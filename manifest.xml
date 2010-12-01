@@ -8,9 +8,21 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/jsk_perception</url>
+  <depend package="rospy"/>
   <depend package="roseus"/>
+  <!-- for eusmodel_template_* -->
   <depend package="imagesift"/>
   <depend package="posedetectiondb"/>
+
+  <!-- for metchtemplate -->
+  <depend package="sensor_msgs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="opencv2"/>
+  <depend package="cv_bridge"/>
+  <depend package="image_geometry"/>
+  <depend package="image_transport"/>
+  <depend package="driver_base"/>
+  <depend package="dynamic_reconfigure"/>
 
 </package>
 

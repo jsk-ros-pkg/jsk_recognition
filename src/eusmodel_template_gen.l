@@ -1,4 +1,4 @@
-(load "package://eusmodel_sift_detector/euslisp/eusmodel_template_gen_utils.l")
+(load "package://jsk_perception/euslisp/eusmodel_template_gen_utils.l")
 
 ;;
 (load "package://euslib/rbrain/models/irt-all-objects.l")
@@ -18,18 +18,16 @@
 
 ;;
 (make-sift-template-and-launch
- "launch/detection-eusmodels.launch"
+ "launch/eusmodel_detection_tiny-objects.launch"
  (list
-;;(make-twinings)  (make-coffee-filter-pack)
   (instance twinings-object :init)
   (instance coffee-filter-object :init)
   ))
 
 ;;
 (make-sift-template-and-launch
- "launch/panel-detection.launch"
+ "launch/eusmodel_detection_elevator-panels.launch"
  (list
-;;(make-elevator-call-panel-body) (make-elevator-inside-panel-body)
   (instance elevator_call_panel-object :init)
   (instance elevator_inside_panel-object :init)
   ))

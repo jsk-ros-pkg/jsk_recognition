@@ -5,7 +5,7 @@
 
 (load "euslaunch.l")
 
-(defconstant *pkgname* "eusmodel_sift_detector")
+(defconstant *pkgname* "jsk_perception")
 
 (defun need-generate-template (imagefile)
   (let* ((path (pathname imagefile))

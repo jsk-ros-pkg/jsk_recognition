@@ -1,0 +1,17 @@
+<package>
+  <description brief="jsk_perception">
+
+     jsk_perception
+
+  </description>
+  <author>Manabu Saito</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/jsk_perception</url>
+  <depend package="roseus"/>
+  <depend package="imagesift"/>
+  <depend package="posedetectiondb"/>
+
+</package>
+
+

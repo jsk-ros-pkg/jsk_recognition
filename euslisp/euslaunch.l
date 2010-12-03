@@ -69,7 +69,7 @@
 	  output cwd launch_prefix required filename params))
 (defmethod rosnode
   (:init (_package _node_type &key ((:name _name) "")
-		   ((:namespace _namespace) "/")
+		   ((:namespace _namespace) nil)
 		   ((:machine_name _machine_name) nil)
 		   ((:args _args) "") ((:respawn _respawn) nil)
 		   ((:remap_args _remap_args) nil) ((:env_args _env_args) nil)
@@ -96,15 +96,23 @@
   (:type (&rest arg) (setq type (or (car arg) type)))
   (:name (&rest arg) (setq name (or (car arg) name)))
   (:args (&rest arg) (setq args (or (car arg) args)))
+  (:namespace (&rest arg) (setq namespace (or (car arg) namespace)))
+  (:machine_name (&rest arg) (setq machine_name (or (car arg) machine_name)))
   (:params (&rest arg) (setq params (or (car arg) params)))
 
   (:attrs ()
     (append
-     (list (cons "pkg" package) (cons "type" type)
-	   (cons "ns" namespace)(cons "args" args) (cons "output" output)
-	   (cons "cwd" cwd) (cons "respawn" (if respawn "True" "False"))
-	   (cons "name" name) (cons "launch-prefix" launch_prefix)
-	   (cons "required" (if required "True" "False")))
+     (remove nil
+	     `(,(cons "pkg" package)
+	       ,(cons "type" type)
+	       ,(if namespace (cons "ns" namespace))
+	       ,(if args (cons "args" args))
+	       ,(if output (cons "output" output))
+	       ,(if cwd (cons "cwd" cwd))
+	       ,(cons "respawn" (if respawn "True" "False"))
+	       ,(if name (cons "name" name))
+	       ,(if launch_prefix (cons "launch-prefix" launch_prefix))
+	       ,(cons "required" (if required "True" "False"))))
      (if machine_name (list (cons "machine" machine_name)))))
   (:remap_args ()
     (mapcar #'(lambda(x)(list "remap"

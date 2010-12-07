@@ -31,3 +31,5 @@
   (instance elevator_call_panel-object :init)
   (instance elevator_inside_panel-object :init)
   ))
+
+(exit)

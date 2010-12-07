@@ -6,6 +6,6 @@ touched: src/eusmodel_template_gen.l
 	touch touched
 
 clean:
-	rm -rf launch template
+	rm -rf template
 	make clean -f Makefile.ros
 	rm -f touched

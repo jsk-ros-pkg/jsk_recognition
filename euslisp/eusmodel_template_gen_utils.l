@@ -125,7 +125,7 @@
    (dolist (obj objects)
      (let (obj-launch xmllist xmltext nodes)
        (setq obj-launch
-	     (format nil "~A/launch/_template_~A.launch" (ros::resolve-ros-path (format nil "package://~A" *pkgname*))
+	     (format nil "~A/template/_template_~A.launch" (ros::resolve-ros-path (format nil "package://~A" *pkgname*))
 		     (send obj :name)))
        (setq nodes (gen-detection-nodes obj))
        (setq xmllist (append (list "launch" nil)

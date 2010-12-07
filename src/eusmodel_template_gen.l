@@ -1,7 +1,7 @@
 (load "package://jsk_perception/euslisp/eusmodel_template_gen_utils.l")
 
 ;;
-(load "package://euslib/rbrain/models/irt-all-objects.l")
+(load "models/irt-all-objects.l")
 
 ;; detection-object needs :name as frame_id
 
@@ -17,12 +17,12 @@
   (gen-all-template objects :type "imagesift"))
 
 ;;
-(make-sift-template-and-launch
- "launch/eusmodel_detection_tiny-objects.launch"
- (list
-  (instance twinings-object :init)
-  (instance coffee-filter-object :init)
-  ))
+;; (make-sift-template-and-launch
+;;  "launch/eusmodel_detection_tiny-objects.launch"
+;;  (list
+;;   (instance twinings-object :init)
+;;   (instance coffee-filter-object :init)
+;;   ))
 
 ;;
 (make-sift-template-and-launch

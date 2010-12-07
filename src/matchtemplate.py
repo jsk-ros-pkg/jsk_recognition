@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import roslib; roslib.load_manifest('jsk_mep_converter')
+import roslib; roslib.load_manifest('jsk_perception')
 import rospy
 import numpy
 import thread

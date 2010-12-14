@@ -17,7 +17,7 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 #uncomment if you have defined messages
-#rosbuild_genmsg()
+rosbuild_genmsg()
 #uncomment if you have defined services
 #rosbuild_gensrv()
 
@@ -33,4 +33,12 @@ gencfg()
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
+
+rosbuild_add_executable(camshiftdemo src/camshiftdemo.cpp)
+
+ADD_CUSTOM_COMMAND(
+  OUTPUT  ${CMAKE_SOURCE_DIR}/template
+  DEPENDS ${CMAKE_SOURCE_DIR}/src/eusmodel_template_gen.l
+  COMMAND ${CMAKE_SOURCE_DIR}/src/eusmodel_template_gen.sh)
+ADD_CUSTOM_TARGET(eusmodel_template ALL DEPENDS ${CMAKE_SOURCE_DIR}/template)
 

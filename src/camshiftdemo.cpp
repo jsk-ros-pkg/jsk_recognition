@@ -41,7 +41,15 @@ protected:
   Config config_;
 
   Mat image_;
-  Mat hsv_, hue_, mask_, hist_, histimg_, backproj_;
+  Mat hsv_, hue_, mask_, histimg_, backproj_;
+
+  // opencv 2.1 uses MatND which is removed in 2.2
+  // this code will be removend in D-Turtle
+#if (CV_MAJOR_VERSION == 2 && CV_MINOR_VERSION < 2)
+  MatND hist_;
+#else
+  Mat hist_;
+#endif
 
   bool backprojMode_;
   bool selectObject_;

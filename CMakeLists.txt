@@ -35,6 +35,7 @@ gencfg()
 #target_link_libraries(example ${PROJECT_NAME})
 
 rosbuild_add_executable(camshiftdemo src/camshiftdemo.cpp)
+rosbuild_add_executable(point_pose_extractor src/point_pose_extractor.cpp)
 
 ADD_CUSTOM_COMMAND(
   OUTPUT  ${CMAKE_SOURCE_DIR}/template

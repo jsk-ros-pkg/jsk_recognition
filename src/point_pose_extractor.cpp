@@ -196,7 +196,7 @@ public:
 	H = cv::findHomography(cv::Mat(pt1), cv::Mat(pt2), CV_RANSAC, _reprojection_threshold);
       }
 
-      if ( !H.empty() ) {
+      if ( cv::countNonZero(H) != 0) {
 	cv::Point2f corners2d[4] = {cv::Point2f(0,0),
 				    cv::Point2f(_template_img.cols,0),
 				    cv::Point2f(_template_img.cols,_template_img.rows),

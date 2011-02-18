@@ -3,6 +3,9 @@
 //
 // Masaho Ishida (ishida@jsk.t.u-tokyo.ac.jp) 2010
 //
+// this code requirs OpenCV r4351 with patch attached at
+// https://code.ros.org/trac/opencv/ticket/819
+//
 #include <ros/ros.h>
 #include <opencv/highgui.h>
 #include <cv_bridge/CvBridge.h>

@@ -32,4 +32,11 @@
   (instance elevator_inside_panel-object :init)
   ))
 
+(make-sift-template-and-launch
+ "launch/eusmodel_detection_elevator-panels-eng2.launch"
+ (list
+  (instance elevator_call_panel_eng2-object :init)
+  (instance elevator_inside_panel_eng2-object :init)
+  ))
+
 (exit)

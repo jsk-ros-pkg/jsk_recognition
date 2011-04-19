@@ -134,22 +134,33 @@ public:
 
   double log_fac( int n )
   {
-    double f = 0;
-    int i;
-    for( i = 1; i <= n; i++ ){
-      f += log( i );
+    static std::vector<double> slog_table;
+    int osize = slog_table.size();
+    if(osize <= n){
+      slog_table.resize(n+1);
+      if(osize == 0){
+	slog_table[0] = -1;
+	slog_table[1] = log(1.0);
+	osize = 2;
+      }
+      for(int i = osize; i <= n; i++ ){
+	slog_table[i] = slog_table[i-1] + log(i);
+      }
     }
-    return f;
+    return slog_table[n];
   }
 
   int min_inlier( int n, int m, double p_badsupp, double p_badxform )
   {
-    double pi, sum;
+    double pi, sum, lp_badsupp, lp_badsupp_1;
     int i, j;
+    lp_badsupp = log( p_badsupp );
+    lp_badsupp_1 = log( 1.0 - p_badsupp );
+
     for( j = m+1; j <= n; j++ ){
       sum = 0;
       for( i = j; i <= n; i++ ){
-	pi = (i-m) * log( p_badsupp ) + (n-i+m) * log( 1.0 - p_badsupp ) +
+	pi = (i-m) * lp_badsupp + (n-i+m) * lp_badsupp_1 +
 	  log_fac( n - m ) - log_fac( i - m ) - log_fac( n - i );
 	sum += exp( pi );
       }
@@ -381,7 +392,6 @@ public:
     std::string template_filename;
     std::string window_name;
 
-    local_nh.param("child_frame_id", matching_frame, std::string("matching"));
     local_nh.param("object_width",  template_width,  0.17);
     local_nh.param("object_height", template_height, 0.24);
     local_nh.param("template_filename", template_filename, std::string("/home/leus/prog/euslib/jsk/img/kellog-front.jpg"));

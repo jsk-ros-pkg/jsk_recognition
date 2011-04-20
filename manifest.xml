@@ -24,7 +24,7 @@
   <depend package="image_transport"/>
   <depend package="driver_base"/>
   <depend package="dynamic_reconfigure"/>
-
+  <depend package="jsk_mep_converter"/>
 </package>
 
 

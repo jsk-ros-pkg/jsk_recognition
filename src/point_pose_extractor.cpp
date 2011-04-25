@@ -537,7 +537,7 @@ public:
 
     local_nh.param("child_frame_id", matching_frame, std::string("matching"));
     local_nh.param("object_width",  template_width,  0.15);
-    local_nh.param("object_height", template_height, 0.076);
+    local_nh.param("object_height", template_height, 0.15);
     // local_nh.param("camera_matrix", _cam_mat, cv::Mat_<double>(3,3) << 2390.868098,0,1238.661939, 0,2379.143559,1068.037996, 0,0,1);
     // local_nh.param("camera_distortion", _cam_mat, cv::Mat_<double>(1,5) << 0,0,0,0,0);
     std::string default_template_file_name;

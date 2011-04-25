@@ -257,7 +257,7 @@ public:
       inlier_sum += (int)mask.at(k);
     }
 
-    double text_scale = 2.0;
+    double text_scale = src_img.cols / 640.0;
     {
       std::string text;
       text = "inlier: " + boost::lexical_cast<string>((int)inlier_sum) + " / " + boost::lexical_cast<string>((int)pt2.size());

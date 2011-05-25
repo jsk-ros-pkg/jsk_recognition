@@ -260,14 +260,14 @@ public:
     double text_scale = src_img.cols / 640.0;
     {
       std::string text;
-      text = "inlier: " + boost::lexical_cast<string>((int)inlier_sum) + " / " + boost::lexical_cast<std::string>((int)pt2.size());
+      text = "inlier: " + boost::lexical_cast<std::string>((int)inlier_sum) + " / " + boost::lexical_cast<std::string>((int)pt2.size());
       int x, y;
       x = stack_img.size().width - 16*17*text_scale; // 16pt * 17
       y = _template_img.size().height - (16 + 2)*text_scale;
       cv::putText (stack_img, text, cv::Point(x, y),
 		   0, text_scale, CV_RGB(0, 255, 0),
 		   2, 8, false);
-      text = "template: " + boost::lexical_cast<string>((int)_template_keypoints.size());
+      text = "template: " + boost::lexical_cast<std::string>((int)_template_keypoints.size());
       x = stack_img.size().width - 16*17*text_scale; // 16pt * 17
       y = _template_img.size().height - (16 + 2)*text_scale*3;
       cv::putText (stack_img, text, cv::Point(x, y),
@@ -472,7 +472,7 @@ public:
     {
       std::string text;
       int x, y;
-      text = "error: " + boost::lexical_cast<string>(err_sum);
+      text = "error: " + boost::lexical_cast<std::string>(err_sum);
       x = stack_img.size().width - 16*17*text_scale; // 16pt * 17
       y = _template_img.size().height - (16 + 2)*text_scale*6;
       cv::putText (stack_img, text, cv::Point(x, y),

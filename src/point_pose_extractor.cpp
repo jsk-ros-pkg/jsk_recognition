@@ -260,7 +260,7 @@ public:
     double text_scale = src_img.cols / 640.0;
     {
       std::string text;
-      text = "inlier: " + boost::lexical_cast<string>((int)inlier_sum) + " / " + boost::lexical_cast<string>((int)pt2.size());
+      text = "inlier: " + boost::lexical_cast<string>((int)inlier_sum) + " / " + boost::lexical_cast<std::string>((int)pt2.size());
       int x, y;
       x = stack_img.size().width - 16*17*text_scale; // 16pt * 17
       y = _template_img.size().height - (16 + 2)*text_scale;

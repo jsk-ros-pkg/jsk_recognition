@@ -545,7 +545,7 @@ public:
     try {
       rospack::Package *p = rp.get_pkg("opencv2");
       if (p!=NULL) default_template_file_name = p->path + std::string("/opencv/share/opencv/doc/opencv-logo2.png");
-    } catch (runtime_error &e) {
+    } catch (std::runtime_error &e) {
     }
     local_nh.param("template_filename", template_filename, default_template_file_name);
     local_nh.param("reprojection_threshold", _reprojection_threshold, 3.0);

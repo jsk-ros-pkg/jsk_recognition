@@ -13,6 +13,7 @@
 #include <image_geometry/pinhole_camera_model.h>
 #include <tf/tf.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/foreach.hpp>
 #include <vector>
 
 #include <posedetectiondb/SetTemplate.h>
@@ -42,7 +43,10 @@ void features2keypoint (posedetection_msgs::Feature0D features,
 
 class Matching_Template
 {
-private:
+  //private:
+
+public:
+
   std::string _matching_frame;
   cv::Mat _template_img;
   std::vector<cv::KeyPoint> _template_keypoints;
@@ -58,8 +62,15 @@ private:
   double _reprojection_threshold;
   // threshold on squared ratio of distances between NN and 2nd NN
   double _distanceratio_threshold;
+  std::vector<cv::Point2d> _correspondances;
+  cv::Mat _previous_stack_img;
 
-public:
+
+
+
+
+
+
   Matching_Template(){
   }
   Matching_Template(cv::Mat img,
@@ -87,11 +98,13 @@ public:
     _reprojection_threshold = reprojection_threshold;
     _distanceratio_threshold = distanceratio_threshold;
     _template_keypoints.clear();
-    cv::namedWindow(_window_name, autosize ? CV_WINDOW_AUTOSIZE : 0);
+    _correspondances.clear();
+    //    cv::namedWindow(_window_name, autosize ? CV_WINDOW_AUTOSIZE : 0);
   }
 
 
   virtual ~Matching_Template(){
+    std::cerr << "delete " << _window_name << std::endl;
   }
 
 
@@ -99,6 +112,9 @@ public:
     return _window_name;
   }
 
+  std::vector<cv::Point2d>* correspondances(){
+    return &_correspondances;
+  }
 
   bool check_template (){
     if (_template_img.empty() && _template_keypoints.size() == 0 &&
@@ -143,6 +159,7 @@ public:
 	cv::perspectiveTransform (pt_src_mat, pt_mat, M_inv);
 	_template_keypoints.at(i).pt = pt_mat.at<cv::Point2f>(0,0);
       }
+      //      cvSetMouseCallback (_window_name.c_str(), &PointPoseExtractor::cvmousecb, this);
       //      _template_img = dst;
       return 0;
     } else {
@@ -205,6 +222,7 @@ public:
     cv::add(stack_img_tmp, _template_img, stack_img_tmp);
     cv::Mat stack_img_src(stack_img,cv::Rect(0,_template_img.rows,src_img.cols,src_img.rows));
     cv::add(stack_img_src, src_img, stack_img_src);
+    _previous_stack_img = stack_img.clone();
 
     // matching
     cv::Mat m_indices(_template_descriptors.rows, 2, CV_32S);
@@ -257,22 +275,29 @@ public:
       inlier_sum += (int)mask.at(k);
     }
 
-    double text_scale = src_img.cols / 640.0;
+    double text_scale = 2.0;
     {
       std::string text;
-      text = "inlier: " + boost::lexical_cast<std::string>((int)inlier_sum) + " / " + boost::lexical_cast<std::string>((int)pt2.size());
+      text = "inlier: " + boost::lexical_cast<string>((int)inlier_sum) + " / " + boost::lexical_cast<string>((int)pt2.size());
       int x, y;
       x = stack_img.size().width - 16*17*text_scale; // 16pt * 17
       y = _template_img.size().height - (16 + 2)*text_scale;
       cv::putText (stack_img, text, cv::Point(x, y),
 		   0, text_scale, CV_RGB(0, 255, 0),
 		   2, 8, false);
-      text = "template: " + boost::lexical_cast<std::string>((int)_template_keypoints.size());
+      text = "template: " + boost::lexical_cast<string>((int)_template_keypoints.size());
       x = stack_img.size().width - 16*17*text_scale; // 16pt * 17
       y = _template_img.size().height - (16 + 2)*text_scale*3;
       cv::putText (stack_img, text, cv::Point(x, y),
 		   0, text_scale, CV_RGB(0, 255, 0),
 		   2, 8, false);
+    }
+
+    // draw correspondances
+    ROS_INFO("_correspondances.size: %d", (int)_correspondances.size());
+    for (int j = 0; j < (int)_correspondances.size(); j++){
+      cv::circle(stack_img, cv::Point2f(_correspondances.at(j).x, _correspondances.at(j).y + _template_img.size().height),
+		 8, CV_RGB(255,0,0), -1);
     }
     if ((cv::countNonZero( H ) == 0) || (inlier_sum < min_inlier((int)pt2.size(), 4, 0.10, 0.01))){
       cv::imshow(_window_name, stack_img);
@@ -360,9 +385,6 @@ public:
 			       cv::Point3f(_template_height, _template_width,0),
 			       cv::Point3f(_template_height, 0, 0),
 			       cv::Point3f(0, 0, -0.03),
-			       // cv::Point3f(_template_width, 0, 0.03),
-			       // cv::Point3f(_template_width, _template_height,0.03),
-			       // cv::Point3f(0, _template_height, 0.03)
 			       cv::Point3f(0, _template_width, -0.03),
 			       cv::Point3f(_template_height, _template_width, -0.03),
 			       cv::Point3f(_template_height, 0, -0.03)};
@@ -472,7 +494,7 @@ public:
     {
       std::string text;
       int x, y;
-      text = "error: " + boost::lexical_cast<std::string>(err_sum);
+      text = "error: " + boost::lexical_cast<string>(err_sum);
       x = stack_img.size().width - 16*17*text_scale; // 16pt * 17
       y = _template_img.size().height - (16 + 2)*text_scale*6;
       cv::putText (stack_img, text, cv::Point(x, y),
@@ -480,10 +502,12 @@ public:
 		   2, 8, false);
 
     }
-
     cv::imshow(_window_name, stack_img);
     return err_success;
   }
+
+
+
 };  // the end of difinition of class Matching_Template
 
 
@@ -502,7 +526,7 @@ class PointPoseExtractor
   double _err_thr;
   cv::Mat _cam_mat;
   cv::Mat _cam_dist;
-  std::vector<Matching_Template> _templates;
+  static std::vector<Matching_Template *> _templates;
   bool pnod;
   bool _initialized;
 
@@ -522,6 +546,107 @@ public:
     _pub.shutdown();
   }
 
+
+  static void make_template_from_mousecb(Matching_Template *mt){
+    cv::Mat H;
+    cv::Mat tmp_template;
+    std::vector<cv::Point2f>pt1, pt2;
+    double width, height;
+    std::cout << "input template's [width]" << std::endl;
+    std::cin >> width;
+    std::cout << "input template's [height]" << std::endl;
+    std::cin >> height;
+
+    for (int i = 0; i < 4; i++){
+      pt1.push_back(cv::Point2d((int)mt->_correspondances.at(i).x,
+				(int)mt->_correspondances.at(i).y + mt->_template_img.size().height));
+    }
+
+    cv::Rect rect = cv::boundingRect(cv::Mat(pt1));
+    //    H = cv::findHomography(cv::Mat(pt1), cv::Mat(pt2));
+
+    cv::getRectSubPix(mt->_previous_stack_img, rect.size(),
+                      cv::Point2f((rect.tl().x + rect.br().x)/2.0,(rect.tl().y + rect.br().y)/2.0),
+                      tmp_template);
+
+    // Matching_Template tmplt(tmp_template, "sample",
+    // 			    tmp_template.size().width, tmp_template.size().height,
+    // 			    width, height,
+    // 			    transform, Mvec.at(i),
+    // 			    _reprojection_threshold,
+    // 			    _distanceratio_threshold,
+    // 			    type, _autosize);
+
+    cv::Mat M = (cv::Mat_<double>(3,3) << 1,0,0, 0,1,0, 0,0,1);
+
+    Matching_Template* tmplt = 
+      new Matching_Template (tmp_template, "sample",
+                            tmp_template.size().width, tmp_template.size().height,
+                            width, height,
+			    tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0)),
+			    //                            tf::Transform(),
+			    M,
+                            mt->_reprojection_threshold,
+                            mt->_distanceratio_threshold,
+			    "sample", cv::getWindowProperty(mt->_window_name, CV_WND_PROP_AUTOSIZE));
+
+    mt->_correspondances.clear();
+    _templates.push_back(tmplt);
+    cv::namedWindow("sample", cv::getWindowProperty(mt->_window_name, CV_WND_PROP_AUTOSIZE));
+    cvSetMouseCallback ("sample", &cvmousecb, static_cast<void *>(_templates.back()));
+
+  }
+
+    // double x_min = 10000;
+    // double x_max = 0;
+    // double y_min = 10000;
+    // double y_max = 0;
+    // for (int i = 0; i < (int)_correspondances.size(); i++){
+    //   if (_correspondances.at(i).x < x_min){
+    //     x_min = _correspondances.at(i).x;
+    //   }
+    //   if (_correspondances.at(i).x > x_max){
+    //     x_max = _correspondances.at(i).x;
+    //   }
+    //   if (_correspondances.at(i).y < y_min){
+    //     y_min = _correspondances.at(i).y;
+    //   }
+    //   if (_correspondances.at(i).y > y_max){
+    //     y_max = _correspondances.at(i).y;
+    //   }
+    // }
+    // pt2.push_back(cv::Point2f(0, 0));
+    // pt2.push_back(cv::Point2f(0, 0));
+    // pt2.push_back(cv::Point2f(0, 0));
+    // pt2.push_back(cv::Point2f(0, 0));
+    
+
+
+
+  static void cvmousecb (int event, int x, int y, int flags, void* param){
+    Matching_Template *mt = (Matching_Template*)param;
+    std::cerr << "mousecb_ -> " << mt << std::endl;
+    switch (event){
+    case CV_EVENT_LBUTTONUP: {
+      cv::Point2d pt(x,y - (int)mt->_template_img.size().height);
+      ROS_INFO("add correspondence (%d, %d)", (int)pt.x, (int)pt.y);
+      mt->_correspondances.push_back(pt);
+      if ((int)mt->_correspondances.size() >= 4){
+	make_template_from_mousecb(mt);
+	mt->_correspondances.clear();
+	ROS_INFO("reset");
+      }
+      break;
+    }
+    case CV_EVENT_RBUTTONUP: {
+      mt->_correspondances.clear();
+      ROS_INFO("reset");
+      break;
+    }
+    }
+  }
+
+
   void initialize () {
     std::string matching_frame;
     double template_width;
@@ -529,23 +654,16 @@ public:
     std::string template_filename;
     std::string window_name;
     ros::NodeHandle local_nh("~");
-    //  cv::Mat cam_mat = (cv::Mat_<double>(3,3) << 597,0,313, 0,592,244, 0,0,1);
-    //    cv::Mat cam_mat = (cv::Mat_<double>(3,3) << 597,0,src.size().width/2.0, 0,592,src.size().height/2.0, 0,0,1);
-    //    cv::Mat cam_mat = (cv::Mat_<double>(3,3) << 2390.868098,0,1238.661939, 0,2379.143559,1068.037996, 0,0,1);
-    //  cv::Mat cam_dist = (cv::Mat_<double>(1,5) << 0.17,-0.5,0,0,0);
-    //    cv::Mat cam_dist = (cv::Mat_<double>(1,5) << 0,0,0,0,0);
 
     local_nh.param("child_frame_id", matching_frame, std::string("matching"));
-    local_nh.param("object_width",  template_width,  0.200);
-    local_nh.param("object_height", template_height, 0.246);
-    // local_nh.param("camera_matrix", _cam_mat, cv::Mat_<double>(3,3) << 2390.868098,0,1238.661939, 0,2379.143559,1068.037996, 0,0,1);
-    // local_nh.param("camera_distortion", _cam_mat, cv::Mat_<double>(1,5) << 0,0,0,0,0);
+    local_nh.param("object_width",  template_width,  0.06);
+    local_nh.param("object_height", template_height, 0.0739);
     std::string default_template_file_name;
     rospack::ROSPack rp;
     try {
       rospack::Package *p = rp.get_pkg("opencv2");
       if (p!=NULL) default_template_file_name = p->path + std::string("/opencv/share/opencv/doc/opencv-logo2.png");
-    } catch (std::runtime_error &e) {
+    } catch (runtime_error &e) {
     }
     local_nh.param("template_filename", template_filename, default_template_file_name);
     local_nh.param("reprojection_threshold", _reprojection_threshold, 3.0);
@@ -564,37 +682,9 @@ public:
     if ( template_img.empty()) {
       ROS_ERROR ("template picture <%s> cannot read. template picture is not found or uses unsuported format.", template_filename.c_str());
     }
-    //    cv::Mat cam_mat = (cv::Mat_<double>(3,3) << 1,0,0, 0,1,0, 0,0,1);
-
-    // set camera parameters
-    // XmlRpc::XmlRpcValue double_list;
-    // local_nh.getParam("K", double_list);
-    // if ((double_list.getType() == XmlRpc::XmlRpcValue::TypeArray) &&
-    // 	(double_list.size() == 9)){
-    //   _cam_mat = (cv::Mat_<double>(3,3) << double_list[0],double_list[1],double_list[2],
-    // 			 double_list[3],double_list[4],double_list[5],
-    // 			 double_list[6],double_list[7],double_list[8]);
-    //   if (!_cam_info_check){
-    // 	_cam_info_check = true;
-    //   }
-    // }
-    // local_nh.getParam("D", double_list);
-    // if ((double_list.getType() == XmlRpc::XmlRpcValue::TypeArray) &&
-    // 	(double_list.size() == 5)){
-    //   _cam_dist = (cv::Mat_<double>(1,5) << double_list[0],double_list[1],double_list[2],
-    // 			  double_list[3],double_list[4]);
-    // }
-    // else {
-    //   _cam_info_check = false;
-    // }
-
-    //    _cam_mat = (cv::Mat_<double>(3,3) << 2390.868098,0,1238.661939, 0,2379.143559,1068.037996, 0,0,1);
-    //    _cam_dist = (cv::Mat_<double>(1,5) << 0,0,0,0,0);
-    
 
     std::vector<cv::Mat> imgs;
     std::vector<cv::Mat> Mvec;
-    //    make_warped_images(template_img, imgs, Mvec, 0.17, 0.24, 1.0, 1.0);
     make_warped_images(template_img, imgs, Mvec, template_width, template_height, _th_step, _phi_step);
 
     tf::Transform transform(tf::Quaternion(0, 0, 0, 1),
@@ -606,18 +696,31 @@ public:
       sprintf(chr, "%d", i);
       type = "kellog_" + std::string(chr);
 
-      Matching_Template tmplt(imgs.at(i), type,
-    			      template_img.size().width, template_img.size().height,
-			      //    			      0.17, 0.24,
-			      template_width, template_height,
-    			      transform, Mvec.at(i),
-    			      _reprojection_threshold,
-    			      _distanceratio_threshold,
-    			      type, _autosize);
+      Matching_Template* tmplt =
+	new Matching_Template(imgs.at(i), type,
+			     template_img.size().width, template_img.size().height,
+			     template_width, template_height,
+			     transform, Mvec.at(i),
+			     _reprojection_threshold,
+			     _distanceratio_threshold,
+			     type, _autosize);
+      std::cerr << "tmplt      -> " << tmplt << std::endl;
       _templates.push_back(tmplt);
+      BOOST_FOREACH(Matching_Template *mt, _templates) {
+	std::cerr << "templates0 -> " << mt << std::endl;
+      }
+      //std::cerr << "templates0 -> " << &_templates.at(0) << std::endl;
+      cv::namedWindow(type, _autosize ? CV_WINDOW_AUTOSIZE : 0);
+      //cvSetMouseCallback (type.c_str(), &cvmousecb, tmplt);
+      //      cvSetMouseCallback (type.c_str(), &cvmousecb, &_templates.at((int)_templates.size() - 1));
+      cvSetMouseCallback (type.c_str(), &cvmousecb, _templates.back());
+	    std::cerr << "done" << std::endl;
     }
 
   } // initializae
+
+
+
 
 
   cv::Mat make_homography(cv::Mat src, cv::Mat rvec, cv::Mat tvec,
@@ -671,12 +774,11 @@ public:
   }
 
 
-  int make_warped_images (cv::Mat src, std::vector<cv::Mat> &imgs, // cv::Size size,
+  int make_warped_images (cv::Mat src, std::vector<cv::Mat> &imgs,
 			  std::vector<cv:: Mat> &Mvec,
 			  double template_width, double template_height,
 			  double th_step, double phi_step){
 
-    //  std::vector<cv::Mat> Mvec;
     std::vector<cv::Size> sizevec;
 
     for (int i = (int)((-3.14/4.0)/th_step); i*th_step < 3.14/4.0; i++){
@@ -686,7 +788,6 @@ public:
 	cv::Mat tvec(3, 1, CV_64FC1, fT3);
 
 	tf::Quaternion quat(0, th_step*i, phi_step*j);
-	//	tf::Quaternion quat(0, 0, 0);
 	fR3[0] = quat.getAxis().x() * quat.getAngle();
 	fR3[1] = quat.getAxis().y() * quat.getAngle();
 	fR3[2] = quat.getAxis().z() * quat.getAngle();
@@ -739,7 +840,8 @@ public:
 	sprintf(chr, "%d", i);
 	type = req.type + "_" + std::string(chr);
 
-	Matching_Template tmplt(imgs.at(i), type,
+	Matching_Template * tmplt = 
+	  new Matching_Template(imgs.at(i), type,
 				img.size().width, img.size().height,
 				req.dimx, req.dimy,
 				transform, Mvec.at(i),
@@ -747,6 +849,8 @@ public:
 				_distanceratio_threshold,
 				type, _autosize);
 	_templates.push_back(tmplt);
+	cv::namedWindow(type, _autosize ? CV_WINDOW_AUTOSIZE : 0);
+	cvSetMouseCallback (type.c_str(), &cvmousecb, static_cast<void *>(_templates.back()));
       }
       return true;
   }
@@ -775,15 +879,9 @@ public:
     if ( !_initialized ) {
       // make template images from camera info
       initialize();
+      std::cerr << "done2" << std::endl;
       _initialized = true;
     }
-
-    // if(!_cam_info_check){
-    //   _cam_mat = pcam.intrinsicMatrix().clone();
-    //   _cam_dist = pcam.distortionCoeffs().clone();
-    //   ROS_INFO ("Set camera parameters using camera_info");
-    //   _cam_info_check = true;
-    // }
 
     if ( sourceimg_keypoints.size () < 2 ) {
       ROS_INFO ("The number of keypoints in source image is less than 2");
@@ -793,10 +891,11 @@ public:
       cv::flann::Index *ft = new cv::flann::Index(sourceimg_descriptors, cv::flann::KDTreeIndexParams(1));
 
       // matching and detect object
+      ROS_INFO("_templates size: %d", (int)_templates.size());
       for (int i = 0; i < (int)_templates.size(); i++){
 	posedetection_msgs::Object6DPose o6p;
 
-	if (_templates.at(i).estimate_od(_client, src_img, sourceimg_keypoints, pcam, _err_thr, ft, &o6p))
+	if (_templates.at(i)->estimate_od(_client, src_img, sourceimg_keypoints, pcam, _err_thr, ft, &o6p))
 	  vo6p.push_back(o6p);
       }
       delete ft;
@@ -807,9 +906,16 @@ public:
 	_pub.publish(od);
       }
     }
+    BOOST_FOREACH(Matching_Template* mt, _templates) {
+      std::cerr << "templates_ -> " << mt << std::endl;
+    }
     cv::waitKey( 10 );
   }
+
 };  // the end of definition of class PointPoseExtractor
+
+
+std::vector<Matching_Template *> PointPoseExtractor::_templates;
 
 
 int main (int argc, char **argv){

@@ -18,6 +18,8 @@
 
 #include <posedetectiondb/SetTemplate.h>
 
+bool _first_sample_change;
+
 
 void features2keypoint (posedetection_msgs::Feature0D features,
 			std::vector<cv::KeyPoint>& keypoints,
@@ -43,10 +45,7 @@ void features2keypoint (posedetection_msgs::Feature0D features,
 
 class Matching_Template
 {
-  //private:
-
 public:
-
   std::string _matching_frame;
   cv::Mat _template_img;
   std::vector<cv::KeyPoint> _template_keypoints;
@@ -64,12 +63,6 @@ public:
   double _distanceratio_threshold;
   std::vector<cv::Point2d> _correspondances;
   cv::Mat _previous_stack_img;
-
-
-
-
-
-
 
   Matching_Template(){
   }
@@ -569,6 +562,18 @@ public:
                       cv::Point2f((rect.tl().x + rect.br().x)/2.0,(rect.tl().y + rect.br().y)/2.0),
                       tmp_template);
 
+    for (int i = 0; i < (int)pt1.size(); i++){
+      pt2.push_back(cv::Point2d((int)pt1.at(i).x - rect.x,
+				(int)pt1.at(i).y - rect.y - mt->_template_img.size().height));
+    }
+    // cv::Mat mask_img = cv::Mat::zeros(tmp_template.size(), CV_8UC3);
+    // cv::fillConvexPoly(mask_img, pt2.begin(), (int)pt2.size(), CV_RGB(255, 255, 255));
+
+    // cv::namedWindow("hoge", 1);
+    // cv::imshow("hoge", mask_img);
+
+      
+
     // Matching_Template tmplt(tmp_template, "sample",
     // 			    tmp_template.size().width, tmp_template.size().height,
     // 			    width, height,
@@ -578,23 +583,27 @@ public:
     // 			    type, _autosize);
 
     cv::Mat M = (cv::Mat_<double>(3,3) << 1,0,0, 0,1,0, 0,0,1);
+    std::string window_name = "sample" + boost::lexical_cast<string>((int)_templates.size());
 
     Matching_Template* tmplt = 
       new Matching_Template (tmp_template, "sample",
-                            tmp_template.size().width, tmp_template.size().height,
-                            width, height,
-			    tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0)),
-			    //                            tf::Transform(),
-			    M,
-                            mt->_reprojection_threshold,
-                            mt->_distanceratio_threshold,
-			    "sample", cv::getWindowProperty(mt->_window_name, CV_WND_PROP_AUTOSIZE));
+			     tmp_template.size().width, tmp_template.size().height,
+			     width, height,
+			     tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0)),
+			       //                            tf::Transform(),
+			     M,
+			     mt->_reprojection_threshold,
+			     mt->_distanceratio_threshold,
+			     _first_sample_change ? window_name : mt->_window_name,
+			     cv::getWindowProperty(mt->_window_name, CV_WND_PROP_AUTOSIZE));
 
     mt->_correspondances.clear();
     _templates.push_back(tmplt);
-    cv::namedWindow("sample", cv::getWindowProperty(mt->_window_name, CV_WND_PROP_AUTOSIZE));
-    cvSetMouseCallback ("sample", &cvmousecb, static_cast<void *>(_templates.back()));
-
+    cv::namedWindow(_first_sample_change ? window_name : mt->_window_name,
+		    cv::getWindowProperty(mt->_window_name, CV_WND_PROP_AUTOSIZE));
+    cvSetMouseCallback (_first_sample_change ? window_name.c_str() : mt->_window_name.c_str(),
+			&cvmousecb, static_cast<void *>(_templates.back()));
+    _first_sample_change = true;
   }
 
     // double x_min = 10000;
@@ -622,10 +631,9 @@ public:
     
 
 
-
   static void cvmousecb (int event, int x, int y, int flags, void* param){
     Matching_Template *mt = (Matching_Template*)param;
-    std::cerr << "mousecb_ -> " << mt << std::endl;
+    // std::cerr << "mousecb_ -> " << mt << std::endl;
     switch (event){
     case CV_EVENT_LBUTTONUP: {
       cv::Point2d pt(x,y - (int)mt->_template_img.size().height);
@@ -671,10 +679,11 @@ public:
     local_nh.param("error_threshold", _err_thr, 50.0);
     local_nh.param("theta_step", _th_step, 5.0);
     local_nh.param("phi_step", _phi_step, 5.0);
-    local_nh.param("window_name", window_name, std::string("Matches"));
+    local_nh.param("window_name", window_name, std::string("sample1"));
     local_nh.param("autosize", _autosize, false);
     local_nh.param("publish_null_object_detection", pnod, false);
 
+    _first_sample_change = false;
 
     // make one template
     cv::Mat template_img;
@@ -694,7 +703,7 @@ public:
       std::string type;
       char chr[20];
       sprintf(chr, "%d", i);
-      type = "kellog_" + std::string(chr);
+      type = window_name + "_" + std::string(chr);
 
       Matching_Template* tmplt =
 	new Matching_Template(imgs.at(i), type,
@@ -718,9 +727,6 @@ public:
     }
 
   } // initializae
-
-
-
 
 
   cv::Mat make_homography(cv::Mat src, cv::Mat rvec, cv::Mat tvec,
@@ -906,9 +912,9 @@ public:
 	_pub.publish(od);
       }
     }
-    BOOST_FOREACH(Matching_Template* mt, _templates) {
-      std::cerr << "templates_ -> " << mt << std::endl;
-    }
+    // BOOST_FOREACH(Matching_Template* mt, _templates) {
+    //   std::cerr << "templates_ -> " << mt << std::endl;
+    // }
     cv::waitKey( 10 );
   }
 

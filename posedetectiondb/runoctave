@@ -1,0 +1,9 @@
+#!/bin/sh
+## Simple script that redirects arguments to octave
+fnname=$1
+PATH=$ROS_ROOT/bin:$PATH
+cd `rospack find posedetectiondb`
+export PATH=$PATH:`rospack find openrave`/bin
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+shift
+octave --eval "cd('octave'); posedetectiondb_rosstartup; ${fnname}('$*')"

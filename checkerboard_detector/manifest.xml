@@ -1,0 +1,24 @@
+<package>
+  <description brief="Finds checkerboards and returns their 6D poses">
+    Uses opencv to find checkboards and compute their 6D poses with respect to the image. Requires the image to be calibrated.
+    Parameters:
+    display - show the checkerboard detection
+    rect%d_size_x - size of checker in x direction
+    rect%d_size_y - size of checker in y direction
+    grid%d_size_x - number of checkers in x direction
+    grid%d_size_y - number of checkers in y direction
+    
+    There can be more than one grid%d declared, the numbers should grow consecutively starting at 0.
+  </description>
+  <author>Rosen Diankov (rdiankov@cs.cmu.edu)</author>
+  <license>BSD</license>
+
+  <depend package="roscpp"/>
+  <depend package="opencv2"/>
+  <depend package="cv_bridge"/>
+  <depend package="sensor_msgs"/>
+  <depend package="posedetection_msgs"/>
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
+</package>

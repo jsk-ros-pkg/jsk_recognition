@@ -1,0 +1,11 @@
+cmake_minimum_required(VERSION 2.4.6)
+include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+set(ROS_BUILD_TYPE RelWithDebInfo)
+rosbuild_init()
+rosbuild_add_executable(imagesift imagesift.cpp)
+set_target_properties(imagesift PROPERTIES COMPILE_FLAGS "-msse2 -O3" LINK_FLAGS "-msse2 -O3")
+rosbuild_add_executable(imagesurf imagesurf.cpp)
+set_target_properties(imagesift PROPERTIES COMPILE_FLAGS "-msse2 -O3" LINK_FLAGS "-msse2 -O3")
+rosbuild_add_executable(imagestar imagestar.cpp)
+set_target_properties(imagestar PROPERTIES COMPILE_FLAGS "-msse2 -O3" LINK_FLAGS "-msse2 -O3")
+

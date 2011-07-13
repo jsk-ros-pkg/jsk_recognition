@@ -293,7 +293,8 @@ public:
 		 8, CV_RGB(255,0,0), -1);
     }
     if ((cv::countNonZero( H ) == 0) || (inlier_sum < min_inlier((int)pt2.size(), 4, 0.10, 0.01))){
-      cv::imshow(_window_name, stack_img);
+	  if(_window_name != std::string(""))
+		cv::imshow(_window_name, stack_img);
       return false;
     }
 
@@ -495,7 +496,8 @@ public:
 		   2, 8, false);
 
     }
-    cv::imshow(_window_name, stack_img);
+	if(_window_name != std::string(""))
+	  cv::imshow(_window_name, stack_img);
     return err_success;
   }
 

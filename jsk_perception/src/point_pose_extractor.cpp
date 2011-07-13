@@ -293,8 +293,8 @@ public:
 		 8, CV_RGB(255,0,0), -1);
     }
     if ((cv::countNonZero( H ) == 0) || (inlier_sum < min_inlier((int)pt2.size(), 4, 0.10, 0.01))){
-	  if(_window_name != std::string(""))
-		cv::imshow(_window_name, stack_img);
+      if( _window_name != "" )
+	cv::imshow(_window_name, stack_img);
       return false;
     }
 
@@ -496,8 +496,8 @@ public:
 		   2, 8, false);
 
     }
-	if(_window_name != std::string(""))
-	  cv::imshow(_window_name, stack_img);
+    if( _window_name != "" )
+      cv::imshow(_window_name, stack_img);
     return err_success;
   }
 
@@ -524,6 +524,7 @@ class PointPoseExtractor
   static std::vector<Matching_Template *> _templates;
   bool pnod;
   bool _initialized;
+  bool _viewer;
 
 public:
   PointPoseExtractor(){
@@ -681,6 +682,7 @@ public:
     local_nh.param("error_threshold", _err_thr, 50.0);
     local_nh.param("theta_step", _th_step, 5.0);
     local_nh.param("phi_step", _phi_step, 5.0);
+    local_nh.param("viewer_window", _viewer, true);
     local_nh.param("window_name", window_name, std::string("sample1"));
     local_nh.param("autosize", _autosize, false);
     local_nh.param("publish_null_object_detection", pnod, false);
@@ -714,14 +716,15 @@ public:
 			     transform, Mvec.at(i),
 			     _reprojection_threshold,
 			     _distanceratio_threshold,
-			     type, _autosize);
+			     (_viewer ? type : ""), _autosize);
       std::cerr << "tmplt      -> " << tmplt << std::endl;
       _templates.push_back(tmplt);
       BOOST_FOREACH(Matching_Template *mt, _templates) {
 	std::cerr << "templates0 -> " << mt << std::endl;
       }
       //std::cerr << "templates0 -> " << &_templates.at(0) << std::endl;
-      cv::namedWindow(type, _autosize ? CV_WINDOW_AUTOSIZE : 0);
+      if( _viewer )
+	cv::namedWindow(type, _autosize ? CV_WINDOW_AUTOSIZE : 0);
       //cvSetMouseCallback (type.c_str(), &cvmousecb, tmplt);
       //      cvSetMouseCallback (type.c_str(), &cvmousecb, &_templates.at((int)_templates.size() - 1));
       cvSetMouseCallback (type.c_str(), &cvmousecb, _templates.back());
@@ -857,7 +860,8 @@ public:
 				_distanceratio_threshold,
 				type, _autosize);
 	_templates.push_back(tmplt);
-	cv::namedWindow(type, _autosize ? CV_WINDOW_AUTOSIZE : 0);
+	if( _viewer )
+	  cv::namedWindow(type, _autosize ? CV_WINDOW_AUTOSIZE : 0);
 	cvSetMouseCallback (type.c_str(), &cvmousecb, static_cast<void *>(_templates.back()));
       }
       return true;

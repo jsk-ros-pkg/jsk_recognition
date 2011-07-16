@@ -528,8 +528,8 @@ class PointPoseExtractor
 
 public:
   PointPoseExtractor(){
-    _sub = _n.subscribe("ImageFeature0D", 1,
-    			&PointPoseExtractor::imagefeature_cb, this);
+	//    _sub = _n.subscribe("ImageFeature0D", 1,
+    //			&PointPoseExtractor::imagefeature_cb, this);
     _client = _n.serviceClient<posedetection_msgs::Feature0DDetect>("Feature0DDetect");
     _pub = _n.advertise<posedetection_msgs::ObjectDetection>("ObjectDetection", 10);
     _server = _n.advertiseService("SetTemplate", &PointPoseExtractor::settemplate_cb, this);
@@ -924,6 +924,21 @@ public:
     cv::waitKey( 10 );
   }
 
+  /* if there are subscribers of the output topic -> do work
+	 else if -> unregister all topics this node subscribing
+   */
+  void check_subscribers()
+  {
+	if(_pub.getNumSubscribers() == 0) {
+	  if(_sub)
+		_sub.shutdown();
+	} else {
+	  if(!_sub)
+		_sub = _n.subscribe("ImageFeature0D", 1,
+							&PointPoseExtractor::imagefeature_cb, this);
+	}
+  }
+
 };  // the end of definition of class PointPoseExtractor
 
 
@@ -935,7 +950,12 @@ int main (int argc, char **argv){
 
   PointPoseExtractor matcher;
 
-  ros::spin();
+  ros::Rate r(10); // 10 hz
+  while(ros::ok()) {
+	ros::spinOnce();
+	matcher.check_subscribers();
+	r.sleep();
+  }
 
   return 0;
 }

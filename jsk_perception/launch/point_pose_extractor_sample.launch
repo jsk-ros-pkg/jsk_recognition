@@ -1,7 +1,7 @@
 <launch>
   <node name="uvc_camera" pkg="uvc_camera" type="camera_node"
         respawn="false" output="screen">
-    <param name="camera_info_url" value="file://$(find jsk_sift)/launch/calibdata_sample.yaml"/>
+    <param name="camera_info_url" value="file://$(find roseus_tutorials)/launch/usb-camera.yaml"/>
     <param name="device" value="/dev/video0"/>
     <param name="width" value="640" />
     <param name="height" value="480" />
@@ -14,7 +14,7 @@
   </node>
 
   <node name="imagesift" pkg="imagesift" type="imagesift"
-	respawn="false" output="screen">
+	respawn="false" output="screen" launch-prefix="nice -n 10">
     <remap from="image" to="image_rect_color" />
   </node>
 

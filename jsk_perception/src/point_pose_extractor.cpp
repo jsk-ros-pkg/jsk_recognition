@@ -268,22 +268,28 @@ public:
       inlier_sum += (int)mask.at(k);
     }
 
-    double text_scale = 2.0;
+    double text_scale = 1.5;
     {
-      std::string text;
-      text = "inlier: " + boost::lexical_cast<string>((int)inlier_sum) + " / " + boost::lexical_cast<string>((int)pt2.size());
+	  int fontFace = 0, thickness, baseLine;
       int x, y;
-      x = stack_img.size().width - 16*17*text_scale; // 16pt * 17
-      y = _template_img.size().height - (16 + 2)*text_scale;
+	  cv::Size text_size;
+      std::string text;
+
+      text = "inlier: " + boost::lexical_cast<string>((int)inlier_sum) + " / " + boost::lexical_cast<string>((int)pt2.size());
+	  text_size = cv::getTextSize(text, fontFace, text_scale, thickness, &baseLine);
+	  x = stack_img.size().width - text_size.width;
+	  y = text_size.height + thickness;
       cv::putText (stack_img, text, cv::Point(x, y),
-		   0, text_scale, CV_RGB(0, 255, 0),
-		   2, 8, false);
+		   fontFace, text_scale, CV_RGB(0, 255, 0),
+		    thickness, 8, false);
+
       text = "template: " + boost::lexical_cast<string>((int)_template_keypoints.size());
-      x = stack_img.size().width - 16*17*text_scale; // 16pt * 17
-      y = _template_img.size().height - (16 + 2)*text_scale*3;
+	  text_size = cv::getTextSize(text, fontFace, text_scale, thickness, &baseLine);
+	  x = stack_img.size().width - text_size.width;
+      y += text_size.height + thickness + 10; // 10pt pading
       cv::putText (stack_img, text, cv::Point(x, y),
-		   0, text_scale, CV_RGB(0, 255, 0),
-		   2, 8, false);
+		   fontFace, text_scale, CV_RGB(0, 255, 0),
+		    thickness, 8, false);
     }
 
     // draw correspondances

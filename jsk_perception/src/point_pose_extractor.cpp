@@ -15,6 +15,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/foreach.hpp>
 #include <vector>
+#include <sstream>
+#include <iostream>
 
 #include <posedetectiondb/SetTemplate.h>
 
@@ -270,26 +272,26 @@ public:
 
     double text_scale = 1.5;
     {
-	  int fontFace = 0, thickness, baseLine;
+      int fontFace = 0, thickness, baseLine;
       int x, y;
-	  cv::Size text_size;
+      cv::Size text_size;
       std::string text;
 
       text = "inlier: " + boost::lexical_cast<string>((int)inlier_sum) + " / " + boost::lexical_cast<string>((int)pt2.size());
-	  text_size = cv::getTextSize(text, fontFace, text_scale, thickness, &baseLine);
-	  x = stack_img.size().width - text_size.width;
-	  y = text_size.height + thickness;
+      text_size = cv::getTextSize(text, fontFace, text_scale, thickness, &baseLine);
+      x = stack_img.size().width - text_size.width;
+      y = text_size.height + thickness;
       cv::putText (stack_img, text, cv::Point(x, y),
-		   fontFace, text_scale, CV_RGB(0, 255, 0),
-		    thickness, 8, false);
+                   fontFace, text_scale, CV_RGB(0, 255, 0),
+                   thickness, 8, false);
 
       text = "template: " + boost::lexical_cast<string>((int)_template_keypoints.size());
-	  text_size = cv::getTextSize(text, fontFace, text_scale, thickness, &baseLine);
-	  x = stack_img.size().width - text_size.width;
+      text_size = cv::getTextSize(text, fontFace, text_scale, thickness, &baseLine);
+      x = stack_img.size().width - text_size.width;
       y += text_size.height + thickness + 10; // 10pt pading
       cv::putText (stack_img, text, cv::Point(x, y),
-		   fontFace, text_scale, CV_RGB(0, 255, 0),
-		    thickness, 8, false);
+                   fontFace, text_scale, CV_RGB(0, 255, 0),
+                   thickness, 8, false);
     }
 
     // draw correspondances
@@ -337,7 +339,7 @@ public:
 		  pcam.distortionCoeffs(),
 		  rvec, tvec);
 
-    tf::Transform checktf;
+    tf::Transform checktf, resulttf;
     checktf.setOrigin( tf::Vector3(fT3[0], fT3[1], fT3[2] ) );
     double rx = fR3[0], ry = fR3[1], rz = fR3[2];
 
@@ -347,25 +349,24 @@ public:
     quat.setRotation(tf::Vector3(rx/angle, ry/angle, rz/angle), angle);
     checktf.setRotation( quat );
 
-    //    checktf.operator*=(_relativepose);
+    resulttf = checktf * _relativepose;
 
     ROS_INFO( "tx: (%0.2lf,%0.2lf,%0.2lf) rx: (%0.2lf,%0.2lf,%0.2lf)",
-	      checktf.getOrigin().getX(),
-	      checktf.getOrigin().getY(),
-	      checktf.getOrigin().getZ(),
-    	      checktf.getRotation().getAxis().x() * checktf.getRotation().getAngle(),
-    	      checktf.getRotation().getAxis().y() * checktf.getRotation().getAngle(),
-    	      checktf.getRotation().getAxis().z() * checktf.getRotation().getAngle());
+	      resulttf.getOrigin().getX(),
+	      resulttf.getOrigin().getY(),
+	      resulttf.getOrigin().getZ(),
+    	      resulttf.getRotation().getAxis().x() * resulttf.getRotation().getAngle(),
+    	      resulttf.getRotation().getAxis().y() * resulttf.getRotation().getAngle(),
+    	      resulttf.getRotation().getAxis().z() * resulttf.getRotation().getAngle());
 
-    o6p->pose.position.x = checktf.getOrigin().getX();
-    o6p->pose.position.y = checktf.getOrigin().getY();
-    o6p->pose.position.z = checktf.getOrigin().getZ();
-    o6p->pose.orientation.w = checktf.getRotation().w();
-    o6p->pose.orientation.x = checktf.getRotation().x();
-    o6p->pose.orientation.y = checktf.getRotation().y();
-    o6p->pose.orientation.z = checktf.getRotation().z();
-    o6p->type = _type;
-
+    o6p->pose.position.x = resulttf.getOrigin().getX();
+    o6p->pose.position.y = resulttf.getOrigin().getY();
+    o6p->pose.position.z = resulttf.getOrigin().getZ();
+    o6p->pose.orientation.w = resulttf.getRotation().w();
+    o6p->pose.orientation.x = resulttf.getRotation().x();
+    o6p->pose.orientation.y = resulttf.getRotation().y();
+    o6p->pose.orientation.z = resulttf.getRotation().z();
+    o6p->type = _matching_frame; // _type
 
     // make 3d model
     std::vector<cv::Point2f> projected_top;
@@ -461,12 +462,12 @@ public:
       double cfR3[3], cfT3[3];
       cv::Mat crvec(3, 1, CV_64FC1, cfR3);
       cv::Mat ctvec(3, 1, CV_64FC1, cfT3);
-      cfT3[0] = checktf.getOrigin().getX();
-      cfT3[1] = checktf.getOrigin().getY();
-      cfT3[2] = checktf.getOrigin().getZ();
-      cfR3[0] = checktf.getRotation().getAxis().x() * checktf.getRotation().getAngle();
-      cfR3[1] = checktf.getRotation().getAxis().y() * checktf.getRotation().getAngle();
-      cfR3[2] = checktf.getRotation().getAxis().z() * checktf.getRotation().getAngle();
+      cfT3[0] = resulttf.getOrigin().getX();
+      cfT3[1] = resulttf.getOrigin().getY();
+      cfT3[2] = resulttf.getOrigin().getZ();
+      cfR3[0] = resulttf.getRotation().getAxis().x() * resulttf.getRotation().getAngle();
+      cfR3[1] = resulttf.getRotation().getAxis().y() * resulttf.getRotation().getAngle();
+      cfR3[2] = resulttf.getRotation().getAxis().z() * resulttf.getRotation().getAngle();
 
       cv::Point3f coords[4] = {cv::Point3f(0,0,0),
 			       cv::Point3f(0.05,0,0),
@@ -666,6 +667,7 @@ public:
 
   void initialize () {
     std::string matching_frame;
+    std::string _pose_str;
     double template_width;
     double template_height;
     std::string template_filename;
@@ -675,6 +677,7 @@ public:
     local_nh.param("child_frame_id", matching_frame, std::string("matching"));
     local_nh.param("object_width",  template_width,  0.06);
     local_nh.param("object_height", template_height, 0.0739);
+    local_nh.param("relative_pose", _pose_str, std::string("0 0 0 0 0 0 1"));
     std::string default_template_file_name;
     rospack::ROSPack rp;
     try {
@@ -706,8 +709,13 @@ public:
     std::vector<cv::Mat> Mvec;
     make_warped_images(template_img, imgs, Mvec, template_width, template_height, _th_step, _phi_step);
 
-    tf::Transform transform(tf::Quaternion(0, 0, 0, 1),
-    			    tf::Vector3(0, 0, 0));
+    // relative pose
+    vector<double> rv(7);
+    std::istringstream iss(_pose_str);
+    for(int i=0; i<7; i++)
+      iss >> rv[i];
+    tf::Transform transform(tf::Quaternion(rv[3],rv[4],rv[5],rv[6]),
+    			    tf::Vector3(rv[0], rv[1], rv[2]));
 
     for (int i = 0; i < (int)imgs.size(); i++){
       std::string type;

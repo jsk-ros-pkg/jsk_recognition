@@ -295,12 +295,12 @@ public:
 
                 // remove any corners that are close to the border
                 const int borderthresh = 30;
-        
+
                 for(int j = 0; j < ncorners; ++j) {
                     int x = cb.corners[j].x;
                     int y = cb.corners[j].y;
                     if( x < borderthresh || x > pimggray->width-borderthresh ||
-                        y < borderthresh || y > pimggray->height-borderthresh ) 
+                        y < borderthresh || y > pimggray->height-borderthresh )
                     {
                         allfound = 0;
                         break;
@@ -309,8 +309,8 @@ public:
 
                 // mark out the image
                 CvPoint upperleft, lowerright;
-                upperleft.x = lowerright.x = cb.corners[0].x; 
-                upperleft.y = lowerright.y = cb.corners[0].y; 
+                upperleft.x = lowerright.x = cb.corners[0].x;
+                upperleft.y = lowerright.y = cb.corners[0].y;
                 for(int j = 1; j < (int)cb.corners.size(); ++j) {
                     if( upperleft.x > cb.corners[j].x ) upperleft.x = cb.corners[j].x;
                     if( upperleft.y > cb.corners[j].y ) upperleft.y = cb.corners[j].y;
@@ -318,9 +318,21 @@ public:
                     if( lowerright.y < cb.corners[j].y ) lowerright.y = cb.corners[j].y;
                 }
 
+                float step_size =
+                  (double)( ((upperleft.x - lowerright.x) * (upperleft.x - lowerright.x)) +
+                            ((upperleft.y - lowerright.y) * (upperleft.y - lowerright.y)) )
+                  /
+                  ( ((cb.griddims.width - 1) * (cb.griddims.width - 1)) +
+                    ((cb.griddims.height - 1) * (cb.griddims.height - 1)) );
+#if 0
+                ROS_INFO("(%d %d) - (%d %d) -> %f ",
+                         upperleft.x, upperleft.y, lowerright.x, lowerright.y, sqrt(step_size));
+#endif
+                int size = (int)(0.5*sqrt(step_size) + 0.5);
+
                 if( allfound ) {
-                    cvFindCornerSubPix(pimggray, &cb.corners[0], cb.corners.size(), cvSize(5,5),cvSize(-1,-1),
-                                       cvTermCriteria(CV_TERMCRIT_ITER,20,1e-2));
+                    cvFindCornerSubPix(pimggray, &cb.corners[0], cb.corners.size(), cvSize(size,size), cvSize(-1,-1),
+                                       cvTermCriteria(CV_TERMCRIT_ITER, 50, 1e-2));
                     objpose.pose = FindTransformation(cb.corners, cb.grid3d, cb.tlocaltrans);
                 }
 

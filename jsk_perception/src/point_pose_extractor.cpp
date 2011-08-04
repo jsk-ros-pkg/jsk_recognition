@@ -519,7 +519,7 @@ class PointPoseExtractor
   ros::Subscriber _sub;
   ros::ServiceServer _server;
   ros::ServiceClient _client;
-  ros::Publisher _pub;
+  ros::Publisher _pub, _pub_agg;
   double _reprojection_threshold;
   double _distanceratio_threshold;
   double _th_step;
@@ -539,6 +539,7 @@ public:
     //			&PointPoseExtractor::imagefeature_cb, this);
     _client = _n.serviceClient<posedetection_msgs::Feature0DDetect>("Feature0DDetect");
     _pub = _n.advertise<posedetection_msgs::ObjectDetection>("ObjectDetection", 10);
+    _pub_agg = _n.advertise<posedetection_msgs::ObjectDetection>("ObjectDetection_agg", 10);
     _server = _n.advertiseService("SetTemplate", &PointPoseExtractor::settemplate_cb, this);
     _initialized = false;
   }
@@ -547,6 +548,7 @@ public:
     _sub.shutdown();
     _client.shutdown();
     _pub.shutdown();
+    _pub_agg.shutdown();
   }
 
 
@@ -930,6 +932,7 @@ public:
 	od.header.frame_id = msg->image.header.frame_id;
 	od.objects = vo6p;
 	_pub.publish(od);
+	_pub_agg.publish(od);
       }
     }
     // BOOST_FOREACH(Matching_Template* mt, _templates) {

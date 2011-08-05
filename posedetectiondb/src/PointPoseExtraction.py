@@ -26,6 +26,7 @@ from numpy import *
 
 from openravepy import *
 from openravepy import pyANN
+from openravepy.misc import *
 
 import cv
 from cv_bridge import CvBridge, CvBridgeError

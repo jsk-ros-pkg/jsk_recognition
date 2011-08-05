@@ -20,10 +20,10 @@
     ))
 
 (ros::roseus "objectdetection_marekr")
-(ros::subscribe "ObjectDetection" posedetection_msgs::ObjectDetection #'objectdetection-cb)
+(ros::subscribe "ObjectDetection_agg" posedetection_msgs::ObjectDetection #'objectdetection-cb)
 (ros::advertise "objectdetection_marker_array" visualization_msgs::MarkerArray 5)
 (ros::ros-info "start objectdetection_marker")
-(ros::ros-info "Wait for /ObjectDetection")
+(ros::ros-info "Wait for /ObjectDetection_agg")
 (ros::ros-info "Publish for /objectdetection_marker_array")
 
 (ros::rate 10)

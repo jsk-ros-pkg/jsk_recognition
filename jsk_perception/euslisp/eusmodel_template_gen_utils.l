@@ -72,7 +72,7 @@
 			    (imgname (str+ (send imgpath :name) "." (send imgpath :type))))
 		       (when teximg
 			 (instance rosnode :init "posedetectiondb" "PointPoseExtraction.py"
-				   :args (format nil "--template=$(find ~A)/template/~A.pp --hidegui --errorthresh=0.007 --neighthresh=0.8 --dminexpected=10 --ransaciters=200"
+				   :args (format nil "--template=$(find ~A)/template/~A.pp --hidegui --errorthresh=0.006 --neighthresh=0.82 --dminexpected=10 --ransaciters=200"
 						 *pkgname* imgname)
 				   ))))
 		 (send obj :faces)))

@@ -720,10 +720,12 @@ public:
     			    tf::Vector3(rv[0], rv[1], rv[2]));
 
     for (int i = 0; i < (int)imgs.size(); i++){
-      std::string type;
+      std::string type = window_name;
       char chr[20];
-      sprintf(chr, "%d", i);
-      type = window_name + "_" + std::string(chr);
+      if(imgs.size() > 1) {
+	sprintf(chr, "%d", i);
+	type = type + "_" + std::string(chr);
+      }
 
       Matching_Template* tmplt =
 	new Matching_Template(imgs.at(i), type,

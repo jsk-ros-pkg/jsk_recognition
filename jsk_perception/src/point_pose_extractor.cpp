@@ -2,6 +2,7 @@
 #include <rospack/rospack.h>
 #include <opencv/highgui.h>
 #include <cv_bridge/CvBridge.h>
+#include <cv_bridge/cv_bridge.h>
 #pragma message "Compiling " __FILE__ "..."
 #include <posedetection_msgs/Feature0DDetect.h>
 #include <posedetection_msgs/ImageFeature0D.h>
@@ -195,7 +196,7 @@ public:
   bool estimate_od (ros::ServiceClient client, cv::Mat src_img,
 		    std::vector<cv::KeyPoint> sourceimg_keypoints,
 		    image_geometry::PinholeCameraModel pcam,
-		    double err_thr,
+		    double err_thr, cv::Mat &stack_img,
 		    cv::flann::Index* ft, posedetection_msgs::Object6DPose* o6p){
 
     if ( _template_keypoints.size()== 0 &&
@@ -211,7 +212,7 @@ public:
     // stacked image
     cv::Size stack_size  = cv::Size(MAX(src_img.cols,_template_img.cols),
 				    src_img.rows+_template_img.rows);
-    cv::Mat stack_img(stack_size,CV_8UC3);
+    stack_img = cv::Mat(stack_size,CV_8UC3);
     stack_img = cv::Scalar(0);
     cv::Mat stack_img_tmp(stack_img,cv::Rect(0,0,_template_img.cols,_template_img.rows));
     cv::add(stack_img_tmp, _template_img, stack_img_tmp);
@@ -246,6 +247,7 @@ public:
     std::vector<uchar> mask((int)pt2.size());
 
     if ( pt1.size() > 4 ) {
+	  // ToDO for curve face
       H = cv::findHomography(cv::Mat(pt1), cv::Mat(pt2), mask, CV_RANSAC, _reprojection_threshold);
     }
 
@@ -503,8 +505,10 @@ public:
 		   2, 8, false);
 
     }
+    // for debug window
     if( _window_name != "" )
       cv::imshow(_window_name, stack_img);
+
     return err_success;
   }
 
@@ -516,10 +520,12 @@ public:
 class PointPoseExtractor
 {
   ros::NodeHandle _n;
+  image_transport::ImageTransport it;
   ros::Subscriber _sub;
   ros::ServiceServer _server;
   ros::ServiceClient _client;
   ros::Publisher _pub, _pub_agg;
+  image_transport::Publisher _debug_pub;
   double _reprojection_threshold;
   double _distanceratio_threshold;
   double _th_step;
@@ -534,12 +540,13 @@ class PointPoseExtractor
   bool _viewer;
 
 public:
-  PointPoseExtractor(){
-	//    _sub = _n.subscribe("ImageFeature0D", 1,
+  PointPoseExtractor() : it(_n) {
+    //    _sub = _n.subscribe("ImageFeature0D", 1,
     //			&PointPoseExtractor::imagefeature_cb, this);
     _client = _n.serviceClient<posedetection_msgs::Feature0DDetect>("Feature0DDetect");
     _pub = _n.advertise<posedetection_msgs::ObjectDetection>("ObjectDetection", 10);
     _pub_agg = _n.advertise<posedetection_msgs::ObjectDetection>("ObjectDetection_agg", 10);
+    _debug_pub = it.advertise("debug_image", 1);
     _server = _n.advertiseService("SetTemplate", &PointPoseExtractor::settemplate_cb, this);
     _initialized = false;
   }
@@ -617,31 +624,6 @@ public:
 			&cvmousecb, static_cast<void *>(_templates.back()));
     _first_sample_change = true;
   }
-
-    // double x_min = 10000;
-    // double x_max = 0;
-    // double y_min = 10000;
-    // double y_max = 0;
-    // for (int i = 0; i < (int)_correspondances.size(); i++){
-    //   if (_correspondances.at(i).x < x_min){
-    //     x_min = _correspondances.at(i).x;
-    //   }
-    //   if (_correspondances.at(i).x > x_max){
-    //     x_max = _correspondances.at(i).x;
-    //   }
-    //   if (_correspondances.at(i).y < y_min){
-    //     y_min = _correspondances.at(i).y;
-    //   }
-    //   if (_correspondances.at(i).y > y_max){
-    //     y_max = _correspondances.at(i).y;
-    //   }
-    // }
-    // pt2.push_back(cv::Point2f(0, 0));
-    // pt2.push_back(cv::Point2f(0, 0));
-    // pt2.push_back(cv::Point2f(0, 0));
-    // pt2.push_back(cv::Point2f(0, 0));
-    
-
 
   static void cvmousecb (int event, int x, int y, int flags, void* param){
     Matching_Template *mt = (Matching_Template*)param;
@@ -749,7 +731,7 @@ public:
 	    std::cerr << "done" << std::endl;
     }
 
-  } // initializae
+  } // initialize
 
 
   cv::Mat make_homography(cv::Mat src, cv::Mat rvec, cv::Mat tvec,
@@ -766,23 +748,13 @@ public:
 		      _cam_dist,
 		      coner_img_points);
 
-    double x_min = 10000;
-    double x_max = 0;
-    double y_min = 10000;
-    double y_max = 0;
+    float x_min = 10000, x_max = 0;
+    float y_min = 10000, y_max = 0;
     for (int i = 0; i < (int)coner_img_points.size(); i++){
-      if (coner_img_points.at(i).x < x_min){
-	x_min = coner_img_points.at(i).x;
-      }
-      if (coner_img_points.at(i).x > x_max){
-	x_max = coner_img_points.at(i).x;
-      }
-      if (coner_img_points.at(i).y < y_min){
-	y_min = coner_img_points.at(i).y;
-      }
-      if (coner_img_points.at(i).y > y_max){
-	y_max = coner_img_points.at(i).y;
-      }
+      x_min = std::min(x_min, coner_img_points.at(i).x);
+      x_max = std::max(x_max, coner_img_points.at(i).x);
+      y_min = std::min(y_min, coner_img_points.at(i).y);
+      y_max = std::max(y_max, coner_img_points.at(i).y);
     }
 
     std::vector<cv::Point2f> coner_img_points_trans;
@@ -826,6 +798,9 @@ public:
 
 	cv::Mat M;
 	cv::Size size;
+	//double tmp[9] = {1,0,0,0,1,0,0,0,1};
+	//M = cv::Mat(3,3,CV_64FC1, tmp);
+	//size = cv::Size(100, 100);
 	M = make_homography(src, rvec, tvec, template_width, template_height, size);
 	Mvec.push_back(M);
 	sizevec.push_back(size);
@@ -925,8 +900,16 @@ public:
       for (int i = 0; i < (int)_templates.size(); i++){
 	posedetection_msgs::Object6DPose o6p;
 
-	if (_templates.at(i)->estimate_od(_client, src_img, sourceimg_keypoints, pcam, _err_thr, ft, &o6p))
+	cv::Mat debug_img;
+	if (_templates.at(i)->estimate_od(_client, src_img, sourceimg_keypoints, pcam, _err_thr, debug_img, ft, &o6p))
 	  vo6p.push_back(o6p);
+
+	// for debug Image topic
+	cv_bridge::CvImage out_msg;
+	out_msg.header   = msg->image.header;
+	out_msg.encoding = "bgr8";
+	out_msg.image    = debug_img;
+	_debug_pub.publish(out_msg.toImageMsg());
       }
       delete ft;
       if (((int)vo6p.size() != 0) || pnod) {
@@ -954,7 +937,7 @@ public:
 	} else {
 	  if(!_sub)
 		_sub = _n.subscribe("ImageFeature0D", 1,
-							&PointPoseExtractor::imagefeature_cb, this);
+				    &PointPoseExtractor::imagefeature_cb, this);
 	}
   }
 

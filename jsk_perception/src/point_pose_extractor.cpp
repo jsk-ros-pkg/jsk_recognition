@@ -289,7 +289,7 @@ public:
       cv::Size text_size;
       std::string text;
 
-      text = "inlier: " + boost::lexical_cast<string>((int)inlier_sum) + " / " + boost::lexical_cast<string>((int)pt2.size());
+      text = "inlier: " + boost::lexical_cast<std::string>((int)inlier_sum) + " / " + boost::lexical_cast<std::string>((int)pt2.size());
       text_size = cv::getTextSize(text, fontFace, text_scale, thickness, &baseLine);
       x = stack_img.size().width - text_size.width;
       y = text_size.height + thickness + 10; // 10pt pading
@@ -297,7 +297,7 @@ public:
                    fontFace, text_scale, CV_RGB(0, 255, 0),
                    thickness, 8, false);
 
-      text = "template: " + boost::lexical_cast<string>((int)_template_keypoints.size());
+      text = "template: " + boost::lexical_cast<std::string>((int)_template_keypoints.size());
       text_size = cv::getTextSize(text, fontFace, text_scale, thickness, &baseLine);
       x = stack_img.size().width - text_size.width;
       y += text_size.height + thickness + 10; // 10pt pading
@@ -506,7 +506,7 @@ public:
     {
       std::string text;
       int x, y;
-      text = "error: " + boost::lexical_cast<string>(err_sum);
+      text = "error: " + boost::lexical_cast<std::string>(err_sum);
       x = stack_img.size().width - 16*17*text_scale; // 16pt * 17
       y = _template_img.size().height - (16 + 2)*text_scale*6;
       cv::putText (stack_img, text, cv::Point(x, y),
@@ -597,7 +597,7 @@ public:
     // cv::imshow("hoge", mask_img);
 
     cv::Mat M = (cv::Mat_<double>(3,3) << 1,0,0, 0,1,0, 0,0,1);
-    std::string window_name = "sample" + boost::lexical_cast<string>((int)_templates.size());
+    std::string window_name = "sample" + boost::lexical_cast<std::string>((int)_templates.size());
 
     Matching_Template* tmplt = 
       new Matching_Template (tmp_template, "sample",
@@ -661,7 +661,7 @@ public:
     try {
       rospack::Package *p = rp.get_pkg("opencv2");
       if (p!=NULL) default_template_file_name = p->path + std::string("/opencv/share/opencv/doc/opencv-logo2.png");
-    } catch (runtime_error &e) {
+    } catch (std::runtime_error &e) {
     }
     local_nh.param("template_filename", template_filename, default_template_file_name);
     local_nh.param("reprojection_threshold", _reprojection_threshold, 3.0);
@@ -684,7 +684,7 @@ public:
     }
 
     // relative pose
-    vector<double> rv(7);
+    std::vector<double> rv(7);
     std::istringstream iss(_pose_str);
     for(int i=0; i<7; i++)
       iss >> rv[i];

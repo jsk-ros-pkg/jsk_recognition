@@ -74,7 +74,7 @@ public:
 
     string frame_id; // tf frame id
 
-    int display, verbose;
+    int display, verbose, maxboard;
     vector<CHECKERBOARD> vcheckers; // grid points for every checkerboard
     vector< string > vstrtypes; // type names for every grid point
     map<string,int> maptypes;
@@ -91,6 +91,7 @@ public:
     {
         _node.param("display", display, 0);
         _node.param("verbose", verbose, 1);
+        _node.param("maxboard", maxboard, -1);
         
         char str[32];
         int index = 0;
@@ -277,11 +278,11 @@ public:
 #pragma omp parallel for schedule(dynamic,1)
         for(int i = 0; i < (int)vcheckers.size(); ++i) {
             CHECKERBOARD& cb = vcheckers[i];
-            int ncorners;
+            int ncorners, board=0;
             posedetection_msgs::Object6DPose objpose;
 
             // do until no more checkerboards detected
-            while(1) {
+            while((maxboard==-1)?1:((++board)<=maxboard)) {
                 cb.corners.resize(200);
                 int allfound = cvFindChessboardCorners( pimggray, cb.griddims, &cb.corners[0], &ncorners,
                                                         CV_CALIB_CB_ADAPTIVE_THRESH );

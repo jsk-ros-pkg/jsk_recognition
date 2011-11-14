@@ -14,7 +14,8 @@
 	)))
   ;; generate templates and launchfiles
   (gen-all-launch objects launchfilename)
-  (gen-all-template objects :type "imagesift"))
+; (gen-all-template objects :type "imagesift")
+  )
 
 ;;
 ;; (make-sift-template-and-launch

@@ -7,6 +7,91 @@
 
 (defconstant *pkgname* "jsk_perception")
 
+
+;;
+;; generate template for SIFT matching
+;;
+
+(defun get-template-info (obj aface)
+  (let ((teximg (send aface :get :gl-textureimage))
+	(texcoh (send aface :get :gl-texturecoords))
+	imgpath template)
+    (when (and teximg texcoh)
+      (let* ((texco (send texcoh :list))
+	     (imgfile (if teximg (send teximg :name)))
+	     (path (pathname imgfile))
+	     (origin (send (car (rassoc #f(0 0) texco)) :pvertex aface))
+	     (vx (v- (send (car (rassoc #f(1 0) texco)) :pvertex aface) origin))
+	     (vy (v- (send (car (rassoc #f(0 1) texco)) :pvertex aface) origin))
+	     (width (norm vx)) (height (norm vy))
+	     (nz (v- (send aface :normal))) (nx (scale (/ 1.0 width) vx)) (ny (scale (/ 1.0 height) vy))
+	     (trans-rot (make-matrix 3 3)))
+	(set-matrix-column trans-rot 0 nx)
+	(set-matrix-column trans-rot 1 ny)
+	(set-matrix-column trans-rot 2 nz)
+	(setq trans
+	      (send (make-coords :pos origin :rot trans-rot)
+		    :transformation (send obj :worldcoords)
+		    ))
+	(setq template (ros::resolve-ros-path
+			(format nil "package://~A/template/~A.~A" *pkgname* (send path :name) (send path :type))))
+	(when (or (not (probe-file template)) (file-newer imgfile template))
+	  (unix::system (format nil "cp -f ~a ~a" imgfile template))
+	  (list template width height trans))
+	))))
+
+(defun gen-detection-nodes (obj)
+  (let (nodes)
+    (setq nodes
+	  (mapcar
+	   #'(lambda(aface)
+	       (let* ((teximg (send aface :get :gl-textureimage))
+		      (imgpath (pathname (send teximg :name)))
+		      (imgname (str+ (send imgpath :name) "." (send imgpath :type)))
+		      (tmpl-info (get-template-info obj aface)))
+		 (when (and teximg tmpl-info)
+		   (instance rosnode :init "jsk_perception" "point_pose_extractor"
+			     :name (format nil "point_pose_extractor_~a" (send obj :name))
+			     :params
+      (list
+       (instance rosparam :init :name "window_name" :value (send obj :name))
+       (instance rosparam :init :name "template_filename" :value (car tmpl-info))
+       (instance rosparam :init :name "object_width" :value (* (elt tmpl-info 1) 0.001))
+       (instance rosparam :init :name "object_height" :value (* (elt tmpl-info 2) 0.001))
+       (instance rosparam :init :name "viewer_window" :value "false"))
+			     ))))
+	   (send obj :faces)))
+    (remove nil nodes)))
+
+(defun gen-all-launch (objects launch-file-name)
+  ;; generate launchfile
+  (with-open-file
+   (launch-f launch-file-name :direction :output)
+   (format launch-f "<launch>")
+   (dolist (obj objects)
+     (let (obj-launch xmllist xmltext nodes)
+       (setq obj-launch
+	     (format nil "~A/template/_~x_~A.launch" (ros::resolve-ros-path (format nil "package://~A" *pkgname*))
+		     (system::address obj)
+		     (send obj :name)))
+       (setq nodes (gen-detection-nodes obj))
+       (setq xmllist (append (list "launch" nil)
+			     (send-all nodes :list)))
+       (setq xmltext (simple-list2xml xmllist
+				      :newline "~%" :attrfmt " ~A=\"~A\""))
+       (with-open-file (f obj-launch :direction :output)
+		       (format f xmltext))
+       (format launch-f "<include file=\"~A\"/>~%" obj-launch)
+     ))
+   (format launch-f "</launch>")
+   ))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Old functions
+;;
+
 (defun need-generate-template (imagefile)
   (let* ((path (pathname imagefile))
 	 (template (ros::resolve-ros-path
@@ -62,23 +147,6 @@
     (str+ (send path :directory-string)
 	  "template_" (send path :name) "." (send path :type) ".pp")))
 
-
-(defun gen-detection-nodes (obj)
-  (let (nodes)
-    (setq nodes (mapcar
-		 #'(lambda(aface)
-		     (let* ((teximg (send aface :get :gl-textureimage))
-			    (imgpath (pathname (send teximg :name)))
-			    (imgname (str+ (send imgpath :name) "." (send imgpath :type))))
-		       (when teximg
-			 (instance rosnode :init "posedetectiondb" "PointPoseExtraction.py"
-				   :args (format nil "--template=$(find ~A)/template/~A.pp --hidegui --errorthresh=0.006 --neighthresh=0.82 --dminexpected=10 --ransaciters=200"
-						 *pkgname* imgname)
-				   ))))
-		 (send obj :faces)))
-    (remove nil nodes)))
-
-
 (defun all-texture-names (objs)
   (remove nil
 	  (send-all (send-all (flatten (send-all objs :faces)) :get :gl-textureimage) :name))
@@ -117,25 +185,23 @@
       ))
   )
 
-(defun gen-all-launch (objects launch-file-name)
-  ;; generate launchfile
-  (with-open-file
-   (launch-f launch-file-name :direction :output)
-   (format launch-f "<launch>")
-   (dolist (obj objects)
-     (let (obj-launch xmllist xmltext nodes)
-       (setq obj-launch
-	     (format nil "~A/template/_~x_~A.launch" (ros::resolve-ros-path (format nil "package://~A" *pkgname*))
-		     (system::address obj)
-		     (send obj :name)))
-       (setq nodes (gen-detection-nodes obj))
-       (setq xmllist (append (list "launch" nil)
-			     (send-all nodes :list)))
-       (setq xmltext (simple-list2xml xmllist
-				      :newline "~%" :attrfmt " ~A=\"~A\""))
-       (with-open-file (f obj-launch :direction :output)
-		       (format f xmltext))
-       (format launch-f "<include file=\"~A\"/>~%" obj-launch)
-     ))
-   (format launch-f "</launch>")
-   ))
+
+
+;;
+;; generate launch file
+;;
+
+(defun gen-detection-nodes-old (obj) ;; this is old / for python macher
+  (let (nodes)
+    (setq nodes (mapcar
+		 #'(lambda(aface)
+		     (let* ((teximg (send aface :get :gl-textureimage))
+			    (imgpath (pathname (send teximg :name)))
+			    (imgname (str+ (send imgpath :name) "." (send imgpath :type))))
+		       (when teximg
+			 (instance rosnode :init "posedetectiondb" "PointPoseExtraction.py"
+				   :args (format nil "--template=$(find ~A)/template/~A.pp --hidegui --errorthresh=0.006 --neighthresh=0.82 --dminexpected=10 --ransaciters=200"
+						 *pkgname* imgname)
+				   ))))
+		 (send obj :faces)))
+    (remove nil nodes)))

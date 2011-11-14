@@ -65,7 +65,7 @@
 (defclass rosnode
   :super propertied-object
   :slots (package type name namespace machine_name
-	  args respawn remap_args env_args process_name
+	  args respawn remap_args env_args ;process_name
 	  output cwd launch_prefix required filename params))
 (defmethod rosnode
   (:init (_package _node_type &key ((:name _name) "")
@@ -76,7 +76,8 @@
 		   ((:output _output) "log") ((:cwd _cwd) "ROS_HOME")
 		   ((:launch_prefix _launch_prefix) "")
 		   ((:required _required) nil)
-		   ((:filename _filename) "<unknown>"))
+		   ((:filename _filename) "<unknown>")
+		   ((:params _params) nil))
 	 (setq package _package
 	       type _node_type
 	       name _name
@@ -91,14 +92,15 @@
 	       cwd _cwd
 	       launch_prefix _launch_prefix
 	       required _required
-	       filename _filename))
+	       filename _filename
+	       params _params))
   (:package (&rest arg) (setq package (or (car arg) package)))
   (:type (&rest arg) (setq type (or (car arg) type)))
   (:name (&rest arg) (setq name (or (car arg) name)))
   (:args (&rest arg) (setq args (or (car arg) args)))
   (:namespace (&rest arg) (setq namespace (or (car arg) namespace)))
   (:machine_name (&rest arg) (setq machine_name (or (car arg) machine_name)))
-  (:params (&rest arg) (setq params (or (car arg) params)))
+  (:params (&rest arg) (setq params (if (car arg) arg params)))
 
   (:attrs ()
     (append
@@ -125,10 +127,10 @@
 				    (cons "value" (cdr x)))))
 	    env_args))
   (:list ()
-    (list "node"
-	  (send self :attrs)
-	  (append nil (send self :remap_args) (send self :env_args)
-		  (mapcar #'(lambda(x)(send x :list)) params))))
+    (append (list "node"
+		  (send self :attrs))
+	    (send self :remap_args) (send self :env_args)
+	    (mapcar #'(lambda(x)(send x :list)) params)))
   )
 
 (defun launch (nodes)

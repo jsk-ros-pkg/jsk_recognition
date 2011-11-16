@@ -24,20 +24,20 @@
 	     (vx (v- (send (car (rassoc #f(1 0) texco)) :pvertex aface) origin))
 	     (vy (v- (send (car (rassoc #f(0 1) texco)) :pvertex aface) origin))
 	     (width (norm vx)) (height (norm vy))
-	     (nz (v- (send aface :normal))) (nx (scale (/ 1.0 width) vx)) (ny (scale (/ 1.0 height) vy))
 	     (trans-rot (make-matrix 3 3)))
-	(set-matrix-column trans-rot 0 nx)
-	(set-matrix-column trans-rot 1 ny)
-	(set-matrix-column trans-rot 2 nz)
-	(setq trans
-	      (send (make-coords :pos origin :rot trans-rot)
-		    :transformation (send obj :worldcoords)
-		    ))
+	(set-matrix-column trans-rot 0 (scale (/ 1.0 width) vx)) ;; nx
+	(set-matrix-column trans-rot 1 (scale (/ 1.0 height) vy)) ;; ny
+	(set-matrix-column trans-rot 2 (send aface :normal)) ;; nz
+	(setq trans (make-coords :pos origin :rot trans-rot))
+;	(setq trans
+;	      (send (make-coords :pos origin :rot trans-rot)
+;		    :transformation (send obj :worldcoords)
+;		    ))
 	(setq template (ros::resolve-ros-path
 			(format nil "package://~A/template/~A.~A" *pkgname* (send path :name) (send path :type))))
 	(when (or (not (probe-file template)) (file-newer imgfile template))
-	  (unix::system (format nil "cp -f ~a ~a" imgfile template))
-	  (list template width height trans))
+	  (unix::system (format nil "cp -f ~a ~a" imgfile template)))
+	(list template width height trans)
 	))))
 
 (defun gen-detection-nodes (obj)

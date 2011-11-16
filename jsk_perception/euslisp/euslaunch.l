@@ -48,6 +48,9 @@
   :slots (name value))
 (defmethod rosparam
   (:init (&key ((:name _name) "") ((:value _value) ""))
+    (when (or (float-vector-p _value) (integer-vector-p _value))
+      (setq _value (format nil "~a" _value))
+      (setq _value (subseq _value 3 (1- (length _value)))))
     (setq name _name
 	  value (string _value)))
   (:list ()

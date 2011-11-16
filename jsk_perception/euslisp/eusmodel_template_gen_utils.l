@@ -48,8 +48,11 @@
 	       (let* ((teximg (send aface :get :gl-textureimage))
 		      (imgpath (pathname (send teximg :name)))
 		      (imgname (str+ (send imgpath :name) "." (send imgpath :type)))
-		      (tmpl-info (get-template-info obj aface)))
+		      (tmpl-info (get-template-info obj aface))
+		      trans quat)
 		 (when (and teximg tmpl-info)
+		   (setq trans (elt tmpl-info 3))
+		   (setq quat (matrix2quaternion (send trans :rot)))
 		   (instance rosnode :init "jsk_perception" "point_pose_extractor"
 			     :name (format nil "point_pose_extractor_~a" (send obj :name))
 			     :params
@@ -58,6 +61,7 @@
        (instance rosparam :init :name "template_filename" :value (car tmpl-info))
        (instance rosparam :init :name "object_width" :value (* (elt tmpl-info 1) 0.001))
        (instance rosparam :init :name "object_height" :value (* (elt tmpl-info 2) 0.001))
+       (instance rosparam :init :name "relative_pose" :value (concatenate float-vector (scale 0.001 (send trans :pos)) (subseq quat 1) (subseq quat 0 1)))
        (instance rosparam :init :name "viewer_window" :value "false"))
 			     ))))
 	   (send obj :faces)))

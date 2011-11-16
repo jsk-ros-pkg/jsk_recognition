@@ -380,7 +380,7 @@ public:
     o6p->pose.orientation.z = resulttf.getRotation().z();
     o6p->type = _matching_frame; // _type
 
-    // make 3d model
+    // draw 3d cube model
     std::vector<cv::Point2f> projected_top;
     {
       double cfR3[3], cfT3[3];
@@ -433,38 +433,20 @@ public:
 		CV_AA, 0);
     }
 
-    // draw 3d model
-    {
-      cv::Point2f p1(projected_top.at(0).x,
-		     projected_top.at(0).y+_template_img.rows);
-      cv::Point2f p2(projected_top.at(1).x,
-		     projected_top.at(1).y+_template_img.rows);
-      cv::Point2f p3(projected_top.at(2).x,
-		     projected_top.at(2).y+_template_img.rows);
-      cv::Point2f p4(projected_top.at(3).x,
-		     projected_top.at(3).y+_template_img.rows);
-      cv::Point2f p5(projected_top.at(4).x,
-		     projected_top.at(4).y+_template_img.rows);
-      cv::Point2f p6(projected_top.at(5).x,
-		     projected_top.at(5).y+_template_img.rows);
-      cv::Point2f p7(projected_top.at(6).x,
-		     projected_top.at(6).y+_template_img.rows);
-      cv::Point2f p8(projected_top.at(7).x,
-		     projected_top.at(7).y+_template_img.rows);
+    // draw 3d cube model
+    if(projected_top.size() == 8) { // verify, the size is 8
+      int cnt = 8;
+      std::vector<cv::Point2f> ps(cnt);
+      for(int i=0; i<cnt; i++)
+	ps[i] = cv::Point2f(projected_top[i].x,
+			    projected_top[i].y+_template_img.rows);
 
       int draw_width = ( err_success ? 3 : 1);
-      cv::line (stack_img, p1, p2, CV_RGB(0, 0, 255), draw_width, CV_AA, 0);
-      cv::line (stack_img, p2, p3, CV_RGB(0, 0, 255), draw_width, CV_AA, 0);
-      cv::line (stack_img, p3, p4, CV_RGB(0, 0, 255), draw_width, CV_AA, 0);
-      cv::line (stack_img, p4, p1, CV_RGB(0, 0, 255), draw_width, CV_AA, 0);
-      cv::line (stack_img, p1, p5, CV_RGB(0, 0, 255), draw_width, CV_AA, 0);
-      cv::line (stack_img, p5, p6, CV_RGB(0, 0, 255), draw_width, CV_AA, 0);
-      cv::line (stack_img, p6, p7, CV_RGB(0, 0, 255), draw_width, CV_AA, 0);
-      cv::line (stack_img, p7, p8, CV_RGB(0, 0, 255), draw_width, CV_AA, 0);
-      cv::line (stack_img, p8, p5, CV_RGB(0, 0, 255), draw_width, CV_AA, 0);
-      cv::line (stack_img, p6, p2, CV_RGB(0, 0, 255), draw_width, CV_AA, 0);
-      cv::line (stack_img, p7, p3, CV_RGB(0, 0, 255), draw_width, CV_AA, 0);
-      cv::line (stack_img, p8, p4, CV_RGB(0, 0, 255), draw_width, CV_AA, 0);
+      for(int i=0; i<4; i++) {
+	cv::line (stack_img, ps[i], ps[(i+1)%4], CV_RGB(0, 0, 255), draw_width, CV_AA, 0);
+	cv::line (stack_img, ps[i+4], ps[(i+1)%4+4], CV_RGB(0, 0, 255), draw_width, CV_AA, 0);
+	cv::line (stack_img, ps[i], ps[i+4], CV_RGB(0, 0, 255), draw_width, CV_AA, 0);
+      }
     }
 
     // draw coords
@@ -489,17 +471,13 @@ public:
       cv::projectPoints(coords_mat, crvec, ctvec, pcam.intrinsicMatrix(),
 			pcam.distortionCoeffs(),
 			coords_img_points);
-      cv::Point2f p1(coords_img_points.at(0).x,
-		     coords_img_points.at(0).y+_template_img.rows);
-      cv::Point2f p2(coords_img_points.at(1).x,
-		     coords_img_points.at(1).y+_template_img.rows);
-      cv::Point2f p3(coords_img_points.at(2).x,
-		     coords_img_points.at(2).y+_template_img.rows);
-      cv::Point2f p4(coords_img_points.at(3).x,
-		     coords_img_points.at(3).y+_template_img.rows);
-      cv::line (stack_img, p1, p2, CV_RGB(255, 0, 0), 3, CV_AA, 0);
-      cv::line (stack_img, p1, p3, CV_RGB(0, 255, 0), 3, CV_AA, 0);
-      cv::line (stack_img, p1, p4, CV_RGB(0, 0, 255), 3, CV_AA, 0);
+      std::vector<cv::Point2f> ps(4);
+      for(int i=0; i<4; i++)
+	ps[i] = cv::Point2f(coords_img_points[i].x,
+			    coords_img_points[i].y+_template_img.rows);
+      cv::line (stack_img, ps[0], ps[1], CV_RGB(255, 0, 0), 3, CV_AA, 0);
+      cv::line (stack_img, ps[0], ps[2], CV_RGB(0, 255, 0), 3, CV_AA, 0);
+      cv::line (stack_img, ps[0], ps[3], CV_RGB(0, 0, 255), 3, CV_AA, 0);
     }
 
     // write text on image

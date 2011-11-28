@@ -21,18 +21,17 @@
 	     (imgfile (if teximg (send teximg :name)))
 	     (path (pathname imgfile))
 	     (origin (send (car (rassoc #f(0 0) texco)) :pvertex aface))
-	     (vx (v- (send (car (rassoc #f(1 0) texco)) :pvertex aface) origin))
-	     (vy (v- (send (car (rassoc #f(0 1) texco)) :pvertex aface) origin))
+	     (vx (v- (send (car (rassoc #f(0 1) texco)) :pvertex aface) origin))
+	     (vy (v- (send (car (rassoc #f(1 0) texco)) :pvertex aface) origin))
 	     (width (norm vx)) (height (norm vy))
 	     (trans-rot (make-matrix 3 3)))
 	(set-matrix-column trans-rot 0 (scale (/ 1.0 width) vx)) ;; nx
 	(set-matrix-column trans-rot 1 (scale (/ 1.0 height) vy)) ;; ny
 	(set-matrix-column trans-rot 2 (send aface :normal)) ;; nz
-	(setq trans (make-coords :pos origin :rot trans-rot))
-;	(setq trans
-;	      (send (make-coords :pos origin :rot trans-rot)
-;		    :transformation (send obj :worldcoords)
-;		    ))
+	(setq trans
+	      (send (make-coords :pos origin :rot trans-rot)
+		    :transformation (make-cascoords)
+		    ))
 	(setq template (ros::resolve-ros-path
 			(format nil "package://~A/template/~A.~A" *pkgname* (send path :name) (send path :type))))
 	(when (or (not (probe-file template)) (file-newer imgfile template))

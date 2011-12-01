@@ -21,13 +21,14 @@
 	     (imgfile (if teximg (send teximg :name)))
 	     (path (pathname imgfile))
 	     (origin (send (car (rassoc #f(0 0) texco)) :pvertex aface))
-	     (vx (v- (send (car (rassoc #f(0 1) texco)) :pvertex aface) origin))
-	     (vy (v- (send (car (rassoc #f(1 0) texco)) :pvertex aface) origin))
+	     (vx (v- (send (car (rassoc #f(1 0) texco)) :pvertex aface) origin))
+	     (vy (v- (send (car (rassoc #f(0 1) texco)) :pvertex aface) origin))
 	     (width (norm vx)) (height (norm vy))
 	     (trans-rot (make-matrix 3 3)))
-	(set-matrix-column trans-rot 0 (scale (/ 1.0 width) vx)) ;; nx
-	(set-matrix-column trans-rot 1 (scale (/ 1.0 height) vy)) ;; ny
-	(set-matrix-column trans-rot 2 (send aface :normal)) ;; nz
+        (setq vx (scale (/ 1.0 width) vx) vy (scale (/ 1.0 height) vy))
+        (set-matrix-column trans-rot 0 vy) ;; ny
+        (set-matrix-column trans-rot 1 vx) ;; nx
+        (set-matrix-column trans-rot 2 (v* vy vx)) ;; nz
 	(setq trans
 	      (send (make-coords :pos origin :rot trans-rot)
 		    :transformation (make-cascoords)

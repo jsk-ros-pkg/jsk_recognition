@@ -1,7 +1,6 @@
 #include <ros/ros.h>
 #include <rospack/rospack.h>
 #include <opencv/highgui.h>
-#include <cv_bridge/CvBridge.h>
 #include <cv_bridge/cv_bridge.h>
 #pragma message "Compiling " __FILE__ "..."
 #include <posedetection_msgs/Feature0DDetect.h>
@@ -10,6 +9,7 @@
 #include <posedetection_msgs/Object6DPose.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Quaternion.h>
+#include <sensor_msgs/image_encodings.h>
 #include <image_transport/image_transport.h>
 #include <image_geometry/pinhole_camera_model.h>
 #include <tf/tf.h>
@@ -21,8 +21,9 @@
 
 #include <posedetectiondb/SetTemplate.h>
 
-bool _first_sample_change;
+namespace enc = sensor_msgs::image_encodings;
 
+bool _first_sample_change;
 
 void features2keypoint (posedetection_msgs::Feature0D features,
 			std::vector<cv::KeyPoint>& keypoints,
@@ -125,16 +126,16 @@ public:
 
   int set_template(ros::ServiceClient client){
     posedetection_msgs::Feature0DDetect srv;
-    sensor_msgs::CvBridge bridge;
 
     if ( _template_img.empty()) {
       ROS_ERROR ("template picture is empty.");
       return -1;
     }
     ROS_INFO_STREAM("read template image and call " << client.getService() << " service");
-    boost::shared_ptr<IplImage> _template_imgipl =
-      boost::shared_ptr<IplImage>(new IplImage (_template_img));
-    srv.request.image = *bridge.cvToImgMsg(_template_imgipl.get(), "bgr8");
+    cv_bridge::CvImage cv_img;
+    cv_img.image = cv::Mat(_template_img);
+    cv_img.encoding = std::string("bgr8");
+    srv.request.image = *(cv_img.toImageMsg());
     if (client.call(srv)) {
       ROS_INFO_STREAM("get features with " << srv.response.features.scales.size() << " descriptoins");
       features2keypoint (srv.response.features, _template_keypoints, _template_descriptors);
@@ -284,7 +285,7 @@ public:
 
     double text_scale = 1.5;
     {
-      int fontFace = 0, thickness, baseLine;
+      int fontFace = 0, thickness = 0, baseLine;
       int x, y;
       cv::Size text_size;
       std::string text;
@@ -347,17 +348,18 @@ public:
     cv::Mat rvec(3, 1, CV_64FC1, fR3);
     cv::Mat tvec(3, 1, CV_64FC1, fT3);
 
-    cv::solvePnP (corners3d_mat, corners2d_mat_trans, pcam.intrinsicMatrix(),
-		  pcam.distortionCoeffs(),
+    cv::Mat camera_matrix = pcam.projectionMatrix()(cv::Range::all(), cv::Range(0, 3));
+    cv::solvePnP (corners3d_mat, corners2d_mat_trans, camera_matrix,
+		  pcam.distortionCoeffs(), // ???
 		  rvec, tvec);
 
     tf::Transform checktf, resulttf;
-    checktf.setOrigin( tf::Vector3(fT3[0], fT3[1], fT3[2] ) );
-    double rx = fR3[0], ry = fR3[1], rz = fR3[2];
 
+    checktf.setOrigin( tf::Vector3(fT3[0], fT3[1], fT3[2] ) );
+
+    double rx = fR3[0], ry = fR3[1], rz = fR3[2];
     tf::Quaternion quat;
     double angle = cv::norm(rvec);
-
     quat.setRotation(tf::Vector3(rx/angle, ry/angle, rz/angle), angle);
     checktf.setRotation( quat );
 
@@ -383,31 +385,21 @@ public:
     // draw 3d cube model
     std::vector<cv::Point2f> projected_top;
     {
-      double cfR3[3], cfT3[3];
-      cv::Mat crvec(3, 1, CV_64FC1, cfR3);
-      cv::Mat ctvec(3, 1, CV_64FC1, cfT3);
-      cfT3[0] = checktf.getOrigin().getX();
-      cfT3[1] = checktf.getOrigin().getY();
-      cfT3[2] = checktf.getOrigin().getZ();
-      cfR3[0] = checktf.getRotation().getAxis().x() * checktf.getRotation().getAngle();
-      cfR3[1] = checktf.getRotation().getAxis().y() * checktf.getRotation().getAngle();
-      cfR3[2] = checktf.getRotation().getAxis().z() * checktf.getRotation().getAngle();
+      tf::Vector3 coords[8] = {tf::Vector3(0,0,0),
+			       tf::Vector3(0, _template_width, 0),
+			       tf::Vector3(_template_height, _template_width,0),
+			       tf::Vector3(_template_height, 0, 0),
+			       tf::Vector3(0, 0, -0.03),
+			       tf::Vector3(0, _template_width, -0.03),
+			       tf::Vector3(_template_height, _template_width, -0.03),
+			       tf::Vector3(_template_height, 0, -0.03)};
 
-      cv::Point3f coords[8] = {cv::Point3f(0,0,0),
-			       cv::Point3f(0, _template_width, 0),
-			       cv::Point3f(_template_height, _template_width,0),
-			       cv::Point3f(_template_height, 0, 0),
-			       cv::Point3f(0, 0, -0.03),
-			       cv::Point3f(0, _template_width, -0.03),
-			       cv::Point3f(_template_height, _template_width, -0.03),
-			       cv::Point3f(_template_height, 0, -0.03)};
+      projected_top = std::vector<cv::Point2f>(8);
 
-      cv::Mat coords_mat (cv::Size(8, 1), CV_32FC3, coords);
-      cv::projectPoints(coords_mat, crvec, ctvec, pcam.intrinsicMatrix(),
-			pcam.distortionCoeffs(),
-			projected_top);
-      for (int j = 0; j < 4; j++){
-	projected_top.push_back(projected_top.at(j));
+      for(int i=0; i<8; i++) {
+	coords[i] = resulttf * coords[i];
+	cv::Point3f pt(coords[i].getX(), coords[i].getY(), coords[i].getZ());
+	projected_top[i] = pcam.project3dToPixel(pt);
       }
     }
 
@@ -422,7 +414,7 @@ public:
       err_success = false;
     }
 
-    // draw lines araound object
+    // draw lines around the detected object
     for (int j = 0; j < corners2d_mat_trans.cols; j++){
       cv::Point2f p1(corners2d_mat_trans.at<cv::Point2f>(0,j).x,
 		     corners2d_mat_trans.at<cv::Point2f>(0,j).y+_template_img.rows);
@@ -452,29 +444,19 @@ public:
     // draw coords
     if ( err_success )
     {
-      double cfR3[3], cfT3[3];
-      cv::Mat crvec(3, 1, CV_64FC1, cfR3);
-      cv::Mat ctvec(3, 1, CV_64FC1, cfT3);
-      cfT3[0] = resulttf.getOrigin().getX();
-      cfT3[1] = resulttf.getOrigin().getY();
-      cfT3[2] = resulttf.getOrigin().getZ();
-      cfR3[0] = resulttf.getRotation().getAxis().x() * resulttf.getRotation().getAngle();
-      cfR3[1] = resulttf.getRotation().getAxis().y() * resulttf.getRotation().getAngle();
-      cfR3[2] = resulttf.getRotation().getAxis().z() * resulttf.getRotation().getAngle();
-
-      cv::Point3f coords[4] = {cv::Point3f(0,0,0),
-			       cv::Point3f(0.05,0,0),
-			       cv::Point3f(0,0.05,0),
-			       cv::Point3f(0,0,0.05)};
-      cv::Mat coords_mat (cv::Size(4, 1), CV_32FC3, coords);
-      std::vector<cv::Point2f> coords_img_points;
-      cv::projectPoints(coords_mat, crvec, ctvec, pcam.intrinsicMatrix(),
-			pcam.distortionCoeffs(),
-			coords_img_points);
+      tf::Vector3 coords[4] = { tf::Vector3(0,0,0),
+				tf::Vector3(0.05,0,0),
+				tf::Vector3(0,0.05,0),
+				tf::Vector3(0,0,0.05)};
       std::vector<cv::Point2f> ps(4);
-      for(int i=0; i<4; i++)
-	ps[i] = cv::Point2f(coords_img_points[i].x,
-			    coords_img_points[i].y+_template_img.rows);
+
+      for(int i=0; i<4; i++) {
+	coords[i] = resulttf * coords[i];
+	cv::Point3f pt(coords[i].getX(), coords[i].getY(), coords[i].getZ());	
+	ps[i] = pcam.project3dToPixel(pt);
+	ps[i].y += _template_img.rows; // draw on camera image
+      }
+
       cv::line (stack_img, ps[0], ps[1], CV_RGB(255, 0, 0), 3, CV_AA, 0);
       cv::line (stack_img, ps[0], ps[2], CV_RGB(0, 255, 0), 3, CV_AA, 0);
       cv::line (stack_img, ps[0], ps[3], CV_RGB(0, 0, 255), 3, CV_AA, 0);
@@ -516,9 +498,8 @@ class PointPoseExtractor
   double _phi_step;
   bool _autosize;
   double _err_thr;
-  cv::Mat _cam_mat;
-  cv::Mat _cam_dist;
   static std::vector<Matching_Template *> _templates;
+  image_geometry::PinholeCameraModel pcam;
   bool pnod;
   bool _initialized;
   bool _viewer;
@@ -686,8 +667,9 @@ public:
     cv::Mat coner_mat (cv::Size(4, 1), CV_32FC3, coner);
     std::vector<cv::Point2f> coner_img_points;
 
-    cv::projectPoints(coner_mat, rvec, tvec, _cam_mat,
-		      _cam_dist,
+    cv::projectPoints(coner_mat, rvec, tvec,
+		      pcam.projectionMatrix()(cv::Range::all(), cv::Range(0,3)),
+		      pcam.distortionCoeffs(),
 		      coner_img_points);
 
     float x_min = 10000, x_max = 0;
@@ -730,7 +712,8 @@ public:
 	cv::Mat rvec(3, 1, CV_64FC1, fR3);
 	cv::Mat tvec(3, 1, CV_64FC1, fT3);
 
-	tf::Quaternion quat(0, th_step*i, phi_step*j);
+	tf::Quaternion quat;
+	quat.setEuler(0, th_step*i, phi_step*j);
 	fR3[0] = quat.getAxis().x() * quat.getAngle();
 	fR3[1] = quat.getAxis().y() * quat.getAngle();
 	fR3[2] = quat.getAxis().z() * quat.getAngle();
@@ -790,13 +773,9 @@ public:
 
   bool settemplate_cb (posedetectiondb::SetTemplate::Request &req,
 		       posedetectiondb::SetTemplate::Response &res){
-      IplImage* iplimg;
-      cv::Mat img;
-      sensor_msgs::CvBridge bridge;
-
-      bridge.fromImage (req.image, "bgr8");
-      iplimg = bridge.toIpl();
-      img = cv::Mat(iplimg);
+      cv_bridge::CvImagePtr cv_ptr;
+      cv_ptr = cv_bridge::toCvCopy(req.image, enc::BGR8);
+      cv::Mat img(cv_ptr->image);
 
       tf::Transform transform(tf::Quaternion(req.relativepose.orientation.x,
 					     req.relativepose.orientation.y,
@@ -816,22 +795,16 @@ public:
   void imagefeature_cb (const posedetection_msgs::ImageFeature0DConstPtr& msg){
     std::vector<cv::KeyPoint> sourceimg_keypoints;
     cv::Mat sourceimg_descriptors;
-    image_geometry::PinholeCameraModel pcam;
-    sensor_msgs::CvBridge bridge;
     std::vector<posedetection_msgs::Object6DPose> vo6p;
     posedetection_msgs::ObjectDetection od;
 
-    bridge.fromImage (msg->image, "bgr8");
-    IplImage* src_imgipl;
-    src_imgipl = bridge.toIpl();
-    cv::Mat src_img(src_imgipl);
+    cv_bridge::CvImagePtr cv_ptr;
+    cv_ptr = cv_bridge::toCvCopy(msg->image, enc::BGR8);
+    cv::Mat src_img(cv_ptr->image);
 
     // from ros messages to keypoint and pin hole camera model
     features2keypoint (msg->features, sourceimg_keypoints, sourceimg_descriptors);
     pcam.fromCameraInfo(msg->info);
-
-    _cam_mat = pcam.intrinsicMatrix().clone();
-    _cam_dist = pcam.distortionCoeffs().clone();
 
     if ( !_initialized ) {
       // make template images from camera info

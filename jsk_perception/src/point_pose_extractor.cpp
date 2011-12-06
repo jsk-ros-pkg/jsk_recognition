@@ -397,7 +397,7 @@ public:
       projected_top = std::vector<cv::Point2f>(8);
 
       for(int i=0; i<8; i++) {
-	coords[i] = resulttf * coords[i];
+	coords[i] = checktf * coords[i];
 	cv::Point3f pt(coords[i].getX(), coords[i].getY(), coords[i].getZ());
 	projected_top[i] = pcam.project3dToPixel(pt);
       }

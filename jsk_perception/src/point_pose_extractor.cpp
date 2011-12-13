@@ -347,10 +347,11 @@ public:
     double fR3[3], fT3[3];
     cv::Mat rvec(3, 1, CV_64FC1, fR3);
     cv::Mat tvec(3, 1, CV_64FC1, fT3);
+    cv::Mat zero_distortion_mat = cv::Mat::zeros(4, 1, CV_64FC1);
 
     cv::Mat camera_matrix = pcam.projectionMatrix()(cv::Range::all(), cv::Range(0, 3));
     cv::solvePnP (corners3d_mat, corners2d_mat_trans, camera_matrix,
-		  pcam.distortionCoeffs(), // ???
+		  zero_distortion_mat,//if unrectified: pcam.distortionCoeffs()
 		  rvec, tvec);
 
     tf::Transform checktf, resulttf;
@@ -667,9 +668,10 @@ public:
     cv::Mat coner_mat (cv::Size(4, 1), CV_32FC3, coner);
     std::vector<cv::Point2f> coner_img_points;
 
+    cv::Mat zero_distortion_mat = cv::Mat::zeros(4, 1, CV_64FC1);
     cv::projectPoints(coner_mat, rvec, tvec,
 		      pcam.projectionMatrix()(cv::Range::all(), cv::Range(0,3)),
-		      pcam.distortionCoeffs(),
+		      zero_distortion_mat, // pcam.distortionCoeffs(),
 		      coner_img_points);
 
     float x_min = 10000, x_max = 0;

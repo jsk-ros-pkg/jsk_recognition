@@ -14,17 +14,10 @@
 	)))
   ;; generate templates and launchfiles
   (gen-all-launch objects launchfilename)
-; (gen-all-template objects :type "imagesift")
   )
 
 ;;
-;; (make-sift-template-and-launch
-;;  "launch/eusmodel_detection_tiny-objects.launch"
-;;  (list
-;;   (instance twinings-object :init)
-;;   (instance coffee-filter-object :init)
-;;   ))
-
+;;
 ;;
 (make-sift-template-and-launch
  "launch/eusmodel_detection_elevator-panels.launch"
@@ -41,5 +34,6 @@
   (instance elevator_inside_panel_eng2-object :init
 	    :name "elevator_inside_panel")
   ))
+
 
 (exit)

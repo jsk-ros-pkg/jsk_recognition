@@ -67,7 +67,7 @@
 	   (send obj :faces)))
     (remove nil nodes)))
 
-(defun gen-all-launch (objects launch-file-name)
+(defun gen-all-launch (objects launch-file-name &key (ns ""))
   ;; generate launchfile
   (with-open-file
    (launch-f launch-file-name :direction :output)
@@ -79,6 +79,7 @@
 		     (system::address obj)
 		     (send obj :name)))
        (setq nodes (gen-detection-nodes obj))
+       (send-all nodes :namespace ns)
        (setq xmllist (append (list "launch" nil)
 			     (send-all nodes :list)))
        (setq xmltext (simple-list2xml xmllist
@@ -95,7 +96,7 @@
 ;;
 ;; Old functions
 ;;
-
+#|
 (defun need-generate-template (imagefile)
   (let* ((path (pathname imagefile))
 	 (template (ros::resolve-ros-path
@@ -189,8 +190,6 @@
       ))
   )
 
-
-
 ;;
 ;; generate launch file
 ;;
@@ -209,3 +208,4 @@
 				   ))))
 		 (send obj :faces)))
     (remove nil nodes)))
+|#

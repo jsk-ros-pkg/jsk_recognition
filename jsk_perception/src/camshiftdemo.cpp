@@ -190,23 +190,31 @@ public:
               }
           }
 
-        calcBackProject(&hue_, 1, 0, hist_, backproj_, &phranges_);
-        backproj_ &= mask_;
-        RotatedRect trackBox = CamShift(backproj_, trackWindow_,
-                                        TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
+	try {
+	  calcBackProject(&hue_, 1, 0, hist_, backproj_, &phranges_);
+	  backproj_ &= mask_;
+	  trackBox_ = CamShift(backproj_, trackWindow_,
+					  TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
 
-        if( backprojMode_ )
-          cvtColor( backproj_, image_, CV_GRAY2BGR );
-        ellipse( image_, trackBox, Scalar(0,0,255), 3, CV_AA );
+	  if( backprojMode_ )
+	    cvtColor( backproj_, image_, CV_GRAY2BGR );
+	  ellipse( image_, trackBox_, Scalar(0,0,255), 3, CV_AA );
 
-        jsk_perception::RotatedRectStamped result_msg;
-        result_msg.header = msg_ptr->header;
-        result_msg.rect.x = trackBox.center.x;
-        result_msg.rect.y = trackBox.center.y;
-        result_msg.rect.width = trackBox.size.width;
-        result_msg.rect.height = trackBox.size.height;
-        result_msg.rect.angle = trackBox.angle; // degree->rad
-        pub_result_.publish(result_msg);
+	  jsk_perception::RotatedRectStamped result_msg;
+	  result_msg.header = msg_ptr->header;
+	  result_msg.rect.x = trackBox_.center.x;
+	  result_msg.rect.y = trackBox_.center.y;
+	  result_msg.rect.width = trackBox_.size.width;
+	  result_msg.rect.height = trackBox_.size.height;
+	  result_msg.rect.angle = trackBox_.angle; // degree->rad
+	  pub_result_.publish(result_msg);
+
+	} catch (...) {
+	  ROS_WARN("illegal tracBox = x:%f y:%f width:%f height:%f angle:%f",
+		   trackBox_.center.x, trackBox_.center.y,
+		   trackBox_.size.width, trackBox_.size.height,
+		   trackBox_.angle);
+	}
       }
 
     if( selectObject_ && selection_.width > 0 && selection_.height > 0 )

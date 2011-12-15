@@ -17,12 +17,20 @@
     (send obj :name "sony_tv_controller")
     obj))
 
+(defun make-sharp-rimokon ()
+  (let ((obj (make-cube 48 200 25)))
+    (setq aface (elt (send obj :faces) 1))
+    (send obj :paste-texture-to-face aface
+	  :file "sharp-tv-controller.png")
+    (send obj :name "sharp_tv_controller")
+    obj))
+
 ;; < 2 >
 ;; . generate launch file
 (defun generate-launcher ()
   (load "package://jsk_perception/euslisp/eusmodel_template_gen_utils.l")
-  (gen-all-launch (list (make-sony-rimokon)) "rimokon-pose.launch"
-		  :ns "/narrow_stereo/left" ))
+  (gen-all-launch (list (make-sony-rimokon) (make-sharp-rimokon))
+		  "rimokon-pose.launch" :ns "/narrow_stereo/left" ))
 (warn ";; (generate-launcher)~%")
 
 ;; < 3 >
@@ -36,13 +44,15 @@
   (load "package://elevator_move_base_pr2/src/posedetectiondb-client.l")
   (pr2)
   (setq *ri* (instance pr2-interface :init))
-  (setq obj (make-sony-rimokon))
-  (objects (list *pr2* obj))
+  (setq objs (list (make-sony-rimokon) (make-sharp-rimokon))
+	clients nil)
+  (objects (append (list *pr2*) objs))
   ;;
-  (setq client
-	(instance posedetectiondb-client :init obj
-		  :topic "/narrow_stereo/left/ObjectDetection"
-		  :fixed-frame "/base_footprint"))
+  (dolist (obj objs)
+    (push (instance posedetectiondb-client :init obj
+		    :topic "/narrow_stereo/left/ObjectDetection"
+		    :fixed-frame "/base_footprint")
+	  clients))
   ;;
   (do-until-key
    (ros::spin-once)
@@ -50,7 +60,7 @@
    (x::window-main-one)
    (send *irtviewer* :redraw))
   ;;
-  (send client :unregister)
+  (send-all client :unregister)
 )
 (warn ";; (test-detection-result)~%")
 

@@ -60,7 +60,7 @@
    (x::window-main-one)
    (send *irtviewer* :redraw))
   ;;
-  (send-all client :unregister)
+  (send-all clients :unregister)
 )
 (warn ";; (test-detection-result)~%")
 

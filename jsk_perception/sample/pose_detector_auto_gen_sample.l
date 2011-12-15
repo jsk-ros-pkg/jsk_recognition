@@ -25,12 +25,22 @@
     (send obj :name "sharp_tv_controller")
     obj))
 
+(defun make-lipton-tea-box ()
+  (let ((obj (make-cube 41 62 106)))
+    (setq aface (send obj :face 3))
+    (send obj :paste-texture-to-face aface
+	  :file "lipton-milktea-box.png")
+    (send obj :name "lipton_milktea_box")
+    obj))
+
 ;; < 2 >
 ;; . generate launch file
 (defun generate-launcher ()
   (load "package://jsk_perception/euslisp/eusmodel_template_gen_utils.l")
   (gen-all-launch (list (make-sony-rimokon) (make-sharp-rimokon))
-		  "rimokon-pose.launch" :ns "/narrow_stereo/left" ))
+		  "rimokon-pose.launch" :ns "/narrow_stereo/left" )
+  (gen-all-launch (list (make-lipton-tea-box))
+		  "milktea-box.launch" :ns "/narrow_stereo/left"))
 (warn ";; (generate-launcher)~%")
 
 ;; < 3 >

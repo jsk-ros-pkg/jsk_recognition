@@ -529,10 +529,13 @@ public:
     cv::Mat tmp_template;
     std::vector<cv::Point2f>pt1, pt2;
     double width, height;
+    std::string filename;
     std::cout << "input template's [width]" << std::endl;
     std::cin >> width;
     std::cout << "input template's [height]" << std::endl;
     std::cin >> height;
+    std::cout << "input template's [filename]" << std::endl;
+    std::cin >> filename;
 
     for (int i = 0; i < 4; i++){
       pt1.push_back(cv::Point2d((int)mt->_correspondances.at(i).x,
@@ -545,6 +548,11 @@ public:
     cv::getRectSubPix(mt->_previous_stack_img, rect.size(),
                       cv::Point2f((rect.tl().x + rect.br().x)/2.0,(rect.tl().y + rect.br().y)/2.0),
                       tmp_template);
+    try {
+      cv::imwrite(filename,tmp_template);
+    }catch (cv::Exception e) {
+      std::cerr << e.what()  << std::endl;
+    }
 
     for (int i = 0; i < (int)pt1.size(); i++){
       pt2.push_back(cv::Point2d((int)pt1.at(i).x - rect.x,
@@ -619,8 +627,8 @@ public:
     std::string default_template_file_name;
     rospack::ROSPack rp;
     try {
-      rospack::Package *p = rp.get_pkg("opencv2");
-      if (p!=NULL) default_template_file_name = p->path + std::string("/opencv/share/opencv/doc/opencv-logo2.png");
+      rospack::Package *p = rp.get_pkg("jsk_perception");
+      if (p!=NULL) default_template_file_name = p->path + std::string("/sample/opencv-logo2.png");
     } catch (std::runtime_error &e) {
     }
     local_nh.param("template_filename", template_filename, default_template_file_name);
@@ -641,6 +649,7 @@ public:
     template_img = cv::imread (template_filename, 1);
     if ( template_img.empty()) {
       ROS_ERROR ("template picture <%s> cannot read. template picture is not found or uses unsuported format.", template_filename.c_str());
+      return;
     }
 
     // relative pose

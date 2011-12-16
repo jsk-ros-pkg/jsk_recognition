@@ -15,6 +15,7 @@
 #include <tf/tf.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/foreach.hpp>
+#include <boost/filesystem.hpp>
 #include <vector>
 #include <sstream>
 #include <iostream>
@@ -526,7 +527,7 @@ public:
 
   static void make_template_from_mousecb(Matching_Template *mt){
     cv::Mat H;
-    cv::Mat tmp_template;
+    cv::Mat tmp_template, tmp_warp_template;
     std::vector<cv::Point2f>pt1, pt2;
     double width, height;
     std::string filename;
@@ -541,15 +542,22 @@ public:
       pt1.push_back(cv::Point2d((int)mt->_correspondances.at(i).x,
 				(int)mt->_correspondances.at(i).y + mt->_template_img.size().height));
     }
-
     cv::Rect rect = cv::boundingRect(cv::Mat(pt1));
-    //    H = cv::findHomography(cv::Mat(pt1), cv::Mat(pt2));
+    pt2.push_back(cv::Point2d(0,0));
+    pt2.push_back(cv::Point2d(0+rect.width,0));
+    pt2.push_back(cv::Point2d(0+rect.width,rect.height));
+    pt2.push_back(cv::Point2d(0,rect.height));
+    H = cv::findHomography(cv::Mat(pt1), cv::Mat(pt2));
 
     cv::getRectSubPix(mt->_previous_stack_img, rect.size(),
                       cv::Point2f((rect.tl().x + rect.br().x)/2.0,(rect.tl().y + rect.br().y)/2.0),
                       tmp_template);
+    cv::warpPerspective(mt->_previous_stack_img, tmp_warp_template, H, rect.size());
+
     try {
       cv::imwrite(filename,tmp_template);
+      boost::filesystem::path fname(filename);
+      cv::imwrite(fname.stem()+"_wrap"+fname.extension(),tmp_warp_template);
     }catch (cv::Exception e) {
       std::cerr << e.what()  << std::endl;
     }

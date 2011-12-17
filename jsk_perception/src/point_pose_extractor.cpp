@@ -543,16 +543,18 @@ public:
 				(int)mt->_correspondances.at(i).y + mt->_template_img.size().height));
     }
     cv::Rect rect = cv::boundingRect(cv::Mat(pt1));
+    double scale = std::max(width, height) / 500.0;
+    int iwidth = width / scale, iheight = height / scale;
     pt2.push_back(cv::Point2d(0,0));
-    pt2.push_back(cv::Point2d(0+rect.width,0));
-    pt2.push_back(cv::Point2d(0+rect.width,rect.height));
-    pt2.push_back(cv::Point2d(0,rect.height));
+    pt2.push_back(cv::Point2d(iwidth,0));
+    pt2.push_back(cv::Point2d(iwidth,iheight));
+    pt2.push_back(cv::Point2d(0,     iheight));
     H = cv::findHomography(cv::Mat(pt1), cv::Mat(pt2));
 
     cv::getRectSubPix(mt->_previous_stack_img, rect.size(),
                       cv::Point2f((rect.tl().x + rect.br().x)/2.0,(rect.tl().y + rect.br().y)/2.0),
                       tmp_template);
-    cv::warpPerspective(mt->_previous_stack_img, tmp_warp_template, H, rect.size());
+    cv::warpPerspective(mt->_previous_stack_img, tmp_warp_template, H, cv::Size(iwidth, iheight));
 
     try {
       cv::imwrite(filename,tmp_template);
@@ -576,8 +578,8 @@ public:
     std::string window_name = "sample" + boost::lexical_cast<std::string>((int)_templates.size());
 
     Matching_Template* tmplt = 
-      new Matching_Template (tmp_template, "sample",
-			     tmp_template.size().width, tmp_template.size().height,
+      new Matching_Template (tmp_warp_template, "sample",
+			     tmp_warp_template.size().width, tmp_warp_template.size().height,
 			     width, height,
 			     tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0)),
 			     M,

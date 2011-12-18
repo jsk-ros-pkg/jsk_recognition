@@ -21,7 +21,7 @@
   (let ((obj (make-cube 48 200 25)))
     (setq aface (elt (send obj :faces) 1))
     (send obj :paste-texture-to-face aface
-	  :file "sharp-tv-controller-ist.png")
+	  :file "sharp-tv-controller-ut.png")
     (send obj :name "sharp_tv_controller")
     obj))
 

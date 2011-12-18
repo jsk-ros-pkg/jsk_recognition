@@ -67,7 +67,7 @@
 	   (send obj :faces)))
     (remove nil nodes)))
 
-(defun gen-all-launch (objects launch-file-name &key (ns ""))
+(defun gen-all-launch (objects launch-file-name &key (ns nil))
   ;; generate launchfile
   (with-open-file
    (launch-f launch-file-name :direction :output)

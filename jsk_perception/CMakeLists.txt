@@ -36,6 +36,7 @@ gencfg()
 
 rosbuild_add_executable(camshiftdemo src/camshiftdemo.cpp)
 rosbuild_add_executable(point_pose_extractor src/point_pose_extractor.cpp)
+rosbuild_link_boost(point_pose_extractor filesystem system)
 
 ADD_CUSTOM_COMMAND(
   OUTPUT  ${CMAKE_SOURCE_DIR}/template

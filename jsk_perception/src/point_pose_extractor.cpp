@@ -559,7 +559,9 @@ public:
     try {
       cv::imwrite(filename,tmp_template);
       boost::filesystem::path fname(filename);
-      cv::imwrite(fname.stem()+"_wrap"+fname.extension(),tmp_warp_template);
+      std::stringstream ss;
+      ss << fname.stem() << "_wrap" << fname.extension();
+      cv::imwrite(ss.str(),tmp_warp_template);
     }catch (cv::Exception e) {
       std::cerr << e.what()  << std::endl;
     }

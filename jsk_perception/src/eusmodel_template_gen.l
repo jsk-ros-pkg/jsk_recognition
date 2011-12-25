@@ -20,7 +20,7 @@
 ;;
 ;;
 (make-sift-template-and-launch
- "launch/eusmodel_detection_elevator-panels.launch"
+ "launch/eusmodel_detection_elevator-panels-eng8.launch"
  (list
   (instance elevator_call_panel-object :init)
   (instance elevator_inside_panel-object :init)

@@ -19,7 +19,8 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
-
+#include <dynamic_reconfigure/server.h>
+#include <jsk_perception/point_pose_extractorConfig.h>
 #include <posedetectiondb/SetTemplate.h>
 
 namespace enc = sensor_msgs::image_encodings;
@@ -889,16 +890,47 @@ public:
 	}
   }
 
+  /* callback for dynamic reconfigure */
+  void dyn_conf_callback(jsk_perception::point_pose_extractorConfig &config,
+			 uint32_t level) {
+    std::cout << "id = " << config.template_id << std::endl;
+    std::cout << "lvl = " << level << std::endl;
+    if((int)_templates.size() <= config.template_id) {
+      ROS_WARN("template_id is invalid");
+      config.template_id = 0;
+      if(_templates.size() != 0)
+	config.frame_id = _templates[0]->_matching_frame;
+    } else {
+      Matching_Template* tmpl = _templates[config.template_id];
+      if(config.frame_id == tmpl->_matching_frame) {
+	ROS_WARN("update params");
+	tmpl->_reprojection_threshold = config.reprojection_threshold;
+	tmpl->_distanceratio_threshold = config.distanceratio_threshold;
+	_err_thr = config.error_threshold;
+      } else {
+	ROS_WARN("get params");
+	config.frame_id = tmpl->_matching_frame;
+	config.reprojection_threshold = tmpl->_reprojection_threshold;
+	config.distanceratio_threshold = tmpl->_distanceratio_threshold;
+	config.error_threshold = _err_thr;
+      }
+    }
+  }
+
 };  // the end of definition of class PointPoseExtractor
 
 
 std::vector<Matching_Template *> PointPoseExtractor::_templates;
 
-
 int main (int argc, char **argv){
   ros::init (argc, argv, "PointPoseExtractor");
 
   PointPoseExtractor matcher;
+
+  dynamic_reconfigure::Server<jsk_perception::point_pose_extractorConfig> server;
+  dynamic_reconfigure::Server<jsk_perception::point_pose_extractorConfig>::CallbackType f;
+  f = boost::bind(&PointPoseExtractor::dyn_conf_callback, &matcher, _1, _2);
+  server.setCallback(f);
 
   ros::Rate r(10); // 10 hz
   while(ros::ok()) {

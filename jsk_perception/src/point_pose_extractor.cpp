@@ -266,17 +266,17 @@ public:
 
     // draw line
     for (int j = 0; j < (int)pt1.size(); j++){
-      cv::Point2f pt;
+      cv::Point2f pt, pt_orig;
       cv::Mat pt_mat(cv::Size(1,1), CV_32FC2, &pt);
       cv::Mat pt_src_mat(cv::Size(1,1), CV_32FC2, &pt1.at(j));
       cv::perspectiveTransform (pt_src_mat, pt_mat, _affine_matrix);
-      pt1.at(j) = pt_mat.at<cv::Point2f>(0,0);
+      pt_orig = pt_mat.at<cv::Point2f>(0,0);
       if ( mask.at(j)){
-	cv::line(stack_img, pt1.at(j), pt2.at(j)+cv::Point2f(0,_template_img.rows),
+	cv::line(stack_img, pt_orig, pt2.at(j)+cv::Point2f(0,_template_img.rows),
 		 CV_RGB(0,255,0), 1,8,0);
       }
       else {
-	cv::line(stack_img, pt1.at(j), pt2.at(j)+cv::Point2f(0,_template_img.rows),
+	cv::line(stack_img, pt_orig, pt2.at(j)+cv::Point2f(0,_template_img.rows),
 		 CV_RGB(255,0,255), 1,8,0);
       }
     }
@@ -315,6 +315,7 @@ public:
       cv::circle(stack_img, cv::Point2f(_correspondances.at(j).x, _correspondances.at(j).y + _template_img.size().height),
 		 8, CV_RGB(255,0,0), -1);
     }
+
     if ((cv::countNonZero( H ) == 0) || (inlier_sum < min_inlier((int)pt2.size(), 4, 0.10, 0.01))){
       if( _window_name != "" )
 	cv::imshow(_window_name, stack_img);
@@ -403,6 +404,21 @@ public:
 	coords[i] = checktf * coords[i];
 	cv::Point3f pt(coords[i].getX(), coords[i].getY(), coords[i].getZ());
 	projected_top[i] = pcam.project3dToPixel(pt);
+      }
+    }
+
+    { // check if the matched region does not too big or too small
+      float max_x, max_y, min_x, min_y;
+      max_x = max_y = -1e9;
+      min_x = min_y = 1e9;
+      for (int j = 0; j < 4; j++){
+	cv::Point2f pt = corners2d_mat_trans.at<cv::Point2f>(0,j);
+	max_x = std::max(max_x, pt.x), max_y = std::max(max_y, pt.y);
+	min_x = std::min(min_x, pt.x), min_y = std::min(min_y, pt.y);
+      }
+      if((max_x - min_x) < 30 || (max_y - min_y) < 30 ||
+	 src_img.rows < (max_x - min_x)/2 || src_img.cols < (max_y - min_y)/2){
+	return false;
       }
     }
 

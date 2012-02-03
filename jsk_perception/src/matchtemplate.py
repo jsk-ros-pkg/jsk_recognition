@@ -6,7 +6,7 @@ import numpy
 import thread
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import *
-from face_detector_mono.msg import *
+from jsk_perception.msg import *
 import cv
 from cv_bridge import CvBridge, CvBridgeError
 
@@ -30,7 +30,7 @@ from jsk_perception.cfg import matchtemplateConfig as ConfigType
 #   ~/reference           [sensor_msgs/Image]
 #   ~/search              [sensor_msgs/Image]
 #   ~/set_reference_point [geometry_msgs/PointStamped]
-#   ~/set_search_rect     [face_detector_mono/Rect]
+#   ~/set_search_rect     [jsk_perception/Rect]
 
 # return (1st-val,1st-loc,2nd-val,2nd-loc)
 def _MinMaxLock2nd(arr,ex_size,is_min):

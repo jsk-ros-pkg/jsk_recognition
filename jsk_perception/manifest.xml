@@ -16,7 +16,6 @@
 
   <!-- for metchtemplate -->
   <depend package="sensor_msgs"/>
-  <depend package="face_detector_mono"/>
   <depend package="geometry_msgs"/>
   <depend package="opencv2"/>
   <depend package="cv_bridge"/>

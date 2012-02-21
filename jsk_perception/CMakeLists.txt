@@ -19,7 +19,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #uncomment if you have defined messages
 rosbuild_genmsg()
 #uncomment if you have defined services
-#rosbuild_gensrv()
+rosbuild_gensrv()
 
 # add dynamic reconfigure api
 rosbuild_find_ros_package(dynamic_reconfigure)
@@ -37,6 +37,7 @@ gencfg()
 rosbuild_add_executable(camshiftdemo src/camshiftdemo.cpp)
 rosbuild_add_executable(virtual_camera_mono src/virtual_camera_mono.cpp)
 rosbuild_add_executable(point_pose_extractor src/point_pose_extractor.cpp)
+rosbuild_add_executable(white_balance_converter src/white_balance_converter.cpp)
 rosbuild_link_boost(point_pose_extractor filesystem system)
 
 ADD_CUSTOM_COMMAND(

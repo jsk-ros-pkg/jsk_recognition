@@ -4,8 +4,8 @@
 
 #include <Eigen/Dense>
 
-#include "white_balance_converter/WhiteBalance.h"
-#include "white_balance_converter/WhiteBalancePoints.h"
+#include "jsk_perception/WhiteBalance.h"
+#include "jsk_perception/WhiteBalancePoints.h"
 
 class WhiteBalanceConverter {
 
@@ -57,15 +57,15 @@ public:
                                         &WhiteBalanceConverter::pointsCallback, this);
   }
 
-  bool imageCallback(white_balance_converter::WhiteBalance::Request &req,
-                     white_balance_converter::WhiteBalance::Response &res) {
+  bool imageCallback(jsk_perception::WhiteBalance::Request &req,
+                     jsk_perception::WhiteBalance::Response &res) {
     makeConvertMatrix(req.reference_color[0], req.reference_color[1], req.reference_color[2]);
 
     return true;
   }
 
-  bool pointsCallback(white_balance_converter::WhiteBalancePoints::Request &req,
-                      white_balance_converter::WhiteBalancePoints::Response &res) {
+  bool pointsCallback(jsk_perception::WhiteBalancePoints::Request &req,
+                      jsk_perception::WhiteBalancePoints::Response &res) {
     makeConvertMatrix(req.reference_color[0], req.reference_color[1], req.reference_color[2]);
 
     int rgb_offset = -1;

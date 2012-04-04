@@ -13,6 +13,7 @@
 
 #include "jsk_perception/ClusterPointIndices.h"
 #include "jsk_perception/EuclideanSegment.h"
+#include "jsk_perception/PointsArray.h"
 
 using namespace std;
 using namespace pcl;
@@ -23,6 +24,7 @@ protected:
   ros::NodeHandle _nh;
   ros::NodeHandle _private_nh;
   ros::Publisher result_pub_;
+  ros::Publisher array_pub_;
   ros::Subscriber sub_input_;
   //ros::Publisher pcl_pub_;
   pcl_ros::Publisher<pcl::PointXYZRGB > pcl_pub_;
@@ -32,6 +34,7 @@ protected:
   double tolerance;
   int minsize_;
   int maxsize_;
+  bool publish_array_;
 
 public:
   //EuclideanClustering() {};
@@ -47,6 +50,9 @@ public:
     _private_nh.param("min_size", minsize_, 20);
     ROS_INFO("min cluster size : %d", minsize_);
 
+    _private_nh.param("publish_array", publish_array_, false);
+    ROS_INFO("publish_array : %d", publish_array_);
+
     result_pub_ = _private_nh.advertise<jsk_perception::ClusterPointIndices> ("output", 1);
     //pcl_pub_ = _private_nh.advertise<pcl::PointCloud<pcl::PointXYZRGB> > ("points_output",1);
     pcl_pub_.advertise(_private_nh, "points_output",1);
@@ -55,6 +61,10 @@ public:
 
     service_ = _private_nh.advertiseService(_private_nh.resolveName("euclidean_clustering"),
                                              &EuclideanClustering::serviceCallback, this);
+
+    if (publish_array_) {
+      array_pub_ = _private_nh.advertise<jsk_perception::PointsArray> ("array_output", 1);
+    }
   }
 
   virtual void extract(const sensor_msgs::PointCloud2ConstPtr &input)
@@ -82,32 +92,42 @@ public:
     // Publish result indices
     jsk_perception::ClusterPointIndices result;
     result.cluster_indices.resize(cluster_indices.size());
-
     for (size_t i=0; i<cluster_indices.size(); i++)
       {
         result.cluster_indices[i].header = cluster_indices[i].header;
         result.cluster_indices[i].indices = cluster_indices[i].indices;
       }
-
     result_pub_.publish(result);
 
-    // Publish point cloud after clustering
-    size_t number_of_clusters = cluster_indices.size();
-    for (size_t i=0; i<number_of_clusters; i++)
-      {
-        uint8_t r, g, b;
-        r = rand()%256;
-        g = rand()%256;
-        b = rand()%256;
-        uint32_t rgb = ((uint32_t)r<<16 | (uint32_t)g<<8 | (uint32_t)b);
-
-        for (size_t j=0; j<cluster_indices[i].indices.size(); j++)
-          {
-            cloud_out->points[ cluster_indices[i].indices[j] ].rgb = *reinterpret_cast<float*>(&rgb);
-          }
+    if ( publish_array_ ) {
+      jsk_perception::PointsArray output;
+      output.cloud_list.resize( cluster_indices.size() );
+      pcl::ExtractIndices<sensor_msgs::PointCloud2> ex;
+      ex.setInputCloud ( input );
+      for ( size_t i = 0; i < cluster_indices.size(); i++ ) {
+        ex.setIndices ( boost::make_shared< pcl::PointIndices > (cluster_indices[i]) );
+        ex.setNegative ( false );
+        ex.filter ( output.cloud_list[i] );
       }
+      array_pub_.publish( output );
+    } else {
+      // Publish point cloud after clustering
+      size_t number_of_clusters = cluster_indices.size();
+      for (size_t i=0; i<number_of_clusters; i++)
+        {
+          uint8_t r, g, b;
+          r = rand()%256;
+          g = rand()%256;
+          b = rand()%256;
+          uint32_t rgb = ((uint32_t)r<<16 | (uint32_t)g<<8 | (uint32_t)b);
 
-    pcl_pub_.publish(cloud_out);
+          for (size_t j=0; j<cluster_indices[i].indices.size(); j++)
+            {
+              cloud_out->points[ cluster_indices[i].indices[j] ].rgb = *reinterpret_cast<float*>(&rgb);
+            }
+        }
+      pcl_pub_.publish(cloud_out);
+    }
   }
 
   bool serviceCallback(jsk_perception::EuclideanSegment::Request &req,

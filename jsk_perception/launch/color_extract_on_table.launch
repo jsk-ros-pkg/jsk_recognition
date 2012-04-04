@@ -40,13 +40,11 @@
   <node pkg="jsk_perception" name="euclidean_clustering"
         type="euclidean_clustering" output="screen"
         clear_params="true">
-    <!--
-    <remap from="input" to="/camera/depth_registered/points" />
-    -->
+    <remap from="~input" to="/color_extractor/output" />
+    <param name="publish_array" value="true" />
     <param name="tolerance" value="0.02" />
     <param name="max_size" value="3000" />
     <param name="min_size" value="50" />
   </node>
-
 
 </launch>

@@ -21,7 +21,7 @@
 #include <iostream>
 #include <dynamic_reconfigure/server.h>
 #include <jsk_perception/point_pose_extractorConfig.h>
-#include <posedetectiondb/SetTemplate.h>
+#include <jsk_perception/SetTemplate.h>
 
 namespace enc = sensor_msgs::image_encodings;
 
@@ -811,8 +811,8 @@ public:
     return true;
   }
 
-  bool settemplate_cb (posedetectiondb::SetTemplate::Request &req,
-		       posedetectiondb::SetTemplate::Response &res){
+  bool settemplate_cb (jsk_perception::SetTemplate::Request &req,
+		       jsk_perception::SetTemplate::Response &res){
       cv_bridge::CvImagePtr cv_ptr;
       cv_ptr = cv_bridge::toCvCopy(req.image, enc::BGR8);
       cv::Mat img(cv_ptr->image);

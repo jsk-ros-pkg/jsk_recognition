@@ -14,7 +14,6 @@
 
   <!-- for eusmodel_template_* -->
   <depend package="imagesift"/>
-  <depend package="posedetectiondb"/>
 
   <!-- for metchtemplate -->
   <depend package="sensor_msgs"/>

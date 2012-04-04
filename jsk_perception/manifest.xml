@@ -25,6 +25,8 @@
   <depend package="image_transport"/>
   <depend package="driver_base"/>
   <depend package="dynamic_reconfigure"/>
+
+  <!-- for pointcloud -->
+  <depend package="pcl"/>
+  <depend package="pcl_ros"/>
 </package>
-
-

@@ -38,6 +38,11 @@ rosbuild_add_executable(camshiftdemo src/camshiftdemo.cpp)
 rosbuild_add_executable(virtual_camera_mono src/virtual_camera_mono.cpp)
 rosbuild_add_executable(point_pose_extractor src/point_pose_extractor.cpp)
 rosbuild_add_executable(white_balance_converter src/white_balance_converter.cpp)
+
+rosbuild_add_executable(euclidean_clustering src/euclidean_clustering.cpp)
+rosbuild_add_executable(plane_detector src/plane_detector.cpp)
+rosbuild_add_executable(color_extractor src/color_extractor.cpp)
+
 rosbuild_link_boost(point_pose_extractor filesystem system)
 
 ADD_CUSTOM_COMMAND(

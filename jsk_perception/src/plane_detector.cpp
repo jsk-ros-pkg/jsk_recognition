@@ -252,10 +252,10 @@ pcl::PointCloud<pcl::Normal>::ConstPtr PlaneDetector::normalEstimate
 {
 #if (defined PCL_VERSION_COMPARE)
 #if PCL_VERSION_COMPARE(>=,1,3,0)
-    pcl::search::KdTree<Point>::Ptr normals_tree = boost::make_shared<pcl::search::KdTree<Point> > ();
+  pcl::search::KdTree<Point>::Ptr normals_tree = boost::make_shared<pcl::search::KdTree<Point> > ();
 #endif
 #else
-  KdTreePtr normals_tree = boost::make_shared<pcl::KdTreeFLANN<Point> > ();
+  pcl::KdTree<Point>::Ptr normals_tree = boost::make_shared<pcl::KdTreeFLANN<Point> > ();
 #endif
   _n3d.setSearchMethod (normals_tree);
   _n3d.setInputCloud (pcl_cloud_ptr);

@@ -76,8 +76,13 @@ public:
     pcl::fromROSMsg(*input, *cloud_out);
 
     ROS_INFO("subscribe input point cloud");
-
+#if (defined PCL_VERSION_COMPARE)
+#if PCL_VERSION_COMPARE(>=,1,3,0)
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
+#endif
+#else
     pcl::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::KdTreeFLANN<pcl::PointXYZ>);
+#endif
     tree->setInputCloud (cloud);
 
     vector<pcl::PointIndices> cluster_indices;
@@ -137,7 +142,13 @@ public:
 
     ROS_INFO("service input point cloud");
 
+#if (defined PCL_VERSION_COMPARE)
+#if PCL_VERSION_COMPARE(>=,1,3,0)
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
+#endif
+#else
     pcl::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::KdTreeFLANN<pcl::PointXYZ>);
+#endif
     tree->setInputCloud (cloud);
 
     vector<pcl::PointIndices> cluster_indices;

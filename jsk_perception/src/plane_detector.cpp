@@ -26,7 +26,6 @@
 #include "pcl/surface/convex_hull.h"
 
 typedef pcl::PointXYZRGB Point;
-typedef pcl::KdTree<Point>::Ptr KdTreePtr;
 
 class PlaneDetector
 {
@@ -251,7 +250,13 @@ void PlaneDetector::planeEstimate(pcl::PointCloud<Point>::ConstPtr pcl_cloud_ptr
 pcl::PointCloud<pcl::Normal>::ConstPtr PlaneDetector::normalEstimate
 (pcl::PointCloud<Point>::ConstPtr pcl_cloud_ptr)
 {
+#if (defined PCL_VERSION_COMPARE)
+#if PCL_VERSION_COMPARE(>=,1,3,0)
+    pcl::search::KdTree<Point>::Ptr normals_tree = boost::make_shared<pcl::search::KdTree<Point> > ();
+#endif
+#else
   KdTreePtr normals_tree = boost::make_shared<pcl::KdTreeFLANN<Point> > ();
+#endif
   _n3d.setSearchMethod (normals_tree);
   _n3d.setInputCloud (pcl_cloud_ptr);
   _n3d.compute (_cloud_normals);

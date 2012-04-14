@@ -161,7 +161,7 @@ public:
         DestroyAllImages();
 
         ROS_INFO("imagesift: image: %d(size=%d), num: %d, sift time: %.3fs, total: %.3fs", imagemsg.header.seq,
-                 imagemsg.get_data_size(),  numkeys,
+                 imagemsg.data.size(),  numkeys,
                  (float)(ros::Time::now()-siftbasetime).toSec(), (float)(ros::Time::now()-lasttime).toSec());
         lasttime = ros::Time::now();
         return true;

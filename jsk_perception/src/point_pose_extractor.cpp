@@ -656,8 +656,8 @@ public:
     std::string default_template_file_name;
     try {
 #ifdef ROSPACK_EXPORT
-	rospack::ROSPack rp;
-	rospack::Package *p = rp.get_pkg("jsk_perception");
+      rospack::ROSPack rp;
+      rospack::Package *p = rp.get_pkg("jsk_perception");
       if (p!=NULL) default_template_file_name = p->path + std::string("/sample/opencv-logo2.png");
 #else
       rospack::Rospack rp;

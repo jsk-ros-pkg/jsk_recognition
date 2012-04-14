@@ -654,10 +654,19 @@ public:
     local_nh.param("object_height", template_height, 0.0739);
     local_nh.param("relative_pose", _pose_str, std::string("0 0 0 0 0 0 1"));
     std::string default_template_file_name;
-    rospack::ROSPack rp;
     try {
-      rospack::Package *p = rp.get_pkg("jsk_perception");
+#ifdef ROSPACK_EXPORT
+	rospack::ROSPack rp;
+	rospack::Package *p = rp.get_pkg("jsk_perception");
       if (p!=NULL) default_template_file_name = p->path + std::string("/sample/opencv-logo2.png");
+#else
+      rospack::Rospack rp;
+      std::vector<std::string> search_path;
+      rp.getSearchPathFromEnv(search_path);
+      rp.crawl(search_path, 1);
+      std::string path;
+      if (rp.find("jsk_perception",path)==true) default_template_file_name = path + std::string("/sample/opencv-logo2.png");
+#endif
     } catch (std::runtime_error &e) {
     }
     local_nh.param("template_filename", template_filename, default_template_file_name);

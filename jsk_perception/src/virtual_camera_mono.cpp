@@ -121,7 +121,7 @@ public:
 	tf_listener_.transformPoint(cam_model_.tfFrame() ,point, cpoint);
 	tf_listener_.transformPoint(trans.frame_id_ ,point, vpoint);
 
-	btVector3 vpt_vec = trans.inverse() * btVector3(vpoint.point.x, vpoint.point.y, vpoint.point.z);
+	tf::Vector3 vpt_vec = trans.inverse() * tf::Vector3(vpoint.point.x, vpoint.point.y, vpoint.point.z);
 
 	// push
 	target_poly.push_back(tf::Point(cpoint.point.x, cpoint.point.y, cpoint.point.z));

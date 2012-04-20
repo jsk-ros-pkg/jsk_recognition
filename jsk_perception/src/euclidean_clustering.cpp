@@ -75,7 +75,7 @@ public:
     pcl::fromROSMsg(*input, *cloud);
     pcl::fromROSMsg(*input, *cloud_out);
 
-    ROS_INFO("subscribe input point cloud");
+    // ROS_INFO("subscribe input point cloud");
 #if (defined PCL_VERSION_COMPARE)
 #if PCL_VERSION_COMPARE(>=,1,3,0)
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
@@ -83,9 +83,14 @@ public:
 #else
     pcl::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::KdTreeFLANN<pcl::PointXYZ>);
 #endif
+
+    if ( cloud->points.size() < minsize_ ) {
+      ROS_WARN("input cloud (%d) is less than minimum cluster size (%d).", cloud->points.size(), minsize_);
+      return;
+    }
     tree->setInputCloud (cloud);
 
-    vector<pcl::PointIndices> cluster_indices;
+    vector<pcl::PointIndices> cluster_indices(0);
     EuclideanClusterExtraction<pcl::PointXYZ> ec;
     ec.setClusterTolerance (tolerance);
     ec.setMinClusterSize (minsize_);
@@ -94,14 +99,16 @@ public:
     ec.setInputCloud (cloud);
     ec.extract (cluster_indices);
 
+    if ( cluster_indices.size() == 0 )
+      ROS_WARN("can't extract any valid cluster.");
+
     // Publish result indices
     jsk_perception::ClusterPointIndices result;
     result.cluster_indices.resize(cluster_indices.size());
-    for (size_t i=0; i<cluster_indices.size(); i++)
-      {
+    for (size_t i=0; i<cluster_indices.size(); i++) {
         result.cluster_indices[i].header = cluster_indices[i].header;
         result.cluster_indices[i].indices = cluster_indices[i].indices;
-      }
+    }
     result_pub_.publish(result);
 
     if ( publish_array_ ) {

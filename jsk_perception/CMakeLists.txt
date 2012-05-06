@@ -37,6 +37,7 @@ gencfg()
 rosbuild_add_executable(camshiftdemo src/camshiftdemo.cpp)
 rosbuild_add_executable(virtual_camera_mono src/virtual_camera_mono.cpp)
 rosbuild_add_executable(point_pose_extractor src/point_pose_extractor.cpp)
+target_link_libraries(point_pose_extractor rospack)
 rosbuild_add_executable(white_balance_converter src/white_balance_converter.cpp)
 
 rosbuild_add_executable(euclidean_clustering src/euclidean_clustering.cpp)

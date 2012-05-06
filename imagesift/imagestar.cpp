@@ -22,6 +22,9 @@
 
 #include <opencv/highgui.h>
 #include <opencv/cv.h>
+#if (CV_MAJOR_VERSION >= 2 && CV_MAJOR_VERSION >= 4)
+#include <opencv2/nonfree/nonfree.hpp>
+#endif
 
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
@@ -108,9 +111,9 @@ public:
         cv::Mat desc_mat;
         calc_star(grayImage,kp_vec);
 
-        // computt SURF description
+        // compute SURF description
         cv::DescriptorExtractor *de;
-        de = new cv::SurfDescriptorExtractor/*( int nOctaves=4, int nOctaveLayers=2, bool extended=false )*/;
+        //de = new cv::SurfDescriptorExtractor/*( int nOctaves=4, int nOctaveLayers=2, bool extended=false )*/;
         de->compute(grayImage,kp_vec,desc_mat);
 
         // write the keys to the output

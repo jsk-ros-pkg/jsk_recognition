@@ -22,6 +22,9 @@
 
 #include <opencv/highgui.h>
 #include <opencv/cv.h>
+#if (CV_MAJOR_VERSION >= 2 && CV_MAJOR_VERSION >= 4)
+#include <opencv2/nonfree/nonfree.hpp>
+#endif
 
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>

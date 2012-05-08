@@ -27,5 +27,5 @@
   <depend package="pcl"/>
   <depend package="pcl_ros"/>
 
-  <rosdep name="opencv"/>
+  <rosdep name="opencv2"/>
 </package>

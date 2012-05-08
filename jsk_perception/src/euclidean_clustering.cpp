@@ -25,6 +25,7 @@ protected:
   ros::NodeHandle _private_nh;
   ros::Publisher result_pub_;
   ros::Publisher array_pub_;
+  ros::Publisher max_pub_;
   ros::Subscriber sub_input_;
   //ros::Publisher pcl_pub_;
   pcl_ros::Publisher<pcl::PointXYZRGB > pcl_pub_;
@@ -35,6 +36,7 @@ protected:
   int minsize_;
   int maxsize_;
   bool publish_array_;
+  bool publish_max_one_;
 
 public:
   //EuclideanClustering() {};
@@ -53,6 +55,9 @@ public:
     _private_nh.param("publish_array", publish_array_, false);
     ROS_INFO("publish_array : %d", publish_array_);
 
+    _private_nh.param("publish_max_one", publish_max_one_, false);
+    ROS_INFO("publish_max_one : %d", publish_max_one_);
+
     result_pub_ = _private_nh.advertise<jsk_perception::ClusterPointIndices> ("output", 1);
     //pcl_pub_ = _private_nh.advertise<pcl::PointCloud<pcl::PointXYZRGB> > ("points_output",1);
     pcl_pub_.advertise(_private_nh, "points_output",1);
@@ -64,6 +69,9 @@ public:
 
     if (publish_array_) {
       array_pub_ = _private_nh.advertise<jsk_perception::PointsArray> ("array_output", 1);
+    }
+    if (publish_max_one_) {
+      max_pub_ = _private_nh.advertise<sensor_msgs::PointCloud2> ("max_output", 1);
     }
   }
 
@@ -111,17 +119,38 @@ public:
     }
     result_pub_.publish(result);
 
-    if ( publish_array_ ) {
-      jsk_perception::PointsArray output;
-      output.cloud_list.resize( cluster_indices.size() );
+    if ( publish_array_ || publish_max_one_ ) {
       pcl::ExtractIndices<sensor_msgs::PointCloud2> ex;
       ex.setInputCloud ( input );
-      for ( size_t i = 0; i < cluster_indices.size(); i++ ) {
-        ex.setIndices ( boost::make_shared< pcl::PointIndices > (cluster_indices[i]) );
-        ex.setNegative ( false );
-        ex.filter ( output.cloud_list[i] );
+
+      if (publish_array_) {
+	jsk_perception::PointsArray output;
+	output.cloud_list.resize( cluster_indices.size() );
+	for ( size_t i = 0; i < cluster_indices.size(); i++ ) {
+	  ex.setIndices ( boost::make_shared< pcl::PointIndices > (cluster_indices[i]) );
+	  ex.setNegative ( false );
+	  ex.filter ( output.cloud_list[i] );
+	}
+	array_pub_.publish( output );
       }
-      array_pub_.publish( output );
+
+      if (publish_max_one_) {
+	sensor_msgs::PointCloud2 output;
+	size_t maxone = 0;
+	int maxpos = 0;
+	for ( size_t i = 0; i < cluster_indices.size(); i++ ) {
+	  if ((cluster_indices[i].indices.size()) >= maxone ) {
+	    maxone = cluster_indices[i].indices.size();
+	    maxpos = i;
+	  }
+	}
+	if (maxone != 0) {
+	  ex.setIndices ( boost::make_shared< pcl::PointIndices > (cluster_indices[maxpos]) );
+	  ex.setNegative ( false );
+	  ex.filter ( output );
+	  max_pub_.publish( output );
+	}
+      }
     } else {
       // Publish point cloud after clustering
       size_t number_of_clusters = cluster_indices.size();

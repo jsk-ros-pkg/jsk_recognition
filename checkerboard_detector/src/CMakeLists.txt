@@ -1,9 +1,12 @@
+find_package(OpenCV REQUIRED)
 rosbuild_add_executable(checkerboard_detector checkerboard_detector.cpp)
 rosbuild_link_boost(checkerboard_detector thread)
 rosbuild_add_openmp_flags(checkerboard_detector)
+target_link_libraries(checkerboard_detector ${OpenCV_LIBRARIES})
 
 rosbuild_add_executable(checkerboard_calibration checkerboard_calibration.cpp)
 rosbuild_link_boost(checkerboard_calibration thread)
+target_link_libraries(checkerboard_calibration ${OpenCV_LIBRARIES})
 
 include(CheckIncludeFile)
 include(CheckCXXCompilerFlag)

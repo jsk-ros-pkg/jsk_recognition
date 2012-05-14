@@ -351,7 +351,7 @@ public:
             //cvSaveImage("temp.jpg", pimggray);
         }
 
-        objdetmsg.set_objects_vec(vobjects);
+        objdetmsg.objects = vobjects;
         objdetmsg.header.stamp = imagemsg.header.stamp;
         if( frame_id.size() > 0 )
             objdetmsg.header.frame_id = frame_id;
@@ -360,7 +360,7 @@ public:
 
         if( verbose > 0 )
             ROS_INFO("checkerboard: image: %ux%u (size=%u), num: %u, total: %.3fs",imagemsg.width,imagemsg.height,
-                     (unsigned int)imagemsg.data.size(), (unsigned int)objdetmsg.get_objects_size(),
+                     (unsigned int)imagemsg.data.size(), (unsigned int)objdetmsg.objects.size(),
                      (float)(ros::Time::now()-lasttime).toSec());
         lasttime = ros::Time::now();
 

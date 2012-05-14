@@ -8,4 +8,8 @@ rosbuild_add_executable(imagesurf imagesurf.cpp)
 set_target_properties(imagesift PROPERTIES COMPILE_FLAGS "-msse2 -O3" LINK_FLAGS "-msse2 -O3")
 rosbuild_add_executable(imagestar imagestar.cpp)
 set_target_properties(imagestar PROPERTIES COMPILE_FLAGS "-msse2 -O3" LINK_FLAGS "-msse2 -O3")
+find_package(OpenCV REQUIRED)
+target_link_libraries(imagesift ${OpenCV_LIBRARIES})
+target_link_libraries(imagesurf ${OpenCV_LIBRARIES})
+target_link_libraries(imagestar ${OpenCV_LIBRARIES})
 

@@ -12,7 +12,6 @@
   <depend package="geometry_msgs"/>
   <depend package="rospy"/>
   <depend package="libsiftfast"/>
-  <depend package="opencv2"/>
   <depend package="openrave"/>
   <depend package="cv_bridge"/>
   <depend package="tf"/>
@@ -22,4 +21,6 @@
   <sysdepend os="ubuntu" version="7.04-feisty" package="python-scipy"/>
   <sysdepend os="ubuntu" version="8.04-hardy" package="python-scipy"/>
   <sysdepend os="ubuntu" version="9.04-jaunty" package="python-scipy"/>
+
+  <rosdep name="opencv2"/>
 </package>

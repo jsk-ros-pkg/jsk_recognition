@@ -1,0 +1,74 @@
+<!-- -*- mode: xml -*- -->
+<launch>
+  <!-- kinect node -->
+  <!-- <include file="$(find openni_camera)/launch/openni_node.launch" /> -->
+  <node pkg="nodelet" type="nodelet" name="pcl_manager"
+        args="manager" output="screen"/>
+
+  <!-- kinect node (Nodelet) -->
+  <include file="$(find openni_camera)/launch/kinect_frames.launch"/>
+  <node pkg="nodelet" type="nodelet" name="kinect_camera"
+        args="load openni_camera/OpenNINodelet pcl_manager" output="screen">
+    <param name="device_id" value="#1"/> <!-- this line uses first enumerated device -->
+    <rosparam command="load" file="$(find openni_camera)/info/openni_params.yaml" />
+    <param name="rgb_frame_id" value="/openni_rgb_optical_frame" />
+    <param name="depth_frame_id" value="/openni_depth_optical_frame" />
+    <param name="use_indices" value="false" />
+    <param name="depth_registration" value="true" />
+    <param name="image_mode" value="2" />
+    <param name="depth_mode" value="2" />
+    <param name="debayering" value="2" />
+    <param name="depth_time_offset" value="0" />
+    <param name="image_time_offset" value="0" />
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="passthrough" args="load
+    pcl/PassThrough pcl_manager" output="screen">
+    <remap from="~input" to="/camera/rgb/points" />
+    <rosparam>
+      filter_field_name: z
+      filter_limit_min: 0.0
+      filter_limit_max: 2.0
+      filter_limit_negative: False
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="hsv_converter"
+        args="load jsk_pcl/RGB2HSVColorConverter pcl_manager"
+        output="screen">
+    <remap from="~input" to="/passthrough/output" />
+    <rosparam>
+      use_indices: false
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="hsv_filter" args="load
+    jsk_pcl/HSVColorFilter pcl_manager" output="screen">
+    <remap from="~input" to="/hsv_converter/output" />
+    <rosparam>
+      use_indices: false
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="extract2"
+        args="load pcl/ExtractIndices pcl_manager" output="screen">
+    <remap from="~input"   to="/passthrough/output" />
+    <remap from="~indices" to="/hsv_filter/output_indices" />
+    <rosparam>
+      max_queue_size: 30
+      negative: true
+    </rosparam>
+  </node>
+
+  <!-- dummy for subscribe output -->
+  <node pkg="nodelet" type="nodelet" name="dummy2"
+        args="load pcl/ExtractIndices pcl_manager" output="screen">
+    <remap from="~input"   to="/hsv_filter/output" />
+    max_queue_size: 1
+  </node>
+
+ <!-- input == passthrough === hsv_converter == hsv_filter ==                -->
+ <!--                       |                                |               -->
+ <!--                       ============================= extract2 == output -->
+
+</launch>

@@ -1,0 +1,19 @@
+<!-- -*- mode: xml -*- -->
+<launch>
+  <node pkg="nodelet" type="nodelet" name="pcl_manager"
+        args="manager" output="screen" />
+  
+  <node pkg="nodelet" type="nodelet"
+        name="hsv_converter" args="load jsk_pcl/RGB2HSVColorConverter pcl_manager"
+        output="screen" clear_aprams="true">
+    <remap from="~input" to="/camera/depth/points2" />
+    <rosparam>
+      use_indices: false
+      radius_search: 0.0
+      spatial_locator: 0
+    </rosparam>
+  </node>
+</launch>
+
+
+

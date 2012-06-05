@@ -1,0 +1,37 @@
+<package>
+  <description brief="jsk_pcl_ros">
+
+     jsk_pcl_ros
+
+  </description>
+  <author>ryohei ueda</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/jsk_pcl_ros</url>
+  <depend package="pcl" />
+  <depend package="pcl_ros" />
+  <depend package="opencv2" />
+  <depend package="cv_bridge" />
+  <depend package="tf" />
+  <depend package="stereo_msgs" />
+  <depend package="geometry_msgs" />
+  <depend package="stereo_msgs" />
+  <depend package="nodelet" />
+  <depend package="dynamic_reconfigure" />
+  <depend package="jskpointcloud" />
+  <depend package="std_srvs" />
+  <depend package="image_transport" />
+  <depend package="image_geometry" />
+
+  <rosdep name="libtbb" />
+
+  <export>
+    <nodelet plugin="${prefix}/jsk_pcl_nodelets.xml" />
+    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ljsk_pcl_ros" />
+  </export>
+
+  <export>
+    <rosdoc config="rosdoc.yaml" />
+  </export>
+
+</package>

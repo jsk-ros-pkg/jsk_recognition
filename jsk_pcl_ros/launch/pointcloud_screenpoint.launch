@@ -1,0 +1,40 @@
+<launch>
+  <machine name="localhost" address="localhost" ros-root="$(env ROS_ROOT)"
+  	   ros-package-path="$(env ROS_PACKAGE_PATH)"/>
+  <arg name="cloud_machine" default="localhost"/>
+  <arg name="display_machine" default="localhost"/>
+  <arg name="image" default="/camera/rgb"/>
+  <arg name="points" default="/camera/rgb/points"/>
+
+  <node name="pointcloud_screenpoint" pkg="nodelet"
+	type="nodelet" args="manager" output="screen"
+	machine="$(arg cloud_machine)" respawn="true"/>
+  <node name="depth_image_creator_nodelet" pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/DepthImageCreator pointcloud_screenpoint"
+	output="screen" clear_params="true" respawn="true"
+	machine="$(arg cloud_machine)">
+    <remap from="~info" to="$(arg image)/camera_info" />
+    <remap from="~input" to="$(arg points)" />
+    <remap from="~output_cloud" to="/pointcloud_screenpoint/points" />
+    <rosparam>
+    scale_depth: 5.0
+    max_queue_size: 10
+    use_fixed_transform: false
+    use_service: false
+    use_asynchronous: true
+    use_approximate: true
+    </rosparam>
+  </node>
+  <node name="pointcloud_screenpoint_nodelet"
+	pkg="nodelet" type="nodelet" output="screen"
+	machine="$(arg cloud_machine)" respawn="true"
+  	args="load jsk_pcl/PointcloudScreenpoint pointcloud_screenpoint" >
+    <remap from="~points" to="/pointcloud_screenpoint/points" />
+  </node>
+  <sphinxdoc><![CDATA[
+
+  Please see pointcloud_screenpoint_sample.launch for documentation.
+
+  ]]></sphinxdoc>
+
+</launch>

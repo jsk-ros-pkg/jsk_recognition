@@ -1,0 +1,68 @@
+<library path="lib/libjsk_pcl_ros">
+
+  <class name="jsk_pcl/ColorFilter" type="ColorFilter"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      hoga hoga
+    </description>
+  </class>
+
+  <class name="jsk_pcl/RGBColorFilter" type="RGBColorFilter"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      hoga hoga
+    </description>
+  </class>
+
+  <class name="jsk_pcl/HSVColorFilter" type="HSVColorFilter"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      hoga hoga
+    </description>
+  </class>
+
+  <class name="jsk_pcl/RGB2HSVColorConverter" type="RGB2HSVColorConverter"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      hoga hoga
+    </description>
+  </class>
+
+  <class name="jsk_pcl/HSV2RGBColorConverter" type="HSV2RGBColorConverter"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      hoga hoga
+    </description>
+  </class>
+
+  <class name="jsk_pcl/DelayPointCloud" type="DelayPointCloud"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      hoge hoge
+    </description>
+  </class>
+
+  <class name="jsk_pcl/HSVColorFilter2" type="pcl_ros::HSVColorFilter2"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Filter color using HSV
+    </description>
+  </class>
+
+  <class name="jsk_pcl/ResizePointsPublisher" type="ResizePointsPublisher"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Resize PointCloud
+    </description>
+  </class>
+
+  <class name="jsk_pcl/PointcloudScreenpoint" type="PointcloudScreenpoint"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      subscribe pointcloud2 and convert screenpoint(x,y) to 3dpoint(x,y,z)
+      The pointcloud must be same size as screen, DepthImageCreator
+      take pointcloud and camera info to generate pointlocud.
+    </description>
+  </class>
+
+</library>

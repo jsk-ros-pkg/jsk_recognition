@@ -1,0 +1,88 @@
+<launch>
+  <machine name="c1" address="pr1012" ros-root="$(env ROS_ROOT)"
+  	   ros-package-path="$(env ROS_PACKAGE_PATH)">
+    <env name="PATH" value="$(env PATH)"/>
+  </machine>
+  <arg name="cloud_machine" default="c1"/>
+  <arg name="display_machine" default="localhost"/>
+  <arg name="image" default="/camera/rgb"/>
+  <arg name="points" default="/camera/rgb/points"/>
+  <include file="$(find jsk_pcl_ros)/launch/pointcloud_screenpoint.launch">
+    <arg name="cloud_machine" default="$(arg cloud_machine)"/>
+    <arg name="display_machine" default="$(arg display_machine)"/>
+    <arg name="image" default="$(arg image)"/>
+    <arg name="points" default="$(arg points)"/>
+  </include>
+  <node name="display_point" pkg="jsk_pcl_ros" machine="localhost"
+        type="pointcloud_screenpoint.l" output="screen">
+    <param name="~sensor_topic" value="$(arg image)/image_rect_color"/>
+    <param name="~ray_srv" value="/pointcloud_screenpoint_nodelet/screen_to_point"/>
+  </node>
+  <!-- If PATH is different, you can directly call roseus like below -->
+  <!--<node name="display_point" pkg="roseus" machine="$(arg cloud_machine)"
+  	type="roseus" output="screen" respawn="true"
+        args="$(find jsk_pcl_ros)/euslisp/pointcloud_screenpoint.l">
+    <param name="sensor_topic" value="$(arg image)/image_rect_color"/>
+    <param name="ray_srv" value="/pointcloud_screenpoint_nodelet/screen_to_point"/>
+    </node>-->
+  <node name="image_view2" pkg="image_view2"
+  	type="image_view2" machine="$(arg display_machine)">
+    <remap from="image" to="$(arg image)/image_rect_color" />
+    <remap from="camera_info" to="$(arg image)/camera_info" />
+  </node>
+  <!-- Visualize on rviz -->
+  <!-- <node name="$(anon rviz)" type="rviz" output="screen"
+       respawn="true" pkg="rviz" machine="$(arg display_machine)"
+       args="-d $(find jsk_pcl_ros)/launch/pointcloud_screenpoint.vcg"/> -->
+
+  <sphinxdoc><![CDATA[
+
+This script displays which point the user pointed on a 2D screen in the 3D rviz.
+
+Sample images below:
+
+.. image:: launch/images/pointcloud_screenpoint_3people.png
+  :width: 640
+
+There are two parameters to input.
+
+1. 'image' is used in showing a image view on the image_view2, and its camera_info parameter is used for changing the coordinates of points.
+2. 'points' is the pointcloud source to estimate 3D points that the user wantedt to specify on a 2D screen.
+
+For example,
+By default, pointcloud_screenpoint takes camera image and point clouds from kinect.
+
+.. code-block:: bash
+
+  roslaunch jsk_pcl_ros pointcloud_screenpoint_sample.launch
+
+You can mix wide_stereo camera and assembled_tilt_scan.
+
+.. code-block:: bash
+
+  roslaunch jsk_pcl_ros pointcloud_screenpoint_sample.launch image:=/wide_stereo/left points:=/tilt_laser_cloud2
+
+Or, you can mix kinect camera and assembled_tilt_scan.
+
+.. code-block:: bash
+
+  roslaunch jsk_pcl_ros pointcloud_screenpoint_sample.launch image:=/camera/rgb points:=/tilt_laser_cloud2
+
+pointclouds published by kinect
+
+.. image:: launch/images/pointcloud_screenpoint_kinect.png
+  :width: 640
+
+pointclouds published by laser
+
+.. image:: launch/images/pointcloud_screenpoint_laser.png
+  :width: 640
+
+amplifiered pointclouds published by laser
+
+.. image:: launch/images/pointcloud_screenpoint_disparity_laser.png
+  :width: 640
+
+
+  ]]></sphinxdoc>
+</launch>

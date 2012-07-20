@@ -26,6 +26,7 @@ rosbuild_add_library (jsk_pcl_ros
   src/color_converter_nodelet.cpp
   src/delay_pointcloud_nodelet.cpp
   src/HSV_color_filter_nodelet.cpp
+  src/depth_image_creator_nodelet.cpp
   src/resize_points_publisher.cpp
   src/pointcloud_screenpoint_nodelet.cpp)
 

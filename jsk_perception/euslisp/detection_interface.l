@@ -14,7 +14,8 @@
 (ros::advertise "/object_detection_marker_array" visualization_msgs::MarkerArray 5)
 
 (defmethod coordinates
-  (:stamp (&optional s) (if s (setf (get self :stamp) s)) (get self :stamp)))
+  (:stamp (&optional s) (if s (setf (get self :stamp) s)) (get self :stamp))
+  (:frame_id (&optional f) (if f (setf (get self :frame_id) f)) (get self :frame_id)))
 
 (defun objectdetection (force target-obj msg)
   (pprint 'objectDetection)
@@ -39,6 +40,7 @@
                        (send (send msg :header :stamp) :to-sec))
         (send target-obj :name (send obj :type))
         (send target-obj :stamp (send msg :header :stamp))
+        (send target-obj :frame_id (send msg :header :frame_id))
         ;; (send *pr2* :angle-vector (send *ri* :state :potentio-vector))
         (send target-obj :reset-coords)
         (send target-obj :move-to trans :local)
@@ -110,6 +112,7 @@
               (ros::ros-info (format nil "ok - obj-type(~a)"  target-obj))
               (if (and (boundp '*irtviewer*) x::*display* (/= x::*display* 0)) (send *irtviewer* :draw-objects))
               (stop-subscribe)
+              (return-from check-detection target-obj)
               ;;(unless speak
               ;;(speak-jp (format nil "~a がみつかりました" (send target-obj :name)))
               ;;(setq speak t))

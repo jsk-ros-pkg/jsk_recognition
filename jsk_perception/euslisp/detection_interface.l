@@ -3,6 +3,7 @@
 (defvar *detection-topic* "/narrow_stereo/left/ObjectDetection")
 (defvar *base-frame-id* "/base_footprint")
 (defvar *robot-symbol* '*pr2*)
+(defvar *solve-tf* t)
 
 (ros::roseus-add-msgs "posedetection_msgs")
 ;;
@@ -28,11 +29,14 @@
     (when (or (not (stringp tp))
               (substringp tp (send obj :type))) ;; found target
       (setq stamp (if force (ros::time 0) (send msg :header :stamp)))
-      ;;
-      (unless (send *tfl* :wait-for-transform *base-frame-id* frame stamp 1)
-        (ros::ros-error "could not solve ~A to ~A" *base-frame-id* frame))
-      (setq trans (send *tfl* :lookup-transform *base-frame-id* frame stamp))
-      (ros::ros-info "trans ~A" trans)
+
+      (cond
+       (*solve-tf*
+        (unless (send *tfl* :wait-for-transform *base-frame-id* frame stamp 1)
+          (ros::ros-error "could not solve ~A to ~A" *base-frame-id* frame))
+        (setq trans (send *tfl* :lookup-transform *base-frame-id* frame stamp))
+        (ros::ros-info "trans ~A" trans))
+       (t (setq trans (make-coords))))
 
       (when trans
         (ros::ros-info "object detected ~A ~A ~20,9f" (send obj :type)

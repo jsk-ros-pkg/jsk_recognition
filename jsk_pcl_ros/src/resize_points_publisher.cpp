@@ -86,6 +86,10 @@ namespace jsk_pcl_ros
       if((width - ox)%sx) output.width += 1;
       output.height = (height - oy)/sy;
       if((height - oy)%sy) output.height += 1;
+
+      output.row_step = output.point_step * output.width;
+      output.is_dense = input->is_dense;
+
 #if DEBUG
       ROS_INFO("%dx%d (%d %d)(%d %d) -> %dx%d %d", width,height, ox, oy, sx, sy,
                output.width, output.height, ex_indices.size());

@@ -22,17 +22,18 @@ include (${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
 gencfg ()
 
 rosbuild_add_library (jsk_pcl_ros
-  src/color_filter_nodelet.cpp
-  src/color_converter_nodelet.cpp
+#  src/color_filter_nodelet.cpp
+#  src/color_converter_nodelet.cpp
   src/delay_pointcloud_nodelet.cpp
-  src/HSV_color_filter_nodelet.cpp
+#  src/HSV_color_filter_nodelet.cpp
   src/depth_image_creator_nodelet.cpp
   src/resize_points_publisher.cpp
   src/pointcloud_screenpoint_nodelet.cpp)
 
 rosbuild_add_compile_flags (jsk_pcl_ros ${SSE_FLAGS})
 rosbuild_link_boost (jsk_pcl_ros system)
-target_link_libraries (jsk_pcl_ros tbb pcl_ros_io pcl_ros_features pcl_ros_filters pcl_ros_segmentation pcl_ros_surface)
+#target_link_libraries (jsk_pcl_ros tbb pcl_ros_io pcl_ros_features pcl_ros_filters pcl_ros_segmentation pcl_ros_surface)
+target_link_libraries (jsk_pcl_ros tbb pcl_ros_io pcl_ros_filters pcl_ros_tf)
 
 #uncomment if you have defined messages
 rosbuild_genmsg()

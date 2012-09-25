@@ -5,7 +5,11 @@
 #include <dynamic_reconfigure/server.h>
 
 #include <pcl/range_image/range_image_planar.h>
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
+#include <pcl/common/transforms.h>
+#else
 #include <pcl/common/transform.h>
+#endif
 
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
@@ -47,8 +51,8 @@ namespace jsk_pcl_ros
 
     tf::StampedTransform fixed_transform;
     double scale_depth;
-
-    typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
+    typedef pcl::PointXYZ Point;
+    typedef pcl::PointCloud< Point > PointCloud;
 
     void onInit();
 

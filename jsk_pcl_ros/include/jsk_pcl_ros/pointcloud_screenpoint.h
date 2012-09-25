@@ -23,7 +23,11 @@ namespace jsk_pcl_ros
     std_msgs::Header header_;
 
     pcl::NormalEstimation< pcl::PointXYZ, pcl::Normal > n3d_;
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
+    pcl::search::KdTree< pcl::PointXYZ >::Ptr normals_tree_;
+#else
     pcl::KdTree< pcl::PointXYZ >::Ptr normals_tree_;
+#endif
 
     void onInit();
     bool screenpoint_cb(jsk_pcl_ros::TransformScreenpoint::Request &req,

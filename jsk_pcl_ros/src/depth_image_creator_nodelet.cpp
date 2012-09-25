@@ -191,8 +191,13 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
     pcl::fromROSMsg(*pcloud2, tpc);
 
     Eigen::Affine3f inv;
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
+    inv = sensorPose.inverse();
+    pcl::transformPointCloud< Point > (tpc, pointCloud, inv);
+#else
     pcl::getInverse(sensorPose, inv);
     pcl::getTransformedPointCloud<PointCloud> (tpc, inv, pointCloud);
+#endif
 
     Eigen::Affine3f dummytrans;
     dummytrans.setIdentity();

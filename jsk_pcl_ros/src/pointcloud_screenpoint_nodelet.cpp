@@ -13,7 +13,11 @@ void jsk_pcl_ros::PointcloudScreenpoint::onInit()
   
   int k_ = 16; // todo : this value should be set from parameter.
   
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
+  normals_tree_ = boost::make_shared< pcl::search::KdTree<pcl::PointXYZ> > ();
+#else
   normals_tree_ = boost::make_shared<pcl::KdTreeFLANN<pcl::PointXYZ> > ();
+#endif
   n3d_.setKSearch (k_);
   n3d_.setSearchMethod (normals_tree_);
 }

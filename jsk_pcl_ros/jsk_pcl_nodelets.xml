@@ -65,4 +65,11 @@
     </description>
   </class>
 
+  <class name="jsk_pcl/DepthImageCreator" type="DepthImageCreator"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      DepthImageCreator take pointcloud and camera info to generate pointlocud.
+    </description>
+  </class>
+
 </library>

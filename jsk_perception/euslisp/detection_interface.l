@@ -55,26 +55,29 @@
     ))
 
 (defun start-subscribe (tf-force obj)
+  (ros::ros-info "start subscribe")
   (ros::subscribe *detection-topic*
                   posedetection_msgs::ObjectDetection #'objectdetection tf-force obj))
 (defun stop-subscribe ()
+  (ros::ros-info "stop subscribe")
   (ros::unsubscribe *detection-topic*))
 
-(defun check-detection (&key (timeout 10) (type nil) (tf-force nil) (diff-position 10.0))
+(defun check-detection (&key (timeout 10) (type nil) (tf-force nil)
+			     (diff-position 10.0) (single nil) (speak t)
+			     (marker-life 30))
   (let ((target-obj (make-cube 60 60 60)))
     (setf (get target-obj :type) type)
-    (send target-obj :stamp (ros::time-now))
     (start-subscribe tf-force target-obj) (unix::sleep 2)
+    (send target-obj :stamp (ros::time-now))
     (let* (current-object-coords
            previous-object-coords
-           speak (start-time (ros::time-now)) (detect-object-list))
+           (start-time (ros::time-now)) (detect-object-list))
       (ros::ros-info "check (timeout=~A, type=~A, tf-force=~A)" timeout type tf-force)
       (while (ros::ok)
         (ros::spin-once) ;; target-obj was updated in objectdetection
-
         ;; check target-obj is previously detected
         (when (and (> (send (send target-obj :stamp) :to-sec)
-                      (send start-time :to-sec))                          ;; discard object detection result before check function called
+                      (send start-time :to-sec))    ;; discard object detection result before check function called
                    (not (member (send target-obj :stamp) detect-object-list))) ;; check if obj is already stored in detect-object-list
           (push (send target-obj :stamp) detect-object-list)
           (setq current-object-coords (send target-obj :copy-worldcoords)) ;; updated position
@@ -89,14 +92,14 @@
                                                                     :stamp (send target-obj :stamp)
                                                                     :frame_id *base-frame-id*)
                                                           :ns "object_text" :color #f(1 0 0)
-                                                          :scale 100 :lifetime 15 :id 0)
+                                                          :scale 100 :lifetime marker-life :id 0)
                                         (coords->marker-msg current-object-coords
                                                             (instance std_msgs::header :init
                                                                       :stamp (send target-obj :stamp)
                                                                       :frame_id *base-frame-id*)
                                                             :ns  "object_coords"
                                                             ;; :size 200 :width 20
-                                                            :lifetime 15 :id 1)
+                                                            :lifetime marker-life :id 1)
                                         )))
 
           (ros::ros-info "object detected ~A diff-pos:~A, diff-rot:~A"
@@ -106,21 +109,21 @@
                          (if previous-object-coords
                              (elt (send previous-object-coords :difference-rotation current-object-coords
                                         :rotation-axis :xy) 2)))
-          (when (and previous-object-coords
-                     (< (norm (send previous-object-coords :difference-position current-object-coords))
-
-                        diff-position)) ;; moved a little -> found obj
+          (when (or single
+		    (and previous-object-coords
+			 (< (norm (send previous-object-coords :difference-position current-object-coords))
+			    diff-position))) ;; moved a little -> found obj
             (cond
              ((or (not (stringp type))
                   (substringp type (send target-obj :name))) ;; found target
               (ros::ros-info (format nil "ok - obj-type(~a)"  target-obj))
-              (if (and (boundp '*irtviewer*) x::*display* (/= x::*display* 0)) (send *irtviewer* :draw-objects))
+              (if (and (boundp '*irtviewer*) x::*display* (/= x::*display* 0))
+		  (send *irtviewer* :draw-objects))
               (stop-subscribe)
+	      (when speak
+		(speak-jp (format nil "~a がみつかりました" (send target-obj :name))))
               (return-from check-detection target-obj)
-              ;;(unless speak
-              ;;(speak-jp (format nil "~a がみつかりました" (send target-obj :name)))
-              ;;(setq speak t))
-              )
+	      )
               (t
                (ros::ros-info (format nil "no - obj-type(~a)" (send target-obj :name)))
               ))
@@ -134,6 +137,8 @@
                  (send (ros::time- (ros::time-now) start-time) :to-sec))
           (ros::ros-info "timeout")
           (stop-subscribe)
+	  (when speak
+	    (speak-jp ""))
           (return-from check-detection nil))
         (unix::usleep (* 50 1000))
         ) ;; while (ros::ok)

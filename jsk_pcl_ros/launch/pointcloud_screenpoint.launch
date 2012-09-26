@@ -1,18 +1,13 @@
 <launch>
-  <machine name="localhost" address="localhost" ros-root="$(env ROS_ROOT)"
-  	   ros-package-path="$(env ROS_PACKAGE_PATH)"/>
-  <arg name="cloud_machine" default="localhost"/>
-  <arg name="display_machine" default="localhost"/>
   <arg name="image" default="/camera/rgb"/>
   <arg name="points" default="/camera/rgb/points"/>
 
   <node name="pointcloud_screenpoint" pkg="nodelet"
 	type="nodelet" args="manager" output="screen"
-	machine="$(arg cloud_machine)" respawn="true"/>
+	respawn="true"/>
   <node name="depth_image_creator_nodelet" pkg="nodelet" type="nodelet"
         args="load jsk_pcl/DepthImageCreator pointcloud_screenpoint"
-	output="screen" clear_params="true" respawn="true"
-	machine="$(arg cloud_machine)">
+	output="screen" clear_params="true" respawn="true" >
     <remap from="~info" to="$(arg image)/camera_info" />
     <remap from="~input" to="$(arg points)" />
     <remap from="~output_cloud" to="/pointcloud_screenpoint/points" />
@@ -27,7 +22,7 @@
   </node>
   <node name="pointcloud_screenpoint_nodelet"
 	pkg="nodelet" type="nodelet" output="screen"
-	machine="$(arg cloud_machine)" respawn="true"
+	respawn="true"
   	args="load jsk_pcl/PointcloudScreenpoint pointcloud_screenpoint" >
     <remap from="~points" to="/pointcloud_screenpoint/points" />
   </node>

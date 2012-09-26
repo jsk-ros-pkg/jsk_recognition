@@ -21,7 +21,10 @@ rosbuild_find_ros_package (dynamic_reconfigure)
 include (${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
 gencfg ()
 
+rosbuild_find_ros_package (pcl_ros)
+
 rosbuild_add_library (jsk_pcl_ros
+  ${pcl_ros_PACKAGE_PATH}/src/pcl_ros/features/feature.cpp
 #  src/color_filter_nodelet.cpp
 #  src/color_converter_nodelet.cpp
   src/delay_pointcloud_nodelet.cpp

@@ -1,8 +1,8 @@
 <launch>
   <machine name="localhost" address="localhost" env-loader="$(env ROS_ENV_LOADER)" />
   <arg name="cloud_machine" default="localhost"/>
-  <arg name="image" default="/camera/rgb"/>
-  <arg name="points" default="/camera/rgb/points"/>
+  <arg name="image" default="/openni/rgb"/>
+  <arg name="points" default="/openni/depth_registered/points"/>
 
   <node name="pointcloud_screenpoint" pkg="nodelet"
 	type="nodelet" args="manager" output="screen"

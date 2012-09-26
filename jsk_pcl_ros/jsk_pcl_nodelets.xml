@@ -1,5 +1,5 @@
 <library path="lib/libjsk_pcl_ros">
-
+<!--
   <class name="jsk_pcl/ColorFilter" type="ColorFilter"
          base_class_type="nodelet::Nodelet">
     <description>
@@ -34,21 +34,21 @@
       hoga hoga
     </description>
   </class>
-
+-->
   <class name="jsk_pcl/DelayPointCloud" type="DelayPointCloud"
          base_class_type="nodelet::Nodelet">
     <description>
       hoge hoge
     </description>
   </class>
-
+<!--
   <class name="jsk_pcl/HSVColorFilter2" type="pcl_ros::HSVColorFilter2"
          base_class_type="nodelet::Nodelet">
     <description>
       Filter color using HSV
     </description>
   </class>
-
+-->
   <class name="jsk_pcl/ResizePointsPublisher" type="ResizePointsPublisher"
          base_class_type="nodelet::Nodelet">
     <description>

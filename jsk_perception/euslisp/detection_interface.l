@@ -63,8 +63,8 @@
   (ros::unsubscribe *detection-topic*))
 
 (defun check-detection (&key (timeout 10) (type nil) (tf-force nil)
-			     (diff-position 10.0) (single nil) (speak t)
-			     (marker-life 30))
+                             (diff-position 10.0) (single nil) (speak t)
+                             (marker-life 30))
   (let ((target-obj (make-cube 60 60 60)))
     (setf (get target-obj :type) type)
     (start-subscribe tf-force target-obj) (unix::sleep 2)
@@ -110,20 +110,20 @@
                              (elt (send previous-object-coords :difference-rotation current-object-coords
                                         :rotation-axis :xy) 2)))
           (when (or single
-		    (and previous-object-coords
-			 (< (norm (send previous-object-coords :difference-position current-object-coords))
-			    diff-position))) ;; moved a little -> found obj
+                    (and previous-object-coords
+                         (< (norm (send previous-object-coords :difference-position current-object-coords))
+                            diff-position))) ;; moved a little -> found obj
             (cond
              ((or (not (stringp type))
                   (substringp type (send target-obj :name))) ;; found target
               (ros::ros-info (format nil "ok - obj-type(~a)"  target-obj))
               (if (and (boundp '*irtviewer*) x::*display* (/= x::*display* 0))
-		  (send *irtviewer* :draw-objects))
+                  (send *irtviewer* :draw-objects))
               (stop-subscribe)
-	      (when speak
-		(speak-jp (format nil "~a がみつかりました" (send target-obj :name))))
+              (when speak
+                (speak-jp (format nil "~a がみつかりました" (send target-obj :name))))
               (return-from check-detection target-obj)
-	      )
+              )
               (t
                (ros::ros-info (format nil "no - obj-type(~a)" (send target-obj :name)))
               ))
@@ -137,8 +137,8 @@
                  (send (ros::time- (ros::time-now) start-time) :to-sec))
           (ros::ros-info "timeout")
           (stop-subscribe)
-	  (when speak
-	    (speak-jp ""))
+          (when speak
+            (speak-jp "なにも みつかりませんでした"))
           (return-from check-detection nil))
         (unix::usleep (* 50 1000))
         ) ;; while (ros::ok)

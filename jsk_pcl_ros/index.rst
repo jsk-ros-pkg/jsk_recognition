@@ -150,11 +150,10 @@ Contents
 .. code-block:: xml
 
   <launch>
-    <machine address="localhost" name="localhost" ros-package-path="$(env ROS_PACKAGE_PATH)" ros-root="$(env ROS_ROOT)" />
+    <machine address="localhost" env-loader="$(env ROS_ENV_LOADER)" name="localhost" />
     <arg default="localhost" name="cloud_machine" />
-    <arg default="localhost" name="display_machine" />
-    <arg default="/camera/rgb" name="image" />
-    <arg default="/camera/rgb/points" name="points" />
+    <arg default="/openni/rgb" name="image" />
+    <arg default="/openni/depth_registered/points" name="points" />
   
     <node args="manager" machine="$(arg cloud_machine)" name="pointcloud_screenpoint" output="screen" pkg="nodelet" respawn="true" type="nodelet" />
     <node args="load jsk_pcl/DepthImageCreator pointcloud_screenpoint" clear_params="true" machine="$(arg cloud_machine)" name="depth_image_creator_nodelet" output="screen" pkg="nodelet" respawn="true" type="nodelet">

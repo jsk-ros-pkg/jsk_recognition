@@ -181,12 +181,16 @@ public:
         }
 
         lasttime = ros::Time::now();
-        _pubDetection = _node.advertise<posedetection_msgs::ObjectDetection>("ObjectDetection",1);
 
-        this->camInfoSubscriber = _node.subscribe("camera_info", 1, &CheckerboardDetector::caminfo_cb, this); 
-        this->imageSubscriber = _node.subscribe("image",1, &CheckerboardDetector::image_cb, this);
-        this->camInfoSubscriber2 = _node.subscribe("CameraInfo", 1, &CheckerboardDetector::caminfo_cb2, this); 
-        this->imageSubscriber2 = _node.subscribe("Image",1, &CheckerboardDetector::image_cb2, this);
+        ros::SubscriberStatusCallback connect_cb = boost::bind( &CheckerboardDetector::connectCb, this);
+        _pubDetection =
+          _node.advertise<posedetection_msgs::ObjectDetection> ("ObjectDetection", 1,
+                                                                connect_cb, connect_cb);
+
+        //this->camInfoSubscriber = _node.subscribe("camera_info", 1, &CheckerboardDetector::caminfo_cb, this);
+        //this->imageSubscriber = _node.subscribe("image",1, &CheckerboardDetector::image_cb, this);
+        //this->camInfoSubscriber2 = _node.subscribe("CameraInfo", 1, &CheckerboardDetector::caminfo_cb2, this);
+        //this->imageSubscriber2 = _node.subscribe("Image",1, &CheckerboardDetector::image_cb2, this);
         _srvDetect = _node.advertiseService("Detect",&CheckerboardDetector::detect_cb,this);
     }
 
@@ -243,6 +247,30 @@ public:
     bool detect_cb(posedetection_msgs::Detect::Request& req, posedetection_msgs::Detect::Response& res)
     {
         return Detect(res.object_detection,req.image,req.camera_info);
+    }
+
+    //
+    void connectCb( )
+    {
+      boost::mutex::scoped_lock lock(this->mutexcalib);
+      if (_pubDetection.getNumSubscribers() == 0)
+        {
+          camInfoSubscriber.shutdown();
+          camInfoSubscriber2.shutdown();
+          imageSubscriber.shutdown();
+          imageSubscriber2.shutdown();
+        }
+      else
+        {
+          if ( camInfoSubscriber == NULL )
+            camInfoSubscriber = _node.subscribe("camera_info", 1, &CheckerboardDetector::caminfo_cb, this);
+          if ( imageSubscriber == NULL )
+            imageSubscriber = _node.subscribe("image", 1, &CheckerboardDetector::image_cb, this);
+          if ( camInfoSubscriber2 == NULL )
+            camInfoSubscriber2 = _node.subscribe("CameraInfo", 1, &CheckerboardDetector::caminfo_cb2, this);
+          if ( imageSubscriber2 == NULL )
+            imageSubscriber2 = _node.subscribe("Image",1, &CheckerboardDetector::image_cb2, this);
+        }
     }
 
     bool Detect(posedetection_msgs::ObjectDetection& objdetmsg, const sensor_msgs::Image& imagemsg, const sensor_msgs::CameraInfo& camInfoMsg)

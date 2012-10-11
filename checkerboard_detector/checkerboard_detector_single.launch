@@ -1,0 +1,21 @@
+<launch>
+ <group ns="checkerdetector" clear_params="true">
+    <!-- display 0: (default) not display / 1: display found corner -->
+    <param name="display" type="int" value="1"/>
+    <!-- maxboard -1: (default) infinite search board / 1<=: limit found number of boards -->
+    <param name="maxboard" type="int" value="1"/>
+    <!-- set frame_id if you want to use specific frame_id -->
+    <!-- param name="frame_id" type="string" value="stereo_link"/-->
+    <param name="rect0_size_x" type="double" value="0.3"/>
+    <param name="rect0_size_y" type="double" value="0.3"/>
+    <param name="grid0_size_x" type="int" value="4"/>
+    <param name="grid0_size_y" type="int" value="5"/>
+    <param name="type0" type="string" value="4x5chessboard"/>
+
+    <node pkg="checkerboard_detector" type="checkerboard_detector"
+          name="detector_node" respawn="false" output="screen">
+      <remap from="camera_info" to="/camera/rgb/camera_info"/>
+      <remap from="image" to="/camera/rgb/image_rect"/>
+    </node>
+  </group>
+</launch>

@@ -153,11 +153,12 @@ Contents
     <machine address="localhost" env-loader="$(env ROS_ENV_LOADER)" name="localhost" />
     <arg default="localhost" name="cloud_machine" />
     <arg default="/openni/rgb" name="image" />
+    <arg default="$(arg image)/camera_info" name="camera_info" />
     <arg default="/openni/depth_registered/points" name="points" />
   
     <node args="manager" machine="$(arg cloud_machine)" name="pointcloud_screenpoint" output="screen" pkg="nodelet" respawn="true" type="nodelet" />
     <node args="load jsk_pcl/DepthImageCreator pointcloud_screenpoint" clear_params="true" machine="$(arg cloud_machine)" name="depth_image_creator_nodelet" output="screen" pkg="nodelet" respawn="true" type="nodelet">
-      <remap from="~info" to="$(arg image)/camera_info" />
+      <remap from="~info" to="$(arg camera_info)" />
       <remap from="~input" to="$(arg points)" />
       <remap from="~output_cloud" to="/pointcloud_screenpoint/points" />
       <rosparam>

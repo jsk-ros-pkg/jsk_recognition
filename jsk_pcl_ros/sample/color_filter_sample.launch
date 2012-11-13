@@ -25,6 +25,7 @@
   <node pkg="nodelet" type="nodelet" name="passthrough" args="load
     pcl/PassThrough pcl_manager" output="screen">
     <remap from="~input" to="/camera/rgb/points" />
+    <remap from="~output" to="/hsv_input" />
     <rosparam>
       filter_field_name: z
       filter_limit_min: 0.0
@@ -33,40 +34,20 @@
     </rosparam>
   </node>
 
-  <node pkg="nodelet" type="nodelet" name="hsv_converter"
-        args="load jsk_pcl/RGB2HSVColorConverter pcl_manager"
-        output="screen">
-    <remap from="~input" to="/passthrough/output" />
-    <rosparam>
-      use_indices: false
-    </rosparam>
-  </node>
+  <include file="$(find jsk_pcl_ros)/launch/hsv_color_filter.launch" >
+    <arg name="create_manager" value="false" />
+    <arg name="manager" value="/pcl_manager" />
+    <arg name="OUTPUT" value="/filtered_red" />
+    <arg name="DEFAULT_NAMESPACE" value="/HSV_filter_red" />
+    <arg name="h_max" value="1.0" />
+  </include>
 
-  <node pkg="nodelet" type="nodelet" name="hsv_filter" args="load
-    jsk_pcl/HSVColorFilter pcl_manager" output="screen">
-    <remap from="~input" to="/hsv_converter/output" />
-    <rosparam>
-      use_indices: false
-    </rosparam>
-  </node>
-
-  <node pkg="nodelet" type="nodelet" name="extract2"
-        args="load pcl/ExtractIndices pcl_manager" output="screen">
-    <remap from="~input"   to="/passthrough/output" />
-    <remap from="~indices" to="/hsv_filter/output_indices" />
-    <rosparam>
-      max_queue_size: 30
-      negative: true
-    </rosparam>
-  </node>
-
-  <!-- dummy for subscribe output -->
-  <node pkg="nodelet" type="nodelet" name="dummy2"
-        args="load pcl/ExtractIndices pcl_manager" output="screen">
-    <remap from="~input"   to="/hsv_filter/output" />
-    max_queue_size: 1
-  </node>
-
+  <include file="$(find jsk_pcl_ros)/launch/hsv_color_filter.launch" >
+    <arg name="create_manager" value="false" />
+    <arg name="manager" value="/pcl_manager" />
+    <arg name="OUTPUT" value="/filtered_blue" />
+    <arg name="DEFAULT_NAMESPACE" value="/HSV_filter_blue" />
+  </include>
  <!-- input == passthrough === hsv_converter == hsv_filter ==                -->
  <!--                       |                                |               -->
  <!--                       ============================= extract2 == output -->

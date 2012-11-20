@@ -25,10 +25,9 @@ rosbuild_find_ros_package (pcl_ros)
 
 rosbuild_add_library (jsk_pcl_ros
   ${pcl_ros_PACKAGE_PATH}/src/pcl_ros/features/feature.cpp
-#  src/color_filter_nodelet.cpp
+  src/color_filter_nodelet.cpp
 #  src/color_converter_nodelet.cpp
   src/delay_pointcloud_nodelet.cpp
-#  src/HSV_color_filter_nodelet.cpp
   src/depth_image_creator_nodelet.cpp
   src/resize_points_publisher.cpp
   src/pointcloud_screenpoint_nodelet.cpp)

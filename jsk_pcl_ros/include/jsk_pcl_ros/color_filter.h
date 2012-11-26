@@ -27,7 +27,7 @@ namespace pcl
     typedef pcl::PointCloud< PointType > PointCloud;
 
   protected:
-    unsigned char r_min_, r_max_, b_min_, b_max_, g_min_, g_max_;
+    int r_min_, r_max_, b_min_, b_max_, g_min_, g_max_;
     ConditionalRemoval<PointType> filter_instance_;
 
   public:
@@ -40,18 +40,18 @@ namespace pcl
     }
     virtual ~RGBColorFilter (){ };
 
-    inline void setRedMin (unsigned char r_min) {r_min_ = r_min;}
-    inline void setRedMax (unsigned char r_max) {r_max_ = r_max;}
-    inline void setGreenMin (unsigned char g_min) {g_min_ = g_min;}
-    inline void setGreenMax (unsigned char g_max) {g_max_ = g_max;}
-    inline void setBlueMin (unsigned char b_min) {b_min_ = b_min;}
-    inline void setBlueMax (unsigned char b_max) {b_max_ = b_max;}
-    inline unsigned char getRedMin() { return r_min_; }
-    inline unsigned char getRedMax() { return r_max_; }
-    inline unsigned char getGreenMin() { return g_min_; }
-    inline unsigned char getGreenMax() { return g_max_; }
-    inline unsigned char getBlueMin() { return b_min_; }
-    inline unsigned char getBlueMax() { return b_max_; }
+    inline void setRedMin (int r_min) {r_min_ = r_min;}
+    inline void setRedMax (int r_max) {r_max_ = r_max;}
+    inline void setGreenMin (int g_min) {g_min_ = g_min;}
+    inline void setGreenMax (int g_max) {g_max_ = g_max;}
+    inline void setBlueMin (int b_min) {b_min_ = b_min;}
+    inline void setBlueMax (int b_max) {b_max_ = b_max;}
+    inline int getRedMin() { return r_min_; }
+    inline int getRedMax() { return r_max_; }
+    inline int getGreenMin() { return g_min_; }
+    inline int getGreenMax() { return g_max_; }
+    inline int getBlueMin() { return b_min_; }
+    inline int getBlueMax() { return b_max_; }
     inline void updateCondition()
     {
       pcl::ConditionBase<PointType>::Ptr condp (new pcl::ConditionOr<PointType> ());
@@ -164,13 +164,13 @@ namespace pcl
     typedef pcl::PointCloud< PointType > PointCloud;
 
   protected:
-    float h_min_, h_max_, s_min_, s_max_, v_min_, v_max_;
+    int h_min_, h_max_, s_min_, s_max_, v_min_, v_max_;
     bool use_h_;
     ConditionalRemoval<PointType> filter_instance_;
 
   public:
-    HSVColorFilter () : h_min_(0), h_max_(1.0), s_min_(0), s_max_(1.0),
-                        v_min_(0), v_max_(1.0), use_h_(true),
+    HSVColorFilter () : h_min_(-128), h_max_(127), s_min_(0), s_max_(255),
+                        v_min_(0), v_max_(255), use_h_(true),
                         filter_instance_(true)
     {
       filter_name_ = "HSVColorFilter";
@@ -178,18 +178,18 @@ namespace pcl
     }
     virtual ~HSVColorFilter () {};
 
-    inline void setHueMin (float h_min) {h_min_ = h_min;}
-    inline void setHueMax (float h_max) {h_max_ = h_max;}
-    inline void setSaturationMin (float s_min) {s_min_ = s_min;}
-    inline void setSaturationMax (float s_max) {s_max_ = s_max;}
-    inline void setValueMin (float v_min) {v_min_ = v_min;}
-    inline void setValueMax (float v_max) {v_max_ = v_max;}
-    inline float getHueMin() { return h_min_; }
-    inline float getHueMax() { return h_max_; }
-    inline float getSaturationMin() { return s_min_; }
-    inline float getSaturationMax() { return s_max_; }
-    inline float getValueMin() { return v_min_; }
-    inline float getValueMax() { return v_max_; }
+    inline void setHueMin (int h_min) {h_min_ = h_min;}
+    inline void setHueMax (int h_max) {h_max_ = h_max;}
+    inline void setSaturationMin (int s_min) {s_min_ = s_min;}
+    inline void setSaturationMax (int s_max) {s_max_ = s_max;}
+    inline void setValueMin (int v_min) {v_min_ = v_min;}
+    inline void setValueMax (int v_max) {v_max_ = v_max;}
+    inline int getHueMin() { return h_min_; }
+    inline int getHueMax() { return h_max_; }
+    inline int getSaturationMin() { return s_min_; }
+    inline int getSaturationMax() { return s_max_; }
+    inline int getValueMin() { return v_min_; }
+    inline int getValueMax() { return v_max_; }
     inline void setUseHue (bool use_h) { use_h_ = use_h; }
     inline bool getUseHue (void) { return use_h_; }
     inline void updateCondition()

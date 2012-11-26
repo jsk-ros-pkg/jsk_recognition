@@ -105,10 +105,10 @@ namespace pcl_ros
       Filter::onInit ();
       double h_max, h_min, s_max, s_min, v_max, v_min;
       bool use_h;
-      pnh_->param<double>("h_limit_max", h_max, 1.0);
-      pnh_->param<double>("s_limit_max", s_max, 1.0);
-      pnh_->param<double>("v_limit_max", v_max, 1.0);
-      pnh_->param<double>("h_limit_min", h_min, 0);
+      pnh_->param<double>("h_limit_max", h_max, 127);
+      pnh_->param<double>("s_limit_max", s_max, 255);
+      pnh_->param<double>("v_limit_max", v_max, 255);
+      pnh_->param<double>("h_limit_min", h_min, -128);
       pnh_->param<double>("s_limit_min", s_min, 0);
       pnh_->param<double>("v_limit_min", v_min, 0);
       pnh_->param<bool>("use_h", use_h, true);

@@ -7,7 +7,6 @@
 
 #include <pcl_ros/filters/filter.h>
 
-#include "jsk_pcl_ros/ColorFilterConfig.h"
 #include "jsk_pcl_ros/RGBColorFilterConfig.h"
 #include "jsk_pcl_ros/HSVColorFilterConfig.h"
 

@@ -17,7 +17,7 @@
 
   <node pkg="jsk_perception" type="point_pose_extractor"
         name="microwave_range">
-    <param name="template_filename" value="$(find euslisp)/test.png" />
+    <param name="template_filename" value="$(find jsk_perception)/sample/73b1-microwave.png" />
     <param name="window_name" value="microwave_range" /> <!-- name of type -->
     <param name="object_width" value="0.084" />
     <param name="object_height" value="0.22" />

@@ -15,6 +15,11 @@
 (ros::advertise "/object_detection_marker_array" visualization_msgs::MarkerArray 5)
 
 (defmethod coordinates
+  (:speak-name
+   (&optional s)
+   (if s (setf (get self :speak-name) s)
+     (let ((nm (get self :speak-name)))
+       (if nm nm (send self :name)))))
   (:stamp (&optional s) (if s (setf (get self :stamp) s)) (get self :stamp))
   (:frame_id (&optional f) (if f (setf (get self :frame_id) f)) (get self :frame_id)))
 
@@ -64,11 +69,14 @@
 
 (defun check-detection (&key (timeout 10) (type nil) (tf-force nil)
                              (diff-position 10.0) (single nil) (speak t)
-                             (marker-life 30))
+                             (marker-life 30) (speak-name))
   (let ((target-obj (make-cube 60 60 60)))
     (setf (get target-obj :type) type)
+    (when speak-name
+      (send target-obj :speak-name speak-name))
     (start-subscribe tf-force target-obj) (unix::sleep 2)
     (send target-obj :stamp (ros::time-now))
+
     (let* (current-object-coords
            previous-object-coords
            (start-time (ros::time-now)) (detect-object-list))
@@ -77,41 +85,52 @@
         (ros::spin-once) ;; target-obj was updated in objectdetection
         ;; check target-obj is previously detected
         (when (and (> (send (send target-obj :stamp) :to-sec)
-                      (send start-time :to-sec))    ;; discard object detection result before check function called
-                   (not (member (send target-obj :stamp) detect-object-list))) ;; check if obj is already stored in detect-object-list
+                      (send start-time :to-sec))
+                   ;; discard object detection result before check function called
+                   (not (member (send target-obj :stamp) detect-object-list))
+                   ;; check if obj is already stored in detect-object-list
+                   )
+          (when speak
+            (speak-jp (format nil "~a を さがしています"
+                              (send target-obj :speak-name))))
           (push (send target-obj :stamp) detect-object-list)
           (setq current-object-coords (send target-obj :copy-worldcoords)) ;; updated position
           (ros::ros-info "current -> ~A" current-object-coords)
           (ros::publish "/object_detection_marker_array"
                         (instance visualization_msgs::MarkerArray :init
                                   :markers
-                                  (list (text->marker-msg (send target-obj :name)
-                                                          (send (send current-object-coords :copy-worldcoords)
-                                                                :translate #f(-100 0 100))
-                                                          (instance std_msgs::header :init
-                                                                    :stamp (send target-obj :stamp)
-                                                                    :frame_id *base-frame-id*)
-                                                          :ns "object_text" :color #f(1 0 0)
-                                                          :scale 100 :lifetime marker-life :id 0)
-                                        (coords->marker-msg current-object-coords
-                                                            (instance std_msgs::header :init
-                                                                      :stamp (send target-obj :stamp)
-                                                                      :frame_id *base-frame-id*)
-                                                            :ns  "object_coords"
-                                                            ;; :size 200 :width 20
-                                                            :lifetime marker-life :id 1)
+                                  (list (text->marker-msg
+                                         (send target-obj :name)
+                                         (send (send current-object-coords :copy-worldcoords)
+                                               :translate #f(-100 0 100))
+                                         (instance std_msgs::header :init
+                                                   :stamp (send target-obj :stamp)
+                                                   :frame_id *base-frame-id*)
+                                         :ns "object_text" :color #f(1 0 0)
+                                         :scale 100 :lifetime marker-life :id 0)
+                                        (coords->marker-msg
+                                         current-object-coords
+                                         (instance std_msgs::header :init
+                                                   :stamp (send target-obj :stamp)
+                                                   :frame_id *base-frame-id*)
+                                         :ns "object_coords"
+                                         ;; :size 200 :width 20
+                                         :lifetime marker-life :id 1)
                                         )))
 
           (ros::ros-info "object detected ~A diff-pos:~A, diff-rot:~A"
                          (send target-obj :name)
                          (if previous-object-coords
-                             (norm (send previous-object-coords :difference-position current-object-coords)))
+                             (norm (send previous-object-coords
+                                         :difference-position current-object-coords)))
                          (if previous-object-coords
-                             (elt (send previous-object-coords :difference-rotation current-object-coords
+                             (elt (send previous-object-coords
+                                        :difference-rotation current-object-coords
                                         :rotation-axis :xy) 2)))
           (when (or single
                     (and previous-object-coords
-                         (< (norm (send previous-object-coords :difference-position current-object-coords))
+                         (< (norm (send previous-object-coords
+                                        :difference-position current-object-coords))
                             diff-position))) ;; moved a little -> found obj
             (cond
              ((or (not (stringp type))
@@ -121,9 +140,9 @@
                   (send *irtviewer* :draw-objects))
               (stop-subscribe)
               (when speak
-                (speak-jp (format nil "~a がみつかりました" (send target-obj :name))))
-              (return-from check-detection target-obj)
-              )
+                (speak-jp (format nil "~a がみつかりました"
+                                  (send target-obj :speak-name))))
+              (return-from check-detection target-obj))
               (t
                (ros::ros-info (format nil "no - obj-type(~a)" (send target-obj :name)))
               ))
@@ -131,14 +150,16 @@
           (when (and (boundp '*irtviewer*) x::*display* (/= x::*display* 0))
             (send *irtviewer* :draw-objects)
             (x::window-main-one))
-          (setq previous-object-coords current-object-coords) ;; set current coords ad previous coords
+          (setq previous-object-coords current-object-coords)
+          ;; set current coords ad previous coords
           ) ;; memq target-obj detect-object-list
         (when (< timeout
                  (send (ros::time- (ros::time-now) start-time) :to-sec))
           (ros::ros-info "timeout")
           (stop-subscribe)
           (when speak
-            (speak-jp "なにも みつかりませんでした"))
+            (speak-jp (format nil "~a は みつかりませんでした"
+                              (send target-obj :speak-name))))
           (return-from check-detection nil))
         (unix::usleep (* 50 1000))
         ) ;; while (ros::ok)

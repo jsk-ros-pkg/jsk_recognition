@@ -91,7 +91,7 @@
                    ;; check if obj is already stored in detect-object-list
                    )
           (when speak
-            (speak-jp (format nil "~a を さがしています"
+            (speak-jp (format nil "~a を さがして います"
                               (send target-obj :speak-name))))
           (push (send target-obj :stamp) detect-object-list)
           (setq current-object-coords (send target-obj :copy-worldcoords)) ;; updated position
@@ -140,7 +140,7 @@
                   (send *irtviewer* :draw-objects))
               (stop-subscribe)
               (when speak
-                (speak-jp (format nil "~a がみつかりました"
+                (speak-jp (format nil "~a が みつかり ました"
                                   (send target-obj :speak-name))))
               (return-from check-detection target-obj))
               (t
@@ -158,7 +158,7 @@
           (ros::ros-info "timeout")
           (stop-subscribe)
           (when speak
-            (speak-jp (format nil "~a は みつかりませんでした"
+            (speak-jp (format nil "~a は みつかりません でした"
                               (send target-obj :speak-name))))
           (return-from check-detection nil))
         (unix::usleep (* 50 1000))

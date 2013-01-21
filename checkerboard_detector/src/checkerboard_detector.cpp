@@ -176,7 +176,8 @@ public:
         }
 
         if( display ) {
-            cvNamedWindow("Checkerboard Detector", CV_WINDOW_AUTOSIZE);
+	  // enable to set other window flag // use display value if display != 1 because only CV_WINDOW_AUTOSIZE is supported officially
+	  cvNamedWindow("Checkerboard Detector", (display == 1? CV_WINDOW_AUTOSIZE : display));
             cvStartWindowThread();
         }
 

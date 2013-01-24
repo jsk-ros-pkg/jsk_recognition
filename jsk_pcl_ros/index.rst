@@ -166,7 +166,7 @@ Contents
       max_queue_size: 10
       use_fixed_transform: false
       use_service: false
-      use_asynchronous: true
+      use_asynchronous: false
       use_approximate: true
       </rosparam>
     </node>

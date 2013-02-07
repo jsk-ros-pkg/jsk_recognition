@@ -22,7 +22,7 @@
   <depend package="image_transport" />
   <depend package="image_geometry" />
 
-  <rosdep name="libtbb" />
+  <rosdep name="tbb" />
 
   <export>
     <nodelet plugin="${prefix}/jsk_pcl_nodelets.xml" />

@@ -1,2 +1,2 @@
-libtbb:
+tbb:
   ubuntu: libtbb-dev

@@ -30,7 +30,7 @@
 #include <cstdio>
 #include <vector>
 
-#include <cv_bridge/CvBridge.h>
+#include <cv_bridge/cv_bridge.h>
 #include <siftfast/siftfast.h>
 
 using namespace std;
@@ -45,7 +45,6 @@ class SiftNode
     ros::ServiceServer _srvDetect;
     Subscriber _subInfo;
     Publisher _pubSift;
-    sensor_msgs::CvBridge _bridge, _bridgefloat;
     posedetection_msgs::ImageFeature0D sift_msg;
     bool _bInfoInitialized;
 public:
@@ -85,17 +84,17 @@ public:
     bool Detect(posedetection_msgs::Feature0D& features, const sensor_msgs::Image& imagemsg)
     {
         boost::mutex::scoped_lock lock(_mutex);
-        IplImage *frame = NULL;
         Image imagesift = NULL;
         try {
-            if (!_bridge.fromImage(imagemsg, "bgr8"))
+            cv_bridge::CvImagePtr frame, framefloat;
+            if (!(frame = cv_bridge::toCvCopy(imagemsg, "bgr8")) )
                 return false;
-            frame = _bridge.toIpl();
+            //frame = _bridge.toIpl();
             //frame = _bridge.imgMsgToCv(msg_ptr, "bgr8");
 
-            if (!_bridgefloat.fromImage(imagemsg, "mono8"))
+            if (!(framefloat = cv_bridge::toCvCopy(imagemsg, "mono8")) )
                 return false;
-            IplImage* framefloat = _bridgefloat.toIpl();
+            //IplImage* framefloat = _bridgefloat.toIpl();
             //IplImage* framefloat = _bridgefloat.imgMsgToCv(msg_ptr,"mono8");
             if( imagesift != NULL && (imagesift->cols!=imagemsg.width || imagesift->rows!=imagemsg.height)  ) {
                 ROS_INFO("clear sift resources");
@@ -107,14 +106,14 @@ public:
                 imagesift = CreateImage(imagemsg.height,imagemsg.width);
 
             for(int i = 0; i < imagemsg.height; ++i) {
-                uint8_t* psrc = (uint8_t*)framefloat->imageData+framefloat->widthStep*i;
+                uint8_t* psrc = (uint8_t*)framefloat->image.data+framefloat->image.step*i;
                 float* pdst = imagesift->pixels+i*imagesift->stride;
                 for(int j = 0; j < imagemsg.width; ++j)
                     pdst[j] = (float)psrc[j]*(1.0f/255.0f);
                 //memcpy(imagesift->pixels+i*imagesift->stride,framefloat->imageData+framefloat->widthStep*i,imagemsg.width*sizeof(float));
             }
         }
-        catch (sensor_msgs::CvBridgeException error) {
+        catch (cv_bridge::Exception error) {
             ROS_WARN("bad frame");
             return false;
         }

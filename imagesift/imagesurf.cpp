@@ -34,7 +34,7 @@
 #include <cstdio>
 #include <vector>
 
-#include <cv_bridge/CvBridge.h>
+#include <cv_bridge/cv_bridge.h>
 
 using namespace std;
 using namespace ros;
@@ -48,7 +48,6 @@ class SurfNode
     ros::ServiceServer _srvDetect;
     Subscriber _subInfo;
     Publisher _pubSurf;
-    sensor_msgs::CvBridge _bridge, _bridgefloat;
     posedetection_msgs::ImageFeature0D surf_msg;
     bool _bInfoInitialized;
 
@@ -92,15 +91,14 @@ public:
     bool Detect(posedetection_msgs::Feature0D& features, const sensor_msgs::Image& imagemsg)
     {
         boost::mutex::scoped_lock lock(_mutex);
-        IplImage *frame;
         cv::Mat grayImage;
         try {
-          if (!_bridge.fromImage(imagemsg, "mono8"))
+          cv_bridge::CvImagePtr frame;
+          if (!(frame = cv_bridge::toCvCopy(imagemsg, "mono8")) )
             return false;
-          frame = _bridge.toIpl();
-          grayImage = cv::Mat(frame).clone();
+          grayImage = frame->image;
         }
-        catch (sensor_msgs::CvBridgeException error) {
+        catch (cv_bridge::Exception error) {
             ROS_WARN("bad frame");
             return false;
         }

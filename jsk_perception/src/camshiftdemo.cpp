@@ -9,7 +9,7 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/fill_image.h>
 #include <image_transport/image_transport.h>
-#include <cv_bridge/CvBridge.h>
+#include <cv_bridge/cv_bridge.h>
 
 #include <opencv2/video/tracking.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -28,7 +28,6 @@ protected:
   image_transport::ImageTransport it_;
   image_transport::Subscriber sub_;
   image_transport::Publisher pub_, pub_hist_;
-  sensor_msgs::CvBridge bridge_;
   sensor_msgs::Image img_;
   ros::Subscriber sub_rectangle_;
   ros::Publisher pub_result_;
@@ -141,13 +140,15 @@ public:
 
   void imageCB(const sensor_msgs::ImageConstPtr& msg_ptr)
   {
+    cv_bridge::CvImagePtr cv_ptr;
     Mat frame;
 
     try
       {
-        frame = bridge_.imgMsgToCv(msg_ptr, "bgr8");
+        cv_ptr = cv_bridge::toCvCopy(msg_ptr, "bgr8");
+        frame = cv_ptr->image;
       }
-    catch (sensor_msgs::CvBridgeException error)
+    catch (cv_bridge::Exception error)
       {
         ROS_ERROR("error");
       }

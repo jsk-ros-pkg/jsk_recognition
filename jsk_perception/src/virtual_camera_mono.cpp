@@ -5,7 +5,7 @@
 #include <tf/transform_broadcaster.h>
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
-#include <cv_bridge/CvBridge.h>
+#include <cv_bridge/cv_bridge.h>
 
 #include <vector>
 
@@ -19,7 +19,6 @@ class VirtualCameraMono
   image_transport::CameraSubscriber sub_;
   image_transport::CameraPublisher pub_;
   tf::TransformListener tf_listener_;
-  sensor_msgs::CvBridge bridge_;
   image_geometry::PinholeCameraModel cam_model_;
   tf::TransformBroadcaster tf_broadcaster_;
   ros::Subscriber sub_trans_, sub_poly_;
@@ -60,11 +59,13 @@ public:
     if(pub_.getNumSubscribers() == 0)
       return;
 
-    IplImage* image = NULL;
+    cv_bridge::CvImagePtr cv_ptr;
+    cv::Mat image;
     try {
-      image = bridge_.imgMsgToCv(image_msg, "bgr8");
+      cv_ptr = cv_bridge::toCvCopy(image_msg, "bgr8");
+      image = cv_ptr->image;
     }
-    catch (sensor_msgs::CvBridgeException& ex) {
+    catch (cv_bridge::Exception& ex) {
       ROS_ERROR("[virtual_camera_mono] Failed to convert image");
       return;
     }
@@ -76,12 +77,15 @@ public:
 
     //
     ROS_INFO("transform image.");
-    IplImage *outimage = cvCloneImage(image); // need to release
+    //IplImage *outimage = cvCloneImage(image); // need to release
+    cv::Mat outimage = image.clone();
     if (TransformImage(image, outimage, trans_, poly_, cam_model_)) {
       //
       ROS_INFO("publish image and transform.");
       sensor_msgs::CameraInfo virtual_info = *info_msg;
-      sensor_msgs::Image::Ptr img_msg = bridge_.cvToImgMsg(outimage, "bgr8");
+      //sensor_msgs::Image::Ptr img_msg = bridge_.cvToImgMsg(outimage, "bgr8");
+      cv_ptr->image = outimage;
+      sensor_msgs::Image::Ptr img_msg = cv_ptr->toImageMsg();
       img_msg->header.stamp = trans_.stamp_;
       virtual_info.header.stamp = trans_.stamp_;
       img_msg->header.frame_id = trans_.child_frame_id_;
@@ -90,7 +94,7 @@ public:
     }
 
     // finalize
-    cvReleaseImage(&outimage);
+    //cvReleaseImage(&outimage);
   }
 
   // subscribe target polygon
@@ -107,7 +111,7 @@ public:
   }
 
   // poly is plane only
-  bool TransformImage(IplImage* src, IplImage* dest,
+  bool TransformImage(cv::Mat src, cv::Mat dest,
 		      tf::StampedTransform& trans, geometry_msgs::PolygonStamped& poly,
 		      image_geometry::PinholeCameraModel& cam_model_)
   {
@@ -144,13 +148,18 @@ public:
 
       CvMat* map_matrix = cvCreateMat (3, 3, CV_32FC1);
       cvGetPerspectiveTransform (src_pnt, dst_pnt, map_matrix);
+      cv::Mat map_matrix2(map_matrix);
+      
 
       // unrectified?
-      IplImage* rectified = cvCloneImage(src);
-      cv::Mat from_mat = cv::Mat(src), to_mat = cv::Mat(rectified);
-      cam_model_.rectifyImage(from_mat,to_mat);
-      cvWarpPerspective (rectified, dest, map_matrix, CV_INTER_LINEAR + CV_WARP_FILL_OUTLIERS, cvScalarAll (0));
-      cvReleaseImage(&rectified);
+      //IplImage* rectified = cvCloneImage(src);
+      //cv::Mat from_mat = cv::Mat(src), to_mat = cv::Mat(rectified);
+      //cam_model_.rectifyImage(from_mat,to_mat);
+      //cvWarpPerspective (rectified, dest, map_matrix, CV_INTER_LINEAR + CV_WARP_FILL_OUTLIERS, cvScalarAll (0));
+      cv::Mat to_mat = src.clone();
+      cam_model_.rectifyImage(src, to_mat);
+      cv::warpPerspective (src, dest, map_matrix2, dest.size(), cv::INTER_LINEAR);
+      //cvReleaseImage(&rectified);
     } catch ( std::runtime_error e ) {
       // ROS_ERROR("%s",e.what());
       return false;

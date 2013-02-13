@@ -140,9 +140,9 @@ public:
 			      target_poly_translated[i].y(),
 			      target_poly_translated[i].z());
 	cv::Point2d uv,uv_trans;
-	cam_model_.project3dToPixel(xyz,uv);
+	uv = cam_model_.project3dToPixel(xyz);
 	src_pnt[i] = cvPoint2D32f (uv.x, uv.y);
-	cam_model_.project3dToPixel(xyz_trans,uv_trans);
+	uv_trans = cam_model_.project3dToPixel(xyz_trans);
 	dst_pnt[i] = cvPoint2D32f (uv_trans.x, uv_trans.y);
       }
 

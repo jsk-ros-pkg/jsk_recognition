@@ -52,8 +52,8 @@ void jsk_pcl_ros::DepthImageCreator::onInit () {
              trans_quat[0], trans_quat[1],
              trans_quat[2], trans_quat[3]);
   }
-  btQuaternion btq(trans_quat[0], trans_quat[1], trans_quat[2], trans_quat[3]);
-  btVector3 btp(trans_pos[0], trans_pos[1], trans_pos[2]);
+  tf::Quaternion btq(trans_quat[0], trans_quat[1], trans_quat[2], trans_quat[3]);
+  tf::Vector3 btp(trans_pos[0], trans_pos[1], trans_pos[2]);
   fixed_transform.setOrigin(btp);
   fixed_transform.setRotation(btq);
 

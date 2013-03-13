@@ -44,7 +44,7 @@
            (let ((cds (send *tfl* :lookup-transform
                             *transform-points* (send (get pts :header) :frame_id)
                             (send (get pts :header) :stamp))))
-             ;;(setf (get pts :transcoords) cds)
+             (setf (get pts :transcoords) cds)
              (send pts :transform-points cds)
              ))
          (setq lastpts pts)))
@@ -57,3 +57,9 @@
   (exit))
 
 (ros-spin)
+
+;;
+;; (setq *lst* (remove-if #'(lambda (x) (null (get x :transcoords))) *lst*))
+;; (setq slst (send-all *lst* :step 2 :create t))
+;; (send-all slst :filter :key #'(lambda (p) (not (c-isnan (elt p 0)))))
+;;

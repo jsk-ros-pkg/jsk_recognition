@@ -18,7 +18,6 @@
 #include <stereo_msgs/DisparityImage.h>
 
 #include <opencv2/opencv.hpp>
-#include <cv_bridge/cv_bridge.h>
 
 #include <std_srvs/Empty.h>
 #include <boost/thread/mutex.hpp>

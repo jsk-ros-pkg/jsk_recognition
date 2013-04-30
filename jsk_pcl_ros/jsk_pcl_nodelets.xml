@@ -3,21 +3,21 @@
   <class name="jsk_pcl/RGBColorFilter" type="RGBColorFilter"
          base_class_type="nodelet::Nodelet">
     <description>
-      hoga hoga
+      filter using RGB color scale
     </description>
   </class>
 
   <class name="jsk_pcl/HSVColorFilter" type="HSVColorFilter"
          base_class_type="nodelet::Nodelet">
     <description>
-      hoga hoga
+      filter using HSV color scale
     </description>
   </class>
 
   <class name="jsk_pcl/DelayPointCloud" type="DelayPointCloud"
          base_class_type="nodelet::Nodelet">
     <description>
-      hoge hoge
+      delay point cloud
     </description>
   </class>
 

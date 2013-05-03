@@ -44,4 +44,11 @@
     </description>
   </class>
 
+  <class name="jsk_pcl/EuclideanClustering" type="pcl_ros::EuclideanClustering"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Clustering based on Euclidean distance
+    </description>
+  </class>
+
 </library>

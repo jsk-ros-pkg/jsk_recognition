@@ -35,7 +35,9 @@ rosbuild_add_library (jsk_pcl_ros
 #  src/color_converter_nodelet.cpp
   src/delay_pointcloud_nodelet.cpp
   src/depth_image_creator_nodelet.cpp
-  src/pointcloud_screenpoint_nodelet.cpp)
+  src/pointcloud_screenpoint_nodelet.cpp
+  src/euclidean_cluster_extraction_nodelet.cpp
+)
 
 rosbuild_add_compile_flags (jsk_pcl_ros ${SSE_FLAGS})
 rosbuild_link_boost (jsk_pcl_ros system)
@@ -48,7 +50,8 @@ rosbuild_genmsg()
 rosbuild_gensrv()
 
 rosbuild_add_executable(pointcloud_screenpoint src/pointcloud_screenpoint.cpp)
-
+rosbuild_add_executable(depth_image_creator src/depth_image_creator.cpp)
+rosbuild_add_executable(euclidean_cluster_extraction src/euclidean_cluster_extraction.cpp)
 # roslaunch documentation
 rosbuild_find_ros_package("jsk_tools")
 execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} python ${jsk_tools_PACKAGE_PATH}/bin/launchdoc-generator.py ${PROJECT_NAME} --output_dir=./build --nomakefile RESULT_VARIABLE _make_failed)

@@ -7,12 +7,12 @@
 #include <pcl/filters/extract_indices.h>
 
 #include <pcl_ros/pcl_nodelet.h>
-#include <pcl_ros/filters/filter.h>
 #include <pluginlib/class_list_macros.h>
+#include "jsk_pcl_ros/filter.h"
 
 namespace jsk_pcl_ros
 {
-  class ResizePointsPublisher : public pcl_ros::Filter
+  class ResizePointsPublisher : public jsk_pcl_ros::Filter
   {
   private:
     int step_x_, step_y_;
@@ -20,7 +20,7 @@ namespace jsk_pcl_ros
 
     void onInit () {
       NODELET_INFO("[%s::onInit]", getName().c_str());
-      pcl_ros::Filter::onInit();
+      jsk_pcl_ros::Filter::onInit();
 
       pnh_->param("step_x", step_x_, 2);
       ROS_INFO("step_x : %d", step_x_);

@@ -1,6 +1,6 @@
 if(NOT $ENV{ROS_DISTRO} STREQUAL "fuerte")
-  include(catkin.cmake)
-  return()
+#  include(catkin.cmake)
+#  return()
 endif()
 cmake_minimum_required(VERSION 2.4.6)
 include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
@@ -29,11 +29,12 @@ rosbuild_find_ros_package (pcl_ros)
 
 rosbuild_add_library (jsk_pcl_ros
 #  ${pcl_ros_PACKAGE_PATH}/src/pcl_ros/features/feature.cpp
+  src/filter.cpp # copy from pcl_ros https://github.com/ros-perception/perception_pcl/issues/9
   src/color_filter_nodelet.cpp
+  src/resize_points_publisher.cpp
 #  src/color_converter_nodelet.cpp
   src/delay_pointcloud_nodelet.cpp
   src/depth_image_creator_nodelet.cpp
-  src/resize_points_publisher.cpp
   src/pointcloud_screenpoint_nodelet.cpp)
 
 rosbuild_add_compile_flags (jsk_pcl_ros ${SSE_FLAGS})

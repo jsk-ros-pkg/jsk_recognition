@@ -1,7 +1,7 @@
 #include <pluginlib/class_list_macros.h>
 #include "jsk_pcl_ros/color_filter_nodelet.h"
 
-namespace pcl_ros
+namespace jsk_pcl_ros
 {
   void RGBColorFilter::config_callback (Config &config, uint32_t level)
   {
@@ -57,8 +57,8 @@ namespace pcl_ros
   }
 }
 
-typedef pcl_ros::RGBColorFilter RGBColorFilter;
-typedef pcl_ros::HSVColorFilter HSVColorFilter;
+typedef jsk_pcl_ros::RGBColorFilter RGBColorFilter;
+typedef jsk_pcl_ros::HSVColorFilter HSVColorFilter;
 
 PLUGINLIB_DECLARE_CLASS (jsk_pcl, RGBColorFilter, RGBColorFilter, nodelet::Nodelet);
 PLUGINLIB_DECLARE_CLASS (jsk_pcl, HSVColorFilter, HSVColorFilter, nodelet::Nodelet);

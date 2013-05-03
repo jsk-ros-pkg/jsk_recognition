@@ -5,12 +5,12 @@
 // PCL includes
 #include "jsk_pcl_ros/color_filter.h"
 
-#include <pcl_ros/filters/filter.h>
+#include "jsk_pcl_ros/filter.h"
 
 #include "jsk_pcl_ros/RGBColorFilterConfig.h"
 #include "jsk_pcl_ros/HSVColorFilterConfig.h"
 
-namespace pcl_ros
+namespace jsk_pcl_ros
 {
   class RGBColorFilter : public Filter
   {

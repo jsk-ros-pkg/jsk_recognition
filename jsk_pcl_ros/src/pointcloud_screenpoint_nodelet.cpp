@@ -18,10 +18,11 @@ void jsk_pcl_ros::PointcloudScreenpoint::onInit()
   pnh_->param ("crop_size", crop_size_, 10);
   pnh_->param ("search_size", k_, 16);
 
-  bool use_rect, use_point;
+  bool use_rect, use_point, use_sync;
 
   pnh_->param ("use_rect", use_rect, false);
   pnh_->param ("use_point", use_point, false);
+  pnh_->param ("use_sync", use_sync, false);
 
   pnh_->param("publish_points", publish_points_, false);
   pnh_->param("publish_point", publish_point_, false);
@@ -30,16 +31,24 @@ void jsk_pcl_ros::PointcloudScreenpoint::onInit()
 
   if (use_rect) {
     rect_sub_.subscribe   (*pnh_, "rect", queue_size_);
-    sync_a_polygon_ = boost::make_shared < message_filters::Synchronizer< PolygonApproxSyncPolicy > > (queue_size_);
-    sync_a_polygon_->connectInput (points_sub_, rect_sub_);
-    sync_a_polygon_->registerCallback (boost::bind (&PointcloudScreenpoint::callback_polygon, this, _1, _2));
+    if (use_sync) {
+      sync_a_polygon_ = boost::make_shared < message_filters::Synchronizer< PolygonApproxSyncPolicy > > (queue_size_);
+      sync_a_polygon_->connectInput (points_sub_, rect_sub_);
+      sync_a_polygon_->registerCallback (boost::bind (&PointcloudScreenpoint::callback_polygon, this, _1, _2));
+    } else {
+      rect_sub_.registerCallback (boost::bind (&PointcloudScreenpoint::rect_cb, this, _1));
+    }
   }
 
   if (use_point) {
     point_sub_.subscribe  (*pnh_, "point", queue_size_);
-    sync_a_point_ = boost::make_shared < message_filters::Synchronizer< PointApproxSyncPolicy > > (queue_size_);
-    sync_a_point_->connectInput (points_sub_, point_sub_);
-    sync_a_point_->registerCallback (boost::bind (&PointcloudScreenpoint::callback_point, this, _1, _2));
+    if (use_sync) {
+      sync_a_point_ = boost::make_shared < message_filters::Synchronizer< PointApproxSyncPolicy > > (queue_size_);
+      sync_a_point_->connectInput (points_sub_, point_sub_);
+      sync_a_point_->registerCallback (boost::bind (&PointcloudScreenpoint::callback_point, this, _1, _2));
+    } else {
+      point_sub_.registerCallback (boost::bind (&PointcloudScreenpoint::point_cb, this, _1));
+    }
   }
 
   points_sub_.registerCallback (boost::bind (&PointcloudScreenpoint::points_cb, this, _1));
@@ -217,8 +226,7 @@ void jsk_pcl_ros::PointcloudScreenpoint::extract_rect (const sensor_msgs::PointC
   pub_points_.publish (pt);
 }
 
-void jsk_pcl_ros::PointcloudScreenpoint::callback_point (const sensor_msgs::PointCloud2ConstPtr& points_ptr,
-                                                         const geometry_msgs::PointStampedConstPtr& pt_ptr) {
+void jsk_pcl_ros::PointcloudScreenpoint::point_cb (const geometry_msgs::PointStampedConstPtr& pt_ptr) {
   if (publish_point_) {
     geometry_msgs::PointStamped ps;
     bool ret; float rx, ry, rz;
@@ -226,10 +234,15 @@ void jsk_pcl_ros::PointcloudScreenpoint::callback_point (const sensor_msgs::Poin
 
     if (ret) {
       ps.point.x = rx; ps.point.y = ry; ps.point.z = rz;
-      ps.header = points_ptr->header;
+      ps.header = header_;
       pub_point_.publish (ps);
     }
   }
+}
+
+void jsk_pcl_ros::PointcloudScreenpoint::callback_point (const sensor_msgs::PointCloud2ConstPtr& points_ptr,
+                                                         const geometry_msgs::PointStampedConstPtr& pt_ptr) {
+  point_cb (pt_ptr);
 
   if (publish_points_) {
     int st_x = pt_ptr->point.x - crop_size_;
@@ -241,6 +254,26 @@ void jsk_pcl_ros::PointcloudScreenpoint::callback_point (const sensor_msgs::Poin
   }
 }
 
+void jsk_pcl_ros::PointcloudScreenpoint::rect_cb (const geometry_msgs::PolygonStampedConstPtr& array_ptr) {
+  if (array_ptr->polygon.points.size() > 1) {
+    int st_x = array_ptr->polygon.points[0].x;
+    int st_y = array_ptr->polygon.points[0].y;
+    int ed_x = array_ptr->polygon.points[1].x;
+    int ed_y = array_ptr->polygon.points[1].y;
+    if (publish_point_) {
+      geometry_msgs::PointStamped ps;
+      bool ret; float rx, ry, rz;
+      ret = extract_point (pts, (st_x + ed_x) / 2, (st_y + ed_y) / 2, rx, ry, rz);
+
+      if (ret) {
+        ps.point.x = rx; ps.point.y = ry; ps.point.z = rz;
+        ps.header = header_;
+        pub_point_.publish (ps);
+      }
+    }
+  }
+}
+
 void jsk_pcl_ros::PointcloudScreenpoint::callback_polygon(const sensor_msgs::PointCloud2ConstPtr& points_ptr,
                                                           const geometry_msgs::PolygonStampedConstPtr& array_ptr) {
   if (array_ptr->polygon.points.size() > 1) {
@@ -249,17 +282,7 @@ void jsk_pcl_ros::PointcloudScreenpoint::callback_polygon(const sensor_msgs::Poi
     int ed_x = array_ptr->polygon.points[1].x;
     int ed_y = array_ptr->polygon.points[1].y;
 
-    if (publish_point_) {
-      geometry_msgs::PointStamped ps;
-      bool ret; float rx, ry, rz;
-      ret = extract_point (pts, (st_x + ed_x) / 2, (st_y + ed_x) / 2, rx, ry, rz);
-
-      if (ret) {
-        ps.point.x = rx; ps.point.y = ry; ps.point.z = rz;
-        ps.header = points_ptr->header;
-        pub_point_.publish (ps);
-      }
-    }
+    rect_cb (array_ptr);
 
     if (publish_points_) {
       extract_rect (points_ptr, st_x, st_y, ed_x, ed_y);

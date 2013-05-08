@@ -5,9 +5,11 @@
   <arg name="image_type" default="image_rect_color"/>
   <arg name="camera_info" default="$(arg image)/camera_info"/>
   <arg name="points" default="/openni/depth_registered/points"/>
-  <arg name="USE_VIEW" default="false" />
   <arg name="LAUNCH_OPENNI" default="false" />
   <arg name="USE_DEPTH_CREATER" default="true" />
+  <arg name="USE_VIEW" default="false" />
+  <arg name="USE_SYNC" default="false" />
+  <arg name="PUBLISH_POINTS" default="false" />
 
   <arg unless="$(arg USE_DEPTH_CREATER)"
        name="inpoints" value="$(arg points)" />
@@ -78,9 +80,10 @@
       search_size: 16
       use_rect: false
       use_point: true
-      publish_points: true
       publish_point: true
     </rosparam>
+    <param name="use_sync" value="$(arg USE_SYNC)" />
+    <param name="publish_points" value="$(arg PUBLISH_POINTS)" />
   </node>
   </group>
 

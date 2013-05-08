@@ -65,8 +65,10 @@ namespace jsk_pcl_ros
                         float &resx, float &resy, float &resz);
     void extract_rect (const sensor_msgs::PointCloud2ConstPtr& points_ptr,
                        int st_x, int st_y, int ed_x, int ed_y);
+    void point_cb (const geometry_msgs::PointStampedConstPtr& pt_ptr);
     void callback_point (const sensor_msgs::PointCloud2ConstPtr& points_ptr,
                          const geometry_msgs::PointStampedConstPtr& pt_ptr);
+    void rect_cb (const geometry_msgs::PolygonStampedConstPtr& array_ptr);
     void callback_polygon(const sensor_msgs::PointCloud2ConstPtr& points_ptr,
                           const geometry_msgs::PolygonStampedConstPtr& array_ptr);
     boost::mutex mutex_callback_;

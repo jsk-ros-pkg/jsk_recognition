@@ -6,13 +6,54 @@
 void jsk_pcl_ros::PointcloudScreenpoint::onInit()
 {
   NODELET_INFO("[%s::onInit]", getName().c_str());
-  PCLNodelet::onInit();
-  
-  sub_ = pnh_->subscribe("points", 1, &PointcloudScreenpoint::points_cb, this);
+
+  //pnh_.reset (new ros::NodeHandle (getMTPrivateNodeHandle ()));
+  pnh_.reset (new ros::NodeHandle (getPrivateNodeHandle ()));
+
+  queue_size_ = 1;
+  crop_size_ = 10;
+  k_ = 16; // todo : this value should be set from parameter.
+
+  pnh_->param ("queue_size", queue_size_, 1);
+  pnh_->param ("crop_size", crop_size_, 10);
+  pnh_->param ("search_size", k_, 16);
+
+  bool use_rect, use_point;
+
+  pnh_->param ("use_rect", use_rect, false);
+  pnh_->param ("use_point", use_point, false);
+
+  pnh_->param("publish_points", publish_points_, false);
+  pnh_->param("publish_point", publish_point_, false);
+
+  points_sub_.subscribe (*pnh_, "points", queue_size_);
+
+  if (use_rect) {
+    rect_sub_.subscribe   (*pnh_, "rect", queue_size_);
+    sync_a_polygon_ = boost::make_shared < message_filters::Synchronizer< PolygonApproxSyncPolicy > > (queue_size_);
+    sync_a_polygon_->connectInput (points_sub_, rect_sub_);
+    sync_a_polygon_->registerCallback (boost::bind (&PointcloudScreenpoint::callback_polygon, this, _1, _2));
+  }
+
+  if (use_point) {
+    point_sub_.subscribe  (*pnh_, "point", queue_size_);
+    sync_a_point_ = boost::make_shared < message_filters::Synchronizer< PointApproxSyncPolicy > > (queue_size_);
+    sync_a_point_->connectInput (points_sub_, point_sub_);
+    sync_a_point_->registerCallback (boost::bind (&PointcloudScreenpoint::callback_point, this, _1, _2));
+  }
+
+  points_sub_.registerCallback (boost::bind (&PointcloudScreenpoint::points_cb, this, _1));
+
   srv_ = pnh_->advertiseService("screen_to_point", &PointcloudScreenpoint::screenpoint_cb, this);
-  
-  int k_ = 16; // todo : this value should be set from parameter.
-  
+
+  if (publish_point_) {
+    pub_point_ = pnh_->advertise< geometry_msgs::PointStamped > ("output_point", 1);
+  }
+
+  if (publish_points_) {
+    pub_points_ = pnh_->advertise< sensor_msgs::PointCloud2 > ("output", 1);
+  }
+
 #if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
   normals_tree_ = boost::make_shared< pcl::search::KdTree<pcl::PointXYZ> > ();
 #else
@@ -22,8 +63,61 @@ void jsk_pcl_ros::PointcloudScreenpoint::onInit()
   n3d_.setSearchMethod (normals_tree_);
 }
 
+bool jsk_pcl_ros::PointcloudScreenpoint::checkpoint (pcl::PointCloud< pcl::PointXYZ > &in_pts, int x, int y,
+                                                     float &resx, float &resy, float &resz)  {
+  if ((x < 0) || (y < 0) || (x >= in_pts.width) || (y >= in_pts.height)) return false;
+  pcl::PointXYZ p = in_pts.points[in_pts.width * y + x];
+  // search near points
+  ROS_INFO_STREAM("Request: screenpoint ("<<x<<","<<y<<")="<<"(" << p.x << ", " <<p.y << ", " <<p.z <<")");
+  //return !(isnan (p.x) || ( (p.x == 0.0) && (p.y == 0.0) && (p.z == 0.0)));
+
+  if ( !isnan (p.x) && ((p.x != 0.0) || (p.y != 0.0) || (p.z == 0.0)) ) {
+    resx = p.x; resy = p.y; resz = p.z;
+    return true;
+  }
+  return false;
+}
+
+bool jsk_pcl_ros::PointcloudScreenpoint::extract_point (pcl::PointCloud< pcl::PointXYZ > &in_pts, int reqx, int reqy,
+                                                        float &resx, float &resy, float &resz) {
+  int x, y;
+
+  x = reqx < 0.0 ? ceil(reqx - 0.5) : floor(reqx + 0.5);
+  y = reqy < 0.0 ? ceil(reqy - 0.5) : floor(reqy + 0.5);
+  ROS_WARN("Request : %d %d", x, y);
+
+  if (checkpoint (in_pts, x, y, resx, resy, resz)) {
+    return true;
+  } else {
+    for (int n = 1; n < crop_size_; n++) {
+      for (int y2 = 0; y2 <= n; y2++) {
+        int x2 = n - y2;
+        if (checkpoint (in_pts, x + x2, y + y2, resx, resy, resz)) {
+          return true;
+        }
+        if (x2 != 0 && y2 != 0) {
+          if (checkpoint (in_pts, x - x2, y - y2, resx, resy, resz)) {
+            return true;
+          }
+        }
+        if (x2 != 0) {
+          if (checkpoint (in_pts, x - x2, y + y2, resx, resy, resz)) {
+            return true;
+          }
+        }
+        if (y2 != 0) {
+          if (checkpoint (in_pts, x + x2, y - y2, resx, resy, resz)) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+  return false;
+}
+
 bool jsk_pcl_ros::PointcloudScreenpoint::screenpoint_cb (jsk_pcl_ros::TransformScreenpoint::Request &req,
-							 jsk_pcl_ros::TransformScreenpoint::Response &res)
+                                                         jsk_pcl_ros::TransformScreenpoint::Response &res)
 {
   ROS_DEBUG("PointcloudScreenpoint::screenpoint_cb");
   boost::mutex::scoped_lock lock(this->mutex_callback_);
@@ -31,43 +125,19 @@ bool jsk_pcl_ros::PointcloudScreenpoint::screenpoint_cb (jsk_pcl_ros::TransformS
     ROS_ERROR("no point cloud was received");
     return false;
   }
-  int x, y;
-  res.header = header_;
-  x = req.x < 0.0 ? ceil(req.x - 0.5) : floor(req.x + 0.5);
-  y = req.y < 0.0 ? ceil(req.y - 0.5) : floor(req.y + 0.5);
-  ROS_WARN("Request : %d %d", x, y);
 
-  pcl::PointXYZ p = pts.points[pts.width*y + x];
-  ROS_INFO_STREAM("Request: screenpoint ("<<x<<","<<y<<")="<<"(" << p.x << ", " <<p.y << ", " <<p.z <<")");
-  if ( isnan(p.x) || ( (p.x == 0.0) && (p.y == 0.0) && (p.z == 0.0)) ) {
-    // try
-    {
-      bool point_found = false; int radius=10, step_size = 1;
-      for (int y2=y-radius; y2<=y+radius; y2+=step_size)
-	{
-	  for (int x2=x-radius; x2<=x+radius; x2+=step_size)
-	    {
-	      pcl::PointXYZ p2 = pts.points[pts.width*y2 + x2];
-	      ROS_INFO_STREAM("Request: lookfor new screenpoint ("<<x2<<","<<y2<<")="<<"(" << p2.x << ", " <<p2.y << ", " <<p2.z <<")");
-	      if ( isnan(p2.x) || ( (p2.x == 0.0) && (p2.y == 0.0) && (p2.z == 0.0)) ) {
-		continue;
-	      }
-	      res.point.x = p2.x;
-	      res.point.y = p2.y;
-	      res.point.z = p2.z;
-	      point_found = true;
-	      break;
-	    }
-	  if(point_found) break;
-	}
-      if(!point_found)  return false;
-    }
-  } else {
-    res.point.x = p.x;
-    res.point.y = p.y;
-    res.point.z = p.z;
+  res.header = header_;
+
+  bool ret;
+  float rx, ry, rz;
+  ret = extract_point (pts, req.x, req.y, rx, ry, rz);
+  res.point.x = rx; res.point.y = ry; res.point.z = rz;
+
+  if (!ret) {
+    return false;
   }
 
+  // search normal
   n3d_.setSearchSurface(boost::make_shared<pcl::PointCloud<pcl::PointXYZ > > (pts));
 
   pcl::PointCloud<pcl::PointXYZ> cloud_;
@@ -86,20 +156,115 @@ bool jsk_pcl_ros::PointcloudScreenpoint::screenpoint_cb (jsk_pcl_ros::TransformS
   res.vector.y = cloud_normals.points[0].normal_y;
   res.vector.z = cloud_normals.points[0].normal_z;
 
-  if((res.point.x * res.vector.x + res.point.y * res.vector.y + res.point.z * res.vector.z) < 0)
-    {
-      res.vector.x *= -1;
-      res.vector.y *= -1;
-      res.vector.z *= -1;
-    }
+  if((res.point.x * res.vector.x + res.point.y * res.vector.y + res.point.z * res.vector.z) < 0) {
+    res.vector.x *= -1;
+    res.vector.y *= -1;
+    res.vector.z *= -1;
+  }
+
+  if (publish_point_) {
+    geometry_msgs::PointStamped ps;
+    ps.header = header_;
+    ps.point.x = res.point.x;
+    ps.point.y = res.point.y;
+    ps.point.z = res.point.z;
+    pub_point_.publish(ps);
+  }
+
   return true;
 }
 
 void jsk_pcl_ros::PointcloudScreenpoint::points_cb(const sensor_msgs::PointCloud2ConstPtr &msg) {
-  ROS_DEBUG("PointcloudScreenpoint::points_cb");
-  boost::mutex::scoped_lock lock(this->mutex_callback_);
+  //ROS_DEBUG("PointcloudScreenpoint::points_cb");
+  //boost::mutex::scoped_lock lock(this->mutex_callback_);
   header_ = msg->header;
   pcl::fromROSMsg (*msg, pts);
+}
+
+void jsk_pcl_ros::PointcloudScreenpoint::extract_rect (const sensor_msgs::PointCloud2ConstPtr& points_ptr,
+                                                       int st_x, int st_y, int ed_x, int ed_y) {
+  if ( st_x < 0 ) st_x = 0;
+  if ( st_y < 0 ) st_y = 0;
+  if ( ed_x >= points_ptr->width ) ed_x = points_ptr->width -1;
+  if ( ed_y >= points_ptr->height ) ed_y = points_ptr->height -1;
+
+  int wd = points_ptr->width;
+  int ht = points_ptr->height;
+  int rstep = points_ptr->row_step;
+  int pstep = points_ptr->point_step;
+
+  sensor_msgs::PointCloud2 pt;
+  pt.header = points_ptr->header;
+  pt.width = ed_x - st_x + 1;
+  pt.height = ed_y - st_y + 1;
+  pt.row_step = pt.width * pstep;
+  pt.point_step = pstep;
+  pt.is_bigendian = false;
+  pt.fields = points_ptr->fields;
+  pt.is_dense = false;
+  pt.data.resize(pt.row_step * pt.height);
+
+  unsigned char * dst_ptr = &(pt.data[0]);
+
+  for (size_t idx_y = st_y; idx_y <= ed_y; idx_y++) {
+    for (size_t idx_x = st_x; idx_x <= ed_x; idx_x++) {
+      const unsigned char * src_ptr = &(points_ptr->data[idx_y * rstep + idx_x * pstep]);
+      memcpy(dst_ptr, src_ptr, pstep);
+      dst_ptr += pstep;
+    }
+  }
+
+  pub_points_.publish (pt);
+}
+
+void jsk_pcl_ros::PointcloudScreenpoint::callback_point (const sensor_msgs::PointCloud2ConstPtr& points_ptr,
+                                                         const geometry_msgs::PointStampedConstPtr& pt_ptr) {
+  if (publish_point_) {
+    geometry_msgs::PointStamped ps;
+    bool ret; float rx, ry, rz;
+    ret = extract_point (pts, pt_ptr->point.x, pt_ptr->point.y, rx, ry, rz);
+
+    if (ret) {
+      ps.point.x = rx; ps.point.y = ry; ps.point.z = rz;
+      ps.header = points_ptr->header;
+      pub_point_.publish (ps);
+    }
+  }
+
+  if (publish_points_) {
+    int st_x = pt_ptr->point.x - crop_size_;
+    int st_y = pt_ptr->point.y - crop_size_;
+    int ed_x = pt_ptr->point.x + crop_size_;
+    int ed_y = pt_ptr->point.y + crop_size_;
+
+    extract_rect (points_ptr, st_x, st_y, ed_x, ed_y);
+  }
+}
+
+void jsk_pcl_ros::PointcloudScreenpoint::callback_polygon(const sensor_msgs::PointCloud2ConstPtr& points_ptr,
+                                                          const geometry_msgs::PolygonStampedConstPtr& array_ptr) {
+  if (array_ptr->polygon.points.size() > 1) {
+    int st_x = array_ptr->polygon.points[0].x;
+    int st_y = array_ptr->polygon.points[0].y;
+    int ed_x = array_ptr->polygon.points[1].x;
+    int ed_y = array_ptr->polygon.points[1].y;
+
+    if (publish_point_) {
+      geometry_msgs::PointStamped ps;
+      bool ret; float rx, ry, rz;
+      ret = extract_point (pts, (st_x + ed_x) / 2, (st_y + ed_x) / 2, rx, ry, rz);
+
+      if (ret) {
+        ps.point.x = rx; ps.point.y = ry; ps.point.z = rz;
+        ps.header = points_ptr->header;
+        pub_point_.publish (ps);
+      }
+    }
+
+    if (publish_points_) {
+      extract_rect (points_ptr, st_x, st_y, ed_x, ed_y);
+    }
+  }
 }
 
 typedef jsk_pcl_ros::PointcloudScreenpoint PointcloudScreenpoint;

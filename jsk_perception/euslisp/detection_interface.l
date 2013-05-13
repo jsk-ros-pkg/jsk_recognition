@@ -69,8 +69,10 @@
 
 (defun check-detection (&key (timeout 10) (type nil) (tf-force nil)
                              (diff-position 10.0) (single nil) (speak t)
-                             (marker-life 30) (speak-name))
-  (let ((target-obj (make-cube 60 60 60)))
+                             (marker-life 30) (speak-name)
+                             ((:target-object target-obj) (make-cube 60 60 60)))
+  (let ((tgt-cds (send target-obj :copy-worldcoords)))
+    (send target-obj :reset-coords)
     (setf (get target-obj :type) type)
     (when speak-name
       (send target-obj :speak-name speak-name))
@@ -160,6 +162,8 @@
           (when speak
             (speak-jp (format nil "~a は みつかりませんでした"
                               (send target-obj :speak-name))))
+          (send target-obj :reset-coords)
+          (send target-obj :transform tgt-cds)
           (return-from check-detection nil))
         (unix::usleep (* 50 1000))
         ) ;; while (ros::ok)

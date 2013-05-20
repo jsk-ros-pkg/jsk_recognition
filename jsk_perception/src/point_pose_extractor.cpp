@@ -693,14 +693,22 @@ public:
     // relative pose
     std::vector<double> rv(7);
     std::istringstream iss(_pose_str);
-    for(int i=0; i<7; i++)
+    tf::Transform transform;
+    for(int i=0; i<6; i++)
       iss >> rv[i];
-    tf::Transform transform(tf::Quaternion(rv[3],rv[4],rv[5],rv[6]),
-    			    tf::Vector3(rv[0], rv[1], rv[2]));
 
-    // add the image to template list 
+    if (iss.eof()) { // use rpy expression
+      transform = tf::Transform(tf::createQuaternionFromRPY(rv[3], rv[4], rv[5]),
+                                 tf::Vector3(rv[0], rv[1], rv[2]));
+    } else {  // use quaternion expression
+	  iss >> rv[7];
+      transform = tf::Transform(tf::Quaternion(rv[3], rv[4], rv[5], rv[6]),
+                                 tf::Vector3(rv[0], rv[1], rv[2]));
+    }
+
+    // add the image to template list
     add_new_template(template_img, window_name, transform,
-		     template_width, template_height, _th_step, _phi_step);
+                     template_width, template_height, _th_step, _phi_step);
 
   } // initialize
 

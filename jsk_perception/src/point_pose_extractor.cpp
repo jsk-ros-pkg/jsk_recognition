@@ -491,7 +491,7 @@ public:
       cv::putText (stack_img, text, cv::Point(x, y),
 		   0, text_scale, CV_RGB(0, 255, 0),
 		   2, 8, false);
-
+      ROS_INFO( text.c_str() );
     }
     // for debug window
     if( _window_name != "" )

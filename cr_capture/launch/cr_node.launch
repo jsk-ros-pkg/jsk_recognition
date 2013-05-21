@@ -1,0 +1,30 @@
+<!-- -*- mode: xml -*- -->
+<launch>
+  <node name="cr_capture" pkg="cr_capture" type="cr_capture"
+	output="screen" clear_params="true">
+    <remap from="~left/image" to="wide_stereo/left/image_rect_color"/>
+    <remap from="~left/camera_info" to="wide_stereo/left/camera_info"/>
+    <remap from="~right/image" to="wide_stereo/right/image_rect_color"/>
+    <remap from="~right/camera_info" to="wide_stereo/right/camera_info"/>
+    <remap from="~range" to="range"/>
+    <!--
+    <rosparam command="load" file="$(find cr_capture)/launch/external.yaml"/>
+    -->
+    <param name="max_range" value="5.0"/>
+    <param name="calculation_pixel" value="false"/>
+    <param name="use_filter" value="true"/>
+    <param name="use_images" value="true"/>
+
+    <!-- birateral smooth filter -->
+    <param name="use_smooth" value="true" />
+    <param name="smooth_size" value="6" />
+    <param name="smooth_depth" value="0.01" />
+    <param name="smooth_space" value="6.0" />
+
+    <!-- use short range calibration result-->
+    <param name="short_range" value="true" />
+
+    <param name="intensity_threshold" value="1"/>
+    <param name="confidence_threshold" value="200"/>
+  </node>
+</launch>

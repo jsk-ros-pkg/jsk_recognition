@@ -1,0 +1,174 @@
+Index: src/camera_calibration/calibrator.py
+===================================================================
+--- src/camera_calibration/calibrator.py	(リビジョン 36313)
++++ src/camera_calibration/calibrator.py	(作業コピー)
+@@ -139,7 +139,7 @@
+     """
+     Base class for calibration system
+     """
+-    def __init__(self, boards):
++    def __init__(self, boards, flags=cv.CV_CALIB_FIX_K3):
+         self._boards = boards
+         self.calibrated = False
+         self.br = cv_bridge.CvBridge()
+@@ -147,6 +147,7 @@
+         self.p_maxs = None
+         self.db = {}
+         self.goodenough = False
++        self.calib_flags = flags
+ 
+     def mkgray(self, msg):
+         """
+@@ -244,10 +245,12 @@
+         """ Used by :meth:`as_message`.  Return a CameraInfo message for the given calibration matrices """
+         msg = sensor_msgs.msg.CameraInfo()
+         (msg.width, msg.height) = self.size
+-        msg.distortion_model = "plumb_bob"
++        if d.rows > 5:
++            msg.distortion_model = "rational_polynomial"
++        else:
++            msg.distortion_model = "plumb_bob"
++
+         msg.D = [d[i,0] for i in range(d.rows)]
+-        while len(msg.D)<5:
+-	        msg.D.append(0)
+         msg.K = list(cvmat_iterator(k))
+         msg.R = list(cvmat_iterator(r))
+         msg.P = list(cvmat_iterator(p))
+@@ -280,7 +283,7 @@
+         + " ".join(["%8f" % k[2,i] for i in range(3)]) + "\n"
+         + "\n"
+         + "distortion\n"
+-        + " ".join(["%8f" % d[i,0] for i in range(4)]) + " 0.0000\n"
++        + " ".join(["%8f" % d[i,0] for i in range(d.rows)]) + "\n"
+         + "\n"
+         + "rectification\n"
+         + " ".join(["%8f" % r[0,i] for i in range(3)]) + "\n"
+@@ -414,7 +417,10 @@
+         npts = self.mk_point_counts(boards)
+ 
+         intrinsics = cv.CreateMat(3, 3, cv.CV_64FC1)
+-        distortion = cv.CreateMat(4, 1, cv.CV_64FC1)
++        if (self.calib_flags & cv.CALIB_RATIONAL_MODEL):
++            distortion = cv.CreateMat(8, 1, cv.CV_64FC1)  # rational_polynomial
++        else:
++            distortion = cv.CreateMat(5, 1, cv.CV_64FC1) # plumb_bob
+         cv.SetZero(intrinsics)
+         cv.SetZero(distortion)
+         # focal lengths have 1/1 ratio
+@@ -425,7 +431,7 @@
+                    distortion,
+                    cv.CreateMat(len(good), 3, cv.CV_32FC1),
+                    cv.CreateMat(len(good), 3, cv.CV_32FC1),
+-                   flags = 0) # cv.CV_CALIB_ZERO_TANGENT_DIST)
++                   flags = self.calib_flags)
+         self.intrinsics = intrinsics
+         self.distortion = distortion
+ 
+@@ -485,10 +491,10 @@
+ 
+         self.size = (msg.width, msg.height)
+         self.intrinsics = cv.CreateMat(3, 3, cv.CV_64FC1)
+-        self.distortion = cv.CreateMat(4, 1, cv.CV_64FC1)
++        self.distortion = cv.CreateMat(msg.D.rows, 1, cv.CV_64FC1)
+         self.R = cv.CreateMat(3, 3, cv.CV_64FC1)
+         self.P = cv.CreateMat(3, 4, cv.CV_64FC1)
+-        for i in range(4):
++        for i in range(msg.D.rows):
+             self.distortion[i, 0] = msg.D[i]
+         for i in range(9):
+             cv.Set1D(self.intrinsics, i, msg.K[i])
+@@ -696,12 +702,10 @@
+         lipts = self.mk_image_points([(l, b) for (l, r, b) in good])
+         ripts = self.mk_image_points([(r, b) for (l, r, b) in good])
+         boards = [ b for (_, _, b) in good]
+-        
++
+         opts = self.mk_object_points(boards, True)
+         npts = self.mk_point_counts(boards)
+ 
+-        flags = cv.CV_CALIB_FIX_ASPECT_RATIO | cv.CV_CALIB_FIX_INTRINSIC
+-
+         self.T = cv.CreateMat(3, 1, cv.CV_64FC1)
+         self.R = cv.CreateMat(3, 3, cv.CV_64FC1)
+         cv.SetIdentity(self.T)
+@@ -715,7 +719,7 @@
+                            cv.CreateMat(3, 3, cv.CV_32FC1),   # E
+                            cv.CreateMat(3, 3, cv.CV_32FC1),   # F
+                            (cv.CV_TERMCRIT_ITER + cv.CV_TERMCRIT_EPS, 1, 1e-5),
+-                           flags)
++                           flags = cv.CV_CALIB_FIX_ASPECT_RATIO | cv.CV_CALIB_FIX_INTRINSIC | self.calib_flags)
+         self.lR = cv.CreateMat(3, 3, cv.CV_64FC1)
+         self.rR = cv.CreateMat(3, 3, cv.CV_64FC1)
+         self.lP = cv.CreateMat(3, 4, cv.CV_64FC1)
+Index: nodes/cameracalibrator.py
+===================================================================
+--- nodes/cameracalibrator.py	(リビジョン 36313)
++++ nodes/cameracalibrator.py	(作業コピー)
+@@ -85,7 +85,7 @@
+ 
+ 
+ class CalibrationNode:
+-    def __init__(self, boards, service_check = True, synchronizer = message_filters.TimeSynchronizer):
++    def __init__(self, boards, service_check = True, synchronizer = message_filters.TimeSynchronizer, flags = 0):
+         if service_check:
+             # assume any non-default service names have been set.  Wait for the service to become ready
+             for svcname in ["camera", "left_camera", "right_camera"]:
+@@ -101,6 +101,7 @@
+                         rospy.signal_shutdown('Quit')
+ 
+         self._boards = boards
++        self._calib_flags = flags
+         lsub = message_filters.Subscriber('left', sensor_msgs.msg.Image)
+         rsub = message_filters.Subscriber('right', sensor_msgs.msg.Image)
+         ts = synchronizer([lsub, rsub], 4)
+@@ -139,7 +140,7 @@
+ 
+     def handle_monocular(self, msg):
+         if self.c == None:
+-            self.c = MonoCalibrator(self._boards)
++            self.c = MonoCalibrator(self._boards, self._calib_flags)
+ 
+         # This should just call the MonoCalibrator
+         drawable = self.c.handle_msg(msg)
+@@ -149,7 +150,7 @@
+     def handle_stereo(self, msg):
+         (lmsg, rmsg) = msg
+         if self.c == None:
+-            self.c = StereoCalibrator(self._boards)
++            self.c = StereoCalibrator(self._boards, self._calib_flags)
+             
+         drawable = self.c.handle_msg(msg)
+         self.displaywidth = drawable.lscrib.cols + drawable.rscrib.cols
+@@ -335,6 +336,10 @@
+                       help="specify chessboard square size in meters [default: 0.108]")
+     parser.add_option("", "--no-service-check", dest="service_check", action="store_false", default=True, help="disable check for set_camera_info services at startup")
+     parser.add_option("", "--approximate", dest="approximate", type="float", default=0.0, help="Use approximate time synchronizer for incoming stereo images")
++    parser.add_option("", "--use-rational", dest="use_rational", action="store_true", default=False, help="")
++    parser.add_option("", "--use-kappa3", dest="use_kappa3", action="store_true", default=False, help="")
++    parser.add_option("", "--fix-principal_point", dest="fix_principal", action="store_true", default=False, help="")
++    parser.add_option("", "--zero-tangent-dist", dest="zero_tangent_dist", action="store_true", default=False, help="")
+     options, args = parser.parse_args()
+ 
+     rospy.init_node('cameracalibrator') 
+@@ -363,7 +368,19 @@
+         sync = message_filters.TimeSynchronizer
+     else:
+         sync = functools.partial(ApproximateSynchronizer, options.approximate)
+-    node = OpenCVCalibrationNode(boards, options.service_check, sync)
++
++    calib_flags = 0
++    if options.use_rational:
++        calib_flags |= cv.CALIB_RATIONAL_MODEL
++    else:
++        if not options.use_kappa3:
++            calib_flags |= cv.CV_CALIB_FIX_K3
++    if options.fix_principal:
++        calib_flags |= cv.CALIB_FIX_PRINCIPAL_POINT
++    if options.zero_tangent_dist:
++        calib_flags |= cv.CALIB_ZERO_TANGENT_DIST
++
++    node = OpenCVCalibrationNode(boards, options.service_check, sync, calib_flags)
+     rospy.spin()
+ 
+ if __name__ == "__main__":

@@ -1,0 +1,39 @@
+<!-- -*- mode: xml -*- -->
+<launch>
+  <group ns="wide_stereo">
+    <node name="flea_left" pkg="camera1394" type="camera1394_node"
+	  respawn="false" output="screen" clear_params="true">
+      <remap from="camera" to="left_raw" />
+      <param name="frame_rate" value="7.5"/>
+      <param name="video_mode" value="640x480_rgb8"/>
+      <!-- write your own GUID -->
+      <!-- <param name="guid" value="00b09d01008c8f46"/> -->
+      <param name="frame_id" type="string" value="/FLEA_LEFT"/>
+      <!-- add your own calibration parameter -->
+      <!--
+      <param name="camera_info_url"
+	     value="file:///$(find cr_capture)/launch/stereo-left.yaml"/>
+      -->
+    </node>
+    <node name="flea_right" pkg="camera1394" type="camera1394_node"
+	  respawn="false" output="screen" clear_params="true">
+      <remap from="camera" to="right_raw" />
+      <param name="frame_rate" value="7.5"/>
+      <param name="video_mode" value="640x480_rgb8"/>
+      <!-- add your own GUID -->
+      <!-- <param name="guid" value="00b09d01008c8f44"/> -->
+      <param name="frame_id" type="string" value="/FLEA_LEFT"/>
+      <!-- add your own calibration parameter -->
+      <!--
+      <param name="camera_info_url"
+	     value="file:///$(find cr_capture)/launch/stereo-right.yaml"/>
+      -->
+    </node>
+    <!-- synchronizer -->
+    <node name="stereo_synchronizer" pkg="stereo_synchronizer" type="stereo_synchronizer"
+	  respawn="false" output="screen" />
+    <!-- stereo proc -->
+    <node name="stereo_proc" pkg="stereo_image_proc" type="stereo_image_proc"
+	  respawn="false" output="screen" />
+  </group>
+</launch>

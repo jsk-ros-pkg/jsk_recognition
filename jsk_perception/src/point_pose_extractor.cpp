@@ -701,7 +701,7 @@ public:
       transform = tf::Transform(tf::createQuaternionFromRPY(rv[3], rv[4], rv[5]),
                                  tf::Vector3(rv[0], rv[1], rv[2]));
     } else {  // use quaternion expression
-	  iss >> rv[7];
+      iss >> rv[6];
       transform = tf::Transform(tf::Quaternion(rv[3], rv[4], rv[5], rv[6]),
                                  tf::Vector3(rv[0], rv[1], rv[2]));
     }

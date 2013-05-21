@@ -2,7 +2,6 @@
 ;;
 (defvar *detection-topic* "/narrow_stereo/left/ObjectDetection")
 (defvar *base-frame-id* "/base_footprint")
-(defvar *robot-symbol* '*pr2*)
 (defvar *solve-tf* t)
 
 (ros::roseus-add-msgs "posedetection_msgs")
@@ -12,7 +11,10 @@
 
 (unless (boundp '*tfl*)
   (setq *tfl* (instance ros::transform-listener :init)))
+(unless (boundp '*tfb*)
+  (setq *tfb* (instance ros::transform-broadcaster :init)))
 (ros::advertise "/object_detection_marker_array" visualization_msgs::MarkerArray 5)
+(ros::ros-info "Publish for /objectdetection_marker_array")
 
 (defmethod coordinates
   (:speak-name
@@ -24,17 +26,15 @@
   (:frame_id (&optional f) (if f (setf (get self :frame_id) f)) (get self :frame_id)))
 
 (defun objectdetection (force target-obj msg)
-  (pprint 'objectDetection)
   (let ((obj (car (send msg :objects)))
         ;;(av (send *pr2* :angle-vector))
         (frame (send msg :header :frame_id))
-        (robot (eval *robot-symbol*))
         (tp (get target-obj :type))
         stamp trans)
+    (ros::ros-info "object detection callback target ~A, frmae ~A, object ~A" tp frame (send obj :type))
     (when (or (not (stringp tp))
               (substringp tp (send obj :type))) ;; found target
       (setq stamp (if force (ros::time 0) (send msg :header :stamp)))
-
       (cond
        (*solve-tf*
         (unless (send *tfl* :wait-for-transform *base-frame-id* frame stamp 1)
@@ -54,17 +54,20 @@
         (send target-obj :reset-coords)
         (send target-obj :move-to trans :local)
         (send target-obj :move-to (ros::tf-pose->coords (send obj :pose)) :local)
+	(when (find-method target-obj :update-descendants)
+	  (send target-obj :update-descendants) ;; clean me
+	  )
         ;; target-obj should be on *base-frame-id* coordinates
         ;; (send *pr2* :angle-vector av)
         ))
     ))
 
 (defun start-subscribe (tf-force obj)
-  (ros::ros-info "start subscribe")
+  (ros::ros-info "start subscribe ~A" *detection-topic*)
   (ros::subscribe *detection-topic*
                   posedetection_msgs::ObjectDetection #'objectdetection tf-force obj))
 (defun stop-subscribe ()
-  (ros::ros-info "stop subscribe")
+  (ros::ros-info "stop subscribe ~A" *detection-topic*)
   (ros::unsubscribe *detection-topic*))
 
 (defun check-detection (&key (timeout 10) (type nil) (tf-force nil)
@@ -97,7 +100,8 @@
                               (send target-obj :speak-name))))|#
           (push (send target-obj :stamp) detect-object-list)
           (setq current-object-coords (send target-obj :copy-worldcoords)) ;; updated position
-          (ros::ros-info "current -> ~A" current-object-coords)
+          (ros::ros-info "current -> ~A (~A)" current-object-coords (send target-obj :name))
+	  (send *tfb* :send-transform current-object-coords *base-frame-id* (send target-obj :name))
           (ros::publish "/object_detection_marker_array"
                         (instance visualization_msgs::MarkerArray :init
                                   :markers
@@ -118,6 +122,13 @@
                                          :ns "object_coords"
                                          ;; :size 200 :width 20
                                          :lifetime marker-life :id 1)
+                                        (object->marker-msg
+                                         target-obj
+                                         (instance std_msgs::header :init
+                                                   :stamp (send target-obj :stamp)
+                                                   :frame_id *base-frame-id*)
+                                         :ns "object_body"
+                                         :lifetime marker-life :id 2)
                                         )))
 
           (ros::ros-info "object detected ~A diff-pos:~A, diff-rot:~A"

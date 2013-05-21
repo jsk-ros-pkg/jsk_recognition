@@ -57,6 +57,7 @@
 	(when (find-method target-obj :update-descendants)
 	  (send target-obj :update-descendants) ;; clean me
 	  )
+	(send *tfb* :send-transform (ros::tf-pose->coords (send obj :pose)) frame (send target-obj :name))
         ;; target-obj should be on *base-frame-id* coordinates
         ;; (send *pr2* :angle-vector av)
         ))
@@ -101,7 +102,6 @@
           (push (send target-obj :stamp) detect-object-list)
           (setq current-object-coords (send target-obj :copy-worldcoords)) ;; updated position
           (ros::ros-info "current -> ~A (~A)" current-object-coords (send target-obj :name))
-	  (send *tfb* :send-transform current-object-coords *base-frame-id* (send target-obj :name))
           (ros::publish "/object_detection_marker_array"
                         (instance visualization_msgs::MarkerArray :init
                                   :markers

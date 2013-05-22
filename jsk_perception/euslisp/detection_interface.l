@@ -6,14 +6,8 @@
 
 (ros::roseus-add-msgs "posedetection_msgs")
 ;;
-(unless (ros::ok)
-  (ros::roseus "detection_interface"))
+;;(unless (ros::ok) (ros::roseus "detection_interface"))
 
-(unless (boundp '*tfl*)
-  (setq *tfl* (instance ros::transform-listener :init)))
-(unless (boundp '*tfb*)
-  (setq *tfb* (instance ros::transform-broadcaster :init)))
-(ros::advertise "/object_detection_marker_array" visualization_msgs::MarkerArray 5)
 (ros::ros-info "Publish for /objectdetection_marker_array")
 
 (defmethod coordinates
@@ -37,6 +31,8 @@
       (setq stamp (if force (ros::time 0) (send msg :header :stamp)))
       (cond
        (*solve-tf*
+        (unless (boundp '*tfl*)
+          (setq *tfl* (instance ros::transform-listener :init)))
         (unless (send *tfl* :wait-for-transform *base-frame-id* frame stamp 1)
           (ros::ros-error "could not solve ~A to ~A" *base-frame-id* frame))
         (setq trans (send *tfl* :lookup-transform *base-frame-id* frame stamp))
@@ -57,6 +53,8 @@
 	(when (find-method target-obj :update-descendants)
 	  (send target-obj :update-descendants) ;; clean me
 	  )
+        (unless (boundp '*tfb*)
+          (setq *tfb* (instance ros::transform-broadcaster :init)))
 	(send *tfb* :send-transform (ros::tf-pose->coords (send obj :pose)) frame (send target-obj :name))
         ;; target-obj should be on *base-frame-id* coordinates
         ;; (send *pr2* :angle-vector av)
@@ -102,6 +100,7 @@
           (push (send target-obj :stamp) detect-object-list)
           (setq current-object-coords (send target-obj :copy-worldcoords)) ;; updated position
           (ros::ros-info "current -> ~A (~A)" current-object-coords (send target-obj :name))
+          (ros::advertise "/object_detection_marker_array" visualization_msgs::MarkerArray 5)
           (ros::publish "/object_detection_marker_array"
                         (instance visualization_msgs::MarkerArray :init
                                   :markers

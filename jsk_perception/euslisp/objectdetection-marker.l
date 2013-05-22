@@ -3,6 +3,7 @@
 
 ;; define detection parameters befor load detection_interface.l
 ;;(defvar *detection-topic* "/ObjectDetection")
+;;(defvar *detection-topic* "/openni/rgb/ObjectDetection")
 (defvar *detection-topic* "/narrow_stereo/left/ObjectDetection")
 
 ;; load functions  
@@ -13,7 +14,11 @@
 
 ;;(load "package://euslisp/jskeus/eus/models/room610-chair-object.l")
 ;;(setq *target-object* (room610-chair))
+;;(load "package://euslisp/jskeus/eus/models/room610-laundry-machine-object.l")
+;;(setq *target-object* (room610-laundry-machine))
 (setq *target-object* (make-cube 300 300 500))
+
+(ros::roseus "object_detection_marker")
 (ros::rate 10)
 (do-until-key
  (send *target-object* :move-to (make-coords) :world)

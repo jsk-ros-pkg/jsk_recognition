@@ -31,7 +31,8 @@
 
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
-#include "cv_bridge/CvBridge.h"
+#include "cv_bridge/cv_bridge.h"
+#include "sensor_msgs/image_encodings.h"
 #include "sensor_msgs/Image.h"
 #include "math.h"
 
@@ -57,7 +58,7 @@ public:
         vector<CvPoint2D32f> corners;
     };
 
-    sensor_msgs::CvBridge _cvbridge;
+    cv_bridge::CvImagePtr _cvbridge;
     
     int display;
     CHECKERBOARD _checkerboard; // grid points for every checkerboard
@@ -139,12 +140,15 @@ private:
     }
     void image_cb(const sensor_msgs::ImageConstPtr& image_msg)
     {
-        if( !_cvbridge.fromImage(*image_msg, "mono8") ) {
+        try {
+            _cvbridge = cv_bridge::toCvCopy(image_msg, sensor_msgs::image_encodings::MONO8);
+        } catch (cv_bridge::Exception &e) {
             ROS_ERROR("failed to get image");
             return;
         }
 
-        IplImage *pimggray = _cvbridge.toIpl();
+        IplImage imggray = _cvbridge->image;
+        IplImage *pimggray = &imggray;
         if( display ) {
             // copy the raw image
             if( frame != NULL && (frame->width != (int)pimggray->width || frame->height != (int)pimggray->height) ) {

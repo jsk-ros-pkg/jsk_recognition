@@ -32,7 +32,8 @@
 
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
-#include "cv_bridge/CvBridge.h"
+#include "cv_bridge/cv_bridge.h"
+#include "sensor_msgs/image_encodings.h"
 #include "sensor_msgs/CameraInfo.h"
 #include "sensor_msgs/Image.h"
 #include "posedetection_msgs/ObjectDetection.h"
@@ -64,7 +65,7 @@ public:
     };
 
     posedetection_msgs::ObjectDetection _objdetmsg;
-    sensor_msgs::CvBridge _cvbridge;
+    cv_bridge::CvImagePtr capture;
     sensor_msgs::CameraInfo _camInfoMsg;
 
     ros::Subscriber camInfoSubscriber,camInfoSubscriber2;
@@ -283,18 +284,23 @@ public:
             for(int j = 0; j < 3; ++j)
                 this->intrinsic_matrix->data.fl[3*i+j] = camInfoMsg.P[4*i+j];
 
-        if( !_cvbridge.fromImage(imagemsg, "mono8") ) {
-            ROS_ERROR("failed to get image");
+        try {
+            capture = cv_bridge::toCvCopy(imagemsg, sensor_msgs::image_encodings::MONO8);
+        } catch (cv_bridge::Exception &e) {
+            ROS_ERROR("failed to get image %s", e.what());
             return false;
         }
 
-        IplImage *pimggray = _cvbridge.toIpl();
+        IplImage imggray = capture->image;
+        IplImage *pimggray = &imggray;
         if( display ) {
             // copy the raw image
             if( frame != NULL && (frame->width != (int)imagemsg.width || frame->height != (int)imagemsg.height) ) {
                 cvReleaseImage(&frame);
                 frame = NULL;
             }
+            imggray = capture->image;
+            pimggray = &imggray;
 
             if( frame == NULL ) 
                 frame = cvCreateImage(cvSize(imagemsg.width,imagemsg.height),IPL_DEPTH_8U, 3);

@@ -3,8 +3,8 @@
 
 ;; define detection parameters befor load detection_interface.l
 ;;(defvar *detection-topic* "/ObjectDetection")
-;;(defvar *detection-topic* "/openni/rgb/ObjectDetection")
-(defvar *detection-topic* "/narrow_stereo/left/ObjectDetection")
+(defvar *detection-topic* "/openni/rgb/ObjectDetection")
+;;(defvar *detection-topic* "/narrow_stereo/left/ObjectDetection")
 
 ;; load functions  
 (load "package://jsk_perception/euslisp/detection_interface.l")

@@ -70,7 +70,9 @@
   (ros::unsubscribe *detection-topic*))
 
 (defun check-detection (&key (timeout 10) (type nil) (tf-force nil)
-                             (diff-position 10.0) (single nil) (speak t)
+                             (diff-position 10.0)
+                             (diff-rotation 1) ;; radian
+                             (single nil) (speak t)
                              (marker-life 30) (speak-name)
                              ((:target-object target-obj) (make-cube 60 60 60)))
   (let ((tgt-cds (send target-obj :copy-worldcoords)))
@@ -136,14 +138,19 @@
                              (norm (send previous-object-coords
                                          :difference-position current-object-coords)))
                          (if previous-object-coords
-                             (elt (send previous-object-coords
-                                        :difference-rotation current-object-coords
-                                        :rotation-axis :xy) 2)))
+                             (norm (send previous-object-coords
+                                         :difference-rotation current-object-coords))))
           (when (or single
                     (and previous-object-coords
-                         (< (norm (send previous-object-coords
-                                        :difference-position current-object-coords))
-                            diff-position))) ;; moved a little -> found obj
+                         (and diff-position
+                              (< (norm (send previous-object-coords
+                                             :difference-position current-object-coords))
+                                 diff-position)) ;; moved a little -> found obj
+                         (and diff-rotation
+                              (< (norm (send previous-object-coords
+                                             :difference-rotation current-object-coords))
+                                 diff-rotation)) ;; moved a little -> found obj
+                         ))
             (cond
              ((or (not (stringp type))
                   (substringp type (send target-obj :name))) ;; found target

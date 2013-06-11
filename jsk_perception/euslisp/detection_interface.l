@@ -1,6 +1,6 @@
 ;;
 ;;
-(defvar *detection-topic* "/narrow_stereo/left/ObjectDetection")
+(defparameter *detection-topic* "/narrow_stereo/left/ObjectDetection")
 (defvar *base-frame-id* "/base_footprint")
 (defvar *solve-tf* t)
 
@@ -25,7 +25,7 @@
         (frame (send msg :header :frame_id))
         (tp (get target-obj :type))
         stamp trans)
-    (ros::ros-info "object detection callback target ~A, frmae ~A, object ~A" tp frame (send obj :type))
+    (ros::ros-info "object detection callback target ~A, frame ~A, object ~A" tp frame (send obj :type))
     (when (or (not (stringp tp))
               (substringp tp (send obj :type))) ;; found target
       (setq stamp (if force (ros::time 0) (send msg :header :stamp)))
@@ -73,6 +73,7 @@
                              (diff-position 10.0)
                              (diff-rotation 1) ;; radian
                              (single nil) (speak t)
+                             (publish-objectdetection-marker t)
                              (marker-life 30) (speak-name)
                              ((:target-object target-obj) (make-cube 60 60 60)))
   (let ((tgt-cds (send target-obj :copy-worldcoords)))
@@ -102,35 +103,36 @@
           (push (send target-obj :stamp) detect-object-list)
           (setq current-object-coords (send target-obj :copy-worldcoords)) ;; updated position
           (ros::ros-info "current -> ~A (~A)" current-object-coords (send target-obj :name))
-          (ros::advertise "/object_detection_marker_array" visualization_msgs::MarkerArray 5)
-          (ros::publish "/object_detection_marker_array"
-                        (instance visualization_msgs::MarkerArray :init
-                                  :markers
-                                  (list (text->marker-msg
-                                         (send target-obj :name)
-                                         (send (send current-object-coords :copy-worldcoords)
-                                               :translate #f(-100 0 100))
-                                         (instance std_msgs::header :init
-                                                   :stamp (send target-obj :stamp)
-                                                   :frame_id *base-frame-id*)
-                                         :ns "object_text" :color #f(1 0 0)
-                                         :scale 100 :lifetime marker-life :id 0)
-                                        (coords->marker-msg
-                                         current-object-coords
-                                         (instance std_msgs::header :init
-                                                   :stamp (send target-obj :stamp)
-                                                   :frame_id *base-frame-id*)
-                                         :ns "object_coords"
-                                         ;; :size 200 :width 20
-                                         :lifetime marker-life :id 1)
-                                        (object->marker-msg
-                                         target-obj
-                                         (instance std_msgs::header :init
-                                                   :stamp (send target-obj :stamp)
-                                                   :frame_id *base-frame-id*)
-                                         :ns "object_body"
-                                         :lifetime marker-life :id 2)
-                                        )))
+          (when publish-objectdetection-marker
+            (ros::advertise "/object_detection_marker_array" visualization_msgs::MarkerArray 5)
+            (ros::publish "/object_detection_marker_array"
+                          (instance visualization_msgs::MarkerArray :init
+                                    :markers
+                                    (list (text->marker-msg
+                                           (send target-obj :name)
+                                           (send (send current-object-coords :copy-worldcoords)
+                                                 :translate #f(-100 0 100))
+                                           (instance std_msgs::header :init
+                                                     :stamp (send target-obj :stamp)
+                                                     :frame_id *base-frame-id*)
+                                           :ns (format nil "object_text_~A" (send target-obj :name)) :color #f(1 0 0)
+                                           :scale 100 :lifetime marker-life :id 0)
+                                          (coords->marker-msg
+                                           current-object-coords
+                                           (instance std_msgs::header :init
+                                                     :stamp (send target-obj :stamp)
+                                                     :frame_id *base-frame-id*)
+                                           :ns (format nil "object_coords_~A" (send target-obj :name))
+                                           ;; :size 200 :width 20
+                                           :lifetime marker-life :id 1)
+                                          (object->marker-msg
+                                           target-obj
+                                           (instance std_msgs::header :init
+                                                     :stamp (send target-obj :stamp)
+                                                     :frame_id *base-frame-id*)
+                                           :ns (format nil "object_body_~A" (send target-obj :name))
+                                           :lifetime marker-life :id 2)
+                                          ))))
 
           (ros::ros-info "object detected ~A diff-pos:~A, diff-rot:~A"
                          (send target-obj :name)

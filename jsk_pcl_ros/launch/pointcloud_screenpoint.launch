@@ -50,12 +50,11 @@
         machine="$(arg cloud_machine)">
     <remap from="~points" to="$(arg inpoints)" />
     <rosparam>
-      queue_size: 1
+      queue_size: 4
       crop_size: 10
       search_size: 16
       use_rect: false
-      use_point: false
-      publish_points: false
+      use_point: true
       publish_point: true
     </rosparam>
     <param name="use_sync" value="$(arg USE_SYNC)" />

@@ -1,0 +1,19 @@
+<package>
+  <description brief="resized_imagetransport">
+
+     resized_imagetransport
+
+  </description>
+  <author>Yohei Kakiuchi</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/resized_imagetransport</url>
+
+  <depend package="opencv2" />
+  <depend package="cv_bridge" />
+  <depend package="sensor_msgs" />
+  <depend package="image_transport" />
+
+</package>
+
+

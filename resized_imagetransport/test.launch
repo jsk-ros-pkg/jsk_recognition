@@ -1,0 +1,9 @@
+<launch>
+  <node pkg="resized_imagetransport" type="image_resizer" name="resized"
+        output="screen" >
+    <remap from="camera" to="/multisense_sl/camera/left" />
+    <remap from="image_type" to="image_rect_color" />
+    <param name="resize_scale_x" value="0.4" />
+    <param name="resize_scale_y" value="0.4" />
+  </node>
+</launch>

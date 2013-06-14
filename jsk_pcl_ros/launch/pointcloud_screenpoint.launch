@@ -1,5 +1,5 @@
 <launch>
-  <machine name="localhost" address="localhost" env-loader="$(env ROS_ENV_LOADER)" />
+  <machine name="localhost" address="localhost" />
   <arg name="cloud_machine" default="localhost"/>
   <arg name="image" default="/openni/rgb"/>
   <arg name="image_type" default="image_rect_color"/>

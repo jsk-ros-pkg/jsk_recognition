@@ -17,6 +17,7 @@
     <remap from="image_type" to="image_rect_throttle" />
     <param name="resize_scale_x" value="0.4" />
     <param name="resize_scale_y" value="0.4" />
+    <param name="use_snapshot" value="true" />
   </node>
 
   <node pkg="resized_imagetransport" type="image_resizer" name="lhand_resized"
@@ -25,6 +26,7 @@
     <remap from="image_type" to="image_rect_throttle" />
     <param name="resize_scale_x" value="0.4" />
     <param name="resize_scale_y" value="0.4" />
+    <param name="use_snapshot" value="true" />
   </node>
 
   <node pkg="resized_imagetransport" type="image_resizer" name="rhand_resized"
@@ -33,6 +35,7 @@
     <remap from="image_type" to="image_rect_throttle" />
     <param name="resize_scale_x" value="0.4" />
     <param name="resize_scale_y" value="0.4" />
+    <param name="use_snapshot" value="true" />
   </node>
 
 </launch>

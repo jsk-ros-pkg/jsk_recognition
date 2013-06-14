@@ -5,13 +5,14 @@
 #include <image_transport/image_transport.h>
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
+#include <std_srvs/Empty.h>
 
 #include <boost/thread/mutex.hpp>
 
 class ImageResizer
 {
 public:
-  ImageResizer () : nh(), pnh("~") {
+  ImageResizer () : nh(), pnh("~"), publish_once_(true) {
 
     pnh.param("resize_scale_x", resize_x_, 1.0);
     ROS_INFO("resize_scale_x : %f", resize_x_);
@@ -25,6 +26,8 @@ public:
 
     pnh.param("max_queue_size", max_queue_size_, 5);
 
+    pnh.param("use_snapshot", use_snapshot_, false);
+
     it_ = new image_transport::ImageTransport(pnh);
     std::string img = nh.resolveName("image_type");
     std::string cam = nh.resolveName("camera");
@@ -33,6 +36,11 @@ public:
     }
     ROS_INFO("camera = %s", cam.c_str());
     ROS_INFO("image = %s", img.c_str());
+
+    if (use_snapshot_) {
+      publish_once_ = false;
+      srv_ = pnh.advertiseService("snapshot", &ImageResizer::snapshot_cb, this);
+    }
 
     cs_ = it_->subscribeCamera(cam + "/" + img, max_queue_size_,
                                &ImageResizer::callback, this);
@@ -49,18 +57,29 @@ protected:
   image_transport::CameraSubscriber cs_;
   image_transport::CameraPublisher cp_;
   image_transport::ImageTransport *it_;
+  ros::ServiceServer srv_;
 
   double resize_x_, resize_y_;
   int dst_width_, dst_height_;
   int max_queue_size_;
+  bool use_snapshot_;
+  bool publish_once_;
   boost::mutex mutex_;
+
+  bool snapshot_cb (std_srvs::Empty::Request &req,
+                    std_srvs::Empty::Response &res) {
+    boost::mutex::scoped_lock lock(mutex_);
+
+    publish_once_ = true;
+    return true;
+  }
 
   void callback(const sensor_msgs::ImageConstPtr &img,
                 const sensor_msgs::CameraInfoConstPtr &info) {
     boost::mutex::scoped_lock lock(mutex_);
 
     ROS_DEBUG("resize: callback");
-    if ( cp_.getNumSubscribers () == 0 ) {
+    if ( !publish_once_ || cp_.getNumSubscribers () == 0 ) {
       ROS_DEBUG("resize: number of subscribers is 0, ignoring image");
       return;
     }
@@ -91,6 +110,9 @@ protected:
 
     cp_.publish(cv_img->toImageMsg(),
                 boost::make_shared<sensor_msgs::CameraInfo> (tinfo));
+    if(use_snapshot_) {
+      publish_once_ = false;
+    }
   }
 
 };

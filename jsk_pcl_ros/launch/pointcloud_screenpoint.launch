@@ -58,6 +58,8 @@
       publish_points: false
       publish_point: true
     </rosparam>
+    <param name="use_sync" value="$(arg USE_SYNC)" />
+    <param name="publish_points" value="$(arg PUBLISH_POINTS)" />
   </node>
   </group>
 

@@ -7,6 +7,7 @@
   <arg name="points" default="/openni/depth_registered/points"/>
   <arg name="LAUNCH_OPENNI" default="false" />
   <arg name="USE_DEPTH_CREATER" default="true" />
+  <arg name="USE_REGISTERED_DEPTH" default="false" />
   <arg name="USE_VIEW" default="false" />
   <arg name="USE_SYNC" default="false" />
   <arg name="PUBLISH_POINTS" default="false" />
@@ -34,13 +35,23 @@
     <remap from="~input" to="$(arg points)" />
     <remap from="~output_cloud" to="/screenpoint_manager/points" />
     <rosparam>
-    scale_depth: 5.0
-    max_queue_size: 10
-    use_fixed_transform: false
-    use_service: false
-    use_asynchronous: false
-    use_approximate: true
+      scale_depth: 5.0
+      max_queue_size: 10
+      use_fixed_transform: false
+      use_service: false
+      use_asynchronous: false
+      use_approximate: true
     </rosparam>
+  </node>
+  <node if="$(arg USE_REGISTERED_DEPTH)"
+        name="depth_image_proc_nodelet" pkg="nodelet" type="nodelet"
+        args="load depth_image_proc/point_cloud_xyzrgb screenpoint_manager"
+        output="screen" clear_params="true" respawn="true"
+        machine="$(arg cloud_machine)">
+    <remap from="rgb/camera_info" to="$(arg camera_info)" />
+    <remap from="rgb/image_rect_color" to="$(arg image)/$(arg image_type)" />
+    <remap from="depth_registered/image_rect" to="/depth_image_creator_nodelet/output" />
+    <param name="qeueu_size" value="30" />
   </node>
 
   <group unless="$(arg USE_VIEW)" >

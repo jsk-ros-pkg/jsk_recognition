@@ -4,12 +4,12 @@
   <arg name="OUTPUT" default="/hsv_output"/>
   <arg name="DEFAULT_NAMESPACE" default="HSV_color_filter"/>
 
-  <arg name="h_max" default="1.0" />
-  <arg name="h_min" default="0.0" />
-  <arg name="s_max" default="1.0" />
-  <arg name="s_min" default="0.0" />
-  <arg name="v_max" default="1.0" />
-  <arg name="v_min" default="0.0" />
+  <arg name="h_max" default="127" />
+  <arg name="h_min" default="-128" />
+  <arg name="s_max" default="255" />
+  <arg name="s_min" default="0" />
+  <arg name="v_max" default="255" />
+  <arg name="v_min" default="0" />
 
   <arg name="create_manager" default="true" />
   <arg name="manager" default="hsv_filter_manager" />
@@ -19,18 +19,10 @@
           pkg="nodelet" type="nodelet" name="$(arg manager)"
           args="manager" output="screen"/>
 
-    <node pkg="nodelet" type="nodelet" name="hsv_converter"
-          args="load jsk_pcl/RGB2HSVColorConverter $(arg manager)"
-          output="screen">
-      <remap from="~input" to="$(arg INPUT)" />
-      <rosparam>
-        use_indices: false
-      </rosparam>
-    </node>
-
     <node pkg="nodelet" type="nodelet" name="hsv_filter"
           args="load jsk_pcl/HSVColorFilter $(arg manager)" output="screen">
-      <remap from="~input" to="hsv_converter/output" />
+      <remap from="~input" to="$(arg INPUT)" />
+      <remap from="~output" to="$(arg OUTPUT)" />
       <rosparam>
         use_indices: false
       </rosparam>
@@ -42,27 +34,6 @@
       <param name="v_limit_min" value="$(arg v_min)" />
     </node>
 
-    <node pkg="nodelet" type="nodelet" name="extract2"
-          args="load pcl/ExtractIndices $(arg manager)" output="screen">
-      <remap from="~input"   to="$(arg INPUT)" />
-      <remap from="~indices" to="hsv_filter/output_indices" />
-
-      <remap from="~output" to="$(arg OUTPUT)" />
-      <rosparam>
-        max_queue_size: 30
-        negative: true
-      </rosparam>
-    </node>
-
-    <!-- dummy for subscribe output -->
-    <node pkg="nodelet" type="nodelet" name="dummy2"
-          args="load pcl/ExtractIndices $(arg manager)" output="screen">
-      <remap from="~input" to="hsv_filter/output" />
-      max_queue_size: 1
-    </node>
   </group>
- <!-- input === hsv_converter == hsv_filter ==                -->
- <!--        |                                |               -->
- <!--        ============================= extract2 == output -->
 
 </launch>

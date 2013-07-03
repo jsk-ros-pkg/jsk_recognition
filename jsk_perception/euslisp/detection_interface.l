@@ -1,6 +1,6 @@
 ;;
 ;;
-(defparameter *detection-topic* "/narrow_stereo/left/ObjectDetection")
+(defvar *detection-topic* "/narrow_stereo/left/ObjectDetection")
 (defvar *base-frame-id* "/base_footprint")
 (defvar *solve-tf* t)
 

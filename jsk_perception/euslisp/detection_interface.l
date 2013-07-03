@@ -161,8 +161,9 @@
                   (send *irtviewer* :draw-objects))
               (stop-subscribe)
               (when speak
-                (speak-jp (format nil "~a が みつかりました"
-                                  (send target-obj :speak-name))))
+                (if (and (boundp '*use-voicetext*) *use-voicetext*)
+                    (speak-jp (format nil "~aが見つかりました。" (send target-obj :speak-name)))
+                  (speak-jp (format nil "~a が みつかりました" (send target-obj :speak-name)))))
               (return-from check-detection target-obj))
               (t
                (ros::ros-info (format nil "no - obj-type(~a)" (send target-obj :name)))
@@ -179,8 +180,9 @@
           (ros::ros-info "timeout")
           (stop-subscribe)
           (when speak
-            (speak-jp (format nil "~a は みつかりませんでした"
-                              (send target-obj :speak-name))))
+            (if (and (boundp '*use-voicetext*) *use-voicetext*)
+                (speak-jp (format nil "~aは見つかりませんでした。" (send target-obj :speak-name)))
+              (speak-jp (format nil "~a は みつかりませんでした" (send target-obj :speak-name)))))
           (send target-obj :reset-coords)
           (send target-obj :transform tgt-cds)
           (return-from check-detection nil))

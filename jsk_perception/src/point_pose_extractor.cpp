@@ -491,7 +491,7 @@ public:
       cv::putText (stack_img, text, cv::Point(x, y),
 		   0, text_scale, CV_RGB(0, 255, 0),
 		   2, 8, false);
-      ROS_INFO( text.c_str() );
+      ROS_INFO( " %s < %f (threshold)", text.c_str(), err_thr );
     }
     // for debug window
     if( _window_name != "" )
@@ -916,6 +916,10 @@ public:
 	if(_pub.getNumSubscribers() == 0) {
 	  if(_sub)
 		_sub.shutdown();
+          static int i = 0;
+          if ( i++ % 100 == 0 ) {
+              ROS_INFO("wait for subscriberes ... %s", _pub.getTopic().c_str());
+          }
 	} else {
 	  if(!_sub)
 		_sub = _n.subscribe("ImageFeature0D", 1,

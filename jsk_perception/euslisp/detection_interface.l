@@ -81,6 +81,10 @@
     (setf (get target-obj :type) type)
     (when speak-name
       (send target-obj :speak-name speak-name))
+    (when speak
+      (if (and (boundp '*use-voicetext*) *use-voicetext*)
+	  (speak-jp (format nil "~aをさがしています" (send target-obj :speak-name)))
+	(speak-jp (format nil "~a を さがして います" (send target-obj :speak-name)))))
     (start-subscribe tf-force target-obj) (unix::sleep 2)
     (send target-obj :stamp (ros::time-now))
 
@@ -88,10 +92,6 @@
            previous-object-coords
            (start-time (ros::time-now)) (detect-object-list))
       (ros::ros-info "check (timeout=~A, type=~A, tf-force=~A)" timeout type tf-force)
-      (when speak
-        (if (and (boundp '*use-voicetext*) *use-voicetext*)
-            (speak-jp (format nil "~aをさがしています" (send target-obj :speak-name)))
-          (speak-jp (format nil "~a を さがして います" (send target-obj :speak-name)))))
       (while (ros::ok)
         (ros::spin-once) ;; target-obj was updated in objectdetection
         ;; check target-obj is previously detected

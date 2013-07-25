@@ -88,6 +88,10 @@
            previous-object-coords
            (start-time (ros::time-now)) (detect-object-list))
       (ros::ros-info "check (timeout=~A, type=~A, tf-force=~A)" timeout type tf-force)
+      (when speak
+        (if (and (boundp '*use-voicetext*) *use-voicetext*)
+            (speak-jp (format nil "~aをさがしています" (send target-obj :speak-name)))
+          (speak-jp (format nil "~a を さがして います" (send target-obj :speak-name)))))
       (while (ros::ok)
         (ros::spin-once) ;; target-obj was updated in objectdetection
         ;; check target-obj is previously detected
@@ -97,9 +101,6 @@
                    (not (member (send target-obj :stamp) detect-object-list))
                    ;; check if obj is already stored in detect-object-list
                    )
-          #|(when speak
-            (speak-jp (format nil "~a を さがして います"
-                              (send target-obj :speak-name))))|#
           (push (send target-obj :stamp) detect-object-list)
           (setq current-object-coords (send target-obj :copy-worldcoords)) ;; updated position
           (ros::ros-info "current -> ~A (~A)" current-object-coords (send target-obj :name))

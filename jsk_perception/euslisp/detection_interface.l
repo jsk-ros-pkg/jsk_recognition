@@ -83,7 +83,10 @@
       (send target-obj :speak-name speak-name))
     (when speak
       (if (and (boundp '*use-voicetext*) *use-voicetext*)
-	  (speak-jp (format nil "~aをさがしています" (send target-obj :speak-name)))
+          (cond
+           ((and (boundp '*use-english*) *use-english*)
+            (speak-jp (format nil "I am looking for ~a." (send target-obj :speak-name))))
+           (t (speak-jp (format nil "~aをさがしています" (send target-obj :speak-name)))))
 	(speak-jp (format nil "~a を さがして います" (send target-obj :speak-name)))))
     (start-subscribe tf-force target-obj) (unix::sleep 2)
     (send target-obj :stamp (ros::time-now))
@@ -163,7 +166,10 @@
               (stop-subscribe)
               (when speak
                 (if (and (boundp '*use-voicetext*) *use-voicetext*)
-                    (speak-jp (format nil "~aが見つかりました。" (send target-obj :speak-name)))
+                    (cond
+                     ((and (boundp '*use-english*) *use-english*)
+                      (speak-jp (format nil "I have found ~a." (send target-obj :speak-name))))
+                     (t (speak-jp (format nil "~aが見つかりました。" (send target-obj :speak-name)))))
                   (speak-jp (format nil "~a が みつかりました" (send target-obj :speak-name)))))
               (return-from check-detection target-obj))
               (t
@@ -182,7 +188,10 @@
           (stop-subscribe)
           (when speak
             (if (and (boundp '*use-voicetext*) *use-voicetext*)
-                (speak-jp (format nil "~aは見つかりませんでした。" (send target-obj :speak-name)))
+                (cond
+                 ((and (boundp '*use-english*) *use-english*)
+                  (speak-jp (format nil "I could not find ~a." (send target-obj :speak-name))))
+                 (t (speak-jp (format nil "~aは見つかりませんでした。" (send target-obj :speak-name)))))
               (speak-jp (format nil "~a は みつかりませんでした" (send target-obj :speak-name)))))
           (send target-obj :reset-coords)
           (send target-obj :transform tgt-cds)

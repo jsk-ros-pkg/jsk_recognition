@@ -1,0 +1,8 @@
+<launch>
+  <!-- tfのフレームを出す -->
+  <group ns="tf">
+     <node pkg="tf" name="origin_to_camera_link"
+           type="static_transform_publisher"
+           args="0 0 0 0 0 0 /origin /camera_link" />
+  </group>
+</launch>

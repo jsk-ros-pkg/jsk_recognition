@@ -1,0 +1,42 @@
+<launch>
+  <!-- nodeletの名前は/camera_nodelet_manager -->
+  <arg name="manager" default="/camera_nodelet_manager" />
+  <arg name="input_point" default="/camera/depth_registered/points" />
+  <!-- 注目する領域の点群だけ抜き出す -->
+  <group ns="pcl_nodelet">
+    <node pkg="nodelet" type="nodelet"
+          name="passthrough_z"
+          args="load pcl/PassThrough $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="$(arg input_point)" />
+      <rosparam>
+        filter_field_name: z
+        filter_limit_min: 1.2
+        filter_limit_max: 1.6
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="passthrough_y"
+          args="load pcl/PassThrough $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="/pcl_nodelet/passthrough_z/output" />
+      <rosparam>
+        filter_field_name: y
+        filter_limit_min: -0.25
+        filter_limit_max: 0.25
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="passthrough_x"
+          args="load pcl/PassThrough $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="/pcl_nodelet/passthrough_y/output" />
+      <rosparam>
+        filter_field_name: x
+        filter_limit_min: -0.35
+        filter_limit_max: 0.35
+      </rosparam>
+    </node>
+
+  </group>                      <!-- pcl_nodelet -->
+</launch>

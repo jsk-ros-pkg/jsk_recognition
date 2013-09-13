@@ -3,6 +3,9 @@
   <group ns="tf">
      <node pkg="tf" name="origin_to_camera_link"
            type="static_transform_publisher"
-           args="0 0 0 0 0 0 /origin /camera_link" />
+           args="0 0 2.3 0 0 0 /origin /camera_link 100" />
+     <node pkg="tf" name="origin_to_table_center"
+           type="static_transform_publisher"
+           args="0 0 0.6977 0 0 0 /origin /table_center 100" />
   </group>
 </launch>

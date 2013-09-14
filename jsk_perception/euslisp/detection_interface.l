@@ -87,8 +87,10 @@
            ((and (boundp '*use-english*) *use-english*)
             (speak-jp (format nil "I am looking for ~a." (send target-obj :speak-name))))
            (t (speak-jp (format nil "~aをさがしています" (send target-obj :speak-name)))))
-	(speak-jp (format nil "~a を さがして います" (send target-obj :speak-name)))))
-    (start-subscribe tf-force target-obj) (unix::sleep 2)
+        (speak-jp (format nil "~a を さがして います" (send target-obj :speak-name)))))
+    (start-subscribe tf-force target-obj)
+    (send *ri* :ros-wait 2.0 :spin-self t
+          :func-before-throw #'(lambda (sl) (stop-subscribe))) ;; attention-check ...
     (send target-obj :stamp (ros::time-now))
 
     (let* (current-object-coords
@@ -96,7 +98,8 @@
            (start-time (ros::time-now)) (detect-object-list))
       (ros::ros-info "check (timeout=~A, type=~A, tf-force=~A)" timeout type tf-force)
       (while (ros::ok)
-        (ros::spin-once) ;; target-obj was updated in objectdetection
+        (send *ri* :ros-wait 0.0 :spin t
+              :func-before-throw #'(lambda (sl) (stop-subscribe))) ;; attention-check ...  ;; target-obj was updated in objectdetection
         ;; check target-obj is previously detected
         (when (and (> (send (send target-obj :stamp) :to-sec)
                       (send start-time :to-sec))
@@ -157,6 +160,8 @@
                                              :difference-rotation current-object-coords))
                                  diff-rotation)) ;; moved a little -> found obj
                          ))
+            (send *ri* :ros-wait 0.0 :func-before-throw
+                  #'(lambda (sl) (stop-subscribe))) ;; attention-check ...
             (cond
              ((or (not (stringp type))
                   (substringp type (send target-obj :name))) ;; found target
@@ -195,9 +200,12 @@
               (speak-jp (format nil "~a は みつかりませんでした" (send target-obj :speak-name)))))
           (send target-obj :reset-coords)
           (send target-obj :transform tgt-cds)
+          (send *ri* :ros-wait 0.0) ;; attention-check ...
           (return-from check-detection nil))
-        (unix::usleep (* 50 1000))
+        (send *ri* :ros-wait 0.05 :spin-self t
+              :func-before-throw #'(lambda (sl) (stop-subscribe))) ;; attention-check ...
         ) ;; while (ros::ok)
       (stop-subscribe)
+      (send *ri* :ros-wait 0.05 :spin-self t) ;; attention-check ...
       target-obj
       )))

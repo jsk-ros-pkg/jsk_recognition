@@ -82,7 +82,6 @@ namespace pcl_ros
       tree->setInputCloud (cloud);
 
       vector<pcl::PointIndices> cluster_indices;
-      ROS_INFO("tolerance: %f", tolerance);
       impl_.setClusterTolerance (tolerance); // 2cm
       impl_.setMinClusterSize (minsize_);
       impl_.setMaxClusterSize (maxsize_);

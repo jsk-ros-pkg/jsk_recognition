@@ -2,6 +2,9 @@
 #include <ros/ros.h>
 #include <ros/names.h>
 
+#include <dynamic_reconfigure/server.h>
+#include "pcl_ros/FilterConfig.h"
+
 #include <pcl_ros/pcl_nodelet.h>
 
 #include <pcl/point_types.h>
@@ -13,6 +16,8 @@
 
 #include "jsk_pcl_ros/ClusterPointIndices.h"
 #include "jsk_pcl_ros/EuclideanSegment.h"
+
+#include "jsk_pcl_ros/EuclideanClusteringConfig.h"
 
 using namespace std;
 using namespace pcl;
@@ -27,6 +32,24 @@ namespace pcl_ros
     ~EuclideanClustering()
     {};
 
+  protected:
+    typedef jsk_pcl_ros::EuclideanClusteringConfig Config;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    boost::mutex mutex_;
+      
+    bool child_init(ros::NodeHandle &nh, bool &has_service)
+    {
+        ROS_INFO("chid_init is called");
+        has_service = true;
+        srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (nh);
+        dynamic_reconfigure::Server<Config>::CallbackType f =
+            boost::bind (&EuclideanClustering::config_callback, this, _1, _2);
+        srv_->setCallback (f);
+        return true;
+    }
+
+    void config_callback (Config &config, uint32_t level);
+      
   private:
     ros::Publisher result_pub_;
     ros::Subscriber sub_input_;
@@ -37,7 +60,8 @@ namespace pcl_ros
     double tolerance;
     int minsize_;
     int maxsize_;
-
+    EuclideanClusterExtraction<pcl::PointXYZ> impl_;
+      
     virtual void extract(const sensor_msgs::PointCloud2ConstPtr &input)
     {
       pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
@@ -58,13 +82,13 @@ namespace pcl_ros
       tree->setInputCloud (cloud);
 
       vector<pcl::PointIndices> cluster_indices;
-      EuclideanClusterExtraction<pcl::PointXYZ> ec;
-      ec.setClusterTolerance (tolerance); // 2cm
-      ec.setMinClusterSize (minsize_);
-      ec.setMaxClusterSize (maxsize_);
-      ec.setSearchMethod (tree);
-      ec.setInputCloud (cloud);
-      ec.extract (cluster_indices);
+      ROS_INFO("tolerance: %f", tolerance);
+      impl_.setClusterTolerance (tolerance); // 2cm
+      impl_.setMinClusterSize (minsize_);
+      impl_.setMaxClusterSize (maxsize_);
+      impl_.setSearchMethod (tree);
+      impl_.setInputCloud (cloud);
+      impl_.extract (cluster_indices);
 
       // Publish result indices
       jsk_pcl_ros::ClusterPointIndices result;
@@ -113,21 +137,21 @@ namespace pcl_ros
 #endif
 
       vector<pcl::PointIndices> cluster_indices;
-      EuclideanClusterExtraction<pcl::PointXYZ> ec;
+      EuclideanClusterExtraction<pcl::PointXYZ> impl_;
       double tor;
       if ( req.tolerance < 0) {
         tor = tolerance;
       } else {
         tor = req.tolerance;
       }
-      ec.setClusterTolerance (tor);
-      ec.setMinClusterSize (minsize_);
-      ec.setMaxClusterSize (maxsize_);
-      ec.setSearchMethod (tree);
-      ec.setInputCloud (cloud);
-      ec.extract (cluster_indices);
+      impl_.setClusterTolerance (tor);
+      impl_.setMinClusterSize (minsize_);
+      impl_.setMaxClusterSize (maxsize_);
+      impl_.setSearchMethod (tree);
+      impl_.setInputCloud (cloud);
+      impl_.extract (cluster_indices);
 
-      ROS_INFO("clusters %d", cluster_indices.size());
+      ROS_INFO("clusters: %lu", cluster_indices.size());
 
       res.output.resize( cluster_indices.size() );
       pcl::ExtractIndices<sensor_msgs::PointCloud2> ex;
@@ -149,6 +173,11 @@ namespace pcl_ros
 
       PCLNodelet::onInit();
 
+      srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+      dynamic_reconfigure::Server<Config>::CallbackType f =
+          boost::bind (&EuclideanClustering::config_callback, this, _1, _2);
+      srv_->setCallback (f);
+      
       pnh_->param("tolerance", tolerance, 0.02);
       ROS_INFO("tolerance : %f", tolerance);
 
@@ -166,4 +195,5 @@ namespace pcl_ros
                                         &EuclideanClustering::serviceCallback, this);
     }
   };
+    
 }

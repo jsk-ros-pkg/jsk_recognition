@@ -38,5 +38,16 @@
       </rosparam>
     </node>
 
+    <node pkg="nodelet" type="nodelet"
+          name="clustering"
+          args="load jsk_pcl/EuclideanClustering $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="/pcl_nodelet/passthrough_x/output" />
+      <rosparam>
+
+      </rosparam>
+    </node>
+    
+
   </group>                      <!-- pcl_nodelet -->
 </launch>

@@ -15,6 +15,7 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/segmentation/extract_clusters.h>
 #include <pcl/filters/extract_indices.h>
+#include <pcl/common/centroid.h>
 
 #include "jsk_pcl_ros/ClusterPointIndices.h"
 #include "jsk_pcl_ros/EuclideanSegment.h"
@@ -63,7 +64,7 @@ namespace pcl_ros
     EuclideanClusterExtraction<pcl::PointXYZ> impl_;
 
     // the list of COGs of each cluster
-    std::vector<pcl::PointCloud<pcl::PointXYZ> > cogs_;
+    std::vector<Eigen::Vector4f> cogs_;
 
     // the colors to be used to colorize
     std::vector<std_msgs::ColorRGBA> colors_;
@@ -72,11 +73,15 @@ namespace pcl_ros
     {
       pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_out (new pcl::PointCloud<pcl::PointXYZRGB>);
-
+      
       pcl::fromROSMsg(*input, *cloud);
       pcl::fromROSMsg(*input, *cloud_out);
 
-
+      if (cloud->points.size() == 0) {
+          ROS_WARN("empty input");
+          return;
+      }
+      
 #if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
       pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
       tree = boost::make_shared< pcl::search::KdTree<pcl::PointXYZ> > ();
@@ -98,7 +103,26 @@ namespace pcl_ros
       jsk_pcl_ros::ClusterPointIndices result;
       result.cluster_indices.resize(cluster_indices.size());
 
-      for (size_t i=0; i<cluster_indices.size(); i++)
+      if (cogs_.size() == 0)    // not initialized yet
+      {
+          pcl::ExtractIndices<pcl::PointXYZ> extract;
+          extract.setInputCloud(cloud);
+          for (size_t i = 0; i < cluster_indices.size(); i++)
+          {
+              // build pointcloud
+              pcl::PointCloud<pcl::PointXYZ>::Ptr segmented_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+              pcl::PointIndices::Ptr segmented_indices (new pcl::PointIndices);
+              for (size_t j = 0; j < cluster_indices[i].indices.size(); j++) {
+                  segmented_indices->indices.push_back(cluster_indices[i].indices[j]);
+              }
+              extract.setIndices(segmented_indices);
+              Eigen::Vector4f center;
+              pcl::compute3DCentroid(*segmented_cloud, center);
+              cogs_.push_back(center);
+          }
+      }
+      
+      for (size_t i = 0; i < cluster_indices.size(); i++)
       {
           result.cluster_indices[i].header = cluster_indices[i].header;
           result.cluster_indices[i].indices = cluster_indices[i].indices;

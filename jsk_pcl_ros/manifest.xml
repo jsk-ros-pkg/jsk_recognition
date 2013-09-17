@@ -18,6 +18,7 @@
   <depend package="nodelet" />
   <depend package="dynamic_reconfigure" />
   <depend package="std_srvs" />
+  <depend package="std_msgs" />
   <depend package="image_transport" />
   <depend package="image_geometry" />
 

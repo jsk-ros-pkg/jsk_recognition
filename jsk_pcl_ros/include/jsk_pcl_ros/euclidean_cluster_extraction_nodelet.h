@@ -2,6 +2,8 @@
 #include <ros/ros.h>
 #include <ros/names.h>
 
+#include <std_msgs/ColorRGBA.h>
+
 #include <dynamic_reconfigure/server.h>
 #include "pcl_ros/FilterConfig.h"
 
@@ -27,8 +29,17 @@ namespace pcl_ros
   class EuclideanClustering : public PCLNodelet
   {
   public:
+      
     EuclideanClustering()
-    {};
+    {
+        // initialize colors_
+        colors_.push_back(makeColor(1.0, 0.0, 0.0, 1.0));
+        colors_.push_back(makeColor(0.0, 1.0, 0.0, 1.0));
+        colors_.push_back(makeColor(0.0, 0.0, 1.0, 1.0));
+        colors_.push_back(makeColor(1.0, 1.0, 0.0, 1.0));
+        colors_.push_back(makeColor(1.0, 0.0, 1.0, 1.0));
+        colors_.push_back(makeColor(0.0, 1.0, 1.0, 1.0));
+    };
     ~EuclideanClustering()
     {};
 
@@ -36,18 +47,7 @@ namespace pcl_ros
     typedef jsk_pcl_ros::EuclideanClusteringConfig Config;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
-      
-    bool child_init(ros::NodeHandle &nh, bool &has_service)
-    {
-        ROS_INFO("chid_init is called");
-        has_service = true;
-        srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (nh);
-        dynamic_reconfigure::Server<Config>::CallbackType f =
-            boost::bind (&EuclideanClustering::config_callback, this, _1, _2);
-        srv_->setCallback (f);
-        return true;
-    }
-
+   
     void config_callback (Config &config, uint32_t level);
       
   private:
@@ -61,6 +61,12 @@ namespace pcl_ros
     int minsize_;
     int maxsize_;
     EuclideanClusterExtraction<pcl::PointXYZ> impl_;
+
+    // the list of COGs of each cluster
+    std::vector<pcl::PointCloud<pcl::PointXYZ> > cogs_;
+
+    // the colors to be used to colorize
+    std::vector<std_msgs::ColorRGBA> colors_;
       
     virtual void extract(const sensor_msgs::PointCloud2ConstPtr &input)
     {
@@ -102,19 +108,26 @@ namespace pcl_ros
 
       // Publish point cloud after clustering
       size_t number_of_clusters = cluster_indices.size();
-      for (size_t i=0; i<number_of_clusters; i++)
-        {
-              uint8_t r, g, b;
-              r = rand()%256;
-              g = rand()%256;
-              b = rand()%256;
-              uint32_t rgb = ((uint32_t)r<<16 | (uint32_t)g<<8 | (uint32_t)b);
-
+      
+      for (size_t i = 0, color_index = 0; i<number_of_clusters; i++)
+      {
+          if (color_index == colors_.size())
+              color_index = 0;
+          
+          uint8_t r, g, b;
+          std_msgs::ColorRGBA c = colors_[color_index];
+          r = (uint8_t)(c.r * 255);
+          g = (uint8_t)(c.g * 255);
+          b = (uint8_t)(c.b * 255);
+          uint32_t rgb = ((uint32_t)r<<16 | (uint32_t)g<<8 | (uint32_t)b);
+          
           for (size_t j=0; j<cluster_indices[i].indices.size(); j++)
-            {
+          {
               cloud_out->points[ cluster_indices[i].indices[j] ].rgb = *reinterpret_cast<float*>(&rgb);
-            }
-        }
+          }
+          
+          color_index++;
+      }
 
       pcl_pub_.publish(*cloud_out);
     }
@@ -164,6 +177,16 @@ namespace pcl_ros
       return true;
     }
 
+    static std_msgs::ColorRGBA makeColor(double r, double g, double b, double a)
+    {
+        std_msgs::ColorRGBA c;
+        c.r = r;
+        c.g = g;
+        c.b = b;
+        c.a = a;
+        return c;
+    }
+      
     virtual void onInit()
     {
       // boost::shared_ptr<ros::NodeHandle> pnh_;

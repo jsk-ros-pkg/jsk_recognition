@@ -99,10 +99,10 @@ namespace pcl_ros
       result.cluster_indices.resize(cluster_indices.size());
 
       for (size_t i=0; i<cluster_indices.size(); i++)
-        {
+      {
           result.cluster_indices[i].header = cluster_indices[i].header;
           result.cluster_indices[i].indices = cluster_indices[i].indices;
-        }
+      }
 
       result_pub_.publish(result);
 

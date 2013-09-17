@@ -70,7 +70,6 @@ namespace pcl_ros
       pcl::fromROSMsg(*input, *cloud);
       pcl::fromROSMsg(*input, *cloud_out);
 
-      ROS_INFO("subscribe input point cloud");
 
 #if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
       pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);

@@ -217,11 +217,8 @@ namespace pcl_ros
           if (pivot_table.size() != 0)
           {
               cluster_indices = pivotClusterIndices(pivot_table, cluster_indices);
-              cogs_ = computeCentroidsOfClusters(cloud, cluster_indices); // NB: not efficient
           }
-          else {                // just reset
-              cogs_ = computeCentroidsOfClusters(cloud, cluster_indices); // NB: not efficient
-          }
+          cogs_ = computeCentroidsOfClusters(cloud, cluster_indices); // NB: not efficient
       }
       
       for (size_t i = 0; i < cluster_indices.size(); i++)

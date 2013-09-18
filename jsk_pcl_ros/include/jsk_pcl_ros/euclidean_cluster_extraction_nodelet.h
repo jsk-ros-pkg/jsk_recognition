@@ -70,7 +70,69 @@ namespace pcl_ros
     // the colors to be used to colorize
     std::vector<std_msgs::ColorRGBA> colors_;
 
-    std::vector<Eigen::Vector4f>
+      static std::vector<pcl::PointIndices> pivotClusterIndices(std::vector<int>& pivot_table, std::vector<pcl::PointIndices>& cluster_indices)
+      {
+          std::vector<pcl::PointIndices> new_cluster_indices;
+          new_cluster_indices.resize(pivot_table.size());
+          for (size_t i = 0; i < pivot_table.size(); i++) {
+              new_cluster_indices[i] = cluster_indices[pivot_table[i]];
+          }
+          return new_cluster_indices;
+      }
+      
+    static std::vector<int> buildLabelTrackingPivotTable(double* D, std::vector<Eigen::Vector4f> cogs, std::vector<Eigen::Vector4f> new_cogs)
+    {
+          std::vector<int> pivot_table;
+          // initialize pivot table
+          pivot_table.resize(cogs.size());
+          for (size_t i = 0; i < pivot_table.size(); i++)
+              pivot_table[i] = i;
+          for (size_t pivot_counter = 0; pivot_counter < pivot_table.size();
+               pivot_counter++)
+          {
+              double minimum_distance = DBL_MAX;
+              size_t minimum_previous_index = 0;
+              size_t minimum_next_index = 0;
+              for (size_t i = 0; i < cogs.size(); i++)
+              {
+                  for (size_t j = 0; j < new_cogs.size(); j++)
+                  {
+                      double distance = D[i * cogs.size() + j];
+                      if (distance < minimum_distance)
+                      {
+                          minimum_previous_index = i;
+                          minimum_next_index = j;
+                      }
+                  }
+              }
+              pivot_table[minimum_previous_index] = minimum_next_index;
+              // fill the D matrix with DBL_MAX
+              for (size_t j = 0; j < new_cogs.size(); j++)
+              {
+                  D[minimum_previous_index * cogs.size() + j] = DBL_MAX;
+              }
+          }
+          return pivot_table;
+      }
+
+    static void computeDistanceMatrix(double* D,
+                                      std::vector<Eigen::Vector4f>& old_cogs,
+                                      std::vector<Eigen::Vector4f>& new_cogs)
+    {
+        for (size_t i = 0; i < old_cogs.size(); i++)
+        {
+            Eigen::Vector4f previous_cog = old_cogs[i];
+            for (size_t j = 0; j < new_cogs.size(); j++)
+            {
+                Eigen::Vector4f next_cog = new_cogs[j];
+                double distance = (next_cog - previous_cog).norm();
+                //D[i][j] = distance;
+                D[i * old_cogs.size() + j] = distance;
+            }
+        }
+    }
+      
+    static std::vector<Eigen::Vector4f>
     computeCentroidsOfClusters(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, std::vector<pcl::PointIndices> cluster_indices)
     {
         std::vector<Eigen::Vector4f> ret;
@@ -127,77 +189,23 @@ namespace pcl_ros
       jsk_pcl_ros::ClusterPointIndices result;
       result.cluster_indices.resize(cluster_indices.size());
       
-      if (cogs_.size() == 0)    // not initialized yet
+      if (cogs_.size() == 0 || cogs_.size() != cluster_indices.size())    // not initialized yet
       {
           cogs_ = computeCentroidsOfClusters(cloud, cluster_indices);
       }
-      else {
-          if (cogs_.size() == cluster_indices.size())
-          { // tracking the labels
-              ROS_INFO("computing distance matrix");
-              // compute distance matrix
-              // D[i][j] --> distance between the i-th previous cluster
-              //             and the current j-th cluster
-              std::vector<Eigen::Vector4f> new_cogs
-                  = computeCentroidsOfClusters(cloud, cluster_indices);
-              double D[cogs_.size()][new_cogs.size()];
-              
-              for (size_t i = 0; i < cogs_.size(); i++)
-              {
-                  Eigen::Vector4f previous_cog = cogs_[i];
-                  for (size_t j = 0; j < new_cogs.size(); j++)
-                  {
-                      Eigen::Vector4f next_cog = new_cogs[j];
-                      double distance = (next_cog - previous_cog).norm();
-                      D[i][j] = distance;
-                  }
-              }
-              // lookup minimum distance pair and build pivot_table
-              std::vector<int> pivot_table;
-              // initialize pivot table
-              pivot_table.resize(cluster_indices.size());
-              for (size_t i = 0; i < pivot_table.size(); i++)
-                  pivot_table[i] = i;
-              for (size_t pivot_counter = 0; pivot_counter < pivot_table.size();
-                   pivot_counter++)
-              {
-                  double minimum_distance = DBL_MAX;
-                  size_t minimum_previous_index = 0;
-                  size_t minimum_next_index = 0;
-                  
-                  for (size_t i = 0; i < cogs_.size(); i++)
-                  {
-                      for (size_t j = 0; j < new_cogs.size(); j++)
-                      {
-                          double distance = D[i][j];
-                          if (distance < minimum_distance)
-                          {
-                              minimum_previous_index = i;
-                              minimum_next_index = j;
-                          }
-                      }
-                  }
-                  pivot_table[minimum_previous_index] = minimum_next_index;
-                  // fill the D matrix with DBL_MAX
-                  for (size_t j = 0; j < new_cogs.size(); j++)
-                  {
-                      D[minimum_previous_index][j] = DBL_MAX;
-                  }
-              }
-              // pivoting
-              std::vector<pcl::PointIndices> new_cluster_indices;
-              new_cluster_indices.resize(pivot_table.size());
-              for (size_t i = 0; i < pivot_table.size(); i++) {
-                  new_cluster_indices[i] = cluster_indices[pivot_table[i]];
-              }
-              cluster_indices = new_cluster_indices;
-              cogs_ = computeCentroidsOfClusters(cloud, cluster_indices); // NB: not efficient
-          }
-          else
-          {                // rehash
-              cogs_ = computeCentroidsOfClusters(cloud, cluster_indices);
-          }
-          
+      else
+      {// tracking the labels
+          ROS_INFO("computing distance matrix");
+          // compute distance matrix
+          // D[i][j] --> distance between the i-th previous cluster
+          //             and the current j-th cluster
+          std::vector<Eigen::Vector4f> new_cogs
+              = computeCentroidsOfClusters(cloud, cluster_indices);
+          double D[cogs_.size() * new_cogs.size()];
+          computeDistanceMatrix(D, cogs_, new_cogs);
+          std::vector<int> pivot_table = buildLabelTrackingPivotTable(D, cogs_, new_cogs);
+          cluster_indices = pivotClusterIndices(pivot_table, cluster_indices);
+          cogs_ = computeCentroidsOfClusters(cloud, cluster_indices); // NB: not efficient
       }
       
       for (size_t i = 0; i < cluster_indices.size(); i++)

@@ -40,6 +40,7 @@ namespace pcl_ros
         colors_.push_back(makeColor(1.0, 1.0, 0.0, 1.0));
         colors_.push_back(makeColor(1.0, 0.0, 1.0, 1.0));
         colors_.push_back(makeColor(0.0, 1.0, 1.0, 1.0));
+        colors_.push_back(makeColor(1.0, 1.0, 1.0, 1.0));
     };
     ~EuclideanClustering()
     {};

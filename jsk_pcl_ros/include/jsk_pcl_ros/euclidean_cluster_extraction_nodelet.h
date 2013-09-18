@@ -199,7 +199,7 @@ namespace pcl_ros
       jsk_pcl_ros::ClusterPointIndices result;
       result.cluster_indices.resize(cluster_indices.size());
       
-      if (cogs_.size() == 0 || cogs_.size() != cluster_indices.size())    // not initialized yet
+      if (cogs_.size() == 0 || cogs_.size() != cluster_indices.size())    
       {
           cogs_ = computeCentroidsOfClusters(cloud, cluster_indices);
       }

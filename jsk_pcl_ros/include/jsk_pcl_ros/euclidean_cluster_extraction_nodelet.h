@@ -68,6 +68,29 @@ namespace pcl_ros
 
     // the colors to be used to colorize
     std::vector<std_msgs::ColorRGBA> colors_;
+
+    std::vector<Eigen::Vector4f>
+    computeCentroidsOfClusters(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, std::vector<pcl::PointIndices> cluster_indices)
+    {
+        std::vector<Eigen::Vector4f> ret;
+        pcl::ExtractIndices<pcl::PointXYZ> extract;
+        extract.setInputCloud(cloud);
+        for (size_t i = 0; i < cluster_indices.size(); i++)
+        {
+            // build pointcloud
+            pcl::PointCloud<pcl::PointXYZ>::Ptr segmented_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+            pcl::PointIndices::Ptr segmented_indices (new pcl::PointIndices);
+            for (size_t j = 0; j < cluster_indices[i].indices.size(); j++)
+            {
+                segmented_indices->indices.push_back(cluster_indices[i].indices[j]);
+            }
+            extract.setIndices(segmented_indices);
+            Eigen::Vector4f center;
+            pcl::compute3DCentroid(*segmented_cloud, center);
+            ret.push_back(center);
+        }
+        return ret;
+    }
       
     virtual void extract(const sensor_msgs::PointCloud2ConstPtr &input)
     {
@@ -91,7 +114,7 @@ namespace pcl_ros
 #endif
       tree->setInputCloud (cloud);
 
-      vector<pcl::PointIndices> cluster_indices;
+      std::vector<pcl::PointIndices> cluster_indices;
       impl_.setClusterTolerance (tolerance); // 2cm
       impl_.setMinClusterSize (minsize_);
       impl_.setMaxClusterSize (maxsize_);
@@ -105,21 +128,7 @@ namespace pcl_ros
 
       if (cogs_.size() == 0)    // not initialized yet
       {
-          pcl::ExtractIndices<pcl::PointXYZ> extract;
-          extract.setInputCloud(cloud);
-          for (size_t i = 0; i < cluster_indices.size(); i++)
-          {
-              // build pointcloud
-              pcl::PointCloud<pcl::PointXYZ>::Ptr segmented_cloud (new pcl::PointCloud<pcl::PointXYZ>);
-              pcl::PointIndices::Ptr segmented_indices (new pcl::PointIndices);
-              for (size_t j = 0; j < cluster_indices[i].indices.size(); j++) {
-                  segmented_indices->indices.push_back(cluster_indices[i].indices[j]);
-              }
-              extract.setIndices(segmented_indices);
-              Eigen::Vector4f center;
-              pcl::compute3DCentroid(*segmented_cloud, center);
-              cogs_.push_back(center);
-          }
+          cogs_ = computeCentroidsOfClusters(cloud, cluster_indices);
       }
       
       for (size_t i = 0; i < cluster_indices.size(); i++)
@@ -138,12 +147,7 @@ namespace pcl_ros
           if (color_index == colors_.size())
               color_index = 0;
           
-          uint8_t r, g, b;
-          std_msgs::ColorRGBA c = colors_[color_index];
-          r = (uint8_t)(c.r * 255);
-          g = (uint8_t)(c.g * 255);
-          b = (uint8_t)(c.b * 255);
-          uint32_t rgb = ((uint32_t)r<<16 | (uint32_t)g<<8 | (uint32_t)b);
+          uint32_t rgb = colorRGBAToUInt32(colors_[color_index]);
           
           for (size_t j=0; j<cluster_indices[i].indices.size(); j++)
           {
@@ -210,6 +214,16 @@ namespace pcl_ros
         c.a = a;
         return c;
     }
+
+    static uint32_t colorRGBAToUInt32(std_msgs::ColorRGBA c)
+    {
+        uint8_t r, g, b;
+        r = (uint8_t)(c.r * 255);
+        g = (uint8_t)(c.g * 255);
+        b = (uint8_t)(c.b * 255);
+        return ((uint32_t)r<<16 | (uint32_t)g<<8 | (uint32_t)b);
+    }
+
       
     virtual void onInit()
     {

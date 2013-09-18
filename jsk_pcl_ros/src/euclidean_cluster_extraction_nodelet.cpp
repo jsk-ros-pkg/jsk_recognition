@@ -9,6 +9,9 @@ namespace pcl_ros
         if (tolerance != config.tolerance) {
             tolerance = config.tolerance;
         }
+        if (label_tracking_tolerance != config.label_tracking_tolerance) {
+            label_tracking_tolerance = config.label_tracking_tolerance;
+        }
         if (maxsize_ != config.max_size) {
             maxsize_ = config.max_size;
         }

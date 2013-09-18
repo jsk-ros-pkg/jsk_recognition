@@ -60,6 +60,7 @@ namespace pcl_ros
     ros::ServiceServer service_;
 
     double tolerance;
+    double label_tracking_tolerance;
     int minsize_;
     int maxsize_;
     EuclideanClusterExtraction<pcl::PointXYZ> impl_;
@@ -70,17 +71,19 @@ namespace pcl_ros
     // the colors to be used to colorize
     std::vector<std_msgs::ColorRGBA> colors_;
 
-      static std::vector<pcl::PointIndices> pivotClusterIndices(std::vector<int>& pivot_table, std::vector<pcl::PointIndices>& cluster_indices)
-      {
-          std::vector<pcl::PointIndices> new_cluster_indices;
-          new_cluster_indices.resize(pivot_table.size());
-          for (size_t i = 0; i < pivot_table.size(); i++) {
-              new_cluster_indices[i] = cluster_indices[pivot_table[i]];
-          }
-          return new_cluster_indices;
-      }
+    static std::vector<pcl::PointIndices> pivotClusterIndices(std::vector<int>& pivot_table, std::vector<pcl::PointIndices>& cluster_indices)
+    {
+        std::vector<pcl::PointIndices> new_cluster_indices;
+        new_cluster_indices.resize(pivot_table.size());
+        for (size_t i = 0; i < pivot_table.size(); i++)
+        {
+            new_cluster_indices[i] = cluster_indices[pivot_table[i]];
+        }
+        return new_cluster_indices;
+    }
       
-    static std::vector<int> buildLabelTrackingPivotTable(double* D, std::vector<Eigen::Vector4f> cogs, std::vector<Eigen::Vector4f> new_cogs)
+   static std::vector<int> buildLabelTrackingPivotTable(double* D, std::vector<Eigen::Vector4f> cogs, std::vector<Eigen::Vector4f> new_cogs,
+                                                        double label_tracking_tolerance)
     {
           std::vector<int> pivot_table;
           // initialize pivot table
@@ -104,6 +107,13 @@ namespace pcl_ros
                           minimum_next_index = j;
                       }
                   }
+              }
+              if (minimum_distance > label_tracking_tolerance)
+              {
+                  ROS_WARN("minimum tracking distance exceeds tolerance: %f > %f",
+                           minimum_distance, label_tracking_tolerance);
+                  std::vector<int> dummy;
+                  return dummy;
               }
               pivot_table[minimum_previous_index] = minimum_next_index;
               // fill the D matrix with DBL_MAX
@@ -203,9 +213,15 @@ namespace pcl_ros
               = computeCentroidsOfClusters(cloud, cluster_indices);
           double D[cogs_.size() * new_cogs.size()];
           computeDistanceMatrix(D, cogs_, new_cogs);
-          std::vector<int> pivot_table = buildLabelTrackingPivotTable(D, cogs_, new_cogs);
-          cluster_indices = pivotClusterIndices(pivot_table, cluster_indices);
-          cogs_ = computeCentroidsOfClusters(cloud, cluster_indices); // NB: not efficient
+          std::vector<int> pivot_table = buildLabelTrackingPivotTable(D, cogs_, new_cogs, label_tracking_tolerance);
+          if (pivot_table.size() != 0)
+          {
+              cluster_indices = pivotClusterIndices(pivot_table, cluster_indices);
+              cogs_ = computeCentroidsOfClusters(cloud, cluster_indices); // NB: not efficient
+          }
+          else {                // just reset
+              cogs_ = computeCentroidsOfClusters(cloud, cluster_indices); // NB: not efficient
+          }
       }
       
       for (size_t i = 0; i < cluster_indices.size(); i++)
@@ -316,6 +332,8 @@ namespace pcl_ros
       
       pnh_->param("tolerance", tolerance, 0.02);
       ROS_INFO("tolerance : %f", tolerance);
+      pnh_->param("label_tracking_tolerance", label_tracking_tolerance, 0.02);
+      ROS_INFO("label_tracking_tolerance : %f", tolerance);
 
       pnh_->param("max_size", maxsize_, 25000);
       ROS_INFO("max cluster size : %d", maxsize_);

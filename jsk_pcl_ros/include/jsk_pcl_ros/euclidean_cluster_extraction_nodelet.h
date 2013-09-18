@@ -131,6 +131,31 @@ namespace pcl_ros
       {
           cogs_ = computeCentroidsOfClusters(cloud, cluster_indices);
       }
+      else {
+          if (cogs_.size() == cluster_indices.size()) { // tracking the labels
+              ROS_INFO("computing distance matrix");
+              // compute distance matrix
+              // D[i][j] --> distance between the i-th previous cluster
+              //             and the current j-th cluster
+              std::vector<Eigen::Vector4f> new_cogs
+                  = computeCentroidsOfClusters(cloud, cluster_indices);
+              double D[cogs_.size()][new_cogs.size()];
+              for (size_t i = 0; i < cogs_.size(); i++)
+              {
+                  Eigen::Vector4f previous_cog = cogs_[i];
+                  for (size_t j = 0; j < new_cogs.size(); j++)
+                  {
+                      Eigen::Vector4f next_cog = new_cogs[j];
+                      double distance = (next_cog - previous_cog).norm();
+                      D[i][j] = distance;
+                  }
+              }
+          }
+          else {                // rehash
+              cogs_ = computeCentroidsOfClusters(cloud, cluster_indices);
+          }
+          
+      }
       
       for (size_t i = 0; i < cluster_indices.size(); i++)
       {

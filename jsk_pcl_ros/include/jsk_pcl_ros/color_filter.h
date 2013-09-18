@@ -140,7 +140,8 @@ namespace pcl
       pcl::IndicesConstPtr ids_c = filter_instance_.getRemovedIndices();
       pcl::IndicesPtr ids (new std::vector<int>);
       ids->resize (ids_c->size());
-      for (int i = 0; i < ids_c->size(); i++) (*ids)[i] = (*ids_c)[i];
+      for (size_t i = 0; i < ids_c->size(); i++)
+          (*ids)[i] = (*ids_c)[i];
 
       pcl::ExtractIndices< sensor_msgs::PointCloud2 > ei;
       ei.setInputCloud (input_);
@@ -280,7 +281,8 @@ namespace pcl
       pcl::IndicesConstPtr ids_c = filter_instance_.getRemovedIndices();
       pcl::IndicesPtr ids (new std::vector<int>);
       ids->resize (ids_c->size());
-      for (int i = 0; i < ids_c->size(); i++) (*ids)[i] = (*ids_c)[i];
+      for (size_t i = 0; i < ids_c->size(); i++)
+          (*ids)[i] = (*ids_c)[i];
 
       pcl::ExtractIndices< sensor_msgs::PointCloud2 > ei;
       ei.setInputCloud (input_);

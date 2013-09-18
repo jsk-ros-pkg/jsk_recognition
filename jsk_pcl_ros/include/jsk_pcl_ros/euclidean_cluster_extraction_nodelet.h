@@ -199,11 +199,7 @@ namespace pcl_ros
       jsk_pcl_ros::ClusterPointIndices result;
       result.cluster_indices.resize(cluster_indices.size());
       
-      if (cogs_.size() == 0 || cogs_.size() != cluster_indices.size())    
-      {
-          cogs_ = computeCentroidsOfClusters(cloud, cluster_indices);
-      }
-      else
+      if (cogs_.size() != 0 && cogs_.size() == cluster_indices.size())    
       {// tracking the labels
           ROS_INFO("computing distance matrix");
           // compute distance matrix
@@ -218,8 +214,8 @@ namespace pcl_ros
           {
               cluster_indices = pivotClusterIndices(pivot_table, cluster_indices);
           }
-          cogs_ = computeCentroidsOfClusters(cloud, cluster_indices); // NB: not efficient
       }
+      cogs_ = computeCentroidsOfClusters(cloud, cluster_indices); // NB: not efficient
       
       for (size_t i = 0; i < cluster_indices.size(); i++)
       {

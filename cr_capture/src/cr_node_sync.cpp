@@ -21,7 +21,7 @@
 #include <tf/transform_listener.h>
 
 #include <opencv/cv.h>
-#include <cv_bridge/CvBridge.h>
+#include <cv_bridge/cv_bridge.h>
 
 #include "SRCalibratedLib.h"
 #include "CRLib.h"

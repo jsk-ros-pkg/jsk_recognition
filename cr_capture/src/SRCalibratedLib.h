@@ -5,7 +5,7 @@
 #include <sensor_msgs/PointCloud.h>
 
 #include <opencv/cv.h>
-#include <cv_bridge/CvBridge.h>
+#include <cv_bridge/cv_bridge.h>
 
 class SRCalibratedLib {
 private:

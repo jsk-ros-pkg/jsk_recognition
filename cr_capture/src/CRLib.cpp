@@ -15,8 +15,8 @@ CRLib::setLeftImg (const sensor_msgs::ImageConstPtr &img,
   {
       ipl_left_ = cvCreateImage(cvSize(img->width, img->height), IPL_DEPTH_8U, 3);
   }
-  sensor_msgs::CvBridge bridge;
-  cvResize(bridge.imgMsgToCv(img, "rgb8"), ipl_left_);
+  IplImage iplimg(cv_bridge::toCvCopy(img, "rgb8")->image);
+  cvResize(&iplimg, ipl_left_);
   info_left_ = *info;
 }
 
@@ -29,8 +29,8 @@ CRLib::setRightImg (const sensor_msgs::ImageConstPtr &img,
   {
     ipl_right_ = cvCreateImage(cvSize(img->width, img->height), IPL_DEPTH_8U, 3);
   }
-  sensor_msgs::CvBridge bridge;
-  cvResize(bridge.imgMsgToCv(img, "rgb8"), ipl_right_);
+  IplImage iplimg(cv_bridge::toCvCopy(img, "rgb8")->image);
+  cvResize(&iplimg, ipl_right_);
   info_right_ = *info;
 }
 

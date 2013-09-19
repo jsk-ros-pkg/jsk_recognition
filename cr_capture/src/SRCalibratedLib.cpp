@@ -129,8 +129,8 @@ SRCalibratedLib::setRengeImg (const sensor_msgs::ImageConstPtr &img_conf,
     srheight = img_depth->height;
   }
 
-  sensor_msgs::CvBridge bridge;
-  cvResize(bridge.imgMsgToCv(img_depth), ipl_depth_); // pass through
+  IplImage iplimg(cv_bridge::toCvCopy(img_depth)->image); // pass through
+  cvResize(&iplimg, ipl_depth_);
   info_depth_ = *info;
 
   if ( img_conf != img_depth && img_intent != img_depth )

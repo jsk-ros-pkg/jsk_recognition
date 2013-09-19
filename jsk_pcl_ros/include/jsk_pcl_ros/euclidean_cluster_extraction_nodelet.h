@@ -22,6 +22,9 @@
 
 #include "jsk_pcl_ros/EuclideanClusteringConfig.h"
 
+#include<Eigen/StdVector>
+
+
 using namespace std;
 using namespace pcl;
 
@@ -66,7 +69,7 @@ namespace pcl_ros
     EuclideanClusterExtraction<pcl::PointXYZ> impl_;
 
     // the list of COGs of each cluster
-    std::vector<Eigen::Vector4f> cogs_;
+    std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > cogs_;
 
     // the colors to be used to colorize
     std::vector<std_msgs::ColorRGBA> colors_;
@@ -82,7 +85,9 @@ namespace pcl_ros
         return new_cluster_indices;
     }
       
-   static std::vector<int> buildLabelTrackingPivotTable(double* D, std::vector<Eigen::Vector4f> cogs, std::vector<Eigen::Vector4f> new_cogs,
+   static std::vector<int> buildLabelTrackingPivotTable(double* D,
+                                                        std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > cogs,
+                                                        std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > new_cogs,
                                                         double label_tracking_tolerance)
     {
           std::vector<int> pivot_table;
@@ -101,8 +106,10 @@ namespace pcl_ros
                   for (size_t j = 0; j < new_cogs.size(); j++)
                   {
                       double distance = D[i * cogs.size() + j];
+                      //ROS_INFO("distance %lux%lu: %f", i, j, distance);
                       if (distance < minimum_distance)
                       {
+                          minimum_distance = distance;
                           minimum_previous_index = i;
                           minimum_next_index = j;
                       }
@@ -126,8 +133,8 @@ namespace pcl_ros
       }
 
     static void computeDistanceMatrix(double* D,
-                                      std::vector<Eigen::Vector4f>& old_cogs,
-                                      std::vector<Eigen::Vector4f>& new_cogs)
+                                      std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> >& old_cogs,
+                                      std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> >& new_cogs)
     {
         for (size_t i = 0; i < old_cogs.size(); i++)
         {
@@ -136,18 +143,25 @@ namespace pcl_ros
             {
                 Eigen::Vector4f next_cog = new_cogs[j];
                 double distance = (next_cog - previous_cog).norm();
+                // ROS_INFO("row distance (%f, %f, %f) -- (%f, %f, %f)",
+                //          next_cog[0], next_cog[1], next_cog[2],
+                //         previous_cog[0], previous_cog[1], previous_cog[2]);
+                    
+                //ROS_INFO("raw distance %lux%lu: %f", i, j, distance);
                 //D[i][j] = distance;
                 D[i * old_cogs.size() + j] = distance;
             }
         }
     }
       
-    static std::vector<Eigen::Vector4f>
-    computeCentroidsOfClusters(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, std::vector<pcl::PointIndices> cluster_indices)
+    static void
+    computeCentroidsOfClusters(std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> >& ret,
+                               pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
+                               std::vector<pcl::PointIndices> cluster_indices)
     {
-        std::vector<Eigen::Vector4f> ret;
         pcl::ExtractIndices<pcl::PointXYZ> extract;
         extract.setInputCloud(cloud);
+        ret.resize(cluster_indices.size());
         for (size_t i = 0; i < cluster_indices.size(); i++)
         {
             // build pointcloud
@@ -158,11 +172,11 @@ namespace pcl_ros
                 segmented_indices->indices.push_back(cluster_indices[i].indices[j]);
             }
             extract.setIndices(segmented_indices);
+            extract.filter(*segmented_cloud);
             Eigen::Vector4f center;
             pcl::compute3DCentroid(*segmented_cloud, center);
-            ret.push_back(center);
+            ret[i] = center;
         }
-        return ret;
     }
       
     virtual void extract(const sensor_msgs::PointCloud2ConstPtr &input)
@@ -194,28 +208,42 @@ namespace pcl_ros
       impl_.setSearchMethod (tree);
       impl_.setInputCloud (cloud);
       impl_.extract (cluster_indices);
-
+      if (cluster_indices.size() == 0) {
+          ROS_WARN("empty cluster");
+          return;               // do nothing
+      }
       // Publish result indices
       jsk_pcl_ros::ClusterPointIndices result;
       result.cluster_indices.resize(cluster_indices.size());
       
       if (cogs_.size() != 0 && cogs_.size() == cluster_indices.size())    
       {// tracking the labels
-          ROS_INFO("computing distance matrix");
+          //ROS_INFO("computing distance matrix");
           // compute distance matrix
           // D[i][j] --> distance between the i-th previous cluster
           //             and the current j-th cluster
-          std::vector<Eigen::Vector4f> new_cogs
-              = computeCentroidsOfClusters(cloud, cluster_indices);
+          std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > new_cogs;
+          computeCentroidsOfClusters(new_cogs, cloud, cluster_indices);
           double D[cogs_.size() * new_cogs.size()];
           computeDistanceMatrix(D, cogs_, new_cogs);
           std::vector<int> pivot_table = buildLabelTrackingPivotTable(D, cogs_, new_cogs, label_tracking_tolerance);
+          // print pivot table
+          // ROS_INFO("pivoting");
+          // for (size_t i = 0; i < pivot_table.size(); i++)
+          // {
+          //     ROS_INFO("%lu -> %d", i, pivot_table[i]);
+          // }
           if (pivot_table.size() != 0)
           {
               cluster_indices = pivotClusterIndices(pivot_table, cluster_indices);
           }
       }
-      cogs_ = computeCentroidsOfClusters(cloud, cluster_indices); // NB: not efficient
+      else {
+          ROS_WARN("reset tracking");
+      }
+      std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > tmp_cogs;
+      computeCentroidsOfClusters(tmp_cogs, cloud, cluster_indices); // NB: not efficient
+      cogs_ = tmp_cogs;
       
       for (size_t i = 0; i < cluster_indices.size(); i++)
       {

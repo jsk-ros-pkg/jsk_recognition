@@ -114,8 +114,8 @@ public:
     }
     ROS_INFO("rotation : [%f, %f, %f, %f]", trans_quat[0], trans_quat[1],
              trans_quat[2], trans_quat[3]);
-    btQuaternion btq(trans_quat[0], trans_quat[1], trans_quat[2], trans_quat[3]);
-    btVector3 btp(trans_pos[0], trans_pos[1], trans_pos[2]);
+    tf::Quaternion btq(trans_quat[0], trans_quat[1], trans_quat[2], trans_quat[3]);
+    tf::Vector3 btp(trans_pos[0], trans_pos[1], trans_pos[2]);
     cr_lib_.cam_trans.setOrigin(btp);
     cr_lib_.cam_trans.setRotation(btq);
 

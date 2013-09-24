@@ -35,7 +35,9 @@
 
 #include "jsk_pcl_ros/cluster_point_indices_decomposer.h"
 #include <pluginlib/class_list_macros.h>
+#include <pcl/filters/extract_indices.h>
 
+#include <boost/format.hpp>
 namespace jsk_pcl_ros
 {
   ClusterPointIndicesDecomposer::ClusterPointIndicesDecomposer() {}
@@ -43,20 +45,52 @@ namespace jsk_pcl_ros
   void ClusterPointIndicesDecomposer::onInit()
   {
     PCLNodelet::onInit();
-    sub_input_ = pnh_->subscribe("input", 1, &ClusterPointIndicesDecomposer::extract, this);
+    pnh_.reset (new ros::NodeHandle (getPrivateNodeHandle ()));
+    sub_input_.subscribe(*pnh_, "input", 1);
+    sub_target_.subscribe(*pnh_, "target", 1);
+    //sync_ = boost::make_shared<message_filters::TimeSynchronizer<sensor_msgs::PointCloud2, jsk_pcl_ros::ClusterPointIndices> >(input_sub, target_sub, 100);
+    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+    sync_->connectInput(sub_input_, sub_target_);
+    sync_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2));
   }
   
   void ClusterPointIndicesDecomposer::extract
-  (const jsk_pcl_ros::ClusterPointIndicesConstPtr &input)
+  (const sensor_msgs::PointCloud2ConstPtr &input,
+   const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices)
   {
+    allocatePublishers(indices->cluster_indices.size());
+    pcl::ExtractIndices<pcl::PointXYZRGB> extract;
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::fromROSMsg(*input, *cloud);
+    extract.setInputCloud(cloud);
+    for (size_t i = 0; i < indices->cluster_indices.size(); i++)
+    {
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+      pcl::PointIndices::Ptr segmented_indices (new pcl::PointIndices);
+      for (size_t j = 0; j < indices->cluster_indices[i].indices.size(); j++)
+      {
+        segmented_indices->indices.push_back(indices->cluster_indices[i].indices[j]);
+      }
+      extract.setIndices(segmented_indices);
+      extract.filter(*segmented_cloud);
+      sensor_msgs::PointCloud2::Ptr out_cloud(new sensor_msgs::PointCloud2);
+      pcl::toROSMsg(*segmented_cloud, *out_cloud);
+      publishers_[i].publish(out_cloud);
+    }
     
   }
 
   void ClusterPointIndicesDecomposer::allocatePublishers(size_t num)
   {
-    if (num > publishers_.size()) {
-      ros::Publisher publisher = pnh_->advertise<sensor_msgs::PointCloud2>("foo", 1);
-      publishers_.push_back(publisher);
+    if (num > publishers_.size())
+    {
+        for (size_t i = publishers_.size(); i < num; i++)
+        {
+            std::string topic_name = (boost::format("output%02u") % (i)).str();
+            ROS_INFO("advertising %s", topic_name.c_str());
+            ros::Publisher publisher = pnh_->advertise<sensor_msgs::PointCloud2>(topic_name, 1);
+            publishers_.push_back(publisher);
+        }
     }
   }
   

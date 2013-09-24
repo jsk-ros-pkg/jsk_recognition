@@ -252,7 +252,7 @@ namespace pcl_ros
       // Publish result indices
       jsk_pcl_ros::ClusterPointIndices result;
       result.cluster_indices.resize(cluster_indices.size());
-      
+      result.header = input->header;
       if (cogs_.size() != 0 && cogs_.size() == cluster_indices.size())    
       {// tracking the labels
           //ROS_INFO("computing distance matrix");

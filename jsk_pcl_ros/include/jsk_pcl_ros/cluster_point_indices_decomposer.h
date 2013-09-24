@@ -42,7 +42,9 @@
 #include "jsk_pcl_ros/ClusterPointIndices.h"
 #include "sensor_msgs/PointCloud2.h"
 #include <pcl_ros/pcl_nodelet.h>
-
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
 #include <pcl/point_types.h>
 #include <pcl/impl/point_types.hpp>
 
@@ -51,13 +53,19 @@ namespace jsk_pcl_ros
   class ClusterPointIndicesDecomposer: public pcl_ros::PCLNodelet
   {
   public:
+    typedef message_filters::sync_policies::ExactTime< sensor_msgs::PointCloud2,
+                                                       jsk_pcl_ros::ClusterPointIndices > SyncPolicy;
     ClusterPointIndicesDecomposer();
     virtual ~ClusterPointIndicesDecomposer();
     virtual void onInit();
-    virtual void extract(const jsk_pcl_ros::ClusterPointIndicesConstPtr &input);
+    virtual void extract(const sensor_msgs::PointCloud2ConstPtr &point,
+                         const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices);
   protected:
     boost::shared_ptr<ros::NodeHandle> pnh_;
-    ros::Subscriber sub_input_;
+    //ros::Subscriber sub_input_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
+    message_filters::Subscriber<jsk_pcl_ros::ClusterPointIndices> sub_target_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     std::vector<ros::Publisher> publishers_;
 
     virtual void allocatePublishers(size_t num);

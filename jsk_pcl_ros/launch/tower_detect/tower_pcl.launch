@@ -47,6 +47,17 @@
 
       </rosparam>
     </node>
+
+   <node pkg="nodelet" type="nodelet"
+          name="cluster_decomposer"
+          args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="/pcl_nodelet/passthrough_x/output" />
+      <remap from="~target" to="/pcl_nodelet/clustering/output" />
+      <rosparam>
+
+      </rosparam>
+    </node>
     
 
   </group>                      <!-- pcl_nodelet -->

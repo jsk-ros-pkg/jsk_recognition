@@ -1,3 +1,4 @@
+// -*- mode: C++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
@@ -32,7 +33,9 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-// -*- mode: C++ -*-
+#ifndef JSK_PCL_ROS_EUCLIDEAN_CLUSTER_EXTRACTION_NODELET_H_
+#define JSK_PCL_ROS_EUCLIDEAN_CLUSTER_EXTRACTION_NODELET_H_
+
 #include <ros/ros.h>
 #include <ros/names.h>
 
@@ -79,7 +82,7 @@ namespace pcl_ros
         colors_.push_back(makeColor(0.0, 1.0, 1.0, 1.0));
         colors_.push_back(makeColor(1.0, 1.0, 1.0, 1.0));
     };
-    ~EuclideanClustering()
+    virtual ~EuclideanClustering()
     {};
 
   protected:
@@ -406,3 +409,5 @@ namespace pcl_ros
   };
     
 }
+
+#endif

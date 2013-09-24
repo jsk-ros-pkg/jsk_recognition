@@ -37,6 +37,7 @@ rosbuild_add_library (jsk_pcl_ros
   src/depth_image_creator_nodelet.cpp
   src/pointcloud_screenpoint_nodelet.cpp
   src/euclidean_cluster_extraction_nodelet.cpp
+  src/cluster_point_indices_decomposer_nodelet.cpp
 )
 
 rosbuild_add_compile_flags (jsk_pcl_ros ${SSE_FLAGS})
@@ -50,6 +51,7 @@ rosbuild_genmsg()
 rosbuild_gensrv()
 
 rosbuild_add_executable(pointcloud_screenpoint src/pointcloud_screenpoint.cpp)
+rosbuild_add_executable(cluster_point_indices_decomposer.cpp src/cluster_point_indices_decomposer.cpp)
 rosbuild_add_executable(depth_image_creator src/depth_image_creator.cpp)
 rosbuild_add_executable(euclidean_cluster_extraction src/euclidean_cluster_extraction.cpp)
 # roslaunch documentation

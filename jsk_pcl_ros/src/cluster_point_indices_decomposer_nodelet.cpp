@@ -36,6 +36,32 @@
 #include "jsk_pcl_ros/cluster_point_indices_decomposer.h"
 #include <pluginlib/class_list_macros.h>
 
+namespace jsk_pcl_ros
+{
+  ClusterPointIndicesDecomposer::ClusterPointIndicesDecomposer() {}
+  ClusterPointIndicesDecomposer::~ClusterPointIndicesDecomposer() {}
+  void ClusterPointIndicesDecomposer::onInit()
+  {
+    PCLNodelet::onInit();
+    sub_input_ = pnh_->subscribe("input", 1, &ClusterPointIndicesDecomposer::extract, this);
+  }
+  
+  void ClusterPointIndicesDecomposer::extract
+  (const jsk_pcl_ros::ClusterPointIndicesConstPtr &input)
+  {
+    
+  }
+
+  void ClusterPointIndicesDecomposer::allocatePublishers(size_t num)
+  {
+    if (num > publishers_.size()) {
+      ros::Publisher publisher = pnh_->advertise<sensor_msgs::PointCloud2>("foo", 1);
+      publishers_.push_back(publisher);
+    }
+  }
+  
+}
+
 typedef jsk_pcl_ros::ClusterPointIndicesDecomposer ClusterPointIndicesDecomposer;
 PLUGINLIB_DECLARE_CLASS (jsk_pcl, ClusterPointIndicesDecomposer, ClusterPointIndicesDecomposer, nodelet::Nodelet);
 

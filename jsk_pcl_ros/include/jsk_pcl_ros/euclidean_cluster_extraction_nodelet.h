@@ -375,7 +375,6 @@ namespace pcl_ros
         return ((uint32_t)r<<16 | (uint32_t)g<<8 | (uint32_t)b);
     }
 
-      
     virtual void onInit()
     {
       // boost::shared_ptr<ros::NodeHandle> pnh_;

@@ -38,6 +38,7 @@ rosbuild_add_library (jsk_pcl_ros
   src/pointcloud_screenpoint_nodelet.cpp
   src/euclidean_cluster_extraction_nodelet.cpp
   src/cluster_point_indices_decomposer_nodelet.cpp
+  src/cluster_point_indices_decomposer_z_axis_nodelet.cpp
 )
 
 rosbuild_add_compile_flags (jsk_pcl_ros ${SSE_FLAGS})

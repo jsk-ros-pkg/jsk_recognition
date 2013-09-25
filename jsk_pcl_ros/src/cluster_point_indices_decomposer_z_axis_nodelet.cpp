@@ -1,4 +1,3 @@
-// -*- mode: C++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
@@ -33,26 +32,20 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_CLUSTER_POINT_INDICES_DECOMPOSER_Z_ORDER_H_
-#define JSK_PCL_ROS_CLUSTER_POINT_INDICES_DECOMPOSER_Z_ORDER_H_
-
-#include <ros/ros.h>
-#include <ros/names.h>
-
-#include "jsk_pcl_ros/ClusterPointIndices.h"
-#include "sensor_msgs/PointCloud2.h"
-
-#include "jsk_pcl_ros/cluster_point_indices_decomposer.h"
+#include "jsk_pcl_ros/cluster_point_indices_decomposer_z_axis.h"
+#include <pluginlib/class_list_macros.h>
+#include <pcl/filters/extract_indices.h>
 
 namespace jsk_pcl_ros
 {
-  class ClusterPointIndicesDecomposerZAxis: public ClusterPointIndicesDecomposer
-  {
-  public:
-    void sortIndicesOrder(const sensor_msgs::PointCloud2ConstPtr &input,
+  void ClusterPointIndicesDecomposerZAxis::sortIndicesOrder(const sensor_msgs::PointCloud2ConstPtr &input,
                           const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices,
-                          jsk_pcl_ros::ClusterPointIndicesPtr indices_output);
-  };
+                          jsk_pcl_ros::ClusterPointIndicesPtr indices_output)
+  {
+    // not yet implemented
+  }
 }
 
-#endif
+
+typedef jsk_pcl_ros::ClusterPointIndicesDecomposerZAxis ClusterPointIndicesDecomposerZAxis;
+PLUGINLIB_DECLARE_CLASS (jsk_pcl, ClusterPointIndicesDecomposerZAxis, ClusterPointIndicesDecomposerZAxis, nodelet::Nodelet);

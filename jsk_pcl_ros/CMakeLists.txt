@@ -52,6 +52,7 @@ rosbuild_gensrv()
 
 rosbuild_add_executable(pointcloud_screenpoint src/pointcloud_screenpoint.cpp)
 rosbuild_add_executable(cluster_point_indices_decomposer src/cluster_point_indices_decomposer.cpp)
+rosbuild_add_executable(cluster_point_indices_decomposer_z_axis src/cluster_point_indices_decomposer_z_axis.cpp)
 rosbuild_add_executable(depth_image_creator src/depth_image_creator.cpp)
 rosbuild_add_executable(euclidean_cluster_extraction src/euclidean_cluster_extraction.cpp)
 # roslaunch documentation

@@ -60,5 +60,33 @@
     </node>
     
 
+    <node pkg="nodelet" type="nodelet"
+          name="centroid_publisher00"
+          args="load jsk_pcl/CentroidPublisher $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="/pcl_nodelet/cluster_decomposer/output00" />
+      <rosparam>
+        frame: cluster00
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="centroid_publisher01"
+          args="load jsk_pcl/CentroidPublisher $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="/pcl_nodelet/cluster_decomposer/output01" />
+      <rosparam>
+        frame: cluster01
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="centroid_publisher02"
+          args="load jsk_pcl/CentroidPublisher $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="/pcl_nodelet/cluster_decomposer/output02" />
+      <rosparam>
+        frame: cluster02
+      </rosparam>
+    </node>
+
   </group>                      <!-- pcl_nodelet -->
 </launch>

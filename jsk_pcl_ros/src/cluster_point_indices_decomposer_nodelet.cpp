@@ -55,18 +55,15 @@ namespace jsk_pcl_ros
   }
   
   void ClusterPointIndicesDecomposer::sortIndicesOrder
-  (const sensor_msgs::PointCloud2ConstPtr &input,
-   const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices,
-   jsk_pcl_ros::ClusterPointIndicesPtr indices_output)
+  (pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+   std::vector<pcl::IndicesPtr> indices_array,
+   std::vector<pcl::IndicesPtr> &output_array)
   {
-    indices_output->header = indices->header;
-    indices_output->cluster_indices.resize(indices->cluster_indices.size());
-    for (size_t i = 0; i < indices->cluster_indices.size(); i++)
+    output_array.resize(indices_array.size());
+    for (size_t i = 0; i < indices_array.size(); i++)
     {
-      indices_output->cluster_indices[i] = indices->cluster_indices[i];
-      
+      output_array[i] = indices_array[i];
     }
-    // indices_output = indices;
   }
   
   void ClusterPointIndicesDecomposer::extract
@@ -76,24 +73,30 @@ namespace jsk_pcl_ros
     allocatePublishers(indices_input->cluster_indices.size());
     pcl::ExtractIndices<pcl::PointXYZRGB> extract;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-    jsk_pcl_ros::ClusterPointIndicesPtr indices (new jsk_pcl_ros::ClusterPointIndices);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*input, *cloud);
-    extract.setInputCloud(cloud);
+    pcl::fromROSMsg(*input, *cloud_xyz);
 
-    sortIndicesOrder(input, indices_input, indices);
+    std::vector<pcl::IndicesPtr> converted_indices;
+    std::vector<pcl::IndicesPtr> sorted_indices;
+    for (size_t i = 0; i < indices_input->cluster_indices.size(); i++)
+    {
+      pcl::IndicesPtr vindices;
+      vindices.reset (new std::vector<int> (indices_input->cluster_indices[i].indices));
+      converted_indices.push_back(vindices);
+    }
     
-    for (size_t i = 0; i < indices->cluster_indices.size(); i++)
+    sortIndicesOrder(cloud_xyz, converted_indices, sorted_indices);
+    extract.setInputCloud(cloud);
+    for (size_t i = 0; i < sorted_indices.size(); i++)
     {
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
       pcl::PointIndices::Ptr segmented_indices (new pcl::PointIndices);
-      for (size_t j = 0; j < indices->cluster_indices[i].indices.size(); j++)
-      {
-        segmented_indices->indices.push_back(indices->cluster_indices[i].indices[j]);
-      }
-      extract.setIndices(segmented_indices);
+      extract.setIndices(sorted_indices[i]);
       extract.filter(*segmented_cloud);
       sensor_msgs::PointCloud2::Ptr out_cloud(new sensor_msgs::PointCloud2);
       pcl::toROSMsg(*segmented_cloud, *out_cloud);
+      out_cloud->header = input->header;
       publishers_[i].publish(out_cloud);
     }
     

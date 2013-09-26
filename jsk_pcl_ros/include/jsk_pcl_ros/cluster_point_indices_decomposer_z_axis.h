@@ -49,9 +49,9 @@ namespace jsk_pcl_ros
   class ClusterPointIndicesDecomposerZAxis: public ClusterPointIndicesDecomposer
   {
   public:
-    void sortIndicesOrder(const sensor_msgs::PointCloud2ConstPtr &input,
-                          const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices,
-                          jsk_pcl_ros::ClusterPointIndicesPtr indices_output);
+    virtual void sortIndicesOrder(pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+                                  std::vector<pcl::IndicesPtr> indices_array,
+                                  std::vector<pcl::IndicesPtr> &output_array);
   };
 }
 

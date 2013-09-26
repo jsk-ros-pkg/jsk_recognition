@@ -60,9 +60,9 @@ namespace jsk_pcl_ros
     virtual void onInit();
     virtual void extract(const sensor_msgs::PointCloud2ConstPtr &point,
                          const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices);
-    virtual void sortIndicesOrder(const sensor_msgs::PointCloud2ConstPtr &input,
-                                  const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices,
-                                  jsk_pcl_ros::ClusterPointIndicesPtr indices_output);
+    virtual void sortIndicesOrder(pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+                                  std::vector<pcl::IndicesPtr> indices_array,
+                                  std::vector<pcl::IndicesPtr> &output_array);
   protected:
     boost::shared_ptr<ros::NodeHandle> pnh_;
     //ros::Subscriber sub_input_;

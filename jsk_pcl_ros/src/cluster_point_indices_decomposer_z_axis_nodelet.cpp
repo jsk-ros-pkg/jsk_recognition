@@ -38,13 +38,14 @@
 
 namespace jsk_pcl_ros
 {
-  void ClusterPointIndicesDecomposerZAxis::sortIndicesOrder(const sensor_msgs::PointCloud2ConstPtr &input,
-                          const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices,
-                          jsk_pcl_ros::ClusterPointIndicesPtr indices_output)
+  void ClusterPointIndicesDecomposerZAxis::sortIndicesOrder
+  (pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+   std::vector<pcl::IndicesPtr> indices_array,
+   std::vector<pcl::IndicesPtr> &output_array)
   {
-    // not yet implemented
-    std::vector<pcl::PointCloud<pcl::PointXYZ> > clouds;
-    
+    std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr > clouds;
+    pcl::ExtractIndices<pcl::PointXYZ> ex;
+    ex.setInputCloud(input);
   }
 }
 

@@ -16,7 +16,7 @@
       // Create the main viewer.
       var viewer = new MJPEGCANVAS.Viewer({
       divID : 'mjpeg',
-      host : '192.168.97.84',
+      host : location.hostname,
       width : 640,
       height : 480,
       topic : '/camera/rgb/image_color'

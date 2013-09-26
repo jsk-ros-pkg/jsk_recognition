@@ -64,5 +64,10 @@
     </description>
   </class>
 
-
+  <class name="jsk_pcl/CentroidPublisher" type="CentroidPublisher"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      publish the centroid of the pointcloud to /tf
+    </description>
+  </class>
 </library>

@@ -35,8 +35,6 @@
 #include <ros/ros.h>
 #include <nodelet/loader.h>
 
-#include "jsk_pcl_ros/euclidean_cluster_extraction_nodelet.h"
-
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "euclidean_cluster_extraction");

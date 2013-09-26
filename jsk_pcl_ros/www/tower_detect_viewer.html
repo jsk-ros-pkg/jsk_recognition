@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+    <script type="text/javascript" src="http://cdn.robotwebtools.org/mjpegcanvasjs/current/mjpegcanvas.min.js"></script>
+    
+    <!-- <script type="text/javascript" src="./eventemitter2.js"></script> -->
+    <!-- <script type="text/javascript" src="./mjpegcanvas.js"></script> -->
+
+    <script type="text/javascript" type="text/javascript">
+      /**
+      * Setup all visualization elements when the page is loaded.
+      */
+      function init() {
+      // Create the main viewer.
+      var viewer = new MJPEGCANVAS.Viewer({
+      divID : 'mjpeg',
+      host : '192.168.97.84',
+      width : 640,
+      height : 480,
+      topic : '/camera/rgb/image_color'
+      });
+      }
+    </script>
+  </head>
+
+  <body onload="init()">
+    <h1>Simple MJPEG Canvas Example</h1>
+        <div id="mjpeg"></div>
+  </body>
+</html>

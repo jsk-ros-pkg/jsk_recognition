@@ -1,6 +1,9 @@
 <launch>
   <node pkg="mjpeg_server" type="mjpeg_server"
         name="mjpeg_server"
+        output="screen"
         clear_params="true">
   </node>
+  <!-- <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" /> -->
+  <node name="roswww" pkg="roswww" type="webserver.py" />
 </launch>

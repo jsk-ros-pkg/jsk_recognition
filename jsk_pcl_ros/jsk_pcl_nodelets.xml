@@ -57,6 +57,12 @@
       decompose jsk_pcl_ros::ClusterPointIndices into PointCloud2
     </description>
   </class>
+  <class name="jsk_pcl/ClusterPointIndicesDecomposerZAxis" type="ClusterPointIndicesDecomposerZAxis"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      decompose jsk_pcl_ros::ClusterPointIndices into PointCloud2 with sorting according to z axis
+    </description>
+  </class>
 
 
 </library>

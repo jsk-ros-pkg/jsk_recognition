@@ -50,7 +50,7 @@
 
    <node pkg="nodelet" type="nodelet"
           name="cluster_decomposer"
-          args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg manager)"
+          args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis $(arg manager)"
           output="screen" clear_params="true">
       <remap from="~input" to="/pcl_nodelet/passthrough_x/output" />
       <remap from="~target" to="/pcl_nodelet/clustering/output" />

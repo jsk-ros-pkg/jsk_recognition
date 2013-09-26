@@ -36,6 +36,8 @@
 #include <pluginlib/class_list_macros.h>
 #include <pcl/filters/extract_indices.h>
 
+#include <pcl/common/centroid.h>
+
 namespace jsk_pcl_ros
 {
   void ClusterPointIndicesDecomposerZAxis::sortIndicesOrder
@@ -43,9 +45,37 @@ namespace jsk_pcl_ros
    std::vector<pcl::IndicesPtr> indices_array,
    std::vector<pcl::IndicesPtr> &output_array)
   {
-    std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr > clouds;
+    output_array.resize(indices_array.size());
+    std::vector<double> z_values;
     pcl::ExtractIndices<pcl::PointXYZ> ex;
     ex.setInputCloud(input);
+    for (size_t i = 0; i < indices_array.size(); i++)
+    {
+      Eigen::Vector4f center;
+      ex.setIndices(indices_array[i]);
+      pcl::PointCloud<pcl::PointXYZ>::Ptr tmp(new pcl::PointCloud<pcl::PointXYZ>);
+      ex.filter(*tmp);
+      pcl::compute3DCentroid(*tmp, center);
+      z_values.push_back(center[2]); // only focus on z value
+    }
+    
+    // sort centroids
+    for (size_t i = 0; i < indices_array.size(); i++)
+    {
+      size_t minimum_index = 0;
+      double minimum_value = DBL_MAX;
+      for (size_t j = 0; j < indices_array.size(); j++)
+      {
+        if (z_values[j] < minimum_value)
+        {
+          minimum_value = z_values[j];
+          minimum_index = j;
+        }
+      }
+      // ROS_INFO("%lu => %lu", i, minimum_index);
+      output_array[i] = indices_array[minimum_index];
+      z_values[minimum_index] = DBL_MAX;
+    }
   }
 }
 

@@ -275,8 +275,17 @@ namespace pcl_ros
               cluster_indices = pivotClusterIndices(pivot_table, cluster_indices);
           }
       }
-      else {
-          ROS_WARN("reset tracking");
+      else
+      {
+        if (cogs_.size() == 0)
+        {
+          ROS_WARN("reset tracking for initialization");
+        }
+        else if (cogs_.size() != cluster_indices.size())
+        {
+          ROS_WARN("reset tracking, cluster size changed: %lu -> %lu",
+                   cogs_.size(), cluster_indices.size());
+        }
       }
       std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > tmp_cogs;
       computeCentroidsOfClusters(tmp_cogs, cloud, cluster_indices); // NB: not efficient

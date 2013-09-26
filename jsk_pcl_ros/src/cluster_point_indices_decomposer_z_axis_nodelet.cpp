@@ -43,6 +43,8 @@ namespace jsk_pcl_ros
                           jsk_pcl_ros::ClusterPointIndicesPtr indices_output)
   {
     // not yet implemented
+    std::vector<pcl::PointCloud<pcl::PointXYZ> > clouds;
+    
   }
 }
 

@@ -44,7 +44,7 @@
           output="screen" clear_params="true">
       <remap from="~input" to="/pcl_nodelet/passthrough_x/output" />
       <rosparam>
-
+        min_size: 500
       </rosparam>
     </node>
 

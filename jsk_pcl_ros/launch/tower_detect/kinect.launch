@@ -1,6 +1,7 @@
 <launch>
-  <param name="depth_registered" value="true"/>
+  
   <include file="$(find openni_launch)/launch/openni.launch">
+    <arg name="depth_registration" value="true"/>
   </include>
   <node name="$(anon rviz)" pkg="rviz" type="rviz">
   </node>

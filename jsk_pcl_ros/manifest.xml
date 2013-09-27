@@ -21,6 +21,7 @@
   <depend package="std_msgs" />
   <depend package="image_transport" />
   <depend package="image_geometry" />
+  <depend package="image_view2" />
 
   <rosdep name="tbb" />
 

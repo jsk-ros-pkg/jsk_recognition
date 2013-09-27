@@ -13,20 +13,21 @@ def usage():
   print "Usage: ", sys.argv[0], "frame_id diameter [r, g, b]"
 
 def main():
-  if len(sys.argv) != 3 and len(sys.argv) != 6:
+  rospy.init_node("draw_3d_circle")
+  if len(rospy.myargv()) != 3 and len(rospy.myargv()) != 6:
     usage()
     exit(1)
-  frame_id = sys.argv[1]
-  diameter = float(sys.argv[2])
+  frame_id = rospy.myargv()[1]
+  diameter = float(rospy.myargv()[2])
   pub = rospy.Publisher("image_marker", ImageMarker2)
-  rospy.init_node("draw_3d_circle")
+  
   use_color = False
   color = ColorRGBA()
-  if len(sys.argv) == 6:
+  if len(rospy.myargv()) == 6:
     use_color = True
-    color.r = float(sys.argv[3])
-    color.g = float(sys.argv[4])
-    color.b = float(sys.argv[5])
+    color.r = float(rospy.myargv()[3])
+    color.g = float(rospy.myargv()[4])
+    color.b = float(rospy.myargv()[5])
     color.a = 1.0
   while not rospy.is_shutdown():
     now = rospy.Time.now()

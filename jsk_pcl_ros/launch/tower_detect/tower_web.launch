@@ -6,4 +6,15 @@
   </node>
   <!-- <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" /> -->
   <node name="roswww" pkg="roswww" type="webserver.py" />
+  <node pkg="jsk_pcl_ros" type="draw_3d_circle.py"
+        name="cluster00_drawer"
+        args="/cluster00 0.1 1 0 0" />
+<node pkg="jsk_pcl_ros" type="draw_3d_circle.py"
+        name="cluster01_drawer"
+        args="/cluster01 0.1 0 1 0" />
+  <node pkg="image_view2" type="image_view2" name="image_view2"
+        respawn="true">
+    <remap from="image" to="/camera/rgb/image_rect_color" />
+    <remap from="camera_info" to="/camera/rgb/camera_info" />
+  </node>
 </launch>

@@ -30,12 +30,13 @@ def main():
     color.b = float(rospy.myargv()[5])
     color.a = 1.0
   while not rospy.is_shutdown():
-    now = rospy.Time.now()
+    #now = rospy.Time.now()
+    now = rospy.Time()
     marker = ImageMarker2()
     marker.header.frame_id = frame_id
     marker.header.stamp = now
-    #marker.type = ImageMarker2.LINE_STRIP3D
-    marker.type = ImageMarker2.POLYGON3D
+    marker.type = ImageMarker2.LINE_STRIP3D
+    # marker.type = ImageMarker2.POLYGON3D
     RESOLUTION = 20
     point_array = PointArrayStamped()
     point_array.header.frame_id = frame_id

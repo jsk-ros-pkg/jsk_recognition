@@ -51,6 +51,7 @@ def main():
       point.z = 0
       point_array.points.append(point)
     marker.points3D = point_array
+    marker.lifetime = rospy.Duration(1.0)
     if use_color:
       marker.outline_colors = [color]
     pub.publish(marker)

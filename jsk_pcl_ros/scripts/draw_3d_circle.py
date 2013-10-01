@@ -14,7 +14,7 @@ def usage():
   
 pub = None
 def callback(data):
-  now = rospy.Time()
+  now = data.header.stamp
   marker = ImageMarker2()
   marker.id = marker_id
   marker.header.frame_id = frame_id

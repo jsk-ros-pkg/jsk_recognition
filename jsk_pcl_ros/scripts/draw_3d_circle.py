@@ -10,29 +10,31 @@ from std_msgs.msg import ColorRGBA
 import math
 
 def usage():
-  print "Usage: ", sys.argv[0], "frame_id diameter [r, g, b]"
+  print "Usage: ", sys.argv[0], "id frame_id diameter [r, g, b]"
 
 def main():
   rospy.init_node("draw_3d_circle")
-  if len(rospy.myargv()) != 3 and len(rospy.myargv()) != 6:
+  if len(rospy.myargv()) != 4 and len(rospy.myargv()) != 7:
     usage()
     exit(1)
-  frame_id = rospy.myargv()[1]
-  diameter = float(rospy.myargv()[2])
+  marker_id = int(rospy.myargv()[1])
+  frame_id = rospy.myargv()[2]
+  diameter = float(rospy.myargv()[3])
   pub = rospy.Publisher("image_marker", ImageMarker2)
   
   use_color = False
   color = ColorRGBA()
-  if len(rospy.myargv()) == 6:
+  if len(rospy.myargv()) == 7:
     use_color = True
-    color.r = float(rospy.myargv()[3])
-    color.g = float(rospy.myargv()[4])
-    color.b = float(rospy.myargv()[5])
+    color.r = float(rospy.myargv()[4])
+    color.g = float(rospy.myargv()[5])
+    color.b = float(rospy.myargv()[6])
     color.a = 1.0
   while not rospy.is_shutdown():
     #now = rospy.Time.now()
     now = rospy.Time()
     marker = ImageMarker2()
+    marker.id = marker_id
     marker.header.frame_id = frame_id
     marker.header.stamp = now
     marker.type = ImageMarker2.LINE_STRIP3D
@@ -56,6 +58,7 @@ def main():
     if use_color:
       marker.outline_colors = [color]
     pub.publish(marker)
+    rospy.sleep(1.0 / 20)                 #20Hz
 
 if __name__ == '__main__':
   try:

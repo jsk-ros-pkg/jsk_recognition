@@ -18,6 +18,7 @@
         args="3 /cluster02 0.1 0 0 1" />
   <node pkg="image_view2" type="image_view2" name="image_view2"
         respawn="true">
+    <param name="tf_timeout" value="10.0" />
     <remap from="image" to="/camera/rgb/image_rect_color" />
     <remap from="camera_info" to="/camera/rgb/camera_info" />
   </node>

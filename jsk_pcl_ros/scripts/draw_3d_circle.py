@@ -19,6 +19,7 @@ class Drawer3DCircle:
     self.marker_id = marker_id
     self.frame_id = frame_id
     self.radius = radius
+    self.fill = True
     if color:
       self.color = ColorRGBA()
       self.color.r = color[0]
@@ -48,7 +49,10 @@ class Drawer3DCircle:
     marker.points3D = point_array
     if self.color:
       marker.outline_colors = [self.color]
-      marker.filled = 1
+      if self.fill:
+        marker.filled = 1
+      else:
+        marker.filled = 0
       marker.fill_color = self.color
     self.publisher.publish(marker)
 

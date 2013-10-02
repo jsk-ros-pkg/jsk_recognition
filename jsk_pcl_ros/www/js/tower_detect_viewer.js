@@ -44,7 +44,19 @@ $(function() {
             messageType: "std_msgs/String"
         });
         listener.subscribe(function(msg) {
-            $("#coordinates").html(msg.data);
+            $("#message").html(msg.data);
+        });
+    });
+
+    // draw /browser/state
+    $(function() {
+        var listener = new ROSLIB.Topic({
+            ros: ros,
+            name: "/browser/state",
+            messageType: "std_msgs/String"
+        });
+        listener.subscribe(function(msg) {
+            $("#state").html("state: " + msg.data);
         });
     });
 });

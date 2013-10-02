@@ -48,6 +48,8 @@ class TowerDetectViewerServer:
                                                   self.clickCB)
         self.browser_message_pub = rospy.Publisher("/browser/message",
                                                   String)
+        self.browser_state_pub = rospy.Publisher("/browser/state",
+                                                  String)
         self.image_sub = rospy.Subscriber("/image_marked",
                                           Image,
                                           self.imageCB)
@@ -79,6 +81,7 @@ class TowerDetectViewerServer:
             self.procInitialState(click_index)
         elif self.state == self.CONFIRMING_STATE:
             self.procConfirmingState(click_index)
+        self.publishState()
     def procInitialState(self, click_index):
         if click_index != -1:
             self.clicked_index = click_index
@@ -92,11 +95,13 @@ class TowerDetectViewerServer:
             self.cv_image = self.bridge.imgmsg_to_cv(data, "bgr8")
         except CvBridgeError, e:
             print e
+    def publishState(self):
+        self.browser_state_pub.publish(String(str(self.state)))
     def spin(self):
         while not rospy.is_shutdown():
-            self.circle0.publish()
-            self.circle1.publish()
-            self.circle2.publish()
+            for c in self.circles:
+                c.publish()
+            self.publishState()
             rospy.sleep(1.0)
 
 

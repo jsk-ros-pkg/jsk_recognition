@@ -5,12 +5,28 @@ $(function() {
     var debugp = $("body").attr("data-debug") == "true";
 
     var CANVAS_DIV_ID = "mjpeg";
-    
+
+    var aspect_ratio = 640 / 480.0;
+    var window_height = $(window).height();
+    var window_width = $(window).width();
+    var target_width = window_width;
+    var target_height = window_height;
+    if ((window_width / window_height) > aspect_ratio) { // too long width
+        var height_should_be = (1.0 / aspect_ratio) * window_width;
+        target_height = height_should_be;
+        // setting offset
+        $("#" + CANVAS_DIV_ID).css("margin-top", "-" + (target_height - window_height) / 2.0 + "px");
+    }
+    else {
+        var width_should_be = aspect_ratio * window_height;
+        target_width = width_should_be;
+        $("#" + CANVAS_DIV_ID).css("margin-left", "-" + (target_width - window_width) / 2.0 + "px");
+    }
     var mjpeg_viewer = new MJPEGCANVAS.Viewer({
         divID : CANVAS_DIV_ID,
         host : location.hostname,
-        width : 640,
-        height : 480,
+        width : target_width,
+        height : target_height,
         topic : '/image_marked'
     });
 

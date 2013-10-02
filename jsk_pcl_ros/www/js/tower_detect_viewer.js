@@ -31,8 +31,20 @@ $(function() {
                 y: y / $(this).height(),
                 z: 0
             });
-            $("#coordinates").html("(" + x + ", " + y + ")");
+            
             click_topic.publish(point);
+        });
+    });
+
+    // draw /browser/message
+    $(function() {
+        var listener = new ROSLIB.Topic({
+            ros: ros,
+            name: "/browser/message",
+            messageType: "std_msgs/String"
+        });
+        listener.subscribe(function(msg) {
+            $("#coordinates").html(msg.data);
         });
     });
 });

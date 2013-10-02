@@ -6,6 +6,7 @@
   </node>
   <!-- <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" /> -->
   <node name="roswww" pkg="roswww" type="webserver.py" />
+  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
   <node pkg="jsk_pcl_ros" type="draw_3d_circle.py"
         name="cluster00_drawer"
         output="screen"

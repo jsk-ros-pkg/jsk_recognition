@@ -2,31 +2,21 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
-    <script type="text/javascript" src="http://cdn.robotwebtools.org/mjpegcanvasjs/current/mjpegcanvas.min.js"></script>
-    
-    <!-- <script type="text/javascript" src="./eventemitter2.js"></script> -->
-    <!-- <script type="text/javascript" src="./mjpegcanvas.js"></script> -->
-
-    <script type="text/javascript" type="text/javascript">
-      /**
-      * Setup all visualization elements when the page is loaded.
-      */
-      function init() {
-      // Create the main viewer.
-      var viewer = new MJPEGCANVAS.Viewer({
-      divID : 'mjpeg',
-      host : location.hostname,
-      width : 640,
-      height : 480,
-      topic : '/image_marked'
-      });
-      }
-    </script>
+    <link rel="stylesheet" href="css/html5-doctor-reset-stylesheet.min.css" type="text/css"></link>
+    <link rel="stylesheet/less" type="text/css" href="less/tower_detect_viewer.less" />
+    <script src="js/less.min.js" type="text/javascript"></script>
   </head>
-
-  <body onload="init()">
-    <h1>Simple MJPEG Canvas Example</h1>
-        <div id="mjpeg"></div>
+  <body data-debug="true">
+    <div id="canvas-area">
+      <div id="overlay">
+        <p id="coordinates"></p>
+      </div>
+      <div id="mjpeg"></div>
+    </div>
+    <script type="text/javascript" src="./js/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="./js/eventemitter2.min.js"></script>
+    <script type="text/javascript" src="./js/mjpegcanvas.js"></script>
+    <script type="text/javascript" src="./js/roslib.min.js"></script>
+    <script type="text/javascript" src="./js/tower_detect_viewer.js"></script>
   </body>
 </html>

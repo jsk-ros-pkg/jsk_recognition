@@ -19,8 +19,8 @@ def callback():
   marker.id = marker_id
   marker.header.frame_id = frame_id
   marker.header.stamp = now
-  marker.type = ImageMarker2.LINE_STRIP3D
-  # marker.type = ImageMarker2.POLYGON3D
+  #marker.type = ImageMarker2.LINE_STRIP3D
+  marker.type = ImageMarker2.POLYGON3D
   RESOLUTION = 20
   point_array = PointArrayStamped()
   point_array.header.frame_id = frame_id
@@ -38,6 +38,8 @@ def callback():
   marker.points3D = point_array
   if use_color:
     marker.outline_colors = [color]
+    marker.filled = 1
+    marker.fill_color = color
   pub.publish(marker)
   
 def main():

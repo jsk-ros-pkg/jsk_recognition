@@ -11,17 +11,25 @@ $(function() {
     var window_width = $(window).width();
     var target_width = window_width;
     var target_height = window_height;
+    var canvas_width = window_width;
+    var canvas_height = window_height;
     if ((window_width / window_height) > aspect_ratio) { // too long width
-        var height_should_be = (1.0 / aspect_ratio) * window_width;
+        var height_should_be =( 1.0 / aspect_ratio) * window_width;
+        console.log(height_should_be);
+        console.log(target_width);
         target_height = height_should_be;
-        // setting offset
-        $("#" + CANVAS_DIV_ID).css("margin-top", "-" + (target_height - window_height) / 2.0 + "px");
+        console.log(((target_height - window_height) / 2.0));
+        
+        
     }
     else {
         var width_should_be = aspect_ratio * window_height;
         target_width = width_should_be;
-        $("#" + CANVAS_DIV_ID).css("margin-left", "-" + (target_width - window_width) / 2.0 + "px");
     }
+    
+    $("#" + CANVAS_DIV_ID).css("width", window_width)
+        .css("height", window_height);
+    
     var mjpeg_viewer = new MJPEGCANVAS.Viewer({
         divID : CANVAS_DIV_ID,
         host : location.hostname,
@@ -29,6 +37,16 @@ $(function() {
         height : target_height,
         topic : '/image_marked'
     });
+
+    if ((window_width / window_height) > aspect_ratio) { // too long width
+        // setting offset
+        $("#" + CANVAS_DIV_ID).find("canvas")
+            .css("margin-top", "-" + ((target_height - window_height) / 2.0) + "px");
+    }
+    else {
+        $("#" + CANVAS_DIV_ID).find("canvas")
+            .css("margin-left", "-" + ((target_width - window_width) / 2.0) + "px");
+    }
 
     // broadcast click event to ros
     $(function() {

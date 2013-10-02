@@ -7,16 +7,11 @@
   <!-- <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" /> -->
   <node name="roswww" pkg="roswww" type="webserver.py" />
   <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
-  <node pkg="jsk_pcl_ros" type="draw_3d_circle.py"
-        name="cluster00_drawer"
-        output="screen"
-        args="1 /cluster00 0.075 1 0 0" />
-  <node pkg="jsk_pcl_ros" type="draw_3d_circle.py"
-        name="cluster01_drawer"
-        args="2 /cluster01 0.075 0 1 0" />
-  <node pkg="jsk_pcl_ros" type="draw_3d_circle.py"
-        name="cluster02_drawer"
-        args="3 /cluster02 0.075 0 0 1" />
+  <node pkg="jsk_pcl_ros" type="tower_detect_viewer_server.py"
+        name="tower_detect_viewer_server"
+        output="screen">
+    <param name="radius" value="0.075" />
+  </node>
   <node pkg="image_view2" type="image_view2" name="image_view2"
         respawn="true">
     <param name="tf_timeout" value="10.0" />

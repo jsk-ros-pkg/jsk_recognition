@@ -2,7 +2,7 @@ $(function() {
     var ros = new ROSLIB.Ros({
         url: "ws://" + location.hostname + ":9090"
     });
-    var debugp = $("body").attr("data-debug") == "true";
+    var debugp = false;
 
     var CANVAS_DIV_ID = "mjpeg";
 
@@ -50,7 +50,8 @@ $(function() {
                 .css("margin-left", "-" + ((size.canvas_width - size.window_width) / 2.0) + "px");
         }
     }
-    
+
+    // initialize mjpeg viewer
     var mjpeg_viewer = new MJPEGCANVAS.Viewer({
         divID : CANVAS_DIV_ID,
         host : location.hostname,
@@ -58,11 +59,15 @@ $(function() {
     });
     
     updateCanvasSize(mjpeg_viewer);
+    // when the window size changes, change the
+    // size and offset of the canvas
     $(window).resize(function() {
         updateCanvasSize(mjpeg_viewer);
     });
 
-    
+    // $(window).bind("orientationchange",function(){
+    //     updateCanvasSize(mjpeg_viewer);
+    // });
 
     // broadcast click event to ros
     $(function() {
@@ -109,4 +114,42 @@ $(function() {
             $("#state").html("state: " + msg.data);
         });
     });
+
+    // debug button
+    $("#debug-button").click(function() {
+        if ($(this).hasClass("btn-default")) {
+            $(this).addClass("btn-danger")
+                .removeClass("btn-default")
+                .html("有効");
+            debugp = true;
+            $("#overlay").css("display", "block");
+        }
+        else {
+            $(this).addClass("btn-default")
+                .removeClass("btn-danger")
+                .html("無効");
+            $("#overlay").css("display", "none");
+            debugp = false;
+        }
+    });
+    
+    // question button
+    // $(function() {
+    //     $("#question-button").click(function() {
+    //         return false;
+    //     });
+    // });
+
+    $("#fullscreen-button").click(function() {
+        if (this.webkitRequestFullScreen) {
+            this.webkitRequestFullScreen();
+        }
+        else if (this. mozRequestFullScreen) {
+            this. mozRequestFullScreen();
+        }
+        else {
+            alert("not found")
+        }
+    });
+    
 });

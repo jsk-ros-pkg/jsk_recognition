@@ -16,6 +16,8 @@ roslib.load_manifest("jsk_pcl_ros")
 from image_view2.msg import ImageMarker2, PointArrayStamped
 from geometry_msgs.msg import Point
 from std_msgs.msg import String
+from jsk_pcl_ros.srv import *
+
 from draw_3d_circle import Drawer3DCircle
 
 from sensor_msgs.msg import Image
@@ -53,6 +55,21 @@ class TowerDetectViewerServer:
         self.image_sub = rospy.Subscriber("/image_marked",
                                           Image,
                                           self.imageCB)
+        self.check_circle_srv = rospy.Service("/browser/check_circle",
+                                              CheckCircle,
+                                              self.checkCircleCB)
+    def checkCircleCB(self, req):
+        (width, height) = cv.GetSize(self.cv_image)
+        x = int(width * req.point.x)
+        y = int(height * req.point.y)
+        click_index = -1
+        if self.checkColor(self.cv_image[y, x], self.color_indices[0]):
+            click_index = 0
+        elif self.checkColor(self.cv_image[y, x], self.color_indices[1]):
+            click_index = 1
+        elif self.checkColor(self.cv_image[y, x], self.color_indices[2]):
+            click_index = 2
+        return CheckCircleResponse(click_index != -1, click_index)
     def checkColor(self, image_color, array_color):
         return (image_color[0] == array_color[0] and image_color[1] == array_color[1] and image_color[2] == array_color[2])
     def clickCB(self, msg):
@@ -72,7 +89,7 @@ class TowerDetectViewerServer:
             output_str = output_str + " cluster02 clicked"
             click_index = 2
         self.browser_message_pub.publish(String(output_str))
-        self.proc(click_index)
+        # self.proc(click_index)
     def proc(self, click_index):
         """
         process state machine

@@ -11,6 +11,9 @@
   </head>
   <body>
     <div id="canvas-area">
+      <div id="loader" style="display: none;">
+        <p class="loading-message">通信中...</p>
+      </div>
       <div id="overlay" style="display: none;">
         <p id="message"></p>
         <p id="state"></p>
@@ -94,6 +97,7 @@
     <script type="text/javascript" src="./js/eventemitter2.min.js"></script>
     <script type="text/javascript" src="./js/mjpegcanvas.js"></script>
     <script type="text/javascript" src="./js/roslib.min.js"></script>
+    <script type="text/javascript" src="./js/sonic.js"></script>
     <script type="text/javascript" src="./js/tower_detect_viewer.js"></script>
   </body>
 </html>

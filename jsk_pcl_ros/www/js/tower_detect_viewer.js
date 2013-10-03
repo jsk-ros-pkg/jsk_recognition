@@ -4,6 +4,11 @@ $(function() {
     });
     var debugp = false;
 
+    var waiting_server = false;
+    var state = -1;
+    var INITIALSTATE = 0;
+    var CONFIRMING_STATE = 1
+    
     var CANVAS_DIV_ID = "mjpeg";
 
     function calcCanvasSize() {
@@ -51,6 +56,14 @@ $(function() {
         }
     }
 
+    function enableLoading() {
+        $("#loader").css("display", "block");
+    };
+
+    function disableLoading() {
+        $("#loader").css("display", "none");
+    };
+    
     // initialize mjpeg viewer
     var mjpeg_viewer = new MJPEGCANVAS.Viewer({
         divID : CANVAS_DIV_ID,
@@ -65,10 +78,6 @@ $(function() {
         updateCanvasSize(mjpeg_viewer);
     });
 
-    // $(window).bind("orientationchange",function(){
-    //     updateCanvasSize(mjpeg_viewer);
-    // });
-
     // broadcast click event to ros
     $(function() {
         var click_topic = new ROSLIB.Topic({
@@ -76,6 +85,12 @@ $(function() {
             name: "/browser/click",
             messageType: "geometry_msgs/Point"
         });
+        var check_circle = new ROSLIB.Service({
+            ros: ros,
+            name: "/browser/check_circle",
+            serviceType: "jsk_pcl_ros/CheckCircle"
+        });
+        
         $("#mjpeg canvas").click(function(e) {
             var offset = $(this).offset();
             var x = e.clientX - offset.left;
@@ -88,6 +103,20 @@ $(function() {
             });
             
             click_topic.publish(point);
+
+            var req = new ROSLIB.ServiceRequest({
+                point: point
+            });
+            enableLoading();
+            waiting_server = true;
+            check_circle.callService(req, function(result) {
+                waiting_server = false;
+                disableLoading();
+                if (result.clicked) {
+                    // showing modal
+                    alert("you clicked " + result.index);
+                }
+            });
         });
     });
 
@@ -98,6 +127,7 @@ $(function() {
             name: "/browser/message",
             messageType: "std_msgs/String"
         });
+        
         listener.subscribe(function(msg) {
             $("#message").html(msg.data);
         });
@@ -112,6 +142,9 @@ $(function() {
         });
         listener.subscribe(function(msg) {
             $("#state").html("state: " + msg.data);
+            
+            //state = msg.data;
+            
         });
     });
 
@@ -133,13 +166,6 @@ $(function() {
         }
     });
     
-    // question button
-    // $(function() {
-    //     $("#question-button").click(function() {
-    //         return false;
-    //     });
-    // });
-
     $("#fullscreen-button").click(function() {
         if (this.webkitRequestFullScreen) {
             this.webkitRequestFullScreen();
@@ -151,5 +177,30 @@ $(function() {
             alert("not found")
         }
     });
-    
+
+    // setup loader
+    $(function() {
+        var param = {
+            width: 100,
+            height: 50,
+            stepsPerFrame: 1,
+            trailLength: 1,
+            pointDistance: .1,
+            fps: 10,
+            padding: 10,
+            //step: 'fader',
+            fillColor: '#ff0000',
+            setup: function() {
+                this._.lineWidth = 20;
+            },
+            path: [
+                ['line', 0, 0, 100, 0],
+                ['line', 100, 0, 0, 0]
+                ]
+        };
+        var a = new Sonic(param);
+        var d = document.getElementById("loader");
+        d.appendChild(a.canvas);
+        a.play();
+    });
 });

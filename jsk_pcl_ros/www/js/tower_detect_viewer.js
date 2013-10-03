@@ -219,7 +219,7 @@ $(function() {
             this. mozRequestFullScreen();
         }
         else {
-            alert("not found")
+            alert("全画面モードはサポートされていません");
         }
     });
 

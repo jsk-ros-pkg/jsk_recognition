@@ -2,14 +2,18 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+            
     <link rel="stylesheet" href="css/html5-doctor-reset-stylesheet.min.css" type="text/css"></link>
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     
     <link rel="stylesheet/less" type="text/css" href="less/tower_detect_viewer.less" />
     <script src="js/less.min.js" type="text/javascript"></script>
   </head>
-  <body>
+  <body ontouchmove="event.preventDefault()">
+    
     <div id="canvas-area">
       <div id="loader" style="display: none;">
         <p class="loading-message">通信中...</p>
@@ -25,6 +29,29 @@
       </div>
       <div id="mjpeg"></div>
     </div>
+    <div class="modal fade" id="confirm-modal" tabindex="-1" role="dialog"
+         aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close"
+                    data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">確認</h4>
+          </div>
+          <div class="modal-body">
+            <p>あなたは<span class="label clicked-tower-color"></span>色のタワーをクリックしました。</p>
+            <p><span class="label clicked-tower-color"></span>のタワーの上にシャーレを置いてよいですか?</p>
+            <p class="modal-yes-no-line">
+              <button type="button" id="confirm-modal-yes-button"
+                      class="btn btn-primary btn-lg btn-block">はい</button>
+              <button type="button" data-dismiss="modal" class="btn btn-danger btn-lg btn-block">
+                いいえ</button>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <div class="modal fade" id="question-modal" tabindex="-1" role="dialog"
          aria-labelledby="myModalLabel" aria-hidden="true">
       <div class="modal-dialog">

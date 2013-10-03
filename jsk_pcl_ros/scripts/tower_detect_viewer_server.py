@@ -58,6 +58,12 @@ class TowerDetectViewerServer:
         self.check_circle_srv = rospy.Service("/browser/check_circle",
                                               CheckCircle,
                                               self.checkCircleCB)
+        self.pickup_srv = rospy.Service("/browser/pickup",
+                                        TowerPickUp,
+                                        self.pickupCB)
+    def pickupCB(self, req):
+        rospy.sleep(10)                   #適当
+        return TowerPickUpResponse()
     def checkCircleCB(self, req):
         (width, height) = cv.GetSize(self.cv_image)
         x = int(width * req.point.x)

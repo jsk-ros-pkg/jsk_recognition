@@ -6,11 +6,11 @@ $(function() {
 
     var waiting_server = false;
     var state = -1;
-    var INITIALSTATE = 0;
+    var INITIAL_STATE = 0;
     var CONFIRMING_STATE = 1
-    
+    var PICKINGUP_STATE = 2
     var CANVAS_DIV_ID = "mjpeg";
-
+    var clicked_index = -1;
     function calcCanvasSize() {
         var aspect_ratio = 640 / 480.0;
         var window_height = $(window).height();
@@ -61,7 +61,7 @@ $(function() {
     };
 
     function disableLoading() {
-        // $("#loader").css("display", "none");
+        $("#loader").css("display", "none");
     };
     
     // initialize mjpeg viewer
@@ -103,7 +103,8 @@ $(function() {
             });
             
             click_topic.publish(point);
-
+            if (state == PICKINGUP_STATE)
+                return;
             var req = new ROSLIB.ServiceRequest({
                 point: point
             });
@@ -113,10 +114,54 @@ $(function() {
                 waiting_server = false;
                 disableLoading();
                 if (result.clicked) {
+                    clicked_index = result.index;
                     // showing modal
-                    alert("you clicked " + result.index);
+                    //alert("you clicked " + result.index);
+                    var color_name = "";
+                    var color_class = "";
+                    if (result.index == 0) {
+                        color_name = "赤";
+                        color_class = "label-danger";
+                    }
+                    else if (result.index == 1) {
+                        color_name = "緑";
+                        color_class = "label-success";
+                    }
+                    else if (result.index == 2) {
+                        color_name = "青";
+                        color_class = "label-primary";
+                    }
+                    $(".clicked-tower-color")
+                        .removeClass("label-danger")
+                        .removeClass("label-success")
+                        .removeClass("label-primary")
+                        .addClass(color_class)
+                        .html(color_name);
+                    $("#confirm-modal").modal();
                 }
             });
+        });
+    });
+
+    // modal yes click
+    $(function() {
+        var pickup = new ROSLIB.Service({
+            ros: ros,
+            name: "/browser/pickup",
+            serviceType: "jsk_pcl_ros/TowerPickUp"
+        });
+        
+        $("#confirm-modal-yes-button").click(function() {
+            var req = new ROSLIB.ServiceRequest({
+                index: clicked_index
+            });
+            enableLoading();
+            $("#confirm-modal").modal("hide");
+            pickup.callService(req, function(result) {
+                disableLoading();
+                state = INITIAL_STATE;
+            });
+            state = PICKINGUP_STATE;
         });
     });
 
@@ -132,7 +177,7 @@ $(function() {
             $("#message").html(msg.data);
         });
     });
-
+    
     // draw /browser/state
     $(function() {
         var listener = new ROSLIB.Topic({

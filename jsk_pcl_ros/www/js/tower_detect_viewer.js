@@ -61,7 +61,7 @@ $(function() {
     };
 
     function disableLoading() {
-        $("#loader").css("display", "none");
+        // $("#loader").css("display", "none");
     };
     
     // initialize mjpeg viewer

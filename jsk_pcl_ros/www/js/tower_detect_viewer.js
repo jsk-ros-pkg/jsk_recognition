@@ -6,47 +6,63 @@ $(function() {
 
     var CANVAS_DIV_ID = "mjpeg";
 
-    var aspect_ratio = 640 / 480.0;
-    var window_height = $(window).height();
-    var window_width = $(window).width();
-    var target_width = window_width;
-    var target_height = window_height;
-    var canvas_width = window_width;
-    var canvas_height = window_height;
-    if ((window_width / window_height) > aspect_ratio) { // too long width
-        var height_should_be =( 1.0 / aspect_ratio) * window_width;
-        console.log(height_should_be);
-        console.log(target_width);
-        target_height = height_should_be;
-        console.log(((target_height - window_height) / 2.0));
-        
-        
+    function calcCanvasSize() {
+        var aspect_ratio = 640 / 480.0;
+        var window_height = $(window).height();
+        var window_width = $(window).width();
+        var target_width = window_width;
+        var target_height = window_height;
+        if ((window_width / window_height) > aspect_ratio) { // too long width
+            var height_should_be =( 1.0 / aspect_ratio) * window_width;
+            target_height = height_should_be;
+        }
+        else {
+            var width_should_be = aspect_ratio * window_height;
+            target_width = width_should_be;
+        }
+        return {
+            window_height: window_height,
+            window_width: window_width,
+            canvas_width: target_width,
+            canvas_height: target_height,
+            aspect_ratio: aspect_ratio
+        };
     }
-    else {
-        var width_should_be = aspect_ratio * window_height;
-        target_width = width_should_be;
+
+    function updateCanvasSize(viewer) {
+        var size = calcCanvasSize();
+        viewer.width = size.canvas_width;
+        viewer.height = size.canvas_height;
+        $("#" + CANVAS_DIV_ID)
+            .css("width", size.window_width + "px")
+            .css("height", size.window_height + "px")
+            .find("canvas")
+            .attr("width", size.canvas_width + "px")
+            .attr("height", size.canvas_height + "px");
+        
+        if ((size.window_width / size.window_height) > size.aspect_ratio) { // too long width
+            $("#" + CANVAS_DIV_ID)
+                .find("canvas")
+                .css("margin-top", "-" + ((size.canvas_height - size.window_height) / 2.0) + "px");
+        }
+        else {
+            $("#" + CANVAS_DIV_ID).find("canvas")
+                .css("margin-left", "-" + ((size.canvas_width - size.window_width) / 2.0) + "px");
+        }
     }
-    
-    $("#" + CANVAS_DIV_ID).css("width", window_width)
-        .css("height", window_height);
     
     var mjpeg_viewer = new MJPEGCANVAS.Viewer({
         divID : CANVAS_DIV_ID,
         host : location.hostname,
-        width : target_width,
-        height : target_height,
-        topic : '/image_marked'
+        topic : '/image_marked',
+    });
+    
+    updateCanvasSize(mjpeg_viewer);
+    $(window).resize(function() {
+        updateCanvasSize(mjpeg_viewer);
     });
 
-    if ((window_width / window_height) > aspect_ratio) { // too long width
-        // setting offset
-        $("#" + CANVAS_DIV_ID).find("canvas")
-            .css("margin-top", "-" + ((target_height - window_height) / 2.0) + "px");
-    }
-    else {
-        $("#" + CANVAS_DIV_ID).find("canvas")
-            .css("margin-left", "-" + ((target_width - window_width) / 2.0) + "px");
-    }
+    
 
     // broadcast click event to ros
     $(function() {

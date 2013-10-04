@@ -143,26 +143,26 @@ $(function() {
                     clicked_index = result.index;
                     // showing modal
                     //alert("you clicked " + result.index);
-                    var color_name = "";
+                    var tower_name = "";
                     var color_class = "";
                     if (result.index == 0) {
-                        color_name = "赤";
+                        tower_name = "一番高い";
                         color_class = "label-danger";
                     }
                     else if (result.index == 1) {
-                        color_name = "緑";
+                        tower_name = "真ん中の高さの";
                         color_class = "label-success";
                     }
                     else if (result.index == 2) {
-                        color_name = "青";
+                        tower_name = "一番低い";
                         color_class = "label-primary";
                     }
-                    $(".clicked-tower-color")
+                    $(".clicked-tower-name")
                         .removeClass("label-danger")
                         .removeClass("label-success")
                         .removeClass("label-primary")
                         .addClass(color_class)
-                        .html(color_name);
+                        .html(tower_name);
                     $("#confirm-modal").modal();
                 }
             });
@@ -253,7 +253,6 @@ $(function() {
     $(".modal").on("show.bs.modal", function() {
         setTimeout(function() {
             updateCanvasSize(mjpeg_viewer);
-            console.log("foooo");
         }, 1000);
     });
     

@@ -15,6 +15,7 @@ roslib.load_manifest("jsk_pcl_ros")
 
 from image_view2.msg import ImageMarker2, PointArrayStamped
 from geometry_msgs.msg import Point
+from std_msgs.msg import Int16
 from std_msgs.msg import String
 from jsk_pcl_ros.srv import *
 
@@ -24,13 +25,29 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv
 
+class State:
+    INITIAL = 1
+    SELECT_TOWER = 2
+    CONFIRM = 3
+    START_TASK = 4
+    INITIALIZE_PROBLEM = 5
+    MOVE_LARGE_S_G = 6
+    MOVE_MIDDLE_S_I = 7
+    MOVE_LARGE_G_I = 8
+    MOVE_SMALL_S_G = 9
+    MOVE_LARGE_I_S = 10
+    MOVE_MIDDLE_I_G = 11
+    MOVE_LARGE_S_G = 12
+    def __init__(self, topic):
+        self.pub = rospy.Publisher(topic, Int16)
+        self.state_val = -1
+    def publish(self):
+        self.pub.publish(Int16(self.state_val))
+    def updateState(self, next_state):
+        self.state_val = next_state
 
 class TowerDetectViewerServer:
-    # state
-    INITIAL_STATE = 0
-    CONFIRMING_STATE = 1
     def __init__(self):
-        self.state = self.INITIAL_STATE
         self.radius = rospy.get_param("radius", 0.075)
         self.circle0 = Drawer3DCircle("/image_marker", 1, "/cluster00",
                                       self.radius, [1, 0, 0])
@@ -45,12 +62,11 @@ class TowerDetectViewerServer:
         self.circle1.advertise()
         self.circle2.advertise()
         self.bridge = CvBridge()
+        self.state = State("/browser/state")
         self.browser_click_sub = rospy.Subscriber("/browser/click", 
                                                   Point, 
                                                   self.clickCB)
         self.browser_message_pub = rospy.Publisher("/browser/message",
-                                                  String)
-        self.browser_state_pub = rospy.Publisher("/browser/state",
                                                   String)
         self.image_sub = rospy.Subscriber("/image_marked",
                                           Image,
@@ -61,8 +77,13 @@ class TowerDetectViewerServer:
         self.pickup_srv = rospy.Service("/browser/pickup",
                                         TowerPickUp,
                                         self.pickupCB)
+        self.state.updateState(State.INITIAL)
     def pickupCB(self, req):
+        self.state.updateState(State.MOVE_LARGE_S_G)
+        self.state.publish()
         rospy.sleep(10)                   #適当
+        self.state.updateState(State.INITIAL)
+        self.state.publish()
         return TowerPickUpResponse()
     def checkCircleCB(self, req):
         (width, height) = cv.GetSize(self.cv_image)
@@ -77,7 +98,9 @@ class TowerDetectViewerServer:
             click_index = 2
         return CheckCircleResponse(click_index != -1, click_index)
     def checkColor(self, image_color, array_color):
-        return (image_color[0] == array_color[0] and image_color[1] == array_color[1] and image_color[2] == array_color[2])
+        return (image_color[0] == array_color[0] and 
+                image_color[1] == array_color[1] and 
+                image_color[2] == array_color[2])
     def clickCB(self, msg):
         (width, height) = cv.GetSize(self.cv_image)
         # msg.x and msg.y is on a relative coordinate (u, v)
@@ -95,38 +118,19 @@ class TowerDetectViewerServer:
             output_str = output_str + " cluster02 clicked"
             click_index = 2
         self.browser_message_pub.publish(String(output_str))
-        # self.proc(click_index)
-    def proc(self, click_index):
-        """
-        process state machine
-        """
-        if self.state == self.INITIAL_STATE:
-            self.procInitialState(click_index)
-        elif self.state == self.CONFIRMING_STATE:
-            self.procConfirmingState(click_index)
-        self.publishState()
-    def procInitialState(self, click_index):
-        if click_index != -1:
-            self.clicked_index = click_index
-            self.circles[click_index].fill = False
-            self.state = self.CONFIRMING_STATE
-    def procConfirmingState(self, click_index):
-        self.circles[self.clicked_index].fill = True
-        self.state = self.INITIAL_STATE
     def imageCB(self, data):
         try:
             self.cv_image = self.bridge.imgmsg_to_cv(data, "bgr8")
         except CvBridgeError, e:
             print e
     def publishState(self):
-        self.browser_state_pub.publish(String(str(self.state)))
+        self.state.publish()
     def spin(self):
         while not rospy.is_shutdown():
             for c in self.circles:
                 c.publish()
             self.publishState()
             rospy.sleep(1.0)
-
 
 def main():
     rospy.init_node("tower_detect_viewer_server")

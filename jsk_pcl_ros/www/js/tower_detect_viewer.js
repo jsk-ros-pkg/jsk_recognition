@@ -2,15 +2,36 @@ $(function() {
     var ros = new ROSLIB.Ros({
         url: "ws://" + location.hostname + ":9090"
     });
-    var debugp = false;
-
     var waiting_server = false;
-    var state = -1;
-    var INITIAL_STATE = 0;
-    var CONFIRMING_STATE = 1
-    var PICKINGUP_STATE = 2
+    var state = -1;             // state is always updated by /browser/state
+    
+    var STATE = {
+        INITIAL: 1,
+        SELECT_TOWER: 2,
+        CONFIRM: 3,
+        START_TASK: 4,
+        INITIALIZE_PROBLEM: 5,
+        MOVE_LARGE_S_G: 6,
+        MOVE_MIDDLE_S_I: 7,
+        MOVE_LARGE_G_I: 8,
+        MOVE_SMALL_S_G: 9,
+        MOVE_LARGE_I_S: 10,
+        MOVE_MIDDLE_I_G: 11,
+        MOVE_LARGE_S_G: 12,
+    };
+
+    function stateToString(state) {
+        for (var key in STATE) {
+            if (state == STATE[key])
+                return key;
+        }
+        return "NONE";
+    }
+    
+    
     var CANVAS_DIV_ID = "mjpeg";
     var clicked_index = -1;
+
     function calcCanvasSize() {
         var aspect_ratio = 640 / 480.0;
         var window_height = $(window).height();
@@ -33,7 +54,7 @@ $(function() {
             aspect_ratio: aspect_ratio
         };
     }
-
+    
     function updateCanvasSize(viewer) {
         var size = calcCanvasSize();
         viewer.width = size.canvas_width;
@@ -63,7 +84,9 @@ $(function() {
     function disableLoading() {
         $("#loader").css("display", "none");
     };
-    
+
+    ///////////////////////////////////////////////////////
+    // mjpeg viewer
     // initialize mjpeg viewer
     var mjpeg_viewer = new MJPEGCANVAS.Viewer({
         divID : CANVAS_DIV_ID,
@@ -77,7 +100,9 @@ $(function() {
     $(window).resize(function() {
         updateCanvasSize(mjpeg_viewer);
     });
-
+    
+    ///////////////////////////////////////////////////////
+    // click event
     // broadcast click event to ros
     $(function() {
         var click_topic = new ROSLIB.Topic({
@@ -103,8 +128,9 @@ $(function() {
             });
             
             click_topic.publish(point);
-            if (state == PICKINGUP_STATE)
+            if (state != STATE.INITIAL) {
                 return;
+            }
             var req = new ROSLIB.ServiceRequest({
                 point: point
             });
@@ -159,12 +185,10 @@ $(function() {
             $("#confirm-modal").modal("hide");
             pickup.callService(req, function(result) {
                 disableLoading();
-                state = INITIAL_STATE;
             });
-            state = PICKINGUP_STATE;
         });
     });
-
+    
     // draw /browser/message
     $(function() {
         var listener = new ROSLIB.Topic({
@@ -183,46 +207,56 @@ $(function() {
         var listener = new ROSLIB.Topic({
             ros: ros,
             name: "/browser/state",
-            messageType: "std_msgs/String"
+            messageType: "std_msgs/Int16"
         });
         listener.subscribe(function(msg) {
-            $("#state").html("state: " + msg.data);
-            
-            //state = msg.data;
-            
+            state = msg.data;
+            $("#state").html("state: " + stateToString(state));
         });
     });
 
+    ///////////////////////////////////////////////////////
+    // help modal
+    // 
     // debug button
+    // toggle #debug visibility when debug button is clicked
     $("#debug-button").click(function() {
         if ($(this).hasClass("btn-default")) {
             $(this).addClass("btn-danger")
                 .removeClass("btn-default")
                 .html("有効");
-            debugp = true;
-            $("#overlay").css("display", "block");
+            $("#debug").css("display", "block");
         }
         else {
             $(this).addClass("btn-default")
                 .removeClass("btn-danger")
                 .html("無効");
-            $("#overlay").css("display", "none");
-            debugp = false;
+            $("#debug").css("display", "none");
         }
     });
-    
+    // enable fullscreen button
     $("#fullscreen-button").click(function() {
         if (this.webkitRequestFullScreen) {
             this.webkitRequestFullScreen();
+            updateCanvasSize(mjpeg_viewer);
         }
         else if (this. mozRequestFullScreen) {
             this. mozRequestFullScreen();
+            updateCanvasSize(mjpeg_viewer);
         }
         else {
             alert("全画面モードはサポートされていません");
         }
     });
 
+    // calling updateCanvasSize when modal view is shown
+    $(".modal").on("show.bs.modal", function() {
+        setTimeout(function() {
+            updateCanvasSize(mjpeg_viewer);
+            console.log("foooo");
+        }, 1000);
+    });
+    
     // setup loader
     $(function() {
         var param = {
@@ -248,4 +282,5 @@ $(function() {
         d.appendChild(a.canvas);
         a.play();
     });
+    
 });

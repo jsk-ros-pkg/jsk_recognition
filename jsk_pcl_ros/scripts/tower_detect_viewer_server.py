@@ -46,6 +46,7 @@ class State:
     def updateState(self, next_state):
         self.state_val = next_state
 
+        
 class TowerDetectViewerServer:
     def __init__(self):
         self.radius = rospy.get_param("radius", 0.075)

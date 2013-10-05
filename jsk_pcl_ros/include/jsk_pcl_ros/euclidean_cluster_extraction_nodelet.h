@@ -56,6 +56,7 @@
 
 #include "jsk_pcl_ros/ClusterPointIndices.h"
 #include "jsk_pcl_ros/EuclideanSegment.h"
+#include "jsk_pcl_ros/Int32Stamped.h"
 
 #include "jsk_pcl_ros/EuclideanClusteringConfig.h"
 
@@ -96,6 +97,7 @@ namespace pcl_ros
     ros::Publisher result_pub_;
     ros::Subscriber sub_input_;
     ros::Publisher pcl_pub_;
+    ros::Publisher cluster_num_pub_;
 
     ros::ServiceServer service_;
 
@@ -318,6 +320,12 @@ namespace pcl_ros
       }
 
       pcl_pub_.publish(*cloud_out);
+
+      jsk_pcl_ros::Int32Stamped::Ptr cluster_num_msg (new jsk_pcl_ros::Int32Stamped);
+      cluster_num_msg->header = input->header;
+      cluster_num_msg->data = number_of_clusters;
+      cluster_num_pub_.publish(cluster_num_msg);
+      
     }
 
     bool serviceCallback(jsk_pcl_ros::EuclideanSegment::Request &req,
@@ -409,8 +417,8 @@ namespace pcl_ros
 
       result_pub_ = pnh_->advertise<jsk_pcl_ros::ClusterPointIndices> ("output", 1);
       pcl_pub_ = pnh_->advertise<pcl::PointCloud<pcl::PointXYZRGB> > ("points_output",1);
+      cluster_num_pub_ = pnh_->advertise<jsk_pcl_ros::Int32Stamped> ("cluster_num", 1);
       sub_input_ = pnh_->subscribe("input", 1, &EuclideanClustering::extract, this);
-
       service_ = pnh_->advertiseService(pnh_->resolveName("euclidean_clustering"),
                                         &EuclideanClustering::serviceCallback, this);
     }

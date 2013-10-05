@@ -17,6 +17,7 @@ from image_view2.msg import ImageMarker2, PointArrayStamped
 from geometry_msgs.msg import Point
 from std_msgs.msg import Int16
 from std_msgs.msg import String
+from jsk_pcl_ros.msg import Int32Stamped
 from jsk_pcl_ros.srv import *
 
 from draw_3d_circle import Drawer3DCircle
@@ -59,6 +60,7 @@ class TowerDetectViewerServer:
         self.circles = [self.circle0, self.circle1, self.circle2]
         # bgr
         self.color_indices = [[0, 0, 255], [0, 255, 0], [255, 0, 0]]
+        self.cluster_num = -1
         self.circle0.advertise()
         self.circle1.advertise()
         self.circle2.advertise()
@@ -72,6 +74,9 @@ class TowerDetectViewerServer:
         self.image_sub = rospy.Subscriber("/image_marked",
                                           Image,
                                           self.imageCB)
+        self.cluster_num_sub = rospy.Subscriber("/pcl_nodelet/clustering/cluster_num",
+                                                Int32Stamped,
+                                                self.clusterNumCB)
         self.check_circle_srv = rospy.Service("/browser/check_circle",
                                               CheckCircle,
                                               self.checkCircleCB)
@@ -79,6 +84,8 @@ class TowerDetectViewerServer:
                                         TowerPickUp,
                                         self.pickupCB)
         self.state.updateState(State.INITIAL)
+    def clusterNumCB(self, msg):
+        self.cluster_num = msg.data
     def pickupCB(self, req):
         self.state.updateState(State.MOVE_LARGE_S_G)
         self.state.publish()

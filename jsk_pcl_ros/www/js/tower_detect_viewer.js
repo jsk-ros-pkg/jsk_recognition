@@ -100,6 +100,22 @@ $(function() {
     $(window).resize(function() {
         updateCanvasSize(mjpeg_viewer);
     });
+
+    ///////////////////////////////////////////////////////
+    // subscribing /pcl_nodelet/clustering/cluster_num
+    cluster_num = -1;
+    $(function() {
+        var cluster_num_sub = new ROSLIB.Topic({
+            ros: ros,
+            name: "/pcl_nodelet/clustering/cluster_num",
+            messageType: "jsk_pcl_ros/Int32Stamped"
+        });
+        cluster_num_sub.subscribe(function(msg) {
+            cluster_num = msg.data;
+            // update the debug message
+            $("#cluster-num-message").html(cluster_num + " clusters");
+        });
+    });
     
     ///////////////////////////////////////////////////////
     // click event

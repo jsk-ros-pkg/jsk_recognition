@@ -101,6 +101,13 @@ $(function() {
         updateCanvasSize(mjpeg_viewer);
     });
 
+
+    // graph
+        var graph_data = [];
+        var GRAPH_MAX = 100;
+    var graph_plot = null;
+    
+    
     ///////////////////////////////////////////////////////
     // subscribing /pcl_nodelet/clustering/cluster_num
     cluster_num = -1;
@@ -110,10 +117,21 @@ $(function() {
             name: "/pcl_nodelet/clustering/cluster_num",
             messageType: "jsk_pcl_ros/Int32Stamped"
         });
+        
         cluster_num_sub.subscribe(function(msg) {
+            if (graph_data.length > GRAPH_MAX)
+                graph_data = graph_data.slice(1);
             cluster_num = msg.data;
             // update the debug message
             $("#cluster-num-message").html(cluster_num + " clusters");
+            graph_data.push(cluster_num);
+            var set_data = [];
+            for (var i = 0; i < graph_data.length; i++)
+                set_data.push([i, graph_data[i]]);
+            if (graph_plot) {
+                graph_plot.setData([set_data]);
+                graph_plot.draw();
+            }
         });
     });
     
@@ -242,6 +260,23 @@ $(function() {
                 .removeClass("btn-default")
                 .html("有効");
             $("#debug").css("display", "block");
+            if (!graph_plot) {
+                $("#graph-placeholder").width("100%").height(200);
+                graph_plot = $.plot("#graph-placeholder", [graph_data], {
+                    series: {
+                        shadowSize: 0   // Drawing is faster without shadows
+                    },
+                    yaxis: {
+                        min: 0,
+                        max: 10
+                    },
+                    xaxis: {
+                        min: 0,
+                        max: GRAPH_MAX,
+                        show: false
+                    }
+                });
+            }
         }
         else {
             $(this).addClass("btn-default")
@@ -297,5 +332,4 @@ $(function() {
         d.appendChild(a.canvas);
         a.play();
     });
-    
 });

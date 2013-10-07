@@ -116,7 +116,7 @@ class TowerDetectViewerServer:
 
         # waiting for ik server
         rospy.loginfo("waiting for ik server")
-        #rospy.wait_for_service("/mcr04_ik_server_0")
+        # rospy.wait_for_service("/mcr04_ik_server_0")
         self.robot_server01 = rospy.ServiceProxy("/mcr04_ik_server_0", RobotPickupReleasePoint)
         rospy.loginfo("success to connect to ik server")
 
@@ -188,10 +188,18 @@ class TowerDetectViewerServer:
         self.cluster_num = msg.data
     def moveRobot(self, plate, from_tower, to_tower, from_height, to_height):
         robot_index = 0                   #use the 1st robot first
+        robot_frame_id = self.robotBaseFrameId(robot_index)
         rospy.loginfo("moving: %s from %s(%s) to %s(%s)" % (self.resolvePlateName(plate), 
                                                             self.resolveTowerName(from_tower), self.resolvePlateHeight(from_height),
                                                             self.resolveTowerName(to_tower), self.resolvePlateHeight(to_height)))
-        
+        from_target_position = self.tower_position[from_tower][robot_frame_id]
+        to_target_position = self.tower_position[from_tower][robot_frame_id]
+        rospy.loginfo("        (%f, %f, %f) => (%f, %f, %f)" % (from_target_position.x,
+                                                                from_target_position.y,
+                                                                from_target_position.z,
+                                                                to_target_position.x,
+                                                                to_target_position.y,
+                                                                to_target_position.z))
         rospy.sleep(2)
     def runMain(self):
         # first of all, resolve tf and store the position of the tower
@@ -243,6 +251,8 @@ class TowerDetectViewerServer:
         # lookup I
         self.I_TOWER = (set([self.TOWER_LOWEST, self.TOWER_MIDDLE, self.TOWER_HIGHEST]) 
                         - set([self.G_TOWER, self.S_TOWER])).pop()
+
+        # update the position of the tower
         self.state.updateState(State.MOVE_LARGE_S_G)
         self.state.publish()
         self.runMain()

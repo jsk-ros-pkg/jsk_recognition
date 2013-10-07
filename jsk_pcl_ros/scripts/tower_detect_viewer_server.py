@@ -136,6 +136,33 @@ class TowerDetectViewerServer:
             return "/cluster00"
         else:
             raise Exception("unknown tower: %d" % (tower_name))
+    def resolveTowerName(self, tower_id):
+        if tower_id == self.TOWER_LOWEST:
+            return "TOWER_LOWEST"
+        elif tower_id == self.TOWER_MIDDLE:
+            return "TOWER_MIDDLE"
+        elif tower_id == self.TOWER_HIGHEST:
+            return "TOWER_HIGHEST"
+        else:
+            raise Exception("unknown tower: %d" % (tower_id))
+    def resolvePlateName(self, plate_id):
+        if plate_id == self.PLATE_SMALL:
+            return "PLATE_SMALL"
+        elif plate_id == self.PLATE_MIDDLE:
+            return "PLATE_MIDDLE"
+        elif plate_id == self.PLATE_LARGE:
+            return "PLATE_LARGE"
+        else:
+            raise Exception("unknown plate id: %d" % (plate_id))
+    def resolvePlateHeight(self, height_id):
+        if height_id == self.PLATE_HEIGHT_LOWEST:
+            return "lowest"
+        elif height_id == self.PLATE_HEIGHT_MIDDLE:
+            return "middle"
+        elif height_id == self.PLATE_HEIGHT_HIGHEST:
+            return "highest"
+        else:
+            raise Exception("unknown plate height: %d" % (height_id))
     def robotBaseFrameId(self, index):    #index is 0 or 1
         if index == 0:
             return self.ROBOT0_BASE_FRAME_ID
@@ -159,8 +186,11 @@ class TowerDetectViewerServer:
         
     def clusterNumCB(self, msg):
         self.cluster_num = msg.data
-    def moveRobot(self, plate_name, from_tower, to_tower, from_height, to_height):
-        pass
+    def moveRobot(self, plate, from_tower, to_tower, from_height, to_height):
+        rospy.loginfo("moving: %s from %s(%s) to %s(%s)" % (self.resolvePlateName(plate), 
+                                                            self.resolveTowerName(from_tower), self.resolvePlateHeight(from_height),
+                                                            self.resolveTowerName(to_tower), self.resolvePlateHeight(to_height)))
+        rospy.sleep(2)
     def runMain(self):
         # first of all, resolve tf and store the position of the tower
         # but, we don't need to update `S' tower's position.

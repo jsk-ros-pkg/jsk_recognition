@@ -173,30 +173,28 @@ $(function() {
             check_circle.callService(req, function(result) {
                 waiting_server = false;
                 disableLoading();
-                if (result.clicked) {
-                    clicked_index = result.index;
-                    // showing modal
-                    //alert("you clicked " + result.index);
-                    var tower_name = "";
-                    var color_class = "";
-                    if (result.index == 0) {
-                        tower_name = "一番高い";
-                        color_class = "label-danger";
-                    }
-                    else if (result.index == 1) {
-                        tower_name = "真ん中の高さの";
-                        color_class = "label-success";
-                    }
-                    else if (result.index == 2) {
-                        tower_name = "一番低い";
-                        color_class = "label-primary";
-                    }
-                    $(".clicked-tower-name")
+                var tower_name = "";
+                var color_class = "";
+                if (result.index == 0) {
+                    tower_name = "一番高い";
+                    color_class = "label-danger";
+                }
+                else if (result.index == 1) {
+                    tower_name = "真ん中の高さの";
+                    color_class = "label-success";
+                }
+                else if (result.index == 2) {
+                    tower_name = "一番低い";
+                    color_class = "label-primary";
+                }
+                $(".clicked-tower-name")
                         .removeClass("label-danger")
                         .removeClass("label-success")
                         .removeClass("label-primary")
                         .addClass(color_class)
                         .html(tower_name);
+                if (result.clicked) {
+                    clicked_index = result.index;
                     $("#confirm-modal").modal();
                 }
                 else if (result.msg != "") {

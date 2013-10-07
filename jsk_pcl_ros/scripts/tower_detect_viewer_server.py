@@ -187,9 +187,11 @@ class TowerDetectViewerServer:
     def clusterNumCB(self, msg):
         self.cluster_num = msg.data
     def moveRobot(self, plate, from_tower, to_tower, from_height, to_height):
+        robot_index = 0                   #use the 1st robot first
         rospy.loginfo("moving: %s from %s(%s) to %s(%s)" % (self.resolvePlateName(plate), 
                                                             self.resolveTowerName(from_tower), self.resolvePlateHeight(from_height),
                                                             self.resolveTowerName(to_tower), self.resolvePlateHeight(to_height)))
+        
         rospy.sleep(2)
     def runMain(self):
         # first of all, resolve tf and store the position of the tower

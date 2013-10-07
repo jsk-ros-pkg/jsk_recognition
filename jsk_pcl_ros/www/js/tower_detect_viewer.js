@@ -199,6 +199,10 @@ $(function() {
                         .html(tower_name);
                     $("#confirm-modal").modal();
                 }
+                else if (result.msg != "") {
+                    console.log(result.msg);
+                    $("#alert-modal").modal("show");
+                }
             });
         });
     });

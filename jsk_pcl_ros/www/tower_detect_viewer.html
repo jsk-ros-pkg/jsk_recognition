@@ -33,6 +33,7 @@
       </div>
       <div id="mjpeg"></div>
     </div>
+
     <div class="modal fade" id="confirm-modal" tabindex="-1" role="dialog"
          aria-labelledby="myModalLabel" aria-hidden="true">
       <div class="modal-dialog">
@@ -44,7 +45,7 @@
           </div>
           <div class="modal-body">
             <p>あなたは<span class="label clicked-tower-name"></span>タワーをクリックしました。</p>
-            <p><span class="label clicked-tower-name"></span>のタワーの上にシャーレを移動させてよいですか?</p>
+            <p><span class="label clicked-tower-name"></span>タワーの上にシャーレを移動させてよいですか?</p>
           </div>
           <div class="modal-footer">
             <p class="modal-yes-no-line">
@@ -53,6 +54,27 @@
               <button type="button" data-dismiss="modal" class="btn btn-danger btn-lg btn-block">
                 いいえ</button>
             </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="alert-modal" tabindex="-1" role="dialog"
+         aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close"
+                    data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title"><span class="label label-danger">!!! 警告 !!!</span></h4>
+          </div>
+          <div class="modal-body">
+            <p><span class="label clicked-tower-name"></span>タワーの上にはすでにシャーレがおいてあります。</p>
+            <p>他のタワーを選択してください</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-lg btn-block btn-primary">
+              閉じる</button>
           </div>
         </div>
       </div>

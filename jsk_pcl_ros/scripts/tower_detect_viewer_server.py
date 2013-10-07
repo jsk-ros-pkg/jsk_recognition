@@ -254,12 +254,17 @@ class TowerDetectViewerServer:
         y = int(height * req.point.y)
         click_index = -1
         if self.checkColor(self.cv_image[y, x], self.color_indices[0]):
-            click_index = 0
+            click_index = self.TOWER_HIGHEST
         elif self.checkColor(self.cv_image[y, x], self.color_indices[1]):
-            click_index = 1
+            click_index = self.TOWER_MIDDLE
         elif self.checkColor(self.cv_image[y, x], self.color_indices[2]):
-            click_index = 2
-        return CheckCircleResponse(click_index != -1, click_index)
+            click_index = self.TOWER_LOWEST
+        if click_index == self.S_TOWER:
+            msg = "the tower the user clicked equals to the start tower"
+            rospy.logerr(msg)
+            return CheckCircleResponse(False, click_index, msg)
+        else:
+            return CheckCircleResponse(click_index != -1, click_index, "")
     def checkColor(self, image_color, array_color):
         return (image_color[0] == array_color[0] and 
                 image_color[1] == array_color[1] and 

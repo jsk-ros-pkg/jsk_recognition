@@ -116,9 +116,10 @@ class TowerDetectViewerServer:
         self.state.updateState(State.INITIAL)
 
         # waiting for ik server
-        rospy.loginfo("waiting for ik server")
-        rospy.wait_for_service("/mcr04_ik_server_1")
-        self.robot_server1 = rospy.ServiceProxy("/mcr04_ik_server_1", RobotPickupReleasePoint)
+        if rospy.get_param("~wait_ik_server", False):
+            rospy.loginfo("waiting for ik server")
+            rospy.wait_for_service("/mcr04_ik_server_1")
+            self.robot_server1 = rospy.ServiceProxy("/mcr04_ik_server_1", RobotPickupReleasePoint)
         rospy.loginfo("success to connect to ik server")
 
         # initialize the position of the towers from TL
@@ -198,7 +199,7 @@ class TowerDetectViewerServer:
                                                             self.resolveTowerName(from_tower), self.resolvePlateHeight(from_height),
                                                             self.resolveTowerName(to_tower), self.resolvePlateHeight(to_height)))
         from_target_position = self.tower_position[from_tower][robot_frame_id]
-        to_target_position = self.tower_position[from_tower][robot_frame_id]
+        to_target_position = self.tower_position[to_tower][robot_frame_id]
         rospy.loginfo("        (%f, %f, %f) => (%f, %f, %f)" % (from_target_position.x,
                                                                 from_target_position.y,
                                                                 from_target_position.z,

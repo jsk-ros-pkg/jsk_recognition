@@ -17,6 +17,7 @@ from image_view2.msg import ImageMarker2, PointArrayStamped
 from geometry_msgs.msg import Point
 from std_msgs.msg import Int16
 from std_msgs.msg import String
+from std_msgs.msg import Header
 from jsk_pcl_ros.msg import Int32Stamped
 from jsk_pcl_ros.srv import *
 import tf
@@ -60,8 +61,8 @@ class TowerDetectViewerServer:
     PLATE_HEIGHT_LOWEST = 0
     PLATE_HEIGHT_MIDDLE = 1
     PLATE_HEIGHT_HIGHEST = 2
-    ROBOT0_BASE_FRAME_ID = "/R0/L0"
-    ROBOT1_BASE_FRAME_ID = "/R1/L0"
+    ROBOT0_BASE_FRAME_ID = "/R1/L0"
+    ROBOT1_BASE_FRAME_ID = "/R2/L0"
     def __init__(self):
         # initialize the position of the tower
         self.tower_position = {
@@ -116,8 +117,8 @@ class TowerDetectViewerServer:
 
         # waiting for ik server
         rospy.loginfo("waiting for ik server")
-        # rospy.wait_for_service("/mcr04_ik_server_0")
-        self.robot_server01 = rospy.ServiceProxy("/mcr04_ik_server_0", RobotPickupReleasePoint)
+        rospy.wait_for_service("/mcr04_ik_server_1")
+        self.robot_server1 = rospy.ServiceProxy("/mcr04_ik_server_1", RobotPickupReleasePoint)
         rospy.loginfo("success to connect to ik server")
 
         # initialize the position of the towers from TL
@@ -154,6 +155,11 @@ class TowerDetectViewerServer:
             return "PLATE_LARGE"
         else:
             raise Exception("unknown plate id: %d" % (plate_id))
+    def resolvePlateHeightOffset(self, height_id):
+        """
+        return the offset of z-axis of `height_id'
+        """
+        return 0.0
     def resolvePlateHeight(self, height_id):
         if height_id == self.PLATE_HEIGHT_LOWEST:
             return "lowest"
@@ -183,7 +189,6 @@ class TowerDetectViewerServer:
                 self.tower_position[tower_name][robot_base_frame_id].z = trans[2]
             except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
                 rospy.logerr("failed to lookup transform: %s => %s" % (robot_base_frame_id, frame_id))
-        
     def clusterNumCB(self, msg):
         self.cluster_num = msg.data
     def moveRobot(self, plate, from_tower, to_tower, from_height, to_height):
@@ -200,7 +205,8 @@ class TowerDetectViewerServer:
                                                                 to_target_position.x,
                                                                 to_target_position.y,
                                                                 to_target_position.z))
-        rospy.sleep(2)
+        self.robot_server1(Header(), from_target_position, 0)
+        self.robot_server1(Header(), to_target_position, 1)
     def runMain(self):
         # first of all, resolve tf and store the position of the tower
         # but, we don't need to update `S' tower's position.

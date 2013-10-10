@@ -1,0 +1,15 @@
+# a service to move robot with tower index
+byte ROBOT1=1
+byte ROBOT2=2
+byte ROBOT3=3
+
+byte PLATE_SMALL=1
+byte PLATE_MIDDLE=2
+byte PLATE_LARGE=3
+
+byte OPTION_MOVE_INITIAL=1
+
+int32 robot_index
+int32 plate_index
+int32 option_command
+---

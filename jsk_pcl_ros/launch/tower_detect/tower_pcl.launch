@@ -56,7 +56,6 @@
       <remap from="~input" to="/pcl_nodelet/passthrough_x/output" />
       <remap from="~target" to="/pcl_nodelet/clustering/output" />
       <rosparam>
-
       </rosparam>
     </node>
     

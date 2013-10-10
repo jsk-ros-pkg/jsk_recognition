@@ -20,6 +20,7 @@ from std_msgs.msg import String
 from std_msgs.msg import Header
 from jsk_pcl_ros.msg import Int32Stamped
 from jsk_pcl_ros.srv import *
+import jsk_pcl_ros.srv
 import tf
 from draw_3d_circle import Drawer3DCircle
 
@@ -52,12 +53,12 @@ class State:
         
 class TowerDetectViewerServer:
     # name of tower
-    TOWER_LOWEST = 2
-    TOWER_MIDDLE = 1
-    TOWER_HIGHEST = 0
-    PLATE_SMALL = 0
-    PLATE_MIDDLE = 1
-    PLATE_LARGE = 2
+    TOWER_LOWEST = jsk_pcl_ros.srv.TowerRobotMoveCommandRequest.TOWER_LOWEST
+    TOWER_MIDDLE = jsk_pcl_ros.srv.TowerRobotMoveCommandRequest.TOWER_MIDDLE
+    TOWER_HIGHEST = jsk_pcl_ros.srv.TowerRobotMoveCommandRequest.TOWER_HIGHEST
+    PLATE_SMALL = jsk_pcl_ros.srv.TowerRobotMoveCommandRequest.PLATE_SMALL
+    PLATE_MIDDLE = jsk_pcl_ros.srv.TowerRobotMoveCommandRequest.PLATE_MIDDLE
+    PLATE_LARGE = jsk_pcl_ros.srv.TowerRobotMoveCommandRequest.PLATE_LARGE
     PLATE_HEIGHT_LOWEST = 0
     PLATE_HEIGHT_MIDDLE = 1
     PLATE_HEIGHT_HIGHEST = 2
@@ -116,11 +117,11 @@ class TowerDetectViewerServer:
         self.state.updateState(State.INITIAL)
 
         # waiting for ik server
-        if rospy.get_param("~wait_ik_server", False):
-            rospy.loginfo("waiting for ik server")
-            rospy.wait_for_service("/mcr04_ik_server_1")
-            self.robot_server1 = rospy.ServiceProxy("/mcr04_ik_server_1", RobotPickupReleasePoint)
-        rospy.loginfo("success to connect to ik server")
+        if rospy.get_param("~wait_robot_move_command", False):
+            rospy.loginfo("waiting for robot server")
+            rospy.wait_for_service("/browser/tower_robot_move_command")
+        self.robot_command = rospy.ServiceProxy("/browser/tower_robot_move_command", TowerRobotMoveCommand)
+        rospy.loginfo("connected to robot_move server")
 
         # initialize the position of the towers from TL
         self.updateTowerPosition(self.TOWER_LOWEST)
@@ -200,14 +201,12 @@ class TowerDetectViewerServer:
                                                             self.resolveTowerName(to_tower), self.resolvePlateHeight(to_height)))
         from_target_position = self.tower_position[from_tower][robot_frame_id]
         to_target_position = self.tower_position[to_tower][robot_frame_id]
-        rospy.loginfo("        (%f, %f, %f) => (%f, %f, %f)" % (from_target_position.x,
-                                                                from_target_position.y,
-                                                                from_target_position.z,
-                                                                to_target_position.x,
-                                                                to_target_position.y,
-                                                                to_target_position.z))
-        self.robot_server1(Header(), from_target_position, 0)
-        self.robot_server1(Header(), to_target_position, 1)
+        self.robot_move(jsk_pcl_ros.srv.TowerRobotMoveCommandRequest.ROBOT1,
+                        plate,
+                        from_tower,
+                        to_tower)
+        # self.robot_server1(Header(), from_target_position, 0)
+        # self.robot_server1(Header(), to_target_position, 1)
     def runMain(self):
         # first of all, resolve tf and store the position of the tower
         # but, we don't need to update `S' tower's position.
@@ -297,13 +296,13 @@ class TowerDetectViewerServer:
         click_index = -1
         if self.checkColor(self.cv_image[y, x], self.color_indices[0]):
             output_str = output_str + " cluster00 clicked"
-            click_index = 0
+            click_index = self.TOWER_HIGHEST
         elif self.checkColor(self.cv_image[y, x], self.color_indices[1]):
             output_str = output_str + " cluster01 clicked"
-            click_index = 1
+            click_index = self.TOWER_MIDDLE
         elif self.checkColor(self.cv_image[y, x], self.color_indices[2]):
             output_str = output_str + " cluster02 clicked"
-            click_index = 2
+            click_index = self.TOWER_LOWEST
         self.browser_message_pub.publish(String(output_str))
     def imageCB(self, data):
         try:

@@ -175,15 +175,15 @@ $(function() {
                 disableLoading();
                 var tower_name = "";
                 var color_class = "";
-                if (result.index == 0) {
+                if (result.index == 3) {
                     tower_name = "一番高い";
                     color_class = "label-danger";
                 }
-                else if (result.index == 1) {
+                else if (result.index == 2) {
                     tower_name = "真ん中の高さの";
                     color_class = "label-success";
                 }
-                else if (result.index == 2) {
+                else if (result.index == 1) {
                     tower_name = "一番低い";
                     color_class = "label-primary";
                 }

@@ -201,10 +201,10 @@ class TowerDetectViewerServer:
                                                             self.resolveTowerName(to_tower), self.resolvePlateHeight(to_height)))
         from_target_position = self.tower_position[from_tower][robot_frame_id]
         to_target_position = self.tower_position[to_tower][robot_frame_id]
-        self.robot_move(jsk_pcl_ros.srv.TowerRobotMoveCommandRequest.ROBOT1,
-                        plate,
-                        from_tower,
-                        to_tower)
+        self.robot_command(jsk_pcl_ros.srv.TowerRobotMoveCommandRequest.ROBOT1,
+                           plate,
+                           from_tower, to_tower,
+                           jsk_pcl_ros.srv.TowerRobotMoveCommandRequest.OPTION_NONE)
         # self.robot_server1(Header(), from_target_position, 0)
         # self.robot_server1(Header(), to_target_position, 1)
     def runMain(self):

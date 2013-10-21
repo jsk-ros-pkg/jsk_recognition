@@ -1,2 +1,2 @@
 Header header
-pcl/PointIndices[] cluster_indices 
+pcl_msgs/PointIndices[] cluster_indices 

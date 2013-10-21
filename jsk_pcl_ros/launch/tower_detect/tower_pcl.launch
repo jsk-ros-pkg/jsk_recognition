@@ -12,8 +12,8 @@
       <rosparam>
         filter_field_name: z
         filter_limit_min: 1.2
-        filter_limit_max: 1.5
-        #filter_limit_max: 1.88
+        #filter_limit_max: 1.5
+        filter_limit_max: 1.85
       </rosparam>
     </node>
     <node pkg="nodelet" type="nodelet"
@@ -24,7 +24,8 @@
       <rosparam>
         filter_field_name: y
         filter_limit_min: -0.4
-        filter_limit_max: 0.4
+        #filter_limit_max: 0.4
+        filter_limit_max: 0.0
       </rosparam>
     </node>
     <node pkg="nodelet" type="nodelet"

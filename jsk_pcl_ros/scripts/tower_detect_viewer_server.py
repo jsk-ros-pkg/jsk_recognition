@@ -67,8 +67,8 @@ class TowerDetectViewerServer:
     def __init__(self):
         # initialize the position of the tower
         self.tower_position = {
-            self.TOWER_LOWEST: Point()
-            self.TOWER_MIDDLE: Point()
+            self.TOWER_LOWEST: Point(),
+            self.TOWER_MIDDLE: Point(),
             self.TOWER_HIGHEST: Point()
         }
         self.radius = rospy.get_param("radius", 0.075)

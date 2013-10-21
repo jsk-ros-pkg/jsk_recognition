@@ -241,7 +241,11 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
     rangeImagePP.setDepthImage ((float *)mat.ptr(),
                                 width, height,
                                 cx, cy, fx, fy);
+#if PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION >= 7
+    rangeImagePP.header = pcl_conversions::toPCL(info->header);
+#else
     rangeImagePP.header = info->header;
+#endif
     if(proc_cloud) {
       pub_cloud_.publish(boost::make_shared<pcl::PointCloud<pcl::PointWithRange > >
                          ( (pcl::PointCloud<pcl::PointWithRange>)rangeImagePP) );
@@ -249,7 +253,11 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
 
     if(proc_disp) {
       stereo_msgs::DisparityImage disp;
+#if PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION >= 7
+      disp.header = pcl_conversions::fromPCL(rangeImagePP.header);
+#else
       disp.header = rangeImagePP.header;
+#endif
       disp.image.encoding  = sensor_msgs::image_encodings::TYPE_32FC1;
       disp.image.height    = rangeImagePP.height;
       disp.image.width     = rangeImagePP.width;

@@ -52,6 +52,7 @@ add_dependencies(jsk_pcl_ros jsk_pcl_ros_gencpp)
 
 add_executable(pointcloud_screenpoint src/pointcloud_screenpoint.cpp)
 target_link_libraries(pointcloud_screenpoint ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES})
+add_dependencies(pointcloud_screenpoint jsk_pcl_ros_gencpp)
 
 #
 install(DIRECTORY include/${PROJECT_NAME}/

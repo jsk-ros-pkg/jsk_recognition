@@ -67,18 +67,9 @@ class TowerDetectViewerServer:
     def __init__(self):
         # initialize the position of the tower
         self.tower_position = {
-            self.TOWER_LOWEST: {
-                self.ROBOT0_BASE_FRAME_ID: Point(),
-                self.ROBOT1_BASE_FRAME_ID: Point(),
-            },
-            self.TOWER_MIDDLE: {
-                self.ROBOT0_BASE_FRAME_ID: Point(),
-                self.ROBOT1_BASE_FRAME_ID: Point(),
-            },
-            self.TOWER_HIGHEST: {
-                self.ROBOT0_BASE_FRAME_ID: Point(),
-                self.ROBOT1_BASE_FRAME_ID: Point(),
-            }
+            self.TOWER_LOWEST: Point()
+            self.TOWER_MIDDLE: Point()
+            self.TOWER_HIGHEST: Point()
         }
         self.radius = rospy.get_param("radius", 0.075)
         self.circle0 = Drawer3DCircle("/image_marker", 1, "/cluster00",
@@ -181,16 +172,14 @@ class TowerDetectViewerServer:
     def updateTowerPosition(self, tower_name):
         frame_id = self.towerNameToFrameId(tower_name)
         rospy.loginfo("resolving %s" % (frame_id))
-        for robot_index in range(2):
-            try:
-                robot_base_frame_id = self.robotBaseFrameId(robot_index)
-                (trans, rot) = self.tf_listener.lookupTransform(robot_base_frame_id, frame_id, rospy.Time(0))
-                rospy.loginfo("%s => %s: (%f, %f, %f)" % (robot_base_frame_id, frame_id, trans[0], trans[1], trans[2]))
-                self.tower_position[tower_name][robot_base_frame_id].x = trans[0]
-                self.tower_position[tower_name][robot_base_frame_id].y = trans[1]
-                self.tower_position[tower_name][robot_base_frame_id].z = trans[2]
-            except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-                rospy.logerr("failed to lookup transform: %s => %s" % (robot_base_frame_id, frame_id))
+        try:
+            (trans, rot) = self.tf_listener.lookupTransform("/origin", frame_id, rospy.Time(0))
+            rospy.loginfo("%s => %s: (%f, %f, %f)" % (robot_base_frame_id, frame_id, trans[0], trans[1], trans[2]))
+            self.tower_position[tower_name].x = trans[0]
+            self.tower_position[tower_name].y = trans[1]
+            self.tower_position[tower_name].z = trans[2]
+        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+            rospy.logerr("failed to lookup transform: %s => %s" % (robot_base_frame_id, frame_id))
     def clusterNumCB(self, msg):
         self.cluster_num = msg.data
     def moveRobot(self, plate, from_tower, to_tower, from_height, to_height):
@@ -199,8 +188,8 @@ class TowerDetectViewerServer:
         rospy.loginfo("moving: %s from %s(%s) to %s(%s)" % (self.resolvePlateName(plate), 
                                                             self.resolveTowerName(from_tower), self.resolvePlateHeight(from_height),
                                                             self.resolveTowerName(to_tower), self.resolvePlateHeight(to_height)))
-        from_target_position = self.tower_position[from_tower][robot_frame_id]
-        to_target_position = self.tower_position[to_tower][robot_frame_id]
+        from_target_position = self.tower_position[from_tower]
+        to_target_position = self.tower_position[to_tower]
         self.robot_command(jsk_pcl_ros.srv.TowerRobotMoveCommandRequest.ROBOT1,
                            plate,
                            from_tower, to_tower,

@@ -118,7 +118,7 @@ class TowerDetectViewerServer:
         self.updateTowerPosition(self.TOWER_LOWEST)
         self.updateTowerPosition(self.TOWER_MIDDLE)
         self.updateTowerPosition(self.TOWER_HIGHEST)
-        self.S_TOWER = self.TOWER_LOWEST
+        self.S_TOWER = self.TOWER_MIDDLE
         self.G_TOWER = None
         self.I_TOWER = None
     def towerNameToFrameId(self, tower_name):

@@ -24,6 +24,8 @@ add_executable(checkerboard_detector src/checkerboard_detector.cpp)
 target_link_libraries(checkerboard_detector ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 add_executable(checkerboard_calibration src/checkerboard_calibration.cpp)
 target_link_libraries(checkerboard_calibration ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+add_dependencies(checkerboard_detector    posedetection_msgs_gencpp)
+add_dependencies(checkerboard_calibration posedetection_msgs_gencpp)
 
 catkin_package(
     CATKIN_DEPENDS roscpp cv_bridge sensor_msgs posedetection_msgs

@@ -75,7 +75,7 @@ namespace jsk_pcl_ros
 
     void config_callback (Config &config, uint32_t level);
 
-    pcl::RGBColorFilter<sensor_msgs::PointCloud2> impl_;
+    pcl::RGBColorFilter<POINT_CLOUD2_TYPE> impl_;
   public:
     void onInit ()
     {
@@ -131,7 +131,7 @@ namespace jsk_pcl_ros
 
     void config_callback (Config &config, uint32_t level);
 
-    pcl::HSVColorFilter<sensor_msgs::PointCloud2> impl_;
+    pcl::HSVColorFilter<POINT_CLOUD2_TYPE> impl_;
   public:
     void onInit ()
     {

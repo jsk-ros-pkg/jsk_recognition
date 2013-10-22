@@ -44,6 +44,12 @@
 #include <pcl/filters/conditional_removal.h>
 #include <pcl/filters/extract_indices.h>
 
+#if PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION >= 7
+  #define POINT_CLOUD2_TYPE pcl::PCLPointCloud2
+#else
+  #define POINT_CLOUD2_TYPE sensor_msgs::PointCloud2
+#endif
+
 namespace pcl
 {
   template <typename PointT>
@@ -52,9 +58,9 @@ namespace pcl
   };
 
   template <>
-  class RGBColorFilter<sensor_msgs::PointCloud2> : public Filter<sensor_msgs::PointCloud2>
+  class RGBColorFilter<POINT_CLOUD2_TYPE> : public Filter<POINT_CLOUD2_TYPE>
   {
-    typedef sensor_msgs::PointCloud2 PointCloud2;
+    typedef POINT_CLOUD2_TYPE PointCloud2;
     typedef PointCloud2::Ptr PointCloud2Ptr;
     typedef PointCloud2::ConstPtr PointCloud2ConstPtr;
     typedef pcl::PointXYZRGB PointType;
@@ -162,7 +168,7 @@ namespace pcl
       filter_instance_.setCondition (condp);
     }
 
-    inline virtual void applyFilter (sensor_msgs::PointCloud2 &output)
+    inline virtual void applyFilter (POINT_CLOUD2_TYPE &output)
     {
       PointCloud tmp_in;
       fromROSMsg<PointType> (*input_, tmp_in);
@@ -177,7 +183,7 @@ namespace pcl
       for (size_t i = 0; i < ids_c->size(); i++)
           (*ids)[i] = (*ids_c)[i];
 
-      pcl::ExtractIndices< sensor_msgs::PointCloud2 > ei;
+      pcl::ExtractIndices< POINT_CLOUD2_TYPE > ei;
       ei.setInputCloud (input_);
       ei.setIndices (ids);
       ei.filter (output);
@@ -190,9 +196,9 @@ namespace pcl
   };
 
   template <>
-  class HSVColorFilter<sensor_msgs::PointCloud2> : public Filter<sensor_msgs::PointCloud2>
+  class HSVColorFilter<POINT_CLOUD2_TYPE> : public Filter<POINT_CLOUD2_TYPE>
   {
-    typedef sensor_msgs::PointCloud2 PointCloud2;
+    typedef POINT_CLOUD2_TYPE PointCloud2;
     typedef PointCloud2::Ptr PointCloud2Ptr;
     typedef PointCloud2::ConstPtr PointCloud2ConstPtr;
     typedef pcl::PointXYZRGB PointType;
@@ -303,7 +309,7 @@ namespace pcl
       filter_instance_.setCondition (condp);
     }
 
-    virtual inline void applyFilter (sensor_msgs::PointCloud2 &output)
+    virtual inline void applyFilter (POINT_CLOUD2_TYPE &output)
     {
       PointCloud tmp_in;
       fromROSMsg<PointType> (*input_, tmp_in);
@@ -318,7 +324,7 @@ namespace pcl
       for (size_t i = 0; i < ids_c->size(); i++)
           (*ids)[i] = (*ids_c)[i];
 
-      pcl::ExtractIndices< sensor_msgs::PointCloud2 > ei;
+      pcl::ExtractIndices< POINT_CLOUD2_TYPE > ei;
       ei.setInputCloud (input_);
       ei.setIndices (ids);
       ei.filter (output);

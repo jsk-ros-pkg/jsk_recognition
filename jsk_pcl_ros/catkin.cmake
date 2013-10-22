@@ -9,7 +9,6 @@ add_message_files(FILES IndicesArray.msg PointsArray.msg ClusterPointIndices.msg
 add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv)
 generate_messages(DEPENDENCIES pcl_msgs)
 
-include_directories(include ${catkin_INCLUDE_DIRS})
 # TODO: fill in what other packages will need to use this package
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
@@ -24,7 +23,6 @@ generate_dynamic_reconfigure_options(
   cfg/HSVColorFilter.cfg
   cfg/RGBColorFilter.cfg
   )
-include_directories(include cfg/cpp)
 
 catkin_package(
     DEPENDS pcl
@@ -32,6 +30,8 @@ catkin_package(
     INCLUDE_DIRS include
     LIBRARIES jsk_pcl_ros
 )
+#include_directories(include cfg/cpp)
+include_directories(include ${catkin_INCLUDE_DIRS})
 
 
 # pcl_ros::Filter based class is not working...
@@ -44,15 +44,15 @@ set(SOURCE_FILES
   src/pointcloud_screenpoint_nodelet.cpp
   )
 
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+
 add_library(jsk_pcl_ros SHARED ${SOURCE_FILES})
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES})
-add_dependencies(jsk_pcl_ros jsk_pcl_ros_gencpp)
+add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 
 
 add_executable(pointcloud_screenpoint src/pointcloud_screenpoint.cpp)
 target_link_libraries(pointcloud_screenpoint ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES})
-add_dependencies(pointcloud_screenpoint jsk_pcl_ros_gencpp)
+add_dependencies(pointcloud_screenpoint ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 
 #
 install(DIRECTORY include/${PROJECT_NAME}/

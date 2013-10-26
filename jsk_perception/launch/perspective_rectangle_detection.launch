@@ -1,0 +1,31 @@
+<launch>
+  <arg name="GUI" value="true" />
+  <node pkg="jsk_perception" type="edge_detector" name="edge_detector" >
+    <remap from="image" to="image_raw" />
+    <param name="threshold1" value="100"/>
+    <param name="threshold2" value="100"/>
+    <param name="apatureSize" value="3"/>
+  </node>
+  <node pkg="jsk_perception" type="hough_lines" name="hough_lines" >
+    <remap from="image" to="edge/image" />
+    <param name="rho" value="1"/>
+    <param name="theta" value="1"/>
+    <param name="threshold" value="70"/>
+    <param name="minLineLength" value="30"/>
+    <param name="maxLineGap" value="10"/>
+  </node>
+  <node pkg="jsk_perception" type="rectangle_detector" name="rectangle_detector" >
+    <remap from="image" to="image_raw" />
+  </node>
+  <group if="$(arg GUI)">
+    <node pkg="image_view" type="image_view" name="edge_view" >
+      <remap from="image" to="edge/image" />
+    </node>
+    <node pkg="image_view" type="image_view" name="hough_view" >
+      <remap from="image" to="hough/image" />
+    </node>
+    <node pkg="image_view" type="image_view" name="rectangle_view" >
+      <remap from="image" to="rectangle/image" />
+    </node>
+  </group>
+</launch>

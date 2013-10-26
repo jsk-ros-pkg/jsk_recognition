@@ -1,6 +1,4 @@
 #include <ros/ros.h>
-#include <tf/transform_listener.h>
-#include <tf/transform_broadcaster.h>
 #include <jsk_perception/EdgeDetectorConfig.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
@@ -58,7 +56,9 @@ class EdgeDetector
 
                 // Do the work
                 cv::Mat out_image;
-                cv::Canny(in_image, out_image, _threshold1, _threshold2, _apertureSize, _L2gradient);
+                cv::cvtColor(in_image, out_image, CV_BGR2GRAY);
+                cv::blur(out_image, out_image, cv::Size(_apertureSize,_apertureSize));
+                cv::Canny(out_image, out_image, _threshold1, _threshold2, _apertureSize, _L2gradient);
 
                 // Publish the image.
                 sensor_msgs::Image::Ptr out_img = cv_bridge::CvImage(msg->header, enc::MONO8, out_image).toImageMsg();

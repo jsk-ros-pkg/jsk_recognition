@@ -1,6 +1,4 @@
 #include <ros/ros.h>
-#include <tf/transform_listener.h>
-#include <tf/transform_broadcaster.h>
 #include <jsk_perception/HoughLinesConfig.h>
 #include <jsk_perception/LineArray.h>
 #include <image_transport/image_transport.h>
@@ -69,8 +67,10 @@ class HoughLines
                 cvtColor(in_image, out_image, CV_GRAY2BGR);
 
                 // Do the work
+                ROS_INFO_STREAM("Hough Lines : rho:" << _rho << ", tehta:" << _theta << ", threshold:" <<  _threshold << ", minLineLength:" <<  _minLineLength << ", maxLineGap" <<  _maxLineGap);
+#if 1
                 std::vector<cv::Vec4i> lines;
-                HoughLinesP( in_image, lines, _rho, _theta, _threshold, _minLineLength, _maxLineGap );
+                cv::HoughLinesP( in_image, lines, _rho, _theta*CV_PI/180 , _threshold, _minLineLength, _maxLineGap );
                 jsk_perception::LineArray out_lines;
                 out_lines.header = msg->header;
                 out_lines.lines.resize(lines.size());
@@ -83,6 +83,25 @@ class HoughLines
                         cv::line( out_image, cv::Point(lines[i][0], lines[i][1]),
                                   cv::Point(lines[i][2], lines[i][3]), cv::Scalar(255,0,0), 3, 8 );
                     }
+#else
+                std::vector<cv::Vec2f> lines;
+                cv::HoughLines( in_image, lines, _rho, _theta, _threshold*CV_PI/180, _minLineLength, _maxLineGap );
+                jsk_perception::LineArray out_lines;
+                out_lines.header = msg->header;
+                out_lines.lines.resize(lines.size());
+                for( size_t i = 0; i < lines.size(); i++ )
+                    {
+                        float rho = lines[i][0];
+                        float theta = lines[i][1];
+                        double a = cos(theta), b = sin(theta);
+                        double x0 = a*rho, y0 = b*rho;
+                        cv::Point pt1(cvRound(x0 + 1000*(-b)),
+                                      cvRound(y0 + 1000*(a)));
+                        cv::Point pt2(cvRound(x0 - 1000*(-b)),
+                                      cvRound(y0 - 1000*(a)));
+                        cv::line( out_image, pt1, pt2, cv::Scalar(0,0,255), 3, 8 );
+                    }
+#endif
 
                 // Publish the image.
                 sensor_msgs::Image::Ptr out_img = cv_bridge::CvImage(msg->header, enc::RGB8, out_image).toImageMsg();

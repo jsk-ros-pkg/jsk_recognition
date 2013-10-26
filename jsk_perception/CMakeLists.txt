@@ -41,6 +41,7 @@ rosbuild_add_executable(point_pose_extractor src/point_pose_extractor.cpp)
 rosbuild_add_executable(white_balance_converter src/white_balance_converter.cpp)
 rosbuild_add_executable(edge_detector src/edge_detector.cpp)
 rosbuild_add_executable(hough_lines src/hough_lines.cpp)
+rosbuild_add_executable(rectangle_detector src/rectangle_detector.cpp)
 
 target_link_libraries(camshiftdemo ${OpenCV_LIBRARIES})
 target_link_libraries(virtual_camera_mono ${OpenCV_LIBRARIES} rospack)
@@ -48,6 +49,7 @@ target_link_libraries(point_pose_extractor ${OpenCV_LIBRARIES} rospack)
 rosbuild_link_boost(point_pose_extractor filesystem system)
 target_link_libraries(edge_detector ${OpenCV_LIBRARIES})
 target_link_libraries(hough_lines ${OpenCV_LIBRARIES})
+target_link_libraries(rectangle_detector ${OpenCV_LIBRARIES})
 
 ADD_CUSTOM_COMMAND(
   OUTPUT  ${CMAKE_SOURCE_DIR}/template

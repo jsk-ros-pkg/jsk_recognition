@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(jsk_pcl_ros)
 # Load catkin and all dependencies required for this package
 # TODO: remove all from COMPONENTS that are not catkin packages.
-find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros nodelet message_generation genmsg)
+find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros nodelet message_generation genmsg pcl_msgs)
 
 add_message_files(FILES IndicesArray.msg PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg)
 add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv)
@@ -26,7 +26,7 @@ generate_dynamic_reconfigure_options(
 
 catkin_package(
     DEPENDS pcl
-    CATKIN-DEPENDS pcl_ros message_runtime
+    CATKIN-DEPENDS pcl_ros message_runtime pcl_msgs
     INCLUDE_DIRS include
     LIBRARIES jsk_pcl_ros
 )

@@ -1,0 +1,22 @@
+<package>
+  <description brief="orbit_pantilt">
+
+     orbit_pantilt
+
+  </description>
+  <author>k-okada</author>
+
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/orbit_pantilt</url>
+
+  <depend package="roscpp"/>
+  <depend package="std_srvs"/>
+  <depend package="sensor_msgs"/>
+  <depend package="dynamic_reconfigure" />
+
+  <rosdep name="uvcdynctrl" />
+
+</package>
+
+

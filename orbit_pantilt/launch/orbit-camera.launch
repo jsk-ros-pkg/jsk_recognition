@@ -1,0 +1,7 @@
+<launch>
+  <node pkg="orbit_pantilt" name="orbit_pantilt" type="orbit_pantilt" >
+    <param name="device" value="/dev/video1" />
+    <param name="pan_ratio"  value="40" />
+    <param name="tilt_raito" value="40" />
+  </node>
+</launch>

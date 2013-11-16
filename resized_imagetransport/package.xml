@@ -1,0 +1,37 @@
+<package>
+  <name>resized_imagetransport</name>
+  <version>0.1.0</version>
+  <description>resized_imagetransport</description>
+
+  <maintainer email="youhei@jsk.t.u-tokyo.ac.jp">Yohei Kakiuchi</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://ros.org/wiki/resized_imagetransport</url>
+
+  <author email="youhei@jsk.t.u-tokyo.ac.jp">Yohei Kakiuchi</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>opencv2</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>image_transport</build_depend>
+  <build_depend>std_srvs</build_depend>
+
+  <run_depend>opencv2</run_depend>
+  <run_depend>cv_bridge</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>image_transport</run_depend>
+  <run_depend>std_srvs</run_depend>
+
+  <!-- <test_depend>opencv2</test_depend> -->
+  <!-- <test_depend>cv_bridge</test_depend> -->
+  <!-- <test_depend>sensor_msgs</test_depend> -->
+  <!-- <test_depend>image_transport</test_depend> -->
+  <!-- <test_depend>std_srvs</test_depend> -->
+
+  <export>
+
+  </export>
+</package>

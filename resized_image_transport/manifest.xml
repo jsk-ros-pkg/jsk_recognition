@@ -1,13 +1,13 @@
 <package>
-  <description brief="resized_imagetransport">
+  <description brief="resized_image_transport">
 
-     resized_imagetransport
+     resized_image_transport
 
   </description>
   <author>Yohei Kakiuchi</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/resized_imagetransport</url>
+  <url>http://ros.org/wiki/resized_image_transport</url>
   
   <depend package="opencv2" />
   <depend package="cv_bridge" />

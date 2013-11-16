@@ -18,7 +18,7 @@
     <node pkg="topic_tools" type="throttle"
           name="img_throttle" ns="/sandia_hands/r_hand/camera/left"
           args="messages image_rect $(arg THROTTLE_RATE)"/>
-    <node pkg="resized_imagetransport" type="image_resizer" name="head_resized"
+    <node pkg="resized_image_transport" type="image_resizer" name="head_resized"
           output="screen" >
       <remap from="camera" to="/multisense_sl/camera/left" />
       <remap from="image_type" to="$(arg THROTTLE_IMAGE_TYPE)" />
@@ -26,7 +26,7 @@
       <param name="resize_scale_y" value="$(arg THROTTLE_RESIZE_RATE)" />
       <param name="use_snapshot" value="false" />
     </node>
-    <node pkg="resized_imagetransport" type="image_resizer" name="lhand_resized"
+    <node pkg="resized_image_transport" type="image_resizer" name="lhand_resized"
           output="screen" >
       <remap from="camera" to="/sandia_hands/l_hand/camera/left" />
       <remap from="image_type" to="$(arg THROTTLE_IMAGE_TYPE)" />
@@ -34,7 +34,7 @@
       <param name="resize_scale_y" value="$(arg THROTTLE_RESIZE_RATE)" />
       <param name="use_snapshot" value="false" />
     </node>
-    <node pkg="resized_imagetransport" type="image_resizer" name="rhand_resized"
+    <node pkg="resized_image_transport" type="image_resizer" name="rhand_resized"
           output="screen" >
       <remap from="camera" to="/sandia_hands/r_hand/camera/left" />
       <remap from="image_type" to="$(arg THROTTLE_IMAGE_TYPE)" />
@@ -45,7 +45,7 @@
   </group>
 
   <group if="$(arg USE_SNAPSHOT)" >
-    <node pkg="resized_imagetransport" type="image_resizer" name="head_snap"
+    <node pkg="resized_image_transport" type="image_resizer" name="head_snap"
           output="screen" >
       <remap from="camera" to="/multisense_sl/camera/left" />
       <remap from="image_type" to="$(arg SNAPSHOT_IMAGE_TYPE)" />
@@ -53,7 +53,7 @@
       <param name="resize_scale_y" value="$(arg SNAPSHOT_RESIZE_RATE)" />
       <param name="use_snapshot" value="true" />
     </node>
-    <node pkg="resized_imagetransport" type="image_resizer" name="lhand_snap"
+    <node pkg="resized_image_transport" type="image_resizer" name="lhand_snap"
           output="screen" >
       <remap from="camera" to="/sandia_hands/l_hand/camera/left" />
       <remap from="image_type" to="$(arg SNAPSHOT_IMAGE_TYPE)" />
@@ -61,7 +61,7 @@
       <param name="resize_scale_y" value="$(arg SNAPSHOT_RESIZE_RATE)" />
       <param name="use_snapshot" value="true" />
     </node>
-    <node pkg="resized_imagetransport" type="image_resizer" name="rhand_snap"
+    <node pkg="resized_image_transport" type="image_resizer" name="rhand_snap"
           output="screen" >
       <remap from="camera" to="/sandia_hands/r_hand/camera/left" />
       <remap from="image_type" to="$(arg SNAPSHOT_IMAGE_TYPE)" />

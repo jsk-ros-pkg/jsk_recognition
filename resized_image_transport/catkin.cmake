@@ -1,6 +1,6 @@
 # http://ros.org/doc/groovy/api/catkin/html/user_guide/supposed.html
 cmake_minimum_required(VERSION 2.8.3)
-project(resized_imagetransport)
+project(resized_image_transport)
 
 find_package(catkin REQUIRED COMPONENTS cv_bridge sensor_msgs image_transport std_srvs)
 find_package(OpenCV REQUIRED)

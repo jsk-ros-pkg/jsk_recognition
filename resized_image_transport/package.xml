@@ -1,13 +1,13 @@
 <package>
-  <name>resized_imagetransport</name>
+  <name>resized_image_transport</name>
   <version>0.1.0</version>
-  <description>resized_imagetransport</description>
+  <description>resized_image_transport</description>
 
   <maintainer email="youhei@jsk.t.u-tokyo.ac.jp">Yohei Kakiuchi</maintainer>
 
   <license>BSD</license>
 
-  <url type="website">http://ros.org/wiki/resized_imagetransport</url>
+  <url type="website">http://ros.org/wiki/resized_image_transport</url>
 
   <author email="youhei@jsk.t.u-tokyo.ac.jp">Yohei Kakiuchi</author>
 

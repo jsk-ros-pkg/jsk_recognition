@@ -75,7 +75,7 @@
 
   <group if="$(arg USE_VIEW)" >
   <node name="screenpoint_view" ns="$(arg image)"
-        pkg="image_view2" type="image_view2" output="screen" >
+        pkg="image_view2" type="image_view2" output="screen" respawn="true">
     <remap from="image" to="$(arg image_type)" />
     <param name="autosize" value="true" />
   </node>

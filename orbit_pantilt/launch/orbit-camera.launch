@@ -1,7 +1,13 @@
 <launch>
+  <arg name="device" default="/dev/video1" />
+  <include file="$(find roseus_tutorials)/launch/usb-camera.launch">
+    <arg name="device" value="$(arg device)" />
+    <arg name="camera_info_url" value="file://$(find orbit_pantilt)/launch/orbit-camera.yaml" />
+  </include>
   <node pkg="orbit_pantilt" name="orbit_pantilt" type="orbit_pantilt" >
     <param name="device" value="/dev/video1" />
     <param name="pan_ratio"  value="40" />
     <param name="tilt_raito" value="40" />
   </node>
+  <node name="image_view" pkg="image_view" type="image_view" args="image:=/image_rect_color" />
 </launch>

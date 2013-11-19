@@ -8,11 +8,21 @@
 #include <std_srvs/Empty.h>
 
 #include <boost/thread/mutex.hpp>
+#include <boost/foreach.hpp>
+#include <boost/circular_buffer.hpp>
+#include <boost/lambda/lambda.hpp>
+
+// dynamic reconfigure
+#include <dynamic_reconfigure/server.h>
+#include "resized_image_transport/ImageResizerConfig.h"
 
 class ImageResizer
 {
 public:
-  ImageResizer () : nh(), pnh("~"), publish_once_(true) {
+    ImageResizer () : nh(), pnh("~"), publish_once_(true) {
+
+    ReconfigureServer::CallbackType f = boost::bind(&ImageResizer::config_cb, this, _1, _2);
+    reconfigure_server_.setCallback(f);
 
     pnh.param("resize_scale_x", resize_x_, 1.0);
     ROS_INFO("resize_scale_x : %f", resize_x_);
@@ -27,9 +37,18 @@ public:
     pnh.param("max_queue_size", max_queue_size_, 5);
 
     pnh.param("use_snapshot", use_snapshot_, false);
+    pnh.param("use_messages", use_messages_, false);
+    if (use_messages_) {
+        double d_period;
+        pnh.param("period", d_period, 1.0);
+        period_ = ros::Duration(d_period);
+        ROS_INFO("use_messages : %d", use_messages_);
+        ROS_INFO("message period : %f", period_.toSec());
+    }
+    pnh.param("use_bytes", use_bytes_, false);
 
     it_ = new image_transport::ImageTransport(pnh);
-    std::string img = nh.resolveName("image_type");
+    std::string img = nh.resolveName("image");
     std::string cam = nh.resolveName("camera");
     if (img.at(0) == '/') {
       img.erase(0, 1);
@@ -46,6 +65,7 @@ public:
                                &ImageResizer::callback, this);
 
     cp_ = it_->advertiseCamera(img, max_queue_size_);
+
   }
 
   ~ImageResizer() { }
@@ -53,6 +73,10 @@ public:
 protected:
   ros::NodeHandle nh;
   ros::NodeHandle pnh;
+
+  // dynamic reconfigure
+  typedef dynamic_reconfigure::Server<resized_image_transport::ImageResizerConfig> ReconfigureServer;
+  ReconfigureServer reconfigure_server_;
 
   image_transport::CameraSubscriber cs_;
   image_transport::CameraPublisher cp_;
@@ -64,7 +88,23 @@ protected:
   int max_queue_size_;
   bool use_snapshot_;
   bool publish_once_;
+  bool use_messages_;
+  bool use_bytes_;
+  ros::Time last_rosinfo_time_, last_subscribe_time_, last_publish_time_;
+  ros::Duration period_;
   boost::mutex mutex_;
+
+  void config_cb (resized_image_transport::ImageResizerConfig &config, uint32_t level) {
+    ROS_INFO("config_cb");
+    resize_x_ = config.resize_scale_x;
+    resize_y_ = config.resize_scale_y;
+    period_ = ros::Duration(1.0/config.msg_par_second);
+
+    ROS_INFO("resize_scale_x : %f", resize_x_);
+    ROS_INFO("resize_scale_y : %f", resize_y_);
+    ROS_INFO("message period : %f", period_.toSec());
+  }
+
 
   bool snapshot_cb (std_srvs::Empty::Request &req,
                     std_srvs::Empty::Response &res) {
@@ -77,12 +117,22 @@ protected:
   void callback(const sensor_msgs::ImageConstPtr &img,
                 const sensor_msgs::CameraInfoConstPtr &info) {
     boost::mutex::scoped_lock lock(mutex_);
+    ros::Time now = ros::Time::now();
+
+    static boost::circular_buffer<double> in_times(100);
+    static boost::circular_buffer<double> out_times(100);
+    static boost::circular_buffer<double> in_bytes(100);
+    static boost::circular_buffer<double> out_bytes(100);
 
     ROS_DEBUG("resize: callback");
     if ( !publish_once_ || cp_.getNumSubscribers () == 0 ) {
       ROS_DEBUG("resize: number of subscribers is 0, ignoring image");
       return;
     }
+
+    in_times.push_front((now - last_subscribe_time_).toSec());
+    in_bytes.push_front(img->data.size());
+    //
     int width = dst_width_ ? dst_width_ : (resize_x_ * info->width);
     int height = dst_height_ ? dst_height_ : (resize_y_ * info->height);
     double scale_x = dst_width_ ? ((double)dst_width_)/info->width : resize_x_;
@@ -108,8 +158,69 @@ protected:
     tinfo.P[5] = tinfo.P[5] * scale_y; // fy
     tinfo.P[6] = tinfo.P[6] * scale_y; // cy
 
-    cp_.publish(cv_img->toImageMsg(),
-                boost::make_shared<sensor_msgs::CameraInfo> (tinfo));
+    if ( !use_messages_ || now - last_publish_time_  > period_ ) {
+        cp_.publish(cv_img->toImageMsg(),
+                    boost::make_shared<sensor_msgs::CameraInfo> (tinfo));
+
+        out_times.push_front((now - last_publish_time_).toSec());
+        out_bytes.push_front(cv_img->image.total()*cv_img->image.elemSize());
+
+        last_publish_time_ = now;
+    }
+
+
+    float duration =  (now - last_rosinfo_time_).toSec();
+    if ( duration > 2 ) {
+        int in_time_n = in_times.size();
+        int out_time_n = out_times.size();
+        double in_time_mean = 0, in_time_rate = 1.0, in_time_std_dev = 0.0, in_time_max_delta, in_time_min_delta;
+        double out_time_mean = 0, out_time_rate = 1.0, out_time_std_dev = 0.0, out_time_max_delta, out_time_min_delta;
+
+        std::for_each( in_times.begin(), in_times.end(), (in_time_mean += boost::lambda::_1) );
+        in_time_mean /= in_time_n;
+        in_time_rate /= in_time_mean;
+        std::for_each( in_times.begin(), in_times.end(), (in_time_std_dev += (boost::lambda::_1 - in_time_mean)*(boost::lambda::_1 - in_time_mean) ) );
+        in_time_std_dev = sqrt(in_time_std_dev/in_time_n);
+        if ( in_time_n > 1 ) {
+            in_time_min_delta = *std::min_element(in_times.begin(), in_times.end());
+            in_time_max_delta = *std::max_element(in_times.begin(), in_times.end());
+        }
+
+        std::for_each( out_times.begin(), out_times.end(), (out_time_mean += boost::lambda::_1) );
+        out_time_mean /= out_time_n;
+        out_time_rate /= out_time_mean;
+        std::for_each( out_times.begin(), out_times.end(), (out_time_std_dev += (boost::lambda::_1 - out_time_mean)*(boost::lambda::_1 - out_time_mean) ) );
+        out_time_std_dev = sqrt(out_time_std_dev/out_time_n);
+        if ( out_time_n > 1 ) {
+            out_time_min_delta = *std::min_element(out_times.begin(), out_times.end());
+            out_time_max_delta = *std::max_element(out_times.begin(), out_times.end());
+        }
+
+        double in_byte_mean = 0, out_byte_mean = 0;
+        std::for_each( in_bytes.begin(), in_bytes.end(), (in_byte_mean += boost::lambda::_1) );
+        std::for_each( out_bytes.begin(), out_bytes.end(), (out_byte_mean += boost::lambda::_1) );
+        in_byte_mean /= duration;
+        out_byte_mean /= duration;
+
+        ROS_INFO_STREAM(" in  bandwidth: " << std::fixed << std::setw(11) << std::setprecision(3)  << in_byte_mean/1000
+                        << " kB rate:"   << std::fixed << std::setw(7) << std::setprecision(3) << in_time_rate
+                        << " hz min:"      << std::fixed << std::setw(7) << std::setprecision(3) << in_time_min_delta
+                        << " s max: "    << std::fixed << std::setw(7) << std::setprecision(3) << in_time_max_delta
+                        << " s std_dev: "<< std::fixed << std::setw(7) << std::setprecision(3) << in_time_std_dev << "s n: " << in_time_n);
+        ROS_INFO_STREAM(" out bandwidth: " << std::fixed << std::setw(11) << std::setprecision(3)  << out_byte_mean/1000
+                        << " kB rate:"   << std::fixed << std::setw(7) << std::setprecision(3) << out_time_rate
+                        << " hz min:"      << std::fixed << std::setw(7) << std::setprecision(3) << out_time_min_delta
+                        << " s max: "    << std::fixed << std::setw(7) << std::setprecision(3) << out_time_max_delta
+                        << " s std_dev: "<< std::fixed << std::setw(7) << std::setprecision(3) << out_time_std_dev << "s n: " << out_time_n);
+        in_times.clear();
+        in_bytes.clear();
+        out_times.clear();
+        out_bytes.clear();
+        last_rosinfo_time_ = now;
+    }
+
+    last_subscribe_time_ = now;
+
     if(use_snapshot_) {
       publish_once_ = false;
     }

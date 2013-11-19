@@ -7,6 +7,7 @@
 (ros::wait-for-service "/orbit_pantilt/pan_reset")
 (ros::advertise "/orbit_pantilt/pan_tilt_command" orbit_pantilt::jointcommand 1)
 
+(format t "~%")
 (format t ";; r        : reset pan tilt~%")
 (format t ";; p [pan]  : control pan~%")
 (format t ";; t [pan]  : control tilt~%")

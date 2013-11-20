@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(resized_image_transport)
 
-find_package(catkin REQUIRED COMPONENTS cv_bridge sensor_msgs image_transport std_srvs message_generation)
+find_package(catkin REQUIRED COMPONENTS cv_bridge sensor_msgs image_transport std_srvs message_generation dynamic_reconfigure)
 find_package(OpenCV REQUIRED)
 
 # generate the dynamic_reconfigure config file

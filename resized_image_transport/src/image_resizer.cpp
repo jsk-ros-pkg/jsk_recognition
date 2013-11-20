@@ -202,13 +202,13 @@ protected:
         in_byte_mean /= duration;
         out_byte_mean /= duration;
 
-        ROS_INFO_STREAM(" in  bandwidth: " << std::fixed << std::setw(11) << std::setprecision(3)  << in_byte_mean/1000
-                        << " kB rate:"   << std::fixed << std::setw(7) << std::setprecision(3) << in_time_rate
+        ROS_INFO_STREAM(" in  bandwidth: " << std::fixed << std::setw(11) << std::setprecision(3)  << in_byte_mean/1000*8
+                        << " Kbps rate:"   << std::fixed << std::setw(7) << std::setprecision(3) << in_time_rate
                         << " hz min:"      << std::fixed << std::setw(7) << std::setprecision(3) << in_time_min_delta
                         << " s max: "    << std::fixed << std::setw(7) << std::setprecision(3) << in_time_max_delta
                         << " s std_dev: "<< std::fixed << std::setw(7) << std::setprecision(3) << in_time_std_dev << "s n: " << in_time_n);
-        ROS_INFO_STREAM(" out bandwidth: " << std::fixed << std::setw(11) << std::setprecision(3)  << out_byte_mean/1000
-                        << " kB rate:"   << std::fixed << std::setw(7) << std::setprecision(3) << out_time_rate
+        ROS_INFO_STREAM(" out bandwidth: " << std::fixed << std::setw(11) << std::setprecision(3)  << out_byte_mean/1000*8
+                        << " kbps rate:"   << std::fixed << std::setw(7) << std::setprecision(3) << out_time_rate
                         << " hz min:"      << std::fixed << std::setw(7) << std::setprecision(3) << out_time_min_delta
                         << " s max: "    << std::fixed << std::setw(7) << std::setprecision(3) << out_time_max_delta
                         << " s std_dev: "<< std::fixed << std::setw(7) << std::setprecision(3) << out_time_std_dev << "s n: " << out_time_n);

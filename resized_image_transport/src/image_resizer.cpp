@@ -133,39 +133,43 @@ protected:
     in_times.push_front((now - last_subscribe_time_).toSec());
     in_bytes.push_front(img->data.size());
     //
-    int width = dst_width_ ? dst_width_ : (resize_x_ * info->width);
-    int height = dst_height_ ? dst_height_ : (resize_y_ * info->height);
-    double scale_x = dst_width_ ? ((double)dst_width_)/info->width : resize_x_;
-    double scale_y = dst_height_ ? ((double)dst_height_)/info->height : resize_y_;
+    try {
+        int width = dst_width_ ? dst_width_ : (resize_x_ * info->width);
+        int height = dst_height_ ? dst_height_ : (resize_y_ * info->height);
+        double scale_x = dst_width_ ? ((double)dst_width_)/info->width : resize_x_;
+        double scale_y = dst_height_ ? ((double)dst_height_)/info->height : resize_y_;
 
-    cv_bridge::CvImagePtr cv_img = cv_bridge::toCvCopy(img);
+        cv_bridge::CvImagePtr cv_img = cv_bridge::toCvCopy(img);
 
-    cv::Mat tmpmat(height, width, cv_img->image.type());
-    cv::resize(cv_img->image, tmpmat, cv::Size(width, height));
-    cv_img->image = tmpmat;
+        cv::Mat tmpmat(height, width, cv_img->image.type());
+        cv::resize(cv_img->image, tmpmat, cv::Size(width, height));
+        cv_img->image = tmpmat;
 
-    sensor_msgs::CameraInfo tinfo = *info;
-    tinfo.height = height;
-    tinfo.width = width;
-    tinfo.K[0] = tinfo.K[0] * scale_x; // fx
-    tinfo.K[2] = tinfo.K[2] * scale_x; // cx
-    tinfo.K[4] = tinfo.K[4] * scale_y; // fy
-    tinfo.K[5] = tinfo.K[5] * scale_y; // cy
+        sensor_msgs::CameraInfo tinfo = *info;
+        tinfo.height = height;
+        tinfo.width = width;
+        tinfo.K[0] = tinfo.K[0] * scale_x; // fx
+        tinfo.K[2] = tinfo.K[2] * scale_x; // cx
+        tinfo.K[4] = tinfo.K[4] * scale_y; // fy
+        tinfo.K[5] = tinfo.K[5] * scale_y; // cy
 
-    tinfo.P[0] = tinfo.P[0] * scale_x; // fx
-    tinfo.P[2] = tinfo.P[2] * scale_x; // cx
-    tinfo.P[3] = tinfo.P[3] * scale_x; // T
-    tinfo.P[5] = tinfo.P[5] * scale_y; // fy
-    tinfo.P[6] = tinfo.P[6] * scale_y; // cy
+        tinfo.P[0] = tinfo.P[0] * scale_x; // fx
+        tinfo.P[2] = tinfo.P[2] * scale_x; // cx
+        tinfo.P[3] = tinfo.P[3] * scale_x; // T
+        tinfo.P[5] = tinfo.P[5] * scale_y; // fy
+        tinfo.P[6] = tinfo.P[6] * scale_y; // cy
 
-    if ( !use_messages_ || now - last_publish_time_  > period_ ) {
-        cp_.publish(cv_img->toImageMsg(),
-                    boost::make_shared<sensor_msgs::CameraInfo> (tinfo));
+        if ( !use_messages_ || now - last_publish_time_  > period_ ) {
+            cp_.publish(cv_img->toImageMsg(),
+                        boost::make_shared<sensor_msgs::CameraInfo> (tinfo));
 
-        out_times.push_front((now - last_publish_time_).toSec());
-        out_bytes.push_front(cv_img->image.total()*cv_img->image.elemSize());
+            out_times.push_front((now - last_publish_time_).toSec());
+            out_bytes.push_front(cv_img->image.total()*cv_img->image.elemSize());
 
-        last_publish_time_ = now;
+            last_publish_time_ = now;
+        }
+    } catch( cv::Exception& e ) {
+        ROS_ERROR(e.what());
     }
 
 

@@ -6,7 +6,7 @@ project(jsk_pcl_ros)
 find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros nodelet message_generation genmsg pcl_msgs)
 
 add_message_files(FILES IndicesArray.msg PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg)
-add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv)
+add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv SetPointCloud2.srv)
 generate_messages(DEPENDENCIES pcl_msgs)
 
 # TODO: fill in what other packages will need to use this package
@@ -42,6 +42,7 @@ set(SOURCE_FILES
   src/depth_image_creator_nodelet.cpp
 #  src/resize_points_publisher.cpp
   src/pointcloud_screenpoint_nodelet.cpp
+  src/particle_filter_tracking_nodelet.cpp
   )
 
 
@@ -54,11 +55,16 @@ add_executable(pointcloud_screenpoint src/pointcloud_screenpoint.cpp)
 target_link_libraries(pointcloud_screenpoint ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES})
 add_dependencies(pointcloud_screenpoint ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 
+add_executable(particle_filter_tracking src/particle_filter_tracking.cpp)
+target_link_libraries(particle_filter_tracking ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES})
+add_dependencies(particle_filter_tracking ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
+
+
 #
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
-install(TARGETS jsk_pcl_ros pointcloud_screenpoint
+install(TARGETS jsk_pcl_ros pointcloud_screenpoint particle_filter_tracking
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})

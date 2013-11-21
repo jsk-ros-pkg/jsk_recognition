@@ -78,7 +78,7 @@
 #include <pcl/tracking/approx_nearest_pair_point_cloud_coherence.h>
 #include <pcl/tracking/nearest_pair_point_cloud_coherence.h>
 
-#include <jsk_pcl_ros/RenewTargetPointCloud.h>
+#include <jsk_pcl_ros/SetPointCloud2.h>
 
 using namespace pcl::tracking;
 namespace jsk_pcl_ros
@@ -113,8 +113,8 @@ namespace jsk_pcl_ros
                                         const std::vector<pcl::PointIndices> cluster_indices,
                                         const int segment_index,
                                         pcl::PointCloud<pcl::PointXYZRGBA> &result);
-    virtual bool renewModel_cb(jsk_pcl_ros::RenewTargetPointCloud::Request &req,
-                               jsk_pcl_ros::RenewTargetPointCloud::Response &response
+    virtual bool renewModel_cb(jsk_pcl_ros::SetPointCloud2::Request &req,
+                               jsk_pcl_ros::SetPointCloud2::Response &response
                                );
 
 

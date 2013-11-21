@@ -277,11 +277,11 @@ namespace jsk_pcl_ros
     result.is_dense = true;
   }
 
-  bool ParticleFilterTracking::renewModel_cb(jsk_pcl_ros::RenewTargetPointCloud::Request &req,
-                                             jsk_pcl_ros::RenewTargetPointCloud::Response &res)
+  bool ParticleFilterTracking::renewModel_cb(jsk_pcl_ros::SetPointCloud2::Request &req,
+                                             jsk_pcl_ros::SetPointCloud2::Response &res)
   {
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr new_target_cloud(new pcl::PointCloud<pcl::PointXYZRGBA>());
-    pcl::fromROSMsg(req.points, *new_target_cloud);
+    pcl::fromROSMsg(req.cloud, *new_target_cloud);
     resetTrackingTargetModel(new_target_cloud);
     return true;
   }

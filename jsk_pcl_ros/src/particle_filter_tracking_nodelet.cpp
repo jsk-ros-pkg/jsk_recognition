@@ -113,7 +113,6 @@ namespace jsk_pcl_ros
   void
   ParticleFilterTracking::publishParticles ()
   {
-    ROS_INFO("publishParticles");
     ParticleFilterTracker<pcl::PointXYZRGBA, ParticleXYZRPY>::PointCloudStatePtr particles = tracker_->getParticles ();
     if (particles && new_cloud_)
       {
@@ -139,7 +138,6 @@ namespace jsk_pcl_ros
   void
   ParticleFilterTracking::publishResult ()
   {
-    ROS_INFO("publishResult");
     ParticleXYZRPY result = tracker_->getResult ();
     Eigen::Affine3f transformation = tracker_->toEigenMatrix (result);
 
@@ -169,9 +167,12 @@ namespace jsk_pcl_ros
     pcl::transformPointCloud(*new_target_cloud, *transed_ref, trans.inverse());
     gridSampleApprox (transed_ref, *transed_ref_downsampled, downsampling_grid_size_);
     //set reference model and trans
-    tracker_->setReferenceCloud (transed_ref_downsampled);
-    tracker_->setTrans (trans);
-    tracker_->resetTracking();
+    {
+      boost::mutex::scoped_lock lock(mtx_);
+      tracker_->setReferenceCloud (transed_ref_downsampled);
+      tracker_->setTrans (trans);
+      tracker_->resetTracking();
+    }
     //Reset target Model
     ROS_INFO("RESET TARGET MODEL");
   }
@@ -180,7 +181,6 @@ namespace jsk_pcl_ros
   void
   ParticleFilterTracking::cloud_cb (const sensor_msgs::PointCloud2 &pc)
   {
-    ROS_INFO("cloud_cb");
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGBA>());
     frame_id_ = pc.header.frame_id;
     std::vector<int> indices;
@@ -193,6 +193,7 @@ namespace jsk_pcl_ros
       cloud_pass_downsampled_.reset (new pcl::PointCloud<pcl::PointXYZRGBA>);
       pcl::copyPointCloud(*cloud, *cloud_pass_downsampled_);
       if (!cloud_pass_downsampled_->points.empty()){
+        boost::mutex::scoped_lock lock(mtx_);
         tracker_->setInputCloud (cloud_pass_downsampled_);
         tracker_->compute ();
         publishParticles();

@@ -90,6 +90,7 @@ namespace jsk_pcl_ros
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr target_cloud_;
 
     boost::shared_ptr<ParticleFilterTracker<pcl::PointXYZRGBA, ParticleXYZRPY> > tracker_;
+    boost::mutex mtx_;
     bool new_cloud_;
     double downsampling_grid_size_;
     int counter_;

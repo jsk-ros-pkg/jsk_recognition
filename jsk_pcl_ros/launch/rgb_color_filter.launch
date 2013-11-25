@@ -19,7 +19,7 @@
           pkg="nodelet" type="nodelet" name="$(arg manager)"
           args="manager" output="screen"/>
 
-    <node pkg="nodelet" type="nodelet" name="hsv_filter"
+    <node pkg="nodelet" type="nodelet" name="rgb_filter"
           args="load jsk_pcl/RGBColorFilter $(arg manager)" output="screen">
       <remap from="~input" to="$(arg INPUT)" />
       <remap from="~output" to="$(arg OUTPUT)" />

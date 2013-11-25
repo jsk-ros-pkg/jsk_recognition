@@ -111,9 +111,9 @@ namespace pcl
       {
         pcl::ConditionBase<PointType>::Ptr cond (new pcl::ConditionAnd<PointType> ());
         pcl::ComparisonBase<PointType>::Ptr
-          le (new pcl::PackedRGBComparison<PointType> ("r", pcl::ComparisonOps::LE, r_max_));
+          le (new pcl::PackedRGBComparison<PointType> ("r", pcl::ComparisonOps::GE, r_max_));
         pcl::ComparisonBase<PointType>::Ptr
-          ge (new pcl::PackedRGBComparison<PointType> ("r", pcl::ComparisonOps::GE, r_min_));
+          ge (new pcl::PackedRGBComparison<PointType> ("r", pcl::ComparisonOps::LE, r_min_));
         cond->addComparison (le);
         cond->addComparison (ge);
         condp->addCondition(cond);
@@ -134,9 +134,9 @@ namespace pcl
       {
         pcl::ConditionBase<PointType>::Ptr cond (new pcl::ConditionAnd<PointType> ());
         pcl::ComparisonBase<PointType>::Ptr
-          le (new pcl::PackedRGBComparison<PointType> ("g", pcl::ComparisonOps::LE, g_max_));
+          le (new pcl::PackedRGBComparison<PointType> ("g", pcl::ComparisonOps::GE, g_max_));
         pcl::ComparisonBase<PointType>::Ptr
-          ge (new pcl::PackedRGBComparison<PointType> ("g", pcl::ComparisonOps::GE, g_min_));
+          ge (new pcl::PackedRGBComparison<PointType> ("g", pcl::ComparisonOps::LE, g_min_));
         cond->addComparison (le);
         cond->addComparison (ge);
         condp->addCondition(cond);
@@ -157,9 +157,9 @@ namespace pcl
       {
         pcl::ConditionBase<PointType>::Ptr cond (new pcl::ConditionAnd<PointType> ());
         pcl::ComparisonBase<PointType>::Ptr
-          le (new pcl::PackedRGBComparison<PointType> ("b", pcl::ComparisonOps::LE, b_max_));
+          le (new pcl::PackedRGBComparison<PointType> ("b", pcl::ComparisonOps::GE, b_max_));
         pcl::ComparisonBase<PointType>::Ptr
-          ge (new pcl::PackedRGBComparison<PointType> ("b", pcl::ComparisonOps::GE, b_min_));
+          ge (new pcl::PackedRGBComparison<PointType> ("b", pcl::ComparisonOps::LE, b_min_));
         cond->addComparison (le);
         cond->addComparison (ge);
         condp->addCondition(cond);
@@ -252,9 +252,9 @@ namespace pcl
       {
         pcl::ConditionBase<PointType>::Ptr cond (new pcl::ConditionAnd<PointType> ());
         pcl::ComparisonBase<PointType>::Ptr
-          le (new pcl::PackedHSIComparison<PointType> ("h", pcl::ComparisonOps::LE, h_max_));
+          le (new pcl::PackedHSIComparison<PointType> ("h", pcl::ComparisonOps::GE, h_max_));
         pcl::ComparisonBase<PointType>::Ptr
-          ge (new pcl::PackedHSIComparison<PointType> ("h", pcl::ComparisonOps::GE, h_min_));
+          ge (new pcl::PackedHSIComparison<PointType> ("h", pcl::ComparisonOps::LE, h_min_));
         cond->addComparison (le);
         cond->addComparison (ge);
         condp->addCondition(cond);
@@ -275,9 +275,9 @@ namespace pcl
       {
         pcl::ConditionBase<PointType>::Ptr cond (new pcl::ConditionAnd<PointType> ());
         pcl::ComparisonBase<PointType>::Ptr
-          le (new pcl::PackedHSIComparison<PointType> ("s", pcl::ComparisonOps::LE, s_max_));
+          le (new pcl::PackedHSIComparison<PointType> ("s", pcl::ComparisonOps::GE, s_max_));
         pcl::ComparisonBase<PointType>::Ptr
-          ge (new pcl::PackedHSIComparison<PointType> ("s", pcl::ComparisonOps::GE, s_min_));
+          ge (new pcl::PackedHSIComparison<PointType> ("s", pcl::ComparisonOps::LE, s_min_));
         cond->addComparison (le);
         cond->addComparison (ge);
         condp->addCondition(cond);
@@ -298,9 +298,9 @@ namespace pcl
       {
         pcl::ConditionBase<PointType>::Ptr cond (new pcl::ConditionAnd<PointType> ());
         pcl::ComparisonBase<PointType>::Ptr
-          le (new pcl::PackedHSIComparison<PointType> ("i", pcl::ComparisonOps::LE, v_max_));
+          le (new pcl::PackedHSIComparison<PointType> ("i", pcl::ComparisonOps::GE, v_max_));
         pcl::ComparisonBase<PointType>::Ptr
-          ge (new pcl::PackedHSIComparison<PointType> ("i", pcl::ComparisonOps::GE, v_min_));
+          ge (new pcl::PackedHSIComparison<PointType> ("i", pcl::ComparisonOps::LE, v_min_));
         cond->addComparison (le);
         cond->addComparison (ge);
         condp->addCondition(cond);

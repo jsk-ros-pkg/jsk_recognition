@@ -7,23 +7,29 @@ from posedetection_msgs.msg import ObjectDetection
 from dynamic_tf_publisher.srv import *
 import tf
 
-def callback(msg, subscriber):
-    for detected_object in msg.objects:
-        br = tf.TransformBroadcaster()
-        br.sendTransform((detected_object.position.x,
-                          detected_object.position.y,
-                          detected_object.position.z),
-                         (detected_object.orientation.x,
-                          detected_object.orientation.y,
-                          detected_object.orientation.z,
-                          detected_object.orientation.w),
-                         rospy.Time.now(),
-                         "object_" + msg.header.seq,
-                         msg.header.frame_id)
-#        subscriber.unregister()
+def callback(msg):
+    global object_messages
+    object_messages = msg
 
 if __name__== '__main__':
+    global object_messages
+    object_messages = None
     rospy.init_node('objectdetection_tf_publisher', anonymous=True)
-    subscriber = None
-    subscriber = rospy.Subscriber("ObjectDetection", ObjectDetection, callback, subscriber)
-    rospy.spin()
+    subscriber = rospy.Subscriber("ObjectDetection", ObjectDetection, callback)
+    r = rospy.Rate(100)
+    while True:
+        if object_messages:
+            for detected_object in object_messages.objects:
+                br = tf.TransformBroadcaster()
+                br.sendTransform((detected_object.pose.position.x,
+                                  detected_object.pose.position.y,
+                                  detected_object.pose.position.z),
+                                 (detected_object.pose.orientation.x,
+                                  detected_object.pose.orientation.y,
+                                  detected_object.pose.orientation.z,
+                                  detected_object.pose.orientation.w),
+                                 rospy.Time.now(),
+                                 "/object",
+                                 object_messages.header.frame_id)
+        r.sleep()
+

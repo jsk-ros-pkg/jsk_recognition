@@ -1,0 +1,8 @@
+<launch>
+  <group ns="/camera/rgb">
+    <node name="objectdetection_tf_publisher"
+          pkg="checkerboard_detector"
+          type="objectdetection_tf_publisher.py" />
+  </group>
+<node pkg="tf" type="static_transform_publisher" name="base_to_checkerboard" args="0.1 -0.1 -0.075 1 0 0 0 /object /BASE 10" />
+</launch>

@@ -10,5 +10,10 @@
     <param name="pan_ratio"  value="40" />
     <param name="tilt_raito" value="40" />
   </node>
+  <param name="robot_description" textfile="$(find orbit_pantilt)/model/orbit_camera.urdf"/>
+  <node pkg="robot_state_publisher" type="robot_state_publisher"
+        name="robot_state_publisher" >
+    <remap from="joint_states" to="orbit_pantilt/joint_states" />
+  </node>
   <node name="image_view" pkg="image_view" type="image_view" args="image:=/image_rect_color" />
 </launch>

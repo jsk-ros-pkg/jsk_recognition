@@ -1,0 +1,26 @@
+<robot name="orbit_camera">
+  <link name="base" />
+  <link name="stick" />
+  <link name="camera-link1" />
+  <link name="camera-link2" />
+
+  <joint name="joint1" type="fixed">
+    <parent link="base" />
+    <child link="stick" />
+    <origin xyz="0.015 0 0.05" rpy="0 0 0" />
+  </joint>
+
+  <joint name="pan" type="continuous">
+    <parent link="stick" />
+    <child link="camera-link1" />
+    <origin xyz="0 0 0.2" rpy="0 0 0" />
+    <axis xyz="0 0 1" />
+  </joint>
+
+  <joint name="tilt" type="continuous">
+    <parent link="camera-link1" />
+    <child link="camera-link2" />
+    <origin xyz="0 0 0.05" rpy="0 0 0" />
+    <axis xyz="0 1 0" />
+  </joint>
+</robot>

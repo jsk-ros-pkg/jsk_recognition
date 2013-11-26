@@ -29,11 +29,11 @@
         (#\p
          (setq pan (read-from-string (subseq l 2)))
          (format t ";; pan  ~A~%" pan)
-         (ros::publish "/orbit_pantilt/pan_tilt_command" (instance orbit_pantilt::jointcommand :init :pan pan :tilt tilt)))
+         (ros::publish "/orbit_pantilt/pan_tilt_command" (instance orbit_pantilt::jointcommand :init :pan (deg2rad pan) :tilt (deg2rad tilt))))
         (#\t
          (setq tilt (read-from-string (subseq l 2)))
          (format t ";; tilt ~A~%" tilt)
-         (ros::publish "/orbit_pantilt/pan_tilt_command" (instance orbit_pantilt::jointcommand :init :pan pan :tilt tilt)))
+         (ros::publish "/orbit_pantilt/pan_tilt_command" (instance orbit_pantilt::jointcommand :init :pan (deg2rad pan) :tilt (deg2rad tilt))))
         (#\q
          (return))
         (t

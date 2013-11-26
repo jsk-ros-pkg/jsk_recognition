@@ -4,7 +4,8 @@
     <arg name="device" value="$(arg device)" />
     <arg name="camera_info_url" value="file://$(find orbit_pantilt)/launch/orbit-camera.yaml" />
   </include>
-  <node pkg="orbit_pantilt" name="orbit_pantilt" type="orbit_pantilt" >
+  <node pkg="orbit_pantilt" name="orbit_pantilt" type="orbit_pantilt" 
+        output="screen" >
     <param name="device" value="$(arg device)" />
     <param name="pan_ratio"  value="40" />
     <param name="tilt_raito" value="40" />

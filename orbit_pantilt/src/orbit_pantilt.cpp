@@ -32,7 +32,7 @@ private:
     //
     int fd_;
     std::string device_;
-    int pan_, tilt_;
+    double pan_, tilt_; // [rad]
     int pan_ratio_, tilt_ratio_;
 
 public:
@@ -84,16 +84,29 @@ public:
         }
     }
 
-    void command_cb(const orbit_pantilt::JointCommandConstPtr& msg) {
-        if (!set_ext_ctrls(fd_, V4L2_CID_PAN_RELATIVE, round((msg->pan-pan_)*pan_ratio_)))
-            throw std::runtime_error(device_ + " does not support set pan relative");
-        pan_ = msg->pan;
-        nh_.setParam("pan", pan_);
+    double min_max_angle(double raw_data_rad, double min_deg, double max_deg) {
+      double min_rad = min_deg * M_PI / 180.0;
+      double max_rad = max_deg * M_PI / 180.0;
+      if (raw_data_rad < min_rad) { return min_rad; }
+      if (raw_data_rad > max_rad) { return max_rad; }
+      return raw_data_rad;
+    }
 
-        if (!set_ext_ctrls(fd_, V4L2_CID_TILT_RELATIVE, round((msg->tilt-tilt_)*tilt_ratio_)))
+    void command_cb(const orbit_pantilt::JointCommandConstPtr& msg) {
+      double msgpan = min_max_angle(msg->pan, -94, 94);
+      double msgtilt = min_max_angle(msg->tilt, -51, 51);
+      if ( fabs(msgpan - pan_) > 0.5 * M_PI / 180.0 ) {
+        if (!set_ext_ctrls(fd_, V4L2_CID_PAN_RELATIVE, round((msgpan-pan_)*pan_ratio_*180.0/M_PI)))
+            throw std::runtime_error(device_ + " does not support set pan relative");
+        pan_ = msgpan;
+        nh_.setParam("pan", pan_*180.0/M_PI);
+      }
+      if ( fabs(msgtilt - tilt_) > 0.5 * M_PI / 180.0 ) {
+        if (!set_ext_ctrls(fd_, V4L2_CID_TILT_RELATIVE, round((msgtilt-tilt_)*tilt_ratio_*180.0/M_PI)))
             throw std::runtime_error(device_ + " does not support set tilt relative");
-        tilt_ = msg->tilt;
-        nh_.setParam("tilt", tilt_);
+        tilt_ = msgtilt;
+        nh_.setParam("tilt", tilt_*180.0/M_PI);
+      }
     }
 
     bool pan_reset(std_srvs::Empty::Request &req,

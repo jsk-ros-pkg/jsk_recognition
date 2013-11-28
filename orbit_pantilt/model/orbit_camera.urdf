@@ -1,5 +1,5 @@
 <robot name="orbit_camera">
-  <link name="base_link">
+  <link name="orbit_base_link">
     <visual>
       <origin xyz="0 0 0.02" />
       <geometry>
@@ -12,12 +12,12 @@
   </link>
 
   <joint name="stick_joint" type="fixed">
-    <parent link="base_link" />
-    <child link="stick_link" />
+    <parent link="orbit_base_link" />
+    <child link="orbit_stick_link" />
     <origin xyz="0.01 0 0.05" rpy="0 0 0" />
   </joint>
 
-  <link name="stick_link">
+  <link name="orbit_stick_link">
     <visual>
       <origin xyz="0 0 0.11" />
       <geometry>
@@ -30,13 +30,13 @@
   </link>
 
   <joint name="pan" type="continuous">
-    <parent link="stick_link" />
-    <child link="camera_pan_link" />
+    <parent link="orbit_stick_link" />
+    <child link="orbit_camera_pan_link" />
     <origin xyz="0 0 0.22" rpy="0 0 0" />
     <axis xyz="0 0 1" />
   </joint>
 
-  <link name="camera_pan_link">
+  <link name="orbit_camera_pan_link">
     <visual>
       <origin xyz="0 0 0.035" />
       <geometry>
@@ -49,13 +49,13 @@
   </link>
 
   <joint name="tilt" type="continuous">
-    <parent link="camera_pan_link" />
-    <child link="camera_tilt_link" />
+    <parent link="orbit_camera_pan_link" />
+    <child link="orbit_camera_tilt_link" />
     <origin xyz="0 0 0.035" rpy="0 0 0" />
     <axis xyz="0 1 0" />
   </joint>
 
-  <link name="camera_tilt_link">
+  <link name="orbit_camera_tilt_link">
     <visual>
       <origin xyz="0.02 0 0" rpy="0 1.57 0" />
       <geometry>

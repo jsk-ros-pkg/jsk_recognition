@@ -51,13 +51,13 @@
   <joint name="tilt" type="continuous">
     <parent link="orbit_camera_pan_link" />
     <child link="orbit_camera_tilt_link" />
-    <origin xyz="0 0 0.035" rpy="0 0 0" />
+    <origin xyz="0 0 0.035" rpy="-1.57 0 -1.57" />
     <axis xyz="0 1 0" />
   </joint>
 
   <link name="orbit_camera_tilt_link">
     <visual>
-      <origin xyz="0.02 0 0" rpy="0 1.57 0" />
+      <origin xyz="0 0 0.02" rpy="0 0 0" />
       <geometry>
         <cylinder length="0.05" radius="0.01" />
       </geometry>
@@ -66,7 +66,7 @@
       </material>
     </visual>
     <visual>
-      <origin xyz="0.006 0 0" rpy="1.57 0 0" />
+      <origin xyz="0 0 0.006" rpy="0 1.57 0" />
       <geometry>
         <cylinder length="0.01" radius="0.033" />
       </geometry>

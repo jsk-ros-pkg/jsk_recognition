@@ -65,6 +65,7 @@ rosbuild_add_executable(cluster_point_indices_decomposer_z_axis src/cluster_poin
 rosbuild_add_executable(depth_image_creator src/depth_image_creator.cpp)
 rosbuild_add_executable(euclidean_cluster_extraction src/euclidean_cluster_extraction.cpp)
 rosbuild_add_executable(icp_server src/icp_server.cpp)
+rosbuild_add_executable(pointcloud_flowrate src/pointcloud_flowrate.cpp)
 # roslaunch documentation
 rosbuild_find_ros_package("jsk_tools")
 execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} python ${jsk_tools_PACKAGE_PATH}/bin/launchdoc-generator.py ${PROJECT_NAME} --output_dir=./build --nomakefile RESULT_VARIABLE _make_failed)

@@ -45,6 +45,7 @@ rosbuild_add_library (jsk_pcl_ros
   src/cluster_point_indices_decomposer_z_axis_nodelet.cpp
   src/centroid_publisher_nodelet.cpp
   src/particle_filter_tracking_nodelet.cpp
+  src/pointcloud_flowrate_nodelet.cpp
 )
 
 rosbuild_add_compile_flags (jsk_pcl_ros ${SSE_FLAGS})

@@ -44,7 +44,7 @@ int main(int argc, char **argv)
   nodelet::M_string remappings;
   nodelet::V_string my_argv;
 
-  manager.load(ros::this_node::getName(), "jsk_pcl/LazyConcatenaterr", remappings, my_argv);
+  manager.load(ros::this_node::getName(), "jsk_pcl/LazyConcatenater", remappings, my_argv);
 
   ros::spin();
   return 0;

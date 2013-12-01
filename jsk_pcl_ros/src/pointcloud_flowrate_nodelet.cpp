@@ -39,9 +39,42 @@ namespace jsk_pcl_ros
 {
   void PointCloudFlowRate::onInit(void)
   {
+    PCLNodelet::onInit();
+    sub_input_ = pnh_->subscribe("input", 1, &PointCloudFlowRate::extract, this);
+    publisher_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
+    if (!pnh_->getParam("rate", rate_)) {
+      rate_ = 1.0;              // 1Hz
+    }
+    int max_size;
+    if (!pnh_->getParam("max_size", max_size)) {
+      max_size_ = 500;
+    }
+    else {
+      max_size_ = (size_t)max_size;
+    }
   }
+  
   void PointCloudFlowRate::extract(const sensor_msgs::PointCloud2ConstPtr &input)
   {
+    pcl::PointCloud<pcl::PointXYZ> cloud_xyz;
+    pcl::fromROSMsg(*input, cloud_xyz);
+    size_t cluster_num = cloud_xyz.points.size() / max_size_;
+    NODELET_INFO("cluster num is: %lu", cluster_num);
+    for (size_t i = 0; i < cluster_num; i++) {
+      size_t start_index = i * max_size_;
+      size_t finish_index = (i + 1) * max_size_ > cloud_xyz.points.size() ? cloud_xyz.points.size(): (i + 1) * max_size_;
+      pcl::PointCloud<pcl::PointXYZ> subcloud;
+      subcloud.points.resize(finish_index - start_index);
+      for (size_t j = start_index; j < finish_index; j++) { // fill subcloud
+        subcloud.points[j - start_index] = cloud_xyz.points[j];
+      }
+      sensor_msgs::PointCloud2::Ptr out_cloud(new sensor_msgs::PointCloud2);
+      pcl::toROSMsg(subcloud, *out_cloud);
+      out_cloud->header = input->header;
+      publisher_.publish(out_cloud);
+      ros::Duration duration(1.0 / rate_);
+      duration.sleep();
+    }
   }
 }
 

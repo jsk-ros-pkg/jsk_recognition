@@ -1,4 +1,4 @@
-// -*- mode: C++ -*-
+// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
@@ -33,35 +33,34 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-
-#ifndef JSK_PCL_ROS_POINTCLOUD_FLOWRATE_H_
-#define JSK_PCL_ROS_POINTCLOUD_FLOWRATE_H_
+#ifndef JSK_PCL_ROS_LAZY_CONCATENATER_H_
+#define JSK_PCL_ROS_LAZY_CONCATENATER_H_
 
 // ros
 #include <ros/ros.h>
 #include <ros/names.h>
 #include <sensor_msgs/PointCloud2.h>
-#include <tf/transform_broadcaster.h>
 
 // pcl
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl/point_types.h>
-#include <pcl/common/centroid.h>
-#include <pcl/filters/extract_indices.h>
 
 namespace jsk_pcl_ros
 {
-  class PointCloudFlowRate: public pcl_ros::PCLNodelet
+  class LazyConcatenater: public pcl_ros::PCLNodelet
   {
-  protected:
-    ros::Subscriber sub_input_;
-    ros::Publisher publisher_;
-    double rate_;
-    size_t max_size_;
-    virtual void extract(const sensor_msgs::PointCloud2ConstPtr &input);
+    
+    virtual void subscribeCallback(std::string topic,
+                                   const sensor_msgs::PointCloud2ConstPtr &input);
   private:
+    std::vector<ros::Subscriber> subscribers_;
+    ros::Publisher pub_;
+    std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> pointcloud_buffer_;
+    void publishConcatenatePointCloud(const std_msgs::Header &header);
     virtual void onInit();
+    //virtual void publishFullCloud();
+    virtual void resetSubscribers(std::vector<std::string>);
   };
 }
 
-#endif  // JSK_PCL_ROS_POINTCLOUD_FLOWRATE_H_
+#endif  // JSK_PCL_ROS_LAZY_CONCATENATER_H_

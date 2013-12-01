@@ -35,8 +35,44 @@
 #include "jsk_pcl_ros/lazy_concatenater.h"
 #include <pluginlib/class_list_macros.h>
 
+#include <boost/format.hpp>
+
 namespace jsk_pcl_ros
 {
+
+  void LazyConcatenater::configCallback(Config &config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock (mutex_);
+    // max 20
+    std::vector<std::string> topics;
+#define ADD_TOPIC(x) {                                                  \
+      if (config.enable_input_topic##x && config.input_topic##x.length() > 0) { \
+        topics.push_back(config.input_topic##x);                        \
+      }                                                                 \
+    }
+    ADD_TOPIC(0);
+    ADD_TOPIC(1);
+    ADD_TOPIC(2);
+    ADD_TOPIC(3);
+    ADD_TOPIC(4);
+    ADD_TOPIC(5);
+    ADD_TOPIC(6);
+    ADD_TOPIC(7);
+    ADD_TOPIC(8);
+    ADD_TOPIC(9);
+    ADD_TOPIC(10);
+    ADD_TOPIC(11);
+    ADD_TOPIC(12);
+    ADD_TOPIC(13);
+    ADD_TOPIC(14);
+    ADD_TOPIC(15);
+    ADD_TOPIC(16);
+    ADD_TOPIC(17);
+    ADD_TOPIC(18);
+    ADD_TOPIC(19);
+    resetSubscribers(topics);
+  }
+  
   void LazyConcatenater::subscribeCallback(std::string topic_name,
                                            const sensor_msgs::PointCloud2ConstPtr &input)
   {
@@ -82,12 +118,33 @@ namespace jsk_pcl_ros
 
   void LazyConcatenater::resetSubscribers(std::vector<std::string> topics)
   {
+
+    std::vector<ros::Subscriber> subscribers_to_be_removed;
+    std::vector<ros::Subscriber> subscribers_to_be_remained;
+    std::vector<std::string> subscribers_to_be_remained_names;
+    ROS_INFO("subscribers_ => %lu", subscribers_.size());
     for (size_t i = 0; i < subscribers_.size(); i++) {
-      ROS_INFO_STREAM("unsubscribing [" << subscribers_[i].getTopic() << "]");
-      subscribers_[i].shutdown();
+      std::string topic_name = subscribers_[i].getTopic();
+      // check `topic_name' is included in topics or not
+      if(std::find(topics.begin(), topics.end(), topic_name) == topics.end()) { // cannot find
+        ROS_INFO_STREAM(topic_name << " will be removed");
+        subscribers_to_be_removed.push_back(subscribers_[i]);
+        
+      }
+      else {                    // found
+        ROS_INFO_STREAM(topic_name << " will be remained");
+        subscribers_to_be_remained.push_back(subscribers_[i]);
+        subscribers_to_be_remained_names.push_back(topic_name);
+        
+      }
     }
     
-    subscribers_.resize(topics.size());
+    for (size_t i = 0; i < subscribers_to_be_removed.size(); i++) {
+      ROS_INFO_STREAM("unsubscribing [" << subscribers_to_be_removed[i].getTopic() << "]");
+      subscribers_to_be_removed[i].shutdown();
+    }
+    
+    subscribers_ = subscribers_to_be_remained;
     //pointcloud_buffer_.resize();
     // clear all the pointcloud buffer
     pointcloud_buffer_.resize(topics.size());
@@ -100,14 +157,21 @@ namespace jsk_pcl_ros
     for (size_t i = 0; i < topics.size(); i++)
     {
       std::string topic_name = topics[i];
-      ROS_INFO_STREAM("subscribing " << topic_name);
-      ros::Subscriber sub
-        = pnh_->subscribe<sensor_msgs::PointCloud2>(topic_name, 1,
-                                                    boost::bind(&LazyConcatenater::subscribeCallback,
-                                                                this,
-                                                                topic_name,
-                                                                _1));
-      subscribers_[i] = sub;
+      
+      if (std::find(subscribers_to_be_remained_names.begin(),
+                    subscribers_to_be_remained_names.end(), topic_name) != subscribers_to_be_remained_names.end()) {
+        //ROS_INFO_STREAM("skip subscribing " << topic_name);
+      }
+      else {
+        ROS_INFO_STREAM("subscribing " << topic_name);
+        ros::Subscriber sub
+          = pnh_->subscribe<sensor_msgs::PointCloud2>(topic_name, 1,
+                                                      boost::bind(&LazyConcatenater::subscribeCallback,
+                                                                  this,
+                                                                  topic_name,
+                                                                  _1));
+        subscribers_.push_back(sub);
+      }
     }
   }
   
@@ -116,31 +180,31 @@ namespace jsk_pcl_ros
     PCLNodelet::onInit();
     // read topics to subscribe from parameter server
     pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
-    XmlRpc::XmlRpcValue input_topics;
-    if (!pnh_->getParam("input_topics", input_topics))
-    {
-      NODELET_ERROR ("[onInit] no ~input_topics is specified");
-      return;
-    }
-    switch (input_topics.getType ())
-    {
-      case XmlRpc::XmlRpcValue::TypeArray:
-      {
-        std::vector<std::string> topics;
-        for (int i = 0; i < input_topics.size(); i++) {
-          topics.push_back((std::string)input_topics[i]);
-        }
-        resetSubscribers(topics);
-        break;
+    // dynamic reconfigure
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (&LazyConcatenater::configCallback, this, _1, _2);
+    srv_->setCallback (f);
+    
+    // concatenater reads the parmeter input_topic0, input_topic1, ..., input_topic20
+    const size_t max_input = 20;
+    std::vector<std::string> input_topics;
+    for (size_t i = 0; i < max_input; i++) {
+      std::string input_topic;
+      bool enable_input_topic;
+      std::string target_param = (boost::format("input_topic%d") % (i)).str();
+      std::string target_enabled_param = (boost::format("enable_input_topic%d") % (i)).str();
+      if (!pnh_->getParam(target_enabled_param, enable_input_topic)) { // default False
+        enable_input_topic = false;
       }
-    default:
-    {
-      NODELET_ERROR ("[onInit] Invalid 'input_topics' parameter given!");
-      return;
+      if (enable_input_topic && pnh_->getParam(target_param, input_topic)) {
+        input_topics.push_back(input_topic);
+      }
+      else {
+        ROS_INFO_STREAM(target_param << " is not specified or not enabled, ignore it");
+      }
     }
-    }
-    
-    
+    resetSubscribers(input_topics);
   }
 }
 

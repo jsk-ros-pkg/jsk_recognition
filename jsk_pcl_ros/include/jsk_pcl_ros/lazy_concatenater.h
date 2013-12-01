@@ -40,7 +40,8 @@
 #include <ros/ros.h>
 #include <ros/names.h>
 #include <sensor_msgs/PointCloud2.h>
-
+#include <dynamic_reconfigure/server.h>
+#include "jsk_pcl_ros/LazyConcatenaterConfig.h"
 // pcl
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl/point_types.h>
@@ -49,9 +50,13 @@ namespace jsk_pcl_ros
 {
   class LazyConcatenater: public pcl_ros::PCLNodelet
   {
-    
+  protected:
+    typedef jsk_pcl_ros::LazyConcatenaterConfig Config;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    boost::mutex mutex_;
     virtual void subscribeCallback(std::string topic,
                                    const sensor_msgs::PointCloud2ConstPtr &input);
+    virtual void configCallback (Config &config, uint32_t level);
   private:
     std::vector<ros::Subscriber> subscribers_;
     ros::Publisher pub_;

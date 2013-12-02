@@ -69,6 +69,7 @@ rosbuild_add_executable(euclidean_cluster_extraction src/euclidean_cluster_extra
 rosbuild_add_executable(icp_server src/icp_server.cpp)
 rosbuild_add_executable(pointcloud_flowrate src/pointcloud_flowrate.cpp)
 rosbuild_add_executable(lazy_concatenater src/lazy_concatenater.cpp)
+rosbuild_add_executable(voxel_grid_downsample_manager src/voxel_grid_downsample_manager.cpp)
 # roslaunch documentation
 rosbuild_find_ros_package("jsk_tools")
 execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} python ${jsk_tools_PACKAGE_PATH}/bin/launchdoc-generator.py ${PROJECT_NAME} --output_dir=./build --nomakefile RESULT_VARIABLE _make_failed)

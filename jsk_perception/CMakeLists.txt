@@ -50,6 +50,7 @@ rosbuild_link_boost(point_pose_extractor filesystem system)
 target_link_libraries(edge_detector ${OpenCV_LIBRARIES})
 target_link_libraries(hough_lines ${OpenCV_LIBRARIES})
 target_link_libraries(rectangle_detector ${OpenCV_LIBRARIES})
+rosbuild_link_boost(rectangle_detector signals)
 
 ADD_CUSTOM_COMMAND(
   OUTPUT  ${CMAKE_SOURCE_DIR}/template

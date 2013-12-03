@@ -48,6 +48,7 @@ rosbuild_add_library (jsk_pcl_ros
   #src/pointcloud_flowrate_nodelet.cpp
   src/lazy_concatenater_nodelet.cpp
   src/voxel_grid_downsample_manager_nodelet.cpp
+  src/voxel_grid_downsample_decoder_nodelet.cpp
 )
 
 rosbuild_add_compile_flags (jsk_pcl_ros ${SSE_FLAGS})
@@ -71,6 +72,7 @@ rosbuild_add_executable(icp_server src/icp_server.cpp)
 rosbuild_add_executable(pointcloud_flowrate src/pointcloud_flowrate.cpp)
 rosbuild_add_executable(lazy_concatenater src/lazy_concatenater.cpp)
 rosbuild_add_executable(voxel_grid_downsample_manager src/voxel_grid_downsample_manager.cpp)
+rosbuild_add_executable(voxel_grid_downsample_decoder src/voxel_grid_downsample_decoder.cpp)
 # roslaunch documentation
 rosbuild_find_ros_package("jsk_tools")
 execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} python ${jsk_tools_PACKAGE_PATH}/bin/launchdoc-generator.py ${PROJECT_NAME} --output_dir=./build --nomakefile RESULT_VARIABLE _make_failed)

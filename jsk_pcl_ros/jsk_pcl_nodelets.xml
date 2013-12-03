@@ -95,4 +95,10 @@
       donwsample pointcloud in voxel
     </description>
   </class>
+  <class name="jsk_pcl/VoxelGridDownsampleDecoder" type="VoxelGridDownsampleDecoder"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      decode donwsampled pointcloud
+    </description>
+  </class>
 </library>

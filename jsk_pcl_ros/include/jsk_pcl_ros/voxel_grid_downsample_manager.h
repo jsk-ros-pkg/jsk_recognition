@@ -41,6 +41,8 @@
 #include <ros/names.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <visualization_msgs/Marker.h>
+#include <tf/transform_listener.h>
+
 // pcl
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl/point_types.h>
@@ -51,6 +53,7 @@ namespace jsk_pcl_ros
   class VoxelGridDownsampleManager : public pcl_ros::PCLNodelet
   {
   protected:
+    tf::TransformListener tf_listener;
     std::vector<visualization_msgs::Marker::ConstPtr> grid_;
     void addGrid(const visualization_msgs::Marker::ConstPtr &new_box);
   private:

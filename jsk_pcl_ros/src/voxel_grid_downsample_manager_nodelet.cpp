@@ -38,6 +38,8 @@
 #include <pcl/filters/passthrough.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/io/io.h>
+#include <pcl_ros/transforms.h>
+#include <boost/format.hpp>
 
 namespace jsk_pcl_ros
 {
@@ -58,12 +60,24 @@ namespace jsk_pcl_ros
       visualization_msgs::Marker::ConstPtr target_grid = grid_[i];
       // not yet tf is supported
       int id = target_grid->id;
+      // solve tf with ros::Time 0.0
+
+      // transform pointcloud to the frame_id of target_grid
+      pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+      // transformPointCloud (const std::string &target_frame,
+      //                      const pcl::PointCloud <PointT> &cloud_in,
+      //                      pcl::PointCloud <PointT> &cloud_out,
+      //                      const tf::TransformListener &tf_listener);
+      pcl_ros::transformPointCloud(target_grid->header.frame_id,
+                                   *cloud,
+                                   *transformed_cloud,
+                                   tf_listener);
       double center_x = target_grid->pose.position.x;
       double center_y = target_grid->pose.position.y;
       double center_z = target_grid->pose.position.z;
-      double range_x = target_grid->scale.x * 10.0; // for debug
-      double range_y = target_grid->scale.y * 10.0;
-      double range_z = target_grid->scale.z * 10.0;
+      double range_x = target_grid->scale.x * 1.0; // for debug
+      double range_y = target_grid->scale.y * 1.0;
+      double range_z = target_grid->scale.z * 1.0;
       double min_x = center_x - range_x / 2.0;
       double max_x = center_x + range_x / 2.0;
       double min_y = center_y - range_y / 2.0;
@@ -88,7 +102,7 @@ namespace jsk_pcl_ros
       ROS_INFO_STREAM(id << " filter z: " << min_z << " - " << max_z);
       
       pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_after_x (new pcl::PointCloud<pcl::PointXYZ>);
-      pass_x.setInputCloud (cloud);
+      pass_x.setInputCloud (transformed_cloud);
       pass_x.filter(*cloud_after_x);
 
       pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_after_y (new pcl::PointCloud<pcl::PointXYZ>);
@@ -105,6 +119,13 @@ namespace jsk_pcl_ros
       sor.setLeafSize (resolution, resolution, resolution);
       pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
       sor.filter (*cloud_filtered);
+
+      // reverse transform
+      pcl::PointCloud<pcl::PointXYZ>::Ptr reverse_transformed_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+      pcl_ros::transformPointCloud(input->header.frame_id,
+                                   *cloud_filtered,
+                                   *reverse_transformed_cloud,
+                                   tf_listener);
       
       // adding the output into *output_cloud
       // tmp <- cloud_filtered + output_cloud
@@ -112,9 +133,9 @@ namespace jsk_pcl_ros
       //pcl::PointCloud<pcl::PointXYZ>::Ptr tmp (new pcl::PointCloud<pcl::PointXYZ>);
       //pcl::concatenatePointCloud (*cloud_filtered, *output_cloud, tmp);
       //output_cloud = tmp;
-      ROS_INFO_STREAM(id << " includes " << cloud_filtered->points.size() << " points");
-      for (size_t i = 0; i < cloud_filtered->points.size(); i++) {
-        output_cloud->points.push_back(cloud_filtered->points[i]);
+      ROS_INFO_STREAM(id << " includes " << reverse_transformed_cloud->points.size() << " points");
+      for (size_t i = 0; i < reverse_transformed_cloud->points.size(); i++) {
+        output_cloud->points.push_back(reverse_transformed_cloud->points[i]);
       }
     }
     sensor_msgs::PointCloud2 out;
@@ -134,12 +155,14 @@ namespace jsk_pcl_ros
         cluster_out_pcl(new pcl::PointCloud<pcl::PointXYZ>);
       cluster_out_pcl->points.resize(end_index - start_index);
       // build cluster_out_pcl
+      ROS_INFO_STREAM("make cluster from " << start_index << " to " << end_index);
       for (size_t j = start_index; j < end_index; j++) {
         cluster_out_pcl->points[j - start_index] = output_cloud->points[j];
       }
       // conevrt cluster_out_pcl into ros msg
       toROSMsg(*cluster_out_pcl, cluster_out_ros);
       cluster_out_ros.header = input->header;
+      cluster_out_ros.header.frame_id = (boost::format("%s %d") % (cluster_out_ros.header.frame_id) % (i)).str();
       pub_encoded_.publish(cluster_out_ros);
       ros::Duration(1.0 / rate_).sleep();
     }

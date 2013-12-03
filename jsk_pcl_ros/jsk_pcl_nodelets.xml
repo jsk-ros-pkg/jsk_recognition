@@ -89,4 +89,10 @@
       concatenate pointlcouds in lazy way
     </description>
   </class>
+  <class name="jsk_pcl/VoxelGridDownsampleManager" type="VoxelGridDownsampleManager"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      donwsample pointcloud in voxel
+    </description>
+  </class>
 </library>

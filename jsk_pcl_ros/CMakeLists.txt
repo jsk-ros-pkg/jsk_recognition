@@ -47,6 +47,7 @@ rosbuild_add_library (jsk_pcl_ros
   src/particle_filter_tracking_nodelet.cpp
   #src/pointcloud_flowrate_nodelet.cpp
   src/lazy_concatenater_nodelet.cpp
+  src/voxel_grid_downsample_manager_nodelet.cpp
 )
 
 rosbuild_add_compile_flags (jsk_pcl_ros ${SSE_FLAGS})

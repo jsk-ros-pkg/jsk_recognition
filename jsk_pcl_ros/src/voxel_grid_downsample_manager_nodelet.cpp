@@ -150,6 +150,7 @@ namespace jsk_pcl_ros
     // check we have new_box->id in our bounding_boxes_
     if (new_box->id == -1) {
       // cancel all
+      ROS_INFO("clear all pointclouds");
       clearAll();
     }
     else {

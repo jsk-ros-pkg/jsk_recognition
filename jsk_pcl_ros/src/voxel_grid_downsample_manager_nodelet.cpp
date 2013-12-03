@@ -194,7 +194,7 @@ namespace jsk_pcl_ros
                                         this);
     pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
     pub_encoded_ = pnh_->advertise<sensor_msgs::PointCloud2>("output_encoded", 1);
-    max_points_ = 500;
+    max_points_ = 300;
     rate_ = 1.0;                // 1Hz
   }
 }

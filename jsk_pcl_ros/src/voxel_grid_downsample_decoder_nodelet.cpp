@@ -38,6 +38,8 @@
 #include <pcl/filters/passthrough.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/io/io.h>
+#include <pcl_ros/transforms.h>
+
 
 #include <string>
 #include <iostream>
@@ -80,20 +82,32 @@ namespace jsk_pcl_ros
 
   void VoxelGridDownsampleDecoder::publishBuffer(void)
   {
+    if (pc_buffer_.size() == 0) {
+      ROS_WARN("no pointcloud is subscribed yet");
+      return;
+    }
+    std::string result_frame_id = getPointcloudFrameId(pc_buffer_[0]);
     pcl::PointCloud<pcl::PointXYZ>::Ptr concatenated_cloud (new pcl::PointCloud<pcl::PointXYZ>);
     for (size_t i = 0; i < pc_buffer_.size(); i++)
     {
       pcl::PointCloud<pcl::PointXYZ>::Ptr tmp_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+      pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_tmp_cloud (new pcl::PointCloud<pcl::PointXYZ>);
       fromROSMsg(*pc_buffer_[i], *tmp_cloud);
+      tmp_cloud->header.frame_id = getPointcloudFrameId(pc_buffer_[i]);
+      // transform the pointcloud
+      pcl_ros::transformPointCloud(result_frame_id,
+                                   *tmp_cloud,
+                                   *transformed_tmp_cloud,
+                                   tf_listener);
       // concatenate the tmp_cloud into concatenated_cloud
-      for (size_t j = 0; j < tmp_cloud->points.size(); j++) {
-        concatenated_cloud->points.push_back(tmp_cloud->points[j]);
+      for (size_t j = 0; j < transformed_tmp_cloud->points.size(); j++) {
+        concatenated_cloud->points.push_back(transformed_tmp_cloud->points[j]);
       }
     }
     sensor_msgs::PointCloud2 out;
     toROSMsg(*concatenated_cloud, out);
     out.header = pc_buffer_[0]->header;
-    out.header.frame_id = getPointcloudFrameId(pc_buffer_[0]); // TODO: it's not good...
+    out.header.frame_id = getPointcloudFrameId(pc_buffer_[0]);
     pub_.publish(out);
   }
   

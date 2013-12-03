@@ -51,6 +51,7 @@ namespace jsk_pcl_ros
   class VoxelGridDownsampleDecoder : public pcl_ros::PCLNodelet
   {
   protected:
+    tf::TransformListener tf_listener;
     // utility
     int getPointcloudID(const sensor_msgs::PointCloud2ConstPtr &input);
     std::string getPointcloudFrameId(const sensor_msgs::PointCloud2ConstPtr &input);

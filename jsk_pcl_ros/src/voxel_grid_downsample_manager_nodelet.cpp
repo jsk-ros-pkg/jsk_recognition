@@ -64,10 +64,6 @@ namespace jsk_pcl_ros
 
       // transform pointcloud to the frame_id of target_grid
       pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud (new pcl::PointCloud<pcl::PointXYZ>);
-      // transformPointCloud (const std::string &target_frame,
-      //                      const pcl::PointCloud <PointT> &cloud_in,
-      //                      pcl::PointCloud <PointT> &cloud_out,
-      //                      const tf::TransformListener &tf_listener);
       pcl_ros::transformPointCloud(target_grid->header.frame_id,
                                    *cloud,
                                    *transformed_cloud,

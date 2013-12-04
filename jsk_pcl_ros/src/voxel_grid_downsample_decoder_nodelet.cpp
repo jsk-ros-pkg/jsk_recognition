@@ -57,6 +57,13 @@ namespace jsk_pcl_ros
     int id = boost::lexical_cast<int>(v[1]);
     return id;
   }
+  
+  int VoxelGridDownsampleDecoder::getPointcloudSequenceID(const sensor_msgs::PointCloud2ConstPtr &input) {
+    std::vector<std::string> v;
+    boost::algorithm::split(v, input->header.frame_id, boost::is_any_of(" "));
+    int id = boost::lexical_cast<int>(v[2]);
+    return id;
+  }
 
   std::string VoxelGridDownsampleDecoder::getPointcloudFrameId(const sensor_msgs::PointCloud2ConstPtr &input) {
     std::vector<std::string> v;
@@ -65,15 +72,38 @@ namespace jsk_pcl_ros
   }
   
   void VoxelGridDownsampleDecoder::pointCB(const sensor_msgs::PointCloud2ConstPtr &input)
-  {                                 
+  {
+    ROS_INFO_STREAM("new pointcloud!" << input->header.frame_id);
+    
     int id = getPointcloudID(input);
+    int new_sequence_id = getPointcloudSequenceID(input);
     std::string frame_id = getPointcloudFrameId(input);
-    // if id = 0, clear the buffer
-    if (id == 0) {
+    if (new_sequence_id != latest_sequence_id_) {
+      ROS_INFO_STREAM("clearing pointcloud");
       pc_buffer_.clear();
+      latest_sequence_id_ = new_sequence_id;
     }
+    
+    // // if id = 0, clear the buffer
+    // if (id == 0) {
+    //   pc_buffer_.clear();
+    // }
+    
     // update the buffer
-    pc_buffer_.push_back(input);
+    if (id >= (int)pc_buffer_.size()) {
+      // extend the buffer
+      //pc_buffer_.resize(id + 1);
+      int extend = id - pc_buffer_.size() + 1;
+      ROS_INFO_STREAM("extend " << extend << " pointclouds");
+      for (int i = 0; i < extend; i++) {
+        ROS_INFO_STREAM("new pointcloud allocation!");
+        pc_buffer_.push_back(sensor_msgs::PointCloud2ConstPtr());
+        pc_buffer_[pc_buffer_.size() - 1].reset();
+      }
+    }
+    //pc_buffer_.push_back(input);
+    ROS_INFO_STREAM("id: " << id << " size: " << pc_buffer_.size());
+    pc_buffer_[id] = input;
     
     // publush the buffer
     publishBuffer();
@@ -82,17 +112,29 @@ namespace jsk_pcl_ros
 
   void VoxelGridDownsampleDecoder::publishBuffer(void)
   {
-    if (pc_buffer_.size() == 0) {
+    ROS_INFO("publishBuffer");
+    if (pc_buffer_.size() == 0 || !pc_buffer_[0]) {
       ROS_WARN("no pointcloud is subscribed yet");
       return;
     }
+    
     std::string result_frame_id = getPointcloudFrameId(pc_buffer_[0]);
     pcl::PointCloud<pcl::PointXYZ>::Ptr concatenated_cloud (new pcl::PointCloud<pcl::PointXYZ>);
     for (size_t i = 0; i < pc_buffer_.size(); i++)
     {
+      if (!pc_buffer_[i]) {
+        ROS_INFO_STREAM("buffer[" << i << "] is not yet available, skip it");
+        continue;
+      }
       pcl::PointCloud<pcl::PointXYZ>::Ptr tmp_cloud (new pcl::PointCloud<pcl::PointXYZ>);
       pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_tmp_cloud (new pcl::PointCloud<pcl::PointXYZ>);
       fromROSMsg(*pc_buffer_[i], *tmp_cloud);
+      if (tmp_cloud->points.size() == 0) {
+        ROS_INFO_STREAM("buffer[" << i << "] is not yet available, skip it");
+        continue;
+      }
+
+      
       tmp_cloud->header.frame_id = getPointcloudFrameId(pc_buffer_[i]);
       // transform the pointcloud
       pcl_ros::transformPointCloud(result_frame_id,
@@ -114,6 +156,7 @@ namespace jsk_pcl_ros
   void VoxelGridDownsampleDecoder::onInit(void)
   {
     PCLNodelet::onInit();
+    latest_sequence_id_ = -1;
     // encoded input
     sub_ = pnh_->subscribe("input", 1, &VoxelGridDownsampleDecoder::pointCB,
                            this);

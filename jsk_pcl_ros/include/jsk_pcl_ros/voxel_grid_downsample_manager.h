@@ -65,6 +65,7 @@ namespace jsk_pcl_ros
     ros::Publisher pub_encoded_;
     size_t max_points_;
     double rate_;
+    int sequence_id_;           // incremented by every add_box
     virtual void onInit();
   };
 }

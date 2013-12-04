@@ -54,8 +54,10 @@ namespace jsk_pcl_ros
     tf::TransformListener tf_listener;
     // utility
     int getPointcloudID(const sensor_msgs::PointCloud2ConstPtr &input);
+    int getPointcloudSequenceID(const sensor_msgs::PointCloud2ConstPtr &input);
     std::string getPointcloudFrameId(const sensor_msgs::PointCloud2ConstPtr &input);
   private:
+    int latest_sequence_id_;
     void publishBuffer();
     std::vector<sensor_msgs::PointCloud2ConstPtr> pc_buffer_;
     void pointCB(const sensor_msgs::PointCloud2ConstPtr &input);

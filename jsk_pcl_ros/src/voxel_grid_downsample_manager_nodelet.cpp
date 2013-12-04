@@ -158,7 +158,7 @@ namespace jsk_pcl_ros
       // conevrt cluster_out_pcl into ros msg
       toROSMsg(*cluster_out_pcl, cluster_out_ros);
       cluster_out_ros.header = input->header;
-      cluster_out_ros.header.frame_id = (boost::format("%s %d") % (cluster_out_ros.header.frame_id) % (i)).str();
+      cluster_out_ros.header.frame_id = (boost::format("%s %d %d") % (cluster_out_ros.header.frame_id) % (i) % (sequence_id_)).str();
       pub_encoded_.publish(cluster_out_ros);
       ros::Duration(1.0 / rate_).sleep();
     }
@@ -166,6 +166,7 @@ namespace jsk_pcl_ros
 
   void VoxelGridDownsampleManager::addGrid(const visualization_msgs::Marker::ConstPtr &new_box)
   {
+    ++sequence_id_;
     // check we have new_box->id in our bounding_boxes_
     if (new_box->id == -1) {
       // cancel all
@@ -187,7 +188,7 @@ namespace jsk_pcl_ros
   void VoxelGridDownsampleManager::onInit(void)
   {
     PCLNodelet::onInit();
-
+    sequence_id_ = 0;
     sub_ = pnh_->subscribe("input", 1, &VoxelGridDownsampleManager::pointCB,
                            this);
     bounding_box_sub_ = pnh_->subscribe("add_grid", 1, &VoxelGridDownsampleManager::addGrid,

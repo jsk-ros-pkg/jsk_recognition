@@ -6,6 +6,7 @@
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <std_srvs/Empty.h>
+#include <std_msgs/Empty.h>
 
 #include <boost/thread/mutex.hpp>
 #include <boost/foreach.hpp>
@@ -58,7 +59,8 @@ public:
 
     if (use_snapshot_) {
       publish_once_ = false;
-      srv_ = pnh.advertiseService("snapshot", &ImageResizer::snapshot_cb, this);
+      srv_ = pnh.advertiseService("snapshot", &ImageResizer::snapshot_srv_cb, this);
+      sub_ = pnh.subscribe("snapshot", 1, &ImageResizer::snapshot_msg_cb, this);
     }
 
     cs_ = it_->subscribeCamera(cam + "/" + img, max_queue_size_,
@@ -82,6 +84,7 @@ protected:
   image_transport::CameraPublisher cp_;
   image_transport::ImageTransport *it_;
   ros::ServiceServer srv_;
+  ros::Subscriber sub_;
 
   double resize_x_, resize_y_;
   int dst_width_, dst_height_;
@@ -105,9 +108,14 @@ protected:
     ROS_INFO("message period : %f", period_.toSec());
   }
 
+  void snapshot_msg_cb (const std_msgs::EmptyConstPtr msg) {
+    boost::mutex::scoped_lock lock(mutex_);
 
-  bool snapshot_cb (std_srvs::Empty::Request &req,
-                    std_srvs::Empty::Response &res) {
+    publish_once_ = true;
+  }
+
+  bool snapshot_srv_cb (std_srvs::Empty::Request &req,
+                        std_srvs::Empty::Response &res) {
     boost::mutex::scoped_lock lock(mutex_);
 
     publish_once_ = true;

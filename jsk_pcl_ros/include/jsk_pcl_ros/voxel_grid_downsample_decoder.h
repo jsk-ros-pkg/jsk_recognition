@@ -58,6 +58,7 @@ namespace jsk_pcl_ros
     std::string getPointcloudFrameId(const sensor_msgs::PointCloud2ConstPtr &input);
   private:
     int latest_sequence_id_;
+    int previous_id_;
     void publishBuffer();
     std::vector<sensor_msgs::PointCloud2ConstPtr> pc_buffer_;
     void pointCB(const sensor_msgs::PointCloud2ConstPtr &input);

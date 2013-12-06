@@ -104,7 +104,13 @@ namespace jsk_pcl_ros
     //pc_buffer_.push_back(input);
     ROS_INFO_STREAM("id: " << id << " size: " << pc_buffer_.size());
     pc_buffer_[id] = input;
-    
+    if (previous_id_ != id + 1) { // the point cloud is not continuous
+      if (previous_id != pc_buffer_.size() - 1) { // if not the last one
+        // make pc_buffer_ shorten
+        pc_buffer_.resize(id);
+      }
+    }
+    previous_id_ = id;          // update the previous one
     // publush the buffer
     publishBuffer();
     
@@ -156,7 +162,8 @@ namespace jsk_pcl_ros
   void VoxelGridDownsampleDecoder::onInit(void)
   {
     PCLNodelet::onInit();
-    latest_sequence_id_ = -1;
+    previous_id_ = -1;
+    continuous_p_ = true;
     // encoded input
     sub_ = pnh_->subscribe("input", 1, &VoxelGridDownsampleDecoder::pointCB,
                            this);

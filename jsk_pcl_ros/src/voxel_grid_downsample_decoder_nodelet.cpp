@@ -163,7 +163,6 @@ namespace jsk_pcl_ros
   {
     PCLNodelet::onInit();
     previous_id_ = -1;
-    continuous_p_ = true;
     // encoded input
     sub_ = pnh_->subscribe("input", 1, &VoxelGridDownsampleDecoder::pointCB,
                            this);

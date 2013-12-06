@@ -105,7 +105,7 @@ namespace jsk_pcl_ros
     ROS_INFO_STREAM("id: " << id << " size: " << pc_buffer_.size());
     pc_buffer_[id] = input;
     if (previous_id_ != id + 1) { // the point cloud is not continuous
-      if (previous_id != pc_buffer_.size() - 1) { // if not the last one
+      if (previous_id_ != pc_buffer_.size() - 1) { // if not the last one
         // make pc_buffer_ shorten
         pc_buffer_.resize(id);
       }

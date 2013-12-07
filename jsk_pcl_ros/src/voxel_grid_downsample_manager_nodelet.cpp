@@ -184,10 +184,29 @@ namespace jsk_pcl_ros
       grid_.push_back(new_box);
     }
   }
+
+  void VoxelGridDownsampleManager::initializeGrid(void) {
+    visualization_msgs::Marker::Ptr box (new visualization_msgs::Marker);
+    box->header.stamp = ros::Time(0.0);
+    box->header.frame_id = "/pelvis";
+    const double D = 2.0;
+    box->pose.position.x = D / 2.0;
+    box->pose.position.y = 0.0;
+    box->pose.position.x = D / 2.0;
+    box->scale.x = D;
+    box->scale.y = D;
+    box->scale.z = D;
+    box->color.r = 0.05;
+    box->color.g = 0.05;
+    box->color.b = 0.05;
+    box->color.a = 1.0;
+    grid_.push_back(box);
+  }
   
   void VoxelGridDownsampleManager::onInit(void)
   {
     PCLNodelet::onInit();
+    initializeGrid();
     sequence_id_ = 0;
     sub_ = pnh_->subscribe("input", 1, &VoxelGridDownsampleManager::pointCB,
                            this);

@@ -190,10 +190,10 @@ namespace jsk_pcl_ros
     box->header.stamp = ros::Time(0.0);
     box->header.frame_id = "/pelvis";
     const double D = 2.0;
-    box->pose.position.x = D / 2.0;
+    box->pose.position.x = D / 2.0 * 1.5;
     box->pose.position.y = 0.0;
     box->pose.position.x = D / 2.0;
-    box->scale.x = D;
+    box->scale.x = D * 1.5;
     box->scale.y = D;
     box->scale.z = D;
     box->color.r = 0.05;

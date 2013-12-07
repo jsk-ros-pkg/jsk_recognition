@@ -59,6 +59,7 @@ namespace jsk_pcl_ros
   private:
     void pointCB(const sensor_msgs::PointCloud2ConstPtr &input);
     void clearAll();
+    void initializeGrid(void);
     ros::Subscriber sub_;
     ros::Subscriber bounding_box_sub_;
     ros::Publisher pub_;

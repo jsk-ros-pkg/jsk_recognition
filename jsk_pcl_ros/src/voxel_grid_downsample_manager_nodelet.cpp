@@ -54,6 +54,10 @@ namespace jsk_pcl_ros
   {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    if (grid_.size() == 0) {
+      ROS_INFO("the number of registered grids is 0, skipping");
+      return;
+    }
     fromROSMsg(*input, *cloud);
     for (size_t i = 0; i < grid_.size(); i++)
     {

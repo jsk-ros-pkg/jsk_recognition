@@ -189,13 +189,12 @@ namespace jsk_pcl_ros
     visualization_msgs::Marker::Ptr box (new visualization_msgs::Marker);
     box->header.stamp = ros::Time(0.0);
     box->header.frame_id = "/pelvis";
-    const double D = 2.0;
-    box->pose.position.x = D / 2.0 * 1.5;
+    box->pose.position.x = 2.0;
     box->pose.position.y = 0.0;
-    box->pose.position.x = D / 2.0;
-    box->scale.x = D * 1.5;
-    box->scale.y = D;
-    box->scale.z = D;
+    box->pose.position.z = -0.5;
+    box->scale.x = 4.0;
+    box->scale.y = 2.0;
+    box->scale.z = 3.0;
     box->color.r = 0.05;
     box->color.g = 0.05;
     box->color.b = 0.05;

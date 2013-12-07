@@ -84,11 +84,6 @@ namespace jsk_pcl_ros
       latest_sequence_id_ = new_sequence_id;
     }
     
-    // // if id = 0, clear the buffer
-    // if (id == 0) {
-    //   pc_buffer_.clear();
-    // }
-    
     // update the buffer
     if (id >= (int)pc_buffer_.size()) {
       // extend the buffer
@@ -104,10 +99,15 @@ namespace jsk_pcl_ros
     //pc_buffer_.push_back(input);
     ROS_INFO_STREAM("id: " << id << " size: " << pc_buffer_.size());
     pc_buffer_[id] = input;
-    if (previous_id_ != id + 1) { // the point cloud is not continuous
-      if (previous_id_ != pc_buffer_.size() - 1) { // if not the last one
-        // make pc_buffer_ shorten
-        pc_buffer_.resize(id);
+    if (pc_buffer_.size() == 1) {
+      // no need to do anything
+    }
+    else {
+      if (previous_id_ + 1 != id) { // the point cloud is not continuous
+	if (previous_id_ != pc_buffer_.size() - 1) { // if not the last one
+	  // make pc_buffer_ shorten
+	  pc_buffer_.resize(previous_id_ + 1);
+	}
       }
     }
     previous_id_ = id;          // update the previous one

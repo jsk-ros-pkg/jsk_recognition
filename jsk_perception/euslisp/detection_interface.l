@@ -210,3 +210,45 @@
       (send *ri* :ros-wait 0.05 :spin-self t) ;; attention-check ...
       target-obj
       )))
+;;
+;; check program, publish objectdetection_msgs as marker_array
+;;
+(defun detection-checker (msg)
+  (pprint 'subscribe)
+  (let ((objs (send msg :objects))
+        (hdr (send msg :header))
+        (cntr 0))
+    (dolist (obj objs)
+      (let ((objtype (send obj :type))
+            (cds (ros::tf-pose->coords (send obj :pose))))
+        (ros::publish "/object_detection_marker_array"
+                      (instance visualization_msgs::MarkerArray :init
+                                :markers
+                                (list
+                                 (text->marker-msg
+                                  objtype
+                                  (send (send cds :copy-worldcoords) :translate #f(100 -100 0))
+                                  hdr
+                                  :ns (format nil "object_text_~A" objtype)
+                                  :color #f(1 0 0)
+                                  :scale 100 :lifetime 0 :id 0)
+                                 (coords->marker-msg
+                                  cds hdr
+                                  :ns (format nil "object_coords_~A" objtype)
+                                  ;; :size 200 :width 20
+                                  :lifetime 0 :id 1)
+                                 )))
+        (incf cntr)
+        ))
+    ))
+(defun detection-marker-test ()
+  (ros::roseus "detection_marker_test")
+  (ros::advertise "/object_detection_marker_array" visualization_msgs::MarkerArray 100)
+  (ros::subscribe *detection-topic*
+                  posedetection_msgs::ObjectDetection
+                  #'detection-checker)
+  (ros::rate 100)
+  (do-until-key
+   (ros::spin-once)
+   (ros::sleep))
+  )

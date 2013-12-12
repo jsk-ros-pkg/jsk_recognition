@@ -20,45 +20,47 @@
   (:frame_id (&optional f) (if f (setf (get self :frame_id) f)) (get self :frame_id)))
 
 (defun objectdetection (force target-obj msg)
-  (let ((obj (car (send msg :objects)))
+  (let ((obj-lst (car (send msg :objects)))
         ;;(av (send *pr2* :angle-vector))
         (frame (send msg :header :frame_id))
         (tp (get target-obj :type))
         stamp trans)
     (ros::ros-info "object detection callback target ~A, frame ~A, object ~A" tp frame (send obj :type))
-    (when (or (not (stringp tp))
-              (substringp tp (send obj :type))) ;; found target
-      (setq stamp (if force (ros::time 0) (send msg :header :stamp)))
-      (cond
-       (*solve-tf*
-        (unless (boundp '*tfl*)
-          (setq *tfl* (instance ros::transform-listener :init)))
-        (unless (send *tfl* :wait-for-transform *base-frame-id* frame stamp 1)
-          (ros::ros-error "could not solve ~A to ~A" *base-frame-id* frame))
-        (setq trans (send *tfl* :lookup-transform *base-frame-id* frame stamp))
-        (ros::ros-info "trans ~A" trans))
-       (t (setq trans (make-coords))))
+    (dolist (obj obj-lst)
+      (when (or (not (stringp tp))
+                (substringp tp (send obj :type))) ;; found target
+        (setq stamp (if force (ros::time 0) (send msg :header :stamp)))
+        (cond
+         (*solve-tf*
+          (unless (boundp '*tfl*)
+            (setq *tfl* (instance ros::transform-listener :init)))
+          (unless (send *tfl* :wait-for-transform *base-frame-id* frame stamp 1)
+            (ros::ros-error "could not solve ~A to ~A" *base-frame-id* frame))
+          (setq trans (send *tfl* :lookup-transform *base-frame-id* frame stamp))
+          (ros::ros-info "trans ~A" trans))
+         (t (setq trans (make-coords))))
 
-      (when trans
-        (ros::ros-info "object detected ~A ~A ~20,9f" (send obj :type)
-                       (ros::tf-pose->coords (send obj :pose))
-                       (send (send msg :header :stamp) :to-sec))
-        (send target-obj :name (send obj :type))
-        (send target-obj :stamp (send msg :header :stamp))
-        (send target-obj :frame_id (send msg :header :frame_id))
-        ;; (send *pr2* :angle-vector (send *ri* :state :potentio-vector))
-        (send target-obj :reset-coords)
-        (send target-obj :move-to trans :local)
-        (send target-obj :move-to (ros::tf-pose->coords (send obj :pose)) :local)
-	(when (find-method target-obj :update-descendants)
-	  (send target-obj :update-descendants) ;; clean me
-	  )
-        (unless (boundp '*tfb*)
-          (setq *tfb* (instance ros::transform-broadcaster :init)))
-	(send *tfb* :send-transform (ros::tf-pose->coords (send obj :pose)) frame (send target-obj :name))
-        ;; target-obj should be on *base-frame-id* coordinates
-        ;; (send *pr2* :angle-vector av)
-        ))
+        (when trans
+          (ros::ros-info "object detected ~A ~A ~20,9f" (send obj :type)
+                         (ros::tf-pose->coords (send obj :pose))
+                         (send (send msg :header :stamp) :to-sec))
+          (send target-obj :name (send obj :type))
+          (send target-obj :stamp (send msg :header :stamp))
+          (send target-obj :frame_id (send msg :header :frame_id))
+          ;; (send *pr2* :angle-vector (send *ri* :state :potentio-vector))
+          (send target-obj :reset-coords)
+          (send target-obj :move-to trans :local)
+          (send target-obj :move-to (ros::tf-pose->coords (send obj :pose)) :local)
+          (when (find-method target-obj :update-descendants)
+            (send target-obj :update-descendants) ;; clean me
+            )
+          (unless (boundp '*tfb*)
+            (setq *tfb* (instance ros::transform-broadcaster :init)))
+          (send *tfb* :send-transform (ros::tf-pose->coords (send obj :pose)) frame (send target-obj :name))
+          ;; target-obj should be on *base-frame-id* coordinates
+          ;; (send *pr2* :angle-vector av)
+          ))
+      )
     ))
 
 (defun start-subscribe (tf-force obj &optional (topic *detection-topic*))

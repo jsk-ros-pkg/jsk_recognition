@@ -72,7 +72,7 @@
   (ros::ros-info "stop subscribe ~A" topic)
   (ros::unsubscribe topic))
 
-(defun check-detection (&key (timeout 10) (type nil) (tf-force nil)
+(defun check-detection (&key (timeout 10) ((:type atype) nil) (tf-force nil)
                              (diff-position 10.0)
                              (diff-rotation 1) ;; radian
                              (single nil) (speak t)
@@ -82,7 +82,7 @@
                              ((:target-object target-obj) (make-cube 60 60 60)))
   (let ((tgt-cds (send target-obj :copy-worldcoords)))
     (send target-obj :reset-coords)
-    (setf (get target-obj :type) type)
+    (setf (get target-obj :type) atype)
     (when speak-name
       (send target-obj :speak-name speak-name))
     (when speak
@@ -100,7 +100,7 @@
     (let* (current-object-coords
            previous-object-coords
            (start-time (ros::time-now)) (detect-object-list))
-      (ros::ros-info "check (timeout=~A, type=~A, tf-force=~A)" timeout type tf-force)
+      (ros::ros-info "check (timeout=~A, type=~A, tf-force=~A)" timeout atype tf-force)
       (while (ros::ok)
         (send *ri* :ros-wait 0.0 :spin t
               :func-before-throw #'(lambda (sl) (stop-subscribe detection-topic))) ;; attention-check ...  ;; target-obj was updated in objectdetection
@@ -167,8 +167,8 @@
             (send *ri* :ros-wait 0.0 :func-before-throw
                   #'(lambda (sl) (stop-subscribe detection-topic))) ;; attention-check ...
             (cond
-             ((or (not (stringp type))
-                  (substringp type (send target-obj :name))) ;; found target
+             ((or (not (stringp atype))
+                  (substringp atype (send target-obj :name))) ;; found target
               (ros::ros-info (format nil "ok - obj-type(~a)"  target-obj))
               (if (and (boundp '*irtviewer*) x::*display* (/= x::*display* 0))
                   (send *irtviewer* :draw-objects))

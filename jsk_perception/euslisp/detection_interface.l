@@ -20,12 +20,13 @@
   (:frame_id (&optional f) (if f (setf (get self :frame_id) f)) (get self :frame_id)))
 
 (defun objectdetection (force target-obj msg)
-  (let ((obj-lst (car (send msg :objects)))
+  (let ((obj-lst (send msg :objects))
         ;;(av (send *pr2* :angle-vector))
         (frame (send msg :header :frame_id))
         (tp (get target-obj :type))
         stamp trans)
-    (ros::ros-info "object detection callback target ~A, frame ~A, object ~A" tp frame (send obj :type))
+    (ros::ros-info "object detection callback target ~A, frame ~A, object ~A"
+                   tp frame target-obj)
     (dolist (obj obj-lst)
       (when (or (not (stringp tp))
                 (substringp tp (send obj :type))) ;; found target

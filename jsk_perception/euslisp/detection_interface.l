@@ -25,8 +25,8 @@
         (frame (send msg :header :frame_id))
         (tp (get target-obj :type))
         stamp trans)
-    (ros::ros-info "object detection callback target ~A, frame ~A, object ~A"
-                   tp frame target-obj)
+    (ros::ros-info "object detection callback target ~A(~A), frame ~A, object ~A"
+                   tp (stringp tp) frame target-obj)
     (dolist (obj obj-lst)
       (when (or (not (stringp tp))
                 (substringp tp (send obj :type))) ;; found target
@@ -145,7 +145,7 @@
                                            :lifetime marker-life :id 2)
                                           ))))
 
-          (ros::ros-info "object detected ~A diff-pos:~A, diff-rot:~A"
+          (ros::ros-info "check detected ~A diff-pos:~A, diff-rot:~A"
                          (send target-obj :name)
                          (if previous-object-coords
                              (norm (send previous-object-coords

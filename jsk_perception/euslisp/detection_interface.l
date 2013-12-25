@@ -19,7 +19,7 @@
   (:stamp (&optional s) (if s (setf (get self :stamp) s)) (get self :stamp))
   (:frame_id (&optional f) (if f (setf (get self :frame_id) f)) (get self :frame_id)))
 
-(defun objectdetection (force target-obj msg)
+(defun detection-interface-objectdetection (force target-obj msg)
   (let ((obj-lst (send msg :objects))
         ;;(av (send *pr2* :angle-vector))
         (frame (send msg :header :frame_id))
@@ -67,7 +67,8 @@
 (defun start-detection-interface-subscribe (tf-force obj &optional (topic *detection-topic*))
   (ros::ros-info "start subscribe ~A" topic)
   (ros::subscribe topic
-                  posedetection_msgs::ObjectDetection #'objectdetection tf-force obj))
+                  posedetection_msgs::ObjectDetection
+                  #'detection-interface-objectdetection tf-force obj))
 (defun stop-detection-interface-subscribe (&optional (topic *detection-topic*))
   (ros::ros-info "stop subscribe ~A" topic)
   (ros::unsubscribe topic))

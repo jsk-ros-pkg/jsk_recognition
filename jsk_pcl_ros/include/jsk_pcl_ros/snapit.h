@@ -1,3 +1,4 @@
+// -*- mode: C++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
@@ -32,39 +33,46 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#ifndef JSK_PCL_ROS_SNAPIT_H_
+#define JSK_PCL_ROS_SNAPIT_H_
 
-#include "jsk_pcl_ros/centroid_publisher.h"
-#include <pluginlib/class_list_macros.h>
+#include <ros/ros.h>
 
+#include <pcl/point_types.h>
+#include <pcl_ros/pcl_nodelet.h>
 
-#include <pcl/common/centroid.h>
+#include "jsk_pcl_ros/CallSnapIt.h"
+#include <tf/transform_listener.h>
 
 namespace jsk_pcl_ros
 {
-  void CentroidPublisher::extract(const sensor_msgs::PointCloud2ConstPtr &input)
+  class SnapIt: public pcl_ros::PCLNodelet
   {
-    pcl::PointCloud<pcl::PointXYZ> cloud_xyz;
-    pcl::fromROSMsg(*input, cloud_xyz);
-    Eigen::Vector4f center;
-    pcl::compute3DCentroid(cloud_xyz, center);
-    tf::Transform transform;
-    transform.setOrigin(tf::Vector3(center[0], center[1], center[2]));
-    transform.setRotation(tf::createIdentityQuaternion());
-    br.sendTransform(tf::StampedTransform(transform, input->header.stamp,
-                                          input->header.frame_id, frame));
-  }
-  
-  void CentroidPublisher::onInit(void)
-  {
-    PCLNodelet::onInit();
-    sub_input_ = pnh_->subscribe("input", 1, &CentroidPublisher::extract, this);
-    if (!pnh_->getParam("frame", frame))
-    {
-      ROS_WARN("~frame is not specified, using %s", getName().c_str());
-      frame = getName();
-    }
-  }
+  public:
+    SnapIt();
+    virtual ~SnapIt();
+    virtual void onInit();
+  protected:
+    typedef std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f> > EigenVector3fVector;
+    virtual void inputCallback(const sensor_msgs::PointCloud2::ConstPtr& input);
+    virtual bool snapitCallback(jsk_pcl_ros::CallSnapIt::Request& req,
+                                jsk_pcl_ros::CallSnapIt::Response& res);
+    virtual bool extractPointsInsidePlanePole(geometry_msgs::PolygonStamped target_plane,
+                                              pcl::PointIndices::Ptr inliers,
+                                              EigenVector3fVector& points,
+                                              Eigen::Vector3f &n,
+                                              Eigen::Vector3f &p);
+    virtual bool checkPointInsidePlane(EigenVector3fVector &plane_points,
+                                       Eigen::Vector3f normal,
+                                       Eigen::Vector3f point);
+    ros::Subscriber sub_input_;
+    ros::Publisher debug_candidate_points_pub_;
+    ros::ServiceServer call_snapit_srv_;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr input_;
+    boost::shared_ptr<tf::TransformListener> tf_listener_;
+    std_msgs::Header input_header_;
+    std::string input_frame_id_;
+  };
 }
 
-typedef jsk_pcl_ros::CentroidPublisher CentroidPublisher;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, CentroidPublisher, CentroidPublisher, nodelet::Nodelet);
+#endif 

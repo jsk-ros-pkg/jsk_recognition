@@ -52,6 +52,7 @@ rosbuild_add_library (jsk_pcl_ros
   src/lazy_concatenater_nodelet.cpp
   src/voxel_grid_downsample_manager_nodelet.cpp
   src/voxel_grid_downsample_decoder_nodelet.cpp
+  src/snapit_nodelet.cpp
 )
 
 rosbuild_add_compile_flags (jsk_pcl_ros ${SSE_FLAGS})
@@ -59,10 +60,11 @@ rosbuild_link_boost (jsk_pcl_ros system)
 #target_link_libraries (jsk_pcl_ros tbb pcl_ros_io pcl_ros_features pcl_ros_filters pcl_ros_segmentation pcl_ros_surface)
 target_link_libraries (jsk_pcl_ros tbb pcl_ros_io pcl_ros_filters pcl_ros_tf)
 
-#uncomment if you have defined messages
-rosbuild_genmsg()
 #uncomment if you have defined services
 rosbuild_gensrv()
+
+#uncomment if you have defined messages
+rosbuild_genmsg()
 
 rosbuild_add_executable(pointcloud_screenpoint src/pointcloud_screenpoint.cpp)
 rosbuild_add_executable(centroid_publisher src/centroid_publisher.cpp)
@@ -76,6 +78,7 @@ rosbuild_add_executable(pointcloud_flowrate src/pointcloud_flowrate.cpp)
 rosbuild_add_executable(lazy_concatenater src/lazy_concatenater.cpp)
 rosbuild_add_executable(voxel_grid_downsample_manager src/voxel_grid_downsample_manager.cpp)
 rosbuild_add_executable(voxel_grid_downsample_decoder src/voxel_grid_downsample_decoder.cpp)
+rosbuild_add_executable(snapit src/snapit.cpp)
 # roslaunch documentation
 rosbuild_find_ros_package("jsk_tools")
 execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} python ${jsk_tools_PACKAGE_PATH}/bin/launchdoc-generator.py ${PROJECT_NAME} --output_dir=./build --nomakefile RESULT_VARIABLE _make_failed)

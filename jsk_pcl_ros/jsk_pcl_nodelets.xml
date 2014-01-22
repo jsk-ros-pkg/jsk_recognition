@@ -101,4 +101,10 @@
       decode donwsampled pointcloud
     </description>
   </class>
+  <class name="jsk_pcl/Snapit" type="SnapIt"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      snapit nodelet node
+    </description>
+  </class>
 </library>

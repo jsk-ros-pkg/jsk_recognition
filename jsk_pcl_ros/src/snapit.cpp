@@ -32,39 +32,20 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#include <ros/ros.h>
+#include <nodelet/loader.h>
 
-#include "jsk_pcl_ros/centroid_publisher.h"
-#include <pluginlib/class_list_macros.h>
-
-
-#include <pcl/common/centroid.h>
-
-namespace jsk_pcl_ros
+int main(int argc, char **argv)
 {
-  void CentroidPublisher::extract(const sensor_msgs::PointCloud2ConstPtr &input)
-  {
-    pcl::PointCloud<pcl::PointXYZ> cloud_xyz;
-    pcl::fromROSMsg(*input, cloud_xyz);
-    Eigen::Vector4f center;
-    pcl::compute3DCentroid(cloud_xyz, center);
-    tf::Transform transform;
-    transform.setOrigin(tf::Vector3(center[0], center[1], center[2]));
-    transform.setRotation(tf::createIdentityQuaternion());
-    br.sendTransform(tf::StampedTransform(transform, input->header.stamp,
-                                          input->header.frame_id, frame));
-  }
-  
-  void CentroidPublisher::onInit(void)
-  {
-    PCLNodelet::onInit();
-    sub_input_ = pnh_->subscribe("input", 1, &CentroidPublisher::extract, this);
-    if (!pnh_->getParam("frame", frame))
-    {
-      ROS_WARN("~frame is not specified, using %s", getName().c_str());
-      frame = getName();
-    }
-  }
-}
+  ros::init(argc, argv, "snapit");
 
-typedef jsk_pcl_ros::CentroidPublisher CentroidPublisher;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, CentroidPublisher, CentroidPublisher, nodelet::Nodelet);
+  // Shared parameters to be propagated to nodelet private namespaces
+  nodelet::Loader manager(true); // Don't bring up the manager ROS API
+  nodelet::M_string remappings;
+  nodelet::V_string my_argv;
+
+  manager.load(ros::this_node::getName(), "jsk_pcl/SnapIt", remappings, my_argv);
+
+  ros::spin();
+  return 0;
+}

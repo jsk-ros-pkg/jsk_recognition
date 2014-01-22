@@ -37,7 +37,7 @@
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "centroid_publisher");
+  ros::init(argc, argv, "flowrate");
 
   // Shared parameters to be propagated to nodelet private namespaces
   nodelet::Loader manager(true); // Don't bring up the manager ROS API

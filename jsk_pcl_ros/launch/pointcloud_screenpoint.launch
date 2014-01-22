@@ -14,7 +14,7 @@
 
   <arg unless="$(arg USE_DEPTH_CREATER)"
        name="inpoints" value="$(arg points)" />
-  <arg if    ="$(arg USE_DEPTH_CREATER)"
+  <arg if="$(arg USE_DEPTH_CREATER)"
        name="inpoints" value="/screenpoint_manager/points" />
 
   <include if="$(arg LAUNCH_OPENNI)"

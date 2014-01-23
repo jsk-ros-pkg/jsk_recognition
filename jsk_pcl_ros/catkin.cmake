@@ -3,11 +3,16 @@ cmake_minimum_required(VERSION 2.8.3)
 project(jsk_pcl_ros)
 # Load catkin and all dependencies required for this package
 # TODO: remove all from COMPONENTS that are not catkin packages.
-find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros nodelet message_generation genmsg pcl_msgs)
+if($ENV{ROS_DISTRO} STREQUAL "groovy")
+  set(PCL_MSGS pcl)
+else()
+  set(PCL_MSGS pcl_msgs) ## hydro and later
+endif()
+find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros nodelet message_generation genmsg ${PCL_MSGS})
 
 add_message_files(FILES IndicesArray.msg PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg)
 add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv SetPointCloud2.srv)
-generate_messages(DEPENDENCIES pcl_msgs)
+generate_messages(DEPENDENCIES ${PCL_MSGS})
 
 # TODO: fill in what other packages will need to use this package
 ## LIBRARIES: libraries you create in this project that dependent projects also need
@@ -26,7 +31,7 @@ generate_dynamic_reconfigure_options(
 
 catkin_package(
     DEPENDS pcl
-    CATKIN-DEPENDS pcl_ros message_runtime pcl_msgs
+    CATKIN-DEPENDS pcl_ros message_runtime ${PCL_MSGS}
     INCLUDE_DIRS include
     LIBRARIES jsk_pcl_ros
 )

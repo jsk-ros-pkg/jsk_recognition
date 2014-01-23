@@ -218,6 +218,13 @@ namespace jsk_pcl_ros
     seg.setMethodType (pcl::SAC_RANSAC);
     seg.setDistanceThreshold (0.01);
     seg.setInputCloud(points_inside_pole);
+    seg.setAxis(n);
+    if (req.request.eps_angle != 0.0) {
+      seg.setEpsAngle(req.request.eps_angle);
+    }
+    else {
+      seg.setEpsAngle(0.2);
+    }
     seg.segment (*plane_inliers, *plane_coefficients);
 
     if (plane_inliers->indices.size () == 0)

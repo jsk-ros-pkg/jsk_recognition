@@ -67,6 +67,8 @@ namespace jsk_pcl_ros
                                        Eigen::Vector3f point);
     ros::Subscriber sub_input_;
     ros::Publisher debug_candidate_points_pub_;
+    ros::Publisher debug_centroid_pub_;
+    ros::Publisher debug_centroid_after_trans_pub_;
     ros::ServiceServer call_snapit_srv_;
     pcl::PointCloud<pcl::PointXYZ>::Ptr input_;
     boost::shared_ptr<tf::TransformListener> tf_listener_;

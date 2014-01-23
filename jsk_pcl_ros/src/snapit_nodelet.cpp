@@ -42,7 +42,7 @@
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
-
+#include <eigen_conversions/eigen_msg.h>
 
 namespace jsk_pcl_ros
 {
@@ -56,6 +56,8 @@ namespace jsk_pcl_ros
     tf_listener_.reset(new tf::TransformListener);
     input_.reset(new pcl::PointCloud<pcl::PointXYZ>);
     debug_candidate_points_pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("debug_candidate_points", 10);
+    debug_centroid_pub_ = pnh_->advertise<geometry_msgs::PointStamped>("debug_centroid", 10);
+    debug_centroid_after_trans_pub_ = pnh_->advertise<geometry_msgs::PointStamped>("debug_transformed_centroid", 10);
     sub_input_ = pnh_->subscribe("input", 1, &SnapIt::inputCallback, this);
     call_snapit_srv_ = pnh_->advertiseService("snapit", &SnapIt::snapitCallback,
                                               this);
@@ -250,26 +252,25 @@ namespace jsk_pcl_ros
     Eigen::Vector3f C = trans * C_orig;
     float alpha = - plane_coefficients->values[3] - n_prime.dot(C);
     
-    //Eigen::Vector3f C_new = C + alpha * n_prime;
     Eigen::Vector3f C_new = alpha * n_prime + C;
 
-    Eigen::Affine3f A = Eigen::Translation3f(C_new - C) * trans;
-    Eigen::Quaternionf final_rot(A.rotation());
-    Eigen::Translation3f final_trans(A.translation());
-    res.transformation.orientation.x = final_rot.x();
-    res.transformation.orientation.y = final_rot.y();
-    res.transformation.orientation.z = final_rot.z();
-    res.transformation.orientation.w = final_rot.w();
-    
-    res.transformation.position.x = final_trans.x();
-    res.transformation.position.y = final_trans.y();
-    res.transformation.position.z = final_trans.z();
+    Eigen::Affine3f A = Eigen::Translation3f(C) * Eigen::Translation3f(C_new - C) * trans * Eigen::Translation3f(C_orig).inverse();
+    tf::poseEigenToMsg((Eigen::Affine3d)A, res.transformation);
 
+    geometry_msgs::PointStamped centroid;
+    centroid.point.x = C_orig[0];
+    centroid.point.y = C_orig[1];
+    centroid.point.z = C_orig[2];
+    centroid.header = target_plane.header;
+    debug_centroid_pub_.publish(centroid);
+
+    geometry_msgs::PointStamped centroid_transformed;
+    centroid_transformed.point.x = C_new[0];
+    centroid_transformed.point.y = C_new[1];
+    centroid_transformed.point.z = C_new[2];
+    centroid_transformed.header = target_plane.header;
+    debug_centroid_after_trans_pub_.publish(centroid_transformed);
     
-    if (isnan(alpha)) {
-      NODELET_ERROR("alpha == nan");
-      return false;
-    }
     return true;
   }
   

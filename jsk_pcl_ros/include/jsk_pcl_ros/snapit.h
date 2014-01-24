@@ -57,11 +57,24 @@ namespace jsk_pcl_ros
     virtual void inputCallback(const sensor_msgs::PointCloud2::ConstPtr& input);
     virtual bool snapitCallback(jsk_pcl_ros::CallSnapIt::Request& req,
                                 jsk_pcl_ros::CallSnapIt::Response& res);
+    virtual bool processModelPlane(jsk_pcl_ros::CallSnapIt::Request& req,
+                                   jsk_pcl_ros::CallSnapIt::Response& res);
+    virtual bool processModelCylinder(jsk_pcl_ros::CallSnapIt::Request& req,
+                                      jsk_pcl_ros::CallSnapIt::Response& res);
     virtual bool extractPointsInsidePlanePole(geometry_msgs::PolygonStamped target_plane,
                                               pcl::PointIndices::Ptr inliers,
                                               EigenVector3fVector& points,
                                               Eigen::Vector3f &n,
                                               Eigen::Vector3f &p);
+    virtual double distanceAlongWithLine(const Eigen::Vector4f& point, const Eigen::Vector4f& center, const Eigen::Vector4f direction);
+    virtual bool extractPointsInsideCylinder(const geometry_msgs::PointStamped& center,
+                                             const geometry_msgs::Vector3Stamped direction,
+                                             const double radius,
+                                             const double height,
+                                             pcl::PointIndices::Ptr inliers,
+                                             Eigen::Vector3f &n,
+                                             Eigen::Vector3f &C_orig,
+                                             const double fat_factor);
     virtual bool checkPointInsidePlane(EigenVector3fVector &plane_points,
                                        Eigen::Vector3f normal,
                                        Eigen::Vector3f point);

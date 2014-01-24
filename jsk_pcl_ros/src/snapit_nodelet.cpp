@@ -42,6 +42,9 @@
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
+#include <pcl/common/distances.h>
+#include <pcl/features/normal_3d.h>
+
 #include <eigen_conversions/eigen_msg.h>
 
 namespace jsk_pcl_ros
@@ -171,10 +174,9 @@ namespace jsk_pcl_ros
     //ROS_INFO("%lu points inside the plane", inliers->indices.size());
     return true;
   }
-  
-  bool SnapIt::snapitCallback(jsk_pcl_ros::CallSnapIt::Request& req,
-                              jsk_pcl_ros::CallSnapIt::Response& res)
-  {
+
+  bool SnapIt::processModelPlane(jsk_pcl_ros::CallSnapIt::Request& req,
+                                 jsk_pcl_ros::CallSnapIt::Response& res) {
     // first build plane model
     geometry_msgs::PolygonStamped target_plane = req.request.target_plane;
     // check the size of the points
@@ -279,6 +281,170 @@ namespace jsk_pcl_ros
     debug_centroid_after_trans_pub_.publish(centroid_transformed);
     
     return true;
+  }
+
+  double SnapIt::distanceAlongWithLine(const Eigen::Vector4f& point, const Eigen::Vector4f& center, const Eigen::Vector4f direction) {
+    return fabs((point - center).dot(direction));
+  }
+  
+  bool SnapIt::extractPointsInsideCylinder(const geometry_msgs::PointStamped& center, const geometry_msgs::Vector3Stamped direction,
+                                           const double radius,
+                                           const double height,
+                                           pcl::PointIndices::Ptr inliers,
+                                           Eigen::Vector3f &n,
+                                           Eigen::Vector3f &C_orig,
+                                           const double fat_factor) {
+    // resolve tf
+    geometry_msgs::PointStamped transformed_center;
+    geometry_msgs::Vector3Stamped transformed_direction;
+    tf_listener_->transformPoint(input_frame_id_, center, transformed_center);
+    tf_listener_->transformVector(input_frame_id_, direction, transformed_direction);
+    Eigen::Vector4f center_eigen, direction_eigen;
+    center_eigen[0] = transformed_center.point.x;
+    center_eigen[1] = transformed_center.point.y;
+    center_eigen[2] = transformed_center.point.z;
+    for (size_t i = 0; i < 3; i++) {
+      C_orig[i] = center_eigen[i];
+    }
+    direction_eigen[0] = transformed_direction.vector.x;
+    direction_eigen[1] = transformed_direction.vector.y;
+    direction_eigen[2] = transformed_direction.vector.z;
+    double fat_radius = radius * fat_factor;
+    for (size_t i = 0; i < input_->points.size(); i++) {
+      double distance = pcl::sqrPointToLineDistance (input_->points[i].getVector4fMap(), center_eigen, direction_eigen);
+      if (sqrt(distance) < fat_radius * 3.0) {
+        // compute the distance toward z-direction
+        if (distanceAlongWithLine(input_->points[i].getVector4fMap(), center_eigen, direction_eigen) < height * fat_factor / 2.0) {
+          inliers->indices.push_back(i);
+        }
+      }
+    }
+    for (size_t i = 0; i < 3; i++) {
+      n[i] = direction_eigen[i];
+    }
+    
+    return true;
+  }
+  
+  
+  bool SnapIt::processModelCylinder(jsk_pcl_ros::CallSnapIt::Request& req,
+                                    jsk_pcl_ros::CallSnapIt::Response& res) {
+    pcl::PointCloud<pcl::PointXYZ>::Ptr candidate_points (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
+    Eigen::Vector3f n, C_orig;
+    if (!extractPointsInsideCylinder(req.request.center,
+                                     req.request.direction,
+                                     req.request.radius,
+                                     req.request.height,
+                                     inliers, n, C_orig,
+                                     1.3)) {
+      return false;
+    }
+    if (inliers->indices.size() < 3) {
+      NODELET_ERROR("not enough points inside of the target_plane");
+      return false;
+    }
+
+    geometry_msgs::PointStamped centroid;
+    centroid.point.x = C_orig[0];
+    centroid.point.y = C_orig[1];
+    centroid.point.z = C_orig[2];
+    centroid.header = req.request.header;
+    
+    
+    pcl::ExtractIndices<pcl::PointXYZ> extract;
+    extract.setInputCloud(input_);
+    extract.setIndices(inliers);
+    extract.filter(*candidate_points);
+    sensor_msgs::PointCloud2::Ptr debug_cloud(new sensor_msgs::PointCloud2);
+    // publish for debug
+    pcl::toROSMsg(*candidate_points, *debug_cloud);
+    debug_cloud->header = input_header_;
+    debug_candidate_points_pub_.publish(debug_cloud);
+
+    // normal estimation
+    pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
+    pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ> ());
+    ne.setSearchMethod (tree);
+    ne.setInputCloud (candidate_points);
+    ne.setKSearch (50);
+    ne.compute (*cloud_normals);
+    
+    
+    // segmentation
+    pcl::ModelCoefficients::Ptr cylinder_coefficients (new pcl::ModelCoefficients);
+    pcl::PointIndices::Ptr cylinder_inliers (new pcl::PointIndices);
+    // Create the segmentation object
+    pcl::SACSegmentationFromNormals<pcl::PointXYZ, pcl::Normal> seg;
+    // Optional
+    seg.setOptimizeCoefficients (true);
+    // Mandatory
+    seg.setModelType (pcl::SACMODEL_CYLINDER);
+    seg.setMethodType (pcl::SAC_RANSAC);
+    seg.setRadiusLimits (0.01, req.request.radius * 1.2);
+    seg.setDistanceThreshold (0.05);
+    
+    seg.setInputCloud(candidate_points);
+    seg.setInputNormals (cloud_normals);
+    seg.setMaxIterations (10000);
+    seg.setNormalDistanceWeight (0.01);
+    seg.setAxis(n);
+    if (req.request.eps_angle != 0.0) {
+      seg.setEpsAngle(req.request.eps_angle);
+    }
+    else {
+      seg.setEpsAngle(0.35);
+    }
+    seg.segment (*cylinder_inliers, *cylinder_coefficients);
+    //std::cerr << "Cylinder coefficients: " << *cylinder_coefficients << std::endl;
+    if (cylinder_inliers->indices.size () == 0)
+    {
+      NODELET_ERROR ("Could not estimate a cylinder model for the given dataset.");
+      return false;
+    }
+    debug_centroid_pub_.publish(centroid);
+    Eigen::Vector3f n_prime;
+    Eigen::Vector3f C_new;
+    for (size_t i = 0; i < 3; i++) {
+      C_new[i] = cylinder_coefficients->values[i];
+      n_prime[i] = cylinder_coefficients->values[i + 3];
+    }
+    
+    Eigen::Vector3f n_cross = n.cross(n_prime);
+    if (n.dot(n_prime)) {
+      n_cross = - n_cross;
+    }
+    double theta = asin(n_cross.norm());
+    Eigen::Quaternionf trans (Eigen::AngleAxisf(theta, n_cross.normalized()));
+    Eigen::Vector3f C = trans * C_orig;
+    Eigen::Affine3f A = Eigen::Translation3f(C) * Eigen::Translation3f(C_new - C) * trans * Eigen::Translation3f(C_orig).inverse();
+    tf::poseEigenToMsg((Eigen::Affine3d)A, res.transformation);
+
+    geometry_msgs::PointStamped centroid_transformed;
+    centroid_transformed.point.x = C_new[0];
+    centroid_transformed.point.y = C_new[1];
+    centroid_transformed.point.z = C_new[2];
+    centroid_transformed.header = req.request.header;
+    debug_centroid_after_trans_pub_.publish(centroid_transformed);
+    
+    return true;
+  }
+  
+  
+  
+  bool SnapIt::snapitCallback(jsk_pcl_ros::CallSnapIt::Request& req,
+                              jsk_pcl_ros::CallSnapIt::Response& res)
+  {
+    switch (req.request.model_type) {
+    case jsk_pcl_ros::SnapItRequest::MODEL_PLANE:
+      return processModelPlane(req, res);
+    case jsk_pcl_ros::SnapItRequest::MODEL_CYLINDER:
+      return processModelCylinder(req, res);
+    default:
+      ROS_FATAL_STREAM("unknown model_type: " << req.request.model_type);
+      return false;
+    }
   }
   
   

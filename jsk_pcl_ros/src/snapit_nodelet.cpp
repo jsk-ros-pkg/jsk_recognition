@@ -44,7 +44,7 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/common/distances.h>
 #include <pcl/features/normal_3d.h>
-
+#include <visualization_msgs/Marker.h>
 #include <eigen_conversions/eigen_msg.h>
 
 namespace jsk_pcl_ros
@@ -59,7 +59,10 @@ namespace jsk_pcl_ros
     tf_listener_.reset(new tf::TransformListener);
     input_.reset(new pcl::PointCloud<pcl::PointXYZ>);
     debug_candidate_points_pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("debug_candidate_points", 10);
+    debug_candidate_points_pub2_ = pnh_->advertise<sensor_msgs::PointCloud2>("debug_candidate_points2", 10);
+    debug_candidate_points_pub3_ = pnh_->advertise<sensor_msgs::PointCloud2>("debug_candidate_points3", 10);
     debug_centroid_pub_ = pnh_->advertise<geometry_msgs::PointStamped>("debug_centroid", 10);
+    marker_pub_ = pnh_->advertise<visualization_msgs::Marker>("snapit_marker", 10);
     debug_centroid_after_trans_pub_ = pnh_->advertise<geometry_msgs::PointStamped>("debug_transformed_centroid", 10);
     sub_input_ = pnh_->subscribe("input", 1, &SnapIt::inputCallback, this);
     call_snapit_srv_ = pnh_->advertiseService("snapit", &SnapIt::snapitCallback,
@@ -175,6 +178,29 @@ namespace jsk_pcl_ros
     return true;
   }
 
+  void SnapIt::extractPlanePoints(pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+                                  pcl::PointIndices::Ptr out_inliers,
+                                  pcl::ModelCoefficients::Ptr out_coefficients,
+                                  Eigen::Vector3f normal,
+                                  double eps_angle) {
+    pcl::SACSegmentation<pcl::PointXYZ> seg;
+    // Optional
+    seg.setOptimizeCoefficients (true);
+    // Mandatory
+    seg.setModelType (pcl::SACMODEL_PLANE);
+    seg.setMethodType (pcl::SAC_RANSAC);
+    seg.setDistanceThreshold (0.01);
+    seg.setInputCloud(input);
+    seg.setAxis(normal);
+    if (eps_angle != 0.0) {
+      seg.setEpsAngle(eps_angle);
+    }
+    else {
+      seg.setEpsAngle(0.2);
+    }
+    seg.segment (*out_inliers, *out_coefficients);
+  }
+  
   bool SnapIt::processModelPlane(jsk_pcl_ros::CallSnapIt::Request& req,
                                  jsk_pcl_ros::CallSnapIt::Response& res) {
     // first build plane model
@@ -201,33 +227,15 @@ namespace jsk_pcl_ros
     extract.setInputCloud(input_);
     extract.setIndices(inliers);
     extract.filter(*points_inside_pole);
-    sensor_msgs::PointCloud2::Ptr debug_cloud(new sensor_msgs::PointCloud2);
-    // publish for debug
-    pcl::toROSMsg(*points_inside_pole, *debug_cloud);
-    debug_cloud->header = input_header_;
-    debug_candidate_points_pub_.publish(debug_cloud);
 
+    publishPointCloud(debug_candidate_points_pub_, points_inside_pole);
+    
     // estimate plane
     
     pcl::ModelCoefficients::Ptr plane_coefficients (new pcl::ModelCoefficients);
     pcl::PointIndices::Ptr plane_inliers (new pcl::PointIndices);
-    // Create the segmentation object
-    pcl::SACSegmentation<pcl::PointXYZ> seg;
-    // Optional
-    seg.setOptimizeCoefficients (true);
-    // Mandatory
-    seg.setModelType (pcl::SACMODEL_PLANE);
-    seg.setMethodType (pcl::SAC_RANSAC);
-    seg.setDistanceThreshold (0.01);
-    seg.setInputCloud(points_inside_pole);
-    seg.setAxis(n);
-    if (req.request.eps_angle != 0.0) {
-      seg.setEpsAngle(req.request.eps_angle);
-    }
-    else {
-      seg.setEpsAngle(0.2);
-    }
-    seg.segment (*plane_inliers, *plane_coefficients);
+    extractPlanePoints(points_inside_pole, plane_inliers, plane_coefficients,
+                       n, req.request.eps_angle);
 
     if (plane_inliers->indices.size () == 0)
     {
@@ -325,7 +333,13 @@ namespace jsk_pcl_ros
     
     return true;
   }
-  
+
+  void SnapIt::publishPointCloud(ros::Publisher pub, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud) {
+    sensor_msgs::PointCloud2::Ptr ros_cloud(new sensor_msgs::PointCloud2);
+    pcl::toROSMsg(*cloud, *ros_cloud);
+    cloud->header = input_header_;
+    pub.publish(ros_cloud);
+  }
   
   bool SnapIt::processModelCylinder(jsk_pcl_ros::CallSnapIt::Request& req,
                                     jsk_pcl_ros::CallSnapIt::Response& res) {
@@ -344,7 +358,7 @@ namespace jsk_pcl_ros
       NODELET_ERROR("not enough points inside of the target_plane");
       return false;
     }
-
+    
     geometry_msgs::PointStamped centroid;
     centroid.point.x = C_orig[0];
     centroid.point.y = C_orig[1];
@@ -356,18 +370,35 @@ namespace jsk_pcl_ros
     extract.setInputCloud(input_);
     extract.setIndices(inliers);
     extract.filter(*candidate_points);
-    sensor_msgs::PointCloud2::Ptr debug_cloud(new sensor_msgs::PointCloud2);
-    // publish for debug
-    pcl::toROSMsg(*candidate_points, *debug_cloud);
-    debug_cloud->header = input_header_;
-    debug_candidate_points_pub_.publish(debug_cloud);
+    
+    publishPointCloud(debug_candidate_points_pub_, candidate_points);
 
+
+    // first, to remove plane we estimate the plane
+    pcl::ModelCoefficients::Ptr plane_coefficients (new pcl::ModelCoefficients);
+    pcl::PointIndices::Ptr plane_inliers (new pcl::PointIndices);
+    extractPlanePoints(candidate_points, plane_inliers, plane_coefficients,
+                       n, req.request.eps_angle);
+    if (plane_inliers->indices.size() == 0) {
+      NODELET_ERROR ("plane estimation failed");
+      return false;
+    }
+
+    // remove the points blonging to the plane
+    pcl::PointCloud<pcl::PointXYZ>::Ptr points_inside_pole_wo_plane (new pcl::PointCloud<pcl::PointXYZ>);
+    extract.setInputCloud (candidate_points);
+    extract.setIndices (plane_inliers);
+    extract.setNegative (true);
+    extract.filter (*points_inside_pole_wo_plane);
+
+    publishPointCloud(debug_candidate_points_pub2_, points_inside_pole_wo_plane);
+    
     // normal estimation
     pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
     pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ> ());
     ne.setSearchMethod (tree);
-    ne.setInputCloud (candidate_points);
+    ne.setInputCloud (points_inside_pole_wo_plane);
     ne.setKSearch (50);
     ne.compute (*cloud_normals);
     
@@ -385,10 +416,10 @@ namespace jsk_pcl_ros
     seg.setRadiusLimits (0.01, req.request.radius * 1.2);
     seg.setDistanceThreshold (0.05);
     
-    seg.setInputCloud(candidate_points);
+    seg.setInputCloud(points_inside_pole_wo_plane);
     seg.setInputNormals (cloud_normals);
     seg.setMaxIterations (10000);
-    seg.setNormalDistanceWeight (0.01);
+    seg.setNormalDistanceWeight (0.1);
     seg.setAxis(n);
     if (req.request.eps_angle != 0.0) {
       seg.setEpsAngle(req.request.eps_angle);
@@ -403,13 +434,41 @@ namespace jsk_pcl_ros
       NODELET_ERROR ("Could not estimate a cylinder model for the given dataset.");
       return false;
     }
+
     debug_centroid_pub_.publish(centroid);
+    
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cylinder_points (new pcl::PointCloud<pcl::PointXYZ>);
+    extract.setInputCloud (points_inside_pole_wo_plane);
+    extract.setIndices (cylinder_inliers);
+    extract.setNegative (false);
+    extract.filter (*cylinder_points);
+
+    publishPointCloud(debug_candidate_points_pub3_, cylinder_points);
+
     Eigen::Vector3f n_prime;
     Eigen::Vector3f C_new;
     for (size_t i = 0; i < 3; i++) {
       C_new[i] = cylinder_coefficients->values[i];
       n_prime[i] = cylinder_coefficients->values[i + 3];
     }
+    
+    // inorder to compute centroid, we project all the points to the center line.
+    // and after that, get the minimum and maximum points in the coordinate system of the center line
+    double min_alpha = DBL_MAX;
+    double max_alpha = -DBL_MAX;
+    for (size_t i = 0; i < cylinder_points->points.size(); i++ ) {
+      pcl::PointXYZ q = cylinder_points->points[i];
+      double alpha = (q.getVector3fMap() - C_new).dot(n_prime);
+      if (alpha < min_alpha) {
+        min_alpha = alpha;
+      }
+      if (alpha > max_alpha) {
+        max_alpha = alpha;
+      }
+    }
+     
+    Eigen::Vector3f C_new_prime = C_new + (max_alpha + min_alpha) / 2.0 * n_prime;
+    
     
     Eigen::Vector3f n_cross = n.cross(n_prime);
     if (n.dot(n_prime)) {
@@ -418,13 +477,13 @@ namespace jsk_pcl_ros
     double theta = asin(n_cross.norm());
     Eigen::Quaternionf trans (Eigen::AngleAxisf(theta, n_cross.normalized()));
     Eigen::Vector3f C = trans * C_orig;
-    Eigen::Affine3f A = Eigen::Translation3f(C) * Eigen::Translation3f(C_new - C) * trans * Eigen::Translation3f(C_orig).inverse();
+    Eigen::Affine3f A = Eigen::Translation3f(C) * Eigen::Translation3f(C_new_prime - C) * trans * Eigen::Translation3f(C_orig).inverse();
     tf::poseEigenToMsg((Eigen::Affine3d)A, res.transformation);
 
     geometry_msgs::PointStamped centroid_transformed;
-    centroid_transformed.point.x = C_new[0];
-    centroid_transformed.point.y = C_new[1];
-    centroid_transformed.point.z = C_new[2];
+    centroid_transformed.point.x = C_new_prime[0];
+    centroid_transformed.point.y = C_new_prime[1];
+    centroid_transformed.point.z = C_new_prime[2];
     centroid_transformed.header = req.request.header;
     debug_centroid_after_trans_pub_.publish(centroid_transformed);
     

@@ -67,6 +67,10 @@ namespace jsk_pcl_ros
                                               Eigen::Vector3f &n,
                                               Eigen::Vector3f &p);
     virtual double distanceAlongWithLine(const Eigen::Vector4f& point, const Eigen::Vector4f& center, const Eigen::Vector4f direction);
+    virtual void extractPlanePoints(pcl::PointCloud<pcl::PointXYZ>::Ptr input, pcl::PointIndices::Ptr out_inliers,
+                                    pcl::ModelCoefficients::Ptr out_coefficients,
+                                    Eigen::Vector3f normal,
+                                    double eps_angle);
     virtual bool extractPointsInsideCylinder(const geometry_msgs::PointStamped& center,
                                              const geometry_msgs::Vector3Stamped direction,
                                              const double radius,
@@ -78,9 +82,13 @@ namespace jsk_pcl_ros
     virtual bool checkPointInsidePlane(EigenVector3fVector &plane_points,
                                        Eigen::Vector3f normal,
                                        Eigen::Vector3f point);
+    virtual void publishPointCloud(ros::Publisher pub, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
     ros::Subscriber sub_input_;
     ros::Publisher debug_candidate_points_pub_;
+    ros::Publisher debug_candidate_points_pub2_;
+    ros::Publisher debug_candidate_points_pub3_;
     ros::Publisher debug_centroid_pub_;
+    ros::Publisher marker_pub_;
     ros::Publisher debug_centroid_after_trans_pub_;
     ros::ServiceServer call_snapit_srv_;
     pcl::PointCloud<pcl::PointXYZ>::Ptr input_;

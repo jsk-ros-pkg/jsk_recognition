@@ -83,6 +83,8 @@ namespace jsk_pcl_ros
                                        Eigen::Vector3f normal,
                                        Eigen::Vector3f point);
     virtual void publishPointCloud(ros::Publisher pub, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
+    virtual void publishConvexHullMarker(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_hull);
+    
     ros::Subscriber sub_input_;
     ros::Publisher debug_candidate_points_pub_;
     ros::Publisher debug_candidate_points_pub2_;

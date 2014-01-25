@@ -44,6 +44,8 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/common/distances.h>
 #include <pcl/features/normal_3d.h>
+#include <pcl/surface/concave_hull.h>
+#include <pcl/common/centroid.h>
 #include <visualization_msgs/Marker.h>
 #include <eigen_conversions/eigen_msg.h>
 
@@ -60,7 +62,7 @@ namespace jsk_pcl_ros
     input_.reset(new pcl::PointCloud<pcl::PointXYZ>);
     debug_candidate_points_pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("debug_candidate_points", 10);
     debug_candidate_points_pub2_ = pnh_->advertise<sensor_msgs::PointCloud2>("debug_candidate_points2", 10);
-    debug_candidate_points_pub3_ = pnh_->advertise<sensor_msgs::PointCloud2>("debug_candidate_points3", 10);
+    debug_candidate_points_pub3_ = pnh_->advertise<sensor_msgs::PointCloud2>("debug_model_points", 10);
     debug_centroid_pub_ = pnh_->advertise<geometry_msgs::PointStamped>("debug_centroid", 10);
     marker_pub_ = pnh_->advertise<visualization_msgs::Marker>("snapit_marker", 10);
     debug_centroid_after_trans_pub_ = pnh_->advertise<geometry_msgs::PointStamped>("debug_transformed_centroid", 10);
@@ -178,6 +180,26 @@ namespace jsk_pcl_ros
     return true;
   }
 
+  void SnapIt::publishConvexHullMarker(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_hull) {
+    // publish marker
+    visualization_msgs::Marker marker;
+    marker.header = input_header_;
+    marker.type = visualization_msgs::Marker::LINE_STRIP;
+    for (size_t i = 0; i < cloud_hull->points.size(); i++) {
+      geometry_msgs::Point point;
+      point.x = cloud_hull->points[i].x;
+      point.y = cloud_hull->points[i].y;
+      point.z = cloud_hull->points[i].z;
+      marker.points.push_back(point);
+    }
+    marker.points.push_back(marker.points[0]);
+    marker.pose.orientation.w = 1.0;
+    marker.color.g = 1.0;
+    marker.color.a = 1.0;
+    marker.scale.x = 0.01;      // 1cm width
+    marker_pub_.publish(marker);
+  }
+  
   void SnapIt::extractPlanePoints(pcl::PointCloud<pcl::PointXYZ>::Ptr input,
                                   pcl::PointIndices::Ptr out_inliers,
                                   pcl::ModelCoefficients::Ptr out_coefficients,
@@ -242,6 +264,39 @@ namespace jsk_pcl_ros
       NODELET_ERROR ("Could not estimate a planar model for the given dataset.");
       return false;
     }
+
+    // extract plane points
+    pcl::PointCloud<pcl::PointXYZ>::Ptr plane_points (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::ProjectInliers<pcl::PointXYZ> proj;
+    proj.setModelType (pcl::SACMODEL_PLANE);
+    proj.setIndices (plane_inliers);
+    proj.setInputCloud (points_inside_pole);
+    proj.setModelCoefficients (plane_coefficients);
+    proj.filter (*plane_points);
+    publishPointCloud(debug_candidate_points_pub3_, plane_points);
+    
+    // next, compute convexhull and centroid
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_hull (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::ConcaveHull<pcl::PointXYZ> chull;
+    chull.setInputCloud (plane_points);
+    chull.setDimension(2);
+    chull.setAlpha (0.1);
+    
+    chull.reconstruct (*cloud_hull);
+
+    if (cloud_hull->points.size() < 3) {
+      NODELET_ERROR("failed to estimate convex hull");
+      return false;
+    }
+    publishConvexHullMarker(cloud_hull);
+    
+    Eigen::Vector4f C_new_4f;
+    pcl::compute3DCentroid(*cloud_hull, C_new_4f);
+    Eigen::Vector3f C_new;
+    for (size_t i = 0; i < 3; i++) {
+      C_new[i] = C_new_4f[i];
+    }
+    
     Eigen::Vector3f n_prime;
     n_prime[0] = plane_coefficients->values[0];
     n_prime[1] = plane_coefficients->values[1];
@@ -267,9 +322,7 @@ namespace jsk_pcl_ros
     C_orig = C_orig / points.size();
     // compute C
     Eigen::Vector3f C = trans * C_orig;
-    float alpha = - plane_coefficients->values[3] - n_prime.dot(C);
     
-    Eigen::Vector3f C_new = alpha * n_prime + C;
 
     Eigen::Affine3f A = Eigen::Translation3f(C) * Eigen::Translation3f(C_new - C) * trans * Eigen::Translation3f(C_orig).inverse();
     tf::poseEigenToMsg((Eigen::Affine3d)A, res.transformation);
@@ -428,7 +481,6 @@ namespace jsk_pcl_ros
       seg.setEpsAngle(0.35);
     }
     seg.segment (*cylinder_inliers, *cylinder_coefficients);
-    //std::cerr << "Cylinder coefficients: " << *cylinder_coefficients << std::endl;
     if (cylinder_inliers->indices.size () == 0)
     {
       NODELET_ERROR ("Could not estimate a cylinder model for the given dataset.");
@@ -451,7 +503,8 @@ namespace jsk_pcl_ros
       C_new[i] = cylinder_coefficients->values[i];
       n_prime[i] = cylinder_coefficients->values[i + 3];
     }
-    
+
+    double radius = fabs(cylinder_coefficients->values[6]);
     // inorder to compute centroid, we project all the points to the center line.
     // and after that, get the minimum and maximum points in the coordinate system of the center line
     double min_alpha = DBL_MAX;
@@ -466,9 +519,8 @@ namespace jsk_pcl_ros
         max_alpha = alpha;
       }
     }
-     
+    // the center of cylinder
     Eigen::Vector3f C_new_prime = C_new + (max_alpha + min_alpha) / 2.0 * n_prime;
-    
     
     Eigen::Vector3f n_cross = n.cross(n_prime);
     if (n.dot(n_prime)) {
@@ -486,6 +538,38 @@ namespace jsk_pcl_ros
     centroid_transformed.point.z = C_new_prime[2];
     centroid_transformed.header = req.request.header;
     debug_centroid_after_trans_pub_.publish(centroid_transformed);
+
+    // publish marker
+    visualization_msgs::Marker marker;
+    marker.type = visualization_msgs::Marker::CYLINDER;
+    marker.scale.x = radius;
+    marker.scale.y = radius;
+    marker.scale.z = (max_alpha - min_alpha);
+    marker.pose.position.x = C_new_prime[0];
+    marker.pose.position.y = C_new_prime[1];
+    marker.pose.position.z = C_new_prime[2];
+
+    // n_prime -> z
+    // n_cross.normalized() -> x
+    Eigen::Vector3f z_axis = n_prime.normalized();
+    Eigen::Vector3f y_axis = n_cross.normalized();
+    Eigen::Vector3f x_axis = (y_axis.cross(z_axis)).normalized();
+    Eigen::Matrix3f M;
+    for (size_t i = 0; i < 3; i++) {
+      M(i, 0) = x_axis[i];
+      M(i, 1) = y_axis[i];
+      M(i, 2) = z_axis[i];
+    }
+    
+    Eigen::Quaternionf q (M);
+    marker.pose.orientation.x = q.x();
+    marker.pose.orientation.y = q.y();
+    marker.pose.orientation.z = q.z();
+    marker.pose.orientation.w = q.w();
+    marker.color.g = 1.0;
+    marker.color.a = 1.0;
+    marker.header = input_header_;
+    marker_pub_.publish(marker);
     
     return true;
   }

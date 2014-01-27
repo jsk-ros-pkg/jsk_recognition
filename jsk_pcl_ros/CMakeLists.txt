@@ -1,13 +1,13 @@
 if($ENV{ROS_DISTRO} STREQUAL "groovy")
   message("-->${CMAKE_CURRENT_SOURCE_DIR}/msg/*.msg")
   file(GLOB _msg_files ${CMAKE_CURRENT_SOURCE_DIR}/msg/*.msg)
-  foreach(_msg_file ${_msg_files})
-    message("convert pcl_msgs -> pcl for groovy ${_msg_file}")
-    execute_process(COMMAND grep pcl_msgs ${_msg_file} OUTPUT_VARIABLE _grep_pcl_msgs)
-    if (NOT ${_grep_pcl_msgs})
-      execute_process(COMMAND sed -i s@^pcl_msgs/@pcl/@g ${_msg_file})
-    endif()
-  endforeach()
+  # foreach(_msg_file ${_msg_files})
+  #   message("convert pcl_msgs -> pcl for groovy ${_msg_file}")
+  #   execute_process(COMMAND grep pcl_msgs ${_msg_file} OUTPUT_VARIABLE _grep_pcl_msgs)
+  #   if (NOT ${_grep_pcl_msgs})
+  #     execute_process(COMMAND sed -i s@^pcl_msgs/@pcl/@g ${_msg_file})
+  #   endif()
+  # endforeach()
 endif()
 if(NOT USE_ROSBUILD)
   include(catkin.cmake)
@@ -57,6 +57,7 @@ rosbuild_add_library (jsk_pcl_ros
   src/voxel_grid_downsample_manager_nodelet.cpp
   src/voxel_grid_downsample_decoder_nodelet.cpp
   src/snapit_nodelet.cpp
+  src/hinted_plane_detector_nodelet.cpp
 )
 
 rosbuild_add_compile_flags (jsk_pcl_ros ${SSE_FLAGS})
@@ -83,6 +84,7 @@ rosbuild_add_executable(lazy_concatenater src/lazy_concatenater.cpp)
 rosbuild_add_executable(voxel_grid_downsample_manager src/voxel_grid_downsample_manager.cpp)
 rosbuild_add_executable(voxel_grid_downsample_decoder src/voxel_grid_downsample_decoder.cpp)
 rosbuild_add_executable(snapit src/snapit.cpp)
+rosbuild_add_executable(hinted_plane_detector src/hinted_plane_detector.cpp)
 # roslaunch documentation
 rosbuild_find_ros_package("jsk_tools")
 execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} python ${jsk_tools_PACKAGE_PATH}/bin/launchdoc-generator.py ${PROJECT_NAME} --output_dir=./build --nomakefile RESULT_VARIABLE _make_failed)

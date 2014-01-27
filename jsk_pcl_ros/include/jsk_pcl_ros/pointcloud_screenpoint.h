@@ -29,6 +29,8 @@ namespace jsk_pcl_ros
 
     typedef message_filters::sync_policies::ApproximateTime< sensor_msgs::PointCloud2,
                                                              geometry_msgs::PointStamped > PointApproxSyncPolicy;
+    typedef message_filters::sync_policies::ApproximateTime< sensor_msgs::PointCloud2,
+                                                             sensor_msgs::PointCloud2 > PointCloudApproxSyncPolicy;
 
   private:
     boost::shared_ptr<ros::NodeHandle> pnh_;
@@ -36,9 +38,11 @@ namespace jsk_pcl_ros
     message_filters::Subscriber < sensor_msgs::PointCloud2 > points_sub_;
     message_filters::Subscriber < geometry_msgs::PolygonStamped > rect_sub_;
     message_filters::Subscriber < geometry_msgs::PointStamped > point_sub_;
+    message_filters::Subscriber < sensor_msgs::PointCloud2 > point_array_sub_;
 
     boost::shared_ptr < message_filters::Synchronizer < PolygonApproxSyncPolicy > > sync_a_polygon_;
     boost::shared_ptr < message_filters::Synchronizer < PointApproxSyncPolicy > > sync_a_point_;
+    boost::shared_ptr < message_filters::Synchronizer < PointCloudApproxSyncPolicy > > sync_a_point_array_;
 
     ros::Publisher pub_points_;
     ros::Publisher pub_point_;
@@ -68,6 +72,10 @@ namespace jsk_pcl_ros
     void point_cb (const geometry_msgs::PointStampedConstPtr& pt_ptr);
     void callback_point (const sensor_msgs::PointCloud2ConstPtr& points_ptr,
                          const geometry_msgs::PointStampedConstPtr& pt_ptr);
+    void point_array_cb (const sensor_msgs::PointCloud2ConstPtr& pt_arr_ptr);
+    void callback_point_array (const sensor_msgs::PointCloud2ConstPtr& points_ptr,
+                               const sensor_msgs::PointCloud2ConstPtr& pt_arr_ptr);
+    
     void rect_cb (const geometry_msgs::PolygonStampedConstPtr& array_ptr);
     void callback_polygon(const sensor_msgs::PointCloud2ConstPtr& points_ptr,
                           const geometry_msgs::PolygonStampedConstPtr& array_ptr);

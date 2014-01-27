@@ -18,11 +18,12 @@ void jsk_pcl_ros::PointcloudScreenpoint::onInit()
   pnh_->param ("crop_size", crop_size_, 10);
   pnh_->param ("search_size", k_, 16);
 
-  bool use_rect, use_point, use_sync;
+  bool use_rect, use_point, use_sync, use_point_array;
 
   pnh_->param ("use_rect", use_rect, false);
   pnh_->param ("use_point", use_point, false);
   pnh_->param ("use_sync", use_sync, false);
+  pnh_->param ("use_point_array", use_point_array, false);
 
   pnh_->param("publish_points", publish_points_, false);
   pnh_->param("publish_point", publish_point_, false);
@@ -48,6 +49,17 @@ void jsk_pcl_ros::PointcloudScreenpoint::onInit()
       sync_a_point_->registerCallback (boost::bind (&PointcloudScreenpoint::callback_point, this, _1, _2));
     } else {
       point_sub_.registerCallback (boost::bind (&PointcloudScreenpoint::point_cb, this, _1));
+    }
+  }
+
+  if (use_point_array) {
+    point_array_sub_.subscribe(*pnh_, "point_array", queue_size_);
+    if (use_sync) {
+      sync_a_point_array_ = boost::make_shared < message_filters::Synchronizer< PointCloudApproxSyncPolicy > > (queue_size_);
+      sync_a_point_array_->connectInput (points_sub_, point_array_sub_);
+      sync_a_point_array_->registerCallback (boost::bind (&PointcloudScreenpoint::callback_point_array, this, _1, _2));
+    } else {
+      point_array_sub_.registerCallback (boost::bind (&PointcloudScreenpoint::point_array_cb, this, _1));
     }
   }
 
@@ -252,6 +264,36 @@ void jsk_pcl_ros::PointcloudScreenpoint::callback_point (const sensor_msgs::Poin
 
     extract_rect (points_ptr, st_x, st_y, ed_x, ed_y);
   }
+}
+
+void jsk_pcl_ros::PointcloudScreenpoint::point_array_cb (const sensor_msgs::PointCloud2ConstPtr& pt_arr_ptr) {
+  if (publish_points_) {
+    pcl::PointCloud<pcl::PointXY>::Ptr point_array_cloud(new pcl::PointCloud<pcl::PointXY>);
+    pcl::fromROSMsg(*pt_arr_ptr, *point_array_cloud);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr result_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    result_cloud->header = header_;
+    for (size_t i = 0; i < point_array_cloud->points.size(); i++) {
+      pcl::PointXY point = point_array_cloud->points[i];
+      geometry_msgs::PointStamped ps;
+      bool ret; float rx, ry, rz;
+      ret = extract_point (pts, point.x, point.y, rx, ry, rz);
+      if (ret) {
+        pcl::PointXYZ point_on_screen;
+        point_on_screen.x = rx;
+        point_on_screen.y = ry;
+        point_on_screen.z = rz;
+        result_cloud->points.push_back(point_on_screen);
+      }
+    }
+    sensor_msgs::PointCloud2::Ptr ros_cloud(new sensor_msgs::PointCloud2);
+    pcl::toROSMsg(*result_cloud, *ros_cloud);
+    ros_cloud->header = header_;
+    pub_points_.publish(ros_cloud);
+  }
+}
+void jsk_pcl_ros::PointcloudScreenpoint::callback_point_array (const sensor_msgs::PointCloud2ConstPtr& points_ptr,
+                                                               const sensor_msgs::PointCloud2ConstPtr& pt_arr_ptr) {
+  point_array_cb(pt_arr_ptr);
 }
 
 void jsk_pcl_ros::PointcloudScreenpoint::rect_cb (const geometry_msgs::PolygonStampedConstPtr& array_ptr) {

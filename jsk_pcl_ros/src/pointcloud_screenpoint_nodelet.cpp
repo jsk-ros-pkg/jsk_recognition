@@ -271,7 +271,7 @@ void jsk_pcl_ros::PointcloudScreenpoint::point_array_cb (const sensor_msgs::Poin
     pcl::PointCloud<pcl::PointXY>::Ptr point_array_cloud(new pcl::PointCloud<pcl::PointXY>);
     pcl::fromROSMsg(*pt_arr_ptr, *point_array_cloud);
     pcl::PointCloud<pcl::PointXYZ>::Ptr result_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    result_cloud->header = header_;
+    result_cloud->header = pcl_conversions::toPCL(header_); // if hydro
     for (size_t i = 0; i < point_array_cloud->points.size(); i++) {
       pcl::PointXY point = point_array_cloud->points[i];
       geometry_msgs::PointStamped ps;

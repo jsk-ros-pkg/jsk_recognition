@@ -1,4 +1,5 @@
 #include "jsk_pcl_ros/pointcloud_screenpoint.h"
+#include <pcl_conversions/pcl_conversions.h>
 
 // F/K/A <ray converter>
 // Haseru Chen, Kei Okada, Yohei Kakiuchi

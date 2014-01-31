@@ -65,6 +65,7 @@
       crop_size: 10
       search_size: 16
       use_rect: false
+      use_point_array: true
       use_point: true
       publish_point: true
     </rosparam>
@@ -86,11 +87,13 @@
     <remap from="~points" to="$(arg inpoints)" />
     <remap from="~point" to="$(arg image)/$(arg image_type)/screenpoint" />
     <remap from="~rect" to="$(arg image)/$(arg image_type)/screenrectangle" />
+    <remap from="~point_array" to="$(arg image)/$(arg image_type)/screenpoint_array" />
     <rosparam>
       queue_size: 10
       crop_size: 10
       search_size: 16
       use_rect: false
+      use_point_array: true
       use_point: true
       publish_point: true
     </rosparam>

@@ -107,4 +107,10 @@
       snapit nodelet node
     </description>
   </class>
+  <class name="jsk_pcl/HintedPlaneDetector" type="HintedPlaneDetector"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      HintedPlaneDetector nodelet node
+    </description>
+  </class>
 </library>

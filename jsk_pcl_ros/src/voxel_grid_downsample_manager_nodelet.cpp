@@ -192,7 +192,7 @@ namespace jsk_pcl_ros
   void VoxelGridDownsampleManager::initializeGrid(void) {
     visualization_msgs::Marker::Ptr box (new visualization_msgs::Marker);
     box->header.stamp = ros::Time(0.0);
-    box->header.frame_id = "/pelvis";
+    box->header.frame_id = base_frame_;
     box->pose.position.x = 2.0;
     box->pose.position.y = 0.0;
     box->pose.position.z = -0.5;
@@ -209,6 +209,8 @@ namespace jsk_pcl_ros
   void VoxelGridDownsampleManager::onInit(void)
   {
     PCLNodelet::onInit();
+    pnh_->param("base_frame", base_frame_, std::string("pelvis"));
+
     initializeGrid();
     sequence_id_ = 0;
     sub_ = pnh_->subscribe("input", 1, &VoxelGridDownsampleManager::pointCB,

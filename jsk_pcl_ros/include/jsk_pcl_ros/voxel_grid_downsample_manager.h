@@ -67,6 +67,7 @@ namespace jsk_pcl_ros
     size_t max_points_;
     double rate_;
     int sequence_id_;           // incremented by every add_box
+    std::string base_frame_;
     virtual void onInit();
   };
 }

@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(checkerboard_detector)
 
-find_package(catkin REQUIRED COMPONENTS roscpp cv_bridge sensor_msgs posedetection_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp rosconsole cv_bridge sensor_msgs posedetection_msgs)
 find_package(OpenCV REQUIRED)
 find_package(OpenMP)
 find_package(posedetection_msgs)
@@ -28,7 +28,7 @@ add_dependencies(checkerboard_detector    posedetection_msgs_gencpp)
 add_dependencies(checkerboard_calibration posedetection_msgs_gencpp)
 
 catkin_package(
-    CATKIN_DEPENDS roscpp cv_bridge sensor_msgs posedetection_msgs
+    CATKIN_DEPENDS roscpp rosconsole cv_bridge sensor_msgs posedetection_msgs
     DEPENDS OpenCV2
     INCLUDE_DIRS # TODO include
     LIBRARIES # TODO

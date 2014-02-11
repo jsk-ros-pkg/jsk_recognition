@@ -15,15 +15,6 @@ add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.sr
   CallSnapIt.srv)
 generate_messages(DEPENDENCIES ${PCL_MSGS})
 
-# TODO: fill in what other packages will need to use this package
-## LIBRARIES: libraries you create in this project that dependent projects also need
-## CATKIN_DEPENDS: catkin_packages dependent projects also need
-## DEPENDS: system dependencies of this project that dependent projects also need
-
-#find_package(wxWidgets REQUIRED)
-#include(${wxWidgets_USE_FILE})
-#include_directories( ${wxWidgets_INCLUDE_DIRS} )
-
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
   cfg/HSVColorFilter.cfg
@@ -49,6 +40,10 @@ set(SOURCE_FILES
 #  src/resize_points_publisher.cpp
   src/pointcloud_screenpoint_nodelet.cpp
   src/particle_filter_tracking_nodelet.cpp
+  src/voxel_grid_downsample_manager_nodelet.cpp
+  src/voxel_grid_downsample_decoder_nodelet.cpp
+  src/snapit_nodelet.cpp
+  src/hinted_plane_detector_nodelet.cpp
   )
 
 

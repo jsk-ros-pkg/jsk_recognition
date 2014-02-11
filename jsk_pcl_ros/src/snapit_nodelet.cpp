@@ -390,7 +390,6 @@ namespace jsk_pcl_ros
   void SnapIt::publishPointCloud(ros::Publisher pub, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud) {
     sensor_msgs::PointCloud2::Ptr ros_cloud(new sensor_msgs::PointCloud2);
     pcl::toROSMsg(*cloud, *ros_cloud);
-    cloud->header = input_header_;
     pub.publish(ros_cloud);
   }
   

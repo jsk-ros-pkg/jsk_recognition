@@ -37,6 +37,10 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl/registration/icp.h>
+#if PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 7
+#include <pcl/registration/icp.h>
+#endif
+
 #include "jsk_pcl_ros/ICPAlign.h"
 
 #include <pcl_ros/pcl_nodelet.h>
@@ -48,15 +52,21 @@ bool ICPCallback(jsk_pcl_ros::ICPAlign::Request &req,
 
   pcl::fromROSMsg(req.reference_cloud, *cloud_in);
   pcl::fromROSMsg(req.target_cloud, *cloud_out);
-  
-  pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
-  icp.setInputCloud(cloud_in);
-  icp.setInputTarget(cloud_out);
+
+  pcl::Registration <pcl::PointXYZ, pcl::PointXYZ>::Ptr icp;
+#if PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 7
+  icp.reset (new pcl::GeneralizedIterativeClosestPoint< pcl::PointXYZ, pcl::PointXYZ >());
+#else
+  icp.reset (new pcl::IterativeClosestPoint< pcl::PointXYZ, pcl::PointXYZ >());
+#endif
+  icp->setInputCloud(cloud_in);
+  icp->setInputTarget(cloud_out);
   pcl::PointCloud<pcl::PointXYZ> Final;
-  icp.align(Final);
-  std::cout << "has converged:" << icp.hasConverged() << " score: " <<
-    icp.getFitnessScore() << std::endl;
-  std::cout << icp.getFinalTransformation() << std::endl;
+  icp->align(Final);
+  std::cout << "has converged:" << icp->hasConverged() << " score: " <<
+    icp->getFitnessScore() << std::endl;
+  std::cout << icp->getFinalTransformation() << std::endl;
+
   return true;
 };
 

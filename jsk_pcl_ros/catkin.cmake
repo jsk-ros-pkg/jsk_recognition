@@ -43,6 +43,7 @@ set(SOURCE_FILES
   src/voxel_grid_downsample_manager_nodelet.cpp
   src/voxel_grid_downsample_decoder_nodelet.cpp
   src/snapit_nodelet.cpp
+  src/keypoints_publisher_nodelet.cpp
   src/hinted_plane_detector_nodelet.cpp
   )
 

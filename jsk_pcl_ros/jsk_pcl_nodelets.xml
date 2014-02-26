@@ -107,6 +107,12 @@
       snapit nodelet node
     </description>
   </class>
+  <class name="jsk_pcl/KeypointsPublisher" type="KeypointsPublisher"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      keypoints_publisher nodelet node
+    </description>
+  </class>
   <class name="jsk_pcl/HintedPlaneDetector" type="HintedPlaneDetector"
          base_class_type="nodelet::Nodelet">
     <description>

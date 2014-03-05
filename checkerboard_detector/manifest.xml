@@ -17,6 +17,12 @@
   <depend package="cv_bridge"/>
   <depend package="sensor_msgs"/>
   <depend package="posedetection_msgs"/>
+
+  <rosdep name="roscpp"/>
+  <rosdep name="cv_bridge"/>
+  <rosdep name="sensor_msgs"/>
+  <rosdep name="posedetection_msgs"/>
+
   <platform os="ubuntu" version="9.04"/>
   <platform os="ubuntu" version="9.10"/>
   <platform os="ubuntu" version="10.04"/>

@@ -9,13 +9,13 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/resized_image_transport</url>
   
-  <depend package="opencv2" />
-  <depend package="cv_bridge" />
-  <depend package="sensor_msgs" />
-  <depend package="image_transport" />
-  <depend package="dynamic_reconfigure" />
+  <rosdep name="opencv2" />
+  <rosdep name="cv_bridge" />
+  <rosdep name="sensor_msgs" />
+  <rosdep name="image_transport" />
+  <rosdep name="dynamic_reconfigure" />
 
-  <depend package="std_srvs" />
+  <rosdep name="std_srvs" />
 
 </package>
 

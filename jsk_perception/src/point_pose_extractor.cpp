@@ -913,7 +913,7 @@ public:
    */
   void check_subscribers()
   {
-	if(_pub.getNumSubscribers() == 0) {
+	if(_pub.getNumSubscribers() == 0 && _initialized) {
 	  if(_sub)
 		_sub.shutdown();
           static int i = 0;

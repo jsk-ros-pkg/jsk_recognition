@@ -51,8 +51,6 @@ rosbuild_add_library (jsk_pcl_ros
   src/cluster_point_indices_decomposer_z_axis_nodelet.cpp
   src/centroid_publisher_nodelet.cpp
   src/particle_filter_tracking_nodelet.cpp
-  #src/pointcloud_flowrate_nodelet.cpp
-  src/lazy_concatenater_nodelet.cpp
   src/voxel_grid_downsample_manager_nodelet.cpp
   src/voxel_grid_downsample_decoder_nodelet.cpp
   src/snapit_nodelet.cpp
@@ -77,9 +75,6 @@ rosbuild_add_executable(cluster_point_indices_decomposer src/cluster_point_indic
 rosbuild_add_executable(cluster_point_indices_decomposer_z_axis src/cluster_point_indices_decomposer_z_axis.cpp)
 rosbuild_add_executable(depth_image_creator src/depth_image_creator.cpp)
 rosbuild_add_executable(euclidean_cluster_extraction src/euclidean_cluster_extraction.cpp)
-rosbuild_add_executable(icp_server src/icp_server.cpp)
-rosbuild_add_executable(pointcloud_flowrate src/pointcloud_flowrate.cpp)
-rosbuild_add_executable(lazy_concatenater src/lazy_concatenater.cpp)
 rosbuild_add_executable(voxel_grid_downsample_manager src/voxel_grid_downsample_manager.cpp)
 rosbuild_add_executable(voxel_grid_downsample_decoder src/voxel_grid_downsample_decoder.cpp)
 rosbuild_add_executable(snapit src/snapit.cpp)

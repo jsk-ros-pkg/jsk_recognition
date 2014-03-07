@@ -77,18 +77,6 @@
       publish the centroid of the pointcloud to /tf
     </description>
   </class>
-  <!-- <class name="jsk_pcl/PointCloudFlowRate" type="PointCloudFlowRate" -->
-  <!--        base_class_type="nodelet::Nodelet"> -->
-  <!--   <description> -->
-  <!--     publish pointcloud on narrowband condition -->
-  <!--   </description> -->
-  <!-- </class> -->
-  <class name="jsk_pcl/LazyConcatenater" type="LazyConcatenater"
-         base_class_type="nodelet::Nodelet">
-    <description>
-      concatenate pointlcouds in lazy way
-    </description>
-  </class>
   <class name="jsk_pcl/VoxelGridDownsampleManager" type="VoxelGridDownsampleManager"
          base_class_type="nodelet::Nodelet">
     <description>

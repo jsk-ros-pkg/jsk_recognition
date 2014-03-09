@@ -8,9 +8,8 @@ if [ $WSTOOL = rosws ] ; then
     $ROSWS merge /opt/ros/$ROS_DISTRO/.rosinstall
 fi
 $WSTOOL update -j10
-echo TRAVIS_REPO_SLUG is $TRAVIS_REPO_SLUG
 if [ $WSTOOL = rosws ] ; then
-    $ROSWS set --git $TRAVIS_REPO_SLUG https://dummy.com/dummy -y
+    $ROSWS set --git $REPOSITORY_NAME https://dummy.com/dummy -y
 fi
 ln -s $CI_SOURCE_PATH . # Link the repo we are testing to the new workspace
 cd ../

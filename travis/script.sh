@@ -1,5 +1,7 @@
 #!/bin/sh
 
+~/ros/ws_$REPOSITORY_NAME
+rospack profile
 if [ $BUILDER = catkin ]; then
     catkin_make -j4
     catkin_make test

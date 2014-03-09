@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e                          # exit on error
+
 cd ~/ros/ws_$REPOSITORY_NAME
 rospack profile
 if [ $BUILDER = catkin ]; then
@@ -12,5 +14,6 @@ if [ $BUILDER = catkin ]; then
 else
     cd src
     source setup.sh
+    echo $ROS_PACKAGE_PATH
     rosmake $BUILD_PACKAGES
 fi

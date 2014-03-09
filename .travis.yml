@@ -6,6 +6,9 @@ python:
   - "2.7"
 compiler:
   - gcc
+env:
+  - ROS_DISTRO=hydro
+  - ROS_DISTRO=groovy
 #notifications:
 #  email:
 #    recipients:
@@ -14,7 +17,6 @@ compiler:
 #    on_failure: always #[always|never|change] # default: always
 before_install: # Use this to prepare the system to install prerequisites or dependencies
   # Define some config vars
-  - export ROS_DISTRO=hydro
   - export CI_SOURCE_PATH=$(pwd)
   - export REPOSITORY_NAME=${PWD##*/}
   - ./travis/before_install.sh

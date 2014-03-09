@@ -7,8 +7,8 @@ python:
 compiler:
   - gcc
 env:
-  - ROS_DISTRO=hydro
-  - ROS_DISTRO=groovy
+  - ROS_DISTRO=hydro WSTOOL=wstool
+  - ROS_DISTRO=groovy WSTOOL=wstool
 #notifications:
 #  email:
 #    recipients:

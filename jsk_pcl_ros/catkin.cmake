@@ -21,12 +21,21 @@ generate_dynamic_reconfigure_options(
   cfg/RGBColorFilter.cfg
   )
 
+if($ENV{ROS_DISTRO} STREQUAL "groovy")
 catkin_package(
     DEPENDS pcl
-    CATKIN-DEPENDS pcl_ros message_runtime ${PCL_MSGS}
+    CATKIN_DEPENDS pcl_ros message_runtime ${PCL_MSGS}
     INCLUDE_DIRS include
     LIBRARIES jsk_pcl_ros
 )
+else($ENV{ROS_DISTRO} STREQUAL "groovy")
+catkin_package(
+    CATKIN_DEPENDS pcl_ros message_runtime ${PCL_MSGS} pcl
+    INCLUDE_DIRS include
+    LIBRARIES jsk_pcl_ros
+)
+  
+endif($ENV{ROS_DISTRO} STREQUAL "groovy")
 #include_directories(include cfg/cpp)
 include_directories(include ${catkin_INCLUDE_DIRS})
 

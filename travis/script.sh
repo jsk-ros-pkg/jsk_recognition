@@ -1,6 +1,6 @@
 #!/bin/sh
 
-~/ros/ws_$REPOSITORY_NAME
+cd ~/ros/ws_$REPOSITORY_NAME
 rospack profile
 if [ $BUILDER = catkin ]; then
     catkin_make -j4
@@ -10,5 +10,7 @@ if [ $BUILDER = catkin ]; then
     source install/setup.bash
     find install -iname "*.test" -print0 | xargs -0 -n1 rostest
 else
+    cd src
+    source setup.sh
     rosmake $BUILD_PACKAGES
 fi

@@ -15,3 +15,8 @@ ln -s $CI_SOURCE_PATH . # Link the repo we are testing to the new workspace
 cd ../
 # Install dependencies for source repos
 rosdep install -r -n --from-paths src --ignore-src --rosdistro $ROS_DISTRO -y
+
+if [ $ROS_DISTRO = groovy ]; then
+    # ationlib_msgs won't be installed on groovy
+    sudo apt-get install ros-$ROS_DISTRO-common-tutorials
+fi

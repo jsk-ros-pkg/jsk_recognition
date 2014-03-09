@@ -24,12 +24,7 @@ install: # Use this to install any prerequisites or dependencies necessary to ru
 before_script: # Use this to prepare your build for testing e.g. copy database configurations, environment variables, etc.
   - source /opt/ros/$ROS_DISTRO/setup.bash
 script: # All commands must exit with code 0 on success. Anything else is considered failure.
-  - catkin_make -j4
-  - catkin_make test
-  - catkin_make install
-  - rm -fr devel src build
-  - source install/setup.bash
-  - find install -iname "*.test" -print0 | xargs -0 -n1 rostest
+  - ./travis/script.sh
 after_failure:
   - if [ -e ./build/Testing/Temporary/LastTest.log ]; then cat ./build/Testing/Temporary/LastTest.log; fi
   - find ${HOME}/.ros/test_results -type f -exec echo "== {} ==" \; -exec cat {} \;

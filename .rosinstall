@@ -4,6 +4,6 @@
 - git:
     uri: https://github.com/jsk-ros-pkg/jsk_roseus.git
     local-name: jsk-ros-pkg/jsk_roseus
-- git:
-    uri: https://github.com/jsk-ros-pkg/openrave_planning.git
-    local-name: jsk-ros-pkg/openrave_planning
+# - git:
+#     uri: https://github.com/jsk-ros-pkg/openrave_planning.git
+#     local-name: jsk-ros-pkg/openrave_planning

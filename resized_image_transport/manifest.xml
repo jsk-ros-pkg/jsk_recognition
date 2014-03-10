@@ -8,6 +8,16 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/resized_image_transport</url>
+
+  <depend package="opencv2" />
+  <depend package="cv_bridge" />
+  <depend package="sensor_msgs" />
+  <depend package="image_transport" />
+  <depend package="dynamic_reconfigure" />
+  <depend package="driver_base" />
+
+  <depend package="std_srvs" />
+
   
   <rosdep name="opencv2" />
   <rosdep name="cv_bridge" />

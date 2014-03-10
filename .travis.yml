@@ -7,9 +7,9 @@ python:
 compiler:
   - gcc
 env:
-  - ROS_DISTRO=hydro WSTOOL=wstool BUILDER=catkin
-  - ROS_DISTRO=groovy WSTOOL=wstool BUILDER=catkin
-  - ROS_DISTRO=groovy WSTOOL=rosws BUILDER=rosbuild BUILD_PACKAGES="checkerboard_detector cr_calibration cr_capture imagesift jsk_pcl_ros jsk_perception orbit_pantilt posedetectiondb resized_image_transport"
+  - ROS_DISTRO=hydro ROSWS=wstool BUILDER=catkin
+  - ROS_DISTRO=groovy ROSWS=wstool BUILDER=catkin
+  - ROS_DISTRO=groovy ROSWS=rosws BUILDER=rosbuild BUILD_PACKAGES="checkerboard_detector cr_calibration cr_capture imagesift jsk_pcl_ros jsk_perception orbit_pantilt posedetectiondb resized_image_transport"
 #notifications:
 #  email:
 #    recipients:

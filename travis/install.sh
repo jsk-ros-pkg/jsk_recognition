@@ -18,5 +18,5 @@ rosdep install -r -n --from-paths src --ignore-src --rosdistro $ROS_DISTRO -y
 
 if [ $ROS_DISTRO = groovy ]; then
     # ationlib_msgs won't be installed on groovy
-    sudo apt-get install ros-$ROS_DISTRO-common-tutorials
+    sudo apt-get install ros-$ROS_DISTRO-common-tutorials ros-$ROS_DISTRO-pcl-conversions
 fi

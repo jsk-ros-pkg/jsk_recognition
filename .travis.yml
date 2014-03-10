@@ -38,6 +38,7 @@ install: # Use this to install any prerequisites or dependencies necessary to ru
   - mkdir -p ~/ros/ws_$REPOSITORY_NAME/src
   - cd ~/ros/ws_$REPOSITORY_NAME/src
   - $ROSWS init .
+  - cat $CI_SOURCE_PATH/.rosinstall
   - $ROSWS merge $CI_SOURCE_PATH/.rosinstall
   - if [ $ROSWS = rosws ] ; then $ROSWS merge /opt/ros/$ROS_DISTRO/.rosinstall; fi
   - $ROSWS update -j10

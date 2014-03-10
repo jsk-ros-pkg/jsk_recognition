@@ -53,7 +53,7 @@ script: # All commands must exit with code 0 on success. Anything else is consid
   - cd ~/ros/ws_$REPOSITORY_NAME
   - if [ $BUILDER = rosbuild ]; then source src/setup.sh; cd src; fi
   - rospack profile
-  - if [ $BUILDER = catkin ]; then catkin_make -j4; else rosmake $BUILD_PACKAGES --profile; fi
+  - if [ $BUILDER = catkin ]; then catkin_make -j4; else rosmake $BUILD_PACKAGES --profile --pjobs=8; fi
   - if [ $BUILDER = catkin ]; then catkin_make test; else rosmake $BUILD_PACKAGES --test-only; fi
   - if [ $BUILDER = catkin ]; then catkin_make install; fi
   - if [ $BUILDER = catkin ]; then rm -fr devel src build; source install/setup.bash; else source setup.sh; fi

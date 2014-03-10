@@ -1,6 +1,14 @@
 # http://ros.org/doc/groovy/api/catkin/html/user_guide/supposed.html
 cmake_minimum_required(VERSION 2.8.3)
 project(jsk_pcl_ros)
+
+if($ENV{ROS_DISTRO} STREQUAL "groovy")
+  # update package.xml, in groovy we need to add pcl to package.xml
+  execute_process(COMMAND sed -i s@<run_depend>pcl_ros</run_depend>@<run_depend>pcl_ros</run_depend><run_depend>pcl</run_depend>@g ${PROJECT_SOURCE_DIR}/package.xml)
+  execute_process(COMMAND sed -i s@<build_depend>pcl_ros</build_depend>@<build_depend>pcl_ros</build_depend><build_depend>pcl</build_depend>@g ${PROJECT_SOURCE_DIR}/package.xml)
+endif($ENV{ROS_DISTRO} STREQUAL "groovy")
+
+
 # Load catkin and all dependencies required for this package
 # TODO: remove all from COMPONENTS that are not catkin packages.
 if($ENV{ROS_DISTRO} STREQUAL "groovy")
@@ -23,10 +31,12 @@ generate_dynamic_reconfigure_options(
 
 catkin_package(
     DEPENDS pcl
-    CATKIN-DEPENDS pcl_ros message_runtime ${PCL_MSGS}
+    CATKIN_DEPENDS pcl_ros message_runtime ${PCL_MSGS}
     INCLUDE_DIRS include
     LIBRARIES jsk_pcl_ros
 )
+
+
 #include_directories(include cfg/cpp)
 include_directories(include ${catkin_INCLUDE_DIRS})
 

@@ -46,16 +46,20 @@ install: # Use this to install any prerequisites or dependencies necessary to ru
   - ln -s $CI_SOURCE_PATH . # Link the repo we are testing to the new workspace
   - cd ../
   # Install dependencies for source repos
+  - find -L src -name package.xml -exec dirname {} \; | xargs -n 1 -i find {} -name manifest.xml | xargs -n 1 -i mv {} {}.deprecated
   - rosdep install -r -n --from-paths src --ignore-src --rosdistro $ROS_DISTRO -y
-  - if [ $ROS_DISTRO = groovy ]; then sudo apt-get install ros-$ROS_DISTRO-common-tutorials ros-$ROS_DISTRO-pcl-conversions; fi
+  - find -L src -name manifest.xml.deprecated | xargs -n 1 -i dirname {} | xargs -n 1 -i ln -sf `pwd`/{}/manifest.xml.deprecated `pwd`/{}/manifest.xml
+  - if [ $BUILDER = rosbuild ]; then source src/setup.sh; rosdep install -a -y -n -r; fi
+  - if [ $ROS_DISTRO = groovy ]; then sudo apt-get install ros-$ROS_DISTRO-common-tutorials; fi
 before_script: # Use this to prepare your build for testing e.g. copy database configurations, environment variables, etc.
   - source /opt/ros/$ROS_DISTRO/setup.bash
+  - export CATKIN_PACKAGES="`find $CI_SOURCE_PATH -name package.xml | xargs -n 1 dirname | xargs -n 1 basename`"
 script: # All commands must exit with code 0 on success. Anything else is considered failure.
   - cd ~/ros/ws_$REPOSITORY_NAME
   - if [ $BUILDER = rosbuild ]; then source src/setup.sh; cd src; fi
   - rospack profile
   - if [ $BUILDER = catkin ]; then catkin_make -j4; else rosmake $BUILD_PACKAGES --profile --pjobs=4; fi
-  - if [ $BUILDER = catkin ]; then catkin_make test; else rosmake $BUILD_PACKAGES --test-only; fi
+  - if [ $BUILDER = catkin ]; then if [ "$CATKIN_PACKAGES" != "" ]; then catkin_make test --pkg $CATKIN_PACKAGES; fi; else rosmake $BUILD_PACKAGES --test-only; fi
   - if [ $BUILDER = catkin ]; then catkin_make install; fi
   - if [ $BUILDER = catkin ]; then rm -fr devel src build; source install/setup.bash; else source setup.sh; fi
 after_failure:

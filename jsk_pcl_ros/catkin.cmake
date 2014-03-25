@@ -37,46 +37,44 @@ catkin_package(
 )
 
 
-#include_directories(include cfg/cpp)
 include_directories(include ${catkin_INCLUDE_DIRS})
 
+macro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
+  list(APPEND jsk_pcl_nodelet_sources ${_nodelet_cpp})
+  set(NODELET ${_nodelet_class})
+  set(DEFAULT_NODE_NAME ${_single_nodelet_exec_name})
+  configure_file(${PROJECT_SOURCE_DIR}/src/single_nodelet_exec.cpp.in
+    ${_single_nodelet_exec_name}.cpp)
+  add_executable(${_single_nodelet_exec_name} ${_single_nodelet_exec_name}.cpp)
+  target_link_libraries(${_single_nodelet_exec_name}
+    ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES})
+  add_dependencies(${_single_nodelet_exec_name}
+    ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
+  install(TARGETS ${_single_nodelet_exec_name}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
+endmacro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
 
 # pcl_ros::Filter based class is not working...
 # https://github.com/ros-perception/perception_pcl/issues/9
-set(SOURCE_FILES
-#  src/color_filter_nodelet.cpp
-  src/delay_pointcloud_nodelet.cpp
-  src/depth_image_creator_nodelet.cpp
-#  src/resize_points_publisher.cpp
-  src/pointcloud_screenpoint_nodelet.cpp
-  src/particle_filter_tracking_nodelet.cpp
-  src/voxel_grid_downsample_manager_nodelet.cpp
-  src/voxel_grid_downsample_decoder_nodelet.cpp
-  src/snapit_nodelet.cpp
-  src/keypoints_publisher_nodelet.cpp
-  src/hinted_plane_detector_nodelet.cpp
-  )
+jsk_pcl_nodelet(src/delay_pointcloud_nodelet.cpp "jsk_pcl/DelayPointCloud" "deley_point_cloud")
+jsk_pcl_nodelet(src/pointcloud_screenpoint_nodelet.cpp "jsk_pcl/PointcloudScreenpoint" "pointcloud_screenpoint")
+jsk_pcl_nodelet(src/particle_filter_tracking_nodelet.cpp "jsk_pcl/ParticleFilterTracking" "particle_filter_tracking")
+jsk_pcl_nodelet(src/voxel_grid_downsample_manager_nodelet.cpp "jsk_pcl/VoxelGridDownsampleManager" "voxel_grid_downsample_manager")
+jsk_pcl_nodelet(src/voxel_grid_downsample_decoder_nodelet.cpp "jsk_pcl/VoxelGridDownsampleDecoder" "voxel_grid_downsample_decoder")
+jsk_pcl_nodelet(src/snapit_nodelet.cpp "jsk_pcl/Snapit" "snapit")
+jsk_pcl_nodelet(src/keypoints_publisher_nodelet.cpp "jsk_pcl/KeypointsPublisher" "keypoints_publisher")
+jsk_pcl_nodelet(src/hinted_plane_detector_nodelet.cpp "jsk_pcl/HintedPlaneDetector" "hinted_plane_detector")
 
-
-add_library(jsk_pcl_ros SHARED ${SOURCE_FILES})
+add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES})
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 
-
-add_executable(pointcloud_screenpoint src/pointcloud_screenpoint.cpp)
-target_link_libraries(pointcloud_screenpoint ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES})
-add_dependencies(pointcloud_screenpoint ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
-
-add_executable(particle_filter_tracking src/particle_filter_tracking.cpp)
-target_link_libraries(particle_filter_tracking ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES})
-add_dependencies(particle_filter_tracking ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
-
-
-#
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
-install(TARGETS jsk_pcl_ros pointcloud_screenpoint particle_filter_tracking
+install(TARGETS jsk_pcl_ros
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})

@@ -44,7 +44,7 @@ macro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
   set(NODELET ${_nodelet_class})
   set(DEFAULT_NODE_NAME ${_single_nodelet_exec_name})
   configure_file(${PROJECT_SOURCE_DIR}/src/single_nodelet_exec.cpp.in
-    ${_single_nodelet_exec_name}.cpp) #${CMAKE_CURRENT_BINARY_DIR}/
+    ${_single_nodelet_exec_name}.cpp)
   add_executable(${_single_nodelet_exec_name} ${_single_nodelet_exec_name}.cpp)
   target_link_libraries(${_single_nodelet_exec_name}
     ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES})

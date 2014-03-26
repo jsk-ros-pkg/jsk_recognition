@@ -21,13 +21,6 @@
     </description>
   </class>
 
-  <class name="jsk_pcl/DelayPointCloud" type="DelayPointCloud"
-         base_class_type="nodelet::Nodelet">
-    <description>
-      delay point cloud
-    </description>
-  </class>
-
   <class name="jsk_pcl/ResizePointsPublisher" type="ResizePointsPublisher"
          base_class_type="nodelet::Nodelet">
     <description>

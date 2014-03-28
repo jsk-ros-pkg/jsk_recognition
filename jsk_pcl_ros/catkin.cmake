@@ -16,12 +16,12 @@ if($ENV{ROS_DISTRO} STREQUAL "groovy")
 else()
   set(PCL_MSGS pcl_msgs) ## hydro and later
 endif()
-find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros nodelet message_generation genmsg ${PCL_MSGS})
+find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros nodelet message_generation genmsg ${PCL_MSGS} sensor_msgs)
 
 add_message_files(FILES IndicesArray.msg PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg SnapItRequest.msg PolygonArray.msg)
 add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv SetPointCloud2.srv
   CallSnapIt.srv)
-generate_messages(DEPENDENCIES ${PCL_MSGS})
+generate_messages(DEPENDENCIES ${PCL_MSGS} sensor_msgs)
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
@@ -31,7 +31,7 @@ generate_dynamic_reconfigure_options(
 
 catkin_package(
     DEPENDS pcl
-    CATKIN_DEPENDS pcl_ros message_runtime ${PCL_MSGS}
+    CATKIN_DEPENDS pcl_ros message_runtime ${PCL_MSGS} sensor_msgs
     INCLUDE_DIRS include
     LIBRARIES jsk_pcl_ros
 )

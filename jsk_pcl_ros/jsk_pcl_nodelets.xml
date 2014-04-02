@@ -1,5 +1,12 @@
 <library path="lib/libjsk_pcl_ros">
 
+  <class name="jsk_pcl/NodeletPointCloudThrottle" type="NodeletPointCloudThrottle"
+         base_class_type="nodelet::Nodelet">
+    <description>
+  
+    </description>
+  </class>
+
   <class name="jsk_pcl/ParticleFilterTracking" type="ParticleFilterTracking"
          base_class_type="nodelet::Nodelet">
     <description>

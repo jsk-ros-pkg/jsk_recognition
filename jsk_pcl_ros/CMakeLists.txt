@@ -60,7 +60,8 @@ jsk_pcl_nodelet(src/euclidean_cluster_extraction_nodelet.cpp "jsk_pcl/EuclideanC
 jsk_pcl_nodelet(src/cluster_point_indices_decomposer_nodelet.cpp "jsk_pcl/ClusterPointIndicesDecomposer" "cluster_point_indices_decomposer")
 jsk_pcl_nodelet(src/cluster_point_indices_decomposer_z_axis_nodelet.cpp "jsk_pcl/ClusterPointIndicesDecomposerZAxis" "cluster_point_indices_decomposer_z_axis")
 jsk_pcl_nodelet(src/centroid_publisher_nodelet.cpp "jsk_pcl/CentroidPublisher" "centroid_publisher")
-
+jsk_pcl_nodelet(src/pointcloud_throttle_nodelet.cpp
+  "jsk_pcl/PointCloudThrottle" "point_cloud_throttle")
 
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}

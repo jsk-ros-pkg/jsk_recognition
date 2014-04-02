@@ -1,0 +1,15 @@
+<launch>
+  <arg name="MANAGER" value="/camera/camera_nodelet_manager" />
+  <include file="$(find openni_launch)/launch/openni.launch" />
+  <group ns="camera">
+    <node name="throttle"
+          pkg="nodelet"
+          type="nodelet"
+          output="screen"
+          args="load jsk_pcl/NodeletPointCloudThrottle $(arg MANAGER)">
+      <remap from="topic_in"  to="/camera/depth_registered/points" />
+      <remap from="topic_out" to="/camera/depth_registered/points_throttle" />
+      <param name="update_rate" value="1.0" />
+    </node>
+  </group>
+</launch>

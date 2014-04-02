@@ -6,6 +6,12 @@
   
     </description>
   </class>
+  <class name="jsk_pcl/NodeletImageThrottle" type="NodeletImageThrottle"
+         base_class_type="nodelet::Nodelet">
+    <description>
+  
+    </description>
+  </class>
 
   <class name="jsk_pcl/ParticleFilterTracking" type="ParticleFilterTracking"
          base_class_type="nodelet::Nodelet">

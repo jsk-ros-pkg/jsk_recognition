@@ -56,7 +56,8 @@ jsk_pcl_nodelet(src/voxel_grid_downsample_decoder_nodelet.cpp "jsk_pcl/VoxelGrid
 jsk_pcl_nodelet(src/snapit_nodelet.cpp "jsk_pcl/Snapit" "snapit")
 jsk_pcl_nodelet(src/keypoints_publisher_nodelet.cpp "jsk_pcl/KeypointsPublisher" "keypoints_publisher")
 jsk_pcl_nodelet(src/hinted_plane_detector_nodelet.cpp "jsk_pcl/HintedPlaneDetector" "hinted_plane_detector")
-jsk_pcl_nodelet(src/pointcloud_throttle_nodelet.cpp "jsk_pcl/PointCloudThrottle" "point_cloud_throttle")
+jsk_pcl_nodelet(src/pointcloud_throttle_nodelet.cpp "jsk_pcl/NodeletPointCloudThrottle" "point_cloud_throttle")
+jsk_pcl_nodelet(src/image_throttle_nodelet.cpp "jsk_pcl/NodeletImageThrottle" "image_throttle")
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES})

@@ -64,6 +64,10 @@ jsk_pcl_nodelet(src/pointcloud_throttle_nodelet.cpp
   "jsk_pcl/NodeletPointCloudThrottle" "point_cloud_throttle")
 jsk_pcl_nodelet(src/image_throttle_nodelet.cpp
   "jsk_pcl/NodeletImageThrottle" "image_throttle")
+jsk_pcl_nodelet(src/image_mux_nodelet.cpp
+  "jsk_pcl/NodeletImageMUX" "image_mux")
+jsk_pcl_nodelet(src/image_demux_nodelet.cpp
+  "jsk_pcl/NodeletImageDEMUX" "image_demux")
 
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}

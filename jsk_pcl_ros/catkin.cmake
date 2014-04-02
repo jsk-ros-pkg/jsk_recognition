@@ -16,26 +16,17 @@ if($ENV{ROS_DISTRO} STREQUAL "groovy")
 else()
   set(PCL_MSGS pcl_msgs) ## hydro and later
 endif()
-find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros nodelet message_generation genmsg ${PCL_MSGS})
+find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros nodelet message_generation genmsg ${PCL_MSGS} sensor_msgs geometry_msgs)
 
 add_message_files(FILES IndicesArray.msg PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg SnapItRequest.msg PolygonArray.msg)
 add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv SetPointCloud2.srv
   CallSnapIt.srv)
-generate_messages(DEPENDENCIES ${PCL_MSGS})
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
   cfg/HSVColorFilter.cfg
   cfg/RGBColorFilter.cfg
   )
-
-catkin_package(
-    DEPENDS pcl
-    CATKIN_DEPENDS pcl_ros message_runtime ${PCL_MSGS}
-    INCLUDE_DIRS include
-    LIBRARIES jsk_pcl_ros
-)
-
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
@@ -69,6 +60,15 @@ jsk_pcl_nodelet(src/hinted_plane_detector_nodelet.cpp "jsk_pcl/HintedPlaneDetect
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES})
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
+
+generate_messages(DEPENDENCIES ${PCL_MSGS} sensor_msgs geometry_msgs)
+
+catkin_package(
+    DEPENDS pcl
+    CATKIN_DEPENDS pcl_ros message_runtime ${PCL_MSGS} sensor_msgs geometry_msgs
+    INCLUDE_DIRS include
+    LIBRARIES jsk_pcl_ros
+)
 
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})

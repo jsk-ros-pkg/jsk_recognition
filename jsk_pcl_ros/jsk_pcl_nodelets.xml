@@ -12,6 +12,18 @@
   
     </description>
   </class>
+  <class name="jsk_pcl/NodeletImageMUX" type="NodeletImageMUX"
+         base_class_type="nodelet::Nodelet">
+    <description>
+  
+    </description>
+  </class>
+  <class name="jsk_pcl/NodeletImageDEMUX" type="NodeletImageDEMUX"
+         base_class_type="nodelet::Nodelet">
+    <description>
+  
+    </description>
+  </class>
 
   <class name="jsk_pcl/ParticleFilterTracking" type="ParticleFilterTracking"
          base_class_type="nodelet::Nodelet">

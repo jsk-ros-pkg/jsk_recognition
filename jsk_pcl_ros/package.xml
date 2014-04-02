@@ -14,7 +14,7 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <!-- <build_depend>pcl</build_depend> -->
-  <build_depend>pcl_ros</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend><build_depend>pcl</build_depend>
+  <build_depend>pcl_ros</build_depend><build_depend>pcl</build_depend>
   <build_depend>pcl_msgs</build_depend>
   <build_depend>opencv2</build_depend>
   <build_depend>tf</build_depend>
@@ -36,7 +36,7 @@
   <!-- <run_depend>pcl</run_depend> -->
   <run_depend>eigen_conversions</run_depend>
   <run_depend>pcl_conversions</run_depend>
-  <run_depend>pcl_ros</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend><run_depend>pcl</run_depend>
+  <run_depend>pcl_ros</run_depend><run_depend>pcl</run_depend>
   <run_depend>pcl_msgs</run_depend>
   <run_depend>opencv2</run_depend>
   <run_depend>tf</run_depend>

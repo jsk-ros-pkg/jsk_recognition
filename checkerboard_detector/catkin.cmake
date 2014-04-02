@@ -33,3 +33,15 @@ catkin_package(
     INCLUDE_DIRS # TODO include
     LIBRARIES # TODO
 )
+
+install(TARGETS checkerboard_detector checkerboard_calibration
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+file(GLOB _launch *.launch)
+file(GLOB _pdf *.pdf)
+install(FILES ${_launch} ${_pdf}
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+        )

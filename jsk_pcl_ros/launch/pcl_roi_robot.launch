@@ -22,6 +22,7 @@
           args="$(arg HEAD_SELECTED) $(arg HEAD_TOPIC)">
       <remap from="mux" to="head_pointcloud_mux"/>
     </node>
+
     <node if="$(arg USE_LHAND_POINTCLOUD)"
 	  pkg="topic_tools" type="mux" name="l_hand_pointcloud_mux"
           args="$(arg LHAND_SELECTED) $(arg LHAND_TOPIC)">
@@ -37,10 +38,11 @@
     <node pkg="nodelet" type="nodelet"
           name="pcl_roi_robot_manager" args="manager"
           output="screen" alaunch-prefix="xterm -e gdb --args" />
+
     <node if="$(arg USE_HEAD_POINTCLOUD)"
 	  pkg="nodelet" type="nodelet"
           name="voxel_grid_manager"
-          args="load jsk_pcl/VoxelGridDownsampleManager /pointcloud_roi/pcl_roi_robot_manager"
+          args="load jsk_pcl/VoxelGridDownsampleManager /openni_nodelet_manager"
           output="screen" clear_params="true">
       <param name="base_frame" value="$(arg BASE_FRAME)"/>
       <remap from="~input" to="$(arg HEAD_SELECTED)" />

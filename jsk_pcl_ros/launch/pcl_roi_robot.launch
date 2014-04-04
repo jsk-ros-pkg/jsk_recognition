@@ -13,6 +13,7 @@
   <arg name="RHAND_TOPIC" default="/sandia_hands/r_hand/points2_dummy /sandia_hands/r_hand/points2"/>
 
   <arg name="BASE_FRAME" default="pelvis" />
+  <arg name="HEAD_NODELET_MANAGER" default="/pointcloud_roi/pcl_roi_robot_manager"/>
 
   <group ns="pointcloud_roi">
     <!-- we will have add_grid at /pointcloud_roi/add_grid -->
@@ -42,7 +43,7 @@
     <node if="$(arg USE_HEAD_POINTCLOUD)"
 	  pkg="nodelet" type="nodelet"
           name="voxel_grid_manager"
-          args="load jsk_pcl/VoxelGridDownsampleManager /openni_nodelet_manager"
+          args="load jsk_pcl/VoxelGridDownsampleManager $(arg HEAD_NODELET_MANAGER)"
           output="screen" clear_params="true">
       <param name="base_frame" value="$(arg BASE_FRAME)"/>
       <remap from="~input" to="$(arg HEAD_SELECTED)" />

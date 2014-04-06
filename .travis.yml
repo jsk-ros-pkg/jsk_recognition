@@ -51,6 +51,7 @@ script: # All commands must exit with code 0 on success. Anything else is consid
   - source install/setup.bash
   - find install -iname "*.test" -print0 | xargs -0 -n1 rostest
 after_failure:
+  - if [ $BUILDER == rosbuild ]; then find ${HOME}/.ros/rosmake/ -type f -exec echo "=== {} ===" \; -exec cat {} \; ; fi
   - if [ -e ./build/Testing/Temporary/LastTest.log ]; then cat ./build/Testing/Temporary/LastTest.log; fi
   - find ${HOME}/.ros/test_results -type f -exec echo "== {} ==" \; -exec cat {} \;
   - for file in ${HOME}/.ros/log/rostest-*; do echo "=== $file ==="; cat $file; done

@@ -26,6 +26,7 @@
 
   <rosdep name="pcl" />
   <rosdep name="pcl_ros" />
+  <rosdep name="pcl_conversions" />
   <rosdep name="opencv2" />
   <rosdep name="tf" />
   <rosdep name="sensor_msgs" />

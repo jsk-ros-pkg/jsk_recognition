@@ -57,10 +57,8 @@
 #include <dynamic_reconfigure/server.h>
 #include <math.h>
 
-#if ROS_VERSION_MINIMUM(1, 10, 0)
-#define TF2_ROS tf2_ros
-#else
-#define TF2_ROS tf2
+#ifdef TF2_ROS_VERSION_3 // if this is groovy
+#define tf2_ros tf2
 #endif
 
 namespace jsk_pcl_ros {
@@ -69,7 +67,7 @@ class ImageRotateNodelet : public nodelet::Nodelet
   bool use_tf2_;
   boost::shared_ptr<tf::TransformListener> tf_sub_;
   tf::TransformBroadcaster tf_pub_;
-  boost::shared_ptr<TF2_ROS::BufferClient> tf2_client_;
+  boost::shared_ptr<tf2_ros::BufferClient> tf2_client_;
   image_rotate::ImageRotateConfig config_;
   dynamic_reconfigure::Server<image_rotate::ImageRotateConfig> srv;
 
@@ -318,7 +316,7 @@ public:
   {
     nh_ = getNodeHandle();
     it_ = boost::shared_ptr<image_transport::ImageTransport>(new image_transport::ImageTransport(nh_));
-    tf2_client_.reset(new TF2_ROS::BufferClient("tf2_buffer_server", 100, ros::Duration(0.2)));
+    tf2_client_.reset(new tf2_ros::BufferClient("tf2_buffer_server", 100, ros::Duration(0.2)));
     subscriber_count_ = 0;
     angle_ = 0;
     prev_stamp_ = ros::Time(0, 0);

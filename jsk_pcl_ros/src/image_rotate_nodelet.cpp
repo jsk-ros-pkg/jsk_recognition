@@ -57,7 +57,10 @@
 #include <dynamic_reconfigure/server.h>
 #include <math.h>
 
-#ifdef TF2_ROS_VERSION_3 // if this is groovy
+#if ROS_VERSION_MINIMUM(1, 10, 0)
+// hydro and later
+#else
+// groovy
 #define tf2_ros tf2
 #endif
 

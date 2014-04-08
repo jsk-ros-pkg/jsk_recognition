@@ -23,7 +23,9 @@
   <depend package="image_geometry" />
   <depend package="image_view2" />
   <depend package="eigen_conversions" />
-
+  <depend package="tf_conversions" />
+  <depend package="tf2_ros" />
+  
   <rosdep name="pcl" />
   <rosdep name="pcl_ros" />
   <rosdep name="pcl_conversions" />
@@ -40,7 +42,9 @@
   <rosdep name="image_geometry" />
   <rosdep name="image_view2" />
   <rosdep name="eigen_conversions" />
-
+  <rosdep name="tf_conversions" />
+  <rosdep name="tf2_ros" />
+  
   <rosdep name="tbb" />
 
   <export>

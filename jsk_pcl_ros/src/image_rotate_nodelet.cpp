@@ -49,7 +49,7 @@
 #include <tf2_ros/buffer_client.h>
 #include <eigen_conversions/eigen_msg.h>
 #include <tf_conversions/tf_eigen.h>
-#include <image_rotate/ImageRotateConfig.h>
+#include <jsk_pcl_ros/ImageRotateConfig.h>
 #include <geometry_msgs/Vector3Stamped.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>

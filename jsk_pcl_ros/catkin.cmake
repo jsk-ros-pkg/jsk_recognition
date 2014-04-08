@@ -27,6 +27,7 @@ add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.sr
 generate_dynamic_reconfigure_options(
   cfg/HSVColorFilter.cfg
   cfg/RGBColorFilter.cfg
+  cfg/ImageRotate.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)

@@ -40,6 +40,7 @@
 #include <pcl/io/io.h>
 #include <pcl_ros/transforms.h>
 #include <boost/format.hpp>
+#include "jsk_pcl_ros/SlicedPointCloud.h"
 
 namespace jsk_pcl_ros
 {
@@ -52,6 +53,7 @@ namespace jsk_pcl_ros
   
   void VoxelGridDownsampleManager::pointCB(const sensor_msgs::PointCloud2ConstPtr &input)
   {
+    try {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud (new pcl::PointCloud<pcl::PointXYZ>);
     if (grid_.size() == 0) {
@@ -161,9 +163,16 @@ namespace jsk_pcl_ros
       }
       // conevrt cluster_out_pcl into ros msg
       toROSMsg(*cluster_out_pcl, cluster_out_ros);
+      jsk_pcl_ros::SlicedPointCloud publish_point_cloud;
       cluster_out_ros.header = input->header;
-      cluster_out_ros.header.frame_id = (boost::format("%s %d %d") % (cluster_out_ros.header.frame_id) % (i) % (sequence_id_)).str();
-      pub_encoded_.publish(cluster_out_ros);
+      publish_point_cloud.slice_index = i;
+      publish_point_cloud.sequence_id = sequence_id_;
+      pub_encoded_.publish(publish_point_cloud);
+      ros::Duration(1.0 / rate_).sleep();
+    }
+    }
+    catch (std::runtime_error e) { // catch any error
+      NODELET_WARN_STREAM("error has occured in VoxelGridDownsampleManager but ignore it: " << e.what());
       ros::Duration(1.0 / rate_).sleep();
     }
   }
@@ -218,7 +227,7 @@ namespace jsk_pcl_ros
     bounding_box_sub_ = pnh_->subscribe("add_grid", 1, &VoxelGridDownsampleManager::addGrid,
                                         this);
     pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
-    pub_encoded_ = pnh_->advertise<sensor_msgs::PointCloud2>("output_encoded", 1);
+    pub_encoded_ = pnh_->advertise<jsk_pcl_ros::SlicedPointCloud>("output_encoded", 1);
     max_points_ = 300;
     rate_ = 1.0;                // 1Hz
   }

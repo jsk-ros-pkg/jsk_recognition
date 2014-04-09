@@ -53,6 +53,7 @@ namespace jsk_pcl_ros
   
   void VoxelGridDownsampleManager::pointCB(const sensor_msgs::PointCloud2ConstPtr &input)
   {
+    try {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud (new pcl::PointCloud<pcl::PointXYZ>);
     if (grid_.size() == 0) {
@@ -167,6 +168,11 @@ namespace jsk_pcl_ros
       publish_point_cloud.slice_index = i;
       publish_point_cloud.sequence_id = sequence_id_;
       pub_encoded_.publish(publish_point_cloud);
+      ros::Duration(1.0 / rate_).sleep();
+    }
+    }
+    catch (std::runtime_error e) { // catch any error
+      NODELET_WARN_STREAM("error has occured in VoxelGridDownsampleManager but ignore it: " << e.what());
       ros::Duration(1.0 / rate_).sleep();
     }
   }

@@ -71,8 +71,8 @@ class ImageRotateNodelet : public nodelet::Nodelet
   boost::shared_ptr<tf::TransformListener> tf_sub_;
   tf::TransformBroadcaster tf_pub_;
   boost::shared_ptr<tf2_ros::BufferClient> tf2_client_;
-  image_rotate::ImageRotateConfig config_;
-  dynamic_reconfigure::Server<image_rotate::ImageRotateConfig> srv;
+  jsk_pcl_ros::ImageRotateConfig config_;
+  dynamic_reconfigure::Server<jsk_pcl_ros::ImageRotateConfig> srv;
 
   image_transport::Publisher img_pub_;
   image_transport::Subscriber img_sub_;
@@ -103,7 +103,7 @@ class ImageRotateNodelet : public nodelet::Nodelet
     }
   }
   
-  void reconfigureCallback(image_rotate::ImageRotateConfig &new_config, uint32_t level)
+  void reconfigureCallback(jsk_pcl_ros::ImageRotateConfig &new_config, uint32_t level)
   {
     config_ = new_config;
     target_vector_.setValue(config_.target_x, config_.target_y, config_.target_z);
@@ -327,7 +327,7 @@ public:
     image_transport::SubscriberStatusCallback disconnect_cb = boost::bind(&ImageRotateNodelet::disconnectCb, this, _1);
     img_pub_ = image_transport::ImageTransport(ros::NodeHandle(nh_, "rotated")).advertise("image", 1, connect_cb, disconnect_cb);
 
-    dynamic_reconfigure::Server<image_rotate::ImageRotateConfig>::CallbackType f =
+    dynamic_reconfigure::Server<jsk_pcl_ros::ImageRotateConfig>::CallbackType f =
       boost::bind(&ImageRotateNodelet::reconfigureCallback, this, _1, _2);
     srv.setCallback(f);
   }

@@ -22,7 +22,7 @@ find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros nodelet mess
 add_message_files(FILES IndicesArray.msg PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg SnapItRequest.msg PolygonArray.msg
   SlicedPointCloud.msg)
 add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv SetPointCloud2.srv
-  CallSnapIt.srv)
+  CallSnapIt.srv CallPolygon.srv)
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(

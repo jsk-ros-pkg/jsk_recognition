@@ -2,6 +2,7 @@
 <launch>
   <arg name="INPUT" default="/bgsub_input"/>
   <arg name="OUTPUT" default="/bgsub_output"/>
+  <arg name="TARGET" default="/target"/>
   <arg name="DEFAULT_NAMESPACE" default="background_subtraction"/>
 
   <arg name="create_manager" default="true" />
@@ -13,22 +14,11 @@
           args="manager" output="screen"/>
 
     <node pkg="nodelet" type="nodelet"
-          name="delay_pointcloud"
-          args="load jsk_pcl/DelayPointCloud $(arg manager)"
-           output="screen" clear_params="true">
-      <remap from="~input" to="$(arg INPUT)" />
-      <rosparam>
-        delay_index: 1
-        max_queue_size: 1
-      </rosparam>
-    </node>
-
-    <node pkg="nodelet" type="nodelet"
           name="bg_substract"
           args="load pcl/SegmentDifferences $(arg manager)"
           output="log" clear_params="true">
       <remap from="~input" to="$(arg INPUT)" />
-      <remap from="~target" to="delay_pointcloud/output" />
+      <remap from="~target" to="$(arg TARGET)" />
       <remap from="~output" to="$(arg OUTPUT)" />
       <rosparam>
         max_queue_size: 30

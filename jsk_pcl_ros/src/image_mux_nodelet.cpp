@@ -32,20 +32,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <ros/ros.h>
-#include <nodelet/loader.h>
+#include <nodelet_topic_tools/nodelet_mux.h>
+#include <message_filters/subscriber.h>
+#include <sensor_msgs/Image.h>
+#include <pluginlib/class_list_macros.h>
 
-int main(int argc, char **argv)
-{
-  ros::init(argc, argv, "centroid_publisher");
-
-  // Shared parameters to be propagated to nodelet private namespaces
-  nodelet::Loader manager(true); // Don't bring up the manager ROS API
-  nodelet::M_string remappings;
-  nodelet::V_string my_argv;
-
-  manager.load(ros::this_node::getName(), "jsk_pcl/CentroidPublisher", remappings, my_argv);
-
-  ros::spin();
-  return 0;
-}
+typedef nodelet::NodeletMUX<sensor_msgs::Image, message_filters::Subscriber<sensor_msgs::Image> > NodeletImageMUX;
+PLUGINLIB_DECLARE_CLASS (jsk_pcl, NodeletImageMUX, NodeletImageMUX, nodelet::Nodelet);

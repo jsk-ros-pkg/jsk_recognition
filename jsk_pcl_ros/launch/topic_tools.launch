@@ -1,0 +1,51 @@
+<launch>
+  <arg name="MANAGER" value="/camera/camera_nodelet_manager" />
+  <include file="$(find openni_launch)/launch/openni.launch" />
+  <group ns="camera">
+    <node name="pointcloud_throttle"
+          pkg="nodelet"
+          type="nodelet"
+          output="screen"
+          args="load jsk_pcl/NodeletPointCloudThrottle $(arg MANAGER)">
+      <remap from="topic_in"  to="/camera/depth_registered/points" />
+      <remap from="topic_out" to="/camera/depth_registered/points_throttle" />
+      <param name="update_rate" value="1.0" />
+    </node>
+    <node name="image_throttle"
+          pkg="nodelet"
+          type="nodelet"
+          output="screen"
+          args="load jsk_pcl/NodeletImageThrottle $(arg MANAGER)">
+      <remap from="topic_in"  to="/camera/rgb/image_rect_color" />
+      <remap from="topic_out" to="/camera/rgb/image_rect_color_throttle" />
+      <param name="update_rate" value="1.0" />
+    </node>
+
+    <node name="image_mux"
+          pkg="nodelet"
+          type="nodelet"
+          output="screen"
+          clear_params="true"
+          args="load jsk_pcl/NodeletImageMUX $(arg MANAGER)">
+      <rosparam>
+        input_topics: ["/camera/rgb/image_rect_color", "/camera/rgb/image_rect_mono"]
+      </rosparam>
+      <remap from="~output" to="/image_mux" />
+    </node>
+
+    <!-- NB: NodeletMux is unstable -->
+    <node name="image_demux"
+          pkg="nodelet"
+          if="false"
+          type="nodelet"
+          output="screen"
+          clear_params="true"
+          args="load jsk_pcl/NodeletImageDEMUX $(arg MANAGER)">
+      <rosparam>
+        output_topics: ["/camera/rgb/image_rect_color0", "/camera/rgb/image_rect_color1", "/camera/rgb/image_rect_color2"]
+      </rosparam>
+      <remap from="~input" to="/camera/rgb/image_rect_color" />
+    </node>
+    
+  </group>
+</launch>

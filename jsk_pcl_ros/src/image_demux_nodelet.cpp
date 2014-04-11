@@ -1,8 +1,7 @@
-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Yuto Inagaki and JSK Lab
+ *  Copyright (c) 2013, Ryohei Ueda and JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,20 +32,9 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <ros/ros.h>
-#include <nodelet/loader.h>
+#include <nodelet_topic_tools/nodelet_demux.h>
+#include <sensor_msgs/Image.h>
+#include <pluginlib/class_list_macros.h>
 
-int main(int argc, char **argv)
-{
-  ros::init(argc, argv, "particle_filter_tracking");
-
-  // Shared parameters to be propagated to nodelet private namespaces
-  nodelet::Loader manager(true); // Don't bring up the manager ROS API
-  nodelet::M_string remappings;
-  nodelet::V_string my_argv;
-
-  manager.load(ros::this_node::getName(), "jsk_pcl/ParticleFilterTracking", remappings, my_argv);
-
-  ros::spin();
-  return 0;
-}
+typedef nodelet::NodeletDEMUX<sensor_msgs::Image> NodeletImageDEMUX;
+PLUGINLIB_DECLARE_CLASS (jsk_pcl, NodeletImageDEMUX, NodeletImageDEMUX, nodelet::Nodelet);

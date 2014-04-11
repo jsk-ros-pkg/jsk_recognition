@@ -10,6 +10,7 @@
   <url>http://ros.org/wiki/jsk_pcl_ros</url>
   <depend package="pcl" />
   <depend package="pcl_ros" />
+  <depend package="pcl_conversions" />
   <depend package="opencv2" />
   <depend package="tf" />
   <depend package="sensor_msgs" />
@@ -23,22 +24,8 @@
   <depend package="image_geometry" />
   <depend package="image_view2" />
   <depend package="eigen_conversions" />
-
-  <rosdep name="pcl" />
-  <rosdep name="pcl_ros" />
-  <rosdep name="opencv2" />
-  <rosdep name="tf" />
-  <rosdep name="sensor_msgs" />
-  <rosdep name="geometry_msgs" />
-  <rosdep name="stereo_msgs" />
-  <rosdep name="nodelet" />
-  <rosdep name="dynamic_reconfigure" />
-  <rosdep name="std_srvs" />
-  <rosdep name="std_msgs" />
-  <rosdep name="image_transport" />
-  <rosdep name="image_geometry" />
-  <rosdep name="image_view2" />
-  <rosdep name="eigen_conversions" />
+  <depend package="tf_conversions" />
+  <depend package="tf2_ros" />
 
   <rosdep name="tbb" />
 

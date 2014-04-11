@@ -1,0 +1,29 @@
+<package>
+  <name>imagesift</name>
+  <version>0.1.2</version>
+  <description>
+    For every image, computes its sift features and send a new message with the image, its intrinsic parameters, and the features.
+    Parameters include:
+    display - shows the image on the local computer
+  </description>
+  <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
+  <author>Rosen Diankov (rdiankov@cs.cmu.edu), Kei Okada</author>
+  <license>LGPL</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>posedetection_msgs</build_depend>
+  <build_depend>image_transport</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>libsiftfast</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>posedetection_msgs</run_depend>
+  <run_depend>image_transport</run_depend>
+  <run_depend>cv_bridge</run_depend>
+  <run_depend>libsiftfast</run_depend>
+
+</package>

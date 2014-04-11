@@ -1,6 +1,6 @@
 <package>
   <name>jsk_pcl_ros</name>
-  <version>0.0.1</version>
+  <version>0.1.2</version>
   <description>jsk_pcl_ros</description>
   <maintainer email="youhei@jsk.t.u-tokyo.ac.jp">Youhei Kakiuchi</maintainer>
 
@@ -14,7 +14,7 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <!-- <build_depend>pcl</build_depend> -->
-  <build_depend>pcl_ros</build_depend>
+  <build_depend>pcl_ros</build_depend><build_depend>pcl</build_depend>
   <build_depend>pcl_msgs</build_depend>
   <build_depend>opencv2</build_depend>
   <build_depend>tf</build_depend>
@@ -23,6 +23,8 @@
   <build_depend>stereo_msgs</build_depend>
   <build_depend>nodelet</build_depend>
   <build_depend>eigen_conversions</build_depend>
+  <build_depend>tf_conversions</build_depend>
+  <build_depend>tf2_ros</build_depend>
   <build_depend>pcl_conversions</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>std_srvs</build_depend>
@@ -35,8 +37,10 @@
 
   <!-- <run_depend>pcl</run_depend> -->
   <run_depend>eigen_conversions</run_depend>
+  <run_depend>tf_conversions</run_depend>
+  <run_depend>tf2_ros</run_depend>
   <run_depend>pcl_conversions</run_depend>
-  <run_depend>pcl_ros</run_depend>
+  <run_depend>pcl_ros</run_depend><run_depend>pcl</run_depend>
   <run_depend>pcl_msgs</run_depend>
   <run_depend>opencv2</run_depend>
   <run_depend>tf</run_depend>

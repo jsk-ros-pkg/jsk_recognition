@@ -2,8 +2,8 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.2 (2014-04-11)
+------------------
 * use find_module to check catkin/rosbuild to pass git-buildpackage
 * Contributors: Kei Okada
 

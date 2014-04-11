@@ -165,6 +165,7 @@ namespace jsk_pcl_ros
       toROSMsg(*cluster_out_pcl, cluster_out_ros);
       jsk_pcl_ros::SlicedPointCloud publish_point_cloud;
       cluster_out_ros.header = input->header;
+      publish_point_cloud.point_cloud = cluster_out_ros;
       publish_point_cloud.slice_index = i;
       publish_point_cloud.sequence_id = sequence_id_;
       pub_encoded_.publish(publish_point_cloud);

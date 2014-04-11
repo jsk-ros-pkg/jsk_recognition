@@ -2,6 +2,13 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* use find_moduel to check catkin/rosbuild to pass git-buildpackage
+* Contributors: Kei Okada
+* add CallPolygon.srv for `jsk-ros-pkg/jsk_smart_apps#17 <https://github.com/jsk-ros-pkg/jsk_smart_apps/issues/17>`_
+* Contributors: Yuto Inagaki
+
 0.1.1 (2014-04-10)
 ------------------
 * add depend_tag for pcl_conversions and not needed tags

@@ -2,6 +2,11 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* use find_module to check catkin/rosbuild to pass git-buildpackage
+* Contributors: Kei Okada
+
 0.1.1 (2014-04-10)
 ------------------
 * `#11 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/11>`_: add depend tags

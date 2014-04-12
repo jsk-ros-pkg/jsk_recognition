@@ -2,6 +2,14 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* add depends to visualization_msgs
+* delete lines for refactoring the tracking
+* add RGB color
+* fill point_cloud field
+* Contributors: Ryohei Ueda, Kei Okada, Yuto Inagaki
+
 0.1.2 (2014-04-11)
 ------------------
 * use find_moduel to check catkin/rosbuild to pass git-buildpackage

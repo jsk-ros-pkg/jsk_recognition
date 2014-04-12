@@ -26,6 +26,7 @@
   <depend package="eigen_conversions" />
   <depend package="tf_conversions" />
   <depend package="tf2_ros" />
+  <depend package="visualization_msgs" />
 
   <rosdep name="tbb" />
 

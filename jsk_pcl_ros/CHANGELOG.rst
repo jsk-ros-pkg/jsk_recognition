@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.3 (2014-04-12)
+------------------
 * add depends to visualization_msgs
 * delete lines for refactoring the tracking
 * add RGB color

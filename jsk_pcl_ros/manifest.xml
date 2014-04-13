@@ -28,6 +28,7 @@
   <depend package="tf2_ros" />
   <depend package="visualization_msgs" />
 
+  <rosdep name="boost" />
   <rosdep name="tbb" />
 
   <export>

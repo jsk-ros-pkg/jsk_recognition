@@ -30,6 +30,9 @@
   <build_depend>eigen</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>message_generation</build_depend>
+  <build_depend>rosbuild</build_depend>
+  <build_depend>mk</build_depend>
+  <build_depend>angles</build_depend>
 
   <run_depend>rospy</run_depend>
   <run_depend>roseus</run_depend>
@@ -46,5 +49,8 @@
   <run_depend>eigen</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>message_runtime</run_depend>
+  <run_depend>rosbuild</run_depend>
+  <run_depend>mk</run_depend>
+  <run_depend>angles</run_depend>
 
 </package>

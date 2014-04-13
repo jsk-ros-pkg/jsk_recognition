@@ -30,6 +30,7 @@
   <!-- for build -->
   <depend package="rosbuild"/>
   <depend package="mk"/>
+  <depend package="angles"/>
 
   <rosdep name="opencv2"/>
 </package>

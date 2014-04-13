@@ -26,6 +26,10 @@
   <!-- for pointcloud -->
   <depend package="pcl"/>
   <depend package="pcl_ros"/>
+  
+  <!-- for build -->
+  <depend package="rosbuild"/>
+  <depend package="mk"/>
 
   <rosdep name="opencv2"/>
 </package>

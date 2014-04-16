@@ -1,0 +1,8 @@
+<library path="lib/libjsk_perception">
+  <class name="jsk_perception/EdgeDetector" type="EdgeDetector"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Nodelet to detect edges
+    </description>
+  </class>
+</library>

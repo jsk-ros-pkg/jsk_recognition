@@ -31,6 +31,12 @@
   <depend package="rosbuild"/>
   <depend package="mk"/>
   <depend package="angles"/>
-
+  <depend package="nodelet" />
+  
   <rosdep name="opencv2"/>
+
+  <export>
+    <nodelet plugin="${prefix}/jsk_perception_nodelets.xml"/>
+  </export>
+  
 </package>

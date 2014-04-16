@@ -49,6 +49,8 @@ macro(jsk_perception_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_na
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 endmacro()
 jsk_perception_nodelet(src/edge_detector.cpp "jsk_perception/EdgeDetector" "edge_detector")
+jsk_perception_nodelet(src/sparse_image_encoder.cpp "jsk_perception/SparseImageEncoder" "sparse_image_encoder")
+jsk_perception_nodelet(src/sparse_image_decoder.cpp "jsk_perception/SparseImageDecoder" "sparse_image_decoder")
 
 # compiling jsk_perception library for nodelet
 add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources})

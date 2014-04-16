@@ -68,6 +68,8 @@ jsk_pcl_nodelet(src/image_mux_nodelet.cpp
   "jsk_pcl/NodeletImageMUX" "image_mux")
 jsk_pcl_nodelet(src/image_demux_nodelet.cpp
   "jsk_pcl/NodeletImageDEMUX" "image_demux")
+jsk_pcl_nodelet(src/image_rotate_nodelet.cpp
+  "jsk_pcl/ImageRotateNodelet" "image_rotate")
 
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}

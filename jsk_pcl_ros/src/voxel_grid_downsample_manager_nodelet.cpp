@@ -40,6 +40,7 @@
 #include <pcl/io/io.h>
 #include <pcl_ros/transforms.h>
 #include <boost/format.hpp>
+#include "jsk_pcl_ros/SlicedPointCloud.h"
 
 namespace jsk_pcl_ros
 {
@@ -52,8 +53,9 @@ namespace jsk_pcl_ros
   
   void VoxelGridDownsampleManager::pointCB(const sensor_msgs::PointCloud2ConstPtr &input)
   {
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    try {
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr output_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
     if (grid_.size() == 0) {
       ROS_INFO("the number of registered grids is 0, skipping");
       return;
@@ -67,7 +69,7 @@ namespace jsk_pcl_ros
       // solve tf with ros::Time 0.0
 
       // transform pointcloud to the frame_id of target_grid
-      pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr transformed_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
       pcl_ros::transformPointCloud(target_grid->header.frame_id,
                                    *cloud,
                                    *transformed_cloud,
@@ -86,14 +88,14 @@ namespace jsk_pcl_ros
       double max_z = center_z + range_z / 2.0;
       double resolution = target_grid->color.r;
       // filter order: x -> y -> z -> downsample
-      pcl::PassThrough<pcl::PointXYZ> pass_x;
+      pcl::PassThrough<pcl::PointXYZRGB> pass_x;
       pass_x.setFilterFieldName("x");
       pass_x.setFilterLimits(min_x, max_x);
       
-      pcl::PassThrough<pcl::PointXYZ> pass_y;
+      pcl::PassThrough<pcl::PointXYZRGB> pass_y;
       pass_y.setFilterFieldName("y");
       pass_y.setFilterLimits(min_y, max_y);
-      pcl::PassThrough<pcl::PointXYZ> pass_z;
+      pcl::PassThrough<pcl::PointXYZRGB> pass_z;
       pass_z.setFilterFieldName("z");
       pass_z.setFilterLimits(min_z, max_z);
 
@@ -101,27 +103,27 @@ namespace jsk_pcl_ros
       ROS_INFO_STREAM(id << " filter y: " << min_y << " - " << max_y);
       ROS_INFO_STREAM(id << " filter z: " << min_z << " - " << max_z);
       
-      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_after_x (new pcl::PointCloud<pcl::PointXYZ>);
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_after_x (new pcl::PointCloud<pcl::PointXYZRGB>);
       pass_x.setInputCloud (transformed_cloud);
       pass_x.filter(*cloud_after_x);
 
-      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_after_y (new pcl::PointCloud<pcl::PointXYZ>);
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_after_y (new pcl::PointCloud<pcl::PointXYZRGB>);
       pass_y.setInputCloud (cloud_after_x);
       pass_y.filter(*cloud_after_y);
 
-      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_after_z (new pcl::PointCloud<pcl::PointXYZ>);
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_after_z (new pcl::PointCloud<pcl::PointXYZRGB>);
       pass_z.setInputCloud (cloud_after_y);
       pass_z.filter(*cloud_after_z);
 
       // downsample
-      pcl::VoxelGrid<pcl::PointXYZ> sor;
+      pcl::VoxelGrid<pcl::PointXYZRGB> sor;
       sor.setInputCloud (cloud_after_z);
       sor.setLeafSize (resolution, resolution, resolution);
-      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZRGB>);
       sor.filter (*cloud_filtered);
 
       // reverse transform
-      pcl::PointCloud<pcl::PointXYZ>::Ptr reverse_transformed_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr reverse_transformed_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
       pcl_ros::transformPointCloud(input->header.frame_id,
                                    *cloud_filtered,
                                    *reverse_transformed_cloud,
@@ -130,7 +132,7 @@ namespace jsk_pcl_ros
       // adding the output into *output_cloud
       // tmp <- cloud_filtered + output_cloud
       // output_cloud <- tmp
-      //pcl::PointCloud<pcl::PointXYZ>::Ptr tmp (new pcl::PointCloud<pcl::PointXYZ>);
+      //pcl::PointCloud<pcl::PointXYZRGB>::Ptr tmp (new pcl::PointCloud<pcl::PointXYZRGB>);
       //pcl::concatenatePointCloud (*cloud_filtered, *output_cloud, tmp);
       //output_cloud = tmp;
       ROS_INFO_STREAM(id << " includes " << reverse_transformed_cloud->points.size() << " points");
@@ -151,8 +153,8 @@ namespace jsk_pcl_ros
       size_t end_index = max_points_ * (i + 1) > output_cloud->points.size() ?
         output_cloud->points.size(): max_points_ * (i + 1);
       sensor_msgs::PointCloud2 cluster_out_ros;
-      pcl::PointCloud<pcl::PointXYZ>::Ptr
-        cluster_out_pcl(new pcl::PointCloud<pcl::PointXYZ>);
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr
+        cluster_out_pcl(new pcl::PointCloud<pcl::PointXYZRGB>);
       cluster_out_pcl->points.resize(end_index - start_index);
       // build cluster_out_pcl
       ROS_INFO_STREAM("make cluster from " << start_index << " to " << end_index);
@@ -161,9 +163,17 @@ namespace jsk_pcl_ros
       }
       // conevrt cluster_out_pcl into ros msg
       toROSMsg(*cluster_out_pcl, cluster_out_ros);
+      jsk_pcl_ros::SlicedPointCloud publish_point_cloud;
       cluster_out_ros.header = input->header;
-      cluster_out_ros.header.frame_id = (boost::format("%s %d %d") % (cluster_out_ros.header.frame_id) % (i) % (sequence_id_)).str();
-      pub_encoded_.publish(cluster_out_ros);
+      publish_point_cloud.point_cloud = cluster_out_ros;
+      publish_point_cloud.slice_index = i;
+      publish_point_cloud.sequence_id = sequence_id_;
+      pub_encoded_.publish(publish_point_cloud);
+      ros::Duration(1.0 / rate_).sleep();
+    }
+    }
+    catch (std::runtime_error e) { // catch any error
+      NODELET_WARN_STREAM("error has occured in VoxelGridDownsampleManager but ignore it: " << e.what());
       ros::Duration(1.0 / rate_).sleep();
     }
   }
@@ -218,7 +228,7 @@ namespace jsk_pcl_ros
     bounding_box_sub_ = pnh_->subscribe("add_grid", 1, &VoxelGridDownsampleManager::addGrid,
                                         this);
     pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
-    pub_encoded_ = pnh_->advertise<sensor_msgs::PointCloud2>("output_encoded", 1);
+    pub_encoded_ = pnh_->advertise<jsk_pcl_ros::SlicedPointCloud>("output_encoded", 1);
     max_points_ = 300;
     rate_ = 1.0;                // 1Hz
   }

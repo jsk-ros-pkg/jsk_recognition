@@ -1,43 +1,6 @@
 <launch>
-  <!-- nodeletの名前は/camera_nodelet_manager -->
-  <arg name="manager" default="/camera/camera_nodelet_manager" />
-  <param name="depth_registered" value="true"/>
-  <include file="$(find openni_launch)/launch/openni.launch">
-    <arg name="depth_registration" value="true"/>
+  <!-- nodelet name is /camera/camera_nodelet_manager in hydro-->
+  <include file="$(find jsk_pcl_ros)/launch/tracking.launch">
+    <arg name="manager" default="/camera/camera_nodelet_manager" />
   </include>
-  <arg name="input_point" default="/camera/depth_registered/points" />
-  <!-- 注目する領域の点群だけ抜き出す -->
-  <group ns="pcl_nodelet">
-     <node pkg="nodelet" type="nodelet"
-          name="voxelgrid"
-          args="load pcl/VoxelGrid $(arg manager)"
-          output="screen" clear_params="true">
-      <remap from="~input" to="$(arg input_point)" />
-      <rosparam>
-        filter_limit_max: 5.0
-        leaf_size: 0.01
-      </rosparam>
-    </node>
-     <node pkg="nodelet" type="nodelet"
-          name="passthrough_z"
-          args="load pcl/PassThrough $(arg manager)"
-          output="screen" clear_params="true">
-      <remap from="~input" to="/pcl_nodelet/voxelgrid/output" />
-      <rosparam>
-        filter_field_name: z
-        filter_limit_min: 0.0
-        filter_limit_max: 5.0
-      </rosparam>
-    </node>
-    <node pkg="nodelet" type="nodelet"
-          name="particle_filter_tracker"
-          args="load jsk_pcl/ParticleFilterTracking $(arg manager)"
-          output="screen" clear_params="true">
-      <remap from="~input" to="/pcl_nodelet/passthrough_z/output" />
-      <rosparam>
-        frame: cluster01
-      </rosparam>
-    </node>
-  </group>                      <!-- pcl_nodelet -->
-  <node pkg="jsk_pcl_ros" name="renew_trakcing" type="renew_trakcing.py" />
 </launch>

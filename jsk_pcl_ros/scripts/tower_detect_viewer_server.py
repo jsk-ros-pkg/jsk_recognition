@@ -10,7 +10,7 @@ communicating with the browser and controlling the visualization
 import sys
 import rospy
 
-PKG='jsk_ros_pkg'
+PKG='jsk_pcl_ros'
 
 import imp
 try:

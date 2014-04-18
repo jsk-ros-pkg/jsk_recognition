@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import rospy
 
-PKG='jsk_ros_pkg'
+PKG='jsk_pcl_ros'
 
 import imp
 try:

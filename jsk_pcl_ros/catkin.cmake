@@ -71,6 +71,7 @@ jsk_pcl_nodelet(src/image_demux_nodelet.cpp
 jsk_pcl_nodelet(src/image_rotate_nodelet.cpp
   "jsk_pcl/ImageRotateNodelet" "image_rotate")
 jsk_pcl_nodelet(src/normal_publisher_nodelet.cpp "jsk_pcl/NormalPublisher" "normal_publisher")
+jsk_pcl_nodelet(src/normal_marker_array_nodelet.cpp "jsk_pcl/NormalMarkerArray" "normal_marker_array")
 
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})

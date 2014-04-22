@@ -136,5 +136,11 @@
       NormalPublisher nodelet node
     </description>
   </class>
+  <class name="jsk_pcl/NormalMarkerArray" type="NormalMarkerArray"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Get the pcl normal, visuakize the normal and publish the it for rviz.
+    </description>
+  </class>
 
 </library>

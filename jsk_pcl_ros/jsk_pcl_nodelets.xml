@@ -130,4 +130,11 @@
       HintedPlaneDetector nodelet node
     </description>
   </class>
+  <class name="jsk_pcl/NormalPublisher" type="NormalPublisher"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      NormalPublisher nodelet node
+    </description>
+  </class>
+
 </library>

@@ -142,5 +142,11 @@
       Get the pcl normal, visuakize the normal and publish the it for rviz.
     </description>
   </class>
+  <class name="jsk_pcl/FPFHPublisher" type="FPFHPublisher"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Publish the FPFH
+    </description>
+  </class>
 
 </library>

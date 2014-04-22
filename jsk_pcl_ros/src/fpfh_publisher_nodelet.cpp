@@ -33,14 +33,14 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/fpfh_publisher_nodelet.h"
+#include "jsk_pcl_ros/fpfh_publisher.h"
 #include <pluginlib/class_list_macros.h>
 
 #include <pcl_ros/point_cloud.h>
 namespace jsk_pcl_ros
 {
 
-  bool NormalMarkerArray::check_include_normal_feature(const sensor_msgs::PointCloud2& pc)
+  bool FPFHPublisher::check_include_normal_feature(const sensor_msgs::PointCloud2& pc)
   {
     for(int index= 0; index < pc.fields.size(); index++){
       if(pc.fields[index].name.find("normal",0) != std::string::npos){
@@ -58,7 +58,7 @@ namespace jsk_pcl_ros
       return;
     }
 
-    pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
+    pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGBNormal>());
     pcl::PCLPointCloud2 pcl_pc;
     std::vector<int> indices;
     pcl_conversions::toPCL(pc, pcl_pc);
@@ -100,7 +100,7 @@ namespace jsk_pcl_ros
         radius_search = 0.01;
       }
 
-    sub_input_ = pnh_->subscribe("input", 1, &FPFHPublisher::calculate_normal, this);
+    sub_input_ = pnh_->subscribe("input", 1, &FPFHPublisher::calculate_fpfh, this);
     pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
   }
 }

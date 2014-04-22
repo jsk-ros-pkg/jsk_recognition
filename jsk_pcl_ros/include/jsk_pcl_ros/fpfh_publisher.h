@@ -48,7 +48,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl/filters/impl/filter.hpp>
 #include <pcl_conversions/pcl_conversions.h>
-#include <pcl/features/normal_3d_omp.h>
+#include <pcl/features/fpfh.h>
 
 namespace jsk_pcl_ros
 {

@@ -8,10 +8,15 @@ communicating with the browser and controlling the visualization
 """
 
 import sys
-
 import rospy
-import roslib
-roslib.load_manifest("jsk_pcl_ros")
+
+PKG='jsk_pcl_ros'
+
+import imp
+try:
+    imp.find_module(PKG)
+except:
+    import roslib;roslib.load_manifest(PKG)
 
 from image_view2.msg import ImageMarker2, PointArrayStamped
 from geometry_msgs.msg import Point

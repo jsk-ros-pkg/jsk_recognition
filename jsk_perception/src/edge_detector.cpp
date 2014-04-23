@@ -1,4 +1,4 @@
-#include <ros/ros.h>
+#include <nodelet/nodelet.h>
 #include <jsk_perception/EdgeDetectorConfig.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
@@ -8,9 +8,12 @@
 
 #include <dynamic_reconfigure/server.h>
 
+#include <pluginlib/class_list_macros.h>
+
 namespace enc = sensor_msgs::image_encodings;
 
-class EdgeDetector
+namespace jsk_perception {
+class EdgeDetector: public nodelet::Nodelet
 {
     jsk_perception::EdgeDetectorConfig config_;
     dynamic_reconfigure::Server<jsk_perception::EdgeDetectorConfig> srv;
@@ -18,7 +21,7 @@ class EdgeDetector
     image_transport::Publisher img_pub_;
     image_transport::Subscriber img_sub_;
 
-    image_transport::ImageTransport it_;
+    boost::shared_ptr<image_transport::ImageTransport> it_;
     ros::NodeHandle nh_;
     int subscriber_count_;
 
@@ -66,19 +69,19 @@ class EdgeDetector
             }
         catch (cv::Exception &e)
             {
-                ROS_ERROR("Image processing error: %s %s %s %i", e.err.c_str(), e.func.c_str(), e.file.c_str(), e.line);
+                NODELET_ERROR("Image processing error: %s %s %s %i", e.err.c_str(), e.func.c_str(), e.file.c_str(), e.line);
             }
     }
 
     void subscribe()
     {
-        ROS_DEBUG("Subscribing to image topic.");
-        img_sub_ = it_.subscribe("image", 3, &EdgeDetector::imageCallback, this);
+        NODELET_DEBUG("Subscribing to image topic.");
+        img_sub_ = it_->subscribe("image", 3, &EdgeDetector::imageCallback, this);
     }
 
     void unsubscribe()
     {
-        ROS_DEBUG("Unsubscribing from image topic.");
+        NODELET_DEBUG("Unsubscribing from image topic.");
         img_sub_.shutdown();
     }
 
@@ -98,22 +101,21 @@ class EdgeDetector
     }
 
 public:
-    EdgeDetector(ros::NodeHandle nh = ros::NodeHandle()) : it_(nh), nh_(nh), subscriber_count_(0)
-    {
-        image_transport::SubscriberStatusCallback connect_cb    = boost::bind(&EdgeDetector::connectCb, this, _1);
-        image_transport::SubscriberStatusCallback disconnect_cb = boost::bind(&EdgeDetector::disconnectCb, this, _1);
-        img_pub_ = image_transport::ImageTransport(ros::NodeHandle(nh_, "edge")).advertise("image", 1, connect_cb, disconnect_cb);
+    void onInit() {
+      nh_ = getNodeHandle();
+      it_.reset(new image_transport::ImageTransport(nh_));
+      subscriber_count_ = 0;
+      image_transport::SubscriberStatusCallback connect_cb    = boost::bind(&EdgeDetector::connectCb, this, _1);
+      image_transport::SubscriberStatusCallback disconnect_cb = boost::bind(&EdgeDetector::disconnectCb, this, _1);
+      img_pub_ = image_transport::ImageTransport(ros::NodeHandle(nh_, "edge")).advertise("image", 1, connect_cb, disconnect_cb);
 
-        dynamic_reconfigure::Server<jsk_perception::EdgeDetectorConfig>::CallbackType f =
-            boost::bind(&EdgeDetector::reconfigureCallback, this, _1, _2);
-        srv.setCallback(f);
+      dynamic_reconfigure::Server<jsk_perception::EdgeDetectorConfig>::CallbackType f =
+        boost::bind(&EdgeDetector::reconfigureCallback, this, _1, _2);
+      srv.setCallback(f);
     }
+  
 };
-
-int main(int argc, char **argv)
-{
-    ros::init(argc, argv, "edge_detector", ros::init_options::AnonymousName);
-
-    EdgeDetector ed;
-    ros::spin();
 }
+
+typedef jsk_perception::EdgeDetector EdgeDetector;
+PLUGINLIB_DECLARE_CLASS (jsk_perception, EdgeDetector, EdgeDetector, nodelet::Nodelet);

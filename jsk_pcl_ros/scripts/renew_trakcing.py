@@ -1,7 +1,14 @@
 #!/usr/bin/env python
 import rospy
 
-import roslib; roslib.load_manifest('jsk_pcl_ros') # for rosbuild
+PKG='jsk_pcl_ros'
+
+import imp
+try:
+    imp.find_module(PKG)
+except:
+    import roslib;roslib.load_manifest(PKG)
+
 from sensor_msgs.msg import PointCloud2
 from jsk_pcl_ros.srv import SetPointCloud2
 

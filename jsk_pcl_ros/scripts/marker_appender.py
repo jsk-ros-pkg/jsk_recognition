@@ -1,9 +1,13 @@
 #!/usr/bin/env python
-
-import roslib
 import rospy
 
-roslib.load_manifest("jsk_pcl_ros")
+PKG='jsk_pcl_ros'
+
+import imp
+try:
+    imp.find_module(PKG)
+except:
+    import roslib;roslib.load_manifest(PKG)
 
 from visualization_msgs.msg import Marker, MarkerArray
 

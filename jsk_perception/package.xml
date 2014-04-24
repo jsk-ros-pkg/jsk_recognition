@@ -34,7 +34,8 @@
   <build_depend>mk</build_depend>
   <build_depend>angles</build_depend>
   <build_depend>nodelet</build_depend>
-  
+  <build_depend>rostest</build_depend>
+
   <run_depend>rospy</run_depend>
   <run_depend>roseus</run_depend>
   <run_depend>imagesift</run_depend>
@@ -54,6 +55,7 @@
   <run_depend>mk</run_depend>
   <run_depend>angles</run_depend>
   <run_depend>nodelet</run_depend>
+  <run_depend>rostest</run_depend>
   <export>
     <nodelet plugin="${prefix}/jsk_perception_nodelets.xml"/>
   </export>

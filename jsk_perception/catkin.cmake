@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(jsk_perception)
 
-find_package(catkin REQUIRED COMPONENTS message_generation imagesift std_msgs sensor_msgs geometry_msgs cv_bridge image_geometry image_transport driver_base dynamic_reconfigure pcl_ros eigen roscpp nodelet)
+find_package(catkin REQUIRED COMPONENTS message_generation imagesift std_msgs sensor_msgs geometry_msgs cv_bridge image_geometry image_transport driver_base dynamic_reconfigure pcl_ros eigen roscpp nodelet rostest)
 find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 
@@ -9,7 +9,7 @@ find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 generate_dynamic_reconfigure_options(cfg/camshiftdemo.cfg cfg/EdgeDetector.cfg cfg/HoughLines.cfg cfg/matchtemplate.cfg cfg/point_pose_extractor.cfg cfg/RectangleDetector.cfg)
 
 add_message_files(FILES # ClusterPointIndices.msg
-      PointsArray.msg RotatedRectStamped.msg LineArray.msg Rect.msg Line.msg RotatedRect.msg)
+      PointsArray.msg RotatedRectStamped.msg LineArray.msg Rect.msg Line.msg RotatedRect.msg SparseImage.msg)
 
 add_service_files(FILES EuclideanSegment.srv  SetTemplate.srv  WhiteBalancePoints.srv  WhiteBalance.srv)
 
@@ -92,3 +92,4 @@ install(DIRECTORY sample launch euslisp
 
 install(FILES jsk_perception_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
+add_rostest(test/sparse_image.test)

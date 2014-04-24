@@ -36,9 +36,13 @@ class SparseImageEncoder: public nodelet::Nodelet
 
       // check if uint16 array needed
       bool useData32 = false;
-      if (std::max(msg->width, msg->height) > 256) useData32 = true;
+      if (std::max(msg->width, msg->height) > 256){
+        useData32 = true;
+        NODELET_DEBUG("use data32 array");
+      }
 
       _spr_img_ptr->header.stamp = msg->header.stamp;
+      _spr_img_ptr->header.frame_id = input_frame_from_msg;
       _spr_img_ptr->width  = msg->width;
       _spr_img_ptr->height = msg->height;
       if (!_spr_img_ptr->data16.empty()) _spr_img_ptr->data16.clear();
@@ -47,7 +51,7 @@ class SparseImageEncoder: public nodelet::Nodelet
       // make sparse image
       for (uint32_t y = 0; y < msg->height; ++y){
         for (uint32_t x = 0; x < msg->width; ++x){
-          if(msg->data[(x+y*msg->step)*channel] > 0){
+          if(msg->data[x*channel+y*msg->step] > 125){
             if (useData32) _spr_img_ptr->data32.push_back( (x << 16) | y );
             else           _spr_img_ptr->data16.push_back( (x << 8)  | y );
           }
@@ -61,7 +65,7 @@ class SparseImageEncoder: public nodelet::Nodelet
       NODELET_ERROR("making sparse image error");
     }
 
-    ros::Rate pubRate(_rate);
+    ros::Rate pubRate(_rate); // hz
     pubRate.sleep();
   } // end of do_work function
 
@@ -75,13 +79,13 @@ class SparseImageEncoder: public nodelet::Nodelet
     _img_sub.shutdown();
   }
 
-  void connectCb(const image_transport::SingleSubscriberPublisher& ssp) {
+  void connectCb(const ros::SingleSubscriberPublisher& ssp) {
     if (_subscriber_count++ == 0) {
       subscribe();
     }
   }
 
-  void disconnectCb(const image_transport::SingleSubscriberPublisher&) {
+  void disconnectCb(const ros::SingleSubscriberPublisher&) {
     _subscriber_count--;
     if (_subscriber_count == 0) {
       unsubscribe();
@@ -94,16 +98,14 @@ public:
     _ln = ros::NodeHandle("~");
     _it.reset(new image_transport::ImageTransport(_nh));
     _subscriber_count = 0;
-    image_transport::SubscriberStatusCallback connect_cb = boost::bind(&SparseImageEncoder::connectCb, this, _1);
-      image_transport::SubscriberStatusCallback disconnect_cb = boost::bind(&SparseImageEncoder::disconnectCb, this, _1);
-      _spr_img_pub = _nh.advertise<jsk_perception::SparseImage>("sparse_image", 10);
-      _spr_img_ptr = boost::make_shared<jsk_perception::SparseImage>();
-
-      _ln.param("rate", _rate, 3.0);
+    ros::SubscriberStatusCallback connect_cb    = boost::bind(&SparseImageEncoder::connectCb, this, _1);
+    ros::SubscriberStatusCallback disconnect_cb = boost::bind(&SparseImageEncoder::disconnectCb, this, _1);
+    _spr_img_pub = _nh.advertise<jsk_perception::SparseImage>("sparse_image", 10, connect_cb, disconnect_cb);
+    _spr_img_ptr = boost::make_shared<jsk_perception::SparseImage>();
+    _ln.param("rate", _rate, 3.0);
   } // end of onInit function
 }; // end of SparseImageEncoder class definition
 } // end of jsk_perception namespace
 
 typedef jsk_perception::SparseImageEncoder SparseImageEncoder;
 PLUGINLIB_DECLARE_CLASS (jsk_perception, SparseImageEncoder, SparseImageEncoder, nodelet::Nodelet);
-

@@ -77,3 +77,4 @@ ADD_CUSTOM_COMMAND(
   COMMAND ${CMAKE_SOURCE_DIR}/src/eusmodel_template_gen.sh)
 ADD_CUSTOM_TARGET(eusmodel_template ALL DEPENDS ${CMAKE_SOURCE_DIR}/template)
 
+rosbuild_add_rostest(test/sparse_image.test)

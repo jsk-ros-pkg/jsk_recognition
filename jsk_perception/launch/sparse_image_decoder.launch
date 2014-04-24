@@ -1,0 +1,10 @@
+<launch>
+  <node pkg="jsk_perception" type="sparse_image_decoder" name="sparse_image_decoder"
+        output="screen">
+    <remap from="sparse_image" to="sparse/image" />
+    <remap from="sparse/image_decoded" to="edge/image_decoded" />
+  </node>
+  <node pkg="image_view" type="image_view" name="sparse_edge_image_view">
+    <remap from="image" to="edge/image_decoded" />
+  </node>
+</launch>

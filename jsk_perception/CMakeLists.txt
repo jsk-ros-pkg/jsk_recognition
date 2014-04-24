@@ -64,6 +64,8 @@ macro(jsk_perception_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_na
 endmacro(jsk_perception_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
 
 jsk_perception_nodelet(src/edge_detector.cpp "jsk_perception/EdgeDetector" "edge_detector")
+jsk_perception_nodelet(src/sparse_image_encoder.cpp "jsk_perception/SparseImageEncoder" "sparse_image_encoder")
+jsk_perception_nodelet(src/sparse_image_decoder.cpp "jsk_perception/SparseImageDecoder" "sparse_image_decoder")
 rosbuild_add_library (${PROJECT_NAME}
   ${jsk_perception_nodelet_sources}
   )
@@ -75,3 +77,4 @@ ADD_CUSTOM_COMMAND(
   COMMAND ${CMAKE_SOURCE_DIR}/src/eusmodel_template_gen.sh)
 ADD_CUSTOM_TARGET(eusmodel_template ALL DEPENDS ${CMAKE_SOURCE_DIR}/template)
 
+rosbuild_add_rostest(test/sparse_image.test)

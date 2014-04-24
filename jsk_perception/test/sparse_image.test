@@ -1,0 +1,14 @@
+<launch>
+  <node name="sparse_image_encoder"
+        pkg="jsk_perception" type="sparse_image_encoder">
+    <remap from="image" to="/test_edge_image"/>
+  </node>
+  <node name="sparse_image_decoder"
+        pkg="jsk_perception" type="sparse_image_decoder">
+    <remap from="sparse_image" to="sparse_image"/>
+    <remap from="image" to="/sparse/image_decoded"/>
+  </node>
+  <test test-name="sparse_image_test"
+        pkg="jsk_perception" type="test_sparse_image.py"
+        name="test_sparse_image" />
+</launch>

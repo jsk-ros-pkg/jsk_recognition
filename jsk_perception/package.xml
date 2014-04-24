@@ -31,6 +31,7 @@
   <build_depend>roscpp</build_depend>
   <build_depend>message_generation</build_depend>
   <build_depend>rosbuild</build_depend>
+  <build_depend>cmake_modules</build_depend>
   <build_depend>mk</build_depend>
   <build_depend>angles</build_depend>
   <build_depend>nodelet</build_depend>

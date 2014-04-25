@@ -2,6 +2,11 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fixed compile error jsk_pcl_ros
+* Contributors: Kei Okada, Ryohei Ueda, Yuto Inagaki
+
 0.1.3 (2014-04-12)
 ------------------
 * add depends to visualization_msgs

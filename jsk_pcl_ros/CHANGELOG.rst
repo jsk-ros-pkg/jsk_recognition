@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.4 (2014-04-25)
+------------------
 * fixed compile error jsk_pcl_ros
 * Contributors: Kei Okada, Ryohei Ueda, Yuto Inagaki
 

@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.4 (2014-04-25)
+------------------
 
 * add sparse_image program to jsk_percepton
 * make edge_detector nodelet class

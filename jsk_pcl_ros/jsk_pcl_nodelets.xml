@@ -130,4 +130,10 @@
       HintedPlaneDetector nodelet node
     </description>
   </class>
+  <class name="jsk_pcl/OctreeChangePublisher" type="OctreeChangePublisher"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      OctreeChangePublisher nodelet node
+    </description>
+  </class>
 </library>

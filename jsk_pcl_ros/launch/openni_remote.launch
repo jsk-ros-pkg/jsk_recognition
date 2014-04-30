@@ -21,4 +21,20 @@
     <arg name="depth_processing" value="true" />
     <arg name="depth_registered_processing" value="true" />
   </include>
+  
+  <!-- camera_info relaying -->
+  <group ns="camera_remote">
+    <group ns="rgb">
+      <node pkg="topic_tools"
+	    type="relay"
+	    name="relay_camera_info"
+	    args="/camera/rgb/camera_info /camera_remote/rgb/camera_info" />
+    </group>
+    <group ns="depth">
+      <node pkg="topic_tools"
+	    type="relay"
+	    name="relay_camera_info"
+	    args="/camera/depth/camera_info /camera_remote/depth/camera_info" />
+    </group>
+  </group>
 </launch>

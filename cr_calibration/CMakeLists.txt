@@ -16,11 +16,13 @@ cmake_minimum_required(VERSION 2.4.6)
 #set the default path for built libraries to the "lib" directory
 #set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
-execute_process(COMMAND ${PROJECT_SOURCE_DIR}/apply_patch.sh
-                RESULT_VARIABLE _make_failed)
-if(_make_failed)
-  message(FATAL_ERROR "patch error for camera calibration")
-endif(_make_failed)
+if($ENV{ROS_DISTRO} STREQUAL "diamondback")
+  execute_process(COMMAND ${PROJECT_SOURCE_DIR}/apply_patch.sh
+    RESULT_VARIABLE _make_failed)
+  if(_make_failed)
+    message(FATAL_ERROR "patch error for camera calibration")
+  endif(_make_failed)
+endif()
 
 #uncomment if you have defined messages
 #rosbuild_genmsg()

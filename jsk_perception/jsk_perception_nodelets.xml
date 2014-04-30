@@ -1,0 +1,20 @@
+<library path="lib/libjsk_perception">
+  <class name="jsk_perception/EdgeDetector" type="EdgeDetector"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Nodelet to detect edges
+    </description>
+  </class>
+  <class name="jsk_perception/SparseImageEncoder" type="SparseImageEncoder"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Nodelet to encode image to an array of sparse matrix.
+    </description>
+  </class>
+  <class name="jsk_perception/SparseImageDecoder" type="SparseImageDecoder"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Nodelet to decode from an array of sparse matrix to image.
+    </description>
+  </class>
+</library>

@@ -116,15 +116,15 @@ namespace jsk_pcl_ros
     }
     
     std::string result_frame_id = getPointcloudFrameId(pc_buffer_[0]);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr concatenated_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr concatenated_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
     for (size_t i = 0; i < pc_buffer_.size(); i++)
     {
       if (!pc_buffer_[i]) {
         NODELET_INFO_STREAM("buffer[" << i << "] is not yet available, skip it");
         continue;
       }
-      pcl::PointCloud<pcl::PointXYZ>::Ptr tmp_cloud (new pcl::PointCloud<pcl::PointXYZ>);
-      pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_tmp_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr tmp_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr transformed_tmp_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
       fromROSMsg(pc_buffer_[i]->point_cloud, *tmp_cloud);
       if (tmp_cloud->points.size() == 0) {
         NODELET_INFO_STREAM("buffer[" << i << "] is not yet available, skip it");

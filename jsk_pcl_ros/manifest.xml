@@ -26,7 +26,11 @@
   <depend package="eigen_conversions" />
   <depend package="tf_conversions" />
   <depend package="tf2_ros" />
+  <depend package="visualization_msgs" />
+  <depend package="rosboost_cfg" />
+  <depend package="cv_bridge" />
 
+  <rosdep name="boost" />
   <rosdep name="tbb" />
 
   <export>

@@ -1,6 +1,5 @@
 <launch>
   <arg name="manager" default="/camera_nodelet_manager" />
-  <param name="depth_registered" value="true"/>
   <include file="$(find openni_launch)/launch/openni.launch">
     <arg name="depth_registration" value="true"/>
   </include>

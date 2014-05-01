@@ -41,25 +41,44 @@
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl/filters/conditional_removal.h>
 #include "jsk_pcl_ros/RGBColorFilterConfig.h"
-
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
 #include <dynamic_reconfigure/server.h>
+
+#if ROS_VERSION_MINIMUM(1, 10, 0)
+// hydro and later
+typedef pcl_msgs::PointIndices PCLIndicesMsg;
+#else
+// groovy
+typedef pcl::PointIndices PCLIndicesMsg;
+#endif
+
 
 namespace jsk_pcl_ros
 {
   class RGBColorFilter: public pcl_ros::PCLNodelet
   {
+  public:
+    typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2,
+                                                      PCLIndicesMsg> SyncPolicy;
+    typedef pcl::ConditionBase<pcl::PointXYZRGB>::Ptr ConditionPtr;
+    typedef pcl::ComparisonBase<pcl::PointXYZRGB>::Ptr ComparisonPtr;
+    typedef pcl::PackedRGBComparison<pcl::PointXYZRGB> RGBComparison;
   protected:
     boost::mutex mutex_;
     int r_min_, r_max_, b_min_, b_max_, g_min_, g_max_;
     pcl::ConditionalRemoval<pcl::PointXYZRGB> filter_instance_;
-    ros::Subscriber sub_input_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
+    message_filters::Subscriber<PCLIndicesMsg> sub_indices_;
     ros::Publisher pub_;
     typedef jsk_pcl_ros::RGBColorFilterConfig Config;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     virtual void configCallback(Config &config, uint32_t level);
     virtual void updateCondition();
     virtual void filter(const sensor_msgs::PointCloud2ConstPtr &input);
-  public:
+    virtual void filter(const sensor_msgs::PointCloud2ConstPtr &input,
+                        const PCLIndicesMsg::ConstPtr& indices);
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
   private:
     virtual void onInit();
   };

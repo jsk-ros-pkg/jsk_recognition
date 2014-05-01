@@ -41,7 +41,7 @@ namespace jsk_pcl_ros
 
   void RGBColorFilter::updateCondition()
   {
-    pcl::ConditionBase<pcl::PointXYZRGB>::Ptr condp (new pcl::ConditionAnd<pcl::PointXYZRGB> ());
+    ConditionPtr condp (new pcl::ConditionAnd<pcl::PointXYZRGB> ());
 
     int r_max, r_min, g_max, g_min, b_max, b_min;
     if ( r_max_ >= r_min_ ) {
@@ -70,31 +70,25 @@ namespace jsk_pcl_ros
     }
     
     { 
-      pcl::ConditionBase<pcl::PointXYZRGB>::Ptr cond (new pcl::ConditionAnd<pcl::PointXYZRGB> ());
-      pcl::ComparisonBase<pcl::PointXYZRGB>::Ptr
-        le (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("r", pcl::ComparisonOps::LE, r_max));
-      pcl::ComparisonBase<pcl::PointXYZRGB>::Ptr
-        ge (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("r", pcl::ComparisonOps::GE, r_min));
+      ConditionPtr cond (new pcl::ConditionAnd<pcl::PointXYZRGB> ());
+      ComparisonPtr le (new RGBComparison ("r", pcl::ComparisonOps::LE, r_max));
+      ComparisonPtr ge (new RGBComparison ("r", pcl::ComparisonOps::GE, r_min));
       cond->addComparison (le);
       cond->addComparison (ge);
       condp->addCondition(cond);
     }
     { 
-      pcl::ConditionBase<pcl::PointXYZRGB>::Ptr cond (new pcl::ConditionAnd<pcl::PointXYZRGB> ());
-      pcl::ComparisonBase<pcl::PointXYZRGB>::Ptr
-        le (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("g", pcl::ComparisonOps::LE, g_max));
-      pcl::ComparisonBase<pcl::PointXYZRGB>::Ptr
-        ge (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("g", pcl::ComparisonOps::GE, g_min));
+      ConditionPtr cond (new pcl::ConditionAnd<pcl::PointXYZRGB> ());
+      ComparisonPtr le (new RGBComparison ("g", pcl::ComparisonOps::LE, g_max));
+      ComparisonPtr ge (new RGBComparison ("g", pcl::ComparisonOps::GE, g_min));
       cond->addComparison (le);
       cond->addComparison (ge);
       condp->addCondition(cond);
     }
     {
-      pcl::ConditionBase<pcl::PointXYZRGB>::Ptr cond (new pcl::ConditionAnd<pcl::PointXYZRGB> ());
-      pcl::ComparisonBase<pcl::PointXYZRGB>::Ptr
-        le (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("b", pcl::ComparisonOps::LE, b_max));
-      pcl::ComparisonBase<pcl::PointXYZRGB>::Ptr
-        ge (new pcl::PackedRGBComparison<pcl::PointXYZRGB> ("b", pcl::ComparisonOps::GE, b_min));
+      ConditionPtr cond (new pcl::ConditionAnd<pcl::PointXYZRGB> ());
+      ComparisonPtr le (new RGBComparison ("b", pcl::ComparisonOps::LE, b_max));
+      ComparisonPtr ge (new RGBComparison ("b", pcl::ComparisonOps::GE, b_min));
       cond->addComparison (le);
       cond->addComparison (ge);
       condp->addCondition(cond);
@@ -102,28 +96,29 @@ namespace jsk_pcl_ros
 
     filter_instance_.setCondition (condp);
   }
-  
-  void RGBColorFilter::filter(const sensor_msgs::PointCloud2ConstPtr &input)
+
+  void RGBColorFilter::filter(const sensor_msgs::PointCloud2ConstPtr &input,
+                              const PCLIndicesMsg::ConstPtr& indices)
   {
     pcl::PointCloud<pcl::PointXYZRGB> tmp_in, tmp_out;
     sensor_msgs::PointCloud2 out;
     fromROSMsg(*input, tmp_in);
-
-    // for (size_t i = 0; i < tmp_in.points.size(); i++) {
-    //   pcl::PointXYZRGB p = tmp_in.points[i];
-    //   uint32_t rgb = *reinterpret_cast<int*>(&p.rgb);
-    //   uint8_t r = (rgb >> 16) & 0x0000ff;
-    //   uint8_t g = (rgb >> 8)  & 0x0000ff;
-    //   uint8_t b = (rgb)       & 0x0000ff;
-    //   NODELET_INFO("r: %u g: %u b: %u", r, g, b);
-    // }
-    
     filter_instance_.setInputCloud (tmp_in.makeShared());
+    if (indices) {
+      pcl::IndicesPtr vindices;
+      vindices.reset(new std::vector<int> (indices->indices));
+      filter_instance_.setIndices(vindices);
+    }
     filter_instance_.filter(tmp_out);
     if (tmp_out.points.size() > 0) {
       toROSMsg(tmp_out, out);
       pub_.publish(out);
     }
+  }
+  
+  void RGBColorFilter::filter(const sensor_msgs::PointCloud2ConstPtr &input)
+  {
+    filter(input, PCLIndicesMsg::ConstPtr());
   }
 
   void RGBColorFilter::configCallback(Config &config, uint32_t level)
@@ -150,7 +145,17 @@ namespace jsk_pcl_ros
     filter_instance_ = pcl::ConditionalRemoval<pcl::PointXYZRGB>(true);
     updateCondition();
     pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
-    sub_input_ = pnh_->subscribe("input", 1, &RGBColorFilter::filter, this);
+    sub_input_.subscribe(*pnh_, "input", 1);
+    if (use_indices_) {
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(10);
+      sub_indices_.subscribe(*pnh_, "indices", 1);
+      sync_->connectInput(sub_input_, sub_indices_);
+      sync_->registerCallback(boost::bind(&RGBColorFilter::filter, this, _1, _2));
+      //sub_input_ = pnh_->subscribe("input", 1, &RGBColorFilter::filter, this);
+    }
+    else {
+      sub_input_.registerCallback(&RGBColorFilter::filter, this);
+    }
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&RGBColorFilter::configCallback, this, _1, _2);

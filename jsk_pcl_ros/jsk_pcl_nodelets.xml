@@ -130,4 +130,16 @@
       HintedPlaneDetector nodelet node
     </description>
   </class>
+  <class name="jsk_pcl/OctreeChangePublisher" type="OctreeChangePublisher"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      OctreeChangePublisher nodelet node
+    </description>
+  </class>
+  <class name="jsk_pcl/TfTransformCloud" type="TfTransformCloud"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      publish transformed cloud with target id
+    </description>
+  </class>
 </library>

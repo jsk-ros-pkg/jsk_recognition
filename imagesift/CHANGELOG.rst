@@ -2,6 +2,9 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.4 (2014-04-25)
+------------------
+
 0.1.3 (2014-04-12)
 ------------------
 * use pkg_check_moduels for libsiftfast, due to https://github.com/jsk-ros-pkg/jsk_common/pull/380

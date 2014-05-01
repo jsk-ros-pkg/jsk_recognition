@@ -29,6 +29,7 @@
   
   <!-- for build -->
   <depend package="rosbuild"/>
+  <depend package="cmake_modules"/>
   <depend package="mk"/>
   <depend package="angles"/>
   <depend package="nodelet" />

@@ -1,0 +1,31 @@
+<launch>
+  <arg name="manager" default="/camera_nodelet_manager" />
+
+  <include file="$(find openni_launch)/launch/openni.launch">
+    <param name="depth_registered" value="true"/>
+  </include>
+
+  <arg name="input_point" default="/camera/depth_registered/points" />
+  <group ns="pcl_nodelet">
+    <node pkg="nodelet" type="nodelet"
+          name="voxelgrid"
+          args="load pcl/VoxelGrid $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="$(arg input_point)" />
+      <rosparam>
+        filter_limit_max: 5.0
+        leaf_size: 0.01
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="octree_change_detector"
+          args="load jsk_pcl/OctreeChangePublisher $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="/pcl_nodelet/voxelgrid/output" />
+      <rosparam>
+        resolution: 0.02
+        noise_filter: 2
+      </rosparam>
+    </node>
+  </group>
+</launch>

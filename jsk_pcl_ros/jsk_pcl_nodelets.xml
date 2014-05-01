@@ -1,5 +1,10 @@
 <library path="lib/libjsk_pcl_ros">
 
+  <class name="jsk_pcl/ImageRotateNodelet" type="ImageRotateNodelet"
+         base_class_type="nodelet::Nodelet">
+    <description>Nodelet to rotate sensor_msgs/Image</description>
+  </class>
+
   <class name="jsk_pcl/NodeletPointCloudThrottle" type="NodeletPointCloudThrottle"
          base_class_type="nodelet::Nodelet">
     <description>
@@ -123,6 +128,18 @@
          base_class_type="nodelet::Nodelet">
     <description>
       HintedPlaneDetector nodelet node
+    </description>
+  </class>
+  <class name="jsk_pcl/OctreeChangePublisher" type="OctreeChangePublisher"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      OctreeChangePublisher nodelet node
+    </description>
+  </class>
+  <class name="jsk_pcl/TfTransformCloud" type="TfTransformCloud"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      publish transformed cloud with target id
     </description>
   </class>
 </library>

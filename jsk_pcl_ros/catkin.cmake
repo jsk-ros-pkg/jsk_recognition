@@ -16,19 +16,24 @@ if($ENV{ROS_DISTRO} STREQUAL "groovy")
 else()
   set(PCL_MSGS pcl_msgs) ## hydro and later
 endif()
-find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros nodelet message_generation genmsg ${PCL_MSGS} sensor_msgs geometry_msgs)
+find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros nodelet message_generation genmsg ${PCL_MSGS} sensor_msgs geometry_msgs
+  eigen_conversions tf_conversions tf2_ros tf image_transport nodelet cv_bridge)
 
-add_message_files(FILES IndicesArray.msg PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg SnapItRequest.msg PolygonArray.msg)
+add_message_files(FILES IndicesArray.msg PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg SnapItRequest.msg PolygonArray.msg
+  SlicedPointCloud.msg)
 add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv SetPointCloud2.srv
-  CallSnapIt.srv)
+  CallSnapIt.srv CallPolygon.srv)
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
   cfg/HSVColorFilter.cfg
   cfg/RGBColorFilter.cfg
+  cfg/ImageRotate.cfg
   )
 
-include_directories(include ${catkin_INCLUDE_DIRS})
+find_package(OpenCV REQUIRED core imgproc)
+
+include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 
 macro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
   list(APPEND jsk_pcl_nodelet_sources ${_nodelet_cpp})
@@ -57,15 +62,23 @@ jsk_pcl_nodelet(src/snapit_nodelet.cpp "jsk_pcl/Snapit" "snapit")
 jsk_pcl_nodelet(src/keypoints_publisher_nodelet.cpp "jsk_pcl/KeypointsPublisher" "keypoints_publisher")
 jsk_pcl_nodelet(src/hinted_plane_detector_nodelet.cpp "jsk_pcl/HintedPlaneDetector" "hinted_plane_detector")
 jsk_pcl_nodelet(src/pointcloud_throttle_nodelet.cpp "jsk_pcl/NodeletPointCloudThrottle" "point_cloud_throttle")
+jsk_pcl_nodelet(src/centroid_publisher_nodelet.cpp "jsk_pcl/CentroidPublisher" "centroid_publisher")
 jsk_pcl_nodelet(src/image_throttle_nodelet.cpp
   "jsk_pcl/NodeletImageThrottle" "image_throttle")
 jsk_pcl_nodelet(src/image_mux_nodelet.cpp
   "jsk_pcl/NodeletImageMUX" "image_mux")
 jsk_pcl_nodelet(src/image_demux_nodelet.cpp
   "jsk_pcl/NodeletImageDEMUX" "image_demux")
+jsk_pcl_nodelet(src/image_rotate_nodelet.cpp
+  "jsk_pcl/ImageRotateNodelet" "image_rotate")
+jsk_pcl_nodelet(src/octree_change_publisher_nodelet.cpp
+  "jsk_pcl/OctreeChangePublisher" "octree_change_publisher")
+jsk_pcl_nodelet(src/tf_transform_cloud_nodelet.cpp
+  "jsk_pcl/TfTransformCloud" "tf_transform_cloud")
+
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
-target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES})
+target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 
 generate_messages(DEPENDENCIES ${PCL_MSGS} sensor_msgs geometry_msgs)

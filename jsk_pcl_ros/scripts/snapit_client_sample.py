@@ -1,9 +1,14 @@
 #!/usr/bin/env python
-
 import rospy
-import roslib
 
-roslib.load_manifest("jsk_pcl_ros")
+PKG='jsk_pcl_ros'
+
+import imp
+try:
+    imp.find_module(PKG)
+except:
+    import roslib;roslib.load_manifest(PKG)
+
 roslib.load_manifest("interactive_markers")
 from interactive_markers.interactive_marker_server import *
 from interactive_markers.menu_handler import *

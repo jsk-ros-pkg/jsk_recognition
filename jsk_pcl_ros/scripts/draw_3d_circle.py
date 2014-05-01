@@ -1,8 +1,14 @@
 #!/usr/bin/env python
-
 import rospy
-import roslib
-roslib.load_manifest("jsk_pcl_ros")
+
+PKG='jsk_pcl_ros'
+
+import imp
+try:
+    imp.find_module(PKG)
+except:
+    import roslib;roslib.load_manifest(PKG)
+
 import sys
 from image_view2.msg import ImageMarker2, PointArrayStamped
 from geometry_msgs.msg import Point

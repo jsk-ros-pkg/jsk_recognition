@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<package>
+  <name>jsk_recognition</name>
+  <version>0.1.4</version>
+  <description>
+   <p>Metapackage that contains recognition package for jsk-ros-pkg</p>
+  </description>
+
+  <maintainer email="ueda@jsk.t.u-tokyo.ac.jp">Ryohei Ueda</maintainer>
+  <author email="ueda@jsk.t.u-tokyo.ac.jp">Ryohei Ueda</author>
+  <author email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</author>
+  <author email="youhei@jsk.imi.i.u-tokyo.ac.jp">Youhei Kakiuchi</author>
+
+  <license>BSD</license>
+  <url type="website">http://ros.org/wiki/jsk_recognition</url>
+  <url type="repository">https://github.com/jsk-ros-pkg/jsk_recognition</url>
+  <url type="bugtracker">https://github.com/jsk-ros-pkg/jsk_recognition/issues</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>checkerboard_detector</run_depend>
+  <run_depend>imagesift</run_depend>
+  <run_depend>jsk_pcl_ros</run_depend>
+  <run_depend>jsk_perception</run_depend>
+  <run_depend>resized_image_transport</run_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+</package>

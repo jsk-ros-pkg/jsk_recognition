@@ -100,6 +100,7 @@ namespace jsk_pcl_ros
   void RGBColorFilter::filter(const sensor_msgs::PointCloud2ConstPtr &input,
                               const PCLIndicesMsg::ConstPtr& indices)
   {
+    boost::mutex::scoped_lock lock (mutex_);
     pcl::PointCloud<pcl::PointXYZRGB> tmp_in, tmp_out;
     sensor_msgs::PointCloud2 out;
     fromROSMsg(*input, tmp_in);

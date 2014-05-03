@@ -8,11 +8,11 @@ This package provides some programs as nodelet.
 
 ## nodelets
 ### jsk\_pcl/ParticleFilterTracking
-####What Is This
+#### What Is This
 
 This nodelet will track the target pointcloud which you set in rviz.
 
-####Sample
+#### Sample
 
 run the below command.
 
@@ -25,10 +25,8 @@ and run the rviz.
 
 
 ```
-rosrun rviz rviz
+rosrun rviz rviz -D `rospack find jsk_pcl_ros`/launch/rviz/tracking.rviz
 ```
-
-After rviz brang up, select "Add New Panel" and choose jsk_rviz_plugins' SelectPointCloudPublishAction Panel. Now, the new Panel will appear at left display.
 
 Push the "Select" button at the top bar , drag and surround the target poincloud which you want to track in the rectangle area.Then, finally, push the "SelectPointCloudPublishActoin" button at SelectPointCloudPublishAction Panel. The tracker will start tracking the target.
 
@@ -40,25 +38,65 @@ Push the "Select" button at the top bar , drag and surround the target poincloud
 ### jsk\_pcl/ClusterPointIndicesDecomposer
 ### jsk\_pcl/ClusterPointIndicesDecomposerZAxis
 ### jsk\_pcl/CentroidPublisher
+#### What Is This
+
+This nodelet will subscribe the sensor_msgs::PointCloud2, calculate its centroid  and boardcast the tf whose parent is cloud headers frame_id and whose child is the new centroid frame_id.
+
+#### Sample
+Plug the depth sensor which can be launched by openni.launch and run the below command.
+
+```
+roslaunch jsk_pcl_ros centroid_publisher.launch
+```
+
+And launch rviz.
+
+```
+rosrun rviz rviz -d `rospack find jsk_pcl_ros`/launch/rviz/centroid_publisher.rviz
+```
+
 ### jsk\_pcl/VoxelGridDownsampleManager
 ### jsk\_pcl/VoxelGridDownsampleDecoder
 ### jsk\_pcl/Snapit
 ### jsk\_pcl/KeypointsPublisher
 ### jsk\_pcl/HintedPlaneDetector
-### jsk\_pcl/ObjectChangeDetector
-####What Is This
+### jsk\_pcl/OctreeChangeDetector
+#### What Is This
 
 This nodelet will publish the difference of sequential pointcloud. You can get the newly generated pointclouds.
 
 Difference with pcl_ros/SegmentDifference refer https://github.com/jsk-ros-pkg/jsk_recognition/pull/67
 
-####Sample
+#### Sample
 
-####Speed
+Plug the depth sensor which can be launched by openni.launch and run the below command.
+
+```
+roslaunch jsk_pcl_ros octree_change_detector.launch
+```
+
+And launch rviz.
+
+```
+rosrun rviz rviz -d `rospack find jsk_pcl_ros`/launch/rviz/octree_change_detector.rviz
+```
+
+#### Speed
 
 ### jsk\_pcl/TfTransformCloud
-####What Is This
+#### What Is This
 
 This nodelet will republish the pointcloud which is transformed with the designated frame_id.
 
-####Sample
+#### Sample
+Plug the depth sensor which can be launched by openni.launch and run the below command.
+
+```
+roslaunch jsk_pcl_ros tf_transform_cloud.launch
+```
+
+And launch rviz.
+
+```
+rosrun rviz rviz -d `rospack find jsk_pcl_ros`/launch/rviz/tf_transform_cloud.rviz
+```

@@ -70,12 +70,18 @@ jsk_pcl_nodelet(src/image_demux_nodelet.cpp
   "jsk_pcl/NodeletImageDEMUX" "image_demux")
 jsk_pcl_nodelet(src/image_rotate_nodelet.cpp
   "jsk_pcl/ImageRotateNodelet" "image_rotate")
+jsk_pcl_nodelet(src/octree_change_publisher_nodelet.cpp
+  "jsk_pcl/OctreeChangePublisher" "octree_change_publisher")
+jsk_pcl_nodelet(src/tf_transform_cloud_nodelet.cpp
+  "jsk_pcl/TfTransformCloud" "tf_transform_cloud")
+jsk_pcl_nodelet(src/rgb_color_filter_nodelet.cpp
+  "jsk_pcl/RGBColorFilter" "rgb_color_filter")
 
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}
 #  ${pcl_ros_PACKAGE_PATH}/src/pcl_ros/features/feature.cpp
-  src/filter.cpp # copy from pcl_ros https://github.com/ros-perception/perception_pcl/issues/9
-  src/color_filter_nodelet.cpp
+#  src/filter.cpp # copy from pcl_ros https://github.com/ros-perception/perception_pcl/issues/9
+#  src/color_filter_nodelet.cpp
 )
 
 rosbuild_add_compile_flags (jsk_pcl_ros ${SSE_FLAGS})

@@ -24,7 +24,6 @@ class EdgeImagePublisher(object):
     def _publish(self):
         try:
             self.edgemsg.header.stamp = rospy.Time.now()
-            rospy.sleep(3) # Omajinai
             self.pub.publish(self.edgemsg)
         except CvBridgeError, e:
             print e
@@ -58,11 +57,10 @@ class EdgeImagePublisher(object):
             self.response = True
 
     def checkSparseImage(self):
-        self._publish()
-        rospy.sleep(3)
         cnt = 0
-        while cnt <= 5:
+        while cnt <= 100:
             try:
+                self._publish() 
                 rospy.wait_for_message(self.sub_topic_name, Image, timeout=1.0)
             except:
                 pass
@@ -87,6 +85,5 @@ class TestSparseImage(unittest.TestCase):
 if __name__ == "__main__":
     import rostest
     rospy.init_node("sparse_image_test_py")
-    rospy.sleep(10)
     rostest.rosrun("jsk_perception", "test_sparse_image", TestSparseImage)
 

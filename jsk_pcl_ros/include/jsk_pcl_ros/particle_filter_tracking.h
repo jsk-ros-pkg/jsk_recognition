@@ -102,7 +102,6 @@ namespace jsk_pcl_ros
     ros::Publisher tf_publisher_;
     ros::ServiceServer srv_;
 
-    static tf::TransformBroadcaster tfBroadcaster;
       
     virtual void gridSampleApprox (const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &cloud, pcl::PointCloud<pcl::PointXYZRGBA> &result, double leaf_size);
     virtual void publishParticles ();

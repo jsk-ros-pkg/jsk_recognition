@@ -145,7 +145,8 @@ namespace jsk_pcl_ros
     //Publisher object transformation
     tf::Transform tfTransformation;
     tf::transformEigenToTF((Eigen::Affine3d) transformation, tfTransformation);
-    static tf::TransformBroadcaster tfBroadcaster;
+    
+    static tf::TransformBroadcaster tfBroadcaster;  
     tfBroadcaster.sendTransform(tf::StampedTransform(tfTransformation, ros::Time::now(), frame_id_, "tracker_result"));
     
     //move close to camera a little for better visualization

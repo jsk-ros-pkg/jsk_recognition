@@ -26,7 +26,7 @@ add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.sr
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
-  cfg/HSVColorFilter.cfg
+  cfg/HSIColorFilter.cfg
   cfg/RGBColorFilter.cfg
   cfg/ImageRotate.cfg
   )

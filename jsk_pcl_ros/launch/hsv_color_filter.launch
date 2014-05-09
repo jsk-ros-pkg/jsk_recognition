@@ -1,7 +1,15 @@
 <!-- -*- mode: xml -*- -->
 <launch>
-  <arg name="INPUT" default="/hsv_input"/>
-  <arg name="OUTPUT" default="/hsv_output"/>
+  <!--
+  $ roslaunch openni_launch openni.launch    ;; start kinect camera
+  $ rosrun rqt_reconfigure rqt_reconfigure   ;; parameter settings
+  $ roslaunch jsk_pcl_ros rgb_color_filter.launch DEFAULT_NAMESPACE:=/camera/depth_registered INPUT:=points
+  ;; subscribe camera/depth_registered/rgb_output
+  ;; subscribe tf and find /target
+  -->
+  <arg name="INPUT" default="hsv_input"/>
+  <arg name="OUTPUT" default="hsv_output"/>
+  <arg name="CENTROID_FRAME" default="target"/>
   <arg name="DEFAULT_NAMESPACE" default="HSV_color_filter"/>
 
   <arg name="h_max" default="127" />
@@ -33,6 +41,13 @@
       <param name="v_limit_max" value="$(arg v_max)" />
       <param name="v_limit_min" value="$(arg v_min)" />
     </node>
+
+    <node pkg="nodelet" type="nodelet" name="centroid_publisher"
+	  args="load jsk_pcl/CentroidPublisher $(arg manager)" output="screen">
+      <remap from="~input" to="$(arg OUTPUT)" />
+      <param name="frame" value="$(arg CENTROID_FRAME)" />
+    </node>
+
 
   </group>
 

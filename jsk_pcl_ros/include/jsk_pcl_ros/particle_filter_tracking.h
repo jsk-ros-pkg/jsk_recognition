@@ -41,7 +41,7 @@
 #include <ros/names.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <tf/transform_broadcaster.h>
-
+#include <tf_conversions/tf_eigen.h>
 // pcl
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl/point_types.h>
@@ -97,10 +97,12 @@ namespace jsk_pcl_ros
     std::string frame_id_;
 
     ros::Subscriber sub_;
-    ros::Publisher particle_publiser_;
-    ros::Publisher track_result_publiser_;
+    ros::Publisher particle_publisher_;
+    ros::Publisher track_result_publisher_;
+    ros::Publisher tf_publisher_;
     ros::ServiceServer srv_;
 
+      
     virtual void gridSampleApprox (const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &cloud, pcl::PointCloud<pcl::PointXYZRGBA> &result, double leaf_size);
     virtual void publishParticles ();
     virtual void publishResult ();

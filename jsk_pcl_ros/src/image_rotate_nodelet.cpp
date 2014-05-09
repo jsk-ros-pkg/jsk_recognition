@@ -231,6 +231,15 @@ class ImageRotateNodelet : public nodelet::Nodelet
     {
       NODELET_ERROR("Transform error: %s", e.what());
     }
+    catch (tf2::TransformException &e)
+    {
+      NODELET_ERROR("Transform error: %s", e.what());
+    }
+    catch (...)
+    {
+      NODELET_ERROR("Transform error");
+    }
+
 
     //NODELET_INFO("angle: %f", 180 * angle_ / M_PI);
 
@@ -279,6 +288,7 @@ class ImageRotateNodelet : public nodelet::Nodelet
     {
       NODELET_ERROR("Image processing error: %s %s %s %i", e.err.c_str(), e.func.c_str(), e.file.c_str(), e.line);
     }
+
 
     prev_stamp_ = msg->header.stamp;
   }

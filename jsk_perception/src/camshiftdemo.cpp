@@ -3,11 +3,13 @@
 #include <dynamic_reconfigure/server.h>
 #include <jsk_perception/camshiftdemoConfig.h>
 #include <jsk_perception/RotatedRectStamped.h>
+#include <sensor_msgs/SetCameraInfo.h>
 
 // opencv/samples/cp/camshiftdemo.c
 
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/fill_image.h>
+
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 
@@ -31,6 +33,7 @@ protected:
   sensor_msgs::Image img_;
   ros::Subscriber sub_rectangle_;
   ros::Publisher pub_result_;
+  ros::ServiceServer roi_service_;
   int max_queue_size_;
   bool debug_;
  
@@ -90,6 +93,9 @@ public:
     sub_rectangle_ = nh.subscribe(nh.resolveName("screenrectangle"), 1, &CamShiftDemo::setRectangleCB, this);
     pub_result_ = nh.advertise<jsk_perception::RotatedRectStamped>(local_nh.resolveName("result"), 1);
 
+    //roi_service_ = local_nh.advertiseService("set_roi", sensor_msgs::SetCameraInfo);
+    roi_service_ = local_nh.advertiseService("set_roi", &CamShiftDemo::setROICb, this);
+    
     // camshiftdemo.cpp
     backprojMode_ = false;
     selectObject_ = false;
@@ -136,6 +142,24 @@ public:
 
   ~CamShiftDemo()
   {
+  }
+
+  bool setROICb(sensor_msgs::SetCameraInfo::Request &req,
+                sensor_msgs::SetCameraInfo::Response &res)
+  {
+
+    onMouse(CV_EVENT_LBUTTONDOWN,
+            req.camera_info.roi.x_offset,
+            req.camera_info.roi.y_offset,
+            0,
+            &on_mouse_param_);
+    onMouse(CV_EVENT_LBUTTONUP,
+            req.camera_info.roi.x_offset + req.camera_info.roi.width,
+            req.camera_info.roi.y_offset + req.camera_info.roi.height,
+            0,
+            &on_mouse_param_);
+    res.success = true;
+    return true;
   }
 
   void imageCB(const sensor_msgs::ImageConstPtr& msg_ptr)

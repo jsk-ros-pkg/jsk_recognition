@@ -80,6 +80,10 @@ jsk_pcl_nodelet(src/rgb_color_filter_nodelet.cpp
   "jsk_pcl/RGBColorFilter" "rgb_color_filter")
 jsk_pcl_nodelet(src/euclidean_cluster_extraction_nodelet.cpp
   "jsk_pcl/EuclideanClustering" "euclidean_clustering")
+jsk_pcl_nodelet(src/cluster_point_indices_decomposer_nodelet.cpp
+  "jsk_pcl/ClusterPointIndicesDecomposer" "cluster_point_indices_decomposer")
+jsk_pcl_nodelet(src/cluster_point_indices_decomposer_z_axis_nodelet.cpp
+  "jsk_pcl/ClusterPointIndicesDecomposerZAxis" "cluster_point_indices_decomposer_z_axis")
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})

@@ -42,7 +42,6 @@
 #include <std_msgs/ColorRGBA.h>
 
 #include <dynamic_reconfigure/server.h>
-#include "pcl_ros/FilterConfig.h"
 
 #include <pcl_ros/pcl_nodelet.h>
 
@@ -295,7 +294,8 @@ namespace pcl_ros
       
       for (size_t i = 0; i < cluster_indices.size(); i++)
       {
-          result.cluster_indices[i].header = cluster_indices[i].header;
+          result.cluster_indices[i].header
+            = pcl_conversions::fromPCL(cluster_indices[i].header);
           result.cluster_indices[i].indices = cluster_indices[i].indices;
       }
 
@@ -361,13 +361,14 @@ namespace pcl_ros
       ROS_INFO("clusters: %lu", cluster_indices.size());
 
       res.output.resize( cluster_indices.size() );
-      pcl::ExtractIndices<sensor_msgs::PointCloud2> ex;
-      ex.setInputCloud ( boost::make_shared< sensor_msgs::PointCloud2 > (req.input) );
+      pcl::ExtractIndices<pcl::PointXYZ> ex;
+      ex.setInputCloud(cloud);
       for ( size_t i = 0; i < cluster_indices.size(); i++ ) {
-        //ex.setInputCloud ( boost::make_shared< sensor_msgs::PointCloud2 > (req.input) );
         ex.setIndices ( boost::make_shared< pcl::PointIndices > (cluster_indices[i]) );
         ex.setNegative ( false );
-        ex.filter ( res.output[i] );
+        pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+        ex.filter ( *output_cloud );
+        pcl::toROSMsg(*output_cloud, res.output[i]);
       }
 
       return true;

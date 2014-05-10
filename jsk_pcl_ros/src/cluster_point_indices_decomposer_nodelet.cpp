@@ -36,7 +36,7 @@
 #include "jsk_pcl_ros/cluster_point_indices_decomposer.h"
 #include <pluginlib/class_list_macros.h>
 #include <pcl/filters/extract_indices.h>
-
+#include <pcl/common/centroid.h>
 #include <boost/format.hpp>
 namespace jsk_pcl_ros
 {
@@ -48,6 +48,12 @@ namespace jsk_pcl_ros
     pnh_.reset (new ros::NodeHandle (getPrivateNodeHandle ()));
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_target_.subscribe(*pnh_, "target", 1);
+    if (!pnh_->getParam("tf_prefix_", tf_prefix_))
+    {
+      ROS_WARN("~tf_prefix_ is not specified, using %s", getName().c_str());
+      tf_prefix_ = getName();
+    }
+
     //sync_ = boost::make_shared<message_filters::TimeSynchronizer<sensor_msgs::PointCloud2, jsk_pcl_ros::ClusterPointIndices> >(input_sub, target_sub, 100);
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
     sync_->connectInput(sub_input_, sub_target_);
@@ -98,6 +104,15 @@ namespace jsk_pcl_ros
       pcl::toROSMsg(*segmented_cloud, *out_cloud);
       out_cloud->header = input->header;
       publishers_[i].publish(out_cloud);
+      // publish tf
+      Eigen::Vector4f center;
+      pcl::compute3DCentroid(*segmented_cloud, center);
+      tf::Transform transform;
+      transform.setOrigin(tf::Vector3(center[0], center[1], center[2]));
+      transform.setRotation(tf::createIdentityQuaternion());
+      br_.sendTransform(tf::StampedTransform(transform, input->header.stamp,
+                                             input->header.frame_id,
+                                             tf_prefix_ + (boost::format("output%02u") % (i)).str()));
     }
     
   }

@@ -8,31 +8,71 @@
 
 #include <pcl_ros/pcl_nodelet.h>
 #include <pluginlib/class_list_macros.h>
-#include "jsk_pcl_ros/filter.h"
+
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
+
+
+#if ROS_VERSION_MINIMUM(1, 10, 0)
+// hydro and later
+typedef pcl_msgs::PointIndices PCLIndicesMsg;
+#else
+// groovy
+typedef pcl::PointIndices PCLIndicesMsg;
+#endif
+
 
 namespace jsk_pcl_ros
 {
-  class ResizePointsPublisher : public jsk_pcl_ros::Filter
+  class ResizePointsPublisher : public pcl_ros::PCLNodelet
   {
+    typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2,
+                                                      PCLIndicesMsg> SyncPolicy;
+
   private:
     int step_x_, step_y_;
-    pcl::ExtractIndices<sensor_msgs::PointCloud2> extract_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
+    message_filters::Subscriber<PCLIndicesMsg> sub_indices_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    ros::Publisher pub_;
 
+    pcl::ExtractIndices<pcl::PointXYZRGB> extract_;
+
+    boost::mutex mutex_;
+    
     void onInit () {
       NODELET_INFO("[%s::onInit]", getName().c_str());
-      jsk_pcl_ros::Filter::onInit();
+      pcl_ros::PCLNodelet::onInit();
 
       pnh_->param("step_x", step_x_, 2);
       ROS_INFO("step_x : %d", step_x_);
       pnh_->param("step_y", step_y_, 2);
       ROS_INFO("step_y : %d", step_y_);
+
+      pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
+      sub_input_.subscribe(*pnh_, "input", 1);
+      if (use_indices_) {
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(10);
+      sub_indices_.subscribe(*pnh_, "indices", 1);
+      sync_->connectInput(sub_input_, sub_indices_);
+      sync_->registerCallback(boost::bind(&ResizePointsPublisher::filter, this, _1, _2));
+    }
+    else {
+      sub_input_.registerCallback(&ResizePointsPublisher::filter, this);
+    }
     }
 
     ~ResizePointsPublisher() { }
 
-    void filter (const PointCloud2::ConstPtr &input,
-                 const IndicesPtr &indices,
-                 PointCloud2 &output) {
+    void filter (const sensor_msgs::PointCloud2::ConstPtr &input) {
+      filter(input, PCLIndicesMsg::ConstPtr());
+    }
+    
+    void filter (const sensor_msgs::PointCloud2::ConstPtr &input,
+                 const PCLIndicesMsg::ConstPtr &indices) {
+      pcl::PointCloud<pcl::PointXYZRGB> pcl_input_cloud, output;
+      fromROSMsg(*input, pcl_input_cloud);
       boost::mutex::scoped_lock lock (mutex_);
       std::vector<int> ex_indices;
       ex_indices.resize(0);
@@ -58,8 +98,8 @@ namespace jsk_pcl_ros
         //std::vector<int>::iterator it;
         //for(it = indices->begin(); it != indices->end(); it++)
         //flags[*it] = 1;
-        for(unsigned int i = 0; i < indices->size(); i++) {
-          flags[indices->at(i)] = 1;
+        for(unsigned int i = 0; i < indices->indices.size(); i++) {
+          flags[indices->indices.at(i)] = 1;
         }
         for(int y = oy; y < height; y += sy) {
           for(int x = ox; x < width; x += sx) {
@@ -76,28 +116,30 @@ namespace jsk_pcl_ros
         }
       }
 
-      extract_.setInputCloud (input);
+      extract_.setInputCloud (pcl_input_cloud.makeShared());
       extract_.setIndices (boost::make_shared <std::vector<int> > (ex_indices));
       extract_.setNegative (false);
       extract_.filter (output);
 
-      output.header = input->header;
-      output.width = (width - ox)/sx;
-      if((width - ox)%sx) output.width += 1;
-      output.height = (height - oy)/sy;
-      if((height - oy)%sy) output.height += 1;
-
-      output.row_step = output.point_step * output.width;
-      output.is_dense = input->is_dense;
-
+      if (output.points.size() > 0) {
+        sensor_msgs::PointCloud2 ros_out;
+        toROSMsg(output, ros_out);
+        ros_out.header = input->header;
+        ros_out.width = (width - ox)/sx;
+        if((width - ox)%sx) ros_out.width += 1;
+        ros_out.height = (height - oy)/sy;
+        if((height - oy)%sy) ros_out.height += 1;
+        ros_out.row_step = ros_out.point_step * ros_out.width;
+        ros_out.is_dense = input->is_dense;
 #if DEBUG
-      ROS_INFO("%dx%d (%d %d)(%d %d) -> %dx%d %d", width,height, ox, oy, sx, sy,
-               output.width, output.height, ex_indices.size());
+        ROS_INFO("%dx%d (%d %d)(%d %d) -> %dx%d %d", width,height, ox, oy, sx, sy,
+                 ros_out.width, ros_out.height, ex_indices.size());
 #endif
+        pub_.publish(ros_out);
+      }
+      
     }
 
-  public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };
 }
 

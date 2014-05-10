@@ -294,8 +294,15 @@ namespace pcl_ros
       
       for (size_t i = 0; i < cluster_indices.size(); i++)
       {
+#if ROS_VERSION_MINIMUM(1, 10, 0)
+// hydro and later
           result.cluster_indices[i].header
             = pcl_conversions::fromPCL(cluster_indices[i].header);
+#else
+// groovy
+          result.cluster_indices[i].header = cluster_indices[i].header;
+#endif
+
           result.cluster_indices[i].indices = cluster_indices[i].indices;
       }
 

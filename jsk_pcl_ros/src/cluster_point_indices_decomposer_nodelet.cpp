@@ -120,27 +120,70 @@ namespace jsk_pcl_ros
       br_.sendTransform(tf::StampedTransform(transform, input->header.stamp,
                                              input->header.frame_id,
                                              tf_prefix_ + (boost::format("output%02u") % (i)).str()));
-      
+      // create a bounding box
       visualization_msgs::Marker marker;
       Eigen::Vector4f minpt, maxpt;
       pcl::getMinMax3D<pcl::PointXYZRGB>(*segmented_cloud, minpt, maxpt);
       marker.action = visualization_msgs::Marker::ADD;
-      marker.type = visualization_msgs::Marker::CUBE;
+      marker.type = visualization_msgs::Marker::LINE_LIST;
       marker.header = input->header;
       marker.id = i;
-      marker.pose.position.x = center[0];
-      marker.pose.position.y = center[1];
-      marker.pose.position.z = center[2];
-      marker.pose.orientation.x = 0.0;
-      marker.pose.orientation.y = 0.0;
-      marker.pose.orientation.z = 0.0;
-      marker.pose.orientation.w = 1.0;
-      marker.scale.x = std::max(fabs(minpt[0] - center[0]),
-                                fabs(maxpt[0] - center[0])) * 2.0;
-      marker.scale.y = std::max(fabs(minpt[1] - center[1]),
-                                fabs(maxpt[1] - center[1])) * 2.0;
-      marker.scale.z = std::max(fabs(minpt[2] - center[2]),
-                                fabs(maxpt[2] - center[2])) * 2.0;
+      marker.scale.x = 0.01;
+      geometry_msgs::Point a, b, c, d, e, f, g, h;
+      double xwidth = std::max(fabs(minpt[0] - center[0]),
+                               fabs(maxpt[0] - center[0])) * 2.0;
+      double ywidth = std::max(fabs(minpt[0] - center[0]),
+                               fabs(maxpt[0] - center[0])) * 2.0;
+      double zwidth = std::max(fabs(minpt[0] - center[0]),
+                               fabs(maxpt[0] - center[0])) * 2.0;
+      a.x = center[0] + xwidth / 2.0;
+      a.y = center[1] - ywidth / 2.0;
+      a.z = center[2] + zwidth / 2.0;
+      b.x = center[0] + xwidth / 2.0;
+      b.y = center[1] + ywidth / 2.0;
+      b.z = center[2] + zwidth / 2.0;
+      c.x = center[0] - xwidth / 2.0;
+      c.y = center[1] + ywidth / 2.0;
+      c.z = center[2] + zwidth / 2.0;
+      d.x = center[0] - xwidth / 2.0;
+      d.y = center[1] - ywidth / 2.0;
+      d.z = center[2] + zwidth / 2.0;
+      e.x = center[0] + xwidth / 2.0;
+      e.y = center[1] - ywidth / 2.0;
+      e.z = center[2] - zwidth / 2.0;
+      f.x = center[0] + xwidth / 2.0;
+      f.y = center[1] + ywidth / 2.0;
+      f.z = center[2] - zwidth / 2.0;
+      g.x = center[0] - xwidth / 2.0;
+      g.y = center[1] + ywidth / 2.0;
+      g.z = center[2] - zwidth / 2.0;
+      h.x = center[0] - xwidth / 2.0;
+      h.y = center[1] - ywidth / 2.0;
+      h.z = center[2] - zwidth / 2.0;
+      marker.points.push_back(a);
+      marker.points.push_back(b);
+      marker.points.push_back(b);
+      marker.points.push_back(c);
+      marker.points.push_back(c);
+      marker.points.push_back(d);
+      marker.points.push_back(d);
+      marker.points.push_back(a);
+      marker.points.push_back(e);
+      marker.points.push_back(f);
+      marker.points.push_back(f);
+      marker.points.push_back(g);
+      marker.points.push_back(g);
+      marker.points.push_back(h);
+      marker.points.push_back(h);
+      marker.points.push_back(e);
+      marker.points.push_back(a);
+      marker.points.push_back(e);
+      marker.points.push_back(b);
+      marker.points.push_back(f);
+      marker.points.push_back(c);
+      marker.points.push_back(g);
+      marker.points.push_back(d);
+      marker.points.push_back(h);
       marker.color.a = 0.5;
       marker.color.r = 1.0;
       marker.color.g = 1.0;

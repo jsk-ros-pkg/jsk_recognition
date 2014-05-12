@@ -36,8 +36,11 @@
 #include "jsk_pcl_ros/cluster_point_indices_decomposer.h"
 #include <pluginlib/class_list_macros.h>
 #include <pcl/filters/extract_indices.h>
-
+#include <pcl/common/centroid.h>
+#include <pcl/common/common.h>
 #include <boost/format.hpp>
+#include <visualization_msgs/MarkerArray.h>
+
 namespace jsk_pcl_ros
 {
   ClusterPointIndicesDecomposer::ClusterPointIndicesDecomposer() {}
@@ -45,9 +48,17 @@ namespace jsk_pcl_ros
   void ClusterPointIndicesDecomposer::onInit()
   {
     PCLNodelet::onInit();
+    marker_num_ = 0;
     pnh_.reset (new ros::NodeHandle (getPrivateNodeHandle ()));
+    marker_pub_ = pnh_->advertise<visualization_msgs::MarkerArray>("marker", 1);
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_target_.subscribe(*pnh_, "target", 1);
+    if (!pnh_->getParam("tf_prefix_", tf_prefix_))
+    {
+      ROS_WARN("~tf_prefix_ is not specified, using %s", getName().c_str());
+      tf_prefix_ = getName();
+    }
+
     //sync_ = boost::make_shared<message_filters::TimeSynchronizer<sensor_msgs::PointCloud2, jsk_pcl_ros::ClusterPointIndices> >(input_sub, target_sub, 100);
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
     sync_->connectInput(sub_input_, sub_target_);
@@ -88,6 +99,8 @@ namespace jsk_pcl_ros
     
     sortIndicesOrder(cloud_xyz, converted_indices, sorted_indices);
     extract.setInputCloud(cloud);
+
+    visualization_msgs::MarkerArray marker_array;
     for (size_t i = 0; i < sorted_indices.size(); i++)
     {
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
@@ -98,8 +111,97 @@ namespace jsk_pcl_ros
       pcl::toROSMsg(*segmented_cloud, *out_cloud);
       out_cloud->header = input->header;
       publishers_[i].publish(out_cloud);
+      // publish tf
+      Eigen::Vector4f center;
+      pcl::compute3DCentroid(*segmented_cloud, center);
+      tf::Transform transform;
+      transform.setOrigin(tf::Vector3(center[0], center[1], center[2]));
+      transform.setRotation(tf::createIdentityQuaternion());
+      br_.sendTransform(tf::StampedTransform(transform, input->header.stamp,
+                                             input->header.frame_id,
+                                             tf_prefix_ + (boost::format("output%02u") % (i)).str()));
+      // create a bounding box
+      visualization_msgs::Marker marker;
+      Eigen::Vector4f minpt, maxpt;
+      pcl::getMinMax3D<pcl::PointXYZRGB>(*segmented_cloud, minpt, maxpt);
+      marker.action = visualization_msgs::Marker::ADD;
+      marker.type = visualization_msgs::Marker::LINE_LIST;
+      marker.header = input->header;
+      marker.id = i;
+      marker.scale.x = 0.01;
+      geometry_msgs::Point a, b, c, d, e, f, g, h;
+      double xwidth = std::max(fabs(minpt[0] - center[0]),
+                               fabs(maxpt[0] - center[0])) * 2.0;
+      double ywidth = std::max(fabs(minpt[0] - center[0]),
+                               fabs(maxpt[0] - center[0])) * 2.0;
+      double zwidth = std::max(fabs(minpt[0] - center[0]),
+                               fabs(maxpt[0] - center[0])) * 2.0;
+      a.x = center[0] + xwidth / 2.0;
+      a.y = center[1] - ywidth / 2.0;
+      a.z = center[2] + zwidth / 2.0;
+      b.x = center[0] + xwidth / 2.0;
+      b.y = center[1] + ywidth / 2.0;
+      b.z = center[2] + zwidth / 2.0;
+      c.x = center[0] - xwidth / 2.0;
+      c.y = center[1] + ywidth / 2.0;
+      c.z = center[2] + zwidth / 2.0;
+      d.x = center[0] - xwidth / 2.0;
+      d.y = center[1] - ywidth / 2.0;
+      d.z = center[2] + zwidth / 2.0;
+      e.x = center[0] + xwidth / 2.0;
+      e.y = center[1] - ywidth / 2.0;
+      e.z = center[2] - zwidth / 2.0;
+      f.x = center[0] + xwidth / 2.0;
+      f.y = center[1] + ywidth / 2.0;
+      f.z = center[2] - zwidth / 2.0;
+      g.x = center[0] - xwidth / 2.0;
+      g.y = center[1] + ywidth / 2.0;
+      g.z = center[2] - zwidth / 2.0;
+      h.x = center[0] - xwidth / 2.0;
+      h.y = center[1] - ywidth / 2.0;
+      h.z = center[2] - zwidth / 2.0;
+      marker.points.push_back(a);
+      marker.points.push_back(b);
+      marker.points.push_back(b);
+      marker.points.push_back(c);
+      marker.points.push_back(c);
+      marker.points.push_back(d);
+      marker.points.push_back(d);
+      marker.points.push_back(a);
+      marker.points.push_back(e);
+      marker.points.push_back(f);
+      marker.points.push_back(f);
+      marker.points.push_back(g);
+      marker.points.push_back(g);
+      marker.points.push_back(h);
+      marker.points.push_back(h);
+      marker.points.push_back(e);
+      marker.points.push_back(a);
+      marker.points.push_back(e);
+      marker.points.push_back(b);
+      marker.points.push_back(f);
+      marker.points.push_back(c);
+      marker.points.push_back(g);
+      marker.points.push_back(d);
+      marker.points.push_back(h);
+      marker.color.a = 0.5;
+      marker.color.r = 1.0;
+      marker.color.g = 1.0;
+      marker.color.b = 1.0;
+      marker_array.markers.push_back(marker);
     }
     
+    if (marker_num_ > sorted_indices.size()) { // delete the markers
+      for (size_t i = sorted_indices.size(); i < marker_num_; i++) {
+        visualization_msgs::Marker marker;
+        marker.header = input->header;
+        marker.action = visualization_msgs::Marker::DELETE;
+        marker.id = i;
+        marker_array.markers.push_back(marker);
+      }
+    }
+    marker_pub_.publish(marker_array);
+    marker_num_ = marker_array.markers.size();
   }
 
   void ClusterPointIndicesDecomposer::allocatePublishers(size_t num)

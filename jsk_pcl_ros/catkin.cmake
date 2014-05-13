@@ -26,7 +26,8 @@ add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.sr
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
-  cfg/HSVColorFilter.cfg
+  cfg/EuclideanClustering.cfg
+  cfg/HSIColorFilter.cfg
   cfg/RGBColorFilter.cfg
   cfg/ImageRotate.cfg
   )
@@ -75,9 +76,18 @@ jsk_pcl_nodelet(src/octree_change_publisher_nodelet.cpp
   "jsk_pcl/OctreeChangePublisher" "octree_change_publisher")
 jsk_pcl_nodelet(src/tf_transform_cloud_nodelet.cpp
   "jsk_pcl/TfTransformCloud" "tf_transform_cloud")
-jsk_pcl_nodelet(src/rgb_color_filter_nodelet.cpp
+jsk_pcl_nodelet(src/color_filter_nodelet.cpp
   "jsk_pcl/RGBColorFilter" "rgb_color_filter")
-
+jsk_pcl_nodelet(src/color_filter_nodelet.cpp
+  "jsk_pcl/HSIColorFilter" "hsi_color_filter")
+jsk_pcl_nodelet(src/euclidean_cluster_extraction_nodelet.cpp
+  "jsk_pcl/EuclideanClustering" "euclidean_clustering")
+jsk_pcl_nodelet(src/cluster_point_indices_decomposer_nodelet.cpp
+  "jsk_pcl/ClusterPointIndicesDecomposer" "cluster_point_indices_decomposer")
+jsk_pcl_nodelet(src/cluster_point_indices_decomposer_z_axis_nodelet.cpp
+  "jsk_pcl/ClusterPointIndicesDecomposerZAxis" "cluster_point_indices_decomposer_z_axis")
+jsk_pcl_nodelet(src/resize_points_publisher_nodelet.cpp
+  "jsk_pcl/ResizePointsPublisher" "resize_points_publisher")
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})

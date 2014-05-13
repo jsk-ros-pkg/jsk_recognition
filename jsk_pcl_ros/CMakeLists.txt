@@ -53,7 +53,6 @@ jsk_pcl_nodelet(src/voxel_grid_downsample_decoder_nodelet.cpp "jsk_pcl/VoxelGrid
 jsk_pcl_nodelet(src/snapit_nodelet.cpp "jsk_pcl/Snapit" "snapit")
 jsk_pcl_nodelet(src/keypoints_publisher_nodelet.cpp "jsk_pcl/KeypointsPublisher" "keypoints_publisher")
 jsk_pcl_nodelet(src/hinted_plane_detector_nodelet.cpp "jsk_pcl/HintedPlaneDetector" "hinted_plane_detector")
-#jsk_pcl_nodelet(src/color_filter_nodelet.cpp "jsk_pcl/RGBColorFilter" "rgb_color_filter")
 jsk_pcl_nodelet(src/resize_points_publisher_nodelet.cpp "jsk_pcl/ResizePointsPublisher" "resize_points_publisher")
 jsk_pcl_nodelet(src/depth_image_creator_nodelet.cpp "jsk_pcl/DepthImageCreator" "depth_image_creator")
 jsk_pcl_nodelet(src/euclidean_cluster_extraction_nodelet.cpp "jsk_pcl/EuclideanClustering" "euclidean_clustering")
@@ -70,14 +69,18 @@ jsk_pcl_nodelet(src/image_demux_nodelet.cpp
   "jsk_pcl/NodeletImageDEMUX" "image_demux")
 jsk_pcl_nodelet(src/image_rotate_nodelet.cpp
   "jsk_pcl/ImageRotateNodelet" "image_rotate")
-jsk_pcl_nodelet(src/normal_publisher_nodelet.cpp "jsk_pcl/NormalPublisher" "normal_publisher")
-jsk_pcl_nodelet(src/normal_marker_array_nodelet.cpp "jsk_pcl/NormalMarkerArray" "normal_marker_array")
+jsk_pcl_nodelet(src/octree_change_publisher_nodelet.cpp
+  "jsk_pcl/OctreeChangePublisher" "octree_change_publisher")
+jsk_pcl_nodelet(src/tf_transform_cloud_nodelet.cpp
+  "jsk_pcl/TfTransformCloud" "tf_transform_cloud")
+jsk_pcl_nodelet(src/color_filter_nodelet.cpp
+  "jsk_pcl/RGBColorFilter" "rgb_color_filter")
+jsk_pcl_nodelet(src/color_filter_nodelet.cpp
+  "jsk_pcl/HSIColorFilter" "hsi_color_filter")
 
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}
 #  ${pcl_ros_PACKAGE_PATH}/src/pcl_ros/features/feature.cpp
-  src/filter.cpp # copy from pcl_ros https://github.com/ros-perception/perception_pcl/issues/9
-  src/color_filter_nodelet.cpp
 )
 
 rosbuild_add_compile_flags (jsk_pcl_ros ${SSE_FLAGS})

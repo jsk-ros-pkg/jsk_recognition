@@ -44,10 +44,10 @@
     </description>
   </class>
 
-  <class name="jsk_pcl/HSVColorFilter" type="HSVColorFilter"
+  <class name="jsk_pcl/HSIColorFilter" type="HSIColorFilter"
          base_class_type="nodelet::Nodelet">
     <description>
-      filter using HSV color scale
+      filter using HSI color scale
     </description>
   </class>
 
@@ -130,17 +130,16 @@
       HintedPlaneDetector nodelet node
     </description>
   </class>
-  <class name="jsk_pcl/NormalPublisher" type="NormalPublisher"
+  <class name="jsk_pcl/OctreeChangePublisher" type="OctreeChangePublisher"
          base_class_type="nodelet::Nodelet">
     <description>
-      NormalPublisher nodelet node
+      OctreeChangePublisher nodelet node
     </description>
   </class>
-  <class name="jsk_pcl/NormalMarkerArray" type="NormalMarkerArray"
+  <class name="jsk_pcl/TfTransformCloud" type="TfTransformCloud"
          base_class_type="nodelet::Nodelet">
     <description>
-      Get the pcl normal, visuakize the normal and publish the it for rviz.
+      publish transformed cloud with target id
     </description>
   </class>
-
 </library>

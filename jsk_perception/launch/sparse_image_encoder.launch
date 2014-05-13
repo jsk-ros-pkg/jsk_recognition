@@ -1,0 +1,7 @@
+<launch>
+  <node pkg="jsk_perception" type="sparse_image_encoder" name="sparse_image_encoder">
+    <remap from="image" to="edge/image" />
+    <remap from="sparse_image" to="sparse/image" />
+    <param name="rate" value="1.0" />
+  </node>
+</launch>

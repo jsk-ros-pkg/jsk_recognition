@@ -40,22 +40,20 @@ namespace jsk_pcl_ros
 {
   void OctreeChangePublisher::onInit(void)
   {
-    // not implemented yet
     PCLNodelet::onInit();
     counter_ = 0;
 
     pnh_->param("resolution", resolution_, 0.02);
     pnh_->param("noise_filter", noise_filter_, 2);
 
-    octree_ = new pcl::octree::OctreePointCloudChangeDetector<pcl::PointXYZRGBA>(resolution_);
+    octree_ = new pcl::octree::OctreePointCloudChangeDetector<pcl::PointXYZRGB>(resolution_);
 
-    filtered_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGBA>);
+    filtered_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>);
 
     //Set subscribe setting
     sub_ = pnh_->subscribe("input", 1, &OctreeChangePublisher::cloud_cb,this);
     diff_pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("octree_change_result", 1);
 
-    pnh_->param("loop_rate", loop_rate_, 2);
   }
 
   void OctreeChangePublisher::cloud_cb(const sensor_msgs::PointCloud2 &pc)
@@ -64,46 +62,30 @@ namespace jsk_pcl_ros
       return;
     }
 
-    if(counter_ > loop_rate_ && counter_ % loop_rate_ != 0 ){
-      sensor_msgs::PointCloud2 octree_change_pointcloud2;
-      pcl::toROSMsg(*filtered_cloud, octree_change_pointcloud2);
-      octree_change_pointcloud2.header = pc.header;
-      octree_change_pointcloud2.is_dense = false;
-      diff_pub_.publish(octree_change_pointcloud2);
-      counter_++;
-      return;
-    }
-
-    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGBA>());
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
     std::vector<int> indices;
     pcl::fromROSMsg(pc, *cloud);
-    // assign point cloud to octree
     octree_->setInputCloud (cloud);
-
-    // add points from cloud to octree
     octree_->addPointsFromInputCloud ();
+
     if (counter_ != 0){
       boost::shared_ptr<std::vector<int> > newPointIdxVector (new std::vector<int>);
 
-      // get a vector of new points, which did not exist in previous buffer
       octree_->getPointIndicesFromNewVoxels (*newPointIdxVector, noise_filter_);
 
-      filtered_cloud.reset (new pcl::PointCloud<pcl::PointXYZRGBA>);
+      filtered_cloud.reset (new pcl::PointCloud<pcl::PointXYZRGB>);
       filtered_cloud->points.reserve(newPointIdxVector->size());
 
       for (std::vector<int>::iterator it = newPointIdxVector->begin (); it != newPointIdxVector->end (); it++)
         filtered_cloud->points.push_back(cloud->points[*it]);
 
-
-      //publish
       sensor_msgs::PointCloud2 octree_change_pointcloud2;
       pcl::toROSMsg(*filtered_cloud, octree_change_pointcloud2);
       octree_change_pointcloud2.header = pc.header;
       octree_change_pointcloud2.is_dense = false;
       diff_pub_.publish(octree_change_pointcloud2);
-
     }
-    // switch buffers - reset tree
+
     octree_->switchBuffers ();
     counter_++;
   }

@@ -33,74 +33,19 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_OCTREE_CHANGE_PUBLISHER_H_
-#define JSK_PCL_ROS_OCTREE_CHANGE_PUBLISHER_H_
+#ifndef __JSK_PCL_ROS_OCTREE_CHANGE_PUBLISHER_H__
+#define __JSK_PCL_ROS_OCTREE_CHANGE_PUBLISHER_H__
 
 // ros
 #include <ros/ros.h>
-#include <ros/names.h>
 #include <sensor_msgs/PointCloud2.h>
-#include <tf/transform_broadcaster.h>
+#include <pcl_conversions/pcl_conversions.h>
 
 // pcl
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl/point_types.h>
-#include <pcl/common/centroid.h>
-#include <pcl/filters/extract_indices.h>
-
 #include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-#include <pcl/io/openni_grabber.h>
-#include <pcl/console/parse.h>
-#include <pcl/common/time.h>
-
-#include <pcl/io/pcd_io.h>
-
-#include <pcl/filters/passthrough.h>
-#include <pcl/filters/voxel_grid.h>
-#include <pcl/filters/approximate_voxel_grid.h>
-#include <pcl/filters/extract_indices.h>
-
-#include <pcl/sample_consensus/method_types.h>
-#include <pcl/sample_consensus/model_types.h>
-
-#include <pcl/segmentation/sac_segmentation.h>
-#include <pcl/segmentation/extract_polygonal_prism_data.h>
-#include <pcl/segmentation/extract_clusters.h>
-
-#include <pcl/search/pcl_search.h>
-#include <pcl/common/transforms.h>
-
-#include <boost/format.hpp>
-#include <boost/thread/thread.hpp>
-#include <pcl/PCLPointCloud2.h>
-
-
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-#include <pcl/io/openni_grabber.h>
-#include <pcl/io/openni_grabber.h>
 #include <pcl/octree/octree.h>
-#include <pcl/filters/extract_indices.h>
-
-#include <pcl/console/parse.h>
-
-
-#include <pcl/filters/filter.h>
-//-----------------------ROS-----------------------------//
-#include "ros/ros.h"
-#include <ros/time.h>
-#include "std_msgs/String.h"
-#include "sensor_msgs/PointCloud2.h"
-#include <pcl_conversions/pcl_conversions.h>
-#include <tf/transform_broadcaster.h>
-#include <tf_conversions/tf_eigen.h>
-
-#include <iostream>
-#include <string>
-#include <stdio.h>
-#include <time.h>
-
 
 namespace jsk_pcl_ros
 {
@@ -109,21 +54,18 @@ namespace jsk_pcl_ros
   protected:
     int counter_;
     int noise_filter_;
-    int loop_rate_;
     double resolution_;
 
     ros::Subscriber sub_;
     ros::Publisher diff_pub_;
-    pcl::octree::OctreePointCloudChangeDetector<pcl::PointXYZRGBA> *octree_;
-      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr filtered_cloud;
-
+    pcl::octree::OctreePointCloudChangeDetector<pcl::PointXYZRGB> *octree_;
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr filtered_cloud;
 
     virtual void
     cloud_cb (const sensor_msgs::PointCloud2 &pc);
 
   private:
     virtual void onInit();
-
   };
 }
 

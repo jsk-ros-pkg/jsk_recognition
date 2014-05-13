@@ -50,7 +50,6 @@ namespace jsk_pcl_ros
 
   void TfTransformCloud::onInit(void)
   {
-    // not implemented yet
     PCLNodelet::onInit();
     sub_cloud_ = pnh_->subscribe("input", 1, &TfTransformCloud::transform, this);
     if (!pnh_->getParam("target_frame_id", target_frame_id_))
@@ -58,7 +57,6 @@ namespace jsk_pcl_ros
       ROS_WARN("~target_frame_id is not specified, using %s", "/base_footprint");
     }
 
-    //init publisher
     pub_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
   }
 }

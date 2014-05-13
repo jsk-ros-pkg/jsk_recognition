@@ -1,8 +1,16 @@
 <!-- -*- mode: xml -*- -->
 <launch>
-  <arg name="INPUT" default="/hsv_input"/>
-  <arg name="OUTPUT" default="/hsv_output"/>
-  <arg name="DEFAULT_NAMESPACE" default="HSV_color_filter"/>
+  <!--
+  $ roslaunch openni_launch openni.launch    ;; start kinect camera
+  $ rosrun rqt_reconfigure rqt_reconfigure   ;; parameter settings
+  $ roslaunch jsk_pcl_ros hsi_color_filter.launch DEFAULT_NAMESPACE:=/camera/depth_registered INPUT:=points
+  ;; subscribe camera/depth_registered/hsi_output
+  ;; subscribe tf and find /target
+  -->
+  <arg name="INPUT" default="hsi_input"/>
+  <arg name="OUTPUT" default="hsi_output"/>
+  <arg name="CENTROID_FRAME" default="target"/>
+  <arg name="DEFAULT_NAMESPACE" default="HSI_color_filter"/>
 
   <arg name="h_max" default="127" />
   <arg name="h_min" default="-128" />
@@ -12,15 +20,15 @@
   <arg name="v_min" default="0" />
 
   <arg name="create_manager" default="true" />
-  <arg name="manager" default="hsv_filter_manager" />
+  <arg name="manager" default="hsi_filter_manager" />
 
   <group ns="$(arg DEFAULT_NAMESPACE)">
     <node if="$(arg create_manager)"
           pkg="nodelet" type="nodelet" name="$(arg manager)"
           args="manager" output="screen"/>
 
-    <node pkg="nodelet" type="nodelet" name="hsv_filter"
-          args="load jsk_pcl/HSVColorFilter $(arg manager)" output="screen">
+    <node pkg="nodelet" type="nodelet" name="hsi_filter"
+          args="load jsk_pcl/HSIColorFilter $(arg manager)" output="screen">
       <remap from="~input" to="$(arg INPUT)" />
       <remap from="~output" to="$(arg OUTPUT)" />
       <rosparam>
@@ -33,6 +41,13 @@
       <param name="v_limit_max" value="$(arg v_max)" />
       <param name="v_limit_min" value="$(arg v_min)" />
     </node>
+
+    <node pkg="nodelet" type="nodelet" name="centroid_publisher"
+	  args="load jsk_pcl/CentroidPublisher $(arg manager)" output="screen">
+      <remap from="~input" to="$(arg OUTPUT)" />
+      <param name="frame" value="$(arg CENTROID_FRAME)" />
+    </node>
+
 
   </group>
 

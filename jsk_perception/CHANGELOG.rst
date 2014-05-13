@@ -2,6 +2,15 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.4 (2014-04-25)
+------------------
+
+* add sparse_image program to jsk_percepton
+* make edge_detector nodelet class
+* Contributors: Ryohei Ueda, furushchev
+* Merge pull request `#47 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/47>`_ from k-okada/add_rosbuild
+* Contributors: Kei Okada
+
 0.1.3 (2014-04-12)
 ------------------
 

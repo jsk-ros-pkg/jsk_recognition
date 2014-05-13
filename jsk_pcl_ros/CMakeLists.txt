@@ -79,9 +79,9 @@ jsk_pcl_nodelet(src/rgb_color_filter_nodelet.cpp
 
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}
-# ${pcl_ros_PACKAGE_PATH}/src/pcl_ros/features/feature.cpp
+#  ${pcl_ros_PACKAGE_PATH}/src/pcl_ros/features/feature.cpp
   src/filter.cpp # copy from pcl_ros https://github.com/ros-perception/perception_pcl/issues/9
-# src/color_filter_nodelet.cpp
+#  src/color_filter_nodelet.cpp
 )
 
 rosbuild_add_compile_flags (jsk_pcl_ros ${SSE_FLAGS})

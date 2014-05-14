@@ -11,20 +11,6 @@ jsk_pcl_ros ROS Launch Files
 
 **License:** BSD
 
-color_converter_sample.launch
------------------------------
-
-.. code-block:: bash
-
-  roslaunch jsk_pcl_ros color_converter_sample.launch
-
-color_filter_sample.launch
---------------------------
-
-.. code-block:: bash
-
-  roslaunch jsk_pcl_ros color_filter_sample.launch
-
 pointcloud_screenpoint_sample.launch
 ------------------------------------
 
@@ -124,12 +110,6 @@ background_subtraction.launch
 
   roslaunch jsk_pcl_ros background_subtraction.launch
 
-hsv_color_filter.launch
------------------------
-
-.. code-block:: bash
-
-  roslaunch jsk_pcl_ros hsv_color_filter.launch
 
 pointcloud_screenpoint.launch
 -----------------------------

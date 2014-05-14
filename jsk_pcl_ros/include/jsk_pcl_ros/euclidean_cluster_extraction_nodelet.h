@@ -368,16 +368,25 @@ namespace pcl_ros
       ROS_INFO("clusters: %lu", cluster_indices.size());
 
       res.output.resize( cluster_indices.size() );
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 7 )
       pcl::PCLPointCloud2::Ptr pcl_cloud(new pcl::PCLPointCloud2);
       pcl_conversions::toPCL(req.input, *pcl_cloud);
       pcl::ExtractIndices<pcl::PCLPointCloud2> ex;
       ex.setInputCloud(pcl_cloud);
+#else
+      pcl::ExtractIndices<sensor_msgs::PointCloud2> ex;
+      ex.setInputCloud ( boost::make_shared< sensor_msgs::PointCloud2 > (req.input) );
+#endif
       for ( size_t i = 0; i < cluster_indices.size(); i++ ) {
         ex.setIndices ( boost::make_shared< pcl::PointIndices > (cluster_indices[i]) );
         ex.setNegative ( false );
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 7 )
         pcl::PCLPointCloud2 output_cloud;
         ex.filter ( output_cloud );
         pcl_conversions::fromPCL(output_cloud, res.output[i]);
+#else
+        ex.filter ( res.output[i] );
+#endif
       }
 
       return true;

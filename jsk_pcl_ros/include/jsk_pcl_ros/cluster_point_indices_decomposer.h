@@ -47,6 +47,7 @@
 #include <message_filters/synchronizer.h>
 #include <pcl/point_types.h>
 #include <pcl/impl/point_types.hpp>
+#include <tf/transform_broadcaster.h>
 
 namespace jsk_pcl_ros
 {
@@ -70,7 +71,10 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<jsk_pcl_ros::ClusterPointIndices> sub_target_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     std::vector<ros::Publisher> publishers_;
-
+    ros::Publisher marker_pub_;
+    tf::TransformBroadcaster br_;
+    std::string tf_prefix_;
+    size_t marker_num_;
     virtual void allocatePublishers(size_t num);
     
   };

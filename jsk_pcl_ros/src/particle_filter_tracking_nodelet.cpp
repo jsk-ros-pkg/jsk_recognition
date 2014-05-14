@@ -97,8 +97,9 @@ namespace jsk_pcl_ros
     sub_ = pnh_->subscribe("input", 1, &ParticleFilterTracking::cloud_cb,this);
     srv_ = pnh_->advertiseService("renew_model", &ParticleFilterTracking::renewModel_cb, this);
     //Set publish setting
-    particle_publiser_ = pnh_->advertise<sensor_msgs::PointCloud2>("particle", 1);
-    track_result_publiser_ = pnh_->advertise<sensor_msgs::PointCloud2>("track_result", 1);
+    particle_publisher_ = pnh_->advertise<sensor_msgs::PointCloud2>("particle", 1);
+    track_result_publisher_ = pnh_->advertise<sensor_msgs::PointCloud2>("track_result", 1);
+    tf_publisher_ = pnh_->advertise<sensor_msgs::PointCloud2>("track_result", 1);
   }
 
   void ParticleFilterTracking::gridSampleApprox (const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &cloud, pcl::PointCloud<pcl::PointXYZRGBA> &result, double leaf_size)
@@ -130,7 +131,7 @@ namespace jsk_pcl_ros
         sensor_msgs::PointCloud2 particle_pointcloud2;
         pcl::toROSMsg(*particle_cloud, particle_pointcloud2);
         particle_pointcloud2.header.frame_id = frame_id_;
-        particle_publiser_.publish(particle_pointcloud2);
+        particle_publisher_.publish(particle_pointcloud2);
       }
   }
 
@@ -141,16 +142,24 @@ namespace jsk_pcl_ros
     ParticleXYZRPY result = tracker_->getResult ();
     Eigen::Affine3f transformation = tracker_->toEigenMatrix (result);
 
+    //Publisher object transformation
+    tf::Transform tfTransformation;
+    tf::transformEigenToTF((Eigen::Affine3d) transformation, tfTransformation);
+    
+    static tf::TransformBroadcaster tfBroadcaster;  
+    tfBroadcaster.sendTransform(tf::StampedTransform(tfTransformation, ros::Time::now(), frame_id_, "tracker_result"));
+    
     //move close to camera a little for better visualization
     transformation.translation () += Eigen::Vector3f (0.0f, 0.0f, -0.005f);
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr result_cloud (new pcl::PointCloud<pcl::PointXYZRGBA> ());
     pcl::transformPointCloud<pcl::PointXYZRGBA> (*(tracker_->getReferenceCloud ()), *result_cloud, transformation);
 
-    //Publish  model reference point cloud
+    //Publish model reference point cloud
     sensor_msgs::PointCloud2 result_pointcloud2;
     pcl::toROSMsg(*result_cloud, result_pointcloud2);
     result_pointcloud2.header.frame_id = frame_id_;
-    track_result_publiser_.publish(result_pointcloud2);
+    track_result_publisher_.publish(result_pointcloud2);
+
   }
 
   void

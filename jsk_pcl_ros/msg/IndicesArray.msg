@@ -1,1 +1,1 @@
-pcl_msgs/PointIndices[] cluster_indices
+pcl/PointIndices[] cluster_indices

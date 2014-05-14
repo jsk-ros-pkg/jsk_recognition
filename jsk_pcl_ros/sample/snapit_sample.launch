@@ -19,4 +19,6 @@
         output="screen">
     <remap from="snapit" to="/pcl_nodelet/snapit/snapit" />
   </node>
+  <node pkg="rviz" type="rviz" name="rviz" args=" -d $(find jsk_pcl_ros)/sample/rviz/snapit_sample.rviz"/>
+
 </launch>

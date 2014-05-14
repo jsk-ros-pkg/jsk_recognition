@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/rgb_color_filter.h"
+#include "jsk_pcl_ros/color_filter.h"
 
 #include <pluginlib/class_list_macros.h>
 

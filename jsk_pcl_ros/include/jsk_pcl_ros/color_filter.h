@@ -34,8 +34,8 @@
  *********************************************************************/
 
 
-#ifndef JSK_PCL_ROS_RGB_COLOR_FILTER_H_
-#define JSK_PCL_ROS_RGB_COLOR_FILTER_H_
+#ifndef JSK_PCL_ROS_COLOR_FILTER_H_
+#define JSK_PCL_ROS_COLOR_FILTER_H_
 
 #include <nodelet/nodelet.h>
 #include <pcl_ros/pcl_nodelet.h>

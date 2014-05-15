@@ -1,0 +1,50 @@
+<launch>
+  <arg name="INPUT" default="/camera/depth_registered/points" />
+  <node pkg="nodelet" type="nodelet" name="manager"
+        args="manager"
+        output="screen"/>
+  <node pkg="nodelet" type="nodelet" name="normal_estimate"
+        args="load pcl/NormalEstimationOMP manager"
+        clear_params="true">
+    <remap from="~input" to="$(arg INPUT)" />
+    <!-- <remap from="~output" to="/normal_concat/input" /> -->
+    <rosparam>
+      radius_search: 0
+      k_search: 10
+      # 0, => ANN, 1 => FLANN, 2 => Organized
+      spatial_locator: 2
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="normal_concat"
+        args="load jsk_pcl/NormalConcatenater manager"
+        clear_params="true">
+    <remap from="~input" to="$(arg INPUT)"/>
+    <remap from="~normal" to="/normal_estimate/output"/>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="remove_nan"
+        args="load pcl/PassThrough manager"
+        clear_params="true">
+    <remap from="~input" to="/normal_concat/output" />
+    <rosparam>
+      filter_field_name: z
+      filter_limit_min: 0.0
+      filter_limit_max: 3.0
+      keep_organized: false
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="region_segment"
+        args="load jsk_pcl/RegionGrowingSegmentation manager"
+        clear_params="true">
+    <remap from="~input" to="/remove_nan/output" />
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        name="cluster_decomposer"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer manager"
+        output="screen" clear_params="true">
+    <remap from="~input" to="/remove_nan/output" />
+    <remap from="~target" to="/region_segment/output" />
+    <rosparam>
+    </rosparam>
+  </node>
+
+</launch>

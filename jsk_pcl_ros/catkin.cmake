@@ -30,6 +30,7 @@ generate_dynamic_reconfigure_options(
   cfg/HSIColorFilter.cfg
   cfg/RGBColorFilter.cfg
   cfg/ImageRotate.cfg
+  cfg/RegionGrowingSegmentation.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -90,6 +91,10 @@ jsk_pcl_nodelet(src/resize_points_publisher_nodelet.cpp
   "jsk_pcl/ResizePointsPublisher" "resize_points_publisher")
 jsk_pcl_nodelet(src/normal_concatenater_nodelet.cpp
   "jsk_pcl/NormalConcatenater" "normal_concatenater")
+if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
+  jsk_pcl_nodelet(src/region_growing_segmentation_nodelet.cpp
+    "jsk_pcl/RegionGrowingSegmentation" "region_growing_segmentation")
+endif(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})

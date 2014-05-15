@@ -1,7 +1,7 @@
 <launch>
   <!-- nodeletの名前は/camera_nodelet_manager -->
-  <arg name="camera_name" value="openni" />
-  <arg name="manager" default="/$(arg camera_name)/$(arg camera_name)_nodelet_manager" />
+  <arg name="camera_name" value="camera" />
+  <arg name="manager" default="/$(arg camera_name)_nodelet_manager" />
   <param name="depth_registered" value="true"/>
   <include file="$(find openni_launch)/launch/openni.launch">
     <arg name="camera" value="$(arg camera_name)" />
@@ -16,4 +16,6 @@
       <remap from="~input" to="$(arg input_point)" />
     </node>
   </group>                      <!-- pcl_nodelet -->
+
+  <node pkg="rviz" type="rviz" name="rviz" args=" -d $(find jsk_pcl_ros)/sample/rviz/keypoints_publisher.rviz"/>
 </launch>

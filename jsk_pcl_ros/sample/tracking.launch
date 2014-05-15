@@ -29,4 +29,6 @@
   </group>
 
   <node pkg="jsk_pcl_ros" name="renew_trakcing" type="renew_trakcing.py" />
+
+  <node pkg="rviz" type="rviz" name="rviz" args=" -d $(find jsk_pcl_ros)/sample/rviz/tracking.rviz"/>
 </launch>

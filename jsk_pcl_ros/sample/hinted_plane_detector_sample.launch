@@ -65,4 +65,6 @@
         name="marker_appender">
     <remap from="marker" to="/hinted_plane_detector/marker" />
   </node>
+
+  <node pkg="rviz" type="rviz" name="rviz" args=" -d $(find jsk_pcl_ros)/sample/rviz/hinted_plane_detector.rviz"/>
 </launch>

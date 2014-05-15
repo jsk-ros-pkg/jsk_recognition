@@ -1,5 +1,15 @@
 <library path="lib/libjsk_pcl_ros">
 
+  <class name="jsk_pcl/OrganizedMultiPlaneSegmentation" type="OrganizedMultiPlaneSegmentation"
+         base_class_type="nodelet::Nodelet">
+    <description>segment pointcloud by organized multi plane segmentation</description>
+  </class>
+
+  <class name="jsk_pcl/RegionGrowingSegmentation" type="RegionGrowingSegmentation"
+         base_class_type="nodelet::Nodelet">
+    <description>segment pointcloud by region growing</description>
+  </class>
+
   <class name="jsk_pcl/NormalConcatenater" type="NormalConcatenater"
          base_class_type="nodelet::Nodelet">
     <description>Concatenater normal to x, y, z and rgb pointcloud</description>

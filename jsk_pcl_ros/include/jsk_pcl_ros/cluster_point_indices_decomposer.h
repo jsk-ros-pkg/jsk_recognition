@@ -48,7 +48,7 @@
 #include <pcl/point_types.h>
 #include <pcl/impl/point_types.hpp>
 #include <tf/transform_broadcaster.h>
-
+#include <std_msgs/ColorRGBA.h>
 namespace jsk_pcl_ros
 {
   class ClusterPointIndicesDecomposer: public pcl_ros::PCLNodelet
@@ -71,12 +71,30 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<jsk_pcl_ros::ClusterPointIndices> sub_target_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     std::vector<ros::Publisher> publishers_;
-    ros::Publisher marker_pub_;
+    ros::Publisher marker_pub_, pc_pub_;
     tf::TransformBroadcaster br_;
     std::string tf_prefix_;
     size_t marker_num_;
     virtual void allocatePublishers(size_t num);
-    
+    std::vector<std_msgs::ColorRGBA> colors_;
+    static std_msgs::ColorRGBA makeColor(double r, double g, double b, double a)
+    {
+        std_msgs::ColorRGBA c;
+        c.r = r;
+        c.g = g;
+        c.b = b;
+        c.a = a;
+        return c;
+
+    }
+    static uint32_t colorRGBAToUInt32(std_msgs::ColorRGBA c)
+    {
+        uint8_t r, g, b;
+        r = (uint8_t)(c.r * 255);
+        g = (uint8_t)(c.g * 255);
+        b = (uint8_t)(c.b * 255);
+        return ((uint32_t)r<<16 | (uint32_t)g<<8 | (uint32_t)b);
+    }
   };
 
 }

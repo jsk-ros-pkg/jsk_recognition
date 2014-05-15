@@ -31,6 +31,7 @@ generate_dynamic_reconfigure_options(
   cfg/RGBColorFilter.cfg
   cfg/ImageRotate.cfg
   cfg/RegionGrowingSegmentation.cfg
+  cfg/OrganizedMultiPlaneSegmentation.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -93,6 +94,9 @@ jsk_pcl_nodelet(src/normal_concatenater_nodelet.cpp
   "jsk_pcl/NormalConcatenater" "normal_concatenater")
 jsk_pcl_nodelet(src/region_growing_segmentation_nodelet.cpp
   "jsk_pcl/RegionGrowingSegmentation" "region_growing_segmentation")
+
+jsk_pcl_nodelet(src/organized_multi_plane_segmentation_nodelet.cpp
+  "jsk_pcl/OrganizedMultiPlaneSegmentation" "organized_multi_plane_segmentation")
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})

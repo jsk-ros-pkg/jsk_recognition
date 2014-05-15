@@ -147,7 +147,6 @@
       </rosparam>
     </node>
 
-
-
+  <node pkg="rviz" type="rviz" name="rviz" args=" -d $(find jsk_pcl_ros)/sample/rviz/euclidean_segmentation.rviz"/>
   </group>                      <!-- pcl_nodelet -->
 </launch>

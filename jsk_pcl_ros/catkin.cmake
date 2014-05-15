@@ -92,8 +92,10 @@ jsk_pcl_nodelet(src/resize_points_publisher_nodelet.cpp
   "jsk_pcl/ResizePointsPublisher" "resize_points_publisher")
 jsk_pcl_nodelet(src/normal_concatenater_nodelet.cpp
   "jsk_pcl/NormalConcatenater" "normal_concatenater")
-jsk_pcl_nodelet(src/region_growing_segmentation_nodelet.cpp
-  "jsk_pcl/RegionGrowingSegmentation" "region_growing_segmentation")
+if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
+  jsk_pcl_nodelet(src/region_growing_segmentation_nodelet.cpp
+    "jsk_pcl/RegionGrowingSegmentation" "region_growing_segmentation")
+endif(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
 
 jsk_pcl_nodelet(src/organized_multi_plane_segmentation_nodelet.cpp
   "jsk_pcl/OrganizedMultiPlaneSegmentation" "organized_multi_plane_segmentation")

@@ -1,0 +1,28 @@
+<launch>
+  <arg name="INPUT" default="/camera/depth_registered/points" />
+  <arg name="DEFAULT_NODELET_GROUP" default="pcl_nodelet" />
+  <arg name="tolerance" default="0.1"/>
+  <arg name="create_manager" default="true" />
+  <arg name="MANAGER" default="nodelet_manager" />
+  <arg name="manager" default="/$(arg DEFAULT_NODELET_GROUP)/$(arg MANAGER)"/>
+
+  <group ns="$(arg DEFAULT_NODELET_GROUP)">
+    <node if="$(arg create_manager)"
+          pkg="nodelet" type="nodelet" name="$(arg MANAGER)"
+          args="manager" output="screen"/>
+
+    <node pkg="nodelet" type="nodelet"
+          name="snapit"
+          args="load jsk_pcl/Snapit $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="$(arg INPUT)" />
+      <param name="tolerance" value="$(arg tolerance)"/>
+    </node>
+  </group>
+  <node pkg="jsk_pcl_ros"
+        type="snapit_client_sample.py"
+        name="snapit_sample"
+        output="screen">
+    <remap from="snapit" to="/$(arg DEFAULT_NODELET_GROUP)/snapit/snapit" />
+  </node>
+</launch>

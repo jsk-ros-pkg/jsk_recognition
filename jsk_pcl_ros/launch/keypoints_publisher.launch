@@ -1,0 +1,19 @@
+<launch>
+  <arg name="input_point" default="/camera/depth_registered/points" />
+  <arg name="create_manager" default="true" />
+  <arg name="manager" default="nodelet_manager" />
+  <arg name="DEFAULT_NAMESPACE" default="pcl_nodelet"/>
+
+  <group ns="$(arg DEFAULT_NAMESPACE)">
+    <node if="$(arg create_manager)"
+          pkg="nodelet" type="nodelet" name="$(arg manager)"
+          args="manager" output="screen"/>
+
+    <node pkg="nodelet" type="nodelet"
+          name="keypoints_publisher"
+          args="load jsk_pcl/KeypointsPublisher $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="$(arg input_point)" />
+    </node>
+  </group>                      <!-- pcl_nodelet -->
+</launch>

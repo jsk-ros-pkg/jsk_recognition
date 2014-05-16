@@ -6,9 +6,6 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /TF1/Frames1
-        - /PointCloud21
-        - /PointCloud22
       Splitter Ratio: 0.5
     Tree Height: 595
   - Class: rviz/Selection
@@ -29,7 +26,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: PointCloud2
+    SyncSource: InputCloud
 Visualization Manager:
   Class: ""
   Displays:
@@ -48,7 +45,7 @@ Visualization Manager:
         /camera_rgb_optical_frame:
           Value: true
         All Enabled: true
-      Marker Scale: 1
+      Marker Scale: 0.3
       Name: TF
       Show Arrows: true
       Show Axes: true
@@ -80,7 +77,7 @@ Visualization Manager:
       Max Intensity: 4096
       Min Color: 0; 0; 0
       Min Intensity: 0
-      Name: PointCloud2
+      Name: DiffCloud
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
@@ -108,7 +105,7 @@ Visualization Manager:
       Max Intensity: 4096
       Min Color: 0; 0; 0
       Min Intensity: 0
-      Name: PointCloud2
+      Name: InputCloud
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
@@ -144,15 +141,15 @@ Visualization Manager:
       Class: rviz/Orbit
       Distance: 1.34251
       Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
+        X: 0.222456
+        Y: -0.243398
+        Z: 0.321628
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.200199
+      Pitch: 0.335199
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.19539
+      Yaw: 3.53539
     Saved: ~
 Window Geometry:
   Displays:

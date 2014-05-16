@@ -1,24 +1,14 @@
 <launch>
-  <arg name="MANAGER" default="/camera_nodelet_manager" />
   <include file="$(find openni_launch)/launch/openni.launch">
+    <arg name="depth_registration" value="true"/>
   </include>
-  <group ns="pcl_nodelet">
-    <node pkg="nodelet" type="nodelet"
-          name="snapit"
-          args="load jsk_pcl/Snapit $(arg MANAGER)"
-          output="screen" clear_params="true">
-      <remap from="~input" to="/camera/depth_registered/points" />
-      <rosparam>
-         tolerance: 0.1
-      </rosparam>
-    </node>
-  </group>
-  <node pkg="jsk_pcl_ros"
-        type="snapit_client_sample.py"
-        name="snapit_sample"
-        output="screen">
-    <remap from="snapit" to="/pcl_nodelet/snapit/snapit" />
-  </node>
+
+  <include file="$(find jsk_pcl_ros)/launch/snapit.launch">
+    <arg name="INPUT" value="/camera/depth_registered/points" />
+    <arg name="DEFAULT_NODELET_GROUP" value="pcl_nodelet" />
+    <arg name="tolerance" value="0.1"/>
+  </include>
+
   <node pkg="rviz" type="rviz" name="rviz" args=" -d $(find jsk_pcl_ros)/sample/rviz/snapit_sample.rviz"/>
 
 </launch>

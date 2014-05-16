@@ -52,7 +52,7 @@ namespace jsk_pcl_ros
   {
   public:
   protected:
-    ros::Publisher pub_;
+    ros::Publisher pub_, polygon_pub_;
     ros::Subscriber sub_;
     int min_size_;
     double angular_threshold_;

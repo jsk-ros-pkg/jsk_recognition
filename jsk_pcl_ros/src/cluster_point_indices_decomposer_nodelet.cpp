@@ -45,12 +45,24 @@ namespace jsk_pcl_ros
 {
   ClusterPointIndicesDecomposer::ClusterPointIndicesDecomposer() {}
   ClusterPointIndicesDecomposer::~ClusterPointIndicesDecomposer() {}
+
+  
   void ClusterPointIndicesDecomposer::onInit()
   {
     PCLNodelet::onInit();
+
+    colors_.push_back(makeColor(1.0, 0.0, 0.0, 1.0));
+    colors_.push_back(makeColor(0.0, 1.0, 0.0, 1.0));
+    colors_.push_back(makeColor(0.0, 0.0, 1.0, 1.0));
+    colors_.push_back(makeColor(1.0, 1.0, 0.0, 1.0));
+    colors_.push_back(makeColor(1.0, 0.0, 1.0, 1.0));
+    colors_.push_back(makeColor(0.0, 1.0, 1.0, 1.0));
+    colors_.push_back(makeColor(1.0, 1.0, 1.0, 1.0));
+
     marker_num_ = 0;
     pnh_.reset (new ros::NodeHandle (getPrivateNodeHandle ()));
     marker_pub_ = pnh_->advertise<visualization_msgs::MarkerArray>("marker", 1);
+    pc_pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("debug_output", 1);
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_target_.subscribe(*pnh_, "target", 1);
     if (!pnh_->getParam("tf_prefix_", tf_prefix_))
@@ -100,6 +112,7 @@ namespace jsk_pcl_ros
     sortIndicesOrder(cloud_xyz, converted_indices, sorted_indices);
     extract.setInputCloud(cloud);
 
+    pcl::PointCloud<pcl::PointXYZRGB> debug_output;
     visualization_msgs::MarkerArray marker_array;
     for (size_t i = 0; i < sorted_indices.size(); i++)
     {
@@ -120,6 +133,17 @@ namespace jsk_pcl_ros
       br_.sendTransform(tf::StampedTransform(transform, input->header.stamp,
                                              input->header.frame_id,
                                              tf_prefix_ + (boost::format("output%02u") % (i)).str()));
+      // adding the pointcloud into debug_output
+      uint32_t rgb = colorRGBAToUInt32(colors_[i % colors_.size()]);
+      for (size_t j = 0; j < segmented_cloud->points.size(); j++) {
+        pcl::PointXYZRGB p;
+        p.x= segmented_cloud->points[j].x;
+        p.y= segmented_cloud->points[j].y;
+        p.z= segmented_cloud->points[j].z;
+        p.rgb = *reinterpret_cast<float*>(&rgb);
+        debug_output.points.push_back(p);
+      }
+      
       // create a bounding box
       visualization_msgs::Marker marker;
       Eigen::Vector4f minpt, maxpt;
@@ -202,6 +226,12 @@ namespace jsk_pcl_ros
     }
     marker_pub_.publish(marker_array);
     marker_num_ = marker_array.markers.size();
+    sensor_msgs::PointCloud2 debug_ros_output;
+    pcl::toROSMsg(debug_output, debug_ros_output);
+    debug_ros_output.header = input->header;
+    debug_ros_output.is_dense = false;
+
+    pc_pub_.publish(debug_ros_output);
   }
 
   void ClusterPointIndicesDecomposer::allocatePublishers(size_t num)

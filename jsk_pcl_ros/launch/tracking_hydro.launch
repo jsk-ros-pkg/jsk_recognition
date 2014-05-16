@@ -1,6 +1,0 @@
-<launch>
-  <!-- nodelet name is /camera/camera_nodelet_manager in hydro-->
-  <include file="$(find jsk_pcl_ros)/launch/tracking.launch">
-    <arg name="manager" default="/camera/camera_nodelet_manager" />
-  </include>
-</launch>

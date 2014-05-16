@@ -77,6 +77,13 @@ jsk_pcl_nodelet(src/color_filter_nodelet.cpp
   "jsk_pcl/RGBColorFilter" "rgb_color_filter")
 jsk_pcl_nodelet(src/color_filter_nodelet.cpp
   "jsk_pcl/HSIColorFilter" "hsi_color_filter")
+jsk_pcl_nodelet(src/normal_concatenater_nodelet.cpp
+  "jsk_pcl/NormalConcatenater" "normal_concatenater")
+# PCL1.6 does not support these classes
+# jsk_pcl_nodelet(src/region_growing_segmentation_nodelet.cpp
+#   "jsk_pcl/RegionGrowingSegmentation" "region_growing_segmentation")
+# jsk_pcl_nodelet(src/organized_multi_plane_segmentation_nodelet.cpp
+#  "jsk_pcl/OrganizedMultiPlaneSegmentation" "organized_multi_plane_segmentation")
 
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}

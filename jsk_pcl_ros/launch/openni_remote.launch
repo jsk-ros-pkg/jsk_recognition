@@ -1,4 +1,6 @@
 <launch>
+  <arg name="rgb_camera_info_url"   default="" />
+  <arg name="depth_camera_info_url" default="" />
   <group>			<!--group only for remapping-->
     <remap from="/camera_remote/depth/image_raw" 
 	   to="/camera/depth/image_raw"/>
@@ -25,6 +27,8 @@
       <arg name="rgb_processing" value="true" />
       <arg name="depth_processing" value="true" />
       <arg name="depth_registered_processing" value="true" />
+      <arg name="rgb_camera_info_url" value="$(arg rgb_camera_info_url)" />
+      <arg name="depth_camera_info_url" value="$(arg depth_camera_info_url)" />
     </include>
   </group>
   <!-- camera_info relaying -->

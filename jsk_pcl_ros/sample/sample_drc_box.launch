@@ -1,0 +1,12 @@
+<launch>
+  <include file="$(find jsk_data)/launch/pr2_play.launch">
+    <arg name="bagfile_names" value="$(find jsk_data)/large/2014_05_13_drc_box.bag"/>
+    <arg name="rosbag_option" value="--clock -l"/>
+  </include>
+
+  <include file="$(find jsk_pcl_ros)/launch/organized_multi_plane_segmentation.launch">
+    <arg name="INPUT" value="/openni/depth_registered/points"/>
+  </include>
+
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find jsk_pcl_ros)/sample/rviz/2014_05_13_drc_box.rviz"/>
+</launch>

@@ -56,6 +56,7 @@ namespace jsk_pcl_ros
   {
     PCLNodelet::onInit();
     pub_ = pnh_->advertise<jsk_pcl_ros::ClusterPointIndices>("output", 1);
+    polygon_pub_ = pnh_->advertise<jsk_pcl_ros::PolygonArray>("output_polygon", 1);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&OrganizedMultiPlaneSegmentation::configCallback, this, _1, _2);
@@ -85,7 +86,6 @@ namespace jsk_pcl_ros
   (const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock(mutex_);
-    //pcl::PointCloud<pcl::PointNormal>::Ptr input(new pcl::PointCloud<pcl::PointNormal>());
     pcl::PointCloud<pcl::PointNormal> input;
     pcl::fromROSMsg(*msg, input);
     pcl::OrganizedMultiPlaneSegmentation<pcl::PointNormal, pcl::PointNormal, pcl::Label> mps;
@@ -96,7 +96,6 @@ namespace jsk_pcl_ros
     mps.setInputCloud(input.makeShared());
     mps.setInputNormals(input.makeShared());
 
-    //std::vector<pcl::PlanarRegion<pcl::PointNormal> > regions;
     std::vector<pcl::PlanarRegion<pcl::PointNormal>, Eigen::aligned_allocator<pcl::PlanarRegion<pcl::PointNormal> > > regions;
     std::vector<pcl::ModelCoefficients> model_coefficients;
     std::vector<pcl::PointIndices> inlier_indices;
@@ -105,17 +104,29 @@ namespace jsk_pcl_ros
     std::vector<pcl::PointIndices> boundary_indices;
     
     mps.segmentAndRefine(regions, model_coefficients, inlier_indices, labels, label_indices, boundary_indices);
-    ROS_INFO("%lu regions", regions.size());
     jsk_pcl_ros::ClusterPointIndices indices;
+    jsk_pcl_ros::PolygonArray polygon_array;
     indices.header = msg->header;
+    polygon_array.header = msg->header;
     for (size_t i = 0; i < inlier_indices.size(); i++) {
       pcl::PointIndices inlier = inlier_indices[i];
       PCLIndicesMsg one_indices;
       one_indices.indices = inlier.indices;
       one_indices.header = msg->header;
       indices.cluster_indices.push_back(one_indices);
-    } 
+      geometry_msgs::PolygonStamped polygon;
+      polygon.header = msg->header;
+      for (size_t j = 0; j < boundary_indices[i].indices.size(); j++) {
+        geometry_msgs::Point32 point;
+        point.x = input.points[boundary_indices[i].indices[j]].x;
+        point.y = input.points[boundary_indices[i].indices[j]].y;
+        point.z = input.points[boundary_indices[i].indices[j]].z;
+        polygon.polygon.points.push_back(point);
+      }
+      polygon_array.polygons.push_back(polygon);
+    }
    pub_.publish(indices);
+   polygon_pub_.publish(polygon_array);
   }
   
 }

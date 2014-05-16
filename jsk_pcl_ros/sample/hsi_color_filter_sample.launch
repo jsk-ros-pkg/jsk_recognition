@@ -1,0 +1,22 @@
+<launch>
+  <include file="$(find openni_launch)/launch/openni.launch" />
+
+  <include file="$(find jsk_pcl_ros)/launch/hsi_color_filter.launch">
+    <arg name="INPUT" value="/camera/depth_registered/points"/>
+    <arg name="OUTPUT" value="hsi_output"/>
+    <arg name="CENTROID_FRAME" value="target"/>
+    <arg name="DEFAULT_NAMESPACE" value="pcl_nodelet"/>
+
+    <arg name="h_max" value="50" /><!-- 127 -->
+    <arg name="h_min" value="-50" /><!-- -128 -->
+    <arg name="s_max" value="150" /><!-- 255 -->
+    <arg name="s_min" value="50" /><!-- 0 -->
+    <arg name="v_max" value="150" /><!-- 255 -->
+    <arg name="v_min" value="50" /><!-- 0 -->
+
+    <arg name="create_manager" value="true" />
+    <arg name="manager" value="hsi_filter_manager" />
+  </include>
+
+  <node pkg="rviz" type="rviz" name="rviz" args=" -d $(find jsk_pcl_ros)/sample/rviz/hsi_color_filter.rviz"/>
+</launch>

@@ -1,0 +1,22 @@
+<launch>
+  <include file="$(find openni_launch)/launch/openni.launch" />
+
+  <include file="$(find jsk_pcl_ros)/launch/rgb_color_filter.launch">
+    <arg name="INPUT" value="/camera/depth_registered/points"/>
+    <arg name="OUTPUT" value="rgb_output"/>
+    <arg name="CENTROID_FRAME" value="target"/>
+    <arg name="DEFAULT_NAMESPACE" value="pcl_nodelet"/>
+
+    <arg name="r_max" value="255" /><!-- 255 -->
+    <arg name="r_min" value="100" /><!-- 0 -->
+    <arg name="g_max" value="150" /><!-- 255 -->
+    <arg name="g_min" value="0" /><!-- 0 -->
+    <arg name="b_max" value="150" /><!-- 255 -->
+    <arg name="b_min" value="0" /><!-- 0 -->
+
+    <arg name="create_manager" value="true" />
+    <arg name="manager" value="rgb_filter_manager" />
+  </include>
+
+  <node pkg="rviz" type="rviz" name="rviz" args=" -d $(find jsk_pcl_ros)/sample/rviz/rgb_color_filter.rviz"/>
+</launch>

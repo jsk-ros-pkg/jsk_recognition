@@ -1,0 +1,35 @@
+<launch>
+  <arg name="input_point" default="/camera/depth_registered/points" />
+  <arg name="voxel_grid_filter_limit_min" default="0.0"/>
+  <arg name="voxel_grid_filter_limit_max" default="5.0"/>
+  <arg name="voxel_grid_leaf_size" default="0.01"/>
+  <arg name="octree_resolution" default="0.02"/>
+  <arg name="octree_noise_filter" default="2"/>
+  <arg name="create_manager" default="true" />
+  <arg name="MANAGER" default="nodelet_manager" />
+  <arg name="manager" default="/pcl_nodelet/$(arg MANAGER)" />
+
+  <group ns="pcl_nodelet">
+    <node if="$(arg create_manager)"
+          pkg="nodelet" type="nodelet" name="$(arg MANAGER)"
+          args="manager" output="screen"/>
+
+    <node pkg="nodelet" type="nodelet"
+          name="voxelgrid"
+          args="load pcl/VoxelGrid $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="$(arg input_point)" />
+      <param name="filter_limit_min" value="$(arg voxel_grid_filter_limit_min)" />
+      <param name="filter_limit_max" value="$(arg voxel_grid_filter_limit_max)" />
+      <param name="leaf_size" value="$(arg voxel_grid_leaf_size)" />
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="octree_change_detector"
+          args="load jsk_pcl/OctreeChangePublisher $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="/pcl_nodelet/voxelgrid/output" />
+      <param name="resolution" value="$(arg octree_resolution)"/>
+      <param name="noise_filter" value="$(arg octree_noise_filter)"/>
+    </node>
+  </group>
+</launch>

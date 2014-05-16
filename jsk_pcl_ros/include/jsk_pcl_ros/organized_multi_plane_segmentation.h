@@ -52,12 +52,16 @@ namespace jsk_pcl_ros
   {
   public:
   protected:
+    ros::Publisher org_pub_, org_polygon_pub_;
     ros::Publisher pub_, polygon_pub_;
     ros::Subscriber sub_;
     int min_size_;
     double angular_threshold_;
     double distance_threshold_;
     double max_curvature_;
+    double connect_plane_angle_threshold_;
+    double connect_plane_distance_threshold_;
+    double connect_distance_threshold_;
     typedef jsk_pcl_ros::OrganizedMultiPlaneSegmentationConfig Config;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;

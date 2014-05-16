@@ -11,7 +11,7 @@
     <!-- <remap from="~output" to="/normal_concat/input" /> -->
     <rosparam>
       radius_search: 0
-      k_search: 10
+      k_search: 240
       # 0, => ANN, 1 => FLANN, 2 => Organized
       spatial_locator: 2
     </rosparam>
@@ -33,6 +33,15 @@
         output="screen" clear_params="true">
     <remap from="~input" to="/normal_concat/output" />
     <remap from="~target" to="/multi_plane_estimate/output" />
+    <rosparam>
+    </rosparam>
+  </node>
+    <node pkg="nodelet" type="nodelet"
+        name="cluster_decomposer2"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer manager"
+        output="screen" clear_params="true">
+    <remap from="~input" to="/normal_concat/output" />
+    <remap from="~target" to="/multi_plane_estimate/output_nonconnected" />
     <rosparam>
     </rosparam>
   </node>

@@ -375,6 +375,7 @@ namespace jsk_pcl_ros
       polygon_pub_.publish(polygon_array);
       
       jsk_pcl_ros::ModelCoefficientsArray coefficients_array;
+      coefficients_array.header = msg->header;
       for (size_t i = 0; i < output_coefficients.size(); i++) {
         PCLModelCoefficientMsg coefficient;
         coefficient.values = output_coefficients[i].values;

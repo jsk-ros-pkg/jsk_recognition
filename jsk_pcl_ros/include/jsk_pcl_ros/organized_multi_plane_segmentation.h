@@ -46,6 +46,7 @@
 #include <dynamic_reconfigure/server.h>
 #include "jsk_pcl_ros/OrganizedMultiPlaneSegmentationConfig.h"
 #include "jsk_pcl_ros/PolygonArray.h"
+
 namespace jsk_pcl_ros
 {
   class OrganizedMultiPlaneSegmentation: public pcl_ros::PCLNodelet

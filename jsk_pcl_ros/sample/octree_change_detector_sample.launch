@@ -1,0 +1,18 @@
+<launch>
+  <include file="$(find openni_launch)/launch/openni.launch">
+    <param name="depth_registered" value="true"/>
+  </include>
+
+  <include file="$(find jsk_pcl_ros)/launch/octree_change_detector.launch">
+    <arg name="input_point" value="/camera/depth_registered/points" />
+    <arg name="voxel_grid_filter_limit_min" value="0.0"/>
+    <arg name="voxel_grid_filter_limit_max" value="5.0"/>
+    <arg name="voxel_grid_leaf_size" value="0.01"/>
+    <arg name="octree_resolution" value="0.02"/>
+    <arg name="octree_noise_filter" value="2"/>
+    <arg name="create_manager" value="true" />
+    <arg name="MANAGER" value="nodelet_manager" />
+  </include>
+
+  <node pkg="rviz" type="rviz" name="rviz" args=" -d $(find jsk_pcl_ros)/sample/rviz/octree_change_detector.rviz"/>
+</launch>

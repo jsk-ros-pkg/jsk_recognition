@@ -1,0 +1,15 @@
+<launch>
+  <include file="$(find openni_launch)/launch/openni.launch">
+    <arg name="depth_registration" value="true"/>
+  </include>
+
+  <include file="$(find jsk_pcl_ros)/launch/tracking.launch">
+    <arg name="input_point" default="/camera/depth_registered/points" />
+    <arg name="voxel_grid_filter_limit_min" value="0.0"/>
+    <arg name="voxel_grid_filter_limit_max" value="5.0"/>
+    <arg name="voxel_grid_filter_field_name" value="true"/>
+    <arg name="voxel_grid_leaf_size" value="0.01"/>
+  </include>
+
+  <node pkg="rviz" type="rviz" name="rviz" args=" -d $(find jsk_pcl_ros)/sample/rviz/tracking.rviz"/>
+</launch>

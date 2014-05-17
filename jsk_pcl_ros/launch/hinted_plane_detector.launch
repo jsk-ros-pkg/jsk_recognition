@@ -1,10 +1,18 @@
 <launch>
-  <include file="$(find openni_launch)/launch/openni.launch" />
+  <arg name="pt_sc_use_view" default="true"/>
+  <arg name="pt_sc_publish_points" default="true"/>
+  <arg name="input_point" default="/camera/depth_registered/points"/>
+  <arg name="voxel_grid_filter_limit_min" default="0.1"/>
+  <arg name="voxel_grid_filter_limit_max" default="-0.1"/>
+  <arg name="voxel_grid_filter_limit_negative" default="true"/>
+  <arg name="voxel_grid_leaf_size" default="0.1"/>
+
+
   <include file="$(find jsk_pcl_ros)/launch/pointcloud_screenpoint.launch">
-    <arg name="USE_VIEW" value="true" />
-    <arg name="PUBLISH_POINTS" value="true" />
+    <arg name="USE_VIEW" value="$(arg pt_sc_use_view)" />
+    <arg name="PUBLISH_POINTS" value="$(arg pt_sc_publish_points)" />
     <arg name="image" value="/camera/rgb"/>
-    <arg name="points" value="/camera/depth_registered/points"/>
+    <arg name="points" value="$(arg input_point)"/>
     <arg name="image_type" default="image_color"/>
   </include>
 
@@ -13,15 +21,19 @@
         output="screen"
         clear_params="true"
         respawn="false">
-    <remap from="~input" to="/camera/depth_registered/points"/>
-    <rosparam>
-      filter_limit_min: 0.1
-      filter_limit_max: -0.1
-      filter_limit_negative: true
-      leaf_size: 0.01
-    </rosparam>p
+    <remap from="~input" to="$(arg input_point)"/>
+    <param name="filter_limit_min" value="$(arg voxel_grid_filter_limit_min)" />
+    <param name="filter_limit_max" value="$(arg voxel_grid_filter_limit_max)" />
+    <param name="filter_limit_negative" value="$(arg voxel_grid_filter_limit_negative)" />
+    <param name="leaf_size" value="$(arg voxel_grid_leaf_size)" />
+    <!-- <rosparam> -->
+    <!--   filter_limit_min: 0.1 -->
+    <!--   filter_limit_max: -0.1 -->
+    <!--   filter_limit_negative: true -->
+    <!--   leaf_size: 0.01 -->
+    <!-- </rosparam>p -->
   </node>
-  
+
   <node pkg="nodelet" type="nodelet" name="ground_segmentation" args="load pcl/SACSegmentation /screenpoint_manager"
         output="screen"
         clear_params="true"
@@ -40,8 +52,6 @@
         </rosparam>
   </node>
 
-  
-  
   <node pkg="nodelet" type="nodelet" name="extract_nonground_indices" args="load pcl/ExtractIndices /screenpoint_manager" output="screen" respawn="true">
     <remap from="~input"   to="voxel_grid/output" />
     <remap from="~indices" to="/ground_segmentation/inliers" />
@@ -51,7 +61,6 @@
     </rosparam>
   </node>
 
-  
   <node pkg="nodelet"
         type="nodelet"
         args="load jsk_pcl/HintedPlaneDetector /screenpoint_manager"
@@ -65,4 +74,5 @@
         name="marker_appender">
     <remap from="marker" to="/hinted_plane_detector/marker" />
   </node>
+
 </launch>

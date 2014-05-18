@@ -20,6 +20,7 @@ find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros nodelet mess
   eigen_conversions tf_conversions tf2_ros tf image_transport nodelet cv_bridge)
 
 add_message_files(FILES IndicesArray.msg PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg SnapItRequest.msg PolygonArray.msg
+  ModelCoefficientsArray.msg
   SlicedPointCloud.msg)
 add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv SetPointCloud2.srv
   CallSnapIt.srv CallPolygon.srv)
@@ -99,6 +100,9 @@ endif(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
 
 jsk_pcl_nodelet(src/organized_multi_plane_segmentation_nodelet.cpp
   "jsk_pcl/OrganizedMultiPlaneSegmentation" "organized_multi_plane_segmentation")
+
+jsk_pcl_nodelet(src/multi_plane_extraction_nodelet.cpp
+  "jsk_pcl/MultiPlaneExtraction" "multi_plane_extraction")
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})

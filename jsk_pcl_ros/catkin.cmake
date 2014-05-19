@@ -33,6 +33,7 @@ generate_dynamic_reconfigure_options(
   cfg/ImageRotate.cfg
   cfg/RegionGrowingSegmentation.cfg
   cfg/OrganizedMultiPlaneSegmentation.cfg
+  cfg/MultiPlaneExtraction.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)

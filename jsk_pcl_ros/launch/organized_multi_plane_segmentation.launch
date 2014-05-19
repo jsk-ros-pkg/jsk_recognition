@@ -27,7 +27,7 @@
         clear_params="false">
     <remap from="~input" to="/normal_concat/output"/>
   </node>
-    <node pkg="nodelet" type="nodelet"
+  <node pkg="nodelet" type="nodelet"
         name="cluster_decomposer"
         args="load jsk_pcl/ClusterPointIndicesDecomposer manager"
         output="screen" clear_params="true">
@@ -36,7 +36,7 @@
     <rosparam>
     </rosparam>
   </node>
-    <node pkg="nodelet" type="nodelet"
+  <node pkg="nodelet" type="nodelet"
         name="cluster_decomposer2"
         args="load jsk_pcl/ClusterPointIndicesDecomposer manager"
         output="screen" clear_params="true">
@@ -45,5 +45,33 @@
     <rosparam>
     </rosparam>
   </node>
+
+  <node pkg="nodelet" type="nodelet"
+        name="plane_extraction"
+        args="load jsk_pcl/MultiPlaneExtraction manager"
+        output="screen" clear_params="true">
+    <remap from="~input" to="/normal_concat/output" />
+    <remap from="~indices" to="/multi_plane_estimate/output" />
+    <remap from="~input_polygons" to="/multi_plane_estimate/output_polygon" />
+    <remap from="~input_coefficients" to="/multi_plane_estimate/output_coefficients" />
+  </node>
+  
+    <node pkg="nodelet" type="nodelet" name="euclidean_clustering"
+          args="load jsk_pcl/EuclideanClustering /manager" output="screen">
+      <remap from="~input" to="/plane_extraction/output" />
+      <rosparam>
+        tolerance: 0.02
+        min_size: 500
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="cluster_decomposer_final"
+          args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis /manager"
+          output="screen" clear_params="true">
+      <remap from="~input" to="/plane_extraction/output" />
+      <remap from="~target" to="/euclidean_clustering/output" />
+      <rosparam>
+      </rosparam>
+    </node>
 
 </launch>

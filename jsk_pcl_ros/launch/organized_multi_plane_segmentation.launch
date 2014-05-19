@@ -57,7 +57,6 @@
   </node>
   
     <node pkg="nodelet" type="nodelet" name="euclidean_clustering"
-          if="false"
           args="load jsk_pcl/EuclideanClustering /manager" output="screen">
       <remap from="~input" to="/plane_extraction/output" />
       <rosparam>
@@ -67,7 +66,6 @@
     </node>
     <node pkg="nodelet" type="nodelet"
           name="cluster_decomposer_final"
-                    if="false"
           args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis /manager"
           output="screen" clear_params="true">
       <remap from="~input" to="/plane_extraction/output" />

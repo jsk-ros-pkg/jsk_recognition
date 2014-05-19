@@ -36,6 +36,8 @@
 #include "jsk_pcl_ros/multi_plane_extraction.h"
 #include <pluginlib/class_list_macros.h>
 #include <pcl/filters/extract_indices.h>
+#include <pcl/segmentation/extract_polygonal_prism_data.h>
+
 #include <pcl/filters/project_inliers.h>
 #include <set>
 
@@ -98,68 +100,53 @@ namespace jsk_pcl_ros
 
     // for each plane, project nonplane_cloud to the plane and find the points
     // inside of the polygon
-    std::set<size_t> result_set;
+    
+    std::set<int> result_set;
     for (size_t plane_i = 0; plane_i < coefficients->coefficients.size(); plane_i++) {
-      pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr projected_cloud(new pcl::PointCloud<pcl::PointXYZRGBNormal>());
+
+      pcl::ExtractPolygonalPrismData<pcl::PointXYZRGBNormal> prism_extract;
+      pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr hull_cloud(new pcl::PointCloud<pcl::PointXYZRGBNormal>());
       geometry_msgs::Polygon the_polygon = polygons->polygons[plane_i].polygon;
-      pcl::ModelCoefficients::Ptr pcl_coefficients (new pcl::ModelCoefficients());
-      pcl_coefficients->values = coefficients->coefficients[plane_i].values;
+      for (size_t i = 0; i < the_polygon.points.size(); i++) {
+        pcl::PointXYZRGBNormal p;
+        p.x = the_polygon.points[i].x;
+        p.y = the_polygon.points[i].y;
+        p.z = the_polygon.points[i].z;
+        hull_cloud->points.push_back(p);
+      }
       
-      pcl::ProjectInliers<pcl::PointXYZRGBNormal> proj;
-      proj.setModelType (pcl::SACMODEL_PLANE);
-      proj.setInputCloud(nonplane_cloud);
-      //proj.setInputCloud(input_cloud);
-      //proj.setIndices(all_indices);
-      //proj.setNegative(true);
-      proj.setModelCoefficients(pcl_coefficients);
-      proj.filter(*projected_cloud);
-      Eigen::Vector3f n;
-      n[0] = pcl_coefficients->values[0];
-      n[1] = pcl_coefficients->values[1];
-      n[2] = pcl_coefficients->values[2];
-      // check the points is inside of the convex hull or not for all the points
-      for (size_t point_i = 0; point_i < projected_cloud->points.size(); point_i++) {
-        bool insidep = true;
-        Eigen::Vector3f P;
-        P[0] = projected_cloud->points[point_i].x;
-        P[1] = projected_cloud->points[point_i].y;
-        P[2] = projected_cloud->points[point_i].z;
-        for (size_t convex_vertex_i = 0; convex_vertex_i < the_polygon.points.size() - 1; convex_vertex_i++) {
-          Eigen::Vector3f O, B;
-          int b_i = convex_vertex_i + 1;
-          O[0] = the_polygon.points[convex_vertex_i].x;
-          O[1] = the_polygon.points[convex_vertex_i].y;
-          O[2] = the_polygon.points[convex_vertex_i].z;
-          B[0] = the_polygon.points[b_i].x;
-          B[1] = the_polygon.points[b_i].y;
-          B[2] = the_polygon.points[b_i].z;
-          if ((B - O).cross(P - O).dot(n) < 0) {
-            insidep = false;
-            break;
-          }
-          // compute the anglew
-        }
-        if (insidep) {
-          //result_indices.push_back(point_i);
-          result_set.insert(point_i);
-        }
+      prism_extract.setInputCloud(nonplane_cloud);
+      prism_extract.setHeightLimits(0.0, 1.0);
+      prism_extract.setInputPlanarHull(hull_cloud);
+      //pcl::PointCloud<pcl::PointXYZRGBNormal> output;
+      pcl::PointIndices output_indices;
+      prism_extract.segment(output_indices);
+      // append output to result_cloud
+      for (size_t i = 0; i < output_indices.indices.size(); i++) {
+        result_set.insert(output_indices.indices[i]);
+        //result_cloud.points.push_back(output.points[i]);
       }
     }
 
     // convert std::set to PCLIndicesMsg
     //PCLIndicesMsg output_indices;
-    pcl::PointCloud<pcl::PointXYZRGBNormal> result;
-    sensor_msgs::PointCloud2 ros_result;
-    for (std::set<size_t>::iterator it = result_set.begin();
+    pcl::PointCloud<pcl::PointXYZRGBNormal> result_cloud;
+    pcl::PointIndices::Ptr all_result_indices (new pcl::PointIndices());
+    for (std::set<int>::iterator it = result_set.begin();
          it != result_set.end();
          it++) {
-      result.points.push_back(nonplane_cloud->points[*it]);
-      //output_indices.indices.push_back(*it);
+      all_result_indices->indices.push_back(*it);
     }
-    pcl::toROSMsg(result, ros_result);
+
+    pcl::ExtractIndices<pcl::PointXYZRGBNormal> extract_all_indices;
+    extract_all_indices.setInputCloud(nonplane_cloud);
+    extract_all_indices.setIndices(all_result_indices);
+    extract_all_indices.filter(result_cloud);
+    
+    sensor_msgs::PointCloud2 ros_result;
+    pcl::toROSMsg(result_cloud, ros_result);
     ros_result.header = input->header;
     pub_.publish(ros_result);
-    
   }
   
 }

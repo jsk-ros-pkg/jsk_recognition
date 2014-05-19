@@ -5,15 +5,11 @@
         alaunch-prefix="xterm -e gdb --args"
         output="screen"/>
   <node pkg="nodelet" type="nodelet" name="normal_estimate"
-        args="load pcl/NormalEstimationOMP manager"
+        args="load jsk_pcl/NormalEstimationIntegralImage manager"
         clear_params="true">
     <remap from="~input" to="$(arg INPUT)" />
     <!-- <remap from="~output" to="/normal_concat/input" /> -->
     <rosparam>
-      radius_search: 0
-      k_search: 240
-      # 0, => ANN, 1 => FLANN, 2 => Organized
-      spatial_locator: 2
     </rosparam>
   </node>
   <node pkg="nodelet" type="nodelet" name="normal_concat"

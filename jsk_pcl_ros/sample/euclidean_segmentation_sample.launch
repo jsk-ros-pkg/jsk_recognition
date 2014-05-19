@@ -1,0 +1,12 @@
+<launch>
+  <include file="$(find openni_launch)/launch/openni.launch">
+    <arg name="depth_registration" value="true"/>
+  </include>
+
+  <include file="$(find jsk_pcl_ros)/launch/euclidean_segmentation.launch">
+    <arg name="input_point" value="/camera/depth_registered/points"/>
+  </include>
+
+  <node pkg="rviz" type="rviz" name="rviz" args=" -d $(find jsk_pcl_ros)/sample/rviz/euclidean_segmentation.rviz"/>
+
+</launch>

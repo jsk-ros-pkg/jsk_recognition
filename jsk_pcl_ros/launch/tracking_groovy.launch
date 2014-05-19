@@ -1,6 +1,0 @@
-<launch>
-  <!-- nodelet name is /camera_nodelet_manager in groovy-->
-  <include file="$(find jsk_pcl_ros)/launch/tracking.launch">
-    <arg name="manager" value="/camera_nodelet_manager" />
-  </include>
-</launch>

@@ -32,71 +32,47 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-
-#ifndef JSK_PCL_ROS_CLUSTER_POINT_INDICES_DECOMPOSER_H_
-#define JSK_PCL_ROS_CLUSTER_POINT_INDICES_DECOMPOSER_H_
+#ifndef JSK_PCL_ROS_MULTI_PLANE_EXTRACTION_H_
+#define JSK_PCL_ROS_MULTI_PLANE_EXTRACTION_H_
 
 #include <ros/ros.h>
 #include <ros/names.h>
+#include <pcl_ros/pcl_nodelet.h>
+
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
 
 #include "jsk_pcl_ros/ClusterPointIndices.h"
 #include "sensor_msgs/PointCloud2.h"
-#include <pcl_ros/pcl_nodelet.h>
-#include <message_filters/subscriber.h>
-#include <message_filters/time_synchronizer.h>
-#include <message_filters/synchronizer.h>
-#include <pcl/point_types.h>
-#include <pcl/impl/point_types.hpp>
-#include <tf/transform_broadcaster.h>
-#include <std_msgs/ColorRGBA.h>
+#include "jsk_pcl_ros/ModelCoefficientsArray.h"
+#include "jsk_pcl_ros/PolygonArray.h"
+
 namespace jsk_pcl_ros
 {
-  class ClusterPointIndicesDecomposer: public pcl_ros::PCLNodelet
+  class MultiPlaneExtraction: public pcl_ros::PCLNodelet
   {
   public:
-    typedef message_filters::sync_policies::ExactTime< sensor_msgs::PointCloud2,
-                                                       jsk_pcl_ros::ClusterPointIndices > SyncPolicy;
-    ClusterPointIndicesDecomposer();
-    virtual ~ClusterPointIndicesDecomposer();
-    virtual void onInit();
-    virtual void extract(const sensor_msgs::PointCloud2ConstPtr &point,
-                         const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices);
-    virtual void sortIndicesOrder(pcl::PointCloud<pcl::PointXYZ>::Ptr input,
-                                  std::vector<pcl::IndicesPtr> indices_array,
-                                  std::vector<pcl::IndicesPtr> &output_array);
+    typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, jsk_pcl_ros::ClusterPointIndices, jsk_pcl_ros::ModelCoefficientsArray, jsk_pcl_ros::PolygonArray> SyncPolicy;
   protected:
-    boost::shared_ptr<ros::NodeHandle> pnh_;
-    //ros::Subscriber sub_input_;
+    int maximum_queue_size_;
+    ros::Publisher pub_;
+    
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<jsk_pcl_ros::ClusterPointIndices> sub_target_;
+    message_filters::Subscriber<jsk_pcl_ros::ModelCoefficientsArray> sub_coefficients_;
+    message_filters::Subscriber<jsk_pcl_ros::PolygonArray> sub_polygons_;
+    message_filters::Subscriber<jsk_pcl_ros::ClusterPointIndices> sub_indices_;
+    
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
-    std::vector<ros::Publisher> publishers_;
-    ros::Publisher marker_pub_, pc_pub_;
-    tf::TransformBroadcaster br_;
-    std::string tf_prefix_;
-    size_t marker_num_;
-    virtual void allocatePublishers(size_t num);
-    std::vector<std_msgs::ColorRGBA> colors_;
-    static std_msgs::ColorRGBA makeColor(double r, double g, double b, double a)
-    {
-        std_msgs::ColorRGBA c;
-        c.r = r;
-        c.g = g;
-        c.b = b;
-        c.a = a;
-        return c;
-
-    }
-    static uint32_t colorRGBAToUInt32(std_msgs::ColorRGBA c)
-    {
-        uint8_t r, g, b;
-        r = (uint8_t)(c.r * 255);
-        g = (uint8_t)(c.g * 255);
-        b = (uint8_t)(c.b * 255);
-        return ((uint32_t)r<<16 | (uint32_t)g<<8 | (uint32_t)b);
-    }
+    
+    virtual void extract(const sensor_msgs::PointCloud2::ConstPtr& input,
+                         const jsk_pcl_ros::ClusterPointIndices::ConstPtr& indices,
+                         const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients,
+                         const jsk_pcl_ros::PolygonArray::ConstPtr& polygons);
+    
+  private:
+    virtual void onInit();
+    
   };
-
 }
 
 #endif

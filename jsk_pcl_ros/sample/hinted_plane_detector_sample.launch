@@ -1,0 +1,15 @@
+<launch>
+  <include file="$(find openni_launch)/launch/openni.launch" />
+
+  <include file="$(find jsk_pcl_ros)/launch/hinted_plane_detector.launch">
+    <arg name="pt_sc_use_view" value="true"/>
+    <arg name="pt_sc_publish_points" value="true"/>
+    <arg name="input_point" value="/camera/depth_registered/points"/>
+    <arg name="voxel_grid_filter_limit_min" value="-0.1"/>
+    <arg name="voxel_grid_filter_limit_max" value="0.1"/>
+    <arg name="voxel_grid_filter_limit_negative" value="true"/>
+    <arg name="voxel_grid_leaf_size" value="0.01"/>
+  </include>
+
+  <node pkg="rviz" type="rviz" name="rviz" args=" -d $(find jsk_pcl_ros)/sample/rviz/hinted_plane_detector.rviz"/>
+</launch>

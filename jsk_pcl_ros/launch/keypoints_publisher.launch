@@ -1,14 +1,14 @@
 <launch>
-  <!-- nodeletの名前は/camera_nodelet_manager -->
-  <arg name="camera_name" value="openni" />
-  <arg name="manager" default="/$(arg camera_name)/$(arg camera_name)_nodelet_manager" />
-  <param name="depth_registered" value="true"/>
-  <include file="$(find openni_launch)/launch/openni.launch">
-    <arg name="camera" value="$(arg camera_name)" />
-  </include>
-  <arg name="input_point" default="/$(arg camera_name)/depth_registered/points" />
-  <!-- 注目する領域の点群だけ抜き出す -->
-  <group ns="pcl_nodelet">
+  <arg name="input_point" default="/camera/depth_registered/points" />
+  <arg name="create_manager" default="true" />
+  <arg name="manager" default="nodelet_manager" />
+  <arg name="DEFAULT_NAMESPACE" default="pcl_nodelet"/>
+
+  <group ns="$(arg DEFAULT_NAMESPACE)">
+    <node if="$(arg create_manager)"
+          pkg="nodelet" type="nodelet" name="$(arg manager)"
+          args="manager" output="screen"/>
+
     <node pkg="nodelet" type="nodelet"
           name="keypoints_publisher"
           args="load jsk_pcl/KeypointsPublisher $(arg manager)"

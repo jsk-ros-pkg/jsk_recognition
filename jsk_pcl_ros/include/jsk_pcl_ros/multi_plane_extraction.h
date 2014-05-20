@@ -46,17 +46,24 @@
 #include "sensor_msgs/PointCloud2.h"
 #include "jsk_pcl_ros/ModelCoefficientsArray.h"
 #include "jsk_pcl_ros/PolygonArray.h"
+#include <dynamic_reconfigure/server.h>
+#include "jsk_pcl_ros/MultiPlaneExtractionConfig.h"
 
 namespace jsk_pcl_ros
 {
   class MultiPlaneExtraction: public pcl_ros::PCLNodelet
   {
   public:
-    typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, jsk_pcl_ros::ClusterPointIndices, jsk_pcl_ros::ModelCoefficientsArray, jsk_pcl_ros::PolygonArray> SyncPolicy;
-  protected:
-    int maximum_queue_size_;
-    ros::Publisher pub_;
     
+    typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, jsk_pcl_ros::ClusterPointIndices, jsk_pcl_ros::ModelCoefficientsArray, jsk_pcl_ros::PolygonArray> SyncPolicy;
+    typedef jsk_pcl_ros::MultiPlaneExtractionConfig Config;
+  protected:
+    boost::mutex mutex_;
+    int maximum_queue_size_;
+    double min_height_, max_height_;
+    ros::Publisher pub_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    virtual void configCallback (Config &config, uint32_t level);
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<jsk_pcl_ros::ModelCoefficientsArray> sub_coefficients_;
     message_filters::Subscriber<jsk_pcl_ros::PolygonArray> sub_polygons_;

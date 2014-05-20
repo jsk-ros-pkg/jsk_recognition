@@ -1,5 +1,11 @@
 <library path="lib/libjsk_pcl_ros">
 
+  <class name="jsk_pcl/NormalEstimationIntegralImage" type="NormalEstimationIntegralImage"
+         base_class_type="nodelet::Nodelet">
+    <description>estimates normals based on integral image1</description>
+  </class>
+
+
   <class name="jsk_pcl/MultiPlaneExtraction" type="MultiPlaneExtraction"
          base_class_type="nodelet::Nodelet">
     <description>extracts the points which does not belongs to the planes</description>

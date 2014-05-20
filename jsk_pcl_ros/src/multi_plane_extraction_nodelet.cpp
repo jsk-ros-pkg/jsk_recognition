@@ -64,6 +64,11 @@ namespace jsk_pcl_ros
     if (!pnh_->getParam("max_queue_size", maximum_queue_size_)) {
       maximum_queue_size_ = 100;
     }
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (&MultiPlaneExtraction::configCallback, this, _1, _2);
+    srv_->setCallback (f);
+
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(maximum_queue_size_);
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_indices_.subscribe(*pnh_, "indices", 1);
@@ -73,11 +78,19 @@ namespace jsk_pcl_ros
     sync_->registerCallback(boost::bind(&MultiPlaneExtraction::extract, this, _1, _2, _3, _4));
   }
 
+  void MultiPlaneExtraction::configCallback(Config& config, uint32_t level)
+  {
+    boost::mutex::scoped_lock(mutex_);
+    min_height_ = config.min_height;
+    max_height_ = config.max_height;
+  }
+
   void MultiPlaneExtraction::extract(const sensor_msgs::PointCloud2::ConstPtr& input,
                                      const jsk_pcl_ros::ClusterPointIndices::ConstPtr& indices,
                                      const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients,
                                      const jsk_pcl_ros::PolygonArray::ConstPtr& polygons)
   {
+    boost::mutex::scoped_lock(mutex_);
     // convert all to the pcl types
     pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZRGBNormal>());
     pcl::fromROSMsg(*input, *input_cloud);
@@ -116,7 +129,7 @@ namespace jsk_pcl_ros
       }
       
       prism_extract.setInputCloud(nonplane_cloud);
-      prism_extract.setHeightLimits(0.0, 1.0);
+      prism_extract.setHeightLimits(min_height_, max_height_);
       prism_extract.setInputPlanarHull(hull_cloud);
       //pcl::PointCloud<pcl::PointXYZRGBNormal> output;
       pcl::PointIndices output_indices;

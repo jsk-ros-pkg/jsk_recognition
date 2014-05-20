@@ -34,12 +34,12 @@
       <rosparam>
         use_indices: false
       </rosparam>
-      <!-- <param name="h_limit_max" value="$(arg h_max)" /> -->
-      <!-- <param name="h_limit_min" value="$(arg h_min)" /> -->
-      <!-- <param name="s_limit_max" value="$(arg s_max)" /> -->
-      <!-- <param name="s_limit_min" value="$(arg s_min)" /> -->
-      <!-- <param name="v_limit_max" value="$(arg v_max)" /> -->
-      <!-- <param name="v_limit_min" value="$(arg v_min)" /> -->
+      <param name="h_limit_max" value="$(arg h_max)" />
+      <param name="h_limit_min" value="$(arg h_min)" />
+      <param name="s_limit_max" value="$(arg s_max)" />
+      <param name="s_limit_min" value="$(arg s_min)" />
+      <param name="v_limit_max" value="$(arg v_max)" />
+      <param name="v_limit_min" value="$(arg v_min)" />
     </node>
     <node pkg="nodelet" type="nodelet" name="euclidean_clustering"
           args="load jsk_pcl/EuclideanClustering $(arg manager)" output="screen">

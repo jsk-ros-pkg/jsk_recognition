@@ -68,10 +68,10 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock(mutex_);
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr input(new pcl::PointCloud<pcl::PointXYZ>());
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr input(new pcl::PointCloud<pcl::PointXYZRGB>());
     pcl::fromROSMsg(*msg, *input);
     pcl::PointCloud<pcl::Normal> output;
-    pcl::IntegralImageNormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
+    pcl::IntegralImageNormalEstimation<pcl::PointXYZRGB, pcl::Normal> ne;
     if (estimation_method_ == 0) {
       ne.setNormalEstimationMethod (ne.AVERAGE_3D_GRADIENT);
     }
@@ -87,10 +87,10 @@ namespace jsk_pcl_ros
     }
 
     if (border_policy_ignore_) {
-      ne.setBorderPolicy(pcl::IntegralImageNormalEstimation<pcl::PointXYZ, pcl::Normal>::BORDER_POLICY_IGNORE);
+      ne.setBorderPolicy(pcl::IntegralImageNormalEstimation<pcl::PointXYZRGB, pcl::Normal>::BORDER_POLICY_IGNORE);
     }
     else {
-      ne.setBorderPolicy(pcl::IntegralImageNormalEstimation<pcl::PointXYZ, pcl::Normal>::BORDER_POLICY_MIRROR);
+      ne.setBorderPolicy(pcl::IntegralImageNormalEstimation<pcl::PointXYZRGB, pcl::Normal>::BORDER_POLICY_MIRROR);
     }
     
     ne.setMaxDepthChangeFactor(max_depth_change_factor_);

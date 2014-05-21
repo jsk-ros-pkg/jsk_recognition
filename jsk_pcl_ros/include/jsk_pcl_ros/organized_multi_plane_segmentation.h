@@ -69,16 +69,16 @@ namespace jsk_pcl_ros
     boost::mutex mutex_;
     virtual void segment(const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void configCallback (Config &config, uint32_t level);
-    virtual void pointCloudToPolygon(const pcl::PointCloud<pcl::PointNormal>& input,
+    virtual void pointCloudToPolygon(const pcl::PointCloud<pcl::PointXYZRGBNormal>& input,
                                      geometry_msgs::Polygon& polygon);
     virtual void pclIndicesArrayToClusterPointIndices(const std::vector<pcl::PointIndices>& inlier_indices,
                                                       const std_msgs::Header& header,
                                                       jsk_pcl_ros::ClusterPointIndices& output_indices);
-    virtual void connectPlanesMap(const pcl::PointCloud<pcl::PointNormal>::Ptr& input,
+    virtual void connectPlanesMap(const pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr& input,
                                   const std::vector<pcl::ModelCoefficients>& model_coefficients,
                                   const std::vector<pcl::PointIndices>& boundary_indices,
                                   std::vector<std::map<size_t, bool> >& connection_map);
-    virtual void buildConnectedPlanes(const pcl::PointCloud<pcl::PointNormal>::Ptr& input,
+    virtual void buildConnectedPlanes(const pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr& input,
                                       const std_msgs::Header& header,
                                       const std::vector<pcl::PointIndices>& inlier_indices,
                                       const std::vector<pcl::PointIndices>& boundary_indices,
@@ -86,7 +86,7 @@ namespace jsk_pcl_ros
                                       std::vector<std::map<size_t, bool> > connection_map,
                                       std::vector<pcl::PointIndices>& output_indices,
                                       std::vector<pcl::ModelCoefficients>& output_coefficients,
-                                      std::vector<pcl::PointCloud<pcl::PointNormal> >& output_boundary_clouds);
+                                      std::vector<pcl::PointCloud<pcl::PointXYZRGBNormal> >& output_boundary_clouds);
       
   private:
     virtual void onInit();

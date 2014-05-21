@@ -156,10 +156,10 @@ namespace jsk_pcl_ros
       geometry_msgs::Point a, b, c, d, e, f, g, h;
       double xwidth = std::max(fabs(minpt[0] - center[0]),
                                fabs(maxpt[0] - center[0])) * 2.0;
-      double ywidth = std::max(fabs(minpt[0] - center[0]),
-                               fabs(maxpt[0] - center[0])) * 2.0;
-      double zwidth = std::max(fabs(minpt[0] - center[0]),
-                               fabs(maxpt[0] - center[0])) * 2.0;
+      double ywidth = std::max(fabs(minpt[1] - center[1]),
+                               fabs(maxpt[1] - center[1])) * 2.0;
+      double zwidth = std::max(fabs(minpt[2] - center[2]),
+                               fabs(maxpt[2] - center[2])) * 2.0;
       a.x = center[0] + xwidth / 2.0;
       a.y = center[1] - ywidth / 2.0;
       a.z = center[2] + zwidth / 2.0;

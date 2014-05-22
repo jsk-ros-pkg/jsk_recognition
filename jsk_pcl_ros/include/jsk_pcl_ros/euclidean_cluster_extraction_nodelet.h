@@ -227,7 +227,6 @@ namespace pcl_ros
 
       if (cloud->points.size() == 0) {
           ROS_WARN("empty input");
-          return;
       }
       
 #if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
@@ -248,7 +247,6 @@ namespace pcl_ros
       impl_.extract (cluster_indices);
       if (cluster_indices.size() == 0) {
           ROS_WARN("empty cluster");
-          return;               // do nothing
       }
       // Publish result indices
       jsk_pcl_ros::ClusterPointIndices result;

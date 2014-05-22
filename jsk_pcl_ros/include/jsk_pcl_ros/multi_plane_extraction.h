@@ -61,7 +61,7 @@ namespace jsk_pcl_ros
     boost::mutex mutex_;
     int maximum_queue_size_;
     double min_height_, max_height_;
-    ros::Publisher pub_;
+    ros::Publisher pub_, nonplane_pub_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     virtual void configCallback (Config &config, uint32_t level);
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;

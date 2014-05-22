@@ -33,6 +33,8 @@ generate_dynamic_reconfigure_options(
   cfg/ImageRotate.cfg
   cfg/RegionGrowingSegmentation.cfg
   cfg/OrganizedMultiPlaneSegmentation.cfg
+  cfg/MultiPlaneExtraction.cfg
+  cfg/NormalEstimationIntegralImage.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -55,6 +57,8 @@ macro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 endmacro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
+
+add_definitions("-O2")
 
 # pcl_ros::Filter based class is not working...
 # https://github.com/ros-perception/perception_pcl/issues/9
@@ -93,6 +97,8 @@ jsk_pcl_nodelet(src/resize_points_publisher_nodelet.cpp
   "jsk_pcl/ResizePointsPublisher" "resize_points_publisher")
 jsk_pcl_nodelet(src/normal_concatenater_nodelet.cpp
   "jsk_pcl/NormalConcatenater" "normal_concatenater")
+jsk_pcl_nodelet(src/normal_estimation_integral_image_nodelet.cpp
+  "jsk_pcl/NormalEstimationIntegralImage" "normal_estimation_integral_image")
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
   jsk_pcl_nodelet(src/region_growing_segmentation_nodelet.cpp
     "jsk_pcl/RegionGrowingSegmentation" "region_growing_segmentation")

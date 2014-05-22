@@ -230,7 +230,6 @@ namespace jsk_pcl_ros
     pcl::toROSMsg(debug_output, debug_ros_output);
     debug_ros_output.header = input->header;
     debug_ros_output.is_dense = false;
-
     pc_pub_.publish(debug_ros_output);
   }
 

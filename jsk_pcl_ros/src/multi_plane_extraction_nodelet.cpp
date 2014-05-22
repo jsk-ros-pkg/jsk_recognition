@@ -61,6 +61,7 @@ namespace jsk_pcl_ros
     PCLNodelet::onInit();
     //pub_ = pnh_->advertise<PCLIndicesMsg>("output", 1);
     pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
+    nonplane_pub_ = pnh_->advertise<pcl::PointCloud<pcl::PointXYZRGBNormal> >("output_nonplane_cloud", 1);
     if (!pnh_->getParam("max_queue_size", maximum_queue_size_)) {
       maximum_queue_size_ = 100;
     }
@@ -110,7 +111,7 @@ namespace jsk_pcl_ros
     extract_nonplane.setInputCloud(input_cloud);
     extract_nonplane.setIndices(all_indices);
     extract_nonplane.filter(*nonplane_cloud);
-
+    nonplane_pub_.publish(nonplane_cloud);
     // for each plane, project nonplane_cloud to the plane and find the points
     // inside of the polygon
     

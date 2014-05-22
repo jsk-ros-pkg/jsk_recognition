@@ -95,6 +95,10 @@ namespace jsk_pcl_ros
                                                          const std::vector<pcl::PointIndices>& boundary_indices,
                                                          std::vector<std::map<size_t, bool> >& connection_map)
   {
+    if (model_coefficients.size() == 0) {
+      return;                   // do nothing
+    }
+      
     pcl::ExtractIndices<pcl::PointXYZRGBNormal> extract;
     extract.setInputCloud(input);
     connection_map.resize(model_coefficients.size());
@@ -300,9 +304,8 @@ namespace jsk_pcl_ros
     mps.segmentAndRefine(regions, model_coefficients, inlier_indices, labels, label_indices, boundary_indices);
     if (regions.size() == 0) {
       NODELET_DEBUG("no region is segmented");
-      return;
     }
-    
+
     {
       jsk_pcl_ros::ClusterPointIndices indices;
       jsk_pcl_ros::ModelCoefficientsArray coefficients_array;
@@ -336,7 +339,6 @@ namespace jsk_pcl_ros
       }
       org_coefficients_pub_.publish(coefficients_array);
     }
-
     // connection
     // this might be slow...
     ros::Time before_connect_time = ros::Time::now();
@@ -344,7 +346,6 @@ namespace jsk_pcl_ros
     
     std::vector<std::map<size_t, bool> > connection_map;
     connectPlanesMap(input, model_coefficients, boundary_indices, connection_map);
-
     {
       std::vector<pcl::PointIndices> output_indices;
       std::vector<pcl::ModelCoefficients> output_coefficients;
@@ -357,7 +358,6 @@ namespace jsk_pcl_ros
                            connection_map,
                            output_indices, output_coefficients, output_boundary_clouds);
 
-      
       jsk_pcl_ros::ClusterPointIndices indices;
       jsk_pcl_ros::PolygonArray polygon_array;
       indices.header = msg->header;
@@ -372,7 +372,6 @@ namespace jsk_pcl_ros
       }
       pub_.publish(indices);
       polygon_pub_.publish(polygon_array);
-      
       jsk_pcl_ros::ModelCoefficientsArray coefficients_array;
       coefficients_array.header = msg->header;
       for (size_t i = 0; i < output_coefficients.size(); i++) {

@@ -150,8 +150,7 @@ namespace jsk_pcl_ros
             pcl::PointXYZRGBNormal p = b_cloud.points[pi];
             std::vector<int> k_indices;
             std::vector<float> k_sqr_distances;
-            kdtree.radiusSearch(p, connect_distance_threshold_, k_indices, k_sqr_distances, 1);
-            if (k_indices.size() > 0) {
+            if (kdtree.radiusSearch(p, connect_distance_threshold_, k_indices, k_sqr_distances, 1) > 0) {
               NODELET_DEBUG("%lu - %lu connected", i, j);
               foundp = true;
               break;

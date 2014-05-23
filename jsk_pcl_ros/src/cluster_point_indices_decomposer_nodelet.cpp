@@ -39,7 +39,7 @@
 #include <pcl/common/centroid.h>
 #include <pcl/common/common.h>
 #include <boost/format.hpp>
-#include <visualization_msgs/MarkerArray.h>
+#include <jsk_pcl_ros/BoundingBoxArray.h>
 
 namespace jsk_pcl_ros
 {
@@ -59,10 +59,9 @@ namespace jsk_pcl_ros
     colors_.push_back(makeColor(0.0, 1.0, 1.0, 1.0));
     colors_.push_back(makeColor(1.0, 1.0, 1.0, 1.0));
 
-    marker_num_ = 0;
     pnh_.reset (new ros::NodeHandle (getPrivateNodeHandle ()));
-    marker_pub_ = pnh_->advertise<visualization_msgs::MarkerArray>("marker", 1);
     pc_pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("debug_output", 1);
+    box_pub_ = pnh_->advertise<jsk_pcl_ros::BoundingBoxArray>("boxes", 1);
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_target_.subscribe(*pnh_, "target", 1);
     if (!pnh_->getParam("tf_prefix_", tf_prefix_))
@@ -113,7 +112,8 @@ namespace jsk_pcl_ros
     extract.setInputCloud(cloud);
 
     pcl::PointCloud<pcl::PointXYZRGB> debug_output;
-    visualization_msgs::MarkerArray marker_array;
+    jsk_pcl_ros::BoundingBoxArray bounding_box_array;
+    bounding_box_array.header = input->header;
     for (size_t i = 0; i < sorted_indices.size(); i++)
     {
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
@@ -145,14 +145,8 @@ namespace jsk_pcl_ros
       }
       
       // create a bounding box
-      visualization_msgs::Marker marker;
       Eigen::Vector4f minpt, maxpt;
       pcl::getMinMax3D<pcl::PointXYZRGB>(*segmented_cloud, minpt, maxpt);
-      marker.action = visualization_msgs::Marker::ADD;
-      marker.type = visualization_msgs::Marker::LINE_LIST;
-      marker.header = input->header;
-      marker.id = i;
-      marker.scale.x = 0.01;
       geometry_msgs::Point a, b, c, d, e, f, g, h;
       double xwidth = std::max(fabs(minpt[0] - center[0]),
                                fabs(maxpt[0] - center[0])) * 2.0;
@@ -160,77 +154,26 @@ namespace jsk_pcl_ros
                                fabs(maxpt[1] - center[1])) * 2.0;
       double zwidth = std::max(fabs(minpt[2] - center[2]),
                                fabs(maxpt[2] - center[2])) * 2.0;
-      a.x = center[0] + xwidth / 2.0;
-      a.y = center[1] - ywidth / 2.0;
-      a.z = center[2] + zwidth / 2.0;
-      b.x = center[0] + xwidth / 2.0;
-      b.y = center[1] + ywidth / 2.0;
-      b.z = center[2] + zwidth / 2.0;
-      c.x = center[0] - xwidth / 2.0;
-      c.y = center[1] + ywidth / 2.0;
-      c.z = center[2] + zwidth / 2.0;
-      d.x = center[0] - xwidth / 2.0;
-      d.y = center[1] - ywidth / 2.0;
-      d.z = center[2] + zwidth / 2.0;
-      e.x = center[0] + xwidth / 2.0;
-      e.y = center[1] - ywidth / 2.0;
-      e.z = center[2] - zwidth / 2.0;
-      f.x = center[0] + xwidth / 2.0;
-      f.y = center[1] + ywidth / 2.0;
-      f.z = center[2] - zwidth / 2.0;
-      g.x = center[0] - xwidth / 2.0;
-      g.y = center[1] + ywidth / 2.0;
-      g.z = center[2] - zwidth / 2.0;
-      h.x = center[0] - xwidth / 2.0;
-      h.y = center[1] - ywidth / 2.0;
-      h.z = center[2] - zwidth / 2.0;
-      marker.points.push_back(a);
-      marker.points.push_back(b);
-      marker.points.push_back(b);
-      marker.points.push_back(c);
-      marker.points.push_back(c);
-      marker.points.push_back(d);
-      marker.points.push_back(d);
-      marker.points.push_back(a);
-      marker.points.push_back(e);
-      marker.points.push_back(f);
-      marker.points.push_back(f);
-      marker.points.push_back(g);
-      marker.points.push_back(g);
-      marker.points.push_back(h);
-      marker.points.push_back(h);
-      marker.points.push_back(e);
-      marker.points.push_back(a);
-      marker.points.push_back(e);
-      marker.points.push_back(b);
-      marker.points.push_back(f);
-      marker.points.push_back(c);
-      marker.points.push_back(g);
-      marker.points.push_back(d);
-      marker.points.push_back(h);
-      marker.color.a = 0.5;
-      marker.color.r = 1.0;
-      marker.color.g = 1.0;
-      marker.color.b = 1.0;
-      marker_array.markers.push_back(marker);
+      jsk_pcl_ros::BoundingBox bounding_box;
+      bounding_box.header = input->header;
+      bounding_box.pose.orientation.w = 1.0;
+      
+      bounding_box.pose.position.x = center[0];
+      bounding_box.pose.position.y = center[1];
+      bounding_box.pose.position.z = center[2];
+      bounding_box.dimensions.x = xwidth;
+      bounding_box.dimensions.y = ywidth;
+      bounding_box.dimensions.z = zwidth;
+
+      bounding_box_array.boxes.push_back(bounding_box);
     }
     
-    if (marker_num_ > sorted_indices.size()) { // delete the markers
-      for (size_t i = sorted_indices.size(); i < marker_num_; i++) {
-        visualization_msgs::Marker marker;
-        marker.header = input->header;
-        marker.action = visualization_msgs::Marker::DELETE;
-        marker.id = i;
-        marker_array.markers.push_back(marker);
-      }
-    }
-    marker_pub_.publish(marker_array);
-    marker_num_ = marker_array.markers.size();
     sensor_msgs::PointCloud2 debug_ros_output;
     pcl::toROSMsg(debug_output, debug_ros_output);
     debug_ros_output.header = input->header;
     debug_ros_output.is_dense = false;
     pc_pub_.publish(debug_ros_output);
+    box_pub_.publish(bounding_box_array);
   }
 
   void ClusterPointIndicesDecomposer::allocatePublishers(size_t num)

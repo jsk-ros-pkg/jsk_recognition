@@ -64,10 +64,14 @@ namespace jsk_pcl_ros
     box_pub_ = pnh_->advertise<jsk_pcl_ros::BoundingBoxArray>("boxes", 1);
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_target_.subscribe(*pnh_, "target", 1);
-    if (!pnh_->getParam("tf_prefix_", tf_prefix_))
+    if (!pnh_->getParam("tf_prefix", tf_prefix_))
     {
-      ROS_WARN("~tf_prefix_ is not specified, using %s", getName().c_str());
+      ROS_WARN("~tf_prefix is not specified, using %s", getName().c_str());
       tf_prefix_ = getName();
+    }
+
+    if (!pnh_->getParam("publish_clouds", publish_clouds_)) {
+      publish_clouds_ = true;
     }
 
     //sync_ = boost::make_shared<message_filters::TimeSynchronizer<sensor_msgs::PointCloud2, jsk_pcl_ros::ClusterPointIndices> >(input_sub, target_sub, 100);
@@ -92,7 +96,9 @@ namespace jsk_pcl_ros
   (const sensor_msgs::PointCloud2ConstPtr &input,
    const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices_input)
   {
-    allocatePublishers(indices_input->cluster_indices.size());
+    if (publish_clouds_) {
+      allocatePublishers(indices_input->cluster_indices.size());
+    }
     pcl::ExtractIndices<pcl::PointXYZRGB> extract;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz (new pcl::PointCloud<pcl::PointXYZ>);
@@ -123,7 +129,9 @@ namespace jsk_pcl_ros
       sensor_msgs::PointCloud2::Ptr out_cloud(new sensor_msgs::PointCloud2);
       pcl::toROSMsg(*segmented_cloud, *out_cloud);
       out_cloud->header = input->header;
-      publishers_[i].publish(out_cloud);
+      if (publish_clouds_) {
+        publishers_[i].publish(out_cloud);
+      }
       // publish tf
       Eigen::Vector4f center;
       pcl::compute3DCentroid(*segmented_cloud, center);

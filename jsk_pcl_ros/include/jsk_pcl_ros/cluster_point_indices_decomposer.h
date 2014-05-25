@@ -76,6 +76,9 @@ namespace jsk_pcl_ros
     std::string tf_prefix_;
     virtual void allocatePublishers(size_t num);
     std::vector<std_msgs::ColorRGBA> colors_;
+    bool publish_clouds_;
+    
+    
     static std_msgs::ColorRGBA makeColor(double r, double g, double b, double a)
     {
         std_msgs::ColorRGBA c;

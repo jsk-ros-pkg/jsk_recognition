@@ -21,7 +21,9 @@ find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros nodelet mess
 
 add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg SnapItRequest.msg PolygonArray.msg
   ModelCoefficientsArray.msg
-  SlicedPointCloud.msg)
+  SlicedPointCloud.msg
+  BoundingBox.msg
+  BoundingBoxArray.msg)
 add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv SetPointCloud2.srv
   CallSnapIt.srv CallPolygon.srv)
 

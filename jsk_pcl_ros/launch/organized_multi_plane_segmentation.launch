@@ -103,7 +103,25 @@
         output="screen" clear_params="true">
     <remap from="~input" to="/plane_extraction/output" />
     <remap from="~target" to="/euclidean_clustering/output" />
+    <remap from="~align_planes" to="/multi_plane_estimate/output_polygon" />
+    <remap from="~align_planes_coefficients"
+           to="/multi_plane_estimate/output_coefficients" />
     <rosparam>
+      align_boxes: true
+      publish_clouds: false
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        name="cluster_decomposer_final2"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer /$(arg MANAGER)"
+        output="screen" clear_params="true">
+    <remap from="~input" to="/plane_extraction/output" />
+    <remap from="~target" to="/euclidean_clustering/output" />
+    <remap from="~align_planes" to="/multi_plane_estimate/output_polygon" />
+    <remap from="~align_planes_coefficients"
+           to="/multi_plane_estimate/output_coefficients" />
+    <rosparam>
+      align_boxes: false
       publish_clouds: false
     </rosparam>
   </node>

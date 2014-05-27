@@ -2,7 +2,12 @@
 
   <class name="jsk_pcl/NormalEstimationIntegralImage" type="NormalEstimationIntegralImage"
          base_class_type="nodelet::Nodelet">
-    <description>estimates normals based on integral image1</description>
+    <description>estimates normals based on integral image</description>
+  </class>
+
+  <class name="jsk_pcl/SelectedClusterPublisher" type="SelectedClusterPublisher"
+         base_class_type="nodelet::Nodelet">
+    <description>publish the points of the clusters according to the selected index</description>
   </class>
 
 

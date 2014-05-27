@@ -112,6 +112,9 @@ jsk_pcl_nodelet(src/organized_multi_plane_segmentation_nodelet.cpp
 jsk_pcl_nodelet(src/multi_plane_extraction_nodelet.cpp
   "jsk_pcl/MultiPlaneExtraction" "multi_plane_extraction")
 
+jsk_pcl_nodelet(src/selected_cluster_publisher_nodelet.cpp
+  "jsk_pcl/SelectedClusterPublisher" "selected_cluster_publisher")
+
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)

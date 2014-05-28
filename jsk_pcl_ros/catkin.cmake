@@ -19,9 +19,11 @@ endif()
 find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros nodelet message_generation genmsg ${PCL_MSGS} sensor_msgs geometry_msgs
   eigen_conversions tf_conversions tf2_ros tf image_transport nodelet cv_bridge)
 
-add_message_files(FILES IndicesArray.msg PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg SnapItRequest.msg PolygonArray.msg
+add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg SnapItRequest.msg PolygonArray.msg
   ModelCoefficientsArray.msg
-  SlicedPointCloud.msg)
+  SlicedPointCloud.msg
+  BoundingBox.msg
+  BoundingBoxArray.msg)
 add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv SetPointCloud2.srv
   CallSnapIt.srv CallPolygon.srv)
 
@@ -109,6 +111,9 @@ jsk_pcl_nodelet(src/organized_multi_plane_segmentation_nodelet.cpp
 
 jsk_pcl_nodelet(src/multi_plane_extraction_nodelet.cpp
   "jsk_pcl/MultiPlaneExtraction" "multi_plane_extraction")
+
+jsk_pcl_nodelet(src/selected_cluster_publisher_nodelet.cpp
+  "jsk_pcl/SelectedClusterPublisher" "selected_cluster_publisher")
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})

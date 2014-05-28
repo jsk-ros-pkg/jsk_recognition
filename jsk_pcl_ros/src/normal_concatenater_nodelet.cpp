@@ -65,6 +65,7 @@ namespace jsk_pcl_ros
       point.normal_x = normal_cloud.points[i].normal_x;
       point.normal_y = normal_cloud.points[i].normal_y;
       point.normal_z = normal_cloud.points[i].normal_z;
+      point.curvature = normal_cloud.points[i].curvature;
       concatenated_cloud.points[i] = point;
     }
     sensor_msgs::PointCloud2 output_cloud;

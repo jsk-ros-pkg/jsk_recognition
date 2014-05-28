@@ -41,11 +41,23 @@
       <param name="v_limit_max" value="$(arg v_max)" />
       <param name="v_limit_min" value="$(arg v_min)" />
     </node>
-
-    <node pkg="nodelet" type="nodelet" name="centroid_publisher"
-	  args="load jsk_pcl/CentroidPublisher $(arg manager)" output="screen">
+    <node pkg="nodelet" type="nodelet" name="euclidean_clustering"
+          args="load jsk_pcl/EuclideanClustering $(arg manager)" output="screen">
       <remap from="~input" to="$(arg OUTPUT)" />
-      <param name="frame" value="$(arg CENTROID_FRAME)" />
+      <rosparam>
+        tolerance: 0.02
+        min_size: 100
+      </rosparam>
+    </node>
+
+    <node pkg="nodelet" type="nodelet"
+          name="cluster_decomposer"
+          args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="$(arg OUTPUT)" />
+      <remap from="~target" to="euclidean_clustering/output" />
+      <rosparam>
+      </rosparam>
     </node>
 
 

@@ -1,0 +1,20 @@
+<launch>
+  <include file="$(find jsk_data)/launch/pr2_play.launch">
+    <arg name="bagfile_names" default="$(find jsk_data)/large/2014_05_22_subway_receive_throw_rubbish.bag"/>
+   <!-- 1.2014_05_22_subway_receive_throw_rubbish.bag -->
+   <!-- 2.2014_05_22_subway_people_walking.bag -->
+   <!-- 3.2014_05_22_subway_move_around.bag -->
+ 
+    <arg name="rosbag_option" value="--clock -l"/>
+  </include>
+
+  <include file="$(find jsk_pcl_ros)/launch/calculate_normal.launch">
+    <arg name="input_point" value="/openni/depth_registered/points"/>
+    <arg name="voxel_grid_filter_limit_min" value="0.0"/>
+    <arg name="voxel_grid_filter_limit_max" value="5.0"/>
+    <arg name="voxel_grid_leaf_size" value="0.01"/>
+  </include>
+  
+
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find jsk_pcl_ros)/sample/rviz/2014_05_22_subway.rviz"/>
+</launch>

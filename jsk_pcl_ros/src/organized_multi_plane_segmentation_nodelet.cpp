@@ -90,12 +90,16 @@ namespace jsk_pcl_ros
     //concave_alpha_ = config.concave_alpha;
   }
 
-  void OrganizedMultiPlaneSegmentation::connectPlanesMap(const pcl::PointCloud<pcl::PointNormal>::Ptr& input,
+  void OrganizedMultiPlaneSegmentation::connectPlanesMap(const pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr& input,
                                                          const std::vector<pcl::ModelCoefficients>& model_coefficients,
                                                          const std::vector<pcl::PointIndices>& boundary_indices,
                                                          std::vector<std::map<size_t, bool> >& connection_map)
   {
-    pcl::ExtractIndices<pcl::PointNormal> extract;
+    if (model_coefficients.size() == 0) {
+      return;                   // do nothing
+    }
+      
+    pcl::ExtractIndices<pcl::PointXYZRGBNormal> extract;
     extract.setInputCloud(input);
     connection_map.resize(model_coefficients.size());
     for (size_t i = 0; i < model_coefficients.size() - 1; i++) {
@@ -134,7 +138,7 @@ namespace jsk_pcl_ros
           = boost::make_shared<pcl::PointIndices>(boundary_indices[i]);
         pcl::PointIndices::Ptr b_indices
           = boost::make_shared<pcl::PointIndices>(boundary_indices[j]);
-        pcl::PointCloud<pcl::PointNormal> a_cloud, b_cloud;
+        pcl::PointCloud<pcl::PointXYZRGBNormal> a_cloud, b_cloud;
         extract.setIndices(a_indices);
         extract.filter(a_cloud);
         extract.setIndices(b_indices);
@@ -143,15 +147,14 @@ namespace jsk_pcl_ros
         // compute the nearest neighbor of a_cloud and b_cloud,
         // and check the distance between them
         if (a_cloud.points.size() > 0) {
-          pcl::KdTreeFLANN<pcl::PointNormal> kdtree;
+          pcl::KdTreeFLANN<pcl::PointXYZRGBNormal> kdtree;
           kdtree.setInputCloud(a_cloud.makeShared());
           bool foundp = false;
           for (size_t pi = 0; pi < b_cloud.points.size(); pi++) {
-            pcl::PointNormal p = b_cloud.points[pi];
+            pcl::PointXYZRGBNormal p = b_cloud.points[pi];
             std::vector<int> k_indices;
             std::vector<float> k_sqr_distances;
-            kdtree.radiusSearch(p, connect_distance_threshold_, k_indices, k_sqr_distances, 1);
-            if (k_indices.size() > 0) {
+            if (kdtree.radiusSearch(p, connect_distance_threshold_, k_indices, k_sqr_distances, 1) > 0) {
               NODELET_DEBUG("%lu - %lu connected", i, j);
               foundp = true;
               break;
@@ -179,7 +182,7 @@ namespace jsk_pcl_ros
     }
   }
   
-  void OrganizedMultiPlaneSegmentation::pointCloudToPolygon(const pcl::PointCloud<pcl::PointNormal>& input,
+  void OrganizedMultiPlaneSegmentation::pointCloudToPolygon(const pcl::PointCloud<pcl::PointXYZRGBNormal>& input,
                                                             geometry_msgs::Polygon& polygon)
   {
     for (size_t i = 0; i < input.points.size(); i++) {
@@ -191,7 +194,7 @@ namespace jsk_pcl_ros
     }
   }
   
-  void OrganizedMultiPlaneSegmentation::buildConnectedPlanes(const pcl::PointCloud<pcl::PointNormal>::Ptr& input,
+  void OrganizedMultiPlaneSegmentation::buildConnectedPlanes(const pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr& input,
                                                              const std_msgs::Header& header,
                                                              const std::vector<pcl::PointIndices>& inlier_indices,
                                                              const std::vector<pcl::PointIndices>& boundary_indices,
@@ -199,7 +202,7 @@ namespace jsk_pcl_ros
                                                              std::vector<std::map<size_t, bool> > connection_map,
                                                              std::vector<pcl::PointIndices>& output_indices,
                                                              std::vector<pcl::ModelCoefficients>& output_coefficients,
-                                                             std::vector<pcl::PointCloud<pcl::PointNormal> >& output_boundary_clouds)
+                                                             std::vector<pcl::PointCloud<pcl::PointXYZRGBNormal> >& output_boundary_clouds)
   { 
     std::vector<std::set<int> > cloud_sets;
     for (size_t i = 0; i < connection_map.size(); i++) {
@@ -256,21 +259,21 @@ namespace jsk_pcl_ros
       output_coefficients.push_back(model_coefficients[(*cloud_sets[i].begin())]);
       // estimate concave hull
 
-      pcl::PointCloud<pcl::PointNormal>::Ptr cloud_projected (new pcl::PointCloud<pcl::PointNormal>());
+      pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr cloud_projected (new pcl::PointCloud<pcl::PointXYZRGBNormal>());
       pcl::PointIndices::Ptr indices_ptr = boost::make_shared<pcl::PointIndices>(one_boundaries);
-      pcl::ProjectInliers<pcl::PointNormal> proj;
+      pcl::ProjectInliers<pcl::PointXYZRGBNormal> proj;
       proj.setModelType (pcl::SACMODEL_PLANE);
       proj.setIndices (indices_ptr);
       proj.setInputCloud (input);
       proj.setModelCoefficients (boost::make_shared<pcl::ModelCoefficients>(output_coefficients[i]));
       proj.filter (*cloud_projected);
       
-      pcl::ConvexHull<pcl::PointNormal> chull;
+      pcl::ConvexHull<pcl::PointXYZRGBNormal> chull;
       chull.setInputCloud(input);
       chull.setDimension(2);
       //chull.setAlpha(concave_alpha_);      // should be parameterized
       chull.setInputCloud(cloud_projected);
-      pcl::PointCloud<pcl::PointNormal> chull_output;
+      pcl::PointCloud<pcl::PointXYZRGBNormal> chull_output;
       chull.reconstruct(chull_output);
       output_boundary_clouds.push_back(chull_output);
     }
@@ -281,9 +284,9 @@ namespace jsk_pcl_ros
   (const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock(mutex_);
-    pcl::PointCloud<pcl::PointNormal>::Ptr input(new pcl::PointCloud<pcl::PointNormal>());
+    pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr input(new pcl::PointCloud<pcl::PointXYZRGBNormal>());
     pcl::fromROSMsg(*msg, *input);
-    pcl::OrganizedMultiPlaneSegmentation<pcl::PointNormal, pcl::PointNormal, pcl::Label> mps;
+    pcl::OrganizedMultiPlaneSegmentation<pcl::PointXYZRGBNormal, pcl::PointXYZRGBNormal, pcl::Label> mps;
     mps.setMinInliers(min_size_);
     mps.setAngularThreshold(angular_threshold_);
     mps.setDistanceThreshold(distance_threshold_);
@@ -291,7 +294,7 @@ namespace jsk_pcl_ros
     mps.setInputCloud(input);
     mps.setInputNormals(input);
 
-    std::vector<pcl::PlanarRegion<pcl::PointNormal>, Eigen::aligned_allocator<pcl::PlanarRegion<pcl::PointNormal> > > regions;
+    std::vector<pcl::PlanarRegion<pcl::PointXYZRGBNormal>, Eigen::aligned_allocator<pcl::PlanarRegion<pcl::PointXYZRGBNormal> > > regions;
     std::vector<pcl::ModelCoefficients> model_coefficients;
     std::vector<pcl::PointIndices> inlier_indices;
     pcl::PointCloud<pcl::Label>::Ptr labels (new pcl::PointCloud<pcl::Label>());
@@ -301,9 +304,8 @@ namespace jsk_pcl_ros
     mps.segmentAndRefine(regions, model_coefficients, inlier_indices, labels, label_indices, boundary_indices);
     if (regions.size() == 0) {
       NODELET_DEBUG("no region is segmented");
-      return;
     }
-    
+
     {
       jsk_pcl_ros::ClusterPointIndices indices;
       jsk_pcl_ros::ModelCoefficientsArray coefficients_array;
@@ -313,10 +315,10 @@ namespace jsk_pcl_ros
       coefficients_array.header = msg->header;
       pclIndicesArrayToClusterPointIndices(inlier_indices, msg->header,
                                            indices);
-      pcl::ExtractIndices<pcl::PointNormal> extract;
+      pcl::ExtractIndices<pcl::PointXYZRGBNormal> extract;
       extract.setInputCloud(input);
       for (size_t i = 0; i < regions.size(); i++) {
-        pcl::PointCloud<pcl::PointNormal> boundary_cloud;
+        pcl::PointCloud<pcl::PointXYZRGBNormal> boundary_cloud;
         pcl::PointIndices::Ptr indices_ptr = boost::make_shared<pcl::PointIndices>(boundary_indices[i]);
         extract.setIndices(indices_ptr);
         extract.filter(boundary_cloud);
@@ -337,7 +339,6 @@ namespace jsk_pcl_ros
       }
       org_coefficients_pub_.publish(coefficients_array);
     }
-
     // connection
     // this might be slow...
     ros::Time before_connect_time = ros::Time::now();
@@ -345,11 +346,10 @@ namespace jsk_pcl_ros
     
     std::vector<std::map<size_t, bool> > connection_map;
     connectPlanesMap(input, model_coefficients, boundary_indices, connection_map);
-
     {
       std::vector<pcl::PointIndices> output_indices;
       std::vector<pcl::ModelCoefficients> output_coefficients;
-      std::vector<pcl::PointCloud<pcl::PointNormal> > output_boundary_clouds;
+      std::vector<pcl::PointCloud<pcl::PointXYZRGBNormal> > output_boundary_clouds;
     
       buildConnectedPlanes(input, msg->header,
                            inlier_indices,
@@ -358,7 +358,6 @@ namespace jsk_pcl_ros
                            connection_map,
                            output_indices, output_coefficients, output_boundary_clouds);
 
-      
       jsk_pcl_ros::ClusterPointIndices indices;
       jsk_pcl_ros::PolygonArray polygon_array;
       indices.header = msg->header;
@@ -373,7 +372,6 @@ namespace jsk_pcl_ros
       }
       pub_.publish(indices);
       polygon_pub_.publish(polygon_array);
-      
       jsk_pcl_ros::ModelCoefficientsArray coefficients_array;
       coefficients_array.header = msg->header;
       for (size_t i = 0; i < output_coefficients.size(); i++) {

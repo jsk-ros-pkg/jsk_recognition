@@ -1,4 +1,4 @@
-// -*- mode: C++ -*-
+// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
@@ -32,53 +32,37 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-#ifndef JSK_PCL_ROS_MULTI_PLANE_EXTRACTION_H_
-#define JSK_PCL_ROS_MULTI_PLANE_EXTRACTION_H_
+#ifndef JSK_PCL_ROS_NORMAL_ESTIMATION_INTEGRAL_IMAGE_H_
+#define JSK_PCL_ROS_NORMAL_ESTIMATION_INTEGRAL_IMAGE_H_
 
 #include <ros/ros.h>
 #include <ros/names.h>
+#include <sensor_msgs/PointCloud2.h>
+
 #include <pcl_ros/pcl_nodelet.h>
-
-#include <message_filters/time_synchronizer.h>
-#include <message_filters/synchronizer.h>
-
-#include "jsk_pcl_ros/ClusterPointIndices.h"
-#include "sensor_msgs/PointCloud2.h"
-#include "jsk_pcl_ros/ModelCoefficientsArray.h"
-#include "jsk_pcl_ros/PolygonArray.h"
 #include <dynamic_reconfigure/server.h>
-#include "jsk_pcl_ros/MultiPlaneExtractionConfig.h"
+#include "jsk_pcl_ros/NormalEstimationIntegralImageConfig.h"
 
 namespace jsk_pcl_ros
 {
-  class MultiPlaneExtraction: public pcl_ros::PCLNodelet
+  class NormalEstimationIntegralImage: public pcl_ros::PCLNodelet
   {
   public:
-    
-    typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, jsk_pcl_ros::ClusterPointIndices, jsk_pcl_ros::ModelCoefficientsArray, jsk_pcl_ros::PolygonArray> SyncPolicy;
-    typedef jsk_pcl_ros::MultiPlaneExtractionConfig Config;
+    typedef jsk_pcl_ros::NormalEstimationIntegralImageConfig Config;    
   protected:
+    ros::Subscriber sub_input_;
+    ros::Publisher pub_;
     boost::mutex mutex_;
-    int maximum_queue_size_;
-    double min_height_, max_height_;
-    ros::Publisher pub_, nonplane_pub_;
+    int estimation_method_;
+    bool depth_dependent_smoothing_;
+    double max_depth_change_factor_;
+    double normal_smoothing_size_;
+    bool border_policy_ignore_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
-    virtual void configCallback (Config &config, uint32_t level);
-    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<jsk_pcl_ros::ModelCoefficientsArray> sub_coefficients_;
-    message_filters::Subscriber<jsk_pcl_ros::PolygonArray> sub_polygons_;
-    message_filters::Subscriber<jsk_pcl_ros::ClusterPointIndices> sub_indices_;
-    
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
-    
-    virtual void extract(const sensor_msgs::PointCloud2::ConstPtr& input,
-                         const jsk_pcl_ros::ClusterPointIndices::ConstPtr& indices,
-                         const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients,
-                         const jsk_pcl_ros::PolygonArray::ConstPtr& polygons);
-    
+    virtual void configCallback (Config& config, uint32_t level);
+    virtual void compute(const sensor_msgs::PointCloud2::ConstPtr& msg);
   private:
     virtual void onInit();
-    
   };
 }
 

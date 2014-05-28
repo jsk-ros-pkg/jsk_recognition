@@ -1,54 +1,79 @@
 <launch>
   <arg name="INPUT" default="/camera/depth_registered/points" />
-  <node pkg="nodelet" type="nodelet" name="manager"
+  <arg name="LAUNCH_MANAGER" default="true" />
+  <arg name="MANAGER" default="manager" />
+  <node pkg="nodelet" type="nodelet" name="$(arg MANAGER)"
         args="manager"
+        if="$(arg LAUNCH_MANAGER)"
         alaunch-prefix="xterm -e gdb --args"
         output="screen"/>
+  
+  <group ns="input">
+    <node pkg="nodelet" type="nodelet" name="hz"
+          output="screen"
+          args="load jsk_topic_tools/HzMeasure /$(arg MANAGER)">
+      <remap from="~input" to="$(arg INPUT)" />
+    </node>
+  </group>
+
   <node pkg="nodelet" type="nodelet" name="normal_estimate"
-        args="load pcl/NormalEstimationOMP manager"
-        clear_params="true">
+        args="load jsk_pcl/NormalEstimationIntegralImage $(arg MANAGER)"
+        output="screen"
+        >
     <remap from="~input" to="$(arg INPUT)" />
     <!-- <remap from="~output" to="/normal_concat/input" /> -->
     <rosparam>
-      radius_search: 0
-      k_search: 240
-      # 0, => ANN, 1 => FLANN, 2 => Organized
-      spatial_locator: 2
     </rosparam>
   </node>
+  <group ns="normal_estimate">
+    <node pkg="nodelet" type="nodelet" name="hz"
+          output="screen"
+          args="load jsk_topic_tools/HzMeasure /$(arg MANAGER)">
+      <remap from="~input" to="/normal_estimate/output" />
+    </node>
+  </group>
   <node pkg="nodelet" type="nodelet" name="normal_concat"
-        args="load jsk_pcl/NormalConcatenater manager"
+        args="load jsk_pcl/NormalConcatenater $(arg MANAGER)"
         clear_params="false">
     <remap from="~input" to="$(arg INPUT)"/>
     <remap from="~normal" to="/normal_estimate/output"/>
   </node>
   <node pkg="nodelet" type="nodelet" name="multi_plane_estimate"
-        args="load jsk_pcl/OrganizedMultiPlaneSegmentation manager"
+        args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg MANAGER)"
         clear_params="false">
     <remap from="~input" to="/normal_concat/output"/>
   </node>
+  <group ns="multi_plane_estimate">
+    <node pkg="nodelet" type="nodelet" name="hz"
+          output="screen"
+          args="load jsk_topic_tools/HzMeasure /$(arg MANAGER)">
+      <remap from="~input" to="/multi_plane_estimate/output" />
+    </node>
+  </group>
   <node pkg="nodelet" type="nodelet"
         name="cluster_decomposer"
-        args="load jsk_pcl/ClusterPointIndicesDecomposer manager"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)"
         output="screen" clear_params="true">
     <remap from="~input" to="/normal_concat/output" />
     <remap from="~target" to="/multi_plane_estimate/output" />
     <rosparam>
+      publish_clouds: false
     </rosparam>
   </node>
   <node pkg="nodelet" type="nodelet"
         name="cluster_decomposer2"
-        args="load jsk_pcl/ClusterPointIndicesDecomposer manager"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)"
         output="screen" clear_params="true">
     <remap from="~input" to="/normal_concat/output" />
     <remap from="~target" to="/multi_plane_estimate/output_nonconnected" />
     <rosparam>
+      publish_clouds: false
     </rosparam>
   </node>
 
   <node pkg="nodelet" type="nodelet"
         name="plane_extraction"
-        args="load jsk_pcl/MultiPlaneExtraction manager"
+        args="load jsk_pcl/MultiPlaneExtraction $(arg MANAGER)"
         output="screen" clear_params="true">
     <remap from="~input" to="/normal_concat/output" />
     <remap from="~indices" to="/multi_plane_estimate/output" />
@@ -56,22 +81,49 @@
     <remap from="~input_coefficients" to="/multi_plane_estimate/output_coefficients" />
   </node>
   
-    <node pkg="nodelet" type="nodelet" name="euclidean_clustering"
-          args="load jsk_pcl/EuclideanClustering /manager" output="screen">
-      <remap from="~input" to="/plane_extraction/output" />
-      <rosparam>
-        tolerance: 0.02
-        min_size: 500
-      </rosparam>
+  <node pkg="nodelet" type="nodelet" name="euclidean_clustering"
+        args="load jsk_pcl/EuclideanClustering /$(arg MANAGER)" output="screen">
+    <remap from="~input" to="/plane_extraction/output" />
+    <rosparam>
+      tolerance: 0.02
+      min_size: 500
+    </rosparam>
+  </node>
+  <group ns="euclidean_clustering">
+    <node pkg="nodelet" type="nodelet" name="hz"
+          output="screen"
+          args="load jsk_topic_tools/HzMeasure /$(arg MANAGER)">
+      <remap from="~input" to="/euclidean_clustering/output" />
     </node>
-    <node pkg="nodelet" type="nodelet"
-          name="cluster_decomposer_final"
-          args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis /manager"
-          output="screen" clear_params="true">
-      <remap from="~input" to="/plane_extraction/output" />
-      <remap from="~target" to="/euclidean_clustering/output" />
-      <rosparam>
-      </rosparam>
-    </node>
+  </group>
 
+  <node pkg="nodelet" type="nodelet"
+        name="cluster_decomposer_final"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer /$(arg MANAGER)"
+        output="screen" clear_params="true">
+    <remap from="~input" to="/plane_extraction/output" />
+    <remap from="~target" to="/euclidean_clustering/output" />
+    <remap from="~align_planes" to="/multi_plane_estimate/output_polygon" />
+    <remap from="~align_planes_coefficients"
+           to="/multi_plane_estimate/output_coefficients" />
+    <rosparam>
+      align_boxes: true
+      publish_clouds: false
+    </rosparam>
+  </node>
+  <node pkg="jsk_interactive_marker"
+        type="bounding_box_marker"
+        name="bounding_box_marker"
+        output="screen"
+        >
+    <remap from="~bounding_box_array" to="cluster_decomposer_final/boxes" />
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        name="selected_cloud"
+        args="load jsk_pcl/SelectedClusterPublisher /$(arg MANAGER)"
+        output="screen" clear_params="true">
+    <remap from="~input" to="/plane_extraction/output" />
+    <remap from="~indices" to="/euclidean_clustering/output" />
+    <remap from="~selected_index" to="/bounding_box_marker/selected_index" />
+  </node>
 </launch>

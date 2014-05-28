@@ -19,9 +19,11 @@ endif()
 find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros nodelet message_generation genmsg ${PCL_MSGS} sensor_msgs geometry_msgs
   eigen_conversions tf_conversions tf2_ros tf image_transport nodelet cv_bridge)
 
-add_message_files(FILES IndicesArray.msg PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg SnapItRequest.msg PolygonArray.msg
+add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg SnapItRequest.msg PolygonArray.msg
   ModelCoefficientsArray.msg
-  SlicedPointCloud.msg)
+  SlicedPointCloud.msg
+  BoundingBox.msg
+  BoundingBoxArray.msg)
 add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv SetPointCloud2.srv
   CallSnapIt.srv CallPolygon.srv)
 
@@ -34,6 +36,7 @@ generate_dynamic_reconfigure_options(
   cfg/RegionGrowingSegmentation.cfg
   cfg/OrganizedMultiPlaneSegmentation.cfg
   cfg/MultiPlaneExtraction.cfg
+  cfg/NormalEstimationIntegralImage.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -56,6 +59,8 @@ macro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 endmacro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
+
+add_definitions("-O2")
 
 # pcl_ros::Filter based class is not working...
 # https://github.com/ros-perception/perception_pcl/issues/9
@@ -94,6 +99,8 @@ jsk_pcl_nodelet(src/resize_points_publisher_nodelet.cpp
   "jsk_pcl/ResizePointsPublisher" "resize_points_publisher")
 jsk_pcl_nodelet(src/normal_concatenater_nodelet.cpp
   "jsk_pcl/NormalConcatenater" "normal_concatenater")
+jsk_pcl_nodelet(src/normal_estimation_integral_image_nodelet.cpp
+  "jsk_pcl/NormalEstimationIntegralImage" "normal_estimation_integral_image")
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
   jsk_pcl_nodelet(src/region_growing_segmentation_nodelet.cpp
     "jsk_pcl/RegionGrowingSegmentation" "region_growing_segmentation")
@@ -104,6 +111,9 @@ jsk_pcl_nodelet(src/organized_multi_plane_segmentation_nodelet.cpp
 
 jsk_pcl_nodelet(src/multi_plane_extraction_nodelet.cpp
   "jsk_pcl/MultiPlaneExtraction" "multi_plane_extraction")
+
+jsk_pcl_nodelet(src/selected_cluster_publisher_nodelet.cpp
+  "jsk_pcl/SelectedClusterPublisher" "selected_cluster_publisher")
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})

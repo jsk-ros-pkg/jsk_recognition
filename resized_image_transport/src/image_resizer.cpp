@@ -177,7 +177,7 @@ protected:
             last_publish_time_ = now;
         }
     } catch( cv::Exception& e ) {
-        ROS_ERROR(e.what());
+        ROS_ERROR("%s", e.what());
     }
 
 

@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.5 (2014-05-29)
+------------------
 * add new nodelet to publish the points of the cluster selected by
   jsk_pcl_ros/Int32Stamped.
   this nodelet is supposed to be used with jsk_interactive_marker/bounding_box_marker

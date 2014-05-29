@@ -2,6 +2,10 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* src/image_resizer.cpp: fix to compile on rosbuild
+
 0.1.5 (2014-05-29)
 ------------------
 

@@ -126,4 +126,15 @@
     <remap from="~indices" to="/euclidean_clustering/output" />
     <remap from="~selected_index" to="/bounding_box_marker/selected_index" />
   </node>
+  <node pkg="nodelet" type="nodelet"
+        name="plane_rejector"
+        args="load jsk_pcl/PlaneRejector /$(arg MANAGER)"
+        output="screen" clear_params="true">
+    <remap from="~input_polygons" to="/multi_plane_estimate/output_polygon" />
+    <remap from="~input_coefficients" to="/multi_plane_estimate/output_coefficients" />
+    <rosparam>
+      reference_axis: [0, 0, -1]
+      processing_frame_id: camera_depth_optical_frame
+    </rosparam>
+  </node>
 </launch>

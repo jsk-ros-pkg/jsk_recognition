@@ -2,6 +2,12 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* new nodelet to reject the plane which does not satisfy the threshold
+  about normal direction
+* simplyfy tracking and add update with msg function
+
 0.1.6 (2014-05-30)
 ------------------
 

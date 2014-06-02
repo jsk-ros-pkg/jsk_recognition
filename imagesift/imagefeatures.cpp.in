@@ -40,9 +40,11 @@ public:
 
   SiftNode() : _it(_node)
   { 
-    ros::NodeHandle _local_nh("~");
-    _local_nh.param("detector", detector_name, std::string("SIFT"));
-    _local_nh.param("extractor",  extractor_name, std::string("SIFT"));
+    // ros::NodeHandle _local_nh("~");
+    // _local_nh.param("detector", detector_name, std::string("SIFT"));
+    // _local_nh.param("extractor",  extractor_name, std::string("SIFT"));
+    detector_name="@DETECTOR@";
+    extractor_name="@EXTRACTOR@";
     ROS_INFO("detector:%s extractor:%s\n",  detector_name.c_str() ,extractor_name.c_str() );
     detector = cv::FeatureDetector::create(detector_name.c_str());
     extractor = cv::DescriptorExtractor::create(extractor_name.c_str());
@@ -131,7 +133,7 @@ public:
     
     
     
-    ROS_INFO("image_feature: image: %d(size=%d), num: %d, sift time: %.3fs, total: %.3fs", imagemsg.header.seq,
+    ROS_INFO("image_feature: image: %d(size=%lu), num: %d, sift time: %.3fs, total: %.3fs", imagemsg.header.seq,
 	     imagemsg.data.size(),  numkeys,
 	     (float)(ros::Time::now()-siftbasetime).toSec(), (float)(ros::Time::now()-lasttime).toSec());
 		 

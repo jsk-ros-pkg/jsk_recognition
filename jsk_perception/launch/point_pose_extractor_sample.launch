@@ -1,7 +1,4 @@
 <launch>
-  <arg name="use_cv" default="false" />
-  <arg name="detector" default="SIFT" />
-  <arg name="extractor" default="SIFT" />
   <node name="uvc_camera" pkg="uvc_camera" type="camera_node"
         respawn="false" output="screen">
     <param name="camera_info_url" value="file://$(find roseus_tutorials)/launch/usb-camera.yaml"/>
@@ -12,28 +9,16 @@
     <param name="frame_id" value="uvc_camera"/>
   </node>
 
-  <node name="image_proc" 
-	pkg="image_proc" type="image_proc"
-	respawn="true">
+  <node name="image_proc" pkg="image_proc" type="image_proc"
+respawn="true">
   </node>
 
-  <node name="imagesift" unless="$(arg use_cv)"
-	pkg="imagesift" type="imagesift" 
-	respawn="false" output="screen" launch-prefix="nice -n 10">
+  <node name="imagesift" pkg="imagesift" type="imagesift"
+respawn="false" output="screen" launch-prefix="nice -n 10">
     <remap from="image" to="image_rect_color" />
-  </node>
-
-  <node name="image_cv_feature" if="$(arg use_cv)"
-	pkg="imagesift" type="image_cv_feature"
-	respawn="true" output="screen" launch-prefix="nice -n 10">
-    <param name="detector" value="$(arg detector)" />
-    <param name="extractor" value="$(arg extractor)" />
-
-    <remap from="image" to="image_rect_color" />
-     
   </node>
 
   <node name="point_pose_extractor" pkg="jsk_perception" type="point_pose_extractor"
-	respawn="false" output="screen"/>
+respawn="false" output="screen"/>
 
 </launch>

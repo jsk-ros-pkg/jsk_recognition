@@ -92,33 +92,26 @@ namespace jsk_pcl_ros
     boost::shared_ptr<ParticleFilterTracker<pcl::PointXYZRGBA, ParticleXYZRPY> > tracker_;
     boost::mutex mtx_;
     bool new_cloud_;
+    bool track_target_set_;
     double downsampling_grid_size_;
-    int counter_;
     std::string frame_id_;
 
     ros::Subscriber sub_;
+    ros::Subscriber sub_update_model_;
     ros::Publisher particle_publisher_;
     ros::Publisher track_result_publisher_;
     ros::Publisher tf_publisher_;
     ros::ServiceServer srv_;
 
-      
-    virtual void gridSampleApprox (const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &cloud, pcl::PointCloud<pcl::PointXYZRGBA> &result, double leaf_size);
-    virtual void publishParticles ();
-    virtual void publishResult ();
+    virtual void publish_particles ();
+    virtual void publish_result ();
 
-    virtual void resetTrackingTargetModel(const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &new_target_cloud);
+    virtual void reset_traking_target_model(const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &new_target_cloud);
     virtual void cloud_cb (const sensor_msgs::PointCloud2 &pc);
-    virtual void euclideanSegment (const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &cloud, std::vector<pcl::PointIndices> &cluster_indices);
-    virtual void initTargetModel(const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &cloud,
-                                 pcl::PointCloud<pcl::PointXYZRGBA>::Ptr &segmented_cloud);
-    virtual void extractSegmentCluster (const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &cloud,
-                                        const std::vector<pcl::PointIndices> cluster_indices,
-                                        const int segment_index,
-                                        pcl::PointCloud<pcl::PointXYZRGBA> &result);
-    virtual bool renewModel_cb(jsk_pcl_ros::SetPointCloud2::Request &req,
+    virtual bool renew_model_cb(jsk_pcl_ros::SetPointCloud2::Request &req,
                                jsk_pcl_ros::SetPointCloud2::Response &response
                                );
+    virtual void renew_model_topic_cb(const sensor_msgs::PointCloud2 &pc);
 
 
   private:

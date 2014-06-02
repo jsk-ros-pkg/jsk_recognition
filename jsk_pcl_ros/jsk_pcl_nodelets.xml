@@ -1,4 +1,8 @@
 <library path="lib/libjsk_pcl_ros">
+  <class name="jsk_pcl/PlaneRejector" type="PlaneRejector"
+         base_class_type="nodelet::Nodelet">
+    <description>rejects the planes which does not satisfy the parameters</description>
+  </class>
 
   <class name="jsk_pcl/NormalEstimationIntegralImage" type="NormalEstimationIntegralImage"
          base_class_type="nodelet::Nodelet">

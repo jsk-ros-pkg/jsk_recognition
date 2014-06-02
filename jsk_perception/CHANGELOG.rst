@@ -2,6 +2,17 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.7 (2014-05-31)
+------------------
+
+0.1.6 (2014-05-30)
+------------------
+
+0.1.5 (2014-05-29)
+------------------
+* add service interface with sensor_msgs/SetCameraInfo to camshiftdemo, not only mouse selection.
+* Contributors: Ryohei Ueda
+
 0.1.4 (2014-04-25)
 ------------------
 

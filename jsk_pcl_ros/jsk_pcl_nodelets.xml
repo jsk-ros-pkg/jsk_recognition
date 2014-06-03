@@ -1,4 +1,8 @@
 <library path="lib/libjsk_pcl_ros">
+  <class name="jsk_pcl/OcludedPlaneEstimator" type="OcludedPlaneEstimator"
+         base_class_type="nodelet::Nodelet">
+    <description>estimate the planes taking into account occulusions</description>
+  </class>
   <class name="jsk_pcl/PolygonArrayTransformer" type="PolygonArrayTransformer"
          base_class_type="nodelet::Nodelet">
     <description>transform polygons to the specified tf frame</description>

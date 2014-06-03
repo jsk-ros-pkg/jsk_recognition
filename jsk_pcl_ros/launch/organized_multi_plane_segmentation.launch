@@ -158,7 +158,7 @@
     <node pkg="nodelet" type="nodelet" name="polygon_estimator"
           clear_params="true"
           args="load jsk_pcl/OcludedPlaneEstimator /$(arg MANAGER)">
-      <remap from="~input_polygons" to="/estimated_plane_respected_to_odom/output_polygon" />
+      <remap from="~input_polygons" to="/estimated_plane_respected_to_odom/output_polygons" />
       <remap from="~input_coefficients" to="/estimated_plane_respected_to_odom/output_coefficients" />
       <remap from="~input_static_polygons" to="/footstep_respected_to_odom/output_polygons" />
       <remap from="~input_static_coefficients" to="/footstep_respected_to_odom/output_coefficients" />

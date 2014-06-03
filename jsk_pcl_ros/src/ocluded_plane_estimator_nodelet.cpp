@@ -133,15 +133,15 @@ namespace jsk_pcl_ros
           b_distance = - b_distance;
           b_normal = - b_normal;
         }
-        NODELET_DEBUG("[%f, %f, %f] - %f  --- [%f, %f, %f] - %f",
+        NODELET_INFO("[%f, %f, %f] - %f  --- [%f, %f, %f] - %f",
                      a_normal[0], a_normal[1], a_normal[2], a_distance,
                      b_normal[0], b_normal[1], b_normal[2], b_distance);
-        NODELET_DEBUG("%lu - %lu distance: %f", i, j, fabs(fabs(a_distance) - fabs(b_distance)));
+        NODELET_INFO("%lu - %lu distance: %f", i, j, fabs(fabs(a_distance) - fabs(b_distance)));
         if (fabs(fabs(a_distance) - fabs(b_distance)) > plane_distance_threshold_) {
           continue;
         }
         double theta = fabs(acos(a_normal.dot(b_normal)));
-        NODELET_DEBUG("%lu - %lu angle: %f", i, j, theta);
+        NODELET_INFO("%lu - %lu angle: %f", i, j, theta);
         if (theta > M_PI / 2.0) {
           theta = M_PI  - theta;
         }
@@ -156,7 +156,7 @@ namespace jsk_pcl_ros
 
       if (nearest_index != -1) {
         // merged into -1
-        NODELET_DEBUG("merging %lu into %d", i, nearest_index);
+        NODELET_INFO("merging %lu into %d", i, nearest_index);
         // project the points to the plane before run qhull
         pcl::ProjectInliers<pcl::PointXYZ> proj;
         proj.setModelType (pcl::SACMODEL_PLANE);

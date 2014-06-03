@@ -72,6 +72,8 @@ namespace jsk_pcl_ros
     virtual void onInit();
     virtual void transform(const jsk_pcl_ros::PolygonArray::ConstPtr& polygons,
                            const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients);
+    virtual void computeCoefficients(const geometry_msgs::PolygonStamped& polygon,
+                                     PCLModelCoefficientMsg& coefficient);
     virtual void transformModelCoefficient(const Eigen::Affine3d& transform,
                                            const PCLModelCoefficientMsg& coefficient,
                                            PCLModelCoefficientMsg& result);

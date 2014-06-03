@@ -56,23 +56,52 @@ namespace jsk_pcl_ros
     sync_->connectInput(sub_polygons_, sub_coefficients_);
     sync_->registerCallback(boost::bind(&PolygonArrayTransformer::transform, this, _1, _2));
   }
+  
+  void PolygonArrayTransformer::computeCoefficients(const geometry_msgs::PolygonStamped& polygon,
+                                                    PCLModelCoefficientMsg& coefficient)
+  {
+    Eigen::Vector3d A, B, C;
+    A[0] = polygon.polygon.points[0].x;
+    A[1] = polygon.polygon.points[0].y;
+    A[2] = polygon.polygon.points[0].z;
+    B[0] = polygon.polygon.points[1].x;
+    B[1] = polygon.polygon.points[1].y;
+    B[2] = polygon.polygon.points[1].z;
+    C[0] = polygon.polygon.points[2].x;
+    C[1] = polygon.polygon.points[2].y;
+    C[2] = polygon.polygon.points[2].z;
+    Eigen::Vector3d n = (B - A).cross(C - A).normalized();
+    double a = n[0];
+    double b = n[1];
+    double c = n[2];
+    double d = -(a * A[0] + b * A[1] + c * A[2]);
+    coefficient.header = polygon.header;
+    coefficient.values.push_back(a);
+    coefficient.values.push_back(b);
+    coefficient.values.push_back(c);
+    coefficient.values.push_back(d);
+
+  }
 
   void PolygonArrayTransformer::transformModelCoefficient(const Eigen::Affine3d& transform,
                                                           const PCLModelCoefficientMsg& coefficient,
                                                           PCLModelCoefficientMsg& result)
   {
-    Eigen::Vector4d plane_parameter;
-    plane_parameter[0] = coefficient.values[0];
-    plane_parameter[1] = coefficient.values[1];
-    plane_parameter[2] = coefficient.values[2];
-    plane_parameter[3] = coefficient.values[3];
-    Eigen::Vector4d transformed_plane_parameter = transform.inverse() * plane_parameter;
+    Eigen::Vector4d n;
+    n[0] = coefficient.values[0];
+    n[1] = coefficient.values[1];
+    n[2] = coefficient.values[2];
+    n[3] = 0;
+    Eigen::Matrix4d m = transform.matrix();
+    Eigen::Vector4d n_d = m.transpose() * n;
+    Eigen::Vector4d n_dd = n_d.normalized();
+    double d_dd = coefficient.values[3] / n_d.norm();
     result.header.stamp = coefficient.header.stamp;
     result.header.frame_id = frame_id_;
-    result.values.push_back(transformed_plane_parameter[0]);
-    result.values.push_back(transformed_plane_parameter[1]);
-    result.values.push_back(transformed_plane_parameter[2]);
-    result.values.push_back(transformed_plane_parameter[3]);
+    result.values.push_back(n_dd[0]);
+    result.values.push_back(n_dd[1]);
+    result.values.push_back(n_dd[2]);
+    result.values.push_back(d_dd);
   }
 
   void PolygonArrayTransformer::transformPolygon(const Eigen::Affine3d& transform,
@@ -133,11 +162,13 @@ namespace jsk_pcl_ros
         Eigen::Affine3d eigen_transform;
         tf::transformTFToEigen(transform, eigen_transform);
         PCLModelCoefficientMsg transformed_coefficient;
-        transformModelCoefficient(eigen_transform, coefficient, transformed_coefficient);
-        transformed_model_coefficients_array.coefficients.push_back(transformed_coefficient);
+        //transformModelCoefficient(eigen_transform, coefficient, transformed_coefficient);
+        
         geometry_msgs::PolygonStamped transformed_polygon;
         transformPolygon(eigen_transform, polygon, transformed_polygon);
         transformed_polygon_array.polygons.push_back(transformed_polygon);
+        computeCoefficients(transformed_polygon, transformed_coefficient);
+        transformed_model_coefficients_array.coefficients.push_back(transformed_coefficient);
       }
       else {
         NODELET_ERROR("cannot lookup transform from %s to %s at %f",

@@ -1,4 +1,9 @@
 <library path="lib/libjsk_pcl_ros">
+  <class name="jsk_pcl/StaticPolygonArrayPublisher" type="StaticPolygonArrayPublisher"
+         base_class_type="nodelet::Nodelet">
+    <description>publish some static polygons as jsk_pcl_ros/PolygonArray message</description>
+  </class>
+
   <class name="jsk_pcl/PlaneRejector" type="PlaneRejector"
          base_class_type="nodelet::Nodelet">
     <description>rejects the planes which does not satisfy the parameters</description>

@@ -21,3 +21,7 @@ matrix:
 before_script:
   - export ROS_PARALLEL_JOBS="-j4 -l4"
 script: source .travis/travis.sh
+notifications:
+  email:
+    on_success: always
+    on_failure: always

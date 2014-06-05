@@ -23,7 +23,8 @@ add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg
   ModelCoefficientsArray.msg
   SlicedPointCloud.msg
   BoundingBox.msg
-  BoundingBoxArray.msg)
+  BoundingBoxArray.msg
+  ColorHistogram.msg)
 add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv SetPointCloud2.srv
   CallSnapIt.srv CallPolygon.srv)
 

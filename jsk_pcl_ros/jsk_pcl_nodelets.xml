@@ -186,4 +186,16 @@
       publish transformed cloud with target id
     </description>
   </class>
+  <class name="jsk_pcl/ColorizeRandomForest" type="ColorizeRandomForest"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      jsk_pcl_ros::ColorizeRandomForest
+    </description>
+  </class>
+  <class name="jsk_pcl/ColorizeMapRandomForest" type="ColorizeMapRandomForest"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      jsk_pcl_ros::ColorizeMapRandomForest
+    </description>
+  </class>
 </library>

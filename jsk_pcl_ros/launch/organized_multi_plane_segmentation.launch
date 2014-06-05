@@ -125,6 +125,7 @@
     <remap from="~input" to="/plane_extraction/output" />
     <remap from="~indices" to="/euclidean_clustering/output" />
     <remap from="~selected_index" to="/bounding_box_marker/selected_index" />
+    <remap from="~output" to="/selected_pointcloud" />
   </node>
   <node pkg="nodelet" type="nodelet"
         name="plane_rejector"

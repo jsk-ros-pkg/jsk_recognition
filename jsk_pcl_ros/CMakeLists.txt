@@ -92,6 +92,10 @@ jsk_pcl_nodelet(src/selected_cluster_publisher_nodelet.cpp
   "jsk_pcl/SelectedClusterPublisher" "selected_cluster_publisher")
 jsk_pcl_nodelet(src/plane_rejector_nodelet.cpp
   "jsk_pcl/PlaneRejector" "plane_rejector")
+jsk_pcl_nodelet(src/static_polygon_array_publisher_nodelet.cpp
+  "jsk_pcl/StaticPolygonArrayPublisher" "static_polygon_array_publisher")
+jsk_pcl_nodelet(src/polygon_array_transformer_nodelet.cpp
+  "jsk_pcl/PolygonArrayTransformer" "polygon_array_transformer_nodelet")
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}
 #  ${pcl_ros_PACKAGE_PATH}/src/pcl_ros/features/feature.cpp

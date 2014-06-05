@@ -89,7 +89,7 @@ Visualization Manager:
           Size (Pixels): 5
           Size (m): 0.01
           Style: Points
-          Topic: /pcl_nodelet/particle_filter_tracker/track_result
+          Topic: /particle_filter_tracker/track_result
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
@@ -117,7 +117,7 @@ Visualization Manager:
           Size (Pixels): 3
           Size (m): 0.01
           Style: Flat Squares
-          Topic: /pcl_nodelet/particle_filter_tracker/particle
+          Topic: /particle_filter_tracker/particle
           Use Fixed Frame: true
           Use rainbow: true
           Value: true
@@ -145,7 +145,7 @@ Visualization Manager:
           Size (Pixels): 3
           Size (m): 0.01
           Style: Flat Squares
-          Topic: /pcl_nodelet/voxelgrid/output
+          Topic: /voxelgrid/output
           Use Fixed Frame: true
           Use rainbow: true
           Value: true

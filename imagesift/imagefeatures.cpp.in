@@ -1,0 +1,176 @@
+#include <ros/node_handle.h>
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/CameraInfo.h>
+#include <posedetection_msgs/ImageFeature0D.h>
+#include <posedetection_msgs/Feature0DDetect.h>
+#include <image_transport/image_transport.h>
+#include <sensor_msgs/image_encodings.h>
+#include <opencv2/opencv.hpp>
+#include <opencv2/nonfree/nonfree.hpp> // SIFT・SURFモジュール用
+#include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
+#include <map>
+#include <string>
+#include <cstdio>
+#include <vector>
+#include <cv_bridge/cv_bridge.h>
+#include <string.h>
+using namespace std;
+using namespace ros;
+
+class SiftNode
+{
+  boost::mutex _mutex;
+  ros::NodeHandle _node;
+  image_transport::ImageTransport _it;
+  image_transport::Subscriber _subImage;
+  ros::ServiceServer _srvDetect;
+  Subscriber _subInfo;
+  Publisher _pubSift;
+  posedetection_msgs::ImageFeature0D sift_msg;
+  bool _bInfoInitialized;
+  std::string detector_name;
+  std::string extractor_name;
+  cv::Ptr<cv::FeatureDetector> detector;
+  cv::Ptr<cv::DescriptorExtractor> extractor;
+  cv_bridge::CvImagePtr cv_ptr; 
+
+public:
+  ros::Time lasttime;
+
+  SiftNode() : _it(_node)
+  { 
+    // ros::NodeHandle _local_nh("~");
+    // _local_nh.param("detector", detector_name, std::string("SIFT"));
+    // _local_nh.param("extractor",  extractor_name, std::string("SIFT"));
+    detector_name="@DETECTOR@";
+    extractor_name="@EXTRACTOR@";
+    ROS_INFO("detector:%s extractor:%s\n",  detector_name.c_str() ,extractor_name.c_str() );
+    detector = cv::FeatureDetector::create(detector_name.c_str());
+    extractor = cv::DescriptorExtractor::create(extractor_name.c_str());
+    _pubSift = _node.advertise<posedetection_msgs::ImageFeature0D>("ImageFeature0D",1);
+    usleep(100000);
+    _subImage = _it.subscribe("image",1,&SiftNode::image_cb,this);
+    usleep(100000);
+    _subInfo = _node.subscribe("camera_info",1,&SiftNode::info_cb,this);
+    usleep(100000);
+    _srvDetect = _node.advertiseService("Feature0DDetect",&SiftNode::detect_cb,this);
+    lasttime = ros::Time::now();
+    _bInfoInitialized = false;
+  }
+  virtual ~SiftNode() {
+    _srvDetect.shutdown();
+    _subInfo.shutdown();
+    _subImage.shutdown();
+    _pubSift.shutdown();
+  }
+  
+  void info_cb(const sensor_msgs::CameraInfoConstPtr& msg_ptr)
+  {
+    boost::mutex::scoped_lock lock(_mutex);
+    sift_msg.info = *msg_ptr;
+    _bInfoInitialized = true;
+  }
+  
+  bool detect_cb(posedetection_msgs::Feature0DDetect::Request& req, posedetection_msgs::Feature0DDetect::Response& res)
+  {
+    return Detect(res.features,req.image);
+  }
+  
+  bool Detect(posedetection_msgs::Feature0D& features, const sensor_msgs::Image& imagemsg)
+  {
+    boost::mutex::scoped_lock lock(_mutex);
+    try
+      {
+	cv_ptr = cv_bridge::toCvCopy(imagemsg, "bgr8");// sensor_msgs::image_encodings::BGR8);
+      }
+    catch (cv_bridge::Exception& e)
+      {
+	ROS_ERROR("cv_bridge exception: %s", e.what());
+	return 0;
+      }
+    
+    // compute SIFT or something
+    ros::Time siftbasetime = ros::Time::now();
+    vector<cv::KeyPoint> keypts;
+    detector->detect(cv_ptr->image, keypts);
+    int numkeys = keypts.size();  
+    cv::Mat descriptor;
+    extractor->compute(cv_ptr->image, keypts, descriptor);
+
+    // publish                                                                        
+    features.header = imagemsg.header;
+    features.positions.resize(numkeys*2);
+    features.scales.resize(numkeys);
+    features.orientations.resize(numkeys);
+    features.confidences.resize(numkeys);
+    int size_d = descriptor.cols;
+    ROS_INFO("size = %d", size_d);
+    features.descriptors.resize(numkeys*size_d);
+    features.descriptor_dim = size_d;
+    features.type = "cv_sift";
+    
+    int index = 0;
+    
+    while(index<numkeys) {
+      if(!strcmp("SIFT", extractor_name.c_str()) || !strcmp("SURF", extractor_name.c_str())){
+	for(int j = 0; j < size_d; ++j){
+	  features.descriptors[size_d*index+j] = descriptor.at<float>(index, j); 
+	}
+      }
+      else{
+	for(int j = 0; j < size_d; ++j){
+	  features.descriptors[size_d*index+j] = descriptor.at<bool>(index, j); 
+	}
+      }
+      features.positions[2*index+0] = keypts.at(index).pt.x;
+      features.positions[2*index+1] = keypts.at(index).pt.y;
+      features.scales[index] = keypts.at(index).size;
+      features.orientations[index] = keypts.at(index).angle;
+      features.confidences[index] = 1.0; // SIFT has no confidence?      
+      ++index;
+    }
+    
+    
+    
+    ROS_INFO("image_feature: image: %d(size=%lu), num: %d, sift time: %.3fs, total: %.3fs", imagemsg.header.seq,
+	     imagemsg.data.size(),  numkeys,
+	     (float)(ros::Time::now()-siftbasetime).toSec(), (float)(ros::Time::now()-lasttime).toSec());
+		 
+    lasttime = ros::Time::now() ;
+    return true;
+  }
+  
+  void image_cb(const sensor_msgs::ImageConstPtr& msg_ptr)
+  {
+    if( _pubSift.getNumSubscribers()==0 ){ 
+      ROS_DEBUG("number of subscribers is 0, ignoring image");
+      return;
+    }
+    if( !_bInfoInitialized ) {
+      ROS_DEBUG("camera info not initialized, ignoring image");
+      return;
+    }
+    
+    Detect(sift_msg.features,*msg_ptr);
+    sift_msg.image = *msg_ptr; // probably copying pointers so don't use after this call
+    
+    {
+      boost::mutex::scoped_lock lock(_mutex); // needed for camerainfo
+      _pubSift.publish(sift_msg);
+    }
+  }
+};
+
+int main(int argc, char **argv)
+{
+  ros::init(argc,argv,"imagesift");
+  if( !ros::master::check() )
+        return 1;
+  cv::initModule_nonfree();
+  boost::shared_ptr<SiftNode> siftnode(new SiftNode());
+  
+  ros::spin();
+  siftnode.reset();
+  return 0;
+}

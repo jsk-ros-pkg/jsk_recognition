@@ -1,15 +1,18 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(jsk_perception)
 
-find_package(catkin REQUIRED COMPONENTS message_generation imagesift std_msgs sensor_msgs geometry_msgs cv_bridge image_geometry image_transport driver_base dynamic_reconfigure pcl_ros eigen roscpp nodelet rostest)
+find_package(catkin REQUIRED COMPONENTS message_generation imagesift std_msgs sensor_msgs geometry_msgs cv_bridge image_geometry image_transport driver_base dynamic_reconfigure pcl_ros eigen roscpp nodelet rostest jsk_pcl_ros)
 find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 
 # Dynamic reconfigure support
-generate_dynamic_reconfigure_options(cfg/camshiftdemo.cfg cfg/EdgeDetector.cfg cfg/HoughLines.cfg cfg/matchtemplate.cfg cfg/point_pose_extractor.cfg cfg/RectangleDetector.cfg)
+generate_dynamic_reconfigure_options(cfg/camshiftdemo.cfg cfg/EdgeDetector.cfg cfg/HoughLines.cfg cfg/matchtemplate.cfg cfg/point_pose_extractor.cfg cfg/RectangleDetector.cfg
+  cfg/ColorHistogram.cfg
+  cfg/HoughCircles.cfg)
 
 add_message_files(FILES # ClusterPointIndices.msg
-      PointsArray.msg RotatedRectStamped.msg LineArray.msg Rect.msg Line.msg RotatedRect.msg SparseImage.msg)
+      PointsArray.msg RotatedRectStamped.msg LineArray.msg Rect.msg Line.msg RotatedRect.msg SparseImage.msg
+      Circle2D.msg Circle2DArray.msg)
 
 add_service_files(FILES EuclideanSegment.srv  SetTemplate.srv  WhiteBalancePoints.srv  WhiteBalance.srv)
 
@@ -18,7 +21,7 @@ generate_messages(
 )
 
 catkin_package(
-  CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs message_runtime
+  CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs message_runtime jsk_pcl_ros
   DEPENDS
   INCLUDE_DIRS
   LIBRARIES
@@ -51,6 +54,8 @@ endmacro()
 jsk_perception_nodelet(src/edge_detector.cpp "jsk_perception/EdgeDetector" "edge_detector")
 jsk_perception_nodelet(src/sparse_image_encoder.cpp "jsk_perception/SparseImageEncoder" "sparse_image_encoder")
 jsk_perception_nodelet(src/sparse_image_decoder.cpp "jsk_perception/SparseImageDecoder" "sparse_image_decoder")
+jsk_perception_nodelet(src/color_histogram.cpp "jsk_perception/ColorHistogram" "color_histogram")
+jsk_perception_nodelet(src/hough_circles.cpp "jsk_perception/HoughCircleDetector" "hough_circles")
 
 # compiling jsk_perception library for nodelet
 add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources})

@@ -2,22 +2,25 @@
   <arg name="INPUT" default="/camera/depth_registered/points" />
   <arg name="LAUNCH_MANAGER" default="true" />
   <arg name="MANAGER" default="manager" />
-  <node pkg="nodelet" type="nodelet" name="$(arg MANAGER)"
-        args="manager"
-        if="$(arg LAUNCH_MANAGER)"
-        alaunch-prefix="xterm -e gdb --args"
-        output="screen"/>
-  
-  <group ns="input">
-    <node pkg="nodelet" type="nodelet" name="hz"
-          output="screen"
-          args="load jsk_topic_tools/HzMeasure /$(arg MANAGER)">
-      <remap from="~input" to="$(arg INPUT)" />
-    </node>
+  <arg name="MACHINE" default="localhost"/>
+  <arg name="GDB" default="false" />
+  <machine name="localhost" address="localhost" />
+  <group if="$(arg LAUNCH_MANAGER)">
+    <node pkg="nodelet" type="nodelet" name="$(arg MANAGER)"
+          args="manager"
+          machine="$(arg MACHINE)"
+          if="$(arg GDB)"
+          launch-prefix="xterm -e gdb --args"
+          output="screen"/>
+    <node pkg="nodelet" type="nodelet" name="$(arg MANAGER)"
+          args="manager"
+          machine="$(arg MACHINE)"
+          unless="$(arg GDB)"
+          output="screen"/>
   </group>
-
   <node pkg="nodelet" type="nodelet" name="normal_estimate"
         args="load jsk_pcl/NormalEstimationIntegralImage $(arg MANAGER)"
+        machine="$(arg MACHINE)"
         output="screen"
         >
     <remap from="~input" to="$(arg INPUT)" />
@@ -25,33 +28,22 @@
     <rosparam>
     </rosparam>
   </node>
-  <group ns="normal_estimate">
-    <node pkg="nodelet" type="nodelet" name="hz"
-          output="screen"
-          args="load jsk_topic_tools/HzMeasure /$(arg MANAGER)">
-      <remap from="~input" to="/normal_estimate/output" />
-    </node>
-  </group>
   <node pkg="nodelet" type="nodelet" name="normal_concat"
+        machine="$(arg MACHINE)"
         args="load jsk_pcl/NormalConcatenater $(arg MANAGER)"
         clear_params="false">
     <remap from="~input" to="$(arg INPUT)"/>
     <remap from="~normal" to="/normal_estimate/output"/>
   </node>
   <node pkg="nodelet" type="nodelet" name="multi_plane_estimate"
+        machine="$(arg MACHINE)"
         args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg MANAGER)"
         clear_params="false">
     <remap from="~input" to="/normal_concat/output"/>
   </node>
-  <group ns="multi_plane_estimate">
-    <node pkg="nodelet" type="nodelet" name="hz"
-          output="screen"
-          args="load jsk_topic_tools/HzMeasure /$(arg MANAGER)">
-      <remap from="~input" to="/multi_plane_estimate/output" />
-    </node>
-  </group>
   <node pkg="nodelet" type="nodelet"
         name="cluster_decomposer"
+        machine="$(arg MACHINE)"
         args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)"
         output="screen" clear_params="true">
     <remap from="~input" to="/normal_concat/output" />
@@ -62,6 +54,7 @@
   </node>
   <node pkg="nodelet" type="nodelet"
         name="cluster_decomposer2"
+        machine="$(arg MACHINE)"
         args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)"
         output="screen" clear_params="true">
     <remap from="~input" to="/normal_concat/output" />
@@ -73,6 +66,7 @@
 
   <node pkg="nodelet" type="nodelet"
         name="plane_extraction"
+        machine="$(arg MACHINE)"
         args="load jsk_pcl/MultiPlaneExtraction $(arg MANAGER)"
         output="screen" clear_params="true">
     <remap from="~input" to="/normal_concat/output" />
@@ -82,6 +76,7 @@
   </node>
   
   <node pkg="nodelet" type="nodelet" name="euclidean_clustering"
+        machine="$(arg MACHINE)"
         args="load jsk_pcl/EuclideanClustering /$(arg MANAGER)" output="screen">
     <remap from="~input" to="/plane_extraction/output" />
     <rosparam>
@@ -89,16 +84,10 @@
       min_size: 500
     </rosparam>
   </node>
-  <group ns="euclidean_clustering">
-    <node pkg="nodelet" type="nodelet" name="hz"
-          output="screen"
-          args="load jsk_topic_tools/HzMeasure /$(arg MANAGER)">
-      <remap from="~input" to="/euclidean_clustering/output" />
-    </node>
-  </group>
 
   <node pkg="nodelet" type="nodelet"
         name="cluster_decomposer_final"
+        machine="$(arg MACHINE)"
         args="load jsk_pcl/ClusterPointIndicesDecomposer /$(arg MANAGER)"
         output="screen" clear_params="true">
     <remap from="~input" to="/plane_extraction/output" />
@@ -113,6 +102,7 @@
   </node>
   <node pkg="jsk_interactive_marker"
         type="bounding_box_marker"
+        machine="$(arg MACHINE)"
         name="bounding_box_marker"
         output="screen"
         >
@@ -120,6 +110,7 @@
   </node>
   <node pkg="nodelet" type="nodelet"
         name="selected_cloud"
+        machine="$(arg MACHINE)"
         args="load jsk_pcl/SelectedClusterPublisher /$(arg MANAGER)"
         output="screen" clear_params="true">
     <remap from="~input" to="/plane_extraction/output" />
@@ -129,6 +120,7 @@
   </node>
   <node pkg="nodelet" type="nodelet"
         name="plane_rejector"
+        machine="$(arg MACHINE)"
         args="load jsk_pcl/PlaneRejector /$(arg MANAGER)"
         output="screen" clear_params="true">
     <remap from="~input_polygons" to="/multi_plane_estimate/output_polygon" />

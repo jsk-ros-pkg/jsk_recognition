@@ -100,6 +100,7 @@ rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}
 #  ${pcl_ros_PACKAGE_PATH}/src/pcl_ros/features/feature.cpp
 )
+rosbuild_add_openmp_flags(jsk_pcl_ros)
 
 rosbuild_add_compile_flags (jsk_pcl_ros ${SSE_FLAGS})
 rosbuild_link_boost (jsk_pcl_ros system)

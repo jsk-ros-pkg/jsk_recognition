@@ -10,15 +10,15 @@
   </node>
 
   <node name="image_proc" pkg="image_proc" type="image_proc"
-	respawn="true">
+respawn="true">
   </node>
 
   <node name="imagesift" pkg="imagesift" type="imagesift"
-	respawn="false" output="screen" launch-prefix="nice -n 10">
+respawn="false" output="screen" launch-prefix="nice -n 10">
     <remap from="image" to="image_rect_color" />
   </node>
 
   <node name="point_pose_extractor" pkg="jsk_perception" type="point_pose_extractor"
-	respawn="false" output="screen"/>
+respawn="false" output="screen"/>
 
 </launch>

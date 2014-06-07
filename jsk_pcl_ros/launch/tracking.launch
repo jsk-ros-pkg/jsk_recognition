@@ -7,22 +7,19 @@
   <arg name="voxel_grid_leaf_size" default="0.01"/>
   <arg name="create_manager" default="true" />
   <arg name="manager" default="pcl_process_manager" />
-
-
-  <group ns="pcl_nodelet">
     <node if="$(arg create_manager)"
           pkg="nodelet" type="nodelet" name="$(arg manager)"
           args="manager" output="screen"/>
 
      <node pkg="nodelet" type="nodelet"
           name="voxelgrid"
-          args="load pcl/VoxelGrid /pcl_nodelet/$(arg manager)"
+          args="load pcl/VoxelGrid /$(arg manager)"
           output="screen" clear_params="true">
       <remap from="~input" to="$(arg input_point)" />
-    <param name="filter_limit_min" value="$(arg voxel_grid_filter_limit_min)" />
-    <param name="filter_limit_max" value="$(arg voxel_grid_filter_limit_max)" />
-    <param name="filter_limit_field_name" value="$(arg voxel_grid_filter_field_name)" />
-    <param name="leaf_size" value="$(arg voxel_grid_leaf_size)" />
+      <param name="filter_limit_min" value="$(arg voxel_grid_filter_limit_min)" />
+      <param name="filter_limit_max" value="$(arg voxel_grid_filter_limit_max)" />
+      <param name="filter_limit_field_name" value="$(arg voxel_grid_filter_field_name)" />
+      <param name="leaf_size" value="$(arg voxel_grid_leaf_size)" />
       <!-- <rosparam> -->
       <!--   filter_field_name: z -->
       <!--   filter_limit_min: 0.0 -->
@@ -32,11 +29,28 @@
     </node>
     <node pkg="nodelet" type="nodelet"
           name="particle_filter_tracker"
-          args="load jsk_pcl/ParticleFilterTracking $(arg manager)"
+          args="load jsk_pcl/ParticleFilterTracking /$(arg manager)"
           output="screen" clear_params="true">
-      <remap from="~input" to="/pcl_nodelet/voxelgrid/output" />
+      <remap from="~input" to="voxelgrid/output" />
     </node>
-  </group>
+    <node pkg="nodelet" type="nodelet"
+          name="selected_cloud_downsampler"
+          args="load pcl/VoxelGrid /$(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="/selected_pointcloud" />
+      <param name="filter_limit_min" value="$(arg voxel_grid_filter_limit_min)" />
+      <param name="filter_limit_max" value="$(arg voxel_grid_filter_limit_max)" />
+      <param name="filter_limit_field_name" value="$(arg voxel_grid_filter_field_name)" />
+      <param name="leaf_size" value="$(arg voxel_grid_leaf_size)" />
+      <!-- <rosparam> -->
+      <!--   filter_field_name: z -->
+      <!--   filter_limit_min: 0.0 -->
+      <!--   filter_limit_max: 5.0 -->
+      <!--   leaf_size: 0.01 -->
+      <!-- </rosparam> -->
+    </node>
+    <node pkg="jsk_pcl_ros" name="renew_trakcing" type="renew_trakcing.py">
+      <remap from="/selected_pointcloud" to="/selected_cloud_downsampler/output" />
+    </node>
 
-  <node pkg="jsk_pcl_ros" name="renew_trakcing" type="renew_trakcing.py" />
 </launch>

@@ -26,6 +26,7 @@
   <!-- for pointcloud -->
   <depend package="pcl"/>
   <depend package="pcl_ros"/>
+  <depend package="jsk_pcl_ros"/>
   
   <!-- for build -->
   <depend package="rosbuild"/>

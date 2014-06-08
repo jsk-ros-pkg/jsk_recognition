@@ -1,8 +1,30 @@
 <library path="lib/libjsk_pcl_ros">
+  <class name="jsk_pcl/OcludedPlaneEstimator" type="OcludedPlaneEstimator"
+         base_class_type="nodelet::Nodelet">
+    <description>estimate the planes taking into account occulusions</description>
+  </class>
+  <class name="jsk_pcl/PolygonArrayTransformer" type="PolygonArrayTransformer"
+         base_class_type="nodelet::Nodelet">
+    <description>transform polygons to the specified tf frame</description>
+  </class>
+  <class name="jsk_pcl/StaticPolygonArrayPublisher" type="StaticPolygonArrayPublisher"
+         base_class_type="nodelet::Nodelet">
+    <description>publish some static polygons as jsk_pcl_ros/PolygonArray message</description>
+  </class>
+
+  <class name="jsk_pcl/PlaneRejector" type="PlaneRejector"
+         base_class_type="nodelet::Nodelet">
+    <description>rejects the planes which does not satisfy the parameters</description>
+  </class>
 
   <class name="jsk_pcl/NormalEstimationIntegralImage" type="NormalEstimationIntegralImage"
          base_class_type="nodelet::Nodelet">
-    <description>estimates normals based on integral image1</description>
+    <description>estimates normals based on integral image</description>
+  </class>
+
+  <class name="jsk_pcl/SelectedClusterPublisher" type="SelectedClusterPublisher"
+         base_class_type="nodelet::Nodelet">
+    <description>publish the points of the clusters according to the selected index</description>
   </class>
 
 

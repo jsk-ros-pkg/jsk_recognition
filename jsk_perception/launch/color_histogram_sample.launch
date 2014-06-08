@@ -1,0 +1,14 @@
+<launch>
+  <node pkg="usb_cam" type="usb_cam_node" name="usb_cam" />
+  <node pkg="jsk_perception" type="color_histogram" name="color_histogram">
+    <remap from="image" to="/usb_cam/image_raw" />
+  </node>
+  <node pkg="image_view2" type="image_view2" name="image_view2">
+    <remap from="image" to="/usb_cam/image_raw" />
+  </node>
+        
+  <node pkg="jsk_rqt_plugins" type="rqt_histogram_plot" name="red_histogram"
+        args="/usb_cam/image_raw/red_histogram/histogram"/>
+  <node pkg="jsk_rqt_plugins" type="rqt_histogram_plot" name="hue_histogram"
+        args="/usb_cam/image_raw/hue_histogram/histogram"/>
+</launch>

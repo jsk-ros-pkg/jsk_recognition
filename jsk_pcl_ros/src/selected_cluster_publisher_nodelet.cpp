@@ -52,7 +52,7 @@ namespace jsk_pcl_ros
   void SelectedClusterPublisher::onInit()
   {
     PCLNodelet::onInit();
-    pub_ = pnh_->advertise<pcl::PointCloud<pcl::PointXYZRGBNormal> >("output", 1);
+    pub_ = pnh_->advertise<pcl::PointCloud<pcl::PointXYZRGB> >("output", 1);
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(300); // 100 is enough?
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_indices_.subscribe(*pnh_, "indices", 1);
@@ -71,14 +71,14 @@ namespace jsk_pcl_ros
                     indices->cluster_indices.size());
       return;
     }
-    pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr input_cloud (new pcl::PointCloud<pcl::PointXYZRGBNormal>());
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud (new pcl::PointCloud<pcl::PointXYZRGB>());
     pcl::fromROSMsg(*input, *input_cloud);
-    pcl::ExtractIndices<pcl::PointXYZRGBNormal> extract;
+    pcl::ExtractIndices<pcl::PointXYZRGB> extract;
     pcl::PointIndices::Ptr pcl_indices (new pcl::PointIndices);
     pcl_indices->indices = indices->cluster_indices[index->data].indices;
     extract.setInputCloud(input_cloud);
     extract.setIndices(pcl_indices);
-    pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr extracted_cloud(new pcl::PointCloud<pcl::PointXYZRGBNormal>());
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr extracted_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
     extract.filter(*extracted_cloud);
     pub_.publish(extracted_cloud);
   }

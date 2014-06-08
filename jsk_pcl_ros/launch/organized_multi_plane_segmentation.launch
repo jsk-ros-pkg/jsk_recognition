@@ -19,12 +19,16 @@
           unless="$(arg GDB)"
           output="screen"/>
   </group>
-  
+  <node pkg="nodelet" type="nodelet" name="input_relay"
+        machine="$(arg MACHINE)"
+        args="load jsk_topic_tools/Relay $(arg MANAGER)">
+    <remap from="~input" to="$(arg INPUT)" />
+  </node>
   <node pkg="nodelet" type="nodelet" name="multi_plane_estimate"
         machine="$(arg MACHINE)"
         args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg MANAGER)"
         clear_params="false">
-    <remap from="~input" to="$(arg INPUT)"/>
+    <remap from="~input" to="input_relay/output"/>
     <rosparam>
       estimate_normal: true
     </rosparam>
@@ -34,7 +38,7 @@
         machine="$(arg MACHINE)"
         args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)"
         output="screen" clear_params="true">
-    <remap from="~input" to="/normal_concat/output" />
+    <remap from="~input" to="input_relay/output" />
     <remap from="~target" to="/multi_plane_estimate/output" />
     <rosparam>
       publish_clouds: false
@@ -45,7 +49,7 @@
         machine="$(arg MACHINE)"
         args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)"
         output="screen" clear_params="true">
-    <remap from="~input" to="/normal_concat/output" />
+    <remap from="~input" to="input_relay/output" />
     <remap from="~target" to="/multi_plane_estimate/output_nonconnected" />
     <rosparam>
       publish_clouds: false
@@ -57,7 +61,7 @@
         machine="$(arg MACHINE)"
         args="load jsk_pcl/MultiPlaneExtraction $(arg MANAGER)"
         output="screen" clear_params="true">
-    <remap from="~input" to="/normal_concat/output" />
+    <remap from="~input" to="input_relay/output" />
     <remap from="~indices" to="/multi_plane_estimate/output" />
     <remap from="~input_polygons" to="/multi_plane_estimate/output_polygon" />
     <remap from="~input_coefficients" to="/multi_plane_estimate/output_coefficients" />

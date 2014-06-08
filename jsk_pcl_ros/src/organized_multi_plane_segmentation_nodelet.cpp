@@ -430,7 +430,7 @@ namespace jsk_pcl_ros
     ne.setInputCloud(input);
     ne.compute(*output);
     ros::Time after = ros::Time::now();
-    NODELET_INFO("normal estimation: %f (%f Hz)", (after - before).toSec(), 1 / (after - before).toSec());
+    NODELET_DEBUG("normal estimation: %f (%f Hz)", (after - before).toSec(), 1 / (after - before).toSec());
   }
   
   void OrganizedMultiPlaneSegmentation::segment

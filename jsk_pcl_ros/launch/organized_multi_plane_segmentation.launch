@@ -2,6 +2,13 @@
   <arg name="INPUT" default="/camera/depth_registered/points" />
   <arg name="LAUNCH_MANAGER" default="true" />
   <arg name="MANAGER" default="manager" />
+  <arg name="ESTIMATE_OCLUSION" default="false" />
+  <group ns="input">
+    <node pkg="nodelet" type="nodelet" name="hz"
+          output="screen"
+          args="load jsk_topic_tools/HzMeasure /$(arg MANAGER)">
+      <remap from="~input" to="$(arg INPUT)" />
+    </node>
   <arg name="MACHINE" default="localhost"/>
   <arg name="GDB" default="false" />
   <machine name="localhost" address="localhost" />
@@ -130,4 +137,30 @@
       processing_frame_id: camera_depth_optical_frame
     </rosparam>
   </node>
+  <group if="$(arg ESTIMATE_OCLUSION)">
+    <include file="$(find jsk_pcl_ros)/launch/hrp2jsknt_footstep_polygon.launch">
+      <arg name="LAUNCH_MANAGER" value="false" />
+      <arg name="MANAGER" value="$(arg MANAGER)" />
+    </include>
+    <node pkg="nodelet" type="nodelet" name="footstep_respected_to_odom"
+          args="load jsk_pcl/PolygonArrayTransformer /$(arg MANAGER)">
+      <remap from="~input_polygons" to="footstep_polygon_publisher/output_polygons" />
+      <remap from="~input_coefficients" to="footstep_polygon_publisher/output_coefficients" />
+      <param name="frame_id" value="odom" />
+    </node>
+    <node pkg="nodelet" type="nodelet" name="estimated_plane_respected_to_odom"
+          args="load jsk_pcl/PolygonArrayTransformer /$(arg MANAGER)">
+      <remap from="~input_polygons" to="multi_plane_estimate/output_polygon" />
+      <remap from="~input_coefficients" to="multi_plane_estimate/output_coefficients" />
+      <param name="frame_id" value="odom" />
+    </node>
+    <node pkg="nodelet" type="nodelet" name="polygon_estimator"
+          clear_params="true"
+          args="load jsk_pcl/OcludedPlaneEstimator /$(arg MANAGER)">
+      <remap from="~input_polygons" to="/estimated_plane_respected_to_odom/output_polygons" />
+      <remap from="~input_coefficients" to="/estimated_plane_respected_to_odom/output_coefficients" />
+      <remap from="~input_static_polygons" to="/footstep_respected_to_odom/output_polygons" />
+      <remap from="~input_static_coefficients" to="/footstep_respected_to_odom/output_coefficients" />
+    </node>
+  </group>
 </launch>

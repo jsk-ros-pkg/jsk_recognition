@@ -3,12 +3,6 @@
   <arg name="LAUNCH_MANAGER" default="true" />
   <arg name="MANAGER" default="manager" />
   <arg name="ESTIMATE_OCLUSION" default="false" />
-  <group ns="input">
-    <node pkg="nodelet" type="nodelet" name="hz"
-          output="screen"
-          args="load jsk_topic_tools/HzMeasure /$(arg MANAGER)">
-      <remap from="~input" to="$(arg INPUT)" />
-    </node>
   <arg name="MACHINE" default="localhost"/>
   <arg name="GDB" default="false" />
   <machine name="localhost" address="localhost" />
@@ -25,28 +19,15 @@
           unless="$(arg GDB)"
           output="screen"/>
   </group>
-  <node pkg="nodelet" type="nodelet" name="normal_estimate"
-        args="load jsk_pcl/NormalEstimationIntegralImage $(arg MANAGER)"
-        machine="$(arg MACHINE)"
-        output="screen"
-        >
-    <remap from="~input" to="$(arg INPUT)" />
-    <!-- <remap from="~output" to="/normal_concat/input" /> -->
-    <rosparam>
-    </rosparam>
-  </node>
-  <node pkg="nodelet" type="nodelet" name="normal_concat"
-        machine="$(arg MACHINE)"
-        args="load jsk_pcl/NormalConcatenater $(arg MANAGER)"
-        clear_params="false">
-    <remap from="~input" to="$(arg INPUT)"/>
-    <remap from="~normal" to="/normal_estimate/output"/>
-  </node>
+  
   <node pkg="nodelet" type="nodelet" name="multi_plane_estimate"
         machine="$(arg MACHINE)"
         args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg MANAGER)"
         clear_params="false">
-    <remap from="~input" to="/normal_concat/output"/>
+    <remap from="~input" to="$(arg INPUT)"/>
+    <rosparam>
+      estimate_normal: true
+    </rosparam>
   </node>
   <node pkg="nodelet" type="nodelet"
         name="cluster_decomposer"

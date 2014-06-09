@@ -31,7 +31,9 @@ add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg
   BoundingBoxArray.msg
   ColorHistogram.msg)
 add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv SetPointCloud2.srv
-  CallSnapIt.srv CallPolygon.srv)
+  CallSnapIt.srv CallPolygon.srv
+  EnvironmentLock.srv
+  PolygonOnEnvironment.srv)
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
@@ -128,6 +130,8 @@ jsk_pcl_nodelet(src/polygon_array_transformer_nodelet.cpp
   "jsk_pcl/PolygonArrayTransformer" "polygon_array_transformer_nodelet")
 jsk_pcl_nodelet(src/ocluded_plane_estimator_nodelet.cpp
   "jsk_pcl/OcludedPlaneEstimator" "ocluded_plane_estimator")
+jsk_pcl_nodelet(src/environment_plane_modeling_nodelet.cpp
+  "jsk_pcl/EnvironmentPlaneModeling" "environment_plane_modeling")
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})

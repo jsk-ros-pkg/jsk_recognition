@@ -93,7 +93,6 @@ namespace jsk_pcl_ros
     boost::mutex mtx_;
     bool new_cloud_;
     bool track_target_set_;
-    double downsampling_grid_size_;
     std::string frame_id_;
 
     ros::Subscriber sub_;
@@ -113,7 +112,9 @@ namespace jsk_pcl_ros
                                );
     virtual void renew_model_topic_cb(const sensor_msgs::PointCloud2 &pc);
 
-
+    virtual double getXMLDoubleValue(XmlRpc::XmlRpcValue val);
+    virtual bool readVectorParameter(const std::string& param_name,
+                                     std::vector<double>& result);
   private:
     virtual void onInit();
 

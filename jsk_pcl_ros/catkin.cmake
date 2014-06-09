@@ -19,6 +19,11 @@ endif()
 find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros nodelet message_generation genmsg ${PCL_MSGS} sensor_msgs geometry_msgs
   eigen_conversions tf_conversions tf2_ros tf image_transport nodelet cv_bridge)
 
+find_package(OpenMP)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+
 add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg SnapItRequest.msg PolygonArray.msg
   ModelCoefficientsArray.msg
   SlicedPointCloud.msg
@@ -39,6 +44,7 @@ generate_dynamic_reconfigure_options(
   cfg/MultiPlaneExtraction.cfg
   cfg/NormalEstimationIntegralImage.cfg
   cfg/PlaneRejector.cfg
+  cfg/OcludedPlaneEstimator.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -62,7 +68,7 @@ macro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 endmacro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
 
-add_definitions("-O2")
+add_definitions("-O2 -g")
 
 # pcl_ros::Filter based class is not working...
 # https://github.com/ros-perception/perception_pcl/issues/9
@@ -120,6 +126,8 @@ jsk_pcl_nodelet(src/static_polygon_array_publisher_nodelet.cpp
   "jsk_pcl/StaticPolygonArrayPublisher" "static_polygon_array_publisher")
 jsk_pcl_nodelet(src/polygon_array_transformer_nodelet.cpp
   "jsk_pcl/PolygonArrayTransformer" "polygon_array_transformer_nodelet")
+jsk_pcl_nodelet(src/ocluded_plane_estimator_nodelet.cpp
+  "jsk_pcl/OcludedPlaneEstimator" "ocluded_plane_estimator")
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})

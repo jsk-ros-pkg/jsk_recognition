@@ -67,6 +67,7 @@ jsk_perception_nodelet(src/edge_detector.cpp "jsk_perception/EdgeDetector" "edge
 jsk_perception_nodelet(src/sparse_image_encoder.cpp "jsk_perception/SparseImageEncoder" "sparse_image_encoder")
 jsk_perception_nodelet(src/sparse_image_decoder.cpp "jsk_perception/SparseImageDecoder" "sparse_image_decoder")
 jsk_perception_nodelet(src/color_histogram.cpp "jsk_perception/ColorHistogram" "color_histogram")
+jsk_perception_nodelet(src/hough_circles.cpp "jsk_perception/HoughCircleDetector" "hough_circles")
 rosbuild_add_library (${PROJECT_NAME}
   ${jsk_perception_nodelet_sources}
   )

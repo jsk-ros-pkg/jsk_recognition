@@ -2,7 +2,7 @@
   <arg name="INPUT" default="/camera/depth_registered/points" />
   <arg name="LAUNCH_MANAGER" default="true" />
   <arg name="MANAGER" default="manager" />
-  <arg name="ESTIMATE_OCLUSION" default="false" />
+  <arg name="ESTIMATE_OCCLUSION" default="false" />
   <arg name="MACHINE" default="localhost"/>
   <arg name="GDB" default="false" />
   <machine name="localhost" address="localhost" />
@@ -122,7 +122,7 @@
       processing_frame_id: camera_depth_optical_frame
     </rosparam>
   </node>
-  <group if="$(arg ESTIMATE_OCLUSION)">
+  <group if="$(arg ESTIMATE_OCCLUSION)">
     <include file="$(find jsk_pcl_ros)/launch/hrp2jsknt_footstep_polygon.launch">
       <arg name="LAUNCH_MANAGER" value="false" />
       <arg name="MANAGER" value="$(arg MANAGER)" />
@@ -141,7 +141,7 @@
     </node>
     <node pkg="nodelet" type="nodelet" name="polygon_estimator"
           clear_params="true"
-          args="load jsk_pcl/OcludedPlaneEstimator /$(arg MANAGER)">
+          args="load jsk_pcl/OccludedPlaneEstimator /$(arg MANAGER)">
       <remap from="~input_polygons" to="/estimated_plane_respected_to_odom/output_polygons" />
       <remap from="~input_coefficients" to="/estimated_plane_respected_to_odom/output_coefficients" />
       <remap from="~input_static_polygons" to="/footstep_respected_to_odom/output_polygons" />

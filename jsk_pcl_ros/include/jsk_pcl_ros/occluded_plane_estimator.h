@@ -33,8 +33,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_OCLUDED_PLANE_ESTIMATOR_H_
-#define JSK_PCL_ROS_OCLUDED_PLANE_ESTIMATOR_H_
+#ifndef JSK_PCL_ROS_OCCLUDED_PLANE_ESTIMATOR_H_
+#define JSK_PCL_ROS_OCCLUDED_PLANE_ESTIMATOR_H_
 
 // ros
 #include <ros/ros.h>
@@ -51,18 +51,18 @@
 
 #include <jsk_pcl_ros/PolygonArray.h>
 #include <jsk_pcl_ros/ModelCoefficientsArray.h>
-#include <jsk_pcl_ros/OcludedPlaneEstimatorConfig.h>
+#include <jsk_pcl_ros/OccludedPlaneEstimatorConfig.h>
 
 namespace jsk_pcl_ros
 {
-  class OcludedPlaneEstimator: public pcl_ros::PCLNodelet
+  class OccludedPlaneEstimator: public pcl_ros::PCLNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime< jsk_pcl_ros::PolygonArray,
                                                        jsk_pcl_ros::ModelCoefficientsArray,
                                                        jsk_pcl_ros::PolygonArray,
                                                        jsk_pcl_ros::ModelCoefficientsArray> SyncPolicy;
-    typedef jsk_pcl_ros::OcludedPlaneEstimatorConfig Config;
+    typedef jsk_pcl_ros::OccludedPlaneEstimatorConfig Config;
   protected:
     boost::mutex mutex_;
     virtual void onInit();

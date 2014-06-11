@@ -96,8 +96,8 @@ jsk_pcl_nodelet(src/static_polygon_array_publisher_nodelet.cpp
   "jsk_pcl/StaticPolygonArrayPublisher" "static_polygon_array_publisher")
 jsk_pcl_nodelet(src/polygon_array_transformer_nodelet.cpp
   "jsk_pcl/PolygonArrayTransformer" "polygon_array_transformer_nodelet")
-jsk_pcl_nodelet(src/ocluded_plane_estimator_nodelet.cpp
-  "jsk_pcl/OcludedPlaneEstimator" "ocluded_plane_estimator")
+jsk_pcl_nodelet(src/occluded_plane_estimator_nodelet.cpp
+  "jsk_pcl/OccludedPlaneEstimator" "occluded_plane_estimator")
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}
 #  ${pcl_ros_PACKAGE_PATH}/src/pcl_ros/features/feature.cpp

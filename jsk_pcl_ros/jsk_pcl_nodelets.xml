@@ -1,5 +1,5 @@
 <library path="lib/libjsk_pcl_ros">
-  <class name="jsk_pcl/OcludedPlaneEstimator" type="OcludedPlaneEstimator"
+  <class name="jsk_pcl/OccludedPlaneEstimator" type="OccludedPlaneEstimator"
          base_class_type="nodelet::Nodelet">
     <description>estimate the planes taking into account occulusions</description>
   </class>

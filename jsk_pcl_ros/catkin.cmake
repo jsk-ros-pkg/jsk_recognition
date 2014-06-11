@@ -44,7 +44,7 @@ generate_dynamic_reconfigure_options(
   cfg/MultiPlaneExtraction.cfg
   cfg/NormalEstimationIntegralImage.cfg
   cfg/PlaneRejector.cfg
-  cfg/OcludedPlaneEstimator.cfg
+  cfg/OccludedPlaneEstimator.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -126,8 +126,8 @@ jsk_pcl_nodelet(src/static_polygon_array_publisher_nodelet.cpp
   "jsk_pcl/StaticPolygonArrayPublisher" "static_polygon_array_publisher")
 jsk_pcl_nodelet(src/polygon_array_transformer_nodelet.cpp
   "jsk_pcl/PolygonArrayTransformer" "polygon_array_transformer_nodelet")
-jsk_pcl_nodelet(src/ocluded_plane_estimator_nodelet.cpp
-  "jsk_pcl/OcludedPlaneEstimator" "ocluded_plane_estimator")
+jsk_pcl_nodelet(src/occluded_plane_estimator_nodelet.cpp
+  "jsk_pcl/OccludedPlaneEstimator" "occluded_plane_estimator")
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})

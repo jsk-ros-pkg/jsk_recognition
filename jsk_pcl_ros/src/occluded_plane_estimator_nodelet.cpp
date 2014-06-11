@@ -33,7 +33,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/ocluded_plane_estimator.h"
+#include "jsk_pcl_ros/occluded_plane_estimator.h"
 #include <pluginlib/class_list_macros.h>
 #include <pcl/surface/convex_hull.h>
 #include <pcl/filters/project_inliers.h>
@@ -51,14 +51,14 @@ typedef pcl::ModelCoefficients PCLModelCoefficientMsg;
 
 namespace jsk_pcl_ros
 {
-  void OcludedPlaneEstimator::onInit()
+  void OccludedPlaneEstimator::onInit()
   {
     PCLNodelet::onInit();
     polygon_pub_ = pnh_->advertise<jsk_pcl_ros::PolygonArray>("output_polygons", 1);
     coefficient_pub_ = pnh_->advertise<jsk_pcl_ros::ModelCoefficientsArray>("output_coefficients", 1);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&OcludedPlaneEstimator::configCallback, this, _1, _2);
+      boost::bind (&OccludedPlaneEstimator::configCallback, this, _1, _2);
     srv_->setCallback (f);
     
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
@@ -68,18 +68,18 @@ namespace jsk_pcl_ros
     sub_static_coefficients_.subscribe(*pnh_, "input_static_coefficients", 1);
     
     sync_->connectInput(sub_polygons_, sub_coefficients_, sub_static_polygons_, sub_static_coefficients_);
-    sync_->registerCallback(boost::bind(&OcludedPlaneEstimator::estimate,
+    sync_->registerCallback(boost::bind(&OccludedPlaneEstimator::estimate,
                                         this, _1, _2, _3, _4));
   }
 
-  void OcludedPlaneEstimator::configCallback(Config &config, uint32_t level)
+  void OccludedPlaneEstimator::configCallback(Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock(mutex_);
     plane_distance_threshold_ = config.plane_distance_threshold;
     plane_angle_threshold_ = config.plane_angle_threshold;
   }
 
-  void OcludedPlaneEstimator::estimate(const jsk_pcl_ros::PolygonArray::ConstPtr& polygons,
+  void OccludedPlaneEstimator::estimate(const jsk_pcl_ros::PolygonArray::ConstPtr& polygons,
                                        const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients,
                                        const jsk_pcl_ros::PolygonArray::ConstPtr& static_polygons,
                                        const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& static_coefficients)
@@ -206,5 +206,5 @@ namespace jsk_pcl_ros
   
 }
 
-typedef jsk_pcl_ros::OcludedPlaneEstimator OcludedPlaneEstimator;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, OcludedPlaneEstimator, OcludedPlaneEstimator, nodelet::Nodelet);
+typedef jsk_pcl_ros::OccludedPlaneEstimator OccludedPlaneEstimator;
+PLUGINLIB_DECLARE_CLASS (jsk_pcl, OccludedPlaneEstimator, OccludedPlaneEstimator, nodelet::Nodelet);

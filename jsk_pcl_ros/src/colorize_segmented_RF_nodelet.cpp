@@ -31,13 +31,8 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-
-
 #include "jsk_pcl_ros/colorize_segmented_RF.h"
 #include <pluginlib/class_list_macros.h>
-
-
-#include <pcl/common/centroid.h>
 
 namespace jsk_pcl_ros
 {

@@ -31,8 +31,6 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-
-
 #include "jsk_pcl_ros/colorize_random_points_RF.h"
 #include <pluginlib/class_list_macros.h>
 #include <pcl/common/centroid.h>

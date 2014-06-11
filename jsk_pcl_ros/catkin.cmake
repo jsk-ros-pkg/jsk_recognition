@@ -16,8 +16,15 @@ if($ENV{ROS_DISTRO} STREQUAL "groovy")
 else()
   set(PCL_MSGS pcl_msgs) ## hydro and later
 endif()
+
+if($ENV{ROS_DISTRO} STREQUAL "groovy")
+  set(ML_CLASSIFIERS )
+else()
+  set(ML_CLASSIFIERS ml_classifiers) ## hydro and later
+endif()
+
 find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros nodelet message_generation genmsg ${PCL_MSGS} sensor_msgs geometry_msgs
-  eigen_conversions tf_conversions tf2_ros tf image_transport nodelet cv_bridge ml_classifiers sklearn)
+  eigen_conversions tf_conversions tf2_ros tf image_transport nodelet cv_bridge ${ML_CLASSIFIERS} sklearn)
 
 add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg SnapItRequest.msg PolygonArray.msg
   ModelCoefficientsArray.msg
@@ -119,10 +126,14 @@ jsk_pcl_nodelet(src/static_polygon_array_publisher_nodelet.cpp
   "jsk_pcl/StaticPolygonArrayPublisher" "static_polygon_array_publisher")
 jsk_pcl_nodelet(src/polygon_array_transformer_nodelet.cpp
   "jsk_pcl/PolygonArrayTransformer" "polygon_array_transformer_nodelet")
-jsk_pcl_nodelet(src/colorize_segmented_RF_nodelet.cpp
-  "jsk_pcl/ColorizeRandomForest" "colorize_random_forest_result")
-jsk_pcl_nodelet(src/colorize_random_points_RF_nodelet.cpp
-  "jsk_pcl/ColorizeMapRandomForest" "colorize_random_foreset_result2")
+
+if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
+  jsk_pcl_nodelet(src/colorize_segmented_RF_nodelet.cpp
+    "jsk_pcl/ColorizeRandomForest" "colorize_random_forest_result")
+  jsk_pcl_nodelet(src/colorize_random_points_RF_nodelet.cpp
+    "jsk_pcl/ColorizeMapRandomForest" "colorize_random_foreset_result2")
+endif()
+
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})

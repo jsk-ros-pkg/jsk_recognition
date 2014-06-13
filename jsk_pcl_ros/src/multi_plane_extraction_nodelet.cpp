@@ -61,7 +61,7 @@ namespace jsk_pcl_ros
     PCLNodelet::onInit();
     //pub_ = pnh_->advertise<PCLIndicesMsg>("output", 1);
     pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
-    nonplane_pub_ = pnh_->advertise<pcl::PointCloud<pcl::PointXYZRGBNormal> >("output_nonplane_cloud", 1);
+    nonplane_pub_ = pnh_->advertise<pcl::PointCloud<pcl::PointXYZRGB> >("output_nonplane_cloud", 1);
     if (!pnh_->getParam("max_queue_size", maximum_queue_size_)) {
       maximum_queue_size_ = 100;
     }
@@ -93,7 +93,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock(mutex_);
     // convert all to the pcl types
-    pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZRGBNormal>());
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
     pcl::fromROSMsg(*input, *input_cloud);
     
     // concat indices into one PointIndices
@@ -105,8 +105,8 @@ namespace jsk_pcl_ros
       }
     }
 
-    pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr nonplane_cloud(new pcl::PointCloud<pcl::PointXYZRGBNormal>());
-    pcl::ExtractIndices<pcl::PointXYZRGBNormal> extract_nonplane;
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr nonplane_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
+    pcl::ExtractIndices<pcl::PointXYZRGB> extract_nonplane;
     extract_nonplane.setNegative(true);
     extract_nonplane.setInputCloud(input_cloud);
     extract_nonplane.setIndices(all_indices);
@@ -118,11 +118,11 @@ namespace jsk_pcl_ros
     std::set<int> result_set;
     for (size_t plane_i = 0; plane_i < coefficients->coefficients.size(); plane_i++) {
 
-      pcl::ExtractPolygonalPrismData<pcl::PointXYZRGBNormal> prism_extract;
-      pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr hull_cloud(new pcl::PointCloud<pcl::PointXYZRGBNormal>());
+      pcl::ExtractPolygonalPrismData<pcl::PointXYZRGB> prism_extract;
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr hull_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
       geometry_msgs::Polygon the_polygon = polygons->polygons[plane_i].polygon;
       for (size_t i = 0; i < the_polygon.points.size(); i++) {
-        pcl::PointXYZRGBNormal p;
+        pcl::PointXYZRGB p;
         p.x = the_polygon.points[i].x;
         p.y = the_polygon.points[i].y;
         p.z = the_polygon.points[i].z;
@@ -132,7 +132,7 @@ namespace jsk_pcl_ros
       prism_extract.setInputCloud(nonplane_cloud);
       prism_extract.setHeightLimits(min_height_, max_height_);
       prism_extract.setInputPlanarHull(hull_cloud);
-      //pcl::PointCloud<pcl::PointXYZRGBNormal> output;
+      //pcl::PointCloud<pcl::PointXYZRGB> output;
       pcl::PointIndices output_indices;
       prism_extract.segment(output_indices);
       // append output to result_cloud
@@ -144,7 +144,7 @@ namespace jsk_pcl_ros
 
     // convert std::set to PCLIndicesMsg
     //PCLIndicesMsg output_indices;
-    pcl::PointCloud<pcl::PointXYZRGBNormal> result_cloud;
+    pcl::PointCloud<pcl::PointXYZRGB> result_cloud;
     pcl::PointIndices::Ptr all_result_indices (new pcl::PointIndices());
     for (std::set<int>::iterator it = result_set.begin();
          it != result_set.end();
@@ -152,7 +152,7 @@ namespace jsk_pcl_ros
       all_result_indices->indices.push_back(*it);
     }
 
-    pcl::ExtractIndices<pcl::PointXYZRGBNormal> extract_all_indices;
+    pcl::ExtractIndices<pcl::PointXYZRGB> extract_all_indices;
     extract_all_indices.setInputCloud(nonplane_cloud);
     extract_all_indices.setIndices(all_result_indices);
     extract_all_indices.filter(result_cloud);

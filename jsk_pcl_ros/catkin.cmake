@@ -16,14 +16,27 @@ if($ENV{ROS_DISTRO} STREQUAL "groovy")
 else()
   set(PCL_MSGS pcl_msgs) ## hydro and later
 endif()
+
+if($ENV{ROS_DISTRO} STREQUAL "groovy")
+  set(ML_CLASSIFIERS )
+else()
+  set(ML_CLASSIFIERS ml_classifiers) ## hydro and later
+endif()
+
 find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros nodelet message_generation genmsg ${PCL_MSGS} sensor_msgs geometry_msgs
-  eigen_conversions tf_conversions tf2_ros tf image_transport nodelet cv_bridge)
+  eigen_conversions tf_conversions tf2_ros tf image_transport nodelet cv_bridge ${ML_CLASSIFIERS} sklearn)
+
+find_package(OpenMP)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 
 add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg SnapItRequest.msg PolygonArray.msg
   ModelCoefficientsArray.msg
   SlicedPointCloud.msg
   BoundingBox.msg
-  BoundingBoxArray.msg)
+  BoundingBoxArray.msg
+  ColorHistogram.msg)
 add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv SetPointCloud2.srv
   CallSnapIt.srv CallPolygon.srv)
 
@@ -38,6 +51,7 @@ generate_dynamic_reconfigure_options(
   cfg/MultiPlaneExtraction.cfg
   cfg/NormalEstimationIntegralImage.cfg
   cfg/PlaneRejector.cfg
+  cfg/OccludedPlaneEstimator.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -61,7 +75,7 @@ macro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 endmacro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
 
-add_definitions("-O2")
+add_definitions("-O2 -g")
 
 # pcl_ros::Filter based class is not working...
 # https://github.com/ros-perception/perception_pcl/issues/9
@@ -119,8 +133,21 @@ jsk_pcl_nodelet(src/static_polygon_array_publisher_nodelet.cpp
   "jsk_pcl/StaticPolygonArrayPublisher" "static_polygon_array_publisher")
 jsk_pcl_nodelet(src/polygon_array_transformer_nodelet.cpp
   "jsk_pcl/PolygonArrayTransformer" "polygon_array_transformer_nodelet")
+jsk_pcl_nodelet(src/occluded_plane_estimator_nodelet.cpp
+  "jsk_pcl/OccludedPlaneEstimator" "occluded_plane_estimator")
 
-add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
+
+
+if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
+  jsk_pcl_nodelet(src/colorize_segmented_RF_nodelet.cpp
+    "jsk_pcl/ColorizeRandomForest" "colorize_random_forest_result")
+  jsk_pcl_nodelet(src/colorize_random_points_RF_nodelet.cpp
+    "jsk_pcl/ColorizeMapRandomForest" "colorize_random_foreset_result2")
+endif()
+
+
+add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
+  src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp)
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 

@@ -110,7 +110,7 @@ namespace jsk_pcl_ros
     double a = n[0];
     double b = n[1];
     double c = n[2];
-    double d = a * A[0] + b * A[1] + c * A[2];
+    double d = -(a * A[0] + b * A[1] + c * A[2]);
     PCLModelCoefficientMsg coefficient;
     coefficient.header = polygon.header;
     coefficient.values.push_back(a);

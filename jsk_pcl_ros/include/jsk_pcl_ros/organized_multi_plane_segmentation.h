@@ -52,9 +52,11 @@ namespace jsk_pcl_ros
   class OrganizedMultiPlaneSegmentation: public pcl_ros::PCLNodelet
   {
   public:
+    typedef pcl::PointXYZRGBA PointT;
   protected:
     ros::Publisher org_pub_, org_polygon_pub_, org_coefficients_pub_;
     ros::Publisher pub_, polygon_pub_, coefficients_pub_;
+    ros::Publisher normal_pub_;
     ros::Subscriber sub_;
     int min_size_;
     double concave_alpha_;
@@ -64,21 +66,30 @@ namespace jsk_pcl_ros
     double connect_plane_angle_threshold_;
     double connect_plane_distance_threshold_;
     double connect_distance_threshold_;
+    int estimation_method_;
+    bool depth_dependent_smoothing_;
+    double max_depth_change_factor_;
+    double normal_smoothing_size_;
+    bool border_policy_ignore_;
+    bool estimate_normal_;
+    bool publish_normal_;
     typedef jsk_pcl_ros::OrganizedMultiPlaneSegmentationConfig Config;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
     virtual void segment(const sensor_msgs::PointCloud2::ConstPtr& msg);
+    virtual void estimateNormal(pcl::PointCloud<PointT>::Ptr input,
+                                pcl::PointCloud<pcl::Normal>::Ptr output);
     virtual void configCallback (Config &config, uint32_t level);
-    virtual void pointCloudToPolygon(const pcl::PointCloud<pcl::PointXYZRGBNormal>& input,
+    virtual void pointCloudToPolygon(const pcl::PointCloud<PointT>& input,
                                      geometry_msgs::Polygon& polygon);
     virtual void pclIndicesArrayToClusterPointIndices(const std::vector<pcl::PointIndices>& inlier_indices,
                                                       const std_msgs::Header& header,
                                                       jsk_pcl_ros::ClusterPointIndices& output_indices);
-    virtual void connectPlanesMap(const pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr& input,
+    virtual void connectPlanesMap(const pcl::PointCloud<PointT>::Ptr& input,
                                   const std::vector<pcl::ModelCoefficients>& model_coefficients,
                                   const std::vector<pcl::PointIndices>& boundary_indices,
                                   std::vector<std::map<size_t, bool> >& connection_map);
-    virtual void buildConnectedPlanes(const pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr& input,
+    virtual void buildConnectedPlanes(const pcl::PointCloud<PointT>::Ptr& input,
                                       const std_msgs::Header& header,
                                       const std::vector<pcl::PointIndices>& inlier_indices,
                                       const std::vector<pcl::PointIndices>& boundary_indices,
@@ -86,8 +97,11 @@ namespace jsk_pcl_ros
                                       std::vector<std::map<size_t, bool> > connection_map,
                                       std::vector<pcl::PointIndices>& output_indices,
                                       std::vector<pcl::ModelCoefficients>& output_coefficients,
-                                      std::vector<pcl::PointCloud<pcl::PointXYZRGBNormal> >& output_boundary_clouds);
-      
+                                      std::vector<pcl::PointCloud<PointT> >& output_boundary_clouds);
+    
+    virtual void segmentFromNormals(pcl::PointCloud<PointT>::Ptr input,
+                                    pcl::PointCloud<pcl::Normal>::Ptr normal,
+                                    const std_msgs::Header& header);
   private:
     virtual void onInit();
   };

@@ -264,7 +264,8 @@ namespace jsk_pcl_ros
   }
   
   void OccludedPlaneEstimator::fullfillEstimatedRegionByPointCloud
-  (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
+  (const std_msgs::Header& header,
+   const pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
    const jsk_pcl_ros::ClusterPointIndices::ConstPtr& indices,
    const jsk_pcl_ros::PolygonArray::ConstPtr& polygons,
    const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients,
@@ -331,7 +332,7 @@ namespace jsk_pcl_ros
     // publish the result of concatenation
     sensor_msgs::PointCloud2 ros_output;
     toROSMsg(*all_cloud, ros_output);
-    ros_output.header = indices->header;
+    ros_output.header = header;
     cloud_pub_.publish(ros_output);
     indices_pub_.publish(all_indices);
     
@@ -398,7 +399,8 @@ namespace jsk_pcl_ros
     // fulfill estimated region by pointcloud and publish thems
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr pcl_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
     fromROSMsg(*input, *pcl_cloud);
-    fullfillEstimatedRegionByPointCloud(pcl_cloud,
+    fullfillEstimatedRegionByPointCloud(input->header,
+                                        pcl_cloud,
                                         input_indices,
                                         polygons,
                                         coefficients,

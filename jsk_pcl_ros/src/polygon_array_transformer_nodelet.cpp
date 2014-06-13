@@ -165,10 +165,21 @@ namespace jsk_pcl_ros
         //transformModelCoefficient(eigen_transform, coefficient, transformed_coefficient);
         
         geometry_msgs::PolygonStamped transformed_polygon;
-        transformPolygon(eigen_transform, polygon, transformed_polygon);
-        transformed_polygon_array.polygons.push_back(transformed_polygon);
-        computeCoefficients(transformed_polygon, transformed_coefficient);
-        transformed_model_coefficients_array.coefficients.push_back(transformed_coefficient);
+        if (polygon.polygon.points.size() == 0) {
+          transformed_polygon.header = polygon.header;
+          transformed_polygon.header.frame_id = frame_id_;
+          transformed_polygon_array.polygons.push_back(transformed_polygon);
+          transformed_coefficient.values = coefficient.values;
+          transformed_coefficient.header = polygon.header;
+          transformed_coefficient.header.frame_id = frame_id_;
+          transformed_model_coefficients_array.coefficients.push_back(transformed_coefficient);
+        }
+        else {
+          transformPolygon(eigen_transform, polygon, transformed_polygon);
+          transformed_polygon_array.polygons.push_back(transformed_polygon);
+          computeCoefficients(transformed_polygon, transformed_coefficient);
+          transformed_model_coefficients_array.coefficients.push_back(transformed_coefficient);
+        }
       }
       else {
         NODELET_ERROR("cannot lookup transform from %s to %s at %f",

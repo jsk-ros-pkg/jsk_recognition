@@ -136,6 +136,8 @@ jsk_pcl_nodelet(src/polygon_array_transformer_nodelet.cpp
 jsk_pcl_nodelet(src/occluded_plane_estimator_nodelet.cpp
   "jsk_pcl/OccludedPlaneEstimator" "occluded_plane_estimator")
 
+
+
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
   jsk_pcl_nodelet(src/colorize_segmented_RF_nodelet.cpp
     "jsk_pcl/ColorizeRandomForest" "colorize_random_forest_result")
@@ -144,7 +146,8 @@ if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
 endif()
 
 
-add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
+add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
+  src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp)
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 

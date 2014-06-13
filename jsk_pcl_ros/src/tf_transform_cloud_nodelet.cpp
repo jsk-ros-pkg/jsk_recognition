@@ -44,8 +44,9 @@ namespace jsk_pcl_ros
   void TfTransformCloud::transform(const sensor_msgs::PointCloud2ConstPtr &input)
   {
     sensor_msgs::PointCloud2 output;
-    pcl_ros::transformPointCloud(target_frame_id_, *input, output, tf_listener_);
-    pub_cloud_.publish(output);
+    if (pcl_ros::transformPointCloud(target_frame_id_, *input, output, tf_listener_)) {
+      pub_cloud_.publish(output);
+    }
   }
 
   void TfTransformCloud::onInit(void)

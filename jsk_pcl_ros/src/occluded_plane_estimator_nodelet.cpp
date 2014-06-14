@@ -86,6 +86,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock(estimation_mutex_);
     require_estimation_ = true;
+    NODELET_INFO("estimation is required");
     return true;
   }
 
@@ -353,6 +354,7 @@ namespace jsk_pcl_ros
       NODELET_DEBUG("no estimation is required");
       return;
     }
+    NODELET_INFO("estimating...");
     // error check
     if (polygons->polygons.size() != coefficients->coefficients.size()) {
       NODELET_ERROR("the size of the input polygon array and model coefficients array is not same");
@@ -412,6 +414,7 @@ namespace jsk_pcl_ros
     
     
     require_estimation_ = false;
+    NODELET_INFO("done estimating...");
   }
   
 }

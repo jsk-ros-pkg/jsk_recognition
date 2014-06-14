@@ -37,7 +37,11 @@
 #include <pcl/filters/extract_indices.h>
 #include <pcl/common/distances.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <pcl/filters/project_inliers.h>
+
 #include <pluginlib/class_list_macros.h>
+
+
 namespace jsk_pcl_ros
 {
   void EnvironmentPlaneModeling::onInit()
@@ -90,13 +94,17 @@ namespace jsk_pcl_ros
     jsk_pcl_ros::EnvironmentLock::Request& req,
     jsk_pcl_ros::EnvironmentLock::Response& res)
   {
-    {
+    if (!latest_input_) {
+      NODELET_ERROR("[EnvironmentPlaneModeling] no valid input yet");
+      return false;
+    }
+    //{
       boost::mutex::scoped_lock(mutex_);
       processing_input_ = latest_input_;
       processing_input_indices_ = latest_input_indices_;
       processing_input_polygons_ = latest_input_polygons_;
       processing_input_coefficients_ = latest_input_coefficients_;
-    }
+      //}
     NODELET_INFO("lock %lu pointclouds",
                  processing_input_indices_->cluster_indices.size());
     // build kdtrees
@@ -109,18 +117,27 @@ namespace jsk_pcl_ros
     for (size_t i = 0;
          i < processing_input_indices_->cluster_indices.size();
          i++) {
-      pcl::PointCloud<PointT>::Ptr kdtree_input (new pcl::PointCloud<PointT>);
+      pcl::PointCloud<PointT>::Ptr nonprojected_input (new pcl::PointCloud<PointT>);
       pcl::PointIndices::Ptr indices (new pcl::PointIndices);
       pcl_conversions::toPCL(processing_input_indices_->cluster_indices[i],
                              *indices);
       extract.setIndices(indices);
-      extract.filter(*kdtree_input);
+      extract.filter(*nonprojected_input);
+      // project `nonprojected_input' to the plane
+      pcl::PointCloud<PointT>::Ptr kdtree_input (new pcl::PointCloud<PointT>);
+      pcl::ProjectInliers<PointT> proj;
+      proj.setModelType (pcl::SACMODEL_PLANE);
+      pcl::ModelCoefficients::Ptr plane_coefficients (new pcl::ModelCoefficients);
+      plane_coefficients->values = processing_input_coefficients_->coefficients[i].values;
+      proj.setModelCoefficients(plane_coefficients);
+      proj.setInputCloud(nonprojected_input);
+      proj.filter(*kdtree_input);
       pcl::KdTreeFLANN<PointT>::Ptr kdtree (new pcl::KdTreeFLANN<PointT>);
       kdtree->setInputCloud(kdtree_input);
       kdtrees_.push_back(kdtree);
       separated_point_cloud_.push_back(kdtree_input);
     }
-    res.environment_id = environment_id_++;
+    res.environment_id = ++environment_id_;
     return true;
   }
 
@@ -138,7 +155,9 @@ namespace jsk_pcl_ros
     debug_env_pointcloud_pub_.publish(debug_env_pointcloud);
       
     // check collision
+    // all the sampled points should near enough from target_polygon
     pcl::KdTreeFLANN<PointT>::Ptr target_kdtree = kdtrees_[plane_i];
+    // NODELET_INFO("checking %lu points", target_kdtree->getInputCloud()->points.size());
     for (size_t i = 0; i < sampled_point_cloud->points.size(); i++) {
       PointT p = sampled_point_cloud->points[i];
       std::vector<int> k_indices;
@@ -147,7 +166,21 @@ namespace jsk_pcl_ros
                                       distance_thr_,
                                       k_indices,
                                       k_sqr_distances, 1) == 0) {
+        // NODELET_INFO("%lu plane is too far (%lu sampled point [%f, %f, %f])",
+        //              plane_i, i, 
+        //              p.x, p.y, p.z);
         return false;
+      }
+      // target_kdtree->nearestKSearch(p, 1, k_indices, k_sqr_distances);
+      // NODELET_INFO("%lu plane 's nearest distance is: %f (%f, %f, %f)",
+      //              plane_i, k_sqr_distances[0], p.x, p.y, p.z);
+      // if (k_sqr_distances[0] > distance_thr_) {
+      //   return false;
+      // }
+      else {
+         // NODELET_INFO("%lu plane is near enough (%lu sampled point [%f, %f, %f])",
+         //              plane_i, i,
+         //              p.x, p.y, p.z);
       }
     }
     return true;
@@ -222,7 +255,6 @@ namespace jsk_pcl_ros
     pcl::PointCloud<PointT>::Ptr output,
     double sampling_param)
   {
-    ros::Time before = ros::Time::now();
     for (size_t i = 0; i < sample_polygon.polygon.points.size(); i++) {
       // geometry_msgs::Point32 from_point, to_point;
       // from_point = sample_polygon.polygon.points[i];
@@ -246,8 +278,6 @@ namespace jsk_pcl_ros
       msgToPCL(point, pcl_point);
       output->points.push_back(pcl_point);
     }
-    ros::Time after = ros::Time::now();
-    NODELET_INFO("sampling took %f sec", (after - before).toSec());
   }
   
 }

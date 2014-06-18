@@ -119,10 +119,15 @@
     <remap from="~input_coefficients" to="/multi_plane_estimate/output_coefficients" />
     <rosparam>
       reference_axis: [0, 0, -1]
-      processing_frame_id: camera_depth_optical_frame
+      processing_frame_id: odom
     </rosparam>
   </node>
-  <group if="$(arg ESTIMATE_OCCLUSION)">
+    <node pkg="nodelet" type="nodelet" name="transform_input"
+          args="load jsk_pcl/TfTransformCloud $(arg MANAGER)">
+      <remap from="~input" to="input_relay/output" />
+      <param name="target_frame_id" value="odom" />
+    </node>
+    <group if="$(arg ESTIMATE_OCCLUSION)">
     <include file="$(find jsk_pcl_ros)/launch/hrp2jsknt_footstep_polygon.launch">
       <arg name="LAUNCH_MANAGER" value="false" />
       <arg name="MANAGER" value="$(arg MANAGER)" />
@@ -139,13 +144,26 @@
       <remap from="~input_coefficients" to="multi_plane_estimate/output_coefficients" />
       <param name="frame_id" value="odom" />
     </node>
+
     <node pkg="nodelet" type="nodelet" name="polygon_estimator"
           clear_params="true"
           args="load jsk_pcl/OccludedPlaneEstimator /$(arg MANAGER)">
+      <remap from="~input" to="transform_input/output" />
+      <remap from="~indices" to="/multi_plane_estimate/output" />
       <remap from="~input_polygons" to="/estimated_plane_respected_to_odom/output_polygons" />
       <remap from="~input_coefficients" to="/estimated_plane_respected_to_odom/output_coefficients" />
       <remap from="~input_static_polygons" to="/footstep_respected_to_odom/output_polygons" />
       <remap from="~input_static_coefficients" to="/footstep_respected_to_odom/output_coefficients" />
     </node>
+    <node pkg="nodelet" type="nodelet" name="env_server"
+          clear_params="true"
+          output="screen"
+          args="load jsk_pcl/EnvironmentPlaneModeling /$(arg MANAGER)" >
+      <remap from="~input" to="polygon_estimator/output_cloud" />
+      <remap from="~indices" to="polygon_estimator/output_indices" />
+      <remap from="~input_polygons" to="polygon_estimator/output_polygons" />
+      <remap from="~input_coefficients" to="polygon_estimator/output_coefficients" />
+    </node>
+    <include file="$(find jsk_footstep_controller)/launch/hrp2jsknt_real.launch" />
   </group>
 </launch>

@@ -1,7 +1,8 @@
+// -*- mode: C++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Yuto Inagaki and JSK Lab
+ *  Copyright (c) 2013, yuto_inagaki and JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,42 +33,52 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#ifndef __JSK_PCL_COLORIZE_RANDOM_FOREST__
+#define __JSK_PCL_COLORIZE_RANDOM_FOREST__
 
-#include "jsk_pcl_ros/tf_transform_cloud.h"
-#include <pluginlib/class_list_macros.h>
-
-#include <tf2_ros/buffer_client.h>
+// ros
+#include <ros/ros.h>
+#include <ros/names.h>
+#include <jsk_pcl_ros/PointsArray.h>
+// pcl
+#include <pcl_ros/pcl_nodelet.h>
+#include <pcl/point_types.h>
+#include <pcl/point_types.h>
+#include <pcl/filters/passthrough.h>
 #include <pcl/common/centroid.h>
+#include <pcl/common/impl/common.hpp>
+#include <pcl/features/normal_3d.h>
+#include <pcl/kdtree/kdtree.h>
+#include <pcl/features/fpfh_omp.h>
+#include <ml_classifiers/ClassifyData.h>
+#include <ml_classifiers/ClassDataPoint.h>
+#include <math.h>
+#include <stdlib.h>
 
 namespace jsk_pcl_ros
 {
-  void TfTransformCloud::transform(const sensor_msgs::PointCloud2ConstPtr &input)
+  class ColorizeMapRandomForest: public pcl_ros::PCLNodelet
   {
-    sensor_msgs::PointCloud2 output;
-    try
-    {
-      if (pcl_ros::transformPointCloud(target_frame_id_, *input, output, tf_listener_)) {
-        pub_cloud_.publish(output);
-      }
-    }
-    catch (tf2::ConnectivityException &e)
-    {
-      NODELET_ERROR("Transform error: %s", e.what());
-    }
-  }
+  protected:
+    ros::Subscriber sub_input_;
+    ros::Publisher pub_;
 
-  void TfTransformCloud::onInit(void)
-  {
-    PCLNodelet::onInit();
-    sub_cloud_ = pnh_->subscribe("input", 1, &TfTransformCloud::transform, this);
-    if (!pnh_->getParam("target_frame_id", target_frame_id_))
-    {
-      ROS_WARN("~target_frame_id is not specified, using %s", "/base_footprint");
-    }
-
-    pub_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
-  }
+    double angular_threshold_;
+    double mps_distance_threshold_;
+    double approx_threshold_;
+    double max_depth_change_factor_;
+    double normal_smoothingsize_;
+    double refinement_threshold_;
+    float radius_search_;
+    float pass_offset_;
+    float pass_offset2_;
+    int min_inliers_;
+    int mode_;
+    int sum_num_;
+  private:
+    virtual void onInit();
+    void extract(const sensor_msgs::PointCloud2 cloud);
+  };
 }
 
-typedef jsk_pcl_ros::TfTransformCloud TfTransformCloud;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, TfTransformCloud, TfTransformCloud, nodelet::Nodelet);
+#endif

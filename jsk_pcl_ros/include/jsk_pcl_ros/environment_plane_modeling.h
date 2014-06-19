@@ -42,6 +42,7 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
+#include <dynamic_reconfigure/server.h>
 
 #include <jsk_pcl_ros/PolygonArray.h>
 #include <jsk_pcl_ros/ModelCoefficientsArray.h>
@@ -50,26 +51,51 @@
 #include <jsk_pcl_ros/EnvironmentLock.h>
 #include <jsk_pcl_ros/PolygonOnEnvironment.h>
 
+#include <jsk_pcl_ros/pcl_conversion_util.h>
+#include <jsk_pcl_ros/EnvironmentPlaneModelingConfig.h>
+
 namespace jsk_pcl_ros
 {
   class EnvironmentPlaneModeling: public pcl_ros::PCLNodelet
   {
   public:
     typedef pcl::PointXYZRGB PointT;
-    typedef message_filters::sync_policies::ExactTime< sensor_msgs::PointCloud2,
-                                                       jsk_pcl_ros::ClusterPointIndices,
-                                                       jsk_pcl_ros::PolygonArray,
-                                                       jsk_pcl_ros::ModelCoefficientsArray> SyncPolicy;
+    typedef EnvironmentPlaneModelingConfig Config;
+    typedef message_filters::sync_policies::ExactTime<
+      sensor_msgs::PointCloud2,
+      ClusterPointIndices,
+      PolygonArray,
+      ModelCoefficientsArray,
+      PolygonArray,
+      ModelCoefficientsArray> SyncPolicy;
   protected:
     virtual void onInit();
-    virtual void inputCallback(const sensor_msgs::PointCloud2::ConstPtr& input,
-                               const jsk_pcl_ros::ClusterPointIndices::ConstPtr& input_indices,
-                               const jsk_pcl_ros::PolygonArray::ConstPtr& input_polygons,
-                               const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& input_coefficients);
-    virtual bool lockCallback(jsk_pcl_ros::EnvironmentLock::Request& req,
-                              jsk_pcl_ros::EnvironmentLock::Response& res);
-    virtual bool polygonOnEnvironmentCallback(jsk_pcl_ros::PolygonOnEnvironment::Request& req,
-                                              jsk_pcl_ros::PolygonOnEnvironment::Response& res);
+
+    
+    virtual void estimateOcclusion(
+      const sensor_msgs::PointCloud2::ConstPtr& input,
+      const ClusterPointIndices::ConstPtr& input_indices,
+      const PolygonArray::ConstPtr& polygons,
+      const ModelCoefficientsArray::ConstPtr& coefficients,
+      const PolygonArray::ConstPtr& static_polygons,
+      const ModelCoefficientsArray::ConstPtr& static_coefficients,
+      PolygonArray::Ptr result_polygons,
+      ModelCoefficientsArray::Ptr result_coefficients,
+      pcl::PointCloud<PointT>::Ptr result_pointcloud,
+      ClusterPointIndices::Ptr result_indices);
+    
+    virtual void inputCallback(
+      const sensor_msgs::PointCloud2::ConstPtr& input,
+      const ClusterPointIndices::ConstPtr& input_indices,
+      const PolygonArray::ConstPtr& polygons,
+      const ModelCoefficientsArray::ConstPtr& coefficients,
+      const PolygonArray::ConstPtr& static_polygons,
+      const ModelCoefficientsArray::ConstPtr& static_coefficients);
+    virtual void configCallback(Config &config, uint32_t level);
+    virtual bool lockCallback(EnvironmentLock::Request& req,
+                              EnvironmentLock::Response& res);
+    virtual bool polygonOnEnvironmentCallback(PolygonOnEnvironment::Request& req,
+                                              PolygonOnEnvironment::Response& res);
     virtual bool polygonNearEnoughToPointCloud(
       const size_t plane_i,
       const pcl::PointCloud<PointT>::Ptr sampled_point_cloud);
@@ -80,14 +106,59 @@ namespace jsk_pcl_ros
     virtual void internalPointDivide(const PointT& A, const PointT& B,
                                      const double ratio,
                                      PointT& output);
-    void msgToPCL(const geometry_msgs::Point32 msg_point, PointT& pcl_point);
+
+    virtual void extendConvexPolygon(
+      const geometry_msgs::PolygonStamped& static_polygon,
+      const PCLModelCoefficientMsg& coefficients,
+      const geometry_msgs::PolygonStamped& nearest_polygon,
+      geometry_msgs::PolygonStamped& output_polygon);
+    virtual void updateAppendingInfo(const int env_plane_index,
+                                     const size_t static_plane_index,
+                                     std::map<int, std::set<size_t> >& result);
+
     
+    // find the nearest plane to static_polygon and static_coefficient
+    // from polygons and coefficients
+    virtual int findNearestPolygon(
+      const PolygonArray::ConstPtr& polygons,
+      const ModelCoefficientsArray::ConstPtr& coefficients,
+      const geometry_msgs::PolygonStamped& static_polygon,
+      const PCLModelCoefficientMsg& static_coefficient);
+
+    virtual void fillEstimatedRegionByPointCloud
+    (const std_msgs::Header& header,
+     const pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
+     const ClusterPointIndices::ConstPtr& indices,
+     const PolygonArray::ConstPtr& polygons,
+     const ModelCoefficientsArray::ConstPtr& coefficients,
+     const PolygonArray::ConstPtr& static_polygons,
+     const ModelCoefficientsArray::ConstPtr& static_coefficients,
+     const PolygonArray& result_polygons,
+     const std::map<int, std::set<size_t> >& estimation_summary,
+     pcl::PointCloud<PointT>::Ptr all_cloud,
+     ClusterPointIndices& all_indices);
+    
+    virtual void copyClusterPointIndices
+    (const ClusterPointIndices::ConstPtr& indices,
+     ClusterPointIndices& output);
+    virtual void computePolygonCentroid(
+      const geometry_msgs::PolygonStamped msg,
+      pcl::PointXYZRGB& output);
+    virtual void addIndices(const size_t start, const size_t end,
+                            PCLIndicesMsg& output);
     boost::mutex mutex_;
+
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    
+    // synchronized subscription
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<jsk_pcl_ros::ClusterPointIndices> sub_indices_;
-    message_filters::Subscriber<jsk_pcl_ros::PolygonArray> sub_polygons_;
-    message_filters::Subscriber<jsk_pcl_ros::ModelCoefficientsArray> sub_coefficients_;
+    message_filters::Subscriber<ClusterPointIndices> sub_indices_;
+    message_filters::Subscriber<PolygonArray> sub_polygons_;
+    message_filters::Subscriber<ModelCoefficientsArray> sub_coefficients_;
+    message_filters::Subscriber<PolygonArray> sub_static_polygons_;
+    message_filters::Subscriber<ModelCoefficientsArray> sub_static_coefficients_;
+    
     ros::ServiceServer lock_service_;
     ros::ServiceServer polygon_on_environment_service_;
 
@@ -95,23 +166,34 @@ namespace jsk_pcl_ros
     ros::Publisher debug_env_polygon_pub_;
     ros::Publisher debug_pointcloud_pub_;
     ros::Publisher debug_env_pointcloud_pub_;
-    
+    ros::Publisher occlusion_result_polygons_pub_;
+    ros::Publisher occlusion_result_coefficients_pub_;
+    ros::Publisher occlusion_result_pointcloud_pub_;
+    ros::Publisher occlusion_result_indices_pub_;
+    // member variables to store the latest messages
     sensor_msgs::PointCloud2::ConstPtr latest_input_;
-    jsk_pcl_ros::ClusterPointIndices::ConstPtr latest_input_indices_;
-    jsk_pcl_ros::PolygonArray::ConstPtr latest_input_polygons_;
-    jsk_pcl_ros::ModelCoefficientsArray::ConstPtr latest_input_coefficients_;
-
+    ClusterPointIndices::ConstPtr latest_input_indices_;
+    PolygonArray::ConstPtr latest_input_polygons_;
+    ModelCoefficientsArray::ConstPtr latest_input_coefficients_;
+    PolygonArray::ConstPtr latest_static_polygons_;
+    ModelCoefficientsArray::ConstPtr latest_static_coefficients_;
+    
+    // member variables to keep the messasge which we process
     sensor_msgs::PointCloud2::ConstPtr processing_input_;
-    jsk_pcl_ros::ClusterPointIndices::ConstPtr processing_input_indices_;
-    jsk_pcl_ros::PolygonArray::ConstPtr processing_input_polygons_;
-    jsk_pcl_ros::ModelCoefficientsArray::ConstPtr processing_input_coefficients_;
+    ClusterPointIndices::ConstPtr processing_input_indices_;
+    PolygonArray::ConstPtr processing_input_polygons_;
+    ModelCoefficientsArray::ConstPtr processing_input_coefficients_;
+    PolygonArray::ConstPtr processing_static_polygons_;
+    ModelCoefficientsArray::ConstPtr processing_static_coefficients_;
     
     std::vector<pcl::KdTreeFLANN<PointT>::Ptr> kdtrees_;
     std::vector<pcl::PointCloud<PointT>::Ptr> separated_point_cloud_;
     uint32_t environment_id_;
     double distance_thr_;
     double sampling_d_;
-    
+    // parameters for occlusion
+    double plane_distance_threshold_;
+    double plane_angle_threshold_;
   private:
   };
 }

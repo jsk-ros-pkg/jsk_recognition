@@ -53,7 +53,7 @@ generate_dynamic_reconfigure_options(
   cfg/MultiPlaneExtraction.cfg
   cfg/NormalEstimationIntegralImage.cfg
   cfg/PlaneRejector.cfg
-  cfg/OccludedPlaneEstimator.cfg
+  cfg/EnvironmentPlaneModeling.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -135,8 +135,6 @@ jsk_pcl_nodelet(src/static_polygon_array_publisher_nodelet.cpp
   "jsk_pcl/StaticPolygonArrayPublisher" "static_polygon_array_publisher")
 jsk_pcl_nodelet(src/polygon_array_transformer_nodelet.cpp
   "jsk_pcl/PolygonArrayTransformer" "polygon_array_transformer_nodelet")
-jsk_pcl_nodelet(src/occluded_plane_estimator_nodelet.cpp
-  "jsk_pcl/OccludedPlaneEstimator" "occluded_plane_estimator")
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
   jsk_pcl_nodelet(src/colorize_segmented_RF_nodelet.cpp
     "jsk_pcl/ColorizeRandomForest" "colorize_random_forest_result")
@@ -147,7 +145,7 @@ jsk_pcl_nodelet(src/environment_plane_modeling_nodelet.cpp
   "jsk_pcl/EnvironmentPlaneModeling" "environment_plane_modeling")
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
-  src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp)
+  src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp)
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 

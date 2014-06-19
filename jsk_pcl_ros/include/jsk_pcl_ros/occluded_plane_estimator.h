@@ -112,14 +112,15 @@ namespace jsk_pcl_ros
     virtual void msgToPCL(const geometry_msgs::Point32& msg,
                           pcl::PointXYZRGB& p);
     virtual void fullfillEstimatedRegionByPointCloud
-      (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
-       const jsk_pcl_ros::ClusterPointIndices::ConstPtr& indices,
-       const jsk_pcl_ros::PolygonArray::ConstPtr& polygons,
-       const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients,
-       const jsk_pcl_ros::PolygonArray::ConstPtr& static_polygons,
-       const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& static_coefficients,
-       const jsk_pcl_ros::PolygonArray& result_polygons,
-       const std::map<int, std::set<size_t> >& estimation_summary);
+    (const std_msgs::Header& header,
+     const pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
+     const jsk_pcl_ros::ClusterPointIndices::ConstPtr& indices,
+     const jsk_pcl_ros::PolygonArray::ConstPtr& polygons,
+     const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients,
+     const jsk_pcl_ros::PolygonArray::ConstPtr& static_polygons,
+     const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& static_coefficients,
+     const jsk_pcl_ros::PolygonArray& result_polygons,
+     const std::map<int, std::set<size_t> >& estimation_summary);
     virtual void computePolygonCentroid(const geometry_msgs::PolygonStamped msg,
                                         pcl::PointXYZRGB& output);
     virtual void copyClusterPointIndices

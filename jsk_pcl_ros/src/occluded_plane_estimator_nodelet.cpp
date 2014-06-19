@@ -86,6 +86,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock(estimation_mutex_);
     require_estimation_ = true;
+    NODELET_INFO("estimation is required");
     return true;
   }
 
@@ -264,7 +265,8 @@ namespace jsk_pcl_ros
   }
   
   void OccludedPlaneEstimator::fullfillEstimatedRegionByPointCloud
-  (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
+  (const std_msgs::Header& header,
+   const pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
    const jsk_pcl_ros::ClusterPointIndices::ConstPtr& indices,
    const jsk_pcl_ros::PolygonArray::ConstPtr& polygons,
    const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients,
@@ -331,7 +333,7 @@ namespace jsk_pcl_ros
     // publish the result of concatenation
     sensor_msgs::PointCloud2 ros_output;
     toROSMsg(*all_cloud, ros_output);
-    ros_output.header = indices->header;
+    ros_output.header = header;
     cloud_pub_.publish(ros_output);
     indices_pub_.publish(all_indices);
     
@@ -352,6 +354,7 @@ namespace jsk_pcl_ros
       NODELET_DEBUG("no estimation is required");
       return;
     }
+    NODELET_INFO("estimating...");
     // error check
     if (polygons->polygons.size() != coefficients->coefficients.size()) {
       NODELET_ERROR("the size of the input polygon array and model coefficients array is not same");
@@ -398,7 +401,8 @@ namespace jsk_pcl_ros
     // fulfill estimated region by pointcloud and publish thems
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr pcl_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
     fromROSMsg(*input, *pcl_cloud);
-    fullfillEstimatedRegionByPointCloud(pcl_cloud,
+    fullfillEstimatedRegionByPointCloud(input->header,
+                                        pcl_cloud,
                                         input_indices,
                                         polygons,
                                         coefficients,
@@ -410,6 +414,7 @@ namespace jsk_pcl_ros
     
     
     require_estimation_ = false;
+    NODELET_INFO("done estimating...");
   }
   
 }

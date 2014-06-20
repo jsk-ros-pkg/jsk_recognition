@@ -40,45 +40,123 @@ using namespace pcl::tracking;
 
 namespace jsk_pcl_ros
 {
+
+  double ParticleFilterTracking::getXMLDoubleValue(XmlRpc::XmlRpcValue val) {
+    switch(val.getType()) {
+    case XmlRpc::XmlRpcValue::TypeInt:
+      return (double)((int)val);
+    case XmlRpc::XmlRpcValue::TypeDouble:
+      return (double)val;
+    default:
+      return 0;
+    }
+  }
+  
+  bool ParticleFilterTracking::readVectorParameter(const std::string& param_name,
+                                                   std::vector<double>& result)
+  {
+    if (pnh_->hasParam(param_name)) {
+      XmlRpc::XmlRpcValue v;
+      pnh_->param(param_name, v, v);
+      if (v.getType() == XmlRpc::XmlRpcValue::TypeArray &&
+          v.size() == result.size()) {
+        for (size_t i = 0; i < result.size(); i++) {
+          result[i] = getXMLDoubleValue(v[i]);
+        }
+        return true;
+      }
+      else {
+        NODELET_ERROR("%s parameter does not match the length: %lu",
+                      param_name.c_str(),
+                      result.size());
+        return false;
+      }
+    }
+    else {
+      return false;
+    }
+  }
+  
   void ParticleFilterTracking::onInit(void){
     // not implemented yet
     PCLNodelet::onInit();
 
-    int thread_nr=8;
-    downsampling_grid_size_=0.02;
-    new_cloud_ = false;
-    counter_ = 0;
-    target_cloud_.reset(new pcl::PointCloud<pcl::PointXYZRGBA>());
+    // read parameters
+    int thread_nr = omp_get_num_procs();
+    pnh_->getParam("thread_nr", thread_nr);
+    int max_particle_num = 1000;
+    pnh_->getParam("max_particle_num", max_particle_num);
+    int particle_num = 600;
+    pnh_->getParam("particle_num", particle_num);
+    double delta = 0.99;
+    pnh_->getParam("delta", delta);
+    double epsilon = 0.2;
+    pnh_->getParam("epsilon", epsilon);
+    bool use_normal = false;
+    pnh_->getParam("use_normal", use_normal);
+    int iteration_num = 1;
+    pnh_->getParam("iteration_num", iteration_num);
+    double resample_likelihood_thr = 0.0;
+    pnh_->getParam("resample_likelihood_thr", resample_likelihood_thr);
 
+    std::vector<double> bin_size_vector(6);
+    if (!readVectorParameter("bin_size", bin_size_vector)) {
+      for (size_t i = 0; i < 6; i++) {
+        bin_size_vector[i] = 0.1;
+      }
+    }
     ParticleXYZRPY bin_size;
-    bin_size.x = bin_size.y = bin_size.z = bin_size.roll = bin_size.pitch = bin_size.yaw = 0.1f;
+    bin_size.x = bin_size_vector[0];
+    bin_size.y = bin_size_vector[1];
+    bin_size.z = bin_size_vector[2];
+    bin_size.roll = bin_size_vector[3];
+    bin_size.pitch = bin_size_vector[4];
+    bin_size.yaw = bin_size_vector[5];
+
+    std::vector<double> default_step_covariance(6);
+    if (!readVectorParameter("default_step_covariance",
+                             default_step_covariance)) {
+      for (size_t i = 0; i < default_step_covariance.size(); i++) {
+        default_step_covariance[i] = 0.015 * 0.015;
+      }
+      default_step_covariance[3] *= 40.0;
+      default_step_covariance[4] *= 40.0;
+      default_step_covariance[5] *= 40.0;
+    }
+    std::vector<double> initial_noise_covariance = std::vector<double> (6, 0.00001);
+    readVectorParameter("initial_noise_covariance",
+                        initial_noise_covariance);
+    std::vector<double> default_initial_mean = std::vector<double> (6, 0.0);
+    readVectorParameter("default_initial_mean", default_initial_mean);
+    //First the track target is not set
+    double octree_resolution = 0.01;
+    pnh_->getParam("octree_resolution", octree_resolution);
+    track_target_set_ = false;
+    
+    new_cloud_ = false;
+    target_cloud_.reset(new pcl::PointCloud<pcl::PointXYZRGBA>());
 
     boost::shared_ptr<KLDAdaptiveParticleFilterOMPTracker<pcl::PointXYZRGBA, ParticleXYZRPY> > tracker
       (new KLDAdaptiveParticleFilterOMPTracker<pcl::PointXYZRGBA, ParticleXYZRPY> (thread_nr));
 
     //Set all parameters for KLDAdaptiveParticleFilterTracker<pcl::PointXYZRGBA, pcl::PointXYZ>OMPTracker
-    tracker->setMaximumParticleNum (1000);
-    tracker->setDelta (0.99);
-    tracker->setEpsilon (0.2);
+    
+    tracker->setMaximumParticleNum (max_particle_num);
+    tracker->setDelta (delta);
+    tracker->setEpsilon (epsilon);
     tracker->setBinSize (bin_size);
 
     //Set all parameters for  ParticleFilterTracker<pcl::PointXYZRGBA, pcl::PointXYZ>
-    std::vector<double> default_step_covariance = std::vector<double> (6, 0.015 * 0.015);
-    std::vector<double> initial_noise_covariance = std::vector<double> (6, 0.00001);
-    std::vector<double> default_initial_mean = std::vector<double> (6, 0.0);
 
-    default_step_covariance[3] *= 40.0;
-    default_step_covariance[4] *= 40.0;
-    default_step_covariance[5] *= 40.0;
     tracker_ = tracker;
     tracker_->setTrans (Eigen::Affine3f::Identity ());
     tracker_->setStepNoiseCovariance (default_step_covariance);
     tracker_->setInitialNoiseCovariance (initial_noise_covariance);
     tracker_->setInitialNoiseMean (default_initial_mean);
-    tracker_->setIterationNum (1);
-    tracker_->setParticleNum (600);
-    tracker_->setResampleLikelihoodThr(0.00);
-    tracker_->setUseNormal (false);
+    tracker_->setIterationNum (iteration_num);
+    tracker_->setParticleNum (particle_num);
+    tracker_->setResampleLikelihoodThr(resample_likelihood_thr);
+    tracker_->setUseNormal (use_normal);
 
     //Setup coherence object for tracking
     ApproxNearestPairPointCloudCoherence<pcl::PointXYZRGBA>::Ptr coherence = ApproxNearestPairPointCloudCoherence<pcl::PointXYZRGBA>::Ptr(new ApproxNearestPairPointCloudCoherence<pcl::PointXYZRGBA> ());
@@ -87,35 +165,27 @@ namespace jsk_pcl_ros
       = boost::shared_ptr<DistanceCoherence<pcl::PointXYZRGBA> > (new DistanceCoherence<pcl::PointXYZRGBA> ());
     coherence->addPointCoherence (distance_coherence);
 
-    boost::shared_ptr<pcl::search::Octree<pcl::PointXYZRGBA> > search (new pcl::search::Octree<pcl::PointXYZRGBA> (0.01));
+    boost::shared_ptr<pcl::search::Octree<pcl::PointXYZRGBA> > search (new pcl::search::Octree<pcl::PointXYZRGBA> (octree_resolution));
     coherence->setSearchMethod (search);
-    coherence->setMaximumDistance (0.01);
+    coherence->setMaximumDistance (octree_resolution);
 
     tracker_->setCloudCoherence (coherence);
 
     //Set subscribe setting
     sub_ = pnh_->subscribe("input", 1, &ParticleFilterTracking::cloud_cb,this);
-    srv_ = pnh_->advertiseService("renew_model", &ParticleFilterTracking::renewModel_cb, this);
+    sub_update_model_ = pnh_->subscribe("renew_model", 1, &ParticleFilterTracking::renew_model_topic_cb,this);
+    srv_ = pnh_->advertiseService("renew_model", &ParticleFilterTracking::renew_model_cb, this);
     //Set publish setting
     particle_publisher_ = pnh_->advertise<sensor_msgs::PointCloud2>("particle", 1);
     track_result_publisher_ = pnh_->advertise<sensor_msgs::PointCloud2>("track_result", 1);
     tf_publisher_ = pnh_->advertise<sensor_msgs::PointCloud2>("track_result", 1);
   }
 
-  void ParticleFilterTracking::gridSampleApprox (const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &cloud, pcl::PointCloud<pcl::PointXYZRGBA> &result, double leaf_size)
-  {
-    pcl::ApproximateVoxelGrid<pcl::PointXYZRGBA> grid;
-    grid.setLeafSize (static_cast<float> (leaf_size), static_cast<float> (leaf_size), static_cast<float> (leaf_size));
-    grid.setInputCloud (cloud);
-    grid.filter (result);
-  }
-
   //Publish the current particles
-  void
-  ParticleFilterTracking::publishParticles ()
+  void ParticleFilterTracking::publish_particles ()
   {
     ParticleFilterTracker<pcl::PointXYZRGBA, ParticleXYZRPY>::PointCloudStatePtr particles = tracker_->getParticles ();
-    if (particles && new_cloud_)
+    if (particles && new_cloud_ && particle_publisher_.getNumSubscribers())
       {
         //Set pointCloud with particle's points
         pcl::PointCloud<pcl::PointXYZ>::Ptr particle_cloud (new pcl::PointCloud<pcl::PointXYZ> ());
@@ -131,13 +201,13 @@ namespace jsk_pcl_ros
         sensor_msgs::PointCloud2 particle_pointcloud2;
         pcl::toROSMsg(*particle_cloud, particle_pointcloud2);
         particle_pointcloud2.header.frame_id = frame_id_;
+        particle_pointcloud2.header.stamp = stamp_;
         particle_publisher_.publish(particle_pointcloud2);
       }
   }
 
   //Publish model reference point cloud
-  void
-  ParticleFilterTracking::publishResult ()
+  void ParticleFilterTracking::publish_result ()
   {
     ParticleXYZRPY result = tracker_->getResult ();
     Eigen::Affine3f transformation = tracker_->toEigenMatrix (result);
@@ -145,12 +215,10 @@ namespace jsk_pcl_ros
     //Publisher object transformation
     tf::Transform tfTransformation;
     tf::transformEigenToTF((Eigen::Affine3d) transformation, tfTransformation);
-    
-    static tf::TransformBroadcaster tfBroadcaster;  
-    tfBroadcaster.sendTransform(tf::StampedTransform(tfTransformation, ros::Time::now(), frame_id_, "tracker_result"));
-    
-    //move close to camera a little for better visualization
-    transformation.translation () += Eigen::Vector3f (0.0f, 0.0f, -0.005f);
+
+    static tf::TransformBroadcaster tfBroadcaster;
+    tfBroadcaster.sendTransform(tf::StampedTransform(tfTransformation, stamp_, frame_id_, "tracker_result"));
+
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr result_cloud (new pcl::PointCloud<pcl::PointXYZRGBA> ());
     pcl::transformPointCloud<pcl::PointXYZRGBA> (*(tracker_->getReferenceCloud ()), *result_cloud, transformation);
 
@@ -158,141 +226,75 @@ namespace jsk_pcl_ros
     sensor_msgs::PointCloud2 result_pointcloud2;
     pcl::toROSMsg(*result_cloud, result_pointcloud2);
     result_pointcloud2.header.frame_id = frame_id_;
+    result_pointcloud2.header.stamp = stamp_;
     track_result_publisher_.publish(result_pointcloud2);
-
   }
 
   void
-  ParticleFilterTracking::resetTrackingTargetModel(const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &new_target_cloud)
+  ParticleFilterTracking::reset_traking_target_model(const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &new_target_cloud)
   {
-    //prepare the model of tracker's target
-    Eigen::Vector4f c;
-    Eigen::Affine3f trans = Eigen::Affine3f::Identity ();
-    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr transed_ref (new pcl::PointCloud<pcl::PointXYZRGBA>);
-    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr transed_ref_downsampled (new pcl::PointCloud<pcl::PointXYZRGBA>);
+    if(!new_target_cloud->points.empty()){
+      //prepare the model of tracker's target
+      Eigen::Vector4f c;
+      Eigen::Affine3f trans = Eigen::Affine3f::Identity ();
+      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr transed_ref (new pcl::PointCloud<pcl::PointXYZRGBA>);
 
-    pcl::compute3DCentroid (*new_target_cloud, c);
-    trans.translation ().matrix () = Eigen::Vector3f (c[0], c[1], c[2]);
-    pcl::transformPointCloud(*new_target_cloud, *transed_ref, trans.inverse());
-    gridSampleApprox (transed_ref, *transed_ref_downsampled, downsampling_grid_size_);
-    //set reference model and trans
-    {
-      boost::mutex::scoped_lock lock(mtx_);
-      tracker_->setReferenceCloud (transed_ref_downsampled);
-      tracker_->setTrans (trans);
-      tracker_->resetTracking();
+      pcl::compute3DCentroid (*new_target_cloud, c);
+      trans.translation ().matrix () = Eigen::Vector3f (c[0], c[1], c[2]);
+      pcl::transformPointCloud(*new_target_cloud, *transed_ref, trans.inverse());
+      //set reference model and trans
+      {
+        boost::mutex::scoped_lock lock(mtx_);
+        tracker_->setReferenceCloud (transed_ref);
+        tracker_->setTrans (trans);
+        tracker_->resetTracking();
+      }
+      track_target_set_ = true;
+      ROS_INFO("RESET TARGET MODEL");
+    }else{
+      track_target_set_ = false;
+      ROS_INFO("TARGET MODEL POINTS SIZE IS 0 !! Stop TRACKING");
     }
-    //Reset target Model
-    ROS_INFO("RESET TARGET MODEL");
   }
 
   //OpenNI Grabber's cloud Callback function
-  void
-  ParticleFilterTracking::cloud_cb (const sensor_msgs::PointCloud2 &pc)
+  void ParticleFilterTracking::cloud_cb (const sensor_msgs::PointCloud2 &pc)
   {
-    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGBA>());
-    frame_id_ = pc.header.frame_id;
-    std::vector<int> indices;
-    pcl::fromROSMsg(pc, *cloud);
-    cloud->is_dense = false;
-    pcl::removeNaNFromPointCloud(*cloud, *cloud, indices);
+    if(track_target_set_){
+      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGBA>());
+      frame_id_ = pc.header.frame_id;
+      stamp_ = pc.header.stamp;
+      std::vector<int> indices;
+      pcl::fromROSMsg(pc, *cloud);
+      cloud->is_dense = false;
+      pcl::removeNaNFromPointCloud(*cloud, *cloud, indices);
 
-    //when counter_ > 10, try to track.
-    if(counter_ > 10){
       cloud_pass_downsampled_.reset (new pcl::PointCloud<pcl::PointXYZRGBA>);
       pcl::copyPointCloud(*cloud, *cloud_pass_downsampled_);
       if (!cloud_pass_downsampled_->points.empty()){
         boost::mutex::scoped_lock lock(mtx_);
         tracker_->setInputCloud (cloud_pass_downsampled_);
         tracker_->compute ();
-        publishParticles();
-        publishResult();
-        ROS_INFO("Tracking.. %d", (int)cloud->points.size());
-      }else{
-        if(counter_%20 == 0){
-          ROS_INFO("Not Tracking... Select Point/Area (Press 'h' to show Help)");
-        }
+        publish_particles();
+        publish_result();
       }
       new_cloud_ = true;
     }
-    //when counter_ == 10, generate Target Model.
-    else if (counter_ == 10){
-      ROS_INFO("Target Model Segment Start");
-      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr segmented_cloud_(new pcl::PointCloud<pcl::PointXYZRGBA>);
-      initTargetModel(cloud, segmented_cloud_);
-      resetTrackingTargetModel(segmented_cloud_);
-    }
-    counter_++;
   }
 
-  void ParticleFilterTracking::initTargetModel(const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &cloud,
-                                              pcl::PointCloud<pcl::PointXYZRGBA>::Ptr &segmented_cloud)
+  void ParticleFilterTracking::renew_model_topic_cb (const sensor_msgs::PointCloud2 &pc)
   {
-      std::vector<pcl::PointIndices> cluster_indices;
-      euclideanSegment (cloud, cluster_indices);
-
-      // select the cluster to track
-      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr temp_cloud (new pcl::PointCloud<pcl::PointXYZRGBA>);
-      extractSegmentCluster (cloud, cluster_indices, 0, *temp_cloud);
-      Eigen::Vector4f c;
-      pcl::compute3DCentroid<pcl::PointXYZRGBA> (*temp_cloud, c);
-      int segment_index = 0;
-      double segment_distance = c[0] * c[0] + c[1] * c[1];
-
-      //choose most near cloud to z axis.
-      for (size_t i = 1; i < cluster_indices.size (); i++)
-        {
-          temp_cloud.reset (new pcl::PointCloud<pcl::PointXYZRGBA>);
-          extractSegmentCluster (cloud, cluster_indices, int (i), *temp_cloud);
-          pcl::compute3DCentroid<pcl::PointXYZRGBA> (*temp_cloud, c);
-          double distance = c[0] * c[0] + c[1] * c[1];
-          if (distance < segment_distance)
-            {
-              segment_index = int (i);
-              segment_distance = distance;
-            }
-        }
-      extractSegmentCluster (cloud, cluster_indices, segment_index, *segmented_cloud);
+    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr new_target_cloud(new pcl::PointCloud<pcl::PointXYZRGBA>());
+    pcl::fromROSMsg(pc, *new_target_cloud);
+    reset_traking_target_model(new_target_cloud);
   }
 
-
-  //Execute  euclidean segment and retrun indices.
-  void ParticleFilterTracking::euclideanSegment (const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &cloud,
-                                                 std::vector<pcl::PointIndices> &cluster_indices)
-  {
-    pcl::EuclideanClusterExtraction<pcl::PointXYZRGBA> ec;
-    pcl::search::KdTree<pcl::PointXYZRGBA>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZRGBA> ());
-
-    ec.setClusterTolerance (0.05);
-    ec.setMinClusterSize (50);
-    ec.setMaxClusterSize (25000);
-    ec.setSearchMethod (tree);
-    ec.setInputCloud (cloud);
-    ec.extract (cluster_indices);
-  }
-
-  void ParticleFilterTracking::extractSegmentCluster (const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &cloud,
-                                                      const std::vector<pcl::PointIndices> cluster_indices,
-                                                      const int segment_index,
-                                                      pcl::PointCloud<pcl::PointXYZRGBA> &result)
-  {
-    pcl::PointIndices segmented_indices = cluster_indices[segment_index];
-    for (size_t i = 0; i < segmented_indices.indices.size (); i++)
-      {
-        pcl::PointXYZRGBA point = cloud->points[segmented_indices.indices[i]];
-        result.points.push_back (point);
-      }
-    result.width = pcl::uint32_t (result.points.size ());
-    result.height = 1;
-    result.is_dense = true;
-  }
-
-  bool ParticleFilterTracking::renewModel_cb(jsk_pcl_ros::SetPointCloud2::Request &req,
-                                             jsk_pcl_ros::SetPointCloud2::Response &res)
+  bool ParticleFilterTracking::renew_model_cb(jsk_pcl_ros::SetPointCloud2::Request &req,
+                                              jsk_pcl_ros::SetPointCloud2::Response &res)
   {
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr new_target_cloud(new pcl::PointCloud<pcl::PointXYZRGBA>());
     pcl::fromROSMsg(req.cloud, *new_target_cloud);
-    resetTrackingTargetModel(new_target_cloud);
+    reset_traking_target_model(new_target_cloud);
     return true;
   }
 }

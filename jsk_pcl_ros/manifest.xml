@@ -8,7 +8,6 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/jsk_pcl_ros</url>
-  <depend package="pcl" />
   <depend package="pcl_ros" />
   <depend package="pcl_conversions" />
   <depend package="opencv2" />

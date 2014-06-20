@@ -144,10 +144,10 @@
       <remap from="~input_coefficients" to="multi_plane_estimate/output_coefficients" />
       <param name="frame_id" value="odom" />
     </node>
-
-    <node pkg="nodelet" type="nodelet" name="polygon_estimator"
+    <node pkg="nodelet" type="nodelet" name="env_server"
           clear_params="true"
-          args="load jsk_pcl/OccludedPlaneEstimator /$(arg MANAGER)">
+          output="screen"
+          args="load jsk_pcl/EnvironmentPlaneModeling /$(arg MANAGER)" >
       <remap from="~input" to="transform_input/output" />
       <remap from="~indices" to="/multi_plane_estimate/output" />
       <remap from="~input_polygons" to="/estimated_plane_respected_to_odom/output_polygons" />
@@ -155,15 +155,8 @@
       <remap from="~input_static_polygons" to="/footstep_respected_to_odom/output_polygons" />
       <remap from="~input_static_coefficients" to="/footstep_respected_to_odom/output_coefficients" />
     </node>
-    <node pkg="nodelet" type="nodelet" name="env_server"
-          clear_params="true"
-          output="screen"
-          args="load jsk_pcl/EnvironmentPlaneModeling /$(arg MANAGER)" >
-      <remap from="~input" to="polygon_estimator/output_cloud" />
-      <remap from="~indices" to="polygon_estimator/output_indices" />
-      <remap from="~input_polygons" to="polygon_estimator/output_polygons" />
-      <remap from="~input_coefficients" to="polygon_estimator/output_coefficients" />
-    </node>
-    <include file="$(find jsk_footstep_controller)/launch/hrp2jsknt_real.launch" />
+    <include file="$(find jsk_footstep_controller)/launch/hrp2jsknt_real.launch">
+      <arg name="USE_PLANE" value="true" />
+    </include>
   </group>
 </launch>

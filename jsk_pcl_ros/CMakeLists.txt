@@ -96,10 +96,11 @@ jsk_pcl_nodelet(src/static_polygon_array_publisher_nodelet.cpp
   "jsk_pcl/StaticPolygonArrayPublisher" "static_polygon_array_publisher")
 jsk_pcl_nodelet(src/polygon_array_transformer_nodelet.cpp
   "jsk_pcl/PolygonArrayTransformer" "polygon_array_transformer_nodelet")
-jsk_pcl_nodelet(src/occluded_plane_estimator_nodelet.cpp
-  "jsk_pcl/OccludedPlaneEstimator" "occluded_plane_estimator")
+jsk_pcl_nodelet(src/environment_plane_modeling_nodelet.cpp
+  "jsk_pcl/EnvironmentPlaneModeling" "environment_plane_modeling")
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}
+  src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
 #  ${pcl_ros_PACKAGE_PATH}/src/pcl_ros/features/feature.cpp
 )
 rosbuild_add_openmp_flags(jsk_pcl_ros)

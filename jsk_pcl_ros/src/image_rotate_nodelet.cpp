@@ -160,11 +160,13 @@ class ImageRotateNodelet : public nodelet::Nodelet
       target_vector.frame_id_ = input_frame_id;
     }
     else {
-      tf_sub_->waitForTransform(input_frame_id, target_time,
-                                source_frame_id, time,
-                                fixed_frame_id, duration);
-      tf_sub_->transformVector(input_frame_id, target_time, input_vector,
-                               fixed_frame_id, target_vector);
+      if(tf_sub_){
+	tf_sub_->waitForTransform(input_frame_id, target_time,
+				  source_frame_id, time,
+				  fixed_frame_id, duration);
+	tf_sub_->transformVector(input_frame_id, target_time, input_vector,
+				 fixed_frame_id, target_vector);
+      }
     }
   }
   

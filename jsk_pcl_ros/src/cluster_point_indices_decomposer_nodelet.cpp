@@ -41,6 +41,8 @@
 #include <boost/format.hpp>
 #include <jsk_pcl_ros/BoundingBoxArray.h>
 #include <pcl/registration/ia_ransac.h>
+#include <pcl/filters/project_inliers.h>
+#include <pcl/common/pca.h>
 
 #include <Eigen/Geometry> 
 
@@ -68,22 +70,21 @@ namespace jsk_pcl_ros
     box_pub_ = pnh_->advertise<jsk_pcl_ros::BoundingBoxArray>("boxes", 1);
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_target_.subscribe(*pnh_, "target", 1);
-    
+
+    pnh_->param("publish_tf", publish_tf_, true);
     if (!pnh_->getParam("tf_prefix", tf_prefix_))
     {
-      ROS_WARN("~tf_prefix is not specified, using %s", getName().c_str());
+      if (publish_tf_) {
+        ROS_WARN("~tf_prefix is not specified, using %s", getName().c_str());
+      }
       tf_prefix_ = getName();
     }
 
-    if (!pnh_->getParam("publish_clouds", publish_clouds_)) {
-      publish_clouds_ = true;
-    }
-
-    if (!pnh_->getParam("align_boxes", align_boxes_)) {
-      align_boxes_ = false;
-    }
+    pnh_->param("publish_clouds", publish_clouds_, true);
     
-
+    pnh_->param("align_boxes", align_boxes_, false);
+    pnh_->param("use_pca", use_pca_, false);
+    
     if (align_boxes_) {
       sync_align_ = boost::make_shared<message_filters::Synchronizer<SyncAlignPolicy> >(100);
       sub_polygons_.subscribe(*pnh_, "align_planes", 1);
@@ -167,22 +168,23 @@ namespace jsk_pcl_ros
       pcl::PointIndices::Ptr segmented_indices (new pcl::PointIndices);
       extract.setIndices(sorted_indices[i]);
       extract.filter(*segmented_cloud);
-      sensor_msgs::PointCloud2::Ptr out_cloud(new sensor_msgs::PointCloud2);
-      pcl::toROSMsg(*segmented_cloud, *out_cloud);
-      out_cloud->header = input->header;
       if (publish_clouds_) {
+        sensor_msgs::PointCloud2::Ptr out_cloud(new sensor_msgs::PointCloud2);
+        pcl::toROSMsg(*segmented_cloud, *out_cloud);
+        out_cloud->header = input->header;
         publishers_[i].publish(out_cloud);
       }
       // publish tf
       Eigen::Vector4f center;
       pcl::compute3DCentroid(*segmented_cloud, center);
-      
-      tf::Transform transform;
-      transform.setOrigin(tf::Vector3(center[0], center[1], center[2]));
-      transform.setRotation(tf::createIdentityQuaternion());
-      br_.sendTransform(tf::StampedTransform(transform, input->header.stamp,
-                                             input->header.frame_id,
-                                             tf_prefix_ + (boost::format("output%02u") % (i)).str()));
+      if (publish_tf_) {
+        tf::Transform transform;
+        transform.setOrigin(tf::Vector3(center[0], center[1], center[2]));
+        transform.setRotation(tf::createIdentityQuaternion());
+        br_.sendTransform(tf::StampedTransform(transform, input->header.stamp,
+                                               input->header.frame_id,
+                                               tf_prefix_ + (boost::format("output%02u") % (i)).str()));
+      }
       // adding the pointcloud into debug_output
       uint32_t rgb = colorRGBAToUInt32(colors_[i % colors_.size()]);
       for (size_t j = 0; j < segmented_cloud->points.size(); j++) {
@@ -221,11 +223,38 @@ namespace jsk_pcl_ros
           else {
             Eigen::Matrix3f m = Eigen::Matrix3f::Identity();
             m = m * Eigen::AngleAxisf(theta, rotation_axis);
+
+            if (use_pca_) {
+              // first project points to the plane
+              pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud
+                (new pcl::PointCloud<pcl::PointXYZRGB>);
+              pcl::ProjectInliers<pcl::PointXYZRGB> proj;
+              proj.setModelType (pcl::SACMODEL_PLANE);
+              pcl::ModelCoefficients::Ptr
+                plane_coefficients (new pcl::ModelCoefficients);
+              plane_coefficients->values
+                = coefficients->coefficients[nearest_plane_index].values;
+              proj.setModelCoefficients(plane_coefficients);
+              proj.setInputCloud(segmented_cloud);
+              proj.filter(*projected_cloud);
+
+              pcl::PCA<pcl::PointXYZRGB> pca;
+              pca.setInputCloud(projected_cloud);
+              Eigen::Matrix3f eigen = pca.getEigenVectors();
+              m.col(0) = eigen.col(0);
+              m.col(1) = eigen.col(1);
+              // flip axis to satisfy right-handed system
+              if (m.col(0).cross(m.col(1)).dot(m.col(2)) < 0) {
+                m.col(0) = - m.col(0);
+              }
+            }
+            
+            // m4 <- m
             for (size_t row = 0; row < 3; row++) {
               for (size_t column = 0; column < 3; column++) {
                 m4(row, column) = m(row, column);
               }
-            }
+           }
             q = m;
             Eigen::Matrix4f inv_m = m4.inverse();
             pcl::transformPointCloud(*segmented_cloud, *segmented_cloud_transformed, inv_m);
@@ -259,7 +288,6 @@ namespace jsk_pcl_ros
       bounding_box.dimensions.x = xwidth;
       bounding_box.dimensions.y = ywidth;
       bounding_box.dimensions.z = zwidth;
-
       bounding_box_array.boxes.push_back(bounding_box);
     }
     

@@ -1,8 +1,9 @@
 <launch>
+  <arg name="BASE_FRAME_ID" default="odom" />
   <arg name="INPUT" default="/camera/depth_registered/points" />
   <arg name="LAUNCH_MANAGER" default="true" />
   <arg name="MANAGER" default="manager" />
-  <arg name="ESTIMATE_OCLUSION" default="false" />
+  <arg name="ESTIMATE_OCCLUSION" default="false" />
   <arg name="MACHINE" default="localhost"/>
   <arg name="GDB" default="false" />
   <machine name="localhost" address="localhost" />
@@ -89,6 +90,7 @@
            to="/multi_plane_estimate/output_coefficients" />
     <rosparam>
       align_boxes: true
+      use_pca: true
       publish_clouds: false
     </rosparam>
   </node>
@@ -117,12 +119,17 @@
         output="screen" clear_params="true">
     <remap from="~input_polygons" to="/multi_plane_estimate/output_polygon" />
     <remap from="~input_coefficients" to="/multi_plane_estimate/output_coefficients" />
-    <rosparam>
+    <rosparam subst_value="true">
       reference_axis: [0, 0, -1]
-      processing_frame_id: camera_depth_optical_frame
+      processing_frame_id: $(arg BASE_FRAME_ID)
     </rosparam>
   </node>
-  <group if="$(arg ESTIMATE_OCLUSION)">
+    <node pkg="nodelet" type="nodelet" name="transform_input"
+          args="load jsk_pcl/TfTransformCloud $(arg MANAGER)">
+      <remap from="~input" to="input_relay/output" />
+      <param name="target_frame_id" value="$(arg BASE_FRAME_ID)" />
+    </node>
+    <group if="$(arg ESTIMATE_OCCLUSION)">
     <include file="$(find jsk_pcl_ros)/launch/hrp2jsknt_footstep_polygon.launch">
       <arg name="LAUNCH_MANAGER" value="false" />
       <arg name="MANAGER" value="$(arg MANAGER)" />
@@ -131,21 +138,27 @@
           args="load jsk_pcl/PolygonArrayTransformer /$(arg MANAGER)">
       <remap from="~input_polygons" to="footstep_polygon_publisher/output_polygons" />
       <remap from="~input_coefficients" to="footstep_polygon_publisher/output_coefficients" />
-      <param name="frame_id" value="odom" />
+      <param name="frame_id" value="$(arg BASE_FRAME_ID)" />
     </node>
     <node pkg="nodelet" type="nodelet" name="estimated_plane_respected_to_odom"
           args="load jsk_pcl/PolygonArrayTransformer /$(arg MANAGER)">
       <remap from="~input_polygons" to="multi_plane_estimate/output_polygon" />
       <remap from="~input_coefficients" to="multi_plane_estimate/output_coefficients" />
-      <param name="frame_id" value="odom" />
+      <param name="frame_id" value="$(arg BASE_FRAME_ID)" />
     </node>
-    <node pkg="nodelet" type="nodelet" name="polygon_estimator"
+    <node pkg="nodelet" type="nodelet" name="env_server"
           clear_params="true"
-          args="load jsk_pcl/OcludedPlaneEstimator /$(arg MANAGER)">
+          output="screen"
+          args="load jsk_pcl/EnvironmentPlaneModeling /$(arg MANAGER)" >
+      <remap from="~input" to="transform_input/output" />
+      <remap from="~indices" to="/multi_plane_estimate/output" />
       <remap from="~input_polygons" to="/estimated_plane_respected_to_odom/output_polygons" />
       <remap from="~input_coefficients" to="/estimated_plane_respected_to_odom/output_coefficients" />
       <remap from="~input_static_polygons" to="/footstep_respected_to_odom/output_polygons" />
       <remap from="~input_static_coefficients" to="/footstep_respected_to_odom/output_coefficients" />
     </node>
+    <include file="$(find jsk_footstep_controller)/launch/hrp2jsknt_real.launch">
+      <arg name="USE_PLANE" value="true" />
+    </include>
   </group>
 </launch>

@@ -94,6 +94,7 @@ namespace jsk_pcl_ros
     bool new_cloud_;
     bool track_target_set_;
     std::string frame_id_;
+    ros::Time stamp_;
 
     ros::Subscriber sub_;
     ros::Subscriber sub_update_model_;

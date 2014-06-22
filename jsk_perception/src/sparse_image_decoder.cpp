@@ -97,12 +97,12 @@ class SparseImageDecoder: public nodelet::Nodelet
 public:
   void onInit() {
     _nh = getNodeHandle();
+    _img_ptr.reset(new sensor_msgs::Image());
     _it.reset(new image_transport::ImageTransport(_nh));
     _subscriber_count = 0;
     image_transport::SubscriberStatusCallback connect_cb    = boost::bind(&SparseImageDecoder::connectCb, this, _1);
     image_transport::SubscriberStatusCallback disconnect_cb = boost::bind(&SparseImageDecoder::disconnectCb, this, _1);
     _img_pub = image_transport::ImageTransport(ros::NodeHandle(_nh, "sparse")).advertise("image_decoded", 1, connect_cb, disconnect_cb);
-    _img_ptr.reset(new sensor_msgs::Image());
   } // end of onInit function
 }; // end of SparseImageDecoder class definition
 } // end of jsk_perception namespace

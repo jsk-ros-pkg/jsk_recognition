@@ -1,7 +1,8 @@
+// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Yuto Inagaki and JSK Lab
+ *  Copyright (c) 2014, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,42 +33,41 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#include "jsk_pcl_ros/pcl_conversion_util.h"
 
-#include "jsk_pcl_ros/tf_transform_cloud.h"
-#include <pluginlib/class_list_macros.h>
-
-#include <tf2_ros/buffer_client.h>
-#include <pcl/common/centroid.h>
-
-namespace jsk_pcl_ros
+namespace pcl_conversions
 {
-  void TfTransformCloud::transform(const sensor_msgs::PointCloud2ConstPtr &input)
+  void toPCL(const geometry_msgs::Point32& msg,
+             pcl::PointXYZRGB& p)
   {
-    sensor_msgs::PointCloud2 output;
-    try
-    {
-      if (pcl_ros::transformPointCloud(target_frame_id_, *input, output, tf_listener_)) {
-        pub_cloud_.publish(output);
-      }
-    }
-    catch (tf2::ConnectivityException &e)
-    {
-      NODELET_ERROR("Transform error: %s", e.what());
-    }
+    p.x = msg.x;
+    p.y = msg.y;
+    p.z = msg.z;
   }
 
-  void TfTransformCloud::onInit(void)
+  void toPCL(const geometry_msgs::Point32& msg,
+             pcl::PointXYZ& p)
   {
-    PCLNodelet::onInit();
-    sub_cloud_ = pnh_->subscribe("input", 1, &TfTransformCloud::transform, this);
-    if (!pnh_->getParam("target_frame_id", target_frame_id_))
-    {
-      ROS_WARN("~target_frame_id is not specified, using %s", "/base_footprint");
-    }
-
-    pub_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
+    p.x = msg.x;
+    p.y = msg.y;
+    p.z = msg.z;
   }
+
+  
+  void fromPCL(const pcl::PointXYZRGB& p,
+               geometry_msgs::Point32& msg)
+  {
+    msg.x = p.x;
+    msg.y = p.y;
+    msg.z = p.z;
+  }
+
+  void fromPCL(const pcl::PointXYZ& p,
+               geometry_msgs::Point32& msg)
+  {
+    msg.x = p.x;
+    msg.y = p.y;
+    msg.z = p.z;
+  }
+
 }
-
-typedef jsk_pcl_ros::TfTransformCloud TfTransformCloud;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, TfTransformCloud, TfTransformCloud, nodelet::Nodelet);

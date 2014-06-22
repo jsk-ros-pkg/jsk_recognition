@@ -59,7 +59,11 @@ class EdgeDetector: public nodelet::Nodelet
 
                 // Do the work
                 cv::Mat out_image;
-                cv::cvtColor(in_image, out_image, CV_BGR2GRAY);
+		if(in_image.channels() >= 3){
+		  cv::cvtColor(in_image, out_image, CV_BGR2GRAY);
+		}else{
+		  out_image = in_image;
+		}
                 cv::blur(out_image, out_image, cv::Size(_apertureSize,_apertureSize));
                 cv::Canny(out_image, out_image, _threshold1, _threshold2, _apertureSize, _L2gradient);
 

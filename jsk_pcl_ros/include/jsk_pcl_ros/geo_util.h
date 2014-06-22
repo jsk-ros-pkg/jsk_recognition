@@ -1,7 +1,8 @@
+// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Yuto Inagaki and JSK Lab
+ *  Copyright (c) 2014, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,42 +33,40 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#ifndef JSK_PCL_ROS_GEO_UTIL_H_
+#define JSK_PCL_ROS_GEO_UTIL_H_
 
-#include "jsk_pcl_ros/tf_transform_cloud.h"
-#include <pluginlib/class_list_macros.h>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 
-#include <tf2_ros/buffer_client.h>
-#include <pcl/common/centroid.h>
+#include <vector>
+
+#include <boost/shared_ptr.hpp>
 
 namespace jsk_pcl_ros
 {
-  void TfTransformCloud::transform(const sensor_msgs::PointCloud2ConstPtr &input)
+  class Plane
   {
-    sensor_msgs::PointCloud2 output;
-    try
-    {
-      if (pcl_ros::transformPointCloud(target_frame_id_, *input, output, tf_listener_)) {
-        pub_cloud_.publish(output);
-      }
-    }
-    catch (tf2::ConnectivityException &e)
-    {
-      NODELET_ERROR("Transform error: %s", e.what());
-    }
-  }
-
-  void TfTransformCloud::onInit(void)
-  {
-    PCLNodelet::onInit();
-    sub_cloud_ = pnh_->subscribe("input", 1, &TfTransformCloud::transform, this);
-    if (!pnh_->getParam("target_frame_id", target_frame_id_))
-    {
-      ROS_WARN("~target_frame_id is not specified, using %s", "/base_footprint");
-    }
-
-    pub_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
-  }
+  public:
+    typedef boost::shared_ptr<Plane> Ptr;
+    Plane(const std::vector<float>& coefficients);
+    Plane(Eigen::Vector3d normal, double d);
+    virtual ~Plane();
+    Plane flip();
+    bool isSameDirection(const Plane& another);
+    
+    double signedDistanceToPoint(const Eigen::Vector4f p);
+    double distanceToPoint(const Eigen::Vector4f p);
+    double signedDistanceToPoint(const Eigen::Vector3d p);
+    double distanceToPoint(const Eigen::Vector3d p);
+    
+    double distance(const Plane& another);
+    double angle(const Plane& another);
+  protected:
+    Eigen::Vector3d normal_;
+    double d_;
+  private:
+  };
 }
 
-typedef jsk_pcl_ros::TfTransformCloud TfTransformCloud;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, TfTransformCloud, TfTransformCloud, nodelet::Nodelet);
+#endif

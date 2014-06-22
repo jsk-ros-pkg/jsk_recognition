@@ -1,7 +1,8 @@
+// -*- mode: C++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Yuto Inagaki and JSK Lab
+ *  Copyright (c) 2014, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -31,43 +32,58 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
+#ifndef JSK_PCL_ROS_GRID_LINE_H_
+#define JSK_PCL_ROS_GRID_LINE_H_
 
+#include <pcl/point_types.h>
+#include <boost/shared_ptr.hpp>
+#include "jsk_pcl_ros/grid_index.h"
 
-#include "jsk_pcl_ros/tf_transform_cloud.h"
-#include <pluginlib/class_list_macros.h>
-
-#include <tf2_ros/buffer_client.h>
-#include <pcl/common/centroid.h>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 
 namespace jsk_pcl_ros
 {
-  void TfTransformCloud::transform(const sensor_msgs::PointCloud2ConstPtr &input)
+  class GridLine
   {
-    sensor_msgs::PointCloud2 output;
-    try
+  public:
+    typedef boost::shared_ptr<GridLine> Ptr;
+    GridLine(const pcl::PointXYZRGB a, const pcl::PointXYZRGB b);
+    virtual ~GridLine();
+    virtual bool penetrateGrid(const pcl::PointXYZRGB& A,
+                               const pcl::PointXYZRGB& B,
+                               const pcl::PointXYZRGB& C,
+                               const pcl::PointXYZRGB& D);
+    virtual bool penetrateGrid(const Eigen::Vector3f A,
+                               const Eigen::Vector3f B,
+                               const Eigen::Vector3f C,
+                               const Eigen::Vector3f D)
     {
-      if (pcl_ros::transformPointCloud(target_frame_id_, *input, output, tf_listener_)) {
-        pub_cloud_.publish(output);
+      Eigen::Vector3f Across = (A - from).cross(d_);
+      Eigen::Vector3f Bcross = (B - from).cross(d_);
+      Eigen::Vector3f Ccross = (C - from).cross(d_);
+      Eigen::Vector3f Dcross = (D - from).cross(d_);
+      bool ab_direction = Across.dot(Bcross) < 0;
+      bool ac_direction = Across.dot(Ccross) < 0;
+      bool ad_direction = Across.dot(Dcross) < 0;
+      bool bc_direction = Bcross.dot(Ccross) < 0;
+      bool bd_direction = Bcross.dot(Dcross) < 0;
+      bool cd_direction = Ccross.dot(Dcross) < 0;
+      if ((ab_direction == ac_direction) && (ab_direction == ad_direction)
+          && (ab_direction == bc_direction) && (ab_direction == bd_direction)
+          && (ab_direction == cd_direction)) {
+        return false;
+      }
+      else {
+        return true;
       }
     }
-    catch (tf2::ConnectivityException &e)
-    {
-      NODELET_ERROR("Transform error: %s", e.what());
-    }
-  }
-
-  void TfTransformCloud::onInit(void)
-  {
-    PCLNodelet::onInit();
-    sub_cloud_ = pnh_->subscribe("input", 1, &TfTransformCloud::transform, this);
-    if (!pnh_->getParam("target_frame_id", target_frame_id_))
-    {
-      ROS_WARN("~target_frame_id is not specified, using %s", "/base_footprint");
-    }
-
-    pub_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
-  }
+    
+    const Eigen::Vector3f from;
+    const Eigen::Vector3f to;
+  protected:
+    const Eigen::Vector3f d_;
+  };
 }
 
-typedef jsk_pcl_ros::TfTransformCloud TfTransformCloud;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, TfTransformCloud, TfTransformCloud, nodelet::Nodelet);
+#endif

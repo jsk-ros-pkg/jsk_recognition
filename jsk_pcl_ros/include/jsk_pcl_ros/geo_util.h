@@ -54,6 +54,12 @@ namespace jsk_pcl_ros
     virtual ~Plane();
     Plane flip();
     bool isSameDirection(const Plane& another);
+    
+    double signedDistanceToPoint(const Eigen::Vector4f p);
+    double distanceToPoint(const Eigen::Vector4f p);
+    double signedDistanceToPoint(const Eigen::Vector3d p);
+    double distanceToPoint(const Eigen::Vector3d p);
+    
     double distance(const Plane& another);
     double angle(const Plane& another);
   protected:

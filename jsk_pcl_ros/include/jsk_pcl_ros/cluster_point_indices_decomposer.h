@@ -91,7 +91,9 @@ namespace jsk_pcl_ros
     virtual void allocatePublishers(size_t num);
     std::vector<std_msgs::ColorRGBA> colors_;
     bool publish_clouds_;
+    bool publish_tf_;
     bool align_boxes_;
+    bool use_pca_;
     
     virtual int findNearestPlane(const Eigen::Vector4f& center,
                                  const jsk_pcl_ros::PolygonArrayConstPtr& planes,

@@ -33,37 +33,41 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_PCL_CONVERSION_UTIL_H_
-#define JSK_PCL_ROS_PCL_CONVERSION_UTIL_H_
+#include "jsk_pcl_ros/pcl_conversion_util.h"
 
-#include <pcl/point_types.h>
-#include <pcl_ros/pcl_nodelet.h>
-
-#include <geometry_msgs/Point32.h>
-
-
-#if ROS_VERSION_MINIMUM(1, 10, 0)
-// hydro and later
-typedef pcl_msgs::PointIndices PCLIndicesMsg;
-typedef pcl_msgs::ModelCoefficients PCLModelCoefficientMsg;
-#else
-// groovy
-typedef pcl::PointIndices PCLIndicesMsg;
-typedef pcl::ModelCoefficients PCLModelCoefficientMsg;
-#endif
-
-
-// extend pcl_conversions package's toPCL and fromPCL functions
 namespace pcl_conversions
 {
   void toPCL(const geometry_msgs::Point32& msg,
-             pcl::PointXYZRGB& p);
-  void toPCL(const geometry_msgs::Point32& msg,
-             pcl::PointXYZ& p);
-  void fromPCL(const pcl::PointXYZRGB& p,
-               geometry_msgs::Point32& msg);
-  void fromPCL(const pcl::PointXYZ& p,
-               geometry_msgs::Point32& msg);
-}
+             pcl::PointXYZRGB& p)
+  {
+    p.x = msg.x;
+    p.y = msg.y;
+    p.z = msg.z;
+  }
 
-#endif
+  void toPCL(const geometry_msgs::Point32& msg,
+             pcl::PointXYZ& p)
+  {
+    p.x = msg.x;
+    p.y = msg.y;
+    p.z = msg.z;
+  }
+
+  
+  void fromPCL(const pcl::PointXYZRGB& p,
+               geometry_msgs::Point32& msg)
+  {
+    msg.x = p.x;
+    msg.y = p.y;
+    msg.z = p.z;
+  }
+
+  void fromPCL(const pcl::PointXYZ& p,
+               geometry_msgs::Point32& msg)
+  {
+    msg.x = p.x;
+    msg.y = p.y;
+    msg.z = p.z;
+  }
+
+}

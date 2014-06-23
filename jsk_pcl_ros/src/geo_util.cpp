@@ -65,6 +65,26 @@ namespace jsk_pcl_ros
     return normal_.dot(another.normal_) > 0;
   }
 
+  double Plane::signedDistanceToPoint(const Eigen::Vector3d p)
+  {
+    return (normal_.dot(p) + d_);
+  }
+  
+  double Plane::signedDistanceToPoint(const Eigen::Vector4f p)
+  {
+    return signedDistanceToPoint(Eigen::Vector3d(p[0], p[1], p[2]));
+  }
+  
+  double Plane::distanceToPoint(const Eigen::Vector4f p)
+  {
+    return fabs(signedDistanceToPoint(p));
+  }
+
+  double Plane::distanceToPoint(const Eigen::Vector3d p)
+  {
+    return fabs(signedDistanceToPoint(p));
+  }
+  
   double Plane::distance(const Plane& another)
   {
     return fabs(fabs(d_) - fabs(another.d_));

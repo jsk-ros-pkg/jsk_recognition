@@ -1,4 +1,5 @@
 <launch>
+  <arg name="BASE_FRAME_ID" default="odom" />
   <arg name="INPUT" default="/camera/depth_registered/points" />
   <arg name="LAUNCH_MANAGER" default="true" />
   <arg name="MANAGER" default="manager" />
@@ -89,6 +90,7 @@
            to="/multi_plane_estimate/output_coefficients" />
     <rosparam>
       align_boxes: true
+      use_pca: true
       publish_clouds: false
     </rosparam>
   </node>
@@ -117,15 +119,15 @@
         output="screen" clear_params="true">
     <remap from="~input_polygons" to="/multi_plane_estimate/output_polygon" />
     <remap from="~input_coefficients" to="/multi_plane_estimate/output_coefficients" />
-    <rosparam>
+    <rosparam subst_value="true">
       reference_axis: [0, 0, -1]
-      processing_frame_id: odom
+      processing_frame_id: $(arg BASE_FRAME_ID)
     </rosparam>
   </node>
     <node pkg="nodelet" type="nodelet" name="transform_input"
           args="load jsk_pcl/TfTransformCloud $(arg MANAGER)">
       <remap from="~input" to="input_relay/output" />
-      <param name="target_frame_id" value="odom" />
+      <param name="target_frame_id" value="$(arg BASE_FRAME_ID)" />
     </node>
     <group if="$(arg ESTIMATE_OCCLUSION)">
     <include file="$(find jsk_pcl_ros)/launch/hrp2jsknt_footstep_polygon.launch">
@@ -136,13 +138,13 @@
           args="load jsk_pcl/PolygonArrayTransformer /$(arg MANAGER)">
       <remap from="~input_polygons" to="footstep_polygon_publisher/output_polygons" />
       <remap from="~input_coefficients" to="footstep_polygon_publisher/output_coefficients" />
-      <param name="frame_id" value="odom" />
+      <param name="frame_id" value="$(arg BASE_FRAME_ID)" />
     </node>
     <node pkg="nodelet" type="nodelet" name="estimated_plane_respected_to_odom"
           args="load jsk_pcl/PolygonArrayTransformer /$(arg MANAGER)">
       <remap from="~input_polygons" to="multi_plane_estimate/output_polygon" />
       <remap from="~input_coefficients" to="multi_plane_estimate/output_coefficients" />
-      <param name="frame_id" value="odom" />
+      <param name="frame_id" value="$(arg BASE_FRAME_ID)" />
     </node>
     <node pkg="nodelet" type="nodelet" name="env_server"
           clear_params="true"

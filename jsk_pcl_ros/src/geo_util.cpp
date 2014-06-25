@@ -49,6 +49,13 @@ namespace jsk_pcl_ros
   {
     
   }
+
+  Plane::Plane(Eigen::Vector3d normal, Eigen::Vector3d p) :
+    normal_(normal), d_(- normal.dot(p))
+  {
+    
+  }
+          
   
   Plane::~Plane()
   {
@@ -93,6 +100,12 @@ namespace jsk_pcl_ros
   double Plane::angle(const Plane& another)
   {
     return acos(normal_.dot(another.normal_));
+  }
+
+  void Plane::project(const Eigen::Vector3d p, Eigen::Vector3d& output)
+  {
+    double alpha = - p.dot(normal_);
+    output = p + alpha * normal_;
   }
   
 }

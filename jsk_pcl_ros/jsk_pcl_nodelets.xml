@@ -3,6 +3,10 @@
          base_class_type="nodelet::Nodelet">
     <description>estimate handle from pointcloud</description>
   </class>
+  <class name="jsk_pcl/GridSampler" type="GridSampler"
+         base_class_type="nodelet::Nodelet">
+    <description>grid based sampling of pointcloud</description>
+  </class>
   <class name="jsk_pcl/EnvironmentPlaneModeling" type="EnvironmentPlaneModeling"
          base_class_type="nodelet::Nodelet">
     <description>modeling the environment</description>

@@ -3,6 +3,10 @@
          base_class_type="nodelet::Nodelet">
     <description>modeling the environment</description>
   </class>
+  <class name="jsk_pcl/ColorHistogramMatcher" type="ColorHistogramMatcher"
+         base_class_type="nodelet::Nodelet">
+    <description>find object based on h-s-v histogram</description>
+  </class>
   <class name="jsk_pcl/PolygonArrayTransformer" type="PolygonArrayTransformer"
          base_class_type="nodelet::Nodelet">
     <description>transform polygons to the specified tf frame</description>

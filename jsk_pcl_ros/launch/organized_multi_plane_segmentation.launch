@@ -4,6 +4,7 @@
   <arg name="LAUNCH_MANAGER" default="true" />
   <arg name="MANAGER" default="manager" />
   <arg name="ESTIMATE_OCCLUSION" default="false" />
+  <arg name="COLRO_HISTOGRAM" default="false" />
   <arg name="HANDLE_ESTIMATE" default="false" />
   <arg name="MACHINE" default="localhost"/>
   <arg name="GDB" default="false" />
@@ -75,7 +76,11 @@
         args="load jsk_pcl/EuclideanClustering /$(arg MANAGER)" output="screen">
     <remap from="~input" to="/plane_extraction/output" />
     <rosparam>
+<<<<<<< HEAD
+      tolerance: 0.02
+=======
       tolerance: 0.01
+>>>>>>> refs/remotes/origin/master
       min_size: 100
     </rosparam>
   </node>
@@ -126,6 +131,26 @@
       processing_frame_id: $(arg BASE_FRAME_ID)
     </rosparam>
   </node>
+<<<<<<< HEAD
+  <group if="$(arg COLOR_HISTOGRAM)">
+    <node pkg="nodelet" type="nodelet" name="color_histogram"
+          args="load jsk_pcl/ColorHistogramMatcher /$(arg MANAGER)"
+          machine="$(arg MACHINE)"
+          output="screen">
+      <remap from="~input" to="/plane_extraction/output" />
+      <remap from="~input_indices" to="/euclidean_clustering/output" />
+      <remap from="~input_reference_cloud" to="/selected_pointcloud" />
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="match_result"
+          machine="$(arg MACHINE)"
+          args="load jsk_pcl/ClusterPointIndicesDecomposer /$(arg MANAGER)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="/plane_extraction/output" />
+      <remap from="~target" to="color_histogram/output" />
+    </node>
+  </group>
+=======
   <node pkg="nodelet" type="nodelet" name="handle_estimator"
         if="$(arg HANDLE_ESTIMATOR)"
         machine="$(arg MACHINE)"
@@ -136,7 +161,9 @@
       approach_offset: 0.1
     </rosparam>
   </node>
+>>>>>>> refs/remotes/origin/master
     <node pkg="nodelet" type="nodelet" name="transform_input"
+          machine="$(arg MACHINE)"
           args="load jsk_pcl/TfTransformCloud $(arg MANAGER)">
       <remap from="~input" to="input_relay/output" />
       <param name="target_frame_id" value="$(arg BASE_FRAME_ID)" />
@@ -173,4 +200,5 @@
       <arg name="USE_PLANE" value="true" />
     </include>
   </group>
+
 </launch>

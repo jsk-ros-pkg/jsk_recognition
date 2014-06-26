@@ -37,6 +37,7 @@
 
 namespace pcl_conversions
 {
+  
   void toPCL(const geometry_msgs::Point32& msg,
              pcl::PointXYZRGB& p)
   {

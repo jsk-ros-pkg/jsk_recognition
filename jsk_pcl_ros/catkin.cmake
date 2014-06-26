@@ -36,7 +36,8 @@ add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg
   SlicedPointCloud.msg
   BoundingBox.msg
   BoundingBoxArray.msg
-  ColorHistogram.msg)
+  ColorHistogram.msg
+  ColorHistogramArray.msg)
 add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv SetPointCloud2.srv
   CallSnapIt.srv CallPolygon.srv
   EnvironmentLock.srv
@@ -54,6 +55,7 @@ generate_dynamic_reconfigure_options(
   cfg/NormalEstimationIntegralImage.cfg
   cfg/PlaneRejector.cfg
   cfg/EnvironmentPlaneModeling.cfg
+  cfg/ColorHistogramMatcher.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -143,6 +145,12 @@ if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
 endif()
 jsk_pcl_nodelet(src/environment_plane_modeling_nodelet.cpp
   "jsk_pcl/EnvironmentPlaneModeling" "environment_plane_modeling")
+jsk_pcl_nodelet(src/color_histogram_matcher_nodelet.cpp
+  "jsk_pcl/ColorHistogramMatcher" "color_histogram_matcher")
+
+
+jsk_pcl_nodelet(src/handle_estimator_nodelet.cpp
+  "jsk_pcl/HandleEstimator" "handle_estimator")
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp

@@ -144,7 +144,7 @@ namespace jsk_pcl_ros
     result.header = input_indices->header;
     for (size_t i = 0; i < input_indices->cluster_indices.size(); i++) {
       const double coefficient = bhattacharyyaCoefficient(histograms[i], reference_histogram_);
-      //NODELET_INFO_STREAM("coefficient: " << i << "::" << coefficient);
+      NODELET_DEBUG_STREAM("coefficient: " << i << "::" << coefficient);
       if (coefficient > coefficient_thr_) {
         result.cluster_indices.push_back(input_indices->cluster_indices[i]);
       }
@@ -193,11 +193,7 @@ namespace jsk_pcl_ros
         val_max = 1.0;
         val_min = 0.0;
       }
-      output.resize(bin_size_);
-      // fill by 0
-      for (size_t i = 0; i < bin_size_; i++) {
-        output[i] = 0.0;
-      }
+      output.resize(bin_size_, 0);
       for (size_t i = 0; i < cloud.points.size(); i++) {
         pcl::PointXYZHSV output_point = cloud.points[i];
         // ratil
@@ -215,9 +211,7 @@ namespace jsk_pcl_ros
         if (index >= bin_size_) {
           index = bin_size_ - 1;
         }
-        if (val != 0.0 && val != 1.0 && val != 360.0) { // is it ok??
-          output[index] += 1.0;
-        }
+        output[index] += 1.0;
       }
     }
     // normalize

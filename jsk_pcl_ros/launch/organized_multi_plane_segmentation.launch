@@ -4,7 +4,7 @@
   <arg name="LAUNCH_MANAGER" default="true" />
   <arg name="MANAGER" default="manager" />
   <arg name="ESTIMATE_OCCLUSION" default="false" />
-  <arg name="COLRO_HISTOGRAM" default="false" />
+  <arg name="COLOR_HISTOGRAM" default="false" />
   <arg name="HANDLE_ESTIMATOR" default="false" />
   <arg name="MACHINE" default="localhost"/>
   <arg name="GDB" default="false" />

@@ -132,31 +132,48 @@
           args="load jsk_pcl/ColorHistogramMatcher /$(arg MANAGER)"
           machine="$(arg MACHINE)"
           output="screen">
-      <remap from="~input" to="/plane_extraction/output" />
-      <remap from="~input_indices" to="/euclidean_clustering/output" />
+      <!-- <remap from="~input" to="/plane_extraction/output" />-->
+      <remap from="~input" to="input_relay/output"/>
+      <remap from="~input_indices" to="grid_sampler/output" />
+      <!-- <remap from="~input_indices" to="euclidean_clustering/output" /> -->
       <remap from="~input_reference_cloud" to="/selected_pointcloud" />
+      <rosparam>
+        bin_size: 20
+      </rosparam>
     </node>
     <node pkg="nodelet" type="nodelet" name="grid_sampler"
           args="load jsk_pcl/GridSampler /$(arg MANAGER)"
           machine="$(arg MACHINE)"
           output="screen">
-      <remap from="~input" to="input_relay/output" />
+      <!-- <remap from="~input" to="/plane_extraction/output" /> -->
+      <remap from="~input" to="input_relay/output"/>
+      <rosparam>
+        grid_size: 0.1
+      </rosparam>
     </node>
     <node pkg="nodelet" type="nodelet"
           name="grid_sample_decompose"
           machine="$(arg MACHINE)"
           args="load jsk_pcl/ClusterPointIndicesDecomposer /$(arg MANAGER)"
           output="screen" clear_params="true">
-      <remap from="~input" to="input_relay/output" />
+      <!-- <remap from="~input" to="/plane_extraction/output" /> -->
+      <remap from="~input" to="input_relay/output"/>
       <remap from="~target" to="grid_sampler/output" />
+      <rosparam>
+        publish_clouds: false
+      </rosparam>
     </node>
     <node pkg="nodelet" type="nodelet"
           name="match_result"
           machine="$(arg MACHINE)"
           args="load jsk_pcl/ClusterPointIndicesDecomposer /$(arg MANAGER)"
           output="screen" clear_params="true">
-      <remap from="~input" to="/plane_extraction/output" />
+      <!-- <remap from="~input" to="/plane_extraction/output" /> -->
+      <remap from="~input" to="input_relay/output"/>
       <remap from="~target" to="color_histogram/output" />
+      <rosparam>
+        publish_clouds: false
+      </rosparam>
     </node>
   </group>
   <node pkg="nodelet" type="nodelet" name="handle_estimator"

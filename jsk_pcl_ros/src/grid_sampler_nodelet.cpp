@@ -44,10 +44,10 @@ namespace jsk_pcl_ros
   {
     PCLNodelet::onInit();
     pub_ = pnh_->advertise<jsk_pcl_ros::ClusterPointIndices>("output", 1);
-    grid_size_ = 0.2;
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&GridSampler::configCallback, this, _1, _2);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    srv_->setCallback (f);
     sub_ = pnh_->subscribe("input", 1, &GridSampler::sample, this);
   }
 

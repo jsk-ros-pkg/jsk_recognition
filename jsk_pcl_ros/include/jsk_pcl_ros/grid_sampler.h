@@ -33,42 +33,34 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#ifndef JSK_PCL_ROS_GRID_SAMPLER_H_
+#define JSK_PCL_ROS_GRID_SAMPLER_H_
 
-namespace pcl_conversions
+#include <pcl_ros/pcl_nodelet.h>
+#include <dynamic_reconfigure/server.h>
+#include <jsk_pcl_ros/ClusterPointIndices.h>
+#include <sensor_msgs/PointCloud2.h>
+
+#include <jsk_pcl_ros/GridSamplerConfig.h>
+
+namespace jsk_pcl_ros
 {
-  
-  void toPCL(const geometry_msgs::Point32& msg,
-             pcl::PointXYZRGB& p)
+  class GridSampler: public pcl_ros::PCLNodelet
   {
-    p.x = msg.x;
-    p.y = msg.y;
-    p.z = msg.z;
-  }
-
-  void toPCL(const geometry_msgs::Point32& msg,
-             pcl::PointXYZ& p)
-  {
-    p.x = msg.x;
-    p.y = msg.y;
-    p.z = msg.z;
-  }
-
-  
-  void fromPCL(const pcl::PointXYZRGB& p,
-               geometry_msgs::Point32& msg)
-  {
-    msg.x = p.x;
-    msg.y = p.y;
-    msg.z = p.z;
-  }
-
-  void fromPCL(const pcl::PointXYZ& p,
-               geometry_msgs::Point32& msg)
-  {
-    msg.x = p.x;
-    msg.y = p.y;
-    msg.z = p.z;
-  }
-
+  public:
+    typedef jsk_pcl_ros::GridSamplerConfig Config;
+  protected:
+    virtual void onInit();
+    virtual void sample(const sensor_msgs::PointCloud2::ConstPtr& msg);
+    virtual void configCallback(Config &config, uint32_t level);
+    boost::mutex mutex_;
+    double grid_size_;
+    ros::Subscriber sub_;
+    ros::Publisher pub_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+  private:
+    
+  }; 
 }
+
+#endif

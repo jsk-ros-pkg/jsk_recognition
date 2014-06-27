@@ -4,6 +4,8 @@
   <arg name="LAUNCH_MANAGER" default="true" />
   <arg name="MANAGER" default="manager" />
   <arg name="ESTIMATE_OCCLUSION" default="false" />
+  <arg name="COLRO_HISTOGRAM" default="false" />
+  <arg name="HANDLE_ESTIMATOR" default="false" />
   <arg name="MACHINE" default="localhost"/>
   <arg name="GDB" default="false" />
   <machine name="localhost" address="localhost" />
@@ -31,6 +33,7 @@
         clear_params="false">
     <remap from="~input" to="input_relay/output"/>
     <rosparam>
+      max_curvature: 0.01
       estimate_normal: true
     </rosparam>
   </node>
@@ -74,7 +77,7 @@
     <remap from="~input" to="/plane_extraction/output" />
     <rosparam>
       tolerance: 0.02
-      min_size: 500
+      min_size: 100
     </rosparam>
   </node>
 
@@ -124,7 +127,67 @@
       processing_frame_id: $(arg BASE_FRAME_ID)
     </rosparam>
   </node>
+  <group if="$(arg COLOR_HISTOGRAM)">
+    <node pkg="nodelet" type="nodelet" name="color_histogram"
+          args="load jsk_pcl/ColorHistogramMatcher /$(arg MANAGER)"
+          machine="$(arg MACHINE)"
+          output="screen">
+      <!-- <remap from="~input" to="/plane_extraction/output" />-->
+      <remap from="~input" to="input_relay/output"/>
+      <remap from="~input_indices" to="grid_sampler/output" />
+      <!-- <remap from="~input_indices" to="euclidean_clustering/output" /> -->
+      <remap from="~input_reference_cloud" to="/selected_pointcloud" />
+      <rosparam>
+        bin_size: 20
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="grid_sampler"
+          args="load jsk_pcl/GridSampler /$(arg MANAGER)"
+          machine="$(arg MACHINE)"
+          output="screen">
+      <!-- <remap from="~input" to="/plane_extraction/output" /> -->
+      <remap from="~input" to="input_relay/output"/>
+      <rosparam>
+        grid_size: 0.1
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="grid_sample_decompose"
+          machine="$(arg MACHINE)"
+          args="load jsk_pcl/ClusterPointIndicesDecomposer /$(arg MANAGER)"
+          output="screen" clear_params="true">
+      <!-- <remap from="~input" to="/plane_extraction/output" /> -->
+      <remap from="~input" to="input_relay/output"/>
+      <remap from="~target" to="grid_sampler/output" />
+      <rosparam>
+        publish_clouds: false
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="match_result"
+          machine="$(arg MACHINE)"
+          args="load jsk_pcl/ClusterPointIndicesDecomposer /$(arg MANAGER)"
+          output="screen" clear_params="true">
+      <!-- <remap from="~input" to="/plane_extraction/output" /> -->
+      <remap from="~input" to="input_relay/output"/>
+      <remap from="~target" to="color_histogram/output" />
+      <rosparam>
+        publish_clouds: false
+      </rosparam>
+    </node>
+  </group>
+  <node pkg="nodelet" type="nodelet" name="handle_estimator"
+        if="$(arg HANDLE_ESTIMATOR)"
+        machine="$(arg MACHINE)"
+        args="load jsk_pcl/HandleEstimator /$(arg MANAGER)">
+    <remap from="~input" to="input_relay/output" />
+    <remap from="~input_box" to="/bounding_box_marker/selected_box" />
+    <rosparam>
+      approach_offset: 0.1
+    </rosparam>
+  </node>
     <node pkg="nodelet" type="nodelet" name="transform_input"
+          machine="$(arg MACHINE)"
           args="load jsk_pcl/TfTransformCloud $(arg MANAGER)">
       <remap from="~input" to="input_relay/output" />
       <param name="target_frame_id" value="$(arg BASE_FRAME_ID)" />
@@ -161,4 +224,5 @@
       <arg name="USE_PLANE" value="true" />
     </include>
   </group>
+
 </launch>

@@ -33,37 +33,34 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_PCL_CONVERSION_UTIL_H_
-#define JSK_PCL_ROS_PCL_CONVERSION_UTIL_H_
+#ifndef JSK_PCL_ROS_GRID_SAMPLER_H_
+#define JSK_PCL_ROS_GRID_SAMPLER_H_
 
-#include <pcl/point_types.h>
 #include <pcl_ros/pcl_nodelet.h>
+#include <dynamic_reconfigure/server.h>
+#include <jsk_pcl_ros/ClusterPointIndices.h>
+#include <sensor_msgs/PointCloud2.h>
 
-#include <geometry_msgs/Point32.h>
+#include <jsk_pcl_ros/GridSamplerConfig.h>
 
-
-#if ROS_VERSION_MINIMUM(1, 10, 0)
-// hydro and later
-typedef pcl_msgs::PointIndices PCLIndicesMsg;
-typedef pcl_msgs::ModelCoefficients PCLModelCoefficientMsg;
-#else
-// groovy
-typedef pcl::PointIndices PCLIndicesMsg;
-typedef pcl::ModelCoefficients PCLModelCoefficientMsg;
-#endif
-
-
-// extend pcl_conversions package's toPCL and fromPCL functions
-namespace pcl_conversions
+namespace jsk_pcl_ros
 {
-  void toPCL(const geometry_msgs::Point32& msg,
-             pcl::PointXYZRGB& p);
-  void toPCL(const geometry_msgs::Point32& msg,
-             pcl::PointXYZ& p);
-  void fromPCL(const pcl::PointXYZRGB& p,
-               geometry_msgs::Point32& msg);
-  void fromPCL(const pcl::PointXYZ& p,
-               geometry_msgs::Point32& msg);
+  class GridSampler: public pcl_ros::PCLNodelet
+  {
+  public:
+    typedef jsk_pcl_ros::GridSamplerConfig Config;
+  protected:
+    virtual void onInit();
+    virtual void sample(const sensor_msgs::PointCloud2::ConstPtr& msg);
+    virtual void configCallback(Config &config, uint32_t level);
+    boost::mutex mutex_;
+    double grid_size_;
+    ros::Subscriber sub_;
+    ros::Publisher pub_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+  private:
+    
+  }; 
 }
 
 #endif

@@ -51,11 +51,20 @@ namespace jsk_pcl_ros
     typedef boost::shared_ptr<Plane> Ptr;
     Plane(const std::vector<float>& coefficients);
     Plane(Eigen::Vector3d normal, double d);
+    Plane(Eigen::Vector3d normal, Eigen::Vector3d p);
     virtual ~Plane();
-    Plane flip();
-    bool isSameDirection(const Plane& another);
-    double distance(const Plane& another);
-    double angle(const Plane& another);
+    virtual Plane flip();
+    
+    virtual bool isSameDirection(const Plane& another);
+    
+    virtual double signedDistanceToPoint(const Eigen::Vector4f p);
+    virtual double distanceToPoint(const Eigen::Vector4f p);
+    virtual double signedDistanceToPoint(const Eigen::Vector3d p);
+    virtual double distanceToPoint(const Eigen::Vector3d p);
+    
+    virtual double distance(const Plane& another);
+    virtual double angle(const Plane& another);
+    virtual void project(const Eigen::Vector3d p, Eigen::Vector3d& output);
   protected:
     Eigen::Vector3d normal_;
     double d_;

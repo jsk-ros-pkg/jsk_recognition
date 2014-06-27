@@ -49,6 +49,13 @@ namespace jsk_pcl_ros
   {
     
   }
+
+  Plane::Plane(Eigen::Vector3d normal, Eigen::Vector3d p) :
+    normal_(normal), d_(- normal.dot(p))
+  {
+    
+  }
+          
   
   Plane::~Plane()
   {
@@ -65,6 +72,26 @@ namespace jsk_pcl_ros
     return normal_.dot(another.normal_) > 0;
   }
 
+  double Plane::signedDistanceToPoint(const Eigen::Vector3d p)
+  {
+    return (normal_.dot(p) + d_);
+  }
+  
+  double Plane::signedDistanceToPoint(const Eigen::Vector4f p)
+  {
+    return signedDistanceToPoint(Eigen::Vector3d(p[0], p[1], p[2]));
+  }
+  
+  double Plane::distanceToPoint(const Eigen::Vector4f p)
+  {
+    return fabs(signedDistanceToPoint(p));
+  }
+
+  double Plane::distanceToPoint(const Eigen::Vector3d p)
+  {
+    return fabs(signedDistanceToPoint(p));
+  }
+  
   double Plane::distance(const Plane& another)
   {
     return fabs(fabs(d_) - fabs(another.d_));
@@ -73,6 +100,12 @@ namespace jsk_pcl_ros
   double Plane::angle(const Plane& another)
   {
     return acos(normal_.dot(another.normal_));
+  }
+
+  void Plane::project(const Eigen::Vector3d p, Eigen::Vector3d& output)
+  {
+    double alpha = - p.dot(normal_);
+    output = p + alpha * normal_;
   }
   
 }

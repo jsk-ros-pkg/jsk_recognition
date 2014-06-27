@@ -46,6 +46,7 @@
     <remap from="~target" to="/multi_plane_estimate/output" />
     <rosparam>
       publish_clouds: false
+      publish_tf: false
     </rosparam>
   </node>
   <node pkg="nodelet" type="nodelet"
@@ -57,6 +58,7 @@
     <remap from="~target" to="/multi_plane_estimate/output_nonconnected" />
     <rosparam>
       publish_clouds: false
+      publish_tf: false
     </rosparam>
   </node>
 
@@ -161,6 +163,7 @@
       <remap from="~target" to="grid_sampler/output" />
       <rosparam>
         publish_clouds: false
+        publish_tf: false
       </rosparam>
     </node>
     <node pkg="nodelet" type="nodelet"

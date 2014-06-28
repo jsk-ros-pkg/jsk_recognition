@@ -60,6 +60,7 @@ namespace jsk_pcl_ros
     }
     else {
       grid_size_ = config.grid_size;
+      min_indices_ = config.min_indices;
     }
   }
 
@@ -143,13 +144,15 @@ namespace jsk_pcl_ros
              zit != zbins.end();
              zit++) {
           std::vector<size_t> indices = zit->second;
-          PCLIndicesMsg ros_indices;
-          ros_indices.header = msg->header;
           NODELET_DEBUG_STREAM("size: " << indices.size());
-          for (size_t j = 0; j < indices.size(); j++) {
-            ros_indices.indices.push_back(indices[j]);
+          if (indices.size() > min_indices_) {
+            PCLIndicesMsg ros_indices;
+            ros_indices.header = msg->header;
+            for (size_t j = 0; j < indices.size(); j++) {
+              ros_indices.indices.push_back(indices[j]);
+            }
+            output.cluster_indices.push_back(ros_indices);
           }
-          output.cluster_indices.push_back(ros_indices);
         }
       }
     }

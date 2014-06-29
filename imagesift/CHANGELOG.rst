@@ -2,6 +2,12 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* maked configure_file to create imagesurf, imagestar and imagebrisk automatically
+* added the programs to use cv_detection
+* Contributors: Yu Ohara
+
 0.1.7 (2014-05-31)
 ------------------
 

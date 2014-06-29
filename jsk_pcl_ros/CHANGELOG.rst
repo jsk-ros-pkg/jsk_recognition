@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.8 (2014-06-29)
+------------------
 * add min_indices parameter to ignore the grid which does not include
   enough points.
 * add throttle for bounding box visualization in

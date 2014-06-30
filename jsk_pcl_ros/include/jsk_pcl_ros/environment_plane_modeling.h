@@ -54,6 +54,11 @@
 #include <jsk_pcl_ros/pcl_conversion_util.h>
 #include <jsk_pcl_ros/EnvironmentPlaneModelingConfig.h>
 
+#include <diagnostic_updater/diagnostic_updater.h>
+#include <diagnostic_updater/publisher.h>
+
+#include "jsk_pcl_ros/pcl_util.h"
+
 namespace jsk_pcl_ros
 {
   class EnvironmentPlaneModeling: public pcl_ros::PCLNodelet
@@ -146,6 +151,10 @@ namespace jsk_pcl_ros
       pcl::PointXYZRGB& output);
     virtual void addIndices(const size_t start, const size_t end,
                             PCLIndicesMsg& output);
+    virtual void updateDiagnostic(
+      diagnostic_updater::DiagnosticStatusWrapper &stat);
+
+    
     boost::mutex mutex_;
 
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
@@ -170,6 +179,7 @@ namespace jsk_pcl_ros
     ros::Publisher occlusion_result_coefficients_pub_;
     ros::Publisher occlusion_result_pointcloud_pub_;
     ros::Publisher occlusion_result_indices_pub_;
+    ros::Publisher grid_map_array_pub_;
     // member variables to store the latest messages
     sensor_msgs::PointCloud2::ConstPtr latest_input_;
     ClusterPointIndices::ConstPtr latest_input_indices_;
@@ -191,9 +201,17 @@ namespace jsk_pcl_ros
     uint32_t environment_id_;
     double distance_thr_;
     double sampling_d_;
+    double resolution_size_;
     // parameters for occlusion
     double plane_distance_threshold_;
     double plane_angle_threshold_;
+    bool continuous_estimation_;
+    
+    
+    TimeAccumulator occlusion_estimate_time_acc_;
+    TimeAccumulator grid_building_time_acc_;
+    
+    boost::shared_ptr<diagnostic_updater::Updater> diagnostic_updater_;
   private:
   };
 }

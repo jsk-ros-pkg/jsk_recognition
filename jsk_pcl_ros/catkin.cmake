@@ -37,7 +37,11 @@ add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg
   BoundingBox.msg
   BoundingBoxArray.msg
   ColorHistogram.msg
-  ColorHistogramArray.msg)
+  ColorHistogramArray.msg
+  SparseOccupancyGridCell.msg
+  SparseOccupancyGridColumn.msg
+  SparseOccupancyGrid.msg
+  SparseOccupancyGridArray.msg)
 add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv SetPointCloud2.srv
   CallSnapIt.srv CallPolygon.srv
   EnvironmentLock.srv

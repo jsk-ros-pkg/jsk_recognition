@@ -36,6 +36,8 @@
 #include "jsk_pcl_ros/grid_map.h"
 #include <boost/make_shared.hpp>
 #include <Eigen/Core>
+#include "jsk_pcl_ros/geo_util.h"
+#include <eigen_conversions/eigen_msg.h>
 
 namespace jsk_pcl_ros
 {
@@ -50,7 +52,7 @@ namespace jsk_pcl_ros
       d_ = d_ / normal_.norm();
       normal_ = normal_ / normal_.norm();
     }
-    O = - d_ * normal_;
+    O_ = - d_ * normal_;
     // decide ex_ and ey_
     Eigen::Vector3f u(1, 0, 0);
     if (normal_ == u) {
@@ -67,14 +69,14 @@ namespace jsk_pcl_ros
 
   void GridMap::registerIndex(const int x, const int y)
   {
-    RowIterator it = data_.find(x);
+    ColumnIterator it = data_.find(x);
     if (it != data_.end()) {
       (it->second).insert(y);
     }
     else {
-      Column new_column;
-      new_column.insert(y);
-      data_[x] = new_column;
+      RowIndices new_row;
+      new_row.insert(y);
+      data_[x] = new_row;
     }
   }
   
@@ -112,8 +114,8 @@ namespace jsk_pcl_ros
 
   void GridMap::pointToIndex(const Eigen::Vector3f& p, GridIndex::Ptr index)
   {
-    index->x = (p - O).dot(ex_) / resolution_;
-    index->y = (p - O).dot(ey_) / resolution_;
+    index->x = (p - O_).dot(ex_) / resolution_;
+    index->y = (p - O_).dot(ey_) / resolution_;
   }
 
   void GridMap::gridToPoint(GridIndex::Ptr index, Eigen::Vector3f& pos)
@@ -123,12 +125,12 @@ namespace jsk_pcl_ros
 
   void GridMap::gridToPoint(const GridIndex& index, Eigen::Vector3f& pos)
   {
-    pos = resolution_ * (index.x * ex_ + index.y * ey_) + O;
+    pos = resolution_ * (index.x * ex_ + index.y * ey_) + O_;
   }
 
   void GridMap::gridToPoint2(const GridIndex& index, Eigen::Vector3f& pos)
   {
-    pos = resolution_ * ((index.x - 0.5) * ex_ + (index.y - 0.5) * ey_) + O;
+    pos = resolution_ * ((index.x - 0.5) * ex_ + (index.y - 0.5) * ey_) + O_;
   }
 
   
@@ -153,12 +155,12 @@ namespace jsk_pcl_ros
       }
     }
 
-    RowIterator it = data_.find(x);
+    ColumnIterator it = data_.find(x);
     if (it == data_.end()) {
       return false;
     }
     else {
-      Column c = it->second;
+      RowIndices c = it->second;
       if (c.find(y) == c.end()) {
         return false;
       }
@@ -222,6 +224,41 @@ namespace jsk_pcl_ros
       new_point.y = point[1];
       new_point.z = point[2];
       cloud->points.push_back(new_point);
+    }
+  }
+
+  void GridMap::originPose(Eigen::Affine3d& output)
+  {
+    Eigen::Matrix3d rot_mat;
+    rot_mat.col(0) = Eigen::Vector3d(ex_[0], ex_[1], ex_[2]);
+    rot_mat.col(1) = Eigen::Vector3d(ey_[0], ey_[1], ey_[2]);
+    rot_mat.col(2) = Eigen::Vector3d(normal_[0], normal_[1], normal_[2]);
+    output = Eigen::Translation3d(Eigen::Vector3d(O_[0], O_[1], O_[2])) * Eigen::Quaterniond(rot_mat);
+  }
+  
+  void GridMap::toMsg(SparseOccupancyGrid& grid)
+  {
+    grid.resolution = resolution_;
+    // compute origin POSE from O and normal_, d_
+    Eigen::Affine3d plane_pose;
+    originPose(plane_pose);
+    tf::poseEigenToMsg(plane_pose, grid.origin_pose);
+    for (ColumnIterator it = data_.begin();
+         it != data_.end();
+         it++) {
+      int column_index = it->first;
+      RowIndices row_indices = it->second;
+      SparseOccupancyGridColumn ros_column;
+      ros_column.column_index = column_index;
+      for (RowIterator rit = row_indices.begin();
+           rit != row_indices.end();
+           rit++) {
+        SparseOccupancyGridCell cell;
+        cell.row_index = *rit;
+        cell.value = 1.0;
+        ros_column.cells.push_back(cell);
+      }
+      grid.columns.push_back(ros_column);
     }
   }
   

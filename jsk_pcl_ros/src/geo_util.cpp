@@ -107,5 +107,6 @@ namespace jsk_pcl_ros
     double alpha = - p.dot(normal_);
     output = p + alpha * normal_;
   }
+
   
 }

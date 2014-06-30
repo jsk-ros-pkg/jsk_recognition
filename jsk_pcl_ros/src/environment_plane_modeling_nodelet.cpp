@@ -52,9 +52,7 @@ namespace jsk_pcl_ros
   {
     PCLNodelet::onInit();
     environment_id_ = 0;
-    distance_thr_ = 0.01;       // 1cm
-    sampling_d_ = 0.01;         // 1cm
-
+    
     // setup publisher
     debug_polygon_pub_
       = pnh_->advertise<geometry_msgs::PolygonStamped>("debug_polygon", 1);
@@ -122,6 +120,8 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock(mutex_);
     plane_distance_threshold_ = config.plane_distance_threshold;
     plane_angle_threshold_ = config.plane_angle_threshold;
+    distance_thr_ = config.distance_threshold;
+    sampling_d_ = config.resolution;
   }
 
   void EnvironmentPlaneModeling::updateAppendingInfo(
@@ -140,7 +140,6 @@ namespace jsk_pcl_ros
       result[env_plane_index].insert(static_plane_index);
     }
   }
-
     
   void EnvironmentPlaneModeling::extendConvexPolygon(
     const geometry_msgs::PolygonStamped& static_polygon,

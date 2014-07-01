@@ -14,7 +14,7 @@
   </include>
 
   <!-- camera_info and image relaying -->
-  <group ns="camera_remote">
+  <group ns="$(arg camera_remote)">
     <group ns="rgb">
       <node pkg="topic_tools"
 	    type="relay"

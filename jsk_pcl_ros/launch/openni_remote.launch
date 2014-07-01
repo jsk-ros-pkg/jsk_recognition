@@ -1,9 +1,9 @@
 <launch>
-  <arg name="camera" default="openni" />
+  <arg name="camera" default="camera" />
   <arg name="camera_remote" default="camera_remote" />
   <arg name="rgb_camera_info_url"   default="" />
   <arg name="depth_camera_info_url" default="" />
- 
+
   <include file="$(find openni_launch)/launch/openni.launch">
     <arg name="publish_tf" value="false" />
     <arg name="camera" value="$(arg camera_remote)" />

@@ -2,6 +2,9 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.9 (2014-07-01)
+------------------
+
 0.1.8 (2014-06-29)
 ------------------
 * maked configure_file to create imagesurf, imagestar and imagebrisk automatically

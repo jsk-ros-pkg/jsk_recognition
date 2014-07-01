@@ -2,6 +2,9 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.9 (2014-07-01)
+------------------
+
 0.1.8 (2014-06-29)
 ------------------
 * initialize _img_ptr at first

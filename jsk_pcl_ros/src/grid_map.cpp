@@ -58,8 +58,8 @@ namespace jsk_pcl_ros
     if (normal_ == u) {
       u[0] = 0; u[1] = 1; u[2] = 0;
     }
-    ey_ = normal_.cross(u);
-    ex_ = ey_.cross(normal_);
+    ey_ = normal_.cross(u).normalized();
+    ex_ = ey_.cross(normal_).normalized();
   }
   
   GridMap::~GridMap()
@@ -233,7 +233,8 @@ namespace jsk_pcl_ros
     rot_mat.col(0) = Eigen::Vector3d(ex_[0], ex_[1], ex_[2]);
     rot_mat.col(1) = Eigen::Vector3d(ey_[0], ey_[1], ey_[2]);
     rot_mat.col(2) = Eigen::Vector3d(normal_[0], normal_[1], normal_[2]);
-    output = Eigen::Translation3d(Eigen::Vector3d(O_[0], O_[1], O_[2])) * Eigen::Quaterniond(rot_mat);
+    output = Eigen::Translation3d(Eigen::Vector3d(O_[0], O_[1], O_[2]))
+      * Eigen::Quaterniond(rot_mat);
   }
   
   void GridMap::toMsg(SparseOccupancyGrid& grid)

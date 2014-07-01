@@ -33,25 +33,35 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_PCL_UTIL_H_
-#define JSK_PCL_ROS_PCL_UTIL_H_
+#ifndef JSK_PCL_ROS_GRID_SAMPLER_H_
+#define JSK_PCL_ROS_GRID_SAMPLER_H_
 
-#include <pcl/point_types.h>
+#include <pcl_ros/pcl_nodelet.h>
+#include <dynamic_reconfigure/server.h>
+#include <jsk_pcl_ros/ClusterPointIndices.h>
+#include <sensor_msgs/PointCloud2.h>
 
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/min.hpp>
-#include <boost/accumulators/statistics/max.hpp>
-#include <boost/accumulators/statistics/variance.hpp>
+#include <jsk_pcl_ros/GridSamplerConfig.h>
 
 namespace jsk_pcl_ros
 {
-  typedef boost::accumulators::accumulator_set<
-    double,
-    boost::accumulators::stats<boost::accumulators::tag::mean,
-                               boost::accumulators::tag::min,
-                               boost::accumulators::tag::max,
-                               boost::accumulators::tag::variance> > TimeAccumulator;
+  class GridSampler: public pcl_ros::PCLNodelet
+  {
+  public:
+    typedef jsk_pcl_ros::GridSamplerConfig Config;
+  protected:
+    virtual void onInit();
+    virtual void sample(const sensor_msgs::PointCloud2::ConstPtr& msg);
+    virtual void configCallback(Config &config, uint32_t level);
+    boost::mutex mutex_;
+    double grid_size_;
+    int min_indices_;
+    ros::Subscriber sub_;
+    ros::Publisher pub_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+  private:
+    
+  }; 
 }
 
 #endif

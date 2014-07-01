@@ -38,9 +38,20 @@
 
 #include <pcl/point_types.h>
 
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/min.hpp>
+#include <boost/accumulators/statistics/max.hpp>
+#include <boost/accumulators/statistics/variance.hpp>
+
 namespace jsk_pcl_ros
 {
-  
+  typedef boost::accumulators::accumulator_set<
+    double,
+    boost::accumulators::stats<boost::accumulators::tag::mean,
+                               boost::accumulators::tag::min,
+                               boost::accumulators::tag::max,
+                               boost::accumulators::tag::variance> > TimeAccumulator;
 }
 
 #endif

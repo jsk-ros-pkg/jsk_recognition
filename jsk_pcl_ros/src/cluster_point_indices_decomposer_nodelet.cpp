@@ -119,7 +119,16 @@ namespace jsk_pcl_ros
     double min_distance = DBL_MAX;
     int nearest_index = -1;
     for (size_t i = 0; i < coefficients->coefficients.size(); i++) {
-      Plane p(coefficients->coefficients[i].values);
+      geometry_msgs::PolygonStamped polygon_msg = planes->polygons[i];
+      std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> > vertices;
+      for (size_t j = 0; j < polygon_msg.polygon.points.size(); j++) {
+        Eigen::Vector3d v;
+        v[0] = polygon_msg.polygon.points[j].x;
+        v[1] = polygon_msg.polygon.points[j].y;
+        v[2] = polygon_msg.polygon.points[j].z;
+        vertices.push_back(v);
+      }
+      ConvexPolygon p(vertices, coefficients->coefficients[i].values);
       double distance = p.distanceToPoint(center);
       if (distance < min_distance) {
         min_distance = distance;

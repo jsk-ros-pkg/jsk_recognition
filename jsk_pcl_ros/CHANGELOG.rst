@@ -2,6 +2,13 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.9 (2014-07-01)
+------------------
+* publish the result of grid modeling as SparseOccupancyGridArray
+* compute segmented cloud's distance to polygon based on convex polygon assumption
+* add new parameter to dynamic_reconfigure of EnvironmentPlaneModeling
+* Contributors: Ryohei Ueda
+
 0.1.8 (2014-06-29)
 ------------------
 * add min_indices parameter to ignore the grid which does not include

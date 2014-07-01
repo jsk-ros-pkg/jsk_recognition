@@ -1,6 +1,6 @@
 <package>
   <name>jsk_pcl_ros</name>
-  <version>0.1.8</version>
+  <version>0.1.9</version>
   <description>jsk_pcl_ros</description>
   <maintainer email="youhei@jsk.t.u-tokyo.ac.jp">Youhei Kakiuchi</maintainer>
 
@@ -39,7 +39,8 @@
   <build_depend>cv_bridge</build_depend>
   <build_depend>ml_classifiers</build_depend>
   <build_depend>sklearn</build_depend>
-
+  <build_depend>diagnostic_updater</build_depend>
+  <build_depend>diagnostic_msgs</build_depend>
 
   <!-- <run_depend>pcl</run_depend> -->
   <run_depend>eigen_conversions</run_depend>
@@ -67,7 +68,9 @@
   <run_depend>cv_bridge</run_depend>
   <run_depend>ml_classifiers</run_depend>
   <run_depend>sklearn</run_depend>
-
+  <run_depend>diagnostic_updater</run_depend>
+  <run_depend>diagnostic_msgs</run_depend>
+  
   <export>
     <nodelet plugin="${prefix}/jsk_pcl_nodelets.xml"/>
     <cpp lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ljsk_pcl_ros" cflags="-I${prefix}/include"/>

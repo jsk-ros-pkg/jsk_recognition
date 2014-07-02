@@ -55,6 +55,7 @@ namespace jsk_pcl_ros
     virtual void configCallback(Config &config, uint32_t level);
     boost::mutex mutex_;
     double grid_size_;
+    int min_indices_;
     ros::Subscriber sub_;
     ros::Publisher pub_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;

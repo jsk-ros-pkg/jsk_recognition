@@ -4,7 +4,7 @@
   <arg name="LAUNCH_MANAGER" default="true" />
   <arg name="MANAGER" default="manager" />
   <arg name="ESTIMATE_OCCLUSION" default="false" />
-  <arg name="COLRO_HISTOGRAM" default="false" />
+  <arg name="COLOR_HISTOGRAM" default="false" />
   <arg name="HANDLE_ESTIMATOR" default="false" />
   <arg name="MACHINE" default="localhost"/>
   <arg name="GDB" default="false" />
@@ -46,6 +46,7 @@
     <remap from="~target" to="/multi_plane_estimate/output" />
     <rosparam>
       publish_clouds: false
+      publish_tf: false
     </rosparam>
   </node>
   <node pkg="nodelet" type="nodelet"
@@ -57,6 +58,7 @@
     <remap from="~target" to="/multi_plane_estimate/output_nonconnected" />
     <rosparam>
       publish_clouds: false
+      publish_tf: false
     </rosparam>
   </node>
 
@@ -87,7 +89,7 @@
         args="load jsk_pcl/ClusterPointIndicesDecomposer /$(arg MANAGER)"
         output="screen" clear_params="true">
     <remap from="~input" to="/plane_extraction/output" />
-    <remap from="~target" to="/euclidean_clustering/output" />
+    <remap from="~target" to="/euclidean_clustering/output_throttle" />
     <remap from="~align_planes" to="/multi_plane_estimate/output_polygon" />
     <remap from="~align_planes_coefficients"
            to="/multi_plane_estimate/output_coefficients" />
@@ -96,6 +98,13 @@
       use_pca: true
       publish_clouds: false
     </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        name="throttle_segmentation"
+        args="load jsk_topic_tools/LightweightThrottle /$(arg MANAGER)"
+        output="screen">
+    <remap from="~input" to="euclidean_clustering/output" />
+    <remap from="~output" to="euclidean_clustering/output_throttle" />
   </node>
   <node pkg="jsk_interactive_marker"
         type="bounding_box_marker"
@@ -161,6 +170,7 @@
       <remap from="~target" to="grid_sampler/output" />
       <rosparam>
         publish_clouds: false
+        publish_tf: false
       </rosparam>
     </node>
     <node pkg="nodelet" type="nodelet"

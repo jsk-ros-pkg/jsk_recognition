@@ -40,6 +40,7 @@
 #include <pcl/filters/project_inliers.h>
 #include <pcl/surface/convex_hull.h>
 #include <pcl/filters/project_inliers.h>
+#include <jsk_pcl_ros/SparseOccupancyGridArray.h>
 
 #include <pluginlib/class_list_macros.h>
 
@@ -52,9 +53,11 @@ namespace jsk_pcl_ros
   {
     PCLNodelet::onInit();
     environment_id_ = 0;
-    distance_thr_ = 0.01;       // 1cm
-    sampling_d_ = 0.01;         // 1cm
-
+    diagnostic_updater_.reset(new diagnostic_updater::Updater);
+    diagnostic_updater_->setHardwareID(getName());
+    diagnostic_updater_->add("Modeling Stats", boost::bind(&EnvironmentPlaneModeling::updateDiagnostic,
+                                                           this,
+                                                           _1));
     // setup publisher
     debug_polygon_pub_
       = pnh_->advertise<geometry_msgs::PolygonStamped>("debug_polygon", 1);
@@ -74,10 +77,14 @@ namespace jsk_pcl_ros
       = pnh_->advertise<sensor_msgs::PointCloud2>("occlusion_result_cloud", 1);
     occlusion_result_indices_pub_
       = pnh_->advertise<ClusterPointIndices>("occlusion_result_indices", 1);
+    grid_map_array_pub_ = pnh_->advertise<SparseOccupancyGridArray>("output_grid_map", 1);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&EnvironmentPlaneModeling::configCallback, this, _1, _2);
     srv_->setCallback (f);
+
+    pnh_->param("continuous_estimation", continuous_estimation_, false);
+    
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_indices_.subscribe(*pnh_, "indices", 1);
@@ -100,6 +107,41 @@ namespace jsk_pcl_ros
                                &EnvironmentPlaneModeling::polygonOnEnvironmentCallback, this);
   }
 
+  void EnvironmentPlaneModeling::updateDiagnostic(
+    diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    boost::mutex::scoped_lock(mutex_);
+    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "EnvironmentPlaneModeling running");
+    
+    stat.add("Time to estimate occlusion (Avg.)",
+             boost::accumulators::mean(occlusion_estimate_time_acc_));
+    stat.add("Time to estimate occlusion (Max)",
+             boost::accumulators::max(occlusion_estimate_time_acc_));
+    stat.add("Time to estimate occlusion (Min)",
+             boost::accumulators::min(occlusion_estimate_time_acc_));
+    stat.add("Time to estimate occlusion (Var.)",
+             boost::accumulators::variance(occlusion_estimate_time_acc_));
+
+    stat.add("Time to build grid (Avg.)",
+             boost::accumulators::mean(grid_building_time_acc_));
+    stat.add("Time to build grid (Max)",
+             boost::accumulators::max(grid_building_time_acc_));
+    stat.add("Time to build grid (Min)",
+             boost::accumulators::min(grid_building_time_acc_));
+    stat.add("Time to build grid (Var.)",
+             boost::accumulators::variance(grid_building_time_acc_));
+
+    stat.add("Time to build kdtree (Avg.)",
+             boost::accumulators::mean(kdtree_building_time_acc_));
+    stat.add("Time to build kdtree (Max)",
+             boost::accumulators::max(kdtree_building_time_acc_));
+    stat.add("Time to build kdtree (Min)",
+             boost::accumulators::min(kdtree_building_time_acc_));
+    stat.add("Time to build kdtree (Var.)",
+             boost::accumulators::variance(kdtree_building_time_acc_));
+    
+  }
+  
   void EnvironmentPlaneModeling::inputCallback(
     const sensor_msgs::PointCloud2::ConstPtr& input,
     const ClusterPointIndices::ConstPtr& input_indices,
@@ -108,13 +150,21 @@ namespace jsk_pcl_ros
     const PolygonArray::ConstPtr& static_polygons,
     const ModelCoefficientsArray::ConstPtr& static_coefficients)
   {
-    boost::mutex::scoped_lock(mutex_);
-    latest_input_ = input;
-    latest_input_indices_ = input_indices;
-    latest_input_polygons_ = polygons;
-    latest_input_coefficients_ = coefficients;
-    latest_static_polygons_ = static_polygons;
-    latest_static_coefficients_ = static_coefficients;
+    {
+      boost::mutex::scoped_lock(mutex_);
+      latest_input_ = input;
+      latest_input_indices_ = input_indices;
+      latest_input_polygons_ = polygons;
+      latest_input_coefficients_ = coefficients;
+      latest_static_polygons_ = static_polygons;
+      latest_static_coefficients_ = static_coefficients;
+    }
+    if (continuous_estimation_) {
+      EnvironmentLock::Request req;
+      EnvironmentLock::Response res;
+      lockCallback(req, res);
+    }
+    diagnostic_updater_->update();
   }
 
   void EnvironmentPlaneModeling::configCallback(Config &config, uint32_t level)
@@ -122,6 +172,9 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock(mutex_);
     plane_distance_threshold_ = config.plane_distance_threshold;
     plane_angle_threshold_ = config.plane_angle_threshold;
+    distance_thr_ = config.distance_threshold;
+    sampling_d_ = config.collision_check_sampling_d;
+    resolution_size_ = config.resolution_size;
   }
 
   void EnvironmentPlaneModeling::updateAppendingInfo(
@@ -140,7 +193,6 @@ namespace jsk_pcl_ros
       result[env_plane_index].insert(static_plane_index);
     }
   }
-
     
   void EnvironmentPlaneModeling::extendConvexPolygon(
     const geometry_msgs::PolygonStamped& static_polygon,
@@ -221,6 +273,21 @@ namespace jsk_pcl_ros
     output.z /= msg.polygon.points.size();
   }
 
+  void EnvironmentPlaneModeling::publishGridMap(
+    const std_msgs::Header& header,
+    const std::vector<GridMap::Ptr> grid_maps)
+  {
+    SparseOccupancyGridArray grid_array_msg;
+    grid_array_msg.header = header;
+    for (size_t i = 0; i < grid_maps.size(); i++) {
+      GridMap::Ptr grid_map = grid_maps[i];
+      SparseOccupancyGrid ros_grid_map;
+      ros_grid_map.header = header;
+      grid_map->toMsg(ros_grid_map);
+      grid_array_msg.grids.push_back(ros_grid_map);
+    }
+    grid_map_array_pub_.publish(grid_array_msg);
+  }
   
   void EnvironmentPlaneModeling::fillEstimatedRegionByPointCloud
   (const std_msgs::Header& header,
@@ -233,24 +300,23 @@ namespace jsk_pcl_ros
    const PolygonArray& result_polygons,
    const std::map<int, std::set<size_t> >& estimation_summary,
    pcl::PointCloud<PointT>::Ptr all_cloud,
-   ClusterPointIndices& all_indices)
+   ClusterPointIndices& all_indices,
+   std::vector<GridMap::Ptr> grid_maps)
   {
-    NODELET_INFO("%lu convexhull will be fulfilled", estimation_summary.size());
+    NODELET_DEBUG("%lu convexhull will be fulfilled", estimation_summary.size());
     typedef std::map<int, std::set<size_t> >::const_iterator Iterator;
     *all_cloud = *input;
     copyClusterPointIndices(indices, all_indices);
-    
     for (Iterator it = estimation_summary.begin();
          it != estimation_summary.end();
          it++)
     {
       int env_plane_index = it->first;
       std::set<size_t> static_polygon_indices = it->second;
-      NODELET_INFO("%d plane is appended by %lu planes", env_plane_index,
+      NODELET_DEBUG("%d plane is appended by %lu planes", env_plane_index,
                    static_polygon_indices.size());
       // 2cm
-      GridMap grid(0.01, coefficients->coefficients[env_plane_index].values);
-      grid.registerPointCloud(input);
+      GridMap::Ptr grid = grid_maps[env_plane_index];
       geometry_msgs::PolygonStamped convex_polygon
         = result_polygons.polygons[env_plane_index];
       for (size_t i = 0; i < convex_polygon.polygon.points.size() - 1; i++) {
@@ -259,7 +325,7 @@ namespace jsk_pcl_ros
         pcl::PointXYZRGB from_pcl, to_pcl;
         pcl_conversions::toPCL(from, from_pcl);
         pcl_conversions::toPCL(to, to_pcl);
-        grid.registerLine(from_pcl, to_pcl);
+        grid->registerLine(from_pcl, to_pcl);
       }
 
       std::vector<GridIndex::Ptr> filled_indices;
@@ -270,17 +336,17 @@ namespace jsk_pcl_ros
         size_t before_point_size = filled_indices.size();
         pcl::PointXYZRGB centroid;
         computePolygonCentroid(static_polygons->polygons[*it], centroid);
-        grid.fillRegion(centroid.getVector3fMap(), filled_indices);
-        NODELET_INFO("%lu static polygon merged into %d env polygon and %lu points is required to fill",
-                     *it, env_plane_index,
-                     filled_indices.size() - before_point_size);
+        grid->fillRegion(centroid.getVector3fMap(), filled_indices);
+        NODELET_DEBUG("%lu static polygon merged into %d env polygon and %lu points is required to fill",
+                      *it, env_plane_index,
+                      filled_indices.size() - before_point_size);
       }
       
-      NODELET_INFO("add %lu points into %d cluster",
+      NODELET_DEBUG("add %lu points into %d cluster",
                    filled_indices.size(),
                    env_plane_index);
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr new_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-      grid.indicesToPointCloud(filled_indices, new_cloud);
+      grid->indicesToPointCloud(filled_indices, new_cloud);
       size_t before_point_num = all_cloud->points.size();
       *all_cloud = *all_cloud + *new_cloud;
       // update
@@ -288,30 +354,62 @@ namespace jsk_pcl_ros
       addIndices(before_point_num, after_point_num, all_indices.cluster_indices[env_plane_index]);
     }
     // publish the result of concatenation
-     sensor_msgs::PointCloud2 ros_output;
-     toROSMsg(*all_cloud, ros_output);
-     ros_output.header = header;
-     occlusion_result_pointcloud_pub_.publish(ros_output);
-     occlusion_result_indices_pub_.publish(all_indices);
-     occlusion_result_polygons_pub_.publish(result_polygons);
-     occlusion_result_coefficients_pub_.publish(coefficients);
+    sensor_msgs::PointCloud2 ros_output;
+    toROSMsg(*all_cloud, ros_output);
+    ros_output.header = header;
+    occlusion_result_pointcloud_pub_.publish(ros_output);
+    occlusion_result_indices_pub_.publish(all_indices);
+    occlusion_result_polygons_pub_.publish(result_polygons);
+    occlusion_result_coefficients_pub_.publish(coefficients);
+  }
+
+  // build the grid map for each planes
+  void EnvironmentPlaneModeling::buildGridMap(
+    const std::vector<pcl::PointCloud<PointT>::Ptr>& segmented_clouds,
+    const PolygonArray::ConstPtr& polygons,
+    const ModelCoefficientsArray::ConstPtr& coefficients,
+    std::vector<GridMap::Ptr>& grid_maps)
+  {
+    ros::Time bot = ros::Time::now();
+    for (size_t i = 0; i < segmented_clouds.size(); i++) {
+      pcl::PointCloud<PointT>::Ptr cloud = segmented_clouds[i];
+      // we need to project the point clouds on to the plane
+      // because of the noise of the pointclouds.
+      pcl::ProjectInliers<PointT> proj;
+      proj.setModelType (pcl::SACMODEL_PLANE);
+      pcl::ModelCoefficients plane_coefficients;
+      plane_coefficients.values = coefficients->coefficients[i].values;
+      proj.setModelCoefficients (boost::make_shared<pcl::ModelCoefficients>(plane_coefficients));
+      pcl::PointCloud<PointT>::Ptr projected_cloud (new pcl::PointCloud<PointT>);
+      proj.setInputCloud(cloud);
+      proj.filter(*projected_cloud);
+      GridMap::Ptr grid(new GridMap(resolution_size_,
+                                    coefficients->coefficients[i].values));
+      grid->registerPointCloud(projected_cloud);
+      grid_maps.push_back(grid);
+    }
+    ros::Time eot = ros::Time::now();
+    grid_building_time_acc_((eot - bot).toSec());
   }
   
   void EnvironmentPlaneModeling::estimateOcclusion(
-      const sensor_msgs::PointCloud2::ConstPtr& input,
-      const ClusterPointIndices::ConstPtr& input_indices,
-      const PolygonArray::ConstPtr& polygons,
-      const ModelCoefficientsArray::ConstPtr& coefficients,
-      const PolygonArray::ConstPtr& static_polygons,
-      const ModelCoefficientsArray::ConstPtr& static_coefficients,
-      PolygonArray::Ptr result_polygons,
-      ModelCoefficientsArray::Ptr result_coefficients,
-      pcl::PointCloud<PointT>::Ptr result_pointcloud,
-      ClusterPointIndices::Ptr result_indices)
+    const pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
+    const ClusterPointIndices::ConstPtr& input_indices,
+    const std::vector<pcl::PointCloud<PointT>::Ptr>& segmented_cloud,
+    std::vector<GridMap::Ptr>& grid_maps,
+    const PolygonArray::ConstPtr& polygons,
+    const ModelCoefficientsArray::ConstPtr& coefficients,
+    const PolygonArray::ConstPtr& static_polygons,
+    const ModelCoefficientsArray::ConstPtr& static_coefficients,
+    PolygonArray::Ptr result_polygons,
+    ModelCoefficientsArray::Ptr result_coefficients,
+    pcl::PointCloud<PointT>::Ptr result_pointcloud,
+    ClusterPointIndices::Ptr result_indices)
   {
+    ros::Time bot = ros::Time::now();
     *result_polygons = *polygons;
     *result_coefficients = *coefficients;
-
+    
     std::map<int, std::set<size_t> > appending_map;
     for (size_t i = 0; i < static_polygons->polygons.size(); i++) {
       // looking for the nearest polygon from the static polygon
@@ -325,11 +423,11 @@ namespace jsk_pcl_ros
                                              static_coefficient);
       if (nearest_index != -1) {
         // merged into nearest_index
-        NODELET_INFO("merging %lu into %d", i, nearest_index);
+        NODELET_DEBUG("merging %lu into %d", i, nearest_index);
         geometry_msgs::PolygonStamped nearest_polygon
           = result_polygons->polygons[nearest_index];
         geometry_msgs::PolygonStamped new_polygon;
-
+        
         extendConvexPolygon(static_polygon,
                             coefficients->coefficients[nearest_index],
                             nearest_polygon,
@@ -343,10 +441,11 @@ namespace jsk_pcl_ros
     // publish result_polygons and result_coefficients
     occlusion_result_polygons_pub_.publish(result_polygons);
     occlusion_result_coefficients_pub_.publish(result_coefficients);
-    pcl::PointCloud<PointT>::Ptr pcl_cloud (new pcl::PointCloud<PointT>);
-    pcl::fromROSMsg(*processing_input_, *pcl_cloud);
+    // pcl::PointCloud<PointT>::Ptr pcl_cloud (new pcl::PointCloud<PointT>);
+    // pcl::fromROSMsg(*processing_input_, *pcl_cloud);
+    
     fillEstimatedRegionByPointCloud(processing_input_->header,
-                                    pcl_cloud,
+                                    input,
                                     input_indices,
                                     polygons,
                                     coefficients,
@@ -355,10 +454,32 @@ namespace jsk_pcl_ros
                                     *result_polygons,
                                     appending_map,
                                     result_pointcloud,
-                                    *result_indices);
+                                    *result_indices,
+                                    grid_maps);
+    ros::Time eot = ros::Time::now();
+    occlusion_estimate_time_acc_((bot - eot).toSec());
   }
 
-  
+  void EnvironmentPlaneModeling::decomposePointCloud(
+    const pcl::PointCloud<PointT>::Ptr& input,
+    const ClusterPointIndices::ConstPtr& input_indices,
+    std::vector<pcl::PointCloud<PointT>::Ptr>& output)
+  {
+    pcl::ExtractIndices<PointT> extract;
+    extract.setInputCloud(input);
+    for (size_t i = 0;
+         i < input_indices->cluster_indices.size();
+         i++) {
+      pcl::PointCloud<PointT>::Ptr segmented_cloud (new pcl::PointCloud<PointT>);
+      pcl::PointIndices::Ptr indices (new pcl::PointIndices);
+      pcl_conversions::toPCL(input_indices->cluster_indices[i],
+                             *indices);
+      extract.setIndices(indices);
+      extract.filter(*segmented_cloud);
+      output.push_back(segmented_cloud);
+    }
+  }
+    
   bool EnvironmentPlaneModeling::lockCallback(
     EnvironmentLock::Request& req,
     EnvironmentLock::Response& res)
@@ -377,7 +498,7 @@ namespace jsk_pcl_ros
     processing_static_polygons_ = latest_static_polygons_;
     processing_static_coefficients_ = latest_static_coefficients_;
     
-    NODELET_INFO("lock %lu pointclouds",
+    NODELET_DEBUG("lock %lu pointclouds",
                  processing_input_indices_->cluster_indices.size());
     if (processing_input_polygons_->polygons.size()
         != processing_input_coefficients_->coefficients.size()) {
@@ -393,14 +514,35 @@ namespace jsk_pcl_ros
         << "static model coefficients array is not same");
       return false;
     }
+
+    pcl::PointCloud<PointT>::Ptr pcl_cloud (new pcl::PointCloud<PointT>);
+    pcl::fromROSMsg(*processing_input_, *pcl_cloud);
     
-    NODELET_INFO("estimating occlusion first");
+    NODELET_DEBUG("estimating occlusion first");
+    // decompose pointcloud into segmented pointcloud
+    std::vector<pcl::PointCloud<PointT>::Ptr> segmented_clouds;
+    decomposePointCloud(
+      pcl_cloud,
+      processing_input_indices_,
+      segmented_clouds);
+    
+    // first, build grid map
+    std::vector<GridMap::Ptr> grid_maps;
+    buildGridMap(segmented_clouds,
+                 processing_input_polygons_,
+                 processing_input_coefficients_,
+                 grid_maps);
+    
+    
     PolygonArray::Ptr result_polygons (new PolygonArray);
     ModelCoefficientsArray::Ptr result_coefficients(new ModelCoefficientsArray);
     pcl::PointCloud<PointT>::Ptr result_pointcloud (new pcl::PointCloud<PointT>);
     ClusterPointIndices::Ptr result_indices(new ClusterPointIndices);
-    estimateOcclusion(processing_input_,
+
+    estimateOcclusion(pcl_cloud,
                       processing_input_indices_,
+                      segmented_clouds,
+                      grid_maps,
                       processing_input_polygons_,
                       processing_input_coefficients_,
                       processing_static_polygons_,
@@ -409,6 +551,9 @@ namespace jsk_pcl_ros
                       result_coefficients,
                       result_pointcloud,
                       result_indices);
+    publishGridMap(processing_input_->header, grid_maps);
+
+    ros::Time bot = ros::Time::now();
     // build kdtrees
     kdtrees_.clear();
     separated_point_cloud_.clear();
@@ -439,6 +584,10 @@ namespace jsk_pcl_ros
       separated_point_cloud_.push_back(kdtree_input);
     }
     res.environment_id = ++environment_id_;
+
+    ros::Time eot = ros::Time::now();
+    kdtree_building_time_acc_((bot - eot).toSec());
+    
     return true;
   }
 
@@ -448,7 +597,7 @@ namespace jsk_pcl_ros
   {
     geometry_msgs::PolygonStamped target_polygon
       = processing_input_polygons_->polygons[plane_i];
-    // debug information
+    // debug debugrmation
     debug_env_polygon_pub_.publish(target_polygon);
     sensor_msgs::PointCloud2 debug_env_pointcloud;
     toROSMsg(*separated_point_cloud_[plane_i], debug_env_pointcloud);
@@ -458,7 +607,7 @@ namespace jsk_pcl_ros
     // check collision
     // all the sampled points should near enough from target_polygon
     pcl::KdTreeFLANN<PointT>::Ptr target_kdtree = kdtrees_[plane_i];
-    // NODELET_INFO("checking %lu points", target_kdtree->getInputCloud()->points.size());
+    // NODELET_DEBUG("checking %lu points", target_kdtree->getInputCloud()->points.size());
     for (size_t i = 0; i < sampled_point_cloud->points.size(); i++) {
       PointT p = sampled_point_cloud->points[i];
       std::vector<int> k_indices;
@@ -539,7 +688,7 @@ namespace jsk_pcl_ros
       }
     }
     ros::Time after = ros::Time::now();
-    NODELET_INFO("kdtree took %f sec", (after - before).toSec());
+    NODELET_DEBUG("kdtree took %f sec", (after - before).toSec());
     if (found_contact_plane) {
       res.result = true;
       return true;
@@ -585,7 +734,7 @@ namespace jsk_pcl_ros
       //                       j / (double)sampling_num, dividing_point);
       //   output->points.push_back(dividing_point);
       // }
-      //NODELET_INFO("sampled %d points", sampling_num);
+      //NODELET_DEBUG("sampled %d points", sampling_num);
       geometry_msgs::Point32 point = sample_polygon.polygon.points[i];
       PointT pcl_point;
       pcl_conversions::toPCL(point, pcl_point);

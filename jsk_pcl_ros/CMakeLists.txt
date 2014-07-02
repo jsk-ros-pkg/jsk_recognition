@@ -108,7 +108,7 @@ jsk_pcl_nodelet(src/handle_estimator_nodelet.cpp
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
-  src/pcl_conversion_util.cpp
+  src/pcl_conversion_util.cpp src/pcl_util.cpp
 )
 rosbuild_add_openmp_flags(jsk_pcl_ros)
 

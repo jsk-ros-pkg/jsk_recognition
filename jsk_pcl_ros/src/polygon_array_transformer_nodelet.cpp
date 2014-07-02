@@ -80,7 +80,7 @@ namespace jsk_pcl_ros
     coefficient.values.push_back(b);
     coefficient.values.push_back(c);
     coefficient.values.push_back(d);
-
+    
   }
 
   void PolygonArrayTransformer::transformModelCoefficient(const Eigen::Affine3d& transform,
@@ -91,7 +91,7 @@ namespace jsk_pcl_ros
     n[0] = coefficient.values[0];
     n[1] = coefficient.values[1];
     n[2] = coefficient.values[2];
-    n[3] = 0;
+    n[3] = coefficient.values[3];
     Eigen::Matrix4d m = transform.matrix();
     Eigen::Vector4d n_d = m.transpose() * n;
     Eigen::Vector4d n_dd = n_d.normalized();
@@ -101,7 +101,11 @@ namespace jsk_pcl_ros
     result.values.push_back(n_dd[0]);
     result.values.push_back(n_dd[1]);
     result.values.push_back(n_dd[2]);
-    result.values.push_back(d_dd);
+    //result.values.push_back(d_dd);
+    result.values.push_back(n_dd[3]);
+    NODELET_INFO("[%f, %f, %f, %f] => [%f, %f, %f, %f]",
+                 coefficient.values[0], coefficient.values[1], coefficient.values[2], coefficient.values[3],
+                 result.values[0], result.values[1], result.values[2], result.values[3]);
   }
 
   void PolygonArrayTransformer::transformPolygon(const Eigen::Affine3d& transform,
@@ -176,8 +180,16 @@ namespace jsk_pcl_ros
         }
         else {
           transformPolygon(eigen_transform, polygon, transformed_polygon);
+          //computeCoefficients(transformed_polygon, transformed_coefficient);
+          transformModelCoefficient(eigen_transform, coefficient,
+                                    transformed_coefficient);
+          if (isnan(transformed_coefficient.values[0]) ||
+              isnan(transformed_coefficient.values[1]) ||
+              isnan(transformed_coefficient.values[2]) ||
+              isnan(transformed_coefficient.values[3])) {
+            continue;
+          }
           transformed_polygon_array.polygons.push_back(transformed_polygon);
-          computeCoefficients(transformed_polygon, transformed_coefficient);
           transformed_model_coefficients_array.coefficients.push_back(transformed_coefficient);
         }
       }

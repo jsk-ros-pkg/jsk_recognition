@@ -45,6 +45,7 @@
 #include <set>
 #include <Eigen/Geometry>
 
+#include "jsk_pcl_ros/geo_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -80,6 +81,8 @@ namespace jsk_pcl_ros
     // toMsg does not fill header, be carefull
     virtual void originPose(Eigen::Affine3d& output);
     virtual void toMsg(SparseOccupancyGrid& grid);
+    virtual Plane toPlane();
+    virtual std::vector<float> getCoefficients();
   protected:    
     double resolution_;
     Eigen::Vector3f O_;

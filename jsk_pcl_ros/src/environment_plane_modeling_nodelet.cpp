@@ -140,6 +140,15 @@ namespace jsk_pcl_ros
     stat.add("Time to build kdtree (Var.)",
              kdtree_building_time_acc_.variance());
     
+    stat.add("Time to check collision of polygons (Avg.)",
+             polygon_collision_check_time_acc_.mean());
+    stat.add("Time to check collision of polygons (Max)",
+             polygon_collision_check_time_acc_.max());
+    stat.add("Time to check collision of polygons (Min)",
+             polygon_collision_check_time_acc_.min());
+    stat.add("Time to check collision of polygons (Var.)",
+             polygon_collision_check_time_acc_.variance());
+    
   }
   
   void EnvironmentPlaneModeling::inputCallback(
@@ -662,8 +671,7 @@ namespace jsk_pcl_ros
                     environment_id_);
       return false;
     }
-    ros::Time before = ros::Time::now();
-    
+    ScopedTimer timer = polygon_collision_check_time_acc_.scopedTimer();
     pcl::PointCloud<PointT>::Ptr sampled_point_cloud (new pcl::PointCloud<PointT>());
     samplePolygonToPointCloud(req.polygon, sampled_point_cloud, sampling_d_);
 
@@ -682,8 +690,6 @@ namespace jsk_pcl_ros
         break;
       }
     }
-    ros::Time after = ros::Time::now();
-    NODELET_DEBUG("kdtree took %f sec", (after - before).toSec());
     if (found_contact_plane) {
       res.result = true;
       return true;

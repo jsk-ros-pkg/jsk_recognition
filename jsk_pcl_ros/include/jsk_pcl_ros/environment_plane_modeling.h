@@ -225,6 +225,7 @@ namespace jsk_pcl_ros
     TimeAccumulator occlusion_estimate_time_acc_;
     TimeAccumulator grid_building_time_acc_;
     TimeAccumulator kdtree_building_time_acc_;
+    TimeAccumulator polygon_collision_check_time_acc_;
     boost::shared_ptr<diagnostic_updater::Updater> diagnostic_updater_;
   private:
   };

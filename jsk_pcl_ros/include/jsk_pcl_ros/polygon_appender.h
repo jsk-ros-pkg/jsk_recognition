@@ -1,8 +1,8 @@
-// -*- mode: c++ -*-
+// -*- mode: C++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, JSK Lab
+ *  Copyright (c) 2013, Ryohei Ueda and JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,67 +33,45 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_STATIC_POLYGON_ARRAY_PUBLISHER_H_
-#define JSK_PCL_ROS_STATIC_POLYGON_ARRAY_PUBLISHER_H_
+#ifndef JSK_PCL_ROS_POLYGON_APPENDER_H_
+#define JSK_PCL_ROS_POLYGON_APPENDER_H_
 
-#include <ros/ros.h>
-#include <ros/names.h>
-#include <sensor_msgs/PointCloud2.h>
-
-#include <pcl_ros/pcl_nodelet.h>
 #include <jsk_pcl_ros/PolygonArray.h>
 #include <jsk_pcl_ros/ModelCoefficientsArray.h>
-
-#include <nodelet/nodelet.h>
-#include <topic_tools/shape_shifter.h>
+#include <pcl_ros/pcl_nodelet.h>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/approximate_time.h>
 
-#include <jsk_pcl_ros/Int32Stamped.h>
-#include <std_msgs/Header.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros
 {
-
-  class StaticPolygonArrayPublisher: public pcl_ros::PCLNodelet
+  class PolygonAppender: public pcl_ros::PCLNodelet
   {
   public:
-    typedef message_filters::sync_policies::ApproximateTime<
-    sensor_msgs::PointCloud2,
-    Int32Stamped > SyncPolicy;
-
+    typedef message_filters::sync_policies::ExactTime<
+    PolygonArray, ModelCoefficientsArray,
+    PolygonArray, ModelCoefficientsArray> SyncPolicy2;
+    
   protected:
-    ros::Publisher polygon_pub_, coefficients_pub_;
-    ros::Subscriber sub_;
-    jsk_pcl_ros::PolygonArray polygons_;
-    jsk_pcl_ros::ModelCoefficientsArray coefficients_;
-    ros::Timer periodic_timer_;
-    bool use_periodic_;
-    bool use_message_;
-    bool use_trigger_;
-    double periodic_rate_;      // in Hz
-    std::vector<std::string> frame_ids_;
-    ros::Timer timer_;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<Int32Stamped> sub_trigger_;
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     virtual void onInit();
-    virtual void inputCallback(const sensor_msgs::PointCloud2::ConstPtr& msg);
-    virtual void timerCallback(const ros::TimerEvent& event);
-    virtual void publishPolygon(const ros::Time& stamp);
-    virtual bool readPolygonArray(const std::string& param);
-    virtual bool readFrameIds(const std::string& param);
-    virtual double getXMLDoubleValue(XmlRpc::XmlRpcValue val);
-    virtual PCLModelCoefficientMsg polygonToModelCoefficients(const geometry_msgs::PolygonStamped& polygon);
-    virtual void triggerCallback(const sensor_msgs::PointCloud2::ConstPtr& input,
-                                 const Int32Stamped::ConstPtr& trigger);
+    virtual void appendAndPublish(
+      const std::vector<PolygonArray::ConstPtr>& arrays,
+      const std::vector<ModelCoefficientsArray::ConstPtr>& coefficients_array);
+    virtual void callback2(const PolygonArray::ConstPtr& msg0,
+                           const ModelCoefficientsArray::ConstPtr& coefficients0,
+                           const PolygonArray::ConstPtr& msg1,
+                           const ModelCoefficientsArray::ConstPtr& coefficients1);
+    
+    message_filters::Subscriber<PolygonArray> sub_polygon0_;
+    message_filters::Subscriber<PolygonArray> sub_polygon1_;
+    message_filters::Subscriber<ModelCoefficientsArray> sub_coefficients0_;
+    message_filters::Subscriber<ModelCoefficientsArray> sub_coefficients1_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy2> >sync_;
+    ros::Publisher pub_polygon_, pub_coefficients_;
   private:
   };
-
 }
 
-#endif
+#endif 

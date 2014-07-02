@@ -100,6 +100,8 @@ jsk_pcl_nodelet(src/environment_plane_modeling_nodelet.cpp
   "jsk_pcl/EnvironmentPlaneModeling" "environment_plane_modeling")
 jsk_pcl_nodelet(src/color_histogram_matcher_nodelet.cpp
   "jsk_pcl/ColorHistogramMatcher" "color_histogram_matcher")
+jsk_pcl_nodelet(src/polygon_appender_nodelet.cpp
+  "jsk_pcl/PolygonAppender" "polygon_appender")
 jsk_pcl_nodelet(src/grid_sampler_nodelet.cpp
   "jsk_pcl/GridSampler" "grid_sampler")
 jsk_pcl_nodelet(src/handle_estimator_nodelet.cpp

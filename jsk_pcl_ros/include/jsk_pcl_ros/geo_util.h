@@ -38,6 +38,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <Eigen/StdVector>
 
 #include <vector>
 
@@ -45,6 +46,34 @@
 
 namespace jsk_pcl_ros
 {
+  // (infinite) line
+  class Line
+  {
+  public:
+    typedef boost::shared_ptr<Line> Ptr;
+    Line(const Eigen::Vector3d& direction, const Eigen::Vector3d& origin);
+    virtual void getDirection(Eigen::Vector3d& output);
+    virtual double distanceToPoint(const Eigen::Vector3d& from);
+    virtual double distanceToPoint(const Eigen::Vector3d& from, Eigen::Vector3d& foot);
+    virtual void foot(const Eigen::Vector3d& point, Eigen::Vector3d& output);
+  protected:
+    Eigen::Vector3d direction_;
+    Eigen::Vector3d origin_;
+  private:
+  };
+
+  class Segment: public Line
+  {
+  public:
+    typedef boost::shared_ptr<Segment> Ptr;
+    Segment(const Eigen::Vector3d& from, const Eigen::Vector3d to);
+    virtual void foot(const Eigen::Vector3d& point, Eigen::Vector3d& output);
+    virtual double dividingRatio(const Eigen::Vector3d& point);
+  protected:
+    Eigen::Vector3d from_, to_;
+  private:
+  };
+
   class Plane
   {
   public:
@@ -64,12 +93,30 @@ namespace jsk_pcl_ros
     
     virtual double distance(const Plane& another);
     virtual double angle(const Plane& another);
-    virtual void project(const Eigen::Vector3d p, Eigen::Vector3d& output);
+    virtual void project(const Eigen::Vector3d& p, Eigen::Vector3d& output);
   protected:
     Eigen::Vector3d normal_;
     double d_;
   private:
   };
+
+  class ConvexPolygon: public Plane
+  {
+  public:
+    typedef boost::shared_ptr<ConvexPolygon> Ptr;
+    // vertices should be CW
+    ConvexPolygon(const std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> >& vertices);
+    ConvexPolygon(const std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> >& vertices,
+                  const std::vector<float>& coefficients);
+    //virtual Polygon flip();
+    virtual void project(const Eigen::Vector3d& p, Eigen::Vector3d& output);
+    // p should be a point on the plane
+    virtual bool isInside(const Eigen::Vector3d& p);
+  protected:
+    std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> > vertices_;
+  private:
+  };
+  
 }
 
 #endif

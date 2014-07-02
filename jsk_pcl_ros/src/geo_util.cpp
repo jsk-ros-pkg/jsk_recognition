@@ -34,9 +34,74 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/geo_util.h"
+#include <cfloat>
 
 namespace jsk_pcl_ros
 {
+  Line::Line(const Eigen::Vector3d& direction, const Eigen::Vector3d& origin)
+    : direction_ (direction.normalized()), origin_(origin)
+  {
+
+  }
+
+  void Line::getDirection(Eigen::Vector3d& output)
+  {
+    output = direction_;
+  }
+
+  void Line::foot(const Eigen::Vector3d& point, Eigen::Vector3d& output)
+  {
+    const double alpha = point.dot(direction_) - origin_.dot(direction_);
+    output = alpha * direction_ + origin_;
+  }
+
+  double Line::distanceToPoint(const Eigen::Vector3d& from, Eigen::Vector3d& foot_point)
+  {
+    foot(from, foot_point);
+    return (from - foot_point).norm();
+  }
+  
+  double Line::distanceToPoint(const Eigen::Vector3d& from)
+  {
+    Eigen::Vector3d foot_point;
+    return distanceToPoint(from, foot_point);
+  }
+
+  Segment::Segment(const Eigen::Vector3d& from, const Eigen::Vector3d to):
+    Line(from - to, from), from_(from), to_(to)
+  {
+    
+  }
+
+  double Segment::dividingRatio(const Eigen::Vector3d& point)
+  {
+    if (to_[0] != from_[0]) {
+      return (point[0] - from_[0]) / (to_[0] - from_[0]);
+    }
+    else if (to_[1] != from_[1]) {
+      return (point[1] - from_[1]) / (to_[1] - from_[1]);
+    }
+    else {
+      return (point[2] - from_[2]) / (to_[2] - from_[2]);
+    }
+  }
+  
+  void Segment::foot(const Eigen::Vector3d& from, Eigen::Vector3d& output)
+  {
+    Eigen::Vector3d foot_point;
+    Line::foot(from, foot_point);
+    double r = dividingRatio(foot_point);
+    if (r < 0.0) {
+      output = from_;
+    }
+    else if (r > 1.0) {
+      output = to_;
+    }
+    else {
+      output = foot_point;
+    }
+  }
+  
   Plane::Plane(const std::vector<float>& coefficients)
   {
     normal_ = Eigen::Vector3d(coefficients[0], coefficients[1], coefficients[2]);
@@ -102,10 +167,66 @@ namespace jsk_pcl_ros
     return acos(normal_.dot(another.normal_));
   }
 
-  void Plane::project(const Eigen::Vector3d p, Eigen::Vector3d& output)
+  void Plane::project(const Eigen::Vector3d& p, Eigen::Vector3d& output)
   {
     double alpha = - p.dot(normal_);
     output = p + alpha * normal_;
+  }
+
+  ConvexPolygon::ConvexPolygon(const std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> >& vertices,
+                               const std::vector<float>& coefficients):
+    Plane(coefficients), vertices_(vertices)
+  {
+
+  }
+    
+  
+  ConvexPolygon::ConvexPolygon(const std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> >& vertices):
+    Plane((vertices[1] - vertices[0]).cross(vertices[2] - vertices[0]), vertices[0]),
+    vertices_(vertices)
+  {
+
+  }
+
+  void ConvexPolygon::project(const Eigen::Vector3d& p, Eigen::Vector3d& output)
+  {
+    Eigen::Vector3d point_on_plane;
+    Plane::project(p, point_on_plane);
+    // check point_ is inside or not
+    if (isInside(point_on_plane)) {
+      output = point_on_plane;
+    }
+    else {
+      // find the minimum foot point
+      double min_distance = DBL_MAX;
+      Eigen::Vector3d min_point;
+      for (size_t i = 0; i < vertices_.size() - 1; i++) {
+        Segment seg(vertices_[i], vertices_[i + 1]);
+        Eigen::Vector3d foot;
+        double distance = seg.distanceToPoint(p, foot);
+        if (distance < min_distance) {
+          min_distance = distance;
+          min_point = foot;
+        }
+      }
+      output = min_point;
+    }
+  }
+
+  bool ConvexPolygon::isInside(const Eigen::Vector3d& p)
+  {
+    for (size_t i = 0; i < vertices_.size() - 1; i++) {
+      Eigen::Vector3d A = vertices_[i];
+      Eigen::Vector3d B = vertices_[i + 1];
+      Eigen::Vector3d direction = (B - A).normalized();
+      Eigen::Vector3d direction2 = (p - A).normalized();
+      if (direction.cross(direction2).dot(normal_) > 0) {
+        continue;
+      }
+      else {
+        return false;
+      }
+    }
   }
   
 }

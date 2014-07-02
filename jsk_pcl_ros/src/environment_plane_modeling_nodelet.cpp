@@ -114,31 +114,31 @@ namespace jsk_pcl_ros
     stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "EnvironmentPlaneModeling running");
     
     stat.add("Time to estimate occlusion (Avg.)",
-             boost::accumulators::mean(occlusion_estimate_time_acc_));
+             occlusion_estimate_time_acc_.mean());
     stat.add("Time to estimate occlusion (Max)",
-             boost::accumulators::max(occlusion_estimate_time_acc_));
+             occlusion_estimate_time_acc_.max());
     stat.add("Time to estimate occlusion (Min)",
-             boost::accumulators::min(occlusion_estimate_time_acc_));
+             occlusion_estimate_time_acc_.min());
     stat.add("Time to estimate occlusion (Var.)",
-             boost::accumulators::variance(occlusion_estimate_time_acc_));
+             occlusion_estimate_time_acc_.variance());
 
     stat.add("Time to build grid (Avg.)",
-             boost::accumulators::mean(grid_building_time_acc_));
+             grid_building_time_acc_.mean());
     stat.add("Time to build grid (Max)",
-             boost::accumulators::max(grid_building_time_acc_));
+             grid_building_time_acc_.max());
     stat.add("Time to build grid (Min)",
-             boost::accumulators::min(grid_building_time_acc_));
+             grid_building_time_acc_.min());
     stat.add("Time to build grid (Var.)",
-             boost::accumulators::variance(grid_building_time_acc_));
+             grid_building_time_acc_.variance());
 
     stat.add("Time to build kdtree (Avg.)",
-             boost::accumulators::mean(kdtree_building_time_acc_));
+             kdtree_building_time_acc_.mean());
     stat.add("Time to build kdtree (Max)",
-             boost::accumulators::max(kdtree_building_time_acc_));
+             kdtree_building_time_acc_.max());
     stat.add("Time to build kdtree (Min)",
-             boost::accumulators::min(kdtree_building_time_acc_));
+             kdtree_building_time_acc_.min());
     stat.add("Time to build kdtree (Var.)",
-             boost::accumulators::variance(kdtree_building_time_acc_));
+             kdtree_building_time_acc_.variance());
     
   }
   
@@ -370,7 +370,7 @@ namespace jsk_pcl_ros
     const ModelCoefficientsArray::ConstPtr& coefficients,
     std::vector<GridMap::Ptr>& grid_maps)
   {
-    ros::Time bot = ros::Time::now();
+    ScopedTimer timer = grid_building_time_acc_.scopedTimer();
     for (size_t i = 0; i < segmented_clouds.size(); i++) {
       pcl::PointCloud<PointT>::Ptr cloud = segmented_clouds[i];
       // we need to project the point clouds on to the plane
@@ -388,8 +388,6 @@ namespace jsk_pcl_ros
       grid->registerPointCloud(projected_cloud);
       grid_maps.push_back(grid);
     }
-    ros::Time eot = ros::Time::now();
-    grid_building_time_acc_((eot - bot).toSec());
   }
   
   void EnvironmentPlaneModeling::estimateOcclusion(
@@ -406,7 +404,7 @@ namespace jsk_pcl_ros
     pcl::PointCloud<PointT>::Ptr result_pointcloud,
     ClusterPointIndices::Ptr result_indices)
   {
-    ros::Time bot = ros::Time::now();
+    ScopedTimer timer = occlusion_estimate_time_acc_.scopedTimer();
     *result_polygons = *polygons;
     *result_coefficients = *coefficients;
     
@@ -456,8 +454,6 @@ namespace jsk_pcl_ros
                                     result_pointcloud,
                                     *result_indices,
                                     grid_maps);
-    ros::Time eot = ros::Time::now();
-    occlusion_estimate_time_acc_((bot - eot).toSec());
   }
 
   void EnvironmentPlaneModeling::decomposePointCloud(
@@ -553,41 +549,40 @@ namespace jsk_pcl_ros
                       result_indices);
     publishGridMap(processing_input_->header, grid_maps);
 
-    ros::Time bot = ros::Time::now();
-    // build kdtrees
-    kdtrees_.clear();
-    separated_point_cloud_.clear();
+    {
+      ScopedTimer timer = kdtree_building_time_acc_.scopedTimer();
+      // build kdtrees
+      kdtrees_.clear();
+      separated_point_cloud_.clear();
     
-    pcl::ExtractIndices<PointT> extract;
-    extract.setInputCloud(result_pointcloud);
-    for (size_t i = 0;
-         i < result_indices->cluster_indices.size();
-         i++) {
-      pcl::PointCloud<PointT>::Ptr nonprojected_input (new pcl::PointCloud<PointT>);
-      pcl::PointIndices::Ptr indices (new pcl::PointIndices);
-      pcl_conversions::toPCL(result_indices->cluster_indices[i],
-                             *indices);
-      extract.setIndices(indices);
-      extract.filter(*nonprojected_input);
-      // project `nonprojected_input' to the plane
-      pcl::PointCloud<PointT>::Ptr kdtree_input (new pcl::PointCloud<PointT>);
-      pcl::ProjectInliers<PointT> proj;
-      proj.setModelType (pcl::SACMODEL_PLANE);
-      pcl::ModelCoefficients::Ptr plane_coefficients (new pcl::ModelCoefficients);
-      plane_coefficients->values = processing_input_coefficients_->coefficients[i].values;
-      proj.setModelCoefficients(plane_coefficients);
-      proj.setInputCloud(nonprojected_input);
-      proj.filter(*kdtree_input);
-      pcl::KdTreeFLANN<PointT>::Ptr kdtree (new pcl::KdTreeFLANN<PointT>);
-      kdtree->setInputCloud(kdtree_input);
-      kdtrees_.push_back(kdtree);
-      separated_point_cloud_.push_back(kdtree_input);
-    }
-    res.environment_id = ++environment_id_;
+      pcl::ExtractIndices<PointT> extract;
+      extract.setInputCloud(result_pointcloud);
+      for (size_t i = 0;
+           i < result_indices->cluster_indices.size();
+           i++) {
+        pcl::PointCloud<PointT>::Ptr nonprojected_input (new pcl::PointCloud<PointT>);
+        pcl::PointIndices::Ptr indices (new pcl::PointIndices);
+        pcl_conversions::toPCL(result_indices->cluster_indices[i],
+                               *indices);
+        extract.setIndices(indices);
+        extract.filter(*nonprojected_input);
+        // project `nonprojected_input' to the plane
+        pcl::PointCloud<PointT>::Ptr kdtree_input (new pcl::PointCloud<PointT>);
+        pcl::ProjectInliers<PointT> proj;
+        proj.setModelType (pcl::SACMODEL_PLANE);
+        pcl::ModelCoefficients::Ptr plane_coefficients (new pcl::ModelCoefficients);
+        plane_coefficients->values = processing_input_coefficients_->coefficients[i].values;
+        proj.setModelCoefficients(plane_coefficients);
+        proj.setInputCloud(nonprojected_input);
+        proj.filter(*kdtree_input);
+        pcl::KdTreeFLANN<PointT>::Ptr kdtree (new pcl::KdTreeFLANN<PointT>);
+        kdtree->setInputCloud(kdtree_input);
+        kdtrees_.push_back(kdtree);
+        separated_point_cloud_.push_back(kdtree_input);
+      }
+      res.environment_id = ++environment_id_;
 
-    ros::Time eot = ros::Time::now();
-    kdtree_building_time_acc_((bot - eot).toSec());
-    
+    }    
     return true;
   }
 

@@ -163,9 +163,6 @@ add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/pcl_conversion_util.cpp src/pcl_util.cpp)
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
-add_executable(timer_test src/timer_test.cpp src/pcl_util.cpp)
-target_link_libraries(timer_test
-  ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES})
 
 generate_messages(DEPENDENCIES ${PCL_MSGS} sensor_msgs geometry_msgs)
 

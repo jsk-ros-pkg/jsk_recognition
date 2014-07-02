@@ -167,7 +167,6 @@ add_executable(timer_test src/timer_test.cpp src/pcl_util.cpp)
 target_link_libraries(timer_test
   ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES})
 
-
 generate_messages(DEPENDENCIES ${PCL_MSGS} sensor_msgs geometry_msgs)
 
 catkin_package(

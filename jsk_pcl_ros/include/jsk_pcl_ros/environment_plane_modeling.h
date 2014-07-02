@@ -54,6 +54,13 @@
 #include <jsk_pcl_ros/pcl_conversion_util.h>
 #include <jsk_pcl_ros/EnvironmentPlaneModelingConfig.h>
 
+#include <diagnostic_updater/diagnostic_updater.h>
+#include <diagnostic_updater/publisher.h>
+
+#include "jsk_pcl_ros/pcl_util.h"
+
+#include "jsk_pcl_ros/grid_map.h"
+
 namespace jsk_pcl_ros
 {
   class EnvironmentPlaneModeling: public pcl_ros::PCLNodelet
@@ -70,11 +77,11 @@ namespace jsk_pcl_ros
       ModelCoefficientsArray> SyncPolicy;
   protected:
     virtual void onInit();
-
-    
     virtual void estimateOcclusion(
-      const sensor_msgs::PointCloud2::ConstPtr& input,
+      const pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
       const ClusterPointIndices::ConstPtr& input_indices,
+      const std::vector<pcl::PointCloud<PointT>::Ptr>& segmented_cloud,
+      std::vector<GridMap::Ptr>& grid_maps,
       const PolygonArray::ConstPtr& polygons,
       const ModelCoefficientsArray::ConstPtr& coefficients,
       const PolygonArray::ConstPtr& static_polygons,
@@ -103,6 +110,11 @@ namespace jsk_pcl_ros
       const geometry_msgs::PolygonStamped sample_polygon,
       pcl::PointCloud<PointT>::Ptr output,
       double sampling_param);
+    
+    virtual void decomposePointCloud(
+      const pcl::PointCloud<PointT>::Ptr& input,
+      const ClusterPointIndices::ConstPtr& input_indices,
+      std::vector<pcl::PointCloud<PointT>::Ptr>& output);
     virtual void internalPointDivide(const PointT& A, const PointT& B,
                                      const double ratio,
                                      PointT& output);
@@ -115,8 +127,14 @@ namespace jsk_pcl_ros
     virtual void updateAppendingInfo(const int env_plane_index,
                                      const size_t static_plane_index,
                                      std::map<int, std::set<size_t> >& result);
-
-    
+    virtual void buildGridMap(
+      const std::vector<pcl::PointCloud<PointT>::Ptr>& segmented_clouds,
+      const PolygonArray::ConstPtr& polygons,
+      const ModelCoefficientsArray::ConstPtr& coefficients,
+      std::vector<GridMap::Ptr>& grid_maps);
+    virtual void publishGridMap(
+      const std_msgs::Header& header,
+      const std::vector<GridMap::Ptr> grid_maps);
     // find the nearest plane to static_polygon and static_coefficient
     // from polygons and coefficients
     virtual int findNearestPolygon(
@@ -136,7 +154,8 @@ namespace jsk_pcl_ros
      const PolygonArray& result_polygons,
      const std::map<int, std::set<size_t> >& estimation_summary,
      pcl::PointCloud<PointT>::Ptr all_cloud,
-     ClusterPointIndices& all_indices);
+     ClusterPointIndices& all_indices,
+     std::vector<GridMap::Ptr> grid_maps);
     
     virtual void copyClusterPointIndices
     (const ClusterPointIndices::ConstPtr& indices,
@@ -146,6 +165,10 @@ namespace jsk_pcl_ros
       pcl::PointXYZRGB& output);
     virtual void addIndices(const size_t start, const size_t end,
                             PCLIndicesMsg& output);
+    virtual void updateDiagnostic(
+      diagnostic_updater::DiagnosticStatusWrapper &stat);
+
+    
     boost::mutex mutex_;
 
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
@@ -170,6 +193,7 @@ namespace jsk_pcl_ros
     ros::Publisher occlusion_result_coefficients_pub_;
     ros::Publisher occlusion_result_pointcloud_pub_;
     ros::Publisher occlusion_result_indices_pub_;
+    ros::Publisher grid_map_array_pub_;
     // member variables to store the latest messages
     sensor_msgs::PointCloud2::ConstPtr latest_input_;
     ClusterPointIndices::ConstPtr latest_input_indices_;
@@ -191,9 +215,18 @@ namespace jsk_pcl_ros
     uint32_t environment_id_;
     double distance_thr_;
     double sampling_d_;
+    double resolution_size_;
     // parameters for occlusion
     double plane_distance_threshold_;
     double plane_angle_threshold_;
+    bool continuous_estimation_;
+    
+    
+    TimeAccumulator occlusion_estimate_time_acc_;
+    TimeAccumulator grid_building_time_acc_;
+    TimeAccumulator kdtree_building_time_acc_;
+    TimeAccumulator polygon_collision_check_time_acc_;
+    boost::shared_ptr<diagnostic_updater::Updater> diagnostic_updater_;
   private:
   };
 }

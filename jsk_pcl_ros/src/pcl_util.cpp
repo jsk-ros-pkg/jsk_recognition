@@ -33,57 +33,58 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_PCL_UTIL_H_
-#define JSK_PCL_ROS_PCL_UTIL_H_
-
-#include <pcl/point_types.h>
-#include <ros/time.h>
-
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/min.hpp>
-#include <boost/accumulators/statistics/max.hpp>
-#include <boost/accumulators/statistics/variance.hpp>
-
-#include <boost/timer.hpp>
+#include "jsk_pcl_ros/pcl_util.h"
 
 namespace jsk_pcl_ros
 {
-  class ScopedTimer;
-  
-  class TimeAccumulator
+  TimeAccumulator::TimeAccumulator()
   {
-  public:
-    typedef boost::accumulators::accumulator_set<
-    double,
-    boost::accumulators::stats<boost::accumulators::tag::mean,
-                               boost::accumulators::tag::min,
-                               boost::accumulators::tag::max,
-                               boost::accumulators::tag::variance> > Accumulator;
-    
-    TimeAccumulator();
-    virtual ~TimeAccumulator();
-    virtual ScopedTimer scopedTimer();
-    virtual void registerTime(double time);
-    virtual double mean();
-    virtual double min();
-    virtual double max();
-    virtual double variance();
-  protected:
-    Accumulator acc_;
-  };
 
-  class ScopedTimer
+  }
+
+  TimeAccumulator::~TimeAccumulator()
   {
-  public:
-    ScopedTimer(TimeAccumulator* parent);
-    virtual ~ScopedTimer();
-  protected:
-    TimeAccumulator* parent_;
-    ros::WallTime start_time_;
-  };
+
+  }
   
+  ScopedTimer TimeAccumulator::scopedTimer()
+  {
+    return ScopedTimer(this);
+  }
+
+  void TimeAccumulator::registerTime(double time)
+  {
+    acc_(time);
+  }
+
+  double TimeAccumulator::mean()
+  {
+    return boost::accumulators::mean(acc_);
+  }
+
+  double TimeAccumulator::min()
+  {
+    return boost::accumulators::min(acc_);
+  }
+
+  double TimeAccumulator::max()
+  {
+    return boost::accumulators::max(acc_);
+  }
+
+  double TimeAccumulator::variance()
+  {
+    return boost::accumulators::variance(acc_);
+  }
   
+  ScopedTimer::ScopedTimer(TimeAccumulator* parent):
+    parent_(parent), start_time_(ros::WallTime::now())
+  {
+  }
+
+  ScopedTimer::~ScopedTimer()
+  {
+    parent_->registerTime((ros::WallTime::now() - start_time_).toSec());
+  }
 }
 
-#endif

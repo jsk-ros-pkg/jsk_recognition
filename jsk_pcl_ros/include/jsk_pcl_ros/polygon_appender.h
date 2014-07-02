@@ -1,8 +1,8 @@
-// -*- mode: c++ -*-
+// -*- mode: C++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, JSK Lab
+ *  Copyright (c) 2013, Ryohei Ueda and JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,57 +33,45 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_PCL_UTIL_H_
-#define JSK_PCL_ROS_PCL_UTIL_H_
+#ifndef JSK_PCL_ROS_POLYGON_APPENDER_H_
+#define JSK_PCL_ROS_POLYGON_APPENDER_H_
 
-#include <pcl/point_types.h>
-#include <ros/time.h>
+#include <jsk_pcl_ros/PolygonArray.h>
+#include <jsk_pcl_ros/ModelCoefficientsArray.h>
+#include <pcl_ros/pcl_nodelet.h>
 
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/min.hpp>
-#include <boost/accumulators/statistics/max.hpp>
-#include <boost/accumulators/statistics/variance.hpp>
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
 
-#include <boost/timer.hpp>
 
 namespace jsk_pcl_ros
 {
-  class ScopedTimer;
-  
-  class TimeAccumulator
+  class PolygonAppender: public pcl_ros::PCLNodelet
   {
   public:
-    typedef boost::accumulators::accumulator_set<
-    double,
-    boost::accumulators::stats<boost::accumulators::tag::mean,
-                               boost::accumulators::tag::min,
-                               boost::accumulators::tag::max,
-                               boost::accumulators::tag::variance> > Accumulator;
+    typedef message_filters::sync_policies::ExactTime<
+    PolygonArray, ModelCoefficientsArray,
+    PolygonArray, ModelCoefficientsArray> SyncPolicy2;
     
-    TimeAccumulator();
-    virtual ~TimeAccumulator();
-    virtual ScopedTimer scopedTimer();
-    virtual void registerTime(double time);
-    virtual double mean();
-    virtual double min();
-    virtual double max();
-    virtual double variance();
   protected:
-    Accumulator acc_;
+    virtual void onInit();
+    virtual void appendAndPublish(
+      const std::vector<PolygonArray::ConstPtr>& arrays,
+      const std::vector<ModelCoefficientsArray::ConstPtr>& coefficients_array);
+    virtual void callback2(const PolygonArray::ConstPtr& msg0,
+                           const ModelCoefficientsArray::ConstPtr& coefficients0,
+                           const PolygonArray::ConstPtr& msg1,
+                           const ModelCoefficientsArray::ConstPtr& coefficients1);
+    
+    message_filters::Subscriber<PolygonArray> sub_polygon0_;
+    message_filters::Subscriber<PolygonArray> sub_polygon1_;
+    message_filters::Subscriber<ModelCoefficientsArray> sub_coefficients0_;
+    message_filters::Subscriber<ModelCoefficientsArray> sub_coefficients1_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy2> >sync_;
+    ros::Publisher pub_polygon_, pub_coefficients_;
+  private:
   };
-
-  class ScopedTimer
-  {
-  public:
-    ScopedTimer(TimeAccumulator* parent);
-    virtual ~ScopedTimer();
-  protected:
-    TimeAccumulator* parent_;
-    ros::WallTime start_time_;
-  };
-  
-  
 }
 
-#endif
+#endif 

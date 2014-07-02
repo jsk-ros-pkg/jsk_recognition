@@ -35,6 +35,8 @@
 #ifndef JSK_PCL_ROS_GRID_MAP_H_
 #define JSK_PCL_ROS_GRID_MAP_H_
 
+#include <jsk_pcl_ros/SparseOccupancyGrid.h>
+
 #include "jsk_pcl_ros/grid_index.h"
 #include "jsk_pcl_ros/grid_line.h"
 #include <pcl/point_types.h>
@@ -42,6 +44,7 @@
 #include <map>
 #include <set>
 #include <Eigen/Geometry>
+
 
 namespace jsk_pcl_ros
 {
@@ -51,6 +54,10 @@ namespace jsk_pcl_ros
   {
   public:
     typedef boost::shared_ptr<GridMap> Ptr;
+    typedef std::set<int> RowIndices;
+    typedef std::map<int, RowIndices> Columns;
+    typedef Columns::iterator ColumnIterator;
+    typedef std::set<int>::iterator RowIterator;
     GridMap(double resolution, const std::vector<float>& coefficients);
     virtual ~GridMap();
     virtual void registerPoint(const pcl::PointXYZRGB& point);
@@ -70,13 +77,12 @@ namespace jsk_pcl_ros
     virtual void gridToPoint2(const GridIndex& index, Eigen::Vector3f& pos);
     virtual void fillRegion(const Eigen::Vector3f& start, std::vector<GridIndex::Ptr>& output);
     virtual void fillRegion(const GridIndex::Ptr start, std::vector<GridIndex::Ptr>& output);
+    // toMsg does not fill header, be carefull
+    virtual void originPose(Eigen::Affine3d& output);
+    virtual void toMsg(SparseOccupancyGrid& grid);
   protected:    
-    typedef std::map<int, std::set<int> > Row;
-    typedef Row::iterator RowIterator;
-    typedef std::set<int> Column;
-    typedef Column::iterator ColumnIterator;
     double resolution_;
-    Eigen::Vector3f O;
+    Eigen::Vector3f O_;
     
     // plane parameter
     Eigen::Vector3f normal_;
@@ -85,7 +91,7 @@ namespace jsk_pcl_ros
     Eigen::Vector3f ex_, ey_;
     
     std::vector<GridLine::Ptr> lines_;
-    std::map<int, std::set<int> > data_;
+    Columns data_;
   private:
   };
   

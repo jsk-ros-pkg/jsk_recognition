@@ -185,6 +185,35 @@ namespace jsk_pcl_ros
     output = p + alpha * normal_;
   }
 
+  Plane Plane::transform(const Eigen::Affine3d& transform)
+  {
+    Eigen::Vector4d n;
+    n[0] = normal_[0];
+    n[1] = normal_[1];
+    n[2] = normal_[2];
+    n[3] = d_;
+    Eigen::Matrix4d m = transform.matrix();
+    Eigen::Vector4d n_d = m.transpose() * n;
+    Eigen::Vector4d n_dd = n_d.normalized();
+    
+    return Plane(Eigen::Vector3d(n_dd[0], n_dd[1], n_dd[2]), n_dd[3]);
+  }
+  
+  std::vector<float> Plane::toCoefficients()
+  {
+    std::vector<float> ret;
+    toCoefficients(ret);
+    return ret;
+  }
+
+  void Plane::toCoefficients(std::vector<float>& output)
+  {
+    output.push_back(normal_[0]);
+    output.push_back(normal_[1]);
+    output.push_back(normal_[2]);
+    output.push_back(d_);
+  }
+
   ConvexPolygon::ConvexPolygon(const std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> >& vertices,
                                const std::vector<float>& coefficients):
     Plane(coefficients), vertices_(vertices)

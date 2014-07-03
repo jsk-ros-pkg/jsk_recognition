@@ -94,6 +94,10 @@ namespace jsk_pcl_ros
     virtual double distance(const Plane& another);
     virtual double angle(const Plane& another);
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3d& output);
+
+    virtual Plane transform(const Eigen::Affine3d& transform);
+    virtual void toCoefficients(std::vector<float>& output);
+    virtual std::vector<float> toCoefficients();
   protected:
     Eigen::Vector3d normal_;
     double d_;

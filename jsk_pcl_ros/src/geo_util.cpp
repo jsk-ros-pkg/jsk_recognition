@@ -164,7 +164,19 @@ namespace jsk_pcl_ros
 
   double Plane::angle(const Plane& another)
   {
-    return acos(normal_.dot(another.normal_));
+    double dot = normal_.dot(another.normal_);
+    if (dot > 1.0) {
+      dot = 1.0;
+    }
+    else if (dot < -1.0) {
+      dot = -1.0;
+    }
+    double theta = acos(dot);
+    if (theta > M_PI / 2.0) {
+      return M_PI - theta;
+    }
+
+    return acos(dot);
   }
 
   void Plane::project(const Eigen::Vector3d& p, Eigen::Vector3d& output)

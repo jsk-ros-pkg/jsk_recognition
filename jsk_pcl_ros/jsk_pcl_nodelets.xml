@@ -1,4 +1,8 @@
 <library path="lib/libjsk_pcl_ros">
+  <class name="jsk_pcl/PolygonAppender" type="PolygonAppender"
+         base_class_type="nodelet::Nodelet">
+    <description>append jsk_pcl_ros/PolygonArray </description>
+  </class>
   <class name="jsk_pcl/HandleEstimator" type="HandleEstimator"
          base_class_type="nodelet::Nodelet">
     <description>estimate handle from pointcloud</description>

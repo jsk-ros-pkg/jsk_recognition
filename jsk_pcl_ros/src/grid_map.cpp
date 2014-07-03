@@ -42,7 +42,7 @@
 namespace jsk_pcl_ros
 {
   GridMap::GridMap(double resolution, const std::vector<float>& coefficients):
-    resolution_(resolution)
+    resolution_(resolution), vote_(0)
   {
     normal_[0] = coefficients[0];
     normal_[1] = coefficients[1];
@@ -276,6 +276,25 @@ namespace jsk_pcl_ros
     output.push_back(normal_[2]);
     output.push_back(d_);
     return output;
+  }
+
+  void GridMap::vote()
+  {
+    ++vote_;
+  }
+
+  unsigned int GridMap::getVoteNum()
+  {
+    return vote_;
+  }
+
+  void GridMap::setGeneration(unsigned int generation) {
+    generation_ = generation;
+  }
+
+  unsigned int GridMap::getGeneration()
+  {
+    return generation_;
   }
   
 }

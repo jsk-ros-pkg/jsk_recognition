@@ -53,12 +53,14 @@ namespace jsk_pcl_ros
   {
     PCLNodelet::onInit();
     environment_id_ = 0;
+    generation_ = 0;
     diagnostic_updater_.reset(new diagnostic_updater::Updater);
     diagnostic_updater_->setHardwareID(getName());
     diagnostic_updater_->add("Modeling Stats", boost::bind(&EnvironmentPlaneModeling::updateDiagnostic,
                                                            this,
                                                            _1));
     pnh_->param("history_accumulation", history_accumulation_, false);
+    pnh_->param("history_statical_rejection", history_statical_rejection_, false);
     // setup publisher
     debug_polygon_pub_
       = pnh_->advertise<geometry_msgs::PolygonStamped>("debug_polygon", 1);
@@ -193,6 +195,8 @@ namespace jsk_pcl_ros
     }
     grid_map_angle_threshold_ = config.grid_map_angle_threshold;
     grid_map_distance_threshold_ = config.grid_map_distance_threshold;
+    required_vote_ = config.required_vote;
+    static_generation_ = config.static_generation;
   }
 
   void EnvironmentPlaneModeling::updateAppendingInfo(
@@ -411,6 +415,7 @@ namespace jsk_pcl_ros
       if (grid_map_index == -1) {
         GridMap::Ptr grid(new GridMap(resolution_size_,
                                       coefficients->coefficients[i].values));
+        grid->setGeneration(generation_);
         grid->registerPointCloud(projected_cloud);
         registerGridMap(grid);
         ordered_grid_maps.push_back(grid);
@@ -418,6 +423,7 @@ namespace jsk_pcl_ros
       else {
         GridMap::Ptr grid = grid_maps_[grid_map_index];
         grid->registerPointCloud(projected_cloud);
+        grid->vote();
         ordered_grid_maps.push_back(grid);
       }
       
@@ -543,6 +549,7 @@ namespace jsk_pcl_ros
     EnvironmentLock::Request& req,
     EnvironmentLock::Response& res)
   {
+    ++generation_;
     boost::mutex::scoped_lock(mutex_);
     
     if (!latest_input_) {
@@ -590,6 +597,9 @@ namespace jsk_pcl_ros
     if (!history_accumulation_) { 
       grid_maps_.clear();
     }
+    
+    selectionGridMaps();
+    
     std::vector<GridMap::Ptr> ordered_grid_maps;  
     // first, build grid map
     buildGridMap(segmented_clouds,
@@ -660,7 +670,8 @@ namespace jsk_pcl_ros
                           coefficients[0] << ", " <<
                           coefficients[1] << ", " <<
                           coefficients[2] << ", " <<
-                          coefficients[3]);
+                          coefficients[3] <<
+                          " ( " << grid->getVoteNum() << ")");
     }
     return true;
   }
@@ -696,6 +707,28 @@ namespace jsk_pcl_ros
     return true;
   }
 
+  void EnvironmentPlaneModeling::selectionGridMaps()
+  {
+        // clean up too minor grids
+    if (history_statical_rejection_) {
+      for (std::vector<GridMap::Ptr>::iterator it = grid_maps_.begin();
+           it != grid_maps_.end();) {
+        GridMap::Ptr map = *it;
+        if ((generation_ - map->getGeneration()) > static_generation_) {
+          if (map->getVoteNum() < required_vote_) { // minimum 5
+            it = grid_maps_.erase(it);
+          }
+          else {
+            it++;
+          }
+        }
+        else {
+          it++;
+        }
+      }
+    }
+  }
+  
   int EnvironmentPlaneModeling::findNearestPolygon(
     const PolygonArray::ConstPtr& polygons,
     const ModelCoefficientsArray::ConstPtr& coefficients,

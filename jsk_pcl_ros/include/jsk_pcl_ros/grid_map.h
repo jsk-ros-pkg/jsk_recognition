@@ -82,6 +82,10 @@ namespace jsk_pcl_ros
     virtual void originPose(Eigen::Affine3d& output);
     virtual void toMsg(SparseOccupancyGrid& grid);
     virtual Plane toPlane();
+    virtual void vote();
+    virtual unsigned int getVoteNum();
+    virtual void setGeneration(unsigned int generation);
+    virtual unsigned int getGeneration();
     virtual std::vector<float> getCoefficients();
   protected:    
     double resolution_;
@@ -95,6 +99,8 @@ namespace jsk_pcl_ros
     
     std::vector<GridLine::Ptr> lines_;
     Columns data_;
+    unsigned int vote_;
+    unsigned int generation_;
   private:
   };
   

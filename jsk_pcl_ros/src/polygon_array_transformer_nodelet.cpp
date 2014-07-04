@@ -93,9 +93,9 @@ namespace jsk_pcl_ros
     result.header.stamp = coefficient.header.stamp;
     result.header.frame_id = frame_id_;
     transformed_plane.toCoefficients(result.values);
-    NODELET_INFO("[%f, %f, %f, %f] => [%f, %f, %f, %f]",
-                 coefficient.values[0], coefficient.values[1], coefficient.values[2], coefficient.values[3],
-                 result.values[0], result.values[1], result.values[2], result.values[3]);
+    NODELET_DEBUG("[%f, %f, %f, %f] => [%f, %f, %f, %f]",
+                  coefficient.values[0], coefficient.values[1], coefficient.values[2], coefficient.values[3],
+                  result.values[0], result.values[1], result.values[2], result.values[3]);
   }
 
   void PolygonArrayTransformer::transformPolygon(const Eigen::Affine3d& transform,

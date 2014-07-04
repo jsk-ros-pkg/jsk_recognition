@@ -64,7 +64,7 @@ namespace pcl_conversions
                geometry_msgs::Point32& msg);
   void fromPCL(const pcl::PointXYZ& p,
                geometry_msgs::Point32& msg);
-
+  
 }
 
 #endif

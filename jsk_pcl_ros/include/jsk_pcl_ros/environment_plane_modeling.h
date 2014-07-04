@@ -169,7 +169,8 @@ namespace jsk_pcl_ros
       diagnostic_updater::DiagnosticStatusWrapper &stat);
     // for historical_accumulation_
     virtual int findCorrespondGridMap(
-      const std::vector<float>& coefficients);
+      const std::vector<float>& coefficients,
+      const geometry_msgs::Polygon& polygon);
     virtual void registerGridMap(const GridMap::Ptr new_grid_map);
     virtual void selectionGridMaps();
     

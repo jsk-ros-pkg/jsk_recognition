@@ -41,17 +41,10 @@ namespace jsk_pcl_ros
   void StaticPolygonArrayPublisher::onInit()
   {
     PCLNodelet::onInit();
-
-    if(!pnh_->getParam("use_periodic", use_periodic_)) {
-      use_periodic_ = false;
-    }
-    if (!pnh_->getParam("use_message", use_message_)) {
-      use_message_ = false;
-    }
-
-    if (!pnh_->getParam("periodic_rate", periodic_rate_)) {
-      periodic_rate_ = 10.0;    // 10fps
-    }
+    pnh_->param("use_periodic", use_periodic_, false);
+    pnh_->param("use_message", use_message_, false);
+    pnh_->param("use_trigger", use_trigger_, false);
+    pnh_->param("periodic_rate", periodic_rate_, 10.0);
     
     bool frame_id_read_p = readFrameIds("frame_ids");
     if (!frame_id_read_p) {
@@ -77,8 +70,8 @@ namespace jsk_pcl_ros
       }
     }
     
-    if (!use_periodic_ && !use_message_) {
-      NODELET_FATAL("~use_preiodic nor ~use_message is not true");
+    if (!use_periodic_ && !use_message_ && !use_trigger_) {
+      NODELET_FATAL("~use_preiodic, ~use_trigger nor ~use_message is not true");
       return;
     }
 
@@ -92,8 +85,25 @@ namespace jsk_pcl_ros
     if (use_message_) {
       sub_ = pnh_->subscribe("input", 1, &StaticPolygonArrayPublisher::inputCallback, this);
     }
+    if (use_trigger_) {
+      sub_input_.subscribe(*pnh_, "input", 1);
+      sub_trigger_.subscribe(*pnh_, "trigger", 1);
+      sync_
+        = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+      sync_->connectInput(sub_input_, sub_trigger_);
+      sync_->registerCallback(boost::bind(
+                                &StaticPolygonArrayPublisher::triggerCallback,
+                                this, _1, _2));
+    }
   }
 
+  void StaticPolygonArrayPublisher::triggerCallback(
+    const sensor_msgs::PointCloud2::ConstPtr& input,
+    const Int32Stamped::ConstPtr& trigger)
+  {
+    publishPolygon(input->header.stamp);
+  }
+  
   PCLModelCoefficientMsg StaticPolygonArrayPublisher::polygonToModelCoefficients(const geometry_msgs::PolygonStamped& polygon)
   {
     Eigen::Vector3d A, B, C;

@@ -42,7 +42,7 @@
 namespace jsk_pcl_ros
 {
   GridMap::GridMap(double resolution, const std::vector<float>& coefficients):
-    resolution_(resolution)
+    resolution_(resolution), vote_(0)
   {
     normal_[0] = coefficients[0];
     normal_[1] = coefficients[1];
@@ -50,7 +50,7 @@ namespace jsk_pcl_ros
     d_ = coefficients[3];
     if (normal_.norm() != 1.0) {
       d_ = d_ / normal_.norm();
-      normal_ = normal_ / normal_.norm();
+      normal_.normalize();
     }
     O_ = - d_ * normal_;
     // decide ex_ and ey_
@@ -261,6 +261,40 @@ namespace jsk_pcl_ros
       }
       grid.columns.push_back(ros_column);
     }
+  }
+
+  Plane GridMap::toPlane()
+  {
+    return Plane(Eigen::Vector3d(normal_[0], normal_[1], normal_[2]), d_);
+  }
+
+  std::vector<float> GridMap::getCoefficients()
+  {
+    std::vector<float> output;
+    output.push_back(normal_[0]);
+    output.push_back(normal_[1]);
+    output.push_back(normal_[2]);
+    output.push_back(d_);
+    return output;
+  }
+
+  void GridMap::vote()
+  {
+    ++vote_;
+  }
+
+  unsigned int GridMap::getVoteNum()
+  {
+    return vote_;
+  }
+
+  void GridMap::setGeneration(unsigned int generation) {
+    generation_ = generation;
+  }
+
+  unsigned int GridMap::getGeneration()
+  {
+    return generation_;
   }
   
 }

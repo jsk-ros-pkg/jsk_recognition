@@ -167,7 +167,12 @@ namespace jsk_pcl_ros
                             PCLIndicesMsg& output);
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
-
+    // for historical_accumulation_
+    virtual int findCorrespondGridMap(
+      const std::vector<float>& coefficients,
+      const geometry_msgs::Polygon& polygon);
+    virtual void registerGridMap(const GridMap::Ptr new_grid_map);
+    virtual void selectionGridMaps();
     
     boost::mutex mutex_;
 
@@ -219,14 +224,21 @@ namespace jsk_pcl_ros
     // parameters for occlusion
     double plane_distance_threshold_;
     double plane_angle_threshold_;
+    // grid map
+    double grid_map_distance_threshold_;
+    double grid_map_angle_threshold_;
     bool continuous_estimation_;
-    
-    
+    bool history_accumulation_;
+    bool history_statical_rejection_;
+    int static_generation_;
+    int required_vote_;
+    std::vector<GridMap::Ptr> grid_maps_;
     TimeAccumulator occlusion_estimate_time_acc_;
     TimeAccumulator grid_building_time_acc_;
     TimeAccumulator kdtree_building_time_acc_;
     TimeAccumulator polygon_collision_check_time_acc_;
     boost::shared_ptr<diagnostic_updater::Updater> diagnostic_updater_;
+    int generation_;
   private:
   };
 }

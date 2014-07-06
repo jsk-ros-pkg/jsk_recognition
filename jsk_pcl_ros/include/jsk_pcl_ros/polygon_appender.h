@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, JSK Lab
+ *  Copyright (c) 2013, Ryohei Ueda and JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,56 +33,45 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_OCLUDED_PLANE_ESTIMATOR_H_
-#define JSK_PCL_ROS_OCLUDED_PLANE_ESTIMATOR_H_
-
-// ros
-#include <ros/ros.h>
-#include <ros/names.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <message_filters/subscriber.h>
-#include <message_filters/time_synchronizer.h>
-#include <message_filters/synchronizer.h>
-#include <dynamic_reconfigure/server.h>
-
-// pcl
-#include <pcl_ros/pcl_nodelet.h>
-#include <pcl/point_types.h>
+#ifndef JSK_PCL_ROS_POLYGON_APPENDER_H_
+#define JSK_PCL_ROS_POLYGON_APPENDER_H_
 
 #include <jsk_pcl_ros/PolygonArray.h>
 #include <jsk_pcl_ros/ModelCoefficientsArray.h>
-#include <jsk_pcl_ros/OcludedPlaneEstimatorConfig.h>
+#include <pcl_ros/pcl_nodelet.h>
+
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
+
 
 namespace jsk_pcl_ros
 {
-  class OcludedPlaneEstimator: public pcl_ros::PCLNodelet
+  class PolygonAppender: public pcl_ros::PCLNodelet
   {
   public:
-    typedef message_filters::sync_policies::ExactTime< jsk_pcl_ros::PolygonArray,
-                                                       jsk_pcl_ros::ModelCoefficientsArray,
-                                                       jsk_pcl_ros::PolygonArray,
-                                                       jsk_pcl_ros::ModelCoefficientsArray> SyncPolicy;
-    typedef jsk_pcl_ros::OcludedPlaneEstimatorConfig Config;
+    typedef message_filters::sync_policies::ExactTime<
+    PolygonArray, ModelCoefficientsArray,
+    PolygonArray, ModelCoefficientsArray> SyncPolicy2;
+    
   protected:
-    boost::mutex mutex_;
     virtual void onInit();
-    virtual void estimate(const jsk_pcl_ros::PolygonArray::ConstPtr& polygons,
-                          const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients,
-                          const jsk_pcl_ros::PolygonArray::ConstPtr& static_polygons,
-                          const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& static_coefficients);
-    message_filters::Subscriber<jsk_pcl_ros::PolygonArray> sub_polygons_;
-    message_filters::Subscriber<jsk_pcl_ros::PolygonArray> sub_static_polygons_;
-    message_filters::Subscriber<jsk_pcl_ros::ModelCoefficientsArray> sub_coefficients_;
-    message_filters::Subscriber<jsk_pcl_ros::ModelCoefficientsArray> sub_static_coefficients_;
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
-    ros::Publisher polygon_pub_, coefficient_pub_;
-    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
-    virtual void configCallback(Config &config, uint32_t level);
-    double plane_distance_threshold_;
-    double plane_angle_threshold_;
+    virtual void appendAndPublish(
+      const std::vector<PolygonArray::ConstPtr>& arrays,
+      const std::vector<ModelCoefficientsArray::ConstPtr>& coefficients_array);
+    virtual void callback2(const PolygonArray::ConstPtr& msg0,
+                           const ModelCoefficientsArray::ConstPtr& coefficients0,
+                           const PolygonArray::ConstPtr& msg1,
+                           const ModelCoefficientsArray::ConstPtr& coefficients1);
+    
+    message_filters::Subscriber<PolygonArray> sub_polygon0_;
+    message_filters::Subscriber<PolygonArray> sub_polygon1_;
+    message_filters::Subscriber<ModelCoefficientsArray> sub_coefficients0_;
+    message_filters::Subscriber<ModelCoefficientsArray> sub_coefficients1_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy2> >sync_;
+    ros::Publisher pub_polygon_, pub_coefficients_;
   private:
   };
-  
 }
 
-#endif
+#endif 

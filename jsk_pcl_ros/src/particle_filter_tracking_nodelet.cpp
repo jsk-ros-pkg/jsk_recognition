@@ -201,6 +201,7 @@ namespace jsk_pcl_ros
         sensor_msgs::PointCloud2 particle_pointcloud2;
         pcl::toROSMsg(*particle_cloud, particle_pointcloud2);
         particle_pointcloud2.header.frame_id = frame_id_;
+        particle_pointcloud2.header.stamp = stamp_;
         particle_publisher_.publish(particle_pointcloud2);
       }
   }
@@ -216,10 +217,8 @@ namespace jsk_pcl_ros
     tf::transformEigenToTF((Eigen::Affine3d) transformation, tfTransformation);
 
     static tf::TransformBroadcaster tfBroadcaster;
-    tfBroadcaster.sendTransform(tf::StampedTransform(tfTransformation, ros::Time::now(), frame_id_, "tracker_result"));
+    tfBroadcaster.sendTransform(tf::StampedTransform(tfTransformation, stamp_, frame_id_, "tracker_result"));
 
-    //move close to camera a little for better visualization
-    transformation.translation () += Eigen::Vector3f (0.0f, 0.0f, -0.005f);
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr result_cloud (new pcl::PointCloud<pcl::PointXYZRGBA> ());
     pcl::transformPointCloud<pcl::PointXYZRGBA> (*(tracker_->getReferenceCloud ()), *result_cloud, transformation);
 
@@ -227,6 +226,7 @@ namespace jsk_pcl_ros
     sensor_msgs::PointCloud2 result_pointcloud2;
     pcl::toROSMsg(*result_cloud, result_pointcloud2);
     result_pointcloud2.header.frame_id = frame_id_;
+    result_pointcloud2.header.stamp = stamp_;
     track_result_publisher_.publish(result_pointcloud2);
   }
 
@@ -263,6 +263,7 @@ namespace jsk_pcl_ros
     if(track_target_set_){
       pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGBA>());
       frame_id_ = pc.header.frame_id;
+      stamp_ = pc.header.stamp;
       std::vector<int> indices;
       pcl::fromROSMsg(pc, *cloud);
       cloud->is_dense = false;

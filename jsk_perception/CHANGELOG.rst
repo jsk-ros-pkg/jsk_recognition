@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.10 (2014-07-07)
+-------------------
 * adding oriented_gradient_node
 * add calc_flow program to calc optical flow
 * Contributors: Hiroaki Yaguchi, Ryohei Ueda

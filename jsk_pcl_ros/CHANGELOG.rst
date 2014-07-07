@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.10 (2014-07-07)
+-------------------
 * compute distance based on Polygon-to-ConvexCentroid in order to identify
   the grid maps
 * remove debug code in PolygonArrayTransformer

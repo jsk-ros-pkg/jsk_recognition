@@ -403,7 +403,9 @@ namespace jsk_pcl_ros
       pcl::PointCloud<PointT>::Ptr cloud = segmented_clouds[i];
       // we need to project the point clouds on to the plane
       // because of the noise of the pointclouds.
-      int grid_map_index = findCorrespondGridMap(coefficients->coefficients[i].values);
+      int grid_map_index = findCorrespondGridMap(
+        coefficients->coefficients[i].values,
+        polygons->polygons[i].polygon);
       pcl::ProjectInliers<PointT> proj;
       proj.setModelType (pcl::SACMODEL_PLANE);
       pcl::ModelCoefficients plane_coefficients;
@@ -517,9 +519,19 @@ namespace jsk_pcl_ros
   }
 
   int EnvironmentPlaneModeling::findCorrespondGridMap(
-    const std::vector<float>& coefficients)
+    const std::vector<float>& coefficients,
+    const geometry_msgs::Polygon& polygon)
   {
-    Plane new_grid_map(coefficients);
+    ConvexPolygon::Vertices vertices;
+    for (size_t i = 0; i < polygon.points.size(); i++) {
+      Eigen::Vector3d v(polygon.points[i].x,
+                        polygon.points[i].y,
+                        polygon.points[i].z);
+      vertices.push_back(v);
+    }
+    //Plane new_grid_map(coefficients);
+    ConvexPolygon new_grid_map(vertices, coefficients);
+    Eigen::Vector3d c = new_grid_map.getCentroid();
     int min_index = -1;
     double min_distance = DBL_MAX;
     for (size_t i = 0; i < grid_maps_.size(); i++) {
@@ -527,11 +539,13 @@ namespace jsk_pcl_ros
       double angle = grid_plane.angle(new_grid_map);
       std::vector<float> grid_coefficients = grid_maps_[i]->getCoefficients();
       NODELET_INFO("comparing [%f, %f, %f, %f] and [%f, %f, %f, %f]",
-                    coefficients[0], coefficients[1], coefficients[2], coefficients[3],
-                    grid_coefficients[0], grid_coefficients[1], grid_coefficients[2], grid_coefficients[3]);
+                   coefficients[0], coefficients[1], coefficients[2], coefficients[3],
+                   grid_coefficients[0], grid_coefficients[1], grid_coefficients[2], grid_coefficients[3]);
+      NODELET_INFO("centroid: [%f, %f, %f]",
+                   c[0], c[1], c[2]);
       NODELET_INFO_STREAM("  angle: " << angle);
       if (angle < grid_map_angle_threshold_) {
-        double distance = grid_plane.distance(new_grid_map);
+        double distance = grid_plane.distanceToPoint(c);
         NODELET_INFO_STREAM("  distance: " << distance);
         if (distance < grid_map_distance_threshold_) {
           if (min_distance > distance) {

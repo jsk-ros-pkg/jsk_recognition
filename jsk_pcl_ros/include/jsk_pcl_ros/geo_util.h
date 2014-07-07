@@ -85,7 +85,7 @@ namespace jsk_pcl_ros
     virtual Plane flip();
     
     virtual bool isSameDirection(const Plane& another);
-    
+    virtual bool isSameDirection(const Eigen::Vector3d& another_normal);
     virtual double signedDistanceToPoint(const Eigen::Vector4f p);
     virtual double distanceToPoint(const Eigen::Vector4f p);
     virtual double signedDistanceToPoint(const Eigen::Vector3d p);
@@ -94,6 +94,10 @@ namespace jsk_pcl_ros
     virtual double distance(const Plane& another);
     virtual double angle(const Plane& another);
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3d& output);
+    virtual Eigen::Vector3d getNormal();
+    virtual Plane transform(const Eigen::Affine3d& transform);
+    virtual void toCoefficients(std::vector<float>& output);
+    virtual std::vector<float> toCoefficients();
   protected:
     Eigen::Vector3d normal_;
     double d_;
@@ -104,16 +108,21 @@ namespace jsk_pcl_ros
   {
   public:
     typedef boost::shared_ptr<ConvexPolygon> Ptr;
+    typedef std::vector<Eigen::Vector3d,
+                        Eigen::aligned_allocator<Eigen::Vector3d> > Vertices;
     // vertices should be CW
-    ConvexPolygon(const std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> >& vertices);
-    ConvexPolygon(const std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> >& vertices,
+    ConvexPolygon(const Vertices& vertices);
+    ConvexPolygon(const Vertices& vertices,
                   const std::vector<float>& coefficients);
     //virtual Polygon flip();
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3d& output);
+    virtual void projectOnPlane(const Eigen::Vector3d& p, Eigen::Vector3d& output);
     // p should be a point on the plane
     virtual bool isInside(const Eigen::Vector3d& p);
+    virtual ConvexPolygon flipConvex();
+    virtual Eigen::Vector3d getCentroid();
   protected:
-    std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> > vertices_;
+    Vertices vertices_;
   private:
   };
   

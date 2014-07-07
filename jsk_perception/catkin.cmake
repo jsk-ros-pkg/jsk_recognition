@@ -22,7 +22,7 @@ generate_messages(
 
 catkin_package(
   CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs message_runtime jsk_pcl_ros
-  DEPENDS
+  DEPENDS pcl OpenCV
   INCLUDE_DIRS include
   LIBRARIES
 )
@@ -34,6 +34,7 @@ add_executable(point_pose_extractor src/point_pose_extractor.cpp)
 add_executable(white_balance_converter src/white_balance_converter.cpp)
 add_executable(hough_lines src/hough_lines.cpp)
 add_executable(rectangle_detector src/rectangle_detector.cpp)
+add_executable(calc_flow src/calc_flow.cpp)
 add_library(oriented_gradient src/oriented_gradient.cpp)
 add_executable(oriented_gradient_node src/oriented_gradient_node.cpp)
 
@@ -72,6 +73,7 @@ target_link_libraries(edge_detector            ${catkin_LIBRARIES} ${OpenCV_LIBR
 target_link_libraries(white_balance_converter  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 target_link_libraries(hough_lines              ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 target_link_libraries(rectangle_detector       ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(calc_flow                ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 target_link_libraries(oriented_gradient_node   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} oriented_gradient)
 
 add_dependencies(camshiftdemo             ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
@@ -87,7 +89,7 @@ add_dependencies(rectangle_detector       ${PROJECT_NAME}_gencfg ${PROJECT_NAME}
 #  COMMAND ${PROJECT_SOURCE_DIR}/src/eusmodel_template_gen.sh)
 #add_custom_target(eusmodel_template ALL DEPENDS ${PROJECT_SOURCE_DIR}/template)
 
-install(TARGETS camshiftdemo virtual_camera_mono point_pose_extractor white_balance_converter hough_lines rectangle_detector ${PROJECT_NAME}
+install(TARGETS camshiftdemo virtual_camera_mono point_pose_extractor white_balance_converter hough_lines rectangle_detector calc_flow ${PROJECT_NAME}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

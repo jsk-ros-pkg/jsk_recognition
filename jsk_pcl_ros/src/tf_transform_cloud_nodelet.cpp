@@ -36,7 +36,7 @@
 #include "jsk_pcl_ros/tf_transform_cloud.h"
 #include <pluginlib/class_list_macros.h>
 
-
+#include <tf2_ros/buffer_client.h>
 #include <pcl/common/centroid.h>
 
 namespace jsk_pcl_ros
@@ -44,8 +44,16 @@ namespace jsk_pcl_ros
   void TfTransformCloud::transform(const sensor_msgs::PointCloud2ConstPtr &input)
   {
     sensor_msgs::PointCloud2 output;
-    pcl_ros::transformPointCloud(target_frame_id_, *input, output, tf_listener_);
-    pub_cloud_.publish(output);
+    try
+    {
+      if (pcl_ros::transformPointCloud(target_frame_id_, *input, output, tf_listener_)) {
+        pub_cloud_.publish(output);
+      }
+    }
+    catch (tf2::ConnectivityException &e)
+    {
+      NODELET_ERROR("Transform error: %s", e.what());
+    }
   }
 
   void TfTransformCloud::onInit(void)

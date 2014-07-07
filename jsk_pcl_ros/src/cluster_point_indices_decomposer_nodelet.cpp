@@ -39,7 +39,14 @@
 #include <pcl/common/centroid.h>
 #include <pcl/common/common.h>
 #include <boost/format.hpp>
-#include <visualization_msgs/MarkerArray.h>
+#include <pcl/registration/ia_ransac.h>
+#include <pcl/filters/project_inliers.h>
+#include <pcl/common/pca.h>
+
+#include <Eigen/Geometry> 
+
+#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_pcl_ros/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -59,22 +66,38 @@ namespace jsk_pcl_ros
     colors_.push_back(makeColor(0.0, 1.0, 1.0, 1.0));
     colors_.push_back(makeColor(1.0, 1.0, 1.0, 1.0));
 
-    marker_num_ = 0;
     pnh_.reset (new ros::NodeHandle (getPrivateNodeHandle ()));
-    marker_pub_ = pnh_->advertise<visualization_msgs::MarkerArray>("marker", 1);
     pc_pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("debug_output", 1);
+    box_pub_ = pnh_->advertise<jsk_pcl_ros::BoundingBoxArray>("boxes", 1);
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_target_.subscribe(*pnh_, "target", 1);
-    if (!pnh_->getParam("tf_prefix_", tf_prefix_))
+
+    pnh_->param("publish_tf", publish_tf_, true);
+    if (!pnh_->getParam("tf_prefix", tf_prefix_))
     {
-      ROS_WARN("~tf_prefix_ is not specified, using %s", getName().c_str());
+      if (publish_tf_) {
+        ROS_WARN("~tf_prefix is not specified, using %s", getName().c_str());
+      }
       tf_prefix_ = getName();
     }
 
-    //sync_ = boost::make_shared<message_filters::TimeSynchronizer<sensor_msgs::PointCloud2, jsk_pcl_ros::ClusterPointIndices> >(input_sub, target_sub, 100);
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-    sync_->connectInput(sub_input_, sub_target_);
-    sync_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2));
+    pnh_->param("publish_clouds", publish_clouds_, true);
+    
+    pnh_->param("align_boxes", align_boxes_, false);
+    pnh_->param("use_pca", use_pca_, false);
+    
+    if (align_boxes_) {
+      sync_align_ = boost::make_shared<message_filters::Synchronizer<SyncAlignPolicy> >(100);
+      sub_polygons_.subscribe(*pnh_, "align_planes", 1);
+      sub_coefficients_.subscribe(*pnh_, "align_planes_coefficients", 1);
+      sync_align_->connectInput(sub_input_, sub_target_, sub_polygons_, sub_coefficients_);
+      sync_align_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2, _3, _4));
+    }
+    else {
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+      sync_->connectInput(sub_input_, sub_target_);
+      sync_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2));
+    }
   }
   
   void ClusterPointIndicesDecomposer::sortIndicesOrder
@@ -89,11 +112,161 @@ namespace jsk_pcl_ros
     }
   }
   
+  int ClusterPointIndicesDecomposer::findNearestPlane(const Eigen::Vector4f& center,
+                                                      const jsk_pcl_ros::PolygonArrayConstPtr& planes,
+                                                      const jsk_pcl_ros::ModelCoefficientsArrayConstPtr& coefficients)
+  {
+    double min_distance = DBL_MAX;
+    int nearest_index = -1;
+    for (size_t i = 0; i < coefficients->coefficients.size(); i++) {
+      geometry_msgs::PolygonStamped polygon_msg = planes->polygons[i];
+      std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> > vertices;
+      for (size_t j = 0; j < polygon_msg.polygon.points.size(); j++) {
+        Eigen::Vector3d v;
+        v[0] = polygon_msg.polygon.points[j].x;
+        v[1] = polygon_msg.polygon.points[j].y;
+        v[2] = polygon_msg.polygon.points[j].z;
+        vertices.push_back(v);
+      }
+      ConvexPolygon p(vertices, coefficients->coefficients[i].values);
+      double distance = p.distanceToPoint(center);
+      if (distance < min_distance) {
+        min_distance = distance;
+        nearest_index = i;
+      }
+    }
+    return nearest_index;
+  }
+
+  void ClusterPointIndicesDecomposer::computeBoundingBox
+  (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
+   const std_msgs::Header header,
+   const Eigen::Vector4f center,
+   const jsk_pcl_ros::PolygonArrayConstPtr& planes,
+   const jsk_pcl_ros::ModelCoefficientsArrayConstPtr& coefficients,
+   jsk_pcl_ros::BoundingBox& bounding_box)
+  {
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr
+      segmented_cloud_transformed (new pcl::PointCloud<pcl::PointXYZRGB>);
+    // align boxes if possible
+    Eigen::Matrix4f m4 = Eigen::Matrix4f::Identity();
+    Eigen::Quaternionf q = Eigen::Quaternionf::Identity();
+    if (align_boxes_) {
+      int nearest_plane_index = findNearestPlane(center, planes, coefficients);
+      if (nearest_plane_index == -1) {
+        segmented_cloud_transformed = segmented_cloud;
+        NODELET_ERROR("no planes to align boxes are given");
+      }
+      else {
+        Eigen::Vector3f normal, z_axis;
+        normal[0] = coefficients->coefficients[nearest_plane_index].values[0];
+        normal[1] = coefficients->coefficients[nearest_plane_index].values[1];
+        normal[2] = coefficients->coefficients[nearest_plane_index].values[2];
+        normal = normal.normalized();
+        z_axis[0] = 0; z_axis[1] = 0; z_axis[2] = 1;
+        Eigen::Vector3f rotation_axis = z_axis.cross(normal).normalized();
+        double theta = acos(z_axis.dot(normal));
+        if (isnan(theta)) {
+          segmented_cloud_transformed = segmented_cloud;
+          NODELET_ERROR("cannot compute angle to align the point cloud: [%f, %f, %f], [%f, %f, %f]",
+                        z_axis[0], z_axis[1], z_axis[2],
+                        normal[0], normal[1], normal[2]);
+        }
+        else {
+          Eigen::Matrix3f m = Eigen::Matrix3f::Identity();
+          m = m * Eigen::AngleAxisf(theta, rotation_axis);
+
+          if (use_pca_) {
+            // first project points to the plane
+            pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud
+              (new pcl::PointCloud<pcl::PointXYZRGB>);
+            pcl::ProjectInliers<pcl::PointXYZRGB> proj;
+            proj.setModelType (pcl::SACMODEL_PLANE);
+            pcl::ModelCoefficients::Ptr
+              plane_coefficients (new pcl::ModelCoefficients);
+            plane_coefficients->values
+              = coefficients->coefficients[nearest_plane_index].values;
+            proj.setModelCoefficients(plane_coefficients);
+            proj.setInputCloud(segmented_cloud);
+            proj.filter(*projected_cloud);
+
+            pcl::PCA<pcl::PointXYZRGB> pca;
+            pca.setInputCloud(projected_cloud);
+            Eigen::Matrix3f eigen = pca.getEigenVectors();
+            m.col(0) = eigen.col(0);
+            m.col(1) = eigen.col(1);
+            // flip axis to satisfy right-handed system
+            if (m.col(0).cross(m.col(1)).dot(m.col(2)) < 0) {
+              m.col(0) = - m.col(0);
+            }
+          }
+            
+          // m4 <- m
+          for (size_t row = 0; row < 3; row++) {
+            for (size_t column = 0; column < 3; column++) {
+              m4(row, column) = m(row, column);
+            }
+          }
+          q = m;
+          Eigen::Matrix4f inv_m = m4.inverse();
+          pcl::transformPointCloud(*segmented_cloud, *segmented_cloud_transformed, inv_m);
+        }
+      }
+    }
+    else {
+      segmented_cloud_transformed = segmented_cloud;
+    }
+      
+    // create a bounding box
+    Eigen::Vector4f minpt, maxpt;
+    pcl::getMinMax3D<pcl::PointXYZRGB>(*segmented_cloud_transformed, minpt, maxpt);
+
+    double xwidth = maxpt[0] - minpt[0];
+    double ywidth = maxpt[1] - minpt[1];
+    double zwidth = maxpt[2] - minpt[2];
+
+    Eigen::Vector4f center2((maxpt[0] + minpt[0]) / 2.0, (maxpt[1] + minpt[1]) / 2.0, (maxpt[2] + minpt[2]) / 2.0, 1.0);
+    Eigen::Vector4f center_transformed = m4 * center2;
+      
+    bounding_box.header = header;
+      
+    bounding_box.pose.position.x = center_transformed[0];
+    bounding_box.pose.position.y = center_transformed[1];
+    bounding_box.pose.position.z = center_transformed[2];
+    bounding_box.pose.orientation.x = q.x();
+    bounding_box.pose.orientation.y = q.y();
+    bounding_box.pose.orientation.z = q.z();
+    bounding_box.pose.orientation.w = q.w();
+    bounding_box.dimensions.x = xwidth;
+    bounding_box.dimensions.y = ywidth;
+    bounding_box.dimensions.z = zwidth;
+  }
+
+  void ClusterPointIndicesDecomposer::addToDebugPointCloud
+  (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
+   size_t i,
+   pcl::PointCloud<pcl::PointXYZRGB>& debug_output)
+  {
+    uint32_t rgb = colorRGBAToUInt32(colors_[i % colors_.size()]);
+    for (size_t j = 0; j < segmented_cloud->points.size(); j++) {
+      pcl::PointXYZRGB p;
+      p.x= segmented_cloud->points[j].x;
+      p.y= segmented_cloud->points[j].y;
+      p.z= segmented_cloud->points[j].z;
+      p.rgb = *reinterpret_cast<float*>(&rgb);
+      debug_output.points.push_back(p);
+    }
+  }
+  
   void ClusterPointIndicesDecomposer::extract
   (const sensor_msgs::PointCloud2ConstPtr &input,
-   const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices_input)
+   const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices_input,
+   const jsk_pcl_ros::PolygonArrayConstPtr& planes,
+   const jsk_pcl_ros::ModelCoefficientsArrayConstPtr& coefficients)
   {
-    allocatePublishers(indices_input->cluster_indices.size());
+    if (publish_clouds_) {
+      allocatePublishers(indices_input->cluster_indices.size());
+    }
     pcl::ExtractIndices<pcl::PointXYZRGB> extract;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz (new pcl::PointCloud<pcl::PointXYZ>);
@@ -113,125 +286,55 @@ namespace jsk_pcl_ros
     extract.setInputCloud(cloud);
 
     pcl::PointCloud<pcl::PointXYZRGB> debug_output;
-    visualization_msgs::MarkerArray marker_array;
+    jsk_pcl_ros::BoundingBoxArray bounding_box_array;
+    bounding_box_array.header = input->header;
     for (size_t i = 0; i < sorted_indices.size(); i++)
     {
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+      
       pcl::PointIndices::Ptr segmented_indices (new pcl::PointIndices);
       extract.setIndices(sorted_indices[i]);
       extract.filter(*segmented_cloud);
-      sensor_msgs::PointCloud2::Ptr out_cloud(new sensor_msgs::PointCloud2);
-      pcl::toROSMsg(*segmented_cloud, *out_cloud);
-      out_cloud->header = input->header;
-      publishers_[i].publish(out_cloud);
+      if (publish_clouds_) {
+        sensor_msgs::PointCloud2::Ptr out_cloud(new sensor_msgs::PointCloud2);
+        pcl::toROSMsg(*segmented_cloud, *out_cloud);
+        out_cloud->header = input->header;
+        publishers_[i].publish(out_cloud);
+      }
       // publish tf
       Eigen::Vector4f center;
       pcl::compute3DCentroid(*segmented_cloud, center);
-      tf::Transform transform;
-      transform.setOrigin(tf::Vector3(center[0], center[1], center[2]));
-      transform.setRotation(tf::createIdentityQuaternion());
-      br_.sendTransform(tf::StampedTransform(transform, input->header.stamp,
-                                             input->header.frame_id,
-                                             tf_prefix_ + (boost::format("output%02u") % (i)).str()));
-      // adding the pointcloud into debug_output
-      uint32_t rgb = colorRGBAToUInt32(colors_[i % colors_.size()]);
-      for (size_t j = 0; j < segmented_cloud->points.size(); j++) {
-        pcl::PointXYZRGB p;
-        p.x= segmented_cloud->points[j].x;
-        p.y= segmented_cloud->points[j].y;
-        p.z= segmented_cloud->points[j].z;
-        p.rgb = *reinterpret_cast<float*>(&rgb);
-        debug_output.points.push_back(p);
+      if (publish_tf_) {
+        tf::Transform transform;
+        transform.setOrigin(tf::Vector3(center[0], center[1], center[2]));
+        transform.setRotation(tf::createIdentityQuaternion());
+        br_.sendTransform(tf::StampedTransform(transform, input->header.stamp,
+                                               input->header.frame_id,
+                                               tf_prefix_ + (boost::format("output%02u") % (i)).str()));
       }
+      // adding the pointcloud into debug_output
+      addToDebugPointCloud(segmented_cloud, i, debug_output);
       
-      // create a bounding box
-      visualization_msgs::Marker marker;
-      Eigen::Vector4f minpt, maxpt;
-      pcl::getMinMax3D<pcl::PointXYZRGB>(*segmented_cloud, minpt, maxpt);
-      marker.action = visualization_msgs::Marker::ADD;
-      marker.type = visualization_msgs::Marker::LINE_LIST;
-      marker.header = input->header;
-      marker.id = i;
-      marker.scale.x = 0.01;
-      geometry_msgs::Point a, b, c, d, e, f, g, h;
-      double xwidth = std::max(fabs(minpt[0] - center[0]),
-                               fabs(maxpt[0] - center[0])) * 2.0;
-      double ywidth = std::max(fabs(minpt[1] - center[1]),
-                               fabs(maxpt[1] - center[1])) * 2.0;
-      double zwidth = std::max(fabs(minpt[2] - center[2]),
-                               fabs(maxpt[2] - center[2])) * 2.0;
-      a.x = center[0] + xwidth / 2.0;
-      a.y = center[1] - ywidth / 2.0;
-      a.z = center[2] + zwidth / 2.0;
-      b.x = center[0] + xwidth / 2.0;
-      b.y = center[1] + ywidth / 2.0;
-      b.z = center[2] + zwidth / 2.0;
-      c.x = center[0] - xwidth / 2.0;
-      c.y = center[1] + ywidth / 2.0;
-      c.z = center[2] + zwidth / 2.0;
-      d.x = center[0] - xwidth / 2.0;
-      d.y = center[1] - ywidth / 2.0;
-      d.z = center[2] + zwidth / 2.0;
-      e.x = center[0] + xwidth / 2.0;
-      e.y = center[1] - ywidth / 2.0;
-      e.z = center[2] - zwidth / 2.0;
-      f.x = center[0] + xwidth / 2.0;
-      f.y = center[1] + ywidth / 2.0;
-      f.z = center[2] - zwidth / 2.0;
-      g.x = center[0] - xwidth / 2.0;
-      g.y = center[1] + ywidth / 2.0;
-      g.z = center[2] - zwidth / 2.0;
-      h.x = center[0] - xwidth / 2.0;
-      h.y = center[1] - ywidth / 2.0;
-      h.z = center[2] - zwidth / 2.0;
-      marker.points.push_back(a);
-      marker.points.push_back(b);
-      marker.points.push_back(b);
-      marker.points.push_back(c);
-      marker.points.push_back(c);
-      marker.points.push_back(d);
-      marker.points.push_back(d);
-      marker.points.push_back(a);
-      marker.points.push_back(e);
-      marker.points.push_back(f);
-      marker.points.push_back(f);
-      marker.points.push_back(g);
-      marker.points.push_back(g);
-      marker.points.push_back(h);
-      marker.points.push_back(h);
-      marker.points.push_back(e);
-      marker.points.push_back(a);
-      marker.points.push_back(e);
-      marker.points.push_back(b);
-      marker.points.push_back(f);
-      marker.points.push_back(c);
-      marker.points.push_back(g);
-      marker.points.push_back(d);
-      marker.points.push_back(h);
-      marker.color.a = 0.5;
-      marker.color.r = 1.0;
-      marker.color.g = 1.0;
-      marker.color.b = 1.0;
-      marker_array.markers.push_back(marker);
+      jsk_pcl_ros::BoundingBox bounding_box;
+      computeBoundingBox(segmented_cloud, input->header, center, planes, coefficients, bounding_box);
+      bounding_box_array.boxes.push_back(bounding_box);
     }
     
-    if (marker_num_ > sorted_indices.size()) { // delete the markers
-      for (size_t i = sorted_indices.size(); i < marker_num_; i++) {
-        visualization_msgs::Marker marker;
-        marker.header = input->header;
-        marker.action = visualization_msgs::Marker::DELETE;
-        marker.id = i;
-        marker_array.markers.push_back(marker);
-      }
-    }
-    marker_pub_.publish(marker_array);
-    marker_num_ = marker_array.markers.size();
     sensor_msgs::PointCloud2 debug_ros_output;
     pcl::toROSMsg(debug_output, debug_ros_output);
     debug_ros_output.header = input->header;
     debug_ros_output.is_dense = false;
-
     pc_pub_.publish(debug_ros_output);
+    box_pub_.publish(bounding_box_array);
+  }
+  
+  void ClusterPointIndicesDecomposer::extract
+  (const sensor_msgs::PointCloud2ConstPtr &input,
+   const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices_input)
+  {
+    extract(input, indices_input,
+            jsk_pcl_ros::PolygonArrayConstPtr(),
+            jsk_pcl_ros::ModelCoefficientsArrayConstPtr());
   }
 
   void ClusterPointIndicesDecomposer::allocatePublishers(size_t num)

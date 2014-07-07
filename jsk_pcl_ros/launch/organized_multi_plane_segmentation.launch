@@ -1,107 +1,238 @@
 <launch>
+  <arg name="BASE_FRAME_ID" default="odom" />
   <arg name="INPUT" default="/camera/depth_registered/points" />
   <arg name="LAUNCH_MANAGER" default="true" />
   <arg name="MANAGER" default="manager" />
-  <node pkg="nodelet" type="nodelet" name="$(arg MANAGER)"
-        args="manager"
-        if="$(arg LAUNCH_MANAGER)"
-        alaunch-prefix="xterm -e gdb --args"
-        output="screen"/>
-  
-  <group ns="input">
-    <node pkg="nodelet" type="nodelet" name="hz"
-          output="screen"
-          args="load jsk_topic_tools/HzMeasure /$(arg MANAGER)">
-      <remap from="~input" to="$(arg INPUT)" />
-    </node>
+  <arg name="ESTIMATE_OCCLUSION" default="false" />
+  <arg name="COLOR_HISTOGRAM" default="false" />
+  <arg name="HANDLE_ESTIMATOR" default="false" />
+  <arg name="MACHINE" default="localhost"/>
+  <arg name="GDB" default="false" />
+  <machine name="localhost" address="localhost" />
+  <group if="$(arg LAUNCH_MANAGER)">
+    <node pkg="nodelet" type="nodelet" name="$(arg MANAGER)"
+          args="manager"
+          machine="$(arg MACHINE)"
+          if="$(arg GDB)"
+          launch-prefix="xterm -e gdb --args"
+          output="screen"/>
+    <node pkg="nodelet" type="nodelet" name="$(arg MANAGER)"
+          args="manager"
+          machine="$(arg MACHINE)"
+          unless="$(arg GDB)"
+          output="screen"/>
   </group>
-
-  <node pkg="nodelet" type="nodelet" name="normal_estimate"
-        args="load jsk_pcl/NormalEstimationIntegralImage $(arg MANAGER)"
-        output="screen"
-        >
+  <node pkg="nodelet" type="nodelet" name="input_relay"
+        machine="$(arg MACHINE)"
+        args="load jsk_topic_tools/Relay $(arg MANAGER)">
     <remap from="~input" to="$(arg INPUT)" />
-    <!-- <remap from="~output" to="/normal_concat/input" /> -->
-    <rosparam>
-    </rosparam>
-  </node>
-  <group ns="normal_estimate">
-    <node pkg="nodelet" type="nodelet" name="hz"
-          output="screen"
-          args="load jsk_topic_tools/HzMeasure /$(arg MANAGER)">
-      <remap from="~input" to="/normal_estimate/output" />
-    </node>
-  </group>
-  <node pkg="nodelet" type="nodelet" name="normal_concat"
-        args="load jsk_pcl/NormalConcatenater $(arg MANAGER)"
-        clear_params="false">
-    <remap from="~input" to="$(arg INPUT)"/>
-    <remap from="~normal" to="/normal_estimate/output"/>
   </node>
   <node pkg="nodelet" type="nodelet" name="multi_plane_estimate"
+        machine="$(arg MACHINE)"
         args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg MANAGER)"
         clear_params="false">
-    <remap from="~input" to="/normal_concat/output"/>
+    <remap from="~input" to="input_relay/output"/>
+    <rosparam>
+      max_curvature: 0.01
+      estimate_normal: true
+    </rosparam>
   </node>
-  <group ns="multi_plane_estimate">
-    <node pkg="nodelet" type="nodelet" name="hz"
-          output="screen"
-          args="load jsk_topic_tools/HzMeasure /$(arg MANAGER)">
-      <remap from="~input" to="/multi_plane_estimate/output" />
-    </node>
-  </group>
   <node pkg="nodelet" type="nodelet"
         name="cluster_decomposer"
+        machine="$(arg MACHINE)"
         args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)"
         output="screen" clear_params="true">
-    <remap from="~input" to="/normal_concat/output" />
+    <remap from="~input" to="input_relay/output" />
     <remap from="~target" to="/multi_plane_estimate/output" />
     <rosparam>
+      publish_clouds: false
+      publish_tf: false
     </rosparam>
   </node>
   <node pkg="nodelet" type="nodelet"
         name="cluster_decomposer2"
+        machine="$(arg MACHINE)"
         args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)"
         output="screen" clear_params="true">
-    <remap from="~input" to="/normal_concat/output" />
+    <remap from="~input" to="input_relay/output" />
     <remap from="~target" to="/multi_plane_estimate/output_nonconnected" />
     <rosparam>
+      publish_clouds: false
+      publish_tf: false
     </rosparam>
   </node>
 
   <node pkg="nodelet" type="nodelet"
         name="plane_extraction"
+        machine="$(arg MACHINE)"
         args="load jsk_pcl/MultiPlaneExtraction $(arg MANAGER)"
         output="screen" clear_params="true">
-    <remap from="~input" to="/normal_concat/output" />
+    <remap from="~input" to="input_relay/output" />
     <remap from="~indices" to="/multi_plane_estimate/output" />
     <remap from="~input_polygons" to="/multi_plane_estimate/output_polygon" />
     <remap from="~input_coefficients" to="/multi_plane_estimate/output_coefficients" />
   </node>
   
   <node pkg="nodelet" type="nodelet" name="euclidean_clustering"
+        machine="$(arg MACHINE)"
         args="load jsk_pcl/EuclideanClustering /$(arg MANAGER)" output="screen">
     <remap from="~input" to="/plane_extraction/output" />
     <rosparam>
       tolerance: 0.02
-      min_size: 500
+      min_size: 100
     </rosparam>
   </node>
-  <group ns="euclidean_clustering">
-    <node pkg="nodelet" type="nodelet" name="hz"
-          output="screen"
-          args="load jsk_topic_tools/HzMeasure /$(arg MANAGER)">
-      <remap from="~input" to="/euclidean_clustering/output" />
-    </node>
-  </group>
 
   <node pkg="nodelet" type="nodelet"
         name="cluster_decomposer_final"
-        args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis /$(arg MANAGER)"
+        machine="$(arg MACHINE)"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer /$(arg MANAGER)"
         output="screen" clear_params="true">
     <remap from="~input" to="/plane_extraction/output" />
-    <remap from="~target" to="/euclidean_clustering/output" />
+    <remap from="~target" to="/euclidean_clustering/output_throttle" />
+    <remap from="~align_planes" to="/multi_plane_estimate/output_polygon" />
+    <remap from="~align_planes_coefficients"
+           to="/multi_plane_estimate/output_coefficients" />
     <rosparam>
+      align_boxes: true
+      use_pca: true
+      publish_clouds: false
     </rosparam>
   </node>
+  <node pkg="nodelet" type="nodelet"
+        name="throttle_segmentation"
+        args="load jsk_topic_tools/LightweightThrottle /$(arg MANAGER)"
+        output="screen">
+    <remap from="~input" to="euclidean_clustering/output" />
+    <remap from="~output" to="euclidean_clustering/output_throttle" />
+  </node>
+  <node pkg="jsk_interactive_marker"
+        type="bounding_box_marker"
+        machine="$(arg MACHINE)"
+        name="bounding_box_marker"
+        output="screen"
+        >
+    <remap from="~bounding_box_array" to="cluster_decomposer_final/boxes" />
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        name="selected_cloud"
+        machine="$(arg MACHINE)"
+        args="load jsk_pcl/SelectedClusterPublisher /$(arg MANAGER)"
+        output="screen" clear_params="true">
+    <remap from="~input" to="/plane_extraction/output" />
+    <remap from="~indices" to="/euclidean_clustering/output" />
+    <remap from="~selected_index" to="/bounding_box_marker/selected_index" />
+    <remap from="~output" to="/selected_pointcloud" />
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        name="plane_rejector"
+        machine="$(arg MACHINE)"
+        args="load jsk_pcl/PlaneRejector /$(arg MANAGER)"
+        output="screen" clear_params="true">
+    <remap from="~input_polygons" to="/multi_plane_estimate/output_polygon" />
+    <remap from="~input_coefficients" to="/multi_plane_estimate/output_coefficients" />
+    <rosparam subst_value="true">
+      reference_axis: [0, 0, -1]
+      processing_frame_id: $(arg BASE_FRAME_ID)
+    </rosparam>
+  </node>
+  <group if="$(arg COLOR_HISTOGRAM)">
+    <node pkg="nodelet" type="nodelet" name="color_histogram"
+          args="load jsk_pcl/ColorHistogramMatcher /$(arg MANAGER)"
+          machine="$(arg MACHINE)"
+          output="screen">
+      <!-- <remap from="~input" to="/plane_extraction/output" />-->
+      <remap from="~input" to="input_relay/output"/>
+      <remap from="~input_indices" to="grid_sampler/output" />
+      <!-- <remap from="~input_indices" to="euclidean_clustering/output" /> -->
+      <remap from="~input_reference_cloud" to="/selected_pointcloud" />
+      <rosparam>
+        bin_size: 20
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="grid_sampler"
+          args="load jsk_pcl/GridSampler /$(arg MANAGER)"
+          machine="$(arg MACHINE)"
+          output="screen">
+      <!-- <remap from="~input" to="/plane_extraction/output" /> -->
+      <remap from="~input" to="input_relay/output"/>
+      <rosparam>
+        grid_size: 0.1
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="grid_sample_decompose"
+          machine="$(arg MACHINE)"
+          args="load jsk_pcl/ClusterPointIndicesDecomposer /$(arg MANAGER)"
+          output="screen" clear_params="true">
+      <!-- <remap from="~input" to="/plane_extraction/output" /> -->
+      <remap from="~input" to="input_relay/output"/>
+      <remap from="~target" to="grid_sampler/output" />
+      <rosparam>
+        publish_clouds: false
+        publish_tf: false
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="match_result"
+          machine="$(arg MACHINE)"
+          args="load jsk_pcl/ClusterPointIndicesDecomposer /$(arg MANAGER)"
+          output="screen" clear_params="true">
+      <!-- <remap from="~input" to="/plane_extraction/output" /> -->
+      <remap from="~input" to="input_relay/output"/>
+      <remap from="~target" to="color_histogram/output" />
+      <rosparam>
+        publish_clouds: false
+      </rosparam>
+    </node>
+  </group>
+  <node pkg="nodelet" type="nodelet" name="handle_estimator"
+        if="$(arg HANDLE_ESTIMATOR)"
+        machine="$(arg MACHINE)"
+        args="load jsk_pcl/HandleEstimator /$(arg MANAGER)">
+    <remap from="~input" to="input_relay/output" />
+    <remap from="~input_box" to="/bounding_box_marker/selected_box" />
+    <rosparam>
+      approach_offset: 0.1
+    </rosparam>
+  </node>
+    <node pkg="nodelet" type="nodelet" name="transform_input"
+          machine="$(arg MACHINE)"
+          args="load jsk_pcl/TfTransformCloud $(arg MANAGER)">
+      <remap from="~input" to="input_relay/output" />
+      <param name="target_frame_id" value="$(arg BASE_FRAME_ID)" />
+    </node>
+    <group if="$(arg ESTIMATE_OCCLUSION)">
+    <include file="$(find jsk_pcl_ros)/launch/hrp2jsknt_footstep_polygon.launch">
+      <arg name="LAUNCH_MANAGER" value="false" />
+      <arg name="MANAGER" value="$(arg MANAGER)" />
+    </include>
+    <node pkg="nodelet" type="nodelet" name="footstep_respected_to_odom"
+          args="load jsk_pcl/PolygonArrayTransformer /$(arg MANAGER)">
+      <remap from="~input_polygons" to="footstep_polygon_publisher/output_polygons" />
+      <remap from="~input_coefficients" to="footstep_polygon_publisher/output_coefficients" />
+      <param name="frame_id" value="$(arg BASE_FRAME_ID)" />
+    </node>
+    <node pkg="nodelet" type="nodelet" name="estimated_plane_respected_to_odom"
+          args="load jsk_pcl/PolygonArrayTransformer /$(arg MANAGER)">
+      <remap from="~input_polygons" to="multi_plane_estimate/output_polygon" />
+      <remap from="~input_coefficients" to="multi_plane_estimate/output_coefficients" />
+      <param name="frame_id" value="$(arg BASE_FRAME_ID)" />
+    </node>
+    <node pkg="nodelet" type="nodelet" name="env_server"
+          clear_params="true"
+          output="screen"
+          args="load jsk_pcl/EnvironmentPlaneModeling /$(arg MANAGER)" >
+      <remap from="~input" to="transform_input/output" />
+      <remap from="~indices" to="/multi_plane_estimate/output" />
+      <remap from="~input_polygons" to="/estimated_plane_respected_to_odom/output_polygons" />
+      <remap from="~input_coefficients" to="/estimated_plane_respected_to_odom/output_coefficients" />
+      <remap from="~input_static_polygons" to="/footstep_respected_to_odom/output_polygons" />
+      <remap from="~input_static_coefficients" to="/footstep_respected_to_odom/output_coefficients" />
+    </node>
+    <include file="$(find jsk_footstep_controller)/launch/hrp2jsknt_real.launch">
+      <arg name="USE_PLANE" value="true" />
+    </include>
+  </group>
+
 </launch>

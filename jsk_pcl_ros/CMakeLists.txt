@@ -88,11 +88,31 @@ jsk_pcl_nodelet(src/normal_estimation_integral_image_nodelet.cpp
 #  "jsk_pcl/OrganizedMultiPlaneSegmentation" "organized_multi_plane_segmentation")
 jsk_pcl_nodelet(src/multi_plane_extraction_nodelet.cpp
   "jsk_pcl/MultiPlaneExtraction" "multi_plane_extraction")
+jsk_pcl_nodelet(src/selected_cluster_publisher_nodelet.cpp
+  "jsk_pcl/SelectedClusterPublisher" "selected_cluster_publisher")
+jsk_pcl_nodelet(src/plane_rejector_nodelet.cpp
+  "jsk_pcl/PlaneRejector" "plane_rejector")
+jsk_pcl_nodelet(src/static_polygon_array_publisher_nodelet.cpp
+  "jsk_pcl/StaticPolygonArrayPublisher" "static_polygon_array_publisher")
+jsk_pcl_nodelet(src/polygon_array_transformer_nodelet.cpp
+  "jsk_pcl/PolygonArrayTransformer" "polygon_array_transformer_nodelet")
+jsk_pcl_nodelet(src/environment_plane_modeling_nodelet.cpp
+  "jsk_pcl/EnvironmentPlaneModeling" "environment_plane_modeling")
+jsk_pcl_nodelet(src/color_histogram_matcher_nodelet.cpp
+  "jsk_pcl/ColorHistogramMatcher" "color_histogram_matcher")
+jsk_pcl_nodelet(src/polygon_appender_nodelet.cpp
+  "jsk_pcl/PolygonAppender" "polygon_appender")
+jsk_pcl_nodelet(src/grid_sampler_nodelet.cpp
+  "jsk_pcl/GridSampler" "grid_sampler")
+jsk_pcl_nodelet(src/handle_estimator_nodelet.cpp
+  "jsk_pcl/HandleEstimator" "handle_estimator")
 
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}
-#  ${pcl_ros_PACKAGE_PATH}/src/pcl_ros/features/feature.cpp
+  src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
+  src/pcl_conversion_util.cpp src/pcl_util.cpp
 )
+rosbuild_add_openmp_flags(jsk_pcl_ros)
 
 rosbuild_add_compile_flags (jsk_pcl_ros ${SSE_FLAGS})
 rosbuild_link_boost (jsk_pcl_ros system)

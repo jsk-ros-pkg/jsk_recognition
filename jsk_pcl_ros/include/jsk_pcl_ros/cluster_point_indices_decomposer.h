@@ -40,6 +40,9 @@
 #include <ros/names.h>
 
 #include "jsk_pcl_ros/ClusterPointIndices.h"
+#include "jsk_pcl_ros/PolygonArray.h"
+#include "jsk_pcl_ros/ModelCoefficientsArray.h"
+
 #include "sensor_msgs/PointCloud2.h"
 #include <pcl_ros/pcl_nodelet.h>
 #include <message_filters/subscriber.h>
@@ -49,6 +52,8 @@
 #include <pcl/impl/point_types.hpp>
 #include <tf/transform_broadcaster.h>
 #include <std_msgs/ColorRGBA.h>
+#include <jsk_pcl_ros/BoundingBoxArray.h>
+
 namespace jsk_pcl_ros
 {
   class ClusterPointIndicesDecomposer: public pcl_ros::PCLNodelet
@@ -56,9 +61,17 @@ namespace jsk_pcl_ros
   public:
     typedef message_filters::sync_policies::ExactTime< sensor_msgs::PointCloud2,
                                                        jsk_pcl_ros::ClusterPointIndices > SyncPolicy;
+    typedef message_filters::sync_policies::ExactTime< sensor_msgs::PointCloud2,
+                                                       jsk_pcl_ros::ClusterPointIndices,
+                                                       jsk_pcl_ros::PolygonArray,
+                                                       jsk_pcl_ros::ModelCoefficientsArray> SyncAlignPolicy;
     ClusterPointIndicesDecomposer();
     virtual ~ClusterPointIndicesDecomposer();
     virtual void onInit();
+    virtual void extract(const sensor_msgs::PointCloud2ConstPtr &point,
+                         const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices,
+                         const jsk_pcl_ros::PolygonArrayConstPtr& planes,
+                         const jsk_pcl_ros::ModelCoefficientsArrayConstPtr& coefficients);
     virtual void extract(const sensor_msgs::PointCloud2ConstPtr &point,
                          const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices);
     virtual void sortIndicesOrder(pcl::PointCloud<pcl::PointXYZ>::Ptr input,
@@ -69,14 +82,39 @@ namespace jsk_pcl_ros
     //ros::Subscriber sub_input_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<jsk_pcl_ros::ClusterPointIndices> sub_target_;
+    message_filters::Subscriber<jsk_pcl_ros::PolygonArray> sub_polygons_;
+    message_filters::Subscriber<jsk_pcl_ros::ModelCoefficientsArray> sub_coefficients_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncAlignPolicy> >sync_align_;
     std::vector<ros::Publisher> publishers_;
-    ros::Publisher marker_pub_, pc_pub_;
+    ros::Publisher pc_pub_, box_pub_;
     tf::TransformBroadcaster br_;
     std::string tf_prefix_;
-    size_t marker_num_;
     virtual void allocatePublishers(size_t num);
     std::vector<std_msgs::ColorRGBA> colors_;
+    bool publish_clouds_;
+    bool publish_tf_;
+    bool align_boxes_;
+    bool use_pca_;
+
+    void addToDebugPointCloud
+    (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
+     size_t i,
+     pcl::PointCloud<pcl::PointXYZRGB>& debug_output);
+    
+    virtual void computeBoundingBox
+    (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
+     const std_msgs::Header header,
+     const Eigen::Vector4f center,
+     const jsk_pcl_ros::PolygonArrayConstPtr& planes,
+     const jsk_pcl_ros::ModelCoefficientsArrayConstPtr& coefficients,
+     jsk_pcl_ros::BoundingBox& bounding_box);
+
+    
+    virtual int findNearestPlane(const Eigen::Vector4f& center,
+                                 const jsk_pcl_ros::PolygonArrayConstPtr& planes,
+                                 const jsk_pcl_ros::ModelCoefficientsArrayConstPtr& coefficients);
+    
     static std_msgs::ColorRGBA makeColor(double r, double g, double b, double a)
     {
         std_msgs::ColorRGBA c;

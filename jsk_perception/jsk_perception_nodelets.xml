@@ -1,4 +1,16 @@
 <library path="lib/libjsk_perception">
+  <class name="jsk_perception/HoughCircleDetector" type="HoughCircleDetector"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      nodelet to detect circles based on hough transformation
+    </description>
+  </class>
+  <class name="jsk_perception/ColorHistogram" type="ColorHistogram"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Nodelet to compute histogram
+    </description>
+  </class>
   <class name="jsk_perception/EdgeDetector" type="EdgeDetector"
          base_class_type="nodelet::Nodelet">
     <description>

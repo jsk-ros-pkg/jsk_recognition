@@ -2,6 +2,162 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.9 (2014-07-01)
+------------------
+* publish the result of grid modeling as SparseOccupancyGridArray
+* compute segmented cloud's distance to polygon based on convex polygon assumption
+* add new parameter to dynamic_reconfigure of EnvironmentPlaneModeling
+* Contributors: Ryohei Ueda
+
+0.1.8 (2014-06-29)
+------------------
+* add min_indices parameter to ignore the grid which does not include
+  enough points.
+* add throttle for bounding box visualization in
+  organized_multi_plane_segmentation.launch.
+  Because it may be too fast to see...
+* add ~publish_tf=false to several nodelets in organized_multi_plane_segmentation.launch
+* fix typo of launch file
+* run ColorHistogramMatcher with GridSampler
+* implement GridSampler
+* find object based on hsv color histogram of the pointcloud
+* implement simple handle detector to grasp
+* refactor cluster decomposer class
+  run PCA to compute orientation of bounding box
+* run PCA to compute bouding box
+* fix segmentation fault
+* estimate occlusion in EnvironmentPlaneModeling
+* fix several bags for plane-based environment modeling
+* fix the header of the output of the estimation of occlusion
+* do not compute transformation if no points are available
+* does not publish pointclouds if transformation failed
+* merge remote branch origin/master
+* fulfill occluded reagion with pointcloud by OccludedPlaneEstimator
+* debug and substitute stamp value to header/stamp
+  add cloth classification sample
+* only make will be executed on hydro
+* fix typo: oclusoin -> occlusion
+* add new nodelet: EnvironmentPlaneModeling
+* use pcl::PointXYZRGB rather than pcl::PointXYZRGBNormal
+* add normal estimation to organized multi plane segmentation
+* d varaible of the normal should be transformed correctly by PolygonArrayTransfomer.
+  fix transformation compuation to normalize d parameter
+* add depent tag to ml_classifiers
+* add more rosparameters to ParticleFilterTracking
+* add MACHINE and GDB argument
+* add program to compute color histogram (rgb and hsv color space)
+* add cloth classification sample
+* change the namespace of the topics to use tracking.launch from the other launch files
+* add OcludedPlaneEstimator nodelet to estimate the ocluded planes
+* new nodelet to transform PolygonArray and ModelCoefficientsArray
+* add nodelet to publish static jsk_pcl_ros/PolygonArray with timestamp
+  synchronized with the pointclouds
+* Contributors: Ryohei Ueda, Yuto Inagaki, Masaki Murooka, Yusuke Furuta
+
+0.1.7 (2014-05-31)
+------------------
+* new nodelet to reject the plane which does not satisfy the threshold
+  about normal direction
+* simplyfy tracking and add update with msg function
+
+0.1.6 (2014-05-30)
+------------------
+
+0.1.5 (2014-05-29)
+------------------
+* add new nodelet to publish the points of the cluster selected by
+  jsk_pcl_ros/Int32Stamped.
+  this nodelet is supposed to be used with jsk_interactive_marker/bounding_box_marker
+* align the boxes to the nearest plane
+* add new parameter publish_clouds to ClusterPointIndicesDecomposer
+  to disable publishing decomposed pointclouds
+* add new message: BoundingBox and BoundingBoxArray and publish
+  BoundingBoxArray from ClusterPointIndicesDecomposer
+* use enum to select estimation method of NormalEstimationIntegralImage
+* add launch and rviz file for subway bagfiles
+* remove IndiceArray.msg, which are not used any more
+* publish empty result if segmentation failed
+* update the default parameters
+* use PointXYZRGBNormal rather than PointXYZ nor Normal to speed up
+  pointcloud conversion between ROS <-> PCL
+* for realtime organized multi plane segmentation, add optimization flag
+* add curvature veature
+* comment in again and remove centroid publisher
+* fix conflicts
+* fix the size of the AABB published from ClusterPointIndicesDecomposer
+* update launch file for OrganizedMultiPlaneSegmentatoin.
+  introduce several arguments.
+  add several HzMeasure to measure the speed of the processing
+* add new nodelet: NormalEstimationIntegralImage
+* add new nodelet: NormalEstimationIntegralImage
+* add dynamic reconfigure to MultiPlaneExtraction
+* commnet out hsv-limit and remove centroid publisher
+* use ExtractPolygonalPrismData class to extract the pointcloud ON the planes
+* add new class: MultiPlaneExtraction to extract the points which does not
+  belong to the planes. However it's not so stable and efficient now
+* publish the result of the clustring as polygon with convex hull
+  reconstruction. and publish the result of the plane estimation as ModelCoefficientsArray.
+* implement connectiong of the planes segmented by organized multi planse segmentation
+* output the segmentation as PolygonArray as the result of
+  OrganizedMultiPlaneSegmentation
+* delete unneeded files
+* rearrange many launch files , rviz files and add sample for rosbags
+* add argument for camera_info url
+* fix for groovy
+* does not compile region growing segmentation on groovy
+* publish colorized points from cluster point indices decomposer
+* does not compile on groovy
+* does not compile region growing segmentation on groovy
+* implement OrganizedMultiPlaneSegmentation
+* add new nodelet: RegionGrowingSegmentation based
+  on pcl::RegionGrowingSegmentation class
+* add pcl_ros/NormalConcatenater nodelet.
+  it retrieves PointXYZRGB from ~input and Normal from ~normal and
+  concatenate them into ~output as PointXYZRGBNormal
+* update index.rst
+* delete wrong commited files
+* update README and arrage some launch files directory
+* fix for groovy
+* use pclpointcloud2
+* add sample_610_clothes.launch
+* remove the sample launch files for non-used color converter and color filter
+* rename rgb_color_filter.cpp and rgb_color_filter.h
+  to rgb color_filter.cpp and color_filter.h.
+* use the lines rather than cube to visualize bounding box
+* add hsi_color_filter executable
+* implement resize_points_publisher w/o filter class.
+  remove nonused files such as color_filter, color_converter and so on.
+* add marker to display the result of the clustering as bounding boxes
+* publishes tf frames to the center of the clusters
+* add euclidean clustering, decomposer and zfilter
+* add filter.cpp to jsk_pcl_ros on rosbuild. because resize points publisher requires it.
+  this is a hotfix, so I will re-implement that nodelet w/o filter.cpp
+* support groovy and pcl 1.6
+* compile cluster_point_indices_decomposer and cluster_point_indices_decomposer_z_axis on catkin
+* compile euclidean_cluster_extraction_nodelet.cpp on catkin
+* add add HSI Color filter
+* rgb_color_filter.launch: add comment and launch centroid_publisher as default
+* catch tf exception
+* remove redundant declaration of TransformBroadcaster
+* remove redundant declaration of TransformBroadcaster
+* update README and add centroid related files
+* do not run dynamic reconfigure callback and topic callback symultenously
+* support ~indices topic to specify indices vector of the points and refactor codes
+* re-implement RGBColorFilter as simpler class
+* add centroid_publisher to catkin
+* add tracking rviz config
+* delete unneeded line in tf_transfomr_cloud.launch
+* add tf transform cloud launch and rviz
+* add octree_change_detector.launch
+* add group tag to create local scope to remap several topics in openni2.launch
+* To update README, add explanation to tracking , octree and tf cloud
+* relaying camera_info under camera_remote namespace
+* add tf transform nodelet
+* make paritcal_filter_tracking_nodelet publish tracked object tf trasnformation
+* add two launch files to run openni on remote machine
+* add octree_change_detector
+* Contributors: Ryohei Ueda, Yohei Kakiuchi, Yuto Inagaki, Masaki Murooka, Shunichi Nozawa, Yusuke Furuta, Ryo Terasawa, Chan Wesley, Kei Okada
+
 0.1.4 (2014-04-25)
 ------------------
 * fixed compile error jsk_pcl_ros
@@ -290,4 +446,4 @@ Changelog for package jsk_pcl_ros
 * remove jskpointcloud dependency from jsk_pcl_ros
 * copy depth_image_creator from unreleased
 * add jsk_pcl_ros (copy from unreleased repository)
-* Contributors: JSK applications, Kei Okada, Ryohei Ueda, aginika, chen, furushchev, furuta, inagaki, k-okada, kazuto, roseus, ueda, wesley, youhei
+* Contributors: Kei Okada, Ryohei Ueda, Yuto Inagaki, Haseru Chen, Yuki Furuta, Kazuto Murase, Chen Wesley, Youhei Kakiuchi

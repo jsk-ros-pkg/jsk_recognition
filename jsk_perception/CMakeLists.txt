@@ -45,6 +45,7 @@ rosbuild_add_executable(point_pose_extractor src/point_pose_extractor.cpp)
 rosbuild_add_executable(white_balance_converter src/white_balance_converter.cpp)
 rosbuild_add_executable(hough_lines src/hough_lines.cpp)
 rosbuild_add_executable(rectangle_detector src/rectangle_detector.cpp)
+rosbuild_add_executable(calc_flow src/calc_flow.cpp)
 
 target_link_libraries(camshiftdemo ${OpenCV_LIBRARIES})
 target_link_libraries(virtual_camera_mono ${OpenCV_LIBRARIES} rospack)
@@ -52,6 +53,7 @@ target_link_libraries(point_pose_extractor ${OpenCV_LIBRARIES} rospack)
 rosbuild_link_boost(point_pose_extractor filesystem system)
 target_link_libraries(hough_lines ${OpenCV_LIBRARIES})
 target_link_libraries(rectangle_detector ${OpenCV_LIBRARIES})
+target_link_libraries(calc_flow ${OpenCV_LIBRARIES})
 rosbuild_link_boost(rectangle_detector signals)
 
 macro(jsk_perception_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
@@ -66,6 +68,8 @@ endmacro(jsk_perception_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec
 jsk_perception_nodelet(src/edge_detector.cpp "jsk_perception/EdgeDetector" "edge_detector")
 jsk_perception_nodelet(src/sparse_image_encoder.cpp "jsk_perception/SparseImageEncoder" "sparse_image_encoder")
 jsk_perception_nodelet(src/sparse_image_decoder.cpp "jsk_perception/SparseImageDecoder" "sparse_image_decoder")
+jsk_perception_nodelet(src/color_histogram.cpp "jsk_perception/ColorHistogram" "color_histogram")
+jsk_perception_nodelet(src/hough_circles.cpp "jsk_perception/HoughCircleDetector" "hough_circles")
 rosbuild_add_library (${PROJECT_NAME}
   ${jsk_perception_nodelet_sources}
   )

@@ -2,6 +2,30 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.9 (2014-07-01)
+------------------
+
+0.1.8 (2014-06-29)
+------------------
+* initialize _img_ptr at first
+* convert color image to GRAY
+* add nodelet to detect circles based on hough transformation
+* add program to compute color histogram (rgb and hsv color space)
+* maked configure_file to create imagesurf, imagestar and imagebrisk automatically
+* added the programs to use cv_detection
+* Contributors: Ryohei Ueda, Yu Ohara, Yusuke Furuta
+
+0.1.7 (2014-05-31)
+------------------
+
+0.1.6 (2014-05-30)
+------------------
+
+0.1.5 (2014-05-29)
+------------------
+* add service interface with sensor_msgs/SetCameraInfo to camshiftdemo, not only mouse selection.
+* Contributors: Ryohei Ueda
+
 0.1.4 (2014-04-25)
 ------------------
 

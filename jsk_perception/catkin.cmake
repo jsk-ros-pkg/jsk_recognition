@@ -1,16 +1,19 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(jsk_perception)
 
-find_package(catkin REQUIRED COMPONENTS message_generation imagesift std_msgs sensor_msgs geometry_msgs cv_bridge image_geometry image_transport driver_base dynamic_reconfigure pcl_ros eigen roscpp nodelet rostest jsk_pcl_ros)
+find_package(catkin REQUIRED COMPONENTS message_generation imagesift std_msgs sensor_msgs geometry_msgs cv_bridge image_geometry image_transport driver_base dynamic_reconfigure eigen roscpp nodelet rostest tf)
 find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem system signals)
+
+find_package(Eigen REQUIRED)
+include_directories(${Eigen_INCLUDE_DIRS})
 
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(cfg/camshiftdemo.cfg cfg/EdgeDetector.cfg cfg/HoughLines.cfg cfg/matchtemplate.cfg cfg/point_pose_extractor.cfg cfg/RectangleDetector.cfg
   cfg/ColorHistogram.cfg
   cfg/HoughCircles.cfg)
 
-add_message_files(FILES # ClusterPointIndices.msg
+add_message_files(FILES
       PointsArray.msg RotatedRectStamped.msg LineArray.msg Rect.msg Line.msg RotatedRect.msg SparseImage.msg
       Circle2D.msg Circle2DArray.msg)
 
@@ -21,8 +24,8 @@ generate_messages(
 )
 
 catkin_package(
-  CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs message_runtime jsk_pcl_ros
-  DEPENDS pcl OpenCV
+  CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs message_runtime
+  DEPENDS OpenCV
   INCLUDE_DIRS include
   LIBRARIES
 )

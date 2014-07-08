@@ -23,10 +23,7 @@
   <depend package="driver_base"/>
   <depend package="dynamic_reconfigure"/>
 
-  <!-- for pointcloud -->
-  <depend package="pcl"/>
-  <depend package="pcl_ros"/>
-  <depend package="jsk_pcl_ros"/>
+  <depend package="tf"/>
   
   <!-- for build -->
   <depend package="rosbuild"/>
@@ -34,9 +31,9 @@
   <depend package="mk"/>
   <depend package="angles"/>
   <depend package="nodelet" />
-  
+  <depend package="jsk_pcl_ros" />
   <rosdep name="opencv2"/>
-
+  <rosdep name="eigen"/>
   <export>
     <nodelet plugin="${prefix}/jsk_perception_nodelets.xml"/>
   </export>

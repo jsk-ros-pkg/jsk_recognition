@@ -2,6 +2,11 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* jsk_perception does not depends on pcl, but depends on eigen and tf
+* Contributors: Ryohei Ueda
+
 0.1.10 (2014-07-07)
 -------------------
 * adding oriented_gradient_node

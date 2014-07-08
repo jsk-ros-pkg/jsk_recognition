@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.11 (2014-07-08)
+-------------------
 * jsk_perception does not depends on pcl, but depends on eigen and tf
 * Contributors: Ryohei Ueda
 

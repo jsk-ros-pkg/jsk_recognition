@@ -2,6 +2,27 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.11 (2014-07-08)
+-------------------
+
+0.1.10 (2014-07-07)
+-------------------
+* compute distance based on Polygon-to-ConvexCentroid in order to identify
+  the grid maps
+* remove debug code in PolygonArrayTransformer
+* use Plane class to compute transformation of coefficients
+* statical voting and rejection to the grid map to remove unstable
+  recognition result
+* support appending of GridMap in time series in EnvironmentPlaneModeling
+* measure time to compute polygon collision in EnvironmentPlaneModeling
+* add a nodelet to concatenate PolygonStamped
+* publish polygon synchronized with ~trigger message
+* new utility class to measure time
+* change default camera name
+* build and publish grid map always on EnvironmentPlaneModeling
+* add launch file for openni
+* Contributors: Ryohei Ueda, Yusuke Furuta
+
 0.1.9 (2014-07-01)
 ------------------
 * publish the result of grid modeling as SparseOccupancyGridArray

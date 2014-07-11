@@ -14,6 +14,7 @@ def callback(msg):
 if __name__== '__main__':
     global object_messages
     object_messages = None
+    frame_id = rospy.get_param("~frame_id", "object")
     rospy.init_node('objectdetection_tf_publisher', anonymous=True)
     subscriber = rospy.Subscriber("ObjectDetection", ObjectDetection, callback)
     r = rospy.Rate(100)
@@ -28,8 +29,8 @@ if __name__== '__main__':
                                   detected_object.pose.orientation.y,
                                   detected_object.pose.orientation.z,
                                   detected_object.pose.orientation.w),
-                                 rospy.Time.now(),
-                                 "/object",
+                                 object_messages.header.stamp,
+                                 frame_id,
                                  object_messages.header.frame_id)
         r.sleep()
 

@@ -2,6 +2,9 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.11 (2014-07-08)
+-------------------
+
 0.1.10 (2014-07-07)
 -------------------
 * compute distance based on Polygon-to-ConvexCentroid in order to identify

@@ -106,7 +106,10 @@ jsk_pcl_nodelet(src/grid_sampler_nodelet.cpp
   "jsk_pcl/GridSampler" "grid_sampler")
 jsk_pcl_nodelet(src/handle_estimator_nodelet.cpp
   "jsk_pcl/HandleEstimator" "handle_estimator")
-
+jsk_pcl_nodelet(src/delay_pointcloud_nodelet.cpp
+  "jsk_pcl/DelayPointCloud" "delay_pointcloud")
+jsk_pcl_nodelet(src/depth_image_error_nodelet.cpp
+  "jsk_pcl/DepthImageError" "depth_image_error")
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp

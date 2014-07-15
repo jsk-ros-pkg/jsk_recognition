@@ -41,7 +41,8 @@ add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg
   SparseOccupancyGridCell.msg
   SparseOccupancyGridColumn.msg
   SparseOccupancyGrid.msg
-  SparseOccupancyGridArray.msg)
+  SparseOccupancyGridArray.msg
+  DepthErrorResult.msg)
 add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv SetPointCloud2.srv
   CallSnapIt.srv CallPolygon.srv
   EnvironmentLock.srv

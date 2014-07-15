@@ -37,14 +37,18 @@
 #ifndef JSK_PCL_ROS_DEPTH_IMAGE_ERROR_H_
 #define JSK_PCL_ROS_DEPTH_IMAGE_ERROR_H_
 
+#include <ros/ros.h>
 #include <pcl_ros/pcl_nodelet.h>
 #include <sensor_msgs/Image.h>
 #include <geometry_msgs/PointStamped.h>
+#include <jsk_pcl_ros/DepthErrorResult.h>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
+
+#include <string>
 
 namespace jsk_pcl_ros
 {
@@ -55,7 +59,8 @@ namespace jsk_pcl_ros
     sensor_msgs::Image,
     geometry_msgs::PointStamped
      > SyncPolicy;
-    
+    ros::Publisher depth_error_publisher_;
+
   protected:
     virtual void onInit();
     virtual void calcError(const sensor_msgs::Image::ConstPtr& depth_image,

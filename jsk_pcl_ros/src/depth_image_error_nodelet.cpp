@@ -58,12 +58,10 @@ namespace jsk_pcl_ros
     cv_bridge::CvImagePtr cv_ptr;
     cv_ptr = cv_bridge::toCvCopy(depth_image, sensor_msgs::image_encodings::TYPE_32FC1);
     cv::Mat cv_depth_image = cv_ptr->image;
+    double depth_from_depth_sensor = cv_depth_image.at<float>((int)uv_point->point.y, (int)uv_point->point.x);
     NODELET_INFO("(u, v) = (%f, %f)", uv_point->point.x, uv_point->point.y);
-    NODELET_INFO("(z, d) = (%f, %f)", uv_point->point.z, 
-                 cv_depth_image.at<float>((int)uv_point->point.x,
-                                          (int)uv_point->point.y));
+    NODELET_INFO("(z, d) = (%f, %f)", uv_point->point.z, depth_from_depth_sensor);
   }
-
 }
 
 typedef jsk_pcl_ros::DepthImageError DepthImageError;

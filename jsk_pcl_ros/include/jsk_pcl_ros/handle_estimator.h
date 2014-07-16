@@ -45,6 +45,11 @@
 #include <tf/transform_listener.h>
 
 #include <jsk_pcl_ros/BoundingBox.h>
+#include "jsk_pcl_ros/Int32Stamped.h"
+#include <geometry_msgs/PoseArray.h>
+
+#include <boost/circular_buffer.hpp>
+#include <boost/tuple/tuple.hpp>
 
 namespace jsk_pcl_ros
 {
@@ -75,13 +80,17 @@ namespace jsk_pcl_ros
     virtual void handleSmallEnoughStandOnPlane(
       const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
       const jsk_pcl_ros::BoundingBox::ConstPtr& box_msg);
-    ros::Publisher pub_, pub_best_, pub_preapproach_;
+
+    virtual void selectedIndexCallback( const jsk_pcl_ros::Int32StampedConstPtr &index);
+    ros::Publisher pub_, pub_best_, pub_preapproach_, pub_selected_, pub_selected_preapproach_;
+    ros::Subscriber sub_index_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<jsk_pcl_ros::BoundingBox> sub_box_;
     boost::shared_ptr<tf::TransformListener> tf_listener_;
     double gripper_size_;
     double approach_offset_;
+    boost::circular_buffer<boost::tuple<geometry_msgs::PoseArray, geometry_msgs::PoseArray> > output_buf;
   private:
   };
 }

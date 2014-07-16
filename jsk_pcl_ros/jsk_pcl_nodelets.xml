@@ -1,4 +1,16 @@
 <library path="lib/libjsk_pcl_ros">
+
+  <class name="jsk_pcl/DepthImageError" type="DepthImageError"
+         base_class_type="nodelet::Nodelet">
+    <description>compute error of depth image</description>
+  </class>
+
+
+  <class name="jsk_pcl/DelayPointCloud" type="DelayPointCloud"
+         base_class_type="nodelet::Nodelet">
+    <description>delay pointcloud messages</description>
+  </class>
+
   <class name="jsk_pcl/PolygonAppender" type="PolygonAppender"
          base_class_type="nodelet::Nodelet">
     <description>append jsk_pcl_ros/PolygonArray </description>

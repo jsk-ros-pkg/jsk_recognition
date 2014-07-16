@@ -120,6 +120,11 @@ namespace jsk_pcl_ros
     pcl::fromROSMsg(*input_cloud, *pcl_cloud);
     pcl::PointCloud<pcl::PointXYZHSV>::Ptr hsv_cloud (new pcl::PointCloud<pcl::PointXYZHSV>);
     pcl::PointCloudXYZRGBtoXYZHSV(*pcl_cloud, *hsv_cloud);
+    for (size_t i = 0; i < pcl_cloud->points.size(); i++) {
+      hsv_cloud->points[i].x = pcl_cloud->points[i].x;
+      hsv_cloud->points[i].y = pcl_cloud->points[i].y;
+      hsv_cloud->points[i].z = pcl_cloud->points[i].z;
+    }
     // compute histograms first
     std::vector<std::vector<float> > histograms;
     histograms.resize(input_indices->cluster_indices.size());
@@ -129,13 +134,13 @@ namespace jsk_pcl_ros
     // for debug
     jsk_pcl_ros::ColorHistogramArray histogram_array;
     histogram_array.header = input_cloud->header;
-    std::vector<pcl::PointCloud<pcl::PointXYZHSV> > segmented_clouds;
+    std::vector<pcl::PointCloud<pcl::PointXYZHSV>::Ptr > segmented_clouds;
     for (size_t i = 0; i < input_indices->cluster_indices.size(); i++) {
       pcl::IndicesPtr indices (new std::vector<int>(input_indices->cluster_indices[i].indices));
       extract.setIndices(indices);
       pcl::PointCloud<pcl::PointXYZHSV> segmented_cloud;
       extract.filter(segmented_cloud);
-      segmented_clouds.push_back(segmented_cloud);
+      segmented_clouds.push_back(segmented_cloud.makeShared());
       std::vector<float> histogram;
       computeHistogram(segmented_cloud, histogram, policy_);
       histograms[i] = histogram;
@@ -157,16 +162,18 @@ namespace jsk_pcl_ros
       if (coefficient > coefficient_thr_) {
         result.cluster_indices.push_back(input_indices->cluster_indices[i]);
         if (best_coefficient < coefficient) {
+          best_coefficient = coefficient;
           best_index = i;
         }
       }
     }
+    NODELET_INFO("best coefficients: %f, %d", best_coefficient, best_index);
     result_pub_.publish(result);
     if (best_index != -1) {
-      pcl::PointCloud<pcl::PointXYZHSV> best_cloud
+      pcl::PointCloud<pcl::PointXYZHSV>::Ptr best_cloud
         = segmented_clouds[best_index];
       Eigen::Vector4f center;
-      pcl::compute3DCentroid(best_cloud, center);
+      pcl::compute3DCentroid(*best_cloud, center);
       geometry_msgs::PoseStamped best_pose;
       best_pose.header = input_cloud->header;
       best_pose.pose.position.x = center[0];

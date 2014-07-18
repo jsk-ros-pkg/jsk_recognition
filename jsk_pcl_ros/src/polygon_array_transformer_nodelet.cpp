@@ -145,9 +145,12 @@ namespace jsk_pcl_ros
                       i, coefficient.header.frame_id.c_str());
         return;
       }
+      listener_->waitForTransform(coefficient.header.frame_id,
+                                  frame_id_,
+                                  coefficient.header.stamp,
+                                  ros::Duration(1.0));
       if (listener_->canTransform(coefficient.header.frame_id,
                                   frame_id_,
-                                  //ros::Time(0.0))) {
                                   coefficient.header.stamp)) {
         tf::StampedTransform transform; // header -> frame_id_
         listener_->lookupTransform(coefficient.header.frame_id, frame_id_,

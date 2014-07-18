@@ -162,6 +162,7 @@ namespace jsk_pcl_ros
     const PolygonArray::ConstPtr& static_polygons,
     const ModelCoefficientsArray::ConstPtr& static_coefficients)
   {
+    NODELET_INFO_STREAM(getName() << "::inputCallback");
     {
       boost::mutex::scoped_lock(mutex_);
       latest_input_ = input;
@@ -325,7 +326,7 @@ namespace jsk_pcl_ros
    ClusterPointIndices& all_indices,
    std::vector<GridMap::Ptr> grid_maps)
   {
-    NODELET_DEBUG("%lu convexhull will be fulfilled", estimation_summary.size());
+    NODELET_INFO("%lu convexhull will be fulfilled", estimation_summary.size());
     typedef std::map<int, std::set<size_t> >::const_iterator Iterator;
     *all_cloud = *input;
     copyClusterPointIndices(indices, all_indices);
@@ -335,12 +336,13 @@ namespace jsk_pcl_ros
     {
       int env_plane_index = it->first;
       std::set<size_t> static_polygon_indices = it->second;
-      NODELET_DEBUG("%d plane is appended by %lu planes", env_plane_index,
+      NODELET_INFO("%d plane is appended by %lu planes", env_plane_index,
                    static_polygon_indices.size());
       // 2cm
       GridMap::Ptr grid = grid_maps[env_plane_index];
       geometry_msgs::PolygonStamped convex_polygon
         = result_polygons.polygons[env_plane_index];
+      NODELET_INFO("registering %d lines", convex_polygon.polygon.points.size() - 1);
       for (size_t i = 0; i < convex_polygon.polygon.points.size() - 1; i++) {
         geometry_msgs::Point32 from = convex_polygon.polygon.points[i];
         geometry_msgs::Point32 to = convex_polygon.polygon.points[i + 1];
@@ -349,22 +351,59 @@ namespace jsk_pcl_ros
         pcl_conversions::toPCL(to, to_pcl);
         grid->registerLine(from_pcl, to_pcl);
       }
-
+      // the last one
+      {
+        geometry_msgs::Point32 from = convex_polygon.polygon.points[convex_polygon.polygon.points.size() - 1];
+        geometry_msgs::Point32 to = convex_polygon.polygon.points[0];
+        pcl::PointXYZRGB from_pcl, to_pcl;
+        pcl_conversions::toPCL(from, from_pcl);
+        pcl_conversions::toPCL(to, to_pcl);
+        grid->registerLine(from_pcl, to_pcl);
+      }
+      NODELET_INFO("hello");
       std::vector<GridIndex::Ptr> filled_indices;
       
+      ConvexPolygon convex_polygon_model = ConvexPolygon::fromROSMsg(convex_polygon.polygon);
       for (std::set<size_t>::iterator it = static_polygon_indices.begin();
            it != static_polygon_indices.end();
            it++) {
         size_t before_point_size = filled_indices.size();
         pcl::PointXYZRGB centroid;
         computePolygonCentroid(static_polygons->polygons[*it], centroid);
-        grid->fillRegion(centroid.getVector3fMap(), filled_indices);
-        NODELET_DEBUG("%lu static polygon merged into %d env polygon and %lu points is required to fill",
-                      *it, env_plane_index,
-                      filled_indices.size() - before_point_size);
+        // project the point onto the plane
+        NODELET_INFO("hello2");
+        // before running fillRegion, we should ensure the point will be inside of the
+        // convex hull region
+        Eigen::Vector3f centroid_eigen = centroid.getVector3fMap();
+        Eigen::Vector3f centroid_projected;
+        PCLModelCoefficientMsg the_coefficients = static_coefficients->coefficients[*it];
+        Eigen::Vector3f normal;
+        normal[0] = the_coefficients.values[0];
+        normal[1] = the_coefficients.values[1];
+        normal[2] = the_coefficients.values[2];
+        double d = the_coefficients.values[3] / normal.norm();
+        normal.normalize();
+        double alpha = normal.dot(centroid_eigen) - d;
+        centroid_projected = centroid_eigen - alpha * normal;
+        //pcl_conversions::fromPCLToEigen(centroid, centroid_p);
+        Eigen::Vector3d centroid_projected_d;
+        centroid_projected_d[0] = centroid_projected[0];
+        centroid_projected_d[1] = centroid_projected[1];
+        centroid_projected_d[2] = centroid_projected[2];
+        if (convex_polygon_model.isInside(centroid_projected_d)) {
+          //grid->registerPoint(centroid);
+          //grid->fillRegion(centroid.getVector3fMap(), filled_indices);
+          grid->fillRegion(centroid_projected, filled_indices);
+          NODELET_INFO("%lu static polygon merged into %d env polygon and %lu points is required to fill",
+                       *it, env_plane_index,
+                       filled_indices.size() - before_point_size);
+        }
+        else {
+          NODELET_ERROR("the centroid point is outside of convex region");
+        }
       }
       
-      NODELET_DEBUG("add %lu points into %d cluster",
+      NODELET_INFO("add %lu points into %d cluster",
                    filled_indices.size(),
                    env_plane_index);
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr new_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
@@ -447,7 +486,7 @@ namespace jsk_pcl_ros
     ClusterPointIndices::Ptr result_indices)
   {
     ScopedTimer timer = occlusion_estimate_time_acc_.scopedTimer();
-    *result_polygons = *polygons;
+    *result_polygons = *polygons; // copied
     *result_coefficients = *coefficients;
     
     std::map<int, std::set<size_t> > appending_map;
@@ -463,7 +502,7 @@ namespace jsk_pcl_ros
                                              static_coefficient);
       if (nearest_index != -1) {
         // merged into nearest_index
-        NODELET_DEBUG("merging %lu into %d", i, nearest_index);
+        NODELET_INFO("merging %lu into %d", i, nearest_index);
         geometry_msgs::PolygonStamped nearest_polygon
           = result_polygons->polygons[nearest_index];
         geometry_msgs::PolygonStamped new_polygon;
@@ -563,6 +602,7 @@ namespace jsk_pcl_ros
     EnvironmentLock::Request& req,
     EnvironmentLock::Response& res)
   {
+    NODELET_INFO_STREAM(getName() << "::lockCallback");
     ++generation_;
     boost::mutex::scoped_lock(mutex_);
     
@@ -578,7 +618,7 @@ namespace jsk_pcl_ros
     processing_static_polygons_ = latest_static_polygons_;
     processing_static_coefficients_ = latest_static_coefficients_;
     
-    NODELET_DEBUG("lock %lu pointclouds",
+    NODELET_INFO("lock %lu pointclouds",
                  processing_input_indices_->cluster_indices.size());
     if (processing_input_polygons_->polygons.size()
         != processing_input_coefficients_->coefficients.size()) {
@@ -598,7 +638,7 @@ namespace jsk_pcl_ros
     pcl::PointCloud<PointT>::Ptr pcl_cloud (new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(*processing_input_, *pcl_cloud);
     
-    NODELET_DEBUG("estimating occlusion first");
+    NODELET_INFO("estimating occlusion first");
     // decompose pointcloud into segmented pointcloud
     std::vector<pcl::PointCloud<PointT>::Ptr> segmented_clouds;
     decomposePointCloud(
@@ -706,7 +746,7 @@ namespace jsk_pcl_ros
     // check collision
     // all the sampled points should near enough from target_polygon
     pcl::KdTreeFLANN<PointT>::Ptr target_kdtree = kdtrees_[plane_i];
-    // NODELET_DEBUG("checking %lu points", target_kdtree->getInputCloud()->points.size());
+    // NODELET_INFO("checking %lu points", target_kdtree->getInputCloud()->points.size());
     for (size_t i = 0; i < sampled_point_cloud->points.size(); i++) {
       PointT p = sampled_point_cloud->points[i];
       std::vector<int> k_indices;
@@ -852,7 +892,7 @@ namespace jsk_pcl_ros
       //                       j / (double)sampling_num, dividing_point);
       //   output->points.push_back(dividing_point);
       // }
-      //NODELET_DEBUG("sampled %d points", sampling_num);
+      //NODELET_INFO("sampled %d points", sampling_num);
       geometry_msgs::Point32 point = sample_polygon.polygon.points[i];
       PointT pcl_point;
       pcl_conversions::toPCL(point, pcl_point);

@@ -59,6 +59,16 @@ namespace jsk_pcl_ros
                                const Eigen::Vector3f C,
                                const Eigen::Vector3f D)
     {
+      // std::cout << "checking "
+      //           << "[" << from[0] << ", " << from[1] << ", " << from[2] << "]"
+      //           << "--"
+      //           << "[" << to[0] << ", " << to[1] << ", " << to[2] << "]"
+      //           << std::endl;
+      // std::cout << " penetrates "
+      //           << "[" << A[0] << ", " << A[1] << ", " << A[2] << "], "
+      //           << "[" << B[0] << ", " << B[1] << ", " << B[2] << "], "
+      //           << "[" << C[0] << ", " << C[1] << ", " << C[2] << "], "
+      //           << "[" << D[0] << ", " << D[1] << ", " << D[2] << "]" << std::endl;
       Eigen::Vector3f Across = (A - from).cross(d_);
       Eigen::Vector3f Bcross = (B - from).cross(d_);
       Eigen::Vector3f Ccross = (C - from).cross(d_);
@@ -67,11 +77,15 @@ namespace jsk_pcl_ros
       bool ac_direction = Across.dot(Ccross) < 0;
       bool ad_direction = Across.dot(Dcross) < 0;
       bool bc_direction = Bcross.dot(Ccross) < 0;
-      bool bd_direction = Bcross.dot(Dcross) < 0;
-      bool cd_direction = Ccross.dot(Dcross) < 0;
-      if ((ab_direction == ac_direction) && (ab_direction == ad_direction)
-          && (ab_direction == bc_direction) && (ab_direction == bd_direction)
-          && (ab_direction == cd_direction)) {
+      if (Across.norm() == 0 || 
+          Bcross.norm() == 0 || 
+          Ccross.norm() == 0 || 
+          Dcross.norm() == 0) {
+        return true;
+      }
+      else if ((ab_direction == ac_direction) && 
+               (ab_direction == ad_direction)
+               && (ab_direction == bc_direction)) {
         return false;
       }
       else {

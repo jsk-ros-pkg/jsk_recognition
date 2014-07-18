@@ -167,7 +167,7 @@ namespace jsk_pcl_ros
         }
       }
     }
-    NODELET_INFO("best coefficients: %f, %d", best_coefficient, best_index);
+    NODELET_DEBUG("best coefficients: %f, %d", best_coefficient, best_index);
     result_pub_.publish(result);
     if (best_index != -1) {
       pcl::PointCloud<pcl::PointXYZHSV>::Ptr best_cloud

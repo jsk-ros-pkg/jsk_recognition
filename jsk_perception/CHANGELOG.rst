@@ -2,6 +2,17 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.11 (2014-07-08)
+-------------------
+* jsk_perception does not depends on pcl, but depends on eigen and tf
+* Contributors: Ryohei Ueda
+
+0.1.10 (2014-07-07)
+-------------------
+* adding oriented_gradient_node
+* add calc_flow program to calc optical flow
+* Contributors: Hiroaki Yaguchi, Ryohei Ueda
+
 0.1.9 (2014-07-01)
 ------------------
 

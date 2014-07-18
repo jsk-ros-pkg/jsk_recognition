@@ -1,16 +1,19 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(jsk_perception)
 
-find_package(catkin REQUIRED COMPONENTS message_generation imagesift std_msgs sensor_msgs geometry_msgs cv_bridge image_geometry image_transport driver_base dynamic_reconfigure pcl_ros eigen roscpp nodelet rostest jsk_pcl_ros)
+find_package(catkin REQUIRED COMPONENTS message_generation imagesift std_msgs sensor_msgs geometry_msgs cv_bridge image_geometry image_transport driver_base dynamic_reconfigure eigen roscpp nodelet rostest tf rospack)
 find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem system signals)
+
+find_package(Eigen REQUIRED)
+include_directories(${Eigen_INCLUDE_DIRS})
 
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(cfg/camshiftdemo.cfg cfg/EdgeDetector.cfg cfg/HoughLines.cfg cfg/matchtemplate.cfg cfg/point_pose_extractor.cfg cfg/RectangleDetector.cfg
   cfg/ColorHistogram.cfg
   cfg/HoughCircles.cfg)
 
-add_message_files(FILES # ClusterPointIndices.msg
+add_message_files(FILES
       PointsArray.msg RotatedRectStamped.msg LineArray.msg Rect.msg Line.msg RotatedRect.msg SparseImage.msg
       Circle2D.msg Circle2DArray.msg)
 
@@ -21,8 +24,8 @@ generate_messages(
 )
 
 catkin_package(
-  CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs message_runtime jsk_pcl_ros
-  DEPENDS
+  CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs message_runtime
+  DEPENDS OpenCV
   INCLUDE_DIRS include
   LIBRARIES
 )
@@ -34,6 +37,7 @@ add_executable(point_pose_extractor src/point_pose_extractor.cpp)
 add_executable(white_balance_converter src/white_balance_converter.cpp)
 add_executable(hough_lines src/hough_lines.cpp)
 add_executable(rectangle_detector src/rectangle_detector.cpp)
+add_executable(calc_flow src/calc_flow.cpp)
 add_library(oriented_gradient src/oriented_gradient.cpp)
 add_executable(oriented_gradient_node src/oriented_gradient_node.cpp)
 
@@ -67,11 +71,12 @@ add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 
 target_link_libraries(camshiftdemo             ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 target_link_libraries(virtual_camera_mono      ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-target_link_libraries(point_pose_extractor     ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} /opt/ros/$ENV{ROS_DISTRO}/lib/librospack.so)
+target_link_libraries(point_pose_extractor     ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
 target_link_libraries(edge_detector            ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 target_link_libraries(white_balance_converter  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 target_link_libraries(hough_lines              ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 target_link_libraries(rectangle_detector       ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(calc_flow                ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 target_link_libraries(oriented_gradient_node   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} oriented_gradient)
 
 add_dependencies(camshiftdemo             ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
@@ -87,7 +92,7 @@ add_dependencies(rectangle_detector       ${PROJECT_NAME}_gencfg ${PROJECT_NAME}
 #  COMMAND ${PROJECT_SOURCE_DIR}/src/eusmodel_template_gen.sh)
 #add_custom_target(eusmodel_template ALL DEPENDS ${PROJECT_SOURCE_DIR}/template)
 
-install(TARGETS camshiftdemo virtual_camera_mono point_pose_extractor white_balance_converter hough_lines rectangle_detector ${PROJECT_NAME}
+install(TARGETS camshiftdemo virtual_camera_mono point_pose_extractor white_balance_converter hough_lines rectangle_detector calc_flow ${PROJECT_NAME}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

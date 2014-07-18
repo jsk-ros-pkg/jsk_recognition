@@ -45,12 +45,18 @@ namespace jsk_pcl_ros
   void HandleEstimator::onInit()
   {
     PCLNodelet::onInit();
+    output_buf.resize(100);
+
     //tf_listener_.reset(new tf::TransformListener());
     pnh_->param("gripper_size", gripper_size_, 0.08); // defaults to pr2 gripper size
     pnh_->param("approach_offset", approach_offset_, 0.1); // default to 10 cm
     pub_ = pnh_->advertise<geometry_msgs::PoseArray>("output", 1);
     pub_best_ = pnh_->advertise<geometry_msgs::PoseStamped>("output_best", 1);
+    pub_selected_ = pnh_->advertise<geometry_msgs::PoseStamped>("output_selected", 1);
+
     pub_preapproach_ = pnh_->advertise<geometry_msgs::PoseArray>("output_preapproach", 1);
+    pub_selected_preapproach_ = pnh_->advertise<geometry_msgs::PoseStamped>("output_selected_preapproach", 1);
+    sub_index_ = pnh_->subscribe<jsk_pcl_ros::Int32Stamped>("selected_index", 1, boost::bind( &HandleEstimator::selectedIndexCallback, this, _1));
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_box_.subscribe(*pnh_, "input_box", 1);
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
@@ -179,6 +185,8 @@ namespace jsk_pcl_ros
     best.header = pose_array.header;
     best.pose = pose_array.poses[pose_array.poses.size() / 2];
     pub_best_.publish(best);
+
+    output_buf.push_front(boost::make_tuple(pose_array, prepose_array));
   }
   
   void HandleEstimator::handleSmallEnoughLieOnPlane(
@@ -243,8 +251,30 @@ namespace jsk_pcl_ros
     best.header = pose_array.header;
     best.pose = pose_array.poses[pose_array.poses.size() / 2];
     pub_best_.publish(best);
+
+    output_buf.push_front(boost::make_tuple(pose_array, prepose_array));
   }
   
+  void HandleEstimator::selectedIndexCallback( const jsk_pcl_ros::Int32StampedConstPtr &index){
+    boost::circular_buffer<boost::tuple<geometry_msgs::PoseArray, geometry_msgs::PoseArray> >::iterator it = output_buf.begin();
+    while (it != output_buf.end()) {
+      geometry_msgs::PoseArray pose_array = it->get<0>();
+      geometry_msgs::PoseArray prepose_array = it->get<1>();
+
+      if(pose_array.header.stamp == index->header.stamp){
+	geometry_msgs::PoseStamped ps;
+	ps.header = pose_array.header;
+	ps.pose = pose_array.poses[index->data];
+	pub_selected_.publish(ps);
+
+	ps.header = prepose_array.header;
+	ps.pose = prepose_array.poses[index->data];
+	pub_selected_preapproach_.publish(ps);
+	break;
+      }
+      ++it;
+    }
+  }
 }
 
 typedef jsk_pcl_ros::HandleEstimator HandleEstimator;

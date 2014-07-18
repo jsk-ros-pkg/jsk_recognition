@@ -189,8 +189,10 @@ namespace jsk_pcl_ros
 
   void Plane::project(const Eigen::Vector3d& p, Eigen::Vector3d& output)
   {
-    double alpha = - p.dot(normal_);
-    output = p + alpha * normal_;
+    // double alpha = - p.dot(normal_);
+    // output = p + alpha * normal_;
+    double alpha = p.dot(normal_) - d_;
+    output = p - alpha * normal_;
   }
 
   Plane Plane::transform(const Eigen::Affine3d& transform)

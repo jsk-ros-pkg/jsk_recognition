@@ -62,10 +62,11 @@ namespace jsk_pcl_ros
     GridMap(double resolution, const std::vector<float>& coefficients);
     virtual ~GridMap();
     virtual void registerPoint(const pcl::PointXYZRGB& point);
-    virtual void registerLine(const pcl::PointXYZRGB& from, const pcl::PointXYZRGB& to);
+    virtual std::vector<GridIndex::Ptr> registerLine(const pcl::PointXYZRGB& from, const pcl::PointXYZRGB& to);
+    virtual void removeIndex(const GridIndex::Ptr& index);
     virtual void registerPointCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
-    virtual void registerIndex(const GridIndex::Ptr& index);
-    virtual void registerIndex(const int x, const int y);
+    virtual GridIndex::Ptr registerIndex(const GridIndex::Ptr& index);
+    virtual GridIndex::Ptr registerIndex(const int x, const int y);
     virtual void pointToIndex(const pcl::PointXYZRGB& point, GridIndex::Ptr index);
     virtual void pointToIndex(const Eigen::Vector3f& point, GridIndex::Ptr index);
     virtual void indicesToPointCloud(const std::vector<GridIndex::Ptr>& indices,

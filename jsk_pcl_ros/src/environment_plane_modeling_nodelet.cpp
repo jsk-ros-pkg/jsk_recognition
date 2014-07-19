@@ -348,13 +348,17 @@ namespace jsk_pcl_ros
       else {
         NODELET_INFO("registering 0 lines");
       }
+      std::vector<GridIndex::Ptr> line_indices;
       for (size_t i = 0; i < convex_polygon.polygon.points.size() - 1; i++) {
         geometry_msgs::Point32 from = convex_polygon.polygon.points[i];
         geometry_msgs::Point32 to = convex_polygon.polygon.points[i + 1];
         pcl::PointXYZRGB from_pcl, to_pcl;
         pcl_conversions::toPCL(from, from_pcl);
         pcl_conversions::toPCL(to, to_pcl);
-        grid->registerLine(from_pcl, to_pcl);
+        std::vector<GridIndex::Ptr> aline_indices = grid->registerLine(from_pcl, to_pcl);
+        for (size_t j = 0; j < aline_indices.size(); j++) {
+          line_indices.push_back(aline_indices[j]);
+        }
       }
       // the last one
       {
@@ -365,7 +369,6 @@ namespace jsk_pcl_ros
         pcl_conversions::toPCL(to, to_pcl);
         grid->registerLine(from_pcl, to_pcl);
       }
-      NODELET_INFO("hello");
       std::vector<GridIndex::Ptr> filled_indices;
       
       ConvexPolygon convex_polygon_model = ConvexPolygon::fromROSMsg(convex_polygon.polygon);
@@ -390,15 +393,13 @@ namespace jsk_pcl_ros
         normal.normalize();
         double alpha = normal.dot(centroid_eigen) - d;
         centroid_projected = centroid_eigen - alpha * normal;
-        //pcl_conversions::fromPCLToEigen(centroid, centroid_p);
         Eigen::Vector3d centroid_projected_d;
         centroid_projected_d[0] = centroid_projected[0];
         centroid_projected_d[1] = centroid_projected[1];
         centroid_projected_d[2] = centroid_projected[2];
         if (convex_polygon_model.isInside(centroid_projected_d)) {
-          //grid->registerPoint(centroid);
-          //grid->fillRegion(centroid.getVector3fMap(), filled_indices);
           grid->fillRegion(centroid_projected, filled_indices);
+          
           NODELET_INFO("%lu static polygon merged into %d env polygon and %lu points is required to fill",
                        *it, env_plane_index,
                        filled_indices.size() - before_point_size);
@@ -407,7 +408,10 @@ namespace jsk_pcl_ros
           NODELET_ERROR("the centroid point is outside of convex region");
         }
       }
-      
+      // remove line region
+      for (size_t j = 0; j < line_indices.size(); j++) {
+        grid->removeIndex(line_indices[j]);
+      }
       NODELET_INFO("add %lu points into %d cluster",
                    filled_indices.size(),
                    env_plane_index);

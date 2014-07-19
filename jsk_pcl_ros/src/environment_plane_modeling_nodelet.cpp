@@ -342,7 +342,12 @@ namespace jsk_pcl_ros
       GridMap::Ptr grid = grid_maps[env_plane_index];
       geometry_msgs::PolygonStamped convex_polygon
         = result_polygons.polygons[env_plane_index];
-      NODELET_INFO("registering %d lines", convex_polygon.polygon.points.size() - 1);
+      if (convex_polygon.polygon.points.size() > 0) {
+        NODELET_INFO("registering %lu lines", convex_polygon.polygon.points.size() - 1);
+      }
+      else {
+        NODELET_INFO("registering 0 lines");
+      }
       for (size_t i = 0; i < convex_polygon.polygon.points.size() - 1; i++) {
         geometry_msgs::Point32 from = convex_polygon.polygon.points[i];
         geometry_msgs::Point32 to = convex_polygon.polygon.points[i + 1];

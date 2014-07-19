@@ -250,6 +250,8 @@ namespace jsk_pcl_ros
       
       pcl::PointIndices one_indices;
       pcl::PointIndices one_boundaries;
+      std::vector<float> new_coefficients;
+      new_coefficients.resize(4, 0);
       for (std::set<int>::iterator it = cloud_sets[i].begin();
            it != cloud_sets[i].end();
            it++) {
@@ -263,12 +265,30 @@ namespace jsk_pcl_ros
         for (size_t j = 0; j < boundary_inlier.indices.size(); j++) {
           one_boundaries.indices.push_back(boundary_inlier.indices[j]);
         }
+        for (size_t i = 0; i < 4; i++) { // take summation of coefficients
+          new_coefficients[0] += model_coefficients[*it].values[0];
+          new_coefficients[1] += model_coefficients[*it].values[1];
+          new_coefficients[2] += model_coefficients[*it].values[2];
+          new_coefficients[3] += model_coefficients[*it].values[3];
+        }
       }
       if (one_indices.indices.size() == 0) {
         continue;
       }
+      // normalize coefficients
+      double norm = sqrt(new_coefficients[0] * new_coefficients[0] 
+                         + new_coefficients[1] * new_coefficients[1]
+                         + new_coefficients[2] * new_coefficients[2]);
+      new_coefficients[0] /= norm;
+      new_coefficients[1] /= norm;
+      new_coefficients[2] /= norm;
+      new_coefficients[3] /= norm;
       output_indices.push_back(one_indices);
-      output_coefficients.push_back(model_coefficients[(*cloud_sets[i].begin())]);
+      // take the average of the coefficients
+      pcl::ModelCoefficients pcl_new_coefficients;
+      pcl_new_coefficients.values = new_coefficients;
+      output_coefficients.push_back(pcl_new_coefficients);
+      //output_coefficients.push_back(model_coefficients[(*cloud_sets[i].begin())]);
       // estimate concave hull
 
       pcl::PointCloud<PointT>::Ptr cloud_projected (new pcl::PointCloud<PointT>());

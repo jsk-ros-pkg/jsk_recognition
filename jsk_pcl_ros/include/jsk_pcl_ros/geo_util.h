@@ -44,6 +44,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <geometry_msgs/Polygon.h>
+
 namespace jsk_pcl_ros
 {
   // (infinite) line
@@ -114,6 +116,7 @@ namespace jsk_pcl_ros
     ConvexPolygon(const Vertices& vertices);
     ConvexPolygon(const Vertices& vertices,
                   const std::vector<float>& coefficients);
+    
     //virtual Polygon flip();
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3d& output);
     virtual void projectOnPlane(const Eigen::Vector3d& p, Eigen::Vector3d& output);
@@ -121,6 +124,7 @@ namespace jsk_pcl_ros
     virtual bool isInside(const Eigen::Vector3d& p);
     virtual ConvexPolygon flipConvex();
     virtual Eigen::Vector3d getCentroid();
+    static ConvexPolygon fromROSMsg(const geometry_msgs::Polygon& polygon);
   protected:
     Vertices vertices_;
   private:

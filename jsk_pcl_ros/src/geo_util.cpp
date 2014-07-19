@@ -34,6 +34,7 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/geo_util.h"
+#include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <algorithm>
 #include <iterator>
 #include <cfloat>
@@ -188,8 +189,10 @@ namespace jsk_pcl_ros
 
   void Plane::project(const Eigen::Vector3d& p, Eigen::Vector3d& output)
   {
-    double alpha = - p.dot(normal_);
-    output = p + alpha * normal_;
+    // double alpha = - p.dot(normal_);
+    // output = p + alpha * normal_;
+    double alpha = p.dot(normal_) - d_;
+    output = p - alpha * normal_;
   }
 
   Plane Plane::transform(const Eigen::Affine3d& transform)
@@ -201,8 +204,8 @@ namespace jsk_pcl_ros
     n[3] = d_;
     Eigen::Matrix4d m = transform.matrix();
     Eigen::Vector4d n_d = m.transpose() * n;
-    Eigen::Vector4d n_dd = n_d.normalized();
-    
+    //Eigen::Vector4d n_dd = n_d.normalized();
+    Eigen::Vector4d n_dd = n_d / sqrt(n_d[0] * n_d[0] + n_d[1] * n_d[1] + n_d[2] * n_d[2]);
     return Plane(Eigen::Vector3d(n_dd[0], n_dd[1], n_dd[2]), n_dd[3]);
   }
   
@@ -319,6 +322,17 @@ namespace jsk_pcl_ros
       ret = ret + vertices_[i];
     }
     return ret / vertices_.size();
+  }
+
+  ConvexPolygon ConvexPolygon::fromROSMsg(const geometry_msgs::Polygon& polygon)
+  {
+    std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> > vertices;
+    for (size_t i = 0; i < polygon.points.size(); i++) {
+      Eigen::Vector3d p;
+      pcl_conversions::fromMSGToEigen(polygon.points[i], p);
+      vertices.push_back(p);
+    }
+    return ConvexPolygon(vertices);
   }
   
 }

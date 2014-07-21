@@ -113,13 +113,13 @@ namespace jsk_pcl_ros
   }
 
   Plane::Plane(Eigen::Vector3d normal, double d) :
-    normal_(normal), d_(d)
+    normal_(normal.normalized()), d_(d / normal.norm())
   {
     
   }
 
   Plane::Plane(Eigen::Vector3d normal, Eigen::Vector3d p) :
-    normal_(normal), d_(- normal.dot(p))
+    normal_(normal.normalized()), d_(- normal.dot(p) / normal.norm())
   {
     
   }
@@ -229,6 +229,11 @@ namespace jsk_pcl_ros
     return normal_;
   }
 
+  double Plane::getD() 
+  {
+  return d_;
+  }
+
   ConvexPolygon::ConvexPolygon(const std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> >& vertices,
                                const std::vector<float>& coefficients):
     Plane(coefficients), vertices_(vertices)
@@ -238,7 +243,7 @@ namespace jsk_pcl_ros
     
   
   ConvexPolygon::ConvexPolygon(const std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> >& vertices):
-    Plane((vertices[1] - vertices[0]).cross(vertices[2] - vertices[0]), vertices[0]),
+    Plane((vertices[1] - vertices[0]).cross(vertices[2] - vertices[0]).normalized(), vertices[0]),
     vertices_(vertices)
   {
 

@@ -38,7 +38,7 @@
 #include <Eigen/Core>
 #include "jsk_pcl_ros/geo_util.h"
 #include <eigen_conversions/eigen_msg.h>
-
+#include <nodelet/nodelet.h>
 //#define DEBUG_GRID_MAP
 
 namespace jsk_pcl_ros
@@ -243,23 +243,23 @@ namespace jsk_pcl_ros
   bool GridMap::getValue(const int x, const int y)
   {
     // check line
-    for (size_t i = 0; i < lines_.size(); i++) {
-      GridLine::Ptr line = lines_[i];
-      Eigen::Vector3f A, B, C, D;
-      gridToPoint2(GridIndex(x, y), A);
-      gridToPoint2(GridIndex(x + 1, y), B);
-      gridToPoint2(GridIndex(x + 1, y + 1), C);
-      gridToPoint2(GridIndex(x, y + 1), D);
-      bool penetrate = line->penetrateGrid(A, B, C, D);
-      if (penetrate) {
-      //   // printf("(%lf, %lf, %lf) - (%lf, %lf, %lf) penetrate (%d, %d)\n",
-      //   //        line->from[0],line->from[1],line->from[2],
-      //   //        line->to[0],line->to[1],line->to[2],
-      //   //        x, y);
-      //   //std::cout << "penetrate"
-        return true;
-      }
-    }
+    // for (size_t i = 0; i < lines_.size(); i++) {
+    //   GridLine::Ptr line = lines_[i];
+    //   Eigen::Vector3f A, B, C, D;
+    //   gridToPoint2(GridIndex(x, y), A);
+    //   gridToPoint2(GridIndex(x + 1, y), B);
+    //   gridToPoint2(GridIndex(x + 1, y + 1), C);
+    //   gridToPoint2(GridIndex(x, y + 1), D);
+    //   bool penetrate = line->penetrateGrid(A, B, C, D);
+    //   if (penetrate) {
+    //   //   // printf("(%lf, %lf, %lf) - (%lf, %lf, %lf) penetrate (%d, %d)\n",
+    //   //   //        line->from[0],line->from[1],line->from[2],
+    //   //   //        line->to[0],line->to[1],line->to[2],
+    //   //   //        x, y);
+    //   //   //std::cout << "penetrate"
+    //     return true;
+    //   }
+    // }
 
     ColumnIterator it = data_.find(x);
     if (it == data_.end()) {
@@ -391,6 +391,13 @@ namespace jsk_pcl_ros
     return Plane(Eigen::Vector3d(normal_[0], normal_[1], normal_[2]), d_);
   }
 
+  Plane::Ptr GridMap::toPlanePtr()
+  {
+    Plane::Ptr ret (new Plane(Eigen::Vector3d(normal_[0], normal_[1], normal_[2]), d_));
+    return ret;
+  }
+
+
   std::vector<float> GridMap::getCoefficients()
   {
     std::vector<float> output;
@@ -432,5 +439,11 @@ namespace jsk_pcl_ros
       }
     }
   }
-
+  bool GridMap::isBinsOccupied(const Eigen::Vector3f& p)
+  {
+    GridIndex::Ptr ret (new GridIndex());
+    pointToIndex(p, ret);
+    //ROS_INFO("checking (%d, %d)", ret->x, ret->y);
+    return getValue(ret);
+  }
 }

@@ -57,6 +57,8 @@
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
 
+#include <std_srvs/Empty.h>
+
 #include "jsk_pcl_ros/pcl_util.h"
 
 #include "jsk_pcl_ros/grid_map.h"
@@ -99,10 +101,15 @@ namespace jsk_pcl_ros
       const PolygonArray::ConstPtr& static_polygons,
       const ModelCoefficientsArray::ConstPtr& static_coefficients);
     virtual void configCallback(Config &config, uint32_t level);
-    virtual bool lockCallback(EnvironmentLock::Request& req,
-                              EnvironmentLock::Response& res);
+    virtual bool lockCallback();
+    virtual bool dummyLockCallback(EnvironmentLock::Request& req,
+                                   EnvironmentLock::Response& res);
     virtual bool polygonOnEnvironmentCallback(PolygonOnEnvironment::Request& req,
                                               PolygonOnEnvironment::Response& res);
+    virtual bool primitiveLockCallback(std_srvs::Empty::Request& req,
+                                       std_srvs::Empty::Response& res);
+    virtual bool primitiveUnlockCallback(std_srvs::Empty::Request& req,
+                                         std_srvs::Empty::Response& res);
     virtual bool polygonNearEnoughToPointCloud(
       const size_t plane_i,
       const pcl::PointCloud<PointT>::Ptr sampled_point_cloud);
@@ -189,7 +196,8 @@ namespace jsk_pcl_ros
     
     ros::ServiceServer lock_service_;
     ros::ServiceServer polygon_on_environment_service_;
-
+    ros::ServiceServer primitive_lock_service_;
+    ros::ServiceServer primitive_unlock_service_;
     ros::Publisher debug_polygon_pub_;
     ros::Publisher debug_env_polygon_pub_;
     ros::Publisher debug_pointcloud_pub_;

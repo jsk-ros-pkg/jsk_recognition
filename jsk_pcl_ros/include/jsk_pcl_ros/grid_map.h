@@ -83,11 +83,13 @@ namespace jsk_pcl_ros
     virtual void originPose(Eigen::Affine3d& output);
     virtual void toMsg(SparseOccupancyGrid& grid);
     virtual Plane toPlane();
+    virtual Plane::Ptr toPlanePtr();
     virtual void vote();
     virtual unsigned int getVoteNum();
     virtual void setGeneration(unsigned int generation);
     virtual unsigned int getGeneration();
     virtual std::vector<float> getCoefficients();
+    virtual bool isBinsOccupied(const Eigen::Vector3f& p);
   protected:    
     double resolution_;
     Eigen::Vector3f O_;

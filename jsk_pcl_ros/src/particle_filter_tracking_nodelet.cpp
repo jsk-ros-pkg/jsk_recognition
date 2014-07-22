@@ -237,7 +237,7 @@ namespace jsk_pcl_ros
       pcl::PointCloud<pcl::PointXYZRGBA>::Ptr new_target_cloud (new pcl::PointCloud<pcl::PointXYZRGBA>);
       std::vector<int> indices;
       new_target_cloud->is_dense = false;
-      pcl::removeNaNFromPointCloud(*new_target_cloud, *new_target_cloud, indices);
+      pcl::removeNaNFromPointCloud(*recieved_target_cloud, *new_target_cloud, indices);
 
       //prepare the model of tracker's target
       Eigen::Vector4f c;

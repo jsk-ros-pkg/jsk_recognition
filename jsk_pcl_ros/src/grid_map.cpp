@@ -38,6 +38,8 @@
 #include <Eigen/Core>
 #include "jsk_pcl_ros/geo_util.h"
 #include <eigen_conversions/eigen_msg.h>
+#include <nodelet/nodelet.h>
+//#define DEBUG_GRID_MAP
 
 namespace jsk_pcl_ros
 {
@@ -67,7 +69,7 @@ namespace jsk_pcl_ros
     
   }
 
-  void GridMap::registerIndex(const int x, const int y)
+  GridIndex::Ptr GridMap::registerIndex(const int x, const int y)
   {
     ColumnIterator it = data_.find(x);
     if (it != data_.end()) {
@@ -78,11 +80,13 @@ namespace jsk_pcl_ros
       new_row.insert(y);
       data_[x] = new_row;
     }
+    GridIndex::Ptr ret(new GridIndex(x, y));
+    return ret;
   }
   
-  void GridMap::registerIndex(const GridIndex::Ptr& index)
+  GridIndex::Ptr GridMap::registerIndex(const GridIndex::Ptr& index)
   {
-    registerIndex(index->x, index->y);
+    return registerIndex(index->x, index->y);
   }
   
   void GridMap::registerPoint(const pcl::PointXYZRGB& point)
@@ -93,11 +97,111 @@ namespace jsk_pcl_ros
     registerIndex(index);
   }
   
-  void GridMap::registerLine(const pcl::PointXYZRGB& from,
-                             const pcl::PointXYZRGB& to)
+  std::vector<GridIndex::Ptr> GridMap::registerLine(const pcl::PointXYZRGB& from,
+                                                 const pcl::PointXYZRGB& to)
   {
-    GridLine::Ptr new_line (new GridLine(from, to));
-    lines_.push_back(new_line);
+#ifdef DEBUG_GRID_MAP
+    std::cout << "newline" << std::endl;
+#endif
+    std::vector<GridIndex::Ptr> added_indices;
+    //GridLine::Ptr new_line (new GridLine(from, to));
+    //lines_.push_back(new_line);
+    // count up all the grids which the line penetrates
+    
+    // 1. convert to y = ax + b style equation.
+    // 2. move x from the start index to the end index and count up the y range
+    // if it cannot be convert to y = ax + b style, it means the equation
+    // is represented as x = c style.
+    double from_x = from.getVector3fMap().dot(ex_) / resolution_;
+    double from_y = from.getVector3fMap().dot(ey_) / resolution_;
+    double to_x = to.getVector3fMap().dot(ex_) / resolution_;
+    double to_y = to.getVector3fMap().dot(ey_) / resolution_;
+#ifdef DEBUG_GRID_MAP
+    std::cout << "registering (" << (int)from_x << ", " << (int)from_y << ")" << std::endl;
+    std::cout << "registering (" << (int)to_x << ", " << (int)to_y << ")" << std::endl;
+#endif
+    added_indices.push_back(registerIndex(from_x, from_y));
+    added_indices.push_back(registerIndex(to_x, to_y));
+    if (from_x != to_x) {
+      double a = (to_y - from_y) / (to_x - from_x);
+      double b = - a * from_x + from_y;
+#ifdef DEBUG_GRID_MAP
+      std::cout << "a: " << a << std::endl;
+#endif
+      if (a == 0.0) {
+#ifdef DEBUG_GRID_MAP
+        std::cout << "parallel to x" << std::endl;
+#endif
+        int from_int_x = (int)from_x;
+        int to_int_x = (int)to_x;
+        int int_y = (int)from_y;
+        if (from_int_x > to_int_x) {
+          std::swap(from_int_x, to_int_x);
+        }
+        for (int ix = from_int_x; ix < to_int_x; ++ix) {
+          added_indices.push_back(registerIndex(ix, int_y));
+#ifdef DEBUG_GRID_MAP
+          std::cout << "registering (" << ix << ", " << int_y << ")" << std::endl;
+#endif
+        }
+      }
+      else if (fabs(a) < 1.0) {
+#ifdef DEBUG_GRID_MAP
+        std::cout << "based on x" << std::endl;
+#endif
+        int from_int_x = (int)from_x;
+        int to_int_x = (int)to_x;
+        if (from_int_x > to_int_x) {
+          std::swap(from_int_x, to_int_x);
+        }
+        
+        for (int ix = from_int_x; ix < to_int_x; ++ix) {
+          double y = a * ix + b;
+          added_indices.push_back(registerIndex(ix, (int)y));
+#ifdef DEBUG_GRID_MAP
+          std::cout << "registering (" << ix << ", " << (int)y << ")" << std::endl;
+#endif
+        }
+      }
+      else {
+#ifdef DEBUG_GRID_MAP
+        std::cout << "based on y" << std::endl;
+#endif
+        int from_int_y = (int)from_y;
+        int to_int_y = (int)to_y;
+        if (from_int_y > to_int_y) {
+          std::swap(from_int_y, to_int_y);
+        }
+        
+        for (int iy = from_int_y; iy < to_int_y; ++iy) {
+          double x = iy / a - b / a;
+          added_indices.push_back(registerIndex((int)x, iy));
+#ifdef DEBUG_GRID_MAP
+          std::cout << "registering (" << (int)x << ", " << iy << ")" << std::endl;
+#endif
+        }
+      }
+      
+    }
+    else {
+#ifdef DEBUG_GRID_MAP
+      std::cout << "parallel to y" << std::endl;
+#endif
+      // the line is parallel to y
+      int from_int_y = (int)from_y;
+      int to_int_y = (int)to_y;
+      int int_x = (int)from_x;
+      if (from_int_y > to_int_y) {
+        std::swap(from_int_y, to_int_y);
+      }
+      for (int iy = from_int_y; iy < to_int_y; ++iy) {
+        added_indices.push_back(registerIndex(int_x, iy));
+#ifdef DEBUG_GRID_MAP
+        std::cout << "registering (" << int_x << ", " << (int)iy << ")" << std::endl;
+#endif
+      }
+    }
+    return added_indices;
   }
 
   void GridMap::registerPointCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
@@ -125,35 +229,37 @@ namespace jsk_pcl_ros
 
   void GridMap::gridToPoint(const GridIndex& index, Eigen::Vector3f& pos)
   {
-    pos = resolution_ * (index.x * ex_ + index.y * ey_) + O_;
+    //pos = resolution_ * (index.x * ex_ + index.y * ey_) + O_;
+    pos = resolution_ * ((index.x + 0.5) * ex_ + (index.y + 0.5) * ey_) + O_;
   }
 
   void GridMap::gridToPoint2(const GridIndex& index, Eigen::Vector3f& pos)
   {
-    pos = resolution_ * ((index.x - 0.5) * ex_ + (index.y - 0.5) * ey_) + O_;
+    //pos = resolution_ * ((index.x - 0.5) * ex_ + (index.y - 0.5) * ey_) + O_;
+    pos = resolution_ * ((index.x - 0.0) * ex_ + (index.y - 0.0) * ey_) + O_;
   }
 
   
   bool GridMap::getValue(const int x, const int y)
   {
     // check line
-    for (size_t i = 0; i < lines_.size(); i++) {
-      GridLine::Ptr line = lines_[i];
-      Eigen::Vector3f A, B, C, D;
-      gridToPoint2(GridIndex(x, y), A);
-      gridToPoint2(GridIndex(x + 1, y), B);
-      gridToPoint2(GridIndex(x + 1, y + 1), C);
-      gridToPoint2(GridIndex(x, y + 1), D);
-      bool penetrate = line->penetrateGrid(A, B, C, D);
-      if (penetrate) {
-        // printf("(%lf, %lf, %lf) - (%lf, %lf, %lf) penetrate (%d, %d)\n",
-        //        line->from[0],line->from[1],line->from[2],
-        //        line->to[0],line->to[1],line->to[2],
-        //        x, y);
-        //std::cout << "penetrate"
-        return true;
-      }
-    }
+    // for (size_t i = 0; i < lines_.size(); i++) {
+    //   GridLine::Ptr line = lines_[i];
+    //   Eigen::Vector3f A, B, C, D;
+    //   gridToPoint2(GridIndex(x, y), A);
+    //   gridToPoint2(GridIndex(x + 1, y), B);
+    //   gridToPoint2(GridIndex(x + 1, y + 1), C);
+    //   gridToPoint2(GridIndex(x, y + 1), D);
+    //   bool penetrate = line->penetrateGrid(A, B, C, D);
+    //   if (penetrate) {
+    //   //   // printf("(%lf, %lf, %lf) - (%lf, %lf, %lf) penetrate (%d, %d)\n",
+    //   //   //        line->from[0],line->from[1],line->from[2],
+    //   //   //        line->to[0],line->to[1],line->to[2],
+    //   //   //        x, y);
+    //   //   //std::cout << "penetrate"
+    //     return true;
+    //   }
+    // }
 
     ColumnIterator it = data_.find(x);
     if (it == data_.end()) {
@@ -182,9 +288,26 @@ namespace jsk_pcl_ros
 
   void GridMap::fillRegion(const GridIndex::Ptr start, std::vector<GridIndex::Ptr>& output)
   {
+#ifdef DEBUG_GRID_MAP
+    std::cout << "filling " << start->x << ", " << start->y << std::endl;
+#endif
     output.push_back(start);
     registerIndex(start);
-    
+#ifdef DEBUG_GRID_MAP
+    if (abs(start->x) > 100 || abs(start->y) > 100) {
+      //exit(1);
+      std::cout << "force to quit" << std::endl;
+      for (size_t i = 0; i < lines_.size(); i++) {
+        GridLine::Ptr line = lines_[i];
+        Eigen::Vector3f from = line->from;
+        Eigen::Vector3f to = line->to;
+        std::cout << "line[" << i << "]: "
+                  << "[" << from[0] << ", " << from[1] << ", " << from[2] << "] -- "
+                  << "[" << to[0] << ", " << to[1] << ", " << to[2] << std::endl;
+      }
+      return;                   // force to quit
+    }
+#endif
     GridIndex U(start->x, start->y + 1),
               D(start->x, start->y - 1),
               R(start->x + 1, start->y),
@@ -268,6 +391,13 @@ namespace jsk_pcl_ros
     return Plane(Eigen::Vector3d(normal_[0], normal_[1], normal_[2]), d_);
   }
 
+  Plane::Ptr GridMap::toPlanePtr()
+  {
+    Plane::Ptr ret (new Plane(Eigen::Vector3d(normal_[0], normal_[1], normal_[2]), d_));
+    return ret;
+  }
+
+
   std::vector<float> GridMap::getCoefficients()
   {
     std::vector<float> output;
@@ -297,4 +427,23 @@ namespace jsk_pcl_ros
     return generation_;
   }
   
+  void GridMap::removeIndex(const GridIndex::Ptr& index)
+  {
+    int x = index->x;
+    int y = index->y;
+    ColumnIterator it = data_.find(x);
+    if (it != data_.end()) {
+      RowIterator rit = (it->second).find(y);
+      if (rit != it->second.end()) {
+        it->second.erase(rit);
+      }
+    }
+  }
+  bool GridMap::isBinsOccupied(const Eigen::Vector3f& p)
+  {
+    GridIndex::Ptr ret (new GridIndex());
+    pointToIndex(p, ret);
+    //ROS_INFO("checking (%d, %d)", ret->x, ret->y);
+    return getValue(ret);
+  }
 }

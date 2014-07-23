@@ -34,6 +34,7 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/geo_util.h"
+#include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <algorithm>
 #include <iterator>
 #include <cfloat>
@@ -112,13 +113,13 @@ namespace jsk_pcl_ros
   }
 
   Plane::Plane(Eigen::Vector3d normal, double d) :
-    normal_(normal), d_(d)
+    normal_(normal.normalized()), d_(d / normal.norm())
   {
     
   }
 
   Plane::Plane(Eigen::Vector3d normal, Eigen::Vector3d p) :
-    normal_(normal), d_(- normal.dot(p))
+    normal_(normal.normalized()), d_(- normal.dot(p) / normal.norm())
   {
     
   }
@@ -188,8 +189,10 @@ namespace jsk_pcl_ros
 
   void Plane::project(const Eigen::Vector3d& p, Eigen::Vector3d& output)
   {
-    double alpha = - p.dot(normal_);
-    output = p + alpha * normal_;
+    // double alpha = - p.dot(normal_);
+    // output = p + alpha * normal_;
+    double alpha = p.dot(normal_) - d_;
+    output = p - alpha * normal_;
   }
 
   Plane Plane::transform(const Eigen::Affine3d& transform)
@@ -201,8 +204,8 @@ namespace jsk_pcl_ros
     n[3] = d_;
     Eigen::Matrix4d m = transform.matrix();
     Eigen::Vector4d n_d = m.transpose() * n;
-    Eigen::Vector4d n_dd = n_d.normalized();
-    
+    //Eigen::Vector4d n_dd = n_d.normalized();
+    Eigen::Vector4d n_dd = n_d / sqrt(n_d[0] * n_d[0] + n_d[1] * n_d[1] + n_d[2] * n_d[2]);
     return Plane(Eigen::Vector3d(n_dd[0], n_dd[1], n_dd[2]), n_dd[3]);
   }
   
@@ -226,6 +229,11 @@ namespace jsk_pcl_ros
     return normal_;
   }
 
+  double Plane::getD() 
+  {
+  return d_;
+  }
+
   ConvexPolygon::ConvexPolygon(const std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> >& vertices,
                                const std::vector<float>& coefficients):
     Plane(coefficients), vertices_(vertices)
@@ -235,7 +243,7 @@ namespace jsk_pcl_ros
     
   
   ConvexPolygon::ConvexPolygon(const std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> >& vertices):
-    Plane((vertices[1] - vertices[0]).cross(vertices[2] - vertices[0]), vertices[0]),
+    Plane((vertices[1] - vertices[0]).cross(vertices[2] - vertices[0]).normalized(), vertices[0]),
     vertices_(vertices)
   {
 
@@ -319,6 +327,17 @@ namespace jsk_pcl_ros
       ret = ret + vertices_[i];
     }
     return ret / vertices_.size();
+  }
+
+  ConvexPolygon ConvexPolygon::fromROSMsg(const geometry_msgs::Polygon& polygon)
+  {
+    std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> > vertices;
+    for (size_t i = 0; i < polygon.points.size(); i++) {
+      Eigen::Vector3d p;
+      pcl_conversions::fromMSGToEigen(polygon.points[i], p);
+      vertices.push_back(p);
+    }
+    return ConvexPolygon(vertices);
   }
   
 }

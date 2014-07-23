@@ -44,6 +44,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <geometry_msgs/Polygon.h>
+
 namespace jsk_pcl_ros
 {
   // (infinite) line
@@ -98,6 +100,7 @@ namespace jsk_pcl_ros
     virtual Plane transform(const Eigen::Affine3d& transform);
     virtual void toCoefficients(std::vector<float>& output);
     virtual std::vector<float> toCoefficients();
+    virtual double getD();
   protected:
     Eigen::Vector3d normal_;
     double d_;
@@ -108,12 +111,15 @@ namespace jsk_pcl_ros
   {
   public:
     typedef boost::shared_ptr<ConvexPolygon> Ptr;
+    typedef Eigen::Vector3d Vertex;
+            
     typedef std::vector<Eigen::Vector3d,
                         Eigen::aligned_allocator<Eigen::Vector3d> > Vertices;
     // vertices should be CW
     ConvexPolygon(const Vertices& vertices);
     ConvexPolygon(const Vertices& vertices,
                   const std::vector<float>& coefficients);
+    
     //virtual Polygon flip();
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3d& output);
     virtual void projectOnPlane(const Eigen::Vector3d& p, Eigen::Vector3d& output);
@@ -121,6 +127,7 @@ namespace jsk_pcl_ros
     virtual bool isInside(const Eigen::Vector3d& p);
     virtual ConvexPolygon flipConvex();
     virtual Eigen::Vector3d getCentroid();
+    static ConvexPolygon fromROSMsg(const geometry_msgs::Polygon& polygon);
   protected:
     Vertices vertices_;
   private:

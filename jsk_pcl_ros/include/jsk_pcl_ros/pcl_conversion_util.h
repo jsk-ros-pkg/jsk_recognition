@@ -66,6 +66,8 @@ namespace pcl_conversions
                geometry_msgs::Point32& msg);
   void fromMSGToEigen(const geometry_msgs::Point32& msg,
                       Eigen::Vector3d& p);
+  void fromMSGToEigen(const geometry_msgs::Point32& msg,
+                      Eigen::Vector3f& p);
   void fromPCLToEigen(const pcl::PointXYZRGB& p,
                       Eigen::Vector3d& output);
 }

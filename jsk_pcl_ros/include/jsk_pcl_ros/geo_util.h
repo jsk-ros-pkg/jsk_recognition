@@ -48,19 +48,24 @@
 
 namespace jsk_pcl_ros
 {
+  void convertEigenVector(const Eigen::Vector3f& input,
+                          Eigen::Vector3d& output);
+  void convertEigenVector(const Eigen::Vector3d& input,
+                          Eigen::Vector3f& output);
+  
   // (infinite) line
   class Line
   {
   public:
     typedef boost::shared_ptr<Line> Ptr;
-    Line(const Eigen::Vector3d& direction, const Eigen::Vector3d& origin);
-    virtual void getDirection(Eigen::Vector3d& output);
-    virtual double distanceToPoint(const Eigen::Vector3d& from);
-    virtual double distanceToPoint(const Eigen::Vector3d& from, Eigen::Vector3d& foot);
-    virtual void foot(const Eigen::Vector3d& point, Eigen::Vector3d& output);
+    Line(const Eigen::Vector3f& direction, const Eigen::Vector3f& origin);
+    virtual void getDirection(Eigen::Vector3f& output);
+    virtual double distanceToPoint(const Eigen::Vector3f& from);
+    virtual double distanceToPoint(const Eigen::Vector3f& from, Eigen::Vector3f& foot);
+    virtual void foot(const Eigen::Vector3f& point, Eigen::Vector3f& output);
   protected:
-    Eigen::Vector3d direction_;
-    Eigen::Vector3d origin_;
+    Eigen::Vector3f direction_;
+    Eigen::Vector3f origin_;
   private:
   };
 
@@ -68,11 +73,11 @@ namespace jsk_pcl_ros
   {
   public:
     typedef boost::shared_ptr<Segment> Ptr;
-    Segment(const Eigen::Vector3d& from, const Eigen::Vector3d to);
-    virtual void foot(const Eigen::Vector3d& point, Eigen::Vector3d& output);
-    virtual double dividingRatio(const Eigen::Vector3d& point);
+    Segment(const Eigen::Vector3f& from, const Eigen::Vector3f to);
+    virtual void foot(const Eigen::Vector3f& point, Eigen::Vector3f& output);
+    virtual double dividingRatio(const Eigen::Vector3f& point);
   protected:
-    Eigen::Vector3d from_, to_;
+    Eigen::Vector3f from_, to_;
   private:
   };
 
@@ -81,28 +86,31 @@ namespace jsk_pcl_ros
   public:
     typedef boost::shared_ptr<Plane> Ptr;
     Plane(const std::vector<float>& coefficients);
-    Plane(Eigen::Vector3d normal, double d);
-    Plane(Eigen::Vector3d normal, Eigen::Vector3d p);
+    Plane(Eigen::Vector3f normal, double d);
+    Plane(Eigen::Vector3f normal, Eigen::Vector3f p);
     virtual ~Plane();
     virtual Plane flip();
     
     virtual bool isSameDirection(const Plane& another);
-    virtual bool isSameDirection(const Eigen::Vector3d& another_normal);
+    virtual bool isSameDirection(const Eigen::Vector3f& another_normal);
     virtual double signedDistanceToPoint(const Eigen::Vector4f p);
     virtual double distanceToPoint(const Eigen::Vector4f p);
-    virtual double signedDistanceToPoint(const Eigen::Vector3d p);
-    virtual double distanceToPoint(const Eigen::Vector3d p);
+    virtual double signedDistanceToPoint(const Eigen::Vector3f p);
+    virtual double distanceToPoint(const Eigen::Vector3f p);
     
     virtual double distance(const Plane& another);
     virtual double angle(const Plane& another);
+    virtual void project(const Eigen::Vector3f& p, Eigen::Vector3f& output);
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3d& output);
-    virtual Eigen::Vector3d getNormal();
+    virtual void project(const Eigen::Vector3d& p, Eigen::Vector3f& output);
+    virtual void project(const Eigen::Vector3f& p, Eigen::Vector3d& output);
+    virtual Eigen::Vector3f getNormal();
     virtual Plane transform(const Eigen::Affine3d& transform);
     virtual void toCoefficients(std::vector<float>& output);
     virtual std::vector<float> toCoefficients();
     virtual double getD();
   protected:
-    Eigen::Vector3d normal_;
+    Eigen::Vector3f normal_;
     double d_;
   private:
   };
@@ -111,22 +119,25 @@ namespace jsk_pcl_ros
   {
   public:
     typedef boost::shared_ptr<ConvexPolygon> Ptr;
-    typedef Eigen::Vector3d Vertex;
+    typedef Eigen::Vector3f Vertex;
             
-    typedef std::vector<Eigen::Vector3d,
-                        Eigen::aligned_allocator<Eigen::Vector3d> > Vertices;
+    typedef std::vector<Eigen::Vector3f,
+                        Eigen::aligned_allocator<Eigen::Vector3f> > Vertices;
     // vertices should be CW
     ConvexPolygon(const Vertices& vertices);
     ConvexPolygon(const Vertices& vertices,
                   const std::vector<float>& coefficients);
     
     //virtual Polygon flip();
+    virtual void project(const Eigen::Vector3f& p, Eigen::Vector3f& output);
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3d& output);
-    virtual void projectOnPlane(const Eigen::Vector3d& p, Eigen::Vector3d& output);
+    virtual void project(const Eigen::Vector3d& p, Eigen::Vector3f& output);
+    virtual void project(const Eigen::Vector3f& p, Eigen::Vector3d& output);
+    virtual void projectOnPlane(const Eigen::Vector3f& p, Eigen::Vector3f& output);
     // p should be a point on the plane
-    virtual bool isInside(const Eigen::Vector3d& p);
+    virtual bool isInside(const Eigen::Vector3f& p);
     virtual ConvexPolygon flipConvex();
-    virtual Eigen::Vector3d getCentroid();
+    virtual Eigen::Vector3f getCentroid();
     static ConvexPolygon fromROSMsg(const geometry_msgs::Polygon& polygon);
   protected:
     Vertices vertices_;

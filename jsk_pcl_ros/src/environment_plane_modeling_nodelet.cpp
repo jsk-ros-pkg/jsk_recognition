@@ -143,7 +143,7 @@ namespace jsk_pcl_ros
   void EnvironmentPlaneModeling::updateDiagnostic(
     diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
-    boost::mutex::scoped_lock(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
     stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "EnvironmentPlaneModeling running");
     
     stat.add("Time to estimate occlusion (Avg.)",
@@ -643,7 +643,6 @@ namespace jsk_pcl_ros
   bool EnvironmentPlaneModeling::lockCallback()
   {
     //NODELET_INFO_STREAM(getName() << "::lockCallback");
-    //boost::mutex::scoped_lock(mutex_);
     ++generation_;
     
     if (!latest_input_) {
@@ -901,7 +900,6 @@ namespace jsk_pcl_ros
     PolygonOnEnvironment::Request& req,
     PolygonOnEnvironment::Response& res)
   {
-    //boost::mutex::scoped_lock(mutex_);
     if (req.environment_id != environment_id_ && req.environment_id != 0) { // 0 is always OK
       NODELET_FATAL("environment id does not match. %u is provided but the environment stored is %u",
                     req.environment_id,

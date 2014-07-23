@@ -38,7 +38,7 @@
 #include <Eigen/Core>
 #include "jsk_pcl_ros/geo_util.h"
 #include <eigen_conversions/eigen_msg.h>
-
+#include <nodelet/nodelet.h>
 //#define DEBUG_GRID_MAP
 
 namespace jsk_pcl_ros
@@ -69,7 +69,7 @@ namespace jsk_pcl_ros
     
   }
 
-  void GridMap::registerIndex(const int x, const int y)
+  GridIndex::Ptr GridMap::registerIndex(const int x, const int y)
   {
     ColumnIterator it = data_.find(x);
     if (it != data_.end()) {
@@ -80,11 +80,13 @@ namespace jsk_pcl_ros
       new_row.insert(y);
       data_[x] = new_row;
     }
+    GridIndex::Ptr ret(new GridIndex(x, y));
+    return ret;
   }
   
-  void GridMap::registerIndex(const GridIndex::Ptr& index)
+  GridIndex::Ptr GridMap::registerIndex(const GridIndex::Ptr& index)
   {
-    registerIndex(index->x, index->y);
+    return registerIndex(index->x, index->y);
   }
   
   void GridMap::registerPoint(const pcl::PointXYZRGB& point)
@@ -95,12 +97,13 @@ namespace jsk_pcl_ros
     registerIndex(index);
   }
   
-  void GridMap::registerLine(const pcl::PointXYZRGB& from,
-                             const pcl::PointXYZRGB& to)
+  std::vector<GridIndex::Ptr> GridMap::registerLine(const pcl::PointXYZRGB& from,
+                                                 const pcl::PointXYZRGB& to)
   {
 #ifdef DEBUG_GRID_MAP
     std::cout << "newline" << std::endl;
 #endif
+    std::vector<GridIndex::Ptr> added_indices;
     //GridLine::Ptr new_line (new GridLine(from, to));
     //lines_.push_back(new_line);
     // count up all the grids which the line penetrates
@@ -117,8 +120,8 @@ namespace jsk_pcl_ros
     std::cout << "registering (" << (int)from_x << ", " << (int)from_y << ")" << std::endl;
     std::cout << "registering (" << (int)to_x << ", " << (int)to_y << ")" << std::endl;
 #endif
-    registerIndex(from_x, from_y);
-    registerIndex(to_x, to_y);
+    added_indices.push_back(registerIndex(from_x, from_y));
+    added_indices.push_back(registerIndex(to_x, to_y));
     if (from_x != to_x) {
       double a = (to_y - from_y) / (to_x - from_x);
       double b = - a * from_x + from_y;
@@ -136,7 +139,7 @@ namespace jsk_pcl_ros
           std::swap(from_int_x, to_int_x);
         }
         for (int ix = from_int_x; ix < to_int_x; ++ix) {
-          registerIndex(ix, int_y);
+          added_indices.push_back(registerIndex(ix, int_y));
 #ifdef DEBUG_GRID_MAP
           std::cout << "registering (" << ix << ", " << int_y << ")" << std::endl;
 #endif
@@ -154,7 +157,7 @@ namespace jsk_pcl_ros
         
         for (int ix = from_int_x; ix < to_int_x; ++ix) {
           double y = a * ix + b;
-          registerIndex(ix, (int)y);
+          added_indices.push_back(registerIndex(ix, (int)y));
 #ifdef DEBUG_GRID_MAP
           std::cout << "registering (" << ix << ", " << (int)y << ")" << std::endl;
 #endif
@@ -172,7 +175,7 @@ namespace jsk_pcl_ros
         
         for (int iy = from_int_y; iy < to_int_y; ++iy) {
           double x = iy / a - b / a;
-          registerIndex((int)x, iy);
+          added_indices.push_back(registerIndex((int)x, iy));
 #ifdef DEBUG_GRID_MAP
           std::cout << "registering (" << (int)x << ", " << iy << ")" << std::endl;
 #endif
@@ -192,12 +195,13 @@ namespace jsk_pcl_ros
         std::swap(from_int_y, to_int_y);
       }
       for (int iy = from_int_y; iy < to_int_y; ++iy) {
-        registerIndex(int_x, iy);
+        added_indices.push_back(registerIndex(int_x, iy));
 #ifdef DEBUG_GRID_MAP
         std::cout << "registering (" << int_x << ", " << (int)iy << ")" << std::endl;
 #endif
       }
     }
+    return added_indices;
   }
 
   void GridMap::registerPointCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
@@ -239,23 +243,23 @@ namespace jsk_pcl_ros
   bool GridMap::getValue(const int x, const int y)
   {
     // check line
-    for (size_t i = 0; i < lines_.size(); i++) {
-      GridLine::Ptr line = lines_[i];
-      Eigen::Vector3f A, B, C, D;
-      gridToPoint2(GridIndex(x, y), A);
-      gridToPoint2(GridIndex(x + 1, y), B);
-      gridToPoint2(GridIndex(x + 1, y + 1), C);
-      gridToPoint2(GridIndex(x, y + 1), D);
-      bool penetrate = line->penetrateGrid(A, B, C, D);
-      if (penetrate) {
-      //   // printf("(%lf, %lf, %lf) - (%lf, %lf, %lf) penetrate (%d, %d)\n",
-      //   //        line->from[0],line->from[1],line->from[2],
-      //   //        line->to[0],line->to[1],line->to[2],
-      //   //        x, y);
-      //   //std::cout << "penetrate"
-        return true;
-      }
-    }
+    // for (size_t i = 0; i < lines_.size(); i++) {
+    //   GridLine::Ptr line = lines_[i];
+    //   Eigen::Vector3f A, B, C, D;
+    //   gridToPoint2(GridIndex(x, y), A);
+    //   gridToPoint2(GridIndex(x + 1, y), B);
+    //   gridToPoint2(GridIndex(x + 1, y + 1), C);
+    //   gridToPoint2(GridIndex(x, y + 1), D);
+    //   bool penetrate = line->penetrateGrid(A, B, C, D);
+    //   if (penetrate) {
+    //   //   // printf("(%lf, %lf, %lf) - (%lf, %lf, %lf) penetrate (%d, %d)\n",
+    //   //   //        line->from[0],line->from[1],line->from[2],
+    //   //   //        line->to[0],line->to[1],line->to[2],
+    //   //   //        x, y);
+    //   //   //std::cout << "penetrate"
+    //     return true;
+    //   }
+    // }
 
     ColumnIterator it = data_.find(x);
     if (it == data_.end()) {
@@ -387,6 +391,13 @@ namespace jsk_pcl_ros
     return Plane(Eigen::Vector3d(normal_[0], normal_[1], normal_[2]), d_);
   }
 
+  Plane::Ptr GridMap::toPlanePtr()
+  {
+    Plane::Ptr ret (new Plane(Eigen::Vector3d(normal_[0], normal_[1], normal_[2]), d_));
+    return ret;
+  }
+
+
   std::vector<float> GridMap::getCoefficients()
   {
     std::vector<float> output;
@@ -416,4 +427,23 @@ namespace jsk_pcl_ros
     return generation_;
   }
   
+  void GridMap::removeIndex(const GridIndex::Ptr& index)
+  {
+    int x = index->x;
+    int y = index->y;
+    ColumnIterator it = data_.find(x);
+    if (it != data_.end()) {
+      RowIterator rit = (it->second).find(y);
+      if (rit != it->second.end()) {
+        it->second.erase(rit);
+      }
+    }
+  }
+  bool GridMap::isBinsOccupied(const Eigen::Vector3f& p)
+  {
+    GridIndex::Ptr ret (new GridIndex());
+    pointToIndex(p, ret);
+    //ROS_INFO("checking (%d, %d)", ret->x, ret->y);
+    return getValue(ret);
+  }
 }

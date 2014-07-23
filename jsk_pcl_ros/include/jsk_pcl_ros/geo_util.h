@@ -100,6 +100,7 @@ namespace jsk_pcl_ros
     virtual Plane transform(const Eigen::Affine3d& transform);
     virtual void toCoefficients(std::vector<float>& output);
     virtual std::vector<float> toCoefficients();
+    virtual double getD();
   protected:
     Eigen::Vector3d normal_;
     double d_;
@@ -110,6 +111,8 @@ namespace jsk_pcl_ros
   {
   public:
     typedef boost::shared_ptr<ConvexPolygon> Ptr;
+    typedef Eigen::Vector3d Vertex;
+            
     typedef std::vector<Eigen::Vector3d,
                         Eigen::aligned_allocator<Eigen::Vector3d> > Vertices;
     // vertices should be CW

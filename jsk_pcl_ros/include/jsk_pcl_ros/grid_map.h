@@ -62,10 +62,11 @@ namespace jsk_pcl_ros
     GridMap(double resolution, const std::vector<float>& coefficients);
     virtual ~GridMap();
     virtual void registerPoint(const pcl::PointXYZRGB& point);
-    virtual void registerLine(const pcl::PointXYZRGB& from, const pcl::PointXYZRGB& to);
+    virtual std::vector<GridIndex::Ptr> registerLine(const pcl::PointXYZRGB& from, const pcl::PointXYZRGB& to);
+    virtual void removeIndex(const GridIndex::Ptr& index);
     virtual void registerPointCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
-    virtual void registerIndex(const GridIndex::Ptr& index);
-    virtual void registerIndex(const int x, const int y);
+    virtual GridIndex::Ptr registerIndex(const GridIndex::Ptr& index);
+    virtual GridIndex::Ptr registerIndex(const int x, const int y);
     virtual void pointToIndex(const pcl::PointXYZRGB& point, GridIndex::Ptr index);
     virtual void pointToIndex(const Eigen::Vector3f& point, GridIndex::Ptr index);
     virtual void indicesToPointCloud(const std::vector<GridIndex::Ptr>& indices,
@@ -82,11 +83,13 @@ namespace jsk_pcl_ros
     virtual void originPose(Eigen::Affine3d& output);
     virtual void toMsg(SparseOccupancyGrid& grid);
     virtual Plane toPlane();
+    virtual Plane::Ptr toPlanePtr();
     virtual void vote();
     virtual unsigned int getVoteNum();
     virtual void setGeneration(unsigned int generation);
     virtual unsigned int getGeneration();
     virtual std::vector<float> getCoefficients();
+    virtual bool isBinsOccupied(const Eigen::Vector3f& p);
   protected:    
     double resolution_;
     Eigen::Vector3f O_;

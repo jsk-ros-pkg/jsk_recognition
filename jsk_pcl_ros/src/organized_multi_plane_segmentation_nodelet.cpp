@@ -63,6 +63,17 @@ namespace jsk_pcl_ros
   void OrganizedMultiPlaneSegmentation::onInit()
   {
     PCLNodelet::onInit();
+    diagnostic_updater_.reset(new diagnostic_updater::Updater);
+    diagnostic_updater_->setHardwareID(getName());
+    diagnostic_updater_->add("NormalEstimation",
+                             boost::bind(&OrganizedMultiPlaneSegmentation::updateDiagnosticNormalEstimation,
+                                         this,
+                                         _1));
+    diagnostic_updater_->add("PlaneSegmentation",
+                             boost::bind(&OrganizedMultiPlaneSegmentation::updateDiagnosticPlaneSegmentation,
+                                         this,
+                                         _1));
+
     estimate_normal_ = false;
     pnh_->getParam("estimate_normal", estimate_normal_);
     // publishers
@@ -250,6 +261,8 @@ namespace jsk_pcl_ros
       
       pcl::PointIndices one_indices;
       pcl::PointIndices one_boundaries;
+      std::vector<float> new_coefficients;
+      new_coefficients.resize(4, 0);
       for (std::set<int>::iterator it = cloud_sets[i].begin();
            it != cloud_sets[i].end();
            it++) {
@@ -263,12 +276,30 @@ namespace jsk_pcl_ros
         for (size_t j = 0; j < boundary_inlier.indices.size(); j++) {
           one_boundaries.indices.push_back(boundary_inlier.indices[j]);
         }
+        for (size_t i = 0; i < 4; i++) { // take summation of coefficients
+          new_coefficients[0] += model_coefficients[*it].values[0];
+          new_coefficients[1] += model_coefficients[*it].values[1];
+          new_coefficients[2] += model_coefficients[*it].values[2];
+          new_coefficients[3] += model_coefficients[*it].values[3];
+        }
       }
       if (one_indices.indices.size() == 0) {
         continue;
       }
+      // normalize coefficients
+      double norm = sqrt(new_coefficients[0] * new_coefficients[0] 
+                         + new_coefficients[1] * new_coefficients[1]
+                         + new_coefficients[2] * new_coefficients[2]);
+      new_coefficients[0] /= norm;
+      new_coefficients[1] /= norm;
+      new_coefficients[2] /= norm;
+      new_coefficients[3] /= norm;
       output_indices.push_back(one_indices);
-      output_coefficients.push_back(model_coefficients[(*cloud_sets[i].begin())]);
+      // take the average of the coefficients
+      pcl::ModelCoefficients pcl_new_coefficients;
+      pcl_new_coefficients.values = new_coefficients;
+      output_coefficients.push_back(pcl_new_coefficients);
+      //output_coefficients.push_back(model_coefficients[(*cloud_sets[i].begin())]);
       // estimate concave hull
 
       pcl::PointCloud<PointT>::Ptr cloud_projected (new pcl::PointCloud<PointT>());
@@ -310,8 +341,10 @@ namespace jsk_pcl_ros
     pcl::PointCloud<pcl::Label>::Ptr labels (new pcl::PointCloud<pcl::Label>());
     std::vector<pcl::PointIndices> label_indices;
     std::vector<pcl::PointIndices> boundary_indices;
-    
-    mps.segmentAndRefine(regions, model_coefficients, inlier_indices, labels, label_indices, boundary_indices);
+    {
+      ScopedTimer timer = plane_segmentation_time_acc_.scopedTimer();
+      mps.segmentAndRefine(regions, model_coefficients, inlier_indices, labels, label_indices, boundary_indices);
+    }
     if (regions.size() == 0) {
       NODELET_DEBUG("no region is segmented");
     }
@@ -399,7 +432,7 @@ namespace jsk_pcl_ros
   void OrganizedMultiPlaneSegmentation::estimateNormal(pcl::PointCloud<PointT>::Ptr input,
                                                        pcl::PointCloud<pcl::Normal>::Ptr output)
   {
-    
+    ScopedTimer timer = normal_estimation_time_acc_.scopedTimer();
     pcl::IntegralImageNormalEstimation<PointT, pcl::Normal> ne;
     if (estimation_method_ == 0) {
       ne.setNormalEstimationMethod (ne.AVERAGE_3D_GRADIENT);
@@ -425,12 +458,8 @@ namespace jsk_pcl_ros
     ne.setMaxDepthChangeFactor(max_depth_change_factor_);
     ne.setNormalSmoothingSize(normal_smoothing_size_);
     ne.setDepthDependentSmoothing(depth_dependent_smoothing_);
-
-    ros::Time before = ros::Time::now();
     ne.setInputCloud(input);
     ne.compute(*output);
-    ros::Time after = ros::Time::now();
-    NODELET_DEBUG("normal estimation: %f (%f Hz)", (after - before).toSec(), 1 / (after - before).toSec());
   }
   
   void OrganizedMultiPlaneSegmentation::segment
@@ -456,6 +485,36 @@ namespace jsk_pcl_ros
       pcl::fromROSMsg(*msg, *normal);
     }
     segmentFromNormals(input, normal, msg->header);
+    diagnostic_updater_->update();
+  }
+
+  void OrganizedMultiPlaneSegmentation::updateDiagnosticNormalEstimation(
+    diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "NormalEstimation running");
+    stat.add("Time to estimate normal (Avg.)",
+             normal_estimation_time_acc_.mean());
+    stat.add("Time to estimate normal (Max)",
+             normal_estimation_time_acc_.max());
+    stat.add("Time to estimate normal (Min)",
+             normal_estimation_time_acc_.min());
+    stat.add("Time to estimate normal (Var.)",
+             normal_estimation_time_acc_.variance());
+  }
+
+  void OrganizedMultiPlaneSegmentation::updateDiagnosticPlaneSegmentation(
+    diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                 "PlaneSegmentation running");
+    stat.add("Time to segment planes (Avg.)",
+             plane_segmentation_time_acc_.mean());
+    stat.add("Time to segment planes (Max)",
+             plane_segmentation_time_acc_.max());
+    stat.add("Time to segment planes (Min)",
+             plane_segmentation_time_acc_.min());
+    stat.add("Time to segment planes (Var.)",
+             plane_segmentation_time_acc_.variance());
   }
   
 }

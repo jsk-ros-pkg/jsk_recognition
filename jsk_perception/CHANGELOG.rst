@@ -2,6 +2,11 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.12 (2014-07-24)
+-------------------
+* fix to use catkin to link rospack
+* Contributors: Dave Coleman, Kei Okada
+
 0.1.11 (2014-07-08)
 -------------------
 * jsk_perception does not depends on pcl, but depends on eigen and tf

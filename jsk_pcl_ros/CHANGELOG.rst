@@ -2,6 +2,34 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.12 (2014-07-24)
+-------------------
+* Merge pull request `#210 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/210>`_ from aginika/add-remove-nan-funtion-line
+  Add remove nan funtion line
+* prevent nan pointcloud error with inserting removeNan function in ParticleFilterTracking
+* fix environment modeling and changed api to lock/unlock environment
+* remove border region from environment model
+* publish diagnostic information from OrganizedMultiPlaneSementation
+* take the average of plane coefficients to be combined in EnvironmentPlaneModeling
+* wait transform before transforming in PolygonArrayTransformer
+* convert convex line information into grid cell before computing grid cell
+* fix normalization of the normal when creating Polygon object
+* catch more exceptions in TfTransformPointCloud nodelet
+* Supress debug message from ColorHistogramMatcher
+* fill x-y-z field to publish correct pose of the pointcloud from ColorHistogramMatcher
+* publish the pose of the best matched candidate in ColorHistogramMatcher
+* publish selected handle pose
+* publish u, v, true_depth and observed_depth
+* fix the order of Mat::at
+* add two nodelets (DelayPointCloud and DepthImageError) to jsk_pcl_ros
+  and publish u/v coordinates of the checkerboard from checkerboard_detector.
+  * DepthImageError is just a skelton yet.
+  * DelayPointCloud re-publishes pointcloud with specified delay time.
+  * publish u/v coordinates from checkerboard_detector.
+  * frame_id broadcasted from objectdetection_tf_publisher.py is configurable
+* copy the header of the input cloud to the output cloud in SelectedClusterPublisher
+* Contributors: Ryohei Ueda, Yuto Inagaki, Eisoku Kuroiwa, Yusuke Furuta
+
 0.1.11 (2014-07-08)
 -------------------
 

@@ -81,7 +81,7 @@ namespace jsk_pcl_ros
 
   void MultiPlaneExtraction::configCallback(Config& config, uint32_t level)
   {
-    boost::mutex::scoped_lock(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
     min_height_ = config.min_height;
     max_height_ = config.max_height;
   }
@@ -91,7 +91,7 @@ namespace jsk_pcl_ros
                                      const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients,
                                      const jsk_pcl_ros::PolygonArray::ConstPtr& polygons)
   {
-    boost::mutex::scoped_lock(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
     // convert all to the pcl types
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
     pcl::fromROSMsg(*input, *input_cloud);

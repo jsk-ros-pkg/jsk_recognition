@@ -117,14 +117,14 @@ namespace jsk_pcl_ros
   
   void PlaneRejector::configCallback (Config &config, uint32_t level)
   {
-    boost::mutex::scoped_lock(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
     angle_thr_ = config.angle_thr;
   }
   
   void PlaneRejector::reject(const jsk_pcl_ros::PolygonArray::ConstPtr& polygons,
                              const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients)
   {
-    boost::mutex::scoped_lock(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
     jsk_pcl_ros::PolygonArray result_polygons;
     jsk_pcl_ros::ModelCoefficientsArray result_coefficients;
     result_polygons.header = polygons->header;

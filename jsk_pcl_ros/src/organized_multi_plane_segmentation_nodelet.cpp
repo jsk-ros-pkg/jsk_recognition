@@ -86,7 +86,7 @@ namespace jsk_pcl_ros
 
   void OrganizedMultiPlaneSegmentation::configCallback(Config &config, uint32_t level)
   {
-    boost::mutex::scoped_lock(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
     min_size_ = config.min_size;
     angular_threshold_ = config.angular_threshold;
     distance_threshold_ = config.distance_threshold;
@@ -455,7 +455,7 @@ namespace jsk_pcl_ros
   void OrganizedMultiPlaneSegmentation::segment
   (const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
-    boost::mutex::scoped_lock(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
     // if estimate_normal_ is true, we run integral image normal estimation
     // before segmenting planes
     pcl::PointCloud<PointT>::Ptr input(new pcl::PointCloud<PointT>());

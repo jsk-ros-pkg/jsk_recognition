@@ -482,7 +482,7 @@ namespace jsk_pcl_ros
     const ModelCoefficientsArray::ConstPtr& coefficients,
     std::vector<GridMap::Ptr>& ordered_grid_maps)
   {
-    ScopedTimer timer = grid_building_time_acc_.scopedTimer();
+    jsk_topic_tools::ScopedTimer timer = grid_building_time_acc_.scopedTimer();
     for (size_t i = 0; i < segmented_clouds.size(); i++) {
       pcl::PointCloud<PointT>::Ptr cloud = segmented_clouds[i];
       // we need to project the point clouds on to the plane
@@ -530,7 +530,7 @@ namespace jsk_pcl_ros
     pcl::PointCloud<PointT>::Ptr result_pointcloud,
     ClusterPointIndices::Ptr result_indices)
   {
-    ScopedTimer timer = occlusion_estimate_time_acc_.scopedTimer();
+    jsk_topic_tools::ScopedTimer timer = occlusion_estimate_time_acc_.scopedTimer();
     *result_polygons = *polygons; // copied
     *result_coefficients = *coefficients;
     
@@ -727,7 +727,7 @@ namespace jsk_pcl_ros
       return false;
     }
     {
-      ScopedTimer timer = kdtree_building_time_acc_.scopedTimer();
+      jsk_topic_tools::ScopedTimer timer = kdtree_building_time_acc_.scopedTimer();
       // build kdtrees
       kdtrees_.clear();
       separated_point_cloud_.clear();
@@ -912,7 +912,7 @@ namespace jsk_pcl_ros
                     environment_id_);
       return false;
     }
-    ScopedTimer timer = polygon_collision_check_time_acc_.scopedTimer();
+    jsk_topic_tools::ScopedTimer timer = polygon_collision_check_time_acc_.scopedTimer();
     pcl::PointCloud<PointT>::Ptr sampled_point_cloud (new pcl::PointCloud<PointT>());
     samplePolygonToPointCloud(req.polygon, sampled_point_cloud, sampling_d_);
 

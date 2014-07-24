@@ -350,13 +350,24 @@ namespace jsk_pcl_ros
     }
   }
 
+  void GridMap::originPose(Eigen::Affine3f& output)
+  {
+    Eigen::Matrix3f rot_mat;
+    rot_mat.col(0) = Eigen::Vector3f(ex_[0], ex_[1], ex_[2]);
+    rot_mat.col(1) = Eigen::Vector3f(ey_[0], ey_[1], ey_[2]);
+    rot_mat.col(2) = Eigen::Vector3f(normal_[0], normal_[1], normal_[2]);
+    output = Eigen::Translation3f(O_) * Eigen::Quaternionf(rot_mat);
+  }
+  
   void GridMap::originPose(Eigen::Affine3d& output)
   {
     Eigen::Matrix3d rot_mat;
     rot_mat.col(0) = Eigen::Vector3d(ex_[0], ex_[1], ex_[2]);
     rot_mat.col(1) = Eigen::Vector3d(ey_[0], ey_[1], ey_[2]);
     rot_mat.col(2) = Eigen::Vector3d(normal_[0], normal_[1], normal_[2]);
-    output = Eigen::Translation3d(Eigen::Vector3d(O_[0], O_[1], O_[2]))
+    output = Eigen::Translation3d(Eigen::Vector3d(O_[0],
+                                                  O_[1],
+                                                  O_[2]))
       * Eigen::Quaterniond(rot_mat);
   }
   
@@ -364,9 +375,10 @@ namespace jsk_pcl_ros
   {
     grid.resolution = resolution_;
     // compute origin POSE from O and normal_, d_
-    Eigen::Affine3d plane_pose;
+    Eigen::Affine3f plane_pose;
     originPose(plane_pose);
-    tf::poseEigenToMsg(plane_pose, grid.origin_pose);
+    
+    //tf::poseEigenToMsg(plane_pose, grid.origin_pose);
     for (ColumnIterator it = data_.begin();
          it != data_.end();
          it++) {
@@ -388,12 +400,12 @@ namespace jsk_pcl_ros
 
   Plane GridMap::toPlane()
   {
-    return Plane(Eigen::Vector3d(normal_[0], normal_[1], normal_[2]), d_);
+    return Plane(normal_, d_);
   }
 
   Plane::Ptr GridMap::toPlanePtr()
   {
-    Plane::Ptr ret (new Plane(Eigen::Vector3d(normal_[0], normal_[1], normal_[2]), d_));
+    Plane::Ptr ret (new Plane(normal_, d_));
     return ret;
   }
 

@@ -80,6 +80,7 @@ namespace jsk_pcl_ros
     virtual void fillRegion(const Eigen::Vector3f& start, std::vector<GridIndex::Ptr>& output);
     virtual void fillRegion(const GridIndex::Ptr start, std::vector<GridIndex::Ptr>& output);
     // toMsg does not fill header, be carefull
+    virtual void originPose(Eigen::Affine3f& output);
     virtual void originPose(Eigen::Affine3d& output);
     virtual void toMsg(SparseOccupancyGrid& grid);
     virtual Plane toPlane();

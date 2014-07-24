@@ -2,8 +2,8 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.12 (2014-07-24)
+-------------------
 * add two nodelets (DelayPointCloud and DepthImageError) to jsk_pcl_ros
   and publish u/v coordinates of the checkerboard from checkerboard_detector.
   * DepthImageError is just a skelton yet.

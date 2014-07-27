@@ -56,7 +56,7 @@ namespace jsk_pcl_ros
 
   void NormalEstimationIntegralImage::configCallback(Config& config, uint32_t level)
   {
-    boost::mutex::scoped_lock(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
     max_depth_change_factor_ = config.max_depth_change_factor;
     normal_smoothing_size_ = config.normal_smoothing_size;
     depth_dependent_smoothing_ = config.depth_dependent_smoothing;
@@ -66,7 +66,7 @@ namespace jsk_pcl_ros
 
   void NormalEstimationIntegralImage::compute(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
-    boost::mutex::scoped_lock(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
 
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr input(new pcl::PointCloud<pcl::PointXYZRGB>());
     pcl::fromROSMsg(*msg, *input);

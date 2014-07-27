@@ -79,7 +79,7 @@ namespace jsk_pcl_ros
 
   void ColorHistogramMatcher::configCallback(Config &config, uint32_t level)
   {
-    boost::mutex::scoped_lock(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
     coefficient_thr_ = config.coefficient_thr;
     bin_size_ = config.bin_size;
     ComparePolicy new_histogram;
@@ -111,7 +111,7 @@ namespace jsk_pcl_ros
       const sensor_msgs::PointCloud2::ConstPtr& input_cloud,
       const jsk_pcl_ros::ClusterPointIndices::ConstPtr& input_indices)
   {
-    boost::mutex::scoped_lock(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
     if (!reference_set_) {
       NODELET_WARN("reference histogram is not available yet");
       return;
@@ -264,7 +264,7 @@ namespace jsk_pcl_ros
   void ColorHistogramMatcher::reference(
     const sensor_msgs::PointCloud2::ConstPtr& input_cloud)
   {
-    boost::mutex::scoped_lock(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
     std::vector<float> hist;
     pcl::PointCloud<pcl::PointXYZRGB> pcl_cloud;
     pcl::fromROSMsg(*input_cloud, pcl_cloud);
@@ -283,7 +283,7 @@ namespace jsk_pcl_ros
   void ColorHistogramMatcher::referenceHistogram(
     const jsk_pcl_ros::ColorHistogram::ConstPtr& input_histogram)
   {
-    boost::mutex::scoped_lock(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
     NODELET_INFO("update reference");
     reference_histogram_ = input_histogram->histogram;
     reference_histogram_pub_.publish(input_histogram);

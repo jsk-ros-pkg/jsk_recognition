@@ -28,7 +28,8 @@
   <depend package="visualization_msgs" />
   <depend package="rosboost_cfg" />
   <depend package="cv_bridge" />
-
+  <depend package="jsk_topic_tools" />
+  <depend package="roscpp_tutorials" />
   <rosdep name="boost" />
   <rosdep name="tbb" />
 

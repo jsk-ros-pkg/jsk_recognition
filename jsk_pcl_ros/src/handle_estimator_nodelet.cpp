@@ -140,7 +140,7 @@ namespace jsk_pcl_ros
     Eigen::Affine3d center;
     tf::poseMsgToEigen(box_msg->pose, center);
     Eigen::Vector3d z = center.rotation().col(2);
-    Plane p(z, 0);
+    Plane p(Eigen::Vector3f(z[0], z[1], z[2]), 0);
     Eigen::Vector3d ray = center.translation().normalized();
     Eigen::Vector3d ray_projected;
     p.project(ray, ray_projected);

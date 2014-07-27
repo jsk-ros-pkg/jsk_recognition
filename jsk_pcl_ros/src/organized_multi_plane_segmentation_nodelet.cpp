@@ -44,11 +44,11 @@
 #include <pcl/filters/project_inliers.h>
 #include <pcl/features/integral_image_normal.h>
 
+#include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <pluginlib/class_list_macros.h>
 #include <jsk_pcl_ros/pcl_conversion_util.h>
 
 #include <boost/format.hpp>
-
 
 namespace jsk_pcl_ros
 {
@@ -103,7 +103,7 @@ namespace jsk_pcl_ros
 
   void OrganizedMultiPlaneSegmentation::configCallback(Config &config, uint32_t level)
   {
-    boost::mutex::scoped_lock(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
     min_size_ = config.min_size;
     angular_threshold_ = config.angular_threshold;
     distance_threshold_ = config.distance_threshold;
@@ -349,7 +349,7 @@ namespace jsk_pcl_ros
     std::vector<pcl::PointIndices> label_indices;
     std::vector<pcl::PointIndices> boundary_indices;
     {
-      ScopedTimer timer = plane_segmentation_time_acc_.scopedTimer();
+      jsk_topic_tools::ScopedTimer timer = plane_segmentation_time_acc_.scopedTimer();
       mps.segmentAndRefine(regions, model_coefficients, inlier_indices, labels, label_indices, boundary_indices);
     }
     if (regions.size() == 0) {
@@ -439,7 +439,7 @@ namespace jsk_pcl_ros
   void OrganizedMultiPlaneSegmentation::estimateNormal(pcl::PointCloud<PointT>::Ptr input,
                                                        pcl::PointCloud<pcl::Normal>::Ptr output)
   {
-    ScopedTimer timer = normal_estimation_time_acc_.scopedTimer();
+    jsk_topic_tools::ScopedTimer timer = normal_estimation_time_acc_.scopedTimer();
     pcl::IntegralImageNormalEstimation<PointT, pcl::Normal> ne;
     if (estimation_method_ == 0) {
       ne.setNormalEstimationMethod (ne.AVERAGE_3D_GRADIENT);
@@ -472,7 +472,7 @@ namespace jsk_pcl_ros
   void OrganizedMultiPlaneSegmentation::segment
   (const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
-    boost::mutex::scoped_lock(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();
     // if estimate_normal_ is true, we run integral image normal estimation
     // before segmenting planes

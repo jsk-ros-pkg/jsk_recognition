@@ -41,42 +41,58 @@
 
 namespace jsk_pcl_ros
 {
-  Line::Line(const Eigen::Vector3d& direction, const Eigen::Vector3d& origin)
+  void convertEigenVector(const Eigen::Vector3f& input,
+                          Eigen::Vector3d& output)
+  {
+    output[0] = input[0];
+    output[1] = input[1];
+    output[2] = input[2];
+  }
+  void convertEigenVector(const Eigen::Vector3d& input,
+                          Eigen::Vector3f& output)
+  {
+    output[0] = input[0];
+    output[1] = input[1];
+    output[2] = input[2];
+  }
+
+  
+  Line::Line(const Eigen::Vector3f& direction, const Eigen::Vector3f& origin)
     : direction_ (direction.normalized()), origin_(origin)
   {
 
   }
 
-  void Line::getDirection(Eigen::Vector3d& output)
+  void Line::getDirection(Eigen::Vector3f& output)
   {
     output = direction_;
   }
 
-  void Line::foot(const Eigen::Vector3d& point, Eigen::Vector3d& output)
+  void Line::foot(const Eigen::Vector3f& point, Eigen::Vector3f& output)
   {
     const double alpha = point.dot(direction_) - origin_.dot(direction_);
     output = alpha * direction_ + origin_;
   }
 
-  double Line::distanceToPoint(const Eigen::Vector3d& from, Eigen::Vector3d& foot_point)
+  double Line::distanceToPoint(const Eigen::Vector3f& from, Eigen::Vector3f& foot_point)
   {
     foot(from, foot_point);
     return (from - foot_point).norm();
   }
   
-  double Line::distanceToPoint(const Eigen::Vector3d& from)
+  double Line::distanceToPoint(const Eigen::Vector3f& from)
   {
-    Eigen::Vector3d foot_point;
+    Eigen::Vector3f foot_point;
     return distanceToPoint(from, foot_point);
   }
 
-  Segment::Segment(const Eigen::Vector3d& from, const Eigen::Vector3d to):
+  Segment::Segment(const Eigen::Vector3f& from, const Eigen::Vector3f to):
     Line(from - to, from), from_(from), to_(to)
   {
     
   }
 
-  double Segment::dividingRatio(const Eigen::Vector3d& point)
+  double Segment::dividingRatio(const Eigen::Vector3f& point)
   {
     if (to_[0] != from_[0]) {
       return (point[0] - from_[0]) / (to_[0] - from_[0]);
@@ -89,9 +105,9 @@ namespace jsk_pcl_ros
     }
   }
   
-  void Segment::foot(const Eigen::Vector3d& from, Eigen::Vector3d& output)
+  void Segment::foot(const Eigen::Vector3f& from, Eigen::Vector3f& output)
   {
-    Eigen::Vector3d foot_point;
+    Eigen::Vector3f foot_point;
     Line::foot(from, foot_point);
     double r = dividingRatio(foot_point);
     if (r < 0.0) {
@@ -107,18 +123,18 @@ namespace jsk_pcl_ros
   
   Plane::Plane(const std::vector<float>& coefficients)
   {
-    normal_ = Eigen::Vector3d(coefficients[0], coefficients[1], coefficients[2]);
+    normal_ = Eigen::Vector3f(coefficients[0], coefficients[1], coefficients[2]);
     d_ = coefficients[3] / normal_.norm();
     normal_.normalize();
   }
 
-  Plane::Plane(Eigen::Vector3d normal, double d) :
+  Plane::Plane(Eigen::Vector3f normal, double d) :
     normal_(normal.normalized()), d_(d / normal.norm())
   {
     
   }
 
-  Plane::Plane(Eigen::Vector3d normal, Eigen::Vector3d p) :
+  Plane::Plane(Eigen::Vector3f normal, Eigen::Vector3f p) :
     normal_(normal.normalized()), d_(- normal.dot(p) / normal.norm())
   {
     
@@ -140,19 +156,19 @@ namespace jsk_pcl_ros
     return isSameDirection(another.normal_);
   }
   
-  bool Plane::isSameDirection(const Eigen::Vector3d& another_normal)
+  bool Plane::isSameDirection(const Eigen::Vector3f& another_normal)
   {
     return normal_.dot(another_normal) > 0;
   }
   
-  double Plane::signedDistanceToPoint(const Eigen::Vector3d p)
+  double Plane::signedDistanceToPoint(const Eigen::Vector3f p)
   {
     return (normal_.dot(p) + d_);
   }
   
   double Plane::signedDistanceToPoint(const Eigen::Vector4f p)
   {
-    return signedDistanceToPoint(Eigen::Vector3d(p[0], p[1], p[2]));
+    return signedDistanceToPoint(Eigen::Vector3f(p[0], p[1], p[2]));
   }
   
   double Plane::distanceToPoint(const Eigen::Vector4f p)
@@ -160,7 +176,7 @@ namespace jsk_pcl_ros
     return fabs(signedDistanceToPoint(p));
   }
 
-  double Plane::distanceToPoint(const Eigen::Vector3d p)
+  double Plane::distanceToPoint(const Eigen::Vector3f p)
   {
     return fabs(signedDistanceToPoint(p));
   }
@@ -187,7 +203,7 @@ namespace jsk_pcl_ros
     return acos(dot);
   }
 
-  void Plane::project(const Eigen::Vector3d& p, Eigen::Vector3d& output)
+  void Plane::project(const Eigen::Vector3f& p, Eigen::Vector3f& output)
   {
     // double alpha = - p.dot(normal_);
     // output = p + alpha * normal_;
@@ -195,6 +211,25 @@ namespace jsk_pcl_ros
     output = p - alpha * normal_;
   }
 
+  void Plane::project(const Eigen::Vector3d& p, Eigen::Vector3d& output)
+  {
+    Eigen::Vector3f output_f;
+    project(Eigen::Vector3f(p[0], p[1], p[2]), output_f);
+    convertEigenVector(output_f, output);
+  }
+
+  void Plane::project(const Eigen::Vector3d& p, Eigen::Vector3f& output)
+  {
+    project(Eigen::Vector3f(p[0], p[1], p[2]), output);
+  }
+
+  void Plane::project(const Eigen::Vector3f& p, Eigen::Vector3d& output)
+  {
+    Eigen::Vector3f output_f;
+    project(p, output);
+    convertEigenVector(output_f, output);
+  }
+  
   Plane Plane::transform(const Eigen::Affine3d& transform)
   {
     Eigen::Vector4d n;
@@ -206,7 +241,7 @@ namespace jsk_pcl_ros
     Eigen::Vector4d n_d = m.transpose() * n;
     //Eigen::Vector4d n_dd = n_d.normalized();
     Eigen::Vector4d n_dd = n_d / sqrt(n_d[0] * n_d[0] + n_d[1] * n_d[1] + n_d[2] * n_d[2]);
-    return Plane(Eigen::Vector3d(n_dd[0], n_dd[1], n_dd[2]), n_dd[3]);
+    return Plane(Eigen::Vector3f(n_dd[0], n_dd[1], n_dd[2]), n_dd[3]);
   }
   
   std::vector<float> Plane::toCoefficients()
@@ -224,7 +259,7 @@ namespace jsk_pcl_ros
     output.push_back(d_);
   }
 
-  Eigen::Vector3d Plane::getNormal()
+  Eigen::Vector3f Plane::getNormal()
   {
     return normal_;
   }
@@ -234,7 +269,7 @@ namespace jsk_pcl_ros
   return d_;
   }
 
-  ConvexPolygon::ConvexPolygon(const std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> >& vertices,
+  ConvexPolygon::ConvexPolygon(const std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f> >& vertices,
                                const std::vector<float>& coefficients):
     Plane(coefficients), vertices_(vertices)
   {
@@ -242,30 +277,30 @@ namespace jsk_pcl_ros
   }
     
   
-  ConvexPolygon::ConvexPolygon(const std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> >& vertices):
+  ConvexPolygon::ConvexPolygon(const std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f> >& vertices):
     Plane((vertices[1] - vertices[0]).cross(vertices[2] - vertices[0]).normalized(), vertices[0]),
     vertices_(vertices)
   {
 
   }
 
-  void ConvexPolygon::projectOnPlane(const Eigen::Vector3d& p, Eigen::Vector3d& output)
+  void ConvexPolygon::projectOnPlane(const Eigen::Vector3f& p, Eigen::Vector3f& output)
   {
     Plane::project(p, output);
   }
 
   ConvexPolygon ConvexPolygon::flipConvex()
   {
-    std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> >
+    std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f> >
       new_vertices;
     new_vertices.resize(vertices_.size());
     std::reverse_copy(vertices_.begin(), vertices_.end(), std::back_inserter(new_vertices));
     return ConvexPolygon(new_vertices);
   }
   
-  void ConvexPolygon::project(const Eigen::Vector3d& p, Eigen::Vector3d& output)
+  void ConvexPolygon::project(const Eigen::Vector3f& p, Eigen::Vector3f& output)
   {
-    Eigen::Vector3d point_on_plane;
+    Eigen::Vector3f point_on_plane;
     Plane::project(p, point_on_plane);
     // check point_ is inside or not
     if (isInside(point_on_plane)) {
@@ -274,10 +309,10 @@ namespace jsk_pcl_ros
     else {
       // find the minimum foot point
       double min_distance = DBL_MAX;
-      Eigen::Vector3d min_point;
+      Eigen::Vector3f min_point;
       for (size_t i = 0; i < vertices_.size() - 1; i++) {
         Segment seg(vertices_[i], vertices_[i + 1]);
-        Eigen::Vector3d foot;
+        Eigen::Vector3f foot;
         double distance = seg.distanceToPoint(p, foot);
         if (distance < min_distance) {
           min_distance = distance;
@@ -288,18 +323,40 @@ namespace jsk_pcl_ros
     }
   }
 
-  bool ConvexPolygon::isInside(const Eigen::Vector3d& p)
+  void ConvexPolygon::project(const Eigen::Vector3d& p, Eigen::Vector3d& output)
   {
-    Eigen::Vector3d A0 = vertices_[0];
-    Eigen::Vector3d B0 = vertices_[0 + 1];
-    Eigen::Vector3d direction0 = (B0 - A0).normalized();
-    Eigen::Vector3d direction20 = (p - A0).normalized();
+    Eigen::Vector3f output_f;
+    Eigen::Vector3f p_f(p[0], p[1], p[2]);
+    project(p_f, output_f);
+    convertEigenVector(output_f, output);
+  }
+  
+  void ConvexPolygon::project(const Eigen::Vector3d& p, Eigen::Vector3f& output)
+  {
+    Eigen::Vector3f p_f(p[0], p[1], p[2]);
+    project(p_f, output);
+  }
+  
+  void ConvexPolygon::project(const Eigen::Vector3f& p, Eigen::Vector3d& output)
+  {
+    Eigen::Vector3f output_f;
+    project(p, output_f);
+    convertEigenVector(output_f, output);
+  }
+  
+
+  bool ConvexPolygon::isInside(const Eigen::Vector3f& p)
+  {
+    Eigen::Vector3f A0 = vertices_[0];
+    Eigen::Vector3f B0 = vertices_[0 + 1];
+    Eigen::Vector3f direction0 = (B0 - A0).normalized();
+    Eigen::Vector3f direction20 = (p - A0).normalized();
     bool direction_way = direction0.cross(direction20).dot(normal_) > 0;
     for (size_t i = 1; i < vertices_.size() - 1; i++) {
-      Eigen::Vector3d A = vertices_[i];
-      Eigen::Vector3d B = vertices_[i + 1];
-      Eigen::Vector3d direction = (B - A).normalized();
-      Eigen::Vector3d direction2 = (p - A).normalized();
+      Eigen::Vector3f A = vertices_[i];
+      Eigen::Vector3f B = vertices_[i + 1];
+      Eigen::Vector3f direction = (B - A).normalized();
+      Eigen::Vector3f direction2 = (p - A).normalized();
       if (direction_way) {
         if (direction.cross(direction2).dot(normal_) >= 0) {
           continue;
@@ -320,9 +377,9 @@ namespace jsk_pcl_ros
     return true;
   }
 
-  Eigen::Vector3d ConvexPolygon::getCentroid()
+  Eigen::Vector3f ConvexPolygon::getCentroid()
   {
-    Eigen::Vector3d ret(0, 0, 0);
+    Eigen::Vector3f ret(0, 0, 0);
     for (size_t i = 0; i < vertices_.size(); i++) {
       ret = ret + vertices_[i];
     }
@@ -331,9 +388,9 @@ namespace jsk_pcl_ros
 
   ConvexPolygon ConvexPolygon::fromROSMsg(const geometry_msgs::Polygon& polygon)
   {
-    std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> > vertices;
+    std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f> > vertices;
     for (size_t i = 0; i < polygon.points.size(); i++) {
-      Eigen::Vector3d p;
+      Eigen::Vector3f p;
       pcl_conversions::fromMSGToEigen(polygon.points[i], p);
       vertices.push_back(p);
     }

@@ -47,8 +47,27 @@
 
 #include <boost/timer.hpp>
 
+#include <boost/thread.hpp>
+
 namespace jsk_pcl_ros
 {
+  // multi-thread safe
+  class VitalChecker
+  {
+  public:
+    typedef boost::shared_ptr<VitalChecker> Ptr;
+    VitalChecker(const double dead_sec);
+    virtual ~VitalChecker();
+    void poke();
+    bool isAlive();
+    double deadSec();
+  protected:
+    ros::Time last_alive_time_;
+    double dead_sec_;
+    boost::mutex mutex_;
+  private:
+  };
+  
   class ScopedTimer;
   
   class TimeAccumulator

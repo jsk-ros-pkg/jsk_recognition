@@ -47,6 +47,7 @@
 #include "jsk_pcl_ros/OrganizedMultiPlaneSegmentationConfig.h"
 #include "jsk_pcl_ros/PolygonArray.h"
 #include <jsk_topic_tools/time_accumulator.h>
+#include "jsk_pcl_ros/pcl_util.h"
 
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>

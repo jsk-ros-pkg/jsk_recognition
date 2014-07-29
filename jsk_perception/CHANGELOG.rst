@@ -2,6 +2,9 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.1.12 (2014-07-24)
 -------------------
 * fix to use catkin to link rospack

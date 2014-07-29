@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.13 (2014-07-29)
+-------------------
 * add include of pcl_util.h to OrganizedMultiPlaneSegmentation
 * use jsk_topic_tools::TimeAccumulator instead of
   jsk_pcl_ros::TimeAccumulator in jsk_pcl_ros

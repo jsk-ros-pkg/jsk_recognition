@@ -2,6 +2,9 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.13 (2014-07-29)
+-------------------
+
 0.1.12 (2014-07-24)
 -------------------
 * add two nodelets (DelayPointCloud and DepthImageError) to jsk_pcl_ros

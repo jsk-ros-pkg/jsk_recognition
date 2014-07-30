@@ -37,6 +37,38 @@
 
 namespace jsk_pcl_ros
 {
+  VitalChecker::VitalChecker(const double dead_sec):
+    dead_sec_(dead_sec)
+  {
+
+  }
+
+  VitalChecker::~VitalChecker()
+  {
+
+  }
+
+  void VitalChecker::poke()
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    last_alive_time_ = ros::Time::now();
+  }
+
+  bool VitalChecker::isAlive()
+  {
+    bool ret;
+    {
+     boost::mutex::scoped_lock lock(mutex_);
+     ret = (ros::Time::now() - last_alive_time_).toSec() < dead_sec_;
+    }
+    return ret;
+  }
+
+  double VitalChecker::deadSec()
+  {
+    return dead_sec_;
+  }
+  
   TimeAccumulator::TimeAccumulator()
   {
 

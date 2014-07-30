@@ -2,6 +2,16 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.13 (2014-07-29)
+-------------------
+* add include of pcl_util.h to OrganizedMultiPlaneSegmentation
+* use jsk_topic_tools::TimeAccumulator instead of
+  jsk_pcl_ros::TimeAccumulator in jsk_pcl_ros
+* new class to check connectivity; VitalChecker
+* fixing the usage of boost::mutex::scoped_lock
+* use Eigen::Vector3f as a default type in geo_util classes
+* Contributors: Ryohei Ueda
+
 0.1.12 (2014-07-24)
 -------------------
 * Merge pull request `#210 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/210>`_ from aginika/add-remove-nan-funtion-line

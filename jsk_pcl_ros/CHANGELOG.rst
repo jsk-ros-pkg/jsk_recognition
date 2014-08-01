@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.14 (2014-08-01)
+-------------------
 * add bounging box movement msg
 * Contributors: Yusuke Furuta
 

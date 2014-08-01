@@ -30,7 +30,14 @@ catkin_package(
   LIBRARIES
 )
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+execute_process(
+  COMMAND cmake -E chdir ${CMAKE_CURRENT_BINARY_DIR}
+  make -f ${PROJECT_SOURCE_DIR}/Makefile.slic
+  INSTALL_DIR=${CATKIN_DEVEL_PREFIX}
+  MK_DIR=${mk_PREFIX}/share/mk
+  RESULT_VARIABLE _make_failed)
+
+include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/build/SLIC-Superpixels)
 add_executable(camshiftdemo src/camshiftdemo.cpp)
 add_executable(virtual_camera_mono src/virtual_camera_mono.cpp)
 add_executable(point_pose_extractor src/point_pose_extractor.cpp)
@@ -62,9 +69,11 @@ jsk_perception_nodelet(src/sparse_image_encoder.cpp "jsk_perception/SparseImageE
 jsk_perception_nodelet(src/sparse_image_decoder.cpp "jsk_perception/SparseImageDecoder" "sparse_image_decoder")
 jsk_perception_nodelet(src/color_histogram.cpp "jsk_perception/ColorHistogram" "color_histogram")
 jsk_perception_nodelet(src/hough_circles.cpp "jsk_perception/HoughCircleDetector" "hough_circles")
+jsk_perception_nodelet(src/slic_superpixels.cpp "jsk_perception/SLICSuperPixels" "slic_super_pixels")
 
 # compiling jsk_perception library for nodelet
-add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources})
+add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
+  ${CMAKE_CURRENT_BINARY_DIR}/build/SLIC-Superpixels/slic.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 

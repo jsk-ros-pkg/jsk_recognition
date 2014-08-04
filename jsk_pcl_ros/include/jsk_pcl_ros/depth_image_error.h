@@ -1,4 +1,4 @@
-// -*- mode: c++ -*-
+// -*- mode: C++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
@@ -33,90 +33,43 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/pcl_util.h"
+
+#ifndef JSK_PCL_ROS_DEPTH_IMAGE_ERROR_H_
+#define JSK_PCL_ROS_DEPTH_IMAGE_ERROR_H_
+
+#include <ros/ros.h>
+#include <pcl_ros/pcl_nodelet.h>
+#include <sensor_msgs/Image.h>
+#include <geometry_msgs/PointStamped.h>
+#include <jsk_pcl_ros/DepthErrorResult.h>
+
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
+
+#include <string>
 
 namespace jsk_pcl_ros
 {
-  VitalChecker::VitalChecker(const double dead_sec):
-    dead_sec_(dead_sec)
+  class DepthImageError: public pcl_ros::PCLNodelet
   {
+  public:
+    typedef message_filters::sync_policies::ApproximateTime<
+    sensor_msgs::Image,
+    geometry_msgs::PointStamped
+     > SyncPolicy;
+    ros::Publisher depth_error_publisher_;
 
-  }
-
-  VitalChecker::~VitalChecker()
-  {
-
-  }
-
-  void VitalChecker::poke()
-  {
-    boost::mutex::scoped_lock lock(mutex_);
-    last_alive_time_ = ros::Time::now();
-  }
-
-  bool VitalChecker::isAlive()
-  {
-    bool ret;
-    {
-     boost::mutex::scoped_lock lock(mutex_);
-     ret = (ros::Time::now() - last_alive_time_).toSec() < dead_sec_;
-    }
-    return ret;
-  }
-
-  double VitalChecker::deadSec()
-  {
-    return dead_sec_;
-  }
-  
-  TimeAccumulator::TimeAccumulator()
-  {
-
-  }
-
-  TimeAccumulator::~TimeAccumulator()
-  {
-
-  }
-  
-  ScopedTimer TimeAccumulator::scopedTimer()
-  {
-    return ScopedTimer(this);
-  }
-
-  void TimeAccumulator::registerTime(double time)
-  {
-    acc_(time);
-  }
-
-  double TimeAccumulator::mean()
-  {
-    return boost::accumulators::mean(acc_);
-  }
-
-  double TimeAccumulator::min()
-  {
-    return boost::accumulators::min(acc_);
-  }
-
-  double TimeAccumulator::max()
-  {
-    return boost::accumulators::max(acc_);
-  }
-
-  double TimeAccumulator::variance()
-  {
-    return boost::accumulators::variance(acc_);
-  }
-  
-  ScopedTimer::ScopedTimer(TimeAccumulator* parent):
-    parent_(parent), start_time_(ros::WallTime::now())
-  {
-  }
-
-  ScopedTimer::~ScopedTimer()
-  {
-    parent_->registerTime((ros::WallTime::now() - start_time_).toSec());
-  }
+  protected:
+    virtual void onInit();
+    virtual void calcError(const sensor_msgs::Image::ConstPtr& depth_image,
+                           const geometry_msgs::PointStamped::ConstPtr& uv_point);
+    message_filters::Subscriber<sensor_msgs::Image> sub_image_;
+    message_filters::Subscriber<geometry_msgs::PointStamped> sub_point_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+  private:
+  };
 }
 
+#endif

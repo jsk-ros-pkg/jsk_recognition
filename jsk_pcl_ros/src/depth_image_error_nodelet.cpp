@@ -1,7 +1,8 @@
+// -*- mode: C++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Yuto Inagaki and JSK Lab
+ *  Copyright (c) 2014, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,46 +33,46 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-
-#include "jsk_pcl_ros/tf_transform_cloud.h"
+#include "jsk_pcl_ros/depth_image_error.h"
 #include <pluginlib/class_list_macros.h>
-
-#include <tf2_ros/buffer_client.h>
-#include <pcl/common/centroid.h>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
 
 namespace jsk_pcl_ros
 {
-  void TfTransformCloud::transform(const sensor_msgs::PointCloud2ConstPtr &input)
-  {
-    sensor_msgs::PointCloud2 output;
-    try
-    {
-      if (pcl_ros::transformPointCloud(target_frame_id_, *input, output, tf_listener_)) {
-        pub_cloud_.publish(output);
-      }
-    }
-    catch (tf2::ConnectivityException &e)
-    {
-      NODELET_ERROR("Transform error: %s", e.what());
-    }
-    catch (tf2::InvalidArgumentException &e)
-    {
-      NODELET_ERROR("Transform error: %s", e.what());
-    }
-  }
-
-  void TfTransformCloud::onInit(void)
+  void DepthImageError::onInit()
   {
     PCLNodelet::onInit();
-    sub_cloud_ = pnh_->subscribe("input", 1, &TfTransformCloud::transform, this);
-    if (!pnh_->getParam("target_frame_id", target_frame_id_))
-    {
-      ROS_WARN("~target_frame_id is not specified, using %s", "/base_footprint");
-    }
+    sub_image_.subscribe(*pnh_, "image", 1);
+    sub_point_.subscribe(*pnh_, "point", 1);
+    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(1000);
+    sync_->connectInput(sub_image_, sub_point_);
+    sync_->registerCallback(boost::bind(&DepthImageError::calcError,
+                                        this, _1, _2));
+  }
 
-    pub_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
+  void DepthImageError::calcError(const sensor_msgs::Image::ConstPtr& depth_image,
+                                  const geometry_msgs::PointStamped::ConstPtr& uv_point)
+  {
+    NODELET_INFO("calcError is called");
+    cv_bridge::CvImagePtr cv_ptr;
+    cv_ptr = cv_bridge::toCvCopy(depth_image, sensor_msgs::image_encodings::TYPE_32FC1);
+    cv::Mat cv_depth_image = cv_ptr->image;
+    double depth_from_depth_sensor = cv_depth_image.at<float>((int)uv_point->point.y, (int)uv_point->point.x);
+    NODELET_INFO("(u, v) = (%d, %d)", (int)uv_point->point.x, (int)uv_point->point.y);
+    NODELET_INFO("(z, d) = (%f, %f)", uv_point->point.z, depth_from_depth_sensor);
+    if (! isnan(depth_from_depth_sensor)) {
+      jsk_pcl_ros::DepthErrorResult result;
+      result.header.frame_id = depth_image->header.frame_id;
+      result.header.stamp = depth_image->header.stamp;
+      result.u = (int)uv_point->point.x;
+      result.v = (int)uv_point->point.y;
+      result.true_depth = uv_point->point.z;
+      result.observed_depth = depth_from_depth_sensor;
+      depth_error_publisher_.publish(result);
+    }
   }
 }
 
-typedef jsk_pcl_ros::TfTransformCloud TfTransformCloud;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, TfTransformCloud, TfTransformCloud, nodelet::Nodelet);
+typedef jsk_pcl_ros::DepthImageError DepthImageError;
+PLUGINLIB_DECLARE_CLASS (jsk_pcl, DepthImageError, DepthImageError, nodelet::Nodelet);

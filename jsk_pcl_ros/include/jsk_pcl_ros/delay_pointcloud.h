@@ -1,4 +1,4 @@
-// -*- mode: c++ -*-
+// -*- mode: C++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
@@ -33,90 +33,33 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/pcl_util.h"
+#ifndef JSK_PCL_ROS_DELAY_POINTCLOUD_H_
+#define JSK_PCL_ROS_DELAY_POINTCLOUD_H_
+
+#include <pcl_ros/pcl_nodelet.h>
+#include <sensor_msgs/PointCloud.h>
 
 namespace jsk_pcl_ros
 {
-  VitalChecker::VitalChecker(const double dead_sec):
-    dead_sec_(dead_sec)
-  {
 
-  }
-
-  VitalChecker::~VitalChecker()
+  class DelayPointCloud: public pcl_ros::PCLNodelet
   {
+    
+  public:
+    
+  protected:
+    virtual void onInit();
+    virtual void delay(const sensor_msgs::PointCloud2::ConstPtr& msg);
 
-  }
+    double sleep_time_;
+    ros::Subscriber sub_;
+    ros::Publisher pub_;
+  private:
 
-  void VitalChecker::poke()
-  {
-    boost::mutex::scoped_lock lock(mutex_);
-    last_alive_time_ = ros::Time::now();
-  }
+  };
 
-  bool VitalChecker::isAlive()
-  {
-    bool ret;
-    {
-     boost::mutex::scoped_lock lock(mutex_);
-     ret = (ros::Time::now() - last_alive_time_).toSec() < dead_sec_;
-    }
-    return ret;
-  }
-
-  double VitalChecker::deadSec()
-  {
-    return dead_sec_;
-  }
-  
-  TimeAccumulator::TimeAccumulator()
-  {
-
-  }
-
-  TimeAccumulator::~TimeAccumulator()
-  {
-
-  }
-  
-  ScopedTimer TimeAccumulator::scopedTimer()
-  {
-    return ScopedTimer(this);
-  }
-
-  void TimeAccumulator::registerTime(double time)
-  {
-    acc_(time);
-  }
-
-  double TimeAccumulator::mean()
-  {
-    return boost::accumulators::mean(acc_);
-  }
-
-  double TimeAccumulator::min()
-  {
-    return boost::accumulators::min(acc_);
-  }
-
-  double TimeAccumulator::max()
-  {
-    return boost::accumulators::max(acc_);
-  }
-
-  double TimeAccumulator::variance()
-  {
-    return boost::accumulators::variance(acc_);
-  }
-  
-  ScopedTimer::ScopedTimer(TimeAccumulator* parent):
-    parent_(parent), start_time_(ros::WallTime::now())
-  {
-  }
-
-  ScopedTimer::~ScopedTimer()
-  {
-    parent_->registerTime((ros::WallTime::now() - start_time_).toSec());
-  }
 }
+
+
+#endif
 

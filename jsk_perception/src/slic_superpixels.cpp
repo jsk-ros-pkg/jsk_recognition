@@ -33,76 +33,63 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_PCL_UTIL_H_
-#define JSK_PCL_ROS_PCL_UTIL_H_
-
-#include <pcl/point_types.h>
-#include <ros/time.h>
-
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/min.hpp>
-#include <boost/accumulators/statistics/max.hpp>
-#include <boost/accumulators/statistics/variance.hpp>
-
-#include <boost/timer.hpp>
-
+#include <ros/ros.h>
+#include <nodelet/nodelet.h>
+#include <sensor_msgs/image_encodings.h>
+#include <cv_bridge/cv_bridge.h>
+#include <image_transport/image_transport.h>
+#include <dynamic_reconfigure/server.h>
 #include <boost/thread.hpp>
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
+#include "slic.h"
 
-namespace jsk_pcl_ros
+namespace jsk_perception
 {
-  // multi-thread safe
-  class VitalChecker
+  class SLICSuperPixels: public nodelet::Nodelet
   {
   public:
-    typedef boost::shared_ptr<VitalChecker> Ptr;
-    VitalChecker(const double dead_sec);
-    virtual ~VitalChecker();
-    void poke();
-    bool isAlive();
-    double deadSec();
-  protected:
-    ros::Time last_alive_time_;
-    double dead_sec_;
+    ros::NodeHandle nh_, pnh_;
+    boost::shared_ptr<image_transport::ImageTransport> it_;
     boost::mutex mutex_;
+    image_transport::Subscriber image_sub_;
+    void imageCallback(const sensor_msgs::Image::ConstPtr& image)
+    {
+      boost::mutex::scoped_lock lock(mutex_);
+      cv_bridge::CvImagePtr cv_ptr;
+      cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);
+      cv::Mat bgr_image = cv_ptr->image;
+
+      IplImage bgr_image_ipl;
+      bgr_image_ipl = bgr_image;
+      IplImage* lab_image = cvCloneImage(&bgr_image_ipl);
+      IplImage* out_image = cvCloneImage(&bgr_image_ipl);
+      // slic
+      cvCvtColor(&bgr_image_ipl, lab_image, CV_BGR2Lab);
+      int w = image->width, h = image->height;
+      int nr_superpixels = 200;
+      int nc = 4;
+      double step = sqrt((w * h) / (double) nr_superpixels);
+      Slic slic;
+      slic.generate_superpixels(lab_image, step, nc);
+      slic.create_connectivity(lab_image);
+      slic.display_contours(out_image, CV_RGB(255,0,0));
+      cvShowImage("result", out_image);
+      cvWaitKey(10);
+    }
+    
+    virtual void onInit()
+    {
+      nh_ = ros::NodeHandle(getNodeHandle(), "image");
+      pnh_ = getPrivateNodeHandle();
+      it_.reset(new image_transport::ImageTransport(nh_));
+      image_sub_ = it_->subscribe("", 1, &SLICSuperPixels::imageCallback, this);
+    }
+  protected:
   private:
   };
-  
-  class ScopedTimer;
-  
-  class TimeAccumulator
-  {
-  public:
-    typedef boost::accumulators::accumulator_set<
-    double,
-    boost::accumulators::stats<boost::accumulators::tag::mean,
-                               boost::accumulators::tag::min,
-                               boost::accumulators::tag::max,
-                               boost::accumulators::tag::variance> > Accumulator;
-    
-    TimeAccumulator();
-    virtual ~TimeAccumulator();
-    virtual ScopedTimer scopedTimer();
-    virtual void registerTime(double time);
-    virtual double mean();
-    virtual double min();
-    virtual double max();
-    virtual double variance();
-  protected:
-    Accumulator acc_;
-  };
-
-  class ScopedTimer
-  {
-  public:
-    ScopedTimer(TimeAccumulator* parent);
-    virtual ~ScopedTimer();
-  protected:
-    TimeAccumulator* parent_;
-    ros::WallTime start_time_;
-  };
-  
-  
 }
 
-#endif
+#include <pluginlib/class_list_macros.h>
+typedef jsk_perception::SLICSuperPixels SLICSuperPixels;
+PLUGINLIB_DECLARE_CLASS (jsk_perception, SLICSuperPixels, SLICSuperPixels, nodelet::Nodelet);

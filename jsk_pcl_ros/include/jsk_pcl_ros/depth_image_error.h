@@ -33,56 +33,43 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_OCCLUDED_PLANE_ESTIMATOR_H_
-#define JSK_PCL_ROS_OCCLUDED_PLANE_ESTIMATOR_H_
 
-// ros
+#ifndef JSK_PCL_ROS_DEPTH_IMAGE_ERROR_H_
+#define JSK_PCL_ROS_DEPTH_IMAGE_ERROR_H_
+
 #include <ros/ros.h>
-#include <ros/names.h>
-#include <sensor_msgs/PointCloud2.h>
+#include <pcl_ros/pcl_nodelet.h>
+#include <sensor_msgs/Image.h>
+#include <geometry_msgs/PointStamped.h>
+#include <jsk_pcl_ros/DepthErrorResult.h>
+
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
-#include <dynamic_reconfigure/server.h>
+#include <message_filters/sync_policies/approximate_time.h>
 
-// pcl
-#include <pcl_ros/pcl_nodelet.h>
-#include <pcl/point_types.h>
-
-#include <jsk_pcl_ros/PolygonArray.h>
-#include <jsk_pcl_ros/ModelCoefficientsArray.h>
-#include <jsk_pcl_ros/OccludedPlaneEstimatorConfig.h>
+#include <string>
 
 namespace jsk_pcl_ros
 {
-  class OccludedPlaneEstimator: public pcl_ros::PCLNodelet
+  class DepthImageError: public pcl_ros::PCLNodelet
   {
   public:
-    typedef message_filters::sync_policies::ExactTime< jsk_pcl_ros::PolygonArray,
-                                                       jsk_pcl_ros::ModelCoefficientsArray,
-                                                       jsk_pcl_ros::PolygonArray,
-                                                       jsk_pcl_ros::ModelCoefficientsArray> SyncPolicy;
-    typedef jsk_pcl_ros::OccludedPlaneEstimatorConfig Config;
+    typedef message_filters::sync_policies::ApproximateTime<
+    sensor_msgs::Image,
+    geometry_msgs::PointStamped
+     > SyncPolicy;
+    ros::Publisher depth_error_publisher_;
+
   protected:
-    boost::mutex mutex_;
     virtual void onInit();
-    virtual void estimate(const jsk_pcl_ros::PolygonArray::ConstPtr& polygons,
-                          const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients,
-                          const jsk_pcl_ros::PolygonArray::ConstPtr& static_polygons,
-                          const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& static_coefficients);
-    message_filters::Subscriber<jsk_pcl_ros::PolygonArray> sub_polygons_;
-    message_filters::Subscriber<jsk_pcl_ros::PolygonArray> sub_static_polygons_;
-    message_filters::Subscriber<jsk_pcl_ros::ModelCoefficientsArray> sub_coefficients_;
-    message_filters::Subscriber<jsk_pcl_ros::ModelCoefficientsArray> sub_static_coefficients_;
+    virtual void calcError(const sensor_msgs::Image::ConstPtr& depth_image,
+                           const geometry_msgs::PointStamped::ConstPtr& uv_point);
+    message_filters::Subscriber<sensor_msgs::Image> sub_image_;
+    message_filters::Subscriber<geometry_msgs::PointStamped> sub_point_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
-    ros::Publisher polygon_pub_, coefficient_pub_;
-    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
-    virtual void configCallback(Config &config, uint32_t level);
-    double plane_distance_threshold_;
-    double plane_angle_threshold_;
   private:
   };
-  
 }
 
 #endif

@@ -2,6 +2,122 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.14 (2014-08-01)
+-------------------
+* add bounging box movement msg
+* Contributors: Yusuke Furuta
+
+0.1.13 (2014-07-29)
+-------------------
+* add include of pcl_util.h to OrganizedMultiPlaneSegmentation
+* use jsk_topic_tools::TimeAccumulator instead of
+  jsk_pcl_ros::TimeAccumulator in jsk_pcl_ros
+* new class to check connectivity; VitalChecker
+* fixing the usage of boost::mutex::scoped_lock
+* use Eigen::Vector3f as a default type in geo_util classes
+* Contributors: Ryohei Ueda
+
+0.1.12 (2014-07-24)
+-------------------
+* Merge pull request `#210 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/210>`_ from aginika/add-remove-nan-funtion-line
+  Add remove nan funtion line
+* prevent nan pointcloud error with inserting removeNan function in ParticleFilterTracking
+* fix environment modeling and changed api to lock/unlock environment
+* remove border region from environment model
+* publish diagnostic information from OrganizedMultiPlaneSementation
+* take the average of plane coefficients to be combined in EnvironmentPlaneModeling
+* wait transform before transforming in PolygonArrayTransformer
+* convert convex line information into grid cell before computing grid cell
+* fix normalization of the normal when creating Polygon object
+* catch more exceptions in TfTransformPointCloud nodelet
+* Supress debug message from ColorHistogramMatcher
+* fill x-y-z field to publish correct pose of the pointcloud from ColorHistogramMatcher
+* publish the pose of the best matched candidate in ColorHistogramMatcher
+* publish selected handle pose
+* publish u, v, true_depth and observed_depth
+* fix the order of Mat::at
+* add two nodelets (DelayPointCloud and DepthImageError) to jsk_pcl_ros
+  and publish u/v coordinates of the checkerboard from checkerboard_detector.
+  * DepthImageError is just a skelton yet.
+  * DelayPointCloud re-publishes pointcloud with specified delay time.
+  * publish u/v coordinates from checkerboard_detector.
+  * frame_id broadcasted from objectdetection_tf_publisher.py is configurable
+* copy the header of the input cloud to the output cloud in SelectedClusterPublisher
+* Contributors: Ryohei Ueda, Yuto Inagaki, Eisoku Kuroiwa, Yusuke Furuta
+
+0.1.11 (2014-07-08)
+-------------------
+
+0.1.10 (2014-07-07)
+-------------------
+* compute distance based on Polygon-to-ConvexCentroid in order to identify
+  the grid maps
+* remove debug code in PolygonArrayTransformer
+* use Plane class to compute transformation of coefficients
+* statical voting and rejection to the grid map to remove unstable
+  recognition result
+* support appending of GridMap in time series in EnvironmentPlaneModeling
+* measure time to compute polygon collision in EnvironmentPlaneModeling
+* add a nodelet to concatenate PolygonStamped
+* publish polygon synchronized with ~trigger message
+* new utility class to measure time
+* change default camera name
+* build and publish grid map always on EnvironmentPlaneModeling
+* add launch file for openni
+* Contributors: Ryohei Ueda, Yusuke Furuta
+
+0.1.9 (2014-07-01)
+------------------
+* publish the result of grid modeling as SparseOccupancyGridArray
+* compute segmented cloud's distance to polygon based on convex polygon assumption
+* add new parameter to dynamic_reconfigure of EnvironmentPlaneModeling
+* Contributors: Ryohei Ueda
+
+0.1.8 (2014-06-29)
+------------------
+* add min_indices parameter to ignore the grid which does not include
+  enough points.
+* add throttle for bounding box visualization in
+  organized_multi_plane_segmentation.launch.
+  Because it may be too fast to see...
+* add ~publish_tf=false to several nodelets in organized_multi_plane_segmentation.launch
+* fix typo of launch file
+* run ColorHistogramMatcher with GridSampler
+* implement GridSampler
+* find object based on hsv color histogram of the pointcloud
+* implement simple handle detector to grasp
+* refactor cluster decomposer class
+  run PCA to compute orientation of bounding box
+* run PCA to compute bouding box
+* fix segmentation fault
+* estimate occlusion in EnvironmentPlaneModeling
+* fix several bags for plane-based environment modeling
+* fix the header of the output of the estimation of occlusion
+* do not compute transformation if no points are available
+* does not publish pointclouds if transformation failed
+* merge remote branch origin/master
+* fulfill occluded reagion with pointcloud by OccludedPlaneEstimator
+* debug and substitute stamp value to header/stamp
+  add cloth classification sample
+* only make will be executed on hydro
+* fix typo: oclusoin -> occlusion
+* add new nodelet: EnvironmentPlaneModeling
+* use pcl::PointXYZRGB rather than pcl::PointXYZRGBNormal
+* add normal estimation to organized multi plane segmentation
+* d varaible of the normal should be transformed correctly by PolygonArrayTransfomer.
+  fix transformation compuation to normalize d parameter
+* add depent tag to ml_classifiers
+* add more rosparameters to ParticleFilterTracking
+* add MACHINE and GDB argument
+* add program to compute color histogram (rgb and hsv color space)
+* add cloth classification sample
+* change the namespace of the topics to use tracking.launch from the other launch files
+* add OcludedPlaneEstimator nodelet to estimate the ocluded planes
+* new nodelet to transform PolygonArray and ModelCoefficientsArray
+* add nodelet to publish static jsk_pcl_ros/PolygonArray with timestamp
+  synchronized with the pointclouds
+* Contributors: Ryohei Ueda, Yuto Inagaki, Masaki Murooka, Yusuke Furuta
+
 0.1.7 (2014-05-31)
 ------------------
 * new nodelet to reject the plane which does not satisfy the threshold

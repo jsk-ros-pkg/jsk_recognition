@@ -168,6 +168,8 @@ jsk_pcl_nodelet(src/delay_pointcloud_nodelet.cpp
   "jsk_pcl/DelayPointCloud" "delay_pointcloud")
 jsk_pcl_nodelet(src/depth_image_error_nodelet.cpp
   "jsk_pcl/DepthImageError" "depth_image_error")
+jsk_pcl_nodelet(src/organize_pointcloud_nodelet.cpp
+  "jsk_pcl/OrganizePointCloud" "organize_pointcloud")
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp

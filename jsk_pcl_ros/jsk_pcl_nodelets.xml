@@ -218,4 +218,10 @@
       jsk_pcl_ros::ColorizeMapRandomForest
     </description>
   </class>
+  <class name="jsk_pcl/OrganizePointCloud" type="OrganizePointCloud"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      jsk_pcl_ros::OrganizePointCloud
+    </description>
+  </class>
 </library>

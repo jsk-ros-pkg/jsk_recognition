@@ -43,8 +43,10 @@ namespace jsk_pcl_ros
   void DepthImageError::onInit()
   {
     PCLNodelet::onInit();
+    depth_error_publisher_ = pnh_->advertise<DepthErrorResult>("output", 1);
     sub_image_.subscribe(*pnh_, "image", 1);
     sub_point_.subscribe(*pnh_, "point", 1);
+    
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(1000);
     sync_->connectInput(sub_image_, sub_point_);
     sync_->registerCallback(boost::bind(&DepthImageError::calcError,
@@ -54,11 +56,11 @@ namespace jsk_pcl_ros
   void DepthImageError::calcError(const sensor_msgs::Image::ConstPtr& depth_image,
                                   const geometry_msgs::PointStamped::ConstPtr& uv_point)
   {
-    NODELET_INFO("calcError is called");
     cv_bridge::CvImagePtr cv_ptr;
     cv_ptr = cv_bridge::toCvCopy(depth_image, sensor_msgs::image_encodings::TYPE_32FC1);
     cv::Mat cv_depth_image = cv_ptr->image;
     double depth_from_depth_sensor = cv_depth_image.at<float>((int)uv_point->point.y, (int)uv_point->point.x);
+    NODELET_INFO("timestamp diff is %f", (depth_image->header.stamp - uv_point->header.stamp).toSec());
     NODELET_INFO("(u, v) = (%d, %d)", (int)uv_point->point.x, (int)uv_point->point.y);
     NODELET_INFO("(z, d) = (%f, %f)", uv_point->point.z, depth_from_depth_sensor);
     if (! isnan(depth_from_depth_sensor)) {

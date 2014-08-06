@@ -46,6 +46,11 @@
 #include <dynamic_reconfigure/server.h>
 #include "jsk_pcl_ros/OrganizedMultiPlaneSegmentationConfig.h"
 #include "jsk_pcl_ros/PolygonArray.h"
+#include <jsk_topic_tools/time_accumulator.h>
+#include "jsk_pcl_ros/pcl_util.h"
+
+#include <diagnostic_updater/diagnostic_updater.h>
+#include <diagnostic_updater/publisher.h>
 
 namespace jsk_pcl_ros
 {
@@ -76,6 +81,11 @@ namespace jsk_pcl_ros
     typedef jsk_pcl_ros::OrganizedMultiPlaneSegmentationConfig Config;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
+    boost::shared_ptr<diagnostic_updater::Updater> diagnostic_updater_;
+    jsk_topic_tools::TimeAccumulator plane_segmentation_time_acc_;
+    jsk_topic_tools::TimeAccumulator normal_estimation_time_acc_;
+    VitalChecker::Ptr vital_checker_;
+    ros::Timer diagnostics_timer_;
     virtual void segment(const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void estimateNormal(pcl::PointCloud<PointT>::Ptr input,
                                 pcl::PointCloud<pcl::Normal>::Ptr output);
@@ -102,6 +112,13 @@ namespace jsk_pcl_ros
     virtual void segmentFromNormals(pcl::PointCloud<PointT>::Ptr input,
                                     pcl::PointCloud<pcl::Normal>::Ptr normal,
                                     const std_msgs::Header& header);
+    virtual void updateDiagnostics(const ros::TimerEvent& event);
+    virtual void updateDiagnosticNormalEstimation(
+      diagnostic_updater::DiagnosticStatusWrapper &stat);
+    virtual void updateDiagnosticPlaneSegmentation(
+      diagnostic_updater::DiagnosticStatusWrapper &stat);
+    virtual void updateDiagnosticConnectivity(
+      diagnostic_updater::DiagnosticStatusWrapper &stat);
   private:
     virtual void onInit();
   };

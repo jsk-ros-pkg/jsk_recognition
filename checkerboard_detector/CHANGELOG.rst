@@ -2,6 +2,28 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.14 (2014-08-01)
+-------------------
+
+0.1.13 (2014-07-29)
+-------------------
+
+0.1.12 (2014-07-24)
+-------------------
+* add two nodelets (DelayPointCloud and DepthImageError) to jsk_pcl_ros
+  and publish u/v coordinates of the checkerboard from checkerboard_detector.
+  * DepthImageError is just a skelton yet.
+  * DelayPointCloud re-publishes pointcloud with specified delay time.
+  * publish u/v coordinates from checkerboard_detector.
+  * frame_id broadcasted from objectdetection_tf_publisher.py is configurable
+* Contributors: Ryohei Ueda
+
+0.1.11 (2014-07-08)
+-------------------
+
+0.1.10 (2014-07-07)
+-------------------
+
 0.1.9 (2014-07-01)
 ------------------
 

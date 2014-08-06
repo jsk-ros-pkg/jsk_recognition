@@ -106,6 +106,10 @@ jsk_pcl_nodelet(src/grid_sampler_nodelet.cpp
   "jsk_pcl/GridSampler" "grid_sampler")
 jsk_pcl_nodelet(src/handle_estimator_nodelet.cpp
   "jsk_pcl/HandleEstimator" "handle_estimator")
+jsk_pcl_nodelet(src/delay_pointcloud_nodelet.cpp
+  "jsk_pcl/DelayPointCloud" "delay_pointcloud")
+jsk_pcl_nodelet(src/depth_image_error_nodelet.cpp
+  "jsk_pcl/DepthImageError" "depth_image_error")
 jsk_pcl_nodelet(src/organize_pointcloud_nodelet.cpp
   "jsk_pcl/OrganizePointCloud" "organize_pointcloud")
 

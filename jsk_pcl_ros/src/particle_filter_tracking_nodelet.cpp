@@ -231,9 +231,14 @@ namespace jsk_pcl_ros
   }
 
   void
-  ParticleFilterTracking::reset_traking_target_model(const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &new_target_cloud)
+  ParticleFilterTracking::reset_traking_target_model(const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &recieved_target_cloud)
   {
-    if(!new_target_cloud->points.empty()){
+    if(!recieved_target_cloud->points.empty()){
+      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr new_target_cloud (new pcl::PointCloud<pcl::PointXYZRGBA>);
+      std::vector<int> indices;
+      new_target_cloud->is_dense = false;
+      pcl::removeNaNFromPointCloud(*recieved_target_cloud, *new_target_cloud, indices);
+
       //prepare the model of tracker's target
       Eigen::Vector4f c;
       Eigen::Affine3f trans = Eigen::Affine3f::Identity ();

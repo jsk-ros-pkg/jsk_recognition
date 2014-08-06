@@ -73,7 +73,7 @@ namespace jsk_perception
     
     void imageCallback(const sensor_msgs::Image::ConstPtr& image)
     {
-      boost::mutex::scoped_lock(mutex_);
+      boost::mutex::scoped_lock lock(mutex_);
       cv_bridge::CvImagePtr cv_ptr;
       cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);
       cv::Mat bgr_image = cv_ptr->image;
@@ -121,7 +121,7 @@ namespace jsk_perception
 
     void configCallback(Config &new_config, uint32_t level)
     {
-      boost::mutex::scoped_lock(mutex_);
+      boost::mutex::scoped_lock lock(mutex_);
       gaussian_blur_size_ = new_config.gaussian_blur_size;
       gaussian_sigma_x_ = new_config.gaussian_sigma_x;
       gaussian_sigma_y_ = new_config.gaussian_sigma_y;

@@ -64,7 +64,7 @@ namespace jsk_pcl_ros
 
   void RegionGrowingSegmentation::configCallback(Config &config, uint32_t level)
   {
-    boost::mutex::scoped_lock(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
 
     if (number_of_neighbors_ != config.number_of_neighbors) {
       number_of_neighbors_ = config.number_of_neighbors;
@@ -85,7 +85,7 @@ namespace jsk_pcl_ros
 
   void RegionGrowingSegmentation::segment(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
-    boost::mutex::scoped_lock(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
     pcl::search::Search<pcl::PointNormal>::Ptr tree = boost::shared_ptr<pcl::search::Search<pcl::PointNormal> > (new pcl::search::KdTree<pcl::PointNormal>);
     pcl::PointCloud<pcl::PointNormal> cloud;
     pcl::fromROSMsg(*msg, cloud);

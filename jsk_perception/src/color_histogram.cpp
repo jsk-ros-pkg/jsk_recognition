@@ -72,7 +72,7 @@ namespace jsk_perception
     
     void configCallback(Config &new_config, uint32_t level)
     {
-      boost::mutex::scoped_lock(mutex_);
+      boost::mutex::scoped_lock lock(mutex_);
       b_hist_size_ = new_config.blue_histogram_bin;
       g_hist_size_ = new_config.green_histogram_bin;
       r_hist_size_ = new_config.red_histogram_bin;
@@ -184,7 +184,7 @@ namespace jsk_perception
     virtual void extract(const sensor_msgs::Image::ConstPtr& image,
                          const geometry_msgs::PolygonStamped::ConstPtr& rectangle)
     {
-      boost::mutex::scoped_lock(mutex_);
+      boost::mutex::scoped_lock lock(mutex_);
       try
       {
         cv_bridge::CvImagePtr cv_ptr;

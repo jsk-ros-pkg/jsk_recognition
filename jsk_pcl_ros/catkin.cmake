@@ -23,8 +23,12 @@ else()
   set(ML_CLASSIFIERS ml_classifiers) ## hydro and later
 endif()
 
-find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros nodelet message_generation genmsg ${PCL_MSGS} sensor_msgs geometry_msgs
-  eigen_conversions tf_conversions tf2_ros tf image_transport nodelet cv_bridge ${ML_CLASSIFIERS} sklearn)
+find_package(catkin REQUIRED COMPONENTS
+  dynamic_reconfigure pcl_ros nodelet message_generation genmsg
+  ${PCL_MSGS} sensor_msgs geometry_msgs
+  eigen_conversions tf_conversions tf2_ros tf
+  image_transport nodelet cv_bridge
+  ${ML_CLASSIFIERS} sklearn jsk_topic_tools)
 
 find_package(OpenMP)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
@@ -41,7 +45,8 @@ add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg
   SparseOccupancyGridCell.msg
   SparseOccupancyGridColumn.msg
   SparseOccupancyGrid.msg
-  SparseOccupancyGridArray.msg)
+  SparseOccupancyGridArray.msg
+  DepthErrorResult.msg)
 add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv SetPointCloud2.srv
   CallSnapIt.srv CallPolygon.srv
   EnvironmentLock.srv
@@ -159,6 +164,10 @@ jsk_pcl_nodelet(src/grid_sampler_nodelet.cpp
   "jsk_pcl/GridSampler" "grid_sampler")
 jsk_pcl_nodelet(src/handle_estimator_nodelet.cpp
   "jsk_pcl/HandleEstimator" "handle_estimator")
+jsk_pcl_nodelet(src/delay_pointcloud_nodelet.cpp
+  "jsk_pcl/DelayPointCloud" "delay_pointcloud")
+jsk_pcl_nodelet(src/depth_image_error_nodelet.cpp
+  "jsk_pcl/DepthImageError" "depth_image_error")
 jsk_pcl_nodelet(src/organize_pointcloud_nodelet.cpp
   "jsk_pcl/OrganizePointCloud" "organize_pointcloud")
 

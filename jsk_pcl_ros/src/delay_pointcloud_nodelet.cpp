@@ -1,4 +1,4 @@
-// -*- mode: c++ -*-
+// -*- mode: C++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
@@ -33,90 +33,27 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_pcl_ros/delay_pointcloud.h"
+#include <pluginlib/class_list_macros.h>
 
 namespace jsk_pcl_ros
 {
-  VitalChecker::VitalChecker(const double dead_sec):
-    dead_sec_(dead_sec)
+  void DelayPointCloud::onInit()
   {
-
+    PCLNodelet::onInit();
+    pnh_->param("sleep_time", sleep_time_, 1.0);
+    sub_ = pnh_->subscribe("input", 1, &DelayPointCloud::delay, this);
+    pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
   }
 
-  VitalChecker::~VitalChecker()
+  void DelayPointCloud::delay(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
-
+    ros::Duration(sleep_time_).sleep();
+    pub_.publish(msg);
   }
 
-  void VitalChecker::poke()
-  {
-    boost::mutex::scoped_lock lock(mutex_);
-    last_alive_time_ = ros::Time::now();
-  }
 
-  bool VitalChecker::isAlive()
-  {
-    bool ret;
-    {
-     boost::mutex::scoped_lock lock(mutex_);
-     ret = (ros::Time::now() - last_alive_time_).toSec() < dead_sec_;
-    }
-    return ret;
-  }
-
-  double VitalChecker::deadSec()
-  {
-    return dead_sec_;
-  }
-  
-  TimeAccumulator::TimeAccumulator()
-  {
-
-  }
-
-  TimeAccumulator::~TimeAccumulator()
-  {
-
-  }
-  
-  ScopedTimer TimeAccumulator::scopedTimer()
-  {
-    return ScopedTimer(this);
-  }
-
-  void TimeAccumulator::registerTime(double time)
-  {
-    acc_(time);
-  }
-
-  double TimeAccumulator::mean()
-  {
-    return boost::accumulators::mean(acc_);
-  }
-
-  double TimeAccumulator::min()
-  {
-    return boost::accumulators::min(acc_);
-  }
-
-  double TimeAccumulator::max()
-  {
-    return boost::accumulators::max(acc_);
-  }
-
-  double TimeAccumulator::variance()
-  {
-    return boost::accumulators::variance(acc_);
-  }
-  
-  ScopedTimer::ScopedTimer(TimeAccumulator* parent):
-    parent_(parent), start_time_(ros::WallTime::now())
-  {
-  }
-
-  ScopedTimer::~ScopedTimer()
-  {
-    parent_->registerTime((ros::WallTime::now() - start_time_).toSec());
-  }
 }
 
+typedef jsk_pcl_ros::DelayPointCloud DelayPointCloud;
+PLUGINLIB_DECLARE_CLASS (jsk_pcl, DelayPointCloud, DelayPointCloud, nodelet::Nodelet);

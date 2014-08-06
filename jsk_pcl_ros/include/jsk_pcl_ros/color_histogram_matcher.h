@@ -89,6 +89,7 @@ namespace jsk_pcl_ros
     ros::Publisher result_pub_;
     ros::Publisher all_histogram_pub_;
     ros::Publisher reference_histogram_pub_;
+    ros::Publisher best_pub_;
     std::vector<float> reference_histogram_;
     bool reference_set_;
     double coefficient_thr_;

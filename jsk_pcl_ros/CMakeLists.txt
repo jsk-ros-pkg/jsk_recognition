@@ -112,6 +112,8 @@ jsk_pcl_nodelet(src/depth_image_error_nodelet.cpp
   "jsk_pcl/DepthImageError" "depth_image_error")
 jsk_pcl_nodelet(src/organize_pointcloud_nodelet.cpp
   "jsk_pcl/OrganizePointCloud" "organize_pointcloud")
+jsk_pcl_nodelet(src/polygon_array_wrapper_nodelet.cpp
+  "jsk_pcl/PolygonArrayWrapper" "polygon_array_wrapper")
 
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}

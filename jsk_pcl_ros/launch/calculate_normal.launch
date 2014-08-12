@@ -39,6 +39,17 @@
         min_inliers: 100
       </rosparam>
     </node>
+    <node pkg="nodelet" type="nodelet" name="project_inliers" args="load pcl/ProjectInliers $(arg manager)">
+      <remap from="~input" to="voxel_grid/output"/>
+      <remap from="~indices" to="ground_segmentation/inliers" />
+      <remap from="~model" to="ground_segmentation/model" />
+      <rosparam>
+        model_type: 9
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="convex_hull" args="load pcl/ConvexHull2D $(arg manager)">
+      <remap from="~input" to="project_inliers/output" />
+    </node>
     <node pkg="nodelet" type="nodelet" name="extract_nonground_indices" args="load pcl/ExtractIndices $(arg manager)" output="screen" respawn="true">
       <remap from="~input"   to="voxel_grid/output" />
       <remap from="~indices" to="ground_segmentation/inliers" />

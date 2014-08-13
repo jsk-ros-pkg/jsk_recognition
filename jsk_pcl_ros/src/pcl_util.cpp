@@ -68,55 +68,5 @@ namespace jsk_pcl_ros
   {
     return dead_sec_;
   }
-  
-  TimeAccumulator::TimeAccumulator()
-  {
-
-  }
-
-  TimeAccumulator::~TimeAccumulator()
-  {
-
-  }
-  
-  ScopedTimer TimeAccumulator::scopedTimer()
-  {
-    return ScopedTimer(this);
-  }
-
-  void TimeAccumulator::registerTime(double time)
-  {
-    acc_(time);
-  }
-
-  double TimeAccumulator::mean()
-  {
-    return boost::accumulators::mean(acc_);
-  }
-
-  double TimeAccumulator::min()
-  {
-    return boost::accumulators::min(acc_);
-  }
-
-  double TimeAccumulator::max()
-  {
-    return boost::accumulators::max(acc_);
-  }
-
-  double TimeAccumulator::variance()
-  {
-    return boost::accumulators::variance(acc_);
-  }
-  
-  ScopedTimer::ScopedTimer(TimeAccumulator* parent):
-    parent_(parent), start_time_(ros::WallTime::now())
-  {
-  }
-
-  ScopedTimer::~ScopedTimer()
-  {
-    parent_->registerTime((ros::WallTime::now() - start_time_).toSec());
-  }
 }
 

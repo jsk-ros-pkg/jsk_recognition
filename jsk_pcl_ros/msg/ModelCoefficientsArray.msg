@@ -1,2 +1,2 @@
 Header header
-pcl/ModelCoefficients[] coefficients
+pcl_msgs/ModelCoefficients[] coefficients

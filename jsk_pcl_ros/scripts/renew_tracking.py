@@ -24,5 +24,5 @@ def cloud_cb(cloud):
 if __name__ == "__main__":
     rospy.init_node('send_renew_model', anonymous=True)
     rospy.wait_for_service('particle_filter_tracker/renew_model')
-    rospy.Subscriber("/selected_pointcloud", PointCloud2, cloud_cb)
+    rospy.Subscriber("selected_pointcloud", PointCloud2, cloud_cb)
     rospy.spin()

@@ -33,40 +33,47 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_pcl_ros/polygon_array_wrapper.h"
 
 namespace jsk_pcl_ros
 {
-  VitalChecker::VitalChecker(const double dead_sec):
-    dead_sec_(dead_sec)
+  void PolygonArrayWrapper::onInit()
   {
-
+    PCLNodelet::onInit();
+    pub_polygon_array_ = pnh_->advertise<jsk_pcl_ros::PolygonArray>(
+      "output_polygons", 1);
+    pub_coefficients_array_
+      = pnh_->advertise<jsk_pcl_ros::ModelCoefficientsArray>(
+        "output_coefficients", 1);
+    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+    sub_polygon_.subscribe(*pnh_, "input_polygon", 1);
+    sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
+    sync_->connectInput(sub_polygon_, sub_coefficients_);
+    sync_->registerCallback(boost::bind(
+                              &PolygonArrayWrapper::wrap,
+                              this, _1, _2));
   }
 
-  VitalChecker::~VitalChecker()
+  
+  void PolygonArrayWrapper::wrap(
+    const geometry_msgs::PolygonStamped::ConstPtr& polygon,
+    const PCLModelCoefficientMsg::ConstPtr& coefficients)
   {
+    jsk_pcl_ros::PolygonArray array_msg;
+    array_msg.header = polygon->header;
+    geometry_msgs::PolygonStamped new_polygon(*polygon);
+    array_msg.polygons.push_back(new_polygon);
+    pub_polygon_array_.publish(array_msg);
 
+    jsk_pcl_ros::ModelCoefficientsArray coefficients_array;
+    coefficients_array.header = coefficients->header;
+    PCLModelCoefficientMsg new_coefficients(*coefficients);
+    coefficients_array.coefficients.push_back(new_coefficients);
+    pub_coefficients_array_.publish(coefficients_array);
   }
-
-  void VitalChecker::poke()
-  {
-    boost::mutex::scoped_lock lock(mutex_);
-    last_alive_time_ = ros::Time::now();
-  }
-
-  bool VitalChecker::isAlive()
-  {
-    bool ret;
-    {
-     boost::mutex::scoped_lock lock(mutex_);
-     ret = (ros::Time::now() - last_alive_time_).toSec() < dead_sec_;
-    }
-    return ret;
-  }
-
-  double VitalChecker::deadSec()
-  {
-    return dead_sec_;
-  }
+  
 }
 
+#include <pluginlib/class_list_macros.h>
+typedef jsk_pcl_ros::PolygonArrayWrapper PolygonArrayWrapper;
+PLUGINLIB_DECLARE_CLASS (jsk_pcl, PolygonArrayWrapper, PolygonArrayWrapper, nodelet::Nodelet);

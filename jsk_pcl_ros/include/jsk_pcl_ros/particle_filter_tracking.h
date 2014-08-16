@@ -94,19 +94,19 @@ namespace jsk_pcl_ros
     bool new_cloud_;
     bool track_target_set_;
     std::string frame_id_;
+    std::string track_target_name_;
     ros::Time stamp_;
 
     ros::Subscriber sub_;
     ros::Subscriber sub_update_model_;
     ros::Publisher particle_publisher_;
     ros::Publisher track_result_publisher_;
-    ros::Publisher tf_publisher_;
     ros::ServiceServer srv_;
 
     virtual void publish_particles ();
     virtual void publish_result ();
 
-    virtual void reset_traking_target_model(const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &new_target_cloud);
+    virtual void reset_tracking_target_model(const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &new_target_cloud);
     virtual void cloud_cb (const sensor_msgs::PointCloud2 &pc);
     virtual bool renew_model_cb(jsk_pcl_ros::SetPointCloud2::Request &req,
                                jsk_pcl_ros::SetPointCloud2::Response &response

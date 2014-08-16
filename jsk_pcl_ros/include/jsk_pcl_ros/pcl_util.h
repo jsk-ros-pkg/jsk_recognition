@@ -67,42 +67,6 @@ namespace jsk_pcl_ros
     boost::mutex mutex_;
   private:
   };
-  
-  class ScopedTimer;
-  
-  class TimeAccumulator
-  {
-  public:
-    typedef boost::accumulators::accumulator_set<
-    double,
-    boost::accumulators::stats<boost::accumulators::tag::mean,
-                               boost::accumulators::tag::min,
-                               boost::accumulators::tag::max,
-                               boost::accumulators::tag::variance> > Accumulator;
-    
-    TimeAccumulator();
-    virtual ~TimeAccumulator();
-    virtual ScopedTimer scopedTimer();
-    virtual void registerTime(double time);
-    virtual double mean();
-    virtual double min();
-    virtual double max();
-    virtual double variance();
-  protected:
-    Accumulator acc_;
-  };
-
-  class ScopedTimer
-  {
-  public:
-    ScopedTimer(TimeAccumulator* parent);
-    virtual ~ScopedTimer();
-  protected:
-    TimeAccumulator* parent_;
-    ros::WallTime start_time_;
-  };
-  
-  
 }
 
 #endif

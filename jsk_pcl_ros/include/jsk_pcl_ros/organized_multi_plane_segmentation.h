@@ -47,6 +47,7 @@
 #include "jsk_pcl_ros/OrganizedMultiPlaneSegmentationConfig.h"
 #include "jsk_pcl_ros/PolygonArray.h"
 #include <jsk_topic_tools/time_accumulator.h>
+#include <jsk_topic_tools/vital_checker.h>
 #include "jsk_pcl_ros/pcl_util.h"
 
 #include <diagnostic_updater/diagnostic_updater.h>
@@ -84,7 +85,7 @@ namespace jsk_pcl_ros
     boost::shared_ptr<diagnostic_updater::Updater> diagnostic_updater_;
     jsk_topic_tools::TimeAccumulator plane_segmentation_time_acc_;
     jsk_topic_tools::TimeAccumulator normal_estimation_time_acc_;
-    VitalChecker::Ptr vital_checker_;
+    jsk_topic_tools::VitalChecker::Ptr vital_checker_;
     ros::Timer diagnostics_timer_;
     virtual void segment(const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void estimateNormal(pcl::PointCloud<PointT>::Ptr input,

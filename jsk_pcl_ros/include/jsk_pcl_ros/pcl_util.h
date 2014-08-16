@@ -37,36 +37,5 @@
 #define JSK_PCL_ROS_PCL_UTIL_H_
 
 #include <pcl/point_types.h>
-#include <ros/time.h>
-
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/min.hpp>
-#include <boost/accumulators/statistics/max.hpp>
-#include <boost/accumulators/statistics/variance.hpp>
-
-#include <boost/timer.hpp>
-
-#include <boost/thread.hpp>
-
-namespace jsk_pcl_ros
-{
-  // multi-thread safe
-  class VitalChecker
-  {
-  public:
-    typedef boost::shared_ptr<VitalChecker> Ptr;
-    VitalChecker(const double dead_sec);
-    virtual ~VitalChecker();
-    void poke();
-    bool isAlive();
-    double deadSec();
-  protected:
-    ros::Time last_alive_time_;
-    double dead_sec_;
-    boost::mutex mutex_;
-  private:
-  };
-}
 
 #endif

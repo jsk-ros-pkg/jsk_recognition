@@ -36,23 +36,14 @@
 #include <pluginlib/class_list_macros.h>
 #include <pcl/filters/extract_indices.h>
 
-#if ROS_VERSION_MINIMUM(1, 10, 0)
-// hydro and later
-typedef pcl_msgs::PointIndices PCLIndicesMsg;
-typedef pcl_msgs::ModelCoefficients PCLModelCoefficientMsg;
-#else
-// groovy
-typedef pcl::PointIndices PCLIndicesMsg;
-typedef pcl::ModelCoefficients PCLModelCoefficientMsg;
-#endif
-
+#include "jsk_pcl_ros/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros
 {
   void SelectedClusterPublisher::onInit()
   {
     PCLNodelet::onInit();
-    pub_ = pnh_->advertise<pcl::PointCloud<pcl::PointXYZRGB> >("output", 1);
+    pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(300); // 100 is enough?
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_indices_.subscribe(*pnh_, "indices", 1);
@@ -80,7 +71,10 @@ namespace jsk_pcl_ros
     extract.setIndices(pcl_indices);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr extracted_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
     extract.filter(*extracted_cloud);
-    pub_.publish(extracted_cloud);
+    sensor_msgs::PointCloud2 ros_msg;
+    pcl::toROSMsg(*extracted_cloud, ros_msg);
+    ros_msg.header = input->header;
+    pub_.publish(ros_msg);
   }
 }
 

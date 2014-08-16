@@ -2,6 +2,41 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.14 (2014-08-01)
+-------------------
+
+0.1.13 (2014-07-29)
+-------------------
+
+0.1.12 (2014-07-24)
+-------------------
+* fix to use catkin to link rospack
+* Contributors: Dave Coleman, Kei Okada
+
+0.1.11 (2014-07-08)
+-------------------
+* jsk_perception does not depends on pcl, but depends on eigen and tf
+* Contributors: Ryohei Ueda
+
+0.1.10 (2014-07-07)
+-------------------
+* adding oriented_gradient_node
+* add calc_flow program to calc optical flow
+* Contributors: Hiroaki Yaguchi, Ryohei Ueda
+
+0.1.9 (2014-07-01)
+------------------
+
+0.1.8 (2014-06-29)
+------------------
+* initialize _img_ptr at first
+* convert color image to GRAY
+* add nodelet to detect circles based on hough transformation
+* add program to compute color histogram (rgb and hsv color space)
+* maked configure_file to create imagesurf, imagestar and imagebrisk automatically
+* added the programs to use cv_detection
+* Contributors: Ryohei Ueda, Yu Ohara, Yusuke Furuta
+
 0.1.7 (2014-05-31)
 ------------------
 

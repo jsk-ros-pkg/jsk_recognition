@@ -38,6 +38,7 @@
 #include "sensor_msgs/Image.h"
 #include "posedetection_msgs/ObjectDetection.h"
 #include "posedetection_msgs/Detect.h"
+#include "geometry_msgs/PointStamped.h"
 #include "math.h"
 
 #include <sys/timeb.h>    // ftime(), struct timeb
@@ -71,6 +72,7 @@ public:
     ros::Subscriber camInfoSubscriber,camInfoSubscriber2;
     ros::Subscriber imageSubscriber,imageSubscriber2;
     ros::Publisher _pubDetection;
+    ros::Publisher _pubCornerPoint;
     ros::ServiceServer _srvDetect;
 
     string frame_id; // tf frame id
@@ -188,7 +190,7 @@ public:
         _pubDetection =
           _node.advertise<posedetection_msgs::ObjectDetection> ("ObjectDetection", 1,
                                                                 connect_cb, connect_cb);
-
+        _pubCornerPoint = _node.advertise<geometry_msgs::PointStamped>("corner_point", 1, connect_cb, connect_cb);
         //this->camInfoSubscriber = _node.subscribe("camera_info", 1, &CheckerboardDetector::caminfo_cb, this);
         //this->imageSubscriber = _node.subscribe("image",1, &CheckerboardDetector::image_cb, this);
         //this->camInfoSubscriber2 = _node.subscribe("CameraInfo", 1, &CheckerboardDetector::caminfo_cb2, this);
@@ -255,7 +257,7 @@ public:
     void connectCb( )
     {
       boost::mutex::scoped_lock lock(this->mutexcalib);
-      if (_pubDetection.getNumSubscribers() == 0)
+      if (_pubDetection.getNumSubscribers() == 0 && _pubCornerPoint.getNumSubscribers() == 0)
         {
           camInfoSubscriber.shutdown();
           camInfoSubscriber2.shutdown();
@@ -448,6 +450,13 @@ public:
                 }
 
                 cvCircle(frame, X[0], 3, CV_RGB(255,255,128), 3);
+                // publish X[0]
+                geometry_msgs::PointStamped point_msg;
+                point_msg.header = imagemsg.header;
+                point_msg.point.x = X[0].x;
+                point_msg.point.y = X[0].y;
+                point_msg.point.z = vobjects[i].pose.position.z;
+                _pubCornerPoint.publish(point_msg);
             }
 
             cvShowImage("Checkerboard Detector",frame);

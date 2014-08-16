@@ -1,0 +1,19 @@
+all: build/SLIC-Superpixels
+
+INSTALL_DIR ?= ${CURDIR}
+GIT_DIR = build/SLIC-Superpixels
+PATCH_DIR = $(CURDIR)
+GIT_URL = https://github.com/PSMM/SLIC-Superpixels.git
+#GIT_REVISION = 315.2.0
+GIT_PATCH   =
+
+MK_DIR       = $(shell rospack find mk)
+NUM_OF_CPUS = $(shell grep -c '^processor' /proc/cpuinfo)
+
+include $(MK_DIR)/git_checkout.mk
+
+clean:
+	-cd $(GIT_DIR) && make clean
+
+download:
+	git clone $(GIT_URL) $(GIT_DIR); (cd ${GIT_DIR}; git checkout $(GIT_REVISION) up; rm -f `rospack find jsk_perception`/installed)

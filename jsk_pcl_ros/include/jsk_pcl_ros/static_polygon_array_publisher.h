@@ -47,16 +47,14 @@
 #include <nodelet/nodelet.h>
 #include <topic_tools/shape_shifter.h>
 
-#if ROS_VERSION_MINIMUM(1, 10, 0)
-// hydro and later
-typedef pcl_msgs::PointIndices PCLIndicesMsg;
-typedef pcl_msgs::ModelCoefficients PCLModelCoefficientMsg;
-#else
-// groovy
-typedef pcl::PointIndices PCLIndicesMsg;
-typedef pcl::ModelCoefficients PCLModelCoefficientMsg;
-#endif
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
 
+#include <jsk_pcl_ros/Int32Stamped.h>
+#include <std_msgs/Header.h>
+#include "jsk_pcl_ros/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -64,6 +62,10 @@ namespace jsk_pcl_ros
   class StaticPolygonArrayPublisher: public pcl_ros::PCLNodelet
   {
   public:
+    typedef message_filters::sync_policies::ApproximateTime<
+    sensor_msgs::PointCloud2,
+    Int32Stamped > SyncPolicy;
+
   protected:
     ros::Publisher polygon_pub_, coefficients_pub_;
     ros::Subscriber sub_;
@@ -72,9 +74,13 @@ namespace jsk_pcl_ros
     ros::Timer periodic_timer_;
     bool use_periodic_;
     bool use_message_;
+    bool use_trigger_;
     double periodic_rate_;      // in Hz
     std::vector<std::string> frame_ids_;
     ros::Timer timer_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
+    message_filters::Subscriber<Int32Stamped> sub_trigger_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     virtual void onInit();
     virtual void inputCallback(const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void timerCallback(const ros::TimerEvent& event);
@@ -83,6 +89,8 @@ namespace jsk_pcl_ros
     virtual bool readFrameIds(const std::string& param);
     virtual double getXMLDoubleValue(XmlRpc::XmlRpcValue val);
     virtual PCLModelCoefficientMsg polygonToModelCoefficients(const geometry_msgs::PolygonStamped& polygon);
+    virtual void triggerCallback(const sensor_msgs::PointCloud2::ConstPtr& input,
+                                 const Int32Stamped::ConstPtr& trigger);
   private:
   };
 

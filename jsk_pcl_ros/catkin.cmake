@@ -16,8 +16,19 @@ if($ENV{ROS_DISTRO} STREQUAL "groovy")
 else()
   set(PCL_MSGS pcl_msgs) ## hydro and later
 endif()
-find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros nodelet message_generation genmsg ${PCL_MSGS} sensor_msgs geometry_msgs
-  eigen_conversions tf_conversions tf2_ros tf image_transport nodelet cv_bridge)
+
+if($ENV{ROS_DISTRO} STREQUAL "groovy")
+  set(ML_CLASSIFIERS )
+else()
+  set(ML_CLASSIFIERS ml_classifiers) ## hydro and later
+endif()
+
+find_package(catkin REQUIRED COMPONENTS
+  dynamic_reconfigure pcl_ros nodelet message_generation genmsg
+  ${PCL_MSGS} sensor_msgs geometry_msgs
+  eigen_conversions tf_conversions tf2_ros tf
+  image_transport nodelet cv_bridge
+  ${ML_CLASSIFIERS} sklearn jsk_topic_tools)
 
 find_package(OpenMP)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
@@ -29,9 +40,17 @@ add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg
   SlicedPointCloud.msg
   BoundingBox.msg
   BoundingBoxArray.msg
-  ColorHistogram.msg)
+  ColorHistogram.msg
+  ColorHistogramArray.msg
+  SparseOccupancyGridCell.msg
+  SparseOccupancyGridColumn.msg
+  SparseOccupancyGrid.msg
+  SparseOccupancyGridArray.msg
+  DepthErrorResult.msg)
 add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv SetPointCloud2.srv
-  CallSnapIt.srv CallPolygon.srv)
+  CallSnapIt.srv CallPolygon.srv
+  EnvironmentLock.srv
+  PolygonOnEnvironment.srv)
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
@@ -44,7 +63,9 @@ generate_dynamic_reconfigure_options(
   cfg/MultiPlaneExtraction.cfg
   cfg/NormalEstimationIntegralImage.cfg
   cfg/PlaneRejector.cfg
-  cfg/OcludedPlaneEstimator.cfg
+  cfg/EnvironmentPlaneModeling.cfg
+  cfg/ColorHistogramMatcher.cfg
+  cfg/GridSampler.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -126,13 +147,38 @@ jsk_pcl_nodelet(src/static_polygon_array_publisher_nodelet.cpp
   "jsk_pcl/StaticPolygonArrayPublisher" "static_polygon_array_publisher")
 jsk_pcl_nodelet(src/polygon_array_transformer_nodelet.cpp
   "jsk_pcl/PolygonArrayTransformer" "polygon_array_transformer_nodelet")
-jsk_pcl_nodelet(src/ocluded_plane_estimator_nodelet.cpp
-  "jsk_pcl/OcludedPlaneEstimator" "ocluded_plane_estimator")
+if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
+  jsk_pcl_nodelet(src/colorize_segmented_RF_nodelet.cpp
+    "jsk_pcl/ColorizeRandomForest" "colorize_random_forest_result")
+  jsk_pcl_nodelet(src/colorize_random_points_RF_nodelet.cpp
+    "jsk_pcl/ColorizeMapRandomForest" "colorize_random_foreset_result2")
+endif()
+jsk_pcl_nodelet(src/environment_plane_modeling_nodelet.cpp
+  "jsk_pcl/EnvironmentPlaneModeling" "environment_plane_modeling")
+jsk_pcl_nodelet(src/color_histogram_matcher_nodelet.cpp
+  "jsk_pcl/ColorHistogramMatcher" "color_histogram_matcher")
+jsk_pcl_nodelet(src/polygon_appender_nodelet.cpp
+  "jsk_pcl/PolygonAppender" "polygon_appender")
 
-add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
+jsk_pcl_nodelet(src/grid_sampler_nodelet.cpp
+  "jsk_pcl/GridSampler" "grid_sampler")
+jsk_pcl_nodelet(src/handle_estimator_nodelet.cpp
+  "jsk_pcl/HandleEstimator" "handle_estimator")
+jsk_pcl_nodelet(src/delay_pointcloud_nodelet.cpp
+  "jsk_pcl/DelayPointCloud" "delay_pointcloud")
+jsk_pcl_nodelet(src/depth_image_error_nodelet.cpp
+  "jsk_pcl/DepthImageError" "depth_image_error")
+jsk_pcl_nodelet(src/organize_pointcloud_nodelet.cpp
+  "jsk_pcl/OrganizePointCloud" "organize_pointcloud")
+jsk_pcl_nodelet(src/polygon_array_wrapper_nodelet.cpp
+  "jsk_pcl/PolygonArrayWrapper" "polygon_array_wrapper")
+
+
+add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
+  src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
+  src/pcl_conversion_util.cpp src/pcl_util.cpp)
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
-
 
 generate_messages(DEPENDENCIES ${PCL_MSGS} sensor_msgs geometry_msgs)
 

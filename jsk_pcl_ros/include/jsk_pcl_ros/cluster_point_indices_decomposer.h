@@ -52,6 +52,8 @@
 #include <pcl/impl/point_types.hpp>
 #include <tf/transform_broadcaster.h>
 #include <std_msgs/ColorRGBA.h>
+#include <jsk_pcl_ros/BoundingBoxArray.h>
+
 namespace jsk_pcl_ros
 {
   class ClusterPointIndicesDecomposer: public pcl_ros::PCLNodelet
@@ -91,7 +93,23 @@ namespace jsk_pcl_ros
     virtual void allocatePublishers(size_t num);
     std::vector<std_msgs::ColorRGBA> colors_;
     bool publish_clouds_;
+    bool publish_tf_;
     bool align_boxes_;
+    bool use_pca_;
+
+    void addToDebugPointCloud
+    (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
+     size_t i,
+     pcl::PointCloud<pcl::PointXYZRGB>& debug_output);
+    
+    virtual void computeBoundingBox
+    (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
+     const std_msgs::Header header,
+     const Eigen::Vector4f center,
+     const jsk_pcl_ros::PolygonArrayConstPtr& planes,
+     const jsk_pcl_ros::ModelCoefficientsArrayConstPtr& coefficients,
+     jsk_pcl_ros::BoundingBox& bounding_box);
+
     
     virtual int findNearestPlane(const Eigen::Vector4f& center,
                                  const jsk_pcl_ros::PolygonArrayConstPtr& planes,

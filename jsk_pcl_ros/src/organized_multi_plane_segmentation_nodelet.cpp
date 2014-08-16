@@ -75,7 +75,7 @@ namespace jsk_pcl_ros
                   _1));
     double vital_rate;
     pnh_->param("vital_rate", vital_rate, 1.0);
-    vital_checker_.reset(new VitalChecker(1 / vital_rate));
+    vital_checker_.reset(new jsk_topic_tools::VitalChecker(1 / vital_rate));
     estimate_normal_ = false;
     pnh_->getParam("estimate_normal", estimate_normal_);
     // publishers

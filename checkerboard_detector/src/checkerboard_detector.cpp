@@ -287,7 +287,19 @@ public:
                 this->intrinsic_matrix->data.fl[3*i+j] = camInfoMsg.P[4*i+j];
 
         try {
+          if (imagemsg.encoding == "32FC1") {
+            cv_bridge::CvImagePtr float_capture
+              = cv_bridge::toCvCopy(imagemsg,
+                                    sensor_msgs::image_encodings::TYPE_32FC1);
+            cv::Mat float_image = float_capture->image;
+            cv::Mat mono_image;
+            float_image.convertTo(mono_image, CV_8UC1);
+            capture.reset(new cv_bridge::CvImage());
+            capture->image = mono_image;
+          }
+          else {
             capture = cv_bridge::toCvCopy(imagemsg, sensor_msgs::image_encodings::MONO8);
+          }
         } catch (cv_bridge::Exception &e) {
             ROS_ERROR("failed to get image %s", e.what());
             return false;

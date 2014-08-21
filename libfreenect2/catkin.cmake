@@ -7,13 +7,19 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   nodelet
+  image_transport
+  camera_info_manager
 )
 
-# library dependency
-# 1. libusbx
-# 2. glfw
-# 3. glew
-# compile libfreenect2 here
+catkin_package(
+#  INCLUDE_DIRS include ${libfreenect_source_dir}/include
+  INCLUDE_DIRS include
+  LIBRARIES freenect2 freenect2_nodelet
+  CATKIN_DEPENDS cv_bridge roscpp sensor_msgs
+#  DEPENDS system_lib
+)
+
+LINK_DIRECTORIES(${CATKIN_DEVEL_PREFIX}/lib ${CATKIN_DEVEL_PREFIX}/lib64)
 if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/installed)
   execute_process(
     COMMAND cmake -E chdir ${CMAKE_CURRENT_BINARY_DIR}
@@ -46,20 +52,20 @@ FUNCTION(GENERATE_RESOURCES OUTPUT BASE_FOLDER)
     OUTPUT ${OUTPUT}
     COMMAND generate_resources_tool ${BASE_FOLDER} ${ARGN} > ${OUTPUT}
     WORKING_DIRECTORY ${BASE_FOLDER}
-    DEPENDS generate_resources_tool ${ARGN}
+    DEPENDS generate_resources_tool #${ARGN}
     )
 ENDFUNCTION(GENERATE_RESOURCES)
 
 GENERATE_RESOURCES(${RESOURCES_INC_FILE} ${libfreenect_source_dir}
-  ${libfreenect_source_dir}/11to16.bin
-  ${libfreenect_source_dir}/xTable.bin
-  ${libfreenect_source_dir}/zTable.bin
-  ${libfreenect_source_dir}/src/shader/debug.fs
-  ${libfreenect_source_dir}/src/shader/default.vs
-  ${libfreenect_source_dir}/src/shader/filter1.fs
-  ${libfreenect_source_dir}/src/shader/filter2.fs
-  ${libfreenect_source_dir}/src/shader/stage1.fs
-  ${libfreenect_source_dir}/src/shader/stage2.fs
+  11to16.bin
+  xTable.bin
+  zTable.bin
+  src/shader/debug.fs
+  src/shader/default.vs
+  src/shader/filter1.fs
+  src/shader/filter2.fs
+  src/shader/stage1.fs
+  src/shader/stage2.fs
 )
 
 INCLUDE_DIRECTORIES(${libfreenect_source_dir}/include)
@@ -93,6 +99,11 @@ ADD_LIBRARY(freenect2 SHARED
   ${RESOURCES_INC_FILE}
 )
 
+TARGET_LINK_LIBRARIES(freenect2
+  glfw GLEW GLEWmx usb-1.0 turbojpeg
+  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES}
+  )
+
 if(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
   include(${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
 else(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
@@ -104,23 +115,15 @@ macro(freenect_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
     freenect_nodelet_sources)
 endmacro(freenect_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
 
-freenect_nodelet(src/driver_nodelet.cpp "freenect2/driver" "driver")
+freenect_nodelet(src/driver_nodelet.cpp "libfreenect2/Driver" "driver")
 
 add_definitions("-O2 -g")
 include_directories(include)
 add_library(freenect2_nodelet SHARED ${freenect_nodelet_sources})
 target_link_libraries(freenect2_nodelet
   freenect2
-  ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})
+  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(freenect2_nodelet ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
-
-catkin_package(
-#  INCLUDE_DIRS include ${libfreenect_source_dir}/include
-  INCLUDE_DIRS include
-  LIBRARIES freenect2 freenect2_nodelet
-  CATKIN_DEPENDS cv_bridge roscpp sensor_msgs
-#  DEPENDS system_lib
-)
 
 ###########
 ## Build ##

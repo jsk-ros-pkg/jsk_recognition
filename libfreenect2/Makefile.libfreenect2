@@ -3,8 +3,8 @@ all: installed
 
 GIT_DIR = build/libfreenect2
 PATCH_DIR = $(CURDIR)
-GIT_URL = https://github.com/OpenKinect/libfreenect2.git
-GIT_REVISION = 
+GIT_URL = https://github.com/garaemon/libfreenect2.git
+GIT_REVISION = work-on-ubuntu
 GIT_PATCH   =
 MK_DIR       = $(shell rospack find mk)
 include $(MK_DIR)/git_checkout.mk
@@ -38,6 +38,7 @@ installed: disable_ssl $(GIT_DIR) $(GIT_PATCH)
 	git clone https://github.com/nigels-com/glew.git ${GLEW_SOURCE_DIR}
 	(cd ${GLEW_SOURCE_DIR} && \
 	export GLEW_DEST=${INSTALL_DIR} && \
+	export LIBDIR=${INSTALL_DIR}/lib && \
 	make extensions && make all && make install.all)
 	touch installed
 

@@ -44,7 +44,8 @@
 #include <libfreenect2/libfreenect2.hpp>
 #include <libfreenect2/frame_listener_impl.h>
 #include <libfreenect2/threading.h>
-
+#include <image_transport/image_transport.h>
+#include <camera_info_manager/camera_info_manager.h>
 #include <boost/thread.hpp>
 
 namespace libfreenect2
@@ -52,12 +53,21 @@ namespace libfreenect2
   class Driver: public nodelet::Nodelet
   {
   public:
+    typedef boost::shared_ptr<camera_info_manager::CameraInfoManager>
+    CameraInfoManagerPtr;
   protected:
     virtual void onInit();
     Freenect2* freenect2_;
     Freenect2Device* dev_;
     SyncMultiFrameListener* listener_;
     boost::mutex mutex_;
+    sensor_msgs::CameraInfo::Ptr getRGBCameraInfo(
+      libfreenect2::Frame* frame, ros::Time stamp, std::string frame_id);
+    sensor_msgs::CameraInfo::Ptr getIRCameraInfo(
+      libfreenect2::Frame* frame, ros::Time stamp, std::string frame_id);
+    CameraInfoManagerPtr ir_caminfo_manager_, rgb_caminfo_manager_;
+    Freenect2Device::ColorCameraParams default_rgb_params_;
+    Freenect2Device::IrCameraParams default_ir_params_;
   private:
     
   };

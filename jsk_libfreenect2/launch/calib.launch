@@ -1,0 +1,27 @@
+<launch>
+  <group ns="checkerdetector" clear_params="true">
+    <param name="display" type="int" value="1"/>
+    <!--param name="frame_id" type="string" value="stereo_link"/-->
+    <param name="rect0_size_x" type="double" value="0.03"/>
+    <param name="rect0_size_y" type="double" value="0.03"/>
+    <param name="grid0_size_x" type="int" value="4"/>
+    <param name="grid0_size_y" type="int" value="5"/>
+    <param name="type0" type="string" value="data/ricebox.kinbody.xml"/>
+
+    <node pkg="checkerboard_detector" name="checkerboard_detector_rgb" type="checkerboard_detector" respawn="false" output="log">
+      <remap from="camera_info" to="/camera/rgb/camera_info"/>
+      <remap from="image" to="/camera/rgb/image_rect"/>
+      <remap from="/checkerdetector/ObjectDetection" to="/rgb_object_detection" />
+    </node>
+    <node pkg="checkerboard_detector" name="checkerboard_detector_depth" type="checkerboard_detector" respawn="false" output="log">
+      <remap from="camera_info" to="/camera/ir/camera_info"/>
+      <remap from="image" to="/camera/ir/image_rect"/>
+      <remap from="/checkerdetector/ObjectDetection" to="/ir_object_detection" />
+    </node>
+    <node pkg="checkerboard_detector" name="objectdetection_echo" type="objectdetection_transform_echo" output="screen">
+      <remap from="detection1" to="/rgb_object_detection" />
+      <remap from="detection2" to="/ir_object_detection" />
+    </node>
+  </group>
+  <include file="$(find jsk_libfreenect2)/launch/demo.launch"/>
+</launch>

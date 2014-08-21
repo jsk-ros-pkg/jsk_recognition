@@ -1,0 +1,53 @@
+<launch>
+  <!-- do not use rectified images, camera parameter is wrong... -->
+  <arg name="camera" default="camera" />
+  <arg name="manager" default="camera_nodelet_manager" />
+  <group ns="$(arg camera)">
+    <node pkg="nodelet" type="nodelet" args="manager" name="$(arg manager)" output="screen"/>
+    <node pkg="nodelet" type="nodelet" args="manager" name="$(arg manager)2" output="screen"/>
+        <node pkg="nodelet" type="nodelet" args="manager" name="$(arg manager)3" output="screen"/>
+    <node pkg="nodelet" type="nodelet" args="load jsk_libfreenect2/Driver /$(arg camera)/$(arg manager)" name="driver">
+      <param name="rgb_camera_info_url" value="" />
+      <param name="depth_camera_info_url" value="" />
+      <remap from="depth/image_raw" to="depth/image_rect"/>
+      <remap from="ir/image_raw" to="ir/image_rect"/>
+    </node>
+    <group ns="rgb">
+      <node pkg="image_proc" type="image_proc" name="image_proc" output="screen"/>
+    </group>
+    <!-- <group ns="depth"> -->
+    <!--   <node pkg="nodelet" type="nodelet" args="load image_proc/rectify /$(arg camera)/$(arg manager)2" -->
+    <!--         output="screen" -->
+    <!--         name="depth_image_rect"> -->
+    <!--     <remap from="image_mono" to="image_raw" /> -->
+    <!--   </node> -->
+    <!-- </group> -->
+    <!-- <group ns="ir"> -->
+    <!--   <node pkg="nodelet" type="nodelet" args="load image_proc/rectify /$(arg camera)/$(arg manager)2" -->
+    <!--         output="screen" -->
+    <!--         name="ir_image_rect"> -->
+    <!--     <remap from="image_mono" to="image_raw" /> -->
+    <!--   </node> -->
+    <!-- </group> -->
+    <node name="depth_image_register"
+          pkg="nodelet" type="nodelet" args="load depth_image_proc/register /$(arg camera)/$(arg manager)2" output="screen">
+    </node>
+    <node pkg="nodelet" type="nodelet" args="load depth_image_proc/point_cloud_xyzrgb /$(arg camera)/$(arg manager)2" output="screen"
+          name="depth_point_xyzrgb">
+    </node>
+    <node pkg="nodelet" type="nodelet" args="load jsk_pcl/ResizePointsPublisher /$(arg camera)/$(arg manager)2" output="screen"
+          name="scale_1_2">
+      <remap from="~input" to="/$(arg camera)/depth_registered/points" />
+      <param name="step_x" value="2" />
+      <param name="step_y" value="2" />
+    </node>
+    <node pkg="nodelet" type="nodelet" args="load jsk_pcl/ResizePointsPublisher /$(arg camera)/$(arg manager)2" output="screen"
+          name="scale_1_4">
+      <remap from="~input" to="/$(arg camera)/depth_registered/points" />
+      <param name="step_x" value="4" />
+      <param name="step_y" value="4" />
+    </node>
+    <node pkg="tf" type="static_transform_publisher" name="freenect_tf_frame"
+          args="0.053018 0.022749 0.026190 0.010748 -0.000448 0.004077 0.999934 openni_rgb_optical_frame openni_depth_optical_frame 10" />
+  </group>
+</launch>

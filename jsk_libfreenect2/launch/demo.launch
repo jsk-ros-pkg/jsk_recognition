@@ -1,0 +1,27 @@
+<launch>
+  <include file="$(find jsk_libfreenect2)/launch/libfreenect2.launch" />
+  <!-- viewer -->
+  <node pkg="image_view" type="image_view" name="rgb_image_view">
+    <remap from="image" to="/camera/rgb/image_rect_color" />
+  </node>
+  <!-- <node pkg="image_view" type="image_view" name="rgb_raw_image_view"> -->
+  <!--   <remap from="image" to="/camera/rgb/image_raw" /> -->
+  <!-- </node> -->
+  <node pkg="image_view" type="image_view" name="depth_image_view">
+    <remap from="image" to="/camera/depth/image_rect" />
+  </node>
+  <!-- <node pkg="image_view" type="image_view" name="depth_raw_image_view"> -->
+  <!--   <remap from="image" to="/camera/depth/image_raw" /> -->
+  <!-- </node> -->
+  <node pkg="image_view" type="image_view" name="depth_registered_image_view">
+    <remap from="image" to="/camera/depth_registered/image_rect" />
+  </node>
+  <node pkg="image_view" type="image_view" name="ir_image_view">
+    <remap from="image" to="/camera/ir/image_rect" />
+  </node>
+  <!-- <node pkg="image_view" type="image_view" name="ir_raw_image_view"> -->
+  <!--   <remap from="image" to="/camera/ir/image_raw" /> -->
+  <!-- </node> -->
+  <node pkg="rviz" type="rviz" name="kinect_rviz"
+        args="-d $(find jsk_libfreenect2)/config/libfreenect2.rviz" />
+</launch>

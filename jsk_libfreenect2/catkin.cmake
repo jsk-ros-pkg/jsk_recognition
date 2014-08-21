@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   nodelet
   image_transport
   camera_info_manager
+  jsk_topic_tools
 )
 
 catkin_package(

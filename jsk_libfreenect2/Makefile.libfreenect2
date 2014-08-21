@@ -46,5 +46,5 @@ clean:
 	-cd $(GIT_DIR) && make clean
 
 download:
-	git clone $(GIT_URL) $(GIT_DIR); (cd ${GIT_DIR}; git checkout $(GIT_REVISION) up; rm -f `rospack find libfreenect2`/installed)
+	git clone $(GIT_URL) $(GIT_DIR); (cd ${GIT_DIR}; git checkout $(GIT_REVISION) up; rm -f `rospack find jsk_libfreenect2`/installed)
 

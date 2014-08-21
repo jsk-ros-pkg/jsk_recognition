@@ -23,5 +23,5 @@
       <remap from="detection2" to="/ir_object_detection" />
     </node>
   </group>
-  <include file="$(find libfreenect2)/launch/demo.launch"/>
+  <include file="$(find jsk_libfreenect2)/launch/demo.launch"/>
 </launch>

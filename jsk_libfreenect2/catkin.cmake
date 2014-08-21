@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(libfreenect2)
+project(jsk_libfreenect2)
 
 find_package(catkin REQUIRED COMPONENTS
   mk
@@ -115,7 +115,7 @@ macro(freenect_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
     freenect_nodelet_sources)
 endmacro(freenect_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
 
-freenect_nodelet(src/driver_nodelet.cpp "libfreenect2/Driver" "driver")
+freenect_nodelet(src/driver_nodelet.cpp "jsk_libfreenect2/Driver" "driver")
 
 add_definitions("-O2 -g")
 include_directories(include)

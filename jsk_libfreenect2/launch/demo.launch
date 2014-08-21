@@ -1,5 +1,5 @@
 <launch>
-  <include file="$(find libfreenect2)/launch/libfreenect2.launch" />
+  <include file="$(find jsk_libfreenect2)/launch/libfreenect2.launch" />
   <!-- viewer -->
   <node pkg="image_view" type="image_view" name="rgb_image_view">
     <remap from="image" to="/camera/rgb/image_rect_color" />
@@ -23,5 +23,5 @@
   <!--   <remap from="image" to="/camera/ir/image_raw" /> -->
   <!-- </node> -->
   <node pkg="rviz" type="rviz" name="kinect_rviz"
-        args="-d $(find libfreenect2)/config/libfreenect2.rviz" />
+        args="-d $(find jsk_libfreenect2)/config/libfreenect2.rviz" />
 </launch>

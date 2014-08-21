@@ -6,7 +6,7 @@
     <node pkg="nodelet" type="nodelet" args="manager" name="$(arg manager)" output="screen"/>
     <node pkg="nodelet" type="nodelet" args="manager" name="$(arg manager)2" output="screen"/>
         <node pkg="nodelet" type="nodelet" args="manager" name="$(arg manager)3" output="screen"/>
-    <node pkg="nodelet" type="nodelet" args="load libfreenect2/Driver /$(arg camera)/$(arg manager)" name="driver">
+    <node pkg="nodelet" type="nodelet" args="load jsk_libfreenect2/Driver /$(arg camera)/$(arg manager)" name="driver">
       <param name="rgb_camera_info_url" value="" />
       <param name="depth_camera_info_url" value="" />
       <remap from="depth/image_raw" to="depth/image_rect"/>

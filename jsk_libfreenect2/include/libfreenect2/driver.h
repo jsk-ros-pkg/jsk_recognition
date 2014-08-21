@@ -57,6 +57,8 @@ namespace libfreenect2
     CameraInfoManagerPtr;
   protected:
     virtual void onInit();
+    virtual void run(const ros::TimerEvent&);
+    ros::Timer timer_;
     Freenect2* freenect2_;
     Freenect2Device* dev_;
     SyncMultiFrameListener* listener_;

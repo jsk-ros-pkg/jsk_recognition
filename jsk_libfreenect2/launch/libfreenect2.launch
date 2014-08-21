@@ -4,9 +4,8 @@
   <arg name="manager" default="camera_nodelet_manager" />
   <group ns="$(arg camera)">
     <node pkg="nodelet" type="nodelet" args="manager" name="$(arg manager)" output="screen"/>
-    <node pkg="nodelet" type="nodelet" args="manager" name="$(arg manager)2" output="screen"/>
-        <node pkg="nodelet" type="nodelet" args="manager" name="$(arg manager)3" output="screen"/>
-    <node pkg="nodelet" type="nodelet" args="load jsk_libfreenect2/Driver /$(arg camera)/$(arg manager)" name="driver">
+    <node pkg="nodelet" type="nodelet" args="load jsk_libfreenect2/Driver /$(arg camera)/$(arg manager)"
+          name="driver">
       <param name="rgb_camera_info_url" value="" />
       <param name="depth_camera_info_url" value="" />
       <remap from="depth/image_raw" to="depth/image_rect"/>
@@ -30,18 +29,18 @@
     <!--   </node> -->
     <!-- </group> -->
     <node name="depth_image_register"
-          pkg="nodelet" type="nodelet" args="load depth_image_proc/register /$(arg camera)/$(arg manager)2" output="screen">
+          pkg="nodelet" type="nodelet" args="load depth_image_proc/register /$(arg camera)/$(arg manager)" output="screen">
     </node>
-    <node pkg="nodelet" type="nodelet" args="load depth_image_proc/point_cloud_xyzrgb /$(arg camera)/$(arg manager)2" output="screen"
+    <node pkg="nodelet" type="nodelet" args="load depth_image_proc/point_cloud_xyzrgb /$(arg camera)/$(arg manager)" output="screen"
           name="depth_point_xyzrgb">
     </node>
-    <node pkg="nodelet" type="nodelet" args="load jsk_pcl/ResizePointsPublisher /$(arg camera)/$(arg manager)2" output="screen"
+    <node pkg="nodelet" type="nodelet" args="load jsk_pcl/ResizePointsPublisher /$(arg camera)/$(arg manager)" output="screen"
           name="scale_1_2">
       <remap from="~input" to="/$(arg camera)/depth_registered/points" />
       <param name="step_x" value="2" />
       <param name="step_y" value="2" />
     </node>
-    <node pkg="nodelet" type="nodelet" args="load jsk_pcl/ResizePointsPublisher /$(arg camera)/$(arg manager)2" output="screen"
+    <node pkg="nodelet" type="nodelet" args="load jsk_pcl/ResizePointsPublisher /$(arg camera)/$(arg manager)" output="screen"
           name="scale_1_4">
       <remap from="~input" to="/$(arg camera)/depth_registered/points" />
       <param name="step_x" value="4" />

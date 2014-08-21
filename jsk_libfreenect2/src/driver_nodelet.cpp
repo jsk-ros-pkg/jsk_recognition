@@ -34,15 +34,18 @@ namespace libfreenect2
 {
   void Driver::onInit()
   {
-    int argc = 1;
-    char* argv[] = {"dummy"};
     glfwInit();
-    
+    timer_ = getNodeHandle().createTimer(
+      ros::Duration(5.0),
+      boost::bind(&Driver::run, this, _1), true);
+  }
+  
+  void Driver::run(const ros::TimerEvent&) {
     freenect2_ = new Freenect2();
     dev_ = freenect2_->openDefaultDevice();
     if (dev_ == 0)
     {
-      NODELET_FATAL("[Driver::onInit] no device connected");
+      NODELET_FATAL("[Driver::run] no device connected");
       return;
     }
     listener_ = new SyncMultiFrameListener(
@@ -50,8 +53,10 @@ namespace libfreenect2
     dev_->setColorFrameListener(listener_);
     dev_->setIrAndDepthFrameListener(listener_);
     dev_->start();
-    NODELET_INFO_STREAM("[Driver::onInit] device serial: " << dev_->getSerialNumber());
-    NODELET_INFO_STREAM("[Driver::onInit] device firmware: " << dev_->getFirmwareVersion());
+    NODELET_INFO_STREAM("[Driver::run] device serial: "
+                        << dev_->getSerialNumber());
+    NODELET_INFO_STREAM("[Driver::run] device firmware: "
+                        << dev_->getFirmwareVersion());
 
     
     

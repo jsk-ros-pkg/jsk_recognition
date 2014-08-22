@@ -3,8 +3,8 @@
   <inlucde file="$(find roseus_tutorials)/launch/usb-camera.launch" />
   <node pkg="resized_image_transport" type="image_resizer" name="image_resizer"
         output="screen" >
-    <remap from="camera" to="/" />
-    <remap from="image" to="image_rect" />
+    <remap from="~input/image" to="image_rect" />
+    <remap from="~output/image" to="~image_rect" />
     <param name="resize_scale_x" value="$(arg RESIZE_RATE)" />
     <param name="resize_scale_y" value="$(arg RESIZE_RATE)" />
   </node>

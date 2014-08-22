@@ -34,8 +34,8 @@
  *********************************************************************/
 
 
-#ifndef LIBFREENECT2_DRIVER_H_
-#define LIBFREENECT2_DRIVER_H_
+#ifndef JSK_LIBFREENECT2_DRIVER_H_
+#define JSK_LIBFREENECT2_DRIVER_H_
 
 #include <ros/ros.h>
 #include <nodelet/nodelet.h>
@@ -48,7 +48,7 @@
 #include <camera_info_manager/camera_info_manager.h>
 #include <boost/thread.hpp>
 
-namespace libfreenect2
+namespace jsk_libfreenect2
 {
   class Driver: public nodelet::Nodelet
   {
@@ -59,17 +59,17 @@ namespace libfreenect2
     virtual void onInit();
     virtual void run(const ros::TimerEvent&);
     ros::Timer timer_;
-    Freenect2* freenect2_;
-    Freenect2Device* dev_;
-    SyncMultiFrameListener* listener_;
+    libfreenect2::Freenect2* freenect2_;
+    libfreenect2::Freenect2Device* dev_;
+    libfreenect2::SyncMultiFrameListener* listener_;
     boost::mutex mutex_;
     sensor_msgs::CameraInfo::Ptr getRGBCameraInfo(
       libfreenect2::Frame* frame, ros::Time stamp, std::string frame_id);
     sensor_msgs::CameraInfo::Ptr getIRCameraInfo(
       libfreenect2::Frame* frame, ros::Time stamp, std::string frame_id);
     CameraInfoManagerPtr ir_caminfo_manager_, rgb_caminfo_manager_;
-    Freenect2Device::ColorCameraParams default_rgb_params_;
-    Freenect2Device::IrCameraParams default_ir_params_;
+    libfreenect2::Freenect2Device::ColorCameraParams default_rgb_params_;
+    libfreenect2::Freenect2Device::IrCameraParams default_ir_params_;
   private:
     
   };

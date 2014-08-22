@@ -22,7 +22,7 @@
  * either License.
  */
 
-#include "libfreenect2/driver.h"
+#include "jsk_libfreenect2/driver.h"
 #include <cv_bridge/cv_bridge.h>
 #include <std_msgs/Header.h>
 #include <sensor_msgs/distortion_models.h>
@@ -30,7 +30,7 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_io.hpp>
 
-namespace libfreenect2
+namespace jsk_libfreenect2
 {
   void Driver::onInit()
   {
@@ -41,15 +41,17 @@ namespace libfreenect2
   }
   
   void Driver::run(const ros::TimerEvent&) {
-    freenect2_ = new Freenect2();
+    freenect2_ = new libfreenect2::Freenect2();
     dev_ = freenect2_->openDefaultDevice();
     if (dev_ == 0)
     {
       NODELET_FATAL("[Driver::run] no device connected");
       return;
     }
-    listener_ = new SyncMultiFrameListener(
-      Frame::Color | Frame::Ir | Frame::Depth);
+    listener_ = new libfreenect2::SyncMultiFrameListener(
+      libfreenect2::Frame::Color |
+      libfreenect2::Frame::Ir |
+      libfreenect2::Frame::Depth);
     dev_->setColorFrameListener(listener_);
     dev_->setIrAndDepthFrameListener(listener_);
     dev_->start();
@@ -94,9 +96,12 @@ namespace libfreenect2
     //   NODELET_WARN("Using default parameters for IR/depth camera calibration.");
     
     libfreenect2::FrameMap frames;
-    image_transport::CameraPublisher depth_pub = depth_it.advertiseCamera("image_raw", 1);
-    image_transport::CameraPublisher ir_pub = ir_it.advertiseCamera("image_raw", 1);
-    image_transport::CameraPublisher color_pub = rgb_it.advertiseCamera("image_raw", 1);
+    image_transport::CameraPublisher depth_pub
+      = depth_it.advertiseCamera("image_raw", 1);
+    image_transport::CameraPublisher ir_pub
+      = ir_it.advertiseCamera("image_raw", 1);
+    image_transport::CameraPublisher color_pub
+      = rgb_it.advertiseCamera("image_raw", 1);
     
     while(ros::ok())
     {
@@ -231,6 +236,6 @@ namespace libfreenect2
 }
 
 #include <pluginlib/class_list_macros.h>
-typedef libfreenect2::Driver Driver;
-PLUGINLIB_DECLARE_CLASS (libfreenect2, Driver, Driver, nodelet::Nodelet);
+typedef jsk_libfreenect2::Driver Driver;
+PLUGINLIB_DECLARE_CLASS (jsk_libfreenect2, Driver, Driver, nodelet::Nodelet);
 

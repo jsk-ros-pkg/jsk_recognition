@@ -17,7 +17,8 @@
   <depend package="driver_base" />
 
   <depend package="std_srvs" />
-
+  <depend package="jsk_topic_tools" />
+  <depend package="nodelet" />
   
   <rosdep name="opencv2" />
   <rosdep name="cv_bridge" />
@@ -27,7 +28,9 @@
   <rosdep name="driver_base" />
 
   <rosdep name="std_srvs" />
-
+  <export>
+    <nodelet plugin="${prefix}/nodelet.xml"/>
+  </export>
 </package>
 
 

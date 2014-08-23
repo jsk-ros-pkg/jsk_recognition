@@ -98,6 +98,8 @@ namespace jsk_pcl_ros
     pnh_->getParam("iteration_num", iteration_num);
     double resample_likelihood_thr = 0.0;
     pnh_->getParam("resample_likelihood_thr", resample_likelihood_thr);
+    track_target_name_ = "track_result";
+    pnh_->getParam("track_target_name", track_target_name_);
 
     std::vector<double> bin_size_vector(6);
     if (!readVectorParameter("bin_size", bin_size_vector)) {
@@ -178,7 +180,6 @@ namespace jsk_pcl_ros
     //Set publish setting
     particle_publisher_ = pnh_->advertise<sensor_msgs::PointCloud2>("particle", 1);
     track_result_publisher_ = pnh_->advertise<sensor_msgs::PointCloud2>("track_result", 1);
-    tf_publisher_ = pnh_->advertise<sensor_msgs::PointCloud2>("track_result", 1);
   }
 
   //Publish the current particles
@@ -217,7 +218,7 @@ namespace jsk_pcl_ros
     tf::transformEigenToTF((Eigen::Affine3d) transformation, tfTransformation);
 
     static tf::TransformBroadcaster tfBroadcaster;
-    tfBroadcaster.sendTransform(tf::StampedTransform(tfTransformation, stamp_, frame_id_, "tracker_result"));
+    tfBroadcaster.sendTransform(tf::StampedTransform(tfTransformation, stamp_, frame_id_, track_target_name_));
 
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr result_cloud (new pcl::PointCloud<pcl::PointXYZRGBA> ());
     pcl::transformPointCloud<pcl::PointXYZRGBA> (*(tracker_->getReferenceCloud ()), *result_cloud, transformation);
@@ -231,14 +232,14 @@ namespace jsk_pcl_ros
   }
 
   void
-  ParticleFilterTracking::reset_traking_target_model(const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &recieved_target_cloud)
+  ParticleFilterTracking::reset_tracking_target_model(const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &recieved_target_cloud)
   {
-    if(!recieved_target_cloud->points.empty()){
       pcl::PointCloud<pcl::PointXYZRGBA>::Ptr new_target_cloud (new pcl::PointCloud<pcl::PointXYZRGBA>);
       std::vector<int> indices;
       new_target_cloud->is_dense = false;
       pcl::removeNaNFromPointCloud(*recieved_target_cloud, *new_target_cloud, indices);
 
+    if(!recieved_target_cloud->points.empty()){
       //prepare the model of tracker's target
       Eigen::Vector4f c;
       Eigen::Affine3f trans = Eigen::Affine3f::Identity ();
@@ -291,7 +292,7 @@ namespace jsk_pcl_ros
   {
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr new_target_cloud(new pcl::PointCloud<pcl::PointXYZRGBA>());
     pcl::fromROSMsg(pc, *new_target_cloud);
-    reset_traking_target_model(new_target_cloud);
+    reset_tracking_target_model(new_target_cloud);
   }
 
   bool ParticleFilterTracking::renew_model_cb(jsk_pcl_ros::SetPointCloud2::Request &req,
@@ -299,7 +300,7 @@ namespace jsk_pcl_ros
   {
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr new_target_cloud(new pcl::PointCloud<pcl::PointXYZRGBA>());
     pcl::fromROSMsg(req.cloud, *new_target_cloud);
-    reset_traking_target_model(new_target_cloud);
+    reset_tracking_target_model(new_target_cloud);
     return true;
   }
 }

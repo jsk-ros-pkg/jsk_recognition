@@ -2,7 +2,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(checkerboard_detector)
 
-find_package(catkin REQUIRED COMPONENTS roscpp rosconsole cv_bridge sensor_msgs posedetection_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp rosconsole cv_bridge sensor_msgs
+  posedetection_msgs eigen_conversions message_filters tf tf2)
 find_package(OpenCV REQUIRED)
 find_package(OpenMP)
 find_package(posedetection_msgs)
@@ -22,10 +23,13 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 add_executable(checkerboard_detector src/checkerboard_detector.cpp)
 target_link_libraries(checkerboard_detector ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+add_executable(objectdetection_transform_echo src/objectdetection_transform_echo.cpp)
+target_link_libraries(objectdetection_transform_echo ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 add_executable(checkerboard_calibration src/checkerboard_calibration.cpp)
 target_link_libraries(checkerboard_calibration ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(checkerboard_detector    posedetection_msgs_gencpp)
 add_dependencies(checkerboard_calibration posedetection_msgs_gencpp)
+add_dependencies(objectdetection_transform_echo posedetection_msgs_gencpp)
 
 catkin_package(
     CATKIN_DEPENDS roscpp rosconsole cv_bridge sensor_msgs posedetection_msgs
@@ -35,6 +39,7 @@ catkin_package(
 )
 
 install(TARGETS checkerboard_detector checkerboard_calibration
+  objectdetection_transform_echo
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

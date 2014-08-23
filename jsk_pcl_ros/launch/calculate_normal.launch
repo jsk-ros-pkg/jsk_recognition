@@ -39,6 +39,17 @@
         min_inliers: 100
       </rosparam>
     </node>
+    <node pkg="nodelet" type="nodelet" name="project_inliers" args="load pcl/ProjectInliers $(arg manager)">
+      <remap from="~input" to="voxel_grid/output"/>
+      <remap from="~indices" to="ground_segmentation/inliers" />
+      <remap from="~model" to="ground_segmentation/model" />
+      <rosparam>
+        model_type: 9
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="convex_hull" args="load pcl/ConvexHull2D $(arg manager)">
+      <remap from="~input" to="project_inliers/output" />
+    </node>
     <node pkg="nodelet" type="nodelet" name="extract_nonground_indices" args="load pcl/ExtractIndices $(arg manager)" output="screen" respawn="true">
       <remap from="~input"   to="voxel_grid/output" />
       <remap from="~indices" to="ground_segmentation/inliers" />
@@ -58,6 +69,12 @@
         # 0, => ANN, 1 => FLANN, 2 => Organized
         spatial_locator: 2
       </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="polygon_array_wrapper"
+          args="load jsk_pcl/PolygonArrayWrapper $(arg manager)"
+          output="screen">
+      <remap from="~input_polygon" to="convex_hull/output_polygon" />
+      <remap from="~input_coefficients" to="ground_segmentation/model" />
     </node>
     <node pkg="nodelet" type="nodelet" name="normal_concat"
           args="load jsk_pcl/NormalConcatenater $(arg manager)"
@@ -80,7 +97,11 @@
           output="screen" clear_params="true">
       <remap from="~input" to="extract_nonground_indices/output" />
       <remap from="~target" to="clustering/output" />
+      <remap from="~align_planes" to="polygon_array_wrapper/output_polygons" />
+      <remap from="~align_planes_coefficients" to="polygon_array_wrapper/output_coefficients" />
       <rosparam>
+        align_boxes: true
+        use_pca: true
       </rosparam>
     </node>
   </group>

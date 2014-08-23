@@ -36,6 +36,10 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 rosbuild_find_ros_package(dynamic_reconfigure)
 include(${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
 gencfg()
-
-rosbuild_add_executable(image_resizer src/image_resizer.cpp)
-
+rosbuild_find_ros_package(jsk_topic_tools)
+include(${jsk_topic_tools_PACKAGE_PATH}/cmake/nodelet.cmake)
+jsk_nodelet(src/image_resizer_nodelet.cpp
+  "resized_image_transport/ImageResizer"
+  "image_resizer"
+  nodelet_sources)
+rosbuild_add_library(resized_image_transport SHARED ${nodelet_sources})

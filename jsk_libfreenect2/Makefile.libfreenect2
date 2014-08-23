@@ -1,0 +1,50 @@
+# -*- mode: makefile; -*-
+all: installed
+
+GIT_DIR = build/libfreenect2
+PATCH_DIR = $(CURDIR)
+GIT_URL = https://github.com/garaemon/libfreenect2.git
+GIT_REVISION = work-on-ubuntu
+GIT_PATCH   =
+MK_DIR       = $(shell rospack find mk)
+include $(MK_DIR)/git_checkout.mk
+
+LIBUSBX_SOURCE_DIR   = build/libusbx_src
+GLFW_SOURCE_DIR=${DEPENDS_DIR}/glfw_src
+GLEW_SOURCE_DIR=${DEPENDS_DIR}/glew_src
+INSTALL_DIR = build/libusbx
+DEPENDS_DIR = ${PATCH_DIR}/build/libfreenect2/depends
+
+disable_ssl:
+	git config --global http.sslVerify false
+
+installed: disable_ssl $(GIT_DIR) $(GIT_PATCH)
+	rm -rf ${LIBUSBX_SOURCE_DIR}
+	git clone -b superspeed https://github.com/JoshBlake/libusbx.git ${LIBUSBX_SOURCE_DIR}
+	(cd ${LIBUSBX_SOURCE_DIR} && \
+	git apply ${DEPENDS_DIR}/linux_usbfs_increase_max_iso_buffer_length.patch && \
+	./bootstrap.sh && \
+	./configure --prefix=${INSTALL_DIR} && \
+	make && make install)
+	rm -rf ${GLFW_SOURCE_DIR}
+	git clone https://github.com/glfw/glfw.git ${GLFW_SOURCE_DIR}
+	(cd ${GLFW_SOURCE_DIR} && \
+	git checkout 3.0.4 && \
+	mkdir build && \
+	cd build && \
+	cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DBUILD_SHARED_LIBS=TRUE .. && \
+	make && make install)
+	rm -rf ${GLEW_SOURCE_DIR}
+	git clone https://github.com/nigels-com/glew.git ${GLEW_SOURCE_DIR}
+	(cd ${GLEW_SOURCE_DIR} && \
+	export GLEW_DEST=${INSTALL_DIR} && \
+	export LIBDIR=${INSTALL_DIR}/lib && \
+	make extensions && make all && make install.all)
+	touch installed
+
+clean:
+	-cd $(GIT_DIR) && make clean
+
+download:
+	git clone $(GIT_URL) $(GIT_DIR); (cd ${GIT_DIR}; git checkout $(GIT_REVISION) up; rm -f `rospack find jsk_libfreenect2`/installed)
+

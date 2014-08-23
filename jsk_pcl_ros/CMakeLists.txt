@@ -36,14 +36,11 @@ include (${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
 gencfg ()
 
 rosbuild_find_ros_package (pcl_ros)
-
+rosbuild_find_ros_package(jsk_topic_tools)
+include(${jsk_topic_tools_PACKAGE_PATH}/cmake/nodelet.cmake)
 macro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
-  list(APPEND jsk_pcl_nodelet_sources ${_nodelet_cpp})
-  set(NODELET ${_nodelet_class})
-  set(DEFAULT_NODE_NAME ${_single_nodelet_exec_name})
-  configure_file(${PROJECT_SOURCE_DIR}/src/single_nodelet_exec.cpp.in
-    ${_single_nodelet_exec_name}.cpp) #${CMAKE_CURRENT_BINARY_DIR}/
-  rosbuild_add_executable(${_single_nodelet_exec_name} build/${_single_nodelet_exec_name}.cpp)
+  jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
+    jsk_pcl_nodelet_sources)
 endmacro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
 
 jsk_pcl_nodelet(src/pointcloud_screenpoint_nodelet.cpp "jsk_pcl/PointcloudScreenpoint" "pointcloud_screenpoint")
@@ -110,6 +107,11 @@ jsk_pcl_nodelet(src/delay_pointcloud_nodelet.cpp
   "jsk_pcl/DelayPointCloud" "delay_pointcloud")
 jsk_pcl_nodelet(src/depth_image_error_nodelet.cpp
   "jsk_pcl/DepthImageError" "depth_image_error")
+jsk_pcl_nodelet(src/organize_pointcloud_nodelet.cpp
+  "jsk_pcl/OrganizePointCloud" "organize_pointcloud")
+jsk_pcl_nodelet(src/polygon_array_wrapper_nodelet.cpp
+  "jsk_pcl/PolygonArrayWrapper" "polygon_array_wrapper")
+
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp

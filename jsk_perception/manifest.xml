@@ -32,6 +32,7 @@
   <depend package="angles"/>
   <depend package="nodelet" />
   <depend package="jsk_pcl_ros" />
+  <depend package="jsk_topic_tools" />
   <rosdep name="opencv2"/>
   <rosdep name="eigen"/>
   <export>

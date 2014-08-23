@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(jsk_perception)
 
-find_package(catkin REQUIRED COMPONENTS message_generation imagesift std_msgs sensor_msgs geometry_msgs cv_bridge image_geometry image_transport driver_base dynamic_reconfigure eigen roscpp nodelet rostest tf rospack)
+find_package(catkin REQUIRED COMPONENTS
+  message_generation imagesift std_msgs sensor_msgs geometry_msgs cv_bridge
+  image_geometry image_transport driver_base dynamic_reconfigure eigen
+  roscpp nodelet rostest tf rospack
+  jsk_topic_tools)
 find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 
@@ -30,7 +34,14 @@ catkin_package(
   LIBRARIES
 )
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+execute_process(
+  COMMAND cmake -E chdir ${CMAKE_CURRENT_BINARY_DIR}
+  make -f ${PROJECT_SOURCE_DIR}/Makefile.slic
+  INSTALL_DIR=${CATKIN_DEVEL_PREFIX}
+  MK_DIR=${mk_PREFIX}/share/mk
+  RESULT_VARIABLE _make_failed)
+
+include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/build/SLIC-Superpixels)
 add_executable(camshiftdemo src/camshiftdemo.cpp)
 add_executable(virtual_camera_mono src/virtual_camera_mono.cpp)
 add_executable(point_pose_extractor src/point_pose_extractor.cpp)
@@ -41,30 +52,26 @@ add_executable(calc_flow src/calc_flow.cpp)
 add_library(oriented_gradient src/oriented_gradient.cpp)
 add_executable(oriented_gradient_node src/oriented_gradient_node.cpp)
 
+if(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
+  include(${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
+else(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
+  include(${jsk_topic_tools_PREFIX}/share/jsk_topic_tools/cmake/nodelet.cmake)
+endif(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
+
 macro(jsk_perception_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
-  list(APPEND jsk_perception_nodelet_sources ${_nodelet_cpp})
-  set(NODELET ${_nodelet_class})
-  set(DEFAULT_NODE_NAME ${_single_nodelet_exec_name})
-  configure_file(${PROJECT_SOURCE_DIR}/src/single_nodelet_exec.cpp.in
-    ${_single_nodelet_exec_name}.cpp)
-  add_executable(${_single_nodelet_exec_name} ${_single_nodelet_exec_name}.cpp)
-  target_link_libraries(${_single_nodelet_exec_name}
-    ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-  add_dependencies(${_single_nodelet_exec_name}
-    ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
-  install(TARGETS ${_single_nodelet_exec_name}
-    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
+  jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
+    jsk_perception_nodelet_sources)
 endmacro()
 jsk_perception_nodelet(src/edge_detector.cpp "jsk_perception/EdgeDetector" "edge_detector")
 jsk_perception_nodelet(src/sparse_image_encoder.cpp "jsk_perception/SparseImageEncoder" "sparse_image_encoder")
 jsk_perception_nodelet(src/sparse_image_decoder.cpp "jsk_perception/SparseImageDecoder" "sparse_image_decoder")
 jsk_perception_nodelet(src/color_histogram.cpp "jsk_perception/ColorHistogram" "color_histogram")
 jsk_perception_nodelet(src/hough_circles.cpp "jsk_perception/HoughCircleDetector" "hough_circles")
+jsk_perception_nodelet(src/slic_superpixels.cpp "jsk_perception/SLICSuperPixels" "slic_super_pixels")
 
 # compiling jsk_perception library for nodelet
-add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources})
+add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
+  ${CMAKE_CURRENT_BINARY_DIR}/build/SLIC-Superpixels/slic.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 

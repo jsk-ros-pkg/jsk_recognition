@@ -44,18 +44,11 @@
 #include <pcl/filters/project_inliers.h>
 #include <pcl/features/integral_image_normal.h>
 
+#include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <pluginlib/class_list_macros.h>
+#include <jsk_pcl_ros/pcl_conversion_util.h>
 
-#if ROS_VERSION_MINIMUM(1, 10, 0)
-// hydro and later
-typedef pcl_msgs::PointIndices PCLIndicesMsg;
-typedef pcl_msgs::ModelCoefficients PCLModelCoefficientMsg;
-#else
-// groovy
-typedef pcl::PointIndices PCLIndicesMsg;
-typedef pcl::ModelCoefficients PCLModelCoefficientMsg;
-#endif
-
+#include <boost/format.hpp>
 
 namespace jsk_pcl_ros
 {
@@ -65,15 +58,24 @@ namespace jsk_pcl_ros
     PCLNodelet::onInit();
     diagnostic_updater_.reset(new diagnostic_updater::Updater);
     diagnostic_updater_->setHardwareID(getName());
-    diagnostic_updater_->add("NormalEstimation",
-                             boost::bind(&OrganizedMultiPlaneSegmentation::updateDiagnosticNormalEstimation,
-                                         this,
-                                         _1));
-    diagnostic_updater_->add("PlaneSegmentation",
-                             boost::bind(&OrganizedMultiPlaneSegmentation::updateDiagnosticPlaneSegmentation,
-                                         this,
-                                         _1));
-
+    diagnostic_updater_->add(
+      "NormalEstimation",
+      boost::bind(&OrganizedMultiPlaneSegmentation::updateDiagnosticNormalEstimation,
+                  this,
+                  _1));
+    diagnostic_updater_->add(
+      "PlaneSegmentation",
+      boost::bind(&OrganizedMultiPlaneSegmentation::updateDiagnosticPlaneSegmentation,
+                  this,
+                  _1));
+    diagnostic_updater_->add(
+      "Connectivity",
+      boost::bind(&OrganizedMultiPlaneSegmentation::updateDiagnosticConnectivity,
+                  this,
+                  _1));
+    double vital_rate;
+    pnh_->param("vital_rate", vital_rate, 1.0);
+    vital_checker_.reset(new jsk_topic_tools::VitalChecker(1 / vital_rate));
     estimate_normal_ = false;
     pnh_->getParam("estimate_normal", estimate_normal_);
     // publishers
@@ -92,11 +94,16 @@ namespace jsk_pcl_ros
     srv_->setCallback (f);
 
     sub_ = pnh_->subscribe("input", 1, &OrganizedMultiPlaneSegmentation::segment, this);
+    diagnostics_timer_ = pnh_->createTimer(
+      ros::Duration(1.0),
+      boost::bind(&OrganizedMultiPlaneSegmentation::updateDiagnostics,
+                  this,
+                  _1));
   }
 
   void OrganizedMultiPlaneSegmentation::configCallback(Config &config, uint32_t level)
   {
-    boost::mutex::scoped_lock(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
     min_size_ = config.min_size;
     angular_threshold_ = config.angular_threshold;
     distance_threshold_ = config.distance_threshold;
@@ -342,7 +349,7 @@ namespace jsk_pcl_ros
     std::vector<pcl::PointIndices> label_indices;
     std::vector<pcl::PointIndices> boundary_indices;
     {
-      ScopedTimer timer = plane_segmentation_time_acc_.scopedTimer();
+      jsk_topic_tools::ScopedTimer timer = plane_segmentation_time_acc_.scopedTimer();
       mps.segmentAndRefine(regions, model_coefficients, inlier_indices, labels, label_indices, boundary_indices);
     }
     if (regions.size() == 0) {
@@ -432,7 +439,7 @@ namespace jsk_pcl_ros
   void OrganizedMultiPlaneSegmentation::estimateNormal(pcl::PointCloud<PointT>::Ptr input,
                                                        pcl::PointCloud<pcl::Normal>::Ptr output)
   {
-    ScopedTimer timer = normal_estimation_time_acc_.scopedTimer();
+    jsk_topic_tools::ScopedTimer timer = normal_estimation_time_acc_.scopedTimer();
     pcl::IntegralImageNormalEstimation<PointT, pcl::Normal> ne;
     if (estimation_method_ == 0) {
       ne.setNormalEstimationMethod (ne.AVERAGE_3D_GRADIENT);
@@ -465,7 +472,8 @@ namespace jsk_pcl_ros
   void OrganizedMultiPlaneSegmentation::segment
   (const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
-    boost::mutex::scoped_lock(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     // if estimate_normal_ is true, we run integral image normal estimation
     // before segmenting planes
     pcl::PointCloud<PointT>::Ptr input(new pcl::PointCloud<PointT>());
@@ -502,6 +510,21 @@ namespace jsk_pcl_ros
              normal_estimation_time_acc_.variance());
   }
 
+  void OrganizedMultiPlaneSegmentation::updateDiagnosticConnectivity(
+    diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    bool alivep = vital_checker_->isAlive();
+    if (alivep) {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                   "the input callback is called");
+    }
+    else {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,
+                   (boost::format("the input callback is not called for %f sec")
+                    % vital_checker_->deadSec()).str());
+    }
+  }
+  
   void OrganizedMultiPlaneSegmentation::updateDiagnosticPlaneSegmentation(
     diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
@@ -515,6 +538,13 @@ namespace jsk_pcl_ros
              plane_segmentation_time_acc_.min());
     stat.add("Time to segment planes (Var.)",
              plane_segmentation_time_acc_.variance());
+  }
+
+  void OrganizedMultiPlaneSegmentation::updateDiagnostics(
+    const ros::TimerEvent& event)
+  {
+    boost::mutex::scoped_lock(mutex_);
+    diagnostic_updater_->update();
   }
   
 }

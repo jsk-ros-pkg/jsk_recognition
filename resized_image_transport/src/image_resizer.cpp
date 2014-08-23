@@ -63,10 +63,10 @@ public:
       sub_ = pnh.subscribe("snapshot", 1, &ImageResizer::snapshot_msg_cb, this);
     }
 
-    cs_ = it_->subscribeCamera(cam + "/" + img, max_queue_size_,
+    cs_ = it_->subscribeCamera("input/image", max_queue_size_,
                                &ImageResizer::callback, this);
 
-    cp_ = it_->advertiseCamera(img, max_queue_size_);
+    cp_ = it_->advertiseCamera("output/image", max_queue_size_);
 
   }
 

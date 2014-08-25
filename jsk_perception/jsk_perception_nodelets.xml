@@ -1,4 +1,10 @@
 <library path="lib/libjsk_perception">
+  <class name="jsk_perception/SLICSuperPixels" type="SLICSuperPixels"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      compute superpixels
+    </description>
+  </class>
   <class name="jsk_perception/HoughCircleDetector" type="HoughCircleDetector"
          base_class_type="nodelet::Nodelet">
     <description>

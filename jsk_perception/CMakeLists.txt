@@ -56,13 +56,12 @@ target_link_libraries(rectangle_detector ${OpenCV_LIBRARIES})
 target_link_libraries(calc_flow ${OpenCV_LIBRARIES})
 rosbuild_link_boost(rectangle_detector signals)
 
+rosbuild_find_ros_package(jsk_topic_tools)
+include(${jsk_topic_tools_PACKAGE_PATH}/cmake/nodelet.cmake)
+
 macro(jsk_perception_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
-  list(APPEND jsk_perception_nodelet_sources ${_nodelet_cpp})
-  set(NODELET ${_nodelet_class})
-  set(DEFAULT_NODE_NAME ${_single_nodelet_exec_name})
-  configure_file(${PROJECT_SOURCE_DIR}/src/single_nodelet_exec.cpp.in
-    ${_single_nodelet_exec_name}.cpp)
-  rosbuild_add_executable(${_single_nodelet_exec_name} build/${_single_nodelet_exec_name}.cpp)
+  jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
+    jsk_perception_nodelet_sources)
 endmacro(jsk_perception_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
 
 jsk_perception_nodelet(src/edge_detector.cpp "jsk_perception/EdgeDetector" "edge_detector")

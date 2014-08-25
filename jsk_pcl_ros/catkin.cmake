@@ -23,8 +23,12 @@ else()
   set(ML_CLASSIFIERS ml_classifiers) ## hydro and later
 endif()
 
-find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure pcl_ros nodelet message_generation genmsg ${PCL_MSGS} sensor_msgs geometry_msgs
-  eigen_conversions tf_conversions tf2_ros tf image_transport nodelet cv_bridge ${ML_CLASSIFIERS} sklearn)
+find_package(catkin REQUIRED COMPONENTS
+  dynamic_reconfigure pcl_ros nodelet message_generation genmsg
+  ${PCL_MSGS} sensor_msgs geometry_msgs
+  eigen_conversions tf_conversions tf2_ros tf
+  image_transport nodelet cv_bridge
+  ${ML_CLASSIFIERS} sklearn jsk_topic_tools)
 
 find_package(OpenMP)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
@@ -41,7 +45,8 @@ add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg
   SparseOccupancyGridCell.msg
   SparseOccupancyGridColumn.msg
   SparseOccupancyGrid.msg
-  SparseOccupancyGridArray.msg)
+  SparseOccupancyGridArray.msg
+  DepthErrorResult.msg)
 add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv SetPointCloud2.srv
   CallSnapIt.srv CallPolygon.srv
   EnvironmentLock.srv
@@ -67,21 +72,15 @@ find_package(OpenCV REQUIRED core imgproc)
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 
+if(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
+  include(${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
+else(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
+  include(${jsk_topic_tools_PREFIX}/share/jsk_topic_tools/cmake/nodelet.cmake)
+endif(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
+
 macro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
-  list(APPEND jsk_pcl_nodelet_sources ${_nodelet_cpp})
-  set(NODELET ${_nodelet_class})
-  set(DEFAULT_NODE_NAME ${_single_nodelet_exec_name})
-  configure_file(${PROJECT_SOURCE_DIR}/src/single_nodelet_exec.cpp.in
-    ${_single_nodelet_exec_name}.cpp)
-  add_executable(${_single_nodelet_exec_name} ${_single_nodelet_exec_name}.cpp)
-  target_link_libraries(${_single_nodelet_exec_name}
-    ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES})
-  add_dependencies(${_single_nodelet_exec_name}
-    ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
-  install(TARGETS ${_single_nodelet_exec_name}
-    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
+  jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
+    jsk_pcl_nodelet_sources)
 endmacro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
 
 add_definitions("-O2 -g")
@@ -159,6 +158,15 @@ jsk_pcl_nodelet(src/grid_sampler_nodelet.cpp
   "jsk_pcl/GridSampler" "grid_sampler")
 jsk_pcl_nodelet(src/handle_estimator_nodelet.cpp
   "jsk_pcl/HandleEstimator" "handle_estimator")
+jsk_pcl_nodelet(src/delay_pointcloud_nodelet.cpp
+  "jsk_pcl/DelayPointCloud" "delay_pointcloud")
+jsk_pcl_nodelet(src/depth_image_error_nodelet.cpp
+  "jsk_pcl/DepthImageError" "depth_image_error")
+jsk_pcl_nodelet(src/organize_pointcloud_nodelet.cpp
+  "jsk_pcl/OrganizePointCloud" "organize_pointcloud")
+jsk_pcl_nodelet(src/polygon_array_wrapper_nodelet.cpp
+  "jsk_pcl/PolygonArrayWrapper" "polygon_array_wrapper")
+
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp

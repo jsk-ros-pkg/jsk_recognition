@@ -1,0 +1,8 @@
+<library path="lib/libresized_image_transport">
+  <class name="resized_image_transport/ImageResizer" type="ImageResizer"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      publish resized image and camera_info
+    </description>
+  </class>
+</library>

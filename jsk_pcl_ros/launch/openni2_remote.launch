@@ -1,22 +1,22 @@
 <launch>
   <arg name="rgb_camera_info_url"   default="" />
   <arg name="depth_camera_info_url" default="" />
-  <group>			<!--group only for remapping-->
+  <group>       <!--group only for remapping-->
     <remap from="/camera_remote/depth/image_raw" 
-	   to="/camera/depth/image_raw"/>
+           to="/camera/depth/image_raw"/>
     <remap from="/camera_remote/depth/camera_info" 
-	   to="/camera/depth/camera_info"/>
+           to="/camera/depth/camera_info"/>
     <remap from="/camera_remote/depth/image_rect_raw"
-	   to="/camera/depth/image_rect_raw"/>
+           to="/camera/depth/image_rect_raw"/>
 
     <remap from="/camera_remote/depth_registered/image_raw"
-	   to="/camera/depth_registered/image_raw"/>
+           to="/camera/depth_registered/image_raw"/>
     <remap from="/camera_remote/rgb/image_raw"
-	   to="/camera/rgb/image_raw"/>
+           to="/camera/rgb/image_raw"/>
     <remap from="/camera_remote/rgb/camera_info"
-	   to="/camera/rgb/camera_info"/>
+           to="/camera/rgb/camera_info"/>
     <remap from="/camera_remote/depth_registered/hw_registered/image_rect_raw"
-	   to="/camera/depth_registered/hw_registered/image_rect_raw"/>
+           to="/camera/depth_registered/hw_registered/image_rect_raw"/>
     <include file="$(find openni2_launch)/launch/openni2.launch">
 
 
@@ -31,19 +31,61 @@
       <arg name="depth_camera_info_url" value="$(arg depth_camera_info_url)" />
     </include>
   </group>
-  <!-- camera_info relaying -->
+  
   <group ns="camera_remote">
+    <!--                      -->
+    <!-- camera_info relaying -->
+    <!--                      -->
     <group ns="rgb">
       <node pkg="topic_tools"
-	    type="relay"
-	    name="relay_camera_info"
-	    args="/camera/rgb/camera_info /camera_remote/rgb/camera_info" />
+            type="relay"
+            name="relay_camera_info"
+            args="/camera/rgb/camera_info /camera_remote/rgb/camera_info" />
     </group>
     <group ns="depth">
       <node pkg="topic_tools"
-	    type="relay"
-	    name="relay_camera_info"
-	    args="/camera/depth/camera_info /camera_remote/depth/camera_info" />
+            type="relay"
+            name="relay_camera_info"
+            args="/camera/depth/camera_info /camera_remote/depth/camera_info" />
     </group>
+    <!--            -->
+    <!-- downsample -->
+    <!--            -->
+    <node pkg="nodelet"
+          type="nodelet"
+          name="depth_registered_half"
+          args="load jsk_pcl/ResizePointsPublisher camera_remote_nodelet_manager">
+      <remap from="~input" to="depth_registered/points" />
+      <param name="step_x" value="2" />
+      <param name="step_y" value="2" />
+    </node>
+    <node pkg="nodelet"
+          type="nodelet"
+          name="depth_half"
+          args="load jsk_pcl/ResizePointsPublisher camera_remote_nodelet_manager">
+      <remap from="~input" to="depth/points" />
+      <param name="not_use_rgb" value="true" />
+      <param name="step_x" value="2" />
+      <param name="step_y" value="2" />
+    </node>
+    <node pkg="nodelet"
+          type="nodelet"
+          name="depth_registered_quater"
+          args="load jsk_pcl/ResizePointsPublisher camera_remote_nodelet_manager">
+      <remap from="~input" to="depth_registered/points" />
+      <param name="step_x" value="4" />
+      <param name="step_y" value="4" />
+    </node>
+    <node pkg="nodelet"
+          type="nodelet"
+          name="depth_quater"
+          args="load jsk_pcl/ResizePointsPublisher camera_remote_nodelet_manager">
+      <remap from="~input" to="depth/points" />
+      <param name="not_use_rgb" value="true" />
+      <param name="step_x" value="4" />
+      <param name="step_y" value="4" />
+    </node>
   </group>
+  
+  
 </launch>

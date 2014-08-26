@@ -40,6 +40,7 @@ add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg
   SlicedPointCloud.msg
   BoundingBox.msg
   BoundingBoxArray.msg
+  BoundingBoxMovement.msg
   ColorHistogram.msg
   ColorHistogramArray.msg
   SparseOccupancyGridCell.msg

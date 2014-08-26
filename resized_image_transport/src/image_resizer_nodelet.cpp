@@ -1,4 +1,5 @@
 #include <ros/ros.h>
+#include <nodelet/nodelet.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
 
@@ -17,61 +18,12 @@
 #include <dynamic_reconfigure/server.h>
 #include "resized_image_transport/ImageResizerConfig.h"
 
-class ImageResizer
+namespace resized_image_transport
 {
+class ImageResizer: public nodelet::Nodelet
+{
+  // variables
 public:
-    ImageResizer () : nh(), pnh("~"), publish_once_(true) {
-
-    ReconfigureServer::CallbackType f = boost::bind(&ImageResizer::config_cb, this, _1, _2);
-    reconfigure_server_.setCallback(f);
-
-    pnh.param("resize_scale_x", resize_x_, 1.0);
-    ROS_INFO("resize_scale_x : %f", resize_x_);
-    pnh.param("resize_scale_y", resize_y_, 1.0);
-    ROS_INFO("resize_scale_y : %f", resize_y_);
-
-    pnh.param("width", dst_width_, 0);
-    ROS_INFO("width : %d", dst_width_);
-    pnh.param("height", dst_height_, 0);
-    ROS_INFO("height : %d", dst_height_);
-
-    pnh.param("max_queue_size", max_queue_size_, 5);
-
-    pnh.param("use_snapshot", use_snapshot_, false);
-    pnh.param("use_messages", use_messages_, false);
-    if (use_messages_) {
-        double d_period;
-        pnh.param("period", d_period, 1.0);
-        period_ = ros::Duration(d_period);
-        ROS_INFO("use_messages : %d", use_messages_);
-        ROS_INFO("message period : %f", period_.toSec());
-    }
-    pnh.param("use_bytes", use_bytes_, false);
-
-    it_ = new image_transport::ImageTransport(pnh);
-    std::string img = nh.resolveName("image");
-    std::string cam = nh.resolveName("camera");
-    if (img.at(0) == '/') {
-      img.erase(0, 1);
-    }
-    ROS_INFO("camera = %s", cam.c_str());
-    ROS_INFO("image = %s", img.c_str());
-
-    if (use_snapshot_) {
-      publish_once_ = false;
-      srv_ = pnh.advertiseService("snapshot", &ImageResizer::snapshot_srv_cb, this);
-      sub_ = pnh.subscribe("snapshot", 1, &ImageResizer::snapshot_msg_cb, this);
-    }
-
-    cs_ = it_->subscribeCamera(cam + "/" + img, max_queue_size_,
-                               &ImageResizer::callback, this);
-
-    cp_ = it_->advertiseCamera(img, max_queue_size_);
-
-  }
-
-  ~ImageResizer() { }
-
 protected:
   ros::NodeHandle nh;
   ros::NodeHandle pnh;
@@ -97,15 +49,77 @@ protected:
   ros::Duration period_;
   boost::mutex mutex_;
 
+private:
+  
+  
+public:
+protected:
+  void onInit() {
+    nh = getNodeHandle();
+    pnh = getPrivateNodeHandle();
+    publish_once_ = true;
+    ReconfigureServer::CallbackType f
+      = boost::bind(&ImageResizer::config_cb, this, _1, _2);
+    reconfigure_server_.setCallback(f);
+
+    pnh.param("resize_scale_x", resize_x_, 1.0);
+    NODELET_INFO("resize_scale_x : %f", resize_x_);
+    pnh.param("resize_scale_y", resize_y_, 1.0);
+    NODELET_INFO("resize_scale_y : %f", resize_y_);
+
+    pnh.param("width", dst_width_, 0);
+    NODELET_INFO("width : %d", dst_width_);
+    pnh.param("height", dst_height_, 0);
+    NODELET_INFO("height : %d", dst_height_);
+
+    pnh.param("max_queue_size", max_queue_size_, 5);
+
+    pnh.param("use_snapshot", use_snapshot_, false);
+    pnh.param("use_messages", use_messages_, false);
+    if (use_messages_) {
+        double d_period;
+        pnh.param("period", d_period, 1.0);
+        period_ = ros::Duration(d_period);
+        NODELET_INFO("use_messages : %d", use_messages_);
+        NODELET_INFO("message period : %f", period_.toSec());
+    }
+    pnh.param("use_bytes", use_bytes_, false);
+
+    it_ = new image_transport::ImageTransport(pnh);
+    std::string img = nh.resolveName("image");
+    std::string cam = nh.resolveName("camera");
+    if (img.at(0) == '/') {
+      img.erase(0, 1);
+    }
+    NODELET_INFO("camera = %s", cam.c_str());
+    NODELET_INFO("image = %s", img.c_str());
+
+    if (use_snapshot_) {
+      publish_once_ = false;
+      srv_ = pnh.advertiseService("snapshot", &ImageResizer::snapshot_srv_cb, this);
+      sub_ = pnh.subscribe("snapshot", 1, &ImageResizer::snapshot_msg_cb, this);
+    }
+
+    cs_ = it_->subscribeCamera("input/image", max_queue_size_,
+                               &ImageResizer::callback, this);
+
+    cp_ = it_->advertiseCamera("output/image", max_queue_size_);
+
+  }
+
+  ~ImageResizer() { }
+
+protected:
+
   void config_cb (resized_image_transport::ImageResizerConfig &config, uint32_t level) {
-    ROS_INFO("config_cb");
+    NODELET_INFO("config_cb");
     resize_x_ = config.resize_scale_x;
     resize_y_ = config.resize_scale_y;
     period_ = ros::Duration(1.0/config.msg_par_second);
 
-    ROS_INFO("resize_scale_x : %f", resize_x_);
-    ROS_INFO("resize_scale_y : %f", resize_y_);
-    ROS_INFO("message period : %f", period_.toSec());
+    NODELET_INFO("resize_scale_x : %f", resize_x_);
+    NODELET_INFO("resize_scale_y : %f", resize_y_);
+    NODELET_INFO("message period : %f", period_.toSec());
   }
 
   void snapshot_msg_cb (const std_msgs::EmptyConstPtr msg) {
@@ -214,16 +228,16 @@ protected:
         in_byte_mean /= duration;
         out_byte_mean /= duration;
 
-        ROS_INFO_STREAM(" in  bandwidth: " << std::fixed << std::setw(11) << std::setprecision(3)  << in_byte_mean/1000*8
-                        << " Kbps rate:"   << std::fixed << std::setw(7) << std::setprecision(3) << in_time_rate
-                        << " hz min:"      << std::fixed << std::setw(7) << std::setprecision(3) << in_time_min_delta
-                        << " s max: "    << std::fixed << std::setw(7) << std::setprecision(3) << in_time_max_delta
-                        << " s std_dev: "<< std::fixed << std::setw(7) << std::setprecision(3) << in_time_std_dev << "s n: " << in_time_n);
-        ROS_INFO_STREAM(" out bandwidth: " << std::fixed << std::setw(11) << std::setprecision(3)  << out_byte_mean/1000*8
-                        << " kbps rate:"   << std::fixed << std::setw(7) << std::setprecision(3) << out_time_rate
-                        << " hz min:"      << std::fixed << std::setw(7) << std::setprecision(3) << out_time_min_delta
-                        << " s max: "    << std::fixed << std::setw(7) << std::setprecision(3) << out_time_max_delta
-                        << " s std_dev: "<< std::fixed << std::setw(7) << std::setprecision(3) << out_time_std_dev << "s n: " << out_time_n);
+        NODELET_INFO_STREAM(" in  bandwidth: " << std::fixed << std::setw(11) << std::setprecision(3)  << in_byte_mean/1000*8
+                            << " Kbps rate:"   << std::fixed << std::setw(7) << std::setprecision(3) << in_time_rate
+                            << " hz min:"      << std::fixed << std::setw(7) << std::setprecision(3) << in_time_min_delta
+                            << " s max: "    << std::fixed << std::setw(7) << std::setprecision(3) << in_time_max_delta
+                            << " s std_dev: "<< std::fixed << std::setw(7) << std::setprecision(3) << in_time_std_dev << "s n: " << in_time_n);
+        NODELET_INFO_STREAM(" out bandwidth: " << std::fixed << std::setw(11) << std::setprecision(3)  << out_byte_mean/1000*8
+                            << " kbps rate:"   << std::fixed << std::setw(7) << std::setprecision(3) << out_time_rate
+                            << " hz min:"      << std::fixed << std::setw(7) << std::setprecision(3) << out_time_min_delta
+                            << " s max: "    << std::fixed << std::setw(7) << std::setprecision(3) << out_time_max_delta
+                            << " s std_dev: "<< std::fixed << std::setw(7) << std::setprecision(3) << out_time_std_dev << "s n: " << out_time_n);
         in_times.clear();
         in_bytes.clear();
         out_times.clear();
@@ -237,14 +251,9 @@ protected:
       publish_once_ = false;
     }
   }
-
 };
-
-int main(int argc, char** argv) {
-  ros::init(argc, argv, "image_resizer");
-
-  ImageResizer ir;
-  ros::spin();
-
-  return 0;
 }
+
+#include <pluginlib/class_list_macros.h>
+typedef resized_image_transport::ImageResizer ImageResizer;
+PLUGINLIB_DECLARE_CLASS (resized_image_transport, ImageResizer, ImageResizer, nodelet::Nodelet);

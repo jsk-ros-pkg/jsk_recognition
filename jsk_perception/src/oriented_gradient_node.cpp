@@ -19,6 +19,7 @@ class OrientedGradientNode {
  public:
   explicit OrientedGradientNode(const ros::NodeHandle& nh) :
       handle_(nh), image_transport_(nh) {
+    image_pub_ = image_transport_.advertise("image", 1);
     image_sub_ = image_transport_.subscribe(
         "/camera/rgb/image_raw", 1,
         &OrientedGradientNode::imageCallback, this);
@@ -32,7 +33,7 @@ class OrientedGradientNode {
   ros::NodeHandle handle_;
   image_transport::ImageTransport image_transport_;
   image_transport::Subscriber image_sub_;
-
+  image_transport::Publisher image_pub_;
   void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
     cv_bridge::CvImagePtr cv_ptr;
 
@@ -52,8 +53,13 @@ class OrientedGradientNode {
     // H is orientation and V is intensity
     calcOrientedGradient(cv_img, cv_og_img);
     cv::cvtColor(cv_og_img, cv_out_img, CV_HSV2BGR);
-    cv::imshow("OrinetedGradient", cv_out_img);
-    cv::waitKey(1);
+    // cv::imshow("OrinetedGradient", cv_out_img);
+    // cv::waitKey(1);
+    sensor_msgs::Image::Ptr out_img = cv_bridge::CvImage(
+      msg->header,
+      sensor_msgs::image_encodings::BGR8,
+      cv_out_img).toImageMsg();
+    image_pub_.publish(out_img);
   }
 };
 

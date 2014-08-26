@@ -40,6 +40,7 @@ add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg
   SlicedPointCloud.msg
   BoundingBox.msg
   BoundingBoxArray.msg
+  BoundingBoxMovement.msg
   ColorHistogram.msg
   ColorHistogramArray.msg
   SparseOccupancyGridCell.msg
@@ -72,21 +73,15 @@ find_package(OpenCV REQUIRED core imgproc)
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 
+if(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
+  include(${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
+else(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
+  include(${jsk_topic_tools_PREFIX}/share/jsk_topic_tools/cmake/nodelet.cmake)
+endif(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
+
 macro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
-  list(APPEND jsk_pcl_nodelet_sources ${_nodelet_cpp})
-  set(NODELET ${_nodelet_class})
-  set(DEFAULT_NODE_NAME ${_single_nodelet_exec_name})
-  configure_file(${PROJECT_SOURCE_DIR}/src/single_nodelet_exec.cpp.in
-    ${_single_nodelet_exec_name}.cpp)
-  add_executable(${_single_nodelet_exec_name} ${_single_nodelet_exec_name}.cpp)
-  target_link_libraries(${_single_nodelet_exec_name}
-    ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES})
-  add_dependencies(${_single_nodelet_exec_name}
-    ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
-  install(TARGETS ${_single_nodelet_exec_name}
-    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
+  jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
+    jsk_pcl_nodelet_sources)
 endmacro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
 
 add_definitions("-O2 -g")
@@ -168,6 +163,13 @@ jsk_pcl_nodelet(src/delay_pointcloud_nodelet.cpp
   "jsk_pcl/DelayPointCloud" "delay_pointcloud")
 jsk_pcl_nodelet(src/depth_image_error_nodelet.cpp
   "jsk_pcl/DepthImageError" "depth_image_error")
+jsk_pcl_nodelet(src/organize_pointcloud_nodelet.cpp
+  "jsk_pcl/OrganizePointCloud" "organize_pointcloud")
+jsk_pcl_nodelet(src/polygon_array_wrapper_nodelet.cpp
+  "jsk_pcl/PolygonArrayWrapper" "polygon_array_wrapper")
+jsk_pcl_nodelet(src/border_estimator_nodelet.cpp
+  "jsk_pcl/BorderEstimator" "border_estimator")
+
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp

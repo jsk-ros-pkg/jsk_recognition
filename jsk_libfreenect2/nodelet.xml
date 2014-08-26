@@ -1,0 +1,8 @@
+<library path="lib/libfreenect2_nodelet">
+    <class name="jsk_libfreenect2/Driver" type="Driver"
+           base_class_type="nodelet::Nodelet">
+      <description>
+        driver nodelet for kinect2
+      </description>
+    </class>
+</library>

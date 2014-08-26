@@ -2,6 +2,11 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.14 (2014-08-01)
+-------------------
+* add bounging box movement msg
+* Contributors: Yusuke Furuta
+
 0.1.13 (2014-07-29)
 -------------------
 * add include of pcl_util.h to OrganizedMultiPlaneSegmentation

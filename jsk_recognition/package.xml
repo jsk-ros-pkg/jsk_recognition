@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>jsk_recognition</name>
-  <version>0.1.14</version>
+  <version>0.1.15</version>
   <description>
    <p>Metapackage that contains recognition package for jsk-ros-pkg</p>
   </description>

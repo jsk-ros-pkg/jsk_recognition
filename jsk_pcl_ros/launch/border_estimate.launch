@@ -1,0 +1,7 @@
+<launch>
+  <node pkg="jsk_pcl_ros" type="border_estimator" name="border_estimator"
+        output="screen">
+    <remap from="~input" to="/camera/depth_registered/points" />
+    <remap from="~input_camera_info" to="/camera/rgb/camera_info" />
+  </node>
+</launch>

@@ -40,6 +40,7 @@ add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg
   SlicedPointCloud.msg
   BoundingBox.msg
   BoundingBoxArray.msg
+  BoundingBoxMovement.msg
   ColorHistogram.msg
   ColorHistogramArray.msg
   SparseOccupancyGridCell.msg
@@ -166,6 +167,8 @@ jsk_pcl_nodelet(src/organize_pointcloud_nodelet.cpp
   "jsk_pcl/OrganizePointCloud" "organize_pointcloud")
 jsk_pcl_nodelet(src/polygon_array_wrapper_nodelet.cpp
   "jsk_pcl/PolygonArrayWrapper" "polygon_array_wrapper")
+jsk_pcl_nodelet(src/border_estimator_nodelet.cpp
+  "jsk_pcl/BorderEstimator" "border_estimator")
 
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}

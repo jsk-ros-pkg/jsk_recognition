@@ -47,6 +47,38 @@ namespace jsk_pcl_ros
     }
     return std::vector<int>(all.begin(), all.end());
   }
+
+  void Counter::add(double v)
+  {
+    acc_(v);
+  }
   
+  double Counter::mean()
+  {
+    return boost::accumulators::mean(acc_);
+  }
+
+  double Counter::min()
+  {
+    return boost::accumulators::min(acc_);
+  }
+
+  double Counter::max()
+  {
+    return boost::accumulators::max(acc_);
+  }
+
+  int Counter::count()
+  {
+    return boost::accumulators::count(acc_);
+  }
+  
+  double Counter::variance()
+  {
+    return boost::accumulators::variance(acc_);
+  }
+
+
+>>>>>>> refs/remotes/origin/master
 }
 

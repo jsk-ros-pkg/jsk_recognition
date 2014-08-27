@@ -85,8 +85,12 @@ namespace jsk_pcl_ros
     boost::shared_ptr<diagnostic_updater::Updater> diagnostic_updater_;
     jsk_topic_tools::TimeAccumulator plane_segmentation_time_acc_;
     jsk_topic_tools::TimeAccumulator normal_estimation_time_acc_;
-    jsk_topic_tools::VitalChecker::Ptr vital_checker_;
+    jsk_topic_tools::VitalChecker::Ptr normal_estimation_vital_checker_;
+    jsk_topic_tools::VitalChecker::Ptr plane_segmentation_vital_checker_;
     ros::Timer diagnostics_timer_;
+    Counter original_plane_num_counter_;
+    Counter connected_plane_num_counter_;
+
     virtual void segment(const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void estimateNormal(pcl::PointCloud<PointT>::Ptr input,
                                 pcl::PointCloud<pcl::Normal>::Ptr output);
@@ -117,8 +121,6 @@ namespace jsk_pcl_ros
     virtual void updateDiagnosticNormalEstimation(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void updateDiagnosticPlaneSegmentation(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
-    virtual void updateDiagnosticConnectivity(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
   private:
     virtual void onInit();

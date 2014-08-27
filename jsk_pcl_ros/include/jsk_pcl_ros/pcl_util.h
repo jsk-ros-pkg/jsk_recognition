@@ -37,5 +37,9 @@
 #define JSK_PCL_ROS_PCL_UTIL_H_
 
 #include <pcl/point_types.h>
-
+namespace jsk_pcl_ros
+{
+  std::vector<int> addIndices(const std::vector<int>& a,
+                              const std::vector<int>& b);
+}
 #endif

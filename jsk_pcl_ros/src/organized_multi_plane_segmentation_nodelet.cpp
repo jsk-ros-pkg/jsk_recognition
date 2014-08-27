@@ -56,29 +56,30 @@ namespace jsk_pcl_ros
   void OrganizedMultiPlaneSegmentation::onInit()
   {
     PCLNodelet::onInit();
+    //////////////////////////////////////////////////////////
+    // prepare diagnostics
+    //////////////////////////////////////////////////////////
     diagnostic_updater_.reset(new diagnostic_updater::Updater);
     diagnostic_updater_->setHardwareID(getName());
     diagnostic_updater_->add(
-      "NormalEstimation",
+                             getName() + "::NormalEstimation",
       boost::bind(&OrganizedMultiPlaneSegmentation::updateDiagnosticNormalEstimation,
                   this,
                   _1));
     diagnostic_updater_->add(
-      "PlaneSegmentation",
+                             getName() + "::PlaneSegmentation",
       boost::bind(&OrganizedMultiPlaneSegmentation::updateDiagnosticPlaneSegmentation,
-                  this,
-                  _1));
-    diagnostic_updater_->add(
-      "Connectivity",
-      boost::bind(&OrganizedMultiPlaneSegmentation::updateDiagnosticConnectivity,
                   this,
                   _1));
     double vital_rate;
     pnh_->param("vital_rate", vital_rate, 1.0);
-    vital_checker_.reset(new jsk_topic_tools::VitalChecker(1 / vital_rate));
+    normal_estimation_vital_checker_.reset(new jsk_topic_tools::VitalChecker(1 / vital_rate));
+    plane_segmentation_vital_checker_.reset(new jsk_topic_tools::VitalChecker(1 / vital_rate));
     estimate_normal_ = false;
     pnh_->getParam("estimate_normal", estimate_normal_);
-    // publishers
+    //////////////////////////////////////////////////////////
+    // prepare publishers
+    //////////////////////////////////////////////////////////
     pub_ = pnh_->advertise<jsk_pcl_ros::ClusterPointIndices>("output", 1);
     polygon_pub_ = pnh_->advertise<jsk_pcl_ros::PolygonArray>("output_polygon", 1);
     coefficients_pub_ = pnh_->advertise<jsk_pcl_ros::ModelCoefficientsArray>("output_coefficients", 1);
@@ -88,6 +89,7 @@ namespace jsk_pcl_ros
     if (estimate_normal_) {
       normal_pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output_normal", 1);
     }
+    
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&OrganizedMultiPlaneSegmentation::configCallback, this, _1, _2);
@@ -334,6 +336,7 @@ namespace jsk_pcl_ros
                                                            pcl::PointCloud<pcl::Normal>::Ptr normal,
                                                            const std_msgs::Header& header)
   {
+    plane_segmentation_vital_checker_->poke();
     pcl::OrganizedMultiPlaneSegmentation<PointT, pcl::Normal, pcl::Label> mps;
     mps.setMinInliers(min_size_);
     mps.setAngularThreshold(angular_threshold_);
@@ -352,11 +355,15 @@ namespace jsk_pcl_ros
       jsk_topic_tools::ScopedTimer timer = plane_segmentation_time_acc_.scopedTimer();
       mps.segmentAndRefine(regions, model_coefficients, inlier_indices, labels, label_indices, boundary_indices);
     }
+    original_plane_num_counter_.add(regions.size());
     if (regions.size() == 0) {
       NODELET_DEBUG("no region is segmented");
     }
-
+    
     {
+      //////////////////////////////////////////////////////////
+      // publish original segmentation information
+      //////////////////////////////////////////////////////////
       jsk_pcl_ros::ClusterPointIndices indices;
       jsk_pcl_ros::ModelCoefficientsArray coefficients_array;
       jsk_pcl_ros::PolygonArray polygon_array;
@@ -414,6 +421,7 @@ namespace jsk_pcl_ros
       polygon_array.header = header;
       pclIndicesArrayToClusterPointIndices(output_indices, header,
                                            indices);
+      connected_plane_num_counter_.add(output_boundary_clouds.size());
       for (size_t i = 0; i < output_boundary_clouds.size(); i++) {
         geometry_msgs::PolygonStamped polygon;
         polygon.header = header;
@@ -473,13 +481,14 @@ namespace jsk_pcl_ros
   (const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    vital_checker_->poke();
+    
     // if estimate_normal_ is true, we run integral image normal estimation
     // before segmenting planes
     pcl::PointCloud<PointT>::Ptr input(new pcl::PointCloud<PointT>());
     pcl::PointCloud<pcl::Normal>::Ptr normal(new pcl::PointCloud<pcl::Normal>());
     pcl::fromROSMsg(*msg, *input);
     if (estimate_normal_) {
+      normal_estimation_vital_checker_->poke();
       estimateNormal(input, normal);
       // publish normal to ros
       if (publish_normal_) {
@@ -499,51 +508,99 @@ namespace jsk_pcl_ros
   void OrganizedMultiPlaneSegmentation::updateDiagnosticNormalEstimation(
     diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
-    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "NormalEstimation running");
-    stat.add("Time to estimate normal (Avg.)",
-             normal_estimation_time_acc_.mean());
-    stat.add("Time to estimate normal (Max)",
-             normal_estimation_time_acc_.max());
-    stat.add("Time to estimate normal (Min)",
-             normal_estimation_time_acc_.min());
-    stat.add("Time to estimate normal (Var.)",
-             normal_estimation_time_acc_.variance());
-  }
-
-  void OrganizedMultiPlaneSegmentation::updateDiagnosticConnectivity(
-    diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-    bool alivep = vital_checker_->isAlive();
-    if (alivep) {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                   "the input callback is called");
+    if (estimate_normal_) {
+      bool alivep = normal_estimation_vital_checker_->isAlive();
+      if (alivep) {
+        stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "NormalEstimation running");
+        stat.add("Time to estimate normal (Avg.)",
+                 normal_estimation_time_acc_.mean());
+        stat.add("Time to estimate normal (Max)",
+                 normal_estimation_time_acc_.max());
+        stat.add("Time to estimate normal (Min)",
+                 normal_estimation_time_acc_.min());
+        stat.add("Time to estimate normal (Var.)",
+                 normal_estimation_time_acc_.variance());
+        // normal estimation parameters
+        if (estimation_method_ == 0) {
+          stat.add("Estimation Method", "AVERAGE_3D_GRADIENT");
+        }
+        else if (estimation_method_ == 1) {
+          stat.add("Estimation Method", "COVARIANCE_MATRIX");
+        }
+        else if (estimation_method_ == 2) {
+          stat.add("Estimation Method", "AVERAGE_DEPTH_CHANGE");
+        }
+        if (border_policy_ignore_) {
+        stat.add("Border Policy", "ignore");
+        }
+        else {
+          stat.add("Border Policy", "mirror");
+        }
+        stat.add("Max Depth Change Factor", max_depth_change_factor_);
+        stat.add("Normal Smoothing Size", normal_smoothing_size_);
+        if (depth_dependent_smoothing_) {
+          stat.add("Depth Dependent Smooting", "Enabled");
+        }
+        else {
+          stat.add("Depth Dependent Smooting", "Disabled");
+        }
+        if (publish_normal_) {
+          stat.add("Publish Normal", "Enabled");
+        }
+        else {
+          stat.add("Publish Normal", "Disabled");
+        }
+      }
+      else {
+        stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,
+                     (boost::format("NormalEstimation not running for %f sec")
+                      % normal_estimation_vital_checker_->deadSec()).str());
+      }
+      
     }
     else {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,
-                   (boost::format("the input callback is not called for %f sec")
-                    % vital_checker_->deadSec()).str());
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                   "NormalEstimation is not activated");
     }
   }
-  
+
   void OrganizedMultiPlaneSegmentation::updateDiagnosticPlaneSegmentation(
     diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
-    stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                 "PlaneSegmentation running");
-    stat.add("Time to segment planes (Avg.)",
-             plane_segmentation_time_acc_.mean());
-    stat.add("Time to segment planes (Max)",
-             plane_segmentation_time_acc_.max());
-    stat.add("Time to segment planes (Min)",
-             plane_segmentation_time_acc_.min());
-    stat.add("Time to segment planes (Var.)",
-             plane_segmentation_time_acc_.variance());
+    bool alivep = plane_segmentation_vital_checker_->isAlive();
+    if (alivep) {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                   "PlaneSegmentation running");
+      stat.add("Time to segment planes (Avg.)",
+               plane_segmentation_time_acc_.mean());
+      stat.add("Time to segment planes (Max)",
+               plane_segmentation_time_acc_.max());
+      stat.add("Time to segment planes (Min)",
+               plane_segmentation_time_acc_.min());
+      stat.add("Time to segment planes (Var.)",
+               plane_segmentation_time_acc_.variance());
+      stat.add("Minimum Inliers", min_size_);
+      stat.add("Angular Threshold (rad)", angular_threshold_);
+      stat.add("Angular Threshold (deg)", angular_threshold_ / M_PI * 180.0);
+      stat.add("Distance Threshold", distance_threshold_);
+      stat.add("Max Curvature", max_curvature_);
+      stat.add("Number of original segmented planes (Avg.)", 
+               original_plane_num_counter_.mean());
+      stat.add("Number of connected segmented planes (Avg.)", 
+               connected_plane_num_counter_.mean());
+    }
+    else {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,
+                   (boost::format("PlaneSegmentation not running for %f sec")
+                    % plane_segmentation_vital_checker_->deadSec()).str());
+    }
+    
   }
 
   void OrganizedMultiPlaneSegmentation::updateDiagnostics(
     const ros::TimerEvent& event)
   {
-    boost::mutex::scoped_lock(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
     diagnostic_updater_->update();
   }
   

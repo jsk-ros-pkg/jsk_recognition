@@ -77,8 +77,5 @@ namespace jsk_pcl_ros
   {
     return boost::accumulators::variance(acc_);
   }
-
-
->>>>>>> refs/remotes/origin/master
 }
 

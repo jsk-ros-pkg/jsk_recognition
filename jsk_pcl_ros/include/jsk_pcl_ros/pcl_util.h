@@ -72,5 +72,4 @@ namespace jsk_pcl_ros
   };
 }
 
->>>>>>> refs/remotes/origin/master
 #endif

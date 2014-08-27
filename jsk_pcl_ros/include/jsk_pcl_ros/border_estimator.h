@@ -33,40 +33,45 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/pcl_util.h"
+
+#ifndef JSK_PCL_ROS_BORDER_ESTIMATOR_H_
+#define JSK_PCL_ROS_BORDER_ESTIMATOR_H_
+
+#include <pcl_ros/pcl_nodelet.h>
+#include <pcl/range_image/range_image.h>
+#include <pcl/features/range_image_border_extractor.h>
+
+#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/CameraInfo.h>
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
 
 namespace jsk_pcl_ros
 {
-  void Counter::add(double v)
+  class BorderEstimator: public pcl_ros::PCLNodelet
   {
-    acc_(v);
-  }
-  
-  double Counter::mean()
-  {
-    return boost::accumulators::mean(acc_);
-  }
+  public:
+    typedef message_filters::sync_policies::ApproximateTime<
+    sensor_msgs::PointCloud2, sensor_msgs::CameraInfo> SyncPolicy;
 
-  double Counter::min()
-  {
-    return boost::accumulators::min(acc_);
-  }
-
-  double Counter::max()
-  {
-    return boost::accumulators::max(acc_);
-  }
-
-  int Counter::count()
-  {
-    return boost::accumulators::count(acc_);
-  }
-  
-  double Counter::variance()
-  {
-    return boost::accumulators::variance(acc_);
-  }
-
-
+  protected:
+    virtual void onInit();
+    virtual pcl::PointXYZ convertPoint(const pcl::PointWithRange& input);
+    virtual void estimate(const sensor_msgs::PointCloud2::ConstPtr& msg,
+                          const sensor_msgs::CameraInfo::ConstPtr& caminfo);
+    void publishCloud(ros::Publisher& pub,
+                      const pcl::PointCloud<pcl::PointXYZ>& cloud,
+                      const std_msgs::Header& header);
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_point_;
+    message_filters::Subscriber<sensor_msgs::CameraInfo> sub_camera_info_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    ros::Publisher pub_border_, pub_veil_, pub_shadow_;
+  private:
+    
+  };
 }
 
+#endif

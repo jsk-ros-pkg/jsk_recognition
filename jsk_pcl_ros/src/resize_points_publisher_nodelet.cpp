@@ -37,8 +37,6 @@ namespace jsk_pcl_ros
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     ros::Publisher pub_;
 
-    pcl::ExtractIndices<pcl::PointXYZRGB> extract_;
-
     boost::mutex mutex_;
     
     void onInit () {
@@ -49,29 +47,40 @@ namespace jsk_pcl_ros
       ROS_INFO("step_x : %d", step_x_);
       pnh_->param("step_y", step_y_, 2);
       ROS_INFO("step_y : %d", step_y_);
-
+      bool not_use_rgb;
+      pnh_->param("not_use_rgb", not_use_rgb, false);
       pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
       sub_input_.subscribe(*pnh_, "input", 1);
       if (use_indices_) {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(10);
       sub_indices_.subscribe(*pnh_, "indices", 1);
       sync_->connectInput(sub_input_, sub_indices_);
-      sync_->registerCallback(boost::bind(&ResizePointsPublisher::filter, this, _1, _2));
+      if (!not_use_rgb) {
+        sync_->registerCallback(boost::bind(&ResizePointsPublisher::filter<pcl::PointXYZRGB>, this, _1, _2));
+      }
+      else {
+        sync_->registerCallback(boost::bind(&ResizePointsPublisher::filter<pcl::PointXYZ>, this, _1, _2));
+      }
     }
     else {
-      sub_input_.registerCallback(&ResizePointsPublisher::filter, this);
+      if (!not_use_rgb) {
+        sub_input_.registerCallback(&ResizePointsPublisher::filter<pcl::PointXYZRGB>, this);
+      }
+      else {
+        sub_input_.registerCallback(&ResizePointsPublisher::filter<pcl::PointXYZ>, this);
+      }
     }
     }
 
     ~ResizePointsPublisher() { }
 
-    void filter (const sensor_msgs::PointCloud2::ConstPtr &input) {
-      filter(input, PCLIndicesMsg::ConstPtr());
+    template<class T> void filter (const sensor_msgs::PointCloud2::ConstPtr &input) {
+      filter<T>(input, PCLIndicesMsg::ConstPtr());
     }
     
-    void filter (const sensor_msgs::PointCloud2::ConstPtr &input,
-                 const PCLIndicesMsg::ConstPtr &indices) {
-      pcl::PointCloud<pcl::PointXYZRGB> pcl_input_cloud, output;
+    template<class T> void filter (const sensor_msgs::PointCloud2::ConstPtr &input,
+                                   const PCLIndicesMsg::ConstPtr &indices) {
+      pcl::PointCloud<T> pcl_input_cloud, output;
       fromROSMsg(*input, pcl_input_cloud);
       boost::mutex::scoped_lock lock (mutex_);
       std::vector<int> ex_indices;
@@ -115,11 +124,11 @@ namespace jsk_pcl_ros
           }
         }
       }
-
-      extract_.setInputCloud (pcl_input_cloud.makeShared());
-      extract_.setIndices (boost::make_shared <std::vector<int> > (ex_indices));
-      extract_.setNegative (false);
-      extract_.filter (output);
+      pcl::ExtractIndices<T> extract;
+      extract.setInputCloud (pcl_input_cloud.makeShared());
+      extract.setIndices (boost::make_shared <std::vector<int> > (ex_indices));
+      extract.setNegative (false);
+      extract.filter (output);
 
       if (output.points.size() > 0) {
         sensor_msgs::PointCloud2 ros_out;

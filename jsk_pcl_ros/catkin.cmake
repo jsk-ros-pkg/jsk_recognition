@@ -29,7 +29,10 @@ find_package(catkin REQUIRED COMPONENTS
   eigen_conversions tf_conversions tf2_ros tf
   image_transport nodelet cv_bridge
   ${ML_CLASSIFIERS} sklearn jsk_topic_tools)
-find_package(PCL REQUIRED)
+# only run in hydro
+if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
+  find_package(PCL REQUIRED)
+endif(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
 find_package(OpenMP)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
@@ -171,10 +174,12 @@ jsk_pcl_nodelet(src/polygon_array_wrapper_nodelet.cpp
 jsk_pcl_nodelet(src/border_estimator_nodelet.cpp
   "jsk_pcl/BorderEstimator" "border_estimator")
 
-IF(${PCL_VERSION} VERSION_GREATER "1.7.1")
-  jsk_pcl_nodelet(src/organized_edge_detector_nodelet.cpp
-    "jsk_pcl/OrganizedEdgeDetector" "organized_edge_detector")
-ENDIF(${PCL_VERSION} VERSION_GREATER "1.7.1")
+if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
+  IF(${PCL_VERSION} VERSION_GREATER "1.7.1")
+    jsk_pcl_nodelet(src/organized_edge_detector_nodelet.cpp
+      "jsk_pcl/OrganizedEdgeDetector" "organized_edge_detector")
+  ENDIF(${PCL_VERSION} VERSION_GREATER "1.7.1")
+endif(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
 
 jsk_pcl_nodelet(src/edge_depth_refinement_nodelet.cpp
   "jsk_pcl/EdgeDepthRefinementr" "edge_depth_refinement")

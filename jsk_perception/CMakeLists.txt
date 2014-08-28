@@ -74,10 +74,10 @@ rosbuild_add_library (${PROJECT_NAME}
   )
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES})
 
-ADD_CUSTOM_COMMAND(
-  OUTPUT  ${CMAKE_SOURCE_DIR}/template
-  DEPENDS ${CMAKE_SOURCE_DIR}/src/eusmodel_template_gen.l
-  COMMAND ${CMAKE_SOURCE_DIR}/src/eusmodel_template_gen.sh)
-ADD_CUSTOM_TARGET(eusmodel_template ALL DEPENDS ${CMAKE_SOURCE_DIR}/template)
+# ADD_CUSTOM_COMMAND(
+#   OUTPUT  ${CMAKE_SOURCE_DIR}/template
+#   DEPENDS ${CMAKE_SOURCE_DIR}/src/eusmodel_template_gen.l
+#   COMMAND ${CMAKE_SOURCE_DIR}/src/eusmodel_template_gen.sh)
+# ADD_CUSTOM_TARGET(eusmodel_template ALL DEPENDS ${CMAKE_SOURCE_DIR}/template)
 
 rosbuild_add_rostest(test/sparse_image.test)

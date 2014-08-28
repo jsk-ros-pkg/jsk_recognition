@@ -79,10 +79,10 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_;
     ros::Publisher pub_nan_boundary_edges_indices_,
       pub_occluding_edges_indices_, pub_occluded_edges_indices_,
-      pub_curvature_edges_indices_, pub_rgb_edges_indices_;
+      pub_curvature_edges_indices_, pub_rgb_edges_indices_, pub_all_edges_indices_;
     ros::Publisher pub_nan_boundary_edges_,
       pub_occluding_edges_, pub_occluded_edges_,
-      pub_curvature_edges_, pub_rgb_edges_;
+      pub_curvature_edges_, pub_rgb_edges_, pub_all_edges_;
     ros::Publisher pub_normal_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
@@ -100,6 +100,11 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     double depth_discontinuation_threshold_;
     int max_search_neighbors_;
+    bool use_nan_boundary_;
+    bool use_occluding_;
+    bool use_occluded_;
+    bool use_curvature_;
+    bool use_rgb_;
     
   private:
     

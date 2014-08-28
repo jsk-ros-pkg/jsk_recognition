@@ -38,6 +38,7 @@
 
 #include <pcl/features/organized_edge_detection.h>
 #include <pcl/features/integral_image_normal.h>
+#include "jsk_pcl_ros/pcl_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -57,7 +58,8 @@ namespace jsk_pcl_ros
       = pnh_->advertise<PCLIndicesMsg>("output_curvature_edge_indices", 1);
     pub_rgb_edges_indices_
       = pnh_->advertise<PCLIndicesMsg>("output_rgb_edge_indices", 1);
-    
+    pub_all_edges_indices_
+      = pnh_->advertise<PCLIndicesMsg>("output_indices", 1);
     ////////////////////////////////////////////////////////
     // pointcloud publishers
     ////////////////////////////////////////////////////////
@@ -72,7 +74,8 @@ namespace jsk_pcl_ros
       = pnh_->advertise<sensor_msgs::PointCloud2>("output_curvature_edge", 1);
     pub_rgb_edges_
       = pnh_->advertise<sensor_msgs::PointCloud2>("output_rgb_edge", 1);
-
+    pub_all_edges_
+      = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
     ////////////////////////////////////////////////////////
     // setup dynamic reconfigure
     ////////////////////////////////////////////////////////
@@ -136,6 +139,11 @@ namespace jsk_pcl_ros
     max_search_neighbors_ = config.max_search_neighbors;
     depth_discontinuation_threshold_ = config.depth_discontinuation_threshold;
     publish_normal_ = config.publish_normal;
+    use_nan_boundary_ = config.use_nan_boundary;
+    use_occluding_ = config.use_occluding;
+    use_occluded_ = config.use_occluded;
+    use_curvature_ = config.use_curvature;
+    use_rgb_ = config.use_rgb;
   }
   
   void OrganizedEdgeDetector::estimateEdge(
@@ -147,9 +155,23 @@ namespace jsk_pcl_ros
     pcl::OrganizedEdgeFromRGBNormals<PointT, pcl::Normal, pcl::Label> oed;
     oed.setDepthDisconThreshold (depth_discontinuation_threshold_);
     oed.setMaxSearchNeighbors (max_search_neighbors_);
-    oed.setEdgeType (oed.EDGELABEL_NAN_BOUNDARY | oed.EDGELABEL_OCCLUDING | oed.EDGELABEL_OCCLUDED | oed.EDGELABEL_HIGH_CURVATURE | oed.EDGELABEL_RGB_CANNY);
-    //oed.setEdgeType (oed.EDGELABEL_NAN_BOUNDARY | oed.EDGELABEL_OCCLUDING | oed.EDGELABEL_OCCLUDED);
-    
+    int flags = 0;
+    if (use_nan_boundary_) {
+      flags |= oed.EDGELABEL_NAN_BOUNDARY;
+    }
+    if (use_occluding_) {
+      flags |= oed.EDGELABEL_OCCLUDING;
+    }
+    if (use_occluded_) {
+      flags |= oed.EDGELABEL_OCCLUDED;
+    }
+    if (use_curvature_) {
+      flags |= oed.EDGELABEL_HIGH_CURVATURE;
+    }
+    if (use_rgb_) {
+      flags |= oed.EDGELABEL_RGB_CANNY;
+    }
+    oed.setEdgeType (flags);
     oed.setInputNormals(normal);
     oed.setInputCloud(input);
     oed.compute(*output, label_indices);
@@ -198,7 +220,21 @@ namespace jsk_pcl_ros
     
     estimateNormal(cloud, normal, msg->header);
     estimateEdge(cloud, normal, label, label_indices);
+    ////////////////////////////////////////////////////////
+    // build indices includes all the indices
+    ////////////////////////////////////////////////////////
+    std::vector<int> tmp1 = addIndices(label_indices[0].indices,
+                                       label_indices[1].indices);
+    std::vector<int> tmp2 = addIndices(tmp1,
+                                       label_indices[2].indices);
+    std::vector<int> tmp3 = addIndices(tmp2,
+                                       label_indices[3].indices);
+    std::vector<int> all = addIndices(tmp3,
+                                       label_indices[4].indices);
     
+    ////////////////////////////////////////////////////////
+    // publish result
+    ////////////////////////////////////////////////////////
     publishIndices(pub_nan_boundary_edges_, pub_nan_boundary_edges_indices_,
                    cloud,
                    label_indices[0].indices, msg->header);
@@ -214,6 +250,9 @@ namespace jsk_pcl_ros
     publishIndices(pub_rgb_edges_, pub_rgb_edges_indices_,
                    cloud,
                    label_indices[4].indices, msg->header);
+    publishIndices(pub_all_edges_, pub_all_edges_indices_,
+                   cloud,
+                   all, msg->header);
   }
 }
 

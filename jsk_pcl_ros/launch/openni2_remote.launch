@@ -48,14 +48,15 @@
             name="relay_camera_info"
             args="/camera/depth/camera_info /camera_remote/depth/camera_info" />
     </group>
-    <!--            -->
-    <!-- downsample -->
-    <!--            -->
+    <!--                       -->
+    <!-- downsample pointcloud -->
+    <!--                       -->
     <node pkg="nodelet"
           type="nodelet"
           name="depth_registered_half"
           args="load jsk_pcl/ResizePointsPublisher camera_remote_nodelet_manager">
       <remap from="~input" to="depth_registered/points" />
+      <remap from="~output" to="~points" />
       <param name="step_x" value="2" />
       <param name="step_y" value="2" />
     </node>
@@ -64,6 +65,7 @@
           name="depth_half"
           args="load jsk_pcl/ResizePointsPublisher camera_remote_nodelet_manager">
       <remap from="~input" to="depth/points" />
+      <remap from="~output" to="~points" />
       <param name="not_use_rgb" value="true" />
       <param name="step_x" value="2" />
       <param name="step_y" value="2" />
@@ -73,6 +75,7 @@
           name="depth_registered_quater"
           args="load jsk_pcl/ResizePointsPublisher camera_remote_nodelet_manager">
       <remap from="~input" to="depth_registered/points" />
+      <remap from="~output" to="~points" />
       <param name="step_x" value="4" />
       <param name="step_y" value="4" />
     </node>
@@ -81,9 +84,31 @@
           name="depth_quater"
           args="load jsk_pcl/ResizePointsPublisher camera_remote_nodelet_manager">
       <remap from="~input" to="depth/points" />
+      <remap from="~output" to="~points" />
       <param name="not_use_rgb" value="true" />
       <param name="step_x" value="4" />
       <param name="step_y" value="4" />
+    </node>
+    <!--            -->
+    <!-- resize rgb -->
+    <!--            -->
+    <node pkg="nodelet"
+          type="nodelet"
+          name="rgb_half"
+          args="load resized_image_transport/ImageResizer camera_remote_nodelet_manager">
+      <param name="resize_scale_x" value="0.5" />
+      <param name="resize_scale_y" value="0.5" />
+      <remap from="~input/image" to="rgb/image_rect_color" />
+      <remap from="~output/image" to="~image_rect_color" />
+    </node>
+    <node pkg="nodelet"
+          type="nodelet"
+          name="rgb_quater"
+          args="load resized_image_transport/ImageResizer camera_remote_nodelet_manager">
+      <param name="resize_scale_x" value="0.25" />
+      <param name="resize_scale_y" value="0.25" />
+      <remap from="~input/image" to="rgb/image_rect_color" />
+      <remap from="~output/image" to="~image_rect_color" />
     </node>
   </group>
   

@@ -41,6 +41,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <jsk_pcl_ros/OrganizedEdgeDetectorConfig.h>
 #include <dynamic_reconfigure/server.h>
+#include <image_transport/image_transport.h>
 
 namespace jsk_pcl_ros
 {
@@ -72,7 +73,16 @@ namespace jsk_pcl_ros
       const pcl::PointCloud<PointT>::Ptr& cloud,
       const std::vector<int>& indices,
       const std_msgs::Header& header);
-    
+    virtual void estimateStraightEdges(
+      const pcl::PointCloud<PointT>::Ptr& cloud,
+      const std::vector<int>& indices,
+      const std_msgs::Header& header,
+      std::vector<std::vector<int> >& output_indices);
+    virtual void publishStraightEdges(
+      const pcl::PointCloud<PointT>::Ptr& cloud,
+      const std_msgs::Header& header,
+      const std::vector<std::vector<int> > indices);
+
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
@@ -84,6 +94,8 @@ namespace jsk_pcl_ros
       pub_occluding_edges_, pub_occluded_edges_,
       pub_curvature_edges_, pub_rgb_edges_, pub_all_edges_;
     ros::Publisher pub_normal_;
+    ros::Publisher pub_straight_edges_indices_;
+    image_transport::Publisher pub_edge_image_, pub_hough_image_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
     ////////////////////////////////////////////////////////
@@ -106,6 +118,17 @@ namespace jsk_pcl_ros
     bool use_curvature_;
     bool use_rgb_;
     
+    ////////////////////////////////////////////////////////
+    // straight line detection
+    ////////////////////////////////////////////////////////
+    bool use_straightline_detection_;
+    double rho_;
+    double theta_;
+    int    straightline_threshold_;
+    double min_line_length_;
+    double max_line_gap_;
+    bool publish_debug_image_;
+
   private:
     
   };

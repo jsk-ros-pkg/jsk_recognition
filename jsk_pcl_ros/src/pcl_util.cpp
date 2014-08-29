@@ -34,9 +34,20 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/pcl_util.h"
+#include <set>
 
 namespace jsk_pcl_ros
 {
+  std::vector<int> addIndices(const std::vector<int>& a,
+                              const std::vector<int>& b)
+  {
+    std::set<int> all(b.begin(), b.end());
+    for (size_t i = 0; i < a.size(); i++) {
+      all.insert(a[i]);
+    }
+    return std::vector<int>(all.begin(), all.end());
+  }
+
   void Counter::add(double v)
   {
     acc_(v);
@@ -66,7 +77,5 @@ namespace jsk_pcl_ros
   {
     return boost::accumulators::variance(acc_);
   }
-
-
 }
 

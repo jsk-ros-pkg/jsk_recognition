@@ -48,6 +48,9 @@
 
 namespace jsk_pcl_ros
 {
+  std::vector<int> addIndices(const std::vector<int>& a,
+                              const std::vector<int>& b);
+
   class Counter
   {
   public:

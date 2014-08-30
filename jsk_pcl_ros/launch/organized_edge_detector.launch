@@ -4,6 +4,11 @@
         args="load jsk_pcl/OrganizedEdgeDetector /edge_manager">
     <remap from="~input" to="/camera_remote/depth_registered/points" />
   </node>
+  <node pkg="nodelet" type="nodelet" name="edge_refinement"
+        args="load jsk_pcl/EdgeDepthRefinement /edge_manager">
+    <remap from="~input" to="/camera_remote/depth_registered/points" />
+    <remap from="~input_indices" to="/edge_detector/output_straight_edges_indices" />
+  </node>
   <node pkg="nodelet" type="nodelet" name="straight_edge_decomposer"
         args="load jsk_pcl/ClusterPointIndicesDecomposer /edge_manager">
     <remap from="~input" to="/camera_remote/depth_registered/points" />
@@ -14,4 +19,14 @@
     </rosparam>
   </node>
 
+  <node pkg="nodelet" type="nodelet" name="refined_straight_edge_decomposer"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer /edge_manager">
+    <remap from="~input" to="/camera_remote/depth_registered/points" />
+    <remap from="~target" to="/edge_refinement/output" />
+    <rosparam>
+      publish_tf: false
+      publish_clouds: false
+    </rosparam>
+  </node>
+  
 </launch>

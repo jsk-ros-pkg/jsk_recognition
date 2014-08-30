@@ -126,11 +126,41 @@ target_link_libraries(freenect2_nodelet
   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(freenect2_nodelet ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 
-###########
-## Build ##
-###########
 
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
-# include_directories(include)
+# install
+install(DIRECTORY
+  include/${PROJECT_NAME}/
+  ${CATKIN_DEVEL_PREFIX}/include/libusb-1.0
+  ${CATKIN_DEVEL_PREFIX}/include/GL
+  ${CATKIN_DEVEL_PREFIX}/include/GLFW
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+install(DIRECTORY config launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+install(FILES nodelet.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
+install(
+  TARGETS freenect2 freenect2_nodelet driver
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
+
+install(FILES
+  ${CATKIN_DEVEL_PREFIX}/lib/libusb-1.0.a
+  ${CATKIN_DEVEL_PREFIX}/lib/libusb-1.0.la
+  ${CATKIN_DEVEL_PREFIX}/lib/libusb-1.0.so
+  ${CATKIN_DEVEL_PREFIX}/lib/libusb-1.0.so.0
+  ${CATKIN_DEVEL_PREFIX}/lib/libusb-1.0.so.0.1.0
+  ${CATKIN_DEVEL_PREFIX}/lib/libglfw.so
+  ${CATKIN_DEVEL_PREFIX}/lib/libglfw.so.3
+  ${CATKIN_DEVEL_PREFIX}/lib/libglfw.so.3.0
+  ${CATKIN_DEVEL_PREFIX}/lib64/libGLEW.a
+  ${CATKIN_DEVEL_PREFIX}/lib64/libGLEWmx.a
+  ${CATKIN_DEVEL_PREFIX}/lib64/libGLEWmx.so
+  ${CATKIN_DEVEL_PREFIX}/lib64/libGLEWmx.so.1.11
+  ${CATKIN_DEVEL_PREFIX}/lib64/libGLEWmx.so.1.11.0
+  ${CATKIN_DEVEL_PREFIX}/lib64/libGLEW.so
+  ${CATKIN_DEVEL_PREFIX}/lib64/libGLEW.so.1.11
+  ${CATKIN_DEVEL_PREFIX}/lib64/libGLEW.so.1.11.0
+  DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
+
+# pkgconfig is left not installed
 

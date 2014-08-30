@@ -33,49 +33,45 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/pcl_util.h"
-#include <set>
+
+#ifndef JSK_PCL_ROS_EDGE_DEPTH_REFINEMENT_H_
+#define JSK_PCL_ROS_EDGE_DEPTH_REFINEMENT_H_
+
+#include <pcl_ros/pcl_nodelet.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <jsk_pcl_ros/ClusterPointIndices.h>
+
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
 
 namespace jsk_pcl_ros
 {
-  std::vector<int> addIndices(const std::vector<int>& a,
-                              const std::vector<int>& b)
+  class EdgeDepthRefinement: public pcl_ros::PCLNodelet
   {
-    std::set<int> all(b.begin(), b.end());
-    for (size_t i = 0; i < a.size(); i++) {
-      all.insert(a[i]);
-    }
-    return std::vector<int>(all.begin(), all.end());
-  }
-
-  void Counter::add(double v)
-  {
-    acc_(v);
-  }
-  
-  double Counter::mean()
-  {
-    return boost::accumulators::mean(acc_);
-  }
-
-  double Counter::min()
-  {
-    return boost::accumulators::min(acc_);
-  }
-
-  double Counter::max()
-  {
-    return boost::accumulators::max(acc_);
-  }
-
-  int Counter::count()
-  {
-    return boost::accumulators::count(acc_);
-  }
-  
-  double Counter::variance()
-  {
-    return boost::accumulators::variance(acc_);
-  }
+  public:
+    typedef message_filters::sync_policies::ExactTime<
+    sensor_msgs::PointCloud2,
+    jsk_pcl_ros::ClusterPointIndices > SyncPolicy;
+    typedef pcl::PointXYZRGB PointT;
+  protected:
+    ////////////////////////////////////////////////////////
+    // methods
+    ////////////////////////////////////////////////////////
+    virtual void onInit();
+    virtual void refine(
+      const sensor_msgs::PointCloud2ConstPtr &point,
+      const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices);
+    ////////////////////////////////////////////////////////
+    // ROS variables
+    ////////////////////////////////////////////////////////
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
+    message_filters::Subscriber<jsk_pcl_ros::ClusterPointIndices> sub_indices_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    ros::Publisher pub_indices_;
+  private:
+    
+  };
 }
 
+#endif

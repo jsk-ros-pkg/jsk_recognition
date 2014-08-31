@@ -113,6 +113,8 @@ jsk_pcl_nodelet(src/polygon_array_wrapper_nodelet.cpp
   "jsk_pcl/PolygonArrayWrapper" "polygon_array_wrapper")
 jsk_pcl_nodelet(src/border_estimator_nodelet.cpp
   "jsk_pcl/BorderEstimator" "border_estimator")
+jsk_pcl_nodelet(src/edge_depth_refinement_nodelet.cpp
+  "jsk_pcl/EdgeDepthRefinementr" "edge_depth_refinement")
 
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}

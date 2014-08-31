@@ -181,6 +181,9 @@ if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
   ENDIF(${PCL_VERSION} VERSION_GREATER "1.7.1")
 endif(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
 
+jsk_pcl_nodelet(src/edge_depth_refinement_nodelet.cpp
+  "jsk_pcl/EdgeDepthRefinementr" "edge_depth_refinement")
+
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
   src/pcl_conversion_util.cpp src/pcl_util.cpp)

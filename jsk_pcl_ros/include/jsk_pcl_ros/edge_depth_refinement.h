@@ -45,6 +45,12 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_pcl_ros/geo_util.h"
+#include <jsk_pcl_ros/EdgeDepthRefinementConfig.h>
+#include <dynamic_reconfigure/server.h>
+#include <boost/tuple/tuple.hpp>
+
 namespace jsk_pcl_ros
 {
   class EdgeDepthRefinement: public pcl_ros::PCLNodelet
@@ -54,21 +60,87 @@ namespace jsk_pcl_ros
     sensor_msgs::PointCloud2,
     jsk_pcl_ros::ClusterPointIndices > SyncPolicy;
     typedef pcl::PointXYZRGB PointT;
+    typedef jsk_pcl_ros::EdgeDepthRefinementConfig Config;
   protected:
     ////////////////////////////////////////////////////////
     // methods
     ////////////////////////////////////////////////////////
     virtual void onInit();
+    
     virtual void refine(
       const sensor_msgs::PointCloud2ConstPtr &point,
       const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices);
+    
+    virtual void removeOutliersByLine(
+      const pcl::PointCloud<PointT>::Ptr& cloud,
+      const std::vector<int>& indices,
+      pcl::PointIndices& inliers,
+      pcl::ModelCoefficients& coefficients);
+    
+    virtual void removeOutliers(
+      const pcl::PointCloud<PointT>::Ptr& cloud,
+      const std::vector<PCLIndicesMsg>& indices,
+      std::vector<pcl::PointIndices::Ptr>& output_inliers,
+      std::vector<pcl::ModelCoefficients::Ptr>& output_coefficients);
+    
+    virtual void removeDuplicatedEdges(
+      const pcl::PointCloud<PointT>::Ptr& cloud,
+      const std::vector<pcl::PointIndices::Ptr> inliers,
+      const std::vector<pcl::ModelCoefficients::Ptr> coefficients,
+      std::vector<pcl::PointIndices::Ptr>& output_inliers,
+      std::vector<pcl::ModelCoefficients::Ptr>& output_coefficients);
+    
+    virtual Line::Ptr lineFromCoefficients(
+      const pcl::ModelCoefficients::Ptr coefficients);
+    
+    virtual Segment::Ptr segmentFromIndices(
+      const pcl::PointCloud<PointT>::Ptr& cloud,
+      const std::vector<int>& indices,
+      const Line::Ptr& line);
+    
+    virtual void publishIndices(
+      ros::Publisher& pub,
+      const std::vector<pcl::PointIndices::Ptr> inliers,
+      const std::vector<pcl::ModelCoefficients::Ptr> coefficients,
+      const std_msgs::Header& header);
+    
+    virtual boost::tuple<int, int> findMinMaxIndex(
+      const int width, const int height,
+      const std::vector<int>& indices);
+    
+    virtual void buildDuplicationSetRecursive(
+      std::map<int, std::vector<int> >& duplication_map,
+      const int from_index,
+      std::vector<int>& to_indices,
+      std::set<int>& output_set);
+    
+    virtual void integrateDuplicatedIndices(
+      const pcl::PointCloud<PointT>::Ptr& cloud,
+      const std::set<int>& duplicated_set,
+      const std::vector<pcl::PointIndices::Ptr> all_inliers,
+      pcl::PointIndices::Ptr& output_indices);
+    
+    virtual void configCallback (Config &config, uint32_t level);
+    
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<jsk_pcl_ros::ClusterPointIndices> sub_indices_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
-    ros::Publisher pub_indices_;
+    ros::Publisher pub_indices_, pub_outlier_removed_indices_;
+    boost::mutex mutex_;
+    ////////////////////////////////////////////////////////
+    // outlier removal
+    ////////////////////////////////////////////////////////
+    double outlier_distance_threshold_;
+    int min_inliers_;
+    ////////////////////////////////////////////////////////
+    // duplication removal
+    ////////////////////////////////////////////////////////
+    double duplication_angle_threshold_;
+    double duplication_distance_threshold_;
   private:
     
   };

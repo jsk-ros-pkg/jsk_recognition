@@ -71,6 +71,7 @@ generate_dynamic_reconfigure_options(
   cfg/ColorHistogramMatcher.cfg
   cfg/GridSampler.cfg
   cfg/OrganizedEdgeDetector.cfg
+  cfg/EdgeDepthRefinement.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)

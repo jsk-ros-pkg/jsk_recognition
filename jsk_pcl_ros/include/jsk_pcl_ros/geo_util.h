@@ -62,7 +62,9 @@ namespace jsk_pcl_ros
     virtual void getDirection(Eigen::Vector3f& output);
     virtual double distanceToPoint(const Eigen::Vector3f& from);
     virtual double distanceToPoint(const Eigen::Vector3f& from, Eigen::Vector3f& foot);
+    virtual double distance(const Line& other);
     virtual void foot(const Eigen::Vector3f& point, Eigen::Vector3f& output);
+    virtual double angle(const Line& other);
   protected:
     Eigen::Vector3f direction_;
     Eigen::Vector3f origin_;
@@ -76,6 +78,8 @@ namespace jsk_pcl_ros
     Segment(const Eigen::Vector3f& from, const Eigen::Vector3f to);
     virtual void foot(const Eigen::Vector3f& point, Eigen::Vector3f& output);
     virtual double dividingRatio(const Eigen::Vector3f& point);
+    virtual double distance(const Eigen::Vector3f& point);
+    //virtual double distance(const Segment& other);
   protected:
     Eigen::Vector3f from_, to_;
   private:

@@ -50,7 +50,8 @@ add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg
   SparseOccupancyGridColumn.msg
   SparseOccupancyGrid.msg
   SparseOccupancyGridArray.msg
-  DepthErrorResult.msg)
+  DepthErrorResult.msg
+  ParallelEdge.msg ParallelEdgeArray.msg)
 add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv SetPointCloud2.srv
   CallSnapIt.srv CallPolygon.srv
   EnvironmentLock.srv
@@ -72,6 +73,7 @@ generate_dynamic_reconfigure_options(
   cfg/GridSampler.cfg
   cfg/OrganizedEdgeDetector.cfg
   cfg/EdgeDepthRefinement.cfg
+  cfg/ParallelEdgeFinder.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -183,7 +185,9 @@ if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
 endif(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
 
 jsk_pcl_nodelet(src/edge_depth_refinement_nodelet.cpp
-  "jsk_pcl/EdgeDepthRefinementr" "edge_depth_refinement")
+  "jsk_pcl/EdgeDepthRefinement" "edge_depth_refinement")
+jsk_pcl_nodelet(src/parallel_edge_finder_nodelet.cpp
+  "jsk_pcl/ParallelEdgeFinder" "parallel_edge_finder")
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp

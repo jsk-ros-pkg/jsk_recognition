@@ -108,12 +108,6 @@ namespace jsk_pcl_ros
       const int width, const int height,
       const std::vector<int>& indices);
     
-    virtual void buildDuplicationSetRecursive(
-      std::map<int, std::vector<int> >& duplication_map,
-      const int from_index,
-      std::vector<int>& to_indices,
-      std::set<int>& output_set);
-    
     virtual void integrateDuplicatedIndices(
       const pcl::PointCloud<PointT>::Ptr& cloud,
       const std::set<int>& duplicated_set,

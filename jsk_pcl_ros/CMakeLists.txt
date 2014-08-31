@@ -115,6 +115,8 @@ jsk_pcl_nodelet(src/border_estimator_nodelet.cpp
   "jsk_pcl/BorderEstimator" "border_estimator")
 jsk_pcl_nodelet(src/edge_depth_refinement_nodelet.cpp
   "jsk_pcl/EdgeDepthRefinementr" "edge_depth_refinement")
+jsk_pcl_nodelet(src/parallel_edge_finder_nodelet.cpp
+  "jsk_pcl/ParallelEdgeFinder" "parallel_edge_finder")
 
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}

@@ -77,5 +77,37 @@ namespace jsk_pcl_ros
   {
     return boost::accumulators::variance(acc_);
   }
+
+  void buildGroupFromGraphMap(std::map<int, std::vector<int> > graph_map,
+                              const int from_index,
+                              std::vector<int>& to_indices,
+                              std::set<int>& output_set)
+  {
+    output_set.insert(from_index);
+    for (size_t i = 0; i < to_indices.size(); i++) {
+      int to_index = to_indices[i];
+      if (output_set.find(to_index) == output_set.end()) {
+        output_set.insert(to_index);
+        std::vector<int> next_indices = graph_map[to_index];
+        buildGroupFromGraphMap(graph_map,
+                               to_index,
+                               next_indices,
+                               output_set);
+      }
+    }
+  }
+
+  template <class T>
+  void addSet(std::set<T>& output,
+              const std::set<T>& new_set)
+  {
+    typedef typename std::set<T> Set;
+    typedef typename Set::iterator Iterator;
+    for (Iterator it = new_set.begin();
+         it != new_set.end();
+         ++it) {
+      output.insert(*it);
+    }
+  }
 }
 

@@ -65,6 +65,7 @@ namespace jsk_pcl_ros
     virtual double distance(const Line& other);
     virtual void foot(const Eigen::Vector3f& point, Eigen::Vector3f& output);
     virtual double angle(const Line& other);
+    virtual bool isParallel(const Line& other, double angle_threshold = 0.1);
   protected:
     Eigen::Vector3f direction_;
     Eigen::Vector3f origin_;

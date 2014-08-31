@@ -161,27 +161,6 @@ namespace jsk_pcl_ros
     return segment;
   }
 
-  void EdgeDepthRefinement::buildDuplicationSetRecursive(
-    std::map<int, std::vector<int> >& duplication_map,
-    const int from_index,
-    std::vector<int>& to_indices,
-    std::set<int>& output_set)
-  {
-    output_set.insert(from_index);
-    for (size_t i = 0; i < to_indices.size(); i++) {
-      int to_index = to_indices[i];
-      if (output_set.find(to_index) == output_set.end()) {
-        output_set.insert(to_index);
-        std::vector<int> next_indices = duplication_map[to_index];
-        buildDuplicationSetRecursive(duplication_map,
-                                     to_index,
-                                     next_indices,
-                                     output_set);
-      }
-    }
-    
-  }
-
   void EdgeDepthRefinement::integrateDuplicatedIndices(
     const pcl::PointCloud<PointT>::Ptr& cloud,
     const std::set<int>& duplicated_set,
@@ -263,17 +242,13 @@ namespace jsk_pcl_ros
         }
         else {
           std::set<int> new_duplication_set;
-          buildDuplicationSetRecursive(duplication_map,
-                                       i,
-                                       duplication_list,
-                                       new_duplication_set);
+          buildGroupFromGraphMap(duplication_map,
+                                 i,
+                                 duplication_list,
+                                 new_duplication_set);
           duplication_set_list.push_back(new_duplication_set);
           // add new_duplication_set to duplicated_indices
-          for (std::set<int>::iterator it = new_duplication_set.begin();
-               it != new_duplication_set.end();
-               ++it) {
-            duplicated_indices.insert(*it);
-          }
+          addSet(duplicated_indices, new_duplication_set);
         }
       }
     }

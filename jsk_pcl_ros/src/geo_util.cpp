@@ -97,6 +97,11 @@ namespace jsk_pcl_ros
     }
   }
 
+  bool Line::isParallel(const Line& other, double angle_threshold)
+  {
+    return angle(other) < angle_threshold;
+  }
+
   double Line::distance(const Line& other)
   {
     Eigen::Vector3f v12 = (other.origin_ - origin_);

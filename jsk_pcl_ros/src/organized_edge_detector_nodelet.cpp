@@ -39,6 +39,11 @@
 #include <pcl/features/organized_edge_detection.h>
 #include <pcl/features/integral_image_normal.h>
 #include "jsk_pcl_ros/pcl_util.h"
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+
+#include <opencv2/opencv.hpp>
+#include <jsk_pcl_ros/ClusterPointIndices.h>
 
 namespace jsk_pcl_ros
 {
@@ -60,6 +65,9 @@ namespace jsk_pcl_ros
       = pnh_->advertise<PCLIndicesMsg>("output_rgb_edge_indices", 1);
     pub_all_edges_indices_
       = pnh_->advertise<PCLIndicesMsg>("output_indices", 1);
+    pub_straight_edges_indices_
+      = pnh_->advertise<jsk_pcl_ros::ClusterPointIndices>(
+        "output_straight_edges_indices", 1);
     ////////////////////////////////////////////////////////
     // pointcloud publishers
     ////////////////////////////////////////////////////////
@@ -76,6 +84,12 @@ namespace jsk_pcl_ros
       = pnh_->advertise<sensor_msgs::PointCloud2>("output_rgb_edge", 1);
     pub_all_edges_
       = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
+    ////////////////////////////////////////////////////////
+    // image publishers
+    ////////////////////////////////////////////////////////
+    image_transport::ImageTransport it(*pnh_);
+    pub_edge_image_ = it.advertise("edge_image", 1);
+    pub_hough_image_ = it.advertise("hough_image", 1);
     ////////////////////////////////////////////////////////
     // setup dynamic reconfigure
     ////////////////////////////////////////////////////////
@@ -144,6 +158,13 @@ namespace jsk_pcl_ros
     use_occluded_ = config.use_occluded;
     use_curvature_ = config.use_curvature;
     use_rgb_ = config.use_rgb;
+    use_straightline_detection_ = config.use_straightline_detection;
+    rho_ = config.rho;
+    theta_ = config.theta;
+    straightline_threshold_ = config.straightline_threshold;
+    min_line_length_ = config.min_line_length;
+    max_line_gap_ = config.max_line_gap;
+    publish_debug_image_ = config.publish_debug_image;
   }
   
   void OrganizedEdgeDetector::estimateEdge(
@@ -196,12 +217,86 @@ namespace jsk_pcl_ros
     // publish cloud
     ////////////////////////////////////////////////////////
     pcl::PointCloud<PointT>::Ptr output(new pcl::PointCloud<PointT>);
-    ROS_INFO("%lu points", indices.size());
     pcl::copyPointCloud(*cloud, indices, *output);
     sensor_msgs::PointCloud2 ros_output;
     pcl::toROSMsg(*output, ros_output);
     ros_output.header = header;
     pub.publish(ros_output);
+  }
+
+  void OrganizedEdgeDetector::publishStraightEdges(
+    const pcl::PointCloud<PointT>::Ptr& cloud,
+    const std_msgs::Header& header,
+    const std::vector<std::vector<int> > indices)
+  {
+    // output as cluster indices
+    jsk_pcl_ros::ClusterPointIndices ros_msg;
+    ros_msg.header = header;
+    ros_msg.cluster_indices.resize(indices.size());
+    for (size_t i = 0; i < indices.size(); i++) {
+      PCLIndicesMsg ros_indices;
+      ros_indices.header = header;
+      ros_indices.indices = indices[i];
+      ros_msg.cluster_indices[i] = ros_indices;
+    }
+    pub_straight_edges_indices_.publish(ros_msg);
+  }
+  
+  void OrganizedEdgeDetector::estimateStraightEdges(
+    const pcl::PointCloud<PointT>::Ptr& cloud,
+    const std::vector<int>& indices,
+    const std_msgs::Header& header,
+    std::vector<std::vector<int> >& output_indices)
+  {
+    // initialize all the value by 0
+    cv::Mat mat = cv::Mat(cloud->height, cloud->width, CV_8UC1) * 0;
+    for (size_t i = 0; i < indices.size(); i++) {
+      int index = indices[i];
+      int index_height = index / cloud->width;
+      int index_width = index % cloud->width;
+      mat.data[index_height * mat.step + index_width * mat.elemSize()] = 255;
+    }
+    
+    std::vector<cv::Vec4i> lines;
+    cv::HoughLinesP(mat, lines, rho_, theta_ * CV_PI/180,
+                    straightline_threshold_, min_line_length_, max_line_gap_);
+    output_indices.resize(lines.size());
+    std::set<int> all_indices_set(indices.begin(), indices.end());
+    for (size_t i_line = 0; i_line < lines.size(); i_line++) {
+      std::vector<int> pixels;
+      cv::LineIterator it(mat,
+                          cv::Point(lines[i_line][0], lines[i_line][1]),
+                          cv::Point(lines[i_line][2], lines[i_line][3]), 4);
+      for(int i_pixel = 0; i_pixel < it.count; i_pixel++, ++it) {
+        cv::Point point = it.pos();
+        int flatten_index = point.x + point.y * cloud->width;
+        // check if flatten_index is included in indices or not
+        if (all_indices_set.find(flatten_index) != all_indices_set.end()) {
+          pixels.push_back(flatten_index);
+        }
+      }
+      output_indices[i_line] = pixels;
+    }
+    if (publish_debug_image_) {
+      cv::Mat color_dst;
+      cv::cvtColor(mat, color_dst, CV_GRAY2BGR );
+      for( size_t i = 0; i < lines.size(); i++ )
+      {
+        cv::line( color_dst,
+                  cv::Point(lines[i][0], lines[i][1]),
+                  cv::Point(lines[i][2], lines[i][3]), cv::Scalar(0,0,255), 3, 8);
+      }
+      sensor_msgs::Image::Ptr ros_edge_image
+        = cv_bridge::CvImage(header,
+                             sensor_msgs::image_encodings::MONO8,
+                             mat).toImageMsg();
+      pub_edge_image_.publish(ros_edge_image);
+      sensor_msgs::Image::Ptr ros_hough_image
+        = cv_bridge::CvImage(header,
+                             sensor_msgs::image_encodings::BGR8,
+                             color_dst).toImageMsg();
+      pub_hough_image_.publish(ros_hough_image);
+    }
   }
   
   void OrganizedEdgeDetector::estimate(
@@ -231,7 +326,12 @@ namespace jsk_pcl_ros
                                        label_indices[3].indices);
     std::vector<int> all = addIndices(tmp3,
                                        label_indices[4].indices);
-    
+    if (use_straightline_detection_) {
+      std::vector<std::vector<int> > straightline_indices;
+      estimateStraightEdges(cloud, all, msg->header, straightline_indices);
+      // publish the result
+      publishStraightEdges(cloud, msg->header, straightline_indices);
+    }
     ////////////////////////////////////////////////////////
     // publish result
     ////////////////////////////////////////////////////////

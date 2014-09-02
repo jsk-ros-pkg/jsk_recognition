@@ -1,5 +1,6 @@
 <launch>
-  <node pkg="nodelet" type="nodelet" name="edge_manager" args="manager" output="screen"/>
+  <node pkg="nodelet" type="nodelet" name="edge_manager" args="manager" output="screen"
+        />
   <node pkg="nodelet" type="nodelet" name="edge_detector"
         args="load jsk_pcl/OrganizedEdgeDetector /edge_manager">
     <remap from="~input" to="/camera_remote/depth_registered/points" />
@@ -8,6 +9,11 @@
         args="load jsk_pcl/EdgeDepthRefinement /edge_manager">
     <remap from="~input" to="/camera_remote/depth_registered/points" />
     <remap from="~input_indices" to="/edge_detector/output_straight_edges_indices" />
+  </node>
+  <node pkg="nodelet" type="nodelet" name="parallel_edge"
+        args="load jsk_pcl/ParallelEdgeFinder /edge_manager">
+    <remap from="~input_indices" to="edge_refinement/output" />
+    <remap from="~input_coefficients" to="edge_refinement/output_coefficients" />
   </node>
   <node pkg="nodelet" type="nodelet" name="straight_edge_decomposer"
         args="load jsk_pcl/ClusterPointIndicesDecomposer /edge_manager">
@@ -23,6 +29,15 @@
         args="load jsk_pcl/ClusterPointIndicesDecomposer /edge_manager">
     <remap from="~input" to="/camera_remote/depth_registered/points" />
     <remap from="~target" to="/edge_refinement/output" />
+    <rosparam>
+      publish_tf: false
+      publish_clouds: false
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="parallel_edge_decomposer"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer /edge_manager">
+    <remap from="~input" to="/camera_remote/depth_registered/points" />
+    <remap from="~target" to="/parallel_edge/output_clusters" />
     <rosparam>
       publish_tf: false
       publish_clouds: false

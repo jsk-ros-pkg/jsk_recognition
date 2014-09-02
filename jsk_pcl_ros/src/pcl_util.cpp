@@ -96,18 +96,5 @@ namespace jsk_pcl_ros
       }
     }
   }
-
-  template <class T>
-  void addSet(std::set<T>& output,
-              const std::set<T>& new_set)
-  {
-    typedef typename std::set<T> Set;
-    typedef typename Set::iterator Iterator;
-    for (Iterator it = new_set.begin();
-         it != new_set.end();
-         ++it) {
-      output.insert(*it);
-    }
-  }
 }
 

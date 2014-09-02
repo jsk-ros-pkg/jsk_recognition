@@ -95,9 +95,19 @@ namespace jsk_pcl_ros
                               const int from_index,
                               std::vector<int>& to_indices,
                               std::set<int>& output_set);
+  
   template <class T>
   void addSet(std::set<T>& output,
-              const std::set<T>& new_set);
+              const std::set<T>& new_set)
+  {
+    typedef typename std::set<T> Set;
+    typedef typename Set::iterator Iterator;
+    for (Iterator it = new_set.begin();
+         it != new_set.end();
+         ++it) {
+      output.insert(*it);
+    }
+  }
 }
 
 #endif

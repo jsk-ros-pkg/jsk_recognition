@@ -86,6 +86,29 @@ namespace jsk_pcl_ros
     return distanceToPoint(from, foot_point);
   }
 
+  double Line::angle(const Line& other)
+  {
+    double dot = fabs(direction_.dot(other.direction_));
+    if (dot > 1.0) {
+      return M_PI / 2.0;
+    }
+    else {
+      return acos(dot);
+    }
+  }
+
+  bool Line::isParallel(const Line& other, double angle_threshold)
+  {
+    return angle(other) < angle_threshold;
+  }
+
+  double Line::distance(const Line& other)
+  {
+    Eigen::Vector3f v12 = (other.origin_ - origin_);
+    Eigen::Vector3f n = direction_.cross(other.direction_);
+    return fabs(n.dot(v12)) / n.norm();
+  }
+  
   Segment::Segment(const Eigen::Vector3f& from, const Eigen::Vector3f to):
     Line(from - to, from), from_(from), to_(to)
   {
@@ -120,6 +143,18 @@ namespace jsk_pcl_ros
       output = foot_point;
     }
   }
+
+  double Segment::distance(const Eigen::Vector3f& point)
+  {
+    Eigen::Vector3f foot_point;
+    foot(point, foot_point);
+    return (foot_point - point).norm();
+  }
+
+  // double Segment::distance(const Segment& other)
+  // {
+    
+  // }
   
   Plane::Plane(const std::vector<float>& coefficients)
   {

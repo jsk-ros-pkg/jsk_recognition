@@ -50,11 +50,14 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // publishers
     ////////////////////////////////////////////////////////
-    pub_indices_ = pnh_->advertise<jsk_pcl_ros::ClusterPointIndices>(
+    pub_indices_ = pnh_->advertise<ClusterPointIndices>(
       "output", 1);
-    pub_outlier_removed_indices_
-      = pnh_->advertise<jsk_pcl_ros::ClusterPointIndices>(
-        "output_outlierr_removed", 1);
+    pub_coefficients_ = pnh_->advertise<ModelCoefficientsArray>(
+      "output_coefficients", 1);
+    pub_outlier_removed_indices_ = pnh_->advertise<ClusterPointIndices>(
+      "output_outlier_removed", 1);
+    pub_outlier_removed_coefficients_ = pnh_->advertise<ModelCoefficientsArray>(
+      "output_outlier_removed_coefficients", 1);
     ////////////////////////////////////////////////////////
     // dynamic reconfigure
     ////////////////////////////////////////////////////////
@@ -86,9 +89,6 @@ namespace jsk_pcl_ros
   Line::Ptr EdgeDepthRefinement::lineFromCoefficients(
     const pcl::ModelCoefficients::Ptr coefficients)
   {
-    // NODELET_INFO("coefficients: %f, %f, %f, %f, %f, %f",
-    //              coefficients->values[0], coefficients->values[1], coefficients->values[2],
-    //              coefficients->values[3], coefficients->values[4], coefficients->values[5]);
     Eigen::Vector3f p(coefficients->values[0],
                       coefficients->values[1],
                       coefficients->values[2]);
@@ -188,7 +188,6 @@ namespace jsk_pcl_ros
       NODELET_ERROR("no edges are specified");
       return;
     }
-    NODELET_INFO("%lu edges", all_inliers.size());
     std::vector<pcl::PointIndices::Ptr> nonduplicated_inliers;
     std::vector<pcl::ModelCoefficients::Ptr> cnonduplicated_oefficients;
 
@@ -248,20 +247,25 @@ namespace jsk_pcl_ros
                                  new_duplication_set);
           duplication_set_list.push_back(new_duplication_set);
           // add new_duplication_set to duplicated_indices
-          addSet(duplicated_indices, new_duplication_set);
+          addSet<int>(duplicated_indices, new_duplication_set);
         }
       }
     }
 
-    
+
     for (size_t i = 0; i < duplication_set_list.size(); i++) {
       pcl::PointIndices::Ptr integrated_indices (new pcl::PointIndices);
       integrateDuplicatedIndices(cloud, duplication_set_list[i],
                                  all_inliers,
                                  integrated_indices);
       output_inliers.push_back(integrated_indices);
+      
+      // use the first one,,, ok?
+      pcl::ModelCoefficients::Ptr integrated_coefficients 
+        = all_coefficients[(*duplication_set_list[i].begin())];
+      output_coefficients.push_back(integrated_coefficients);
     }
-    
+
     // print result for debug
     // NODELET_INFO("%lu duplication set", duplication_set_list.size());
     // for (size_t i = 0; i < duplication_set_list.size(); i++) {
@@ -329,19 +333,28 @@ namespace jsk_pcl_ros
 
   void EdgeDepthRefinement::publishIndices(
     ros::Publisher& pub,
+    ros::Publisher& pub_coefficients,
     const std::vector<pcl::PointIndices::Ptr> inliers,
     const std::vector<pcl::ModelCoefficients::Ptr> coefficients,
     const std_msgs::Header& header)
   {
-    jsk_pcl_ros::ClusterPointIndices output_ros_msg;
+    ClusterPointIndices output_ros_msg;
+    ModelCoefficientsArray output_ros_coefficients_msg;
     output_ros_msg.header = header;
+    output_ros_coefficients_msg.header = header;
     for (size_t i = 0; i < inliers.size(); i++) {
       PCLIndicesMsg output_indices_msg;
+      PCLModelCoefficientMsg output_coefficients_msg;
       output_indices_msg.header = header;
       output_indices_msg.indices = inliers[i]->indices;
       output_ros_msg.cluster_indices.push_back(output_indices_msg);
+
+      output_coefficients_msg.header = header;
+      output_coefficients_msg.values = coefficients[i]->values;
+      output_ros_coefficients_msg.coefficients.push_back(output_coefficients_msg);
     }
     pub.publish(output_ros_msg);
+    pub_coefficients.publish(output_ros_coefficients_msg);
   }
 
   void EdgeDepthRefinement::configCallback (Config &config, uint32_t level)
@@ -370,9 +383,12 @@ namespace jsk_pcl_ros
     removeDuplicatedEdges(cloud, inliers, coefficients,
                           non_duplicated_inliers,
                           non_duplicated_coefficients);
-    publishIndices(pub_outlier_removed_indices_, inliers, coefficients,
+    publishIndices(pub_outlier_removed_indices_,
+                   pub_outlier_removed_coefficients_,
+                   inliers, coefficients,
                    input->header);
     publishIndices(pub_indices_,
+                   pub_coefficients_,
                    non_duplicated_inliers,
                    non_duplicated_coefficients,
                    input->header);

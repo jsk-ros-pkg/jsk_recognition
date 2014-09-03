@@ -120,9 +120,9 @@ namespace jsk_pcl_ros
     int nearest_index = -1;
     for (size_t i = 0; i < coefficients->coefficients.size(); i++) {
       geometry_msgs::PolygonStamped polygon_msg = planes->polygons[i];
-      ConvexPolygon::Vertices vertices;
+      Vertices vertices;
       for (size_t j = 0; j < polygon_msg.polygon.points.size(); j++) {
-        ConvexPolygon::Vertex v;
+        Vertex v;
         v[0] = polygon_msg.polygon.points[j].x;
         v[1] = polygon_msg.polygon.points[j].y;
         v[2] = polygon_msg.polygon.points[j].z;

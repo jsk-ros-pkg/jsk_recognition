@@ -48,6 +48,15 @@ namespace jsk_pcl_ros
     return std::vector<int>(all.begin(), all.end());
   }
 
+  pcl::PointIndices::Ptr addIndices(const pcl::PointIndices& a,
+                                    const pcl::PointIndices& b)
+  {
+    std::vector<int> indices = addIndices(a.indices, b.indices);
+    pcl::PointIndices::Ptr ret(new pcl::PointIndices);
+    ret->indices = indices;
+    return ret;
+  }
+  
   void Counter::add(double v)
   {
     acc_(v);

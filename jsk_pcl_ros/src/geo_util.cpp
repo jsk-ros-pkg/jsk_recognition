@@ -55,7 +55,33 @@ namespace jsk_pcl_ros
     output[1] = input[1];
     output[2] = input[2];
   }
+  
+  void convertEigenVector(const Eigen::Vector4d& input,
+                          Eigen::Vector3f& output)
+  {
+    output[0] = input[0];
+    output[1] = input[1];
+    output[2] = input[2];
+  }
 
+  void convertEigenVector(const Eigen::Vector4f& input,
+                          Eigen::Vector3f& output)
+  {
+    output[0] = input[0];
+    output[1] = input[1];
+    output[2] = input[2];
+  }
+  
+  Eigen::Quaternionf rotFrom3Axis(const Eigen::Vector3f& ex,
+                                  const Eigen::Vector3f& ey,
+                                  const Eigen::Vector3f& ez)
+  {
+    Eigen::Matrix3f rot;
+    rot.col(0) = ex.normalized();
+    rot.col(1) = ey.normalized();
+    rot.col(2) = ez.normalized();
+    return Eigen::Quaternionf(rot);
+  }
   
   Line::Line(const Eigen::Vector3f& direction, const Eigen::Vector3f& origin)
     : direction_ (direction.normalized()), origin_(origin)
@@ -63,50 +89,151 @@ namespace jsk_pcl_ros
 
   }
 
-  void Line::getDirection(Eigen::Vector3f& output)
+  void Line::getDirection(Eigen::Vector3f& output) const
   {
     output = direction_;
   }
 
-  void Line::foot(const Eigen::Vector3f& point, Eigen::Vector3f& output)
+  void Line::getOrigin(Eigen::Vector3f& output) const
   {
-    const double alpha = point.dot(direction_) - origin_.dot(direction_);
+    output = origin_;
+  }
+
+  void Line::foot(const Eigen::Vector3f& point, Eigen::Vector3f& output) const
+  {
+    const double alpha = computeAlpha(point);
     output = alpha * direction_ + origin_;
   }
 
-  double Line::distanceToPoint(const Eigen::Vector3f& from, Eigen::Vector3f& foot_point)
+  double Line::distanceToPoint(
+    const Eigen::Vector3f& from, Eigen::Vector3f& foot_point) const
   {
     foot(from, foot_point);
     return (from - foot_point).norm();
   }
   
-  double Line::distanceToPoint(const Eigen::Vector3f& from)
+  double Line::distanceToPoint(const Eigen::Vector3f& from) const
   {
     Eigen::Vector3f foot_point;
     return distanceToPoint(from, foot_point);
   }
 
-  double Line::angle(const Line& other)
+  double Line::angle(const Line& other) const
   {
     double dot = fabs(direction_.dot(other.direction_));
     if (dot > 1.0) {
       return M_PI / 2.0;
     }
     else {
-      return acos(dot);
+      double theta = acos(dot);
+      if (theta > M_PI / 2.0) {
+        return M_PI / 2.0 - theta;
+      }
+      else {
+        return theta;
+      }
     }
   }
 
-  bool Line::isParallel(const Line& other, double angle_threshold)
+  bool Line::isParallel(const Line& other, double angle_threshold) const
   {
     return angle(other) < angle_threshold;
   }
 
-  double Line::distance(const Line& other)
+  bool Line::isPerpendicular(const Line& other, double angle_threshold) const
+  {
+    return (M_PI / 2.0 - angle(other)) < angle_threshold;
+  }
+
+  bool Line::isSameDirection(const Line& other) const
+  {
+    return direction_.dot(other.direction_) > 0;
+  }
+
+  Line::Ptr Line::flip()
+  {
+    Line::Ptr ret (new Line(-direction_, origin_));
+    return ret;
+  }
+  
+  Line::Ptr Line::midLine(const Line& other) const
+  {
+    Eigen::Vector3f new_directin = (direction_ + other.direction_).normalized();
+    Eigen::Vector3f new_origin;
+    other.foot(origin_, new_origin);
+    Line::Ptr ret (new Line(new_directin, (new_origin + origin_) / 2.0));
+    return ret;
+  }
+
+  void Line::parallelLineNormal(const Line& other, Eigen::Vector3f& output)
+    const
+  {
+    Eigen::Vector3f foot_point;
+    other.foot(origin_, foot_point);
+    output = origin_ - foot_point;
+  }
+  
+  Line::Ptr Line::fromCoefficients(const std::vector<float>& coefficients)
+  {
+    Eigen::Vector3f p(coefficients[0],
+                      coefficients[1],
+                      coefficients[2]);
+    Eigen::Vector3f d(coefficients[3],
+                      coefficients[4],
+                      coefficients[5]);
+    Line::Ptr ret(new Line(d, p));
+    return ret;
+  }
+
+  double Line::distance(const Line& other) const
   {
     Eigen::Vector3f v12 = (other.origin_ - origin_);
     Eigen::Vector3f n = direction_.cross(other.direction_);
     return fabs(n.dot(v12)) / n.norm();
+  }
+
+  Line::Ptr Line::parallelLineOnAPoint(const Eigen::Vector3f& p) const
+  {
+    Line::Ptr ret (new Line(direction_, p));
+    return ret;
+  }
+  
+  double Line::computeAlpha(const Point& p) const
+  {
+    return p.dot(direction_) - origin_.dot(direction_);
+  }
+  
+  PointPair Line::findEndPoints(const Vertices& points) const
+  {
+    double min_alpha = DBL_MAX;
+    double max_alpha = - DBL_MAX;
+    Point min_alpha_point, max_alpha_point;
+    for (size_t i = 0; i < points.size(); i++) {
+      Point p = points[i];
+      double alpha = computeAlpha(p);
+      if (alpha > max_alpha) {
+        max_alpha_point = p;
+        max_alpha = alpha;
+      }
+      if (alpha < min_alpha) {
+        min_alpha_point = p;
+        min_alpha = alpha;
+      }
+    }
+    // ROS_INFO("min: %f", min_alpha);
+    // ROS_INFO("max: %f", max_alpha);
+    return boost::make_tuple<Point, Point>(min_alpha_point, max_alpha_point);
+  }
+
+  void Line::print()
+  {
+    ROS_INFO("d: [%f, %f, %f], p: [%f, %f, %f]", direction_[0], direction_[1], direction_[2],
+             origin_[0], origin_[1], origin_[2]);
+  }
+
+  void Line::point(double alpha, Eigen::Vector3f& output)
+  {
+    output = alpha * direction_ + origin_;
   }
   
   Segment::Segment(const Eigen::Vector3f& from, const Eigen::Vector3f to):
@@ -115,7 +242,7 @@ namespace jsk_pcl_ros
     
   }
 
-  double Segment::dividingRatio(const Eigen::Vector3f& point)
+  double Segment::dividingRatio(const Eigen::Vector3f& point) const
   {
     if (to_[0] != from_[0]) {
       return (point[0] - from_[0]) / (to_[0] - from_[0]);
@@ -128,7 +255,7 @@ namespace jsk_pcl_ros
     }
   }
   
-  void Segment::foot(const Eigen::Vector3f& from, Eigen::Vector3f& output)
+  void Segment::foot(const Eigen::Vector3f& from, Eigen::Vector3f& output) const
   {
     Eigen::Vector3f foot_point;
     Line::foot(from, foot_point);
@@ -144,7 +271,7 @@ namespace jsk_pcl_ros
     }
   }
 
-  double Segment::distance(const Eigen::Vector3f& point)
+  double Segment::distance(const Eigen::Vector3f& point) const
   {
     Eigen::Vector3f foot_point;
     foot(point, foot_point);
@@ -430,6 +557,173 @@ namespace jsk_pcl_ros
       vertices.push_back(p);
     }
     return ConvexPolygon(vertices);
+  }
+
+  bool ConvexPolygon::distanceSmallerThan(const Eigen::Vector3f& p,
+                                          double distance_threshold)
+  {
+    double dummy_distance;
+    return distanceSmallerThan(p, distance_threshold, dummy_distance);
+  }
+  
+  bool ConvexPolygon::distanceSmallerThan(const Eigen::Vector3f& p,
+                                          double distance_threshold,
+                                          double& output_distance)
+  {
+    // first check distance as Plane rather than Convex
+    double plane_distance = distanceToPoint(p);
+    if (plane_distance > distance_threshold) {
+      output_distance = plane_distance;
+      return false;
+    }
+
+    Eigen::Vector3f foot_point;
+    project(p, foot_point);
+    double convex_distance = (p - foot_point).norm();
+    output_distance = convex_distance;
+    return convex_distance > distance_threshold;
+  }
+
+  double ConvexPolygon::area()
+  {
+    double sum = 0.0;
+    for (size_t i = 0; i < vertices_.size(); i++) {
+      Eigen::Vector3f p_k = vertices_[i];
+      Eigen::Vector3f p_k_1;
+      if (i == vertices_.size() - 1) {
+        p_k_1 = vertices_[0];
+      }
+      else {
+        p_k_1 = vertices_[i + 1];
+      }
+      sum += p_k.cross(p_k_1).norm();
+    }
+    return sum / 2.0;
+  }
+
+  bool ConvexPolygon::allEdgesLongerThan(double thr)
+  {
+    for (size_t i = 0; i < vertices_.size(); i++) {
+      Eigen::Vector3f p_k = vertices_[i];
+      Eigen::Vector3f p_k_1;
+      if (i == vertices_.size() - 1) {
+        p_k_1 = vertices_[0];
+      }
+      else {
+        p_k_1 = vertices_[i + 1];
+      }
+      if ((p_k - p_k_1).norm() < thr) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  ConvexPolygon::Ptr ConvexPolygon::magnify(const double scale_factor)
+  {
+    // compute centroid
+    Eigen::Vector3f centroid(0, 0, 0);
+    for (size_t i = 0; i < vertices_.size(); i++) {
+      centroid = centroid + vertices_[i];
+    }
+    centroid = centroid / vertices_.size();
+
+    Vertices new_vertices;
+    for (size_t i = 0; i < vertices_.size(); i++) {
+      new_vertices.push_back((vertices_[i] - centroid) * scale_factor
+                             + centroid);
+    }
+    ConvexPolygon::Ptr ret (new ConvexPolygon(new_vertices));
+    return ret;
+  }
+
+  geometry_msgs::Polygon ConvexPolygon::toROSMsg()
+  {
+    geometry_msgs::Polygon polygon;
+    for (size_t i = 0; i < vertices_.size(); i++) {
+      geometry_msgs::Point32 ros_point;
+      ros_point.x = vertices_[i][0];
+      ros_point.y = vertices_[i][1];
+      ros_point.z = vertices_[i][2];
+      polygon.points.push_back(ros_point);
+    }
+    return polygon;
+  }
+  
+  Cube::Cube(const Eigen::Vector3f& pos, const Eigen::Quaternionf& rot):
+    pos_(pos), rot_(rot)
+  {
+    
+  }
+
+  Cube::Cube(const Eigen::Vector3f& pos, const Eigen::Quaternionf& rot,
+             const std::vector<double>& dimensions):
+    pos_(pos), rot_(rot), dimensions_(dimensions)
+  {
+    
+  }
+
+  Cube::Cube(const Eigen::Vector3f& pos,
+             const Line& line_a, const Line& line_b, const Line& line_c)
+  {
+    double distance_a_b = line_a.distance(line_b);
+    double distance_a_c = line_a.distance(line_c);
+    double distance_b_c = line_b.distance(line_c);
+    Line::Ptr axis;
+    dimensions_.resize(3);
+    Eigen::Vector3f ex, ey, ez;
+    if (distance_a_b >= distance_a_c &&
+        distance_a_b >= distance_b_c) {
+      axis = line_a.midLine(line_b);
+      line_a.parallelLineNormal(line_c, ex);
+      line_c.parallelLineNormal(line_b, ey);
+      
+    }
+    else if (distance_a_c >= distance_a_b &&
+             distance_a_c >= distance_b_c) {
+      axis = line_a.midLine(line_c);
+      line_a.parallelLineNormal(line_b, ex);
+      line_b.parallelLineNormal(line_c, ey);
+    }
+    else {
+      // else if (distance_b_c >= distance_a_b &&
+      //          distance_b_c >= distance_a_c) {
+      axis = line_b.midLine(line_c);
+      line_b.parallelLineNormal(line_a, ex);
+      line_a.parallelLineNormal(line_c, ey);
+    }
+    dimensions_[0] = ex.norm();
+    dimensions_[1] = ey.norm();
+    axis->getDirection(ez);
+    ez.normalize();
+    ex.normalize();
+    ey.normalize();
+    if (ex.cross(ey).dot(ez) < 0) {
+      ez = - ez;
+    }
+    rot_ = rotFrom3Axis(ex, ey, ez);
+    axis->foot(pos, pos_);       // project
+  }
+  
+  Cube::~Cube()
+  {
+
+  }
+
+  BoundingBox Cube::toROSMsg()
+  {
+    BoundingBox ret;
+    ret.pose.position.x = pos_[0];
+    ret.pose.position.y = pos_[1];
+    ret.pose.position.z = pos_[2];
+    ret.pose.orientation.x = rot_.x();
+    ret.pose.orientation.y = rot_.y();
+    ret.pose.orientation.z = rot_.z();
+    ret.pose.orientation.w = rot_.w();
+    ret.dimensions.x = dimensions_[0];
+    ret.dimensions.y = dimensions_[1];
+    ret.dimensions.z = dimensions_[2];
+    return ret;
   }
   
 }

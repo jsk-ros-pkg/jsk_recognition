@@ -48,11 +48,16 @@
 #include <set>
 #include <map>
 
+#include <sensor_msgs/PointCloud2.h>
+#include <ros/ros.h>
+#include <pcl/PointIndices.h>
+
 namespace jsk_pcl_ros
 {
   std::vector<int> addIndices(const std::vector<int>& a,
                               const std::vector<int>& b);
-
+  pcl::PointIndices::Ptr addIndices(const pcl::PointIndices& a,
+                                    const pcl::PointIndices& b);
   class Counter
   {
   public:
@@ -108,6 +113,7 @@ namespace jsk_pcl_ros
       output.insert(*it);
     }
   }
+
 }
 
 #endif

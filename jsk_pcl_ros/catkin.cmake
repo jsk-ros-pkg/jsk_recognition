@@ -74,6 +74,7 @@ generate_dynamic_reconfigure_options(
   cfg/OrganizedEdgeDetector.cfg
   cfg/EdgeDepthRefinement.cfg
   cfg/ParallelEdgeFinder.cfg
+  cfg/EdgebasedCubeFinder.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -188,6 +189,8 @@ jsk_pcl_nodelet(src/edge_depth_refinement_nodelet.cpp
   "jsk_pcl/EdgeDepthRefinement" "edge_depth_refinement")
 jsk_pcl_nodelet(src/parallel_edge_finder_nodelet.cpp
   "jsk_pcl/ParallelEdgeFinder" "parallel_edge_finder")
+jsk_pcl_nodelet(src/edgebased_cube_finder_nodelet.cpp
+  "jsk_pcl/EdgebasedCubeFinder" "edgebased_cube_finder")
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp

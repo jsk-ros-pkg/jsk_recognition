@@ -80,12 +80,12 @@ if [ ! -e $ROS_SRC_DIR/.rosinstall ]; then
 fi
 
 redecho compiling ros parent workspace
-(cd $ROS_SRC_DIR && rosinstall_generator jsk_pcl_ros jsk_perception --flat --deps --deps-only --wet-only --tar --exclude euslisp roseus| wstool merge -)
+(cd $ROS_SRC_DIR && rosinstall_generator jsk_pcl_ros --flat --deps --deps-only --wet-only --tar --exclude euslisp roseus| wstool merge -)
 (cd $ROS_SRC_DIR && wstool update -j10)
 
 unset CMAKE_PREFIX_PATH
 
-(cd $ROS_SRC_DIR/.. &&  BOOST_ROOT=$BOOST_INSTALL_DIR catkin_make_isolated --install -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBoost_REALPATH=ON -DBoost_NO_SYSTEM_PATHS=ON -DBOOST_ROOT=$BOOST_INSTALL_DIR -DPCL_DIR=$PCL_INSTALL_DIR/share/pcl-1.7)
+(cd $ROS_SRC_DIR/.. &&  BOOST_ROOT=$BOOST_INSTALL_DIR catkin_make_isolated --install -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBoost_REALPATH=ON -DBoost_NO_SYSTEM_PATHS=ON -DBOOST_ROOT=$BOOST_INSTALL_DIR -DPCL_DIR=$PCL_INSTALL_DIR/share/pcl-1.7 -DCMAKE_INSTALL_RPATH_USE_LINK_PATH=TRUE)
 
 redecho compiling ros child workspace
 mkdir -p $ROS_CHILD_SRC_DIR
@@ -102,6 +102,6 @@ fi
 (cd $ROS_CHILD_SRC_DIR && wstool update -j10)
 unset CMAKE_PREFIX_PATH
 source $ROS_SRC_DIR/../install_isolated/setup.sh
-(cd $ROS_CHILD_SRC_DIR/.. &&  BOOST_ROOT=$BOOST_INSTALL_DIR catkin_make -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBoost_REALPATH=ON -DBoost_NO_SYSTEM_PATHS=ON -DBOOST_ROOT=$BOOST_INSTALL_DIR -DPCL_DIR=$PCL_INSTALL_DIR/share/pcl-1.7 --only-pkg-with-deps jsk_pcl_ros)
+(cd $ROS_CHILD_SRC_DIR/.. &&  BOOST_ROOT=$BOOST_INSTALL_DIR catkin_make -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBoost_REALPATH=ON -DBoost_NO_SYSTEM_PATHS=ON -DBOOST_ROOT=$BOOST_INSTALL_DIR -DPCL_DIR=$PCL_INSTALL_DIR/share/pcl-1.7 --only-pkg-with-deps jsk_pcl_ros -DCMAKE_INSTALL_RPATH_USE_LINK_PATH=TRUE)
 
 redecho done, please check out $ROS_CHILD_SRC_DIR and $ROS_CHILD_SRC_DIR/../devel directory

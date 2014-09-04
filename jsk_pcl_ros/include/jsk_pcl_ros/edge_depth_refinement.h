@@ -40,6 +40,7 @@
 #include <pcl_ros/pcl_nodelet.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <jsk_pcl_ros/ClusterPointIndices.h>
+#include <jsk_pcl_ros/ModelCoefficientsArray.h>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -100,6 +101,7 @@ namespace jsk_pcl_ros
     
     virtual void publishIndices(
       ros::Publisher& pub,
+      ros::Publisher& pub_coefficients,
       const std::vector<pcl::PointIndices::Ptr> inliers,
       const std::vector<pcl::ModelCoefficients::Ptr> coefficients,
       const std_msgs::Header& header);
@@ -107,12 +109,6 @@ namespace jsk_pcl_ros
     virtual boost::tuple<int, int> findMinMaxIndex(
       const int width, const int height,
       const std::vector<int>& indices);
-    
-    virtual void buildDuplicationSetRecursive(
-      std::map<int, std::vector<int> >& duplication_map,
-      const int from_index,
-      std::vector<int>& to_indices,
-      std::set<int>& output_set);
     
     virtual void integrateDuplicatedIndices(
       const pcl::PointCloud<PointT>::Ptr& cloud,
@@ -130,6 +126,7 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<jsk_pcl_ros::ClusterPointIndices> sub_indices_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     ros::Publisher pub_indices_, pub_outlier_removed_indices_;
+    ros::Publisher pub_coefficients_, pub_outlier_removed_coefficients_;
     boost::mutex mutex_;
     ////////////////////////////////////////////////////////
     // outlier removal

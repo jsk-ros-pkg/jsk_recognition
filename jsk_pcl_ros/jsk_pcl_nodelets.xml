@@ -1,4 +1,10 @@
 <library path="lib/libjsk_pcl_ros">
+  <class name="jsk_pcl/ParallelEdgeFinder" type="ParallelEdgeFinder"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      a nodelet to find parallel straight edges
+    </description>
+  </class>
   <class name="jsk_pcl/EdgeDepthRefinement" type="EdgeDepthRefinement"
          base_class_type="nodelet::Nodelet">
     <description>

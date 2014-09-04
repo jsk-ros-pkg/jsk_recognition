@@ -2,6 +2,11 @@
 Changelog for package jsk_libfreenect2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Install files generated in jsk_libfreenect2
+* Contributors: Ryohei Ueda
+
 0.1.15 (2014-08-26)
 -------------------
 * add new package: jsk_libfreenect2

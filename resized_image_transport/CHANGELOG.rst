@@ -2,6 +2,13 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* remove static variables from ImageResizer because now it is used as
+  nodelet
+* add client for resize image
+* Contributors: Ryohei Ueda, Yusuke Furuta
+
 0.1.14 (2014-08-01)
 -------------------
 

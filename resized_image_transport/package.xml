@@ -1,6 +1,6 @@
 <package>
   <name>resized_image_transport</name>
-  <version>0.1.15</version>
+  <version>0.1.16</version>
   <description>resized_image_transport</description>
 
   <maintainer email="youhei@jsk.t.u-tokyo.ac.jp">Yohei Kakiuchi</maintainer>

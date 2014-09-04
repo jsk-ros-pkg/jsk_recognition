@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.16 (2014-09-04)
+-------------------
 * do not use rosrun in the script of jsk_perception/src/eusmodel_template_gen.sh
 * Contributors: Ryohei Ueda
 

@@ -34,6 +34,7 @@
 
 #include <jsk_pcl_ros/static_polygon_array_publisher.h>
 #include <pluginlib/class_list_macros.h>
+#include <jsk_topic_tools/rosparam_utils.h>
 
 namespace jsk_pcl_ros
 {
@@ -46,7 +47,10 @@ namespace jsk_pcl_ros
     pnh_->param("use_trigger", use_trigger_, false);
     pnh_->param("periodic_rate", periodic_rate_, 10.0);
     
-    bool frame_id_read_p = readFrameIds("frame_ids");
+    //bool frame_id_read_p = readFrameIds("frame_ids");
+    bool frame_id_read_p
+      = jsk_topic_tools::readVectorParameter(*pnh_, "frame_ids",
+                                             frame_ids_);
     if (!frame_id_read_p) {
       NODELET_FATAL("failed to read frame_ids from ~frame_ids");
       return;

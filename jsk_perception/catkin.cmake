@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(jsk_perception)
 
 find_package(catkin REQUIRED COMPONENTS
-  message_generation imagesift std_msgs sensor_msgs geometry_msgs cv_bridge
+  mk message_generation imagesift std_msgs sensor_msgs geometry_msgs cv_bridge
   image_geometry image_transport driver_base dynamic_reconfigure eigen
   roscpp nodelet rostest tf rospack
   jsk_topic_tools)

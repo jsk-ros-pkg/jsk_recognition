@@ -54,6 +54,12 @@ private:
   
 public:
 protected:
+  
+  boost::circular_buffer<double> in_times;
+  boost::circular_buffer<double> out_times;
+  boost::circular_buffer<double> in_bytes;
+  boost::circular_buffer<double> out_bytes;
+
   void onInit() {
     nh = getNodeHandle();
     pnh = getPrivateNodeHandle();
@@ -106,7 +112,13 @@ protected:
     cp_ = it_->advertiseCamera("output/image", max_queue_size_);
 
   }
-
+public:
+  ImageResizer():
+    in_times(boost::circular_buffer<double>(100)),
+    out_times(boost::circular_buffer<double>(100)),
+    in_bytes(boost::circular_buffer<double>(100)),
+    out_bytes(boost::circular_buffer<double>(100))
+    { }
   ~ImageResizer() { }
 
 protected:
@@ -140,18 +152,11 @@ protected:
                 const sensor_msgs::CameraInfoConstPtr &info) {
     boost::mutex::scoped_lock lock(mutex_);
     ros::Time now = ros::Time::now();
-
-    static boost::circular_buffer<double> in_times(100);
-    static boost::circular_buffer<double> out_times(100);
-    static boost::circular_buffer<double> in_bytes(100);
-    static boost::circular_buffer<double> out_bytes(100);
-
     ROS_DEBUG("resize: callback");
     if ( !publish_once_ || cp_.getNumSubscribers () == 0 ) {
       ROS_DEBUG("resize: number of subscribers is 0, ignoring image");
       return;
     }
-
     in_times.push_front((now - last_subscribe_time_).toSec());
     in_bytes.push_front(img->data.size());
     //

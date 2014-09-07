@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.17 (2014-09-07)
+-------------------
 * add laser_registration.launch
 * Contributors: Yuki Furuta
 

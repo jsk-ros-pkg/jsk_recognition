@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.17 (2014-09-07)
+-------------------
 * add mk/git to build_depend
 * Contributors: Kei Okada
 

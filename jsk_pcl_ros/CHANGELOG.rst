@@ -2,6 +2,11 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* add laser_registration.launch
+* Contributors: Yuki Furuta
+
 0.1.16 (2014-09-04)
 -------------------
 * bugfix: add depth_image_creator to jsk_pcl_nodelet on catkin.cmake

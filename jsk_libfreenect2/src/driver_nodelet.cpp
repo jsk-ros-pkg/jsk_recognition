@@ -128,17 +128,17 @@ namespace jsk_libfreenect2
         // quick hack
         // [76, 345], [82, 354], [103, 383], [212, 20], [340, 403], [479, 150]
         // is broken
-        std::vector<boost::tuple<int, int> > forbidden_pixels;
-        forbidden_pixels.push_back(boost::make_tuple(76, 345));
-        forbidden_pixels.push_back(boost::make_tuple(82, 354));
-        forbidden_pixels.push_back(boost::make_tuple(103, 383));
-        forbidden_pixels.push_back(boost::make_tuple(212, 20));
-        forbidden_pixels.push_back(boost::make_tuple(340, 403));
-        forbidden_pixels.push_back(boost::make_tuple(479, 150));
-        for (size_t i = 0; i < forbidden_pixels.size(); i++) {
-          boost::tuple<int, int> pixel = forbidden_pixels[i];
-          cvir.at<float>(pixel.get<1>(), pixel.get<0>()) = 0;
-        }
+        // std::vector<boost::tuple<int, int> > forbidden_pixels;
+        // forbidden_pixels.push_back(boost::make_tuple(76, 345));
+        // forbidden_pixels.push_back(boost::make_tuple(82, 354));
+        // forbidden_pixels.push_back(boost::make_tuple(103, 383));
+        // forbidden_pixels.push_back(boost::make_tuple(212, 20));
+        // forbidden_pixels.push_back(boost::make_tuple(340, 403));
+        // forbidden_pixels.push_back(boost::make_tuple(479, 150));
+        // for (size_t i = 0; i < forbidden_pixels.size(); i++) {
+        //   boost::tuple<int, int> pixel = forbidden_pixels[i];
+        //   cvir.at<float>(pixel.get<1>(), pixel.get<0>()) = 0;
+        // }
         
         ros::Time stamp = ros::Time::now();
         std_msgs::Header rgb_header, ir_header;

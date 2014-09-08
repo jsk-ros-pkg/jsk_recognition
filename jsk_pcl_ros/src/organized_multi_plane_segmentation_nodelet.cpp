@@ -46,9 +46,12 @@
 
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <pluginlib/class_list_macros.h>
-#include <jsk_pcl_ros/pcl_conversion_util.h>
 
 #include <boost/format.hpp>
+#include <pcl/common/centroid.h>
+#include <visualization_msgs/Marker.h>
+#include "jsk_pcl_ros/geo_util.h"
+
 
 namespace jsk_pcl_ros
 {
@@ -63,39 +66,54 @@ namespace jsk_pcl_ros
     diagnostic_updater_->setHardwareID(getName());
     diagnostic_updater_->add(
                              getName() + "::NormalEstimation",
-      boost::bind(&OrganizedMultiPlaneSegmentation::updateDiagnosticNormalEstimation,
-                  this,
-                  _1));
+      boost::bind(
+        &OrganizedMultiPlaneSegmentation::updateDiagnosticNormalEstimation,
+        this,
+        _1));
     diagnostic_updater_->add(
-                             getName() + "::PlaneSegmentation",
-      boost::bind(&OrganizedMultiPlaneSegmentation::updateDiagnosticPlaneSegmentation,
-                  this,
-                  _1));
+      getName() + "::PlaneSegmentation",
+      boost::bind(
+        &OrganizedMultiPlaneSegmentation::updateDiagnosticPlaneSegmentation,
+        this,
+        _1));
     double vital_rate;
     pnh_->param("vital_rate", vital_rate, 1.0);
-    normal_estimation_vital_checker_.reset(new jsk_topic_tools::VitalChecker(1 / vital_rate));
-    plane_segmentation_vital_checker_.reset(new jsk_topic_tools::VitalChecker(1 / vital_rate));
-    estimate_normal_ = false;
+    normal_estimation_vital_checker_.reset(
+      new jsk_topic_tools::VitalChecker(1 / vital_rate));
+    plane_segmentation_vital_checker_.reset(
+      new jsk_topic_tools::VitalChecker(1 / vital_rate));
+    estimate_normal_ = true;
     pnh_->getParam("estimate_normal", estimate_normal_);
     //////////////////////////////////////////////////////////
     // prepare publishers
     //////////////////////////////////////////////////////////
-    pub_ = pnh_->advertise<jsk_pcl_ros::ClusterPointIndices>("output", 1);
-    polygon_pub_ = pnh_->advertise<jsk_pcl_ros::PolygonArray>("output_polygon", 1);
-    coefficients_pub_ = pnh_->advertise<jsk_pcl_ros::ModelCoefficientsArray>("output_coefficients", 1);
-    org_pub_ = pnh_->advertise<jsk_pcl_ros::ClusterPointIndices>("output_nonconnected", 1);
-    org_polygon_pub_ = pnh_->advertise<jsk_pcl_ros::PolygonArray>("output_nonconnected_polygon", 1);
-    org_coefficients_pub_ = pnh_->advertise<jsk_pcl_ros::ModelCoefficientsArray>("output_nonconnected_coefficients", 1);
+    pub_ = pnh_->advertise<ClusterPointIndices>("output", 1);
+    polygon_pub_ = pnh_->advertise<PolygonArray>("output_polygon", 1);
+    coefficients_pub_
+      = pnh_->advertise<ModelCoefficientsArray>("output_coefficients", 1);
+    org_pub_ = pnh_->advertise<ClusterPointIndices>("output_nonconnected", 1);
+    org_polygon_pub_
+      = pnh_->advertise<PolygonArray>("output_nonconnected_polygon", 1);
+    org_coefficients_pub_
+      = pnh_->advertise<ModelCoefficientsArray>(
+        "output_nonconnected_coefficients", 1);
+    pub_connection_marker_
+      = pnh_->advertise<visualization_msgs::Marker>(
+        "debug_connection_map", 1);
+
     if (estimate_normal_) {
-      normal_pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output_normal", 1);
+      normal_pub_
+        = pnh_->advertise<sensor_msgs::PointCloud2>("output_normal", 1);
     }
     
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&OrganizedMultiPlaneSegmentation::configCallback, this, _1, _2);
+      boost::bind (
+        &OrganizedMultiPlaneSegmentation::configCallback, this, _1, _2);
     srv_->setCallback (f);
 
-    sub_ = pnh_->subscribe("input", 1, &OrganizedMultiPlaneSegmentation::segment, this);
+    sub_ = pnh_->subscribe("input", 1,
+                           &OrganizedMultiPlaneSegmentation::segment, this);
     diagnostics_timer_ = pnh_->createTimer(
       ros::Duration(1.0),
       boost::bind(&OrganizedMultiPlaneSegmentation::updateDiagnostics,
@@ -122,15 +140,16 @@ namespace jsk_pcl_ros
     //concave_alpha_ = config.concave_alpha;
   }
 
-  void OrganizedMultiPlaneSegmentation::connectPlanesMap(const pcl::PointCloud<PointT>::Ptr& input,
-                                                         const std::vector<pcl::ModelCoefficients>& model_coefficients,
-                                                         const std::vector<pcl::PointIndices>& boundary_indices,
-                                                         std::vector<std::map<size_t, bool> >& connection_map)
+  void OrganizedMultiPlaneSegmentation::connectPlanesMap(
+    const pcl::PointCloud<PointT>::Ptr& input,
+    const std::vector<pcl::ModelCoefficients>& model_coefficients,
+    const std::vector<pcl::PointIndices>& boundary_indices,
+    std::vector<std::map<size_t, bool> >& connection_map)
   {
     if (model_coefficients.size() == 0) {
       return;                   // do nothing
     }
-      
+    
     pcl::ExtractIndices<PointT> extract;
     extract.setInputCloud(input);
     connection_map.resize(model_coefficients.size());
@@ -165,7 +184,9 @@ namespace jsk_pcl_ros
           continue;
         }
         // the planes are near enough as a plane formula.
-        
+
+        // compute the distance between two boundaries.
+        // if they are near enough, we can regard these two map should connect
         pcl::PointIndices::Ptr a_indices
           = boost::make_shared<pcl::PointIndices>(boundary_indices[i]);
         pcl::PointIndices::Ptr b_indices
@@ -175,9 +196,6 @@ namespace jsk_pcl_ros
         extract.filter(a_cloud);
         extract.setIndices(b_indices);
         extract.filter(b_cloud);
-
-        // compute the nearest neighbor of a_cloud and b_cloud,
-        // and check the distance between them
         if (a_cloud.points.size() > 0) {
           pcl::KdTreeFLANN<PointT> kdtree;
           kdtree.setInputCloud(a_cloud.makeShared());
@@ -332,9 +350,18 @@ namespace jsk_pcl_ros
 
   }
 
-  void OrganizedMultiPlaneSegmentation::segmentFromNormals(pcl::PointCloud<PointT>::Ptr input,
-                                                           pcl::PointCloud<pcl::Normal>::Ptr normal,
-                                                           const std_msgs::Header& header)
+  ////////////////////////////////////////////////////////
+  // simple PCL wrapper
+  ////////////////////////////////////////////////////////
+  void OrganizedMultiPlaneSegmentation::segmentOrganizedMultiPlanes(
+    pcl::PointCloud<PointT>::Ptr input,
+    pcl::PointCloud<pcl::Normal>::Ptr normal,
+    PlanarRegionVector& regions,
+    std::vector<pcl::ModelCoefficients>& model_coefficients,
+    std::vector<pcl::PointIndices>& inlier_indices,
+    pcl::PointCloud<pcl::Label>::Ptr& labels,
+    std::vector<pcl::PointIndices>& label_indices,
+    std::vector<pcl::PointIndices>& boundary_indices)
   {
     plane_segmentation_vital_checker_->poke();
     pcl::OrganizedMultiPlaneSegmentation<PointT, pcl::Normal, pcl::Label> mps;
@@ -344,65 +371,146 @@ namespace jsk_pcl_ros
     mps.setMaximumCurvature(max_curvature_);
     mps.setInputCloud(input);
     mps.setInputNormals(normal);
+    {
+      jsk_topic_tools::ScopedTimer timer = plane_segmentation_time_acc_.scopedTimer();
+      mps.segmentAndRefine(
+        regions, model_coefficients, inlier_indices,
+        labels, label_indices, boundary_indices);
+    }
+  }
+  
+  void OrganizedMultiPlaneSegmentation::publishSegmentationInformation(
+    const std_msgs::Header& header,
+    const pcl::PointCloud<PointT>::Ptr input,
+    const std::vector<pcl::PointIndices>& inlier_indices,
+    const std::vector<pcl::PointIndices>& boundary_indices,
+    const PlanarRegionVector& regions,
+    const std::vector<pcl::ModelCoefficients>& model_coefficients)
+  {
+    jsk_pcl_ros::ClusterPointIndices indices;
+    jsk_pcl_ros::ModelCoefficientsArray coefficients_array;
+    jsk_pcl_ros::PolygonArray polygon_array;
+    indices.header = header;
+    polygon_array.header = header;
+    coefficients_array.header = header;
+    
+    ////////////////////////////////////////////////////////
+    // publish inliers
+    ////////////////////////////////////////////////////////
+    pclIndicesArrayToClusterPointIndices(inlier_indices, header,
+                                         indices);
+    org_pub_.publish(indices);
 
-    std::vector<pcl::PlanarRegion<PointT>, Eigen::aligned_allocator<pcl::PlanarRegion<PointT> > > regions;
+    ////////////////////////////////////////////////////////
+    // boundaries as polygon and pointcloud
+    ////////////////////////////////////////////////////////
+    pcl::ExtractIndices<PointT> extract;
+    extract.setInputCloud(input);
+    for (size_t i = 0; i < regions.size(); i++) {
+      pcl::PointCloud<PointT> boundary_cloud;
+      pcl::PointIndices::Ptr indices_ptr = boost::make_shared<pcl::PointIndices>(boundary_indices[i]);
+      extract.setIndices(indices_ptr);
+      extract.filter(boundary_cloud);
+      geometry_msgs::PolygonStamped polygon;
+      pointCloudToPolygon(boundary_cloud, polygon.polygon);
+      polygon.header = header;
+      polygon_array.polygons.push_back(polygon);
+    }
+    org_polygon_pub_.publish(polygon_array);
+
+    ////////////////////////////////////////////////////////
+    // publish coefficients
+    ////////////////////////////////////////////////////////
+    for (size_t i = 0; i < model_coefficients.size(); i++) {
+      PCLModelCoefficientMsg coefficient;
+      coefficient.values = model_coefficients[i].values;
+      coefficient.header = header;
+      coefficients_array.coefficients.push_back(coefficient);
+    }
+    org_coefficients_pub_.publish(coefficients_array);
+  }
+
+  void OrganizedMultiPlaneSegmentation::publishMarkerOfConnection(
+    const std::vector<std::map<size_t, bool> >& connection_map,
+    const pcl::PointCloud<PointT>::Ptr cloud,
+    const std::vector<pcl::PointIndices>& inliers,
+    const std_msgs::Header& header)
+  {
+    ////////////////////////////////////////////////////////
+    // visualize connection as lines
+    ////////////////////////////////////////////////////////
+    visualization_msgs::Marker connection_marker;
+    connection_marker.type = visualization_msgs::Marker::LINE_LIST;
+    connection_marker.scale.x = 0.01;
+    connection_marker.header = header;
+    connection_marker.pose.orientation.w = 1.0;
+    connection_marker.color = colorCategory20(0);
+    Vertices centroids;
+    for (size_t i = 0; i < inliers.size(); i++) {
+      pcl::PointIndices::Ptr target_inliers
+        = boost::make_shared<pcl::PointIndices>(inliers[i]);
+      pcl::PointCloud<PointT>::Ptr target_cloud (new pcl::PointCloud<PointT>);
+      Eigen::Vector4f centroid;
+      pcl::ExtractIndices<PointT> ex;
+      ex.setInputCloud(cloud);
+      ex.setIndices(target_inliers);
+      ex.filter(*target_cloud);
+      pcl::compute3DCentroid(*target_cloud, centroid);
+      Eigen::Vector3f centroid_3f(centroid[0], centroid[1], centroid[2]);
+      centroids.push_back(centroid_3f);
+    }
+
+    for (size_t i = 0; i < connection_map.size(); i++) {
+      // from = i
+      std::map<size_t, bool> the_connection_map = connection_map[i];
+      int from_index = i;
+      for (std::map<size_t, bool>::iterator it = the_connection_map.begin();
+           it != the_connection_map.end();
+           ++it) {
+        if (it->second) {
+          int to_index = it->first;
+          Eigen::Vector3f from_point = centroids[from_index];
+          Eigen::Vector3f to_point = centroids[to_index];
+          geometry_msgs::Point from_point_ros, to_point_ros;
+          pcl_conversions::fromEigenToMSG(from_point, from_point_ros);
+          pcl_conversions::fromEigenToMSG(to_point, to_point_ros);
+          connection_marker.points.push_back(from_point_ros);
+          connection_marker.points.push_back(to_point_ros);
+          connection_marker.colors.push_back(colorCategory20(i));
+          connection_marker.colors.push_back(colorCategory20(i));
+        }
+      }
+    }
+    pub_connection_marker_.publish(connection_marker);
+  }
+  
+  void OrganizedMultiPlaneSegmentation::segmentFromNormals(
+    pcl::PointCloud<PointT>::Ptr input,
+    pcl::PointCloud<pcl::Normal>::Ptr normal,
+    const std_msgs::Header& header)
+  {
+    PlanarRegionVector regions;
     std::vector<pcl::ModelCoefficients> model_coefficients;
     std::vector<pcl::PointIndices> inlier_indices;
     pcl::PointCloud<pcl::Label>::Ptr labels (new pcl::PointCloud<pcl::Label>());
     std::vector<pcl::PointIndices> label_indices;
     std::vector<pcl::PointIndices> boundary_indices;
-    {
-      jsk_topic_tools::ScopedTimer timer = plane_segmentation_time_acc_.scopedTimer();
-      mps.segmentAndRefine(regions, model_coefficients, inlier_indices, labels, label_indices, boundary_indices);
-    }
+    segmentOrganizedMultiPlanes(input, normal, regions, model_coefficients,
+                                inlier_indices, labels, label_indices,
+                                boundary_indices);
     original_plane_num_counter_.add(regions.size());
-    if (regions.size() == 0) {
-      NODELET_DEBUG("no region is segmented");
-    }
+    publishSegmentationInformation(header, input, inlier_indices,
+                                   boundary_indices, regions,
+                                   model_coefficients);
     
-    {
-      //////////////////////////////////////////////////////////
-      // publish original segmentation information
-      //////////////////////////////////////////////////////////
-      jsk_pcl_ros::ClusterPointIndices indices;
-      jsk_pcl_ros::ModelCoefficientsArray coefficients_array;
-      jsk_pcl_ros::PolygonArray polygon_array;
-      indices.header = header;
-      polygon_array.header = header;
-      coefficients_array.header = header;
-      pclIndicesArrayToClusterPointIndices(inlier_indices, header,
-                                           indices);
-      pcl::ExtractIndices<PointT> extract;
-      extract.setInputCloud(input);
-      for (size_t i = 0; i < regions.size(); i++) {
-        pcl::PointCloud<PointT> boundary_cloud;
-        pcl::PointIndices::Ptr indices_ptr = boost::make_shared<pcl::PointIndices>(boundary_indices[i]);
-        extract.setIndices(indices_ptr);
-        extract.filter(boundary_cloud);
-        geometry_msgs::PolygonStamped polygon;
-        pointCloudToPolygon(boundary_cloud, polygon.polygon);
-        polygon.header = header;
-        polygon_array.polygons.push_back(polygon);
-      }
-      org_pub_.publish(indices);
-      org_polygon_pub_.publish(polygon_array);
-
-      // coefficients
-      for (size_t i = 0; i < model_coefficients.size(); i++) {
-        PCLModelCoefficientMsg coefficient;
-        coefficient.values = model_coefficients[i].values;
-        coefficient.header = header;
-        coefficients_array.coefficients.push_back(coefficient);
-      }
-      org_coefficients_pub_.publish(coefficients_array);
-    }
-    // connection
-    // this might be slow...
-    ros::Time before_connect_time = ros::Time::now();
-    NODELET_DEBUG("checking %lu connection", regions.size());
-    
+    ////////////////////////////////////////////////////////
+    // segmentation by PCL organized multiplane segmentation
+    // is not enough. we "connect" planes like graph problem.
+    ////////////////////////////////////////////////////////
     std::vector<std::map<size_t, bool> > connection_map;
     connectPlanesMap(input, model_coefficients, boundary_indices, connection_map);
+    publishMarkerOfConnection(connection_map, input, inlier_indices, header);
+    
     {
       std::vector<pcl::PointIndices> output_indices;
       std::vector<pcl::ModelCoefficients> output_coefficients;
@@ -440,8 +548,6 @@ namespace jsk_pcl_ros
       }
       coefficients_pub_.publish(coefficients_array);
     }
-    ros::Time after_connect_time = ros::Time::now();
-    NODELET_DEBUG("checking connection done, %f", (after_connect_time - before_connect_time).toSec());
   }
 
   void OrganizedMultiPlaneSegmentation::estimateNormal(pcl::PointCloud<PointT>::Ptr input,
@@ -487,6 +593,7 @@ namespace jsk_pcl_ros
     pcl::PointCloud<PointT>::Ptr input(new pcl::PointCloud<PointT>());
     pcl::PointCloud<pcl::Normal>::Ptr normal(new pcl::PointCloud<pcl::Normal>());
     pcl::fromROSMsg(*msg, *input);
+    
     if (estimate_normal_) {
       normal_estimation_vital_checker_->poke();
       estimateNormal(input, normal);
@@ -501,6 +608,7 @@ namespace jsk_pcl_ros
     else {
       pcl::fromROSMsg(*msg, *normal);
     }
+    
     segmentFromNormals(input, normal, msg->header);
     diagnostic_updater_->update();
   }

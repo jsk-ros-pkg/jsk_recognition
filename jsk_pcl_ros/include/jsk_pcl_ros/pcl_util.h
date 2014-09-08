@@ -48,11 +48,16 @@
 #include <set>
 #include <map>
 
+#include <std_msgs/ColorRGBA.h>
+
 namespace jsk_pcl_ros
 {
   std::vector<int> addIndices(const std::vector<int>& a,
                               const std::vector<int>& b);
 
+  // select color out of 20 colors
+  std_msgs::ColorRGBA colorCategory20(int i);
+  
   class Counter
   {
   public:

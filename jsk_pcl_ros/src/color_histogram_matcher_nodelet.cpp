@@ -38,7 +38,6 @@
 #include <pcl/filters/extract_indices.h>
 #include <pcl/point_types_conversion.h>
 #include <pcl/common/centroid.h>
-#include <visualization_msgs/Marker.h>
 #include <geometry_msgs/PoseStamped.h>
 
 namespace jsk_pcl_ros
@@ -62,6 +61,8 @@ namespace jsk_pcl_ros
       = pnh_->advertise<jsk_pcl_ros::ColorHistogram>("output_reference", 1);
     result_pub_
       = pnh_->advertise<jsk_pcl_ros::ClusterPointIndices>("output", 1);
+    coefficient_points_pub_
+      = pnh_->advertise<sensor_msgs::PointCloud2>("coefficient_points", 1);
     reference_sub_ = pnh_->subscribe("input_reference_cloud", 1,
                                      &ColorHistogramMatcher::reference,
                                      this);
@@ -128,7 +129,7 @@ namespace jsk_pcl_ros
     // compute histograms first
     std::vector<std::vector<float> > histograms;
     histograms.resize(input_indices->cluster_indices.size());
-    
+    unsigned long point_all_size=0;
     pcl::ExtractIndices<pcl::PointXYZHSV> extract;
     extract.setInputCloud(hsv_cloud);
     // for debug
@@ -137,6 +138,7 @@ namespace jsk_pcl_ros
     std::vector<pcl::PointCloud<pcl::PointXYZHSV>::Ptr > segmented_clouds;
     for (size_t i = 0; i < input_indices->cluster_indices.size(); i++) {
       pcl::IndicesPtr indices (new std::vector<int>(input_indices->cluster_indices[i].indices));
+      point_all_size+=indices->size();
       extract.setIndices(indices);
       pcl::PointCloud<pcl::PointXYZHSV> segmented_cloud;
       extract.filter(segmented_cloud);
@@ -150,24 +152,67 @@ namespace jsk_pcl_ros
       histogram_array.histograms.push_back(ros_histogram);
     }
     all_histogram_pub_.publish(histogram_array);
-    
+
     // compare histograms
     jsk_pcl_ros::ClusterPointIndices result;
     result.header = input_indices->header;
     double best_coefficient = - DBL_MAX;
     int best_index = -1;
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr output_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+    output_cloud->width=point_all_size;
+    output_cloud->height=1; 
+    output_cloud->resize(point_all_size);
+    unsigned long count_points=0;
     for (size_t i = 0; i < input_indices->cluster_indices.size(); i++) {
       const double coefficient = bhattacharyyaCoefficient(histograms[i], reference_histogram_);
       NODELET_DEBUG_STREAM("coefficient: " << i << "::" << coefficient);
+      int tmp_point_size = input_indices->cluster_indices[i].indices.size();
+      for(int j=0; j<tmp_point_size; j++){
+	output_cloud->points[j+count_points].x=segmented_clouds[i]->points[j].x;
+	output_cloud->points[j+count_points].y=segmented_clouds[i]->points[j].y;
+	output_cloud->points[j+count_points].z=segmented_clouds[i]->points[j].z;
+	// like thermo
+	int color_index = (int)(coefficient*coefficient*coefficient*coefficient*1280);
+	char color_r, color_g, color_b;
+	switch(color_index/256){
+	case 0:
+	  color_r=0; color_g=0; color_b=color_index;
+	  break;
+	case 1:
+	  color_r=color_index-256; color_g=0; color_b=255;
+	  break;
+	case 2:
+	  color_r=255; color_g=0; color_b=255-(color_index-256*2);
+	  break;
+	case 3:
+	  color_r=255; color_g=color_index-256*3; color_b=0;
+	  break;
+	case 4:
+	  color_r=255; color_g=255; color_b=color_index-256*4;
+	  break;
+	case 5:
+	  color_r=255; color_g=255; color_b=255;
+	  break;
+	}
+	output_cloud->points[j+count_points].r=color_r;
+	output_cloud->points[j+count_points].g=color_g;
+	output_cloud->points[j+count_points].b=color_b;
+      }
+      count_points+=tmp_point_size;
       if (coefficient > coefficient_thr_) {
         result.cluster_indices.push_back(input_indices->cluster_indices[i]);
-        if (best_coefficient < coefficient) {
+	if (best_coefficient < coefficient) {
           best_coefficient = coefficient;
           best_index = i;
         }
       }
     }
     NODELET_DEBUG("best coefficients: %f, %d", best_coefficient, best_index);
+    //show coefficience with points
+    sensor_msgs::PointCloud2 p_msg;
+    pcl::toROSMsg(*output_cloud, p_msg);
+    p_msg.header=input_cloud->header;
+    coefficient_points_pub_.publish(p_msg);
     result_pub_.publish(result);
     if (best_index != -1) {
       pcl::PointCloud<pcl::PointXYZHSV>::Ptr best_cloud

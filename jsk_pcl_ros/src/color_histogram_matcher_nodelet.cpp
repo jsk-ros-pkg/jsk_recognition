@@ -38,7 +38,7 @@
 #include <pcl/filters/extract_indices.h>
 #include <pcl/point_types_conversion.h>
 #include <pcl/common/centroid.h>
-
+#include <visualization_msgs/Marker.h>
 #include <geometry_msgs/PoseStamped.h>
 
 namespace jsk_pcl_ros

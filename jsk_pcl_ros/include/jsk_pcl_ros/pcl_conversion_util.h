@@ -72,6 +72,13 @@ namespace pcl_conversions
                       geometry_msgs::Point& msg);
   void fromPCLToEigen(const pcl::PointXYZRGB& p,
                       Eigen::Vector3d& output);
+
+  std::vector<pcl::PointIndices::Ptr>
+  convertToPCLPointIndices(const std::vector<PCLIndicesMsg>& cluster_indices);
+
+  std::vector<pcl::ModelCoefficients::Ptr>
+  convertToPCLModelCoefficients(
+    const std::vector<PCLModelCoefficientMsg>& coefficients);
 }
 
 #endif

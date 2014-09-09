@@ -71,9 +71,6 @@ namespace jsk_pcl_ros
       const ClusterPointIndices::ConstPtr& input_indices,
       const ModelCoefficientsArray::ConstPtr& input_coefficients);
 
-    virtual Line::Ptr lineFromCoefficients(
-      const std::vector<float>& coefficients);
-
     virtual void publishResult(
       const std::vector<std::set<int> >& parallel_groups_list,
       const ClusterPointIndices::ConstPtr& input_indices,

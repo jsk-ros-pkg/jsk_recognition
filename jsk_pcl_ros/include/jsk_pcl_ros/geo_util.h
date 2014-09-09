@@ -43,8 +43,21 @@
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
-
+#include <boost/thread.hpp>
 #include <geometry_msgs/Polygon.h>
+#include <jsk_pcl_ros/BoundingBox.h>
+#include <boost/tuple/tuple.hpp>
+
+////////////////////////////////////////////////////////
+// PCL headers
+////////////////////////////////////////////////////////
+#include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
+#include <pcl/PointIndices.h>
+#include <pcl/filters/extract_indices.h>
+#include <pcl/ModelCoefficients.h>
+#include <pcl/filters/project_inliers.h>
+#include <pcl/surface/concave_hull.h>
 
 namespace jsk_pcl_ros
 {
@@ -52,22 +65,50 @@ namespace jsk_pcl_ros
                           Eigen::Vector3d& output);
   void convertEigenVector(const Eigen::Vector3d& input,
                           Eigen::Vector3f& output);
+  void convertEigenVector(const Eigen::Vector4d& input,
+                          Eigen::Vector3f& output);
+  void convertEigenVector(const Eigen::Vector4f& input,
+                          Eigen::Vector3f& output);
   typedef std::vector<Eigen::Vector3f,
                       Eigen::aligned_allocator<Eigen::Vector3f> > Vertices;
   
+  ////////////////////////////////////////////////////////
+  // compute quaternion from 3 unit vector
+  // these vector should be normalized and diagonal
+  ////////////////////////////////////////////////////////
+  Eigen::Quaternionf rotFrom3Axis(const Eigen::Vector3f& ex,
+                                  const Eigen::Vector3f& ey,
+                                  const Eigen::Vector3f& ez);
+  typedef Eigen::Vector3f Point;
+  typedef Eigen::Vector3f Vertex;
+  typedef std::vector<Eigen::Vector3f,
+                      Eigen::aligned_allocator<Eigen::Vector3f> > Vertices;
+  typedef boost::tuple<Point, Point> PointPair;
   // (infinite) line
   class Line
   {
   public:
     typedef boost::shared_ptr<Line> Ptr;
     Line(const Eigen::Vector3f& direction, const Eigen::Vector3f& origin);
-    virtual void getDirection(Eigen::Vector3f& output);
-    virtual double distanceToPoint(const Eigen::Vector3f& from);
-    virtual double distanceToPoint(const Eigen::Vector3f& from, Eigen::Vector3f& foot);
-    virtual double distance(const Line& other);
-    virtual void foot(const Eigen::Vector3f& point, Eigen::Vector3f& output);
-    virtual double angle(const Line& other);
-    virtual bool isParallel(const Line& other, double angle_threshold = 0.1);
+    virtual void getDirection(Eigen::Vector3f& output) const;
+    virtual void getOrigin(Eigen::Vector3f& output) const;
+    virtual double distanceToPoint(const Eigen::Vector3f& from) const;
+    virtual double distanceToPoint(const Eigen::Vector3f& from, Eigen::Vector3f& foot) const;
+    virtual double distance(const Line& other) const;
+    virtual void foot(const Eigen::Vector3f& point, Eigen::Vector3f& output) const;
+    virtual double angle(const Line& other) const;
+    virtual bool isParallel(const Line& other, double angle_threshold = 0.1) const;
+    virtual bool isPerpendicular(const Line& other, double angle_threshold = 0.1) const;
+    virtual Ptr midLine(const Line& other) const;
+    virtual Ptr parallelLineOnAPoint(const Eigen::Vector3f& p) const;
+    virtual PointPair findEndPoints(const Vertices& points) const;
+    virtual double computeAlpha(const Point& p) const;
+    virtual bool isSameDirection(const Line& other) const;
+    virtual Line::Ptr flip();
+    virtual void parallelLineNormal(const Line& other, Eigen::Vector3f& output) const;
+    static Ptr fromCoefficients(const std::vector<float>& coefficients);
+    virtual void print();
+    virtual void point(double alpha, Eigen::Vector3f& ouptut);
   protected:
     Eigen::Vector3f direction_;
     Eigen::Vector3f origin_;
@@ -79,9 +120,9 @@ namespace jsk_pcl_ros
   public:
     typedef boost::shared_ptr<Segment> Ptr;
     Segment(const Eigen::Vector3f& from, const Eigen::Vector3f to);
-    virtual void foot(const Eigen::Vector3f& point, Eigen::Vector3f& output);
-    virtual double dividingRatio(const Eigen::Vector3f& point);
-    virtual double distance(const Eigen::Vector3f& point);
+    virtual void foot(const Eigen::Vector3f& point, Eigen::Vector3f& output) const;
+    virtual double dividingRatio(const Eigen::Vector3f& point) const;
+    virtual double distance(const Eigen::Vector3f& point) const;
     //virtual double distance(const Segment& other);
   protected:
     Eigen::Vector3f from_, to_;
@@ -140,14 +181,90 @@ namespace jsk_pcl_ros
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3f& output);
     virtual void project(const Eigen::Vector3f& p, Eigen::Vector3d& output);
     virtual void projectOnPlane(const Eigen::Vector3f& p, Eigen::Vector3f& output);
+    virtual Vertices getVertices() { return vertices_; };
     // p should be a point on the plane
     virtual bool isInside(const Eigen::Vector3f& p);
     virtual ConvexPolygon flipConvex();
     virtual Eigen::Vector3f getCentroid();
+    virtual Ptr magnify(const double scale_factor);
     static ConvexPolygon fromROSMsg(const geometry_msgs::Polygon& polygon);
+    bool distanceSmallerThan(
+      const Eigen::Vector3f& p, double distance_threshold);
+    bool distanceSmallerThan(
+      const Eigen::Vector3f& p, double distance_threshold,
+      double& output_distance);
+    double area();
+    bool allEdgesLongerThan(double thr);
+    geometry_msgs::Polygon toROSMsg();
   protected:
     Vertices vertices_;
   private:
+  };
+
+  template<class PointT>
+  ConvexPolygon::Ptr convexFromCoefficientsAndInliers(
+    const typename pcl::PointCloud<PointT>::Ptr cloud,
+    const pcl::PointIndices::Ptr inliers,
+    const pcl::ModelCoefficients::Ptr coefficients) {
+    typedef typename pcl::PointCloud<PointT> POINTCLOUD;
+    typename POINTCLOUD::Ptr projected_cloud(new pcl::PointCloud<PointT>);
+    // project inliers based on coefficients
+    std::cout << "inliers: " << inliers->indices.size() << std::endl;
+    std::cout << "coefficients: " << *coefficients << std::endl;
+    pcl::ProjectInliers<PointT> proj;
+    proj.setModelType(pcl::SACMODEL_PERPENDICULAR_PLANE);
+    proj.setInputCloud(cloud);
+    proj.setModelCoefficients(coefficients);
+    proj.setIndices(inliers);
+    proj.filter(*projected_cloud);
+    // compute convex with giant mutex
+    static boost::mutex global_convex_mutex;
+    {
+      boost::mutex::scoped_lock lock(global_convex_mutex);
+      typename POINTCLOUD::Ptr convex_cloud(new pcl::PointCloud<PointT>);
+      pcl::ConvexHull<PointT> chull;
+      chull.setDimension(2);
+      chull.setInputCloud (projected_cloud);
+      chull.reconstruct (*convex_cloud);
+      if (convex_cloud->points.size() > 0) {
+        // convert pointcloud to vertices
+        Vertices vs;
+        for (size_t i = 0; i < convex_cloud->points.size(); i++) {
+          Eigen::Vector3f v = convex_cloud->points[i].getVector3fMap();
+          vs.push_back(v);
+        }
+        ConvexPolygon::Ptr convex (new ConvexPolygon(vs));
+        return convex;
+      }
+      else {
+        return ConvexPolygon::Ptr();
+      }
+    }
+  }
+  
+  class Cube
+  {
+  public:
+    typedef boost::shared_ptr<Cube> Ptr;
+    Cube(const Eigen::Vector3f& pos, const Eigen::Quaternionf& rot);
+    Cube(const Eigen::Vector3f& pos, const Eigen::Quaternionf& rot,
+         const std::vector<double>& dimensions);
+    Cube(const Eigen::Vector3f& pos, // centroid
+         const Line& line_a, const Line& line_b, const Line& line_c);
+    virtual ~Cube();
+    std::vector<double> getDimensions() const { return dimensions_; };
+    void setDimensions(const std::vector<double>& new_dimensions) {
+      dimensions_[0] = new_dimensions[0];
+      dimensions_[1] = new_dimensions[1];
+      dimensions_[2] = new_dimensions[2];
+    }
+    BoundingBox toROSMsg();
+  protected:
+    Eigen::Vector3f pos_;
+    Eigen::Quaternionf rot_;
+    std::vector<double> dimensions_;
+  private:
+    
   };
   
 }

@@ -95,6 +95,33 @@ namespace pcl_conversions
     output[2] = p.z;
   }
 
+  std::vector<pcl::PointIndices::Ptr>
+  convertToPCLPointIndices(
+    const std::vector<PCLIndicesMsg>& cluster_indices)
+  {
+    std::vector<pcl::PointIndices::Ptr> ret;
+    for (size_t i = 0; i < cluster_indices.size(); i++) {
+      std::vector<int> indices = cluster_indices[i].indices;
+      pcl::PointIndices::Ptr pcl_indices (new pcl::PointIndices);
+      pcl_indices->indices = indices;
+      ret.push_back(pcl_indices);
+    }
+    return ret;
+  }
+
+  std::vector<pcl::ModelCoefficients::Ptr>
+  convertToPCLModelCoefficients(
+    const std::vector<PCLModelCoefficientMsg>& coefficients)
+  {
+    std::vector<pcl::ModelCoefficients::Ptr> ret;
+    for (size_t i = 0; i < coefficients.size(); i++) {
+      pcl::ModelCoefficients::Ptr pcl_coefficients (new pcl::ModelCoefficients);
+      pcl_coefficients->values = coefficients[i].values;
+      ret.push_back(pcl_coefficients);
+    }
+    return ret;
+  }
+  
   void fromEigenToMSG(const Eigen::Vector3f& p,
                       geometry_msgs::Point& msg)
   {

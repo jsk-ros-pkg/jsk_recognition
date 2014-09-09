@@ -95,6 +95,11 @@ namespace jsk_pcl_ros
     bool reference_set_;
     double coefficient_thr_;
     int bin_size_;
+    bool publish_colored_cloud_;
+    int power_;
+    double color_min_coefficient_;
+    double color_max_coefficient_;
+    int show_method_;
     // must be exclusive
     ComparePolicy policy_;
   private:

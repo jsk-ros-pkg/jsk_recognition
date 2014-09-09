@@ -59,38 +59,14 @@ namespace jsk_pcl_ros
   {
   public:
     typedef pcl::PointXYZRGBA PointT;
-  protected:
-    ros::Publisher org_pub_, org_polygon_pub_, org_coefficients_pub_;
-    ros::Publisher pub_, polygon_pub_, coefficients_pub_;
-    ros::Publisher normal_pub_;
-    ros::Subscriber sub_;
-    int min_size_;
-    double concave_alpha_;
-    double angular_threshold_;
-    double distance_threshold_;
-    double max_curvature_;
-    double connect_plane_angle_threshold_;
-    double connect_plane_distance_threshold_;
-    double connect_distance_threshold_;
-    int estimation_method_;
-    bool depth_dependent_smoothing_;
-    double max_depth_change_factor_;
-    double normal_smoothing_size_;
-    bool border_policy_ignore_;
-    bool estimate_normal_;
-    bool publish_normal_;
+    typedef std::vector<pcl::PlanarRegion<PointT>,
+                        Eigen::aligned_allocator<pcl::PlanarRegion<PointT> > >
+    PlanarRegionVector;
     typedef jsk_pcl_ros::OrganizedMultiPlaneSegmentationConfig Config;
-    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
-    boost::mutex mutex_;
-    boost::shared_ptr<diagnostic_updater::Updater> diagnostic_updater_;
-    jsk_topic_tools::TimeAccumulator plane_segmentation_time_acc_;
-    jsk_topic_tools::TimeAccumulator normal_estimation_time_acc_;
-    jsk_topic_tools::VitalChecker::Ptr normal_estimation_vital_checker_;
-    jsk_topic_tools::VitalChecker::Ptr plane_segmentation_vital_checker_;
-    ros::Timer diagnostics_timer_;
-    Counter original_plane_num_counter_;
-    Counter connected_plane_num_counter_;
-
+  protected:
+    ////////////////////////////////////////////////////////
+    // methods
+    ////////////////////////////////////////////////////////
     virtual void segment(const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void estimateNormal(pcl::PointCloud<PointT>::Ptr input,
                                 pcl::PointCloud<pcl::Normal>::Ptr output);
@@ -114,14 +90,77 @@ namespace jsk_pcl_ros
                                       std::vector<pcl::ModelCoefficients>& output_coefficients,
                                       std::vector<pcl::PointCloud<PointT> >& output_boundary_clouds);
     
+    virtual void publishMarkerOfConnection(
+      const std::vector<std::map<size_t, bool> >& connection_map,
+      const pcl::PointCloud<PointT>::Ptr cloud,
+      const std::vector<pcl::PointIndices>& inliers,
+      const std_msgs::Header& header);
+
+    virtual void segmentOrganizedMultiPlanes(
+      pcl::PointCloud<PointT>::Ptr input,
+      pcl::PointCloud<pcl::Normal>::Ptr normal,
+      PlanarRegionVector& regions,
+      std::vector<pcl::ModelCoefficients>& model_coefficients,
+      std::vector<pcl::PointIndices>& inlier_indices,
+      pcl::PointCloud<pcl::Label>::Ptr& labels,
+      std::vector<pcl::PointIndices>& label_indices,
+      std::vector<pcl::PointIndices>& boundary_indices);
+    
     virtual void segmentFromNormals(pcl::PointCloud<PointT>::Ptr input,
                                     pcl::PointCloud<pcl::Normal>::Ptr normal,
                                     const std_msgs::Header& header);
+    virtual void publishSegmentationInformation(
+      const std_msgs::Header& header,
+      const pcl::PointCloud<PointT>::Ptr input,
+      const std::vector<pcl::PointIndices>& inlier_indices,
+      const std::vector<pcl::PointIndices>& boundary_indices,
+      const PlanarRegionVector& regions,
+      const std::vector<pcl::ModelCoefficients>& model_coefficients);
+
+    
     virtual void updateDiagnostics(const ros::TimerEvent& event);
     virtual void updateDiagnosticNormalEstimation(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void updateDiagnosticPlaneSegmentation(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
+    
+    ////////////////////////////////////////////////////////
+    // ROS variables
+    ////////////////////////////////////////////////////////
+    ros::Publisher org_pub_, org_polygon_pub_, org_coefficients_pub_;
+    ros::Publisher pub_, polygon_pub_, coefficients_pub_;
+    ros::Publisher normal_pub_;
+    ros::Publisher pub_connection_marker_;
+    ros::Subscriber sub_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    boost::mutex mutex_;
+    boost::shared_ptr<diagnostic_updater::Updater> diagnostic_updater_;
+    jsk_topic_tools::TimeAccumulator plane_segmentation_time_acc_;
+    jsk_topic_tools::TimeAccumulator normal_estimation_time_acc_;
+    jsk_topic_tools::VitalChecker::Ptr normal_estimation_vital_checker_;
+    jsk_topic_tools::VitalChecker::Ptr plane_segmentation_vital_checker_;
+    ros::Timer diagnostics_timer_;
+    
+    int min_size_;
+    double concave_alpha_;
+    double angular_threshold_;
+    double distance_threshold_;
+    double max_curvature_;
+    double connect_plane_angle_threshold_;
+    double connect_plane_distance_threshold_;
+    double connect_distance_threshold_;
+    int estimation_method_;
+    bool depth_dependent_smoothing_;
+    double max_depth_change_factor_;
+    double normal_smoothing_size_;
+    bool border_policy_ignore_;
+    bool estimate_normal_;
+    bool publish_normal_;
+    
+    Counter original_plane_num_counter_;
+    Counter connected_plane_num_counter_;
+
+    
   private:
     virtual void onInit();
   };

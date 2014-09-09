@@ -604,9 +604,9 @@ namespace jsk_pcl_ros
     const std::vector<float>& coefficients,
     const geometry_msgs::Polygon& polygon)
   {
-    ConvexPolygon::Vertices vertices;
+    Vertices vertices;
     for (size_t i = 0; i < polygon.points.size(); i++) {
-      ConvexPolygon::Vertex v;
+      Vertex v;
       pcl_conversions::fromMSGToEigen(polygon.points[i], v);
       vertices.push_back(v);
     }

@@ -2,6 +2,16 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.17 (2014-09-07)
+-------------------
+* add mk/git to build_depend
+* Contributors: Kei Okada
+
+0.1.16 (2014-09-04)
+-------------------
+* do not use rosrun in the script of jsk_perception/src/eusmodel_template_gen.sh
+* Contributors: Ryohei Ueda
+
 0.1.14 (2014-08-01)
 -------------------
 

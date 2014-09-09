@@ -45,12 +45,24 @@
 #include <boost/accumulators/statistics/variance.hpp>
 #include <boost/accumulators/statistics/count.hpp>
 
+#include <set>
+#include <map>
+
+#include <sensor_msgs/PointCloud2.h>
+#include <ros/ros.h>
+#include <pcl/PointIndices.h>
+#include <std_msgs/ColorRGBA.h>
 
 namespace jsk_pcl_ros
 {
   std::vector<int> addIndices(const std::vector<int>& a,
                               const std::vector<int>& b);
+  pcl::PointIndices::Ptr addIndices(const pcl::PointIndices& a,
+                                    const pcl::PointIndices& b);
 
+  // select color out of 20 colors
+  std_msgs::ColorRGBA colorCategory20(int i);
+  
   class Counter
   {
   public:
@@ -70,6 +82,43 @@ namespace jsk_pcl_ros
   protected:
     Accumulator acc_;
   };
+
+  ////////////////////////////////////////////////////////
+  // Graph utility function
+  ////////////////////////////////////////////////////////
+
+  ////////////////////////////////////////////////////////
+  // buildGroupFromGraphMap (recursive function)
+  //   This function retrieves a directional graph, and build
+  //   a set of the indices where can be arrived from a specified
+  //   vertex.
+  // 
+  //   graph_map := A map representeing edges of the graph.
+  //                The graph is one-directional graph.
+  //                the key means "from vertex" and the value
+  //                means the "to indices" from the key vertex.
+  //   from_index := The index to pay attension
+  //   to_indices := The "to indices" from from_index
+  //   output_set := result
+  ////////////////////////////////////////////////////////
+  void buildGroupFromGraphMap(std::map<int, std::vector<int> > graph_map,
+                              const int from_index,
+                              std::vector<int>& to_indices,
+                              std::set<int>& output_set);
+  
+  template <class T>
+  void addSet(std::set<T>& output,
+              const std::set<T>& new_set)
+  {
+    typedef typename std::set<T> Set;
+    typedef typename Set::iterator Iterator;
+    for (Iterator it = new_set.begin();
+         it != new_set.end();
+         ++it) {
+      output.insert(*it);
+    }
+  }
+
 }
 
 #endif

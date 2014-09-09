@@ -122,4 +122,12 @@ namespace pcl_conversions
     return ret;
   }
   
+  void fromEigenToMSG(const Eigen::Vector3f& p,
+                      geometry_msgs::Point& msg)
+  {
+    msg.x = p[0];
+    msg.y = p[1];
+    msg.z = p[2];
+  }
+  
 }

@@ -51,6 +51,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <ros/ros.h>
 #include <pcl/PointIndices.h>
+#include <std_msgs/ColorRGBA.h>
 
 namespace jsk_pcl_ros
 {
@@ -58,6 +59,10 @@ namespace jsk_pcl_ros
                               const std::vector<int>& b);
   pcl::PointIndices::Ptr addIndices(const pcl::PointIndices& a,
                                     const pcl::PointIndices& b);
+
+  // select color out of 20 colors
+  std_msgs::ColorRGBA colorCategory20(int i);
+  
   class Counter
   {
   public:

@@ -173,6 +173,8 @@ jsk_pcl_nodelet(src/depth_image_error_nodelet.cpp
   "jsk_pcl/DepthImageError" "depth_image_error")
 jsk_pcl_nodelet(src/organize_pointcloud_nodelet.cpp
   "jsk_pcl/OrganizePointCloud" "organize_pointcloud")
+jsk_pcl_nodelet(src/depth_image_creator_nodelet.cpp
+  "jsk_pcl/DepthImageCreator" "depth_image_creator")
 jsk_pcl_nodelet(src/polygon_array_wrapper_nodelet.cpp
   "jsk_pcl/PolygonArrayWrapper" "polygon_array_wrapper")
 jsk_pcl_nodelet(src/border_estimator_nodelet.cpp

@@ -69,6 +69,8 @@ namespace jsk_pcl_ros
                           Eigen::Vector3f& output);
   void convertEigenVector(const Eigen::Vector4f& input,
                           Eigen::Vector3f& output);
+  typedef std::vector<Eigen::Vector3f,
+                      Eigen::aligned_allocator<Eigen::Vector3f> > Vertices;
   
   ////////////////////////////////////////////////////////
   // compute quaternion from 3 unit vector
@@ -165,7 +167,9 @@ namespace jsk_pcl_ros
   {
   public:
     typedef boost::shared_ptr<ConvexPolygon> Ptr;
-    
+    typedef Eigen::Vector3f Vertex;
+    typedef std::vector<Eigen::Vector3f,
+                        Eigen::aligned_allocator<Eigen::Vector3f> > Vertices;
     // vertices should be CW
     ConvexPolygon(const Vertices& vertices);
     ConvexPolygon(const Vertices& vertices,

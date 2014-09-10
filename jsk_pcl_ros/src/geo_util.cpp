@@ -41,37 +41,6 @@
 
 namespace jsk_pcl_ros
 {
-  void convertEigenVector(const Eigen::Vector3f& input,
-                          Eigen::Vector3d& output)
-  {
-    output[0] = input[0];
-    output[1] = input[1];
-    output[2] = input[2];
-  }
-  void convertEigenVector(const Eigen::Vector3d& input,
-                          Eigen::Vector3f& output)
-  {
-    output[0] = input[0];
-    output[1] = input[1];
-    output[2] = input[2];
-  }
-  
-  void convertEigenVector(const Eigen::Vector4d& input,
-                          Eigen::Vector3f& output)
-  {
-    output[0] = input[0];
-    output[1] = input[1];
-    output[2] = input[2];
-  }
-
-  void convertEigenVector(const Eigen::Vector4f& input,
-                          Eigen::Vector3f& output)
-  {
-    output[0] = input[0];
-    output[1] = input[1];
-    output[2] = input[2];
-  }
-  
   Eigen::Quaternionf rotFrom3Axis(const Eigen::Vector3f& ex,
                                   const Eigen::Vector3f& ey,
                                   const Eigen::Vector3f& ez)
@@ -377,7 +346,7 @@ namespace jsk_pcl_ros
   {
     Eigen::Vector3f output_f;
     project(Eigen::Vector3f(p[0], p[1], p[2]), output_f);
-    convertEigenVector(output_f, output);
+    pointFromVectorToVector<Eigen::Vector3f, Eigen::Vector3d>(output_f, output);
   }
 
   void Plane::project(const Eigen::Vector3d& p, Eigen::Vector3f& output)
@@ -389,7 +358,7 @@ namespace jsk_pcl_ros
   {
     Eigen::Vector3f output_f;
     project(p, output);
-    convertEigenVector(output_f, output);
+    pointFromVectorToVector<Eigen::Vector3f, Eigen::Vector3d>(output_f, output);
   }
   
   Plane Plane::transform(const Eigen::Affine3d& transform)
@@ -490,7 +459,7 @@ namespace jsk_pcl_ros
     Eigen::Vector3f output_f;
     Eigen::Vector3f p_f(p[0], p[1], p[2]);
     project(p_f, output_f);
-    convertEigenVector(output_f, output);
+    pointFromVectorToVector<Eigen::Vector3f, Eigen::Vector3d>(output_f, output);
   }
   
   void ConvexPolygon::project(const Eigen::Vector3d& p, Eigen::Vector3f& output)
@@ -503,7 +472,7 @@ namespace jsk_pcl_ros
   {
     Eigen::Vector3f output_f;
     project(p, output_f);
-    convertEigenVector(output_f, output);
+    pointFromVectorToVector<Eigen::Vector3f, Eigen::Vector3d>(output_f, output);
   }
   
 
@@ -550,10 +519,11 @@ namespace jsk_pcl_ros
 
   ConvexPolygon ConvexPolygon::fromROSMsg(const geometry_msgs::Polygon& polygon)
   {
-    std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f> > vertices;
+    Vertices vertices;
     for (size_t i = 0; i < polygon.points.size(); i++) {
       Eigen::Vector3f p;
-      pcl_conversions::fromMSGToEigen(polygon.points[i], p);
+      pointFromXYZToVector<geometry_msgs::Point32, Eigen::Vector3f>(
+        polygon.points[i], p);
       vertices.push_back(p);
     }
     return ConvexPolygon(vertices);

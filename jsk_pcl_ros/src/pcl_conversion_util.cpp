@@ -37,64 +37,6 @@
 
 namespace pcl_conversions
 {
-  
-  void toPCL(const geometry_msgs::Point32& msg,
-             pcl::PointXYZRGB& p)
-  {
-    p.x = msg.x;
-    p.y = msg.y;
-    p.z = msg.z;
-  }
-
-  void toPCL(const geometry_msgs::Point32& msg,
-             pcl::PointXYZ& p)
-  {
-    p.x = msg.x;
-    p.y = msg.y;
-    p.z = msg.z;
-  }
-
-  
-  void fromPCL(const pcl::PointXYZRGB& p,
-               geometry_msgs::Point32& msg)
-  {
-    msg.x = p.x;
-    msg.y = p.y;
-    msg.z = p.z;
-  }
-
-  void fromPCL(const pcl::PointXYZ& p,
-               geometry_msgs::Point32& msg)
-  {
-    msg.x = p.x;
-    msg.y = p.y;
-    msg.z = p.z;
-  }
-
-  void fromMSGToEigen(const geometry_msgs::Point32& msg,
-                      Eigen::Vector3d& p)
-  {
-    p[0] = msg.x;
-    p[1] = msg.y;
-    p[2] = msg.z;
-  }
-
-  void fromMSGToEigen(const geometry_msgs::Point32& msg,
-                      Eigen::Vector3f& p)
-  {
-    p[0] = msg.x;
-    p[1] = msg.y;
-    p[2] = msg.z;
-  }
-
-  void fromPCLToEigen(const pcl::PointXYZRGB& p,
-                      Eigen::Vector3d& output)
-  {
-    output[0] = p.x;
-    output[1] = p.y;
-    output[2] = p.z;
-  }
-
   std::vector<pcl::PointIndices::Ptr>
   convertToPCLPointIndices(
     const std::vector<PCLIndicesMsg>& cluster_indices)
@@ -120,14 +62,6 @@ namespace pcl_conversions
       ret.push_back(pcl_coefficients);
     }
     return ret;
-  }
-  
-  void fromEigenToMSG(const Eigen::Vector3f& p,
-                      geometry_msgs::Point& msg)
-  {
-    msg.x = p[0];
-    msg.y = p[1];
-    msg.z = p[2];
   }
   
 }

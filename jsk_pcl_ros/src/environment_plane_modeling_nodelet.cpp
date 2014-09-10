@@ -266,12 +266,14 @@ namespace jsk_pcl_ros
     pcl::PointCloud<pcl::PointXYZ> cloud;
     for (size_t j = 0; j < static_polygon.polygon.points.size(); j++) {
       pcl::PointXYZ p;
-      pcl_conversions::toPCL(static_polygon.polygon.points[j], p);
+      pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZ>(
+        static_polygon.polygon.points[j], p);
       cloud.points.push_back(p);
     }
     for (size_t j = 0; j < nearest_polygon.polygon.points.size(); j++) {
       pcl::PointXYZ p;
-      pcl_conversions::toPCL(nearest_polygon.polygon.points[j], p);
+      pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZ>(
+        nearest_polygon.polygon.points[j], p);
       cloud.points.push_back(p);
     }
     pcl::PointCloud<pcl::PointXYZ> projected_cloud;
@@ -285,7 +287,8 @@ namespace jsk_pcl_ros
     output_polygon.header = nearest_polygon.header;
     for (size_t j = 0; j < chull_output.points.size(); j++) {
       geometry_msgs::Point32 p;
-      pcl_conversions::fromPCL(chull_output.points[j], p);
+      pointFromXYZToXYZ<pcl::PointXYZ, geometry_msgs::Point32>(
+        chull_output.points[j], p);
       output_polygon.polygon.points.push_back(p);
     }
   }
@@ -388,8 +391,10 @@ namespace jsk_pcl_ros
         geometry_msgs::Point32 from = convex_polygon.polygon.points[i];
         geometry_msgs::Point32 to = convex_polygon.polygon.points[i + 1];
         pcl::PointXYZRGB from_pcl, to_pcl;
-        pcl_conversions::toPCL(from, from_pcl);
-        pcl_conversions::toPCL(to, to_pcl);
+        pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZRGB>(
+          from, from_pcl);
+        pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZRGB>(
+          to, to_pcl);
         std::vector<GridIndex::Ptr> aline_indices = grid->registerLine(from_pcl, to_pcl);
         for (size_t j = 0; j < aline_indices.size(); j++) {
           line_indices.push_back(aline_indices[j]);
@@ -400,8 +405,10 @@ namespace jsk_pcl_ros
         geometry_msgs::Point32 from = convex_polygon.polygon.points[convex_polygon.polygon.points.size() - 1];
         geometry_msgs::Point32 to = convex_polygon.polygon.points[0];
         pcl::PointXYZRGB from_pcl, to_pcl;
-        pcl_conversions::toPCL(from, from_pcl);
-        pcl_conversions::toPCL(to, to_pcl);
+        pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZRGB>(
+          from, from_pcl);
+        pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZRGB>(
+          to, to_pcl);
         std::vector<GridIndex::Ptr> aline_indices = grid->registerLine(from_pcl, to_pcl);
         for (size_t j = 0; j < aline_indices.size(); j++) {
           line_indices.push_back(aline_indices[j]);
@@ -607,7 +614,8 @@ namespace jsk_pcl_ros
     Vertices vertices;
     for (size_t i = 0; i < polygon.points.size(); i++) {
       Vertex v;
-      pcl_conversions::fromMSGToEigen(polygon.points[i], v);
+      pointFromXYZToVector<geometry_msgs::Point32, Eigen::Vector3f>(
+        polygon.points[i], v);
       vertices.push_back(v);
     }
     //Plane new_grid_map(coefficients);
@@ -975,7 +983,8 @@ namespace jsk_pcl_ros
       //NODELET_INFO("sampled %d points", sampling_num);
       geometry_msgs::Point32 point = sample_polygon.polygon.points[i];
       PointT pcl_point;
-      pcl_conversions::toPCL(point, pcl_point);
+      pointFromXYZToXYZ<geometry_msgs::Point32, PointT>(
+        point, pcl_point);
       output->points.push_back(pcl_point);
     }
   }

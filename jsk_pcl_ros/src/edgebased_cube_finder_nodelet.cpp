@@ -80,7 +80,7 @@ namespace jsk_pcl_ros
     ex.setIndices(indices);
     ex.filter(*target_cloud);
     pcl::compute3DCentroid(*target_cloud, centroid);
-    convertEigenVector(centroid, output);
+    pointFromVectorToVector<Eigen::Vector4f, Eigen::Vector3f>(centroid, output);
   }
 
   void CubeHypothesis::getLinePoints(
@@ -616,9 +616,12 @@ namespace jsk_pcl_ros
     pcl::compute3DCentroid(*point_on_a, a_centroid4);
     pcl::compute3DCentroid(*point_on_b, b_centroid4);
     pcl::compute3DCentroid(*point_on_c, c_centroid4);
-    convertEigenVector(a_centroid4, a_centroid);
-    convertEigenVector(b_centroid4, b_centroid);
-    convertEigenVector(c_centroid4, c_centroid);
+    pointFromVectorToVector<Eigen::Vector4f, Eigen::Vector3f>(
+      a_centroid4, a_centroid);
+    pointFromVectorToVector<Eigen::Vector4f, Eigen::Vector3f>(
+      b_centroid4, b_centroid);
+    pointFromVectorToVector<Eigen::Vector4f, Eigen::Vector3f>(
+      c_centroid4, c_centroid);
     
     Line::Ptr line_a_aligned = axis->parallelLineOnAPoint(a_centroid);
     Line::Ptr line_b_aligned = axis->parallelLineOnAPoint(b_centroid);

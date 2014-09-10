@@ -489,8 +489,10 @@ namespace jsk_pcl_ros
         Eigen::Vector3f from_point = centroids[from_index];
         Eigen::Vector3f to_point = centroids[to_index];
         geometry_msgs::Point from_point_ros, to_point_ros;
-        pcl_conversions::fromEigenToMSG(from_point, from_point_ros);
-        pcl_conversions::fromEigenToMSG(to_point, to_point_ros);
+        pointFromVectorToXYZ<Eigen::Vector3f, geometry_msgs::Point>(
+          from_point, from_point_ros);
+        pointFromVectorToXYZ<Eigen::Vector3f, geometry_msgs::Point>(
+          to_point, to_point_ros);
         connection_marker.points.push_back(from_point_ros);
         connection_marker.points.push_back(to_point_ros);
         connection_marker.colors.push_back(colorCategory20(from_index));

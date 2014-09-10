@@ -61,14 +61,6 @@
 
 namespace jsk_pcl_ros
 {
-  void convertEigenVector(const Eigen::Vector3f& input,
-                          Eigen::Vector3d& output);
-  void convertEigenVector(const Eigen::Vector3d& input,
-                          Eigen::Vector3f& output);
-  void convertEigenVector(const Eigen::Vector4d& input,
-                          Eigen::Vector3f& output);
-  void convertEigenVector(const Eigen::Vector4f& input,
-                          Eigen::Vector3f& output);
   typedef std::vector<Eigen::Vector3f,
                       Eigen::aligned_allocator<Eigen::Vector3f> > Vertices;
   

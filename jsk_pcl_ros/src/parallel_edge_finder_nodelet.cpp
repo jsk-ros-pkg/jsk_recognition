@@ -68,19 +68,6 @@ namespace jsk_pcl_ros
                                         this, _1, _2));
   }
 
-  Line::Ptr ParallelEdgeFinder::lineFromCoefficients(
-    const std::vector<float>& coefficients)
-  {
-    Eigen::Vector3f p(coefficients[0],
-                      coefficients[1],
-                      coefficients[2]);
-    Eigen::Vector3f d(coefficients[3],
-                      coefficients[4],
-                      coefficients[5]);
-    Line::Ptr ret (new Line(d, p));
-    return ret;
-  }
-
   void ParallelEdgeFinder::configCallback(
     Config &config, uint32_t level)
   {
@@ -97,10 +84,13 @@ namespace jsk_pcl_ros
     // first, build Line instances
     ////////////////////////////////////////////////////////
     std::vector<Line::Ptr> lines;
+    if (input_coefficients->coefficients.size() == 0) {
+      return;
+    }
     for (size_t i = 0; i < input_coefficients->coefficients.size(); i++) {
       std::vector<float> the_coefficients
         = input_coefficients->coefficients[i].values;
-      lines.push_back(lineFromCoefficients(the_coefficients));
+      lines.push_back(Line::fromCoefficients(the_coefficients));
     }
 
     std::map<int, std::vector<int> > parallel_map;
@@ -114,7 +104,7 @@ namespace jsk_pcl_ros
         }
       }
     }
-
+    
     // build 'Group' recursively
     // list of set of the indices of parallel edges
     std::vector<std::set<int> > parallel_groups_list;

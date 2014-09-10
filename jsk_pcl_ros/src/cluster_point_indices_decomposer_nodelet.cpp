@@ -47,7 +47,7 @@
 
 #include "jsk_pcl_ros/geo_util.h"
 #include "jsk_pcl_ros/pcl_conversion_util.h"
-
+#include "jsk_pcl_ros/pcl_util.h"
 namespace jsk_pcl_ros
 {
   ClusterPointIndicesDecomposer::ClusterPointIndicesDecomposer() {}
@@ -57,14 +57,6 @@ namespace jsk_pcl_ros
   void ClusterPointIndicesDecomposer::onInit()
   {
     PCLNodelet::onInit();
-
-    colors_.push_back(makeColor(1.0, 0.0, 0.0, 1.0));
-    colors_.push_back(makeColor(0.0, 1.0, 0.0, 1.0));
-    colors_.push_back(makeColor(0.0, 0.0, 1.0, 1.0));
-    colors_.push_back(makeColor(1.0, 1.0, 0.0, 1.0));
-    colors_.push_back(makeColor(1.0, 0.0, 1.0, 1.0));
-    colors_.push_back(makeColor(0.0, 1.0, 1.0, 1.0));
-    colors_.push_back(makeColor(1.0, 1.0, 1.0, 1.0));
 
     pnh_.reset (new ros::NodeHandle (getPrivateNodeHandle ()));
     pc_pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("debug_output", 1);
@@ -120,9 +112,9 @@ namespace jsk_pcl_ros
     int nearest_index = -1;
     for (size_t i = 0; i < coefficients->coefficients.size(); i++) {
       geometry_msgs::PolygonStamped polygon_msg = planes->polygons[i];
-      ConvexPolygon::Vertices vertices;
+      Vertices vertices;
       for (size_t j = 0; j < polygon_msg.polygon.points.size(); j++) {
-        ConvexPolygon::Vertex v;
+        Vertex v;
         v[0] = polygon_msg.polygon.points[j].x;
         v[1] = polygon_msg.polygon.points[j].y;
         v[2] = polygon_msg.polygon.points[j].z;
@@ -247,7 +239,7 @@ namespace jsk_pcl_ros
    size_t i,
    pcl::PointCloud<pcl::PointXYZRGB>& debug_output)
   {
-    uint32_t rgb = colorRGBAToUInt32(colors_[i % colors_.size()]);
+    uint32_t rgb = colorRGBAToUInt32(colorCategory20(i));
     for (size_t j = 0; j < segmented_cloud->points.size(); j++) {
       pcl::PointXYZRGB p;
       p.x= segmented_cloud->points[j].x;

@@ -86,7 +86,6 @@ namespace jsk_pcl_ros
     virtual void timerCallback(const ros::TimerEvent& event);
     virtual void publishPolygon(const ros::Time& stamp);
     virtual bool readPolygonArray(const std::string& param);
-    virtual bool readFrameIds(const std::string& param);
     virtual double getXMLDoubleValue(XmlRpc::XmlRpcValue val);
     virtual PCLModelCoefficientMsg polygonToModelCoefficients(const geometry_msgs::PolygonStamped& polygon);
     virtual void triggerCallback(const sensor_msgs::PointCloud2::ConstPtr& input,

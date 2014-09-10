@@ -2,6 +2,34 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.17 (2014-09-07)
+-------------------
+* add laser_registration.launch
+* Contributors: Yuki Furuta
+
+0.1.16 (2014-09-04)
+-------------------
+* bugfix: add depth_image_creator to jsk_pcl_nodelet on catkin.cmake
+* a launch file for stereo camera using pointgrey
+* Publish ModelCoefficients from EdgeDepthRefinement
+* Add new nodelet to detect parallel edge
+* Remove duplicated edges according to the line coefficients in
+  EdgeDepthRefinement
+* do not use EIGEN_ALIGNED_NEW_OPERATOR and use onInit super method on
+  PointcloudScreenpoint
+* Remove several unused headers from ParticleFilterTracking
+* not compile OrganizedEdgeDetector on groovy
+* add a new nodelet to refine edges based on depth connectivity
+* Detect straight edges from organized pointcloud
+* toggle edge feature by rqt_reqoncifugre in OrganizedEdgeDetector
+* add new nodelet: OrganizedEdgeDetector, which is only available with
+  latest PCL
+* Do not include header of cloud viewer in region_growing_segmentation.h
+* Add more diagnostic information to OrganizedMultiPlaneSegmentation
+* downsample rgb as well as pointcloud in openni2_remote.launch
+* add new nodelet: BorderEstimator
+* Contributors: Ryohei Ueda, Yuki Furuta
+
 0.1.14 (2014-08-01)
 -------------------
 * add bounging box movement msg

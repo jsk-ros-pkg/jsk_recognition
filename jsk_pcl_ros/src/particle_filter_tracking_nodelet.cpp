@@ -94,6 +94,8 @@ namespace jsk_pcl_ros
     pnh_->getParam("epsilon", epsilon);
     bool use_normal = false;
     pnh_->getParam("use_normal", use_normal);
+    bool use_hsv = true;
+    pnh_->getParam("use_hsv", use_hsv);
     int iteration_num = 1;
     pnh_->getParam("iteration_num", iteration_num);
     double resample_likelihood_thr = 0.0;
@@ -167,6 +169,14 @@ namespace jsk_pcl_ros
       = boost::shared_ptr<DistanceCoherence<pcl::PointXYZRGBA> > (new DistanceCoherence<pcl::PointXYZRGBA> ());
     coherence->addPointCoherence (distance_coherence);
 
+    //add HSV coherence
+    if (use_hsv)
+    {
+        boost::shared_ptr<HSVColorCoherence<pcl::PointXYZRGBA> > hsv_color_coherence
+            = boost::shared_ptr<HSVColorCoherence<pcl::PointXYZRGBA> > (new HSVColorCoherence<pcl::PointXYZRGBA> ());
+        coherence->addPointCoherence (hsv_color_coherence);
+    }
+    
     boost::shared_ptr<pcl::search::Octree<pcl::PointXYZRGBA> > search (new pcl::search::Octree<pcl::PointXYZRGBA> (octree_resolution));
     coherence->setSearchMethod (search);
     coherence->setMaximumDistance (octree_resolution);

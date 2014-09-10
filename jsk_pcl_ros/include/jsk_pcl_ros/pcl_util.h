@@ -94,18 +94,35 @@ namespace jsk_pcl_ros
   //   vertex.
   // 
   //   graph_map := A map representeing edges of the graph.
-  //                The graph is one-directional graph.
+  //                The graph is bidirectional graph.
   //                the key means "from vertex" and the value
   //                means the "to indices" from the key vertex.
   //   from_index := The index to pay attension
   //   to_indices := The "to indices" from from_index
   //   output_set := result
   ////////////////////////////////////////////////////////
-  void buildGroupFromGraphMap(std::map<int, std::vector<int> > graph_map,
+  typedef std::map<int, std::vector<int> > IntegerGraphMap;
+  
+  void buildGroupFromGraphMap(IntegerGraphMap graph_map,
+                              const int from_index,
+                              std::vector<int>& to_indices,
+                              std::set<int>& output_set);
+  void _buildGroupFromGraphMap(IntegerGraphMap graph_map,
                               const int from_index,
                               std::vector<int>& to_indices,
                               std::set<int>& output_set);
   
+  ////////////////////////////////////////////////////////
+  // buildAllGraphSetFromGraphMap
+  //   get all the list of set represented in graph_map
+  ////////////////////////////////////////////////////////
+  void buildAllGroupsSetFromGraphMap(IntegerGraphMap graph_map,
+                                     std::vector<std::set<int> >& output_sets);
+  
+  ////////////////////////////////////////////////////////
+  // addSet<class>(A, B)
+  //   add two set like A = A + B
+  ////////////////////////////////////////////////////////
   template <class T>
   void addSet(std::set<T>& output,
               const std::set<T>& new_set)

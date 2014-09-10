@@ -187,6 +187,18 @@ namespace jsk_pcl_ros
     virtual ConvexPolygon flipConvex();
     virtual Eigen::Vector3f getCentroid();
     virtual Ptr magnify(const double scale_factor);
+    
+    template<class PointT> void boundariesToPointCloud(
+      pcl::PointCloud<PointT>& output) {
+      output.points.resize(vertices_.size());
+      for (size_t i = 0; i < vertices_.size(); i++) {
+        Eigen::Vector3f v = vertices_[i];
+        PointT p;
+        p.x = v[0]; p.y = v[1]; p.z = v[2];
+        output.points[i] = p;
+      }
+    }
+    
     static ConvexPolygon fromROSMsg(const geometry_msgs::Polygon& polygon);
     bool distanceSmallerThan(
       const Eigen::Vector3f& p, double distance_threshold);
@@ -209,8 +221,8 @@ namespace jsk_pcl_ros
     typedef typename pcl::PointCloud<PointT> POINTCLOUD;
     typename POINTCLOUD::Ptr projected_cloud(new pcl::PointCloud<PointT>);
     // project inliers based on coefficients
-    std::cout << "inliers: " << inliers->indices.size() << std::endl;
-    std::cout << "coefficients: " << *coefficients << std::endl;
+    // std::cout << "inliers: " << inliers->indices.size() << std::endl;
+    // std::cout << "coefficients: " << *coefficients << std::endl;
     pcl::ProjectInliers<PointT> proj;
     proj.setModelType(pcl::SACMODEL_PERPENDICULAR_PLANE);
     proj.setInputCloud(cloud);
@@ -233,8 +245,7 @@ namespace jsk_pcl_ros
           Eigen::Vector3f v = convex_cloud->points[i].getVector3fMap();
           vs.push_back(v);
         }
-        ConvexPolygon::Ptr convex (new ConvexPolygon(vs));
-        return convex;
+        return ConvexPolygon::Ptr(new ConvexPolygon(vs));
       }
       else {
         return ConvexPolygon::Ptr();

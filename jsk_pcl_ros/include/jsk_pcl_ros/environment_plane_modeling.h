@@ -62,6 +62,7 @@
 #include <jsk_topic_tools/time_accumulator.h>
 
 #include "jsk_pcl_ros/grid_map.h"
+#include "jsk_pcl_ros/pcl_util.h"
 
 namespace jsk_pcl_ros
 {

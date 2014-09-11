@@ -173,6 +173,7 @@ namespace jsk_pcl_ros
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3f& output);
     virtual void project(const Eigen::Vector3f& p, Eigen::Vector3d& output);
     virtual void projectOnPlane(const Eigen::Vector3f& p, Eigen::Vector3f& output);
+    virtual bool isProjectableInside(const Eigen::Vector3f& p);
     virtual Vertices getVertices() { return vertices_; };
     // p should be a point on the plane
     virtual bool isInside(const Eigen::Vector3f& p);

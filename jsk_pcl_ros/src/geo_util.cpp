@@ -619,6 +619,13 @@ namespace jsk_pcl_ros
     }
     return polygon;
   }
+
+  bool ConvexPolygon::isProjectableInside(const Eigen::Vector3f& p)
+  {
+    Eigen::Vector3f foot_point;
+    Plane::project(p, foot_point);
+    return isInside(foot_point);
+  }
   
   Cube::Cube(const Eigen::Vector3f& pos, const Eigen::Quaternionf& rot):
     pos_(pos), rot_(rot)

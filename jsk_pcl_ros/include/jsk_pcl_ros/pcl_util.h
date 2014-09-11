@@ -53,6 +53,10 @@
 #include <pcl/PointIndices.h>
 #include <std_msgs/ColorRGBA.h>
 
+#include <jsk_topic_tools/time_accumulator.h>
+
+#include <diagnostic_updater/diagnostic_updater.h>
+
 namespace jsk_pcl_ros
 {
   std::vector<int> addIndices(const std::vector<int>& a,
@@ -136,6 +140,14 @@ namespace jsk_pcl_ros
     }
   }
 
+  ////////////////////////////////////////////////////////
+  // add TimeAcumulator information to Diagnostics
+  ////////////////////////////////////////////////////////
+  void addDiagnosticInformation(
+    const std::string& string_prefix,
+    jsk_topic_tools::TimeAccumulator& accumulator,
+    diagnostic_updater::DiagnosticStatusWrapper& stat);
+  
 }
 
 #endif

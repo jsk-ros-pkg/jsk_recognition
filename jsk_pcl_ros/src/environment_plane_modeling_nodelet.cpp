@@ -145,43 +145,15 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "EnvironmentPlaneModeling running");
-    
-    stat.add("Time to estimate occlusion (Avg.)",
-             occlusion_estimate_time_acc_.mean());
-    stat.add("Time to estimate occlusion (Max)",
-             occlusion_estimate_time_acc_.max());
-    stat.add("Time to estimate occlusion (Min)",
-             occlusion_estimate_time_acc_.min());
-    stat.add("Time to estimate occlusion (Var.)",
-             occlusion_estimate_time_acc_.variance());
-
-    stat.add("Time to build grid (Avg.)",
-             grid_building_time_acc_.mean());
-    stat.add("Time to build grid (Max)",
-             grid_building_time_acc_.max());
-    stat.add("Time to build grid (Min)",
-             grid_building_time_acc_.min());
-    stat.add("Time to build grid (Var.)",
-             grid_building_time_acc_.variance());
-
-    stat.add("Time to build kdtree (Avg.)",
-             kdtree_building_time_acc_.mean());
-    stat.add("Time to build kdtree (Max)",
-             kdtree_building_time_acc_.max());
-    stat.add("Time to build kdtree (Min)",
-             kdtree_building_time_acc_.min());
-    stat.add("Time to build kdtree (Var.)",
-             kdtree_building_time_acc_.variance());
-    
-    stat.add("Time to check collision of polygons (Avg.)",
-             polygon_collision_check_time_acc_.mean());
-    stat.add("Time to check collision of polygons (Max)",
-             polygon_collision_check_time_acc_.max());
-    stat.add("Time to check collision of polygons (Min)",
-             polygon_collision_check_time_acc_.min());
-    stat.add("Time to check collision of polygons (Var.)",
-             polygon_collision_check_time_acc_.variance());
-    
+    addDiagnosticInformation(
+      "Time to estimate occlusion", occlusion_estimate_time_acc_, stat);
+    addDiagnosticInformation(
+      "Time to build grid", grid_building_time_acc_, stat);
+    addDiagnosticInformation(
+      "Time to build kdtree", kdtree_building_time_acc_, stat);
+    addDiagnosticInformation(
+      "Time to check collision of polygons",
+      polygon_collision_check_time_acc_, stat);
   }
   
   void EnvironmentPlaneModeling::inputCallback(

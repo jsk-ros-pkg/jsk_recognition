@@ -689,14 +689,8 @@ namespace jsk_pcl_ros
       bool alivep = normal_estimation_vital_checker_->isAlive();
       if (alivep) {
         stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "NormalEstimation running");
-        stat.add("Time to estimate normal (Avg.)",
-                 normal_estimation_time_acc_.mean());
-        stat.add("Time to estimate normal (Max)",
-                 normal_estimation_time_acc_.max());
-        stat.add("Time to estimate normal (Min)",
-                 normal_estimation_time_acc_.min());
-        stat.add("Time to estimate normal (Var.)",
-                 normal_estimation_time_acc_.variance());
+        addDiagnosticInformation(
+          "Time to estimate normal", normal_estimation_time_acc_, stat);
         // normal estimation parameters
         if (estimation_method_ == 0) {
           stat.add("Estimation Method", "AVERAGE_3D_GRADIENT");
@@ -748,14 +742,8 @@ namespace jsk_pcl_ros
     if (alivep) {
       stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
                    "PlaneSegmentation running");
-      stat.add("Time to segment planes (Avg.)",
-               plane_segmentation_time_acc_.mean());
-      stat.add("Time to segment planes (Max)",
-               plane_segmentation_time_acc_.max());
-      stat.add("Time to segment planes (Min)",
-               plane_segmentation_time_acc_.min());
-      stat.add("Time to segment planes (Var.)",
-               plane_segmentation_time_acc_.variance());
+      addDiagnosticInformation(
+        "Time to segment planes", plane_segmentation_time_acc_, stat);
       stat.add("Minimum Inliers", min_size_);
       stat.add("Angular Threshold (rad)", angular_threshold_);
       stat.add("Angular Threshold (deg)", angular_threshold_ / M_PI * 180.0);

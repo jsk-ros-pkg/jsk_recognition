@@ -40,13 +40,12 @@ namespace jsk_pcl_ros
     boost::mutex mutex_;
     
     void onInit () {
-      NODELET_INFO("[%s::onInit]", getName().c_str());
       pcl_ros::PCLNodelet::onInit();
 
       pnh_->param("step_x", step_x_, 2);
-      ROS_INFO("step_x : %d", step_x_);
+      NODELET_INFO("step_x : %d", step_x_);
       pnh_->param("step_y", step_y_, 2);
-      ROS_INFO("step_y : %d", step_y_);
+      NODELET_INFO("step_y : %d", step_y_);
       bool not_use_rgb;
       pnh_->param("not_use_rgb", not_use_rgb, false);
       pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
@@ -141,7 +140,7 @@ namespace jsk_pcl_ros
         ros_out.row_step = ros_out.point_step * ros_out.width;
         ros_out.is_dense = input->is_dense;
 #if DEBUG
-        ROS_INFO("%dx%d (%d %d)(%d %d) -> %dx%d %d", width,height, ox, oy, sx, sy,
+        NODELET_INFO("%dx%d (%d %d)(%d %d) -> %dx%d %d", width,height, ox, oy, sx, sy,
                  ros_out.width, ros_out.height, ex_indices.size());
 #endif
         pub_.publish(ros_out);

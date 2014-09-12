@@ -62,12 +62,14 @@ namespace jsk_pcl_ros
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_indices_.subscribe(*pnh_, "input_indices", 1);
     sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
-
+    sub_polygons_.subscribe(*pnh_, "input_polygons", 1);
+    
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-    sync_->connectInput(sub_input_, sub_indices_, sub_coefficients_);
+    sync_->connectInput(sub_input_, sub_indices_, sub_coefficients_,
+                        sub_polygons_);
     sync_->registerCallback(boost::bind(
                               &ColorizeDistanceFromPlane::colorize,
-                              this, _1, _2, _3));
+                              this, _1, _2, _3, _4));
 
   }
 
@@ -114,7 +116,8 @@ namespace jsk_pcl_ros
   void ColorizeDistanceFromPlane::colorize(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
     const ClusterPointIndices::ConstPtr& indices_msg,
-    const ModelCoefficientsArray::ConstPtr& coefficients_msg)
+    const ModelCoefficientsArray::ConstPtr& coefficients_msg,
+    const PolygonArray::ConstPtr& polygons)
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (indices_msg->cluster_indices.size() == 0) {
@@ -135,11 +138,12 @@ namespace jsk_pcl_ros
     
     // first, build ConvexPolygon::Ptr
     std::vector<ConvexPolygon::Ptr> convexes;
-    for (size_t i = 0; i < indices.size(); i++) {
-      ConvexPolygon::Ptr convex =
-        convexFromCoefficientsAndInliers<PointT>(
-          cloud, indices[i], coefficients[i]);
-      convexes.push_back(convex);
+    for (size_t i = 0; i < polygons->polygons.size(); i++) {
+      ConvexPolygon convex =
+        ConvexPolygon::fromROSMsg(polygons->polygons[i].polygon);
+      ConvexPolygon::Ptr convex_ptr
+        = boost::make_shared<ConvexPolygon>(convex);
+      convexes.push_back(convex_ptr);
     }
 
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr output_cloud

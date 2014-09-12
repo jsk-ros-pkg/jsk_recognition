@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.18 (2014-09-13)
+-------------------
 * Subscribe PolygonArray message to build ConvexPolygon in ColorizeDistanceFromPlane
 * Introduce global mutex for quick hull
 * Fix coloring bug and add ~only_projectable parameter to visualize the

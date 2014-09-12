@@ -258,6 +258,12 @@
       jsk_pcl_ros::ColorizeRandomForest
     </description>
   </class>
+  <class name="jsk_pcl/ColorizeDistanceFromPlane" type="ColorizeDistanceFromPlane"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      colorize pointcloud according to the distance from the nearest plane
+    </description>
+  </class>
   <class name="jsk_pcl/ColorizeMapRandomForest" type="ColorizeMapRandomForest"
          base_class_type="nodelet::Nodelet">
     <description>

@@ -307,6 +307,17 @@ namespace jsk_pcl_ros
       }
     }
   }
+
+  void addDiagnosticInformation(
+    const std::string& string_prefix,
+    jsk_topic_tools::TimeAccumulator& accumulator,
+    diagnostic_updater::DiagnosticStatusWrapper& stat)
+  {
+    stat.add(string_prefix + " (Avg.)", accumulator.mean());
+    stat.add(string_prefix + " (Max)", accumulator.max());
+    stat.add(string_prefix + " (Min)", accumulator.min());
+    stat.add(string_prefix + " (Var.)", accumulator.variance());
+  }
   
 }
 

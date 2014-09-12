@@ -35,6 +35,7 @@
 
 #ifndef JSK_PCL_ROS_GEO_UTIL_H_
 #define JSK_PCL_ROS_GEO_UTIL_H_
+#define BOOST_PARAMETER_MAX_ARITY 7 
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -58,6 +59,8 @@
 #include <pcl/ModelCoefficients.h>
 #include <pcl/filters/project_inliers.h>
 #include <pcl/surface/concave_hull.h>
+
+#include "jsk_pcl_ros/pcl_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -223,9 +226,8 @@ namespace jsk_pcl_ros
     proj.setIndices(inliers);
     proj.filter(*projected_cloud);
     // compute convex with giant mutex
-    static boost::mutex global_convex_mutex;
     {
-      boost::mutex::scoped_lock lock(global_convex_mutex);
+      boost::mutex::scoped_lock lock(global_chull_mutex);
       typename POINTCLOUD::Ptr convex_cloud(new pcl::PointCloud<PointT>);
       pcl::ConvexHull<PointT> chull;
       chull.setDimension(2);

@@ -2,6 +2,12 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Creating publisher before subscribe topics in resized_image_transport
+* Supress messages from resized_image_transport
+* Contributors: Ryohei Ueda
+
 0.1.17 (2014-09-07)
 -------------------
 

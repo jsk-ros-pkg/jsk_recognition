@@ -2,6 +2,11 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* add git to build_depend of jsk_libfreenect2
+* Contributors: Ryohei Ueda
+
 0.1.17 (2014-09-07)
 -------------------
 * add mk/git to build_depend

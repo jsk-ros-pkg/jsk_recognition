@@ -79,9 +79,11 @@ namespace jsk_pcl_ros
     double min_distance = DBL_MAX;
     for (size_t i = 0; i < convexes.size(); i++) {
       ConvexPolygon::Ptr convex = convexes[i];
-      double d = convex->distanceToPoint(v);
-      if (d < min_distance) {
-        min_distance = d;
+      if (!only_projectable_ || convex->isProjectableInside(v)) {
+        double d = convex->distanceToPoint(v);
+        if (d < min_distance) {
+          min_distance = d;
+        }
       }
     }
     return min_distance;
@@ -94,10 +96,10 @@ namespace jsk_pcl_ros
       ratio = 1.0;
     }
     else if (d < min_distance_) {
-      ratio = 1.0;
+      ratio = 0.0;
     }
     else {
-      ratio = (max_distance_ - d) / (max_distance_ - min_distance_);
+      ratio = fabs(min_distance_ - d) / (max_distance_ - min_distance_);
     }
     double r = ratio;
     double g = 0.0;
@@ -115,6 +117,10 @@ namespace jsk_pcl_ros
     const ModelCoefficientsArray::ConstPtr& coefficients_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    if (indices_msg->cluster_indices.size() == 0) {
+      // no indices
+      return;
+    }
     // convert all the data into pcl format
     pcl::PointCloud<PointT>::Ptr cloud
       (new pcl::PointCloud<PointT>);
@@ -144,9 +150,11 @@ namespace jsk_pcl_ros
       pcl::PointXYZRGB p_output;
       pointFromXYZToXYZ<PointT, pcl::PointXYZRGB>(p, p_output);
       double d = distanceToConvexes(p, convexes);
-      uint32_t color = colorForDistance(d);
-      p_output.rgb = *reinterpret_cast<float*>(&color);
-      output_cloud->points.push_back(p_output);
+      if (d != DBL_MAX) {
+        uint32_t color = colorForDistance(d);
+        p_output.rgb = *reinterpret_cast<float*>(&color);
+        output_cloud->points.push_back(p_output);
+      }
     }
     
     sensor_msgs::PointCloud2 ros_output;

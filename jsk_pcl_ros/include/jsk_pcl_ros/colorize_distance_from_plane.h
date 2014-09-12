@@ -94,6 +94,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     double max_distance_;
     double min_distance_;
+    bool only_projectable_;
     
   private:
     

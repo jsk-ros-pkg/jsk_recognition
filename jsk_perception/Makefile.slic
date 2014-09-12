@@ -12,8 +12,11 @@ NUM_OF_CPUS = $(shell grep -c '^processor' /proc/cpuinfo)
 
 include $(MK_DIR)/git_checkout.mk
 
+disable_ssl:
+	git config --global http.sslVerify false
+
 clean:
 	-cd $(GIT_DIR) && make clean
 
-download:
+download: disable_ssl
 	git clone $(GIT_URL) $(GIT_DIR); (cd ${GIT_DIR}; git checkout $(GIT_REVISION) up; rm -f `rospack find jsk_perception`/installed)

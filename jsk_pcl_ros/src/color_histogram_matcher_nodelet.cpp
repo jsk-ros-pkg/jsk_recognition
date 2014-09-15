@@ -83,6 +83,11 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     coefficient_thr_ = config.coefficient_thr;
     bin_size_ = config.bin_size;
+    publish_colored_cloud_ = config.publish_colored_cloud;
+    power_ = config.power;
+    color_min_coefficient_ = config.color_min_coefficient;
+    color_max_coefficient_ = config.color_max_coefficient;
+    show_method_ = config.show_method;
     ComparePolicy new_histogram;
     if (config.histogram_method == 0) {
       new_histogram = USE_HUE;
@@ -159,46 +164,71 @@ namespace jsk_pcl_ros
     double best_coefficient = - DBL_MAX;
     int best_index = -1;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr output_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-    output_cloud->width=point_all_size;
-    output_cloud->height=1; 
-    output_cloud->resize(point_all_size);
+    if(publish_colored_cloud_){
+      output_cloud->width=point_all_size;
+      output_cloud->height=1; 
+      output_cloud->resize(point_all_size);
+    }
     unsigned long count_points=0;
     for (size_t i = 0; i < input_indices->cluster_indices.size(); i++) {
       const double coefficient = bhattacharyyaCoefficient(histograms[i], reference_histogram_);
       NODELET_DEBUG_STREAM("coefficient: " << i << "::" << coefficient);
-      int tmp_point_size = input_indices->cluster_indices[i].indices.size();
-      for(int j=0; j<tmp_point_size; j++){
-	output_cloud->points[j+count_points].x=segmented_clouds[i]->points[j].x;
-	output_cloud->points[j+count_points].y=segmented_clouds[i]->points[j].y;
-	output_cloud->points[j+count_points].z=segmented_clouds[i]->points[j].z;
-	// like thermo
-	int color_index = (int)(coefficient*coefficient*coefficient*coefficient*1280);
-	char color_r, color_g, color_b;
-	switch(color_index/256){
+      if(publish_colored_cloud_){
+	int tmp_point_size = input_indices->cluster_indices[i].indices.size();
+	double color_standard;
+	if(color_min_coefficient_ > coefficient){
+	  color_standard = 0;
+	} else if(color_max_coefficient_ < coefficient){
+	  color_standard = 1;
+	} else{
+	  color_standard = (coefficient - color_min_coefficient_) / (color_max_coefficient_ - color_min_coefficient_);
+	}
+	double color_standard_powered = 1;
+	for (int k=0; k<power_; k++){
+	  color_standard_powered *= color_standard;
+	}
+	unsigned char color_r, color_g, color_b;
+	switch(show_method_){
 	case 0:
-	  color_r=0; color_g=0; color_b=color_index;
+	  color_r=(int)(255*color_standard_powered);
+	  color_g=0;
+	  color_b=(int)(255*(1-color_standard_powered));
 	  break;
 	case 1:
+	  // like thermo
+	  int color_index = (int)(color_standard_powered*1280);
+	  switch(color_index/256){
+	  case 0:
+	    color_r=0; color_g=0; color_b=color_index;
+	    break;
+	  case 1:
 	  color_r=color_index-256; color_g=0; color_b=255;
 	  break;
-	case 2:
-	  color_r=255; color_g=0; color_b=255-(color_index-256*2);
-	  break;
-	case 3:
-	  color_r=255; color_g=color_index-256*3; color_b=0;
-	  break;
-	case 4:
-	  color_r=255; color_g=255; color_b=color_index-256*4;
-	  break;
-	case 5:
-	  color_r=255; color_g=255; color_b=255;
+	  case 2:
+	    color_r=255; color_g=0; color_b=255-(color_index-256*2);
+	    break;
+	  case 3:
+	    color_r=255; color_g=color_index-256*3; color_b=0;
+	    break;
+	  case 4:
+	    color_r=255; color_g=255; color_b=color_index-256*4;
+	    break;
+	  case 5:
+	    color_r=255; color_g=255; color_b=255;
+	    break;
+	  }
 	  break;
 	}
-	output_cloud->points[j+count_points].r=color_r;
-	output_cloud->points[j+count_points].g=color_g;
-	output_cloud->points[j+count_points].b=color_b;
+	for(int j=0; j<tmp_point_size; j++){
+	  output_cloud->points[j+count_points].x=segmented_clouds[i]->points[j].x;
+	  output_cloud->points[j+count_points].y=segmented_clouds[i]->points[j].y;
+	  output_cloud->points[j+count_points].z=segmented_clouds[i]->points[j].z;
+	  output_cloud->points[j+count_points].r=color_r;
+	  output_cloud->points[j+count_points].g=color_g;
+	  output_cloud->points[j+count_points].b=color_b;
+	}
+	count_points+=tmp_point_size;
       }
-      count_points+=tmp_point_size;
       if (coefficient > coefficient_thr_) {
         result.cluster_indices.push_back(input_indices->cluster_indices[i]);
 	if (best_coefficient < coefficient) {
@@ -210,9 +240,11 @@ namespace jsk_pcl_ros
     NODELET_DEBUG("best coefficients: %f, %d", best_coefficient, best_index);
     //show coefficience with points
     sensor_msgs::PointCloud2 p_msg;
-    pcl::toROSMsg(*output_cloud, p_msg);
-    p_msg.header=input_cloud->header;
-    coefficient_points_pub_.publish(p_msg);
+    if(publish_colored_cloud_){
+      pcl::toROSMsg(*output_cloud, p_msg);
+      p_msg.header=input_cloud->header;
+      coefficient_points_pub_.publish(p_msg);
+    }
     result_pub_.publish(result);
     if (best_index != -1) {
       pcl::PointCloud<pcl::PointXYZHSV>::Ptr best_cloud

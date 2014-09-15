@@ -57,7 +57,7 @@ namespace jsk_pcl_ros
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr output_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
     if (grid_.size() == 0) {
-      ROS_INFO("the number of registered grids is 0, skipping");
+      NODELET_DEBUG("the number of registered grids is 0, skipping");
       return;
     }
     fromROSMsg(*input, *cloud);
@@ -99,9 +99,9 @@ namespace jsk_pcl_ros
       pass_z.setFilterFieldName("z");
       pass_z.setFilterLimits(min_z, max_z);
 
-      ROS_INFO_STREAM(id << " filter x: " << min_x << " - " << max_x);
-      ROS_INFO_STREAM(id << " filter y: " << min_y << " - " << max_y);
-      ROS_INFO_STREAM(id << " filter z: " << min_z << " - " << max_z);
+      NODELET_DEBUG_STREAM(id << " filter x: " << min_x << " - " << max_x);
+      NODELET_DEBUG_STREAM(id << " filter y: " << min_y << " - " << max_y);
+      NODELET_DEBUG_STREAM(id << " filter z: " << min_z << " - " << max_z);
       
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_after_x (new pcl::PointCloud<pcl::PointXYZRGB>);
       pass_x.setInputCloud (transformed_cloud);
@@ -135,7 +135,7 @@ namespace jsk_pcl_ros
       //pcl::PointCloud<pcl::PointXYZRGB>::Ptr tmp (new pcl::PointCloud<pcl::PointXYZRGB>);
       //pcl::concatenatePointCloud (*cloud_filtered, *output_cloud, tmp);
       //output_cloud = tmp;
-      ROS_INFO_STREAM(id << " includes " << reverse_transformed_cloud->points.size() << " points");
+      NODELET_DEBUG_STREAM(id << " includes " << reverse_transformed_cloud->points.size() << " points");
       for (size_t i = 0; i < reverse_transformed_cloud->points.size(); i++) {
         output_cloud->points.push_back(reverse_transformed_cloud->points[i]);
       }
@@ -147,7 +147,7 @@ namespace jsk_pcl_ros
 
     // for concatenater
     size_t cluster_num = output_cloud->points.size() / max_points_ + 1;
-    ROS_INFO_STREAM("encoding into " << cluster_num << " clusters");
+    NODELET_DEBUG_STREAM("encoding into " << cluster_num << " clusters");
     for (size_t i = 0; i < cluster_num; i++) {
       size_t start_index = max_points_ * i;
       size_t end_index = max_points_ * (i + 1) > output_cloud->points.size() ?
@@ -157,7 +157,7 @@ namespace jsk_pcl_ros
         cluster_out_pcl(new pcl::PointCloud<pcl::PointXYZRGB>);
       cluster_out_pcl->points.resize(end_index - start_index);
       // build cluster_out_pcl
-      ROS_INFO_STREAM("make cluster from " << start_index << " to " << end_index);
+      NODELET_DEBUG_STREAM("make cluster from " << start_index << " to " << end_index);
       for (size_t j = start_index; j < end_index; j++) {
         cluster_out_pcl->points[j - start_index] = output_cloud->points[j];
       }
@@ -184,17 +184,17 @@ namespace jsk_pcl_ros
     // check we have new_box->id in our bounding_boxes_
     if (new_box->id == -1) {
       // cancel all
-      ROS_INFO("clear all pointclouds");
+      NODELET_DEBUG("clear all pointclouds");
       clearAll();
     }
     else {
       for (size_t i = 0; i < grid_.size(); i++) {
         if (grid_[i]->id == new_box->id) {
-          ROS_INFO_STREAM("updating " << new_box->id << " grid");
+          NODELET_DEBUG_STREAM("updating " << new_box->id << " grid");
           grid_[i] = new_box;
         }
       }
-      ROS_INFO_STREAM("adding new grid: " << new_box->id);
+      NODELET_DEBUG_STREAM("adding new grid: " << new_box->id);
       grid_.push_back(new_box);
     }
   }

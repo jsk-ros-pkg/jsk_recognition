@@ -63,5 +63,35 @@ namespace pcl_conversions
     }
     return ret;
   }
+
+  std::vector<PCLIndicesMsg>
+  convertToROSPointIndices(
+    const std::vector<pcl::PointIndices::Ptr> cluster_indices,
+    const std_msgs::Header& header)
+  {
+    std::vector<PCLIndicesMsg> ret;
+    for (size_t i = 0; i < cluster_indices.size(); i++) {
+      PCLIndicesMsg ros_msg;
+      ros_msg.header = header;
+      ros_msg.indices = cluster_indices[i]->indices;
+      ret.push_back(ros_msg);
+    }
+    return ret;
+  }
+
+  std::vector<PCLModelCoefficientMsg>
+  convertToROSModelCoefficients(
+    const std::vector<pcl::ModelCoefficients::Ptr>& coefficients,
+    const std_msgs::Header& header)
+  {
+    std::vector<PCLModelCoefficientMsg> ret;
+    for (size_t i = 0; i < coefficients.size(); i++) {
+      PCLModelCoefficientMsg ros_msg;
+      ros_msg.header = header;
+      ros_msg.values = coefficients[i]->values;
+      ret.push_back(ros_msg);
+    }
+    return ret;
+  }
   
 }

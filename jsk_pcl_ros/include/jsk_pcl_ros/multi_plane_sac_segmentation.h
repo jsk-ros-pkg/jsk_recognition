@@ -42,6 +42,9 @@
 #include "jsk_pcl_ros/geo_util.h"
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <dynamic_reconfigure/server.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
 
 #include <jsk_pcl_ros/MultiPlaneSACSegmentationConfig.h>
 
@@ -60,6 +63,10 @@ namespace jsk_pcl_ros
   public:
     typedef pcl::PointXYZRGB PointT;
     typedef jsk_pcl_ros::MultiPlaneSACSegmentationConfig Config;
+    typedef message_filters::sync_policies::ExactTime<
+      sensor_msgs::PointCloud2,
+      sensor_msgs::PointCloud2 > SyncPolicy;
+    
   protected:
     ////////////////////////////////////////////////////////
     // methods
@@ -67,9 +74,12 @@ namespace jsk_pcl_ros
     virtual void onInit();
     
     virtual void segment(const sensor_msgs::PointCloud2::ConstPtr& msg);
+    virtual void segment(const sensor_msgs::PointCloud2::ConstPtr& msg,
+                         const sensor_msgs::PointCloud2::ConstPtr& msg_nromal);
     
     virtual void applyRecursiveRANSAC(
       const pcl::PointCloud<PointT>::Ptr& input,
+      const pcl::PointCloud<pcl::Normal>::Ptr& normal,
       std::vector<pcl::PointIndices::Ptr>& output_inliers,
       std::vector<pcl::ModelCoefficients::Ptr>& output_coefficients,
       std::vector<ConvexPolygon::Ptr>& output_polygons);
@@ -82,6 +92,9 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_;
     ros::Publisher pub_inliers_, pub_coefficients_, pub_polygons_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_normal_;
     boost::mutex mutex_;
 
     ////////////////////////////////////////////////////////
@@ -91,6 +104,7 @@ namespace jsk_pcl_ros
     int min_inliers_;
     int min_points_;
     int max_iterations_;
+    bool use_normal_;
   private:
     
   };

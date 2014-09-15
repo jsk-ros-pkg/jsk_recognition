@@ -48,7 +48,7 @@ namespace jsk_pcl_ros
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&MultiPlaneSACSegmentation::configCallback, this, _1, _2);
     srv_->setCallback (f);
-    
+    pnh_->param("use_normal", use_normal_, false);
     ////////////////////////////////////////////////////////
     // publishers
     ////////////////////////////////////////////////////////
@@ -60,7 +60,17 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // subscriber
     ////////////////////////////////////////////////////////
-    sub_ = pnh_->subscribe("input", 1, &MultiPlaneSACSegmentation::segment, this);
+    if (!use_normal_) {
+      sub_ = pnh_->subscribe("input", 1, &MultiPlaneSACSegmentation::segment, this);
+    }
+    else {
+      sub_input_.subscribe(*pnh_, "input", 1);
+      sub_normal_.subscribe(*pnh_, "input_normal", 1);
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+      sync_->connectInput(sub_input_, sub_normal_);
+      sync_->registerCallback(boost::bind(&MultiPlaneSACSegmentation::segment,
+                                          this, _1, _2));
+    }
   }
 
   void MultiPlaneSACSegmentation::configCallback (Config &config, uint32_t level)
@@ -74,26 +84,42 @@ namespace jsk_pcl_ros
   
   void MultiPlaneSACSegmentation::applyRecursiveRANSAC(
       const pcl::PointCloud<PointT>::Ptr& input,
+      const pcl::PointCloud<pcl::Normal>::Ptr& normal,
       std::vector<pcl::PointIndices::Ptr>& output_inliers,
       std::vector<pcl::ModelCoefficients::Ptr>& output_coefficients,
       std::vector<ConvexPolygon::Ptr>& output_polygons)
   {
     pcl::PointCloud<PointT>::Ptr rest_cloud (new pcl::PointCloud<PointT>);
+    pcl::PointCloud<pcl::Normal>::Ptr rest_normal (new pcl::PointCloud<pcl::Normal>);
     *rest_cloud = *input;
+    *rest_normal = *normal;
     int counter = 0;
     while (true) {
       NODELET_INFO("apply RANSAC: %d", counter);
       ++counter;
       pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
       pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
-      pcl::SACSegmentation<PointT> seg;
-      seg.setOptimizeCoefficients (true);
-      seg.setModelType (pcl::SACMODEL_PLANE);
-      seg.setMethodType (pcl::SAC_RANSAC);
-      seg.setDistanceThreshold (outlier_threshold_);
-      seg.setInputCloud(rest_cloud);
-      seg.setMaxIterations (max_iterations_);
-      seg.segment (*inliers, *coefficients);
+      if (!use_normal_) {
+        pcl::SACSegmentation<PointT> seg;
+        seg.setOptimizeCoefficients (true);
+        seg.setModelType (pcl::SACMODEL_PLANE);
+        seg.setMethodType (pcl::SAC_RANSAC);
+        seg.setDistanceThreshold (outlier_threshold_);
+        seg.setInputCloud(rest_cloud);
+        seg.setMaxIterations (max_iterations_);
+        seg.segment (*inliers, *coefficients);
+      }
+      else {
+        pcl::SACSegmentationFromNormals<PointT, pcl::Normal> seg;
+        seg.setOptimizeCoefficients (true);
+        seg.setModelType (pcl::SACMODEL_NORMAL_PLANE);
+        seg.setMethodType (pcl::SAC_RANSAC);
+        seg.setDistanceThreshold (outlier_threshold_);
+        seg.setInputCloud(rest_cloud);
+        seg.setInputNormals(rest_normal);
+        seg.setMaxIterations (max_iterations_);
+        seg.segment (*inliers, *coefficients);
+      }
       NODELET_INFO("inliers: %lu", inliers->indices.size());
       if (inliers->indices.size() < min_inliers_) {
         return;
@@ -104,33 +130,45 @@ namespace jsk_pcl_ros
         input, inliers, coefficients);
       output_polygons.push_back(convex);
       // prepare for next loop
-      pcl::PointCloud<PointT>::Ptr next_rest_cloud (new pcl::PointCloud<PointT>);
+      pcl::PointCloud<PointT>::Ptr next_rest_cloud
+        (new pcl::PointCloud<PointT>);
+      pcl::PointCloud<pcl::Normal>::Ptr next_rest_normal
+        (new pcl::PointCloud<pcl::Normal>);
       pcl::ExtractIndices<PointT> ex;
       ex.setInputCloud(rest_cloud);
       ex.setIndices(inliers);
       ex.setNegative(true);
       ex.setKeepOrganized(true);
       ex.filter(*next_rest_cloud);
+      if (use_normal_) {
+        pcl::ExtractIndices<pcl::Normal> ex_normal;
+        ex_normal.setInputCloud(rest_normal);
+        ex_normal.setIndices(inliers);
+        ex_normal.setNegative(true);
+        ex_normal.setKeepOrganized(true);
+        ex_normal.filter(*next_rest_normal);
+      }
       if (next_rest_cloud->points.size() < min_points_) {
         return;
       }
       rest_cloud = next_rest_cloud;
-      
+      rest_normal = next_rest_normal;
     }
   }
-  
   void MultiPlaneSACSegmentation::segment(
-    const sensor_msgs::PointCloud2::ConstPtr& msg)
+    const sensor_msgs::PointCloud2::ConstPtr& msg,
+    const sensor_msgs::PointCloud2::ConstPtr& msg_normal)
   {
-    boost::mutex::scoped_lock lock(mutex_);
     ROS_INFO("segment");
+    boost::mutex::scoped_lock lock(mutex_);
     pcl::PointCloud<PointT>::Ptr input (new pcl::PointCloud<PointT>);
+    pcl::PointCloud<pcl::Normal>::Ptr normal (new pcl::PointCloud<pcl::Normal>);
     pcl::fromROSMsg(*msg, *input);
-
+    pcl::fromROSMsg(*msg_normal, *normal);
     std::vector<pcl::PointIndices::Ptr> inliers;
     std::vector<pcl::ModelCoefficients::Ptr> coefficients;
     std::vector<ConvexPolygon::Ptr> convexes;
-    applyRecursiveRANSAC(input, inliers, coefficients, convexes);
+    applyRecursiveRANSAC(input, normal, inliers, coefficients, convexes);
 
     jsk_pcl_ros::ClusterPointIndices ros_indices_output;
     jsk_pcl_ros::ModelCoefficientsArray ros_coefficients_output;
@@ -151,6 +189,12 @@ namespace jsk_pcl_ros
       ros_polygon_output.polygons.push_back(polygon);
     }
     pub_polygons_.publish(ros_polygon_output);
+  }
+  
+  void MultiPlaneSACSegmentation::segment(
+    const sensor_msgs::PointCloud2::ConstPtr& msg)
+  {
+    segment(msg, sensor_msgs::PointCloud2::ConstPtr());
   }
 }
 

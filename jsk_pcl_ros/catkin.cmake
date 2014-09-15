@@ -76,6 +76,7 @@ generate_dynamic_reconfigure_options(
   cfg/EdgeDepthRefinement.cfg
   cfg/ParallelEdgeFinder.cfg
   cfg/EdgebasedCubeFinder.cfg
+  cfg/MultiPlaneSACSegmentation.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -196,6 +197,8 @@ jsk_pcl_nodelet(src/edgebased_cube_finder_nodelet.cpp
   "jsk_pcl/EdgebasedCubeFinder" "edgebased_cube_finder")
 jsk_pcl_nodelet(src/colorize_distance_from_plane_nodelet.cpp
   "jsk_pcl/ColorizeDistanceFromPlane" "colorize_distance_from_plane")
+jsk_pcl_nodelet(src/multi_plane_sac_segmentation_nodelet.cpp
+  "jsk_pcl/MultiPlaneSACSegmentation" "multi_plane_sac_segmentation")
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp

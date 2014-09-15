@@ -62,12 +62,14 @@ namespace jsk_pcl_ros
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_indices_.subscribe(*pnh_, "input_indices", 1);
     sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
-
+    sub_polygons_.subscribe(*pnh_, "input_polygons", 1);
+    
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-    sync_->connectInput(sub_input_, sub_indices_, sub_coefficients_);
+    sync_->connectInput(sub_input_, sub_indices_, sub_coefficients_,
+                        sub_polygons_);
     sync_->registerCallback(boost::bind(
                               &ColorizeDistanceFromPlane::colorize,
-                              this, _1, _2, _3));
+                              this, _1, _2, _3, _4));
 
   }
 
@@ -79,9 +81,11 @@ namespace jsk_pcl_ros
     double min_distance = DBL_MAX;
     for (size_t i = 0; i < convexes.size(); i++) {
       ConvexPolygon::Ptr convex = convexes[i];
-      double d = convex->distanceToPoint(v);
-      if (d < min_distance) {
-        min_distance = d;
+      if (!only_projectable_ || convex->isProjectableInside(v)) {
+        double d = convex->distanceToPoint(v);
+        if (d < min_distance) {
+          min_distance = d;
+        }
       }
     }
     return min_distance;
@@ -94,10 +98,10 @@ namespace jsk_pcl_ros
       ratio = 1.0;
     }
     else if (d < min_distance_) {
-      ratio = 1.0;
+      ratio = 0.0;
     }
     else {
-      ratio = (max_distance_ - d) / (max_distance_ - min_distance_);
+      ratio = fabs(min_distance_ - d) / (max_distance_ - min_distance_);
     }
     double r = ratio;
     double g = 0.0;
@@ -112,9 +116,14 @@ namespace jsk_pcl_ros
   void ColorizeDistanceFromPlane::colorize(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
     const ClusterPointIndices::ConstPtr& indices_msg,
-    const ModelCoefficientsArray::ConstPtr& coefficients_msg)
+    const ModelCoefficientsArray::ConstPtr& coefficients_msg,
+    const PolygonArray::ConstPtr& polygons)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    if (indices_msg->cluster_indices.size() == 0) {
+      // no indices
+      return;
+    }
     // convert all the data into pcl format
     pcl::PointCloud<PointT>::Ptr cloud
       (new pcl::PointCloud<PointT>);
@@ -129,11 +138,12 @@ namespace jsk_pcl_ros
     
     // first, build ConvexPolygon::Ptr
     std::vector<ConvexPolygon::Ptr> convexes;
-    for (size_t i = 0; i < indices.size(); i++) {
-      ConvexPolygon::Ptr convex =
-        convexFromCoefficientsAndInliers<PointT>(
-          cloud, indices[i], coefficients[i]);
-      convexes.push_back(convex);
+    for (size_t i = 0; i < polygons->polygons.size(); i++) {
+      ConvexPolygon convex =
+        ConvexPolygon::fromROSMsg(polygons->polygons[i].polygon);
+      ConvexPolygon::Ptr convex_ptr
+        = boost::make_shared<ConvexPolygon>(convex);
+      convexes.push_back(convex_ptr);
     }
 
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr output_cloud
@@ -144,9 +154,11 @@ namespace jsk_pcl_ros
       pcl::PointXYZRGB p_output;
       pointFromXYZToXYZ<PointT, pcl::PointXYZRGB>(p, p_output);
       double d = distanceToConvexes(p, convexes);
-      uint32_t color = colorForDistance(d);
-      p_output.rgb = *reinterpret_cast<float*>(&color);
-      output_cloud->points.push_back(p_output);
+      if (d != DBL_MAX) {
+        uint32_t color = colorForDistance(d);
+        p_output.rgb = *reinterpret_cast<float*>(&color);
+        output_cloud->points.push_back(p_output);
+      }
     }
     
     sensor_msgs::PointCloud2 ros_output;

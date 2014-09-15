@@ -318,6 +318,8 @@ namespace jsk_pcl_ros
     stat.add(string_prefix + " (Min)", accumulator.min());
     stat.add(string_prefix + " (Var.)", accumulator.variance());
   }
+
+  //static boost::mutex global_chull_mutex;
   
 }
 

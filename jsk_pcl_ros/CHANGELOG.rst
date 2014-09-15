@@ -2,6 +2,32 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.18 (2014-09-13)
+-------------------
+* Subscribe PolygonArray message to build ConvexPolygon in ColorizeDistanceFromPlane
+* Introduce global mutex for quick hull
+* Fix coloring bug and add ~only_projectable parameter to visualize the
+  points only if they can be projected on the convex region
+* Add use_laser_pipeline argument to laserscan_registration.launch to
+  toggle include laser_pileline.launch of jsk_tilt_laser or not
+  Add new utility for diagnostics: addDiagnosticInformation
+* Supress output from resize_points_publisher
+* ROS_INFO -> NODELET_DEBUG in VoxelGridDownsampleManager
+* New utilify functoin for diagnostic: addDiagnosticInformation.
+  It's a simple function to add jsk_topic_tools::TimeAccumulator to
+  diagnostic_updater::DiagnosticStatusWrapper.
+* Colorize pointcloud according to the distance from nearest plane
+* Use template functions to convert tiny type conversions
+* Refine the result of connecting small multi planes in OrganizedMultiplaneSegmentation
+* add hsv coherence to particle_fitler_tracker
+* change color_histogram showing methods with reconfigure
+* visualize color_histogram coefficience
+* add new nodelet: EdgebasedCubeFinder
+* use colorCategory20 function to colorize pointcloud in ClusterPointIndicesDecomposer
+* visualizing connection of planes with lines in OrganizedMultiPlaneSegmentation
+* use rosparam_utils of jsk_topic_tools in StaticPolygonArrayPublisher
+* Contributors: Ryohei Ueda, ohara, wesleypchan
+
 0.1.17 (2014-09-07)
 -------------------
 * add laser_registration.launch

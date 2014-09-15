@@ -147,6 +147,8 @@ namespace jsk_pcl_ros
     const std::string& string_prefix,
     jsk_topic_tools::TimeAccumulator& accumulator,
     diagnostic_updater::DiagnosticStatusWrapper& stat);
+
+  static boost::mutex global_chull_mutex;
   
 }
 

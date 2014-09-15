@@ -2,6 +2,12 @@
 Changelog for package jsk_libfreenect2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.18 (2014-09-13)
+-------------------
+* add git to build_depend of jsk_libfreenect2
+* do not hard-code to erase pixels in jsk_libfreenect2
+* Contributors: Ryohei Ueda
+
 0.1.17 (2014-09-07)
 -------------------
 

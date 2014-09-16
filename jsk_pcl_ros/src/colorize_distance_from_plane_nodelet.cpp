@@ -139,11 +139,16 @@ namespace jsk_pcl_ros
     // first, build ConvexPolygon::Ptr
     std::vector<ConvexPolygon::Ptr> convexes;
     for (size_t i = 0; i < polygons->polygons.size(); i++) {
-      ConvexPolygon convex =
-        ConvexPolygon::fromROSMsg(polygons->polygons[i].polygon);
-      ConvexPolygon::Ptr convex_ptr
-        = boost::make_shared<ConvexPolygon>(convex);
-      convexes.push_back(convex_ptr);
+      if (polygons->polygons[i].polygon.points.size() > 0) {
+        ConvexPolygon convex =
+          ConvexPolygon::fromROSMsg(polygons->polygons[i].polygon);
+        ConvexPolygon::Ptr convex_ptr
+          = boost::make_shared<ConvexPolygon>(convex);
+        convexes.push_back(convex_ptr);
+      }
+      else {
+        NODELET_ERROR_STREAM(__PRETTY_FUNCTION__ << ":: there is no points in the polygon");
+      }
     }
 
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr output_cloud

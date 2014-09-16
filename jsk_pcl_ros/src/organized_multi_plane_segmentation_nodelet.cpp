@@ -607,15 +607,16 @@ namespace jsk_pcl_ros
       pcl::PointIndices::Ptr refined_inliers (new pcl::PointIndices);
       pcl::ModelCoefficients::Ptr refined_coefficients(new pcl::ModelCoefficients);
       seg.segment (*refined_inliers, *refined_coefficients);
-      output_indices.push_back(*refined_inliers);
-      output_coefficients.push_back(*refined_coefficients);
-
       ////////////////////////////////////////////////////////
       // compute boundaries from convex hull of
       ////////////////////////////////////////////////////////
       ConvexPolygon::Ptr convex = convexFromCoefficientsAndInliers<PointT>(
         input, refined_inliers, refined_coefficients);
-      output_convexes.push_back(convex);
+      if (convex) {
+        output_convexes.push_back(convex);
+        output_indices.push_back(*refined_inliers);
+        output_coefficients.push_back(*refined_coefficients);
+      }
     }
   }
 

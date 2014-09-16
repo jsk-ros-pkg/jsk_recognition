@@ -216,9 +216,11 @@ namespace jsk_pcl_ros
     const pcl::ModelCoefficients::Ptr coefficients) {
     typedef typename pcl::PointCloud<PointT> POINTCLOUD;
     typename POINTCLOUD::Ptr projected_cloud(new pcl::PointCloud<PointT>);
+    // check inliers has enough points
+    if (inliers->indices.size() == 0) {
+      return ConvexPolygon::Ptr();
+    }
     // project inliers based on coefficients
-    // std::cout << "inliers: " << inliers->indices.size() << std::endl;
-    // std::cout << "coefficients: " << *coefficients << std::endl;
     pcl::ProjectInliers<PointT> proj;
     proj.setModelType(pcl::SACMODEL_PERPENDICULAR_PLANE);
     proj.setInputCloud(cloud);

@@ -60,16 +60,14 @@ namespace jsk_pcl_ros
     // subscribe
     ////////////////////////////////////////////////////////
     sub_input_.subscribe(*pnh_, "input", 1);
-    sub_indices_.subscribe(*pnh_, "input_indices", 1);
     sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
     sub_polygons_.subscribe(*pnh_, "input_polygons", 1);
     
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-    sync_->connectInput(sub_input_, sub_indices_, sub_coefficients_,
-                        sub_polygons_);
+    sync_->connectInput(sub_input_, sub_coefficients_, sub_polygons_);
     sync_->registerCallback(boost::bind(
                               &ColorizeDistanceFromPlane::colorize,
-                              this, _1, _2, _3, _4));
+                              this, _1, _2, _3));
 
   }
 
@@ -115,23 +113,17 @@ namespace jsk_pcl_ros
   
   void ColorizeDistanceFromPlane::colorize(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
-    const ClusterPointIndices::ConstPtr& indices_msg,
     const ModelCoefficientsArray::ConstPtr& coefficients_msg,
     const PolygonArray::ConstPtr& polygons)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    if (indices_msg->cluster_indices.size() == 0) {
-      // no indices
+    if (coefficients_msg->coefficients.size() == 0) {
       return;
     }
     // convert all the data into pcl format
     pcl::PointCloud<PointT>::Ptr cloud
       (new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(*cloud_msg, *cloud);
-    std::vector<pcl::PointIndices::Ptr> indices
-      = pcl_conversions::convertToPCLPointIndices(
-        indices_msg->cluster_indices);
-    
     std::vector<pcl::ModelCoefficients::Ptr> coefficients
       = pcl_conversions::convertToPCLModelCoefficients(
         coefficients_msg->coefficients);

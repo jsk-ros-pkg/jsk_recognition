@@ -59,7 +59,7 @@ namespace jsk_pcl_ros
     typedef boost::shared_ptr<ColorizeDistanceFromPlane> Ptr;
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
-      ClusterPointIndices, ModelCoefficientsArray,
+      ModelCoefficientsArray,
       PolygonArray
       > SyncPolicy;
     typedef ColorizeDistanceFromPlaneConfig Config;
@@ -70,7 +70,6 @@ namespace jsk_pcl_ros
     virtual void onInit();
     
     virtual void colorize(const sensor_msgs::PointCloud2::ConstPtr& cloud,
-                          const ClusterPointIndices::ConstPtr& indices,
                           const ModelCoefficientsArray::ConstPtr& coefficients,
                           const PolygonArray::ConstPtr& polygons);
 
@@ -87,7 +86,6 @@ namespace jsk_pcl_ros
     ros::Publisher pub_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<ClusterPointIndices> sub_indices_;
     message_filters::Subscriber<ModelCoefficientsArray> sub_coefficients_;
     message_filters::Subscriber<PolygonArray> sub_polygons_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;

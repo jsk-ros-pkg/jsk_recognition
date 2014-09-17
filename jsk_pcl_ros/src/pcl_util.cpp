@@ -351,5 +351,54 @@ namespace jsk_pcl_ros
       return true;
     }
   }
+
+  TimeredDiagnosticUpdater::TimeredDiagnosticUpdater(
+    ros::NodeHandle& nh,
+    const ros::Duration& timer_duration):
+    diagnostic_updater_(new diagnostic_updater::Updater)
+  {
+    timer_ = nh.createTimer(
+      timer_duration, boost::bind(
+        &TimeredDiagnosticUpdater::timerCallback,
+        this,
+        _1));
+    timer_.stop();
+  }
+  
+  void TimeredDiagnosticUpdater::start()
+  {
+    timer_.start();
+  }
+
+  TimeredDiagnosticUpdater::~TimeredDiagnosticUpdater()
+  {
+  }
+
+  void TimeredDiagnosticUpdater::setHardwareID(const std::string& name)
+  {
+    diagnostic_updater_->setHardwareID(name);
+  }
+  
+  void TimeredDiagnosticUpdater::add(const std::string& name,
+                                     diagnostic_updater::TaskFunction f)
+  {
+    diagnostic_updater_->add(name, f);
+  }
+  
+  // void TimeredDiagnosticUpdater::add(diagnostic_updater::DiagnosticTask task)
+  // {
+  //   diagnostic_updater_->add(task);
+  // }
+
+  void TimeredDiagnosticUpdater::update()
+  {
+    diagnostic_updater_->update();
+  }
+  
+  void TimeredDiagnosticUpdater::timerCallback(const ros::TimerEvent& event)
+  {
+    update();
+  }
+  
 }
 

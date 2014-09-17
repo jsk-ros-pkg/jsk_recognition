@@ -57,6 +57,7 @@
 
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <boost/circular_buffer.hpp>
+
 namespace jsk_pcl_ros
 {
   std::vector<int> addIndices(const std::vector<int>& a,
@@ -164,6 +165,33 @@ namespace jsk_pcl_ros
   protected:
   private:
     boost::circular_buffer<bool> buf_;
+  };
+
+  ////////////////////////////////////////////////////////
+  // TimeredDiagnosticUpdater
+  //   useful wrapper of DiagnosticUpdater.
+  ////////////////////////////////////////////////////////
+  class TimeredDiagnosticUpdater
+  {
+  public:
+    typedef boost::shared_ptr<TimeredDiagnosticUpdater> Ptr;
+    TimeredDiagnosticUpdater(ros::NodeHandle& nh,
+                             const ros::Duration& timer_duration);
+    virtual ~TimeredDiagnosticUpdater();
+    // wrapper methods of diagnostic_updater::Updater
+    virtual void add(const std::string& name,
+                     diagnostic_updater::TaskFunction f);
+    //virtual void add(diagnostic_updater::DiagnosticTask task);
+    virtual void start();
+    virtual void setHardwareID(const std::string& name);
+    virtual void update();
+    
+  protected:
+    virtual void timerCallback(const ros::TimerEvent& event);
+    ros::Timer timer_;
+    boost::shared_ptr<diagnostic_updater::Updater> diagnostic_updater_;
+  private:
+    
   };
   
   extern boost::mutex global_chull_mutex;

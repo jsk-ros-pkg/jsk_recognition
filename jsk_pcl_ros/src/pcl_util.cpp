@@ -321,5 +321,35 @@ namespace jsk_pcl_ros
     stat.add(string_prefix + " (Var.)", accumulator.variance());
   }
 
+  SeriesedBoolean::SeriesedBoolean(const int buf_len):
+    buf_(buf_len)
+  {
+  }
+  
+  SeriesedBoolean::~SeriesedBoolean()
+  {
+  }
+
+  void SeriesedBoolean::addValue(bool val)
+  {
+    buf_.push_front(val);
+  }
+  
+  bool SeriesedBoolean::getValue()
+  {
+    if (buf_.size() == 0) {
+      return false;
+    }
+    else {
+      for (boost::circular_buffer<bool>::iterator it = buf_.begin();
+           it != buf_.end();
+           ++it) {
+        if (!*it) {
+          return false;
+        }
+      }
+      return true;
+    }
+  }
 }
 

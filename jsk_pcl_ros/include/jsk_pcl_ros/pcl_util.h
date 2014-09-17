@@ -56,7 +56,7 @@
 #include <jsk_topic_tools/time_accumulator.h>
 
 #include <diagnostic_updater/diagnostic_updater.h>
-
+#include <boost/circular_buffer.hpp>
 namespace jsk_pcl_ros
 {
   std::vector<int> addIndices(const std::vector<int>& a,
@@ -148,6 +148,24 @@ namespace jsk_pcl_ros
     jsk_topic_tools::TimeAccumulator& accumulator,
     diagnostic_updater::DiagnosticStatusWrapper& stat);
 
+  ////////////////////////////////////////////////////////
+  // SeriesedBoolean
+  //   store boolean value to limited buffer
+  //   and return true if all the values are true.
+  ////////////////////////////////////////////////////////
+  class SeriesedBoolean
+  {
+  public:
+    typedef boost::shared_ptr<SeriesedBoolean> Ptr;
+    SeriesedBoolean(const int buf_len);
+    virtual ~SeriesedBoolean();
+    virtual void addValue(bool val);
+    virtual bool getValue();
+  protected:
+  private:
+    boost::circular_buffer<bool> buf_;
+  };
+  
   extern boost::mutex global_chull_mutex;
   
 }

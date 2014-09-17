@@ -123,7 +123,8 @@ jsk_pcl_nodelet(src/colorize_distance_from_plane_nodelet.cpp
   "jsk_pcl/ColorizeDistanceFromPlane" "colorize_distance_from_plane")
 jsk_pcl_nodelet(src/multi_plane_sac_segmentation_nodelet.cpp
   "jsk_pcl/MultiPlaneSACSegmentation" "multi_plane_sac_segmentation")
-
+jsk_pcl_nodelet(src/bounding_box_filter_nodelet.cpp
+  "jsk_pcl/BoundingBoxFilter" "bounding_box_filter")
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp

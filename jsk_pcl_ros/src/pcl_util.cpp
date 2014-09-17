@@ -335,6 +335,19 @@ namespace jsk_pcl_ros
        % string_prefix % vital_checker->deadSec()).str());
   }
   
+  void addDiagnosticBooleanStat(
+    const std::string& string_prefix,
+    const bool value,
+    diagnostic_updater::DiagnosticStatusWrapper& stat)
+  {
+    if (value) {
+      stat.add(string_prefix, "True");
+    }
+    else {
+      stat.add(string_prefix, "False");
+    }
+  }
+
   SeriesedBoolean::SeriesedBoolean(const int buf_len):
     buf_(buf_len)
   {

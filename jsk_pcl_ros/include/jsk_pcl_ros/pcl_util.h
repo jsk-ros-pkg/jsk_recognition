@@ -157,6 +157,14 @@ namespace jsk_pcl_ros
     const std::string& string_prefix,
     jsk_topic_tools::VitalChecker::Ptr vital_checker,
     diagnostic_updater::DiagnosticStatusWrapper& stat);
+
+  ////////////////////////////////////////////////////////
+  // add Boolean string to stat
+  ////////////////////////////////////////////////////////
+  void addDiagnosticBooleanStat(
+    const std::string& string_prefix,
+    const bool value,
+    diagnostic_updater::DiagnosticStatusWrapper& stat);
   
   ////////////////////////////////////////////////////////
   // SeriesedBoolean

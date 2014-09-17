@@ -123,8 +123,7 @@ namespace jsk_pcl_ros
                 % (reference_axis_[0])
                 %  (reference_axis_[1])
                 % (reference_axis_[2])).str());
-                 
-      
+      stat.add("Processing Frame ID", processing_frame_id_);
     }
     else {
       stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,

@@ -248,6 +248,7 @@
     </include>
   </group>
   <node pkg="diagnostic_aggregator" type="aggregator_node"
+        respawn="true"
         name="pcl_diagnostic_aggregator">
   </node>
   <node pkg="rqt_robot_monitor" type="rqt_robot_monitor"

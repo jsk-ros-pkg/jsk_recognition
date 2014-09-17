@@ -48,22 +48,28 @@
 #include "jsk_pcl_ros/geo_util.h"
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include "jsk_pcl_ros/pcl_util.h"
+
 namespace jsk_pcl_ros
 {
-  ClusterPointIndicesDecomposer::ClusterPointIndicesDecomposer() {}
-  ClusterPointIndicesDecomposer::~ClusterPointIndicesDecomposer() {}
-
-  
   void ClusterPointIndicesDecomposer::onInit()
   {
     PCLNodelet::onInit();
-
-    pnh_.reset (new ros::NodeHandle (getPrivateNodeHandle ()));
-    pc_pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("debug_output", 1);
-    box_pub_ = pnh_->advertise<jsk_pcl_ros::BoundingBoxArray>("boxes", 1);
-    sub_input_.subscribe(*pnh_, "input", 1);
-    sub_target_.subscribe(*pnh_, "target", 1);
-
+    
+    diagnostic_updater_.reset(
+      new TimeredDiagnosticUpdater(*pnh_, ros::Duration(1.0)));
+    diagnostic_updater_->setHardwareID(getName());
+    diagnostic_updater_->add(
+      getName() + "::ClusterPointIndicesDecomposer",
+      boost::bind(
+        &ClusterPointIndicesDecomposer::updateDiagnostic,
+        this,
+        _1));
+    double vital_rate;
+    pnh_->param("vital_rate", vital_rate, 1.0);
+    vital_checker_.reset(
+      new jsk_topic_tools::VitalChecker(1 / vital_rate));
+    diagnostic_updater_->start();
+    
     pnh_->param("publish_tf", publish_tf_, true);
     if (!pnh_->getParam("tf_prefix", tf_prefix_))
     {
@@ -77,6 +83,11 @@ namespace jsk_pcl_ros
     
     pnh_->param("align_boxes", align_boxes_, false);
     pnh_->param("use_pca", use_pca_, false);
+    
+    pc_pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("debug_output", 1);
+    box_pub_ = pnh_->advertise<jsk_pcl_ros::BoundingBoxArray>("boxes", 1);
+    sub_input_.subscribe(*pnh_, "input", 1);
+    sub_target_.subscribe(*pnh_, "target", 1);
     
     if (align_boxes_) {
       sync_align_ = boost::make_shared<message_filters::Synchronizer<SyncAlignPolicy> >(100);
@@ -101,6 +112,46 @@ namespace jsk_pcl_ros
     for (size_t i = 0; i < indices_array.size(); i++)
     {
       output_array[i] = indices_array[i];
+    }
+  }
+
+  void ClusterPointIndicesDecomposer::updateDiagnostic(
+    diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    if (vital_checker_->isAlive()) {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                   "ClusterPointIndicesDecomposer running");
+      if (publish_clouds_) {
+        stat.add("publish_clouds", "True");
+      }
+      else {
+        stat.add("publish_clouds", "False");
+      }
+      if (publish_tf_) {
+        stat.add("publish_tf", "True");
+      }
+      else {
+        stat.add("publish_tf", "False");
+      }
+      if (use_pca_) {
+        stat.add("use_pca", "True");
+      }
+      else {
+        stat.add("use_pca", "False");
+      }
+      if (align_boxes_) {
+        stat.add("align_boxes", "True");
+      }
+      else {
+        stat.add("align_boxes", "False");
+      }
+      stat.add("tf_prefix", tf_prefix_);
+      
+      stat.add("Clusters (Ave.)", cluster_counter_.mean());
+    }
+    else {
+      addDiagnosticErrorSummary(
+        "ClusterPointIndicesDecomposer", vital_checker_, stat);
     }
   }
   
@@ -259,14 +310,17 @@ namespace jsk_pcl_ros
     if (publish_clouds_) {
       allocatePublishers(indices_input->cluster_indices.size());
     }
+    vital_checker_->poke();
     pcl::ExtractIndices<pcl::PointXYZRGB> extract;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*input, *cloud);
     pcl::fromROSMsg(*input, *cloud_xyz);
-
+    cluster_counter_.add(indices_input->cluster_indices.size());
+    
     std::vector<pcl::IndicesPtr> converted_indices;
     std::vector<pcl::IndicesPtr> sorted_indices;
+    
     for (size_t i = 0; i < indices_input->cluster_indices.size(); i++)
     {
       pcl::IndicesPtr vindices;

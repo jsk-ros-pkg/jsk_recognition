@@ -41,35 +41,51 @@
 #include <pcl/filters/project_inliers.h>
 #include <set>
 
-#if ROS_VERSION_MINIMUM(1, 10, 0)
-// hydro and later
-typedef pcl_msgs::PointIndices PCLIndicesMsg;
-typedef pcl_msgs::ModelCoefficients PCLModelCoefficientMsg;
-#else
-// groovy
-typedef pcl::PointIndices PCLIndicesMsg;
-typedef pcl::ModelCoefficients PCLModelCoefficientMsg;
-#endif
-
-
-
 namespace jsk_pcl_ros
 {
 
   void MultiPlaneExtraction::onInit()
   {
     PCLNodelet::onInit();
-    //pub_ = pnh_->advertise<PCLIndicesMsg>("output", 1);
+
+    ////////////////////////////////////////////////////////
+    // Diagnostics
+    ////////////////////////////////////////////////////////
+    diagnostic_updater_.reset(
+      new TimeredDiagnosticUpdater(*pnh_, ros::Duration(1.0)));
+    diagnostic_updater_->setHardwareID(getName());
+    diagnostic_updater_->add(
+      getName() + "::MultiPlaneExtraction",
+      boost::bind(
+        &MultiPlaneExtraction::updateDiagnostic,
+        this,
+        _1));
+    double vital_rate;
+    pnh_->param("vital_rate", vital_rate, 1.0);
+    vital_checker_.reset(
+      new jsk_topic_tools::VitalChecker(1 / vital_rate));
+    diagnostic_updater_->start();
+    
+    ////////////////////////////////////////////////////////
+    // Publishers
+    ////////////////////////////////////////////////////////
     pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
     nonplane_pub_ = pnh_->advertise<pcl::PointCloud<pcl::PointXYZRGB> >("output_nonplane_cloud", 1);
     if (!pnh_->getParam("max_queue_size", maximum_queue_size_)) {
       maximum_queue_size_ = 100;
     }
+
+    ////////////////////////////////////////////////////////
+    // Dynamic Reconfigure
+    ////////////////////////////////////////////////////////
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&MultiPlaneExtraction::configCallback, this, _1, _2);
     srv_->setCallback (f);
 
+    ////////////////////////////////////////////////////////
+    // Subscribe
+    ////////////////////////////////////////////////////////
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(maximum_queue_size_);
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_indices_.subscribe(*pnh_, "indices", 1);
@@ -86,12 +102,30 @@ namespace jsk_pcl_ros
     max_height_ = config.max_height;
   }
 
+  void MultiPlaneExtraction::updateDiagnostic(
+    diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    if (vital_checker_->isAlive()) {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                   "MultiPlaneExtraction running");
+      stat.add("Minimum Height", min_height_);
+      stat.add("Maximum Height", max_height_);
+      stat.add("Number of Planes", plane_counter_.mean());
+    }
+    else {
+      addDiagnosticErrorSummary(
+        "MultiPlaneExtraction", vital_checker_, stat);
+    }
+  }
+  
   void MultiPlaneExtraction::extract(const sensor_msgs::PointCloud2::ConstPtr& input,
                                      const jsk_pcl_ros::ClusterPointIndices::ConstPtr& indices,
                                      const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients,
                                      const jsk_pcl_ros::PolygonArray::ConstPtr& polygons)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
+    
     // convert all to the pcl types
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
     pcl::fromROSMsg(*input, *input_cloud);
@@ -116,6 +150,7 @@ namespace jsk_pcl_ros
     // inside of the polygon
     
     std::set<int> result_set;
+    plane_counter_.add(coefficients->coefficients.size());
     for (size_t plane_i = 0; plane_i < coefficients->coefficients.size(); plane_i++) {
 
       pcl::ExtractPolygonalPrismData<pcl::PointXYZRGB> prism_extract;
@@ -123,22 +158,19 @@ namespace jsk_pcl_ros
       geometry_msgs::Polygon the_polygon = polygons->polygons[plane_i].polygon;
       for (size_t i = 0; i < the_polygon.points.size(); i++) {
         pcl::PointXYZRGB p;
-        p.x = the_polygon.points[i].x;
-        p.y = the_polygon.points[i].y;
-        p.z = the_polygon.points[i].z;
+        pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZRGB>(
+          the_polygon.points[i], p);
         hull_cloud->points.push_back(p);
       }
       
       prism_extract.setInputCloud(nonplane_cloud);
       prism_extract.setHeightLimits(min_height_, max_height_);
       prism_extract.setInputPlanarHull(hull_cloud);
-      //pcl::PointCloud<pcl::PointXYZRGB> output;
       pcl::PointIndices output_indices;
       prism_extract.segment(output_indices);
       // append output to result_cloud
       for (size_t i = 0; i < output_indices.indices.size(); i++) {
         result_set.insert(output_indices.indices[i]);
-        //result_cloud.points.push_back(output.points[i]);
       }
     }
 
@@ -161,6 +193,8 @@ namespace jsk_pcl_ros
     pcl::toROSMsg(result_cloud, ros_result);
     ros_result.header = input->header;
     pub_.publish(ros_result);
+
+    diagnostic_updater_->update();
   }
   
 }

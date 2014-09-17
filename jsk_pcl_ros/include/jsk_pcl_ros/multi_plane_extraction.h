@@ -48,6 +48,10 @@
 #include "jsk_pcl_ros/PolygonArray.h"
 #include <dynamic_reconfigure/server.h>
 #include "jsk_pcl_ros/MultiPlaneExtractionConfig.h"
+#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include <jsk_topic_tools/vital_checker.h>
+
 
 namespace jsk_pcl_ros
 {
@@ -55,29 +59,54 @@ namespace jsk_pcl_ros
   {
   public:
     
-    typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, jsk_pcl_ros::ClusterPointIndices, jsk_pcl_ros::ModelCoefficientsArray, jsk_pcl_ros::PolygonArray> SyncPolicy;
+    typedef message_filters::sync_policies::ExactTime<
+    sensor_msgs::PointCloud2,
+    jsk_pcl_ros::ClusterPointIndices,
+    jsk_pcl_ros::ModelCoefficientsArray,
+    jsk_pcl_ros::PolygonArray> SyncPolicy;
     typedef jsk_pcl_ros::MultiPlaneExtractionConfig Config;
   protected:
-    boost::mutex mutex_;
-    int maximum_queue_size_;
-    double min_height_, max_height_;
-    ros::Publisher pub_, nonplane_pub_;
-    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
-    virtual void configCallback (Config &config, uint32_t level);
-    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<jsk_pcl_ros::ModelCoefficientsArray> sub_coefficients_;
-    message_filters::Subscriber<jsk_pcl_ros::PolygonArray> sub_polygons_;
-    message_filters::Subscriber<jsk_pcl_ros::ClusterPointIndices> sub_indices_;
-    
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    ////////////////////////////////////////////////////////
+    // methods
+    ////////////////////////////////////////////////////////
+    virtual void onInit();
     
     virtual void extract(const sensor_msgs::PointCloud2::ConstPtr& input,
                          const jsk_pcl_ros::ClusterPointIndices::ConstPtr& indices,
                          const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients,
                          const jsk_pcl_ros::PolygonArray::ConstPtr& polygons);
     
+    virtual void configCallback (Config &config, uint32_t level);
+
+    virtual void updateDiagnostic(
+      diagnostic_updater::DiagnosticStatusWrapper &stat);
+    ////////////////////////////////////////////////////////
+    // ROS variables
+    ////////////////////////////////////////////////////////
+    boost::mutex mutex_;
+    ros::Publisher pub_, nonplane_pub_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
+    message_filters::Subscriber<jsk_pcl_ros::ModelCoefficientsArray> sub_coefficients_;
+    message_filters::Subscriber<jsk_pcl_ros::PolygonArray> sub_polygons_;
+    message_filters::Subscriber<jsk_pcl_ros::ClusterPointIndices> sub_indices_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+
+    ////////////////////////////////////////////////////////
+    // Diagnostics Variables
+    ////////////////////////////////////////////////////////
+    TimeredDiagnosticUpdater::Ptr diagnostic_updater_;
+    jsk_topic_tools::VitalChecker::Ptr vital_checker_;
+    Counter plane_counter_;
+    
+    ////////////////////////////////////////////////////////
+    // Parameters
+    ////////////////////////////////////////////////////////
+    int maximum_queue_size_;
+    double min_height_, max_height_;
+    
   private:
-    virtual void onInit();
+    
     
   };
 }

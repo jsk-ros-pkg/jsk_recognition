@@ -39,81 +39,104 @@
 #include <geometry_msgs/Vector3Stamped.h>
 #include <eigen_conversions/eigen_msg.h>
 
-#if ROS_VERSION_MINIMUM(1, 10, 0)
-// hydro and later
-typedef pcl_msgs::PointIndices PCLIndicesMsg;
-typedef pcl_msgs::ModelCoefficients PCLModelCoefficientMsg;
-#else
-// groovy
-typedef pcl::PointIndices PCLIndicesMsg;
-typedef pcl::ModelCoefficients PCLModelCoefficientMsg;
-#endif
-
-
 namespace jsk_pcl_ros
 {
   void PlaneRejector::onInit()
   {
     PCLNodelet::onInit();
+    tf_success_.reset(new SeriesedBoolean(30));
+    listener_.reset(new tf::TransformListener());
+    double vital_rate;
+    pnh_->param("vital_rate", vital_rate, 1.0);
+    vital_checker_.reset(
+      new jsk_topic_tools::VitalChecker(1 / vital_rate));
+    
+    diagnostic_updater_.reset(new diagnostic_updater::Updater);
+    diagnostic_updater_->setHardwareID(getName());
+    diagnostic_updater_->add(
+      getName() + "::PlaneRejector",
+      boost::bind(
+        &PlaneRejector::updateDiagnosticsPlaneRejector,
+        this, _1));
     if (!pnh_->getParam("processing_frame_id", processing_frame_id_)) {
       NODELET_FATAL("You need to specify ~processing_frame_id");
       return;
     }
-    if (!readVectorParam("reference_axis")) {
+
+    std::vector<double> reference_axis;
+    if (!jsk_topic_tools::readVectorParameter(
+          *pnh_, "reference_axis", reference_axis)) {
+      NODELET_FATAL("you need to specify ~reference_axis");
       return;
     }
+    else if (reference_axis.size() != 3){
+      NODELET_FATAL("~reference_axis is not 3 length vector");
+      return;
+    }
+    else {
+      pointFromVectorToVector(reference_axis, reference_axis_);
+      reference_axis_.normalize();
+    }
+    
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&PlaneRejector::configCallback, this, _1, _2);
     srv_->setCallback (f);
-
-    listener_.reset(new tf::TransformListener());
+    
     polygons_pub_ = pnh_->advertise<jsk_pcl_ros::PolygonArray>("output_polygons", 1);
     coefficients_pub_ = pnh_->advertise<jsk_pcl_ros::ModelCoefficientsArray>("output_coefficients", 1);
+    
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
     sub_polygons_.subscribe(*pnh_, "input_polygons", 1);
     sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
     sync_->connectInput(sub_polygons_, sub_coefficients_);
     sync_->registerCallback(boost::bind(&PlaneRejector::reject, this, _1, _2));
-  }
 
-  double PlaneRejector::getXMLDoubleValue(XmlRpc::XmlRpcValue val) {
-    switch(val.getType()) {
-    case XmlRpc::XmlRpcValue::TypeInt:
-      return (double)((int)val);
-    case XmlRpc::XmlRpcValue::TypeDouble:
-      return (double)val;
-    default:
-      return 0;
-    }
+    diagnostics_timer_ = pnh_->createTimer(
+      ros::Duration(1.0),
+      boost::bind(&PlaneRejector::updateDiagnostics,
+                  this,
+                  _1));
+    
   }
   
-  bool PlaneRejector::readVectorParam(const std::string& param_name)
+  void PlaneRejector::updateDiagnosticsPlaneRejector(
+    diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
-    if (pnh_->hasParam(param_name)) {
-      XmlRpc::XmlRpcValue v;
-      pnh_->param(param_name, v, v);
-      if (v.getType() == XmlRpc::XmlRpcValue::TypeArray &&
-          v.size() == 3) {
-        reference_axis_[0] = getXMLDoubleValue(v[0]);
-        reference_axis_[1] = getXMLDoubleValue(v[1]);
-        reference_axis_[2] = getXMLDoubleValue(v[2]);
-        reference_axis_.normalize();
-        return true;
+    bool alivep = vital_checker_->isAlive();
+    // check tf successeed or not
+    if (alivep) {
+      if (tf_success_->getValue()) {
+        stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                     "PlaneRejector running");
       }
       else {
-        NODELET_FATAL("%s is not 3 dimensional vector",
-                      param_name.c_str());
-        return false;
+        stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,
+                     "failed to tf transform");
       }
+      stat.add("Input planes (Avg.)", input_plane_counter_.mean());
+      stat.add("Rejected Planes (Avg.)", rejected_plane_counter_.mean());
+      stat.add("Passed Planes (Avg.)", passed_plane_counter_.mean());
+      stat.add("Angular Threahold", angle_thr_);
+      stat.add("Reference Axis",
+               (boost::format("[%f, %f, %f]")
+                % (reference_axis_[0])
+                %  (reference_axis_[1])
+                % (reference_axis_[2])).str());
+      stat.add("Processing Frame ID", processing_frame_id_);
     }
     else {
-      NODELET_FATAL("%s is not available",
-                    param_name.c_str());
-      return false;
+      stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,
+                   "PlaneRejector not running");
     }
+    
   }
-
+  
+  void PlaneRejector::updateDiagnostics(const ros::TimerEvent& event)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    diagnostic_updater_->update();
+  }
   
   void PlaneRejector::configCallback (Config &config, uint32_t level)
   {
@@ -121,14 +144,19 @@ namespace jsk_pcl_ros
     angle_thr_ = config.angle_thr;
   }
   
-  void PlaneRejector::reject(const jsk_pcl_ros::PolygonArray::ConstPtr& polygons,
-                             const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients)
+  void PlaneRejector::reject(
+    const PolygonArray::ConstPtr& polygons,
+    const ModelCoefficientsArray::ConstPtr& coefficients)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     jsk_pcl_ros::PolygonArray result_polygons;
     jsk_pcl_ros::ModelCoefficientsArray result_coefficients;
     result_polygons.header = polygons->header;
     result_coefficients.header = coefficients->header;
+    input_plane_counter_.add(polygons->polygons.size());
+    int rejected_plane_counter = 0;
+    int passed_plane_counter = 0;
     for (size_t i = 0; i < polygons->polygons.size(); i++) {
       geometry_msgs::PolygonStamped polygon = polygons->polygons[i];
       PCLModelCoefficientMsg coefficient = coefficients->coefficients[i];
@@ -136,6 +164,7 @@ namespace jsk_pcl_ros
       if (listener_->canTransform(coefficient.header.frame_id,
                                   processing_frame_id_,
                                   coefficient.header.stamp)) {
+        tf_success_->addValue(true);
         geometry_msgs::Vector3Stamped plane_axis;
         plane_axis.header = coefficient.header;
         plane_axis.vector.x = coefficient.values[0];
@@ -150,17 +179,23 @@ namespace jsk_pcl_ros
                              eigen_transformed_plane_axis);
         double ang = acos(eigen_transformed_plane_axis.normalized().dot(reference_axis_));
         if (ang < angle_thr_) {
+          ++passed_plane_counter;
           result_polygons.polygons.push_back(polygons->polygons[i]);
           result_coefficients.coefficients.push_back(coefficient);
         }
+        else {
+          ++rejected_plane_counter;
+        }
       }
       else {
-        ROS_FATAL("failed to transform %s to %s",
-                  coefficient.header.frame_id.c_str(), processing_frame_id_.c_str());
+        tf_success_->addValue(false);
      }
     }
+    rejected_plane_counter_.add(rejected_plane_counter);
+    passed_plane_counter_.add(passed_plane_counter);
     polygons_pub_.publish(result_polygons);
     coefficients_pub_.publish(result_coefficients);
+    diagnostic_updater_->update();
   }
   
 }

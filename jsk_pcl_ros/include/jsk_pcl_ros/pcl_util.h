@@ -148,7 +148,7 @@ namespace jsk_pcl_ros
     jsk_topic_tools::TimeAccumulator& accumulator,
     diagnostic_updater::DiagnosticStatusWrapper& stat);
 
-  static boost::mutex global_chull_mutex;
+  extern boost::mutex global_chull_mutex;
   
 }
 

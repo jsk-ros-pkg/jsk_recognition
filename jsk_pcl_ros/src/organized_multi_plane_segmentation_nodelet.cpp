@@ -69,7 +69,7 @@ namespace jsk_pcl_ros
     diagnostic_updater_.reset(new diagnostic_updater::Updater);
     diagnostic_updater_->setHardwareID(getName());
     diagnostic_updater_->add(
-                             getName() + "::NormalEstimation",
+      getName() + "::NormalEstimation",
       boost::bind(
         &OrganizedMultiPlaneSegmentation::updateDiagnosticNormalEstimation,
         this,
@@ -275,15 +275,8 @@ namespace jsk_pcl_ros
   { 
     std::vector<std::set<int> > cloud_sets;
     buildAllGroupsSetFromGraphMap(connection_map, cloud_sets);
+    connected_plane_num_counter_.add(cloud_sets.size());
     for (size_t i = 0; i < cloud_sets.size(); i++) {
-      //std::cout << i << " cloud set: ";
-      // for (std::set<int>::iterator it = cloud_sets[i].begin();
-      //      it != cloud_sets[i].end();
-      //      ++it) {
-      //   std::cout << *it << ", ";
-      // }
-      // std::cout << std::endl;
-      
       pcl::PointIndices one_indices;
       pcl::PointIndices one_boundaries;
       std::vector<float> new_coefficients;
@@ -310,31 +303,28 @@ namespace jsk_pcl_ros
       new_coefficients[1] /= norm;
       new_coefficients[2] /= norm;
       new_coefficients[3] /= norm;
-      output_indices.push_back(one_indices);
+      
       // take the average of the coefficients
       pcl::ModelCoefficients pcl_new_coefficients;
       pcl_new_coefficients.values = new_coefficients;
-      output_coefficients.push_back(pcl_new_coefficients);
-      //output_coefficients.push_back(model_coefficients[(*cloud_sets[i].begin())]);
       // estimate concave hull
-
-      pcl::PointCloud<PointT>::Ptr cloud_projected (new pcl::PointCloud<PointT>());
-      pcl::PointIndices::Ptr indices_ptr = boost::make_shared<pcl::PointIndices>(one_boundaries);
-      pcl::ProjectInliers<PointT> proj;
-      proj.setModelType (pcl::SACMODEL_PLANE);
-      proj.setIndices (indices_ptr);
-      proj.setInputCloud (input);
-      proj.setModelCoefficients (boost::make_shared<pcl::ModelCoefficients>(output_coefficients[i]));
-      proj.filter (*cloud_projected);
-      
-      pcl::ConvexHull<PointT> chull;
-      chull.setInputCloud(input);
-      chull.setDimension(2);
-      //chull.setAlpha(concave_alpha_);      // should be parameterized
-      chull.setInputCloud(cloud_projected);
-      pcl::PointCloud<PointT> chull_output;
-      chull.reconstruct(chull_output);
-      output_boundary_clouds.push_back(chull_output);
+      pcl::PointIndices::Ptr indices_ptr
+        = boost::make_shared<pcl::PointIndices>(one_boundaries);
+      pcl::ModelCoefficients::Ptr coefficients_ptr
+        = boost::make_shared<pcl::ModelCoefficients>(pcl_new_coefficients);
+      ConvexPolygon::Ptr convex
+        = convexFromCoefficientsAndInliers<PointT>(
+          input, indices_ptr, coefficients_ptr);
+      if (convex) {
+        pcl::PointCloud<PointT> chull_output;
+        convex->boundariesToPointCloud<PointT>(chull_output);
+        output_indices.push_back(one_indices);
+        output_coefficients.push_back(pcl_new_coefficients);
+        output_boundary_clouds.push_back(chull_output);
+      }
+      else {
+        NODELET_ERROR("failed to build convex");
+      }
     }
 
   }
@@ -557,7 +547,6 @@ namespace jsk_pcl_ros
       std::vector<pcl::PointIndices> refined_inliers;
       std::vector<pcl::ModelCoefficients> refined_coefficients;
       std::vector<ConvexPolygon::Ptr> refined_convexes;
-      
       refineBasedOnRANSAC(
         input, output_nonrefined_indices, output_nonrefined_coefficients,
         refined_inliers, refined_coefficients, refined_convexes);
@@ -568,9 +557,9 @@ namespace jsk_pcl_ros
         refined_boundary_clouds.push_back(refined_boundary);
       }
       publishSegmentationInformation(
-      header, input,
-      refined_pub_, refined_polygon_pub_, refined_coefficients_pub_,
-      refined_inliers, refined_boundary_clouds, refined_coefficients);
+        header, input,
+        refined_pub_, refined_polygon_pub_, refined_coefficients_pub_,
+        refined_inliers, refined_boundary_clouds, refined_coefficients);
     }
   }
 
@@ -606,16 +595,18 @@ namespace jsk_pcl_ros
       seg.setEpsAngle(pcl::deg2rad(20.0));
       pcl::PointIndices::Ptr refined_inliers (new pcl::PointIndices);
       pcl::ModelCoefficients::Ptr refined_coefficients(new pcl::ModelCoefficients);
-      seg.segment (*refined_inliers, *refined_coefficients);
-      ////////////////////////////////////////////////////////
-      // compute boundaries from convex hull of
-      ////////////////////////////////////////////////////////
-      ConvexPolygon::Ptr convex = convexFromCoefficientsAndInliers<PointT>(
-        input, refined_inliers, refined_coefficients);
-      if (convex) {
-        output_convexes.push_back(convex);
-        output_indices.push_back(*refined_inliers);
-        output_coefficients.push_back(*refined_coefficients);
+      seg.segment(*refined_inliers, *refined_coefficients);
+      if (refined_inliers->indices.size() > 0) {
+        ////////////////////////////////////////////////////////
+        // compute boundaries from convex hull of
+        ////////////////////////////////////////////////////////
+        ConvexPolygon::Ptr convex = convexFromCoefficientsAndInliers<PointT>(
+          input, refined_inliers, refined_coefficients);
+        if (convex) {
+          output_convexes.push_back(convex);
+          output_indices.push_back(*refined_inliers);
+          output_coefficients.push_back(*refined_coefficients);
+        }
       }
     }
   }
@@ -703,7 +694,7 @@ namespace jsk_pcl_ros
           stat.add("Estimation Method", "AVERAGE_DEPTH_CHANGE");
         }
         if (border_policy_ignore_) {
-        stat.add("Border Policy", "ignore");
+          stat.add("Border Policy", "ignore");
         }
         else {
           stat.add("Border Policy", "mirror");
@@ -745,11 +736,24 @@ namespace jsk_pcl_ros
                    "PlaneSegmentation running");
       addDiagnosticInformation(
         "Time to segment planes", plane_segmentation_time_acc_, stat);
+      if (ransac_refine_coefficients_) {
+        addDiagnosticInformation(
+          "Time to refine by RANSAC", ransac_refinement_time_acc_, stat);
+      }
       stat.add("Minimum Inliers", min_size_);
       stat.add("Angular Threshold (rad)", angular_threshold_);
       stat.add("Angular Threshold (deg)", angular_threshold_ / M_PI * 180.0);
       stat.add("Distance Threshold", distance_threshold_);
       stat.add("Max Curvature", max_curvature_);
+      if (ransac_refine_coefficients_) {
+        stat.add("Use RANSAC refinement", "True");
+        stat.add("RANSAC refinement distance threshold",
+                 ransac_refine_outlier_distance_threshold_);
+      }
+      else {
+        stat.add("Use RANSAC refinement", "False");
+      }
+      
       stat.add("Number of original segmented planes (Avg.)", 
                original_plane_num_counter_.mean());
       stat.add("Number of connected segmented planes (Avg.)", 

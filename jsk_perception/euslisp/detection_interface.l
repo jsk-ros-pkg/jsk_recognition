@@ -67,8 +67,8 @@
 (defun start-detection-interface-subscribe (tf-force obj &optional (topic *detection-topic*))
   (ros::ros-info "start subscribe ~A" topic)
   (ros::subscribe topic
-                  posedetection_msgs::ObjectDetection
-                  #'detection-interface-objectdetection tf-force obj))
+    posedetection_msgs::ObjectDetection
+    #'detection-interface-objectdetection tf-force obj))
 (defun stop-detection-interface-subscribe (&optional (topic *detection-topic*))
   (ros::ros-info "stop subscribe ~A" topic)
   (ros::unsubscribe topic))
@@ -97,7 +97,7 @@
     (send *ri* :ros-wait 2.0 :spin-self t
           :func-before-throw #'(lambda (sl) (stop-detection-interface-subscribe detection-topic))) ;; attention-check ...
     (send target-obj :stamp (ros::time-now))
-
+    
     (let* (current-object-coords
            previous-object-coords
            (start-time (ros::time-now)) (detect-object-list))

@@ -39,6 +39,8 @@
 
 namespace jsk_pcl_ros
 {
+  //static boost::mutex global_chull_mutex;
+  boost::mutex global_chull_mutex;
   std::vector<int> addIndices(const std::vector<int>& a,
                               const std::vector<int>& b)
   {
@@ -319,7 +321,5 @@ namespace jsk_pcl_ros
     stat.add(string_prefix + " (Var.)", accumulator.variance());
   }
 
-  //static boost::mutex global_chull_mutex;
-  
 }
 

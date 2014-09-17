@@ -128,8 +128,6 @@ namespace jsk_pcl_ros
     bool align_boxes_;
     bool use_pca_;
 
-    ros::Timer diagnostics_timer_;
-    //boost::shared_ptr<diagnostic_updater::Updater> diagnostic_updater_;
     TimeredDiagnosticUpdater::Ptr diagnostic_updater_;
     jsk_topic_tools::VitalChecker::Ptr vital_checker_;
     Counter cluster_counter_;

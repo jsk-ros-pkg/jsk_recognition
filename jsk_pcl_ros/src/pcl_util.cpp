@@ -321,6 +321,17 @@ namespace jsk_pcl_ros
     stat.add(string_prefix + " (Var.)", accumulator.variance());
   }
 
+  void addDiagnosticErrorSummary(
+    const std::string& string_prefix,
+    jsk_topic_tools::VitalChecker::Ptr vital_checker,
+    diagnostic_updater::DiagnosticStatusWrapper& stat)
+  {
+    stat.summary(
+      diagnostic_msgs::DiagnosticStatus::ERROR,
+      (boost::format("%s not running for %f sec")
+       % string_prefix % vital_checker->deadSec()).str());
+  }
+  
   SeriesedBoolean::SeriesedBoolean(const int buf_len):
     buf_(buf_len)
   {

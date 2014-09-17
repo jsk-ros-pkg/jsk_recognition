@@ -57,6 +57,7 @@
 
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <boost/circular_buffer.hpp>
+#include <jsk_topic_tools/vital_checker.h>
 
 namespace jsk_pcl_ros
 {
@@ -150,6 +151,14 @@ namespace jsk_pcl_ros
     diagnostic_updater::DiagnosticStatusWrapper& stat);
 
   ////////////////////////////////////////////////////////
+  // set error string to 
+  ////////////////////////////////////////////////////////
+  void addDiagnosticErrorSummary(
+    const std::string& string_prefix,
+    jsk_topic_tools::VitalChecker::Ptr vital_checker,
+    diagnostic_updater::DiagnosticStatusWrapper& stat);
+  
+  ////////////////////////////////////////////////////////
   // SeriesedBoolean
   //   store boolean value to limited buffer
   //   and return true if all the values are true.
@@ -185,7 +194,6 @@ namespace jsk_pcl_ros
     virtual void start();
     virtual void setHardwareID(const std::string& name);
     virtual void update();
-    
   protected:
     virtual void timerCallback(const ros::TimerEvent& event);
     ros::Timer timer_;

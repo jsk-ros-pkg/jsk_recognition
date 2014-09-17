@@ -118,7 +118,6 @@ namespace jsk_pcl_ros
   void ClusterPointIndicesDecomposer::updateDiagnostic(
     diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
-    bool alivep = vital_checker_->isAlive();
     if (vital_checker_->isAlive()) {
       stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
                    "ClusterPointIndicesDecomposer running");
@@ -151,9 +150,8 @@ namespace jsk_pcl_ros
       stat.add("Clusters (Ave.)", cluster_counter_.mean());
     }
     else {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,
-                   (boost::format("NormalEstimation not running for %f sec")
-                    % vital_checker_->deadSec()).str());
+      addDiagnosticErrorSummary(
+        "ClusterPointIndicesDecomposer", vital_checker_, stat);
     }
   }
   

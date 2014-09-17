@@ -2,6 +2,9 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.19 (2014-09-15)
+-------------------
+
 0.1.18 (2014-09-13)
 -------------------
 * Subscribe PolygonArray message to build ConvexPolygon in ColorizeDistanceFromPlane

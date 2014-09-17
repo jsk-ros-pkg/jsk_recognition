@@ -2,6 +2,11 @@
 Changelog for package jsk_libfreenect2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.19 (2014-09-15)
+-------------------
+* Add libtool dependency to libfreenect2
+* Contributors: Ryohei Ueda
+
 0.1.18 (2014-09-13)
 -------------------
 * add git to build_depend of jsk_libfreenect2

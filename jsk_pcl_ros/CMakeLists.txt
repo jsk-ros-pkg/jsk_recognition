@@ -121,6 +121,8 @@ jsk_pcl_nodelet(src/edgebased_cube_finder_nodelet.cpp
   "jsk_pcl/EdgebasedCubeFinder" "edgebased_cube_finder")
 jsk_pcl_nodelet(src/colorize_distance_from_plane_nodelet.cpp
   "jsk_pcl/ColorizeDistanceFromPlane" "colorize_distance_from_plane")
+jsk_pcl_nodelet(src/multi_plane_sac_segmentation_nodelet.cpp
+  "jsk_pcl/MultiPlaneSACSegmentation" "multi_plane_sac_segmentation")
 
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}

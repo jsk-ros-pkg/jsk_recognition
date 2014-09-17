@@ -34,70 +34,77 @@
  *********************************************************************/
 
 
-#ifndef JSK_PCL_ROS_COLORIZE_DISTANCE_FROM_PLANE_H_
-#define JSK_PCL_ROS_COLORIZE_DISTANCE_FROM_PLANE_H_
+#ifndef JSK_PCL_ROS_MULTI_PLANE_SEGMENTATION_H_
+#define JSK_PCL_ROS_MULTI_PLANE_SEGMENTATION_H_
 
 #include <pcl_ros/pcl_nodelet.h>
+#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include <dynamic_reconfigure/server.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 
+#include <jsk_pcl_ros/MultiPlaneSACSegmentationConfig.h>
+
+////////////////////////////////////////////////////////
+// messages
+////////////////////////////////////////////////////////
 #include <sensor_msgs/PointCloud2.h>
-#include <jsk_pcl_ros/ClusterPointIndices.h>
-#include <jsk_pcl_ros/ModelCoefficientsArray.h>
 #include <jsk_pcl_ros/PolygonArray.h>
-#include <dynamic_reconfigure/server.h>
-#include <jsk_pcl_ros/ColorizeDistanceFromPlaneConfig.h>
-#include "jsk_pcl_ros/geo_util.h"
+#include <jsk_pcl_ros/ModelCoefficientsArray.h>
+#include <jsk_pcl_ros/ClusterPointIndices.h>
 
 namespace jsk_pcl_ros
 {
-  class ColorizeDistanceFromPlane: public pcl_ros::PCLNodelet
+  class MultiPlaneSACSegmentation: public pcl_ros::PCLNodelet
   {
   public:
     typedef pcl::PointXYZRGB PointT;
-    typedef boost::shared_ptr<ColorizeDistanceFromPlane> Ptr;
+    typedef jsk_pcl_ros::MultiPlaneSACSegmentationConfig Config;
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
-      ModelCoefficientsArray,
-      PolygonArray
-      > SyncPolicy;
-    typedef ColorizeDistanceFromPlaneConfig Config;
+      sensor_msgs::PointCloud2 > SyncPolicy;
+    
   protected:
     ////////////////////////////////////////////////////////
     // methods
     ////////////////////////////////////////////////////////
     virtual void onInit();
     
-    virtual void colorize(const sensor_msgs::PointCloud2::ConstPtr& cloud,
-                          const ModelCoefficientsArray::ConstPtr& coefficients,
-                          const PolygonArray::ConstPtr& polygons);
+    virtual void segment(const sensor_msgs::PointCloud2::ConstPtr& msg);
+    virtual void segment(const sensor_msgs::PointCloud2::ConstPtr& msg,
+                         const sensor_msgs::PointCloud2::ConstPtr& msg_nromal);
+    
+    virtual void applyRecursiveRANSAC(
+      const pcl::PointCloud<PointT>::Ptr& input,
+      const pcl::PointCloud<pcl::Normal>::Ptr& normal,
+      std::vector<pcl::PointIndices::Ptr>& output_inliers,
+      std::vector<pcl::ModelCoefficients::Ptr>& output_coefficients,
+      std::vector<ConvexPolygon::Ptr>& output_polygons);
 
-    virtual double distanceToConvexes(
-      const PointT& p, const std::vector<ConvexPolygon::Ptr>& convexes);
-    
-    virtual uint32_t colorForDistance(const double d);
-    
-    virtual void configCallback(Config &config, uint32_t level);
+    virtual void configCallback (Config &config, uint32_t level);
     
     ////////////////////////////////////////////////////////
     // ROS variabels
     ////////////////////////////////////////////////////////
-    ros::Publisher pub_;
+    ros::Subscriber sub_;
+    ros::Publisher pub_inliers_, pub_coefficients_, pub_polygons_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<ModelCoefficientsArray> sub_coefficients_;
-    message_filters::Subscriber<PolygonArray> sub_polygons_;
-    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_normal_;
     boost::mutex mutex_;
-    
+
     ////////////////////////////////////////////////////////
-    // varibales to configure colorization
+    // parameters
     ////////////////////////////////////////////////////////
-    double max_distance_;
-    double min_distance_;
-    bool only_projectable_;
-    
+    double outlier_threshold_;
+    int min_inliers_;
+    int min_points_;
+    int max_iterations_;
+    bool use_normal_;
   private:
     
   };

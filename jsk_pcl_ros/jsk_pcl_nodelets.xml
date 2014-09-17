@@ -1,4 +1,10 @@
 <library path="lib/libjsk_pcl_ros">
+  <class name="jsk_pcl/MultiPlaneSACSegmentation" type="MultiPlaneSACSegmentation"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      segment multi planes by applying SACSegmentation recursively
+    </description>
+  </class>
   <class name="jsk_pcl/EdgebasedCubeFinder" type="EdgebasedCubeFinder"
          base_class_type="nodelet::Nodelet">
     <description>

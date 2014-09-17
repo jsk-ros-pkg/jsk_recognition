@@ -54,6 +54,11 @@
 #include <std_msgs/ColorRGBA.h>
 #include <jsk_pcl_ros/BoundingBoxArray.h>
 
+#include <diagnostic_updater/diagnostic_updater.h>
+#include <diagnostic_updater/publisher.h>
+#include "jsk_pcl_ros/pcl_util.h"
+#include <jsk_topic_tools/vital_checker.h>
+
 namespace jsk_pcl_ros
 {
   class ClusterPointIndicesDecomposer: public pcl_ros::PCLNodelet
@@ -65,8 +70,6 @@ namespace jsk_pcl_ros
                                                        jsk_pcl_ros::ClusterPointIndices,
                                                        jsk_pcl_ros::PolygonArray,
                                                        jsk_pcl_ros::ModelCoefficientsArray> SyncAlignPolicy;
-    ClusterPointIndicesDecomposer();
-    virtual ~ClusterPointIndicesDecomposer();
     virtual void onInit();
     virtual void extract(const sensor_msgs::PointCloud2ConstPtr &point,
                          const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices,
@@ -78,24 +81,6 @@ namespace jsk_pcl_ros
                                   std::vector<pcl::IndicesPtr> indices_array,
                                   std::vector<pcl::IndicesPtr> &output_array);
   protected:
-    boost::shared_ptr<ros::NodeHandle> pnh_;
-    //ros::Subscriber sub_input_;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<jsk_pcl_ros::ClusterPointIndices> sub_target_;
-    message_filters::Subscriber<jsk_pcl_ros::PolygonArray> sub_polygons_;
-    message_filters::Subscriber<jsk_pcl_ros::ModelCoefficientsArray> sub_coefficients_;
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
-    boost::shared_ptr<message_filters::Synchronizer<SyncAlignPolicy> >sync_align_;
-    std::vector<ros::Publisher> publishers_;
-    ros::Publisher pc_pub_, box_pub_;
-    tf::TransformBroadcaster br_;
-    std::string tf_prefix_;
-    virtual void allocatePublishers(size_t num);
-    bool publish_clouds_;
-    bool publish_tf_;
-    bool align_boxes_;
-    bool use_pca_;
-
     void addToDebugPointCloud
     (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
      size_t i,
@@ -113,17 +98,11 @@ namespace jsk_pcl_ros
     virtual int findNearestPlane(const Eigen::Vector4f& center,
                                  const jsk_pcl_ros::PolygonArrayConstPtr& planes,
                                  const jsk_pcl_ros::ModelCoefficientsArrayConstPtr& coefficients);
-    
-    static std_msgs::ColorRGBA makeColor(double r, double g, double b, double a)
-    {
-        std_msgs::ColorRGBA c;
-        c.r = r;
-        c.g = g;
-        c.b = b;
-        c.a = a;
-        return c;
 
-    }
+    virtual void updateDiagnostic(
+      diagnostic_updater::DiagnosticStatusWrapper &stat);
+    virtual void allocatePublishers(size_t num);
+    
     static uint32_t colorRGBAToUInt32(std_msgs::ColorRGBA c)
     {
         uint8_t r, g, b;
@@ -132,6 +111,27 @@ namespace jsk_pcl_ros
         b = (uint8_t)(c.b * 255);
         return ((uint32_t)r<<16 | (uint32_t)g<<8 | (uint32_t)b);
     }
+
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
+    message_filters::Subscriber<jsk_pcl_ros::ClusterPointIndices> sub_target_;
+    message_filters::Subscriber<jsk_pcl_ros::PolygonArray> sub_polygons_;
+    message_filters::Subscriber<jsk_pcl_ros::ModelCoefficientsArray> sub_coefficients_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncAlignPolicy> >sync_align_;
+    std::vector<ros::Publisher> publishers_;
+    ros::Publisher pc_pub_, box_pub_;
+    tf::TransformBroadcaster br_;
+    std::string tf_prefix_;
+    
+    bool publish_clouds_;
+    bool publish_tf_;
+    bool align_boxes_;
+    bool use_pca_;
+
+    TimeredDiagnosticUpdater::Ptr diagnostic_updater_;
+    jsk_topic_tools::VitalChecker::Ptr vital_checker_;
+    Counter cluster_counter_;
+    
   };
 
 }

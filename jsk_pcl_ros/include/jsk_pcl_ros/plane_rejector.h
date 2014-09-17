@@ -54,6 +54,15 @@
 #include <jsk_pcl_ros/ModelCoefficientsArray.h>
 #include "jsk_pcl_ros/PlaneRejectorConfig.h"
 
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include <jsk_topic_tools/time_accumulator.h>
+#include <jsk_topic_tools/vital_checker.h>
+
+#include <diagnostic_updater/diagnostic_updater.h>
+#include <diagnostic_updater/publisher.h>
+#include <jsk_topic_tools/rosparam_utils.h>
+#include "jsk_pcl_ros/pcl_util.h"
+
 namespace jsk_pcl_ros
 {
   class PlaneRejector: public pcl_ros::PCLNodelet
@@ -66,9 +75,17 @@ namespace jsk_pcl_ros
     virtual void onInit();
     virtual void reject(const jsk_pcl_ros::PolygonArray::ConstPtr& polygons,
                         const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients);
+    virtual void configCallback (Config &config, uint32_t level);
+
+    
+    virtual void updateDiagnostics(const ros::TimerEvent& event);
+    virtual void updateDiagnosticsPlaneRejector(
+      diagnostic_updater::DiagnosticStatusWrapper &stat);
+    
     message_filters::Subscriber<jsk_pcl_ros::PolygonArray> sub_polygons_;
     message_filters::Subscriber<jsk_pcl_ros::ModelCoefficientsArray> sub_coefficients_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    
     bool use_tf2_;
     std::string processing_frame_id_;
     // axis
@@ -78,9 +95,14 @@ namespace jsk_pcl_ros
     boost::mutex mutex_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     ros::Publisher polygons_pub_, coefficients_pub_;
-    virtual void configCallback (Config &config, uint32_t level);
-    virtual bool readVectorParam(const std::string& param_name);
-    virtual double getXMLDoubleValue(XmlRpc::XmlRpcValue val);
+    ros::Timer diagnostics_timer_;
+    boost::shared_ptr<diagnostic_updater::Updater> diagnostic_updater_;
+    jsk_topic_tools::VitalChecker::Ptr vital_checker_;
+    SeriesedBoolean::Ptr tf_success_;
+    
+    Counter rejected_plane_counter_;
+    Counter passed_plane_counter_;
+    Counter input_plane_counter_;
   private:
     
   };

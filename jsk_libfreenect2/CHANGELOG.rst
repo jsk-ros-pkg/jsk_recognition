@@ -2,8 +2,8 @@
 Changelog for package jsk_libfreenect2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.20 (2014-09-17)
+-------------------
 * Add autoconf to jsk_libfreenect2
 * Contributors: Ryohei Ueda
 

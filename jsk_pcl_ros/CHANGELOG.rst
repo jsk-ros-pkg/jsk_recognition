@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.20 (2014-09-17)
+-------------------
 * Not use inliers to colorize pointcloud based on distance from planes
 * Add check to be able to make convex or not on ColorizeDistanceFromPlane
   and OrganizedMultiPlaneSegmentation

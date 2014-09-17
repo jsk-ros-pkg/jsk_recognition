@@ -209,7 +209,10 @@ namespace jsk_pcl_ros
         z_axis[0] = 0; z_axis[1] = 0; z_axis[2] = 1;
         Eigen::Vector3f rotation_axis = z_axis.cross(normal).normalized();
         double theta = acos(z_axis.dot(normal));
-        if (isnan(theta)) {
+        if (isnan(theta) ||
+            isnan(rotation_axis[0]) ||
+            isnan(rotation_axis[1]) ||
+            isnan(rotation_axis[2])) {
           segmented_cloud_transformed = segmented_cloud;
           NODELET_ERROR("cannot compute angle to align the point cloud: [%f, %f, %f], [%f, %f, %f]",
                         z_axis[0], z_axis[1], z_axis[2],
@@ -218,7 +221,7 @@ namespace jsk_pcl_ros
         else {
           Eigen::Matrix3f m = Eigen::Matrix3f::Identity();
           m = m * Eigen::AngleAxisf(theta, rotation_axis);
-
+          
           if (use_pca_) {
             // first project points to the plane
             pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud
@@ -267,12 +270,12 @@ namespace jsk_pcl_ros
     double xwidth = maxpt[0] - minpt[0];
     double ywidth = maxpt[1] - minpt[1];
     double zwidth = maxpt[2] - minpt[2];
-
+    
     Eigen::Vector4f center2((maxpt[0] + minpt[0]) / 2.0, (maxpt[1] + minpt[1]) / 2.0, (maxpt[2] + minpt[2]) / 2.0, 1.0);
     Eigen::Vector4f center_transformed = m4 * center2;
       
     bounding_box.header = header;
-      
+    
     bounding_box.pose.position.x = center_transformed[0];
     bounding_box.pose.position.y = center_transformed[1];
     bounding_box.pose.position.z = center_transformed[2];

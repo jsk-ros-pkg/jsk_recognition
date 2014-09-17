@@ -316,6 +316,9 @@ namespace jsk_pcl_ros
     diagnostic_updater::DiagnosticStatusWrapper& stat)
   {
     stat.add(string_prefix + " (Avg.)", accumulator.mean());
+    if (accumulator.mean() != 0.0) {
+      stat.add(string_prefix + " (Avg., fps)", 1.0 / accumulator.mean());
+    }
     stat.add(string_prefix + " (Max)", accumulator.max());
     stat.add(string_prefix + " (Min)", accumulator.min());
     stat.add(string_prefix + " (Var.)", accumulator.variance());

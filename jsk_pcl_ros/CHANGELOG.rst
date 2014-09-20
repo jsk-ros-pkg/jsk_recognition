@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.21 (2014-09-20)
+-------------------
 * Add utility methods for 2-D geometry
 * Add new nodelet to filter bounding box array
 * Check align axis before aligning boundingbox in ClusterPointIndicesDecomposer

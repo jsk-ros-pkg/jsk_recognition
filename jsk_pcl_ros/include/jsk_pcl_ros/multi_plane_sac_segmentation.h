@@ -1,8 +1,8 @@
-// -*- mode: C++ -*-
+// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Ryohei Ueda and JSK Lab
+ *  Copyright (c) 2014, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,81 +32,80 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-#ifndef JSK_PCL_ROS_MULTI_PLANE_EXTRACTION_H_
-#define JSK_PCL_ROS_MULTI_PLANE_EXTRACTION_H_
 
-#include <ros/ros.h>
-#include <ros/names.h>
+
+#ifndef JSK_PCL_ROS_MULTI_PLANE_SEGMENTATION_H_
+#define JSK_PCL_ROS_MULTI_PLANE_SEGMENTATION_H_
+
 #include <pcl_ros/pcl_nodelet.h>
-
+#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include <dynamic_reconfigure/server.h>
+#include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 
-#include "jsk_pcl_ros/ClusterPointIndices.h"
-#include "sensor_msgs/PointCloud2.h"
-#include "jsk_pcl_ros/ModelCoefficientsArray.h"
-#include "jsk_pcl_ros/PolygonArray.h"
-#include <dynamic_reconfigure/server.h>
-#include "jsk_pcl_ros/MultiPlaneExtractionConfig.h"
-#include "jsk_pcl_ros/pcl_util.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
-#include <jsk_topic_tools/vital_checker.h>
+#include <jsk_pcl_ros/MultiPlaneSACSegmentationConfig.h>
 
+////////////////////////////////////////////////////////
+// messages
+////////////////////////////////////////////////////////
+#include <sensor_msgs/PointCloud2.h>
+#include <jsk_pcl_ros/PolygonArray.h>
+#include <jsk_pcl_ros/ModelCoefficientsArray.h>
+#include <jsk_pcl_ros/ClusterPointIndices.h>
 
 namespace jsk_pcl_ros
 {
-  class MultiPlaneExtraction: public pcl_ros::PCLNodelet
+  class MultiPlaneSACSegmentation: public pcl_ros::PCLNodelet
   {
   public:
-    
+    typedef pcl::PointXYZRGB PointT;
+    typedef jsk_pcl_ros::MultiPlaneSACSegmentationConfig Config;
     typedef message_filters::sync_policies::ExactTime<
-    sensor_msgs::PointCloud2,
-    jsk_pcl_ros::ClusterPointIndices,
-    jsk_pcl_ros::ModelCoefficientsArray,
-    jsk_pcl_ros::PolygonArray> SyncPolicy;
-    typedef jsk_pcl_ros::MultiPlaneExtractionConfig Config;
+      sensor_msgs::PointCloud2,
+      sensor_msgs::PointCloud2 > SyncPolicy;
+    
   protected:
     ////////////////////////////////////////////////////////
     // methods
     ////////////////////////////////////////////////////////
     virtual void onInit();
     
-    virtual void extract(const sensor_msgs::PointCloud2::ConstPtr& input,
-                         const jsk_pcl_ros::ClusterPointIndices::ConstPtr& indices,
-                         const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients,
-                         const jsk_pcl_ros::PolygonArray::ConstPtr& polygons);
+    virtual void segment(const sensor_msgs::PointCloud2::ConstPtr& msg);
+    virtual void segment(const sensor_msgs::PointCloud2::ConstPtr& msg,
+                         const sensor_msgs::PointCloud2::ConstPtr& msg_nromal);
     
+    virtual void applyRecursiveRANSAC(
+      const pcl::PointCloud<PointT>::Ptr& input,
+      const pcl::PointCloud<pcl::Normal>::Ptr& normal,
+      std::vector<pcl::PointIndices::Ptr>& output_inliers,
+      std::vector<pcl::ModelCoefficients::Ptr>& output_coefficients,
+      std::vector<ConvexPolygon::Ptr>& output_polygons);
+
     virtual void configCallback (Config &config, uint32_t level);
-
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
+    
     ////////////////////////////////////////////////////////
-    // ROS variables
+    // ROS variabels
     ////////////////////////////////////////////////////////
-    boost::mutex mutex_;
-    ros::Publisher pub_, nonplane_pub_;
+    ros::Subscriber sub_;
+    ros::Publisher pub_inliers_, pub_coefficients_, pub_polygons_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<jsk_pcl_ros::ModelCoefficientsArray> sub_coefficients_;
-    message_filters::Subscriber<jsk_pcl_ros::PolygonArray> sub_polygons_;
-    message_filters::Subscriber<jsk_pcl_ros::ClusterPointIndices> sub_indices_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_normal_;
+    boost::mutex mutex_;
 
     ////////////////////////////////////////////////////////
-    // Diagnostics Variables
+    // parameters
     ////////////////////////////////////////////////////////
-    TimeredDiagnosticUpdater::Ptr diagnostic_updater_;
-    jsk_topic_tools::VitalChecker::Ptr vital_checker_;
-    Counter plane_counter_;
-    
-    ////////////////////////////////////////////////////////
-    // Parameters
-    ////////////////////////////////////////////////////////
-    int maximum_queue_size_;
-    double min_height_, max_height_;
-    
+    double outlier_threshold_;
+    int min_inliers_;
+    int min_points_;
+    int max_iterations_;
+    bool use_normal_;
   private:
-    
     
   };
 }

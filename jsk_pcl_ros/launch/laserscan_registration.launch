@@ -8,10 +8,10 @@
 
   <arg name="use_gui" default="false" />
   <arg name="use_gdb" default="false" />
-
+  <arg name="use_laser_pipeline" default="true" />
   <!-- laserscan to pc2 -->
   <!-- NOTE: currently use furushchev/jsk_tilt_laser -->
-  <include file="$(find jsk_tilt_laser)/launch/laser_pipeline.launch">
+  <include file="$(find jsk_tilt_laser)/launch/laser_pipeline.launch" if="$(arg use_laser_pipeline)">
     <arg name="laser_scan" value="$(arg laser)" />
   </include>
 

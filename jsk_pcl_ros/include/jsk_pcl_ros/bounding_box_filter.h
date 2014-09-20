@@ -1,8 +1,8 @@
-// -*- mode: C++ -*-
+// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Ryohei Ueda and JSK Lab
+ *  Copyright (c) 2014, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,81 +32,81 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-#ifndef JSK_PCL_ROS_MULTI_PLANE_EXTRACTION_H_
-#define JSK_PCL_ROS_MULTI_PLANE_EXTRACTION_H_
 
-#include <ros/ros.h>
-#include <ros/names.h>
+
+#ifndef BOUNDING_BOX_FILTER_H_
+#define BOUNDING_BOX_FILTER_H_
+
 #include <pcl_ros/pcl_nodelet.h>
-
+#include <dynamic_reconfigure/server.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 
-#include "jsk_pcl_ros/ClusterPointIndices.h"
-#include "sensor_msgs/PointCloud2.h"
-#include "jsk_pcl_ros/ModelCoefficientsArray.h"
-#include "jsk_pcl_ros/PolygonArray.h"
-#include <dynamic_reconfigure/server.h>
-#include "jsk_pcl_ros/MultiPlaneExtractionConfig.h"
 #include "jsk_pcl_ros/pcl_util.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
-#include <jsk_topic_tools/vital_checker.h>
-
+#include "jsk_pcl_ros/geo_util.h"
+#include <jsk_pcl_ros/BoundingBoxArray.h>
+#include <jsk_pcl_ros/ClusterPointIndices.h>
+#include <jsk_pcl_ros/ModelCoefficientsArray.h>
+#include <jsk_pcl_ros/BoundingBoxFilterConfig.h>
 
 namespace jsk_pcl_ros
 {
-  class MultiPlaneExtraction: public pcl_ros::PCLNodelet
+  class BoundingBoxFilter: public pcl_ros::PCLNodelet
   {
   public:
-    
+    typedef jsk_pcl_ros::BoundingBoxFilterConfig Config;
+
     typedef message_filters::sync_policies::ExactTime<
-    sensor_msgs::PointCloud2,
-    jsk_pcl_ros::ClusterPointIndices,
-    jsk_pcl_ros::ModelCoefficientsArray,
-    jsk_pcl_ros::PolygonArray> SyncPolicy;
-    typedef jsk_pcl_ros::MultiPlaneExtractionConfig Config;
+      BoundingBoxArray,
+      ClusterPointIndices
+      > SyncPolicy;
+
   protected:
     ////////////////////////////////////////////////////////
     // methods
     ////////////////////////////////////////////////////////
     virtual void onInit();
-    
-    virtual void extract(const sensor_msgs::PointCloud2::ConstPtr& input,
-                         const jsk_pcl_ros::ClusterPointIndices::ConstPtr& indices,
-                         const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients,
-                         const jsk_pcl_ros::PolygonArray::ConstPtr& polygons);
-    
-    virtual void configCallback (Config &config, uint32_t level);
-
+    virtual void filter(
+      const BoundingBoxArray::ConstPtr& box_array_msg,
+      const ClusterPointIndices::ConstPtr& indices_msg);
+    virtual void configCallback(Config &config, uint32_t level);
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
     ////////////////////////////////////////////////////////
-    // ROS variables
+    // ROS varariables
     ////////////////////////////////////////////////////////
-    boost::mutex mutex_;
-    ros::Publisher pub_, nonplane_pub_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<jsk_pcl_ros::ModelCoefficientsArray> sub_coefficients_;
-    message_filters::Subscriber<jsk_pcl_ros::PolygonArray> sub_polygons_;
-    message_filters::Subscriber<jsk_pcl_ros::ClusterPointIndices> sub_indices_;
+    message_filters::Subscriber<BoundingBoxArray> sub_box_;
+    message_filters::Subscriber<ClusterPointIndices> sub_indices_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
-
+    ros::Publisher filtered_box_pub_;
+    ros::Publisher filtered_indices_pub_;
+    boost::mutex mutex_;
+    
     ////////////////////////////////////////////////////////
     // Diagnostics Variables
     ////////////////////////////////////////////////////////
     TimeredDiagnosticUpdater::Ptr diagnostic_updater_;
     jsk_topic_tools::VitalChecker::Ptr vital_checker_;
-    Counter plane_counter_;
+    Counter remove_counter_;
+    Counter pass_counter_;
     
     ////////////////////////////////////////////////////////
     // Parameters
     ////////////////////////////////////////////////////////
-    int maximum_queue_size_;
-    double min_height_, max_height_;
+    bool filter_limit_negative_;
+    bool use_x_dimension_;
+    bool use_y_dimension_;
+    bool use_z_dimension_;
+    double x_dimension_min_;
+    double x_dimension_max_;
+    double y_dimension_min_;
+    double y_dimension_max_;
+    double z_dimension_min_;
+    double z_dimension_max_;
+    
     
   private:
-    
     
   };
 }

@@ -2,6 +2,12 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.21 (2014-09-20)
+-------------------
+* Add more diagnostics to OrganizedMultiPlaneSegmentation and fix global
+  hook for ConvexHull
+* Contributors: Ryohei Ueda
+
 0.1.20 (2014-09-17)
 -------------------
 

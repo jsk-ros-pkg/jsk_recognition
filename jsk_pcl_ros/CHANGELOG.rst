@@ -2,6 +2,20 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.21 (2014-09-20)
+-------------------
+* Add utility methods for 2-D geometry
+* Add new nodelet to filter bounding box array
+* Check align axis before aligning boundingbox in ClusterPointIndicesDecomposer
+* Add diagnostic information to EuclideanClusteringExtraction
+* Add diagnostic information to MultiPlaneExtraction
+* Add processing frame id information to PlaneRejector's diagnostic
+* Add diagnostic information to ClusterPointIndicesDecomposer
+* Add diagnostics to PlaneRejector
+* Add more diagnostics to OrganizedMultiPlaneSegmentation and fix global
+  hook for ConvexHull
+* Contributors: Ryohei Ueda
+
 0.1.20 (2014-09-17)
 -------------------
 * Not use inliers to colorize pointcloud based on distance from planes

@@ -20,3 +20,6 @@ clean:
 
 download: disable_ssl
 	git clone $(GIT_URL) $(GIT_DIR); (cd ${GIT_DIR}; git checkout $(GIT_REVISION) up; rm -f `rospack find jsk_perception`/installed)
+
+installed: disable_ssl $(GIT_DIR) $(GIT_PATCH)
+	touch installed

@@ -2,6 +2,11 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Disable ssl when calling git
+* Contributors: Ryohei Ueda
+
 0.1.21 (2014-09-20)
 -------------------
 * Add more diagnostics to OrganizedMultiPlaneSegmentation and fix global

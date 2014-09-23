@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.22 (2014-09-24)
+-------------------
 * Disable ssl when calling git
 * Contributors: Ryohei Ueda
 

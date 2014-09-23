@@ -1,4 +1,12 @@
 <library path="lib/libjsk_pcl_ros">
+  <class name="jsk_pcl/BoundingBoxFilter" type="BoundingBoxFilter"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      filter BoundingBoxArray and ClusterPointIndices based on the size
+      of the bounding boxes.
+    </description>
+  </class>
+  
   <class name="jsk_pcl/MultiPlaneSACSegmentation" type="MultiPlaneSACSegmentation"
          base_class_type="nodelet::Nodelet">
     <description>
@@ -190,7 +198,7 @@
     </description>
   </class>
 
-  <class name="jsk_pcl/EuclideanClustering" type="pcl_ros::EuclideanClustering"
+  <class name="jsk_pcl/EuclideanClustering" type="EuclideanClustering"
          base_class_type="nodelet::Nodelet">
     <description>
       Clustering based on Euclidean distance

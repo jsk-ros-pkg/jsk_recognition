@@ -56,6 +56,8 @@
 #include <jsk_topic_tools/time_accumulator.h>
 
 #include <diagnostic_updater/diagnostic_updater.h>
+#include <boost/circular_buffer.hpp>
+#include <jsk_topic_tools/vital_checker.h>
 
 namespace jsk_pcl_ros
 {
@@ -148,7 +150,67 @@ namespace jsk_pcl_ros
     jsk_topic_tools::TimeAccumulator& accumulator,
     diagnostic_updater::DiagnosticStatusWrapper& stat);
 
-  static boost::mutex global_chull_mutex;
+  ////////////////////////////////////////////////////////
+  // set error string to 
+  ////////////////////////////////////////////////////////
+  void addDiagnosticErrorSummary(
+    const std::string& string_prefix,
+    jsk_topic_tools::VitalChecker::Ptr vital_checker,
+    diagnostic_updater::DiagnosticStatusWrapper& stat);
+
+  ////////////////////////////////////////////////////////
+  // add Boolean string to stat
+  ////////////////////////////////////////////////////////
+  void addDiagnosticBooleanStat(
+    const std::string& string_prefix,
+    const bool value,
+    diagnostic_updater::DiagnosticStatusWrapper& stat);
+  
+  ////////////////////////////////////////////////////////
+  // SeriesedBoolean
+  //   store boolean value to limited buffer
+  //   and return true if all the values are true.
+  ////////////////////////////////////////////////////////
+  class SeriesedBoolean
+  {
+  public:
+    typedef boost::shared_ptr<SeriesedBoolean> Ptr;
+    SeriesedBoolean(const int buf_len);
+    virtual ~SeriesedBoolean();
+    virtual void addValue(bool val);
+    virtual bool getValue();
+  protected:
+  private:
+    boost::circular_buffer<bool> buf_;
+  };
+
+  ////////////////////////////////////////////////////////
+  // TimeredDiagnosticUpdater
+  //   useful wrapper of DiagnosticUpdater.
+  ////////////////////////////////////////////////////////
+  class TimeredDiagnosticUpdater
+  {
+  public:
+    typedef boost::shared_ptr<TimeredDiagnosticUpdater> Ptr;
+    TimeredDiagnosticUpdater(ros::NodeHandle& nh,
+                             const ros::Duration& timer_duration);
+    virtual ~TimeredDiagnosticUpdater();
+    // wrapper methods of diagnostic_updater::Updater
+    virtual void add(const std::string& name,
+                     diagnostic_updater::TaskFunction f);
+    //virtual void add(diagnostic_updater::DiagnosticTask task);
+    virtual void start();
+    virtual void setHardwareID(const std::string& name);
+    virtual void update();
+  protected:
+    virtual void timerCallback(const ros::TimerEvent& event);
+    ros::Timer timer_;
+    boost::shared_ptr<diagnostic_updater::Updater> diagnostic_updater_;
+  private:
+    
+  };
+  
+  extern boost::mutex global_chull_mutex;
   
 }
 

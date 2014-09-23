@@ -38,7 +38,7 @@
 #include <algorithm>
 #include <iterator>
 #include <cfloat>
-
+// #define DEBUG_GEO_UTIL
 namespace jsk_pcl_ros
 {
   Eigen::Quaternionf rotFrom3Axis(const Eigen::Vector3f& ex,
@@ -400,7 +400,332 @@ namespace jsk_pcl_ros
   return d_;
   }
 
-  ConvexPolygon::ConvexPolygon(const std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f> >& vertices,
+  Polygon Polygon::createPolygonWithSkip(const Vertices& vertices)
+  {
+    const double thr = 0.01;
+    Polygon not_skipped_polygon(vertices);
+    Vertices skipped_vertices;
+    for (size_t i = 0; i < vertices.size(); i++) {
+      size_t next_i = not_skipped_polygon.nextIndex(i);
+      Eigen::Vector3f v0 = vertices[i];
+      Eigen::Vector3f v1 = vertices[next_i];
+      if ((v1 - v0).norm() > thr) {
+        skipped_vertices.push_back(vertices[i]);
+      }
+    }
+    return Polygon(skipped_vertices);
+  }
+  
+  Polygon::Polygon(const Vertices& vertices):
+    Plane((vertices[1] - vertices[0]).cross(vertices[2] - vertices[0]).normalized(), vertices[0]),
+    vertices_(vertices)
+  {
+    
+  }
+  
+  Polygon::~Polygon()
+  {
+
+  }
+
+  size_t Polygon::getFarestPointIndex(const Eigen::Vector3f& O)
+  {
+    double max_distance = - DBL_MAX;
+    size_t max_index = 0;
+    for (size_t i = 0; i < vertices_.size(); i++) {
+      Eigen::Vector3f v = vertices_[i];
+      double d = (O - v).norm();
+      if (max_distance < d) {
+        max_distance = d;
+        max_index = i;
+      }
+    }
+    return max_index;
+  }
+
+  PointIndexPair Polygon::getNeighborIndex(size_t index)
+  {
+    return boost::make_tuple<size_t, size_t>(
+      previousIndex(index), nextIndex(index));
+  }
+  
+  Eigen::Vector3f Polygon::directionAtPoint(size_t i)
+  {
+    Eigen::Vector3f O = vertices_[i];
+    Eigen::Vector3f A = vertices_[previousIndex(i)];
+    Eigen::Vector3f B = vertices_[nextIndex(i)];
+    Eigen::Vector3f OA = A - O;
+    Eigen::Vector3f OB = B - O;
+    Eigen::Vector3f n = (OA.normalized()).cross(OB.normalized());
+    if (n.norm() == 0) {
+      // ROS_ERROR("normal is 0");
+      // ROS_ERROR("O: [%f, %f, %f]", O[0], O[1], O[2]);
+      // ROS_ERROR("A: [%f, %f, %f]", A[0], A[1], A[2]);
+      // ROS_ERROR("B: [%f, %f, %f]", B[0], B[1], B[2]);
+      // ROS_ERROR("OA: [%f, %f, %f]", OA[0], OA[1], OA[2]);
+      // ROS_ERROR("OB: [%f, %f, %f]", OB[0], OB[1], OB[2]);
+      //exit(1);
+    }
+    return n.normalized();
+  }
+  
+  bool Polygon::isTriangle() {
+    return vertices_.size() == 3;
+  }
+  
+  size_t Polygon::getNumVertices() {
+    return vertices_.size();
+  }
+  
+  Eigen::Vector3f Polygon::getVertex(size_t i) {
+    return vertices_[i];
+  }
+  
+  Polygon::PtrPair Polygon::separatePolygon(size_t index)
+  {
+    PointIndexPair neighbor_index = getNeighborIndex(index);
+    Vertices triangle_vertices;
+    triangle_vertices.push_back(vertices_[index]);
+    triangle_vertices.push_back(vertices_[neighbor_index.get<1>()]);
+    triangle_vertices.push_back(vertices_[neighbor_index.get<0>()]);
+    Polygon::Ptr triangle(new Polygon(triangle_vertices));
+    Vertices rest_vertices;
+    // do not add the points on the line
+    for (size_t i = neighbor_index.get<1>(); i != index;) {
+      // check the points on the line
+      if (i == neighbor_index.get<1>()) {
+        rest_vertices.push_back(vertices_[i]);
+      }
+      else {
+        if (directionAtPoint(i).norm() != 0.0) {
+          rest_vertices.push_back(vertices_[i]);
+        }
+        else {
+          ROS_ERROR("removed: %lu", i);
+        }
+      }
+      i = nextIndex(i);
+    }
+    Polygon::Ptr rest(new Polygon(rest_vertices));
+    return boost::make_tuple<Polygon::Ptr, Polygon::Ptr>(
+      triangle, rest);
+  }
+  
+  bool Polygon::isPossibleToRemoveTriangleAtIndex(
+    size_t index,
+    const Eigen::Vector3f& direction)
+  {
+    Polygon::PtrPair candidate = separatePolygon(index);
+    Polygon::Ptr triangle_candidate = candidate.get<0>();
+    Polygon::Ptr rest_candidate = candidate.get<1>();
+    // first check direction
+    Eigen::Vector3f the_direction = directionAtPoint(index);
+    //ROS_INFO("direction: [%f, %f, %f]", the_direction[0], the_direction[1], the_direction[2]);
+    if (the_direction.norm() == 0.0) {
+      ROS_ERROR("malformed polygon");
+      exit(1);
+    }
+    if (direction.dot(the_direction) < 0) {
+#ifdef DEBUG_GEO_UTIL
+      ROS_INFO("triangle is not same direction");
+      ROS_INFO("direction: [%f, %f, %f]", direction[0], direction[1], direction[2]);
+      ROS_INFO("the_direction: [%f, %f, %f]",
+               the_direction[0],
+               the_direction[1],
+               the_direction[2]);
+      for (size_t i = 0; i < vertices_.size(); i++) {
+        Eigen::Vector3f v = directionAtPoint(i);
+        ROS_INFO("the_direction[%lu]: [%f, %f, %f]",
+                 i, v[0], v[1], v[2]);
+      // other direction
+      }
+#endif
+      return false;
+    }
+    else {
+      //return true;
+      // second, check the triangle includes the rest of points or not
+      for (size_t i = 0; i < rest_candidate->vertices_.size(); i++) {
+        if (i == 0 || i == rest_candidate->vertices_.size() - 1) {
+          continue;       // do not check the first and the last point
+        }
+        else {
+          Eigen::Vector3f P = rest_candidate->getVertex(i);
+          Eigen::Vector3f A = triangle_candidate->getVertex(0);
+          Eigen::Vector3f B = triangle_candidate->getVertex(1);
+          Eigen::Vector3f C = triangle_candidate->getVertex(2);
+          Eigen::Vector3f CA = A - C;
+          Eigen::Vector3f BC = C - B;
+          Eigen::Vector3f AB = B - A;
+          Eigen::Vector3f AP = P - A;
+          Eigen::Vector3f BP = P - B;
+          Eigen::Vector3f CP = P - C;
+          Eigen::Vector3f Across = CA.normalized().cross(AP.normalized()).normalized();
+          Eigen::Vector3f Bcross = AB.normalized().cross(BP.normalized()).normalized();
+          Eigen::Vector3f Ccross = BC.normalized().cross(CP.normalized()).normalized();
+#ifdef DEBUG_GEO_UTIL
+          ROS_INFO("P: [%f, %f, %f]", P[0], P[1], P[2]);
+          ROS_INFO("A: [%f, %f, %f]", A[0], A[1], A[2]);
+          ROS_INFO("B: [%f, %f, %f]", B[0], B[1], B[2]);
+          ROS_INFO("C: [%f, %f, %f]", C[0], C[1], C[2]);
+          ROS_INFO("Across: [%f, %f, %f]", Across[0], Across[1], Across[2]);
+          ROS_INFO("Bcross: [%f, %f, %f]", Bcross[0], Bcross[1], Bcross[2]);
+          ROS_INFO("Ccross: [%f, %f, %f]", Ccross[0], Ccross[1], Ccross[2]);
+          ROS_INFO("Across-Bcross: %f", Across.dot(Bcross));
+          ROS_INFO("Bcross-Ccross: %f", Bcross.dot(Ccross));
+          ROS_INFO("Ccross-Across: %f", Ccross.dot(Across));
+#endif
+          if (((Across.dot(Bcross) > 0 &&
+                Bcross.dot(Ccross) > 0 &&
+                Ccross.dot(Across) > 0) ||
+               (Across.dot(Bcross) < 0 &&
+                Bcross.dot(Ccross) < 0 &&
+                Ccross.dot(Across) < 0))) {
+            // ROS_ERROR("%lu -- %lu is inside", index, i);
+            return false;
+          }
+          // ConvexPolygon convex_triangle(triangle_candidate->vertices_);
+          // if (convex_triangle.isInside(v)) {
+          //   //ROS_INFO("vertices is inside of the polygon");
+          //   return false;
+          // }
+        }
+      }
+      return true;
+    }
+  }
+
+  bool Polygon::isConvex()
+  {
+#ifdef DEBUG_GEO_UTIL
+    for (size_t i = 0; i < getNumVertices(); i++) {
+      Eigen::Vector3f n = directionAtPoint(i);
+      ROS_INFO("n[%lu] [%f, %f, %f]", i, n[0], n[1], n[2]);
+    }
+#endif
+    Eigen::Vector3f n0 = directionAtPoint(0);
+    for (size_t i = 1; i < getNumVertices(); i++) {
+      Eigen::Vector3f n = directionAtPoint(i);
+      if (n0.dot(n) < 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
+  std::vector<Polygon::Ptr> Polygon::decomposeToTriangles()
+  {
+    std::vector<Polygon::Ptr> ret;
+    
+    // if this polygon is triangle, return immediately
+    if (isTriangle()) {
+      ret.push_back(Polygon::Ptr(this));
+      return ret;
+    }
+    // the first triangle is special. the first triangle is at
+    // farest point from origin.
+    Eigen::Vector3f O(0, 0, 0);
+    size_t farest_point_index = getFarestPointIndex(O);
+    // we can remove the first triangle.
+    Polygon::PtrPair polygon_pair = separatePolygon(farest_point_index);
+    Polygon::Ptr first_triangle = polygon_pair.get<0>();
+    Eigen::Vector3f way_of_normal = directionAtPoint(farest_point_index);
+    if (way_of_normal.norm() == 0.0) {
+      ROS_ERROR("way_of_norml is 0");
+      exit(3);
+    }
+    ret.push_back(first_triangle);
+    Polygon::Ptr the_polygon = polygon_pair.get<1>();
+    while (the_polygon->getNumVertices() >= 3) {
+      //ROS_INFO("found triangle:: %lu", the_polygon->getNumVertices());
+      // the end of removal
+      if (the_polygon->isTriangle()) {
+        ret.push_back(the_polygon);
+        break;
+      }
+      else {
+#ifdef DEBUG_GEO_UTIL
+        for (size_t i = 0; i < the_polygon->getNumVertices(); i++) {
+          Eigen::Vector3f n = the_polygon->getVertex(i);
+          ROS_WARN("v[%lu] [%f, %f, %f]", i, n[0], n[1], n[2]);
+        }
+        for (size_t i = 0; i < the_polygon->getNumVertices(); i++) {
+          Eigen::Vector3f n = the_polygon->directionAtPoint(i);
+          ROS_WARN("d[%lu] [%f, %f, %f]", i, n[0], n[1], n[2]);
+        }
+#endif
+        // need to remove triangle patch
+        size_t next_index = 0;
+        while (true) {          // loop until success to remove next polygon
+          if (the_polygon->isPossibleToRemoveTriangleAtIndex(
+                next_index, way_of_normal)) {
+            Polygon::PtrPair next_pair
+              = the_polygon->separatePolygon(next_index);
+            ret.push_back(next_pair.get<0>());
+            the_polygon = next_pair.get<1>();
+            break;
+          }
+          else {
+            next_index = the_polygon->nextIndex(next_index);
+            if (next_index == 0) {
+              ROS_ERROR("looped! %lu", the_polygon->getNumVertices());
+#ifdef DEBUG_GEO_UTIL
+              for (size_t i = 0; i < the_polygon->getNumVertices(); i++) {
+                Eigen::Vector3f v = the_polygon->getVertex(i);
+                ROS_INFO("v[%lu] [%f, %f, %f]", i, v[0], v[1], v[2]);
+                // ROS_INFO("Eigen::Vector3f v%lu(%f, %f, %f);", i, v[0], v[1], v[2]);
+                // ROS_INFO("vs.push_back(v%lu);", i);
+              }
+              for (size_t i = 0; i < the_polygon->getNumVertices(); i++) {
+                Eigen::Vector3f v0 = the_polygon->getVertex(i);
+                Eigen::Vector3f v1 = the_polygon->getVertex(the_polygon->nextIndex(i));
+                Eigen::Vector3f v = (v1 - v0);
+                ROS_INFO("d[%lu] [%f, %f, %f]", i, v[0], v[1], v[2]);
+                ROS_INFO("d[%lu] %f", i, v.norm());
+              }
+#endif
+              return ret;
+            }
+          }
+        }
+      }
+    }
+    return ret;
+  }
+
+  size_t Polygon::previousIndex(size_t i)
+  {
+    if (i == 0) {
+      return vertices_.size() - 1;
+    }
+    else {
+      return i - 1;
+    }
+  }
+  
+  size_t Polygon::nextIndex(size_t i)
+  {
+    if (i == vertices_.size() - 1) {
+      return 0;
+    }
+    else {
+      return i + 1;
+    }
+  }
+
+  Polygon Polygon::fromROSMsg(const geometry_msgs::Polygon& polygon)
+  {
+    Vertices vertices;
+    for (size_t i = 0; i < polygon.points.size(); i++) {
+      Eigen::Vector3f v;
+      pointFromXYZToVector<geometry_msgs::Point32, Eigen::Vector3f>(
+        polygon.points[i], v);
+      vertices.push_back(v);
+    }
+    return Polygon(vertices);
+  }
+  
+  ConvexPolygon::ConvexPolygon(const Vertices& vertices,
                                const std::vector<float>& coefficients):
     Plane(coefficients), vertices_(vertices)
   {
@@ -408,7 +733,7 @@ namespace jsk_pcl_ros
   }
     
   
-  ConvexPolygon::ConvexPolygon(const std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f> >& vertices):
+  ConvexPolygon::ConvexPolygon(const Vertices& vertices):
     Plane((vertices[1] - vertices[0]).cross(vertices[2] - vertices[0]).normalized(), vertices[0]),
     vertices_(vertices)
   {
@@ -489,7 +814,7 @@ namespace jsk_pcl_ros
       Eigen::Vector3f direction = (B - A).normalized();
       Eigen::Vector3f direction2 = (p - A).normalized();
       if (direction_way) {
-        if (direction.cross(direction2).dot(normal_) >= 0) {
+        if (direction.cross(direction2).dot(normal_) > 0) {
           continue;
         }
         else {
@@ -497,7 +822,7 @@ namespace jsk_pcl_ros
         }
       }
       else {
-        if (direction.cross(direction2).dot(normal_) <= 0) {
+        if (direction.cross(direction2).dot(normal_) < 0) {
           continue;
         }
         else {

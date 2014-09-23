@@ -112,6 +112,12 @@
       publish_clouds: false
     </rosparam>
   </node>
+  <node name="bounding_box_filter"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/BoundingBoxFilter /$(arg MANAGER)">
+    <remap from="~input_box" to="cluster_decomposer_final/boxes" />
+    <remap from="~input_indices" to="euclidean_clustering/output_throttle" />
+  </node>
   <node pkg="nodelet" type="nodelet"
         name="throttle_segmentation"
         args="load jsk_topic_tools/LightweightThrottle /$(arg MANAGER)"
@@ -248,6 +254,7 @@
     </include>
   </group>
   <node pkg="diagnostic_aggregator" type="aggregator_node"
+        respawn="true"
         name="pcl_diagnostic_aggregator">
   </node>
   <node pkg="rqt_robot_monitor" type="rqt_robot_monitor"

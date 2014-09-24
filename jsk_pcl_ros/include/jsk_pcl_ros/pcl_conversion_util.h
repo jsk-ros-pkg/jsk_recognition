@@ -52,24 +52,55 @@ typedef pcl::PointIndices PCLIndicesMsg;
 typedef pcl::ModelCoefficients PCLModelCoefficientMsg;
 #endif
 
+namespace jsk_pcl_ros
+{
+  template<class FromT, class ToT>
+  void pointFromXYZToVector(const FromT& msg,
+                            ToT& p)
+  {
+    p[0] = msg.x; p[1] = msg.y; p[2] = msg.z;
+  }
 
+  template<class FromT, class ToT>
+  void pointFromVectorToXYZ(const FromT& p,
+                            ToT& msg)
+  {
+    msg.x = p[0]; msg.y = p[1]; msg.z = p[2];
+  }
+
+  template<class FromT, class ToT>
+  void pointFromXYZToXYZ(const FromT& from,
+                         ToT& to)
+  {
+    to.x = from.x; to.y = from.y; to.z = from.z;
+  }
+
+  template<class FromT, class ToT>
+  void pointFromVectorToVector(const FromT& from,
+                               ToT& to)
+  {
+    to[0] = from[0]; to[1] = from[1]; to[2] = from[2];
+  }
+}
 // extend pcl_conversions package's toPCL and fromPCL functions
 namespace pcl_conversions
-{
-  void toPCL(const geometry_msgs::Point32& msg,
-             pcl::PointXYZRGB& p);
-  void toPCL(const geometry_msgs::Point32& msg,
-             pcl::PointXYZ& p);
-  void fromPCL(const pcl::PointXYZRGB& p,
-               geometry_msgs::Point32& msg);
-  void fromPCL(const pcl::PointXYZ& p,
-               geometry_msgs::Point32& msg);
-  void fromMSGToEigen(const geometry_msgs::Point32& msg,
-                      Eigen::Vector3d& p);
-  void fromMSGToEigen(const geometry_msgs::Point32& msg,
-                      Eigen::Vector3f& p);
-  void fromPCLToEigen(const pcl::PointXYZRGB& p,
-                      Eigen::Vector3d& output);
+{  
+  std::vector<pcl::PointIndices::Ptr>
+  convertToPCLPointIndices(const std::vector<PCLIndicesMsg>& cluster_indices);
+
+  std::vector<pcl::ModelCoefficients::Ptr>
+  convertToPCLModelCoefficients(
+    const std::vector<PCLModelCoefficientMsg>& coefficients);
+
+  std::vector<PCLIndicesMsg>
+  convertToROSPointIndices(
+    const std::vector<pcl::PointIndices::Ptr> cluster_indices,
+    const std_msgs::Header& header);
+
+  std::vector<PCLModelCoefficientMsg>
+  convertToROSModelCoefficients(
+    const std::vector<pcl::ModelCoefficients::Ptr>& coefficients,
+    const std_msgs::Header& header);
 }
 
 #endif

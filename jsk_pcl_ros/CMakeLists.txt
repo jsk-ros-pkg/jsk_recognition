@@ -111,7 +111,20 @@ jsk_pcl_nodelet(src/organize_pointcloud_nodelet.cpp
   "jsk_pcl/OrganizePointCloud" "organize_pointcloud")
 jsk_pcl_nodelet(src/polygon_array_wrapper_nodelet.cpp
   "jsk_pcl/PolygonArrayWrapper" "polygon_array_wrapper")
-
+jsk_pcl_nodelet(src/border_estimator_nodelet.cpp
+  "jsk_pcl/BorderEstimator" "border_estimator")
+jsk_pcl_nodelet(src/edge_depth_refinement_nodelet.cpp
+  "jsk_pcl/EdgeDepthRefinementr" "edge_depth_refinement")
+jsk_pcl_nodelet(src/parallel_edge_finder_nodelet.cpp
+  "jsk_pcl/ParallelEdgeFinder" "parallel_edge_finder")
+jsk_pcl_nodelet(src/edgebased_cube_finder_nodelet.cpp
+  "jsk_pcl/EdgebasedCubeFinder" "edgebased_cube_finder")
+jsk_pcl_nodelet(src/colorize_distance_from_plane_nodelet.cpp
+  "jsk_pcl/ColorizeDistanceFromPlane" "colorize_distance_from_plane")
+jsk_pcl_nodelet(src/multi_plane_sac_segmentation_nodelet.cpp
+  "jsk_pcl/MultiPlaneSACSegmentation" "multi_plane_sac_segmentation")
+jsk_pcl_nodelet(src/bounding_box_filter_nodelet.cpp
+  "jsk_pcl/BoundingBoxFilter" "bounding_box_filter")
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp

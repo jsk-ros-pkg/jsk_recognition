@@ -1,6 +1,6 @@
 <package>
   <name>jsk_perception</name>
-  <version>0.1.14</version>
+  <version>0.1.22</version>
 
   <description>
 
@@ -15,6 +15,8 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <build_depend>mk</build_depend>
+  <build_depend>git</build_depend>
   <build_depend>rospy</build_depend>
   <build_depend>roseus</build_depend>
   <build_depend>imagesift</build_depend>
@@ -39,6 +41,7 @@
   <build_depend>tf</build_depend>
   <build_depend>eigen</build_depend>
   <build_depend>jsk_pcl_ros</build_depend>
+
   <run_depend>rospy</run_depend>
   <run_depend>roseus</run_depend>
   <run_depend>imagesift</run_depend>

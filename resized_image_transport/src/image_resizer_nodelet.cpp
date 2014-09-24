@@ -45,6 +45,7 @@ protected:
   bool publish_once_;
   bool use_messages_;
   bool use_bytes_;
+  bool verbose_;
   ros::Time last_rosinfo_time_, last_subscribe_time_, last_publish_time_;
   ros::Duration period_;
   boost::mutex mutex_;
@@ -54,6 +55,12 @@ private:
   
 public:
 protected:
+  
+  boost::circular_buffer<double> in_times;
+  boost::circular_buffer<double> out_times;
+  boost::circular_buffer<double> in_bytes;
+  boost::circular_buffer<double> out_bytes;
+
   void onInit() {
     nh = getNodeHandle();
     pnh = getPrivateNodeHandle();
@@ -100,13 +107,20 @@ protected:
       sub_ = pnh.subscribe("snapshot", 1, &ImageResizer::snapshot_msg_cb, this);
     }
 
+    cp_ = it_->advertiseCamera("output/image", max_queue_size_);
+
     cs_ = it_->subscribeCamera("input/image", max_queue_size_,
                                &ImageResizer::callback, this);
 
-    cp_ = it_->advertiseCamera("output/image", max_queue_size_);
 
   }
-
+public:
+  ImageResizer():
+    in_times(boost::circular_buffer<double>(100)),
+    out_times(boost::circular_buffer<double>(100)),
+    in_bytes(boost::circular_buffer<double>(100)),
+    out_bytes(boost::circular_buffer<double>(100))
+    { }
   ~ImageResizer() { }
 
 protected:
@@ -116,10 +130,10 @@ protected:
     resize_x_ = config.resize_scale_x;
     resize_y_ = config.resize_scale_y;
     period_ = ros::Duration(1.0/config.msg_par_second);
-
-    NODELET_INFO("resize_scale_x : %f", resize_x_);
-    NODELET_INFO("resize_scale_y : %f", resize_y_);
-    NODELET_INFO("message period : %f", period_.toSec());
+    verbose_ = config.verbose;
+    NODELET_DEBUG("resize_scale_x : %f", resize_x_);
+    NODELET_DEBUG("resize_scale_y : %f", resize_y_);
+    NODELET_DEBUG("message period : %f", period_.toSec());
   }
 
   void snapshot_msg_cb (const std_msgs::EmptyConstPtr msg) {
@@ -140,18 +154,11 @@ protected:
                 const sensor_msgs::CameraInfoConstPtr &info) {
     boost::mutex::scoped_lock lock(mutex_);
     ros::Time now = ros::Time::now();
-
-    static boost::circular_buffer<double> in_times(100);
-    static boost::circular_buffer<double> out_times(100);
-    static boost::circular_buffer<double> in_bytes(100);
-    static boost::circular_buffer<double> out_bytes(100);
-
     ROS_DEBUG("resize: callback");
     if ( !publish_once_ || cp_.getNumSubscribers () == 0 ) {
       ROS_DEBUG("resize: number of subscribers is 0, ignoring image");
       return;
     }
-
     in_times.push_front((now - last_subscribe_time_).toSec());
     in_bytes.push_front(img->data.size());
     //
@@ -228,16 +235,18 @@ protected:
         in_byte_mean /= duration;
         out_byte_mean /= duration;
 
-        NODELET_INFO_STREAM(" in  bandwidth: " << std::fixed << std::setw(11) << std::setprecision(3)  << in_byte_mean/1000*8
-                            << " Kbps rate:"   << std::fixed << std::setw(7) << std::setprecision(3) << in_time_rate
-                            << " hz min:"      << std::fixed << std::setw(7) << std::setprecision(3) << in_time_min_delta
-                            << " s max: "    << std::fixed << std::setw(7) << std::setprecision(3) << in_time_max_delta
-                            << " s std_dev: "<< std::fixed << std::setw(7) << std::setprecision(3) << in_time_std_dev << "s n: " << in_time_n);
-        NODELET_INFO_STREAM(" out bandwidth: " << std::fixed << std::setw(11) << std::setprecision(3)  << out_byte_mean/1000*8
-                            << " kbps rate:"   << std::fixed << std::setw(7) << std::setprecision(3) << out_time_rate
-                            << " hz min:"      << std::fixed << std::setw(7) << std::setprecision(3) << out_time_min_delta
-                            << " s max: "    << std::fixed << std::setw(7) << std::setprecision(3) << out_time_max_delta
-                            << " s std_dev: "<< std::fixed << std::setw(7) << std::setprecision(3) << out_time_std_dev << "s n: " << out_time_n);
+        if (verbose_) {
+          NODELET_INFO_STREAM(" in  bandwidth: " << std::fixed << std::setw(11) << std::setprecision(3)  << in_byte_mean/1000*8
+                              << " Kbps rate:"   << std::fixed << std::setw(7) << std::setprecision(3) << in_time_rate
+                              << " hz min:"      << std::fixed << std::setw(7) << std::setprecision(3) << in_time_min_delta
+                              << " s max: "    << std::fixed << std::setw(7) << std::setprecision(3) << in_time_max_delta
+                              << " s std_dev: "<< std::fixed << std::setw(7) << std::setprecision(3) << in_time_std_dev << "s n: " << in_time_n);
+          NODELET_INFO_STREAM(" out bandwidth: " << std::fixed << std::setw(11) << std::setprecision(3)  << out_byte_mean/1000*8
+                              << " kbps rate:"   << std::fixed << std::setw(7) << std::setprecision(3) << out_time_rate
+                              << " hz min:"      << std::fixed << std::setw(7) << std::setprecision(3) << out_time_min_delta
+                              << " s max: "    << std::fixed << std::setw(7) << std::setprecision(3) << out_time_max_delta
+                              << " s std_dev: "<< std::fixed << std::setw(7) << std::setprecision(3) << out_time_std_dev << "s n: " << out_time_n);
+        }
         in_times.clear();
         in_bytes.clear();
         out_times.clear();

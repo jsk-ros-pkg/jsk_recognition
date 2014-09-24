@@ -34,6 +34,7 @@
 
 #include <jsk_pcl_ros/static_polygon_array_publisher.h>
 #include <pluginlib/class_list_macros.h>
+#include <jsk_topic_tools/rosparam_utils.h>
 
 namespace jsk_pcl_ros
 {
@@ -46,7 +47,9 @@ namespace jsk_pcl_ros
     pnh_->param("use_trigger", use_trigger_, false);
     pnh_->param("periodic_rate", periodic_rate_, 10.0);
     
-    bool frame_id_read_p = readFrameIds("frame_ids");
+    bool frame_id_read_p
+      = jsk_topic_tools::readVectorParameter(*pnh_, "frame_ids",
+                                             frame_ids_);
     if (!frame_id_read_p) {
       NODELET_FATAL("failed to read frame_ids from ~frame_ids");
       return;
@@ -130,34 +133,6 @@ namespace jsk_pcl_ros
     return coefficient;
   }
 
-  bool StaticPolygonArrayPublisher::readFrameIds(const std::string& param_name)
-  {
-    if (pnh_->hasParam(param_name)) {
-      XmlRpc::XmlRpcValue v;
-      pnh_->param(param_name, v, v);
-      if (v.getType() == XmlRpc::XmlRpcValue::TypeArray) {
-        for (size_t i = 0; i < v.size(); i++) {
-          if (v[i].getType() == XmlRpc::XmlRpcValue::TypeString) {
-            frame_ids_.push_back((std::string)v[i]);
-          }
-          else {
-            NODELET_FATAL("%s[%lu] is not string", param_name.c_str(), i);
-            return false;
-          }
-        }
-      }
-      else {
-        NODELET_FATAL("%s is not array", param_name.c_str());
-        return false;
-      }
-    }
-    else {
-      NODELET_FATAL("no %s is available", param_name.c_str());
-      return false;
-    }
-
-  }
-  
   /*
     parameter format is:
     polygon_array: [[[0, 0, 0], [0, 0, 1], [1, 0, 0]], ...]

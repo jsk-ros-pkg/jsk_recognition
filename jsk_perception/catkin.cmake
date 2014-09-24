@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(jsk_perception)
 
 find_package(catkin REQUIRED COMPONENTS
-  message_generation imagesift std_msgs sensor_msgs geometry_msgs cv_bridge
+  mk message_generation imagesift std_msgs sensor_msgs geometry_msgs cv_bridge
   image_geometry image_transport driver_base dynamic_reconfigure eigen
   roscpp nodelet rostest tf rospack
   jsk_topic_tools)
@@ -38,7 +38,7 @@ execute_process(
   COMMAND cmake -E chdir ${CMAKE_CURRENT_BINARY_DIR}
   make -f ${PROJECT_SOURCE_DIR}/Makefile.slic
   INSTALL_DIR=${CATKIN_DEVEL_PREFIX}
-  MK_DIR=${mk_PREFIX}/share/mk
+  MK_DIR=${mk_PREFIX}/share/mk installed
   RESULT_VARIABLE _make_failed)
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/build/SLIC-Superpixels)

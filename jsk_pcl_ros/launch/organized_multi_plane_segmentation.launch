@@ -1,4 +1,6 @@
 <launch>
+  <remap from="/diagnostics" to="/diagnostics_pcl" />
+  <remap from="/diagnostics_agg" to="/diagnostics_pcl_agg" />
   <arg name="BASE_FRAME_ID" default="odom" />
   <arg name="INPUT" default="/camera/depth_registered/points" />
   <arg name="LAUNCH_MANAGER" default="true" />
@@ -37,6 +39,17 @@
       estimate_normal: true
     </rosparam>
   </node>
+
+  <node pkg="nodelet" type="nodelet" name="colorize_error"
+        machine="$(arg MACHINE)"
+        args="load jsk_pcl/ColorizeDistanceFromPlane $(arg MANAGER)"
+        clear_params="false">
+    <remap from="~input" to="input_relay/output"/>
+    <remap from="~input_indices" to="multi_plane_estimate/output_refined"/>
+    <remap from="~input_coefficients" to="multi_plane_estimate/output_refined_coefficients"/>
+    <remap from="~input_polygons" to="/multi_plane_estimate/output_polygon" />
+  </node>
+  
   <node pkg="nodelet" type="nodelet"
         name="cluster_decomposer"
         machine="$(arg MACHINE)"
@@ -98,6 +111,12 @@
       use_pca: true
       publish_clouds: false
     </rosparam>
+  </node>
+  <node name="bounding_box_filter"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/BoundingBoxFilter /$(arg MANAGER)">
+    <remap from="~input_box" to="cluster_decomposer_final/boxes" />
+    <remap from="~input_indices" to="euclidean_clustering/output_throttle" />
   </node>
   <node pkg="nodelet" type="nodelet"
         name="throttle_segmentation"
@@ -234,5 +253,10 @@
       <arg name="USE_PLANE" value="true" />
     </include>
   </group>
-
+  <node pkg="diagnostic_aggregator" type="aggregator_node"
+        respawn="true"
+        name="pcl_diagnostic_aggregator">
+  </node>
+  <node pkg="rqt_robot_monitor" type="rqt_robot_monitor"
+        name="pcl_diagnostics_monitor" />
 </launch>

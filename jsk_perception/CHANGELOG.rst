@@ -2,6 +2,38 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.22 (2014-09-24)
+-------------------
+* Disable ssl when calling git
+* Contributors: Ryohei Ueda
+
+0.1.21 (2014-09-20)
+-------------------
+* Add more diagnostics to OrganizedMultiPlaneSegmentation and fix global
+  hook for ConvexHull
+* Contributors: Ryohei Ueda
+
+0.1.20 (2014-09-17)
+-------------------
+
+0.1.19 (2014-09-15)
+-------------------
+
+0.1.18 (2014-09-13)
+-------------------
+* add git to build_depend of jsk_libfreenect2
+* Contributors: Ryohei Ueda
+
+0.1.17 (2014-09-07)
+-------------------
+* add mk/git to build_depend
+* Contributors: Kei Okada
+
+0.1.16 (2014-09-04)
+-------------------
+* do not use rosrun in the script of jsk_perception/src/eusmodel_template_gen.sh
+* Contributors: Ryohei Ueda
+
 0.1.14 (2014-08-01)
 -------------------
 

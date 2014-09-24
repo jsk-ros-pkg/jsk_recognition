@@ -2,6 +2,34 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.22 (2014-09-24)
+-------------------
+
+0.1.21 (2014-09-20)
+-------------------
+
+0.1.20 (2014-09-17)
+-------------------
+
+0.1.19 (2014-09-15)
+-------------------
+
+0.1.18 (2014-09-13)
+-------------------
+* Creating publisher before subscribe topics in resized_image_transport
+* Supress messages from resized_image_transport
+* Contributors: Ryohei Ueda
+
+0.1.17 (2014-09-07)
+-------------------
+
+0.1.16 (2014-09-04)
+-------------------
+* remove static variables from ImageResizer because now it is used as
+  nodelet
+* add client for resize image
+* Contributors: Ryohei Ueda, Yusuke Furuta
+
 0.1.14 (2014-08-01)
 -------------------
 

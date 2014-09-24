@@ -2,6 +2,89 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.22 (2014-09-24)
+-------------------
+
+0.1.21 (2014-09-20)
+-------------------
+* Add utility methods for 2-D geometry
+* Add new nodelet to filter bounding box array
+* Check align axis before aligning boundingbox in ClusterPointIndicesDecomposer
+* Add diagnostic information to EuclideanClusteringExtraction
+* Add diagnostic information to MultiPlaneExtraction
+* Add processing frame id information to PlaneRejector's diagnostic
+* Add diagnostic information to ClusterPointIndicesDecomposer
+* Add diagnostics to PlaneRejector
+* Add more diagnostics to OrganizedMultiPlaneSegmentation and fix global
+  hook for ConvexHull
+* Contributors: Ryohei Ueda
+
+0.1.20 (2014-09-17)
+-------------------
+* Not use inliers to colorize pointcloud based on distance from planes
+* Add check to be able to make convex or not on ColorizeDistanceFromPlane
+  and OrganizedMultiPlaneSegmentation
+* add ~use_normal to use noraml to segment multi planes
+* add new nodelet to segment multiple planese by applying RANSAC recursively
+* Contributors: Ryohei Ueda
+
+0.1.19 (2014-09-15)
+-------------------
+
+0.1.18 (2014-09-13)
+-------------------
+* Subscribe PolygonArray message to build ConvexPolygon in ColorizeDistanceFromPlane
+* Introduce global mutex for quick hull
+* Fix coloring bug and add ~only_projectable parameter to visualize the
+  points only if they can be projected on the convex region
+* Add use_laser_pipeline argument to laserscan_registration.launch to
+  toggle include laser_pileline.launch of jsk_tilt_laser or not
+  Add new utility for diagnostics: addDiagnosticInformation
+* Supress output from resize_points_publisher
+* ROS_INFO -> NODELET_DEBUG in VoxelGridDownsampleManager
+* New utilify functoin for diagnostic: addDiagnosticInformation.
+  It's a simple function to add jsk_topic_tools::TimeAccumulator to
+  diagnostic_updater::DiagnosticStatusWrapper.
+* Colorize pointcloud according to the distance from nearest plane
+* Use template functions to convert tiny type conversions
+* Refine the result of connecting small multi planes in OrganizedMultiplaneSegmentation
+* add hsv coherence to particle_fitler_tracker
+* change color_histogram showing methods with reconfigure
+* visualize color_histogram coefficience
+* add new nodelet: EdgebasedCubeFinder
+* use colorCategory20 function to colorize pointcloud in ClusterPointIndicesDecomposer
+* visualizing connection of planes with lines in OrganizedMultiPlaneSegmentation
+* use rosparam_utils of jsk_topic_tools in StaticPolygonArrayPublisher
+* Contributors: Ryohei Ueda, ohara, wesleypchan
+
+0.1.17 (2014-09-07)
+-------------------
+* add laser_registration.launch
+* Contributors: Yuki Furuta
+
+0.1.16 (2014-09-04)
+-------------------
+* bugfix: add depth_image_creator to jsk_pcl_nodelet on catkin.cmake
+* a launch file for stereo camera using pointgrey
+* Publish ModelCoefficients from EdgeDepthRefinement
+* Add new nodelet to detect parallel edge
+* Remove duplicated edges according to the line coefficients in
+  EdgeDepthRefinement
+* do not use EIGEN_ALIGNED_NEW_OPERATOR and use onInit super method on
+  PointcloudScreenpoint
+* Remove several unused headers from ParticleFilterTracking
+* not compile OrganizedEdgeDetector on groovy
+* add a new nodelet to refine edges based on depth connectivity
+* Detect straight edges from organized pointcloud
+* toggle edge feature by rqt_reqoncifugre in OrganizedEdgeDetector
+* add new nodelet: OrganizedEdgeDetector, which is only available with
+  latest PCL
+* Do not include header of cloud viewer in region_growing_segmentation.h
+* Add more diagnostic information to OrganizedMultiPlaneSegmentation
+* downsample rgb as well as pointcloud in openni2_remote.launch
+* add new nodelet: BorderEstimator
+* Contributors: Ryohei Ueda, Yuki Furuta
+
 0.1.14 (2014-08-01)
 -------------------
 * add bounging box movement msg

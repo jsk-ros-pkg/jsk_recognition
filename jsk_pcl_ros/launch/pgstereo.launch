@@ -1,0 +1,108 @@
+<launch>
+  <arg name="RUN_DRIVER" default="true" />
+  <node pkg="nodelet" type="nodelet" name="manager" args="manager"
+        output="screen" />
+    <group ns="left">
+      <node pkg="nodelet" type="nodelet"
+            args="load pointgrey_camera_driver/PointGreyCameraNodelet /manager"
+            if="$(arg RUN_DRIVER)"
+            name="driver" respawn="true">
+        <param name="serial" value="14137651" />
+      </node>
+      <node pkg="image_view" type="image_view" name="image_view">
+        <remap from="image" to="image_raw" />
+      </node>
+      <node pkg="image_view" type="image_view" name="image_view_rect">
+        <remap from="image" to="image_rect" />
+      </node>
+    </group>
+    <group ns="right">
+      <node pkg="nodelet" type="nodelet"
+            args="load pointgrey_camera_driver/PointGreyCameraNodelet /manager"
+            if="$(arg RUN_DRIVER)"
+            name="driver" respawn="true">
+        <param name="serial" value="14137639" />
+      </node>
+      <node pkg="image_view" type="image_view" name="image_view">
+        <remap from="image" to="image_raw" />
+      </node>
+      <node pkg="image_view" type="image_view" name="image_view_rect">
+        <remap from="image" to="image_rect" />
+      </node>
+    </group>
+  <node pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc">
+    <param name="approximate_sync" value="true" />
+  </node>
+  
+  <node pkg="image_view" type="disparity_view" name="disparity_view">
+    <remap from="image" to="disparity" />
+  </node>
+  <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_reconfigure" respawn="true"/>
+  <group ns="half">
+    <group ns="left_1_2">
+      <node pkg="nodelet" type="nodelet" args="load resized_image_transport/ImageResizer /manager"
+            name="image_resizer">
+        <param name="resize_scale_x" value="0.5" />
+        <param name="resize_scale_y" value="0.5" />
+        <remap from="~input/image" to="/left/image_raw" />
+        <remap from="~output/image" to="image_raw" />
+      </node>
+    </group>
+    <group ns="right_1_2">
+      <node pkg="nodelet" type="nodelet" args="load resized_image_transport/ImageResizer /manager" name="image_resizer">
+        <param name="resize_scale_x" value="0.5" />
+        <param name="resize_scale_y" value="0.5" />
+        <remap from="~input/image" to="/right/image_raw" />
+        <remap from="~output/image" to="image_raw" />
+      </node>
+    </group>
+    <node pkg="stereo_image_proc" type="stereo_image_proc"
+          name="stereo_image_proc_2" output="screen">
+      <param name="approximate_sync" value="true" />
+      <remap from="left/image_raw" to="left_1_2/image_raw"/>
+      <remap from="left/camera_info" to="left_1_2/camera_info"/>
+      <remap from="right/image_raw" to="right_1_2/image_raw"/>
+      <remap from="right/camera_info" to="right_1_2/camera_info"/>
+      
+      <remap from="point2" to="~points2" />
+      <remap from="disparity" to="~disparity" />
+    </node>
+    <node pkg="image_view" type="disparity_view" name="disparity_view2">
+      <remap from="image" to="stereo_image_proc_2/disparity" />
+    </node>
+  </group>
+  <group ns="quater">
+    <group ns="left_1_4">
+      <node pkg="nodelet" type="nodelet" args="load resized_image_transport/ImageResizer /manager"
+            name="image_resizer">
+        <param name="resize_scale_x" value="0.25" />
+        <param name="resize_scale_y" value="0.25" />
+        <remap from="~input/image" to="/left/image_raw" />
+        <remap from="~output/image" to="image_raw" />
+      </node>
+    </group>
+    <group ns="right_1_4">
+      <node pkg="nodelet" type="nodelet" args="load resized_image_transport/ImageResizer /manager"
+            name="image_resizer">
+        <param name="resize_scale_x" value="0.25" />
+        <param name="resize_scale_y" value="0.25" />
+        <remap from="~input/image" to="/right/image_raw" />
+        <remap from="~output/image" to="image_raw" />
+      </node>
+    </group>
+    <node pkg="stereo_image_proc" type="stereo_image_proc"
+          name="stereo_image_proc_4" output="screen">
+      <param name="approximate_sync" value="true" />
+      <remap from="left/image_raw" to="left_1_4/image_raw"/>
+      <remap from="right/image_raw" to="right_1_4/image_raw"/>
+      <remap from="left/camera_info" to="left_1_4/camera_info"/>
+      <remap from="right/camera_info" to="right_1_4/camera_info"/>
+      <remap from="point2" to="~points2" />
+      <remap from="disparity" to="~disparity" />
+    </node>
+    <node pkg="image_view" type="disparity_view" name="disparity_view4">
+      <remap from="image" to="stereo_image_proc_4/disparity" />
+    </node>
+  </group>
+  
+</launch>

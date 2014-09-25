@@ -67,6 +67,8 @@ add_service_files(FILES SwitchTopic.srv
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/PlaneReasoner.cfg
+  cfg/OrganizedPassThrough.cfg
   cfg/EuclideanClustering.cfg
   cfg/ColorizeDistanceFromPlane.cfg
   cfg/HSIColorFilter.cfg
@@ -210,10 +212,15 @@ jsk_pcl_nodelet(src/multi_plane_sac_segmentation_nodelet.cpp
   "jsk_pcl/MultiPlaneSACSegmentation" "multi_plane_sac_segmentation")
 jsk_pcl_nodelet(src/bounding_box_filter_nodelet.cpp
   "jsk_pcl/BoundingBoxFilter" "bounding_box_filter")
+jsk_pcl_nodelet(src/organized_pass_through_nodelet.cpp
+  "jsk_pcl/OrganizedPassThrough" "organized_pass_through")
+jsk_pcl_nodelet(src/plane_reasoner_nodelet.cpp
+  "jsk_pcl/PlaneReasoner" "plane_reasoner")
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
-  src/pcl_conversion_util.cpp src/pcl_util.cpp)
+  src/pcl_conversion_util.cpp src/pcl_util.cpp
+  src/diagnostic_nodelet.cpp)
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 

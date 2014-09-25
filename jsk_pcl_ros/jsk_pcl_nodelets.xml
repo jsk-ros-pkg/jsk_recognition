@@ -1,4 +1,16 @@
 <library path="lib/libjsk_pcl_ros">
+  <class name="jsk_pcl/PlaneReasoner" type="PlaneReasoner"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      group polygons into several groups like vertical planes, horizontal planes.
+    </description>
+  </class>
+  <class name="jsk_pcl/OrganizedPassThrough" type="OrganizedPassThrough"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      filter organized pointcloud based on the index range of x or y field.
+    </description>
+  </class>
   <class name="jsk_pcl/BoundingBoxFilter" type="BoundingBoxFilter"
          base_class_type="nodelet::Nodelet">
     <description>
@@ -6,7 +18,6 @@
       of the bounding boxes.
     </description>
   </class>
-  
   <class name="jsk_pcl/MultiPlaneSACSegmentation" type="MultiPlaneSACSegmentation"
          base_class_type="nodelet::Nodelet">
     <description>

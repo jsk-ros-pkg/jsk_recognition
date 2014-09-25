@@ -2,6 +2,9 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.22 (2014-09-24)
+-------------------
+
 0.1.21 (2014-09-20)
 -------------------
 * Add utility methods for 2-D geometry

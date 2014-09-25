@@ -119,6 +119,7 @@ namespace jsk_pcl_ros
     pcl::toROSMsg(output, ros_output);
     ros_output.header = msg->header;
     pub_.publish(ros_output);
+    diagnostic_updater_->update();
   }
 
   void OrganizedPassThrough::updateDiagnostic(

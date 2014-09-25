@@ -145,6 +145,7 @@ namespace jsk_pcl_ros
     
     virtual double distance(const Plane& another);
     virtual double angle(const Plane& another);
+    virtual double angle(const Eigen::Vector3f& vector);
     virtual void project(const Eigen::Vector3f& p, Eigen::Vector3f& output);
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3d& output);
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3f& output);
@@ -159,6 +160,9 @@ namespace jsk_pcl_ros
     double d_;
   private:
   };
+
+  std::vector<Plane::Ptr> convertToPlanes(
+    std::vector<pcl::ModelCoefficients::Ptr>);
 
   class Polygon: public Plane
   {

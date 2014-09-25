@@ -34,7 +34,16 @@
 	    type="relay"
 	    name="relay_image_raw"
 	    args="/$(arg camera)/depth/image_raw /$(arg camera_remote)/depth/image_raw" />
-
+    </group>
+    <group ns="depth_registered">
+      <node pkg="topic_tools"
+	    type="relay"
+	    name="relay_camera_info"
+	    args="/$(arg camera)/depth_registered/camera_info /$(arg camera_remote)/depth_registered/camera_info " />
+      <node pkg="topic_tools"
+	    type="relay"
+	    name="relay_image_raw"
+            args="/$(arg camera)/depth_registered/image_raw /$(arg camera_remote)/depth_registered/image_raw" />
     </group>
   </group>
 </launch>

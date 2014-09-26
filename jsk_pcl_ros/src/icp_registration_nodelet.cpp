@@ -68,6 +68,8 @@ namespace jsk_pcl_ros
       "debug/source", 1);
     pub_debug_target_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>(
       "debug/target", 1);
+    pub_debug_flipped_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>(
+      "debug/flipped", 1);
     pub_debug_result_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>(
       "debug/result", 1);
 
@@ -108,6 +110,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     algorithm_ = config.algorithm;
+    use_flipped_initial_pose_ = config.use_flipped_initial_pose;
     max_iteration_ = config.max_iteration;
     correspondence_distance_ = config.correspondence_distance;
     transform_epsilon_ = config.transform_epsilon;
@@ -161,10 +164,13 @@ namespace jsk_pcl_ros
     Eigen::Affine3f offset = Eigen::Affine3f::Identity();
     alignPointcloud(cloud, offset, msg->header);
   }
-  
-  void ICPRegistration::alignPointcloud(pcl::PointCloud<PointT>::Ptr& cloud,
-                                        const Eigen::Affine3f& offset,
-                                        const std_msgs::Header& header) {
+
+  double ICPRegistration::alignPointcloud(
+    pcl::PointCloud<PointT>::Ptr& cloud,
+    const Eigen::Affine3f& offset,
+    pcl::PointCloud<PointT>::Ptr& output_cloud,
+    Eigen::Affine3d& output_transform)
+  {
     pcl::IterativeClosestPoint<PointT, PointT> icp;
     // icp.setInputSource(cloud);
     // icp.setInputTarget(reference_cloud_);
@@ -183,28 +189,63 @@ namespace jsk_pcl_ros
     icp.setEuclideanFitnessEpsilon (euclidean_fittness_epsilon_);
     pcl::PointCloud<PointT> final;
     icp.align(final);
-    pcl::PointCloud<PointT> final_with_offset;
-    pcl::transformPointCloud(final, final_with_offset, offset);
-    NODELET_INFO_STREAM("ICP converged: " << icp.hasConverged());
-    NODELET_INFO_STREAM("ICP score: " << icp.getFitnessScore());
-    
-    Eigen::Matrix4f transformation = icp.getFinalTransformation ();
+    pcl::transformPointCloud(final, *output_cloud, offset);
+    // NODELET_INFO_STREAM("ICP converged: " << icp.hasConverged());
+    // NODELET_INFO_STREAM("ICP score: " << icp.getFitnessScore());
+        Eigen::Matrix4f transformation = icp.getFinalTransformation ();
     Eigen::Matrix4d transformation_d;
     convertMatrix4<Eigen::Matrix4f, Eigen::Matrix4d>(
       transformation, transformation_d);
-    Eigen::Affine3d transform_affine (transformation_d);
-    geometry_msgs::PoseStamped pose;
-    pose.header = header;
-    tf::poseEigenToMsg(transform_affine, pose.pose);
-    pub_result_pose_.publish(pose);
-    // convert Eigen Matrix4f to Matrix4d
+    output_transform = Eigen::Affine3d(transformation_d);
+    return icp.getFitnessScore();
+  }
+  
+  void ICPRegistration::alignPointcloud(pcl::PointCloud<PointT>::Ptr& cloud,
+                                        const Eigen::Affine3f& offset,
+                                        const std_msgs::Header& header) {
+    pcl::PointCloud<PointT>::Ptr transformed_cloud
+      (new pcl::PointCloud<PointT>);
+    pcl::PointCloud<PointT>::Ptr transformed_cloud_for_debug_result
+      (new pcl::PointCloud<PointT>);
+    Eigen::Affine3d transform_result;
+    double score = alignPointcloud(cloud, offset,
+                                   transformed_cloud, transform_result);
+    pcl::transformPointCloud(
+      *transformed_cloud, *transformed_cloud_for_debug_result,
+      offset.inverse());
+    NODELET_INFO("score: %f", score);
+    if (use_flipped_initial_pose_) {
+      pcl::PointCloud<PointT>::Ptr flipped_transformed_cloud
+        (new pcl::PointCloud<PointT>);
+    Eigen::Affine3d flipped_transform_result;
+    Eigen::Affine3f flipped_offset
+      = offset * Eigen::AngleAxisf(M_PI, Eigen::Vector3f(0, 0, 1));
+      pcl::PointCloud<PointT>::Ptr flipped_cloud (new pcl::PointCloud<PointT>);
+      pcl::transformPointCloud(
+        *cloud, *flipped_cloud,
+        Eigen::Affine3f(Eigen::AngleAxisf(M_PI, Eigen::Vector3f(0, 0, 1))));
+      publishDebugCloud(pub_debug_flipped_cloud_, *flipped_cloud);
+      double flipped_score
+        = alignPointcloud(flipped_cloud, flipped_offset,
+                          flipped_transformed_cloud,
+                          flipped_transform_result);
+      NODELET_INFO("flipped score: %f", flipped_score);
+      if (flipped_score < score) {
+        transformed_cloud = flipped_transformed_cloud;
+        transform_result = flipped_transform_result;
+        pcl::transformPointCloud(
+          *transformed_cloud, *transformed_cloud_for_debug_result,
+          flipped_offset.inverse());
+      }
+    }
     sensor_msgs::PointCloud2 ros_final;
-    pcl::toROSMsg(final_with_offset, ros_final);
+    pcl::toROSMsg(*transformed_cloud, ros_final);
     ros_final.header = header;
     pub_result_cloud_.publish(ros_final);
+    
     publishDebugCloud(pub_debug_source_cloud_, *reference_cloud_);
     publishDebugCloud(pub_debug_target_cloud_, *cloud);
-    publishDebugCloud(pub_debug_result_cloud_, final);
+    publishDebugCloud(pub_debug_result_cloud_, *transformed_cloud_for_debug_result);
     
   }
   

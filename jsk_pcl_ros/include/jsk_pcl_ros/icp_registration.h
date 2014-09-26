@@ -74,6 +74,12 @@ namespace jsk_pcl_ros
     virtual void publishDebugCloud(
       ros::Publisher& pub,
       const pcl::PointCloud<PointT>& cloud);
+    double alignPointcloud(
+      pcl::PointCloud<PointT>::Ptr& cloud,
+      const Eigen::Affine3f& offset,
+      pcl::PointCloud<PointT>::Ptr& output_cloud,
+      Eigen::Affine3d& output_transform);
+
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
@@ -83,7 +89,8 @@ namespace jsk_pcl_ros
     ros::Publisher pub_result_cloud_;
     ros::Publisher pub_debug_source_cloud_,
       pub_debug_target_cloud_,
-      pub_debug_result_cloud_;
+      pub_debug_result_cloud_,
+      pub_debug_flipped_cloud_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
@@ -94,6 +101,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // parameters for ICP
     ////////////////////////////////////////////////////////
+    bool use_flipped_initial_pose_;
     int algorithm_;
     pcl::PointCloud<PointT>::Ptr reference_cloud_;
     int max_iteration_;

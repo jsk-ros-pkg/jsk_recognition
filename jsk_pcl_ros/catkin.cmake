@@ -217,6 +217,8 @@ jsk_pcl_nodelet(src/organized_pass_through_nodelet.cpp
   "jsk_pcl/OrganizedPassThrough" "organized_pass_through")
 jsk_pcl_nodelet(src/plane_reasoner_nodelet.cpp
   "jsk_pcl/PlaneReasoner" "plane_reasoner")
+jsk_pcl_nodelet(src/joint_state_static_filter_nodelet.cpp
+  "jsk_pcl/JointStateStaticFilter" "joint_state_static_filter")
 jsk_pcl_nodelet(src/icp_registration_nodelet.cpp
   "jsk_pcl/ICPRegistration" "icp_registration")
 

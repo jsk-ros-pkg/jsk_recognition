@@ -146,18 +146,6 @@
     <remap from="~selected_index" to="/bounding_box_marker/selected_index" />
     <remap from="~output" to="/selected_pointcloud" />
   </node>
-  <node pkg="nodelet" type="nodelet"
-        name="plane_rejector"
-        machine="$(arg MACHINE)"
-        args="load jsk_pcl/PlaneRejector /$(arg MANAGER)"
-        output="screen" clear_params="true">
-    <remap from="~input_polygons" to="/multi_plane_estimate/output_polygon" />
-    <remap from="~input_coefficients" to="/multi_plane_estimate/output_coefficients" />
-    <rosparam subst_value="true">
-      reference_axis: [0, 0, -1]
-      processing_frame_id: $(arg BASE_FRAME_ID)
-    </rosparam>
-  </node>
   <group if="$(arg COLOR_HISTOGRAM)">
     <node pkg="nodelet" type="nodelet" name="color_histogram"
           args="load jsk_pcl/ColorHistogramMatcher /$(arg MANAGER)"

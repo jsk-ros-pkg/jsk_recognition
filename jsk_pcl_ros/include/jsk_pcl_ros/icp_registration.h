@@ -38,6 +38,8 @@
 #define JSK_PCL_ROS_ICP_REGISTRATION_H_
 
 #include <pcl_ros/pcl_nodelet.h>
+#include <dynamic_reconfigure/server.h>
+#include <jsk_pcl_ros/ICPRegistrationConfig.h>
 
 namespace jsk_pcl_ros
 {
@@ -45,6 +47,7 @@ namespace jsk_pcl_ros
   {
   public:
     typedef pcl::PointXYZRGB PointT;
+    typedef jsk_pcl_ros::ICPRegistrationConfig Config;
   protected:
     ////////////////////////////////////////////////////////
     // methosd
@@ -53,7 +56,7 @@ namespace jsk_pcl_ros
     virtual void align(const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void referenceCallback(
       const sensor_msgs::PointCloud2::ConstPtr& msg);
-
+    virtual void configCallback (Config &config, uint32_t level);
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
@@ -61,12 +64,17 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_reference_;
     ros::Publisher pub_result_pose_;
     ros::Publisher pub_result_cloud_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
 
     ////////////////////////////////////////////////////////
     // parameters
     ////////////////////////////////////////////////////////
     pcl::PointCloud<PointT>::Ptr reference_cloud_;
+    int max_iteration_;
+    double correspondence_distance_;
+    double transform_epsilon_;
+    double euclidean_fittness_epsilon_;
   private:
     
   };

@@ -34,78 +34,79 @@
  *********************************************************************/
 
 
-#ifndef JSK_PCL_ROS_ICP_REGISTRATION_H_
-#define JSK_PCL_ROS_ICP_REGISTRATION_H_
+#ifndef JSK_PCL_ROS_TRANSFORM_POINTCLOUD_IN_BOUNDING_BOX_H_
+#define JSK_PCL_ROS_TRANSFORM_POINTCLOUD_IN_BOUNDING_BOX_H_
 
 #include <pcl_ros/pcl_nodelet.h>
-#include <dynamic_reconfigure/server.h>
-#include <jsk_pcl_ros/ICPRegistrationConfig.h>
 #include <jsk_pcl_ros/BoundingBox.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 #include <tf/transform_listener.h>
+#include <eigen_conversions/eigen_msg.h>
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include <pcl/common/transforms.h>
 
 namespace jsk_pcl_ros
 {
-  class ICPRegistration: public pcl_ros::PCLNodelet
+  template <class PointT>
+  void transformPointcloudInBoundingBox(
+    const BoundingBox& box_msg,
+    const sensor_msgs::PointCloud2& cloud_msg,
+    pcl::PointCloud<PointT>& output,
+    Eigen::Affine3f& offset,
+    tf::TransformListener& tf_listener)
+  {
+    geometry_msgs::PoseStamped box_pose;
+    box_pose.header = box_msg.header;
+    box_pose.pose = box_msg.pose;
+    // transform box_pose into msg frame
+    geometry_msgs::PoseStamped box_pose_respected_to_cloud;
+    tf_listener.transformPose(cloud_msg.header.frame_id,
+                                box_pose,
+                                box_pose_respected_to_cloud);
+    // convert the pose into eigen
+    Eigen::Affine3d box_pose_respected_to_cloud_eigend;
+    tf::poseMsgToEigen(box_pose_respected_to_cloud.pose,
+                       box_pose_respected_to_cloud_eigend);
+    Eigen::Affine3d box_pose_respected_to_cloud_eigend_inversed
+      = box_pose_respected_to_cloud_eigend.inverse();
+    Eigen::Matrix4f box_pose_respected_to_cloud_eigen_inversed_matrixf;
+    Eigen::Matrix4d box_pose_respected_to_cloud_eigen_inversed_matrixd
+      = box_pose_respected_to_cloud_eigend_inversed.matrix();
+    convertMatrix4<Eigen::Matrix4d, Eigen::Matrix4f>(
+      box_pose_respected_to_cloud_eigen_inversed_matrixd,
+      box_pose_respected_to_cloud_eigen_inversed_matrixf);
+    offset = Eigen::Affine3f(box_pose_respected_to_cloud_eigen_inversed_matrixf);
+    pcl::PointCloud<PointT> input;
+    pcl::fromROSMsg(cloud_msg, input);
+    pcl::transformPointCloud(input, output, offset);
+  }
+  
+  class TransformPointcloudInBoundingBox: public pcl_ros::PCLNodelet
   {
   public:
     typedef pcl::PointXYZRGB PointT;
-    typedef jsk_pcl_ros::ICPRegistrationConfig Config;
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
       BoundingBox > SyncPolicy;
   protected:
     ////////////////////////////////////////////////////////
-    // methosd
+    // methods
     ////////////////////////////////////////////////////////
     virtual void onInit();
-    virtual void align(const sensor_msgs::PointCloud2::ConstPtr& msg);
-    virtual void alignWithBox(
-      const sensor_msgs::PointCloud2::ConstPtr& msg,
-      const BoundingBox::ConstPtr& box_msg);
-    virtual void alignPointcloud(pcl::PointCloud<PointT>::Ptr& cloud,
-                                 const Eigen::Affine3f& offset,
-                                 const std_msgs::Header& header);
-    virtual void referenceCallback(
-      const sensor_msgs::PointCloud2::ConstPtr& msg);
-    virtual void configCallback (Config &config, uint32_t level);
-    virtual void publishDebugCloud(
-      ros::Publisher& pub,
-      const pcl::PointCloud<PointT>& cloud);
+    virtual void transform(const sensor_msgs::PointCloud2::ConstPtr& msg,
+                           const BoundingBox::ConstPtr& box_msg);
+    
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
-    ros::Subscriber sub_;
-    ros::Subscriber sub_reference_;
-    ros::Publisher pub_result_pose_;
-    ros::Publisher pub_result_cloud_;
-    ros::Publisher pub_debug_source_cloud_,
-      pub_debug_target_cloud_,
-      pub_debug_result_cloud_;
-    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
-    boost::mutex mutex_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<BoundingBox> sub_box_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    ros::Publisher pub_cloud_;
+    ros::Publisher pub_offset_pose_;
     boost::shared_ptr<tf::TransformListener> tf_listener_;
-
-    ////////////////////////////////////////////////////////
-    // parameters for ICP
-    ////////////////////////////////////////////////////////
-    int algorithm_;
-    pcl::PointCloud<PointT>::Ptr reference_cloud_;
-    int max_iteration_;
-    double correspondence_distance_;
-    double transform_epsilon_;
-    double euclidean_fittness_epsilon_;
-    ////////////////////////////////////////////////////////
-    // parameters for GICP
-    ////////////////////////////////////////////////////////
-    double rotation_epsilon_;
-    int correspondence_randomness_;
-    int maximum_optimizer_iterations_;
   private:
     
   };

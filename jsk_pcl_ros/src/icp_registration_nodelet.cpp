@@ -38,13 +38,16 @@
 #include <pcl/registration/gicp.h>
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <eigen_conversions/eigen_msg.h>
+#include <pcl/common/transforms.h>
+#include <eigen_conversions/eigen_msg.h>
+#include "jsk_pcl_ros/transform_pointcloud_in_bounding_box.h"
 
 namespace jsk_pcl_ros
 {
   void ICPRegistration::onInit()
   {
     PCLNodelet::onInit();
-    
+    tf_listener_.reset(new tf::TransformListener());
     ////////////////////////////////////////////////////////
     // Dynamic Reconfigure
     ////////////////////////////////////////////////////////
@@ -54,22 +57,52 @@ namespace jsk_pcl_ros
         &ICPRegistration::configCallback, this, _1, _2);
     srv_->setCallback (f);
 
+    bool align_box;
+    pnh_->param("align_box", align_box, false);
     
     pub_result_pose_ = pnh_->advertise<geometry_msgs::PoseStamped>(
       "output_pose", 1);
     pub_result_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>(
       "output", 1);
+    pub_debug_source_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>(
+      "debug/source", 1);
+    pub_debug_target_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>(
+      "debug/target", 1);
+    pub_debug_result_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>(
+      "debug/result", 1);
+
     ////////////////////////////////////////////////////////
     // subscription
     ////////////////////////////////////////////////////////
     sub_reference_ = pnh_->subscribe("input_reference", 1,
-                                     &ICPRegistration::referenceCallback,
-                                     this);
-    sub_ = pnh_->subscribe("input", 1,
-                           &ICPRegistration::align,
-                           this);
+                                       &ICPRegistration::referenceCallback,
+                                       this);
+    if (align_box) {
+      sub_input_.subscribe(*pnh_, "input", 1);
+      sub_box_.subscribe(*pnh_, "input_box", 1);
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+      sync_->connectInput(sub_input_, sub_box_);
+      sync_->registerCallback(boost::bind(
+                                &ICPRegistration::alignWithBox,
+                                this, _1, _2));
+    }
+    else {
+      sub_ = pnh_->subscribe("input", 1,
+                             &ICPRegistration::align,
+                             this);
+    }
   }
 
+  void ICPRegistration::publishDebugCloud(
+      ros::Publisher& pub,
+      const pcl::PointCloud<PointT>& cloud)
+  {
+    sensor_msgs::PointCloud2 ros_cloud;
+    pcl::toROSMsg(cloud, ros_cloud);
+    ros_cloud.header.frame_id = "base_link";
+    ros_cloud.header.stamp = ros::Time::now();
+    pub.publish(ros_cloud);
+  }
   
   void ICPRegistration::configCallback(Config &config, uint32_t level)
   {
@@ -82,7 +115,39 @@ namespace jsk_pcl_ros
     rotation_epsilon_ = config.rotation_epsilon;
     maximum_optimizer_iterations_ = config.maximum_optimizer_iterations;
   }
-  
+
+  void ICPRegistration::alignWithBox(
+      const sensor_msgs::PointCloud2::ConstPtr& msg,
+      const BoundingBox::ConstPtr& box_msg)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    if (!reference_cloud_) {
+      NODELET_FATAL("no reference is specified");
+      return;
+    }
+    try
+    {
+      Eigen::Affine3f offset;
+      pcl::PointCloud<PointT>::Ptr output (new pcl::PointCloud<PointT>);
+      transformPointcloudInBoundingBox<PointT>(
+        *box_msg, *msg,
+        *output, offset,
+        *tf_listener_);
+      Eigen::Affine3f inversed_offset = offset.inverse();
+      alignPointcloud(output, inversed_offset, msg->header);
+    }
+    catch (tf2::ConnectivityException &e)
+    {
+      NODELET_ERROR("Transform error: %s", e.what());
+    }
+    catch (tf2::InvalidArgumentException &e)
+    {
+      NODELET_ERROR("Transform error: %s", e.what());
+    }
+
+    
+  }
+
   void ICPRegistration::align(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
@@ -93,6 +158,13 @@ namespace jsk_pcl_ros
     
     pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(*msg, *cloud);
+    Eigen::Affine3f offset = Eigen::Affine3f::Identity();
+    alignPointcloud(cloud, offset, msg->header);
+  }
+  
+  void ICPRegistration::alignPointcloud(pcl::PointCloud<PointT>::Ptr& cloud,
+                                        const Eigen::Affine3f& offset,
+                                        const std_msgs::Header& header) {
     pcl::IterativeClosestPoint<PointT, PointT> icp;
     // icp.setInputSource(cloud);
     // icp.setInputTarget(reference_cloud_);
@@ -111,6 +183,8 @@ namespace jsk_pcl_ros
     icp.setEuclideanFitnessEpsilon (euclidean_fittness_epsilon_);
     pcl::PointCloud<PointT> final;
     icp.align(final);
+    pcl::PointCloud<PointT> final_with_offset;
+    pcl::transformPointCloud(final, final_with_offset, offset);
     NODELET_INFO_STREAM("ICP converged: " << icp.hasConverged());
     NODELET_INFO_STREAM("ICP score: " << icp.getFitnessScore());
     
@@ -120,20 +194,23 @@ namespace jsk_pcl_ros
       transformation, transformation_d);
     Eigen::Affine3d transform_affine (transformation_d);
     geometry_msgs::PoseStamped pose;
-    pose.header = msg->header;
+    pose.header = header;
     tf::poseEigenToMsg(transform_affine, pose.pose);
     pub_result_pose_.publish(pose);
     // convert Eigen Matrix4f to Matrix4d
     sensor_msgs::PointCloud2 ros_final;
-    pcl::toROSMsg(final, ros_final);
-    ros_final.header = msg->header;
+    pcl::toROSMsg(final_with_offset, ros_final);
+    ros_final.header = header;
     pub_result_cloud_.publish(ros_final);
+    publishDebugCloud(pub_debug_source_cloud_, *reference_cloud_);
+    publishDebugCloud(pub_debug_target_cloud_, *cloud);
+    publishDebugCloud(pub_debug_result_cloud_, final);
+    
   }
   
   void ICPRegistration::referenceCallback(
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
-    
     pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(*msg, *cloud);
     {

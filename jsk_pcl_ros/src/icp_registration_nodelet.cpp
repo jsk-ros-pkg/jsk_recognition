@@ -35,6 +35,7 @@
 
 #include "jsk_pcl_ros/icp_registration.h"
 #include <pcl/registration/icp.h>
+#include <pcl/registration/gicp.h>
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <eigen_conversions/eigen_msg.h>
 
@@ -73,10 +74,13 @@ namespace jsk_pcl_ros
   void ICPRegistration::configCallback(Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    algorithm_ = config.algorithm;
     max_iteration_ = config.max_iteration;
     correspondence_distance_ = config.correspondence_distance;
     transform_epsilon_ = config.transform_epsilon;
     euclidean_fittness_epsilon_ = config.euclidean_fittness_epsilon;
+    rotation_epsilon_ = config.rotation_epsilon;
+    maximum_optimizer_iterations_ = config.maximum_optimizer_iterations;
   }
   
   void ICPRegistration::align(const sensor_msgs::PointCloud2::ConstPtr& msg)
@@ -92,6 +96,13 @@ namespace jsk_pcl_ros
     pcl::IterativeClosestPoint<PointT, PointT> icp;
     // icp.setInputSource(cloud);
     // icp.setInputTarget(reference_cloud_);
+    if (algorithm_ == 1) {
+      pcl::GeneralizedIterativeClosestPoint<PointT, PointT> gicp;
+      gicp.setRotationEpsilon(rotation_epsilon_);
+      gicp.setCorrespondenceRandomness(correspondence_randomness_);
+      gicp.setMaximumOptimizerIterations(maximum_optimizer_iterations_);
+      icp = gicp;
+    }
     icp.setInputSource(reference_cloud_);
     icp.setInputTarget(cloud);
     icp.setMaxCorrespondenceDistance (correspondence_distance_);

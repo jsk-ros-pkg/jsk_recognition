@@ -3,6 +3,8 @@
   <remap from="/diagnostics_agg" to="/diagnostics_pcl_agg" />
   <arg name="BASE_FRAME_ID" default="odom" />
   <arg name="INPUT" default="/camera/depth_registered/points" />
+  <arg name="ICP_REGISTRATION" default="false" />
+  <arg name="MODEL_FILE" default="$(find jsk_pcl_ros)/hand_drill.pcd" />
   <arg name="LAUNCH_MANAGER" default="true" />
   <arg name="MANAGER" default="manager" />
   <arg name="ESTIMATE_OCCLUSION" default="false" />
@@ -10,6 +12,7 @@
   <arg name="HANDLE_ESTIMATOR" default="false" />
   <arg name="MACHINE" default="localhost"/>
   <arg name="GDB" default="false" />
+  <arg name="SAVE_SELECTED_CLOUD" default="false" />
   <machine name="localhost" address="localhost" />
   <group if="$(arg LAUNCH_MANAGER)">
     <node pkg="nodelet" type="nodelet" name="$(arg MANAGER)"
@@ -259,4 +262,21 @@
   </node>
   <node pkg="rqt_robot_monitor" type="rqt_robot_monitor"
         name="pcl_diagnostics_monitor" />
+  <group if="$(arg SAVE_SELECTED_CLOUD)">
+    <node pkg="nodelet" type="nodelet" name="pcd_saver"
+          args="load pcl/PCDWriter /$(arg MANAGER)">
+      <remap from="~input" to="/selected_pointcloud" />
+    </node>
+  </group>
+  <group if="$(arg ICP_REGISTRATION)">
+    <node pkg="nodelet" type="nodelet" name="icp_registration"
+          args="load jsk_pcl/ICPRegistration /$(arg MANAGER)">
+      <remap from="~input" to="/selected_pointcloud" />
+      <remap from="~input_reference" to="reference_cloud" />
+    </node>
+    <node pkg="pcl_ros" type="pcd_to_pointcloud" name="model_publisher"
+          args="$(arg MODEL_FILE)">
+      <remap from="cloud_pcd" to="reference_cloud" />
+    </node>
+  </group>
 </launch>

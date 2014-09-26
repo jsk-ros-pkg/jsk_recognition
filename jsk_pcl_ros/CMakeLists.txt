@@ -129,6 +129,8 @@ jsk_pcl_nodelet(src/organized_pass_through_nodelet.cpp
   "jsk_pcl/OrganizedPassThrough" "organized_pass_through")
 jsk_pcl_nodelet(src/plane_reasoner_nodelet.cpp
   "jsk_pcl/PlaneReasoner" "plane_reasoner")
+jsk_pcl_nodelet(src/icp_registration_nodelet.cpp
+  "jsk_pcl/ICPRegistration" "icp_registration")
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp

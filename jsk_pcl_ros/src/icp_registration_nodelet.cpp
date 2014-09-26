@@ -43,7 +43,17 @@ namespace jsk_pcl_ros
   void ICPRegistration::onInit()
   {
     PCLNodelet::onInit();
+    
+    ////////////////////////////////////////////////////////
+    // Dynamic Reconfigure
+    ////////////////////////////////////////////////////////
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (
+        &ICPRegistration::configCallback, this, _1, _2);
+    srv_->setCallback (f);
 
+    
     pub_result_pose_ = pnh_->advertise<geometry_msgs::PoseStamped>(
       "output_pose", 1);
     pub_result_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>(
@@ -59,6 +69,16 @@ namespace jsk_pcl_ros
                            this);
   }
 
+  
+  void ICPRegistration::configCallback(Config &config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    max_iteration_ = config.max_iteration;
+    correspondence_distance_ = config.correspondence_distance;
+    transform_epsilon_ = config.transform_epsilon;
+    euclidean_fittness_epsilon_ = config.euclidean_fittness_epsilon;
+  }
+  
   void ICPRegistration::align(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
@@ -74,6 +94,10 @@ namespace jsk_pcl_ros
     // icp.setInputTarget(reference_cloud_);
     icp.setInputSource(reference_cloud_);
     icp.setInputTarget(cloud);
+    icp.setMaxCorrespondenceDistance (correspondence_distance_);
+    icp.setMaximumIterations (max_iteration_);
+    icp.setTransformationEpsilon (transform_epsilon_);
+    icp.setEuclideanFitnessEpsilon (euclidean_fittness_epsilon_);
     pcl::PointCloud<PointT> final;
     icp.align(final);
     NODELET_INFO_STREAM("ICP converged: " << icp.hasConverged());

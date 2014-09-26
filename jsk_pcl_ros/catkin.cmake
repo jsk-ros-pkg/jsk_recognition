@@ -67,6 +67,7 @@ add_service_files(FILES SwitchTopic.srv
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/ICPRegistration.cfg
   cfg/PlaneReasoner.cfg
   cfg/OrganizedPassThrough.cfg
   cfg/EuclideanClustering.cfg

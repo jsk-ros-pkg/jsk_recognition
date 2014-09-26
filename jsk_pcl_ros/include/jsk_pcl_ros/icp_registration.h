@@ -68,13 +68,20 @@ namespace jsk_pcl_ros
     boost::mutex mutex_;
 
     ////////////////////////////////////////////////////////
-    // parameters
+    // parameters for ICP
     ////////////////////////////////////////////////////////
+    int algorithm_;
     pcl::PointCloud<PointT>::Ptr reference_cloud_;
     int max_iteration_;
     double correspondence_distance_;
     double transform_epsilon_;
     double euclidean_fittness_epsilon_;
+    ////////////////////////////////////////////////////////
+    // parameters for GICP
+    ////////////////////////////////////////////////////////
+    double rotation_epsilon_;
+    int correspondence_randomness_;
+    int maximum_optimizer_iterations_;
   private:
     
   };

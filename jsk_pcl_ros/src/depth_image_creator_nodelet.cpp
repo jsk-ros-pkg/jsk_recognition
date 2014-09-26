@@ -282,5 +282,4 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
   }
 }
 
-typedef jsk_pcl_ros::DepthImageCreator DepthImageCreator;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, DepthImageCreator, DepthImageCreator, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::DepthImageCreator, nodelet::Nodelet);

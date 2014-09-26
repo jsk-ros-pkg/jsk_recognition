@@ -37,4 +37,4 @@
 #include <pluginlib/class_list_macros.h>
 
 typedef nodelet_topic_tools::NodeletThrottle<sensor_msgs::Image> NodeletImageThrottle;
-PLUGINLIB_DECLARE_CLASS (jck_pcl, NodeletImageThrottle, NodeletImageThrottle, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (NodeletImageThrottle, nodelet::Nodelet);

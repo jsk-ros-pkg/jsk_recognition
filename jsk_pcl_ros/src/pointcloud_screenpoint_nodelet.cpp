@@ -365,5 +365,4 @@ void jsk_pcl_ros::PointcloudScreenpoint::callback_polygon(const sensor_msgs::Poi
   }
 }
 
-typedef jsk_pcl_ros::PointcloudScreenpoint PointcloudScreenpoint;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, PointcloudScreenpoint, PointcloudScreenpoint, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::PointcloudScreenpoint, nodelet::Nodelet);

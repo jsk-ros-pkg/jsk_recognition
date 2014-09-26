@@ -94,5 +94,4 @@ namespace jsk_pcl_ros
   }
   
 }
-typedef jsk_pcl_ros::KeypointsPublisher KeypointsPublisher;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, KeypointsPublisher, KeypointsPublisher, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::KeypointsPublisher, nodelet::Nodelet);

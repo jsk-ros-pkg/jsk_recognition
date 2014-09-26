@@ -92,5 +92,5 @@ namespace jsk_pcl_ros
 }
 
 #include <pluginlib/class_list_macros.h>
-typedef jsk_pcl_ros::TransformPointcloudInBoundingBox TransformPointcloudInBoundingBox;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, TransformPointcloudInBoundingBox, TransformPointcloudInBoundingBox, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::TransformPointcloudInBoundingBox,
+                        nodelet::Nodelet);

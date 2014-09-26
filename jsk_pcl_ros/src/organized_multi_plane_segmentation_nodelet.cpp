@@ -780,6 +780,5 @@ namespace jsk_pcl_ros
   }
   
 }
-
-typedef jsk_pcl_ros::OrganizedMultiPlaneSegmentation OrganizedMultiPlaneSegmentation;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, OrganizedMultiPlaneSegmentation, OrganizedMultiPlaneSegmentation, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::OrganizedMultiPlaneSegmentation,
+                        nodelet::Nodelet);

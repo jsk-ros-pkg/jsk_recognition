@@ -237,5 +237,5 @@ namespace jsk_pcl_ros
   }
 }
 
-typedef jsk_pcl_ros::VoxelGridDownsampleManager VoxelGridDownsampleManager;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, VoxelGridDownsampleManager, VoxelGridDownsampleManager, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::VoxelGridDownsampleManager,
+                        nodelet::Nodelet);

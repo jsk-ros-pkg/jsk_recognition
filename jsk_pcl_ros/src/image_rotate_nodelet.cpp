@@ -229,10 +229,6 @@ class ImageRotateNodelet : public nodelet::Nodelet
       }
       angle_ = fmod(angle_, 2.0 * M_PI);
     }
-    catch (tf::TransformException &e)
-    {
-      NODELET_ERROR("Transform error: %s", e.what());
-    }
     catch (tf2::TransformException &e)
     {
       NODELET_ERROR("Transform error: %s", e.what());
@@ -345,6 +341,6 @@ public:
   }
 };
 }
+
 #include <pluginlib/class_list_macros.h>
-typedef jsk_pcl_ros::ImageRotateNodelet ImageRotateNodelet;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, ImageRotateNodelet, ImageRotateNodelet, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::ImageRotateNodelet, nodelet::Nodelet);

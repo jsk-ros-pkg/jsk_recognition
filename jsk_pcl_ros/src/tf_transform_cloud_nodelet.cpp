@@ -73,5 +73,4 @@ namespace jsk_pcl_ros
   }
 }
 
-typedef jsk_pcl_ros::TfTransformCloud TfTransformCloud;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, TfTransformCloud, TfTransformCloud, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::TfTransformCloud, nodelet::Nodelet);

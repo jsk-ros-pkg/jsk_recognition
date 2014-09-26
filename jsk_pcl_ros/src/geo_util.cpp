@@ -317,6 +317,23 @@ namespace jsk_pcl_ros
     return fabs(fabs(d_) - fabs(another.d_));
   }
 
+  double Plane::angle(const Eigen::Vector3f& vector)
+  {
+    double dot = normal_.dot(vector);
+    if (dot > 1.0) {
+      dot = 1.0;
+    }
+    else if (dot < -1.0) {
+      dot = -1.0;
+    }
+    double theta = acos(dot);
+    if (theta > M_PI / 2.0) {
+      return M_PI - theta;
+    }
+
+    return acos(dot);
+  }
+  
   double Plane::angle(const Plane& another)
   {
     double dot = normal_.dot(another.normal_);
@@ -415,6 +432,17 @@ namespace jsk_pcl_ros
     }
     return Polygon(skipped_vertices);
   }
+
+  std::vector<Plane::Ptr> convertToPlanes(
+    std::vector<pcl::ModelCoefficients::Ptr> coefficients)
+  {
+    std::vector<Plane::Ptr> ret;
+    for (size_t i = 0; i < coefficients.size(); i++) {
+      ret.push_back(Plane::Ptr (new Plane(coefficients[i]->values)));
+    }
+    return ret;
+  }
+  
   
   Polygon::Polygon(const Vertices& vertices):
     Plane((vertices[1] - vertices[0]).cross(vertices[2] - vertices[0]).normalized(), vertices[0]),

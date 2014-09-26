@@ -165,6 +165,11 @@ namespace jsk_pcl_ros
     if (model_coefficients.size() == 0) {
       return;                   // do nothing
     }
+
+    if (model_coefficients.size() == 1) {
+      connection_map[0]= std::vector<int>();
+      return;
+    }
     
     pcl::ExtractIndices<PointT> extract;
     extract.setInputCloud(input);

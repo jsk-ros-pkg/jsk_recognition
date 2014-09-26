@@ -5,6 +5,12 @@
       relay pointcloud if the joint state look static
     </description>
   </class>
+  <class name="jsk_pcl/ICPRegistration" type="ICPRegistration"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      register pointclouds using ICP algorithm
+    </description>
+  </class>
   <class name="jsk_pcl/PlaneReasoner" type="PlaneReasoner"
          base_class_type="nodelet::Nodelet">
     <description>

@@ -5,6 +5,12 @@
       transform pointcloud whose origin is the center of bounding box;
     </description>
   </class>
+  <class name="jsk_pcl/JointStateStaticFilter" type="JointStateStaticFilter"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      relay pointcloud if the joint state look static
+    </description>
+  </class>
   <class name="jsk_pcl/ICPRegistration" type="ICPRegistration"
          base_class_type="nodelet::Nodelet">
     <description>

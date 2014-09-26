@@ -51,6 +51,9 @@
           args="load jsk_pcl/VoxelGridDownsampleManager $(arg HEAD_NODELET_MANAGER)"
           output="screen" clear_params="true">
       <param name="base_frame" value="$(arg BASE_FRAME)"/>
+      <param name="max_points" value="100"/>
+      <param name="rate" value="0.1"/>
+
       <remap from="~input" to="$(arg HEAD_SELECTED)" />
       <remap from="~add_grid" to="add_grid"/>
     </node>

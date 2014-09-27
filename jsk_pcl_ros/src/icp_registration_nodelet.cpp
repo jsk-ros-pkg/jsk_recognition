@@ -59,7 +59,10 @@ namespace jsk_pcl_ros
 
     bool align_box;
     pnh_->param("align_box", align_box, false);
-    
+
+    ////////////////////////////////////////////////////////
+    // Publishers
+    ////////////////////////////////////////////////////////
     pub_result_pose_ = pnh_->advertise<geometry_msgs::PoseStamped>(
       "output_pose", 1);
     pub_result_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>(
@@ -74,7 +77,7 @@ namespace jsk_pcl_ros
       "debug/result", 1);
 
     ////////////////////////////////////////////////////////
-    // subscription
+    // Subscription
     ////////////////////////////////////////////////////////
     sub_reference_ = pnh_->subscribe("input_reference", 1,
                                        &ICPRegistration::referenceCallback,
@@ -99,11 +102,13 @@ namespace jsk_pcl_ros
       ros::Publisher& pub,
       const pcl::PointCloud<PointT>& cloud)
   {
-    sensor_msgs::PointCloud2 ros_cloud;
-    pcl::toROSMsg(cloud, ros_cloud);
-    ros_cloud.header.frame_id = "base_link";
-    ros_cloud.header.stamp = ros::Time::now();
-    pub.publish(ros_cloud);
+    if (pub.getNumSubscribers() > 0) {
+      sensor_msgs::PointCloud2 ros_cloud;
+      pcl::toROSMsg(cloud, ros_cloud);
+      ros_cloud.header.frame_id = "base_link";
+      ros_cloud.header.stamp = ros::Time::now();
+      pub.publish(ros_cloud);
+    }
   }
   
   void ICPRegistration::configCallback(Config &config, uint32_t level)
@@ -147,8 +152,6 @@ namespace jsk_pcl_ros
     {
       NODELET_ERROR("Transform error: %s", e.what());
     }
-
-    
   }
 
   void ICPRegistration::align(const sensor_msgs::PointCloud2::ConstPtr& msg)
@@ -192,11 +195,13 @@ namespace jsk_pcl_ros
     pcl::transformPointCloud(final, *output_cloud, offset);
     // NODELET_INFO_STREAM("ICP converged: " << icp.hasConverged());
     // NODELET_INFO_STREAM("ICP score: " << icp.getFitnessScore());
-        Eigen::Matrix4f transformation = icp.getFinalTransformation ();
+    Eigen::Matrix4f transformation = icp.getFinalTransformation ();
     Eigen::Matrix4d transformation_d;
     convertMatrix4<Eigen::Matrix4f, Eigen::Matrix4d>(
       transformation, transformation_d);
-    output_transform = Eigen::Affine3d(transformation_d);
+    Eigen::Affine3d offsetd;
+    convertEigenAffine3(offset, offsetd);
+    output_transform = offsetd * Eigen::Affine3d(transformation_d);
     return icp.getFitnessScore();
   }
   
@@ -238,15 +243,21 @@ namespace jsk_pcl_ros
           flipped_offset.inverse());
       }
     }
-    sensor_msgs::PointCloud2 ros_final;
-    pcl::toROSMsg(*transformed_cloud, ros_final);
-    ros_final.header = header;
-    pub_result_cloud_.publish(ros_final);
-    
+    if (pub_result_cloud_.getNumSubscribers() > 0) {
+      sensor_msgs::PointCloud2 ros_final;
+      pcl::toROSMsg(*transformed_cloud, ros_final);
+      ros_final.header = header;
+      pub_result_cloud_.publish(ros_final);
+    }
+    // publish result pose
+    geometry_msgs::PoseStamped ros_result_pose;
+    ros_result_pose.header = header;
+    tf::poseEigenToMsg(transform_result, ros_result_pose.pose);
+    pub_result_pose_.publish(ros_result_pose);
     publishDebugCloud(pub_debug_source_cloud_, *reference_cloud_);
     publishDebugCloud(pub_debug_target_cloud_, *cloud);
-    publishDebugCloud(pub_debug_result_cloud_, *transformed_cloud_for_debug_result);
-    
+    publishDebugCloud(pub_debug_result_cloud_,
+                      *transformed_cloud_for_debug_result);
   }
   
   void ICPRegistration::referenceCallback(

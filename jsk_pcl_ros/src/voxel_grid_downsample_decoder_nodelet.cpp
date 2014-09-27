@@ -164,5 +164,5 @@ namespace jsk_pcl_ros
 }
 
 
-typedef jsk_pcl_ros::VoxelGridDownsampleDecoder VoxelGridDownsampleDecoder;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, VoxelGridDownsampleDecoder, VoxelGridDownsampleDecoder, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::VoxelGridDownsampleDecoder,
+                        nodelet::Nodelet);

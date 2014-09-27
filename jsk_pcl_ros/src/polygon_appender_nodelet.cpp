@@ -109,6 +109,5 @@ namespace jsk_pcl_ros
   }
 }
 
-typedef jsk_pcl_ros::PolygonAppender PolygonAppender;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, PolygonAppender, PolygonAppender, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::PolygonAppender, nodelet::Nodelet);
 

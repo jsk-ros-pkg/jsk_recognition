@@ -121,5 +121,5 @@ namespace jsk_pcl_ros
 }
 
 #include <pluginlib/class_list_macros.h>
-typedef jsk_pcl_ros::BorderEstimator BorderEstimator;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, BorderEstimator, BorderEstimator, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::BorderEstimator,
+                        nodelet::Nodelet);

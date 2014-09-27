@@ -268,5 +268,5 @@ namespace jsk_pcl_ros
 
 typedef jsk_pcl_ros::RGBColorFilter RGBColorFilter;
 typedef jsk_pcl_ros::HSIColorFilter HSIColorFilter;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, RGBColorFilter, RGBColorFilter, nodelet::Nodelet);
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, HSIColorFilter, HSIColorFilter, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::RGBColorFilter, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::HSIColorFilter, nodelet::Nodelet);

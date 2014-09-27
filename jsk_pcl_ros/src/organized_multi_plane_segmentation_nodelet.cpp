@@ -165,6 +165,11 @@ namespace jsk_pcl_ros
     if (model_coefficients.size() == 0) {
       return;                   // do nothing
     }
+
+    if (model_coefficients.size() == 1) {
+      connection_map[0]= std::vector<int>();
+      return;
+    }
     
     pcl::ExtractIndices<PointT> extract;
     extract.setInputCloud(input);
@@ -775,6 +780,5 @@ namespace jsk_pcl_ros
   }
   
 }
-
-typedef jsk_pcl_ros::OrganizedMultiPlaneSegmentation OrganizedMultiPlaneSegmentation;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, OrganizedMultiPlaneSegmentation, OrganizedMultiPlaneSegmentation, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::OrganizedMultiPlaneSegmentation,
+                        nodelet::Nodelet);

@@ -52,13 +52,24 @@ add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg
   SparseOccupancyGridArray.msg
   DepthErrorResult.msg
   ParallelEdge.msg ParallelEdgeArray.msg)
-add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv SetPointCloud2.srv
+
+add_service_files(FILES SwitchTopic.srv
+  TransformScreenpoint.srv
+  CheckCircle.srv
+  RobotPickupReleasePoint.srv
+  TowerPickUp.srv
+  EuclideanSegment.srv
+  TowerRobotMoveCommand.srv
+  SetPointCloud2.srv
   CallSnapIt.srv CallPolygon.srv
   EnvironmentLock.srv
   PolygonOnEnvironment.srv)
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/ICPRegistration.cfg
+  cfg/PlaneReasoner.cfg
+  cfg/OrganizedPassThrough.cfg
   cfg/EuclideanClustering.cfg
   cfg/ColorizeDistanceFromPlane.cfg
   cfg/HSIColorFilter.cfg
@@ -77,6 +88,7 @@ generate_dynamic_reconfigure_options(
   cfg/ParallelEdgeFinder.cfg
   cfg/EdgebasedCubeFinder.cfg
   cfg/MultiPlaneSACSegmentation.cfg
+  cfg/BoundingBoxFilter.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -199,10 +211,22 @@ jsk_pcl_nodelet(src/colorize_distance_from_plane_nodelet.cpp
   "jsk_pcl/ColorizeDistanceFromPlane" "colorize_distance_from_plane")
 jsk_pcl_nodelet(src/multi_plane_sac_segmentation_nodelet.cpp
   "jsk_pcl/MultiPlaneSACSegmentation" "multi_plane_sac_segmentation")
-
+jsk_pcl_nodelet(src/bounding_box_filter_nodelet.cpp
+  "jsk_pcl/BoundingBoxFilter" "bounding_box_filter")
+jsk_pcl_nodelet(src/organized_pass_through_nodelet.cpp
+  "jsk_pcl/OrganizedPassThrough" "organized_pass_through")
+jsk_pcl_nodelet(src/plane_reasoner_nodelet.cpp
+  "jsk_pcl/PlaneReasoner" "plane_reasoner")
+jsk_pcl_nodelet(src/joint_state_static_filter_nodelet.cpp
+  "jsk_pcl/JointStateStaticFilter" "joint_state_static_filter")
+jsk_pcl_nodelet(src/icp_registration_nodelet.cpp
+  "jsk_pcl/ICPRegistration" "icp_registration")
+jsk_pcl_nodelet(src/transform_pointcloud_in_bounding_box_nodelet.cpp
+  "jsk_pcl/TransformPointcloudInBoundingBox" "transform_pointcloud_in_bounding_box")
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
-  src/pcl_conversion_util.cpp src/pcl_util.cpp)
+  src/pcl_conversion_util.cpp src/pcl_util.cpp
+  src/diagnostic_nodelet.cpp)
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 

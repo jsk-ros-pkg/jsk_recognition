@@ -79,6 +79,8 @@ namespace jsk_pcl_ros
   typedef std::vector<Eigen::Vector3f,
                       Eigen::aligned_allocator<Eigen::Vector3f> > Vertices;
   typedef boost::tuple<Point, Point> PointPair;
+  typedef boost::tuple<size_t, size_t> PointIndexPair;
+  
   // (infinite) line
   class Line
   {
@@ -143,6 +145,7 @@ namespace jsk_pcl_ros
     
     virtual double distance(const Plane& another);
     virtual double angle(const Plane& another);
+    virtual double angle(const Eigen::Vector3f& vector);
     virtual void project(const Eigen::Vector3f& p, Eigen::Vector3f& output);
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3d& output);
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3f& output);
@@ -158,6 +161,39 @@ namespace jsk_pcl_ros
   private:
   };
 
+  std::vector<Plane::Ptr> convertToPlanes(
+    std::vector<pcl::ModelCoefficients::Ptr>);
+
+  class Polygon: public Plane
+  {
+  public:
+    typedef boost::shared_ptr<Polygon> Ptr;
+    typedef boost::tuple<Ptr, Ptr> PtrPair;
+    Polygon(const Vertices& vertices);
+    virtual ~Polygon();
+    virtual std::vector<Polygon::Ptr> decomposeToTriangles();
+    virtual bool isTriangle();
+    virtual size_t getNumVertices();
+    virtual size_t getFarestPointIndex(const Eigen::Vector3f& O);
+    virtual Eigen::Vector3f directionAtPoint(size_t i);
+    virtual Eigen::Vector3f getVertex(size_t i);
+    virtual PointIndexPair getNeighborIndex(size_t index);
+    virtual bool isPossibleToRemoveTriangleAtIndex(
+      size_t index,
+      const Eigen::Vector3f& direction);
+    virtual PtrPair separatePolygon(size_t index);
+    size_t previousIndex(size_t i);
+    size_t nextIndex(size_t i);
+    static Polygon fromROSMsg(const geometry_msgs::Polygon& polygon);
+    static Polygon createPolygonWithSkip(const Vertices& vertices);
+    virtual bool isConvex();
+  protected:
+    Vertices vertices_;
+  private:
+    
+  };
+  
+  
   class ConvexPolygon: public Plane
   {
   public:

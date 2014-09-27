@@ -35,6 +35,27 @@
 
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 
+namespace jsk_pcl_ros
+{
+  void convertEigenAffine3(const Eigen::Affine3d& from,
+                           Eigen::Affine3f& to)
+  {
+    Eigen::Matrix4d from_mat = from.matrix();
+    Eigen::Matrix4f to_mat;
+    convertMatrix4<Eigen::Matrix4d, Eigen::Matrix4f>(from_mat, to_mat);
+    to = Eigen::Affine3f(to_mat);
+  }
+  
+  void convertEigenAffine3(const Eigen::Affine3f& from,
+                           Eigen::Affine3d& to)
+  {
+    Eigen::Matrix4f from_mat = from.matrix();
+    Eigen::Matrix4d to_mat;
+    convertMatrix4<Eigen::Matrix4f, Eigen::Matrix4d>(from_mat, to_mat);
+    to = Eigen::Affine3d(to_mat);
+  }
+}
+
 namespace pcl_conversions
 {
   std::vector<pcl::PointIndices::Ptr>

@@ -3,7 +3,9 @@
   <remap from="/diagnostics_agg" to="/diagnostics_pcl_agg" />
   <arg name="BASE_FRAME_ID" default="odom" />
   <arg name="RUN_SELF_FILTER" default="false"/>
-  <arg name="SELF_FILTER_PARAM" value="$(find jsk_pr2_startup)/jsk_pr2_sensors/tilt_self_filter.yaml" />
+  <arg name="SELF_FILTER_PARAM" default="$(find jsk_pr2_startup)/jsk_pr2_sensors/tilt_self_filter.yaml" />
+  <arg name="JOINT_STATIC_FILTER" default="false" />
+  <arg name="FILTER_JOINT_PARAM" value="$(find jsk_pcl_ros)/config/pr2_sensor_joint.yaml" />
   <arg name="INPUT" default="/camera/depth_registered/points" />
   <arg name="ICP_REGISTRATION" default="false" />
   <arg name="MODEL_FILE" default="$(find jsk_pcl_ros)/models/hand_drill_kinect.pcd" />
@@ -48,7 +50,19 @@
         args="load jsk_topic_tools/Relay $(arg MANAGER)">
     <remap from="~input" to="$(arg INPUT)" unless="$(arg RUN_SELF_FILTER)" />
     <remap from="~input" to="openni_cloud_self_filter/cloud_out" if="$(arg RUN_SELF_FILTER)" />
+    <remap from="~output" to="~raw_output" if="$(arg JOINT_STATIC_FILTER)" />
   </node>
+  
+  <node pkg="nodelet" type="nodelet" name="joint_static_filter"
+        if="$(arg JOINT_STATIC_FILTER)"
+        machine="$(arg MACHINE)"
+        args="load jsk_pcl/JointStateStaticFilter /$(arg MANAGER)">
+    <remap from="~input_joint_state" to="/joint_states" />
+    <remap from="~input" to="input_relay/raw_output"/>
+    <remap from="~output" to="input_relay/output" />
+    <rosparam command="load" file="$(arg FILTER_JOINT_PARAM)" />
+  </node>
+  
   <node pkg="nodelet" type="nodelet" name="multi_plane_estimate"
         machine="$(arg MACHINE)"
         args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg MANAGER)"

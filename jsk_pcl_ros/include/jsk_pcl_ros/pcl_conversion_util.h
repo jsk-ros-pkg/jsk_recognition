@@ -92,6 +92,11 @@ namespace jsk_pcl_ros
       }
     }
   }
+
+  void convertEigenAffine3(const Eigen::Affine3d& from,
+                           Eigen::Affine3f& to);
+  void convertEigenAffine3(const Eigen::Affine3f& from,
+                           Eigen::Affine3d& to);
   
 }
 // extend pcl_conversions package's toPCL and fromPCL functions

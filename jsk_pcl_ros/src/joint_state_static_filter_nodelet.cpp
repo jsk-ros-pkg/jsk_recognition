@@ -66,6 +66,7 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    NODELET_DEBUG("Pointcloud Callback");
     vital_checker_->poke();
     if (isStatic(msg->header.stamp)) {
       ROS_DEBUG("static");
@@ -105,16 +106,16 @@ namespace jsk_pcl_ros
   {
     double min_diff = DBL_MAX;
     bool min_value = false;
-    
     for (boost::circular_buffer<StampedBool>::iterator it = buf_.begin();
          it != buf_.end();
          ++it) {
-      double diff = (it->get<0>() - stamp).toSec();
+      double diff = fabs((it->get<0>() - stamp).toSec());
       if (diff < min_diff) {
         min_value = it->get<1>();
         min_diff = diff;
       }
     }
+    NODELET_DEBUG("min_diff: %f", min_diff);
     return min_value;
   }
   
@@ -122,6 +123,7 @@ namespace jsk_pcl_ros
     const sensor_msgs::JointState::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    NODELET_DEBUG("jointCallback");
     // filter out joints based on joint names
     std::vector<double> joints = filterJointState(msg);
     if (joints.size() == 0) {

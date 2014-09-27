@@ -58,18 +58,21 @@
 #include <diagnostic_updater/publisher.h>
 #include "jsk_pcl_ros/pcl_util.h"
 #include <jsk_topic_tools/vital_checker.h>
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class ClusterPointIndicesDecomposer: public pcl_ros::PCLNodelet
+  class ClusterPointIndicesDecomposer: public ConnectionBasedNodelet
   {
   public:
-    typedef message_filters::sync_policies::ExactTime< sensor_msgs::PointCloud2,
-                                                       jsk_pcl_ros::ClusterPointIndices > SyncPolicy;
-    typedef message_filters::sync_policies::ExactTime< sensor_msgs::PointCloud2,
-                                                       jsk_pcl_ros::ClusterPointIndices,
-                                                       jsk_pcl_ros::PolygonArray,
-                                                       jsk_pcl_ros::ModelCoefficientsArray> SyncAlignPolicy;
+    typedef message_filters::sync_policies::ExactTime<
+    sensor_msgs::PointCloud2,
+    jsk_pcl_ros::ClusterPointIndices > SyncPolicy;
+    typedef message_filters::sync_policies::ExactTime<
+      sensor_msgs::PointCloud2,
+      jsk_pcl_ros::ClusterPointIndices,
+      jsk_pcl_ros::PolygonArray,
+      jsk_pcl_ros::ModelCoefficientsArray> SyncAlignPolicy;
     virtual void onInit();
     virtual void extract(const sensor_msgs::PointCloud2ConstPtr &point,
                          const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices,
@@ -102,6 +105,9 @@ namespace jsk_pcl_ros
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void allocatePublishers(size_t num);
+
+    virtual void subscribe();
+    virtual void unsubscribe();
     
     static uint32_t colorRGBAToUInt32(std_msgs::ColorRGBA c)
     {

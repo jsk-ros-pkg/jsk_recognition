@@ -397,5 +397,4 @@ namespace jsk_pcl_ros
 }
 
 #include <pluginlib/class_list_macros.h>
-typedef jsk_pcl_ros::EdgeDepthRefinement EdgeDepthRefinement;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, EdgeDepthRefinement, EdgeDepthRefinement, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::EdgeDepthRefinement, nodelet::Nodelet);

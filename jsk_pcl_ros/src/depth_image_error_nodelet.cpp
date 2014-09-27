@@ -76,5 +76,4 @@ namespace jsk_pcl_ros
   }
 }
 
-typedef jsk_pcl_ros::DepthImageError DepthImageError;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, DepthImageError, DepthImageError, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::DepthImageError, nodelet::Nodelet);

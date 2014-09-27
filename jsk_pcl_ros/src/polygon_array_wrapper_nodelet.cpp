@@ -75,5 +75,4 @@ namespace jsk_pcl_ros
 }
 
 #include <pluginlib/class_list_macros.h>
-typedef jsk_pcl_ros::PolygonArrayWrapper PolygonArrayWrapper;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, PolygonArrayWrapper, PolygonArrayWrapper, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::PolygonArrayWrapper, nodelet::Nodelet);

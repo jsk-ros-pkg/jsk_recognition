@@ -37,4 +37,4 @@
 #include <pluginlib/class_list_macros.h>
 
 typedef nodelet::NodeletDEMUX<sensor_msgs::Image> NodeletImageDEMUX;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, NodeletImageDEMUX, NodeletImageDEMUX, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (NodeletImageDEMUX, nodelet::Nodelet);

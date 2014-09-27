@@ -369,5 +369,5 @@ namespace jsk_pcl_ros
   
 }
 
-typedef jsk_pcl_ros::ColorHistogramMatcher ColorHistogramMatcher;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, ColorHistogramMatcher, ColorHistogramMatcher, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::ColorHistogramMatcher,
+                        nodelet::Nodelet);

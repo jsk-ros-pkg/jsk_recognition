@@ -160,6 +160,5 @@ namespace jsk_pcl_ros
   }
 }
 
-typedef jsk_pcl_ros::GridSampler GridSampler;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, GridSampler, GridSampler, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::GridSampler, nodelet::Nodelet);
 

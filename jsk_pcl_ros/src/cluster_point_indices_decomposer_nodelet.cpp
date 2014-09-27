@@ -402,6 +402,6 @@ namespace jsk_pcl_ros
   
 }
 
-typedef jsk_pcl_ros::ClusterPointIndicesDecomposer ClusterPointIndicesDecomposer;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, ClusterPointIndicesDecomposer, ClusterPointIndicesDecomposer, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::ClusterPointIndicesDecomposer,
+                        nodelet::Nodelet);
 

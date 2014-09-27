@@ -244,5 +244,4 @@ namespace jsk_pcl_ros
   }
 }
 
-typedef jsk_pcl_ros::ColorizeRandomForest ColorizeRandomForest;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, ColorizeRandomForest, ColorizeRandomForest, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::ColorizeRandomForest, nodelet::Nodelet);

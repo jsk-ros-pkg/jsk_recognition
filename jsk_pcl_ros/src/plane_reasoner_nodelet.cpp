@@ -264,5 +264,4 @@ namespace jsk_pcl_ros
 }
 
 #include <pluginlib/class_list_macros.h>
-typedef jsk_pcl_ros::PlaneReasoner PlaneReasoner;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, PlaneReasoner, PlaneReasoner, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::PlaneReasoner, nodelet::Nodelet);

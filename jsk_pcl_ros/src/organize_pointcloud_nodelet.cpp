@@ -85,6 +85,5 @@ namespace jsk_pcl_ros
   }
 }
 
-typedef jsk_pcl_ros::OrganizePointCloud OrganizePointCloud;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, OrganizePointCloud, OrganizePointCloud, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::OrganizePointCloud, nodelet::Nodelet);
 

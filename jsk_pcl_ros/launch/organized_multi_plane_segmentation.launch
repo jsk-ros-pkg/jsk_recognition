@@ -67,7 +67,7 @@
     <remap from="~input" to="input_relay/output"/>
     <remap from="~input_indices" to="multi_plane_estimate/output_refined"/>
     <remap from="~input_coefficients" to="multi_plane_estimate/output_refined_coefficients"/>
-    <remap from="~input_polygons" to="/multi_plane_estimate/output_polygon" />
+    <remap from="~input_polygons" to="/multi_plane_estimate/output_refined_polygon" />
   </node>
   
   <node pkg="nodelet" type="nodelet"
@@ -101,9 +101,9 @@
         args="load jsk_pcl/MultiPlaneExtraction $(arg MANAGER)"
         output="screen">
     <remap from="~input" to="input_relay/output" />
-    <remap from="~indices" to="/multi_plane_estimate/output" />
-    <remap from="~input_polygons" to="/multi_plane_estimate/output_polygon" />
-    <remap from="~input_coefficients" to="/multi_plane_estimate/output_coefficients" />
+    <remap from="~indices" to="/multi_plane_estimate/output_refined" />
+    <remap from="~input_polygons" to="/multi_plane_estimate/output_refined_polygon" />
+    <remap from="~input_coefficients" to="/multi_plane_estimate/output_refined_coefficients" />
   </node>
   
   <node pkg="nodelet" type="nodelet" name="euclidean_clustering"
@@ -123,9 +123,9 @@
         output="screen">
     <remap from="~input" to="/plane_extraction/output" />
     <remap from="~target" to="/euclidean_clustering/output_throttle" />
-    <remap from="~align_planes" to="/multi_plane_estimate/output_polygon" />
+    <remap from="~align_planes" to="/multi_plane_estimate/output_refined_polygon" />
     <remap from="~align_planes_coefficients"
-           to="/multi_plane_estimate/output_coefficients" />
+           to="/multi_plane_estimate/output_refined_coefficients" />
     <rosparam>
       align_boxes: true
       use_pca: true
@@ -242,15 +242,15 @@
     </node>
     <node pkg="nodelet" type="nodelet" name="estimated_plane_respected_to_odom"
           args="load jsk_pcl/PolygonArrayTransformer /$(arg MANAGER)">
-      <remap from="~input_polygons" to="multi_plane_estimate/output_polygon" />
-      <remap from="~input_coefficients" to="multi_plane_estimate/output_coefficients" />
+      <remap from="~input_polygons" to="multi_plane_estimate/output_refined_polygon" />
+      <remap from="~input_coefficients" to="multi_plane_estimate/output_refined_coefficients" />
       <param name="frame_id" value="$(arg BASE_FRAME_ID)" />
     </node>
     <node pkg="nodelet" type="nodelet" name="env_server"
           output="screen"
           args="load jsk_pcl/EnvironmentPlaneModeling /$(arg MANAGER)" >
       <remap from="~input" to="transform_input/output" />
-      <remap from="~indices" to="/multi_plane_estimate/output" />
+      <remap from="~indices" to="/multi_plane_estimate/output_refined" />
       <remap from="~input_polygons" to="/estimated_plane_respected_to_odom/output_polygons" />
       <remap from="~input_coefficients" to="/estimated_plane_respected_to_odom/output_coefficients" />
       <remap from="~input_static_polygons" to="/footstep_respected_to_odom/output_polygons" />

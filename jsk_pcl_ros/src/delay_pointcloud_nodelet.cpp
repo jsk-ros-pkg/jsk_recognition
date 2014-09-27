@@ -55,5 +55,4 @@ namespace jsk_pcl_ros
 
 }
 
-typedef jsk_pcl_ros::DelayPointCloud DelayPointCloud;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, DelayPointCloud, DelayPointCloud, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::DelayPointCloud, nodelet::Nodelet);

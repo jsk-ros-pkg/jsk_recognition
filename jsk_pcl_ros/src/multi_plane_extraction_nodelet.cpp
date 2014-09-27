@@ -199,5 +199,4 @@ namespace jsk_pcl_ros
   
 }
 
-typedef jsk_pcl_ros::MultiPlaneExtraction MultiPlaneExtraction;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, MultiPlaneExtraction, MultiPlaneExtraction, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::MultiPlaneExtraction, nodelet::Nodelet);

@@ -106,5 +106,5 @@ namespace jsk_pcl_ros
 }
 
 
-typedef jsk_pcl_ros::NormalEstimationIntegralImage NormalEstimationIntegralImage;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, NormalEstimationIntegralImage, NormalEstimationIntegralImage, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::NormalEstimationIntegralImage,
+                        nodelet::Nodelet);

@@ -66,5 +66,4 @@ namespace jsk_pcl_ros
   }
 }
 
-typedef jsk_pcl_ros::CentroidPublisher CentroidPublisher;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, CentroidPublisher, CentroidPublisher, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::CentroidPublisher, nodelet::Nodelet);

@@ -263,5 +263,4 @@ namespace jsk_pcl_ros
 }
 
 #include <pluginlib/class_list_macros.h>
-typedef jsk_pcl_ros::ICPRegistration ICPRegistration;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, ICPRegistration, ICPRegistration, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::ICPRegistration, nodelet::Nodelet);

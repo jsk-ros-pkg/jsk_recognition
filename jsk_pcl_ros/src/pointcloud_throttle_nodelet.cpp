@@ -37,4 +37,4 @@
 #include <pluginlib/class_list_macros.h>
 
 typedef nodelet_topic_tools::NodeletThrottle<sensor_msgs::PointCloud2> NodeletPointCloudThrottle;
-PLUGINLIB_DECLARE_CLASS (jck_pcl, NodeletPointCloudThrottle, NodeletPointCloudThrottle, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (NodeletPointCloudThrottle, nodelet::Nodelet);

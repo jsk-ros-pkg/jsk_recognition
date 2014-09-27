@@ -196,6 +196,5 @@ namespace jsk_pcl_ros
 }
 
 #include <pluginlib/class_list_macros.h>
-typedef jsk_pcl_ros::ParallelEdgeFinder ParallelEdgeFinder;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, ParallelEdgeFinder, ParallelEdgeFinder, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::ParallelEdgeFinder, nodelet::Nodelet);
 

@@ -199,5 +199,4 @@ namespace jsk_pcl_ros
   
 }
 
-typedef jsk_pcl_ros::PolygonArrayTransformer PolygonArrayTransformer;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, PolygonArrayTransformer, PolygonArrayTransformer, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::PolygonArrayTransformer, nodelet::Nodelet);

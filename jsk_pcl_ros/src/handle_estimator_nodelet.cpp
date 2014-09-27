@@ -277,5 +277,4 @@ namespace jsk_pcl_ros
   }
 }
 
-typedef jsk_pcl_ros::HandleEstimator HandleEstimator;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, HandleEstimator, HandleEstimator, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::HandleEstimator, nodelet::Nodelet);

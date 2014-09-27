@@ -38,4 +38,4 @@
 #include <pluginlib/class_list_macros.h>
 
 typedef nodelet::NodeletMUX<sensor_msgs::Image, message_filters::Subscriber<sensor_msgs::Image> > NodeletImageMUX;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, NodeletImageMUX, NodeletImageMUX, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (NodeletImageMUX, nodelet::Nodelet);

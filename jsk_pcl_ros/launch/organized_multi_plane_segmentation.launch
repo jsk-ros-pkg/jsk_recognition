@@ -2,11 +2,13 @@
   <remap from="/diagnostics" to="/diagnostics_pcl" />
   <remap from="/diagnostics_agg" to="/diagnostics_pcl_agg" />
   <arg name="BASE_FRAME_ID" default="odom" />
+  <arg name="RUN_SELF_FILTER" default="false"/>
+  <arg name="SELF_FILTER_PARAM" value="$(find jsk_pr2_startup)/jsk_pr2_sensors/tilt_self_filter.yaml" />
   <arg name="INPUT" default="/camera/depth_registered/points" />
   <arg name="ICP_REGISTRATION" default="false" />
   <arg name="MODEL_FILE" default="$(find jsk_pcl_ros)/models/hand_drill_kinect.pcd" />
   <arg name="LAUNCH_MANAGER" default="true" />
-  <arg name="MANAGER" default="manager" />
+  <arg name="MANAGER" default="organized_multi_plane_manager" />
   <arg name="ESTIMATE_OCCLUSION" default="false" />
   <arg name="COLOR_HISTOGRAM" default="false" />
   <arg name="HANDLE_ESTIMATOR" default="false" />
@@ -27,10 +29,25 @@
           unless="$(arg GDB)"
           output="screen"/>
   </group>
+
+  <group if="$(arg RUN_SELF_FILTER)">
+    <node pkg="pr2_navigation_self_filter"
+          type="self_filter" clear_params="true"
+          name="openni_cloud_self_filter" respawn="true" output="screen">
+      <remap from="cloud_in" to="$(arg INPUT)" />
+      <remap from="cloud_out" to="~cloud_out" />
+      <rosparam command="load" file="$(arg SELF_FILTER_PARAM)" />
+      <param name="use_rgb" value="true" />
+      <param name="keep_organized" value="true"/>
+      <param name="subsample_value" type="double" value="0.0"/>
+    </node>
+  </group>
+
   <node pkg="nodelet" type="nodelet" name="input_relay"
         machine="$(arg MACHINE)"
         args="load jsk_topic_tools/Relay $(arg MANAGER)">
-    <remap from="~input" to="$(arg INPUT)" />
+    <remap from="~input" to="$(arg INPUT)" unless="$(arg RUN_SELF_FILTER)" />
+    <remap from="~input" to="openni_cloud_self_filter/cloud_out" if="$(arg RUN_SELF_FILTER)" />
   </node>
   <node pkg="nodelet" type="nodelet" name="multi_plane_estimate"
         machine="$(arg MACHINE)"

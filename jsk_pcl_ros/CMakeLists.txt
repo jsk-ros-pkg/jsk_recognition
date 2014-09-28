@@ -138,6 +138,7 @@ rosbuild_add_library (jsk_pcl_ros
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
   src/pcl_conversion_util.cpp src/pcl_util.cpp
   src/diagnostic_nodelet.cpp
+  src/connection_based_nodelet.cpp
 )
 rosbuild_add_openmp_flags(jsk_pcl_ros)
 

@@ -223,18 +223,33 @@ namespace jsk_pcl_ros
 
     initializeGrid();
     sequence_id_ = 0;
-    sub_ = pnh_->subscribe("input", 1, &VoxelGridDownsampleManager::pointCB,
-                           this);
-    bounding_box_sub_ = pnh_->subscribe("add_grid", 1, &VoxelGridDownsampleManager::addGrid,
-                                        this);
-    pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
-    pub_encoded_ = pnh_->advertise<jsk_pcl_ros::SlicedPointCloud>("output_encoded", 1);
+
     int max_points_param;
     pnh_->param("max_points", max_points_param, 300);
     pnh_->param("rate", rate_, 1.0);
     max_points_  = max_points_param;
-
+    
+    pub_ = advertise<sensor_msgs::PointCloud2>(
+      *pnh_, "output", 1);
+    pub_encoded_ = advertise<jsk_pcl_ros::SlicedPointCloud>(
+      *pnh_, "output_encoded", 1);
+    
   }
+
+  void VoxelGridDownsampleManager::subscribe()
+  {
+    sub_ = pnh_->subscribe("input", 1, &VoxelGridDownsampleManager::pointCB,
+                           this);
+    bounding_box_sub_ = pnh_->subscribe("add_grid", 1, &VoxelGridDownsampleManager::addGrid,
+                                        this);
+  }
+
+  void VoxelGridDownsampleManager::unsubscribe()
+  {
+    sub_.shutdown();
+    bounding_box_sub_.shutdown();
+  }
+  
 }
 
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::VoxelGridDownsampleManager,

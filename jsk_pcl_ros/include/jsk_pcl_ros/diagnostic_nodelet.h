@@ -42,10 +42,11 @@
 #include <diagnostic_updater/publisher.h>
 #include <jsk_topic_tools/vital_checker.h>
 #include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class DiagnosticNodelet: public pcl_ros::PCLNodelet
+  class DiagnosticNodelet: public ConnectionBasedNodelet
   {
   public:
     typedef boost::shared_ptr<DiagnosticNodelet> Ptr;

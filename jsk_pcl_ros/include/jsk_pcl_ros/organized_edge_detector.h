@@ -42,10 +42,11 @@
 #include <jsk_pcl_ros/OrganizedEdgeDetectorConfig.h>
 #include <dynamic_reconfigure/server.h>
 #include <image_transport/image_transport.h>
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class OrganizedEdgeDetector: public pcl_ros::PCLNodelet
+  class OrganizedEdgeDetector: public ConnectionBasedNodelet
   {
   public:
     typedef pcl::PointXYZRGB PointT;
@@ -83,6 +84,9 @@ namespace jsk_pcl_ros
       const std_msgs::Header& header,
       const std::vector<std::vector<int> > indices);
 
+    virtual void subscribe();
+    virtual void unsubscribe();
+    
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////

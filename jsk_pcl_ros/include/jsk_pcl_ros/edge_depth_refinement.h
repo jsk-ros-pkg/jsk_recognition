@@ -52,9 +52,11 @@
 #include <dynamic_reconfigure/server.h>
 #include <boost/tuple/tuple.hpp>
 
+#include "jsk_pcl_ros/connection_based_nodelet.h"
+
 namespace jsk_pcl_ros
 {
-  class EdgeDepthRefinement: public pcl_ros::PCLNodelet
+  class EdgeDepthRefinement: public ConnectionBasedNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime<
@@ -117,6 +119,9 @@ namespace jsk_pcl_ros
       pcl::PointIndices::Ptr& output_indices);
     
     virtual void configCallback (Config &config, uint32_t level);
+
+    virtual void subscribe();
+    virtual void unsubscribe();
     
     ////////////////////////////////////////////////////////
     // ROS variables

@@ -62,10 +62,12 @@
 #include <diagnostic_updater/publisher.h>
 #include <jsk_topic_tools/rosparam_utils.h>
 #include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_pcl_ros/connection_based_nodelet.h"
+
 
 namespace jsk_pcl_ros
 {
-  class PlaneRejector: public pcl_ros::PCLNodelet
+  class PlaneRejector: public ConnectionBasedNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime< jsk_pcl_ros::PolygonArray,
@@ -81,6 +83,8 @@ namespace jsk_pcl_ros
     virtual void updateDiagnostics(const ros::TimerEvent& event);
     virtual void updateDiagnosticsPlaneRejector(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
+    virtual void subscribe();
+    virtual void unsubscribe();
     
     message_filters::Subscriber<jsk_pcl_ros::PolygonArray> sub_polygons_;
     message_filters::Subscriber<jsk_pcl_ros::ModelCoefficientsArray> sub_coefficients_;

@@ -47,10 +47,11 @@
 #include <pcl/point_types.h>
 #include <pcl/common/centroid.h>
 #include <pcl/filters/extract_indices.h>
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class NormalConcatenater: public pcl_ros::PCLNodelet
+  class NormalConcatenater: public ConnectionBasedNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> SyncPolicy;
@@ -61,6 +62,8 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_xyz_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_normal_;
     virtual void concatenate(const sensor_msgs::PointCloud2::ConstPtr& xyz, const sensor_msgs::PointCloud2::ConstPtr& normal);
+    virtual void subscribe();
+    virtual void unsubscribe();
   private:
     virtual void onInit();
     

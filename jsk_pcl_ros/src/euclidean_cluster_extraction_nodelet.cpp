@@ -205,17 +205,25 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // Publisher
     ////////////////////////////////////////////////////////
-    result_pub_ = pnh_->advertise<jsk_pcl_ros::ClusterPointIndices> ("output", 1);
-    cluster_num_pub_ = pnh_->advertise<jsk_pcl_ros::Int32Stamped> ("cluster_num", 1);
-
-    ////////////////////////////////////////////////////////
-    // Subscription
-    ////////////////////////////////////////////////////////
-    sub_input_ = pnh_->subscribe("input", 1, &EuclideanClustering::extract, this);
+    result_pub_ = advertise<jsk_pcl_ros::ClusterPointIndices> (*pnh_, "output", 1);
+    cluster_num_pub_ = advertise<jsk_pcl_ros::Int32Stamped> (*pnh_, "cluster_num", 1);
     service_ = pnh_->advertiseService(pnh_->resolveName("euclidean_clustering"),
                                       &EuclideanClustering::serviceCallback, this);
   }
 
+  void EuclideanClustering::subscribe()
+  {
+    ////////////////////////////////////////////////////////
+    // Subscription
+    ////////////////////////////////////////////////////////
+    sub_input_ = pnh_->subscribe("input", 1, &EuclideanClustering::extract, this);
+  }
+
+  void EuclideanClustering::unsubscribe()
+  {
+    sub_input_.shutdown();
+  }
+  
   void EuclideanClustering::updateDiagnostic(
     diagnostic_updater::DiagnosticStatusWrapper &stat)
   {

@@ -54,10 +54,10 @@
 #include <ml_classifiers/ClassDataPoint.h>
 #include <math.h>
 #include <stdlib.h>
-
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 namespace jsk_pcl_ros
 {
-  class ColorizeMapRandomForest: public pcl_ros::PCLNodelet
+  class ColorizeMapRandomForest: public ConnectionBasedNodelet
   {
   protected:
     ros::Subscriber sub_input_;
@@ -78,6 +78,8 @@ namespace jsk_pcl_ros
   private:
     virtual void onInit();
     void extract(const sensor_msgs::PointCloud2 cloud);
+    void subscribe();
+    void unsubscribe();
   };
 }
 

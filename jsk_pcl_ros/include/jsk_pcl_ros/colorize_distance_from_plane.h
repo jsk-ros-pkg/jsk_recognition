@@ -82,7 +82,7 @@ namespace jsk_pcl_ros
     virtual void configCallback(Config &config, uint32_t level);
 
     virtual void subscribe();
-    virtual void ubsubscribe();
+    virtual void unsubscribe();
     
     ////////////////////////////////////////////////////////
     // ROS variabels

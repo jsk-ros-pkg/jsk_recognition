@@ -49,9 +49,11 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 
+#include "jsk_pcl_ros/connection_based_nodelet.h"
+
 namespace jsk_pcl_ros
 {
-  class BorderEstimator: public pcl_ros::PCLNodelet
+  class BorderEstimator: public ConnectionBasedNodelet
   {
   public:
     typedef message_filters::sync_policies::ApproximateTime<
@@ -62,9 +64,11 @@ namespace jsk_pcl_ros
     virtual pcl::PointXYZ convertPoint(const pcl::PointWithRange& input);
     virtual void estimate(const sensor_msgs::PointCloud2::ConstPtr& msg,
                           const sensor_msgs::CameraInfo::ConstPtr& caminfo);
-    void publishCloud(ros::Publisher& pub,
-                      const pcl::PointCloud<pcl::PointXYZ>& cloud,
-                      const std_msgs::Header& header);
+    virtual void publishCloud(ros::Publisher& pub,
+                              const pcl::PointCloud<pcl::PointXYZ>& cloud,
+                              const std_msgs::Header& header);
+    virtual void subscribe();
+    virtual void unsubscribe();
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_point_;
     message_filters::Subscriber<sensor_msgs::CameraInfo> sub_camera_info_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;

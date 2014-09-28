@@ -33,55 +33,44 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/polygon_array_wrapper.h"
+
+#ifndef CONNECTION_BASED_NODELET_H_
+#define CONNECTION_BASED_NODELET_H_
+
+#include <pcl_ros/pcl_nodelet.h>
 
 namespace jsk_pcl_ros
 {
-  void PolygonArrayWrapper::onInit()
+  class ConnectionBasedNodelet: public pcl_ros::PCLNodelet
   {
-    PCLNodelet::onInit();
-    pub_polygon_array_ = advertise<jsk_pcl_ros::PolygonArray>(*pnh_,
-      "output_polygons", 1);
-    pub_coefficients_array_
-      = advertise<jsk_pcl_ros::ModelCoefficientsArray>(*pnh_,
-        "output_coefficients", 1);
-  }
-
-  void PolygonArrayWrapper::subscribe()
-  {
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-    sub_polygon_.subscribe(*pnh_, "input_polygon", 1);
-    sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
-    sync_->connectInput(sub_polygon_, sub_coefficients_);
-    sync_->registerCallback(boost::bind(
-                              &PolygonArrayWrapper::wrap,
-                              this, _1, _2));
-  }
-
-  void PolygonArrayWrapper::unsubscribe()
-  {
-    sub_polygon_.unsubscribe();
-    sub_coefficients_.unsubscribe();
-  }
-  
-  void PolygonArrayWrapper::wrap(
-    const geometry_msgs::PolygonStamped::ConstPtr& polygon,
-    const PCLModelCoefficientMsg::ConstPtr& coefficients)
-  {
-    jsk_pcl_ros::PolygonArray array_msg;
-    array_msg.header = polygon->header;
-    geometry_msgs::PolygonStamped new_polygon(*polygon);
-    array_msg.polygons.push_back(new_polygon);
-    pub_polygon_array_.publish(array_msg);
-
-    jsk_pcl_ros::ModelCoefficientsArray coefficients_array;
-    coefficients_array.header = coefficients->header;
-    PCLModelCoefficientMsg new_coefficients(*coefficients);
-    coefficients_array.coefficients.push_back(new_coefficients);
-    pub_coefficients_array_.publish(coefficients_array);
-  }
-  
+  public:
+    ConnectionBasedNodelet(): subscribed_(false) { }
+  protected:
+    virtual void connectionCallback(const ros::SingleSubscriberPublisher& pub);
+    virtual void subscribe() = 0;
+    virtual void unsubscribe() = 0;
+    
+    template<class T> ros::Publisher
+    advertise(ros::NodeHandle& nh,
+              std::string topic, int queue_size)
+    {
+      ros::SubscriberStatusCallback connect_cb
+        = boost::bind( &ConnectionBasedNodelet::connectionCallback, this, _1);
+      ros::SubscriberStatusCallback disconnect_cb
+        = boost::bind( &ConnectionBasedNodelet::connectionCallback, this, _1);
+      ros::Publisher ret = nh.advertise<T>(topic, queue_size,
+                                           connect_cb,
+                                           disconnect_cb);
+      publishers_.push_back(ret);
+      return ret;
+    }
+    
+    boost::mutex connection_mutex_;
+    std::vector<ros::Publisher> publishers_;
+    bool subscribed_;
+  private:
+    
+  };
 }
 
-#include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::PolygonArrayWrapper, nodelet::Nodelet);
+#endif

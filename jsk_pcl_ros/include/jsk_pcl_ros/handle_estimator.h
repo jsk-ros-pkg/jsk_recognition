@@ -51,9 +51,11 @@
 #include <boost/circular_buffer.hpp>
 #include <boost/tuple/tuple.hpp>
 
+#include "jsk_pcl_ros/connection_based_nodelet.h"
+
 namespace jsk_pcl_ros
 {
-  class HandleEstimator: public pcl_ros::PCLNodelet
+  class HandleEstimator: public ConnectionBasedNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime< sensor_msgs::PointCloud2,
@@ -82,6 +84,10 @@ namespace jsk_pcl_ros
       const jsk_pcl_ros::BoundingBox::ConstPtr& box_msg);
 
     virtual void selectedIndexCallback( const jsk_pcl_ros::Int32StampedConstPtr &index);
+
+    virtual void subscribe();
+    virtual void unsubscribe();
+    
     ros::Publisher pub_, pub_best_, pub_preapproach_, pub_selected_, pub_selected_preapproach_;
     ros::Subscriber sub_index_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;

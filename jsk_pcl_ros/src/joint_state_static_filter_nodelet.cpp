@@ -53,13 +53,23 @@ namespace jsk_pcl_ros
       NODELET_FATAL("NO ~joint_names is specified");
       return;
     }
-    pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
+    pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+  }
+
+  void JointStateStaticFilter::subscribe()
+  {
     sub_joint_ = pnh_->subscribe("input_joint_state", 1,
                                  &JointStateStaticFilter::jointStateCallback,
                                  this);
     sub_input_ = pnh_->subscribe("input", 1,
                                  &JointStateStaticFilter::filter,
                                  this);
+  }
+
+  void JointStateStaticFilter::unsubscribe()
+  {
+    sub_joint_.shutdown();
+    sub_input_.shutdown();
   }
 
   void JointStateStaticFilter::filter(

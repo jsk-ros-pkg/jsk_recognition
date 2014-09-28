@@ -47,6 +47,7 @@
 #include <message_filters/synchronizer.h>
 
 #include <jsk_pcl_ros/MultiPlaneSACSegmentationConfig.h>
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 ////////////////////////////////////////////////////////
 // messages
@@ -58,7 +59,7 @@
 
 namespace jsk_pcl_ros
 {
-  class MultiPlaneSACSegmentation: public pcl_ros::PCLNodelet
+  class MultiPlaneSACSegmentation: public ConnectionBasedNodelet
   {
   public:
     typedef pcl::PointXYZRGB PointT;
@@ -85,6 +86,9 @@ namespace jsk_pcl_ros
       std::vector<ConvexPolygon::Ptr>& output_polygons);
 
     virtual void configCallback (Config &config, uint32_t level);
+
+    virtual void subscribe();
+    virtual void unsubscribe();
     
     ////////////////////////////////////////////////////////
     // ROS variabels

@@ -50,24 +50,17 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 
-#if ROS_VERSION_MINIMUM(1, 10, 0)
-// hydro and later
-typedef pcl_msgs::PointIndices PCLIndicesMsg;
-typedef pcl_msgs::ModelCoefficients PCLModelCoefficientMsg;
-#else
-// groovy
-typedef pcl::PointIndices PCLIndicesMsg;
-typedef pcl::ModelCoefficients PCLModelCoefficientMsg;
-#endif
-
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class PolygonArrayTransformer: public pcl_ros::PCLNodelet
+  class PolygonArrayTransformer: public ConnectionBasedNodelet
   {
   public:
-    typedef message_filters::sync_policies::ExactTime< jsk_pcl_ros::PolygonArray,
-                                                       jsk_pcl_ros::ModelCoefficientsArray > SyncPolicy;
+    typedef message_filters::sync_policies::ExactTime<
+    jsk_pcl_ros::PolygonArray,
+    jsk_pcl_ros::ModelCoefficientsArray > SyncPolicy;
   protected:
     virtual void onInit();
     virtual void transform(const jsk_pcl_ros::PolygonArray::ConstPtr& polygons,
@@ -80,7 +73,8 @@ namespace jsk_pcl_ros
     virtual void transformPolygon(const Eigen::Affine3d& transform,
                                   const geometry_msgs::PolygonStamped& polygon,
                                   geometry_msgs::PolygonStamped& result);
-        
+    virtual void subscribe();
+    virtual void unsubscribe();
     ros::Publisher polygons_pub_, coefficients_pub_;
     boost::shared_ptr<tf::TransformListener> listener_;
     std::string frame_id_;

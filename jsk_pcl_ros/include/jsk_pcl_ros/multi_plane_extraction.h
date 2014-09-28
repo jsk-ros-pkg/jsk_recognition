@@ -51,11 +51,11 @@
 #include "jsk_pcl_ros/pcl_util.h"
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <jsk_topic_tools/vital_checker.h>
-
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class MultiPlaneExtraction: public pcl_ros::PCLNodelet
+  class MultiPlaneExtraction: public ConnectionBasedNodelet
   {
   public:
     
@@ -80,6 +80,9 @@ namespace jsk_pcl_ros
 
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
+
+    virtual void subscribe();
+    virtual void unsubscribe();
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////

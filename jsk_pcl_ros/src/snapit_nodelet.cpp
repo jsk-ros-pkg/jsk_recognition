@@ -588,7 +588,6 @@ namespace jsk_pcl_ros
       return false;
     }
   }
-  
-  
 }
+
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::SnapIt, nodelet::Nodelet);

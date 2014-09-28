@@ -33,55 +33,26 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/polygon_array_wrapper.h"
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  void PolygonArrayWrapper::onInit()
+  void ConnectionBasedNodelet::connectionCallback(const ros::SingleSubscriberPublisher& pub)
   {
-    PCLNodelet::onInit();
-    pub_polygon_array_ = advertise<jsk_pcl_ros::PolygonArray>(*pnh_,
-      "output_polygons", 1);
-    pub_coefficients_array_
-      = advertise<jsk_pcl_ros::ModelCoefficientsArray>(*pnh_,
-        "output_coefficients", 1);
+    boost::mutex::scoped_lock lock(connection_mutex_);
+    for (size_t i = 0; i < publishers_.size(); i++) {
+      ros::Publisher pub = publishers_[i];
+      if (pub.getNumSubscribers() > 0) {
+        if (!subscribed_) {
+          subscribe();
+          subscribed_ = true;
+        }
+        return;
+      }
+    }
+    if (subscribed_) {
+      unsubscribe();
+      subscribed_ = false;
+    }
   }
-
-  void PolygonArrayWrapper::subscribe()
-  {
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-    sub_polygon_.subscribe(*pnh_, "input_polygon", 1);
-    sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
-    sync_->connectInput(sub_polygon_, sub_coefficients_);
-    sync_->registerCallback(boost::bind(
-                              &PolygonArrayWrapper::wrap,
-                              this, _1, _2));
-  }
-
-  void PolygonArrayWrapper::unsubscribe()
-  {
-    sub_polygon_.unsubscribe();
-    sub_coefficients_.unsubscribe();
-  }
-  
-  void PolygonArrayWrapper::wrap(
-    const geometry_msgs::PolygonStamped::ConstPtr& polygon,
-    const PCLModelCoefficientMsg::ConstPtr& coefficients)
-  {
-    jsk_pcl_ros::PolygonArray array_msg;
-    array_msg.header = polygon->header;
-    geometry_msgs::PolygonStamped new_polygon(*polygon);
-    array_msg.polygons.push_back(new_polygon);
-    pub_polygon_array_.publish(array_msg);
-
-    jsk_pcl_ros::ModelCoefficientsArray coefficients_array;
-    coefficients_array.header = coefficients->header;
-    PCLModelCoefficientMsg new_coefficients(*coefficients);
-    coefficients_array.coefficients.push_back(new_coefficients);
-    pub_coefficients_array_.publish(coefficients_array);
-  }
-  
 }
-
-#include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::PolygonArrayWrapper, nodelet::Nodelet);

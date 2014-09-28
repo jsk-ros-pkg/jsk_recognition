@@ -56,6 +56,10 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     virtual void onInit();
     
+    virtual void subscribe();
+    
+    virtual void unsubscribe();
+    
     virtual void configCallback (Config &config, uint32_t level);
     
     virtual void filter(const sensor_msgs::PointCloud2::ConstPtr& msg);

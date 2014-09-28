@@ -46,10 +46,11 @@
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl/octree/octree.h>
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class OctreeChangePublisher: public pcl_ros::PCLNodelet
+  class OctreeChangePublisher: public ConnectionBasedNodelet
   {
   protected:
     int counter_;
@@ -63,7 +64,8 @@ namespace jsk_pcl_ros
 
     virtual void
     cloud_cb (const sensor_msgs::PointCloud2 &pc);
-
+    virtual void subscribe();
+    virtual void unsubscribe();
   private:
     virtual void onInit();
   };

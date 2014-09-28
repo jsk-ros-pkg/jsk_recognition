@@ -154,13 +154,20 @@ namespace jsk_pcl_ros
   {
     PCLNodelet::onInit();
     previous_id_ = -1;
-    // encoded input
+    // decoded output
+    pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+  }
+
+  void VoxelGridDownsampleDecoder::subscribe()
+  {
     sub_ = pnh_->subscribe("input", 1, &VoxelGridDownsampleDecoder::pointCB,
                            this);
-    // decoded output
-    pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
   }
-    
+
+  void VoxelGridDownsampleDecoder::unsubscribe()
+  {
+    sub_.shutdown();
+  }
 }
 
 

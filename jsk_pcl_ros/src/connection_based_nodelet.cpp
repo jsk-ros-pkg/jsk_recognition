@@ -33,49 +33,26 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-
-#ifndef JSK_PCL_ROS_BORDER_ESTIMATOR_H_
-#define JSK_PCL_ROS_BORDER_ESTIMATOR_H_
-
-#include <pcl_ros/pcl_nodelet.h>
-#include <pcl/range_image/range_image.h>
-#include <pcl/features/range_image_border_extractor.h>
-
-#include <sensor_msgs/PointCloud2.h>
-#include <sensor_msgs/CameraInfo.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
-
-#include <message_filters/subscriber.h>
-#include <message_filters/time_synchronizer.h>
-#include <message_filters/synchronizer.h>
-
 #include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class BorderEstimator: public ConnectionBasedNodelet
+  void ConnectionBasedNodelet::connectionCallback(const ros::SingleSubscriberPublisher& pub)
   {
-  public:
-    typedef message_filters::sync_policies::ApproximateTime<
-    sensor_msgs::PointCloud2, sensor_msgs::CameraInfo> SyncPolicy;
-
-  protected:
-    virtual void onInit();
-    virtual pcl::PointXYZ convertPoint(const pcl::PointWithRange& input);
-    virtual void estimate(const sensor_msgs::PointCloud2::ConstPtr& msg,
-                          const sensor_msgs::CameraInfo::ConstPtr& caminfo);
-    virtual void publishCloud(ros::Publisher& pub,
-                              const pcl::PointCloud<pcl::PointXYZ>& cloud,
-                              const std_msgs::Header& header);
-    virtual void subscribe();
-    virtual void unsubscribe();
-    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_point_;
-    message_filters::Subscriber<sensor_msgs::CameraInfo> sub_camera_info_;
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
-    ros::Publisher pub_border_, pub_veil_, pub_shadow_;
-  private:
-    
-  };
+    boost::mutex::scoped_lock lock(connection_mutex_);
+    for (size_t i = 0; i < publishers_.size(); i++) {
+      ros::Publisher pub = publishers_[i];
+      if (pub.getNumSubscribers() > 0) {
+        if (!subscribed_) {
+          subscribe();
+          subscribed_ = true;
+        }
+        return;
+      }
+    }
+    if (subscribed_) {
+      unsubscribe();
+      subscribed_ = false;
+    }
+  }
 }
-
-#endif

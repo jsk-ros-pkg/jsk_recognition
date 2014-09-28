@@ -46,10 +46,11 @@
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl/point_types.h>
 
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class VoxelGridDownsampleDecoder : public pcl_ros::PCLNodelet
+  class VoxelGridDownsampleDecoder : public ConnectionBasedNodelet
   {
   protected:
     tf::TransformListener tf_listener;
@@ -57,6 +58,8 @@ namespace jsk_pcl_ros
     int getPointcloudID(const jsk_pcl_ros::SlicedPointCloudConstPtr &input);
     int getPointcloudSequenceID(const jsk_pcl_ros::SlicedPointCloudConstPtr &input);
     std::string getPointcloudFrameId(const jsk_pcl_ros::SlicedPointCloudConstPtr &input);
+    virtual void subscribe();
+    virtual void unsubscribe();
   private:
     int latest_sequence_id_;
     int previous_id_;

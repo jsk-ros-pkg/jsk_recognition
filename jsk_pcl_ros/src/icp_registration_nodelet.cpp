@@ -57,32 +57,34 @@ namespace jsk_pcl_ros
         &ICPRegistration::configCallback, this, _1, _2);
     srv_->setCallback (f);
 
-    bool align_box;
-    pnh_->param("align_box", align_box, false);
+    pnh_->param("align_box", align_box_, false);
 
     ////////////////////////////////////////////////////////
     // Publishers
     ////////////////////////////////////////////////////////
-    pub_result_pose_ = pnh_->advertise<geometry_msgs::PoseStamped>(
+    pub_result_pose_ = advertise<geometry_msgs::PoseStamped>(*pnh_,
       "output_pose", 1);
-    pub_result_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>(
+    pub_result_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_,
       "output", 1);
-    pub_debug_source_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>(
+    pub_debug_source_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_,
       "debug/source", 1);
-    pub_debug_target_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>(
+    pub_debug_target_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_,
       "debug/target", 1);
-    pub_debug_flipped_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>(
+    pub_debug_flipped_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_,
       "debug/flipped", 1);
-    pub_debug_result_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>(
+    pub_debug_result_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_,
       "debug/result", 1);
+  }
 
+  void ICPRegistration::subscribe()
+  {
     ////////////////////////////////////////////////////////
     // Subscription
     ////////////////////////////////////////////////////////
     sub_reference_ = pnh_->subscribe("input_reference", 1,
                                        &ICPRegistration::referenceCallback,
                                        this);
-    if (align_box) {
+    if (align_box_) {
       sub_input_.subscribe(*pnh_, "input", 1);
       sub_box_.subscribe(*pnh_, "input_box", 1);
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
@@ -98,6 +100,18 @@ namespace jsk_pcl_ros
     }
   }
 
+  void ICPRegistration::unsubscribe()
+  {
+    sub_reference_.shutdown();
+    if (align_box_) {
+      sub_input_.unsubscribe();
+      sub_box_.unsubscribe();
+    }
+    else {
+      sub_.shutdown();
+    }
+  }
+  
   void ICPRegistration::publishDebugCloud(
       ros::Publisher& pub,
       const pcl::PointCloud<PointT>& cloud)

@@ -42,17 +42,19 @@
 
 #include <tf/transform_listener.h>
 
+#include "jsk_pcl_ros/connection_based_nodelet.h"
+
 namespace jsk_pcl_ros {
-  class HintedPlaneDetector: public pcl_ros::PCLNodelet
+  class HintedPlaneDetector: public ConnectionBasedNodelet
   {
   public:
-    HintedPlaneDetector();
-    virtual ~HintedPlaneDetector();
     virtual void onInit();
     
   protected:
     void inputCallback(const sensor_msgs::PointCloud2::ConstPtr& msg);
     void hintCallback(const sensor_msgs::PointCloud2::ConstPtr& msg);
+    void subscribe();
+    void unsubscribe();
     pcl::PointCloud<pcl::PointXYZ>::Ptr input_;
     std_msgs::Header input_header_;
     ros::Subscriber sub_input_;

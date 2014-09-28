@@ -47,10 +47,10 @@
 
 #include <dynamic_reconfigure/server.h>
 #include "jsk_pcl_ros/RegionGrowingSegmentationConfig.h"
-
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 namespace jsk_pcl_ros
 {
-  class RegionGrowingSegmentation : public pcl_ros::PCLNodelet
+  class RegionGrowingSegmentation : public ConnectionBasedNodelet
   {
   public:
   protected:
@@ -66,6 +66,8 @@ namespace jsk_pcl_ros
     boost::mutex mutex_;
     virtual void segment(const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void configCallback (Config &config, uint32_t level);
+    virtual void subscribe();
+    virtual void unsubscribe();
   private:
     virtual void onInit();
   };

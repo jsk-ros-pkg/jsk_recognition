@@ -53,10 +53,11 @@
 
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class OrganizedMultiPlaneSegmentation: public pcl_ros::PCLNodelet
+  class OrganizedMultiPlaneSegmentation: public ConnectionBasedNodelet
   {
   public:
     typedef pcl::PointXYZRGBA PointT;
@@ -144,7 +145,8 @@ namespace jsk_pcl_ros
       diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void updateDiagnosticPlaneSegmentation(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
-    
+    virtual void subscribe();
+    virtual void unsubscribe();
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////

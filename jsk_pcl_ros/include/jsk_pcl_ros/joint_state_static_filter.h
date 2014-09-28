@@ -65,6 +65,8 @@ namespace jsk_pcl_ros
       diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual std::vector<double> filterJointState(
       const sensor_msgs::JointState::ConstPtr& msg);
+    virtual void subscribe();
+    virtual void unsubscribe();
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////

@@ -50,9 +50,11 @@
 #include <dynamic_reconfigure/server.h>
 #include <jsk_pcl_ros/ColorHistogramMatcherConfig.h>
 
+#include "jsk_pcl_ros/connection_based_nodelet.h"
+
 namespace jsk_pcl_ros
 {
-  class ColorHistogramMatcher : public pcl_ros::PCLNodelet
+  class ColorHistogramMatcher : public ConnectionBasedNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime< sensor_msgs::PointCloud2,
@@ -79,6 +81,8 @@ namespace jsk_pcl_ros
     virtual double bhattacharyyaCoefficient(const std::vector<float>& a,
                                             const std::vector<float>& b);
     virtual void configCallback(Config &config, uint32_t level);
+    virtual void subscribe();
+    virtual void unsubscribe();
     boost::mutex mutex_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;

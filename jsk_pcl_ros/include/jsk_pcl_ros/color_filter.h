@@ -46,14 +46,8 @@
 #include <message_filters/synchronizer.h>
 #include <dynamic_reconfigure/server.h>
 
-#if ROS_VERSION_MINIMUM(1, 10, 0)
-// hydro and later
-typedef pcl_msgs::PointIndices PCLIndicesMsg;
-#else
-// groovy
-typedef pcl::PointIndices PCLIndicesMsg;
-#endif
-
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
@@ -61,7 +55,7 @@ namespace jsk_pcl_ros
   class HSIColorFilter;
 
   template <class PackedComparison, typename Config>
-  class ColorFilter: public pcl_ros::PCLNodelet
+  class ColorFilter: public ConnectionBasedNodelet
   {
     friend class RGBColorFilter;
     friend class HSIColorFilter;
@@ -84,6 +78,8 @@ namespace jsk_pcl_ros
     virtual void filter(const sensor_msgs::PointCloud2ConstPtr &input);
     virtual void filter(const sensor_msgs::PointCloud2ConstPtr &input,
                         const PCLIndicesMsg::ConstPtr& indices);
+    virtual void subscribe();
+    virtual void unsubscribe();
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
   private:
     virtual void onInit();

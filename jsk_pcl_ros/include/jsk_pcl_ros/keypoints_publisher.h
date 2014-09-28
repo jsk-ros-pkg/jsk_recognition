@@ -12,8 +12,6 @@ namespace jsk_pcl_ros
   class KeypointsPublisher: public ConnectionBasedNodelet
   {
   public:
-    KeypointsPublisher();
-    virtual ~KeypointsPublisher();
     virtual void onInit();
   protected:
     virtual void inputCallback(const sensor_msgs::PointCloud2::ConstPtr& input);

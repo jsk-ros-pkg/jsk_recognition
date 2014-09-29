@@ -56,7 +56,10 @@ namespace jsk_pcl_ros
     pub_coefficients_
       = pnh_->advertise<ModelCoefficientsArray>("output_coefficients", 1);
     pub_polygons_ = pnh_->advertise<PolygonArray>("output_polygons", 1);
+  }
 
+  void MultiPlaneSACSegmentation::subscribe()
+  {
     ////////////////////////////////////////////////////////
     // subscriber
     ////////////////////////////////////////////////////////
@@ -70,6 +73,20 @@ namespace jsk_pcl_ros
       sync_->connectInput(sub_input_, sub_normal_);
       sync_->registerCallback(boost::bind(&MultiPlaneSACSegmentation::segment,
                                           this, _1, _2));
+    }
+  }
+
+  void MultiPlaneSACSegmentation::unsubscribe()
+  {
+    ////////////////////////////////////////////////////////
+    // subscriber
+    ////////////////////////////////////////////////////////
+    if (!use_normal_) {
+      sub_.shutdown();
+    }
+    else {
+      sub_input_.unsubscribe();
+      sub_normal_.unsubscribe();
     }
   }
 

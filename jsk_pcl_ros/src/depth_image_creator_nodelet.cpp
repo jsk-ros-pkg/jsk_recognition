@@ -92,10 +92,16 @@ void jsk_pcl_ros::DepthImageCreator::onInit () {
   fixed_transform.setOrigin(btp);
   fixed_transform.setRotation(btq);
 
-  pub_image_ = pnh_->advertise<sensor_msgs::Image> ("output", max_queue_size_);
-  pub_cloud_ = pnh_->advertise<PointCloud> ("output_cloud", max_queue_size_);
-  pub_disp_image_ = pnh_->advertise<stereo_msgs::DisparityImage> ("output_disp", max_queue_size_);
+  pub_image_ = advertise<sensor_msgs::Image> (*pnh_, "output", max_queue_size_);
+  pub_cloud_ = advertise<PointCloud>(*pnh_, "output_cloud", max_queue_size_);
+  pub_disp_image_ = advertise<stereo_msgs::DisparityImage> (*pnh_, "output_disp", max_queue_size_);
+  if (use_service) {
+    service_ = pnh_->advertiseService("set_point_cloud",
+                                      &DepthImageCreator::service_cb, this);
+  }
+}
 
+void jsk_pcl_ros::DepthImageCreator::subscribe() {
   if (!use_service) {
     if (use_asynchronous) {
       sub_as_info_ = pnh_->subscribe<sensor_msgs::CameraInfo> ("info", max_queue_size_,
@@ -120,12 +126,25 @@ void jsk_pcl_ros::DepthImageCreator::onInit () {
     // not continuous
     sub_as_info_ = pnh_->subscribe<sensor_msgs::CameraInfo> ("info", max_queue_size_,
                                                              &DepthImageCreator::callback_info, this);
-    service_ = pnh_->advertiseService("set_point_cloud",
-                                      &DepthImageCreator::service_cb, this);
+   
   }
 }
 
-jsk_pcl_ros::DepthImageCreator::~DepthImageCreator() { }
+void jsk_pcl_ros::DepthImageCreator::unsubscribe() {
+  if (!use_service) {
+    if (use_asynchronous) {
+      sub_as_info_.shutdown();
+      sub_as_cloud_.shutdown();
+    }
+    else {
+      sub_info_.unsubscribe();
+      sub_cloud_.unsubscribe();
+    }
+  } else {
+    // not continuous
+    sub_as_info_.shutdown();
+  }
+}
 
 bool jsk_pcl_ros::DepthImageCreator::service_cb (std_srvs::Empty::Request &req,
                                                  std_srvs::Empty::Response &res) {

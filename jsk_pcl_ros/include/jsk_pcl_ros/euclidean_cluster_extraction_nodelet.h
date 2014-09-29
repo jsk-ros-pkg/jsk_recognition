@@ -66,12 +66,14 @@
 #include <jsk_topic_tools/vital_checker.h>
 #include <jsk_topic_tools/time_accumulator.h>
 
+#include "jsk_pcl_ros/connection_based_nodelet.h"
+
 using namespace std;
 using namespace pcl;
 
 namespace jsk_pcl_ros
 {
-  class EuclideanClustering : public pcl_ros::PCLNodelet
+  class EuclideanClustering : public ConnectionBasedNodelet
   {
   public:
     typedef jsk_pcl_ros::EuclideanClusteringConfig Config;
@@ -129,9 +131,8 @@ namespace jsk_pcl_ros
                                pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
                                std::vector<pcl::PointIndices> cluster_indices);
 
-
-    
-    
+    virtual void subscribe();
+    virtual void unsubscribe();
   };
     
 }

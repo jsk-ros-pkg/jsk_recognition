@@ -45,10 +45,11 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 #include <tf/transform_listener.h>
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class ICPRegistration: public pcl_ros::PCLNodelet
+  class ICPRegistration: public ConnectionBasedNodelet
   {
   public:
     typedef pcl::PointXYZRGB PointT;
@@ -74,12 +75,13 @@ namespace jsk_pcl_ros
     virtual void publishDebugCloud(
       ros::Publisher& pub,
       const pcl::PointCloud<PointT>& cloud);
-    double alignPointcloud(
+    virtual double alignPointcloud(
       pcl::PointCloud<PointT>::Ptr& cloud,
       const Eigen::Affine3f& offset,
       pcl::PointCloud<PointT>::Ptr& output_cloud,
       Eigen::Affine3d& output_transform);
-
+    virtual void subscribe();
+    virtual void unsubscribe();
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
@@ -91,6 +93,7 @@ namespace jsk_pcl_ros
       pub_debug_target_cloud_,
       pub_debug_result_cloud_,
       pub_debug_flipped_cloud_;
+    bool align_box_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;

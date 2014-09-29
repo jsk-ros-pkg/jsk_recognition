@@ -42,10 +42,11 @@
 #include <sensor_msgs/PointCloud2.h>
 
 #include <jsk_pcl_ros/GridSamplerConfig.h>
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class GridSampler: public pcl_ros::PCLNodelet
+  class GridSampler: public ConnectionBasedNodelet
   {
   public:
     typedef jsk_pcl_ros::GridSamplerConfig Config;
@@ -53,6 +54,8 @@ namespace jsk_pcl_ros
     virtual void onInit();
     virtual void sample(const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void configCallback(Config &config, uint32_t level);
+    virtual void subscribe();
+    virtual void unsubscribe();
     boost::mutex mutex_;
     double grid_size_;
     int min_indices_;

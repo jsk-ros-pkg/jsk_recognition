@@ -44,10 +44,11 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class PolygonAppender: public pcl_ros::PCLNodelet
+  class PolygonAppender: public ConnectionBasedNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime<
@@ -56,6 +57,8 @@ namespace jsk_pcl_ros
     
   protected:
     virtual void onInit();
+    virtual void subscribe();
+    virtual void unsubscribe();
     virtual void appendAndPublish(
       const std::vector<PolygonArray::ConstPtr>& arrays,
       const std::vector<ModelCoefficientsArray::ConstPtr>& coefficients_array);

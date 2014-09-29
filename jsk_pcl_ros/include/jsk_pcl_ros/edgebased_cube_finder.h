@@ -58,6 +58,8 @@
 #include <jsk_pcl_ros/EdgebasedCubeFinderConfig.h>
 #include <dynamic_reconfigure/server.h>
 
+#include "jsk_pcl_ros/connection_based_nodelet.h"
+
 namespace jsk_pcl_ros
 {
   typedef boost::tuple<pcl::PointIndices::Ptr, pcl::PointIndices::Ptr>
@@ -150,7 +152,7 @@ namespace jsk_pcl_ros
   private:
   };
   
-  class EdgebasedCubeFinder: public pcl_ros::PCLNodelet
+  class EdgebasedCubeFinder: public ConnectionBasedNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime<
@@ -272,6 +274,9 @@ namespace jsk_pcl_ros
       pcl::PointIndices::Ptr inliers);
     
     virtual void configCallback (Config &config, uint32_t level);
+
+    virtual void subscribe();
+    virtual void unsubscribe();
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////

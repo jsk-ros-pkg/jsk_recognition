@@ -22,11 +22,13 @@
 #include <std_srvs/Empty.h>
 #include <boost/thread/mutex.hpp>
 
+#include "jsk_pcl_ros/connection_based_nodelet.h"
+
 namespace jsk_pcl_ros
 {
-  class DepthImageCreator : public pcl_ros::PCLNodelet
+  class DepthImageCreator : public ConnectionBasedNodelet
   {
-  private:
+  protected:
     message_filters::Subscriber<sensor_msgs::CameraInfo> sub_info_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_cloud_;
     ros::Subscriber sub_as_info_;
@@ -67,10 +69,10 @@ namespace jsk_pcl_ros
 
     void publish_points(const sensor_msgs::CameraInfoConstPtr& info,
                         const sensor_msgs::PointCloud2ConstPtr& pcloud2);
+
+    void subscribe();
+    void unsubscribe();
   public:
-    DepthImageCreator() {};
-    ~DepthImageCreator();
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   };
 }
 

@@ -50,8 +50,18 @@ namespace jsk_pcl_ros
       boost::bind (&NormalEstimationIntegralImage::configCallback, this, _1, _2);
     srv_->setCallback (f);
 
-    pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
+    pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    
+  }
+
+  void NormalEstimationIntegralImage::subscribe()
+  {
     sub_input_ = pnh_->subscribe("input", 1, &NormalEstimationIntegralImage::compute, this);
+  }
+
+  void NormalEstimationIntegralImage::unsubscribe()
+  {
+    sub_input_.shutdown();
   }
 
   void NormalEstimationIntegralImage::configCallback(Config& config, uint32_t level)
@@ -106,5 +116,5 @@ namespace jsk_pcl_ros
 }
 
 
-typedef jsk_pcl_ros::NormalEstimationIntegralImage NormalEstimationIntegralImage;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, NormalEstimationIntegralImage, NormalEstimationIntegralImage, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::NormalEstimationIntegralImage,
+                        nodelet::Nodelet);

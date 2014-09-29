@@ -40,23 +40,48 @@
 #include <pcl_ros/pcl_nodelet.h>
 #include <dynamic_reconfigure/server.h>
 #include <jsk_pcl_ros/ICPRegistrationConfig.h>
+#include <jsk_pcl_ros/BoundingBox.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
+#include <tf/transform_listener.h>
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class ICPRegistration: public pcl_ros::PCLNodelet
+  class ICPRegistration: public ConnectionBasedNodelet
   {
   public:
     typedef pcl::PointXYZRGB PointT;
     typedef jsk_pcl_ros::ICPRegistrationConfig Config;
+    typedef message_filters::sync_policies::ExactTime<
+      sensor_msgs::PointCloud2,
+      BoundingBox > SyncPolicy;
   protected:
     ////////////////////////////////////////////////////////
     // methosd
     ////////////////////////////////////////////////////////
     virtual void onInit();
     virtual void align(const sensor_msgs::PointCloud2::ConstPtr& msg);
+    virtual void alignWithBox(
+      const sensor_msgs::PointCloud2::ConstPtr& msg,
+      const BoundingBox::ConstPtr& box_msg);
+    virtual void alignPointcloud(pcl::PointCloud<PointT>::Ptr& cloud,
+                                 const Eigen::Affine3f& offset,
+                                 const std_msgs::Header& header);
     virtual void referenceCallback(
       const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void configCallback (Config &config, uint32_t level);
+    virtual void publishDebugCloud(
+      ros::Publisher& pub,
+      const pcl::PointCloud<PointT>& cloud);
+    virtual double alignPointcloud(
+      pcl::PointCloud<PointT>::Ptr& cloud,
+      const Eigen::Affine3f& offset,
+      pcl::PointCloud<PointT>::Ptr& output_cloud,
+      Eigen::Affine3d& output_transform);
+    virtual void subscribe();
+    virtual void unsubscribe();
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
@@ -64,17 +89,34 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_reference_;
     ros::Publisher pub_result_pose_;
     ros::Publisher pub_result_cloud_;
+    ros::Publisher pub_debug_source_cloud_,
+      pub_debug_target_cloud_,
+      pub_debug_result_cloud_,
+      pub_debug_flipped_cloud_;
+    bool align_box_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
+    message_filters::Subscriber<BoundingBox> sub_box_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    boost::shared_ptr<tf::TransformListener> tf_listener_;
 
     ////////////////////////////////////////////////////////
-    // parameters
+    // parameters for ICP
     ////////////////////////////////////////////////////////
+    bool use_flipped_initial_pose_;
+    int algorithm_;
     pcl::PointCloud<PointT>::Ptr reference_cloud_;
     int max_iteration_;
     double correspondence_distance_;
     double transform_epsilon_;
     double euclidean_fittness_epsilon_;
+    ////////////////////////////////////////////////////////
+    // parameters for GICP
+    ////////////////////////////////////////////////////////
+    double rotation_epsilon_;
+    int correspondence_randomness_;
+    int maximum_optimizer_iterations_;
   private:
     
   };

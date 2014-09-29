@@ -72,18 +72,26 @@ namespace jsk_pcl_ros
     // Publishers
     ////////////////////////////////////////////////////////
     filtered_box_pub_
-      = pnh_->advertise<BoundingBoxArray>("output_box", 1);
+      = advertise<BoundingBoxArray>(*pnh_, "output_box", 1);
     filtered_indices_pub_
-      = pnh_->advertise<ClusterPointIndices>("output_indices", 1);
+      = advertise<ClusterPointIndices>(*pnh_, "output_indices", 1);
 
-    ////////////////////////////////////////////////////////
-    // Subscription
-    ////////////////////////////////////////////////////////
+    
+  }
+
+  void BoundingBoxFilter::subscribe()
+  {
     sub_box_.subscribe(*pnh_, "input_box", 1);
     sub_indices_.subscribe(*pnh_, "input_indices", 1);
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
     sync_->connectInput(sub_box_, sub_indices_);
     sync_->registerCallback(boost::bind(&BoundingBoxFilter::filter, this, _1, _2));
+  }
+
+  void BoundingBoxFilter::unsubscribe()
+  {
+    sub_box_.unsubscribe();
+    sub_indices_.unsubscribe();
   }
 
   void BoundingBoxFilter::filter(
@@ -208,5 +216,4 @@ namespace jsk_pcl_ros
 }
 
 #include <pluginlib/class_list_macros.h>
-typedef jsk_pcl_ros::BoundingBoxFilter BoundingBoxFilter;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, BoundingBoxFilter, BoundingBoxFilter, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::BoundingBoxFilter, nodelet::Nodelet);

@@ -48,10 +48,11 @@
 #include <jsk_pcl_ros/ClusterPointIndices.h>
 #include <jsk_pcl_ros/ModelCoefficientsArray.h>
 #include <jsk_pcl_ros/BoundingBoxFilterConfig.h>
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class BoundingBoxFilter: public pcl_ros::PCLNodelet
+  class BoundingBoxFilter: public ConnectionBasedNodelet
   {
   public:
     typedef jsk_pcl_ros::BoundingBoxFilterConfig Config;
@@ -72,6 +73,8 @@ namespace jsk_pcl_ros
     virtual void configCallback(Config &config, uint32_t level);
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
+    virtual void subscribe();
+    virtual void unsubscribe();
     ////////////////////////////////////////////////////////
     // ROS varariables
     ////////////////////////////////////////////////////////

@@ -40,10 +40,8 @@ namespace jsk_pcl_ros
   void ColorizeMapRandomForest::onInit(void)
   {
     PCLNodelet::onInit();
-    sub_input_ = pnh_->subscribe("input", 1, &ColorizeMapRandomForest::extract, this);
-
-    pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("cloth_result", 1);
-
+    pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "cloth_result", 1);
+    
     srand(time(NULL));
 
     double tmp_radius, tmp_pass, tmp_pass2;
@@ -78,6 +76,16 @@ namespace jsk_pcl_ros
     sum_num_ = tmp_sum_num;
   }
 
+  void ColorizeMapRandomForest::subscribe()
+  {
+    sub_input_ = pnh_->subscribe("input", 1, &ColorizeMapRandomForest::extract, this);
+  }
+
+  void ColorizeMapRandomForest::unsubscribe()
+  {
+    sub_input_.shutdown();
+  }
+  
   void ColorizeMapRandomForest::extract(const sensor_msgs::PointCloud2 pc)
   {
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB> ());
@@ -234,5 +242,4 @@ namespace jsk_pcl_ros
 }
 
 
-typedef jsk_pcl_ros::ColorizeMapRandomForest ColorizeMapRandomForest;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl_ros, ColorizeMapRandomForest, ColorizeMapRandomForest, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::ColorizeMapRandomForest, nodelet::Nodelet);

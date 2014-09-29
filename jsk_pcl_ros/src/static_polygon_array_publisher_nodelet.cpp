@@ -77,14 +77,27 @@ namespace jsk_pcl_ros
       NODELET_FATAL("~use_preiodic, ~use_trigger nor ~use_message is not true");
       return;
     }
-
-    polygon_pub_ = pnh_->advertise<jsk_pcl_ros::PolygonArray>("output_polygons", 1);
-    coefficients_pub_ = pnh_->advertise<jsk_pcl_ros::ModelCoefficientsArray>("output_coefficients", 1);
     polygons_.header.frame_id = frame_ids_[0];
     coefficients_.header.frame_id = frame_ids_[0];
-    if (use_periodic_) {
+
+    if (!use_periodic_) {
+      polygon_pub_ = advertise<jsk_pcl_ros::PolygonArray>(
+        *pnh_, "output_polygons", 1);
+      coefficients_pub_ = advertise<jsk_pcl_ros::ModelCoefficientsArray>(
+        *pnh_, "output_coefficients", 1);
+    }
+    else {
+      polygon_pub_ = pnh_->advertise<jsk_pcl_ros::PolygonArray>(
+        "output_polygons", 1);
+      coefficients_pub_ = pnh_->advertise<jsk_pcl_ros::ModelCoefficientsArray>(
+        "output_coefficients", 1);
+      subscribe();
       timer_ = pnh_->createTimer(ros::Duration(1.0 / periodic_rate_), &StaticPolygonArrayPublisher::timerCallback, this);
     }
+  }
+
+  void StaticPolygonArrayPublisher::subscribe()
+  {
     if (use_message_) {
       sub_ = pnh_->subscribe("input", 1, &StaticPolygonArrayPublisher::inputCallback, this);
     }
@@ -97,6 +110,17 @@ namespace jsk_pcl_ros
       sync_->registerCallback(boost::bind(
                                 &StaticPolygonArrayPublisher::triggerCallback,
                                 this, _1, _2));
+    }
+  }
+
+  void StaticPolygonArrayPublisher::unsubscribe()
+  {
+    if (use_message_) {
+      sub_.shutdown();
+    }
+    if (use_trigger_) {
+      sub_input_.unsubscribe();
+      sub_trigger_.unsubscribe();
     }
   }
 
@@ -230,6 +254,6 @@ namespace jsk_pcl_ros
 
 }
 
-typedef jsk_pcl_ros::StaticPolygonArrayPublisher StaticPolygonArrayPublisher;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, StaticPolygonArrayPublisher, StaticPolygonArrayPublisher, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::StaticPolygonArrayPublisher,
+                        nodelet::Nodelet);
 

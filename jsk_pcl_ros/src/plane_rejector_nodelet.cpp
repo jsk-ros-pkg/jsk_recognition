@@ -83,14 +83,10 @@ namespace jsk_pcl_ros
       boost::bind (&PlaneRejector::configCallback, this, _1, _2);
     srv_->setCallback (f);
     
-    polygons_pub_ = pnh_->advertise<jsk_pcl_ros::PolygonArray>("output_polygons", 1);
-    coefficients_pub_ = pnh_->advertise<jsk_pcl_ros::ModelCoefficientsArray>("output_coefficients", 1);
-    
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-    sub_polygons_.subscribe(*pnh_, "input_polygons", 1);
-    sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
-    sync_->connectInput(sub_polygons_, sub_coefficients_);
-    sync_->registerCallback(boost::bind(&PlaneRejector::reject, this, _1, _2));
+    polygons_pub_ = advertise<jsk_pcl_ros::PolygonArray>(
+      *pnh_, "output_polygons", 1);
+    coefficients_pub_ = advertise<jsk_pcl_ros::ModelCoefficientsArray>(
+      *pnh_, "output_coefficients", 1);
 
     diagnostics_timer_ = pnh_->createTimer(
       ros::Duration(1.0),
@@ -98,6 +94,21 @@ namespace jsk_pcl_ros
                   this,
                   _1));
     
+  }
+
+  void PlaneRejector::subscribe()
+  {
+    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+    sub_polygons_.subscribe(*pnh_, "input_polygons", 1);
+    sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
+    sync_->connectInput(sub_polygons_, sub_coefficients_);
+    sync_->registerCallback(boost::bind(&PlaneRejector::reject, this, _1, _2));
+  }
+
+  void PlaneRejector::unsubscribe()
+  {
+    sub_polygons_.unsubscribe();
+    sub_coefficients_.unsubscribe();
   }
   
   void PlaneRejector::updateDiagnosticsPlaneRejector(
@@ -200,5 +211,4 @@ namespace jsk_pcl_ros
   
 }
 
-typedef jsk_pcl_ros::PlaneRejector PlaneRejector;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, PlaneRejector, PlaneRejector, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::PlaneRejector, nodelet::Nodelet);

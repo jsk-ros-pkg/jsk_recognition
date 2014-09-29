@@ -40,9 +40,13 @@ namespace jsk_pcl_ros
   void BorderEstimator::onInit()
   {
     PCLNodelet::onInit();
-    pub_border_ = pnh_->advertise<sensor_msgs::PointCloud2>("output_border", 1);
-    pub_veil_ = pnh_->advertise<sensor_msgs::PointCloud2>("output_veil", 1);
-    pub_shadow_ = pnh_->advertise<sensor_msgs::PointCloud2>("output_shadow", 1);
+    pub_border_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_border", 1);
+    pub_veil_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_veil", 1);
+    pub_shadow_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_shadow", 1);
+  }
+
+  void BorderEstimator::subscribe()
+  {
     sub_point_.subscribe(*pnh_, "input", 1);
     sub_camera_info_.subscribe(*pnh_, "input_camera_info", 1);
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
@@ -50,6 +54,12 @@ namespace jsk_pcl_ros
     sync_->registerCallback(boost::bind(&BorderEstimator::estimate, this, _1, _2));
   }
 
+  void BorderEstimator::unsubscribe()
+  {
+    sub_point_.unsubscribe();
+    sub_camera_info_.unsubscribe();
+  }
+  
   pcl::PointXYZ BorderEstimator::convertPoint(const pcl::PointWithRange& input)
   {
     pcl::PointXYZ output;
@@ -121,5 +131,5 @@ namespace jsk_pcl_ros
 }
 
 #include <pluginlib/class_list_macros.h>
-typedef jsk_pcl_ros::BorderEstimator BorderEstimator;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, BorderEstimator, BorderEstimator, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::BorderEstimator,
+                        nodelet::Nodelet);

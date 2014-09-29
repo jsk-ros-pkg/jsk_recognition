@@ -91,32 +91,32 @@ namespace jsk_pcl_ros
     //////////////////////////////////////////////////////////
     // prepare publishers
     //////////////////////////////////////////////////////////
-    pub_ = pnh_->advertise<ClusterPointIndices>("output", 1);
-    polygon_pub_ = pnh_->advertise<PolygonArray>("output_polygon", 1);
+    pub_ = advertise<ClusterPointIndices>(*pnh_, "output", 1);
+    polygon_pub_ = advertise<PolygonArray>(*pnh_, "output_polygon", 1);
     coefficients_pub_
-      = pnh_->advertise<ModelCoefficientsArray>("output_coefficients", 1);
-    org_pub_ = pnh_->advertise<ClusterPointIndices>("output_nonconnected", 1);
+      = advertise<ModelCoefficientsArray>(*pnh_, "output_coefficients", 1);
+    org_pub_ = advertise<ClusterPointIndices>(*pnh_, "output_nonconnected", 1);
     org_polygon_pub_
-      = pnh_->advertise<PolygonArray>("output_nonconnected_polygon", 1);
+      = advertise<PolygonArray>(*pnh_, "output_nonconnected_polygon", 1);
     org_coefficients_pub_
-      = pnh_->advertise<ModelCoefficientsArray>(
+      = advertise<ModelCoefficientsArray>(*pnh_, 
         "output_nonconnected_coefficients", 1);
     
-    refined_pub_ = pnh_->advertise<ClusterPointIndices>(
+    refined_pub_ = advertise<ClusterPointIndices>(*pnh_, 
       "output_refined", 1);
     refined_polygon_pub_
-      = pnh_->advertise<PolygonArray>("output_refined_polygon", 1);
+      = advertise<PolygonArray>(*pnh_, "output_refined_polygon", 1);
     refined_coefficients_pub_
-      = pnh_->advertise<ModelCoefficientsArray>(
+      = advertise<ModelCoefficientsArray>(*pnh_, 
         "output_refined_coefficients", 1);
     
     pub_connection_marker_
-      = pnh_->advertise<visualization_msgs::Marker>(
+      = advertise<visualization_msgs::Marker>(*pnh_, 
         "debug_connection_map", 1);
 
     if (estimate_normal_) {
       normal_pub_
-        = pnh_->advertise<sensor_msgs::PointCloud2>("output_normal", 1);
+        = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_normal", 1);
     }
     
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
@@ -125,13 +125,22 @@ namespace jsk_pcl_ros
         &OrganizedMultiPlaneSegmentation::configCallback, this, _1, _2);
     srv_->setCallback (f);
 
-    sub_ = pnh_->subscribe("input", 1,
-                           &OrganizedMultiPlaneSegmentation::segment, this);
     diagnostics_timer_ = pnh_->createTimer(
       ros::Duration(1.0),
       boost::bind(&OrganizedMultiPlaneSegmentation::updateDiagnostics,
                   this,
                   _1));
+  }
+
+  void OrganizedMultiPlaneSegmentation::subscribe()
+  {
+    sub_ = pnh_->subscribe("input", 1,
+                           &OrganizedMultiPlaneSegmentation::segment, this);
+  }
+
+  void OrganizedMultiPlaneSegmentation::unsubscribe()
+  {
+    sub_.shutdown();
   }
 
   void OrganizedMultiPlaneSegmentation::configCallback(Config &config, uint32_t level)
@@ -780,6 +789,5 @@ namespace jsk_pcl_ros
   }
   
 }
-
-typedef jsk_pcl_ros::OrganizedMultiPlaneSegmentation OrganizedMultiPlaneSegmentation;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, OrganizedMultiPlaneSegmentation, OrganizedMultiPlaneSegmentation, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::OrganizedMultiPlaneSegmentation,
+                        nodelet::Nodelet);

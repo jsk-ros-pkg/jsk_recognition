@@ -45,7 +45,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // publisher
     ////////////////////////////////////////////////////////
-    pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
+    pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     
     ////////////////////////////////////////////////////////
     // dynamic reconfigure
@@ -55,7 +55,10 @@ namespace jsk_pcl_ros
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&ColorizeDistanceFromPlane::configCallback, this, _1, _2);
     srv_->setCallback (f);
-    
+  }
+
+  void ColorizeDistanceFromPlane::subscribe()
+  {
     ////////////////////////////////////////////////////////
     // subscribe
     ////////////////////////////////////////////////////////
@@ -68,9 +71,15 @@ namespace jsk_pcl_ros
     sync_->registerCallback(boost::bind(
                               &ColorizeDistanceFromPlane::colorize,
                               this, _1, _2, _3));
-
   }
 
+  void ColorizeDistanceFromPlane::unsubscribe()
+  {
+    sub_input_.unsubscribe();
+    sub_coefficients_.unsubscribe();
+    sub_polygons_.unsubscribe();
+  }
+  
   double ColorizeDistanceFromPlane::distanceToConvexes(
     const PointT& p,
     const std::vector<ConvexPolygon::Ptr>& convexes)
@@ -184,5 +193,5 @@ namespace jsk_pcl_ros
 }
 
 #include <pluginlib/class_list_macros.h>
-typedef jsk_pcl_ros::ColorizeDistanceFromPlane ColorizeDistanceFromPlane;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, ColorizeDistanceFromPlane, ColorizeDistanceFromPlane, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::ColorizeDistanceFromPlane,
+                        nodelet::Nodelet);

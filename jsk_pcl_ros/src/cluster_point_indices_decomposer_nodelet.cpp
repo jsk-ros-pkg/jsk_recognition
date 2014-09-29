@@ -83,12 +83,14 @@ namespace jsk_pcl_ros
     
     pnh_->param("align_boxes", align_boxes_, false);
     pnh_->param("use_pca", use_pca_, false);
-    
-    pc_pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("debug_output", 1);
-    box_pub_ = pnh_->advertise<jsk_pcl_ros::BoundingBoxArray>("boxes", 1);
+    pc_pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "debug_output", 1);
+    box_pub_ = advertise<BoundingBoxArray>(*pnh_, "boxes", 1);
+  }
+
+  void ClusterPointIndicesDecomposer::subscribe()
+  {
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_target_.subscribe(*pnh_, "target", 1);
-    
     if (align_boxes_) {
       sync_align_ = boost::make_shared<message_filters::Synchronizer<SyncAlignPolicy> >(100);
       sub_polygons_.subscribe(*pnh_, "align_planes", 1);
@@ -100,6 +102,16 @@ namespace jsk_pcl_ros
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
       sync_->connectInput(sub_input_, sub_target_);
       sync_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2));
+    }
+  }
+
+  void ClusterPointIndicesDecomposer::unsubscribe()
+  {
+    sub_input_.unsubscribe();
+    sub_target_.unsubscribe();
+    if (align_boxes_) {
+      sub_polygons_.unsubscribe();
+      sub_coefficients_.unsubscribe();
     }
   }
   
@@ -121,32 +133,11 @@ namespace jsk_pcl_ros
     if (vital_checker_->isAlive()) {
       stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
                    "ClusterPointIndicesDecomposer running");
-      if (publish_clouds_) {
-        stat.add("publish_clouds", "True");
-      }
-      else {
-        stat.add("publish_clouds", "False");
-      }
-      if (publish_tf_) {
-        stat.add("publish_tf", "True");
-      }
-      else {
-        stat.add("publish_tf", "False");
-      }
-      if (use_pca_) {
-        stat.add("use_pca", "True");
-      }
-      else {
-        stat.add("use_pca", "False");
-      }
-      if (align_boxes_) {
-        stat.add("align_boxes", "True");
-      }
-      else {
-        stat.add("align_boxes", "False");
-      }
+      addDiagnosticBooleanStat("publish_clouds", publish_clouds_, stat);
+      addDiagnosticBooleanStat("publish_tf", publish_tf_, stat);
+      addDiagnosticBooleanStat("use_pca", use_pca_, stat);
+      addDiagnosticBooleanStat("align_boxes", align_boxes_, stat);
       stat.add("tf_prefix", tf_prefix_);
-      
       stat.add("Clusters (Ave.)", cluster_counter_.mean());
     }
     else {
@@ -155,9 +146,10 @@ namespace jsk_pcl_ros
     }
   }
   
-  int ClusterPointIndicesDecomposer::findNearestPlane(const Eigen::Vector4f& center,
-                                                      const jsk_pcl_ros::PolygonArrayConstPtr& planes,
-                                                      const jsk_pcl_ros::ModelCoefficientsArrayConstPtr& coefficients)
+  int ClusterPointIndicesDecomposer::findNearestPlane(
+    const Eigen::Vector4f& center,
+    const jsk_pcl_ros::PolygonArrayConstPtr& planes,
+    const jsk_pcl_ros::ModelCoefficientsArrayConstPtr& coefficients)
   {
     double min_distance = DBL_MAX;
     int nearest_index = -1;
@@ -402,6 +394,6 @@ namespace jsk_pcl_ros
   
 }
 
-typedef jsk_pcl_ros::ClusterPointIndicesDecomposer ClusterPointIndicesDecomposer;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, ClusterPointIndicesDecomposer, ClusterPointIndicesDecomposer, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::ClusterPointIndicesDecomposer,
+                        nodelet::Nodelet);
 

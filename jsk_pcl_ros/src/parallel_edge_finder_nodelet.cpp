@@ -56,7 +56,10 @@ namespace jsk_pcl_ros
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&ParallelEdgeFinder::configCallback, this, _1, _2);
     srv_->setCallback (f);
-    
+  }
+
+  void ParallelEdgeFinder::subscribe()
+  {
     ////////////////////////////////////////////////////////
     // subscription
     ////////////////////////////////////////////////////////
@@ -66,6 +69,12 @@ namespace jsk_pcl_ros
     sync_->connectInput(sub_indices_, sub_coefficients_);
     sync_->registerCallback(boost::bind(&ParallelEdgeFinder::estimate,
                                         this, _1, _2));
+  }
+
+  void ParallelEdgeFinder::unsubscribe()
+  {
+    sub_indices_.unsubscribe();
+    sub_coefficients_.unsubscribe();
   }
 
   void ParallelEdgeFinder::configCallback(
@@ -196,6 +205,5 @@ namespace jsk_pcl_ros
 }
 
 #include <pluginlib/class_list_macros.h>
-typedef jsk_pcl_ros::ParallelEdgeFinder ParallelEdgeFinder;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, ParallelEdgeFinder, ParallelEdgeFinder, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::ParallelEdgeFinder, nodelet::Nodelet);
 

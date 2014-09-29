@@ -244,7 +244,18 @@ namespace jsk_pcl_ros
     filter_instance_ = pcl::ConditionalRemoval<pcl::PointXYZRGB>(true);
     updateCondition();
 
-    pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
+    pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    typename dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (&ColorFilter::configCallback, this, _1, _2);
+    srv_->setCallback (f);
+
+  }
+
+  template <class PackedComparison, typename Config>
+  void ColorFilter<PackedComparison, Config>::subscribe()
+  {
     sub_input_.subscribe(*pnh_, "input", 1);
     if (use_indices_) {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(10);
@@ -256,17 +267,20 @@ namespace jsk_pcl_ros
     else {
       sub_input_.registerCallback(&ColorFilter::filter, this);
     }
+  }
 
-    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
-    typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&ColorFilter::configCallback, this, _1, _2);
-    srv_->setCallback (f);
-
+  template <class PackedComparison, typename Config>
+  void ColorFilter<PackedComparison, Config>::unsubscribe()
+  {
+    sub_input_.unsubscribe();
+    if (use_indices_) {
+      sub_indices_.unsubscribe();
+    }
   }
   
 }
 
 typedef jsk_pcl_ros::RGBColorFilter RGBColorFilter;
 typedef jsk_pcl_ros::HSIColorFilter HSIColorFilter;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, RGBColorFilter, RGBColorFilter, nodelet::Nodelet);
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, HSIColorFilter, HSIColorFilter, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::RGBColorFilter, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::HSIColorFilter, nodelet::Nodelet);

@@ -588,8 +588,6 @@ namespace jsk_pcl_ros
       return false;
     }
   }
-  
-  
 }
-typedef jsk_pcl_ros::SnapIt SnapIt;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, SnapIt, SnapIt, nodelet::Nodelet);
+
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::SnapIt, nodelet::Nodelet);

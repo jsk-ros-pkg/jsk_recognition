@@ -46,16 +46,18 @@
 // pcl
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl/point_types.h>
-
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class VoxelGridDownsampleManager : public pcl_ros::PCLNodelet
+  class VoxelGridDownsampleManager : public ConnectionBasedNodelet
   {
   protected:
     tf::TransformListener tf_listener;
     std::vector<visualization_msgs::Marker::ConstPtr> grid_;
     void addGrid(const visualization_msgs::Marker::ConstPtr &new_box);
+    virtual void subscribe();
+    virtual void unsubscribe();
   private:
     void pointCB(const sensor_msgs::PointCloud2ConstPtr &input);
     void clearAll();

@@ -43,14 +43,24 @@ namespace jsk_pcl_ros
   void GridSampler::onInit()
   {
     PCLNodelet::onInit();
-    pub_ = pnh_->advertise<jsk_pcl_ros::ClusterPointIndices>("output", 1);
+    pub_ = advertise<jsk_pcl_ros::ClusterPointIndices>(*pnh_, "output", 1);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&GridSampler::configCallback, this, _1, _2);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     srv_->setCallback (f);
-    sub_ = pnh_->subscribe("input", 1, &GridSampler::sample, this);
+    
   }
 
+  void GridSampler::subscribe()
+  {
+    sub_ = pnh_->subscribe("input", 1, &GridSampler::sample, this);
+  }
+  
+  void GridSampler::unsubscribe()
+  {
+    sub_.shutdown();
+  }
+  
   void GridSampler::configCallback(Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock(mutex_);
@@ -160,6 +170,5 @@ namespace jsk_pcl_ros
   }
 }
 
-typedef jsk_pcl_ros::GridSampler GridSampler;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, GridSampler, GridSampler, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::GridSampler, nodelet::Nodelet);
 

@@ -388,17 +388,21 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // publishers
     ////////////////////////////////////////////////////////
-    pub_ = pnh_->advertise<jsk_pcl_ros::BoundingBoxArray>("output", 1);
+    pub_ = advertise<jsk_pcl_ros::BoundingBoxArray>(*pnh_, "output", 1);
     pub_pose_array_
-      = pnh_->advertise<geometry_msgs::PoseArray>("output_pose_array", 1);
+      = advertise<geometry_msgs::PoseArray>(*pnh_, "output_pose_array", 1);
     pub_debug_marker_
-      = pnh_->advertise<visualization_msgs::Marker>("debug_marker", 1);
-    pub_debug_filtered_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>(
-      "debug_filtered_cloud", 1);
+      = advertise<visualization_msgs::Marker>(*pnh_, "debug_marker", 1);
+    pub_debug_filtered_cloud_ = advertise<sensor_msgs::PointCloud2>(
+      *pnh_, "debug_filtered_cloud", 1);
     pub_debug_polygons_
-      = pnh_->advertise<jsk_pcl_ros::PolygonArray>("debug_polygons", 1);
+      = advertise<jsk_pcl_ros::PolygonArray>(*pnh_, "debug_polygons", 1);
     pub_debug_clusers_
-      = pnh_->advertise<ClusterPointIndices>("debug_clusters", 1);
+      = advertise<ClusterPointIndices>(*pnh_, "debug_clusters", 1);
+  }
+
+  void EdgebasedCubeFinder::subscribe()
+  {
     ////////////////////////////////////////////////////////
     // subscription
     ////////////////////////////////////////////////////////
@@ -408,6 +412,12 @@ namespace jsk_pcl_ros
     sync_->connectInput(sub_input_, sub_edges_);
     sync_->registerCallback(boost::bind(
                               &EdgebasedCubeFinder::estimate, this, _1, _2));
+  }
+
+  void EdgebasedCubeFinder::unsubscribe()
+  {
+    sub_input_.unsubscribe();
+    sub_edges_.unsubscribe();
   }
 
   Line::Ptr EdgebasedCubeFinder::midLineFromCoefficientsPair(
@@ -1206,6 +1216,5 @@ namespace jsk_pcl_ros
 }
 
 #include <pluginlib/class_list_macros.h>
-typedef jsk_pcl_ros::EdgebasedCubeFinder EdgebasedCubeFinder;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, EdgebasedCubeFinder, EdgebasedCubeFinder, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::EdgebasedCubeFinder, nodelet::Nodelet);
 

@@ -49,10 +49,11 @@
 #include <dynamic_reconfigure/server.h>
 #include <jsk_pcl_ros/ColorizeDistanceFromPlaneConfig.h>
 #include "jsk_pcl_ros/geo_util.h"
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class ColorizeDistanceFromPlane: public pcl_ros::PCLNodelet
+  class ColorizeDistanceFromPlane: public ConnectionBasedNodelet
   {
   public:
     typedef pcl::PointXYZRGB PointT;
@@ -79,6 +80,9 @@ namespace jsk_pcl_ros
     virtual uint32_t colorForDistance(const double d);
     
     virtual void configCallback(Config &config, uint32_t level);
+
+    virtual void subscribe();
+    virtual void unsubscribe();
     
     ////////////////////////////////////////////////////////
     // ROS variabels

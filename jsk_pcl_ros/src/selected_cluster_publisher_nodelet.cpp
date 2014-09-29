@@ -43,13 +43,24 @@ namespace jsk_pcl_ros
   void SelectedClusterPublisher::onInit()
   {
     PCLNodelet::onInit();
-    pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
+    pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+  }
+
+  void SelectedClusterPublisher::subscribe()
+  {
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(300); // 100 is enough?
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_indices_.subscribe(*pnh_, "indices", 1);
     sub_index_.subscribe(*pnh_, "selected_index", 1);
     sync_->connectInput(sub_input_, sub_indices_, sub_index_);
     sync_->registerCallback(boost::bind(&SelectedClusterPublisher::extract, this, _1, _2, _3));
+  }
+
+  void SelectedClusterPublisher::unsubscribe()
+  {
+    sub_input_.unsubscribe();
+    sub_indices_.unsubscribe();
+    sub_index_.unsubscribe();
   }
 
   void SelectedClusterPublisher::extract(const sensor_msgs::PointCloud2::ConstPtr& input,
@@ -78,5 +89,5 @@ namespace jsk_pcl_ros
   }
 }
 
-typedef jsk_pcl_ros::SelectedClusterPublisher SelectedClusterPublisher;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, SelectedClusterPublisher, SelectedClusterPublisher, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::SelectedClusterPublisher,
+                        nodelet::Nodelet);

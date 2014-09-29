@@ -50,18 +50,30 @@ namespace jsk_pcl_ros
     //tf_listener_.reset(new tf::TransformListener());
     pnh_->param("gripper_size", gripper_size_, 0.08); // defaults to pr2 gripper size
     pnh_->param("approach_offset", approach_offset_, 0.1); // default to 10 cm
-    pub_ = pnh_->advertise<geometry_msgs::PoseArray>("output", 1);
-    pub_best_ = pnh_->advertise<geometry_msgs::PoseStamped>("output_best", 1);
-    pub_selected_ = pnh_->advertise<geometry_msgs::PoseStamped>("output_selected", 1);
+    pub_ = advertise<geometry_msgs::PoseArray>(*pnh_, "output", 1);
+    pub_best_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output_best", 1);
+    pub_selected_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output_selected", 1);
 
-    pub_preapproach_ = pnh_->advertise<geometry_msgs::PoseArray>("output_preapproach", 1);
-    pub_selected_preapproach_ = pnh_->advertise<geometry_msgs::PoseStamped>("output_selected_preapproach", 1);
+    pub_preapproach_ = advertise<geometry_msgs::PoseArray>(*pnh_, "output_preapproach", 1);
+    pub_selected_preapproach_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output_selected_preapproach", 1);
+    
+  }
+
+  void HandleEstimator::subscribe()
+  {
     sub_index_ = pnh_->subscribe<jsk_pcl_ros::Int32Stamped>("selected_index", 1, boost::bind( &HandleEstimator::selectedIndexCallback, this, _1));
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_box_.subscribe(*pnh_, "input_box", 1);
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
     sync_->connectInput(sub_input_, sub_box_);
     sync_->registerCallback(boost::bind(&HandleEstimator::estimate, this, _1, _2));
+  }
+
+  void HandleEstimator::unsubscribe()
+  {
+    sub_index_.shutdown();
+    sub_input_.unsubscribe();
+    sub_box_.unsubscribe();
   }
   
   void HandleEstimator::estimate(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
@@ -277,5 +289,4 @@ namespace jsk_pcl_ros
   }
 }
 
-typedef jsk_pcl_ros::HandleEstimator HandleEstimator;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, HandleEstimator, HandleEstimator, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::HandleEstimator, nodelet::Nodelet);

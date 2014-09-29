@@ -60,17 +60,21 @@ namespace jsk_pcl_ros
     // Publishers
     ////////////////////////////////////////////////////////
     pub_vertical_inliers_
-      = pnh_->advertise<ClusterPointIndices>("output/vertical/inliers", 1);
+      = advertise<ClusterPointIndices>(*pnh_, "output/vertical/inliers", 1);
     pub_vertical_coefficients_
-      = pnh_->advertise<ModelCoefficientsArray>("output/vertical/coefficients", 1);
+      = advertise<ModelCoefficientsArray>(*pnh_, "output/vertical/coefficients", 1);
     pub_vertical_polygons_
-      = pnh_->advertise<PolygonArray>("output/vertical/polygons", 1);
+      = advertise<PolygonArray>(*pnh_, "output/vertical/polygons", 1);
     pub_horizontal_inliers_
-      = pnh_->advertise<ClusterPointIndices>("output/horizontal/inliers", 1);
+      = advertise<ClusterPointIndices>(*pnh_, "output/horizontal/inliers", 1);
     pub_horizontal_coefficients_
-      = pnh_->advertise<ModelCoefficientsArray>("output/horizontal/coefficients", 1);
+      = advertise<ModelCoefficientsArray>(*pnh_, "output/horizontal/coefficients", 1);
     pub_horizontal_polygons_
-      = pnh_->advertise<PolygonArray>("output/horizontal/polygons", 1);
+      = advertise<PolygonArray>(*pnh_, "output/horizontal/polygons", 1);
+  }
+
+  void PlaneReasoner::subscribe()
+  {
     ////////////////////////////////////////////////////////
     // Subscribers
     ////////////////////////////////////////////////////////
@@ -85,6 +89,15 @@ namespace jsk_pcl_ros
                                         this, _1, _2, _3, _4));
   }
 
+  void PlaneReasoner::unsubscribe()
+  {
+    sub_input_.unsubscribe();
+    sub_inliers_.unsubscribe();
+    sub_coefficients_.unsubscribe();
+    sub_polygons_.unsubscribe();
+  }
+                                
+  
   void PlaneReasoner::configCallback(Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mutex_);
@@ -264,5 +277,4 @@ namespace jsk_pcl_ros
 }
 
 #include <pluginlib/class_list_macros.h>
-typedef jsk_pcl_ros::PlaneReasoner PlaneReasoner;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, PlaneReasoner, PlaneReasoner, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::PlaneReasoner, nodelet::Nodelet);

@@ -41,18 +41,30 @@ namespace jsk_pcl_ros
   void PolygonAppender::onInit()
   {
     PCLNodelet::onInit();
-    pub_polygon_ = pnh_->advertise<PolygonArray>("output", 1);
-    pub_coefficients_ = pnh_->advertise<ModelCoefficientsArray>(
+    pub_polygon_ = advertise<PolygonArray>(*pnh_, "output", 1);
+    pub_coefficients_ = advertise<ModelCoefficientsArray>(*pnh_,
       "output_coefficients", 1);
     
-    sub_polygon0_.subscribe(*pnh_, "input0", 1);
-    sub_polygon1_.subscribe(*pnh_, "input1", 1);
-    sub_coefficients0_.subscribe(*pnh_, "input_coefficients0", 1);
-    sub_coefficients1_.subscribe(*pnh_, "input_coefficients1", 1);
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy2> >(100);
     sync_->connectInput(sub_polygon0_, sub_coefficients0_,
                         sub_polygon1_, sub_coefficients1_);
     sync_->registerCallback(boost::bind(&PolygonAppender::callback2, this, _1, _2, _3, _4));
+  }
+
+  void PolygonAppender::subscribe()
+  {
+    sub_polygon0_.subscribe(*pnh_, "input0", 1);
+    sub_polygon1_.subscribe(*pnh_, "input1", 1);
+    sub_coefficients0_.subscribe(*pnh_, "input_coefficients0", 1);
+    sub_coefficients1_.subscribe(*pnh_, "input_coefficients1", 1);
+  }
+
+  void PolygonAppender::unsubscribe()
+  {
+    sub_polygon0_.unsubscribe();
+    sub_polygon1_.unsubscribe();
+    sub_coefficients0_.unsubscribe();
+    sub_coefficients1_.unsubscribe();
   }
   
   void PolygonAppender::callback2(
@@ -109,6 +121,5 @@ namespace jsk_pcl_ros
   }
 }
 
-typedef jsk_pcl_ros::PolygonAppender PolygonAppender;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, PolygonAppender, PolygonAppender, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::PolygonAppender, nodelet::Nodelet);
 

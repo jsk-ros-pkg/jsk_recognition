@@ -62,7 +62,7 @@ namespace jsk_pcl_ros
 
     pcl::RangeImage rangeImage;
     rangeImage.createFromPointCloud(pointCloud, angularResolution, maxAngleWidth, maxAngleHeight,
-				    sensorPose, coordinate_frame, noiseLevel, minRange, borderSize);
+                                    sensorPose, coordinate_frame, noiseLevel, minRange, borderSize);
     ROS_INFO_STREAM("input image size " << input->width << " x " << input->height << "(=" << input->width * input->height << ")");
     ROS_INFO_STREAM("output image size " << rangeImage.width << " x " << rangeImage.height << "(=" << rangeImage.width * rangeImage.height << ")");
     ROS_DEBUG_STREAM(rangeImage);
@@ -76,15 +76,24 @@ namespace jsk_pcl_ros
   void OrganizePointCloud::onInit(void)
   {
     PCLNodelet::onInit();
-    sub_ = pnh_->subscribe("input", 1, &OrganizePointCloud::extract, this);
-    pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
+    
+    pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     pnh_->param<double>("angular_resolution", angular_resolution, 1.0);
     pnh_->param<double>("angle_width", angle_width, 120.0);
     pnh_->param<double>("angle_height", angle_height, 90.0);
     pnh_->param<int>("min_points", min_points, 1000);
   }
+
+  void OrganizePointCloud::subscribe()
+  {
+    sub_ = pnh_->subscribe("input", 1, &OrganizePointCloud::extract, this);
+  }
+
+  void OrganizePointCloud::unsubscribe()
+  {
+    sub_.shutdown();
+  }
 }
 
-typedef jsk_pcl_ros::OrganizePointCloud OrganizePointCloud;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, OrganizePointCloud, OrganizePointCloud, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::OrganizePointCloud, nodelet::Nodelet);
 

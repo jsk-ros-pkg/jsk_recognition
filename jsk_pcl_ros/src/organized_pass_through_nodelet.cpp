@@ -49,7 +49,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // Publisher
     ////////////////////////////////////////////////////////
-    pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
+    pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
 
     ////////////////////////////////////////////////////////
     // Dynamic Reconfigure
@@ -59,10 +59,19 @@ namespace jsk_pcl_ros
       boost::bind (
         &OrganizedPassThrough::configCallback, this, _1, _2);
     srv_->setCallback (f);
+  }
+
+  void OrganizedPassThrough::subscribe()
+  {
     ////////////////////////////////////////////////////////
     // Subscriber
     ////////////////////////////////////////////////////////
     sub_ = pnh_->subscribe("input", 1, &OrganizedPassThrough::filter, this);
+  }
+
+  void OrganizedPassThrough::unsubscribe()
+  {
+    sub_.shutdown();
   }
 
   void OrganizedPassThrough::configCallback(Config &config, uint32_t level)
@@ -149,10 +158,7 @@ namespace jsk_pcl_ros
         "ClusterPointIndicesDecomposer", vital_checker_, stat);
     }
   }
-  
-  
 }
 
 #include <pluginlib/class_list_macros.h>
-typedef jsk_pcl_ros::OrganizedPassThrough OrganizedPassThrough;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, OrganizedPassThrough, OrganizedPassThrough, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::OrganizedPassThrough, nodelet::Nodelet);

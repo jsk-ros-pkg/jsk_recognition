@@ -69,8 +69,8 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // Publishers
     ////////////////////////////////////////////////////////
-    pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
-    nonplane_pub_ = pnh_->advertise<pcl::PointCloud<pcl::PointXYZRGB> >("output_nonplane_cloud", 1);
+    pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    nonplane_pub_ = advertise<pcl::PointCloud<pcl::PointXYZRGB> >(*pnh_, "output_nonplane_cloud", 1);
     if (!pnh_->getParam("max_queue_size", maximum_queue_size_)) {
       maximum_queue_size_ = 100;
     }
@@ -82,7 +82,10 @@ namespace jsk_pcl_ros
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&MultiPlaneExtraction::configCallback, this, _1, _2);
     srv_->setCallback (f);
+  }
 
+  void MultiPlaneExtraction::subscribe()
+  {
     ////////////////////////////////////////////////////////
     // Subscribe
     ////////////////////////////////////////////////////////
@@ -93,6 +96,14 @@ namespace jsk_pcl_ros
     sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
     sync_->connectInput(sub_input_, sub_indices_, sub_coefficients_, sub_polygons_);
     sync_->registerCallback(boost::bind(&MultiPlaneExtraction::extract, this, _1, _2, _3, _4));
+  }
+
+  void MultiPlaneExtraction::unsubscribe()
+  {
+    sub_input_.unsubscribe();
+    sub_indices_.unsubscribe();
+    sub_polygons_.unsubscribe();
+    sub_coefficients_.unsubscribe();
   }
 
   void MultiPlaneExtraction::configCallback(Config& config, uint32_t level)
@@ -199,5 +210,4 @@ namespace jsk_pcl_ros
   
 }
 
-typedef jsk_pcl_ros::MultiPlaneExtraction MultiPlaneExtraction;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, MultiPlaneExtraction, MultiPlaneExtraction, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::MultiPlaneExtraction, nodelet::Nodelet);

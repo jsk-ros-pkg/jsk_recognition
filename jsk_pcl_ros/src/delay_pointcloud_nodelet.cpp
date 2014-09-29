@@ -42,8 +42,7 @@ namespace jsk_pcl_ros
   {
     PCLNodelet::onInit();
     pnh_->param("sleep_time", sleep_time_, 1.0);
-    sub_ = pnh_->subscribe("input", 1, &DelayPointCloud::delay, this);
-    pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
+    pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
   }
 
   void DelayPointCloud::delay(const sensor_msgs::PointCloud2::ConstPtr& msg)
@@ -52,8 +51,14 @@ namespace jsk_pcl_ros
     pub_.publish(msg);
   }
 
-
+  void DelayPointCloud::subscribe()
+  {
+    sub_ = pnh_->subscribe("input", 1, &DelayPointCloud::delay, this);
+  }
+  void DelayPointCloud::unsubscribe()
+  {
+    sub_.shutdown();
+  }
 }
 
-typedef jsk_pcl_ros::DelayPointCloud DelayPointCloud;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, DelayPointCloud, DelayPointCloud, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::DelayPointCloud, nodelet::Nodelet);

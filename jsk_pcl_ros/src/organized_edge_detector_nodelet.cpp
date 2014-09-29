@@ -54,36 +54,36 @@ namespace jsk_pcl_ros
     // indices publishers
     ////////////////////////////////////////////////////////
     pub_nan_boundary_edges_indices_
-      = pnh_->advertise<PCLIndicesMsg>("output_nan_boundary_edge_indices", 1);
+      = advertise<PCLIndicesMsg>(*pnh_, "output_nan_boundary_edge_indices", 1);
     pub_occluding_edges_indices_
-      = pnh_->advertise<PCLIndicesMsg>("output_occluding_edge_indices", 1);
+      = advertise<PCLIndicesMsg>(*pnh_, "output_occluding_edge_indices", 1);
     pub_occluded_edges_indices_
-      = pnh_->advertise<PCLIndicesMsg>("output_occluded_edge_indices", 1);
+      = advertise<PCLIndicesMsg>(*pnh_, "output_occluded_edge_indices", 1);
     pub_curvature_edges_indices_
-      = pnh_->advertise<PCLIndicesMsg>("output_curvature_edge_indices", 1);
+      = advertise<PCLIndicesMsg>(*pnh_, "output_curvature_edge_indices", 1);
     pub_rgb_edges_indices_
-      = pnh_->advertise<PCLIndicesMsg>("output_rgb_edge_indices", 1);
+      = advertise<PCLIndicesMsg>(*pnh_, "output_rgb_edge_indices", 1);
     pub_all_edges_indices_
-      = pnh_->advertise<PCLIndicesMsg>("output_indices", 1);
+      = advertise<PCLIndicesMsg>(*pnh_, "output_indices", 1);
     pub_straight_edges_indices_
-      = pnh_->advertise<jsk_pcl_ros::ClusterPointIndices>(
+      = advertise<jsk_pcl_ros::ClusterPointIndices>(*pnh_, 
         "output_straight_edges_indices", 1);
     ////////////////////////////////////////////////////////
     // pointcloud publishers
     ////////////////////////////////////////////////////////
-    pub_normal_ = pnh_->advertise<sensor_msgs::PointCloud2>("output_normal", 1);
+    pub_normal_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_normal", 1);
     pub_nan_boundary_edges_
-      = pnh_->advertise<sensor_msgs::PointCloud2>("output_nan_boundary_edge", 1);
+      = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_nan_boundary_edge", 1);
     pub_occluding_edges_
-      = pnh_->advertise<sensor_msgs::PointCloud2>("output_occluding_edge", 1);
+      = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_occluding_edge", 1);
     pub_occluded_edges_
-      = pnh_->advertise<sensor_msgs::PointCloud2>("output_occluded_edge", 1);
+      = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_occluded_edge", 1);
     pub_curvature_edges_
-      = pnh_->advertise<sensor_msgs::PointCloud2>("output_curvature_edge", 1);
+      = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_curvature_edge", 1);
     pub_rgb_edges_
-      = pnh_->advertise<sensor_msgs::PointCloud2>("output_rgb_edge", 1);
+      = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_rgb_edge", 1);
     pub_all_edges_
-      = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
+      = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     ////////////////////////////////////////////////////////
     // image publishers
     ////////////////////////////////////////////////////////
@@ -97,11 +97,18 @@ namespace jsk_pcl_ros
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&OrganizedEdgeDetector::configCallback, this, _1, _2);
     srv_->setCallback (f);
-
-    
+  }
+  
+  void OrganizedEdgeDetector::subscribe()
+  {
     sub_ = pnh_->subscribe("input", 1, &OrganizedEdgeDetector::estimate, this);
   }
 
+  void OrganizedEdgeDetector::unsubscribe()
+  {
+    sub_.shutdown();
+  }
+  
   void OrganizedEdgeDetector::estimateNormal(
     const pcl::PointCloud<PointT>::Ptr& input,
     pcl::PointCloud<pcl::Normal>::Ptr output,
@@ -357,5 +364,4 @@ namespace jsk_pcl_ros
 }
 
 #include <pluginlib/class_list_macros.h>
-typedef jsk_pcl_ros::OrganizedEdgeDetector OrganizedEdgeDetector;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, OrganizedEdgeDetector, OrganizedEdgeDetector, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::OrganizedEdgeDetector, nodelet::Nodelet);

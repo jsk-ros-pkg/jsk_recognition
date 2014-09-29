@@ -50,11 +50,11 @@
 #include <message_filters/synchronizer.h>
 #include "jsk_pcl_ros/geo_util.h"
 
-
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class ParallelEdgeFinder: public pcl_ros::PCLNodelet
+  class ParallelEdgeFinder: public ConnectionBasedNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime<
@@ -83,6 +83,9 @@ namespace jsk_pcl_ros
       const ModelCoefficientsArray::ConstPtr& input_coefficients);
 
     virtual void configCallback (Config &config, uint32_t level);
+
+    virtual void subscribe();
+    virtual void unsubscribe();
     
     ////////////////////////////////////////////////////////
     // ROS variables

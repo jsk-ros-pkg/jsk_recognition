@@ -47,9 +47,11 @@
 #include <pcl/filters/extract_indices.h>
 #include <pcl/range_image/range_image.h>
 
+#include "jsk_pcl_ros/connection_based_nodelet.h"
+
 namespace jsk_pcl_ros
 {
-  class OrganizePointCloud: public pcl_ros::PCLNodelet
+  class OrganizePointCloud: public ConnectionBasedNodelet
   {
   protected:
     double angular_resolution, angle_width, angle_height;
@@ -57,6 +59,8 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_;
     ros::Publisher pub_;
     virtual void extract(const sensor_msgs::PointCloud2ConstPtr &input);
+    virtual void subscribe();
+    virtual void unsubscribe();
   private:
     virtual void onInit();
   };

@@ -51,8 +51,6 @@ void jsk_pcl_ros::PointcloudScreenpoint::onInit()
   pnh_->param ("crop_size", crop_size_, 10);
   pnh_->param ("search_size", k_, 16);
 
-  bool use_rect, use_point, use_sync, use_point_array;
-
   pnh_->param ("use_rect", use_rect, false);
   pnh_->param ("use_point", use_point, false);
   pnh_->param ("use_sync", use_sync, false);
@@ -61,6 +59,27 @@ void jsk_pcl_ros::PointcloudScreenpoint::onInit()
   pnh_->param("publish_points", publish_points_, false);
   pnh_->param("publish_point", publish_point_, false);
 
+  srv_ = pnh_->advertiseService("screen_to_point", &PointcloudScreenpoint::screenpoint_cb, this);
+
+  if (publish_point_) {
+    pub_point_ = pnh_->advertise< geometry_msgs::PointStamped > ("output_point", 1);
+  }
+
+  if (publish_points_) {
+    pub_points_ = pnh_->advertise< sensor_msgs::PointCloud2 > ("output", 1);
+  }
+
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
+  normals_tree_ = boost::make_shared< pcl::search::KdTree<pcl::PointXYZ> > ();
+#else
+  normals_tree_ = boost::make_shared<pcl::KdTreeFLANN<pcl::PointXYZ> > ();
+#endif
+  n3d_.setKSearch (k_);
+  n3d_.setSearchMethod (normals_tree_);
+}
+
+void jsk_pcl_ros::PointcloudScreenpoint::subscribe()
+{
   points_sub_.subscribe (*pnh_, "points", queue_size_);
 
   if (use_rect) {
@@ -97,24 +116,23 @@ void jsk_pcl_ros::PointcloudScreenpoint::onInit()
   }
 
   points_sub_.registerCallback (boost::bind (&PointcloudScreenpoint::points_cb, this, _1));
+}
 
-  srv_ = pnh_->advertiseService("screen_to_point", &PointcloudScreenpoint::screenpoint_cb, this);
+void jsk_pcl_ros::PointcloudScreenpoint::unsubscribe()
+{
+  points_sub_.unsubscribe();
 
-  if (publish_point_) {
-    pub_point_ = pnh_->advertise< geometry_msgs::PointStamped > ("output_point", 1);
+  if (use_rect) {
+    rect_sub_.unsubscribe();
   }
 
-  if (publish_points_) {
-    pub_points_ = pnh_->advertise< sensor_msgs::PointCloud2 > ("output", 1);
+  if (use_point) {
+    point_sub_.unsubscribe();
   }
 
-#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
-  normals_tree_ = boost::make_shared< pcl::search::KdTree<pcl::PointXYZ> > ();
-#else
-  normals_tree_ = boost::make_shared<pcl::KdTreeFLANN<pcl::PointXYZ> > ();
-#endif
-  n3d_.setKSearch (k_);
-  n3d_.setSearchMethod (normals_tree_);
+  if (use_point_array) {
+    point_array_sub_.unsubscribe();
+  }
 }
 
 bool jsk_pcl_ros::PointcloudScreenpoint::checkpoint (pcl::PointCloud< pcl::PointXYZ > &in_pts, int x, int y,
@@ -365,5 +383,4 @@ void jsk_pcl_ros::PointcloudScreenpoint::callback_polygon(const sensor_msgs::Poi
   }
 }
 
-typedef jsk_pcl_ros::PointcloudScreenpoint PointcloudScreenpoint;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, PointcloudScreenpoint, PointcloudScreenpoint, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::PointcloudScreenpoint, nodelet::Nodelet);

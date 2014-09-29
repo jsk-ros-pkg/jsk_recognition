@@ -54,15 +54,20 @@ namespace jsk_pcl_ros
     reference_set_ = false;
     // setup publishers
     all_histogram_pub_
-      = pnh_->advertise<jsk_pcl_ros::ColorHistogramArray>("output_histograms", 1);
+      = advertise<jsk_pcl_ros::ColorHistogramArray>(
+        *pnh_, "output_histograms", 1);
     best_pub_
-      = pnh_->advertise<geometry_msgs::PoseStamped>("best_match", 1);
+      = advertise<geometry_msgs::PoseStamped>(*pnh_, "best_match", 1);
     reference_histogram_pub_
-      = pnh_->advertise<jsk_pcl_ros::ColorHistogram>("output_reference", 1);
+      = advertise<jsk_pcl_ros::ColorHistogram>(*pnh_, "output_reference", 1);
     result_pub_
-      = pnh_->advertise<jsk_pcl_ros::ClusterPointIndices>("output", 1);
+      = advertise<jsk_pcl_ros::ClusterPointIndices>(*pnh_, "output", 1);
     coefficient_points_pub_
-      = pnh_->advertise<sensor_msgs::PointCloud2>("coefficient_points", 1);
+      = advertise<sensor_msgs::PointCloud2>(*pnh_, "coefficient_points", 1);
+  }
+
+  void ColorHistogramMatcher::subscribe()
+  {
     reference_sub_ = pnh_->subscribe("input_reference_cloud", 1,
                                      &ColorHistogramMatcher::reference,
                                      this);
@@ -76,6 +81,14 @@ namespace jsk_pcl_ros
     sync_->connectInput(sub_input_, sub_indices_);
     sync_->registerCallback(boost::bind(&ColorHistogramMatcher::feature,
                                         this, _1, _2));
+  }
+
+  void ColorHistogramMatcher::unsubscribe()
+  {
+    reference_sub_.shutdown();
+    reference_histogram_sub_.shutdown();
+    sub_input_.unsubscribe();
+    sub_indices_.unsubscribe();
   }
 
   void ColorHistogramMatcher::configCallback(Config &config, uint32_t level)
@@ -369,5 +382,5 @@ namespace jsk_pcl_ros
   
 }
 
-typedef jsk_pcl_ros::ColorHistogramMatcher ColorHistogramMatcher;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, ColorHistogramMatcher, ColorHistogramMatcher, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::ColorHistogramMatcher,
+                        nodelet::Nodelet);

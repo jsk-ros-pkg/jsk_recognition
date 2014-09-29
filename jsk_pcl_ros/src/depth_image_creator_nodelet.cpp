@@ -1,3 +1,38 @@
+// -*- mode: c++ -*-
+/*********************************************************************
+ * Software License Agreement (BSD License)
+ *
+ *  Copyright (c) 2014, JSK Lab
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/o2r other materials provided
+ *     with the distribution.
+ *   * Neither the name of the Willow Garage nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *********************************************************************/
+
 #include "jsk_pcl_ros/depth_image_creator.h"
 
 void jsk_pcl_ros::DepthImageCreator::onInit () {
@@ -57,10 +92,16 @@ void jsk_pcl_ros::DepthImageCreator::onInit () {
   fixed_transform.setOrigin(btp);
   fixed_transform.setRotation(btq);
 
-  pub_image_ = pnh_->advertise<sensor_msgs::Image> ("output", max_queue_size_);
-  pub_cloud_ = pnh_->advertise<PointCloud> ("output_cloud", max_queue_size_);
-  pub_disp_image_ = pnh_->advertise<stereo_msgs::DisparityImage> ("output_disp", max_queue_size_);
+  pub_image_ = advertise<sensor_msgs::Image> (*pnh_, "output", max_queue_size_);
+  pub_cloud_ = advertise<PointCloud>(*pnh_, "output_cloud", max_queue_size_);
+  pub_disp_image_ = advertise<stereo_msgs::DisparityImage> (*pnh_, "output_disp", max_queue_size_);
+  if (use_service) {
+    service_ = pnh_->advertiseService("set_point_cloud",
+                                      &DepthImageCreator::service_cb, this);
+  }
+}
 
+void jsk_pcl_ros::DepthImageCreator::subscribe() {
   if (!use_service) {
     if (use_asynchronous) {
       sub_as_info_ = pnh_->subscribe<sensor_msgs::CameraInfo> ("info", max_queue_size_,
@@ -85,12 +126,25 @@ void jsk_pcl_ros::DepthImageCreator::onInit () {
     // not continuous
     sub_as_info_ = pnh_->subscribe<sensor_msgs::CameraInfo> ("info", max_queue_size_,
                                                              &DepthImageCreator::callback_info, this);
-    service_ = pnh_->advertiseService("set_point_cloud",
-                                      &DepthImageCreator::service_cb, this);
+   
   }
 }
 
-jsk_pcl_ros::DepthImageCreator::~DepthImageCreator() { }
+void jsk_pcl_ros::DepthImageCreator::unsubscribe() {
+  if (!use_service) {
+    if (use_asynchronous) {
+      sub_as_info_.shutdown();
+      sub_as_cloud_.shutdown();
+    }
+    else {
+      sub_info_.unsubscribe();
+      sub_cloud_.unsubscribe();
+    }
+  } else {
+    // not continuous
+    sub_as_info_.shutdown();
+  }
+}
 
 bool jsk_pcl_ros::DepthImageCreator::service_cb (std_srvs::Empty::Request &req,
                                                  std_srvs::Empty::Response &res) {
@@ -282,5 +336,4 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
   }
 }
 
-typedef jsk_pcl_ros::DepthImageCreator DepthImageCreator;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, DepthImageCreator, DepthImageCreator, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::DepthImageCreator, nodelet::Nodelet);

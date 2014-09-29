@@ -47,12 +47,13 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 #include <string>
 
 namespace jsk_pcl_ros
 {
-  class DepthImageError: public pcl_ros::PCLNodelet
+  class DepthImageError: public ConnectionBasedNodelet
   {
   public:
     typedef message_filters::sync_policies::ApproximateTime<
@@ -65,6 +66,8 @@ namespace jsk_pcl_ros
     virtual void onInit();
     virtual void calcError(const sensor_msgs::Image::ConstPtr& depth_image,
                            const geometry_msgs::PointStamped::ConstPtr& uv_point);
+    virtual void subscribe();
+    virtual void unsubscribe();
     message_filters::Subscriber<sensor_msgs::Image> sub_image_;
     message_filters::Subscriber<geometry_msgs::PointStamped> sub_point_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;

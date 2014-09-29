@@ -50,14 +50,14 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // publishers
     ////////////////////////////////////////////////////////
-    pub_indices_ = pnh_->advertise<ClusterPointIndices>(
-      "output", 1);
-    pub_coefficients_ = pnh_->advertise<ModelCoefficientsArray>(
-      "output_coefficients", 1);
-    pub_outlier_removed_indices_ = pnh_->advertise<ClusterPointIndices>(
-      "output_outlier_removed", 1);
-    pub_outlier_removed_coefficients_ = pnh_->advertise<ModelCoefficientsArray>(
-      "output_outlier_removed_coefficients", 1);
+    pub_indices_ = advertise<ClusterPointIndices>(
+      *pnh_, "output", 1);
+    pub_coefficients_ = advertise<ModelCoefficientsArray>(
+      *pnh_, "output_coefficients", 1);
+    pub_outlier_removed_indices_ = advertise<ClusterPointIndices>(
+      *pnh_, "output_outlier_removed", 1);
+    pub_outlier_removed_coefficients_ = advertise<ModelCoefficientsArray>(
+      *pnh_, "output_outlier_removed_coefficients", 1);
     ////////////////////////////////////////////////////////
     // dynamic reconfigure
     ////////////////////////////////////////////////////////
@@ -65,7 +65,10 @@ namespace jsk_pcl_ros
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&EdgeDepthRefinement::configCallback, this, _1, _2);
     srv_->setCallback (f);
+  }
 
+  void EdgeDepthRefinement::subscribe()
+  {
     ////////////////////////////////////////////////////////
     // subscribesrs
     ////////////////////////////////////////////////////////
@@ -77,6 +80,12 @@ namespace jsk_pcl_ros
                                         this, _1, _2));
   }
 
+  void EdgeDepthRefinement::unsubscribe()
+  {
+    sub_input_.unsubscribe();
+    sub_indices_.unsubscribe();
+  }
+  
   ////////////////////////////////////////////////////////
   // line coefficients are:
   // 0: point.x
@@ -397,5 +406,4 @@ namespace jsk_pcl_ros
 }
 
 #include <pluginlib/class_list_macros.h>
-typedef jsk_pcl_ros::EdgeDepthRefinement EdgeDepthRefinement;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, EdgeDepthRefinement, EdgeDepthRefinement, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::EdgeDepthRefinement, nodelet::Nodelet);

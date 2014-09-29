@@ -50,10 +50,17 @@ namespace jsk_pcl_ros
 
     filtered_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>);
 
-    //Set subscribe setting
-    sub_ = pnh_->subscribe("input", 1, &OctreeChangePublisher::cloud_cb,this);
-    diff_pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("octree_change_result", 1);
+    diff_pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "octree_change_result", 1);
+  }
 
+  void OctreeChangePublisher::subscribe()
+  {
+    sub_ = pnh_->subscribe("input", 1, &OctreeChangePublisher::cloud_cb,this);
+  }
+
+  void OctreeChangePublisher::unsubscribe()
+  {
+    sub_.shutdown();
   }
 
   void OctreeChangePublisher::cloud_cb(const sensor_msgs::PointCloud2 &pc)
@@ -91,5 +98,4 @@ namespace jsk_pcl_ros
   }
 }
 
-typedef jsk_pcl_ros::OctreeChangePublisher OctreeChangePublisher;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, OctreeChangePublisher, OctreeChangePublisher, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::OctreeChangePublisher, nodelet::Nodelet);

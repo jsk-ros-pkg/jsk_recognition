@@ -39,6 +39,7 @@
 #include "jsk_pcl_ros/geo_util.h"
 #include <eigen_conversions/eigen_msg.h>
 #include <nodelet/nodelet.h>
+#include "jsk_pcl_ros/pcl_conversion_util.h"
 //#define DEBUG_GRID_MAP
 
 namespace jsk_pcl_ros
@@ -46,10 +47,10 @@ namespace jsk_pcl_ros
   GridMap::GridMap(double resolution, const std::vector<float>& coefficients):
     resolution_(resolution), vote_(0)
   {
-    normal_[0] = coefficients[0];
-    normal_[1] = coefficients[1];
-    normal_[2] = coefficients[2];
-    d_ = coefficients[3];
+    normal_[0] = -coefficients[0];
+    normal_[1] = -coefficients[1];
+    normal_[2] = -coefficients[2];
+    d_ = -coefficients[3];
     if (normal_.norm() != 1.0) {
       d_ = d_ / normal_.norm();
       normal_.normalize();
@@ -208,6 +209,7 @@ namespace jsk_pcl_ros
   {
     for (size_t i = 0; i < cloud->points.size(); i++) {
       registerPoint(cloud->points[i]);
+      //ROS_INFO("registered point: [%f, %f, %f]", cloud->points[i].x, cloud->points[i].y, cloud->points[i].z);
     }
   }
   
@@ -356,29 +358,27 @@ namespace jsk_pcl_ros
     rot_mat.col(0) = Eigen::Vector3f(ex_[0], ex_[1], ex_[2]);
     rot_mat.col(1) = Eigen::Vector3f(ey_[0], ey_[1], ey_[2]);
     rot_mat.col(2) = Eigen::Vector3f(normal_[0], normal_[1], normal_[2]);
+    ROS_INFO("O: [%f, %f, %f]", O_[0], O_[1], O_[2]);
+    ROS_INFO("ex: [%f, %f, %f]", ex_[0], ex_[1], ex_[2]);
+    ROS_INFO("ey: [%f, %f, %f]", ey_[0], ey_[1], ey_[2]);
+    ROS_INFO("normal: [%f, %f, %f]", normal_[0], normal_[1], normal_[2]);
     output = Eigen::Translation3f(O_) * Eigen::Quaternionf(rot_mat);
   }
   
   void GridMap::originPose(Eigen::Affine3d& output)
   {
-    Eigen::Matrix3d rot_mat;
-    rot_mat.col(0) = Eigen::Vector3d(ex_[0], ex_[1], ex_[2]);
-    rot_mat.col(1) = Eigen::Vector3d(ey_[0], ey_[1], ey_[2]);
-    rot_mat.col(2) = Eigen::Vector3d(normal_[0], normal_[1], normal_[2]);
-    output = Eigen::Translation3d(Eigen::Vector3d(O_[0],
-                                                  O_[1],
-                                                  O_[2]))
-      * Eigen::Quaterniond(rot_mat);
+    Eigen::Affine3f float_affine;
+    originPose(float_affine);
+    convertEigenAffine3(float_affine, output);
   }
   
   void GridMap::toMsg(SparseOccupancyGrid& grid)
   {
     grid.resolution = resolution_;
     // compute origin POSE from O and normal_, d_
-    Eigen::Affine3f plane_pose;
+    Eigen::Affine3d plane_pose;
     originPose(plane_pose);
-    
-    //tf::poseEigenToMsg(plane_pose, grid.origin_pose);
+    tf::poseEigenToMsg(plane_pose, grid.origin_pose);
     for (ColumnIterator it = data_.begin();
          it != data_.end();
          it++) {

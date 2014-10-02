@@ -298,11 +298,16 @@
       <param name="align_box" value="true" />
       <remap from="~input" to="/selected_pointcloud" />
       <remap from="~input_box" to="/bounding_box_marker/selected_box" />
-      <remap from="~input_reference" to="reference_cloud" />
+      <remap from="~input_reference_array" to="pointcloud_server/output" />
     </node>
-    <node pkg="pcl_ros" type="pcd_to_pointcloud" name="model_publisher"
-          args="$(arg MODEL_FILE)">
-      <remap from="cloud_pcd" to="reference_cloud" />
+    <node pkg="nodelet" type="nodelet" name="pointcloud_server"
+          args="load jsk_pcl/PointcloudDatabaseServer /$(arg MANAGER)">
+      <rosparam subst_value="true">
+        models: ["$(find jsk_pcl_ros)/models/cup_kinect.pcd",
+                 "$(find jsk_pcl_ros)/models/hand_drill_kinect.pcd",
+                 "$(find jsk_pcl_ros)/models/takenoko_drill_kinect.pcd",
+                 "$(find jsk_pcl_ros)/models/ps3_controller_kinect.pcd"]
+      </rosparam>
     </node>
   </group>
 </launch>

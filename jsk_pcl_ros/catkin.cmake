@@ -223,6 +223,8 @@ jsk_pcl_nodelet(src/icp_registration_nodelet.cpp
   "jsk_pcl/ICPRegistration" "icp_registration")
 jsk_pcl_nodelet(src/transform_pointcloud_in_bounding_box_nodelet.cpp
   "jsk_pcl/TransformPointcloudInBoundingBox" "transform_pointcloud_in_bounding_box")
+jsk_pcl_nodelet(src/pointcloud_database_server_nodelet.cpp
+  "jsk_pcl/PointcloudDatabaseServer" "pointcloud_database_server")
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
   src/pcl_conversion_util.cpp src/pcl_util.cpp

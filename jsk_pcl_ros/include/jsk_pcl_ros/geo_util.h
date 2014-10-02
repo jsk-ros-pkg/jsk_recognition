@@ -151,6 +151,7 @@ namespace jsk_pcl_ros
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3f& output);
     virtual void project(const Eigen::Vector3f& p, Eigen::Vector3d& output);
     virtual Eigen::Vector3f getNormal();
+    virtual Eigen::Vector3f getPointOnPlane();
     virtual Plane transform(const Eigen::Affine3d& transform);
     virtual void toCoefficients(std::vector<float>& output);
     virtual std::vector<float> toCoefficients();

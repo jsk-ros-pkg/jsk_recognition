@@ -264,7 +264,7 @@ namespace jsk_pcl_ros
   {
     
   }
-
+  
   Plane::Plane(Eigen::Vector3f normal, Eigen::Vector3f p) :
     normal_(normal.normalized()), d_(- normal.dot(p) / normal.norm())
   {
@@ -275,6 +275,12 @@ namespace jsk_pcl_ros
   Plane::~Plane()
   {
 
+  }
+  
+  Eigen::Vector3f Plane::getPointOnPlane()
+  {
+    Eigen::Vector3f x = normal_ / (normal_.norm() * normal_.norm()) * (- d_);
+    return x;
   }
 
   Plane Plane::flip()

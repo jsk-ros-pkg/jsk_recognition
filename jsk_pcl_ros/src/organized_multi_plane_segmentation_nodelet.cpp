@@ -132,6 +132,29 @@ namespace jsk_pcl_ros
                   _1));
   }
 
+  void OrganizedMultiPlaneSegmentation::forceToDirectOrigin(
+    const std::vector<pcl::ModelCoefficients>& coefficients,
+    std::vector<pcl::ModelCoefficients>& output_coefficients)
+  {
+    output_coefficients.resize(coefficients.size());
+    for (size_t i = 0; i < coefficients.size(); i++) {
+      pcl::ModelCoefficients plane_coefficient = coefficients[i];
+      Plane plane(coefficients[i].values);
+      
+      Eigen::Vector3f p = plane.getPointOnPlane();
+      Eigen::Vector3f n = plane.getNormal();
+      if (p.dot(n) < 0) {
+        output_coefficients[i] = plane_coefficient;
+      }
+      else {
+        Plane flip = plane.flip();
+        pcl::ModelCoefficients new_coefficient;
+        flip.toCoefficients(new_coefficient.values);
+        output_coefficients[i] = new_coefficient;
+      }
+    }
+  }
+
   void OrganizedMultiPlaneSegmentation::subscribe()
   {
     sub_ = pnh_->subscribe("input", 1,
@@ -524,6 +547,10 @@ namespace jsk_pcl_ros
     segmentOrganizedMultiPlanes(input, normal, regions, model_coefficients,
                                 inlier_indices, labels, label_indices,
                                 boundary_indices);
+    std::vector<pcl::ModelCoefficients> fixed_model_coefficients;
+    forceToDirectOrigin(model_coefficients, fixed_model_coefficients);
+    model_coefficients = fixed_model_coefficients;
+    
     original_plane_num_counter_.add(regions.size());
     publishSegmentationInformation(
       header, input,
@@ -548,6 +575,9 @@ namespace jsk_pcl_ros
                          output_nonrefined_indices,
                          output_nonrefined_coefficients,
                          output_nonrefined_boundary_clouds);
+    std::vector<pcl::ModelCoefficients> fixed_output_nonrefined_coefficients;
+    forceToDirectOrigin(output_nonrefined_coefficients, fixed_output_nonrefined_coefficients);
+    output_nonrefined_coefficients = fixed_output_nonrefined_coefficients;
     publishSegmentationInformation(
       header, input,
       pub_, polygon_pub_, coefficients_pub_,
@@ -570,6 +600,9 @@ namespace jsk_pcl_ros
         refined_convexes[i]->boundariesToPointCloud(refined_boundary);
         refined_boundary_clouds.push_back(refined_boundary);
       }
+      std::vector<pcl::ModelCoefficients> fixed_refined_coefficients;
+      forceToDirectOrigin(refined_coefficients, fixed_refined_coefficients);
+      refined_coefficients = fixed_refined_coefficients;
       publishSegmentationInformation(
         header, input,
         refined_pub_, refined_polygon_pub_, refined_coefficients_pub_,

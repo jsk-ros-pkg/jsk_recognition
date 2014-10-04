@@ -46,6 +46,7 @@
 #include <message_filters/synchronizer.h>
 #include <tf/transform_listener.h>
 #include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <jsk_pcl_ros/PointsArray.h>
 
 namespace jsk_pcl_ros
 {
@@ -66,20 +67,32 @@ namespace jsk_pcl_ros
     virtual void alignWithBox(
       const sensor_msgs::PointCloud2::ConstPtr& msg,
       const BoundingBox::ConstPtr& box_msg);
-    virtual void alignPointcloud(pcl::PointCloud<PointT>::Ptr& cloud,
-                                 const Eigen::Affine3f& offset,
-                                 const std_msgs::Header& header);
     virtual void referenceCallback(
       const sensor_msgs::PointCloud2::ConstPtr& msg);
+    virtual void referenceArrayCallback(
+      const PointsArray::ConstPtr& msg);
     virtual void configCallback (Config &config, uint32_t level);
     virtual void publishDebugCloud(
       ros::Publisher& pub,
       const pcl::PointCloud<PointT>& cloud);
     virtual double alignPointcloud(
       pcl::PointCloud<PointT>::Ptr& cloud,
+      pcl::PointCloud<PointT>::Ptr& reference,
       const Eigen::Affine3f& offset,
       pcl::PointCloud<PointT>::Ptr& output_cloud,
       Eigen::Affine3d& output_transform);
+    virtual double alignPointcloudWithReferences(
+      pcl::PointCloud<PointT>::Ptr& cloud,
+      const Eigen::Affine3f& offset,
+      const std_msgs::Header& header);
+    virtual double scorePointcloudAlignment(
+      pcl::PointCloud<PointT>::Ptr& cloud,
+      pcl::PointCloud<PointT>::Ptr& reference,
+      const Eigen::Affine3f& offset,
+      Eigen::Affine3f& offset_result,
+      pcl::PointCloud<PointT>::Ptr transformed_cloud,
+      Eigen::Affine3d& transform_result);
+
     virtual void subscribe();
     virtual void unsubscribe();
     ////////////////////////////////////////////////////////
@@ -87,6 +100,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     ros::Subscriber sub_;
     ros::Subscriber sub_reference_;
+    ros::Subscriber sub_reference_array_;
     ros::Publisher pub_result_pose_;
     ros::Publisher pub_result_cloud_;
     ros::Publisher pub_debug_source_cloud_,
@@ -106,7 +120,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     bool use_flipped_initial_pose_;
     int algorithm_;
-    pcl::PointCloud<PointT>::Ptr reference_cloud_;
+    std::vector<pcl::PointCloud<PointT>::Ptr> reference_cloud_list_;
     int max_iteration_;
     double correspondence_distance_;
     double transform_epsilon_;

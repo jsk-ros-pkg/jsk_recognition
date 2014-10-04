@@ -183,7 +183,7 @@ namespace jsk_pcl_ros
       // EnvironmentLock::Response res;
       lockCallback();
     }
-    diagnostic_updater_->update();
+    //diagnostic_updater_->update();
   }
 
   void EnvironmentPlaneModeling::configCallback(Config &config, uint32_t level)
@@ -339,16 +339,17 @@ namespace jsk_pcl_ros
     NODELET_INFO("%lu convexhull will be fulfilled", estimation_summary.size());
     typedef std::map<int, std::set<size_t> >::const_iterator Iterator;
     *all_cloud = *input;
-    copyClusterPointIndices(indices, all_indices);
+    copyClusterPointIndices(indices, all_indices); // concatenate indices into all_indices
+    
     for (Iterator it = estimation_summary.begin();
          it != estimation_summary.end();
          it++)
     {
       int env_plane_index = it->first;
+      NODELET_INFO("env_plane_index: %d", env_plane_index);
       std::set<size_t> static_polygon_indices = it->second;
       NODELET_INFO("%d plane is appended by %lu planes", env_plane_index,
                    static_polygon_indices.size());
-      // 2cm
       GridMap::Ptr grid = grid_maps[env_plane_index];
       geometry_msgs::PolygonStamped convex_polygon
         = result_polygons.polygons[env_plane_index];
@@ -358,29 +359,27 @@ namespace jsk_pcl_ros
       else {
         NODELET_INFO("registering 0 lines");
       }
+      // a variable to store all the indices of the lines
       std::vector<GridIndex::Ptr> line_indices;
-      for (size_t i = 0; i < convex_polygon.polygon.points.size() - 1; i++) {
+      for (size_t i = 0; i < convex_polygon.polygon.points.size(); i++) { // for all points in convex_polygon
         geometry_msgs::Point32 from = convex_polygon.polygon.points[i];
-        geometry_msgs::Point32 to = convex_polygon.polygon.points[i + 1];
-        pcl::PointXYZRGB from_pcl, to_pcl;
-        pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZRGB>(
-          from, from_pcl);
-        pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZRGB>(
-          to, to_pcl);
-        std::vector<GridIndex::Ptr> aline_indices = grid->registerLine(from_pcl, to_pcl);
-        for (size_t j = 0; j < aline_indices.size(); j++) {
-          line_indices.push_back(aline_indices[j]);
+        
+        geometry_msgs::Point32 to;
+        if (i == convex_polygon.polygon.points.size() - 1) {
+          to = convex_polygon.polygon.points[0];
         }
-      }
-      // the last one
-      {
-        geometry_msgs::Point32 from = convex_polygon.polygon.points[convex_polygon.polygon.points.size() - 1];
-        geometry_msgs::Point32 to = convex_polygon.polygon.points[0];
+        else {
+          to = convex_polygon.polygon.points[i + 1];
+        }
+
         pcl::PointXYZRGB from_pcl, to_pcl;
         pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZRGB>(
           from, from_pcl);
         pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZRGB>(
           to, to_pcl);
+        ROS_INFO("line point: [%f, %f, %f] - [%f, %f, %f]",
+                 from_pcl.x, from_pcl.y, from_pcl.z,
+                 to_pcl.x, to_pcl.y, to_pcl.z);
         std::vector<GridIndex::Ptr> aline_indices = grid->registerLine(from_pcl, to_pcl);
         for (size_t j = 0; j < aline_indices.size(); j++) {
           line_indices.push_back(aline_indices[j]);
@@ -401,16 +400,9 @@ namespace jsk_pcl_ros
         // convex hull region
         Eigen::Vector3f centroid_eigen = centroid.getVector3fMap();
         Eigen::Vector3f centroid_projected;
-        PCLModelCoefficientMsg the_coefficients = static_coefficients->coefficients[*it];
-        Eigen::Vector3f normal;
-        normal[0] = the_coefficients.values[0];
-        normal[1] = the_coefficients.values[1];
-        normal[2] = the_coefficients.values[2];
-        double d = the_coefficients.values[3] / normal.norm();
-        normal.normalize();
-        //double alpha = normal.dot(centroid_eigen) - d;
-        double alpha = normal.dot(centroid_eigen);
-        centroid_projected = centroid_eigen - alpha * normal;
+        //Plane static_plane(static_coefficients->coefficients[*it].values);
+        //static_plane.project(centroid_eigen, centroid_projected);
+        convex_polygon_model.project(centroid_eigen, centroid_projected);
         if (convex_polygon_model.isInside(centroid_projected)) {
           grid->fillRegion(centroid_projected, filled_indices);
           
@@ -460,6 +452,7 @@ namespace jsk_pcl_ros
     const ModelCoefficientsArray::ConstPtr& coefficients,
     std::vector<GridMap::Ptr>& ordered_grid_maps)
   {
+    NODELET_INFO("buildGridMap:: %lu polygons", polygons->polygons.size());
     jsk_topic_tools::ScopedTimer timer = grid_building_time_acc_.scopedTimer();
     for (size_t i = 0; i < segmented_clouds.size(); i++) {
       pcl::PointCloud<PointT>::Ptr cloud = segmented_clouds[i];
@@ -698,7 +691,9 @@ namespace jsk_pcl_ros
                       result_coefficients,
                       result_pointcloud,
                       result_indices);
+    
     publishGridMap(processing_input_->header, grid_maps_);
+    
     if (result_indices->cluster_indices.size() == 0) {
       NODELET_WARN("failed to build gridmap?, result_indices equals to 0");
       return false;

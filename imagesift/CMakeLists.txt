@@ -26,6 +26,8 @@ endmacro(jsk_feature detector extractor exec_name)
 jsk_feature("SURF" "SURF" "imagesurf")
 jsk_feature("STAR" "SURF" "imagestar")
 jsk_feature("BRISK" "BRISK" "imagebrisk")
+jsk_feature("SIFT" "SIFT" "imagesift_sift")
+jsk_feature("SIFT" "SURF" "imagesift_surf")
 
 rosbuild_add_executable(imagesift imagesift.cpp)
 set_target_properties(imagesift PROPERTIES COMPILE_FLAGS "-msse2 -O3" LINK_FLAGS "-msse2 -O3")

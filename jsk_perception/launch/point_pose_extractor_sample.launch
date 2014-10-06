@@ -2,7 +2,7 @@
   <arg name="feature_node" default="imagesift" />
   <arg name="launch_camera" default="true" />
   <arg name="image" default="image_rect_color" />
-  <arg name="camera_info" dafault="camera_info" />
+  <arg name="camera_info" default="camera_info" />
   <node if="$(arg launch_camera)" name="uvc_camera" pkg="uvc_camera" type="uvc_camera_node"
         respawn="false" output="screen">
     <param name="camera_info_url" value="file://$(find roseus_tutorials)/launch/usb-camera.yaml"/>

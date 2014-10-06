@@ -44,8 +44,10 @@
 #include <map>
 #include <set>
 #include <Eigen/Geometry>
+#include <boost/tuple/tuple.hpp>
 
 #include "jsk_pcl_ros/geo_util.h"
+#include <opencv2/opencv.hpp>
 
 namespace jsk_pcl_ros
 {
@@ -91,6 +93,17 @@ namespace jsk_pcl_ros
     virtual unsigned int getGeneration();
     virtual std::vector<float> getCoefficients();
     virtual bool isBinsOccupied(const Eigen::Vector3f& p);
+    virtual int normalizedWidth();
+    virtual int normalizedHeight();
+    virtual boost::tuple<int, int> minMaxX();
+    virtual boost::tuple<int, int> minMaxY();
+    virtual int widthOffset();
+    virtual int heightOffset();
+    virtual int normalizedIndex(int width_offset, int height_offset,
+                                int step,
+                                int elem_size,
+                                int original_x, int original_y);
+    virtual cv::Mat toImage();
   protected:    
     double resolution_;
     Eigen::Vector3f O_;

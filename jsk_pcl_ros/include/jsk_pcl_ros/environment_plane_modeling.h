@@ -78,6 +78,12 @@ namespace jsk_pcl_ros
       ModelCoefficientsArray,
       PolygonArray,
       ModelCoefficientsArray> SyncPolicy;
+    typedef message_filters::sync_policies::ExactTime<
+      sensor_msgs::PointCloud2,
+      ClusterPointIndices,
+      PolygonArray,
+      ModelCoefficientsArray
+      > SyncPolicyWithoutStaticPolygon;
   protected:
     virtual void onInit();
     virtual void estimateOcclusion(
@@ -94,6 +100,10 @@ namespace jsk_pcl_ros
       pcl::PointCloud<PointT>::Ptr result_pointcloud,
       ClusterPointIndices::Ptr result_indices);
     
+    template <class A, class B>
+    bool isValidHeaders(
+      const std::vector<A>& as, const std::vector<B>& bs);
+    bool isValidInput();
     virtual void inputCallback(
       const sensor_msgs::PointCloud2::ConstPtr& input,
       const ClusterPointIndices::ConstPtr& input_indices,
@@ -164,6 +174,12 @@ namespace jsk_pcl_ros
      pcl::PointCloud<PointT>::Ptr all_cloud,
      ClusterPointIndices& all_indices,
      std::vector<GridMap::Ptr> grid_maps);
+
+    virtual void inputCallback(
+      const sensor_msgs::PointCloud2::ConstPtr& input,
+      const ClusterPointIndices::ConstPtr& input_indices,
+      const PolygonArray::ConstPtr& polygons,
+      const ModelCoefficientsArray::ConstPtr& coefficients);
     
     virtual void copyClusterPointIndices
     (const ClusterPointIndices::ConstPtr& indices,
@@ -181,13 +197,20 @@ namespace jsk_pcl_ros
       const geometry_msgs::Polygon& polygon);
     virtual void registerGridMap(const GridMap::Ptr new_grid_map);
     virtual void selectionGridMaps();
+    virtual pcl::PointCloud<EnvironmentPlaneModeling::PointT>::Ptr
+    projectCloud(
+    const pcl::PointCloud<PointT>::Ptr input_cloud,
+    const std::vector<float> input_coefficient);
     
     boost::mutex mutex_;
 
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     
     // synchronized subscription
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
+    boost::shared_ptr<
+      message_filters::Synchronizer<SyncPolicyWithoutStaticPolygon> >
+    sync_without_static_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<ClusterPointIndices> sub_indices_;
     message_filters::Subscriber<PolygonArray> sub_polygons_;
@@ -239,6 +262,8 @@ namespace jsk_pcl_ros
     bool continuous_estimation_;
     bool history_accumulation_;
     bool history_statical_rejection_;
+    bool estimate_occlusion_;
+    bool use_static_polygons_;
     int static_generation_;
     int required_vote_;
     std::vector<GridMap::Ptr> grid_maps_;

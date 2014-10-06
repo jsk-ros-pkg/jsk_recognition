@@ -121,6 +121,8 @@ namespace jsk_pcl_ros
                                        std_srvs::Empty::Response& res);
     virtual bool primitiveUnlockCallback(std_srvs::Empty::Request& req,
                                          std_srvs::Empty::Response& res);
+    virtual bool clearMapCallback(std_srvs::Empty::Request& req,
+                                  std_srvs::Empty::Response& res);
     virtual bool polygonNearEnoughToPointCloud(
       const size_t plane_i,
       const pcl::PointCloud<PointT>::Ptr sampled_point_cloud);
@@ -201,9 +203,11 @@ namespace jsk_pcl_ros
     projectCloud(
     const pcl::PointCloud<PointT>::Ptr input_cloud,
     const std::vector<float> input_coefficient);
-    
-    boost::mutex mutex_;
 
+    ////////////////////////////////////////////////////////
+    // ROS variables
+    ////////////////////////////////////////////////////////
+    boost::mutex mutex_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     
     // synchronized subscription
@@ -217,11 +221,11 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<ModelCoefficientsArray> sub_coefficients_;
     message_filters::Subscriber<PolygonArray> sub_static_polygons_;
     message_filters::Subscriber<ModelCoefficientsArray> sub_static_coefficients_;
-    
     ros::ServiceServer lock_service_;
     ros::ServiceServer polygon_on_environment_service_;
     ros::ServiceServer primitive_lock_service_;
     ros::ServiceServer primitive_unlock_service_;
+    ros::ServiceServer clear_map_service_;
     ros::Publisher debug_polygon_pub_;
     ros::Publisher debug_env_polygon_pub_;
     ros::Publisher debug_pointcloud_pub_;

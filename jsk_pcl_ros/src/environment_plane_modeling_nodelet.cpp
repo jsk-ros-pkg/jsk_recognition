@@ -136,6 +136,10 @@ namespace jsk_pcl_ros
       = pnh_->advertiseService(
         "polygon_on_environment",
         &EnvironmentPlaneModeling::polygonOnEnvironmentCallback, this);
+    clear_map_service_
+      = pnh_->advertiseService(
+        "clear_maps",
+        &EnvironmentPlaneModeling::clearMapCallback, this);
   }
 
 
@@ -153,6 +157,14 @@ namespace jsk_pcl_ros
     mutex_.lock();
     NODELET_INFO("locked!!");
     return true;
+  }
+
+  bool EnvironmentPlaneModeling::clearMapCallback(
+    std_srvs::Empty::Request& req,
+    std_srvs::Empty::Response& res)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    grid_maps_ = std::vector<GridMap::Ptr>();
   }
 
   bool EnvironmentPlaneModeling::primitiveUnlockCallback(

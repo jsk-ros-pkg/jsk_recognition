@@ -139,6 +139,8 @@ namespace jsk_pcl_ros
                                      const double ratio,
                                      PointT& output);
 
+    virtual void downsizeGridMaps();
+    
     virtual void extendConvexPolygon(
       const geometry_msgs::PolygonStamped& static_polygon,
       const PCLModelCoefficientMsg& coefficients,
@@ -270,6 +272,7 @@ namespace jsk_pcl_ros
     bool use_static_polygons_;
     int static_generation_;
     int required_vote_;
+    int decrease_grid_map_;
     std::vector<GridMap::Ptr> grid_maps_;
     jsk_topic_tools::TimeAccumulator occlusion_estimate_time_acc_;
     jsk_topic_tools::TimeAccumulator grid_building_time_acc_;

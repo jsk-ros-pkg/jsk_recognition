@@ -250,6 +250,7 @@ namespace jsk_pcl_ros
     distance_thr_ = config.distance_threshold;
     sampling_d_ = config.collision_check_sampling_d;
     estimate_occlusion_ = config.estimate_occlusion;
+    decrease_grid_map_ = config.decrease_grid_map;
     if (resolution_size_ != config.resolution_size) {
       NODELET_INFO_STREAM(
         "clearing grid maps because of the change of resolution size: "
@@ -777,7 +778,6 @@ namespace jsk_pcl_ros
                  processing_input_coefficients_,
                  ordered_grid_maps);
     
-    
     PolygonArray::Ptr result_polygons (new PolygonArray);
     ModelCoefficientsArray::Ptr result_coefficients(new ModelCoefficientsArray);
     pcl::PointCloud<PointT>::Ptr result_pointcloud (new pcl::PointCloud<PointT>);
@@ -794,6 +794,8 @@ namespace jsk_pcl_ros
                       result_coefficients,
                       result_pointcloud,
                       result_indices);
+    // decrease all the maps
+    downsizeGridMaps();
     
     publishGridMap(processing_input_->header, grid_maps_);
     
@@ -849,6 +851,13 @@ namespace jsk_pcl_ros
     return true;
   }
 
+  void EnvironmentPlaneModeling::downsizeGridMaps()
+  {
+    for (size_t i = 0; i < grid_maps_.size(); i++) {
+      grid_maps_[i]->decrease(decrease_grid_map_);
+    }
+  }
+  
   bool EnvironmentPlaneModeling::polygonNearEnoughToPointCloud(
     const size_t plane_i,
     const pcl::PointCloud<PointT>::Ptr sampled_point_cloud)

@@ -458,4 +458,147 @@ namespace jsk_pcl_ros
     //ROS_INFO("checking (%d, %d)", ret->x, ret->y);
     return getValue(ret);
   }
+
+  boost::tuple<int, int> GridMap::minMaxX()
+  {
+    int min_x = INT_MAX;
+    int max_x = - INT_MAX;
+    for (ColumnIterator it = data_.begin();
+         it != data_.end();
+         ++it) {
+      int x = it->first;
+      if (min_x > x) {
+        min_x = x;
+      }
+      if (max_x < x) {
+        max_x = x;
+      }
+    }
+    return boost::make_tuple<int, int>(min_x, max_x);
+  }
+
+  boost::tuple<int, int> GridMap::minMaxY()
+  {
+    int min_y = INT_MAX;
+    int max_y = - INT_MAX;
+    for (ColumnIterator it = data_.begin();
+         it != data_.end();
+         ++it) {
+      RowIndices row_indices = it->second;
+      for (RowIterator rit = row_indices.begin();
+           rit != row_indices.end();
+           rit++) {
+        int y = *rit;
+        if (min_y > y) {
+          min_y = y;
+        }
+        if (max_y < y) {
+          max_y = y;
+        }
+      }
+    }
+    return boost::make_tuple<int, int>(min_y, max_y);
+  }
+  
+  int GridMap::normalizedWidth()
+  {
+    boost::tuple<int, int> min_max_x = minMaxX();
+    return min_max_x.get<1>() - min_max_x.get<0>();
+  }
+
+  int GridMap::normalizedHeight()
+  {
+    boost::tuple<int, int> min_max_y = minMaxY();
+    return min_max_y.get<1>() - min_max_y.get<0>();
+  }
+
+  int GridMap::widthOffset()
+  {
+    boost::tuple<int, int> min_max_x = minMaxX();
+    int min_x = min_max_x.get<0>();
+    return - min_x;
+  }
+
+  int GridMap::heightOffset()
+  {
+    boost::tuple<int, int> min_max_y = minMaxY();
+    int min_y = min_max_y.get<0>();
+    return - min_y;
+  }
+
+  int GridMap::normalizedIndex(int width_offset, int height_offset,
+                               int step,
+                               int elem_size,
+                               int original_x, int original_y)
+  {
+    int x = original_x + width_offset;
+    int y = original_y + height_offset;
+    return y * step + x * elem_size;
+  }
+  
+  
+  cv::Mat GridMap::toImage()
+  {
+    // initialize with black
+    int width = normalizedWidth();
+    int height = normalizedHeight();
+    int width_offset = widthOffset();
+    int height_offset = heightOffset();
+    cv::Mat m = cv::Mat(width, height, CV_8UC1) * 0;
+    // for all index
+    for (ColumnIterator it = data_.begin();
+         it != data_.end();
+         ++it) {
+      for (RowIterator rit = it->second.begin();
+           rit != it->second.end();
+           ++rit) {
+        m.data[normalizedIndex(width_offset, height_offset,
+                               m.step, m.elemSize(),
+                               it->first, *rit)] = 255;
+      }
+    }
+    
+    return m;
+  }
+
+  bool GridMap::check4Neighbor(int x, int y) {
+    if (getValue(x + 1, y) &&
+        getValue(x + 1, y + 1) &&
+        getValue(x - 1, y) &&
+        getValue(x - 1, y - 1)) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+  
+  void GridMap::decreaseOne()
+  {
+    //Columns new_data;
+    GridMap::Ptr new_map (new GridMap(resolution_, getCoefficients()));
+    for (ColumnIterator it = data_.begin();
+         it != data_.end();
+         it++) {
+      RowIndices row_indices = it->second;
+      int x = it->first;
+      for (RowIterator rit = row_indices.begin();
+           rit != row_indices.end();
+           rit++) {
+        int y = *rit;
+        if (check4Neighbor(x, y)) {
+          new_map->registerIndex(x, y);
+        }
+      }
+    }
+    data_ = new_map->data_;
+  }
+  
+  void GridMap::decrease(int i)
+  {
+    for (int ii = 0; ii < i; ii++) {
+      decreaseOne();
+    }
+  }
+  
 }

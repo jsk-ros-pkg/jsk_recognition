@@ -94,10 +94,11 @@ public:
     ros::Time siftbasetime = ros::Time::now();
     vector<cv::KeyPoint> keypts;
     detector->detect(cv_ptr->image, keypts);
+    ros::Time detect_end_time = ros::Time::now();
     int numkeys = keypts.size();  
     cv::Mat descriptor;
     extractor->compute(cv_ptr->image, keypts, descriptor);
-
+    ros::Time extract_end_time = ros::Time::now();
     // publish                                                                        
     features.header = imagemsg.header;
     features.positions.resize(numkeys*2);
@@ -133,9 +134,11 @@ public:
     
     
     
-    ROS_INFO("image_feature: image: %d(size=%lu), num: %d, sift time: %.3fs, total: %.3fs", imagemsg.header.seq,
+    ROS_INFO("image_feature: image: %d(size=%lu), num: %d, feature time: %.3fs(keypoint-detect time: %.3fs, feature-extract time: %.3f, other time: %.3f), total: %.3fs", imagemsg.header.seq,
 	     imagemsg.data.size(),  numkeys,
-	     (float)(ros::Time::now()-siftbasetime).toSec(), (float)(ros::Time::now()-lasttime).toSec());
+	     (float)(ros::Time::now()-siftbasetime).toSec(), 
+	     (float)(detect_end_time-siftbasetime).toSec(), (float)(extract_end_time-detect_end_time).toSec(), (float)(ros::Time::now()-extract_end_time).toSec(),
+	     (float)(ros::Time::now()-lasttime).toSec());
 		 
     lasttime = ros::Time::now() ;
     return true;

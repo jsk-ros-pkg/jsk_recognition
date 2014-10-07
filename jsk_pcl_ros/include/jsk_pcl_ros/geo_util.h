@@ -171,6 +171,8 @@ namespace jsk_pcl_ros
     typedef boost::shared_ptr<Polygon> Ptr;
     typedef boost::tuple<Ptr, Ptr> PtrPair;
     Polygon(const Vertices& vertices);
+    Polygon(const Vertices& vertices,
+            const std::vector<float>& coefficients);
     virtual ~Polygon();
     virtual std::vector<Polygon::Ptr> decomposeToTriangles();
     virtual bool isTriangle();
@@ -179,6 +181,7 @@ namespace jsk_pcl_ros
     virtual Eigen::Vector3f directionAtPoint(size_t i);
     virtual Eigen::Vector3f getVertex(size_t i);
     virtual PointIndexPair getNeighborIndex(size_t index);
+    virtual double area();
     virtual bool isPossibleToRemoveTriangleAtIndex(
       size_t index,
       const Eigen::Vector3f& direction);
@@ -195,7 +198,7 @@ namespace jsk_pcl_ros
   };
   
   
-  class ConvexPolygon: public Plane
+  class ConvexPolygon: public Polygon
   {
   public:
     typedef boost::shared_ptr<ConvexPolygon> Ptr;
@@ -206,7 +209,6 @@ namespace jsk_pcl_ros
     ConvexPolygon(const Vertices& vertices);
     ConvexPolygon(const Vertices& vertices,
                   const std::vector<float>& coefficients);
-    
     //virtual Polygon flip();
     virtual void project(const Eigen::Vector3f& p, Eigen::Vector3f& output);
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3d& output);
@@ -238,11 +240,10 @@ namespace jsk_pcl_ros
     bool distanceSmallerThan(
       const Eigen::Vector3f& p, double distance_threshold,
       double& output_distance);
-    double area();
     bool allEdgesLongerThan(double thr);
     geometry_msgs::Polygon toROSMsg();
   protected:
-    Vertices vertices_;
+    
   private:
   };
 

@@ -104,7 +104,13 @@ namespace jsk_pcl_ros
                                 int elem_size,
                                 int original_x, int original_y);
     virtual cv::Mat toImage();
-  protected:    
+    virtual bool check4Neighbor(int x, int y);
+    
+    virtual void decrease(int i);
+    
+  protected:
+    virtual void decreaseOne();
+    
     double resolution_;
     Eigen::Vector3f O_;
     

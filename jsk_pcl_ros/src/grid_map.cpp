@@ -560,4 +560,45 @@ namespace jsk_pcl_ros
     
     return m;
   }
+
+  bool GridMap::check4Neighbor(int x, int y) {
+    if (getValue(x + 1, y) &&
+        getValue(x + 1, y + 1) &&
+        getValue(x - 1, y) &&
+        getValue(x - 1, y - 1)) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+  
+  void GridMap::decreaseOne()
+  {
+    //Columns new_data;
+    GridMap::Ptr new_map (new GridMap(resolution_, getCoefficients()));
+    for (ColumnIterator it = data_.begin();
+         it != data_.end();
+         it++) {
+      RowIndices row_indices = it->second;
+      int x = it->first;
+      for (RowIterator rit = row_indices.begin();
+           rit != row_indices.end();
+           rit++) {
+        int y = *rit;
+        if (check4Neighbor(x, y)) {
+          new_map->registerIndex(x, y);
+        }
+      }
+    }
+    data_ = new_map->data_;
+  }
+  
+  void GridMap::decrease(int i)
+  {
+    for (int ii = 0; ii < i; ii++) {
+      decreaseOne();
+    }
+  }
+  
 }

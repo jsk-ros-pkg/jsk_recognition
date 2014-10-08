@@ -96,9 +96,6 @@ namespace jsk_pcl_ros
                                );
     virtual void renew_model_topic_cb(const sensor_msgs::PointCloud2 &pc);
 
-    virtual double getXMLDoubleValue(XmlRpc::XmlRpcValue val);
-    virtual bool readVectorParameter(const std::string& param_name,
-                                     std::vector<double>& result);
   private:
     virtual void onInit();
 

@@ -29,7 +29,7 @@ endif(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
 jsk_nodelet(src/image_resizer_nodelet.cpp
   "resized_image_transport/ImageResizer"
   "image_resizer"
-  nodelet_sources)
+  nodelet_sources nodelet_executables)
 add_library(resized_image_transport SHARED ${nodelet_sources})
   
 add_definitions("-O2 -g")
@@ -39,7 +39,7 @@ add_dependencies(resized_image_transport ${PROJECT_NAME}_gencfg)
 
 
 # Mark executables and/or libraries for installation
-install(TARGETS image_resizer resized_image_transport
+install(TARGETS image_resizer resized_image_transport ${nodelet_executables}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

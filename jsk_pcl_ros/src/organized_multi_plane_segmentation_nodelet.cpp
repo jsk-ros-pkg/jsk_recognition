@@ -132,6 +132,29 @@ namespace jsk_pcl_ros
                   _1));
   }
 
+  void OrganizedMultiPlaneSegmentation::forceToDirectOrigin(
+    const std::vector<pcl::ModelCoefficients>& coefficients,
+    std::vector<pcl::ModelCoefficients>& output_coefficients)
+  {
+    output_coefficients.resize(coefficients.size());
+    for (size_t i = 0; i < coefficients.size(); i++) {
+      pcl::ModelCoefficients plane_coefficient = coefficients[i];
+      Plane plane(coefficients[i].values);
+      
+      Eigen::Vector3f p = plane.getPointOnPlane();
+      Eigen::Vector3f n = plane.getNormal();
+      if (p.dot(n) < 0) {
+        output_coefficients[i] = plane_coefficient;
+      }
+      else {
+        Plane flip = plane.flip();
+        pcl::ModelCoefficients new_coefficient;
+        flip.toCoefficients(new_coefficient.values);
+        output_coefficients[i] = new_coefficient;
+      }
+    }
+  }
+
   void OrganizedMultiPlaneSegmentation::subscribe()
   {
     sub_ = pnh_->subscribe("input", 1,
@@ -151,7 +174,6 @@ namespace jsk_pcl_ros
     distance_threshold_ = config.distance_threshold;
     max_curvature_ = config.max_curvature;
     connect_plane_angle_threshold_ = config.connect_plane_angle_threshold;
-    connect_plane_distance_threshold_ = config.connect_plane_distance_threshold;
     connect_distance_threshold_ = config.connect_distance_threshold;
     max_depth_change_factor_ = config.max_depth_change_factor;
     normal_smoothing_size_ = config.normal_smoothing_size;
@@ -162,9 +184,11 @@ namespace jsk_pcl_ros
     ransac_refine_coefficients_ = config.ransac_refine_coefficients;
     ransac_refine_outlier_distance_threshold_
       = config.ransac_refine_outlier_distance_threshold;
+    min_refined_area_threshold_ = config.min_refined_area_threshold;
+    max_refined_area_threshold_ = config.max_refined_area_threshold;
     //concave_alpha_ = config.concave_alpha;
   }
-
+  
   void OrganizedMultiPlaneSegmentation::connectPlanesMap(
     const pcl::PointCloud<PointT>::Ptr& input,
     const std::vector<pcl::ModelCoefficients>& model_coefficients,
@@ -202,10 +226,6 @@ namespace jsk_pcl_ros
           b_distance = b_distance / b_normal.norm();
           b_normal = b_normal / b_normal.norm();
         }
-        NODELET_DEBUG("%lu - %lu distance: %f", i, j, fabs(fabs(a_distance) - fabs(b_distance)));
-        if (fabs(fabs(a_distance) - fabs(b_distance)) > connect_plane_distance_threshold_) {
-          continue;
-        }
         double theta = fabs(acos(a_normal.dot(b_normal)));
         NODELET_DEBUG("%lu - %lu angle: %f", i, j, theta);
         if (theta > M_PI / 2.0) {
@@ -235,7 +255,8 @@ namespace jsk_pcl_ros
             PointT p = b_cloud.points[pi];
             std::vector<int> k_indices;
             std::vector<float> k_sqr_distances;
-            if (kdtree.radiusSearch(p, connect_distance_threshold_, k_indices, k_sqr_distances, 1) > 0) {
+            if (kdtree.radiusSearch(
+                  p, connect_distance_threshold_, k_indices, k_sqr_distances, 1) > 0) {
               NODELET_DEBUG("%lu - %lu connected", i, j);
               foundp = true;
               break;
@@ -524,6 +545,10 @@ namespace jsk_pcl_ros
     segmentOrganizedMultiPlanes(input, normal, regions, model_coefficients,
                                 inlier_indices, labels, label_indices,
                                 boundary_indices);
+    std::vector<pcl::ModelCoefficients> fixed_model_coefficients;
+    forceToDirectOrigin(model_coefficients, fixed_model_coefficients);
+    model_coefficients = fixed_model_coefficients;
+    
     original_plane_num_counter_.add(regions.size());
     publishSegmentationInformation(
       header, input,
@@ -548,6 +573,9 @@ namespace jsk_pcl_ros
                          output_nonrefined_indices,
                          output_nonrefined_coefficients,
                          output_nonrefined_boundary_clouds);
+    std::vector<pcl::ModelCoefficients> fixed_output_nonrefined_coefficients;
+    forceToDirectOrigin(output_nonrefined_coefficients, fixed_output_nonrefined_coefficients);
+    output_nonrefined_coefficients = fixed_output_nonrefined_coefficients;
     publishSegmentationInformation(
       header, input,
       pub_, polygon_pub_, coefficients_pub_,
@@ -570,6 +598,9 @@ namespace jsk_pcl_ros
         refined_convexes[i]->boundariesToPointCloud(refined_boundary);
         refined_boundary_clouds.push_back(refined_boundary);
       }
+      std::vector<pcl::ModelCoefficients> fixed_refined_coefficients;
+      forceToDirectOrigin(refined_coefficients, fixed_refined_coefficients);
+      refined_coefficients = fixed_refined_coefficients;
       publishSegmentationInformation(
         header, input,
         refined_pub_, refined_polygon_pub_, refined_coefficients_pub_,
@@ -617,9 +648,14 @@ namespace jsk_pcl_ros
         ConvexPolygon::Ptr convex = convexFromCoefficientsAndInliers<PointT>(
           input, refined_inliers, refined_coefficients);
         if (convex) {
-          output_convexes.push_back(convex);
-          output_indices.push_back(*refined_inliers);
-          output_coefficients.push_back(*refined_coefficients);
+          // check area threshold
+          double area = convex->area();
+          if (area > min_refined_area_threshold_ &&
+              area < max_refined_area_threshold_) {
+            output_convexes.push_back(convex);
+            output_indices.push_back(*refined_inliers);
+            output_coefficients.push_back(*refined_coefficients);
+          }
         }
       }
     }

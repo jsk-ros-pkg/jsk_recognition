@@ -39,6 +39,7 @@
 #include "jsk_pcl_ros/geo_util.h"
 #include <eigen_conversions/eigen_msg.h>
 #include <nodelet/nodelet.h>
+#include "jsk_pcl_ros/pcl_conversion_util.h"
 //#define DEBUG_GRID_MAP
 
 namespace jsk_pcl_ros
@@ -46,10 +47,10 @@ namespace jsk_pcl_ros
   GridMap::GridMap(double resolution, const std::vector<float>& coefficients):
     resolution_(resolution), vote_(0)
   {
-    normal_[0] = coefficients[0];
-    normal_[1] = coefficients[1];
-    normal_[2] = coefficients[2];
-    d_ = coefficients[3];
+    normal_[0] = -coefficients[0];
+    normal_[1] = -coefficients[1];
+    normal_[2] = -coefficients[2];
+    d_ = -coefficients[3];
     if (normal_.norm() != 1.0) {
       d_ = d_ / normal_.norm();
       normal_.normalize();
@@ -208,6 +209,7 @@ namespace jsk_pcl_ros
   {
     for (size_t i = 0; i < cloud->points.size(); i++) {
       registerPoint(cloud->points[i]);
+      //ROS_INFO("registered point: [%f, %f, %f]", cloud->points[i].x, cloud->points[i].y, cloud->points[i].z);
     }
   }
   
@@ -356,29 +358,27 @@ namespace jsk_pcl_ros
     rot_mat.col(0) = Eigen::Vector3f(ex_[0], ex_[1], ex_[2]);
     rot_mat.col(1) = Eigen::Vector3f(ey_[0], ey_[1], ey_[2]);
     rot_mat.col(2) = Eigen::Vector3f(normal_[0], normal_[1], normal_[2]);
+    ROS_INFO("O: [%f, %f, %f]", O_[0], O_[1], O_[2]);
+    ROS_INFO("ex: [%f, %f, %f]", ex_[0], ex_[1], ex_[2]);
+    ROS_INFO("ey: [%f, %f, %f]", ey_[0], ey_[1], ey_[2]);
+    ROS_INFO("normal: [%f, %f, %f]", normal_[0], normal_[1], normal_[2]);
     output = Eigen::Translation3f(O_) * Eigen::Quaternionf(rot_mat);
   }
   
   void GridMap::originPose(Eigen::Affine3d& output)
   {
-    Eigen::Matrix3d rot_mat;
-    rot_mat.col(0) = Eigen::Vector3d(ex_[0], ex_[1], ex_[2]);
-    rot_mat.col(1) = Eigen::Vector3d(ey_[0], ey_[1], ey_[2]);
-    rot_mat.col(2) = Eigen::Vector3d(normal_[0], normal_[1], normal_[2]);
-    output = Eigen::Translation3d(Eigen::Vector3d(O_[0],
-                                                  O_[1],
-                                                  O_[2]))
-      * Eigen::Quaterniond(rot_mat);
+    Eigen::Affine3f float_affine;
+    originPose(float_affine);
+    convertEigenAffine3(float_affine, output);
   }
   
   void GridMap::toMsg(SparseOccupancyGrid& grid)
   {
     grid.resolution = resolution_;
     // compute origin POSE from O and normal_, d_
-    Eigen::Affine3f plane_pose;
+    Eigen::Affine3d plane_pose;
     originPose(plane_pose);
-    
-    //tf::poseEigenToMsg(plane_pose, grid.origin_pose);
+    tf::poseEigenToMsg(plane_pose, grid.origin_pose);
     for (ColumnIterator it = data_.begin();
          it != data_.end();
          it++) {
@@ -458,4 +458,147 @@ namespace jsk_pcl_ros
     //ROS_INFO("checking (%d, %d)", ret->x, ret->y);
     return getValue(ret);
   }
+
+  boost::tuple<int, int> GridMap::minMaxX()
+  {
+    int min_x = INT_MAX;
+    int max_x = - INT_MAX;
+    for (ColumnIterator it = data_.begin();
+         it != data_.end();
+         ++it) {
+      int x = it->first;
+      if (min_x > x) {
+        min_x = x;
+      }
+      if (max_x < x) {
+        max_x = x;
+      }
+    }
+    return boost::make_tuple<int, int>(min_x, max_x);
+  }
+
+  boost::tuple<int, int> GridMap::minMaxY()
+  {
+    int min_y = INT_MAX;
+    int max_y = - INT_MAX;
+    for (ColumnIterator it = data_.begin();
+         it != data_.end();
+         ++it) {
+      RowIndices row_indices = it->second;
+      for (RowIterator rit = row_indices.begin();
+           rit != row_indices.end();
+           rit++) {
+        int y = *rit;
+        if (min_y > y) {
+          min_y = y;
+        }
+        if (max_y < y) {
+          max_y = y;
+        }
+      }
+    }
+    return boost::make_tuple<int, int>(min_y, max_y);
+  }
+  
+  int GridMap::normalizedWidth()
+  {
+    boost::tuple<int, int> min_max_x = minMaxX();
+    return min_max_x.get<1>() - min_max_x.get<0>();
+  }
+
+  int GridMap::normalizedHeight()
+  {
+    boost::tuple<int, int> min_max_y = minMaxY();
+    return min_max_y.get<1>() - min_max_y.get<0>();
+  }
+
+  int GridMap::widthOffset()
+  {
+    boost::tuple<int, int> min_max_x = minMaxX();
+    int min_x = min_max_x.get<0>();
+    return - min_x;
+  }
+
+  int GridMap::heightOffset()
+  {
+    boost::tuple<int, int> min_max_y = minMaxY();
+    int min_y = min_max_y.get<0>();
+    return - min_y;
+  }
+
+  int GridMap::normalizedIndex(int width_offset, int height_offset,
+                               int step,
+                               int elem_size,
+                               int original_x, int original_y)
+  {
+    int x = original_x + width_offset;
+    int y = original_y + height_offset;
+    return y * step + x * elem_size;
+  }
+  
+  
+  cv::Mat GridMap::toImage()
+  {
+    // initialize with black
+    int width = normalizedWidth();
+    int height = normalizedHeight();
+    int width_offset = widthOffset();
+    int height_offset = heightOffset();
+    cv::Mat m = cv::Mat(width, height, CV_8UC1) * 0;
+    // for all index
+    for (ColumnIterator it = data_.begin();
+         it != data_.end();
+         ++it) {
+      for (RowIterator rit = it->second.begin();
+           rit != it->second.end();
+           ++rit) {
+        m.data[normalizedIndex(width_offset, height_offset,
+                               m.step, m.elemSize(),
+                               it->first, *rit)] = 255;
+      }
+    }
+    
+    return m;
+  }
+
+  bool GridMap::check4Neighbor(int x, int y) {
+    if (getValue(x + 1, y) &&
+        getValue(x + 1, y + 1) &&
+        getValue(x - 1, y) &&
+        getValue(x - 1, y - 1)) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+  
+  void GridMap::decreaseOne()
+  {
+    //Columns new_data;
+    GridMap::Ptr new_map (new GridMap(resolution_, getCoefficients()));
+    for (ColumnIterator it = data_.begin();
+         it != data_.end();
+         it++) {
+      RowIndices row_indices = it->second;
+      int x = it->first;
+      for (RowIterator rit = row_indices.begin();
+           rit != row_indices.end();
+           rit++) {
+        int y = *rit;
+        if (check4Neighbor(x, y)) {
+          new_map->registerIndex(x, y);
+        }
+      }
+    }
+    data_ = new_map->data_;
+  }
+  
+  void GridMap::decrease(int i)
+  {
+    for (int ii = 0; ii < i; ii++) {
+      decreaseOne();
+    }
+  }
+  
 }

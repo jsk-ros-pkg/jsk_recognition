@@ -264,7 +264,7 @@ namespace jsk_pcl_ros
   {
     
   }
-
+  
   Plane::Plane(Eigen::Vector3f normal, Eigen::Vector3f p) :
     normal_(normal.normalized()), d_(- normal.dot(p) / normal.norm())
   {
@@ -275,6 +275,12 @@ namespace jsk_pcl_ros
   Plane::~Plane()
   {
 
+  }
+  
+  Eigen::Vector3f Plane::getPointOnPlane()
+  {
+    Eigen::Vector3f x = normal_ / (normal_.norm() * normal_.norm()) * (- d_);
+    return x;
   }
 
   Plane Plane::flip()
@@ -450,6 +456,13 @@ namespace jsk_pcl_ros
   {
     
   }
+
+  Polygon::Polygon(const Vertices& vertices,
+                   const std::vector<float>& coefficients):
+    Plane(coefficients), vertices_(vertices)
+  {
+    
+  }
   
   Polygon::~Polygon()
   {
@@ -475,6 +488,21 @@ namespace jsk_pcl_ros
   {
     return boost::make_tuple<size_t, size_t>(
       previousIndex(index), nextIndex(index));
+  }
+
+  double Polygon::area()
+  {
+    if (isTriangle()) {
+      return (vertices_[1] - vertices_[0]).cross(vertices_[2] - vertices_[0]).norm() / 2.0;
+    }
+    else {
+      std::vector<Polygon::Ptr> triangles = decomposeToTriangles();
+      double sum = 0;
+      for (size_t i = 0; i < triangles.size(); i++) {
+        sum += triangles[i]->area();
+      }
+      return sum;
+    }
   }
   
   Eigen::Vector3f Polygon::directionAtPoint(size_t i)
@@ -753,21 +781,20 @@ namespace jsk_pcl_ros
     return Polygon(vertices);
   }
   
+
+  ConvexPolygon::ConvexPolygon(const Vertices& vertices):
+    Polygon(vertices)
+  {
+
+  }
+
   ConvexPolygon::ConvexPolygon(const Vertices& vertices,
                                const std::vector<float>& coefficients):
-    Plane(coefficients), vertices_(vertices)
+    Polygon(vertices, coefficients)
   {
 
   }
-    
   
-  ConvexPolygon::ConvexPolygon(const Vertices& vertices):
-    Plane((vertices[1] - vertices[0]).cross(vertices[2] - vertices[0]).normalized(), vertices[0]),
-    vertices_(vertices)
-  {
-
-  }
-
   void ConvexPolygon::projectOnPlane(const Eigen::Vector3f& p, Eigen::Vector3f& output)
   {
     Plane::project(p, output);
@@ -905,23 +932,6 @@ namespace jsk_pcl_ros
     double convex_distance = (p - foot_point).norm();
     output_distance = convex_distance;
     return convex_distance > distance_threshold;
-  }
-
-  double ConvexPolygon::area()
-  {
-    double sum = 0.0;
-    for (size_t i = 0; i < vertices_.size(); i++) {
-      Eigen::Vector3f p_k = vertices_[i];
-      Eigen::Vector3f p_k_1;
-      if (i == vertices_.size() - 1) {
-        p_k_1 = vertices_[0];
-      }
-      else {
-        p_k_1 = vertices_[i + 1];
-      }
-      sum += p_k.cross(p_k_1).norm();
-    }
-    return sum / 2.0;
   }
 
   bool ConvexPolygon::allEdgesLongerThan(double thr)

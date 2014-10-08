@@ -54,11 +54,18 @@ namespace jsk_pcl_ros
     PCLNodelet::onInit();
     environment_id_ = 0;
     generation_ = 0;
+    
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (&EnvironmentPlaneModeling::configCallback, this, _1, _2);
+    srv_->setCallback (f);
+    
     diagnostic_updater_.reset(new diagnostic_updater::Updater);
     diagnostic_updater_->setHardwareID(getName());
-    diagnostic_updater_->add("Modeling Stats", boost::bind(&EnvironmentPlaneModeling::updateDiagnostic,
-                                                           this,
-                                                           _1));
+    diagnostic_updater_->add(
+      "Modeling Stats", boost::bind(&EnvironmentPlaneModeling::updateDiagnostic,
+                                    this,
+                                    _1));
     pnh_->param("history_accumulation", history_accumulation_, false);
     pnh_->param("history_statical_rejection", history_statical_rejection_, false);
     // setup publisher
@@ -81,58 +88,88 @@ namespace jsk_pcl_ros
     occlusion_result_indices_pub_
       = pnh_->advertise<ClusterPointIndices>("occlusion_result_indices", 1);
     grid_map_array_pub_ = pnh_->advertise<SparseOccupancyGridArray>("output_grid_map", 1);
-    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
-    dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&EnvironmentPlaneModeling::configCallback, this, _1, _2);
-    srv_->setCallback (f);
 
     pnh_->param("continuous_estimation", continuous_estimation_, false);
+    pnh_->param("use_static_polygons_", use_static_polygons_, false);
     
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_indices_.subscribe(*pnh_, "indices", 1);
     sub_polygons_.subscribe(*pnh_, "input_polygons", 1);
     sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
-    sub_static_polygons_.subscribe(*pnh_, "input_static_polygons", 1);
-    sub_static_coefficients_.subscribe(*pnh_, "input_static_coefficients", 1);
-    sync_->connectInput(sub_input_, sub_indices_,
-                        sub_polygons_, sub_coefficients_,
-                        sub_static_polygons_, sub_static_coefficients_);
-    sync_->registerCallback(boost::bind(
-                              &EnvironmentPlaneModeling::inputCallback,
-                              this, _1, _2, _3, _4, _5, _6));
+    
+    if (use_static_polygons_) {
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+      sub_static_polygons_.subscribe(*pnh_, "input_static_polygons", 1);
+      sub_static_coefficients_.subscribe(*pnh_, "input_static_coefficients", 1);
+      sync_->connectInput(sub_input_, sub_indices_,
+                          sub_polygons_, sub_coefficients_,
+                          sub_static_polygons_, sub_static_coefficients_);
+      sync_->registerCallback(boost::bind(
+                                &EnvironmentPlaneModeling::inputCallback,
+                                this, _1, _2, _3, _4, _5, _6));
+    }
+    else {
+      sync_without_static_
+        = boost::make_shared<
+        message_filters::Synchronizer<SyncPolicyWithoutStaticPolygon> >(100);
+      sync_without_static_->connectInput(sub_input_, sub_indices_,
+                                         sub_polygons_, sub_coefficients_);
+      sync_without_static_->registerCallback(
+        boost::bind(
+          &EnvironmentPlaneModeling::inputCallback,
+          this, _1, _2, _3, _4));
+    }
     
     lock_service_
-      = pnh_->advertiseService("lock", &EnvironmentPlaneModeling::dummyLockCallback,
-                               this);
+      = pnh_->advertiseService(
+        "lock", &EnvironmentPlaneModeling::dummyLockCallback,
+        this);
     primitive_lock_service_
-      = pnh_->advertiseService("primitive_lock", &EnvironmentPlaneModeling::primitiveLockCallback,
-                               this);
+      = pnh_->advertiseService(
+        "primitive_lock", &EnvironmentPlaneModeling::primitiveLockCallback,
+        this);
     primitive_unlock_service_
-      = pnh_->advertiseService("primitive_unlock", &EnvironmentPlaneModeling::primitiveUnlockCallback,
-                               this);
+      = pnh_->advertiseService(
+        "primitive_unlock", &EnvironmentPlaneModeling::primitiveUnlockCallback,
+        this);
     polygon_on_environment_service_
-      = pnh_->advertiseService("polygon_on_environment",
-                               &EnvironmentPlaneModeling::polygonOnEnvironmentCallback, this);
+      = pnh_->advertiseService(
+        "polygon_on_environment",
+        &EnvironmentPlaneModeling::polygonOnEnvironmentCallback, this);
+    clear_map_service_
+      = pnh_->advertiseService(
+        "clear_maps",
+        &EnvironmentPlaneModeling::clearMapCallback, this);
   }
 
 
-  bool EnvironmentPlaneModeling::dummyLockCallback(EnvironmentLock::Request& req,
-                                                   EnvironmentLock::Response& res)
+  bool EnvironmentPlaneModeling::dummyLockCallback(
+    EnvironmentLock::Request& req,
+    EnvironmentLock::Response& res)
   {
     return true;
   }
 
-  bool EnvironmentPlaneModeling::primitiveLockCallback(std_srvs::Empty::Request& req,
-                                                       std_srvs::Empty::Response& res)
+  bool EnvironmentPlaneModeling::primitiveLockCallback(
+    std_srvs::Empty::Request& req,
+    std_srvs::Empty::Response& res)
   {
     mutex_.lock();
     NODELET_INFO("locked!!");
     return true;
   }
 
-  bool EnvironmentPlaneModeling::primitiveUnlockCallback(std_srvs::Empty::Request& req,
-                                                         std_srvs::Empty::Response& res)
+  bool EnvironmentPlaneModeling::clearMapCallback(
+    std_srvs::Empty::Request& req,
+    std_srvs::Empty::Response& res)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    grid_maps_ = std::vector<GridMap::Ptr>();
+  }
+
+  bool EnvironmentPlaneModeling::primitiveUnlockCallback(
+    std_srvs::Empty::Request& req,
+    std_srvs::Empty::Response& res)
   {
     mutex_.unlock();
     NODELET_INFO("unlocked!!");
@@ -144,7 +181,8 @@ namespace jsk_pcl_ros
     diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "EnvironmentPlaneModeling running");
+    stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                 "EnvironmentPlaneModeling running");
     addDiagnosticInformation(
       "Time to estimate occlusion", occlusion_estimate_time_acc_, stat);
     addDiagnosticInformation(
@@ -166,26 +204,44 @@ namespace jsk_pcl_ros
   {
     NODELET_INFO_STREAM(getName() << "::inputCallback");
     boost::mutex::scoped_lock lock(mutex_);
-    {
-      if (input_indices->cluster_indices.size() == 0) {
-        NODELET_WARN("no clusters is available");
-        return;
-      }
-      latest_input_ = input;
-      latest_input_indices_ = input_indices;
-      latest_input_polygons_ = polygons;
-      latest_input_coefficients_ = coefficients;
-      latest_static_polygons_ = static_polygons;
-      latest_static_coefficients_ = static_coefficients;
+    if (input_indices->cluster_indices.size() == 0) {
+      NODELET_WARN("no clusters is available");
+      return;
     }
-    if (continuous_estimation_) {
-      // EnvironmentLock::Request req;
-      // EnvironmentLock::Response res;
+    latest_input_ = input;
+    latest_input_indices_ = input_indices;
+    latest_input_polygons_ = polygons;
+    latest_input_coefficients_ = coefficients;
+    latest_static_polygons_ = static_polygons;
+    latest_static_coefficients_ = static_coefficients;
+    //if (continuous_estimation_) {
       lockCallback();
-    }
-    diagnostic_updater_->update();
+      //}
   }
 
+  void EnvironmentPlaneModeling::inputCallback(
+    const sensor_msgs::PointCloud2::ConstPtr& input,
+    const ClusterPointIndices::ConstPtr& input_indices,
+    const PolygonArray::ConstPtr& polygons,
+    const ModelCoefficientsArray::ConstPtr& coefficients)
+  {
+    NODELET_INFO_STREAM(getName() << "::inputCallback");
+    boost::mutex::scoped_lock lock(mutex_);
+    if (input_indices->cluster_indices.size() == 0) {
+      NODELET_WARN("no clusters is available");
+      return;
+    }
+    latest_input_ = input;
+    latest_input_indices_ = input_indices;
+    latest_input_polygons_ = polygons;
+    latest_input_coefficients_ = coefficients;
+    latest_static_polygons_ = PolygonArray::ConstPtr();
+    latest_static_coefficients_ = ModelCoefficientsArray::ConstPtr();
+    //if (continuous_estimation_) {
+      lockCallback();
+      //}
+  }
+  
   void EnvironmentPlaneModeling::configCallback(Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mutex_);
@@ -193,6 +249,8 @@ namespace jsk_pcl_ros
     plane_angle_threshold_ = config.plane_angle_threshold;
     distance_thr_ = config.distance_threshold;
     sampling_d_ = config.collision_check_sampling_d;
+    estimate_occlusion_ = config.estimate_occlusion;
+    decrease_grid_map_ = config.decrease_grid_map;
     if (resolution_size_ != config.resolution_size) {
       NODELET_INFO_STREAM(
         "clearing grid maps because of the change of resolution size: "
@@ -339,16 +397,17 @@ namespace jsk_pcl_ros
     NODELET_INFO("%lu convexhull will be fulfilled", estimation_summary.size());
     typedef std::map<int, std::set<size_t> >::const_iterator Iterator;
     *all_cloud = *input;
-    copyClusterPointIndices(indices, all_indices);
+    copyClusterPointIndices(indices, all_indices); // concatenate indices into all_indices
+    
     for (Iterator it = estimation_summary.begin();
          it != estimation_summary.end();
          it++)
     {
       int env_plane_index = it->first;
+      NODELET_INFO("env_plane_index: %d", env_plane_index);
       std::set<size_t> static_polygon_indices = it->second;
       NODELET_INFO("%d plane is appended by %lu planes", env_plane_index,
                    static_polygon_indices.size());
-      // 2cm
       GridMap::Ptr grid = grid_maps[env_plane_index];
       geometry_msgs::PolygonStamped convex_polygon
         = result_polygons.polygons[env_plane_index];
@@ -358,29 +417,27 @@ namespace jsk_pcl_ros
       else {
         NODELET_INFO("registering 0 lines");
       }
+      // a variable to store all the indices of the lines
       std::vector<GridIndex::Ptr> line_indices;
-      for (size_t i = 0; i < convex_polygon.polygon.points.size() - 1; i++) {
+      for (size_t i = 0; i < convex_polygon.polygon.points.size(); i++) { // for all points in convex_polygon
         geometry_msgs::Point32 from = convex_polygon.polygon.points[i];
-        geometry_msgs::Point32 to = convex_polygon.polygon.points[i + 1];
-        pcl::PointXYZRGB from_pcl, to_pcl;
-        pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZRGB>(
-          from, from_pcl);
-        pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZRGB>(
-          to, to_pcl);
-        std::vector<GridIndex::Ptr> aline_indices = grid->registerLine(from_pcl, to_pcl);
-        for (size_t j = 0; j < aline_indices.size(); j++) {
-          line_indices.push_back(aline_indices[j]);
+        
+        geometry_msgs::Point32 to;
+        if (i == convex_polygon.polygon.points.size() - 1) {
+          to = convex_polygon.polygon.points[0];
         }
-      }
-      // the last one
-      {
-        geometry_msgs::Point32 from = convex_polygon.polygon.points[convex_polygon.polygon.points.size() - 1];
-        geometry_msgs::Point32 to = convex_polygon.polygon.points[0];
+        else {
+          to = convex_polygon.polygon.points[i + 1];
+        }
+
         pcl::PointXYZRGB from_pcl, to_pcl;
         pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZRGB>(
           from, from_pcl);
         pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZRGB>(
           to, to_pcl);
+        ROS_INFO("line point: [%f, %f, %f] - [%f, %f, %f]",
+                 from_pcl.x, from_pcl.y, from_pcl.z,
+                 to_pcl.x, to_pcl.y, to_pcl.z);
         std::vector<GridIndex::Ptr> aline_indices = grid->registerLine(from_pcl, to_pcl);
         for (size_t j = 0; j < aline_indices.size(); j++) {
           line_indices.push_back(aline_indices[j]);
@@ -401,16 +458,9 @@ namespace jsk_pcl_ros
         // convex hull region
         Eigen::Vector3f centroid_eigen = centroid.getVector3fMap();
         Eigen::Vector3f centroid_projected;
-        PCLModelCoefficientMsg the_coefficients = static_coefficients->coefficients[*it];
-        Eigen::Vector3f normal;
-        normal[0] = the_coefficients.values[0];
-        normal[1] = the_coefficients.values[1];
-        normal[2] = the_coefficients.values[2];
-        double d = the_coefficients.values[3] / normal.norm();
-        normal.normalize();
-        //double alpha = normal.dot(centroid_eigen) - d;
-        double alpha = normal.dot(centroid_eigen);
-        centroid_projected = centroid_eigen - alpha * normal;
+        //Plane static_plane(static_coefficients->coefficients[*it].values);
+        //static_plane.project(centroid_eigen, centroid_projected);
+        convex_polygon_model.project(centroid_eigen, centroid_projected);
         if (convex_polygon_model.isInside(centroid_projected)) {
           grid->fillRegion(centroid_projected, filled_indices);
           
@@ -452,6 +502,23 @@ namespace jsk_pcl_ros
   {
     grid_maps_.push_back(new_grid_map);
   }
+
+  pcl::PointCloud<EnvironmentPlaneModeling::PointT>::Ptr
+  EnvironmentPlaneModeling::projectCloud(
+    const pcl::PointCloud<PointT>::Ptr input_cloud,
+    const std::vector<float> input_coefficient)
+  {
+    pcl::ProjectInliers<PointT> proj;
+    proj.setModelType (pcl::SACMODEL_PLANE);
+    pcl::ModelCoefficients::Ptr plane_coefficients (new pcl::ModelCoefficients);
+    plane_coefficients->values = input_coefficient;
+    proj.setModelCoefficients (plane_coefficients);
+    pcl::PointCloud<PointT>::Ptr projected_cloud (new pcl::PointCloud<PointT>);
+    proj.setInputCloud(input_cloud);
+    proj.filter(*projected_cloud);
+    return projected_cloud;
+  }
+
   
   // build the grid map for each planes
   void EnvironmentPlaneModeling::buildGridMap(
@@ -460,23 +527,18 @@ namespace jsk_pcl_ros
     const ModelCoefficientsArray::ConstPtr& coefficients,
     std::vector<GridMap::Ptr>& ordered_grid_maps)
   {
+    NODELET_INFO("buildGridMap:: %lu polygons", polygons->polygons.size());
     jsk_topic_tools::ScopedTimer timer = grid_building_time_acc_.scopedTimer();
-    for (size_t i = 0; i < segmented_clouds.size(); i++) {
+    for (size_t i = 0; i < segmented_clouds.size(); i++) { // for all the planes
       pcl::PointCloud<PointT>::Ptr cloud = segmented_clouds[i];
-      // we need to project the point clouds on to the plane
-      // because of the noise of the pointclouds.
       int grid_map_index = findCorrespondGridMap(
         coefficients->coefficients[i].values,
         polygons->polygons[i].polygon);
-      pcl::ProjectInliers<PointT> proj;
-      proj.setModelType (pcl::SACMODEL_PLANE);
-      pcl::ModelCoefficients plane_coefficients;
-      plane_coefficients.values = coefficients->coefficients[i].values;
-      proj.setModelCoefficients (boost::make_shared<pcl::ModelCoefficients>(plane_coefficients));
-      pcl::PointCloud<PointT>::Ptr projected_cloud (new pcl::PointCloud<PointT>);
-      proj.setInputCloud(cloud);
-      proj.filter(*projected_cloud);
+      // we need to project the point clouds on to the plane
+      // because of the noise of the pointclouds.
       if (grid_map_index == -1) {
+        pcl::PointCloud<PointT>::Ptr projected_cloud = projectCloud(
+          cloud, coefficients->coefficients[i].values);
         GridMap::Ptr grid(new GridMap(resolution_size_,
                                       coefficients->coefficients[i].values));
         grid->setGeneration(generation_);
@@ -486,6 +548,11 @@ namespace jsk_pcl_ros
       }
       else {
         GridMap::Ptr grid = grid_maps_[grid_map_index];
+        // project the pointcloud on the existing gridmap
+        std::vector<float> grid_coefficients
+          = grid->toPlanePtr()->toCoefficients();
+        pcl::PointCloud<PointT>::Ptr projected_cloud = projectCloud(
+          cloud, grid_coefficients);
         grid->registerPointCloud(projected_cloud);
         grid->vote();
         ordered_grid_maps.push_back(grid);
@@ -493,7 +560,8 @@ namespace jsk_pcl_ros
       
     }
   }
-  
+
+  // return plane information with occlusion estimation
   void EnvironmentPlaneModeling::estimateOcclusion(
     const pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
     const ClusterPointIndices::ConstPtr& input_indices,
@@ -509,9 +577,14 @@ namespace jsk_pcl_ros
     ClusterPointIndices::Ptr result_indices)
   {
     jsk_topic_tools::ScopedTimer timer = occlusion_estimate_time_acc_.scopedTimer();
-    *result_polygons = *polygons; // copied
+    *result_polygons = *polygons;
     *result_coefficients = *coefficients;
-    
+    if (!estimate_occlusion_) {
+      return;
+    }
+    if (!static_polygons || !static_coefficients) {
+      return;
+    }
     std::map<int, std::set<size_t> > appending_map;
     for (size_t i = 0; i < static_polygons->polygons.size(); i++) {
       // looking for the nearest polygon from the static polygon
@@ -529,13 +602,13 @@ namespace jsk_pcl_ros
         geometry_msgs::PolygonStamped nearest_polygon
           = result_polygons->polygons[nearest_index];
         geometry_msgs::PolygonStamped new_polygon;
-        
+          
         extendConvexPolygon(static_polygon,
                             coefficients->coefficients[nearest_index],
                             nearest_polygon,
                             new_polygon);
         result_polygons->polygons[nearest_index] = new_polygon;
-        
+          
         // add the result into appended_map
         updateAppendingInfo(nearest_index, i, appending_map);
       }
@@ -583,15 +656,7 @@ namespace jsk_pcl_ros
     const std::vector<float>& coefficients,
     const geometry_msgs::Polygon& polygon)
   {
-    Vertices vertices;
-    for (size_t i = 0; i < polygon.points.size(); i++) {
-      Vertex v;
-      pointFromXYZToVector<geometry_msgs::Point32, Eigen::Vector3f>(
-        polygon.points[i], v);
-      vertices.push_back(v);
-    }
-    //Plane new_grid_map(coefficients);
-    ConvexPolygon new_grid_map(vertices, coefficients);
+    ConvexPolygon new_grid_map = ConvexPolygon::fromROSMsg(polygon);
     Eigen::Vector3f c = new_grid_map.getCentroid();
     int min_index = -1;
     double min_distance = DBL_MAX;
@@ -599,9 +664,10 @@ namespace jsk_pcl_ros
       Plane grid_plane = grid_maps_[i]->toPlane();
       double angle = grid_plane.angle(new_grid_map);
       std::vector<float> grid_coefficients = grid_maps_[i]->getCoefficients();
-      NODELET_INFO("comparing [%f, %f, %f, %f] and [%f, %f, %f, %f]",
-                   coefficients[0], coefficients[1], coefficients[2], coefficients[3],
-                   grid_coefficients[0], grid_coefficients[1], grid_coefficients[2], grid_coefficients[3]);
+      NODELET_INFO(
+        "comparing [%f, %f, %f, %f] and [%f, %f, %f, %f]",
+        coefficients[0], coefficients[1], coefficients[2], coefficients[3],
+        grid_coefficients[0], grid_coefficients[1], grid_coefficients[2], grid_coefficients[3]);
       NODELET_INFO("centroid: [%f, %f, %f]",
                    c[0], c[1], c[2]);
       NODELET_INFO_STREAM("  angle: " << angle);
@@ -619,7 +685,42 @@ namespace jsk_pcl_ros
     ROS_INFO_STREAM("min distance is " << min_distance);
     return min_index;
   }
+
+  template <class A, class B>
+  bool EnvironmentPlaneModeling::isValidHeaders(
+    const std::vector<A>& as, const std::vector<B>& bs)
+  {
+    if (as.size() != bs.size()) {
+      NODELET_ERROR(
+        "size of the headers does not match");
+      return false;
+    }
+    for (size_t i = 0; i < as.size(); i++) {
+      if (as[i].header.frame_id != bs[i].header.frame_id) {
+        NODELET_ERROR(
+          "header does not match");
+        return false;
+      }
+    }
+    return true;
+  }
   
+  bool EnvironmentPlaneModeling::isValidInput()
+  {
+    if (isValidHeaders<
+        geometry_msgs::PolygonStamped,
+        PCLModelCoefficientMsg>(
+          processing_input_polygons_->polygons,
+          processing_input_coefficients_->coefficients)) {
+      // if (processing_input_polygons_->polygons[0].header.frame_id
+      //     == processing_static_polygons_->polygons[0].header.frame_id) {
+        return true;
+        //}
+    }
+    return false;
+  }
+  
+  // main processing
   bool EnvironmentPlaneModeling::lockCallback()
   {
     //NODELET_INFO_STREAM(getName() << "::lockCallback");
@@ -639,26 +740,20 @@ namespace jsk_pcl_ros
     
     NODELET_INFO("lock %lu pointclouds",
                  processing_input_indices_->cluster_indices.size());
-    if (processing_input_polygons_->polygons.size()
-        != processing_input_coefficients_->coefficients.size()) {
-      NODELET_ERROR_STREAM(
-        "the size of the input polygon array and model coefficients "
-        << "array is not same");
+    // error check
+    if (!isValidInput()) {
+      NODELET_INFO("not valid input");
       return false;
     }
-    if (processing_static_polygons_->polygons.size()
-        != processing_static_coefficients_->coefficients.size()) {
-      NODELET_ERROR_STREAM(
-        "the size of the input static polygon array and "
-        << "static model coefficients array is not same");
-      return false;
+    else {
+      NODELET_INFO("valid input");
     }
 
     pcl::PointCloud<PointT>::Ptr pcl_cloud (new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(*processing_input_, *pcl_cloud);
     
-    NODELET_INFO("estimating occlusion first");
     // decompose pointcloud into segmented pointcloud
+    // segmented_clouds should represent pointcloud of the planes
     std::vector<pcl::PointCloud<PointT>::Ptr> segmented_clouds;
     decomposePointCloud(
       pcl_cloud,
@@ -668,11 +763,13 @@ namespace jsk_pcl_ros
     // if you don't need to have history of grid maps,
     // clear them.
     if (!history_accumulation_) { 
-      //grid_maps_.clear();
       grid_maps_ = std::vector<GridMap::Ptr>();
     }
-    
-    selectionGridMaps();
+    else {
+      // if need to reject grid maps because of history,
+      // remove them here
+      selectionGridMaps();
+    }
     
     std::vector<GridMap::Ptr> ordered_grid_maps;  
     // first, build grid map
@@ -680,7 +777,6 @@ namespace jsk_pcl_ros
                  processing_input_polygons_,
                  processing_input_coefficients_,
                  ordered_grid_maps);
-    
     
     PolygonArray::Ptr result_polygons (new PolygonArray);
     ModelCoefficientsArray::Ptr result_coefficients(new ModelCoefficientsArray);
@@ -698,7 +794,11 @@ namespace jsk_pcl_ros
                       result_coefficients,
                       result_pointcloud,
                       result_indices);
+    // decrease all the maps
+    downsizeGridMaps();
+    
     publishGridMap(processing_input_->header, grid_maps_);
+    
     if (result_indices->cluster_indices.size() == 0) {
       NODELET_WARN("failed to build gridmap?, result_indices equals to 0");
       return false;
@@ -751,6 +851,13 @@ namespace jsk_pcl_ros
     return true;
   }
 
+  void EnvironmentPlaneModeling::downsizeGridMaps()
+  {
+    for (size_t i = 0; i < grid_maps_.size(); i++) {
+      grid_maps_[i]->decrease(decrease_grid_map_);
+    }
+  }
+  
   bool EnvironmentPlaneModeling::polygonNearEnoughToPointCloud(
     const size_t plane_i,
     const pcl::PointCloud<PointT>::Ptr sampled_point_cloud)
@@ -862,11 +969,8 @@ namespace jsk_pcl_ros
         continue;
       }
       double theta = a.angle(b);
-      if (theta > M_PI / 2.0) {
-        theta = M_PI  - theta;
-      }
       if (theta > plane_angle_threshold_) {
-        continue;
+        continue;               // not near enough
       }
       if (min_angle_distance > theta) {
         min_angle_distance = theta;
@@ -960,7 +1064,7 @@ namespace jsk_pcl_ros
       output->points.push_back(pcl_point);
     }
   }
-  
+
 }
 
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::EnvironmentPlaneModeling,

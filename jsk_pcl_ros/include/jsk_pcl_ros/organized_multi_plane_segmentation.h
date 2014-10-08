@@ -91,7 +91,8 @@ namespace jsk_pcl_ros
                                       std::vector<pcl::PointIndices>& output_indices,
                                       std::vector<pcl::ModelCoefficients>& output_coefficients,
                                       std::vector<pcl::PointCloud<PointT> >& output_boundary_clouds);
-    
+    virtual void forceToDirectOrigin(const std::vector<pcl::ModelCoefficients>& coefficients,
+                                     std::vector<pcl::ModelCoefficients>& output_coefficients);
     virtual void publishMarkerOfConnection(
       IntegerGraphMap connection_map,
       const pcl::PointCloud<PointT>::Ptr cloud,
@@ -172,8 +173,9 @@ namespace jsk_pcl_ros
     double distance_threshold_;
     double max_curvature_;
     double connect_plane_angle_threshold_;
-    double connect_plane_distance_threshold_;
     double connect_distance_threshold_;
+    double min_refined_area_threshold_;
+    double max_refined_area_threshold_;
     int estimation_method_;
     bool depth_dependent_smoothing_;
     double max_depth_change_factor_;

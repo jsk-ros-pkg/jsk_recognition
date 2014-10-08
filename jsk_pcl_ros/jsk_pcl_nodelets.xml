@@ -1,4 +1,16 @@
 <library path="lib/libjsk_pcl_ros">
+  <class name="jsk_pcl/BilateralFilter" type="jsk_pcl_ros::BilateralFilter"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      bilateral filer class
+    </description>
+  </class>
+  <class name="jsk_pcl/PointcloudDatabaseServer" type="jsk_pcl_ros::PointcloudDatabaseServer"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      database server storing pointcloud data
+    </description>
+  </class>
   <class name="jsk_pcl/TransformPointcloudInBoundingBox" type="jsk_pcl_ros::TransformPointcloudInBoundingBox"
          base_class_type="nodelet::Nodelet">
     <description>

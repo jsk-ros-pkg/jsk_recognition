@@ -181,6 +181,7 @@ namespace jsk_pcl_ros
     virtual Eigen::Vector3f directionAtPoint(size_t i);
     virtual Eigen::Vector3f getVertex(size_t i);
     virtual PointIndexPair getNeighborIndex(size_t index);
+    virtual Vertices getVertices() { return vertices_; };
     virtual double area();
     virtual bool isPossibleToRemoveTriangleAtIndex(
       size_t index,
@@ -216,7 +217,6 @@ namespace jsk_pcl_ros
     virtual void project(const Eigen::Vector3f& p, Eigen::Vector3d& output);
     virtual void projectOnPlane(const Eigen::Vector3f& p, Eigen::Vector3f& output);
     virtual bool isProjectableInside(const Eigen::Vector3f& p);
-    virtual Vertices getVertices() { return vertices_; };
     // p should be a point on the plane
     virtual bool isInside(const Eigen::Vector3f& p);
     virtual ConvexPolygon flipConvex();

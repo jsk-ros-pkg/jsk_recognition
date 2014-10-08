@@ -84,6 +84,10 @@ namespace jsk_pcl_ros
       PolygonArray,
       ModelCoefficientsArray
       > SyncPolicyWithoutStaticPolygon;
+    typedef message_filters::sync_policies::ExactTime<
+      PolygonArray,
+      ModelCoefficientsArray
+      > PolygonSyncPolicy;
   protected:
     virtual void onInit();
     virtual void estimateOcclusion(
@@ -155,6 +159,7 @@ namespace jsk_pcl_ros
       const ModelCoefficientsArray::ConstPtr& coefficients,
       std::vector<GridMap::Ptr>& grid_maps);
     virtual void publishGridMap(
+      ros::Publisher& pub,
       const std_msgs::Header& header,
       const std::vector<GridMap::Ptr> grid_maps);
     // find the nearest plane to static_polygon and static_coefficient
@@ -206,6 +211,22 @@ namespace jsk_pcl_ros
     const pcl::PointCloud<PointT>::Ptr input_cloud,
     const std::vector<float> input_coefficient);
 
+    virtual void staticPolygonCallback(
+      const PolygonArray::ConstPtr& polygons,
+      const ModelCoefficientsArray::ConstPtr& coefficients);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr samplePointCloudOnPolygon(
+      const geometry_msgs::PolygonStamped& candidate_polygon,
+      const PCLModelCoefficientMsg& candidate_polygon_coefficients);
+    virtual void completeGridMap(
+    const pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
+    const ClusterPointIndices::ConstPtr& input_indices,
+    const std::vector<pcl::PointCloud<PointT>::Ptr>& segmented_cloud,
+    const PolygonArray::ConstPtr& polygons,
+    const ModelCoefficientsArray::ConstPtr& coefficients,
+    const PolygonArray::ConstPtr& static_polygons,
+    const ModelCoefficientsArray::ConstPtr& static_coefficients,
+    std::vector<GridMap::Ptr>& output_grid_maps);
+        
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
@@ -217,6 +238,8 @@ namespace jsk_pcl_ros
     boost::shared_ptr<
       message_filters::Synchronizer<SyncPolicyWithoutStaticPolygon> >
     sync_without_static_;
+    boost::shared_ptr<
+      message_filters::Synchronizer<PolygonSyncPolicy> > sync_static_polygon_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<ClusterPointIndices> sub_indices_;
     message_filters::Subscriber<PolygonArray> sub_polygons_;
@@ -232,6 +255,7 @@ namespace jsk_pcl_ros
     ros::Publisher debug_env_polygon_pub_;
     ros::Publisher debug_pointcloud_pub_;
     ros::Publisher debug_env_pointcloud_pub_;
+    ros::Publisher debug_grid_map_completion_pub_;
     ros::Publisher occlusion_result_polygons_pub_;
     ros::Publisher occlusion_result_coefficients_pub_;
     ros::Publisher occlusion_result_pointcloud_pub_;
@@ -252,6 +276,8 @@ namespace jsk_pcl_ros
     ModelCoefficientsArray::ConstPtr processing_input_coefficients_;
     PolygonArray::ConstPtr processing_static_polygons_;
     ModelCoefficientsArray::ConstPtr processing_static_coefficients_;
+    PolygonArray::ConstPtr completion_static_polygons_;
+    ModelCoefficientsArray::ConstPtr completion_static_coefficients_;
     
     std::vector<pcl::KdTreeFLANN<PointT>::Ptr> kdtrees_;
     std::vector<pcl::PointCloud<PointT>::Ptr> separated_point_cloud_;

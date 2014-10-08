@@ -70,13 +70,15 @@ namespace jsk_pcl_ros
     pnh_->param("history_statical_rejection", history_statical_rejection_, false);
     // setup publisher
     debug_polygon_pub_
-      = pnh_->advertise<geometry_msgs::PolygonStamped>("debug_polygon", 1);
+      = pnh_->advertise<geometry_msgs::PolygonStamped>("debug/polygon", 1);
     debug_env_polygon_pub_
-      = pnh_->advertise<geometry_msgs::PolygonStamped>("debug_env_polygon", 1);
+      = pnh_->advertise<geometry_msgs::PolygonStamped>("debug/env_polygon", 1);
     debug_pointcloud_pub_
-      = pnh_->advertise<sensor_msgs::PointCloud2>("debug_sampled_pointcloud", 1);
+      = pnh_->advertise<sensor_msgs::PointCloud2>("debug/sampled_pointcloud", 1);
     debug_env_pointcloud_pub_
-      = pnh_->advertise<sensor_msgs::PointCloud2>("debug_pointcloud", 1);
+      = pnh_->advertise<sensor_msgs::PointCloud2>("debug/pointcloud", 1);
+    debug_grid_map_completion_pub_
+      = pnh_->advertise<SparseOccupancyGridArray>("debug/completion/grid_map", 1);
     occlusion_result_polygons_pub_
       = pnh_->advertise<PolygonArray>(
         "occlusion_result_polygons", 1);
@@ -118,6 +120,16 @@ namespace jsk_pcl_ros
         boost::bind(
           &EnvironmentPlaneModeling::inputCallback,
           this, _1, _2, _3, _4));
+      
+      sync_static_polygon_
+        = boost::make_shared<message_filters::Synchronizer<PolygonSyncPolicy> >(100);
+      sub_static_polygons_.subscribe(*pnh_, "input_static_polygons", 1);
+      sub_static_coefficients_.subscribe(*pnh_, "input_static_coefficients", 1);
+      sync_static_polygon_->connectInput(sub_static_polygons_, sub_static_coefficients_);
+      sync_static_polygon_->registerCallback(
+        boost::bind(
+          &EnvironmentPlaneModeling::staticPolygonCallback,
+          this, _1, _2));
     }
     
     lock_service_
@@ -143,6 +155,15 @@ namespace jsk_pcl_ros
   }
 
 
+  void EnvironmentPlaneModeling::staticPolygonCallback(
+    const PolygonArray::ConstPtr& polygons,
+    const ModelCoefficientsArray::ConstPtr& coefficients)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    completion_static_polygons_ = polygons;
+    completion_static_coefficients_ = coefficients;
+  }
+  
   bool EnvironmentPlaneModeling::dummyLockCallback(
     EnvironmentLock::Request& req,
     EnvironmentLock::Response& res)
@@ -365,6 +386,7 @@ namespace jsk_pcl_ros
   }
 
   void EnvironmentPlaneModeling::publishGridMap(
+    ros::Publisher& pub,
     const std_msgs::Header& header,
     const std::vector<GridMap::Ptr> grid_maps)
   {
@@ -377,7 +399,7 @@ namespace jsk_pcl_ros
       grid_map->toMsg(ros_grid_map);
       grid_array_msg.grids.push_back(ros_grid_map);
     }
-    grid_map_array_pub_.publish(grid_array_msg);
+    pub.publish(grid_array_msg);
   }
   
   void EnvironmentPlaneModeling::fillEstimatedRegionByPointCloud
@@ -561,6 +583,120 @@ namespace jsk_pcl_ros
     }
   }
 
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr EnvironmentPlaneModeling::samplePointCloudOnPolygon(
+    const geometry_msgs::PolygonStamped& candidate_polygon,
+    const PCLModelCoefficientMsg& candidate_polygon_coefficients)
+  {
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr ret (new pcl::PointCloud<pcl::PointXYZRGB>);
+    // 1. compute ex and ey of the plygon
+    // 2. compute width and height of the polygon
+    // 3. sample all the grid in the AABB region
+    // 4. filter which is inside of the polygon or not
+    ConvexPolygon::Ptr polygon = boost::make_shared<ConvexPolygon>(
+      ConvexPolygon::fromROSMsg(candidate_polygon.polygon));
+
+    // 1. compute ex and ey of the plygon
+    Eigen::Vector3f normal = polygon->getNormal();
+    Eigen::Vector3f u(1, 0, 0);
+    if (normal == u) {
+      u[0] = 0; u[1] = 1; u[2] = 0;
+    }
+    Eigen::Vector3f ey = normal.cross(u).normalized();
+    Eigen::Vector3f ex = ey.cross(normal).normalized();
+    Eigen::Vector3f O = - polygon->getD() * normal;
+    // 2. compute width and height of the polygon
+    double min_x = DBL_MAX;
+    double max_x = - DBL_MAX;
+    double min_y = DBL_MAX;
+    double max_y = - DBL_MAX;
+    Vertices vs = polygon->getVertices();
+    for (size_t i = 0; i < vs.size(); i++) {
+      Eigen::Vector3f v = vs[i];
+      // represent v using ex and ey
+      Eigen::Vector3f v_on_plane = v - O;
+      double x = v_on_plane.dot(ex);
+      double y = v_on_plane.dot(ey);
+      if (x > max_x) {
+        max_x = x;
+      }
+      if (x < min_x) {
+        min_x = x;
+      }
+      if (y > max_y) {
+        max_y = y;
+      }
+      if (y < min_y) {
+        min_y = y;
+      }
+    }
+
+    // 3. sample all the grid in the AABB region
+    for (double x = min_x; x < max_x; x += resolution_size_) {
+      for (double y = min_y; y < max_y; y += resolution_size_) {
+        Eigen::Vector3f v = x * ex + y * ey + O;
+        if (polygon->isInside(v)) {
+          pcl::PointXYZRGB p;
+          pointFromVectorToXYZ<Eigen::Vector3f, pcl::PointXYZRGB>(v, p);
+          ret->points.push_back(p);
+        }
+      }
+    }
+    return ret;
+  }
+  
+  void EnvironmentPlaneModeling::completeGridMap(
+    const pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
+    const ClusterPointIndices::ConstPtr& input_indices,
+    const std::vector<pcl::PointCloud<PointT>::Ptr>& segmented_cloud,
+    const PolygonArray::ConstPtr& polygons,
+    const ModelCoefficientsArray::ConstPtr& coefficients,
+    const PolygonArray::ConstPtr& static_polygons,
+    const ModelCoefficientsArray::ConstPtr& static_coefficients,
+    std::vector<GridMap::Ptr>& output_grid_maps)
+  {
+    // deep-copy grid_maps
+    output_grid_maps.resize(grid_maps_.size());
+    for (size_t i = 0; i < grid_maps_.size(); i++) {
+      GridMap::Ptr new_grid (new GridMap(*grid_maps_[i]));
+      output_grid_maps[i] = new_grid;
+    }
+    // check the polygon is near enough
+    for (size_t i = 0; i < static_polygons->polygons.size(); i++) {
+      geometry_msgs::PolygonStamped candidate_polygon
+        = static_polygons->polygons[i];
+      PCLModelCoefficientMsg candidate_polygon_coefficients
+        = static_coefficients->coefficients[i];
+      int nearest_index = findCorrespondGridMap(
+        candidate_polygon_coefficients.values,
+        candidate_polygon.polygon);
+      if (nearest_index != -1) {
+        // there is a candidate to merge the polygon
+        // 1. sample polygon as pointcloud
+        // 2. project the pointcloud on to the grid map
+        // 3. add the points into the grid map
+
+        // 1. sample polygon as pointcloud
+        pcl::PointCloud<pcl::PointXYZRGB>::Ptr sampled_pointcloud
+          = samplePointCloudOnPolygon(
+            candidate_polygon,
+            candidate_polygon_coefficients);
+        // 2. project the pointcloud on to the grid map
+        GridMap::Ptr candidate_grid_map = output_grid_maps[nearest_index];
+        pcl::ModelCoefficients::Ptr grid_plane_coefficients (new pcl::ModelCoefficients);
+        grid_plane_coefficients->values = candidate_grid_map->getCoefficients();
+        pcl::ProjectInliers<pcl::PointXYZRGB> proj;
+        proj.setModelType (pcl::SACMODEL_PLANE);
+        proj.setInputCloud(sampled_pointcloud);
+        proj.setModelCoefficients(grid_plane_coefficients);
+        pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+        proj.filter(*projected_cloud);
+
+        // 3. add the points into the grid map
+        candidate_grid_map->registerPointCloud(projected_cloud);
+      }
+    }
+  }
+  
   // return plane information with occlusion estimation
   void EnvironmentPlaneModeling::estimateOcclusion(
     const pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
@@ -719,6 +855,8 @@ namespace jsk_pcl_ros
     }
     return false;
   }
+
+  
   
   // main processing
   bool EnvironmentPlaneModeling::lockCallback()
@@ -782,22 +920,40 @@ namespace jsk_pcl_ros
     ModelCoefficientsArray::Ptr result_coefficients(new ModelCoefficientsArray);
     pcl::PointCloud<PointT>::Ptr result_pointcloud (new pcl::PointCloud<PointT>);
     ClusterPointIndices::Ptr result_indices(new ClusterPointIndices);
-    estimateOcclusion(pcl_cloud,
-                      processing_input_indices_,
-                      segmented_clouds,
-                      ordered_grid_maps,
-                      processing_input_polygons_,
-                      processing_input_coefficients_,
-                      processing_static_polygons_,
-                      processing_static_coefficients_,
-                      result_polygons,
-                      result_coefficients,
-                      result_pointcloud,
-                      result_indices);
+    // In actual, this method is deprecated
+    // estimateOcclusion(pcl_cloud,
+    //                   processing_input_indices_,
+    //                   segmented_clouds,
+    //                   ordered_grid_maps,
+    //                   processing_input_polygons_,
+    //                   processing_input_coefficients_,
+    //                   processing_static_polygons_,
+    //                   processing_static_coefficients_,
+    //                   result_polygons,
+    //                   result_coefficients,
+    //                   result_pointcloud,
+    //                   result_indices);
+    *result_polygons = *processing_input_polygons_;
+    *result_coefficients = *processing_input_coefficients_;
+
+
+    // complete gridmap as just test
+    std::vector<GridMap::Ptr> completed_grid_maps;
+    completeGridMap(pcl_cloud,
+                    processing_input_indices_,
+                    segmented_clouds,
+                    processing_input_polygons_,
+                    processing_input_coefficients_,
+                    completion_static_polygons_,
+                    completion_static_coefficients_,
+                    completed_grid_maps);
+    
+    
     // decrease all the maps
     downsizeGridMaps();
     
-    publishGridMap(processing_input_->header, grid_maps_);
+    publishGridMap(grid_map_array_pub_, processing_input_->header, grid_maps_);
+    publishGridMap(debug_grid_map_completion_pub_, processing_input_->header, completed_grid_maps);
     
     if (result_indices->cluster_indices.size() == 0) {
       NODELET_WARN("failed to build gridmap?, result_indices equals to 0");

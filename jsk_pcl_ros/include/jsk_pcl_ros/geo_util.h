@@ -192,6 +192,17 @@ namespace jsk_pcl_ros
     static Polygon fromROSMsg(const geometry_msgs::Polygon& polygon);
     static Polygon createPolygonWithSkip(const Vertices& vertices);
     virtual bool isConvex();
+    template<class PointT> void boundariesToPointCloud(
+      pcl::PointCloud<PointT>& output) {
+      output.points.resize(vertices_.size());
+      for (size_t i = 0; i < vertices_.size(); i++) {
+        Eigen::Vector3f v = vertices_[i];
+        PointT p;
+        p.x = v[0]; p.y = v[1]; p.z = v[2];
+        output.points[i] = p;
+      }
+    }
+
   protected:
     Vertices vertices_;
   private:
@@ -222,18 +233,7 @@ namespace jsk_pcl_ros
     virtual ConvexPolygon flipConvex();
     virtual Eigen::Vector3f getCentroid();
     virtual Ptr magnify(const double scale_factor);
-    
-    template<class PointT> void boundariesToPointCloud(
-      pcl::PointCloud<PointT>& output) {
-      output.points.resize(vertices_.size());
-      for (size_t i = 0; i < vertices_.size(); i++) {
-        Eigen::Vector3f v = vertices_[i];
-        PointT p;
-        p.x = v[0]; p.y = v[1]; p.z = v[2];
-        output.points[i] = p;
-      }
-    }
-    
+        
     static ConvexPolygon fromROSMsg(const geometry_msgs::Polygon& polygon);
     bool distanceSmallerThan(
       const Eigen::Vector3f& p, double distance_threshold);

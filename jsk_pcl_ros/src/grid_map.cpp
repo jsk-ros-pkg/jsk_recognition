@@ -358,10 +358,10 @@ namespace jsk_pcl_ros
     rot_mat.col(0) = Eigen::Vector3f(ex_[0], ex_[1], ex_[2]);
     rot_mat.col(1) = Eigen::Vector3f(ey_[0], ey_[1], ey_[2]);
     rot_mat.col(2) = Eigen::Vector3f(normal_[0], normal_[1], normal_[2]);
-    ROS_INFO("O: [%f, %f, %f]", O_[0], O_[1], O_[2]);
-    ROS_INFO("ex: [%f, %f, %f]", ex_[0], ex_[1], ex_[2]);
-    ROS_INFO("ey: [%f, %f, %f]", ey_[0], ey_[1], ey_[2]);
-    ROS_INFO("normal: [%f, %f, %f]", normal_[0], normal_[1], normal_[2]);
+    ROS_DEBUG("O: [%f, %f, %f]", O_[0], O_[1], O_[2]);
+    ROS_DEBUG("ex: [%f, %f, %f]", ex_[0], ex_[1], ex_[2]);
+    ROS_DEBUG("ey: [%f, %f, %f]", ey_[0], ey_[1], ey_[2]);
+    ROS_DEBUG("normal: [%f, %f, %f]", normal_[0], normal_[1], normal_[2]);
     output = Eigen::Translation3f(O_) * Eigen::Quaternionf(rot_mat);
   }
   
@@ -598,6 +598,27 @@ namespace jsk_pcl_ros
   {
     for (int ii = 0; ii < i; ii++) {
       decreaseOne();
+    }
+  }
+
+  void GridMap::add(GridMap& other)
+  {
+    for (ColumnIterator it = other.data_.begin();
+         it != other.data_.end();
+         it++) {
+      RowIndices row_indices = it->second;
+      int x = it->first;
+      for (RowIterator rit = row_indices.begin();
+           rit != row_indices.end();
+           rit++) {
+        int y = *rit;
+        Eigen::Vector3f pos;
+        GridIndex index(x, y);
+        other.gridToPoint(index, pos);
+        pcl::PointXYZRGB p;
+        pointFromVectorToXYZ<Eigen::Vector3f, pcl::PointXYZRGB>(pos, p);
+        registerPoint(p);
+      }
     }
   }
   

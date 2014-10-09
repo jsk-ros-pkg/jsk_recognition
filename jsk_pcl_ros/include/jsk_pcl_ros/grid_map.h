@@ -107,7 +107,7 @@ namespace jsk_pcl_ros
     virtual bool check4Neighbor(int x, int y);
     
     virtual void decrease(int i);
-    
+    virtual void add(GridMap& other);
   protected:
     virtual void decreaseOne();
     

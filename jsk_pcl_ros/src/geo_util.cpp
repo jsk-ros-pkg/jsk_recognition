@@ -290,6 +290,19 @@ namespace jsk_pcl_ros
     return Plane(- normal_, - d_);
   }
 
+  Plane::Ptr Plane::faceToOrigin()
+  {
+    Eigen::Vector3f p = getPointOnPlane();
+    Eigen::Vector3f n = getNormal();
+    
+    if (p.dot(n) < 0) {
+      return Plane::Ptr (new Plane(normal_, d_));
+    }
+    else {
+      return Plane::Ptr (new Plane(- normal_, - d_));
+    }
+  }
+
   bool Plane::isSameDirection(const Plane& another)
   {
     return isSameDirection(another.normal_);

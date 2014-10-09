@@ -135,7 +135,7 @@ namespace jsk_pcl_ros
     Plane(Eigen::Vector3f normal, Eigen::Vector3f p);
     virtual ~Plane();
     virtual Plane flip();
-    
+    virtual Plane::Ptr faceToOrigin();
     virtual bool isSameDirection(const Plane& another);
     virtual bool isSameDirection(const Eigen::Vector3f& another_normal);
     virtual double signedDistanceToPoint(const Eigen::Vector4f p);

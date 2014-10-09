@@ -127,6 +127,13 @@ namespace jsk_pcl_ros
                                          std_srvs::Empty::Response& res);
     virtual bool clearMapCallback(std_srvs::Empty::Request& req,
                                   std_srvs::Empty::Response& res);
+    virtual bool registerToHistoryCallback(std_srvs::Empty::Request& req,
+                                           std_srvs::Empty::Response& res);
+    virtual bool registerCompletionToHistoryCallback(
+      std_srvs::Empty::Request& req,
+      std_srvs::Empty::Response& res);
+    virtual void appendGridMaps(std::vector<GridMap::Ptr>& old_maps,
+                                std::vector<GridMap::Ptr>& new_maps);
     virtual bool polygonNearEnoughToPointCloud(
       const size_t plane_i,
       const pcl::PointCloud<PointT>::Ptr sampled_point_cloud);
@@ -204,6 +211,8 @@ namespace jsk_pcl_ros
     virtual int findCorrespondGridMap(
       const std::vector<float>& coefficients,
       const geometry_msgs::Polygon& polygon);
+    virtual int findNearGridMapFromCoefficients(
+      const std::vector<GridMap::Ptr>& maps, GridMap::Ptr map);
     virtual void registerGridMap(const GridMap::Ptr new_grid_map);
     virtual void selectionGridMaps();
     virtual pcl::PointCloud<EnvironmentPlaneModeling::PointT>::Ptr
@@ -251,6 +260,8 @@ namespace jsk_pcl_ros
     ros::ServiceServer primitive_lock_service_;
     ros::ServiceServer primitive_unlock_service_;
     ros::ServiceServer clear_map_service_;
+    ros::ServiceServer register_to_history_service_;
+    ros::ServiceServer register_completion_to_history_service_;
     ros::Publisher debug_polygon_pub_;
     ros::Publisher debug_env_polygon_pub_;
     ros::Publisher debug_pointcloud_pub_;
@@ -261,6 +272,7 @@ namespace jsk_pcl_ros
     ros::Publisher occlusion_result_pointcloud_pub_;
     ros::Publisher occlusion_result_indices_pub_;
     ros::Publisher grid_map_array_pub_;
+    ros::Publisher old_map_pub_;
     // member variables to store the latest messages
     sensor_msgs::PointCloud2::ConstPtr latest_input_;
     ClusterPointIndices::ConstPtr latest_input_indices_;
@@ -299,7 +311,10 @@ namespace jsk_pcl_ros
     int static_generation_;
     int required_vote_;
     int decrease_grid_map_;
+    bool register_next_map_;
+    bool register_completion_next_map_;
     std::vector<GridMap::Ptr> grid_maps_;
+    std::vector<GridMap::Ptr> old_grid_maps_;
     jsk_topic_tools::TimeAccumulator occlusion_estimate_time_acc_;
     jsk_topic_tools::TimeAccumulator grid_building_time_acc_;
     jsk_topic_tools::TimeAccumulator kdtree_building_time_acc_;

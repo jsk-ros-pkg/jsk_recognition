@@ -38,6 +38,8 @@
 #include <algorithm>
 #include <iterator>
 #include <cfloat>
+#include <pcl/surface/ear_clipping.h>
+#include <pcl/conversions.h>
 // #define DEBUG_GEO_UTIL
 namespace jsk_pcl_ros
 {
@@ -286,6 +288,19 @@ namespace jsk_pcl_ros
   Plane Plane::flip()
   {
     return Plane(- normal_, - d_);
+  }
+
+  Plane::Ptr Plane::faceToOrigin()
+  {
+    Eigen::Vector3f p = getPointOnPlane();
+    Eigen::Vector3f n = getNormal();
+    
+    if (p.dot(n) < 0) {
+      return Plane::Ptr (new Plane(normal_, d_));
+    }
+    else {
+      return Plane::Ptr (new Plane(- normal_, - d_));
+    }
   }
 
   bool Plane::isSameDirection(const Plane& another)
@@ -672,79 +687,45 @@ namespace jsk_pcl_ros
   std::vector<Polygon::Ptr> Polygon::decomposeToTriangles()
   {
     std::vector<Polygon::Ptr> ret;
-    
+
     // if this polygon is triangle, return immediately
     if (isTriangle()) {
       ret.push_back(Polygon::Ptr(this));
       return ret;
     }
-    // the first triangle is special. the first triangle is at
-    // farest point from origin.
-    Eigen::Vector3f O(0, 0, 0);
-    size_t farest_point_index = getFarestPointIndex(O);
-    // we can remove the first triangle.
-    Polygon::PtrPair polygon_pair = separatePolygon(farest_point_index);
-    Polygon::Ptr first_triangle = polygon_pair.get<0>();
-    Eigen::Vector3f way_of_normal = directionAtPoint(farest_point_index);
-    if (way_of_normal.norm() == 0.0) {
-      ROS_ERROR("way_of_norml is 0");
-      exit(3);
+
+    pcl::EarClipping clip;
+    // convert
+    pcl::PolygonMesh::Ptr input_mesh (new pcl::PolygonMesh);
+    pcl::PCLPointCloud2 mesh_cloud;
+    pcl::PointCloud<pcl::PointXYZ> mesh_pcl_cloud;
+    boundariesToPointCloud<pcl::PointXYZ>(mesh_pcl_cloud);
+    std::vector<pcl::Vertices> mesh_vertices(1);
+    for (size_t i = 0; i < vertices_.size(); i++) {
+      mesh_vertices[0].vertices.push_back(i);
     }
-    ret.push_back(first_triangle);
-    Polygon::Ptr the_polygon = polygon_pair.get<1>();
-    while (the_polygon->getNumVertices() >= 3) {
-      //ROS_INFO("found triangle:: %lu", the_polygon->getNumVertices());
-      // the end of removal
-      if (the_polygon->isTriangle()) {
-        ret.push_back(the_polygon);
-        break;
+    mesh_vertices[0].vertices.push_back(0); // close
+    mesh_pcl_cloud.height = 1;
+    mesh_pcl_cloud.width = mesh_pcl_cloud.points.size();
+    pcl::toPCLPointCloud2<pcl::PointXYZ>(mesh_pcl_cloud, mesh_cloud);
+
+    input_mesh->polygons = mesh_vertices;
+    input_mesh->cloud = mesh_cloud;
+    clip.setInputMesh(input_mesh);
+    pcl::PolygonMesh output;
+    clip.process(output);
+    // convert to Polygon instances
+    for (size_t i = 0; i < output.polygons.size(); i++) {
+      pcl::Vertices output_polygon_vertices = output.polygons[i];
+      Vertices vs(output_polygon_vertices.vertices.size());
+      for (size_t j = 0; j < output_polygon_vertices.vertices.size(); j++) {
+        pcl::PointXYZ p
+          = mesh_pcl_cloud.points[output_polygon_vertices.vertices[j]];
+        Eigen::Vector3f v;
+        pointFromXYZToVector<pcl::PointXYZ, Eigen::Vector3f>(p, v);
+        vs[j] = v;
       }
-      else {
-#ifdef DEBUG_GEO_UTIL
-        for (size_t i = 0; i < the_polygon->getNumVertices(); i++) {
-          Eigen::Vector3f n = the_polygon->getVertex(i);
-          ROS_WARN("v[%lu] [%f, %f, %f]", i, n[0], n[1], n[2]);
-        }
-        for (size_t i = 0; i < the_polygon->getNumVertices(); i++) {
-          Eigen::Vector3f n = the_polygon->directionAtPoint(i);
-          ROS_WARN("d[%lu] [%f, %f, %f]", i, n[0], n[1], n[2]);
-        }
-#endif
-        // need to remove triangle patch
-        size_t next_index = 0;
-        while (true) {          // loop until success to remove next polygon
-          if (the_polygon->isPossibleToRemoveTriangleAtIndex(
-                next_index, way_of_normal)) {
-            Polygon::PtrPair next_pair
-              = the_polygon->separatePolygon(next_index);
-            ret.push_back(next_pair.get<0>());
-            the_polygon = next_pair.get<1>();
-            break;
-          }
-          else {
-            next_index = the_polygon->nextIndex(next_index);
-            if (next_index == 0) {
-              ROS_ERROR("looped! %lu", the_polygon->getNumVertices());
-#ifdef DEBUG_GEO_UTIL
-              for (size_t i = 0; i < the_polygon->getNumVertices(); i++) {
-                Eigen::Vector3f v = the_polygon->getVertex(i);
-                ROS_INFO("v[%lu] [%f, %f, %f]", i, v[0], v[1], v[2]);
-                // ROS_INFO("Eigen::Vector3f v%lu(%f, %f, %f);", i, v[0], v[1], v[2]);
-                // ROS_INFO("vs.push_back(v%lu);", i);
-              }
-              for (size_t i = 0; i < the_polygon->getNumVertices(); i++) {
-                Eigen::Vector3f v0 = the_polygon->getVertex(i);
-                Eigen::Vector3f v1 = the_polygon->getVertex(the_polygon->nextIndex(i));
-                Eigen::Vector3f v = (v1 - v0);
-                ROS_INFO("d[%lu] [%f, %f, %f]", i, v[0], v[1], v[2]);
-                ROS_INFO("d[%lu] %f", i, v.norm());
-              }
-#endif
-              return ret;
-            }
-          }
-        }
-      }
+      ret.push_back(Polygon::Ptr(new Polygon(vs, toCoefficients())));
     }
     return ret;
   }

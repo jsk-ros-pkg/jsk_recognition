@@ -676,8 +676,9 @@ namespace jsk_pcl_ros
       ne.setNormalEstimationMethod (ne.AVERAGE_DEPTH_CHANGE);
     }
     else {
-      NODELET_FATAL("unknown estimation method: %d", estimation_method_);
-      return;
+      NODELET_FATAL("unknown estimation method, force to use COVARIANCE_MATRIX: %d",
+                    estimation_method_);
+      ne.setNormalEstimationMethod (ne.COVARIANCE_MATRIX);
     }
 
     if (border_policy_ignore_) {

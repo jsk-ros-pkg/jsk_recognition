@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>jsk_libfreenect2</name>
-  <version>0.1.22</version>
+  <version>0.1.23</version>
   <description>The libfreenect2 package</description>
   <maintainer email="ueda@jsk.t.u-tokyo.ac.jp">Ryohei Ueda</maintainer>
 

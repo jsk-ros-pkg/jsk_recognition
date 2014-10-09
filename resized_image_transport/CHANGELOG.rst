@@ -2,6 +2,11 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.23 (2014-10-09)
+-------------------
+* Install nodelet executables
+* Contributors: Ryohei Ueda
+
 0.1.22 (2014-09-24)
 -------------------
 

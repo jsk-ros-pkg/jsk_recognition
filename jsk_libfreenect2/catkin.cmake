@@ -113,7 +113,7 @@ endif(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
 
 macro(freenect_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
   jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
-    freenect_nodelet_sources)
+    freenect_nodelet_sources freenect_nodelet_executables)
 endmacro(freenect_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
 
 freenect_nodelet(src/driver_nodelet.cpp "jsk_libfreenect2/Driver" "driver")
@@ -138,7 +138,7 @@ install(DIRECTORY config launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 install(FILES nodelet.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 install(
-  TARGETS freenect2 freenect2_nodelet driver
+  TARGETS freenect2 freenect2_nodelet driver ${freenect_nodelet_executables}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})

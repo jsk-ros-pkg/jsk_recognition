@@ -2,6 +2,71 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.23 (2014-10-09)
+-------------------
+* Use pcl::EarClip to decompose polygon into triangles
+* Complete gridmap with statically defined polygon
+* Install nodelet executables
+* Use jsk_topic_tools::readVectorParameter in ParticleFilterTracking
+* Add BilateralFilter
+* Decrease size of grid map to add 'padding'
+* Add service to clear grid maps
+* Add min-max threshold to filter polygons based on area on OrganizedMultiPlaneSegmentation
+* EnvironmentPlaneModeling support building grid map without static
+  polygon information
+* delete models
+* Fix env_server's mis posing of origin
+* Force for planes to direct sensor origin in organized multi segmentation
+* Support PointcloudDatabaseServer when running ICPRegistration
+* Add PointCloudDatabaseServer
+* Fix keypoints publisher compilation
+* Subscribe topics as needed for almost all the nodelets
+* Use ConnectionBasedNodelet for DelayPointCloud not to subscribe topics if the nodelet's publishers are not subscribed
+* Use ConnectionBasedNodelet for ColorizeDistanceFromPlane not to subscribe topics if the nodelet's publishers are not subscribed
+* Use ConnectionBasedNodelet for DelayPointcloud not to subscribe topics if the nodelet's publishers are not subscribed
+* Use ConnectionBasedNodelet for ColorizeDistanceFromPlane not to subscribe topics if the nodelet's publishers are not subscribed
+* Use ConnectionBasedNodelet for ColorHistogramMatcher not to subscribe topics if the nodelet's publishers are not subscribed
+* Use ConnectionBasedNodelet for BoundingBoxFilter not to subscribe topics if the nodelet's publishers are not subscribed
+* Use ConnectionBasedNodelet for ResizePointsPublisher not to subscribe
+  topics if the nodelet's publishers are not subscribed
+* Do not subscribe until any publish is subscribed on ColorFIlter and
+  BorderEstimator
+* Do not subscribe until any publisher is subscribed on
+  ClusterPointIndicesDecomposer and add utlity class to handle connection
+* Fix JointStateStaticFilter to use absolute diff when calculating
+  time difference and add JointStateStaticFilter to organized_multi_plane_segmentation.launch
+  if JOINT_STATIC_FILTER:=true
+* Use refined plane information in recognition pipeline
+* Add pr2_navigation_self_filter to organized_multi_plane_segmentation.launch
+* Publish result of ICP as geometry_msgs::PoseStamped
+* Add pcd model files for registration sample
+* Use PLUGIN_EXPORT_CLASS instead of PLUGIN_DECLARE_CLASS
+* Considering flipped initial pose on ICP registration
+* Merge remote-tracking branch 'refs/remotes/origin/master' into use-boundingbox-information-to-compute-origin-of-icp-pointcloud
+  Conflicts:
+  jsk_pcl_ros/jsk_pcl_nodelets.xml
+* Add new nodelet to transform pointcloud to make its origin equal to the
+  pose of boundingbox and use bounding box information when running ICP
+* Merge pull request `#307 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/307>`_ from garaemon/joint-state-static-pointcloud-filter
+  JointStateStaticFilter
+* Add Generalized ICP algorithm
+* read voxel grid donwsample manager parameter
+* Merge remote-tracking branch 'refs/remotes/origin/master' into garaemon-joint-state-static-pointcloud-filter
+  Conflicts:
+  jsk_pcl_ros/CMakeLists.txt
+  jsk_pcl_ros/catkin.cmake
+  jsk_pcl_ros/jsk_pcl_nodelets.xml
+* Add new nodelet to pass pointcloud only if joint states is stable
+* Support dynamic_reconfigure of ICPRegistration
+* add new nodelet to align two pointcloud based on ICP algorithm
+* Fix for plane segmentation results into only one plane
+* Add new nodelet 'PlaneReasoner' to segment wall/ground
+* Resize pointcloud and images in openni_remote.launch
+* Fix topic relaying of openni_remote for openni_launch on hydro
+* Add new nodelet to filter organized pointcloud based on x-y index rather
+  than 3-D position value.
+* Contributors: Ryohei Ueda, aginika, tarukosu
+
 0.1.22 (2014-09-24)
 -------------------
 

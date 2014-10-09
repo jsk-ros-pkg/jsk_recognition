@@ -2,6 +2,15 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.23 (2014-10-09)
+-------------------
+* Install nodelet executables
+* mend spell-miss in launch
+* modified program to select which camera_info to sub
+* renamed camera_node to uvc_camera_node, and added some options
+* modified detection-interface.l
+* Contributors: Ryohei Ueda, Yu Ohara, Kamada
+
 0.1.22 (2014-09-24)
 -------------------
 * Disable ssl when calling git

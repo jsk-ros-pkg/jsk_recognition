@@ -35,47 +35,12 @@
 
 #include "jsk_pcl_ros/particle_filter_tracking.h"
 #include <pluginlib/class_list_macros.h>
+#include <jsk_topic_tools/rosparam_utils.h>
 
 using namespace pcl::tracking;
 
 namespace jsk_pcl_ros
 {
-
-  double ParticleFilterTracking::getXMLDoubleValue(XmlRpc::XmlRpcValue val) {
-    switch(val.getType()) {
-    case XmlRpc::XmlRpcValue::TypeInt:
-      return (double)((int)val);
-    case XmlRpc::XmlRpcValue::TypeDouble:
-      return (double)val;
-    default:
-      return 0;
-    }
-  }
-  
-  bool ParticleFilterTracking::readVectorParameter(const std::string& param_name,
-                                                   std::vector<double>& result)
-  {
-    if (pnh_->hasParam(param_name)) {
-      XmlRpc::XmlRpcValue v;
-      pnh_->param(param_name, v, v);
-      if (v.getType() == XmlRpc::XmlRpcValue::TypeArray &&
-          v.size() == result.size()) {
-        for (size_t i = 0; i < result.size(); i++) {
-          result[i] = getXMLDoubleValue(v[i]);
-        }
-        return true;
-      }
-      else {
-        NODELET_ERROR("%s parameter does not match the length: %lu",
-                      param_name.c_str(),
-                      result.size());
-        return false;
-      }
-    }
-    else {
-      return false;
-    }
-  }
   
   void ParticleFilterTracking::onInit(void){
     // not implemented yet
@@ -104,7 +69,8 @@ namespace jsk_pcl_ros
     pnh_->getParam("track_target_name", track_target_name_);
 
     std::vector<double> bin_size_vector(6);
-    if (!readVectorParameter("bin_size", bin_size_vector)) {
+    if (!jsk_topic_tools::readVectorParameter(
+          *pnh_, "bin_size", bin_size_vector)) {
       for (size_t i = 0; i < 6; i++) {
         bin_size_vector[i] = 0.1;
       }
@@ -118,8 +84,10 @@ namespace jsk_pcl_ros
     bin_size.yaw = bin_size_vector[5];
 
     std::vector<double> default_step_covariance(6);
-    if (!readVectorParameter("default_step_covariance",
-                             default_step_covariance)) {
+    if (!jsk_topic_tools::readVectorParameter(
+          *pnh_,
+          "default_step_covariance",
+          default_step_covariance)) {
       for (size_t i = 0; i < default_step_covariance.size(); i++) {
         default_step_covariance[i] = 0.015 * 0.015;
       }
@@ -128,10 +96,12 @@ namespace jsk_pcl_ros
       default_step_covariance[5] *= 40.0;
     }
     std::vector<double> initial_noise_covariance = std::vector<double> (6, 0.00001);
-    readVectorParameter("initial_noise_covariance",
-                        initial_noise_covariance);
+    jsk_topic_tools::readVectorParameter(
+      *pnh_, "initial_noise_covariance",
+      initial_noise_covariance);
     std::vector<double> default_initial_mean = std::vector<double> (6, 0.0);
-    readVectorParameter("default_initial_mean", default_initial_mean);
+    jsk_topic_tools::readVectorParameter(
+      *pnh_, "default_initial_mean", default_initial_mean);
     //First the track target is not set
     double octree_resolution = 0.01;
     pnh_->getParam("octree_resolution", octree_resolution);

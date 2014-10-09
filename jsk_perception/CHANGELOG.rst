@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.23 (2014-10-09)
+-------------------
 * Install nodelet executables
 * mend spell-miss in launch
 * modified program to select which camera_info to sub

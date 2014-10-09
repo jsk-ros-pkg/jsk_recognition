@@ -2,8 +2,8 @@
 Changelog for package jsk_libfreenect2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.23 (2014-10-09)
+-------------------
 * Install nodelet executables
 * Contributors: Ryohei Ueda
 

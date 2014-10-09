@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.23 (2014-10-09)
+-------------------
 * Use pcl::EarClip to decompose polygon into triangles
 * Complete gridmap with statically defined polygon
 * Install nodelet executables

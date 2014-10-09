@@ -2,6 +2,12 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* added codes to check how long it takes to calc keypoints
+* added codes to make executable file that use some feature extraction methods
+* Contributors: Yu Ohara
+
 0.1.22 (2014-09-24)
 -------------------
 

@@ -3,6 +3,7 @@
   <remap from="/diagnostics_agg" to="/diagnostics_pcl_agg" />
   <arg name="BASE_FRAME_ID" default="odom" />
   <arg name="RUN_SELF_FILTER" default="false"/>
+  <arg name="ORGANIZED_PASS_THROUGH" default="true" />
   <arg name="SELF_FILTER_PARAM" default="$(find jsk_pr2_startup)/jsk_pr2_sensors/tilt_self_filter.yaml" />
   <arg name="JOINT_STATIC_FILTER" default="false" />
   <arg name="FILTER_JOINT_PARAM" value="$(find jsk_pcl_ros)/config/pr2_sensor_joint.yaml" />
@@ -32,6 +33,19 @@
           output="screen"/>
   </group>
 
+  
+  <group if="$(arg ORGANIZED_PASS_THROUGH)">
+    <node pkg="nodelet" type="nodelet" name="organized_pass_through_y"
+          args="load jsk_pcl/OrganizedPassThrough /$(arg MANAGER)">
+      <remap from="~input" to="$(arg INPUT)" />
+      <!-- suppose QVGA -->
+      <rosparam>
+        filter_field: y
+        min_index: 100
+        max_index: 220
+      </rosparam>
+    </node>
+  </group>
   <group if="$(arg RUN_SELF_FILTER)">
     <node pkg="pr2_navigation_self_filter"
           type="self_filter" clear_params="true"
@@ -48,7 +62,8 @@
   <node pkg="nodelet" type="nodelet" name="input_relay"
         machine="$(arg MACHINE)"
         args="load jsk_topic_tools/Relay $(arg MANAGER)">
-    <remap from="~input" to="$(arg INPUT)" unless="$(arg RUN_SELF_FILTER)" />
+    <!-- <remap from="~input" to="$(arg INPUT)" unless="$(arg RUN_SELF_FILTER)" /> -->
+    <remap from="~input" to="organized_pass_through_y/output" />
     <remap from="~input" to="openni_cloud_self_filter/cloud_out" if="$(arg RUN_SELF_FILTER)" />
     <remap from="~output" to="~raw_output" if="$(arg JOINT_STATIC_FILTER)" />
   </node>
@@ -177,6 +192,13 @@
     <remap from="~selected_index" to="/bounding_box_marker/selected_index" />
     <remap from="~output" to="/selected_pointcloud" />
   </node>
+  <node pkg="nodelet" type="nodelet" name="estimated_plane_respected_to_odom"
+          args="load jsk_pcl/PolygonArrayTransformer /$(arg MANAGER)">
+      <remap from="~input_polygons" to="multi_plane_estimate/output_refined_polygon" />
+      <remap from="~input_coefficients" to="multi_plane_estimate/output_refined_coefficients" />
+      <param name="frame_id" value="CHEST_LINK1" />
+    </node>
+
   <group if="$(arg COLOR_HISTOGRAM)">
     <node pkg="nodelet" type="nodelet" name="color_histogram"
           args="load jsk_pcl/ColorHistogramMatcher /$(arg MANAGER)"

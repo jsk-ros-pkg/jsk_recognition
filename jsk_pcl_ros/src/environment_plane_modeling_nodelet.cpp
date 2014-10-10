@@ -55,6 +55,7 @@ namespace jsk_pcl_ros
     environment_id_ = 0;
     generation_ = 0;
     register_next_map_ = false;
+    continuous_estimation_ = false;
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&EnvironmentPlaneModeling::configCallback, this, _1, _2);
@@ -92,9 +93,12 @@ namespace jsk_pcl_ros
       = pnh_->advertise<ClusterPointIndices>("occlusion_result_indices", 1);
     grid_map_array_pub_ = pnh_->advertise<SparseOccupancyGridArray>(
       "output_grid_map", 1);
-    old_map_pub_ = pnh_->advertise<SparseOccupancyGridArray>("old_grid_map", 1);
+    old_map_pub_ = pnh_->advertise<SparseOccupancyGridArray>("old/grid_map", 1);
+    old_map_polygon_pub_ 
+      = pnh_->advertise<PolygonArray>("old/polygons", 1);
+    old_map_polygon_coefficients_pub_ = pnh_->advertise<ModelCoefficientsArray>(
+      "old/coefficients", 1);
     
-    pnh_->param("continuous_estimation", continuous_estimation_, false);
     pnh_->param("use_static_polygons_", use_static_polygons_, false);
     
     sub_input_.subscribe(*pnh_, "input", 1);
@@ -164,8 +168,34 @@ namespace jsk_pcl_ros
       = pnh_->advertiseService(
         "register_completion_to_hisotry",
         &EnvironmentPlaneModeling::registerCompletionToHistoryCallback, this);
+    start_build_environment_service_
+      = pnh_->advertiseService(
+        "start_building",
+        &EnvironmentPlaneModeling::startBuildEnvironmentCallback, this);
+    stop_build_environment_service_
+      = pnh_->advertiseService(
+        "stop_building",
+        &EnvironmentPlaneModeling::stopBuildEnvironmentCallback, this);
   }
-
+    
+  bool EnvironmentPlaneModeling::startBuildEnvironmentCallback(
+    std_srvs::Empty::Request& req,
+    std_srvs::Empty::Response& res)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    continuous_estimation_ = true;
+    return true;
+  }
+  
+  bool EnvironmentPlaneModeling::stopBuildEnvironmentCallback(
+    std_srvs::Empty::Request& req,
+    std_srvs::Empty::Response& res)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    continuous_estimation_ = false;
+    return true;
+  }
+  
 
   void EnvironmentPlaneModeling::staticPolygonCallback(
     const PolygonArray::ConstPtr& polygons,
@@ -258,7 +288,7 @@ namespace jsk_pcl_ros
     NODELET_DEBUG_STREAM(getName() << "::inputCallback");
     boost::mutex::scoped_lock lock(mutex_);
     if (input_indices->cluster_indices.size() == 0) {
-      NODELET_WARN("no clusters is available");
+      NODELET_DEBUG("no clusters is available");
       return;
     }
     latest_input_ = input;
@@ -267,9 +297,7 @@ namespace jsk_pcl_ros
     latest_input_coefficients_ = coefficients;
     latest_static_polygons_ = static_polygons;
     latest_static_coefficients_ = static_coefficients;
-    //if (continuous_estimation_) {
-      lockCallback();
-      //}
+    lockCallback();
   }
 
   void EnvironmentPlaneModeling::inputCallback(
@@ -281,7 +309,7 @@ namespace jsk_pcl_ros
     NODELET_DEBUG_STREAM(getName() << "::inputCallback");
     boost::mutex::scoped_lock lock(mutex_);
     if (input_indices->cluster_indices.size() == 0) {
-      NODELET_WARN("no clusters is available");
+      NODELET_DEBUG("no clusters is available");
       return;
     }
     latest_input_ = input;
@@ -290,9 +318,7 @@ namespace jsk_pcl_ros
     latest_input_coefficients_ = coefficients;
     latest_static_polygons_ = PolygonArray::ConstPtr();
     latest_static_coefficients_ = ModelCoefficientsArray::ConstPtr();
-    //if (continuous_estimation_) {
-      lockCallback();
-      //}
+    lockCallback();
   }
   
   void EnvironmentPlaneModeling::configCallback(Config &config, uint32_t level)
@@ -415,6 +441,32 @@ namespace jsk_pcl_ros
     output.x /= msg.polygon.points.size();
     output.y /= msg.polygon.points.size();
     output.z /= msg.polygon.points.size();
+  }
+
+  void EnvironmentPlaneModeling::publishGridMapPolygon(
+    ros::Publisher& pub_polygons,
+    ros::Publisher& pub_coefficients,
+    const std_msgs::Header& header,
+    const std::vector<GridMap::Ptr> grid_maps)
+  {
+    PolygonArray ros_polygons;
+    ModelCoefficientsArray ros_coefficients;
+    ros_polygons.header = header;
+    ros_coefficients.header = header;
+    for (size_t i = 0; i < grid_maps.size(); i++) {
+      GridMap::Ptr grid = grid_maps[i];
+      ConvexPolygon::Ptr convex = grid->toConvexPolygon();
+      geometry_msgs::PolygonStamped polygon_stamped;
+      polygon_stamped.header = header;
+      polygon_stamped.polygon = convex->toROSMsg();
+      PCLModelCoefficientMsg coefficients;
+      coefficients.header = header;
+      coefficients.values = convex->toCoefficients();
+      ros_polygons.polygons.push_back(polygon_stamped);
+      ros_coefficients.coefficients.push_back(coefficients);
+    }
+    pub_polygons.publish(ros_polygons);
+    pub_coefficients.publish(ros_coefficients);
   }
 
   void EnvironmentPlaneModeling::publishGridMap(
@@ -974,16 +1026,7 @@ namespace jsk_pcl_ros
       processing_input_indices_,
       segmented_clouds);
 
-    // if you don't need to have history of grid maps,
-    // clear them.
-    //if (!history_accumulation_) { 
     grid_maps_ = std::vector<GridMap::Ptr>(); // always clear
-    // }
-    // else {
-    //   // if need to reject grid maps because of history,
-    //   // remove them here
-    //   //selectionGridMaps();
-    // }
     
     std::vector<GridMap::Ptr> ordered_grid_maps;  
     // first, build grid map
@@ -996,25 +1039,13 @@ namespace jsk_pcl_ros
     ModelCoefficientsArray::Ptr result_coefficients(new ModelCoefficientsArray);
     pcl::PointCloud<PointT>::Ptr result_pointcloud (new pcl::PointCloud<PointT>);
     ClusterPointIndices::Ptr result_indices(new ClusterPointIndices);
-    // In actual, this method is deprecated
-    // estimateOcclusion(pcl_cloud,
-    //                   processing_input_indices_,
-    //                   segmented_clouds,
-    //                   ordered_grid_maps,
-    //                   processing_input_polygons_,
-    //                   processing_input_coefficients_,
-    //                   processing_static_polygons_,
-    //                   processing_static_coefficients_,
-    //                   result_polygons,
-    //                   result_coefficients,
-    //                   result_pointcloud,
-    //                   result_indices);
     *result_polygons = *processing_input_polygons_;
     *result_coefficients = *processing_input_coefficients_;
 
 
     // complete gridmap as just test
     std::vector<GridMap::Ptr> completed_grid_maps;
+    downsizeGridMaps(grid_maps_);
     completeGridMap(pcl_cloud,
                     processing_input_indices_,
                     segmented_clouds,
@@ -1023,7 +1054,8 @@ namespace jsk_pcl_ros
                     completion_static_polygons_,
                     completion_static_coefficients_,
                     completed_grid_maps);
-
+    
+    
     if (register_next_map_) {
       // old_grid_maps_ += grid_maps_
       appendGridMaps(old_grid_maps_, grid_maps_);
@@ -1035,46 +1067,28 @@ namespace jsk_pcl_ros
       
     }
     
-    // decrease all the maps
-    downsizeGridMaps();
+    if (continuous_estimation_) {
+      appendGridMaps(old_grid_maps_, completed_grid_maps);
+    }
+
+    
 
     publishGridMap(grid_map_array_pub_, processing_input_->header, grid_maps_);
     publishGridMap(debug_grid_map_completion_pub_, processing_input_->header, completed_grid_maps);
     publishGridMap(old_map_pub_, processing_input_->header, old_grid_maps_);
-    // if (result_indices->cluster_indices.size() == 0) {
-    //   NODELET_WARN("failed to build gridmap?, result_indices equals to 0");
-    //   return false;
-    // }
+    publishGridMapPolygon(old_map_polygon_pub_, old_map_polygon_coefficients_pub_,
+                          processing_input_->header,
+                          old_grid_maps_);
     {
       jsk_topic_tools::ScopedTimer timer = kdtree_building_time_acc_.scopedTimer();
       // build kdtrees
       kdtrees_.clear();
-      separated_point_cloud_.clear();
-    
-      pcl::ExtractIndices<PointT> extract;
-      extract.setInputCloud(result_pointcloud);
-      for (size_t i = 0;
-           i < result_indices->cluster_indices.size();
-           i++) {
-        pcl::PointCloud<PointT>::Ptr nonprojected_input (new pcl::PointCloud<PointT>);
-        pcl::PointIndices::Ptr indices (new pcl::PointIndices);
-        pcl_conversions::toPCL(result_indices->cluster_indices[i],
-                               *indices);
-        extract.setIndices(indices);
-        extract.filter(*nonprojected_input);
-        // project `nonprojected_input' to the plane
-        pcl::PointCloud<PointT>::Ptr kdtree_input (new pcl::PointCloud<PointT>);
-        pcl::ProjectInliers<PointT> proj;
-        proj.setModelType (pcl::SACMODEL_PLANE);
-        pcl::ModelCoefficients::Ptr plane_coefficients (new pcl::ModelCoefficients);
-        plane_coefficients->values = processing_input_coefficients_->coefficients[i].values;
-        proj.setModelCoefficients(plane_coefficients);
-        proj.setInputCloud(nonprojected_input);
-        proj.filter(*kdtree_input);
-        pcl::KdTreeFLANN<PointT>::Ptr kdtree (new pcl::KdTreeFLANN<PointT>);
+      for (size_t i = 0; i < old_grid_maps_.size(); i++) {
+        GridMap::Ptr map = old_grid_maps_[i];
+        pcl::PointCloud<pcl::PointXYZ>::Ptr kdtree_input = map->toPointCloud();
+        pcl::KdTreeFLANN<pcl::PointXYZ>::Ptr kdtree (new pcl::KdTreeFLANN<pcl::PointXYZ>);
         kdtree->setInputCloud(kdtree_input);
         kdtrees_.push_back(kdtree);
-        separated_point_cloud_.push_back(kdtree_input);
       }
       //res.environment_id = ++environment_id_;
     }
@@ -1093,10 +1107,10 @@ namespace jsk_pcl_ros
     return true;
   }
 
-  void EnvironmentPlaneModeling::downsizeGridMaps()
+  void EnvironmentPlaneModeling::downsizeGridMaps(std::vector<GridMap::Ptr>& maps)
   {
-    for (size_t i = 0; i < grid_maps_.size(); i++) {
-      grid_maps_[i]->decrease(decrease_grid_map_);
+    for (size_t i = 0; i < maps.size(); i++) {
+      maps[i]->decrease(decrease_grid_map_);
     }
   }
   
@@ -1107,7 +1121,7 @@ namespace jsk_pcl_ros
     // geometry_msgs::PolygonStamped target_polygon
     //   = processing_input_polygons_->polygons[plane_i];
     // sensor_msgs::PointCloud2 debug_env_pointcloud;
-    GridMap::Ptr grid = grid_maps_[plane_i];
+    GridMap::Ptr grid = old_grid_maps_[plane_i];
     Plane::Ptr grid_plane = grid->toPlanePtr();
     for (size_t i = 0; i < sampled_point_cloud->points.size(); i++) {
       PointT p = sampled_point_cloud->points[i];
@@ -1226,6 +1240,7 @@ namespace jsk_pcl_ros
     PolygonOnEnvironment::Request& req,
     PolygonOnEnvironment::Response& res)
   {
+    ROS_INFO("polygonOnEnvironmentCallback");
     if (req.environment_id != environment_id_ && req.environment_id != 0) { // 0 is always OK
       NODELET_FATAL("environment id does not match. %u is provided but the environment stored is %u",
                     req.environment_id,

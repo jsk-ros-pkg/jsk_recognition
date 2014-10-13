@@ -67,6 +67,7 @@ add_service_files(FILES SwitchTopic.srv
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/ParticleFilterTracking.cfg
   cfg/BilateralFilter.cfg
   cfg/ICPRegistration.cfg
   cfg/PlaneReasoner.cfg

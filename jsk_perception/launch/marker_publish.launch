@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="roseus" type="roseus" name="marker_publish" output="screen"
+        args="$(find jsk_perception)/euslisp/only-perception.l" />
+</launch>

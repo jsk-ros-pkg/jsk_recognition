@@ -137,6 +137,8 @@ jsk_pcl_nodelet(src/pointcloud_database_server_nodelet.cpp
   "jsk_pcl/PointcloudDatabaseServer" "pointcloud_database_server")
 jsk_pcl_nodelet(src/bilateral_filter_nodelet.cpp
   "jsk_pcl/BilateralFilter" "bilateral_filter")
+jsk_pcl_nodelet(src/line_segment_detector_nodelet.cpp
+  "jsk_pcl/LineSegmentDetector" "line_segment_detector")
 
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}

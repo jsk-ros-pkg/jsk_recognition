@@ -47,7 +47,7 @@
 #include <jsk_pcl_ros/LineSegmentDetectorConfig.h>
 #include <dynamic_reconfigure/server.h>
 #include <visualization_msgs/Marker.h>
-
+#include "jsk_pcl_ros/geo_util.h"
 namespace jsk_pcl_ros
 {
 
@@ -55,17 +55,26 @@ namespace jsk_pcl_ros
   {
   public:
     typedef boost::shared_ptr<LineSegment> Ptr;
+    LineSegment(const std_msgs::Header& input_header,
+                pcl::PointIndices::Ptr indices,
+                pcl::ModelCoefficients::Ptr coefficients,
+                pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
     LineSegment(pcl::PointIndices::Ptr indices,
                 pcl::ModelCoefficients::Ptr coefficients);
     virtual ~LineSegment();
     virtual void addMarkerLine(
       visualization_msgs::Marker& marker,
       const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+    virtual Segment::Ptr toSegment();
     pcl::PointIndices::Ptr getIndices() { return indices_; }
     pcl::ModelCoefficients::Ptr getCoefficients() { return coefficients_; }
+    pcl::PointCloud<pcl::PointXYZ>::Ptr getPoints() { return points_; }
+    std_msgs::Header header;
   protected:
     pcl::PointIndices::Ptr indices_;
     pcl::ModelCoefficients::Ptr coefficients_;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr points_;
+    
   private:
     
   };
@@ -121,7 +130,6 @@ namespace jsk_pcl_ros
     int max_iterations_;
     int min_indices_;
     double min_length_;
-    
   private:
     
   };

@@ -35,7 +35,7 @@
 
 ////////////////////////////////////////////////////////
 // the implementation is based on
-// Line segment-based fast 3D plane extraction using nodding 2D laser rangender,
+// Line segment-based fast 3D plane extraction using nodding 2D laser rangender
 //   Su-Yong An, Lae-Kyoung Lee and Se-Young Oh,
 //   ,Robotica / FirstView Article / October 2014, pp 1 - 24
 ////////////////////////////////////////////////////////
@@ -51,7 +51,8 @@
 #include <jsk_topic_tools/time_accumulator.h>
 #include <jsk_pcl_ros/LineSegmentCollectorConfig.h>
 #include <dynamic_reconfigure/server.h>
-
+#include "jsk_pcl_ros/geo_util.h"
+#include <jsk_pcl_ros/PolygonArray.h>
 
 namespace jsk_pcl_ros
 {
@@ -117,6 +118,15 @@ namespace jsk_pcl_ros
     virtual void onInit();
     virtual void collectFromBuffers(const std_msgs::Header& header,
                                     std::vector<LineSegment::Ptr> new_segments);
+    virtual void estimatePlanes(
+      const std_msgs::Header& header,
+      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
+      std::vector<pcl::PointIndices::Ptr> initial_indices);
+    virtual void estimateMultiPlanesFromPointCluoud(
+      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
+      pcl::PointIndices::Ptr initial_indices,
+      std::vector<pcl::ModelCoefficients::Ptr>& coefficients_list,
+      std::vector<pcl::PointIndices::Ptr>& indices_list);
     virtual void collect(
       const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
       const ClusterPointIndices::ConstPtr& indices_msg,
@@ -129,12 +139,17 @@ namespace jsk_pcl_ros
       const sensor_msgs::JointState::ConstPtr& joint_state_msg);
     virtual void cleanupBuffers(
       const ros::Time& stamp);
-    virtual void publishDebugBeforePlaneSegmentation(
+    virtual void publishBeforePlaneSegmentation(
       const std_msgs::Header& header,
       const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
       const std::vector<pcl::PointIndices::Ptr>& connected_indices);
     virtual LineSegmentCluster::Ptr lookupNearestSegment(
       LineSegment::Ptr segment);
+    virtual void publishResult(
+      const std_msgs::Header& header,
+      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
+      std::vector<pcl::ModelCoefficients::Ptr> all_coefficients,
+      std::vector<pcl::PointIndices::Ptr> all_indices);
     virtual void configCallback(Config &config, uint32_t level);
     ////////////////////////////////////////////////////////
     // ROS variables
@@ -148,7 +163,7 @@ namespace jsk_pcl_ros
     ros::Publisher pub_point_cloud_;
     ros::Publisher pub_inliers_;
     ros::Publisher pub_coefficients_;
-    ros::Publisher debug_pub_point_cloud_before_plane_;
+    ros::Publisher pub_polygons_;
     ros::Publisher debug_pub_inliers_before_plane_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     jsk_topic_tools::TimeAccumulator connect_ac_;
@@ -168,13 +183,16 @@ namespace jsk_pcl_ros
     TimeStampedVector<ModelCoefficientsArray::ConstPtr> coefficients_buffer_;
     TimeStampedVector<LineSegment::Ptr> segments_buffer_;
     std::vector<LineSegmentCluster::Ptr> segment_clusters_;
-    //IntegerGraphMap segment_map_;
-    
-    ////////////////////////////////////////////////////////
-    // parameters
-    ////////////////////////////////////////////////////////
     double segment_connect_normal_threshold_;
     double ewma_tau_;
+    
+    ////////////////////////////////////////////////////////
+    // plane estimation
+    ////////////////////////////////////////////////////////
+    double outlier_threshold_;
+    int max_iterations_;
+    int min_indices_;
+    
   private:
     
   };

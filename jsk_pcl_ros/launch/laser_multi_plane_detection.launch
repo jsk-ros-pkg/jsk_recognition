@@ -24,9 +24,20 @@
     </node>
     <node pkg="nodelet" type="nodelet" name="tilt_laser_manager"
           args="manager" output="screen" />
+    <node name="xfilter" pkg="nodelet" type="nodelet"
+          args="load pcl/PassThrough tilt_laser_manager"
+          output="screen" clear_params="true">
+      <remap from="~input" to="cloud_filtered" />
+      <rosparam>
+        filter_field_name: x
+        filter_limit_min: 0.3
+        filter_limit_max: 5.0
+      </rosparam>
+    </node>
+
     <node name="transform_cloud" pkg="nodelet" type="nodelet"
           args="load jsk_pcl/TfTransformCloud tilt_laser_manager">
-      <remap from="~input" to="cloud_filtered" />
+      <remap from="~input" to="xfilter/output" />
       <param name="target_frame_id" value="$(arg BASE_FRAME_ID)" />
     </node>
     <node name="euclidean_clustering"
@@ -81,8 +92,19 @@
           name="connected_segment"
           args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis tilt_laser_manager"
           output="screen">
-      <remap from="~input" to="line_segment_collector/debug/connect_segments/cloud" />
+      <remap from="~input" to="line_segment_collector/output/cloud" />
       <remap from="~target" to="line_segment_collector/debug/connect_segments/inliers" />
+      <rosparam>
+        publish_clouds: false
+        publish_tf: false
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="multi_plane_decomposer"
+          args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis tilt_laser_manager"
+          output="screen">
+      <remap from="~input" to="line_segment_collector/output/cloud" />
+      <remap from="~target" to="line_segment_collector/output/inliers" />
       <rosparam>
         publish_clouds: false
         publish_tf: false

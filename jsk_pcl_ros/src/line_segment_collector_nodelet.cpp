@@ -36,6 +36,9 @@
 #include "jsk_pcl_ros/line_segment_collector.h"
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include "jsk_pcl_ros/pcl_util.h"
+#include <pcl/sample_consensus/method_types.h>
+#include <pcl/sample_consensus/model_types.h>
+#include <pcl/segmentation/sac_segmentation.h>
 
 namespace jsk_pcl_ros
 {
@@ -106,9 +109,8 @@ namespace jsk_pcl_ros
     pub_inliers_ = advertise<ClusterPointIndices>(*pnh_, "output/inliers", 1);
     pub_coefficients_
       = advertise<ModelCoefficientsArray>(*pnh_, "output/coefficients", 1);
-    debug_pub_point_cloud_before_plane_
-      = advertise<sensor_msgs::PointCloud2>(
-        *pnh_, "debug/connect_segments/cloud", 1);
+    pub_polygons_
+      = advertise<PolygonArray>(*pnh_, "output/polygons", 1);
     debug_pub_inliers_before_plane_
       = advertise<ClusterPointIndices>(
         *pnh_, "debug/connect_segments/inliers", 1);
@@ -119,6 +121,9 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     ewma_tau_ = config.ewma_tau;
     segment_connect_normal_threshold_ = config.segment_connect_normal_threshold;
+    outlier_threshold_ = config.outlier_threshold;
+    max_iterations_ = config.max_iterations;
+    min_indices_ = config.min_indices;
   }
 
   void LineSegmentCollector::subscribe()
@@ -195,7 +200,7 @@ namespace jsk_pcl_ros
     //segment_map_ = IntegerGraphMap();
   }
 
-  void LineSegmentCollector::publishDebugBeforePlaneSegmentation(
+  void LineSegmentCollector::publishBeforePlaneSegmentation(
     const std_msgs::Header& header,
     const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
     const std::vector<pcl::PointIndices::Ptr>& connected_indices)
@@ -203,7 +208,7 @@ namespace jsk_pcl_ros
     sensor_msgs::PointCloud2 ros_cloud;
     pcl::toROSMsg(*cloud, ros_cloud);
     ros_cloud.header = header;
-    debug_pub_point_cloud_before_plane_.publish(ros_cloud);
+    pub_point_cloud_.publish(ros_cloud);
     ClusterPointIndices ros_indices;
     ros_indices.header = header;
     ros_indices.cluster_indices
@@ -259,6 +264,7 @@ namespace jsk_pcl_ros
     pcl::PointCloud<pcl::PointXYZ>::Ptr
       connected_cloud(new pcl::PointCloud<pcl::PointXYZ>);
     std::vector<pcl::PointIndices::Ptr> connected_indices;
+    std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr > clouds_list;
     for (size_t i = 0; i < segment_clusters_.size(); i++) {
       LineSegmentCluster::Ptr cluster = segment_clusters_[i];
       pcl::PointIndices::Ptr current_indices (new pcl::PointIndices);
@@ -268,13 +274,107 @@ namespace jsk_pcl_ros
         current_indices->indices.push_back(connected_cloud->points.size() + j);
       }
       connected_indices.push_back(current_indices);
+      clouds_list.push_back(current_cloud);
       *connected_cloud = *connected_cloud + *current_cloud;
     }
     // publish debug information
-    publishDebugBeforePlaneSegmentation(
+    publishBeforePlaneSegmentation(
       header,
       connected_cloud,
       connected_indices);
+    estimatePlanes(header, connected_cloud, connected_indices);
+  }
+
+  void LineSegmentCollector::estimateMultiPlanesFromPointCluoud(
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
+    pcl::PointIndices::Ptr initial_indices,
+    std::vector<pcl::ModelCoefficients::Ptr>& coefficients_list,
+    std::vector<pcl::PointIndices::Ptr>& indices_list)
+  {
+    pcl::PointIndices::Ptr rest_indices (new pcl::PointIndices);
+    *rest_indices = *initial_indices;
+    pcl::SACSegmentation<pcl::PointXYZ> seg;
+    seg.setOptimizeCoefficients (true);
+    seg.setModelType (pcl::SACMODEL_PLANE);
+    seg.setMethodType (pcl::SAC_RANSAC);
+    seg.setDistanceThreshold (outlier_threshold_);
+    seg.setMaxIterations (max_iterations_);
+    seg.setInputCloud(cloud);
+    while (true) {
+      if (rest_indices->indices.size() > min_indices_) {
+        pcl::PointIndices::Ptr
+          result_indices (new pcl::PointIndices);
+        pcl::ModelCoefficients::Ptr
+          result_coefficients (new pcl::ModelCoefficients);
+        seg.setIndices(rest_indices);
+        seg.segment(*result_indices, *result_coefficients);
+        if (result_indices->indices.size() > min_indices_) {
+          coefficients_list.push_back(result_coefficients);
+          indices_list.push_back(result_indices);
+          rest_indices = subIndices(*rest_indices, *result_indices);
+        }
+        else {
+          break;
+        }
+      }
+      else {
+        break;
+      }
+    }
+  }
+
+  void LineSegmentCollector::publishResult(
+    const std_msgs::Header& header,
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
+    std::vector<pcl::ModelCoefficients::Ptr> all_coefficients,
+    std::vector<pcl::PointIndices::Ptr> all_indices)
+  {
+    ClusterPointIndices ros_indices;
+    ros_indices.header = header;
+    ros_indices.cluster_indices
+      = pcl_conversions::convertToROSPointIndices(all_indices,
+                                                  header);
+    pub_inliers_.publish(ros_indices);
+    ModelCoefficientsArray ros_coefficients;
+    ros_coefficients.header = header;
+    ros_coefficients.coefficients
+      = pcl_conversions::convertToROSModelCoefficients(
+        all_coefficients,
+        header);
+    pub_coefficients_.publish(ros_coefficients);
+    PolygonArray ros_polygon;
+    ros_polygon.header = header;
+    for (size_t i = 0; i < all_indices.size(); i++) {
+      ConvexPolygon::Ptr convex
+        = convexFromCoefficientsAndInliers<pcl::PointXYZ>(
+          cloud, all_indices[i], all_coefficients[i]);
+      geometry_msgs::PolygonStamped polygon_stamped;
+      polygon_stamped.header = header;
+      polygon_stamped.polygon = convex->toROSMsg();
+      ros_polygon.polygons.push_back(polygon_stamped);
+    }
+    pub_polygons_.publish(ros_polygon);
+  }
+  
+  void LineSegmentCollector::estimatePlanes(
+    const std_msgs::Header& header,
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
+    std::vector<pcl::PointIndices::Ptr> initial_indices)
+  {
+    std::vector<pcl::ModelCoefficients::Ptr> all_coefficients;
+    std::vector<pcl::PointIndices::Ptr> all_indices;
+    for (size_t i = 0; i < initial_indices.size(); i++) {
+      std::vector<pcl::ModelCoefficients::Ptr> coefficients_list;
+      std::vector<pcl::PointIndices::Ptr> indices_list;
+      estimateMultiPlanesFromPointCluoud(
+        cloud, initial_indices[i], coefficients_list, indices_list);
+      for (size_t i = 0; i < indices_list.size(); i++) {
+        all_indices.push_back(indices_list[i]);
+        all_coefficients.push_back(coefficients_list[i]);
+      }
+    }
+    // publish the result...
+    publishResult(header, cloud, all_coefficients, all_indices);
   }
 
   void LineSegmentCollector::collect(

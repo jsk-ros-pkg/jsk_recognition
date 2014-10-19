@@ -88,6 +88,7 @@ namespace jsk_pcl_ros
     typedef boost::shared_ptr<Line> Ptr;
     Line(const Eigen::Vector3f& direction, const Eigen::Vector3f& origin);
     virtual void getDirection(Eigen::Vector3f& output) const;
+    virtual Eigen::Vector3f getDirection() const;
     virtual void getOrigin(Eigen::Vector3f& output) const;
     virtual double distanceToPoint(const Eigen::Vector3f& from) const;
     virtual double distanceToPoint(const Eigen::Vector3f& from, Eigen::Vector3f& foot) const;

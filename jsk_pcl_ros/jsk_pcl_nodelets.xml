@@ -1,4 +1,16 @@
 <library path="lib/libjsk_pcl_ros">
+  <class name="jsk_pcl/LineSegmentCollector" type="jsk_pcl_ros::LineSegmentCollector"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      collect segmented lines and compose polygons
+    </description>
+  </class>
+  <class name="jsk_pcl/LineSegmentDetector" type="jsk_pcl_ros::LineSegmentDetector"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      segment lines outof clustered pointclouds
+    </description>
+  </class>
   <class name="jsk_pcl/BilateralFilter" type="jsk_pcl_ros::BilateralFilter"
          base_class_type="nodelet::Nodelet">
     <description>

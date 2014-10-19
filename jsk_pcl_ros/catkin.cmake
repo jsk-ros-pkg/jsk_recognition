@@ -67,6 +67,9 @@ add_service_files(FILES SwitchTopic.srv
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/LineSegmentCollector.cfg
+  cfg/LineSegmentDetector.cfg
+  cfg/ParticleFilterTracking.cfg
   cfg/BilateralFilter.cfg
   cfg/ICPRegistration.cfg
   cfg/PlaneReasoner.cfg
@@ -228,6 +231,10 @@ jsk_pcl_nodelet(src/pointcloud_database_server_nodelet.cpp
   "jsk_pcl/PointcloudDatabaseServer" "pointcloud_database_server")
 jsk_pcl_nodelet(src/bilateral_filter_nodelet.cpp
   "jsk_pcl/BilateralFilter" "bilateral_filter")
+jsk_pcl_nodelet(src/line_segment_detector_nodelet.cpp
+  "jsk_pcl/LineSegmentDetector" "line_segment_detector")
+jsk_pcl_nodelet(src/line_segment_collector_nodelet.cpp
+  "jsk_pcl/LineSegmentCollector" "line_segment_collector")
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp

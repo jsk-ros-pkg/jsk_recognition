@@ -90,6 +90,13 @@ roslaunch jsk_pcl_ros tracking_hydro.launch  #(When use hydro)
 Push the "Select" button at the top bar , drag and surround the target poincloud which you want to track in the rectangle area.Then, finally, push the "SelectPointCloudPublishActoin" button at SelectPointCloudPublishAction Panel. The tracker will start tracking the target.
 
 ### jsk\_pcl/ResizePointsPublisher
+#### What is this
+ResizePointsPublisher resizes PointCloud generated from depth images. It keeps *organized* pointcloud. For example you can create QVGA pointcloud from VGA pointcloud of kinect like sensors.
+
+#### Topics
+* `~input`:
+Input PointCloud. The input should be organized pointcloud.
+
 ### jsk\_pcl/PointcloudScreenpoint
 ### jsk\_pcl/DepthImageCreator
 ### jsk\_pcl/EuclideanClustering

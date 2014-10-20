@@ -1,7 +1,8 @@
 #!/usr/bin/env roseus
 
 (load "package://jsk_perception/euslisp/detection_utils.l")
-(load "package://jsk_perception/euslisp/kalmanlib.l")
+(load "package://euslisp/jskeus/irteus/kalmanlib.l")
+
 
 (defvar *detection-topic* "/openni/rgb/ObjectDetection")
 

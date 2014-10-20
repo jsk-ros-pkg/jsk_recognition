@@ -27,6 +27,50 @@ To
 /camera/camera_nodelet_manager
 ```
 
+## types
+jsk\_pcl\_ros provides several message types.
+### ClusterPointIndices.msg
+```
+Header header
+pcl_msgs/PointIndices[] cluster_indices
+```
+ClusterPointIndices is used to represent segmentation result.
+Simply put, ClusterPointIndices is a list of PointIndices.
+
+### ModelCoefficientsArray
+```
+Header header
+pcl_msgs/ModelCoefficients[] coefficients
+```
+ModelCoefficientsArray is used to represent coefficients of model
+for each segmented clusters.
+Simply put, ModelCoefficientsArray is a list of ModelCoefficients.
+
+### PolygonArray
+```
+Header header
+geometry_msgs/PolygonStamped[] polygons
+```
+PolygonArray is a list of PolygonStamped.
+
+You can use [jsk\_rviz\_plugins](https://github.com/jsk-ros-pkg/jsk_visualization) to visualize PolygonArray in rviz.
+
+### BoundingBox
+```
+Header header
+geometry_msgs/Pose pose
+geometry_msgs/Vector3 dimensions #x, y and z
+```
+BoundingBox represent a oriented bounding box. `dimensions` mean the
+size of bounding box.
+
+### BoundingBoxArray
+```
+Header header
+BoundingBox[] boxes
+```
+BoundingBoxArray is a list of BoundingBox.
+You can use [jsk\_rviz\_plugins](https://github.com/jsk-ros-pkg/jsk_visualization) to visualize BoungingBoxArray in rviz.
 
 ## nodelets
 ### jsk\_pcl/ParticleFilterTracking
@@ -39,7 +83,7 @@ This nodelet will track the target pointcloud which you set in rviz.
 run the below command.
 
 ```
-roslaunch jsk_pcl_ros tracking_groovy.launch # (When use groovy)  
+roslaunch jsk_pcl_ros tracking_groovy.launch # (When use groovy)
 roslaunch jsk_pcl_ros tracking_hydro.launch  #(When use hydro)
 ```
 

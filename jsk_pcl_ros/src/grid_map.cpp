@@ -40,6 +40,7 @@
 #include <eigen_conversions/eigen_msg.h>
 #include <nodelet/nodelet.h>
 #include "jsk_pcl_ros/pcl_conversion_util.h"
+#include <pcl/surface/convex_hull.h>
 //#define DEBUG_GRID_MAP
 
 namespace jsk_pcl_ros
@@ -622,4 +623,47 @@ namespace jsk_pcl_ros
     }
   }
   
+  pcl::PointCloud<pcl::PointXYZ>::Ptr GridMap::toPointCloud()
+  {
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    for (ColumnIterator it = data_.begin();
+         it != data_.end();
+         it++) {
+      RowIndices row_indices = it->second;
+      int x = it->first;
+      for (RowIterator rit = row_indices.begin();
+           rit != row_indices.end();
+           rit++) {
+        int y = *rit;
+        Eigen::Vector3f pos;
+        GridIndex index(x, y);
+        gridToPoint(index, pos);
+        pcl::PointXYZ p;
+        pointFromVectorToXYZ<Eigen::Vector3f, pcl::PointXYZ>(pos, p);
+        cloud->points.push_back(p);
+      }
+    }
+    return cloud;
+  }
+
+  ConvexPolygon::Ptr GridMap::toConvexPolygon()
+  {
+    // 1. build pointcloud
+    // 2. compute convex hull
+    // 3. return it as ConvexPolygon
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = toPointCloud();
+    pcl::ConvexHull<pcl::PointXYZ> chull;
+    chull.setInputCloud(cloud);
+    chull.setDimension(2);
+    pcl::PointCloud<pcl::PointXYZ> chull_output;
+    chull.reconstruct(chull_output);
+    // convex chull_output to Vertices
+    Vertices vs;
+    for (size_t i = 0; i < chull_output.points.size(); i++) {
+      Eigen::Vector3f v = chull_output.points[i].getVector3fMap();
+      vs.push_back(v);
+    }
+    return ConvexPolygon::Ptr(new ConvexPolygon(vs));
+  }
+
 }

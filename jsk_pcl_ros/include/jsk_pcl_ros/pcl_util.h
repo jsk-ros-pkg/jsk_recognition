@@ -72,7 +72,7 @@ namespace jsk_pcl_ros
                                     const pcl::PointIndices& b);
   // select color out of 20 colors
   std_msgs::ColorRGBA colorCategory20(int i);
-  
+
   class Counter
   {
   public:

@@ -59,6 +59,28 @@ namespace jsk_pcl_ros
     ret->indices = indices;
     return ret;
   }
+
+  std::vector<int> subIndices(const std::vector<int>& a,
+                              const std::vector<int>& b)
+  {
+    std::set<int> all(a.begin(), a.end());
+    for (size_t i = 0; i < b.size(); i++) {
+      std::set<int>::iterator it = all.find(b[i]);
+      if (it != all.end()) {
+        all.erase(it);
+      }
+    }
+    return std::vector<int>(all.begin(), all.end());
+  }
+  
+  pcl::PointIndices::Ptr subIndices(const pcl::PointIndices& a,
+                                    const pcl::PointIndices& b)
+  {
+    std::vector<int> indices = subIndices(a.indices, b.indices);
+    pcl::PointIndices::Ptr ret(new pcl::PointIndices);
+    ret->indices = indices;
+    return ret;
+  }
   
   void Counter::add(double v)
   {

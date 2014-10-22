@@ -1,4 +1,4 @@
-# jsk\_pcl\_ros
+# jsk_pcl_ros
 
 ## Introduction
 jsk\_pcl\_ros is a package to provide some programs using [pcl](http://pointclouds.org).
@@ -10,10 +10,8 @@ This package provides some programs as nodelet.
 
 Please be careful about the nodelet manager name when execute some sample launches.
 
-<font size="5" color="#ff0000"><b>
 Because the nodelet manager name is different between groovy version and hydro version in openni.launch,
 you have to replace the nodelet manager name when use in groovy as below.
-</b></font>
 
 From
 
@@ -193,6 +191,15 @@ roslaunch jsk_pcl_ros octree_change_detector.launch
 #### What Is This
 
 This nodelet will republish the pointcloud which is transformed with the designated frame_id.
+
+#### Topics
+* Input
+  * `~input` (`sensor_msgs/PointCloud2`): input pointcloud
+* Output
+  * `~output` (`sensor_msgs/PointCloud2`): output pointcloud.
+
+#### Parameters
+* `~target_frame_id` (string): The frame_id to transform pointcloud.
 
 #### Sample
 Plug the depth sensor which can be launched by openni.launch and run the below command.

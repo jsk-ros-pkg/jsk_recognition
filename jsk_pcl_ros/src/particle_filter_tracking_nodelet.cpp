@@ -49,52 +49,22 @@ namespace jsk_pcl_ros
     // read parameters
     int thread_nr = omp_get_num_procs();
     pnh_->getParam("thread_nr", thread_nr);
-    int max_particle_num = 1000;
-    pnh_->getParam("max_particle_num", max_particle_num);
+    default_step_covariance_.resize(6);
+    
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (&ParticleFilterTracking::config_callback, this, _1, _2);
+    srv_->setCallback (f);
+
     int particle_num = 600;
     pnh_->getParam("particle_num", particle_num);
-    double delta = 0.99;
-    pnh_->getParam("delta", delta);
-    double epsilon = 0.2;
-    pnh_->getParam("epsilon", epsilon);
     bool use_normal = false;
     pnh_->getParam("use_normal", use_normal);
     bool use_hsv = true;
     pnh_->getParam("use_hsv", use_hsv);
-    int iteration_num = 1;
-    pnh_->getParam("iteration_num", iteration_num);
-    double resample_likelihood_thr = 0.0;
-    pnh_->getParam("resample_likelihood_thr", resample_likelihood_thr);
     track_target_name_ = "track_result";
     pnh_->getParam("track_target_name", track_target_name_);
-
-    std::vector<double> bin_size_vector(6);
-    if (!jsk_topic_tools::readVectorParameter(
-          *pnh_, "bin_size", bin_size_vector)) {
-      for (size_t i = 0; i < 6; i++) {
-        bin_size_vector[i] = 0.1;
-      }
-    }
-    ParticleXYZRPY bin_size;
-    bin_size.x = bin_size_vector[0];
-    bin_size.y = bin_size_vector[1];
-    bin_size.z = bin_size_vector[2];
-    bin_size.roll = bin_size_vector[3];
-    bin_size.pitch = bin_size_vector[4];
-    bin_size.yaw = bin_size_vector[5];
-
-    std::vector<double> default_step_covariance(6);
-    if (!jsk_topic_tools::readVectorParameter(
-          *pnh_,
-          "default_step_covariance",
-          default_step_covariance)) {
-      for (size_t i = 0; i < default_step_covariance.size(); i++) {
-        default_step_covariance[i] = 0.015 * 0.015;
-      }
-      default_step_covariance[3] *= 40.0;
-      default_step_covariance[4] *= 40.0;
-      default_step_covariance[5] *= 40.0;
-    }
+    
     std::vector<double> initial_noise_covariance = std::vector<double> (6, 0.00001);
     jsk_topic_tools::readVectorParameter(
       *pnh_, "initial_noise_covariance",
@@ -113,30 +83,29 @@ namespace jsk_pcl_ros
     boost::shared_ptr<KLDAdaptiveParticleFilterOMPTracker<pcl::PointXYZRGBA, ParticleXYZRPY> > tracker
       (new KLDAdaptiveParticleFilterOMPTracker<pcl::PointXYZRGBA, ParticleXYZRPY> (thread_nr));
 
-    //Set all parameters for KLDAdaptiveParticleFilterTracker<pcl::PointXYZRGBA, pcl::PointXYZ>OMPTracker
-    
-    tracker->setMaximumParticleNum (max_particle_num);
-    tracker->setDelta (delta);
-    tracker->setEpsilon (epsilon);
-    tracker->setBinSize (bin_size);
+    tracker->setMaximumParticleNum (max_particle_num_);
+    tracker->setDelta (delta_);
+    tracker->setEpsilon (epsilon_);
+    tracker->setBinSize (bin_size_);
 
     //Set all parameters for  ParticleFilterTracker<pcl::PointXYZRGBA, pcl::PointXYZ>
 
     tracker_ = tracker;
     tracker_->setTrans (Eigen::Affine3f::Identity ());
-    tracker_->setStepNoiseCovariance (default_step_covariance);
+    tracker_->setStepNoiseCovariance (default_step_covariance_);
     tracker_->setInitialNoiseCovariance (initial_noise_covariance);
     tracker_->setInitialNoiseMean (default_initial_mean);
-    tracker_->setIterationNum (iteration_num);
+    tracker_->setIterationNum (iteration_num_);
     tracker_->setParticleNum (particle_num);
-    tracker_->setResampleLikelihoodThr(resample_likelihood_thr);
+    tracker_->setResampleLikelihoodThr(resample_likelihood_thr_);
     tracker_->setUseNormal (use_normal);
-
+    
     //Setup coherence object for tracking
-    ApproxNearestPairPointCloudCoherence<pcl::PointXYZRGBA>::Ptr coherence = ApproxNearestPairPointCloudCoherence<pcl::PointXYZRGBA>::Ptr(new ApproxNearestPairPointCloudCoherence<pcl::PointXYZRGBA> ());
+    ApproxNearestPairPointCloudCoherence<pcl::PointXYZRGBA>::Ptr
+      coherence (new ApproxNearestPairPointCloudCoherence<pcl::PointXYZRGBA>);
 
-    boost::shared_ptr<DistanceCoherence<pcl::PointXYZRGBA> > distance_coherence
-      = boost::shared_ptr<DistanceCoherence<pcl::PointXYZRGBA> > (new DistanceCoherence<pcl::PointXYZRGBA> ());
+    boost::shared_ptr<DistanceCoherence<pcl::PointXYZRGBA> >
+      distance_coherence (new DistanceCoherence<pcl::PointXYZRGBA>);
     coherence->addPointCoherence (distance_coherence);
 
     //add HSV coherence
@@ -153,15 +122,48 @@ namespace jsk_pcl_ros
 
     tracker_->setCloudCoherence (coherence);
 
-    //Set subscribe setting
-    sub_ = pnh_->subscribe("input", 1, &ParticleFilterTracking::cloud_cb,this);
-    sub_update_model_ = pnh_->subscribe("renew_model", 1, &ParticleFilterTracking::renew_model_topic_cb,this);
-    srv_ = pnh_->advertiseService("renew_model", &ParticleFilterTracking::renew_model_cb, this);
     //Set publish setting
     particle_publisher_ = pnh_->advertise<sensor_msgs::PointCloud2>("particle", 1);
     track_result_publisher_ = pnh_->advertise<sensor_msgs::PointCloud2>("track_result", 1);
+    //Set subscribe setting
+    sub_ = pnh_->subscribe("input", 1, &ParticleFilterTracking::cloud_cb,this);
+    sub_update_model_ = pnh_->subscribe("renew_model", 1, &ParticleFilterTracking::renew_model_topic_cb,this);
+    renew_model_srv_
+      = pnh_->advertiseService("renew_model", &ParticleFilterTracking::renew_model_cb, this);
   }
 
+  void ParticleFilterTracking::config_callback(Config &config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock(mtx_);
+    max_particle_num_ = config.max_particle_num;
+    iteration_num_ = config.iteration_num;
+    resample_likelihood_thr_ = config.resample_likelihood_thr;
+    delta_ = config.delta;
+    epsilon_ = config.epsilon;
+    bin_size_.x = config.bin_size_x;
+    bin_size_.y = config.bin_size_y;
+    bin_size_.z = config.bin_size_z;
+    bin_size_.roll = config.bin_size_roll;
+    bin_size_.pitch = config.bin_size_pitch;
+    bin_size_.yaw = config.bin_size_yaw;
+    default_step_covariance_[0] = config.default_step_covariance_x;
+    default_step_covariance_[1] = config.default_step_covariance_y;
+    default_step_covariance_[2] = config.default_step_covariance_z;
+    default_step_covariance_[3] = config.default_step_covariance_roll;
+    default_step_covariance_[4] = config.default_step_covariance_pitch;
+    default_step_covariance_[5] = config.default_step_covariance_yaw;
+    if (tracker_) {
+      NODELET_INFO("update tracker parameter");
+      tracker_->setStepNoiseCovariance (default_step_covariance_);
+      tracker_->setIterationNum (iteration_num_);
+      tracker_->setResampleLikelihoodThr(resample_likelihood_thr_);
+      tracker_->setMaximumParticleNum (max_particle_num_);
+      tracker_->setDelta (delta_);
+      tracker_->setEpsilon (epsilon_);
+      tracker_->setBinSize (bin_size_);
+    }
+  }
+  
   //Publish the current particles
   void ParticleFilterTracking::publish_particles ()
   {

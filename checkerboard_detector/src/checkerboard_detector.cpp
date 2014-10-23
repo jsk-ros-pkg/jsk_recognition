@@ -39,6 +39,7 @@
 #include "posedetection_msgs/ObjectDetection.h"
 #include "posedetection_msgs/Detect.h"
 #include "geometry_msgs/PointStamped.h"
+#include "geometry_msgs/PoseStamped.h"
 #include "math.h"
 
 #include <sys/timeb.h>    // ftime(), struct timeb
@@ -72,6 +73,7 @@ public:
     ros::Subscriber camInfoSubscriber,camInfoSubscriber2;
     ros::Subscriber imageSubscriber,imageSubscriber2;
     ros::Publisher _pubDetection;
+    ros::Publisher _pubPoseStamped;
     ros::Publisher _pubCornerPoint;
     ros::ServiceServer _srvDetect;
 
@@ -190,6 +192,9 @@ public:
         _pubDetection =
           _node.advertise<posedetection_msgs::ObjectDetection> ("ObjectDetection", 1,
                                                                 connect_cb, connect_cb);
+        _pubPoseStamped =
+          _node.advertise<geometry_msgs::PoseStamped> ("objectdetection_pose", 1,
+                                                       connect_cb, connect_cb);
         _pubCornerPoint = _node.advertise<geometry_msgs::PointStamped>("corner_point", 1, connect_cb, connect_cb);
         //this->camInfoSubscriber = _node.subscribe("camera_info", 1, &CheckerboardDetector::caminfo_cb, this);
         //this->imageSubscriber = _node.subscribe("image",1, &CheckerboardDetector::image_cb, this);
@@ -235,8 +240,15 @@ public:
     {
         ROS_WARN("The topic Image has been deprecated.  Please change your launch file to use image instead.");
         boost::mutex::scoped_lock lock(this->mutexcalib);
-        if( Detect(_objdetmsg,*msg,this->_camInfoMsg) )
+        if( Detect(_objdetmsg,*msg,this->_camInfoMsg) ) {
+            if (_objdetmsg.objects.size() > 0) {
+                geometry_msgs::PoseStamped pose;
+                pose.header = _objdetmsg.header;
+                pose.pose = _objdetmsg.objects[0].pose;
+                _pubPoseStamped.publish(pose);
+            }
             _pubDetection.publish(_objdetmsg);
+        }
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -244,8 +256,15 @@ public:
     void image_cb(const sensor_msgs::ImageConstPtr &msg)
     {
         boost::mutex::scoped_lock lock(this->mutexcalib);
-        if( Detect(_objdetmsg,*msg,this->_camInfoMsg) )
+        if( Detect(_objdetmsg,*msg,this->_camInfoMsg) ) {
+            if (_objdetmsg.objects.size() > 0) {
+                geometry_msgs::PoseStamped pose;
+                pose.header = _objdetmsg.header;
+                pose.pose = _objdetmsg.objects[0].pose;
+                _pubPoseStamped.publish(pose);
+            }
             _pubDetection.publish(_objdetmsg);
+        }
     }
 
     bool detect_cb(posedetection_msgs::Detect::Request& req, posedetection_msgs::Detect::Response& res)
@@ -257,7 +276,8 @@ public:
     void connectCb( )
     {
       boost::mutex::scoped_lock lock(this->mutexcalib);
-      if (_pubDetection.getNumSubscribers() == 0 && _pubCornerPoint.getNumSubscribers() == 0)
+      if (_pubDetection.getNumSubscribers() == 0 && _pubCornerPoint.getNumSubscribers() == 0 &&
+          _pubPoseStamped.getNumSubscribers() == 0)
         {
           camInfoSubscriber.shutdown();
           camInfoSubscriber2.shutdown();

@@ -1,5 +1,0 @@
-Data <- read.csv("output.csv",  header=TRUE, stringsAsFactors=FALSE)
-B <- lm(rgb_z ~ depth_z, data=Data)
-plot(Data[,1], Data[,2])
-abline(B, col="blue", lwd=2)
-summary(B)

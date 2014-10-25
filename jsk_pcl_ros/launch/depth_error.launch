@@ -41,6 +41,7 @@
         args="load jsk_pcl/DepthImageError pcl_manager">
     <remap from="~image" to="$(arg DEPTH_IMAGE)" />
     <remap from="~point" to="/checkerdetector/corner_point" />
+    <remap from="~camera_info" to="$(arg CAMERA_INFO_TOPIC)" />
   </node>
 
 </launch>

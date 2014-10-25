@@ -17,6 +17,8 @@ xs = []
 ys = []
 us = []
 vs = []
+c_us = []
+c_vs = []
 value_cache = dict()            # (u, v) -> [z]
 eps_z = 0.03                    # 3cm
 lock = threading.Lock()
@@ -60,7 +62,7 @@ def query_yes_no(question, default=None):
                              "(or 'y' or 'n').\n")
 
 
-def genFeatureVector(x, u, v):
+def genFeatureVector(x, u, v, cu, cv):
     global model
     x2 = x * x
     u2 = u * u
@@ -71,21 +73,30 @@ def genFeatureVector(x, u, v):
         return [x2, x]
     elif model == "quadratic-uv":
         return [u * x2, v * x2, x2, u * x, v * x, x, u , v]
+    elif model == "quadratic-uv-abs":
+        return [abs(u - cu) * x2, abs(v - cv) * x2, x2, abs(u - cu) * x, abs(v - cv) * x, x, abs(u - cu), abs(v - cv)]
 
+def isValidClassifier(classifier):
+    # before classifire outputs meaningful value,
+    # intercept is a list, so we skip the value
+    c0 = classifier.intercept_
+    return not hasattr(c0, "__len__");
+    
 def setParameter(classifier):
     global set_param
     c = classifier.coef_
     c0 = classifier.intercept_
-    if hasattr(c0, "__len__"):
+    if not isValidClassifier(classifire):
         print "parameters are list"
         return
     if model == "linear":
-        set_param(0, 0, 0,    0, 0, 0,    0, 0, c0)
+        set_param(0, 0, 0,    0, 0, 0,    0, 0, c0, False)
     elif model == "quadratic":
-        set_param(0, 0, c[0], 0, 0, c[1], 0, 0, c0)
+        set_param(0, 0, c[0], 0, 0, c[1], 0, 0, c0, False)
     elif model == "quadratic-uv":
-        set_param(c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7], c0)
-        
+        set_param(c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7], c0, False)
+    elif model == "quadratic-uv-abs":
+        set_param(c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7], c0, True)
 
 def callback(msg):
     global xs, ys, classifier, u_min, u_max, v_min, v_max
@@ -105,9 +116,11 @@ def callback(msg):
             value_cache[(u, v)] = [y]
         us.append(u)
         vs.append(v)
+        c_us.append(msg.center_u)
+        c_vs.append(msg.center_v)
         if u > u_min and u < u_max and v < v_max and v > v_min:
             print (x, y)
-            xs.append(genFeatureVector(x, u, v))
+            xs.append(genFeatureVector(x, u, v, msg.center_u, msg.center_v))
             ys.append(y)
             classifier.fit(xs, ys)
             # set parameter
@@ -140,8 +153,19 @@ def modelEquationString(classifier):
                                                                                          classifier.coef_[7],
                                                                                          classifier.intercept_,
                                                                                          classifier.score(xs, ys))
-            
-def applyModel(x, u, v, clssifier):
+    elif model == "quadratic-uv-abs":
+        return "(%f|u| + %f|v| + %f)z^2 + (%f|u| + %f|v| + %f)z + %f|u| + %f|v| + %f (score: %f)" % (classifier.coef_[0],
+                                                                                                     classifier.coef_[1],
+                                                                                                     classifier.coef_[2],
+                                                                                                     classifier.coef_[3],
+                                                                                                     classifier.coef_[4],
+                                                                                                     classifier.coef_[5],
+                                                                                                     classifier.coef_[6],
+                                                                                                     classifier.coef_[7],
+                                                                                                     classifier.intercept_,
+                                                                                                     classifier.score(xs, ys))
+
+def applyModel(x, u, v, cu, cv, clssifier):
     global model
     if model == "linear":
         return classifier.coef_[0] * x + classifier.intercept_
@@ -149,6 +173,11 @@ def applyModel(x, u, v, clssifier):
         return classifier.coef_[0] * x * x + classifier.coef_[1] * x + classifier.intercept_
     elif model == "quadratic-uv":
         c = classifier.coef_
+        return (c[0] * u + c[1] * v + c[2]) * x * x + (c[3] * u + c[4] * v + c[5]) * x + c[6] * u + c[7] * v + classifier.intercept_
+    elif model == "quadratic-uv-abs":
+        c = classifier.coef_
+        u = abs(u - cu)
+        v = abs(v - cv)
         return (c[0] * u + c[1] * v + c[2]) * x * x + (c[3] * u + c[4] * v + c[5]) * x + c[6] * u + c[7] * v + classifier.intercept_
     
 def main():
@@ -160,7 +189,7 @@ def main():
     parser.add_argument('--model', default="linear")
     args = parser.parse_args(rospy.myargv()[1:])
     model = args.model
-    if model not in ["linear", "quadratic", "quadratic-uv"]:
+    if model not in ["linear", "quadratic", "quadratic-uv", "quadratic-uv-abs"]:
         raise Exception("Unknown Model: %s" % (model))
     
     if not args.csv:
@@ -181,7 +210,9 @@ def main():
             y = float(row[1])
             u = float(row[2])
             v = float(row[3])
-            xs.append(genFeatureVector(x, u, v))
+            cu = float(row[4])
+            cv = float(row[5])
+            xs.append(genFeatureVector(x, u, v, cu, cv))
             ys.append(y)
         classifier.fit(xs, ys)
     try:
@@ -190,7 +221,7 @@ def main():
             if len(xs) == 0:
                 continue
             with lock:
-                if hasattr(classifier.intercept_, "__len__"):
+                if not isValidClassifier(classifier)
                     continue
                 xmin = np.amin([x[-1] for x in xs])
                 xmax = np.amax([x[-1] for x in xs])
@@ -203,7 +234,7 @@ def main():
                 ax.scatter([[x[-1]] for x in xs], 
                            ys, s=10, c='b', zorder=10, alpha=0.5)
                 ax.plot(X_range, 
-                        applyModel(X_range, 320, 240, classifier),
+                        applyModel(X_range, 320, 240, 320, 240, classifier),
                         linewidth=2, color='red', alpha=0.5)
                 ax.plot(X_range, X_range, linewidth=2, color='green', alpha=0.5)
                 plt.text(xmin, xmax,
@@ -215,20 +246,25 @@ def main():
         if not args.csv:
             print "Save calibration parameters to calibrate.csv"
             with open("calibrate.csv", "w") as f:
-                for x, y, u, v in zip(xs, ys, us, vs):
-                    f.write("%f,%f,%d,%d\n" % (x[0], y, u, v))
-        if query_yes_no("Dump result into launch file?"):
+                for x, y, u, v, cu, cv in zip(xs, ys, us, vs, c_us, c_vs):
+                    f.write("%f,%f,%d,%d,%f,%f\n" % (x[0], y, u, v, cu, cv))
+        if query_yes_no("Dump result into yaml file?"):
             print "writing to calibration_parameter.launch"
-            with open("calibration_parameter.launch", "w") as f:
-                f.write("""<launch>
-    <node pkg="dynamic_reconfigure" type="dynparam" 
-          name="set_z_offset" 
-          args="set driver z_offset_mm %d" />
-    <node pkg="dynamic_reconfigure" type="dynparam" 
-          name="set_z_scale" 
-          args="set driver z_scaling %f" />
-</launch>
-""" % (int(1000.0*classifier.intercept_), classifier.coef_[0]))
+            c = classifier.coef_
+            if model == "quadratic-uv-abs":
+                use_abs = "True"
+            else:
+                use_abs = "False"
+            with open("calibration_parameter.yaml", "w") as f:
+                f.write("""
+coefficients2: [%f, %f, %f]
+coefficients1: [%f, %f, %f]
+coefficients0: [%f, %f, %f]
+use_abs: %s
+                """ % (c[0], c[1], c[2], 
+                       c[3], c[4], c[5], 
+                       c[6], c[7], classifier.intercept_,
+                       use_abs))
 
 if __name__ == "__main__":
     rospy.init_node("depth_error_logistic_regression")

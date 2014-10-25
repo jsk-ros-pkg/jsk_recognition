@@ -48,7 +48,7 @@
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include "jsk_pcl_ros/connection_based_nodelet.h"
-
+#include <sensor_msgs/CameraInfo.h>
 #include <string>
 
 namespace jsk_pcl_ros
@@ -58,18 +58,21 @@ namespace jsk_pcl_ros
   public:
     typedef message_filters::sync_policies::ApproximateTime<
     sensor_msgs::Image,
-    geometry_msgs::PointStamped
+    geometry_msgs::PointStamped,
+    sensor_msgs::CameraInfo
      > SyncPolicy;
     ros::Publisher depth_error_publisher_;
 
   protected:
     virtual void onInit();
     virtual void calcError(const sensor_msgs::Image::ConstPtr& depth_image,
-                           const geometry_msgs::PointStamped::ConstPtr& uv_point);
+                           const geometry_msgs::PointStamped::ConstPtr& uv_point,
+                           const sensor_msgs::CameraInfo::ConstPtr& camera_info);
     virtual void subscribe();
     virtual void unsubscribe();
     message_filters::Subscriber<sensor_msgs::Image> sub_image_;
     message_filters::Subscriber<geometry_msgs::PointStamped> sub_point_;
+    message_filters::Subscriber<sensor_msgs::CameraInfo> sub_camera_info_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
   private:
   };

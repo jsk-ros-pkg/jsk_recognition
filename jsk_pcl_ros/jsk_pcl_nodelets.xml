@@ -1,4 +1,10 @@
 <library path="lib/libjsk_pcl_ros">
+  <class name="jsk_pcl/DepthCalibration" type="jsk_pcl_ros::DepthCalibration"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      depth calibration
+    </description>
+  </class>
   <class name="jsk_pcl/LineSegmentCollector" type="jsk_pcl_ros::LineSegmentCollector"
          base_class_type="nodelet::Nodelet">
     <description>

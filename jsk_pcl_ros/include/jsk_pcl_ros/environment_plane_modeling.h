@@ -117,6 +117,13 @@ namespace jsk_pcl_ros
       const ModelCoefficientsArray::ConstPtr& static_coefficients);
     virtual void configCallback(Config &config, uint32_t level);
     virtual bool lockCallback();
+    virtual bool startBuildEnvironmentCallback(
+      std_srvs::Empty::Request& req,
+      std_srvs::Empty::Response& res);
+    virtual bool stopBuildEnvironmentCallback(
+      std_srvs::Empty::Request& req,
+      std_srvs::Empty::Response& res);
+
     virtual bool dummyLockCallback(EnvironmentLock::Request& req,
                                    EnvironmentLock::Response& res);
     virtual bool polygonOnEnvironmentCallback(PolygonOnEnvironment::Request& req,
@@ -150,7 +157,7 @@ namespace jsk_pcl_ros
                                      const double ratio,
                                      PointT& output);
 
-    virtual void downsizeGridMaps();
+    virtual void downsizeGridMaps(std::vector<GridMap::Ptr>& maps);
     
     virtual void extendConvexPolygon(
       const geometry_msgs::PolygonStamped& static_polygon,
@@ -167,6 +174,11 @@ namespace jsk_pcl_ros
       std::vector<GridMap::Ptr>& grid_maps);
     virtual void publishGridMap(
       ros::Publisher& pub,
+      const std_msgs::Header& header,
+      const std::vector<GridMap::Ptr> grid_maps);
+    virtual void publishGridMapPolygon(
+      ros::Publisher& pub_polygons,
+      ros::Publisher& pub_coefficients,
       const std_msgs::Header& header,
       const std::vector<GridMap::Ptr> grid_maps);
     // find the nearest plane to static_polygon and static_coefficient
@@ -262,11 +274,15 @@ namespace jsk_pcl_ros
     ros::ServiceServer clear_map_service_;
     ros::ServiceServer register_to_history_service_;
     ros::ServiceServer register_completion_to_history_service_;
+    ros::ServiceServer start_build_environment_service_;
+    ros::ServiceServer stop_build_environment_service_;
     ros::Publisher debug_polygon_pub_;
     ros::Publisher debug_env_polygon_pub_;
     ros::Publisher debug_pointcloud_pub_;
     ros::Publisher debug_env_pointcloud_pub_;
     ros::Publisher debug_grid_map_completion_pub_;
+    ros::Publisher old_map_polygon_pub_;
+    ros::Publisher old_map_polygon_coefficients_pub_;
     ros::Publisher occlusion_result_polygons_pub_;
     ros::Publisher occlusion_result_coefficients_pub_;
     ros::Publisher occlusion_result_pointcloud_pub_;
@@ -291,8 +307,7 @@ namespace jsk_pcl_ros
     PolygonArray::ConstPtr completion_static_polygons_;
     ModelCoefficientsArray::ConstPtr completion_static_coefficients_;
     
-    std::vector<pcl::KdTreeFLANN<PointT>::Ptr> kdtrees_;
-    std::vector<pcl::PointCloud<PointT>::Ptr> separated_point_cloud_;
+    std::vector<pcl::KdTreeFLANN<pcl::PointXYZ>::Ptr> kdtrees_;
     uint32_t environment_id_;
     double distance_thr_;
     double sampling_d_;

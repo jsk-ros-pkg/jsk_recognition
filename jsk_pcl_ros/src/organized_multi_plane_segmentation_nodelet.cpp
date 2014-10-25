@@ -57,6 +57,8 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/surface/convex_hull.h>
 
+#include <jsk_topic_tools/color_utils.h>
+
 namespace jsk_pcl_ros
 {
 
@@ -482,7 +484,7 @@ namespace jsk_pcl_ros
     connection_marker.scale.x = 0.01;
     connection_marker.header = header;
     connection_marker.pose.orientation.w = 1.0;
-    connection_marker.color = colorCategory20(0);
+    connection_marker.color = jsk_topic_tools::colorCategory20(0);
     
     ////////////////////////////////////////////////////////
     // first, compute centroids for each clusters
@@ -520,8 +522,8 @@ namespace jsk_pcl_ros
           to_point, to_point_ros);
         connection_marker.points.push_back(from_point_ros);
         connection_marker.points.push_back(to_point_ros);
-        connection_marker.colors.push_back(colorCategory20(from_index));
-        connection_marker.colors.push_back(colorCategory20(from_index));
+        connection_marker.colors.push_back(jsk_topic_tools::colorCategory20(from_index));
+        connection_marker.colors.push_back(jsk_topic_tools::colorCategory20(from_index));
       }
     }
     pub_connection_marker_.publish(connection_marker);

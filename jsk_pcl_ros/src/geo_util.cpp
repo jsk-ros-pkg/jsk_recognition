@@ -65,6 +65,11 @@ namespace jsk_pcl_ros
     output = direction_;
   }
 
+  Eigen::Vector3f Line::getDirection() const
+  {
+    return direction_;
+  }
+  
   void Line::getOrigin(Eigen::Vector3f& output) const
   {
     output = origin_;

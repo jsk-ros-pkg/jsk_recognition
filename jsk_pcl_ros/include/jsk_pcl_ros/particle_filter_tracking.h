@@ -62,17 +62,22 @@
 #include <pcl/tracking/nearest_pair_point_cloud_coherence.h>
 
 #include <jsk_pcl_ros/SetPointCloud2.h>
+#include <jsk_pcl_ros/ParticleFilterTrackingConfig.h>
+#include <dynamic_reconfigure/server.h>
 
 using namespace pcl::tracking;
 namespace jsk_pcl_ros
 {
   class ParticleFilterTracking: public pcl_ros::PCLNodelet
   {
+  public:
+    typedef ParticleFilterTrackingConfig Config;
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_pass_;
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_pass_downsampled_;
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr target_cloud_;
 
-    boost::shared_ptr<ParticleFilterTracker<pcl::PointXYZRGBA, ParticleXYZRPY> > tracker_;
+    //boost::shared_ptr<ParticleFilterTracker<pcl::PointXYZRGBA, ParticleXYZRPY> > tracker_;
+    boost::shared_ptr<KLDAdaptiveParticleFilterOMPTracker<pcl::PointXYZRGBA, ParticleXYZRPY> > tracker_;
     boost::mutex mtx_;
     bool new_cloud_;
     bool track_target_set_;
@@ -84,8 +89,20 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_update_model_;
     ros::Publisher particle_publisher_;
     ros::Publisher track_result_publisher_;
-    ros::ServiceServer srv_;
+    ros::ServiceServer renew_model_srv_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
 
+    ////////////////////////////////////////////////////////
+    // parameters
+    ////////////////////////////////////////////////////////
+    int max_particle_num_;
+    double delta_;
+    double epsilon_;
+    int iteration_num_;
+    double resample_likelihood_thr_;
+    ParticleXYZRPY bin_size_;
+    std::vector<double> default_step_covariance_;
+    virtual void config_callback(Config &config, uint32_t level);
     virtual void publish_particles ();
     virtual void publish_result ();
 

@@ -17,6 +17,8 @@ xs = []
 ys = []
 us = []
 vs = []
+c_us = []
+c_vs = []
 value_cache = dict()            # (u, v) -> [z]
 eps_z = 0.03                    # 3cm
 lock = threading.Lock()
@@ -60,7 +62,7 @@ def query_yes_no(question, default=None):
                              "(or 'y' or 'n').\n")
 
 
-def genFeatureVector(x, u, v):
+def genFeatureVector(x, u, v, cu, cv):
     global model
     x2 = x * x
     u2 = u * u
@@ -71,6 +73,8 @@ def genFeatureVector(x, u, v):
         return [x2, x]
     elif model == "quadratic-uv":
         return [u * x2, v * x2, x2, u * x, v * x, x, u , v]
+    elif model == "quadratic-uv-abs":
+        return [abs(u - cu) * x2, abs(v - cv) * x2, x2, abs(u - cu) * x, abs(v - cv) * x, x, abs(u - cu), abs(v - cv)]
 
 def setParameter(classifier):
     global set_param
@@ -84,6 +88,8 @@ def setParameter(classifier):
     elif model == "quadratic":
         set_param(0, 0, c[0], 0, 0, c[1], 0, 0, c0)
     elif model == "quadratic-uv":
+        set_param(c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7], c0)
+    elif model == "quadratic-uv-abs":
         set_param(c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7], c0)
         
 
@@ -105,9 +111,11 @@ def callback(msg):
             value_cache[(u, v)] = [y]
         us.append(u)
         vs.append(v)
+        c_us.append(msg.center_u)
+        c_vs.append(msg.center_v)
         if u > u_min and u < u_max and v < v_max and v > v_min:
             print (x, y)
-            xs.append(genFeatureVector(x, u, v))
+            xs.append(genFeatureVector(x, u, v, msg.center_u, msg.center_v))
             ys.append(y)
             classifier.fit(xs, ys)
             # set parameter
@@ -129,7 +137,7 @@ def modelEquationString(classifier):
                                    classifier.coef_[1],
                                    classifier.intercept_,
                                    classifier.score(xs, ys))
-    elif model == "quadratic-uv":
+    elif model == "quadratic-uv" or model == "quadratic-uv-abs":
         return "(%fu + %fv + %f)z^2 + (%fu + %fv + %f)z + %fu + %fv + %f (score: %f)" % (classifier.coef_[0],
                                                                                          classifier.coef_[1],
                                                                                          classifier.coef_[2],
@@ -147,7 +155,7 @@ def applyModel(x, u, v, clssifier):
         return classifier.coef_[0] * x + classifier.intercept_
     elif model == "quadratic":
         return classifier.coef_[0] * x * x + classifier.coef_[1] * x + classifier.intercept_
-    elif model == "quadratic-uv":
+    elif model == "quadratic-uv" or model == "quadratic-uv-abs":
         c = classifier.coef_
         return (c[0] * u + c[1] * v + c[2]) * x * x + (c[3] * u + c[4] * v + c[5]) * x + c[6] * u + c[7] * v + classifier.intercept_
     
@@ -160,7 +168,7 @@ def main():
     parser.add_argument('--model', default="linear")
     args = parser.parse_args(rospy.myargv()[1:])
     model = args.model
-    if model not in ["linear", "quadratic", "quadratic-uv"]:
+    if model not in ["linear", "quadratic", "quadratic-uv", "quadratic-uv-abs"]:
         raise Exception("Unknown Model: %s" % (model))
     
     if not args.csv:
@@ -181,7 +189,9 @@ def main():
             y = float(row[1])
             u = float(row[2])
             v = float(row[3])
-            xs.append(genFeatureVector(x, u, v))
+            cu = float(row[4])
+            cv = float(row[5])
+            xs.append(genFeatureVector(x, u, v, cu, cv))
             ys.append(y)
         classifier.fit(xs, ys)
     try:
@@ -215,8 +225,8 @@ def main():
         if not args.csv:
             print "Save calibration parameters to calibrate.csv"
             with open("calibrate.csv", "w") as f:
-                for x, y, u, v in zip(xs, ys, us, vs):
-                    f.write("%f,%f,%d,%d\n" % (x[0], y, u, v))
+                for x, y, u, v, cu, cv in zip(xs, ys, us, vs, c_us, c_vs):
+                    f.write("%f,%f,%d,%d,%f,%f\n" % (x[0], y, u, v, cu, cv))
         if query_yes_no("Dump result into launch file?"):
             print "writing to calibration_parameter.launch"
             with open("calibration_parameter.launch", "w") as f:

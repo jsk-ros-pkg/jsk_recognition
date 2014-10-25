@@ -91,19 +91,24 @@ namespace jsk_pcl_ros
 
   void DepthCalibration::subscribe()
   {
-    sub_ = pnh_->subscribe("input", 1, 
-                           &DepthCalibration::calibrate,
-                           this);
+      sub_input_.subscribe(*pnh_, "input", 1);
+      sub_camera_info_.subscribe(*pnh_, "camera_info", 1);
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+      sync_->connectInput(sub_input_, sub_camera_info_);
+      sync_->registerCallback(boost::bind(&DepthCalibration::calibrate, this, _1, _2));
   }
+  
   void DepthCalibration::unsubscribe()
   {
-    sub_.shutdown();
+      sub_input_.unsubscribe();
+      sub_camera_info_.unsubscribe();
   }
   
   
 
   void DepthCalibration::calibrate(
-    const sensor_msgs::PointCloud2::ConstPtr& msg)
+      const sensor_msgs::PointCloud2::ConstPtr& msg,
+      const sensor_msgs::CameraInfo::ConstPtr& camera_info)
   {
     boost::mutex::scoped_lock lock(mutex_);
     pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
@@ -119,7 +124,7 @@ namespace jsk_pcl_ros
         outp.y = inp.y;
         outp.rgb = inp.rgb;
         if (!isnan(inp.x) && !isnan(inp.y) && !isnan(inp.z)) {
-          outp.z = applyModel(inp.z, u, v);
+            outp.z = applyModel(inp.z, u, v, camera_info->P[2], camera_info->P[6]);
           // if (u % 10 == 0 && v % 10 == 0) {
           //   ROS_INFO("%f(%lu, %lu) -> %f", inp.z, u, v, outp.z);
           // }

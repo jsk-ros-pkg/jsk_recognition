@@ -38,6 +38,10 @@
 
 #include "jsk_pcl_ros/diagnostic_nodelet.h"
 #include "jsk_pcl_ros/DepthCalibrationParameter.h"
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
+#include <sensor_msgs/CameraInfo.h>
 
 namespace jsk_pcl_ros
 {
@@ -49,26 +53,34 @@ namespace jsk_pcl_ros
   {
   public:
     typedef pcl::PointXYZRGB PointT;
+    typedef message_filters::sync_policies::ExactTime<
+        sensor_msgs::PointCloud2,
+        sensor_msgs::CameraInfo> SyncPolicy;
+
     DepthCalibration(): DiagnosticNodelet("DepthCalibration") { }
   protected:
     virtual void onInit();
     virtual void calibrate(
-      const sensor_msgs::PointCloud2::ConstPtr& msg);
+      const sensor_msgs::PointCloud2::ConstPtr& msg,
+      const sensor_msgs::CameraInfo::ConstPtr& camera_info);
     virtual void subscribe();
     virtual void unsubscribe();
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
-    virtual inline double applyModel(double z, int u, int v) {
+    virtual inline double applyModel(double z, int u, int v, double cu, double cv) {
       double z2 = z * z;
-      double c2 = coefficients2_[0] * u + coefficients2_[1] * v + coefficients2_[2];
-      double c1 = coefficients1_[0] * u + coefficients1_[1] * v + coefficients1_[2];
-      double c0 = coefficients0_[0] * u + coefficients0_[1] * v + coefficients0_[2];
+      double c2 = coefficients2_[0] * std::abs(u - cu) + coefficients2_[1] * std::abs(v - cv) + coefficients2_[2];
+      double c1 = coefficients1_[0] * std::abs(u - cu) + coefficients1_[1] * std::abs(v - cv) + coefficients1_[2];
+      double c0 = coefficients0_[0] * std::abs(u - cu) + coefficients0_[1] * std::abs(v - cv) + coefficients0_[2];
       return c2 * z2 + c1 * z + c0;
     }
     virtual bool setCalibrationParameter(
       DepthCalibrationParameter::Request& req,
       DepthCalibrationParameter::Response& res);
-    ros::Subscriber sub_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
+    message_filters::Subscriber<sensor_msgs::CameraInfo> sub_camera_info_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
+
     ros::Publisher pub_;
     ros::ServiceServer set_calibration_parameter_srv_;
     boost::mutex mutex_;

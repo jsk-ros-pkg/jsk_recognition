@@ -62,9 +62,14 @@ namespace jsk_pcl_ros
     else {
       coefficients0_.assign(3, 0);
     }
-    ROS_INFO("C2(u, v) = %fu + %fv + %f", coefficients2_[0], coefficients2_[1], coefficients2_[2]);
-    ROS_INFO("C1(u, v) = %fu + %fv + %f", coefficients1_[0], coefficients1_[1], coefficients1_[2]);
-    ROS_INFO("C0(u, v) = %fu + %fv + %f", coefficients0_[0], coefficients0_[1], coefficients0_[2]);
+    pnh_->param("use_abs", use_abs_, false);
+    
+    ROS_INFO("C2(u, v) = %fu + %fv + %f",
+             coefficients2_[0], coefficients2_[1], coefficients2_[2]);
+    ROS_INFO("C1(u, v) = %fu + %fv + %f",
+             coefficients1_[0], coefficients1_[1], coefficients1_[2]);
+    ROS_INFO("C0(u, v) = %fu + %fv + %f",
+             coefficients0_[0], coefficients0_[1], coefficients0_[2]);
     set_calibration_parameter_srv_ = pnh_->advertiseService(
       "set_calibration_parameter",
       &DepthCalibration::setCalibrationParameter,
@@ -86,6 +91,7 @@ namespace jsk_pcl_ros
     coefficients0_[0] = req.c02;
     coefficients0_[1] = req.c01;
     coefficients0_[2] = req.c00;
+    use_abs_ = req.use_abs;
     return true;
   }
 
@@ -103,8 +109,6 @@ namespace jsk_pcl_ros
       sub_input_.unsubscribe();
       sub_camera_info_.unsubscribe();
   }
-  
-  
 
   void DepthCalibration::calibrate(
       const sensor_msgs::PointCloud2::ConstPtr& msg,

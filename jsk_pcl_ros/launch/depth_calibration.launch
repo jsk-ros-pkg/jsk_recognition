@@ -1,0 +1,12 @@
+<launch>
+  <node pkg="jsk_pcl_ros" type="depth_calibration" name="depth_calibration"
+        clear_params="true"
+        output="screen">
+    <remap from="~input" to="/camera_remote/depth_registered/points" />
+    <rosparam>
+      coefficients2: [0.000344, 0.000355, -0.149616]
+      coefficients1: [-0.000612, -0.000549, 1.377791]
+      coefficients0: [0.000264, 0.000230, -0.161416]
+    </rosparam>
+  </node>
+</launch>

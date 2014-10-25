@@ -69,22 +69,33 @@ namespace jsk_pcl_ros
       diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual inline double applyModel(double z, int u, int v, double cu, double cv) {
       double z2 = z * z;
-      double c2 = coefficients2_[0] * std::abs(u - cu) + coefficients2_[1] * std::abs(v - cv) + coefficients2_[2];
-      double c1 = coefficients1_[0] * std::abs(u - cu) + coefficients1_[1] * std::abs(v - cv) + coefficients1_[2];
-      double c0 = coefficients0_[0] * std::abs(u - cu) + coefficients0_[1] * std::abs(v - cv) + coefficients0_[2];
+      double uu, vv;
+      if (use_abs_) {
+        uu = std::abs(u - cu);
+        vv = std::abs(v - cv);
+      }
+      else {
+        uu = u;
+        vv = v;
+      }
+      double c2 = coefficients2_[0] * uu + coefficients2_[1] * vv + coefficients2_[2];
+      double c1 = coefficients1_[0] * uu + coefficients1_[1] * vv + coefficients1_[2];
+      double c0 = coefficients0_[0] * uu + coefficients0_[1] * vv + coefficients0_[2];
       return c2 * z2 + c1 * z + c0;
     }
+    
     virtual bool setCalibrationParameter(
       DepthCalibrationParameter::Request& req,
       DepthCalibrationParameter::Response& res);
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<sensor_msgs::CameraInfo> sub_camera_info_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
-
     ros::Publisher pub_;
     ros::ServiceServer set_calibration_parameter_srv_;
     boost::mutex mutex_;
+    
     // parameters
+    bool use_abs_;
     std::vector<double> coefficients2_;
     std::vector<double> coefficients1_;
     std::vector<double> coefficients0_;

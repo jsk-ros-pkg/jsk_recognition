@@ -17,6 +17,7 @@
   <depend package="cv_bridge"/>
   <depend package="sensor_msgs"/>
   <depend package="posedetection_msgs"/>
+  <depend package="jsk_pcl_ros"/>
 
   <rosdep name="roscpp"/>
   <rosdep name="cv_bridge"/>

@@ -526,7 +526,7 @@ public:
                 point_msg.header = imagemsg.header;
                 point_msg.point.x = X[0].x;
                 point_msg.point.y = X[0].y;
-                point_msg.point.z = vobjects[cb.grid3d.size() - 1].pose.position.z;
+                point_msg.point.z = vobjects[vobjects.size() - 1].pose.position.z;
                 _pubCornerPoint.publish(point_msg);
                 
             }

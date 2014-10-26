@@ -42,6 +42,7 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 #include <sensor_msgs/CameraInfo.h>
+#include <sensor_msgs/Image.h>
 
 namespace jsk_pcl_ros
 {
@@ -54,14 +55,14 @@ namespace jsk_pcl_ros
   public:
     typedef pcl::PointXYZRGB PointT;
     typedef message_filters::sync_policies::ExactTime<
-        sensor_msgs::PointCloud2,
+        sensor_msgs::Image,
         sensor_msgs::CameraInfo> SyncPolicy;
 
     DepthCalibration(): DiagnosticNodelet("DepthCalibration") { }
   protected:
     virtual void onInit();
     virtual void calibrate(
-      const sensor_msgs::PointCloud2::ConstPtr& msg,
+      const sensor_msgs::Image::ConstPtr& msg,
       const sensor_msgs::CameraInfo::ConstPtr& camera_info);
     virtual void subscribe();
     virtual void unsubscribe();
@@ -87,7 +88,7 @@ namespace jsk_pcl_ros
     virtual bool setCalibrationParameter(
       DepthCalibrationParameter::Request& req,
       DepthCalibrationParameter::Response& res);
-    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
+    message_filters::Subscriber<sensor_msgs::Image> sub_input_;
     message_filters::Subscriber<sensor_msgs::CameraInfo> sub_camera_info_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
     ros::Publisher pub_;

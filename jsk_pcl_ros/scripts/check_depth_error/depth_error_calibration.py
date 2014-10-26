@@ -13,7 +13,8 @@ import argparse
 import csv
 import math
 import datetime
-from jsk_pcl_ros.srv import DepthCalibrationParameter
+from jsk_pcl_ros.srv import SetDepthCalibrationParameter
+from jsk_pcl_ros.msg import DepthCalibrationParameter
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 
@@ -33,7 +34,7 @@ v_min = None
 v_max = None
 model = None
 set_param = None
-MODELS = ["linear", "quadratic", "quadratic-uv", "quadratic-uv-abs"]
+MODELS = ["linear", "quadratic", "quadratic-uv", "quadratic-uv-abs", "quadratic-uv-quadratic", "quadratic-uv-quadratic-abs"]
 
 def query_yes_no(question, default=None):
     """Ask a yes/no question via raw_input() and return their answer.
@@ -73,10 +74,10 @@ def getXFromFeatureVector(v):
         return v[0]
     elif model == "quadratic":
         return v[1]
-    elif model == "quadratic-uv":
+    elif model == "quadratic-uv" or model == "quadratic-uv-abs":
         return v[-3]
-    elif model == "quadratic-uv-abs":
-        return v[-3]
+    elif model == "quadratic-uv-quadratic" or model == "quadratic-uv-quadratic-abs":
+        return v[-5]
 
 def genFeatureVector(x, u, v, cu, cv):
     global model
@@ -88,11 +89,27 @@ def genFeatureVector(x, u, v, cu, cv):
     elif model == "quadratic":
         return [x2, x]
     elif model == "quadratic-uv":
-        return [u * x2, v * x2, x2, u * x, v * x, x, u, v]
+        return [u * x2, v * x2, x2,
+                u * x,  v * x,  x,
+                u, v]
     elif model == "quadratic-uv-abs":
         u = abs(u - cu)
         v = abs(v - cv)
-        return [u * x2, v * x2, x2, u * x, v * x, x, u, v]
+        return [u * x2, v * x2, x2,
+                u * x,  v * x,  x,
+                u, v]
+    elif model == "quadratic-uv-quadratic":
+        return [u2 * x2, u * x2, v2 * x2, v * x2, x2, 
+                u2 * x,  u * x,  v2 * x,  v * x, x, 
+                u2, u, v2, v]
+    elif model == "quadratic-uv-quadratic-abs":
+        u = abs(u - cu)
+        v = abs(v - cv)
+        u2 = u * u
+        v2 = v * v
+        return [u2 * x2, u * x2, v2 * x2, v * x2, x2, 
+                u2 * x,  u * x,  v2 * x,  v * x, x, 
+                u2, u, v2, v]
 
 def isValidClassifier(classifier):
     # before classifire outputs meaningful value,
@@ -104,31 +121,57 @@ def setParameter(classifier):
     global set_param
     c = classifier.coef_
     c0 = classifier.intercept_
+    param = DepthCalibrationParameter()
     if not isValidClassifier(classifier):
         print "parameters are list"
         return
     if model == "linear":
-        set_param(0, 0, 0,    0, 0, 0,    0, 0, c0, False)
+        param.coefficients2 = [0, 0, 0, 0, 0]
+        param.coefficients1 = [0, 0, 0, 0, c[0]]
+        param.coefficients0 = [0, 0, 0, 0, c0]
+        param.use_abs = False
     elif model == "quadratic":
-        set_param(0, 0, c[0], 0, 0, c[1], 0, 0, c0, False)
+        param.coefficients2 = [0, 0, 0, 0, c[0]]
+        param.coefficients1 = [0, 0, 0, 0, c[1]]
+        param.coefficients0 = [0, 0, 0, 0, c0]
+        param.use_abs = False
     elif model == "quadratic-uv":
-        set_param(c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7], c0, False)
+        param.coefficients2 = [0, c[0], 0, c[1], c[2]]
+        param.coefficients1 = [0, c[3], 0, c[4], c[5]]
+        param.coefficients0 = [0, c[6], 0, c[7], c0]
+        param.use_abs = False
     elif model == "quadratic-uv-abs":
-        set_param(c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7], c0, True)
+        param.coefficients2 = [0, c[0], 0, c[1], c[2]]
+        param.coefficients1 = [0, c[3], 0, c[4], c[5]]
+        param.coefficients0 = [0, c[6], 0, c[7], c0]
+        param.use_abs = True
+    elif model == "quadratic-uv-quadratic":
+        param.coefficients2 = c[0:5]
+        param.coefficients1 = c[5:10]
+        param.coefficients0 = [c[10], c[11], c[12], c[13], c0]
+        param.use_abs = False
+    elif model == "quadratic-uv-quadratic-abs":
+        param.coefficients2 = c[0:5]
+        param.coefficients1 = c[5:10]
+        param.coefficients0 = [c[10], c[11], c[12], c[13], c0]
+        param.use_abs = True
+    set_param(param)
 
 def processData(x, y, u, v, cu, cv, fit = True):
     global xs, ys, classifier, u_min, u_max, v_min, v_max, raw_xs
+    uu = int(u/10)
+    vv = int(v/10)
     with lock:
-        if value_cache.has_key((u, v)):
-            zs = value_cache[(u, v)]
+        if value_cache.has_key((uu, vv)):
+            zs = value_cache[(uu, vv)]
             for z in zs:
                 if abs(z - y) < eps_z:
                     print "duplicated value"
                     return
                 else:
-                    value_cache[(u, v)].append(y)
+                    value_cache[(uu, vv)].append(y)
         else:
-            value_cache[(u, v)] = [y]
+            value_cache[(uu, vv)] = [y]
         raw_xs.append(x)
         us.append(u)
         vs.append(v)
@@ -168,6 +211,11 @@ def uvCoefString(c, absolute=False):
         return "%f|u| + %f|v| + %f" % (c[0], c[1], c[2])
     else:
         return "%fu + %fv + %f" % (c[0], c[1], c[2])
+def uvQuadraticCoefString(c, absolute=False):
+    if absolute:
+        return "%f|u|^2 + %f|u| + %f|v|^2 + %f|v| + %f" % (c[0], c[1], c[2], c[3], c[4])
+    else:
+        return "%fu^2 + %fu + %fv^2 + %fv + %f" % (c[0], c[1], c[2], c[3], c[4])
         
 def modelEquationString(classifier):
     global model, xs, ys
@@ -195,6 +243,18 @@ def modelEquationString(classifier):
             uvCoefString(c[3:6], True),
             uvCoefString([c[6], c[7], i], True),
             classifier.score(xs, ys))
+    elif model == "quadratic-uv-quadratic":
+        return "(%s)z^2 +\n(%s)z +\n%s\n(score: %f)" % (
+            uvQuadraticCoefString(c[0:5]),
+            uvQuadraticCoefString(c[5:10]),
+            uvQuadraticCoefString([c[10], c[11], c[12], c[13], i]),
+            classifier.score(xs, ys))
+    elif model == "quadratic-uv-quadratic-abs":
+        return "(%s)z^2 +\n(%s)z +\n%s\n(score: %f)" % (
+            uvQuadraticCoefString(c[0:5], True),
+            uvQuadraticCoefString(c[5:10], True),
+            uvQuadraticCoefString([c[10], c[11], c[12], c[13], i], True),
+            classifier.score(xs, ys))
 
 def applyModel(x, u, v, cu, cv, clssifier):
     global model
@@ -205,12 +265,31 @@ def applyModel(x, u, v, cu, cv, clssifier):
     elif model == "quadratic":
         return c[0] * x * x + c[1] * x + i
     elif model == "quadratic-uv":
-        return (c[0] * u + c[1] * v + c[2]) * x * x + (c[3] * u + c[4] * v + c[5]) * x + c[6] * u + c[7] * v + i
+        return ((c[0] * u + c[1] * v + c[2]) * x * x + 
+                (c[3] * u + c[4] * v + c[5]) * x + 
+                c[6] * u + c[7] * v + i)
     elif model == "quadratic-uv-abs":
         u = abs(u - cu)
         v = abs(v - cv)
-        return (c[0] * u + c[1] * v + c[2]) * x * x + (c[3] * u + c[4] * v + c[5]) * x + c[6] * u + c[7] * v + i
-
+        return ((c[0] * u + c[1] * v + c[2]) * x * x + 
+                (c[3] * u + c[4] * v + c[5]) * x + 
+                c[6] * u + c[7] * v + i)
+    elif model == "quadratic-uv-quadratic":
+        u2 = u * u
+        v2 = v * v
+        return ((c[0] * u2 + c[1] * u + c[2] * v2 + c[3] * v + c[4]) * x * x + 
+                (c[5] * u2 + c[6] * u + c[7] * v2 + c[8] * v + c[9]) * x + 
+                (c[10] * u2 + c[11] * u + c[12] * v2 + c[13] * v + i))
+    elif model == "quadratic-uv-quadratic-abs":
+        u = abs(u - cu)
+        v = abs(v - cv)
+        u2 = u * u
+        v2 = v * v
+        return ((c[0] * u2 + c[1] * u + c[2] * v2 + c[3] * v + c[4]) * x * x + 
+                (c[5] * u2 + c[6] * u + c[7] * v2 + c[8] * v + c[9]) * x + 
+                (c[10] * u2 + c[11] * u + c[12] * v2 + c[13] * v + i))
+                
+        
 def updatePlot(num):
     global xs, ax, width, height
     if rospy.is_shutdown():
@@ -258,8 +337,8 @@ def generateFrequencyMap():
     for (u, v) in value_cache.keys():
         min_color = np.uint8([255, 0, 0])
         max_color = np.uint8([0, 0, 255])
-        uu = int(u/10)
-        vv = int(v/10)
+        uu = u
+        vv = v
         if frequency.has_key((uu, vv)):
             frequency[(uu, vv)] = frequency[(uu, vv)] + len(value_cache[(u, v)])
         else:
@@ -276,7 +355,7 @@ def main():
     height = 480
     pub_image = rospy.Publisher("~frequency_image", Image)
     set_param = rospy.ServiceProxy("depth_calibration/set_calibration_parameter", 
-                                   DepthCalibrationParameter)
+                                   SetDepthCalibrationParameter)
     # parse argument
     parser = argparse.ArgumentParser()
     parser.add_argument('--csv')
@@ -328,23 +407,25 @@ def main():
                 for x, y, u, v, cu, cv in zip(raw_xs, ys, us, vs, c_us, c_vs):
                     f.write("%f,%f,%d,%d,%f,%f\n" % (x, y, u, v, cu, cv))
         if query_yes_no("Dump result into yaml file?"):
-            print "writing to calibration_parameter.launch"
+            yaml_filename = "calibration_parameter_%s.yaml" % datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+            print "writing to %s" % yaml_filename
             c = classifier.coef_
             if model == "quadratic-uv-abs":
                 use_abs = "True"
             else:
                 use_abs = "False"
-            yaml_filename = "calibration_parameter_%s.yaml" % datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+            
             with open(yaml_filename, "w") as f:
                 f.write("""
-coefficients2: [%f, %f, %f]
-coefficients1: [%f, %f, %f]
-coefficients0: [%f, %f, %f]
+coefficients2: [%f, %f, %f, %f, %f]
+coefficients1: [%f, %f, %f, %f, %f]
+coefficients0: [%f, %f, %f, %f, %f]
 use_abs: %s
-                """ % (c[0], c[1], c[2], 
-                       c[3], c[4], c[5], 
-                       c[6], c[7], classifier.intercept_,
-                       use_abs))
+                """ % (
+                    c[0], c[1], c[2], c[3], c[4], 
+                    c[5], c[6], c[7], c[8], c[9],
+                    c[10], c[11], c[12], c[13], classifier.intercept_,
+                    use_abs))
 
 if __name__ == "__main__":
     rospy.init_node("depth_error_logistic_regression")

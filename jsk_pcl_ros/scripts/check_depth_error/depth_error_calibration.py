@@ -25,7 +25,7 @@ vs = []
 c_us = []
 c_vs = []
 value_cache = dict()            # (u, v) -> [z]
-eps_z = 0.03                    # 3cm
+eps_z = 0.1                    # 10cm
 lock = threading.Lock()
 u_min = None
 u_max = None
@@ -235,7 +235,10 @@ def updatePlot(num):
             X_range = np.linspace(xmin, xmax, 100)
             ax.plot(X_range, X_range, linewidth=2, color='green', alpha=0.5)
             ax.plot(X_range, 
-                    applyModel(X_range, 320, 240, 320, 240, classifier),
+                    applyModel(X_range, 
+                               width / 2, height / 2,
+                               width / 2, height / 2,
+                               classifier),
                     linewidth=2, color='red', alpha=0.5)
             plt.text(xmin, xmax - 0.1,
                      modelEquationString(classifier),
@@ -248,13 +251,21 @@ def updatePlot(num):
             rospy.logerr(e.message)
 
 def generateFrequencyMap():
+    global width, height
     # bgr
-    img = np.tile(np.uint8([0,0,0]), (height, width, 1))
+    img = np.tile(np.uint8([0,0,0]), (height / 10, width / 10, 1))
+    frequency = dict()
     for (u, v) in value_cache.keys():
-        # max = 100
         min_color = np.uint8([255, 0, 0])
         max_color = np.uint8([0, 0, 255])
-        r = min(len(value_cache[(u, v)]) / 10.0, 1)
+        uu = int(u/10)
+        vv = int(v/10)
+        if frequency.has_key((uu, vv)):
+            frequency[(uu, vv)] = frequency[(uu, vv)] + len(value_cache[(u, v)])
+        else:
+            frequency[(uu, vv)] = len(value_cache[(u, v)])
+    for (u, v) in frequency.keys():
+        r = min(frequency[(u, v)] / 10.0, 1)
         img[v, u] = min_color * (1 - r) + max_color * r
     return img
         
@@ -271,7 +282,11 @@ def main():
     parser.add_argument('--csv')
     parser.add_argument('--model', default="linear")
     parser.add_argument('--models', action="store_true", default=False)
+    parser.add_argument("--width", default=640)
+    parser.add_argument("--height", default=480)
     args = parser.parse_args(rospy.myargv()[1:])
+    width = args.width
+    height = args.height
     if args.models:
         for m in MODELS:
             print m

@@ -351,10 +351,8 @@ def generateFrequencyMap():
 def main():
     global ax, xs, ys, classifier, u_min, u_max, v_min, v_max, model, set_param
     global width, height, pub_image
-    width = 640
-    height = 480
     pub_image = rospy.Publisher("~frequency_image", Image)
-    set_param = rospy.ServiceProxy("depth_calibration/set_calibration_parameter", 
+    set_param = rospy.ServiceProxy("/camera_remote/depth_calibration/set_calibration_parameter", 
                                    SetDepthCalibrationParameter)
     # parse argument
     parser = argparse.ArgumentParser()
@@ -397,6 +395,10 @@ def main():
             cv = float(row[5])
             processData(x, y, u, v, cu, cv, fit = False)
         classifier.fit(xs, ys)
+        try:
+            setParameter(classifier)
+        except rospy.service.ServiceException, e:
+            rospy.logfatal("failed to call service: %s" % (e.message))
     try:
         plt.show()
     finally:
@@ -410,21 +412,21 @@ def main():
             yaml_filename = "calibration_parameter_%s.yaml" % datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
             print "writing to %s" % yaml_filename
             c = classifier.coef_
-            if model == "quadratic-uv-abs":
+            if model == "quadratic-uv-abs" or model == "quadratic-uv-quadratic-abs":
                 use_abs = "True"
             else:
                 use_abs = "False"
             
             with open(yaml_filename, "w") as f:
                 f.write("""
-coefficients2: [%f, %f, %f, %f, %f]
-coefficients1: [%f, %f, %f, %f, %f]
-coefficients0: [%f, %f, %f, %f, %f]
+coefficients2: [%s, %s, %s, %s, %s]
+coefficients1: [%s, %s, %s, %s, %s]
+coefficients0: [%s, %s, %s, %s, %s]
 use_abs: %s
                 """ % (
-                    c[0], c[1], c[2], c[3], c[4], 
-                    c[5], c[6], c[7], c[8], c[9],
-                    c[10], c[11], c[12], c[13], classifier.intercept_,
+                    repr(c[0]), repr(c[1]), repr(c[2]), repr(c[3]), repr(c[4]), 
+                    repr(c[5]), repr(c[6]), repr(c[7]), repr(c[8]), repr(c[9]),
+                    repr(c[10]), repr(c[11]), repr(c[12]), repr(c[13]), repr(classifier.intercept_),
                     use_abs))
 
 if __name__ == "__main__":

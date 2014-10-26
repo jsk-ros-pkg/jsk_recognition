@@ -77,12 +77,18 @@ namespace jsk_pcl_ros
   
   void DepthCalibration::printModel()
   {
-    ROS_INFO("C2(u, v) = %fu^2 + %fu + %fv^2 + %fv + %f",
+    NODELET_INFO("C2(u, v) = %fu^2 + %fu + %fv^2 + %fv + %f",
              coefficients2_[0], coefficients2_[1], coefficients2_[2], coefficients2_[3], coefficients2_[4]);
-    ROS_INFO("C1(u, v) = %fu^2 + %fu + %fv^2 + %fv + %f",
+    NODELET_INFO("C1(u, v) = %fu^2 + %fu + %fv^2 + %fv + %f",
              coefficients1_[0], coefficients1_[1], coefficients1_[2], coefficients1_[3], coefficients1_[4]);
-    ROS_INFO("C0(u, v) = %fu^2 + %fu + %fv^2 + %fv + %f",
+    NODELET_INFO("C0(u, v) = %fu^2 + %fu + %fv^2 + %fv + %f",
              coefficients0_[0], coefficients0_[1], coefficients0_[2], coefficients0_[3], coefficients0_[4]);
+    if (use_abs_) {
+      NODELET_INFO("use_abs: True");
+    }
+    else {
+      NODELET_INFO("use_abs: False");
+    }
   }
 
   bool DepthCalibration::setCalibrationParameter(

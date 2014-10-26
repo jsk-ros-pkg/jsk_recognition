@@ -3,6 +3,7 @@
   <arg name="depth_camera_info_url" default="" />
   <arg name="rgb_frame_id"   default="/camera_rgb_optical_frame" />
   <arg name="depth_frame_id" default="/camera_depth_optical_frame" />
+  <arg name="depth_calibration_file" default="" />
   <group>       <!--group only for remapping-->
     <remap from="/camera_remote_uncalibrated/depth/image_raw" 
            to="/camera/depth/image_raw"/>
@@ -79,6 +80,16 @@
         <remap from="depth_registered/image_rect" to="$(arg depth_registered)/hw_registered/image_rect_raw_calibrated" />
         <remap from="depth_registered/points"     to="$(arg depth_registered)/points" />
       </node>
+      <node pkg="nodelet" type="nodelet" name="depth_calibration"
+          args="load jsk_pcl/DepthCalibration $(arg manager) $(arg bond)"
+          respawn="$(arg respawn)"
+          clear_params="true"
+          output="screen">
+        <remap from="~input" to="/camera_remote/depth_registered/hw_registered/image_rect_raw" />
+        <remap from="~camera_info" to="/camera/depth_registered/camera_info" />
+        <remap from="~output" to="/camera_remote/depth_registered/hw_registered/image_rect_raw_calibrated" />
+        <rosparam command="load" file="$(arg depth_calibration_file)" />
+      </node>
     </group>
     <!-- only for rgb rectification -->
     <include file="$(find openni2_launch)/launch/openni2.launch">
@@ -92,8 +103,6 @@
       <arg name="rgb_camera_info_url" value="$(arg rgb_camera_info_url)" />
       <arg name="depth_camera_info_url" value="$(arg depth_camera_info_url)" />
     </include>
-    
-
   </group>
   
   <group ns="camera_remote">

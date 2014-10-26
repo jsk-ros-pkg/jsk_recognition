@@ -48,30 +48,26 @@ namespace jsk_pcl_ros
         *pnh_, "coefficients2", coefficients2_);
     }
     else {
-      coefficients2_.assign(3, 0);
+      coefficients2_.assign(5, 0);
     }
     if (pnh_->hasParam("coefficients1")) {
       jsk_topic_tools::readVectorParameter(
         *pnh_, "coefficients1", coefficients1_);
     }
     else {
-      coefficients1_.assign(3, 0);
+      coefficients1_.assign(5, 0);
+      coefficients1_[4] = 1.0;
     }
     if (pnh_->hasParam("coefficients0")) {
       jsk_topic_tools::readVectorParameter(
         *pnh_, "coefficients0", coefficients0_);
     }
     else {
-      coefficients0_.assign(3, 0);
+      coefficients0_.assign(5, 0);
     }
     pnh_->param("use_abs", use_abs_, false);
     
-    ROS_INFO("C2(u, v) = %fu + %fv + %f",
-             coefficients2_[0], coefficients2_[1], coefficients2_[2]);
-    ROS_INFO("C1(u, v) = %fu + %fv + %f",
-             coefficients1_[0], coefficients1_[1], coefficients1_[2]);
-    ROS_INFO("C0(u, v) = %fu + %fv + %f",
-             coefficients0_[0], coefficients0_[1], coefficients0_[2]);
+    printModel();
     set_calibration_parameter_srv_ = pnh_->advertiseService(
       "set_calibration_parameter",
       &DepthCalibration::setCalibrationParameter,
@@ -79,21 +75,26 @@ namespace jsk_pcl_ros
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
   }
   
+  void DepthCalibration::printModel()
+  {
+    ROS_INFO("C2(u, v) = %fu^2 + %fu + %fv^2 + %fv + %f",
+             coefficients2_[0], coefficients2_[1], coefficients2_[2], coefficients2_[3], coefficients2_[4]);
+    ROS_INFO("C1(u, v) = %fu^2 + %fu + %fv^2 + %fv + %f",
+             coefficients1_[0], coefficients1_[1], coefficients1_[2], coefficients1_[3], coefficients1_[4]);
+    ROS_INFO("C0(u, v) = %fu^2 + %fu + %fv^2 + %fv + %f",
+             coefficients0_[0], coefficients0_[1], coefficients0_[2], coefficients0_[3], coefficients0_[4]);
+  }
+
   bool DepthCalibration::setCalibrationParameter(
-    DepthCalibrationParameter::Request& req,
-    DepthCalibrationParameter::Response& res)
+    SetDepthCalibrationParameter::Request& req,
+    SetDepthCalibrationParameter::Response& res)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    coefficients2_[0] = req.c22;
-    coefficients2_[1] = req.c21;
-    coefficients2_[2] = req.c20;
-    coefficients1_[0] = req.c12;
-    coefficients1_[1] = req.c11;
-    coefficients1_[2] = req.c10;
-    coefficients0_[0] = req.c02;
-    coefficients0_[1] = req.c01;
-    coefficients0_[2] = req.c00;
-    use_abs_ = req.use_abs;
+    coefficients2_ = req.parameter.coefficients2;
+    coefficients1_ = req.parameter.coefficients1;
+    coefficients0_ = req.parameter.coefficients0;
+    use_abs_ = req.parameter.use_abs;
+    printModel();
     return true;
   }
 

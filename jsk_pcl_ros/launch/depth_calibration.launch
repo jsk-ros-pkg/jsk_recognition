@@ -6,9 +6,6 @@
     <remap from="~camera_info" to="/camera/depth_registered/camera_info" />
     <remap from="~output" to="/camera_remote/depth_registered/hw_registered/image_rect_raw_calibrated" />
     <rosparam>
-      coefficients2: [0.000344, 0.000355, -0.149616]
-      coefficients1: [-0.000612, -0.000549, 1.377791]
-      coefficients0: [0.000264, 0.000230, -0.161416]
     </rosparam>
   </node>
 </launch>

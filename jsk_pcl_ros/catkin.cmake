@@ -39,6 +39,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 
 add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg SnapItRequest.msg PolygonArray.msg
+  DepthCalibrationParameter.msg
   ModelCoefficientsArray.msg
   SlicedPointCloud.msg
   BoundingBox.msg
@@ -54,7 +55,7 @@ add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg
   ParallelEdge.msg ParallelEdgeArray.msg)
 
 add_service_files(FILES SwitchTopic.srv
-  DepthCalibrationParameter.srv
+  SetDepthCalibrationParameter.srv
   TransformScreenpoint.srv
   CheckCircle.srv
   RobotPickupReleasePoint.srv

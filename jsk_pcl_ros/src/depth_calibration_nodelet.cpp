@@ -35,6 +35,8 @@
 
 #include "jsk_pcl_ros/depth_calibration.h"
 #include <jsk_topic_tools/rosparam_utils.h>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
 
 namespace jsk_pcl_ros
 {
@@ -46,52 +48,59 @@ namespace jsk_pcl_ros
         *pnh_, "coefficients2", coefficients2_);
     }
     else {
-      coefficients2_.assign(3, 0);
+      coefficients2_.assign(5, 0);
     }
     if (pnh_->hasParam("coefficients1")) {
       jsk_topic_tools::readVectorParameter(
         *pnh_, "coefficients1", coefficients1_);
     }
     else {
-      coefficients1_.assign(3, 0);
+      coefficients1_.assign(5, 0);
+      coefficients1_[4] = 1.0;
     }
     if (pnh_->hasParam("coefficients0")) {
       jsk_topic_tools::readVectorParameter(
         *pnh_, "coefficients0", coefficients0_);
     }
     else {
-      coefficients0_.assign(3, 0);
+      coefficients0_.assign(5, 0);
     }
     pnh_->param("use_abs", use_abs_, false);
     
-    ROS_INFO("C2(u, v) = %fu + %fv + %f",
-             coefficients2_[0], coefficients2_[1], coefficients2_[2]);
-    ROS_INFO("C1(u, v) = %fu + %fv + %f",
-             coefficients1_[0], coefficients1_[1], coefficients1_[2]);
-    ROS_INFO("C0(u, v) = %fu + %fv + %f",
-             coefficients0_[0], coefficients0_[1], coefficients0_[2]);
+    printModel();
     set_calibration_parameter_srv_ = pnh_->advertiseService(
       "set_calibration_parameter",
       &DepthCalibration::setCalibrationParameter,
       this);
-    pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
   }
   
+  void DepthCalibration::printModel()
+  {
+    NODELET_INFO("C2(u, v) = %fu^2 + %fu + %fv^2 + %fv + %f",
+             coefficients2_[0], coefficients2_[1], coefficients2_[2], coefficients2_[3], coefficients2_[4]);
+    NODELET_INFO("C1(u, v) = %fu^2 + %fu + %fv^2 + %fv + %f",
+             coefficients1_[0], coefficients1_[1], coefficients1_[2], coefficients1_[3], coefficients1_[4]);
+    NODELET_INFO("C0(u, v) = %fu^2 + %fu + %fv^2 + %fv + %f",
+             coefficients0_[0], coefficients0_[1], coefficients0_[2], coefficients0_[3], coefficients0_[4]);
+    if (use_abs_) {
+      NODELET_INFO("use_abs: True");
+    }
+    else {
+      NODELET_INFO("use_abs: False");
+    }
+  }
+
   bool DepthCalibration::setCalibrationParameter(
-    DepthCalibrationParameter::Request& req,
-    DepthCalibrationParameter::Response& res)
+    SetDepthCalibrationParameter::Request& req,
+    SetDepthCalibrationParameter::Response& res)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    coefficients2_[0] = req.c22;
-    coefficients2_[1] = req.c21;
-    coefficients2_[2] = req.c20;
-    coefficients1_[0] = req.c12;
-    coefficients1_[1] = req.c11;
-    coefficients1_[2] = req.c10;
-    coefficients0_[0] = req.c02;
-    coefficients0_[1] = req.c01;
-    coefficients0_[2] = req.c00;
-    use_abs_ = req.use_abs;
+    coefficients2_ = req.parameter.coefficients2;
+    coefficients1_ = req.parameter.coefficients1;
+    coefficients0_ = req.parameter.coefficients0;
+    use_abs_ = req.parameter.use_abs;
+    printModel();
     return true;
   }
 
@@ -111,42 +120,38 @@ namespace jsk_pcl_ros
   }
 
   void DepthCalibration::calibrate(
-      const sensor_msgs::PointCloud2::ConstPtr& msg,
+      const sensor_msgs::Image::ConstPtr& msg,
       const sensor_msgs::CameraInfo::ConstPtr& camera_info)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
-    pcl::PointCloud<PointT>::Ptr output_cloud 
-      (new pcl::PointCloud<PointT>);
-    pcl::fromROSMsg(*msg, *cloud);
-    output_cloud->points.resize(cloud->points.size());
-    for (size_t u = 0; u < msg->width; u++) {
-      for (size_t v = 0; v < msg->height; v++) {
-        PointT inp = cloud->points[u + v * msg->width];
-        PointT outp;
-        outp.x = inp.x;
-        outp.y = inp.y;
-        outp.rgb = inp.rgb;
-        if (!isnan(inp.x) && !isnan(inp.y) && !isnan(inp.z)) {
-            outp.z = applyModel(inp.z, u, v, camera_info->P[2], camera_info->P[6]);
-          // if (u % 10 == 0 && v % 10 == 0) {
-          //   ROS_INFO("%f(%lu, %lu) -> %f", inp.z, u, v, outp.z);
-          // }
+    cv_bridge::CvImagePtr cv_ptr;
+    try
+    {
+      cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::TYPE_32FC1);
+    }
+    catch (cv_bridge::Exception& e)
+    {
+      NODELET_ERROR("cv_bridge exception: %s", e.what());
+      return;
+    }
+    cv::Mat image = cv_ptr->image;
+    cv::Mat output_image = image.clone();
+    double cu = camera_info->P[2];
+    double cv = camera_info->P[6];
+    for(int v = 0; v < image.rows; v++) {
+      for(int u = 0; u < image.cols; u++) {
+        float z = image.at<float>(v, u);
+        if (isnan(z)) {
+          output_image.at<float>(v, u) = z;
         }
         else {
-          outp.z = inp.z;
+          output_image.at<float>(v, u) = applyModel(z, u, v, cu, cv);
         }
-        output_cloud->points[u + v * msg->width] = outp;
-        
+        //NODELET_INFO("z: %f", z);
       }
     }
-    sensor_msgs::PointCloud2 ros_out;
-    pcl::toROSMsg(*output_cloud, ros_out);
-    ros_out.header = msg->header;
-    ros_out.is_dense = false;
-    ros_out.width = msg->width;
-    ros_out.height = msg->height;
-    pub_.publish(ros_out);
+    sensor_msgs::Image::Ptr ros_image = cv_bridge::CvImage(msg->header, "32FC1", output_image).toImageMsg();
+    pub_.publish(ros_image);
   }
 
   void DepthCalibration::updateDiagnostic(

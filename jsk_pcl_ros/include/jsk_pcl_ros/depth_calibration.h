@@ -37,11 +37,12 @@
 #define JSK_PCL_ROS_DEPTH_CALIBRATION_H_
 
 #include "jsk_pcl_ros/diagnostic_nodelet.h"
-#include "jsk_pcl_ros/DepthCalibrationParameter.h"
+#include "jsk_pcl_ros/SetDepthCalibrationParameter.h"
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 #include <sensor_msgs/CameraInfo.h>
+#include <sensor_msgs/Image.h>
 
 namespace jsk_pcl_ros
 {
@@ -54,17 +55,18 @@ namespace jsk_pcl_ros
   public:
     typedef pcl::PointXYZRGB PointT;
     typedef message_filters::sync_policies::ExactTime<
-        sensor_msgs::PointCloud2,
+        sensor_msgs::Image,
         sensor_msgs::CameraInfo> SyncPolicy;
 
     DepthCalibration(): DiagnosticNodelet("DepthCalibration") { }
   protected:
     virtual void onInit();
     virtual void calibrate(
-      const sensor_msgs::PointCloud2::ConstPtr& msg,
+      const sensor_msgs::Image::ConstPtr& msg,
       const sensor_msgs::CameraInfo::ConstPtr& camera_info);
     virtual void subscribe();
     virtual void unsubscribe();
+    virtual void printModel();
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual inline double applyModel(double z, int u, int v, double cu, double cv) {
@@ -78,16 +80,22 @@ namespace jsk_pcl_ros
         uu = u;
         vv = v;
       }
-      double c2 = coefficients2_[0] * uu + coefficients2_[1] * vv + coefficients2_[2];
-      double c1 = coefficients1_[0] * uu + coefficients1_[1] * vv + coefficients1_[2];
-      double c0 = coefficients0_[0] * uu + coefficients0_[1] * vv + coefficients0_[2];
+      double c2 = coefficients2_[0] * uu * uu + coefficients2_[1] * uu +
+        coefficients2_[2] * vv * vv + coefficients2_[3] * vv + 
+        coefficients2_[4];
+      double c1 = coefficients1_[0] * uu * uu + coefficients1_[1] * uu +
+        coefficients1_[2] * vv * vv + coefficients1_[3] * vv + 
+        coefficients1_[4];
+      double c0 = coefficients0_[0] * uu * uu + coefficients0_[1] * uu +
+        coefficients0_[2] * vv * vv + coefficients0_[3] * vv + 
+        coefficients0_[4];
       return c2 * z2 + c1 * z + c0;
     }
     
     virtual bool setCalibrationParameter(
-      DepthCalibrationParameter::Request& req,
-      DepthCalibrationParameter::Response& res);
-    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
+      SetDepthCalibrationParameter::Request& req,
+      SetDepthCalibrationParameter::Response& res);
+    message_filters::Subscriber<sensor_msgs::Image> sub_input_;
     message_filters::Subscriber<sensor_msgs::CameraInfo> sub_camera_info_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
     ros::Publisher pub_;

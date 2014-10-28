@@ -5,26 +5,6 @@ jsk\_pcl\_ros is a package to provide some programs using [pcl](http://pointclou
 
 This package provides some programs as nodelet.
 
-
-## To Test Some Samples
-
-Please be careful about the nodelet manager name when execute some sample launches.
-
-Because the nodelet manager name is different between groovy version and hydro version in openni.launch,
-you have to replace the nodelet manager name when use in groovy as below.
-
-From
-
-```
-/camera_nodelet_manager
-```
-
-To
-
-```
-/camera/camera_nodelet_manager
-```
-
 ## types
 jsk\_pcl\_ros provides several message types.
 ### ClusterPointIndices.msg
@@ -226,6 +206,7 @@ The number of `~info` messages to skip to generate depth image.
 Queue length of topics.
 
 ### jsk\_pcl/EuclideanClustering
+![](images/euclidean_segmentation.png)
 #### What Is This
 Segment pointcloud based euclidean metrics, which is based on `pcl::EuclideanClusterExtraction`.
 This nodelet has topic interface and service interface.
@@ -370,4 +351,23 @@ Plug the depth sensor which can be launched by openni.launch and run the below c
 
 ```
 roslaunch jsk_pcl_ros tf_transform_cloud.launch
+```
+
+## To Test Some Samples
+
+Please be careful about the nodelet manager name when execute some sample launches.
+
+Because the nodelet manager name is different between groovy version and hydro version in openni.launch,
+you have to replace the nodelet manager name when use in groovy as below.
+
+From
+
+```
+/camera_nodelet_manager
+```
+
+To
+
+```
+/camera/camera_nodelet_manager
 ```

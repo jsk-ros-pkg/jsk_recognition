@@ -39,8 +39,12 @@
 #include "posedetection_msgs/ObjectDetection.h"
 #include "posedetection_msgs/Detect.h"
 #include "geometry_msgs/PointStamped.h"
+#include "geometry_msgs/PoseStamped.h"
 #include "math.h"
-
+#include "geometry_msgs/PolygonStamped.h"
+#include "jsk_pcl_ros/PolygonArray.h"
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "eigen_conversions/eigen_msg.h"
 #include <sys/timeb.h>    // ftime(), struct timeb
 #include <sys/time.h>
 
@@ -72,7 +76,9 @@ public:
     ros::Subscriber camInfoSubscriber,camInfoSubscriber2;
     ros::Subscriber imageSubscriber,imageSubscriber2;
     ros::Publisher _pubDetection;
+    ros::Publisher _pubPoseStamped;
     ros::Publisher _pubCornerPoint;
+      ros::Publisher _pubPolygonArray;
     ros::ServiceServer _srvDetect;
 
     string frame_id; // tf frame id
@@ -87,6 +93,8 @@ public:
     IplImage* frame;
 
     ros::NodeHandle _node;
+    int dimx, dimy;
+    double fRectSize[2];
 
     //////////////////////////////////////////////////////////////////////////////
     // Constructor
@@ -100,8 +108,6 @@ public:
         int index = 0;
 
         while(1) {
-            int dimx, dimy;
-            double fRectSize[2];
             string type;
 
             sprintf(str,"grid%d_size_x",index);
@@ -190,7 +196,11 @@ public:
         _pubDetection =
           _node.advertise<posedetection_msgs::ObjectDetection> ("ObjectDetection", 1,
                                                                 connect_cb, connect_cb);
+        _pubPoseStamped =
+          _node.advertise<geometry_msgs::PoseStamped> ("objectdetection_pose", 1,
+                                                       connect_cb, connect_cb);
         _pubCornerPoint = _node.advertise<geometry_msgs::PointStamped>("corner_point", 1, connect_cb, connect_cb);
+        _pubPolygonArray = _node.advertise<jsk_pcl_ros::PolygonArray>("polygons", 1, connect_cb, connect_cb);
         //this->camInfoSubscriber = _node.subscribe("camera_info", 1, &CheckerboardDetector::caminfo_cb, this);
         //this->imageSubscriber = _node.subscribe("image",1, &CheckerboardDetector::image_cb, this);
         //this->camInfoSubscriber2 = _node.subscribe("CameraInfo", 1, &CheckerboardDetector::caminfo_cb2, this);
@@ -230,13 +240,53 @@ public:
         ROS_WARN("The topic CameraInfo has been deprecated.  Please change your launch file to use camera_info instead.");
         caminfo_cb(msg);
     }
+    
+    void publishPolygonArray(const posedetection_msgs::ObjectDetection& obj)
+    {
+        jsk_pcl_ros::PolygonArray polygon_array;
+        polygon_array.header = obj.header;
+        for (size_t i = 0; i < obj.objects.size(); i++) {
+            geometry_msgs::Pose pose = obj.objects[i].pose;
+            Eigen::Affine3d affine;
+            tf::poseMsgToEigen(pose, affine);
+            Eigen::Vector3d A_local(0, 0, 0);
+            Eigen::Vector3d B_local((dimx - 1) * fRectSize[0], 0, 0);
+            Eigen::Vector3d C_local((dimx - 1) * fRectSize[0], (dimy - 1) * fRectSize[1], 0);
+            Eigen::Vector3d D_local(0, (dimy - 1) * fRectSize[1], 0);
+            Eigen::Vector3d A_global = affine * A_local;
+            Eigen::Vector3d B_global = affine * B_local;
+            Eigen::Vector3d C_global = affine * C_local;
+            Eigen::Vector3d D_global = affine * D_local;
+            geometry_msgs::Point32 a, b, c, d;
+            jsk_pcl_ros::pointFromVectorToXYZ<Eigen::Vector3d, geometry_msgs::Point32>(A_global, a);
+            jsk_pcl_ros::pointFromVectorToXYZ<Eigen::Vector3d, geometry_msgs::Point32>(B_global, b);
+            jsk_pcl_ros::pointFromVectorToXYZ<Eigen::Vector3d, geometry_msgs::Point32>(C_global, c);
+            jsk_pcl_ros::pointFromVectorToXYZ<Eigen::Vector3d, geometry_msgs::Point32>(D_global, d);
+            geometry_msgs::PolygonStamped polygon;
+            polygon.header = obj.header;
+            polygon.polygon.points.push_back(a);
+            polygon.polygon.points.push_back(b);
+            polygon.polygon.points.push_back(c);
+            polygon.polygon.points.push_back(d);
+            polygon_array.polygons.push_back(polygon);
+        }
+        _pubPolygonArray.publish(polygon_array);
+    }
 
     void image_cb2(const sensor_msgs::ImageConstPtr &msg)
     {
         ROS_WARN("The topic Image has been deprecated.  Please change your launch file to use image instead.");
         boost::mutex::scoped_lock lock(this->mutexcalib);
-        if( Detect(_objdetmsg,*msg,this->_camInfoMsg) )
+        if( Detect(_objdetmsg,*msg,this->_camInfoMsg) ) {
+            if (_objdetmsg.objects.size() > 0) {
+                geometry_msgs::PoseStamped pose;
+                pose.header = _objdetmsg.header;
+                pose.pose = _objdetmsg.objects[0].pose;
+                _pubPoseStamped.publish(pose);
+            }
             _pubDetection.publish(_objdetmsg);
+            publishPolygonArray(_objdetmsg);
+        }
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -244,8 +294,16 @@ public:
     void image_cb(const sensor_msgs::ImageConstPtr &msg)
     {
         boost::mutex::scoped_lock lock(this->mutexcalib);
-        if( Detect(_objdetmsg,*msg,this->_camInfoMsg) )
+        if( Detect(_objdetmsg,*msg,this->_camInfoMsg) ) {
+            if (_objdetmsg.objects.size() > 0) {
+                geometry_msgs::PoseStamped pose;
+                pose.header = _objdetmsg.header;
+                pose.pose = _objdetmsg.objects[0].pose;
+                _pubPoseStamped.publish(pose);
+            }
             _pubDetection.publish(_objdetmsg);
+            publishPolygonArray(_objdetmsg);
+        }
     }
 
     bool detect_cb(posedetection_msgs::Detect::Request& req, posedetection_msgs::Detect::Response& res)
@@ -257,7 +315,8 @@ public:
     void connectCb( )
     {
       boost::mutex::scoped_lock lock(this->mutexcalib);
-      if (_pubDetection.getNumSubscribers() == 0 && _pubCornerPoint.getNumSubscribers() == 0)
+      if (_pubDetection.getNumSubscribers() == 0 && _pubCornerPoint.getNumSubscribers() == 0 &&
+          _pubPoseStamped.getNumSubscribers() == 0 && _pubPolygonArray.getNumSubscribers() == 0)
         {
           camInfoSubscriber.shutdown();
           camInfoSubscriber2.shutdown();
@@ -467,8 +526,9 @@ public:
                 point_msg.header = imagemsg.header;
                 point_msg.point.x = X[0].x;
                 point_msg.point.y = X[0].y;
-                point_msg.point.z = vobjects[i].pose.position.z;
+                point_msg.point.z = vobjects[vobjects.size() - 1].pose.position.z;
                 _pubCornerPoint.publish(point_msg);
+                
             }
 
             cvShowImage("Checkerboard Detector",frame);

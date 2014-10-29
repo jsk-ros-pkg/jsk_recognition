@@ -42,7 +42,7 @@
 #include <pcl/registration/ia_ransac.h>
 #include <pcl/filters/project_inliers.h>
 #include <pcl/common/pca.h>
-
+#include <jsk_topic_tools/color_utils.h>
 #include <Eigen/Geometry> 
 
 #include "jsk_pcl_ros/geo_util.h"
@@ -285,7 +285,7 @@ namespace jsk_pcl_ros
    size_t i,
    pcl::PointCloud<pcl::PointXYZRGB>& debug_output)
   {
-    uint32_t rgb = colorRGBAToUInt32(colorCategory20(i));
+    uint32_t rgb = colorRGBAToUInt32(jsk_topic_tools::colorCategory20(i));
     for (size_t j = 0; j < segmented_cloud->points.size(); j++) {
       pcl::PointXYZRGB p;
       p.x= segmented_cloud->points[j].x;

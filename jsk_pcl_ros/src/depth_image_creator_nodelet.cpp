@@ -34,6 +34,7 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/depth_image_creator.h"
+#include <jsk_topic_tools/rosparam_utils.h>
 
 void jsk_pcl_ros::DepthImageCreator::onInit () {
   NODELET_INFO("[%s::onInit]", getName().c_str());
@@ -60,32 +61,13 @@ void jsk_pcl_ros::DepthImageCreator::onInit () {
   info_counter_ = 0;
  
   // set transformation
-  double trans_pos[3];
-  double trans_quat[4];
-  trans_pos[0] = trans_pos[1] = trans_pos[2] = 0;
+  std::vector<double> trans_pos(3, 0);
+  std::vector<double> trans_quat(4, 0); trans_quat[3] = 1.0;
   if (pnh_->hasParam("translation")) {
-    XmlRpc::XmlRpcValue param_val;
-    pnh_->getParam("translation", param_val);
-    if (param_val.getType() == XmlRpc::XmlRpcValue::TypeArray && param_val.size() == 3) {
-      trans_pos[0] = param_val[0];
-      trans_pos[1] = param_val[1];
-      trans_pos[2] = param_val[2];
-    }
-    ROS_INFO("translation : [%f, %f, %f]", trans_pos[0], trans_pos[1], trans_pos[2]);
+    jsk_topic_tools::readVectorParameter(*pnh_, "translation", trans_pos);
   }
-  trans_quat[0] = trans_quat[1] = trans_quat[2] = 0; trans_quat[3] = 1;
   if (pnh_->hasParam("rotation")) {
-    XmlRpc::XmlRpcValue param_val;
-    pnh_->getParam("rotation", param_val);
-    if (param_val.getType() == XmlRpc::XmlRpcValue::TypeArray && param_val.size() == 4) {
-      trans_quat[0] = param_val[0];
-      trans_quat[1] = param_val[1];
-      trans_quat[2] = param_val[2];
-      trans_quat[3] = param_val[3];
-    }
-    ROS_INFO("rotation : [%f, %f, %f, %f]",
-             trans_quat[0], trans_quat[1],
-             trans_quat[2], trans_quat[3]);
+    jsk_topic_tools::readVectorParameter(*pnh_, "rotation", trans_quat);
   }
   tf::Quaternion btq(trans_quat[0], trans_quat[1], trans_quat[2], trans_quat[3]);
   tf::Vector3 btp(trans_pos[0], trans_pos[1], trans_pos[2]);

@@ -51,11 +51,37 @@ namespace jsk_pcl_ros
     indices_(indices), coefficients_(coefficients)
   {
   }
+  
+  LineSegment::LineSegment(
+    const std_msgs::Header& input_header,
+    pcl::PointIndices::Ptr indices,
+    pcl::ModelCoefficients::Ptr coefficients,
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud):
+    header(input_header),
+    indices_(indices), coefficients_(coefficients),
+    points_(new pcl::PointCloud<pcl::PointXYZ>)
+  {
+    pcl::ProjectInliers<pcl::PointXYZ> proj;
+    proj.setInputCloud(cloud);
+    proj.setIndices(indices);
+    proj.setModelType(pcl::SACMODEL_LINE);
+    proj.setModelCoefficients(coefficients);
+    proj.filter(*points_);
+  }
 
   LineSegment::~LineSegment()
   {
   }
 
+  Segment::Ptr LineSegment::toSegment()
+  {
+    // we suppose the first and the last point should be the end points
+    return Segment::Ptr(
+      new Segment(
+        points_->points[0].getVector3fMap(),
+        points_->points[points_->points.size() - 1].getVector3fMap()));
+  }
+  
   void LineSegment::addMarkerLine(
     visualization_msgs::Marker& marker,
     const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
@@ -96,7 +122,7 @@ namespace jsk_pcl_ros
     pub_line_marker_ = advertise<visualization_msgs::Marker>(
       *pnh_, "debug/line_marker", 1);
     pub_indices_ = advertise<ClusterPointIndices>(
-      *pnh_, "output/indices", 1);
+      *pnh_, "output/inliers", 1);
     pub_coefficients_ = advertise<ModelCoefficientsArray>(
       *pnh_, "output/coefficients", 1);
 

@@ -139,7 +139,10 @@ jsk_pcl_nodelet(src/bilateral_filter_nodelet.cpp
   "jsk_pcl/BilateralFilter" "bilateral_filter")
 jsk_pcl_nodelet(src/line_segment_detector_nodelet.cpp
   "jsk_pcl/LineSegmentDetector" "line_segment_detector")
-
+jsk_pcl_nodelet(src/line_segment_collector_nodelet.cpp
+  "jsk_pcl/LineSegmentCollector" "line_segment_collector")
+jsk_pcl_nodelet(src/depth_calibration_nodelet.cpp
+  "jsk_pcl/DepthCalibration" "depth_calibration")
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp

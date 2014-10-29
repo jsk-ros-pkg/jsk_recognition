@@ -695,7 +695,7 @@ namespace jsk_pcl_ros
 
     // if this polygon is triangle, return immediately
     if (isTriangle()) {
-      ret.push_back(Polygon::Ptr(this));
+      ret.push_back(Polygon::Ptr( new Polygon(*this)));
       return ret;
     }
 

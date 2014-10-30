@@ -52,7 +52,8 @@ add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg
   SparseOccupancyGrid.msg
   SparseOccupancyGridArray.msg
   DepthErrorResult.msg
-  ParallelEdge.msg ParallelEdgeArray.msg)
+  ParallelEdge.msg ParallelEdgeArray.msg
+  ICPResult.msg)
 
 add_service_files(FILES SwitchTopic.srv
   SetDepthCalibrationParameter.srv
@@ -65,7 +66,8 @@ add_service_files(FILES SwitchTopic.srv
   SetPointCloud2.srv
   CallSnapIt.srv CallPolygon.srv
   EnvironmentLock.srv
-  PolygonOnEnvironment.srv)
+  PolygonOnEnvironment.srv
+  ICPAlignWithBox.srv)
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(

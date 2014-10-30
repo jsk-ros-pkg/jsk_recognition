@@ -77,7 +77,7 @@ namespace jsk_pcl_ros
     pub_icp_result = advertise<jsk_pcl_ros::ICPResult>(*pnh_,
       "icp_result", 1);
     srv_detect = pnh_->advertiseService("icp_service", &ICPRegistration::alignWithBoxService, this);
-    //sub_reference_.shutdown()
+    sub_reference_.shutdown();
 
   }
 

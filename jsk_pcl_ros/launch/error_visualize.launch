@@ -15,15 +15,15 @@
     </node>
   </group>
 
-  <include file="$(env HOME)/visualize_plane_distance.launch">
+  <include file="./visualize_plane_distance.launch">
     <arg name="namespace" value="kinect_error" />
     <arg name="input" value="/openni_c2/depth_registered/points" />
   </include>
-  <include file="$(env HOME)/visualize_plane_distance.launch">
+  <include file="./visualize_plane_distance.launch">
     <arg name="namespace" value="tilt_error" />
     <arg name="input" value="/tilt_scan_shadow_filtered" />
   </include>
-  <include file="$(env HOME)/visualize_plane_distance.launch">
+  <include file="./visualize_plane_distance.launch">
     <arg name="namespace" value="narrow_stereo_error" />
     <arg name="input" value="/narrow_stereo/points2" />
   </include>  

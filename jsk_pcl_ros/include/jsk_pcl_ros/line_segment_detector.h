@@ -65,16 +65,18 @@ namespace jsk_pcl_ros
     virtual void addMarkerLine(
       visualization_msgs::Marker& marker,
       const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
-    virtual Segment::Ptr toSegment();
+    //virtual Segment::Ptr toSegment();
+    virtual Line::Ptr toSegment();
     pcl::PointIndices::Ptr getIndices() { return indices_; }
     pcl::ModelCoefficients::Ptr getCoefficients() { return coefficients_; }
     pcl::PointCloud<pcl::PointXYZ>::Ptr getPoints() { return points_; }
+    pcl::PointCloud<pcl::PointXYZ>::Ptr getRawPoints() { return raw_points_; }
     std_msgs::Header header;
   protected:
     pcl::PointIndices::Ptr indices_;
     pcl::ModelCoefficients::Ptr coefficients_;
     pcl::PointCloud<pcl::PointXYZ>::Ptr points_;
-    
+    pcl::PointCloud<pcl::PointXYZ>::Ptr raw_points_;
   private:
     
   };

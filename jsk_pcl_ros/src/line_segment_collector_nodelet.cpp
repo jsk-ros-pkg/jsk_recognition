@@ -98,6 +98,7 @@ namespace jsk_pcl_ros
     if (removed) {
       // reconstruct pointcloud
       points_.reset(new pcl::PointCloud<pcl::PointXYZ>);
+
       raw_points_.reset(new pcl::PointCloud<pcl::PointXYZ>);
       for (std::vector<LineSegment::Ptr>::iterator it = segments_.begin();
          it != segments_.end(); ++it) {

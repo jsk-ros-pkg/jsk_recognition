@@ -50,6 +50,14 @@ BoundingBox[] boxes
 BoundingBoxArray is a list of BoundingBox.
 You can use [jsk\_rviz\_plugins](https://github.com/jsk-ros-pkg/jsk_visualization) to visualize BoungingBoxArray in rviz.
 
+### TimeRange
+```
+Header header
+time start
+time end
+```
+Represent range of time.
+
 ## nodelets
 ### jsk\_pcl/ParticleFilterTracking
 #### What Is This
@@ -162,6 +170,39 @@ Enable `~point_array` topic.
 Publish result of screenpoint to `~output` topic.
 * `~publish_point` (Boolean, default: `False`):
 Publish result of screenpoint to `~output_point` topic.
+
+### jsk\_pcl/TiltLaserListener
+#### What is this
+Listen to the joint_states of tilt/spindle laser and publish time range to scane full 3-D space.
+You can choose several types of tilt/spindle lasers such as tilt-laser of PR2, infinite spindle laser of multisense.
+
+#### Subscribing Topics
+* `~input`(`sensor_msgs/JointState`): Joint angles of laser actuator.
+
+#### Publishing Topics
+* `~output` (`jsk_pcl_ros/TimeRange`): Time range to scan 3-D space.
+* `~output_cloud` (`sensor_msgs/PointCloud2`): Assembled pointcloud according to time range
+of `~output`. this require `~assemble_scans2` service of [laser_assembler](http://wiki.ros.org/laser_assembler).
+
+#### Using Services
+* `~assemble_scans2` (`laser_assembler/AssembleScans2`): A service to build 3-D pointcloud from scan pointcloud.
+It should be remapped to `assemble_scans2` service of [laser_assembler](http://wiki.ros.org/laser_assembler).
+
+#### Parameters
+* `~use_laser_assembler` (Boolean, default: `False`): Enable `~output_cloud` and `~assemble_scans2`.
+* `~joint_name` (String, **required**): Joint name of actuator to rotate laser.
+* `~laser_type` (String, default: `tilt_half_down`): type of rotating laser. You can choose one of the types:
+1. `tilt`: A mode for tilting laser. In this mode, TiltLaserListener assumes the motor to be moved from minimum
+joint angle to maximum joint angle over again. TiltLaserListener publishes the minimum and latest time range to
+move tilting laser from minimum joint angle to maximim joint angle.
+2. `tilt_half_down`:
+In this mode, TiltLaserListener publishes time range from maximum joint angle to minimum joint angle.
+3. `tilt_half_up`:
+In this mode, TiltLaserListener publishes time range from minimum joint angle to maximum joint angle like `tilt_half_down`.
+4. `infinite_spindle`: Infinite spindle laser. TiltLaserListener publishes time range to rotate laser 360 degrees.
+5. `infinite_spindle_half`: Infinite spindle laser, but most of laser has over 180 degrees range of field.
+Therefore we don't need to rotate laser 360 degrees to scan 3-D space, just 180 degree rotation is required.
+In this mode, TiltLaserListener publishes time range a time range of 180 degree rotation.
 
 ### jsk\_pcl/DepthImageCreator
 #### What is this

@@ -68,11 +68,41 @@ namespace jsk_pcl_ros
   {
     return points_;
   }
+
+  void LineSegmentCluster::removeBefore(const ros::Time& stamp)
+  {
+    bool removed = false;
+    for (std::vector<LineSegment::Ptr>::iterator it = segments_.begin();
+         it != segments_.end(); ) {
+      if (((*it)->header.stamp - stamp).toSec() < 0) {
+        it = segments_.erase(it);
+        removed = true;
+      }
+      else {
+        ++it;
+      }
+    }
+    if (removed) {
+      // reconstruct pointcloud
+      points_.reset(new pcl::PointCloud<pcl::PointXYZ>);
+      for (std::vector<LineSegment::Ptr>::iterator it = segments_.begin();
+         it != segments_.end(); ++it) {
+        pcl::PointCloud<pcl::PointXYZ>::Ptr segment_points = (*it)->getPoints();
+        for (size_t i = 0; i < segment_points->points.size(); i++) {
+          points_->points.push_back(segment_points->points[i]);
+        }
+      }
+    }
+  }
+  
+  bool LineSegmentCluster::isEmpty()
+  {
+    return segments_.size() == 0;
+  }
   
   void LineSegmentCollector::onInit()
   {
     DiagnosticNodelet::onInit();
-    initialize_joint_angle_ = true;
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&LineSegmentCollector::configCallback, this, _1, _2);
@@ -80,11 +110,6 @@ namespace jsk_pcl_ros
     
     if (!pnh_->getParam("fixed_frame_id", fixed_frame_id_)) {
       NODELET_ERROR("no ~fixed_frame_id is specified");
-      return;
-    }
-
-    if (!pnh_->getParam("rotate_joint_name", rotate_joint_name_)) {
-      NODELET_ERROR("no ~rotate_joint_name is specified");
       return;
     }
 
@@ -135,9 +160,8 @@ namespace jsk_pcl_ros
     sync_->connectInput(sub_input_, sub_indices_, sub_coefficients_);
     sync_->registerCallback(boost::bind(&LineSegmentCollector::collect,
                                         this, _1, _2, _3));
-    sub_joint_state_ = pnh_->subscribe(
-      "input_joint_states", 1,
-      &LineSegmentCollector::jointStateCallback, this);
+    sub_trigger_ = pnh_->subscribe("trigger", 1,
+                                   &LineSegmentCollector::triggerCallback, this);
   }
 
   void LineSegmentCollector::unsubscribe()
@@ -145,48 +169,13 @@ namespace jsk_pcl_ros
     sub_input_.unsubscribe();
     sub_indices_.unsubscribe();
     sub_coefficients_.unsubscribe();
-    sub_joint_state_.shutdown();
+    sub_trigger_.shutdown();
   }
   
   void LineSegmentCollector::updateDiagnostic(
     diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
 
-  }
-
-  void LineSegmentCollector::jointStateCallback(
-    const sensor_msgs::JointState::ConstPtr& joint_state_msg)
-  {
-    boost::mutex::scoped_lock lock(mutex_);
-    // lookup the joint
-    int target_index = -1;
-    for (size_t i = 0; i < joint_state_msg->name.size(); i++) {
-      if (joint_state_msg->name[i] == rotate_joint_name_) {
-        target_index = i;
-        break;
-      }
-    }
-    if (target_index == -1) {
-      NODELET_ERROR("failed to find the joint '%s'", rotate_joint_name_.c_str());
-      return;
-    }
-    double current_joint_angle = joint_state_msg->position[target_index];
-    if (initialize_joint_angle_) {
-      initial_joint_angle_ = current_joint_angle;
-      latest_joint_angle_ = current_joint_angle;
-      initialize_joint_angle_ = false;
-      prev_joint_velocity_ = 0.0;
-      return;
-    }
-    if (rotate_type_ == ROTATION_TILT_TWO_WAY) {
-      double velocity = latest_joint_angle_ - current_joint_angle;
-      if (prev_joint_velocity_ <= 0 && velocity > 0) {
-        // bottom
-        cleanupBuffers(joint_state_msg->header.stamp);
-      }
-      prev_joint_velocity_ = velocity;
-      latest_joint_angle_ = current_joint_angle;
-    }
   }
 
   void LineSegmentCollector::cleanupBuffers(
@@ -196,10 +185,26 @@ namespace jsk_pcl_ros
     indices_buffer_.removeBefore(stamp);
     coefficients_buffer_.removeBefore(stamp);
     segments_buffer_.removeBefore(stamp);
-    segment_clusters_.resize(0);
-    //segment_map_ = IntegerGraphMap();
+    for (std::vector<LineSegmentCluster::Ptr>::iterator it = segment_clusters_.begin();
+         it != segment_clusters_.end();) {
+      (*it)->removeBefore(stamp);
+      if ((*it)->isEmpty()) {
+        it = segment_clusters_.erase(it);
+      }
+      else {
+        ++it;
+      }
+    }
   }
 
+  void LineSegmentCollector::triggerCallback(
+    const TimeRange::ConstPtr& trigger)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    time_range_ = trigger;
+    cleanupBuffers(time_range_->start);
+  }
+  
   void LineSegmentCollector::publishBeforePlaneSegmentation(
     const std_msgs::Header& header,
     const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,

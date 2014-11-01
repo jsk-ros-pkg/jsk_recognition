@@ -332,6 +332,9 @@ If this parameter is set to `True`, `~align_planes` and `~align_planes_coefficie
 Run PCA algorithm on each cluster to estimate x and y direction.
 
 ### jsk\_pcl/ClusterPointIndicesDecomposerZAxis
+#### What Is This
+This nodelet is almost same to jsk\_pcl/ClusterPointIndicesDecomposer, however it always sort clusters in z direction.
+
 ### jsk\_pcl/CentroidPublisher
 #### What Is This
 

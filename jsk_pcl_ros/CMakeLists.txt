@@ -151,6 +151,7 @@ rosbuild_add_library (jsk_pcl_ros
   src/pcl_conversion_util.cpp src/pcl_util.cpp
   src/diagnostic_nodelet.cpp
   src/connection_based_nodelet.cpp
+  src/pointcloud_moveit_filter.cpp
 )
 rosbuild_add_openmp_flags(jsk_pcl_ros)
 

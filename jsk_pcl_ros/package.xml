@@ -78,8 +78,13 @@
   <run_depend>python_sklearn</run_depend>
   <build_depend>laser_assembler</build_depend>
   <run_depend>laser_assembler</run_depend>
+  <build_depend>moveit_ros_perception</build_depend>
+  <run_depend>moveit_ros_perception</run_depend>
+  <build_depend>moveit_core</build_depend>
+  <run_depend>moveit_core</run_depend>
   <export>
     <nodelet plugin="${prefix}/jsk_pcl_nodelets.xml"/>
     <cpp lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ljsk_pcl_ros" cflags="-I${prefix}/include"/>
+    <moveit_ros_perception plugin="${prefix}/jsk_pcl_nodelets.xml"/>
   </export>
 </package>

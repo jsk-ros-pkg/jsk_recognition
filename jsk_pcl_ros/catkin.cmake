@@ -29,7 +29,7 @@ find_package(catkin REQUIRED COMPONENTS
   eigen_conversions tf_conversions tf2_ros tf
   image_transport nodelet cv_bridge
   ${ML_CLASSIFIERS} sklearn jsk_topic_tools
-  laser_assembler)
+  laser_assembler moveit_ros_perception)
 # only run in hydro
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
   find_package(PCL REQUIRED)
@@ -250,6 +250,7 @@ add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
   src/pcl_conversion_util.cpp src/pcl_util.cpp
   src/diagnostic_nodelet.cpp
+  src/pointcloud_moveit_filter.cpp
   src/connection_based_nodelet.cpp)
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)

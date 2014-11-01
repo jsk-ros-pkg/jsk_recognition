@@ -30,12 +30,14 @@
   <depend package="cv_bridge" />
   <depend package="jsk_topic_tools" />
   <depend package="roscpp_tutorials" />
+  <depend package="moveit_ros_perception" />
   <rosdep name="boost" />
   <rosdep name="tbb" />
 
   <export>
     <nodelet plugin="${prefix}/jsk_pcl_nodelets.xml" />
     <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ljsk_pcl_ros" />
+    <moveit_ros_perception plugin="${prefix}/jsk_pcl_nodelets.xml"/>
   </export>
 
   <export>

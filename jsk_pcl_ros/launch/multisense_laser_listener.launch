@@ -1,0 +1,13 @@
+<launch>
+  <node pkg="jsk_pcl_ros" type="tilt_laser_listener"
+        name="tilt_laser_listener"
+        output="screen">
+    <remap from="~input" to="/multisense/joint_states" />
+    <rosparam>
+      laser_type: infinite_spindle_half
+      joint_name: motor_joint
+      use_laser_assembler: true
+    </rosparam>
+    <remap from="~assemble_scans2" to="/assemble_scans2" />
+  </node>
+</launch>

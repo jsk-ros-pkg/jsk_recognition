@@ -41,6 +41,8 @@
 #include <dynamic_reconfigure/server.h>
 #include <jsk_pcl_ros/ICPRegistrationConfig.h>
 #include <jsk_pcl_ros/BoundingBox.h>
+#include <jsk_pcl_ros/ICPAlignWithBox.h>
+#include <jsk_pcl_ros/ICPResult.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
@@ -67,10 +69,15 @@ namespace jsk_pcl_ros
     virtual void alignWithBox(
       const sensor_msgs::PointCloud2::ConstPtr& msg,
       const BoundingBox::ConstPtr& box_msg);
+    virtual bool alignWithBoxService(
+      jsk_pcl_ros::ICPAlignWithBox::Request& req, 
+      jsk_pcl_ros::ICPAlignWithBox::Response& res);
     virtual void referenceCallback(
       const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void referenceArrayCallback(
       const PointsArray::ConstPtr& msg);
+    virtual void referenceAddCallback(
+      const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void configCallback (Config &config, uint32_t level);
     virtual void publishDebugCloud(
       ros::Publisher& pub,
@@ -81,7 +88,7 @@ namespace jsk_pcl_ros
       const Eigen::Affine3f& offset,
       pcl::PointCloud<PointT>::Ptr& output_cloud,
       Eigen::Affine3d& output_transform);
-    virtual double alignPointcloudWithReferences(
+    virtual jsk_pcl_ros::ICPResult alignPointcloudWithReferences(
       pcl::PointCloud<PointT>::Ptr& cloud,
       const Eigen::Affine3f& offset,
       const std_msgs::Header& header);
@@ -92,7 +99,6 @@ namespace jsk_pcl_ros
       Eigen::Affine3f& offset_result,
       pcl::PointCloud<PointT>::Ptr transformed_cloud,
       Eigen::Affine3d& transform_result);
-
     virtual void subscribe();
     virtual void unsubscribe();
     ////////////////////////////////////////////////////////
@@ -100,6 +106,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     ros::Subscriber sub_;
     ros::Subscriber sub_reference_;
+    ros::Subscriber sub_reference_add;
     ros::Subscriber sub_reference_array_;
     ros::Publisher pub_result_pose_;
     ros::Publisher pub_result_cloud_;
@@ -107,6 +114,9 @@ namespace jsk_pcl_ros
       pub_debug_target_cloud_,
       pub_debug_result_cloud_,
       pub_debug_flipped_cloud_;
+    ros::Publisher pub_icp_result;
+
+    ros::ServiceServer srv_detect;
     bool align_box_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;

@@ -28,7 +28,8 @@ find_package(catkin REQUIRED COMPONENTS
   ${PCL_MSGS} sensor_msgs geometry_msgs
   eigen_conversions tf_conversions tf2_ros tf
   image_transport nodelet cv_bridge
-  ${ML_CLASSIFIERS} sklearn jsk_topic_tools)
+  ${ML_CLASSIFIERS} sklearn jsk_topic_tools
+  laser_assembler moveit_ros_perception)
 # only run in hydro
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
   find_package(PCL REQUIRED)
@@ -39,6 +40,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 
 add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg SnapItRequest.msg PolygonArray.msg
+  TimeRange.msg
   DepthCalibrationParameter.msg
   ModelCoefficientsArray.msg
   SlicedPointCloud.msg
@@ -52,7 +54,8 @@ add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg
   SparseOccupancyGrid.msg
   SparseOccupancyGridArray.msg
   DepthErrorResult.msg
-  ParallelEdge.msg ParallelEdgeArray.msg)
+  ParallelEdge.msg ParallelEdgeArray.msg
+  ICPResult.msg)
 
 add_service_files(FILES SwitchTopic.srv
   SetDepthCalibrationParameter.srv
@@ -65,7 +68,8 @@ add_service_files(FILES SwitchTopic.srv
   SetPointCloud2.srv
   CallSnapIt.srv CallPolygon.srv
   EnvironmentLock.srv
-  PolygonOnEnvironment.srv)
+  PolygonOnEnvironment.srv
+  ICPAlignWithBox.srv)
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
@@ -239,11 +243,14 @@ jsk_pcl_nodelet(src/line_segment_collector_nodelet.cpp
   "jsk_pcl/LineSegmentCollector" "line_segment_collector")
 jsk_pcl_nodelet(src/depth_calibration_nodelet.cpp
   "jsk_pcl/DepthCalibration" "depth_calibration")
+jsk_pcl_nodelet(src/tilt_laser_listener_nodelet.cpp
+  "jsk_pcl/TiltLaserListener" "tilt_laser_listener")
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
   src/pcl_conversion_util.cpp src/pcl_util.cpp
   src/diagnostic_nodelet.cpp
+  src/pointcloud_moveit_filter.cpp
   src/connection_based_nodelet.cpp)
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)

@@ -59,7 +59,8 @@ namespace jsk_pcl_ros
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud):
     header(input_header),
     indices_(indices), coefficients_(coefficients),
-    points_(new pcl::PointCloud<pcl::PointXYZ>)
+    points_(new pcl::PointCloud<pcl::PointXYZ>),
+    raw_points_(new pcl::PointCloud<pcl::PointXYZ>)
   {
     pcl::ProjectInliers<pcl::PointXYZ> proj;
     proj.setInputCloud(cloud);
@@ -67,19 +68,33 @@ namespace jsk_pcl_ros
     proj.setModelType(pcl::SACMODEL_LINE);
     proj.setModelCoefficients(coefficients);
     proj.filter(*points_);
+    pcl::ExtractIndices<pcl::PointXYZ> ex;
+    ex.setInputCloud(cloud);
+    ex.setIndices(indices);
+    ex.filter(*raw_points_);
   }
 
   LineSegment::~LineSegment()
   {
   }
 
-  Segment::Ptr LineSegment::toSegment()
+  Line::Ptr LineSegment::toSegment()
   {
     // we suppose the first and the last point should be the end points
-    return Segment::Ptr(
-      new Segment(
-        points_->points[0].getVector3fMap(),
-        points_->points[points_->points.size() - 1].getVector3fMap()));
+    // return Segment::Ptr(
+    //   new Segment(
+    //     points_->points[0].getVector3fMap(),
+    //     points_->points[points_->points.size() - 1].getVector3fMap()));
+    Eigen::Vector3f direction;
+    direction[0] = coefficients_->values[3];
+    direction[1] = coefficients_->values[4];
+    direction[2] = coefficients_->values[5];
+    return Line::Ptr(new Line(direction,
+                              points_->points[0].getVector3fMap()));
+    // return Segment::Ptr(
+    //   new Segment(
+    //     points_->points[0].getVector3fMap(),
+    //     points_->points[points_->points.size() - 1].getVector3fMap()));
   }
   
   void LineSegment::addMarkerLine(

@@ -38,6 +38,7 @@
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/filters/extract_indices.h>
+#include "jsk_pcl_ros/pcl_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -49,13 +50,14 @@ namespace jsk_pcl_ros
       boost::bind (&MultiPlaneSACSegmentation::configCallback, this, _1, _2);
     srv_->setCallback (f);
     pnh_->param("use_normal", use_normal_, false);
+    pnh_->param("use_clusters", use_clusters_, false);
     ////////////////////////////////////////////////////////
     // publishers
     ////////////////////////////////////////////////////////
-    pub_inliers_ = pnh_->advertise<ClusterPointIndices>("output_indices", 1);
+    pub_inliers_ = advertise<ClusterPointIndices>(*pnh_, "output_indices", 1);
     pub_coefficients_
-      = pnh_->advertise<ModelCoefficientsArray>("output_coefficients", 1);
-    pub_polygons_ = pnh_->advertise<PolygonArray>("output_polygons", 1);
+      = advertise<ModelCoefficientsArray>(*pnh_, "output_coefficients", 1);
+    pub_polygons_ = advertise<PolygonArray>(*pnh_, "output_polygons", 1);
   }
 
   void MultiPlaneSACSegmentation::subscribe()
@@ -63,16 +65,27 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // subscriber
     ////////////////////////////////////////////////////////
-    if (!use_normal_) {
-      sub_ = pnh_->subscribe("input", 1, &MultiPlaneSACSegmentation::segment, this);
-    }
-    else {
+    if (use_normal_) {
       sub_input_.subscribe(*pnh_, "input", 1);
       sub_normal_.subscribe(*pnh_, "input_normal", 1);
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
       sync_->connectInput(sub_input_, sub_normal_);
       sync_->registerCallback(boost::bind(&MultiPlaneSACSegmentation::segment,
                                           this, _1, _2));
+    }
+    else if (use_clusters_) {
+      NODELET_INFO("use clusters");
+      sub_input_.subscribe(*pnh_, "input", 1);
+      sub_clusters_.subscribe(*pnh_, "input_clusters", 1);
+      sync_cluster_
+        = boost::make_shared<message_filters::Synchronizer<SyncClusterPolicy> >(100);
+      sync_cluster_->connectInput(sub_input_, sub_clusters_);
+      sync_cluster_->registerCallback(
+        boost::bind(&MultiPlaneSACSegmentation::segmentWithClusters,
+                    this, _1, _2));
+    }
+    else {
+      sub_ = pnh_->subscribe("input", 1, &MultiPlaneSACSegmentation::segment, this);
     }
   }
 
@@ -81,12 +94,16 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // subscriber
     ////////////////////////////////////////////////////////
-    if (!use_normal_) {
-      sub_.shutdown();
-    }
-    else {
+    if (use_normal_) {
       sub_input_.unsubscribe();
       sub_normal_.unsubscribe();
+    }
+    else if (use_clusters_) {
+      sub_input_.unsubscribe();
+      sub_clusters_.unsubscribe();
+    }
+    else {
+      sub_.shutdown();
     }
   }
 
@@ -172,11 +189,73 @@ namespace jsk_pcl_ros
       rest_normal = next_rest_normal;
     }
   }
+
+  void MultiPlaneSACSegmentation::segmentWithClusters(
+    const sensor_msgs::PointCloud2::ConstPtr& msg,
+    const ClusterPointIndices::ConstPtr& clusters)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    ROS_INFO("segment");
+    pcl::PointCloud<PointT>::Ptr input (new pcl::PointCloud<PointT>);
+    pcl::fromROSMsg(*msg, *input);
+    std::vector<pcl::PointIndices::Ptr> cluster_indices
+      = pcl_conversions::convertToPCLPointIndices(clusters->cluster_indices);
+    pcl::ExtractIndices<PointT> ex;
+    ex.setInputCloud(input);
+    ex.setKeepOrganized(true);
+    std::vector<pcl::PointIndices::Ptr> all_inliers;
+    std::vector<pcl::ModelCoefficients::Ptr> all_coefficients;
+    std::vector<ConvexPolygon::Ptr> all_convexes;
+    for (size_t i = 0; i < cluster_indices.size(); i++) {
+      pcl::PointIndices::Ptr indices = cluster_indices[i];
+      pcl::PointCloud<PointT>::Ptr cluster_cloud (new pcl::PointCloud<PointT>);
+      pcl::PointCloud<pcl::Normal>::Ptr normal (new pcl::PointCloud<pcl::Normal>);
+      ex.setIndices(indices);
+      
+      ex.filter(*cluster_cloud);
+      std::vector<pcl::PointIndices::Ptr> inliers;
+      std::vector<pcl::ModelCoefficients::Ptr> coefficients;
+      std::vector<ConvexPolygon::Ptr> convexes;
+      applyRecursiveRANSAC(cluster_cloud, normal, inliers, coefficients, convexes);
+      appendVector(all_inliers, inliers);
+      appendVector(all_coefficients, coefficients);
+      appendVector(all_convexes, convexes);
+    }
+    publishResult(msg->header, all_inliers, all_coefficients, all_convexes);
+  }
+
+  void MultiPlaneSACSegmentation::publishResult(
+    const std_msgs::Header& header,
+    const std::vector<pcl::PointIndices::Ptr>& inliers,
+    const std::vector<pcl::ModelCoefficients::Ptr>& coefficients,
+    const std::vector<ConvexPolygon::Ptr>& convexes)
+  {
+    jsk_pcl_ros::ClusterPointIndices ros_indices_output;
+    jsk_pcl_ros::ModelCoefficientsArray ros_coefficients_output;
+    jsk_pcl_ros::PolygonArray ros_polygon_output;
+    ros_indices_output.header = header;
+    ros_coefficients_output.header = header;
+    ros_polygon_output.header = header;
+    ros_indices_output.cluster_indices
+      = pcl_conversions::convertToROSPointIndices(inliers, header);
+    ros_coefficients_output.coefficients
+      = pcl_conversions::convertToROSModelCoefficients(coefficients, header);
+    pub_inliers_.publish(ros_indices_output);
+    pub_coefficients_.publish(ros_coefficients_output);
+    for (size_t i = 0; i < convexes.size(); i++) {
+      geometry_msgs::PolygonStamped polygon;
+      polygon.header = header;
+      polygon.polygon = convexes[i]->toROSMsg();
+      ros_polygon_output.polygons.push_back(polygon);
+    }
+    pub_polygons_.publish(ros_polygon_output);
+  }
+  
   void MultiPlaneSACSegmentation::segment(
     const sensor_msgs::PointCloud2::ConstPtr& msg,
     const sensor_msgs::PointCloud2::ConstPtr& msg_normal)
   {
-    ROS_INFO("segment");
+    
     boost::mutex::scoped_lock lock(mutex_);
     pcl::PointCloud<PointT>::Ptr input (new pcl::PointCloud<PointT>);
     pcl::PointCloud<pcl::Normal>::Ptr normal (new pcl::PointCloud<pcl::Normal>);
@@ -186,26 +265,7 @@ namespace jsk_pcl_ros
     std::vector<pcl::ModelCoefficients::Ptr> coefficients;
     std::vector<ConvexPolygon::Ptr> convexes;
     applyRecursiveRANSAC(input, normal, inliers, coefficients, convexes);
-
-    jsk_pcl_ros::ClusterPointIndices ros_indices_output;
-    jsk_pcl_ros::ModelCoefficientsArray ros_coefficients_output;
-    jsk_pcl_ros::PolygonArray ros_polygon_output;
-    ros_indices_output.header = msg->header;
-    ros_coefficients_output.header = msg->header;
-    ros_polygon_output.header = msg->header;
-    ros_indices_output.cluster_indices
-      = pcl_conversions::convertToROSPointIndices(inliers, msg->header);
-    ros_coefficients_output.coefficients
-      = pcl_conversions::convertToROSModelCoefficients(coefficients, msg->header);
-    pub_inliers_.publish(ros_indices_output);
-    pub_coefficients_.publish(ros_coefficients_output);
-    for (size_t i = 0; i < convexes.size(); i++) {
-      geometry_msgs::PolygonStamped polygon;
-      polygon.header = msg->header;
-      polygon.polygon = convexes[i]->toROSMsg();
-      ros_polygon_output.polygons.push_back(polygon);
-    }
-    pub_polygons_.publish(ros_polygon_output);
+    publishResult(msg->header, inliers, coefficients, convexes);
   }
   
   void MultiPlaneSACSegmentation::segment(

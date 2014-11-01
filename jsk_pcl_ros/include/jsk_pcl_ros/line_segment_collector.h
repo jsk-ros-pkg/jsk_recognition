@@ -53,6 +53,7 @@
 #include <dynamic_reconfigure/server.h>
 #include "jsk_pcl_ros/geo_util.h"
 #include <jsk_pcl_ros/PolygonArray.h>
+#include <jsk_pcl_ros/TimeRange.h>
 
 namespace jsk_pcl_ros
 {
@@ -70,10 +71,14 @@ namespace jsk_pcl_ros
     virtual void addLineSegmentEWMA(LineSegment::Ptr segment, const double tau);
     virtual Eigen::Vector3f getDelta() { return delta_; }
     virtual pcl::PointCloud<pcl::PointXYZ>::Ptr getPoints();
+    virtual pcl::PointCloud<pcl::PointXYZ>::Ptr getRawPoints();
+    virtual void removeBefore(const ros::Time& stamp);
+    virtual bool isEmpty();
   protected:
     Eigen::Vector3f delta_;
     std::vector<LineSegment::Ptr> segments_;
     pcl::PointCloud<pcl::PointXYZ>::Ptr points_;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr raw_points_;
   private:
     
   };
@@ -118,15 +123,6 @@ namespace jsk_pcl_ros
     virtual void onInit();
     virtual void collectFromBuffers(const std_msgs::Header& header,
                                     std::vector<LineSegment::Ptr> new_segments);
-    virtual void estimatePlanes(
-      const std_msgs::Header& header,
-      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
-      std::vector<pcl::PointIndices::Ptr> initial_indices);
-    virtual void estimateMultiPlanesFromPointCluoud(
-      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
-      pcl::PointIndices::Ptr initial_indices,
-      std::vector<pcl::ModelCoefficients::Ptr>& coefficients_list,
-      std::vector<pcl::PointIndices::Ptr>& indices_list);
     virtual void collect(
       const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
       const ClusterPointIndices::ConstPtr& indices_msg,
@@ -135,8 +131,8 @@ namespace jsk_pcl_ros
     virtual void unsubscribe();
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
-    virtual void jointStateCallback(
-      const sensor_msgs::JointState::ConstPtr& joint_state_msg);
+    virtual void triggerCallback(
+      const TimeRange::ConstPtr& trigger);
     virtual void cleanupBuffers(
       const ros::Time& stamp);
     virtual void publishBeforePlaneSegmentation(
@@ -159,7 +155,6 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<ClusterPointIndices> sub_indices_;
     message_filters::Subscriber<ModelCoefficientsArray> sub_coefficients_;
-    ros::Subscriber sub_joint_state_;
     ros::Publisher pub_point_cloud_;
     ros::Publisher pub_inliers_;
     ros::Publisher pub_coefficients_;
@@ -167,17 +162,13 @@ namespace jsk_pcl_ros
     ros::Publisher debug_pub_inliers_before_plane_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     jsk_topic_tools::TimeAccumulator connect_ac_;
+    ros::Subscriber sub_trigger_;
     
     ////////////////////////////////////////////////////////
     // parameters to collect pointclouds
     ////////////////////////////////////////////////////////
     std::string fixed_frame_id_;
     RotateType rotate_type_;
-    std::string rotate_joint_name_;
-    bool initialize_joint_angle_;
-    double initial_joint_angle_;
-    double latest_joint_angle_;
-    double prev_joint_velocity_;
     TimeStampedVector<sensor_msgs::PointCloud2::ConstPtr> pointclouds_buffer_;
     TimeStampedVector<ClusterPointIndices::ConstPtr> indices_buffer_;
     TimeStampedVector<ModelCoefficientsArray::ConstPtr> coefficients_buffer_;
@@ -185,13 +176,11 @@ namespace jsk_pcl_ros
     std::vector<LineSegmentCluster::Ptr> segment_clusters_;
     double segment_connect_normal_threshold_;
     double ewma_tau_;
-    
+    TimeRange::ConstPtr time_range_;
     ////////////////////////////////////////////////////////
     // plane estimation
     ////////////////////////////////////////////////////////
     double outlier_threshold_;
-    int max_iterations_;
-    int min_indices_;
     
   private:
     

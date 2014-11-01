@@ -1,4 +1,8 @@
-<library path="lib/libjsk_pcl_ros">
+<library path="libjsk_pcl_ros">
+  <class name="jsk_pcl/TiltLaserListener" type="jsk_pcl_ros::TiltLaserListener"
+         base_class_type="nodelet::Nodelet">
+    listen joint state and publish TimeRange to assemble pointcloud
+  </class>
   <class name="jsk_pcl/DepthCalibration" type="jsk_pcl_ros::DepthCalibration"
          base_class_type="nodelet::Nodelet">
     <description>
@@ -347,6 +351,12 @@
          base_class_type="nodelet::Nodelet">
     <description>
       jsk_pcl_ros::OrganizePointCloud
+    </description>
+  </class>
+  <class name="jsk_pcl/PointCloudMoveitFilter"
+         type="jsk_pcl_ros::PointCloudMoveitFilter"
+         base_class_type="occupancy_map_monitor::OccupancyMapUpdater">
+    <description>
     </description>
   </class>
 </library>

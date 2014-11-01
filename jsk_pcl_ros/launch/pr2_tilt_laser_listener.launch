@@ -1,0 +1,13 @@
+<launch>
+  <node pkg="jsk_pcl_ros" type="tilt_laser_listener"
+        name="tilt_laser_listener"
+        output="screen">
+    <remap from="~input" to="/joint_states" />
+    <rosparam>
+      laser_type: tilt_half_down
+      joint_name: laser_tilt_mount_joint
+      use_laser_assembler: true
+    </rosparam>
+    <remap from="~assemble_scans2" to="/assemble_scans2" />
+  </node>
+</launch>

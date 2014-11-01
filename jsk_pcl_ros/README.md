@@ -338,7 +338,14 @@ This nodelet is almost same to jsk\_pcl/ClusterPointIndicesDecomposer, however i
 ### jsk\_pcl/CentroidPublisher
 #### What Is This
 
-This nodelet will subscribe the sensor_msgs::PointCloud2, calculate its centroid  and boardcast the tf whose parent is cloud headers frame_id and whose child is the new centroid frame_id.
+This nodelet will subscribe the sensor\_msgs::PointCloud2, calculate its centroid  and boardcast the tf whose parent is cloud headers frame\_id and whose child is the new centroid frame_id.
+
+#### Subscribing Topics
+* `~input` (`sensor_msgs/PointCloud2`): input pointcloud.
+#### Publishing Topics
+* `/tf`: Publish tf of the centroid of the input pointcloud.
+#### Parameters
+* `~frame` (String, required): frame_id of centroid tf
 
 #### Sample
 Plug the depth sensor which can be launched by openni.launch and run the below command.

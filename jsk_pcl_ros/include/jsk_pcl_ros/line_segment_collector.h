@@ -71,12 +71,14 @@ namespace jsk_pcl_ros
     virtual void addLineSegmentEWMA(LineSegment::Ptr segment, const double tau);
     virtual Eigen::Vector3f getDelta() { return delta_; }
     virtual pcl::PointCloud<pcl::PointXYZ>::Ptr getPoints();
+    virtual pcl::PointCloud<pcl::PointXYZ>::Ptr getRawPoints();
     virtual void removeBefore(const ros::Time& stamp);
     virtual bool isEmpty();
   protected:
     Eigen::Vector3f delta_;
     std::vector<LineSegment::Ptr> segments_;
     pcl::PointCloud<pcl::PointXYZ>::Ptr points_;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr raw_points_;
   private:
     
   };
@@ -121,15 +123,6 @@ namespace jsk_pcl_ros
     virtual void onInit();
     virtual void collectFromBuffers(const std_msgs::Header& header,
                                     std::vector<LineSegment::Ptr> new_segments);
-    virtual void estimatePlanes(
-      const std_msgs::Header& header,
-      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
-      std::vector<pcl::PointIndices::Ptr> initial_indices);
-    virtual void estimateMultiPlanesFromPointCluoud(
-      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
-      pcl::PointIndices::Ptr initial_indices,
-      std::vector<pcl::ModelCoefficients::Ptr>& coefficients_list,
-      std::vector<pcl::PointIndices::Ptr>& indices_list);
     virtual void collect(
       const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
       const ClusterPointIndices::ConstPtr& indices_msg,
@@ -188,8 +181,6 @@ namespace jsk_pcl_ros
     // plane estimation
     ////////////////////////////////////////////////////////
     double outlier_threshold_;
-    int max_iterations_;
-    int min_indices_;
     
   private:
     

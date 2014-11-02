@@ -354,6 +354,23 @@ Plug the depth sensor which can be launched by openni.launch and run the below c
 roslaunch jsk_pcl_ros centroid_publisher.launch
 ```
 
+### jsk\_pcl/OrganizedMultiPlaneSegmentation
+#### What Is This
+This nodelet segments multiple planes from **organized** pointcloud.
+It estimates planes based on [connected-component analysis](http://en.wikipedia.org/wiki/Connected-component_labeling)
+using `pcl::OrganizedMultiPlaneSegmentation`.
+
+![overview](images/graph/organized_multi_plane_segmentation_overview.png) shows the overview of the pipeline.
+
+1. Estimate normal using integral image.
+2. Conduct connected component analysis to estimate planar regions.
+3. Connect neighbor planes if the normal directions and the borders of the planes are near enough.
+4. Refine plane coefficients of connected planes based on RANSAC. If the areas of the planes after refinement are too small, they will be removed.
+
+These process is implemented in one nodelet in order not to convert pointcloud between
+PCL and ROS.
+
+
 ### jsk\_pcl/VoxelGridDownsampleManager
 ### jsk\_pcl/VoxelGridDownsampleDecoder
 ### jsk\_pcl/Snapit

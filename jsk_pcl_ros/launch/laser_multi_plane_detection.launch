@@ -12,7 +12,7 @@
         - name: range
           type: LaserScanRangeFilter
           params:
-            lower_threshold: 0.1
+            lower_threshold: 0.2
             upper_threshold: .inf
         - name: shadows
           type: ScanShadowsFilter
@@ -21,27 +21,10 @@
             max_angle: 170
             neighbors: 5
             window: 1
-        - name: dark_shadows
-          type: LaserScanIntensityFilter
-          params: 
-            lower_threshold: 100
-            upper_threshold: 10000
-            disp_histogram: 0
       </rosparam>
     </node>
     <node pkg="nodelet" type="nodelet" name="tilt_laser_manager"
           args="manager" output="screen" />
-    <node name="xfilter" pkg="nodelet" type="nodelet"
-          args="load pcl/PassThrough tilt_laser_manager"
-          output="screen" clear_params="true">
-      <remap from="~input" to="cloud_filtered" />
-      <rosparam>
-        filter_field_name: x
-        filter_limit_min: 0.3
-        filter_limit_max: 5.0
-      </rosparam>
-    </node>
-
     <node name="transform_cloud" pkg="nodelet" type="nodelet"
           args="load jsk_pcl/TfTransformCloud tilt_laser_manager">
       <remap from="~input" to="cloud_filtered" />
@@ -122,10 +105,41 @@
           args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis tilt_laser_manager"
           output="screen">
       <remap from="~input" to="line_segment_collector/output/cloud" />
-      <remap from="~target" to="line_segment_collector/output/inliers" />
+      <remap from="~target" to="multi_plane_detector/output_indices" />
       <rosparam>
         publish_clouds: false
         publish_tf: false
+      </rosparam>
+    </node>
+    <node name="line_segment_clustering"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/EuclideanClustering tilt_laser_manager"
+          output="screen">
+      <remap from="~input" to="line_segment_collector/output/cloud" />
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="line_segment_clustering_decomposer"
+          args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis tilt_laser_manager"
+          output="screen">
+      <remap from="~input" to="line_segment_collector/output/cloudq" />
+      <remap from="~target" to="line_segment_clustering/output" />
+      <rosparam>
+        publish_clouds: false
+        publish_tf: false
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="multi_plane_detector"
+          args="load jsk_pcl/MultiPlaneSACSegmentation tilt_laser_manager"
+          output="screen">
+      <remap from="~input" to="line_segment_collector/output/cloud"/>
+      <!-- <remap from="~input_clusters" to="line_segment_collector/debug/connect_segments/inliers" /> -->
+      <remap from="~input_clusters" to="line_segment_clustering/output" />
+      <rosparam>
+        use_normal: false
+        use_clusters: true
+        min_inliers: 40
+        min_points: 50
       </rosparam>
     </node>
   </group>

@@ -93,7 +93,7 @@ namespace jsk_pcl_ros
       for (iterator it = std::vector<T>::begin();
            it != std::vector<T>::end();) {
         if (((*it)->header.stamp - stamp) < ros::Duration(0.0)) {
-          it = erase(it);
+          it = this->erase(it);
         }
         else {
           ++it;

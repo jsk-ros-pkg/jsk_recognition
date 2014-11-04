@@ -3,7 +3,7 @@ project(jsk_perception)
 
 find_package(catkin REQUIRED COMPONENTS
   mk message_generation imagesift std_msgs sensor_msgs geometry_msgs cv_bridge
-  image_geometry image_transport driver_base dynamic_reconfigure eigen
+  image_geometry image_transport driver_base dynamic_reconfigure cmake_modules
   roscpp nodelet rostest tf rospack
   jsk_topic_tools)
 find_package(OpenCV REQUIRED)

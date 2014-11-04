@@ -39,6 +39,7 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/filters/extract_indices.h>
 #include "jsk_pcl_ros/pcl_util.h"
+#include <eigen_conversions/eigen_msg.h>
 
 namespace jsk_pcl_ros
 {
@@ -51,6 +52,16 @@ namespace jsk_pcl_ros
     srv_->setCallback (f);
     pnh_->param("use_normal", use_normal_, false);
     pnh_->param("use_clusters", use_clusters_, false);
+    pnh_->param("use_imu_parallel", use_imu_parallel_, false);
+    pnh_->param("use_imu_perpendicular", use_imu_perpendicular_, false);
+    
+    if (use_imu_perpendicular_ && use_imu_parallel_) {
+      NODELET_ERROR("Cannot use ~use_imu_perpendicular and ~use_imu_parallel at the same time");
+      return;
+    }
+    if (use_imu_perpendicular_ || use_imu_parallel_) {
+      tf_listener_.reset(new tf::TransformListener());
+    }
     ////////////////////////////////////////////////////////
     // publishers
     ////////////////////////////////////////////////////////
@@ -65,7 +76,27 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // subscriber
     ////////////////////////////////////////////////////////
-    if (use_normal_) {
+    if (use_imu_perpendicular_ || use_imu_parallel_) {
+      sub_input_.subscribe(*pnh_, "input", 1);
+      sub_imu_.subscribe(*pnh_, "input_imu", 1);
+      if (use_normal_) {
+        sub_normal_.subscribe(*pnh_, "input_normal", 1);
+        sync_normal_imu_ = boost::make_shared<NormalImuSynchronizer>(100);
+        sync_normal_imu_->connectInput(sub_input_, sub_normal_, sub_imu_);
+        sync_normal_imu_->registerCallback(
+          boost::bind(
+            &MultiPlaneSACSegmentation::segmentWithImu,
+            this, _1, _2, _3));
+      }
+      else {
+        sync_imu_ = boost::make_shared<message_filters::Synchronizer<SyncImuPolicy> >(100);
+        sync_imu_->connectInput(sub_input_, sub_imu_);
+        sync_imu_->registerCallback(boost::bind(
+                                      &MultiPlaneSACSegmentation::segmentWithImu,
+                                      this, _1, _2));
+      }
+    }
+    else if (use_normal_) {
       sub_input_.subscribe(*pnh_, "input", 1);
       sub_normal_.subscribe(*pnh_, "input_normal", 1);
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
@@ -114,11 +145,15 @@ namespace jsk_pcl_ros
     min_inliers_ = config.min_inliers;
     min_points_ = config.min_points;
     max_iterations_ = config.max_iterations;
+    eps_angle_ = config.eps_angle;
+    normal_distance_weight_ = config.normal_distance_weight;
+    min_trial_ = config.min_trial;
   }
   
   void MultiPlaneSACSegmentation::applyRecursiveRANSAC(
       const pcl::PointCloud<PointT>::Ptr& input,
       const pcl::PointCloud<pcl::Normal>::Ptr& normal,
+      const Eigen::Vector3f& imu_vector,
       std::vector<pcl::PointIndices::Ptr>& output_inliers,
       std::vector<pcl::ModelCoefficients::Ptr>& output_coefficients,
       std::vector<ConvexPolygon::Ptr>& output_polygons)
@@ -136,33 +171,65 @@ namespace jsk_pcl_ros
       if (!use_normal_) {
         pcl::SACSegmentation<PointT> seg;
         seg.setOptimizeCoefficients (true);
-        seg.setModelType (pcl::SACMODEL_PLANE);
+        seg.setRadiusLimits(0.3, std::numeric_limits<double>::max ());
         seg.setMethodType (pcl::SAC_RANSAC);
         seg.setDistanceThreshold (outlier_threshold_);
         seg.setInputCloud(rest_cloud);
         seg.setMaxIterations (max_iterations_);
+        if (use_imu_parallel_) {
+          seg.setModelType(pcl::SACMODEL_PARALLEL_PLANE);
+          seg.setAxis(imu_vector);
+          seg.setEpsAngle(eps_angle_);
+        }
+        else if (use_imu_perpendicular_) {
+          seg.setModelType(pcl::SACMODEL_PERPENDICULAR_PLANE);
+          seg.setAxis(imu_vector);
+          seg.setEpsAngle(eps_angle_);
+        }
+        else {
+          seg.setModelType (pcl::SACMODEL_PLANE);
+        }
         seg.segment (*inliers, *coefficients);
       }
       else {
         pcl::SACSegmentationFromNormals<PointT, pcl::Normal> seg;
         seg.setOptimizeCoefficients (true);
-        seg.setModelType (pcl::SACMODEL_NORMAL_PLANE);
+        
         seg.setMethodType (pcl::SAC_RANSAC);
         seg.setDistanceThreshold (outlier_threshold_);
+        seg.setNormalDistanceWeight(normal_distance_weight_);
         seg.setInputCloud(rest_cloud);
         seg.setInputNormals(rest_normal);
         seg.setMaxIterations (max_iterations_);
+        if (use_imu_parallel_) {
+          seg.setModelType (pcl::SACMODEL_NORMAL_PARALLEL_PLANE);
+          seg.setAxis(imu_vector);
+          seg.setEpsAngle(eps_angle_);
+        }
+        else if (use_imu_perpendicular_) {
+          seg.setModelType (pcl::SACMODEL_NORMAL_PLANE);
+          seg.setAxis(imu_vector);
+          seg.setEpsAngle(eps_angle_);
+        }
+        else {
+          seg.setModelType (pcl::SACMODEL_NORMAL_PLANE);  
+        }
         seg.segment (*inliers, *coefficients);
       }
       NODELET_INFO("inliers: %lu", inliers->indices.size());
-      if (inliers->indices.size() < min_inliers_) {
-        return;
+      if (inliers->indices.size() >= min_inliers_) {
+        output_inliers.push_back(inliers);
+        output_coefficients.push_back(coefficients);
+        ConvexPolygon::Ptr convex = convexFromCoefficientsAndInliers<PointT>(
+          input, inliers, coefficients);
+        output_polygons.push_back(convex);
       }
-      output_inliers.push_back(inliers);
-      output_coefficients.push_back(coefficients);
-      ConvexPolygon::Ptr convex = convexFromCoefficientsAndInliers<PointT>(
-        input, inliers, coefficients);
-      output_polygons.push_back(convex);
+      else {
+        if (min_trial_ <= counter) {
+          return;
+        }
+      }
+      
       // prepare for next loop
       pcl::PointCloud<PointT>::Ptr next_rest_cloud
         (new pcl::PointCloud<PointT>);
@@ -183,6 +250,7 @@ namespace jsk_pcl_ros
         ex_normal.filter(*next_rest_normal);
       }
       if (next_rest_cloud->points.size() < min_points_) {
+        NODELET_INFO("no more enough points are left");
         return;
       }
       rest_cloud = next_rest_cloud;
@@ -195,7 +263,6 @@ namespace jsk_pcl_ros
     const ClusterPointIndices::ConstPtr& clusters)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    ROS_INFO("segment");
     pcl::PointCloud<PointT>::Ptr input (new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(*msg, *input);
     std::vector<pcl::PointIndices::Ptr> cluster_indices
@@ -216,7 +283,8 @@ namespace jsk_pcl_ros
       std::vector<pcl::PointIndices::Ptr> inliers;
       std::vector<pcl::ModelCoefficients::Ptr> coefficients;
       std::vector<ConvexPolygon::Ptr> convexes;
-      applyRecursiveRANSAC(cluster_cloud, normal, inliers, coefficients, convexes);
+      Eigen::Vector3f dummy_imu_vector;
+      applyRecursiveRANSAC(cluster_cloud, normal, dummy_imu_vector, inliers, coefficients, convexes);
       appendVector(all_inliers, inliers);
       appendVector(all_coefficients, coefficients);
       appendVector(all_convexes, convexes);
@@ -250,12 +318,66 @@ namespace jsk_pcl_ros
     }
     pub_polygons_.publish(ros_polygon_output);
   }
+
+  void MultiPlaneSACSegmentation::segmentWithImu(
+    const sensor_msgs::PointCloud2::ConstPtr& msg,
+    const sensor_msgs::Imu::ConstPtr& imu_msg)
+  {
+    segmentWithImu(msg, sensor_msgs::PointCloud2::ConstPtr(), imu_msg);
+  }
+  
+  void MultiPlaneSACSegmentation::segmentWithImu(
+    const sensor_msgs::PointCloud2::ConstPtr& msg,
+    const sensor_msgs::PointCloud2::ConstPtr& normal_msg,
+    const sensor_msgs::Imu::ConstPtr& imu_msg)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    pcl::PointCloud<PointT>::Ptr input (new pcl::PointCloud<PointT>);
+    pcl::PointCloud<pcl::Normal>::Ptr
+      normal (new pcl::PointCloud<pcl::Normal>);
+    pcl::fromROSMsg(*msg, *input);
+    if (normal_msg) {
+      pcl::fromROSMsg(*normal_msg, *normal);
+    }
+    geometry_msgs::Vector3Stamped stamped_imu, transformed_stamped_imu;
+    stamped_imu.header = imu_msg->header;
+    stamped_imu.vector = imu_msg->linear_acceleration;
+    try {
+      tf_listener_->waitForTransform(
+        msg->header.frame_id, imu_msg->header.frame_id, imu_msg->header.stamp,
+        ros::Duration(0.1));
+      tf_listener_->transformVector(
+        msg->header.frame_id, stamped_imu, transformed_stamped_imu); 
+      Eigen::Vector3d imu_vectord;
+      Eigen::Vector3f imu_vector;
+      tf::vectorMsgToEigen(transformed_stamped_imu.vector, imu_vectord);
+      pointFromVectorToVector<Eigen::Vector3d, Eigen::Vector3f>(
+        imu_vectord, imu_vector);
+      imu_vector = - imu_vector;
+      
+      std::vector<pcl::PointIndices::Ptr> inliers;
+      std::vector<pcl::ModelCoefficients::Ptr> coefficients;
+      std::vector<ConvexPolygon::Ptr> convexes;
+      applyRecursiveRANSAC(input, normal, imu_vector,
+                           inliers, coefficients, convexes);
+      publishResult(msg->header, inliers, coefficients, convexes);                     
+    }
+    catch (tf2::ConnectivityException &e) {
+      NODELET_ERROR("Transform error: %s", e.what());
+    }
+    catch (tf2::InvalidArgumentException &e) {
+      NODELET_ERROR("Transform error: %s", e.what());
+    }
+    catch (tf2::ExtrapolationException& e) {
+      NODELET_ERROR("Transform error: %s", e.what());
+    }
+    
+  }
   
   void MultiPlaneSACSegmentation::segment(
     const sensor_msgs::PointCloud2::ConstPtr& msg,
     const sensor_msgs::PointCloud2::ConstPtr& msg_normal)
   {
-    
     boost::mutex::scoped_lock lock(mutex_);
     pcl::PointCloud<PointT>::Ptr input (new pcl::PointCloud<PointT>);
     pcl::PointCloud<pcl::Normal>::Ptr normal (new pcl::PointCloud<pcl::Normal>);
@@ -264,8 +386,10 @@ namespace jsk_pcl_ros
     std::vector<pcl::PointIndices::Ptr> inliers;
     std::vector<pcl::ModelCoefficients::Ptr> coefficients;
     std::vector<ConvexPolygon::Ptr> convexes;
-    applyRecursiveRANSAC(input, normal, inliers, coefficients, convexes);
-    publishResult(msg->header, inliers, coefficients, convexes);
+    Eigen::Vector3f dummy_imu_vector;
+    applyRecursiveRANSAC(input, normal, dummy_imu_vector,
+                         inliers, coefficients, convexes);
+    publishResult(msg->header, inliers, coefficients, convexes); 
   }
   
   void MultiPlaneSACSegmentation::segment(
@@ -277,4 +401,3 @@ namespace jsk_pcl_ros
 
 #include <pluginlib/class_list_macros.h>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::MultiPlaneSACSegmentation, nodelet::Nodelet);
-

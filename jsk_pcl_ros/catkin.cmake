@@ -73,6 +73,7 @@ add_service_files(FILES SwitchTopic.srv
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/RegionGrowingMultiplePlaneSegmentation.cfg
   cfg/LineSegmentCollector.cfg
   cfg/LineSegmentDetector.cfg
   cfg/ParticleFilterTracking.cfg
@@ -203,6 +204,9 @@ jsk_pcl_nodelet(src/polygon_array_wrapper_nodelet.cpp
   "jsk_pcl/PolygonArrayWrapper" "polygon_array_wrapper")
 jsk_pcl_nodelet(src/border_estimator_nodelet.cpp
   "jsk_pcl/BorderEstimator" "border_estimator")
+jsk_pcl_nodelet(src/region_growing_multiple_plane_segmentation_nodelet.cpp
+  "jsk_pcl/RegionGrowingMultiplePlaneSegmentation"
+  "region_growing_multiple_plane_segmentation")
 
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
   IF(${PCL_VERSION} VERSION_GREATER "1.7.1")

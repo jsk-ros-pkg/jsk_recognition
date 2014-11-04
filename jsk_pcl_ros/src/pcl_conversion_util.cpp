@@ -100,6 +100,21 @@ namespace pcl_conversions
     return ret;
   }
 
+  std::vector<PCLIndicesMsg>
+  convertToROSPointIndices(
+    const std::vector<pcl::PointIndices> cluster_indices,
+    const std_msgs::Header& header)
+  {
+    std::vector<PCLIndicesMsg> ret;
+    for (size_t i = 0; i < cluster_indices.size(); i++) {
+      PCLIndicesMsg ros_msg;
+      ros_msg.header = header;
+      ros_msg.indices = cluster_indices[i].indices;
+      ret.push_back(ros_msg);
+    }
+    return ret;
+  }
+
   std::vector<PCLModelCoefficientMsg>
   convertToROSModelCoefficients(
     const std::vector<pcl::ModelCoefficients::Ptr>& coefficients,

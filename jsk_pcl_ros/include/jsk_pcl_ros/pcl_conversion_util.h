@@ -114,6 +114,11 @@ namespace pcl_conversions
     const std::vector<pcl::PointIndices::Ptr> cluster_indices,
     const std_msgs::Header& header);
 
+  std::vector<PCLIndicesMsg>
+  convertToROSPointIndices(
+    const std::vector<pcl::PointIndices> cluster_indices,
+    const std_msgs::Header& header);
+
   std::vector<PCLModelCoefficientMsg>
   convertToROSModelCoefficients(
     const std::vector<pcl::ModelCoefficients::Ptr>& coefficients,

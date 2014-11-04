@@ -1,4 +1,9 @@
 <library path="libjsk_pcl_ros">
+  <class name="jsk_pcl/RegionGrowingMultiplePlaneSegmentation"
+         type="jsk_pcl_ros::RegionGrowingMultiplePlaneSegmentation"
+         base_class_type="nodelet::Nodelet">
+    Region growing based multiple plane segmentation
+  </class>
   <class name="jsk_pcl/TiltLaserListener" type="jsk_pcl_ros::TiltLaserListener"
          base_class_type="nodelet::Nodelet">
     listen joint state and publish TimeRange to assemble pointcloud

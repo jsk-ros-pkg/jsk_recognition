@@ -52,25 +52,7 @@
       filter_limit_max: 2.0
     </rosparam>
   </node>
-  <node pkg="nodelet" type="nodelet"
-        args="load pcl/NormalEstimationOMP multi_plane_manager"
-        name="normal_estimation">
-    <remap from="~input" to="zfilter/output" />
-    <rosparam>
-      radius_search: 0
-      k_search: 40
-      # 0, => ANN, 1 => FLANN, 2 => Organized
-      spatial_locator: 2
-    </rosparam>
-  </node>
-  <node pkg="nodelet" type="nodelet" name="normal_concat"
-        args="load jsk_pcl/NormalConcatenater multi_plane_manager"
-        clear_params="true">
-    <remap from="~input" to="zfilter/output"/>
-    <remap from="~normal" to="normal_estimation/output"/>
-  </node>
 
-  
   <node pkg="nodelet" type="nodelet"
         args="load pcl/VoxelGrid multi_plane_manager"
         name="voxel_grid">
@@ -81,10 +63,33 @@
       filter_limit_max: 10.0
     </rosparam>
   </node>
+  
+  <node pkg="nodelet" type="nodelet"
+        args="load pcl/NormalEstimationOMP multi_plane_manager"
+        name="normal_estimation">
+    <remap from="~input" to="voxel_grid/output" />
+    <rosparam>
+      radius_search: 0
+      k_search: 40
+      # 0, => ANN, 1 => FLANN, 2 => Organized
+      spatial_locator: 2
+    </rosparam>
+  </node>
+
+  
+  <node pkg="nodelet" type="nodelet" name="normal_concat"
+        args="load jsk_pcl/NormalConcatenater multi_plane_manager"
+        clear_params="true">
+    <remap from="~input" to="voxel_grid/output"/>
+    <remap from="~normal" to="normal_estimation/output"/>
+  </node>
+
+  
+  
   <node pkg="nodelet" type="nodelet"
         args="load jsk_pcl/RegionGrowingMultiplePlaneSegmentation multi_plane_manager"
         name="multi_plane_region_growing">
-    <remap from="~input" to="zfilter/output" />
+    <remap from="~input" to="voxel_grid/output" />
     <remap from="~input_normal" to="normal_estimation/output" />
     <rosparam>
       cluster_tolerance: 0.1
@@ -93,7 +98,7 @@
   <node pkg="nodelet" type="nodelet"
         args="load jsk_pcl/MultiPlaneSACSegmentation multi_plane_manager"
         name="multi_plane_sac_segmentation">
-    <remap from="~input" to="zfilter/output" />
+    <remap from="~input" to="voxel_grid/output" />
     <remap from="~input_clusters" to="multi_plane_region_growing/output/inliers" />
     <remap from="~input_normal" to="normal_estimation/output" />
     <rosparam>
@@ -106,11 +111,28 @@
   <node pkg="nodelet" type="nodelet"
         args="load jsk_pcl/ClusterPointIndicesDecomposer multi_plane_manager"
         name="multi_plane_region_growing_decomposer">
-    <remap from="~input" to="zfilter/output" />
+    <remap from="~input" to="voxel_grid/output" />
     <remap from="~target" to="multi_plane_region_growing/output/inliers" />
     <rosparam>
       publish_tf: false
       publish_clouds: false
     </rosparam>
   </node>
+
+  <node pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/NormalDirectionFilter multi_plane_manager"
+        name="normal_direction_filter">
+    <remap from="~input" to="normal_estimation/output" />
+    <remap from="~input_imu" to="/multisense/imu/imu_data" />
+    <rosparam>
+      use_imu: true
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        args="load pcl/ExtractIndices multi_plane_manager"
+        name="normal_direction_filtered_cloud">
+    <remap from="~input" to="voxel_grid/output" />
+    <remap from="~indices" to="normal_direction_filter/output" />
+  </node>
+  
 </launch>

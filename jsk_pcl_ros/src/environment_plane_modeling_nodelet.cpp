@@ -746,38 +746,40 @@ namespace jsk_pcl_ros
       output_grid_maps[i] = new_grid;
     }
     // check the polygon is near enough
-    for (size_t i = 0; i < static_polygons->polygons.size(); i++) {
-      geometry_msgs::PolygonStamped candidate_polygon
-        = static_polygons->polygons[i];
-      PCLModelCoefficientMsg candidate_polygon_coefficients
-        = static_coefficients->coefficients[i];
-      int nearest_index = findCorrespondGridMap(
-        candidate_polygon_coefficients.values,
-        candidate_polygon.polygon);
-      if (nearest_index != -1) {
-        // there is a candidate to merge the polygon
-        // 1. sample polygon as pointcloud
-        // 2. project the pointcloud on to the grid map
-        // 3. add the points into the grid map
+    if (static_polygons) {
+      for (size_t i = 0; i < static_polygons->polygons.size(); i++) {
+        geometry_msgs::PolygonStamped candidate_polygon
+          = static_polygons->polygons[i];
+        PCLModelCoefficientMsg candidate_polygon_coefficients
+          = static_coefficients->coefficients[i];
+        int nearest_index = findCorrespondGridMap(
+          candidate_polygon_coefficients.values,
+          candidate_polygon.polygon);
+        if (nearest_index != -1) {
+          // there is a candidate to merge the polygon
+          // 1. sample polygon as pointcloud
+          // 2. project the pointcloud on to the grid map
+          // 3. add the points into the grid map
 
-        // 1. sample polygon as pointcloud
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr sampled_pointcloud
-          = samplePointCloudOnPolygon(
-            candidate_polygon,
-            candidate_polygon_coefficients);
-        // 2. project the pointcloud on to the grid map
-        GridMap::Ptr candidate_grid_map = output_grid_maps[nearest_index];
-        pcl::ModelCoefficients::Ptr grid_plane_coefficients (new pcl::ModelCoefficients);
-        grid_plane_coefficients->values = candidate_grid_map->getCoefficients();
-        pcl::ProjectInliers<pcl::PointXYZRGB> proj;
-        proj.setModelType (pcl::SACMODEL_PLANE);
-        proj.setInputCloud(sampled_pointcloud);
-        proj.setModelCoefficients(grid_plane_coefficients);
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-        proj.filter(*projected_cloud);
+          // 1. sample polygon as pointcloud
+          pcl::PointCloud<pcl::PointXYZRGB>::Ptr sampled_pointcloud
+            = samplePointCloudOnPolygon(
+              candidate_polygon,
+              candidate_polygon_coefficients);
+          // 2. project the pointcloud on to the grid map
+          GridMap::Ptr candidate_grid_map = output_grid_maps[nearest_index];
+          pcl::ModelCoefficients::Ptr grid_plane_coefficients (new pcl::ModelCoefficients);
+          grid_plane_coefficients->values = candidate_grid_map->getCoefficients();
+          pcl::ProjectInliers<pcl::PointXYZRGB> proj;
+          proj.setModelType (pcl::SACMODEL_PLANE);
+          proj.setInputCloud(sampled_pointcloud);
+          proj.setModelCoefficients(grid_plane_coefficients);
+          pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+          proj.filter(*projected_cloud);
 
-        // 3. add the points into the grid map
-        candidate_grid_map->registerPointCloud(projected_cloud);
+          // 3. add the points into the grid map
+          candidate_grid_map->registerPointCloud(projected_cloud);
+        }
       }
     }
   }

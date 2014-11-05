@@ -59,9 +59,37 @@ time end
 Represent range of time.
 
 ## nodelets
+### jsk\_pcl/NormalDirectionFilter
+![NormalDirectionFilter](images/normal_direction_filter.png)
+
+jsk\_pcl/NormalDirectionFilter filters pointcloud based on the direction of the normal.
+It can filters pointcloud based on **static** direction and direction based on imu linear_acceleration.
+
+#### Subscribing Topics
+* `~input` (`sensor_msgs/PointCloud2`)
+   input normal pointcloud.
+* `~input_imu` (`sensor_msgs/Imu`)
+   imu message, which is enabled if `~use_imu` parameter is true
+
+#### Publishing Topics
+* `~output` (`pcl_msgs/PointIndices`)
+   result of filtering as indices. You can use `pcl/ExtractIndices` to get pointcloud of the indices.
+
+#### Parameters
+* `~use_imu` (Boolean, default: `False`):
+   Enable `~input_imu` topic and set target direction based on imu linear acceleration.
+* `~eps_angle` (Double, default: `0.2`):
+   Eps angle difference to regard the normal as required direction.
+* `~angle_offset` (Double, default: `0.0`):
+   Offset parameter to the direction.
+* `~direction` (Double Array, required):
+   if `~use_imu` is false, the direction should be specified with this parmaeter.
+
 ### jsk\_pcl/RegionGrowingMultiplePlaneSegmentation
-jsk\_pcl/RegionGrowingMultiplePlaneSegmentation estimates multiple plenes from pointcloud.
 ![jsk_pcl/RegionGrowingMultiplePlaneSegmentation](images/region_growing_multiple_plane_segmentation.png).
+
+jsk\_pcl/RegionGrowingMultiplePlaneSegmentation estimates multiple plenes from pointcloud.
+
 
 It extracts planes based on [region growing](http://en.wikipedia.org/wiki/Region_growing)
 and evaluation function of connectivity if based on the following equation:
@@ -388,6 +416,8 @@ roslaunch jsk_pcl_ros centroid_publisher.launch
 
 ### jsk\_pcl/OrganizedMultiPlaneSegmentation
 #### What Is This
+![images/organized_multi_plane_segmentation.png](images/organized_multi_plane_segmentation.png)
+
 This nodelet segments multiple planes from **organized** pointcloud.
 It estimates planes based on [connected-component analysis](http://en.wikipedia.org/wiki/Connected-component_labeling)
 using `pcl::OrganizedMultiPlaneSegmentation`.
@@ -402,6 +432,60 @@ using `pcl::OrganizedMultiPlaneSegmentation`.
 These process is implemented in one nodelet in order not to convert pointcloud between
 PCL and ROS.
 
+#### Subscribing Topics
+* `~input` (`sensor_msgs/PointCloud2`):
+   Input pointcloud. This should be **organized** pointcloud.
+
+#### Publishing topisc
+* `~output` (`jsk_pcl_ros/ClusterPointIndices`):
+* `~output_polygon` (`jsk_pcl_ros/PolygonArray`):
+* `~output_coefficients` (`jsk_pcl_ros/ModelCoefficientsArray`)
+   The inliers, coefficients and convex polygons of the connected polygons.
+* `~output_nonconnected` (`jsk_pcl_ros/ClusterPointIndices`):
+* `~output_nonconnected_polygon` (`jsk_pcl_ros/PolygonArray`):
+* `~output_nonconnected_coefficients` (`jsk_pcl_ros/ModelCoefficientsArray`)
+   The inliers, coefficients and polygons of the polygons of connected components analysis.
+* `~output_refined` (`jsk_pcl_ros/ClusterPointIndices`):
+* `~output_refined_polygon` (`jsk_pcl_ros/PolygonArray`):
+* `~output_refined_coefficients` (`jsk_pcl_ros/ModelCoefficientsArray`)
+   The inliers, coefficients and convex polygons of the refined polygons.
+* `~output_normal` (`sensor_msgs/PointCloud2`):
+   The pointcloud of normal of `~input` pointcloud.
+#### Parameters
+* `~estimate_normal` (Boolean, default: `True`):
+   Estimate normal if it is set to `True`
+* `~publish_normal` (Boolean, default: `False`):
+   Publish the result of normal to `~output_normal`
+* `~max_depth_change_factor` (Double, default: `0.02`):
+   The depth change threshold for computing object borders in normal estimation.
+* `~normal_smoothing_size` (Double, default: `20.0`):
+   the size of the area used to smooth normals
+   (depth dependent if `~depth_dependent_smoothing` is true)
+* `~depth_dependent_smoothing` (Boolean, default: `False`)
+   Smooth normal depending on depth
+* `~estimation_method` (Integer, default: `1`)
+   Estimation method of normal. You can choose one of `AVERAGE_3D_GRADIENT(0)`, `COVARIANCE_MATRIX(1)` and `AVERAGE_DEPTH_CHANGE(2)`.
+* `~border_policy_ignore` (Boolean, default: `True`)
+   Ignore border if this is `True`
+* `~min_size` (Integer, default: `2000`)
+   Minimum number of the points on a planar region during connected component analysis.
+   We recommend smaller size for this parameter in order to get stable result.
+* `~angular_threshold` (Double, default: `0.05`)
+* `~distance_threshold` (Double, default: `0.01`)
+   Distance and angular threshold in connected component analysis.
+* `~max_curvature` (Double, default: `0.001`)
+   The maximum curvature allowed for a planar region
+* `~connect_plane_angle_threshold` (Double, default: `0.2`)
+* `~connect_distance_threshold` (Double, default: `0.01`)
+   These parameters affect near plane connection. OrganizedMultiPlaneSegmentation connects
+   planes which have near normal direction and whose boundaries are near enough.
+* `~ransac_refine_coefficients` (Boolean, default: `True`)
+   Conduct RANSAC refinment for each plane if it is true.
+* `~ransac_refine_outlier_distance_threshold` (Double, default: `0.1`)
+   Outlier threshold of RANSAC refinment for each plane.
+* `~min_refined_area_threshold` (Double, default: `0.04`)
+* `~max_refined_area_threshold` (Double, default: `10000`)
+   Minimum and maximum area threshold for each convex polygon.
 
 ### jsk\_pcl/VoxelGridDownsampleManager
 ### jsk\_pcl/VoxelGridDownsampleDecoder

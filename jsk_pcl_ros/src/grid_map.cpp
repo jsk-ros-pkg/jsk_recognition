@@ -304,9 +304,11 @@ namespace jsk_pcl_ros
         GridLine::Ptr line = lines_[i];
         Eigen::Vector3f from = line->from;
         Eigen::Vector3f to = line->to;
+#ifdef DEBUG_GRID_MAP
         std::cout << "line[" << i << "]: "
                   << "[" << from[0] << ", " << from[1] << ", " << from[2] << "] -- "
                   << "[" << to[0] << ", " << to[1] << ", " << to[2] << std::endl;
+#endif
       }
       return;                   // force to quit
     }

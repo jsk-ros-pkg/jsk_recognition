@@ -6,7 +6,9 @@
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/image_encodings.h>
 #include <opencv2/opencv.hpp>
+#ifdef OPENCV_NON_FREE
 #include <opencv2/nonfree/nonfree.hpp> // SIFT・SURFモジュール用
+#endif
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
 #include <map>
@@ -170,7 +172,9 @@ int main(int argc, char **argv)
   ros::init(argc,argv,"imagesift");
   if( !ros::master::check() )
         return 1;
+#ifdef OPENCV_NON_FREE
   cv::initModule_nonfree();
+#endif
   boost::shared_ptr<SiftNode> siftnode(new SiftNode());
   
   ros::spin();

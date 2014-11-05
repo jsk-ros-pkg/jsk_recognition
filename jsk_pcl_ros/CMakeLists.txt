@@ -148,6 +148,8 @@ jsk_pcl_nodelet(src/tilt_laser_listener_nodelet.cpp
 jsk_pcl_nodelet(src/region_growing_multiple_plane_segmentation_nodelet.cpp
   "jsk_pcl/RegionGrowingMultiplePlaneSegmentation"
   "region_growing_multiple_plane_segmentation")
+jsk_pcl_nodelet(src/normal_direction_filter_nodelet.cpp
+  "jsk_pcl/NormalDirectionFilter" "normal_direction_filter")
 
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}

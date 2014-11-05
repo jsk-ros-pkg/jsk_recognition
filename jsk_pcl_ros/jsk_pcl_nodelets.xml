@@ -1,4 +1,9 @@
 <library path="libjsk_pcl_ros">
+  <class name="jsk_pcl/NormalDirectionFilter"
+         type="jsk_pcl_ros::NormalDirectionFilter"
+         base_class_type="nodelet::Nodelet">
+    Normal direction filter
+  </class>
   <class name="jsk_pcl/RegionGrowingMultiplePlaneSegmentation"
          type="jsk_pcl_ros::RegionGrowingMultiplePlaneSegmentation"
          base_class_type="nodelet::Nodelet">

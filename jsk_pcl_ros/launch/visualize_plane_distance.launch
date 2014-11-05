@@ -1,0 +1,35 @@
+<launch>
+  <arg name="namespace" default="visualize_kinect_error" />
+  <arg name="input" default="/openni_c2/depth_registered/points" />
+  <arg name="fixed_frame_id" default="base_footprint" />
+  <group ns="$(arg namespace)">
+    <node pkg="nodelet" type="nodelet" args="manager" name="manager" />
+    <node pkg="nodelet" type="nodelet" name="input_relay"
+          args="load jsk_topic_tools/Relay manager">
+      <remap from="~input" to="$(arg input)" />
+    </node>
+    <node pkg="nodelet" type="nodelet" name="footprint_polygon_publisher"
+          clear_params="true"
+          args="load jsk_pcl/StaticPolygonArrayPublisher manager">
+      <remap from="~input" to="input_relay/output" />
+      <rosparam subst_value="true">
+        use_message: true
+        frame_ids: [$(arg fixed_frame_id)]
+        polygon_array: [[[10, 10, 0], [-10, 10, 0], [-10, -10, 0], [10, -10, 0]]]
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="transform_points"
+          args="load jsk_pcl/TfTransformCloud manager">
+      <remap from="~input" to="input_relay/output" />
+      <rosparam subst_value="true">
+        target_frame_id: $(arg fixed_frame_id)
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="colorize_points"
+          args="load jsk_pcl/ColorizeDistanceFromPlane manager">
+      <remap from="~input" to="transform_points/output" />
+      <remap from="~input_coefficients" to="footprint_polygon_publisher/output_coefficients" />
+      <remap from="~input_polygons" to="footprint_polygon_publisher/output_polygons" />
+    </node>
+  </group>
+</launch>

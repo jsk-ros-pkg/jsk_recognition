@@ -44,7 +44,8 @@ namespace jsk_pcl_ros
 {
   LineSegmentCluster::LineSegmentCluster():
     delta_(Eigen::Vector3f(0, 0, 0)),
-    points_(new pcl::PointCloud<pcl::PointXYZ>)
+    points_(new pcl::PointCloud<pcl::PointXYZ>),
+    raw_points_(new pcl::PointCloud<pcl::PointXYZ>)
   {
 
   }
@@ -57,10 +58,17 @@ namespace jsk_pcl_ros
     if (new_delta.dot(delta_) < 0) {
       new_delta = - new_delta;
     }
-    delta_ = (1 - tau) * delta_ + tau * new_delta;
+    delta_ = ((1 - tau) * delta_ + tau * new_delta).normalized();
+    
+    // update points_
     pcl::PointCloud<pcl::PointXYZ>::Ptr new_cloud = segment->getPoints();
     for (size_t i = 0; i < new_cloud->points.size(); i++) {
       points_->points.push_back(new_cloud->points[i]);
+    }
+    // update raw_points_
+    pcl::PointCloud<pcl::PointXYZ>::Ptr new_raw_cloud = segment->getRawPoints();
+    for (size_t i = 0; i < new_raw_cloud->points.size(); i++) {
+      raw_points_->points.push_back(new_raw_cloud->points[i]);
     }
   }
 
@@ -68,11 +76,56 @@ namespace jsk_pcl_ros
   {
     return points_;
   }
+
+  pcl::PointCloud<pcl::PointXYZ>::Ptr LineSegmentCluster::getRawPoints()
+  {
+    return raw_points_;
+  }
+
+  void LineSegmentCluster::removeBefore(const ros::Time& stamp)
+  {
+    bool removed = false;
+    for (std::vector<LineSegment::Ptr>::iterator it = segments_.begin();
+         it != segments_.end(); ) {
+      if (((*it)->header.stamp - stamp).toSec() < 0) {
+        it = segments_.erase(it);
+        removed = true;
+      }
+      else {
+        ++it;
+      }
+    }
+    if (removed) {
+      // reconstruct pointcloud
+      points_.reset(new pcl::PointCloud<pcl::PointXYZ>);
+
+      raw_points_.reset(new pcl::PointCloud<pcl::PointXYZ>);
+      for (std::vector<LineSegment::Ptr>::iterator it = segments_.begin();
+         it != segments_.end(); ++it) {
+        {
+          pcl::PointCloud<pcl::PointXYZ>::Ptr segment_points = (*it)->getPoints();
+          for (size_t i = 0; i < segment_points->points.size(); i++) {
+            points_->points.push_back(segment_points->points[i]);
+          }
+        }
+        {
+          pcl::PointCloud<pcl::PointXYZ>::Ptr segment_points = (*it)->getRawPoints();
+          for (size_t i = 0; i < segment_points->points.size(); i++) {
+            raw_points_->points.push_back(segment_points->points[i]);
+          }
+        }
+      }
+    }
+  }
+  
+  bool LineSegmentCluster::isEmpty()
+  {
+    return segments_.size() == 0;
+  }
   
   void LineSegmentCollector::onInit()
   {
     DiagnosticNodelet::onInit();
-    initialize_joint_angle_ = true;
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&LineSegmentCollector::configCallback, this, _1, _2);
@@ -80,11 +133,6 @@ namespace jsk_pcl_ros
     
     if (!pnh_->getParam("fixed_frame_id", fixed_frame_id_)) {
       NODELET_ERROR("no ~fixed_frame_id is specified");
-      return;
-    }
-
-    if (!pnh_->getParam("rotate_joint_name", rotate_joint_name_)) {
-      NODELET_ERROR("no ~rotate_joint_name is specified");
       return;
     }
 
@@ -122,8 +170,6 @@ namespace jsk_pcl_ros
     ewma_tau_ = config.ewma_tau;
     segment_connect_normal_threshold_ = config.segment_connect_normal_threshold;
     outlier_threshold_ = config.outlier_threshold;
-    max_iterations_ = config.max_iterations;
-    min_indices_ = config.min_indices;
   }
 
   void LineSegmentCollector::subscribe()
@@ -135,9 +181,8 @@ namespace jsk_pcl_ros
     sync_->connectInput(sub_input_, sub_indices_, sub_coefficients_);
     sync_->registerCallback(boost::bind(&LineSegmentCollector::collect,
                                         this, _1, _2, _3));
-    sub_joint_state_ = pnh_->subscribe(
-      "input_joint_states", 1,
-      &LineSegmentCollector::jointStateCallback, this);
+    sub_trigger_ = pnh_->subscribe("trigger", 1,
+                                   &LineSegmentCollector::triggerCallback, this);
   }
 
   void LineSegmentCollector::unsubscribe()
@@ -145,48 +190,13 @@ namespace jsk_pcl_ros
     sub_input_.unsubscribe();
     sub_indices_.unsubscribe();
     sub_coefficients_.unsubscribe();
-    sub_joint_state_.shutdown();
+    sub_trigger_.shutdown();
   }
   
   void LineSegmentCollector::updateDiagnostic(
     diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
 
-  }
-
-  void LineSegmentCollector::jointStateCallback(
-    const sensor_msgs::JointState::ConstPtr& joint_state_msg)
-  {
-    boost::mutex::scoped_lock lock(mutex_);
-    // lookup the joint
-    int target_index = -1;
-    for (size_t i = 0; i < joint_state_msg->name.size(); i++) {
-      if (joint_state_msg->name[i] == rotate_joint_name_) {
-        target_index = i;
-        break;
-      }
-    }
-    if (target_index == -1) {
-      NODELET_ERROR("failed to find the joint '%s'", rotate_joint_name_.c_str());
-      return;
-    }
-    double current_joint_angle = joint_state_msg->position[target_index];
-    if (initialize_joint_angle_) {
-      initial_joint_angle_ = current_joint_angle;
-      latest_joint_angle_ = current_joint_angle;
-      initialize_joint_angle_ = false;
-      prev_joint_velocity_ = 0.0;
-      return;
-    }
-    if (rotate_type_ == ROTATION_TILT_TWO_WAY) {
-      double velocity = latest_joint_angle_ - current_joint_angle;
-      if (prev_joint_velocity_ <= 0 && velocity > 0) {
-        // bottom
-        cleanupBuffers(joint_state_msg->header.stamp);
-      }
-      prev_joint_velocity_ = velocity;
-      latest_joint_angle_ = current_joint_angle;
-    }
   }
 
   void LineSegmentCollector::cleanupBuffers(
@@ -196,10 +206,26 @@ namespace jsk_pcl_ros
     indices_buffer_.removeBefore(stamp);
     coefficients_buffer_.removeBefore(stamp);
     segments_buffer_.removeBefore(stamp);
-    segment_clusters_.resize(0);
-    //segment_map_ = IntegerGraphMap();
+    for (std::vector<LineSegmentCluster::Ptr>::iterator it = segment_clusters_.begin();
+         it != segment_clusters_.end();) {
+      (*it)->removeBefore(stamp);
+      if ((*it)->isEmpty()) {
+        it = segment_clusters_.erase(it);
+      }
+      else {
+        ++it;
+      }
+    }
   }
 
+  void LineSegmentCollector::triggerCallback(
+    const TimeRange::ConstPtr& trigger)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    time_range_ = trigger;
+    cleanupBuffers(time_range_->start);
+  }
+  
   void LineSegmentCollector::publishBeforePlaneSegmentation(
     const std_msgs::Header& header,
     const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
@@ -225,17 +251,21 @@ namespace jsk_pcl_ros
       LineSegmentCluster::Ptr cluster = segment_clusters_[i];
       Eigen::Vector3f delta_cluster = cluster->getDelta();
       Eigen::Vector3f delta = segment->toSegment()->getDirection();
-      if (delta_cluster.dot(delta) < 0) {
-        delta = - delta;
-      }
-      if (delta_cluster.dot(delta) > segment_connect_normal_threshold_) {
-        if (max_dot < delta_cluster.dot(delta)) {
-          max_dot = delta_cluster.dot(delta);
+      double delta_dot = std::abs(delta_cluster.dot(delta));
+      if (delta_dot > segment_connect_normal_threshold_) {
+        if (max_dot < delta_dot) {
+          max_dot = delta_dot;
           max_index = i;
         }
       }
+      // else {
+      //   if (segment_clusters_.size() != 0) {
+      //     NODELET_INFO("dot: %f", delta_dot);
+      //   }
+      // }
     }
     if (max_index == -1) {
+      
       return LineSegmentCluster::Ptr();
     }
     else {
@@ -269,7 +299,7 @@ namespace jsk_pcl_ros
       LineSegmentCluster::Ptr cluster = segment_clusters_[i];
       pcl::PointIndices::Ptr current_indices (new pcl::PointIndices);
       pcl::PointCloud<pcl::PointXYZ>::Ptr current_cloud
-        = cluster->getPoints();
+        = cluster->getRawPoints();
       for (size_t j = 0; j < current_cloud->points.size(); j++) {
         current_indices->indices.push_back(connected_cloud->points.size() + j);
       }
@@ -282,45 +312,6 @@ namespace jsk_pcl_ros
       header,
       connected_cloud,
       connected_indices);
-    estimatePlanes(header, connected_cloud, connected_indices);
-  }
-
-  void LineSegmentCollector::estimateMultiPlanesFromPointCluoud(
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
-    pcl::PointIndices::Ptr initial_indices,
-    std::vector<pcl::ModelCoefficients::Ptr>& coefficients_list,
-    std::vector<pcl::PointIndices::Ptr>& indices_list)
-  {
-    pcl::PointIndices::Ptr rest_indices (new pcl::PointIndices);
-    *rest_indices = *initial_indices;
-    pcl::SACSegmentation<pcl::PointXYZ> seg;
-    seg.setOptimizeCoefficients (true);
-    seg.setModelType (pcl::SACMODEL_PLANE);
-    seg.setMethodType (pcl::SAC_RANSAC);
-    seg.setDistanceThreshold (outlier_threshold_);
-    seg.setMaxIterations (max_iterations_);
-    seg.setInputCloud(cloud);
-    while (true) {
-      if (rest_indices->indices.size() > min_indices_) {
-        pcl::PointIndices::Ptr
-          result_indices (new pcl::PointIndices);
-        pcl::ModelCoefficients::Ptr
-          result_coefficients (new pcl::ModelCoefficients);
-        seg.setIndices(rest_indices);
-        seg.segment(*result_indices, *result_coefficients);
-        if (result_indices->indices.size() > min_indices_) {
-          coefficients_list.push_back(result_coefficients);
-          indices_list.push_back(result_indices);
-          rest_indices = subIndices(*rest_indices, *result_indices);
-        }
-        else {
-          break;
-        }
-      }
-      else {
-        break;
-      }
-    }
   }
 
   void LineSegmentCollector::publishResult(
@@ -356,27 +347,6 @@ namespace jsk_pcl_ros
     pub_polygons_.publish(ros_polygon);
   }
   
-  void LineSegmentCollector::estimatePlanes(
-    const std_msgs::Header& header,
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
-    std::vector<pcl::PointIndices::Ptr> initial_indices)
-  {
-    std::vector<pcl::ModelCoefficients::Ptr> all_coefficients;
-    std::vector<pcl::PointIndices::Ptr> all_indices;
-    for (size_t i = 0; i < initial_indices.size(); i++) {
-      std::vector<pcl::ModelCoefficients::Ptr> coefficients_list;
-      std::vector<pcl::PointIndices::Ptr> indices_list;
-      estimateMultiPlanesFromPointCluoud(
-        cloud, initial_indices[i], coefficients_list, indices_list);
-      for (size_t i = 0; i < indices_list.size(); i++) {
-        all_indices.push_back(indices_list[i]);
-        all_coefficients.push_back(coefficients_list[i]);
-      }
-    }
-    // publish the result...
-    publishResult(header, cloud, all_coefficients, all_indices);
-  }
-
   void LineSegmentCollector::collect(
       const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
       const ClusterPointIndices::ConstPtr& indices_msg,

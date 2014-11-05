@@ -44,10 +44,12 @@
 #include <dynamic_reconfigure/server.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
 #include <message_filters/synchronizer.h>
 
 #include <jsk_pcl_ros/MultiPlaneSACSegmentationConfig.h>
 #include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <tf/transform_listener.h>
 
 ////////////////////////////////////////////////////////
 // messages
@@ -56,6 +58,7 @@
 #include <jsk_pcl_ros/PolygonArray.h>
 #include <jsk_pcl_ros/ModelCoefficientsArray.h>
 #include <jsk_pcl_ros/ClusterPointIndices.h>
+#include <sensor_msgs/Imu.h>
 
 namespace jsk_pcl_ros
 {
@@ -67,7 +70,20 @@ namespace jsk_pcl_ros
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
       sensor_msgs::PointCloud2 > SyncPolicy;
-    
+    typedef message_filters::sync_policies::ExactTime<
+      sensor_msgs::PointCloud2,
+      ClusterPointIndices > SyncClusterPolicy;
+    typedef message_filters::sync_policies::ApproximateTime<
+      sensor_msgs::PointCloud2,
+      sensor_msgs::Imu
+      > SyncImuPolicy;
+    typedef message_filters::sync_policies::ApproximateTime<
+      sensor_msgs::PointCloud2,
+      sensor_msgs::PointCloud2,
+      sensor_msgs::Imu
+      > SyncNormalImuPolicy;
+    typedef message_filters::Synchronizer<SyncNormalImuPolicy>
+    NormalImuSynchronizer;
   protected:
     ////////////////////////////////////////////////////////
     // methods
@@ -77,14 +93,26 @@ namespace jsk_pcl_ros
     virtual void segment(const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void segment(const sensor_msgs::PointCloud2::ConstPtr& msg,
                          const sensor_msgs::PointCloud2::ConstPtr& msg_nromal);
-    
+    virtual void segmentWithImu(const sensor_msgs::PointCloud2::ConstPtr& msg,
+                                const sensor_msgs::Imu::ConstPtr& imu);
+    virtual void segmentWithImu(const sensor_msgs::PointCloud2::ConstPtr& msg,
+                                const sensor_msgs::PointCloud2::ConstPtr& msg_nromal,
+                                const sensor_msgs::Imu::ConstPtr& imu);
+    virtual void segmentWithClusters(
+      const sensor_msgs::PointCloud2::ConstPtr& msg,
+      const ClusterPointIndices::ConstPtr& clusters);
     virtual void applyRecursiveRANSAC(
       const pcl::PointCloud<PointT>::Ptr& input,
       const pcl::PointCloud<pcl::Normal>::Ptr& normal,
+      const Eigen::Vector3f& imu_vector,
       std::vector<pcl::PointIndices::Ptr>& output_inliers,
       std::vector<pcl::ModelCoefficients::Ptr>& output_coefficients,
       std::vector<ConvexPolygon::Ptr>& output_polygons);
-
+    virtual void publishResult(
+      const std_msgs::Header& header,
+      const std::vector<pcl::PointIndices::Ptr>& inliers,
+      const std::vector<pcl::ModelCoefficients::Ptr>& coefficients,
+      const std::vector<ConvexPolygon::Ptr>& convexes);
     virtual void configCallback (Config &config, uint32_t level);
 
     virtual void subscribe();
@@ -96,11 +124,17 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_;
     ros::Publisher pub_inliers_, pub_coefficients_, pub_polygons_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncClusterPolicy> > sync_cluster_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncImuPolicy> > sync_imu_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncNormalImuPolicy> > sync_normal_imu_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_normal_;
+    message_filters::Subscriber<ClusterPointIndices> sub_clusters_;
+    message_filters::Subscriber<sensor_msgs::Imu> sub_imu_;
     boost::mutex mutex_;
-
+    boost::shared_ptr<tf::TransformListener> tf_listener_;
+    
     ////////////////////////////////////////////////////////
     // parameters
     ////////////////////////////////////////////////////////
@@ -109,6 +143,12 @@ namespace jsk_pcl_ros
     int min_points_;
     int max_iterations_;
     bool use_normal_;
+    bool use_clusters_;
+    bool use_imu_parallel_;
+    bool use_imu_perpendicular_;
+    double eps_angle_;
+    double normal_distance_weight_;
+    int min_trial_;
   private:
     
   };

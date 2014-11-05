@@ -50,7 +50,47 @@ BoundingBox[] boxes
 BoundingBoxArray is a list of BoundingBox.
 You can use [jsk\_rviz\_plugins](https://github.com/jsk-ros-pkg/jsk_visualization) to visualize BoungingBoxArray in rviz.
 
+### TimeRange
+```
+Header header
+time start
+time end
+```
+Represent range of time.
+
 ## nodelets
+### jsk\_pcl/RegionGrowingMultiplePlaneSegmentation
+jsk\_pcl/RegionGrowingMultiplePlaneSegmentation estimates multiple plenes from pointcloud.
+![jsk_pcl/RegionGrowingMultiplePlaneSegmentation](images/region_growing_multiple_plane_segmentation.png).
+
+It extracts planes based on [region growing](http://en.wikipedia.org/wiki/Region_growing)
+and evaluation function of connectivity if based on the following equation:
+![](images/region_growing_multiple_plane_segmentation_eq.gif)
+
+#### Subscribing Topics
+* `~input` (`sensor_msgs/PointCloud2`): input pointcloud.
+* `~input_normal` (`sensor_msgs/PointCloud2`): normal pointcloud of `~input`
+
+#### Publishing Topics
+* `~output/inliers` (`jsk_pcl_ros/ClusterPointIndices`): Set of indices of the polygons.
+* `~output/coefficients` (`jsk_pcl_ros/ModelCoefficientsArray`): Array of coefficients of the polygons.
+* `~output/polygons` (`jsk_pcl_ros/PolygonArray`): Polygons
+#### Parameters
+* `~angular_threshold` (Double, default: `0.04`)
+Angular threshold to connect two points in one cluster. See
+* `~distance_threshold` (Double, default: `0.1`)
+Distance threshold to connect two points in one cluster.
+* `~max_curvature` (Double, default: `0.1`)
+Before extracting planes, filtering out the points which have higer curvature than this value.
+* `~min_size` (Integer, default: `100`)
+The minimum number of the points of each plane.
+* `~cluster_tolerance` (Double, default: `0.1`)
+The spatial tolerance for new cluster candidates.
+* `~ransac_refine_outlier_distance_threshold` (Double, default: `0.1`)
+Outlier threshold for plane estimation using RANSAC.
+* `~ransac_refine_max_iterations` (Integer, default: `100`)
+The maximum number of the iterations for plane estimation using RANSAC.
+
 ### jsk\_pcl/ParticleFilterTracking
 #### What Is This
 
@@ -162,6 +202,39 @@ Enable `~point_array` topic.
 Publish result of screenpoint to `~output` topic.
 * `~publish_point` (Boolean, default: `False`):
 Publish result of screenpoint to `~output_point` topic.
+
+### jsk\_pcl/TiltLaserListener
+#### What is this
+Listen to the joint_states of tilt/spindle laser and publish time range to scane full 3-D space.
+You can choose several types of tilt/spindle lasers such as tilt-laser of PR2, infinite spindle laser of multisense.
+
+#### Subscribing Topics
+* `~input`(`sensor_msgs/JointState`): Joint angles of laser actuator.
+
+#### Publishing Topics
+* `~output` (`jsk_pcl_ros/TimeRange`): Time range to scan 3-D space.
+* `~output_cloud` (`sensor_msgs/PointCloud2`): Assembled pointcloud according to time range
+of `~output`. this require `~assemble_scans2` service of [laser_assembler](http://wiki.ros.org/laser_assembler).
+
+#### Using Services
+* `~assemble_scans2` (`laser_assembler/AssembleScans2`): A service to build 3-D pointcloud from scan pointcloud.
+It should be remapped to `assemble_scans2` service of [laser_assembler](http://wiki.ros.org/laser_assembler).
+
+#### Parameters
+* `~use_laser_assembler` (Boolean, default: `False`): Enable `~output_cloud` and `~assemble_scans2`.
+* `~joint_name` (String, **required**): Joint name of actuator to rotate laser.
+* `~laser_type` (String, default: `tilt_half_down`): type of rotating laser. You can choose one of the types:
+1. `tilt`: A mode for tilting laser. In this mode, TiltLaserListener assumes the motor to be moved from minimum
+joint angle to maximum joint angle over again. TiltLaserListener publishes the minimum and latest time range to
+move tilting laser from minimum joint angle to maximim joint angle.
+2. `tilt_half_down`:
+In this mode, TiltLaserListener publishes time range from maximum joint angle to minimum joint angle.
+3. `tilt_half_up`:
+In this mode, TiltLaserListener publishes time range from minimum joint angle to maximum joint angle like `tilt_half_down`.
+4. `infinite_spindle`: Infinite spindle laser. TiltLaserListener publishes time range to rotate laser 360 degrees.
+5. `infinite_spindle_half`: Infinite spindle laser, but most of laser has over 180 degrees range of field.
+Therefore we don't need to rotate laser 360 degrees to scan 3-D space, just 180 degree rotation is required.
+In this mode, TiltLaserListener publishes time range a time range of 180 degree rotation.
 
 ### jsk\_pcl/DepthImageCreator
 #### What is this
@@ -291,10 +364,20 @@ If this parameter is set to `True`, `~align_planes` and `~align_planes_coefficie
 Run PCA algorithm on each cluster to estimate x and y direction.
 
 ### jsk\_pcl/ClusterPointIndicesDecomposerZAxis
+#### What Is This
+This nodelet is almost same to jsk\_pcl/ClusterPointIndicesDecomposer, however it always sort clusters in z direction.
+
 ### jsk\_pcl/CentroidPublisher
 #### What Is This
 
-This nodelet will subscribe the sensor_msgs::PointCloud2, calculate its centroid  and boardcast the tf whose parent is cloud headers frame_id and whose child is the new centroid frame_id.
+This nodelet will subscribe the sensor\_msgs::PointCloud2, calculate its centroid  and boardcast the tf whose parent is cloud headers frame\_id and whose child is the new centroid frame_id.
+
+#### Subscribing Topics
+* `~input` (`sensor_msgs/PointCloud2`): input pointcloud.
+#### Publishing Topics
+* `/tf`: Publish tf of the centroid of the input pointcloud.
+#### Parameters
+* `~frame` (String, required): frame_id of centroid tf
 
 #### Sample
 Plug the depth sensor which can be launched by openni.launch and run the below command.
@@ -302,6 +385,79 @@ Plug the depth sensor which can be launched by openni.launch and run the below c
 ```
 roslaunch jsk_pcl_ros centroid_publisher.launch
 ```
+
+### jsk\_pcl/OrganizedMultiPlaneSegmentation
+#### What Is This
+![images/organized_multi_plane_segmentation.png](images/organized_multi_plane_segmentation.png)
+
+This nodelet segments multiple planes from **organized** pointcloud.
+It estimates planes based on [connected-component analysis](http://en.wikipedia.org/wiki/Connected-component_labeling)
+using `pcl::OrganizedMultiPlaneSegmentation`.
+
+![overview](images/graph/organized_multi_plane_segmentation_overview.png) shows the overview of the pipeline.
+
+1. Estimate normal using integral image.
+2. Conduct connected component analysis to estimate planar regions.
+3. Connect neighbor planes if the normal directions and the borders of the planes are near enough.
+4. Refine plane coefficients of connected planes based on RANSAC. If the areas of the planes after refinement are too small, they will be removed.
+
+These process is implemented in one nodelet in order not to convert pointcloud between
+PCL and ROS.
+
+#### Subscribing Topics
+* `~input` (`sensor_msgs/PointCloud2`):
+   Input pointcloud. This should be **organized** pointcloud.
+
+#### Publishing topisc
+* `~output` (`jsk_pcl_ros/ClusterPointIndices`):
+* `~output_polygon` (`jsk_pcl_ros/PolygonArray`):
+* `~output_coefficients` (`jsk_pcl_ros/ModelCoefficientsArray`)
+   The inliers, coefficients and convex polygons of the connected polygons.
+* `~output_nonconnected` (`jsk_pcl_ros/ClusterPointIndices`):
+* `~output_nonconnected_polygon` (`jsk_pcl_ros/PolygonArray`):
+* `~output_nonconnected_coefficients` (`jsk_pcl_ros/ModelCoefficientsArray`)
+   The inliers, coefficients and polygons of the polygons of connected components analysis.
+* `~output_refined` (`jsk_pcl_ros/ClusterPointIndices`):
+* `~output_refined_polygon` (`jsk_pcl_ros/PolygonArray`):
+* `~output_refined_coefficients` (`jsk_pcl_ros/ModelCoefficientsArray`)
+   The inliers, coefficients and convex polygons of the refined polygons.
+* `~output_normal` (`sensor_msgs/PointCloud2`):
+   The pointcloud of normal of `~input` pointcloud.
+#### Parameters
+* `~estimate_normal` (Boolean, default: `True`):
+   Estimate normal if it is set to `True`
+* `~publish_normal` (Boolean, default: `False`):
+   Publish the result of normal to `~output_normal`
+* `~max_depth_change_factor` (Double, default: `0.02`):
+   The depth change threshold for computing object borders in normal estimation.
+* `~normal_smoothing_size` (Double, default: `20.0`):
+   the size of the area used to smooth normals
+   (depth dependent if `~depth_dependent_smoothing` is true)
+* `~depth_dependent_smoothing` (Boolean, default: `False`)
+   Smooth normal depending on depth
+* `~estimation_method` (Integer, default: `1`)
+   Estimation method of normal. You can choose one of `AVERAGE_3D_GRADIENT(0)`, `COVARIANCE_MATRIX(1)` and `AVERAGE_DEPTH_CHANGE(2)`.
+* `~border_policy_ignore` (Boolean, default: `True`)
+   Ignore border if this is `True`
+* `~min_size` (Integer, default: `2000`)
+   Minimum number of the points on a planar region during connected component analysis.
+   We recommend smaller size for this parameter in order to get stable result.
+* `~angular_threshold` (Double, default: `0.05`)
+* `~distance_threshold` (Double, default: `0.01`)
+   Distance and angular threshold in connected component analysis.
+* `~max_curvature` (Double, default: `0.001`)
+   The maximum curvature allowed for a planar region
+* `~connect_plane_angle_threshold` (Double, default: `0.2`)
+* `~connect_distance_threshold` (Double, default: `0.01`)
+   These parameters affect near plane connection. OrganizedMultiPlaneSegmentation connects
+   planes which have near normal direction and whose boundaries are near enough.
+* `~ransac_refine_coefficients` (Boolean, default: `True`)
+   Conduct RANSAC refinment for each plane if it is true.
+* `~ransac_refine_outlier_distance_threshold` (Double, default: `0.1`)
+   Outlier threshold of RANSAC refinment for each plane.
+* `~min_refined_area_threshold` (Double, default: `0.04`)
+* `~max_refined_area_threshold` (Double, default: `10000`)
+   Minimum and maximum area threshold for each convex polygon.
 
 ### jsk\_pcl/VoxelGridDownsampleManager
 ### jsk\_pcl/VoxelGridDownsampleDecoder

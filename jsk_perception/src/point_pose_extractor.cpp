@@ -352,8 +352,7 @@ public:
     cv::Mat tvec(3, 1, CV_64FC1, fT3);
     cv::Mat zero_distortion_mat = cv::Mat::zeros(4, 1, CV_64FC1);
 
-    cv::Mat camera_matrix = pcam.projectionMatrix()(cv::Range::all(), cv::Range(0, 3));
-    cv::solvePnP (corners3d_mat, corners2d_mat_trans, camera_matrix,
+    cv::solvePnP (corners3d_mat, corners2d_mat_trans, pcam.projectionMatrix(),
 		  zero_distortion_mat,//if unrectified: pcam.distortionCoeffs()
 		  rvec, tvec);
 
@@ -725,7 +724,7 @@ public:
 
     cv::Mat zero_distortion_mat = cv::Mat::zeros(4, 1, CV_64FC1);
     cv::projectPoints(coner_mat, rvec, tvec,
-		      pcam.projectionMatrix()(cv::Range::all(), cv::Range(0,3)),
+		      pcam.projectionMatrix(),
 		      zero_distortion_mat, // pcam.distortionCoeffs(),
 		      coner_img_points);
 

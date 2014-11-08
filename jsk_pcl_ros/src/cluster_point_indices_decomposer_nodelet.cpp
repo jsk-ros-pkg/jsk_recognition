@@ -53,23 +53,7 @@ namespace jsk_pcl_ros
 {
   void ClusterPointIndicesDecomposer::onInit()
   {
-    PCLNodelet::onInit();
-    
-    diagnostic_updater_.reset(
-      new TimeredDiagnosticUpdater(*pnh_, ros::Duration(1.0)));
-    diagnostic_updater_->setHardwareID(getName());
-    diagnostic_updater_->add(
-      getName() + "::ClusterPointIndicesDecomposer",
-      boost::bind(
-        &ClusterPointIndicesDecomposer::updateDiagnostic,
-        this,
-        _1));
-    double vital_rate;
-    pnh_->param("vital_rate", vital_rate, 1.0);
-    vital_checker_.reset(
-      new jsk_topic_tools::VitalChecker(1 / vital_rate));
-    diagnostic_updater_->start();
-    
+    DiagnosticNodelet::onInit();
     pnh_->param("publish_tf", publish_tf_, true);
     if (!pnh_->getParam("tf_prefix", tf_prefix_))
     {

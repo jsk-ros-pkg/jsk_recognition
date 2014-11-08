@@ -58,13 +58,14 @@
 #include <diagnostic_updater/publisher.h>
 #include "jsk_pcl_ros/pcl_util.h"
 #include <jsk_topic_tools/vital_checker.h>
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include "jsk_pcl_ros/diagnostic_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class ClusterPointIndicesDecomposer: public ConnectionBasedNodelet
+  class ClusterPointIndicesDecomposer: public DiagnosticNodelet
   {
   public:
+    ClusterPointIndicesDecomposer(): DiagnosticNodelet("ClusterPointIndicesDecomposer") { }
     typedef message_filters::sync_policies::ExactTime<
     sensor_msgs::PointCloud2,
     jsk_pcl_ros::ClusterPointIndices > SyncPolicy;
@@ -134,8 +135,6 @@ namespace jsk_pcl_ros
     bool align_boxes_;
     bool use_pca_;
 
-    TimeredDiagnosticUpdater::Ptr diagnostic_updater_;
-    jsk_topic_tools::VitalChecker::Ptr vital_checker_;
     Counter cluster_counter_;
     
   };

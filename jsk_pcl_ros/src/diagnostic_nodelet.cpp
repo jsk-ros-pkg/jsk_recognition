@@ -52,7 +52,7 @@ namespace jsk_pcl_ros
     diagnostic_updater_->add(
       getName() + "::" + name_,
       boost::bind(
-        &DiagnosticNodelet::updateDiagnostic,
+        &DiagnosticNodelet::updateDiagnosticRoot,
         this,
         _1));
     double vital_rate;
@@ -61,4 +61,23 @@ namespace jsk_pcl_ros
       new jsk_topic_tools::VitalChecker(1 / vital_rate));
     diagnostic_updater_->start();
   }
+  
+  void DiagnosticNodelet::updateDiagnosticRoot(
+    diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    if (publishers_.size() > 0) {
+      for (size_t i = 0; i < publishers_.size(); i++) {
+        if (publishers_[i].getNumSubscribers() > 0) {
+          updateDiagnostic(stat);
+          return;
+        }
+      }
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK, 
+                   "No subscriber");
+    }
+    else {
+      updateDiagnostic(stat);
+    }
+  }
+  
 }

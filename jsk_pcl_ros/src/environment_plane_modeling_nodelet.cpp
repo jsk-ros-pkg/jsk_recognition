@@ -1242,7 +1242,6 @@ namespace jsk_pcl_ros
     PolygonOnEnvironment::Request& req,
     PolygonOnEnvironment::Response& res)
   {
-    ROS_INFO("polygonOnEnvironmentCallback");
     if (req.environment_id != environment_id_ && req.environment_id != 0) { // 0 is always OK
       NODELET_FATAL("environment id does not match. %u is provided but the environment stored is %u",
                     req.environment_id,
@@ -1252,11 +1251,6 @@ namespace jsk_pcl_ros
     jsk_topic_tools::ScopedTimer timer = polygon_collision_check_time_acc_.scopedTimer();
     pcl::PointCloud<PointT>::Ptr sampled_point_cloud (new pcl::PointCloud<PointT>());
     samplePolygonToPointCloud(req.polygon, sampled_point_cloud, sampling_d_);
-
-    // sensor_msgs::PointCloud2 debug_sampled_pointcloud;
-    // toROSMsg(*sampled_point_cloud, debug_sampled_pointcloud);
-    // debug_sampled_pointcloud.header = processing_input_->header;
-    // debug_pointcloud_pub_.publish(debug_sampled_pointcloud);
 
     bool found_contact_plane = false;
     for (size_t plane_i = 0;

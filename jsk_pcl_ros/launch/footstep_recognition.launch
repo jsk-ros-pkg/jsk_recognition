@@ -195,6 +195,15 @@
   <node pkg="diagnostic_aggregator" type="aggregator_node"
         respawn="true"
         name="pcl_diagnostic_aggregator">
+    <rosparam>
+      pub_rate: 1.0
+      analyzers:
+        recognition:
+          type: diagnostic_aggregator/GenericAnalyzer
+          path: Footstep Recognition
+          startswith: 'organized_multi_plane_manager'
+          timeout: 10
+    </rosparam>
   </node>
   <node pkg="rqt_robot_monitor" type="rqt_robot_monitor"
         name="pcl_diagnostics_monitor" />

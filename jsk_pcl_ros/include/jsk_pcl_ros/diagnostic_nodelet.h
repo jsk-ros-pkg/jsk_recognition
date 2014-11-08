@@ -54,6 +54,8 @@ namespace jsk_pcl_ros
 
   protected:
     virtual void onInit();
+    virtual void updateDiagnosticRoot(
+      diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat) = 0;
 

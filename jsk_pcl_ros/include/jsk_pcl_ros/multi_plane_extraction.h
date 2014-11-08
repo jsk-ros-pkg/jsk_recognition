@@ -51,11 +51,11 @@
 #include "jsk_pcl_ros/pcl_util.h"
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <jsk_topic_tools/vital_checker.h>
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include "jsk_pcl_ros/diagnostic_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class MultiPlaneExtraction: public ConnectionBasedNodelet
+  class MultiPlaneExtraction: public DiagnosticNodelet
   {
   public:
     
@@ -65,6 +65,8 @@ namespace jsk_pcl_ros
     jsk_pcl_ros::ModelCoefficientsArray,
     jsk_pcl_ros::PolygonArray> SyncPolicy;
     typedef jsk_pcl_ros::MultiPlaneExtractionConfig Config;
+
+    MultiPlaneExtraction(): DiagnosticNodelet("MultiPlaneExtraction") { }
   protected:
     ////////////////////////////////////////////////////////
     // methods
@@ -98,8 +100,6 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // Diagnostics Variables
     ////////////////////////////////////////////////////////
-    TimeredDiagnosticUpdater::Ptr diagnostic_updater_;
-    jsk_topic_tools::VitalChecker::Ptr vital_checker_;
     Counter plane_counter_;
     
     ////////////////////////////////////////////////////////

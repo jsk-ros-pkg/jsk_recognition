@@ -123,7 +123,6 @@
   
   <node pkg="jsk_pcl_ros" type="environment_plane_modeling"
         name="env_server" respawn="true"
-        launch-prefix="xterm -e gdb --args"
         output="screen">
     <remap from="~input" to="transform_input/output" />
     <remap from="~indices" to="/ground_wall_separator/output/horizontal/inliers" />
@@ -149,17 +148,6 @@
         args="load jsk_pcl/TfTransformCloud $(arg MANAGER)">
     <remap from="~input" to="input_relay/output" />
     <param name="target_frame_id" value="$(arg BASE_FRAME_ID)" />
-  </node>
-
-
-  <node pkg="nodelet" type="nodelet" name="colorize_error"
-        machine="$(arg MACHINE)"
-        if="false"
-        args="load jsk_pcl/ColorizeDistanceFromPlane $(arg MANAGER)"
-        clear_params="false">
-    <remap from="~input" to="transform_input/output"/>
-    <remap from="~input_coefficients" to="/footstep_respected_to_odom/output_coefficients"/>
-    <remap from="~input_polygons" to="/footstep_respected_to_odom/output_polygons" />
   </node>
   
   <node pkg="nodelet" type="nodelet"
@@ -207,37 +195,16 @@
   <node pkg="diagnostic_aggregator" type="aggregator_node"
         respawn="true"
         name="pcl_diagnostic_aggregator">
+    <rosparam>
+      pub_rate: 1.0
+      analyzers:
+        recognition:
+          type: diagnostic_aggregator/GenericAnalyzer
+          path: Footstep Recognition
+          startswith: 'organized_multi_plane_manager'
+          timeout: 10
+    </rosparam>
   </node>
   <node pkg="rqt_robot_monitor" type="rqt_robot_monitor"
         name="pcl_diagnostics_monitor" />
-
-  <group if="$(arg SAVE_SELECTED_CLOUD)">
-    <node pkg="nodelet" type="nodelet" name="pointcloud_transform_in_box"
-          args="load jsk_pcl/TransformPointcloudInBoundingBox /$(arg MANAGER)">
-      <remap from="~input" to="/selected_pointcloud" />
-      <remap from="~input_box" to="/bounding_box_marker/selected_box" />
-    </node>
-    <node pkg="nodelet" type="nodelet" name="pcd_saver"
-          args="load pcl/PCDWriter /$(arg MANAGER)">
-      <remap from="~input" to="pointcloud_transform_in_box/output" />
-    </node>
-  </group>
-  <group if="$(arg ICP_REGISTRATION)">
-    <node pkg="nodelet" type="nodelet" name="icp_registration"
-          args="load jsk_pcl/ICPRegistration /$(arg MANAGER)">
-      <param name="align_box" value="true" />
-      <remap from="~input" to="/selected_pointcloud" />
-      <remap from="~input_box" to="/bounding_box_marker/selected_box" />
-      <remap from="~input_reference_array" to="pointcloud_server/output" />
-    </node>
-    <node pkg="nodelet" type="nodelet" name="pointcloud_server"
-          args="load jsk_pcl/PointcloudDatabaseServer /$(arg MANAGER)">
-      <rosparam subst_value="true">
-        pcds: ["$(find jsk_data)/pcds/cup_kinect.pcd",
-                 "$(find jsk_data)/pcds/hand_drill_kinect.pcd",
-                 "$(find jsk_data)/pcds/takenoko_drill_kinect.pcd",
-                 "$(find jsk_data)/pcds/ps3_controller_kinect.pcd"]
-      </rosparam>
-    </node>
-  </group>
 </launch>

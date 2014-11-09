@@ -113,6 +113,7 @@ namespace jsk_pcl_ros
   void OrganizedPassThrough::filter(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(*msg, *cloud);
     pcl::PointIndices::Ptr indices = filterIndices(msg);

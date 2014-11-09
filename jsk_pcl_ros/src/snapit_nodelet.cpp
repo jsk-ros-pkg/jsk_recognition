@@ -51,6 +51,7 @@
 #include <tf_conversions/tf_eigen.h>
 #include <eigen_conversions/eigen_msg.h>
 #include "jsk_pcl_ros/pcl_conversion_util.h"
+#include <algorithm>  
 
 namespace jsk_pcl_ros
 {
@@ -187,6 +188,7 @@ namespace jsk_pcl_ros
     Eigen::Vector3f original_point(pose.translation());
     Eigen::Vector3f projected_point;
     convex->project(original_point, projected_point);
+    
     Eigen::Vector3f normal = convex->getNormal();
     Eigen::Vector3f old_normal;
     old_normal[0] = pose(0, 2);
@@ -196,15 +198,25 @@ namespace jsk_pcl_ros
     if (normal.dot(old_normal) < 0) {
       normal = - normal;
     }
+    // Vertices vs = convex->getVertices();
+    // for (size_t i = 0; i < vs.size(); i++) {
+    //   NODELET_INFO("aligned vs: [%f, %f, %f]", vs[i][0], vs[i][1], vs[i][2]);
+    // }
+    // std::vector<float> coefficients;
+    // convex->toCoefficients(coefficients);
+    // NODELET_INFO("aligned c: [%f, %f, %f, %f]", coefficients[0], coefficients[1], coefficients[2], coefficients[3]);
     // NODELET_INFO("on: [%f, %f, %f]", old_normal[0], old_normal[1], old_normal[2]);
     // NODELET_INFO("n: [%f, %f, %f]", normal[0], normal[1], normal[2]);
     rot.setFromTwoVectors(old_normal, normal);
     
     //aligned_pose.rotate(rot);
     //aligned_pose.rotate(rot * aligned_pose.rotation());
-    aligned_pose.translation() = Eigen::Vector3f(0, 0, 0);
-    aligned_pose = rot * aligned_pose;
+    //aligned_pose.translation() = Eigen::Vector3f(0, 0, 0);
+    
+    aligned_pose = aligned_pose * rot;
     aligned_pose.translation() = projected_point;
+    //NODELET_INFO("projected_point: [%f, %f, %f]", projected_point[0], projected_point[1], projected_point[2]);
+    //aligned_pose.translation() = projected_point;
     Eigen::Affine3d aligned_posed;
     convertEigenAffine3(aligned_pose, aligned_posed);
     geometry_msgs::PoseStamped ret;
@@ -223,17 +235,35 @@ namespace jsk_pcl_ros
         geometry_msgs::PolygonStamped polygon = polygons->polygons[i];
         Vertices vertices;
         for (size_t j = 0; j < polygon.polygon.points.size(); j++) {
-          geometry_msgs::PointStamped in_point, out_point;
-          in_point.header.frame_id = polygon.header.frame_id;
-          in_point.header.stamp = stamp;
-          pointFromXYZToXYZ<geometry_msgs::Point32, geometry_msgs::Point>(
-            polygon.polygon.points[j], in_point.point);
-          tf_listener_->transformPoint(frame_id, in_point, out_point);
+          // geometry_msgs::PointStamped in_point, out_point;
+          // in_point.header.frame_id = polygon.header.frame_id;
+          // in_point.header.stamp = stamp;
+          Eigen::Vector4d p;
+          p[0] = polygon.polygon.points[j].x;
+          p[1] = polygon.polygon.points[j].y;
+          p[2] = polygon.polygon.points[j].z;
+          p[3] = 1;
+          // pointFromXYZToXYZ<geometry_msgs::Point32, geometry_msgs::Point>(
+          //   polygon.polygon.points[j], in_point.point);
+          //NODELET_INFO("%s -> %s", polygon.header.frame_id.c_str(), frame_id.c_str());
+          // tf_listener_->transformPoint(frame_id, in_point, out_point);
+          tf::StampedTransform transform;
+          tf_listener_->lookupTransform(polygon.header.frame_id, frame_id, stamp, transform);
+          Eigen::Affine3d eigen_transform;
+          tf::transformTFToEigen(transform, eigen_transform);
+          Eigen::Vector4d transformed_pointd = eigen_transform.inverse() * p;
+          //tf::transformTFToEigen(transform, eigen_transform);
+          
           Eigen::Vector3f transformed_point;
-          pointFromXYZToVector<geometry_msgs::Point, Eigen::Vector3f>(
-            out_point.point, transformed_point);
+          // pointFromXYZToVector<geometry_msgs::Point, Eigen::Vector3f>(
+          //   out_point.point, transformed_point);
+          transformed_point[0] = transformed_pointd[0];
+          transformed_point[1] = transformed_pointd[1];
+          transformed_point[2] = transformed_pointd[2];
+          //NODELET_INFO("v: [%f, %f, %f]", transformed_point[0], transformed_point[1], transformed_point[2]);
           vertices.push_back(transformed_point);
         }
+        std::reverse(vertices.begin(), vertices.end());
         ConvexPolygon::Ptr convex(new ConvexPolygon(vertices));
         result.push_back(convex);
       }

@@ -46,7 +46,7 @@ namespace jsk_pcl_ros
 
   void MultiPlaneExtraction::onInit()
   {
-    PCLNodelet::onInit();
+    DiagnosticNodelet::onInit();
     
     ////////////////////////////////////////////////////////
     // Publishers

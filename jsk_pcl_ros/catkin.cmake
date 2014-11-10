@@ -73,6 +73,7 @@ add_service_files(FILES SwitchTopic.srv
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/NormalDirectionFilter.cfg
   cfg/RegionGrowingMultiplePlaneSegmentation.cfg
   cfg/LineSegmentCollector.cfg
   cfg/LineSegmentDetector.cfg
@@ -249,6 +250,8 @@ jsk_pcl_nodelet(src/depth_calibration_nodelet.cpp
   "jsk_pcl/DepthCalibration" "depth_calibration")
 jsk_pcl_nodelet(src/tilt_laser_listener_nodelet.cpp
   "jsk_pcl/TiltLaserListener" "tilt_laser_listener")
+jsk_pcl_nodelet(src/normal_direction_filter_nodelet.cpp
+  "jsk_pcl/NormalDirectionFilter" "normal_direction_filter")
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp

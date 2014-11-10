@@ -746,38 +746,40 @@ namespace jsk_pcl_ros
       output_grid_maps[i] = new_grid;
     }
     // check the polygon is near enough
-    for (size_t i = 0; i < static_polygons->polygons.size(); i++) {
-      geometry_msgs::PolygonStamped candidate_polygon
-        = static_polygons->polygons[i];
-      PCLModelCoefficientMsg candidate_polygon_coefficients
-        = static_coefficients->coefficients[i];
-      int nearest_index = findCorrespondGridMap(
-        candidate_polygon_coefficients.values,
-        candidate_polygon.polygon);
-      if (nearest_index != -1) {
-        // there is a candidate to merge the polygon
-        // 1. sample polygon as pointcloud
-        // 2. project the pointcloud on to the grid map
-        // 3. add the points into the grid map
+    if (static_polygons) {
+      for (size_t i = 0; i < static_polygons->polygons.size(); i++) {
+        geometry_msgs::PolygonStamped candidate_polygon
+          = static_polygons->polygons[i];
+        PCLModelCoefficientMsg candidate_polygon_coefficients
+          = static_coefficients->coefficients[i];
+        int nearest_index = findCorrespondGridMap(
+          candidate_polygon_coefficients.values,
+          candidate_polygon.polygon);
+        if (nearest_index != -1) {
+          // there is a candidate to merge the polygon
+          // 1. sample polygon as pointcloud
+          // 2. project the pointcloud on to the grid map
+          // 3. add the points into the grid map
 
-        // 1. sample polygon as pointcloud
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr sampled_pointcloud
-          = samplePointCloudOnPolygon(
-            candidate_polygon,
-            candidate_polygon_coefficients);
-        // 2. project the pointcloud on to the grid map
-        GridMap::Ptr candidate_grid_map = output_grid_maps[nearest_index];
-        pcl::ModelCoefficients::Ptr grid_plane_coefficients (new pcl::ModelCoefficients);
-        grid_plane_coefficients->values = candidate_grid_map->getCoefficients();
-        pcl::ProjectInliers<pcl::PointXYZRGB> proj;
-        proj.setModelType (pcl::SACMODEL_PLANE);
-        proj.setInputCloud(sampled_pointcloud);
-        proj.setModelCoefficients(grid_plane_coefficients);
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-        proj.filter(*projected_cloud);
+          // 1. sample polygon as pointcloud
+          pcl::PointCloud<pcl::PointXYZRGB>::Ptr sampled_pointcloud
+            = samplePointCloudOnPolygon(
+              candidate_polygon,
+              candidate_polygon_coefficients);
+          // 2. project the pointcloud on to the grid map
+          GridMap::Ptr candidate_grid_map = output_grid_maps[nearest_index];
+          pcl::ModelCoefficients::Ptr grid_plane_coefficients (new pcl::ModelCoefficients);
+          grid_plane_coefficients->values = candidate_grid_map->getCoefficients();
+          pcl::ProjectInliers<pcl::PointXYZRGB> proj;
+          proj.setModelType (pcl::SACMODEL_PLANE);
+          proj.setInputCloud(sampled_pointcloud);
+          proj.setModelCoefficients(grid_plane_coefficients);
+          pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+          proj.filter(*projected_cloud);
 
-        // 3. add the points into the grid map
-        candidate_grid_map->registerPointCloud(projected_cloud);
+          // 3. add the points into the grid map
+          candidate_grid_map->registerPointCloud(projected_cloud);
+        }
       }
     }
   }
@@ -1121,25 +1123,31 @@ namespace jsk_pcl_ros
     // geometry_msgs::PolygonStamped target_polygon
     //   = processing_input_polygons_->polygons[plane_i];
     // sensor_msgs::PointCloud2 debug_env_pointcloud;
-    GridMap::Ptr grid = old_grid_maps_[plane_i];
-    Plane::Ptr grid_plane = grid->toPlanePtr();
-    for (size_t i = 0; i < sampled_point_cloud->points.size(); i++) {
-      PointT p = sampled_point_cloud->points[i];
-      Eigen::Vector3f p_eigen = p.getVector3fMap();
-      double d = grid_plane->distanceToPoint(p_eigen);
-      if (d < resolution_size_) {
-        //NODELET_INFO_STREAM("distance: " << d);
-        Eigen::Vector3f p_eigen_projected;
-        grid_plane->project(p_eigen, p_eigen_projected);
-        if (!grid->isBinsOccupied(p_eigen_projected)) {
-          return false;            // near enough!! hopefully...
+    if (old_grid_maps_.size() > plane_i) {
+      GridMap::Ptr grid = old_grid_maps_[plane_i];
+      Plane::Ptr grid_plane = grid->toPlanePtr();
+      for (size_t i = 0; i < sampled_point_cloud->points.size(); i++) {
+        PointT p = sampled_point_cloud->points[i];
+        Eigen::Vector3f p_eigen = p.getVector3fMap();
+        double d = grid_plane->distanceToPoint(p_eigen);
+        if (d < resolution_size_) {
+          //NODELET_INFO_STREAM("distance: " << d);
+          Eigen::Vector3f p_eigen_projected;
+          grid_plane->project(p_eigen, p_eigen_projected);
+          if (!grid->isBinsOccupied(p_eigen_projected)) {
+            return false;            // near enough!! hopefully...
+          }
+        }
+        else {
+          return false;
         }
       }
-      else {
-        return false;
-      }
+      return true;
     }
-    return true;
+    else {
+      NODELET_ERROR("[polygonNearEnoughToPointCloud] the specified polygon index is out of old_grid_maps");
+      return false;
+    }
   }
 
   // bool EnvironmentPlaneModeling::polygonNearEnoughToPointCloud(
@@ -1240,7 +1248,6 @@ namespace jsk_pcl_ros
     PolygonOnEnvironment::Request& req,
     PolygonOnEnvironment::Response& res)
   {
-    ROS_INFO("polygonOnEnvironmentCallback");
     if (req.environment_id != environment_id_ && req.environment_id != 0) { // 0 is always OK
       NODELET_FATAL("environment id does not match. %u is provided but the environment stored is %u",
                     req.environment_id,
@@ -1251,14 +1258,9 @@ namespace jsk_pcl_ros
     pcl::PointCloud<PointT>::Ptr sampled_point_cloud (new pcl::PointCloud<PointT>());
     samplePolygonToPointCloud(req.polygon, sampled_point_cloud, sampling_d_);
 
-    // sensor_msgs::PointCloud2 debug_sampled_pointcloud;
-    // toROSMsg(*sampled_point_cloud, debug_sampled_pointcloud);
-    // debug_sampled_pointcloud.header = processing_input_->header;
-    // debug_pointcloud_pub_.publish(debug_sampled_pointcloud);
-
     bool found_contact_plane = false;
     for (size_t plane_i = 0;
-         plane_i < processing_input_polygons_->polygons.size();
+         plane_i < old_grid_maps_.size();
          plane_i++) {
       debug_polygon_pub_.publish(req.polygon);
       if (polygonNearEnoughToPointCloud(plane_i, sampled_point_cloud)) {

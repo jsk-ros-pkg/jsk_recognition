@@ -381,7 +381,8 @@ namespace jsk_pcl_ros
   {
     // double alpha = - p.dot(normal_);
     // output = p + alpha * normal_;
-    double alpha = p.dot(normal_) - d_;
+    double alpha = p.dot(normal_) + d_;
+    //double alpha = p.dot(normal_) - d_;
     output = p - alpha * normal_;
   }
 
@@ -849,9 +850,16 @@ namespace jsk_pcl_ros
     Eigen::Vector3f direction0 = (B0 - A0).normalized();
     Eigen::Vector3f direction20 = (p - A0).normalized();
     bool direction_way = direction0.cross(direction20).dot(normal_) > 0;
-    for (size_t i = 1; i < vertices_.size() - 1; i++) {
+    for (size_t i = 1; i < vertices_.size(); i++) {
       Eigen::Vector3f A = vertices_[i];
-      Eigen::Vector3f B = vertices_[i + 1];
+      //Eigen::Vector3f B = vertices_[i + 1];
+      Eigen::Vector3f B;
+      if (i != vertices_.size() - 1) {
+        B = vertices_[i + 1];
+      }
+      else {
+        B = vertices_[0];
+      }
       Eigen::Vector3f direction = (B - A).normalized();
       Eigen::Vector3f direction2 = (p - A).normalized();
       if (direction_way) {

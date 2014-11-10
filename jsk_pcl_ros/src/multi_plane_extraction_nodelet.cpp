@@ -46,25 +46,7 @@ namespace jsk_pcl_ros
 
   void MultiPlaneExtraction::onInit()
   {
-    PCLNodelet::onInit();
-
-    ////////////////////////////////////////////////////////
-    // Diagnostics
-    ////////////////////////////////////////////////////////
-    diagnostic_updater_.reset(
-      new TimeredDiagnosticUpdater(*pnh_, ros::Duration(1.0)));
-    diagnostic_updater_->setHardwareID(getName());
-    diagnostic_updater_->add(
-      getName() + "::MultiPlaneExtraction",
-      boost::bind(
-        &MultiPlaneExtraction::updateDiagnostic,
-        this,
-        _1));
-    double vital_rate;
-    pnh_->param("vital_rate", vital_rate, 1.0);
-    vital_checker_.reset(
-      new jsk_topic_tools::VitalChecker(1 / vital_rate));
-    diagnostic_updater_->start();
+    DiagnosticNodelet::onInit();
     
     ////////////////////////////////////////////////////////
     // Publishers

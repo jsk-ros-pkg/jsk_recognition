@@ -9,26 +9,17 @@
           output="screen" clear_params="true">
       <remap from="~input" to="$(arg input_point)" />
       <rosparam>
-        filter_limit_max: 5.0
-        leaf_size: 0.05
-      </rosparam>
-    </node>
-     <node pkg="nodelet" type="nodelet"
-          name="passthrough_z"
-          args="load pcl/PassThrough $(arg manager)"
-          output="screen" clear_params="true">
-      <remap from="~input" to="/pcl_nodelet/voxelgrid/output" />
-      <rosparam>
         filter_field_name: z
         filter_limit_min: 0.0
         filter_limit_max: 5.0
+        leaf_size: 0.01
       </rosparam>
     </node>
      <node pkg="nodelet" type="nodelet"
           name="clustering"
           args="load jsk_pcl/EuclideanClustering $(arg manager)"
           output="screen" clear_params="true">
-      <remap from="~input" to="/pcl_nodelet/passthrough_z/output" />
+      <remap from="~input" to="/pcl_nodelet/voxelgrid/output" />
       <rosparam>
          tolerance: 0.1
       </rosparam>
@@ -37,7 +28,7 @@
           name="cluster_decomposer"
           args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis $(arg manager)"
           output="screen" clear_params="true">
-      <remap from="~input" to="/pcl_nodelet/passthrough_z/output" />
+      <remap from="~input" to="/pcl_nodelet/voxelgrid/output" />
       <remap from="~target" to="/pcl_nodelet/clustering/output" />
       <rosparam>
       </rosparam>

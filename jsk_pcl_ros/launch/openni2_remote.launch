@@ -3,7 +3,7 @@
   <arg name="depth_camera_info_url" default="" />
   <arg name="rgb_frame_id"   default="/camera_rgb_optical_frame" />
   <arg name="depth_frame_id" default="/camera_depth_optical_frame" />
-  <arg name="depth_calibration_file" default="" />
+  <arg name="depth_calibration_file" default="$(find jsk_pcl_ros)/config/default_depth_calibration_parameter.yaml" />
   <group>       <!--group only for remapping-->
     <remap from="/camera_remote_uncalibrated/depth/image_raw" 
            to="/camera/depth/image_raw"/>

@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.24 (2014-11-15)
+-------------------
 * servicecall
 * Use intrinsicMatrix instead of projectionMatrix to specify 3x3 matrix(K)
   instead of 4x3 matrix(P)

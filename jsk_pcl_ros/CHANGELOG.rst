@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.24 (2014-11-15)
+-------------------
 * Add default calibration file for openni2_remote.launch
 * remove unneeded nodelet part
   change param

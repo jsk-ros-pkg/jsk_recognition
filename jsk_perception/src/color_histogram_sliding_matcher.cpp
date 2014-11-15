@@ -3,12 +3,14 @@
 #include <rospack/rospack.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <jsk_perception/Rect.h>
-#include <sensor_msgs/image_encodings.h>
-#include <sensor_msgs/Image.h>
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
 #include <boost/thread/mutex.hpp>
+#include <dynamic_reconfigure/server.h>
+#include <sensor_msgs/image_encodings.h>
+#include <sensor_msgs/Image.h>
+#include <jsk_perception/Rect.h>
+#include <jsk_perception/ColorHistogramSlidingMatcherConfig.h>
 
 using namespace std;
 using namespace ros;
@@ -249,6 +251,15 @@ public:
       cv::imshow("result", image);
       cv::imshow("template", template_images[template_index]);
       cv::waitKey(20);
+    } 
+  }
+  void dyn_conf_callback(jsk_perception::ColorHistogramSlidingMatcherConfig &config, uint32_t level){
+    boost::mutex::scoped_lock lock(_mutex);
+    standard_height = config.standard_height;
+    standard_width = config.standard_width;
+    coefficient_thre = config.coefficient_threshold;
+    if(level==1){ // size changed
+      
     }
   }
 };
@@ -284,6 +295,7 @@ inline bool in_boxes(int x, int y, int dx, int dy,  std::vector<box> boxes){
     }
   }
   return false;
+  
 }
 
 int main(int argc, char **argv){
@@ -291,7 +303,10 @@ int main(int argc, char **argv){
 
   MatcherNode matcher;
 
-  ros::Rate r(10); // 10 hz
+  dynamic_reconfigure::Server<jsk_perception::ColorHistogramSlidingMatcherConfig> server;
+  dynamic_reconfigure::Server<jsk_perception::ColorHistogramSlidingMatcherConfig>::CallbackType f;
+  f = boost::bind(&MatcherNode::dyn_conf_callback, &matcher, _1, _2);
+  server.setCallback(f);  
   ros::spin();
   return 0;
 }

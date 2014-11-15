@@ -39,7 +39,7 @@ gencfg()
 #target_link_libraries(example ${PROJECT_NAME})
 
 find_package(OpenCV REQUIRED)
-FIND_PACKAGE( OpenMP REQUIRED)
+find_package( OpenMP REQUIRED)
 if(OPENMP_FOUND)
 message("OPENMP FOUND")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")

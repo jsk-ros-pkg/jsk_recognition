@@ -2,6 +2,90 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add default calibration file for openni2_remote.launch
+* remove unneeded nodelet part
+  change param
+* added launch that calc plane with pr2_laser
+* Fix polygon projection and confirm that snapit works
+* Fix MultiPlaneExtraction initialization
+* Update SnapIt to use topic interface and reimplement it only for snap on polygon
+* Fix segv in collision checking
+* Fix OrganizedMultiPlaneSegmentation indexing
+* Update diagnostics aggregator settings for footstep_recognition
+* Fix diagnostic information when there is no subscriber
+* Suppress message from EnvironmentPlaneModeling
+* Add document about MultiPlaneExtraction
+* Check the pointer is correctly set to avoid SEGV
+* Add normal direction filter based on Imu direction
+* Update OrganizedMultiPlaneDetection documentation
+* Add new nodelet: region growing based multiple plane detection
+* use this->erase
+* Add imu hint when running MultiPlaneSACSegmentation
+* Add short documentation about OrganizedMultiPlaneSegmentation
+* Update document about CentroidPublisher
+* Add documentation about jsk_pcl/ClusterPointIndicesDecomposerZAxis
+* Add moveit plugin to just filter pointcloud which belongs to robot
+* Add nodelet to handle time range of rotating laser
+* removed passthrough filter
+* rename file name from error_visualize to pr2_pointcloud_error_visualizatoin
+* Support cluster information in MultiplePlaneSACSegmentation and remove
+  plane estimation from LineSegmentCollector
+* restored codes slightly
+* added icp_result_msgs and srvs
+* change launch file path
+* add launch files for visualizing calibration error
+* Add nodelet to handle time range of rotating laser
+* Fix Polygon::decomposeToTriangles if the original polygon is already a triangle
+* Remove single_nodelet_exec.cpp.in
+* Add documentation about ClusterPointIndicesDecomposer
+* Add image to documentation of EuclideanClustering
+* Add documentation about EuclideanSegmentation
+* Add documentation about DepthImageCreator
+* Add documentation about PointcloudScreenpoint
+* Support specifying yaml file to calibrate depth image on openni2_remote.launch
+* Format calibration model on DepthCalibration
+* For precision requirement, use repr function when generating yaml file
+  for depth image calibration
+* Support quadratic model for u and v to calibrate depth image:
+  1. Support quadratic-uv-quadratic and quadratic-uv-quadratic-abs model
+  2. use SetDepthCalibrationParameter.srv to specify depth calibration parameter
+* Downsize frequency map resolution and add --width and --height option to
+  depth_error_calibration.py
+* Update depth calibration program.
+  1. Fix checkerboard_detector to publish correct corner point
+  2. Calibrate depth_image rather than PointCloud
+  3. Use matplotlib animation to visualize graph in depth_error_calibration.py
+* support new model to calibrate kinect like sensor, which use absolute
+  value respected to center coordinate of projectoin matrix
+* Support quadratic-uv-abs model
+* Add service file: DepthCalibrationParameter
+* Add nodelet to apply calibration parameter to pointcloud. and add
+  new model to calibrate: quadratic-uv
+* Support quadratic function fitting in depth_error_calibration.py
+* Add python script to calibrate depth error of depth sensors
+* Merge remote-tracking branch 'refs/remotes/origin/master' into add-document-about-resize-points
+  Conflicts:
+  jsk_pcl_ros/README.md
+* Add script to run logistic regression for depth error
+* Add documentation about ResizePointCloud
+* Merge remote-tracking branch 'refs/remotes/origin/master' into remove-color-category20-from-jsk-pcl-ros
+  Conflicts:
+  jsk_pcl_ros/include/jsk_pcl_ros/pcl_util.h
+* Remove colorCategory20 from jsk_pcl_ros and use jsk_topic_tools' colorCategory20
+* Fix syntax of README.md of jsk_pcl_ros
+* Add documentation about ResizePointCloud
+* Add documentation about typical messages defined in jsk_pcl_ros
+* Extract multi planes out of collected segmented lines from laserrange finder
+* add new nodelet: LienSegmentCollector
+* Add LineSegmentDetector for LRF pointcloud
+* Use dynamic reconfigure to specify several parameters for ParticleFilterTracking
+* Support contiuous model building on EnvironmentPlaneModeling and add
+  a launch file for footstep planning recogniton
+* Add utitlity service interface to register completed maps
+* Contributors: JSK applications, Kei Okada, Ryohei Ueda, Yu Ohara, Yuto Inagaki, Chi Wun Au, Yu Ohara
+
 0.1.23 (2014-10-09)
 -------------------
 * Use pcl::EarClip to decompose polygon into triangles

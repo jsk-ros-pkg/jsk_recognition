@@ -2,6 +2,16 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update depth calibration program.
+  1. Fix checkerboard_detector to publish correct corner point
+  2. Calibrate depth_image rather than PointCloud
+  3. Use matplotlib animation to visualize graph in depth_error_calibration.py
+* Publish checker board region as jsk_pcl_ros/PolygonArray
+* Publish geometry_msgs/PoseStamped from checkerboard_detector
+* Contributors: Ryohei Ueda
+
 0.1.23 (2014-10-09)
 -------------------
 

@@ -73,12 +73,12 @@ namespace jsk_pcl_ros
       double z2 = z * z;
       double uu, vv;
       if (use_abs_) {
-        uu = std::abs(u - cu);
-        vv = std::abs(v - cv);
+        uu = uv_scale_ * std::abs(u - cu);
+        vv = uv_scale_ * std::abs(v - cv);
       }
       else {
-        uu = u;
-        vv = v;
+        uu = uv_scale_ * u;
+        vv = uv_scale_ * v;
       }
       double c2 = coefficients2_[0] * uu * uu + coefficients2_[1] * uu +
         coefficients2_[2] * vv * vv + coefficients2_[3] * vv + 
@@ -104,6 +104,7 @@ namespace jsk_pcl_ros
     
     // parameters
     bool use_abs_;
+    double uv_scale_;
     std::vector<double> coefficients2_;
     std::vector<double> coefficients1_;
     std::vector<double> coefficients0_;

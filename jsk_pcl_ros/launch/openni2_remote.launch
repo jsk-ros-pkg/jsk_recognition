@@ -3,12 +3,12 @@
   <arg name="depth_camera_info_url" default="" />
   <arg name="rgb_frame_id"   default="/camera_rgb_optical_frame" />
   <arg name="depth_frame_id" default="/camera_depth_optical_frame" />
-  <arg name="depth_calibration_file" default="" />
   <arg name="half_step" default="2" />
   <arg name="quater_step" default="4" />
   <arg name="color_half_scale" default="0.5" />
   <arg name="color_quater_scale" default="0.25" />
   <arg name="uv_scale" default="1.0"  />
+  <arg name="depth_calibration_file" default="$(find jsk_pcl_ros)/config/default_depth_calibration_parameter.yaml" />
   <group>       <!--group only for remapping-->
     <remap from="/camera_remote_uncalibrated/depth/image_raw" 
            to="/camera/depth/image_raw"/>

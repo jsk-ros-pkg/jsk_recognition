@@ -1,0 +1,377 @@
+<launch>
+  <arg name="BASE_FRAME_ID" default="odom" />
+  <arg name="RUN_SELF_FILTER" default="false"/>
+  <arg name="SELF_FILTER_PARAM" default="$(find jsk_pr2_startup)/jsk_pr2_sensors/tilt_self_filter.yaml" />
+  <arg name="JOINT_STATIC_FILTER" default="false" />
+  <arg name="FILTER_JOINT_PARAM" value="$(find jsk_pcl_ros)/config/pr2_sensor_joint.yaml" />
+  <arg name="INPUT" default="/camera/depth_registered/points" />
+  <arg name="ICP_REGISTRATION" default="false" />
+  <arg name="MODEL_FILE" default="$(find jsk_data)/pcds/hand_drill_kinect.pcd" />
+  <arg name="LAUNCH_MANAGER" default="true" />
+  <arg name="MANAGER" default="multi_plane_manager" />
+  <arg name="ESTIMATE_OCCLUSION" default="false" />
+  <arg name="COLOR_HISTOGRAM" default="false" />
+  <arg name="HANDLE_ESTIMATOR" default="false" />
+  <arg name="MACHINE" default="localhost"/>
+  <arg name="GDB" default="false" />
+  <arg name="SAVE_SELECTED_CLOUD" default="false" />
+  <machine name="localhost" address="localhost" />
+
+
+  <node pkg="laser_assembler" type="laser_scan_assembler"
+         name="laser_scan_assembler_node"
+         machine="$(arg MACHINE)"
+         output="screen" >
+     <remap from="scan" to="/tilt_scan"/>
+     <param name="tf_cache_time_secs" value="30" />
+     <param name="max_scans" type="int" value="3000" />
+     <param name="fixed_frame" type="string" value="/base_link"/>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="$(arg MANAGER)"
+        machine="$(arg MACHINE)"
+        args="manager" output="screen"/>
+  <node pkg="nodelet" type="nodelet"
+        name="tilt_laser_listener"
+        machine="$(arg MACHINE)"
+        args="load jsk_pcl/TiltLaserListener $(arg MANAGER)"
+        output="screen">
+    <remap from="~input" to="/joint_states" />
+    <rosparam>
+      laser_type: tilt_half_down
+      joint_name: laser_tilt_mount_joint
+      use_laser_assembler: true
+    </rosparam>
+    <remap from="~assemble_scans2" to="/assemble_scans2" />
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        name="xfilter"
+        machine="$(arg MACHINE)"
+        args="load pcl/PassThrough $(arg MANAGER)">
+    <remap from="~input" to="tilt_laser_listener/output_cloud" />
+    <rosparam>
+      filter_field_name: x
+      filter_limit_min: -2.0
+      filter_limit_max: 2.0
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        name="yfilter"
+        machine="$(arg MACHINE)"
+        args="load pcl/PassThrough $(arg MANAGER)">
+    <remap from="~input" to="xfilter/output" />
+    <rosparam>
+      filter_field_name: y
+      filter_limit_min: -2.0
+      filter_limit_max: 2.0
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        name="zfilter"
+        machine="$(arg MACHINE)"
+        args="load pcl/PassThrough $(arg MANAGER)">
+    <remap from="~input" to="yfilter/output" />
+    <rosparam>
+      filter_field_name: z
+      filter_limit_min: -2.0
+      filter_limit_max: 2.0
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet"
+        args="load pcl/VoxelGrid $(arg MANAGER)"
+        machine="$(arg MACHINE)"
+        name="voxel_grid">
+    <remap from="~input" to="zfilter/output"/>
+    <rosparam>
+      leaf_size: 0.01
+      filter_limit_min: -10.0
+      filter_limit_max: 10.0
+    </rosparam>
+  </node>
+  
+  <node pkg="nodelet" type="nodelet"
+        args="load pcl/NormalEstimationOMP $(arg MANAGER)"
+        machine="$(arg MACHINE)"
+        name="normal_estimation">
+    <remap from="~input" to="voxel_grid/output" />
+    <rosparam>
+      radius_search: 0
+      k_search: 40
+      # 0, => ANN, 1 => FLANN, 2 => Organized
+      spatial_locator: 2
+    </rosparam>
+  </node>
+
+  
+  <node pkg="nodelet" type="nodelet" name="normal_concat"
+        args="load jsk_pcl/NormalConcatenater $(arg MANAGER)"
+        machine="$(arg MACHINE)"
+        clear_params="true">
+    <remap from="~input" to="voxel_grid/output"/>
+    <remap from="~normal" to="normal_estimation/output"/>
+  </node>
+
+  
+  
+  <node pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/RegionGrowingMultiplePlaneSegmentation $(arg MANAGER)"
+        machine="$(arg MACHINE)"
+        name="multi_plane_region_growing">
+    <remap from="~input" to="voxel_grid/output" />
+    <remap from="~input_normal" to="normal_estimation/output" />
+    <rosparam>
+      cluster_tolerance: 0.1
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/MultiPlaneSACSegmentation $(arg MANAGER)"
+        machine="$(arg MACHINE)"
+        name="multi_plane_sac_segmentation">
+    <remap from="~input" to="voxel_grid/output" />
+    <remap from="~input_clusters" to="multi_plane_region_growing/output/inliers" />
+    <remap from="~input_normal" to="normal_estimation/output" />
+    <rosparam>
+      use_imu_parallel: false
+      use_imu_perpendicular: false
+      use_normal: false
+      use_clusters: true
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)"
+        name="multi_plane_region_growing_decomposer">
+        machine="$(arg MACHINE)"
+    <remap from="~input" to="voxel_grid/output" />
+    <remap from="~target" to="multi_plane_region_growing/output/inliers" />
+    <rosparam>
+      publish_tf: false
+      publish_clouds: false
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/NormalDirectionFilter $(arg MANAGER)"
+        machine="$(arg MACHINE)"
+        name="normal_direction_filter">
+    <remap from="~input" to="normal_estimation/output" />
+    <remap from="~input_imu" to="/multisense/imu/imu_data" />
+    <rosparam>
+      use_imu: true
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        args="load pcl/ExtractIndices $(arg MANAGER)"
+        machine="$(arg MACHINE)"
+        name="normal_direction_filtered_cloud">
+    <remap from="~input" to="voxel_grid/output" />
+    <remap from="~indices" to="normal_direction_filter/output" />
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        name="plane_extraction"
+        args="load jsk_pcl/MultiPlaneExtraction $(arg MANAGER)"
+        output="screen">
+    <remap from="~input" to="voxel_grid/output" />
+    <remap from="~indices" to="/multi_plane_region_growing/output/inliers" />
+    <remap from="~input_polygons" to="/multi_plane_region_growing/output/polygons" />
+    <remap from="~input_coefficients" to="/multi_plane_region_growing/output/coefficients" />
+  </node>
+    
+  <node pkg="nodelet" type="nodelet" name="euclidean_clustering"
+                machine="$(arg MACHINE)"
+        args="load jsk_pcl/EuclideanClustering /$(arg MANAGER)" output="screen">
+    <remap from="~input" to="/plane_extraction/output" />
+    <rosparam>
+      tolerance: 0.02
+      min_size: 100
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet"
+        name="cluster_decomposer_final"
+        machine="$(arg MACHINE)"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer /$(arg MANAGER)"
+        output="screen">
+    <remap from="~input" to="/plane_extraction/output" />
+    <remap from="~target" to="/euclidean_clustering/output_throttle" />
+    <remap from="~align_planes" to="/multi_plane_region_growing/output/polygons" />
+    <remap from="~align_planes_coefficients"
+           to="/multi_plane_region_growing/output/coefficients" />
+    <rosparam>
+      align_boxes: true
+      use_pca: true
+      publish_clouds: false
+    </rosparam>
+  </node>
+  <node name="bounding_box_filter"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/BoundingBoxFilter /$(arg MANAGER)">
+    <remap from="~input_box" to="cluster_decomposer_final/boxes" />
+    <remap from="~input_indices" to="euclidean_clustering/output_throttle" />
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        name="throttle_segmentation"
+        args="load jsk_topic_tools/LightweightThrottle /$(arg MANAGER)"
+        output="screen">
+    <remap from="~input" to="euclidean_clustering/output" />
+    <remap from="~output" to="euclidean_clustering/output_throttle" />
+  </node>
+  <node pkg="jsk_interactive_marker"
+        type="bounding_box_marker"
+        machine="$(arg MACHINE)"
+        name="bounding_box_marker"
+        output="screen"
+        >
+    <remap from="~bounding_box_array" to="cluster_decomposer_final/boxes" />
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        name="selected_cloud"
+        machine="$(arg MACHINE)"
+        args="load jsk_pcl/SelectedClusterPublisher /$(arg MANAGER)"
+        output="screen">
+    <remap from="~input" to="/plane_extraction/output" />
+    <remap from="~indices" to="/euclidean_clustering/output" />
+    <remap from="~selected_index" to="/bounding_box_marker/selected_index" />
+    <remap from="~output" to="/selected_pointcloud" />
+  </node>
+  <node pkg="nodelet" type="nodelet" name="estimated_plane_respected_to_odom"
+          args="load jsk_pcl/PolygonArrayTransformer /$(arg MANAGER)">
+      <remap from="~input_polygons" to="multi_plane_estimate/output_refined_polygon" />
+      <remap from="~input_coefficients" to="multi_plane_estimate/output_refined_coefficients" />
+      <param name="frame_id" value="CHEST_LINK1" />
+    </node>
+
+  <group if="$(arg COLOR_HISTOGRAM)">
+    <node pkg="nodelet" type="nodelet" name="color_histogram"
+          args="load jsk_pcl/ColorHistogramMatcher /$(arg MANAGER)"
+          machine="$(arg MACHINE)"
+          output="screen">
+      <!-- <remap from="~input" to="/plane_extraction/output" />-->
+      <remap from="~input" to="input_relay/output"/>
+      <remap from="~input_indices" to="grid_sampler/output" />
+      <!-- <remap from="~input_indices" to="euclidean_clustering/output" /> -->
+      <remap from="~input_reference_cloud" to="/selected_pointcloud" />
+      <rosparam>
+        bin_size: 20
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="grid_sampler"
+          args="load jsk_pcl/GridSampler /$(arg MANAGER)"
+          machine="$(arg MACHINE)"
+          output="screen">
+      <!-- <remap from="~input" to="/plane_extraction/output" /> -->
+      <remap from="~input" to="input_relay/output"/>
+      <rosparam>
+        grid_size: 0.1
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="grid_sample_decompose"
+          machine="$(arg MACHINE)"
+          args="load jsk_pcl/ClusterPointIndicesDecomposer /$(arg MANAGER)"
+          output="screen">
+      <!-- <remap from="~input" to="/plane_extraction/output" /> -->
+      <remap from="~input" to="input_relay/output"/>
+      <remap from="~target" to="grid_sampler/output" />
+      <rosparam>
+        publish_clouds: false
+        publish_tf: false
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="match_result"
+          machine="$(arg MACHINE)"
+          args="load jsk_pcl/ClusterPointIndicesDecomposer /$(arg MANAGER)"
+          output="screen">
+      <!-- <remap from="~input" to="/plane_extraction/output" /> -->
+      <remap from="~input" to="input_relay/output"/>
+      <remap from="~target" to="color_histogram/output" />
+      <rosparam>
+        publish_clouds: false
+      </rosparam>
+    </node>
+  </group>
+  <node pkg="nodelet" type="nodelet" name="handle_estimator"
+        if="$(arg HANDLE_ESTIMATOR)"
+        machine="$(arg MACHINE)"
+        args="load jsk_pcl/HandleEstimator /$(arg MANAGER)">
+    <remap from="~input" to="input_relay/output" />
+    <remap from="~input_box" to="/bounding_box_marker/selected_box" />
+    <rosparam>
+      approach_offset: 0.1
+    </rosparam>
+  </node>
+    <group if="$(arg ESTIMATE_OCCLUSION)">
+      <node pkg="nodelet" type="nodelet" name="transform_input"
+            machine="$(arg MACHINE)"
+            args="load jsk_pcl/TfTransformCloud $(arg MANAGER)">
+        <remap from="~input" to="input_relay/output" />
+        <param name="target_frame_id" value="$(arg BASE_FRAME_ID)" />
+      </node>
+    <include file="$(find jsk_pcl_ros)/launch/hrp2jsknt_footstep_polygon.launch">
+      <arg name="LAUNCH_MANAGER" value="false" />
+      <arg name="MANAGER" value="$(arg MANAGER)" />
+    </include>
+    <node pkg="nodelet" type="nodelet" name="footstep_respected_to_odom"
+          args="load jsk_pcl/PolygonArrayTransformer /$(arg MANAGER)">
+      <remap from="~input_polygons" to="footstep_polygon_publisher/output_polygons" />
+      <remap from="~input_coefficients" to="footstep_polygon_publisher/output_coefficients" />
+      <param name="frame_id" value="$(arg BASE_FRAME_ID)" />
+    </node>
+    <node pkg="nodelet" type="nodelet" name="estimated_plane_respected_to_odom"
+          args="load jsk_pcl/PolygonArrayTransformer /$(arg MANAGER)">
+      <remap from="~input_polygons" to="multi_plane_estimate/output_refined_polygon" />
+      <remap from="~input_coefficients" to="multi_plane_estimate/output_refined_coefficients" />
+      <param name="frame_id" value="$(arg BASE_FRAME_ID)" />
+    </node>
+    <node pkg="nodelet" type="nodelet" name="env_server"
+          output="screen"
+          args="load jsk_pcl/EnvironmentPlaneModeling /$(arg MANAGER)" >
+      <remap from="~input" to="transform_input/output" />
+      <remap from="~indices" to="/multi_plane_estimate/output_refined" />
+      <remap from="~input_polygons" to="/estimated_plane_respected_to_odom/output_polygons" />
+      <remap from="~input_coefficients" to="/estimated_plane_respected_to_odom/output_coefficients" />
+      <remap from="~input_static_polygons" to="/footstep_respected_to_odom/output_polygons" />
+      <remap from="~input_static_coefficients" to="/footstep_respected_to_odom/output_coefficients" />
+    </node>
+    <include file="$(find jsk_footstep_controller)/launch/hrp2jsknt_real.launch">
+      <arg name="USE_PLANE" value="true" />
+    </include>
+  </group>
+  <node pkg="diagnostic_aggregator" type="aggregator_node"
+        respawn="true"
+        name="pcl_diagnostic_aggregator">
+  </node>
+  <node pkg="rqt_robot_monitor" type="rqt_robot_monitor"
+        name="pcl_diagnostics_monitor" />
+
+  <group if="$(arg SAVE_SELECTED_CLOUD)">
+    <node pkg="nodelet" type="nodelet" name="pointcloud_transform_in_box"
+          args="load jsk_pcl/TransformPointcloudInBoundingBox /$(arg MANAGER)">
+      <remap from="~input" to="/selected_pointcloud" />
+      <remap from="~input_box" to="/bounding_box_marker/selected_box" />
+    </node>
+    <node pkg="nodelet" type="nodelet" name="pcd_saver"
+          args="load pcl/PCDWriter /$(arg MANAGER)">
+      <remap from="~input" to="pointcloud_transform_in_box/output" />
+    </node>
+  </group>
+  <group if="$(arg ICP_REGISTRATION)">
+    <node pkg="nodelet" type="nodelet" name="icp_registration"
+          args="load jsk_pcl/ICPRegistration /$(arg MANAGER)">
+      <param name="align_box" value="true" />
+      <remap from="~input" to="/selected_pointcloud" />
+      <remap from="~input_box" to="/bounding_box_marker/selected_box" />
+      <remap from="~input_reference_array" to="pointcloud_server/output" />
+    </node>
+    <node pkg="nodelet" type="nodelet" name="pointcloud_server"
+          args="load jsk_pcl/PointcloudDatabaseServer /$(arg MANAGER)">
+      <rosparam subst_value="true">
+        pcds: ["$(find jsk_data)/pcds/cup_kinect.pcd",
+                 "$(find jsk_data)/pcds/hand_drill_kinect.pcd",
+                 "$(find jsk_data)/pcds/takenoko_drill_kinect.pcd",
+                 "$(find jsk_data)/pcds/ps3_controller_kinect.pcd"]
+      </rosparam>
+    </node>
+  </group>
+
+</launch>

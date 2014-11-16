@@ -2,6 +2,12 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.24 (2014-11-15)
+-------------------
+* use ifdef not if for OPENCV_NON_FREE
+* use OPENCV_NON_FREE option, 14.04 does not provide nonfree libraries
+* Contributors: Kei Okada
+
 0.1.23 (2014-10-09)
 -------------------
 * added codes to check how long it takes to calc keypoints

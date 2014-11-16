@@ -2,6 +2,9 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.24 (2014-11-15)
+-------------------
+
 0.1.23 (2014-10-09)
 -------------------
 * Install nodelet executables

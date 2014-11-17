@@ -25,7 +25,7 @@
 
 (defun detection-interface-objectdetection (force target-obj msg)
   (let ((obj-lst (send msg :objects))
-        ;;(av (send *pr2* :angle-vector))                                                                                                                                                                    
+        ;;(av (send *pr2* :angle-vector))
         (frame (send msg :header :frame_id))
         (tp (get target-obj :type))
         stamp trans)
@@ -33,7 +33,7 @@
                    tp (stringp tp) frame target-obj)
     (dolist (obj obj-lst)
       (when (or (not (stringp tp))
-                (substringp tp (send obj :type))) ;; found target                                                                                                                                            
+                (substringp tp (send obj :type))) ;; found target
         (setq stamp (if force (ros::time 0) (send msg :header :stamp)))
         (cond
          (*solve-tf*
@@ -52,18 +52,18 @@
           (send target-obj :name (send obj :type))
           (send target-obj :stamp (send msg :header :stamp))
           (send target-obj :frame_id (send msg :header :frame_id))
-          ;; (send *pr2* :angle-vector (send *ri* :state :potentio-vector))                                                                                                                                  
+          ;; (send *pr2* :angle-vector (send *ri* :state :potentio-vector))
           (send target-obj :reset-coords)
           (send target-obj :move-to trans :local)
           (send target-obj :move-to (ros::tf-pose->coords (send obj :pose)) :local)
           (when (find-method target-obj :update-descendants)
-            (send target-obj :update-descendants) ;; clean me                                                                                                                                                
+            (send target-obj :update-descendants) ;; clean me
             )
           (unless (boundp '*tfb*)
             (setq *tfb* (instance ros::transform-broadcaster :init)))
           (send *tfb* :send-transform (ros::tf-pose->coords (send obj :pose)) frame (send target-obj :name))
-          ;; target-obj should be on *base-frame-id* coordinates                                                                                                                                             
-          ;; (send *pr2* :angle-vector av)                                                                                                                                                                   
+          ;; target-obj should be on *base-frame-id* coordinates
+          ;; (send *pr2* :angle-vector av)
           ))
       )
     ))
@@ -97,7 +97,7 @@
                                            :stamp (send target-obj :stamp)
                                            :frame_id *base-frame-id*)
                                  :ns (format nil "object_coords_~A" (send target-obj :name))
-                                 ;; :size 200 :width 20                                                                                                                                                      
+                                 ;; :size 200 :width 20
                                  :lifetime marker-life :id 1)
                                 (object->marker-msg
                                  target-obj

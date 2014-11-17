@@ -238,7 +238,7 @@
         (tmp-coords (instance posedetection_msgs::Object6DPose :init))
         ts)
     (send tmp-coords :pose :orientation :w 1)
-    (send tmp-coords :prob 0.5)
+    (send tmp-coords :reliability 0.5)
 
     (unless (boundp '*tfl*)
       (setq *tfl* (instance ros::transform-listener :init)))
@@ -265,8 +265,8 @@
      (t
       nil))
     (ros::ros-info "cds:~A" (send cds :worldcoords))
-    (send m :objpose tmp-coords)
-    (ros::ros-info "prob:~A type:~A" (send (send m :objpose) :prob) (send (send m :objpose) :type))
+    (send m :object_pose tmp-coords)
+    (ros::ros-info "reliability:~A type:~A" (send (send m :object_pose) :reliability) (send (send m :object_pose) :type))
     m))
 
 

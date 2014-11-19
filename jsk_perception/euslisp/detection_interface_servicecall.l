@@ -24,15 +24,15 @@
         (send req :type atype)
         (setq res (ros::service-call "targetobj" req))
         (send target-obj :reset-coords)
-        (send target-obj :move-to (ros::tf-pose->coords (send (send res :objpose) :pose)))
-        (send target-obj :name (send (send res :objpose) :type))
+        (send target-obj :move-to (ros::tf-pose->coords (send (send res :object_pose) :pose)))
+        (send target-obj :name (send (send res :object_pose) :type))
 
         (ros::ros-info "current -> ~A (~A)" (send target-obj :copy-worldcoords) (send target-obj :name))
         (ros::ros-info "check detected ~A percent:~A"
                        (send target-obj :name)
-                       (send (send res :objpose) :prob))
+                       (send (send res :object_pose) :reliability))
         (when (or single
-                  (> (send (send res :objpose) :prob) 0))
+                  (> (send (send res :object_pose) :reliability) 0))
           (cond
            ((or (not (stringp atype))
                 (substringp atype (send target-obj :name))) ;; found target
@@ -50,7 +50,7 @@
            (t
             (ros::ros-info (format nil "no - obj-type(~a)" (send target-obj :name)))
             ))
-          ) ;; when (and prob...
+          ) ;; when (and reliability...
         (when (and (boundp '*irtviewer*) x::*display* (/= x::*display* 0))
           (send *irtviewer* :draw-objects)
           (x::window-main-one))

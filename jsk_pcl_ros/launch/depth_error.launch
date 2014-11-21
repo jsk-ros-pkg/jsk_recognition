@@ -1,9 +1,9 @@
 <launch>
   <arg name="POINTCLOUD_INPUT" default="/camera_remote/depth_registered/points"/>
   <arg name="IMAGE_TOPIC"
-       default="/camera_remote/rgb/image_rect_color" />
-  <arg name="DEPTH_IMAGE" default="/camera_remote/depth/image_rect" />
-  <arg name="CAMERA_INFO_TOPIC" default="/camera_remote/rgb/camera_info" />
+       default="/camera_remote_uncalibrated/rgb/image_rect_color" />
+  <arg name="DEPTH_IMAGE" default="/camera_remote_uncalibrated/depth_registered/hw_registered/image_rect_raw" />
+  <arg name="CAMERA_INFO_TOPIC" default="/camera/rgb/camera_info" />
   <arg name="CLIP_SIZE" default="0.2" />
   compute the pose of the checker board from RGB image.
   <group ns="checkerdetector" clear_params="true">
@@ -32,15 +32,12 @@
   </group>
 
   PointCloud Processing.
-  <node pkg="nodelet" type="nodelet" args="manager"
-        output="screen"
-        name="pcl_manager" />
-  <node pkg="nodelet" type="nodelet"
+  <node pkg="jsk_pcl_ros" type="depth_image_error"
         name="depth_image_error"
-        output="screen"
-        args="load jsk_pcl/DepthImageError pcl_manager">
+        output="screen">
     <remap from="~image" to="$(arg DEPTH_IMAGE)" />
     <remap from="~point" to="/checkerdetector/corner_point" />
+    <remap from="~camera_info" to="$(arg CAMERA_INFO_TOPIC)" />
   </node>
 
 </launch>

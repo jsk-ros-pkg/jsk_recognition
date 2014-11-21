@@ -40,11 +40,15 @@ namespace jsk_pcl_ros
   void PolygonArrayWrapper::onInit()
   {
     PCLNodelet::onInit();
-    pub_polygon_array_ = pnh_->advertise<jsk_pcl_ros::PolygonArray>(
+    pub_polygon_array_ = advertise<jsk_pcl_ros::PolygonArray>(*pnh_,
       "output_polygons", 1);
     pub_coefficients_array_
-      = pnh_->advertise<jsk_pcl_ros::ModelCoefficientsArray>(
+      = advertise<jsk_pcl_ros::ModelCoefficientsArray>(*pnh_,
         "output_coefficients", 1);
+  }
+
+  void PolygonArrayWrapper::subscribe()
+  {
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
     sub_polygon_.subscribe(*pnh_, "input_polygon", 1);
     sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
@@ -54,6 +58,11 @@ namespace jsk_pcl_ros
                               this, _1, _2));
   }
 
+  void PolygonArrayWrapper::unsubscribe()
+  {
+    sub_polygon_.unsubscribe();
+    sub_coefficients_.unsubscribe();
+  }
   
   void PolygonArrayWrapper::wrap(
     const geometry_msgs::PolygonStamped::ConstPtr& polygon,
@@ -75,5 +84,4 @@ namespace jsk_pcl_ros
 }
 
 #include <pluginlib/class_list_macros.h>
-typedef jsk_pcl_ros::PolygonArrayWrapper PolygonArrayWrapper;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, PolygonArrayWrapper, PolygonArrayWrapper, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::PolygonArrayWrapper, nodelet::Nodelet);

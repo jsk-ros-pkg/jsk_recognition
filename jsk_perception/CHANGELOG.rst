@@ -2,6 +2,71 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.25 (2014-11-21)
+-------------------
+* kalmanfilter
+* changed name
+* added codes in catkin.cmake
+* added cfg
+* added color_histogram_mathcer_node
+
+0.1.24 (2014-11-15)
+-------------------
+* servicecall
+* Use intrinsicMatrix instead of projectionMatrix to specify 3x3 matrix(K)
+  instead of 4x3 matrix(P)
+* remove eigen and add cmake_modules to find_package for indigo
+* fix: use projectionMatrix() for indigo
+* Add script to setup training assistant for opencv-like dataset
+* Add script to check opencv cascade file
+* Script to reject positive data for OpenCV training
+* renamed only-perception.launch
+* calc existance probability
+* removed kalmanlib.l from jsk_perception
+* add kalman-filter library
+* Contributors: Kamada Hitoshi, Kei Okada, Ryohei Ueda, Hitoshi Kamada
+
+0.1.23 (2014-10-09)
+-------------------
+* Install nodelet executables
+* mend spell-miss in launch
+* modified program to select which camera_info to sub
+* renamed camera_node to uvc_camera_node, and added some options
+* modified detection-interface.l
+* Contributors: Ryohei Ueda, Yu Ohara, Kamada
+
+0.1.22 (2014-09-24)
+-------------------
+* Disable ssl when calling git
+* Contributors: Ryohei Ueda
+
+0.1.21 (2014-09-20)
+-------------------
+* Add more diagnostics to OrganizedMultiPlaneSegmentation and fix global
+  hook for ConvexHull
+* Contributors: Ryohei Ueda
+
+0.1.20 (2014-09-17)
+-------------------
+
+0.1.19 (2014-09-15)
+-------------------
+
+0.1.18 (2014-09-13)
+-------------------
+* add git to build_depend of jsk_libfreenect2
+* Contributors: Ryohei Ueda
+
+0.1.17 (2014-09-07)
+-------------------
+* add mk/git to build_depend
+* Contributors: Kei Okada
+
+0.1.16 (2014-09-04)
+-------------------
+* do not use rosrun in the script of jsk_perception/src/eusmodel_template_gen.sh
+* Contributors: Ryohei Ueda
+
 0.1.14 (2014-08-01)
 -------------------
 

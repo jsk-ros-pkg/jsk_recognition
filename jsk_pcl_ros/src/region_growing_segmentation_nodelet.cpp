@@ -39,14 +39,7 @@
 #include <pcl/segmentation/impl/region_growing.hpp>
 #include <pluginlib/class_list_macros.h>
 
-#if ROS_VERSION_MINIMUM(1, 10, 0)
-// hydro and later
-typedef pcl_msgs::PointIndices PCLIndicesMsg;
-#else
-// groovy
-typedef pcl::PointIndices PCLIndicesMsg;
-#endif
-
+#include "jsk_pcl_ros/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -58,8 +51,17 @@ namespace jsk_pcl_ros
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&RegionGrowingSegmentation::configCallback, this, _1, _2);
     srv_->setCallback (f);
-    pub_ = pnh_->advertise<jsk_pcl_ros::ClusterPointIndices>("output", 1);
+    pub_ = advertise<jsk_pcl_ros::ClusterPointIndices>(*pnh_, "output", 1);
+  }
+
+  void RegionGrowingSegmentation::subscribe()
+  {
     sub_ = pnh_->subscribe("input", 1, &RegionGrowingSegmentation::segment, this);
+  }
+
+  void RegionGrowingSegmentation::unsubscribe()
+  {
+    sub_.shutdown();
   }
 
   void RegionGrowingSegmentation::configCallback(Config &config, uint32_t level)
@@ -118,5 +120,5 @@ namespace jsk_pcl_ros
   
 }
 
-typedef jsk_pcl_ros::RegionGrowingSegmentation RegionGrowingSegmentation;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, RegionGrowingSegmentation, RegionGrowingSegmentation, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::RegionGrowingSegmentation,
+                        nodelet::Nodelet);

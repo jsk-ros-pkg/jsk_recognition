@@ -2,6 +2,42 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.25 (2014-11-21)
+-------------------
+
+0.1.24 (2014-11-15)
+-------------------
+* use ifdef not if for OPENCV_NON_FREE
+* use OPENCV_NON_FREE option, 14.04 does not provide nonfree libraries
+* Contributors: Kei Okada
+
+0.1.23 (2014-10-09)
+-------------------
+* added codes to check how long it takes to calc keypoints
+* added codes to make executable file that use some feature extraction methods
+* Contributors: Yu Ohara
+
+0.1.22 (2014-09-24)
+-------------------
+
+0.1.21 (2014-09-20)
+-------------------
+
+0.1.20 (2014-09-17)
+-------------------
+
+0.1.19 (2014-09-15)
+-------------------
+
+0.1.18 (2014-09-13)
+-------------------
+
+0.1.17 (2014-09-07)
+-------------------
+
+0.1.16 (2014-09-04)
+-------------------
+
 0.1.14 (2014-08-01)
 -------------------
 

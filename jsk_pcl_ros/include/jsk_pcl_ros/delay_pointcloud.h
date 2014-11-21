@@ -38,11 +38,12 @@
 
 #include <pcl_ros/pcl_nodelet.h>
 #include <sensor_msgs/PointCloud.h>
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
 
-  class DelayPointCloud: public pcl_ros::PCLNodelet
+  class DelayPointCloud: public ConnectionBasedNodelet
   {
     
   public:
@@ -50,7 +51,8 @@ namespace jsk_pcl_ros
   protected:
     virtual void onInit();
     virtual void delay(const sensor_msgs::PointCloud2::ConstPtr& msg);
-
+    virtual void subscribe();
+    virtual void unsubscribe();
     double sleep_time_;
     ros::Subscriber sub_;
     ros::Publisher pub_;

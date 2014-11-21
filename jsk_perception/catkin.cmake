@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 2.8.3)
 project(jsk_perception)
 
 find_package(catkin REQUIRED COMPONENTS
-  message_generation imagesift std_msgs sensor_msgs geometry_msgs cv_bridge
-  image_geometry image_transport driver_base dynamic_reconfigure eigen
+  mk message_generation imagesift std_msgs sensor_msgs geometry_msgs cv_bridge
+  image_geometry image_transport driver_base dynamic_reconfigure cmake_modules
   roscpp nodelet rostest tf rospack
   jsk_topic_tools)
 find_package(OpenCV REQUIRED)
@@ -12,10 +12,20 @@ find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 find_package(Eigen REQUIRED)
 include_directories(${Eigen_INCLUDE_DIRS})
 
+FIND_PACKAGE( OpenMP REQUIRED)
+if(OPENMP_FOUND)
+message("OPENMP FOUND")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+endif()
+
+
 # Dynamic reconfigure support
-generate_dynamic_reconfigure_options(cfg/camshiftdemo.cfg cfg/EdgeDetector.cfg cfg/HoughLines.cfg cfg/matchtemplate.cfg cfg/point_pose_extractor.cfg cfg/RectangleDetector.cfg
+generate_dynamic_reconfigure_options(cfg/camshiftdemo.cfg cfg/EdgeDetector.cfg cfg/HoughLines.cfg cfg/matchtemplate.cfg cfg/point_pose_extractor.cfg cfg/RectangleDetector.cfg 
   cfg/ColorHistogram.cfg
-  cfg/HoughCircles.cfg)
+  cfg/HoughCircles.cfg
+  cfg/ColorHistogramSlidingMatcher.cfg)
 
 add_message_files(FILES
       PointsArray.msg RotatedRectStamped.msg LineArray.msg Rect.msg Line.msg RotatedRect.msg SparseImage.msg
@@ -38,7 +48,7 @@ execute_process(
   COMMAND cmake -E chdir ${CMAKE_CURRENT_BINARY_DIR}
   make -f ${PROJECT_SOURCE_DIR}/Makefile.slic
   INSTALL_DIR=${CATKIN_DEVEL_PREFIX}
-  MK_DIR=${mk_PREFIX}/share/mk
+  MK_DIR=${mk_PREFIX}/share/mk installed
   RESULT_VARIABLE _make_failed)
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/build/SLIC-Superpixels)
@@ -49,6 +59,7 @@ add_executable(white_balance_converter src/white_balance_converter.cpp)
 add_executable(hough_lines src/hough_lines.cpp)
 add_executable(rectangle_detector src/rectangle_detector.cpp)
 add_executable(calc_flow src/calc_flow.cpp)
+add_executable(color_histogram_sliding_matcher src/color_histogram_sliding_matcher.cpp)
 add_library(oriented_gradient src/oriented_gradient.cpp)
 add_executable(oriented_gradient_node src/oriented_gradient_node.cpp)
 
@@ -60,7 +71,7 @@ endif(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
 
 macro(jsk_perception_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
   jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
-    jsk_perception_nodelet_sources)
+    jsk_perception_nodelet_sources jsk_perception_nodelet_executables)
 endmacro()
 jsk_perception_nodelet(src/edge_detector.cpp "jsk_perception/EdgeDetector" "edge_detector")
 jsk_perception_nodelet(src/sparse_image_encoder.cpp "jsk_perception/SparseImageEncoder" "sparse_image_encoder")
@@ -84,6 +95,7 @@ target_link_libraries(white_balance_converter  ${catkin_LIBRARIES} ${OpenCV_LIBR
 target_link_libraries(hough_lines              ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 target_link_libraries(rectangle_detector       ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
 target_link_libraries(calc_flow                ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+target_link_libraries(color_histogram_sliding_matcher  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 target_link_libraries(oriented_gradient_node   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} oriented_gradient)
 
 add_dependencies(camshiftdemo             ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
@@ -92,6 +104,8 @@ add_dependencies(point_pose_extractor     ${PROJECT_NAME}_gencfg ${PROJECT_NAME}
 add_dependencies(white_balance_converter  ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 add_dependencies(hough_lines              ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 add_dependencies(rectangle_detector       ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
+add_dependencies(color_histogram_sliding_matcher       ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
+
 
 #add_custom_command(
 #  OUTPUT  ${PROJECT_SOURCE_DIR}/template
@@ -99,7 +113,8 @@ add_dependencies(rectangle_detector       ${PROJECT_NAME}_gencfg ${PROJECT_NAME}
 #  COMMAND ${PROJECT_SOURCE_DIR}/src/eusmodel_template_gen.sh)
 #add_custom_target(eusmodel_template ALL DEPENDS ${PROJECT_SOURCE_DIR}/template)
 
-install(TARGETS camshiftdemo virtual_camera_mono point_pose_extractor white_balance_converter hough_lines rectangle_detector calc_flow ${PROJECT_NAME}
+install(TARGETS camshiftdemo virtual_camera_mono point_pose_extractor white_balance_converter hough_lines rectangle_detector calc_flow color_histogram_sliding_matcher ${PROJECT_NAME}
+  ${jsk_perception_nodelet_executables}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

@@ -55,11 +55,12 @@
 #include <jsk_pcl_ros/Int32Stamped.h>
 #include <std_msgs/Header.h>
 #include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
 
-  class StaticPolygonArrayPublisher: public pcl_ros::PCLNodelet
+  class StaticPolygonArrayPublisher: public ConnectionBasedNodelet
   {
   public:
     typedef message_filters::sync_policies::ApproximateTime<
@@ -86,11 +87,12 @@ namespace jsk_pcl_ros
     virtual void timerCallback(const ros::TimerEvent& event);
     virtual void publishPolygon(const ros::Time& stamp);
     virtual bool readPolygonArray(const std::string& param);
-    virtual bool readFrameIds(const std::string& param);
     virtual double getXMLDoubleValue(XmlRpc::XmlRpcValue val);
     virtual PCLModelCoefficientMsg polygonToModelCoefficients(const geometry_msgs::PolygonStamped& polygon);
     virtual void triggerCallback(const sensor_msgs::PointCloud2::ConstPtr& input,
                                  const Int32Stamped::ConstPtr& trigger);
+    virtual void subscribe();
+    virtual void unsubscribe();
   private:
   };
 

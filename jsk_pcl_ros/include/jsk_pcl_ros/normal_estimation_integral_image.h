@@ -42,10 +42,10 @@
 #include <pcl_ros/pcl_nodelet.h>
 #include <dynamic_reconfigure/server.h>
 #include "jsk_pcl_ros/NormalEstimationIntegralImageConfig.h"
-
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 namespace jsk_pcl_ros
 {
-  class NormalEstimationIntegralImage: public pcl_ros::PCLNodelet
+  class NormalEstimationIntegralImage: public ConnectionBasedNodelet
   {
   public:
     typedef jsk_pcl_ros::NormalEstimationIntegralImageConfig Config;    
@@ -61,6 +61,8 @@ namespace jsk_pcl_ros
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     virtual void configCallback (Config& config, uint32_t level);
     virtual void compute(const sensor_msgs::PointCloud2::ConstPtr& msg);
+    virtual void subscribe();
+    virtual void unsubscribe();
   private:
     virtual void onInit();
   };

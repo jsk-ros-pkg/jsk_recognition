@@ -49,13 +49,25 @@ namespace jsk_pcl_ros
       return;
     }
     listener_.reset(new tf::TransformListener());
-    polygons_pub_ = pnh_->advertise<jsk_pcl_ros::PolygonArray>("output_polygons", 1);
-    coefficients_pub_ = pnh_->advertise<jsk_pcl_ros::ModelCoefficientsArray>("output_coefficients", 1);
+    polygons_pub_ = advertise<jsk_pcl_ros::PolygonArray>(*pnh_, "output_polygons", 1);
+    coefficients_pub_ = advertise<jsk_pcl_ros::ModelCoefficientsArray>(
+      *pnh_, "output_coefficients", 1);
+    
+  }
+
+  void PolygonArrayTransformer::subscribe()
+  {
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
     sub_polygons_.subscribe(*pnh_, "input_polygons", 1);
     sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
     sync_->connectInput(sub_polygons_, sub_coefficients_);
     sync_->registerCallback(boost::bind(&PolygonArrayTransformer::transform, this, _1, _2));
+  }
+
+  void PolygonArrayTransformer::unsubscribe()
+  {
+    sub_polygons_.unsubscribe();
+    sub_coefficients_.unsubscribe();
   }
   
   void PolygonArrayTransformer::computeCoefficients(const geometry_msgs::PolygonStamped& polygon,
@@ -199,5 +211,4 @@ namespace jsk_pcl_ros
   
 }
 
-typedef jsk_pcl_ros::PolygonArrayTransformer PolygonArrayTransformer;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, PolygonArrayTransformer, PolygonArrayTransformer, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::PolygonArrayTransformer, nodelet::Nodelet);

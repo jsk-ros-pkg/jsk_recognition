@@ -28,33 +28,62 @@ find_package(catkin REQUIRED COMPONENTS
   ${PCL_MSGS} sensor_msgs geometry_msgs
   eigen_conversions tf_conversions tf2_ros tf
   image_transport nodelet cv_bridge
-  ${ML_CLASSIFIERS} sklearn jsk_topic_tools)
-
+  ${ML_CLASSIFIERS} sklearn jsk_topic_tools
+  laser_assembler moveit_ros_perception)
+# only run in hydro
+if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
+  find_package(PCL REQUIRED)
+endif(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
 find_package(OpenMP)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 
 add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg SnapItRequest.msg PolygonArray.msg
+  TimeRange.msg
+  DepthCalibrationParameter.msg
   ModelCoefficientsArray.msg
   SlicedPointCloud.msg
   BoundingBox.msg
   BoundingBoxArray.msg
+  BoundingBoxMovement.msg
   ColorHistogram.msg
   ColorHistogramArray.msg
   SparseOccupancyGridCell.msg
   SparseOccupancyGridColumn.msg
   SparseOccupancyGrid.msg
   SparseOccupancyGridArray.msg
-  DepthErrorResult.msg)
-add_service_files(FILES SwitchTopic.srv  TransformScreenpoint.srv CheckCircle.srv RobotPickupReleasePoint.srv  TowerPickUp.srv EuclideanSegment.srv TowerRobotMoveCommand.srv SetPointCloud2.srv
+  DepthErrorResult.msg
+  ParallelEdge.msg ParallelEdgeArray.msg
+  ICPResult.msg)
+
+add_service_files(FILES SwitchTopic.srv
+  SetDepthCalibrationParameter.srv
+  TransformScreenpoint.srv
+  CheckCircle.srv
+  RobotPickupReleasePoint.srv
+  TowerPickUp.srv
+  EuclideanSegment.srv
+  TowerRobotMoveCommand.srv
+  SetPointCloud2.srv
   CallSnapIt.srv CallPolygon.srv
   EnvironmentLock.srv
-  PolygonOnEnvironment.srv)
+  PolygonOnEnvironment.srv
+  ICPAlignWithBox.srv)
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/NormalDirectionFilter.cfg
+  cfg/RegionGrowingMultiplePlaneSegmentation.cfg
+  cfg/LineSegmentCollector.cfg
+  cfg/LineSegmentDetector.cfg
+  cfg/ParticleFilterTracking.cfg
+  cfg/BilateralFilter.cfg
+  cfg/ICPRegistration.cfg
+  cfg/PlaneReasoner.cfg
+  cfg/OrganizedPassThrough.cfg
   cfg/EuclideanClustering.cfg
+  cfg/ColorizeDistanceFromPlane.cfg
   cfg/HSIColorFilter.cfg
   cfg/RGBColorFilter.cfg
   cfg/ImageRotate.cfg
@@ -66,6 +95,12 @@ generate_dynamic_reconfigure_options(
   cfg/EnvironmentPlaneModeling.cfg
   cfg/ColorHistogramMatcher.cfg
   cfg/GridSampler.cfg
+  cfg/OrganizedEdgeDetector.cfg
+  cfg/EdgeDepthRefinement.cfg
+  cfg/ParallelEdgeFinder.cfg
+  cfg/EdgebasedCubeFinder.cfg
+  cfg/MultiPlaneSACSegmentation.cfg
+  cfg/BoundingBoxFilter.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -80,7 +115,7 @@ endif(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
 
 macro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
   jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
-    jsk_pcl_nodelet_sources)
+    jsk_pcl_nodelet_sources jsk_pcl_nodelet_executables)
 endmacro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
 
 add_definitions("-O2 -g")
@@ -164,13 +199,67 @@ jsk_pcl_nodelet(src/depth_image_error_nodelet.cpp
   "jsk_pcl/DepthImageError" "depth_image_error")
 jsk_pcl_nodelet(src/organize_pointcloud_nodelet.cpp
   "jsk_pcl/OrganizePointCloud" "organize_pointcloud")
+jsk_pcl_nodelet(src/depth_image_creator_nodelet.cpp
+  "jsk_pcl/DepthImageCreator" "depth_image_creator")
 jsk_pcl_nodelet(src/polygon_array_wrapper_nodelet.cpp
   "jsk_pcl/PolygonArrayWrapper" "polygon_array_wrapper")
+jsk_pcl_nodelet(src/border_estimator_nodelet.cpp
+  "jsk_pcl/BorderEstimator" "border_estimator")
+jsk_pcl_nodelet(src/region_growing_multiple_plane_segmentation_nodelet.cpp
+  "jsk_pcl/RegionGrowingMultiplePlaneSegmentation"
+  "region_growing_multiple_plane_segmentation")
 
+if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
+  IF(${PCL_VERSION} VERSION_GREATER "1.7.1")
+    jsk_pcl_nodelet(src/organized_edge_detector_nodelet.cpp
+      "jsk_pcl/OrganizedEdgeDetector" "organized_edge_detector")
+  ENDIF(${PCL_VERSION} VERSION_GREATER "1.7.1")
+endif(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
+
+jsk_pcl_nodelet(src/edge_depth_refinement_nodelet.cpp
+  "jsk_pcl/EdgeDepthRefinement" "edge_depth_refinement")
+jsk_pcl_nodelet(src/parallel_edge_finder_nodelet.cpp
+  "jsk_pcl/ParallelEdgeFinder" "parallel_edge_finder")
+jsk_pcl_nodelet(src/edgebased_cube_finder_nodelet.cpp
+  "jsk_pcl/EdgebasedCubeFinder" "edgebased_cube_finder")
+jsk_pcl_nodelet(src/colorize_distance_from_plane_nodelet.cpp
+  "jsk_pcl/ColorizeDistanceFromPlane" "colorize_distance_from_plane")
+jsk_pcl_nodelet(src/multi_plane_sac_segmentation_nodelet.cpp
+  "jsk_pcl/MultiPlaneSACSegmentation" "multi_plane_sac_segmentation")
+jsk_pcl_nodelet(src/bounding_box_filter_nodelet.cpp
+  "jsk_pcl/BoundingBoxFilter" "bounding_box_filter")
+jsk_pcl_nodelet(src/organized_pass_through_nodelet.cpp
+  "jsk_pcl/OrganizedPassThrough" "organized_pass_through")
+jsk_pcl_nodelet(src/plane_reasoner_nodelet.cpp
+  "jsk_pcl/PlaneReasoner" "plane_reasoner")
+jsk_pcl_nodelet(src/joint_state_static_filter_nodelet.cpp
+  "jsk_pcl/JointStateStaticFilter" "joint_state_static_filter")
+jsk_pcl_nodelet(src/icp_registration_nodelet.cpp
+  "jsk_pcl/ICPRegistration" "icp_registration")
+jsk_pcl_nodelet(src/transform_pointcloud_in_bounding_box_nodelet.cpp
+  "jsk_pcl/TransformPointcloudInBoundingBox" "transform_pointcloud_in_bounding_box")
+jsk_pcl_nodelet(src/pointcloud_database_server_nodelet.cpp
+  "jsk_pcl/PointcloudDatabaseServer" "pointcloud_database_server")
+jsk_pcl_nodelet(src/bilateral_filter_nodelet.cpp
+  "jsk_pcl/BilateralFilter" "bilateral_filter")
+jsk_pcl_nodelet(src/line_segment_detector_nodelet.cpp
+  "jsk_pcl/LineSegmentDetector" "line_segment_detector")
+jsk_pcl_nodelet(src/line_segment_collector_nodelet.cpp
+  "jsk_pcl/LineSegmentCollector" "line_segment_collector")
+jsk_pcl_nodelet(src/depth_calibration_nodelet.cpp
+  "jsk_pcl/DepthCalibration" "depth_calibration")
+jsk_pcl_nodelet(src/tilt_laser_listener_nodelet.cpp
+  "jsk_pcl/TiltLaserListener" "tilt_laser_listener")
+jsk_pcl_nodelet(src/normal_direction_filter_nodelet.cpp
+  "jsk_pcl/NormalDirectionFilter" "normal_direction_filter")
 
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
-  src/pcl_conversion_util.cpp src/pcl_util.cpp)
+  src/pcl_conversion_util.cpp src/pcl_util.cpp
+  src/diagnostic_nodelet.cpp
+  src/pointcloud_moveit_filter.cpp
+  src/connection_based_nodelet.cpp
+  src/tf_listener_singleton.cpp)
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 
@@ -186,7 +275,7 @@ catkin_package(
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
-install(TARGETS jsk_pcl_ros
+install(TARGETS jsk_pcl_ros ${jsk_pcl_nodelet_executables}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})

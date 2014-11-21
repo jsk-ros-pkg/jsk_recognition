@@ -2,6 +2,248 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.25 (2014-11-21)
+-------------------
+* Add singleton class for tf::TransformListener
+* python_sklearn -> python-sklearn, see https://github.com/ros/rosdistro/blob/master/rosdep/python.yaml#L1264
+* Merge remote-tracking branch 'origin/master' into add-more-parameter-for-calibration
+  Conflicts:
+  jsk_pcl_ros/launch/openni2_remote.launch
+* Add uv_scale parameter to depth_calibration.cpp and update openni2_remote.launch
+  to specify more parameter.
+
+0.1.24 (2014-11-15)
+-------------------
+* Add default calibration file for openni2_remote.launch
+* remove unneeded nodelet part
+  change param
+* added launch that calc plane with pr2_laser
+* Fix polygon projection and confirm that snapit works
+* Fix MultiPlaneExtraction initialization
+* Update SnapIt to use topic interface and reimplement it only for snap on polygon
+* Fix segv in collision checking
+* Fix OrganizedMultiPlaneSegmentation indexing
+* Update diagnostics aggregator settings for footstep_recognition
+* Fix diagnostic information when there is no subscriber
+* Suppress message from EnvironmentPlaneModeling
+* Add document about MultiPlaneExtraction
+* Check the pointer is correctly set to avoid SEGV
+* Add normal direction filter based on Imu direction
+* Update OrganizedMultiPlaneDetection documentation
+* Add new nodelet: region growing based multiple plane detection
+* use this->erase
+* Add imu hint when running MultiPlaneSACSegmentation
+* Add short documentation about OrganizedMultiPlaneSegmentation
+* Update document about CentroidPublisher
+* Add documentation about jsk_pcl/ClusterPointIndicesDecomposerZAxis
+* Add moveit plugin to just filter pointcloud which belongs to robot
+* Add nodelet to handle time range of rotating laser
+* removed passthrough filter
+* rename file name from error_visualize to pr2_pointcloud_error_visualizatoin
+* Support cluster information in MultiplePlaneSACSegmentation and remove
+  plane estimation from LineSegmentCollector
+* restored codes slightly
+* added icp_result_msgs and srvs
+* change launch file path
+* add launch files for visualizing calibration error
+* Add nodelet to handle time range of rotating laser
+* Fix Polygon::decomposeToTriangles if the original polygon is already a triangle
+* Remove single_nodelet_exec.cpp.in
+* Add documentation about ClusterPointIndicesDecomposer
+* Add image to documentation of EuclideanClustering
+* Add documentation about EuclideanSegmentation
+* Add documentation about DepthImageCreator
+* Add documentation about PointcloudScreenpoint
+* Support specifying yaml file to calibrate depth image on openni2_remote.launch
+* Format calibration model on DepthCalibration
+* For precision requirement, use repr function when generating yaml file
+  for depth image calibration
+* Support quadratic model for u and v to calibrate depth image:
+  1. Support quadratic-uv-quadratic and quadratic-uv-quadratic-abs model
+  2. use SetDepthCalibrationParameter.srv to specify depth calibration parameter
+* Downsize frequency map resolution and add --width and --height option to
+  depth_error_calibration.py
+* Update depth calibration program.
+  1. Fix checkerboard_detector to publish correct corner point
+  2. Calibrate depth_image rather than PointCloud
+  3. Use matplotlib animation to visualize graph in depth_error_calibration.py
+* support new model to calibrate kinect like sensor, which use absolute
+  value respected to center coordinate of projectoin matrix
+* Support quadratic-uv-abs model
+* Add service file: DepthCalibrationParameter
+* Add nodelet to apply calibration parameter to pointcloud. and add
+  new model to calibrate: quadratic-uv
+* Support quadratic function fitting in depth_error_calibration.py
+* Add python script to calibrate depth error of depth sensors
+* Merge remote-tracking branch 'refs/remotes/origin/master' into add-document-about-resize-points
+  Conflicts:
+  jsk_pcl_ros/README.md
+* Add script to run logistic regression for depth error
+* Add documentation about ResizePointCloud
+* Merge remote-tracking branch 'refs/remotes/origin/master' into remove-color-category20-from-jsk-pcl-ros
+  Conflicts:
+  jsk_pcl_ros/include/jsk_pcl_ros/pcl_util.h
+* Remove colorCategory20 from jsk_pcl_ros and use jsk_topic_tools' colorCategory20
+* Fix syntax of README.md of jsk_pcl_ros
+* Add documentation about ResizePointCloud
+* Add documentation about typical messages defined in jsk_pcl_ros
+* Extract multi planes out of collected segmented lines from laserrange finder
+* add new nodelet: LienSegmentCollector
+* Add LineSegmentDetector for LRF pointcloud
+* Use dynamic reconfigure to specify several parameters for ParticleFilterTracking
+* Support contiuous model building on EnvironmentPlaneModeling and add
+  a launch file for footstep planning recogniton
+* Add utitlity service interface to register completed maps
+* Contributors: JSK applications, Kei Okada, Ryohei Ueda, Yu Ohara, Yuto Inagaki, Chi Wun Au, Yu Ohara
+
+0.1.23 (2014-10-09)
+-------------------
+* Use pcl::EarClip to decompose polygon into triangles
+* Complete gridmap with statically defined polygon
+* Install nodelet executables
+* Use jsk_topic_tools::readVectorParameter in ParticleFilterTracking
+* Add BilateralFilter
+* Decrease size of grid map to add 'padding'
+* Add service to clear grid maps
+* Add min-max threshold to filter polygons based on area on OrganizedMultiPlaneSegmentation
+* EnvironmentPlaneModeling support building grid map without static
+  polygon information
+* delete models
+* Fix env_server's mis posing of origin
+* Force for planes to direct sensor origin in organized multi segmentation
+* Support PointcloudDatabaseServer when running ICPRegistration
+* Add PointCloudDatabaseServer
+* Fix keypoints publisher compilation
+* Subscribe topics as needed for almost all the nodelets
+* Use ConnectionBasedNodelet for DelayPointCloud not to subscribe topics if the nodelet's publishers are not subscribed
+* Use ConnectionBasedNodelet for ColorizeDistanceFromPlane not to subscribe topics if the nodelet's publishers are not subscribed
+* Use ConnectionBasedNodelet for DelayPointcloud not to subscribe topics if the nodelet's publishers are not subscribed
+* Use ConnectionBasedNodelet for ColorizeDistanceFromPlane not to subscribe topics if the nodelet's publishers are not subscribed
+* Use ConnectionBasedNodelet for ColorHistogramMatcher not to subscribe topics if the nodelet's publishers are not subscribed
+* Use ConnectionBasedNodelet for BoundingBoxFilter not to subscribe topics if the nodelet's publishers are not subscribed
+* Use ConnectionBasedNodelet for ResizePointsPublisher not to subscribe
+  topics if the nodelet's publishers are not subscribed
+* Do not subscribe until any publish is subscribed on ColorFIlter and
+  BorderEstimator
+* Do not subscribe until any publisher is subscribed on
+  ClusterPointIndicesDecomposer and add utlity class to handle connection
+* Fix JointStateStaticFilter to use absolute diff when calculating
+  time difference and add JointStateStaticFilter to organized_multi_plane_segmentation.launch
+  if JOINT_STATIC_FILTER:=true
+* Use refined plane information in recognition pipeline
+* Add pr2_navigation_self_filter to organized_multi_plane_segmentation.launch
+* Publish result of ICP as geometry_msgs::PoseStamped
+* Add pcd model files for registration sample
+* Use PLUGIN_EXPORT_CLASS instead of PLUGIN_DECLARE_CLASS
+* Considering flipped initial pose on ICP registration
+* Merge remote-tracking branch 'refs/remotes/origin/master' into use-boundingbox-information-to-compute-origin-of-icp-pointcloud
+  Conflicts:
+  jsk_pcl_ros/jsk_pcl_nodelets.xml
+* Add new nodelet to transform pointcloud to make its origin equal to the
+  pose of boundingbox and use bounding box information when running ICP
+* Merge pull request `#307 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/307>`_ from garaemon/joint-state-static-pointcloud-filter
+  JointStateStaticFilter
+* Add Generalized ICP algorithm
+* read voxel grid donwsample manager parameter
+* Merge remote-tracking branch 'refs/remotes/origin/master' into garaemon-joint-state-static-pointcloud-filter
+  Conflicts:
+  jsk_pcl_ros/CMakeLists.txt
+  jsk_pcl_ros/catkin.cmake
+  jsk_pcl_ros/jsk_pcl_nodelets.xml
+* Add new nodelet to pass pointcloud only if joint states is stable
+* Support dynamic_reconfigure of ICPRegistration
+* add new nodelet to align two pointcloud based on ICP algorithm
+* Fix for plane segmentation results into only one plane
+* Add new nodelet 'PlaneReasoner' to segment wall/ground
+* Resize pointcloud and images in openni_remote.launch
+* Fix topic relaying of openni_remote for openni_launch on hydro
+* Add new nodelet to filter organized pointcloud based on x-y index rather
+  than 3-D position value.
+* Contributors: Ryohei Ueda, aginika, tarukosu
+
+0.1.22 (2014-09-24)
+-------------------
+
+0.1.21 (2014-09-20)
+-------------------
+* Add utility methods for 2-D geometry
+* Add new nodelet to filter bounding box array
+* Check align axis before aligning boundingbox in ClusterPointIndicesDecomposer
+* Add diagnostic information to EuclideanClusteringExtraction
+* Add diagnostic information to MultiPlaneExtraction
+* Add processing frame id information to PlaneRejector's diagnostic
+* Add diagnostic information to ClusterPointIndicesDecomposer
+* Add diagnostics to PlaneRejector
+* Add more diagnostics to OrganizedMultiPlaneSegmentation and fix global
+  hook for ConvexHull
+* Contributors: Ryohei Ueda
+
+0.1.20 (2014-09-17)
+-------------------
+* Not use inliers to colorize pointcloud based on distance from planes
+* Add check to be able to make convex or not on ColorizeDistanceFromPlane
+  and OrganizedMultiPlaneSegmentation
+* add ~use_normal to use noraml to segment multi planes
+* add new nodelet to segment multiple planese by applying RANSAC recursively
+* Contributors: Ryohei Ueda
+
+0.1.19 (2014-09-15)
+-------------------
+
+0.1.18 (2014-09-13)
+-------------------
+* Subscribe PolygonArray message to build ConvexPolygon in ColorizeDistanceFromPlane
+* Introduce global mutex for quick hull
+* Fix coloring bug and add ~only_projectable parameter to visualize the
+  points only if they can be projected on the convex region
+* Add use_laser_pipeline argument to laserscan_registration.launch to
+  toggle include laser_pileline.launch of jsk_tilt_laser or not
+  Add new utility for diagnostics: addDiagnosticInformation
+* Supress output from resize_points_publisher
+* ROS_INFO -> NODELET_DEBUG in VoxelGridDownsampleManager
+* New utilify functoin for diagnostic: addDiagnosticInformation.
+  It's a simple function to add jsk_topic_tools::TimeAccumulator to
+  diagnostic_updater::DiagnosticStatusWrapper.
+* Colorize pointcloud according to the distance from nearest plane
+* Use template functions to convert tiny type conversions
+* Refine the result of connecting small multi planes in OrganizedMultiplaneSegmentation
+* add hsv coherence to particle_fitler_tracker
+* change color_histogram showing methods with reconfigure
+* visualize color_histogram coefficience
+* add new nodelet: EdgebasedCubeFinder
+* use colorCategory20 function to colorize pointcloud in ClusterPointIndicesDecomposer
+* visualizing connection of planes with lines in OrganizedMultiPlaneSegmentation
+* use rosparam_utils of jsk_topic_tools in StaticPolygonArrayPublisher
+* Contributors: Ryohei Ueda, ohara, wesleypchan
+
+0.1.17 (2014-09-07)
+-------------------
+* add laser_registration.launch
+* Contributors: Yuki Furuta
+
+0.1.16 (2014-09-04)
+-------------------
+* bugfix: add depth_image_creator to jsk_pcl_nodelet on catkin.cmake
+* a launch file for stereo camera using pointgrey
+* Publish ModelCoefficients from EdgeDepthRefinement
+* Add new nodelet to detect parallel edge
+* Remove duplicated edges according to the line coefficients in
+  EdgeDepthRefinement
+* do not use EIGEN_ALIGNED_NEW_OPERATOR and use onInit super method on
+  PointcloudScreenpoint
+* Remove several unused headers from ParticleFilterTracking
+* not compile OrganizedEdgeDetector on groovy
+* add a new nodelet to refine edges based on depth connectivity
+* Detect straight edges from organized pointcloud
+* toggle edge feature by rqt_reqoncifugre in OrganizedEdgeDetector
+* add new nodelet: OrganizedEdgeDetector, which is only available with
+  latest PCL
+* Do not include header of cloud viewer in region_growing_segmentation.h
+* Add more diagnostic information to OrganizedMultiPlaneSegmentation
+* downsample rgb as well as pointcloud in openni2_remote.launch
+* add new nodelet: BorderEstimator
+* Contributors: Ryohei Ueda, Yuki Furuta
+
 0.1.14 (2014-08-01)
 -------------------
 * add bounging box movement msg

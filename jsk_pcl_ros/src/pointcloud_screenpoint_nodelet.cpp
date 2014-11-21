@@ -1,3 +1,38 @@
+// -*- mode: c++ -*-
+/*********************************************************************
+ * Software License Agreement (BSD License)
+ *
+ *  Copyright (c) 2014, JSK Lab
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/o2r other materials provided
+ *     with the distribution.
+ *   * Neither the name of the Willow Garage nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *********************************************************************/
+
 #include "jsk_pcl_ros/pointcloud_screenpoint.h"
 #include <pcl_conversions/pcl_conversions.h>
 
@@ -6,10 +41,7 @@
 
 void jsk_pcl_ros::PointcloudScreenpoint::onInit()
 {
-  NODELET_INFO("[%s::onInit]", getName().c_str());
-
-  //pnh_.reset (new ros::NodeHandle (getMTPrivateNodeHandle ()));
-  pnh_.reset (new ros::NodeHandle (getPrivateNodeHandle ()));
+  PCLNodelet::onInit();
 
   queue_size_ = 1;
   crop_size_ = 10;
@@ -19,8 +51,6 @@ void jsk_pcl_ros::PointcloudScreenpoint::onInit()
   pnh_->param ("crop_size", crop_size_, 10);
   pnh_->param ("search_size", k_, 16);
 
-  bool use_rect, use_point, use_sync, use_point_array;
-
   pnh_->param ("use_rect", use_rect, false);
   pnh_->param ("use_point", use_point, false);
   pnh_->param ("use_sync", use_sync, false);
@@ -29,6 +59,27 @@ void jsk_pcl_ros::PointcloudScreenpoint::onInit()
   pnh_->param("publish_points", publish_points_, false);
   pnh_->param("publish_point", publish_point_, false);
 
+  srv_ = pnh_->advertiseService("screen_to_point", &PointcloudScreenpoint::screenpoint_cb, this);
+
+  if (publish_point_) {
+    pub_point_ = pnh_->advertise< geometry_msgs::PointStamped > ("output_point", 1);
+  }
+
+  if (publish_points_) {
+    pub_points_ = pnh_->advertise< sensor_msgs::PointCloud2 > ("output", 1);
+  }
+
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
+  normals_tree_ = boost::make_shared< pcl::search::KdTree<pcl::PointXYZ> > ();
+#else
+  normals_tree_ = boost::make_shared<pcl::KdTreeFLANN<pcl::PointXYZ> > ();
+#endif
+  n3d_.setKSearch (k_);
+  n3d_.setSearchMethod (normals_tree_);
+}
+
+void jsk_pcl_ros::PointcloudScreenpoint::subscribe()
+{
   points_sub_.subscribe (*pnh_, "points", queue_size_);
 
   if (use_rect) {
@@ -65,24 +116,23 @@ void jsk_pcl_ros::PointcloudScreenpoint::onInit()
   }
 
   points_sub_.registerCallback (boost::bind (&PointcloudScreenpoint::points_cb, this, _1));
+}
 
-  srv_ = pnh_->advertiseService("screen_to_point", &PointcloudScreenpoint::screenpoint_cb, this);
+void jsk_pcl_ros::PointcloudScreenpoint::unsubscribe()
+{
+  points_sub_.unsubscribe();
 
-  if (publish_point_) {
-    pub_point_ = pnh_->advertise< geometry_msgs::PointStamped > ("output_point", 1);
+  if (use_rect) {
+    rect_sub_.unsubscribe();
   }
 
-  if (publish_points_) {
-    pub_points_ = pnh_->advertise< sensor_msgs::PointCloud2 > ("output", 1);
+  if (use_point) {
+    point_sub_.unsubscribe();
   }
 
-#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
-  normals_tree_ = boost::make_shared< pcl::search::KdTree<pcl::PointXYZ> > ();
-#else
-  normals_tree_ = boost::make_shared<pcl::KdTreeFLANN<pcl::PointXYZ> > ();
-#endif
-  n3d_.setKSearch (k_);
-  n3d_.setSearchMethod (normals_tree_);
+  if (use_point_array) {
+    point_array_sub_.unsubscribe();
+  }
 }
 
 bool jsk_pcl_ros::PointcloudScreenpoint::checkpoint (pcl::PointCloud< pcl::PointXYZ > &in_pts, int x, int y,
@@ -333,5 +383,4 @@ void jsk_pcl_ros::PointcloudScreenpoint::callback_polygon(const sensor_msgs::Poi
   }
 }
 
-typedef jsk_pcl_ros::PointcloudScreenpoint PointcloudScreenpoint;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, PointcloudScreenpoint, PointcloudScreenpoint, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::PointcloudScreenpoint, nodelet::Nodelet);

@@ -1,7 +1,8 @@
+// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Ryohei Ueda and JSK Lab
+ *  Copyright (c) 2014, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,20 +33,49 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <ros/ros.h>
-#include <nodelet/loader.h>
 
-int main(int argc, char **argv)
+#ifndef JSK_PCL_ROS_BORDER_ESTIMATOR_H_
+#define JSK_PCL_ROS_BORDER_ESTIMATOR_H_
+
+#include <pcl_ros/pcl_nodelet.h>
+#include <pcl/range_image/range_image.h>
+#include <pcl/features/range_image_border_extractor.h>
+
+#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/CameraInfo.h>
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
+
+#include "jsk_pcl_ros/connection_based_nodelet.h"
+
+namespace jsk_pcl_ros
 {
-  ros::init(argc, argv, "@DEFAULT_NODE_NAME@");
+  class BorderEstimator: public ConnectionBasedNodelet
+  {
+  public:
+    typedef message_filters::sync_policies::ApproximateTime<
+    sensor_msgs::PointCloud2, sensor_msgs::CameraInfo> SyncPolicy;
 
-  // Shared parameters to be propagated to nodelet private namespaces
-  nodelet::Loader manager(true); // Don't bring up the manager ROS API
-  nodelet::M_string remappings;
-  nodelet::V_string my_argv;
-
-  manager.load(ros::this_node::getName(), "@NODELET@", remappings, my_argv);
-
-  ros::spin();
-  return 0;
+  protected:
+    virtual void onInit();
+    virtual pcl::PointXYZ convertPoint(const pcl::PointWithRange& input);
+    virtual void estimate(const sensor_msgs::PointCloud2::ConstPtr& msg,
+                          const sensor_msgs::CameraInfo::ConstPtr& caminfo);
+    virtual void publishCloud(ros::Publisher& pub,
+                              const pcl::PointCloud<pcl::PointXYZ>& cloud,
+                              const std_msgs::Header& header);
+    virtual void subscribe();
+    virtual void unsubscribe();
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_point_;
+    message_filters::Subscriber<sensor_msgs::CameraInfo> sub_camera_info_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    ros::Publisher pub_border_, pub_veil_, pub_shadow_;
+  private:
+    
+  };
 }
+
+#endif

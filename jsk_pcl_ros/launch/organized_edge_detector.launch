@@ -1,0 +1,76 @@
+<launch>
+  <arg name="INPUT_CLOUD" value="/camera_remote/depth_registered/points" />
+  <arg name="FILTERED_CLOUD" value="filter/output" />
+  <node pkg="nodelet" type="nodelet" name="edge_manager" args="manager" output="screen"
+        />
+  <node pkg="nodelet" type="nodelet" name="filter"
+        args="load pcl/PassThrough /edge_manager">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <rosparam>
+      keep_organized: true
+      filter_field_name: x
+      filter_limit_min: -0.5
+      filter_limit_max: 0.5
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="edge_detector"
+        args="load jsk_pcl/OrganizedEdgeDetector /edge_manager">
+    <remap from="~input" to="$(arg FILTERED_CLOUD)" />
+  </node>
+  <node pkg="nodelet" type="nodelet" name="edge_refinement"
+        args="load jsk_pcl/EdgeDepthRefinement /edge_manager">
+    <remap from="~input" to="$(arg FILTERED_CLOUD)" />
+    <remap from="~input_indices" to="/edge_detector/output_straight_edges_indices" />
+  </node>
+  <node pkg="nodelet" type="nodelet" name="parallel_edge"
+        args="load jsk_pcl/ParallelEdgeFinder /edge_manager">
+    <remap from="~input_indices" to="edge_refinement/output" />
+    <remap from="~input_coefficients" to="edge_refinement/output_coefficients" />
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="cube_finder"
+        args="load jsk_pcl/EdgebasedCubeFinder /edge_manager">
+    <remap from="~input" to="$(arg FILTERED_CLOUD)" />
+    <remap from="~input_edges" to="parallel_edge/output_edges_groups" />
+    <remap from="~input_coefficients" to="edge_refinement/output_coefficients" />
+  </node>
+  
+  <node pkg="nodelet" type="nodelet" name="straight_edge_decomposer"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer /edge_manager">
+    <remap from="~input" to="$(arg FILTERED_CLOUD)" />
+    <remap from="~target" to="/edge_detector/output_straight_edges_indices" />
+    <rosparam>
+      publish_tf: false
+      publish_clouds: false
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="refined_straight_edge_decomposer"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer /edge_manager">
+    <remap from="~input" to="$(arg FILTERED_CLOUD)" />
+    <remap from="~target" to="/edge_refinement/output" />
+    <rosparam>
+      publish_tf: false
+      publish_clouds: false
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="parallel_edge_decomposer"
+        args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis /edge_manager">
+    <remap from="~input" to="$(arg FILTERED_CLOUD)" />
+    <remap from="~target" to="/parallel_edge/output_clusters" />
+    <rosparam>
+      publish_tf: false
+      publish_clouds: false
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="cube_candidate"
+        args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis /edge_manager">
+    <remap from="~input" to="$(arg FILTERED_CLOUD)" />
+    <remap from="~target" to="/cube_finder/debug_clusters" />
+    <rosparam>
+      publish_tf: false
+      publish_clouds: false
+    </rosparam>
+  </node>
+  
+</launch>

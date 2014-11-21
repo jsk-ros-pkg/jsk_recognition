@@ -77,10 +77,14 @@ namespace jsk_pcl_ros
   void NormalConcatenater::onInit()
   {
     PCLNodelet::onInit();
-    pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
+    pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     if (!pnh_->getParam("max_queue_size", maximum_queue_size_)) {
       maximum_queue_size_ = 100;
     }
+  }
+
+  void NormalConcatenater::subscribe()
+  {
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(maximum_queue_size_);
     sub_xyz_.subscribe(*pnh_, "input", 1);
     sub_normal_.subscribe(*pnh_, "normal", 1);
@@ -88,8 +92,13 @@ namespace jsk_pcl_ros
     sync_->registerCallback(boost::bind(&NormalConcatenater::concatenate, this, _1, _2));
   }
 
+  void NormalConcatenater::unsubscribe()
+  {
+    sub_xyz_.unsubscribe();
+    sub_normal_.unsubscribe();
+  }
+  
 }
 
-typedef jsk_pcl_ros::NormalConcatenater NormalConcatenater;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, NormalConcatenater, NormalConcatenater, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::NormalConcatenater, nodelet::Nodelet);
 

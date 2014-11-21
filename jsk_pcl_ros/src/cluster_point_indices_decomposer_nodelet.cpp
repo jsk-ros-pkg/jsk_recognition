@@ -42,36 +42,18 @@
 #include <pcl/registration/ia_ransac.h>
 #include <pcl/filters/project_inliers.h>
 #include <pcl/common/pca.h>
-
+#include <jsk_topic_tools/color_utils.h>
 #include <Eigen/Geometry> 
 
 #include "jsk_pcl_ros/geo_util.h"
 #include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_pcl_ros/pcl_util.h"
 
 namespace jsk_pcl_ros
 {
-  ClusterPointIndicesDecomposer::ClusterPointIndicesDecomposer() {}
-  ClusterPointIndicesDecomposer::~ClusterPointIndicesDecomposer() {}
-
-  
   void ClusterPointIndicesDecomposer::onInit()
   {
-    PCLNodelet::onInit();
-
-    colors_.push_back(makeColor(1.0, 0.0, 0.0, 1.0));
-    colors_.push_back(makeColor(0.0, 1.0, 0.0, 1.0));
-    colors_.push_back(makeColor(0.0, 0.0, 1.0, 1.0));
-    colors_.push_back(makeColor(1.0, 1.0, 0.0, 1.0));
-    colors_.push_back(makeColor(1.0, 0.0, 1.0, 1.0));
-    colors_.push_back(makeColor(0.0, 1.0, 1.0, 1.0));
-    colors_.push_back(makeColor(1.0, 1.0, 1.0, 1.0));
-
-    pnh_.reset (new ros::NodeHandle (getPrivateNodeHandle ()));
-    pc_pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("debug_output", 1);
-    box_pub_ = pnh_->advertise<jsk_pcl_ros::BoundingBoxArray>("boxes", 1);
-    sub_input_.subscribe(*pnh_, "input", 1);
-    sub_target_.subscribe(*pnh_, "target", 1);
-
+    DiagnosticNodelet::onInit();
     pnh_->param("publish_tf", publish_tf_, true);
     if (!pnh_->getParam("tf_prefix", tf_prefix_))
     {
@@ -85,7 +67,14 @@ namespace jsk_pcl_ros
     
     pnh_->param("align_boxes", align_boxes_, false);
     pnh_->param("use_pca", use_pca_, false);
-    
+    pc_pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "debug_output", 1);
+    box_pub_ = advertise<BoundingBoxArray>(*pnh_, "boxes", 1);
+  }
+
+  void ClusterPointIndicesDecomposer::subscribe()
+  {
+    sub_input_.subscribe(*pnh_, "input", 1);
+    sub_target_.subscribe(*pnh_, "target", 1);
     if (align_boxes_) {
       sync_align_ = boost::make_shared<message_filters::Synchronizer<SyncAlignPolicy> >(100);
       sub_polygons_.subscribe(*pnh_, "align_planes", 1);
@@ -97,6 +86,16 @@ namespace jsk_pcl_ros
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
       sync_->connectInput(sub_input_, sub_target_);
       sync_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2));
+    }
+  }
+
+  void ClusterPointIndicesDecomposer::unsubscribe()
+  {
+    sub_input_.unsubscribe();
+    sub_target_.unsubscribe();
+    if (align_boxes_) {
+      sub_polygons_.unsubscribe();
+      sub_coefficients_.unsubscribe();
     }
   }
   
@@ -111,18 +110,38 @@ namespace jsk_pcl_ros
       output_array[i] = indices_array[i];
     }
   }
+
+  void ClusterPointIndicesDecomposer::updateDiagnostic(
+    diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    if (vital_checker_->isAlive()) {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                   "ClusterPointIndicesDecomposer running");
+      addDiagnosticBooleanStat("publish_clouds", publish_clouds_, stat);
+      addDiagnosticBooleanStat("publish_tf", publish_tf_, stat);
+      addDiagnosticBooleanStat("use_pca", use_pca_, stat);
+      addDiagnosticBooleanStat("align_boxes", align_boxes_, stat);
+      stat.add("tf_prefix", tf_prefix_);
+      stat.add("Clusters (Ave.)", cluster_counter_.mean());
+    }
+    else {
+      addDiagnosticErrorSummary(
+        "ClusterPointIndicesDecomposer", vital_checker_, stat);
+    }
+  }
   
-  int ClusterPointIndicesDecomposer::findNearestPlane(const Eigen::Vector4f& center,
-                                                      const jsk_pcl_ros::PolygonArrayConstPtr& planes,
-                                                      const jsk_pcl_ros::ModelCoefficientsArrayConstPtr& coefficients)
+  int ClusterPointIndicesDecomposer::findNearestPlane(
+    const Eigen::Vector4f& center,
+    const jsk_pcl_ros::PolygonArrayConstPtr& planes,
+    const jsk_pcl_ros::ModelCoefficientsArrayConstPtr& coefficients)
   {
     double min_distance = DBL_MAX;
     int nearest_index = -1;
     for (size_t i = 0; i < coefficients->coefficients.size(); i++) {
       geometry_msgs::PolygonStamped polygon_msg = planes->polygons[i];
-      ConvexPolygon::Vertices vertices;
+      Vertices vertices;
       for (size_t j = 0; j < polygon_msg.polygon.points.size(); j++) {
-        ConvexPolygon::Vertex v;
+        Vertex v;
         v[0] = polygon_msg.polygon.points[j].x;
         v[1] = polygon_msg.polygon.points[j].y;
         v[2] = polygon_msg.polygon.points[j].z;
@@ -166,7 +185,10 @@ namespace jsk_pcl_ros
         z_axis[0] = 0; z_axis[1] = 0; z_axis[2] = 1;
         Eigen::Vector3f rotation_axis = z_axis.cross(normal).normalized();
         double theta = acos(z_axis.dot(normal));
-        if (isnan(theta)) {
+        if (isnan(theta) ||
+            isnan(rotation_axis[0]) ||
+            isnan(rotation_axis[1]) ||
+            isnan(rotation_axis[2])) {
           segmented_cloud_transformed = segmented_cloud;
           NODELET_ERROR("cannot compute angle to align the point cloud: [%f, %f, %f], [%f, %f, %f]",
                         z_axis[0], z_axis[1], z_axis[2],
@@ -175,7 +197,7 @@ namespace jsk_pcl_ros
         else {
           Eigen::Matrix3f m = Eigen::Matrix3f::Identity();
           m = m * Eigen::AngleAxisf(theta, rotation_axis);
-
+          
           if (use_pca_) {
             // first project points to the plane
             pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud
@@ -224,12 +246,12 @@ namespace jsk_pcl_ros
     double xwidth = maxpt[0] - minpt[0];
     double ywidth = maxpt[1] - minpt[1];
     double zwidth = maxpt[2] - minpt[2];
-
+    
     Eigen::Vector4f center2((maxpt[0] + minpt[0]) / 2.0, (maxpt[1] + minpt[1]) / 2.0, (maxpt[2] + minpt[2]) / 2.0, 1.0);
     Eigen::Vector4f center_transformed = m4 * center2;
       
     bounding_box.header = header;
-      
+    
     bounding_box.pose.position.x = center_transformed[0];
     bounding_box.pose.position.y = center_transformed[1];
     bounding_box.pose.position.z = center_transformed[2];
@@ -247,7 +269,7 @@ namespace jsk_pcl_ros
    size_t i,
    pcl::PointCloud<pcl::PointXYZRGB>& debug_output)
   {
-    uint32_t rgb = colorRGBAToUInt32(colors_[i % colors_.size()]);
+    uint32_t rgb = colorRGBAToUInt32(jsk_topic_tools::colorCategory20(i));
     for (size_t j = 0; j < segmented_cloud->points.size(); j++) {
       pcl::PointXYZRGB p;
       p.x= segmented_cloud->points[j].x;
@@ -267,14 +289,17 @@ namespace jsk_pcl_ros
     if (publish_clouds_) {
       allocatePublishers(indices_input->cluster_indices.size());
     }
+    vital_checker_->poke();
     pcl::ExtractIndices<pcl::PointXYZRGB> extract;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*input, *cloud);
     pcl::fromROSMsg(*input, *cloud_xyz);
-
+    cluster_counter_.add(indices_input->cluster_indices.size());
+    
     std::vector<pcl::IndicesPtr> converted_indices;
     std::vector<pcl::IndicesPtr> sorted_indices;
+    
     for (size_t i = 0; i < indices_input->cluster_indices.size(); i++)
     {
       pcl::IndicesPtr vindices;
@@ -353,6 +378,6 @@ namespace jsk_pcl_ros
   
 }
 
-typedef jsk_pcl_ros::ClusterPointIndicesDecomposer ClusterPointIndicesDecomposer;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, ClusterPointIndicesDecomposer, ClusterPointIndicesDecomposer, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::ClusterPointIndicesDecomposer,
+                        nodelet::Nodelet);
 

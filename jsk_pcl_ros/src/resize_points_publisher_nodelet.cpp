@@ -13,19 +13,12 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 
-
-#if ROS_VERSION_MINIMUM(1, 10, 0)
-// hydro and later
-typedef pcl_msgs::PointIndices PCLIndicesMsg;
-#else
-// groovy
-typedef pcl::PointIndices PCLIndicesMsg;
-#endif
-
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_pcl_ros/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class ResizePointsPublisher : public pcl_ros::PCLNodelet
+  class ResizePointsPublisher : public ConnectionBasedNodelet
   {
     typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2,
                                                       PCLIndicesMsg> SyncPolicy;
@@ -36,42 +29,52 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<PCLIndicesMsg> sub_indices_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     ros::Publisher pub_;
-
+    bool not_use_rgb_;
     boost::mutex mutex_;
     
     void onInit () {
-      NODELET_INFO("[%s::onInit]", getName().c_str());
       pcl_ros::PCLNodelet::onInit();
 
       pnh_->param("step_x", step_x_, 2);
-      ROS_INFO("step_x : %d", step_x_);
+      NODELET_INFO("step_x : %d", step_x_);
       pnh_->param("step_y", step_y_, 2);
-      ROS_INFO("step_y : %d", step_y_);
-      bool not_use_rgb;
-      pnh_->param("not_use_rgb", not_use_rgb, false);
-      pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
-      sub_input_.subscribe(*pnh_, "input", 1);
-      if (use_indices_) {
-      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(10);
-      sub_indices_.subscribe(*pnh_, "indices", 1);
-      sync_->connectInput(sub_input_, sub_indices_);
-      if (!not_use_rgb) {
-        sync_->registerCallback(boost::bind(&ResizePointsPublisher::filter<pcl::PointXYZRGB>, this, _1, _2));
-      }
-      else {
-        sync_->registerCallback(boost::bind(&ResizePointsPublisher::filter<pcl::PointXYZ>, this, _1, _2));
-      }
-    }
-    else {
-      if (!not_use_rgb) {
-        sub_input_.registerCallback(&ResizePointsPublisher::filter<pcl::PointXYZRGB>, this);
-      }
-      else {
-        sub_input_.registerCallback(&ResizePointsPublisher::filter<pcl::PointXYZ>, this);
-      }
-    }
+      NODELET_INFO("step_y : %d", step_y_);
+      pnh_->param("not_use_rgb", not_use_rgb_, false);
+      pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     }
 
+    void subscribe()
+    {
+      sub_input_.subscribe(*pnh_, "input", 1);
+      if (use_indices_) {
+        sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(10);
+        sub_indices_.subscribe(*pnh_, "indices", 1);
+        sync_->connectInput(sub_input_, sub_indices_);
+        if (!not_use_rgb_) {
+          sync_->registerCallback(boost::bind(&ResizePointsPublisher::filter<pcl::PointXYZRGB>, this, _1, _2));
+        }
+        else {
+          sync_->registerCallback(boost::bind(&ResizePointsPublisher::filter<pcl::PointXYZ>, this, _1, _2));
+        }
+      }
+      else {
+        if (!not_use_rgb_) {
+          sub_input_.registerCallback(&ResizePointsPublisher::filter<pcl::PointXYZRGB>, this);
+        }
+        else {
+          sub_input_.registerCallback(&ResizePointsPublisher::filter<pcl::PointXYZ>, this);
+        }
+      }
+    }
+
+    void unsubscribe()
+    {
+      sub_input_.unsubscribe();
+      if (use_indices_) {
+        sub_indices_.unsubscribe();
+      }
+    }
+    
     ~ResizePointsPublisher() { }
 
     template<class T> void filter (const sensor_msgs::PointCloud2::ConstPtr &input) {
@@ -141,7 +144,7 @@ namespace jsk_pcl_ros
         ros_out.row_step = ros_out.point_step * ros_out.width;
         ros_out.is_dense = input->is_dense;
 #if DEBUG
-        ROS_INFO("%dx%d (%d %d)(%d %d) -> %dx%d %d", width,height, ox, oy, sx, sy,
+        NODELET_INFO("%dx%d (%d %d)(%d %d) -> %dx%d %d", width,height, ox, oy, sx, sy,
                  ros_out.width, ros_out.height, ex_indices.size());
 #endif
         pub_.publish(ros_out);
@@ -152,5 +155,4 @@ namespace jsk_pcl_ros
   };
 }
 
-typedef jsk_pcl_ros::ResizePointsPublisher ResizePointsPublisher;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, ResizePointsPublisher, ResizePointsPublisher, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::ResizePointsPublisher, nodelet::Nodelet);

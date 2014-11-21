@@ -1,6 +1,6 @@
 <package>
   <name>checkerboard_detector</name>
-  <version>0.1.14</version>
+  <version>0.1.25</version>
   <description>Uses opencv to find checkboards and compute their 6D poses with respect to the image. Requires the image to be calibrated.
     Parameters:
     display - show the checkerboard detection
@@ -41,6 +41,8 @@
   <run_depend>tf</run_depend>
   <build_depend>tf2</build_depend>
   <run_depend>tf2</run_depend>
+  <build_depend>jsk_pcl_ros</build_depend>
+  <run_depend>jsk_pcl_ros</run_depend>
   <export>
 
   </export>

@@ -47,26 +47,9 @@
 #include <pcl/point_types.h>
 #include <pcl/common/centroid.h>
 #include <pcl/common/transforms.h>
-#include <pcl/io/pcd_io.h>
-
-#include <pcl/filters/passthrough.h>
-#include <pcl/filters/voxel_grid.h>
-#include <pcl/filters/approximate_voxel_grid.h>
-#include <pcl/filters/extract_indices.h>
-
-#include <pcl/sample_consensus/method_types.h>
-#include <pcl/sample_consensus/model_types.h>
-
-#include <pcl/segmentation/sac_segmentation.h>
-#include <pcl/segmentation/extract_polygonal_prism_data.h>
-#include <pcl/segmentation/extract_clusters.h>
 
 #include <pcl/search/pcl_search.h>
 #include <pcl/common/transforms.h>
-
-#include <boost/format.hpp>
-#include <boost/thread/thread.hpp>
-
 
 #include <pcl/tracking/tracking.h>
 #include <pcl/tracking/particle_filter.h>
@@ -79,17 +62,22 @@
 #include <pcl/tracking/nearest_pair_point_cloud_coherence.h>
 
 #include <jsk_pcl_ros/SetPointCloud2.h>
+#include <jsk_pcl_ros/ParticleFilterTrackingConfig.h>
+#include <dynamic_reconfigure/server.h>
 
 using namespace pcl::tracking;
 namespace jsk_pcl_ros
 {
   class ParticleFilterTracking: public pcl_ros::PCLNodelet
   {
+  public:
+    typedef ParticleFilterTrackingConfig Config;
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_pass_;
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_pass_downsampled_;
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr target_cloud_;
 
-    boost::shared_ptr<ParticleFilterTracker<pcl::PointXYZRGBA, ParticleXYZRPY> > tracker_;
+    //boost::shared_ptr<ParticleFilterTracker<pcl::PointXYZRGBA, ParticleXYZRPY> > tracker_;
+    boost::shared_ptr<KLDAdaptiveParticleFilterOMPTracker<pcl::PointXYZRGBA, ParticleXYZRPY> > tracker_;
     boost::mutex mtx_;
     bool new_cloud_;
     bool track_target_set_;
@@ -101,8 +89,20 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_update_model_;
     ros::Publisher particle_publisher_;
     ros::Publisher track_result_publisher_;
-    ros::ServiceServer srv_;
+    ros::ServiceServer renew_model_srv_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
 
+    ////////////////////////////////////////////////////////
+    // parameters
+    ////////////////////////////////////////////////////////
+    int max_particle_num_;
+    double delta_;
+    double epsilon_;
+    int iteration_num_;
+    double resample_likelihood_thr_;
+    ParticleXYZRPY bin_size_;
+    std::vector<double> default_step_covariance_;
+    virtual void config_callback(Config &config, uint32_t level);
     virtual void publish_particles ();
     virtual void publish_result ();
 
@@ -113,9 +113,6 @@ namespace jsk_pcl_ros
                                );
     virtual void renew_model_topic_cb(const sensor_msgs::PointCloud2 &pc);
 
-    virtual double getXMLDoubleValue(XmlRpc::XmlRpcValue val);
-    virtual bool readVectorParameter(const std::string& param_name,
-                                     std::vector<double>& result);
   private:
     virtual void onInit();
 

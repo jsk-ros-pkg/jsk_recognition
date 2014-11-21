@@ -1,23 +1,27 @@
 ;;
 ;;
-(defvar *detection-topic* "/narrow_stereo/left/ObjectDetection")
-(defvar *base-frame-id* "/base_footprint")
-(defvar *solve-tf* t)
-
-(ros::roseus-add-msgs "posedetection_msgs")
 ;;
 ;;(unless (ros::ok) (ros::roseus "detection_interface"))
 
 (ros::ros-info "Publish for /objectdetection_marker_array")
+(ros::load-ros-manifest "roseus")
+(ros::load-ros-manifest "posedetection_msgs")
+(ros::roseus-add-msgs "posedetection_msgs")
+
+(defvar *detection-topic* "/openni/rgb/ObjectDetection")
+(defvar *base-frame-id* "/base_footprint")
+(defvar *solve-tf* t)
+
+(ros::roseus "detection-interface")
 
 (defmethod coordinates
+  (:stamp (&optional s) (if s (setf (get self :stamp) s)) (get self :stamp))
+  (:frame_id (&optional f) (if f (setf (get self :frame_id) f)) (get self :frame_id))
   (:speak-name
    (&optional s)
    (if s (setf (get self :speak-name) s)
      (let ((nm (get self :speak-name)))
-       (if nm nm (send self :name)))))
-  (:stamp (&optional s) (if s (setf (get self :stamp) s)) (get self :stamp))
-  (:frame_id (&optional f) (if f (setf (get self :frame_id) f)) (get self :frame_id)))
+       (if nm nm (send self :name))))))
 
 (defun detection-interface-objectdetection (force target-obj msg)
   (let ((obj-lst (send msg :objects))
@@ -69,9 +73,41 @@
   (ros::subscribe topic
                   posedetection_msgs::ObjectDetection
                   #'detection-interface-objectdetection tf-force obj))
+
 (defun stop-detection-interface-subscribe (&optional (topic *detection-topic*))
   (ros::ros-info "stop subscribe ~A" topic)
   (ros::unsubscribe topic))
+
+(defun publish-marker (target-obj marker-life &key (publish-name "/object_detection_marker_array"))
+  (ros::publish publish-name
+                (instance visualization_msgs::MarkerArray :init
+                          :markers
+                          (list (text->marker-msg
+                                 (send target-obj :name)
+                                 (send (send (send target-obj :copy-worldcoords) :copy-worldcoords)
+                                       :translate #f(-100 0 100))
+                                 (instance std_msgs::header :init
+                                           :stamp (send target-obj :stamp)
+                                           :frame_id *base-frame-id*)
+                                 :ns (format nil "object_text_~A" (send target-obj :name)) :color #f(1 0 0)
+                                 :scale 100 :lifetime marker-life :id 0)
+                                (coords->marker-msg
+                                 (send target-obj :copy-worldcoords)
+                                 (instance std_msgs::header :init
+                                           :stamp (send target-obj :stamp)
+                                           :frame_id *base-frame-id*)
+                                 :ns (format nil "object_coords_~A" (send target-obj :name))
+                                 ;; :size 200 :width 20
+                                 :lifetime marker-life :id 1)
+                                (object->marker-msg
+                                 target-obj
+                                 (instance std_msgs::header :init
+                                           :stamp (send target-obj :stamp)
+                                           :frame_id *base-frame-id*)
+                                 :ns (format nil "object_body_~A" (send target-obj :name))
+                                 :lifetime marker-life :id 2)
+                                ))))
+
 
 (defun check-detection (&key (timeout 10) ((:type atype) nil) (tf-force nil)
                              (diff-position 10.0)
@@ -94,10 +130,9 @@
            (t (speak-jp (format nil "~aをさがしています" (send target-obj :speak-name)))))
         (speak-jp (format nil "~a を さがして います" (send target-obj :speak-name)))))
     (start-detection-interface-subscribe tf-force target-obj detection-topic)
-    (send *ri* :ros-wait 2.0 :spin-self t
+    (send *ri* :ros-wait 0.0 :spin-self t
           :func-before-throw #'(lambda (sl) (stop-detection-interface-subscribe detection-topic))) ;; attention-check ...
     (send target-obj :stamp (ros::time-now))
-
     (let* (current-object-coords
            previous-object-coords
            (start-time (ros::time-now)) (detect-object-list))
@@ -117,35 +152,8 @@
           (ros::ros-info "current -> ~A (~A)" current-object-coords (send target-obj :name))
           (when publish-objectdetection-marker
             (ros::advertise "/object_detection_marker_array" visualization_msgs::MarkerArray 5)
-            (ros::publish "/object_detection_marker_array"
-                          (instance visualization_msgs::MarkerArray :init
-                                    :markers
-                                    (list (text->marker-msg
-                                           (send target-obj :name)
-                                           (send (send current-object-coords :copy-worldcoords)
-                                                 :translate #f(-100 0 100))
-                                           (instance std_msgs::header :init
-                                                     :stamp (send target-obj :stamp)
-                                                     :frame_id *base-frame-id*)
-                                           :ns (format nil "object_text_~A" (send target-obj :name)) :color #f(1 0 0)
-                                           :scale 100 :lifetime marker-life :id 0)
-                                          (coords->marker-msg
-                                           current-object-coords
-                                           (instance std_msgs::header :init
-                                                     :stamp (send target-obj :stamp)
-                                                     :frame_id *base-frame-id*)
-                                           :ns (format nil "object_coords_~A" (send target-obj :name))
-                                           ;; :size 200 :width 20
-                                           :lifetime marker-life :id 1)
-                                          (object->marker-msg
-                                           target-obj
-                                           (instance std_msgs::header :init
-                                                     :stamp (send target-obj :stamp)
-                                                     :frame_id *base-frame-id*)
-                                           :ns (format nil "object_body_~A" (send target-obj :name))
-                                           :lifetime marker-life :id 2)
-                                          ))))
-
+            (publish-marker target-obj marker-life)
+            )
           (ros::ros-info "check detected ~A diff-pos:~A, diff-rot:~A"
                          (send target-obj :name)
                          (if previous-object-coords
@@ -256,3 +264,5 @@
    (ros::spin-once)
    (ros::sleep))
   )
+
+;;(load "package://jsk_perception/euslisp/detection_interface_servicecall.l")

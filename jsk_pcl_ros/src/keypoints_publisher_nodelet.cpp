@@ -45,18 +45,25 @@
 
 namespace jsk_pcl_ros
 {
-  KeypointsPublisher::KeypointsPublisher() {};
-  KeypointsPublisher::~KeypointsPublisher() {};
-
   void KeypointsPublisher::onInit(void)
   {
     PCLNodelet::onInit();
     
     input_.reset(new pcl::PointCloud<pcl::PointXYZ>);
-    keypoints_pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("nerf_keypoints", 10);
+    keypoints_pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "nerf_keypoints", 10);
+    
+  }
+
+  void KeypointsPublisher::subscribe()
+  {
     sub_input_ = pnh_->subscribe("input", 1, &KeypointsPublisher::inputCallback, this);
   }
 
+  void KeypointsPublisher::unsubscribe()
+  {
+    sub_input_.shutdown();
+  }
+  
   void KeypointsPublisher::inputCallback(const sensor_msgs::PointCloud2::ConstPtr& input)
   {
     pcl::fromROSMsg(*input, *input_);
@@ -94,5 +101,4 @@ namespace jsk_pcl_ros
   }
   
 }
-typedef jsk_pcl_ros::KeypointsPublisher KeypointsPublisher;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, KeypointsPublisher, KeypointsPublisher, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::KeypointsPublisher, nodelet::Nodelet);

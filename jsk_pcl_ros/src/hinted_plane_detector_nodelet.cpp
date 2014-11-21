@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Ryohei Ueda and JSK Lab
+ *  Copyright (c) 2013, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -49,24 +49,28 @@
 #include <pluginlib/class_list_macros.h>
 
 namespace jsk_pcl_ros {
-  HintedPlaneDetector::HintedPlaneDetector() {
-  }
-
-  HintedPlaneDetector::~HintedPlaneDetector() {
-  }
-
+  
   void HintedPlaneDetector::onInit() {
     PCLNodelet::onInit();
 
     input_.reset(new pcl::PointCloud<pcl::PointXYZ>);
     
     tf_listener_.reset(new tf::TransformListener);
-    marker_pub_ = pnh_->advertise<visualization_msgs::Marker>("marker", 10);
-    debug_hint_centroid_pub_ = pnh_->advertise<geometry_msgs::PointStamped>("debug_hint_centroid", 10);
-    debug_plane_points_pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("debug_plane_points", 10);
+    marker_pub_ = advertise<visualization_msgs::Marker>(*pnh_, "marker", 10);
+    debug_hint_centroid_pub_ = advertise<geometry_msgs::PointStamped>(*pnh_, "debug_hint_centroid", 10);
+    debug_plane_points_pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "debug_plane_points", 10);
+  }
+
+  void HintedPlaneDetector::subscribe()
+  {
     sub_input_ = pnh_->subscribe("input", 1, &HintedPlaneDetector::inputCallback, this);
     sub_hint_ = pnh_->subscribe("hint", 1, &HintedPlaneDetector::hintCallback, this);
-    
+  }
+
+  void HintedPlaneDetector::unsubscribe()
+  {
+    sub_input_.shutdown();
+    sub_hint_.shutdown();
   }
 
   void HintedPlaneDetector::inputCallback(const sensor_msgs::PointCloud2::ConstPtr& msg) {
@@ -235,5 +239,4 @@ namespace jsk_pcl_ros {
   
 }
 
-typedef jsk_pcl_ros::HintedPlaneDetector HintedPlaneDetector;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, HintedPlaneDetector, HintedPlaneDetector, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::HintedPlaneDetector, nodelet::Nodelet);

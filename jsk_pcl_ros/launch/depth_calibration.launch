@@ -1,0 +1,11 @@
+<launch>
+  <node pkg="jsk_pcl_ros" type="depth_calibration" name="depth_calibration"
+        clear_params="true"
+        output="screen">
+    <remap from="~input" to="/camera_remote/depth_registered/hw_registered/image_rect_raw" />
+    <remap from="~camera_info" to="/camera/depth_registered/camera_info" />
+    <remap from="~output" to="/camera_remote/depth_registered/hw_registered/image_rect_raw_calibrated" />
+    <rosparam>
+    </rosparam>
+  </node>
+</launch>

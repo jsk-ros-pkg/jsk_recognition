@@ -80,5 +80,5 @@ namespace jsk_pcl_ros
 }
 
 
-typedef jsk_pcl_ros::ClusterPointIndicesDecomposerZAxis ClusterPointIndicesDecomposerZAxis;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, ClusterPointIndicesDecomposerZAxis, ClusterPointIndicesDecomposerZAxis, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::ClusterPointIndicesDecomposerZAxis,
+                         nodelet::Nodelet);

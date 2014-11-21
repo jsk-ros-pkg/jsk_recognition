@@ -1,0 +1,63 @@
+<launch>
+  <!-- input:  /tilt_scan -->
+  <!-- output: /tilt_scan/depth_registered/points -->
+  <!-- tested on pr2 -->
+
+  <arg name="color_camera" default="/openni/rgb" />
+  <arg name="laser" default="tilt_scan" />
+
+  <arg name="use_gui" default="false" />
+  <arg name="use_gdb" default="false" />
+  <arg name="use_laser_pipeline" default="true" />
+  <!-- laserscan to pc2 -->
+  <!-- NOTE: currently use furushchev/jsk_tilt_laser -->
+  <include file="$(find jsk_tilt_laser)/launch/laser_pipeline.launch" if="$(arg use_laser_pipeline)">
+    <arg name="laser_scan" value="$(arg laser)" />
+  </include>
+
+  <node pkg="jsk_tilt_laser" type="tilt_laser_assembler.py" name="tilt_laser_controller" output="screen">
+    <param name="tilt_joint_name" value="laser_tilt_mount_joint" />
+    <param name="tilt_joint_min_angle" value="-0.67" />
+    <param name="tilt_joint_max_angle" value="1.02" />
+    <remap from="assemble_cloud" to="$(arg laser)/depth/points" />
+  </node>
+
+  <!-- publish tilt laser camera_info -->
+  <!-- NOTE: temporally relay kinect camera_info -->
+  <node pkg="topic_tools" type="relay" name="laserscan_registration_camera_info_publisher"
+        args="/openni/rgb/camera_info $(arg laser)/depth/camera_info" />
+
+  <node pkg="nodelet" type="nodelet" name="laserscan_registration_manager" args="manager" output="screen"
+        unless="$(arg use_gdb)"/>
+  <node pkg="nodelet" type="nodelet" name="laserscan_registration_manager" args="manager" output="screen"
+        launch-prefix="xterm -e gdb --args"
+        if="$(arg use_gdb)"/>
+
+  <!-- pc2/laser_camera_info -> depth_image -->
+  <node pkg="nodelet" type="nodelet" name="laser_registration_depth_image_creator"
+        args="load jsk_pcl/DepthImageCreator /laserscan_registration_manager">
+    <remap from="~info" to="$(arg laser)/depth/camera_info" />
+    <remap from="~input" to="$(arg laser)/depth/points" />
+    <remap from="~output" to="$(arg laser)/depth/image_rect" />
+    <param name="use_approximate" value="true" />
+  </node>
+
+  <!-- rgb_camera_info/depth_camera_info/depth_image -> depth/image_rect -->
+  <node pkg="nodelet" type="nodelet" name="laser_registration_depth_register"
+        args ="load depth_image_proc/register /laserscan_registration_manager">
+    <remap from="rgb/camera_info" to="$(arg color_camera)/camera_info" />
+    <remap from="depth/camera_info" to="$(arg laser)/depth/camera_info" />
+    <remap from="depth/image_rect" to="$(arg laser)/depth/image_rect" />
+    <remap from="depth_registered/camera_info" to="$(arg laser)/depth_registered/camera_info" />
+    <remap from="depth_registered/image_rect" to="$(arg laser)/depth_registered/image_rect" />
+  </node>
+
+  <!-- rgb_camera_info/rgb_image_rect_color/depth_image_rect -> depth_registered/points -->
+  <node pkg="nodelet" type="nodelet" name="laser_registration_point_cloud_xyzrgb"
+        args="load depth_image_proc/point_cloud_xyzrgb /laserscan_registration_manager">
+    <remap from="rgb/camera_info" to="$(arg color_camera)/camera_info" />
+    <remap from="rgb/image_rect_color" to="$(arg color_camera)/image_rect_color" />
+    <remap from="depth_registered/image_rect" to="$(arg laser)/depth_registered/image_rect" />
+    <remap from="depth_registered/points" to="$(arg laser)/depth_registered/points" />
+  </node>
+</launch>

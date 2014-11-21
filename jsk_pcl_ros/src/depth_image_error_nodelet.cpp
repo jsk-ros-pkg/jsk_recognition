@@ -43,18 +43,31 @@ namespace jsk_pcl_ros
   void DepthImageError::onInit()
   {
     PCLNodelet::onInit();
-    depth_error_publisher_ = pnh_->advertise<DepthErrorResult>("output", 1);
-    sub_image_.subscribe(*pnh_, "image", 1);
-    sub_point_.subscribe(*pnh_, "point", 1);
-    
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(1000);
-    sync_->connectInput(sub_image_, sub_point_);
-    sync_->registerCallback(boost::bind(&DepthImageError::calcError,
-                                        this, _1, _2));
+    depth_error_publisher_ = advertise<DepthErrorResult>(*pnh_, "output", 1);
   }
 
+  void DepthImageError::subscribe()
+  {
+    sub_image_.subscribe(*pnh_, "image", 1);
+    sub_point_.subscribe(*pnh_, "point", 1);
+    sub_camera_info_.subscribe(*pnh_, "camera_info", 1);
+    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(1000);
+    sync_->connectInput(sub_image_, sub_point_, sub_camera_info_);
+    sync_->registerCallback(boost::bind(&DepthImageError::calcError,
+                                        this, _1, _2, _3));
+  }
+
+  void DepthImageError::unsubscribe()
+  {
+    sub_image_.unsubscribe();
+    sub_point_.unsubscribe();
+
+  }
+
+
   void DepthImageError::calcError(const sensor_msgs::Image::ConstPtr& depth_image,
-                                  const geometry_msgs::PointStamped::ConstPtr& uv_point)
+                                  const geometry_msgs::PointStamped::ConstPtr& uv_point,
+                                  const sensor_msgs::CameraInfo::ConstPtr& camera_info)
   {
     cv_bridge::CvImagePtr cv_ptr;
     cv_ptr = cv_bridge::toCvCopy(depth_image, sensor_msgs::image_encodings::TYPE_32FC1);
@@ -69,6 +82,8 @@ namespace jsk_pcl_ros
       result.header.stamp = depth_image->header.stamp;
       result.u = (int)uv_point->point.x;
       result.v = (int)uv_point->point.y;
+      result.center_u = camera_info->P[2];
+      result.center_v = camera_info->P[6];
       result.true_depth = uv_point->point.z;
       result.observed_depth = depth_from_depth_sensor;
       depth_error_publisher_.publish(result);
@@ -76,5 +91,4 @@ namespace jsk_pcl_ros
   }
 }
 
-typedef jsk_pcl_ros::DepthImageError DepthImageError;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, DepthImageError, DepthImageError, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::DepthImageError, nodelet::Nodelet);

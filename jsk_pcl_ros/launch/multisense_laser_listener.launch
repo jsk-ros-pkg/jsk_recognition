@@ -1,0 +1,138 @@
+<launch>
+  <node pkg="laser_assembler" type="laser_scan_assembler"
+         name="laser_scan_assembler_node"
+         output="screen" >
+     <remap from="scan" to="/multisense/lidar_scan"/>
+     <param name="tf_cache_time_secs" value="20" />
+     <param name="max_scans" type="int" value="1000" />
+     <param name="fixed_frame" type="string" value="multisense/head_root"/>
+     <rosparam command="load" file="$(find jsk_tilt_laser)/config/multisense_laser_filter.yaml" />
+  </node>
+  <node pkg="nodelet" type="nodelet" name="multi_plane_manager"
+        args="manager" output="screen"/>
+  <node pkg="nodelet" type="nodelet"
+        name="tilt_laser_listener"
+        args="load jsk_pcl/TiltLaserListener multi_plane_manager"
+        output="screen">
+    <remap from="~input" to="/multisense/joint_states" />
+    <rosparam>
+      laser_type: infinite_spindle_half
+      joint_name: motor_joint
+      use_laser_assembler: true
+    </rosparam>
+    <remap from="~assemble_scans2" to="/assemble_scans2" />
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        name="xfilter"
+        args="load pcl/PassThrough multi_plane_manager">
+    <remap from="~input" to="tilt_laser_listener/output_cloud" />
+    <rosparam>
+      filter_field_name: x
+      filter_limit_min: -2.0
+      filter_limit_max: 2.0
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        name="yfilter"
+        args="load pcl/PassThrough multi_plane_manager">
+    <remap from="~input" to="xfilter/output" />
+    <rosparam>
+      filter_field_name: y
+      filter_limit_min: -2.0
+      filter_limit_max: 2.0
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        name="zfilter"
+        args="load pcl/PassThrough multi_plane_manager">
+    <remap from="~input" to="yfilter/output" />
+    <rosparam>
+      filter_field_name: z
+      filter_limit_min: -2.0
+      filter_limit_max: 2.0
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet"
+        args="load pcl/VoxelGrid multi_plane_manager"
+        name="voxel_grid">
+    <remap from="~input" to="zfilter/output"/>
+    <rosparam>
+      leaf_size: 0.01
+      filter_limit_min: -10.0
+      filter_limit_max: 10.0
+    </rosparam>
+  </node>
+  
+  <node pkg="nodelet" type="nodelet"
+        args="load pcl/NormalEstimationOMP multi_plane_manager"
+        name="normal_estimation">
+    <remap from="~input" to="voxel_grid/output" />
+    <rosparam>
+      radius_search: 0
+      k_search: 40
+      # 0, => ANN, 1 => FLANN, 2 => Organized
+      spatial_locator: 2
+    </rosparam>
+  </node>
+
+  
+  <node pkg="nodelet" type="nodelet" name="normal_concat"
+        args="load jsk_pcl/NormalConcatenater multi_plane_manager"
+        clear_params="true">
+    <remap from="~input" to="voxel_grid/output"/>
+    <remap from="~normal" to="normal_estimation/output"/>
+  </node>
+
+  
+  
+  <node pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/RegionGrowingMultiplePlaneSegmentation multi_plane_manager"
+        name="multi_plane_region_growing">
+    <remap from="~input" to="voxel_grid/output" />
+    <remap from="~input_normal" to="normal_estimation/output" />
+    <rosparam>
+      cluster_tolerance: 0.1
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/MultiPlaneSACSegmentation multi_plane_manager"
+        name="multi_plane_sac_segmentation">
+    <remap from="~input" to="voxel_grid/output" />
+    <remap from="~input_clusters" to="multi_plane_region_growing/output/inliers" />
+    <remap from="~input_normal" to="normal_estimation/output" />
+    <rosparam>
+      use_imu_parallel: false
+      use_imu_perpendicular: false
+      use_normal: false
+      use_clusters: true
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer multi_plane_manager"
+        name="multi_plane_region_growing_decomposer">
+    <remap from="~input" to="voxel_grid/output" />
+    <remap from="~target" to="multi_plane_region_growing/output/inliers" />
+    <rosparam>
+      publish_tf: false
+      publish_clouds: false
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/NormalDirectionFilter multi_plane_manager"
+        name="normal_direction_filter">
+    <remap from="~input" to="normal_estimation/output" />
+    <remap from="~input_imu" to="/multisense/imu/imu_data" />
+    <rosparam>
+      use_imu: true
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        args="load pcl/ExtractIndices multi_plane_manager"
+        name="normal_direction_filtered_cloud">
+    <remap from="~input" to="voxel_grid/output" />
+    <remap from="~indices" to="normal_direction_filter/output" />
+  </node>
+  
+</launch>

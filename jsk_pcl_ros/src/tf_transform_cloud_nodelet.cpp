@@ -63,15 +63,24 @@ namespace jsk_pcl_ros
   void TfTransformCloud::onInit(void)
   {
     PCLNodelet::onInit();
-    sub_cloud_ = pnh_->subscribe("input", 1, &TfTransformCloud::transform, this);
+    
     if (!pnh_->getParam("target_frame_id", target_frame_id_))
     {
       ROS_WARN("~target_frame_id is not specified, using %s", "/base_footprint");
     }
 
-    pub_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>("output", 1);
+    pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+  }
+
+  void TfTransformCloud::subscribe()
+  {
+    sub_cloud_ = pnh_->subscribe("input", 1, &TfTransformCloud::transform, this);
+  }
+
+  void TfTransformCloud::unsubscribe()
+  {
+    sub_cloud_.shutdown();
   }
 }
 
-typedef jsk_pcl_ros::TfTransformCloud TfTransformCloud;
-PLUGINLIB_DECLARE_CLASS (jsk_pcl, TfTransformCloud, TfTransformCloud, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::TfTransformCloud, nodelet::Nodelet);

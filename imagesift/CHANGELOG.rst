@@ -2,6 +2,9 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.1.24 (2014-11-15)
 -------------------
 * use ifdef not if for OPENCV_NON_FREE

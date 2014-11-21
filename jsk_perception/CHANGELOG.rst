@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.25 (2014-11-21)
+-------------------
 * kalmanfilter
 * changed name
 * added codes in catkin.cmake

@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.25 (2014-11-21)
+-------------------
 * Add singleton class for tf::TransformListener
 * python_sklearn -> python-sklearn, see https://github.com/ros/rosdistro/blob/master/rosdep/python.yaml#L1264
 * Merge remote-tracking branch 'origin/master' into add-more-parameter-for-calibration

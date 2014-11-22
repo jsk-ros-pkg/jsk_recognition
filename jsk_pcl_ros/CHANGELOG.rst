@@ -2,6 +2,16 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.25 (2014-11-21)
+-------------------
+* Add singleton class for tf::TransformListener
+* python_sklearn -> python-sklearn, see https://github.com/ros/rosdistro/blob/master/rosdep/python.yaml#L1264
+* Merge remote-tracking branch 'origin/master' into add-more-parameter-for-calibration
+  Conflicts:
+  jsk_pcl_ros/launch/openni2_remote.launch
+* Add uv_scale parameter to depth_calibration.cpp and update openni2_remote.launch
+  to specify more parameter.
+
 0.1.24 (2014-11-15)
 -------------------
 * Add default calibration file for openni2_remote.launch

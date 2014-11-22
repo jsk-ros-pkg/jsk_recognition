@@ -2,6 +2,14 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.25 (2014-11-21)
+-------------------
+* kalmanfilter
+* changed name
+* added codes in catkin.cmake
+* added cfg
+* added color_histogram_mathcer_node
+
 0.1.24 (2014-11-15)
 -------------------
 * servicecall

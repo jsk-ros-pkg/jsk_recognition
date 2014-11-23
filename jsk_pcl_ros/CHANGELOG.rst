@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.26 (2014-11-23)
+-------------------
 * Install launch directory
 * Contributors: Ryohei Ueda
 

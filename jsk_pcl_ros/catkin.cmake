@@ -281,3 +281,5 @@ install(TARGETS jsk_pcl_ros ${jsk_pcl_nodelet_executables}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 
 install(FILES jsk_pcl_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+install(DIRECTORY launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

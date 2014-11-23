@@ -2,6 +2,11 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.26 (2014-11-23)
+-------------------
+* Install launch directory
+* Contributors: Ryohei Ueda
+
 0.1.25 (2014-11-21)
 -------------------
 * Add singleton class for tf::TransformListener

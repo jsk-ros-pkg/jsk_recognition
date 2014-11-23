@@ -48,11 +48,11 @@
 #include <jsk_pcl_ros/ClusterPointIndices.h>
 #include <jsk_pcl_ros/ModelCoefficientsArray.h>
 #include <jsk_pcl_ros/BoundingBoxFilterConfig.h>
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include "jsk_topic_tools/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class BoundingBoxFilter: public ConnectionBasedNodelet
+  class BoundingBoxFilter: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     typedef jsk_pcl_ros::BoundingBoxFilterConfig Config;

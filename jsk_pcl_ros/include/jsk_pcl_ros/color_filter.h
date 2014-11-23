@@ -47,7 +47,7 @@
 #include <dynamic_reconfigure/server.h>
 
 #include "jsk_pcl_ros/pcl_conversion_util.h"
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include "jsk_topic_tools/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
@@ -55,7 +55,7 @@ namespace jsk_pcl_ros
   class HSIColorFilter;
 
   template <class PackedComparison, typename Config>
-  class ColorFilter: public ConnectionBasedNodelet
+  class ColorFilter: public jsk_topic_tools::ConnectionBasedNodelet
   {
     friend class RGBColorFilter;
     friend class HSIColorFilter;
@@ -81,6 +81,8 @@ namespace jsk_pcl_ros
     virtual void subscribe();
     virtual void unsubscribe();
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+
+    bool use_indices_;
   private:
     virtual void onInit();
   };

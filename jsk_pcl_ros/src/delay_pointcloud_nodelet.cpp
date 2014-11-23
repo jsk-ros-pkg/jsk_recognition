@@ -40,7 +40,7 @@ namespace jsk_pcl_ros
 {
   void DelayPointCloud::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     pnh_->param("sleep_time", sleep_time_, 1.0);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
   }

@@ -44,7 +44,7 @@ namespace jsk_pcl_ros
 {
   void BilateralFilter::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&BilateralFilter::configCallback, this, _1, _2);

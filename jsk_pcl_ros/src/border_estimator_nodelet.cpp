@@ -39,7 +39,7 @@ namespace jsk_pcl_ros
 {
   void BorderEstimator::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     pub_border_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_border", 1);
     pub_veil_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_veil", 1);
     pub_shadow_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_shadow", 1);

@@ -62,11 +62,11 @@ void jsk_pcl_ros::PointcloudScreenpoint::onInit()
   srv_ = pnh_->advertiseService("screen_to_point", &PointcloudScreenpoint::screenpoint_cb, this);
 
   if (publish_point_) {
-    pub_point_ = pnh_->advertise< geometry_msgs::PointStamped > ("output_point", 1);
+    pub_point_ = advertise< geometry_msgs::PointStamped > (*pnh_, "output_point", 1);
   }
 
   if (publish_points_) {
-    pub_points_ = pnh_->advertise< sensor_msgs::PointCloud2 > ("output", 1);
+    pub_points_ = advertise< sensor_msgs::PointCloud2 > (*pnh_, "output", 1);
   }
 
 #if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
@@ -81,7 +81,6 @@ void jsk_pcl_ros::PointcloudScreenpoint::onInit()
 void jsk_pcl_ros::PointcloudScreenpoint::subscribe()
 {
   points_sub_.subscribe (*pnh_, "points", queue_size_);
-
   if (use_rect) {
     rect_sub_.subscribe   (*pnh_, "rect", queue_size_);
     if (use_sync) {

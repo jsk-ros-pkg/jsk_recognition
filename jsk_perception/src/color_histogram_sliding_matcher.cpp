@@ -9,6 +9,7 @@
 #include <dynamic_reconfigure/server.h>
 #include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/Image.h>
+#include <geometry_msgs/PolygonStamped.h>
 #include <jsk_perception/Rect.h>
 #include <jsk_perception/ColorHistogramSlidingMatcherConfig.h>
 
@@ -23,11 +24,13 @@ class MatcherNode
   image_transport::Subscriber _subImage;
   ros::Subscriber _subInfo;
   ros::Publisher _pubBestRect;
+  ros::Publisher _pubBestPolygon; //for jsk_pcl_ros/src/pointcloud_screenpoint_nodelet.cpp
   std::vector< cv::Mat > template_images;
   std::vector< std::vector<unsigned int> > template_vecs;
   std::vector< std::vector< std::vector<unsigned int> > >hsv_integral;  
   int standard_height, standard_width;
   double coefficient_thre;
+  bool show_result_;
   inline double calc_coe(std::vector< unsigned int > &a, std::vector<unsigned int> &b){
     unsigned long sum_a=0, sum_b=0;
     double coe=0;
@@ -62,7 +65,8 @@ class MatcherNode
 public:
   MatcherNode() : _it(_node)
   {
-    _pubBestRect = _node.advertise<jsk_perception::Rect>("best_rect", 1);
+    _pubBestRect = _node.advertise< jsk_perception::Rect >("best_rect", 1);
+    _pubBestPolygon = _node.advertise< geometry_msgs::PolygonStamped >("best_polygon", 1);
     _subImage = _it.subscribe("image", 1, &MatcherNode::image_cb, this);
     ros::NodeHandle local_nh("~");
     std::string template_filename;
@@ -85,6 +89,7 @@ public:
     local_nh.param("standard_width", standard_width, 12);
     local_nh.param("standard_height", standard_height, 12);
     local_nh.param("coefficient_threshold", coefficient_thre, 0.67);
+    local_nh.param("show_result", show_result_, true);
     cv::Mat template_image=cv::imread(template_filename);
     if(template_add(template_image))template_images.push_back(template_image);
   }
@@ -246,11 +251,21 @@ public:
       // best result;
       cv::rectangle(image, cv::Point(index_j, index_i), cv::Point(index_j+(max_scale*standard_width), index_i+(max_scale*standard_height)), cv::Scalar(0, 0, 200), 3, 4);
       jsk_perception::Rect rect;
-      rect.x=index_j, rect.y=index_i, rect.width=(int)(max_scale*standard_width); rect.height=(int)(max_scale*standard_width);
+      rect.x=index_j, rect.y=index_i, rect.width=(int)(max_scale*standard_width); rect.height=(int)(max_scale*standard_height);
       _pubBestRect.publish(rect);
-      cv::imshow("result", image);
-      cv::imshow("template", template_images[template_index]);
-      cv::waitKey(20);
+      geometry_msgs::PolygonStamped polygon_msg;
+      polygon_msg.header = msg_ptr->header;
+      polygon_msg.polygon.points.resize(2);
+      polygon_msg.polygon.points[0].x=index_j;
+      polygon_msg.polygon.points[0].y=index_i;
+      polygon_msg.polygon.points[1].x=(int)(max_scale*standard_width)+index_j;
+      polygon_msg.polygon.points[1].y=(int)(max_scale*standard_height)+index_i;
+      _pubBestPolygon.publish(polygon_msg);
+      if(show_result_){
+	cv::imshow("result", image);
+	cv::imshow("template", template_images[template_index]);
+	cv::waitKey(20);
+      }
     } 
   }
   void dyn_conf_callback(jsk_perception::ColorHistogramSlidingMatcherConfig &config, uint32_t level){

@@ -76,10 +76,7 @@ void jsk_pcl_ros::PointcloudScreenpoint::onInit()
 #endif
   n3d_.setKSearch (k_);
   n3d_.setSearchMethod (normals_tree_);
-}
 
-void jsk_pcl_ros::PointcloudScreenpoint::subscribe()
-{
   points_sub_.subscribe (*pnh_, "points", queue_size_);
 
   if (use_rect) {
@@ -118,22 +115,6 @@ void jsk_pcl_ros::PointcloudScreenpoint::subscribe()
   points_sub_.registerCallback (boost::bind (&PointcloudScreenpoint::points_cb, this, _1));
 }
 
-void jsk_pcl_ros::PointcloudScreenpoint::unsubscribe()
-{
-  points_sub_.unsubscribe();
-
-  if (use_rect) {
-    rect_sub_.unsubscribe();
-  }
-
-  if (use_point) {
-    point_sub_.unsubscribe();
-  }
-
-  if (use_point_array) {
-    point_array_sub_.unsubscribe();
-  }
-}
 
 bool jsk_pcl_ros::PointcloudScreenpoint::checkpoint (pcl::PointCloud< pcl::PointXYZ > &in_pts, int x, int y,
                                                      float &resx, float &resy, float &resz)  {

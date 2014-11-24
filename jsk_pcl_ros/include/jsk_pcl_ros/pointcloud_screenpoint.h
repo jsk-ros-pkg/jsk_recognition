@@ -53,12 +53,12 @@
 #include "jsk_pcl_ros/TransformScreenpoint.h"
 
 #include <boost/thread/mutex.hpp>
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+
 // F/K/A <ray ocnverter>
 
 namespace jsk_pcl_ros
 {
-  class PointcloudScreenpoint : public ConnectionBasedNodelet
+  class PointcloudScreenpoint : public pcl_ros::PCLNodelet
   {
     typedef message_filters::sync_policies::ApproximateTime< sensor_msgs::PointCloud2,
                                                              geometry_msgs::PolygonStamped > PolygonApproxSyncPolicy;
@@ -95,8 +95,6 @@ namespace jsk_pcl_ros
 #endif
 
     void onInit();
-    void subscribe();
-    void unsubscribe();
     bool screenpoint_cb(jsk_pcl_ros::TransformScreenpoint::Request &req,
                         jsk_pcl_ros::TransformScreenpoint::Response &res);
     void points_cb(const sensor_msgs::PointCloud2ConstPtr &msg);

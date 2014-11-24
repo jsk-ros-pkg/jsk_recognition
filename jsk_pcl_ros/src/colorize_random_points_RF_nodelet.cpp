@@ -39,7 +39,7 @@ namespace jsk_pcl_ros
 {
   void ColorizeMapRandomForest::onInit(void)
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "cloth_result", 1);
     
     srand(time(NULL));

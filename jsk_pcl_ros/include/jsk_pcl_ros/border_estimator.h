@@ -49,11 +49,11 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include "jsk_topic_tools/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class BorderEstimator: public ConnectionBasedNodelet
+  class BorderEstimator: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     typedef message_filters::sync_policies::ApproximateTime<

@@ -43,7 +43,7 @@ class MatcherNode
   int standard_height, standard_width;
   double coefficient_thre;
   bool show_result_;
-  double template_width;
+ double template_width;
   double template_height;
   inline double calc_coe(std::vector< unsigned int > &a, std::vector<unsigned int> &b){
     unsigned long sum_a=0, sum_b=0;
@@ -290,7 +290,7 @@ public:
       image_geometry::PinholeCameraModel pcam;
       pcam.fromCameraInfo(*info_ptr);
       cv::Point2f corners2d[4] = {cv::Point2f(index_j, index_i),
-				  cv::Point2f((int)(max_scale*standard_width)+index_j, index_j),
+				  cv::Point2f((int)(max_scale*standard_width)+index_j, index_i),
 				  cv::Point2f((int)(max_scale*standard_width)+index_j, (int)(max_scale*standard_height)+index_i),
 				  cv::Point2f(index_j, (int)(max_scale*standard_height)+index_i)
       };
@@ -347,27 +347,6 @@ inline double calc_coe(unsigned int * a, unsigned int* b){
   return coe;
 }
 
-// typedef struct BOX{
-//   int x, y, dx, dy;
-//   BOX(int _x, int _y, int _dx, int _dy){
-//     x=_x, y=_y, dx=_dx, dy=_dy;
-//   }
-// } box;
-// inline bool point_in_box(int x, int y, box a_box){
-//   return a_box.x <= x && a_box.x+a_box.dx >= x && a_box.y <= y && a_box.y+a_box.dy >= y;
-// }
-// inline bool in_box(int x, int y, int dx, int dy, box a_box){
-//   return point_in_box(x, y, a_box) || point_in_box(x+dx, y, a_box) || point_in_box(x, y+dy, a_box) || point_in_box(x+dx, y+dy, a_box);
-// }
-// inline bool in_boxes(int x, int y, int dx, int dy,  std::vector<box> boxes){
-//   for (int i=0; i<boxes.size(); ++i){
-//     if(in_box(x, y, dx, dy, boxes[i])){
-//       return true;
-//     }
-//   }
-//   return false;
-  
-// }
 
 int main(int argc, char **argv){
   ros::init (argc, argv, "ColorHistogramSlidingMatcher");

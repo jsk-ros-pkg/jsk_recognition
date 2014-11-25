@@ -1,5 +1,6 @@
 <launch>
   <arg name="image" default="/camera/rgb/image_rect_color" />
+  <arg name="info" default="/camera/rgb/camera_info" />
   <arg name="points" default="/camera/depth_registered/points"/>
   <arg name="USE_SYNC" default="false" />
   <arg name="PUBLISH_POINTS" default="true" />
@@ -9,6 +10,7 @@
   <node name="color_histogram_sliding_matcher" pkg="jsk_perception" type="color_histogram_sliding_matcher"
 respawn="false" output="screen" launch-prefix="nice -n 10">
     <remap from="image" to="$(arg image)" />
+    <remap from="camera_info" to="$(arg info)" />
     <param name="standard_height" value="24" />
     <param name="standard_width" value="12" />
     <param name="coefficient_threshold" value="0.5" />

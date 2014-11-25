@@ -84,7 +84,7 @@ public:
   {
     _pubBestRect = _node.advertise< jsk_perception::Rect >("best_rect", 1);
     _pubBestPolygon = _node.advertise< geometry_msgs::PolygonStamped >("best_polygon", 1);
-    _pubBestPoint = _node.advertise< geometry_msgs::PointStamped >("best_point", 1);
+    _pubBestPoint = _node.advertise< geometry_msgs::PointStamped >("rough_point", 1);
     // _subImage = _it.subscribe("image", 1, &MatcherNode::image_cb, this);
 
     sync.registerCallback( boost::bind (&MatcherNode::image_cb , this, _1, _2) );
@@ -295,10 +295,10 @@ public:
 				  cv::Point2f(index_j, (int)(max_scale*standard_height)+index_i)
       };
       cv::Mat corners2d_mat(cv::Size(4, 1), CV_32FC2, corners2d);
-      cv::Point3f corners3d[4] = {cv::Point3f(0,0,0),
-      				  cv::Point3f(0,template_width,0),
-      				  cv::Point3f(template_height,template_width,0),
-      				  cv::Point3f(template_height,0,0)
+      cv::Point3f corners3d[4] = {cv::Point3f(-template_height/2,-template_width/2,0),
+      				  cv::Point3f(-template_height/2,template_width/2,0),
+      				  cv::Point3f(template_height/2,template_width/2,0),
+      				  cv::Point3f(template_height/2,-template_width/2,0)
       };
       cv::Mat corners3d_mat (cv::Size(4, 1), CV_32FC3, corners3d);
       double fR3[3], fT3[3];

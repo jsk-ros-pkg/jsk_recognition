@@ -38,12 +38,12 @@
 
 #include <pcl_ros/pcl_nodelet.h>
 #include <sensor_msgs/PointCloud.h>
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include "jsk_topic_tools/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
 
-  class DelayPointCloud: public ConnectionBasedNodelet
+  class DelayPointCloud: public jsk_topic_tools::ConnectionBasedNodelet
   {
     
   public:

@@ -3,8 +3,8 @@
   <!--
   $ roslaunch openni_launch openni.launch    ;; start kinect camera
   $ rosrun rqt_reconfigure rqt_reconfigure   ;; parameter settings
-  $ roslaunch jsk_pcl_ros hsv_color_filter.launch DEFAULT_NAMESPACE:=/camera/depth_registered INPUT:=points
-  ;; subscribe camera/depth_registered/hsv_output
+  $ roslaunch jsk_pcl_ros rgb_color_filter.launch DEFAULT_NAMESPACE:=/camera/depth_registered INPUT:=points
+  ;; subscribe camera/depth_registered/rgb_output
   ;; subscribe tf and find /target
   -->
   <arg name="INPUT" default="rgb_input"/>

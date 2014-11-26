@@ -1123,25 +1123,31 @@ namespace jsk_pcl_ros
     // geometry_msgs::PolygonStamped target_polygon
     //   = processing_input_polygons_->polygons[plane_i];
     // sensor_msgs::PointCloud2 debug_env_pointcloud;
-    GridMap::Ptr grid = old_grid_maps_[plane_i];
-    Plane::Ptr grid_plane = grid->toPlanePtr();
-    for (size_t i = 0; i < sampled_point_cloud->points.size(); i++) {
-      PointT p = sampled_point_cloud->points[i];
-      Eigen::Vector3f p_eigen = p.getVector3fMap();
-      double d = grid_plane->distanceToPoint(p_eigen);
-      if (d < resolution_size_) {
-        //NODELET_INFO_STREAM("distance: " << d);
-        Eigen::Vector3f p_eigen_projected;
-        grid_plane->project(p_eigen, p_eigen_projected);
-        if (!grid->isBinsOccupied(p_eigen_projected)) {
-          return false;            // near enough!! hopefully...
+    if (old_grid_maps_.size() > plane_i) {
+      GridMap::Ptr grid = old_grid_maps_[plane_i];
+      Plane::Ptr grid_plane = grid->toPlanePtr();
+      for (size_t i = 0; i < sampled_point_cloud->points.size(); i++) {
+        PointT p = sampled_point_cloud->points[i];
+        Eigen::Vector3f p_eigen = p.getVector3fMap();
+        double d = grid_plane->distanceToPoint(p_eigen);
+        if (d < resolution_size_) {
+          //NODELET_INFO_STREAM("distance: " << d);
+          Eigen::Vector3f p_eigen_projected;
+          grid_plane->project(p_eigen, p_eigen_projected);
+          if (!grid->isBinsOccupied(p_eigen_projected)) {
+            return false;            // near enough!! hopefully...
+          }
+        }
+        else {
+          return false;
         }
       }
-      else {
-        return false;
-      }
+      return true;
     }
-    return true;
+    else {
+      NODELET_ERROR("[polygonNearEnoughToPointCloud] the specified polygon index is out of old_grid_maps");
+      return false;
+    }
   }
 
   // bool EnvironmentPlaneModeling::polygonNearEnoughToPointCloud(
@@ -1254,7 +1260,7 @@ namespace jsk_pcl_ros
 
     bool found_contact_plane = false;
     for (size_t plane_i = 0;
-         plane_i < processing_input_polygons_->polygons.size();
+         plane_i < old_grid_maps_.size();
          plane_i++) {
       debug_polygon_pub_.publish(req.polygon);
       if (polygonNearEnoughToPointCloud(plane_i, sampled_point_cloud)) {

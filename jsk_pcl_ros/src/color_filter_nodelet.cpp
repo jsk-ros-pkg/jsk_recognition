@@ -239,11 +239,11 @@ namespace jsk_pcl_ros
   template <class PackedComparison, typename Config>
   void ColorFilter<PackedComparison, Config>::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
 
     filter_instance_ = pcl::ConditionalRemoval<pcl::PointXYZRGB>(true);
     updateCondition();
-
+    pnh_->param("use_indices", use_indices_, false);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);

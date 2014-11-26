@@ -117,15 +117,19 @@ namespace jsk_pcl_ros
     if (vital_checker_->isAlive()) {
       stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
                    "ClusterPointIndicesDecomposer running");
-      addDiagnosticBooleanStat("publish_clouds", publish_clouds_, stat);
-      addDiagnosticBooleanStat("publish_tf", publish_tf_, stat);
-      addDiagnosticBooleanStat("use_pca", use_pca_, stat);
-      addDiagnosticBooleanStat("align_boxes", align_boxes_, stat);
+      jsk_topic_tools::addDiagnosticBooleanStat(
+        "publish_clouds", publish_clouds_, stat);
+      jsk_topic_tools::addDiagnosticBooleanStat(
+        "publish_tf", publish_tf_, stat);
+      jsk_topic_tools::addDiagnosticBooleanStat(
+        "use_pca", use_pca_, stat);
+      jsk_topic_tools::addDiagnosticBooleanStat(
+        "align_boxes", align_boxes_, stat);
       stat.add("tf_prefix", tf_prefix_);
       stat.add("Clusters (Ave.)", cluster_counter_.mean());
     }
     else {
-      addDiagnosticErrorSummary(
+      jsk_topic_tools::addDiagnosticErrorSummary(
         "ClusterPointIndicesDecomposer", vital_checker_, stat);
     }
   }

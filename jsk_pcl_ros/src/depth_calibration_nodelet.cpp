@@ -66,7 +66,7 @@ namespace jsk_pcl_ros
       coefficients0_.assign(5, 0);
     }
     pnh_->param("use_abs", use_abs_, false);
-    
+    pnh_->param("uv_scale", uv_scale_, 1.0);
     printModel();
     set_calibration_parameter_srv_ = pnh_->advertiseService(
       "set_calibration_parameter",

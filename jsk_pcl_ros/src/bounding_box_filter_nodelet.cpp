@@ -39,7 +39,7 @@ namespace jsk_pcl_ros
 {
   void BoundingBoxFilter::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
 
     ////////////////////////////////////////////////////////
     // dynamic reconfigure

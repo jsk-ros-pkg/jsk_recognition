@@ -258,7 +258,8 @@ add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/pcl_conversion_util.cpp src/pcl_util.cpp
   src/diagnostic_nodelet.cpp
   src/pointcloud_moveit_filter.cpp
-  src/connection_based_nodelet.cpp)
+  src/connection_based_nodelet.cpp
+  src/tf_listener_singleton.cpp)
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 
@@ -280,3 +281,5 @@ install(TARGETS jsk_pcl_ros ${jsk_pcl_nodelet_executables}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 
 install(FILES jsk_pcl_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+install(DIRECTORY launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

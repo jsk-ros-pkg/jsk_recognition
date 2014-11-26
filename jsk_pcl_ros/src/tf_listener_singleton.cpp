@@ -1,8 +1,8 @@
-// -*- mode: C++ -*-
+// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, yuto_inagaki and JSK Lab
+ *  Copyright (c) 2014, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,54 +33,28 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef __JSK_PCL_COLORIZE_RANDOM_FOREST__
-#define __JSK_PCL_COLORIZE_RANDOM_FOREST__
+#include "jsk_pcl_ros/tf_listener_singleton.h"
 
-// ros
-#include <ros/ros.h>
-#include <ros/names.h>
-#include <jsk_pcl_ros/PointsArray.h>
-// pcl
-#include <pcl_ros/pcl_nodelet.h>
-#include <pcl/point_types.h>
-#include <pcl/point_types.h>
-#include <pcl/filters/passthrough.h>
-#include <pcl/common/centroid.h>
-#include <pcl/common/impl/common.hpp>
-#include <pcl/features/normal_3d.h>
-#include <pcl/kdtree/kdtree.h>
-#include <pcl/features/fpfh_omp.h>
-#include <ml_classifiers/ClassifyData.h>
-#include <ml_classifiers/ClassDataPoint.h>
-#include <math.h>
-#include <stdlib.h>
-#include "jsk_topic_tools/connection_based_nodelet.h"
 namespace jsk_pcl_ros
 {
-  class ColorizeMapRandomForest: public jsk_topic_tools::ConnectionBasedNodelet
+  tf::TransformListener* TfListenerSingleton::getInstance()
   {
-  protected:
-    ros::Subscriber sub_input_;
-    ros::Publisher pub_;
+    boost::mutex::scoped_lock lock(mutex_);
+    if (!instance_) {
+      ROS_INFO("instantiating tf::TransformListener");
+      //instance_ = new tf::TransformListener();
+    }
+    return instance_;
+  }
 
-    double angular_threshold_;
-    double mps_distance_threshold_;
-    double approx_threshold_;
-    double max_depth_change_factor_;
-    double normal_smoothingsize_;
-    double refinement_threshold_;
-    float radius_search_;
-    float pass_offset_;
-    float pass_offset2_;
-    int min_inliers_;
-    int mode_;
-    int sum_num_;
-  private:
-    virtual void onInit();
-    void extract(const sensor_msgs::PointCloud2 cloud);
-    void subscribe();
-    void unsubscribe();
-  };
+  void TfListenerSingleton::destroy()
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    if (instance_) {
+      delete instance_;
+    }
+  }
+
+  tf::TransformListener* TfListenerSingleton::instance_;
+  boost::mutex TfListenerSingleton::mutex_;
 }
-
-#endif

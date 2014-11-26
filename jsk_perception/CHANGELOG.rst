@@ -2,6 +2,33 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.26 (2014-11-23)
+-------------------
+
+0.1.25 (2014-11-21)
+-------------------
+* kalmanfilter
+* changed name
+* added codes in catkin.cmake
+* added cfg
+* added color_histogram_mathcer_node
+
+0.1.24 (2014-11-15)
+-------------------
+* servicecall
+* Use intrinsicMatrix instead of projectionMatrix to specify 3x3 matrix(K)
+  instead of 4x3 matrix(P)
+* remove eigen and add cmake_modules to find_package for indigo
+* fix: use projectionMatrix() for indigo
+* Add script to setup training assistant for opencv-like dataset
+* Add script to check opencv cascade file
+* Script to reject positive data for OpenCV training
+* renamed only-perception.launch
+* calc existance probability
+* removed kalmanlib.l from jsk_perception
+* add kalman-filter library
+* Contributors: Kamada Hitoshi, Kei Okada, Ryohei Ueda, Hitoshi Kamada
+
 0.1.23 (2014-10-09)
 -------------------
 * Install nodelet executables

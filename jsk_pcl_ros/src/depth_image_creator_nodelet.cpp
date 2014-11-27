@@ -187,13 +187,13 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
       transform = fixed_transform;
     } else {
       try {
-	tf_listener_->waitForTransform(pcloud2->header.frame_id,
-				      info->header.frame_id,
-				      info->header.stamp,
-				      ros::Duration(0.001));
+        tf_listener_->waitForTransform(pcloud2->header.frame_id,
+                                       info->header.frame_id,
+                                       info->header.stamp,
+                                       ros::Duration(0.001));
         tf_listener_->lookupTransform(pcloud2->header.frame_id,
-                                     info->header.frame_id,
-                                     info->header.stamp, transform);
+                                      info->header.frame_id,
+                                      info->header.stamp, transform);
       }
       catch ( std::runtime_error e ) {
         ROS_ERROR("%s",e.what());

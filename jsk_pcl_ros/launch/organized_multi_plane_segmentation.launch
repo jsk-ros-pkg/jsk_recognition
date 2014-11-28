@@ -243,6 +243,7 @@
     <remap from="~input_box" to="/bounding_box_marker/selected_box" />
     <rosparam>
       approach_offset: 0.1
+      angle_divide_num: 6
     </rosparam>
   </node>
     <group if="$(arg ESTIMATE_OCCLUSION)">

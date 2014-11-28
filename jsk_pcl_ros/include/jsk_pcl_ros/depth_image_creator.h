@@ -1,3 +1,7 @@
+
+#ifndef JSK_PCL_ROS_IMAGE_CREATOR_H_
+#define JSK_PCL_ROS_IMAGE_CREATOR_H_
+
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl_ros/transforms.h>
 
@@ -22,11 +26,12 @@
 #include <std_srvs/Empty.h>
 #include <boost/thread/mutex.hpp>
 
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <jsk_topic_tools/connection_based_nodelet.h>
+#include "jsk_pcl_ros/tf_listener_singleton.h"
 
 namespace jsk_pcl_ros
 {
-  class DepthImageCreator : public ConnectionBasedNodelet
+  class DepthImageCreator : public jsk_topic_tools::ConnectionBasedNodelet
   {
   protected:
     message_filters::Subscriber<sensor_msgs::CameraInfo> sub_info_;
@@ -49,8 +54,9 @@ namespace jsk_pcl_ros
     bool use_approximate;
     int info_throttle_;
     int info_counter_;
-
+    int max_queue_size_;
     tf::StampedTransform fixed_transform;
+    tf::TransformListener* tf_listener_;
     double scale_depth;
     typedef pcl::PointXYZ Point;
     typedef pcl::PointCloud< Point > PointCloud;
@@ -75,4 +81,6 @@ namespace jsk_pcl_ros
   public:
   };
 }
+
+#endif
 

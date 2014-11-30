@@ -38,8 +38,8 @@
 
 void jsk_pcl_ros::DepthImageCreator::onInit () {
   NODELET_INFO("[%s::onInit]", getName().c_str());
-  PCLNodelet::onInit();
-
+  ConnectionBasedNodelet::onInit();
+  tf_listener_ = TfListenerSingleton::getInstance();
   // scale_depth
   pnh_->param("scale_depth", scale_depth, 1.0);
   ROS_INFO("scale_depth : %f", scale_depth);
@@ -59,7 +59,7 @@ void jsk_pcl_ros::DepthImageCreator::onInit () {
 
   pnh_->param("info_throttle", info_throttle_, 0);
   info_counter_ = 0;
- 
+  pnh_->param("max_queue_size", max_queue_size_, 3);
   // set transformation
   std::vector<double> trans_pos(3, 0);
   std::vector<double> trans_quat(4, 0); trans_quat[3] = 1.0;
@@ -187,13 +187,13 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
       transform = fixed_transform;
     } else {
       try {
-	tf_listener_.waitForTransform(pcloud2->header.frame_id,
-				      info->header.frame_id,
-				      info->header.stamp,
-				      ros::Duration(0.001));
-        tf_listener_.lookupTransform(pcloud2->header.frame_id,
-                                     info->header.frame_id,
-                                     info->header.stamp, transform);
+        tf_listener_->waitForTransform(pcloud2->header.frame_id,
+                                       info->header.frame_id,
+                                       info->header.stamp,
+                                       ros::Duration(0.001));
+        tf_listener_->lookupTransform(pcloud2->header.frame_id,
+                                      info->header.frame_id,
+                                      info->header.stamp, transform);
       }
       catch ( std::runtime_error e ) {
         ROS_ERROR("%s",e.what());

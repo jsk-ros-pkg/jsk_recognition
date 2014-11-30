@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-sudo apt-get install git-buildpackage libudev-dev
+sudo apt-get install git-buildpackage libudev-dev default-jdk
 if [ ! -e /tmp/openni2 ]; then
     mkdir -p /tmp/openni2
     cd /tmp/openni2

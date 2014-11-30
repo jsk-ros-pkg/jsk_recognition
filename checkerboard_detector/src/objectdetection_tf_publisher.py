@@ -65,8 +65,8 @@ class ObjectDetectionTfPublisher():
         set_tf_request.cur_tf.child_frame_id = child_frame_id
         set_tf_request.cur_tf.transform = transform
 
-        rospy.wait_for_service('set_dynamic_tf')
-        set_dynamic_tf = rospy.ServiceProxy('set_dynamic_tf', SetDynamicTF)
+        rospy.wait_for_service('/set_dynamic_tf')
+        set_dynamic_tf = rospy.ServiceProxy('/set_dynamic_tf', SetDynamicTF)
         try:
             res = set_dynamic_tf(set_tf_request)
         except rospy.ServiceException as exc:

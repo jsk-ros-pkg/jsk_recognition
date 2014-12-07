@@ -8,9 +8,10 @@
   ;; subscribe tf and find /target
   -->
   <arg name="INPUT" default="hsi_input"/>
-  <arg name="OUTPUT" default="hsi_output"/>
   <arg name="CENTROID_FRAME" default="target"/>
   <arg name="DEFAULT_NAMESPACE" default="HSI_color_filter"/>
+  <arg name="FILTER_NAME_SUFFIX" default=""/>
+  <arg name="OUTPUT" default="hsi_output$(arg FILTER_NAME_SUFFIX)"/>
 
   <arg name="h_max" default="127" />
   <arg name="h_min" default="-128" />
@@ -27,7 +28,7 @@
           pkg="nodelet" type="nodelet" name="$(arg manager)"
           args="manager" output="screen"/>
 
-    <node pkg="nodelet" type="nodelet" name="hsi_filter"
+    <node pkg="nodelet" type="nodelet" name="hsi_filter$(arg FILTER_NAME_SUFFIX)"
           args="load jsk_pcl/HSIColorFilter $(arg manager)" output="screen">
       <remap from="~input" to="$(arg INPUT)" />
       <remap from="~output" to="$(arg OUTPUT)" />
@@ -41,7 +42,7 @@
       <param name="v_limit_max" value="$(arg v_max)" />
       <param name="v_limit_min" value="$(arg v_min)" />
     </node>
-    <node pkg="nodelet" type="nodelet" name="euclidean_clustering"
+    <node pkg="nodelet" type="nodelet" name="euclidean_clustering$(arg FILTER_NAME_SUFFIX)"
           args="load jsk_pcl/EuclideanClustering $(arg manager)" output="screen">
       <remap from="~input" to="$(arg OUTPUT)" />
       <rosparam>
@@ -51,11 +52,13 @@
     </node>
 
     <node pkg="nodelet" type="nodelet"
-          name="cluster_decomposer"
+          name="cluster_decomposer$(arg FILTER_NAME_SUFFIX)"
           args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis $(arg manager)"
           output="screen" clear_params="true">
       <remap from="~input" to="$(arg OUTPUT)" />
-      <remap from="~target" to="euclidean_clustering/output" />
+      <remap from="~target" to="euclidean_clustering$(arg FILTER_NAME_SUFFIX)/output" />
+      <remap from="~debug_output" to="debug_output$(arg FILTER_NAME_SUFFIX)" />
+      <remap from="~boxes" to="boxes$(arg FILTER_NAME_SUFFIX)" />
       <rosparam>
       </rosparam>
     </node>

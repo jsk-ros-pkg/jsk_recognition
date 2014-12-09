@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.27 (2014-12-09)
+-------------------
 * Add GDB argument to toggle xterm gdb hack
 * changed default parametar for pub_tf false
 * added args in launch not pub tf by cluster_decomposer

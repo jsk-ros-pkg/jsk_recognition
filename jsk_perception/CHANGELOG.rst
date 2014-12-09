@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.27 (2014-12-09)
+-------------------
 * added some algolism to get best window
 * changed codes to pub center of object
 * matchedPointPub by 2dResult of colorhistogram matching

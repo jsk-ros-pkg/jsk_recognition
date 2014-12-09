@@ -2,6 +2,15 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.27 (2014-12-09)
+-------------------
+* forget to install objectdetection_tf_publisher.py
+* Merge pull request `#457 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/457>`_ from YoheiKakiuchi/update_objectdetection_tf
+  update objectdetection_tf_publisher for publishing simple tf
+* update objectdetection_tf_publisher for publishing simple tf
+* add / to service name
+* Contributors: Kei Okada, Yohei Kakiuchi, Yohei Kakiuchi, Yuto Inagaki
+
 0.1.26 (2014-11-23)
 -------------------
 

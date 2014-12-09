@@ -2,6 +2,26 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.27 (2014-12-09)
+-------------------
+* Add GDB argument to toggle xterm gdb hack
+* changed default parametar for pub_tf false
+* added args in launch not pub tf by cluster_decomposer
+* Enable to create several hsi filters
+* fixed bug in icp
+* add param to set angle-divide-param for organized multi plange
+* Fix coding style of DepthImageCreator:
+  * remove hard tabs
+  * add bsd header
+* Use jsk_topic_tool's ConnectionBasedNodelet in DepthImageCreator
+* Add example euslisp code for displaying BoundingBoxArray
+* Fix typo in rgb filter comments
+* changed some topics in icp always subscribe without subscribe method defined in connection_based_nodelet
+* changet pointcloud_screen_point not to use jsconnection_based_nodelet
+* Use jsk_topic_tools::ConnectionBasedNodelet in BilateralFilter,
+  BorderEstimator, BoundingBoxFilter and so on
+* Contributors: Ryohei Ueda, Shunichi Nozawa, Yuto Inagaki, Yu Ohara
+
 0.1.26 (2014-11-23)
 -------------------
 * Install launch directory

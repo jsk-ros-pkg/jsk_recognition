@@ -46,6 +46,10 @@ install(TARGETS checkerboard_detector checkerboard_calibration
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+install(PROGRAMS src/objectdetection_tf_publisher.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 file(GLOB _launch *.launch)
 file(GLOB _pdf *.pdf)
 install(FILES ${_launch} ${_pdf}

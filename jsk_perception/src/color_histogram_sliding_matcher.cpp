@@ -41,9 +41,10 @@ class MatcherNode
   std::vector< std::vector<unsigned int> > template_vecs;
   std::vector< std::vector< std::vector<unsigned int> > >hsv_integral;
   int standard_height, standard_width;
+  int best_window_estimation_method;
   double coefficient_thre;
   bool show_result_;
- double template_width;
+  double template_width;
   double template_height;
   inline double calc_coe(std::vector< unsigned int > &a, std::vector<unsigned int> &b){
     unsigned long sum_a=0, sum_b=0;
@@ -58,8 +59,12 @@ class MatcherNode
   }
   typedef struct BOX{
     int x, y, dx, dy;
+    double coefficient;
     BOX(int _x, int _y, int _dx, int _dy){
       x=_x, y=_y, dx=_dx, dy=_dy;
+    }
+    BOX(int _x, int _y, int _dx, int _dy, double _coefficient){
+      x=_x, y=_y, dx=_dx, dy=_dy, coefficient = _coefficient;
     }
   } box;
   inline bool point_in_box(int x, int y, box a_box){
@@ -110,6 +115,7 @@ public:
     local_nh.param("template_filename", template_filename, default_template_file_name);
     local_nh.param("standard_width", standard_width, 12);
     local_nh.param("standard_height", standard_height, 12);
+    local_nh.param("best_window_estimation_method", best_window_estimation_method, 1);
     local_nh.param("coefficient_threshold", coefficient_thre, 0.67);
     local_nh.param("show_result", show_result_, true);
     local_nh.param("object_width", template_width, 0.06);
@@ -232,7 +238,7 @@ public:
     for(size_t template_index=0; template_index<template_vecs.size(); ++template_index){
       std::vector<unsigned int> template_vec = template_vecs[template_index];
       double max_coe = 0;
-      int index_i=-1, index_j=-1;
+      int index_i=-1, index_j=-1 ,index_width_d, index_height_d;
       float max_scale=-1;  
       // for(float scale=1; scale<image.cols/32; scale*=1.2){
       std::vector<box> boxes;
@@ -255,24 +261,60 @@ public:
 	    double temp_coe = calc_coe(template_vec, vec);
 	    //if larger than 0.7
 	    if(temp_coe > coefficient_thre){
-	      if(in_boxes(j, i, width_d, height_d, boxes)){
-		continue;
-	      }
-	      boxes.push_back(box(j, i, width_d, height_d));
+	      // if(in_boxes(j, i, width_d, height_d, boxes)){
+	      // 	continue;
+	      // }
+	      boxes.push_back(box(j, i, width_d, height_d, temp_coe));
 	  
 	      if (temp_coe > max_coe){
 		max_coe = temp_coe;
 		index_i=i; index_j=j; max_scale = scale;
+		index_width_d=width_d; index_height_d=height_d;
 	      }
 	    }
 	  }
 	}
       }
-      for(int i=0; i<boxes.size(); ++i){
-	ROS_INFO("x: %d, y: %d, dx:%d, dy:%d", boxes[i].x, boxes[i].y, boxes[i].dx, boxes[i].dy);
-	cv::rectangle(image, cv::Point(boxes[i].x, boxes[i].y), cv::Point(boxes[i].x+boxes[i].dx, boxes[i].y+boxes[i].dy), cv::Scalar(200, 0, 0), 3, 4);
+      if(best_window_estimation_method==0){
       }
-      ROS_INFO("y:%d x:%d coe:%f scale:%f", index_i, index_j, max_coe, max_scale);
+      //expand box     
+      if(best_window_estimation_method==1){
+	box best_large_box(index_j, index_i, index_width_d, index_height_d, 0);
+	max_coe = 0;
+	int temp_width = 0;
+	bool large_found=false;
+	for(size_t i=0; i<boxes.size(); ++i){
+	  if(temp_width!=boxes[i].dx){
+	    if(large_found) break;
+	    temp_width = boxes[i].dx;	    
+	  }
+	  if(in_box(index_j, index_i, index_width_d, index_height_d, boxes[i])){
+	    large_found=true;
+	    if(max_coe < boxes[i].coefficient){
+	      best_large_box = boxes[i];
+	      max_coe = boxes[i].coefficient;
+	    }
+	  }
+	}
+	index_j = best_large_box.x; index_i = best_large_box.y;
+	max_scale = best_large_box.dx/standard_width;
+      }
+      if(best_window_estimation_method==2){
+	max_coe = 0;
+	std::vector<box> boxes_temp;
+	for(size_t i=0; i<boxes.size(); ++i){
+	  box box_temp = boxes[i];
+	  if(in_boxes(box_temp.x, box_temp.y, box_temp.dx, box_temp.dy, boxes_temp)){
+	    continue;
+	  }
+	  boxes_temp.push_back(box_temp);
+	  if(box_temp.coefficient > max_coe){
+	    max_coe = box_temp.coefficient;
+	    index_j = box_temp.x, index_j=box_temp.y;
+	    max_scale = box_temp.dx/standard_width;
+	  }
+	}
+      }
       // best result;
       cv::rectangle(image, cv::Point(index_j, index_i), cv::Point(index_j+(max_scale*standard_width), index_i+(max_scale*standard_height)), cv::Scalar(0, 0, 200), 3, 4);
       jsk_perception::Rect rect;
@@ -329,6 +371,7 @@ public:
     standard_height = config.standard_height;
     standard_width = config.standard_width;
     coefficient_thre = config.coefficient_threshold;
+    best_window_estimation_method = config.best_window_estimation_method;
     if(level==1){ // size changed
       
     }

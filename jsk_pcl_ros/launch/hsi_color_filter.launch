@@ -17,8 +17,8 @@
   <arg name="h_min" default="-128" />
   <arg name="s_max" default="255" />
   <arg name="s_min" default="0" />
-  <arg name="v_max" default="255" />
-  <arg name="v_min" default="0" />
+  <arg name="i_max" default="255" />
+  <arg name="i_min" default="0" />
 
   <arg name="create_manager" default="true" />
   <arg name="manager" default="hsi_filter_manager" />
@@ -39,8 +39,8 @@
       <param name="h_limit_min" value="$(arg h_min)" />
       <param name="s_limit_max" value="$(arg s_max)" />
       <param name="s_limit_min" value="$(arg s_min)" />
-      <param name="v_limit_max" value="$(arg v_max)" />
-      <param name="v_limit_min" value="$(arg v_min)" />
+      <param name="i_limit_max" value="$(arg i_max)" />
+      <param name="i_limit_min" value="$(arg i_min)" />
     </node>
     <node pkg="nodelet" type="nodelet" name="euclidean_clustering$(arg FILTER_NAME_SUFFIX)"
           args="load jsk_pcl/EuclideanClustering $(arg manager)" output="screen">

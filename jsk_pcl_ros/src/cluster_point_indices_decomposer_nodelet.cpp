@@ -54,7 +54,7 @@ namespace jsk_pcl_ros
   void ClusterPointIndicesDecomposer::onInit()
   {
     DiagnosticNodelet::onInit();
-    pnh_->param("publish_tf", publish_tf_, true);
+    pnh_->param("publish_tf", publish_tf_, false);
     if (!pnh_->getParam("tf_prefix", tf_prefix_))
     {
       if (publish_tf_) {
@@ -63,7 +63,7 @@ namespace jsk_pcl_ros
       tf_prefix_ = getName();
     }
 
-    pnh_->param("publish_clouds", publish_clouds_, true);
+    pnh_->param("publish_clouds", publish_clouds_, false);
     
     pnh_->param("align_boxes", align_boxes_, false);
     pnh_->param("use_pca", use_pca_, false);

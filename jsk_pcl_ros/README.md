@@ -59,6 +59,59 @@ time end
 Represent range of time.
 
 ## nodelets
+### jsk\_pcl/AttentionClipper
+#### What Is This
+![](images/attention_clipper.png)
+
+It retrives `sensor_msgs/CameraInfo` and publish `sensor_msgs/CameraInfo` with ROI filled.
+
+You can specify the pose and size of the interest bounding box and jsk\_pcl/AttentionClipper returns ROI
+to see the object.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/CameraInfo`)
+
+  Original camera info.
+* `~pose` (`geometry_msgs/PoseStamped`)
+
+  Specify the pose of the bounding box. timestamp will be ignored and camera info's timestamp will be used.
+
+#### Publishing Topic
+* `~output` (`sensor_msgs/CameraInfo`)
+
+  This camera info is same with `~input` except for roi field.
+
+#### Parameter
+* `~dimension_x` (Double, default: `0.1`)
+* `~dimension_y` (Double, default: `0.1`)
+* `~dimension_z` (Double, default: `0.1`)
+
+  Size of bounding box
+
+### jsk\_pcl/ROIClipper
+#### What Is This
+![](images/attention_clipper.png)
+
+It retrives `sensor_msgs/Image` and `sensor_msgs/CameraInfo` and publish `sensor_msgs/Image` of ROI.
+It is similar to `image_proc/crop_decimate` but you can use `CameraInfo/roi` field to specify ROI.
+
+We expect to use jsk\_pcl/ROIClipper with jsk\_pcl/AttentionClipper to get ROI image.
+
+#### Subscribing Topic
+* `~input/image` (`sensor_msgs/Image`)
+
+  Input image.
+* `~input/camera_info` (`sensor_msgs/CameraInfo`)
+
+  Camera parameter and ROI field should be filled.
+
+  These two topic should be synchronized.
+#### Publishing Topic
+* `~output` (`sensor_msgs/Image`)
+
+  Image of ROI.
+
+
 ### jsk\_pcl/NormalDirectionFilter
 ![NormalDirectionFilter](images/normal_direction_filter.png)
 
@@ -669,6 +722,9 @@ roslaunch jsk_pcl_ros octree_change_detector.launch
 ```
 
 #### Speed
+
+### jsk\_pcl/ROIClipper
+#### What Is This
 
 ### jsk\_pcl/TfTransformCloud
 #### What Is This

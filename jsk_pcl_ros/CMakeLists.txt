@@ -150,7 +150,10 @@ jsk_pcl_nodelet(src/region_growing_multiple_plane_segmentation_nodelet.cpp
   "region_growing_multiple_plane_segmentation")
 jsk_pcl_nodelet(src/normal_direction_filter_nodelet.cpp
   "jsk_pcl/NormalDirectionFilter" "normal_direction_filter")
-
+jsk_pcl_nodelet(src/attention_clipper_nodelet.cpp
+  "jsk_pcl/AttentionClipper" "attention_clipper")
+jsk_pcl_nodelet(src/roi_clipper_nodelet.cpp
+  "jsk_pcl/ROIClipper" "roi_clipper")
 rosbuild_add_library (jsk_pcl_ros
   ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp

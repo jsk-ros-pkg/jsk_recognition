@@ -36,4 +36,11 @@ respawn="false" output="screen" launch-prefix="nice -n 10">
     <param name="use_sync" value="$(arg USE_SYNC)" />
     <param name="publish_points" value="$(arg PUBLISH_POINTS)" />
   </node>
+  <node pkg="jsk_interactive_marker"
+        type="bounding_box_marker"
+        name="bounding_box_color_histogram"
+        output="screen"
+        >
+    <remap from="~bounding_box_array" to="/best_box" />
+  </node>
 </launch>

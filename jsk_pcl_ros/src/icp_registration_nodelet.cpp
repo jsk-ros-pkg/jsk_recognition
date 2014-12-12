@@ -281,7 +281,9 @@ namespace jsk_pcl_ros
     result.header = ros_result_pose.header;
     result.pose = ros_result_pose.pose;
     result.score = min_score;
-    result.name = "" + max_index;
+    std::stringstream ss;
+    ss << max_index;
+    result.name = ss.str();
     return result;
   }
   

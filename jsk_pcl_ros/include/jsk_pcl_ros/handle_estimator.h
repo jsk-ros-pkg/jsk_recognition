@@ -96,6 +96,7 @@ namespace jsk_pcl_ros
     boost::shared_ptr<tf::TransformListener> tf_listener_;
     double gripper_size_;
     double approach_offset_;
+    int angle_divide_num_;
     boost::circular_buffer<boost::tuple<geometry_msgs::PoseArray, geometry_msgs::PoseArray> > output_buf;
   private:
   };

@@ -29,6 +29,7 @@ find_package(catkin REQUIRED COMPONENTS
   eigen_conversions tf_conversions tf2_ros tf
   image_transport nodelet cv_bridge
   ${ML_CLASSIFIERS} sklearn jsk_topic_tools
+  image_geometry
   laser_assembler moveit_ros_perception)
 # only run in hydro
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
@@ -252,7 +253,10 @@ jsk_pcl_nodelet(src/tilt_laser_listener_nodelet.cpp
   "jsk_pcl/TiltLaserListener" "tilt_laser_listener")
 jsk_pcl_nodelet(src/normal_direction_filter_nodelet.cpp
   "jsk_pcl/NormalDirectionFilter" "normal_direction_filter")
-
+jsk_pcl_nodelet(src/attention_clipper_nodelet.cpp
+  "jsk_pcl/AttentionClipper" "attention_clipper")
+jsk_pcl_nodelet(src/roi_clipper_nodelet.cpp
+  "jsk_pcl/ROIClipper" "roi_clipper")
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
   src/pcl_conversion_util.cpp src/pcl_util.cpp

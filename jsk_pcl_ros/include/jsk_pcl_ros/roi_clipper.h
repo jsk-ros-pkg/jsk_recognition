@@ -33,28 +33,42 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/tf_listener_singleton.h"
+
+
+#ifndef JSK_PCL_ROS_ROI_CLIPPER_H_
+#define JSK_PCL_ROS_ROI_CLIPPER_H_
+
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/CameraInfo.h>
 
 namespace jsk_pcl_ros
 {
-  tf::TransformListener* TfListenerSingleton::getInstance()
+  class ROIClipper: public jsk_topic_tools::DiagnosticNodelet
   {
-    boost::mutex::scoped_lock lock(mutex_);
-    if (!instance_) {
-      ROS_INFO("instantiating tf::TransformListener");
-      instance_ = new tf::TransformListener();
-    }
-    return instance_;
-  }
-
-  void TfListenerSingleton::destroy()
-  {
-    boost::mutex::scoped_lock lock(mutex_);
-    if (instance_) {
-      delete instance_;
-    }
-  }
-
-  tf::TransformListener* TfListenerSingleton::instance_;
-  boost::mutex TfListenerSingleton::mutex_;
+  public:
+    typedef message_filters::sync_policies::ExactTime<
+    sensor_msgs::Image,
+    sensor_msgs::CameraInfo > SyncPolicy;
+    ROIClipper(): DiagnosticNodelet("ROIClipper") {}
+    
+  protected:
+    virtual void onInit();
+    virtual void clip(const sensor_msgs::Image::ConstPtr& image_msg,
+                      const sensor_msgs::CameraInfo::ConstPtr& camera_info_msg);
+    virtual void subscribe();
+    virtual void unsubscribe();
+    virtual void updateDiagnostic(
+      diagnostic_updater::DiagnosticStatusWrapper &stat);
+    ros::Publisher pub_image_;
+    message_filters::Subscriber<sensor_msgs::Image> sub_image_;
+    message_filters::Subscriber<sensor_msgs::CameraInfo> sub_info_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+  private:
+  };
 }
+
+#endif

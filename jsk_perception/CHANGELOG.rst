@@ -2,6 +2,14 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.27 (2014-12-09)
+-------------------
+* added some algolism to get best window
+* changed codes to pub center of object
+* matchedPointPub by 2dResult of colorhistogram matching
+* changed color_histogram_sliding_matcher and added launch to show result
+* Contributors: Yu Ohara
+
 0.1.26 (2014-11-23)
 -------------------
 

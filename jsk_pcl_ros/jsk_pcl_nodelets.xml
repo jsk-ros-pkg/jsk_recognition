@@ -1,4 +1,14 @@
 <library path="libjsk_pcl_ros">
+  <class name="jsk_pcl/ROIClipper"
+         type="jsk_pcl_ros::ROIClipper"
+         base_class_type="nodelet::Nodelet">
+    Clip image based on camera_info.roi
+  </class>
+  <class name="jsk_pcl/AttentionClipper"
+         type="jsk_pcl_ros::AttentionClipper"
+         base_class_type="nodelet::Nodelet">
+    Publish ROI of attention reagion
+  </class>
   <class name="jsk_pcl/NormalDirectionFilter"
          type="jsk_pcl_ros::NormalDirectionFilter"
          base_class_type="nodelet::Nodelet">

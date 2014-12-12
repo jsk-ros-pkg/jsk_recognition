@@ -235,11 +235,10 @@
       </rosparam>
     </node>
   </group>
-  <node pkg="nodelet" type="nodelet" name="handle_estimator"
+  <node pkg="roseus" type="roseus" name="handle_estimator"
         if="$(arg HANDLE_ESTIMATOR)"
         machine="$(arg MACHINE)"
-        args="load jsk_pcl/HandleEstimator /$(arg MANAGER)">
-    <remap from="~input" to="input_relay/output" />
+        args="$(find jsk_pcl_ros)/euslisp/handle_estimator.l">
     <remap from="~input_box" to="/bounding_box_marker/selected_box" />
     <rosparam>
       approach_offset: 0.1

@@ -145,6 +145,7 @@
       align_boxes: true
       use_pca: true
       publish_clouds: false
+      publish_tf: false
     </rosparam>
   </node>
   <node name="bounding_box_filter"
@@ -238,7 +239,8 @@
   <node pkg="roseus" type="roseus" name="handle_estimator"
         if="$(arg HANDLE_ESTIMATOR)"
         machine="$(arg MACHINE)"
-        args="$(find jsk_pcl_ros)/euslisp/handle_estimator.l">
+        args="$(find jsk_pcl_ros)/euslisp/handle_estimator.l"
+	output="screen">
     <remap from="~input_box" to="/bounding_box_marker/selected_box" />
     <rosparam>
       approach_offset: 0.1

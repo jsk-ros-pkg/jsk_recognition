@@ -16,6 +16,7 @@
 #include <geometry_msgs/PointStamped.h>
 #include <jsk_perception/Rect.h>
 #include <jsk_perception/ColorHistogramSlidingMatcherConfig.h>
+#include <jsk_pcl_ros/BoundingBoxArray.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
@@ -37,6 +38,7 @@ class MatcherNode
   ros::Publisher _pubBestRect;
   ros::Publisher _pubBestPolygon; //for jsk_pcl_ros/src/pointcloud_screenpoint_nodelet.cpp
   ros::Publisher _pubBestPoint;
+  ros::Publisher _pubBestBoundingBox;
   std::vector< cv::Mat > template_images;
   std::vector< std::vector<unsigned int> > template_vecs;
   std::vector< std::vector< std::vector<unsigned int> > >hsv_integral;
@@ -90,6 +92,7 @@ public:
     _pubBestRect = _node.advertise< jsk_perception::Rect >("best_rect", 1);
     _pubBestPolygon = _node.advertise< geometry_msgs::PolygonStamped >("best_polygon", 1);
     _pubBestPoint = _node.advertise< geometry_msgs::PointStamped >("rough_point", 1);
+    _pubBestBoundingBox = _node.advertise< jsk_pcl_ros::BoundingBoxArray >("best_box", 1);
     // _subImage = _it.subscribe("image", 1, &MatcherNode::image_cb, this);
 
     sync.registerCallback( boost::bind (&MatcherNode::image_cb , this, _1, _2) );
@@ -246,7 +249,6 @@ public:
 	int dot = (int)(scale*2);
 	int width_d = (int)(scale*standard_width);
 	int height_d = (int)(scale*standard_height);
-	//ROS_INFO("%d %d %d",dot, width_d, height_d);
 	for(size_t i=0, image_rows=image.rows; i+height_d < image_rows; i+=dot){
 	  for(size_t j=0, image_cols=image.cols; j+width_d < image_cols; j+=dot){	
 	    //if in box continue;
@@ -256,14 +258,10 @@ public:
 		- hsv_integral[j][i+height_d][k] 
 		- hsv_integral[j+width_d][i][k] 
 		+ hsv_integral[j][i][k];
-	      //ROS_INFO("inte %d",hsv_integral[j+width_d][i+height_d][k]);
 	    }
 	    double temp_coe = calc_coe(template_vec, vec);
 	    //if larger than 0.7
 	    if(temp_coe > coefficient_thre){
-	      // if(in_boxes(j, i, width_d, height_d, boxes)){
-	      // 	continue;
-	      // }
 	      boxes.push_back(box(j, i, width_d, height_d, temp_coe));
 	  
 	      if (temp_coe > max_coe){
@@ -275,9 +273,18 @@ public:
 	  }
 	}
       }
+      if(boxes.size() == 0){
+	ROS_INFO("no objects found");
+	if(show_result_){
+	  cv::imshow("result", image);
+	  cv::imshow("template", template_images[template_index]);
+	  cv::waitKey(20);
+	}
+	return;
+      }
       if(best_window_estimation_method==0){
       }
-      //expand box     
+      //expand box
       if(best_window_estimation_method==1){
 	box best_large_box(index_j, index_i, index_width_d, index_height_d, 0);
 	max_coe = 0;
@@ -316,6 +323,7 @@ public:
 	}
       }
       // best result;
+
       cv::rectangle(image, cv::Point(index_j, index_i), cv::Point(index_j+(max_scale*standard_width), index_i+(max_scale*standard_height)), cv::Scalar(0, 0, 200), 3, 4);
       jsk_perception::Rect rect;
       rect.x=index_j, rect.y=index_i, rect.width=(int)(max_scale*standard_width); rect.height=(int)(max_scale*standard_height);
@@ -347,7 +355,7 @@ public:
       cv::Mat rvec(3, 1, CV_64FC1, fR3);
       cv::Mat tvec(3, 1, CV_64FC1, fT3);
       cv::Mat zero_distortion_mat = cv::Mat::zeros(4, 1, CV_64FC1);
-
+      
       cv::solvePnP (corners3d_mat, corners2d_mat,
 		    pcam.intrinsicMatrix(),
 		    zero_distortion_mat,//if unrectified: pcam.distortionCoeffs()
@@ -358,6 +366,16 @@ public:
       best_point.point.z = fT3[2]; 
       best_point.header = msg_ptr->header;
       _pubBestPoint.publish(best_point);
+      jsk_pcl_ros::BoundingBoxArray box_array_msg;
+      jsk_pcl_ros::BoundingBox box_msg;
+      box_array_msg.header = box_msg.header = msg_ptr->header;
+      box_msg.pose.position = best_point.point;
+      box_msg.pose.orientation.x = box_msg.pose.orientation.y = box_msg.pose.orientation.z = 0;
+      box_msg.pose.orientation.w = 1;
+      box_msg.dimensions.x = box_msg.dimensions.z = template_width;
+      box_msg.dimensions.y = template_height;
+      box_array_msg.boxes.push_back(box_msg);
+      _pubBestBoundingBox.publish(box_array_msg);
       //cv::solvePnP ();
       if(show_result_){
 	cv::imshow("result", image);
@@ -373,7 +391,6 @@ public:
     coefficient_thre = config.coefficient_threshold;
     best_window_estimation_method = config.best_window_estimation_method;
     if(level==1){ // size changed
-      
     }
   }
 };

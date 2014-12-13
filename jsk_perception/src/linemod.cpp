@@ -78,31 +78,31 @@ class Mouse
 {
 public:
   static void start(const std::string& a_img_name)
-  {
-    cvSetMouseCallback(a_img_name.c_str(), Mouse::cv_on_mouse, 0);
-  }
+    {
+      cvSetMouseCallback(a_img_name.c_str(), Mouse::cv_on_mouse, 0);
+    }
   static int event(void)
-  {
-    int l_event = m_event;
-    m_event = -1;
-    return l_event;
-  }
+    {
+      int l_event = m_event;
+      m_event = -1;
+      return l_event;
+    }
   static int x(void)
-  {
-    return m_x;
-  }
+    {
+      return m_x;
+    }
   static int y(void)
-  {
-    return m_y;
-  }
+    {
+      return m_y;
+    }
 
 private:
   static void cv_on_mouse(int a_event, int a_x, int a_y, int, void *)
-  {
-    m_event = a_event;
-    m_x = a_x;
-    m_y = a_y;
-  }
+    {
+      m_event = a_event;
+      m_x = a_x;
+      m_y = a_y;
+    }
 
   static int m_event;
   static int m_x;
@@ -136,24 +136,24 @@ public:
   Timer() : start_(0), time_(0) {}
 
   void start()
-  {
-    start_ = cv::getTickCount();
-  }
+    {
+      start_ = cv::getTickCount();
+    }
 
   void stop()
-  {
-    CV_Assert(start_ != 0);
-    int64 end = cv::getTickCount();
-    time_ += end - start_;
-    start_ = 0;
-  }
+    {
+      CV_Assert(start_ != 0);
+      int64 end = cv::getTickCount();
+      time_ += end - start_;
+      start_ = 0;
+    }
 
   double time()
-  {
-    double ret = time_ / cv::getTickFrequency();
-    time_ = 0;
-    return ret;
-  }
+    {
+      double ret = time_ / cv::getTickFrequency();
+      time_ = 0;
+      return ret;
+    }
 
 private:
   int64 start_, time_;
@@ -226,170 +226,170 @@ void callback(const sensor_msgs::Image::ConstPtr& rgb_image,
   //double focal_length = capture.get(CV_CAP_OPENNI_DEPTH_GENERATOR_FOCAL_LENGTH);
   double focal_length = depth_camera_info->K[0]; // fx
 
-    std::vector<cv::Mat> sources;
-    sources.push_back(color);
-    sources.push_back(depth);
-    cv::Mat display = color.clone();
+  std::vector<cv::Mat> sources;
+  sources.push_back(color);
+  sources.push_back(depth);
+  cv::Mat display = color.clone();
 
-    if (!learn_online)
+  if (!learn_online)
+  {
+    cv::Point mouse(Mouse::x(), Mouse::y());
+    int event = Mouse::event();
+
+    // Compute ROI centered on current mouse location
+    cv::Point roi_offset(roi_size.width / 2, roi_size.height / 2);
+    cv::Point pt1 = mouse - roi_offset; // top left
+    cv::Point pt2 = mouse + roi_offset; // bottom right
+
+    if (event == CV_EVENT_RBUTTONDOWN)
     {
-      cv::Point mouse(Mouse::x(), Mouse::y());
-      int event = Mouse::event();
+      // Compute object mask by subtracting the plane within the ROI
+      std::vector<CvPoint> chain(4);
+      chain[0] = pt1;
+      chain[1] = cv::Point(pt2.x, pt1.y);
+      chain[2] = pt2;
+      chain[3] = cv::Point(pt1.x, pt2.y);
+      cv::Mat mask;
+      subtractPlane(depth, mask, chain, focal_length);
 
-      // Compute ROI centered on current mouse location
-      cv::Point roi_offset(roi_size.width / 2, roi_size.height / 2);
-      cv::Point pt1 = mouse - roi_offset; // top left
-      cv::Point pt2 = mouse + roi_offset; // bottom right
+      cv::imshow("mask", mask);
 
-      if (event == CV_EVENT_RBUTTONDOWN)
+      // Extract template
+      std::string class_id = cv::format("class%d", num_classes);
+      cv::Rect bb;
+      extract_timer.start();
+      int template_id = detector->addTemplate(sources, class_id, mask, &bb);
+      extract_timer.stop();
+      if (template_id != -1)
       {
-        // Compute object mask by subtracting the plane within the ROI
-        std::vector<CvPoint> chain(4);
-        chain[0] = pt1;
-        chain[1] = cv::Point(pt2.x, pt1.y);
-        chain[2] = pt2;
-        chain[3] = cv::Point(pt1.x, pt2.y);
-        cv::Mat mask;
-        subtractPlane(depth, mask, chain, focal_length);
-
-        cv::imshow("mask", mask);
-
-        // Extract template
-        std::string class_id = cv::format("class%d", num_classes);
-        cv::Rect bb;
-        extract_timer.start();
-        int template_id = detector->addTemplate(sources, class_id, mask, &bb);
-        extract_timer.stop();
-        if (template_id != -1)
-        {
-          printf("*** Added template (id %d) for new object class %d***\n",
-                 template_id, num_classes);
-          //printf("Extracted at (%d, %d) size %dx%d\n", bb.x, bb.y, bb.width, bb.height);
-        }
-
-        ++num_classes;
+        printf("*** Added template (id %d) for new object class %d***\n",
+               template_id, num_classes);
+        //printf("Extracted at (%d, %d) size %dx%d\n", bb.x, bb.y, bb.width, bb.height);
       }
 
-      // Draw ROI for display
-      cv::rectangle(display, pt1, pt2, CV_RGB(0,0,0), 3);
-      cv::rectangle(display, pt1, pt2, CV_RGB(255,255,0), 1);
+      ++num_classes;
     }
 
-    // Perform matching
-    std::vector<cv::linemod::Match> matches;
-    std::vector<std::string> class_ids;
-    std::vector<cv::Mat> quantized_images;
-    match_timer.start();
-    detector->match(sources, (float)matching_threshold, matches, class_ids, quantized_images);
-    match_timer.stop();
+    // Draw ROI for display
+    cv::rectangle(display, pt1, pt2, CV_RGB(0,0,0), 3);
+    cv::rectangle(display, pt1, pt2, CV_RGB(255,255,0), 1);
+  }
 
-    int classes_visited = 0;
-    std::set<std::string> visited;
+  // Perform matching
+  std::vector<cv::linemod::Match> matches;
+  std::vector<std::string> class_ids;
+  std::vector<cv::Mat> quantized_images;
+  match_timer.start();
+  detector->match(sources, (float)matching_threshold, matches, class_ids, quantized_images);
+  match_timer.stop();
 
-    for (int i = 0; (i < (int)matches.size()) && (classes_visited < num_classes); ++i)
+  int classes_visited = 0;
+  std::set<std::string> visited;
+
+  for (int i = 0; (i < (int)matches.size()) && (classes_visited < num_classes); ++i)
+  {
+    cv::linemod::Match m = matches[i];
+
+    if (visited.insert(m.class_id).second)
     {
-      cv::linemod::Match m = matches[i];
+      ++classes_visited;
 
-      if (visited.insert(m.class_id).second)
+      if (show_match_result)
       {
-        ++classes_visited;
+        printf("Similarity: %5.1f%%; x: %3d; y: %3d; class: %s; template: %3d\n",
+               m.similarity, m.x, m.y, m.class_id.c_str(), m.template_id);
+      }
 
-        if (show_match_result)
+      // Draw matching template
+      const std::vector<cv::linemod::Template>& templates = detector->getTemplates(m.class_id, m.template_id);
+      drawResponse(templates, num_modalities, display, cv::Point(m.x, m.y), detector->getT(0));
+
+      if (learn_online == true)
+      {
+        /// @todo Online learning possibly broken by new gradient feature extraction,
+        /// which assumes an accurate object outline.
+
+        // Compute masks based on convex hull of matched template
+        cv::Mat color_mask, depth_mask;
+        std::vector<CvPoint> chain = maskFromTemplate(templates, num_modalities,
+                                                      cv::Point(m.x, m.y), color.size(),
+                                                      color_mask, display);
+        subtractPlane(depth, depth_mask, chain, focal_length);
+
+        cv::imshow("mask", depth_mask);
+
+        // If pretty sure (but not TOO sure), add new template
+        if (learning_lower_bound < m.similarity && m.similarity < learning_upper_bound)
         {
-          printf("Similarity: %5.1f%%; x: %3d; y: %3d; class: %s; template: %3d\n",
-                 m.similarity, m.x, m.y, m.class_id.c_str(), m.template_id);
-        }
-
-        // Draw matching template
-        const std::vector<cv::linemod::Template>& templates = detector->getTemplates(m.class_id, m.template_id);
-        drawResponse(templates, num_modalities, display, cv::Point(m.x, m.y), detector->getT(0));
-
-        if (learn_online == true)
-        {
-          /// @todo Online learning possibly broken by new gradient feature extraction,
-          /// which assumes an accurate object outline.
-
-          // Compute masks based on convex hull of matched template
-          cv::Mat color_mask, depth_mask;
-          std::vector<CvPoint> chain = maskFromTemplate(templates, num_modalities,
-                                                        cv::Point(m.x, m.y), color.size(),
-                                                        color_mask, display);
-          subtractPlane(depth, depth_mask, chain, focal_length);
-
-          cv::imshow("mask", depth_mask);
-
-          // If pretty sure (but not TOO sure), add new template
-          if (learning_lower_bound < m.similarity && m.similarity < learning_upper_bound)
+          extract_timer.start();
+          int template_id = detector->addTemplate(sources, m.class_id, depth_mask);
+          extract_timer.stop();
+          if (template_id != -1)
           {
-            extract_timer.start();
-            int template_id = detector->addTemplate(sources, m.class_id, depth_mask);
-            extract_timer.stop();
-            if (template_id != -1)
-            {
-              printf("*** Added template (id %d) for existing object class %s***\n",
-                     template_id, m.class_id.c_str());
-            }
+            printf("*** Added template (id %d) for existing object class %s***\n",
+                   template_id, m.class_id.c_str());
           }
         }
       }
     }
+  }
 
-    if (show_match_result && matches.empty())
-      printf("No matches found...\n");
-    if (show_timings)
-    {
-      printf("Training: %.2fs\n", extract_timer.time());
-      printf("Matching: %.2fs\n", match_timer.time());
-    }
-    if (show_match_result || show_timings)
-      printf("------------------------------------------------------------\n");
+  if (show_match_result && matches.empty())
+    printf("No matches found...\n");
+  if (show_timings)
+  {
+    printf("Training: %.2fs\n", extract_timer.time());
+    printf("Matching: %.2fs\n", match_timer.time());
+  }
+  if (show_match_result || show_timings)
+    printf("------------------------------------------------------------\n");
 
-    cv::imshow("color", display);
-    cv::imshow("normals", quantized_images[1]);
+  cv::imshow("color", display);
+  cv::imshow("normals", quantized_images[1]);
 
-    cv::FileStorage fs;
-    char key = (char)cvWaitKey(10);
-    // if( key == 'q' )
-    //   break;
+  cv::FileStorage fs;
+  char key = (char)cvWaitKey(10);
+  // if( key == 'q' )
+  //   break;
 
-    switch (key)
-    {
-      case 'h':
-        help();
-        break;
-      case 'm':
-        // toggle printing match result
-        show_match_result = !show_match_result;
-        printf("Show match result %s\n", show_match_result ? "ON" : "OFF");
-        break;
-      case 't':
-        // toggle printing timings
-        show_timings = !show_timings;
-        printf("Show timings %s\n", show_timings ? "ON" : "OFF");
-        break;
-      case 'l':
-        // toggle online learning
-        learn_online = !learn_online;
-        printf("Online learning %s\n", learn_online ? "ON" : "OFF");
-        break;
-      case '[':
-        // decrement threshold
-        matching_threshold = std::max(matching_threshold - 1, -100);
-        printf("New threshold: %d\n", matching_threshold);
-        break;
-      case ']':
-        // increment threshold
-        matching_threshold = std::min(matching_threshold + 1, +100);
-        printf("New threshold: %d\n", matching_threshold);
-        break;
-      case 'w':
-        // write model to disk
-        writeLinemod(detector, filename);
-        printf("Wrote detector and templates to %s\n", filename.c_str());
-        break;
-      default:
-        ;
-    }
+  switch (key)
+  {
+  case 'h':
+    help();
+    break;
+  case 'm':
+    // toggle printing match result
+    show_match_result = !show_match_result;
+    printf("Show match result %s\n", show_match_result ? "ON" : "OFF");
+    break;
+  case 't':
+    // toggle printing timings
+    show_timings = !show_timings;
+    printf("Show timings %s\n", show_timings ? "ON" : "OFF");
+    break;
+  case 'l':
+    // toggle online learning
+    learn_online = !learn_online;
+    printf("Online learning %s\n", learn_online ? "ON" : "OFF");
+    break;
+  case '[':
+    // decrement threshold
+    matching_threshold = std::max(matching_threshold - 1, -100);
+    printf("New threshold: %d\n", matching_threshold);
+    break;
+  case ']':
+    // increment threshold
+    matching_threshold = std::min(matching_threshold + 1, +100);
+    printf("New threshold: %d\n", matching_threshold);
+    break;
+  case 'w':
+    // write model to disk
+    writeLinemod(detector, filename);
+    printf("Wrote detector and templates to %s\n", filename.c_str());
+    break;
+  default:
+    ;
+  }
 }
 
 typedef message_filters::sync_policies::ApproximateTime<
@@ -553,9 +553,9 @@ static void filterPlane(IplImage * ap_depth, std::vector<IplImage *> & a_masks, 
   for (int l_i = 0; l_i < (int)l_chain_vector.size(); ++l_i)
   {
     float l_dist =  l_n[0] * CV_MAT_ELEM(*lp_pts, float, l_i, 0) +
-                    l_n[1] * CV_MAT_ELEM(*lp_pts, float, l_i, 1) +
-                    l_n[2] * CV_MAT_ELEM(*lp_pts, float, l_i, 2) +
-                    l_n[3] * CV_MAT_ELEM(*lp_pts, float, l_i, 3);
+      l_n[1] * CV_MAT_ELEM(*lp_pts, float, l_i, 1) +
+      l_n[2] * CV_MAT_ELEM(*lp_pts, float, l_i, 2) +
+      l_n[3] * CV_MAT_ELEM(*lp_pts, float, l_i, 3);
 
     if (fabs(l_dist) > l_max_dist)
       l_max_dist = l_dist;
@@ -714,17 +714,17 @@ cv::Mat displayQuantized(const cv::Mat& quantized)
       cv::Vec3b& bgr = color_r[c];
       switch (quant_r[c])
       {
-        case 0:   bgr[0]=  0; bgr[1]=  0; bgr[2]=  0;    break;
-        case 1:   bgr[0]= 55; bgr[1]= 55; bgr[2]= 55;    break;
-        case 2:   bgr[0]= 80; bgr[1]= 80; bgr[2]= 80;    break;
-        case 4:   bgr[0]=105; bgr[1]=105; bgr[2]=105;    break;
-        case 8:   bgr[0]=130; bgr[1]=130; bgr[2]=130;    break;
-        case 16:  bgr[0]=155; bgr[1]=155; bgr[2]=155;    break;
-        case 32:  bgr[0]=180; bgr[1]=180; bgr[2]=180;    break;
-        case 64:  bgr[0]=205; bgr[1]=205; bgr[2]=205;    break;
-        case 128: bgr[0]=230; bgr[1]=230; bgr[2]=230;    break;
-        case 255: bgr[0]=  0; bgr[1]=  0; bgr[2]=255;    break;
-        default:  bgr[0]=  0; bgr[1]=255; bgr[2]=  0;    break;
+      case 0:   bgr[0]=  0; bgr[1]=  0; bgr[2]=  0;    break;
+      case 1:   bgr[0]= 55; bgr[1]= 55; bgr[2]= 55;    break;
+      case 2:   bgr[0]= 80; bgr[1]= 80; bgr[2]= 80;    break;
+      case 4:   bgr[0]=105; bgr[1]=105; bgr[2]=105;    break;
+      case 8:   bgr[0]=130; bgr[1]=130; bgr[2]=130;    break;
+      case 16:  bgr[0]=155; bgr[1]=155; bgr[2]=155;    break;
+      case 32:  bgr[0]=180; bgr[1]=180; bgr[2]=180;    break;
+      case 64:  bgr[0]=205; bgr[1]=205; bgr[2]=205;    break;
+      case 128: bgr[0]=230; bgr[1]=230; bgr[2]=230;    break;
+      case 255: bgr[0]=  0; bgr[1]=  0; bgr[2]=255;    break;
+      default:  bgr[0]=  0; bgr[1]=255; bgr[2]=  0;    break;
       }
     }
   }

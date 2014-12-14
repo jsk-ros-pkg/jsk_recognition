@@ -59,19 +59,27 @@ namespace jsk_perception
     typedef message_filters::sync_policies::ApproximateTime<
     sensor_msgs::Image,
     geometry_msgs::PolygonStamped > SyncPolicy;
+    
+    typedef message_filters::sync_policies::ApproximateTime<
+      sensor_msgs::Image,
+      sensor_msgs::Image> MaskSyncPolicy;
     typedef jsk_perception::ColorHistogramConfig Config;
     ColorHistogram(): DiagnosticNodelet("ColorHistogram") {}
   protected:
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
+    boost::shared_ptr<message_filters::Synchronizer<MaskSyncPolicy> > mask_sync_;
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     image_transport::SubscriberFilter image_sub_;
+    image_transport::SubscriberFilter image_mask_sub_;
     message_filters::Subscriber<geometry_msgs::PolygonStamped> rectangle_sub_;
-    ros::NodeHandle nh_, pnh_;
+    ros::NodeHandle nh_;
     boost::shared_ptr<image_transport::ImageTransport> it_;
     ros::Publisher b_hist_pub_, r_hist_pub_, g_hist_pub_,
       h_hist_pub_, s_hist_pub_, i_hist_pub_;
+    ros::Publisher image_pub_;
     int b_hist_size_, r_hist_size_, g_hist_size_,
       h_hist_size_, s_hist_size_, i_hist_size_;
+    bool use_mask_;
     boost::mutex mutex_;
 
     void configCallback(Config &new_config, uint32_t level);
@@ -88,9 +96,18 @@ namespace jsk_perception
                             const std_msgs::Header& header);
     virtual void processHSI(const cv::Mat& bgr_image,
                             const std_msgs::Header& header);
+    virtual void processBGR(const cv::Mat& bgr_image,
+                            const cv::Mat& mask,
+                            const std_msgs::Header& header);
+    virtual void processHSI(const cv::Mat& bgr_image,
+                            const cv::Mat& mask,
+                            const std_msgs::Header& header);
     virtual void extract(
       const sensor_msgs::Image::ConstPtr& image,
       const geometry_msgs::PolygonStamped::ConstPtr& rectangle);
+    virtual void extractMask(
+      const sensor_msgs::Image::ConstPtr& image,
+      const sensor_msgs::Image::ConstPtr& mask_image);
   private:
     
   };

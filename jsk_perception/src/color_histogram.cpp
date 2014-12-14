@@ -52,7 +52,7 @@ namespace jsk_perception
   {
     DiagnosticNodelet::onInit();
     nh_ = ros::NodeHandle(getNodeHandle(), "image");
-    pnh_ = ros::NodeHandle("~");
+    pnh_->param("use_mask", use_mask_, false);
     b_hist_size_ = r_hist_size_ = g_hist_size_ =
       h_hist_size_ = s_hist_size_ = i_hist_size_ = 512;
     b_hist_pub_ = advertise<jsk_pcl_ros::ColorHistogram>(
@@ -67,7 +67,9 @@ namespace jsk_perception
       nh_, "saturation_histogram", 1);
     i_hist_pub_ = advertise<jsk_pcl_ros::ColorHistogram>(
       nh_, "intensity_histogram", 1);
-    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (pnh_);
+    image_pub_ = advertise<sensor_msgs::Image>(
+      *pnh_, "input_image", 1);
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&ColorHistogram::configCallback, this, _1, _2);
     srv_->setCallback (f);
@@ -75,20 +77,40 @@ namespace jsk_perception
 
   void ColorHistogram::subscribe()
   {
-    it_.reset(new image_transport::ImageTransport(nh_));
-    image_sub_.subscribe(*it_, "", 1);
-    rectangle_sub_.subscribe(nh_, "screenrectangle", 1);
-    sync_
-      = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(10);
-    sync_->connectInput(image_sub_, rectangle_sub_);
-    sync_->registerCallback(boost::bind(
-                              &ColorHistogram::extract, this, _1, _2));
+    if (!use_mask_) {
+      it_.reset(new image_transport::ImageTransport(nh_));
+      image_sub_.subscribe(*it_, "", 1);
+      rectangle_sub_.subscribe(nh_, "screenrectangle", 1);
+      sync_
+        = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(10);
+      sync_->connectInput(image_sub_, rectangle_sub_);
+      sync_->registerCallback(boost::bind(
+                                &ColorHistogram::extract, this, _1, _2));
+    }
+    else {
+      it_.reset(new image_transport::ImageTransport(nh_));
+      image_sub_.subscribe(*it_, "", 1);
+      image_mask_sub_.subscribe(*it_, "mask", 1);
+      mask_sync_
+        = boost::make_shared<message_filters::Synchronizer<
+        MaskSyncPolicy> >(100);
+      mask_sync_->connectInput(image_sub_, image_mask_sub_);
+      mask_sync_->registerCallback(
+        boost::bind(
+          &ColorHistogram::extractMask, this, _1, _2));
+    }
   }
 
   void ColorHistogram::unsubscribe()
   {
-    image_sub_.unsubscribe();
-    rectangle_sub_.unsubscribe();
+    if (!use_mask_) {
+      image_sub_.unsubscribe();
+      rectangle_sub_.unsubscribe();
+    }
+    else {
+      image_sub_.unsubscribe();
+      image_mask_sub_.unsubscribe();
+    }
   }
 
   void ColorHistogram::updateDiagnostic(
@@ -116,21 +138,21 @@ namespace jsk_perception
   }
 
   void ColorHistogram::processBGR(const cv::Mat& bgr_image,
+                                  const cv::Mat& mask,
                                   const std_msgs::Header& header)
   {
-
     float range[] = { 0, 256 } ;
     const float* histRange = { range };
     cv::MatND b_hist, g_hist, r_hist;
     bool uniform = true; bool accumulate = false;
     std::vector<cv::Mat> bgr_planes;
     split(bgr_image, bgr_planes);
-      
-    cv::calcHist(&bgr_planes[0], 1, 0, cv::Mat(), b_hist, 1, &b_hist_size_,
+    
+    cv::calcHist(&bgr_planes[0], 1, 0, mask, b_hist, 1, &b_hist_size_,
                  &histRange, uniform, accumulate);
-    cv::calcHist(&bgr_planes[1], 1, 0, cv::Mat(), g_hist, 1, &g_hist_size_,
+    cv::calcHist(&bgr_planes[1], 1, 0, mask, g_hist, 1, &g_hist_size_,
                  &histRange, uniform, accumulate);
-    cv::calcHist(&bgr_planes[2], 1, 0, cv::Mat(), r_hist, 1, &r_hist_size_,
+    cv::calcHist(&bgr_planes[2], 1, 0, mask, r_hist, 1, &r_hist_size_,
                  &histRange, uniform, accumulate);
       
     jsk_pcl_ros::ColorHistogram b_histogram;
@@ -147,10 +169,22 @@ namespace jsk_perception
     r_histogram.header = header;
     convertHistogramToMsg(r_hist, r_hist_size_, r_histogram);
     r_hist_pub_.publish(r_histogram);
-      
   }
-    
+  
+  void ColorHistogram::processBGR(const cv::Mat& bgr_image,
+                                  const std_msgs::Header& header)
+  {
+    processBGR(bgr_image, cv::Mat(), header);
+  }
+
   void ColorHistogram::processHSI(const cv::Mat& bgr_image,
+                                  const std_msgs::Header& header)
+  {
+    processHSI(bgr_image, cv::Mat(), header);
+  }
+  
+  void ColorHistogram::processHSI(const cv::Mat& bgr_image,
+                                  const cv::Mat& mask,
                                   const std_msgs::Header& header)
   {
     cv::Mat hsi_image;
@@ -220,6 +254,37 @@ namespace jsk_perception
       NODELET_ERROR("cv_bridge exception: %s", e.what());
       return;
     }
+  }
+
+  void ColorHistogram::extractMask(
+    const sensor_msgs::Image::ConstPtr& image,
+    const sensor_msgs::Image::ConstPtr& mask_image)
+  {
+    try {
+      cv_bridge::CvImagePtr cv_ptr
+        = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);
+      cv_bridge::CvImagePtr mask_ptr
+        = cv_bridge::toCvCopy(mask_image, sensor_msgs::image_encodings::MONO8);
+      cv::Mat bgr_image = cv_ptr->image;
+      cv::Mat mask_image = mask_ptr->image;
+      cv::Mat masked_image;
+      bgr_image.copyTo(masked_image, mask_image);
+      sensor_msgs::Image::Ptr ros_masked_image
+        = cv_bridge::CvImage(image->header,
+                             sensor_msgs::image_encodings::BGR8,
+                             masked_image).toImageMsg();
+      image_pub_.publish(ros_masked_image);
+      
+      processBGR(bgr_image, mask_image, image->header);
+      processHSI(bgr_image, mask_image, image->header);
+      
+    }
+    catch (cv_bridge::Exception& e)
+    {
+      NODELET_ERROR("cv_bridge exception: %s", e.what());
+      return;
+    }
+
   }
 }
 

@@ -48,16 +48,18 @@
 #include <jsk_perception/ColorHistogramConfig.h>
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 
 namespace jsk_perception
 {
-  class ColorHistogram: public nodelet::Nodelet
+  class ColorHistogram: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef message_filters::sync_policies::ApproximateTime<
     sensor_msgs::Image,
     geometry_msgs::PolygonStamped > SyncPolicy;
     typedef jsk_perception::ColorHistogramConfig Config;
+    ColorHistogram(): DiagnosticNodelet("ColorHistogram") {}
   protected:
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
@@ -70,7 +72,7 @@ namespace jsk_perception
     int b_hist_size_, r_hist_size_, g_hist_size_,
       h_hist_size_, s_hist_size_, i_hist_size_;
     boost::mutex mutex_;
-    
+
     void configCallback(Config &new_config, uint32_t level)
     {
       boost::mutex::scoped_lock lock(mutex_);
@@ -84,27 +86,31 @@ namespace jsk_perception
     
     virtual void onInit()
     {
+      DiagnosticNodelet::onInit();
       nh_ = ros::NodeHandle(getNodeHandle(), "image");
       pnh_ = ros::NodeHandle("~");
       b_hist_size_ = r_hist_size_ = g_hist_size_ =
         h_hist_size_ = s_hist_size_ = i_hist_size_ = 512;
-      b_hist_pub_ = nh_.advertise<jsk_pcl_ros::ColorHistogram>(
-        "blue_histogram", 1);
-      g_hist_pub_ = nh_.advertise<jsk_pcl_ros::ColorHistogram>(
-        "green_histogram", 1);
-      r_hist_pub_ = nh_.advertise<jsk_pcl_ros::ColorHistogram>(
-        "red_histogram", 1);
-      h_hist_pub_ = nh_.advertise<jsk_pcl_ros::ColorHistogram>(
-        "hue_histogram", 1);
-      s_hist_pub_ = nh_.advertise<jsk_pcl_ros::ColorHistogram>(
-        "saturation_histogram", 1);
-      i_hist_pub_ = nh_.advertise<jsk_pcl_ros::ColorHistogram>(
-        "intensity_histogram", 1);
+      b_hist_pub_ = advertise<jsk_pcl_ros::ColorHistogram>(
+        nh_, "blue_histogram", 1);
+      g_hist_pub_ = advertise<jsk_pcl_ros::ColorHistogram>(
+        nh_, "green_histogram", 1);
+      r_hist_pub_ = advertise<jsk_pcl_ros::ColorHistogram>(
+        nh_, "red_histogram", 1);
+      h_hist_pub_ = advertise<jsk_pcl_ros::ColorHistogram>(
+        nh_, "hue_histogram", 1);
+      s_hist_pub_ = advertise<jsk_pcl_ros::ColorHistogram>(
+        nh_, "saturation_histogram", 1);
+      i_hist_pub_ = advertise<jsk_pcl_ros::ColorHistogram>(
+        nh_, "intensity_histogram", 1);
       srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (pnh_);
       dynamic_reconfigure::Server<Config>::CallbackType f =
         boost::bind (&ColorHistogram::configCallback, this, _1, _2);
       srv_->setCallback (f);
+    }
 
+    virtual void subscribe()
+    {
       it_.reset(new image_transport::ImageTransport(nh_));
       image_sub_.subscribe(*it_, "", 1);
       rectangle_sub_.subscribe(nh_, "screenrectangle", 1);
@@ -113,6 +119,25 @@ namespace jsk_perception
       sync_->connectInput(image_sub_, rectangle_sub_);
       sync_->registerCallback(boost::bind(
                                 &ColorHistogram::extract, this, _1, _2));
+    }
+
+    virtual void unsubscribe()
+    {
+      image_sub_.unsubscribe();
+      rectangle_sub_.unsubscribe();
+    }
+
+    virtual void updateDiagnostic(
+      diagnostic_updater::DiagnosticStatusWrapper &stat)
+    {
+      if (vital_checker_->isAlive()) {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                   "ColorHistogram running");
+      }
+      else {
+        jsk_topic_tools::addDiagnosticErrorSummary(
+          "ColorHistogram", vital_checker_, stat);
+      }
     }
 
     virtual void convertHistogramToMsg(const cv::Mat& hist,
@@ -204,6 +229,7 @@ namespace jsk_perception
       const sensor_msgs::Image::ConstPtr& image,
       const geometry_msgs::PolygonStamped::ConstPtr& rectangle)
     {
+      vital_checker_->poke();
       boost::mutex::scoped_lock lock(mutex_);
       try
       {

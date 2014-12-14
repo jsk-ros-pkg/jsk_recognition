@@ -54,8 +54,9 @@ namespace jsk_perception
   class ColorHistogram: public nodelet::Nodelet
   {
   public:
-    typedef message_filters::sync_policies::ApproximateTime< sensor_msgs::Image,
-                                                             geometry_msgs::PolygonStamped > SyncPolicy;
+    typedef message_filters::sync_policies::ApproximateTime<
+    sensor_msgs::Image,
+    geometry_msgs::PolygonStamped > SyncPolicy;
     typedef jsk_perception::ColorHistogramConfig Config;
   protected:
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
@@ -80,17 +81,25 @@ namespace jsk_perception
       s_hist_size_ = new_config.saturation_histogram_bin;
       i_hist_size_ = new_config.intensity_histogram_bin;
     }
+    
     virtual void onInit()
     {
       nh_ = ros::NodeHandle(getNodeHandle(), "image");
       pnh_ = ros::NodeHandle("~");
-      b_hist_size_ = r_hist_size_ = g_hist_size_ = h_hist_size_ = s_hist_size_ = i_hist_size_ = 512;
-      b_hist_pub_ = nh_.advertise<jsk_pcl_ros::ColorHistogram>("blue_histogram", 1);
-      g_hist_pub_ = nh_.advertise<jsk_pcl_ros::ColorHistogram>("green_histogram", 1);
-      r_hist_pub_ = nh_.advertise<jsk_pcl_ros::ColorHistogram>("red_histogram", 1);
-      h_hist_pub_ = nh_.advertise<jsk_pcl_ros::ColorHistogram>("hue_histogram", 1);
-      s_hist_pub_ = nh_.advertise<jsk_pcl_ros::ColorHistogram>("saturation_histogram", 1);
-      i_hist_pub_ = nh_.advertise<jsk_pcl_ros::ColorHistogram>("intensity_histogram", 1);
+      b_hist_size_ = r_hist_size_ = g_hist_size_ =
+        h_hist_size_ = s_hist_size_ = i_hist_size_ = 512;
+      b_hist_pub_ = nh_.advertise<jsk_pcl_ros::ColorHistogram>(
+        "blue_histogram", 1);
+      g_hist_pub_ = nh_.advertise<jsk_pcl_ros::ColorHistogram>(
+        "green_histogram", 1);
+      r_hist_pub_ = nh_.advertise<jsk_pcl_ros::ColorHistogram>(
+        "red_histogram", 1);
+      h_hist_pub_ = nh_.advertise<jsk_pcl_ros::ColorHistogram>(
+        "hue_histogram", 1);
+      s_hist_pub_ = nh_.advertise<jsk_pcl_ros::ColorHistogram>(
+        "saturation_histogram", 1);
+      i_hist_pub_ = nh_.advertise<jsk_pcl_ros::ColorHistogram>(
+        "intensity_histogram", 1);
       srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (pnh_);
       dynamic_reconfigure::Server<Config>::CallbackType f =
         boost::bind (&ColorHistogram::configCallback, this, _1, _2);
@@ -99,9 +108,11 @@ namespace jsk_perception
       it_.reset(new image_transport::ImageTransport(nh_));
       image_sub_.subscribe(*it_, "", 1);
       rectangle_sub_.subscribe(nh_, "screenrectangle", 1);
-      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(10);
+      sync_
+        = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(10);
       sync_->connectInput(image_sub_, rectangle_sub_);
-      sync_->registerCallback(boost::bind(&ColorHistogram::extract, this, _1, _2));
+      sync_->registerCallback(boost::bind(
+                                &ColorHistogram::extract, this, _1, _2));
     }
 
     virtual void convertHistogramToMsg(const cv::Mat& hist,
@@ -115,7 +126,8 @@ namespace jsk_perception
       }
     }
 
-    virtual void processBGR(const cv::Mat& bgr_image, const std_msgs::Header& header)
+    virtual void processBGR(const cv::Mat& bgr_image,
+                            const std_msgs::Header& header)
     {
 
       float range[] = { 0, 256 } ;
@@ -123,11 +135,14 @@ namespace jsk_perception
       cv::MatND b_hist, g_hist, r_hist;
       bool uniform = true; bool accumulate = false;
       std::vector<cv::Mat> bgr_planes;
-      split( bgr_image, bgr_planes );
+      split(bgr_image, bgr_planes);
       
-      cv::calcHist( &bgr_planes[0], 1, 0, cv::Mat(), b_hist, 1, &b_hist_size_, &histRange, uniform, accumulate );
-      cv::calcHist( &bgr_planes[1], 1, 0, cv::Mat(), g_hist, 1, &g_hist_size_, &histRange, uniform, accumulate );
-      cv::calcHist( &bgr_planes[2], 1, 0, cv::Mat(), r_hist, 1, &r_hist_size_, &histRange, uniform, accumulate );
+      cv::calcHist(&bgr_planes[0], 1, 0, cv::Mat(), b_hist, 1, &b_hist_size_,
+                   &histRange, uniform, accumulate);
+      cv::calcHist(&bgr_planes[1], 1, 0, cv::Mat(), g_hist, 1, &g_hist_size_,
+                   &histRange, uniform, accumulate);
+      cv::calcHist(&bgr_planes[2], 1, 0, cv::Mat(), r_hist, 1, &r_hist_size_,
+                   &histRange, uniform, accumulate);
       
       jsk_pcl_ros::ColorHistogram b_histogram;
       b_histogram.header = header;
@@ -146,7 +161,8 @@ namespace jsk_perception
       
     }
     
-    virtual void processHSI(const cv::Mat& bgr_image, const std_msgs::Header& header)
+    virtual void processHSI(const cv::Mat& bgr_image,
+                            const std_msgs::Header& header)
     {
       cv::Mat hsi_image;
       cv::cvtColor(bgr_image, hsi_image, CV_BGR2HSV);
@@ -158,11 +174,14 @@ namespace jsk_perception
       cv::MatND h_hist, s_hist, i_hist;
       bool uniform = true; bool accumulate = false;
       std::vector<cv::Mat> hsi_planes;
-      split( hsi_image, hsi_planes );
+      split(hsi_image, hsi_planes);
       
-      cv::calcHist( &hsi_planes[0], 1, 0, cv::Mat(), h_hist, 1, &h_hist_size_, &h_histRange, uniform, accumulate );
-      cv::calcHist( &hsi_planes[1], 1, 0, cv::Mat(), s_hist, 1, &s_hist_size_, &histRange, uniform, accumulate );
-      cv::calcHist( &hsi_planes[2], 1, 0, cv::Mat(), i_hist, 1, &i_hist_size_, &histRange, uniform, accumulate );
+      cv::calcHist(&hsi_planes[0], 1, 0, cv::Mat(), h_hist, 1, &h_hist_size_,
+                   &h_histRange, uniform, accumulate);
+      cv::calcHist(&hsi_planes[1], 1, 0, cv::Mat(), s_hist, 1, &s_hist_size_,
+                   &histRange, uniform, accumulate);
+      cv::calcHist(&hsi_planes[2], 1, 0, cv::Mat(), i_hist, 1, &i_hist_size_,
+                   &histRange, uniform, accumulate);
       
       jsk_pcl_ros::ColorHistogram h_histogram;
       h_histogram.header = header;
@@ -181,23 +200,27 @@ namespace jsk_perception
       
     }
     
-    virtual void extract(const sensor_msgs::Image::ConstPtr& image,
-                         const geometry_msgs::PolygonStamped::ConstPtr& rectangle)
+    virtual void extract(
+      const sensor_msgs::Image::ConstPtr& image,
+      const geometry_msgs::PolygonStamped::ConstPtr& rectangle)
     {
       boost::mutex::scoped_lock lock(mutex_);
       try
       {
         cv_bridge::CvImagePtr cv_ptr;
         cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);
-
-        int larger_x_index = rectangle->polygon.points[0].x > rectangle->polygon.points[1].x? 0: 1;
-        int larger_y_index = rectangle->polygon.points[0].y > rectangle->polygon.points[1].y? 0: 1;
-        int smaller_x_index = rectangle->polygon.points[0].x < rectangle->polygon.points[1].x? 0: 1;
-        int smaller_y_index = rectangle->polygon.points[0].y < rectangle->polygon.points[1].y? 0: 1;
+        geometry_msgs::Point32 point0 = rectangle->polygon.points[0];
+        geometry_msgs::Point32 point1 = rectangle->polygon.points[1];
+        int larger_x_index = point0.x > point1.x? 0: 1;
+        int larger_y_index = point0.y > point1.y? 0: 1;
+        int smaller_x_index = point0.x < point1.x? 0: 1;
+        int smaller_y_index = point0.y < point1.y? 0: 1;
         cv::Rect roi(rectangle->polygon.points[smaller_x_index].x,
                      rectangle->polygon.points[smaller_y_index].y,
-                     rectangle->polygon.points[larger_x_index].x - rectangle->polygon.points[smaller_x_index].x,
-                     rectangle->polygon.points[larger_y_index].y - rectangle->polygon.points[smaller_y_index].y);
+                     rectangle->polygon.points[larger_x_index].x
+                     - rectangle->polygon.points[smaller_x_index].x,
+                     rectangle->polygon.points[larger_y_index].y
+                     - rectangle->polygon.points[smaller_y_index].y);
         cv::Mat bgr_image = cv_ptr->image(roi);
         processBGR(bgr_image, image->header);
         processHSI(bgr_image, image->header);

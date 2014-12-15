@@ -69,7 +69,6 @@ namespace jsk_perception
     image_transport::Subscriber sub_;
     cv::BackgroundSubtractorMOG2 bg_;
     bool prev_image_set_;
-    cv::Mat prev_image_;
     boost::shared_ptr<image_transport::ImageTransport> it_;
     boost::mutex mutex_;
     

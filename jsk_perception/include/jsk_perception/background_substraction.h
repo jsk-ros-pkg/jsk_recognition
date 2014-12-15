@@ -45,12 +45,16 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/Image.h>
 
+#include <dynamic_reconfigure/server.h>
+#include <jsk_perception/BackgroundSubstractionConfig.h>
+
 namespace jsk_perception
 {
   class BackgroundSubstraction: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     BackgroundSubstraction(): DiagnosticNodelet("BackgroundSubstraction") {}
+    typedef jsk_perception::BackgroundSubstractionConfig Config;
   protected:
     ////////////////////////////////////////////////////////
     // methods
@@ -62,15 +66,23 @@ namespace jsk_perception
       diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void substract(
       const sensor_msgs::Image::ConstPtr& image_msg);
+    virtual void configCallback (Config &config, uint32_t level);
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
     ros::Publisher image_pub_;
     image_transport::Subscriber sub_;
-    cv::BackgroundSubtractorMOG2 bg_;
-    bool prev_image_set_;
     boost::shared_ptr<image_transport::ImageTransport> it_;
+    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
+
+    ////////////////////////////////////////////////////////
+    // Parameters
+    ////////////////////////////////////////////////////////
+    cv::BackgroundSubtractorMOG2 bg_;
+    bool detect_shadows_;
+    int nmixtures_;
+    double background_ratio_;
     
   private:
     

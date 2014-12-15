@@ -40,11 +40,32 @@ namespace jsk_perception
   void BackgroundSubstraction::onInit()
   {
     DiagnosticNodelet::onInit();
+
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (
+        &BackgroundSubstraction::configCallback, this, _1, _2);
+    srv_->setCallback (f);
+    
     image_pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
-    bg_.set("nmixtures", 3);
-    bg_.set("detectShadows", 1);
+    
   }
 
+  void BackgroundSubstraction::configCallback(Config& config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    bg_ = cv::BackgroundSubtractorMOG2();
+    nmixtures_ = config.nmixtures;
+    detect_shadows_ = config.detect_shadows;
+    bg_.set("nmixtures", nmixtures_);
+    if (detect_shadows_) {
+      bg_.set("detectShadows", 1);
+    }
+    else {
+      bg_.set("detectShadows", 0);
+    }
+  }
+  
   void BackgroundSubstraction::subscribe()
   {
     it_.reset(new image_transport::ImageTransport(*pnh_));

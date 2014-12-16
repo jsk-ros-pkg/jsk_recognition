@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.28 (2014-12-17)
+-------------------
 * Publish attention region mask from AttentionClipper
 * Add new nodelets: ROIClipper and AttentionClipper to control attention
   and ROI

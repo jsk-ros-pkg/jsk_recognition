@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.28 (2014-12-17)
+-------------------
 * added param to set threshold of best_Windoq
 * Add dynamic reconfigure to background substraction
 * Clean up background substraction codes

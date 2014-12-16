@@ -40,11 +40,32 @@ namespace jsk_perception
   void BackgroundSubstraction::onInit()
   {
     DiagnosticNodelet::onInit();
+
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (
+        &BackgroundSubstraction::configCallback, this, _1, _2);
+    srv_->setCallback (f);
+    
     image_pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
-    bg_.set("nmixtures", 3);
-    bg_.set("detectShadows", 1);
+    
   }
 
+  void BackgroundSubstraction::configCallback(Config& config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    bg_ = cv::BackgroundSubtractorMOG2();
+    nmixtures_ = config.nmixtures;
+    detect_shadows_ = config.detect_shadows;
+    bg_.set("nmixtures", nmixtures_);
+    if (detect_shadows_) {
+      bg_.set("detectShadows", 1);
+    }
+    else {
+      bg_.set("detectShadows", 0);
+    }
+  }
+  
   void BackgroundSubstraction::subscribe()
   {
     it_.reset(new image_transport::ImageTransport(*pnh_));
@@ -78,35 +99,14 @@ namespace jsk_perception
     cv_bridge::CvImagePtr cv_ptr
       = cv_bridge::toCvCopy(image_msg, sensor_msgs::image_encodings::BGR8);
     cv::Mat image = cv_ptr->image;
-    // bg.set("nmixtures", 3);
-    // bg.set("detectShadows", 1);
-    
-    //cv::BackgroundSubtractorMOG2 bg(30, 16.0, false);
-    
+    cv::Mat fg;
     std::vector <std::vector<cv::Point > > contours;
-    //cv::Mat fg, back;
-    if (prev_image_.empty()) {
-      prev_image_.create(image.size(), image.type());
-    }
-    bg_(image, prev_image_);
-    //bg.getBackgroundImage (back);
-    // cv::Mat output;
-    // cv::erode (fg, fg, cv::Mat ());
-    // cv::dilate (fg, fg, cv::Mat ());
-    // cv::findContours (fg, contours, CV_RETR_EXTERNAL,
-    //                   CV_CHAIN_APPROX_NONE);
-    // cv::drawContours (image, contours, -1, cv::Scalar (0, 0, 255), 2);
-    
-    // //cv::bitwise_and(image, image, output, prev_image_);
+    bg_(image, fg);
     sensor_msgs::Image::Ptr diff_image
       = cv_bridge::CvImage(image_msg->header,
                            sensor_msgs::image_encodings::MONO8,
-                           prev_image_).toImageMsg();
+                           fg).toImageMsg();
     image_pub_.publish(diff_image);
-    //cv::imshow("input", image);
-    //cv::imshow("output", prev_image_);
-    //cv::imshow("back", back);
-    //cv::waitKey(1);
   }
 }
 

@@ -45,6 +45,7 @@
 #include "jsk_pcl_ros/tf_listener_singleton.h"
 #include <image_geometry/pinhole_camera_model.h>
 #include <jsk_pcl_ros/BoundingBoxArray.h>
+#include <sensor_msgs/Image.h>
 
 namespace jsk_pcl_ros
 {
@@ -76,6 +77,7 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_pose_;
     ros::Publisher pub_camera_info_;
     ros::Publisher pub_bounding_box_array_;
+    ros::Publisher pub_mask_;
     tf::TransformListener* tf_listener_;
     boost::mutex mutex_;
 

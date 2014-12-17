@@ -11,15 +11,19 @@
     <!-- <param name="grid0_size_y" type="int" value="12"/> -->
     <param name="grid0_size_x" type="int" value="4"/>
     <param name="grid0_size_y" type="int" value="6"/>
-    <param name="type0" type="string" value="data/ricebox.kinbody.xml"/>
     <param name="board_type" value="chess" />
+    
     <!-- <param name="board_type" value="acircle" /> -->
+    <!-- <param name="invert_color" value="true" /> -->
     <!-- <param name="grid0_size_x" type="int" value="4"/> -->
     <!-- <param name="grid0_size_y" type="int" value="7"/> -->
-
+    
+    <param name="type0" type="string" value="data/ricebox.kinbody.xml"/>
     <node pkg="checkerboard_detector" name="checkerboard_detector" type="checkerboard_detector" respawn="false" output="screen">
       <remap from="camera_info" to="/wide_stereo/left/camera_info"/>
       <remap from="image" to="/wide_stereo/left/image_rect"/>
+      <!-- <remap from="camera_info" to="/camera/rgb/camera_info"/> -->
+      <!-- <remap from="image" to="/camera/rgb/image_rect_color"/> -->
     </node>
   </group>
 

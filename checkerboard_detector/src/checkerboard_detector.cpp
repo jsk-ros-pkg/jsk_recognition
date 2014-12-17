@@ -82,11 +82,11 @@ public:
     ros::Publisher _pubDetection;
     ros::Publisher _pubPoseStamped;
     ros::Publisher _pubCornerPoint;
-      ros::Publisher _pubPolygonArray;
+    ros::Publisher _pubPolygonArray;
     ros::ServiceServer _srvDetect;
 
     string frame_id; // tf frame id
-
+    bool invert_color;
     int display, verbose, maxboard;
     vector<CHECKERBOARD> vcheckers; // grid points for every checkerboard
     vector< string > vstrtypes; // type names for every grid point
@@ -95,7 +95,6 @@ public:
     CvMat *intrinsic_matrix; // intrinsic matrices
     boost::mutex mutexcalib;
     IplImage* frame;
-
     ros::NodeHandle _node;
     int dimx, dimy;
     double fRectSize[2];
@@ -107,7 +106,7 @@ public:
         _node.param("display", display, 0);
         _node.param("verbose", verbose, 1);
         _node.param("maxboard", maxboard, -1);
-        
+        _node.param("invert_color", invert_color, false);
         char str[32];
         int index = 0;
 
@@ -384,6 +383,16 @@ public:
         }
 
         IplImage imggray = capture->image;
+        if (invert_color) {
+          uchar* data = (uchar *)(imggray.imageData);
+          for (int i = 0; i < imggray.height; i++) {
+            for (int j = 0; j < imggray.width; j++) {
+              data[i*imggray.widthStep + j*imggray.nChannels]
+                = 255 - data[i*imggray.widthStep + j*imggray.nChannels];
+            }
+          }
+        }
+
         IplImage *pimggray = &imggray;
         if( display ) {
             // copy the raw image

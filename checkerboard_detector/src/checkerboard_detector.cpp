@@ -23,6 +23,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 // author: Rosen Diankov
+#include <algorithm>
+
 #include <cstdio>
 #include <vector>
 #include <sstream>
@@ -32,6 +34,7 @@
 
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
+#include "opencv2/opencv.hpp"
 #include "cv_bridge/cv_bridge.h"
 #include "sensor_msgs/image_encodings.h"
 #include "sensor_msgs/CameraInfo.h"
@@ -67,6 +70,7 @@ public:
         vector<Vector> grid3d;
         vector<CvPoint2D32f> corners;
         TransformMatrix tlocaltrans;
+        std::string board_type;
     };
 
     posedetection_msgs::ObjectDetection _objdetmsg;
@@ -140,6 +144,10 @@ public:
                 type = str;
             }
 
+            std::string board_type;
+            _node.param("board_type", board_type, std::string("chess"));
+            
+            
             string strtranslation,strrotation;
             sprintf(str,"translation%d",index);
             _node.param(str,strtranslation,string());
@@ -152,12 +160,23 @@ public:
 
             CHECKERBOARD cb;
             cb.griddims = cvSize(dimx,dimy);
-
+            cb.board_type = board_type;
             cb.grid3d.resize(dimx*dimy);
             int j=0;
-            for(int y=0; y<dimy; ++y)
+            if (board_type == "chess" || board_type == "circle") {
+              for(int y=0; y<dimy; ++y)
                 for(int x=0; x<dimx; ++x)
-                    cb.grid3d[j++] = Vector(x*fRectSize[0], y*fRectSize[1], 0);
+                  cb.grid3d[j++] = Vector(x*fRectSize[0], y*fRectSize[1], 0);
+            }
+            else if (board_type == "acircle") {
+              for(int ii=0; ii<dimy; ii++) {
+                for(int jj=0; jj<dimx; jj++) {
+                  cb.grid3d[j++] = Vector((2*jj + ii % 2)*fRectSize[0],
+                                          ii*fRectSize[1],
+                                          0);
+                }
+              }
+            }
 
             if( vtranslation.size() == 3 )
                 cb.tlocaltrans.trans = 
@@ -391,13 +410,35 @@ public:
 
             // do until no more checkerboards detected
             while((maxboard==-1)?1:((++board)<=maxboard)) {
-                cb.corners.resize(200);
-                int allfound = cvFindChessboardCorners( pimggray, cb.griddims, &cb.corners[0], &ncorners,
-                                                        CV_CALIB_CB_ADAPTIVE_THRESH );
-                cb.corners.resize(ncorners);
-
-                //cvDrawChessboardCorners(pimgGray, itbox->second.griddims, &corners[0], ncorners, allfound);
-                //cvSaveImage("temp.jpg", pimgGray);
+                int allfound = 0;
+                if (cb.board_type == "chess") {
+                  cb.corners.resize(200);
+                  allfound = cvFindChessboardCorners( pimggray, cb.griddims, &cb.corners[0], &ncorners,
+                                                          CV_CALIB_CB_ADAPTIVE_THRESH );
+                  cb.corners.resize(ncorners);
+                }
+                else {
+                  // convert pimgray to cv::mat
+                  std::vector<cv::Point2f> points;
+                  cv::Size griddims_cpp (cb.griddims.width, cb.griddims.height);
+                  cv::Mat pimgray_mat = cv::cvarrToMat(pimggray);
+                  if (cb.board_type == "circle") {
+                    allfound = cv::findCirclesGrid(pimgray_mat,
+                                                   griddims_cpp, points);
+                  }
+                  else if (cb.board_type == "acircle") {
+                    allfound = cv::findCirclesGrid(pimgray_mat,
+                                                   griddims_cpp, points,
+                                                   cv::CALIB_CB_ASYMMETRIC_GRID);
+                  }
+                  cb.corners.resize(points.size());
+                  ncorners = points.size();
+                  for (size_t i = 0; i < points.size(); i++) {
+                    cb.corners[i] = cvPoint2D32f((double)points[i].x, (double)points[i].y);
+                  }
+                }
+                // cvDrawChessboardCorners(pimggray, cb.griddims, &cb.corners[0], ncorners, allfound);
+                // cvSaveImage("temp.jpg", pimggray);
 
                 if(!allfound || ncorners != (int)cb.grid3d.size())
                     break;
@@ -440,8 +481,10 @@ public:
                 int size = (int)(0.5*sqrt(step_size) + 0.5);
 
                 if( allfound ) {
-                    cvFindCornerSubPix(pimggray, &cb.corners[0], cb.corners.size(), cvSize(size,size), cvSize(-1,-1),
-                                       cvTermCriteria(CV_TERMCRIT_ITER, 50, 1e-2));
+                    if (cb.board_type == "chess") { // subpixel only for chessboard
+                      cvFindCornerSubPix(pimggray, &cb.corners[0], cb.corners.size(), cvSize(size,size), cvSize(-1,-1),
+                                         cvTermCriteria(CV_TERMCRIT_ITER, 50, 1e-2));
+                    }
                     objpose.pose = FindTransformation(cb.corners, cb.grid3d, cb.tlocaltrans);
                 }
 
@@ -542,32 +585,49 @@ public:
     // FindTransformation
     geometry_msgs::Pose FindTransformation(const vector<CvPoint2D32f> &imgpts, const vector<Vector> &objpts, const Transform& tlocal)
     {
-        CvMat *objpoints = cvCreateMat(3,objpts.size(),CV_32FC1);
-        for(size_t i=0; i<objpts.size(); ++i) {
-            cvSetReal2D(objpoints, 0,i, objpts[i].x);
-            cvSetReal2D(objpoints, 1,i, objpts[i].y);
-            cvSetReal2D(objpoints, 2,i, objpts[i].z);
-        }
-
         geometry_msgs::Pose pose;
         Transform tchecker;
-        assert(sizeof(tchecker.trans.x)==sizeof(float));
-        float fR3[3];
-        CvMat R3, T3;
-        assert(sizeof(pose.position.x) == sizeof(double));
-        cvInitMatHeader(&R3, 3, 1, CV_32FC1, fR3);
-        cvInitMatHeader(&T3, 3, 1, CV_32FC1, &tchecker.trans.x);
-
-        float kc[4] = {0};
+        double kc[4] = {0};
         CvMat kcmat;
-        cvInitMatHeader(&kcmat,1,4,CV_32FC1,kc);
+        cvInitMatHeader(&kcmat,1,4,CV_64F,kc);
 
         CvMat img_points;
-        cvInitMatHeader(&img_points, 1,imgpts.size(), CV_32FC2, const_cast<CvPoint2D32f*>(&imgpts[0]));
-
-        cvFindExtrinsicCameraParams2(objpoints, &img_points, this->intrinsic_matrix, &kcmat, &R3, &T3);
-        cvReleaseMat(&objpoints);
-
+        // use solvePnP
+        cv::Mat objpoints_mat(objpts.size(), 3, CV_64F);
+        for (size_t i = 0; i < objpts.size(); i++) {
+          objpoints_mat.at<double>(i, 0) = objpts[i].x;
+          objpoints_mat.at<double>(i, 1) = objpts[i].y;
+          objpoints_mat.at<double>(i, 2) = objpts[i].z;
+        }
+        cv::Mat img_points_mat(imgpts.size(), 2, CV_64F);
+        for (size_t i = 0; i < imgpts.size(); i++) {
+          img_points_mat.at<double>(i, 0) = imgpts[i].x;
+          img_points_mat.at<double>(i, 1) = imgpts[i].y;
+        }
+        cv::Mat kcmat_mat (kcmat.rows, kcmat.cols, CV_64F);
+        for (size_t i = 0; i< kcmat.rows; i++) {
+          for (size_t j = 0; j < kcmat.cols; j++) {
+            kcmat_mat.at<double>(i, j) = cvGetReal2D(&kcmat, i, j);
+          }
+        }
+        cv::Mat intrinsic_matrix_mat(intrinsic_matrix->rows, intrinsic_matrix->cols, CV_64F);
+        for (size_t i = 0; i< intrinsic_matrix->rows; i++) {
+          for (size_t j = 0; j < intrinsic_matrix->cols; j++) {
+            intrinsic_matrix_mat.at<double>(i, j) = cvGetReal2D(
+              intrinsic_matrix, i, j);
+          }
+        }
+        cv::Mat R3_mat, T3_mat;
+        cv::solvePnP(objpoints_mat, img_points_mat,
+                     intrinsic_matrix_mat, kcmat_mat,
+                     R3_mat, T3_mat, false);
+        double fR3[3];
+        for (size_t i = 0; i < 3; i++) {
+          fR3[i] = R3_mat.at<double>(i);
+        }
+        tchecker.trans.x = T3_mat.at<double>(0);
+        tchecker.trans.y = T3_mat.at<double>(1);
+        tchecker.trans.z = T3_mat.at<double>(2);
         double fang = sqrt(fR3[0]*fR3[0] + fR3[1]*fR3[1] + fR3[2]*fR3[2]);
         if( fang >= 1e-6 ) {
             double fmult = sin(fang/2)/fang;

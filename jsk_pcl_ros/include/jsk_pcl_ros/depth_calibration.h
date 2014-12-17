@@ -36,7 +36,8 @@
 #ifndef JSK_PCL_ROS_DEPTH_CALIBRATION_H_
 #define JSK_PCL_ROS_DEPTH_CALIBRATION_H_
 
-#include "jsk_pcl_ros/diagnostic_nodelet.h"
+#include "pcl_ros/pcl_nodelet.h"
+#include "jsk_topic_tools/diagnostic_nodelet.h"
 #include "jsk_pcl_ros/SetDepthCalibrationParameter.h"
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -50,7 +51,7 @@ namespace jsk_pcl_ros
   // calibration:
   // z' = C_2(u, v) z^2 + C_1(u, v) z + C_0(u, v)
   // C_i(u, v) = au + bv + c
-  class DepthCalibration: public DiagnosticNodelet
+  class DepthCalibration: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef pcl::PointXYZRGB PointT;

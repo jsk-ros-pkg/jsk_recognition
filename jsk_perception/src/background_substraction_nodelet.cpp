@@ -33,63 +33,82 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/bilateral_filter.h"
-// on hydro, we cannot include this header because of bug of pcl
-//#include <pcl/point_types_conversion.h> 
-#include <pcl/filters/bilateral.h>
-#include <pcl/filters/fast_bilateral.h>
-#include <pcl/filters/fast_bilateral_omp.h>
+#include "jsk_perception/background_substraction.h"
 
-namespace jsk_pcl_ros
+namespace jsk_perception
 {
-  void BilateralFilter::onInit()
+  void BackgroundSubstraction::onInit()
   {
-    ConnectionBasedNodelet::onInit();
+    DiagnosticNodelet::onInit();
+
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
-    typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&BilateralFilter::configCallback, this, _1, _2);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (
+        &BackgroundSubstraction::configCallback, this, _1, _2);
     srv_->setCallback (f);
-
-    pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    
+    image_pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+    
   }
 
-  void BilateralFilter::subscribe()
+  void BackgroundSubstraction::configCallback(Config& config, uint32_t level)
   {
-    sub_ = pnh_->subscribe("input", 1, &BilateralFilter::filter, this);
+    boost::mutex::scoped_lock lock(mutex_);
+    bg_ = cv::BackgroundSubtractorMOG2();
+    nmixtures_ = config.nmixtures;
+    detect_shadows_ = config.detect_shadows;
+    bg_.set("nmixtures", nmixtures_);
+    if (detect_shadows_) {
+      bg_.set("detectShadows", 1);
+    }
+    else {
+      bg_.set("detectShadows", 0);
+    }
+  }
+  
+  void BackgroundSubstraction::subscribe()
+  {
+    it_.reset(new image_transport::ImageTransport(*pnh_));
+    sub_ = it_->subscribe("image", 1, &BackgroundSubstraction::substract, this);
   }
 
-  void BilateralFilter::unsubscribe()
+  void BackgroundSubstraction::unsubscribe()
   {
     sub_.shutdown();
   }
 
-  void BilateralFilter::filter(const sensor_msgs::PointCloud2::ConstPtr& msg)
+  void BackgroundSubstraction::updateDiagnostic(
+    diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
-    boost::mutex::scoped_lock lock(mutex_);
-    pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
-    pcl::PointCloud<PointT>::Ptr
-      output (new pcl::PointCloud<PointT>);
-    pcl::fromROSMsg(*msg, *cloud);
-    pcl::FastBilateralFilter<PointT> bilateral;
-    
-    bilateral.setInputCloud(cloud);
-    bilateral.setSigmaS(sigma_s_);
-    bilateral.setSigmaR(sigma_r_);
-    bilateral.filter(*output);
-    
-    // hmm,,, is it keep organized??
-    pub_.publish(output);
-  }
+    if (vital_checker_->isAlive()) {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                   "BackgroundSubstraction running");
+    }
+    else {
+      jsk_topic_tools::addDiagnosticErrorSummary(
+        "BackgroundSubstraction", vital_checker_, stat);
+    }
 
-  void BilateralFilter::configCallback(Config &config, uint32_t level)
-  {
-    boost::mutex::scoped_lock lock(mutex_);
-    sigma_s_ = config.sigma_s;
-    sigma_r_ = config.sigma_r;
   }
   
+  void BackgroundSubstraction::substract(
+    const sensor_msgs::Image::ConstPtr& image_msg)
+  {
+    vital_checker_->poke();
+    boost::mutex::scoped_lock lock(mutex_);
+    cv_bridge::CvImagePtr cv_ptr
+      = cv_bridge::toCvCopy(image_msg, sensor_msgs::image_encodings::BGR8);
+    cv::Mat image = cv_ptr->image;
+    cv::Mat fg;
+    std::vector <std::vector<cv::Point > > contours;
+    bg_(image, fg);
+    sensor_msgs::Image::Ptr diff_image
+      = cv_bridge::CvImage(image_msg->header,
+                           sensor_msgs::image_encodings::MONO8,
+                           fg).toImageMsg();
+    image_pub_.publish(diff_image);
+  }
 }
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::BilateralFilter,
-                        nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_perception::BackgroundSubstraction, nodelet::Nodelet);

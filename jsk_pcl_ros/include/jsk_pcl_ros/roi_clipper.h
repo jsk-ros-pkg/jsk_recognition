@@ -34,76 +34,40 @@
  *********************************************************************/
 
 
-#ifndef JSK_PCL_ROS_COLORIZE_DISTANCE_FROM_PLANE_H_
-#define JSK_PCL_ROS_COLORIZE_DISTANCE_FROM_PLANE_H_
 
-#include <pcl_ros/pcl_nodelet.h>
+#ifndef JSK_PCL_ROS_ROI_CLIPPER_H_
+#define JSK_PCL_ROS_ROI_CLIPPER_H_
+
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
-
-#include <sensor_msgs/PointCloud2.h>
-#include <jsk_pcl_ros/ClusterPointIndices.h>
-#include <jsk_pcl_ros/ModelCoefficientsArray.h>
-#include <jsk_pcl_ros/PolygonArray.h>
-#include <dynamic_reconfigure/server.h>
-#include <jsk_pcl_ros/ColorizeDistanceFromPlaneConfig.h>
-#include "jsk_pcl_ros/geo_util.h"
-#include "jsk_topic_tools/connection_based_nodelet.h"
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/CameraInfo.h>
 
 namespace jsk_pcl_ros
 {
-  class ColorizeDistanceFromPlane: public jsk_topic_tools::ConnectionBasedNodelet
+  class ROIClipper: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    typedef pcl::PointXYZRGB PointT;
-    typedef boost::shared_ptr<ColorizeDistanceFromPlane> Ptr;
     typedef message_filters::sync_policies::ExactTime<
-      sensor_msgs::PointCloud2,
-      ModelCoefficientsArray,
-      PolygonArray
-      > SyncPolicy;
-    typedef ColorizeDistanceFromPlaneConfig Config;
+    sensor_msgs::Image,
+    sensor_msgs::CameraInfo > SyncPolicy;
+    ROIClipper(): DiagnosticNodelet("ROIClipper") {}
+    
   protected:
-    ////////////////////////////////////////////////////////
-    // methods
-    ////////////////////////////////////////////////////////
     virtual void onInit();
-    
-    virtual void colorize(const sensor_msgs::PointCloud2::ConstPtr& cloud,
-                          const ModelCoefficientsArray::ConstPtr& coefficients,
-                          const PolygonArray::ConstPtr& polygons);
-
-    virtual double distanceToConvexes(
-      const PointT& p, const std::vector<ConvexPolygon::Ptr>& convexes);
-    
-    virtual uint32_t colorForDistance(const double d);
-    
-    virtual void configCallback(Config &config, uint32_t level);
-
+    virtual void clip(const sensor_msgs::Image::ConstPtr& image_msg,
+                      const sensor_msgs::CameraInfo::ConstPtr& camera_info_msg);
     virtual void subscribe();
     virtual void unsubscribe();
-    
-    ////////////////////////////////////////////////////////
-    // ROS variabels
-    ////////////////////////////////////////////////////////
-    ros::Publisher pub_;
+    virtual void updateDiagnostic(
+      diagnostic_updater::DiagnosticStatusWrapper &stat);
+    ros::Publisher pub_image_;
+    message_filters::Subscriber<sensor_msgs::Image> sub_image_;
+    message_filters::Subscriber<sensor_msgs::CameraInfo> sub_info_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<ModelCoefficientsArray> sub_coefficients_;
-    message_filters::Subscriber<PolygonArray> sub_polygons_;
-    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
-    boost::mutex mutex_;
-    
-    ////////////////////////////////////////////////////////
-    // varibales to configure colorization
-    ////////////////////////////////////////////////////////
-    double max_distance_;
-    double min_distance_;
-    bool only_projectable_;
-    
   private:
-    
   };
 }
 

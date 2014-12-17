@@ -34,74 +34,63 @@
  *********************************************************************/
 
 
-#ifndef JSK_PCL_ROS_COLORIZE_DISTANCE_FROM_PLANE_H_
-#define JSK_PCL_ROS_COLORIZE_DISTANCE_FROM_PLANE_H_
+#ifndef JSK_PCL_ROS_ATTENTION_CLIPPER_H_
+#define JSK_PCL_ROS_ATTENTION_CLIPPER_H_
 
-#include <pcl_ros/pcl_nodelet.h>
-#include <message_filters/subscriber.h>
-#include <message_filters/time_synchronizer.h>
-#include <message_filters/synchronizer.h>
-
-#include <sensor_msgs/PointCloud2.h>
-#include <jsk_pcl_ros/ClusterPointIndices.h>
-#include <jsk_pcl_ros/ModelCoefficientsArray.h>
-#include <jsk_pcl_ros/PolygonArray.h>
-#include <dynamic_reconfigure/server.h>
-#include <jsk_pcl_ros/ColorizeDistanceFromPlaneConfig.h>
+#define BOOST_PARAMETER_MAX_ARITY 6
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <sensor_msgs/CameraInfo.h>
+#include "jsk_pcl_ros/pcl_conversion_util.h"
 #include "jsk_pcl_ros/geo_util.h"
-#include "jsk_topic_tools/connection_based_nodelet.h"
+#include "jsk_pcl_ros/tf_listener_singleton.h"
+#include <image_geometry/pinhole_camera_model.h>
+#include <jsk_pcl_ros/BoundingBoxArray.h>
+#include <sensor_msgs/Image.h>
 
 namespace jsk_pcl_ros
 {
-  class ColorizeDistanceFromPlane: public jsk_topic_tools::ConnectionBasedNodelet
+  class AttentionClipper: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    typedef pcl::PointXYZRGB PointT;
-    typedef boost::shared_ptr<ColorizeDistanceFromPlane> Ptr;
-    typedef message_filters::sync_policies::ExactTime<
-      sensor_msgs::PointCloud2,
-      ModelCoefficientsArray,
-      PolygonArray
-      > SyncPolicy;
-    typedef ColorizeDistanceFromPlaneConfig Config;
+    AttentionClipper(): DiagnosticNodelet("AttentionClipper") { }
+    
   protected:
     ////////////////////////////////////////////////////////
     // methods
     ////////////////////////////////////////////////////////
     virtual void onInit();
-    
-    virtual void colorize(const sensor_msgs::PointCloud2::ConstPtr& cloud,
-                          const ModelCoefficientsArray::ConstPtr& coefficients,
-                          const PolygonArray::ConstPtr& polygons);
-
-    virtual double distanceToConvexes(
-      const PointT& p, const std::vector<ConvexPolygon::Ptr>& convexes);
-    
-    virtual uint32_t colorForDistance(const double d);
-    
-    virtual void configCallback(Config &config, uint32_t level);
-
+    virtual void clip(const sensor_msgs::CameraInfo::ConstPtr& msg);
+    virtual void poseCallback(const geometry_msgs::PoseStamped::ConstPtr& pose);
+    virtual Vertices cubeVertices();
     virtual void subscribe();
     virtual void unsubscribe();
-    
+    virtual void updateDiagnostic(
+      diagnostic_updater::DiagnosticStatusWrapper &stat);
+    virtual void computeROI(
+      const sensor_msgs::CameraInfo::ConstPtr& msg,
+      std::vector<cv::Point2d>& points);
+    virtual void publishBoundingBox(const std_msgs::Header& header,Eigen::Affine3f& pose);
     ////////////////////////////////////////////////////////
-    // ROS variabels
+    // ROS variables
     ////////////////////////////////////////////////////////
-    ros::Publisher pub_;
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<ModelCoefficientsArray> sub_coefficients_;
-    message_filters::Subscriber<PolygonArray> sub_polygons_;
-    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    ros::Subscriber sub_;
+    ros::Subscriber sub_pose_;
+    ros::Publisher pub_camera_info_;
+    ros::Publisher pub_bounding_box_array_;
+    ros::Publisher pub_mask_;
+    tf::TransformListener* tf_listener_;
     boost::mutex mutex_;
-    
+
     ////////////////////////////////////////////////////////
-    // varibales to configure colorization
+    // parameters
     ////////////////////////////////////////////////////////
-    double max_distance_;
-    double min_distance_;
-    bool only_projectable_;
-    
+    // only cube is supported
+    Vertices vertices_;
+    double dimension_x_;
+    double dimension_y_;
+    double dimension_z_;
+    Eigen::Affine3f pose_;
+    std::string frame_id_;
   private:
     
   };

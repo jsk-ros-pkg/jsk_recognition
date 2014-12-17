@@ -77,15 +77,7 @@ namespace jsk_pcl_ros
     pub_icp_result = advertise<jsk_pcl_ros::ICPResult>(*pnh_,
       "icp_result", 1);
     srv_detect = pnh_->advertiseService("icp_service", &ICPRegistration::alignWithBoxService, this);
-    sub_reference_.shutdown();
-
-  }
-
-  void ICPRegistration::subscribe()
-  {
-    ////////////////////////////////////////////////////////
-    // Subscription
-    ////////////////////////////////////////////////////////
+    //sub_reference_.shutdown();
     sub_reference_ = pnh_->subscribe("input_reference", 1,
                                        &ICPRegistration::referenceCallback,
                                        this);
@@ -95,6 +87,13 @@ namespace jsk_pcl_ros
     sub_reference_add = pnh_->subscribe("input_reference_add", 1,
                                        &ICPRegistration::referenceAddCallback,
                                        this);
+  }
+
+  void ICPRegistration::subscribe()
+  {
+    ////////////////////////////////////////////////////////
+    // Subscription
+    ////////////////////////////////////////////////////////
     if (align_box_) {
       sub_input_.subscribe(*pnh_, "input", 1);
       sub_box_.subscribe(*pnh_, "input_box", 1);
@@ -281,8 +280,10 @@ namespace jsk_pcl_ros
                       *transformed_cloud_for_debug_result);
     result.header = ros_result_pose.header;
     result.pose = ros_result_pose.pose;
-    result.score = min_score; 
-    result.name = "" + max_index;
+    result.score = min_score;
+    std::stringstream ss;
+    ss << max_index;
+    result.name = ss.str();
     return result;
   }
   
@@ -454,7 +455,7 @@ namespace jsk_pcl_ros
     pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(*msg, *cloud);
     reference_cloud_list_.push_back(cloud);
-    ROS_INFO("reference_num: %zd", reference_cloud_list_.size());
+    ROS_INFO("reference_num: %zd", reference_cloud_list_.size()-1);
   }  
 }
 

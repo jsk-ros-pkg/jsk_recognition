@@ -42,7 +42,7 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     if (!instance_) {
       ROS_INFO("instantiating tf::TransformListener");
-      //instance_ = new tf::TransformListener();
+      instance_ = new tf::TransformListener();
     }
     return instance_;
   }

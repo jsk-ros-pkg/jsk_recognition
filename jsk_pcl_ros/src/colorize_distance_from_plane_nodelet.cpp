@@ -40,7 +40,7 @@ namespace jsk_pcl_ros
 {
   void ColorizeDistanceFromPlane::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
 
     ////////////////////////////////////////////////////////
     // publisher

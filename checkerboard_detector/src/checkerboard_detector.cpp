@@ -370,7 +370,11 @@ public:
         }
         cv::Mat capture = capture_ptr->image;
         if (invert_color) {
-            capture = 255 - capture;
+            capture = cv::Mat((capture + 0.0) * 1.0 / 1.0) * 1.0;
+            //capture = 255 - capture;
+            cv::Mat tmp;
+            cv::bitwise_not(capture, tmp);
+            capture = tmp;
         }
 
         cv::Mat frame;
@@ -401,9 +405,11 @@ public:
                 }
                 else if (cb.board_type == "acircle" ||
                          cb.board_type == "acircles") {
+                    // sometime cv::findCirclesGrid hangs
                     allfound =
-                        cv::findCirclesGrid(capture, cb.griddims, cb.corners,
-                                            cv::CALIB_CB_ASYMMETRIC_GRID);
+                        cv::findCirclesGrid(
+                            capture, cb.griddims, cb.corners,
+                            cv::CALIB_CB_ASYMMETRIC_GRID | cv::CALIB_CB_CLUSTERING);
                 }
 
                 if(!allfound || cb.corners.size() != cb.grid3d.size())

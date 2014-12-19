@@ -28,6 +28,7 @@
 #include <cstdio>
 #include <vector>
 #include <sstream>
+#include <algorithm>
 #include <ros/ros.h>
 
 #include <boost/thread/mutex.hpp>
@@ -348,7 +349,32 @@ public:
                 const sensor_msgs::CameraInfo& camInfoMsg)
     {
         image_geometry::PinholeCameraModel model;
-        model.fromCameraInfo(camInfoMsg);
+        sensor_msgs::CameraInfo cam_info(camInfoMsg);
+        if (cam_info.distortion_model.empty()) {
+            cam_info.distortion_model = "plumb_bob";
+            cam_info.D.resize(5, 0);
+        }
+        // check all the value of R is zero or not
+        // if zero, normalzie it
+        if (std::equal(cam_info.R.begin() + 1, cam_info.R.end(), cam_info.R.begin())) {
+            cam_info.R[0] = 1.0;
+            cam_info.R[4] = 1.0;
+            cam_info.R[8] = 1.0;
+        }
+        // check all the value of K is zero or not
+        // if zero, copy all the value from P
+        if (std::equal(cam_info.K.begin() + 1, cam_info.K.end(), cam_info.K.begin())) {
+            cam_info.K[0] = cam_info.P[0];
+            cam_info.K[1] = cam_info.P[1];
+            cam_info.K[2] = cam_info.P[2];
+            cam_info.K[3] = cam_info.P[4];
+            cam_info.K[4] = cam_info.P[5];
+            cam_info.K[5] = cam_info.P[6];
+            cam_info.K[6] = cam_info.P[8];
+            cam_info.K[7] = cam_info.P[9];
+            cam_info.K[8] = cam_info.P[10];
+        }
+        model.fromCameraInfo(cam_info);
         cv_bridge::CvImagePtr capture_ptr;
         try {
           if (imagemsg.encoding == "32FC1") {

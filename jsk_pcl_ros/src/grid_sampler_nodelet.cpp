@@ -42,7 +42,7 @@ namespace jsk_pcl_ros
 {
   void GridSampler::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     pub_ = advertise<jsk_pcl_ros::ClusterPointIndices>(*pnh_, "output", 1);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&GridSampler::configCallback, this, _1, _2);

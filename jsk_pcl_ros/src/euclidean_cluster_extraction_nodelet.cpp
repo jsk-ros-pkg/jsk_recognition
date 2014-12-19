@@ -174,7 +174,7 @@ namespace jsk_pcl_ros
 
   void EuclideanClustering::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     
     ////////////////////////////////////////////////////////
     // diagnostics

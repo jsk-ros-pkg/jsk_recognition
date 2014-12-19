@@ -58,7 +58,7 @@
 #include <jsk_pcl_ros/EdgebasedCubeFinderConfig.h>
 #include <dynamic_reconfigure/server.h>
 
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <jsk_topic_tools/connection_based_nodelet.h>
 
 namespace jsk_pcl_ros
 {
@@ -152,7 +152,7 @@ namespace jsk_pcl_ros
   private:
   };
   
-  class EdgebasedCubeFinder: public ConnectionBasedNodelet
+  class EdgebasedCubeFinder: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime<

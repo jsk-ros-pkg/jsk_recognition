@@ -47,13 +47,13 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <jsk_topic_tools/connection_based_nodelet.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <string>
 
 namespace jsk_pcl_ros
 {
-  class DepthImageError: public ConnectionBasedNodelet
+  class DepthImageError: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     typedef message_filters::sync_policies::ApproximateTime<
@@ -62,7 +62,6 @@ namespace jsk_pcl_ros
     sensor_msgs::CameraInfo
      > SyncPolicy;
     ros::Publisher depth_error_publisher_;
-
   protected:
     virtual void onInit();
     virtual void calcError(const sensor_msgs::Image::ConstPtr& depth_image,

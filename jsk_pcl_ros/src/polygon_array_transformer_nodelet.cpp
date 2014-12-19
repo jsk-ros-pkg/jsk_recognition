@@ -43,7 +43,7 @@ namespace jsk_pcl_ros
 
   void PolygonArrayTransformer::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     if (!pnh_->getParam("frame_id", frame_id_)) {
       NODELET_FATAL("~frame_id is not specified");
       return;

@@ -37,7 +37,7 @@
 #ifndef JSK_PCL_ROS_TILT_LASER_LISTENER_H_
 #define JSK_PCL_ROS_TILT_LASER_LISTENER_H_
 
-#include "jsk_pcl_ros/diagnostic_nodelet.h"
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/JointState.h>
 #include <jsk_pcl_ros/TimeRange.h>
 #include "jsk_pcl_ros/line_segment_collector.h"
@@ -58,7 +58,7 @@ namespace jsk_pcl_ros
     
   };
   
-  class TiltLaserListener: public DiagnosticNodelet
+  class TiltLaserListener: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     TiltLaserListener(): DiagnosticNodelet("TiltLaserListener") { };

@@ -43,7 +43,7 @@ namespace jsk_pcl_ros
 {
   void NormalEstimationIntegralImage::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =

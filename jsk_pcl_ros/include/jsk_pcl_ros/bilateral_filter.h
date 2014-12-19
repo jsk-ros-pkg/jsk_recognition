@@ -37,6 +37,7 @@
 #ifndef JSK_PCL_ROS_BILATERAL_FILTER_H_
 #define JSK_PCL_ROS_BILATERAL_FILTER_H_
 
+#include <pcl_ros/publisher.h>
 #include <jsk_topic_tools/connection_based_nodelet.h>
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <jsk_pcl_ros/BilateralFilterConfig.h>

@@ -32,7 +32,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-
+#define BOOST_PARAMETER_MAX_ARITY 7 
 #include "jsk_pcl_ros/line_segment_collector.h"
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include "jsk_pcl_ros/pcl_util.h"

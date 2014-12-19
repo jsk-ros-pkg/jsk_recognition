@@ -42,7 +42,7 @@ namespace jsk_pcl_ros
 {
   void SelectedClusterPublisher::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
   }
 

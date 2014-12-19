@@ -38,13 +38,14 @@
 #define JSK_PCL_ROS_ORGANIZED_PASS_THROUGH_H_
 
 #include <pcl_ros/pcl_nodelet.h>
-#include "jsk_pcl_ros/diagnostic_nodelet.h"
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_topic_tools/counter.h>
 #include <dynamic_reconfigure/server.h>
 #include "jsk_pcl_ros/OrganizedPassThroughConfig.h"
 
 namespace jsk_pcl_ros
 {
-  class OrganizedPassThrough: public DiagnosticNodelet
+  class OrganizedPassThrough: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef jsk_pcl_ros::OrganizedPassThroughConfig Config;
@@ -80,7 +81,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // Diagnostics variables
     ////////////////////////////////////////////////////////
-    Counter filtered_points_counter_;
+    jsk_topic_tools::Counter filtered_points_counter_;
     
     enum FilterField
     {

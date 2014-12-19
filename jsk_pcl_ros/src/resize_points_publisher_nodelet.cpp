@@ -14,11 +14,11 @@
 #include <message_filters/synchronizer.h>
 
 #include "jsk_pcl_ros/pcl_conversion_util.h"
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <jsk_topic_tools/connection_based_nodelet.h>
 
 namespace jsk_pcl_ros
 {
-  class ResizePointsPublisher : public ConnectionBasedNodelet
+  class ResizePointsPublisher : public jsk_topic_tools::ConnectionBasedNodelet
   {
     typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2,
                                                       PCLIndicesMsg> SyncPolicy;
@@ -31,9 +31,9 @@ namespace jsk_pcl_ros
     ros::Publisher pub_;
     bool not_use_rgb_;
     boost::mutex mutex_;
-    
+    bool use_indices_;
     void onInit () {
-      pcl_ros::PCLNodelet::onInit();
+      ConnectionBasedNodelet::onInit();
 
       pnh_->param("step_x", step_x_, 2);
       NODELET_INFO("step_x : %d", step_x_);

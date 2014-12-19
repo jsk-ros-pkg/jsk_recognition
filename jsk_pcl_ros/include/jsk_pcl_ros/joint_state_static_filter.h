@@ -37,7 +37,9 @@
 #ifndef JSK_PCL_ROS_JOINT_STATE_STATIC_FILTER_H_
 #define JSK_PCL_ROS_JOINT_STATE_STATIC_FILTER_H_
 
-#include "jsk_pcl_ros/diagnostic_nodelet.h"
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <boost/tuple/tuple.hpp>
+#include <float.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/JointState.h>
 #include <boost/circular_buffer.hpp>
@@ -46,7 +48,7 @@
 namespace jsk_pcl_ros
 {
 
-  class JointStateStaticFilter: public DiagnosticNodelet
+  class JointStateStaticFilter: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef boost::tuple<ros::Time, bool> StampedBool;

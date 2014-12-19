@@ -14,6 +14,12 @@
   <node pkg="image_view" type="image_view" name="roi_image_view">
     <remap from="image" to="roi_attention_clipper/output" />
   </node>
+  <node pkg="image_view" type="image_view" name="mask_image_view">
+    <remap from="image" to="attention_clipper/output/mask" />
+  </node>
+  <node pkg="image_view" type="image_view" name="original_image_view">
+    <remap from="image" to="/openni_c2/rgb/image_rect_color" />
+  </node>
   <node pkg="jsk_pcl_ros" type="attention_pose_set.py"
         name="attention_pose_set" />
 </launch>

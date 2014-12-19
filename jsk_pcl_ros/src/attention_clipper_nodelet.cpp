@@ -37,6 +37,8 @@
 #include <eigen_conversions/eigen_msg.h>
 #include <tf_conversions/tf_eigen.h>
 #include <opencv2/opencv.hpp>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
 
 namespace jsk_pcl_ros
 {
@@ -53,6 +55,7 @@ namespace jsk_pcl_ros
     pub_camera_info_ = advertise<sensor_msgs::CameraInfo>(*pnh_, "output", 1);
     pub_bounding_box_array_
       = advertise<jsk_pcl_ros::BoundingBoxArray>(*pnh_, "output/box_array", 1);
+    pub_mask_ = advertise<sensor_msgs::Image>(*pnh_, "output/mask", 1);
   }
 
   void AttentionClipper::subscribe()
@@ -138,6 +141,17 @@ namespace jsk_pcl_ros
     roi.roi.height = roi_region.height;
     roi.roi.do_rectify = true;
     pub_camera_info_.publish(roi);
+
+    // mask computation
+    cv::Mat mask = cv::Mat::zeros(msg->height, msg->width, CV_8UC1);
+    cv::Size roi_size(roi_region.width, roi_region.height);
+    cv::Rect roi_rect(cv::Point(roi_region.x, roi_region.y), roi_size);
+    const cv::Scalar white(255, 255, 255);
+    cv::rectangle(mask, roi_rect, white, CV_FILLED);
+    cv_bridge::CvImage mask_bridge(msg->header,
+                                   sensor_msgs::image_encodings::MONO8,
+                                   mask);
+    pub_mask_.publish(mask_bridge.toImageMsg());
   }
 
   void AttentionClipper::publishBoundingBox(const std_msgs::Header& header,

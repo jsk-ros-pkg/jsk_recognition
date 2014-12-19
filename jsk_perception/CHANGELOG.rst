@@ -2,6 +2,20 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.28 (2014-12-17)
+-------------------
+* added param to set threshold of best_Windoq
+* Add dynamic reconfigure to background substraction
+* Clean up background substraction codes
+* Add background substraction
+* Support image mask in ColorHistogram
+* Separate header and cpp file of color_hisotgram
+* Use jsk_topic_tools::DiagnosticNodelet for color histogram
+* Fix coding style of color_histogram
+* Fix indent of linemod.cpp
+* Add linemod sample
+* changed color_histogram_matcher to pub box_array defined in jsk_pcl_ros
+
 0.1.27 (2014-12-09)
 -------------------
 * added some algolism to get best window

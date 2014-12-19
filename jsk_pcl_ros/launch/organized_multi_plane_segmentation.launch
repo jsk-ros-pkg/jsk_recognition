@@ -146,6 +146,7 @@
       align_boxes: true
       use_pca: true
       publish_clouds: false
+      publish_tf: false
     </rosparam>
     <rosparam if="$(arg PUBLISH_BOX_TF)">
       publish_tf: true
@@ -242,15 +243,17 @@
       </rosparam>
     </node>
   </group>
-  <node pkg="nodelet" type="nodelet" name="handle_estimator"
+  <node pkg="roseus" type="roseus" name="handle_estimator"
         if="$(arg HANDLE_ESTIMATOR)"
         machine="$(arg MACHINE)"
-        args="load jsk_pcl/HandleEstimator /$(arg MANAGER)">
-    <remap from="~input" to="input_relay/output" />
+        args="$(find jsk_pcl_ros)/euslisp/handle_estimator.l"
+	output="screen">
     <remap from="~input_box" to="/bounding_box_marker/selected_box" />
     <rosparam>
       approach_offset: 0.1
-      angle_divide_num: 6
+      gripper_size: 0.8
+      angle_difference: 20
+      candidate_num: 5
     </rosparam>
   </node>
     <group if="$(arg ESTIMATE_OCCLUSION)">

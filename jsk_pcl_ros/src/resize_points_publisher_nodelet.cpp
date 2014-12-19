@@ -34,7 +34,7 @@ namespace jsk_pcl_ros
     bool use_indices_;
     void onInit () {
       ConnectionBasedNodelet::onInit();
-
+      pnh_->param("use_indices", use_indices_, false);
       pnh_->param("step_x", step_x_, 2);
       NODELET_INFO("step_x : %d", step_x_);
       pnh_->param("step_y", step_y_, 2);

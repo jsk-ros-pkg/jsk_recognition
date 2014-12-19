@@ -1,0 +1,41 @@
+<launch>
+  <arg name="NAMESPACE" default="multiresolution_pointcloud" />
+  <arg name="INPUT" default="/multisense/organized_image_points2_color" />
+  
+  <group ns="$(arg NAMESPACE)">
+    <node pkg="nodelet" type="nodelet" name="manager" args="manager" />
+    <node pkg="nodelet" type="nodelet" name="resize_1_1"
+          args="load jsk_topic_tools/Relay manager">
+      <remap from="~input" to="$(arg INPUT)" />
+      <remap from="~output" to="~points" />
+    </node>
+    <node pkg="nodelet" type="nodelet" name="resize_1_2"
+          args="load jsk_pcl/ResizePointsPublisher manager">
+      <remap from="~input" to="resize_1_1/points" />
+      <rosparam>
+        step_x: 2
+        step_y: 2
+      </rosparam>
+      <remap from="~output" to="~points" />
+    </node>
+    <node pkg="nodelet" type="nodelet" name="resize_1_4"
+          args="load jsk_pcl/ResizePointsPublisher manager">
+      <remap from="~input" to="resize_1_1/points" />
+      <remap from="~output" to="~points" />
+      <rosparam>
+        step_x: 4
+        step_y: 4
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="resize_1_8"
+          args="load jsk_pcl/ResizePointsPublisher manager">
+      <remap from="~input" to="resize_1_1/points" />
+      <remap from="~output" to="~points" />
+      <rosparam>
+        step_x: 8
+        step_y: 8
+      </rosparam>
+    </node>
+  </group>
+             
+</launch>

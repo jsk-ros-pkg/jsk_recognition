@@ -40,7 +40,7 @@ namespace jsk_pcl_ros
 {
   void PolygonAppender::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     pub_polygon_ = advertise<PolygonArray>(*pnh_, "output", 1);
     pub_coefficients_ = advertise<ModelCoefficientsArray>(*pnh_,
       "output_coefficients", 1);

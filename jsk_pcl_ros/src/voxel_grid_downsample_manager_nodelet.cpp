@@ -218,7 +218,7 @@ namespace jsk_pcl_ros
   
   void VoxelGridDownsampleManager::onInit(void)
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     pnh_->param("base_frame", base_frame_, std::string("pelvis"));
 
     initializeGrid();

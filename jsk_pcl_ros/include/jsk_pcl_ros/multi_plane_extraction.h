@@ -51,11 +51,11 @@
 #include "jsk_pcl_ros/pcl_util.h"
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <jsk_topic_tools/vital_checker.h>
-#include "jsk_pcl_ros/diagnostic_nodelet.h"
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 
 namespace jsk_pcl_ros
 {
-  class MultiPlaneExtraction: public DiagnosticNodelet
+  class MultiPlaneExtraction: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     

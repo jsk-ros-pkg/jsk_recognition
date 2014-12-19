@@ -64,7 +64,7 @@ namespace jsk_pcl_ros
 
   void OrganizedMultiPlaneSegmentation::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     //////////////////////////////////////////////////////////
     // prepare diagnostics
     //////////////////////////////////////////////////////////

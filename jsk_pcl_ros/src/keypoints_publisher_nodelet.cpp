@@ -47,7 +47,7 @@ namespace jsk_pcl_ros
 {
   void KeypointsPublisher::onInit(void)
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     
     input_.reset(new pcl::PointCloud<pcl::PointXYZ>);
     keypoints_pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "nerf_keypoints", 10);
@@ -90,7 +90,7 @@ namespace jsk_pcl_ros
     pcl::PointCloud<int> indices;
     narf.compute(indices);
 
-    PointCloud result;
+    pcl::PointCloud<pcl::PointXYZ> result;
     for (int i = 0; i < indices.size(); ++i) {
       result.push_back(cloud->at(indices[i]));
     }

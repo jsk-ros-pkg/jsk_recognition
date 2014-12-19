@@ -46,7 +46,7 @@ namespace jsk_pcl_ros
 {
   void ICPRegistration::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     tf_listener_.reset(new tf::TransformListener());
     ////////////////////////////////////////////////////////
     // Dynamic Reconfigure

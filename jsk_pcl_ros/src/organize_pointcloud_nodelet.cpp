@@ -75,7 +75,7 @@ namespace jsk_pcl_ros
 
   void OrganizePointCloud::onInit(void)
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     pnh_->param<double>("angular_resolution", angular_resolution, 1.0);

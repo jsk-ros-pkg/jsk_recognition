@@ -42,10 +42,10 @@
 
 #include <tf/transform_listener.h>
 
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include "jsk_topic_tools/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros {
-  class HintedPlaneDetector: public ConnectionBasedNodelet
+  class HintedPlaneDetector: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     virtual void onInit();

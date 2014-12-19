@@ -40,7 +40,7 @@ namespace jsk_pcl_ros
 {
   void OctreeChangePublisher::onInit(void)
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     counter_ = 0;
 
     pnh_->param("resolution", resolution_, 0.02);

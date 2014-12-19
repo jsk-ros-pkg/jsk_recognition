@@ -34,6 +34,7 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/organized_pass_through.h"
+#include <jsk_topic_tools/diagnostic_utils.h>
 #include <pcl/filters/extract_indices.h>
 namespace jsk_pcl_ros
 {
@@ -147,12 +148,12 @@ namespace jsk_pcl_ros
       }
       stat.add("min index", min_index_);
       stat.add("max index", max_index_);
-      addDiagnosticBooleanStat("keep organized",
-                               keep_organized_,
-                               stat);
-      addDiagnosticBooleanStat("filter_limit_negative",
-                               filter_limit_negative_,
-                               stat);
+      jsk_topic_tools::addDiagnosticBooleanStat("keep organized",
+                                                keep_organized_,
+                                                stat);
+      jsk_topic_tools::addDiagnosticBooleanStat("filter_limit_negative",
+                                                filter_limit_negative_,
+                                                stat);
     }
     else {
       addDiagnosticErrorSummary(

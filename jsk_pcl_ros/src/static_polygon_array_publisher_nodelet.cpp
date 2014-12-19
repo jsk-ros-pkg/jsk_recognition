@@ -41,7 +41,7 @@ namespace jsk_pcl_ros
 
   void StaticPolygonArrayPublisher::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     pnh_->param("use_periodic", use_periodic_, false);
     pnh_->param("use_message", use_message_, false);
     pnh_->param("use_trigger", use_trigger_, false);

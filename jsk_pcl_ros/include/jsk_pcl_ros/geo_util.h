@@ -35,7 +35,7 @@
 
 #ifndef JSK_PCL_ROS_GEO_UTIL_H_
 #define JSK_PCL_ROS_GEO_UTIL_H_
-#define BOOST_PARAMETER_MAX_ARITY 7 
+//#define BOOST_PARAMETER_MAX_ARITY 7 
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>

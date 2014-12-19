@@ -47,12 +47,12 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 #include <tf/transform_listener.h>
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <jsk_topic_tools/connection_based_nodelet.h>
 #include <jsk_pcl_ros/PointsArray.h>
 
 namespace jsk_pcl_ros
 {
-  class ICPRegistration: public ConnectionBasedNodelet
+  class ICPRegistration: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     typedef pcl::PointXYZRGB PointT;

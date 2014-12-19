@@ -46,11 +46,12 @@
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl/point_types.h>
 
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <jsk_topic_tools/connection_based_nodelet.h>
 
 namespace jsk_pcl_ros
 {
-  class VoxelGridDownsampleDecoder : public ConnectionBasedNodelet
+  class VoxelGridDownsampleDecoder :
+    public jsk_topic_tools::ConnectionBasedNodelet
   {
   protected:
     tf::TransformListener tf_listener;

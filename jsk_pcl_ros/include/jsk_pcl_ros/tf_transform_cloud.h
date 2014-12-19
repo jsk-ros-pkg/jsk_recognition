@@ -47,17 +47,18 @@
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl/point_types.h>
 
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <jsk_topic_tools/connection_based_nodelet.h>
+#include "jsk_pcl_ros/tf_listener_singleton.h"
 
 namespace jsk_pcl_ros
 {
-  class TfTransformCloud: public ConnectionBasedNodelet
+  class TfTransformCloud: public jsk_topic_tools::ConnectionBasedNodelet
   {
   protected:
     ros::Subscriber sub_cloud_;
     ros::Publisher  pub_cloud_;
     std::string target_frame_id_;
-    tf::TransformListener tf_listener_;
+    tf::TransformListener* tf_listener_;
     virtual void transform(const sensor_msgs::PointCloud2ConstPtr &input);
     virtual void subscribe();
     virtual void unsubscribe();

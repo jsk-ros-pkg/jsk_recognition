@@ -152,7 +152,7 @@ namespace jsk_pcl_ros
   
   void VoxelGridDownsampleDecoder::onInit(void)
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     previous_id_ = -1;
     // decoded output
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);

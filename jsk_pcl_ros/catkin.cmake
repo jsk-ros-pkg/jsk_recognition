@@ -260,9 +260,7 @@ jsk_pcl_nodelet(src/roi_clipper_nodelet.cpp
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
   src/pcl_conversion_util.cpp src/pcl_util.cpp
-  src/diagnostic_nodelet.cpp
   src/pointcloud_moveit_filter.cpp
-  src/connection_based_nodelet.cpp
   src/tf_listener_singleton.cpp)
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)

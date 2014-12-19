@@ -39,7 +39,7 @@ namespace jsk_pcl_ros
 {
   void PolygonArrayWrapper::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     pub_polygon_array_ = advertise<jsk_pcl_ros::PolygonArray>(*pnh_,
       "output_polygons", 1);
     pub_coefficients_array_

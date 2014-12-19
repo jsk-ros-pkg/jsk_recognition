@@ -32,10 +32,9 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-
+#include "jsk_pcl_ros/pcl_conversion_util.h"
 #include "jsk_pcl_ros/line_segment_detector.h"
 #include <visualization_msgs/Marker.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>

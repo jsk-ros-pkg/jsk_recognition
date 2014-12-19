@@ -44,7 +44,7 @@ namespace jsk_pcl_ros
 {
   void HandleEstimator::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     output_buf.resize(100);
 
     //tf_listener_.reset(new tf::TransformListener());

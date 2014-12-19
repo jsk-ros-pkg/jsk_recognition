@@ -50,11 +50,11 @@
 #include <message_filters/synchronizer.h>
 #include "jsk_pcl_ros/geo_util.h"
 
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <jsk_topic_tools/connection_based_nodelet.h>
 
 namespace jsk_pcl_ros
 {
-  class ParallelEdgeFinder: public ConnectionBasedNodelet
+  class ParallelEdgeFinder: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime<

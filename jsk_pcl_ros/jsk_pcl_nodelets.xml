@@ -1,4 +1,9 @@
 <library path="libjsk_pcl_ros">
+  <class name="jsk_pcl/CaptureStereoSynchronizer"
+         type="jsk_pcl_ros::CaptureStereoSynchronizer"
+         base_class_type="nodelet::Nodelet">
+    Synchronize stereo messages for capture training data
+  </class>
   <class name="jsk_pcl/PointIndicesToMaskImage"
          type="jsk_pcl_ros::PointIndicesToMaskImage"
          base_class_type="nodelet::Nodelet">

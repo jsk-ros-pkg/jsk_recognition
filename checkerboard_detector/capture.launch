@@ -63,14 +63,17 @@
     <param name="use_indices" value="true" />
   </node>
 
-  <node pkg="jsk_pcl_ros" type="point_indices_to_mask_image" name="mask_image" otuput="screen">
+  <node pkg="jsk_pcl_ros" type="point_indices_to_mask_image" name="mask_image" output="log">
     <remap from="~input" to="attention_clipper/output/point_indices" />
     <remap from="~input/image" to="$(arg CAMERA)/image_rect_color" />
   </node>
   <node pkg="image_view" type="image_view" name="mask_image_view">
     <remap from="image" to="mask_image/output"/>
   </node>
-    <node pkg="image_view" type="image_view" name="original_image_view">
-    <remap from="image" to="$(arg CAMERA)/image_rect_color"/>
+  <node pkg="image_view" type="image_view" name="original_image_view">
+      <remap from="image" to="$(arg CAMERA)/image_rect_color"/>
   </node>
+  <!-- for multi sense -->
+  <node pkg="rostopic" type="rostopic" name="right_image_subscriber"
+        args="hz /multisense/right/image_rect" />
 </launch>

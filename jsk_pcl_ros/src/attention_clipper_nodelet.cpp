@@ -61,13 +61,17 @@ namespace jsk_pcl_ros
   void AttentionClipper::subscribe()
   {
     sub_ = pnh_->subscribe("input", 1, &AttentionClipper::clip, this);
-    sub_pose_ = pnh_->subscribe("input/pose", 1, &AttentionClipper::poseCallback, this);
+    sub_pose_ = pnh_->subscribe("input/pose",
+                                1, &AttentionClipper::poseCallback, this);
+    sub_box_ = pnh_->subscribe("input/box",
+                               1, &AttentionClipper::boxCallback, this);
   }
 
   void AttentionClipper::unsubscribe()
   {
     sub_.shutdown();
     sub_pose_.shutdown();
+    sub_box_.shutdown();
   }
   
   Vertices AttentionClipper::cubeVertices()
@@ -100,6 +104,22 @@ namespace jsk_pcl_ros
     tf::poseMsgToEigen(pose->pose, affine);
     frame_id_ = pose->header.frame_id;
     convertEigenAffine3(affine, pose_);
+  }
+
+  void AttentionClipper::boxCallback(
+    const jsk_pcl_ros::BoundingBox::ConstPtr& box)
+  {
+    {
+      boost::mutex::scoped_lock lock(mutex_);
+      dimension_x_ = box->dimensions.x;
+      dimension_y_ = box->dimensions.y;
+      dimension_z_ = box->dimensions.z;
+      Eigen::Affine3d affine;
+      tf::poseMsgToEigen(box->pose, affine);
+      frame_id_ = box->header.frame_id;
+      convertEigenAffine3(affine, pose_);
+    }
+    
   }
 
   void AttentionClipper::computeROI(

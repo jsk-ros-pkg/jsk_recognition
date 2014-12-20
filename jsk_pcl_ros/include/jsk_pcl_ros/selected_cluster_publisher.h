@@ -65,6 +65,8 @@ namespace jsk_pcl_ros
     virtual void unsubscribe();
   private:
     virtual void onInit();
+    
+    bool keep_organized_;
   };
   
 }

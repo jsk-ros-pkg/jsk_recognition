@@ -1,4 +1,10 @@
 <library path="libjsk_pcl_ros">
+  <class name="jsk_pcl/PointIndicesToMaskImage"
+         type="jsk_pcl_ros::PointIndicesToMaskImage"
+         base_class_type="nodelet::Nodelet">
+    Generate mask image out of point indices
+  </class>
+  
   <class name="jsk_pcl/ROIClipper"
          type="jsk_pcl_ros::ROIClipper"
          base_class_type="nodelet::Nodelet">

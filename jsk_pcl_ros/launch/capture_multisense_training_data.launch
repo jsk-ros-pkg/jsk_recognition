@@ -11,4 +11,8 @@
     <remap from="~input/right_camera_info" to="$(arg CAMERA)/right/image_rect/camera_info" />
     <remap from="~input/disparity" to="$(arg CAMERA)/left/disparity_image" />
   </node>
+  <!-- for multisense -->
+  <node pkg="rostopic" type="rostopic" name="right_image_subscriber"
+        args="hz /multisense/right/image_rect" />
+
 </launch>

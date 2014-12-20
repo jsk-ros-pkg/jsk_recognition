@@ -63,7 +63,8 @@ Represent range of time.
 #### What Is This
 ![](images/attention_clipper.png)
 
-It retrives `sensor_msgs/CameraInfo` and publish `sensor_msgs/CameraInfo` with ROI filled.
+It retrives `sensor_msgs/CameraInfo` and publish `sensor_msgs/CameraInfo` with ROI filled and
+retirieves `sensor_msgs/PointCloud2` and publish `pcl_msgs/PointIndices`.
 
 You can specify the pose and size of the interest bounding box and jsk\_pcl/AttentionClipper returns ROI
 to see the object.
@@ -72,6 +73,10 @@ to see the object.
 * `~input` (`sensor_msgs/CameraInfo`)
 
   Original camera info.
+
+* `~input/points` (`sensor_msgs/PointCloud2`)
+
+  Original pointcloud.
 * `~input/pose` (`geometry_msgs/PoseStamped`)
 * `~input/box` (`jsk_pcl_ros/BoundingBox`)
   Specify the pose of the bounding box. Timestamp will be ignored and camera info's timestamp will be used. If you use `~input/box`, you can change the size of attention region.
@@ -111,7 +116,9 @@ We expect to use jsk\_pcl/ROIClipper with jsk\_pcl/AttentionClipper to get ROI i
 
   Image of ROI.
 
+* `~output/point_indices` (`pcl_msgs/PointIndices`)
 
+  The indices of the pointcloud which is inside of the interest 3-D region.
 ### jsk\_pcl/NormalDirectionFilter
 ![NormalDirectionFilter](images/normal_direction_filter.png)
 

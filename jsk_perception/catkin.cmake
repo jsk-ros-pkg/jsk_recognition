@@ -22,10 +22,17 @@ endif()
 
 
 # Dynamic reconfigure support
-generate_dynamic_reconfigure_options(cfg/camshiftdemo.cfg cfg/EdgeDetector.cfg cfg/HoughLines.cfg cfg/matchtemplate.cfg cfg/point_pose_extractor.cfg cfg/RectangleDetector.cfg 
+generate_dynamic_reconfigure_options(
+  cfg/camshiftdemo.cfg
+  cfg/EdgeDetector.cfg
+  cfg/HoughLines.cfg
+  cfg/matchtemplate.cfg
+  cfg/point_pose_extractor.cfg
+  cfg/RectangleDetector.cfg 
   cfg/ColorHistogram.cfg
   cfg/HoughCircles.cfg
-  cfg/ColorHistogramSlidingMatcher.cfg)
+  cfg/ColorHistogramSlidingMatcher.cfg
+  cfg/BackgroundSubstraction.cfg)
 
 add_message_files(FILES
       PointsArray.msg RotatedRectStamped.msg LineArray.msg Rect.msg Line.msg RotatedRect.msg SparseImage.msg
@@ -78,6 +85,7 @@ jsk_perception_nodelet(src/edge_detector.cpp "jsk_perception/EdgeDetector" "edge
 jsk_perception_nodelet(src/sparse_image_encoder.cpp "jsk_perception/SparseImageEncoder" "sparse_image_encoder")
 jsk_perception_nodelet(src/sparse_image_decoder.cpp "jsk_perception/SparseImageDecoder" "sparse_image_decoder")
 jsk_perception_nodelet(src/color_histogram.cpp "jsk_perception/ColorHistogram" "color_histogram")
+jsk_perception_nodelet(src/background_substraction_nodelet.cpp "jsk_perception/BackgroundSubstraction" "background_substraction")
 jsk_perception_nodelet(src/hough_circles.cpp "jsk_perception/HoughCircleDetector" "hough_circles")
 
 jsk_perception_nodelet(src/slic_superpixels.cpp "jsk_perception/SLICSuperPixels" "slic_super_pixels")

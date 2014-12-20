@@ -34,35 +34,56 @@
  *********************************************************************/
 
 
-#ifndef JSK_PCL_ROS_DIAGNOSTIC_NODELET_
-#define JSK_PCL_ROS_DIAGNOSTIC_NODELET_
+#ifndef JSK_PERCEPTION_BACKGROUND_SUBSTRACTION_H_
+#define JSK_PERCEPTION_BACKGROUND_SUBSTRACTION_H_
 
-#include <pcl_ros/pcl_nodelet.h>
-#include <diagnostic_updater/diagnostic_updater.h>
-#include <diagnostic_updater/publisher.h>
-#include <jsk_topic_tools/vital_checker.h>
-#include "jsk_pcl_ros/pcl_util.h"
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <opencv2/opencv.hpp>
+#include <image_transport/image_transport.h>
+#include <image_transport/subscriber_filter.h>
+#include <sensor_msgs/image_encodings.h>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/Image.h>
 
-namespace jsk_pcl_ros
+#include <dynamic_reconfigure/server.h>
+#include <jsk_perception/BackgroundSubstractionConfig.h>
+
+namespace jsk_perception
 {
-  class DiagnosticNodelet: public ConnectionBasedNodelet
+  class BackgroundSubstraction: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    typedef boost::shared_ptr<DiagnosticNodelet> Ptr;
-    DiagnosticNodelet(const std::string& name);
-
+    BackgroundSubstraction(): DiagnosticNodelet("BackgroundSubstraction") {}
+    typedef jsk_perception::BackgroundSubstractionConfig Config;
   protected:
+    ////////////////////////////////////////////////////////
+    // methods
+    ////////////////////////////////////////////////////////
     virtual void onInit();
-    virtual void updateDiagnosticRoot(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
+    virtual void subscribe();
+    virtual void unsubscribe();
     virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat) = 0;
+      diagnostic_updater::DiagnosticStatusWrapper &stat);
+    virtual void substract(
+      const sensor_msgs::Image::ConstPtr& image_msg);
+    virtual void configCallback (Config &config, uint32_t level);
+    ////////////////////////////////////////////////////////
+    // ROS variables
+    ////////////////////////////////////////////////////////
+    ros::Publisher image_pub_;
+    image_transport::Subscriber sub_;
+    boost::shared_ptr<image_transport::ImageTransport> it_;
+    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
+    boost::mutex mutex_;
 
-    const std::string name_;
-    TimeredDiagnosticUpdater::Ptr diagnostic_updater_;
-    jsk_topic_tools::VitalChecker::Ptr vital_checker_;
-
+    ////////////////////////////////////////////////////////
+    // Parameters
+    ////////////////////////////////////////////////////////
+    cv::BackgroundSubtractorMOG2 bg_;
+    bool detect_shadows_;
+    int nmixtures_;
+    double background_ratio_;
+    
   private:
     
   };

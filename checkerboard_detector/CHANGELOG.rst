@@ -2,6 +2,9 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.28 (2014-12-17)
+-------------------
+
 0.1.27 (2014-12-09)
 -------------------
 * forget to install objectdetection_tf_publisher.py

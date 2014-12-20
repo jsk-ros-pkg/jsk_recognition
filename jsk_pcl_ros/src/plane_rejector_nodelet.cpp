@@ -43,7 +43,7 @@ namespace jsk_pcl_ros
 {
   void PlaneRejector::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     tf_success_.reset(new SeriesedBoolean(30));
     listener_.reset(new tf::TransformListener());
     double vital_rate;

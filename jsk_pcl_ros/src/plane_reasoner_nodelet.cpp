@@ -114,7 +114,7 @@ namespace jsk_pcl_ros
                    name_ + " running");
     }
     else {
-      addDiagnosticErrorSummary(
+      jsk_topic_tools::addDiagnosticErrorSummary(
         name_, vital_checker_, stat);
     }
   }

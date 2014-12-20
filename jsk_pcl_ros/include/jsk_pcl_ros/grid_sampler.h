@@ -42,11 +42,11 @@
 #include <sensor_msgs/PointCloud2.h>
 
 #include <jsk_pcl_ros/GridSamplerConfig.h>
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <jsk_topic_tools/connection_based_nodelet.h>
 
 namespace jsk_pcl_ros
 {
-  class GridSampler: public ConnectionBasedNodelet
+  class GridSampler: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     typedef jsk_pcl_ros::GridSamplerConfig Config;

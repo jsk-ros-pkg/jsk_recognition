@@ -48,6 +48,15 @@ namespace jsk_pcl_ros
     pcl::fromROSMsg(*input, *cloud);
     
     std::vector<pcl::PointIndices> cluster_indices;
+    // list up indices which are not NaN to use
+    // organized pointcloud
+    pcl::PointIndices::Ptr nonnan_indices (new pcl::PointIndices);
+    for (size_t i = 0; i < cloud->points.size(); i++) {
+      pcl::PointXYZ p = cloud->points[i];
+      if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
+        nonnan_indices->indices.push_back(i);
+      }
+    }
     EuclideanClusterExtraction<pcl::PointXYZ> impl;
     {
       jsk_topic_tools::ScopedTimer timer = kdtree_acc_.scopedTimer();
@@ -63,6 +72,7 @@ namespace jsk_pcl_ros
       impl.setMinClusterSize (minsize_);
       impl.setMaxClusterSize (maxsize_);
       impl.setSearchMethod (tree);
+      impl.setIndices(nonnan_indices);
       impl.setInputCloud (cloud);
     }
     
@@ -174,7 +184,7 @@ namespace jsk_pcl_ros
 
   void EuclideanClustering::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     
     ////////////////////////////////////////////////////////
     // diagnostics

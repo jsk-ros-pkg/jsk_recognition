@@ -51,7 +51,7 @@
 namespace jsk_pcl_ros {
   
   void HintedPlaneDetector::onInit() {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
 
     input_.reset(new pcl::PointCloud<pcl::PointXYZ>);
     

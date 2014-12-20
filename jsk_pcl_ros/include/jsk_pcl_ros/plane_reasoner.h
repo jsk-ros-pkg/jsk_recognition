@@ -37,7 +37,7 @@
 #ifndef JSK_PCL_ROS_PLANE_REASONER_H_
 #define JSK_PCL_ROS_PLANE_REASONER_H_
 
-#include "jsk_pcl_ros/diagnostic_nodelet.h"
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include "jsk_pcl_ros/ClusterPointIndices.h"
 #include "jsk_pcl_ros/PolygonArray.h"
 #include "jsk_pcl_ros/ModelCoefficientsArray.h"
@@ -59,7 +59,7 @@ namespace jsk_pcl_ros
                        geometry_msgs::PolygonStamped>
   PlaneInfoContainer;
   
-  class PlaneReasoner: public DiagnosticNodelet
+  class PlaneReasoner: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     ////////////////////////////////////////////////////////

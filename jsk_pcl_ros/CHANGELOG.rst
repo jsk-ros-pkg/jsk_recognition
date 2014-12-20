@@ -2,6 +2,14 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.28 (2014-12-17)
+-------------------
+* Publish attention region mask from AttentionClipper
+* Add new nodelets: ROIClipper and AttentionClipper to control attention
+  and ROI
+* fix hsi_color_filter.launch bug
+* Change default value of publish_tf and publish_clouds of ClusterPointIndicesDecomposer
+
 0.1.27 (2014-12-09)
 -------------------
 * Add GDB argument to toggle xterm gdb hack

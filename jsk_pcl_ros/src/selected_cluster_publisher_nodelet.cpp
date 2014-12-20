@@ -42,7 +42,8 @@ namespace jsk_pcl_ros
 {
   void SelectedClusterPublisher::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
+    pnh_->param("keep_organized", keep_organized_, false);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
   }
 
@@ -81,6 +82,9 @@ namespace jsk_pcl_ros
     extract.setInputCloud(input_cloud);
     extract.setIndices(pcl_indices);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr extracted_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
+    if(keep_organized_){
+      extract.setKeepOrganized(true);
+    }
     extract.filter(*extracted_cloud);
     sensor_msgs::PointCloud2 ros_msg;
     pcl::toROSMsg(*extracted_cloud, ros_msg);

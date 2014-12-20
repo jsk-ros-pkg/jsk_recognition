@@ -51,11 +51,11 @@
 #include <boost/circular_buffer.hpp>
 #include <boost/tuple/tuple.hpp>
 
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <jsk_topic_tools/connection_based_nodelet.h>
 
 namespace jsk_pcl_ros
 {
-  class HandleEstimator: public ConnectionBasedNodelet
+  class HandleEstimator: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime< sensor_msgs::PointCloud2,

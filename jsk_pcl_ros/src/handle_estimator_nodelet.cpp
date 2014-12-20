@@ -44,7 +44,7 @@ namespace jsk_pcl_ros
 {
   void HandleEstimator::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     output_buf.resize(100);
 
     //tf_listener_.reset(new tf::TransformListener());
@@ -95,7 +95,7 @@ namespace jsk_pcl_ros
     HandleType handle_type;
     // detect the handle type
     if (longest_index == 2) {
-      if (dimensions[0] < gripper_size_ && dimensions[1] < gripper_size_) {
+      if (dimensions[0] < gripper_size_ || dimensions[1] < gripper_size_) {
         handle_type = HANDLE_SMALL_ENOUGH_STAND_ON_PLANE;
       }
       else {
@@ -104,7 +104,7 @@ namespace jsk_pcl_ros
     }
     else {
       if (longest_index == 0) {
-        if (dimensions[1] < gripper_size_ && dimensions[2] < gripper_size_) {
+        if (dimensions[1] < gripper_size_ || dimensions[2] < gripper_size_) {
           handle_type = HANDLE_SMALL_ENOUGH_LIE_ON_PLANE_X_LONGEST;
         }
         else {
@@ -112,7 +112,7 @@ namespace jsk_pcl_ros
         }
       }
       else {                    // 1
-        if (dimensions[0] < gripper_size_ && dimensions[2] < gripper_size_) {
+        if (dimensions[0] < gripper_size_ || dimensions[2] < gripper_size_) {
           handle_type = HANDLE_SMALL_ENOUGH_LIE_ON_PLANE_Y_LONGEST;
         }
         else {

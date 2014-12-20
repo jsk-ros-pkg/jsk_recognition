@@ -45,6 +45,8 @@ class MatcherNode
   int standard_height, standard_width;
   int best_window_estimation_method;
   double coefficient_thre;
+  double coefficient_thre_for_best_window;
+  double sliding_factor;
   bool show_result_;
   double template_width;
   double template_height;
@@ -119,7 +121,9 @@ public:
     local_nh.param("standard_width", standard_width, 12);
     local_nh.param("standard_height", standard_height, 12);
     local_nh.param("best_window_estimation_method", best_window_estimation_method, 1);
-    local_nh.param("coefficient_threshold", coefficient_thre, 0.67);
+    local_nh.param("coefficient_threshold", coefficient_thre, 0.5);
+    local_nh.param("coefficient_threshold_for_best_window", coefficient_thre_for_best_window, 0.67);
+    local_nh.param("sliding_factor", sliding_factor, 1.0);
     local_nh.param("show_result", show_result_, true);
     local_nh.param("object_width", template_width, 0.06);
     local_nh.param("object_height", template_height, 0.0739);
@@ -246,7 +250,8 @@ public:
       // for(float scale=1; scale<image.cols/32; scale*=1.2){
       std::vector<box> boxes;
       for(float scale=image.cols/32; scale > 1; scale/=1.2){
-	int dot = (int)(scale*2);
+	int dot = (int)(scale*2*sliding_factor);
+	if(dot<1) dot = 1;
 	int width_d = (int)(scale*standard_width);
 	int height_d = (int)(scale*standard_height);
 	for(size_t i=0, image_rows=image.rows; i+height_d < image_rows; i+=dot){
@@ -273,7 +278,8 @@ public:
 	  }
 	}
       }
-      if(boxes.size() == 0){
+      ROS_INFO("max_coefficient:%f", max_coe);
+      if(boxes.size() == 0 || max_coe < coefficient_thre_for_best_window){
 	ROS_INFO("no objects found");
 	if(show_result_){
 	  cv::imshow("result", image);
@@ -389,6 +395,8 @@ public:
     standard_height = config.standard_height;
     standard_width = config.standard_width;
     coefficient_thre = config.coefficient_threshold;
+    sliding_factor = config.sliding_factor;
+    coefficient_thre_for_best_window = config.coefficient_threshold_for_best_window;
     best_window_estimation_method = config.best_window_estimation_method;
     if(level==1){ // size changed
     }

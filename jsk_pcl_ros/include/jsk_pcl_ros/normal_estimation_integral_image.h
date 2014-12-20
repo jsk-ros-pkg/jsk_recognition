@@ -42,10 +42,12 @@
 #include <pcl_ros/pcl_nodelet.h>
 #include <dynamic_reconfigure/server.h>
 #include "jsk_pcl_ros/NormalEstimationIntegralImageConfig.h"
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <jsk_topic_tools/connection_based_nodelet.h>
+
 namespace jsk_pcl_ros
 {
-  class NormalEstimationIntegralImage: public ConnectionBasedNodelet
+  class NormalEstimationIntegralImage:
+    public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     typedef jsk_pcl_ros::NormalEstimationIntegralImageConfig Config;    

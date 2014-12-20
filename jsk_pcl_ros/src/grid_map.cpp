@@ -32,7 +32,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-
+#define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/grid_map.h"
 #include <boost/make_shared.hpp>
 #include <Eigen/Core>

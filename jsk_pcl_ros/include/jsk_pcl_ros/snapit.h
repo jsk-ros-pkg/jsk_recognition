@@ -44,7 +44,7 @@
 #include <jsk_pcl_ros/ModelCoefficientsArray.h>
 #include "jsk_pcl_ros/CallSnapIt.h"
 #include <tf/transform_listener.h>
-#include "jsk_pcl_ros/diagnostic_nodelet.h"
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include "jsk_pcl_ros/geo_util.h"
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -52,7 +52,7 @@
 
 namespace jsk_pcl_ros
 {
-  class SnapIt: public DiagnosticNodelet
+  class SnapIt: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime<

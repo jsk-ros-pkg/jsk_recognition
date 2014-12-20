@@ -1,0 +1,6 @@
+<launch>
+  <node pkg="jsk_pcl_ros" type="linemod_trainer" name="linemod_trainer" output="screen">
+    <remap from="~input" to="/stereo/points2" />
+    <remap from="~input/indices" to="/capture_stereo_synchronizer/output/mask_indices" />
+  </node>
+</launch>

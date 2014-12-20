@@ -1,4 +1,9 @@
 <library path="libjsk_pcl_ros">
+  <class name="jsk_pcl/LINEMODTrainer"
+         type="jsk_pcl_ros::LINEMODTrainer"
+         base_class_type="nodelet::Nodelet">
+    LINEMOD trainer
+  </class>
   <class name="jsk_pcl/CaptureStereoSynchronizer"
          type="jsk_pcl_ros::CaptureStereoSynchronizer"
          base_class_type="nodelet::Nodelet">

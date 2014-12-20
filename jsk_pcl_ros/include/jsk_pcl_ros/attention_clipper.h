@@ -61,6 +61,7 @@ namespace jsk_pcl_ros
     virtual void onInit();
     virtual void clip(const sensor_msgs::CameraInfo::ConstPtr& msg);
     virtual void poseCallback(const geometry_msgs::PoseStamped::ConstPtr& pose);
+    virtual void boxCallback(const jsk_pcl_ros::BoundingBox::ConstPtr& box);
     virtual Vertices cubeVertices();
     virtual void subscribe();
     virtual void unsubscribe();
@@ -75,6 +76,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     ros::Subscriber sub_;
     ros::Subscriber sub_pose_;
+    ros::Subscriber sub_box_;
     ros::Publisher pub_camera_info_;
     ros::Publisher pub_bounding_box_array_;
     ros::Publisher pub_mask_;

@@ -72,9 +72,9 @@ to see the object.
 * `~input` (`sensor_msgs/CameraInfo`)
 
   Original camera info.
-* `~pose` (`geometry_msgs/PoseStamped`)
-
-  Specify the pose of the bounding box. timestamp will be ignored and camera info's timestamp will be used.
+* `~input/pose` (`geometry_msgs/PoseStamped`)
+* `~input/box` (`jsk_pcl_ros/BoundingBox`)
+  Specify the pose of the bounding box. Timestamp will be ignored and camera info's timestamp will be used. If you use `~input/box`, you can change the size of attention region.
 
 #### Publishing Topic
 * `~output` (`sensor_msgs/CameraInfo`)

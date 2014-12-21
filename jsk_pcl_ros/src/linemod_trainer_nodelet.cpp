@@ -32,12 +32,15 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-
+#include <boost/filesystem.hpp>
+#include <boost/format.hpp>
 #include "jsk_pcl_ros/linemod_trainer.h"
 #include <pcl/recognition/linemod.h>
 #include <pcl/recognition/color_gradient_modality.h>
 #include <pcl/recognition/surface_normal_modality.h>
 #include <pcl/filters/extract_indices.h>
+#include <pcl/io/pcd_io.h>
+
 namespace jsk_pcl_ros
 {
   void LINEMODTrainer::onInit()
@@ -94,6 +97,7 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     ROS_INFO("Start LINEMOD training from %lu samples", samples_.size());
     pcl::LINEMOD linemod;
+    std::vector<pcl::PointCloud<pcl::PointXYZRGBA>::Ptr> masked_clouds;
     for (size_t i = 0; i < samples_.size(); i++) {
       ROS_INFO("Processing %lu-th data", i);
       pcl::PointIndices::Ptr mask = sample_indices_[i];
@@ -105,7 +109,7 @@ namespace jsk_pcl_ros
       ex.setInputCloud(cloud);
       ex.setIndices(mask);
       ex.filter(*masked_cloud);
-
+      masked_clouds.push_back(masked_cloud);
       pcl::ColorGradientModality<pcl::PointXYZRGBA> color_grad_mod;
       color_grad_mod.setInputCloud(masked_cloud);
       color_grad_mod.processInputData();
@@ -145,13 +149,48 @@ namespace jsk_pcl_ros
       linemod.createAndAddTemplate(modalities, masks, region);
     }
     // dump template
+    // lmt file is a tar file
+    //   tar --format=ustar -cf model.lmt ./*template*
+    // 1. mkdir template directory
+    // 2. dump templates into the directory as template_&05d.pcd
+    // 3. call tar
     ROS_INFO("Dump %lu trained data into %s", linemod.getNumOfTemplates(),
              output_file_.c_str());
-    std::ofstream file_stream;
-    file_stream.open(output_file_.c_str(),
-                      std::ofstream::out | std::ofstream::binary);
-    linemod.serialize(file_stream);
-    file_stream.close();
+    
+    boost::filesystem::path temp = boost::filesystem::unique_path();
+    const std::string tempstr = temp.native();
+    ROS_INFO("mkdir %s", tempstr.c_str());
+    boost::filesystem::create_directory(temp);
+    std::stringstream command_stream;
+    command_stream << "tar --format=ustar -cf " << output_file_;
+    for (size_t i = 0; i < linemod.getNumOfTemplates(); i++) {
+      {
+        // sqmmt
+        std::stringstream filename_stream;
+        filename_stream << boost::format("%s/%05lu_template.sqmmt") % tempstr % i;
+        std::string filename = filename_stream.str();
+        ROS_INFO("writing %s", filename.c_str());
+        std::ofstream file_stream;
+        file_stream.open(filename.c_str(),
+                         std::ofstream::out | std::ofstream::binary);
+        linemod.getTemplate(i).serialize(file_stream);
+        file_stream.close();
+        command_stream << " " << filename;
+      }
+      {
+        // pcd
+        std::stringstream filename_stream;
+        filename_stream << boost::format("%s/%05lu_template.pcd") % tempstr % i;
+        std::string filename = filename_stream.str();
+        ROS_INFO("writing %s", filename.c_str());
+        pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud = masked_clouds[i];
+        pcl::PCDWriter writer;
+        writer.write(filename, *cloud);
+        command_stream << " " << filename;
+      }
+    }
+    ROS_INFO("executing %s", command_stream.str().c_str());
+    int ret = system(command_stream.str().c_str());
     return true;
   }
 }

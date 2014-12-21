@@ -85,10 +85,11 @@
 
   (:estimate
    (box)
-   (let ((c (send *tfl* :lookup-transform  *camera-frame* (send box :header :frame_id) (ros::time 0)))
+   (let ((c (send *tfl* :lookup-transform (send box :header :frame_id) *camera-frame* (ros::time 0)))
 	 (p (ros::tf-pose->coords (send box :pose))))
-     (when (<= (v. (matrix-column (send c :worldrot) 0) (matrix-column (send p :worldrot) 2)) 0)
-       (send p :rotate (deg2rad 180) :x)
+     (print (send box :header :frame_id))
+     (when (<= (vector-angle (matrix-column (send c :worldrot) 0) (matrix-column (send p :worldrot) 2)) pi/2)
+       (send p :rotate pi :x)
        (send box :pose (ros::coords->tf-pose p))))
 
    (let* ((dimensions (send box :dimensions))

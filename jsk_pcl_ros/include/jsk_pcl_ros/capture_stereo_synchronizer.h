@@ -33,72 +33,81 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#ifndef JSK_PCL_ROS_CAPTURE_STEREO_SYNCHRONIZER_H_
+#define JSK_PCL_ROS_CAPTURE_STEREO_SYNCHRONIZER_H_
 
-#ifndef JSK_PCL_ROS_ATTENTION_CLIPPER_H_
-#define JSK_PCL_ROS_ATTENTION_CLIPPER_H_
 
-#define BOOST_PARAMETER_MAX_ARITY 6
+
+
+#include <ros/ros.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
-#include <sensor_msgs/CameraInfo.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
-#include "jsk_pcl_ros/geo_util.h"
-#include "jsk_pcl_ros/tf_listener_singleton.h"
-#include <image_geometry/pinhole_camera_model.h>
-#include <jsk_pcl_ros/BoundingBoxArray.h>
+
 #include <sensor_msgs/Image.h>
+#include <sensor_msgs/CameraInfo.h>
+#include <stereo_msgs/DisparityImage.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <pcl_msgs/PointIndices.h>
+#include "jsk_pcl_ros/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros
 {
-  class AttentionClipper: public jsk_topic_tools::DiagnosticNodelet
+  class CaptureStereoSynchronizer: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    AttentionClipper(): DiagnosticNodelet("AttentionClipper") { }
-    
+    typedef boost::shared_ptr<CaptureStereoSynchronizer> Ptr;
+    typedef message_filters::sync_policies::ExactTime<
+      geometry_msgs::PoseStamped, // pose of checker board
+      sensor_msgs::Image,         // mask image
+      pcl_msgs::PointIndices,     // mask indices
+      sensor_msgs::Image,         // left image rect
+      sensor_msgs::CameraInfo,    // left cmaera info
+      sensor_msgs::CameraInfo,    // right camera info
+      stereo_msgs::DisparityImage // stereo disparity
+      > SyncPolicy;
+    CaptureStereoSynchronizer(): DiagnosticNodelet("CaptureStereoSynchronizer") { }
   protected:
     ////////////////////////////////////////////////////////
     // methods
     ////////////////////////////////////////////////////////
     virtual void onInit();
-    virtual void clip(const sensor_msgs::CameraInfo::ConstPtr& msg);
-    virtual void clipPointcloud(const sensor_msgs::PointCloud2::ConstPtr& msg);
-    virtual void poseCallback(const geometry_msgs::PoseStamped::ConstPtr& pose);
-    virtual void boxCallback(const jsk_pcl_ros::BoundingBox::ConstPtr& box);
-    virtual Vertices cubeVertices();
     virtual void subscribe();
     virtual void unsubscribe();
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
-    virtual void computeROI(
-      const sensor_msgs::CameraInfo::ConstPtr& msg,
-      std::vector<cv::Point2d>& points);
-    virtual void publishBoundingBox(const std_msgs::Header& header,Eigen::Affine3f& pose);
+    virtual void republish(
+      const geometry_msgs::PoseStamped::ConstPtr& pose, // pose of checker board
+      const sensor_msgs::Image::ConstPtr& mask,         // mask image
+      const PCLIndicesMsg::ConstPtr& mask_indices, // mask indices
+      const sensor_msgs::Image::ConstPtr& left_image, // left image rect
+      const sensor_msgs::CameraInfo::ConstPtr& left_cam_info, // left cmaera info
+      const sensor_msgs::CameraInfo::ConstPtr& right_cam_info, // right camera info
+      const stereo_msgs::DisparityImage::ConstPtr& disparity // stereo disparity
+      );
+
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
-    ros::Subscriber sub_;
-    ros::Subscriber sub_pose_;
-    ros::Subscriber sub_box_;
-    ros::Subscriber sub_points_;
-    ros::Publisher pub_camera_info_;
-    ros::Publisher pub_bounding_box_array_;
+    int counter_;
+    ros::Publisher pub_pose_;
     ros::Publisher pub_mask_;
-    ros::Publisher pub_indices_;
-    tf::TransformListener* tf_listener_;
-    boost::mutex mutex_;
-
-    ////////////////////////////////////////////////////////
-    // parameters
-    ////////////////////////////////////////////////////////
-    // only cube is supported
-    Vertices vertices_;
-    double dimension_x_;
-    double dimension_y_;
-    double dimension_z_;
-    Eigen::Affine3f pose_;
-    std::string frame_id_;
+    ros::Publisher pub_mask_indices_;
+    ros::Publisher pub_left_image_;
+    ros::Publisher pub_left_cam_info_;
+    ros::Publisher pub_right_cam_info_;
+    ros::Publisher pub_disparity_;
+    message_filters::Subscriber<geometry_msgs::PoseStamped> sub_pose_;
+    message_filters::Subscriber<sensor_msgs::Image> sub_mask_;
+    message_filters::Subscriber<PCLIndicesMsg> sub_mask_indices_;
+    message_filters::Subscriber<sensor_msgs::Image> sub_left_image_;
+    message_filters::Subscriber<sensor_msgs::CameraInfo> sub_left_cam_info_;
+    message_filters::Subscriber<sensor_msgs::CameraInfo> sub_right_cam_info_;
+    message_filters::Subscriber<stereo_msgs::DisparityImage> sub_disparity_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
   private:
-    
+  
   };
 }
-
 #endif

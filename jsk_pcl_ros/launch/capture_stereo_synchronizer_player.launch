@@ -1,0 +1,14 @@
+<launch>
+  <arg name="SYNCHRONIZED_NS" default="/capture_stereo_synchronizer/output" />
+  <group ns="stereo">
+    <node pkg="nodelet" type="nodelet" name="manager" args="manager" output="screen"/>
+    <node pkg="nodelet" type="nodelet" name="point_cloud_xyz"
+          args="load stereo_image_proc/point_cloud2 manager">
+      <remap from="disparity" to="$(arg SYNCHRONIZED_NS)/disparity" />
+      <remap from="right/camera_info" to="$(arg SYNCHRONIZED_NS)/right_camera_info" />
+      <remap from="left/camera_info" to="$(arg SYNCHRONIZED_NS)/left_camera_info" />
+      <remap from="left/image_rect_color" to="$(arg SYNCHRONIZED_NS)/left_image" />
+      <param name="approximate_sync" value="false" />
+    </node>
+  </group>
+</launch>

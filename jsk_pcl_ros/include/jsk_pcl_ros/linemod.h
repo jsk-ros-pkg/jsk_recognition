@@ -91,6 +91,9 @@ namespace jsk_pcl_ros
     double gradient_magnitude_threshold_;
     double detection_threshold_;
     pcl::LineRGBD<pcl::PointXYZRGBA> line_rgbd_;
+    bool use_raw_templates_;
+    std::vector<pcl::PointCloud<pcl::PointXYZRGBA>::Ptr> template_pointclouds_;
+    std::vector<pcl::SparseQuantizedMultiModTemplate> template_sqmmts_;
   private:
     
   };

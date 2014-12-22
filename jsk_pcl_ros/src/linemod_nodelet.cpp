@@ -194,6 +194,7 @@ namespace jsk_pcl_ros
     }
     ROS_INFO("executing %s", command_stream.str().c_str());
     int ret = system(command_stream.str().c_str());
+    ROS_INFO("done");
     return true;
   }
 
@@ -210,9 +211,6 @@ namespace jsk_pcl_ros
     
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     
-    // load linemod templates
-    ROS_INFO("loading LINEMOD templates from %s", template_file_.c_str());
-    line_rgbd_.loadTemplates(template_file_);
   }
 
   void LINEMODDetector::subscribe()
@@ -230,6 +228,12 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     gradient_magnitude_threshold_ = config.gradient_magnitude_threshold;
     detection_threshold_ = config.detection_threshold;
+    line_rgbd_.setGradientMagnitudeThreshold(gradient_magnitude_threshold_);
+    line_rgbd_.setDetectionThreshold(detection_threshold_);
+    // load linemod templates
+    ROS_INFO("loading LINEMOD templates from %s", template_file_.c_str());
+    line_rgbd_.loadTemplates(template_file_);
+    ROS_INFO("done");
   }
 
   void LINEMODDetector::updateDiagnostic(
@@ -248,24 +252,43 @@ namespace jsk_pcl_ros
   void LINEMODDetector::detect(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
+    ROS_INFO("detect");
     vital_checker_->poke();
     boost::mutex::scoped_lock lock(mutex_);
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr
       cloud (new pcl::PointCloud<pcl::PointXYZRGBA>);
     pcl::fromROSMsg(*cloud_msg, *cloud);
-    line_rgbd_.setGradientMagnitudeThreshold(gradient_magnitude_threshold_);
-    line_rgbd_.setDetectionThreshold(detection_threshold_);
+
     line_rgbd_.setInputCloud(cloud);
     line_rgbd_.setInputColors(cloud);
+
     std::vector<pcl::LineRGBD<pcl::PointXYZRGBA>::Detection> detections;
     line_rgbd_.detect(detections);
     ROS_INFO("detected %lu result", detections.size());
-    
-    for (size_t i = 0; i < detections.size(); i++) {
-      pcl::LineRGBD<pcl::PointXYZRGBA>::Detection detection = detections[i];
-      ROS_INFO("detected id: %lu-%lu (%f)",
-               detection.template_id, detection.object_id, detection.response);
-      
+    // lookup the best result
+    if (detections.size() > 0) {
+      double max_response = 0;
+      size_t max_object_id = 0;
+      size_t max_template_id = 0;
+      size_t max_detection_id = 0;
+      for (size_t i = 0; i < detections.size(); i++) {
+        pcl::LineRGBD<pcl::PointXYZRGBA>::Detection detection = detections[i];
+        if (max_response < detection.response) {
+          max_response = detection.response;
+          max_object_id = detection.object_id;
+          max_template_id = detection.template_id;
+          max_detection_id = detection.detection_id;
+        }
+      }
+      ROS_INFO("(%lu, %lu)", max_object_id, max_template_id);
+      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr 
+        result (new pcl::PointCloud<pcl::PointXYZRGBA>);
+      line_rgbd_.computeTransformedTemplatePoints(max_detection_id,
+                                                  *result);
+      sensor_msgs::PointCloud2 ros_result;
+      pcl::toROSMsg(*result, ros_result);
+      ros_result.header = cloud_msg->header;
+      pub_cloud_.publish(ros_result);
     }
   }
   

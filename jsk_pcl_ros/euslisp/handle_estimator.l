@@ -15,6 +15,8 @@
    *selected-preapproach-topic*
    *candidate-topic*
    *candidate-preapproach-topic*
+   *tfl*
+   *camera-frame*
    ))
 
 (defmethod handle-estimator
@@ -51,6 +53,9 @@
    (ros::subscribe (format nil "~A/input_box" *nodename*) jsk_pcl_ros::BoundingBox #'send self :estimate)
    (ros::subscribe (format nil "~A/selected_index" *nodename*) jsk_pcl_ros::Int32Stamped #'send self :selected-index-callback)
 
+   (setq *tfl* (instance ros::transform-listener :init))
+   (setq *camera-frame* "head_mount_link")
+
    (ros::spin)
    )
 
@@ -80,6 +85,13 @@
 
   (:estimate
    (box)
+   (let ((c (send *tfl* :lookup-transform (send box :header :frame_id) *camera-frame* (ros::time 0)))
+	 (p (ros::tf-pose->coords (send box :pose))))
+     (print (send box :header :frame_id))
+     (when (<= (vector-angle (matrix-column (send c :worldrot) 0) (matrix-column (send p :worldrot) 2)) pi/2)
+       (send p :rotate pi :x)
+       (send box :pose (ros::coords->tf-pose p))))
+
    (let* ((dimensions (send box :dimensions))
 	  (x (send dimensions :x))
 	  (y (send dimensions :y))

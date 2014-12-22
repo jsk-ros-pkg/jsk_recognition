@@ -41,6 +41,8 @@
 #include <pcl/common/transforms.h>
 #include <eigen_conversions/eigen_msg.h>
 #include "jsk_pcl_ros/transform_pointcloud_in_bounding_box.h"
+#include <image_geometry/pinhole_camera_model.h>
+#include <pcl/registration/correspondence_estimation_organized_projection.h>
 
 namespace jsk_pcl_ros
 {
@@ -95,6 +97,9 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // Subscription
     ////////////////////////////////////////////////////////
+    sub_camera_info_ = pnh_->subscribe("input/camera_info", 1,
+                                       &ICPRegistration::cameraInfoCallback,
+                                       this);
     if (!synchronize_reference_) {
       if (align_box_) {
         sub_input_.subscribe(*pnh_, "input", 1);
@@ -122,6 +127,7 @@ namespace jsk_pcl_ros
 
   void ICPRegistration::unsubscribe()
   {
+    sub_camera_info_.shutdown();
     if (!synchronize_reference_) {
       if (align_box_) {
         sub_input_.unsubscribe();
@@ -154,6 +160,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     algorithm_ = config.algorithm;
+    correspondence_algorithm_ = config.correspondence_algorithm;
     use_flipped_initial_pose_ = config.use_flipped_initial_pose;
     max_iteration_ = config.max_iteration;
     correspondence_distance_ = config.correspondence_distance;
@@ -324,6 +331,13 @@ namespace jsk_pcl_ros
     result.name = ss.str();
     return result;
   }
+
+  void ICPRegistration::cameraInfoCallback(
+    const sensor_msgs::CameraInfo::ConstPtr& msg)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    camera_info_msg_ = msg;
+  }
   
   double ICPRegistration::alignPointcloud(
     pcl::PointCloud<PointT>::Ptr& cloud,
@@ -341,6 +355,22 @@ namespace jsk_pcl_ros
       gicp.setCorrespondenceRandomness(correspondence_randomness_);
       gicp.setMaximumOptimizerIterations(maximum_optimizer_iterations_);
       icp = gicp;
+    }
+    if (correspondence_algorithm_ == 1) { // Projective
+      if (!camera_info_msg_) {
+        NODELET_ERROR("no camera info is available yet");
+        return DBL_MAX;
+      }
+      image_geometry::PinholeCameraModel model;
+      bool model_success_p = model.fromCameraInfo(camera_info_msg_);
+      if (!model_success_p) {
+        NODELET_ERROR("failed to create camera model");
+        return DBL_MAX;
+      }
+      pcl::registration::CorrespondenceEstimationOrganizedProjection<PointT, PointT, float>::Ptr
+        corr_projection (new pcl::registration::CorrespondenceEstimationOrganizedProjection<PointT, PointT, float>);
+      corr_projection->setFocalLengths(model.fx(), model.fy());
+      corr_projection->setCameraCenters(model.cx(), model.cy());
     }
     icp.setInputSource(reference);
     icp.setInputTarget(cloud);

@@ -59,6 +59,62 @@ time end
 Represent range of time.
 
 ## nodelets
+### jsk\_pcl/LINEMODDetector
+#### What Is This
+![](images/linemod_detector.png)
+
+A nodelet to detect object using LINEMOD.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Input pointcloud.
+
+#### Publishing Topic
+* `~output` (`sensor_msgs/PointCloud2`)
+
+  Result of detection as pointcloud.
+
+#### Parameters
+* `~template_file` (`String`, default: `template.lmt`)
+
+  Template file
+* `~gradient_magnitude_threshold` (`Double`, default: `10.0`)
+
+  Gradient maginutude threshold
+
+* `~detection_threshold` (`Double`, default: `0.75`)
+
+  Detection threshold
+
+### jsk\_pcl/LINEMODTrainer
+#### What Is This
+
+A nodelet to train LINEMOD data from pointcloud and indices to mask the objects.
+This nodelet stores data of pointcloud and if you call `~start_training` service,
+it will train the data and dump the templates into lmt file.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  This pointcloud should be able to be converted into `pcl::PointXYZRGBA` data.
+* `~input/indices` (`pcl_msgs/PointIndices`)
+
+  Indices to mask object in `~input` pointcloud.
+
+#### Advertising Servicies
+* `~start_training` (`std_srvs/Empty`)
+
+  Start training and dump result into a file.
+
+* `~clear_data` (`std_srvs/Empty`)
+
+  Clear stored data.
+#### Parameters
+* `~output_file` (`String`, default: `template.lmt`)
+
+   A file path to dump trained data.
+
 ### jsk\_pcl/CaptureStereoSynchronizer
 #### What Is This
 ![](images/capture_stereo_synchronizer.png)

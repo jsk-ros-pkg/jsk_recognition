@@ -32,9 +32,12 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
+#define BOOST_PARAMETER_MAX_ARITY 7
+
+#include "jsk_pcl_ros/linemod.h"
+#include <pcl_conversions/pcl_conversions.h>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
-#include "jsk_pcl_ros/linemod_trainer.h"
 #include <pcl/recognition/linemod.h>
 #include <pcl/recognition/color_gradient_modality.h>
 #include <pcl/recognition/surface_normal_modality.h>
@@ -193,7 +196,82 @@ namespace jsk_pcl_ros
     int ret = system(command_stream.str().c_str());
     return true;
   }
+
+  void LINEMODDetector::onInit()
+  {
+    DiagnosticNodelet::onInit();
+    pnh_->param("template_file", template_file_, std::string("template.ltm"));
+    
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (
+        &LINEMODDetector::configCallback, this, _1, _2);
+    srv_->setCallback (f);
+    
+    pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    
+    // load linemod templates
+    ROS_INFO("loading LINEMOD templates from %s", template_file_.c_str());
+    line_rgbd_.loadTemplates(template_file_);
+  }
+
+  void LINEMODDetector::subscribe()
+  {
+    sub_cloud_ = pnh_->subscribe("input", 1, &LINEMODDetector::detect, this);
+  }
+
+  void LINEMODDetector::unsubscribe()
+  {
+    sub_cloud_.shutdown();
+  }
+  
+  void LINEMODDetector::configCallback(Config &config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    gradient_magnitude_threshold_ = config.gradient_magnitude_threshold;
+    detection_threshold_ = config.detection_threshold;
+  }
+
+  void LINEMODDetector::updateDiagnostic(
+    diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    if (vital_checker_->isAlive()) {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                   "LINEMODDetector running");
+    }
+    else {
+      jsk_topic_tools::addDiagnosticErrorSummary(
+        "LINEMODDetector", vital_checker_, stat);
+    }
+  }
+  
+  void LINEMODDetector::detect(
+    const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
+  {
+    vital_checker_->poke();
+    boost::mutex::scoped_lock lock(mutex_);
+    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr
+      cloud (new pcl::PointCloud<pcl::PointXYZRGBA>);
+    pcl::fromROSMsg(*cloud_msg, *cloud);
+    line_rgbd_.setGradientMagnitudeThreshold(gradient_magnitude_threshold_);
+    line_rgbd_.setDetectionThreshold(detection_threshold_);
+    line_rgbd_.setInputCloud(cloud);
+    line_rgbd_.setInputColors(cloud);
+    std::vector<pcl::LineRGBD<pcl::PointXYZRGBA>::Detection> detections;
+    line_rgbd_.detect(detections);
+    ROS_INFO("detected %lu result", detections.size());
+    
+    for (size_t i = 0; i < detections.size(); i++) {
+      pcl::LineRGBD<pcl::PointXYZRGBA>::Detection detection = detections[i];
+      ROS_INFO("detected id: %lu-%lu (%f)",
+               detection.template_id, detection.object_id, detection.response);
+      
+    }
+  }
+  
+  
 }
 
 #include <pluginlib/class_list_macros.h>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::LINEMODTrainer, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::LINEMODDetector, nodelet::Nodelet);

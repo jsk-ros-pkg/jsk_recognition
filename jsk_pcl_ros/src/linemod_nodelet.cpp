@@ -43,6 +43,7 @@
 #include <pcl/recognition/surface_normal_modality.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/io/pcd_io.h>
+#include <jsk_topic_tools/rosparam_utils.h>
 
 namespace jsk_pcl_ros
 {
@@ -201,7 +202,55 @@ namespace jsk_pcl_ros
   void LINEMODDetector::onInit()
   {
     DiagnosticNodelet::onInit();
-    pnh_->param("template_file", template_file_, std::string("template.ltm"));
+    pnh_->param("use_raw_templates", use_raw_templates_, false);
+    if (!use_raw_templates_) {
+      pnh_->param("template_file", template_file_, std::string("template.ltm"));
+    }
+    else {
+      std::vector<std::string> template_pcd_files;
+      std::vector<std::string> template_sqmmt_files;
+      jsk_topic_tools::readVectorParameter(*pnh_, 
+                                           "template_pcd_files", template_pcd_files);
+      jsk_topic_tools::readVectorParameter(*pnh_, 
+                                           "template_sqmmt_files", template_sqmmt_files);
+      // error check
+      if (template_pcd_files.size() == 0) {
+        NODELET_FATAL("please specify ~template_pcd_files");
+        return;
+      }
+      else if (template_sqmmt_files.size() == 0) {
+        NODELET_FATAL("please specify ~template_sqmmt_files");
+        return;
+      }
+      else if (template_pcd_files.size() != template_sqmmt_files.size()) {
+        NODELET_FATAL("the number of pcd files and sqmmt files are different");
+        return;
+      }
+      template_pointclouds_.resize(template_pcd_files.size());
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+      for (size_t i = 0; i < template_pointclouds_.size(); i++) {
+        ROS_INFO("reading %s", template_pcd_files[i].c_str());
+        pcl::PCDReader reader;
+        pcl::PointCloud<pcl::PointXYZRGBA>::Ptr 
+          ref(new pcl::PointCloud<pcl::PointXYZRGBA>);
+        reader.read(template_pcd_files[i], *ref);
+        template_pointclouds_[i] = ref;
+      }
+      template_sqmmts_.resize(template_sqmmt_files.size());
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+      for (size_t i = 0; i < template_sqmmts_.size(); i++) {
+        ROS_INFO("reading %s", template_sqmmt_files[i].c_str());
+        std::ifstream file_stream(template_sqmmt_files[i].c_str());
+        pcl::SparseQuantizedMultiModTemplate sqmmt;
+        sqmmt.deserialize(file_stream);
+        template_sqmmts_[i] = sqmmt;
+      }
+          
+    }
     
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -226,14 +275,25 @@ namespace jsk_pcl_ros
   void LINEMODDetector::configCallback(Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    line_rgbd_ = pcl::LineRGBD<pcl::PointXYZRGBA>();
     gradient_magnitude_threshold_ = config.gradient_magnitude_threshold;
     detection_threshold_ = config.detection_threshold;
     line_rgbd_.setGradientMagnitudeThreshold(gradient_magnitude_threshold_);
     line_rgbd_.setDetectionThreshold(detection_threshold_);
     // load linemod templates
-    ROS_INFO("loading LINEMOD templates from %s", template_file_.c_str());
-    line_rgbd_.loadTemplates(template_file_);
-    ROS_INFO("done");
+    if (!use_raw_templates_) {
+      ROS_INFO("loading LINEMOD templates from %s", template_file_.c_str());
+      line_rgbd_.loadTemplates(template_file_);
+      ROS_INFO("done");
+    }
+    else {
+      for (size_t i = 0; i < template_pointclouds_.size(); i++) {
+        ROS_INFO("adding %lu template", i);
+        line_rgbd_.addTemplate(template_sqmmts_[i], 
+                               *template_pointclouds_[i]);
+      }
+      ROS_INFO("done");
+    }
   }
 
   void LINEMODDetector::updateDiagnostic(

@@ -189,7 +189,7 @@ namespace jsk_pcl_ros
         ROS_INFO("writing %s", filename.c_str());
         pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud = masked_clouds[i];
         pcl::PCDWriter writer;
-        writer.write(filename, *cloud);
+        writer.writeBinaryCompressed(filename, *cloud);
         command_stream << " " << filename;
       }
     }

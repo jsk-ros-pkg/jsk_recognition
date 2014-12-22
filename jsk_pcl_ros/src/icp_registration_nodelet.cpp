@@ -58,7 +58,7 @@ namespace jsk_pcl_ros
     srv_->setCallback (f);
     
     pnh_->param("align_box", align_box_, false);
-    
+    pnh_->param("synchronize_reference", synchronize_reference_, false);
     ////////////////////////////////////////////////////////
     // Publishers
     ////////////////////////////////////////////////////////
@@ -77,16 +77,17 @@ namespace jsk_pcl_ros
     pub_icp_result = advertise<jsk_pcl_ros::ICPResult>(*pnh_,
       "icp_result", 1);
     srv_detect = pnh_->advertiseService("icp_service", &ICPRegistration::alignWithBoxService, this);
-    //sub_reference_.shutdown();
-    sub_reference_ = pnh_->subscribe("input_reference", 1,
+    if (!synchronize_reference_) {
+      sub_reference_ = pnh_->subscribe("input_reference", 1,
                                        &ICPRegistration::referenceCallback,
                                        this);
-    sub_reference_array_ = pnh_->subscribe("input_reference_array", 1,
-                                       &ICPRegistration::referenceArrayCallback,
-                                       this);
-    sub_reference_add = pnh_->subscribe("input_reference_add", 1,
-                                       &ICPRegistration::referenceAddCallback,
-                                       this);
+      sub_reference_array_ = pnh_->subscribe("input_reference_array", 1,
+                                           &ICPRegistration::referenceArrayCallback,
+                                             this);
+      sub_reference_add = pnh_->subscribe("input_reference_add", 1,
+                                          &ICPRegistration::referenceAddCallback,
+                                          this);
+    }
   }
 
   void ICPRegistration::subscribe()
@@ -94,30 +95,45 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // Subscription
     ////////////////////////////////////////////////////////
-    if (align_box_) {
-      sub_input_.subscribe(*pnh_, "input", 1);
-      sub_box_.subscribe(*pnh_, "input_box", 1);
-      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-      sync_->connectInput(sub_input_, sub_box_);
-      sync_->registerCallback(boost::bind(
-                                &ICPRegistration::alignWithBox,
-                                this, _1, _2));
+    if (!synchronize_reference_) {
+      if (align_box_) {
+        sub_input_.subscribe(*pnh_, "input", 1);
+        sub_box_.subscribe(*pnh_, "input_box", 1);
+        sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+        sync_->connectInput(sub_input_, sub_box_);
+        sync_->registerCallback(boost::bind(
+                                            &ICPRegistration::alignWithBox,
+                                            this, _1, _2));
+      }
+      else {
+        sub_ = pnh_->subscribe("input", 1,
+                               &ICPRegistration::align,
+                               this);
+      }
     }
     else {
-      sub_ = pnh_->subscribe("input", 1,
-                             &ICPRegistration::align,
-                             this);
+      sub_sync_input_.subscribe(*pnh_, "input", 1);
+      sub_sync_reference_.subscribe(*pnh_, "reference", 1);
+      sync_reference_ = boost::make_shared<message_filters::Synchronizer<ReferenceSyncPolicy> >(100);
+      sync_reference_->connectInput(sub_sync_input_, sub_sync_reference_);
+      sync_reference_->registerCallback(boost::bind(&ICPRegistration::align, this, _1, _2));
     }
   }
 
   void ICPRegistration::unsubscribe()
   {
-    if (align_box_) {
-      sub_input_.unsubscribe();
-      sub_box_.unsubscribe();
+    if (!synchronize_reference_) {
+      if (align_box_) {
+        sub_input_.unsubscribe();
+        sub_box_.unsubscribe();
+      }
+      else {
+        sub_.shutdown();
+      }
     }
     else {
-      sub_.shutdown();
+      sub_sync_input_.unsubscribe();
+      sub_sync_reference_.unsubscribe();
     }
   }
   
@@ -146,6 +162,7 @@ namespace jsk_pcl_ros
     rotation_epsilon_ = config.rotation_epsilon;
     maximum_optimizer_iterations_ = config.maximum_optimizer_iterations;
   }
+
   bool ICPRegistration::alignWithBoxService(
     jsk_pcl_ros::ICPAlignWithBox::Request& req, 
     jsk_pcl_ros::ICPAlignWithBox::Response& res)
@@ -223,6 +240,27 @@ namespace jsk_pcl_ros
     Eigen::Affine3f offset = Eigen::Affine3f::Identity();
     jsk_pcl_ros::ICPResult result = alignPointcloudWithReferences(cloud, offset, msg->header);
     pub_icp_result.publish(result);
+  }
+  
+  void ICPRegistration::align(const sensor_msgs::PointCloud2::ConstPtr& msg,
+                              const sensor_msgs::PointCloud2::ConstPtr& reference_msg)
+  {
+    {
+      boost::mutex::scoped_lock lock(mutex_);
+      reference_cloud_list_.resize(0);
+      pcl::PointCloud<PointT>::Ptr reference_cloud (new pcl::PointCloud<PointT>);
+      pcl::fromROSMsg(*reference_msg, *reference_cloud);
+      // remove nan
+      pcl::PointCloud<PointT>::Ptr non_nan_reference_cloud (new pcl::PointCloud<PointT>);
+      for (size_t i = 0; i < reference_cloud->points.size(); i++) {
+        PointT p = reference_cloud->points[i];
+        if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
+          non_nan_reference_cloud->points.push_back(p);
+        }
+      }
+      reference_cloud_list_.push_back(non_nan_reference_cloud);
+    }
+    align(msg);
   }
 
   jsk_pcl_ros::ICPResult ICPRegistration::alignPointcloudWithReferences(

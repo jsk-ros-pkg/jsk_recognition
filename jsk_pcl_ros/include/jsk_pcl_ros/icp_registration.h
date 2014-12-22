@@ -60,12 +60,18 @@ namespace jsk_pcl_ros
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
       BoundingBox > SyncPolicy;
+    typedef message_filters::sync_policies::ExactTime<
+      sensor_msgs::PointCloud2,
+      sensor_msgs::PointCloud2
+      > ReferenceSyncPolicy;
   protected:
     ////////////////////////////////////////////////////////
     // methosd
     ////////////////////////////////////////////////////////
     virtual void onInit();
     virtual void align(const sensor_msgs::PointCloud2::ConstPtr& msg);
+    virtual void align(const sensor_msgs::PointCloud2::ConstPtr& msg,
+                       const sensor_msgs::PointCloud2::ConstPtr& reference_msg);
     virtual void alignWithBox(
       const sensor_msgs::PointCloud2::ConstPtr& msg,
       const BoundingBox::ConstPtr& box_msg);
@@ -108,6 +114,8 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_reference_;
     ros::Subscriber sub_reference_add;
     ros::Subscriber sub_reference_array_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_sync_input_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_sync_reference_;
     ros::Publisher pub_result_pose_;
     ros::Publisher pub_result_cloud_;
     ros::Publisher pub_debug_source_cloud_,
@@ -123,11 +131,13 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<BoundingBox> sub_box_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    boost::shared_ptr<message_filters::Synchronizer<ReferenceSyncPolicy> > sync_reference_;
     boost::shared_ptr<tf::TransformListener> tf_listener_;
 
     ////////////////////////////////////////////////////////
     // parameters for ICP
     ////////////////////////////////////////////////////////
+    bool synchronize_reference_;
     bool use_flipped_initial_pose_;
     int algorithm_;
     std::vector<pcl::PointCloud<PointT>::Ptr> reference_cloud_list_;

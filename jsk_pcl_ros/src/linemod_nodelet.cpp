@@ -46,6 +46,7 @@
 #include <jsk_topic_tools/rosparam_utils.h>
 #include <glob.h>
 #include <boost/algorithm/string/predicate.hpp>
+#include <pcl/common/transforms.h>
 
 namespace jsk_pcl_ros
 {
@@ -53,6 +54,7 @@ namespace jsk_pcl_ros
   {
     PCLNodelet::onInit();
     pnh_->param("output_file", output_file_, std::string("template.lmt"));
+    pnh_->param("rotation_quantization", rotation_quantization_, 1);
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_indices_.subscribe(*pnh_, "input/indices", 1);
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
@@ -107,52 +109,63 @@ namespace jsk_pcl_ros
     for (size_t i = 0; i < samples_.size(); i++) {
       ROS_INFO("Processing %lu-th data", i);
       pcl::PointIndices::Ptr mask = sample_indices_[i];
-      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud = samples_[i];
-      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr masked_cloud
-        (new pcl::PointCloud<pcl::PointXYZRGBA>);
-      pcl::ExtractIndices<pcl::PointXYZRGBA> ex;
-      ex.setKeepOrganized(true);
-      ex.setInputCloud(cloud);
-      ex.setIndices(mask);
-      ex.filter(*masked_cloud);
-      masked_clouds.push_back(masked_cloud);
-      pcl::ColorGradientModality<pcl::PointXYZRGBA> color_grad_mod;
-      color_grad_mod.setInputCloud(masked_cloud);
-      color_grad_mod.processInputData();
-      pcl::SurfaceNormalModality<pcl::PointXYZRGBA> surface_norm_mod;
-      surface_norm_mod.setInputCloud(masked_cloud);
-      surface_norm_mod.processInputData();
-      std::vector<pcl::QuantizableModality*> modalities(2);
-      modalities[0] = &color_grad_mod;
-      modalities[1] = &surface_norm_mod;
+      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr raw_cloud = samples_[i];
+      for (size_t j = 0; j < rotation_quantization_; j++) {
+        double theta = 2 * M_PI / rotation_quantization_ * j;
+        Eigen::Affine3f transform
+          = Eigen::Affine3f::Identity() *
+          Eigen::AngleAxisf(theta, Eigen::Vector3f::UnitZ());
+        pcl::PointCloud<pcl::PointXYZRGBA>::Ptr
+          cloud(new pcl::PointCloud<pcl::PointXYZRGBA>);
+        pcl::transformPointCloud<pcl::PointXYZRGBA>(*raw_cloud,
+                                                    *cloud,
+                                                    transform);
+        pcl::PointCloud<pcl::PointXYZRGBA>::Ptr masked_cloud
+          (new pcl::PointCloud<pcl::PointXYZRGBA>);
+        pcl::ExtractIndices<pcl::PointXYZRGBA> ex;
+        ex.setKeepOrganized(true);
+        ex.setInputCloud(cloud);
+        ex.setIndices(mask);
+        ex.filter(*masked_cloud);
+        masked_clouds.push_back(masked_cloud);
+        pcl::ColorGradientModality<pcl::PointXYZRGBA> color_grad_mod;
+        color_grad_mod.setInputCloud(masked_cloud);
+        color_grad_mod.processInputData();
+        pcl::SurfaceNormalModality<pcl::PointXYZRGBA> surface_norm_mod;
+        surface_norm_mod.setInputCloud(masked_cloud);
+        surface_norm_mod.processInputData();
+        std::vector<pcl::QuantizableModality*> modalities(2);
+        modalities[0] = &color_grad_mod;
+        modalities[1] = &surface_norm_mod;
       
-      size_t min_x(masked_cloud->width), min_y(masked_cloud->height), max_x(0), max_y(0);
-      pcl::MaskMap mask_map(masked_cloud->width, masked_cloud->height);
-      for (size_t j = 0; j < masked_cloud->height; ++j) {
-        for (size_t i = 0; i < masked_cloud->width; ++i) {
-          pcl::PointXYZRGBA p
-            = masked_cloud->points[j * masked_cloud->width + i];
-          if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
-            mask_map(i, j) = 1;
-            min_x = std::min(min_x, i);
-            max_x = std::max(max_x, i);
-            min_y = std::min(min_y, j);
-            max_y = std::max(max_y, j);
-          }
-          else {
-            mask_map(i, j) = 0;
+        size_t min_x(masked_cloud->width), min_y(masked_cloud->height), max_x(0), max_y(0);
+        pcl::MaskMap mask_map(masked_cloud->width, masked_cloud->height);
+        for (size_t j = 0; j < masked_cloud->height; ++j) {
+          for (size_t i = 0; i < masked_cloud->width; ++i) {
+            pcl::PointXYZRGBA p
+              = masked_cloud->points[j * masked_cloud->width + i];
+            if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
+              mask_map(i, j) = 1;
+              min_x = std::min(min_x, i);
+              max_x = std::max(max_x, i);
+              min_y = std::min(min_y, j);
+              max_y = std::max(max_y, j);
+            }
+            else {
+              mask_map(i, j) = 0;
+            }
           }
         }
+        std::vector<pcl::MaskMap*> masks(2);
+        masks[0] = &mask_map;
+        masks[1] = &mask_map;
+        pcl::RegionXY region;
+        region.x = static_cast<int>(min_x);
+        region.y = static_cast<int>(min_y);
+        region.width = static_cast<int>(max_x - min_x + 1);
+        region.height = static_cast<int>(max_y - min_y + 1);
+        linemod.createAndAddTemplate(modalities, masks, region);
       }
-      std::vector<pcl::MaskMap*> masks(2);
-      masks[0] = &mask_map;
-      masks[1] = &mask_map;
-      pcl::RegionXY region;
-      region.x = static_cast<int>(min_x);
-      region.y = static_cast<int>(min_y);
-      region.width = static_cast<int>(max_x - min_x + 1);
-      region.height = static_cast<int>(max_y - min_y + 1);
-      linemod.createAndAddTemplate(modalities, masks, region);
     }
     // dump template
     // lmt file is a tar file

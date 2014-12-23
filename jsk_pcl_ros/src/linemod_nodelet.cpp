@@ -44,6 +44,8 @@
 #include <pcl/filters/extract_indices.h>
 #include <pcl/io/pcd_io.h>
 #include <jsk_topic_tools/rosparam_utils.h>
+#include <glob.h>
+#include <boost/algorithm/string/predicate.hpp>
 
 namespace jsk_pcl_ros
 {
@@ -207,23 +209,33 @@ namespace jsk_pcl_ros
       pnh_->param("template_file", template_file_, std::string("template.ltm"));
     }
     else {
+      std::string template_files;
+      pnh_->param("template_files", template_files, std::string("template"));
+      // glob files under template_directory
+      glob_t glob_result;
+      glob(template_files.c_str(), GLOB_TILDE, NULL, &glob_result);
       std::vector<std::string> template_pcd_files;
       std::vector<std::string> template_sqmmt_files;
-      jsk_topic_tools::readVectorParameter(*pnh_, 
-                                           "template_pcd_files", template_pcd_files);
-      jsk_topic_tools::readVectorParameter(*pnh_, 
-                                           "template_sqmmt_files", template_sqmmt_files);
+      // PCD file driven
+      for (unsigned int i=0;i<glob_result.gl_pathc;++i) {
+        std::string file(glob_result.gl_pathv[i]);
+        ROS_INFO("file: %s", file.c_str());
+        if (boost::algorithm::ends_with(file, ".pcd")) {
+          // check sqmmt file exists or not
+          std::string pcd_file = file;
+          std::string sqmmt_file = boost::algorithm::replace_all_copy(file, ".pcd", ".sqmmt");
+          if (boost::filesystem::exists(sqmmt_file)) {
+            template_pcd_files.push_back(pcd_file);
+            template_sqmmt_files.push_back(sqmmt_file);
+          }
+          else {
+            NODELET_WARN("cannot find %s", sqmmt_file.c_str());
+          }
+        }
+      }
       // error check
       if (template_pcd_files.size() == 0) {
-        NODELET_FATAL("please specify ~template_pcd_files");
-        return;
-      }
-      else if (template_sqmmt_files.size() == 0) {
-        NODELET_FATAL("please specify ~template_sqmmt_files");
-        return;
-      }
-      else if (template_pcd_files.size() != template_sqmmt_files.size()) {
-        NODELET_FATAL("the number of pcd files and sqmmt files are different");
+        NODELET_FATAL("no pcd/sqmmt files is found");
         return;
       }
       template_pointclouds_.resize(template_pcd_files.size());
@@ -323,7 +335,8 @@ namespace jsk_pcl_ros
     line_rgbd_.setInputColors(cloud);
 
     std::vector<pcl::LineRGBD<pcl::PointXYZRGBA>::Detection> detections;
-    line_rgbd_.detect(detections);
+    //line_rgbd_.detect(detections);
+    line_rgbd_.detectSemiScaleInvariant(detections);
     ROS_INFO("detected %lu result", detections.size());
     // lookup the best result
     if (detections.size() > 0) {

@@ -39,6 +39,7 @@ class MatcherNode
   ros::Publisher _pubBestPolygon; //for jsk_pcl_ros/src/pointcloud_screenpoint_nodelet.cpp
   ros::Publisher _pubBestPoint;
   ros::Publisher _pubBestBoundingBox;
+  image_transport::Publisher _debug_pub;
   std::vector< cv::Mat > template_images;
   std::vector< std::vector<unsigned int> > template_vecs;
   std::vector< std::vector< std::vector<unsigned int> > >hsv_integral;
@@ -48,6 +49,7 @@ class MatcherNode
   double coefficient_thre_for_best_window;
   double sliding_factor;
   bool show_result_;
+  bool pub_debug_image_;
   double template_width;
   double template_height;
   inline double calc_coe(std::vector< unsigned int > &a, std::vector<unsigned int> &b){
@@ -95,8 +97,9 @@ public:
     _pubBestPolygon = _node.advertise< geometry_msgs::PolygonStamped >("best_polygon", 1);
     _pubBestPoint = _node.advertise< geometry_msgs::PointStamped >("rough_point", 1);
     _pubBestBoundingBox = _node.advertise< jsk_pcl_ros::BoundingBoxArray >("best_box", 1);
+    _debug_pub = _it.advertise("debug_image", 1);
     // _subImage = _it.subscribe("image", 1, &MatcherNode::image_cb, this);
-
+    
     sync.registerCallback( boost::bind (&MatcherNode::image_cb , this, _1, _2) );
 
     
@@ -125,6 +128,7 @@ public:
     local_nh.param("coefficient_threshold_for_best_window", coefficient_thre_for_best_window, 0.67);
     local_nh.param("sliding_factor", sliding_factor, 1.0);
     local_nh.param("show_result", show_result_, true);
+    local_nh.param("pub_debug_image", pub_debug_image_, true);
     local_nh.param("object_width", template_width, 0.06);
     local_nh.param("object_height", template_height, 0.0739);
     
@@ -286,7 +290,14 @@ public:
 	  cv::imshow("template", template_images[template_index]);
 	  cv::waitKey(20);
 	}
-	return;
+        if(pub_debug_image_){
+          cv_bridge::CvImage out_msg;
+          out_msg.header = msg_ptr->header;
+          out_msg.encoding = "bgr8";
+          out_msg.image = image;
+          _debug_pub.publish(out_msg.toImageMsg());
+        }
+        return;
       }
       if(best_window_estimation_method==0){
       }
@@ -387,6 +398,13 @@ public:
 	cv::imshow("result", image);
 	cv::imshow("template", template_images[template_index]);
 	cv::waitKey(20);
+      }
+      if(pub_debug_image_){
+        cv_bridge::CvImage out_msg;
+        out_msg.header = msg_ptr->header;
+        out_msg.encoding = "bgr8";
+        out_msg.image = image;
+        _debug_pub.publish(out_msg.toImageMsg());
       }
     } 
   }

@@ -1,4 +1,9 @@
 <library path="libjsk_pcl_ros">
+  <class name="jsk_pcl/IntermittentImageAnnotator"
+         type="jsk_pcl_ros::IntermittentImageAnnotator"
+         base_class_type="nodelet::Nodelet">
+    intermittent image annotator
+  </class>
   <class name="jsk_pcl/LINEMODDetector"
          type="jsk_pcl_ros::LINEMODDetector"
          base_class_type="nodelet::Nodelet">

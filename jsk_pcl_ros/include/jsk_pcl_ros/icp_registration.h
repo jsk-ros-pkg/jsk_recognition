@@ -49,6 +49,7 @@
 #include <tf/transform_listener.h>
 #include <jsk_topic_tools/connection_based_nodelet.h>
 #include <jsk_pcl_ros/PointsArray.h>
+#include <sensor_msgs/CameraInfo.h>
 
 namespace jsk_pcl_ros
 {
@@ -105,11 +106,14 @@ namespace jsk_pcl_ros
       Eigen::Affine3f& offset_result,
       pcl::PointCloud<PointT>::Ptr transformed_cloud,
       Eigen::Affine3d& transform_result);
+    virtual void cameraInfoCallback(
+      const sensor_msgs::CameraInfo::ConstPtr& msg);
     virtual void subscribe();
     virtual void unsubscribe();
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
+    ros::Subscriber sub_camera_info_;
     ros::Subscriber sub_;
     ros::Subscriber sub_reference_;
     ros::Subscriber sub_reference_add;
@@ -140,11 +144,14 @@ namespace jsk_pcl_ros
     bool synchronize_reference_;
     bool use_flipped_initial_pose_;
     int algorithm_;
+    int correspondence_algorithm_;
     std::vector<pcl::PointCloud<PointT>::Ptr> reference_cloud_list_;
     int max_iteration_;
     double correspondence_distance_;
     double transform_epsilon_;
     double euclidean_fittness_epsilon_;
+    sensor_msgs::CameraInfo::ConstPtr camera_info_msg_;
+    
     ////////////////////////////////////////////////////////
     // parameters for GICP
     ////////////////////////////////////////////////////////

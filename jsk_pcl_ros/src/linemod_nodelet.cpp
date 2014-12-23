@@ -44,6 +44,9 @@
 #include <pcl/filters/extract_indices.h>
 #include <pcl/io/pcd_io.h>
 #include <jsk_topic_tools/rosparam_utils.h>
+#include <glob.h>
+#include <boost/algorithm/string/predicate.hpp>
+#include <pcl/common/transforms.h>
 
 namespace jsk_pcl_ros
 {
@@ -51,6 +54,7 @@ namespace jsk_pcl_ros
   {
     PCLNodelet::onInit();
     pnh_->param("output_file", output_file_, std::string("template.lmt"));
+    pnh_->param("rotation_quantization", rotation_quantization_, 1);
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_indices_.subscribe(*pnh_, "input/indices", 1);
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
@@ -105,52 +109,63 @@ namespace jsk_pcl_ros
     for (size_t i = 0; i < samples_.size(); i++) {
       ROS_INFO("Processing %lu-th data", i);
       pcl::PointIndices::Ptr mask = sample_indices_[i];
-      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud = samples_[i];
-      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr masked_cloud
-        (new pcl::PointCloud<pcl::PointXYZRGBA>);
-      pcl::ExtractIndices<pcl::PointXYZRGBA> ex;
-      ex.setKeepOrganized(true);
-      ex.setInputCloud(cloud);
-      ex.setIndices(mask);
-      ex.filter(*masked_cloud);
-      masked_clouds.push_back(masked_cloud);
-      pcl::ColorGradientModality<pcl::PointXYZRGBA> color_grad_mod;
-      color_grad_mod.setInputCloud(masked_cloud);
-      color_grad_mod.processInputData();
-      pcl::SurfaceNormalModality<pcl::PointXYZRGBA> surface_norm_mod;
-      surface_norm_mod.setInputCloud(masked_cloud);
-      surface_norm_mod.processInputData();
-      std::vector<pcl::QuantizableModality*> modalities(2);
-      modalities[0] = &color_grad_mod;
-      modalities[1] = &surface_norm_mod;
+      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr raw_cloud = samples_[i];
+      for (size_t j = 0; j < rotation_quantization_; j++) {
+        double theta = 2 * M_PI / rotation_quantization_ * j;
+        Eigen::Affine3f transform
+          = Eigen::Affine3f::Identity() *
+          Eigen::AngleAxisf(theta, Eigen::Vector3f::UnitZ());
+        pcl::PointCloud<pcl::PointXYZRGBA>::Ptr
+          cloud(new pcl::PointCloud<pcl::PointXYZRGBA>);
+        pcl::transformPointCloud<pcl::PointXYZRGBA>(*raw_cloud,
+                                                    *cloud,
+                                                    transform);
+        pcl::PointCloud<pcl::PointXYZRGBA>::Ptr masked_cloud
+          (new pcl::PointCloud<pcl::PointXYZRGBA>);
+        pcl::ExtractIndices<pcl::PointXYZRGBA> ex;
+        ex.setKeepOrganized(true);
+        ex.setInputCloud(cloud);
+        ex.setIndices(mask);
+        ex.filter(*masked_cloud);
+        masked_clouds.push_back(masked_cloud);
+        pcl::ColorGradientModality<pcl::PointXYZRGBA> color_grad_mod;
+        color_grad_mod.setInputCloud(masked_cloud);
+        color_grad_mod.processInputData();
+        pcl::SurfaceNormalModality<pcl::PointXYZRGBA> surface_norm_mod;
+        surface_norm_mod.setInputCloud(masked_cloud);
+        surface_norm_mod.processInputData();
+        std::vector<pcl::QuantizableModality*> modalities(2);
+        modalities[0] = &color_grad_mod;
+        modalities[1] = &surface_norm_mod;
       
-      size_t min_x(masked_cloud->width), min_y(masked_cloud->height), max_x(0), max_y(0);
-      pcl::MaskMap mask_map(masked_cloud->width, masked_cloud->height);
-      for (size_t j = 0; j < masked_cloud->height; ++j) {
-        for (size_t i = 0; i < masked_cloud->width; ++i) {
-          pcl::PointXYZRGBA p
-            = masked_cloud->points[j * masked_cloud->width + i];
-          if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
-            mask_map(i, j) = 1;
-            min_x = std::min(min_x, i);
-            max_x = std::max(max_x, i);
-            min_y = std::min(min_y, j);
-            max_y = std::max(max_y, j);
-          }
-          else {
-            mask_map(i, j) = 0;
+        size_t min_x(masked_cloud->width), min_y(masked_cloud->height), max_x(0), max_y(0);
+        pcl::MaskMap mask_map(masked_cloud->width, masked_cloud->height);
+        for (size_t j = 0; j < masked_cloud->height; ++j) {
+          for (size_t i = 0; i < masked_cloud->width; ++i) {
+            pcl::PointXYZRGBA p
+              = masked_cloud->points[j * masked_cloud->width + i];
+            if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
+              mask_map(i, j) = 1;
+              min_x = std::min(min_x, i);
+              max_x = std::max(max_x, i);
+              min_y = std::min(min_y, j);
+              max_y = std::max(max_y, j);
+            }
+            else {
+              mask_map(i, j) = 0;
+            }
           }
         }
+        std::vector<pcl::MaskMap*> masks(2);
+        masks[0] = &mask_map;
+        masks[1] = &mask_map;
+        pcl::RegionXY region;
+        region.x = static_cast<int>(min_x);
+        region.y = static_cast<int>(min_y);
+        region.width = static_cast<int>(max_x - min_x + 1);
+        region.height = static_cast<int>(max_y - min_y + 1);
+        linemod.createAndAddTemplate(modalities, masks, region);
       }
-      std::vector<pcl::MaskMap*> masks(2);
-      masks[0] = &mask_map;
-      masks[1] = &mask_map;
-      pcl::RegionXY region;
-      region.x = static_cast<int>(min_x);
-      region.y = static_cast<int>(min_y);
-      region.width = static_cast<int>(max_x - min_x + 1);
-      region.height = static_cast<int>(max_y - min_y + 1);
-      linemod.createAndAddTemplate(modalities, masks, region);
     }
     // dump template
     // lmt file is a tar file
@@ -189,7 +204,7 @@ namespace jsk_pcl_ros
         ROS_INFO("writing %s", filename.c_str());
         pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud = masked_clouds[i];
         pcl::PCDWriter writer;
-        writer.write(filename, *cloud);
+        writer.writeBinaryCompressed(filename, *cloud);
         command_stream << " " << filename;
       }
     }
@@ -207,23 +222,33 @@ namespace jsk_pcl_ros
       pnh_->param("template_file", template_file_, std::string("template.ltm"));
     }
     else {
+      std::string template_files;
+      pnh_->param("template_files", template_files, std::string("template"));
+      // glob files under template_directory
+      glob_t glob_result;
+      glob(template_files.c_str(), GLOB_TILDE, NULL, &glob_result);
       std::vector<std::string> template_pcd_files;
       std::vector<std::string> template_sqmmt_files;
-      jsk_topic_tools::readVectorParameter(*pnh_, 
-                                           "template_pcd_files", template_pcd_files);
-      jsk_topic_tools::readVectorParameter(*pnh_, 
-                                           "template_sqmmt_files", template_sqmmt_files);
+      // PCD file driven
+      for (unsigned int i=0;i<glob_result.gl_pathc;++i) {
+        std::string file(glob_result.gl_pathv[i]);
+        ROS_INFO("file: %s", file.c_str());
+        if (boost::algorithm::ends_with(file, ".pcd")) {
+          // check sqmmt file exists or not
+          std::string pcd_file = file;
+          std::string sqmmt_file = boost::algorithm::replace_all_copy(file, ".pcd", ".sqmmt");
+          if (boost::filesystem::exists(sqmmt_file)) {
+            template_pcd_files.push_back(pcd_file);
+            template_sqmmt_files.push_back(sqmmt_file);
+          }
+          else {
+            NODELET_WARN("cannot find %s", sqmmt_file.c_str());
+          }
+        }
+      }
       // error check
       if (template_pcd_files.size() == 0) {
-        NODELET_FATAL("please specify ~template_pcd_files");
-        return;
-      }
-      else if (template_sqmmt_files.size() == 0) {
-        NODELET_FATAL("please specify ~template_sqmmt_files");
-        return;
-      }
-      else if (template_pcd_files.size() != template_sqmmt_files.size()) {
-        NODELET_FATAL("the number of pcd files and sqmmt files are different");
+        NODELET_FATAL("no pcd/sqmmt files is found");
         return;
       }
       template_pointclouds_.resize(template_pcd_files.size());
@@ -323,7 +348,8 @@ namespace jsk_pcl_ros
     line_rgbd_.setInputColors(cloud);
 
     std::vector<pcl::LineRGBD<pcl::PointXYZRGBA>::Detection> detections;
-    line_rgbd_.detect(detections);
+    //line_rgbd_.detect(detections);
+    line_rgbd_.detectSemiScaleInvariant(detections);
     ROS_INFO("detected %lu result", detections.size());
     // lookup the best result
     if (detections.size() > 0) {

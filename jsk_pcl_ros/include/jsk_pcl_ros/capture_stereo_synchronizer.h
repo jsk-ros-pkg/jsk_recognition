@@ -87,6 +87,11 @@ namespace jsk_pcl_ros
       const stereo_msgs::DisparityImage::ConstPtr& disparity // stereo disparity
       );
 
+    // check is there near pose or not
+    // if there is a near pose, return true
+    virtual bool checkNearPose(
+      const geometry_msgs::Pose& new_pose);
+    
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
@@ -106,6 +111,12 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<sensor_msgs::CameraInfo> sub_right_cam_info_;
     message_filters::Subscriber<stereo_msgs::DisparityImage> sub_disparity_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    std::vector<geometry_msgs::Pose> poses_;
+    ////////////////////////////////////////////////////////
+    // Parameters
+    ////////////////////////////////////////////////////////
+    double rotational_bin_size_;
+    double positional_bin_size_;
   private:
   
   };

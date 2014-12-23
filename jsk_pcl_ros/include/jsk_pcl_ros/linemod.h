@@ -34,19 +34,70 @@
  *********************************************************************/
 
 
-#ifndef JSK_PCL_ROS_LINEMOD_TRAINER_H_
-#define JSK_PCL_ROS_LINEMOD_TRAINER_H_
+#ifndef JSK_PCL_ROS_LINEMOD_H_
+#define JSK_PCL_ROS_LINEMOD_H_
 
-#include <pcl_ros/pcl_nodelet.h>
-#include <sensor_msgs/PointCloud2.h>
 #include "jsk_pcl_ros/pcl_conversion_util.h"
+
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <pcl/recognition/linemod/line_rgbd.h>
+#include <pcl/recognition/color_gradient_modality.h>
+#include <pcl/recognition/surface_normal_modality.h>
+
+#include <jsk_pcl_ros/LINEMODDetectorConfig.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <dynamic_reconfigure/server.h>
+
 #include <std_srvs/Empty.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 
+#include <pcl_ros/pcl_nodelet.h>
+
 namespace jsk_pcl_ros
-{  
+{
+  class LINEMODDetector: public jsk_topic_tools::DiagnosticNodelet
+  {
+  public:
+    typedef LINEMODDetectorConfig Config;
+    LINEMODDetector(): DiagnosticNodelet("LINEMODDetector") {}
+  protected:
+    ////////////////////////////////////////////////////////
+    // methods
+    ////////////////////////////////////////////////////////
+    virtual void onInit();
+    virtual void subscribe();
+    virtual void unsubscribe();
+    virtual void updateDiagnostic(
+      diagnostic_updater::DiagnosticStatusWrapper &stat);
+    virtual void detect(
+      const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
+    virtual void configCallback(
+      Config& config, uint32_t level);
+    
+    ////////////////////////////////////////////////////////
+    // ROS variables
+    ////////////////////////////////////////////////////////
+    ros::Subscriber sub_cloud_;
+    ros::Publisher pub_cloud_;
+    boost::mutex mutex_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    
+    ////////////////////////////////////////////////////////
+    // Parameters
+    ////////////////////////////////////////////////////////
+    std::string template_file_;
+    double gradient_magnitude_threshold_;
+    double detection_threshold_;
+    pcl::LineRGBD<pcl::PointXYZRGBA> line_rgbd_;
+    bool use_raw_templates_;
+    std::vector<pcl::PointCloud<pcl::PointXYZRGBA>::Ptr> template_pointclouds_;
+    std::vector<pcl::SparseQuantizedMultiModTemplate> template_sqmmts_;
+  private:
+    
+  };
+  
   class LINEMODTrainer: public pcl_ros::PCLNodelet
   {
   public:
@@ -79,9 +130,11 @@ namespace jsk_pcl_ros
     std::vector<pcl::PointIndices::Ptr> sample_indices_;
     boost::mutex mutex_;
     std::string output_file_;
+    int rotation_quantization_;
   private:
     
   };
 }
+
 
 #endif

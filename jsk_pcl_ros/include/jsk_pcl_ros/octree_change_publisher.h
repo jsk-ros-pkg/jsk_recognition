@@ -46,11 +46,11 @@
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl/octree/octree.h>
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <jsk_topic_tools/connection_based_nodelet.h>
 
 namespace jsk_pcl_ros
 {
-  class OctreeChangePublisher: public ConnectionBasedNodelet
+  class OctreeChangePublisher: public jsk_topic_tools::ConnectionBasedNodelet
   {
   protected:
     int counter_;

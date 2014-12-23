@@ -37,8 +37,8 @@
 #define JSK_PCL_ROS_PCL_CONVERSION_UTIL_H_
 
 #include <pcl/point_types.h>
-#include <pcl_ros/pcl_nodelet.h>
-
+#include <pcl/point_cloud.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <geometry_msgs/Point32.h>
 
 

@@ -1,4 +1,30 @@
 <library path="libjsk_pcl_ros">
+  <class name="jsk_pcl/IntermittentImageAnnotator"
+         type="jsk_pcl_ros::IntermittentImageAnnotator"
+         base_class_type="nodelet::Nodelet">
+    intermittent image annotator
+  </class>
+  <class name="jsk_pcl/LINEMODDetector"
+         type="jsk_pcl_ros::LINEMODDetector"
+         base_class_type="nodelet::Nodelet">
+    LINEMOD detector
+  </class>
+  <class name="jsk_pcl/LINEMODTrainer"
+         type="jsk_pcl_ros::LINEMODTrainer"
+         base_class_type="nodelet::Nodelet">
+    LINEMOD trainer
+  </class>
+  <class name="jsk_pcl/CaptureStereoSynchronizer"
+         type="jsk_pcl_ros::CaptureStereoSynchronizer"
+         base_class_type="nodelet::Nodelet">
+    Synchronize stereo messages for capture training data
+  </class>
+  <class name="jsk_pcl/PointIndicesToMaskImage"
+         type="jsk_pcl_ros::PointIndicesToMaskImage"
+         base_class_type="nodelet::Nodelet">
+    Generate mask image out of point indices
+  </class>
+  
   <class name="jsk_pcl/ROIClipper"
          type="jsk_pcl_ros::ROIClipper"
          base_class_type="nodelet::Nodelet">

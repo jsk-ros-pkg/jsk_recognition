@@ -46,7 +46,8 @@ namespace jsk_pcl_ros
     sensor_msgs::PointCloud2 output;
     try
     {
-      if (pcl_ros::transformPointCloud(target_frame_id_, *input, output, tf_listener_)) {
+      if (pcl_ros::transformPointCloud(target_frame_id_, *input, output,
+                                       *tf_listener_)) {
         pub_cloud_.publish(output);
       }
     }
@@ -62,13 +63,13 @@ namespace jsk_pcl_ros
 
   void TfTransformCloud::onInit(void)
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     
     if (!pnh_->getParam("target_frame_id", target_frame_id_))
     {
       ROS_WARN("~target_frame_id is not specified, using %s", "/base_footprint");
     }
-
+    tf_listener_ = TfListenerSingleton::getInstance();
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
   }
 

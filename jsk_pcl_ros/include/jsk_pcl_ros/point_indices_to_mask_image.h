@@ -34,42 +34,48 @@
  *********************************************************************/
 
 
-#ifndef CONNECTION_BASED_NODELET_H_
-#define CONNECTION_BASED_NODELET_H_
+#ifndef JSK_PCL_ROS_POINT_INDICES_TO_MASK_IMAGE_H_
+#define JSK_PCL_ROS_POINT_INDICES_TO_MASK_IMAGE_H_
 
-#include <pcl_ros/pcl_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <sensor_msgs/Image.h>
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
 
 namespace jsk_pcl_ros
 {
-  class ConnectionBasedNodelet: public pcl_ros::PCLNodelet
+  class PointIndicesToMaskImage: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    ConnectionBasedNodelet(): subscribed_(false) { }
+    typedef message_filters::sync_policies::ExactTime<
+      PCLIndicesMsg,
+      sensor_msgs::Image > SyncPolicy;
+  
+    PointIndicesToMaskImage(): DiagnosticNodelet("PointIndicesToMaskImage") { }
   protected:
-    virtual void connectionCallback(const ros::SingleSubscriberPublisher& pub);
-    virtual void subscribe() = 0;
-    virtual void unsubscribe() = 0;
-    
-    template<class T> ros::Publisher
-    advertise(ros::NodeHandle& nh,
-              std::string topic, int queue_size)
-    {
-      ros::SubscriberStatusCallback connect_cb
-        = boost::bind( &ConnectionBasedNodelet::connectionCallback, this, _1);
-      ros::SubscriberStatusCallback disconnect_cb
-        = boost::bind( &ConnectionBasedNodelet::connectionCallback, this, _1);
-      ros::Publisher ret = nh.advertise<T>(topic, queue_size,
-                                           connect_cb,
-                                           disconnect_cb);
-      publishers_.push_back(ret);
-      return ret;
-    }
-    
-    boost::mutex connection_mutex_;
-    std::vector<ros::Publisher> publishers_;
-    bool subscribed_;
+    ////////////////////////////////////////////////////////
+    // methods
+    ////////////////////////////////////////////////////////
+    virtual void onInit();
+    virtual void subscribe();
+    virtual void unsubscribe();
+    virtual void updateDiagnostic(
+      diagnostic_updater::DiagnosticStatusWrapper &stat);
+    virtual void mask(
+      const PCLIndicesMsg::ConstPtr& indices_msg,
+      const sensor_msgs::Image::ConstPtr& image_msg);
+  
+    ////////////////////////////////////////////////////////
+    // ROS variables
+    ////////////////////////////////////////////////////////
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    message_filters::Subscriber<PCLIndicesMsg> sub_input_;
+    message_filters::Subscriber<sensor_msgs::Image> sub_image_;
+    ros::Publisher pub_;
   private:
-    
+  
   };
 }
 

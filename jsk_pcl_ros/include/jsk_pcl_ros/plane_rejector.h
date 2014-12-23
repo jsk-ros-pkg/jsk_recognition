@@ -62,12 +62,12 @@
 #include <diagnostic_updater/publisher.h>
 #include <jsk_topic_tools/rosparam_utils.h>
 #include "jsk_pcl_ros/pcl_util.h"
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <jsk_topic_tools/connection_based_nodelet.h>
 
 
 namespace jsk_pcl_ros
 {
-  class PlaneRejector: public ConnectionBasedNodelet
+  class PlaneRejector: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime< jsk_pcl_ros::PolygonArray,

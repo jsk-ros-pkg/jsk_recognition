@@ -48,7 +48,7 @@
 #include <message_filters/synchronizer.h>
 
 #include <jsk_pcl_ros/MultiPlaneSACSegmentationConfig.h>
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <jsk_topic_tools/connection_based_nodelet.h>
 #include <tf/transform_listener.h>
 
 ////////////////////////////////////////////////////////
@@ -62,7 +62,7 @@
 
 namespace jsk_pcl_ros
 {
-  class MultiPlaneSACSegmentation: public ConnectionBasedNodelet
+  class MultiPlaneSACSegmentation: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     typedef pcl::PointXYZRGB PointT;

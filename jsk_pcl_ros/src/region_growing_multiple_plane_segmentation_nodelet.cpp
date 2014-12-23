@@ -33,15 +33,13 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_pcl_ros/geo_util.h"
 #include "jsk_pcl_ros/region_growing_multiple_plane_segmentation.h"
 #include <pcl/segmentation/conditional_euclidean_clustering.h>
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
-#include "jsk_pcl_ros/geo_util.h"
-
-// #include <pcl/segmentation/impl/conditional_euclidean_clustering.hpp>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros
 {

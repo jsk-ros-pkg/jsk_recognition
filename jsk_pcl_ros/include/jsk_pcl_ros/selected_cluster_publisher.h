@@ -43,11 +43,11 @@
 #include <jsk_pcl_ros/ClusterPointIndices.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <jsk_topic_tools/connection_based_nodelet.h>
 
 namespace jsk_pcl_ros
 {
-  class SelectedClusterPublisher: public ConnectionBasedNodelet
+  class SelectedClusterPublisher: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, jsk_pcl_ros::ClusterPointIndices, jsk_pcl_ros::Int32Stamped> SyncPolicy;
@@ -65,6 +65,8 @@ namespace jsk_pcl_ros
     virtual void unsubscribe();
   private:
     virtual void onInit();
+    
+    bool keep_organized_;
   };
   
 }

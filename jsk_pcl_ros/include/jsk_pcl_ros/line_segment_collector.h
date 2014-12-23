@@ -42,7 +42,7 @@
 #ifndef JSK_PCL_ROS_LINE_SEGMENT_COLLECTOR_H_
 #define JSK_PCL_ROS_LINE_SEGMENT_COLLECTOR_H_
 
-#include "jsk_pcl_ros/diagnostic_nodelet.h"
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <jsk_pcl_ros/ClusterPointIndices.h>
 #include <jsk_pcl_ros/ModelCoefficientsArray.h>
 #include <sensor_msgs/JointState.h>
@@ -104,7 +104,7 @@ namespace jsk_pcl_ros
   private:
   };
   
-  class LineSegmentCollector: public DiagnosticNodelet
+  class LineSegmentCollector: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     LineSegmentCollector(): DiagnosticNodelet("LineSegmentCollector") { }

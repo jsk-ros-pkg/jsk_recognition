@@ -39,6 +39,10 @@
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
+#include <pcl/filters/crop_box.h>
+#include <pcl_ros/transforms.h>
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+
 
 namespace jsk_pcl_ros
 {
@@ -56,18 +60,25 @@ namespace jsk_pcl_ros
     pub_bounding_box_array_
       = advertise<jsk_pcl_ros::BoundingBoxArray>(*pnh_, "output/box_array", 1);
     pub_mask_ = advertise<sensor_msgs::Image>(*pnh_, "output/mask", 1);
+    pub_indices_ = advertise<PCLIndicesMsg>(*pnh_, "output/point_indices", 1);
   }
 
   void AttentionClipper::subscribe()
   {
     sub_ = pnh_->subscribe("input", 1, &AttentionClipper::clip, this);
-    sub_pose_ = pnh_->subscribe("input/pose", 1, &AttentionClipper::poseCallback, this);
+    sub_points_ = pnh_->subscribe("input/points", 1,
+                                  &AttentionClipper::clipPointcloud, this);
+    sub_pose_ = pnh_->subscribe("input/pose",
+                                1, &AttentionClipper::poseCallback, this);
+    sub_box_ = pnh_->subscribe("input/box",
+                               1, &AttentionClipper::boxCallback, this);
   }
 
   void AttentionClipper::unsubscribe()
   {
     sub_.shutdown();
     sub_pose_.shutdown();
+    sub_box_.shutdown();
   }
   
   Vertices AttentionClipper::cubeVertices()
@@ -100,6 +111,22 @@ namespace jsk_pcl_ros
     tf::poseMsgToEigen(pose->pose, affine);
     frame_id_ = pose->header.frame_id;
     convertEigenAffine3(affine, pose_);
+  }
+
+  void AttentionClipper::boxCallback(
+    const jsk_pcl_ros::BoundingBox::ConstPtr& box)
+  {
+    {
+      boost::mutex::scoped_lock lock(mutex_);
+      dimension_x_ = box->dimensions.x;
+      dimension_y_ = box->dimensions.y;
+      dimension_z_ = box->dimensions.z;
+      Eigen::Affine3d affine;
+      tf::poseMsgToEigen(box->pose, affine);
+      frame_id_ = box->header.frame_id;
+      convertEigenAffine3(affine, pose_);
+    }
+    
   }
 
   void AttentionClipper::computeROI(
@@ -171,6 +198,50 @@ namespace jsk_pcl_ros
     box_array.header.stamp = header.stamp;
     box_array.header.frame_id = frame_id_;
     pub_bounding_box_array_.publish(box_array);
+  }
+
+  void AttentionClipper::clipPointcloud(
+    const sensor_msgs::PointCloud2::ConstPtr& msg)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
+    try {
+      // 1. transform pointcloud
+      // 2. crop by boundingbox
+      // 3. publish indices
+      sensor_msgs::PointCloud2 transformed_cloud;
+      if (pcl_ros::transformPointCloud(frame_id_, *msg, transformed_cloud,
+                                       *tf_listener_)) {
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::fromROSMsg(transformed_cloud, *cloud);
+        //pcl::fromROSMsg(*msg, *cloud);
+        pcl::CropBox<pcl::PointXYZ> crop_box(false);
+        pcl::PointIndices::Ptr indices (new pcl::PointIndices);
+        Eigen::Vector4f
+          max_points(dimension_x_/2, dimension_y_/2, dimension_z_/2, 0);
+        Eigen::Vector4f
+          min_points(-dimension_x_/2, -dimension_y_/2, -dimension_z_/2, 0);
+        
+        float roll, pitch, yaw;
+        pcl::getEulerAngles(pose_, roll, pitch, yaw);
+        crop_box.setInputCloud(cloud);
+        crop_box.setMax(max_points);
+        crop_box.setMin(min_points);
+        crop_box.setTranslation(pose_.translation());
+        crop_box.setRotation(Eigen::Vector3f(roll, pitch, yaw));
+        crop_box.filter(indices->indices);
+        PCLIndicesMsg indices_msg;
+        pcl_conversions::fromPCL(*indices, indices_msg);
+        indices_msg.header = msg->header;
+        pub_indices_.publish(indices_msg);
+      }
+    }
+    catch (tf2::ConnectivityException &e) {
+      NODELET_ERROR("Transform error: %s", e.what());
+    }
+    catch (tf2::InvalidArgumentException &e) {
+      NODELET_ERROR("Transform error: %s", e.what());
+    }
   }
   
   void AttentionClipper::clip(const sensor_msgs::CameraInfo::ConstPtr& msg)

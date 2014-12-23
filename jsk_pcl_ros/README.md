@@ -59,11 +59,143 @@ time end
 Represent range of time.
 
 ## nodelets
+### jsk\_pcl/LINEMODDetector
+#### What Is This
+![](images/linemod_detector.png)
+
+A nodelet to detect object using LINEMOD.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Input pointcloud.
+
+#### Publishing Topic
+* `~output` (`sensor_msgs/PointCloud2`)
+
+  Result of detection as pointcloud.
+
+#### Parameters
+* `~template_file` (`String`, default: `template.lmt`)
+
+  Template file
+* `~gradient_magnitude_threshold` (`Double`, default: `10.0`)
+
+  Gradient maginutude threshold
+
+* `~detection_threshold` (`Double`, default: `0.75`)
+
+  Detection threshold
+
+### jsk\_pcl/LINEMODTrainer
+#### What Is This
+
+A nodelet to train LINEMOD data from pointcloud and indices to mask the objects.
+This nodelet stores data of pointcloud and if you call `~start_training` service,
+it will train the data and dump the templates into lmt file.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  This pointcloud should be able to be converted into `pcl::PointXYZRGBA` data.
+* `~input/indices` (`pcl_msgs/PointIndices`)
+
+  Indices to mask object in `~input` pointcloud.
+
+#### Advertising Servicies
+* `~start_training` (`std_srvs/Empty`)
+
+  Start training and dump result into a file.
+
+* `~clear_data` (`std_srvs/Empty`)
+
+  Clear stored data.
+#### Parameters
+* `~output_file` (`String`, default: `template.lmt`)
+
+   A file path to dump trained data.
+
+### jsk\_pcl/CaptureStereoSynchronizer
+#### What Is This
+![](images/capture_stereo_synchronizer.png)
+
+A nodelet to capture training data of stereo cameras. It subscribe several messages with
+synchronizing timestamp and republish them into `~output` namespace.
+
+#### Subscribing Topic
+* `~input/pose` (`geometry_msgs/PoseStamped`)
+
+  Pose of checkerboard
+
+* `~input/mask` (`sensor_msgs/Image`)
+
+  Mask image of the object
+
+* `~input/mask_indices` (`pcl_msgs/PointIndices`)
+
+  Pointcloud indices of the object
+
+* `~input/left_image` (`sensor_msgs/Image`)
+
+  Left camera image
+
+* `~input/left_camera_info` (`sensor_msgs/CameraInfo`)
+
+  Left camera parameter
+
+* `~input/right_camera_info` (`sensor_msgs/CameraInfo`)
+
+  Right camera parameter
+
+* `~input/disparity` (`stereo_msgs/Disparity`)
+
+  Disparity image of the stereo camear.
+
+#### Publishing Topic
+* `~output/pose` (`geometry_msgs/PoseStamped`)
+* `~output/mask` (`sensor_msgs/Image`)
+* `~output/mask_indices` (`pcl_msgs/PointIndices`)
+* `~output/left_image` (`sensor_msgs/Image`)
+* `~output/left_camera_info` (`sensor_msgs/CameraInfo`)
+* `~output/right_camera_info` (`sensor_msgs/CameraInfo`)
+* `~output/disparity` (`stereo_msgs/Disparity`)
+
+  These topics are the same message to the `~input/foo` messages but all of them
+  are republished only if input messages are synchronized.
+
+#### Sample
+Please check [capture_multisense_training_data.launch](launch/capture_multisense_training_data.launch).
+
+### jsk\_pcl/PointIndicesToMaskImage
+#### What Is This
+![](images/point_indices_to_mask_image.png)
+
+jsk\_pcl/PointIndicesToMaskImage generates mask image from `pcl_msgs/PointIndices`
+of organized pointcloud and original `sensor_msgs/Image`.
+
+#### Subscribing Topic
+* `~input` (`pcl_msgs/PointIndices`)
+
+   Indices of the point cloud to mask.
+
+* `~input/image` (`sensor_msgs/Image`)
+
+   In order to know width and height of the original image, jsk\_pcl/PointIndicesToMaskImage requires
+   input image.
+
+#### Publishing Topic
+
+* `~output `(`sensor_msg/Image`)
+
+
+   Mask image to get `~input` indices from the origina limage.
+
 ### jsk\_pcl/AttentionClipper
 #### What Is This
 ![](images/attention_clipper.png)
 
-It retrives `sensor_msgs/CameraInfo` and publish `sensor_msgs/CameraInfo` with ROI filled.
+It retrives `sensor_msgs/CameraInfo` and publish `sensor_msgs/CameraInfo` with ROI filled and
+retirieves `sensor_msgs/PointCloud2` and publish `pcl_msgs/PointIndices`.
 
 You can specify the pose and size of the interest bounding box and jsk\_pcl/AttentionClipper returns ROI
 to see the object.
@@ -72,9 +204,13 @@ to see the object.
 * `~input` (`sensor_msgs/CameraInfo`)
 
   Original camera info.
-* `~pose` (`geometry_msgs/PoseStamped`)
 
-  Specify the pose of the bounding box. timestamp will be ignored and camera info's timestamp will be used.
+* `~input/points` (`sensor_msgs/PointCloud2`)
+
+  Original pointcloud.
+* `~input/pose` (`geometry_msgs/PoseStamped`)
+* `~input/box` (`jsk_pcl_ros/BoundingBox`)
+  Specify the pose of the bounding box. Timestamp will be ignored and camera info's timestamp will be used. If you use `~input/box`, you can change the size of attention region.
 
 #### Publishing Topic
 * `~output` (`sensor_msgs/CameraInfo`)
@@ -111,7 +247,9 @@ We expect to use jsk\_pcl/ROIClipper with jsk\_pcl/AttentionClipper to get ROI i
 
   Image of ROI.
 
+* `~output/point_indices` (`pcl_msgs/PointIndices`)
 
+  The indices of the pointcloud which is inside of the interest 3-D region.
 ### jsk\_pcl/NormalDirectionFilter
 ![NormalDirectionFilter](images/normal_direction_filter.png)
 

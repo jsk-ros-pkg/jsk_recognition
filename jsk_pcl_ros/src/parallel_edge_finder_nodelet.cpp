@@ -41,7 +41,7 @@ namespace jsk_pcl_ros
 {
   void ParallelEdgeFinder::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     
     ////////////////////////////////////////////////////////
     // publishers

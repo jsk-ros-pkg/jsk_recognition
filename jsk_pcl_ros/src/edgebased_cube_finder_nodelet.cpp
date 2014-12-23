@@ -376,7 +376,7 @@ namespace jsk_pcl_ros
   
   void EdgebasedCubeFinder::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);

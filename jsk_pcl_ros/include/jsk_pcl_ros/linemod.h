@@ -94,6 +94,7 @@ namespace jsk_pcl_ros
     bool use_raw_templates_;
     std::vector<pcl::PointCloud<pcl::PointXYZRGBA>::Ptr> template_pointclouds_;
     std::vector<pcl::SparseQuantizedMultiModTemplate> template_sqmmts_;
+    int minimum_template_points_;
   private:
     
   };

@@ -35,6 +35,8 @@
 
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/capture_stereo_synchronizer.h"
+#include <pcl/common/angles.h>
+#include <eigen_conversions/eigen_msg.h>
 
 namespace jsk_pcl_ros
 {
@@ -42,8 +44,11 @@ namespace jsk_pcl_ros
   {
     DiagnosticNodelet::onInit();
     counter_ = 0;
+    pnh_->param("rotational_bin_size", rotational_bin_size_, pcl::deg2rad(10.0));
+    pnh_->param("positional_bin_size", positional_bin_size_, 0.1);
     pub_pose_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output/pose", 1);
     pub_mask_ = advertise<sensor_msgs::Image>(*pnh_, "output/mask", 1);
+    poses_.resize(0);
     pub_mask_indices_ = advertise<PCLIndicesMsg>(
       *pnh_, "output/mask_indices", 1);
     pub_left_image_ = advertise<sensor_msgs::Image>(
@@ -56,6 +61,28 @@ namespace jsk_pcl_ros
       *pnh_, "output/disparity", 1);
   }
 
+  bool CaptureStereoSynchronizer::checkNearPose(
+    const geometry_msgs::Pose& new_pose)
+  {
+    Eigen::Affine3d new_affine;
+    tf::poseMsgToEigen(new_pose, new_affine);
+    for (size_t i = 0; i < poses_.size(); i++) {
+      // convert pose into eigen
+      Eigen::Affine3d affine;
+      tf::poseMsgToEigen(poses_[i], affine);
+      // compute difference
+      Eigen::Affine3d diff = affine.inverse() * new_affine;
+      double positional_difference = diff.translation().norm();
+      if (positional_difference < positional_bin_size_) {
+        Eigen::AngleAxisd rotational_difference(diff.rotation());
+        if (rotational_difference.angle() < rotational_bin_size_) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  
   void CaptureStereoSynchronizer::subscribe()
   {
     sub_pose_.subscribe(*pnh_, "input/pose", 1);
@@ -117,14 +144,20 @@ namespace jsk_pcl_ros
     const sensor_msgs::CameraInfo::ConstPtr& right_cam_info,
     const stereo_msgs::DisparityImage::ConstPtr& disparity)
   {
-    ROS_INFO("%d sample", counter_++);
-    pub_pose_.publish(pose);
-    pub_mask_.publish(mask);
-    pub_mask_indices_.publish(mask_indices);
-    pub_left_image_.publish(left_image);
-    pub_left_cam_info_.publish(left_cam_info);
-    pub_right_cam_info_.publish(right_cam_info);
-    pub_disparity_.publish(disparity);
+    if (checkNearPose(pose->pose)) {
+      ROS_INFO("too near");
+    }
+    else {
+      ROS_INFO("%d sample", counter_++);
+      poses_.push_back(pose->pose);
+      pub_pose_.publish(pose);
+      pub_mask_.publish(mask);
+      pub_mask_indices_.publish(mask_indices);
+      pub_left_image_.publish(left_image);
+      pub_left_cam_info_.publish(left_cam_info);
+      pub_right_cam_info_.publish(right_cam_info);
+      pub_disparity_.publish(disparity);
+    }
   }
 }
 

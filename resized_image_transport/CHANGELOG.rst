@@ -2,6 +2,9 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.29 (2014-12-24)
+-------------------
+
 0.1.28 (2014-12-17)
 -------------------
 
@@ -103,4 +106,4 @@ Changelog for package resized_image_transport
 * updating for catkin
 * add option to change fps, rename image_type->image, see Issue 248
 * mv resized_imagetransport resized_image_transport
-* Contributors: Kei Okada, Ryohei Ueda, Youhei Kakiuchi
+* Contributors: Ryohei Ueda, Kei Okada, Youhei Kakiuchi

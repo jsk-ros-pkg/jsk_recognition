@@ -84,7 +84,7 @@ namespace jsk_pcl_ros
     pcl_conversions::toPCL(*indices_msg, *indices);
     samples_.push_back(cloud);
     sample_indices_.push_back(indices);
-    ROS_INFO("%lu samples", samples_.size());
+    NODELET_INFO("%lu samples", samples_.size());
   }
 
   bool LINEMODTrainer::clearData(
@@ -92,7 +92,7 @@ namespace jsk_pcl_ros
     std_srvs::Empty::Response& res)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    ROS_INFO("clearing %lu samples", samples_.size());
+    NODELET_INFO("clearing %lu samples", samples_.size());
     samples_.clear();
     sample_indices_.clear();
     return true;
@@ -103,11 +103,11 @@ namespace jsk_pcl_ros
     std_srvs::Empty::Response& res)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    ROS_INFO("Start LINEMOD training from %lu samples", samples_.size());
+    NODELET_INFO("Start LINEMOD training from %lu samples", samples_.size());
     pcl::LINEMOD linemod;
     std::vector<pcl::PointCloud<pcl::PointXYZRGBA>::Ptr> masked_clouds;
     for (size_t i = 0; i < samples_.size(); i++) {
-      ROS_INFO("Processing %lu-th data", i);
+      NODELET_INFO("Processing %lu-th data", i);
       pcl::PointIndices::Ptr mask = sample_indices_[i];
       pcl::PointCloud<pcl::PointXYZRGBA>::Ptr raw_cloud = samples_[i];
       for (size_t j = 0; j < rotation_quantization_; j++) {
@@ -173,12 +173,12 @@ namespace jsk_pcl_ros
     // 1. mkdir template directory
     // 2. dump templates into the directory as template_&05d.pcd
     // 3. call tar
-    ROS_INFO("Dump %lu trained data into %s", linemod.getNumOfTemplates(),
+    NODELET_INFO("Dump %lu trained data into %s", linemod.getNumOfTemplates(),
              output_file_.c_str());
     
     boost::filesystem::path temp = boost::filesystem::unique_path();
     const std::string tempstr = temp.native();
-    ROS_INFO("mkdir %s", tempstr.c_str());
+    NODELET_INFO("mkdir %s", tempstr.c_str());
     boost::filesystem::create_directory(temp);
     std::stringstream command_stream;
     command_stream << "tar --format=ustar -cf " << output_file_;
@@ -188,7 +188,7 @@ namespace jsk_pcl_ros
         std::stringstream filename_stream;
         filename_stream << boost::format("%s/%05lu_template.sqmmt") % tempstr % i;
         std::string filename = filename_stream.str();
-        ROS_INFO("writing %s", filename.c_str());
+        NODELET_INFO("writing %s", filename.c_str());
         std::ofstream file_stream;
         file_stream.open(filename.c_str(),
                          std::ofstream::out | std::ofstream::binary);
@@ -201,16 +201,16 @@ namespace jsk_pcl_ros
         std::stringstream filename_stream;
         filename_stream << boost::format("%s/%05lu_template.pcd") % tempstr % i;
         std::string filename = filename_stream.str();
-        ROS_INFO("writing %s", filename.c_str());
+        NODELET_INFO("writing %s", filename.c_str());
         pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud = masked_clouds[i];
         pcl::PCDWriter writer;
         writer.writeBinaryCompressed(filename, *cloud);
         command_stream << " " << filename;
       }
     }
-    ROS_INFO("executing %s", command_stream.str().c_str());
+    NODELET_INFO("executing %s", command_stream.str().c_str());
     int ret = system(command_stream.str().c_str());
-    ROS_INFO("done");
+    NODELET_INFO("done");
     return true;
   }
 
@@ -218,6 +218,7 @@ namespace jsk_pcl_ros
   {
     DiagnosticNodelet::onInit();
     pnh_->param("use_raw_templates", use_raw_templates_, false);
+    pnh_->param("minimum_template_points", minimum_template_points_, 3000);
     if (!use_raw_templates_) {
       pnh_->param("template_file", template_file_, std::string("template.ltm"));
     }
@@ -232,7 +233,7 @@ namespace jsk_pcl_ros
       // PCD file driven
       for (unsigned int i=0;i<glob_result.gl_pathc;++i) {
         std::string file(glob_result.gl_pathv[i]);
-        ROS_INFO("file: %s", file.c_str());
+        NODELET_INFO("file: %s", file.c_str());
         if (boost::algorithm::ends_with(file, ".pcd")) {
           // check sqmmt file exists or not
           std::string pcd_file = file;
@@ -256,19 +257,30 @@ namespace jsk_pcl_ros
 #pragma omp parallel for
 #endif
       for (size_t i = 0; i < template_pointclouds_.size(); i++) {
-        ROS_INFO("reading %s", template_pcd_files[i].c_str());
+        NODELET_INFO("reading %s", template_pcd_files[i].c_str());
         pcl::PCDReader reader;
         pcl::PointCloud<pcl::PointXYZRGBA>::Ptr 
           ref(new pcl::PointCloud<pcl::PointXYZRGBA>);
         reader.read(template_pcd_files[i], *ref);
-        template_pointclouds_[i] = ref;
+        // count up non-nan points
+        int valid_points = 0;
+        for (size_t j = 0; j < ref->points.size(); j++) {
+          pcl::PointXYZRGBA p = ref->points[j];
+          if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
+            ++valid_points;
+          }
+        }
+        NODELET_INFO("%s -- %d", template_pcd_files[i].c_str(), valid_points);
+        if (valid_points > minimum_template_points_) {
+          template_pointclouds_[i] = ref;
+        }
       }
       template_sqmmts_.resize(template_sqmmt_files.size());
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif
       for (size_t i = 0; i < template_sqmmts_.size(); i++) {
-        ROS_INFO("reading %s", template_sqmmt_files[i].c_str());
+        NODELET_INFO("reading %s", template_sqmmt_files[i].c_str());
         std::ifstream file_stream(template_sqmmt_files[i].c_str());
         pcl::SparseQuantizedMultiModTemplate sqmmt;
         sqmmt.deserialize(file_stream);
@@ -307,17 +319,19 @@ namespace jsk_pcl_ros
     line_rgbd_.setDetectionThreshold(detection_threshold_);
     // load linemod templates
     if (!use_raw_templates_) {
-      ROS_INFO("loading LINEMOD templates from %s", template_file_.c_str());
+      NODELET_INFO("loading LINEMOD templates from %s", template_file_.c_str());
       line_rgbd_.loadTemplates(template_file_);
-      ROS_INFO("done");
+      NODELET_INFO("done");
     }
     else {
       for (size_t i = 0; i < template_pointclouds_.size(); i++) {
-        ROS_INFO("adding %lu template", i);
-        line_rgbd_.addTemplate(template_sqmmts_[i], 
-                               *template_pointclouds_[i]);
+        if (template_pointclouds_[i]) {
+          NODELET_INFO("adding %lu template", i);
+          line_rgbd_.addTemplate(template_sqmmts_[i], 
+                                 *template_pointclouds_[i]);
+        }
       }
-      ROS_INFO("done");
+      NODELET_INFO("done");
     }
   }
 
@@ -337,7 +351,7 @@ namespace jsk_pcl_ros
   void LINEMODDetector::detect(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
-    ROS_INFO("detect");
+    NODELET_INFO("detect");
     vital_checker_->poke();
     boost::mutex::scoped_lock lock(mutex_);
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr
@@ -350,7 +364,7 @@ namespace jsk_pcl_ros
     std::vector<pcl::LineRGBD<pcl::PointXYZRGBA>::Detection> detections;
     //line_rgbd_.detect(detections);
     line_rgbd_.detectSemiScaleInvariant(detections);
-    ROS_INFO("detected %lu result", detections.size());
+    NODELET_INFO("detected %lu result", detections.size());
     // lookup the best result
     if (detections.size() > 0) {
       double max_response = 0;
@@ -366,7 +380,7 @@ namespace jsk_pcl_ros
           max_detection_id = detection.detection_id;
         }
       }
-      ROS_INFO("(%lu, %lu)", max_object_id, max_template_id);
+      NODELET_INFO("(%lu, %lu)", max_object_id, max_template_id);
       pcl::PointCloud<pcl::PointXYZRGBA>::Ptr 
         result (new pcl::PointCloud<pcl::PointXYZRGBA>);
       line_rgbd_.computeTransformedTemplatePoints(max_detection_id,

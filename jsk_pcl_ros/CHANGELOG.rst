@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.30 (2014-12-24)
+-------------------
 * Publish specified ROI as PosedCameraInfo in IntermittentImageAnnotator
 * Use TfListenerSingleton to get instance of tf::TransformListener
 * Contributors: Ryohei Ueda

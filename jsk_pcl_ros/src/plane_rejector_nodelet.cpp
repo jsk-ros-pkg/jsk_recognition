@@ -45,7 +45,7 @@ namespace jsk_pcl_ros
   {
     ConnectionBasedNodelet::onInit();
     tf_success_.reset(new SeriesedBoolean(30));
-    listener_.reset(new tf::TransformListener());
+    listener_ = TfListenerSingleton::getInstance();
     double vital_rate;
     pnh_->param("vital_rate", vital_rate, 1.0);
     vital_checker_.reset(

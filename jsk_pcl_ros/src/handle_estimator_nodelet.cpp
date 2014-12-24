@@ -47,7 +47,6 @@ namespace jsk_pcl_ros
     ConnectionBasedNodelet::onInit();
     output_buf.resize(100);
 
-    //tf_listener_.reset(new tf::TransformListener());
     pnh_->param("gripper_size", gripper_size_, 0.08); // defaults to pr2 gripper size
     pnh_->param("approach_offset", approach_offset_, 0.1); // default to 10 cm
     pnh_->param("angle_divide_num", angle_divide_num_, 6); // even will be better

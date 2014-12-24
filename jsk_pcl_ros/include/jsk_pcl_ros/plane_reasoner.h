@@ -45,7 +45,8 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
-#include <tf/transform_listener.h>
+#include "jsk_pcl_ros/tf_listener_singleton.h"
+
 #include <dynamic_reconfigure/server.h>
 #include "jsk_pcl_ros/PlaneReasonerConfig.h"
 
@@ -134,7 +135,7 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<PolygonArray> sub_polygons_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
-    boost::shared_ptr<tf::TransformListener> tf_listener_;
+    tf::TransformListener* tf_listener_;
     ros::Publisher pub_vertical_inliers_;
     ros::Publisher pub_vertical_coefficients_;
     ros::Publisher pub_vertical_polygons_;

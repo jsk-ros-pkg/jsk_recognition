@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.29 (2014-12-24)
+-------------------
 * Add document about IntermittentImageAnnotator
 * [LINEMODDetector] Do not use small templates
 * [CaptureStereoSynchronizer] Does not capture near samples

@@ -2,8 +2,8 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.29 (2014-12-24)
+-------------------
 * Move multisense specific lines from capture.launch to capture_multisense_training_data.launch
 * Added new nodelet to capture training data of stereo camera to
   jsk_pcl_ros and update launch files to capture training data of multisense

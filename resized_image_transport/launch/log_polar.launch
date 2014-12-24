@@ -1,0 +1,16 @@
+<launch>
+  <arg name="INPUT_IMAGE" default="rgb/image_rect_color" />
+  <arg name="CAMERA_NS" default="openni" />
+  <arg name="OUTPUT_IMAGE" default="out_image" />
+  <arg name="RESIZE_RATE" default="0.25" />
+  <arg name="NAME" default="log_polar" />
+  <group ns="$(arg CAMERA_NS)">
+    <node pkg="resized_image_transport" type="log_polar" name="$(arg NAME)"
+          output="screen" >
+      <remap from="~input/image" to="$(arg INPUT_IMAGE)" />
+      <remap from="~output/image" to="$(arg OUTPUT_IMAGE)" />
+      <param name="resize_scale_x" value="$(arg RESIZE_RATE)" />
+      <param name="resize_scale_y" value="$(arg RESIZE_RATE)" />
+    </node>
+  </group>
+</launch>

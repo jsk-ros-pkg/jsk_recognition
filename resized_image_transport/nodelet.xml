@@ -5,4 +5,10 @@
       publish resized image and camera_info
     </description>
   </class>
+  <class name="resized_image_transport/LogPolar" type="LogPolar"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      publish log-polar image and camera_info
+    </description>
+  </class>
 </library>

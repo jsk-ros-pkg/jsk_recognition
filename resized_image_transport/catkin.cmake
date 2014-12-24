@@ -30,6 +30,10 @@ jsk_nodelet(src/image_resizer_nodelet.cpp
   "resized_image_transport/ImageResizer"
   "image_resizer"
   nodelet_sources nodelet_executables)
+jsk_nodelet(src/log_polar_nodelet.cpp
+  "resized_image_transport/LogPolar"
+  "log_polar"
+  nodelet_sources nodelet_executables)
 add_library(resized_image_transport SHARED ${nodelet_sources})
   
 add_definitions("-O2 -g")

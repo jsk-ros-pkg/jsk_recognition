@@ -86,6 +86,9 @@ Represent range of time.
 
   Direction of ROI as `PoseStamped`. z-axis directs the center of ROI.
 
+* `~output/roi` (`jsk_pcl_ros/PosedCameraInfo`)
+
+  Publish ROI of specified region as `PosedCameraInfo`.
 #### Parameters
 * `~fixed_frame_id` (`String`, default: `odom`)
 

@@ -59,6 +59,52 @@ time end
 Represent range of time.
 
 ## nodelets
+### jsk\_pcl/IntermittentImageAnnotator
+#### What Is This
+![](images/intermittent_image_annotator.png)
+
+1. Store images when `~shutter` service is called
+2. Publish snapshots as one concatenated image
+3. Subscribe `~output/screenrectangle` to get ROI.
+4. Publish ROI information to `~output` namespace.
+
+#### Subscribing Topic
+* `~input/image` and `~input/camera_info` (`sensor_msgs/Image` and `sensor_msgs/CameraInfo`)
+
+  Input image and camera info.
+
+* `~output/screenrectangle` (`geometry_msgs/PolygonStamped`)
+
+  ROI. We expect to use [image_view2](https://github.com/jsk-ros-pkg/jsk_common/tree/master/jsk_ros_patch/image_view2).
+
+#### Publishing Topic
+* `~output` (`sensor_msgs/Image`)
+
+  Snapshots as one concatenated image.
+
+* `~output/direction` (`geometry_msgs/PoseStamped`)
+
+  Direction of ROI as `PoseStamped`. z-axis directs the center of ROI.
+
+#### Parameters
+* `~fixed_frame_id` (`String`, default: `odom`)
+
+  Fixed frame id to resolve tf.
+
+* `~max_image_buffer` (`Integer`, default: `5`)
+
+  The maximum number of images to store in this nodelet.
+
+#### Advertising Service
+
+* `~shutter` (`std_srvs/Empty`)
+
+  Take a snapshot
+
+* `~clear` (`std_srvs/Empty`)
+
+  Clear images stored in the nodelet.
+
 ### jsk\_pcl/LINEMODDetector
 #### What Is This
 ![](images/linemod_detector.png)

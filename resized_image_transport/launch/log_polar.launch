@@ -1,16 +1,44 @@
 <launch>
-  <arg name="INPUT_IMAGE" default="rgb/image_rect_color" />
-  <arg name="CAMERA_NS" default="openni" />
-  <arg name="OUTPUT_IMAGE" default="out_image" />
-  <arg name="RESIZE_RATE" default="0.25" />
-  <arg name="NAME" default="log_polar" />
+  <arg name="CAMERA_NS" default="openni_c2/rgb" />
+  <arg name="INPUT_IMAGE" default="image_rect_color" />
+  <arg name="RESIZE_RATE" default="0.1" />
+  <arg name="WIDTH" default="640" />
+  <arg name="HEIGHT" default="480" />
+
   <group ns="$(arg CAMERA_NS)">
-    <node pkg="resized_image_transport" type="log_polar" name="$(arg NAME)"
+    <!-- nodes for robot -->
+    <node pkg="resized_image_transport" type="log_polar" name="log_polar"
           output="screen" >
       <remap from="~input/image" to="$(arg INPUT_IMAGE)" />
-      <remap from="~output/image" to="$(arg OUTPUT_IMAGE)" />
+      <remap from="~output/image" to="~image" />
+      <param name="resize_scale_x" value="1.0" />
+      <param name="resize_scale_y" value="1.0" />
+    </node>
+
+    <node pkg="resized_image_transport" type="image_resizer" name="log_polar_image_resizer"
+	  output="screen">
+      <remap from="~input/image" to="log_polar/image" />
+      <remap from="~output/image" to="~image" />
       <param name="resize_scale_x" value="$(arg RESIZE_RATE)" />
       <param name="resize_scale_y" value="$(arg RESIZE_RATE)" />
+    </node>
+
+    <!-- nodes for remote machine -->
+    <node pkg="resized_image_transport" type="image_resizer" name="log_polar_image_enlarger"
+	  output="screen">
+      <remap from="~input/image" to="log_polar_image_resizer/image" />
+      <remap from="~output/image" to="~image" />
+      <param name="width" value="$(arg WIDTH)" />
+      <param name="height" value="$(arg HEIGHT)" />
+    </node>
+
+    <node pkg="resized_image_transport" type="log_polar" name="inverse_log_polar"
+          output="screen">
+      <param name="inverse_log_polar" value="true"/>
+      <remap from="~input/image" to="/$(arg CAMERA_NS)/log_polar_image_enlarger/image" />
+      <remap from="~output/image" to="~image" />
+      <param name="width" value="$(arg WIDTH)" />
+      <param name="height" value="$(arg HEIGHT)" />
     </node>
   </group>
 </launch>

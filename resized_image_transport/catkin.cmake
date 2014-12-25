@@ -11,6 +11,7 @@ find_package(OpenCV REQUIRED)
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
   cfg/ImageResizer.cfg
+  cfg/LogPolar.cfg
   )
 
 catkin_package(

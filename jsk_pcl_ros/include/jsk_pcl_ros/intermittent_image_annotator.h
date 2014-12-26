@@ -113,6 +113,7 @@ namespace jsk_pcl_ros
     ros::ServiceServer request_service_;
     ros::Publisher pub_pose_;
     ros::Publisher pub_roi_;
+    ros::Publisher pub_marker_;
     sensor_msgs::Image::ConstPtr latest_image_msg_;
     sensor_msgs::CameraInfo::ConstPtr latest_camera_info_msg_;
     

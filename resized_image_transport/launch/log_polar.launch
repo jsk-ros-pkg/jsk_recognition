@@ -8,28 +8,41 @@
   <group ns="$(arg CAMERA_NS)">
     <!-- nodes for robot -->
     <node pkg="resized_image_transport" type="log_polar" name="log_polar"
-          output="screen" >
+	  alaunch-prefix="gdb -ex run --args"
+	  output="screen">
+<!--          output="log" > -->
       <remap from="~input/image" to="$(arg INPUT_IMAGE)" />
       <remap from="~output/image" to="~image" />
       <param name="resize_scale_x" value="1.0" />
       <param name="resize_scale_y" value="1.0" />
+      <param name="log_polar_scale" value="100.0" />
+      <param name="period" value="1.0"/>
     </node>
-
+    
     <node pkg="resized_image_transport" type="image_resizer" name="log_polar_image_resizer"
-	  output="screen">
+    	  output="screen">
       <remap from="~input/image" to="log_polar/image" />
       <remap from="~output/image" to="~image" />
       <param name="resize_scale_x" value="$(arg RESIZE_RATE)" />
       <param name="resize_scale_y" value="$(arg RESIZE_RATE)" />
+      <param name="use_messages" value="false" />
     </node>
 
     <!-- nodes for remote machine -->
+    <node pkg="image_transport" type="republish" name="republish_log_polar_image_resizer"
+	  args="compressed" output="screen">
+      <remap from="in" to="log_polar_image_resizer/image" />
+      <remap from="out" to="~image" />
+    </node>
+
     <node pkg="resized_image_transport" type="image_resizer" name="log_polar_image_enlarger"
-	  output="screen">
-      <remap from="~input/image" to="log_polar_image_resizer/image" />
+    	  output="screen">
+      <remap from="~input/image" to="republish_log_polar_image_resizer/image" />
       <remap from="~output/image" to="~image" />
       <param name="width" value="$(arg WIDTH)" />
       <param name="height" value="$(arg HEIGHT)" />
+      <param name="use_camera_info" value="false"/>
+      <param name="use_messages" value="false" />
     </node>
 
     <node pkg="resized_image_transport" type="log_polar" name="inverse_log_polar"
@@ -39,6 +52,8 @@
       <remap from="~output/image" to="~image" />
       <param name="width" value="$(arg WIDTH)" />
       <param name="height" value="$(arg HEIGHT)" />
+      <param name="use_camera_info" value="false"/>
+      <param name="use_messages" value="false" />
     </node>
   </group>
 </launch>

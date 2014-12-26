@@ -45,8 +45,10 @@ namespace jsk_pcl_ros
   {
     DiagnosticNodelet::onInit();
     listener_ = TfListenerSingleton::getInstance();
+    last_publish_time_ = ros::Time::now();
     pnh_->param("fixed_frame_id", fixed_frame_id_, std::string("odom"));
     pnh_->param("max_image_buffer", max_image_buffer_, 5);
+    pnh_->param("rate", rate_, 1.0);
     pub_pose_ = pnh_->advertise<geometry_msgs::PoseStamped>(
       "output/direction", 1);
     pub_roi_ = pnh_->advertise<jsk_pcl_ros::PosedCameraInfo>(
@@ -166,17 +168,21 @@ namespace jsk_pcl_ros
     latest_camera_info_msg_ = info_msg;
 
     if (snapshot_buffer_.size() != 0) {
-      cv::Mat concatenated_image;
-      std::vector<cv::Mat> images;
-      //ROS_INFO("%lu images", snapshot_buffer_.size());
-      for (size_t i = 0; i < snapshot_buffer_.size(); i++) {
-        images.push_back(snapshot_buffer_[i]->image_);
+      ros::Time now = ros::Time::now();
+      if ((now - last_publish_time_).toSec() > 1.0 / rate_) {
+        cv::Mat concatenated_image;
+        std::vector<cv::Mat> images;
+        //ROS_INFO("%lu images", snapshot_buffer_.size());
+        for (size_t i = 0; i < snapshot_buffer_.size(); i++) {
+          images.push_back(snapshot_buffer_[i]->image_);
+        }
+        cv::hconcat(images, concatenated_image);
+        cv_bridge::CvImage concatenate_bridge(latest_camera_info_msg_->header, // ??
+                                              sensor_msgs::image_encodings::BGR8,
+                                              concatenated_image);
+        image_pub_.publish(concatenate_bridge.toImageMsg());
+        last_publish_time_ = now;
       }
-      cv::hconcat(images, concatenated_image);
-      cv_bridge::CvImage concatenate_bridge(latest_camera_info_msg_->header, // ??
-                                            sensor_msgs::image_encodings::BGR8,
-                                            concatenated_image);
-      image_pub_.publish(concatenate_bridge.toImageMsg());
     }
     
   }

@@ -11,12 +11,13 @@ find_package(OpenCV REQUIRED)
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
   cfg/ImageResizer.cfg
+  cfg/LogPolar.cfg
   )
 
 catkin_package(
     DEPENDS # opencv2
     CATKIN_DEPENDS cv_bridge sensor_msgs image_transport std_srvs message_runtime
-    INCLUDE_DIRS # TODO include
+    INCLUDE_DIRS include # TODO include
     LIBRARIES # TODO
 )
 
@@ -30,10 +31,15 @@ jsk_nodelet(src/image_resizer_nodelet.cpp
   "resized_image_transport/ImageResizer"
   "image_resizer"
   nodelet_sources nodelet_executables)
-add_library(resized_image_transport SHARED ${nodelet_sources})
+jsk_nodelet(src/log_polar_nodelet.cpp
+  "resized_image_transport/LogPolar"
+  "log_polar"
+  nodelet_sources nodelet_executables)
+add_library(resized_image_transport SHARED ${nodelet_sources}
+  src/image_processing_nodelet.cpp)
   
 add_definitions("-O2 -g")
-include_directories(${catkin_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS})
 target_link_libraries(resized_image_transport ${catkin_LIBRARIES} ${OpenCV_LIBS})
 add_dependencies(resized_image_transport ${PROJECT_NAME}_gencfg)
 
@@ -45,10 +51,12 @@ install(TARGETS image_resizer resized_image_transport ${nodelet_executables}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   )
 
+install(DIRECTORY include/${PROJECT_NAME}/ 
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
 install(DIRECTORY launch/
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         PATTERN ".svn" EXCLUDE
         )
 install(FILES nodelet.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-#install(FILES jsk_pcl_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+

@@ -2,6 +2,12 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.30 (2014-12-24)
+-------------------
+
+0.1.29 (2014-12-24)
+-------------------
+
 0.1.28 (2014-12-17)
 -------------------
 
@@ -104,4 +110,4 @@ Changelog for package imagesift
 * moved jsk_vision to jsk_visioncommon
 * moved vision packages to jsk_vision
 * moved posedetection_msgs, sift processing, and other packages to jsk_common and jsk_perception
-* Contributors: Kei Okada, k-okada, rosen
+* Contributors: Kei Okada, rosen

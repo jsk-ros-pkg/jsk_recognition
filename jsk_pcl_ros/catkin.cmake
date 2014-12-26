@@ -56,6 +56,7 @@ add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg
   SparseOccupancyGridArray.msg
   DepthErrorResult.msg
   ParallelEdge.msg ParallelEdgeArray.msg
+  PosedCameraInfo.msg
   ICPResult.msg)
 
 add_service_files(FILES SwitchTopic.srv

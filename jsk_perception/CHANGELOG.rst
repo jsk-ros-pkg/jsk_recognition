@@ -2,6 +2,14 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.30 (2014-12-24)
+-------------------
+
+0.1.29 (2014-12-24)
+-------------------
+* added some more parameters for detection
+* Contributors: Yu Ohara
+
 0.1.28 (2014-12-17)
 -------------------
 * added param to set threshold of best_Windoq
@@ -49,7 +57,7 @@ Changelog for package jsk_perception
 * calc existance probability
 * removed kalmanlib.l from jsk_perception
 * add kalman-filter library
-* Contributors: Kamada Hitoshi, Kei Okada, Ryohei Ueda, Hitoshi Kamada
+* Contributors: Ryohei Ueda, Hitoshi Kamada, Kei Okada, Kamada Hitoshi
 
 0.1.23 (2014-10-09)
 -------------------
@@ -58,7 +66,7 @@ Changelog for package jsk_perception
 * modified program to select which camera_info to sub
 * renamed camera_node to uvc_camera_node, and added some options
 * modified detection-interface.l
-* Contributors: Ryohei Ueda, Yu Ohara, Kamada
+* Contributors: Ryohei Ueda, Kamada, Yu Ohara
 
 0.1.22 (2014-09-24)
 -------------------
@@ -101,7 +109,7 @@ Changelog for package jsk_perception
 0.1.12 (2014-07-24)
 -------------------
 * fix to use catkin to link rospack
-* Contributors: Dave Coleman, Kei Okada
+* Contributors: Kei Okada, Dave Coleman
 
 0.1.11 (2014-07-08)
 -------------------
@@ -112,7 +120,7 @@ Changelog for package jsk_perception
 -------------------
 * adding oriented_gradient_node
 * add calc_flow program to calc optical flow
-* Contributors: Hiroaki Yaguchi, Ryohei Ueda
+* Contributors: Ryohei Ueda, Hiroaki Yaguchi
 
 0.1.9 (2014-07-01)
 ------------------
@@ -125,7 +133,7 @@ Changelog for package jsk_perception
 * add program to compute color histogram (rgb and hsv color space)
 * maked configure_file to create imagesurf, imagestar and imagebrisk automatically
 * added the programs to use cv_detection
-* Contributors: Ryohei Ueda, Yu Ohara, Yusuke Furuta
+* Contributors: Ryohei Ueda, Yusuke Furuta, Yu Ohara
 
 0.1.7 (2014-05-31)
 ------------------
@@ -143,7 +151,7 @@ Changelog for package jsk_perception
 
 * add sparse_image program to jsk_percepton
 * make edge_detector nodelet class
-* Contributors: Ryohei Ueda, furushchev
+* Contributors: Ryohei Ueda, Yuki Furuta
 * Merge pull request `#47 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/47>`_ from k-okada/add_rosbuild
 * Contributors: Kei Okada
 
@@ -268,4 +276,4 @@ Changelog for package jsk_perception
 * empty window name to disable window, point_pose_extractor
 * move posedetectiondb to jsk_visioncommon
 * moved jsk_vision to jsk_visioncommon
-* Contributors: HiroyukiMikita, Kei Okada, Haseru Chen, Yuki Furuta, Yuto Inagaki, Kazuto Murai, Manabu Saito, Rosen Dinakov, Youhei Kakiuchi
+* Contributors: Haseru Chen, Kazuto Murai, Youhei Kakiuchi, Yuki Furuta, Kei Okada, Yuto Inagaki, Manabu Saito, Rosen Dinakov, HiroyukiMikita

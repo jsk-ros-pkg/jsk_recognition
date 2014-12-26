@@ -60,7 +60,7 @@ namespace jsk_pcl_ros
       return;
     }
     if (use_imu_perpendicular_ || use_imu_parallel_) {
-      tf_listener_.reset(new tf::TransformListener());
+      tf_listener_ = TfListenerSingleton::getInstance();
     }
     ////////////////////////////////////////////////////////
     // publishers

@@ -54,7 +54,7 @@
    (ros::subscribe (format nil "~A/selected_index" *nodename*) jsk_pcl_ros::Int32Stamped #'send self :selected-index-callback)
 
    (setq *tfl* (instance ros::transform-listener :init))
-   (setq *camera-frame* "head_mount_link")
+   (setq *camera-frame* (ros::get-param "~camera_frame" "head_mount_link"))
 
    (ros::spin)
    )

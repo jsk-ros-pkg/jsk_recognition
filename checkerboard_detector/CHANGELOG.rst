@@ -2,6 +2,29 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.30 (2014-12-24)
+-------------------
+
+0.1.29 (2014-12-24)
+-------------------
+* Move multisense specific lines from capture.launch to capture_multisense_training_data.launch
+* Added new nodelet to capture training data of stereo camera to
+  jsk_pcl_ros and update launch files to capture training data of multisense
+* Add launch file to capture training data with two-checker-boarded table
+* Add launch file for capture board: publishing center of the capture
+  board calculated from two checker board
+* Hotfix for mulformed multisense camera_info. Their K and R matrix and
+  distirtion parameter is not set
+* Add script to estimate position of the camera using two checker boards
+* Stabilize color inverted asymetrical circle detection
+  1) use cv::bitwise_not to invert color
+  2) use cv::CALIB_CB_CLUSTERING when detecting circlesGrid
+* Use OpenCV C++ API in checkerboard_detector
+* Support color inversion to distinguish white-black circle pattern
+  and black-white circle pattern
+* Support ciecle and acircle pattern
+* Contributors: Ryohei Ueda
+
 0.1.28 (2014-12-17)
 -------------------
 
@@ -12,7 +35,7 @@ Changelog for package checkerboard_detector
   update objectdetection_tf_publisher for publishing simple tf
 * update objectdetection_tf_publisher for publishing simple tf
 * add / to service name
-* Contributors: Kei Okada, Yohei Kakiuchi, Yohei Kakiuchi, Yuto Inagaki
+* Contributors: Yohei Kakiuchi, Kei Okada, Yuto Inagaki
 
 0.1.26 (2014-11-23)
 -------------------
@@ -129,4 +152,4 @@ Changelog for package checkerboard_detector
 * moved jsk_vision to jsk_visioncommon
 * moved vision packages to jsk_vision
 * moved posedetection_msgs, sift processing, and other packages to jsk_common and jsk_perception
-* Contributors: Kei Okada, k-okada, kazuto, nozawa, rosen, ueda, youhei
+* Contributors: nozawa, kazuto, Kei Okada, youhei, rosen, Ryohei Ueda

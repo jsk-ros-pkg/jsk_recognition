@@ -2,6 +2,55 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.30 (2014-12-24)
+-------------------
+* Publish specified ROI as PosedCameraInfo in IntermittentImageAnnotator
+* Use TfListenerSingleton to get instance of tf::TransformListener
+* Contributors: Ryohei Ueda
+
+0.1.29 (2014-12-24)
+-------------------
+* Add document about IntermittentImageAnnotator
+* [LINEMODDetector] Do not use small templates
+* [CaptureStereoSynchronizer] Does not capture near samples
+* Add IntermittentImageAnnotator to select ROI out of several snapshots
+* [LINEMODDetector] Use glob to specify template files for linemod
+* [LINEMODTrainer] Simulate samples rotating around z-axis
+* Add projective ICP registration
+* Write PCD file as binary compressed in LINEMODTrainer
+* Load linemod training data from pcd and sqmmt files and use OpenMP
+  to speed-up it
+* Synchronize reference pointcloud and input pointcloud in icp registration
+  to refine result of other recognition
+* LINEMODDetector: add documentation and load template after setting
+  parameters and publish the result of recognition as pointcloud
+* Add LINEMODDetector and implement LINEMODTrainer and LINEMODDetector in
+  one linemod_nodelet.cpp
+* fix transform mistake
+* Fix linemod template format. lmt is just a tar file of pcd and sqmm files
+* rotate pose of box acoording to looking direction
+* Add launch file to reconstruct 3d pointcloud from captured by CaptureStereoSynchronizer
+* Add nodelet to train linemod
+* Move multisense specific lines from capture.launch to capture_multisense_training_data.launch
+* Added new nodelet to capture training data of stereo camera to
+  jsk_pcl_ros and update launch files to capture training data of multisense
+* Add new nodelet to generate mask image from PointIndices
+* Clip Pointcloud and publish the indices inside of a box in AttentionClipper
+* Added topic interface to specify the region by jsk_pcl_ros::BoundingBox
+* add parameter to choose keeping organized
+* Add utility launch file to resize pointcloud and fix initial value of
+  use_indices_ in resize_points_publisher_nodelet.cpp
+* Support pointclouds include nan in EuclideanClustering
+* Remove diagnostic_nodelet.{cpp,h} and connection_based_nodelet.{cpp,h}
+  of jsk_pcl_ros and use them of jsk_topic_tools
+* Use jsk_topic_tools::ConnectionBasedNodelet in DepthImageError, EdgeDepthReginement, EdgebasedCubeFinder, EuclideanClusterExtraction and GridSampler
+* add parameter
+* print handle estimation
+* use handle_estimator.l instead of nodelet version
+* add euslisp handle estimator
+* handle_estimator : change condition or to and
+* Contributors: Ryohei Ueda, Yusuke Furuta, Chi Wun Au, Yuto Inagaki
+
 0.1.28 (2014-12-17)
 -------------------
 * Publish attention region mask from AttentionClipper
@@ -28,7 +77,7 @@ Changelog for package jsk_pcl_ros
 * changet pointcloud_screen_point not to use jsconnection_based_nodelet
 * Use jsk_topic_tools::ConnectionBasedNodelet in BilateralFilter,
   BorderEstimator, BoundingBoxFilter and so on
-* Contributors: Ryohei Ueda, Shunichi Nozawa, Yuto Inagaki, Yu Ohara
+* Contributors: Ryohei Ueda, Shunichi Nozawa, Yu Ohara, Yuto Inagaki
 
 0.1.26 (2014-11-23)
 -------------------
@@ -127,7 +176,7 @@ Changelog for package jsk_pcl_ros
 * Support contiuous model building on EnvironmentPlaneModeling and add
   a launch file for footstep planning recogniton
 * Add utitlity service interface to register completed maps
-* Contributors: JSK applications, Kei Okada, Ryohei Ueda, Yu Ohara, Yuto Inagaki, Chi Wun Au, Yu Ohara
+* Contributors: Kei Okada, Yuto Inagaki, JSK applications, Chi Wun Au, Ryohei Ueda, Yu Ohara
 
 0.1.23 (2014-10-09)
 -------------------
@@ -192,7 +241,7 @@ Changelog for package jsk_pcl_ros
 * Fix topic relaying of openni_remote for openni_launch on hydro
 * Add new nodelet to filter organized pointcloud based on x-y index rather
   than 3-D position value.
-* Contributors: Ryohei Ueda, aginika, tarukosu
+* Contributors: Ryohei Ueda, Yusuke Furuta, Yuto Inagaki
 
 0.1.22 (2014-09-24)
 -------------------
@@ -247,7 +296,7 @@ Changelog for package jsk_pcl_ros
 * use colorCategory20 function to colorize pointcloud in ClusterPointIndicesDecomposer
 * visualizing connection of planes with lines in OrganizedMultiPlaneSegmentation
 * use rosparam_utils of jsk_topic_tools in StaticPolygonArrayPublisher
-* Contributors: Ryohei Ueda, ohara, wesleypchan
+* Contributors: Ryohei Ueda, wesleypchan, ohara
 
 0.1.17 (2014-09-07)
 -------------------
@@ -318,7 +367,7 @@ Changelog for package jsk_pcl_ros
   * publish u/v coordinates from checkerboard_detector.
   * frame_id broadcasted from objectdetection_tf_publisher.py is configurable
 * copy the header of the input cloud to the output cloud in SelectedClusterPublisher
-* Contributors: Ryohei Ueda, Yuto Inagaki, Eisoku Kuroiwa, Yusuke Furuta
+* Contributors: Ryohei Ueda, Eisoku Kuroiwa, Yusuke Furuta, Yuto Inagaki
 
 0.1.11 (2014-07-08)
 -------------------
@@ -391,7 +440,7 @@ Changelog for package jsk_pcl_ros
 * new nodelet to transform PolygonArray and ModelCoefficientsArray
 * add nodelet to publish static jsk_pcl_ros/PolygonArray with timestamp
   synchronized with the pointclouds
-* Contributors: Ryohei Ueda, Yuto Inagaki, Masaki Murooka, Yusuke Furuta
+* Contributors: Ryohei Ueda, Yusuke Furuta, Masaki Murooka, Yuto Inagaki
 
 0.1.7 (2014-05-31)
 ------------------
@@ -495,12 +544,12 @@ Changelog for package jsk_pcl_ros
 * make paritcal_filter_tracking_nodelet publish tracked object tf trasnformation
 * add two launch files to run openni on remote machine
 * add octree_change_detector
-* Contributors: Ryohei Ueda, Yohei Kakiuchi, Yuto Inagaki, Masaki Murooka, Shunichi Nozawa, Yusuke Furuta, Ryo Terasawa, Chan Wesley, Kei Okada
+* Contributors: Chan Wesley, Shunichi Nozawa, Yuto Inagaki, Masaki Murooka, Ryo Terasawa, Ryohei Ueda, Yohei Kakiuchi, Yusuke Furuta, Kei Okada
 
 0.1.4 (2014-04-25)
 ------------------
 * fixed compile error jsk_pcl_ros
-* Contributors: Kei Okada, Ryohei Ueda, Yuto Inagaki
+* Contributors: Ryohei Ueda, Kei Okada, Yuto Inagaki
 
 0.1.3 (2014-04-12)
 ------------------
@@ -785,4 +834,4 @@ Changelog for package jsk_pcl_ros
 * remove jskpointcloud dependency from jsk_pcl_ros
 * copy depth_image_creator from unreleased
 * add jsk_pcl_ros (copy from unreleased repository)
-* Contributors: Kei Okada, Ryohei Ueda, Yuto Inagaki, Haseru Chen, Yuki Furuta, Kazuto Murase, Chen Wesley, Youhei Kakiuchi
+* Contributors: Haseru Chen, Youhei Kakiuchi, Yuki Furuta, Kei Okada, Yuto Inagaki, Chen Wesley, Kazuto Murase, Ryohei Ueda

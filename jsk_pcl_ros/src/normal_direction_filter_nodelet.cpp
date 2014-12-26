@@ -54,7 +54,7 @@ namespace jsk_pcl_ros
       direction, static_direction_);
     }
     else {
-      tf_listener_.reset(new tf::TransformListener);
+      tf_listener_ = TfListenerSingleton::getInstance();
     }
     
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);

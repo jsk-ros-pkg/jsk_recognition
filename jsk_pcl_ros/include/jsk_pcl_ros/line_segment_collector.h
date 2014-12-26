@@ -46,7 +46,6 @@
 #include <jsk_pcl_ros/ClusterPointIndices.h>
 #include <jsk_pcl_ros/ModelCoefficientsArray.h>
 #include <sensor_msgs/JointState.h>
-#include <tf/transform_listener.h>
 #include "jsk_pcl_ros/line_segment_detector.h"
 #include <jsk_topic_tools/time_accumulator.h>
 #include <jsk_pcl_ros/LineSegmentCollectorConfig.h>

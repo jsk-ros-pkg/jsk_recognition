@@ -48,7 +48,7 @@ namespace jsk_pcl_ros
       NODELET_FATAL("~frame_id is not specified");
       return;
     }
-    listener_.reset(new tf::TransformListener());
+    listener_ = TfListenerSingleton::getInstance();
     polygons_pub_ = advertise<jsk_pcl_ros::PolygonArray>(*pnh_, "output_polygons", 1);
     coefficients_pub_ = advertise<jsk_pcl_ros::ModelCoefficientsArray>(
       *pnh_, "output_coefficients", 1);

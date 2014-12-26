@@ -1,6 +1,6 @@
 <package>
   <name>jsk_perception</name>
-  <version>0.1.28</version>
+  <version>0.1.30</version>
 
   <description>
 
@@ -18,7 +18,6 @@
   <build_depend>mk</build_depend>
   <build_depend>git</build_depend>
   <build_depend>rospy</build_depend>
-  <build_depend>roseus</build_depend>
   <build_depend>imagesift</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>sensor_msgs</build_depend>
@@ -43,7 +42,7 @@
   <build_depend>jsk_pcl_ros</build_depend>
 
   <run_depend>rospy</run_depend>
-  <run_depend>roseus</run_depend>
+  <!-- <run_depend>roseus</run_depend> -->
   <run_depend>imagesift</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>sensor_msgs</run_depend>

@@ -2,6 +2,12 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.30 (2014-12-24)
+-------------------
+* Publish specified ROI as PosedCameraInfo in IntermittentImageAnnotator
+* Use TfListenerSingleton to get instance of tf::TransformListener
+* Contributors: Ryohei Ueda
+
 0.1.29 (2014-12-24)
 -------------------
 * Add document about IntermittentImageAnnotator
@@ -71,7 +77,7 @@ Changelog for package jsk_pcl_ros
 * changet pointcloud_screen_point not to use jsconnection_based_nodelet
 * Use jsk_topic_tools::ConnectionBasedNodelet in BilateralFilter,
   BorderEstimator, BoundingBoxFilter and so on
-* Contributors: Ryohei Ueda, Shunichi Nozawa, Yuto Inagaki, Yu Ohara
+* Contributors: Ryohei Ueda, Shunichi Nozawa, Yu Ohara, Yuto Inagaki
 
 0.1.26 (2014-11-23)
 -------------------
@@ -538,7 +544,7 @@ Changelog for package jsk_pcl_ros
 * make paritcal_filter_tracking_nodelet publish tracked object tf trasnformation
 * add two launch files to run openni on remote machine
 * add octree_change_detector
-* Contributors: Chan Wesley, Shunichi Nozawa, Yuto Inagaki, Masaki Murooka, Yohei Kakiuchi, Ryohei Ueda, Ryo Terasawa, Yusuke Furuta, Kei Okada
+* Contributors: Chan Wesley, Shunichi Nozawa, Yuto Inagaki, Masaki Murooka, Ryo Terasawa, Ryohei Ueda, Yohei Kakiuchi, Yusuke Furuta, Kei Okada
 
 0.1.4 (2014-04-25)
 ------------------

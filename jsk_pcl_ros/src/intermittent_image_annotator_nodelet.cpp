@@ -49,6 +49,8 @@ namespace jsk_pcl_ros
     pnh_->param("max_image_buffer", max_image_buffer_, 5);
     pub_pose_ = pnh_->advertise<geometry_msgs::PoseStamped>(
       "output/direction", 1);
+    pub_roi_ = pnh_->advertise<jsk_pcl_ros::PosedCameraInfo>(
+      "output/roi", 1);
     // resize ring buffer
     snapshot_buffer_ = boost::circular_buffer<SnapshotInformation::Ptr>(
       max_image_buffer_);
@@ -138,6 +140,19 @@ namespace jsk_pcl_ros
       ros_pose.header.stamp = latest_image_msg_->header.stamp;
       ros_pose.header.frame_id = fixed_frame_id_;
       pub_pose_.publish(ros_pose);
+
+      // publish ROI
+      jsk_pcl_ros::PosedCameraInfo camera_info;
+      camera_info.header.stamp = latest_image_msg_->header.stamp;
+      camera_info.header.frame_id = fixed_frame_id_;
+      camera_info.camera_info
+        = sensor_msgs::CameraInfo(info->camera_.cameraInfo());
+      camera_info.camera_info.roi.x_offset = x0_wo_offset;
+      camera_info.camera_info.roi.y_offset = y0;
+      camera_info.camera_info.roi.width = x1_wo_offset - x0_wo_offset;
+      camera_info.camera_info.roi.height = y1 - y0;
+      tf::poseEigenToMsg(info->camera_pose_, camera_info.offset);
+      pub_roi_.publish(camera_info);
     }
   }
   

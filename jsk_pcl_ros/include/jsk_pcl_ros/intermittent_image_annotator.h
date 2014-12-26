@@ -48,6 +48,8 @@
 #include <boost/circular_buffer.hpp>
 #include <Eigen/Geometry>
 #include <geometry_msgs/PolygonStamped.h>
+#include <jsk_pcl_ros/PosedCameraInfo.h>
+
 namespace jsk_pcl_ros
 {
   class SnapshotInformation
@@ -108,6 +110,7 @@ namespace jsk_pcl_ros
     ros::ServiceServer clear_service_;
     ros::ServiceServer request_service_;
     ros::Publisher pub_pose_;
+    ros::Publisher pub_roi_;
     sensor_msgs::Image::ConstPtr latest_image_msg_;
     sensor_msgs::CameraInfo::ConstPtr latest_camera_info_msg_;
     

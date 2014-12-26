@@ -49,7 +49,8 @@
 
 #include <jsk_pcl_ros/MultiPlaneSACSegmentationConfig.h>
 #include <jsk_topic_tools/connection_based_nodelet.h>
-#include <tf/transform_listener.h>
+#include "jsk_pcl_ros/tf_listener_singleton.h"
+
 
 ////////////////////////////////////////////////////////
 // messages
@@ -133,7 +134,7 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<ClusterPointIndices> sub_clusters_;
     message_filters::Subscriber<sensor_msgs::Imu> sub_imu_;
     boost::mutex mutex_;
-    boost::shared_ptr<tf::TransformListener> tf_listener_;
+    tf::TransformListener* tf_listener_;
     
     ////////////////////////////////////////////////////////
     // parameters

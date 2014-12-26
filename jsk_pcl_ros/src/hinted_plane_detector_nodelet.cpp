@@ -55,7 +55,7 @@ namespace jsk_pcl_ros {
 
     input_.reset(new pcl::PointCloud<pcl::PointXYZ>);
     
-    tf_listener_.reset(new tf::TransformListener);
+    tf_listener_ = TfListenerSingleton::getInstance();
     marker_pub_ = advertise<visualization_msgs::Marker>(*pnh_, "marker", 10);
     debug_hint_centroid_pub_ = advertise<geometry_msgs::PointStamped>(*pnh_, "debug_hint_centroid", 10);
     debug_plane_points_pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "debug_plane_points", 10);

@@ -47,7 +47,8 @@
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include <sensor_msgs/Imu.h>
-#include <tf/transform_listener.h>
+#include "jsk_pcl_ros/tf_listener_singleton.h"
+
 
 namespace jsk_pcl_ros
 {
@@ -93,7 +94,7 @@ namespace jsk_pcl_ros
     Eigen::Vector3f static_direction_;
     double eps_angle_;
     double angle_offset_;
-    boost::shared_ptr<tf::TransformListener> tf_listener_;
+    tf::TransformListener* tf_listener_;
     bool use_imu_;
     
   private:

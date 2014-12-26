@@ -45,7 +45,8 @@
 #include <jsk_pcl_ros/PolygonArray.h>
 #include <jsk_pcl_ros/ModelCoefficientsArray.h>
 
-#include <tf/transform_listener.h>
+#include "jsk_pcl_ros/tf_listener_singleton.h"
+
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
@@ -76,7 +77,7 @@ namespace jsk_pcl_ros
     virtual void subscribe();
     virtual void unsubscribe();
     ros::Publisher polygons_pub_, coefficients_pub_;
-    boost::shared_ptr<tf::TransformListener> listener_;
+    tf::TransformListener* listener_;
     std::string frame_id_;
     message_filters::Subscriber<jsk_pcl_ros::PolygonArray> sub_polygons_;
     message_filters::Subscriber<jsk_pcl_ros::ModelCoefficientsArray> sub_coefficients_;

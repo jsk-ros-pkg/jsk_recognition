@@ -2,6 +2,9 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.30 (2014-12-24)
+-------------------
+
 0.1.29 (2014-12-24)
 -------------------
 * Move multisense specific lines from capture.launch to capture_multisense_training_data.launch

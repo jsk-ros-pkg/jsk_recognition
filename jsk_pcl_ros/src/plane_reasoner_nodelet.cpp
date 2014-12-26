@@ -45,7 +45,7 @@ namespace jsk_pcl_ros
     // Diagnostics
     ////////////////////////////////////////////////////////
     DiagnosticNodelet::onInit();
-    tf_listener_.reset(new tf::TransformListener());
+    tf_listener_ = TfListenerSingleton::getInstance();
     
     ////////////////////////////////////////////////////////
     // Dynamic Reconfigure

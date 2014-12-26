@@ -43,7 +43,7 @@ namespace jsk_pcl_ros
   void TransformPointcloudInBoundingBox::onInit()
   {
     PCLNodelet::onInit();
-    tf_listener_.reset(new tf::TransformListener());
+    tf_listener_ = TfListenerSingleton::getInstance();
     ////////////////////////////////////////////////////////
     // pulishers
     ////////////////////////////////////////////////////////

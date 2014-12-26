@@ -42,7 +42,7 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
-#include <tf/transform_listener.h>
+#include "jsk_pcl_ros/tf_listener_singleton.h"
 #include <eigen_conversions/eigen_msg.h>
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <pcl/common/transforms.h>
@@ -106,7 +106,7 @@ namespace jsk_pcl_ros
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     ros::Publisher pub_cloud_;
     ros::Publisher pub_offset_pose_;
-    boost::shared_ptr<tf::TransformListener> tf_listener_;
+    tf::TransformListener* tf_listener_;
   private:
     
   };

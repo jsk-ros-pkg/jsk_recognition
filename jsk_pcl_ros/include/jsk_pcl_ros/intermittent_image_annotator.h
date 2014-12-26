@@ -102,6 +102,8 @@ namespace jsk_pcl_ros
     // ROS variables
     ////////////////////////////////////////////////////////
     tf::TransformListener* listener_;
+    double rate_;
+    ros::Time last_publish_time_;
     image_transport::Publisher image_pub_;
     image_transport::CameraSubscriber image_sub_;
     boost::mutex mutex_;

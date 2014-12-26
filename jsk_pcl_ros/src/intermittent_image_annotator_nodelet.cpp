@@ -40,7 +40,8 @@
 #include <eigen_conversions/eigen_msg.h>
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <visualization_msgs/Marker.h>
-
+#include "jsk_pcl_ros/geo_util.h"
+#include <pcl/filters/extract_indices.h>
 namespace jsk_pcl_ros
 {
   void IntermittentImageAnnotator::onInit()
@@ -51,8 +52,12 @@ namespace jsk_pcl_ros
     pnh_->param("fixed_frame_id", fixed_frame_id_, std::string("odom"));
     pnh_->param("max_image_buffer", max_image_buffer_, 5);
     pnh_->param("rate", rate_, 1.0);
+    pnh_->param("store_pointcloud", store_pointcloud_, false);
+    pnh_->param("keep_organized", keep_organized_, false);
     pub_pose_ = pnh_->advertise<geometry_msgs::PoseStamped>(
       "output/direction", 1);
+    pub_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>(
+      "output/cloud", 1);
     pub_roi_ = pnh_->advertise<jsk_pcl_ros::PosedCameraInfo>(
       "output/roi", 1);
     pub_marker_ = pnh_->advertise<visualization_msgs::Marker>(
@@ -69,6 +74,11 @@ namespace jsk_pcl_ros
     rect_sub_ = pnh_->subscribe("output/screenrectangle", 1,
                                 &IntermittentImageAnnotator::rectCallback,
                                 this);
+    if (store_pointcloud_) {
+      cloud_sub_ = pnh_->subscribe("input/cloud", 1,
+                                   &IntermittentImageAnnotator::cloudCallback,
+                                   this);
+    }
     shutter_service_ = pnh_->advertiseService(
       "shutter",
       &IntermittentImageAnnotator::shutterCallback, this);
@@ -195,9 +205,81 @@ namespace jsk_pcl_ros
       marker.color.a = 1.0;
       marker.color.r = 1.0;
       pub_marker_.publish(marker);
+
+      // crop pointcloud
+      if (store_pointcloud_) {
+        publishCroppedPointCloud(info->cloud_,
+                                 A_3d, B_3d, C_3d, D_3d,
+                                 info->camera_pose_);
+      }
     }
   }
   
+
+  void IntermittentImageAnnotator::publishCroppedPointCloud(
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
+    const cv::Point3d& A, const cv::Point3d& B,
+    const cv::Point3d& C, const cv::Point3d& D,
+    const Eigen::Affine3d& pose)
+  {
+    Eigen::Vector3f A_eigen, B_eigen, C_eigen, D_eigen;
+    pointFromXYZToVector<cv::Point3d, Eigen::Vector3f>(
+        A, A_eigen);
+    pointFromXYZToVector<cv::Point3d, Eigen::Vector3f>(
+        B, B_eigen);
+    pointFromXYZToVector<cv::Point3d, Eigen::Vector3f>(
+        C, C_eigen);
+    pointFromXYZToVector<cv::Point3d, Eigen::Vector3f>(
+        D, D_eigen);
+    Eigen::Affine3f posef;
+    convertEigenAffine3(pose, posef);
+    Eigen::Vector3f A_global = posef * A_eigen;
+    Eigen::Vector3f B_global = posef * B_eigen;
+    Eigen::Vector3f C_global = posef * C_eigen;
+    Eigen::Vector3f D_global = posef * D_eigen;
+    Eigen::Vector3f O_global = posef.translation();
+    Vertices vertices0, vertices1, vertices2, vertices3;
+    vertices0.push_back(O_global); vertices0.push_back(A_global); vertices0.push_back(D_global);
+    vertices1.push_back(O_global); vertices1.push_back(B_global); vertices1.push_back(A_global);
+    vertices2.push_back(O_global); vertices2.push_back(C_global); vertices2.push_back(B_global);
+    vertices3.push_back(O_global); vertices3.push_back(D_global); vertices3.push_back(C_global);
+    Polygon::Ptr plane0 (new Polygon(vertices0));
+    Polygon::Ptr plane1 (new Polygon(vertices1));
+    Polygon::Ptr plane2 (new Polygon(vertices2));
+    Polygon::Ptr plane3 (new Polygon(vertices3));
+    pcl::PointIndices::Ptr indices(new pcl::PointIndices);
+    for (size_t i = 0; i < cloud->points.size(); i++) {
+      pcl::PointXYZRGB p = cloud->points[i];
+      Eigen::Vector3f pf = p.getVector3fMap();
+      if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
+        if (plane0->signedDistanceToPoint(pf) > 0 &&
+            plane1->signedDistanceToPoint(pf) > 0 &&
+            plane2->signedDistanceToPoint(pf) > 0 &&
+            plane3->signedDistanceToPoint(pf) > 0) {
+          indices->indices.push_back(i);
+        }
+      }
+    }
+    pcl::ExtractIndices<pcl::PointXYZRGB> ex;
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr output_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+    ex.setInputCloud(cloud);
+    ex.setKeepOrganized(keep_organized_);
+    ex.setIndices(indices);
+    ex.filter(*output_cloud);
+    sensor_msgs::PointCloud2 ros_cloud;
+    pcl::toROSMsg(*output_cloud, ros_cloud);
+    ros_cloud.header.stamp = latest_image_msg_->header.stamp;
+    ros_cloud.header.frame_id = fixed_frame_id_;
+    pub_cloud_.publish(ros_cloud);
+  }
+
+  void IntermittentImageAnnotator::cloudCallback(
+      const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    latest_cloud_msg_ = cloud_msg;
+  }
+
   void IntermittentImageAnnotator::cameraCallback(
       const sensor_msgs::Image::ConstPtr& image_msg,
       const sensor_msgs::CameraInfo::ConstPtr& info_msg)
@@ -257,6 +339,29 @@ namespace jsk_pcl_ros
           info->camera_pose_ = eigen_transform;
           info->camera_ = camera;
           info->image_ = cv_ptr->image;
+          if (store_pointcloud_) {
+            // use pointcloud
+            if (!latest_cloud_msg_) {
+              NODELET_ERROR("no pointcloud is available");
+              return false;
+            }
+            // transform pointcloud to fixed frame
+            pcl::PointCloud<pcl::PointXYZRGB>::Ptr 
+                nontransformed_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+            pcl::PointCloud<pcl::PointXYZRGB>::Ptr 
+                transformed_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+            pcl::fromROSMsg(*latest_cloud_msg_, *nontransformed_cloud);
+            if (pcl_ros::transformPointCloud(fixed_frame_id_, 
+                                             *nontransformed_cloud,
+                                             *transformed_cloud,
+                                             *listener_)) {
+              info->cloud_ = transformed_cloud;
+            }
+            else {
+              NODELET_ERROR("failed to transform pointcloud");
+              return false;
+            }
+          }
           snapshot_buffer_.push_back(info);
           return true;
         }

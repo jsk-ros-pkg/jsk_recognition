@@ -1,38 +1,50 @@
-#include "resized_image_transport/image_resizer_nodelet.h"
+#include "resized_image_transport/log_polar_nodelet.h"
 
 namespace resized_image_transport
 {
-  void ImageResizer::onInit(){
+  void LogPolar::onInit(){
     initNodeHandle();
     initReconfigure();
     initParams();
     initPublishersAndSubscribers();
   }
+  
 
-  void ImageResizer::initReconfigure(){
+  void LogPolar::initReconfigure(){
     ReconfigureServer::CallbackType f
-      = boost::bind(&ImageResizer::config_cb, this, _1, _2);
+      = boost::bind(&LogPolar::config_cb, this, _1, _2);
     reconfigure_server_.setCallback(f);
   }
 
-  void ImageResizer::initParams(){
+  void LogPolar::initParams(){
     ImageProcessing::initParams();
     period_ = ros::Duration(1.0);
+    pnh.param("log_polar_scale", log_polar_scale_, 100.0);
+    NODELET_INFO("log polar scale : %f", log_polar_scale_);
+
+    pnh.param("inverse_log_polar", inverse_log_polar_, false);
+    if (inverse_log_polar_){
+      NODELET_INFO("log polar");
+    }else{
+      NODELET_INFO("inverse log polar");
+    }
   }
   
-  void ImageResizer::config_cb ( ImageResizerConfig &config, uint32_t level) {
+  void LogPolar::config_cb ( LogPolarConfig &config, uint32_t level) {
     NODELET_INFO("config_cb");
     resize_x_ = config.resize_scale_x;
     resize_y_ = config.resize_scale_y;
+    log_polar_scale_ = config.log_polar_scale;
     period_ = ros::Duration(1.0/config.msg_par_second);
     verbose_ = config.verbose;
     NODELET_DEBUG("resize_scale_x : %f", resize_x_);
     NODELET_DEBUG("resize_scale_y : %f", resize_y_);
+    NODELET_DEBUG("log_polar_scale : %f", log_polar_scale_);
     NODELET_DEBUG("message period : %f", period_.toSec());
   }
 
   
-  void ImageResizer::process(const sensor_msgs::ImageConstPtr &src_img, const sensor_msgs::CameraInfoConstPtr &src_info,
+  void LogPolar::process(const sensor_msgs::ImageConstPtr &src_img, const sensor_msgs::CameraInfoConstPtr &src_info,
 			 sensor_msgs::ImagePtr &dst_img, sensor_msgs::CameraInfo &dst_info){
     int image_width, image_height;
     if(use_camera_info_){
@@ -50,15 +62,6 @@ namespace resized_image_transport
     double scale_y = dst_height_ ? ((double)dst_height_)/image_height : resize_y_;
 
     cv_bridge::CvImagePtr cv_img = cv_bridge::toCvCopy(src_img);
-
-    cv::Mat tmpmat(height, width, cv_img->image.type());
-    cv::resize(cv_img->image, tmpmat, cv::Size(width, height));
-    cv_img->image = tmpmat;
-
-
-    /*
-
-    cv_bridge::CvImagePtr cv_img = cv_bridge::toCvCopy(src_img);
     IplImage src = cv_img->image;
     IplImage* dst = cvCloneImage(&src);
 
@@ -66,9 +69,8 @@ namespace resized_image_transport
     if ( inverse_log_polar_ ){
       log_polar_flags += CV_WARP_INVERSE_MAP;
     }
-    cvImageResizer( &src, dst, cvPoint2D32f(image_width/2, image_height/2), log_polar_scale_, log_polar_flags);
+    cvLogPolar( &src, dst, cvPoint2D32f(image_width/2, image_height/2), log_polar_scale_, log_polar_flags);
     cv_img->image = dst;
-    */
 
     dst_img = cv_img->toImageMsg();
     if(use_camera_info_){
@@ -90,5 +92,5 @@ namespace resized_image_transport
 }
 
 #include <pluginlib/class_list_macros.h>
-typedef resized_image_transport::ImageResizer ImageResizer;
-PLUGINLIB_EXPORT_CLASS(ImageResizer, nodelet::Nodelet);
+typedef resized_image_transport::LogPolar LogPolar;
+PLUGINLIB_EXPORT_CLASS(LogPolar, nodelet::Nodelet);

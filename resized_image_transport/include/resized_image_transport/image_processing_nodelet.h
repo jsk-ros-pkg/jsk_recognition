@@ -21,7 +21,6 @@
 
 // dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
-#include "resized_image_transport/ImageProcessingConfig.h"
 
 namespace resized_image_transport
 {

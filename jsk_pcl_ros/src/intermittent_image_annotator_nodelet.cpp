@@ -32,12 +32,14 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-
+#define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/intermittent_image_annotator.h"
 #include <tf_conversions/tf_eigen.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <eigen_conversions/eigen_msg.h>
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include <visualization_msgs/Marker.h>
 
 namespace jsk_pcl_ros
 {
@@ -53,6 +55,8 @@ namespace jsk_pcl_ros
       "output/direction", 1);
     pub_roi_ = pnh_->advertise<jsk_pcl_ros::PosedCameraInfo>(
       "output/roi", 1);
+    pub_marker_ = pnh_->advertise<visualization_msgs::Marker>(
+      "output/marker", 1);
     // resize ring buffer
     snapshot_buffer_ = boost::circular_buffer<SnapshotInformation::Ptr>(
       max_image_buffer_);
@@ -115,10 +119,6 @@ namespace jsk_pcl_ros
       int width_offset = width * image_index;
       int x0_wo_offset = x0 - width_offset;
       int x1_wo_offset = x1 - width_offset;
-      // cv::Point2d A(x0_wo_offset, y0);
-      // cv::Point2d B(x0_wo_offset, y1);
-      // cv::Point2d C(x1_wo_offset, y1);
-      // cv::Point2d D(x1_wo_offset, y0);
       cv::Point2d mid((x0_wo_offset + x1_wo_offset) / 2.0,
                       (y0 + y1) / 2.0);
       Eigen::Affine3d pose(info->camera_pose_);
@@ -155,6 +155,46 @@ namespace jsk_pcl_ros
       camera_info.camera_info.roi.height = y1 - y0;
       tf::poseEigenToMsg(info->camera_pose_, camera_info.offset);
       pub_roi_.publish(camera_info);
+      
+      // marker
+      // 2d points
+      cv::Point2d A(x0_wo_offset, y0);
+      cv::Point2d B(x0_wo_offset, y1);
+      cv::Point2d C(x1_wo_offset, y1);
+      cv::Point2d D(x1_wo_offset, y0);
+      // 3d local points
+      cv::Point3d A_3d = info->camera_.projectPixelTo3dRay(A) * 3;
+      cv::Point3d B_3d = info->camera_.projectPixelTo3dRay(B) * 3;
+      cv::Point3d C_3d = info->camera_.projectPixelTo3dRay(C) * 3;
+      cv::Point3d D_3d = info->camera_.projectPixelTo3dRay(D) * 3;
+      cv::Point3d O_3d;
+      // convert to ros point
+      geometry_msgs::Point A_ros, B_ros, C_ros, D_ros, O_ros;
+      pointFromXYZToXYZ<cv::Point3d, geometry_msgs::Point>(A_3d, A_ros);
+      pointFromXYZToXYZ<cv::Point3d, geometry_msgs::Point>(B_3d, B_ros);
+      pointFromXYZToXYZ<cv::Point3d, geometry_msgs::Point>(C_3d, C_ros);
+      pointFromXYZToXYZ<cv::Point3d, geometry_msgs::Point>(D_3d, D_ros);
+      pointFromXYZToXYZ<cv::Point3d, geometry_msgs::Point>(O_3d, O_ros);
+      // build edges
+      visualization_msgs::Marker marker;
+      marker.header.stamp = latest_image_msg_->header.stamp;
+      marker.header.frame_id = fixed_frame_id_;
+      tf::poseEigenToMsg(info->camera_pose_, marker.pose);
+      marker.type = visualization_msgs::Marker::LINE_LIST;
+      marker.points.push_back(O_ros); marker.points.push_back(A_ros);
+      marker.points.push_back(O_ros); marker.points.push_back(B_ros);
+      marker.points.push_back(O_ros); marker.points.push_back(C_ros);
+      marker.points.push_back(O_ros); marker.points.push_back(D_ros);
+      marker.points.push_back(A_ros); marker.points.push_back(B_ros);
+      marker.points.push_back(B_ros); marker.points.push_back(C_ros);
+      marker.points.push_back(C_ros); marker.points.push_back(D_ros);
+      marker.points.push_back(D_ros); marker.points.push_back(A_ros);
+      marker.scale.x = 0.01;
+      marker.scale.y = 0.01;
+      marker.scale.z = 0.01;
+      marker.color.a = 1.0;
+      marker.color.r = 1.0;
+      pub_marker_.publish(marker);
     }
   }
   

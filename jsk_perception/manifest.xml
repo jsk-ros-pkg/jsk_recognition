@@ -9,7 +9,7 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/jsk_perception</url>
   <depend package="rospy"/>
-  <depend package="roseus"/>
+  <!-- <depend package="roseus"/> -->
 
   <!-- for eusmodel_template_* -->
   <depend package="imagesift"/>

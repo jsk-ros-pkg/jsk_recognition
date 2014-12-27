@@ -62,16 +62,22 @@ Represent range of time.
 ### jsk\_pcl/IntermittentImageAnnotator
 #### What Is This
 ![](images/intermittent_image_annotator.png)
+![](images/intermittent_image_annotator_pointcloud_clip.png)
 
 1. Store images when `~shutter` service is called
 2. Publish snapshots as one concatenated image
 3. Subscribe `~output/screenrectangle` to get ROI.
 4. Publish ROI information to `~output` namespace.
+5. Publish pointcloud inside of the ROI to `~output/cloud` if `~store_pointcloud` is set
 
 #### Subscribing Topic
 * `~input/image` and `~input/camera_info` (`sensor_msgs/Image` and `sensor_msgs/CameraInfo`)
 
   Input image and camera info.
+
+* `~input/cloud` (`sensor_msgs/PointCloud2`)
+
+  Input pointcloud to be clipped by specified ROI.
 
 * `~output/screenrectangle` (`geometry_msgs/PolygonStamped`)
 
@@ -89,6 +95,15 @@ Represent range of time.
 * `~output/roi` (`jsk_pcl_ros/PosedCameraInfo`)
 
   Publish ROI of specified region as `PosedCameraInfo`.
+
+* `~output/cloud` (`sensor_msgs/PointCloud`)
+
+  Pointcloud inside of ROI. pointcloud is stored when `~shutter` service is called and
+  its timestamp will be updated according to the latest image.
+
+* `~output/marker` (`visualization_msgs/Marker`)
+
+  Marker to visualize ROI (`~output/roi`).
 #### Parameters
 * `~fixed_frame_id` (`String`, default: `odom`)
 
@@ -97,6 +112,14 @@ Represent range of time.
 * `~max_image_buffer` (`Integer`, default: `5`)
 
   The maximum number of images to store in this nodelet.
+
+* `~store_pointcloud` (`Boolean`, default: `false`)
+
+  Store pointcloud if it's true
+
+* `~keep_organized` (`Boolean`, default: `false`)
+
+  Keep pointcloud organized after clipping by specified ROI.
 
 #### Advertising Service
 

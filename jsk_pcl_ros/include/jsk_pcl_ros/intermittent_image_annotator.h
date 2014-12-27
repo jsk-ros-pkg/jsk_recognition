@@ -49,6 +49,8 @@
 #include <Eigen/Geometry>
 #include <geometry_msgs/PolygonStamped.h>
 #include <jsk_pcl_ros/PosedCameraInfo.h>
+#include <pcl_ros/transforms.h>
+
 
 namespace jsk_pcl_ros
 {
@@ -62,7 +64,7 @@ namespace jsk_pcl_ros
     Eigen::Affine3d camera_pose_;
     cv::Mat image_;
     image_geometry::PinholeCameraModel camera_;
-    
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_;
   protected:
   private:
     
@@ -74,6 +76,7 @@ namespace jsk_pcl_ros
     typedef boost::shared_ptr<IntermittentImageAnnotator> Ptr;
     IntermittentImageAnnotator():
       DiagnosticNodelet("IntermittentImageAnnotator") {}
+
   protected:
     ////////////////////////////////////////////////////////
     // methods
@@ -86,6 +89,8 @@ namespace jsk_pcl_ros
     virtual void cameraCallback(
       const sensor_msgs::Image::ConstPtr& image_msg,
       const sensor_msgs::CameraInfo::ConstPtr& info_msg);
+    virtual void cloudCallback(
+      const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
     virtual void rectCallback(
       const geometry_msgs::PolygonStamped::ConstPtr& rect);
     virtual bool shutterCallback(
@@ -97,7 +102,11 @@ namespace jsk_pcl_ros
     virtual bool clearCallback(
       std_srvs::Empty::Request& req,
       std_srvs::Empty::Response& res);
-    
+    virtual void publishCroppedPointCloud(
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
+      const cv::Point3d& A, const cv::Point3d& B,
+      const cv::Point3d& C, const cv::Point3d& D,
+      const Eigen::Affine3d& pose);
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
@@ -108,14 +117,19 @@ namespace jsk_pcl_ros
     image_transport::CameraSubscriber image_sub_;
     boost::mutex mutex_;
     ros::Subscriber rect_sub_;
+    ros::Subscriber cloud_sub_;
     ros::ServiceServer shutter_service_;
     ros::ServiceServer clear_service_;
     ros::ServiceServer request_service_;
     ros::Publisher pub_pose_;
     ros::Publisher pub_roi_;
+    ros::Publisher pub_marker_;
+    ros::Publisher pub_cloud_;
     sensor_msgs::Image::ConstPtr latest_image_msg_;
     sensor_msgs::CameraInfo::ConstPtr latest_camera_info_msg_;
-    
+    sensor_msgs::PointCloud2::ConstPtr latest_cloud_msg_;
+    bool store_pointcloud_;
+    bool keep_organized_;
     ////////////////////////////////////////////////////////
     // Parameters
     ////////////////////////////////////////////////////////

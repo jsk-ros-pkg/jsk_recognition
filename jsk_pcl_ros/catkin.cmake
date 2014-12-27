@@ -261,6 +261,8 @@ jsk_pcl_nodelet(src/roi_clipper_nodelet.cpp
   "jsk_pcl/ROIClipper" "roi_clipper")
 jsk_pcl_nodelet(src/point_indices_to_mask_image_nodelet.cpp
   "jsk_pcl/PointIndicesToMaskImage" "point_indices_to_mask_image")
+jsk_pcl_nodelet(src/mask_image_to_point_indices_nodelet.cpp
+  "jsk_pcl/MaskImageToPointIndices" "mask_image_to_point_indices")
 jsk_pcl_nodelet(src/capture_stereo_synchronizer_nodelet.cpp
   "jsk_pcl/CaptureStereoSynchronizer" "capture_stereo_synchronizer")
 jsk_pcl_nodelet(src/linemod_nodelet.cpp

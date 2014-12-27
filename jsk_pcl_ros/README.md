@@ -237,6 +237,20 @@ synchronizing timestamp and republish them into `~output` namespace.
 #### Sample
 Please check [capture_multisense_training_data.launch](launch/capture_multisense_training_data.launch).
 
+### jsk\_pcl/MaskImageToPointIndices
+A nodelet to convert mask image (`sensor_msgs::Image`) to `pcl_msgs/PointIndices` for
+organized pointcloud.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/Image`)
+
+  Input mask image.
+
+#### Publishing Topic
+* `~output` (`pcl_msgs/PointIndices`)
+
+  Output indices converted from the mask image.
+
 ### jsk\_pcl/PointIndicesToMaskImage
 #### What Is This
 ![](images/point_indices_to_mask_image.png)

@@ -40,7 +40,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <geometry_msgs/Point32.h>
-
+#include <eigen_conversions/eigen_msg.h>
 
 #if ROS_VERSION_MINIMUM(1, 10, 0)
 // hydro and later
@@ -123,6 +123,13 @@ namespace pcl_conversions
   convertToROSModelCoefficients(
     const std::vector<pcl::ModelCoefficients::Ptr>& coefficients,
     const std_msgs::Header& header);
+}
+
+namespace tf
+{
+  // for eigen float
+  void poseMsgToEigen(const geometry_msgs::Pose& msg, Eigen::Affine3f& eigen);
+  void poseEigenToMsg(Eigen::Affine3f& eigen, geometry_msgs::Pose& msg);
 }
 
 #endif

@@ -138,23 +138,33 @@ namespace jsk_pcl_ros
     min_v = msg->height;
     max_u = max_v = 0;
     for (size_t i = 0; i < points.size(); i++) {
-      cv::Point2d uv = points[i];
-      if (uv.x > 0 && uv.x < msg->width) {
-        if (min_u > uv.x) {
-          min_u = uv.x;
-        }
-        if (max_u < uv.x) {
-          max_u = uv.x;
-        }
+      cv::Point2d uv(points[i]);
+      // check limit
+      if (uv.x < 0) {
+        uv.x = 0;
       }
-      if (uv.y > 0 && uv.y < msg->height) {
-        if (min_v > uv.y) {
-          min_v = uv.y;
-        }
+      if (uv.y < 0) {
+        uv.y = 0;
+      }
+      if (uv.x > msg->width) {
+        uv.x = msg->width;
+      }
       
-        if (max_v < uv.y) {
-          max_v = uv.y;
-        }
+      if (uv.y > msg->height) {
+        uv.y = msg->height;
+      }
+      if (min_u > uv.x) {
+        min_u = uv.x;
+      }
+      if (max_u < uv.x) {
+        max_u = uv.x;
+      }
+      if (min_v > uv.y) {
+        min_v = uv.y;
+      }
+      
+      if (max_v < uv.y) {
+        max_v = uv.y;
       }
     }
     // now we have min/max of u/v

@@ -53,20 +53,11 @@ public:
     SiftNode() : _it(_node)
     { 
         _pubSift = _node.advertise<posedetection_msgs::ImageFeature0D>("ImageFeature0D",1);
-	usleep(100000);
-        _subImage = _it.subscribe("image",1,&SiftNode::image_cb,this);
-	usleep(100000);
-        _subInfo = _node.subscribe("camera_info",1,&SiftNode::info_cb,this);
-	usleep(100000);
         _srvDetect = _node.advertiseService("Feature0DDetect",&SiftNode::detect_cb,this);
+        _subImage = _it.subscribe("image",1,&SiftNode::image_cb,this);
+        _subInfo = _node.subscribe("camera_info",1,&SiftNode::info_cb,this);
         lasttime = ros::Time::now();
         _bInfoInitialized = false;
-    }
-    virtual ~SiftNode() {
-        _srvDetect.shutdown();
-        _subInfo.shutdown();
-        _subImage.shutdown();
-        _pubSift.shutdown();
     }
 
     void info_cb(const sensor_msgs::CameraInfoConstPtr& msg_ptr)

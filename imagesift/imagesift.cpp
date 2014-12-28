@@ -190,14 +190,20 @@ public:
             msg_ptr, sensor_msgs::image_encodings::BGR8)->image;
         cv::Mat mask = cv_bridge::toCvCopy(
             mask_ptr, sensor_msgs::image_encodings::MONO8)->image;
-        cv::Mat masked_image;
-        input.copyTo(masked_image, mask);
-        sensor_msgs::Image::ConstPtr masked_image_msg = cv_bridge::CvImage(
-            msg_ptr->header,
-            sensor_msgs::image_encodings::BGR8,
-            masked_image).toImageMsg();
-        // sensor_msgs::Image::ConstPtr masked_image_msg_ptr = boost::make_shared<sensor_msgs::Image>(masked_image_msg);
-        image_cb(masked_image_msg);
+        if (input.size() == mask.size()) {
+            cv::Mat masked_image;
+            input.copyTo(masked_image, mask);
+            sensor_msgs::Image::ConstPtr masked_image_msg = cv_bridge::CvImage(
+                msg_ptr->header,
+                sensor_msgs::image_encodings::BGR8,
+                masked_image).toImageMsg();
+            image_cb(masked_image_msg);
+        }
+        else {
+            ROS_WARN("size of mask and input image are different");
+            ROS_WARN("input: %dx%d", input.cols, input.rows);
+            ROS_WARN("mask: %dx%d", mask.cols, mask.rows);
+        }
     }
     
     void image_cb(const sensor_msgs::ImageConstPtr& msg_ptr)

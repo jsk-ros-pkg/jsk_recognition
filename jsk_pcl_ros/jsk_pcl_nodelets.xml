@@ -1,4 +1,12 @@
 <library path="libjsk_pcl_ros">
+  <class name="jsk_pcl/MaskImageToPointIndices"
+         type="jsk_pcl_ros::MaskImageToPointIndices"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl/IncrementalModelRegistration"
+         type="jsk_pcl_ros::IncrementalModelRegistration"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_pcl/IntermittentImageAnnotator"
          type="jsk_pcl_ros::IntermittentImageAnnotator"
          base_class_type="nodelet::Nodelet">

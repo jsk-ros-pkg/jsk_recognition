@@ -42,6 +42,7 @@
 #include <tf/message_filter.h>
 #include <message_filters/subscriber.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <moveit/version.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_updater.h>
 #include <moveit/point_containment_filter/shape_mask.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
@@ -127,8 +128,13 @@ namespace jsk_pcl_ros
           return;
         }
         /* mask out points on the robot */
+#if (MOVEIT_VERSION_MINOR < 6)
         shape_mask_->maskContainment(xyz_cloud, sensor_origin_eigen, 0.0,
                                      max_range_, mask_);
+#else   // from moveit 0.6 (indigo), PCL dependency is removed
+        shape_mask_->maskContainment(*cloud_msg, sensor_origin_eigen, 0.0,
+                                     max_range_, mask_);
+#endif
         typename pcl::PointCloud<PointT>::Ptr
           filtered_cloud (new pcl::PointCloud<PointT>);
         pcl::PointIndices::Ptr indices (new pcl::PointIndices);

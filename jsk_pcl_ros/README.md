@@ -59,6 +59,28 @@ time end
 Represent range of time.
 
 ## nodelets
+### jsk\_pcl/IncrementalModelRegistration
+#### What Is This
+![](images/incremental_model_registration.png)
+
+Build a full-model from sequential captured data.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Input pointcloud. RGB field is required.
+* `~input/pose` (`geometry_msgs/PoseStamped`)
+
+  Initial pose to estimate acculate pose of the pointcloud.
+* `~input/indices` (`pcl_msgs/PointIndices`)
+
+  Indices to mask object in `~input` pointcloud.
+
+#### Publishing Topic
+* `~output/non_registered` (`sensor_msgs/PointCloud2`)
+
+  Pointcloud just concatenated according to `~input/pose`
+
 ### jsk\_pcl/IntermittentImageAnnotator
 #### What Is This
 ![](images/intermittent_image_annotator.png)
@@ -237,6 +259,20 @@ synchronizing timestamp and republish them into `~output` namespace.
 
 #### Sample
 Please check [capture_multisense_training_data.launch](launch/capture_multisense_training_data.launch).
+
+### jsk\_pcl/MaskImageToPointIndices
+A nodelet to convert mask image (`sensor_msgs::Image`) to `pcl_msgs/PointIndices` for
+organized pointcloud.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/Image`)
+
+  Input mask image.
+
+#### Publishing Topic
+* `~output` (`pcl_msgs/PointIndices`)
+
+  Output indices converted from the mask image.
 
 ### jsk\_pcl/PointIndicesToMaskImage
 #### What Is This

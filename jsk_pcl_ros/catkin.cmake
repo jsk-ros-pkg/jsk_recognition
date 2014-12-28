@@ -261,6 +261,8 @@ jsk_pcl_nodelet(src/roi_clipper_nodelet.cpp
   "jsk_pcl/ROIClipper" "roi_clipper")
 jsk_pcl_nodelet(src/point_indices_to_mask_image_nodelet.cpp
   "jsk_pcl/PointIndicesToMaskImage" "point_indices_to_mask_image")
+jsk_pcl_nodelet(src/mask_image_to_point_indices_nodelet.cpp
+  "jsk_pcl/MaskImageToPointIndices" "mask_image_to_point_indices")
 jsk_pcl_nodelet(src/capture_stereo_synchronizer_nodelet.cpp
   "jsk_pcl/CaptureStereoSynchronizer" "capture_stereo_synchronizer")
 jsk_pcl_nodelet(src/linemod_nodelet.cpp
@@ -269,6 +271,8 @@ jsk_pcl_nodelet(src/linemod_nodelet.cpp
   "jsk_pcl/LINEMODDetector" "linemod_detector")
 jsk_pcl_nodelet(src/intermittent_image_annotator_nodelet.cpp
   "jsk_pcl/IntermittentImageAnnotator" "intermittent_image_annotator")
+jsk_pcl_nodelet(src/incremental_model_registration_nodelet.cpp
+  "jsk_pcl/IncrementalModelRegistration" "incremental_model_registration")
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
   src/pcl_conversion_util.cpp src/pcl_util.cpp

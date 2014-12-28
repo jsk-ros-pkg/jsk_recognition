@@ -1,0 +1,18 @@
+<launch>
+  <node pkg="nodelet" type="nodelet" name="extract_indices_manager"
+        args="manager" />
+  <node pkg="nodelet" type="nodelet" name="extract_indices"
+        args="load pcl/ExtractIndices extract_indices_manager">
+    <remap from="~input" to="/stereo/points2" />
+    <remap from="~indices" to="/capture_stereo_synchronizer/output/mask_indices" />
+    <rosparam>
+      use_indices: true
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="incremental_model_registration"
+        name="incremental_model_registration" output="screen">
+    <remap from="~input" to="/stereo/points2" />
+    <remap from="~input/indices" to="/capture_stereo_synchronizer/output/mask_indices" />
+    <remap from="~input/pose" to="/capture_stereo_synchronizer/output/pose" />
+  </node>
+</launch>

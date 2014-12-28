@@ -1,0 +1,31 @@
+<launch>
+  <node pkg="image_view2" type="image_view2" name="image_view2">
+    <remap from="image" to="/multisense/left/image_rect_color" />
+    <rosparam>
+      interaction_mode: grabcut
+    </rosparam>
+  </node>
+  <node pkg="jsk_perception" type="grabcut" name="grabcut">
+    <remap from="~input" to="/multisense/left/image_rect_color" />
+    <remap from="~input/foreground" to="/multisense/left/image_rect_color/foreground" />
+    <remap from="~input/background" to="/multisense/left/image_rect_color/background" />
+  </node>
+  <node pkg="image_view" type="image_view" name="foreground_mask">
+    <remap from="image" to="/multisense/left/image_rect_color/foreground" />
+  </node>
+  <node pkg="image_view" type="image_view" name="background_mask">
+    <remap from="image" to="/multisense/left/image_rect_color/background" />
+  </node>
+  <node pkg="image_view" type="image_view" name="foreground">
+    <remap from="image" to="/grabcut/output/foreground" />
+  </node>
+  <node pkg="image_view" type="image_view" name="background">
+    <remap from="image" to="/grabcut/output/background" />
+  </node>
+  <node pkg="image_view" type="image_view" name="foreground_output_mask">
+    <remap from="image" to="/grabcut/output/foreground_mask" />
+  </node>
+  <node pkg="image_view" type="image_view" name="background_output_mask">
+    <remap from="image" to="/grabcut/output/background_mask" />
+  </node>
+</launch>

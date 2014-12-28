@@ -43,8 +43,14 @@ namespace jsk_perception
   void GrabCut::onInit()
   {
     DiagnosticNodelet::onInit();
-    pub_foreground_ = advertise<sensor_msgs::Image>(*pnh_, "output/foreground", 1);
-    pub_background_ = advertise<sensor_msgs::Image>(*pnh_, "output/background", 1);
+    pub_foreground_
+      = advertise<sensor_msgs::Image>(*pnh_, "output/foreground", 1);
+    pub_background_
+      = advertise<sensor_msgs::Image>(*pnh_, "output/background", 1);
+    pub_foreground_mask_
+      = advertise<sensor_msgs::Image>(*pnh_, "output/foreground_mask", 1);
+    pub_background_mask_
+      = advertise<sensor_msgs::Image>(*pnh_, "output/background_mask", 1);
   }
 
   void GrabCut::subscribe()
@@ -122,8 +128,14 @@ namespace jsk_perception
       image_msg->header, sensor_msgs::image_encodings::BGR8, fgd);
     cv_bridge::CvImage bg_bridge(
       image_msg->header, sensor_msgs::image_encodings::BGR8, bgd);
+    cv_bridge::CvImage fg_mask_bridge(
+      image_msg->header, sensor_msgs::image_encodings::MONO8, fgd_mask);
+    cv_bridge::CvImage bg_mask_bridge(
+      image_msg->header, sensor_msgs::image_encodings::MONO8, bgd_mask);
     pub_foreground_.publish(fg_bridge.toImageMsg());
     pub_background_.publish(bg_bridge.toImageMsg());
+    pub_foreground_mask_.publish(fg_mask_bridge.toImageMsg());
+    pub_background_mask_.publish(bg_mask_bridge.toImageMsg());
   }
   
 }

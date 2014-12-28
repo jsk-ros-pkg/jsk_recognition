@@ -19,6 +19,9 @@
 
 (defparameter kfs-lst nil)
 
+(defvar object-width nil)
+(defvar object-height nil)
+(defvar relative-pose-str nil)
 (defclass kalman-filters
   :super propertied-object
   :slots (kfp kfr)
@@ -98,7 +101,7 @@
             (send *tfb* :send-transform (ros::tf-pose->coords (send obj :pose)) frame (send target-obj :name))
             ;; target-obj should be on *base-frame-id* coordinates
             ;; (send *pr2* :angle-vector av)
-          ))))
+            ))))
     (send map-frame-objectdetection :objects tmp-obj-lst)
     (send map-frame-objectdetection :header :stamp (send msg :header :stamp))
     ))
@@ -230,6 +233,58 @@
 ;;     )
 ;;   )
 
+(defun publish-attention (target-obj &key (object-name map-frame-objectdetection))
+  (let ((mf-obj-lst (send object-name :objects))
+        (tmp-posestamped (instance geometry_msgs::PoseStamped :init))
+        (relative-pose-stream (make-string-input-stream relative-pose-str))
+        (tmp-pose (instance geometry_msgs::Pose :init))
+        (tp (get target-obj :type)))
+
+
+    (ros::unsubscribe "/openni_c2/rgb/image_rect_color")
+
+    (send tmp-pose :position :x (read relative-pose-stream nil))
+    (send tmp-pose :position :y (read relative-pose-stream nil))
+    (send tmp-pose :position :z (read relative-pose-stream nil))
+    (send tmp-pose :orientation :x (read relative-pose-stream nil))
+    (send tmp-pose :orientation :y (read relative-pose-stream nil))
+    (send tmp-pose :orientation :z (read relative-pose-stream nil))
+    (send tmp-pose :orientation :w (read relative-pose-stream nil))
+    (print-ros-msg tmp-pose)
+    (setq inverse-trans (send (send (ros::tf-pose->coords tmp-pose) :inverse-transformation)
+                              :translate (float-vector (* (/ object-height 2.0) 1000) (* (/ object-width 2.0) 1000) 0)))
+    (dolist (obj mf-obj-lst)
+      (when (or (not (stringp tp))
+                (substringp tp (send obj :type))) ;; found target
+        (let ((tmp-coords (send (ros::tf-pose->coords (send obj :pose)) :copy-worldcoords)))
+          (send tmp-coords :transform inverse-trans)
+          (send tmp-posestamped :pose (ros::coords->tf-pose tmp-coords))
+          ;;(send tmp-posestamped :pose (send obj :pose))
+          (send tmp-posestamped :header (send object-name :header))
+          )))
+
+    (ros::publish "/attention_clipper/input/pose" tmp-posestamped)
+    ))
+
+(defun attention-init (msg)
+  (let ((tmp-pose (instance geometry_msgs::Pose :init))
+        (tmp-pose-stamped (instance geometry_msgs::PoseStamped :init))
+        (header (instance std_msgs::header :init))
+        )
+    (send tmp-pose :position :x 0)
+    (send tmp-pose :position :y 0)
+    (send tmp-pose :position :z 0.2)
+    (send tmp-pose :orientation :x 0)
+    (send tmp-pose :orientation :y 0)
+    (send tmp-pose :orientation :z 0)
+    (send tmp-pose :orientation :w 1)
+    (send header :stamp (ros::time 0))
+    (send header :frame_id "/openni_rgb_optical_frame")
+    (send tmp-pose-stamped :pose tmp-pose)
+    (send tmp-pose-stamped :header header)
+    (ros::publish "/attention_clipper/input/pose" tmp-pose-stamped)
+    ))
+
 
 (defun pub-cb (target-obj marker-life force msg)
   (let ((filter-obj))
@@ -240,6 +295,7 @@
       (publish-marker target-obj marker-life :frame *map-id*)
       (publish-marker target-obj marker-life :frame *map-id* :object-name filtered-objectdetection
                       :publish-name "/filtered")
+      (publish-attention target-obj)
       ;;       (publish-2Dpointcloud kfp)
       ;; (ros::ros-info "cur-coords:(~A ~A ~A)"
       ;;                (send (send (send cur-coords :pose) :position) :x)
@@ -294,6 +350,7 @@
                              (publish-objectdetection-marker t)
                              (marker-life 30)
                              (detection-topic *detection-topic*)
+                             (look-at nil)
                              ((:target-object target-obj) (make-cube 60 60 60))
                              )
   (let ((tgt-cds (send target-obj :copy-worldcoords))
@@ -308,7 +365,13 @@
     (ros::advertise "/filtered" visualization_msgs::MarkerArray 5)
     (ros::advertise "/norm/pose" std_msgs::Float32 1)
     (ros::advertise "/norm/rot" std_msgs::Float32 1)
+    (ros::advertise "/attention_clipper/input/pose" geometry_msgs::PoseStamped 1)
     (ros::advertise-service "targetobj" posedetection_msgs::TargetObj #'target-obj-cb)
+    (setq object-width (ros::get-param "~object_width" 0.2))
+    (setq object-height (ros::get-param "~object_height" 0.2))
+    (setq relative-pose-str (ros::get-param "~relative_pose" "0 0 0 0 0 0 1"))
+    (ros::subscribe "/openni_c2/rgb/image_rect_color"
+                    sensor_msgs::Image #'attention-init)
     (ros::spin)
     )
   )

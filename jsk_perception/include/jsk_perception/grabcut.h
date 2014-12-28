@@ -77,10 +77,13 @@ namespace jsk_perception
     ////////////////////////////////////////////////////////
     ros::Publisher pub_foreground_;
     ros::Publisher pub_background_;
+    ros::Publisher pub_foreground_mask_;
+    ros::Publisher pub_background_mask_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     message_filters::Subscriber<sensor_msgs::Image> sub_image_;
     message_filters::Subscriber<sensor_msgs::Image> sub_foreground_;
     message_filters::Subscriber<sensor_msgs::Image> sub_background_;
+    
     
   private:
     

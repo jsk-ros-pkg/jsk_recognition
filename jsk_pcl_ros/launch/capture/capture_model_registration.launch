@@ -14,5 +14,15 @@
     <remap from="~input" to="/stereo/points2" />
     <remap from="~input/indices" to="/capture_stereo_synchronizer/output/mask_indices" />
     <remap from="~input/pose" to="/capture_stereo_synchronizer/output/pose" />
+    <remap from="~icp_service" to="icp_registration/icp_align" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="icp_registration" name="icp_registration" output="screen">
+    <rosparam>
+      use_flipped_initial_pose: false
+      max_iteration: 10000
+      correspondence_distance: 0.001
+      transform_epsilon: 0.01
+      euclidean_fittness_epsilon: 0.01
+    </rosparam>
   </node>
 </launch>

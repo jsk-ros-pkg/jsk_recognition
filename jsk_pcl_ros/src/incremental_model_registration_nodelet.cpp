@@ -39,26 +39,70 @@
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <pcl/common/transforms.h>
 #include <pcl/filters/extract_indices.h>
+#include <jsk_pcl_ros/ICPAlign.h>
 
 namespace jsk_pcl_ros
 {
-  SampleData::SampleData()
+  CapturedSamplePointCloud::CapturedSamplePointCloud()
   {
 
   }
 
-  SampleData::SampleData(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
+  CapturedSamplePointCloud::CapturedSamplePointCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
                          const Eigen::Affine3f& pose):
-    original_cloud_(cloud), original_pose_(pose)
+    original_cloud_(cloud), original_pose_(pose),
+    refined_cloud_(new pcl::PointCloud<pcl::PointXYZRGB>)
   {
     
   }
 
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr
+  CapturedSamplePointCloud::getOriginalPointCloud()
+  {
+    return original_cloud_;
+  }
+
+  Eigen::Affine3f CapturedSamplePointCloud::getOriginalPose()
+  {
+    return original_pose_;
+  }
+
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr
+  CapturedSamplePointCloud::getRefinedPointCloud()
+  {
+    return refined_cloud_;
+  }
+
+  Eigen::Affine3f CapturedSamplePointCloud::getRefinedPose()
+  {
+    return refined_pose_;
+  }
+
+  void CapturedSamplePointCloud::setRefinedPointCloud(
+    pcl::PointCloud<pcl::PointXYZRGB> cloud)
+  {
+    *refined_cloud_ = cloud;   // copying
+  }
+
+  void CapturedSamplePointCloud::setRefinedPose(
+    Eigen::Affine3f pose)
+  {
+    refined_pose_ = Eigen::Affine3f(pose);
+  }
+  
   void IncrementalModelRegistration::onInit()
   {
     DiagnosticNodelet::onInit();
+    pnh_->param("frame_id", frame_id_,
+                std::string("multisense/left_camera_optical_frame"));
+    start_registration_srv_
+      = pnh_->advertiseService(
+        "start_registration", &IncrementalModelRegistration::startRegistration,
+        this);
     pub_cloud_non_registered_
       = pnh_->advertise<sensor_msgs::PointCloud2>("output/non_registered", 1);
+    pub_registered_
+      = pnh_->advertise<sensor_msgs::PointCloud2>("output/registered", 1);
     sub_cloud_.subscribe(*pnh_, "input", 1);
     sub_indices_.subscribe(*pnh_, "input/indices", 1);
     sub_pose_.subscribe(*pnh_, "input/pose", 1);
@@ -118,7 +162,7 @@ namespace jsk_pcl_ros
       tf::poseMsgToEigen(pose_msg->pose, offset);
       initial_pose = origin_.inverse() * offset;
     }
-    SampleData::Ptr sample (new SampleData(transformed_cloud, initial_pose));
+    CapturedSamplePointCloud::Ptr sample (new CapturedSamplePointCloud(transformed_cloud, initial_pose));
     samples_.push_back(sample);
     
     all_cloud_ = all_cloud_ + *transformed_cloud;
@@ -127,6 +171,78 @@ namespace jsk_pcl_ros
     ros_all_cloud.header = cloud_msg->header;
     pub_cloud_non_registered_.publish(ros_all_cloud);
   }
+
+  void IncrementalModelRegistration::callICP(
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr reference,
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr target,
+    Eigen::Affine3f& output_transform)
+  {
+    ros::ServiceClient icp
+      = pnh_->serviceClient<jsk_pcl_ros::ICPAlign>("icp_service");
+    sensor_msgs::PointCloud2 reference_ros, target_ros;
+    pcl::toROSMsg(*reference, reference_ros);
+    pcl::toROSMsg(*target, target_ros);
+    ros::Time now = ros::Time::now();
+    reference_ros.header.stamp = target_ros.header.stamp = now;
+    reference_ros.header.frame_id = target_ros.header.frame_id = "map";
+    ICPAlign srv;
+    srv.request.reference_cloud = reference_ros;
+    srv.request.target_cloud = target_ros;
+    icp.call(srv);
+    tf::poseMsgToEigen(srv.response.result.pose,
+                            output_transform);
+  }
+  
+  bool IncrementalModelRegistration::startRegistration(
+    std_srvs::Empty::Request& req,
+    std_srvs::Empty::Response& res)
+  {
+    if (samples_.size() <= 1) {
+      ROS_ERROR("no enough samples");
+      return false;
+    }
+    ROS_INFO("Starting registration %lu samples", samples_.size());
+    // setup initial
+    CapturedSamplePointCloud::Ptr initial_sample = samples_[0];
+    initial_sample->setRefinedPointCloud(
+      *(initial_sample->getOriginalPointCloud()));
+    initial_sample->setRefinedPose(initial_sample->getOriginalPose());
+    for (size_t i = 0; i < samples_.size() - 1; i++) {
+      CapturedSamplePointCloud::Ptr from_sample = samples_[i];
+      CapturedSamplePointCloud::Ptr to_sample = samples_[i+1];
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr reference_cloud
+        = from_sample->getRefinedPointCloud();
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr target_cloud
+        = to_sample->getOriginalPointCloud();
+      Eigen::Affine3f transform;
+      callICP(reference_cloud, target_cloud, transform);
+      to_sample->setRefinedPose(to_sample->getOriginalPose() * transform);
+      // transform pointcloud
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr transformed_cloud
+        (new pcl::PointCloud<pcl::PointXYZRGB>);
+      pcl::transformPointCloud<pcl::PointXYZRGB>(
+        *target_cloud, *transformed_cloud, transform);
+      to_sample->setRefinedPointCloud(*transformed_cloud);
+    }
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr registered_cloud
+      (new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr non_registered_cloud
+      (new pcl::PointCloud<pcl::PointXYZRGB>);
+    for (size_t i = 0; i < samples_.size(); i++) {
+      *registered_cloud = *(samples_[i]->getRefinedPointCloud()) + *registered_cloud;
+      *non_registered_cloud = *(samples_[i]->getOriginalPointCloud()) + *non_registered_cloud;
+    }
+    sensor_msgs::PointCloud2 registered_ros_cloud, nonregistered_ros_cloud;
+    pcl::toROSMsg(*registered_cloud, registered_ros_cloud);
+    registered_ros_cloud.header.stamp = ros::Time::now();
+    registered_ros_cloud.header.frame_id = frame_id_;
+    pub_registered_.publish(registered_ros_cloud);
+    pcl::toROSMsg(*non_registered_cloud, nonregistered_ros_cloud);
+    nonregistered_ros_cloud.header.stamp = ros::Time::now();
+    nonregistered_ros_cloud.header.frame_id = frame_id_;
+    pub_cloud_non_registered_.publish(nonregistered_ros_cloud);
+  }
+  
 }
 
 #include <pluginlib/class_list_macros.h>

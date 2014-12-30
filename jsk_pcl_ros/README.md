@@ -81,6 +81,14 @@ Build a full-model from sequential captured data.
 
   Pointcloud just concatenated according to `~input/pose`
 
+* `~output/registered` (`sensor_msgs/PointCloud2`)
+
+  Pointcloud refined by ICP.
+#### Using Services
+* `~icp_service` (`jsk_pcl_ros/ICPAlign`)
+
+  ICP service interface to refine model.
+
 ### jsk\_pcl/IntermittentImageAnnotator
 #### What Is This
 ![](images/intermittent_image_annotator.png)

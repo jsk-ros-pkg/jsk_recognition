@@ -226,7 +226,10 @@ namespace jsk_pcl_ros
         }
       }
       new_references.push_back(non_nan_reference_cloud);
-      reference_cloud_list_ = new_references;
+      reference_cloud_list_ = new_references; // replace references
+      NODELET_INFO("reference points: %lu/%lu",
+                   non_nan_reference_cloud->points.size(),
+                   reference_cloud->points.size());
       Eigen::Affine3f offset = Eigen::Affine3f::Identity();
       pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
       pcl::fromROSMsg(req.target_cloud, *cloud);

@@ -37,6 +37,7 @@
 #include "jsk_pcl_ros/capture_stereo_synchronizer.h"
 #include <pcl/common/angles.h>
 #include <eigen_conversions/eigen_msg.h>
+#include <std_msgs/Int32.h>
 
 namespace jsk_pcl_ros
 {
@@ -59,6 +60,8 @@ namespace jsk_pcl_ros
       *pnh_, "output/right_camera_info", 1);
     pub_disparity_ = advertise<stereo_msgs::DisparityImage>(
       *pnh_, "output/disparity", 1);
+    pub_count_ = advertise<std_msgs::Int32>(
+      *pnh_, "output/count", 1);
   }
 
   bool CaptureStereoSynchronizer::checkNearPose(
@@ -145,7 +148,7 @@ namespace jsk_pcl_ros
     const stereo_msgs::DisparityImage::ConstPtr& disparity)
   {
     if (checkNearPose(pose->pose)) {
-      ROS_INFO("too near");
+      ROS_DEBUG("too near");
     }
     else {
       ROS_INFO("%d sample", counter_++);
@@ -158,6 +161,9 @@ namespace jsk_pcl_ros
       pub_right_cam_info_.publish(right_cam_info);
       pub_disparity_.publish(disparity);
     }
+    std_msgs::Int32 count;
+    count.data = counter_;
+    pub_count_.publish(count);
   }
 }
 

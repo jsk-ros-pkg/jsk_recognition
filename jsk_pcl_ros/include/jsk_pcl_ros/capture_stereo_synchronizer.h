@@ -96,6 +96,7 @@ namespace jsk_pcl_ros
     // ROS variables
     ////////////////////////////////////////////////////////
     int counter_;
+    ros::Publisher pub_count_;
     ros::Publisher pub_pose_;
     ros::Publisher pub_mask_;
     ros::Publisher pub_mask_indices_;

@@ -78,7 +78,9 @@ namespace jsk_pcl_ros
       "debug/result", 1);
     pub_icp_result = advertise<jsk_pcl_ros::ICPResult>(*pnh_,
       "icp_result", 1);
-    srv_detect = pnh_->advertiseService("icp_service", &ICPRegistration::alignWithBoxService, this);
+    srv_icp_align_with_box_ = pnh_->advertiseService("icp_service", &ICPRegistration::alignWithBoxService, this);
+    srv_icp_align_ = pnh_->advertiseService(
+      "icp_align", &ICPRegistration::alignService, this);
     if (!synchronize_reference_) {
       sub_reference_ = pnh_->subscribe("input_reference", 1,
                                        &ICPRegistration::referenceCallback,
@@ -203,6 +205,52 @@ namespace jsk_pcl_ros
     return true;
   }
 
+  bool ICPRegistration::alignService(
+    jsk_pcl_ros::ICPAlign::Request& req, 
+    jsk_pcl_ros::ICPAlign::Response& res)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    std::vector<pcl::PointCloud<PointT>::Ptr> tmp_reference_cloud_list
+      = reference_cloud_list_;  // escape
+    try
+    {
+      // first, update reference
+      std::vector<pcl::PointCloud<PointT>::Ptr> new_references;
+      pcl::PointCloud<PointT>::Ptr reference_cloud (new pcl::PointCloud<PointT>);
+      pcl::fromROSMsg(req.reference_cloud, *reference_cloud);
+      pcl::PointCloud<PointT>::Ptr non_nan_reference_cloud (new pcl::PointCloud<PointT>);
+      for (size_t i = 0; i < reference_cloud->points.size(); i++) {
+        PointT p = reference_cloud->points[i];
+        if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
+          non_nan_reference_cloud->points.push_back(p);
+        }
+      }
+      new_references.push_back(non_nan_reference_cloud);
+      reference_cloud_list_ = new_references;
+      Eigen::Affine3f offset = Eigen::Affine3f::Identity();
+      pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
+      pcl::fromROSMsg(req.target_cloud, *cloud);
+      res.result = alignPointcloudWithReferences(cloud,
+                                                 offset,
+                                                 req.target_cloud.header);
+    }
+    catch (tf2::ConnectivityException &e)
+    {
+      NODELET_ERROR("Transform error: %s", e.what());
+      reference_cloud_list_ = tmp_reference_cloud_list;
+      return false;
+    }
+    catch (tf2::InvalidArgumentException &e)
+    {
+      NODELET_ERROR("Transform error: %s", e.what());
+      reference_cloud_list_ = tmp_reference_cloud_list;
+      return false;
+    }
+    reference_cloud_list_ = tmp_reference_cloud_list;
+    return true;
+  }
+
+  
   void ICPRegistration::alignWithBox(
       const sensor_msgs::PointCloud2::ConstPtr& msg,
       const BoundingBox::ConstPtr& box_msg)

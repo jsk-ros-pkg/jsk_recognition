@@ -71,7 +71,8 @@ add_service_files(FILES SwitchTopic.srv
   CallSnapIt.srv CallPolygon.srv
   EnvironmentLock.srv
   PolygonOnEnvironment.srv
-  ICPAlignWithBox.srv)
+  ICPAlignWithBox.srv
+  ICPAlign.srv)
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(

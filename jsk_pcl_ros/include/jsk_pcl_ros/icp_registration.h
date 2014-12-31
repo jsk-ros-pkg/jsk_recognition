@@ -42,6 +42,7 @@
 #include <jsk_pcl_ros/ICPRegistrationConfig.h>
 #include <jsk_pcl_ros/BoundingBox.h>
 #include <jsk_pcl_ros/ICPAlignWithBox.h>
+#include <jsk_pcl_ros/ICPAlign.h>
 #include <jsk_pcl_ros/ICPResult.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -79,6 +80,9 @@ namespace jsk_pcl_ros
     virtual bool alignWithBoxService(
       jsk_pcl_ros::ICPAlignWithBox::Request& req, 
       jsk_pcl_ros::ICPAlignWithBox::Response& res);
+    virtual bool alignService(
+      jsk_pcl_ros::ICPAlign::Request& req, 
+      jsk_pcl_ros::ICPAlign::Response& res);
     virtual void referenceCallback(
       const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void referenceArrayCallback(
@@ -128,7 +132,8 @@ namespace jsk_pcl_ros
       pub_debug_flipped_cloud_;
     ros::Publisher pub_icp_result;
 
-    ros::ServiceServer srv_detect;
+    ros::ServiceServer srv_icp_align_with_box_;
+    ros::ServiceServer srv_icp_align_;
     bool align_box_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;

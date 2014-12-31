@@ -130,6 +130,8 @@ namespace tf
   // for eigen float
   void poseMsgToEigen(const geometry_msgs::Pose& msg, Eigen::Affine3f& eigen);
   void poseEigenToMsg(Eigen::Affine3f& eigen, geometry_msgs::Pose& msg);
+  void transformMsgToEigen(const geometry_msgs::Transform& msg, Eigen::Affine3f& eigen);
+  void transformEigenToMsg(Eigen::Affine3f& eigen, geometry_msgs::Transform& msg);
 }
 
 #endif

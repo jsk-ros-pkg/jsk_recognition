@@ -45,21 +45,30 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 #include <pcl/visualization/pcl_visualizer.h>
+#include <std_srvs/Empty.h>
 
 namespace jsk_pcl_ros
 {
-  class SampleData
+  class CapturedSamplePointCloud
   {
   public:
-    typedef boost::shared_ptr<SampleData> Ptr;
-    SampleData();
-    SampleData(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
+    typedef boost::shared_ptr<CapturedSamplePointCloud> Ptr;
+    CapturedSamplePointCloud();
+    CapturedSamplePointCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
                const Eigen::Affine3f& original_pose);
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr getOriginalPointCloud();
-    geometry_msgs::PoseStamped getOriginalPose();
+    virtual pcl::PointCloud<pcl::PointXYZRGB>::Ptr getOriginalPointCloud();
+    virtual Eigen::Affine3f getOriginalPose();
+    virtual pcl::PointCloud<pcl::PointXYZRGB>::Ptr getRefinedPointCloud();
+    virtual Eigen::Affine3f getRefinedPose();
+    virtual void setRefinedPointCloud(
+      pcl::PointCloud<pcl::PointXYZRGB> cloud);
+    virtual void setRefinedPose(Eigen::Affine3f pose);
+    
   protected:
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr original_cloud_;
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr refined_cloud_;
     Eigen::Affine3f original_pose_;
+    Eigen::Affine3f refined_pose_;
   private:
     
   };
@@ -89,6 +98,13 @@ namespace jsk_pcl_ros
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr output,
       const geometry_msgs::PoseStamped::ConstPtr& pose_msg);
+    virtual bool startRegistration(
+      std_srvs::Empty::Request& req,
+      std_srvs::Empty::Response& res);
+    virtual void callICP(
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr reference,
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr target,
+      Eigen::Affine3f& output_transform);
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
@@ -97,14 +113,18 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<pcl_msgs::PointIndices> sub_indices_;
     message_filters::Subscriber<geometry_msgs::PoseStamped> sub_pose_;
     boost::mutex mutex_;
+    ros::ServiceServer start_registration_srv_;
     ros::Publisher pub_cloud_non_registered_;
+    ros::Publisher pub_registered_;
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer_;
+    
     ////////////////////////////////////////////////////////
     // parameters
     ////////////////////////////////////////////////////////
-    std::vector<SampleData::Ptr> samples_;
+    std::vector<CapturedSamplePointCloud::Ptr> samples_;
     Eigen::Affine3f origin_;
     pcl::PointCloud<pcl::PointXYZRGB> all_cloud_;
+    std::string frame_id_;
   private:
     
   };

@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; c-basic-offset: 4; -*-
 // Software License Agreement (BSD License)
 // Copyright (c) 2008, Willow Garage, Inc.
 // Redistribution and use in source and binary forms, with or without

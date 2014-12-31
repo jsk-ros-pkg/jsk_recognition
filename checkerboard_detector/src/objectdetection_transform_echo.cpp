@@ -88,10 +88,13 @@ void callback(const posedetection_msgs::ObjectDetection::ConstPtr& detection1,
         ROS_INFO("  pos: [%f %f %f]", pos_transformed[0], pos_transformed[1], pos_transformed[2]);
         ROS_INFO("  rot: [%f %f %f %f]", rot_transformed.x(), rot_transformed.y(), rot_transformed.z(), rot_transformed.w());
       }
-      catch(tf::ExtrapolationException& e) {
+      catch(tf2::ConnectivityException &e) {
         ROS_ERROR("failed to resolve tf: %s", e.what());
       }
-      catch(tf2::ExtrapolationException& e) {
+      catch(tf2::InvalidArgumentException &e) {
+        ROS_ERROR("failed to resolve tf: %s", e.what());
+      }
+      catch(tf2::TransformException &e) {
         ROS_ERROR("failed to resolve tf: %s", e.what());
       }
     }

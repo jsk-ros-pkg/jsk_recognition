@@ -20,5 +20,11 @@
         args="0 0 1 0 0.2 0 odom2 odom 10">
   </node>
   <node pkg="jsk_pcl_ros" type="snapit_sample_pose_publisher.py"
-        name="snapit_sample_pose_publisher" />
+        name="snapit_sample_pose_publisher" if="false"/>
+  <node pkg="jsk_interactive_marker" type="marker_6dof" name="marker">
+    <rosparam>
+      frame_id: odom
+    </rosparam>
+    <remap from="~pose" to="snapit/input/convex_align" />
+  </node>
 </launch>

@@ -34,6 +34,7 @@
  *********************************************************************/
 #define BOOST_PARAMETER_MAX_ARITY 7
 
+#include <limits>
 #include "jsk_pcl_ros/linemod.h"
 #include <pcl_conversions/pcl_conversions.h>
 #include <boost/filesystem.hpp>
@@ -47,6 +48,11 @@
 #include <glob.h>
 #include <boost/algorithm/string/predicate.hpp>
 #include <pcl/common/transforms.h>
+#include <pcl/range_image/range_image_planar.h>
+#include "jsk_pcl_ros/viewpoint_sampler.h"
+#include <cv_bridge/cv_bridge.h>
+#include <image_geometry/pinhole_camera_model.h>
+#include <pcl/kdtree/kdtree_flann.h>
 
 namespace jsk_pcl_ros
 {
@@ -54,13 +60,40 @@ namespace jsk_pcl_ros
   {
     PCLNodelet::onInit();
     pnh_->param("output_file", output_file_, std::string("template.lmt"));
-    sub_input_.subscribe(*pnh_, "input", 1);
-    sub_indices_.subscribe(*pnh_, "input/indices", 1);
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-    sync_->connectInput(sub_input_, sub_indices_);
-    sync_->registerCallback(boost::bind(&LINEMODTrainer::store,
-                                        this, _1, _2));
-
+    pnh_->param("sample_viewpoint", sample_viewpoint_, false);
+    pnh_->param("sample_viewpoint_angle_step", sample_viewpoint_angle_step_,
+                40.0);
+    pnh_->param("sample_viewpoint_angle_min", sample_viewpoint_angle_min_,
+                -80.0);
+    pnh_->param("sample_viewpoint_angle_max", sample_viewpoint_angle_max_,
+                80.0);
+    pnh_->param("sample_viewpoint_radius_step", sample_viewpoint_radius_step_,
+                0.2);
+    pnh_->param("sample_viewpoint_radius_min", sample_viewpoint_radius_min_,
+                0.4);
+    pnh_->param("sample_viewpoint_radius_max", sample_viewpoint_radius_max_,
+                0.8);
+    if (!sample_viewpoint_) {
+      sub_input_.subscribe(*pnh_, "input", 1);
+      sub_indices_.subscribe(*pnh_, "input/indices", 1);
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+      sync_->connectInput(sub_input_, sub_indices_);
+      sync_->registerCallback(boost::bind(&LINEMODTrainer::store,
+                                          this, _1, _2));
+    }
+    else {
+      sub_input_nonsync_ = pnh_->subscribe("input", 1,
+                                           &LINEMODTrainer::subscribeCloud,
+                                           this);
+      sub_camera_info_nonsync_ = pnh_->subscribe(
+        "input/info", 1,
+        &LINEMODTrainer::subscribeCameraInfo,
+        this);
+      pub_range_image_ = pnh_->advertise<sensor_msgs::Image>(
+        "output/range_image", 1);
+      pub_sample_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>(
+        "output/sample_cloud", 1);
+    }
     start_training_srv_
       = pnh_->advertiseService(
         "start_training", &LINEMODTrainer::startTraining,
@@ -86,6 +119,24 @@ namespace jsk_pcl_ros
     NODELET_INFO("%lu samples", samples_.size());
   }
 
+  void LINEMODTrainer::subscribeCloud(
+    const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud
+      (new pcl::PointCloud<pcl::PointXYZRGBA>);
+    pcl::fromROSMsg(*cloud_msg, *cloud);
+    samples_before_sampling_.push_back(cloud);
+    NODELET_INFO("%lu samples", samples_.size());
+  }
+
+  void LINEMODTrainer::subscribeCameraInfo(
+    const sensor_msgs::CameraInfo::ConstPtr& info_msg)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    camera_info_ = info_msg;
+  }
+  
   bool LINEMODTrainer::clearData(
     std_srvs::Empty::Request& req,
     std_srvs::Empty::Response& res)
@@ -96,12 +147,115 @@ namespace jsk_pcl_ros
     sample_indices_.clear();
     return true;
   }
-  
-  bool LINEMODTrainer::startTraining(
-    std_srvs::Empty::Request& req,
-    std_srvs::Empty::Response& res)
+
+  void LINEMODTrainer::trainWithViewpointSampling()
   {
-    boost::mutex::scoped_lock lock(mutex_);
+    NODELET_INFO("Start LINEMOD training from %lu samples", samples_.size());
+    if (!camera_info_) {
+      NODELET_FATAL("no camera info is available");
+      return;
+    }
+    image_geometry::PinholeCameraModel model;
+    model.fromCameraInfo(camera_info_);
+    int width = camera_info_->width;
+    int height = camera_info_->height;
+    double fx = model.fx();
+    double fy = model.fy();
+    double cx = model.cx();
+    double cy = model.cy();
+    for (size_t i = 0; i < samples_before_sampling_.size(); i++) {
+      ViewpointSampler sampler(sample_viewpoint_angle_step_,
+                               sample_viewpoint_angle_min_,
+                               sample_viewpoint_angle_max_,
+                               sample_viewpoint_radius_step_,
+                               sample_viewpoint_radius_min_,
+                               sample_viewpoint_radius_max_,
+                               150);
+      NODELET_INFO("training by %lu viewpoints", sampler.sampleNum());
+      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr raw_cloud
+        = samples_before_sampling_[i];
+      for (size_t j = 0; j < sampler.sampleNum(); j++) {
+        if (j % 10 == 0) {
+          NODELET_INFO("training %lu viewpoint", j);
+        }
+        Eigen::Affine3f viewpoint_transform;
+        sampler.get(viewpoint_transform);
+        Eigen::Affine3f object_transform = viewpoint_transform.inverse();
+        pcl::PointCloud<pcl::PointXYZRGBA>::Ptr
+          cloud (new pcl::PointCloud<pcl::PointXYZRGBA>);
+        pcl::transformPointCloud<pcl::PointXYZRGBA> (
+          *raw_cloud, *cloud, object_transform);
+        pcl::RangeImagePlanar range_image;
+        Eigen::Affine3f dummytrans;
+        dummytrans.setIdentity();
+        range_image.createFromPointCloudWithFixedSize (
+          *cloud,
+          width, height,
+          cx, cy,
+          fx, fy,
+          dummytrans);
+        // convert range_image into cv::Mat
+        cv::Mat mat(range_image.height, range_image.width, CV_32FC1);
+        float *tmpf = (float *)mat.ptr();
+        for(unsigned int i = 0; i < range_image.height * range_image.width; i++) {
+          tmpf[i] = range_image.points[i].z;
+        }
+        std_msgs::Header dummy_header;
+        dummy_header.stamp = ros::Time::now();
+        dummy_header.frame_id = camera_info_->header.frame_id;
+        cv_bridge::CvImage cv_bridge(dummy_header,
+                                     "32FC1",
+                                     mat);
+        pub_range_image_.publish(cv_bridge.toImageMsg());
+        pcl::KdTreeFLANN<pcl::PointXYZRGBA>::Ptr
+          kdtree (new pcl::KdTreeFLANN<pcl::PointXYZRGBA>);
+        kdtree->setInputCloud(cloud);
+        pcl::PointCloud<pcl::PointXYZRGBA>::Ptr colored_cloud
+          (new pcl::PointCloud<pcl::PointXYZRGBA>);
+        pcl::PointXYZRGBA nan_point;
+        nan_point.x = nan_point.y = nan_point.z
+          = std::numeric_limits<float>::quiet_NaN();
+        pcl::PointIndices::Ptr mask_indices (new pcl::PointIndices);
+        for (size_t pi = 0; pi < range_image.points.size(); pi++) {
+          if (isnan(range_image.points[pi].x) ||
+              isnan(range_image.points[pi].y) ||
+              isnan(range_image.points[pi].z)) {
+            // nan
+            colored_cloud->points.push_back(nan_point);
+          }
+          else {
+            pcl::PointXYZRGBA input_point;
+            input_point.x = range_image.points[pi].x;
+            input_point.y = range_image.points[pi].y;
+            input_point.z = range_image.points[pi].z;
+            std::vector<int> indices;
+            std::vector<float> distances;
+            kdtree->nearestKSearch(input_point, 1, indices, distances);
+            if (indices.size() > 0) {
+              input_point.rgba = cloud->points[indices[0]].rgba;
+            }
+            colored_cloud->points.push_back(input_point);
+            mask_indices->indices.push_back(pi);
+          }
+        }
+        // trick, rgba -> rgb
+        sensor_msgs::PointCloud2 ros_sample_cloud;
+        pcl::toROSMsg(*colored_cloud, ros_sample_cloud);
+        pcl::PointCloud<pcl::PointXYZRGB> rgb_cloud;
+        pcl::fromROSMsg(ros_sample_cloud, rgb_cloud);
+        pcl::toROSMsg(rgb_cloud, ros_sample_cloud);
+        ros_sample_cloud.header = dummy_header;
+        pub_sample_cloud_.publish(ros_sample_cloud);
+        // push data into samples_
+        samples_.push_back(colored_cloud);
+        sample_indices_.push_back(mask_indices);
+        sampler.next();
+      }
+    }
+  }
+  
+  void LINEMODTrainer::trainWithoutViewpointSampling()
+  {
     NODELET_INFO("Start LINEMOD training from %lu samples", samples_.size());
     pcl::LINEMOD linemod;
     std::vector<pcl::PointCloud<pcl::PointXYZRGBA>::Ptr> masked_clouds;
@@ -199,6 +353,17 @@ namespace jsk_pcl_ros
     NODELET_INFO("executing %s", command_stream.str().c_str());
     int ret = system(command_stream.str().c_str());
     NODELET_INFO("done");
+  }
+  
+  bool LINEMODTrainer::startTraining(
+    std_srvs::Empty::Request& req,
+    std_srvs::Empty::Response& res)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    if (sample_viewpoint_) {
+      trainWithViewpointSampling();
+    }
+    trainWithoutViewpointSampling();
     return true;
   }
 

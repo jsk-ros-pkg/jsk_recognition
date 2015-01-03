@@ -230,6 +230,8 @@ A nodelet to detect object using LINEMOD.
 
 ### jsk\_pcl/LINEMODTrainer
 #### What Is This
+![](images/linemod_trainer.png)
+
 
 A nodelet to train LINEMOD data from pointcloud and indices to mask the objects.
 This nodelet stores data of pointcloud and if you call `~start_training` service,
@@ -243,6 +245,9 @@ it will train the data and dump the templates into lmt file.
 
   Indices to mask object in `~input` pointcloud.
 
+* `~input/info` (`sensor_msgs/CameraInfo`)
+
+  Camera parameter to sample viewpoint.
 #### Advertising Servicies
 * `~start_training` (`std_srvs/Empty`)
 
@@ -255,6 +260,19 @@ it will train the data and dump the templates into lmt file.
 * `~output_file` (`String`, default: `template.lmt`)
 
    A file path to dump trained data.
+
+* `~sample_viewpoint` (`Bool`, default: `False`)
+
+  Generate training data by samplingenerating viewpoint if this parameter is set to true.
+
+* `~sample_viewpoint_angle_step` (`Double`, default: `40.0`)
+* `~sample_viewpoint_angle_min` (`Double`, default: `-80.0`)
+* `~sample_viewpoint_angle_max` (`Double`, default: `80.0`)
+* `~sample_viewpoint_radius_step` (`Double`, default: `0.2`)
+* `~sample_viewpoint_radius_min` (`Double`, default: `0.4`)
+* `~sample_viewpoint_radius_max` (`Double`, default: `0.8`)
+
+  Viewpoint sampling parameters.
 
 ### jsk\_pcl/CaptureStereoSynchronizer
 #### What Is This

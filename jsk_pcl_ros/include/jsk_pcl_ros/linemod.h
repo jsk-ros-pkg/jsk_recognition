@@ -46,6 +46,7 @@
 
 #include <jsk_pcl_ros/LINEMODDetectorConfig.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/CameraInfo.h>
 #include <dynamic_reconfigure/server.h>
 
 #include <std_srvs/Empty.h>
@@ -114,11 +115,16 @@ namespace jsk_pcl_ros
     virtual void store(
       const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
       const PCLIndicesMsg::ConstPtr& indices_msg);
+    virtual void subscribeCloud(
+      const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
+    virtual void subscribeCameraInfo(
+      const sensor_msgs::CameraInfo::ConstPtr& info_msg);
     virtual bool startTraining(std_srvs::Empty::Request& req,
                                std_srvs::Empty::Response& res);
     virtual bool clearData(std_srvs::Empty::Request& req,
                            std_srvs::Empty::Response& res);
-    
+    virtual void trainWithoutViewpointSampling();
+    virtual void trainWithViewpointSampling();
     ////////////////////////////////////////////////////////
     // variables
     ////////////////////////////////////////////////////////
@@ -127,10 +133,23 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<PCLIndicesMsg> sub_indices_;
     ros::ServiceServer start_training_srv_;
     ros::ServiceServer clear_data_srv_;
+    ros::Publisher pub_range_image_;
+    ros::Publisher pub_sample_cloud_;
+    ros::Subscriber sub_input_nonsync_;
+    ros::Subscriber sub_camera_info_nonsync_;
+    sensor_msgs::CameraInfo::ConstPtr camera_info_;
+    std::vector<pcl::PointCloud<pcl::PointXYZRGBA>::Ptr> samples_before_sampling_;
     std::vector<pcl::PointCloud<pcl::PointXYZRGBA>::Ptr> samples_;
     std::vector<pcl::PointIndices::Ptr> sample_indices_;
     boost::mutex mutex_;
     std::string output_file_;
+    bool sample_viewpoint_;
+    double sample_viewpoint_angle_step_;
+    double sample_viewpoint_radius_step_;
+    double sample_viewpoint_angle_min_;
+    double sample_viewpoint_radius_min_;
+    double sample_viewpoint_angle_max_;
+    double sample_viewpoint_radius_max_;
   private:
     
   };

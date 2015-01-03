@@ -131,7 +131,6 @@ namespace jsk_pcl_ros
     std::vector<pcl::PointIndices::Ptr> sample_indices_;
     boost::mutex mutex_;
     std::string output_file_;
-    int rotation_quantization_;
   private:
     
   };

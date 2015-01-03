@@ -404,7 +404,7 @@ namespace jsk_pcl_ros
   void LINEMODTrainer::tar(const std::string& directory, const std::string& output)
   {
     std::stringstream command_stream;
-    command_stream << "tar --format=ustar -cf " << output << " " << directory;
+    command_stream << "tar --format=ustar -cf " << output << " " << directory << "/*";
     NODELET_INFO("executing %s", command_stream.str().c_str());
     int ret = system(command_stream.str().c_str());
   }

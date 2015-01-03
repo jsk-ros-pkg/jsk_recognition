@@ -121,6 +121,12 @@ namespace jsk_pcl_ros
       const sensor_msgs::CameraInfo::ConstPtr& info_msg);
     virtual bool startTraining(std_srvs::Empty::Request& req,
                                std_srvs::Empty::Response& res);
+    virtual std::vector<std::string> trainOneData(
+      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud,
+      pcl::PointIndices::Ptr mask,
+      std::string& tempstr,
+      int i);
+    virtual void tar(std::vector<std::string>& files, const std::string& output);
     virtual bool clearData(std_srvs::Empty::Request& req,
                            std_srvs::Empty::Response& res);
     virtual void trainWithoutViewpointSampling();

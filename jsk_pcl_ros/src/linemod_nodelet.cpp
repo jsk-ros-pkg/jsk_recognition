@@ -155,6 +155,11 @@ namespace jsk_pcl_ros
       NODELET_FATAL("no camera info is available");
       return;
     }
+    boost::filesystem::path temp = boost::filesystem::unique_path();
+    boost::filesystem::create_directory(temp);
+    std::string tempstr = temp.native();
+    NODELET_INFO("mkdir %s", tempstr.c_str());
+    std::vector<std::string> all_files;
     image_geometry::PinholeCameraModel model;
     model.fromCameraInfo(camera_info_);
     int width = camera_info_->width;
@@ -163,6 +168,7 @@ namespace jsk_pcl_ros
     double fy = model.fy();
     double cx = model.cx();
     double cy = model.cy();
+    int counter = 0;
     for (size_t i = 0; i < samples_before_sampling_.size(); i++) {
       ViewpointSampler sampler(sample_viewpoint_angle_step_,
                                sample_viewpoint_angle_min_,
@@ -212,6 +218,9 @@ namespace jsk_pcl_ros
         kdtree->setInputCloud(cloud);
         pcl::PointCloud<pcl::PointXYZRGBA>::Ptr colored_cloud
           (new pcl::PointCloud<pcl::PointXYZRGBA>);
+        colored_cloud->width = range_image.width;
+        colored_cloud->height = range_image.height;
+        colored_cloud->is_dense = range_image.is_dense;
         pcl::PointXYZRGBA nan_point;
         nan_point.x = nan_point.y = nan_point.z
           = std::numeric_limits<float>::quiet_NaN();
@@ -234,6 +243,7 @@ namespace jsk_pcl_ros
             if (indices.size() > 0) {
               input_point.rgba = cloud->points[indices[0]].rgba;
             }
+            
             colored_cloud->points.push_back(input_point);
             mask_indices->indices.push_back(pi);
           }
@@ -247,112 +257,130 @@ namespace jsk_pcl_ros
         ros_sample_cloud.header = dummy_header;
         pub_sample_cloud_.publish(ros_sample_cloud);
         // push data into samples_
-        samples_.push_back(colored_cloud);
-        sample_indices_.push_back(mask_indices);
+        // samples_.push_back(colored_cloud);
+        // sample_indices_.push_back(mask_indices);
+        // immediately train
+        std::vector<std::string> files = trainOneData(
+          colored_cloud, mask_indices, tempstr, counter);
+        for (size_t i = 0; i < files.size(); i++) {
+          all_files.push_back(files[i]);
+        }
         sampler.next();
+        counter++;
       }
     }
+    tar(all_files, output_file_);
+    NODELET_INFO("done");
+  }
+
+  std::vector<std::string> LINEMODTrainer::trainOneData(
+    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud,
+    pcl::PointIndices::Ptr mask,
+    std::string& tempstr,
+    int i)
+  {
+    pcl::LINEMOD linemod;
+    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr masked_cloud
+      (new pcl::PointCloud<pcl::PointXYZRGBA>);
+    pcl::ExtractIndices<pcl::PointXYZRGBA> ex;
+    ex.setKeepOrganized(true);
+    ex.setInputCloud(cloud);
+    ex.setIndices(mask);
+    ex.filter(*masked_cloud);
+    pcl::ColorGradientModality<pcl::PointXYZRGBA> color_grad_mod;
+    color_grad_mod.setInputCloud(masked_cloud);
+    color_grad_mod.processInputData();
+    pcl::SurfaceNormalModality<pcl::PointXYZRGBA> surface_norm_mod;
+    surface_norm_mod.setInputCloud(masked_cloud);
+    surface_norm_mod.processInputData();
+    std::vector<pcl::QuantizableModality*> modalities(2);
+    modalities[0] = &color_grad_mod;
+    modalities[1] = &surface_norm_mod;
+    size_t min_x(masked_cloud->width), min_y(masked_cloud->height), max_x(0), max_y(0);
+    pcl::MaskMap mask_map(masked_cloud->width, masked_cloud->height);
+    for (size_t j = 0; j < masked_cloud->height; ++j) {
+      for (size_t i = 0; i < masked_cloud->width; ++i) {
+        pcl::PointXYZRGBA p
+          = masked_cloud->points[j * masked_cloud->width + i];
+        if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
+          mask_map(i, j) = 1;
+          min_x = std::min(min_x, i);
+          max_x = std::max(max_x, i);
+          min_y = std::min(min_y, j);
+          max_y = std::max(max_y, j);
+        }
+        else {
+          mask_map(i, j) = 0;
+        }
+      }
+    }
+    std::vector<pcl::MaskMap*> masks(2);
+    masks[0] = &mask_map;
+    masks[1] = &mask_map;
+    pcl::RegionXY region;
+    region.x = static_cast<int>(min_x);
+    region.y = static_cast<int>(min_y);
+    region.width = static_cast<int>(max_x - min_x + 1);
+    region.height = static_cast<int>(max_y - min_y + 1);
+    linemod.createAndAddTemplate(modalities, masks, region);
+    
+    std::vector<std::string> ret;
+    {
+      // sqmmt
+      std::stringstream filename_stream;
+      filename_stream << boost::format("%s/%05d_template.sqmmt") % tempstr % i;
+      std::string filename = filename_stream.str();
+      NODELET_INFO("writing %s", filename.c_str());
+      std::ofstream file_stream;
+      file_stream.open(filename.c_str(),
+                       std::ofstream::out | std::ofstream::binary);
+      linemod.getTemplate(0).serialize(file_stream);
+      file_stream.close();
+      ret.push_back(filename);
+    }
+    {
+      // pcd
+      std::stringstream filename_stream;
+      filename_stream << boost::format("%s/%05d_template.pcd") % tempstr % i;
+      std::string filename = filename_stream.str();
+      NODELET_INFO("writing %s", filename.c_str());
+      pcl::PCDWriter writer;
+      writer.writeBinaryCompressed(filename, *masked_cloud);
+      ret.push_back(filename);
+    }
+    return ret;
   }
   
   void LINEMODTrainer::trainWithoutViewpointSampling()
   {
     NODELET_INFO("Start LINEMOD training from %lu samples", samples_.size());
-    pcl::LINEMOD linemod;
-    std::vector<pcl::PointCloud<pcl::PointXYZRGBA>::Ptr> masked_clouds;
+    boost::filesystem::path temp = boost::filesystem::unique_path();
+    boost::filesystem::create_directory(temp);
+    std::string tempstr = temp.native();
+    NODELET_INFO("mkdir %s", tempstr.c_str());
+    std::vector<std::string> all_files;
     for (size_t i = 0; i < samples_.size(); i++) {
       NODELET_INFO("Processing %lu-th data", i);
       pcl::PointIndices::Ptr mask = sample_indices_[i];
       pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud = samples_[i];
-      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr masked_cloud
-        (new pcl::PointCloud<pcl::PointXYZRGBA>);
-      pcl::ExtractIndices<pcl::PointXYZRGBA> ex;
-      ex.setKeepOrganized(true);
-      ex.setInputCloud(cloud);
-      ex.setIndices(mask);
-      ex.filter(*masked_cloud);
-      masked_clouds.push_back(masked_cloud);
-      pcl::ColorGradientModality<pcl::PointXYZRGBA> color_grad_mod;
-      color_grad_mod.setInputCloud(masked_cloud);
-      color_grad_mod.processInputData();
-      pcl::SurfaceNormalModality<pcl::PointXYZRGBA> surface_norm_mod;
-      surface_norm_mod.setInputCloud(masked_cloud);
-      surface_norm_mod.processInputData();
-      std::vector<pcl::QuantizableModality*> modalities(2);
-      modalities[0] = &color_grad_mod;
-      modalities[1] = &surface_norm_mod;
-      
-      size_t min_x(masked_cloud->width), min_y(masked_cloud->height), max_x(0), max_y(0);
-      pcl::MaskMap mask_map(masked_cloud->width, masked_cloud->height);
-      for (size_t j = 0; j < masked_cloud->height; ++j) {
-        for (size_t i = 0; i < masked_cloud->width; ++i) {
-          pcl::PointXYZRGBA p
-            = masked_cloud->points[j * masked_cloud->width + i];
-          if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
-            mask_map(i, j) = 1;
-            min_x = std::min(min_x, i);
-            max_x = std::max(max_x, i);
-            min_y = std::min(min_y, j);
-            max_y = std::max(max_y, j);
-          }
-          else {
-            mask_map(i, j) = 0;
-          }
-        }
+      std::vector<std::string> files = trainOneData(cloud, mask, tempstr, i);
+      for (size_t i = 0; i < files.size(); i++) {
+        all_files.push_back(files[i]);
       }
-      std::vector<pcl::MaskMap*> masks(2);
-      masks[0] = &mask_map;
-      masks[1] = &mask_map;
-      pcl::RegionXY region;
-      region.x = static_cast<int>(min_x);
-      region.y = static_cast<int>(min_y);
-      region.width = static_cast<int>(max_x - min_x + 1);
-      region.height = static_cast<int>(max_y - min_y + 1);
-      linemod.createAndAddTemplate(modalities, masks, region);
     }
-    // dump template
-    // lmt file is a tar file
-    //   tar --format=ustar -cf model.lmt ./*template*
-    // 1. mkdir template directory
-    // 2. dump templates into the directory as template_&05d.pcd
-    // 3. call tar
-    NODELET_INFO("Dump %lu trained data into %s", linemod.getNumOfTemplates(),
-             output_file_.c_str());
-    
-    boost::filesystem::path temp = boost::filesystem::unique_path();
-    const std::string tempstr = temp.native();
-    NODELET_INFO("mkdir %s", tempstr.c_str());
-    boost::filesystem::create_directory(temp);
+    tar(all_files, output_file_);
+    NODELET_INFO("done");
+  }
+
+  void LINEMODTrainer::tar(std::vector<std::string>& files, const std::string& output)
+  {
     std::stringstream command_stream;
-    command_stream << "tar --format=ustar -cf " << output_file_;
-    for (size_t i = 0; i < linemod.getNumOfTemplates(); i++) {
-      {
-        // sqmmt
-        std::stringstream filename_stream;
-        filename_stream << boost::format("%s/%05lu_template.sqmmt") % tempstr % i;
-        std::string filename = filename_stream.str();
-        NODELET_INFO("writing %s", filename.c_str());
-        std::ofstream file_stream;
-        file_stream.open(filename.c_str(),
-                         std::ofstream::out | std::ofstream::binary);
-        linemod.getTemplate(i).serialize(file_stream);
-        file_stream.close();
-        command_stream << " " << filename;
-      }
-      {
-        // pcd
-        std::stringstream filename_stream;
-        filename_stream << boost::format("%s/%05lu_template.pcd") % tempstr % i;
-        std::string filename = filename_stream.str();
-        NODELET_INFO("writing %s", filename.c_str());
-        pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud = masked_clouds[i];
-        pcl::PCDWriter writer;
-        writer.writeBinaryCompressed(filename, *cloud);
-        command_stream << " " << filename;
-      }
+    command_stream << "tar --format=ustar -cf " << output;
+    for (size_t i = 0; i < files.size(); i++) {
+      command_stream << " " << files[i];
     }
     NODELET_INFO("executing %s", command_stream.str().c_str());
     int ret = system(command_stream.str().c_str());
-    NODELET_INFO("done");
   }
   
   bool LINEMODTrainer::startTraining(
@@ -363,7 +391,9 @@ namespace jsk_pcl_ros
     if (sample_viewpoint_) {
       trainWithViewpointSampling();
     }
-    trainWithoutViewpointSampling();
+    else {
+      trainWithoutViewpointSampling();
+    }
     return true;
   }
 

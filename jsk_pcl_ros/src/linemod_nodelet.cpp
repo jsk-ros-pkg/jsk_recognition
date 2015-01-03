@@ -192,7 +192,13 @@ namespace jsk_pcl_ros
       sampler.next();
     }
 
-    boost::mutex omp_mutex;
+    // NB:
+    // This line is super important.
+    // dummy Range Image to avoid static method initialization in
+    // multi-thread environment. In detail,
+    // pcl::RangeImagePlanar::createLookupTables is not thread-safe.
+    pcl::RangeImagePlanar dummy_range_image;
+    
     for (size_t ii = 0; ii < samples_before_sampling_.size(); ii++) {
       pcl::PointCloud<pcl::PointXYZRGBA>::Ptr raw_cloud
         = samples_before_sampling_[ii];
@@ -200,9 +206,6 @@ namespace jsk_pcl_ros
 #pragma omp parallel for
 #endif
       for (size_t j = 0; j < transforms.size(); j++) {
-        if (j % 100 == 0) {
-          NODELET_INFO("training %lu viewpoint", j);
-        }
         Eigen::Affine3f viewpoint_transform = transforms[j];
         Eigen::Affine3f object_transform = viewpoint_transform.inverse();
         pcl::PointCloud<pcl::PointXYZRGBA>::Ptr
@@ -218,21 +221,18 @@ namespace jsk_pcl_ros
           cx, cy,
           fx, fy,
           dummytrans);
-        // convert range_image into cv::Mat
         cv::Mat mat(range_image.height, range_image.width, CV_32FC1);
         float *tmpf = (float *)mat.ptr();
         for(unsigned int i = 0; i < range_image.height * range_image.width; i++) {
           tmpf[i] = range_image.points[i].z;
         }
-        {
-          // std_msgs::Header dummy_header;
-          // dummy_header.stamp = ros::Time::now();
-          // dummy_header.frame_id = camera_info_->header.frame_id;
-          // cv_bridge::CvImage range_bridge(dummy_header,
-          //                                 "32FC1",
-          //                                 mat);
-          // pub_range_image_.publish(range_bridge.toImageMsg());
-        }
+        std_msgs::Header dummy_header;
+        dummy_header.stamp = ros::Time::now();
+        dummy_header.frame_id = camera_info_->header.frame_id;
+        cv_bridge::CvImage range_bridge(dummy_header,
+                                        "32FC1",
+                                        mat);
+        pub_range_image_.publish(range_bridge.toImageMsg());
         pcl::KdTreeFLANN<pcl::PointXYZRGBA>::Ptr
           kdtree (new pcl::KdTreeFLANN<pcl::PointXYZRGBA>);
         kdtree->setInputCloud(cloud);
@@ -273,7 +273,6 @@ namespace jsk_pcl_ros
                           cloud->points[indices[0]].g,
                           cloud->points[indices[0]].b);
             colored_cloud->points[pi] = input_point;
-            //mask_indices->indices.push_back(pi);
           }
         }
         for (size_t pi = 0; pi < range_image.points.size(); pi++) {
@@ -284,29 +283,18 @@ namespace jsk_pcl_ros
             mask_indices->indices.push_back(pi);
           }
         }
-        {
-          // std_msgs::Header dummy_header2;
-          // dummy_header2.stamp = ros::Time::now();
-          // dummy_header2.frame_id = camera_info_->header.frame_id;
-          // cv_bridge::CvImage colored_range_bridge(dummy_header2,
-          //                                         sensor_msgs::image_encodings::RGB8,
-          //                                         colored_image);
-          // pub_colored_range_image_.publish(colored_range_bridge.toImageMsg());
-        }
-        {
-          // cannot run this scope in OMP
-          // // trick, rgba -> rgb
-          // sensor_msgs::PointCloud2 ros_sample_cloud;
-          // pcl::toROSMsg(*colored_cloud, ros_sample_cloud);
-          // pcl::PointCloud<pcl::PointXYZRGB> rgb_cloud;
-          // pcl::fromROSMsg(ros_sample_cloud, rgb_cloud);
-          // pcl::toROSMsg(rgb_cloud, ros_sample_cloud);
-          // std_msgs::Header dummy_header3;
-          // dummy_header3.stamp = ros::Time::now();
-          // dummy_header3.frame_id = camera_info_->header.frame_id;
-          // ros_sample_cloud.header = dummy_header3;
-          // pub_sample_cloud_.publish(ros_sample_cloud);
-        }
+        cv_bridge::CvImage colored_range_bridge(dummy_header,
+                                                sensor_msgs::image_encodings::RGB8,
+                                                colored_image);
+        pub_colored_range_image_.publish(colored_range_bridge.toImageMsg());
+        // // trick, rgba -> rgb
+        sensor_msgs::PointCloud2 ros_sample_cloud;
+        pcl::toROSMsg(*colored_cloud, ros_sample_cloud);
+        pcl::PointCloud<pcl::PointXYZRGB> rgb_cloud;
+        pcl::fromROSMsg(ros_sample_cloud, rgb_cloud);
+        pcl::toROSMsg(rgb_cloud, ros_sample_cloud);
+        ros_sample_cloud.header = dummy_header;
+        pub_sample_cloud_.publish(ros_sample_cloud);
         trainOneData(colored_cloud, mask_indices, tempstr, j);
       }
     }
@@ -440,75 +428,7 @@ namespace jsk_pcl_ros
     DiagnosticNodelet::onInit();
     pnh_->param("use_raw_templates", use_raw_templates_, false);
     pnh_->param("minimum_template_points", minimum_template_points_, 3000);
-    if (!use_raw_templates_) {
-      pnh_->param("template_file", template_file_, std::string("template.ltm"));
-    }
-    else {
-      std::string template_files;
-      pnh_->param("template_files", template_files, std::string("template"));
-      // glob files under template_directory
-      glob_t glob_result;
-      glob(template_files.c_str(), GLOB_TILDE, NULL, &glob_result);
-      std::vector<std::string> template_pcd_files;
-      std::vector<std::string> template_sqmmt_files;
-      // PCD file driven
-      for (unsigned int i=0;i<glob_result.gl_pathc;++i) {
-        std::string file(glob_result.gl_pathv[i]);
-        NODELET_INFO("file: %s", file.c_str());
-        if (boost::algorithm::ends_with(file, ".pcd")) {
-          // check sqmmt file exists or not
-          std::string pcd_file = file;
-          std::string sqmmt_file = boost::algorithm::replace_all_copy(file, ".pcd", ".sqmmt");
-          if (boost::filesystem::exists(sqmmt_file)) {
-            template_pcd_files.push_back(pcd_file);
-            template_sqmmt_files.push_back(sqmmt_file);
-          }
-          else {
-            NODELET_WARN("cannot find %s", sqmmt_file.c_str());
-          }
-        }
-      }
-      // error check
-      if (template_pcd_files.size() == 0) {
-        NODELET_FATAL("no pcd/sqmmt files is found");
-        return;
-      }
-      template_pointclouds_.resize(template_pcd_files.size());
-#ifdef _OPENMP
-#pragma omp parallel for
-#endif
-      for (size_t i = 0; i < template_pointclouds_.size(); i++) {
-        NODELET_INFO("reading %s", template_pcd_files[i].c_str());
-        pcl::PCDReader reader;
-        pcl::PointCloud<pcl::PointXYZRGBA>::Ptr 
-          ref(new pcl::PointCloud<pcl::PointXYZRGBA>);
-        reader.read(template_pcd_files[i], *ref);
-        // count up non-nan points
-        int valid_points = 0;
-        for (size_t j = 0; j < ref->points.size(); j++) {
-          pcl::PointXYZRGBA p = ref->points[j];
-          if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
-            ++valid_points;
-          }
-        }
-        NODELET_INFO("%s -- %d", template_pcd_files[i].c_str(), valid_points);
-        if (valid_points > minimum_template_points_) {
-          template_pointclouds_[i] = ref;
-        }
-      }
-      template_sqmmts_.resize(template_sqmmt_files.size());
-#ifdef _OPENMP
-#pragma omp parallel for
-#endif
-      for (size_t i = 0; i < template_sqmmts_.size(); i++) {
-        NODELET_INFO("reading %s", template_sqmmt_files[i].c_str());
-        std::ifstream file_stream(template_sqmmt_files[i].c_str());
-        pcl::SparseQuantizedMultiModTemplate sqmmt;
-        sqmmt.deserialize(file_stream);
-        template_sqmmts_[i] = sqmmt;
-      }
-          
-    }
+    pnh_->param("template_file", template_file_, std::string("template.ltm"));
     
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -545,11 +465,75 @@ namespace jsk_pcl_ros
       NODELET_INFO("done");
     }
     else {
-      for (size_t i = 0; i < template_pointclouds_.size(); i++) {
-        if (template_pointclouds_[i]) {
+      std::vector<pcl::PointCloud<pcl::PointXYZRGBA>::Ptr> template_pointclouds;
+      std::vector<pcl::SparseQuantizedMultiModTemplate> template_sqmmts;
+      // glob files under template_directory
+      glob_t glob_result;
+      glob(template_file_.c_str(), GLOB_TILDE, NULL, &glob_result);
+      std::vector<std::string> template_pcd_files;
+      std::vector<std::string> template_sqmmt_files;
+      // PCD file driven
+      for (unsigned int i=0;i<glob_result.gl_pathc;++i) {
+        std::string file(glob_result.gl_pathv[i]);
+        NODELET_INFO("file: %s", file.c_str());
+        if (boost::algorithm::ends_with(file, ".pcd")) {
+          // check sqmmt file exists or not
+          std::string pcd_file = file;
+          std::string sqmmt_file = boost::algorithm::replace_all_copy(file, ".pcd", ".sqmmt");
+          if (boost::filesystem::exists(sqmmt_file)) {
+            template_pcd_files.push_back(pcd_file);
+            template_sqmmt_files.push_back(sqmmt_file);
+          }
+          else {
+            NODELET_WARN("cannot find %s", sqmmt_file.c_str());
+          }
+        }
+      }
+      // error check
+      if (template_pcd_files.size() == 0) {
+        NODELET_FATAL("no pcd/sqmmt files is found under %s", template_file_.c_str());
+        return;
+      }
+      template_pointclouds.resize(template_pcd_files.size());
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+      for (size_t i = 0; i < template_pointclouds.size(); i++) {
+        NODELET_INFO("reading %s", template_pcd_files[i].c_str());
+        pcl::PCDReader reader;
+        pcl::PointCloud<pcl::PointXYZRGBA>::Ptr 
+          ref(new pcl::PointCloud<pcl::PointXYZRGBA>);
+        reader.read(template_pcd_files[i], *ref);
+        // count up non-nan points
+        int valid_points = 0;
+        for (size_t j = 0; j < ref->points.size(); j++) {
+          pcl::PointXYZRGBA p = ref->points[j];
+          if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
+            ++valid_points;
+          }
+        }
+        NODELET_INFO("%s -- %d", template_pcd_files[i].c_str(), valid_points);
+        if (valid_points > minimum_template_points_) {
+          template_pointclouds[i] = ref;
+        }
+      }
+      template_sqmmts.resize(template_sqmmt_files.size());
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+      for (size_t i = 0; i < template_sqmmts.size(); i++) {
+        NODELET_INFO("reading %s", template_sqmmt_files[i].c_str());
+        std::ifstream file_stream(template_sqmmt_files[i].c_str());
+        pcl::SparseQuantizedMultiModTemplate sqmmt;
+        sqmmt.deserialize(file_stream);
+        template_sqmmts[i] = sqmmt;
+      }
+      
+      for (size_t i = 0; i < template_pointclouds.size(); i++) {
+        if (template_pointclouds[i]) {
           NODELET_INFO("adding %lu template", i);
-          line_rgbd_.addTemplate(template_sqmmts_[i], 
-                                 *template_pointclouds_[i]);
+          line_rgbd_.addTemplate(template_sqmmts[i], 
+                                 *template_pointclouds[i]);
         }
       }
       NODELET_INFO("done");

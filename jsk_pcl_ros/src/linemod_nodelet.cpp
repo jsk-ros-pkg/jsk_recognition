@@ -225,13 +225,13 @@ namespace jsk_pcl_ros
           tmpf[i] = range_image.points[i].z;
         }
         {
-          std_msgs::Header dummy_header;
-          dummy_header.stamp = ros::Time::now();
-          dummy_header.frame_id = camera_info_->header.frame_id;
-          cv_bridge::CvImage range_bridge(dummy_header,
-                                          "32FC1",
-                                          mat);
-          pub_range_image_.publish(range_bridge.toImageMsg());
+          // std_msgs::Header dummy_header;
+          // dummy_header.stamp = ros::Time::now();
+          // dummy_header.frame_id = camera_info_->header.frame_id;
+          // cv_bridge::CvImage range_bridge(dummy_header,
+          //                                 "32FC1",
+          //                                 mat);
+          // pub_range_image_.publish(range_bridge.toImageMsg());
         }
         pcl::KdTreeFLANN<pcl::PointXYZRGBA>::Ptr
           kdtree (new pcl::KdTreeFLANN<pcl::PointXYZRGBA>);
@@ -285,13 +285,13 @@ namespace jsk_pcl_ros
           }
         }
         {
-          std_msgs::Header dummy_header2;
-          dummy_header2.stamp = ros::Time::now();
-          dummy_header2.frame_id = camera_info_->header.frame_id;
-          cv_bridge::CvImage colored_range_bridge(dummy_header2,
-                                                  sensor_msgs::image_encodings::RGB8,
-                                                  colored_image);
-          pub_colored_range_image_.publish(colored_range_bridge.toImageMsg());
+          // std_msgs::Header dummy_header2;
+          // dummy_header2.stamp = ros::Time::now();
+          // dummy_header2.frame_id = camera_info_->header.frame_id;
+          // cv_bridge::CvImage colored_range_bridge(dummy_header2,
+          //                                         sensor_msgs::image_encodings::RGB8,
+          //                                         colored_image);
+          // pub_colored_range_image_.publish(colored_range_bridge.toImageMsg());
         }
         {
           // cannot run this scope in OMP
@@ -307,13 +307,10 @@ namespace jsk_pcl_ros
           // ros_sample_cloud.header = dummy_header3;
           // pub_sample_cloud_.publish(ros_sample_cloud);
         }
-        std::vector<std::string> files = trainOneData(
-          colored_cloud, mask_indices, tempstr, j);
-        all_files[2*j] = files[0];
-        all_files[2*j + 1] = files[1];
+        trainOneData(colored_cloud, mask_indices, tempstr, j);
       }
     }
-    tar(all_files, output_file_);
+    tar(tempstr, output_file_);
     NODELET_INFO("done");
   }
 
@@ -412,17 +409,14 @@ namespace jsk_pcl_ros
         all_files.push_back(files[i]);
       }
     }
-    tar(all_files, output_file_);
+    tar(tempstr, output_file_);
     NODELET_INFO("done");
   }
 
-  void LINEMODTrainer::tar(std::vector<std::string>& files, const std::string& output)
+  void LINEMODTrainer::tar(const std::string& directory, const std::string& output)
   {
     std::stringstream command_stream;
-    command_stream << "tar --format=ustar -cf " << output;
-    for (size_t i = 0; i < files.size(); i++) {
-      command_stream << " " << files[i];
-    }
+    command_stream << "tar --format=ustar -cf " << output << " " << directory;
     NODELET_INFO("executing %s", command_stream.str().c_str());
     int ret = system(command_stream.str().c_str());
   }

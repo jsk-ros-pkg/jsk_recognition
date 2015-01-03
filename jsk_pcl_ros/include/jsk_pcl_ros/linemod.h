@@ -126,7 +126,7 @@ namespace jsk_pcl_ros
       pcl::PointIndices::Ptr mask,
       std::string& tempstr,
       int i);
-    virtual void tar(std::vector<std::string>& files, const std::string& output);
+    virtual void tar(const std::string& directory, const std::string& output);
     virtual bool clearData(std_srvs::Empty::Request& req,
                            std_srvs::Empty::Response& res);
     virtual void trainWithoutViewpointSampling();

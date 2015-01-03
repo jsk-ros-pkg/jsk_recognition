@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; c-basic-offset: 4; -*-
 // Software License Agreement (BSD License)
 // Copyright (c) 2008, Willow Garage, Inc.
 // Redistribution and use in source and binary forms, with or without
@@ -207,16 +208,26 @@ public:
         }
 
         lasttime = ros::Time::now();
-
-        ros::SubscriberStatusCallback connect_cb = boost::bind( &CheckerboardDetector::connectCb, this);
-        _pubDetection =
-          _node.advertise<posedetection_msgs::ObjectDetection> ("ObjectDetection", 1,
-                                                                connect_cb, connect_cb);
-        _pubPoseStamped =
-          _node.advertise<geometry_msgs::PoseStamped> ("objectdetection_pose", 1,
-                                                       connect_cb, connect_cb);
-        _pubCornerPoint = _node.advertise<geometry_msgs::PointStamped>("corner_point", 1, connect_cb, connect_cb);
-        _pubPolygonArray = _node.advertise<jsk_pcl_ros::PolygonArray>("polygons", 1, connect_cb, connect_cb);
+        if (!display) {
+            ros::SubscriberStatusCallback connect_cb = boost::bind( &CheckerboardDetector::connectCb, this);
+            _pubDetection =
+                _node.advertise<posedetection_msgs::ObjectDetection> ("ObjectDetection", 1,
+                                                                      connect_cb, connect_cb);
+            _pubPoseStamped =
+                _node.advertise<geometry_msgs::PoseStamped> ("objectdetection_pose", 1,
+                                                             connect_cb, connect_cb);
+            _pubCornerPoint = _node.advertise<geometry_msgs::PointStamped>("corner_point", 1, connect_cb, connect_cb);
+            _pubPolygonArray = _node.advertise<jsk_pcl_ros::PolygonArray>("polygons", 1, connect_cb, connect_cb);
+        }
+        else {
+            _pubDetection =
+                _node.advertise<posedetection_msgs::ObjectDetection> ("ObjectDetection", 1);
+            _pubPoseStamped =
+                _node.advertise<geometry_msgs::PoseStamped> ("objectdetection_pose", 1);
+            _pubCornerPoint = _node.advertise<geometry_msgs::PointStamped>("corner_point", 1);
+            _pubPolygonArray = _node.advertise<jsk_pcl_ros::PolygonArray>("polygons", 1);
+            subscribe();
+        }
         //this->camInfoSubscriber = _node.subscribe("camera_info", 1, &CheckerboardDetector::caminfo_cb, this);
         //this->imageSubscriber = _node.subscribe("image",1, &CheckerboardDetector::image_cb, this);
         //this->camInfoSubscriber2 = _node.subscribe("CameraInfo", 1, &CheckerboardDetector::caminfo_cb2, this);
@@ -319,28 +330,39 @@ public:
         return result;
     }
 
-    //
+
+    void subscribe( )
+    {
+        if ( camInfoSubscriber == NULL )
+            camInfoSubscriber = _node.subscribe("camera_info", 1, &CheckerboardDetector::caminfo_cb, this);
+        if ( imageSubscriber == NULL )
+            imageSubscriber = _node.subscribe("image", 1, &CheckerboardDetector::image_cb, this);
+        if ( camInfoSubscriber2 == NULL )
+            camInfoSubscriber2 = _node.subscribe("CameraInfo", 1, &CheckerboardDetector::caminfo_cb2, this);
+        if ( imageSubscriber2 == NULL )
+            imageSubscriber2 = _node.subscribe("Image",1, &CheckerboardDetector::image_cb2, this);
+
+    }
+
+    void unsubscribe( )
+    {
+        camInfoSubscriber.shutdown();
+        camInfoSubscriber2.shutdown();
+        imageSubscriber.shutdown();
+        imageSubscriber2.shutdown();
+    }
+    
     void connectCb( )
     {
       boost::mutex::scoped_lock lock(this->mutexcalib);
       if (_pubDetection.getNumSubscribers() == 0 && _pubCornerPoint.getNumSubscribers() == 0 &&
           _pubPoseStamped.getNumSubscribers() == 0 && _pubPolygonArray.getNumSubscribers() == 0)
         {
-          camInfoSubscriber.shutdown();
-          camInfoSubscriber2.shutdown();
-          imageSubscriber.shutdown();
-          imageSubscriber2.shutdown();
+            unsubscribe();
         }
       else
         {
-          if ( camInfoSubscriber == NULL )
-            camInfoSubscriber = _node.subscribe("camera_info", 1, &CheckerboardDetector::caminfo_cb, this);
-          if ( imageSubscriber == NULL )
-            imageSubscriber = _node.subscribe("image", 1, &CheckerboardDetector::image_cb, this);
-          if ( camInfoSubscriber2 == NULL )
-            camInfoSubscriber2 = _node.subscribe("CameraInfo", 1, &CheckerboardDetector::caminfo_cb2, this);
-          if ( imageSubscriber2 == NULL )
-            imageSubscriber2 = _node.subscribe("Image",1, &CheckerboardDetector::image_cb2, this);
+            subscribe();
         }
     }
 

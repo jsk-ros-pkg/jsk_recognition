@@ -188,6 +188,7 @@ namespace jsk_pcl_ros
       size_t index,
       const Eigen::Vector3f& direction);
     virtual PtrPair separatePolygon(size_t index);
+    virtual bool isInside(const Eigen::Vector3f& p);
     size_t previousIndex(size_t i);
     size_t nextIndex(size_t i);
     static Polygon fromROSMsg(const geometry_msgs::Polygon& polygon);
@@ -230,7 +231,6 @@ namespace jsk_pcl_ros
     virtual void projectOnPlane(const Eigen::Vector3f& p, Eigen::Vector3f& output);
     virtual bool isProjectableInside(const Eigen::Vector3f& p);
     // p should be a point on the plane
-    virtual bool isInside(const Eigen::Vector3f& p);
     virtual ConvexPolygon flipConvex();
     virtual Eigen::Vector3f getCentroid();
     virtual Ptr magnify(const double scale_factor);

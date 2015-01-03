@@ -38,6 +38,9 @@
   <node pkg="image_view" type="image_view" name="sample_viewer">
     <remap from="image" to="linemod_trainer/output/range_image" />
   </node>
+    <node pkg="image_view" type="image_view" name="sample_color_viewer">
+    <remap from="image" to="linemod_trainer/output/colored_range_image" />
+  </node>
   <node pkg="rviz" type="rviz" name="registration_rviz"
         args="-d $(find jsk_pcl_ros)/config/multisense_capture_model_training.rviz" />
   <node pkg="jsk_pcl_ros" type="capture_train_linemod.sh" name="capture_train_linemod_script"

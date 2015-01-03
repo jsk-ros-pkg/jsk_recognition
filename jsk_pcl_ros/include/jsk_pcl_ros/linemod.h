@@ -140,6 +140,7 @@ namespace jsk_pcl_ros
     ros::ServiceServer start_training_srv_;
     ros::ServiceServer clear_data_srv_;
     ros::Publisher pub_range_image_;
+    ros::Publisher pub_colored_range_image_;
     ros::Publisher pub_sample_cloud_;
     ros::Subscriber sub_input_nonsync_;
     ros::Subscriber sub_camera_info_nonsync_;

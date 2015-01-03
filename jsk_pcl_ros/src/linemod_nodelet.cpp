@@ -51,6 +51,7 @@
 #include <pcl/range_image/range_image_planar.h>
 #include "jsk_pcl_ros/viewpoint_sampler.h"
 #include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
 #include <image_geometry/pinhole_camera_model.h>
 #include <pcl/kdtree/kdtree_flann.h>
 
@@ -91,6 +92,8 @@ namespace jsk_pcl_ros
         this);
       pub_range_image_ = pnh_->advertise<sensor_msgs::Image>(
         "output/range_image", 1);
+      pub_colored_range_image_ = pnh_->advertise<sensor_msgs::Image>(
+          "output/colored_range_image", 1);
       pub_sample_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>(
         "output/sample_cloud", 1);
     }
@@ -168,24 +171,39 @@ namespace jsk_pcl_ros
     double fy = model.fy();
     double cx = model.cx();
     double cy = model.cy();
-    int counter = 0;
-    for (size_t i = 0; i < samples_before_sampling_.size(); i++) {
-      ViewpointSampler sampler(sample_viewpoint_angle_step_,
+    if (samples_before_sampling_.size() != 1) {
+      NODELET_FATAL("we expect only one sample data");
+      return;
+    }
+    ViewpointSampler sampler(sample_viewpoint_angle_step_,
                                sample_viewpoint_angle_min_,
                                sample_viewpoint_angle_max_,
                                sample_viewpoint_radius_step_,
                                sample_viewpoint_radius_min_,
                                sample_viewpoint_radius_max_,
                                150);
-      NODELET_INFO("training by %lu viewpoints", sampler.sampleNum());
+    std::vector<Eigen::Affine3f> transforms;
+    transforms.resize(sampler.sampleNum());
+    all_files.resize(sampler.sampleNum() * 2);
+    for (size_t i = 0; i < sampler.sampleNum(); i++) {
+      Eigen::Affine3f transform;
+      sampler.get(transform);
+      transforms[i] = transform;
+      sampler.next();
+    }
+
+    boost::mutex omp_mutex;
+    for (size_t ii = 0; ii < samples_before_sampling_.size(); ii++) {
       pcl::PointCloud<pcl::PointXYZRGBA>::Ptr raw_cloud
-        = samples_before_sampling_[i];
-      for (size_t j = 0; j < sampler.sampleNum(); j++) {
-        if (j % 10 == 0) {
+        = samples_before_sampling_[ii];
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+      for (size_t j = 0; j < transforms.size(); j++) {
+        if (j % 100 == 0) {
           NODELET_INFO("training %lu viewpoint", j);
         }
-        Eigen::Affine3f viewpoint_transform;
-        sampler.get(viewpoint_transform);
+        Eigen::Affine3f viewpoint_transform = transforms[j];
         Eigen::Affine3f object_transform = viewpoint_transform.inverse();
         pcl::PointCloud<pcl::PointXYZRGBA>::Ptr
           cloud (new pcl::PointCloud<pcl::PointXYZRGBA>);
@@ -206,13 +224,15 @@ namespace jsk_pcl_ros
         for(unsigned int i = 0; i < range_image.height * range_image.width; i++) {
           tmpf[i] = range_image.points[i].z;
         }
-        std_msgs::Header dummy_header;
-        dummy_header.stamp = ros::Time::now();
-        dummy_header.frame_id = camera_info_->header.frame_id;
-        cv_bridge::CvImage cv_bridge(dummy_header,
-                                     "32FC1",
-                                     mat);
-        pub_range_image_.publish(cv_bridge.toImageMsg());
+        {
+          std_msgs::Header dummy_header;
+          dummy_header.stamp = ros::Time::now();
+          dummy_header.frame_id = camera_info_->header.frame_id;
+          cv_bridge::CvImage range_bridge(dummy_header,
+                                          "32FC1",
+                                          mat);
+          pub_range_image_.publish(range_bridge.toImageMsg());
+        }
         pcl::KdTreeFLANN<pcl::PointXYZRGBA>::Ptr
           kdtree (new pcl::KdTreeFLANN<pcl::PointXYZRGBA>);
         kdtree->setInputCloud(cloud);
@@ -225,12 +245,16 @@ namespace jsk_pcl_ros
         nan_point.x = nan_point.y = nan_point.z
           = std::numeric_limits<float>::quiet_NaN();
         pcl::PointIndices::Ptr mask_indices (new pcl::PointIndices);
+        colored_cloud->points.resize(range_image.points.size());
+        
+        cv::Mat colored_image = cv::Mat::zeros(
+          range_image.height, range_image.width, CV_8UC3);
         for (size_t pi = 0; pi < range_image.points.size(); pi++) {
           if (isnan(range_image.points[pi].x) ||
               isnan(range_image.points[pi].y) ||
               isnan(range_image.points[pi].z)) {
             // nan
-            colored_cloud->points.push_back(nan_point);
+            colored_cloud->points[pi] = nan_point;
           }
           else {
             pcl::PointXYZRGBA input_point;
@@ -243,30 +267,50 @@ namespace jsk_pcl_ros
             if (indices.size() > 0) {
               input_point.rgba = cloud->points[indices[0]].rgba;
             }
-            
-            colored_cloud->points.push_back(input_point);
+            colored_image.at<cv::Vec3b>(pi / range_image.width,
+                                        pi % range_image.width)
+              = cv::Vec3b(cloud->points[indices[0]].r,
+                          cloud->points[indices[0]].g,
+                          cloud->points[indices[0]].b);
+            colored_cloud->points[pi] = input_point;
+            //mask_indices->indices.push_back(pi);
+          }
+        }
+        for (size_t pi = 0; pi < range_image.points.size(); pi++) {
+          if (!isnan(range_image.points[pi].x) &&
+              !isnan(range_image.points[pi].y) &&
+              !isnan(range_image.points[pi].z)) {
+            // nan
             mask_indices->indices.push_back(pi);
           }
         }
-        // trick, rgba -> rgb
-        sensor_msgs::PointCloud2 ros_sample_cloud;
-        pcl::toROSMsg(*colored_cloud, ros_sample_cloud);
-        pcl::PointCloud<pcl::PointXYZRGB> rgb_cloud;
-        pcl::fromROSMsg(ros_sample_cloud, rgb_cloud);
-        pcl::toROSMsg(rgb_cloud, ros_sample_cloud);
-        ros_sample_cloud.header = dummy_header;
-        pub_sample_cloud_.publish(ros_sample_cloud);
-        // push data into samples_
-        // samples_.push_back(colored_cloud);
-        // sample_indices_.push_back(mask_indices);
-        // immediately train
-        std::vector<std::string> files = trainOneData(
-          colored_cloud, mask_indices, tempstr, counter);
-        for (size_t i = 0; i < files.size(); i++) {
-          all_files.push_back(files[i]);
+        {
+          std_msgs::Header dummy_header2;
+          dummy_header2.stamp = ros::Time::now();
+          dummy_header2.frame_id = camera_info_->header.frame_id;
+          cv_bridge::CvImage colored_range_bridge(dummy_header2,
+                                                  sensor_msgs::image_encodings::RGB8,
+                                                  colored_image);
+          pub_colored_range_image_.publish(colored_range_bridge.toImageMsg());
         }
-        sampler.next();
-        counter++;
+        {
+          // cannot run this scope in OMP
+          // // trick, rgba -> rgb
+          // sensor_msgs::PointCloud2 ros_sample_cloud;
+          // pcl::toROSMsg(*colored_cloud, ros_sample_cloud);
+          // pcl::PointCloud<pcl::PointXYZRGB> rgb_cloud;
+          // pcl::fromROSMsg(ros_sample_cloud, rgb_cloud);
+          // pcl::toROSMsg(rgb_cloud, ros_sample_cloud);
+          // std_msgs::Header dummy_header3;
+          // dummy_header3.stamp = ros::Time::now();
+          // dummy_header3.frame_id = camera_info_->header.frame_id;
+          // ros_sample_cloud.header = dummy_header3;
+          // pub_sample_cloud_.publish(ros_sample_cloud);
+        }
+        std::vector<std::string> files = trainOneData(
+          colored_cloud, mask_indices, tempstr, j);
+        all_files[2*j] = files[0];
+        all_files[2*j + 1] = files[1];
       }
     }
     tar(all_files, output_file_);
@@ -330,7 +374,7 @@ namespace jsk_pcl_ros
       std::stringstream filename_stream;
       filename_stream << boost::format("%s/%05d_template.sqmmt") % tempstr % i;
       std::string filename = filename_stream.str();
-      NODELET_INFO("writing %s", filename.c_str());
+      std::cerr << "writing " << filename << std::endl;
       std::ofstream file_stream;
       file_stream.open(filename.c_str(),
                        std::ofstream::out | std::ofstream::binary);
@@ -343,7 +387,7 @@ namespace jsk_pcl_ros
       std::stringstream filename_stream;
       filename_stream << boost::format("%s/%05d_template.pcd") % tempstr % i;
       std::string filename = filename_stream.str();
-      NODELET_INFO("writing %s", filename.c_str());
+      std::cerr << "writing " << filename << std::endl;
       pcl::PCDWriter writer;
       writer.writeBinaryCompressed(filename, *masked_cloud);
       ret.push_back(filename);

@@ -397,6 +397,15 @@ to see the object.
 
   Size of bounding box
 
+* `~initial_pos` (Array of double, default: `None`):
+
+  Initial pose of interesting region
+
+* `~initial_rot` (Array of double, default: `None`):
+
+  Initial orientation of interesting region. The value should be represented in
+  [roll, pitch, yaw].
+
 ### jsk\_pcl/ROIClipper
 #### What Is This
 ![](images/attention_clipper.png)

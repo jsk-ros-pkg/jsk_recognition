@@ -42,7 +42,7 @@
 #include <pcl/filters/crop_box.h>
 #include <pcl_ros/transforms.h>
 #include "jsk_pcl_ros/pcl_conversion_util.h"
-
+#include <jsk_topic_tools/rosparam_utils.h>
 
 namespace jsk_pcl_ros
 {
@@ -50,12 +50,38 @@ namespace jsk_pcl_ros
   {
     DiagnosticNodelet::onInit();
     tf_listener_ = TfListenerSingleton::getInstance();
+
+    pose_.setIdentity();
+    std::vector<double> initial_pos;
+    if (jsk_topic_tools::readVectorParameter(*pnh_,
+                                             "initial_pos",
+                                             initial_pos))
+    {
+      pose_.translation() = Eigen::Vector3f(initial_pos[0],
+                                            initial_pos[1],
+                                            initial_pos[2]);
+    }
+    
+    std::vector<double> initial_rot;
+    if (jsk_topic_tools::readVectorParameter(*pnh_,
+                                             "initial_rot",
+                                             initial_rot))
+    {
+      pose_ = pose_
+        * Eigen::AngleAxisf(initial_rot[0],
+                          Eigen::Vector3f::UnitX())
+        * Eigen::AngleAxisf(initial_rot[1],
+                            Eigen::Vector3f::UnitY())
+        * Eigen::AngleAxisf(initial_rot[2],
+                            Eigen::Vector3f::UnitZ());
+    }
+    
     // parameter
     pnh_->param("dimension_x", dimension_x_, 0.1);
     pnh_->param("dimension_y", dimension_y_, 0.1);
     pnh_->param("dimension_z", dimension_z_, 0.1);
     pnh_->param("frame_id", frame_id_, std::string("base_link"));
-    pose_.setIdentity();
+    
     pub_camera_info_ = advertise<sensor_msgs::CameraInfo>(*pnh_, "output", 1);
     pub_bounding_box_array_
       = advertise<jsk_pcl_ros::BoundingBoxArray>(*pnh_, "output/box_array", 1);

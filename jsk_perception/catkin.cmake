@@ -32,7 +32,8 @@ generate_dynamic_reconfigure_options(
   cfg/ColorHistogram.cfg
   cfg/HoughCircles.cfg
   cfg/ColorHistogramSlidingMatcher.cfg
-  cfg/BackgroundSubstraction.cfg)
+  cfg/BackgroundSubstraction.cfg
+  cfg/GrabCut.cfg)
 
 add_message_files(FILES
       PointsArray.msg RotatedRectStamped.msg LineArray.msg Rect.msg Line.msg RotatedRect.msg SparseImage.msg

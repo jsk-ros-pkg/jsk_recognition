@@ -44,12 +44,15 @@
 #include <message_filters/synchronizer.h>
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <dynamic_reconfigure/server.h>
+#include "jsk_perception/GrabCutConfig.h"
 
 namespace jsk_perception
 {
   class GrabCut: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
+    typedef GrabCutConfig Config;
     typedef message_filters::sync_policies::ExactTime<
     sensor_msgs::Image,
     sensor_msgs::Image,
@@ -71,7 +74,7 @@ namespace jsk_perception
       const sensor_msgs::Image::ConstPtr& image_msg,
       const sensor_msgs::Image::ConstPtr& foreground_msg,
       const sensor_msgs::Image::ConstPtr& background_msg);
-
+    virtual void configCallback (Config &config, uint32_t level);    
     ////////////////////////////////////////////////////////
     // parameters
     ////////////////////////////////////////////////////////
@@ -83,8 +86,13 @@ namespace jsk_perception
     message_filters::Subscriber<sensor_msgs::Image> sub_image_;
     message_filters::Subscriber<sensor_msgs::Image> sub_foreground_;
     message_filters::Subscriber<sensor_msgs::Image> sub_background_;
+    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
+    boost::mutex mutex_;
     
-    
+    ////////////////////////////////////////////////////////
+    // Parameters
+    ////////////////////////////////////////////////////////
+    bool use_probable_pixel_seed_;    
   private:
     
   };

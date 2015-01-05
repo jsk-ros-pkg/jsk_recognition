@@ -43,6 +43,11 @@ namespace jsk_perception
   void GrabCut::onInit()
   {
     DiagnosticNodelet::onInit();
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (
+        &GrabCut::configCallback, this, _1, _2);
+    srv_->setCallback (f);
     pub_foreground_
       = advertise<sensor_msgs::Image>(*pnh_, "output/foreground", 1);
     pub_background_
@@ -85,6 +90,7 @@ namespace jsk_perception
     const sensor_msgs::Image::ConstPtr& foreground_msg,
     const sensor_msgs::Image::ConstPtr& background_msg)
   {
+    boost::mutex::scoped_lock lock(mutex_);
     cv::Mat input = cv_bridge::toCvCopy(
       image_msg, sensor_msgs::image_encodings::BGR8)->image;
     cv::Mat foreground = cv_bridge::toCvCopy(
@@ -103,10 +109,20 @@ namespace jsk_perception
     for (size_t j = 0; j < input.rows; j++) {
       for (size_t i = 0; i < input.cols; i++) {
         if (foreground.at<uchar>(j, i) == 255) {
-          mask.at<uchar>(j, i) = cv::GC_FGD;
+          if (use_probable_pixel_seed_) {
+            mask.at<uchar>(j, i) = cv::GC_PR_FGD;
+          }
+          else {
+            mask.at<uchar>(j, i) = cv::GC_FGD;
+          }
         }
         if (background.at<uchar>(j, i) == 255) {
-          mask.at<uchar>(j, i) = cv::GC_BGD;
+          if (use_probable_pixel_seed_) {
+            mask.at<uchar>(j, i) = cv::GC_PR_BGD;
+          }
+          else {
+            mask.at<uchar>(j, i) = cv::GC_BGD;
+          }
         }
       }
     }
@@ -136,6 +152,12 @@ namespace jsk_perception
     pub_background_.publish(bg_bridge.toImageMsg());
     pub_foreground_mask_.publish(fg_mask_bridge.toImageMsg());
     pub_background_mask_.publish(bg_mask_bridge.toImageMsg());
+  }
+
+  void GrabCut::configCallback(Config &config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    use_probable_pixel_seed_ = (config.seed_pixel_policy == 1);
   }
   
 }

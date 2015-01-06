@@ -41,6 +41,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <geometry_msgs/Point32.h>
 #include <eigen_conversions/eigen_msg.h>
+#include <tf_conversions/tf_eigen.h>
 
 #if ROS_VERSION_MINIMUM(1, 10, 0)
 // hydro and later
@@ -132,6 +133,8 @@ namespace tf
   void poseEigenToMsg(Eigen::Affine3f& eigen, geometry_msgs::Pose& msg);
   void transformMsgToEigen(const geometry_msgs::Transform& msg, Eigen::Affine3f& eigen);
   void transformEigenToMsg(Eigen::Affine3f& eigen, geometry_msgs::Transform& msg);
+  void transformTFToEigen(const tf::Transform& t, Eigen::Affine3f& eigen);
+  void transformEigenToTF(Eigen::Affine3f& eigen , tf::Transform& t);
 }
 
 #endif

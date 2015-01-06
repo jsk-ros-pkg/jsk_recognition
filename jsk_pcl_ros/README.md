@@ -723,6 +723,11 @@ You can choose several types of tilt/spindle lasers such as tilt-laser of PR2, i
    It should be remapped to `assemble_scans2` service of
    [laser_assembler](http://wiki.ros.org/laser_assembler).
 
+#### Advertising Service
+* `~clear_cache` (`std_srvs/Empty`)
+
+   Clear cache and restart collecting data.
+
 #### Parameters
 * `~use_laser_assembler` (Boolean, default: `False`):
 

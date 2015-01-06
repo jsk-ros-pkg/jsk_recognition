@@ -59,6 +59,8 @@
 #include <boost/circular_buffer.hpp>
 #include <jsk_topic_tools/vital_checker.h>
 
+#include <pcl/filters/extract_indices.h>
+
 namespace jsk_pcl_ros
 {
   std::vector<int> addIndices(const std::vector<int>& a,
@@ -71,6 +73,25 @@ namespace jsk_pcl_ros
   pcl::PointIndices::Ptr subIndices(const pcl::PointIndices& a,
                                     const pcl::PointIndices& b);
 
+  template <class PointT>
+  std::vector<typename pcl::PointCloud<PointT> ::Ptr>
+  convertToPointCloudArray(const typename pcl::PointCloud<PointT>::Ptr& cloud,
+                           const std::vector<pcl::PointIndices::Ptr>& indices)
+  {
+    pcl::ExtractIndices<PointT> extract;
+    extract.setInputCloud(cloud);
+    std::vector<typename pcl::PointCloud<PointT> ::Ptr> cloud_array;
+    for (size_t i = 0; i < indices.size(); i++) {
+      typename pcl::PointCloud<PointT> ::Ptr
+        segment (new pcl::PointCloud<PointT>);
+      extract.setIndices(indices[i]);
+      extract.filter(*segment);
+      cloud_array.push_back(segment);
+    }
+    return cloud_array;
+  }
+
+  
   template<class T>
   void appendVector(std::vector<T>& a, const std::vector<T>& b)
   {

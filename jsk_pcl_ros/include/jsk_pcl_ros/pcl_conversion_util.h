@@ -97,7 +97,7 @@ namespace jsk_pcl_ros
                            Eigen::Affine3f& to);
   void convertEigenAffine3(const Eigen::Affine3f& from,
                            Eigen::Affine3d& to);
-  
+
 }
 // extend pcl_conversions package's toPCL and fromPCL functions
 namespace pcl_conversions
@@ -108,7 +108,7 @@ namespace pcl_conversions
   std::vector<pcl::ModelCoefficients::Ptr>
   convertToPCLModelCoefficients(
     const std::vector<PCLModelCoefficientMsg>& coefficients);
-
+  
   std::vector<PCLIndicesMsg>
   convertToROSPointIndices(
     const std::vector<pcl::PointIndices::Ptr> cluster_indices,
@@ -123,6 +123,7 @@ namespace pcl_conversions
   convertToROSModelCoefficients(
     const std::vector<pcl::ModelCoefficients::Ptr>& coefficients,
     const std_msgs::Header& header);
+
 }
 
 namespace tf

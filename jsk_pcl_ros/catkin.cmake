@@ -76,6 +76,7 @@ add_service_files(FILES SwitchTopic.srv
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/PlaneConcatenator.cfg
   cfg/NormalDirectionFilter.cfg
   cfg/RegionGrowingMultiplePlaneSegmentation.cfg
   cfg/LineSegmentCollector.cfg
@@ -277,6 +278,8 @@ jsk_pcl_nodelet(src/incremental_model_registration_nodelet.cpp
   "jsk_pcl/IncrementalModelRegistration" "incremental_model_registration")
 jsk_pcl_nodelet(src/supervoxel_segmentation_nodelet.cpp
   "jsk_pcl/SupervoxelSegmentation" "supervoxel_segmentation")
+jsk_pcl_nodelet(src/plane_concatenator_nodelet.cpp
+  "jsk_pcl/PlaneConcatenator" "plane_concatenator")
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
   src/pcl_conversion_util.cpp src/pcl_util.cpp

@@ -1,0 +1,11 @@
+<launch>
+  <node pkg="jsk_perception" type="color_histogram"
+        name="color_histogram" output="screen">
+    <param name="use_mask" value="true" />
+    <remap from="image" to="/camera/rgb/image_color" />
+    <remap from="/camera/rgb/image_color/mask" to="/camera/mask" />
+  </node>
+  <node pkg="image_view" type="image_view" name="input_image">
+    <remap from="image" to="color_histogram/input_image" />
+  </node>
+</launch>

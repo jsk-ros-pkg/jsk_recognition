@@ -29,6 +29,7 @@ find_package(catkin REQUIRED COMPONENTS
   eigen_conversions tf_conversions tf2_ros tf
   image_transport nodelet cv_bridge
   ${ML_CLASSIFIERS} sklearn jsk_topic_tools
+  image_geometry
   laser_assembler moveit_ros_perception)
 # only run in hydro
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
@@ -55,6 +56,7 @@ add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg
   SparseOccupancyGridArray.msg
   DepthErrorResult.msg
   ParallelEdge.msg ParallelEdgeArray.msg
+  PosedCameraInfo.msg
   ICPResult.msg)
 
 add_service_files(FILES SwitchTopic.srv
@@ -69,7 +71,8 @@ add_service_files(FILES SwitchTopic.srv
   CallSnapIt.srv CallPolygon.srv
   EnvironmentLock.srv
   PolygonOnEnvironment.srv
-  ICPAlignWithBox.srv)
+  ICPAlignWithBox.srv
+  ICPAlign.srv)
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
@@ -101,6 +104,8 @@ generate_dynamic_reconfigure_options(
   cfg/EdgebasedCubeFinder.cfg
   cfg/MultiPlaneSACSegmentation.cfg
   cfg/BoundingBoxFilter.cfg
+  cfg/LINEMODDetector.cfg
+  cfg/SupervoxelSegmentation.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -252,13 +257,32 @@ jsk_pcl_nodelet(src/tilt_laser_listener_nodelet.cpp
   "jsk_pcl/TiltLaserListener" "tilt_laser_listener")
 jsk_pcl_nodelet(src/normal_direction_filter_nodelet.cpp
   "jsk_pcl/NormalDirectionFilter" "normal_direction_filter")
-
+jsk_pcl_nodelet(src/attention_clipper_nodelet.cpp
+  "jsk_pcl/AttentionClipper" "attention_clipper")
+jsk_pcl_nodelet(src/roi_clipper_nodelet.cpp
+  "jsk_pcl/ROIClipper" "roi_clipper")
+jsk_pcl_nodelet(src/point_indices_to_mask_image_nodelet.cpp
+  "jsk_pcl/PointIndicesToMaskImage" "point_indices_to_mask_image")
+jsk_pcl_nodelet(src/mask_image_to_point_indices_nodelet.cpp
+  "jsk_pcl/MaskImageToPointIndices" "mask_image_to_point_indices")
+jsk_pcl_nodelet(src/capture_stereo_synchronizer_nodelet.cpp
+  "jsk_pcl/CaptureStereoSynchronizer" "capture_stereo_synchronizer")
+jsk_pcl_nodelet(src/linemod_nodelet.cpp
+  "jsk_pcl/LINEMODTrainer" "linemod_trainer")
+jsk_pcl_nodelet(src/linemod_nodelet.cpp
+  "jsk_pcl/LINEMODDetector" "linemod_detector")
+jsk_pcl_nodelet(src/intermittent_image_annotator_nodelet.cpp
+  "jsk_pcl/IntermittentImageAnnotator" "intermittent_image_annotator")
+jsk_pcl_nodelet(src/incremental_model_registration_nodelet.cpp
+  "jsk_pcl/IncrementalModelRegistration" "incremental_model_registration")
+jsk_pcl_nodelet(src/supervoxel_segmentation_nodelet.cpp
+  "jsk_pcl/SupervoxelSegmentation" "supervoxel_segmentation")
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
   src/pcl_conversion_util.cpp src/pcl_util.cpp
-  src/diagnostic_nodelet.cpp
   src/pointcloud_moveit_filter.cpp
-  src/connection_based_nodelet.cpp)
+  src/tf_listener_singleton.cpp
+  src/viewpoint_sampler.cpp)
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 
@@ -280,3 +304,5 @@ install(TARGETS jsk_pcl_ros ${jsk_pcl_nodelet_executables}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 
 install(FILES jsk_pcl_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+install(DIRECTORY launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

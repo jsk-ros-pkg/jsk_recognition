@@ -2,6 +2,182 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.30 (2014-12-24)
+-------------------
+* Publish specified ROI as PosedCameraInfo in IntermittentImageAnnotator
+* Use TfListenerSingleton to get instance of tf::TransformListener
+* Contributors: Ryohei Ueda
+
+0.1.29 (2014-12-24)
+-------------------
+* Add document about IntermittentImageAnnotator
+* [LINEMODDetector] Do not use small templates
+* [CaptureStereoSynchronizer] Does not capture near samples
+* Add IntermittentImageAnnotator to select ROI out of several snapshots
+* [LINEMODDetector] Use glob to specify template files for linemod
+* [LINEMODTrainer] Simulate samples rotating around z-axis
+* Add projective ICP registration
+* Write PCD file as binary compressed in LINEMODTrainer
+* Load linemod training data from pcd and sqmmt files and use OpenMP
+  to speed-up it
+* Synchronize reference pointcloud and input pointcloud in icp registration
+  to refine result of other recognition
+* LINEMODDetector: add documentation and load template after setting
+  parameters and publish the result of recognition as pointcloud
+* Add LINEMODDetector and implement LINEMODTrainer and LINEMODDetector in
+  one linemod_nodelet.cpp
+* fix transform mistake
+* Fix linemod template format. lmt is just a tar file of pcd and sqmm files
+* rotate pose of box acoording to looking direction
+* Add launch file to reconstruct 3d pointcloud from captured by CaptureStereoSynchronizer
+* Add nodelet to train linemod
+* Move multisense specific lines from capture.launch to capture_multisense_training_data.launch
+* Added new nodelet to capture training data of stereo camera to
+  jsk_pcl_ros and update launch files to capture training data of multisense
+* Add new nodelet to generate mask image from PointIndices
+* Clip Pointcloud and publish the indices inside of a box in AttentionClipper
+* Added topic interface to specify the region by jsk_pcl_ros::BoundingBox
+* add parameter to choose keeping organized
+* Add utility launch file to resize pointcloud and fix initial value of
+  use_indices_ in resize_points_publisher_nodelet.cpp
+* Support pointclouds include nan in EuclideanClustering
+* Remove diagnostic_nodelet.{cpp,h} and connection_based_nodelet.{cpp,h}
+  of jsk_pcl_ros and use them of jsk_topic_tools
+* Use jsk_topic_tools::ConnectionBasedNodelet in DepthImageError, EdgeDepthReginement, EdgebasedCubeFinder, EuclideanClusterExtraction and GridSampler
+* add parameter
+* print handle estimation
+* use handle_estimator.l instead of nodelet version
+* add euslisp handle estimator
+* handle_estimator : change condition or to and
+* Contributors: Ryohei Ueda, Yusuke Furuta, Chi Wun Au, Yuto Inagaki
+
+0.1.28 (2014-12-17)
+-------------------
+* Publish attention region mask from AttentionClipper
+* Add new nodelets: ROIClipper and AttentionClipper to control attention
+  and ROI
+* fix hsi_color_filter.launch bug
+* Change default value of publish_tf and publish_clouds of ClusterPointIndicesDecomposer
+
+0.1.27 (2014-12-09)
+-------------------
+* Add GDB argument to toggle xterm gdb hack
+* changed default parametar for pub_tf false
+* added args in launch not pub tf by cluster_decomposer
+* Enable to create several hsi filters
+* fixed bug in icp
+* add param to set angle-divide-param for organized multi plange
+* Fix coding style of DepthImageCreator:
+  * remove hard tabs
+  * add bsd header
+* Use jsk_topic_tool's ConnectionBasedNodelet in DepthImageCreator
+* Add example euslisp code for displaying BoundingBoxArray
+* Fix typo in rgb filter comments
+* changed some topics in icp always subscribe without subscribe method defined in connection_based_nodelet
+* changet pointcloud_screen_point not to use jsconnection_based_nodelet
+* Use jsk_topic_tools::ConnectionBasedNodelet in BilateralFilter,
+  BorderEstimator, BoundingBoxFilter and so on
+* Contributors: Ryohei Ueda, Shunichi Nozawa, Yu Ohara, Yuto Inagaki
+
+0.1.26 (2014-11-23)
+-------------------
+* Install launch directory
+* Contributors: Ryohei Ueda
+
+0.1.25 (2014-11-21)
+-------------------
+* Add singleton class for tf::TransformListener
+* python_sklearn -> python-sklearn, see https://github.com/ros/rosdistro/blob/master/rosdep/python.yaml#L1264
+* Merge remote-tracking branch 'origin/master' into add-more-parameter-for-calibration
+  Conflicts:
+  jsk_pcl_ros/launch/openni2_remote.launch
+* Add uv_scale parameter to depth_calibration.cpp and update openni2_remote.launch
+  to specify more parameter.
+
+0.1.24 (2014-11-15)
+-------------------
+* Add default calibration file for openni2_remote.launch
+* remove unneeded nodelet part
+  change param
+* added launch that calc plane with pr2_laser
+* Fix polygon projection and confirm that snapit works
+* Fix MultiPlaneExtraction initialization
+* Update SnapIt to use topic interface and reimplement it only for snap on polygon
+* Fix segv in collision checking
+* Fix OrganizedMultiPlaneSegmentation indexing
+* Update diagnostics aggregator settings for footstep_recognition
+* Fix diagnostic information when there is no subscriber
+* Suppress message from EnvironmentPlaneModeling
+* Add document about MultiPlaneExtraction
+* Check the pointer is correctly set to avoid SEGV
+* Add normal direction filter based on Imu direction
+* Update OrganizedMultiPlaneDetection documentation
+* Add new nodelet: region growing based multiple plane detection
+* use this->erase
+* Add imu hint when running MultiPlaneSACSegmentation
+* Add short documentation about OrganizedMultiPlaneSegmentation
+* Update document about CentroidPublisher
+* Add documentation about jsk_pcl/ClusterPointIndicesDecomposerZAxis
+* Add moveit plugin to just filter pointcloud which belongs to robot
+* Add nodelet to handle time range of rotating laser
+* removed passthrough filter
+* rename file name from error_visualize to pr2_pointcloud_error_visualizatoin
+* Support cluster information in MultiplePlaneSACSegmentation and remove
+  plane estimation from LineSegmentCollector
+* restored codes slightly
+* added icp_result_msgs and srvs
+* change launch file path
+* add launch files for visualizing calibration error
+* Add nodelet to handle time range of rotating laser
+* Fix Polygon::decomposeToTriangles if the original polygon is already a triangle
+* Remove single_nodelet_exec.cpp.in
+* Add documentation about ClusterPointIndicesDecomposer
+* Add image to documentation of EuclideanClustering
+* Add documentation about EuclideanSegmentation
+* Add documentation about DepthImageCreator
+* Add documentation about PointcloudScreenpoint
+* Support specifying yaml file to calibrate depth image on openni2_remote.launch
+* Format calibration model on DepthCalibration
+* For precision requirement, use repr function when generating yaml file
+  for depth image calibration
+* Support quadratic model for u and v to calibrate depth image:
+  1. Support quadratic-uv-quadratic and quadratic-uv-quadratic-abs model
+  2. use SetDepthCalibrationParameter.srv to specify depth calibration parameter
+* Downsize frequency map resolution and add --width and --height option to
+  depth_error_calibration.py
+* Update depth calibration program.
+  1. Fix checkerboard_detector to publish correct corner point
+  2. Calibrate depth_image rather than PointCloud
+  3. Use matplotlib animation to visualize graph in depth_error_calibration.py
+* support new model to calibrate kinect like sensor, which use absolute
+  value respected to center coordinate of projectoin matrix
+* Support quadratic-uv-abs model
+* Add service file: DepthCalibrationParameter
+* Add nodelet to apply calibration parameter to pointcloud. and add
+  new model to calibrate: quadratic-uv
+* Support quadratic function fitting in depth_error_calibration.py
+* Add python script to calibrate depth error of depth sensors
+* Merge remote-tracking branch 'refs/remotes/origin/master' into add-document-about-resize-points
+  Conflicts:
+  jsk_pcl_ros/README.md
+* Add script to run logistic regression for depth error
+* Add documentation about ResizePointCloud
+* Merge remote-tracking branch 'refs/remotes/origin/master' into remove-color-category20-from-jsk-pcl-ros
+  Conflicts:
+  jsk_pcl_ros/include/jsk_pcl_ros/pcl_util.h
+* Remove colorCategory20 from jsk_pcl_ros and use jsk_topic_tools' colorCategory20
+* Fix syntax of README.md of jsk_pcl_ros
+* Add documentation about ResizePointCloud
+* Add documentation about typical messages defined in jsk_pcl_ros
+* Extract multi planes out of collected segmented lines from laserrange finder
+* add new nodelet: LienSegmentCollector
+* Add LineSegmentDetector for LRF pointcloud
+* Use dynamic reconfigure to specify several parameters for ParticleFilterTracking
+* Support contiuous model building on EnvironmentPlaneModeling and add
+  a launch file for footstep planning recogniton
+* Add utitlity service interface to register completed maps
+* Contributors: Kei Okada, Yuto Inagaki, JSK applications, Chi Wun Au, Ryohei Ueda, Yu Ohara
+
 0.1.23 (2014-10-09)
 -------------------
 * Use pcl::EarClip to decompose polygon into triangles
@@ -65,7 +241,7 @@ Changelog for package jsk_pcl_ros
 * Fix topic relaying of openni_remote for openni_launch on hydro
 * Add new nodelet to filter organized pointcloud based on x-y index rather
   than 3-D position value.
-* Contributors: Ryohei Ueda, aginika, tarukosu
+* Contributors: Ryohei Ueda, Yusuke Furuta, Yuto Inagaki
 
 0.1.22 (2014-09-24)
 -------------------
@@ -120,7 +296,7 @@ Changelog for package jsk_pcl_ros
 * use colorCategory20 function to colorize pointcloud in ClusterPointIndicesDecomposer
 * visualizing connection of planes with lines in OrganizedMultiPlaneSegmentation
 * use rosparam_utils of jsk_topic_tools in StaticPolygonArrayPublisher
-* Contributors: Ryohei Ueda, ohara, wesleypchan
+* Contributors: Ryohei Ueda, wesleypchan, ohara
 
 0.1.17 (2014-09-07)
 -------------------
@@ -191,7 +367,7 @@ Changelog for package jsk_pcl_ros
   * publish u/v coordinates from checkerboard_detector.
   * frame_id broadcasted from objectdetection_tf_publisher.py is configurable
 * copy the header of the input cloud to the output cloud in SelectedClusterPublisher
-* Contributors: Ryohei Ueda, Yuto Inagaki, Eisoku Kuroiwa, Yusuke Furuta
+* Contributors: Ryohei Ueda, Eisoku Kuroiwa, Yusuke Furuta, Yuto Inagaki
 
 0.1.11 (2014-07-08)
 -------------------
@@ -264,7 +440,7 @@ Changelog for package jsk_pcl_ros
 * new nodelet to transform PolygonArray and ModelCoefficientsArray
 * add nodelet to publish static jsk_pcl_ros/PolygonArray with timestamp
   synchronized with the pointclouds
-* Contributors: Ryohei Ueda, Yuto Inagaki, Masaki Murooka, Yusuke Furuta
+* Contributors: Ryohei Ueda, Yusuke Furuta, Masaki Murooka, Yuto Inagaki
 
 0.1.7 (2014-05-31)
 ------------------
@@ -368,12 +544,12 @@ Changelog for package jsk_pcl_ros
 * make paritcal_filter_tracking_nodelet publish tracked object tf trasnformation
 * add two launch files to run openni on remote machine
 * add octree_change_detector
-* Contributors: Ryohei Ueda, Yohei Kakiuchi, Yuto Inagaki, Masaki Murooka, Shunichi Nozawa, Yusuke Furuta, Ryo Terasawa, Chan Wesley, Kei Okada
+* Contributors: Chan Wesley, Shunichi Nozawa, Yuto Inagaki, Masaki Murooka, Ryo Terasawa, Ryohei Ueda, Yohei Kakiuchi, Yusuke Furuta, Kei Okada
 
 0.1.4 (2014-04-25)
 ------------------
 * fixed compile error jsk_pcl_ros
-* Contributors: Kei Okada, Ryohei Ueda, Yuto Inagaki
+* Contributors: Ryohei Ueda, Kei Okada, Yuto Inagaki
 
 0.1.3 (2014-04-12)
 ------------------
@@ -658,4 +834,4 @@ Changelog for package jsk_pcl_ros
 * remove jskpointcloud dependency from jsk_pcl_ros
 * copy depth_image_creator from unreleased
 * add jsk_pcl_ros (copy from unreleased repository)
-* Contributors: Kei Okada, Ryohei Ueda, Yuto Inagaki, Haseru Chen, Yuki Furuta, Kazuto Murase, Chen Wesley, Youhei Kakiuchi
+* Contributors: Haseru Chen, Youhei Kakiuchi, Yuki Furuta, Kei Okada, Yuto Inagaki, Chen Wesley, Kazuto Murase, Ryohei Ueda

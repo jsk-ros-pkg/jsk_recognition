@@ -45,7 +45,8 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
-#include <tf/transform_listener.h>
+#include "jsk_pcl_ros/tf_listener_singleton.h"
+
 #include <dynamic_reconfigure/server.h>
 // pcl
 #include <pcl_ros/pcl_nodelet.h>
@@ -62,12 +63,12 @@
 #include <diagnostic_updater/publisher.h>
 #include <jsk_topic_tools/rosparam_utils.h>
 #include "jsk_pcl_ros/pcl_util.h"
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <jsk_topic_tools/connection_based_nodelet.h>
 
 
 namespace jsk_pcl_ros
 {
-  class PlaneRejector: public ConnectionBasedNodelet
+  class PlaneRejector: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime< jsk_pcl_ros::PolygonArray,
@@ -95,7 +96,7 @@ namespace jsk_pcl_ros
     // axis
     Eigen::Vector3d reference_axis_;
     double angle_thr_;
-    boost::shared_ptr<tf::TransformListener> listener_;
+    tf::TransformListener* listener_;
     boost::mutex mutex_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     ros::Publisher polygons_pub_, coefficients_pub_;

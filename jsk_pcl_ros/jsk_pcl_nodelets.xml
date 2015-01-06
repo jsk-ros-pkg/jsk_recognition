@@ -1,4 +1,52 @@
 <library path="libjsk_pcl_ros">
+  <class name="jsk_pcl/SupervoxelSegmentation"
+         type="jsk_pcl_ros::SupervoxelSegmentation"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl/MaskImageToPointIndices"
+         type="jsk_pcl_ros::MaskImageToPointIndices"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl/IncrementalModelRegistration"
+         type="jsk_pcl_ros::IncrementalModelRegistration"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl/IntermittentImageAnnotator"
+         type="jsk_pcl_ros::IntermittentImageAnnotator"
+         base_class_type="nodelet::Nodelet">
+    intermittent image annotator
+  </class>
+  <class name="jsk_pcl/LINEMODDetector"
+         type="jsk_pcl_ros::LINEMODDetector"
+         base_class_type="nodelet::Nodelet">
+    LINEMOD detector
+  </class>
+  <class name="jsk_pcl/LINEMODTrainer"
+         type="jsk_pcl_ros::LINEMODTrainer"
+         base_class_type="nodelet::Nodelet">
+    LINEMOD trainer
+  </class>
+  <class name="jsk_pcl/CaptureStereoSynchronizer"
+         type="jsk_pcl_ros::CaptureStereoSynchronizer"
+         base_class_type="nodelet::Nodelet">
+    Synchronize stereo messages for capture training data
+  </class>
+  <class name="jsk_pcl/PointIndicesToMaskImage"
+         type="jsk_pcl_ros::PointIndicesToMaskImage"
+         base_class_type="nodelet::Nodelet">
+    Generate mask image out of point indices
+  </class>
+  
+  <class name="jsk_pcl/ROIClipper"
+         type="jsk_pcl_ros::ROIClipper"
+         base_class_type="nodelet::Nodelet">
+    Clip image based on camera_info.roi
+  </class>
+  <class name="jsk_pcl/AttentionClipper"
+         type="jsk_pcl_ros::AttentionClipper"
+         base_class_type="nodelet::Nodelet">
+    Publish ROI of attention reagion
+  </class>
   <class name="jsk_pcl/NormalDirectionFilter"
          type="jsk_pcl_ros::NormalDirectionFilter"
          base_class_type="nodelet::Nodelet">

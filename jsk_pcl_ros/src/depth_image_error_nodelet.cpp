@@ -42,7 +42,7 @@ namespace jsk_pcl_ros
 {
   void DepthImageError::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     depth_error_publisher_ = advertise<DepthErrorResult>(*pnh_, "output", 1);
   }
 

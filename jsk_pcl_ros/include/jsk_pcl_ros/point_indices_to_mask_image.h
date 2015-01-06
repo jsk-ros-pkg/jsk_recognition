@@ -34,37 +34,48 @@
  *********************************************************************/
 
 
-#ifndef JSK_PCL_ROS_DIAGNOSTIC_NODELET_
-#define JSK_PCL_ROS_DIAGNOSTIC_NODELET_
+#ifndef JSK_PCL_ROS_POINT_INDICES_TO_MASK_IMAGE_H_
+#define JSK_PCL_ROS_POINT_INDICES_TO_MASK_IMAGE_H_
 
-#include <pcl_ros/pcl_nodelet.h>
-#include <diagnostic_updater/diagnostic_updater.h>
-#include <diagnostic_updater/publisher.h>
-#include <jsk_topic_tools/vital_checker.h>
-#include "jsk_pcl_ros/pcl_util.h"
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <sensor_msgs/Image.h>
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
 
 namespace jsk_pcl_ros
 {
-  class DiagnosticNodelet: public ConnectionBasedNodelet
+  class PointIndicesToMaskImage: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    typedef boost::shared_ptr<DiagnosticNodelet> Ptr;
-    DiagnosticNodelet(const std::string& name);
-
+    typedef message_filters::sync_policies::ExactTime<
+      PCLIndicesMsg,
+      sensor_msgs::Image > SyncPolicy;
+  
+    PointIndicesToMaskImage(): DiagnosticNodelet("PointIndicesToMaskImage") { }
   protected:
+    ////////////////////////////////////////////////////////
+    // methods
+    ////////////////////////////////////////////////////////
     virtual void onInit();
-    virtual void updateDiagnosticRoot(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
+    virtual void subscribe();
+    virtual void unsubscribe();
     virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat) = 0;
-
-    const std::string name_;
-    TimeredDiagnosticUpdater::Ptr diagnostic_updater_;
-    jsk_topic_tools::VitalChecker::Ptr vital_checker_;
-
+      diagnostic_updater::DiagnosticStatusWrapper &stat);
+    virtual void mask(
+      const PCLIndicesMsg::ConstPtr& indices_msg,
+      const sensor_msgs::Image::ConstPtr& image_msg);
+  
+    ////////////////////////////////////////////////////////
+    // ROS variables
+    ////////////////////////////////////////////////////////
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    message_filters::Subscriber<PCLIndicesMsg> sub_input_;
+    message_filters::Subscriber<sensor_msgs::Image> sub_image_;
+    ros::Publisher pub_;
   private:
-    
+  
   };
 }
 

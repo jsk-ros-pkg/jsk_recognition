@@ -33,26 +33,26 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+
+#ifndef JSK_PCL_ROS_TF_LISTENER_SINGLETON_H_
+#define JSK_PCL_ROS_TF_LISTENER_SINGLETON_H_
+
+#include <tf/transform_listener.h>
 
 namespace jsk_pcl_ros
 {
-  void ConnectionBasedNodelet::connectionCallback(const ros::SingleSubscriberPublisher& pub)
+  class TfListenerSingleton
   {
-    boost::mutex::scoped_lock lock(connection_mutex_);
-    for (size_t i = 0; i < publishers_.size(); i++) {
-      ros::Publisher pub = publishers_[i];
-      if (pub.getNumSubscribers() > 0) {
-        if (!subscribed_) {
-          subscribe();
-          subscribed_ = true;
-        }
-        return;
-      }
-    }
-    if (subscribed_) {
-      unsubscribe();
-      subscribed_ = false;
-    }
-  }
+  public:
+    static tf::TransformListener* getInstance();
+    static void destroy();
+  protected:
+    static tf::TransformListener* instance_;
+    static boost::mutex mutex_;
+  private:
+    TfListenerSingleton(TfListenerSingleton const&){};
+    TfListenerSingleton& operator=(TfListenerSingleton const&){};
+  };
 }
+
+#endif

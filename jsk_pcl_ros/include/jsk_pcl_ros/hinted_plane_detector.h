@@ -40,12 +40,12 @@
 #include <pcl/point_types.h>
 #include <pcl_ros/pcl_nodelet.h>
 
-#include <tf/transform_listener.h>
+#include "jsk_pcl_ros/tf_listener_singleton.h"
 
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include "jsk_topic_tools/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros {
-  class HintedPlaneDetector: public ConnectionBasedNodelet
+  class HintedPlaneDetector: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     virtual void onInit();
@@ -63,7 +63,7 @@ namespace jsk_pcl_ros {
     ros::Publisher marker_pub_;
     ros::Publisher debug_hint_centroid_pub_;
     ros::Publisher debug_plane_points_pub_;
-    boost::shared_ptr<tf::TransformListener> tf_listener_;
+    tf::TransformListener* tf_listener_;
   };
 }
 

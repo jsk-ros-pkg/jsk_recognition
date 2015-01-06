@@ -53,11 +53,12 @@
 
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <jsk_topic_tools/connection_based_nodelet.h>
 
 namespace jsk_pcl_ros
 {
-  class OrganizedMultiPlaneSegmentation: public ConnectionBasedNodelet
+  class OrganizedMultiPlaneSegmentation:
+    public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     typedef pcl::PointXYZRGBA PointT;

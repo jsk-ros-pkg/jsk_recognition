@@ -15,6 +15,8 @@
   <arg name="BASE_FRAME" default="pelvis" />
   <arg name="HEAD_NODELET_MANAGER" default="/pointcloud_roi/pcl_roi_robot_manager"/>
 
+  <arg name="GDB" default="false" />
+
   <group ns="pointcloud_roi">
     <!-- we will have add_grid at /pointcloud_roi/add_grid -->
     <!-- mux -->
@@ -43,7 +45,13 @@
     <!-- voxel_grid -->
     <node pkg="nodelet" type="nodelet"
           name="pcl_roi_robot_manager" args="manager"
-          output="screen" alaunch-prefix="xterm -e gdb --args" />
+          launch-prefix="xterm -e gdb --args"
+          if="$(arg GDB)"
+          output="screen"/>
+    <node pkg="nodelet" type="nodelet"
+          name="pcl_roi_robot_manager" args="manager"
+          unless="$(arg GDB)"
+          output="screen"/>
 
     <node if="$(arg USE_HEAD_POINTCLOUD)"
 	  pkg="nodelet" type="nodelet"

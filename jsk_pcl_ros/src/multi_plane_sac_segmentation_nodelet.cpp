@@ -45,7 +45,7 @@ namespace jsk_pcl_ros
 {
   void MultiPlaneSACSegmentation::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&MultiPlaneSACSegmentation::configCallback, this, _1, _2);
@@ -60,7 +60,7 @@ namespace jsk_pcl_ros
       return;
     }
     if (use_imu_perpendicular_ || use_imu_parallel_) {
-      tf_listener_.reset(new tf::TransformListener());
+      tf_listener_ = TfListenerSingleton::getInstance();
     }
     ////////////////////////////////////////////////////////
     // publishers

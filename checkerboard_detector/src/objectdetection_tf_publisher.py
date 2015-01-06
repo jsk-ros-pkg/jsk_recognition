@@ -5,13 +5,20 @@ roslib.load_manifest("posedetection_msgs")
 roslib.load_manifest("dynamic_tf_publisher")
 from posedetection_msgs.msg import ObjectDetection
 from geometry_msgs.msg import Transform
+from geometry_msgs.msg import PoseStamped
 from dynamic_tf_publisher.srv import *
+import tf
 
 class ObjectDetectionTfPublisher():
     def __init__(self):
-        self.subscriber = rospy.Subscriber("ObjectDetection", ObjectDetection, self.callback);
-        self.frame_id = rospy.get_param("~frame_id", "object")
-        self.init_object_messages()
+
+        if rospy.get_param('~use_simple_tf', False):
+            self.br = tf.TransformBroadcaster()
+            self.subscriber = rospy.Subscriber("ObjectDetection", ObjectDetection, self.simple_callback);
+        else:
+            self.init_object_messages()
+            self.frame_id = rospy.get_param("~frame_id", "object")
+            self.subscriber = rospy.Subscriber("ObjectDetection", ObjectDetection, self.callback);
 
     def init_object_messages(self):
         if rospy.has_param('~checker_board_params/position_x'):
@@ -32,6 +39,15 @@ class ObjectDetectionTfPublisher():
                                          )
         else:
             rospy.loginfo("No parameters (~checker_board_params)  was found for object detection")
+
+    def simple_callback(self, msg):
+        if  msg.objects:
+            for detected_object in msg.objects:
+                self.br.sendTransform((detected_object.pose.position.x, detected_object.pose.position.y, detected_object.pose.position.z),
+                                      (detected_object.pose.orientation.x, detected_object.pose.orientation.y, detected_object.pose.orientation.z, detected_object.pose.orientation.w),
+                                      msg.header.stamp,
+                                      detected_object.type,
+                                      msg.header.frame_id)
 
     def callback(self, msg):
         if  msg.objects:
@@ -65,8 +81,8 @@ class ObjectDetectionTfPublisher():
         set_tf_request.cur_tf.child_frame_id = child_frame_id
         set_tf_request.cur_tf.transform = transform
 
-        rospy.wait_for_service('set_dynamic_tf')
-        set_dynamic_tf = rospy.ServiceProxy('set_dynamic_tf', SetDynamicTF)
+        rospy.wait_for_service('/set_dynamic_tf')
+        set_dynamic_tf = rospy.ServiceProxy('/set_dynamic_tf', SetDynamicTF)
         try:
             res = set_dynamic_tf(set_tf_request)
         except rospy.ServiceException as exc:

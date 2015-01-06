@@ -1,4 +1,4 @@
-// -*- mode: c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
@@ -41,13 +41,15 @@
 #include <pcl/common/transforms.h>
 #include <eigen_conversions/eigen_msg.h>
 #include "jsk_pcl_ros/transform_pointcloud_in_bounding_box.h"
+#include <image_geometry/pinhole_camera_model.h>
+#include <pcl/registration/correspondence_estimation_organized_projection.h>
 
 namespace jsk_pcl_ros
 {
   void ICPRegistration::onInit()
   {
-    PCLNodelet::onInit();
-    tf_listener_.reset(new tf::TransformListener());
+    ConnectionBasedNodelet::onInit();
+    tf_listener_ = TfListenerSingleton::getInstance();
     ////////////////////////////////////////////////////////
     // Dynamic Reconfigure
     ////////////////////////////////////////////////////////
@@ -58,7 +60,7 @@ namespace jsk_pcl_ros
     srv_->setCallback (f);
     
     pnh_->param("align_box", align_box_, false);
-    
+    pnh_->param("synchronize_reference", synchronize_reference_, false);
     ////////////////////////////////////////////////////////
     // Publishers
     ////////////////////////////////////////////////////////
@@ -76,9 +78,20 @@ namespace jsk_pcl_ros
       "debug/result", 1);
     pub_icp_result = advertise<jsk_pcl_ros::ICPResult>(*pnh_,
       "icp_result", 1);
-    srv_detect = pnh_->advertiseService("icp_service", &ICPRegistration::alignWithBoxService, this);
-    sub_reference_.shutdown();
-
+    srv_icp_align_with_box_ = pnh_->advertiseService("icp_service", &ICPRegistration::alignWithBoxService, this);
+    srv_icp_align_ = pnh_->advertiseService(
+      "icp_align", &ICPRegistration::alignService, this);
+    if (!synchronize_reference_) {
+      sub_reference_ = pnh_->subscribe("input_reference", 1,
+                                       &ICPRegistration::referenceCallback,
+                                       this);
+      sub_reference_array_ = pnh_->subscribe("input_reference_array", 1,
+                                           &ICPRegistration::referenceArrayCallback,
+                                             this);
+      sub_reference_add = pnh_->subscribe("input_reference_add", 1,
+                                          &ICPRegistration::referenceAddCallback,
+                                          this);
+    }
   }
 
   void ICPRegistration::subscribe()
@@ -86,39 +99,49 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // Subscription
     ////////////////////////////////////////////////////////
-    sub_reference_ = pnh_->subscribe("input_reference", 1,
-                                       &ICPRegistration::referenceCallback,
+    sub_camera_info_ = pnh_->subscribe("input/camera_info", 1,
+                                       &ICPRegistration::cameraInfoCallback,
                                        this);
-    sub_reference_array_ = pnh_->subscribe("input_reference_array", 1,
-                                       &ICPRegistration::referenceArrayCallback,
-                                       this);
-    sub_reference_add = pnh_->subscribe("input_reference_add", 1,
-                                       &ICPRegistration::referenceAddCallback,
-                                       this);
-    if (align_box_) {
-      sub_input_.subscribe(*pnh_, "input", 1);
-      sub_box_.subscribe(*pnh_, "input_box", 1);
-      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-      sync_->connectInput(sub_input_, sub_box_);
-      sync_->registerCallback(boost::bind(
-                                &ICPRegistration::alignWithBox,
-                                this, _1, _2));
+    if (!synchronize_reference_) {
+      if (align_box_) {
+        sub_input_.subscribe(*pnh_, "input", 1);
+        sub_box_.subscribe(*pnh_, "input_box", 1);
+        sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+        sync_->connectInput(sub_input_, sub_box_);
+        sync_->registerCallback(boost::bind(
+                                            &ICPRegistration::alignWithBox,
+                                            this, _1, _2));
+      }
+      else {
+        sub_ = pnh_->subscribe("input", 1,
+                               &ICPRegistration::align,
+                               this);
+      }
     }
     else {
-      sub_ = pnh_->subscribe("input", 1,
-                             &ICPRegistration::align,
-                             this);
+      sub_sync_input_.subscribe(*pnh_, "input", 1);
+      sub_sync_reference_.subscribe(*pnh_, "reference", 1);
+      sync_reference_ = boost::make_shared<message_filters::Synchronizer<ReferenceSyncPolicy> >(100);
+      sync_reference_->connectInput(sub_sync_input_, sub_sync_reference_);
+      sync_reference_->registerCallback(boost::bind(&ICPRegistration::align, this, _1, _2));
     }
   }
 
   void ICPRegistration::unsubscribe()
   {
-    if (align_box_) {
-      sub_input_.unsubscribe();
-      sub_box_.unsubscribe();
+    sub_camera_info_.shutdown();
+    if (!synchronize_reference_) {
+      if (align_box_) {
+        sub_input_.unsubscribe();
+        sub_box_.unsubscribe();
+      }
+      else {
+        sub_.shutdown();
+      }
     }
     else {
-      sub_.shutdown();
+      sub_sync_input_.unsubscribe();
+      sub_sync_reference_.unsubscribe();
     }
   }
   
@@ -139,6 +162,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     algorithm_ = config.algorithm;
+    correspondence_algorithm_ = config.correspondence_algorithm;
     use_flipped_initial_pose_ = config.use_flipped_initial_pose;
     max_iteration_ = config.max_iteration;
     correspondence_distance_ = config.correspondence_distance;
@@ -147,6 +171,7 @@ namespace jsk_pcl_ros
     rotation_epsilon_ = config.rotation_epsilon;
     maximum_optimizer_iterations_ = config.maximum_optimizer_iterations;
   }
+
   bool ICPRegistration::alignWithBoxService(
     jsk_pcl_ros::ICPAlignWithBox::Request& req, 
     jsk_pcl_ros::ICPAlignWithBox::Response& res)
@@ -161,7 +186,7 @@ namespace jsk_pcl_ros
       Eigen::Affine3f offset;
       pcl::PointCloud<PointT>::Ptr output (new pcl::PointCloud<PointT>);
       transformPointcloudInBoundingBox<PointT>(
-	req.target_box, req.target_cloud,
+        req.target_box, req.target_cloud,
         *output, offset,
         *tf_listener_);
       Eigen::Affine3f inversed_offset = offset.inverse();
@@ -180,6 +205,55 @@ namespace jsk_pcl_ros
     return true;
   }
 
+  bool ICPRegistration::alignService(
+    jsk_pcl_ros::ICPAlign::Request& req, 
+    jsk_pcl_ros::ICPAlign::Response& res)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    std::vector<pcl::PointCloud<PointT>::Ptr> tmp_reference_cloud_list
+      = reference_cloud_list_;  // escape
+    try
+    {
+      // first, update reference
+      std::vector<pcl::PointCloud<PointT>::Ptr> new_references;
+      pcl::PointCloud<PointT>::Ptr reference_cloud (new pcl::PointCloud<PointT>);
+      pcl::fromROSMsg(req.reference_cloud, *reference_cloud);
+      pcl::PointCloud<PointT>::Ptr non_nan_reference_cloud (new pcl::PointCloud<PointT>);
+      for (size_t i = 0; i < reference_cloud->points.size(); i++) {
+        PointT p = reference_cloud->points[i];
+        if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
+          non_nan_reference_cloud->points.push_back(p);
+        }
+      }
+      new_references.push_back(non_nan_reference_cloud);
+      reference_cloud_list_ = new_references; // replace references
+      NODELET_INFO("reference points: %lu/%lu",
+                   non_nan_reference_cloud->points.size(),
+                   reference_cloud->points.size());
+      Eigen::Affine3f offset = Eigen::Affine3f::Identity();
+      pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
+      pcl::fromROSMsg(req.target_cloud, *cloud);
+      res.result = alignPointcloudWithReferences(cloud,
+                                                 offset,
+                                                 req.target_cloud.header);
+    }
+    catch (tf2::ConnectivityException &e)
+    {
+      NODELET_ERROR("Transform error: %s", e.what());
+      reference_cloud_list_ = tmp_reference_cloud_list;
+      return false;
+    }
+    catch (tf2::InvalidArgumentException &e)
+    {
+      NODELET_ERROR("Transform error: %s", e.what());
+      reference_cloud_list_ = tmp_reference_cloud_list;
+      return false;
+    }
+    reference_cloud_list_ = tmp_reference_cloud_list;
+    return true;
+  }
+
+  
   void ICPRegistration::alignWithBox(
       const sensor_msgs::PointCloud2::ConstPtr& msg,
       const BoundingBox::ConstPtr& box_msg)
@@ -225,6 +299,27 @@ namespace jsk_pcl_ros
     jsk_pcl_ros::ICPResult result = alignPointcloudWithReferences(cloud, offset, msg->header);
     pub_icp_result.publish(result);
   }
+  
+  void ICPRegistration::align(const sensor_msgs::PointCloud2::ConstPtr& msg,
+                              const sensor_msgs::PointCloud2::ConstPtr& reference_msg)
+  {
+    {
+      boost::mutex::scoped_lock lock(mutex_);
+      reference_cloud_list_.resize(0);
+      pcl::PointCloud<PointT>::Ptr reference_cloud (new pcl::PointCloud<PointT>);
+      pcl::fromROSMsg(*reference_msg, *reference_cloud);
+      // remove nan
+      pcl::PointCloud<PointT>::Ptr non_nan_reference_cloud (new pcl::PointCloud<PointT>);
+      for (size_t i = 0; i < reference_cloud->points.size(); i++) {
+        PointT p = reference_cloud->points[i];
+        if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
+          non_nan_reference_cloud->points.push_back(p);
+        }
+      }
+      reference_cloud_list_.push_back(non_nan_reference_cloud);
+    }
+    align(msg);
+  }
 
   jsk_pcl_ros::ICPResult ICPRegistration::alignPointcloudWithReferences(
     pcl::PointCloud<PointT>::Ptr& cloud,
@@ -250,7 +345,7 @@ namespace jsk_pcl_ros
         transformed_cloud,
         transform_result);
       if (score < min_score) {
-	max_index = i;
+        max_index = i;
         min_score = score;
         best_transform_result = transform_result;
         best_transformed_cloud = transformed_cloud;
@@ -281,9 +376,18 @@ namespace jsk_pcl_ros
                       *transformed_cloud_for_debug_result);
     result.header = ros_result_pose.header;
     result.pose = ros_result_pose.pose;
-    result.score = min_score; 
-    result.name = "" + max_index;
+    result.score = min_score;
+    std::stringstream ss;
+    ss << max_index;
+    result.name = ss.str();
     return result;
+  }
+
+  void ICPRegistration::cameraInfoCallback(
+    const sensor_msgs::CameraInfo::ConstPtr& msg)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    camera_info_msg_ = msg;
   }
   
   double ICPRegistration::alignPointcloud(
@@ -302,6 +406,22 @@ namespace jsk_pcl_ros
       gicp.setCorrespondenceRandomness(correspondence_randomness_);
       gicp.setMaximumOptimizerIterations(maximum_optimizer_iterations_);
       icp = gicp;
+    }
+    if (correspondence_algorithm_ == 1) { // Projective
+      if (!camera_info_msg_) {
+        NODELET_ERROR("no camera info is available yet");
+        return DBL_MAX;
+      }
+      image_geometry::PinholeCameraModel model;
+      bool model_success_p = model.fromCameraInfo(camera_info_msg_);
+      if (!model_success_p) {
+        NODELET_ERROR("failed to create camera model");
+        return DBL_MAX;
+      }
+      pcl::registration::CorrespondenceEstimationOrganizedProjection<PointT, PointT, float>::Ptr
+        corr_projection (new pcl::registration::CorrespondenceEstimationOrganizedProjection<PointT, PointT, float>);
+      corr_projection->setFocalLengths(model.fx(), model.fy());
+      corr_projection->setCameraCenters(model.cx(), model.cy());
     }
     icp.setInputSource(reference);
     icp.setInputTarget(cloud);
@@ -369,62 +489,6 @@ namespace jsk_pcl_ros
     return score;
   }
 
-#if 0  
-  void ICPRegistration::alignPointcloud(pcl::PointCloud<PointT>::Ptr& cloud,
-                                        const Eigen::Affine3f& offset,
-                                        const std_msgs::Header& header) {
-    pcl::PointCloud<PointT>::Ptr transformed_cloud
-      (new pcl::PointCloud<PointT>);
-    pcl::PointCloud<PointT>::Ptr transformed_cloud_for_debug_result
-      (new pcl::PointCloud<PointT>);
-    Eigen::Affine3d transform_result;
-    double score = alignPointcloud(cloud, offset,
-                                   transformed_cloud, transform_result);
-    pcl::transformPointCloud(
-      *transformed_cloud, *transformed_cloud_for_debug_result,
-      offset.inverse());
-    NODELET_INFO("score: %f", score);
-    if (use_flipped_initial_pose_) {
-      pcl::PointCloud<PointT>::Ptr flipped_transformed_cloud
-        (new pcl::PointCloud<PointT>);
-    Eigen::Affine3d flipped_transform_result;
-    Eigen::Affine3f flipped_offset
-      = offset * Eigen::AngleAxisf(M_PI, Eigen::Vector3f(0, 0, 1));
-      pcl::PointCloud<PointT>::Ptr flipped_cloud (new pcl::PointCloud<PointT>);
-      pcl::transformPointCloud(
-        *cloud, *flipped_cloud,
-        Eigen::Affine3f(Eigen::AngleAxisf(M_PI, Eigen::Vector3f(0, 0, 1))));
-      publishDebugCloud(pub_debug_flipped_cloud_, *flipped_cloud);
-      double flipped_score
-        = alignPointcloud(flipped_cloud, flipped_offset,
-                          flipped_transformed_cloud,
-                          flipped_transform_result);
-      NODELET_INFO("flipped score: %f", flipped_score);
-      if (flipped_score < score) {
-        transformed_cloud = flipped_transformed_cloud;
-        transform_result = flipped_transform_result;
-        pcl::transformPointCloud(
-          *transformed_cloud, *transformed_cloud_for_debug_result,
-          flipped_offset.inverse());
-      }
-    }
-    if (pub_result_cloud_.getNumSubscribers() > 0) {
-      sensor_msgs::PointCloud2 ros_final;
-      pcl::toROSMsg(*transformed_cloud, ros_final);
-      ros_final.header = header;
-      pub_result_cloud_.publish(ros_final);
-    }
-    // publish result pose
-    geometry_msgs::PoseStamped ros_result_pose;
-    ros_result_pose.header = header;
-    tf::poseEigenToMsg(transform_result, ros_result_pose.pose);
-    pub_result_pose_.publish(ros_result_pose);
-    publishDebugCloud(pub_debug_source_cloud_, *reference_cloud_);
-    publishDebugCloud(pub_debug_target_cloud_, *cloud);
-    publishDebugCloud(pub_debug_result_cloud_,
-                      *transformed_cloud_for_debug_result);
-  }
-#endif
   void ICPRegistration::referenceCallback(
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
@@ -445,7 +509,8 @@ namespace jsk_pcl_ros
       pcl::fromROSMsg(msg->cloud_list[i], *cloud);
       reference_cloud_list_.push_back(cloud);
     }
-  } 
+  }
+  
   void ICPRegistration::referenceAddCallback(
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
@@ -454,7 +519,7 @@ namespace jsk_pcl_ros
     pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(*msg, *cloud);
     reference_cloud_list_.push_back(cloud);
-    ROS_INFO("reference_num: %zd", reference_cloud_list_.size());
+    ROS_INFO("reference_num: %zd", reference_cloud_list_.size()-1);
   }  
 }
 

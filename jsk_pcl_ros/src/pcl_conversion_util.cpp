@@ -131,3 +131,35 @@ namespace pcl_conversions
   }
   
 }
+
+
+namespace tf
+{
+  void poseMsgToEigen(const geometry_msgs::Pose& msg, Eigen::Affine3f& eigen)
+  {
+    Eigen::Affine3d eigen_d;
+    poseMsgToEigen(msg, eigen_d);
+    jsk_pcl_ros::convertEigenAffine3(eigen_d, eigen);
+  }
+  
+  void poseEigenToMsg(Eigen::Affine3f& eigen, geometry_msgs::Pose& msg)
+  {
+    Eigen::Affine3d eigen_d;
+    jsk_pcl_ros::convertEigenAffine3(eigen_d, eigen);
+    poseEigenToMsg(eigen_d, msg);
+  }
+
+  void transformMsgToEigen(const geometry_msgs::Transform& msg, Eigen::Affine3f& eigen)
+  {
+    Eigen::Affine3d eigen_d;
+    transformMsgToEigen(msg, eigen_d);
+    jsk_pcl_ros::convertEigenAffine3(eigen_d, eigen);
+  }
+  
+  void transformEigenToMsg(Eigen::Affine3f& eigen, geometry_msgs::Transform& msg)
+  {
+    Eigen::Affine3d eigen_d;
+    jsk_pcl_ros::convertEigenAffine3(eigen_d, eigen);
+    transformEigenToMsg(eigen_d, msg);
+  }
+}

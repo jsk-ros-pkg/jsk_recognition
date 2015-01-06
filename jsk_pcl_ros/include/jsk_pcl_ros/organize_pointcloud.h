@@ -47,11 +47,11 @@
 #include <pcl/filters/extract_indices.h>
 #include <pcl/range_image/range_image.h>
 
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <jsk_topic_tools/connection_based_nodelet.h>
 
 namespace jsk_pcl_ros
 {
-  class OrganizePointCloud: public ConnectionBasedNodelet
+  class OrganizePointCloud: public jsk_topic_tools::ConnectionBasedNodelet
   {
   protected:
     double angular_resolution, angle_width, angle_height;

@@ -54,7 +54,7 @@ namespace jsk_pcl_ros
   void ClusterPointIndicesDecomposer::onInit()
   {
     DiagnosticNodelet::onInit();
-    pnh_->param("publish_tf", publish_tf_, true);
+    pnh_->param("publish_tf", publish_tf_, false);
     if (!pnh_->getParam("tf_prefix", tf_prefix_))
     {
       if (publish_tf_) {
@@ -63,7 +63,7 @@ namespace jsk_pcl_ros
       tf_prefix_ = getName();
     }
 
-    pnh_->param("publish_clouds", publish_clouds_, true);
+    pnh_->param("publish_clouds", publish_clouds_, false);
     
     pnh_->param("align_boxes", align_boxes_, false);
     pnh_->param("use_pca", use_pca_, false);
@@ -117,15 +117,19 @@ namespace jsk_pcl_ros
     if (vital_checker_->isAlive()) {
       stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
                    "ClusterPointIndicesDecomposer running");
-      addDiagnosticBooleanStat("publish_clouds", publish_clouds_, stat);
-      addDiagnosticBooleanStat("publish_tf", publish_tf_, stat);
-      addDiagnosticBooleanStat("use_pca", use_pca_, stat);
-      addDiagnosticBooleanStat("align_boxes", align_boxes_, stat);
+      jsk_topic_tools::addDiagnosticBooleanStat(
+        "publish_clouds", publish_clouds_, stat);
+      jsk_topic_tools::addDiagnosticBooleanStat(
+        "publish_tf", publish_tf_, stat);
+      jsk_topic_tools::addDiagnosticBooleanStat(
+        "use_pca", use_pca_, stat);
+      jsk_topic_tools::addDiagnosticBooleanStat(
+        "align_boxes", align_boxes_, stat);
       stat.add("tf_prefix", tf_prefix_);
       stat.add("Clusters (Ave.)", cluster_counter_.mean());
     }
     else {
-      addDiagnosticErrorSummary(
+      jsk_topic_tools::addDiagnosticErrorSummary(
         "ClusterPointIndicesDecomposer", vital_checker_, stat);
     }
   }

@@ -4,12 +4,12 @@
 
 #include <pcl/point_types.h>
 #include <pcl_ros/pcl_nodelet.h>
-
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <pcl/point_cloud.h>
+#include <jsk_topic_tools/connection_based_nodelet.h>
 
 namespace jsk_pcl_ros
 {
-  class KeypointsPublisher: public ConnectionBasedNodelet
+  class KeypointsPublisher: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     virtual void onInit();

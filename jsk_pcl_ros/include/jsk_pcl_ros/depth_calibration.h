@@ -36,7 +36,8 @@
 #ifndef JSK_PCL_ROS_DEPTH_CALIBRATION_H_
 #define JSK_PCL_ROS_DEPTH_CALIBRATION_H_
 
-#include "jsk_pcl_ros/diagnostic_nodelet.h"
+#include "pcl_ros/pcl_nodelet.h"
+#include "jsk_topic_tools/diagnostic_nodelet.h"
 #include "jsk_pcl_ros/SetDepthCalibrationParameter.h"
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -50,7 +51,7 @@ namespace jsk_pcl_ros
   // calibration:
   // z' = C_2(u, v) z^2 + C_1(u, v) z + C_0(u, v)
   // C_i(u, v) = au + bv + c
-  class DepthCalibration: public DiagnosticNodelet
+  class DepthCalibration: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef pcl::PointXYZRGB PointT;
@@ -73,12 +74,12 @@ namespace jsk_pcl_ros
       double z2 = z * z;
       double uu, vv;
       if (use_abs_) {
-        uu = std::abs(u - cu);
-        vv = std::abs(v - cv);
+        uu = uv_scale_ * std::abs(u - cu);
+        vv = uv_scale_ * std::abs(v - cv);
       }
       else {
-        uu = u;
-        vv = v;
+        uu = uv_scale_ * u;
+        vv = uv_scale_ * v;
       }
       double c2 = coefficients2_[0] * uu * uu + coefficients2_[1] * uu +
         coefficients2_[2] * vv * vv + coefficients2_[3] * vv + 
@@ -104,6 +105,7 @@ namespace jsk_pcl_ros
     
     // parameters
     bool use_abs_;
+    double uv_scale_;
     std::vector<double> coefficients2_;
     std::vector<double> coefficients1_;
     std::vector<double> coefficients0_;

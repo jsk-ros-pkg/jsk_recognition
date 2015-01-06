@@ -32,45 +32,63 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-
-
-#ifndef CONNECTION_BASED_NODELET_H_
-#define CONNECTION_BASED_NODELET_H_
-
-#include <pcl_ros/pcl_nodelet.h>
+#define BOOST_PARAMETER_MAX_ARITY 7
+#include "jsk_pcl_ros/mask_image_to_point_indices.h"
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
 
 namespace jsk_pcl_ros
 {
-  class ConnectionBasedNodelet: public pcl_ros::PCLNodelet
+  void MaskImageToPointIndices::onInit()
   {
-  public:
-    ConnectionBasedNodelet(): subscribed_(false) { }
-  protected:
-    virtual void connectionCallback(const ros::SingleSubscriberPublisher& pub);
-    virtual void subscribe() = 0;
-    virtual void unsubscribe() = 0;
-    
-    template<class T> ros::Publisher
-    advertise(ros::NodeHandle& nh,
-              std::string topic, int queue_size)
-    {
-      ros::SubscriberStatusCallback connect_cb
-        = boost::bind( &ConnectionBasedNodelet::connectionCallback, this, _1);
-      ros::SubscriberStatusCallback disconnect_cb
-        = boost::bind( &ConnectionBasedNodelet::connectionCallback, this, _1);
-      ros::Publisher ret = nh.advertise<T>(topic, queue_size,
-                                           connect_cb,
-                                           disconnect_cb);
-      publishers_.push_back(ret);
-      return ret;
+    DiagnosticNodelet::onInit();
+    pub_ = advertise<PCLIndicesMsg>(*pnh_, "output", 1);
+  }
+
+  void MaskImageToPointIndices::subscribe()
+  {
+    sub_ = pnh_->subscribe("input", 1,
+                           &MaskImageToPointIndices::indices,
+                           this);
+  }
+
+  void MaskImageToPointIndices::unsubscribe()
+  {
+    sub_.shutdown();
+  }
+
+  void MaskImageToPointIndices::updateDiagnostic(
+    diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    if (vital_checker_->isAlive()) {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                   "MaskImageToPointIndices running");
     }
-    
-    boost::mutex connection_mutex_;
-    std::vector<ros::Publisher> publishers_;
-    bool subscribed_;
-  private:
-    
-  };
+    else {
+      jsk_topic_tools::addDiagnosticErrorSummary(
+        "MaskImageToPointIndices", vital_checker_, stat);
+    }
+  }
+  
+  void MaskImageToPointIndices::indices(
+    const sensor_msgs::Image::ConstPtr& image_msg)
+  {
+    cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(
+      image_msg, sensor_msgs::image_encodings::MONO8);
+    cv::Mat image = cv_ptr->image;
+    PCLIndicesMsg indices_msg;
+    indices_msg.header = image_msg->header;
+    for (size_t j = 0; j < image.rows; j++) {
+      for (size_t i = 0; i < image.cols; i++) {
+        if (image.at<uchar>(j, i) == 255) {
+          indices_msg.indices.push_back(j * image.cols + i);
+        }
+      }
+    }
+    pub_.publish(indices_msg);
+  }
 }
 
-#endif
+#include <pluginlib/class_list_macros.h>
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::MaskImageToPointIndices, nodelet::Nodelet);

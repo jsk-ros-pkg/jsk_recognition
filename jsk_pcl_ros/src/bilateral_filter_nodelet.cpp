@@ -33,6 +33,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#include <pcl_ros/publisher.h>
 #include "jsk_pcl_ros/bilateral_filter.h"
 // on hydro, we cannot include this header because of bug of pcl
 //#include <pcl/point_types_conversion.h> 
@@ -44,7 +45,7 @@ namespace jsk_pcl_ros
 {
   void BilateralFilter::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&BilateralFilter::configCallback, this, _1, _2);
@@ -76,9 +77,11 @@ namespace jsk_pcl_ros
     bilateral.setSigmaS(sigma_s_);
     bilateral.setSigmaR(sigma_r_);
     bilateral.filter(*output);
-    
+    sensor_msgs::PointCloud2 ros_output;
+    pcl::toROSMsg(*output, ros_output);
+    ros_output.header = msg->header;
     // hmm,,, is it keep organized??
-    pub_.publish(output);
+    pub_.publish(ros_output);
   }
 
   void BilateralFilter::configCallback(Config &config, uint32_t level)

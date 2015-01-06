@@ -42,7 +42,7 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 
-#include <tf/transform_listener.h>
+#include "jsk_pcl_ros/tf_listener_singleton.h"
 
 #include <jsk_pcl_ros/BoundingBox.h>
 #include "jsk_pcl_ros/Int32Stamped.h"
@@ -51,11 +51,11 @@
 #include <boost/circular_buffer.hpp>
 #include <boost/tuple/tuple.hpp>
 
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include <jsk_topic_tools/connection_based_nodelet.h>
 
 namespace jsk_pcl_ros
 {
-  class HandleEstimator: public ConnectionBasedNodelet
+  class HandleEstimator: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime< sensor_msgs::PointCloud2,
@@ -93,9 +93,10 @@ namespace jsk_pcl_ros
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<jsk_pcl_ros::BoundingBox> sub_box_;
-    boost::shared_ptr<tf::TransformListener> tf_listener_;
+    tf::TransformListener* tf_listener_;
     double gripper_size_;
     double approach_offset_;
+    int angle_divide_num_;
     boost::circular_buffer<boost::tuple<geometry_msgs::PoseArray, geometry_msgs::PoseArray> > output_buf;
   private:
   };

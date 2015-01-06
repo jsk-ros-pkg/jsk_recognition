@@ -2,6 +2,63 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.30 (2014-12-24)
+-------------------
+
+0.1.29 (2014-12-24)
+-------------------
+* added some more parameters for detection
+* Contributors: Yu Ohara
+
+0.1.28 (2014-12-17)
+-------------------
+* added param to set threshold of best_Windoq
+* Add dynamic reconfigure to background substraction
+* Clean up background substraction codes
+* Add background substraction
+* Support image mask in ColorHistogram
+* Separate header and cpp file of color_hisotgram
+* Use jsk_topic_tools::DiagnosticNodelet for color histogram
+* Fix coding style of color_histogram
+* Fix indent of linemod.cpp
+* Add linemod sample
+* changed color_histogram_matcher to pub box_array defined in jsk_pcl_ros
+
+0.1.27 (2014-12-09)
+-------------------
+* added some algolism to get best window
+* changed codes to pub center of object
+* matchedPointPub by 2dResult of colorhistogram matching
+* changed color_histogram_sliding_matcher and added launch to show result
+* Contributors: Yu Ohara
+
+0.1.26 (2014-11-23)
+-------------------
+
+0.1.25 (2014-11-21)
+-------------------
+* kalmanfilter
+* changed name
+* added codes in catkin.cmake
+* added cfg
+* added color_histogram_mathcer_node
+
+0.1.24 (2014-11-15)
+-------------------
+* servicecall
+* Use intrinsicMatrix instead of projectionMatrix to specify 3x3 matrix(K)
+  instead of 4x3 matrix(P)
+* remove eigen and add cmake_modules to find_package for indigo
+* fix: use projectionMatrix() for indigo
+* Add script to setup training assistant for opencv-like dataset
+* Add script to check opencv cascade file
+* Script to reject positive data for OpenCV training
+* renamed only-perception.launch
+* calc existance probability
+* removed kalmanlib.l from jsk_perception
+* add kalman-filter library
+* Contributors: Ryohei Ueda, Hitoshi Kamada, Kei Okada, Kamada Hitoshi
+
 0.1.23 (2014-10-09)
 -------------------
 * Install nodelet executables
@@ -9,7 +66,7 @@ Changelog for package jsk_perception
 * modified program to select which camera_info to sub
 * renamed camera_node to uvc_camera_node, and added some options
 * modified detection-interface.l
-* Contributors: Ryohei Ueda, Yu Ohara, Kamada
+* Contributors: Ryohei Ueda, Kamada, Yu Ohara
 
 0.1.22 (2014-09-24)
 -------------------
@@ -52,7 +109,7 @@ Changelog for package jsk_perception
 0.1.12 (2014-07-24)
 -------------------
 * fix to use catkin to link rospack
-* Contributors: Dave Coleman, Kei Okada
+* Contributors: Kei Okada, Dave Coleman
 
 0.1.11 (2014-07-08)
 -------------------
@@ -63,7 +120,7 @@ Changelog for package jsk_perception
 -------------------
 * adding oriented_gradient_node
 * add calc_flow program to calc optical flow
-* Contributors: Hiroaki Yaguchi, Ryohei Ueda
+* Contributors: Ryohei Ueda, Hiroaki Yaguchi
 
 0.1.9 (2014-07-01)
 ------------------
@@ -76,7 +133,7 @@ Changelog for package jsk_perception
 * add program to compute color histogram (rgb and hsv color space)
 * maked configure_file to create imagesurf, imagestar and imagebrisk automatically
 * added the programs to use cv_detection
-* Contributors: Ryohei Ueda, Yu Ohara, Yusuke Furuta
+* Contributors: Ryohei Ueda, Yusuke Furuta, Yu Ohara
 
 0.1.7 (2014-05-31)
 ------------------
@@ -94,7 +151,7 @@ Changelog for package jsk_perception
 
 * add sparse_image program to jsk_percepton
 * make edge_detector nodelet class
-* Contributors: Ryohei Ueda, furushchev
+* Contributors: Ryohei Ueda, Yuki Furuta
 * Merge pull request `#47 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/47>`_ from k-okada/add_rosbuild
 * Contributors: Kei Okada
 
@@ -219,4 +276,4 @@ Changelog for package jsk_perception
 * empty window name to disable window, point_pose_extractor
 * move posedetectiondb to jsk_visioncommon
 * moved jsk_vision to jsk_visioncommon
-* Contributors: HiroyukiMikita, Kei Okada, Haseru Chen, Yuki Furuta, Yuto Inagaki, Kazuto Murai, Manabu Saito, Rosen Dinakov, Youhei Kakiuchi
+* Contributors: Haseru Chen, Kazuto Murai, Youhei Kakiuchi, Yuki Furuta, Kei Okada, Yuto Inagaki, Manabu Saito, Rosen Dinakov, HiroyukiMikita

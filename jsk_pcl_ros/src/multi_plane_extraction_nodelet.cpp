@@ -46,7 +46,7 @@ namespace jsk_pcl_ros
 
   void MultiPlaneExtraction::onInit()
   {
-    PCLNodelet::onInit();
+    DiagnosticNodelet::onInit();
     
     ////////////////////////////////////////////////////////
     // Publishers
@@ -106,7 +106,7 @@ namespace jsk_pcl_ros
       stat.add("Number of Planes", plane_counter_.mean());
     }
     else {
-      addDiagnosticErrorSummary(
+      jsk_topic_tools::addDiagnosticErrorSummary(
         "MultiPlaneExtraction", vital_checker_, stat);
     }
   }

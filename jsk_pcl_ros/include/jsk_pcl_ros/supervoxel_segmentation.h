@@ -33,51 +33,57 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/diagnostic_nodelet.h"
 
+#ifndef JSK_PCL_ROS_SUPERVOXEL_SEGMENTATION_H_
+#define JSK_PCL_ROS_SUPERVOXEL_SEGMENTATION_H_
+
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include <dynamic_reconfigure/server.h>
+#include <jsk_pcl_ros/SupervoxelSegmentationConfig.h>
+#include <jsk_pcl_ros/ClusterPointIndices.h>
 namespace jsk_pcl_ros
 {
-  DiagnosticNodelet::DiagnosticNodelet(const std::string& name):
-    name_(name)
+  class SupervoxelSegmentation: public jsk_topic_tools::DiagnosticNodelet
   {
+  public:
+    typedef pcl::PointXYZRGB PointT;
+    typedef boost::shared_ptr<SupervoxelSegmentation> Ptr;
+    typedef SupervoxelSegmentationConfig Config;
+    SupervoxelSegmentation(): DiagnosticNodelet("SupervoxelSegmentation") {}
+  protected:
+    ////////////////////////////////////////////////////////
+    // methods
+    ////////////////////////////////////////////////////////
+    virtual void onInit();
+    virtual void subscribe();
+    virtual void unsubscribe();
+    virtual void updateDiagnostic(
+      diagnostic_updater::DiagnosticStatusWrapper &stat);
+    virtual void segment(
+      const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
+    virtual void configCallback (Config &config, uint32_t level);
+    ////////////////////////////////////////////////////////
+    // ROS variables
+    ////////////////////////////////////////////////////////
+    boost::mutex mutex_;
+    ros::Subscriber sub_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    ros::Publisher pub_indices_;
+    ros::Publisher pub_cloud_;
 
-  }
-  
-  void DiagnosticNodelet::onInit()
-  {
-    PCLNodelet::onInit();
-    diagnostic_updater_.reset(
-      new TimeredDiagnosticUpdater(*pnh_, ros::Duration(1.0)));
-    diagnostic_updater_->setHardwareID(getName());
-    diagnostic_updater_->add(
-      getName() + "::" + name_,
-      boost::bind(
-        &DiagnosticNodelet::updateDiagnosticRoot,
-        this,
-        _1));
-    double vital_rate;
-    pnh_->param("vital_rate", vital_rate, 1.0);
-    vital_checker_.reset(
-      new jsk_topic_tools::VitalChecker(1 / vital_rate));
-    diagnostic_updater_->start();
-  }
-  
-  void DiagnosticNodelet::updateDiagnosticRoot(
-    diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-    if (publishers_.size() > 0) {
-      for (size_t i = 0; i < publishers_.size(); i++) {
-        if (publishers_[i].getNumSubscribers() > 0) {
-          updateDiagnostic(stat);
-          return;
-        }
-      }
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK, 
-                   "No subscriber");
-    }
-    else {
-      updateDiagnostic(stat);
-    }
-  }
-  
+    ////////////////////////////////////////////////////////
+    // parameters
+    ////////////////////////////////////////////////////////
+    double color_importance_;
+    double spatial_importance_;
+    double normal_importance_;
+    double voxel_resolution_;
+    double seed_resolution_;
+    bool use_transform_;
+  private:
+    
+  };
 }
+
+#endif

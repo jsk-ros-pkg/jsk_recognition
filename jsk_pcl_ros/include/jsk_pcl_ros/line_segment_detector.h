@@ -37,7 +37,7 @@
 #ifndef JSK_PCL_ROS_LINE_SEGMENT_DETECTOR_H_
 #define JSK_PCL_ROS_LINE_SEGMENT_DETECTOR_H_
 
-#include "jsk_pcl_ros/diagnostic_nodelet.h"
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
@@ -48,6 +48,7 @@
 #include <dynamic_reconfigure/server.h>
 #include <visualization_msgs/Marker.h>
 #include "jsk_pcl_ros/geo_util.h"
+
 namespace jsk_pcl_ros
 {
 
@@ -81,7 +82,7 @@ namespace jsk_pcl_ros
     
   };
   
-  class LineSegmentDetector: public DiagnosticNodelet
+  class LineSegmentDetector: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     LineSegmentDetector(): DiagnosticNodelet("LineSegmentDetector")

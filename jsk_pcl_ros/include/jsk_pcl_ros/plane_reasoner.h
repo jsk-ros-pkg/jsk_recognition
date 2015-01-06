@@ -37,7 +37,7 @@
 #ifndef JSK_PCL_ROS_PLANE_REASONER_H_
 #define JSK_PCL_ROS_PLANE_REASONER_H_
 
-#include "jsk_pcl_ros/diagnostic_nodelet.h"
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include "jsk_pcl_ros/ClusterPointIndices.h"
 #include "jsk_pcl_ros/PolygonArray.h"
 #include "jsk_pcl_ros/ModelCoefficientsArray.h"
@@ -45,7 +45,8 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
-#include <tf/transform_listener.h>
+#include "jsk_pcl_ros/tf_listener_singleton.h"
+
 #include <dynamic_reconfigure/server.h>
 #include "jsk_pcl_ros/PlaneReasonerConfig.h"
 
@@ -59,7 +60,7 @@ namespace jsk_pcl_ros
                        geometry_msgs::PolygonStamped>
   PlaneInfoContainer;
   
-  class PlaneReasoner: public DiagnosticNodelet
+  class PlaneReasoner: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     ////////////////////////////////////////////////////////
@@ -134,7 +135,7 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<PolygonArray> sub_polygons_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
-    boost::shared_ptr<tf::TransformListener> tf_listener_;
+    tf::TransformListener* tf_listener_;
     ros::Publisher pub_vertical_inliers_;
     ros::Publisher pub_vertical_coefficients_;
     ros::Publisher pub_vertical_polygons_;

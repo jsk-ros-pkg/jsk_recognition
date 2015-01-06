@@ -44,12 +44,12 @@ namespace jsk_pcl_ros
 {
   void HandleEstimator::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     output_buf.resize(100);
 
-    //tf_listener_.reset(new tf::TransformListener());
     pnh_->param("gripper_size", gripper_size_, 0.08); // defaults to pr2 gripper size
     pnh_->param("approach_offset", approach_offset_, 0.1); // default to 10 cm
+    pnh_->param("angle_divide_num", angle_divide_num_, 6); // even will be better
     pub_ = advertise<geometry_msgs::PoseArray>(*pnh_, "output", 1);
     pub_best_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output_best", 1);
     pub_selected_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output_selected", 1);
@@ -94,7 +94,7 @@ namespace jsk_pcl_ros
     HandleType handle_type;
     // detect the handle type
     if (longest_index == 2) {
-      if (dimensions[0] < gripper_size_ && dimensions[1] < gripper_size_) {
+      if (dimensions[0] < gripper_size_ || dimensions[1] < gripper_size_) {
         handle_type = HANDLE_SMALL_ENOUGH_STAND_ON_PLANE;
       }
       else {
@@ -103,7 +103,7 @@ namespace jsk_pcl_ros
     }
     else {
       if (longest_index == 0) {
-        if (dimensions[1] < gripper_size_ && dimensions[2] < gripper_size_) {
+        if (dimensions[1] < gripper_size_ || dimensions[2] < gripper_size_) {
           handle_type = HANDLE_SMALL_ENOUGH_LIE_ON_PLANE_X_LONGEST;
         }
         else {
@@ -111,7 +111,7 @@ namespace jsk_pcl_ros
         }
       }
       else {                    // 1
-        if (dimensions[0] < gripper_size_ && dimensions[2] < gripper_size_) {
+        if (dimensions[0] < gripper_size_ || dimensions[2] < gripper_size_) {
           handle_type = HANDLE_SMALL_ENOUGH_LIE_ON_PLANE_Y_LONGEST;
         }
         else {
@@ -168,8 +168,8 @@ namespace jsk_pcl_ros
     const double angle_margin = 0.2;
     const double start_angle = M_PI / 2.0 + angle_margin;
     const double end_angle = M_PI + M_PI / 2.0 - angle_margin;
-    for (size_t i = 0; i < 5; i++) {
-      const double theta = (end_angle - start_angle) / 5.0 * i + start_angle;
+    for (size_t i = 0; i < angle_divide_num_; i++) {
+      const double theta = (end_angle - start_angle) / angle_divide_num_ * i + start_angle;
       Eigen::Vector3d offset_vec = Eigen::Vector3d(cos(theta), sin(theta), 0);
       Eigen::Vector3d pre_approach_pos
         = (center_refined * (approach_offset_ * offset_vec));
@@ -217,8 +217,8 @@ namespace jsk_pcl_ros
     const double start_angle = angle_margin;
     const double end_angle = M_PI - angle_margin;
     
-    for (size_t i = 0; i <= 5; i++) { // 5 samples
-      const double theta = (end_angle - start_angle) / 5.0 * i + start_angle;
+    for (size_t i = 0; i <= angle_divide_num_; i++) { // angle_divide_num samples
+      const double theta = (end_angle - start_angle) / angle_divide_num_ * i + start_angle;
       // x-z plane
       Eigen::Vector3d offset_vec;
       if (y_longest) {

@@ -59,6 +59,379 @@ time end
 Represent range of time.
 
 ## nodelets
+### jsk\_pcl/SupervoxelSegmentation
+![](images/supervoxel_segmentation.png)
+
+Segment pointcloud based on Supervoxel technique.
+see Voxel Cloud Connectivity Segmentation - Supervoxels for Point Clouds (J. Papon et al. CVPR2013).
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Input pointcloud. It should have rgb field.
+
+#### Publishing Topic
+* `~output/cloud` (`sensor_msgs/PointCloud2`)
+
+  Output pointcloud downsampled by voxel grid.
+
+* `~output/indices` (`jsk_pcl_ros/ClusterPointIndices`)
+
+  Clustering result.
+
+#### Parameters
+* `~color_importance` (`Double`, default: `0.2`)
+
+  Color importance factor.
+* `~spatial_importance` (`Double`, default: `0.4`)
+
+  Spatial importance factor.
+* `~normal_importance` (`Double`, default: `1.0`)
+
+  Normal importance factor.
+* `~use_transform` (`Boolean`, default: `True`)
+
+  Use single cloud transform
+* `~seed_resolution` (`Double`, default: `0.1`)
+
+  Seed resolution of super voxels.
+* `~voxel_resolution` (`Double`, default: `0.008`)
+
+  Voxel grid resolution of super voxels.
+
+### jsk\_pcl/IncrementalModelRegistration
+#### What Is This
+![](images/incremental_model_registration.png)
+
+Build a full-model from sequential captured data.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Input pointcloud. RGB field is required.
+* `~input/pose` (`geometry_msgs/PoseStamped`)
+
+  Initial pose to estimate acculate pose of the pointcloud.
+* `~input/indices` (`pcl_msgs/PointIndices`)
+
+  Indices to mask object in `~input` pointcloud.
+
+#### Publishing Topic
+* `~output/non_registered` (`sensor_msgs/PointCloud2`)
+
+  Pointcloud just concatenated according to `~input/pose`
+
+* `~output/registered` (`sensor_msgs/PointCloud2`)
+
+  Pointcloud refined by ICP.
+#### Using Services
+* `~icp_service` (`jsk_pcl_ros/ICPAlign`)
+
+  ICP service interface to refine model.
+
+### jsk\_pcl/IntermittentImageAnnotator
+#### What Is This
+![](images/intermittent_image_annotator.png)
+![](images/intermittent_image_annotator_pointcloud_clip.png)
+
+1. Store images when `~shutter` service is called
+2. Publish snapshots as one concatenated image
+3. Subscribe `~output/screenrectangle` to get ROI.
+4. Publish ROI information to `~output` namespace.
+5. Publish pointcloud inside of the ROI to `~output/cloud` if `~store_pointcloud` is set
+
+#### Subscribing Topic
+* `~input/image` and `~input/camera_info` (`sensor_msgs/Image` and `sensor_msgs/CameraInfo`)
+
+  Input image and camera info.
+
+* `~input/cloud` (`sensor_msgs/PointCloud2`)
+
+  Input pointcloud to be clipped by specified ROI.
+
+* `~output/screenrectangle` (`geometry_msgs/PolygonStamped`)
+
+  ROI. We expect to use [image_view2](https://github.com/jsk-ros-pkg/jsk_common/tree/master/jsk_ros_patch/image_view2).
+
+#### Publishing Topic
+* `~output` (`sensor_msgs/Image`)
+
+  Snapshots as one concatenated image.
+
+* `~output/direction` (`geometry_msgs/PoseStamped`)
+
+  Direction of ROI as `PoseStamped`. z-axis directs the center of ROI.
+
+* `~output/roi` (`jsk_pcl_ros/PosedCameraInfo`)
+
+  Publish ROI of specified region as `PosedCameraInfo`.
+
+* `~output/cloud` (`sensor_msgs/PointCloud`)
+
+  Pointcloud inside of ROI. pointcloud is stored when `~shutter` service is called and
+  its timestamp will be updated according to the latest image.
+
+* `~output/marker` (`visualization_msgs/Marker`)
+
+  Marker to visualize ROI (`~output/roi`).
+#### Parameters
+* `~fixed_frame_id` (`String`, default: `odom`)
+
+  Fixed frame id to resolve tf.
+
+* `~max_image_buffer` (`Integer`, default: `5`)
+
+  The maximum number of images to store in this nodelet.
+
+* `~store_pointcloud` (`Boolean`, default: `false`)
+
+  Store pointcloud if it's true
+
+* `~keep_organized` (`Boolean`, default: `false`)
+
+  Keep pointcloud organized after clipping by specified ROI.
+
+#### Advertising Service
+
+* `~shutter` (`std_srvs/Empty`)
+
+  Take a snapshot
+
+* `~clear` (`std_srvs/Empty`)
+
+  Clear images stored in the nodelet.
+
+### jsk\_pcl/LINEMODDetector
+#### What Is This
+![](images/linemod_detector.png)
+
+A nodelet to detect object using LINEMOD.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Input pointcloud.
+
+#### Publishing Topic
+* `~output` (`sensor_msgs/PointCloud2`)
+
+  Result of detection as pointcloud.
+
+#### Parameters
+* `~template_file` (`String`, default: `template.lmt`)
+
+  Template file
+* `~gradient_magnitude_threshold` (`Double`, default: `10.0`)
+
+  Gradient maginutude threshold
+
+* `~detection_threshold` (`Double`, default: `0.75`)
+
+  Detection threshold
+
+### jsk\_pcl/LINEMODTrainer
+#### What Is This
+![](images/linemod_trainer.png)
+
+
+A nodelet to train LINEMOD data from pointcloud and indices to mask the objects.
+This nodelet stores data of pointcloud and if you call `~start_training` service,
+it will train the data and dump the templates into lmt file.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  This pointcloud should be able to be converted into `pcl::PointXYZRGBA` data.
+* `~input/indices` (`pcl_msgs/PointIndices`)
+
+  Indices to mask object in `~input` pointcloud.
+
+* `~input/info` (`sensor_msgs/CameraInfo`)
+
+  Camera parameter to sample viewpoint.
+#### Advertising Servicies
+* `~start_training` (`std_srvs/Empty`)
+
+  Start training and dump result into a file.
+
+* `~clear_data` (`std_srvs/Empty`)
+
+  Clear stored data.
+#### Parameters
+* `~output_file` (`String`, default: `template.lmt`)
+
+   A file path to dump trained data.
+
+* `~sample_viewpoint` (`Bool`, default: `False`)
+
+  Generate training data by samplingenerating viewpoint if this parameter is set to true.
+
+* `~sample_viewpoint_angle_step` (`Double`, default: `40.0`)
+* `~sample_viewpoint_angle_min` (`Double`, default: `-80.0`)
+* `~sample_viewpoint_angle_max` (`Double`, default: `80.0`)
+* `~sample_viewpoint_radius_step` (`Double`, default: `0.2`)
+* `~sample_viewpoint_radius_min` (`Double`, default: `0.4`)
+* `~sample_viewpoint_radius_max` (`Double`, default: `0.8`)
+
+  Viewpoint sampling parameters.
+
+### jsk\_pcl/CaptureStereoSynchronizer
+#### What Is This
+![](images/capture_stereo_synchronizer.png)
+
+A nodelet to capture training data of stereo cameras. It subscribe several messages with
+synchronizing timestamp and republish them into `~output` namespace.
+
+#### Subscribing Topic
+* `~input/pose` (`geometry_msgs/PoseStamped`)
+
+  Pose of checkerboard
+
+* `~input/mask` (`sensor_msgs/Image`)
+
+  Mask image of the object
+
+* `~input/mask_indices` (`pcl_msgs/PointIndices`)
+
+  Pointcloud indices of the object
+
+* `~input/left_image` (`sensor_msgs/Image`)
+
+  Left camera image
+
+* `~input/left_camera_info` (`sensor_msgs/CameraInfo`)
+
+  Left camera parameter
+
+* `~input/right_camera_info` (`sensor_msgs/CameraInfo`)
+
+  Right camera parameter
+
+* `~input/disparity` (`stereo_msgs/Disparity`)
+
+  Disparity image of the stereo camear.
+
+#### Publishing Topic
+* `~output/pose` (`geometry_msgs/PoseStamped`)
+* `~output/mask` (`sensor_msgs/Image`)
+* `~output/mask_indices` (`pcl_msgs/PointIndices`)
+* `~output/left_image` (`sensor_msgs/Image`)
+* `~output/left_camera_info` (`sensor_msgs/CameraInfo`)
+* `~output/right_camera_info` (`sensor_msgs/CameraInfo`)
+* `~output/disparity` (`stereo_msgs/Disparity`)
+
+  These topics are the same message to the `~input/foo` messages but all of them
+  are republished only if input messages are synchronized.
+
+#### Sample
+Please check [capture_multisense_training_data.launch](launch/capture_multisense_training_data.launch).
+
+### jsk\_pcl/MaskImageToPointIndices
+A nodelet to convert mask image (`sensor_msgs::Image`) to `pcl_msgs/PointIndices` for
+organized pointcloud.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/Image`)
+
+  Input mask image.
+
+#### Publishing Topic
+* `~output` (`pcl_msgs/PointIndices`)
+
+  Output indices converted from the mask image.
+
+### jsk\_pcl/PointIndicesToMaskImage
+#### What Is This
+![](images/point_indices_to_mask_image.png)
+
+jsk\_pcl/PointIndicesToMaskImage generates mask image from `pcl_msgs/PointIndices`
+of organized pointcloud and original `sensor_msgs/Image`.
+
+#### Subscribing Topic
+* `~input` (`pcl_msgs/PointIndices`)
+
+   Indices of the point cloud to mask.
+
+* `~input/image` (`sensor_msgs/Image`)
+
+   In order to know width and height of the original image, jsk\_pcl/PointIndicesToMaskImage requires
+   input image.
+
+#### Publishing Topic
+
+* `~output `(`sensor_msg/Image`)
+
+
+   Mask image to get `~input` indices from the origina limage.
+
+### jsk\_pcl/AttentionClipper
+#### What Is This
+![](images/attention_clipper.png)
+
+It retrives `sensor_msgs/CameraInfo` and publish `sensor_msgs/CameraInfo` with ROI filled and
+retirieves `sensor_msgs/PointCloud2` and publish `pcl_msgs/PointIndices`.
+
+You can specify the pose and size of the interest bounding box and jsk\_pcl/AttentionClipper returns ROI
+to see the object.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/CameraInfo`)
+
+  Original camera info.
+
+* `~input/points` (`sensor_msgs/PointCloud2`)
+
+  Original pointcloud.
+* `~input/pose` (`geometry_msgs/PoseStamped`)
+* `~input/box` (`jsk_pcl_ros/BoundingBox`)
+  Specify the pose of the bounding box. Timestamp will be ignored and camera info's timestamp will be used. If you use `~input/box`, you can change the size of attention region.
+
+#### Publishing Topic
+* `~output` (`sensor_msgs/CameraInfo`)
+
+  This camera info is same with `~input` except for roi field.
+
+#### Parameter
+* `~dimension_x` (Double, default: `0.1`)
+* `~dimension_y` (Double, default: `0.1`)
+* `~dimension_z` (Double, default: `0.1`)
+
+  Size of bounding box
+
+* `~initial_pos` (Array of double, default: `None`):
+
+  Initial pose of interesting region
+
+* `~initial_rot` (Array of double, default: `None`):
+
+  Initial orientation of interesting region. The value should be represented in
+  [roll, pitch, yaw].
+
+### jsk\_pcl/ROIClipper
+#### What Is This
+![](images/attention_clipper.png)
+
+It retrives `sensor_msgs/Image` and `sensor_msgs/CameraInfo` and publish `sensor_msgs/Image` of ROI.
+It is similar to `image_proc/crop_decimate` but you can use `CameraInfo/roi` field to specify ROI.
+
+We expect to use jsk\_pcl/ROIClipper with jsk\_pcl/AttentionClipper to get ROI image.
+
+#### Subscribing Topic
+* `~input/image` (`sensor_msgs/Image`)
+
+  Input image.
+* `~input/camera_info` (`sensor_msgs/CameraInfo`)
+
+  Camera parameter and ROI field should be filled.
+
+  These two topic should be synchronized.
+#### Publishing Topic
+* `~output` (`sensor_msgs/Image`)
+
+  Image of ROI.
+
+* `~output/point_indices` (`pcl_msgs/PointIndices`)
+
+  The indices of the pointcloud which is inside of the interest 3-D region.
 ### jsk\_pcl/NormalDirectionFilter
 ![NormalDirectionFilter](images/normal_direction_filter.png)
 
@@ -669,6 +1042,9 @@ roslaunch jsk_pcl_ros octree_change_detector.launch
 ```
 
 #### Speed
+
+### jsk\_pcl/ROIClipper
+#### What Is This
 
 ### jsk\_pcl/TfTransformCloud
 #### What Is This

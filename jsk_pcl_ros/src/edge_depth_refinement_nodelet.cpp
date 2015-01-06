@@ -45,7 +45,7 @@ namespace jsk_pcl_ros
 {
   void EdgeDepthRefinement::onInit()
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
 
     ////////////////////////////////////////////////////////
     // publishers

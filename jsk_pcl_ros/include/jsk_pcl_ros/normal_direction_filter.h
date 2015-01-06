@@ -37,16 +37,22 @@
 #ifndef JSK_PCL_ROS_NORMAL_DIRECTION_FILTER_H_
 #define JSK_PCL_ROS_NORMAL_DIRECTION_FILTER_H_
 
-#include "jsk_pcl_ros/diagnostic_nodelet.h"
+#include <pcl_ros/point_cloud.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include "jsk_pcl_ros/NormalDirectionFilterConfig.h"
 #include <dynamic_reconfigure/server.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
 #include <sensor_msgs/Imu.h>
+#include "jsk_pcl_ros/tf_listener_singleton.h"
+
+
 namespace jsk_pcl_ros
 {
-  class NormalDirectionFilter: public DiagnosticNodelet
+  class NormalDirectionFilter: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef NormalDirectionFilterConfig Config;
@@ -88,7 +94,7 @@ namespace jsk_pcl_ros
     Eigen::Vector3f static_direction_;
     double eps_angle_;
     double angle_offset_;
-    boost::shared_ptr<tf::TransformListener> tf_listener_;
+    tf::TransformListener* tf_listener_;
     bool use_imu_;
     
   private:

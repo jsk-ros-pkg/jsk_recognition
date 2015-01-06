@@ -32,7 +32,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-
+#define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/geo_util.h"
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <algorithm>
@@ -381,7 +381,8 @@ namespace jsk_pcl_ros
   {
     // double alpha = - p.dot(normal_);
     // output = p + alpha * normal_;
-    double alpha = p.dot(normal_) - d_;
+    double alpha = p.dot(normal_) + d_;
+    //double alpha = p.dot(normal_) - d_;
     output = p - alpha * normal_;
   }
 
@@ -767,6 +768,33 @@ namespace jsk_pcl_ros
     return Polygon(vertices);
   }
   
+  bool Polygon::isInside(const Eigen::Vector3f& p)
+  {
+    if (isTriangle()) {
+      Eigen::Vector3f A = vertices_[0];
+      Eigen::Vector3f B = vertices_[1];
+      Eigen::Vector3f C = vertices_[2];
+      Eigen::Vector3f cross0 = (A - C).cross(p - A);
+      Eigen::Vector3f cross1 = (B - A).cross(p - B);
+      Eigen::Vector3f cross2 = (C - B).cross(p - C);
+      if (cross0.dot(cross1) > 0 &&
+          cross1.dot(cross2) > 0) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    else {
+      std::vector<Polygon::Ptr> triangles = decomposeToTriangles();
+      for (size_t i = 0; i < triangles.size(); i++) {
+        if (triangles[i]->isInside(p)) {
+          return true;
+        }
+      }
+      return false;
+    }
+  }
 
   ConvexPolygon::ConvexPolygon(const Vertices& vertices):
     Polygon(vertices)
@@ -841,38 +869,6 @@ namespace jsk_pcl_ros
     pointFromVectorToVector<Eigen::Vector3f, Eigen::Vector3d>(output_f, output);
   }
   
-
-  bool ConvexPolygon::isInside(const Eigen::Vector3f& p)
-  {
-    Eigen::Vector3f A0 = vertices_[0];
-    Eigen::Vector3f B0 = vertices_[0 + 1];
-    Eigen::Vector3f direction0 = (B0 - A0).normalized();
-    Eigen::Vector3f direction20 = (p - A0).normalized();
-    bool direction_way = direction0.cross(direction20).dot(normal_) > 0;
-    for (size_t i = 1; i < vertices_.size() - 1; i++) {
-      Eigen::Vector3f A = vertices_[i];
-      Eigen::Vector3f B = vertices_[i + 1];
-      Eigen::Vector3f direction = (B - A).normalized();
-      Eigen::Vector3f direction2 = (p - A).normalized();
-      if (direction_way) {
-        if (direction.cross(direction2).dot(normal_) > 0) {
-          continue;
-        }
-        else {
-          return false;
-        }
-      }
-      else {
-        if (direction.cross(direction2).dot(normal_) < 0) {
-          continue;
-        }
-        else {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
 
   Eigen::Vector3f ConvexPolygon::getCentroid()
   {

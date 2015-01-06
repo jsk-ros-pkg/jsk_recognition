@@ -73,7 +73,7 @@ namespace jsk_pcl_ros
       pcl_ros::transformPointCloud(target_grid->header.frame_id,
                                    *cloud,
                                    *transformed_cloud,
-                                   tf_listener);
+                                   *tf_listener);
       double center_x = target_grid->pose.position.x;
       double center_y = target_grid->pose.position.y;
       double center_z = target_grid->pose.position.z;
@@ -127,7 +127,7 @@ namespace jsk_pcl_ros
       pcl_ros::transformPointCloud(input->header.frame_id,
                                    *cloud_filtered,
                                    *reverse_transformed_cloud,
-                                   tf_listener);
+                                   *tf_listener);
       
       // adding the output into *output_cloud
       // tmp <- cloud_filtered + output_cloud
@@ -218,9 +218,9 @@ namespace jsk_pcl_ros
   
   void VoxelGridDownsampleManager::onInit(void)
   {
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
     pnh_->param("base_frame", base_frame_, std::string("pelvis"));
-
+    tf_listener = TfListenerSingleton::getInstance();
     initializeGrid();
     sequence_id_ = 0;
 

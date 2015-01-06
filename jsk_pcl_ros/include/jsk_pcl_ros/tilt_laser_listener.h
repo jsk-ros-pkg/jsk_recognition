@@ -41,6 +41,7 @@
 #include <sensor_msgs/JointState.h>
 #include <jsk_pcl_ros/TimeRange.h>
 #include "jsk_pcl_ros/line_segment_collector.h"
+#include <std_srvs/Empty.h>
 
 namespace jsk_pcl_ros
 {
@@ -84,12 +85,16 @@ namespace jsk_pcl_ros
     virtual void publishTimeRange(const ros::Time& stamp,
                                   const ros::Time& start,
                                   const ros::Time& end);
+    virtual bool clearCacheCallback(
+      std_srvs::Empty::Request& req,
+      std_srvs::Empty::Response& res);
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
     ros::Subscriber sub_;
     ros::Publisher trigger_pub_;
     ros::Publisher cloud_pub_;
+    ros::ServiceServer clear_cache_service_;
     ros::ServiceClient assemble_cloud_srv_;
     ////////////////////////////////////////////////////////
     // parameters
@@ -100,7 +105,7 @@ namespace jsk_pcl_ros
     double prev_velocity_;
     ros::Time start_time_;
     bool use_laser_assembler_;
-    
+    boost::mutex mutex_;
     TimeStampedVector<StampedJointAngle::Ptr> buffer_;
   private:
     

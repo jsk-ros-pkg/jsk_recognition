@@ -87,7 +87,9 @@ namespace jsk_pcl_ros
     prev_angle_ = 0;
     prev_velocity_ = 0;
     start_time_ = ros::Time::now();
-    
+    clear_cache_service_ = pnh_->advertiseService(
+      "clear_cache", &TiltLaserListener::clearCacheCallback,
+      this);
     trigger_pub_ = advertise<jsk_pcl_ros::TimeRange>(*pnh_, "output", 1);
     
   }
@@ -108,6 +110,15 @@ namespace jsk_pcl_ros
 
   }
 
+  bool TiltLaserListener::clearCacheCallback(
+    std_srvs::Empty::Request& req,
+    std_srvs::Empty::Response& res)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    buffer_.clear();
+    return true;
+  }
+  
   void TiltLaserListener::publishTimeRange(
     const ros::Time& stamp,
     const ros::Time& start,
@@ -230,6 +241,7 @@ namespace jsk_pcl_ros
   void TiltLaserListener::jointCallback(
     const sensor_msgs::JointState::ConstPtr& msg)
   {
+    boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();
     for (size_t i = 0; i < msg->name.size(); i++) {
       std::string name = msg->name[i];

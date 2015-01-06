@@ -32,7 +32,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-
+#define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/attention_clipper.h"
 #include <eigen_conversions/eigen_msg.h>
 #include <tf_conversions/tf_eigen.h>
@@ -43,6 +43,8 @@
 #include <pcl_ros/transforms.h>
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <jsk_topic_tools/rosparam_utils.h>
+#include "jsk_pcl_ros/pcl_util.h"
+#include <algorithm>
 
 namespace jsk_pcl_ros
 {
@@ -50,38 +52,118 @@ namespace jsk_pcl_ros
   {
     DiagnosticNodelet::onInit();
     tf_listener_ = TfListenerSingleton::getInstance();
-
-    pose_.setIdentity();
-    std::vector<double> initial_pos;
-    if (jsk_topic_tools::readVectorParameter(*pnh_,
-                                             "initial_pos",
-                                             initial_pos))
-    {
-      pose_.translation() = Eigen::Vector3f(initial_pos[0],
-                                            initial_pos[1],
-                                            initial_pos[2]);
+    pnh_->param("use_multiple_attention", use_multiple_attention_, false);
+    if (!use_multiple_attention_) {
+      Eigen::Affine3f pose = Eigen::Affine3f::Identity();
+      std::vector<double> initial_pos;
+      if (jsk_topic_tools::readVectorParameter(*pnh_,
+                                               "initial_pos",
+                                               initial_pos))
+      {
+        pose.translation() = Eigen::Vector3f(initial_pos[0],
+                                              initial_pos[1],
+                                              initial_pos[2]);
+      }
+    
+      std::vector<double> initial_rot;
+      if (jsk_topic_tools::readVectorParameter(*pnh_,
+                                               "initial_rot",
+                                               initial_rot))
+      {
+        pose = pose
+          * Eigen::AngleAxisf(initial_rot[0],
+                              Eigen::Vector3f::UnitX())
+          * Eigen::AngleAxisf(initial_rot[1],
+                              Eigen::Vector3f::UnitY())
+          * Eigen::AngleAxisf(initial_rot[2],
+                              Eigen::Vector3f::UnitZ());
+      }
+    
+      // parameter
+      // backward compatibility
+      double dimension_x, dimension_y, dimension_z;
+      pnh_->param("dimension_x", dimension_x, 0.1);
+      pnh_->param("dimension_y", dimension_y, 0.1);
+      pnh_->param("dimension_z", dimension_z, 0.1);
+      dimensions_.push_back(Eigen::Vector3f(dimension_x,
+                                            dimension_y,
+                                            dimension_z));
+      std::string frame_id;
+      pnh_->param("frame_id", frame_id, std::string("base_link"));
+      frame_id_list_.push_back(frame_id);
+      pose_list_.push_back(pose);
     }
-    
-    std::vector<double> initial_rot;
-    if (jsk_topic_tools::readVectorParameter(*pnh_,
-                                             "initial_rot",
-                                             initial_rot))
-    {
-      pose_ = pose_
-        * Eigen::AngleAxisf(initial_rot[0],
-                          Eigen::Vector3f::UnitX())
-        * Eigen::AngleAxisf(initial_rot[1],
-                            Eigen::Vector3f::UnitY())
-        * Eigen::AngleAxisf(initial_rot[2],
-                            Eigen::Vector3f::UnitZ());
+    else {                      // multiple interst
+      // ~initial_pos_list
+      //   -> [[0, 0, 0], ...]
+      std::vector<std::vector<double> > initial_pos_list;
+      std::vector<std::vector<double> > initial_rot_list;
+      std::vector<std::vector<double> > dimensions;
+      jsk_topic_tools::readVectorParameter(*pnh_, "initial_pos_list",
+                                           initial_pos_list);
+      jsk_topic_tools::readVectorParameter(*pnh_, "initial_rot_list",
+                                           initial_rot_list);
+      jsk_topic_tools::readVectorParameter(*pnh_, "dimensions", dimensions);
+      if (initial_pos_list.size() != 0) {
+        initializePoseList(initial_pos_list.size());
+        for (size_t i = 0; i < initial_pos_list.size(); i++) {
+          if (initial_pos_list[i].size() != 3) {
+            NODELET_FATAL("element of ~initial_pos_list should be [x, y, z]");
+            return;
+          }
+          pose_list_[i].translation() = Eigen::Vector3f(initial_pos_list[i][0],
+                                                        initial_pos_list[i][1],
+                                                        initial_pos_list[i][2]);
+        }
+      }
+      // ~initial_rot_list
+      //   -> [[0, 0, 0], ...]
+      if (initial_rot_list.size() != 0) {
+        // error check
+        if (initial_pos_list.size() != 0 &&
+            initial_rot_list.size() != initial_pos_list.size()) {
+          NODELET_FATAL(
+            "the size of ~initial_pos_list and ~initial_rot_list are different");
+          return;
+        }
+        if (initial_pos_list.size() == 0) {
+          initializePoseList(initial_rot_list.size());
+        }
+        for (size_t i = 0; i < initial_rot_list.size(); i++) {
+          if (initial_rot_list[i].size() != 3) {
+            NODELET_FATAL("element of ~initial_rot_list should be [rx, ry, rz]");
+            return;
+          }
+          pose_list_[i] = pose_list_[i]
+            * Eigen::AngleAxisf(initial_rot_list[i][0],
+                                Eigen::Vector3f::UnitX())
+            * Eigen::AngleAxisf(initial_rot_list[i][1],
+                                Eigen::Vector3f::UnitY())
+            * Eigen::AngleAxisf(initial_rot_list[i][2],
+                                Eigen::Vector3f::UnitZ());
+        }
+      }
+      // ~dimensions
+      //   -> [[x, y, z], [x, y, z] ...]
+      if (dimensions.size() != 0) {
+        // error check
+        if (pose_list_.size() != 0 &&
+            pose_list_.size() != dimensions.size()) {
+          NODELET_FATAL(
+            "the size of ~dimensions and ~initial_pos_list or ~initial_rot_list are different");
+          return;
+        }
+        if (pose_list_.size() == 0) {
+          initializePoseList(dimensions.size());
+        }
+        for (size_t i = 0; i < dimensions.size(); i++) {
+          dimensions_.push_back(Eigen::Vector3f(dimensions[i][0],
+                                                dimensions[i][1],
+                                                dimensions[i][2]));
+        }
+      }
+      jsk_topic_tools::readVectorParameter(*pnh_, "frame_id_list", frame_id_list_);
     }
-    
-    // parameter
-    pnh_->param("dimension_x", dimension_x_, 0.1);
-    pnh_->param("dimension_y", dimension_y_, 0.1);
-    pnh_->param("dimension_z", dimension_z_, 0.1);
-    pnh_->param("frame_id", frame_id_, std::string("base_link"));
-    
     pub_camera_info_ = advertise<sensor_msgs::CameraInfo>(*pnh_, "output", 1);
     pub_bounding_box_array_
       = advertise<jsk_pcl_ros::BoundingBoxArray>(*pnh_, "output/box_array", 1);
@@ -89,75 +171,135 @@ namespace jsk_pcl_ros
     pub_indices_ = advertise<PCLIndicesMsg>(*pnh_, "output/point_indices", 1);
   }
 
+  void AttentionClipper::initializePoseList(size_t num)
+  {
+    pose_list_.resize(num);
+    for (size_t i = 0; i < pose_list_.size(); i++) {
+      pose_list_[i].setIdentity();
+    }
+  }
+  
   void AttentionClipper::subscribe()
   {
     sub_ = pnh_->subscribe("input", 1, &AttentionClipper::clip, this);
     sub_points_ = pnh_->subscribe("input/points", 1,
                                   &AttentionClipper::clipPointcloud, this);
-    sub_pose_ = pnh_->subscribe("input/pose",
-                                1, &AttentionClipper::poseCallback, this);
-    sub_box_ = pnh_->subscribe("input/box",
-                               1, &AttentionClipper::boxCallback, this);
+    if (!use_multiple_attention_) {
+      sub_pose_ = pnh_->subscribe("input/pose",
+                                  1, &AttentionClipper::poseCallback, this);
+      sub_box_ = pnh_->subscribe("input/box",
+                                 1, &AttentionClipper::boxCallback, this);
+    }
+    else {
+      sub_pose_ = pnh_->subscribe("input/pose_array",
+                                  1, &AttentionClipper::poseArrayCallback, this);
+      sub_box_ = pnh_->subscribe("input/box_array",
+                                 1, &AttentionClipper::boxArrayCallback, this);
+    }
   }
 
   void AttentionClipper::unsubscribe()
   {
     sub_.shutdown();
+    sub_points_.shutdown();
     sub_pose_.shutdown();
     sub_box_.shutdown();
   }
   
-  Vertices AttentionClipper::cubeVertices()
+  Vertices AttentionClipper::cubeVertices(Eigen::Vector3f& dimension)
   {
     Vertices nonoffsetted_vertices;
     nonoffsetted_vertices.push_back(
-      Eigen::Vector3f(-dimension_x_/2, -dimension_y_/2, -dimension_z_/2));
+      Eigen::Vector3f(-dimension[0]/2, -dimension[1]/2, -dimension[2]/2));
     nonoffsetted_vertices.push_back(
-      Eigen::Vector3f(-dimension_x_/2, -dimension_y_/2, dimension_z_/2));
+      Eigen::Vector3f(-dimension[0]/2, -dimension[1]/2, dimension[2]/2));
     nonoffsetted_vertices.push_back(
-      Eigen::Vector3f(-dimension_x_/2, dimension_y_/2, -dimension_z_/2));
+      Eigen::Vector3f(-dimension[0]/2, dimension[1]/2, -dimension[2]/2));
     nonoffsetted_vertices.push_back(
-      Eigen::Vector3f(-dimension_x_/2, dimension_y_/2, dimension_z_/2));
+      Eigen::Vector3f(-dimension[0]/2, dimension[1]/2, dimension[2]/2));
     nonoffsetted_vertices.push_back(
-      Eigen::Vector3f(dimension_x_/2, -dimension_y_/2, -dimension_z_/2));
+      Eigen::Vector3f(dimension[0]/2, -dimension[1]/2, -dimension[2]/2));
     nonoffsetted_vertices.push_back(
-      Eigen::Vector3f(dimension_x_/2, -dimension_y_/2, dimension_z_/2));
+      Eigen::Vector3f(dimension[0]/2, -dimension[1]/2, dimension[2]/2));
     nonoffsetted_vertices.push_back(
-      Eigen::Vector3f(dimension_x_/2, dimension_y_/2, -dimension_z_/2));
+      Eigen::Vector3f(dimension[0]/2, dimension[1]/2, -dimension[2]/2));
     nonoffsetted_vertices.push_back(
-      Eigen::Vector3f(dimension_x_/2, dimension_y_/2, dimension_z_/2));
+      Eigen::Vector3f(dimension[0]/2, dimension[1]/2, dimension[2]/2));
     return nonoffsetted_vertices;
   }
 
+  // callback only for one interaction
   void AttentionClipper::poseCallback(
     const geometry_msgs::PoseStamped::ConstPtr& pose)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    Eigen::Affine3d affine;
-    tf::poseMsgToEigen(pose->pose, affine);
-    frame_id_ = pose->header.frame_id;
-    convertEigenAffine3(affine, pose_);
+    frame_id_list_[0] = pose->header.frame_id;
+    tf::poseMsgToEigen(pose->pose, pose_list_[0]);
   }
 
   void AttentionClipper::boxCallback(
     const jsk_pcl_ros::BoundingBox::ConstPtr& box)
   {
-    {
-      boost::mutex::scoped_lock lock(mutex_);
-      dimension_x_ = box->dimensions.x;
-      dimension_y_ = box->dimensions.y;
-      dimension_z_ = box->dimensions.z;
-      Eigen::Affine3d affine;
-      tf::poseMsgToEigen(box->pose, affine);
-      frame_id_ = box->header.frame_id;
-      convertEigenAffine3(affine, pose_);
-    }
-    
+    boost::mutex::scoped_lock lock(mutex_);
+    dimensions_[0][0] = box->dimensions.x;
+    dimensions_[0][1] = box->dimensions.x;
+    dimensions_[0][2] = box->dimensions.x;
+    frame_id_list_[0] = box->header.frame_id;
+    tf::poseMsgToEigen(box->pose, pose_list_[0]);
   }
 
+  // callback for multiple interactions
+  void AttentionClipper::poseArrayCallback(
+    const geometry_msgs::PoseArray::ConstPtr& pose_array)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    // resize
+    initializePoseList(pose_array->poses.size());
+    frame_id_list_.resize(pose_array->poses.size());
+    std::fill(frame_id_list_.begin(), frame_id_list_.end(),
+              pose_array->header.frame_id);
+    for (size_t i = 0; i < pose_list_.size(); i++) {
+      tf::poseMsgToEigen(pose_array->poses[i], pose_list_[i]);
+    }
+  }
+
+  void AttentionClipper::boxArrayCallback(
+    const jsk_pcl_ros::BoundingBoxArray::ConstPtr& box_array)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    initializePoseList(box_array->boxes.size());
+    frame_id_list_.resize(box_array->boxes.size());
+    dimensions_.resize(box_array->boxes.size());
+    for (size_t i = 0; i < pose_list_.size(); i++) {
+      tf::poseMsgToEigen(box_array->boxes[i].pose, pose_list_[i]);
+      frame_id_list_[i] = box_array->boxes[i].header.frame_id;
+      dimensions_[i] = Eigen::Vector3f(box_array->boxes[i].dimensions.x,
+                                       box_array->boxes[i].dimensions.y,
+                                       box_array->boxes[i].dimensions.z);
+    }
+  }
+
+  void AttentionClipper::publishBoundingBox(
+    const std_msgs::Header& header)
+  {
+    jsk_pcl_ros::BoundingBoxArray box_array;
+    box_array.header.frame_id = header.frame_id;
+    box_array.header.stamp = header.stamp;
+    for (size_t i = 0; i < pose_list_.size(); i++) {
+      jsk_pcl_ros::BoundingBox box;
+      box.header.stamp = header.stamp;
+      box.header.frame_id = frame_id_list_[i];
+      tf::poseEigenToMsg(pose_list_[i], box.pose);
+      jsk_pcl_ros::pointFromVectorToXYZ(dimensions_[i], box.dimensions);
+      box_array.boxes.push_back(box);
+    }
+    pub_bounding_box_array_.publish(box_array);
+  }
+  
   void AttentionClipper::computeROI(
     const sensor_msgs::CameraInfo::ConstPtr& msg,
-    std::vector<cv::Point2d>& points)
+    std::vector<cv::Point2d>& points,
+    cv::Mat& mask)
   {
     double min_u, min_v, max_u, max_v;
     min_u = msg->width;
@@ -204,36 +346,12 @@ namespace jsk_pcl_ros
     roi.roi.height = roi_region.height;
     roi.roi.do_rectify = true;
     pub_camera_info_.publish(roi);
-
     // mask computation
-    cv::Mat mask = cv::Mat::zeros(msg->height, msg->width, CV_8UC1);
+    mask = cv::Mat::zeros(msg->height, msg->width, CV_8UC1);
     cv::Size roi_size(roi_region.width, roi_region.height);
     cv::Rect roi_rect(cv::Point(roi_region.x, roi_region.y), roi_size);
-    const cv::Scalar white(255, 255, 255);
+    const cv::Scalar white(255);
     cv::rectangle(mask, roi_rect, white, CV_FILLED);
-    cv_bridge::CvImage mask_bridge(msg->header,
-                                   sensor_msgs::image_encodings::MONO8,
-                                   mask);
-    pub_mask_.publish(mask_bridge.toImageMsg());
-  }
-
-  void AttentionClipper::publishBoundingBox(const std_msgs::Header& header,
-                                            Eigen::Affine3f& pose)
-  {
-    BoundingBoxArray box_array;
-    BoundingBox box;
-    box.header.stamp = header.stamp;
-    box.header.frame_id = frame_id_;
-    Eigen::Affine3d posed;
-    convertEigenAffine3(pose, posed);
-    tf::poseEigenToMsg(posed, box.pose);
-    box.dimensions.x = dimension_x_;
-    box.dimensions.y = dimension_y_;
-    box.dimensions.z = dimension_z_;
-    box_array.boxes.push_back(box);
-    box_array.header.stamp = header.stamp;
-    box_array.header.frame_id = frame_id_;
-    pub_bounding_box_array_.publish(box_array);
   }
 
   void AttentionClipper::clipPointcloud(
@@ -245,32 +363,41 @@ namespace jsk_pcl_ros
       // 1. transform pointcloud
       // 2. crop by boundingbox
       // 3. publish indices
-      sensor_msgs::PointCloud2 transformed_cloud;
-      if (pcl_ros::transformPointCloud(frame_id_, *msg, transformed_cloud,
-                                       *tf_listener_)) {
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-        pcl::fromROSMsg(transformed_cloud, *cloud);
-        //pcl::fromROSMsg(*msg, *cloud);
-        pcl::CropBox<pcl::PointXYZ> crop_box(false);
-        pcl::PointIndices::Ptr indices (new pcl::PointIndices);
-        Eigen::Vector4f
-          max_points(dimension_x_/2, dimension_y_/2, dimension_z_/2, 0);
-        Eigen::Vector4f
-          min_points(-dimension_x_/2, -dimension_y_/2, -dimension_z_/2, 0);
+      pcl::PointIndices::Ptr all_indices (new pcl::PointIndices);
+      for (size_t i = 0; i < pose_list_.size(); i++) {
+        sensor_msgs::PointCloud2 transformed_cloud;
+        std::string frame_id = frame_id_list_[i];
+        if (pcl_ros::transformPointCloud(frame_id, *msg, transformed_cloud,
+                                         *tf_listener_)) {
+          pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+          pcl::fromROSMsg(transformed_cloud, *cloud);
+          pcl::CropBox<pcl::PointXYZ> crop_box(false);
+          pcl::PointIndices::Ptr indices (new pcl::PointIndices);
+          Eigen::Vector4f max_points(dimensions_[i][0]/2,
+                                     dimensions_[i][1]/2,
+                                     dimensions_[i][2]/2,
+                                     0);
+          Eigen::Vector4f min_points(-dimensions_[i][0]/2,
+                                     -dimensions_[i][1]/2,
+                                     -dimensions_[i][2]/2,
+                                     0);
         
-        float roll, pitch, yaw;
-        pcl::getEulerAngles(pose_, roll, pitch, yaw);
-        crop_box.setInputCloud(cloud);
-        crop_box.setMax(max_points);
-        crop_box.setMin(min_points);
-        crop_box.setTranslation(pose_.translation());
-        crop_box.setRotation(Eigen::Vector3f(roll, pitch, yaw));
-        crop_box.filter(indices->indices);
-        PCLIndicesMsg indices_msg;
-        pcl_conversions::fromPCL(*indices, indices_msg);
-        indices_msg.header = msg->header;
-        pub_indices_.publish(indices_msg);
+          float roll, pitch, yaw;
+          pcl::getEulerAngles(pose_list_[i], roll, pitch, yaw);
+          crop_box.setInputCloud(cloud);
+          crop_box.setMax(max_points);
+          crop_box.setMin(min_points);
+          crop_box.setTranslation(pose_list_[i].translation());
+          crop_box.setRotation(Eigen::Vector3f(roll, pitch, yaw));
+          crop_box.filter(indices->indices);
+          all_indices = addIndices(*all_indices, *indices);
+        }
       }
+      PCLIndicesMsg indices_msg;
+      pcl_conversions::fromPCL(*all_indices, indices_msg);
+      indices_msg.header = msg->header;
+      pub_indices_.publish(indices_msg);
+      publishBoundingBox(msg->header);
     }
     catch (tf2::ConnectivityException &e) {
       NODELET_ERROR("Transform error: %s", e.what());
@@ -284,44 +411,53 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();
-    // resolve tf
+    // resolve tf for all interest
     try {
-      tf_listener_->waitForTransform(frame_id_,
-                                     msg->header.frame_id,
-                                     msg->header.stamp,
-                                     ros::Duration(1.0));
-      if (tf_listener_->canTransform(msg->header.frame_id,
-                                     frame_id_,
-                                     msg->header.stamp)) {
-        tf::StampedTransform transform; // header -> frame_id_
-        tf_listener_->lookupTransform(frame_id_, msg->header.frame_id,
-                                      msg->header.stamp, transform);
-        Eigen::Affine3d eigen_transformd;
-        tf::transformTFToEigen(transform, eigen_transformd);
-        Eigen::Affine3f eigen_transform;
-        convertEigenAffine3(eigen_transformd, eigen_transform);
-        Eigen::Affine3f offset_from_camera = pose_ * eigen_transform.inverse();
-        publishBoundingBox(msg->header, pose_);
-        Vertices original_vertices = cubeVertices();
-        Vertices vertices;
-        for (size_t i = 0; i < original_vertices.size(); i++) {
-          vertices.push_back(eigen_transform.inverse() *  (pose_ * original_vertices[i]));
-        }
-        // compute pinhole camera model
-        image_geometry::PinholeCameraModel model;
-        bool model_success_p = model.fromCameraInfo(msg);
-        if (!model_success_p) {
-          ROS_ERROR("failed to create camera model");
-          return;
-        }
-        std::vector<cv::Point2d> local_points;
-        for (size_t i = 0; i < vertices.size(); i++) {
-          cv::Point3d p(vertices[i][0], vertices[i][1], vertices[i][2]);
-          cv::Point2d uv = model.project3dToPixel(p);
-          local_points.push_back(uv);
-        }
-        computeROI(msg, local_points);
+      image_geometry::PinholeCameraModel model;
+      cv::Mat all_mask_image = cv::Mat::zeros(msg->height, msg->width, CV_8UC1);
+      bool model_success_p = model.fromCameraInfo(msg);
+      if (!model_success_p) {
+        ROS_ERROR("failed to create camera model");
+        return;
       }
+      for (size_t i = 0; i < pose_list_.size(); i++) {
+        std::string frame_id = frame_id_list_[i];
+        tf_listener_->waitForTransform(frame_id,
+                                       msg->header.frame_id,
+                                       msg->header.stamp,
+                                       ros::Duration(1.0));
+        Eigen::Affine3f offset = pose_list_[i];
+        if (tf_listener_->canTransform(msg->header.frame_id,
+                                       frame_id,
+                                       msg->header.stamp)) {
+          tf::StampedTransform transform; // header -> frame_id_
+          tf_listener_->lookupTransform(frame_id, msg->header.frame_id,
+                                        msg->header.stamp, transform);
+          Eigen::Affine3f eigen_transform;
+          tf::transformTFToEigen(transform, eigen_transform);
+          Vertices original_vertices = cubeVertices(dimensions_[i]);
+          Vertices vertices;
+          for (size_t i = 0; i < original_vertices.size(); i++) {
+            vertices.push_back(eigen_transform.inverse()
+                               * (offset * original_vertices[i]));
+          }
+          std::vector<cv::Point2d> local_points;
+          for (size_t i = 0; i < vertices.size(); i++) {
+            cv::Point3d p(vertices[i][0], vertices[i][1], vertices[i][2]);
+            cv::Point2d uv = model.project3dToPixel(p);
+            local_points.push_back(uv);
+          }
+          cv::Mat mask_image;
+          computeROI(msg, local_points, mask_image);
+          all_mask_image = all_mask_image | mask_image;
+        }
+      }
+      // publish
+      cv_bridge::CvImage mask_bridge(msg->header,
+                                     sensor_msgs::image_encodings::MONO8,
+                                     all_mask_image);
+      pub_mask_.publish(mask_bridge.toImageMsg());
+      publishBoundingBox(msg->header);
     }
     catch (tf2::ConnectivityException &e) {
       NODELET_ERROR("Transform error: %s", e.what());

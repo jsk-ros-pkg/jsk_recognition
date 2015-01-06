@@ -145,7 +145,7 @@ namespace tf
   void poseEigenToMsg(Eigen::Affine3f& eigen, geometry_msgs::Pose& msg)
   {
     Eigen::Affine3d eigen_d;
-    jsk_pcl_ros::convertEigenAffine3(eigen_d, eigen);
+    jsk_pcl_ros::convertEigenAffine3(eigen, eigen_d);
     poseEigenToMsg(eigen_d, msg);
   }
 
@@ -161,5 +161,20 @@ namespace tf
     Eigen::Affine3d eigen_d;
     jsk_pcl_ros::convertEigenAffine3(eigen_d, eigen);
     transformEigenToMsg(eigen_d, msg);
+  }
+
+  void transformTFToEigen(const tf::Transform& t, Eigen::Affine3f& eigen)
+  {
+    Eigen::Affine3d eigen_d;
+    transformTFToEigen(t, eigen_d);
+    jsk_pcl_ros::convertEigenAffine3(eigen_d, eigen);
+  }
+
+  void transformEigenToTF(Eigen::Affine3f& eigen , tf::Transform& t)
+  {
+    Eigen::Affine3d eigen_d;
+    jsk_pcl_ros::convertEigenAffine3(eigen, eigen_d);
+    transformEigenToTF(eigen_d, t);
+    
   }
 }

@@ -47,7 +47,7 @@ namespace jsk_pcl_ros
   void MultiPlaneExtraction::onInit()
   {
     DiagnosticNodelet::onInit();
-    
+    pnh_->param("use_indices", use_indices_, true);
     ////////////////////////////////////////////////////////
     // Publishers
     ////////////////////////////////////////////////////////
@@ -71,19 +71,30 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // Subscribe
     ////////////////////////////////////////////////////////
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(maximum_queue_size_);
+
+    
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_indices_.subscribe(*pnh_, "indices", 1);
     sub_polygons_.subscribe(*pnh_, "input_polygons", 1);
     sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
-    sync_->connectInput(sub_input_, sub_indices_, sub_coefficients_, sub_polygons_);
-    sync_->registerCallback(boost::bind(&MultiPlaneExtraction::extract, this, _1, _2, _3, _4));
+    if (use_indices_) {
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(maximum_queue_size_);
+      sync_->connectInput(sub_input_, sub_indices_, sub_coefficients_, sub_polygons_);
+      sync_->registerCallback(boost::bind(&MultiPlaneExtraction::extract, this, _1, _2, _3, _4));
+    }
+    else {
+      sync_wo_indices_ = boost::make_shared<message_filters::Synchronizer<SyncWithoutIndicesPolicy> >(maximum_queue_size_);
+      sync_wo_indices_->connectInput(sub_input_, sub_coefficients_, sub_polygons_);
+      sync_wo_indices_->registerCallback(boost::bind(&MultiPlaneExtraction::extract, this, _1, _2, _3));
+    }
   }
 
   void MultiPlaneExtraction::unsubscribe()
   {
     sub_input_.unsubscribe();
-    sub_indices_.unsubscribe();
+    if (use_indices_) {
+      sub_indices_.unsubscribe();
+    }
     sub_polygons_.unsubscribe();
     sub_coefficients_.unsubscribe();
   }
@@ -110,6 +121,14 @@ namespace jsk_pcl_ros
         "MultiPlaneExtraction", vital_checker_, stat);
     }
   }
+
+  void MultiPlaneExtraction::extract(const sensor_msgs::PointCloud2::ConstPtr& input,
+                                     const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients,
+                                     const jsk_pcl_ros::PolygonArray::ConstPtr& polygons)
+  {
+    extract(input, jsk_pcl_ros::ClusterPointIndices::ConstPtr(),
+            coefficients, polygons);
+  }
   
   void MultiPlaneExtraction::extract(const sensor_msgs::PointCloud2::ConstPtr& input,
                                      const jsk_pcl_ros::ClusterPointIndices::ConstPtr& indices,
@@ -121,24 +140,29 @@ namespace jsk_pcl_ros
     
     // convert all to the pcl types
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
-    pcl::fromROSMsg(*input, *input_cloud);
-    
-    // concat indices into one PointIndices
-    pcl::PointIndices::Ptr all_indices (new pcl::PointIndices);
-    for (size_t i = 0; i < indices->cluster_indices.size(); i++) {
-      std::vector<int> one_indices = indices->cluster_indices[i].indices;
-      for (size_t j = 0; j < one_indices.size(); j++) {
-        all_indices->indices.push_back(one_indices[j]);
-      }
-    }
-
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr nonplane_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
-    pcl::ExtractIndices<pcl::PointXYZRGB> extract_nonplane;
-    extract_nonplane.setNegative(true);
-    extract_nonplane.setInputCloud(input_cloud);
-    extract_nonplane.setIndices(all_indices);
-    extract_nonplane.filter(*nonplane_cloud);
-    nonplane_pub_.publish(nonplane_cloud);
+    pcl::fromROSMsg(*input, *input_cloud);
+    if (indices) {
+      // concat indices into one PointIndices
+      pcl::PointIndices::Ptr all_indices (new pcl::PointIndices);
+      for (size_t i = 0; i < indices->cluster_indices.size(); i++) {
+        std::vector<int> one_indices = indices->cluster_indices[i].indices;
+        for (size_t j = 0; j < one_indices.size(); j++) {
+          all_indices->indices.push_back(one_indices[j]);
+        }
+      }
+
+    
+      pcl::ExtractIndices<pcl::PointXYZRGB> extract_nonplane;
+      extract_nonplane.setNegative(true);
+      extract_nonplane.setInputCloud(input_cloud);
+      extract_nonplane.setIndices(all_indices);
+      extract_nonplane.filter(*nonplane_cloud);
+      nonplane_pub_.publish(nonplane_cloud);
+    }
+    else {
+      nonplane_cloud = input_cloud;
+    }
     // for each plane, project nonplane_cloud to the plane and find the points
     // inside of the polygon
     

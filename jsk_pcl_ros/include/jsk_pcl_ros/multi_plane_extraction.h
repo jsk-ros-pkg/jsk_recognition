@@ -64,6 +64,10 @@ namespace jsk_pcl_ros
     jsk_pcl_ros::ClusterPointIndices,
     jsk_pcl_ros::ModelCoefficientsArray,
     jsk_pcl_ros::PolygonArray> SyncPolicy;
+    typedef message_filters::sync_policies::ExactTime<
+      sensor_msgs::PointCloud2,
+      jsk_pcl_ros::ModelCoefficientsArray,
+      jsk_pcl_ros::PolygonArray> SyncWithoutIndicesPolicy;
     typedef jsk_pcl_ros::MultiPlaneExtractionConfig Config;
 
     MultiPlaneExtraction(): DiagnosticNodelet("MultiPlaneExtraction") { }
@@ -77,6 +81,10 @@ namespace jsk_pcl_ros
                          const jsk_pcl_ros::ClusterPointIndices::ConstPtr& indices,
                          const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients,
                          const jsk_pcl_ros::PolygonArray::ConstPtr& polygons);
+    virtual void extract(
+      const sensor_msgs::PointCloud2::ConstPtr& input,
+      const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients,
+      const jsk_pcl_ros::PolygonArray::ConstPtr& polygons);
     
     virtual void configCallback (Config &config, uint32_t level);
 
@@ -96,6 +104,7 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<jsk_pcl_ros::PolygonArray> sub_polygons_;
     message_filters::Subscriber<jsk_pcl_ros::ClusterPointIndices> sub_indices_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncWithoutIndicesPolicy> > sync_wo_indices_;
 
     ////////////////////////////////////////////////////////
     // Diagnostics Variables
@@ -107,7 +116,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     int maximum_queue_size_;
     double min_height_, max_height_;
-    
+    bool use_indices_;
   private:
     
     

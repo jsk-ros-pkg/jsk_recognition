@@ -507,7 +507,7 @@ Extract the points above the planes between `~min_height` and `~max_height`.
 * `~input_polygons` (`jsk_pcl_ros/PolygonArray`)
 * `~input_coefficients` (`jsk_pcl_ros/ModelCoefficientsArray`):
 
-   The input planes.
+   The input planes. If `~use_indices` parameter is false, `~indices` will not be used.
 #### Publishing Topics
 * `~output` (`sensor_msgs/PointCloud2`):
 
@@ -524,6 +524,12 @@ Extract the points above the planes between `~min_height` and `~max_height`.
 * `~max_queue_size` (Integer, default: `100`)
 
    Queue length for subscribing topics.
+
+* `~use_indices` (Bool, default: `True`)
+
+   Use indices of planar regions to filter if it's set true.
+   You can disable this parameter to filter pointcloud which is not the same pointcloud
+   to segment planes
 
 ### jsk\_pcl/RegionGrowingMultiplePlaneSegmentation
 ![jsk_pcl/RegionGrowingMultiplePlaneSegmentation](images/region_growing_multiple_plane_segmentation.png).

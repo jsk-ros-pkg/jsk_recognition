@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.31 (2015-01-08)
+-------------------
 * Merge pull request #563 from garaemon/no-indices-for-multi-plane-extraction
   [jsk_pcl_ros] Parameter to disable indices in MultiPlaneExtraction
 * [jsk_pcl_ros] Do not use indices in MultiPlaneExtraction

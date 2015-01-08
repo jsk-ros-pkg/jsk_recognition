@@ -2,8 +2,8 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.31 (2015-01-08)
+-------------------
 * [checkerboard_detector] Fix compilation warning of
   objectdetection_transform_echo about tf exception
 * [checkerboard_detector] Force to ubscribe topic if ~display is True

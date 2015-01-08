@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.31 (2015-01-08)
+-------------------
 * [jsk_perception] Add parameter to select seed policy (definitely
   back/foreground or probably back/foreground) to GrabCut
 * adapt attention-clipper for fridge demo

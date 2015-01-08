@@ -2,8 +2,8 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.31 (2015-01-08)
+-------------------
 * not include image prosessing config
 * add log polar sample
 * add include directory

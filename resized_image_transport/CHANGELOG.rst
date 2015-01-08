@@ -2,6 +2,18 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* not include image prosessing config
+* add log polar sample
+* add include directory
+* implement resize image processing
+* implement log-polar processing
+* add base class for processing image
+* add sample launch file
+* add LogPolar.cfg
+* add first sample
+
 0.1.30 (2014-12-24)
 -------------------
 

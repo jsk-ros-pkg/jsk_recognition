@@ -2,6 +2,16 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_perception] Add parameter to select seed policy (definitely
+  back/foreground or probably back/foreground) to GrabCut
+* adapt attention-clipper for fridge demo
+* [jsk_perception] Publish mask image of grabcut result
+* [jsk_perception] add GrabCut nodelet
+* Remove roseus from build dependency of jsk_perception
+* added debug pub
+
 0.1.30 (2014-12-24)
 -------------------
 

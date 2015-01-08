@@ -2,6 +2,14 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [checkerboard_detector] Fix compilation warning of
+  objectdetection_transform_echo about tf exception
+* [checkerboard_detector] Force to ubscribe topic if ~display is True
+* [checkerboard_detector] Add modeline for emacs to keep coding style
+* something have changed in updatream (maybe cv_bridge), added image_geometry as depends
+
 0.1.30 (2014-12-24)
 -------------------
 

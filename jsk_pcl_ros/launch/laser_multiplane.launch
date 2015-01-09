@@ -8,7 +8,7 @@
     <rosparam>
       filter_field_name: x
       filter_limit_min: 0.0
-      filter_limit_max: 2.0
+      filter_limit_max: 3.0
     </rosparam>
   </node>
   <node pkg="nodelet" type="nodelet"
@@ -78,7 +78,7 @@
     <remap from="~input" to="normal_direction_filtered_cloud/output" />
     <remap from="~input_normal" to="normal_direction_filtered_normal/output" />
     <rosparam>
-      cluster_tolerance: 0.1
+      cluster_tolerance: 0.3
     </rosparam>
   </node>
   
@@ -98,7 +98,7 @@
   <node pkg="nodelet" type="nodelet"
         args="load jsk_pcl/ClusterPointIndicesDecomposer multi_plane_manager"
         name="multi_plane_region_growing_decomposer">
-    <remap from="~input" to="voxel_grid/output" />
+    <remap from="~input" to="normal_direction_filtered_cloud/output" />
     <remap from="~target" to="multi_plane_region_growing/output/inliers" />
     <rosparam>
       publish_tf: false
@@ -127,4 +127,37 @@
     <remap from="~input" to="normal_estimation/output" />
     <remap from="~indices" to="normal_direction_filter/output" />
   </node>
+
+  <node pkg="nodelet" type="nodelet"
+        name="plane_extraction"
+        args="load jsk_pcl/MultiPlaneExtraction multi_plane_manager"
+        output="screen">
+    <remap from="~input" to="voxel_grid/output" />
+    <remap from="~input_polygons" to="plane_concatenator/output/polygons" />
+    <remap from="~input_coefficients" to="plane_concatenator/output/coefficients" />
+    <rosparam>
+      use_indices: false
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="euclidean_clustering"
+        args="load jsk_pcl/EuclideanClustering multi_plane_manager" output="screen">
+    <remap from="~input" to="/plane_extraction/output" />
+    <rosparam>
+      tolerance: 0.02
+      min_size: 100
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer multi_plane_manager"
+        name="euclidean_clustering_decomposer">
+    <remap from="~input" to="/plane_extraction/output" />
+    <remap from="~target" to="euclidean_clustering/output" />
+    <rosparam>
+      publish_tf: false
+      publish_clouds: false
+    </rosparam>
+  </node>
+  
+  
 </launch>

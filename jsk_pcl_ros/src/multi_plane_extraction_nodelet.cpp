@@ -48,6 +48,7 @@ namespace jsk_pcl_ros
   {
     DiagnosticNodelet::onInit();
     pnh_->param("use_indices", use_indices_, true);
+    NODELET_INFO_STREAM("use_indices: " << use_indices_);
     ////////////////////////////////////////////////////////
     // Publishers
     ////////////////////////////////////////////////////////
@@ -74,10 +75,11 @@ namespace jsk_pcl_ros
 
     
     sub_input_.subscribe(*pnh_, "input", 1);
-    sub_indices_.subscribe(*pnh_, "indices", 1);
+    
     sub_polygons_.subscribe(*pnh_, "input_polygons", 1);
     sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
     if (use_indices_) {
+      sub_indices_.subscribe(*pnh_, "indices", 1);
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(maximum_queue_size_);
       sync_->connectInput(sub_input_, sub_indices_, sub_coefficients_, sub_polygons_);
       sync_->registerCallback(boost::bind(&MultiPlaneExtraction::extract, this, _1, _2, _3, _4));

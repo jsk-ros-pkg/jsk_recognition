@@ -52,8 +52,10 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <pcl/kdtree/kdtree_flann.h>
-#include "yaml-cpp/yaml.h"
-
+#include <yaml-cpp/yaml.h>
+#include <pcl/common/common.h>
+#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_pcl_ros/geo_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -61,7 +63,7 @@ namespace jsk_pcl_ros
   {
     PCLNodelet::onInit();
     pnh_->param("output_file", output_file_, std::string("template"));
-    pnh_->param("sample_viewpoint", sample_viewpoint_, false);
+    pnh_->param("sample_viewpoint", sample_viewpoint_, true);
     pnh_->param("sample_viewpoint_angle_step", sample_viewpoint_angle_step_,
                 40.0);
     pnh_->param("sample_viewpoint_angle_min", sample_viewpoint_angle_min_,
@@ -323,12 +325,9 @@ namespace jsk_pcl_ros
       pcl::MaskMap mask_map(model.fullResolution().width,
                             model.fullResolution().height);
       pcl::RegionXY region;
-      generateLINEMODTrainingData(cloud,
-                                  indices,
-                                  color_modality,
-                                  surface_norm_mod,
-                                  mask_map,
-                                  region);
+      generateLINEMODTrainingData(cloud, indices,
+                                  color_modality, surface_norm_mod,
+                                  mask_map, region);
       std::vector<pcl::QuantizableModality*> modalities(2);
       modalities[0] = &color_modality;
       modalities[1] = &surface_norm_mod;
@@ -548,7 +547,6 @@ namespace jsk_pcl_ros
   void LINEMODDetector::onInit()
   {
     DiagnosticNodelet::onInit();
-    pnh_->param("minimum_template_points", minimum_template_points_, 3000);
     pnh_->param("template_file", template_file_, std::string("template"));
     // load original point and poses
     template_cloud_.reset(new pcl::PointCloud<pcl::PointXYZRGBA>);
@@ -563,15 +561,18 @@ namespace jsk_pcl_ros
       const YAML::Node& template_pose_yaml = doc["template_poses"];
       for (size_t i = 0; i < template_pose_yaml.size(); i++) {
         const YAML::Node& pose = template_pose_yaml[i];
-        float x, y, z, rx, ry, rz, rw;
-        pose[0] >> x; pose[1] >> y; pose[2] >> z;
-        pose[3] >> rx; pose[4] >> ry; pose[5] >> rz; pose[6] >> rw;
-        Eigen::Vector3f p(x, y, z);
-        Eigen::Quaternionf q(rx, ry, rz, rw);
-        // NODELET_INFO("p: [%f, %f, %f]", p[0], p[1], p[2]);
-        // NODELET_INFO("r: [%f, %f, %f, %f]", q.x(), q.y(), q.z(), q.w());
-        Eigen::Affine3f trans = Eigen::Translation3f(p) * Eigen::AngleAxisf(q);
+        Eigen::Affine3f trans = affineFromYAMLNode(pose);
         template_poses_.push_back(trans);
+        // set template_bboxes
+        pcl::PointCloud<pcl::PointXYZRGBA> transformed_cloud;
+        pcl::transformPointCloud<pcl::PointXYZRGBA>(
+          *template_cloud_, transformed_cloud, trans);
+        // compute size of bounding box
+        Eigen::Vector4f minpt, maxpt;
+        pcl::getMinMax3D<pcl::PointXYZRGBA>(transformed_cloud, minpt, maxpt);
+        BoundingBox bbox = boundingBoxFromPointCloud(transformed_cloud);
+        //ROS_INFO("bounding box size: [%f, %f, %f]", bbox.dimensions.x, bbox.dimensions.y, bbox.dimensions.z);
+        template_bboxes_.push_back(bbox);
       }
     }
     pose_fin.close();
@@ -583,7 +584,7 @@ namespace jsk_pcl_ros
     srv_->setCallback (f);
     
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
-    
+    pub_detect_mask_ = advertise<sensor_msgs::Image>(*pnh_, "output/mask", 1);
   }
 
   void LINEMODDetector::subscribe()
@@ -599,10 +600,8 @@ namespace jsk_pcl_ros
   void LINEMODDetector::configCallback(Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    //line_rgbd_ = pcl::LineRGBD<pcl::PointXYZRGBA>();
     gradient_magnitude_threshold_ = config.gradient_magnitude_threshold;
     detection_threshold_ = config.detection_threshold;
-    // line_rgbd_.setGradientMagnitudeThreshold(gradient_magnitude_threshold_);
     color_gradient_mod_.setGradientMagnitudeThreshold(gradient_magnitude_threshold_);
     linemod_.setDetectionThreshold(detection_threshold_);
 
@@ -626,6 +625,35 @@ namespace jsk_pcl_ros
         "LINEMODDetector", vital_checker_, stat);
     }
   }
+
+  void LINEMODDetector::computeCenterOfTemplate(
+    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud,
+    const pcl::SparseQuantizedMultiModTemplate& linemod_template,
+    const pcl::LINEMODDetection& linemod_detection,
+    Eigen::Vector3f& center)
+  {
+    const size_t start_x = std::max(linemod_detection.x, 0);
+    const size_t start_y = std::max(linemod_detection.y, 0);
+    const size_t end_x = std::min(
+      static_cast<size_t> (start_x + linemod_template.region.width * linemod_detection.scale),
+      static_cast<size_t> (cloud->width));
+    const size_t end_y = std::min(
+      static_cast<size_t> (start_y + linemod_template.region.height * linemod_detection.scale),
+      static_cast<size_t> (cloud->height));
+    size_t counter = 0;
+    for (size_t row_index = start_y; row_index < end_y; ++row_index) {
+      for (size_t col_index = start_x; col_index < end_x; ++col_index) {
+        const pcl::PointXYZRGBA & point = (*cloud) (col_index, row_index);
+        if (pcl_isfinite (point.x) &&
+            pcl_isfinite (point.y) &&
+            pcl_isfinite (point.z)) {
+          center = center + point.getVector3fMap();
+          ++counter;
+        }
+      }
+    }
+    center = center / counter;
+  }
   
   void LINEMODDetector::detect(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
@@ -637,52 +665,74 @@ namespace jsk_pcl_ros
       cloud (new pcl::PointCloud<pcl::PointXYZRGBA>);
     pcl::fromROSMsg(*cloud_msg, *cloud);
 
-    surface_norm_mod_.setInputCloud(cloud);
-    surface_norm_mod_.processInputData ();
+    surface_normal_mod_.setInputCloud(cloud);
+    surface_normal_mod_.processInputData ();
     color_gradient_mod_.setInputCloud (cloud);
     color_gradient_mod_.processInputData ();
     std::vector<pcl::LINEMODDetection> linemod_detections;
     std::vector<pcl::QuantizableModality*> modalities;
-    modalities.push_back (&color_gradient_mod_);
-    modalities.push_back (&surface_normal_mod_);
-    linemod_.detectTemplatesSemiScaleInvariant (modalities, linemod_detections,
-                                                0.6944444f,
-                                                1.44f,
-                                                1.2f);
-    // line_rgbd_.setInputCloud(cloud);
-    // line_rgbd_.setInputColors(cloud);
-
-    std::vector<pcl::LineRGBD<pcl::PointXYZRGBA>::Detection> detections;
-    //line_rgbd_.detectSemiScaleInvariant(detections);
-    NODELET_INFO("detected %lu result", detections.size());
+    modalities.push_back(&color_gradient_mod_);
+    modalities.push_back(&surface_normal_mod_);
+    linemod_.detectTemplatesSemiScaleInvariant(modalities, linemod_detections,
+                                               0.6944444f, 1.44f, 1.2f);
+    NODELET_INFO("detected %lu result", linemod_detections.size());
     // lookup the best result
-    if (detections.size() > 0) {
-      double max_response = 0;
-      size_t max_object_id = 0;
+    if (linemod_detections.size() > 0) {
+      double max_score = 0;
       size_t max_template_id = 0;
-      size_t max_detection_id = 0;
-      for (size_t i = 0; i < detections.size(); i++) {
-        pcl::LineRGBD<pcl::PointXYZRGBA>::Detection detection = detections[i];
-        if (max_response < detection.response) {
-          max_response = detection.response;
-          max_object_id = detection.object_id;
-          max_template_id = detection.template_id;
-          max_detection_id = detection.detection_id;
+      double max_scale = 0;
+      pcl::LINEMODDetection linemod_detection;
+      for (size_t i = 0; i < linemod_detections.size(); i++) {
+        const pcl::LINEMODDetection& detection = linemod_detections[i];
+        if (max_score < detection.score) {
+          linemod_detection = detection;
+          max_score = detection.score;
         }
       }
-      NODELET_INFO("(%lu, %lu)", max_object_id, max_template_id);
+      
+      const pcl::SparseQuantizedMultiModTemplate& linemod_template = 
+        linemod_.getTemplate(linemod_detection.template_id);
+      Eigen::Vector3f center(0, 0, 0);
+      computeCenterOfTemplate(
+        cloud, linemod_template, linemod_detection, center);
+      // publish mask image here
+      cv::Mat detect_mask = cv::Mat::zeros(cloud->width, cloud->height, CV_8UC1);
+      int scaled_template_width
+        = linemod_template.region.width * linemod_detection.scale;
+      int scaled_template_height
+        = linemod_template.region.height * linemod_detection.scale;
+      cv::rectangle(
+        detect_mask,
+        cv::Point(linemod_detection.x, linemod_detection.y),
+        cv::Point(linemod_detection.x + scaled_template_width,
+                  linemod_detection.y + scaled_template_height),
+        cv::Scalar(255), CV_FILLED);
+      pub_detect_mask_.publish(cv_bridge::CvImage(cloud_msg->header,
+                                                  "8UC1",
+                                                  detect_mask).toImageMsg());
+      // compute translation
+      BoundingBox bbox = template_bboxes_[linemod_detection.template_id];
       pcl::PointCloud<pcl::PointXYZRGBA>::Ptr 
         result (new pcl::PointCloud<pcl::PointXYZRGBA>);
-      // line_rgbd_.computeTransformedTemplatePoints(max_detection_id,
-      //                                             *result);
+      pcl::transformPointCloud<pcl::PointXYZRGBA>(
+        *template_cloud_, *result, template_poses_[linemod_detection.template_id]);
+      Eigen::Vector4f minpt, maxpt;
+      pcl::getMinMax3D<pcl::PointXYZRGBA>(*result, minpt, maxpt);
+      Eigen::Vector4f template_center = (minpt + maxpt) / 2;
+      Eigen::Vector3f translation = center - Eigen::Vector3f(template_center[0],
+                                                             template_center[1],
+                                                             template_center[2]);
+
+      for (size_t i = 0; i < result->points.size(); i++) {
+        result->points[i].getVector3fMap()
+          = result->points[i].getVector3fMap() + translation;
+      }
       sensor_msgs::PointCloud2 ros_result;
       pcl::toROSMsg(*result, ros_result);
       ros_result.header = cloud_msg->header;
       pub_cloud_.publish(ros_result);
     }
   }
-  
-  
 }
 
 #include <pluginlib/class_list_macros.h>

@@ -41,6 +41,19 @@ namespace jsk_pcl_ros
 {
   //static boost::mutex global_chull_mutex;
   boost::mutex global_chull_mutex;
+
+  Eigen::Affine3f affineFromYAMLNode(const YAML::Node& pose)
+  {
+    float x, y, z, rx, ry, rz, rw;
+    pose[0] >> x; pose[1] >> y; pose[2] >> z;
+    pose[3] >> rx; pose[4] >> ry; pose[5] >> rz; pose[6] >> rw;
+    Eigen::Vector3f p(x, y, z);
+    Eigen::Quaternionf q(rw, rx, ry, rz);
+    Eigen::Affine3f trans = Eigen::Translation3f(p) * Eigen::AngleAxisf(q);
+    return trans;
+  }
+  
+  
   std::vector<int> addIndices(const std::vector<int>& a,
                               const std::vector<int>& b)
   {

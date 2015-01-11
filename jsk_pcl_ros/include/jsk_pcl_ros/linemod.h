@@ -56,7 +56,8 @@
 #include <pcl/recognition/linemod.h>
 #include <pcl/recognition/color_gradient_modality.h>
 #include <pcl/recognition/surface_normal_modality.h>
-
+#include <jsk_pcl_ros/BoundingBox.h>
+#include <jsk_pcl_ros/BoundingBoxArray.h>
 #include <pcl_ros/pcl_nodelet.h>
 
 namespace jsk_pcl_ros
@@ -79,12 +80,17 @@ namespace jsk_pcl_ros
       const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
     virtual void configCallback(
       Config& config, uint32_t level);
-    
+    virtual void computeCenterOfTemplate(
+      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud,
+      const pcl::SparseQuantizedMultiModTemplate& linemod_template,
+      const pcl::LINEMODDetection& linemod_detection,
+      Eigen::Vector3f& center);
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
     ros::Subscriber sub_cloud_;
     ros::Publisher pub_cloud_;
+    ros::Publisher pub_detect_mask_;
     boost::mutex mutex_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     
@@ -98,9 +104,9 @@ namespace jsk_pcl_ros
     pcl::LINEMOD linemod_;
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr template_cloud_;
     std::vector<Eigen::Affine3f> template_poses_;
+    std::vector<BoundingBox> template_bboxes_;
     pcl::ColorGradientModality<pcl::PointXYZRGBA> color_gradient_mod_;
     pcl::SurfaceNormalModality<pcl::PointXYZRGBA> surface_normal_mod_;
-    int minimum_template_points_;
   private:
     
   };

@@ -33,6 +33,8 @@
     <remap from="~input/info" to="/capture_stereo_synchronizer/output/left_camera_info" />
     <rosparam>
       sample_viewpoint: true
+      sample_viewpoint_radius_min: 1.2
+      sample_viewpoint_radius_max: 1.6
     </rosparam>
   </node>
   <node pkg="image_view" type="image_view" name="sample_viewer">

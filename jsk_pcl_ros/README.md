@@ -256,6 +256,14 @@ A nodelet to detect object using LINEMOD.
 
   Result of detection as mask image.
 
+* `~output/pose` (`geometry_msgs/PoseStamped`)
+
+  Pose of detected template
+
+* `~output/template` (`sensor_msgs/PointCloud2`)
+
+  Template pointcloud at identity pose.
+
 #### Parameters
 * `~template_file` (`String`, default: `template`)
 

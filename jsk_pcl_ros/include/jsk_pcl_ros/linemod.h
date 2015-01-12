@@ -91,6 +91,8 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_cloud_;
     ros::Publisher pub_cloud_;
     ros::Publisher pub_detect_mask_;
+    ros::Publisher pub_pose_;
+    ros::Publisher pub_original_template_cloud_;
     boost::mutex mutex_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     

@@ -585,6 +585,9 @@ namespace jsk_pcl_ros
     
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     pub_detect_mask_ = advertise<sensor_msgs::Image>(*pnh_, "output/mask", 1);
+    pub_pose_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output/pose", 1);
+    pub_original_template_cloud_ = advertise<geometry_msgs::PoseStamped>(
+      *pnh_, "output/template", 1);
   }
 
   void LINEMODDetector::subscribe()
@@ -722,7 +725,11 @@ namespace jsk_pcl_ros
       Eigen::Vector3f translation = center - Eigen::Vector3f(template_center[0],
                                                              template_center[1],
                                                              template_center[2]);
-
+      Eigen::Affine3f pose = template_poses_[linemod_detection.template_id] * Eigen::Translation3f(translation);
+      geometry_msgs::PoseStamped ros_pose;
+      tf::poseEigenToMsg(pose, ros_pose.pose);
+      ros_pose.header = cloud_msg->header;
+      pub_pose_.publish(ros_pose);
       for (size_t i = 0; i < result->points.size(); i++) {
         result->points[i].getVector3fMap()
           = result->points[i].getVector3fMap() + translation;
@@ -731,6 +738,10 @@ namespace jsk_pcl_ros
       pcl::toROSMsg(*result, ros_result);
       ros_result.header = cloud_msg->header;
       pub_cloud_.publish(ros_result);
+      sensor_msgs::PointCloud2 ros_template;
+      pcl::toROSMsg(*template_cloud_, ros_template);
+      ros_template.header = cloud_msg->header;
+      pub_original_template_cloud_.publish(ros_template);
     }
   }
 }

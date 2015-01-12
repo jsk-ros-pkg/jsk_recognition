@@ -2,6 +2,11 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros, checkerboard_detector] Fix offset from checker board
+* Contributors: Ryohei Ueda
+
 0.1.31 (2015-01-08)
 -------------------
 * [checkerboard_detector] Fix compilation warning of

@@ -2,6 +2,9 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.1.31 (2015-01-08)
 -------------------
 * [imagesift] Add warning message if size of mask and image are different

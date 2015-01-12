@@ -2,6 +2,16 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* add Torus.msg and TorusArrray.msg
+* [jsk_pcl_ros, checkerboard_detector] Fix offset from checker board
+* [jsk_pcl_ros] Use pcl::LINEMOD in LINEMODDetector for memory efficiency
+* [jsk_pcl_ros] Use linemod class when training linemod template
+* [jsk_pcl_ros] tune parameter of multi plane based object detection using
+  spindle laser
+* Contributors: Ryohei Ueda, Yuto Inagaki
+
 0.1.31 (2015-01-08)
 -------------------
 * Merge pull request #563 from garaemon/no-indices-for-multi-plane-extraction
@@ -133,7 +143,7 @@ Changelog for package jsk_pcl_ros
 * changet pointcloud_screen_point not to use jsconnection_based_nodelet
 * Use jsk_topic_tools::ConnectionBasedNodelet in BilateralFilter,
   BorderEstimator, BoundingBoxFilter and so on
-* Contributors: Ryohei Ueda, Shunichi Nozawa, Yu Ohara, Yuto Inagaki
+* Contributors: Ryohei Ueda, Shunichi Nozawa, Yuto Inagaki, Yu Ohara
 
 0.1.26 (2014-11-23)
 -------------------
@@ -600,7 +610,7 @@ Changelog for package jsk_pcl_ros
 * make paritcal_filter_tracking_nodelet publish tracked object tf trasnformation
 * add two launch files to run openni on remote machine
 * add octree_change_detector
-* Contributors: Chan Wesley, Shunichi Nozawa, Yuto Inagaki, Masaki Murooka, Ryo Terasawa, Ryohei Ueda, Yohei Kakiuchi, Yusuke Furuta, Kei Okada
+* Contributors: Ryo Terasawa, Shunichi Nozawa, Yuto Inagaki, Masaki Murooka, Yohei Kakiuchi, Ryohei Ueda, Chan Wesley, Yusuke Furuta, Kei Okada
 
 0.1.4 (2014-04-25)
 ------------------

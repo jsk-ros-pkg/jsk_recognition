@@ -120,9 +120,7 @@ namespace jsk_pcl_ros
   {
     Eigen::Affine3f posef;
     tf::poseMsgToEigen(pose_msg->pose, posef);
-    // hard coded!
-    Eigen::Affine3f offset = Eigen::Affine3f::Identity() * Eigen::AngleAxisf(M_PI, Eigen::Vector3f::UnitX());
-    Eigen::Affine3f transform = offset.inverse() * posef.inverse();
+    Eigen::Affine3f transform = posef.inverse();
     
     pcl::transformPointCloud<pcl::PointXYZRGB>(
       *input, *output, transform);

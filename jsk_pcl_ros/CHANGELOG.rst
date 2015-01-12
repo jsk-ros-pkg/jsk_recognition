@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.32 (2015-01-12)
+-------------------
 * add Torus.msg and TorusArrray.msg
 * [jsk_pcl_ros, checkerboard_detector] Fix offset from checker board
 * [jsk_pcl_ros] Use pcl::LINEMOD in LINEMODDetector for memory efficiency

@@ -286,7 +286,7 @@ add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/pointcloud_moveit_filter.cpp
   src/tf_listener_singleton.cpp
   src/viewpoint_sampler.cpp)
-target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES})
+target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 
 generate_messages(DEPENDENCIES ${PCL_MSGS} sensor_msgs geometry_msgs)

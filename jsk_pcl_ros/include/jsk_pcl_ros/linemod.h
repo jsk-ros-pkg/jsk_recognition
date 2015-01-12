@@ -38,7 +38,7 @@
 #define JSK_PCL_ROS_LINEMOD_H_
 
 #include "jsk_pcl_ros/pcl_conversion_util.h"
-
+#include <image_geometry/pinhole_camera_model.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <pcl/recognition/linemod/line_rgbd.h>
 #include <pcl/recognition/color_gradient_modality.h>
@@ -53,7 +53,11 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
-
+#include <pcl/recognition/linemod.h>
+#include <pcl/recognition/color_gradient_modality.h>
+#include <pcl/recognition/surface_normal_modality.h>
+#include <jsk_pcl_ros/BoundingBox.h>
+#include <jsk_pcl_ros/BoundingBoxArray.h>
 #include <pcl_ros/pcl_nodelet.h>
 
 namespace jsk_pcl_ros
@@ -76,12 +80,17 @@ namespace jsk_pcl_ros
       const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
     virtual void configCallback(
       Config& config, uint32_t level);
-    
+    virtual void computeCenterOfTemplate(
+      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud,
+      const pcl::SparseQuantizedMultiModTemplate& linemod_template,
+      const pcl::LINEMODDetection& linemod_detection,
+      Eigen::Vector3f& center);
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
     ros::Subscriber sub_cloud_;
     ros::Publisher pub_cloud_;
+    ros::Publisher pub_detect_mask_;
     boost::mutex mutex_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     
@@ -91,11 +100,13 @@ namespace jsk_pcl_ros
     std::string template_file_;
     double gradient_magnitude_threshold_;
     double detection_threshold_;
-    pcl::LineRGBD<pcl::PointXYZRGBA> line_rgbd_;
-    bool use_raw_templates_;
-    // std::vector<pcl::PointCloud<pcl::PointXYZRGBA>::Ptr> template_pointclouds_;
-    // std::vector<pcl::SparseQuantizedMultiModTemplate> template_sqmmts_;
-    int minimum_template_points_;
+    //pcl::LineRGBD<pcl::PointXYZRGBA> line_rgbd_;
+    pcl::LINEMOD linemod_;
+    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr template_cloud_;
+    std::vector<Eigen::Affine3f> template_poses_;
+    std::vector<BoundingBox> template_bboxes_;
+    pcl::ColorGradientModality<pcl::PointXYZRGBA> color_gradient_mod_;
+    pcl::SurfaceNormalModality<pcl::PointXYZRGBA> surface_normal_mod_;
   private:
     
   };
@@ -131,6 +142,19 @@ namespace jsk_pcl_ros
                            std_srvs::Empty::Response& res);
     virtual void trainWithoutViewpointSampling();
     virtual void trainWithViewpointSampling();
+    virtual void organizedPointCloudWithViewPoint(
+      const Eigen::Affine3f& transform,
+      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr raw_cloud,
+      const image_geometry::PinholeCameraModel& model,
+      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr output,
+      pcl::PointIndices& mask);
+    virtual void generateLINEMODTrainingData(
+      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud,
+      pcl::PointIndices::Ptr mask,
+      pcl::ColorGradientModality<pcl::PointXYZRGBA>& color_grad_mod,
+      pcl::SurfaceNormalModality<pcl::PointXYZRGBA>& surface_norm_mod,
+      pcl::MaskMap& mask_map,
+      pcl::RegionXY& region);
     ////////////////////////////////////////////////////////
     // variables
     ////////////////////////////////////////////////////////

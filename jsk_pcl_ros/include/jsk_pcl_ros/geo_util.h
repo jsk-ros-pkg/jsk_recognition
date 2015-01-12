@@ -313,6 +313,22 @@ namespace jsk_pcl_ros
   private:
     
   };
+
+  template <class PointT>
+  BoundingBox boundingBoxFromPointCloud(const pcl::PointCloud<PointT>& cloud)
+  {
+    Eigen::Vector4f minpt, maxpt;
+    pcl::getMinMax3D<PointT>(cloud, minpt, maxpt);
+    BoundingBox bbox;
+    bbox.dimensions.x = std::abs(minpt[0] - maxpt[0]);
+    bbox.dimensions.y = std::abs(minpt[1] - maxpt[1]);
+    bbox.dimensions.z = std::abs(minpt[2] - maxpt[2]);
+    bbox.pose.position.x = (minpt[0] + maxpt[0]) / 2.0;
+    bbox.pose.position.y = (minpt[1] + maxpt[1]) / 2.0;
+    bbox.pose.position.z = (minpt[2] + maxpt[2]) / 2.0;
+    bbox.pose.orientation.w = 1.0;
+    return bbox;
+  }
   
 }
 

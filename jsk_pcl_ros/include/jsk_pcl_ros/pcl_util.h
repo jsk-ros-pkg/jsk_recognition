@@ -60,9 +60,12 @@
 #include <jsk_topic_tools/vital_checker.h>
 
 #include <pcl/filters/extract_indices.h>
+#include <yaml-cpp/yaml.h>
 
 namespace jsk_pcl_ros
 {
+  Eigen::Affine3f affineFromYAMLNode(const YAML::Node& pose);
+  
   std::vector<int> addIndices(const std::vector<int>& a,
                               const std::vector<int>& b);
   pcl::PointIndices::Ptr addIndices(const pcl::PointIndices& a,

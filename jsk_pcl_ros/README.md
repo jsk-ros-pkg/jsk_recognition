@@ -59,6 +59,25 @@ time end
 Represent range of time.
 
 ## nodelets
+### jsk\_pcl/AddColorFromImage
+Add color to pointcloud (no need to be organized) from image and camera info.
+
+### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud`)
+
+  Input point cloud to add color. No need to be an organized pointcloud.
+* `~input/image` (`sensor_msgs/Image`)
+
+  BGR8 color image.
+* `~input/camera_info` (`sensor_msgs/CameraInfo`)
+
+  Camera parameters of `~input/image`
+
+### Publishing Topic
+* `~output` (`sensor_msgs/PointCloud`)
+
+  Output colored pointcloud.
+
 ### jsk\_pcl/PlaneConcatenator
 ![](image/plane_concatenator.png)
 

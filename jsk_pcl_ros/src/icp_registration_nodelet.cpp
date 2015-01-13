@@ -261,6 +261,12 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     if (reference_cloud_list_.size() == 0) {
       NODELET_FATAL("no reference is specified");
+      jsk_pcl_ros::ICPResult result;
+      result.name = std::string("NONE");
+      result.score = 0.0;
+      result.header = box_msg->header;
+      result.pose = box_msg->pose;
+      pub_icp_result.publish(result);
       return;
     }
     try

@@ -59,6 +59,44 @@ time end
 Represent range of time.
 
 ## nodelets
+### jsk\_pcl/TorusFInder
+![](images/torus_finder.png)
+
+Find a torus out of pointcloud based on RANSAC with 3-D circle model.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud`)
+
+  Input pointcloud. You may need to choose good candidates of pointcloud.
+
+#### Publishing Topic
+
+* `~output` (`jsk_pcl_ros/Torus`)
+
+  Output of detection.
+
+* `~output/inliers` (`pcl_msgs/PointIndices`)
+* `~output/coefficients` (`pcl_msgs/ModelCoefficients`)
+
+  Inliers and coefficients which represents detection result.
+* `~output/array` (`jsk_pcl_ros/TorusArray`)
+
+  Array of torus. It will be used for visualization.
+
+#### Parameters
+* `~min_radius` (Double, default: `0.1`)
+* `~max_radius` (Double, default: `1.0`)
+
+  Minimum and maximum radius of torus.
+* `~min_size` (Integer, default: `10`)
+
+  Minimum number of inliers.
+* `~outlier_threshold` (Double, default: `0.01`)
+
+  Outlier threshold used in RANSAC.
+* `~max_iterations` (Integer, default: `100`)
+
+  Maximum number of iterations of RANSAC.
 ### jsk\_pcl/RectToROI
 Convert rectangle (`geometry_msgs/Polygon`) into ROI with camera info (`sensor_msgs/CameraInfo`).
 

@@ -47,6 +47,7 @@ namespace jsk_pcl_ros
   void ROIClipper::onInit()
   {
     DiagnosticNodelet::onInit();
+    pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
     pnh_->param("not_sync", not_sync_, false);
     pnh_->param("keep_organized", keep_organized_, false);
     pub_image_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
@@ -71,7 +72,7 @@ namespace jsk_pcl_ros
       sub_info_no_sync_ = pnh_->subscribe(
         "input/camera_info", 1,
         &ROIClipper::infoCallback, this);
-      sub_image_no_sync_ = pnh_->subscribe(
+      sub_cloud_no_sync_ = pnh_->subscribe(
         "input/cloud", 1,
         &ROIClipper::cloudCallback, this);
     }
@@ -124,12 +125,9 @@ namespace jsk_pcl_ros
   void ROIClipper::imageCallback(
     const sensor_msgs::Image::ConstPtr& image_msg)
   {
-    //boost::mutex::scoped_lock lock(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
     if (latest_camera_info_) {
       clip(image_msg, latest_camera_info_);
-    }
-    else {
-      NODELET_ERROR("camera_info is not available");
     }
   }
 
@@ -137,6 +135,7 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     if (latest_camera_info_) {
       image_geometry::PinholeCameraModel model;
       model.fromCameraInfo(latest_camera_info_);
@@ -148,12 +147,15 @@ namespace jsk_pcl_ros
       cv::Rect region = model.rectifiedRoi();
       pcl::PointXYZRGB nan_point;
       nan_point.x = nan_point.y = nan_point.z
-        =std::numeric_limits<float>::quiet_NaN();;
+        = std::numeric_limits<float>::quiet_NaN();;
       for (size_t i = 0; i < cloud->points.size(); i++) {
         pcl::PointXYZRGB p = cloud->points[i];
         cv::Point2d uv = model.project3dToPixel(cv::Point3d(p.x, p.y, p.z));
+        
         // ROI region...
-        if (region.contains(uv)) {
+        //if (region.contains(cv::Point(uv.x, cv.y))) {
+        if (uv.x >= 0 && uv.x <= region.width &&
+            uv.y >= 0 && uv.y <= region.height) {
           clipped_cloud->points.push_back(p);
         }
         else if (keep_organized_) {
@@ -168,9 +170,6 @@ namespace jsk_pcl_ros
       pcl::toROSMsg(*clipped_cloud, ros_cloud);
       ros_cloud.header = cloud_msg->header;
       pub_cloud_.publish(ros_cloud);
-    }
-    else {
-      NODELET_ERROR("camera_info is not available");
     }
   }
   

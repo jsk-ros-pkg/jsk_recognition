@@ -72,12 +72,12 @@ namespace jsk_pcl_ros
       sensor_msgs::CameraInfo roi(*latest_camera_info_);
       geometry_msgs::Point32 P0 = rect_msg->polygon.points[0];
       geometry_msgs::Point32 P1 = rect_msg->polygon.points[1];
-      double min_x = std::min(P0.x, P1.x);
+      double min_x = std::max(std::min(P0.x, P1.x), 0.0f);
       double max_x = std::max(P0.x, P1.x);
-      double min_y = std::min(P0.y, P1.y);
+      double min_y = std::max(std::min(P0.y, P1.y), 0.0f);
       double max_y = std::max(P0.y, P1.y);
-      double width = max_x - min_x;
-      double height = max_y - min_y;
+      double width = std::min(max_x - min_x, latest_camera_info_->width - min_x);
+      double height = std::min(max_y - min_y, latest_camera_info_->height - min_y);
       roi.roi.x_offset = (int)min_x;
       roi.roi.y_offset = (int)min_y;
       roi.roi.height = height;

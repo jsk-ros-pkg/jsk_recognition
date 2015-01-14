@@ -124,7 +124,7 @@ namespace jsk_pcl_ros
   void ROIClipper::imageCallback(
     const sensor_msgs::Image::ConstPtr& image_msg)
   {
-    boost::mutex::scoped_lock lock(mutex_);
+    //boost::mutex::scoped_lock lock(mutex_);
     if (latest_camera_info_) {
       clip(image_msg, latest_camera_info_);
     }

@@ -78,6 +78,8 @@ We expect it will be used with image_view2.
   camera info with ROI filled by `~input`.
 
 ### jsk\_pcl/AddColorFromImage
+![](images/add_color_from_image)
+
 Add color to pointcloud (no need to be organized) from image and camera info.
 
 ### Subscribing Topic

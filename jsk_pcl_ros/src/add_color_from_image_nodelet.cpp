@@ -75,7 +75,10 @@ namespace jsk_pcl_ros
   {
     if ((cloud_msg->header.frame_id != image_msg->header.frame_id) ||
         (cloud_msg->header.frame_id != info_msg->header.frame_id)) {
-      NODELET_FATAL("frame_id is not collect");
+      NODELET_FATAL("frame_id is not collect: [%s, %s, %s",
+                    cloud_msg->header.frame_id.c_str(),
+                    image_msg->header.frame_id.c_str(),
+                    info_msg->header.frame_id.c_str());
       return;
     }
     vital_checker_->poke();
@@ -94,18 +97,23 @@ namespace jsk_pcl_ros
     image_geometry::PinholeCameraModel model;
     model.fromCameraInfo(info_msg);
     for (size_t i = 0; i < cloud->points.size(); i++) {
-      pcl::PointXYZRGB p = rgb_cloud->points[i];
-      p.getVector3fMap() = cloud->points[i].getVector3fMap();
-      
+      pcl::PointXYZRGB p;
+      p.x = cloud->points[i].x;
+      p.y = cloud->points[i].y;
+      p.z = cloud->points[i].z;
+      //p.getVector3fMap() = cloud->points[i].getVector3fMap();
+      if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
       // compute RGB
-      cv::Point2d uv = model.project3dToPixel(cv::Point3d(p.x, p.y, p.z));
-      if (uv.x > 0 && uv.x < image_msg->width &&
-          uv.y > 0 && uv.y < image_msg->height) {
-        cv::Vec3b rgb = image.at<cv::Vec3b>(uv.y, uv.x);
-        p.r = rgb[0];
-        p.g = rgb[1];
-        p.b = rgb[2];
+        cv::Point2d uv = model.project3dToPixel(cv::Point3d(p.x, p.y, p.z));
+        if (uv.x > 0 && uv.x < image_msg->width &&
+            uv.y > 0 && uv.y < image_msg->height) {
+          cv::Vec3b rgb = image.at<cv::Vec3b>(uv.y, uv.x);
+          p.r = rgb[2];
+          p.g = rgb[1];
+          p.b = rgb[0];
+        }
       }
+      rgb_cloud->points[i] = p;
     }
     sensor_msgs::PointCloud2 ros_cloud;
     pcl::toROSMsg(*rgb_cloud, ros_cloud);

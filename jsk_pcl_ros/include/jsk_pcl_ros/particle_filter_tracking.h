@@ -63,7 +63,12 @@
 
 #include <jsk_pcl_ros/SetPointCloud2.h>
 #include <jsk_pcl_ros/ParticleFilterTrackingConfig.h>
+#include <jsk_pcl_ros/BoundingBox.h>
+
 #include <dynamic_reconfigure/server.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
 
 using namespace pcl::tracking;
 namespace jsk_pcl_ros
@@ -72,6 +77,10 @@ namespace jsk_pcl_ros
   {
   public:
     typedef ParticleFilterTrackingConfig Config;
+    typedef message_filters::sync_policies::ExactTime<
+      sensor_msgs::PointCloud2,
+      BoundingBox > SyncPolicy;
+
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_pass_;
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_pass_downsampled_;
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr target_cloud_;
@@ -81,12 +90,18 @@ namespace jsk_pcl_ros
     boost::mutex mtx_;
     bool new_cloud_;
     bool track_target_set_;
+    bool align_box_;
     std::string frame_id_;
     std::string track_target_name_;
     ros::Time stamp_;
+    tf::Transform reference_transform_;
 
     ros::Subscriber sub_;
     ros::Subscriber sub_update_model_;
+
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
+    message_filters::Subscriber<BoundingBox> sub_box_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     ros::Publisher particle_publisher_;
     ros::Publisher track_result_publisher_;
     ros::ServiceServer renew_model_srv_;
@@ -111,6 +126,7 @@ namespace jsk_pcl_ros
     virtual bool renew_model_cb(jsk_pcl_ros::SetPointCloud2::Request &req,
                                jsk_pcl_ros::SetPointCloud2::Response &response
                                );
+    virtual void renew_model_with_box_topic_cb(const sensor_msgs::PointCloud2::ConstPtr &pc_ptr, const jsk_pcl_ros::BoundingBox::ConstPtr &bb_ptr);
     virtual void renew_model_topic_cb(const sensor_msgs::PointCloud2 &pc);
 
   private:

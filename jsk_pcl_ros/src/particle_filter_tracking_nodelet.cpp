@@ -75,8 +75,8 @@ namespace jsk_pcl_ros
     //First the track target is not set
     double octree_resolution = 0.01;
     pnh_->getParam("octree_resolution", octree_resolution);
+    pnh_->param("align_box", align_box_, false);
     track_target_set_ = false;
-    
     new_cloud_ = false;
     target_cloud_.reset(new pcl::PointCloud<pcl::PointXYZRGBA>());
 
@@ -127,7 +127,19 @@ namespace jsk_pcl_ros
     track_result_publisher_ = pnh_->advertise<sensor_msgs::PointCloud2>("track_result", 1);
     //Set subscribe setting
     sub_ = pnh_->subscribe("input", 1, &ParticleFilterTracking::cloud_cb,this);
-    sub_update_model_ = pnh_->subscribe("renew_model", 1, &ParticleFilterTracking::renew_model_topic_cb,this);
+    if (align_box_)
+    {
+      sub_input_.subscribe(*pnh_, "renew_model", 1);
+      sub_box_.subscribe(*pnh_, "renew_box", 1);
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+      sync_->connectInput(sub_input_, sub_box_);
+      sync_->registerCallback(boost::bind(
+                                &ParticleFilterTracking::renew_model_with_box_topic_cb,
+                                this, _1, _2));
+    }
+    else{
+      sub_update_model_ = pnh_->subscribe("renew_model", 1, &ParticleFilterTracking::renew_model_topic_cb,this);
+    }
     renew_model_srv_
       = pnh_->advertiseService("renew_model", &ParticleFilterTracking::renew_model_cb, this);
   }
@@ -213,8 +225,7 @@ namespace jsk_pcl_ros
     track_result_publisher_.publish(result_pointcloud2);
   }
 
-  void
-  ParticleFilterTracking::reset_tracking_target_model(const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &recieved_target_cloud)
+  void ParticleFilterTracking::reset_tracking_target_model(const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &recieved_target_cloud)
   {
       pcl::PointCloud<pcl::PointXYZRGBA>::Ptr new_target_cloud (new pcl::PointCloud<pcl::PointXYZRGBA>);
       std::vector<int> indices;
@@ -224,11 +235,16 @@ namespace jsk_pcl_ros
     if(!recieved_target_cloud->points.empty()){
       //prepare the model of tracker's target
       Eigen::Vector4f c;
-      Eigen::Affine3f trans = Eigen::Affine3f::Identity ();
-      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr transed_ref (new pcl::PointCloud<pcl::PointXYZRGBA>);
-
-      pcl::compute3DCentroid (*new_target_cloud, c);
-      trans.translation ().matrix () = Eigen::Vector3f (c[0], c[1], c[2]);
+      Eigen::Affine3f trans = Eigen::Affine3f::Identity (); 
+      pcl::PointCloud<pcl::PointXYZRGBA>::Ptr transed_ref (new pcl::PointCloud<pcl::PointXYZRGBA>);        
+      if(!align_box_){
+        pcl::compute3DCentroid (*new_target_cloud, c);
+        trans.translation ().matrix () = Eigen::Vector3f (c[0], c[1], c[2]);
+      }else{
+        Eigen::Affine3d trans_3d = Eigen::Affine3d::Identity ();
+        tf::transformTFToEigen(reference_transform_, trans_3d);
+        trans = (Eigen::Affine3f) trans_3d;
+      }
       pcl::transformPointCloud(*new_target_cloud, *transed_ref, trans.inverse());
       //set reference model and trans
       {
@@ -276,7 +292,15 @@ namespace jsk_pcl_ros
     pcl::fromROSMsg(pc, *new_target_cloud);
     reset_tracking_target_model(new_target_cloud);
   }
+  void ParticleFilterTracking::renew_model_with_box_topic_cb (const sensor_msgs::PointCloud2::ConstPtr &pc_ptr, const jsk_pcl_ros::BoundingBox::ConstPtr &bb_ptr)
+  {
+    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr new_target_cloud(new pcl::PointCloud<pcl::PointXYZRGBA>());
+    pcl::fromROSMsg(*pc_ptr, *new_target_cloud);
+    reference_transform_ = tf::Transform(tf::Quaternion(bb_ptr->pose.orientation.x, bb_ptr->pose.orientation.y, bb_ptr->pose.orientation.z, bb_ptr->pose.orientation.w), tf::Vector3(bb_ptr->pose.position.x, bb_ptr->pose.position.y, bb_ptr->pose.position.z));
+    reset_tracking_target_model(new_target_cloud);
 
+  }
+  
   bool ParticleFilterTracking::renew_model_cb(jsk_pcl_ros::SetPointCloud2::Request &req,
                                               jsk_pcl_ros::SetPointCloud2::Response &res)
   {

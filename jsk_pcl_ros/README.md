@@ -59,6 +59,26 @@ time end
 Represent range of time.
 
 ## nodelets
+### jsk\_pcl/MaskImageFilter
+![](images/mask_image_filter.png)
+
+Extract indices of pointcloud which is masked by mask image. The pointcloud is no need to be organized.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Input point cloud.
+* `~input/mask` (`sensor_msgs/Image`)
+
+  Mask image.
+* `~input/camera_info` (`sensor_msgs/CameraInfo`)
+
+  Camera parameters of the image.
+
+#### Publishing Topic
+* `~output` (`pcl_msgs/PointIndices`)
+
+  Indices of the points masked by `~input/mask`.
 ### jsk\_pcl/MaskImageToROI
 Convert a mask image into camera info with roi.
 
@@ -144,6 +164,24 @@ We expect it will be used with image_view2.
 * `~output` (`sensor_msgs/CameraInfo`)
 
   camera info with ROI filled by `~input`.
+
+### jsk\_pcl/RectToMaskImage
+Convert rectangle (`geometry_msgs/Polygon`) into mask image (`sensor_msgs/Image`)
+
+We expect it will be used with image_view2.
+
+#### Subscribing Topic
+* `~input` (`geometry_msgs/Polygon`)
+
+  Polygon to represent rectangle region of image.
+* `~input/camera_info` (`sensor_msgs/CameraInfo`)
+
+  Original camera info.
+
+#### Publishing Topic
+* `~output` (`sensor_msgs/Image`)
+
+  Mask image.
 
 ### jsk\_pcl/AddColorFromImage
 ![](images/add_color_from_image)

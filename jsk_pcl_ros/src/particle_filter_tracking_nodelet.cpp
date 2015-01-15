@@ -42,7 +42,8 @@ using namespace pcl::tracking;
 namespace jsk_pcl_ros
 {
   
-  void ParticleFilterTracking::onInit(void){
+  void ParticleFilterTracking::onInit (void)
+  {
     // not implemented yet
     PCLNodelet::onInit();
 
@@ -138,14 +139,15 @@ namespace jsk_pcl_ros
                                 &ParticleFilterTracking::renew_model_with_box_topic_cb,
                                 this, _1, _2));
     }
-    else{
+    else
+    {
       sub_update_model_ = pnh_->subscribe("renew_model", 1, &ParticleFilterTracking::renew_model_topic_cb,this);
     }
     renew_model_srv_
       = pnh_->advertiseService("renew_model", &ParticleFilterTracking::renew_model_cb, this);
   }
 
-  void ParticleFilterTracking::config_callback(Config &config, uint32_t level)
+  void ParticleFilterTracking::config_callback (Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mtx_);
     max_particle_num_ = config.max_particle_num;
@@ -165,7 +167,8 @@ namespace jsk_pcl_ros
     default_step_covariance_[3] = config.default_step_covariance_roll;
     default_step_covariance_[4] = config.default_step_covariance_pitch;
     default_step_covariance_[5] = config.default_step_covariance_yaw;
-    if (tracker_) {
+    if (tracker_) 
+    {
       NODELET_INFO("update tracker parameter");
       tracker_->setStepNoiseCovariance (default_step_covariance_);
       tracker_->setIterationNum (iteration_num_);
@@ -182,24 +185,24 @@ namespace jsk_pcl_ros
   {
     ParticleFilterTracker<pcl::PointXYZRGBA, ParticleXYZRPY>::PointCloudStatePtr particles = tracker_->getParticles ();
     if (particles && new_cloud_ && particle_publisher_.getNumSubscribers())
+    {
+      //Set pointCloud with particle's points
+      pcl::PointCloud<pcl::PointXYZ>::Ptr particle_cloud (new pcl::PointCloud<pcl::PointXYZ> ());
+      for (size_t i = 0; i < particles->points.size (); i++)
       {
-        //Set pointCloud with particle's points
-        pcl::PointCloud<pcl::PointXYZ>::Ptr particle_cloud (new pcl::PointCloud<pcl::PointXYZ> ());
-        for (size_t i = 0; i < particles->points.size (); i++)
-          {
-            pcl::PointXYZ point;
-            point.x = particles->points[i].x;
-            point.y = particles->points[i].y;
-            point.z = particles->points[i].z;
-            particle_cloud->points.push_back (point);
-          }
-        //publish particle_cloud
-        sensor_msgs::PointCloud2 particle_pointcloud2;
-        pcl::toROSMsg(*particle_cloud, particle_pointcloud2);
-        particle_pointcloud2.header.frame_id = reference_frame_id();
-        particle_pointcloud2.header.stamp = stamp_;
-        particle_publisher_.publish(particle_pointcloud2);
+        pcl::PointXYZ point;
+        point.x = particles->points[i].x;
+        point.y = particles->points[i].y;
+        point.z = particles->points[i].z;
+        particle_cloud->points.push_back (point);
       }
+      //publish particle_cloud
+      sensor_msgs::PointCloud2 particle_pointcloud2;
+      pcl::toROSMsg(*particle_cloud, particle_pointcloud2);
+      particle_pointcloud2.header.frame_id = reference_frame_id();
+      particle_pointcloud2.header.stamp = stamp_;
+      particle_publisher_.publish(particle_pointcloud2);
+    }
   }
   //Publish model reference point cloud
   void ParticleFilterTracking::publish_result ()
@@ -231,32 +234,38 @@ namespace jsk_pcl_ros
     result_pointcloud2.header.stamp = stamp_;
     track_result_publisher_.publish(result_pointcloud2);
   }
-  std::string ParticleFilterTracking::reference_frame_id(){
-    if(base_frame_id_.compare("NONE") == 0) return frame_id_;
+  std::string ParticleFilterTracking::reference_frame_id ()
+  {
+    if (base_frame_id_.compare("NONE") == 0) return frame_id_;
     else return base_frame_id_;
   }
   
-  void ParticleFilterTracking::reset_tracking_target_model(const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &recieved_target_cloud)
+  void ParticleFilterTracking::reset_tracking_target_model (const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &recieved_target_cloud)
   {
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr new_target_cloud (new pcl::PointCloud<pcl::PointXYZRGBA>);
     std::vector<int> indices;
     new_target_cloud->is_dense = false;
     pcl::removeNaNFromPointCloud(*recieved_target_cloud, *new_target_cloud, indices);
     
-    if(base_frame_id_.compare("NONE") != 0){
+    if (base_frame_id_.compare("NONE") != 0)
+    {
       tf::Transform transform_result = change_pointcloud_frame(new_target_cloud);
       reference_transform_ = transform_result * reference_transform_;;      
     } 
 
-    if(!recieved_target_cloud->points.empty()){
+    if (!recieved_target_cloud->points.empty())
+    {
       //prepare the model of tracker's target
       Eigen::Vector4f c;
       Eigen::Affine3f trans = Eigen::Affine3f::Identity (); 
       pcl::PointCloud<pcl::PointXYZRGBA>::Ptr transed_ref (new pcl::PointCloud<pcl::PointXYZRGBA>);        
-      if(!align_box_){
+      if (!align_box_)
+      {
         pcl::compute3DCentroid (*new_target_cloud, c);
         trans.translation ().matrix () = Eigen::Vector3f (c[0], c[1], c[2]);
-      }else{
+      }
+      else
+      {
         Eigen::Affine3d trans_3d = Eigen::Affine3d::Identity ();
         tf::transformTFToEigen(reference_transform_, trans_3d);
         trans = (Eigen::Affine3f) trans_3d;
@@ -271,7 +280,9 @@ namespace jsk_pcl_ros
       }
       track_target_set_ = true;
       ROS_INFO("RESET TARGET MODEL");
-    }else{
+    }
+    else
+    {
       track_target_set_ = false;
       ROS_INFO("TARGET MODEL POINTS SIZE IS 0 !! Stop TRACKING");
     }
@@ -283,7 +294,7 @@ namespace jsk_pcl_ros
     tf::StampedTransform tfTransformationStamped;
     ros::Time now = ros::Time::now();
     try{
-      if(base_frame_id_.compare(frame_id_) == 0) ROS_INFO("debug: base_frame_id_ == frame_id_");
+      if (base_frame_id_.compare(frame_id_) == 0) ROS_INFO("debug: base_frame_id_ == frame_id_");
       listener_.waitForTransform(base_frame_id_, frame_id_, now, ros::Duration(2.0));
       listener_.lookupTransform(base_frame_id_, frame_id_, now, tfTransformationStamped);
       //frame_id_ = base_frame_id_;
@@ -304,7 +315,7 @@ namespace jsk_pcl_ros
   //OpenNI Grabber's cloud Callback function
   void ParticleFilterTracking::cloud_cb (const sensor_msgs::PointCloud2 &pc)
   {
-    if(track_target_set_){
+    if (track_target_set_){
       pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGBA>());
       frame_id_ = pc.header.frame_id;
       stamp_ = pc.header.stamp;
@@ -312,7 +323,7 @@ namespace jsk_pcl_ros
       pcl::fromROSMsg(pc, *cloud);
       cloud->is_dense = false;
       pcl::removeNaNFromPointCloud(*cloud, *cloud, indices);
-      if(base_frame_id_.compare("NONE")!=0){
+      if (base_frame_id_.compare("NONE")!=0){
         change_pointcloud_frame(cloud);
       }
       cloud_pass_downsampled_.reset (new pcl::PointCloud<pcl::PointXYZRGBA>);

@@ -295,6 +295,10 @@ jsk_pcl_nodelet(src/mask_image_to_roi_nodelet.cpp
   "jsk_pcl/MaskImageToROI" "mask_image_to_roi")
 jsk_pcl_nodelet(src/mask_image_to_rect_nodelet.cpp
   "jsk_pcl/MaskImageToRect" "mask_image_to_rect")
+jsk_pcl_nodelet(src/roi_to_rect_nodelet.cpp
+  "jsk_pcl/ROIToRect" "roi_to_rect")
+jsk_pcl_nodelet(src/roi_to_mask_image_nodelet.cpp
+  "jsk_pcl/ROIToMaskImage" "roi_to_mask_image")
 jsk_pcl_nodelet(src/mask_image_filter_nodelet.cpp
   "jsk_pcl/MaskImageFilter" "mask_image_filter")
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}

@@ -79,6 +79,29 @@ Extract indices of pointcloud which is masked by mask image. The pointcloud is n
 * `~output` (`pcl_msgs/PointIndices`)
 
   Indices of the points masked by `~input/mask`.
+
+### jsk\_pcl/ROIToRect
+Convert camera info with ROI to `geometry_msgs/PolygonStamped`.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/CameraInfo`)
+
+  Input camera info with ROI filled.
+#### Publishing Topic
+* `~output` (`geometry_msgs/PolygonStamped`)
+
+  Output rectangle region.
+### jsk\_pcl/ROIToMaskImage
+Convert camera info with ROI to mask image.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/CameraInfo`)
+
+  Input camera info with ROI filled.
+#### Publishing Topic
+* `~output` (`sensor_msgs/Image`)
+
+  Output mask image.
 ### jsk\_pcl/MaskImageToROI
 Convert a mask image into camera info with roi.
 

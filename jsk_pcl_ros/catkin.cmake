@@ -78,6 +78,7 @@ add_service_files(FILES SwitchTopic.srv
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/TorusFinder.cfg
   cfg/PlaneConcatenator.cfg
   cfg/NormalDirectionFilter.cfg
   cfg/RegionGrowingMultiplePlaneSegmentation.cfg
@@ -286,6 +287,8 @@ jsk_pcl_nodelet(src/add_color_from_image_nodelet.cpp
   "jsk_pcl/AddColorFromImage" "add_color_from_image")
 jsk_pcl_nodelet(src/rect_to_roi_nodelet.cpp
   "jsk_pcl/RectToROI" "rect_to_roi")
+jsk_pcl_nodelet(src/torus_finder_nodelet.cpp
+  "jsk_pcl/TorusFinder" "torus_finder")
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
   src/pcl_conversion_util.cpp src/pcl_util.cpp

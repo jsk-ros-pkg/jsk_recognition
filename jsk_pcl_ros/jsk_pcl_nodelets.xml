@@ -3,6 +3,14 @@
          type="jsk_pcl_ros::MaskImageFilter"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_pcl/ROIToMaskImage"
+         type="jsk_pcl_ros::ROIToMaskImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl/ROIToRect"
+         type="jsk_pcl_ros::ROIToRect"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_pcl/MaskImageToRect"
          type="jsk_pcl_ros::MaskImageToRect"
          base_class_type="nodelet::Nodelet">

@@ -122,13 +122,13 @@ namespace jsk_pcl_ros
     ParticleXYZRPY bin_size_;
     std::vector<double> default_step_covariance_;
     virtual void config_callback(Config &config, uint32_t level);
-    virtual void publish_particles ();
-    virtual void publish_result ();
-    virtual std::string reference_frame_id ();
+    virtual void publish_particles();
+    virtual void publish_result();
+    virtual std::string reference_frame_id();
     virtual void reset_tracking_target_model(const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &new_target_cloud);
     virtual tf::Transform change_pointcloud_frame(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud);
 
-    virtual void cloud_cb (const sensor_msgs::PointCloud2 &pc);
+    virtual void cloud_cb(const sensor_msgs::PointCloud2 &pc);
     virtual bool renew_model_cb(jsk_pcl_ros::SetPointCloud2::Request &req,
                                jsk_pcl_ros::SetPointCloud2::Response &response
                                );

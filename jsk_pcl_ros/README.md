@@ -59,6 +59,36 @@ time end
 Represent range of time.
 
 ## nodelets
+### jsk\_pcl/MaskImageToROI
+Convert a mask image into camera info with roi.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/Image`)
+
+  Input mask image.
+* `~input/camera_info` (`sensor_msgs/CameraInfo`)
+
+  Original camera info.
+
+#### Publishing Topic
+* `~output` (`sensor_msgs/CameraInfo`)
+
+  Camera info with ROI field filled.
+
+### jsk\_pcl/MaskImageToRect
+Convert a mask image into geometry_msgs::PolygonStamped.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/Image`)
+
+  Input mask image.
+
+#### Publishing Topic
+* `~output` (`geometry_msgs/PolygonStamped`)
+
+  PolygonStamped message which only contains two points. Minimum point and Maximum point to represent bounding box in image.
+
+### jsk\_pcl/MaskImageToRect
 ### jsk\_pcl/TorusFInder
 ![](images/torus_finder.png)
 

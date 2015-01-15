@@ -289,6 +289,10 @@ jsk_pcl_nodelet(src/rect_to_roi_nodelet.cpp
   "jsk_pcl/RectToROI" "rect_to_roi")
 jsk_pcl_nodelet(src/torus_finder_nodelet.cpp
   "jsk_pcl/TorusFinder" "torus_finder")
+jsk_pcl_nodelet(src/mask_image_to_roi_nodelet.cpp
+  "jsk_pcl/MaskImageToROI" "mask_image_to_roi")
+jsk_pcl_nodelet(src/mask_image_to_rect_nodelet.cpp
+  "jsk_pcl/MaskImageToRect" "mask_image_to_rect")
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
   src/pcl_conversion_util.cpp src/pcl_util.cpp

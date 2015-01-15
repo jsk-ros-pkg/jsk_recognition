@@ -63,7 +63,12 @@
 
 #include <jsk_pcl_ros/SetPointCloud2.h>
 #include <jsk_pcl_ros/ParticleFilterTrackingConfig.h>
+#include <jsk_pcl_ros/BoundingBox.h>
+
 #include <dynamic_reconfigure/server.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
 
 using namespace pcl::tracking;
 namespace jsk_pcl_ros
@@ -72,6 +77,10 @@ namespace jsk_pcl_ros
   {
   public:
     typedef ParticleFilterTrackingConfig Config;
+    typedef message_filters::sync_policies::ExactTime<
+      sensor_msgs::PointCloud2,
+      BoundingBox > SyncPolicy;
+
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_pass_;
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_pass_downsampled_;
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr target_cloud_;
@@ -81,17 +90,27 @@ namespace jsk_pcl_ros
     boost::mutex mtx_;
     bool new_cloud_;
     bool track_target_set_;
+    bool align_box_;
+    bool change_frame_;
     std::string frame_id_;
+    std::string base_frame_id_;
     std::string track_target_name_;
     ros::Time stamp_;
+    tf::Transform reference_transform_;
 
     ros::Subscriber sub_;
     ros::Subscriber sub_update_model_;
+
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
+    message_filters::Subscriber<BoundingBox> sub_box_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     ros::Publisher particle_publisher_;
     ros::Publisher track_result_publisher_;
+    ros::Publisher pose_stamped_publisher_;
     ros::ServiceServer renew_model_srv_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
-
+    tf::TransformListener listener_;
+    
     ////////////////////////////////////////////////////////
     // parameters
     ////////////////////////////////////////////////////////
@@ -103,14 +122,17 @@ namespace jsk_pcl_ros
     ParticleXYZRPY bin_size_;
     std::vector<double> default_step_covariance_;
     virtual void config_callback(Config &config, uint32_t level);
-    virtual void publish_particles ();
-    virtual void publish_result ();
-
+    virtual void publish_particles();
+    virtual void publish_result();
+    virtual std::string reference_frame_id();
     virtual void reset_tracking_target_model(const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &new_target_cloud);
-    virtual void cloud_cb (const sensor_msgs::PointCloud2 &pc);
+    virtual tf::Transform change_pointcloud_frame(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud);
+
+    virtual void cloud_cb(const sensor_msgs::PointCloud2 &pc);
     virtual bool renew_model_cb(jsk_pcl_ros::SetPointCloud2::Request &req,
                                jsk_pcl_ros::SetPointCloud2::Response &response
                                );
+    virtual void renew_model_with_box_topic_cb(const sensor_msgs::PointCloud2::ConstPtr &pc_ptr, const jsk_pcl_ros::BoundingBox::ConstPtr &bb_ptr);
     virtual void renew_model_topic_cb(const sensor_msgs::PointCloud2 &pc);
 
   private:

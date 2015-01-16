@@ -1,4 +1,9 @@
 <library path="lib/libjsk_perception">
+  <class name="jsk_perception/SnakeSegmentation" type="jsk_perception::SnakeSegmentation"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
   <class name="jsk_perception/ContourFinder" type="jsk_perception::ContourFinder"
          base_class_type="nodelet::Nodelet">
     <description>

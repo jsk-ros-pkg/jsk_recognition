@@ -23,6 +23,7 @@ endif()
 
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
+  cfg/SnakeSegmentation.cfg
   cfg/camshiftdemo.cfg
   cfg/EdgeDetector.cfg
   cfg/HoughLines.cfg
@@ -93,6 +94,7 @@ jsk_perception_nodelet(src/slic_superpixels.cpp "jsk_perception/SLICSuperPixels"
 jsk_perception_nodelet(src/rgb_decomposer.cpp "jsk_perception/RGBDecomposer" "rgb_decomposer")
 jsk_perception_nodelet(src/hsv_decomposer.cpp "jsk_perception/HSVDecomposer" "hsv_decomposer")
 jsk_perception_nodelet(src/contour_finder.cpp "jsk_perception/ContourFinder" "contour_finder")
+jsk_perception_nodelet(src/snake_segmentation.cpp "jsk_perception/SnakeSegmentation" "snake_segmentation")
 # compiling jsk_perception library for nodelet
 add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
   ${CMAKE_CURRENT_BINARY_DIR}/build/SLIC-Superpixels/slic.cpp)

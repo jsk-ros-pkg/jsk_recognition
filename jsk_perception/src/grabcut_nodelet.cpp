@@ -91,8 +91,22 @@ namespace jsk_perception
     const sensor_msgs::Image::ConstPtr& background_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    cv::Mat input = cv_bridge::toCvCopy(
-      image_msg, sensor_msgs::image_encodings::BGR8)->image;
+    cv::Mat input;
+    cv::Mat in_image = cv_bridge::toCvShare(image_msg,
+                                            image_msg->encoding)->image;
+    if (in_image.channels() == 3) {
+      input = in_image;
+    }
+    else if (in_image.channels() == 1) {
+      input = cv::Mat::zeros(in_image.rows, in_image.cols, CV_8UC3);
+      for (size_t j = 0; j < in_image.rows; ++j) {
+        for (size_t i = 0; i < in_image.cols; ++i) {
+          input.at<cv::Vec3b>(j, i) = cv::Vec3b(in_image.at<uchar>(j, i),
+                                                in_image.at<uchar>(j, i),
+                                                in_image.at<uchar>(j, i));
+        }
+      }
+    }
     cv::Mat foreground = cv_bridge::toCvCopy(
       foreground_msg, sensor_msgs::image_encodings::MONO8)->image;
     cv::Mat background = cv_bridge::toCvCopy(

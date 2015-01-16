@@ -45,29 +45,40 @@
 #include <dynamic_reconfigure/server.h>
 #include <boost/thread.hpp>
 #include <opencv/cv.h>
-#include <opencv/highgui.h>
+
+#include <jsk_perception/SLICSuperPixelsConfig.h>
+#include <dynamic_reconfigure/server.h>
 
 namespace jsk_perception
 {
   class SLICSuperPixels: public nodelet::Nodelet
   {
   public:
+    typedef SLICSuperPixelsConfig Config;
     
   protected:
     ////////////////////////////////////////////////////////
     // methods
     ////////////////////////////////////////////////////////
-    virtual void imageCallback(const sensor_msgs::Image::ConstPtr& image);
     virtual void onInit();
+    virtual void imageCallback(const sensor_msgs::Image::ConstPtr& image);
+    virtual void configCallback(Config &config, uint32_t level);
 
     ////////////////////////////////////////////////////////
-    // variables
+    // ROS variables
     ////////////////////////////////////////////////////////
     ros::NodeHandle nh_, pnh_;
     boost::shared_ptr<image_transport::ImageTransport> it_;
     boost::mutex mutex_;
     image_transport::Subscriber image_sub_;
     ros::Publisher pub_debug_;
+    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
+    
+    ////////////////////////////////////////////////////////
+    // parameters
+    ////////////////////////////////////////////////////////
+    int number_of_super_pixels_;
+    int weight_;
   private:
   };
 }

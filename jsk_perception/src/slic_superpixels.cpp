@@ -43,6 +43,12 @@ namespace jsk_perception
   {
     nh_ = ros::NodeHandle(getNodeHandle(), "image");
     pnh_ = getPrivateNodeHandle();
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (
+        &SLICSuperPixels::configCallback, this, _1, _2);
+    srv_->setCallback (f);
+    
     it_.reset(new image_transport::ImageTransport(nh_));
     pub_debug_ = pnh_.advertise<sensor_msgs::Image>("debug", 1);
     image_sub_ = it_->subscribe("", 1, &SLICSuperPixels::imageCallback, this);
@@ -54,7 +60,6 @@ namespace jsk_perception
     cv_bridge::CvImagePtr cv_ptr;
     cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);
     cv::Mat bgr_image = cv_ptr->image;
-
     IplImage bgr_image_ipl;
     bgr_image_ipl = bgr_image;
     IplImage* lab_image = cvCloneImage(&bgr_image_ipl);
@@ -62,11 +67,9 @@ namespace jsk_perception
     // slic
     cvCvtColor(&bgr_image_ipl, lab_image, CV_BGR2Lab);
     int w = image->width, h = image->height;
-    int nr_superpixels = 200;
-    int nc = 4;
-    double step = sqrt((w * h) / (double) nr_superpixels);
+    double step = sqrt((w * h) / (double) number_of_super_pixels_);
     Slic slic;
-    slic.generate_superpixels(lab_image, step, nc);
+    slic.generate_superpixels(lab_image, step, weight_);
     slic.create_connectivity(lab_image);
     slic.display_contours(out_image, CV_RGB(255,0,0));
     cv::Mat debug_image = cv::cvarrToMat(out_image);
@@ -76,6 +79,12 @@ namespace jsk_perception
                          debug_image).toImageMsg());
   }
 
+  void SLICSuperPixels::configCallback(Config &config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    weight_ = config.weight;
+    number_of_super_pixels_ = config.number_of_super_pixels;
+  }
 }
 
 #include <pluginlib/class_list_macros.h>

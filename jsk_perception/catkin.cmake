@@ -23,6 +23,7 @@ endif()
 
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
+  cfg/SLICSuperPixels.cfg
   cfg/SnakeSegmentation.cfg
   cfg/camshiftdemo.cfg
   cfg/EdgeDetector.cfg

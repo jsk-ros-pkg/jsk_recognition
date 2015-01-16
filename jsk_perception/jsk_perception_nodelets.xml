@@ -31,7 +31,7 @@
       background substraction
     </description>
   </class>
-  <class name="jsk_perception/SLICSuperPixels" type="SLICSuperPixels"
+  <class name="jsk_perception/SLICSuperPixels" type="jsk_perception::SLICSuperPixels"
          base_class_type="nodelet::Nodelet">
     <description>
       compute superpixels

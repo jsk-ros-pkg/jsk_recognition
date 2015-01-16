@@ -1,9 +1,9 @@
 all: build/SLIC-Superpixels
 
 INSTALL_DIR ?= ${CURDIR}
-GIT_DIR = build/SLIC-Superpixels
+GIT_DIR = build/patched-SLIC-Superpixels
 PATCH_DIR = $(CURDIR)
-GIT_URL = https://github.com/PSMM/SLIC-Superpixels.git
+GIT_URL = https://github.com/garaemon/SLIC-Superpixels.git
 #GIT_REVISION = 315.2.0
 GIT_PATCH   =
 

@@ -51,6 +51,7 @@ namespace jsk_perception
     srv_->setCallback (f);
     
     it_.reset(new image_transport::ImageTransport(nh_));
+    pub_ = pnh_.advertise<sensor_msgs::Image>("output", 1);
     pub_debug_ = pnh_.advertise<sensor_msgs::Image>("debug", 1);
     image_sub_ = it_->subscribe("", 1, &SLICSuperPixels::imageCallback, this);
   }
@@ -69,23 +70,26 @@ namespace jsk_perception
       cv::cvtColor(in_image, bgr_image, CV_RGB2BGR);
     }
     //cv::Mat bgr_image = cv_ptr->image;
-    IplImage bgr_image_ipl;
-    bgr_image_ipl = bgr_image;
-    IplImage* lab_image = cvCloneImage(&bgr_image_ipl);
-    IplImage* out_image = cvCloneImage(&bgr_image_ipl);
+    cv::Mat lab_image, out_image;
     // slic
-    cvCvtColor(&bgr_image_ipl, lab_image, CV_BGR2Lab);
+    bgr_image.copyTo(out_image);
+    cv::cvtColor(bgr_image, lab_image, CV_BGR2Lab);
     int w = image->width, h = image->height;
     double step = sqrt((w * h) / (double) number_of_super_pixels_);
     Slic slic;
     slic.generate_superpixels(lab_image, step, weight_);
     slic.create_connectivity(lab_image);
-    slic.display_contours(out_image, CV_RGB(255,0,0));
-    cv::Mat debug_image = cv::cvarrToMat(out_image);
+    slic.display_contours(out_image, cv::Vec3b(0,0,255));
     pub_debug_.publish(cv_bridge::CvImage(
                          image->header,
                          sensor_msgs::image_encodings::BGR8,
-                         debug_image).toImageMsg());
+                         out_image).toImageMsg());
+    // publish clusters
+    cv::Mat clusters = slic.clusters;
+    pub_.publish(cv_bridge::CvImage(
+                   image->header,
+                   sensor_msgs::image_encodings::TYPE_32SC1,
+                   clusters).toImageMsg());
   }
 
   void SLICSuperPixels::configCallback(Config &config, uint32_t level)

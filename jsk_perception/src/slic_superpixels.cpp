@@ -35,6 +35,7 @@
 
 #include "jsk_perception/slic_superpixels.h"
 #include "slic.h"
+#include <sensor_msgs/image_encodings.h>
 
 namespace jsk_perception
 {
@@ -57,9 +58,17 @@ namespace jsk_perception
   void SLICSuperPixels::imageCallback(const sensor_msgs::Image::ConstPtr& image)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    cv_bridge::CvImagePtr cv_ptr;
-    cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);
-    cv::Mat bgr_image = cv_ptr->image;
+    cv::Mat in_image = cv_bridge::toCvShare(image, image->encoding)->image;
+    cv::Mat bgr_image;
+    if (in_image.channels() == 1) {
+      // gray image
+      cv::cvtColor(in_image, bgr_image, CV_GRAY2BGR);
+    }
+    else if (image->encoding == sensor_msgs::image_encodings::RGB8) {
+      // convert to BGR8
+      cv::cvtColor(in_image, bgr_image, CV_RGB2BGR);
+    }
+    //cv::Mat bgr_image = cv_ptr->image;
     IplImage bgr_image_ipl;
     bgr_image_ipl = bgr_image;
     IplImage* lab_image = cvCloneImage(&bgr_image_ipl);

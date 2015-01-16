@@ -1,4 +1,9 @@
 <library path="lib/libjsk_perception">
+  <class name="jsk_perception/RGBDecomposer" type="jsk_perception::RGBDecomposer"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
   <class name="jsk_perception/GrabCut" type="jsk_perception::GrabCut"
          base_class_type="nodelet::Nodelet">
     <description>

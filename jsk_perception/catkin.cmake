@@ -90,6 +90,7 @@ jsk_perception_nodelet(src/background_substraction_nodelet.cpp "jsk_perception/B
 jsk_perception_nodelet(src/hough_circles.cpp "jsk_perception/HoughCircleDetector" "hough_circles")
 jsk_perception_nodelet(src/grabcut_nodelet.cpp "jsk_perception/GrabCut" "grabcut")
 jsk_perception_nodelet(src/slic_superpixels.cpp "jsk_perception/SLICSuperPixels" "slic_super_pixels")
+jsk_perception_nodelet(src/rgb_decomposer.cpp "jsk_perception/RGBDecomposer" "rgb_decomposer")
 # compiling jsk_perception library for nodelet
 add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
   ${CMAKE_CURRENT_BINARY_DIR}/build/SLIC-Superpixels/slic.cpp)

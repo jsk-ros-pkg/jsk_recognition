@@ -1,0 +1,18 @@
+<launch>
+  <node pkg="image_view" type="image_view" name="original_view">
+    <remap from="image" to="/multisense/left/image_rect_color" />
+  </node>
+  <node pkg="jsk_perception" type="slic_super_pixels" name="slic_super_pixels">
+    <remap from="image" to="/multisense/left/image_rect_color" />
+  </node>
+  <node pkg="jsk_perception" type="colorize_labels" name="colorize_labels"
+        output="screen">
+    <remap from="~input" to="slic_super_pixels/output" />
+  </node>
+  <node pkg="image_view" type="image_view" name="label_view">
+    <remap from="image" to="colorize_labels/output" />
+  </node>
+  <node pkg="image_view" type="image_view" name="debug_view">
+    <remap from="image" to="slic_super_pixels/debug" />
+  </node>
+</launch>

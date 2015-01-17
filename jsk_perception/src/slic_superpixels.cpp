@@ -69,6 +69,9 @@ namespace jsk_perception
       // convert to BGR8
       cv::cvtColor(in_image, bgr_image, CV_RGB2BGR);
     }
+    else {
+      bgr_image = in_image;
+    }
     //cv::Mat bgr_image = cv_ptr->image;
     cv::Mat lab_image, out_image;
     // slic
@@ -85,7 +88,8 @@ namespace jsk_perception
                          sensor_msgs::image_encodings::BGR8,
                          out_image).toImageMsg());
     // publish clusters
-    cv::Mat clusters = slic.clusters;
+    cv::Mat clusters;
+    cv::transpose(slic.clusters, clusters);
     pub_.publish(cv_bridge::CvImage(
                    image->header,
                    sensor_msgs::image_encodings::TYPE_32SC1,

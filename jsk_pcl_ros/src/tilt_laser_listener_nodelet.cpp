@@ -134,7 +134,9 @@ namespace jsk_pcl_ros
       srv.request.begin = start;
       srv.request.end = end;
       assemble_cloud_srv_.call(srv);
-      cloud_pub_.publish(srv.response.cloud);
+      sensor_msgs::PointCloud2 output_cloud = srv.response.cloud;
+      output_cloud.header.stamp = stamp;
+      cloud_pub_.publish(output_cloud);
     }
   }
   
@@ -220,12 +222,14 @@ namespace jsk_pcl_ros
             if (buffer_[i-1]->getValue() < threshold) {
               publishTimeRange(stamp, buffer_[i-1]->header.stamp, stamp);
               buffer_.removeBefore(buffer_[i-1]->header.stamp);
+              break;
             }
           }
           else if (velocity < 0) {
             if (buffer_[i-1]->getValue() > threshold) {
               publishTimeRange(stamp, buffer_[i-1]->header.stamp, stamp);
               buffer_.removeBefore(buffer_[i-1]->header.stamp);
+              break;
             }
           }
         }

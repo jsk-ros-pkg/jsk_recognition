@@ -1012,7 +1012,10 @@ You can choose several types of tilt/spindle lasers such as tilt-laser of PR2, i
    5. `infinite_spindle_half`: Infinite spindle laser, but most of laser has over 180 degrees range of field.
    Therefore we don't need to rotate laser 360 degrees to scan 3-D space, just 180 degree rotation is required.
    In this mode, TiltLaserListener publishes time range a time range of 180 degree rotation.
+* `~overwrap_angle` (Double, default: `0.0`)
 
+   overwrap angle offset when detecting time range.
+   Only available in `infinite_spindle` and `infinite_spindle_half`.
 ### jsk\_pcl/DepthImageCreator
 #### What is this
 Create *organized* pointcloud from non-organized pointcloud.

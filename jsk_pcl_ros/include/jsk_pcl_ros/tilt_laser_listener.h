@@ -96,6 +96,7 @@ namespace jsk_pcl_ros
     ros::Publisher cloud_pub_;
     ros::ServiceServer clear_cache_service_;
     ros::ServiceClient assemble_cloud_srv_;
+    
     ////////////////////////////////////////////////////////
     // parameters
     ////////////////////////////////////////////////////////
@@ -103,6 +104,7 @@ namespace jsk_pcl_ros
     std::string joint_name_;
     double prev_angle_;
     double prev_velocity_;
+    double overwrap_angle_;
     ros::Time start_time_;
     bool use_laser_assembler_;
     boost::mutex mutex_;

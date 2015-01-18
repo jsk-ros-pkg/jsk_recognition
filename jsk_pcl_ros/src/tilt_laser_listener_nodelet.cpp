@@ -55,7 +55,7 @@ namespace jsk_pcl_ros
       NODELET_ERROR("no ~joint_state is specified");
       return;
     }
-    
+    pnh_->param("overwrap_angle", overwrap_angle_, 0.0);
     std::string laser_type;
     pnh_->param("laser_type", laser_type, std::string("tilt_half_down"));
     if (laser_type == "tilt_half_up") {
@@ -219,14 +219,14 @@ namespace jsk_pcl_ros
         }
         else {                  // already jumped
           if (velocity > 0) {
-            if (buffer_[i-1]->getValue() < threshold) {
+            if (buffer_[i-1]->getValue() < fmod(threshold - overwrap_angle_, 2.0 * M_PI)) {
               publishTimeRange(stamp, buffer_[i-1]->header.stamp, stamp);
               buffer_.removeBefore(buffer_[i-1]->header.stamp);
               break;
             }
           }
           else if (velocity < 0) {
-            if (buffer_[i-1]->getValue() > threshold) {
+            if (buffer_[i-1]->getValue() > fmod(threshold + overwrap_angle_, 2.0 * M_PI)) {
               publishTimeRange(stamp, buffer_[i-1]->header.stamp, stamp);
               buffer_.removeBefore(buffer_[i-1]->header.stamp);
               break;

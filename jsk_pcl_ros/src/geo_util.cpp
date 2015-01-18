@@ -462,7 +462,7 @@ namespace jsk_pcl_ros
 
   Eigen::Vector3f Polygon::centroid()
   {
-    Eigen::Vector3f c;
+    Eigen::Vector3f c(0, 0, 0);
     if (vertices_.size() == 0) {
       return c;
     }

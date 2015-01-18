@@ -460,6 +460,20 @@ namespace jsk_pcl_ros
     return Polygon(skipped_vertices);
   }
 
+  Eigen::Vector3f Polygon::centroid()
+  {
+    Eigen::Vector3f c;
+    if (vertices_.size() == 0) {
+      return c;
+    }
+    else {
+      for (size_t i = 0; i < vertices_.size(); i++) {
+        c = c + vertices_[i];
+      }
+      return c / vertices_.size();
+    }
+  }
+
   std::vector<Plane::Ptr> convertToPlanes(
     std::vector<pcl::ModelCoefficients::Ptr> coefficients)
   {

@@ -143,7 +143,6 @@ namespace jsk_pcl_ros
     virtual double distanceToPoint(const Eigen::Vector4f p);
     virtual double signedDistanceToPoint(const Eigen::Vector3f p);
     virtual double distanceToPoint(const Eigen::Vector3f p);
-    
     virtual double distance(const Plane& another);
     virtual double angle(const Plane& another);
     virtual double angle(const Eigen::Vector3f& vector);
@@ -194,6 +193,7 @@ namespace jsk_pcl_ros
     static Polygon fromROSMsg(const geometry_msgs::Polygon& polygon);
     static Polygon createPolygonWithSkip(const Vertices& vertices);
     virtual bool isConvex();
+    virtual Eigen::Vector3f centroid();
     template<class PointT> void boundariesToPointCloud(
       pcl::PointCloud<PointT>& output) {
       output.points.resize(vertices_.size());

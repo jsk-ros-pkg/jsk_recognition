@@ -1,78 +1,69 @@
 <launch>
-  <arg name="pt_sc_use_view" default="true"/>
-  <arg name="pt_sc_publish_points" default="true"/>
-  <arg name="input_point" default="/camera/depth_registered/points"/>
-  <arg name="voxel_grid_filter_limit_min" default="0.1"/>
-  <arg name="voxel_grid_filter_limit_max" default="-0.1"/>
-  <arg name="voxel_grid_filter_limit_negative" default="true"/>
-  <arg name="voxel_grid_leaf_size" default="0.1"/>
-
-
-  <include file="$(find jsk_pcl_ros)/launch/pointcloud_screenpoint.launch">
-    <arg name="USE_VIEW" value="$(arg pt_sc_use_view)" />
-    <arg name="PUBLISH_POINTS" value="$(arg pt_sc_publish_points)" />
-    <arg name="image" value="/camera/rgb"/>
-    <arg name="points" value="$(arg input_point)"/>
-    <arg name="image_type" default="image_color"/>
-  </include>
-
-  <node pkg="nodelet" type="nodelet" name="voxel_grid"
-        args="load pcl/VoxelGrid /screenpoint_manager"
-        output="screen"
-        clear_params="true"
-        respawn="false">
-    <remap from="~input" to="$(arg input_point)"/>
-    <param name="filter_limit_min" value="$(arg voxel_grid_filter_limit_min)" />
-    <param name="filter_limit_max" value="$(arg voxel_grid_filter_limit_max)" />
-    <param name="filter_limit_negative" value="$(arg voxel_grid_filter_limit_negative)" />
-    <param name="leaf_size" value="$(arg voxel_grid_leaf_size)" />
-    <!-- <rosparam> -->
-    <!--   filter_limit_min: 0.1 -->
-    <!--   filter_limit_max: -0.1 -->
-    <!--   filter_limit_negative: true -->
-    <!--   leaf_size: 0.01 -->
-    <!-- </rosparam>p -->
+  <node pkg="image_view2" name="attention_viewer" type="image_view2">
+    <remap from="image" to="/multisense/left/image_rect_color" />
   </node>
-
-  <node pkg="nodelet" type="nodelet" name="ground_segmentation" args="load pcl/SACSegmentation /screenpoint_manager"
-        output="screen"
-        clear_params="true"
-        respawn="false">
-        <remap from="~input" to="voxel_grid/output" />
-        <rosparam>
-          # -[ Mandatory parameters
-          model_type: 9
-          distance_threshold: 0.01
-          max_iterations: 5000
-          method_type: 0
-#          axis: [0.0, -1.0, 0.0]
-          optimize_coefficients: true
-          max_queue_size: 20
-          min_inliers: 100
-        </rosparam>
+  <node pkg="jsk_pcl_ros" type="rect_to_roi" name="rect_to_roi">
+    <remap from="~input/camera_info" to="/multisense/left/camera_info" />
+    <remap from="~input" to="/multisense/left/image_rect_color/screenrectangle" />
   </node>
-
-  <node pkg="nodelet" type="nodelet" name="extract_nonground_indices" args="load pcl/ExtractIndices /screenpoint_manager" output="screen" respawn="true">
-    <remap from="~input"   to="voxel_grid/output" />
-    <remap from="~indices" to="/ground_segmentation/inliers" />
+  <node pkg="jsk_pcl_ros" type="rect_to_mask_image" name="rect_to_mask_image">
+    <remap from="~input/camera_info" to="/multisense/left/camera_info" />
+    <remap from="~input" to="/multisense/left/image_rect_color/screenrectangle" />
+  </node>
+  <node pkg="image_view" type="image_view" name="mask_viewer">
+    <remap from="image" to="roi_clipper/output" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="tf_transform_cloud" name="laser_cloud_from_camera_frame">
+    <remap from="~input" to="/full_cloud2" />
     <rosparam>
-      negative: true
-      max_queue_size: 100
+      target_frame_id: multisense/left_camera_optical_frame
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="roi_clipper" name="roi_clipper" output="screen">
+    <param name="not_sync" value="true" />
+    <remap from="~input/image" to="multisense/left/image_rect_color" />
+    <remap from="~input/camera_info" to="rect_to_roi/output" />
+    <remap from="~input/cloud" to="laser_cloud_from_camera_frame/output"/>
+  </node>
+
+  <node pkg="jsk_pcl_ros" type="hinted_plane_detector" name="hinted_plane_detection">
+    <remap from="~input" to="normal_concatenater/output" />
+    <remap from="~input/hint/cloud" to="roi_clipper/output/cloud" />
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="voxelgrid"
+        args="standalone pcl/VoxelGrid">
+    <remap from="~input" to="laser_cloud_from_camera_frame/output" />
+    <rosparam>
+      filter_limit_min: -1000
+      filter_limit_max: 1000
     </rosparam>
   </node>
 
-  <node pkg="nodelet"
-        type="nodelet"
-        args="load jsk_pcl/HintedPlaneDetector /screenpoint_manager"
-        name="hinted_plane_detector"
-        clear_params="true">
-    <remap from="~input" to="/extract_nonground_indices/output" />
-    <remap from="~hint" to="/pointcloud_screenpoint_nodelet/output" />
-  </node>
-  <node pkg="jsk_pcl_ros"
-        type="marker_appender.py"
-        name="marker_appender">
-    <remap from="marker" to="/hinted_plane_detector/marker" />
+  <node pkg="nodelet" type="nodelet" name="normal_estimation"
+        args="standalone pcl/NormalEstimationOMP" output="screen">
+    <remap from="~input" to="voxelgrid/output" />
+    <rosparam>
+        radius_search: 0.1
+        k_search: 0
+        # 0, => ANN, 1 => FLANN, 2 => Organized
+        spatial_locator: 0
+        max_queue_size: 1
+    </rosparam>
   </node>
 
+
+  <node pkg="jsk_pcl_ros" type="normal_concatenater" name="normal_concatenater" output="screen">
+    <remap from="~input" to="voxelgrid/output" />
+    <remap from="~normal" to="normal_estimation/output" />
+  </node>
+  
+  <node pkg="nodelet" type="nodelet" name="candidate_points"
+        args="standalone pcl/ExtractIndices">
+    <remap from="~input" to="normal_concatenater/output" />
+    <remap from="~indices" to="hinted_plane_detection/output/candidate_inliers" />
+    <rosparam>
+      use_indices: true
+    </rosparam>
+  </node>
 </launch>

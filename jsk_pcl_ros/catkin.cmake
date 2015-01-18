@@ -78,6 +78,7 @@ add_service_files(FILES SwitchTopic.srv
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/HintedPlaneDetector.cfg
   cfg/TorusFinder.cfg
   cfg/PlaneConcatenator.cfg
   cfg/NormalDirectionFilter.cfg

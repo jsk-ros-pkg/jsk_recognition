@@ -40,30 +40,84 @@
 #include <pcl/point_types.h>
 #include <pcl_ros/pcl_nodelet.h>
 
-#include "jsk_pcl_ros/tf_listener_singleton.h"
-
-#include "jsk_topic_tools/connection_based_nodelet.h"
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_pcl_ros/geo_util.h"
+#include <geometry_msgs/PolygonStamped.h>
+#include <jsk_pcl_ros/PolygonArray.h>
+#include <dynamic_reconfigure/server.h>
+#include <jsk_pcl_ros/HintedPlaneDetectorConfig.h>
 
 namespace jsk_pcl_ros {
-  class HintedPlaneDetector: public jsk_topic_tools::ConnectionBasedNodelet
+  
+  class HintedPlaneDetector: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    virtual void onInit();
+    typedef HintedPlaneDetectorConfig Config;
+    typedef message_filters::sync_policies::ExactTime<
+    sensor_msgs::PointCloud2,
+    sensor_msgs::PointCloud2> SyncPolicy;
+    HintedPlaneDetector(): DiagnosticNodelet("HintedPlaneDetector") {}
     
   protected:
-    void inputCallback(const sensor_msgs::PointCloud2::ConstPtr& msg);
-    void hintCallback(const sensor_msgs::PointCloud2::ConstPtr& msg);
-    void subscribe();
-    void unsubscribe();
-    pcl::PointCloud<pcl::PointXYZ>::Ptr input_;
-    std_msgs::Header input_header_;
-    ros::Subscriber sub_input_;
-    ros::Subscriber sub_hint_;
+    virtual void onInit();
+    virtual void subscribe();
+    virtual void unsubscribe();
+    virtual void detect(
+      const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
+      const sensor_msgs::PointCloud2::ConstPtr& hint_cloud_msg);
+    virtual bool detectHintPlane(
+      pcl::PointCloud<pcl::PointXYZ>::Ptr hint_cloud,
+      ConvexPolygon::Ptr& convex);
+    virtual bool detectLargerPlane(
+      pcl::PointCloud<pcl::PointNormal>::Ptr input_cloud,
+      ConvexPolygon::Ptr hint_convex);
+    virtual pcl::PointIndices::Ptr getBestCluster(
+      pcl::PointCloud<pcl::PointNormal>::Ptr input_cloud,
+      const std::vector<pcl::PointIndices>& cluster_indices,
+      const ConvexPolygon::Ptr hint_convex);
+    virtual void publishPolygon(
+      const ConvexPolygon::Ptr convex,
+      ros::Publisher& pub_polygon, ros::Publisher& pub_polygon_array,
+      const pcl::PCLHeader& header);
+    virtual void configCallback(Config &config, uint32_t level);
+    
+    ////////////////////////////////////////////////////////
+    // ROS variables
+    ////////////////////////////////////////////////////////
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_cloud_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_hint_cloud_;
+    ros::Publisher pub_hint_polygon_;
+    ros::Publisher pub_hint_polygon_array_;
+    ros::Publisher pub_hint_inliers_;
+    ros::Publisher pub_hint_coefficients_;
+    ros::Publisher pub_polygon_array_before_filtering_; // for visualization
+    ros::Publisher pub_polygon_before_filtering_; // for visualization
+    ros::Publisher pub_polygon_array_;
+    ros::Publisher pub_polygon_;
+    ros::Publisher pub_inliers_;
+    ros::Publisher pub_coefficients_;
+    ros::Publisher pub_candidate_inliers_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    boost::mutex mutex_;
 
-    ros::Publisher marker_pub_;
-    ros::Publisher debug_hint_centroid_pub_;
-    ros::Publisher debug_plane_points_pub_;
-    tf::TransformListener* tf_listener_;
+    ////////////////////////////////////////////////////////
+    // parameters
+    ////////////////////////////////////////////////////////
+    double hint_outlier_threashold_;
+    int hint_max_iteration_;
+    int hint_min_size_;
+    int max_iteration_;
+    int min_size_;
+    double outlier_threashold_;
+    double eps_angle_;
+    double normal_filter_eps_angle_;
+    double euclidean_clustering_filter_tolerance_;
+    int euclidean_clustering_filter_min_size_;
   };
 }
 

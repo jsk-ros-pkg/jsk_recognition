@@ -56,17 +56,17 @@ namespace jsk_perception
     b_hist_size_ = r_hist_size_ = g_hist_size_ =
       h_hist_size_ = s_hist_size_ = i_hist_size_ = 512;
     b_hist_pub_ = advertise<jsk_pcl_ros::ColorHistogram>(
-      nh_, "blue_histogram", 1);
+      *pnh_, "blue_histogram", 1);
     g_hist_pub_ = advertise<jsk_pcl_ros::ColorHistogram>(
-      nh_, "green_histogram", 1);
+      *pnh_, "green_histogram", 1);
     r_hist_pub_ = advertise<jsk_pcl_ros::ColorHistogram>(
-      nh_, "red_histogram", 1);
+      *pnh_, "red_histogram", 1);
     h_hist_pub_ = advertise<jsk_pcl_ros::ColorHistogram>(
-      nh_, "hue_histogram", 1);
+      *pnh_, "hue_histogram", 1);
     s_hist_pub_ = advertise<jsk_pcl_ros::ColorHistogram>(
-      nh_, "saturation_histogram", 1);
+      *pnh_, "saturation_histogram", 1);
     i_hist_pub_ = advertise<jsk_pcl_ros::ColorHistogram>(
-      nh_, "intensity_histogram", 1);
+      *pnh_, "intensity_histogram", 1);
     image_pub_ = advertise<sensor_msgs::Image>(
       *pnh_, "input_image", 1);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);

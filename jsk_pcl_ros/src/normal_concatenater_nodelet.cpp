@@ -43,6 +43,8 @@ namespace jsk_pcl_ros
   {
     if (xyz->width != normal->width || xyz->height != normal->height) {
       NODELET_ERROR("~input and ~normal's width or height does not match");
+      NODELET_ERROR("xyz: width=%d, height=%d", xyz->width, xyz->height);
+      NODELET_ERROR("normal: width=%d, height=%d", normal->width, normal->height);
       return;
     }
     pcl::PointCloud<pcl::PointXYZRGB> xyz_cloud;
@@ -77,6 +79,7 @@ namespace jsk_pcl_ros
   void NormalConcatenater::onInit()
   {
     ConnectionBasedNodelet::onInit();
+    pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     if (!pnh_->getParam("max_queue_size", maximum_queue_size_)) {
       maximum_queue_size_ = 100;

@@ -57,7 +57,7 @@
     <remap from="~input" to="voxelgrid/output" />
     <remap from="~normal" to="normal_estimation/output" />
   </node>
-  
+
   <node pkg="nodelet" type="nodelet" name="candidate_points"
         args="standalone pcl/ExtractIndices">
     <remap from="~input" to="normal_concatenater/output" />
@@ -65,5 +65,14 @@
     <rosparam>
       use_indices: true
     </rosparam>
+  </node>
+
+  <node pkg="jsk_pcl_ros" type="polygon_to_mask_image" name="polygon_to_mask_image" output="screen">
+    <remap from="~input" to="hinted_plane_detection/output/polygon" />
+    <remap from="~input/camera_info" to="/multisense/left/camera_info" />
+  </node>
+
+  <node pkg="image_view" type="image_view" name="polygon_viewer">
+    <remap from="image" to="polygon_to_mask_image/output" />
   </node>
 </launch>

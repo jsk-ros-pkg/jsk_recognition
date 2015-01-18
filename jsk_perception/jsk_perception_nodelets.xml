@@ -1,4 +1,8 @@
 <library path="lib/libjsk_perception">
+  <class name="jsk_perception/ColorHistogramLabelMatch"
+         type="jsk_perception::ColorHistogramLabelMatch"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/GridLabel" type="jsk_perception::GridLabel"
          base_class_type="nodelet::Nodelet">
   </class>

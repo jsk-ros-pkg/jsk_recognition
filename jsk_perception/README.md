@@ -78,3 +78,16 @@ Output of this node is an image and each value means label index.
 * `~weight` (Integer, default: `4`)
 
   Weight of metrics between color and pixel distance.
+
+### jsk\_perception/LabDecomposer
+Decompose BGR/RGB image into separate planes in [CIE-Lab color space](http://en.wikipedia.org/wiki/Lab_color_space).
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/Image`)
+
+  Input image.
+#### Publishing Topic
+* `~output/l` (`sensor_msgs/Image`)
+* `~output/a` (`sensor_msgs/Image`)
+* `~output/b` (`sensor_msgs/Image`)
+  L*, a and b separated planes. Each image has CV_8UC encoding.

@@ -69,6 +69,7 @@ namespace jsk_perception
       *pnh_, "intensity_histogram", 1);
     image_pub_ = advertise<sensor_msgs::Image>(
       *pnh_, "input_image", 1);
+
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&ColorHistogram::configCallback, this, _1, _2);
@@ -248,6 +249,10 @@ namespace jsk_perception
       else {
         roi_image.copyTo(bgr_image);
       }
+      image_pub_.publish(cv_bridge::CvImage(
+                           image->header,
+                           sensor_msgs::image_encodings::BGR8,
+                           bgr_image).toImageMsg());
       processBGR(bgr_image, image->header);
       processHSI(bgr_image, image->header);
     }

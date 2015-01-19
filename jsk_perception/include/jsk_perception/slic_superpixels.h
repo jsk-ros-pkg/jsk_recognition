@@ -72,6 +72,8 @@ namespace jsk_perception
     boost::mutex mutex_;
     image_transport::Subscriber image_sub_;
     ros::Publisher pub_debug_;
+    ros::Publisher pub_debug_mean_color_;
+    ros::Publisher pub_debug_center_grid_;
     ros::Publisher pub_;
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     

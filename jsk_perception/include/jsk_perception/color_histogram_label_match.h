@@ -45,6 +45,8 @@
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include <jsk_perception/ColorHistogramLabelMatchConfig.h>
+#include <dynamic_reconfigure/server.h>
 
 #include <opencv2/opencv.hpp>
 
@@ -53,6 +55,7 @@ namespace jsk_perception
   class ColorHistogramLabelMatch: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
+    typedef ColorHistogramLabelMatchConfig Config;
     typedef message_filters::sync_policies::ExactTime<
     sensor_msgs::Image,
     sensor_msgs::Image> SyncPolicy;
@@ -73,11 +76,15 @@ namespace jsk_perception
                                  cv::Mat& mask);
     virtual double coefficients(const cv::Mat& ref_hist,
                                 const cv::Mat& target_hist);
+    virtual void configCallback(Config &config, uint32_t level);
     virtual void normalizeHistogram(cv::Mat& hist);
+    
     boost::mutex mutex_;
+    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
     message_filters::Subscriber<sensor_msgs::Image> sub_image_;
     message_filters::Subscriber<sensor_msgs::Image> sub_label_;
+    int coefficient_method_;
     ros::Subscriber sub_histogram_;
     cv::Mat histogram_;
     ros::Publisher pub_debug_;

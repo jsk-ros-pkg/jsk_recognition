@@ -23,6 +23,7 @@ endif()
 
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
+  cfg/ColorHistogramLabelMatch.cfg
   cfg/GridLabel.cfg
   cfg/SLICSuperPixels.cfg
   cfg/SnakeSegmentation.cfg

@@ -63,13 +63,22 @@ namespace jsk_perception
     const sensor_msgs::Image::ConstPtr& image_msg)
   {
     cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(
-      image_msg, sensor_msgs::image_encodings::BGR8);
+      image_msg, image_msg->encoding);
     cv::Mat image = cv_ptr->image;
     cv::Mat hsv_image;
     cv::Mat hue = cv::Mat::zeros(image.rows, image.cols, CV_8UC1);
     cv::Mat saturation = cv::Mat::zeros(image.rows, image.cols, CV_8UC1);
     cv::Mat value = cv::Mat::zeros(image.rows, image.cols, CV_8UC1);
-    cv::cvtColor(image, hsv_image, CV_BGR2HSV);
+    if (image_msg->encoding == sensor_msgs::image_encodings::BGR8) {
+      cv::cvtColor(image, hsv_image, CV_BGR2HSV);
+    }
+    else if (image_msg->encoding == sensor_msgs::image_encodings::RGB8) {
+      cv::cvtColor(image, hsv_image, CV_RGB2HSV);
+    }
+    else {
+      NODELET_ERROR("unsupported format to HSV: %s", image_msg->encoding.c_str());
+      return;
+    }
     for (size_t j = 0; j < hsv_image.rows; j++) {
       for (size_t i = 0; i < hsv_image.cols; i++) {
         cv::Vec3b hsv = hsv_image.at<cv::Vec3b>(j, i);

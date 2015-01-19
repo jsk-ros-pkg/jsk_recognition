@@ -63,19 +63,16 @@ namespace jsk_perception
     const sensor_msgs::Image::ConstPtr& image_msg)
   {
     cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(
-      image_msg, sensor_msgs::image_encodings::BGR8);
+      image_msg, image_msg->encoding);
     cv::Mat image = cv_ptr->image;
-    cv::Mat red = cv::Mat::zeros(image.rows, image.cols, CV_8UC1);
-    cv::Mat green = cv::Mat::zeros(image.rows, image.cols, CV_8UC1);
-    cv::Mat blue = cv::Mat::zeros(image.rows, image.cols, CV_8UC1);
-    for (size_t j = 0; j < image.rows; j++) {
-      for (size_t i = 0; i < image.cols; i++) {
-        cv::Vec3b rgb = image.at<cv::Vec3b>(j, i);
-        red.at<uchar>(j, i) = rgb[2];
-        green.at<uchar>(j, i) = rgb[1];
-        blue.at<uchar>(j, i) = rgb[0];
-      }
+    if (image_msg->encoding == sensor_msgs::image_encodings::RGB8) {
+      cv::cvtColor(image, image, CV_RGB2BGR);
     }
+    std::vector<cv::Mat> bgr_planes;
+    cv::split(image, bgr_planes);
+    cv::Mat red = bgr_planes[2];
+    cv::Mat blue = bgr_planes[0];
+    cv::Mat green = bgr_planes[1];
     pub_r_.publish(cv_bridge::CvImage(
                      image_msg->header,
                      sensor_msgs::image_encodings::MONO8,

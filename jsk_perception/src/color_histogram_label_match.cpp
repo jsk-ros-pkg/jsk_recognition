@@ -43,6 +43,12 @@ namespace jsk_perception
   void ColorHistogramLabelMatch::onInit()
   {
     DiagnosticNodelet::onInit();
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (
+        &ColorHistogramLabelMatch::configCallback, this, _1, _2);
+    srv_->setCallback (f);
+
     pub_debug_ = advertise<sensor_msgs::Image>(
       *pnh_, "debug", 1);
   }
@@ -142,6 +148,7 @@ namespace jsk_perception
       
       normalizeHistogram(hist_mat);
       double coef = coefficients(histogram_, hist_mat);
+      //double coef = cv::compareHist(histogram_, hist_mat, CV_COMP_
       std_msgs::ColorRGBA coef_color = jsk_topic_tools::heatColor(coef);
       for (size_t j = 0; j < coefficients_image.rows; j++) {
         for (size_t i = 0; i < coefficients_image.cols; i++) {
@@ -176,19 +183,39 @@ namespace jsk_perception
     const cv::Mat& ref_hist,
     const cv::Mat& target_hist)
   {
-    double sum = 0.0;
-    if (ref_hist.cols != target_hist.cols ||
-        ref_hist.rows != target_hist.rows) {
-      NODELET_FATAL("histogram size is not same");
-      NODELET_FATAL("ref_hist: %dx%d", ref_hist.cols, ref_hist.rows);
-      NODELET_FATAL("target_hist: %dx%d", target_hist.cols, target_hist.rows);
+    if (coefficient_method_ == 0) {
+      return cv::compareHist(ref_hist, target_hist, CV_COMP_CORREL);
+    }
+    else if (coefficient_method_ == 1) {
+      return cv::compareHist(ref_hist, target_hist, CV_COMP_CHISQR);
+    }
+    else if (coefficient_method_ == 2) {
+      return cv::compareHist(ref_hist, target_hist, CV_COMP_INTERSECT);
+    }
+    else if (coefficient_method_ == 3) {
+      return cv::compareHist(ref_hist, target_hist, CV_COMP_BHATTACHARYYA);
+    }
+    else if (coefficient_method_ == 4 || coefficient_method_ == 5) {
+      cv::Mat ref_sig = cv::Mat::zeros(ref_hist.cols, 2, CV_32FC1);
+      cv::Mat target_sig = cv::Mat::zeros(ref_hist.cols, 2, CV_32FC1);
+      //NODELET_INFO("ref_hist.cols = %d", ref_hist.cols);
+      for (size_t i = 0; i < ref_hist.cols; i++) {
+        ref_sig.at<float>(i, 0) = ref_hist.at<float>(0, i);
+        target_sig.at<float>(i, 0) = target_hist.at<float>(0, i);
+        ref_sig.at<float>(i, 1) = i;
+        target_sig.at<float>(i, 1) = i;
+      }
+      if (coefficient_method_ == 4) {
+        return 1.0 - cv::EMD(ref_sig, target_sig, CV_DIST_L1);
+      }
+      else {
+        return 1.0 - cv::EMD(ref_sig, target_sig, CV_DIST_L2);
+      }
+    }
+    else {
+      NODELET_ERROR("unknown coefficiet method: %d", coefficient_method_);
       return 0;
     }
-    // bhattacharyya
-    for (size_t i = 0; i < ref_hist.cols; i++) {
-      sum += sqrt(ref_hist.at<float>(0, i) * target_hist.at<float>(0, i));
-    }
-    return sum;
   }
 
   void ColorHistogramLabelMatch::histogramCallback(
@@ -201,6 +228,13 @@ namespace jsk_perception
       histogram_.at<float>(0, i) = histogram_msg->histogram[i];
     }
     normalizeHistogram(histogram_);
+  }
+
+  void ColorHistogramLabelMatch::configCallback(
+    Config &config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    coefficient_method_ = config.coefficient_method;
   }
   
 }

@@ -32,7 +32,9 @@
   <class name="jsk_perception/LabDecomposer" type="jsk_perception::LabDecomposer"
          base_class_type="nodelet::Nodelet">
   </class>
-
+  <class name="jsk_perception/YCCDecomposer" type="jsk_perception::YCCDecomposer"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/RGBDecomposer" type="jsk_perception::RGBDecomposer"
          base_class_type="nodelet::Nodelet">
     <description>

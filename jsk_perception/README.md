@@ -104,3 +104,24 @@ Decompose BGR/RGB image into separate planes in [YCbCr color space](http://en.wi
 * `~output/cr` (`sensor_msgs/Image`)
 * `~output/cb` (`sensor_msgs/Image`)
   Y, Cr and Cb separated planes. Each image has CV_8UC encoding.
+
+### jsk\_perception/SingleChannelHistogram
+Compute histogram of single channel image.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/Image`)
+
+  Input image. It should has CV_8UC1 as encoding.
+
+* `~input/mask` (`sensor_msgs/Image`)
+
+  Mask image. if `~use_mask` is true, histogram is computed with this mask image.
+#### Publishing Topic
+* `~output` (`jsk_pcl_ros/ColorHistogram`)
+
+  Histogram of `~input` image.
+
+#### Parameters
+* `~use_mask` (Boolean, default: `false`)
+
+  If this parameter is set true, histogram is computed with mask image.

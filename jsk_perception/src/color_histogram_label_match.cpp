@@ -132,6 +132,8 @@ namespace jsk_perception
     int hist_size = histogram_.cols;
     float range[] = { 0, 256 } ;
     const float* hist_range = { range };
+    double min_coef = DBL_MAX;
+    double max_coef = - DBL_MAX;
     for (size_t i = 0; i < labels.size(); i++) {
       int label_index = labels[i];
       cv::Mat mask = cv::Mat::zeros(label.rows, label.cols, CV_8UC1);
@@ -148,6 +150,12 @@ namespace jsk_perception
       
       normalizeHistogram(hist_mat);
       double coef = coefficients(histogram_, hist_mat);
+      if (min_coef > coef) {
+        min_coef = coef;
+      }
+      if (max_coef < coef) {
+        max_coef = coef;
+      }
       //double coef = cv::compareHist(histogram_, hist_mat, CV_COMP_
       std_msgs::ColorRGBA coef_color = jsk_topic_tools::heatColor(coef);
       for (size_t j = 0; j < coefficients_image.rows; j++) {
@@ -161,6 +169,7 @@ namespace jsk_perception
         }
       }
     }
+    NODELET_INFO("coef: %f - %f", min_coef, max_coef);
     pub_debug_.publish(
       cv_bridge::CvImage(image_msg->header,
                          sensor_msgs::image_encodings::BGR8,
@@ -184,16 +193,17 @@ namespace jsk_perception
     const cv::Mat& target_hist)
   {
     if (coefficient_method_ == 0) {
-      return cv::compareHist(ref_hist, target_hist, CV_COMP_CORREL);
+      return (1.0 - cv::compareHist(ref_hist, target_hist, CV_COMP_CORREL)) / 2.0;
     }
     else if (coefficient_method_ == 1) {
-      return cv::compareHist(ref_hist, target_hist, CV_COMP_CHISQR);
+      double x = cv::compareHist(ref_hist, target_hist, CV_COMP_CHISQR);
+      return 1/ (x * x + 1);
     }
     else if (coefficient_method_ == 2) {
       return cv::compareHist(ref_hist, target_hist, CV_COMP_INTERSECT);
     }
     else if (coefficient_method_ == 3) {
-      return cv::compareHist(ref_hist, target_hist, CV_COMP_BHATTACHARYYA);
+      return 1.0 - cv::compareHist(ref_hist, target_hist, CV_COMP_BHATTACHARYYA);
     }
     else if (coefficient_method_ == 4 || coefficient_method_ == 5) {
       cv::Mat ref_sig = cv::Mat::zeros(ref_hist.cols, 2, CV_32FC1);
@@ -206,10 +216,12 @@ namespace jsk_perception
         target_sig.at<float>(i, 1) = i;
       }
       if (coefficient_method_ == 4) {
-        return 1.0 - cv::EMD(ref_sig, target_sig, CV_DIST_L1);
+        double x = cv::EMD(ref_sig, target_sig, CV_DIST_L1);
+        return 1.0  / (1.0 + x * x);
       }
       else {
-        return 1.0 - cv::EMD(ref_sig, target_sig, CV_DIST_L2);
+        double x = cv::EMD(ref_sig, target_sig, CV_DIST_L2);
+        return 1.0  / (1.0 + x * x);
       }
     }
     else {

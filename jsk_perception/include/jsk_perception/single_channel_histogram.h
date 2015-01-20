@@ -79,6 +79,8 @@ namespace jsk_perception
     ros::Publisher pub_;
     boost::mutex mutex_;
     int hist_size_;
+    float min_value_;
+    float max_value_;
   private:
     
   };

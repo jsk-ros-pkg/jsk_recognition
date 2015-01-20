@@ -40,9 +40,9 @@ namespace jsk_pcl_ros
   void BorderEstimator::onInit()
   {
     ConnectionBasedNodelet::onInit();
-    pub_border_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_border", 1);
-    pub_veil_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_veil", 1);
-    pub_shadow_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_shadow", 1);
+    pub_border_ = advertise<PCLIndicesMsg>(*pnh_, "output_border_indices", 1);
+    pub_veil_ = advertise<PCLIndicesMsg>(*pnh_, "output_veil_indices", 1);
+    pub_shadow_ = advertise<PCLIndicesMsg>(*pnh_, "output_shadow_indices", 1);
   }
 
   void BorderEstimator::subscribe()
@@ -60,24 +60,15 @@ namespace jsk_pcl_ros
     sub_camera_info_.unsubscribe();
   }
   
-  pcl::PointXYZ BorderEstimator::convertPoint(const pcl::PointWithRange& input)
-  {
-    pcl::PointXYZ output;
-    output.x = input.x;
-    output.y = input.y;
-    output.z = input.z;
-    return output;
-  }
-  
   void BorderEstimator::publishCloud(
     ros::Publisher& pub,
-    const pcl::PointCloud<pcl::PointXYZ>& cloud,
+    const pcl::PointIndices& inlier,
     const std_msgs::Header& header)
   {
-    sensor_msgs::PointCloud2 ros_msg;
-    pcl::toROSMsg(cloud, ros_msg);
-    ros_msg.header = header;
-    pub.publish(ros_msg);
+    PCLIndicesMsg msg;
+    msg.header = header;
+    msg.indices = inlier.indices;
+    pub.publish(msg);
   }
   
   void BorderEstimator::estimate(
@@ -107,26 +98,23 @@ namespace jsk_pcl_ros
     pcl::RangeImageBorderExtractor border_extractor (&range_image);
     pcl::PointCloud<pcl::BorderDescription> border_descriptions;
     border_extractor.compute (border_descriptions);
-    pcl::PointCloud<pcl::PointXYZ> border_points, veil_points, shadow_points;
+    pcl::PointIndices border_indices, veil_indices, shadow_indices;
     for (int y = 0; y < (int)range_image.height; ++y) {
       for (int x = 0; x < (int)range_image.width; ++x) {
         if (border_descriptions.points[y*range_image.width + x].traits[pcl::BORDER_TRAIT__OBSTACLE_BORDER]) {
-          border_points.points.push_back (
-            convertPoint(range_image.points[y*range_image.width + x]));
+          border_indices.indices.push_back (y*range_image.width + x);
         }
         if (border_descriptions.points[y*range_image.width + x].traits[pcl::BORDER_TRAIT__VEIL_POINT]) {
-          veil_points.points.push_back (
-            convertPoint(range_image.points[y*range_image.width + x]));
+          veil_indices.indices.push_back (y*range_image.width + x);
         }
         if (border_descriptions.points[y*range_image.width + x].traits[pcl::BORDER_TRAIT__SHADOW_BORDER]) {
-          shadow_points.points.push_back (
-            convertPoint(range_image.points[y*range_image.width + x]));
+          shadow_indices.indices.push_back (y*range_image.width + x);
         }
       }
     }
-    publishCloud(pub_border_, border_points, msg->header);
-    publishCloud(pub_veil_, veil_points, msg->header);
-    publishCloud(pub_shadow_, shadow_points, msg->header);
+    publishCloud(pub_border_, border_indices, msg->header);
+    publishCloud(pub_veil_, veil_indices, msg->header);
+    publishCloud(pub_shadow_, shadow_indices, msg->header);
   }
 }
 

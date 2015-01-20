@@ -56,11 +56,12 @@ namespace jsk_perception
   {
     sub_image_.subscribe(*pnh_, "input", 1);
     sub_label_.subscribe(*pnh_, "input/label", 1);
+    sub_mask_.subscribe(*pnh_, "input/mask", 1);
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-    sync_->connectInput(sub_image_, sub_label_);
+    sync_->connectInput(sub_image_, sub_label_, sub_mask_);
     sync_->registerCallback(
       boost::bind(
-        &ColorHistogramLabelMatch::match, this, _1, _2));
+        &ColorHistogramLabelMatch::match, this, _1, _2, _3));
     sub_histogram_ = pnh_->subscribe(
       "input/histogram", 1, &ColorHistogramLabelMatch::histogramCallback, this);
   }
@@ -69,6 +70,7 @@ namespace jsk_perception
   {
     sub_image_.unsubscribe();
     sub_label_.unsubscribe();
+    sub_mask_.unsubscribe();
     sub_histogram_.shutdown();
   }
 
@@ -104,10 +106,30 @@ namespace jsk_perception
       }
     }
   }
+
+  bool ColorHistogramLabelMatch::isMasked(
+    const cv::Mat& original_image,
+    const cv::Mat& masked_image)
+  {
+    int original_count = 0;
+    int masked_count = 0;
+    for (int j = 0; j < original_image.rows; j++) {
+      for (int i = 0; i < original_image.cols; i++) {
+        if (original_image.at<uchar>(j, i) != 0) {
+          original_count++;
+        }
+        if (masked_image.at<uchar>(j, i) != 0) {
+          masked_count++;
+        }
+      }
+    }
+    return original_count != masked_count;
+  }
   
   void ColorHistogramLabelMatch::match(
     const sensor_msgs::Image::ConstPtr& image_msg,
-    const sensor_msgs::Image::ConstPtr& label_msg)
+    const sensor_msgs::Image::ConstPtr& label_msg,
+    const sensor_msgs::Image::ConstPtr& mask_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (histogram_.empty()) {
@@ -115,13 +137,12 @@ namespace jsk_perception
       return;
     }
     
-    cv_bridge::CvImageConstPtr image_bridge
-      = cv_bridge::toCvShare(image_msg, image_msg->encoding);
-    cv_bridge::CvImageConstPtr label_bridge
-      = cv_bridge::toCvShare(label_msg, label_msg->encoding);
-    cv::Mat image = image_bridge->image.clone();
-    cv::Mat label = label_bridge->image.clone();
-    
+    cv::Mat image
+      = cv_bridge::toCvShare(image_msg, image_msg->encoding)->image;
+    cv::Mat label
+      = cv_bridge::toCvShare(label_msg, label_msg->encoding)->image;
+    cv::Mat whole_mask
+      = cv_bridge::toCvShare(mask_msg, mask_msg->encoding)->image;
     std::vector<int> labels;
     getLabels(label, labels);
     
@@ -135,31 +156,40 @@ namespace jsk_perception
     double max_coef = - DBL_MAX;
     for (size_t i = 0; i < labels.size(); i++) {
       int label_index = labels[i];
-      cv::Mat mask = cv::Mat::zeros(label.rows, label.cols, CV_8UC1);
-      getMaskImage(label, label_index, mask);
-      cv::MatND hist;
-      bool uniform = true; bool accumulate = false;
-      cv::calcHist(&image, 1, 0, mask, hist, 1,
-                   &hist_size, &hist_range, uniform, accumulate);
-      cv::normalize(hist, hist, 1, hist.rows, cv::NORM_L2, -1,
-                    cv::Mat());
-      cv::Mat hist_mat = cv::Mat::zeros(1, hist_size, CV_32FC1);
-      for (size_t j = 0; j < hist_size; j++) {
-        hist_mat.at<float>(0, j) = hist.at<float>(0, j);
+      cv::Mat label_mask = cv::Mat::zeros(label.rows, label.cols, CV_8UC1);
+      getMaskImage(label, label_index, label_mask);
+      double coef = 0.0;
+      // get label_mask & whole_mask and check is it all black or not
+      cv::Mat masked_label;
+      label_mask.copyTo(masked_label, whole_mask);
+      if (isMasked(label_mask, masked_label)) {
+        coef = 0.0;
       }
-      //cv::Mat hist_mat = hist;
+      else {
+        cv::MatND hist;
+        bool uniform = true; bool accumulate = false;
+        cv::calcHist(&image, 1, 0, label_mask, hist, 1,
+                     &hist_size, &hist_range, uniform, accumulate);
+        cv::normalize(hist, hist, 1, hist.rows, cv::NORM_L2, -1,
+                      cv::Mat());
+        cv::Mat hist_mat = cv::Mat::zeros(1, hist_size, CV_32FC1);
+        for (size_t j = 0; j < hist_size; j++) {
+          hist_mat.at<float>(0, j) = hist.at<float>(0, j);
+        }
+        //cv::Mat hist_mat = hist;
       
-      double coef = coefficients(hist_mat, histogram_);
-      if (min_coef > coef) {
-        min_coef = coef;
-      }
-      if (max_coef < coef) {
-        max_coef = coef;
+        coef = coefficients(hist_mat, histogram_);
+        if (min_coef > coef) {
+          min_coef = coef;
+        }
+        if (max_coef < coef) {
+          max_coef = coef;
+        }
       }
       std_msgs::ColorRGBA coef_color = jsk_topic_tools::heatColor(coef);
       for (size_t j = 0; j < coefficients_image.rows; j++) {
         for (size_t i = 0; i < coefficients_image.cols; i++) {
-          if (mask.at<uchar>(j, i) == 255) {
+          if (label_mask.at<uchar>(j, i) == 255) {
             coefficients_image.at<cv::Vec3b>(j, i)
               = cv::Vec3b(int(coef_color.b * 255),
                           int(coef_color.g * 255),

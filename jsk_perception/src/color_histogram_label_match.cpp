@@ -228,32 +228,28 @@ namespace jsk_perception
       // convert image into 8UC to apply otsu' method
       cv::Mat otsu_image = cv::Mat::zeros(
         coefficient_image.rows, coefficient_image.cols, CV_8UC1);
-        
       cv::Mat otsu_result_image = cv::Mat::zeros(
         coefficient_image.rows, coefficient_image.cols, CV_8UC1);
-      for (int j = 0; j < coefficient_image.rows; j++) {
-        for (int i = 0; i < coefficient_image.cols; i++) {
-          otsu_image.at<uchar>(j, i) = coefficient_image.at<float>(j, i) * 255;
-        }
-      }
-      cv::threshold(otsu_image, otsu_result_image, coef_threshold_, 1,
+      coefficient_image.convertTo(otsu_image, 8, 255.0);
+      cv::threshold(otsu_image, otsu_result_image, coef_threshold_, 255,
                     cv::THRESH_OTSU);
       // convert it into float image again
-      for (int j = 0; j < coefficient_image.rows; j++) {
-        for (int i = 0; i < coefficient_image.cols; i++) {
-          if (threshold_method_ == 2) {
-            threshold_image.at<float>(j, i) = otsu_result_image.at<uchar>(j, i) / 255.0;
-          }
-          else if (threshold_method_ == 3) {
-            threshold_image.at<float>(j, i) = (1.0 - otsu_result_image.at<uchar>(j, i)) / 255.0;
-          }
-        }
+      if (threshold_method_ == 2) {
+        otsu_result_image.convertTo(threshold_image, 32, 1 / 255.0);
+      }
+      else if (threshold_method_ == 3) {
+        otsu_result_image.convertTo(threshold_image, 32, - 1 / 255.0, 1.0);
       }
     }
+    cv::Mat threshold_uchar_image = cv::Mat(threshold_image.rows,
+                                            threshold_image.cols,
+                                            CV_8UC1);
+    threshold_image.convertTo(threshold_uchar_image, 8, 255.0);
+    // convert image from float to uchar
     pub_result_.publish(
       cv_bridge::CvImage(image_msg->header,
-                         sensor_msgs::image_encodings::TYPE_32FC1,
-                         threshold_image).toImageMsg());
+                         sensor_msgs::image_encodings::MONO8,
+                         threshold_uchar_image).toImageMsg());
   }
 
   double ColorHistogramLabelMatch::coefficients(

@@ -61,11 +61,10 @@ namespace jsk_pcl_ros
 
   protected:
     virtual void onInit();
-    virtual pcl::PointXYZ convertPoint(const pcl::PointWithRange& input);
     virtual void estimate(const sensor_msgs::PointCloud2::ConstPtr& msg,
                           const sensor_msgs::CameraInfo::ConstPtr& caminfo);
     virtual void publishCloud(ros::Publisher& pub,
-                              const pcl::PointCloud<pcl::PointXYZ>& cloud,
+                              const pcl::PointIndices& inlier,
                               const std_msgs::Header& header);
     virtual void subscribe();
     virtual void unsubscribe();

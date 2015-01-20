@@ -125,3 +125,11 @@ Compute histogram of single channel image.
 * `~use_mask` (Boolean, default: `false`)
 
   If this parameter is set true, histogram is computed with mask image.
+* `~hist_size` (Integer, default: `10`)
+
+  The number of bins of histogram
+
+* `~min_value` (Double, default: `0.0`)
+* `~max_value`(Double, default: `255.0`)
+
+  Minimum and maximum value of histogram

@@ -91,7 +91,7 @@ namespace jsk_perception
     if (mask_msg) {
       mask = cv_bridge::toCvCopy(mask_msg, mask_msg->encoding)->image;
     }
-    float range[] = { 0, 256 } ;
+    float range[] = { min_value_, max_value_ } ;
     const float* histRange = { range };
     cv::MatND hist;
     bool uniform = true; bool accumulate = false;
@@ -117,6 +117,8 @@ namespace jsk_perception
   {
     boost::mutex::scoped_lock lock(mutex_);
     hist_size_ = config.hist_size;
+    min_value_ = config.min_value;
+    max_value_ = config.max_value;
   }
 }
 

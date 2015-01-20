@@ -48,7 +48,6 @@ namespace jsk_perception
       boost::bind (
         &ColorHistogramLabelMatch::configCallback, this, _1, _2);
     srv_->setCallback (f);
-
     pub_debug_ = advertise<sensor_msgs::Image>(
       *pnh_, "debug", 1);
   }
@@ -130,7 +129,7 @@ namespace jsk_perception
                                                 image_msg->width,
                                                 CV_8UC3); // BGR8
     int hist_size = histogram_.cols;
-    float range[] = { 0, 256 } ;
+    float range[] = { min_value_, max_value_ };
     const float* hist_range = { range };
     double min_coef = DBL_MAX;
     double max_coef = - DBL_MAX;
@@ -139,24 +138,24 @@ namespace jsk_perception
       cv::Mat mask = cv::Mat::zeros(label.rows, label.cols, CV_8UC1);
       getMaskImage(label, label_index, mask);
       cv::MatND hist;
-      // NB: normalize...?
       bool uniform = true; bool accumulate = false;
       cv::calcHist(&image, 1, 0, mask, hist, 1,
                    &hist_size, &hist_range, uniform, accumulate);
+      cv::normalize(hist, hist, 1, hist.rows, cv::NORM_L2, -1,
+                    cv::Mat());
       cv::Mat hist_mat = cv::Mat::zeros(1, hist_size, CV_32FC1);
       for (size_t j = 0; j < hist_size; j++) {
         hist_mat.at<float>(0, j) = hist.at<float>(0, j);
       }
+      //cv::Mat hist_mat = hist;
       
-      normalizeHistogram(hist_mat);
-      double coef = coefficients(histogram_, hist_mat);
+      double coef = coefficients(hist_mat, histogram_);
       if (min_coef > coef) {
         min_coef = coef;
       }
       if (max_coef < coef) {
         max_coef = coef;
       }
-      //double coef = cv::compareHist(histogram_, hist_mat, CV_COMP_
       std_msgs::ColorRGBA coef_color = jsk_topic_tools::heatColor(coef);
       for (size_t j = 0; j < coefficients_image.rows; j++) {
         for (size_t i = 0; i < coefficients_image.cols; i++) {
@@ -176,24 +175,12 @@ namespace jsk_perception
                          coefficients_image).toImageMsg());
   }
 
-  void ColorHistogramLabelMatch::normalizeHistogram(
-    cv::Mat& histogram)
-  {
-    float sum = 0.0;
-    for (size_t i = 0; i < histogram.cols; i++) {
-      sum += histogram.at<float>(0, i);
-    }
-    for (size_t i = 0; i < histogram.cols; i++) {
-      histogram.at<float>(0, i) = histogram.at<float>(0, i) / sum;
-    }
-  }
-  
   double ColorHistogramLabelMatch::coefficients(
     const cv::Mat& ref_hist,
     const cv::Mat& target_hist)
   {
     if (coefficient_method_ == 0) {
-      return (1.0 - cv::compareHist(ref_hist, target_hist, CV_COMP_CORREL)) / 2.0;
+      return (1.0 + cv::compareHist(ref_hist, target_hist, CV_COMP_CORREL)) / 2.0;
     }
     else if (coefficient_method_ == 1) {
       double x = cv::compareHist(ref_hist, target_hist, CV_COMP_CHISQR);
@@ -239,7 +226,8 @@ namespace jsk_perception
     for (size_t i = 0; i < histogram_msg->histogram.size(); i++) {
       histogram_.at<float>(0, i) = histogram_msg->histogram[i];
     }
-    normalizeHistogram(histogram_);
+    cv::normalize(histogram_, histogram_, 1, histogram_.rows, cv::NORM_L2,
+                  -1, cv::Mat());
   }
 
   void ColorHistogramLabelMatch::configCallback(
@@ -247,6 +235,8 @@ namespace jsk_perception
   {
     boost::mutex::scoped_lock lock(mutex_);
     coefficient_method_ = config.coefficient_method;
+    max_value_ = config.max_value;
+    min_value_ = config.min_value;
   }
   
 }

@@ -77,8 +77,9 @@ namespace jsk_perception
     virtual double coefficients(const cv::Mat& ref_hist,
                                 const cv::Mat& target_hist);
     virtual void configCallback(Config &config, uint32_t level);
-    virtual void normalizeHistogram(cv::Mat& hist);
-    
+
+    float max_value_;
+    float min_value_;
     boost::mutex mutex_;
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;

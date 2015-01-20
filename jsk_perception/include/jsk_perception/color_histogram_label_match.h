@@ -83,9 +83,12 @@ namespace jsk_perception
     virtual double coefficients(const cv::Mat& ref_hist,
                                 const cv::Mat& target_hist);
     virtual void configCallback(Config &config, uint32_t level);
-
+    
     float max_value_;
     float min_value_;
+    float coef_threshold_;
+    float masked_coefficient_;
+    int threshold_method_;
     boost::mutex mutex_;
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
@@ -97,6 +100,8 @@ namespace jsk_perception
     cv::Mat histogram_;
     ros::Publisher pub_debug_;
     ros::Publisher pub_coefficient_image_;
+    ros::Publisher pub_mask_;
+    ros::Publisher pub_result_;
   private:
     
   };

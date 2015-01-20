@@ -52,6 +52,8 @@ namespace jsk_perception
       *pnh_, "debug", 1);
     pub_coefficient_image_ = advertise<sensor_msgs::Image>(
       *pnh_, "output/coefficient_image", 1);
+    pub_result_ = advertise<sensor_msgs::Image>(
+      *pnh_, "output/extracted_region", 1);
   }
 
   void ColorHistogramLabelMatch::subscribe()
@@ -166,7 +168,7 @@ namespace jsk_perception
       cv::Mat masked_label;
       label_mask.copyTo(masked_label, whole_mask);
       if (isMasked(label_mask, masked_label)) {
-        coef = 0.0;
+        coef = masked_coefficient_;
       }
       else {
         cv::MatND hist;
@@ -211,6 +213,47 @@ namespace jsk_perception
       cv_bridge::CvImage(image_msg->header,
                          sensor_msgs::image_encodings::TYPE_32FC1,
                          coefficient_image).toImageMsg());
+    // apply threshold operation
+    cv::Mat threshold_image = cv::Mat::zeros(
+      coefficient_image.rows, coefficient_image.cols, CV_32FC1);
+    if (threshold_method_ == 0) { // smaller than
+      cv::threshold(coefficient_image, threshold_image, coef_threshold_, 1,
+                   cv::THRESH_BINARY_INV);
+    }
+    else if (threshold_method_ == 1) { // greater than
+      cv::threshold(coefficient_image, threshold_image, coef_threshold_, 1,
+                    cv::THRESH_BINARY);
+    }
+    else if (threshold_method_ == 2 || threshold_method_ == 3) {
+      // convert image into 8UC to apply otsu' method
+      cv::Mat otsu_image = cv::Mat::zeros(
+        coefficient_image.rows, coefficient_image.cols, CV_8UC1);
+        
+      cv::Mat otsu_result_image = cv::Mat::zeros(
+        coefficient_image.rows, coefficient_image.cols, CV_8UC1);
+      for (int j = 0; j < coefficient_image.rows; j++) {
+        for (int i = 0; i < coefficient_image.cols; i++) {
+          otsu_image.at<uchar>(j, i) = coefficient_image.at<float>(j, i) * 255;
+        }
+      }
+      cv::threshold(otsu_image, otsu_result_image, coef_threshold_, 1,
+                    cv::THRESH_OTSU);
+      // convert it into float image again
+      for (int j = 0; j < coefficient_image.rows; j++) {
+        for (int i = 0; i < coefficient_image.cols; i++) {
+          if (threshold_method_ == 2) {
+            threshold_image.at<float>(j, i) = otsu_result_image.at<uchar>(j, i) / 255.0;
+          }
+          else if (threshold_method_ == 3) {
+            threshold_image.at<float>(j, i) = (1.0 - otsu_result_image.at<uchar>(j, i)) / 255.0;
+          }
+        }
+      }
+    }
+    pub_result_.publish(
+      cv_bridge::CvImage(image_msg->header,
+                         sensor_msgs::image_encodings::TYPE_32FC1,
+                         threshold_image).toImageMsg());
   }
 
   double ColorHistogramLabelMatch::coefficients(
@@ -275,6 +318,9 @@ namespace jsk_perception
     coefficient_method_ = config.coefficient_method;
     max_value_ = config.max_value;
     min_value_ = config.min_value;
+    masked_coefficient_ = config.masked_coefficient;
+    coef_threshold_ = config.coef_threshold;
+    threshold_method_ = config.threshold_method;
   }
   
 }

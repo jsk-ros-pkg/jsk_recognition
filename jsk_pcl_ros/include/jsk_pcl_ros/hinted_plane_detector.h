@@ -84,7 +84,10 @@ namespace jsk_pcl_ros {
       ros::Publisher& pub_polygon, ros::Publisher& pub_polygon_array,
       const pcl::PCLHeader& header);
     virtual void configCallback(Config &config, uint32_t level);
-    
+    virtual void densityFilter(
+      const pcl::PointCloud<pcl::PointNormal>::Ptr cloud,
+      const pcl::PointIndices::Ptr indices,
+      pcl::PointIndices& output);
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
@@ -118,6 +121,8 @@ namespace jsk_pcl_ros {
     double normal_filter_eps_angle_;
     double euclidean_clustering_filter_tolerance_;
     int euclidean_clustering_filter_min_size_;
+    double density_radius_;
+    int density_num_;
   };
 }
 

@@ -110,6 +110,8 @@ namespace jsk_pcl_ros {
     normal_filter_eps_angle_ = config.normal_filter_eps_angle;
     euclidean_clustering_filter_tolerance_ = config.euclidean_clustering_filter_tolerance;
     euclidean_clustering_filter_min_size_ = config.euclidean_clustering_filter_min_size;
+    density_radius_ = config.density_radius;
+    density_num_ = config.density_num;
   }
   
   void HintedPlaneDetector::detect(
@@ -162,6 +164,28 @@ namespace jsk_pcl_ros {
     pcl::PointIndices::Ptr ret (new pcl::PointIndices);
     ret->indices = cluster_indices[min_index].indices;
     return ret;
+  }
+
+  void HintedPlaneDetector::densityFilter(
+    const pcl::PointCloud<pcl::PointNormal>::Ptr cloud,
+    const pcl::PointIndices::Ptr indices,
+    pcl::PointIndices& output)
+  {
+    pcl::KdTreeFLANN<pcl::PointNormal> kdtree;
+    pcl::KdTreeFLANN<pcl::PointNormal>::IndicesPtr indices_ptr
+      (new std::vector<int>);
+    *indices_ptr = indices->indices;
+    kdtree.setInputCloud(cloud, indices_ptr);
+    for (size_t i = 0; i < indices->indices.size(); i++) {
+      int point_index = indices->indices[i];
+      pcl::PointNormal p = cloud->points[point_index];
+      std::vector<int> result_indices;
+      std::vector<float> result_distances;
+      kdtree.radiusSearch(p, density_radius_, result_indices, result_distances);
+      if (result_distances.size() > density_num_) {
+        output.indices.push_back(point_index);
+      }
+    }
   }
   
   bool HintedPlaneDetector::detectLargerPlane(
@@ -220,27 +244,35 @@ namespace jsk_pcl_ros {
       NODELET_INFO("%lu clusters", cluster_indices.size());
       pcl::PointIndices::Ptr filtered_indices
         = getBestCluster(input_cloud, cluster_indices, hint_convex);
-      ConvexPolygon::Ptr convex_before_filtering
-        = convexFromCoefficientsAndInliers<pcl::PointNormal>(
-          input_cloud, plane_inliers, plane_coefficients);
-      ConvexPolygon::Ptr convex
-        = convexFromCoefficientsAndInliers<pcl::PointNormal>(
-          input_cloud, filtered_indices, plane_coefficients);
-      // publish to ROS
-      publishPolygon(convex_before_filtering,
-                     pub_polygon_before_filtering_,
-                     pub_polygon_array_before_filtering_,
-                     input_cloud->header);
-      publishPolygon(convex,
-                     pub_polygon_, pub_polygon_array_,
-                     input_cloud->header);
-      PCLIndicesMsg ros_inliers;
-      pcl_conversions::fromPCL(*filtered_indices, ros_inliers);
-      pub_inliers_.publish(ros_inliers);
-      PCLModelCoefficientMsg ros_coefficients;
-      pcl_conversions::fromPCL(*plane_coefficients, ros_coefficients);
-      pub_coefficients_.publish(ros_coefficients);
-      return true;
+      pcl::PointIndices::Ptr density_filtered_indices (new pcl::PointIndices);
+      densityFilter(
+        input_cloud, filtered_indices, *density_filtered_indices);
+      if (density_filtered_indices->indices.size() > 3) {
+        ConvexPolygon::Ptr convex_before_filtering
+          = convexFromCoefficientsAndInliers<pcl::PointNormal>(
+            input_cloud, plane_inliers, plane_coefficients);
+        ConvexPolygon::Ptr convex
+          = convexFromCoefficientsAndInliers<pcl::PointNormal>(
+            input_cloud, density_filtered_indices, plane_coefficients);
+        // publish to ROS
+        publishPolygon(convex_before_filtering,
+                       pub_polygon_before_filtering_,
+                       pub_polygon_array_before_filtering_,
+                       input_cloud->header);
+        publishPolygon(convex,
+                       pub_polygon_, pub_polygon_array_,
+                       input_cloud->header);
+        PCLIndicesMsg ros_inliers;
+        pcl_conversions::fromPCL(*filtered_indices, ros_inliers);
+        pub_inliers_.publish(ros_inliers);
+        PCLModelCoefficientMsg ros_coefficients;
+        pcl_conversions::fromPCL(*plane_coefficients, ros_coefficients);
+        pub_coefficients_.publish(ros_coefficients);
+        return true;
+      }
+      else {
+        return false;
+      }
     }
     else {
       return false;

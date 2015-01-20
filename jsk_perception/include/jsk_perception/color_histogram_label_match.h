@@ -56,9 +56,12 @@ namespace jsk_perception
   {
   public:
     typedef ColorHistogramLabelMatchConfig Config;
-    typedef message_filters::sync_policies::ExactTime<
-    sensor_msgs::Image,
-    sensor_msgs::Image> SyncPolicy;
+    //typedef message_filters::sync_policies::ExactTime<
+    typedef message_filters::sync_policies::ApproximateTime<
+      sensor_msgs::Image,         // image
+      sensor_msgs::Image,         // label
+      sensor_msgs::Image          // mask
+      > SyncPolicy;
 
     ColorHistogramLabelMatch(): DiagnosticNodelet("ColorHistogramLabelMatch") {}
   protected:
@@ -67,9 +70,12 @@ namespace jsk_perception
     virtual void unsubscribe();
     virtual void match(
       const sensor_msgs::Image::ConstPtr& image_msg,
-      const sensor_msgs::Image::ConstPtr& label_msg);
+      const sensor_msgs::Image::ConstPtr& label_msg,
+      const sensor_msgs::Image::ConstPtr& mask_msg);
     virtual void histogramCallback(
       const jsk_pcl_ros::ColorHistogram::ConstPtr& histogram_msg);
+    virtual bool isMasked(const cv::Mat& original_image,
+                          const cv::Mat& masked_image);
     virtual void getLabels(const cv::Mat& label, std::vector<int>& labels);
     virtual void getMaskImage(const cv::Mat& label_image,
                                  const int label,
@@ -85,6 +91,7 @@ namespace jsk_perception
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
     message_filters::Subscriber<sensor_msgs::Image> sub_image_;
     message_filters::Subscriber<sensor_msgs::Image> sub_label_;
+    message_filters::Subscriber<sensor_msgs::Image> sub_mask_;
     int coefficient_method_;
     ros::Subscriber sub_histogram_;
     cv::Mat histogram_;

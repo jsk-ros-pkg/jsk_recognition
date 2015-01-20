@@ -104,6 +104,7 @@ namespace jsk_perception
     // publish clusters
     cv::Mat clusters;
     cv::transpose(slic.clusters, clusters);
+    clusters = clusters + cv::Scalar(1);
     pub_.publish(cv_bridge::CvImage(
                    image->header,
                    sensor_msgs::image_encodings::TYPE_32SC1,

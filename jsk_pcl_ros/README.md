@@ -1354,9 +1354,12 @@ Algorithm is:
 * `~output/polygon_array_before_filtering` (`jsk_pcl_ros/PolygonArray`)
 
   Result of detection before euclidean filtering.
-* `~output/candidate_inliers` (`pcl_msgs/PointIndices`)
+* `~output/hint_filtered_indices` (`pcl_msgs/PointIndices`)
+* `~output/plane_filtered_indices` (`pcl_msgs/PointIndices`)
+* `~output/density_filtered_indices` (`pcl_msgs/PointIndices`)
+* `~output/euclidean_filtered_indices` (`pcl_msgs/PointIndices`)
 
-  Candidate point indices filtered by hint plane information.
+  Candidate point indices filtered by each filtering phase.
 
 #### Parameters
 * `~hint_outlier_threshold`

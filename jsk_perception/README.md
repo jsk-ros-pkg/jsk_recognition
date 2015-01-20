@@ -78,3 +78,58 @@ Output of this node is an image and each value means label index.
 * `~weight` (Integer, default: `4`)
 
   Weight of metrics between color and pixel distance.
+
+### jsk\_perception/LabDecomposer
+Decompose BGR/RGB image into separate planes in [CIE-Lab color space](http://en.wikipedia.org/wiki/Lab_color_space).
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/Image`)
+
+  Input image.
+#### Publishing Topic
+* `~output/l` (`sensor_msgs/Image`)
+* `~output/a` (`sensor_msgs/Image`)
+* `~output/b` (`sensor_msgs/Image`)
+  L*, a and b separated planes. Each image has CV_8UC encoding.
+
+### jsk\_perception/YCCDecomposer
+Decompose BGR/RGB image into separate planes in [YCbCr color space](http://en.wikipedia.org/wiki/YCbCr).
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/Image`)
+
+  Input image.
+#### Publishing Topic
+* `~output/y` (`sensor_msgs/Image`)
+* `~output/cr` (`sensor_msgs/Image`)
+* `~output/cb` (`sensor_msgs/Image`)
+  Y, Cr and Cb separated planes. Each image has CV_8UC encoding.
+
+### jsk\_perception/SingleChannelHistogram
+Compute histogram of single channel image.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/Image`)
+
+  Input image. It should has CV_8UC1 as encoding.
+
+* `~input/mask` (`sensor_msgs/Image`)
+
+  Mask image. if `~use_mask` is true, histogram is computed with this mask image.
+#### Publishing Topic
+* `~output` (`jsk_pcl_ros/ColorHistogram`)
+
+  Histogram of `~input` image.
+
+#### Parameters
+* `~use_mask` (Boolean, default: `false`)
+
+  If this parameter is set true, histogram is computed with mask image.
+* `~hist_size` (Integer, default: `10`)
+
+  The number of bins of histogram
+
+* `~min_value` (Double, default: `0.0`)
+* `~max_value`(Double, default: `255.0`)
+
+  Minimum and maximum value of histogram

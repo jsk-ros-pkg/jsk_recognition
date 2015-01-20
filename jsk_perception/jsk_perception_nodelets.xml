@@ -1,4 +1,8 @@
 <library path="lib/libjsk_perception">
+  <class name="jsk_perception/SingleChannelHistogram"
+         type="jsk_perception::SingleChannelHistogram"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/ColorHistogramLabelMatch"
          type="jsk_perception::ColorHistogramLabelMatch"
          base_class_type="nodelet::Nodelet">
@@ -28,6 +32,12 @@
          base_class_type="nodelet::Nodelet">
     <description>
     </description>
+  </class>
+  <class name="jsk_perception/LabDecomposer" type="jsk_perception::LabDecomposer"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/YCCDecomposer" type="jsk_perception::YCCDecomposer"
+         base_class_type="nodelet::Nodelet">
   </class>
   <class name="jsk_perception/RGBDecomposer" type="jsk_perception::RGBDecomposer"
          base_class_type="nodelet::Nodelet">

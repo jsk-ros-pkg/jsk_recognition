@@ -88,6 +88,22 @@ namespace jsk_pcl_ros {
       const pcl::PointCloud<pcl::PointNormal>::Ptr cloud,
       const pcl::PointIndices::Ptr indices,
       pcl::PointIndices& output);
+    virtual void euclideanFilter(
+      const pcl::PointCloud<pcl::PointNormal>::Ptr cloud,
+      const pcl::PointIndices::Ptr indices,
+      const ConvexPolygon::Ptr hint_convex,
+      pcl::PointIndices& output);
+    virtual void planeFilter(
+      const pcl::PointCloud<pcl::PointNormal>::Ptr cloud,
+      const pcl::PointIndices::Ptr indices,
+      const Eigen::Vector3f& normal,
+      pcl::PointIndices& output,
+      pcl::ModelCoefficients& coefficients);
+    virtual void hintFilter(
+      const pcl::PointCloud<pcl::PointNormal>::Ptr cloud,
+      const ConvexPolygon::Ptr hint_convex,
+      pcl::PointIndices& output);
+
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
@@ -98,13 +114,14 @@ namespace jsk_pcl_ros {
     ros::Publisher pub_hint_polygon_array_;
     ros::Publisher pub_hint_inliers_;
     ros::Publisher pub_hint_coefficients_;
-    ros::Publisher pub_polygon_array_before_filtering_; // for visualization
-    ros::Publisher pub_polygon_before_filtering_; // for visualization
     ros::Publisher pub_polygon_array_;
     ros::Publisher pub_polygon_;
     ros::Publisher pub_inliers_;
     ros::Publisher pub_coefficients_;
-    ros::Publisher pub_candidate_inliers_;
+    ros::Publisher pub_hint_filtered_indices_;
+    ros::Publisher pub_plane_filtered_indices_;
+    ros::Publisher pub_density_filtered_indices_;
+    ros::Publisher pub_euclidean_filtered_indices_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
 

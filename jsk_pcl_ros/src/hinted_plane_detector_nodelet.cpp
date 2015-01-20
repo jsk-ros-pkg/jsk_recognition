@@ -68,12 +68,14 @@ namespace jsk_pcl_ros {
       *pnh_, "output/polygon", 1);
     pub_polygon_array_ = advertise<jsk_pcl_ros::PolygonArray>(
       *pnh_, "output/polygon_array", 1);
-    pub_polygon_before_filtering_ = advertise<geometry_msgs::PolygonStamped>(
-      *pnh_, "output/polygon_before_filtering", 1);
-    pub_polygon_array_before_filtering_ = advertise<jsk_pcl_ros::PolygonArray>(
-      *pnh_, "output/polygon_array_before_filtering", 1);
-    pub_candidate_inliers_ = advertise<PCLIndicesMsg>(
-      *pnh_, "output/candidate_inliers", 1);
+    pub_hint_filtered_indices_ = advertise<PCLIndicesMsg>(
+      *pnh_, "output/hint_filtered_indices", 1);
+    pub_plane_filtered_indices_ = advertise<PCLIndicesMsg>(
+      *pnh_, "output/plane_filtered_indices", 1);
+    pub_density_filtered_indices_ = advertise<PCLIndicesMsg>(
+      *pnh_, "output/density_filtered_indices", 1);
+    pub_euclidean_filtered_indices_ = advertise<PCLIndicesMsg>(
+      *pnh_, "output/euclidean_filtered_indices", 1);
     pub_inliers_ = advertise<PCLIndicesMsg>(
       *pnh_, "output/inliers", 1);
     pub_coefficients_ = advertise<PCLModelCoefficientMsg>(
@@ -178,42 +180,80 @@ namespace jsk_pcl_ros {
     kdtree.setInputCloud(cloud, indices_ptr);
     for (size_t i = 0; i < indices->indices.size(); i++) {
       int point_index = indices->indices[i];
-      pcl::PointNormal p = cloud->points[point_index];
       std::vector<int> result_indices;
       std::vector<float> result_distances;
-      kdtree.radiusSearch(p, density_radius_, result_indices, result_distances);
-      if (result_distances.size() > density_num_) {
+      kdtree.radiusSearch(i, density_radius_,
+                          result_indices, result_distances);
+      if (result_distances.size() >= density_num_) {
         output.indices.push_back(point_index);
       }
     }
+    output.header = cloud->header;
+    PCLIndicesMsg ros_indices;
+    pcl_conversions::fromPCL(output, ros_indices);
+    pub_density_filtered_indices_.publish(ros_indices);
   }
-  
-  bool HintedPlaneDetector::detectLargerPlane(
-    pcl::PointCloud<pcl::PointNormal>::Ptr input_cloud,
-    ConvexPolygon::Ptr hint_convex)
+
+  void HintedPlaneDetector::euclideanFilter(
+    const pcl::PointCloud<pcl::PointNormal>::Ptr cloud,
+    const pcl::PointIndices::Ptr indices,
+    const ConvexPolygon::Ptr hint_convex,
+    pcl::PointIndices& output)
   {
-    
-    pcl::PointIndices::Ptr plane_inliers (new pcl::PointIndices);
-    pcl::ModelCoefficients::Ptr plane_coefficients(new pcl::ModelCoefficients);
-    pcl::PointIndices::Ptr candidate_inliers (new pcl::PointIndices);
-    candidate_inliers->header = input_cloud->header;
-    // filter points based on hint_convex to get better result...
-    for (size_t i = 0; i < input_cloud->points.size(); i++) {
-      pcl::PointNormal p = input_cloud->points[i];
+    pcl::EuclideanClusterExtraction<pcl::PointNormal> ec;
+    ec.setClusterTolerance(euclidean_clustering_filter_tolerance_);
+    pcl::search::KdTree<pcl::PointNormal>::Ptr tree
+      (new pcl::search::KdTree<pcl::PointNormal>);
+    tree->setInputCloud(cloud);
+    ec.setSearchMethod(tree);
+    ec.setIndices(indices);
+    ec.setInputCloud(cloud);
+    //ec.setMinClusterSize ();
+    std::vector<pcl::PointIndices> cluster_indices;
+    ec.extract(cluster_indices);
+    if (cluster_indices.size() == 0) {
+      return;
+    }
+    NODELET_INFO("%lu clusters", cluster_indices.size());
+    pcl::PointIndices::Ptr filtered_indices
+      = getBestCluster(cloud, cluster_indices, hint_convex);
+    output = *filtered_indices;
+    output.header = cloud->header;
+    PCLIndicesMsg ros_indices;
+    pcl_conversions::fromPCL(output, ros_indices);
+    pub_euclidean_filtered_indices_.publish(ros_indices);
+  }
+
+  void HintedPlaneDetector::hintFilter(
+    const pcl::PointCloud<pcl::PointNormal>::Ptr cloud,
+    const ConvexPolygon::Ptr hint_convex,
+    pcl::PointIndices& output)
+  {
+    for (size_t i = 0; i < cloud->points.size(); i++) {
+      pcl::PointNormal p = cloud->points[i];
       if (!isnan(p.x) && !isnan(p.y) && !isnan(p.y)) {
         Eigen::Vector4f v = p.getVector4fMap();
         if (hint_convex->distanceToPoint(v) < outlier_threashold_) {
           Eigen::Vector3f n(p.normal_x, p.normal_y, p.normal_z);
           if (hint_convex->angle(n) < normal_filter_eps_angle_) {
-            candidate_inliers->indices.push_back(i);
+            output.indices.push_back(i);
           }
         }
       }
     }
+    output.header = cloud->header;
     PCLIndicesMsg ros_candidate_inliers;
-    pcl_conversions::fromPCL(*candidate_inliers, ros_candidate_inliers);
-    pub_candidate_inliers_.publish(ros_candidate_inliers);
-    
+    pcl_conversions::fromPCL(output, ros_candidate_inliers);
+    pub_hint_filtered_indices_.publish(ros_candidate_inliers);
+  }
+
+  void HintedPlaneDetector::planeFilter(
+    const pcl::PointCloud<pcl::PointNormal>::Ptr cloud,
+    const pcl::PointIndices::Ptr indices,
+    const Eigen::Vector3f& normal,
+    pcl::PointIndices& output,
+    pcl::ModelCoefficients& coefficients)
+  {
     pcl::SACSegmentation<pcl::PointNormal> seg;
     seg.setOptimizeCoefficients (true);
     seg.setModelType (pcl::SACMODEL_PERPENDICULAR_PLANE);
@@ -221,62 +261,63 @@ namespace jsk_pcl_ros {
     seg.setDistanceThreshold (outlier_threashold_);
     seg.setMaxIterations (max_iteration_);
     seg.setEpsAngle(eps_angle_);
-    Eigen::Vector3f normal = hint_convex->getNormal();
     seg.setAxis(normal);
-    seg.setInputCloud(input_cloud);
-    seg.setIndices(candidate_inliers);
-    seg.segment(*plane_inliers, *plane_coefficients);
-    if (plane_inliers->indices.size() > min_size_) { // good!
-      // filtering by euclidean clustering
-      pcl::EuclideanClusterExtraction<pcl::PointNormal> ec;
-      ec.setClusterTolerance(euclidean_clustering_filter_tolerance_);
-      pcl::search::KdTree<pcl::PointNormal>::Ptr tree (new pcl::search::KdTree<pcl::PointNormal>);
-      tree->setInputCloud(input_cloud);
-      ec.setSearchMethod(tree);
-      ec.setIndices(plane_inliers);
-      ec.setInputCloud(input_cloud);
-      //ec.setMinClusterSize ();
-      std::vector<pcl::PointIndices> cluster_indices;
-      ec.extract(cluster_indices);
-      if (cluster_indices.size() == 0) {
-        return false;
-      }
-      NODELET_INFO("%lu clusters", cluster_indices.size());
-      pcl::PointIndices::Ptr filtered_indices
-        = getBestCluster(input_cloud, cluster_indices, hint_convex);
-      pcl::PointIndices::Ptr density_filtered_indices (new pcl::PointIndices);
-      densityFilter(
-        input_cloud, filtered_indices, *density_filtered_indices);
-      if (density_filtered_indices->indices.size() > 3) {
-        ConvexPolygon::Ptr convex_before_filtering
-          = convexFromCoefficientsAndInliers<pcl::PointNormal>(
-            input_cloud, plane_inliers, plane_coefficients);
-        ConvexPolygon::Ptr convex
-          = convexFromCoefficientsAndInliers<pcl::PointNormal>(
-            input_cloud, density_filtered_indices, plane_coefficients);
-        // publish to ROS
-        publishPolygon(convex_before_filtering,
-                       pub_polygon_before_filtering_,
-                       pub_polygon_array_before_filtering_,
-                       input_cloud->header);
-        publishPolygon(convex,
-                       pub_polygon_, pub_polygon_array_,
-                       input_cloud->header);
-        PCLIndicesMsg ros_inliers;
-        pcl_conversions::fromPCL(*filtered_indices, ros_inliers);
-        pub_inliers_.publish(ros_inliers);
-        PCLModelCoefficientMsg ros_coefficients;
-        pcl_conversions::fromPCL(*plane_coefficients, ros_coefficients);
-        pub_coefficients_.publish(ros_coefficients);
-        return true;
-      }
-      else {
-        return false;
-      }
-    }
-    else {
+    seg.setInputCloud(cloud);
+    seg.setIndices(indices);
+    seg.segment(output, coefficients);
+    coefficients.header = cloud->header;
+    output.header = cloud->header;
+    PCLIndicesMsg ros_indices;
+    pcl_conversions::fromPCL(output, ros_indices);
+    pub_plane_filtered_indices_.publish(ros_indices);
+  }
+  
+  bool HintedPlaneDetector::detectLargerPlane(
+    pcl::PointCloud<pcl::PointNormal>::Ptr input_cloud,
+    ConvexPolygon::Ptr hint_convex)
+  {
+    pcl::PointIndices::Ptr candidate_inliers (new pcl::PointIndices);
+    hintFilter(input_cloud, hint_convex, *candidate_inliers);
+    // filter points based on hint_convex to get better result...
+    
+    pcl::PointIndices::Ptr plane_inliers (new pcl::PointIndices);
+    pcl::ModelCoefficients::Ptr plane_coefficients(new pcl::ModelCoefficients);
+    planeFilter(input_cloud, candidate_inliers,
+                hint_convex->getNormal(),
+                *plane_inliers, *plane_coefficients);
+    if (plane_inliers->indices.size() < min_size_) { // good!
+      NODELET_ERROR("failed to detect by plane fitting filtering");
       return false;
     }
+    // filtering by euclidean clustering
+    pcl::PointIndices::Ptr euclidean_filtered_indices(new pcl::PointIndices);
+    euclideanFilter(input_cloud, plane_inliers, hint_convex,
+                    *euclidean_filtered_indices);
+    if (euclidean_filtered_indices->indices.size() < min_size_) {
+      NODELET_ERROR("failed to detect by euclidean filtering");
+      return false;
+    }
+    pcl::PointIndices::Ptr density_filtered_indices (new pcl::PointIndices);
+    densityFilter(
+      input_cloud, euclidean_filtered_indices, *density_filtered_indices);
+      
+    if (density_filtered_indices->indices.size() < min_size_) {
+      NODELET_ERROR("failed to detect by density filtering");
+      return false;
+    }
+    ConvexPolygon::Ptr convex
+      = convexFromCoefficientsAndInliers<pcl::PointNormal>(
+        input_cloud, density_filtered_indices, plane_coefficients);
+    // publish to ROS
+    publishPolygon(convex, pub_polygon_, pub_polygon_array_,
+                   input_cloud->header);
+    PCLIndicesMsg ros_inliers;
+    pcl_conversions::fromPCL(*density_filtered_indices, ros_inliers);
+    pub_inliers_.publish(ros_inliers);
+    PCLModelCoefficientMsg ros_coefficients;
+    pcl_conversions::fromPCL(*plane_coefficients, ros_coefficients);
+    pub_coefficients_.publish(ros_coefficients);
+    return true;
   }
 
   void HintedPlaneDetector::publishPolygon(

@@ -125,6 +125,7 @@ Compute histogram of single channel image.
 * `~use_mask` (Boolean, default: `false`)
 
   If this parameter is set true, histogram is computed with mask image.
+
 * `~hist_size` (Integer, default: `10`)
 
   The number of bins of histogram
@@ -133,3 +134,17 @@ Compute histogram of single channel image.
 * `~max_value`(Double, default: `255.0`)
 
   Minimum and maximum value of histogram
+
+
+### jsk\_perception/AddMaskImage
+Add two mask image into one mask image.
+
+#### Subscribing Topic
+* `~input/src1` (`sensor_msgs/Image`)
+* `~input/src2` (`sensor_msgs/Image`)
+
+  Input mask images.
+#### Publishing Topic
+* `~output` (`sensor_msgs/Image`)
+
+  Added mask image.

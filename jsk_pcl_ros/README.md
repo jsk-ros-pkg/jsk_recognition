@@ -1321,8 +1321,9 @@ Algorithm is:
 2. Filter `~input` pointcloud based on distance and normal direction with hint plane.
 3. Detect plane from the pointcloud using RANSAC
 4. Segment clusters out of the inliers of the detected plane based on euclidean metrics
-5. Extract points from the nearest segmented clusters to the centroid of hint plane
-6. Compute convex hull of the extracted points
+5. Apply density filter
+6. Extract points from the nearest segmented clusters to the centroid of hint plane
+7. Compute convex hull of the extracted points
 
 #### Subscribing Topic
 
@@ -1389,6 +1390,12 @@ Algorithm is:
 * `~euclidean_clustering_filter_min_size`
 
   Minimum cluster size in euclidean clustering to filter far points.
+
+* `~density_radius` (Double, default: `0.1`)
+* `~density_num` (Integer, default: `10`)
+
+  These parameters are used in density filtering. The only points which have `~density_num` neighbors within
+  `~density_radius` distance are passed.
 
 ### jsk\_pcl/OctreeChangeDetector
 #### What Is This

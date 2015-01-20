@@ -33,60 +33,44 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_perception/colorize_labels.h"
-#include <jsk_topic_tools/color_utils.h>
-#include <cv_bridge/cv_bridge.h>
-#include <opencv2/opencv.hpp>
-#include <sensor_msgs/image_encodings.h>
+
+#ifndef JSK_PERCEPTION_ADD_MASK_IMAGE_H_
+#define JSK_PERCEPTION_ADD_MASK_IMAGE_H_
+
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <sensor_msgs/Image.h>
+
+#include <message_filters/subscriber.h>
+#include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/exact_time.h>
+#include <message_filters/sync_policies/approximate_time.h>
 
 namespace jsk_perception
 {
-  void ColorizeLabels::onInit()
+  class AddMaskImage: public jsk_topic_tools::DiagnosticNodelet
   {
-    DiagnosticNodelet::onInit();
-    pub_ = advertise<sensor_msgs::Image>(
-      *pnh_, "output", 1);
-  }
+  public:
+    typedef message_filters::sync_policies::ApproximateTime<
+    sensor_msgs::Image,
+    sensor_msgs::Image > SyncPolicy;
+    
+    AddMaskImage(): DiagnosticNodelet("AddMaskImage") {}
+  protected:
+    virtual void onInit();
+    virtual void subscribe();
+    virtual void unsubscribe();
+    virtual void add(
+      const sensor_msgs::Image::ConstPtr& src1_msg,
+      const sensor_msgs::Image::ConstPtr& src2_msg);
+    
+    ros::Publisher pub_;
+    message_filters::Subscriber<sensor_msgs::Image> sub_src1_;
+    message_filters::Subscriber<sensor_msgs::Image> sub_src2_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
 
-  void ColorizeLabels::subscribe()
-  {
-    sub_ = pnh_->subscribe("input", 1, &ColorizeLabels::colorize, this);
-  }
-
-  void ColorizeLabels::unsubscribe()
-  {
-    sub_.shutdown();
-  }
-
-  void ColorizeLabels::colorize(
-    const sensor_msgs::Image::ConstPtr& label_image_msg)
-  {
-    cv::Mat label_image = cv_bridge::toCvShare(
-      label_image_msg, label_image_msg->encoding)->image;
-    cv::Mat output_image = cv::Mat::zeros(label_image_msg->height,
-                                          label_image_msg->width,
-                                          CV_8UC3);
-    ROS_INFO("%dx%d", label_image_msg->width, label_image_msg->height);
-    for (size_t j = 0; j < label_image.rows; ++j) {
-      for (size_t i = 0; i < label_image.cols; ++i) {
-        int label = label_image.at<int>(j, i);
-        if (label == 0) {
-          output_image.at<cv::Vec3b>(j, i) = cv::Vec3b(0, 0, 0);
-        }
-        else {
-          std_msgs::ColorRGBA rgba = jsk_topic_tools::colorCategory20(label);
-          output_image.at<cv::Vec3b>(j, i)
-            = cv::Vec3b(int(rgba.b * 255), int(rgba.g * 255), int(rgba.r * 255));
-        }
-      }
-    }
-    pub_.publish(
-      cv_bridge::CvImage(
-        label_image_msg->header,
-        sensor_msgs::image_encodings::BGR8,
-        output_image).toImageMsg());
-  }
+  private:
+    
+  };
 }
 
-#include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS (jsk_perception::ColorizeLabels, nodelet::Nodelet);
+#endif

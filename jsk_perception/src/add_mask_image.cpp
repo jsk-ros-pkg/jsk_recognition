@@ -33,60 +33,53 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_perception/colorize_labels.h"
-#include <jsk_topic_tools/color_utils.h>
-#include <cv_bridge/cv_bridge.h>
+#include <jsk_perception/add_mask_image.h>
 #include <opencv2/opencv.hpp>
+#include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 
 namespace jsk_perception
 {
-  void ColorizeLabels::onInit()
+  void AddMaskImage::onInit()
   {
     DiagnosticNodelet::onInit();
     pub_ = advertise<sensor_msgs::Image>(
       *pnh_, "output", 1);
   }
 
-  void ColorizeLabels::subscribe()
+  void AddMaskImage::subscribe()
   {
-    sub_ = pnh_->subscribe("input", 1, &ColorizeLabels::colorize, this);
+    sub_src1_.subscribe(*pnh_, "input/src1", 1);
+    sub_src2_.subscribe(*pnh_, "input/src2", 1);
+    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+    sync_->connectInput(sub_src1_, sub_src2_);
+    sync_->registerCallback(boost::bind(&AddMaskImage::add, this, _1, _2));
   }
 
-  void ColorizeLabels::unsubscribe()
+  void AddMaskImage::unsubscribe()
   {
-    sub_.shutdown();
+    sub_src1_.unsubscribe();
+    sub_src2_.unsubscribe();
   }
 
-  void ColorizeLabels::colorize(
-    const sensor_msgs::Image::ConstPtr& label_image_msg)
+  void AddMaskImage::add(
+    const sensor_msgs::Image::ConstPtr& src1_msg,
+    const sensor_msgs::Image::ConstPtr& src2_msg)
   {
-    cv::Mat label_image = cv_bridge::toCvShare(
-      label_image_msg, label_image_msg->encoding)->image;
-    cv::Mat output_image = cv::Mat::zeros(label_image_msg->height,
-                                          label_image_msg->width,
-                                          CV_8UC3);
-    ROS_INFO("%dx%d", label_image_msg->width, label_image_msg->height);
-    for (size_t j = 0; j < label_image.rows; ++j) {
-      for (size_t i = 0; i < label_image.cols; ++i) {
-        int label = label_image.at<int>(j, i);
-        if (label == 0) {
-          output_image.at<cv::Vec3b>(j, i) = cv::Vec3b(0, 0, 0);
-        }
-        else {
-          std_msgs::ColorRGBA rgba = jsk_topic_tools::colorCategory20(label);
-          output_image.at<cv::Vec3b>(j, i)
-            = cv::Vec3b(int(rgba.b * 255), int(rgba.g * 255), int(rgba.r * 255));
-        }
-      }
-    }
+    cv::Mat src1 = cv_bridge::toCvShare(
+      src1_msg, src1_msg->encoding)->image;
+    cv::Mat src2 = cv_bridge::toCvShare(
+      src2_msg, src2_msg->encoding)->image;
+    cv::Mat result;
+    cv::add(src1, src2, result);
     pub_.publish(
-      cv_bridge::CvImage(
-        label_image_msg->header,
-        sensor_msgs::image_encodings::BGR8,
-        output_image).toImageMsg());
+      cv_bridge::CvImage(src1_msg->header,
+                         sensor_msgs::image_encodings::MONO8,
+                         result).toImageMsg());
   }
+  
 }
 
+
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS (jsk_perception::ColorizeLabels, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_perception::AddMaskImage, nodelet::Nodelet);

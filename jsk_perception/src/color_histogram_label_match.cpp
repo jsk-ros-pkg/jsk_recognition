@@ -50,6 +50,8 @@ namespace jsk_perception
     srv_->setCallback (f);
     pub_debug_ = advertise<sensor_msgs::Image>(
       *pnh_, "debug", 1);
+    pub_coefficient_image_ = advertise<sensor_msgs::Image>(
+      *pnh_, "output/coefficient_image", 1);
   }
 
   void ColorHistogramLabelMatch::subscribe()
@@ -143,12 +145,13 @@ namespace jsk_perception
       = cv_bridge::toCvShare(label_msg, label_msg->encoding)->image;
     cv::Mat whole_mask
       = cv_bridge::toCvShare(mask_msg, mask_msg->encoding)->image;
+    cv::Mat coefficient_image = cv::Mat::zeros(
+      image_msg->height, image_msg->width, CV_32FC1);
     std::vector<int> labels;
     getLabels(label, labels);
     
-    cv::Mat coefficients_image = cv::Mat::zeros(image_msg->height,
-                                                image_msg->width,
-                                                CV_8UC3); // BGR8
+    cv::Mat coefficients_heat_image = cv::Mat::zeros(
+      image_msg->height, image_msg->width, CV_8UC3); // BGR8
     int hist_size = histogram_.cols;
     float range[] = { min_value_, max_value_ };
     const float* hist_range = { range };
@@ -187,13 +190,14 @@ namespace jsk_perception
         }
       }
       std_msgs::ColorRGBA coef_color = jsk_topic_tools::heatColor(coef);
-      for (size_t j = 0; j < coefficients_image.rows; j++) {
-        for (size_t i = 0; i < coefficients_image.cols; i++) {
+      for (size_t j = 0; j < coefficients_heat_image.rows; j++) {
+        for (size_t i = 0; i < coefficients_heat_image.cols; i++) {
           if (label_mask.at<uchar>(j, i) == 255) {
-            coefficients_image.at<cv::Vec3b>(j, i)
+            coefficients_heat_image.at<cv::Vec3b>(j, i)
               = cv::Vec3b(int(coef_color.b * 255),
                           int(coef_color.g * 255),
                           int(coef_color.r * 255));
+            coefficient_image.at<float>(j, i) = coef;
           }
         }
       }
@@ -202,7 +206,11 @@ namespace jsk_perception
     pub_debug_.publish(
       cv_bridge::CvImage(image_msg->header,
                          sensor_msgs::image_encodings::BGR8,
-                         coefficients_image).toImageMsg());
+                         coefficients_heat_image).toImageMsg());
+    pub_coefficient_image_.publish(
+      cv_bridge::CvImage(image_msg->header,
+                         sensor_msgs::image_encodings::TYPE_32FC1,
+                         coefficient_image).toImageMsg());
   }
 
   double ColorHistogramLabelMatch::coefficients(

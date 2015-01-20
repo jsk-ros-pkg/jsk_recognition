@@ -96,6 +96,7 @@ namespace jsk_perception
     ros::Subscriber sub_histogram_;
     cv::Mat histogram_;
     ros::Publisher pub_debug_;
+    ros::Publisher pub_coefficient_image_;
   private:
     
   };

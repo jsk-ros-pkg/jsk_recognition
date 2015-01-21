@@ -45,6 +45,23 @@ Apply mask image to original image and visualize it. It's a utlity to visualize 
 
   Clipped mask image. The image is clipped by bounding box of mask image.
 
+### jsk\_perception/UnpplyMaskImage
+![](images/apply_unapply_mask_image.png)
+
+Unapply mask image to the size of original image.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/Image`)
+
+  Masked image.
+* `~input/mask` (`sensor_msgs/Image`)
+
+  Mask image.
+#### Publishing Topic
+* `~output` (`sensor_msgs/Image`)
+
+  Unmasked image. The region outside of mask image is filled by black (0).
+
 ### jsk\_perception/SLICSuperPixels
 ![](images/slic_super_pixels.png)
 

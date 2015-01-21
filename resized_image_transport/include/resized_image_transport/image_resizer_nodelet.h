@@ -14,6 +14,7 @@ namespace resized_image_transport
   protected:
     typedef dynamic_reconfigure::Server<ImageResizerConfig> ReconfigureServer;
     ReconfigureServer reconfigure_server_;
+    int interpolation_;
 
   protected:
     void onInit();

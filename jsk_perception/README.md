@@ -136,6 +136,8 @@ Compute histogram of single channel image.
   Minimum and maximum value of histogram
 
 ### jsk\_perception/BlobDetector
+![](images/blob_detector.png)
+
 Detect blob of binary image and output label of it.
 The implementation is based on [Imura's implementation](http://oshiro.bpe.es.osaka-u.ac.jp/people/staff/imura/products/labeling).
 

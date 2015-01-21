@@ -70,10 +70,14 @@ namespace jsk_perception
     for (size_t j = 0; j < label_image.rows; ++j) {
       for (size_t i = 0; i < label_image.cols; ++i) {
         int label = label_image.at<int>(j, i);
-        //ROS_INFO("label(%lu, %lu): %d", j, i, label);
-        std_msgs::ColorRGBA rgba = jsk_topic_tools::colorCategory20(label);
-        output_image.at<cv::Vec3b>(j, i)
-          = cv::Vec3b(int(rgba.b * 255), int(rgba.g * 255), int(rgba.r * 255));
+        if (label == 0) {
+          output_image.at<cv::Vec3b>(j, i) = cv::Vec3b(0, 0, 0);
+        }
+        else {
+          std_msgs::ColorRGBA rgba = jsk_topic_tools::colorCategory20(label);
+          output_image.at<cv::Vec3b>(j, i)
+            = cv::Vec3b(int(rgba.b * 255), int(rgba.g * 255), int(rgba.r * 255));
+        }
       }
     }
     pub_.publish(

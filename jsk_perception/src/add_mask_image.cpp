@@ -43,6 +43,7 @@ namespace jsk_perception
   void AddMaskImage::onInit()
   {
     DiagnosticNodelet::onInit();
+    pnh_->param("approximate_sync", approximate_sync_, false);
     pub_ = advertise<sensor_msgs::Image>(
       *pnh_, "output", 1);
   }
@@ -51,9 +52,16 @@ namespace jsk_perception
   {
     sub_src1_.subscribe(*pnh_, "input/src1", 1);
     sub_src2_.subscribe(*pnh_, "input/src2", 1);
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-    sync_->connectInput(sub_src1_, sub_src2_);
-    sync_->registerCallback(boost::bind(&AddMaskImage::add, this, _1, _2));
+    if (approximate_sync_) {
+      async_ = boost::make_shared<message_filters::Synchronizer<ApproxSyncPolicy> >(100);
+      async_->connectInput(sub_src1_, sub_src2_);
+      async_->registerCallback(boost::bind(&AddMaskImage::add, this, _1, _2));
+    }
+    else {
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+      sync_->connectInput(sub_src1_, sub_src2_);
+      sync_->registerCallback(boost::bind(&AddMaskImage::add, this, _1, _2));
+    }
   }
 
   void AddMaskImage::unsubscribe()

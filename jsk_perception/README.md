@@ -45,6 +45,11 @@ Apply mask image to original image and visualize it. It's a utlity to visualize 
 
   Clipped mask image. The image is clipped by bounding box of mask image.
 
+#### Parameters
+* `~approximate_sync` (Bool, default: `false`)
+
+  Approximately synchronize inputs if it's true.
+
 ### jsk\_perception/UnpplyMaskImage
 ![](images/apply_unapply_mask_image.png)
 
@@ -61,6 +66,11 @@ Unapply mask image to the size of original image.
 * `~output` (`sensor_msgs/Image`)
 
   Unmasked image. The region outside of mask image is filled by black (0).
+
+#### Parameters
+* `~approximate_sync` (Bool, default: `false`)
+
+  Approximately synchronize inputs if it's true.
 
 ### jsk\_perception/SLICSuperPixels
 ![](images/slic_super_pixels.png)
@@ -185,3 +195,7 @@ Add two mask image into one mask image.
 * `~output` (`sensor_msgs/Image`)
 
   Added mask image.
+#### Parameters
+* `~approximate_sync` (Bool, default: `false`)
+
+  Approximately synchronize `~input/src1` and `~input/src2` if it's true.

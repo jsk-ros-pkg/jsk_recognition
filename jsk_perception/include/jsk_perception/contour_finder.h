@@ -55,6 +55,7 @@ namespace jsk_perception
 
     ros::Subscriber sub_;
     ros::Publisher pub_debug_image_;
+    ros::Publisher pub_convex_image_;
   private:
     
   };

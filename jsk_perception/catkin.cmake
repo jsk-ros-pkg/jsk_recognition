@@ -5,7 +5,7 @@ find_package(catkin REQUIRED COMPONENTS
   mk message_generation imagesift std_msgs sensor_msgs geometry_msgs cv_bridge
   image_geometry image_transport driver_base dynamic_reconfigure cmake_modules
   roscpp nodelet rostest tf rospack
-  jsk_topic_tools)
+  jsk_topic_tools pcl_ros jsk_pcl_ros)
 find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 
@@ -113,6 +113,7 @@ jsk_perception_nodelet(src/single_channel_histogram.cpp "jsk_perception/SingleCh
 jsk_perception_nodelet(src/blob_detector.cpp "jsk_perception/BlobDetector" "blob_detector")
 jsk_perception_nodelet(src/add_mask_image.cpp "jsk_perception/AddMaskImage" "add_mask_image")
 jsk_perception_nodelet(src/multiply_mask_image.cpp "jsk_perception/MultiplyMaskImage" "multiply_mask_image")
+jsk_perception_nodelet(src/find_object_on_plane.cpp "jsk_perception/FindObjectOnPlane" "find_object_on_plane")
 # compiling jsk_perception library for nodelet
 add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
   ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels/slic.cpp)

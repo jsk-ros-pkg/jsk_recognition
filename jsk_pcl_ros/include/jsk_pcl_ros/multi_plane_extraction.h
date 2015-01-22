@@ -98,6 +98,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     boost::mutex mutex_;
     ros::Publisher pub_, nonplane_pub_;
+    ros::Publisher pub_indices_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<jsk_pcl_ros::ModelCoefficientsArray> sub_coefficients_;

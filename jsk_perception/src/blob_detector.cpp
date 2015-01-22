@@ -73,7 +73,7 @@ namespace jsk_perception
     cv::Mat label(image.size(), CV_16SC1);
     LabelingBS labeling;
     labeling.Exec(image.data, (short*)label.data, image.cols, image.rows,
-                  false, min_area_);
+                  true, min_area_);
     
     cv::Mat label_int(image.size(), CV_32SC1);
     for (int j = 0; j < label.rows; j++) {

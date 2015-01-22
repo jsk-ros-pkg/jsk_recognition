@@ -181,6 +181,10 @@ namespace jsk_pcl_ros
           the_polygon.points[i], p);
         hull_cloud->points.push_back(p);
       }
+      pcl::PointXYZRGB p_last;
+        pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZRGB>(
+          the_polygon.points[0], p_last);
+      hull_cloud->points.push_back(p_last);
       
       prism_extract.setInputCloud(nonplane_cloud);
       prism_extract.setHeightLimits(min_height_, max_height_);

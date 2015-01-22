@@ -26,11 +26,6 @@
     <remap from="~input/cloud" to="laser_cloud_from_camera_frame/output"/>
   </node>
 
-  <node pkg="jsk_pcl_ros" type="hinted_plane_detector" name="hinted_plane_detection">
-    <remap from="~input" to="normal_concatenater/output" />
-    <remap from="~input/hint/cloud" to="roi_clipper/output/cloud" />
-  </node>
-
   <node pkg="nodelet" type="nodelet" name="voxelgrid"
         args="standalone pcl/VoxelGrid">
     <remap from="~input" to="laser_cloud_from_camera_frame/output" />
@@ -47,7 +42,7 @@
         radius_search: 0.1
         k_search: 0
         # 0, => ANN, 1 => FLANN, 2 => Organized
-        spatial_locator: 0
+        spatial_locator: 1
         max_queue_size: 1
     </rosparam>
   </node>
@@ -58,21 +53,46 @@
     <remap from="~normal" to="normal_estimation/output" />
   </node>
 
-  <node pkg="nodelet" type="nodelet" name="candidate_points"
-        args="standalone pcl/ExtractIndices">
+  <node pkg="jsk_pcl_ros" type="hinted_plane_detector" name="hinted_plane_detection">
     <remap from="~input" to="normal_concatenater/output" />
-    <remap from="~indices" to="hinted_plane_detection/output/candidate_inliers" />
+    <remap from="~input/hint/cloud" to="roi_clipper/output/cloud" />
+  </node>
+
+  <!-- convert to polygon array to apply other stuff -->
+  <node pkg="jsk_pcl_ros" type="polygon_array_wrapper" name="polygon_array_wrapper">
+    <remap from="~input_polygon" to="hinted_plane_detection/output/polygon" />
+    <remap from="~input_coefficients" to="hinted_plane_detection/output/coefficients" />
+  </node>
+
+  <node pkg="jsk_pcl_ros" name="plane_extraction" type="multi_plane_extraction">
+    <remap from="~input" to="/laser_cloud_from_camera_frame/output" />
+    <remap from="~input_polygons" to="polygon_array_wrapper/output_polygons" />
+    <remap from="~input_coefficients" to="polygon_array_wrapper/output_coefficients" />
     <rosparam>
-      use_indices: true
+      use_indices: false
+      min_height: 0.025
+      max_height: 0.2
     </rosparam>
   </node>
-
-  <node pkg="jsk_pcl_ros" type="polygon_to_mask_image" name="polygon_to_mask_image" output="screen">
-    <remap from="~input" to="hinted_plane_detection/output/polygon" />
-    <remap from="~input/camera_info" to="/multisense/left/camera_info" />
+  <node pkg="jsk_pcl_ros" type="euclidean_clustering" name="euclidean_clustering">
+    <remap from="~input" to="/plane_extraction/output" />
+    <rosparam>
+      tolerance: 0.02
+      min_size: 10
+    </rosparam>
   </node>
-
-  <node pkg="image_view" type="image_view" name="polygon_viewer">
-    <remap from="image" to="polygon_to_mask_image/output" />
+  <node pkg="jsk_pcl_ros" type="cluster_point_indices_decomposer" name="object_clusters_on_plane">
+    <remap from="~input" to="/plane_extraction/output" />
+    <remap from="~target" to="/euclidean_clustering/output" />
+    <remap from="~align_planes" to="polygon_array_wrapper/output_polygons" />
+    <remap from="~align_planes_coefficients"
+           to="polygon_array_wrapper/output_coefficients" />
+    <rosparam>
+      align_boxes: true
+      use_pca: true
+      publish_clouds: false
+      publish_tf: false
+    </rosparam>
   </node>
+  
 </launch>

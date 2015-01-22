@@ -54,6 +54,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     nonplane_pub_ = advertise<pcl::PointCloud<pcl::PointXYZRGB> >(*pnh_, "output_nonplane_cloud", 1);
+    pub_indices_ = advertise<PCLIndicesMsg>(*pnh_, "output/indices", 1);
     if (!pnh_->getParam("max_queue_size", maximum_queue_size_)) {
       maximum_queue_size_ = 100;
     }
@@ -216,10 +217,12 @@ namespace jsk_pcl_ros
     pcl::toROSMsg(result_cloud, ros_result);
     ros_result.header = input->header;
     pub_.publish(ros_result);
-
+    PCLIndicesMsg ros_indices;
+    pcl_conversions::fromPCL(*all_result_indices, ros_indices);
+    ros_indices.header = input->header;
+    pub_indices_.publish(ros_indices);
     diagnostic_updater_->update();
   }
-  
 }
 
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::MultiPlaneExtraction, nodelet::Nodelet);

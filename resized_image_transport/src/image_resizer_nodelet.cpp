@@ -18,8 +18,23 @@ namespace resized_image_transport
   void ImageResizer::initParams(){
     ImageProcessing::initParams();
     period_ = ros::Duration(1.0);
+    std::string interpolation_method;
+    pnh.param<std::string>("interpolation", interpolation_method, "LINEAR");
+    if(interpolation_method == "NEAREST"){
+      interpolation_ = cv::INTER_NEAREST;
+    }else if(interpolation_method == "LINEAR"){
+      interpolation_ = cv::INTER_LINEAR;
+    }else if(interpolation_method == "AREA"){
+      interpolation_ = cv::INTER_AREA;
+    }else if(interpolation_method == "CUBIC"){
+      interpolation_ = cv::INTER_CUBIC;
+    }else if(interpolation_method == "LANCZOS4"){
+      interpolation_ = cv::INTER_LANCZOS4;
+    }else{
+      ROS_ERROR("unknown interpolation method");
+    }
   }
-  
+
   void ImageResizer::config_cb ( ImageResizerConfig &config, uint32_t level) {
     NODELET_INFO("config_cb");
     resize_x_ = config.resize_scale_x;
@@ -52,23 +67,8 @@ namespace resized_image_transport
     cv_bridge::CvImagePtr cv_img = cv_bridge::toCvCopy(src_img);
 
     cv::Mat tmpmat(height, width, cv_img->image.type());
-    cv::resize(cv_img->image, tmpmat, cv::Size(width, height));
+    cv::resize(cv_img->image, tmpmat, cv::Size(width, height), 0, 0, interpolation_);
     cv_img->image = tmpmat;
-
-
-    /*
-
-    cv_bridge::CvImagePtr cv_img = cv_bridge::toCvCopy(src_img);
-    IplImage src = cv_img->image;
-    IplImage* dst = cvCloneImage(&src);
-
-    int log_polar_flags = CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS;
-    if ( inverse_log_polar_ ){
-      log_polar_flags += CV_WARP_INVERSE_MAP;
-    }
-    cvImageResizer( &src, dst, cvPoint2D32f(image_width/2, image_height/2), log_polar_scale_, log_polar_flags);
-    cv_img->image = dst;
-    */
 
     dst_img = cv_img->toImageMsg();
     if(use_camera_info_){

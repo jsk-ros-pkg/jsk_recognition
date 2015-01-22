@@ -45,6 +45,7 @@ namespace jsk_perception
   {
     DiagnosticNodelet::onInit();
     pub_debug_image_ = advertise<sensor_msgs::Image>(*pnh_, "debug", 1);
+    pub_convex_image_ = advertise<sensor_msgs::Image>(*pnh_, "output/convex", 1);
   }
 
   void ContourFinder::subscribe()
@@ -60,7 +61,8 @@ namespace jsk_perception
   void ContourFinder::segment(
     const sensor_msgs::Image::ConstPtr& image_msg)
   {
-    std::vector< std::vector<cv::Point> > contours;
+    std::vector<std::vector<cv::Point> > contours;
+    std::vector<std::vector<cv::Point> > convex_contours(1);
     std::vector<cv::Vec4i> hierarchy;
     cv::RNG rng(12345);
     cv::Mat input = cv_bridge::toCvCopy(
@@ -76,6 +78,22 @@ namespace jsk_perception
                                image_msg->header,
                                sensor_msgs::image_encodings::BGR8,
                                drawing).toImageMsg());
+    // combine all the contours into one contours
+    std::vector<cv::Point> all_contours;
+    for (size_t i = 0; i < contours.size(); i++) {
+      for (size_t j = 0; j < contours[i].size(); j++) {
+        all_contours.push_back(contours[i][j]);
+      }
+    }
+    // build convex
+    cv::convexHull(cv::Mat(all_contours), convex_contours[0]);
+    cv::Mat convex_image = cv::Mat::zeros(input.size(), CV_8UC1);
+    cv::drawContours(convex_image, convex_contours, 0, cv::Scalar(255), CV_FILLED);
+    pub_convex_image_.publish(
+      cv_bridge::CvImage(
+        image_msg->header,
+        sensor_msgs::image_encodings::MONO8,
+        convex_image).toImageMsg());
   }
 }
 

@@ -1,4 +1,8 @@
 <library path="lib/libjsk_perception">
+  <class name="jsk_perception/FindObjectOnPlane"
+         type="jsk_perception::FindObjectOnPlane"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/BlobDetector"
          type="jsk_perception::BlobDetector"
          base_class_type="nodelet::Nodelet">

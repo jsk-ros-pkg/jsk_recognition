@@ -50,9 +50,12 @@ namespace jsk_perception
   class AddMaskImage: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    typedef message_filters::sync_policies::ApproximateTime<
+    typedef message_filters::sync_policies::ExactTime<
     sensor_msgs::Image,
     sensor_msgs::Image > SyncPolicy;
+    typedef message_filters::sync_policies::ApproximateTime<
+    sensor_msgs::Image,
+    sensor_msgs::Image > ApproxSyncPolicy;
     
     AddMaskImage(): DiagnosticNodelet("AddMaskImage") {}
   protected:
@@ -62,12 +65,13 @@ namespace jsk_perception
     virtual void add(
       const sensor_msgs::Image::ConstPtr& src1_msg,
       const sensor_msgs::Image::ConstPtr& src2_msg);
-    
+
+    bool approximate_sync_;
     ros::Publisher pub_;
     message_filters::Subscriber<sensor_msgs::Image> sub_src1_;
     message_filters::Subscriber<sensor_msgs::Image> sub_src2_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
-
+    boost::shared_ptr<message_filters::Synchronizer<ApproxSyncPolicy> > async_;
   private:
     
   };

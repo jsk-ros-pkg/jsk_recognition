@@ -163,6 +163,10 @@ namespace jsk_pcl_ros
     {
       NODELET_ERROR("Transform error: %s", e.what());
     }
+    catch (tf2::ExtrapolationException &e)
+    {
+      NODELET_ERROR("Transform error: %s", e.what());
+    }
   }
   
   void NormalDirectionFilter::filter(

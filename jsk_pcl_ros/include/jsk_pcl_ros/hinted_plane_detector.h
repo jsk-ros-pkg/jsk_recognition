@@ -138,6 +138,10 @@ namespace jsk_pcl_ros {
     double normal_filter_eps_angle_;
     double euclidean_clustering_filter_tolerance_;
     int euclidean_clustering_filter_min_size_;
+    bool enable_euclidean_filtering_;
+    bool enable_normal_filtering_;
+    bool enable_distance_filtering_;
+    bool enable_density_filtering_;
     double density_radius_;
     int density_num_;
   };

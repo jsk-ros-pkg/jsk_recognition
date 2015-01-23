@@ -114,6 +114,10 @@ namespace jsk_pcl_ros {
     euclidean_clustering_filter_min_size_ = config.euclidean_clustering_filter_min_size;
     density_radius_ = config.density_radius;
     density_num_ = config.density_num;
+    enable_euclidean_filtering_ = config.enable_euclidean_filtering;
+    enable_normal_filtering_ = config.enable_normal_filtering;
+    enable_distance_filtering_ = config.enable_distance_filtering;
+    enable_density_filtering_ = config.enable_density_filtering;
   }
   
   void HintedPlaneDetector::detect(
@@ -173,20 +177,25 @@ namespace jsk_pcl_ros {
     const pcl::PointIndices::Ptr indices,
     pcl::PointIndices& output)
   {
-    pcl::KdTreeFLANN<pcl::PointNormal> kdtree;
-    pcl::KdTreeFLANN<pcl::PointNormal>::IndicesPtr indices_ptr
-      (new std::vector<int>);
-    *indices_ptr = indices->indices;
-    kdtree.setInputCloud(cloud, indices_ptr);
-    for (size_t i = 0; i < indices->indices.size(); i++) {
-      int point_index = indices->indices[i];
-      std::vector<int> result_indices;
-      std::vector<float> result_distances;
-      kdtree.radiusSearch(i, density_radius_,
-                          result_indices, result_distances);
-      if (result_distances.size() >= density_num_) {
-        output.indices.push_back(point_index);
+    if (enable_density_filtering_) {
+      pcl::KdTreeFLANN<pcl::PointNormal> kdtree;
+      pcl::KdTreeFLANN<pcl::PointNormal>::IndicesPtr indices_ptr
+        (new std::vector<int>);
+      *indices_ptr = indices->indices;
+      kdtree.setInputCloud(cloud, indices_ptr);
+      for (size_t i = 0; i < indices->indices.size(); i++) {
+        int point_index = indices->indices[i];
+        std::vector<int> result_indices;
+        std::vector<float> result_distances;
+        kdtree.radiusSearch(i, density_radius_,
+                            result_indices, result_distances);
+        if (result_distances.size() >= density_num_) {
+          output.indices.push_back(point_index);
+        }
       }
+    }
+    else {
+      output = *indices;
     }
     output.header = cloud->header;
     PCLIndicesMsg ros_indices;
@@ -200,24 +209,29 @@ namespace jsk_pcl_ros {
     const ConvexPolygon::Ptr hint_convex,
     pcl::PointIndices& output)
   {
-    pcl::EuclideanClusterExtraction<pcl::PointNormal> ec;
-    ec.setClusterTolerance(euclidean_clustering_filter_tolerance_);
-    pcl::search::KdTree<pcl::PointNormal>::Ptr tree
-      (new pcl::search::KdTree<pcl::PointNormal>);
-    tree->setInputCloud(cloud);
-    ec.setSearchMethod(tree);
-    ec.setIndices(indices);
-    ec.setInputCloud(cloud);
-    //ec.setMinClusterSize ();
-    std::vector<pcl::PointIndices> cluster_indices;
-    ec.extract(cluster_indices);
-    if (cluster_indices.size() == 0) {
-      return;
+    if (enable_density_filtering_) {
+      pcl::EuclideanClusterExtraction<pcl::PointNormal> ec;
+      ec.setClusterTolerance(euclidean_clustering_filter_tolerance_);
+      pcl::search::KdTree<pcl::PointNormal>::Ptr tree
+        (new pcl::search::KdTree<pcl::PointNormal>);
+      tree->setInputCloud(cloud);
+      ec.setSearchMethod(tree);
+      ec.setIndices(indices);
+      ec.setInputCloud(cloud);
+      //ec.setMinClusterSize ();
+      std::vector<pcl::PointIndices> cluster_indices;
+      ec.extract(cluster_indices);
+      if (cluster_indices.size() == 0) {
+        return;
+      }
+      NODELET_INFO("%lu clusters", cluster_indices.size());
+      pcl::PointIndices::Ptr filtered_indices
+        = getBestCluster(cloud, cluster_indices, hint_convex);
+      output = *filtered_indices;
     }
-    NODELET_INFO("%lu clusters", cluster_indices.size());
-    pcl::PointIndices::Ptr filtered_indices
-      = getBestCluster(cloud, cluster_indices, hint_convex);
-    output = *filtered_indices;
+    else {
+      output = *indices;
+    }
     output.header = cloud->header;
     PCLIndicesMsg ros_indices;
     pcl_conversions::fromPCL(output, ros_indices);
@@ -233,9 +247,9 @@ namespace jsk_pcl_ros {
       pcl::PointNormal p = cloud->points[i];
       if (!isnan(p.x) && !isnan(p.y) && !isnan(p.y)) {
         Eigen::Vector4f v = p.getVector4fMap();
-        if (hint_convex->distanceToPoint(v) < outlier_threashold_) {
+        if (!enable_distance_filtering_ || hint_convex->distanceToPoint(v) < outlier_threashold_) {
           Eigen::Vector3f n(p.normal_x, p.normal_y, p.normal_z);
-          if (hint_convex->angle(n) < normal_filter_eps_angle_) {
+          if (!enable_normal_filtering_ || hint_convex->angle(n) < normal_filter_eps_angle_) {
             output.indices.push_back(i);
           }
         }

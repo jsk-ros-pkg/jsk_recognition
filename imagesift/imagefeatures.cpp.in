@@ -72,6 +72,8 @@ public:
       _sync.reset(new message_filters::Synchronizer<SyncPolicy>(
                     SyncPolicy(100), _subImageSync, _subMaskSync));
       _sync->registerCallback(boost::bind(&SiftNode::image_cb, this, _1, _2));
+      _subInfo = _node.subscribe("camera_info",1,&SiftNode::info_cb,this);
+      _srvDetect = _node.advertiseService("Feature0DDetect",&SiftNode::detect_cb,this);
     }
     else {
       usleep(100000);
@@ -108,37 +110,66 @@ public:
               const sensor_msgs::Image::ConstPtr& maskmsg_ptr)
   {
     boost::mutex::scoped_lock lock(_mutex);
-    cv::Mat mask_image;
+    cv::Mat mask;
+    cv::Mat original_image;
+    cv::Mat roi_image;
+    cv::Rect roi;
     try
       {
-	cv_ptr = cv_bridge::toCvCopy(imagemsg, "bgr8");// sensor_msgs::image_encodings::BGR8);
-  if (maskmsg_ptr) {
-    cv_mask_ptr = cv_bridge::toCvCopy(*maskmsg_ptr, maskmsg_ptr->encoding);
-    mask_image = cv_mask_ptr->image;
-  }
+        cv_ptr = cv_bridge::toCvCopy(imagemsg, "bgr8");// sensor_msgs::image_encodings::BGR8);
+        original_image = cv_ptr->image;
+        if (maskmsg_ptr) {
+          cv_mask_ptr = cv_bridge::toCvCopy(*maskmsg_ptr, maskmsg_ptr->encoding);
+          mask = cv_mask_ptr->image;
+          int min_x = mask.cols;
+          int min_y = mask.rows;
+          int max_x = 0;
+          int max_y = 0;
+          for (int j = 0; j < mask.rows; j++) {
+            for (int i = 0; i < mask.cols; i++) {
+              if (mask.at<uchar>(j, i) == 255) {
+                min_x = std::min(min_x, i);
+                min_y = std::min(min_y, j);
+                max_x = std::max(max_x, i);
+                max_y = std::max(max_y, j);
+              }
+            }
+          }
+          if (max_x - min_x < 0) {
+            roi = cv::Rect(0, 0, mask.cols, mask.rows);
+            roi_image = original_image;
+          }
+          else {
+            roi = cv::Rect(min_x, min_y, max_x - min_x, max_y - min_y);
+            roi_image = original_image(roi);
+          }
+        }
+        else {
+          roi = cv::Rect(0, 0, original_image.size().width, original_image.size().height);
+          roi_image = original_image;
+        }
       }
     catch (cv_bridge::Exception& e)
       {
-	ROS_ERROR("cv_bridge exception: %s", e.what());
-	return 0;
+        ROS_ERROR("cv_bridge exception: %s", e.what());
+        return 0;
       }
+    
+    
 
     // compute SIFT or something
     ros::Time siftbasetime = ros::Time::now();
     vector<cv::KeyPoint> keypts;
-    detector->detect(cv_ptr->image, keypts);
+    detector->detect(roi_image, keypts);
     ros::Time detect_end_time = ros::Time::now();
+    
     int numkeys = keypts.size();
     cv::Mat descriptor;
-    extractor->compute(cv_ptr->image, keypts, descriptor);
-    if (!mask_image.empty()) {
-      vector<cv::KeyPoint> keypts_reduced;
-      for (size_t i = 0; i < keypts.size(); i++) {
-        if (mask_image.at<uchar>(keypts[i].pt.y, keypts[i].pt.x) == 255) {
-          keypts_reduced.push_back(keypts[i]);
-        }
-      }
-      keypts = keypts_reduced;
+    extractor->compute(roi_image, keypts, descriptor);
+    // fix keypoint by un-roi-ing
+    for (size_t i = 0; i < keypts.size(); i++) {
+      keypts[i].pt.x = keypts[i].pt.x  + roi.x;
+      keypts[i].pt.y = keypts[i].pt.y  + roi.y;
     }
     ros::Time extract_end_time = ros::Time::now();
     // publish

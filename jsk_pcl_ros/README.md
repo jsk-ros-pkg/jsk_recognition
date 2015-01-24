@@ -244,7 +244,7 @@ We expect it will be used with image_view2.
   Mask image.
 
 ### jsk\_pcl/AddColorFromImage
-![](images/add_color_from_image)
+![](images/add_color_from_image.png)
 
 Add color to pointcloud (no need to be organized) from image and camera info.
 
@@ -1137,6 +1137,7 @@ You can choose several types of tilt/spindle lasers such as tilt-laser of PR2, i
 
    overwrap angle offset when detecting time range.
    Only available in `infinite_spindle` and `infinite_spindle_half`.
+
 ### jsk\_pcl/DepthImageCreator
 #### What is this
 Create *organized* pointcloud from non-organized pointcloud.
@@ -1181,6 +1182,7 @@ Create *organized* pointcloud from non-organized pointcloud.
 * `~max_queue_size` (integer, default: `3`):
 
    Queue length of topics.
+
 ### jsk\_pcl/EuclideanClustering
 ![](images/euclidean_segmentation.png)
 #### What Is This

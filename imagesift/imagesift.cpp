@@ -37,7 +37,7 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
-
+#include <jsk_perception/image_utils.h>
 
 using namespace std;
 using namespace ros;
@@ -95,35 +95,44 @@ public:
 
     bool detect_cb(posedetection_msgs::Feature0DDetect::Request& req, posedetection_msgs::Feature0DDetect::Response& res)
     {
-        return Detect(res.features,req.image);
+        return Detect(res.features,req.image, sensor_msgs::Image::ConstPtr());
     }
 
-    bool Detect(posedetection_msgs::Feature0D& features, const sensor_msgs::Image& imagemsg)
+    bool Detect(posedetection_msgs::Feature0D& features, const sensor_msgs::Image& imagemsg,
+                const sensor_msgs::Image::ConstPtr& mask_ptr)
     {
         boost::mutex::scoped_lock lock(_mutex);
         Image imagesift = NULL;
+        cv::Rect region;
         try {
-            cv_bridge::CvImagePtr frame, framefloat;
-            if (!(frame = cv_bridge::toCvCopy(imagemsg, "bgr8")) )
-                return false;
-            //frame = _bridge.toIpl();
-            //frame = _bridge.imgMsgToCv(msg_ptr, "bgr8");
+            cv::Mat image;
+            cv_bridge::CvImagePtr framefloat;
 
             if (!(framefloat = cv_bridge::toCvCopy(imagemsg, "mono8")) )
                 return false;
-            //IplImage* framefloat = _bridgefloat.toIpl();
-            //IplImage* framefloat = _bridgefloat.imgMsgToCv(msg_ptr,"mono8");
+            
             if( imagesift != NULL && (imagesift->cols!=imagemsg.width || imagesift->rows!=imagemsg.height)  ) {
                 ROS_INFO("clear sift resources");
                 DestroyAllImages();
                 imagesift = NULL;
             }
+            
+            image = framefloat->image;
 
+            if (mask_ptr) {
+                cv::Mat mask = cv_bridge::toCvShare(mask_ptr, mask_ptr->encoding)->image;
+                region = jsk_perception::boundingRectOfMaskImage(mask);
+                image = image(region);
+            }
+            else {
+                region = cv::Rect(0, 0, imagemsg.width, imagemsg.height);
+            }
+            
             if( imagesift == NULL )
                 imagesift = CreateImage(imagemsg.height,imagemsg.width);
 
             for(int i = 0; i < imagemsg.height; ++i) {
-                uint8_t* psrc = (uint8_t*)framefloat->image.data+framefloat->image.step*i;
+                uint8_t* psrc = (uint8_t*)image.data+image.step*i;
                 float* pdst = imagesift->pixels+i*imagesift->stride;
                 for(int j = 0; j < imagemsg.width; ++j)
                     pdst[j] = (float)psrc[j]*(1.0f/255.0f);
@@ -163,8 +172,8 @@ public:
             for(int j = 0; j < 128; ++j)
                 features.descriptors[128*index+j] = key->descrip[j];
 
-            features.positions[2*index+0] = key->col;
-            features.positions[2*index+1] = key->row;
+            features.positions[2*index+0] = key->col + region.x;
+            features.positions[2*index+1] = key->row + region.y;
             features.scales[index] = key->scale;
             features.orientations[index] = key->ori;
             features.confidences[index] = 1.0; // SIFT has no confidence?
@@ -186,28 +195,6 @@ public:
     void image_cb(const sensor_msgs::ImageConstPtr& msg_ptr,
                   const sensor_msgs::ImageConstPtr& mask_ptr)
     {
-        cv::Mat input = cv_bridge::toCvCopy(
-            msg_ptr, sensor_msgs::image_encodings::BGR8)->image;
-        cv::Mat mask = cv_bridge::toCvCopy(
-            mask_ptr, sensor_msgs::image_encodings::MONO8)->image;
-        if (input.size() == mask.size()) {
-            cv::Mat masked_image;
-            input.copyTo(masked_image, mask);
-            sensor_msgs::Image::ConstPtr masked_image_msg = cv_bridge::CvImage(
-                msg_ptr->header,
-                sensor_msgs::image_encodings::BGR8,
-                masked_image).toImageMsg();
-            image_cb(masked_image_msg);
-        }
-        else {
-            ROS_WARN("size of mask and input image are different");
-            ROS_WARN("input: %dx%d", input.cols, input.rows);
-            ROS_WARN("mask: %dx%d", mask.cols, mask.rows);
-        }
-    }
-    
-    void image_cb(const sensor_msgs::ImageConstPtr& msg_ptr)
-    {
         if( _pubSift.getNumSubscribers()==0 ){ 
             ROS_DEBUG("number of subscribers is 0, ignoring image");
             return;
@@ -217,13 +204,18 @@ public:
             return;
         }
 
-        Detect(sift_msg.features,*msg_ptr);
+        Detect(sift_msg.features,*msg_ptr, mask_ptr);
         sift_msg.image = *msg_ptr; // probably copying pointers so don't use after this call
 
         {
             boost::mutex::scoped_lock lock(_mutex); // needed for camerainfo
             _pubSift.publish(sift_msg);
         }
+    }
+    
+    void image_cb(const sensor_msgs::ImageConstPtr& msg_ptr)
+    {
+        image_cb(msg_ptr, sensor_msgs::ImageConstPtr());
     }
 };
 

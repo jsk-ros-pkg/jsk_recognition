@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(imagesift)
 
-find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs posedetection_msgs image_transport cv_bridge)
+find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs posedetection_msgs image_transport cv_bridge
+  jsk_perception)
 
 find_package(OpenCV)
 

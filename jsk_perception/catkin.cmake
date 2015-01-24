@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(jsk_perception)
 
 find_package(catkin REQUIRED COMPONENTS
-  mk message_generation imagesift std_msgs sensor_msgs geometry_msgs cv_bridge
+  mk message_generation std_msgs sensor_msgs geometry_msgs cv_bridge
   image_geometry image_transport driver_base dynamic_reconfigure cmake_modules
   roscpp nodelet rostest tf rospack
   jsk_topic_tools pcl_ros jsk_pcl_ros)
@@ -55,7 +55,7 @@ catkin_package(
   CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs message_runtime
   DEPENDS OpenCV
   INCLUDE_DIRS include
-  LIBRARIES
+  LIBRARIES jsk_perception
 )
 
 execute_process(

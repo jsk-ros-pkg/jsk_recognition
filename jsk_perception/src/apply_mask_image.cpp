@@ -36,6 +36,7 @@
 #include "jsk_perception/apply_mask_image.h"
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
+#include "jsk_perception/image_utils.h"
 
 namespace jsk_perception
 {
@@ -86,17 +87,8 @@ namespace jsk_perception
       NODELET_ERROR("mask: %dx%dx", mask.cols, mask.rows);
       return;
     }
-    std::vector<cv::Point> indices;
-    for (size_t j = 0; j < mask.rows; j++) {
-      for (size_t i = 0; i < mask.cols; i++) {
-        if (mask.at<uchar>(j, i) == 255) {
-          indices.push_back(cv::Point(i, j));
-        }
-      }
-    }
-
-    cv::Rect region = cv::boundingRect(indices);
-
+    
+    cv::Rect region = boundingRectOfMaskImage(mask);
     cv::Mat clipped_mask = mask(region);
     pub_mask_.publish(cv_bridge::CvImage(
                         mask_msg->header,

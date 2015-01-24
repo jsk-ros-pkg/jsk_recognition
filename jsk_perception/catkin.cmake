@@ -116,7 +116,8 @@ jsk_perception_nodelet(src/multiply_mask_image.cpp "jsk_perception/MultiplyMaskI
 jsk_perception_nodelet(src/find_object_on_plane.cpp "jsk_perception/FindObjectOnPlane" "find_object_on_plane")
 # compiling jsk_perception library for nodelet
 add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
-  ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels/slic.cpp)
+  ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels/slic.cpp
+  src/image_utils.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 

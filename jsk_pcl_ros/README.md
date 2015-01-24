@@ -808,6 +808,9 @@ Extract the points above the planes between `~min_height` and `~max_height`.
    You can disable this parameter to filter pointcloud which is not the same pointcloud
    to segment planes
 
+* `~magnify` (Double, default: `0.0`)
+
+  Magnify planes by this parameter. The unit is m.
 ### jsk\_pcl/RegionGrowingMultiplePlaneSegmentation
 ![jsk_pcl/RegionGrowingMultiplePlaneSegmentation](images/region_growing_multiple_plane_segmentation.png).
 

@@ -37,6 +37,7 @@
 #include <sensor_msgs/image_encodings.h>
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
+#include "jsk_perception/image_utils.h"
 
 namespace jsk_perception
 {
@@ -95,16 +96,7 @@ namespace jsk_perception
       output = cv::Mat::zeros(mask.rows, mask.cols, CV_8UC3);
     }
     
-    std::vector<cv::Point> indices;
-    for (size_t j = 0; j < mask.rows; j++) {
-      for (size_t i = 0; i < mask.cols; i++) {
-        if (mask.at<uchar>(j, i) == 255) {
-          indices.push_back(cv::Point(i, j));
-        }
-      }
-    }
-
-    cv::Rect region = cv::boundingRect(indices);
+    cv::Rect region = boundingRectOfMaskImage(mask);
     for (int j = 0; j < image.rows; j++) {
       for (int i = 0; i < image.cols; i++) {
         if (single_channel) {

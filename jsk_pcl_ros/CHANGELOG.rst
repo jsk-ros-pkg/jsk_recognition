@@ -2,6 +2,53 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros] Add magnify parameter to MultiPlaneExtraction
+* [jsk_pcl_ros] Added several flags to toggle filtering in HintedPlaneDetector
+* [jsk_pcl_ros] Update min-max value of min_height and max_height of MultiPlaneExtraction
+* [jsk_pcl_ros] Publish indices from MultiPlaneExtraction
+* [jsk_pcl_ros] Catch tf2::ExtrapolationException error in normal
+  direction filter
+* [jsk_pcl_ros] Add euclidean segmentation to hinted plane detector sample
+* [jsk_pcl_ros] Close convex region
+* [jsk_pcl_ros, jsk_perception] Fix CmakeList for catkin build. Check jsk_topic_tools_SOURCE_PREFIX
+* update params for tracking
+* [jsk_pcl_ros] AddPointIndices
+* [jsk_pcl_ros]change border_estimator to publish indices instread of pointcloud
+* [jsk_pcl_ros] Refactor HintedPlaneDetector
+* [jsk_pcl_ros] Add density filtering to HintedPlaneDetector
+* [jsk_pcl_ros] Supress warning message from OrganizedMultiPlaneSegmentation
+* [jsk_pcl_ros] add ~overwrap_angle parameter to TiltLaserListener
+* [jsk_pcl_ros] Add nodelet to convert geometry_msgs/PolygonStamped into
+  mask image
+* [jsk_pcl_ros] Initialize centroid value
+* [jsk_pcl_ros] Check if a point is nan in ROIClipper
+* [jsk_perception] Update HintedPlaneDetector with better algorithm.
+* [jsk_pcl_ros] Supress warning message from NormalConcatenator
+* [jsk_pcl_ros] Fix timestamp of pointcloud of TiltLaserListener and do
+  not publish same pointcloud twice by TiltLaserListener
+* [jsk_pcl_ros] add ROIToMaskImage and ROIToRect
+* [jsk_pcl_ros] Add RectToMaskImage and MaskImageFilter to filter
+  non-organized pointcloud by mask image
+* standize codes around brackets
+* clean codes in particle_filter_tracking
+* add frame_id_decision
+* [jsk_pcl_ros] implement mask image converters: MaskImageToROI and MaskImageToRect
+* add tracking option that initialize first pose with BBox
+* adding comments to pointcloud_screenpoint.launch and relatives
+* [jsk_pcl_ros] Add TorusFinder
+* [jsk_pcl_ros] update document about ROIClipper
+* [jsk_pcl_ros] Fix ROIClipper and RectToROI to work
+* [jsk_pcl_ros] Do not take nested lock of mutex in roi_cipper
+* [jsk_pcl_ros] Support pointcloud filtering by ROI in ROIClipper and add
+  converter from rectangle region into ROI
+* [jsk_pcl_ros] nodelet to add color to pointcloud from image
+* [jsk_pcl_ros] nodelet to add color to pointcloud from image
+* add none result publisher when reference is empty
+* [jsk_pcl_ros] Publish pose of matched template in LINEMOD
+* Contributors: Ryohei Ueda, Hiroaki Yaguchi, JSK Lab Member, Yu Ohara, Yuto Inagaki
+
 0.1.32 (2015-01-12)
 -------------------
 * add Torus.msg and TorusArrray.msg
@@ -143,7 +190,7 @@ Changelog for package jsk_pcl_ros
 * changet pointcloud_screen_point not to use jsconnection_based_nodelet
 * Use jsk_topic_tools::ConnectionBasedNodelet in BilateralFilter,
   BorderEstimator, BoundingBoxFilter and so on
-* Contributors: Ryohei Ueda, Shunichi Nozawa, Yuto Inagaki, Yu Ohara
+* Contributors: Ryohei Ueda, Shunichi Nozawa, Yu Ohara, Yuto Inagaki
 
 0.1.26 (2014-11-23)
 -------------------
@@ -610,7 +657,7 @@ Changelog for package jsk_pcl_ros
 * make paritcal_filter_tracking_nodelet publish tracked object tf trasnformation
 * add two launch files to run openni on remote machine
 * add octree_change_detector
-* Contributors: Ryo Terasawa, Shunichi Nozawa, Yuto Inagaki, Masaki Murooka, Yohei Kakiuchi, Ryohei Ueda, Chan Wesley, Yusuke Furuta, Kei Okada
+* Contributors: Chan Wesley, Shunichi Nozawa, Yuto Inagaki, Masaki Murooka, Ryo Terasawa, Ryohei Ueda, Yohei Kakiuchi, Yusuke Furuta, Kei Okada
 
 0.1.4 (2014-04-25)
 ------------------

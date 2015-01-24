@@ -2,6 +2,12 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* speed up image sift
+* [imagesift] Support mask image in imagefeatures.cpp.in
+* Contributors: Ryohei Ueda, Hitoshi Kamada
+
 0.1.32 (2015-01-12)
 -------------------
 

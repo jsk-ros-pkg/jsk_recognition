@@ -2,6 +2,82 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_perception] FindObjectOnPlane: Find object on plane from 2d binary
+  image and 3-d polygon coefficients
+* [jsk_perception] Publish convex hull image of mask from ContourFinder
+* [jsk_perception] Fix min_area parameter to work in BlobDetector
+* [jsk_pcl_ros, jsk_perception] Fix CmakeList for catkin build. Check jsk_topic_tools_SOURCE_PREFIX
+* [jsk_perception] Add MultiplyMaskImage
+* [jsk_perception] Add ~approximate_sync parameter to toggle
+  exact/approximate synchronization
+* [jsk_perception] Add UnapplyMaskImage
+* [jsk_perception] Add blob image to document
+* [jsk_perception] Add BlobDetector
+* [jsk_perception] Colorize label 0 as black because label-0 indicates
+  masked region
+* [jsk_perception] AddMaskImage to add two mask images into one image
+* [jsk_perception] Increase label index of SLICSuperPixels to avoid 0. 0
+  is planned to be used as 'masked'
+* [jsk_perception] Publish result binary image as mono image from ColorHistogramMatch
+* [jsk_perception] Extract mask image from coefficients of histogram
+  matching in ColorHistogramLabelMatch
+* [jsk_perception] Publish result of coefficient calculation as float image
+* [jsk_perception] Support mask image in ColorHistogramLabelMatch
+* [jsk_perception] Use OpenCV's function to normalize histogram and add
+  min and max value of histogram in ColorHistogramLabelMatch
+* [jsk_perception] Add ~min_value and ~max_value to SingleChannelHistogram
+* [jsk_perception] SingleChannelHistogram to compute histogram of single
+  channel image
+* [jsk_perception] Add YCrCb decomposer
+* [jsk_perception] Add LabDecomposer to decompose BGR/RGB image into Lab
+  color space
+* [jsk_perception] Use cv::split to split bgr and hsv image into each channel
+* [jsk_perception] Fix metrics of ColorHistogramLabelMatch:
+  1) correlation
+  original value is [-1:1] and 1 is perfect. we apply (1 - x) / 2
+  2) chi-squared
+  original value is [0:+inf] and 0 is perfect. we apply 1 / (1 + x^2)
+  3) intersect
+  original value is [0:1] and 1 is perfect. we apply x
+  4) bhattacharyya
+  original value is [0:1] and 0 is perfect. we apply 1 - x
+  5, 6) EMD
+  original value is [0:+inf] and 0 is perfect. we apply 1 / (1 + x^2)
+* [jsk_perception] Publish more useful debug image from SLICSuperPixels
+  and add documentation.
+* [jsk_perception] Publish image of interest from ColorHistogram
+* [jsk_perception] Implement 6 different method to compute coefficients
+  between two histograms
+* [jsk_perception] Increase the maximum number of super pixels
+* [jsk_perception] Fix ColorHistogram minor bags:
+  1. Support rect message out side of image
+  2. Use mask image in HSV histogram calculation
+* [jsk_perception] Fix HSVDecomposer color space conversion: support RGB8
+* [jsk_perception] color matching based on histogram and label information
+* [jsk_perception] Add utlity to visualize mask image: ApplyMaskImage
+* [jsk_perception] Add GridLabel
+* [jsk_perception] Publish hisotgram messages under private namespace
+* [jsk_perception] Add simple launch file as sample of superpixels
+* [jsk_perception] Utility to colorize labels of segmentation
+* [jsk_perception] Fix SLICSuperPixels:
+  1) if input image if BGR8
+  2) transpose the result of clustering
+* [jsk_perception] Publish segmentation result as cv::Mat<int> and use
+  patched version of SLIC-SuperPixels to get better performance
+* [jsk_perception] Support RGB8 and gray scale color in SLICSuperPixels
+* [jsk_perception] Add dynamic_reconfigure interface to SLICSuperPixels
+* [jsk_perception] Separate SLICSuperPixels into header and cpp files
+* [jsk_perception] Publish result of segmentation of slic superpixels as image
+* [jsk_perception] Add snake segmentation
+* [jsk_perception] ContourFinder
+* [jsk_perception] Support one-channel image in GrabCut
+* [jsk_perception] HSVDecomposer to decompose RGB into HSV separate images
+* [jsk_perception] Add RGBDecomposer to decompose RGB channels into
+  separate images
+* Contributors: Ryohei Ueda
+
 0.1.32 (2015-01-12)
 -------------------
 

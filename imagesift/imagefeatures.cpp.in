@@ -22,6 +22,8 @@
 #include <vector>
 #include <cv_bridge/cv_bridge.h>
 #include <string.h>
+#include <jsk_perception/image_utils.h>
+
 using namespace std;
 using namespace ros;
 
@@ -121,28 +123,8 @@ public:
         if (maskmsg_ptr) {
           cv_mask_ptr = cv_bridge::toCvCopy(*maskmsg_ptr, maskmsg_ptr->encoding);
           mask = cv_mask_ptr->image;
-          int min_x = mask.cols;
-          int min_y = mask.rows;
-          int max_x = 0;
-          int max_y = 0;
-          for (int j = 0; j < mask.rows; j++) {
-            for (int i = 0; i < mask.cols; i++) {
-              if (mask.at<uchar>(j, i) == 255) {
-                min_x = std::min(min_x, i);
-                min_y = std::min(min_y, j);
-                max_x = std::max(max_x, i);
-                max_y = std::max(max_y, j);
-              }
-            }
-          }
-          if (max_x - min_x < 0) {
-            roi = cv::Rect(0, 0, mask.cols, mask.rows);
-            roi_image = original_image;
-          }
-          else {
-            roi = cv::Rect(min_x, min_y, max_x - min_x, max_y - min_y);
-            roi_image = original_image(roi);
-          }
+          roi = jsk_perception::boundingRectOfMaskImage(mask);
+          roi_image = original_image;
         }
         else {
           roi = cv::Rect(0, 0, original_image.size().width, original_image.size().height);
@@ -154,15 +136,15 @@ public:
         ROS_ERROR("cv_bridge exception: %s", e.what());
         return 0;
       }
-    
-    
+
+
 
     // compute SIFT or something
     ros::Time siftbasetime = ros::Time::now();
     vector<cv::KeyPoint> keypts;
     detector->detect(roi_image, keypts);
     ros::Time detect_end_time = ros::Time::now();
-    
+
     int numkeys = keypts.size();
     cv::Mat descriptor;
     extractor->compute(roi_image, keypts, descriptor);

@@ -1,3 +1,39 @@
+// -*- mode: c++; indent-tabs-mode: nil; -*-
+/*********************************************************************
+ * Software License Agreement (BSD License)
+ *
+ *  Copyright (c) 2015, JSK Lab
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/o2r other materials provided
+ *     with the distribution.
+ *   * Neither the name of the JSK Lab nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *********************************************************************/
+
+
 #include <ros/node_handle.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
@@ -36,12 +72,12 @@ class SiftNode
   ros::ServiceServer _srvDetect;
   Subscriber _subInfo;
   Publisher _pubSift;
-  posedetection_msgs::ImageFeature0D sift_msg;
+  posedetection_msgs::ImageFeature0D _sift_msg;
   bool _bInfoInitialized;
-  std::string detector_name;
-  std::string extractor_name;
-  cv::Ptr<cv::FeatureDetector> detector;
-  cv::Ptr<cv::DescriptorExtractor> extractor;
+  std::string _detector_name;
+  std::string _extractor_name;
+  cv::Ptr<cv::FeatureDetector> _detector;
+  cv::Ptr<cv::DescriptorExtractor> _extractor;
   cv_bridge::CvImagePtr cv_ptr;
   cv_bridge::CvImagePtr cv_mask_ptr;
 
@@ -59,12 +95,12 @@ public:
   {
     // ros::NodeHandle _local_nh("~");
     // _local_nh.param("detector", detector_name, std::string("SIFT"));
-    // _local_nh.param("extractor",  extractor_name, std::string("SIFT"));
-    detector_name="@DETECTOR@";
-    extractor_name="@EXTRACTOR@";
-    ROS_INFO("detector:%s extractor:%s\n",  detector_name.c_str() ,extractor_name.c_str() );
-    detector = cv::FeatureDetector::create(detector_name.c_str());
-    extractor = cv::DescriptorExtractor::create(extractor_name.c_str());
+    // _local_nh.param("extractor",  _extractor_name, std::string("SIFT"));
+    _detector_name="@DETECTOR@";
+    _extractor_name="@EXTRACTOR@";
+    ROS_INFO("detector:%s extractor:%s\n",  _detector_name.c_str() ,_extractor_name.c_str() );
+    _detector = cv::FeatureDetector::create(_detector_name.c_str());
+    _extractor = cv::DescriptorExtractor::create(_extractor_name.c_str());
     _pubSift = _node.advertise<posedetection_msgs::ImageFeature0D>("ImageFeature0D",1);
     ros::NodeHandle pnh("~");
     pnh.param("use_mask", _useMask, false);
@@ -73,17 +109,14 @@ public:
       _subMaskSync.subscribe(_it, "mask", 1);
       _sync.reset(new message_filters::Synchronizer<SyncPolicy>(
                     SyncPolicy(100), _subImageSync, _subMaskSync));
-      _sync->registerCallback(boost::bind(&SiftNode::image_cb, this, _1, _2));
-      _subInfo = _node.subscribe("camera_info",1,&SiftNode::info_cb,this);
-      _srvDetect = _node.advertiseService("Feature0DDetect",&SiftNode::detect_cb,this);
+      _sync->registerCallback(boost::bind(&SiftNode::imageCb, this, _1, _2));
+      _subInfo = _node.subscribe("camera_info", 1, &SiftNode::infoCb, this);
+      _srvDetect = _node.advertiseService("Feature0DDetect", &SiftNode::detectCb, this);
     }
     else {
-      usleep(100000);
-      _subImage = _it.subscribe("image",1,&SiftNode::image_cb,this);
-      usleep(100000);
-      _subInfo = _node.subscribe("camera_info",1,&SiftNode::info_cb,this);
-      usleep(100000);
-      _srvDetect = _node.advertiseService("Feature0DDetect",&SiftNode::detect_cb,this);
+      _subImage = _it.subscribe("image", 1, &SiftNode::imageCb, this);
+      _subInfo = _node.subscribe("camera_info", 1, &SiftNode::infoCb, this);
+      _srvDetect = _node.advertiseService("Feature0DDetect", &SiftNode::detectCb, this);
     }
     lasttime = ros::Time::now();
     _bInfoInitialized = false;
@@ -95,19 +128,19 @@ public:
     _pubSift.shutdown();
   }
 
-  void info_cb(const sensor_msgs::CameraInfoConstPtr& msg_ptr)
+  void infoCb(const sensor_msgs::CameraInfoConstPtr& msg_ptr)
   {
     boost::mutex::scoped_lock lock(_mutex);
-    sift_msg.info = *msg_ptr;
+    _sift_msg.info = *msg_ptr;
     _bInfoInitialized = true;
   }
 
-  bool detect_cb(posedetection_msgs::Feature0DDetect::Request& req, posedetection_msgs::Feature0DDetect::Response& res)
+  bool detectCb(posedetection_msgs::Feature0DDetect::Request& req, posedetection_msgs::Feature0DDetect::Response& res)
   {
-    return Detect(res.features,req.image,sensor_msgs::Image::ConstPtr());
+    return detect(res.features,req.image,sensor_msgs::Image::ConstPtr());
   }
 
-  bool Detect(posedetection_msgs::Feature0D& features,
+  bool detect(posedetection_msgs::Feature0D& features,
               const sensor_msgs::Image& imagemsg,
               const sensor_msgs::Image::ConstPtr& maskmsg_ptr)
   {
@@ -142,12 +175,12 @@ public:
     // compute SIFT or something
     ros::Time siftbasetime = ros::Time::now();
     vector<cv::KeyPoint> keypts;
-    detector->detect(roi_image, keypts);
+    _detector->detect(roi_image, keypts);
     ros::Time detect_end_time = ros::Time::now();
 
     int numkeys = keypts.size();
     cv::Mat descriptor;
-    extractor->compute(roi_image, keypts, descriptor);
+    _extractor->compute(roi_image, keypts, descriptor);
     // fix keypoint by un-roi-ing
     for (size_t i = 0; i < keypts.size(); i++) {
       keypts[i].pt.x = keypts[i].pt.x  + roi.x;
@@ -169,15 +202,15 @@ public:
     int index = 0;
 
     while(index<numkeys) {
-      if(!strcmp("SIFT", extractor_name.c_str()) || !strcmp("SURF", extractor_name.c_str())){
-	for(int j = 0; j < size_d; ++j){
-	  features.descriptors[size_d*index+j] = descriptor.at<float>(index, j);
-	}
+      if(!strcmp("SIFT", _extractor_name.c_str()) || !strcmp("SURF", _extractor_name.c_str())){
+        for(int j = 0; j < size_d; ++j){
+          features.descriptors[size_d*index+j] = descriptor.at<float>(index, j);
+        }
       }
       else{
-	for(int j = 0; j < size_d; ++j){
-	  features.descriptors[size_d*index+j] = descriptor.at<bool>(index, j);
-	}
+        for(int j = 0; j < size_d; ++j){
+          features.descriptors[size_d*index+j] = descriptor.at<bool>(index, j);
+        }
       }
       features.positions[2*index+0] = keypts.at(index).pt.x;
       features.positions[2*index+1] = keypts.at(index).pt.y;
@@ -190,40 +223,40 @@ public:
 
 
     ROS_INFO("image_feature: image: %d(size=%lu), num: %d, feature time: %.3fs(keypoint-detect time: %.3fs, feature-extract time: %.3f, other time: %.3f), total: %.3fs", imagemsg.header.seq,
-	     imagemsg.data.size(),  numkeys,
-	     (float)(ros::Time::now()-siftbasetime).toSec(),
-	     (float)(detect_end_time-siftbasetime).toSec(), (float)(extract_end_time-detect_end_time).toSec(), (float)(ros::Time::now()-extract_end_time).toSec(),
-	     (float)(ros::Time::now()-lasttime).toSec());
+             imagemsg.data.size(),  numkeys,
+             (float)(ros::Time::now()-siftbasetime).toSec(),
+             (float)(detect_end_time-siftbasetime).toSec(), (float)(extract_end_time-detect_end_time).toSec(), (float)(ros::Time::now()-extract_end_time).toSec(),
+             (float)(ros::Time::now()-lasttime).toSec());
 
     lasttime = ros::Time::now() ;
     return true;
   }
 
-  void image_cb(const sensor_msgs::ImageConstPtr& msg_ptr,
+  void imageCb(const sensor_msgs::ImageConstPtr& msg_ptr,
                 const sensor_msgs::ImageConstPtr& mask_ptr)
   {
-    if( _pubSift.getNumSubscribers()==0 ){
+    if(_pubSift.getNumSubscribers()==0){
       ROS_DEBUG("number of subscribers is 0, ignoring image");
       return;
     }
-    if( !_bInfoInitialized ) {
+    if(!_bInfoInitialized) {
       ROS_DEBUG("camera info not initialized, ignoring image");
       return;
     }
 
-    Detect(sift_msg.features, *msg_ptr, mask_ptr);
-    sift_msg.image = *msg_ptr; // probably copying pointers so don't use after this call
+    detect(_sift_msg.features, *msg_ptr, mask_ptr);
+    _sift_msg.image = *msg_ptr; // probably copying pointers so don't use after this call
 
     {
       boost::mutex::scoped_lock lock(_mutex); // needed for camerainfo
-      _pubSift.publish(sift_msg);
+      _pubSift.publish(_sift_msg);
     }
 
   }
 
-  void image_cb(const sensor_msgs::ImageConstPtr& msg_ptr)
+  void imageCb(const sensor_msgs::ImageConstPtr& msg_ptr)
   {
-    image_cb(msg_ptr, sensor_msgs::ImageConstPtr());
+    imageCb(msg_ptr, sensor_msgs::ImageConstPtr());
   }
 };
 

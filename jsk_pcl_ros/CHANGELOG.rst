@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.33 (2015-01-24)
+-------------------
 * [jsk_pcl_ros] Add magnify parameter to MultiPlaneExtraction
 * [jsk_pcl_ros] Added several flags to toggle filtering in HintedPlaneDetector
 * [jsk_pcl_ros] Update min-max value of min_height and max_height of MultiPlaneExtraction

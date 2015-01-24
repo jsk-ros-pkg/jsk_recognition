@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.33 (2015-01-24)
+-------------------
 * [jsk_perception] FindObjectOnPlane: Find object on plane from 2d binary
   image and 3-d polygon coefficients
 * [jsk_perception] Publish convex hull image of mask from ContourFinder

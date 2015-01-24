@@ -2,8 +2,8 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.33 (2015-01-24)
+-------------------
 * add parameter to select interpolation method
 * Contributors: Yusuke Furuta
 

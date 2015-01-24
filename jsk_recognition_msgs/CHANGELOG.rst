@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.33 (2015-01-24)
+-------------------
 * [jsk_recognition_msgs] Add jsk_recognition_msgs
 * Contributors: Ryohei Ueda
 

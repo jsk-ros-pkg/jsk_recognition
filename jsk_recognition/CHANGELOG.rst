@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.33 (2015-01-24)
+-------------------
 * [jsk_recognition] Add jsk_recognition_msgs to jsk_recognition meta
   package's dependency
 * Contributors: Ryohei Ueda

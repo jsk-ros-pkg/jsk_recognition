@@ -46,6 +46,7 @@ namespace jsk_pcl_ros
   
   void ParticleFilterTracking::onInit(void)
   {
+    pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
     // not implemented yet
     PCLNodelet::onInit();
     track_target_set_ = false;
@@ -83,6 +84,7 @@ namespace jsk_pcl_ros
     target_cloud_.reset(new pcl::PointCloud<PointT>());
     pnh_->param("not_use_reference_centroid", not_use_reference_centroid_,
                 false);
+    pnh_->param("not_publish_tf", not_publish_tf_, false);
     pnh_->param("reversed", reversed_, false);
     
     int thread_nr;
@@ -231,10 +233,12 @@ namespace jsk_pcl_ros
     tf::Transform tfTransformation;
     tf::transformEigenToTF((Eigen::Affine3d) transformation, tfTransformation);
 
-    static tf::TransformBroadcaster tfBroadcaster;
-    tfBroadcaster.sendTransform(tf::StampedTransform(
-                                  tfTransformation, stamp_,
-                                  reference_frame_id(), track_target_name_));
+    if (!not_publish_tf_) {
+      static tf::TransformBroadcaster tfBroadcaster;
+      tfBroadcaster.sendTransform(tf::StampedTransform(
+                                    tfTransformation, stamp_,
+                                    reference_frame_id(), track_target_name_));
+    }
     //Publish Pose
     geometry_msgs::PoseStamped result_pose_stamped;
     result_pose_stamped.header.frame_id = reference_frame_id();

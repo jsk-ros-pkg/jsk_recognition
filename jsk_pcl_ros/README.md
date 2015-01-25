@@ -976,6 +976,9 @@ This nodelet tracks the target pointcloud.
 
   If this parameter is true, tracker des not use centroid of reference pointcloud as the origin of reference pointcloud.
 
+* `~not_publish_tf` (Boolean, default: `false`)
+
+  If this parameter is true, do not publish tf frame.
 #### Sample
 
 run the below command.

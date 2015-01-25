@@ -70,6 +70,278 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 
+#include <pcl/tracking/particle_filter.h>
+#include <pcl/tracking/impl/tracking.hpp>
+#include <pcl/tracking/impl/particle_filter.hpp>
+
+// This namespace follows PCL coding style
+namespace pcl
+{
+  namespace tracking
+  {
+    // hack pcl::tracking
+    // original tracker assumes that the number of reference points is smaller
+    // than the number of input.
+    // ReversedParticleFilterTracker assumues that the number of reference
+    // points is greater than the number of input.
+    // So we need to change:
+    //   1) transform input pointcloud during weight phase with inverse of each particles
+    //      particle should keep meaning the pose of reference for simplicity.
+    template <typename PointInT, typename StateT>
+    class ReversedParticleFilterTracker: public ParticleFilterTracker<PointInT, StateT>
+    {
+    public:
+      using Tracker<PointInT, StateT>::tracker_name_;
+      using Tracker<PointInT, StateT>::search_;
+      using Tracker<PointInT, StateT>::input_;
+      using Tracker<PointInT, StateT>::indices_;
+      using Tracker<PointInT, StateT>::getClassName;
+      using ParticleFilterTracker<PointInT, StateT>::particles_;
+      using ParticleFilterTracker<PointInT, StateT>::change_detector_;
+      using ParticleFilterTracker<PointInT, StateT>::change_counter_;
+      using ParticleFilterTracker<PointInT, StateT>::change_detector_resolution_;
+      using ParticleFilterTracker<PointInT, StateT>::change_detector_interval_;
+      using ParticleFilterTracker<PointInT, StateT>::use_change_detector_;
+      using ParticleFilterTracker<PointInT, StateT>::alpha_;
+      using ParticleFilterTracker<PointInT, StateT>::changed_;
+      using ParticleFilterTracker<PointInT, StateT>::ref_;
+      using ParticleFilterTracker<PointInT, StateT>::coherence_;
+      using ParticleFilterTracker<PointInT, StateT>::use_normal_;
+      using ParticleFilterTracker<PointInT, StateT>::particle_num_;
+      using ParticleFilterTracker<PointInT, StateT>::change_detector_filter_;
+      using ParticleFilterTracker<PointInT, StateT>::transed_reference_vector_;
+      //using ParticleFilterTracker<PointInT, StateT>::calcLikelihood;
+      using ParticleFilterTracker<PointInT, StateT>::normalizeWeight;
+      using ParticleFilterTracker<PointInT, StateT>::initParticles;
+      using ParticleFilterTracker<PointInT, StateT>::normalizeParticleWeight;
+      using ParticleFilterTracker<PointInT, StateT>::calcBoundingBox;
+
+      typedef Tracker<PointInT, StateT> BaseClass;
+      
+      typedef typename Tracker<PointInT, StateT>::PointCloudIn PointCloudIn;
+      typedef typename PointCloudIn::Ptr PointCloudInPtr;
+      typedef typename PointCloudIn::ConstPtr PointCloudInConstPtr;
+
+      typedef typename Tracker<PointInT, StateT>::PointCloudState PointCloudState;
+      typedef typename PointCloudState::Ptr PointCloudStatePtr;
+      typedef typename PointCloudState::ConstPtr PointCloudStateConstPtr;
+
+      typedef PointCoherence<PointInT> Coherence;
+      typedef boost::shared_ptr< Coherence > CoherencePtr;
+      typedef boost::shared_ptr< const Coherence > CoherenceConstPtr;
+
+      typedef PointCloudCoherence<PointInT> CloudCoherence;
+      typedef boost::shared_ptr< CloudCoherence > CloudCoherencePtr;
+      typedef boost::shared_ptr< const CloudCoherence > CloudCoherenceConstPtr;
+
+    protected:
+      std::vector<PointCloudInPtr> transed_input_vector_;
+
+      virtual bool initCompute()
+      {
+        if (!Tracker<PointInT, StateT>::initCompute ())
+        {
+          PCL_ERROR ("[pcl::%s::initCompute] Init failed.\n", getClassName ().c_str ());
+          return (false);
+        }
+        
+        // allocate pointclouds in transed_input_vector_ instead of transed_reference_vector_
+        if (transed_input_vector_.empty ())
+        {
+          //std::cout << "initializing " << particle_num_ << " input" << std::endl;
+          // only one time allocation
+          transed_input_vector_.resize (particle_num_ + 1);
+          for (int i = 0; i < particle_num_ + 1; i++)
+          {
+            transed_input_vector_[i] = PointCloudInPtr (new PointCloudIn ());
+          }
+        }
+
+        // set reference instead of input
+        coherence_->setTargetCloud (ref_);
+          
+        if (!change_detector_)
+          change_detector_ = boost::shared_ptr<pcl::octree::OctreePointCloudChangeDetector<PointInT> >(new pcl::octree::OctreePointCloudChangeDetector<PointInT> (change_detector_resolution_));
+          
+        if (!particles_ || particles_->points.empty ())
+          initParticles (true);
+        return (true);
+      }
+
+      // only is computation without normal supported
+      void computeTransformedPointCloudWithoutNormal
+      (const StateT& hypothesis, PointCloudIn &cloud)
+        {
+          const Eigen::Affine3f trans = toEigenMatrix (hypothesis);
+          // destructively assigns to cloud
+          pcl::transformPointCloud<PointInT> (*input_, cloud, trans);
+        }
+
+      
+      virtual void weight()
+      {
+        changed_ = true;
+        if (!use_normal_)
+        {
+          coherence_->setTargetCloud (ref_);
+          coherence_->initCompute ();
+          for (size_t i = 0; i < particles_->points.size (); i++)
+          {
+            //std::cout << "processing " << i << " particle: " << particles_->points[i].weight << std::endl;
+            // compute `inverse` of particle
+            StateT inverse_particle;
+            Eigen::Affine3f trans = particles_->points[i].toEigenMatrix();
+            Eigen::Affine3f inverse_trans = trans.inverse();
+            inverse_particle = StateT::toState(inverse_trans);
+            computeTransformedPointCloudWithoutNormal (inverse_particle, *transed_input_vector_[i]);
+            IndicesPtr indices;
+            coherence_->compute (transed_input_vector_[i], indices, particles_->points[i].weight);
+          }
+        }
+        else
+        {
+          coherence_->setTargetCloud (ref_);
+          coherence_->initCompute ();
+          for (size_t i = 0; i < particles_->points.size (); i++)
+          {
+            StateT inverse_particle;
+            Eigen::Affine3f trans = particles_->points[i].toEigenMatrix();
+            Eigen::Affine3f inverse_trans = trans.inverse();
+            inverse_particle = StateT::toState(inverse_trans);
+            IndicesPtr indices (new std::vector<int>);
+            computeTransformedPointCloudWithNormal (inverse_particle, *indices, *transed_input_vector_[i]);
+            coherence_->compute (transed_input_vector_[i], indices, particles_->points[i].weight);
+          }
+        }
+  
+        normalizeWeight ();
+        
+      }
+    private:
+    };
+    
+    template <typename PointInT, typename StateT>
+    class ReversedParticleFilterOMPTracker: public ReversedParticleFilterTracker<PointInT, StateT>
+    {
+    public:
+      using Tracker<PointInT, StateT>::tracker_name_;
+      using Tracker<PointInT, StateT>::search_;
+      using Tracker<PointInT, StateT>::input_;
+      using Tracker<PointInT, StateT>::indices_;
+      using Tracker<PointInT, StateT>::getClassName;
+      using ParticleFilterTracker<PointInT, StateT>::particles_;
+      using ParticleFilterTracker<PointInT, StateT>::change_detector_;
+      using ParticleFilterTracker<PointInT, StateT>::change_counter_;
+      using ParticleFilterTracker<PointInT, StateT>::change_detector_resolution_;
+      using ParticleFilterTracker<PointInT, StateT>::change_detector_interval_;
+      using ParticleFilterTracker<PointInT, StateT>::use_change_detector_;
+      using ParticleFilterTracker<PointInT, StateT>::alpha_;
+      using ParticleFilterTracker<PointInT, StateT>::changed_;
+      using ParticleFilterTracker<PointInT, StateT>::ref_;
+      using ParticleFilterTracker<PointInT, StateT>::coherence_;
+      using ParticleFilterTracker<PointInT, StateT>::use_normal_;
+      using ParticleFilterTracker<PointInT, StateT>::particle_num_;
+      using ParticleFilterTracker<PointInT, StateT>::change_detector_filter_;
+      using ParticleFilterTracker<PointInT, StateT>::transed_reference_vector_;
+      //using ParticleFilterTracker<PointInT, StateT>::calcLikelihood;
+      using ParticleFilterTracker<PointInT, StateT>::normalizeWeight;
+      using ParticleFilterTracker<PointInT, StateT>::initParticles;
+      using ParticleFilterTracker<PointInT, StateT>::normalizeParticleWeight;
+      using ParticleFilterTracker<PointInT, StateT>::calcBoundingBox;
+
+      typedef Tracker<PointInT, StateT> BaseClass;
+      
+      typedef typename Tracker<PointInT, StateT>::PointCloudIn PointCloudIn;
+      typedef typename PointCloudIn::Ptr PointCloudInPtr;
+      typedef typename PointCloudIn::ConstPtr PointCloudInConstPtr;
+
+      typedef typename Tracker<PointInT, StateT>::PointCloudState PointCloudState;
+      typedef typename PointCloudState::Ptr PointCloudStatePtr;
+      typedef typename PointCloudState::ConstPtr PointCloudStateConstPtr;
+
+      typedef PointCoherence<PointInT> Coherence;
+      typedef boost::shared_ptr< Coherence > CoherencePtr;
+      typedef boost::shared_ptr< const Coherence > CoherenceConstPtr;
+
+      typedef PointCloudCoherence<PointInT> CloudCoherence;
+      typedef boost::shared_ptr< CloudCoherence > CloudCoherencePtr;
+      typedef boost::shared_ptr< const CloudCoherence > CloudCoherenceConstPtr;
+      using ReversedParticleFilterTracker<PointInT, StateT>::transed_input_vector_;
+    protected:
+
+      unsigned int threads_;
+      
+    public:
+      ReversedParticleFilterOMPTracker (unsigned int nr_threads = 0)
+        : ReversedParticleFilterTracker<PointInT, StateT> ()
+        , threads_ (nr_threads)
+      {
+        tracker_name_ = "ReversedParticleFilterOMPTracker";
+      }
+
+      inline void
+      setNumberOfThreads (unsigned int nr_threads = 0) { threads_ = nr_threads; }
+
+    protected:
+      
+      virtual void weight()
+      {
+        changed_ = true;
+        if (!use_normal_)
+        {
+          coherence_->setTargetCloud (ref_);
+          coherence_->initCompute ();
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(threads_)
+#endif
+          for (size_t i = 0; i < particles_->points.size (); i++)
+          {
+            //std::cout << "processing " << i << " particle: " << particles_->points[i].weight << std::endl;
+            // compute `inverse` of particle
+            StateT inverse_particle;
+            Eigen::Affine3f trans = particles_->points[i].toEigenMatrix();
+            Eigen::Affine3f inverse_trans = trans.inverse();
+            inverse_particle = StateT::toState(inverse_trans);
+            computeTransformedPointCloudWithoutNormal (inverse_particle, *transed_input_vector_[i]);
+            //computeTransformedPointCloudWithoutNormal (particles_->points[i], *transed_input_vector_[i]);
+            IndicesPtr indices;
+            coherence_->compute (transed_input_vector_[i], indices, particles_->points[i].weight);
+            //std::cout << "processing " << i << " particle: " << particles_->points[i].weight << std::endl;
+            //std::cout << inverse_particle << std::endl;
+          }
+        }
+        else
+        {
+          coherence_->setTargetCloud (ref_);
+          coherence_->initCompute ();
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(threads_)
+#endif
+          for (size_t i = 0; i < particles_->points.size (); i++)
+          {
+            StateT inverse_particle;
+            Eigen::Affine3f trans = particles_->points[i].toEigenMatrix();
+            Eigen::Affine3f inverse_trans = trans.inverse();
+            inverse_particle = StateT::toState(inverse_trans);
+            IndicesPtr indices (new std::vector<int>);
+            computeTransformedPointCloudWithNormal (inverse_particle, *indices, *transed_input_vector_[i]);
+            coherence_->compute (transed_input_vector_[i], indices, particles_->points[i].weight);
+          }
+        }
+  
+        normalizeWeight ();
+        for (size_t i = 0; i < particles_->points.size (); i++)
+        {
+          //std::cout << "normalized " << i << " particle: " << particles_->points[i].weight << std::endl;
+        }
+      }
+    private:
+    };
+    
+  }
+  
+}
+
 using namespace pcl::tracking;
 namespace jsk_pcl_ros
 {
@@ -80,13 +352,15 @@ namespace jsk_pcl_ros
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
       BoundingBox > SyncPolicy;
-
+  protected:
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_pass_;
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_pass_downsampled_;
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr target_cloud_;
 
     //boost::shared_ptr<ParticleFilterTracker<pcl::PointXYZRGBA, ParticleXYZRPY> > tracker_;
     boost::shared_ptr<KLDAdaptiveParticleFilterOMPTracker<pcl::PointXYZRGBA, ParticleXYZRPY> > tracker_;
+    boost::shared_ptr<ReversedParticleFilterOMPTracker<pcl::PointXYZRGBA, ParticleXYZRPY> > reversed_tracker_;
+    //boost::shared_ptr<ReversedParticleFilterTracker<pcl::PointXYZRGBA, ParticleXYZRPY> > reversed_tracker_;
     boost::mutex mtx_;
     bool new_cloud_;
     bool track_target_set_;
@@ -121,6 +395,8 @@ namespace jsk_pcl_ros
     double resample_likelihood_thr_;
     ParticleXYZRPY bin_size_;
     std::vector<double> default_step_covariance_;
+    bool reversed_;
+    bool not_use_reference_centroid_;
     virtual void config_callback(Config &config, uint32_t level);
     virtual void publish_particles();
     virtual void publish_result();
@@ -135,6 +411,31 @@ namespace jsk_pcl_ros
     virtual void renew_model_with_box_topic_cb(const sensor_msgs::PointCloud2::ConstPtr &pc_ptr, const jsk_pcl_ros::BoundingBox::ConstPtr &bb_ptr);
     virtual void renew_model_topic_cb(const sensor_msgs::PointCloud2 &pc);
 
+    ////////////////////////////////////////////////////////
+    // Wrap particle filter methods
+    ////////////////////////////////////////////////////////
+    virtual void tracker_set_trans(const Eigen::Affine3f& trans);
+    virtual void tracker_set_step_noise_covariance(const std::vector<double>& covariance);
+    virtual void tracker_set_initial_noise_covariance(const std::vector<double>& covariance);
+    virtual void tracker_set_initial_noise_mean(const std::vector<double>& mean);
+    virtual void tracker_set_iteration_num(const int num);
+    virtual void tracker_set_particle_num(const int num);
+    virtual void tracker_set_resample_likelihood_thr(double thr);
+    virtual void tracker_set_use_normal(bool use_normal);
+    virtual void tracker_set_cloud_coherence(ApproxNearestPairPointCloudCoherence<pcl::PointXYZRGBA>::Ptr coherence);
+    virtual void tracker_set_maximum_particle_num(int num);
+    virtual void tracker_set_delta(double delta);
+    virtual void tracker_set_epsilon(double epsilon);
+    virtual void tracker_set_bin_size(const ParticleXYZRPY bin_size);
+    virtual ParticleFilterTracker<pcl::PointXYZRGBA, ParticleXYZRPY>::PointCloudStatePtr
+    tracker_get_particles();
+    virtual ParticleXYZRPY tracker_get_result();
+    virtual Eigen::Affine3f tracker_to_eigen_matrix(const ParticleXYZRPY& result);
+    virtual pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr tracker_get_reference_cloud();
+    virtual void tracker_set_reference_cloud(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr ref);
+    virtual void tracker_reset_tracking();
+    virtual void tracker_set_input_cloud(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr input);
+    virtual void tracker_compute();
   private:
     virtual void onInit();
 

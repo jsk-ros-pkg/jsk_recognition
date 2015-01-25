@@ -409,6 +409,7 @@ namespace jsk_pcl_ros
     std::vector<double> default_step_covariance_;
     bool reversed_;
     bool not_use_reference_centroid_;
+    bool not_publish_tf_;
     virtual void config_callback(Config &config, uint32_t level);
     virtual void publish_particles();
     virtual void publish_result();

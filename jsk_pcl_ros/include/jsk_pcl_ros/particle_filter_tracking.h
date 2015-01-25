@@ -357,19 +357,22 @@ namespace jsk_pcl_ros
   class ParticleFilterTracking: public pcl_ros::PCLNodelet
   {
   public:
+    typedef pcl::PointXYZRGBA PointT;
     typedef ParticleFilterTrackingConfig Config;
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
       BoundingBox > SyncPolicy;
+    typedef ParticleFilterTracker<PointT, ParticleXYZRPY>::PointCloudStatePtr
+    PointCloudStatePtr;
   protected:
-    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_pass_;
-    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_pass_downsampled_;
-    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr target_cloud_;
+    pcl::PointCloud<PointT>::Ptr cloud_pass_;
+    pcl::PointCloud<PointT>::Ptr cloud_pass_downsampled_;
+    pcl::PointCloud<PointT>::Ptr target_cloud_;
 
-    //boost::shared_ptr<ParticleFilterTracker<pcl::PointXYZRGBA, ParticleXYZRPY> > tracker_;
-    boost::shared_ptr<KLDAdaptiveParticleFilterOMPTracker<pcl::PointXYZRGBA, ParticleXYZRPY> > tracker_;
-    boost::shared_ptr<ReversedParticleFilterOMPTracker<pcl::PointXYZRGBA, ParticleXYZRPY> > reversed_tracker_;
-    //boost::shared_ptr<ReversedParticleFilterTracker<pcl::PointXYZRGBA, ParticleXYZRPY> > reversed_tracker_;
+    //boost::shared_ptr<ParticleFilterTracker<PointT, ParticleXYZRPY> > tracker_;
+    boost::shared_ptr<KLDAdaptiveParticleFilterOMPTracker<PointT, ParticleXYZRPY> > tracker_;
+    boost::shared_ptr<ReversedParticleFilterOMPTracker<PointT, ParticleXYZRPY> > reversed_tracker_;
+    //boost::shared_ptr<ReversedParticleFilterTracker<PointT, ParticleXYZRPY> > reversed_tracker_;
     boost::mutex mtx_;
     bool new_cloud_;
     bool track_target_set_;
@@ -410,40 +413,49 @@ namespace jsk_pcl_ros
     virtual void publish_particles();
     virtual void publish_result();
     virtual std::string reference_frame_id();
-    virtual void reset_tracking_target_model(const pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr &new_target_cloud);
-    virtual tf::Transform change_pointcloud_frame(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud);
+    virtual void reset_tracking_target_model(
+      const pcl::PointCloud<PointT>::ConstPtr &new_target_cloud);
+    virtual tf::Transform change_pointcloud_frame(
+      pcl::PointCloud<PointT>::Ptr cloud);
 
     virtual void cloud_cb(const sensor_msgs::PointCloud2 &pc);
-    virtual bool renew_model_cb(jsk_pcl_ros::SetPointCloud2::Request &req,
-                               jsk_pcl_ros::SetPointCloud2::Response &response
-                               );
-    virtual void renew_model_with_box_topic_cb(const sensor_msgs::PointCloud2::ConstPtr &pc_ptr, const jsk_pcl_ros::BoundingBox::ConstPtr &bb_ptr);
+    virtual bool renew_model_cb(
+      jsk_pcl_ros::SetPointCloud2::Request &req,
+      jsk_pcl_ros::SetPointCloud2::Response &response);
+    virtual void renew_model_with_box_topic_cb(
+      const sensor_msgs::PointCloud2::ConstPtr &pc_ptr,
+      const jsk_pcl_ros::BoundingBox::ConstPtr &bb_ptr);
     virtual void renew_model_topic_cb(const sensor_msgs::PointCloud2 &pc);
 
     ////////////////////////////////////////////////////////
     // Wrap particle filter methods
     ////////////////////////////////////////////////////////
     virtual void tracker_set_trans(const Eigen::Affine3f& trans);
-    virtual void tracker_set_step_noise_covariance(const std::vector<double>& covariance);
-    virtual void tracker_set_initial_noise_covariance(const std::vector<double>& covariance);
-    virtual void tracker_set_initial_noise_mean(const std::vector<double>& mean);
+    virtual void tracker_set_step_noise_covariance(
+      const std::vector<double>& covariance);
+    virtual void tracker_set_initial_noise_covariance(
+      const std::vector<double>& covariance);
+    virtual void tracker_set_initial_noise_mean(
+      const std::vector<double>& mean);
     virtual void tracker_set_iteration_num(const int num);
     virtual void tracker_set_particle_num(const int num);
     virtual void tracker_set_resample_likelihood_thr(double thr);
     virtual void tracker_set_use_normal(bool use_normal);
-    virtual void tracker_set_cloud_coherence(ApproxNearestPairPointCloudCoherence<pcl::PointXYZRGBA>::Ptr coherence);
+    virtual void tracker_set_cloud_coherence(
+      ApproxNearestPairPointCloudCoherence<PointT>::Ptr coherence);
     virtual void tracker_set_maximum_particle_num(int num);
     virtual void tracker_set_delta(double delta);
     virtual void tracker_set_epsilon(double epsilon);
     virtual void tracker_set_bin_size(const ParticleXYZRPY bin_size);
-    virtual ParticleFilterTracker<pcl::PointXYZRGBA, ParticleXYZRPY>::PointCloudStatePtr
+    virtual ParticleFilterTracker<PointT, ParticleXYZRPY>::PointCloudStatePtr
     tracker_get_particles();
     virtual ParticleXYZRPY tracker_get_result();
-    virtual Eigen::Affine3f tracker_to_eigen_matrix(const ParticleXYZRPY& result);
-    virtual pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr tracker_get_reference_cloud();
-    virtual void tracker_set_reference_cloud(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr ref);
+    virtual Eigen::Affine3f tracker_to_eigen_matrix(
+      const ParticleXYZRPY& result);
+    virtual pcl::PointCloud<PointT>::ConstPtr tracker_get_reference_cloud();
+    virtual void tracker_set_reference_cloud(pcl::PointCloud<PointT>::Ptr ref);
     virtual void tracker_reset_tracking();
-    virtual void tracker_set_input_cloud(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr input);
+    virtual void tracker_set_input_cloud(pcl::PointCloud<PointT>::Ptr input);
     virtual void tracker_compute();
   private:
     virtual void onInit();

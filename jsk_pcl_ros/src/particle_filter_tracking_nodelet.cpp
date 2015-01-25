@@ -34,6 +34,8 @@
 
 
 #include "jsk_pcl_ros/particle_filter_tracking.h"
+#include <pcl/tracking/impl/distance_coherence.hpp>
+#include <pcl/tracking/impl/approx_nearest_pair_point_cloud_coherence.hpp>
 #include <pluginlib/class_list_macros.h>
 #include <jsk_topic_tools/rosparam_utils.h>
 
@@ -80,26 +82,34 @@ namespace jsk_pcl_ros
     track_target_set_ = false;
     new_cloud_ = false;
     target_cloud_.reset(new pcl::PointCloud<pcl::PointXYZRGBA>());
-
-    boost::shared_ptr<KLDAdaptiveParticleFilterOMPTracker<pcl::PointXYZRGBA, ParticleXYZRPY> > tracker
-      (new KLDAdaptiveParticleFilterOMPTracker<pcl::PointXYZRGBA, ParticleXYZRPY>(thread_nr));
-
-    tracker->setMaximumParticleNum(max_particle_num_);
-    tracker->setDelta(delta_);
-    tracker->setEpsilon(epsilon_);
-    tracker->setBinSize(bin_size_);
-
-    //Set all parameters for  ParticleFilterTracker<pcl::PointXYZRGBA, pcl::PointXYZ>
-
-    tracker_ = tracker;
-    tracker_->setTrans(Eigen::Affine3f::Identity());
-    tracker_->setStepNoiseCovariance(default_step_covariance_);
-    tracker_->setInitialNoiseCovariance(initial_noise_covariance);
-    tracker_->setInitialNoiseMean(default_initial_mean);
-    tracker_->setIterationNum(iteration_num_);
-    tracker_->setParticleNum(particle_num);
-    tracker_->setResampleLikelihoodThr(resample_likelihood_thr_);
-    tracker_->setUseNormal(use_normal);
+    not_use_reference_centroid_ = false;
+    pnh_->getParam("not_use_reference_centroid", not_use_reference_centroid_);
+    reversed_ = false;
+    pnh_->getParam("reversed", reversed_);
+    if (!reversed_) {
+      boost::shared_ptr<KLDAdaptiveParticleFilterOMPTracker<pcl::PointXYZRGBA, ParticleXYZRPY> > tracker
+        (new KLDAdaptiveParticleFilterOMPTracker<pcl::PointXYZRGBA, ParticleXYZRPY>(thread_nr));
+      tracker->setMaximumParticleNum(max_particle_num_);
+      tracker->setDelta(delta_);
+      tracker->setEpsilon(epsilon_);
+      tracker->setBinSize(bin_size_);
+      tracker_ = tracker;
+    }
+    else {
+      boost::shared_ptr<ReversedParticleFilterOMPTracker<pcl::PointXYZRGBA, ParticleXYZRPY> > tracker
+        (new ReversedParticleFilterOMPTracker<pcl::PointXYZRGBA, ParticleXYZRPY>(thread_nr));
+      // boost::shared_ptr<ReversedParticleFilterTracker<pcl::PointXYZRGBA, ParticleXYZRPY> > tracker
+      //   (new ReversedParticleFilterTracker<pcl::PointXYZRGBA, ParticleXYZRPY>());
+      reversed_tracker_ = tracker;
+    }
+    tracker_set_trans(Eigen::Affine3f::Identity());
+    tracker_set_step_noise_covariance(default_step_covariance_);
+    tracker_set_initial_noise_covariance(initial_noise_covariance);
+    tracker_set_initial_noise_mean(default_initial_mean);
+    tracker_set_iteration_num(iteration_num_);
+    tracker_set_particle_num(particle_num);
+    tracker_set_resample_likelihood_thr(resample_likelihood_thr_);
+    tracker_set_use_normal(use_normal);
     
     //Setup coherence object for tracking
     ApproxNearestPairPointCloudCoherence<pcl::PointXYZRGBA>::Ptr
@@ -120,7 +130,7 @@ namespace jsk_pcl_ros
     coherence->setSearchMethod(search);
     coherence->setMaximumDistance(octree_resolution);
 
-    tracker_->setCloudCoherence(coherence);
+    tracker_set_cloud_coherence(coherence);
 
     //Set publish setting
     particle_publisher_ = pnh_->advertise<sensor_msgs::PointCloud2>("particle", 1);
@@ -164,23 +174,23 @@ namespace jsk_pcl_ros
     default_step_covariance_[3] = config.default_step_covariance_roll;
     default_step_covariance_[4] = config.default_step_covariance_pitch;
     default_step_covariance_[5] = config.default_step_covariance_yaw;
-    if (tracker_) 
+    if (tracker_ || reversed_tracker_) 
     {
       NODELET_INFO("update tracker parameter");
-      tracker_->setStepNoiseCovariance(default_step_covariance_);
-      tracker_->setIterationNum(iteration_num_);
-      tracker_->setResampleLikelihoodThr(resample_likelihood_thr_);
-      tracker_->setMaximumParticleNum(max_particle_num_);
-      tracker_->setDelta(delta_);
-      tracker_->setEpsilon(epsilon_);
-      tracker_->setBinSize(bin_size_);
+      tracker_set_step_noise_covariance(default_step_covariance_);
+      tracker_set_iteration_num(iteration_num_);
+      tracker_set_resample_likelihood_thr(resample_likelihood_thr_);
+      tracker_set_maximum_particle_num(max_particle_num_);
+      tracker_set_delta(delta_);
+      tracker_set_epsilon(epsilon_);
+      tracker_set_bin_size(bin_size_);
     }
   }
   
   //Publish the current particles
   void ParticleFilterTracking::publish_particles()
   {
-    ParticleFilterTracker<pcl::PointXYZRGBA, ParticleXYZRPY>::PointCloudStatePtr particles = tracker_->getParticles();
+    ParticleFilterTracker<pcl::PointXYZRGBA, ParticleXYZRPY>::PointCloudStatePtr particles = tracker_get_particles();
     if (particles && new_cloud_ && particle_publisher_.getNumSubscribers()) {
       //Set pointCloud with particle's points
       pcl::PointCloud<pcl::PointXYZ>::Ptr particle_cloud(new pcl::PointCloud<pcl::PointXYZ>());
@@ -203,8 +213,8 @@ namespace jsk_pcl_ros
   //Publish model reference point cloud
   void ParticleFilterTracking::publish_result()
   {
-    ParticleXYZRPY result = tracker_->getResult();
-    Eigen::Affine3f transformation = tracker_->toEigenMatrix(result);
+    ParticleXYZRPY result = tracker_get_result();
+    Eigen::Affine3f transformation = tracker_to_eigen_matrix(result);
 
     //Publisher object transformation
     tf::Transform tfTransformation;
@@ -223,13 +233,14 @@ namespace jsk_pcl_ros
     pose_stamped_publisher_.publish(result_pose_stamped);
     //Publish model reference point cloud
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr result_cloud(new pcl::PointCloud<pcl::PointXYZRGBA>());
-    pcl::transformPointCloud<pcl::PointXYZRGBA>(*(tracker_->getReferenceCloud()), *result_cloud, transformation);
+    pcl::transformPointCloud<pcl::PointXYZRGBA>(*(tracker_get_reference_cloud()), *result_cloud, transformation);
     sensor_msgs::PointCloud2 result_pointcloud2;
     pcl::toROSMsg(*result_cloud, result_pointcloud2);
     result_pointcloud2.header.frame_id = reference_frame_id();
     result_pointcloud2.header.stamp = stamp_;
     track_result_publisher_.publish(result_pointcloud2);
   }
+  
   std::string ParticleFilterTracking::reference_frame_id()
   {
     if (base_frame_id_.compare("NONE") == 0) return frame_id_;
@@ -246,16 +257,18 @@ namespace jsk_pcl_ros
     if (base_frame_id_.compare("NONE") != 0) {
       tf::Transform transform_result = change_pointcloud_frame(new_target_cloud);
       reference_transform_ = transform_result * reference_transform_;;      
-    } 
+    }
 
     if (!recieved_target_cloud->points.empty()) {
       //prepare the model of tracker's target
-      Eigen::Vector4f c;
       Eigen::Affine3f trans = Eigen::Affine3f::Identity(); 
       pcl::PointCloud<pcl::PointXYZRGBA>::Ptr transed_ref(new pcl::PointCloud<pcl::PointXYZRGBA>);        
       if (!align_box_) {
-        pcl::compute3DCentroid(*new_target_cloud, c);
-        trans.translation().matrix() = Eigen::Vector3f(c[0], c[1], c[2]);
+        if (!not_use_reference_centroid_) {
+          Eigen::Vector4f c;
+          pcl::compute3DCentroid(*new_target_cloud, c);
+          trans.translation().matrix() = Eigen::Vector3f(c[0], c[1], c[2]);
+        }
       }
       else {
         Eigen::Affine3d trans_3d = Eigen::Affine3d::Identity();
@@ -266,9 +279,9 @@ namespace jsk_pcl_ros
       //set reference model and trans
       {
         boost::mutex::scoped_lock lock(mtx_);
-        tracker_->setReferenceCloud(transed_ref);
-        tracker_->setTrans(trans);
-        tracker_->resetTracking();
+        tracker_set_reference_cloud(transed_ref);
+        tracker_set_trans(trans);
+        tracker_reset_tracking();
       }
       track_target_set_ = true;
       ROS_INFO("RESET TARGET MODEL");
@@ -320,8 +333,8 @@ namespace jsk_pcl_ros
       pcl::copyPointCloud(*cloud, *cloud_pass_downsampled_);
       if (!cloud_pass_downsampled_->points.empty()) {
         boost::mutex::scoped_lock lock(mtx_);
-        tracker_->setInputCloud(cloud_pass_downsampled_);
-        tracker_->compute();
+        tracker_set_input_cloud(cloud_pass_downsampled_);
+        tracker_compute();
         publish_particles();
         publish_result();
       }
@@ -353,6 +366,207 @@ namespace jsk_pcl_ros
     frame_id_ = req.cloud.header.frame_id;
     reset_tracking_target_model(new_target_cloud);
     return true;
+  }
+
+  void ParticleFilterTracking::tracker_set_trans(const Eigen::Affine3f& trans)
+  {
+    Eigen::Vector3f pos = trans.translation();
+    NODELET_INFO("trans: [%f, %f, %f]", pos[0], pos[1], pos[2]);
+    if (reversed_) {
+      reversed_tracker_->setTrans(trans);
+    }
+    else {
+      tracker_->setTrans(trans);
+    }
+  }
+
+  void ParticleFilterTracking::tracker_set_step_noise_covariance(const std::vector<double>& covariance)
+  {
+    if (reversed_) {
+      reversed_tracker_->setStepNoiseCovariance(covariance);
+    }
+    else {
+      tracker_->setStepNoiseCovariance(covariance);
+    }
+  }
+
+  void ParticleFilterTracking::tracker_set_initial_noise_covariance(const std::vector<double>& covariance)
+  {
+    if (reversed_) {
+      reversed_tracker_->setInitialNoiseCovariance(covariance);
+    }
+    else {
+      tracker_->setInitialNoiseCovariance(covariance);
+    }
+  }
+
+  void ParticleFilterTracking::tracker_set_initial_noise_mean(const std::vector<double>& mean)
+  {
+    if (reversed_) {
+      reversed_tracker_->setInitialNoiseMean(mean);
+    }
+    else {
+      tracker_->setInitialNoiseMean(mean);
+    }
+  }
+
+  void ParticleFilterTracking::tracker_set_iteration_num(const int num)
+  {
+    if (reversed_) {
+      reversed_tracker_->setIterationNum(num);
+    }
+    else {
+      tracker_->setIterationNum(num);
+    }
+  }
+
+  void ParticleFilterTracking::tracker_set_particle_num(const int num)
+  {
+    if (reversed_) {
+      reversed_tracker_->setParticleNum(num);
+    }
+    else {
+      tracker_->setParticleNum(num);
+    }
+  }
+
+  void ParticleFilterTracking::tracker_set_resample_likelihood_thr(double thr)
+  {
+    if (reversed_) {
+      reversed_tracker_->setResampleLikelihoodThr(thr);
+    }
+    else {
+      tracker_->setResampleLikelihoodThr(thr);
+    }
+  }
+
+  void ParticleFilterTracking::tracker_set_use_normal(bool use_normal)
+  {
+    if (reversed_) {
+      reversed_tracker_->setUseNormal(use_normal);
+    }
+    else {
+      tracker_->setUseNormal(use_normal);
+    }
+  }
+  
+  void ParticleFilterTracking::tracker_set_cloud_coherence(ApproxNearestPairPointCloudCoherence<pcl::PointXYZRGBA>::Ptr coherence)
+  {
+    if (reversed_) {
+      reversed_tracker_->setCloudCoherence(coherence);
+    }
+    else {
+      tracker_->setCloudCoherence(coherence);
+    }
+  }
+
+  void ParticleFilterTracking::tracker_set_maximum_particle_num(int num)
+  {
+    if (!reversed_) {
+      tracker_->setMaximumParticleNum(num);
+    }
+  }
+  
+  void ParticleFilterTracking::tracker_set_delta(double delta)
+  {
+    if (!reversed_) {
+      tracker_->setDelta(delta);
+    }
+  }
+  
+  void ParticleFilterTracking::tracker_set_epsilon(double epsilon)
+  {
+    if (!reversed_) {
+      tracker_->setEpsilon(epsilon);
+    }
+  }
+  
+  void ParticleFilterTracking::tracker_set_bin_size(const ParticleXYZRPY bin_size)
+  {
+    if (!reversed_) {
+      tracker_->setBinSize(bin_size);
+    }
+  }
+
+  ParticleFilterTracker<pcl::PointXYZRGBA, ParticleXYZRPY>::PointCloudStatePtr
+  ParticleFilterTracking::tracker_get_particles()
+  {
+    if (!reversed_) {
+      return tracker_->getParticles();
+    }
+    else {
+      return reversed_tracker_->getParticles();
+    }
+  }
+
+  ParticleXYZRPY ParticleFilterTracking::tracker_get_result()
+  {
+    if (!reversed_) {
+      return tracker_->getResult();
+    }
+    else {
+      return reversed_tracker_->getResult();
+    }
+  }
+
+  Eigen::Affine3f ParticleFilterTracking::tracker_to_eigen_matrix(
+    const ParticleXYZRPY& result)
+  {
+    if (!reversed_) {
+      return tracker_->toEigenMatrix(result);
+    }
+    else {
+      return reversed_tracker_->toEigenMatrix(result);
+    }
+  }
+
+  pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr ParticleFilterTracking::tracker_get_reference_cloud()
+  {
+    if (!reversed_) {
+      return tracker_->getReferenceCloud();
+    }
+    else {
+      return reversed_tracker_->getReferenceCloud();
+    }
+  }
+
+  void ParticleFilterTracking::tracker_set_reference_cloud(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr ref)
+  {
+    if (!reversed_) {
+      tracker_->setReferenceCloud(ref);
+    }
+    else {
+      reversed_tracker_->setReferenceCloud(ref);
+    }
+  }
+
+  void ParticleFilterTracking::tracker_reset_tracking()
+  {
+    if (!reversed_) {
+      tracker_->resetTracking();
+    }
+    else {
+      reversed_tracker_->resetTracking();
+    }
+  }
+
+  void ParticleFilterTracking::tracker_set_input_cloud(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr input)
+  {
+    if (!reversed_) {
+      tracker_->setInputCloud(input);
+    }
+    else {
+      reversed_tracker_->setInputCloud(input);
+    }
+  }
+  void ParticleFilterTracking::tracker_compute()
+  {
+    if (!reversed_) {
+      tracker_->compute();
+    }
+    else {
+      reversed_tracker_->compute();
+    }
   }
 }
 

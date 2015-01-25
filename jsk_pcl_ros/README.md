@@ -956,14 +956,25 @@ This nodelet tracks the target pointcloud.
 * `~bin_size_yaw` (Double, default: `0.01`)
 
   Size of bin for KLD sampling. Larger value means smaller number of particles.
-* `default_step_covariance_x` (Double, default: 0.00001)
-* `default_step_covariance_y` (Double, default: 0.00001)
-* `default_step_covariance_z` (Double, default: 0.00001)
-* `default_step_covariance_roll` (Double, default: 0.00001)
-* `default_step_covariance_pitch` (Double, default: 0.00001)
-* `default_step_covariance_yaw` (Double, default: 0.00001)
+* `~default_step_covariance_x` (Double, default: 0.00001)
+* `~default_step_covariance_y` (Double, default: 0.00001)
+* `~default_step_covariance_z` (Double, default: 0.00001)
+* `~default_step_covariance_roll` (Double, default: 0.00001)
+* `~default_step_covariance_pitch` (Double, default: 0.00001)
+* `~default_step_covariance_yaw` (Double, default: 0.00001)
 
   Covariance value of noise in resampling phase.
+
+* `~reversed` (Boolean, default: `false`)
+
+  Reverse relationship between reference and input. If this parameter is true,
+  tracker transforms input pointcloud instead of reference pointcloud.
+  It is useful when input pointcloud is smaller than reference pointcloud.
+
+  If this parameter is true, KLDSampling is disabled.
+* `~not_use_reference_centroid` (Boolean, default: `false`)
+
+  If this parameter is true, tracker des not use centroid of reference pointcloud as the origin of reference pointcloud.
 
 #### Sample
 

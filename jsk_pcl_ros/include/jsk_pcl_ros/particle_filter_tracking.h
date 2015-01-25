@@ -134,9 +134,24 @@ namespace pcl
       typedef boost::shared_ptr< CloudCoherence > CloudCoherencePtr;
       typedef boost::shared_ptr< const CloudCoherence > CloudCoherenceConstPtr;
 
+      // call initCompute only if reference pointcloud is updated
+      inline void
+      setReferenceCloud (const PointCloudInConstPtr &ref)
+      {
+        ref_ = ref;
+        if (coherence_) {
+          coherence_->setTargetCloud (ref_);
+          coherence_->initCompute ();
+        }
+        else {
+          PCL_ERROR("coherence_ is not yet available!");
+        }
+      }
+
+
     protected:
       std::vector<PointCloudInPtr> transed_input_vector_;
-
+      
       virtual bool initCompute()
       {
         if (!Tracker<PointInT, StateT>::initCompute ())
@@ -158,7 +173,9 @@ namespace pcl
         }
 
         // set reference instead of input
-        coherence_->setTargetCloud (ref_);
+        // if (coherence_) {
+        //   coherence_->setTargetCloud (ref_);
+        // }
           
         if (!change_detector_)
           change_detector_ = boost::shared_ptr<pcl::octree::OctreePointCloudChangeDetector<PointInT> >(new pcl::octree::OctreePointCloudChangeDetector<PointInT> (change_detector_resolution_));
@@ -183,8 +200,6 @@ namespace pcl
         changed_ = true;
         if (!use_normal_)
         {
-          coherence_->setTargetCloud (ref_);
-          coherence_->initCompute ();
           for (size_t i = 0; i < particles_->points.size (); i++)
           {
             //std::cout << "processing " << i << " particle: " << particles_->points[i].weight << std::endl;
@@ -200,8 +215,6 @@ namespace pcl
         }
         else
         {
-          coherence_->setTargetCloud (ref_);
-          coherence_->initCompute ();
           for (size_t i = 0; i < particles_->points.size (); i++)
           {
             StateT inverse_particle;
@@ -289,8 +302,6 @@ namespace pcl
         changed_ = true;
         if (!use_normal_)
         {
-          coherence_->setTargetCloud (ref_);
-          coherence_->initCompute ();
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(threads_)
 #endif
@@ -312,8 +323,6 @@ namespace pcl
         }
         else
         {
-          coherence_->setTargetCloud (ref_);
-          coherence_->initCompute ();
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(threads_)
 #endif

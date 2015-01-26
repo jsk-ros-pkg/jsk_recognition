@@ -78,14 +78,6 @@ add_executable(color_histogram_sliding_matcher src/color_histogram_sliding_match
 add_library(oriented_gradient src/oriented_gradient.cpp)
 add_executable(oriented_gradient_node src/oriented_gradient_node.cpp)
 
-if(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
-  include(${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
-elseif(EXISTS ${jsk_topic_tools_SOURCE_PREFIX}/cmake/nodelet.cmake)
-  include(${jsk_topic_tools_SOURCE_PREFIX}/cmake/nodelet.cmake)
-else(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
-  include(${jsk_topic_tools_PREFIX}/share/jsk_topic_tools/cmake/nodelet.cmake)
-endif(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
-
 macro(jsk_perception_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
   jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
     jsk_perception_nodelet_sources jsk_perception_nodelet_executables)

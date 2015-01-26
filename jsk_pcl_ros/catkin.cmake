@@ -117,14 +117,6 @@ find_package(OpenCV REQUIRED core imgproc)
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 
-if(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
-  include(${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
-elseif(EXISTS ${jsk_topic_tools_SOURCE_PREFIX}/cmake/nodelet.cmake)
-  include(${jsk_topic_tools_SOURCE_PREFIX}/cmake/nodelet.cmake)
-else(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
-  include(${jsk_topic_tools_PREFIX}/share/jsk_topic_tools/cmake/nodelet.cmake)
-endif(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
-
 macro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
   jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
     jsk_pcl_nodelet_sources jsk_pcl_nodelet_executables)

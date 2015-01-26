@@ -21,14 +21,6 @@ catkin_package(
     LIBRARIES # TODO
 )
 
-if(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
-  include(${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
-elseif(EXISTS ${jsk_topic_tools_SOURCE_PREFIX}/cmake/nodelet.cmake)
-  include(${jsk_topic_tools_SOURCE_PREFIX}/cmake/nodelet.cmake)
-else(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
-  include(${jsk_topic_tools_PREFIX}/share/jsk_topic_tools/cmake/nodelet.cmake)
-endif(EXISTS ${jsk_topic_tools_SOURCE_DIR}/cmake/nodelet.cmake)
-
 jsk_nodelet(src/image_resizer_nodelet.cpp
   "resized_image_transport/ImageResizer"
   "image_resizer"

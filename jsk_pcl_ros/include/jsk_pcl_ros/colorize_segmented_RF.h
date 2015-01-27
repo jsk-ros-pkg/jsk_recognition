@@ -39,7 +39,7 @@
 // ros
 #include <ros/ros.h>
 #include <ros/names.h>
-#include <jsk_pcl_ros/PointsArray.h>
+#include <jsk_recognition_msgs/PointsArray.h>
 // pcl
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl/point_types.h>

@@ -37,7 +37,7 @@
 #include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/common/centroid.h>
 #include "jsk_pcl_ros/pcl_conversion_util.h"
-#include <jsk_pcl_ros/BoundingBoxArray.h>
+#include <jsk_recognition_msgs/BoundingBoxArray.h>
 #include <geometry_msgs/PoseArray.h>
 #include <pcl/filters/extract_indices.h>
 #include <visualization_msgs/Marker.h>
@@ -46,8 +46,8 @@
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/common/angles.h>
-#include <jsk_pcl_ros/PolygonArray.h>
-#include <jsk_pcl_ros/ClusterPointIndices.h>
+#include <jsk_recognition_msgs/PolygonArray.h>
+#include <jsk_recognition_msgs/ClusterPointIndices.h>
 #include <pcl/filters/project_inliers.h>
 #include <pcl/surface/convex_hull.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -388,7 +388,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // publishers
     ////////////////////////////////////////////////////////
-    pub_ = advertise<jsk_pcl_ros::BoundingBoxArray>(*pnh_, "output", 1);
+    pub_ = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "output", 1);
     pub_pose_array_
       = advertise<geometry_msgs::PoseArray>(*pnh_, "output_pose_array", 1);
     pub_debug_marker_
@@ -396,9 +396,9 @@ namespace jsk_pcl_ros
     pub_debug_filtered_cloud_ = advertise<sensor_msgs::PointCloud2>(
       *pnh_, "debug_filtered_cloud", 1);
     pub_debug_polygons_
-      = advertise<jsk_pcl_ros::PolygonArray>(*pnh_, "debug_polygons", 1);
+      = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "debug_polygons", 1);
     pub_debug_clusers_
-      = advertise<ClusterPointIndices>(*pnh_, "debug_clusters", 1);
+      = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "debug_clusters", 1);
   }
 
   void EdgebasedCubeFinder::subscribe()
@@ -1110,7 +1110,7 @@ namespace jsk_pcl_ros
     pub_debug_polygons_.publish(polygon_array);
 
     // convert std::vector<pcl::PointIndices::Ptr> to ClusterPointIndices
-    ClusterPointIndices ros_cluster_indices;
+    jsk_recognition_msgs::ClusterPointIndices ros_cluster_indices;
     ros_cluster_indices.header = input_cloud->header;
     for (size_t i = 0; i < candidate_cluster_indices.size(); i++) {
       PCLIndicesMsg indices_msg;

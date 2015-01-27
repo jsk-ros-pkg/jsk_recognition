@@ -34,7 +34,7 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/organized_multi_plane_segmentation.h"
-#include "jsk_pcl_ros/ModelCoefficientsArray.h"
+#include "jsk_recognition_msgs/ModelCoefficientsArray.h"
 #include <pcl/segmentation/impl/organized_multi_plane_segmentation.hpp>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/kdtree/kdtree_flann.h>

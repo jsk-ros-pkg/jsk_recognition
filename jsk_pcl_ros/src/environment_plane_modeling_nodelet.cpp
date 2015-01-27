@@ -40,7 +40,7 @@
 #include <pcl/filters/project_inliers.h>
 #include <pcl/surface/convex_hull.h>
 #include <pcl/filters/project_inliers.h>
-#include <jsk_pcl_ros/SparseOccupancyGridArray.h>
+#include <jsk_recognition_msgs/SparseOccupancyGridArray.h>
 
 #include <pluginlib/class_list_macros.h>
 

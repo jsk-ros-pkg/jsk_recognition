@@ -46,8 +46,7 @@
 #include "geometry_msgs/PoseStamped.h"
 #include "math.h"
 #include "geometry_msgs/PolygonStamped.h"
-#include "jsk_pcl_ros/PolygonArray.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_msgs/PolygonArray.h"
 #include "eigen_conversions/eigen_msg.h"
 #include <sys/timeb.h>    // ftime(), struct timeb
 #include <sys/time.h>
@@ -217,7 +216,7 @@ public:
                 _node.advertise<geometry_msgs::PoseStamped> ("objectdetection_pose", 1,
                                                              connect_cb, connect_cb);
             _pubCornerPoint = _node.advertise<geometry_msgs::PointStamped>("corner_point", 1, connect_cb, connect_cb);
-            _pubPolygonArray = _node.advertise<jsk_pcl_ros::PolygonArray>("polygons", 1, connect_cb, connect_cb);
+            _pubPolygonArray = _node.advertise<jsk_recognition_msgs::PolygonArray>("polygons", 1, connect_cb, connect_cb);
         }
         else {
             _pubDetection =
@@ -225,7 +224,7 @@ public:
             _pubPoseStamped =
                 _node.advertise<geometry_msgs::PoseStamped> ("objectdetection_pose", 1);
             _pubCornerPoint = _node.advertise<geometry_msgs::PointStamped>("corner_point", 1);
-            _pubPolygonArray = _node.advertise<jsk_pcl_ros::PolygonArray>("polygons", 1);
+            _pubPolygonArray = _node.advertise<jsk_recognition_msgs::PolygonArray>("polygons", 1);
             subscribe();
         }
         //this->camInfoSubscriber = _node.subscribe("camera_info", 1, &CheckerboardDetector::caminfo_cb, this);
@@ -261,7 +260,7 @@ public:
     
     void publishPolygonArray(const posedetection_msgs::ObjectDetection& obj)
     {
-        jsk_pcl_ros::PolygonArray polygon_array;
+        jsk_recognition_msgs::PolygonArray polygon_array;
         polygon_array.header = obj.header;
         for (size_t i = 0; i < obj.objects.size(); i++) {
             geometry_msgs::Pose pose = obj.objects[i].pose;
@@ -276,10 +275,10 @@ public:
             Eigen::Vector3d C_global = affine * C_local;
             Eigen::Vector3d D_global = affine * D_local;
             geometry_msgs::Point32 a, b, c, d;
-            jsk_pcl_ros::pointFromVectorToXYZ<Eigen::Vector3d, geometry_msgs::Point32>(A_global, a);
-            jsk_pcl_ros::pointFromVectorToXYZ<Eigen::Vector3d, geometry_msgs::Point32>(B_global, b);
-            jsk_pcl_ros::pointFromVectorToXYZ<Eigen::Vector3d, geometry_msgs::Point32>(C_global, c);
-            jsk_pcl_ros::pointFromVectorToXYZ<Eigen::Vector3d, geometry_msgs::Point32>(D_global, d);
+            a.x = A_global[0]; a.y = A_global[1]; a.z = A_global[2];
+            b.x = B_global[0]; b.y = B_global[1]; b.z = B_global[2];
+            c.x = C_global[0]; c.y = C_global[1]; c.z = C_global[2];
+            d.x = D_global[0]; d.y = D_global[1]; d.z = D_global[2];
             geometry_msgs::PolygonStamped polygon;
             polygon.header = obj.header;
             polygon.polygon.points.push_back(a);

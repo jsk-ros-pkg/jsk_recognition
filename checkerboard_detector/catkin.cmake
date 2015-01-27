@@ -3,14 +3,13 @@ cmake_minimum_required(VERSION 2.8.3)
 project(checkerboard_detector)
 
 find_package(catkin REQUIRED COMPONENTS roscpp rosconsole cv_bridge sensor_msgs image_geometry
-  jsk_pcl_ros
-  posedetection_msgs eigen_conversions message_filters tf tf2)
+  posedetection_msgs eigen_conversions message_filters tf tf2 jsk_recognition_msgs jsk_recognition_msgs)
 find_package(OpenCV REQUIRED)
 find_package(OpenMP)
 find_package(posedetection_msgs)
 
 catkin_package(
-    CATKIN_DEPENDS roscpp rosconsole cv_bridge sensor_msgs posedetection_msgs image_geometry
+    CATKIN_DEPENDS roscpp rosconsole cv_bridge sensor_msgs posedetection_msgs image_geometry jsk_recognition_msgs
     DEPENDS OpenCV2
     INCLUDE_DIRS # TODO include
     LIBRARIES # TODO
@@ -38,6 +37,9 @@ target_link_libraries(checkerboard_calibration ${catkin_LIBRARIES} ${OpenCV_LIBR
 add_dependencies(checkerboard_detector    posedetection_msgs_gencpp)
 add_dependencies(checkerboard_calibration posedetection_msgs_gencpp)
 add_dependencies(objectdetection_transform_echo posedetection_msgs_gencpp)
+add_dependencies(checkerboard_detector    jsk_recognition_msgs_gencpp)
+add_dependencies(checkerboard_calibration jsk_recognition_msgs_gencpp)
+add_dependencies(objectdetection_transform_echo jsk_recognition_msgs_gencpp)
 
 install(TARGETS checkerboard_detector checkerboard_calibration
   objectdetection_transform_echo

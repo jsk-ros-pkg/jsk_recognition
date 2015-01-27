@@ -34,8 +34,8 @@
  *********************************************************************/
 
 
-#ifndef JSK_PERCEPTION_FIND_OBJECT_ON_PLANE_H_
-#define JSK_PERCEPTION_FIND_OBJECT_ON_PLANE_H_
+#ifndef JSK_PCL_ROS_FIND_OBJECT_ON_PLANE_H_
+#define JSK_PCL_ROS_FIND_OBJECT_ON_PLANE_H_
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <message_filters/subscriber.h>
@@ -49,7 +49,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <jsk_pcl_ros/geo_util.h>
 
-namespace jsk_perception
+namespace jsk_pcl_ros
 {
   class FindObjectOnPlane: public jsk_topic_tools::DiagnosticNodelet
   {

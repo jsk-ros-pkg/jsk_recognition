@@ -375,7 +375,7 @@ namespace jsk_pcl_ros
     convertEigenAffine3(float_affine, output);
   }
   
-  void GridMap::toMsg(SparseOccupancyGrid& grid)
+  void GridMap::toMsg(jsk_recognition_msgs::SparseOccupancyGrid& grid)
   {
     grid.resolution = resolution_;
     // compute origin POSE from O and normal_, d_
@@ -387,12 +387,12 @@ namespace jsk_pcl_ros
          it++) {
       int column_index = it->first;
       RowIndices row_indices = it->second;
-      SparseOccupancyGridColumn ros_column;
+      jsk_recognition_msgs::SparseOccupancyGridColumn ros_column;
       ros_column.column_index = column_index;
       for (RowIterator rit = row_indices.begin();
            rit != row_indices.end();
            rit++) {
-        SparseOccupancyGridCell cell;
+        jsk_recognition_msgs::SparseOccupancyGridCell cell;
         cell.row_index = *rit;
         cell.value = 1.0;
         ros_column.cells.push_back(cell);

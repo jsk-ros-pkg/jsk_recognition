@@ -44,9 +44,9 @@
 #include <message_filters/synchronizer.h>
 #include <dynamic_reconfigure/server.h>
 
-#include <jsk_pcl_ros/PolygonArray.h>
-#include <jsk_pcl_ros/ModelCoefficientsArray.h>
-#include <jsk_pcl_ros/ClusterPointIndices.h>
+#include <jsk_recognition_msgs/PolygonArray.h>
+#include <jsk_recognition_msgs/ModelCoefficientsArray.h>
+#include <jsk_recognition_msgs/ClusterPointIndices.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <jsk_pcl_ros/EnvironmentLock.h>
 #include <jsk_pcl_ros/PolygonOnEnvironment.h>
@@ -64,6 +64,8 @@
 #include "jsk_pcl_ros/grid_map.h"
 #include "jsk_pcl_ros/pcl_util.h"
 
+#include <jsk_recognition_msgs/SparseOccupancyGridArray.h>
+
 namespace jsk_pcl_ros
 {
   class EnvironmentPlaneModeling: public pcl_ros::PCLNodelet
@@ -73,36 +75,36 @@ namespace jsk_pcl_ros
     typedef EnvironmentPlaneModelingConfig Config;
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
-      ClusterPointIndices,
-      PolygonArray,
-      ModelCoefficientsArray,
-      PolygonArray,
-      ModelCoefficientsArray> SyncPolicy;
+      jsk_recognition_msgs::ClusterPointIndices,
+      jsk_recognition_msgs::PolygonArray,
+      jsk_recognition_msgs::ModelCoefficientsArray,
+      jsk_recognition_msgs::PolygonArray,
+      jsk_recognition_msgs::ModelCoefficientsArray> SyncPolicy;
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
-      ClusterPointIndices,
-      PolygonArray,
-      ModelCoefficientsArray
+      jsk_recognition_msgs::ClusterPointIndices,
+      jsk_recognition_msgs::PolygonArray,
+      jsk_recognition_msgs::ModelCoefficientsArray
       > SyncPolicyWithoutStaticPolygon;
     typedef message_filters::sync_policies::ExactTime<
-      PolygonArray,
-      ModelCoefficientsArray
+      jsk_recognition_msgs::PolygonArray,
+      jsk_recognition_msgs::ModelCoefficientsArray
       > PolygonSyncPolicy;
   protected:
     virtual void onInit();
     virtual void estimateOcclusion(
       const pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
-      const ClusterPointIndices::ConstPtr& input_indices,
+      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices,
       const std::vector<pcl::PointCloud<PointT>::Ptr>& segmented_cloud,
       std::vector<GridMap::Ptr>& grid_maps,
-      const PolygonArray::ConstPtr& polygons,
-      const ModelCoefficientsArray::ConstPtr& coefficients,
-      const PolygonArray::ConstPtr& static_polygons,
-      const ModelCoefficientsArray::ConstPtr& static_coefficients,
-      PolygonArray::Ptr result_polygons,
-      ModelCoefficientsArray::Ptr result_coefficients,
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& static_polygons,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& static_coefficients,
+      jsk_recognition_msgs::PolygonArray::Ptr result_polygons,
+      jsk_recognition_msgs::ModelCoefficientsArray::Ptr result_coefficients,
       pcl::PointCloud<PointT>::Ptr result_pointcloud,
-      ClusterPointIndices::Ptr result_indices);
+      jsk_recognition_msgs::ClusterPointIndices::Ptr result_indices);
     
     template <class A, class B>
     bool isValidHeaders(
@@ -110,11 +112,11 @@ namespace jsk_pcl_ros
     bool isValidInput();
     virtual void inputCallback(
       const sensor_msgs::PointCloud2::ConstPtr& input,
-      const ClusterPointIndices::ConstPtr& input_indices,
-      const PolygonArray::ConstPtr& polygons,
-      const ModelCoefficientsArray::ConstPtr& coefficients,
-      const PolygonArray::ConstPtr& static_polygons,
-      const ModelCoefficientsArray::ConstPtr& static_coefficients);
+      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices,
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& static_polygons,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& static_coefficients);
     virtual void configCallback(Config &config, uint32_t level);
     virtual bool lockCallback();
     virtual bool startBuildEnvironmentCallback(
@@ -151,7 +153,7 @@ namespace jsk_pcl_ros
     
     virtual void decomposePointCloud(
       const pcl::PointCloud<PointT>::Ptr& input,
-      const ClusterPointIndices::ConstPtr& input_indices,
+      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices,
       std::vector<pcl::PointCloud<PointT>::Ptr>& output);
     virtual void internalPointDivide(const PointT& A, const PointT& B,
                                      const double ratio,
@@ -169,8 +171,8 @@ namespace jsk_pcl_ros
                                      std::map<int, std::set<size_t> >& result);
     virtual void buildGridMap(
       const std::vector<pcl::PointCloud<PointT>::Ptr>& segmented_clouds,
-      const PolygonArray::ConstPtr& polygons,
-      const ModelCoefficientsArray::ConstPtr& coefficients,
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
       std::vector<GridMap::Ptr>& grid_maps);
     virtual void publishGridMap(
       ros::Publisher& pub,
@@ -184,34 +186,34 @@ namespace jsk_pcl_ros
     // find the nearest plane to static_polygon and static_coefficient
     // from polygons and coefficients
     virtual int findNearestPolygon(
-      const PolygonArray::ConstPtr& polygons,
-      const ModelCoefficientsArray::ConstPtr& coefficients,
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
       const geometry_msgs::PolygonStamped& static_polygon,
       const PCLModelCoefficientMsg& static_coefficient);
 
     virtual void fillEstimatedRegionByPointCloud
     (const std_msgs::Header& header,
      const pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
-     const ClusterPointIndices::ConstPtr& indices,
-     const PolygonArray::ConstPtr& polygons,
-     const ModelCoefficientsArray::ConstPtr& coefficients,
-     const PolygonArray::ConstPtr& static_polygons,
-     const ModelCoefficientsArray::ConstPtr& static_coefficients,
-     const PolygonArray& result_polygons,
+     const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices,
+     const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
+     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
+     const jsk_recognition_msgs::PolygonArray::ConstPtr& static_polygons,
+     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& static_coefficients,
+     const jsk_recognition_msgs::PolygonArray& result_polygons,
      const std::map<int, std::set<size_t> >& estimation_summary,
      pcl::PointCloud<PointT>::Ptr all_cloud,
-     ClusterPointIndices& all_indices,
+     jsk_recognition_msgs::ClusterPointIndices& all_indices,
      std::vector<GridMap::Ptr> grid_maps);
 
     virtual void inputCallback(
       const sensor_msgs::PointCloud2::ConstPtr& input,
-      const ClusterPointIndices::ConstPtr& input_indices,
-      const PolygonArray::ConstPtr& polygons,
-      const ModelCoefficientsArray::ConstPtr& coefficients);
+      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices,
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients);
     
     virtual void copyClusterPointIndices
-    (const ClusterPointIndices::ConstPtr& indices,
-     ClusterPointIndices& output);
+    (const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices,
+     jsk_recognition_msgs::ClusterPointIndices& output);
     virtual void computePolygonCentroid(
       const geometry_msgs::PolygonStamped msg,
       pcl::PointXYZRGB& output);
@@ -233,19 +235,19 @@ namespace jsk_pcl_ros
     const std::vector<float> input_coefficient);
 
     virtual void staticPolygonCallback(
-      const PolygonArray::ConstPtr& polygons,
-      const ModelCoefficientsArray::ConstPtr& coefficients);
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr samplePointCloudOnPolygon(
       const geometry_msgs::PolygonStamped& candidate_polygon,
       const PCLModelCoefficientMsg& candidate_polygon_coefficients);
     virtual void completeGridMap(
     const pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
-    const ClusterPointIndices::ConstPtr& input_indices,
+    const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices,
     const std::vector<pcl::PointCloud<PointT>::Ptr>& segmented_cloud,
-    const PolygonArray::ConstPtr& polygons,
-    const ModelCoefficientsArray::ConstPtr& coefficients,
-    const PolygonArray::ConstPtr& static_polygons,
-    const ModelCoefficientsArray::ConstPtr& static_coefficients,
+    const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
+    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
+    const jsk_recognition_msgs::PolygonArray::ConstPtr& static_polygons,
+    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& static_coefficients,
     std::vector<GridMap::Ptr>& output_grid_maps);
         
     ////////////////////////////////////////////////////////
@@ -262,11 +264,11 @@ namespace jsk_pcl_ros
     boost::shared_ptr<
       message_filters::Synchronizer<PolygonSyncPolicy> > sync_static_polygon_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<ClusterPointIndices> sub_indices_;
-    message_filters::Subscriber<PolygonArray> sub_polygons_;
-    message_filters::Subscriber<ModelCoefficientsArray> sub_coefficients_;
-    message_filters::Subscriber<PolygonArray> sub_static_polygons_;
-    message_filters::Subscriber<ModelCoefficientsArray> sub_static_coefficients_;
+    message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_indices_;
+    message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygons_;
+    message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
+    message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_static_polygons_;
+    message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_static_coefficients_;
     ros::ServiceServer lock_service_;
     ros::ServiceServer polygon_on_environment_service_;
     ros::ServiceServer primitive_lock_service_;
@@ -291,21 +293,21 @@ namespace jsk_pcl_ros
     ros::Publisher old_map_pub_;
     // member variables to store the latest messages
     sensor_msgs::PointCloud2::ConstPtr latest_input_;
-    ClusterPointIndices::ConstPtr latest_input_indices_;
-    PolygonArray::ConstPtr latest_input_polygons_;
-    ModelCoefficientsArray::ConstPtr latest_input_coefficients_;
-    PolygonArray::ConstPtr latest_static_polygons_;
-    ModelCoefficientsArray::ConstPtr latest_static_coefficients_;
+    jsk_recognition_msgs::ClusterPointIndices::ConstPtr latest_input_indices_;
+    jsk_recognition_msgs::PolygonArray::ConstPtr latest_input_polygons_;
+    jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr latest_input_coefficients_;
+    jsk_recognition_msgs::PolygonArray::ConstPtr latest_static_polygons_;
+    jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr latest_static_coefficients_;
     
     // member variables to keep the messasge which we process
     sensor_msgs::PointCloud2::ConstPtr processing_input_;
-    ClusterPointIndices::ConstPtr processing_input_indices_;
-    PolygonArray::ConstPtr processing_input_polygons_;
-    ModelCoefficientsArray::ConstPtr processing_input_coefficients_;
-    PolygonArray::ConstPtr processing_static_polygons_;
-    ModelCoefficientsArray::ConstPtr processing_static_coefficients_;
-    PolygonArray::ConstPtr completion_static_polygons_;
-    ModelCoefficientsArray::ConstPtr completion_static_coefficients_;
+    jsk_recognition_msgs::ClusterPointIndices::ConstPtr processing_input_indices_;
+    jsk_recognition_msgs::PolygonArray::ConstPtr processing_input_polygons_;
+    jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr processing_input_coefficients_;
+    jsk_recognition_msgs::PolygonArray::ConstPtr processing_static_polygons_;
+    jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr processing_static_coefficients_;
+    jsk_recognition_msgs::PolygonArray::ConstPtr completion_static_polygons_;
+    jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr completion_static_coefficients_;
     
     std::vector<pcl::KdTreeFLANN<pcl::PointXYZ>::Ptr> kdtrees_;
     uint32_t environment_id_;

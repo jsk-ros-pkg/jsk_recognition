@@ -14,9 +14,9 @@
 #include <sensor_msgs/CameraInfo.h>
 #include <geometry_msgs/PolygonStamped.h>
 #include <geometry_msgs/PointStamped.h>
-#include <jsk_perception/Rect.h>
+#include <jsk_recognition_msgs/Rect.h>
 #include <jsk_perception/ColorHistogramSlidingMatcherConfig.h>
-#include <jsk_pcl_ros/BoundingBoxArray.h>
+#include <jsk_recognition_msgs/BoundingBoxArray.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
@@ -93,10 +93,10 @@ public:
 		  , _subInfo(_node, "camera_info", 1)
 		  , sync( SyncPolicy(10), _subImage, _subInfo)
   {
-    _pubBestRect = _node.advertise< jsk_perception::Rect >("best_rect", 1);
+    _pubBestRect = _node.advertise< jsk_recognition_msgs::Rect >("best_rect", 1);
     _pubBestPolygon = _node.advertise< geometry_msgs::PolygonStamped >("best_polygon", 1);
     _pubBestPoint = _node.advertise< geometry_msgs::PointStamped >("rough_point", 1);
-    _pubBestBoundingBox = _node.advertise< jsk_pcl_ros::BoundingBoxArray >("best_box", 1);
+    _pubBestBoundingBox = _node.advertise< jsk_recognition_msgs::BoundingBoxArray >("best_box", 1);
     _debug_pub = _it.advertise("debug_image", 1);
     // _subImage = _it.subscribe("image", 1, &MatcherNode::image_cb, this);
     
@@ -342,7 +342,7 @@ public:
       // best result;
 
       cv::rectangle(image, cv::Point(index_j, index_i), cv::Point(index_j+(max_scale*standard_width), index_i+(max_scale*standard_height)), cv::Scalar(0, 0, 200), 3, 4);
-      jsk_perception::Rect rect;
+      jsk_recognition_msgs::Rect rect;
       rect.x=index_j, rect.y=index_i, rect.width=(int)(max_scale*standard_width); rect.height=(int)(max_scale*standard_height);
       _pubBestRect.publish(rect);
       geometry_msgs::PolygonStamped polygon_msg;
@@ -383,8 +383,8 @@ public:
       best_point.point.z = fT3[2]; 
       best_point.header = msg_ptr->header;
       _pubBestPoint.publish(best_point);
-      jsk_pcl_ros::BoundingBoxArray box_array_msg;
-      jsk_pcl_ros::BoundingBox box_msg;
+      jsk_recognition_msgs::BoundingBoxArray box_array_msg;
+      jsk_recognition_msgs::BoundingBox box_msg;
       box_array_msg.header = box_msg.header = msg_ptr->header;
       box_msg.pose.position = best_point.point;
       box_msg.pose.orientation.x = box_msg.pose.orientation.y = box_msg.pose.orientation.z = 0;

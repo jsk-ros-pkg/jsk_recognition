@@ -122,8 +122,8 @@ namespace jsk_pcl_ros
   
   void ColorizeDistanceFromPlane::colorize(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
-    const ModelCoefficientsArray::ConstPtr& coefficients_msg,
-    const PolygonArray::ConstPtr& polygons)
+    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg,
+    const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons)
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (coefficients_msg->coefficients.size() == 0) {

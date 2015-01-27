@@ -25,7 +25,7 @@ endif()
 
 find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure pcl_ros nodelet message_generation genmsg
-  ${PCL_MSGS} sensor_msgs geometry_msgs
+  ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs
   eigen_conversions tf_conversions tf2_ros tf
   image_transport nodelet cv_bridge
   ${ML_CLASSIFIERS} sklearn jsk_topic_tools
@@ -39,27 +39,6 @@ find_package(OpenMP)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-
-add_message_files(FILES PointsArray.msg ClusterPointIndices.msg Int32Stamped.msg SnapItRequest.msg PolygonArray.msg
-  TimeRange.msg
-  DepthCalibrationParameter.msg
-  ModelCoefficientsArray.msg
-  SlicedPointCloud.msg
-  BoundingBox.msg
-  BoundingBoxArray.msg
-  BoundingBoxMovement.msg
-  Torus.msg
-  TorusArray.msg
-  ColorHistogram.msg
-  ColorHistogramArray.msg
-  SparseOccupancyGridCell.msg
-  SparseOccupancyGridColumn.msg
-  SparseOccupancyGrid.msg
-  SparseOccupancyGridArray.msg
-  DepthErrorResult.msg
-  ParallelEdge.msg ParallelEdgeArray.msg
-  PosedCameraInfo.msg
-  ICPResult.msg)
 
 add_service_files(FILES SwitchTopic.srv
   SetDepthCalibrationParameter.srv
@@ -309,7 +288,7 @@ add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
 target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 
-generate_messages(DEPENDENCIES ${PCL_MSGS} sensor_msgs geometry_msgs)
+generate_messages(DEPENDENCIES ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs)
 
 catkin_package(
     DEPENDS pcl

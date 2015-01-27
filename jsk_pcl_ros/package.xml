@@ -86,6 +86,8 @@
   <run_depend>image_geometry</run_depend>
   <build_depend>yaml-cpp</build_depend>
   <run_depend>yaml-cpp</run_depend>
+  <build_depend>jsk_recognition_msgs</build_depend>
+  <run_depend>jsk_recognition_msgs</run_depend>
   <export>
     <nodelet plugin="${prefix}/jsk_pcl_nodelets.xml"/>
     <cpp lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ljsk_pcl_ros" cflags="-I${prefix}/include"/>

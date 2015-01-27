@@ -65,8 +65,8 @@ namespace jsk_pcl_ros
   }
 
   void SelectedClusterPublisher::extract(const sensor_msgs::PointCloud2::ConstPtr& input,
-                                         const jsk_pcl_ros::ClusterPointIndices::ConstPtr& indices,
-                                         const jsk_pcl_ros::Int32Stamped::ConstPtr& index)
+                                         const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices,
+                                         const jsk_recognition_msgs::Int32Stamped::ConstPtr& index)
   {
     if (indices->cluster_indices.size() <= index->data) {
       NODELET_ERROR("the selected index %d is out of clusters array %lu",

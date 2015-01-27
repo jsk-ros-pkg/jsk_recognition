@@ -46,7 +46,7 @@ namespace jsk_pcl_ros
       boost::bind (
         &SupervoxelSegmentation::configCallback, this, _1, _2);
     srv_->setCallback (f);
-    pub_indices_ = advertise<jsk_pcl_ros::ClusterPointIndices>(
+    pub_indices_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(
       *pnh_, "output/indices", 1);
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(
       *pnh_, "output/cloud", 1);
@@ -110,7 +110,7 @@ namespace jsk_pcl_ros
     sensor_msgs::PointCloud2 ros_cloud;
     pcl::toROSMsg(*output, ros_cloud);
     ros_cloud.header = cloud_msg->header;
-    jsk_pcl_ros::ClusterPointIndices ros_indices;
+    jsk_recognition_msgs::ClusterPointIndices ros_indices;
     ros_indices.cluster_indices = pcl_conversions::convertToROSPointIndices(
       all_indices,
       cloud_msg->header);

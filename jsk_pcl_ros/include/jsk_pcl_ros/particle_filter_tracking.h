@@ -63,7 +63,7 @@
 
 #include <jsk_pcl_ros/SetPointCloud2.h>
 #include <jsk_pcl_ros/ParticleFilterTrackingConfig.h>
-#include <jsk_pcl_ros/BoundingBox.h>
+#include <jsk_recognition_msgs/BoundingBox.h>
 
 #include <dynamic_reconfigure/server.h>
 #include <message_filters/subscriber.h>
@@ -361,7 +361,7 @@ namespace jsk_pcl_ros
     typedef ParticleFilterTrackingConfig Config;
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
-      BoundingBox > SyncPolicy;
+      jsk_recognition_msgs::BoundingBox > SyncPolicy;
     typedef ParticleFilterTracker<PointT, ParticleXYZRPY>::PointCloudStatePtr
     PointCloudStatePtr;
   protected:
@@ -388,7 +388,7 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_update_model_;
 
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<BoundingBox> sub_box_;
+    message_filters::Subscriber<jsk_recognition_msgs::BoundingBox> sub_box_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     ros::Publisher particle_publisher_;
     ros::Publisher track_result_publisher_;
@@ -425,7 +425,7 @@ namespace jsk_pcl_ros
       jsk_pcl_ros::SetPointCloud2::Response &response);
     virtual void renew_model_with_box_topic_cb(
       const sensor_msgs::PointCloud2::ConstPtr &pc_ptr,
-      const jsk_pcl_ros::BoundingBox::ConstPtr &bb_ptr);
+      const jsk_recognition_msgs::BoundingBox::ConstPtr &bb_ptr);
     virtual void renew_model_topic_cb(const sensor_msgs::PointCloud2 &pc);
 
     ////////////////////////////////////////////////////////

@@ -39,7 +39,7 @@
 
 #include <pcl_ros/pcl_nodelet.h>
 #include <sensor_msgs/PointCloud2.h>
-#include "jsk_pcl_ros/PointsArray.h"
+#include <jsk_recognition_msgs/PointsArray.h>
 
 namespace jsk_pcl_ros
 {

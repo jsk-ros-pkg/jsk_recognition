@@ -41,8 +41,8 @@ namespace jsk_pcl_ros
   void PolygonAppender::onInit()
   {
     ConnectionBasedNodelet::onInit();
-    pub_polygon_ = advertise<PolygonArray>(*pnh_, "output", 1);
-    pub_coefficients_ = advertise<ModelCoefficientsArray>(*pnh_,
+    pub_polygon_ = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "output", 1);
+    pub_coefficients_ = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(*pnh_,
       "output_coefficients", 1);
     
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy2> >(100);
@@ -68,23 +68,23 @@ namespace jsk_pcl_ros
   }
   
   void PolygonAppender::callback2(
-    const PolygonArray::ConstPtr& msg0,
-    const ModelCoefficientsArray::ConstPtr& coefficients0,
-    const PolygonArray::ConstPtr& msg1,
-    const ModelCoefficientsArray::ConstPtr& coefficients1)
+    const jsk_recognition_msgs::PolygonArray::ConstPtr& msg0,
+    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients0,
+    const jsk_recognition_msgs::PolygonArray::ConstPtr& msg1,
+    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients1)
   {
-    std::vector<PolygonArray::ConstPtr> arrays;
+    std::vector<jsk_recognition_msgs::PolygonArray::ConstPtr> arrays;
     arrays.push_back(msg0);
     arrays.push_back(msg1);
-    std::vector<ModelCoefficientsArray::ConstPtr> coefficients_array;
+    std::vector<jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr> coefficients_array;
     coefficients_array.push_back(coefficients0);
     coefficients_array.push_back(coefficients1);
     appendAndPublish(arrays, coefficients_array);
   }
 
   void PolygonAppender::appendAndPublish(
-    const std::vector<PolygonArray::ConstPtr>& arrays,
-    const std::vector<ModelCoefficientsArray::ConstPtr>& coefficients_array)
+    const std::vector<jsk_recognition_msgs::PolygonArray::ConstPtr>& arrays,
+    const std::vector<jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr>& coefficients_array)
   {
     if (arrays.size() == 0) {
       NODELET_ERROR("there is not enough polygons");
@@ -98,10 +98,10 @@ namespace jsk_pcl_ros
       NODELET_ERROR("polygons and coefficients are not the same length");
       return;
     }
-    PolygonArray new_array;
+    jsk_recognition_msgs::PolygonArray new_array;
     new_array.header = arrays[0]->header;
     for (size_t i = 0; i < arrays.size(); i++) {
-      PolygonArray::ConstPtr array = arrays[i];
+      jsk_recognition_msgs::PolygonArray::ConstPtr array = arrays[i];
       for (size_t j = 0; j < array->polygons.size(); j++) {
         geometry_msgs::PolygonStamped polygon = array->polygons[j];
         new_array.polygons.push_back(polygon);
@@ -109,10 +109,10 @@ namespace jsk_pcl_ros
     }
     pub_polygon_.publish(new_array);
 
-    ModelCoefficientsArray coefficients_new_array;
+    jsk_recognition_msgs::ModelCoefficientsArray coefficients_new_array;
     coefficients_new_array.header = coefficients_array[0]->header;
     for (size_t i = 0; i < coefficients_array.size(); i++) {
-      ModelCoefficientsArray::ConstPtr array = coefficients_array[i];
+      jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr array = coefficients_array[i];
       for (size_t j = 0; j < array->coefficients.size(); j++) {
         coefficients_new_array.coefficients.push_back(array->coefficients[j]);
       }

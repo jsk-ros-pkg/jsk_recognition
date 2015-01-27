@@ -56,8 +56,8 @@
 #include <pcl/recognition/linemod.h>
 #include <pcl/recognition/color_gradient_modality.h>
 #include <pcl/recognition/surface_normal_modality.h>
-#include <jsk_pcl_ros/BoundingBox.h>
-#include <jsk_pcl_ros/BoundingBoxArray.h>
+#include <jsk_recognition_msgs/BoundingBox.h>
+#include <jsk_recognition_msgs/BoundingBoxArray.h>
 #include <pcl_ros/pcl_nodelet.h>
 
 namespace jsk_pcl_ros
@@ -106,7 +106,7 @@ namespace jsk_pcl_ros
     pcl::LINEMOD linemod_;
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr template_cloud_;
     std::vector<Eigen::Affine3f> template_poses_;
-    std::vector<BoundingBox> template_bboxes_;
+    std::vector<jsk_recognition_msgs::BoundingBox> template_bboxes_;
     pcl::ColorGradientModality<pcl::PointXYZRGBA> color_gradient_mod_;
     pcl::SurfaceNormalModality<pcl::PointXYZRGBA> surface_normal_mod_;
   private:

@@ -39,8 +39,8 @@
 
 #include <pcl_ros/pcl_nodelet.h>
 #include <sensor_msgs/PointCloud2.h>
-#include <jsk_pcl_ros/ClusterPointIndices.h>
-#include <jsk_pcl_ros/ModelCoefficientsArray.h>
+#include <jsk_recognition_msgs/ClusterPointIndices.h>
+#include <jsk_recognition_msgs/ModelCoefficientsArray.h>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -61,7 +61,7 @@ namespace jsk_pcl_ros
   public:
     typedef message_filters::sync_policies::ExactTime<
     sensor_msgs::PointCloud2,
-    jsk_pcl_ros::ClusterPointIndices > SyncPolicy;
+    jsk_recognition_msgs::ClusterPointIndices > SyncPolicy;
     typedef pcl::PointXYZRGB PointT;
     typedef jsk_pcl_ros::EdgeDepthRefinementConfig Config;
   protected:
@@ -72,7 +72,7 @@ namespace jsk_pcl_ros
     
     virtual void refine(
       const sensor_msgs::PointCloud2ConstPtr &point,
-      const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices);
+      const jsk_recognition_msgs::ClusterPointIndicesConstPtr &indices);
     
     virtual void removeOutliersByLine(
       const pcl::PointCloud<PointT>::Ptr& cloud,
@@ -128,7 +128,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<jsk_pcl_ros::ClusterPointIndices> sub_indices_;
+    message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_indices_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     ros::Publisher pub_indices_, pub_outlier_removed_indices_;
     ros::Publisher pub_coefficients_, pub_outlier_removed_coefficients_;

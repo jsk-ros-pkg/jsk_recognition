@@ -35,7 +35,7 @@
 
 #include "jsk_pcl_ros/parallel_edge_finder.h"
 #include "jsk_pcl_ros/pcl_util.h"
-#include <jsk_pcl_ros/ParallelEdgeArray.h>
+#include <jsk_recognition_msgs/ParallelEdgeArray.h>
 
 namespace jsk_pcl_ros
 {
@@ -46,8 +46,8 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // publishers
     ////////////////////////////////////////////////////////
-    pub_ = pnh_->advertise<ParallelEdgeArray>("output_edges_groups", 1);
-    pub_clusters_ = pnh_->advertise<ClusterPointIndices>("output_clusters", 1);
+    pub_ = pnh_->advertise<jsk_recognition_msgs::ParallelEdgeArray>("output_edges_groups", 1);
+    pub_clusters_ = pnh_->advertise<jsk_recognition_msgs::ClusterPointIndices>("output_clusters", 1);
 
     ////////////////////////////////////////////////////////
     // dynamic reconfigure
@@ -85,8 +85,8 @@ namespace jsk_pcl_ros
   }
   
   void ParallelEdgeFinder::estimate(
-    const ClusterPointIndices::ConstPtr& input_indices,
-    const ModelCoefficientsArray::ConstPtr& input_coefficients)
+    const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices,
+    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& input_coefficients)
   {
     boost::mutex::scoped_lock lock(mutex_);
     ////////////////////////////////////////////////////////
@@ -147,14 +147,14 @@ namespace jsk_pcl_ros
 
   void ParallelEdgeFinder::publishResult(
     const std::vector<std::set<int> >& parallel_groups_list,
-    const ClusterPointIndices::ConstPtr& input_indices,
-    const ModelCoefficientsArray::ConstPtr& input_coefficients)
+    const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices,
+    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& input_coefficients)
   {
-    ParallelEdgeArray ros_output_msg;
+    jsk_recognition_msgs::ParallelEdgeArray ros_output_msg;
     ros_output_msg.header = input_indices->header;
     for (size_t i = 0; i < parallel_groups_list.size(); i++) {
       std::set<int> parallel_groups = parallel_groups_list[i];
-      ParallelEdge edge_group;
+      jsk_recognition_msgs::ParallelEdge edge_group;
       edge_group.header = input_indices->header;
       for (std::set<int>::iterator it = parallel_groups.begin();
            it != parallel_groups.end();
@@ -180,10 +180,10 @@ namespace jsk_pcl_ros
 
   void ParallelEdgeFinder::publishResultAsCluser(
       const std::vector<std::set<int> >& parallel_groups_list,
-      const ClusterPointIndices::ConstPtr& input_indices,
-      const ModelCoefficientsArray::ConstPtr& input_coefficients)
+      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& input_coefficients)
   {
-    ClusterPointIndices ros_output_msg;
+    jsk_recognition_msgs::ClusterPointIndices ros_output_msg;
     ros_output_msg.header = input_indices->header;
 
     for (size_t i = 0; i < parallel_groups_list.size(); i++) {

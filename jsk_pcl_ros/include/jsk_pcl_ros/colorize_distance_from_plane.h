@@ -43,9 +43,9 @@
 #include <message_filters/synchronizer.h>
 
 #include <sensor_msgs/PointCloud2.h>
-#include <jsk_pcl_ros/ClusterPointIndices.h>
-#include <jsk_pcl_ros/ModelCoefficientsArray.h>
-#include <jsk_pcl_ros/PolygonArray.h>
+#include <jsk_recognition_msgs/ClusterPointIndices.h>
+#include <jsk_recognition_msgs/ModelCoefficientsArray.h>
+#include <jsk_recognition_msgs/PolygonArray.h>
 #include <dynamic_reconfigure/server.h>
 #include <jsk_pcl_ros/ColorizeDistanceFromPlaneConfig.h>
 #include "jsk_pcl_ros/geo_util.h"
@@ -60,8 +60,8 @@ namespace jsk_pcl_ros
     typedef boost::shared_ptr<ColorizeDistanceFromPlane> Ptr;
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
-      ModelCoefficientsArray,
-      PolygonArray
+      jsk_recognition_msgs::ModelCoefficientsArray,
+      jsk_recognition_msgs::PolygonArray
       > SyncPolicy;
     typedef ColorizeDistanceFromPlaneConfig Config;
   protected:
@@ -71,8 +71,8 @@ namespace jsk_pcl_ros
     virtual void onInit();
     
     virtual void colorize(const sensor_msgs::PointCloud2::ConstPtr& cloud,
-                          const ModelCoefficientsArray::ConstPtr& coefficients,
-                          const PolygonArray::ConstPtr& polygons);
+                          const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
+                          const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons);
 
     virtual double distanceToConvexes(
       const PointT& p, const std::vector<ConvexPolygon::Ptr>& convexes);
@@ -90,8 +90,8 @@ namespace jsk_pcl_ros
     ros::Publisher pub_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<ModelCoefficientsArray> sub_coefficients_;
-    message_filters::Subscriber<PolygonArray> sub_polygons_;
+    message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
+    message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygons_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
     

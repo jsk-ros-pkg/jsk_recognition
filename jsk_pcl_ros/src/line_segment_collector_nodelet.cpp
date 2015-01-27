@@ -154,13 +154,13 @@ namespace jsk_pcl_ros
     
     pub_point_cloud_
       = advertise<sensor_msgs::PointCloud2>(*pnh_, "output/cloud", 1);
-    pub_inliers_ = advertise<ClusterPointIndices>(*pnh_, "output/inliers", 1);
+    pub_inliers_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output/inliers", 1);
     pub_coefficients_
-      = advertise<ModelCoefficientsArray>(*pnh_, "output/coefficients", 1);
+      = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(*pnh_, "output/coefficients", 1);
     pub_polygons_
-      = advertise<PolygonArray>(*pnh_, "output/polygons", 1);
+      = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "output/polygons", 1);
     debug_pub_inliers_before_plane_
-      = advertise<ClusterPointIndices>(
+      = advertise<jsk_recognition_msgs::ClusterPointIndices>(
         *pnh_, "debug/connect_segments/inliers", 1);
   }
 
@@ -219,7 +219,7 @@ namespace jsk_pcl_ros
   }
 
   void LineSegmentCollector::triggerCallback(
-    const TimeRange::ConstPtr& trigger)
+    const jsk_recognition_msgs::TimeRange::ConstPtr& trigger)
   {
     boost::mutex::scoped_lock lock(mutex_);
     time_range_ = trigger;
@@ -235,7 +235,7 @@ namespace jsk_pcl_ros
     pcl::toROSMsg(*cloud, ros_cloud);
     ros_cloud.header = header;
     pub_point_cloud_.publish(ros_cloud);
-    ClusterPointIndices ros_indices;
+    jsk_recognition_msgs::ClusterPointIndices ros_indices;
     ros_indices.header = header;
     ros_indices.cluster_indices
       = pcl_conversions::convertToROSPointIndices(connected_indices, header);
@@ -320,20 +320,20 @@ namespace jsk_pcl_ros
     std::vector<pcl::ModelCoefficients::Ptr> all_coefficients,
     std::vector<pcl::PointIndices::Ptr> all_indices)
   {
-    ClusterPointIndices ros_indices;
+    jsk_recognition_msgs::ClusterPointIndices ros_indices;
     ros_indices.header = header;
     ros_indices.cluster_indices
       = pcl_conversions::convertToROSPointIndices(all_indices,
                                                   header);
     pub_inliers_.publish(ros_indices);
-    ModelCoefficientsArray ros_coefficients;
+    jsk_recognition_msgs::ModelCoefficientsArray ros_coefficients;
     ros_coefficients.header = header;
     ros_coefficients.coefficients
       = pcl_conversions::convertToROSModelCoefficients(
         all_coefficients,
         header);
     pub_coefficients_.publish(ros_coefficients);
-    PolygonArray ros_polygon;
+    jsk_recognition_msgs::PolygonArray ros_polygon;
     ros_polygon.header = header;
     for (size_t i = 0; i < all_indices.size(); i++) {
       ConvexPolygon::Ptr convex
@@ -349,8 +349,8 @@ namespace jsk_pcl_ros
   
   void LineSegmentCollector::collect(
       const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
-      const ClusterPointIndices::ConstPtr& indices_msg,
-      const ModelCoefficientsArray::ConstPtr& coefficients_msg)
+      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
     //NODELET_INFO("buffer length: %lu", pointclouds_buffer_.size());

@@ -135,9 +135,9 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     pub_line_marker_ = advertise<visualization_msgs::Marker>(
       *pnh_, "debug/line_marker", 1);
-    pub_indices_ = advertise<ClusterPointIndices>(
+    pub_indices_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(
       *pnh_, "output/inliers", 1);
-    pub_coefficients_ = advertise<ModelCoefficientsArray>(
+    pub_coefficients_ = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(
       *pnh_, "output/coefficients", 1);
 
   }
@@ -195,8 +195,8 @@ namespace jsk_pcl_ros
       marker.colors.push_back(color);
     }
 
-    ModelCoefficientsArray ros_coefficients;
-    ClusterPointIndices ros_indices;
+    jsk_recognition_msgs::ModelCoefficientsArray ros_coefficients;
+    jsk_recognition_msgs::ClusterPointIndices ros_indices;
     ros_coefficients.header = header;
     ros_indices.header = header;
     ros_coefficients.coefficients
@@ -253,7 +253,7 @@ namespace jsk_pcl_ros
   
   void LineSegmentDetector::segment(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
-    const ClusterPointIndices::ConstPtr& cluster_msg)
+    const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& cluster_msg)
   {
     pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(*cloud_msg, *cloud);

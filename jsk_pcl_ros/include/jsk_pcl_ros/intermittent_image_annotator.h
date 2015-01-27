@@ -48,7 +48,7 @@
 #include <boost/circular_buffer.hpp>
 #include <Eigen/Geometry>
 #include <geometry_msgs/PolygonStamped.h>
-#include <jsk_pcl_ros/PosedCameraInfo.h>
+#include <jsk_recognition_msgs/PosedCameraInfo.h>
 #include <pcl_ros/transforms.h>
 
 

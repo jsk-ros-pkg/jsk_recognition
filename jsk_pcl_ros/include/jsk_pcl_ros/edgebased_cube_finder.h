@@ -43,8 +43,10 @@
 // messages
 ////////////////////////////////////////////////////////
 #include <sensor_msgs/PointCloud2.h>
-#include <jsk_pcl_ros/ParallelEdge.h>
-#include <jsk_pcl_ros/ParallelEdgeArray.h>
+#include <jsk_recognition_msgs/ParallelEdge.h>
+#include <jsk_recognition_msgs/PolygonArray.h>
+#include <jsk_recognition_msgs/BoundingBoxArray.h>
+#include <jsk_recognition_msgs/ParallelEdgeArray.h>
 
 #include "jsk_pcl_ros/geo_util.h"
 #include "jsk_pcl_ros/pcl_conversion_util.h"
@@ -157,7 +159,7 @@ namespace jsk_pcl_ros
   public:
     typedef message_filters::sync_policies::ExactTime<
     sensor_msgs::PointCloud2,
-    ParallelEdgeArray > SyncPolicy;
+    jsk_recognition_msgs::ParallelEdgeArray > SyncPolicy;
     typedef pcl::PointXYZRGB PointT;
     typedef jsk_pcl_ros::EdgebasedCubeFinderConfig Config;
     enum EdgeRelation
@@ -178,10 +180,10 @@ namespace jsk_pcl_ros
     
     virtual void estimate(
       const sensor_msgs::PointCloud2::ConstPtr& input_cloud,
-      const ParallelEdgeArray::ConstPtr& input_edges);
+      const jsk_recognition_msgs::ParallelEdgeArray::ConstPtr& input_edges);
     virtual void estimate2(
       const sensor_msgs::PointCloud2::ConstPtr& input_cloud,
-      const ParallelEdgeArray::ConstPtr& input_edges);
+      const jsk_recognition_msgs::ParallelEdgeArray::ConstPtr& input_edges);
 
     ////////////////////////////////////////////////////////
     // combinateIndices
@@ -283,7 +285,7 @@ namespace jsk_pcl_ros
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<ParallelEdgeArray> sub_edges_;
+    message_filters::Subscriber<jsk_recognition_msgs::ParallelEdgeArray> sub_edges_;
     ros::Publisher pub_;
     ros::Publisher pub_pose_array_;
     ros::Publisher pub_debug_marker_, pub_debug_filtered_cloud_,

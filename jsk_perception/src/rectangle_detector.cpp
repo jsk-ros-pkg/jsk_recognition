@@ -8,7 +8,7 @@
 #include <ros/ros.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
-#include <jsk_perception/LineArray.h>
+#include <jsk_recognition_msgs/LineArray.h>
 #include <jsk_perception/RectangleDetectorConfig.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
@@ -34,8 +34,8 @@ class RectangleDetector
     //int subscriber_count_;
 
     message_filters::Subscriber<sensor_msgs::Image> *image_sub;
-    message_filters::Subscriber<jsk_perception::LineArray> *line_sub;
-    TimeSynchronizer<sensor_msgs::Image, jsk_perception::LineArray> *sync;
+    message_filters::Subscriber<jsk_recognition_msgs::LineArray> *line_sub;
+    TimeSynchronizer<sensor_msgs::Image, jsk_recognition_msgs::LineArray> *sync;
 
     double _threshold1;
     double _threshold2;
@@ -94,7 +94,7 @@ class RectangleDetector
     }
 
     void callback(const sensor_msgs::ImageConstPtr& image,
-                  const jsk_perception::LineArrayConstPtr& line)
+                  const jsk_recognition_msgs::LineArrayConstPtr& line)
     {
         // Transform the image.
         try
@@ -190,8 +190,8 @@ public:
     {
 
         image_sub = new message_filters::Subscriber<sensor_msgs::Image>(nh_, "image", 1);
-        line_sub = new message_filters::Subscriber<jsk_perception::LineArray>(nh_, "lines", 1);
-        sync = new TimeSynchronizer<sensor_msgs::Image, jsk_perception::LineArray>(*image_sub, *line_sub, 10);
+        line_sub = new message_filters::Subscriber<jsk_recognition_msgs::LineArray>(nh_, "lines", 1);
+        sync = new TimeSynchronizer<sensor_msgs::Image, jsk_recognition_msgs::LineArray>(*image_sub, *line_sub, 10);
         sync->registerCallback(boost::bind(&RectangleDetector::callback, this, _1, _2));
         image_pub_ = nh_.advertise<sensor_msgs::Image>("rectangle/image", 1);
 

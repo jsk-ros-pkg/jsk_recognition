@@ -54,14 +54,14 @@ namespace jsk_pcl_ros
     reference_set_ = false;
     // setup publishers
     all_histogram_pub_
-      = advertise<jsk_pcl_ros::ColorHistogramArray>(
+      = advertise<jsk_recognition_msgs::ColorHistogramArray>(
         *pnh_, "output_histograms", 1);
     best_pub_
       = advertise<geometry_msgs::PoseStamped>(*pnh_, "best_match", 1);
     reference_histogram_pub_
-      = advertise<jsk_pcl_ros::ColorHistogram>(*pnh_, "output_reference", 1);
+      = advertise<jsk_recognition_msgs::ColorHistogram>(*pnh_, "output_reference", 1);
     result_pub_
-      = advertise<jsk_pcl_ros::ClusterPointIndices>(*pnh_, "output", 1);
+      = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output", 1);
     coefficient_points_pub_
       = advertise<sensor_msgs::PointCloud2>(*pnh_, "coefficient_points", 1);
   }
@@ -128,7 +128,7 @@ namespace jsk_pcl_ros
   
   void ColorHistogramMatcher::feature(
       const sensor_msgs::PointCloud2::ConstPtr& input_cloud,
-      const jsk_pcl_ros::ClusterPointIndices::ConstPtr& input_indices)
+      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices)
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (!reference_set_) {
@@ -151,7 +151,7 @@ namespace jsk_pcl_ros
     pcl::ExtractIndices<pcl::PointXYZHSV> extract;
     extract.setInputCloud(hsv_cloud);
     // for debug
-    jsk_pcl_ros::ColorHistogramArray histogram_array;
+    jsk_recognition_msgs::ColorHistogramArray histogram_array;
     histogram_array.header = input_cloud->header;
     std::vector<pcl::PointCloud<pcl::PointXYZHSV>::Ptr > segmented_clouds;
     for (size_t i = 0; i < input_indices->cluster_indices.size(); i++) {
@@ -164,7 +164,7 @@ namespace jsk_pcl_ros
       std::vector<float> histogram;
       computeHistogram(segmented_cloud, histogram, policy_);
       histograms[i] = histogram;
-      ColorHistogram ros_histogram;
+      jsk_recognition_msgs::ColorHistogram ros_histogram;
       ros_histogram.header = input_cloud->header;
       ros_histogram.histogram = histogram;
       histogram_array.histograms.push_back(ros_histogram);
@@ -172,7 +172,7 @@ namespace jsk_pcl_ros
     all_histogram_pub_.publish(histogram_array);
 
     // compare histograms
-    jsk_pcl_ros::ClusterPointIndices result;
+    jsk_recognition_msgs::ClusterPointIndices result;
     result.header = input_indices->header;
     double best_coefficient = - DBL_MAX;
     int best_index = -1;
@@ -364,14 +364,14 @@ namespace jsk_pcl_ros
     reference_histogram_ = hist;
     NODELET_INFO("update reference");
     reference_set_ = true;
-    ColorHistogram ros_histogram;
+    jsk_recognition_msgs::ColorHistogram ros_histogram;
     ros_histogram.header = input_cloud->header;
     ros_histogram.histogram = reference_histogram_;
     reference_histogram_pub_.publish(ros_histogram);
   }
   
   void ColorHistogramMatcher::referenceHistogram(
-    const jsk_pcl_ros::ColorHistogram::ConstPtr& input_histogram)
+    const jsk_recognition_msgs::ColorHistogram::ConstPtr& input_histogram)
   {
     boost::mutex::scoped_lock lock(mutex_);
     NODELET_INFO("update reference");

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(jsk_perception)
 
 find_package(catkin REQUIRED COMPONENTS
+  jsk_recognition_msgs
   mk message_generation std_msgs sensor_msgs geometry_msgs cv_bridge
   image_geometry image_transport driver_base dynamic_reconfigure cmake_modules
   roscpp nodelet rostest tf rospack
@@ -41,18 +42,14 @@ generate_dynamic_reconfigure_options(
   cfg/BackgroundSubstraction.cfg
   cfg/GrabCut.cfg)
 
-add_message_files(FILES
-      PointsArray.msg RotatedRectStamped.msg LineArray.msg Rect.msg Line.msg RotatedRect.msg SparseImage.msg
-      Circle2D.msg Circle2DArray.msg)
-
 add_service_files(FILES EuclideanSegment.srv  SetTemplate.srv  WhiteBalancePoints.srv  WhiteBalance.srv)
 
 generate_messages(
-  DEPENDENCIES std_msgs sensor_msgs geometry_msgs
+  DEPENDENCIES std_msgs sensor_msgs geometry_msgs jsk_recognition_msgs
 )
 
 catkin_package(
-  CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs message_runtime
+  CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs message_runtime jsk_recognition_msgs
   DEPENDS OpenCV
   INCLUDE_DIRS include
   LIBRARIES jsk_perception

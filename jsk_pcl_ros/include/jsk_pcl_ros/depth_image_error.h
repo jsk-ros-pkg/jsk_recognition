@@ -41,7 +41,7 @@
 #include <pcl_ros/pcl_nodelet.h>
 #include <sensor_msgs/Image.h>
 #include <geometry_msgs/PointStamped.h>
-#include <jsk_pcl_ros/DepthErrorResult.h>
+#include <jsk_recognition_msgs/DepthErrorResult.h>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>

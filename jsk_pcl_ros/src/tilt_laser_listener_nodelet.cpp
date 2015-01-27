@@ -90,7 +90,7 @@ namespace jsk_pcl_ros
     clear_cache_service_ = pnh_->advertiseService(
       "clear_cache", &TiltLaserListener::clearCacheCallback,
       this);
-    trigger_pub_ = advertise<jsk_pcl_ros::TimeRange>(*pnh_, "output", 1);
+    trigger_pub_ = advertise<jsk_recognition_msgs::TimeRange>(*pnh_, "output", 1);
     
   }
 
@@ -124,7 +124,7 @@ namespace jsk_pcl_ros
     const ros::Time& start,
     const ros::Time& end)
   {
-    TimeRange range;
+    jsk_recognition_msgs::TimeRange range;
     range.header.stamp = stamp;
     range.start = start;
     range.end = end;

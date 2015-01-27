@@ -1,6 +1,6 @@
 #include <ros/ros.h>
 #include <jsk_perception/HoughLinesConfig.h>
-#include <jsk_perception/LineArray.h>
+#include <jsk_recognition_msgs/LineArray.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
@@ -71,7 +71,7 @@ class HoughLines
 #if 1
                 std::vector<cv::Vec4i> lines;
                 cv::HoughLinesP( in_image, lines, _rho, _theta*CV_PI/180 , _threshold, _minLineLength, _maxLineGap );
-                jsk_perception::LineArray out_lines;
+                jsk_recognition_msgs::LineArray out_lines;
                 out_lines.header = msg->header;
                 out_lines.lines.resize(lines.size());
                 for( size_t i = 0; i < lines.size(); i++ )
@@ -86,7 +86,7 @@ class HoughLines
 #else
                 std::vector<cv::Vec2f> lines;
                 cv::HoughLines( in_image, lines, _rho, _theta, _threshold*CV_PI/180, _minLineLength, _maxLineGap );
-                jsk_perception::LineArray out_lines;
+                jsk_recognition_msgs::LineArray out_lines;
                 out_lines.header = msg->header;
                 out_lines.lines.resize(lines.size());
                 for( size_t i = 0; i < lines.size(); i++ )
@@ -148,7 +148,7 @@ public:
         image_transport::SubscriberStatusCallback disconnect_cb = boost::bind(&HoughLines::disconnectCb, this, _1);
         img_pub_ = image_transport::ImageTransport(ros::NodeHandle(nh_, "hough")).advertise("image", 1, connect_cb, disconnect_cb);
 
-        out_pub_ = nh.advertise<jsk_perception::LineArray>(nh_.resolveName("lines"), 1);
+        out_pub_ = nh.advertise<jsk_recognition_msgs::LineArray>(nh_.resolveName("lines"), 1);
 
 
         dynamic_reconfigure::Server<jsk_perception::HoughLinesConfig>::CallbackType f =

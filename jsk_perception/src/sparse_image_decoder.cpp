@@ -7,7 +7,7 @@
 #include <image_transport/image_transport.h>
 #include <pluginlib/class_list_macros.h>
 #include <sensor_msgs/image_encodings.h>
-#include <jsk_perception/SparseImage.h>
+#include <jsk_recognition_msgs/SparseImage.h>
 
 
 namespace enc = sensor_msgs::image_encodings;
@@ -24,11 +24,11 @@ class SparseImageDecoder: public nodelet::Nodelet
   ros::NodeHandle _nh;
   int _subscriber_count;
 
-  void imageCallback(const jsk_perception::SparseImageConstPtr& msg){
+  void imageCallback(const jsk_recognition_msgs::SparseImageConstPtr& msg){
     do_work(msg, msg->header.frame_id);
   }
 
-  void do_work(const jsk_perception::SparseImageConstPtr& msg, const std::string input_frame_from_msg){
+  void do_work(const jsk_recognition_msgs::SparseImageConstPtr& msg, const std::string input_frame_from_msg){
     try {
 
       _img_ptr->header.stamp = msg->header.stamp;

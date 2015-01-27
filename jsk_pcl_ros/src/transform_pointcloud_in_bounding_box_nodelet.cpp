@@ -65,7 +65,7 @@ namespace jsk_pcl_ros
 
   void TransformPointcloudInBoundingBox::transform(
     const sensor_msgs::PointCloud2::ConstPtr& msg,
-    const BoundingBox::ConstPtr& box_msg)
+    const jsk_recognition_msgs::BoundingBox::ConstPtr& box_msg)
   {
     try
     {

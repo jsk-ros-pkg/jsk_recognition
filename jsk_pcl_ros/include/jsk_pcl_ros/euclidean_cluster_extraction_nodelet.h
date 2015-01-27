@@ -53,9 +53,9 @@
 #include <pcl/filters/extract_indices.h>
 #include <pcl/common/centroid.h>
 
-#include "jsk_pcl_ros/ClusterPointIndices.h"
+#include "jsk_recognition_msgs/ClusterPointIndices.h"
 #include "jsk_pcl_ros/EuclideanSegment.h"
-#include "jsk_pcl_ros/Int32Stamped.h"
+#include "jsk_recognition_msgs/Int32Stamped.h"
 
 #include "jsk_pcl_ros/EuclideanClusteringConfig.h"
 #include <diagnostic_updater/diagnostic_updater.h>

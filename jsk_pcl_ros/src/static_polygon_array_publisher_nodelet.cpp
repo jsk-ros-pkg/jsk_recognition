@@ -81,15 +81,15 @@ namespace jsk_pcl_ros
     coefficients_.header.frame_id = frame_ids_[0];
 
     if (!use_periodic_) {
-      polygon_pub_ = advertise<jsk_pcl_ros::PolygonArray>(
+      polygon_pub_ = advertise<jsk_recognition_msgs::PolygonArray>(
         *pnh_, "output_polygons", 1);
-      coefficients_pub_ = advertise<jsk_pcl_ros::ModelCoefficientsArray>(
+      coefficients_pub_ = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(
         *pnh_, "output_coefficients", 1);
     }
     else {
-      polygon_pub_ = pnh_->advertise<jsk_pcl_ros::PolygonArray>(
+      polygon_pub_ = pnh_->advertise<jsk_recognition_msgs::PolygonArray>(
         "output_polygons", 1);
-      coefficients_pub_ = pnh_->advertise<jsk_pcl_ros::ModelCoefficientsArray>(
+      coefficients_pub_ = pnh_->advertise<jsk_recognition_msgs::ModelCoefficientsArray>(
         "output_coefficients", 1);
       subscribe();
       timer_ = pnh_->createTimer(ros::Duration(1.0 / periodic_rate_), &StaticPolygonArrayPublisher::timerCallback, this);
@@ -126,7 +126,7 @@ namespace jsk_pcl_ros
 
   void StaticPolygonArrayPublisher::triggerCallback(
     const sensor_msgs::PointCloud2::ConstPtr& input,
-    const Int32Stamped::ConstPtr& trigger)
+    const jsk_recognition_msgs::Int32Stamped::ConstPtr& trigger)
   {
     publishPolygon(input->header.stamp);
   }

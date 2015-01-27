@@ -570,7 +570,7 @@ namespace jsk_pcl_ros
         // compute size of bounding box
         Eigen::Vector4f minpt, maxpt;
         pcl::getMinMax3D<pcl::PointXYZRGBA>(transformed_cloud, minpt, maxpt);
-        BoundingBox bbox = boundingBoxFromPointCloud(transformed_cloud);
+        jsk_recognition_msgs::BoundingBox bbox = boundingBoxFromPointCloud(transformed_cloud);
         //ROS_INFO("bounding box size: [%f, %f, %f]", bbox.dimensions.x, bbox.dimensions.y, bbox.dimensions.z);
         template_bboxes_.push_back(bbox);
       }
@@ -714,7 +714,7 @@ namespace jsk_pcl_ros
                                                   "8UC1",
                                                   detect_mask).toImageMsg());
       // compute translation
-      BoundingBox bbox = template_bboxes_[linemod_detection.template_id];
+      jsk_recognition_msgs::BoundingBox bbox = template_bboxes_[linemod_detection.template_id];
       pcl::PointCloud<pcl::PointXYZRGBA>::Ptr 
         result (new pcl::PointCloud<pcl::PointXYZRGBA>);
       pcl::transformPointCloud<pcl::PointXYZRGBA>(

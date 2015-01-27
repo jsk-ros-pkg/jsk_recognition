@@ -76,7 +76,7 @@ namespace jsk_pcl_ros
       "debug/flipped", 1);
     pub_debug_result_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_,
       "debug/result", 1);
-    pub_icp_result = advertise<jsk_pcl_ros::ICPResult>(*pnh_,
+    pub_icp_result = advertise<jsk_recognition_msgs::ICPResult>(*pnh_,
       "icp_result", 1);
     srv_icp_align_with_box_ = pnh_->advertiseService("icp_service", &ICPRegistration::alignWithBoxService, this);
     srv_icp_align_ = pnh_->advertiseService(
@@ -256,12 +256,12 @@ namespace jsk_pcl_ros
   
   void ICPRegistration::alignWithBox(
       const sensor_msgs::PointCloud2::ConstPtr& msg,
-      const BoundingBox::ConstPtr& box_msg)
+      const jsk_recognition_msgs::BoundingBox::ConstPtr& box_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (reference_cloud_list_.size() == 0) {
       NODELET_FATAL("no reference is specified");
-      jsk_pcl_ros::ICPResult result;
+      jsk_recognition_msgs::ICPResult result;
       result.name = std::string("NONE");
       result.score = 0.0;
       result.header = box_msg->header;
@@ -278,7 +278,7 @@ namespace jsk_pcl_ros
         *output, offset,
         *tf_listener_);
       Eigen::Affine3f inversed_offset = offset.inverse();
-      jsk_pcl_ros::ICPResult result = alignPointcloudWithReferences(output, inversed_offset, msg->header);
+      jsk_recognition_msgs::ICPResult result = alignPointcloudWithReferences(output, inversed_offset, msg->header);
       pub_icp_result.publish(result);
     }
     catch (tf2::ConnectivityException &e)
@@ -302,7 +302,7 @@ namespace jsk_pcl_ros
     pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(*msg, *cloud);
     Eigen::Affine3f offset = Eigen::Affine3f::Identity();
-    jsk_pcl_ros::ICPResult result = alignPointcloudWithReferences(cloud, offset, msg->header);
+    jsk_recognition_msgs::ICPResult result = alignPointcloudWithReferences(cloud, offset, msg->header);
     pub_icp_result.publish(result);
   }
   
@@ -327,7 +327,7 @@ namespace jsk_pcl_ros
     align(msg);
   }
 
-  jsk_pcl_ros::ICPResult ICPRegistration::alignPointcloudWithReferences(
+  jsk_recognition_msgs::ICPResult ICPRegistration::alignPointcloudWithReferences(
     pcl::PointCloud<PointT>::Ptr& cloud,
     const Eigen::Affine3f& offset,
     const std_msgs::Header& header)
@@ -338,7 +338,7 @@ namespace jsk_pcl_ros
     pcl::PointCloud<PointT>::Ptr best_reference;
     Eigen::Affine3d best_transform_result;
     Eigen::Affine3f best_offset_result;
-    jsk_pcl_ros::ICPResult result;
+    jsk_recognition_msgs::ICPResult result;
     for (size_t i = 0; i < reference_cloud_list_.size(); i++) {
       Eigen::Affine3f offset_result;
       pcl::PointCloud<PointT>::Ptr transformed_cloud(new pcl::PointCloud<PointT>);
@@ -506,7 +506,7 @@ namespace jsk_pcl_ros
   }
 
   void ICPRegistration::referenceArrayCallback(
-    const PointsArray::ConstPtr& msg)
+    const jsk_recognition_msgs::PointsArray::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
     reference_cloud_list_.resize(0);

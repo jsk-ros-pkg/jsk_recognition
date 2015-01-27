@@ -53,11 +53,11 @@ namespace jsk_pcl_ros
         &PlaneConcatenator::configCallback, this, _1, _2);
     srv_->setCallback (f);
     
-    pub_indices_ = advertise<ClusterPointIndices>(
+    pub_indices_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(
       *pnh_, "output/indices", 1);
-    pub_polygon_ = advertise<PolygonArray>(
+    pub_polygon_ = advertise<jsk_recognition_msgs::PolygonArray>(
       *pnh_, "output/polygons", 1);
-    pub_coefficients_ = advertise<ModelCoefficientsArray>(
+    pub_coefficients_ = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(
       *pnh_, "output/coefficients", 1);
   }
 
@@ -84,9 +84,9 @@ namespace jsk_pcl_ros
 
   void PlaneConcatenator::concatenate(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
-    const ClusterPointIndices::ConstPtr& indices_msg,
-    const PolygonArray::ConstPtr& polygon_array_msg,
-    const ModelCoefficientsArray::ConstPtr& coefficients_array_msg)
+    const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg,
+    const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon_array_msg,
+    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_array_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();
@@ -150,9 +150,9 @@ namespace jsk_pcl_ros
     }
 
     // publish
-    ClusterPointIndices new_ros_indices;
-    ModelCoefficientsArray new_ros_coefficients;
-    PolygonArray new_ros_polygons;
+    jsk_recognition_msgs::ClusterPointIndices new_ros_indices;
+    jsk_recognition_msgs::ModelCoefficientsArray new_ros_coefficients;
+    jsk_recognition_msgs::PolygonArray new_ros_polygons;
     new_ros_indices.header = cloud_msg->header;
     new_ros_coefficients.header = cloud_msg->header;
     new_ros_polygons.header = cloud_msg->header;

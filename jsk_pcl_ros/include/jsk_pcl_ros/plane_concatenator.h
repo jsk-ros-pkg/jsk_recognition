@@ -37,9 +37,9 @@
 #ifndef JSK_PCL_ROS_PLANE_CONCATENATOR_H_
 #define JSK_PCL_ROS_PLANE_CONCATENATOR_H_
 
-#include <jsk_pcl_ros/PolygonArray.h>
-#include <jsk_pcl_ros/ModelCoefficientsArray.h>
-#include <jsk_pcl_ros/ClusterPointIndices.h>
+#include <jsk_recognition_msgs/PolygonArray.h>
+#include <jsk_recognition_msgs/ModelCoefficientsArray.h>
+#include <jsk_recognition_msgs/ClusterPointIndices.h>
 
 #include <jsk_pcl_ros/PlaneConcatenatorConfig.h>
 #include <dynamic_reconfigure/server.h>
@@ -60,9 +60,9 @@ namespace jsk_pcl_ros
     typedef pcl::PointXYZRGB PointT;
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
-      ClusterPointIndices,
-      PolygonArray,
-      ModelCoefficientsArray
+      jsk_recognition_msgs::ClusterPointIndices,
+      jsk_recognition_msgs::PolygonArray,
+      jsk_recognition_msgs::ModelCoefficientsArray
       > SyncPolicy;
     PlaneConcatenator(): DiagnosticNodelet("PlaneConcatenator") {}
     
@@ -77,9 +77,9 @@ namespace jsk_pcl_ros
       diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void concatenate(
       const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
-      const ClusterPointIndices::ConstPtr& indices_msg,
-      const PolygonArray::ConstPtr& polygon_array_msg,
-      const ModelCoefficientsArray::ConstPtr& coefficients_array_msg);
+      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg,
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon_array_msg,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_array_msg);
     virtual void configCallback(Config &config, uint32_t level);
     virtual bool isNearPointCloud(
       pcl::KdTreeFLANN<PointT>& kdtree,
@@ -92,9 +92,9 @@ namespace jsk_pcl_ros
     // ROS variables
     ////////////////////////////////////////////////////////
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_cloud_;
-    message_filters::Subscriber<ClusterPointIndices> sub_indices_;
-    message_filters::Subscriber<PolygonArray> sub_polygon_;
-    message_filters::Subscriber<ModelCoefficientsArray> sub_coefficients_;
+    message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_indices_;
+    message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygon_;
+    message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     boost::mutex mutex_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;

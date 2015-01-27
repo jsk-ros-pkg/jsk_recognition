@@ -58,7 +58,7 @@ namespace jsk_pcl_ros {
     
     pub_hint_polygon_ = advertise<geometry_msgs::PolygonStamped>(
       *pnh_, "output/hint/polygon", 1);
-    pub_hint_polygon_array_ = advertise<jsk_pcl_ros::PolygonArray>(
+    pub_hint_polygon_array_ = advertise<jsk_recognition_msgs::PolygonArray>(
       *pnh_, "output/hint/polygon_array", 1);
     pub_hint_inliers_ = advertise<PCLIndicesMsg>(
       *pnh_, "output/hint/inliers", 1);
@@ -66,7 +66,7 @@ namespace jsk_pcl_ros {
       *pnh_, "output/hint/coefficients", 1);
     pub_polygon_ = advertise<geometry_msgs::PolygonStamped>(
       *pnh_, "output/polygon", 1);
-    pub_polygon_array_ = advertise<jsk_pcl_ros::PolygonArray>(
+    pub_polygon_array_ = advertise<jsk_recognition_msgs::PolygonArray>(
       *pnh_, "output/polygon_array", 1);
     pub_hint_filtered_indices_ = advertise<PCLIndicesMsg>(
       *pnh_, "output/hint_filtered_indices", 1);
@@ -343,7 +343,7 @@ namespace jsk_pcl_ros {
     geometry_msgs::PolygonStamped ros_polygon;
     ros_polygon.polygon = convex->toROSMsg();
     pcl_conversions::fromPCL(header, ros_polygon.header);
-    PolygonArray ros_polygon_array;
+    jsk_recognition_msgs::PolygonArray ros_polygon_array;
     pcl_conversions::fromPCL(header, ros_polygon_array.header);
     ros_polygon_array.polygons.push_back(
       ros_polygon);

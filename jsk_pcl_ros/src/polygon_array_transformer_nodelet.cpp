@@ -49,8 +49,8 @@ namespace jsk_pcl_ros
       return;
     }
     listener_ = TfListenerSingleton::getInstance();
-    polygons_pub_ = advertise<jsk_pcl_ros::PolygonArray>(*pnh_, "output_polygons", 1);
-    coefficients_pub_ = advertise<jsk_pcl_ros::ModelCoefficientsArray>(
+    polygons_pub_ = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "output_polygons", 1);
+    coefficients_pub_ = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(
       *pnh_, "output_coefficients", 1);
     
   }
@@ -131,8 +131,8 @@ namespace jsk_pcl_ros
     }
   }
   
-  void PolygonArrayTransformer::transform(const jsk_pcl_ros::PolygonArray::ConstPtr& polygons,
-                                          const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients)
+  void PolygonArrayTransformer::transform(const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
+                                          const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients)
   {
     if (polygons->polygons.size() != coefficients->coefficients.size()) {
       NODELET_ERROR("the size of polygons(%lu) does not match with the size of coefficients(%lu)",
@@ -141,8 +141,8 @@ namespace jsk_pcl_ros
       return;
     }
 
-    jsk_pcl_ros::PolygonArray transformed_polygon_array;
-    jsk_pcl_ros::ModelCoefficientsArray transformed_model_coefficients_array;
+    jsk_recognition_msgs::PolygonArray transformed_polygon_array;
+    jsk_recognition_msgs::ModelCoefficientsArray transformed_model_coefficients_array;
     transformed_polygon_array.header = polygons->header;
     transformed_model_coefficients_array.header = coefficients->header;
     transformed_polygon_array.header.frame_id = frame_id_;

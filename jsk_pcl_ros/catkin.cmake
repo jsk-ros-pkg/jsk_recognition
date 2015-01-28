@@ -23,6 +23,13 @@ else()
   set(ML_CLASSIFIERS ml_classifiers) ## hydro and later
 endif()
 
+find_package(PkgConfig)
+pkg_check_modules(yaml_cpp yaml-cpp REQUIRED)
+IF(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
+## indigo yaml-cpp : 0.5.0 /  hydro yaml-cpp : 0.3.0
+  add_definitions("-DUSE_OLD_YAML")
+ENDIF()
+
 find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure pcl_ros nodelet message_generation genmsg
   ${PCL_MSGS} sensor_msgs geometry_msgs

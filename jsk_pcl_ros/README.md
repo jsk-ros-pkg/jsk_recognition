@@ -181,7 +181,7 @@ Find a torus out of pointcloud based on RANSAC with 3-D circle model.
 
 #### Publishing Topic
 
-* `~output` (`jsk_pcl_ros/Torus`)
+* `~output` (`jsk_recognition_msgs/Torus`)
 
   Output of detection.
 
@@ -189,7 +189,7 @@ Find a torus out of pointcloud based on RANSAC with 3-D circle model.
 * `~output/coefficients` (`pcl_msgs/ModelCoefficients`)
 
   Inliers and coefficients which represents detection result.
-* `~output/array` (`jsk_pcl_ros/TorusArray`)
+* `~output/array` (`jsk_recognition_msgs/TorusArray`)
 
   Array of torus. It will be used for visualization.
 
@@ -273,15 +273,15 @@ Concatenate near planes and build new set of planes.
 * `~input` (`sensor_msgs/PointCloud2`)
 
   Input pointcloud.
-* `~input/indices` (`jsk_pcl_ros/ClusterPointIndices`)
-* `~input/polygons` (`jsk_pcl_ros/PolygonArray`)
-* `~input/coefficients` (`jsk_pcl_ros/ModelCoefficientsArray`)
+* `~input/indices` (`jsk_recognition_msgs/ClusterPointIndices`)
+* `~input/polygons` (`jsk_recognition_msgs/PolygonArray`)
+* `~input/coefficients` (`jsk_recognition_msgs/ModelCoefficientsArray`)
   Input planes.
 
 #### Publishing Topics
-* `~output/indices` (`jsk_pcl_ros/ClusterPointIndices`)
-* `~output/polygons` (`jsk_pcl_ros/PolygonArray`)
-* `~output/coefficients` (`jsk_pcl_ros/ModelCoefficientsArray`)
+* `~output/indices` (`jsk_recognition_msgs/ClusterPointIndices`)
+* `~output/polygons` (`jsk_recognition_msgs/PolygonArray`)
+* `~output/coefficients` (`jsk_recognition_msgs/ModelCoefficientsArray`)
   Concatenated planes. Coefficients parameters are refined by RANSAC.
 
 #### Parameters
@@ -315,7 +315,7 @@ see Voxel Cloud Connectivity Segmentation - Supervoxels for Point Clouds (J. Pap
 
   Output pointcloud downsampled by voxel grid.
 
-* `~output/indices` (`jsk_pcl_ros/ClusterPointIndices`)
+* `~output/indices` (`jsk_recognition_msgs/ClusterPointIndices`)
 
   Clustering result.
 
@@ -402,7 +402,7 @@ Build a full-model from sequential captured data.
 
   Direction of ROI as `PoseStamped`. z-axis directs the center of ROI.
 
-* `~output/roi` (`jsk_pcl_ros/PosedCameraInfo`)
+* `~output/roi` (`jsk_recognition_msgs/PosedCameraInfo`)
 
   Publish ROI of specified region as `PosedCameraInfo`.
 
@@ -643,11 +643,11 @@ to see the object.
 
   Original pointcloud.
 * `~input/pose` (`geometry_msgs/PoseStamped`)
-* `~input/box` (`jsk_pcl_ros/BoundingBox`)
+* `~input/box` (`jsk_recognition_msgs/BoundingBox`)
   Specify the pose of the bounding box. Timestamp will be ignored and camera info's timestamp will be used. If you use `~input/box`, you can change the size of attention region. There callbacks are only enabled if `~use_multiple_attention` is false.
 
 * `~input/pose_array` (`geometry_msgs/PoseArray`)
-* `~input/box_array` (`jsk_pcl_ros/BoundingBoxArray`)
+* `~input/box_array` (`jsk_recognition_msgs/BoundingBoxArray`)
   It's an array version of `~input/pose` and `~input/box`. There callbacks are only enabled if `~use_multiple_attention` is true.
 #### Publishing Topic
 * `~output` (`sensor_msgs/CameraInfo`)
@@ -780,9 +780,9 @@ Extract the points above the planes between `~min_height` and `~max_height`.
 * `~input` (`sensor_msgs/PointCloud2`):
 
    Input pointcloud.
-* `~indices` (`jsk_pcl_ros/ClusterPointIndices`)
-* `~input_polygons` (`jsk_pcl_ros/PolygonArray`)
-* `~input_coefficients` (`jsk_pcl_ros/ModelCoefficientsArray`):
+* `~indices` (`jsk_recognition_msgs/ClusterPointIndices`)
+* `~input_polygons` (`jsk_recognition_msgs/PolygonArray`)
+* `~input_coefficients` (`jsk_recognition_msgs/ModelCoefficientsArray`):
 
    The input planes. If `~use_indices` parameter is false, `~indices` will not be used.
 #### Publishing Topics
@@ -830,13 +830,13 @@ and evaluation function of connectivity if based on the following equation:
    normal pointcloud of `~input`
 
 #### Publishing Topics
-* `~output/inliers` (`jsk_pcl_ros/ClusterPointIndices`):
+* `~output/inliers` (`jsk_recognition_msgs/ClusterPointIndices`):
 
    Set of indices of the polygons.
-* `~output/coefficients` (`jsk_pcl_ros/ModelCoefficientsArray`):
+* `~output/coefficients` (`jsk_recognition_msgs/ModelCoefficientsArray`):
 
    Array of coefficients of the polygons.
-* `~output/polygons` (`jsk_pcl_ros/PolygonArray`):
+* `~output/polygons` (`jsk_recognition_msgs/PolygonArray`):
 
    Polygons
 #### Parameters
@@ -877,7 +877,7 @@ This nodelet tracks the target pointcloud.
 
   Reference pointcloud to tracke.
 
-* `~renew_box` (`jsk_pcl_ros/BoundingBox`)
+* `~renew_box` (`jsk_recognition_msgs/BoundingBox`)
 
   Bounding box information to align reference pointcloud model. Only if availabel `~align_box` parameter is true.
 
@@ -1107,7 +1107,7 @@ You can choose several types of tilt/spindle lasers such as tilt-laser of PR2, i
    Joint angles of laser actuator.
 
 #### Publishing Topics
-* `~output` (`jsk_pcl_ros/TimeRange`):
+* `~output` (`jsk_recognition_msgs/TimeRange`):
 
    Time range to scan 3-D space.
 * `~output_cloud` (`sensor_msgs/PointCloud2`):
@@ -1205,7 +1205,7 @@ Create *organized* pointcloud from non-organized pointcloud.
 Segment pointcloud based euclidean metrics, which is based on `pcl::EuclideanClusterExtraction`.
 This nodelet has topic interface and service interface.
 
-The result of clustering is published as `jsk_pcl_ros/ClusterPointIndices`.
+The result of clustering is published as `jsk_recognition_msgs/ClusterPointIndices`.
 
 If the number of the cluster is not changed across different frames, `EuclideanClustering`
 tries to track the segment.
@@ -1215,10 +1215,10 @@ tries to track the segment.
 
    input pointcloud.
 #### Publishing Topics
-* `~output` (`jsk_pcl_ros/ClusterPointIndices`):
+* `~output` (`jsk_recognition_msgs/ClusterPointIndices`):
 
    Result of clustering.
-* `~cluster_num` (`jsk_pcl_ros/Int32Stamped`):
+* `~cluster_num` (`jsk_recognition_msgs/Int32Stamped`):
 
    The number of clusters.
 #### Advertising Services
@@ -1257,18 +1257,18 @@ roslaunch jsk_pcl_ros euclidean_segmentation.launch
 ### jsk\_pcl/ClusterPointIndicesDecomposer
 ![](images/bounding_box.png)
 #### What is this
-Decompose `jsk_pcl_ros/ClusterPointIndices` into array of topics of `sensor_msgs/PointCloud` like `~output00`, `~output01` and so on.
+Decompose `jsk_recognition_msgs/ClusterPointIndices` into array of topics of `sensor_msgs/PointCloud` like `~output00`, `~output01` and so on.
 It also publishes tf of centroids of each cluster and oriented bounding box of them. The direction of the bounding box are aligned on to the nearest planes if available.
 
 #### Subscribing topics
 * `~input` (`sensor_msgs/PointCloud2`):
 
    Input pointcloud.
-* `~target` (`jsk_pcl_ros/ClusterPointIndices`):
+* `~target` (`jsk_recognition_msgs/ClusterPointIndices`):
 
    Input set of indices to represent clusters.
-* `~align_planes` (`jsk_pcl_ros/PolygonArray`):
-* `~align_planes_coefficients` (`jsk_pcl_ros/ModelCoefficientsArray`):
+* `~align_planes` (`jsk_recognition_msgs/PolygonArray`):
+* `~align_planes_coefficients` (`jsk_recognition_msgs/ModelCoefficientsArray`):
 
    The planes for bounding box to be aligned on.
 #### Publishing topics
@@ -1278,7 +1278,7 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 * `~debug_output` (`sensor_msgs/PointCloud2`):
 
    Concatenate all the clusters into one pointcloud and colorize each cluster to see the result of segmentation.
-* `~boxes` (`jsk_pcl_ros/BoundingBoxArray`):
+* `~boxes` (`jsk_recognition_msgs/BoundingBoxArray`):
 
    Array of oriented bounding box for each segmented cluster.
 
@@ -1350,19 +1350,19 @@ PCL and ROS.
    Input pointcloud. This should be **organized** pointcloud.
 
 #### Publishing topisc
-* `~output` (`jsk_pcl_ros/ClusterPointIndices`):
-* `~output_polygon` (`jsk_pcl_ros/PolygonArray`):
-* `~output_coefficients` (`jsk_pcl_ros/ModelCoefficientsArray`)
+* `~output` (`jsk_recognition_msgs/ClusterPointIndices`):
+* `~output_polygon` (`jsk_recognition_msgs/PolygonArray`):
+* `~output_coefficients` (`jsk_recognition_msgs/ModelCoefficientsArray`)
 
    The inliers, coefficients and convex polygons of the connected polygons.
-* `~output_nonconnected` (`jsk_pcl_ros/ClusterPointIndices`):
-* `~output_nonconnected_polygon` (`jsk_pcl_ros/PolygonArray`):
-* `~output_nonconnected_coefficients` (`jsk_pcl_ros/ModelCoefficientsArray`)
+* `~output_nonconnected` (`jsk_recognition_msgs/ClusterPointIndices`):
+* `~output_nonconnected_polygon` (`jsk_recognition_msgs/PolygonArray`):
+* `~output_nonconnected_coefficients` (`jsk_recognition_msgs/ModelCoefficientsArray`)
 
    The inliers, coefficients and polygons of the polygons of connected components analysis.
-* `~output_refined` (`jsk_pcl_ros/ClusterPointIndices`):
-* `~output_refined_polygon` (`jsk_pcl_ros/PolygonArray`):
-* `~output_refined_coefficients` (`jsk_pcl_ros/ModelCoefficientsArray`)
+* `~output_refined` (`jsk_recognition_msgs/ClusterPointIndices`):
+* `~output_refined_polygon` (`jsk_recognition_msgs/PolygonArray`):
+* `~output_refined_coefficients` (`jsk_recognition_msgs/ModelCoefficientsArray`)
 
    The inliers, coefficients and convex polygons of the refined polygons.
 * `~output_normal` (`sensor_msgs/PointCloud2`):
@@ -1477,20 +1477,20 @@ Algorithm is:
 #### Publishing Topic
 
 * `~output/polygon` (`geometry_msgs/PolygonStamped`)
-* `~output/polygon_array` (`jsk_pcl_ros/PolygonArray`)
+* `~output/polygon_array` (`jsk_recognition_msgs/PolygonArray`)
 * `~output/inliers` (`pcl_msgs/PointIndices`)
 * `~output/coefficients` (`pcl_msgs/ModelCoefficients`)
 
   Result of detection.
 
 * `~output/hint/polygon` (`geometry_msgs/PolygonStamped`)
-* `~output/hint/polygon_array` (`jsk_pcl_ros/PolygonArray`)
+* `~output/hint/polygon_array` (`jsk_recognition_msgs/PolygonArray`)
 * `~output/hint/inliers` (`pcl_msgs/PointIndices`)
 * `~output/hint/coefficients` (`pcl_msgs/ModelCoefficients`)
 
   Result of detection of hint pointcloud.
 * `~output/polygon_before_filtering` (`geometry_msgs/PolygonStamped`)
-* `~output/polygon_array_before_filtering` (`jsk_pcl_ros/PolygonArray`)
+* `~output/polygon_array_before_filtering` (`jsk_recognition_msgs/PolygonArray`)
 
   Result of detection before euclidean filtering.
 * `~output/hint_filtered_indices` (`pcl_msgs/PointIndices`)

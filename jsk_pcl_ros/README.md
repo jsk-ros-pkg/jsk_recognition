@@ -70,10 +70,12 @@ Filter pointcloud based on RGB range.
 * `~indices` (`pcl_msgs/PointIndices`)
 
   Indices of pointcloud. only available if `~use_indices` is true.
+
 #### Publishing Topic
 * `~output` (`sensor_msgs/PointCloud2`)
 
   Filtered pointcloud.
+
 #### Parameters
 * `~r_max` (Integer, default: `255`)
 * `~r_min` (Integer, default: `0`)
@@ -83,7 +85,10 @@ Filter pointcloud based on RGB range.
 * `~b_min` (Integer, default: `0`)
 
   Color range to filter.
+
 ### jsk\_pcl/HSIColorFilter
+![](images/hsi_color_filter.png)
+
 Filter pointcloud based on HSI range.
 
 #### Subscribing Topic
@@ -94,10 +99,12 @@ Filter pointcloud based on HSI range.
 * `~indices` (`pcl_msgs/PointIndices`)
 
   Indices of pointcloud. only available if `~use_indices` is true.
+
 #### Publishing Topic
 * `~output` (`sensor_msgs/PointCloud2`)
 
   Filtered pointcloud.
+
 #### Parameters
 * `~h_max` (Integer, default: `127`)
 * `~h_min` (Integer, default: `-128`)
@@ -107,6 +114,7 @@ Filter pointcloud based on HSI range.
 * `~i_min` (Integer, default: `0`)
 
    Color range to filter.
+
 ### jsk\_pcl/AddPointIndices
 add two different `pcl_msgs/PointIndices` into one indices.
 
@@ -144,6 +152,7 @@ Convert polygon into mask image.
 * `~output` (`sensor_msgs/Image`)
 
   Mask image to fill `~input` polygon. Currently only convex polygon is supported.
+
 ### jsk\_pcl/MaskImageFilter
 ![](images/mask_image_filter.png)
 
@@ -172,10 +181,12 @@ Convert camera info with ROI to `geometry_msgs/PolygonStamped`.
 * `~input` (`sensor_msgs/CameraInfo`)
 
   Input camera info with ROI filled.
+
 #### Publishing Topic
 * `~output` (`geometry_msgs/PolygonStamped`)
 
   Output rectangle region.
+
 ### jsk\_pcl/ROIToMaskImage
 Convert camera info with ROI to mask image.
 
@@ -183,10 +194,12 @@ Convert camera info with ROI to mask image.
 * `~input` (`sensor_msgs/CameraInfo`)
 
   Input camera info with ROI filled.
+
 #### Publishing Topic
 * `~output` (`sensor_msgs/Image`)
 
   Output mask image.
+
 ### jsk\_pcl/MaskImageToROI
 Convert a mask image into camera info with roi.
 
@@ -697,6 +710,7 @@ to see the object.
 * `~input/pose_array` (`geometry_msgs/PoseArray`)
 * `~input/box_array` (`jsk_pcl_ros/BoundingBoxArray`)
   It's an array version of `~input/pose` and `~input/box`. There callbacks are only enabled if `~use_multiple_attention` is true.
+
 #### Publishing Topic
 * `~output` (`sensor_msgs/CameraInfo`)
 
@@ -768,6 +782,7 @@ We expect to use jsk\_pcl/ROIClipper with jsk\_pcl/AttentionClipper to get ROI i
 * `~input/cloud` (`sensor_msgs/PointCloud2`)
 
   This topic is only enabled if `~not_sync` is true.
+
 #### Publishing Topic
 * `~output` (`sensor_msgs/Image`)
 
@@ -833,6 +848,7 @@ Extract the points above the planes between `~min_height` and `~max_height`.
 * `~input_coefficients` (`jsk_pcl_ros/ModelCoefficientsArray`):
 
    The input planes. If `~use_indices` parameter is false, `~indices` will not be used.
+
 #### Publishing Topics
 * `~output` (`sensor_msgs/PointCloud2`):
 
@@ -887,6 +903,7 @@ and evaluation function of connectivity if based on the following equation:
 * `~output/polygons` (`jsk_pcl_ros/PolygonArray`):
 
    Polygons
+
 #### Parameters
 * `~angular_threshold` (Double, default: `0.04`)
 
@@ -1027,6 +1044,7 @@ This nodelet tracks the target pointcloud.
 * `~not_publish_tf` (Boolean, default: `false`)
 
   If this parameter is true, do not publish tf frame.
+
 #### Sample
 
 run the below command.
@@ -1046,6 +1064,7 @@ ResizePointsPublisher resizes PointCloud generated from depth images. It keeps *
 * `~input` (`sensor_msgs/PointCloud2`):
 
    Input PointCloud. The input should be organized pointcloud.
+
 #### Publishing Topics.
 * `~output` (`sensor_msgs/PointCloud2`):
 
@@ -1096,6 +1115,7 @@ It retrieves 3-D environment as pointcloud.
 * `~output` (`sensor_msgs/PointCloud`):
 
    The topic to be used to publish series of points as a result of screenpoint.
+
 #### Advertising Servicies
 * `~screen_to_point` (`jsk_pcl_ros::TransformScreenpoint`)
 
@@ -1213,6 +1233,7 @@ Create *organized* pointcloud from non-organized pointcloud.
 * `~info` (`sensor_msgs/CameraInfo`):
 
    Put a simulated camera according to `~info` and generate organized pointcloud.
+
 #### Publishing Topics
 * `~output` (`sensor_msgs/Image`):
 
@@ -1223,6 +1244,7 @@ Create *organized* pointcloud from non-organized pointcloud.
 * `~output_disp` (`sensor_msgs/DisparityImage`)
 
    Publish organized pointcloud as disparity image.
+
 #### Parameters
 * `~scale_depth` (Double, default: `1.0`)
 
@@ -1262,6 +1284,7 @@ tries to track the segment.
 * `~input` (`sensor_msgs/PointCloud2`):
 
    input pointcloud.
+
 #### Publishing Topics
 * `~output` (`jsk_pcl_ros/ClusterPointIndices`):
 
@@ -1269,6 +1292,7 @@ tries to track the segment.
 * `~cluster_num` (`jsk_pcl_ros/Int32Stamped`):
 
    The number of clusters.
+
 #### Advertising Services
 * `~euclidean_clustering` (`jsk_pcl_ros/EuclideanSegment`):
 
@@ -1319,6 +1343,7 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 * `~align_planes_coefficients` (`jsk_pcl_ros/ModelCoefficientsArray`):
 
    The planes for bounding box to be aligned on.
+
 #### Publishing topics
 * `~output%02d` (`sensor_msgs/PointCloud2`):
 
@@ -1362,6 +1387,7 @@ This nodelet will subscribe the sensor\_msgs::PointCloud2, calculate its centroi
 * `/tf`:
 
    Publish tf of the centroid of the input pointcloud.
+
 #### Parameters
 * `~frame` (String, required):
 
@@ -1416,6 +1442,7 @@ PCL and ROS.
 * `~output_normal` (`sensor_msgs/PointCloud2`):
 
    The pointcloud of normal of `~input` pointcloud.
+
 #### Parameters
 * `~estimate_normal` (Boolean, default: `True`):
 

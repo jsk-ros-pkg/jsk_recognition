@@ -189,7 +189,7 @@ namespace pcl
       void computeTransformedPointCloudWithoutNormal
       (const StateT& hypothesis, PointCloudIn &cloud)
         {
-          const Eigen::Affine3f trans = toEigenMatrix (hypothesis);
+          const Eigen::Affine3f trans = this->toEigenMatrix (hypothesis);
           // destructively assigns to cloud
           pcl::transformPointCloud<PointInT> (*input_, cloud, trans);
         }
@@ -222,7 +222,7 @@ namespace pcl
             Eigen::Affine3f inverse_trans = trans.inverse();
             inverse_particle = StateT::toState(inverse_trans);
             IndicesPtr indices (new std::vector<int>);
-            computeTransformedPointCloudWithNormal (inverse_particle, *indices, *transed_input_vector_[i]);
+            this->computeTransformedPointCloudWithNormal (inverse_particle, *indices, *transed_input_vector_[i]);
             coherence_->compute (transed_input_vector_[i], indices, particles_->points[i].weight);
           }
         }
@@ -313,7 +313,7 @@ namespace pcl
             Eigen::Affine3f trans = particles_->points[i].toEigenMatrix();
             Eigen::Affine3f inverse_trans = trans.inverse();
             inverse_particle = StateT::toState(inverse_trans);
-            computeTransformedPointCloudWithoutNormal (inverse_particle, *transed_input_vector_[i]);
+            this->computeTransformedPointCloudWithoutNormal (inverse_particle, *transed_input_vector_[i]);
             //computeTransformedPointCloudWithoutNormal (particles_->points[i], *transed_input_vector_[i]);
             IndicesPtr indices;
             coherence_->compute (transed_input_vector_[i], indices, particles_->points[i].weight);
@@ -333,7 +333,7 @@ namespace pcl
             Eigen::Affine3f inverse_trans = trans.inverse();
             inverse_particle = StateT::toState(inverse_trans);
             IndicesPtr indices (new std::vector<int>);
-            computeTransformedPointCloudWithNormal (inverse_particle, *indices, *transed_input_vector_[i]);
+            this->computeTransformedPointCloudWithNormal (inverse_particle, *indices, *transed_input_vector_[i]);
             coherence_->compute (transed_input_vector_[i], indices, particles_->points[i].weight);
           }
         }

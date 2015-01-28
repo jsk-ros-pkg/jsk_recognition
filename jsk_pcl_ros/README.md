@@ -59,6 +59,54 @@ time end
 Represent range of time.
 
 ## nodelets
+### jsk\_pcl/RGBColorFilter
+Filter pointcloud based on RGB range.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Input pointcloud. rgb field is required.
+
+* `~indices` (`pcl_msgs/PointIndices`)
+
+  Indices of pointcloud. only available if `~use_indices` is true.
+#### Publishing Topic
+* `~output` (`sensor_msgs/PointCloud2`)
+
+  Filtered pointcloud.
+#### Parameters
+* `~r_max` (Integer, default: `255`)
+* `~r_min` (Integer, default: `0`)
+* `~g_max` (Integer, default: `255`)
+* `~g_min` (Integer, default: `0`)
+* `~b_max` (Integer, default: `255`)
+* `~b_min` (Integer, default: `0`)
+
+  Color range to filter.
+### jsk\_pcl/HSIColorFilter
+Filter pointcloud based on HSI range.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Input pointcloud. rgb field is required.
+
+* `~indices` (`pcl_msgs/PointIndices`)
+
+  Indices of pointcloud. only available if `~use_indices` is true.
+#### Publishing Topic
+* `~output` (`sensor_msgs/PointCloud2`)
+
+  Filtered pointcloud.
+#### Parameters
+* `~h_max` (Integer, default: `127`)
+* `~h_min` (Integer, default: `-128`)
+* `~s_max` (Integer, default: `255`)
+* `~s_min` (Integer, default: `0`)
+* `~i_max` (Integer, default: `255`)
+* `~i_min` (Integer, default: `0`)
+
+   Color range to filter.
 ### jsk\_pcl/AddPointIndices
 add two different `pcl_msgs/PointIndices` into one indices.
 

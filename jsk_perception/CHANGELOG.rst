@@ -2,6 +2,23 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_perception, checkerboard_detector] Remove dependency to jsk_pcl_ros
+* [jsk_pcl_ros, jsk_perception] Move find_object_on_plane from
+  jsk_perception to jsk_pcl_ros to make these packages independent
+* [jsk_pcl_ros, jsk_perception] Use jsk_recognition_msgs
+* [jsk_pcl_ros, jsk_perception, resized_image_transport] Do not include
+  jsk_topic_tools/nodelet.cmake because it is exported by CFG_EXTRAS
+* [imagesift] Better support of masking image:
+  1) Use jsk_perception::boundingRectOfMaskImage to compute ROI
+  2) support mask image in imagesift.cpp to make better performance
+* [jsk_perception] Export library
+* [jsk_perception] Do not use cv::boundingRect to compute bounding box of
+  mask image
+* [jsk_perception] install include directory of jsk_perception
+* Contributors: Ryohei Ueda
+
 0.1.33 (2015-01-24)
 -------------------
 * [jsk_perception] FindObjectOnPlane: Find object on plane from 2d binary

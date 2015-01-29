@@ -2,6 +2,18 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [imagesift] Refactor codes:
+  * uniformed variable naming convention
+  * uniformed function naming convention
+  * soft tabs
+  * no space in if parens
+* [imagesift] Better support of masking image:
+  1) Use jsk_perception::boundingRectOfMaskImage to compute ROI
+  2) support mask image in imagesift.cpp to make better performance
+* Contributors: Ryohei Ueda
+
 0.1.33 (2015-01-24)
 -------------------
 * speed up image sift

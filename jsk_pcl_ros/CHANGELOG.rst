@@ -2,6 +2,39 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* support both yaml 0.3.0(hydro) and yaml 0.5.0(indigo)
+* [jsk_pcl_ros] Fixed serious bug to detect points near from polygon
+* use this to call methods, I need this to compile on indigo, but not sure if this really works, please check if this is correct @YuOhara, @garaemon
+* depending on cv_bridge is recommended, see http://wiki.ros.org/indigo/Migration#OpenCV
+* [jsk_pcl_ros] Update document and python script to use jsk_recognition_msgs
+* [jsk_pcl_ros] Fix document indent and add image of HSIColorFilter
+* [jsk_pcl_ros] Add documentation about RGBColorFilter and HSVColorFilter
+* Fix unchanged path to message header
+* [jsk_pcl_ros] Fix header location of find_object_on_plane.h
+* [jsk_pcl_ros, jsk_perception] Move find_object_on_plane from
+  jsk_perception to jsk_pcl_ros to make these packages independent
+* [jsk_pcl_ros, jsk_perception] Use jsk_recognition_msgs
+* [jsk_pcl_ros, jsk_perception, resized_image_transport] Do not include
+  jsk_topic_tools/nodelet.cmake because it is exported by CFG_EXTRAS
+* merge master
+* [jsk_pcl_ros] Add image of TiltLaserListener to document
+* add options for align box and change base_frame_id
+* [jsk_pcl_ros] add ~not_publish_tf parameter to ParticleFilterTracking
+* [jsk_pcl_ros] Refactor ParticleFilterTracking
+* [jsk_pcl_ros] Optimize ReversedParticleFilter by not updating octree per
+  each calculation
+* [jsk_pcl_ros] Add *reversed* mode for ParticleFilterTracking and add
+  sample to localize robot by tilt laser
+* [jsk_pcl_ros] Fix documentation
+  * Update picture of OrganizedMultiPlaneSegmentation
+  * Fix indent
+  * Fix AddColorFromImage picture
+* [jsk_pcl_ros] Update ParticleFilterTracking document
+* [jsk_pcl_ros] Increase initial number of particles to avoid SEGV
+* Contributors: Ryohei Ueda, Kei Okada, JSK Lab Member
+
 0.1.33 (2015-01-24)
 -------------------
 * [jsk_pcl_ros] Add magnify parameter to MultiPlaneExtraction
@@ -47,7 +80,7 @@ Changelog for package jsk_pcl_ros
 * [jsk_pcl_ros] nodelet to add color to pointcloud from image
 * add none result publisher when reference is empty
 * [jsk_pcl_ros] Publish pose of matched template in LINEMOD
-* Contributors: Ryohei Ueda, Hiroaki Yaguchi, JSK Lab Member, Yu Ohara, Yuto Inagaki
+* Contributors: Ryohei Ueda, Yuto Inagaki, Hiroaki Yaguchi, JSK Lab Member, Yu Ohara
 
 0.1.32 (2015-01-12)
 -------------------
@@ -190,7 +223,7 @@ Changelog for package jsk_pcl_ros
 * changet pointcloud_screen_point not to use jsconnection_based_nodelet
 * Use jsk_topic_tools::ConnectionBasedNodelet in BilateralFilter,
   BorderEstimator, BoundingBoxFilter and so on
-* Contributors: Ryohei Ueda, Shunichi Nozawa, Yu Ohara, Yuto Inagaki
+* Contributors: Ryohei Ueda, Shunichi Nozawa, Yuto Inagaki, Yu Ohara
 
 0.1.26 (2014-11-23)
 -------------------
@@ -657,7 +690,7 @@ Changelog for package jsk_pcl_ros
 * make paritcal_filter_tracking_nodelet publish tracked object tf trasnformation
 * add two launch files to run openni on remote machine
 * add octree_change_detector
-* Contributors: Chan Wesley, Shunichi Nozawa, Yuto Inagaki, Masaki Murooka, Ryo Terasawa, Ryohei Ueda, Yohei Kakiuchi, Yusuke Furuta, Kei Okada
+* Contributors: Ryo Terasawa, Shunichi Nozawa, Yuto Inagaki, Masaki Murooka, Yohei Kakiuchi, Ryohei Ueda, Chan Wesley, Yusuke Furuta, Kei Okada
 
 0.1.4 (2014-04-25)
 ------------------

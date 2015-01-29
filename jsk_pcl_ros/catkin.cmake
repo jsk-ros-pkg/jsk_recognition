@@ -300,7 +300,7 @@ generate_messages(DEPENDENCIES ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recogni
 
 catkin_package(
     DEPENDS pcl
-    CATKIN_DEPENDS pcl_ros message_runtime ${PCL_MSGS} sensor_msgs geometry_msgs
+    CATKIN_DEPENDS pcl_ros message_runtime ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs
     INCLUDE_DIRS include
     LIBRARIES jsk_pcl_ros
 )

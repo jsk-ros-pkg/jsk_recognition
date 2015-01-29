@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.1 (2015-01-30)
+------------------
 * Merge pull request #672 from k-okada/add_image_view2
   add image_view2
 * [jsk_pcl_ros] add jsk_recognition_msgs to catkin_package:DEPEND

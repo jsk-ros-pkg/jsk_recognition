@@ -61,7 +61,7 @@ namespace jsk_pcl_ros
 
   void HandleEstimator::subscribe()
   {
-    sub_index_ = pnh_->subscribe<jsk_pcl_ros::Int32Stamped>("selected_index", 1, boost::bind( &HandleEstimator::selectedIndexCallback, this, _1));
+    sub_index_ = pnh_->subscribe<jsk_recognition_msgs::Int32Stamped>("selected_index", 1, boost::bind( &HandleEstimator::selectedIndexCallback, this, _1));
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_box_.subscribe(*pnh_, "input_box", 1);
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
@@ -77,7 +77,7 @@ namespace jsk_pcl_ros
   }
   
   void HandleEstimator::estimate(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
-                                 const jsk_pcl_ros::BoundingBox::ConstPtr& box_msg)
+                                 const jsk_recognition_msgs::BoundingBox::ConstPtr& box_msg)
   {
     // pack dimensions into vector
     std::vector<double> dimensions;
@@ -125,7 +125,7 @@ namespace jsk_pcl_ros
 
   void HandleEstimator::estimateHandle(const HandleType& handle_type,
                                        const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
-                                       const jsk_pcl_ros::BoundingBox::ConstPtr& box_msg)
+                                       const jsk_recognition_msgs::BoundingBox::ConstPtr& box_msg)
   {
     if (handle_type == NO_HANDLE) {
       NODELET_ERROR("failed to estimate handle");
@@ -143,7 +143,7 @@ namespace jsk_pcl_ros
 
   void HandleEstimator::handleSmallEnoughStandOnPlane(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
-    const jsk_pcl_ros::BoundingBox::ConstPtr& box_msg)
+    const jsk_recognition_msgs::BoundingBox::ConstPtr& box_msg)
   {
     geometry_msgs::PoseArray pose_array;
     geometry_msgs::PoseArray prepose_array;
@@ -203,7 +203,7 @@ namespace jsk_pcl_ros
   
   void HandleEstimator::handleSmallEnoughLieOnPlane(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
-    const jsk_pcl_ros::BoundingBox::ConstPtr& box_msg,
+    const jsk_recognition_msgs::BoundingBox::ConstPtr& box_msg,
     bool y_longest)
   {
     geometry_msgs::PoseArray pose_array;
@@ -267,7 +267,7 @@ namespace jsk_pcl_ros
     output_buf.push_front(boost::make_tuple(pose_array, prepose_array));
   }
   
-  void HandleEstimator::selectedIndexCallback( const jsk_pcl_ros::Int32StampedConstPtr &index){
+  void HandleEstimator::selectedIndexCallback( const jsk_recognition_msgs::Int32StampedConstPtr &index){
     boost::circular_buffer<boost::tuple<geometry_msgs::PoseArray, geometry_msgs::PoseArray> >::iterator it = output_buf.begin();
     while (it != output_buf.end()) {
       geometry_msgs::PoseArray pose_array = it->get<0>();

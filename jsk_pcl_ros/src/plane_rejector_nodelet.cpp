@@ -83,9 +83,9 @@ namespace jsk_pcl_ros
       boost::bind (&PlaneRejector::configCallback, this, _1, _2);
     srv_->setCallback (f);
     
-    polygons_pub_ = advertise<jsk_pcl_ros::PolygonArray>(
+    polygons_pub_ = advertise<jsk_recognition_msgs::PolygonArray>(
       *pnh_, "output_polygons", 1);
-    coefficients_pub_ = advertise<jsk_pcl_ros::ModelCoefficientsArray>(
+    coefficients_pub_ = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(
       *pnh_, "output_coefficients", 1);
 
     diagnostics_timer_ = pnh_->createTimer(
@@ -156,13 +156,13 @@ namespace jsk_pcl_ros
   }
   
   void PlaneRejector::reject(
-    const PolygonArray::ConstPtr& polygons,
-    const ModelCoefficientsArray::ConstPtr& coefficients)
+    const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
+    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients)
   {
     boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();
-    jsk_pcl_ros::PolygonArray result_polygons;
-    jsk_pcl_ros::ModelCoefficientsArray result_coefficients;
+    jsk_recognition_msgs::PolygonArray result_polygons;
+    jsk_recognition_msgs::ModelCoefficientsArray result_coefficients;
     result_polygons.header = polygons->header;
     result_coefficients.header = coefficients->header;
     input_plane_counter_.add(polygons->polygons.size());

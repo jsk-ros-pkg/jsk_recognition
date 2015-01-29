@@ -1,3 +1,3 @@
-SnapItRequest request
+jsk_recognition_msgs/SnapItRequest request
 ---
 geometry_msgs/Pose transformation

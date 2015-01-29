@@ -2,10 +2,11 @@ cmake_minimum_required(VERSION 2.8.3)
 project(jsk_perception)
 
 find_package(catkin REQUIRED COMPONENTS
+  jsk_recognition_msgs
   mk message_generation std_msgs sensor_msgs geometry_msgs cv_bridge
   image_geometry image_transport driver_base dynamic_reconfigure cmake_modules
   roscpp nodelet rostest tf rospack
-  jsk_topic_tools pcl_ros jsk_pcl_ros)
+  jsk_topic_tools pcl_ros)
 find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 
@@ -41,18 +42,14 @@ generate_dynamic_reconfigure_options(
   cfg/BackgroundSubstraction.cfg
   cfg/GrabCut.cfg)
 
-add_message_files(FILES
-      PointsArray.msg RotatedRectStamped.msg LineArray.msg Rect.msg Line.msg RotatedRect.msg SparseImage.msg
-      Circle2D.msg Circle2DArray.msg)
-
 add_service_files(FILES EuclideanSegment.srv  SetTemplate.srv  WhiteBalancePoints.srv  WhiteBalance.srv)
 
 generate_messages(
-  DEPENDENCIES std_msgs sensor_msgs geometry_msgs
+  DEPENDENCIES std_msgs sensor_msgs geometry_msgs jsk_recognition_msgs
 )
 
 catkin_package(
-  CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs message_runtime
+  CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs message_runtime jsk_recognition_msgs
   DEPENDS OpenCV
   INCLUDE_DIRS include
   LIBRARIES jsk_perception
@@ -105,7 +102,6 @@ jsk_perception_nodelet(src/single_channel_histogram.cpp "jsk_perception/SingleCh
 jsk_perception_nodelet(src/blob_detector.cpp "jsk_perception/BlobDetector" "blob_detector")
 jsk_perception_nodelet(src/add_mask_image.cpp "jsk_perception/AddMaskImage" "add_mask_image")
 jsk_perception_nodelet(src/multiply_mask_image.cpp "jsk_perception/MultiplyMaskImage" "multiply_mask_image")
-jsk_perception_nodelet(src/find_object_on_plane.cpp "jsk_perception/FindObjectOnPlane" "find_object_on_plane")
 # compiling jsk_perception library for nodelet
 add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
   ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels/slic.cpp

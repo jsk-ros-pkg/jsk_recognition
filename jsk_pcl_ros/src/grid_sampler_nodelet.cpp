@@ -43,7 +43,7 @@ namespace jsk_pcl_ros
   void GridSampler::onInit()
   {
     ConnectionBasedNodelet::onInit();
-    pub_ = advertise<jsk_pcl_ros::ClusterPointIndices>(*pnh_, "output", 1);
+    pub_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output", 1);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&GridSampler::configCallback, this, _1, _2);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
@@ -140,7 +140,7 @@ namespace jsk_pcl_ros
       }
     }
     // publish the result
-    jsk_pcl_ros::ClusterPointIndices output;
+    jsk_recognition_msgs::ClusterPointIndices output;
     output.header = msg->header;
     for (std::map<int, std::map<int, std::map<int, std::vector<size_t> > > >::iterator xit = grid.begin();
          xit != grid.end();

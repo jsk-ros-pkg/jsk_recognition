@@ -37,7 +37,7 @@
 #include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/common/centroid.h>
 #include "jsk_pcl_ros/pcl_conversion_util.h"
-#include <jsk_pcl_ros/BoundingBoxArray.h>
+#include <jsk_recognition_msgs/BoundingBoxArray.h>
 #include <geometry_msgs/PoseArray.h>
 #include <pcl/filters/extract_indices.h>
 #include <visualization_msgs/Marker.h>
@@ -46,8 +46,8 @@
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/common/angles.h>
-#include <jsk_pcl_ros/PolygonArray.h>
-#include <jsk_pcl_ros/ClusterPointIndices.h>
+#include <jsk_recognition_msgs/PolygonArray.h>
+#include <jsk_recognition_msgs/ClusterPointIndices.h>
 #include <pcl/filters/project_inliers.h>
 #include <pcl/surface/convex_hull.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -388,7 +388,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // publishers
     ////////////////////////////////////////////////////////
-    pub_ = advertise<jsk_pcl_ros::BoundingBoxArray>(*pnh_, "output", 1);
+    pub_ = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "output", 1);
     pub_pose_array_
       = advertise<geometry_msgs::PoseArray>(*pnh_, "output_pose_array", 1);
     pub_debug_marker_
@@ -396,9 +396,9 @@ namespace jsk_pcl_ros
     pub_debug_filtered_cloud_ = advertise<sensor_msgs::PointCloud2>(
       *pnh_, "debug_filtered_cloud", 1);
     pub_debug_polygons_
-      = advertise<jsk_pcl_ros::PolygonArray>(*pnh_, "debug_polygons", 1);
+      = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "debug_polygons", 1);
     pub_debug_clusers_
-      = advertise<ClusterPointIndices>(*pnh_, "debug_clusters", 1);
+      = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "debug_clusters", 1);
   }
 
   void EdgebasedCubeFinder::subscribe()
@@ -699,22 +699,22 @@ namespace jsk_pcl_ros
   
   void EdgebasedCubeFinder::estimate(
     const sensor_msgs::PointCloud2::ConstPtr& input_cloud,
-    const ParallelEdgeArray::ConstPtr& input_edges)
+    const jsk_recognition_msgs::ParallelEdgeArray::ConstPtr& input_edges)
   {
      boost::mutex::scoped_lock lock(mutex_);
      pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
      pcl::PointCloud<PointT>::Ptr all_filtered_cloud (new pcl::PointCloud<PointT>);
      pcl::fromROSMsg(*input_cloud, *cloud);
      visualization_msgs::Marker marker;
-     jsk_pcl_ros::PolygonArray polygon_array;
+     jsk_recognition_msgs::PolygonArray polygon_array;
      geometry_msgs::PoseArray pose_array;
-     jsk_pcl_ros::BoundingBoxArray box_array;
+     jsk_recognition_msgs::BoundingBoxArray box_array;
      box_array.header = input_cloud->header;
      pose_array.header = input_cloud->header;
      std::vector<Cube::Ptr> cubes;
      std::vector<pcl::PointIndices::Ptr> candidate_cluster_indices;
      for (size_t i = 0; i < input_edges->edge_groups.size(); i++) {
-       ParallelEdge parallel_edge = input_edges->edge_groups[i];
+       jsk_recognition_msgs::ParallelEdge parallel_edge = input_edges->edge_groups[i];
        std::vector<pcl::PointIndices::Ptr> edges
          = pcl_conversions::convertToPCLPointIndices(
            parallel_edge.cluster_indices);
@@ -745,7 +745,7 @@ namespace jsk_pcl_ros
      if (cubes.size() > 0) {
        for (size_t i = 0; i < cubes.size(); i++) {
          // publish cubes
-         jsk_pcl_ros::BoundingBox ros_box = cubes[i]->toROSMsg();
+         jsk_recognition_msgs::BoundingBox ros_box = cubes[i]->toROSMsg();
          ros_box.header = input_cloud->header;
          box_array.boxes.push_back(ros_box);
          pose_array.poses.push_back(ros_box.pose);
@@ -865,14 +865,14 @@ namespace jsk_pcl_ros
   
   void EdgebasedCubeFinder::estimate2(
     const sensor_msgs::PointCloud2::ConstPtr& input_cloud,
-    const ParallelEdgeArray::ConstPtr& input_edges)
+    const jsk_recognition_msgs::ParallelEdgeArray::ConstPtr& input_edges)
   {
      boost::mutex::scoped_lock lock(mutex_);
      pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
      pcl::PointCloud<PointT>::Ptr all_filtered_cloud (new pcl::PointCloud<PointT>);
      pcl::fromROSMsg(*input_cloud, *cloud);
      visualization_msgs::Marker marker;
-     jsk_pcl_ros::PolygonArray polygon_array;
+     jsk_recognition_msgs::PolygonArray polygon_array;
      std::vector<pcl::PointIndices::Ptr> candidate_cluster_indices;
      
      polygon_array.header = input_cloud->header;
@@ -885,11 +885,11 @@ namespace jsk_pcl_ros
      NODELET_INFO("%lu parallel edge groups", input_edges->edge_groups.size());
      geometry_msgs::PoseArray pose_array;
      pose_array.header = input_cloud->header;
-     BoundingBoxArray ros_output;
+     jsk_recognition_msgs::BoundingBoxArray ros_output;
      ros_output.header = input_cloud->header;
 
      for (size_t i = 0; i < input_edges->edge_groups.size(); i++) {
-       ParallelEdge parallel_edge = input_edges->edge_groups[i];
+       jsk_recognition_msgs::ParallelEdge parallel_edge = input_edges->edge_groups[i];
 
        if (parallel_edge.cluster_indices.size() <= 1) {
          NODELET_ERROR("parallel edge group has only %lu edges",
@@ -1110,7 +1110,7 @@ namespace jsk_pcl_ros
     pub_debug_polygons_.publish(polygon_array);
 
     // convert std::vector<pcl::PointIndices::Ptr> to ClusterPointIndices
-    ClusterPointIndices ros_cluster_indices;
+    jsk_recognition_msgs::ClusterPointIndices ros_cluster_indices;
     ros_cluster_indices.header = input_cloud->header;
     for (size_t i = 0; i < candidate_cluster_indices.size(); i++) {
       PCLIndicesMsg indices_msg;

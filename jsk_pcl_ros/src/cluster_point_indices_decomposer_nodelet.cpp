@@ -68,7 +68,7 @@ namespace jsk_pcl_ros
     pnh_->param("align_boxes", align_boxes_, false);
     pnh_->param("use_pca", use_pca_, false);
     pc_pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "debug_output", 1);
-    box_pub_ = advertise<BoundingBoxArray>(*pnh_, "boxes", 1);
+    box_pub_ = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "boxes", 1);
   }
 
   void ClusterPointIndicesDecomposer::subscribe()
@@ -136,8 +136,8 @@ namespace jsk_pcl_ros
   
   int ClusterPointIndicesDecomposer::findNearestPlane(
     const Eigen::Vector4f& center,
-    const jsk_pcl_ros::PolygonArrayConstPtr& planes,
-    const jsk_pcl_ros::ModelCoefficientsArrayConstPtr& coefficients)
+    const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
+    const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients)
   {
     double min_distance = DBL_MAX;
     int nearest_index = -1;
@@ -165,9 +165,9 @@ namespace jsk_pcl_ros
   (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
    const std_msgs::Header header,
    const Eigen::Vector4f center,
-   const jsk_pcl_ros::PolygonArrayConstPtr& planes,
-   const jsk_pcl_ros::ModelCoefficientsArrayConstPtr& coefficients,
-   jsk_pcl_ros::BoundingBox& bounding_box)
+   const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
+   const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients,
+   jsk_recognition_msgs::BoundingBox& bounding_box)
   {
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr
       segmented_cloud_transformed (new pcl::PointCloud<pcl::PointXYZRGB>);
@@ -286,9 +286,9 @@ namespace jsk_pcl_ros
   
   void ClusterPointIndicesDecomposer::extract
   (const sensor_msgs::PointCloud2ConstPtr &input,
-   const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices_input,
-   const jsk_pcl_ros::PolygonArrayConstPtr& planes,
-   const jsk_pcl_ros::ModelCoefficientsArrayConstPtr& coefficients)
+   const jsk_recognition_msgs::ClusterPointIndicesConstPtr &indices_input,
+   const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
+   const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients)
   {
     if (publish_clouds_) {
       allocatePublishers(indices_input->cluster_indices.size());
@@ -315,7 +315,7 @@ namespace jsk_pcl_ros
     extract.setInputCloud(cloud);
 
     pcl::PointCloud<pcl::PointXYZRGB> debug_output;
-    jsk_pcl_ros::BoundingBoxArray bounding_box_array;
+    jsk_recognition_msgs::BoundingBoxArray bounding_box_array;
     bounding_box_array.header = input->header;
     for (size_t i = 0; i < sorted_indices.size(); i++)
     {
@@ -344,7 +344,7 @@ namespace jsk_pcl_ros
       // adding the pointcloud into debug_output
       addToDebugPointCloud(segmented_cloud, i, debug_output);
       
-      jsk_pcl_ros::BoundingBox bounding_box;
+      jsk_recognition_msgs::BoundingBox bounding_box;
       computeBoundingBox(segmented_cloud, input->header, center, planes, coefficients, bounding_box);
       bounding_box_array.boxes.push_back(bounding_box);
     }
@@ -359,11 +359,11 @@ namespace jsk_pcl_ros
   
   void ClusterPointIndicesDecomposer::extract
   (const sensor_msgs::PointCloud2ConstPtr &input,
-   const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices_input)
+   const jsk_recognition_msgs::ClusterPointIndicesConstPtr &indices_input)
   {
     extract(input, indices_input,
-            jsk_pcl_ros::PolygonArrayConstPtr(),
-            jsk_pcl_ros::ModelCoefficientsArrayConstPtr());
+            jsk_recognition_msgs::PolygonArrayConstPtr(),
+            jsk_recognition_msgs::ModelCoefficientsArrayConstPtr());
   }
 
   void ClusterPointIndicesDecomposer::allocatePublishers(size_t num)

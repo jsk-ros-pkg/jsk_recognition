@@ -50,19 +50,19 @@
 namespace jsk_pcl_ros
 {
 
-  int VoxelGridDownsampleDecoder::getPointcloudID(const jsk_pcl_ros::SlicedPointCloudConstPtr &input) {
+  int VoxelGridDownsampleDecoder::getPointcloudID(const jsk_recognition_msgs::SlicedPointCloudConstPtr &input) {
     return input->slice_index;
   }
   
-  int VoxelGridDownsampleDecoder::getPointcloudSequenceID(const jsk_pcl_ros::SlicedPointCloudConstPtr &input) {
+  int VoxelGridDownsampleDecoder::getPointcloudSequenceID(const jsk_recognition_msgs::SlicedPointCloudConstPtr &input) {
     return input->sequence_id;
   }
 
-  std::string VoxelGridDownsampleDecoder::getPointcloudFrameId(const jsk_pcl_ros::SlicedPointCloudConstPtr &input) {
+  std::string VoxelGridDownsampleDecoder::getPointcloudFrameId(const jsk_recognition_msgs::SlicedPointCloudConstPtr &input) {
     return input->point_cloud.header.frame_id;
   }
   
-  void VoxelGridDownsampleDecoder::pointCB(const jsk_pcl_ros::SlicedPointCloudConstPtr &input)
+  void VoxelGridDownsampleDecoder::pointCB(const jsk_recognition_msgs::SlicedPointCloudConstPtr &input)
   {
     NODELET_INFO_STREAM("new pointcloud!" << input->point_cloud.header.frame_id);
     
@@ -83,7 +83,7 @@ namespace jsk_pcl_ros
       NODELET_INFO_STREAM("extend " << extend << " pointclouds");
       for (int i = 0; i < extend; i++) {
         NODELET_INFO_STREAM("new pointcloud allocation!");
-        pc_buffer_.push_back(jsk_pcl_ros::SlicedPointCloudConstPtr());
+        pc_buffer_.push_back(jsk_recognition_msgs::SlicedPointCloudConstPtr());
         pc_buffer_[pc_buffer_.size() - 1].reset();
       }
     }

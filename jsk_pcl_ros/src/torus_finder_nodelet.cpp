@@ -50,8 +50,8 @@ namespace jsk_pcl_ros
       boost::bind (&TorusFinder::configCallback, this, _1, _2);
     srv_->setCallback (f);
     
-    pub_torus_ = advertise<Torus>(*pnh_, "output", 1);
-    pub_torus_array_ = advertise<TorusArray>(*pnh_, "output/array", 1);
+    pub_torus_ = advertise<jsk_recognition_msgs::Torus>(*pnh_, "output", 1);
+    pub_torus_array_ = advertise<jsk_recognition_msgs::TorusArray>(*pnh_, "output/array", 1);
     pub_inliers_ = advertise<PCLIndicesMsg>(*pnh_, "output/inliers", 1);
     pub_coefficients_ = advertise<PCLModelCoefficientMsg>(
       *pnh_, "output/coefficients", 1);
@@ -116,13 +116,13 @@ namespace jsk_pcl_ros
       ros_coefficients.values = coefficients->values;
       ros_coefficients.header = cloud_msg->header;
       pub_coefficients_.publish(ros_coefficients);
-      Torus torus_msg;
+      jsk_recognition_msgs::Torus torus_msg;
       torus_msg.header = cloud_msg->header;
       tf::poseEigenToMsg(pose, torus_msg.pose);
       torus_msg.small_radius = 0.01;
       torus_msg.large_radius = coefficients->values[3];
       pub_torus_.publish(torus_msg);
-      TorusArray torus_array_msg;
+      jsk_recognition_msgs::TorusArray torus_array_msg;
       torus_array_msg.header = cloud_msg->header;
       torus_array_msg.toruses.push_back(torus_msg);
       pub_torus_array_.publish(torus_array_msg);

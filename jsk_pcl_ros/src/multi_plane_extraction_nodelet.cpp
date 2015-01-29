@@ -127,17 +127,17 @@ namespace jsk_pcl_ros
   }
 
   void MultiPlaneExtraction::extract(const sensor_msgs::PointCloud2::ConstPtr& input,
-                                     const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients,
-                                     const jsk_pcl_ros::PolygonArray::ConstPtr& polygons)
+                                     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
+                                     const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons)
   {
-    extract(input, jsk_pcl_ros::ClusterPointIndices::ConstPtr(),
+    extract(input, jsk_recognition_msgs::ClusterPointIndices::ConstPtr(),
             coefficients, polygons);
   }
   
   void MultiPlaneExtraction::extract(const sensor_msgs::PointCloud2::ConstPtr& input,
-                                     const jsk_pcl_ros::ClusterPointIndices::ConstPtr& indices,
-                                     const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients,
-                                     const jsk_pcl_ros::PolygonArray::ConstPtr& polygons)
+                                     const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices,
+                                     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
+                                     const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons)
   {
     boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();

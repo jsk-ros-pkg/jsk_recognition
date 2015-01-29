@@ -42,8 +42,8 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 
-#include <jsk_pcl_ros/ClusterPointIndices.h>
-#include <jsk_pcl_ros/ModelCoefficientsArray.h>
+#include <jsk_recognition_msgs/ClusterPointIndices.h>
+#include <jsk_recognition_msgs/ModelCoefficientsArray.h>
 #include <jsk_pcl_ros/LineSegmentDetectorConfig.h>
 #include <dynamic_reconfigure/server.h>
 #include <visualization_msgs/Marker.h>
@@ -90,7 +90,7 @@ namespace jsk_pcl_ros
     }
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
-      ClusterPointIndices> SyncPolicy;
+      jsk_recognition_msgs::ClusterPointIndices> SyncPolicy;
     typedef pcl::PointXYZ PointT;
     typedef jsk_pcl_ros::LineSegmentDetectorConfig Config;
   protected:
@@ -103,7 +103,7 @@ namespace jsk_pcl_ros
       diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void onInit();
     virtual void segment(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
-                         const ClusterPointIndices::ConstPtr& cluster_msg);
+                         const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& cluster_msg);
     virtual void configCallback(Config &config, uint32_t level);
     virtual void segmentLines(
       const pcl::PointCloud<PointT>::Ptr& cloud,
@@ -122,7 +122,7 @@ namespace jsk_pcl_ros
     ros::Publisher pub_coefficients_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<jsk_pcl_ros::ClusterPointIndices> sub_indices_;
+    message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_indices_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
 

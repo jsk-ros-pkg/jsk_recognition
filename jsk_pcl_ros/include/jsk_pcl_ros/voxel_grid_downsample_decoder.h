@@ -41,7 +41,7 @@
 #include <ros/names.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <visualization_msgs/Marker.h>
-#include "jsk_pcl_ros/SlicedPointCloud.h"
+#include "jsk_recognition_msgs/SlicedPointCloud.h"
 // pcl
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl/point_types.h>
@@ -56,17 +56,17 @@ namespace jsk_pcl_ros
   protected:
     tf::TransformListener tf_listener;
     // utility
-    int getPointcloudID(const jsk_pcl_ros::SlicedPointCloudConstPtr &input);
-    int getPointcloudSequenceID(const jsk_pcl_ros::SlicedPointCloudConstPtr &input);
-    std::string getPointcloudFrameId(const jsk_pcl_ros::SlicedPointCloudConstPtr &input);
+    int getPointcloudID(const jsk_recognition_msgs::SlicedPointCloudConstPtr &input);
+    int getPointcloudSequenceID(const jsk_recognition_msgs::SlicedPointCloudConstPtr &input);
+    std::string getPointcloudFrameId(const jsk_recognition_msgs::SlicedPointCloudConstPtr &input);
     virtual void subscribe();
     virtual void unsubscribe();
   private:
     int latest_sequence_id_;
     int previous_id_;
     void publishBuffer();
-    std::vector<jsk_pcl_ros::SlicedPointCloudConstPtr> pc_buffer_;
-    void pointCB(const jsk_pcl_ros::SlicedPointCloudConstPtr &input);
+    std::vector<jsk_recognition_msgs::SlicedPointCloudConstPtr> pc_buffer_;
+    void pointCB(const jsk_recognition_msgs::SlicedPointCloudConstPtr &input);
     ros::Subscriber sub_;
     ros::Publisher pub_;
     virtual void onInit();

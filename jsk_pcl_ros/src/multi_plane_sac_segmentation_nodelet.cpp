@@ -65,10 +65,10 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // publishers
     ////////////////////////////////////////////////////////
-    pub_inliers_ = advertise<ClusterPointIndices>(*pnh_, "output_indices", 1);
+    pub_inliers_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output_indices", 1);
     pub_coefficients_
-      = advertise<ModelCoefficientsArray>(*pnh_, "output_coefficients", 1);
-    pub_polygons_ = advertise<PolygonArray>(*pnh_, "output_polygons", 1);
+      = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(*pnh_, "output_coefficients", 1);
+    pub_polygons_ = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "output_polygons", 1);
   }
 
   void MultiPlaneSACSegmentation::subscribe()
@@ -260,7 +260,7 @@ namespace jsk_pcl_ros
 
   void MultiPlaneSACSegmentation::segmentWithClusters(
     const sensor_msgs::PointCloud2::ConstPtr& msg,
-    const ClusterPointIndices::ConstPtr& clusters)
+    const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& clusters)
   {
     boost::mutex::scoped_lock lock(mutex_);
     pcl::PointCloud<PointT>::Ptr input (new pcl::PointCloud<PointT>);
@@ -298,9 +298,9 @@ namespace jsk_pcl_ros
     const std::vector<pcl::ModelCoefficients::Ptr>& coefficients,
     const std::vector<ConvexPolygon::Ptr>& convexes)
   {
-    jsk_pcl_ros::ClusterPointIndices ros_indices_output;
-    jsk_pcl_ros::ModelCoefficientsArray ros_coefficients_output;
-    jsk_pcl_ros::PolygonArray ros_polygon_output;
+    jsk_recognition_msgs::ClusterPointIndices ros_indices_output;
+    jsk_recognition_msgs::ModelCoefficientsArray ros_coefficients_output;
+    jsk_recognition_msgs::PolygonArray ros_polygon_output;
     ros_indices_output.header = header;
     ros_coefficients_output.header = header;
     ros_polygon_output.header = header;

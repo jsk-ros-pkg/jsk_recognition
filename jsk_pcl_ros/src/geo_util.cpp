@@ -927,7 +927,7 @@ namespace jsk_pcl_ros
     project(p, foot_point);
     double convex_distance = (p - foot_point).norm();
     output_distance = convex_distance;
-    return convex_distance > distance_threshold;
+    return convex_distance < distance_threshold;
   }
 
   bool ConvexPolygon::allEdgesLongerThan(double thr)
@@ -1046,9 +1046,9 @@ namespace jsk_pcl_ros
 
   }
 
-  BoundingBox Cube::toROSMsg()
+  jsk_recognition_msgs::BoundingBox Cube::toROSMsg()
   {
-    BoundingBox ret;
+    jsk_recognition_msgs::BoundingBox ret;
     ret.pose.position.x = pos_[0];
     ret.pose.position.y = pos_[1];
     ret.pose.position.z = pos_[2];

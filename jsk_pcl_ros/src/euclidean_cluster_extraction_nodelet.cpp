@@ -82,7 +82,7 @@ namespace jsk_pcl_ros
     }
     
     // Publish result indices
-    jsk_pcl_ros::ClusterPointIndices result;
+    jsk_recognition_msgs::ClusterPointIndices result;
     result.cluster_indices.resize(cluster_indices.size());
     cluster_counter_.add(cluster_indices.size());
     result.header = input->header;
@@ -119,7 +119,7 @@ namespace jsk_pcl_ros
 
     result_pub_.publish(result);
     
-    jsk_pcl_ros::Int32Stamped::Ptr cluster_num_msg (new jsk_pcl_ros::Int32Stamped);
+    jsk_recognition_msgs::Int32Stamped::Ptr cluster_num_msg (new jsk_recognition_msgs::Int32Stamped);
     cluster_num_msg->header = input->header;
     cluster_num_msg->data = cluster_indices.size();
     cluster_num_pub_.publish(cluster_num_msg);
@@ -215,8 +215,8 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // Publisher
     ////////////////////////////////////////////////////////
-    result_pub_ = advertise<jsk_pcl_ros::ClusterPointIndices> (*pnh_, "output", 1);
-    cluster_num_pub_ = advertise<jsk_pcl_ros::Int32Stamped> (*pnh_, "cluster_num", 1);
+    result_pub_ = advertise<jsk_recognition_msgs::ClusterPointIndices> (*pnh_, "output", 1);
+    cluster_num_pub_ = advertise<jsk_recognition_msgs::Int32Stamped> (*pnh_, "cluster_num", 1);
     service_ = pnh_->advertiseService(pnh_->resolveName("euclidean_clustering"),
                                       &EuclideanClustering::serviceCallback, this);
   }

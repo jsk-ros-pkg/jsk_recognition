@@ -58,7 +58,7 @@ namespace jsk_pcl_ros
       "output/direction", 1);
     pub_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>(
       "output/cloud", 1);
-    pub_roi_ = pnh_->advertise<jsk_pcl_ros::PosedCameraInfo>(
+    pub_roi_ = pnh_->advertise<jsk_recognition_msgs::PosedCameraInfo>(
       "output/roi", 1);
     pub_marker_ = pnh_->advertise<visualization_msgs::Marker>(
       "output/marker", 1);
@@ -154,7 +154,7 @@ namespace jsk_pcl_ros
       pub_pose_.publish(ros_pose);
 
       // publish ROI
-      jsk_pcl_ros::PosedCameraInfo camera_info;
+      jsk_recognition_msgs::PosedCameraInfo camera_info;
       camera_info.header.stamp = latest_image_msg_->header.stamp;
       camera_info.header.frame_id = fixed_frame_id_;
       camera_info.camera_info

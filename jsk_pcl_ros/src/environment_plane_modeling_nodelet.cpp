@@ -40,7 +40,7 @@
 #include <pcl/filters/project_inliers.h>
 #include <pcl/surface/convex_hull.h>
 #include <pcl/filters/project_inliers.h>
-#include <jsk_pcl_ros/SparseOccupancyGridArray.h>
+#include <jsk_recognition_msgs/SparseOccupancyGridArray.h>
 
 #include <pluginlib/class_list_macros.h>
 
@@ -80,23 +80,23 @@ namespace jsk_pcl_ros
     debug_env_pointcloud_pub_
       = pnh_->advertise<sensor_msgs::PointCloud2>("debug/pointcloud", 1);
     debug_grid_map_completion_pub_
-      = pnh_->advertise<SparseOccupancyGridArray>("debug/completion/grid_map", 1);
+      = pnh_->advertise<jsk_recognition_msgs::SparseOccupancyGridArray>("debug/completion/grid_map", 1);
     occlusion_result_polygons_pub_
-      = pnh_->advertise<PolygonArray>(
+      = pnh_->advertise<jsk_recognition_msgs::PolygonArray>(
         "occlusion_result_polygons", 1);
     occlusion_result_coefficients_pub_
-      = pnh_->advertise<ModelCoefficientsArray>(
+      = pnh_->advertise<jsk_recognition_msgs::ModelCoefficientsArray>(
         "occlusion_result_coefficients", 1);
     occlusion_result_pointcloud_pub_
       = pnh_->advertise<sensor_msgs::PointCloud2>("occlusion_result_cloud", 1);
     occlusion_result_indices_pub_
-      = pnh_->advertise<ClusterPointIndices>("occlusion_result_indices", 1);
-    grid_map_array_pub_ = pnh_->advertise<SparseOccupancyGridArray>(
+      = pnh_->advertise<jsk_recognition_msgs::ClusterPointIndices>("occlusion_result_indices", 1);
+    grid_map_array_pub_ = pnh_->advertise<jsk_recognition_msgs::SparseOccupancyGridArray>(
       "output_grid_map", 1);
-    old_map_pub_ = pnh_->advertise<SparseOccupancyGridArray>("old/grid_map", 1);
+    old_map_pub_ = pnh_->advertise<jsk_recognition_msgs::SparseOccupancyGridArray>("old/grid_map", 1);
     old_map_polygon_pub_ 
-      = pnh_->advertise<PolygonArray>("old/polygons", 1);
-    old_map_polygon_coefficients_pub_ = pnh_->advertise<ModelCoefficientsArray>(
+      = pnh_->advertise<jsk_recognition_msgs::PolygonArray>("old/polygons", 1);
+    old_map_polygon_coefficients_pub_ = pnh_->advertise<jsk_recognition_msgs::ModelCoefficientsArray>(
       "old/coefficients", 1);
     
     pnh_->param("use_static_polygons_", use_static_polygons_, false);
@@ -198,8 +198,8 @@ namespace jsk_pcl_ros
   
 
   void EnvironmentPlaneModeling::staticPolygonCallback(
-    const PolygonArray::ConstPtr& polygons,
-    const ModelCoefficientsArray::ConstPtr& coefficients)
+    const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
+    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients)
   {
     boost::mutex::scoped_lock lock(mutex_);
     completion_static_polygons_ = polygons;
@@ -279,11 +279,11 @@ namespace jsk_pcl_ros
   
   void EnvironmentPlaneModeling::inputCallback(
     const sensor_msgs::PointCloud2::ConstPtr& input,
-    const ClusterPointIndices::ConstPtr& input_indices,
-    const PolygonArray::ConstPtr& polygons,
-    const ModelCoefficientsArray::ConstPtr& coefficients,
-    const PolygonArray::ConstPtr& static_polygons,
-    const ModelCoefficientsArray::ConstPtr& static_coefficients)
+    const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices,
+    const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
+    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
+    const jsk_recognition_msgs::PolygonArray::ConstPtr& static_polygons,
+    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& static_coefficients)
   {
     NODELET_DEBUG_STREAM(getName() << "::inputCallback");
     boost::mutex::scoped_lock lock(mutex_);
@@ -302,9 +302,9 @@ namespace jsk_pcl_ros
 
   void EnvironmentPlaneModeling::inputCallback(
     const sensor_msgs::PointCloud2::ConstPtr& input,
-    const ClusterPointIndices::ConstPtr& input_indices,
-    const PolygonArray::ConstPtr& polygons,
-    const ModelCoefficientsArray::ConstPtr& coefficients)
+    const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices,
+    const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
+    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients)
   {
     NODELET_DEBUG_STREAM(getName() << "::inputCallback");
     boost::mutex::scoped_lock lock(mutex_);
@@ -316,8 +316,8 @@ namespace jsk_pcl_ros
     latest_input_indices_ = input_indices;
     latest_input_polygons_ = polygons;
     latest_input_coefficients_ = coefficients;
-    latest_static_polygons_ = PolygonArray::ConstPtr();
-    latest_static_coefficients_ = ModelCoefficientsArray::ConstPtr();
+    latest_static_polygons_ = jsk_recognition_msgs::PolygonArray::ConstPtr();
+    latest_static_coefficients_ = jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr();
     lockCallback();
   }
   
@@ -403,8 +403,8 @@ namespace jsk_pcl_ros
   }
 
   void EnvironmentPlaneModeling::copyClusterPointIndices(
-    const jsk_pcl_ros::ClusterPointIndices::ConstPtr& indices,
-    jsk_pcl_ros::ClusterPointIndices& output)
+    const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices,
+    jsk_recognition_msgs::ClusterPointIndices& output)
   {
     output.header = indices->header;
     for (size_t i = 0; i < indices->cluster_indices.size(); i++) {
@@ -449,8 +449,8 @@ namespace jsk_pcl_ros
     const std_msgs::Header& header,
     const std::vector<GridMap::Ptr> grid_maps)
   {
-    PolygonArray ros_polygons;
-    ModelCoefficientsArray ros_coefficients;
+    jsk_recognition_msgs::PolygonArray ros_polygons;
+    jsk_recognition_msgs::ModelCoefficientsArray ros_coefficients;
     ros_polygons.header = header;
     ros_coefficients.header = header;
     for (size_t i = 0; i < grid_maps.size(); i++) {
@@ -474,11 +474,11 @@ namespace jsk_pcl_ros
     const std_msgs::Header& header,
     const std::vector<GridMap::Ptr> grid_maps)
   {
-    SparseOccupancyGridArray grid_array_msg;
+    jsk_recognition_msgs::SparseOccupancyGridArray grid_array_msg;
     grid_array_msg.header = header;
     for (size_t i = 0; i < grid_maps.size(); i++) {
       GridMap::Ptr grid_map = grid_maps[i];
-      SparseOccupancyGrid ros_grid_map;
+      jsk_recognition_msgs::SparseOccupancyGrid ros_grid_map;
       ros_grid_map.header = header;
       grid_map->toMsg(ros_grid_map);
       grid_array_msg.grids.push_back(ros_grid_map);
@@ -489,15 +489,15 @@ namespace jsk_pcl_ros
   void EnvironmentPlaneModeling::fillEstimatedRegionByPointCloud
   (const std_msgs::Header& header,
    const pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
-   const ClusterPointIndices::ConstPtr& indices,
-   const PolygonArray::ConstPtr& polygons,
-   const ModelCoefficientsArray::ConstPtr& coefficients,
-   const PolygonArray::ConstPtr& static_polygons,
-   const ModelCoefficientsArray::ConstPtr& static_coefficients,
-   const PolygonArray& result_polygons,
+   const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices,
+   const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
+   const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
+   const jsk_recognition_msgs::PolygonArray::ConstPtr& static_polygons,
+   const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& static_coefficients,
+   const jsk_recognition_msgs::PolygonArray& result_polygons,
    const std::map<int, std::set<size_t> >& estimation_summary,
    pcl::PointCloud<PointT>::Ptr all_cloud,
-   ClusterPointIndices& all_indices,
+   jsk_recognition_msgs::ClusterPointIndices& all_indices,
    std::vector<GridMap::Ptr> grid_maps)
   {
     NODELET_DEBUG("%lu convexhull will be fulfilled", estimation_summary.size());
@@ -629,8 +629,8 @@ namespace jsk_pcl_ros
   // build the grid map for each planes
   void EnvironmentPlaneModeling::buildGridMap(
     const std::vector<pcl::PointCloud<PointT>::Ptr>& segmented_clouds,
-    const PolygonArray::ConstPtr& polygons,
-    const ModelCoefficientsArray::ConstPtr& coefficients,
+    const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
+    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
     std::vector<GridMap::Ptr>& ordered_grid_maps)
   {
     NODELET_DEBUG("buildGridMap:: %lu polygons", polygons->polygons.size());
@@ -731,12 +731,12 @@ namespace jsk_pcl_ros
   
   void EnvironmentPlaneModeling::completeGridMap(
     const pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
-    const ClusterPointIndices::ConstPtr& input_indices,
+    const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices,
     const std::vector<pcl::PointCloud<PointT>::Ptr>& segmented_cloud,
-    const PolygonArray::ConstPtr& polygons,
-    const ModelCoefficientsArray::ConstPtr& coefficients,
-    const PolygonArray::ConstPtr& static_polygons,
-    const ModelCoefficientsArray::ConstPtr& static_coefficients,
+    const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
+    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
+    const jsk_recognition_msgs::PolygonArray::ConstPtr& static_polygons,
+    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& static_coefficients,
     std::vector<GridMap::Ptr>& output_grid_maps)
   {
     // deep-copy grid_maps
@@ -787,17 +787,17 @@ namespace jsk_pcl_ros
   // return plane information with occlusion estimation
   void EnvironmentPlaneModeling::estimateOcclusion(
     const pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
-    const ClusterPointIndices::ConstPtr& input_indices,
+    const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices,
     const std::vector<pcl::PointCloud<PointT>::Ptr>& segmented_cloud,
     std::vector<GridMap::Ptr>& grid_maps,
-    const PolygonArray::ConstPtr& polygons,
-    const ModelCoefficientsArray::ConstPtr& coefficients,
-    const PolygonArray::ConstPtr& static_polygons,
-    const ModelCoefficientsArray::ConstPtr& static_coefficients,
-    PolygonArray::Ptr result_polygons,
-    ModelCoefficientsArray::Ptr result_coefficients,
+    const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
+    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
+    const jsk_recognition_msgs::PolygonArray::ConstPtr& static_polygons,
+    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& static_coefficients,
+    jsk_recognition_msgs::PolygonArray::Ptr result_polygons,
+    jsk_recognition_msgs::ModelCoefficientsArray::Ptr result_coefficients,
     pcl::PointCloud<PointT>::Ptr result_pointcloud,
-    ClusterPointIndices::Ptr result_indices)
+    jsk_recognition_msgs::ClusterPointIndices::Ptr result_indices)
   {
     jsk_topic_tools::ScopedTimer timer = occlusion_estimate_time_acc_.scopedTimer();
     *result_polygons = *polygons;
@@ -857,7 +857,7 @@ namespace jsk_pcl_ros
 
   void EnvironmentPlaneModeling::decomposePointCloud(
     const pcl::PointCloud<PointT>::Ptr& input,
-    const ClusterPointIndices::ConstPtr& input_indices,
+    const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices,
     std::vector<pcl::PointCloud<PointT>::Ptr>& output)
   {
     pcl::ExtractIndices<PointT> extract;
@@ -1037,10 +1037,10 @@ namespace jsk_pcl_ros
                  processing_input_coefficients_,
                  ordered_grid_maps);
     
-    PolygonArray::Ptr result_polygons (new PolygonArray);
-    ModelCoefficientsArray::Ptr result_coefficients(new ModelCoefficientsArray);
+    jsk_recognition_msgs::PolygonArray::Ptr result_polygons (new jsk_recognition_msgs::PolygonArray);
+    jsk_recognition_msgs::ModelCoefficientsArray::Ptr result_coefficients(new jsk_recognition_msgs::ModelCoefficientsArray);
     pcl::PointCloud<PointT>::Ptr result_pointcloud (new pcl::PointCloud<PointT>);
-    ClusterPointIndices::Ptr result_indices(new ClusterPointIndices);
+    jsk_recognition_msgs::ClusterPointIndices::Ptr result_indices(new jsk_recognition_msgs::ClusterPointIndices);
     *result_polygons = *processing_input_polygons_;
     *result_coefficients = *processing_input_coefficients_;
 
@@ -1213,8 +1213,8 @@ namespace jsk_pcl_ros
   }
   
   int EnvironmentPlaneModeling::findNearestPolygon(
-    const PolygonArray::ConstPtr& polygons,
-    const ModelCoefficientsArray::ConstPtr& coefficients,
+    const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
+    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
     const geometry_msgs::PolygonStamped& static_polygon,
     const PCLModelCoefficientMsg& static_coefficient)
   {

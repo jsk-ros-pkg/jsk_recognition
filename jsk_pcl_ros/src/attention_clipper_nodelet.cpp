@@ -166,7 +166,7 @@ namespace jsk_pcl_ros
     }
     pub_camera_info_ = advertise<sensor_msgs::CameraInfo>(*pnh_, "output", 1);
     pub_bounding_box_array_
-      = advertise<jsk_pcl_ros::BoundingBoxArray>(*pnh_, "output/box_array", 1);
+      = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "output/box_array", 1);
     pub_mask_ = advertise<sensor_msgs::Image>(*pnh_, "output/mask", 1);
     pub_indices_ = advertise<PCLIndicesMsg>(*pnh_, "output/point_indices", 1);
   }
@@ -238,7 +238,7 @@ namespace jsk_pcl_ros
   }
 
   void AttentionClipper::boxCallback(
-    const jsk_pcl_ros::BoundingBox::ConstPtr& box)
+    const jsk_recognition_msgs::BoundingBox::ConstPtr& box)
   {
     boost::mutex::scoped_lock lock(mutex_);
     dimensions_[0][0] = box->dimensions.x;
@@ -264,7 +264,7 @@ namespace jsk_pcl_ros
   }
 
   void AttentionClipper::boxArrayCallback(
-    const jsk_pcl_ros::BoundingBoxArray::ConstPtr& box_array)
+    const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& box_array)
   {
     boost::mutex::scoped_lock lock(mutex_);
     initializePoseList(box_array->boxes.size());
@@ -282,11 +282,11 @@ namespace jsk_pcl_ros
   void AttentionClipper::publishBoundingBox(
     const std_msgs::Header& header)
   {
-    jsk_pcl_ros::BoundingBoxArray box_array;
+    jsk_recognition_msgs::BoundingBoxArray box_array;
     box_array.header.frame_id = header.frame_id;
     box_array.header.stamp = header.stamp;
     for (size_t i = 0; i < pose_list_.size(); i++) {
-      jsk_pcl_ros::BoundingBox box;
+      jsk_recognition_msgs::BoundingBox box;
       box.header.stamp = header.stamp;
       box.header.frame_id = frame_id_list_[i];
       tf::poseEigenToMsg(pose_list_[i], box.pose);

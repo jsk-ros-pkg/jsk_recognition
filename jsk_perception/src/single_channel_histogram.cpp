@@ -49,7 +49,7 @@ namespace jsk_perception
         &SingleChannelHistogram::configCallback, this, _1, _2);
     srv_->setCallback (f);
     
-    pub_ = advertise<jsk_pcl_ros::ColorHistogram>(
+    pub_ = advertise<jsk_recognition_msgs::ColorHistogram>(
       *pnh_, "output", 1);
   }
 
@@ -98,7 +98,7 @@ namespace jsk_perception
     
     cv::calcHist(&image, 1, 0, mask, hist, 1, &hist_size_,
                  &histRange, uniform, accumulate);
-    jsk_pcl_ros::ColorHistogram histogram;
+    jsk_recognition_msgs::ColorHistogram histogram;
     histogram.header = msg->header;
     for (int i = 0; i < hist_size_; i++) {
       histogram.histogram.push_back(hist.at<float>(0, i));

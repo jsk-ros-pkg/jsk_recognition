@@ -39,7 +39,7 @@
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/JointState.h>
-#include <jsk_pcl_ros/TimeRange.h>
+#include <jsk_recognition_msgs/TimeRange.h>
 #include "jsk_pcl_ros/line_segment_collector.h"
 #include <std_srvs/Empty.h>
 

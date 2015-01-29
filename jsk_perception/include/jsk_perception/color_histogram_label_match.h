@@ -39,7 +39,7 @@
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/Image.h>
-#include <jsk_pcl_ros/ColorHistogram.h>
+#include <jsk_recognition_msgs/ColorHistogram.h>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
@@ -73,7 +73,7 @@ namespace jsk_perception
       const sensor_msgs::Image::ConstPtr& label_msg,
       const sensor_msgs::Image::ConstPtr& mask_msg);
     virtual void histogramCallback(
-      const jsk_pcl_ros::ColorHistogram::ConstPtr& histogram_msg);
+      const jsk_recognition_msgs::ColorHistogram::ConstPtr& histogram_msg);
     virtual bool isMasked(const cv::Mat& original_image,
                           const cv::Mat& masked_image);
     virtual void getLabels(const cv::Mat& label, std::vector<int>& labels);

@@ -55,17 +55,17 @@ namespace jsk_perception
     pnh_->param("use_mask", use_mask_, false);
     b_hist_size_ = r_hist_size_ = g_hist_size_ =
       h_hist_size_ = s_hist_size_ = i_hist_size_ = 512;
-    b_hist_pub_ = advertise<jsk_pcl_ros::ColorHistogram>(
+    b_hist_pub_ = advertise<jsk_recognition_msgs::ColorHistogram>(
       *pnh_, "blue_histogram", 1);
-    g_hist_pub_ = advertise<jsk_pcl_ros::ColorHistogram>(
+    g_hist_pub_ = advertise<jsk_recognition_msgs::ColorHistogram>(
       *pnh_, "green_histogram", 1);
-    r_hist_pub_ = advertise<jsk_pcl_ros::ColorHistogram>(
+    r_hist_pub_ = advertise<jsk_recognition_msgs::ColorHistogram>(
       *pnh_, "red_histogram", 1);
-    h_hist_pub_ = advertise<jsk_pcl_ros::ColorHistogram>(
+    h_hist_pub_ = advertise<jsk_recognition_msgs::ColorHistogram>(
       *pnh_, "hue_histogram", 1);
-    s_hist_pub_ = advertise<jsk_pcl_ros::ColorHistogram>(
+    s_hist_pub_ = advertise<jsk_recognition_msgs::ColorHistogram>(
       *pnh_, "saturation_histogram", 1);
-    i_hist_pub_ = advertise<jsk_pcl_ros::ColorHistogram>(
+    i_hist_pub_ = advertise<jsk_recognition_msgs::ColorHistogram>(
       *pnh_, "intensity_histogram", 1);
     image_pub_ = advertise<sensor_msgs::Image>(
       *pnh_, "input_image", 1);
@@ -129,7 +129,7 @@ namespace jsk_perception
 
   void ColorHistogram::convertHistogramToMsg(const cv::Mat& hist,
                                              int size,
-                                             jsk_pcl_ros::ColorHistogram& msg)
+                                             jsk_recognition_msgs::ColorHistogram& msg)
   {
     msg.histogram.clear();
     for (int i = 0; i < size; i++) {
@@ -156,17 +156,17 @@ namespace jsk_perception
     cv::calcHist(&bgr_planes[2], 1, 0, mask, r_hist, 1, &r_hist_size_,
                  &histRange, uniform, accumulate);
       
-    jsk_pcl_ros::ColorHistogram b_histogram;
+    jsk_recognition_msgs::ColorHistogram b_histogram;
     b_histogram.header = header;
     convertHistogramToMsg(b_hist, b_hist_size_, b_histogram);
     b_hist_pub_.publish(b_histogram);
       
-    jsk_pcl_ros::ColorHistogram g_histogram;
+    jsk_recognition_msgs::ColorHistogram g_histogram;
     g_histogram.header = header;
     convertHistogramToMsg(g_hist, g_hist_size_, g_histogram);
     g_hist_pub_.publish(g_histogram);
       
-    jsk_pcl_ros::ColorHistogram r_histogram;
+    jsk_recognition_msgs::ColorHistogram r_histogram;
     r_histogram.header = header;
     convertHistogramToMsg(r_hist, r_hist_size_, r_histogram);
     r_hist_pub_.publish(r_histogram);
@@ -207,17 +207,17 @@ namespace jsk_perception
     cv::calcHist(&hsi_planes[2], 1, 0, mask, i_hist, 1, &i_hist_size_,
                  &histRange, uniform, accumulate);
       
-    jsk_pcl_ros::ColorHistogram h_histogram;
+    jsk_recognition_msgs::ColorHistogram h_histogram;
     h_histogram.header = header;
     convertHistogramToMsg(h_hist, h_hist_size_, h_histogram);
     h_hist_pub_.publish(h_histogram);
       
-    jsk_pcl_ros::ColorHistogram s_histogram;
+    jsk_recognition_msgs::ColorHistogram s_histogram;
     s_histogram.header = header;
     convertHistogramToMsg(s_hist, s_hist_size_, s_histogram);
     s_hist_pub_.publish(s_histogram);
       
-    jsk_pcl_ros::ColorHistogram i_histogram;
+    jsk_recognition_msgs::ColorHistogram i_histogram;
     i_histogram.header = header;
     convertHistogramToMsg(i_hist, i_hist_size_, i_histogram);
     i_hist_pub_.publish(i_histogram);

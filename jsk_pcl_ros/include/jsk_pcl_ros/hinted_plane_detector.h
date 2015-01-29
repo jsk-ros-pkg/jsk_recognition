@@ -47,7 +47,7 @@
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include "jsk_pcl_ros/geo_util.h"
 #include <geometry_msgs/PolygonStamped.h>
-#include <jsk_pcl_ros/PolygonArray.h>
+#include <jsk_recognition_msgs/PolygonArray.h>
 #include <dynamic_reconfigure/server.h>
 #include <jsk_pcl_ros/HintedPlaneDetectorConfig.h>
 

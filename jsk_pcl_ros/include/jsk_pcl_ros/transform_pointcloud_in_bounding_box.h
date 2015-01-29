@@ -38,7 +38,7 @@
 #define JSK_PCL_ROS_TRANSFORM_POINTCLOUD_IN_BOUNDING_BOX_H_
 
 #include <pcl_ros/pcl_nodelet.h>
-#include <jsk_pcl_ros/BoundingBox.h>
+#include <jsk_recognition_msgs/BoundingBox.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
@@ -51,7 +51,7 @@ namespace jsk_pcl_ros
 {
   template <class PointT>
   void transformPointcloudInBoundingBox(
-    const BoundingBox& box_msg,
+    const jsk_recognition_msgs::BoundingBox& box_msg,
     const sensor_msgs::PointCloud2& cloud_msg,
     pcl::PointCloud<PointT>& output,
     Eigen::Affine3f& offset,
@@ -89,20 +89,20 @@ namespace jsk_pcl_ros
     typedef pcl::PointXYZRGB PointT;
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
-      BoundingBox > SyncPolicy;
+      jsk_recognition_msgs::BoundingBox > SyncPolicy;
   protected:
     ////////////////////////////////////////////////////////
     // methods
     ////////////////////////////////////////////////////////
     virtual void onInit();
     virtual void transform(const sensor_msgs::PointCloud2::ConstPtr& msg,
-                           const BoundingBox::ConstPtr& box_msg);
+                           const jsk_recognition_msgs::BoundingBox::ConstPtr& box_msg);
     
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<BoundingBox> sub_box_;
+    message_filters::Subscriber<jsk_recognition_msgs::BoundingBox> sub_box_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     ros::Publisher pub_cloud_;
     ros::Publisher pub_offset_pose_;

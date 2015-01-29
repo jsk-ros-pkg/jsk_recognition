@@ -1,4 +1,8 @@
 <library path="libjsk_pcl_ros">
+  <class name="jsk_pcl_ros/FindObjectOnPlane"
+         type="jsk_pcl_ros::FindObjectOnPlane"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_pcl/AddPointIndices"
          type="jsk_pcl_ros::AddPointIndices"
          base_class_type="nodelet::Nodelet">

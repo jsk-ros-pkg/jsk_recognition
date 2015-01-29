@@ -7,7 +7,7 @@
 #include <image_transport/image_transport.h>
 #include <pluginlib/class_list_macros.h>
 #include <sensor_msgs/image_encodings.h>
-#include <jsk_perception/SparseImage.h>
+#include <jsk_recognition_msgs/SparseImage.h>
 
 
 namespace enc = sensor_msgs::image_encodings;
@@ -18,7 +18,7 @@ class SparseImageEncoder: public nodelet::Nodelet
   ros::Publisher _spr_img_pub;
   image_transport::Subscriber _img_sub;
 
-  jsk_perception::SparseImagePtr _spr_img_ptr;
+  jsk_recognition_msgs::SparseImagePtr _spr_img_ptr;
 
   boost::shared_ptr<image_transport::ImageTransport> _it;
   ros::NodeHandle _nh;
@@ -100,8 +100,8 @@ public:
     _subscriber_count = 0;
     ros::SubscriberStatusCallback connect_cb    = boost::bind(&SparseImageEncoder::connectCb, this, _1);
     ros::SubscriberStatusCallback disconnect_cb = boost::bind(&SparseImageEncoder::disconnectCb, this, _1);
-    _spr_img_pub = _nh.advertise<jsk_perception::SparseImage>("sparse_image", 10, connect_cb, disconnect_cb);
-    _spr_img_ptr = boost::make_shared<jsk_perception::SparseImage>();
+    _spr_img_pub = _nh.advertise<jsk_recognition_msgs::SparseImage>("sparse_image", 10, connect_cb, disconnect_cb);
+    _spr_img_ptr = boost::make_shared<jsk_recognition_msgs::SparseImage>();
     _ln.param("rate", _rate, 3.0);
   } // end of onInit function
 }; // end of SparseImageEncoder class definition

@@ -39,8 +39,8 @@
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/PointCloud2.h>
-#include <jsk_pcl_ros/TorusArray.h>
-#include <jsk_pcl_ros/Torus.h>
+#include <jsk_recognition_msgs/TorusArray.h>
+#include <jsk_recognition_msgs/Torus.h>
 #include <jsk_pcl_ros/TorusFinderConfig.h>
 #include <dynamic_reconfigure/server.h>
 namespace jsk_pcl_ros

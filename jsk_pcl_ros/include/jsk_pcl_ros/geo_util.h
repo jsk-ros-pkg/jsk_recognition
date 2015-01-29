@@ -46,7 +46,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
 #include <geometry_msgs/Polygon.h>
-#include <jsk_pcl_ros/BoundingBox.h>
+#include <jsk_recognition_msgs/BoundingBox.h>
 #include <boost/tuple/tuple.hpp>
 
 ////////////////////////////////////////////////////////
@@ -305,7 +305,7 @@ namespace jsk_pcl_ros
       dimensions_[1] = new_dimensions[1];
       dimensions_[2] = new_dimensions[2];
     }
-    BoundingBox toROSMsg();
+    jsk_recognition_msgs::BoundingBox toROSMsg();
   protected:
     Eigen::Vector3f pos_;
     Eigen::Quaternionf rot_;
@@ -315,11 +315,11 @@ namespace jsk_pcl_ros
   };
 
   template <class PointT>
-  BoundingBox boundingBoxFromPointCloud(const pcl::PointCloud<PointT>& cloud)
+  jsk_recognition_msgs::BoundingBox boundingBoxFromPointCloud(const pcl::PointCloud<PointT>& cloud)
   {
     Eigen::Vector4f minpt, maxpt;
     pcl::getMinMax3D<PointT>(cloud, minpt, maxpt);
-    BoundingBox bbox;
+    jsk_recognition_msgs::BoundingBox bbox;
     bbox.dimensions.x = std::abs(minpt[0] - maxpt[0]);
     bbox.dimensions.y = std::abs(minpt[1] - maxpt[1]);
     bbox.dimensions.z = std::abs(minpt[2] - maxpt[2]);

@@ -4,7 +4,7 @@ project(jsk_perception)
 find_package(catkin REQUIRED COMPONENTS
   jsk_recognition_msgs
   mk message_generation std_msgs sensor_msgs geometry_msgs cv_bridge
-  image_geometry image_transport driver_base dynamic_reconfigure cmake_modules
+  image_geometry image_transport image_view2 driver_base dynamic_reconfigure cmake_modules
   roscpp nodelet rostest tf rospack
   jsk_topic_tools pcl_ros)
 find_package(OpenCV REQUIRED)

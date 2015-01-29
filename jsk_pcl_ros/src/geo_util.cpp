@@ -927,7 +927,7 @@ namespace jsk_pcl_ros
     project(p, foot_point);
     double convex_distance = (p - foot_point).norm();
     output_distance = convex_distance;
-    return convex_distance > distance_threshold;
+    return convex_distance < distance_threshold;
   }
 
   bool ConvexPolygon::allEdgesLongerThan(double thr)

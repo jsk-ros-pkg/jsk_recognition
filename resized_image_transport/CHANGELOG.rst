@@ -2,8 +2,8 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.34 (2015-01-29)
+-------------------
 * depending on cv_bridge is recommended, see http://wiki.ros.org/indigo/Migration#OpenCV
 * [jsk_pcl_ros, jsk_perception, resized_image_transport] Do not include
   jsk_topic_tools/nodelet.cmake because it is exported by CFG_EXTRAS

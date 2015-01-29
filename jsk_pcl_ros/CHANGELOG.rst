@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.34 (2015-01-29)
+-------------------
 * support both yaml 0.3.0(hydro) and yaml 0.5.0(indigo)
 * [jsk_pcl_ros] Fixed serious bug to detect points near from polygon
 * use this to call methods, I need this to compile on indigo, but not sure if this really works, please check if this is correct @YuOhara, @garaemon

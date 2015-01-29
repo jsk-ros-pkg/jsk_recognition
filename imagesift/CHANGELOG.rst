@@ -2,8 +2,8 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.34 (2015-01-29)
+-------------------
 * [imagesift] Refactor codes:
   * uniformed variable naming convention
   * uniformed function naming convention

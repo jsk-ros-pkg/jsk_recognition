@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.34 (2015-01-29)
+-------------------
 * [jsk_perception, checkerboard_detector] Remove dependency to jsk_pcl_ros
 * [jsk_pcl_ros, jsk_perception] Move find_object_on_plane from
   jsk_perception to jsk_pcl_ros to make these packages independent

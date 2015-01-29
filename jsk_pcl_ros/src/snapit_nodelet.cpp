@@ -95,8 +95,8 @@ namespace jsk_pcl_ros
   }
   
   void SnapIt::polygonCallback(
-    const PolygonArray::ConstPtr& polygon_msg,
-    const ModelCoefficientsArray::ConstPtr& coefficients_msg)
+    const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon_msg,
+    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();
@@ -226,7 +226,7 @@ namespace jsk_pcl_ros
   
   std::vector<ConvexPolygon::Ptr> SnapIt::createConvexes(
     const std::string& frame_id, const ros::Time& stamp,
-    PolygonArray::ConstPtr polygons)
+    jsk_recognition_msgs::PolygonArray::ConstPtr polygons)
   {
     std::vector<ConvexPolygon::Ptr> result;
     try

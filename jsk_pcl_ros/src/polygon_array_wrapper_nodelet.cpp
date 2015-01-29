@@ -40,10 +40,10 @@ namespace jsk_pcl_ros
   void PolygonArrayWrapper::onInit()
   {
     ConnectionBasedNodelet::onInit();
-    pub_polygon_array_ = advertise<jsk_pcl_ros::PolygonArray>(*pnh_,
+    pub_polygon_array_ = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_,
       "output_polygons", 1);
     pub_coefficients_array_
-      = advertise<jsk_pcl_ros::ModelCoefficientsArray>(*pnh_,
+      = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(*pnh_,
         "output_coefficients", 1);
   }
 
@@ -68,13 +68,13 @@ namespace jsk_pcl_ros
     const geometry_msgs::PolygonStamped::ConstPtr& polygon,
     const PCLModelCoefficientMsg::ConstPtr& coefficients)
   {
-    jsk_pcl_ros::PolygonArray array_msg;
+    jsk_recognition_msgs::PolygonArray array_msg;
     array_msg.header = polygon->header;
     geometry_msgs::PolygonStamped new_polygon(*polygon);
     array_msg.polygons.push_back(new_polygon);
     pub_polygon_array_.publish(array_msg);
 
-    jsk_pcl_ros::ModelCoefficientsArray coefficients_array;
+    jsk_recognition_msgs::ModelCoefficientsArray coefficients_array;
     coefficients_array.header = coefficients->header;
     PCLModelCoefficientMsg new_coefficients(*coefficients);
     coefficients_array.coefficients.push_back(new_coefficients);

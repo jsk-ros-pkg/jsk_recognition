@@ -43,7 +43,7 @@
 #include "jsk_pcl_ros/geo_util.h"
 #include "jsk_pcl_ros/tf_listener_singleton.h"
 #include <image_geometry/pinhole_camera_model.h>
-#include <jsk_pcl_ros/BoundingBoxArray.h>
+#include <jsk_recognition_msgs/BoundingBoxArray.h>
 #include <geometry_msgs/PoseArray.h>
 #include <sensor_msgs/Image.h>
 
@@ -62,9 +62,9 @@ namespace jsk_pcl_ros
     virtual void clip(const sensor_msgs::CameraInfo::ConstPtr& msg);
     virtual void clipPointcloud(const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void poseCallback(const geometry_msgs::PoseStamped::ConstPtr& pose);
-    virtual void boxCallback(const jsk_pcl_ros::BoundingBox::ConstPtr& box);
+    virtual void boxCallback(const jsk_recognition_msgs::BoundingBox::ConstPtr& box);
     virtual void poseArrayCallback(const geometry_msgs::PoseArray::ConstPtr& pose);
-    virtual void boxArrayCallback(const jsk_pcl_ros::BoundingBoxArray::ConstPtr& box);
+    virtual void boxArrayCallback(const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& box);
     virtual Vertices cubeVertices(Eigen::Vector3f& dimension);
     virtual void subscribe();
     virtual void unsubscribe();

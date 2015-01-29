@@ -39,7 +39,7 @@
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/Image.h>
-#include <jsk_pcl_ros/ColorHistogram.h>
+#include <jsk_recognition_msgs/ColorHistogram.h>
 
 #include <dynamic_reconfigure/server.h>
 #include <jsk_perception/SingleChannelHistogramConfig.h>

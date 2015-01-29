@@ -42,8 +42,8 @@
 
 #include <pcl_ros/pcl_nodelet.h>
 
-#include <jsk_pcl_ros/PolygonArray.h>
-#include <jsk_pcl_ros/ModelCoefficientsArray.h>
+#include <jsk_recognition_msgs/PolygonArray.h>
+#include <jsk_recognition_msgs/ModelCoefficientsArray.h>
 
 #include "jsk_pcl_ros/tf_listener_singleton.h"
 
@@ -60,12 +60,12 @@ namespace jsk_pcl_ros
   {
   public:
     typedef message_filters::sync_policies::ExactTime<
-    jsk_pcl_ros::PolygonArray,
-    jsk_pcl_ros::ModelCoefficientsArray > SyncPolicy;
+    jsk_recognition_msgs::PolygonArray,
+    jsk_recognition_msgs::ModelCoefficientsArray > SyncPolicy;
   protected:
     virtual void onInit();
-    virtual void transform(const jsk_pcl_ros::PolygonArray::ConstPtr& polygons,
-                           const jsk_pcl_ros::ModelCoefficientsArray::ConstPtr& coefficients);
+    virtual void transform(const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
+                           const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients);
     virtual void computeCoefficients(const geometry_msgs::PolygonStamped& polygon,
                                      PCLModelCoefficientMsg& coefficient);
     virtual void transformModelCoefficient(const Eigen::Affine3d& transform,
@@ -79,8 +79,8 @@ namespace jsk_pcl_ros
     ros::Publisher polygons_pub_, coefficients_pub_;
     tf::TransformListener* listener_;
     std::string frame_id_;
-    message_filters::Subscriber<jsk_pcl_ros::PolygonArray> sub_polygons_;
-    message_filters::Subscriber<jsk_pcl_ros::ModelCoefficientsArray> sub_coefficients_;
+    message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygons_;
+    message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
   private:
   };

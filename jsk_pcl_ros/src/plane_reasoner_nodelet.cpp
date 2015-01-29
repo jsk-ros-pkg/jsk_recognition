@@ -60,17 +60,17 @@ namespace jsk_pcl_ros
     // Publishers
     ////////////////////////////////////////////////////////
     pub_vertical_inliers_
-      = advertise<ClusterPointIndices>(*pnh_, "output/vertical/inliers", 1);
+      = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output/vertical/inliers", 1);
     pub_vertical_coefficients_
-      = advertise<ModelCoefficientsArray>(*pnh_, "output/vertical/coefficients", 1);
+      = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(*pnh_, "output/vertical/coefficients", 1);
     pub_vertical_polygons_
-      = advertise<PolygonArray>(*pnh_, "output/vertical/polygons", 1);
+      = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "output/vertical/polygons", 1);
     pub_horizontal_inliers_
-      = advertise<ClusterPointIndices>(*pnh_, "output/horizontal/inliers", 1);
+      = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output/horizontal/inliers", 1);
     pub_horizontal_coefficients_
-      = advertise<ModelCoefficientsArray>(*pnh_, "output/horizontal/coefficients", 1);
+      = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(*pnh_, "output/horizontal/coefficients", 1);
     pub_horizontal_polygons_
-      = advertise<PolygonArray>(*pnh_, "output/horizontal/polygons", 1);
+      = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "output/horizontal/polygons", 1);
   }
 
   void PlaneReasoner::subscribe()
@@ -121,9 +121,9 @@ namespace jsk_pcl_ros
 
   void PlaneReasoner::reason(
       const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
-      const ClusterPointIndices::ConstPtr& inliers_msg,
-      const ModelCoefficientsArray::ConstPtr& coefficients_msg,
-      const PolygonArray::ConstPtr& polygons_msg)
+      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& inliers_msg,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg,
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
     // Check the size of the array messages first
@@ -182,9 +182,9 @@ namespace jsk_pcl_ros
       coefficients.push_back(containers[i].get<1>());
       polygons.push_back(containers[i].get<3>());
     }
-    ClusterPointIndices ros_indices;
-    ModelCoefficientsArray ros_coefficients;
-    PolygonArray ros_polygons;
+    jsk_recognition_msgs::ClusterPointIndices ros_indices;
+    jsk_recognition_msgs::ModelCoefficientsArray ros_coefficients;
+    jsk_recognition_msgs::PolygonArray ros_polygons;
     ros_indices.header = header;
     ros_coefficients.header = header;
     ros_polygons.header = header;

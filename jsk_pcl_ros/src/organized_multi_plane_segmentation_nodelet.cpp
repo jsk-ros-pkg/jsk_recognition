@@ -34,7 +34,7 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/organized_multi_plane_segmentation.h"
-#include "jsk_pcl_ros/ModelCoefficientsArray.h"
+#include "jsk_recognition_msgs/ModelCoefficientsArray.h"
 #include <pcl/segmentation/impl/organized_multi_plane_segmentation.hpp>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/kdtree/kdtree_flann.h>
@@ -94,23 +94,23 @@ namespace jsk_pcl_ros
     //////////////////////////////////////////////////////////
     // prepare publishers
     //////////////////////////////////////////////////////////
-    pub_ = advertise<ClusterPointIndices>(*pnh_, "output", 1);
-    polygon_pub_ = advertise<PolygonArray>(*pnh_, "output_polygon", 1);
+    pub_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output", 1);
+    polygon_pub_ = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "output_polygon", 1);
     coefficients_pub_
-      = advertise<ModelCoefficientsArray>(*pnh_, "output_coefficients", 1);
-    org_pub_ = advertise<ClusterPointIndices>(*pnh_, "output_nonconnected", 1);
+      = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(*pnh_, "output_coefficients", 1);
+    org_pub_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output_nonconnected", 1);
     org_polygon_pub_
-      = advertise<PolygonArray>(*pnh_, "output_nonconnected_polygon", 1);
+      = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "output_nonconnected_polygon", 1);
     org_coefficients_pub_
-      = advertise<ModelCoefficientsArray>(*pnh_, 
+      = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(*pnh_, 
         "output_nonconnected_coefficients", 1);
     
-    refined_pub_ = advertise<ClusterPointIndices>(*pnh_, 
+    refined_pub_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, 
       "output_refined", 1);
     refined_polygon_pub_
-      = advertise<PolygonArray>(*pnh_, "output_refined_polygon", 1);
+      = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "output_refined_polygon", 1);
     refined_coefficients_pub_
-      = advertise<ModelCoefficientsArray>(*pnh_, 
+      = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(*pnh_, 
         "output_refined_coefficients", 1);
     
     pub_connection_marker_
@@ -278,7 +278,7 @@ namespace jsk_pcl_ros
   void OrganizedMultiPlaneSegmentation::pclIndicesArrayToClusterPointIndices(
     const std::vector<pcl::PointIndices>& inlier_indices,
     const std_msgs::Header& header,
-    jsk_pcl_ros::ClusterPointIndices& output_indices)
+    jsk_recognition_msgs::ClusterPointIndices& output_indices)
   {
     for (size_t i = 0; i < inlier_indices.size(); i++) {
       pcl::PointIndices inlier = inlier_indices[i];
@@ -421,9 +421,9 @@ namespace jsk_pcl_ros
     const std::vector<pcl::PointCloud<PointT> >& boundaries,
     const std::vector<pcl::ModelCoefficients>& model_coefficients)
   {
-    jsk_pcl_ros::ClusterPointIndices indices;
-    jsk_pcl_ros::ModelCoefficientsArray coefficients_array;
-    jsk_pcl_ros::PolygonArray polygon_array;
+    jsk_recognition_msgs::ClusterPointIndices indices;
+    jsk_recognition_msgs::ModelCoefficientsArray coefficients_array;
+    jsk_recognition_msgs::PolygonArray polygon_array;
     indices.header = header;
     polygon_array.header = header;
     coefficients_array.header = header;

@@ -56,9 +56,9 @@
 // messages
 ////////////////////////////////////////////////////////
 #include <sensor_msgs/PointCloud2.h>
-#include <jsk_pcl_ros/PolygonArray.h>
-#include <jsk_pcl_ros/ModelCoefficientsArray.h>
-#include <jsk_pcl_ros/ClusterPointIndices.h>
+#include <jsk_recognition_msgs/PolygonArray.h>
+#include <jsk_recognition_msgs/ModelCoefficientsArray.h>
+#include <jsk_recognition_msgs/ClusterPointIndices.h>
 #include <sensor_msgs/Imu.h>
 
 namespace jsk_pcl_ros
@@ -73,7 +73,7 @@ namespace jsk_pcl_ros
       sensor_msgs::PointCloud2 > SyncPolicy;
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
-      ClusterPointIndices > SyncClusterPolicy;
+      jsk_recognition_msgs::ClusterPointIndices > SyncClusterPolicy;
     typedef message_filters::sync_policies::ApproximateTime<
       sensor_msgs::PointCloud2,
       sensor_msgs::Imu
@@ -101,7 +101,7 @@ namespace jsk_pcl_ros
                                 const sensor_msgs::Imu::ConstPtr& imu);
     virtual void segmentWithClusters(
       const sensor_msgs::PointCloud2::ConstPtr& msg,
-      const ClusterPointIndices::ConstPtr& clusters);
+      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& clusters);
     virtual void applyRecursiveRANSAC(
       const pcl::PointCloud<PointT>::Ptr& input,
       const pcl::PointCloud<pcl::Normal>::Ptr& normal,
@@ -131,7 +131,7 @@ namespace jsk_pcl_ros
     boost::shared_ptr<message_filters::Synchronizer<SyncNormalImuPolicy> > sync_normal_imu_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_normal_;
-    message_filters::Subscriber<ClusterPointIndices> sub_clusters_;
+    message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_clusters_;
     message_filters::Subscriber<sensor_msgs::Imu> sub_imu_;
     boost::mutex mutex_;
     tf::TransformListener* tf_listener_;

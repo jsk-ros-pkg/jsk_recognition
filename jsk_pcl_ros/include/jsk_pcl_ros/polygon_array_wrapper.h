@@ -46,8 +46,8 @@
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 
 #include <geometry_msgs/PolygonStamped.h>
-#include <jsk_pcl_ros/PolygonArray.h>
-#include <jsk_pcl_ros/ModelCoefficientsArray.h>
+#include <jsk_recognition_msgs/PolygonArray.h>
+#include <jsk_recognition_msgs/ModelCoefficientsArray.h>
 #include <jsk_topic_tools/connection_based_nodelet.h>
 
 namespace jsk_pcl_ros

@@ -41,7 +41,7 @@
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <dynamic_reconfigure/server.h>
 #include <jsk_pcl_ros/SupervoxelSegmentationConfig.h>
-#include <jsk_pcl_ros/ClusterPointIndices.h>
+#include <jsk_recognition_msgs/ClusterPointIndices.h>
 namespace jsk_pcl_ros
 {
   class SupervoxelSegmentation: public jsk_topic_tools::DiagnosticNodelet

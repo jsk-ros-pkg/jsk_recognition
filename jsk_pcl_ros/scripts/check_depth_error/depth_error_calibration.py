@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from jsk_pcl_ros.msg import DepthErrorResult
+from jsk_recognition_msgs.msg import DepthErrorResult
 from sklearn import linear_model
 import time
 import threading
@@ -14,7 +14,7 @@ import csv
 import math
 import datetime
 from jsk_pcl_ros.srv import SetDepthCalibrationParameter
-from jsk_pcl_ros.msg import DepthCalibrationParameter
+from jsk_recognition_msgs.msg import DepthCalibrationParameter
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 

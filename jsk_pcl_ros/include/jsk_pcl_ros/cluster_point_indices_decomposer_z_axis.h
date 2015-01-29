@@ -39,7 +39,7 @@
 #include <ros/ros.h>
 #include <ros/names.h>
 
-#include "jsk_pcl_ros/ClusterPointIndices.h"
+#include "jsk_recognition_msgs/ClusterPointIndices.h"
 #include "sensor_msgs/PointCloud2.h"
 
 #include "jsk_pcl_ros/cluster_point_indices_decomposer.h"

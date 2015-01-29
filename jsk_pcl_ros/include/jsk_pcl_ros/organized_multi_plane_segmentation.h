@@ -39,13 +39,14 @@
 #include <ros/ros.h>
 #include <ros/names.h>
 
-#include "jsk_pcl_ros/ClusterPointIndices.h"
+#include "jsk_recognition_msgs/ClusterPointIndices.h"
 #include "sensor_msgs/PointCloud2.h"
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl/segmentation/organized_multi_plane_segmentation.h>
 #include <dynamic_reconfigure/server.h>
 #include "jsk_pcl_ros/OrganizedMultiPlaneSegmentationConfig.h"
-#include "jsk_pcl_ros/PolygonArray.h"
+#include "jsk_recognition_msgs/PolygonArray.h"
+#include "jsk_recognition_msgs/ModelCoefficientsArray.h"
 #include <jsk_topic_tools/time_accumulator.h>
 #include <jsk_topic_tools/vital_checker.h>
 #include "jsk_pcl_ros/pcl_util.h"
@@ -78,7 +79,7 @@ namespace jsk_pcl_ros
                                      geometry_msgs::Polygon& polygon);
     virtual void pclIndicesArrayToClusterPointIndices(const std::vector<pcl::PointIndices>& inlier_indices,
                                                       const std_msgs::Header& header,
-                                                      jsk_pcl_ros::ClusterPointIndices& output_indices);
+                                                      jsk_recognition_msgs::ClusterPointIndices& output_indices);
     virtual void connectPlanesMap(const pcl::PointCloud<PointT>::Ptr& input,
                                   const std::vector<pcl::ModelCoefficients>& model_coefficients,
                                   const std::vector<pcl::PointIndices>& boundary_indices,

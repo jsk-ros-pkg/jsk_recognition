@@ -33,12 +33,12 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 #define BOOST_PARAMETER_MAX_ARITY 7
-#include "jsk_perception/find_object_on_plane.h"
+#include "jsk_pcl_ros/find_object_on_plane.h"
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 
-namespace jsk_perception
+namespace jsk_pcl_ros
 {
   void FindObjectOnPlane::onInit()
   {
@@ -295,4 +295,4 @@ namespace jsk_perception
 
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS (jsk_perception::FindObjectOnPlane, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::FindObjectOnPlane, nodelet::Nodelet);

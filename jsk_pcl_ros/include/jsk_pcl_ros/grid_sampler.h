@@ -38,7 +38,7 @@
 
 #include <pcl_ros/pcl_nodelet.h>
 #include <dynamic_reconfigure/server.h>
-#include <jsk_pcl_ros/ClusterPointIndices.h>
+#include <jsk_recognition_msgs/ClusterPointIndices.h>
 #include <sensor_msgs/PointCloud2.h>
 
 #include <jsk_pcl_ros/GridSamplerConfig.h>

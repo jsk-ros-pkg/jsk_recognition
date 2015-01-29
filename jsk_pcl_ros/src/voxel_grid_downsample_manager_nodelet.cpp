@@ -40,7 +40,7 @@
 #include <pcl/io/io.h>
 #include <pcl_ros/transforms.h>
 #include <boost/format.hpp>
-#include "jsk_pcl_ros/SlicedPointCloud.h"
+#include "jsk_recognition_msgs/SlicedPointCloud.h"
 
 namespace jsk_pcl_ros
 {
@@ -163,7 +163,7 @@ namespace jsk_pcl_ros
       }
       // conevrt cluster_out_pcl into ros msg
       toROSMsg(*cluster_out_pcl, cluster_out_ros);
-      jsk_pcl_ros::SlicedPointCloud publish_point_cloud;
+      jsk_recognition_msgs::SlicedPointCloud publish_point_cloud;
       cluster_out_ros.header = input->header;
       publish_point_cloud.point_cloud = cluster_out_ros;
       publish_point_cloud.slice_index = i;
@@ -231,7 +231,7 @@ namespace jsk_pcl_ros
     
     pub_ = advertise<sensor_msgs::PointCloud2>(
       *pnh_, "output", 1);
-    pub_encoded_ = advertise<jsk_pcl_ros::SlicedPointCloud>(
+    pub_encoded_ = advertise<jsk_recognition_msgs::SlicedPointCloud>(
       *pnh_, "output_encoded", 1);
     
   }

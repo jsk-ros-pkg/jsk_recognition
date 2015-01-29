@@ -38,9 +38,9 @@
 #define JSK_PCL_ROS_PARALLEL_EDGE_FINDER_H_
 
 #include <pcl_ros/pcl_nodelet.h>
-#include <jsk_pcl_ros/ParallelEdgeArray.h>
-#include <jsk_pcl_ros/ModelCoefficientsArray.h>
-#include <jsk_pcl_ros/ClusterPointIndices.h>
+#include <jsk_recognition_msgs/ParallelEdgeArray.h>
+#include <jsk_recognition_msgs/ModelCoefficientsArray.h>
+#include <jsk_recognition_msgs/ClusterPointIndices.h>
 #include <jsk_pcl_ros/ParallelEdgeFinderConfig.h>
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <dynamic_reconfigure/server.h>
@@ -58,8 +58,8 @@ namespace jsk_pcl_ros
   {
   public:
     typedef message_filters::sync_policies::ExactTime<
-    ClusterPointIndices,
-    ModelCoefficientsArray > SyncPolicy;
+    jsk_recognition_msgs::ClusterPointIndices,
+    jsk_recognition_msgs::ModelCoefficientsArray > SyncPolicy;
     typedef jsk_pcl_ros::ParallelEdgeFinderConfig Config;
   protected:
     ////////////////////////////////////////////////////////
@@ -68,19 +68,19 @@ namespace jsk_pcl_ros
     virtual void onInit();
 
     virtual void estimate(
-      const ClusterPointIndices::ConstPtr& input_indices,
-      const ModelCoefficientsArray::ConstPtr& input_coefficients);
+      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& input_coefficients);
 
     virtual void publishResult(
       const std::vector<std::set<int> >& parallel_groups_list,
-      const ClusterPointIndices::ConstPtr& input_indices,
-      const ModelCoefficientsArray::ConstPtr& input_coefficients);
+      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& input_coefficients);
 
     // for visualization
     virtual void publishResultAsCluser(
       const std::vector<std::set<int> >& parallel_groups_list,
-      const ClusterPointIndices::ConstPtr& input_indices,
-      const ModelCoefficientsArray::ConstPtr& input_coefficients);
+      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& input_coefficients);
 
     virtual void configCallback (Config &config, uint32_t level);
 
@@ -90,8 +90,8 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
-    message_filters::Subscriber<ClusterPointIndices> sub_indices_;
-    message_filters::Subscriber<ModelCoefficientsArray> sub_coefficients_;
+    message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_indices_;
+    message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     ros::Publisher pub_, pub_clusters_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;

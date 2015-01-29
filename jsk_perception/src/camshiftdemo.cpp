@@ -2,7 +2,7 @@
 #include <geometry_msgs/PolygonStamped.h>
 #include <dynamic_reconfigure/server.h>
 #include <jsk_perception/camshiftdemoConfig.h>
-#include <jsk_perception/RotatedRectStamped.h>
+#include <jsk_recognition_msgs/RotatedRectStamped.h>
 #include <sensor_msgs/SetCameraInfo.h>
 
 // opencv/samples/cp/camshiftdemo.c
@@ -91,7 +91,7 @@ public:
     pub_hist_ = it.advertise(local_nh.resolveName("histimg"), 1);
 
     sub_rectangle_ = nh.subscribe(nh.resolveName("screenrectangle"), 1, &CamShiftDemo::setRectangleCB, this);
-    pub_result_ = nh.advertise<jsk_perception::RotatedRectStamped>(local_nh.resolveName("result"), 1);
+    pub_result_ = nh.advertise<jsk_recognition_msgs::RotatedRectStamped>(local_nh.resolveName("result"), 1);
 
     //roi_service_ = local_nh.advertiseService("set_roi", sensor_msgs::SetCameraInfo);
     roi_service_ = local_nh.advertiseService("set_roi", &CamShiftDemo::setROICb, this);
@@ -225,7 +225,7 @@ public:
 	    cvtColor( backproj_, image_, CV_GRAY2BGR );
 	  ellipse( image_, trackBox_, Scalar(0,0,255), 3, CV_AA );
 
-	  jsk_perception::RotatedRectStamped result_msg;
+	  jsk_recognition_msgs::RotatedRectStamped result_msg;
 	  result_msg.header = msg_ptr->header;
 	  result_msg.rect.x = trackBox_.center.x;
 	  result_msg.rect.y = trackBox_.center.y;

@@ -381,7 +381,7 @@ namespace jsk_pcl_ros
   }
   void ParticleFilterTracking::renew_model_with_box_topic_cb(
     const sensor_msgs::PointCloud2::ConstPtr &pc_ptr,
-    const jsk_pcl_ros::BoundingBox::ConstPtr &bb_ptr)
+    const jsk_recognition_msgs::BoundingBox::ConstPtr &bb_ptr)
   {
     pcl::PointCloud<PointT>::Ptr new_target_cloud
       (new pcl::PointCloud<PointT>());

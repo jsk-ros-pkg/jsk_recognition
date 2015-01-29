@@ -40,8 +40,8 @@
 
 #include <pcl/point_types.h>
 #include <pcl_ros/pcl_nodelet.h>
-#include <jsk_pcl_ros/PolygonArray.h>
-#include <jsk_pcl_ros/ModelCoefficientsArray.h>
+#include <jsk_recognition_msgs/PolygonArray.h>
+#include <jsk_recognition_msgs/ModelCoefficientsArray.h>
 #include "jsk_pcl_ros/CallSnapIt.h"
 #include <tf/transform_listener.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
@@ -56,8 +56,8 @@ namespace jsk_pcl_ros
   {
   public:
     typedef message_filters::sync_policies::ExactTime<
-      jsk_pcl_ros::PolygonArray,
-      jsk_pcl_ros::ModelCoefficientsArray> SyncPolygonPolicy;
+      jsk_recognition_msgs::PolygonArray,
+      jsk_recognition_msgs::ModelCoefficientsArray> SyncPolygonPolicy;
     SnapIt(): DiagnosticNodelet("SnapIt") {}
     
   protected:
@@ -70,29 +70,29 @@ namespace jsk_pcl_ros
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void polygonCallback(
-      const PolygonArray::ConstPtr& polygon_msg,
-      const ModelCoefficientsArray::ConstPtr& coefficients_msg);
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon_msg,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg);
     virtual void polygonAlignCallback(
       const geometry_msgs::PoseStamped::ConstPtr& pose_msg);
     virtual void convexAlignCallback(
       const geometry_msgs::PoseStamped::ConstPtr& pose_msg);
     virtual std::vector<ConvexPolygon::Ptr> createConvexes(
       const std::string& frame_id, const ros::Time& stamp,
-      PolygonArray::ConstPtr polygons);
+      jsk_recognition_msgs::PolygonArray::ConstPtr polygons);
     virtual geometry_msgs::PoseStamped alignPose(
       Eigen::Affine3f& pose, ConvexPolygon::Ptr convex);
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
     boost::shared_ptr<tf::TransformListener> tf_listener_;
-    message_filters::Subscriber<PolygonArray> sub_polygons_;
-    message_filters::Subscriber<ModelCoefficientsArray> sub_coefficients_;
+    message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygons_;
+    message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolygonPolicy> >sync_polygon_;
     ros::Publisher polygon_aligned_pub_;
     ros::Publisher convex_aligned_pub_;
     ros::Subscriber polygon_align_sub_;
     ros::Subscriber convex_align_sub_;
-      PolygonArray::ConstPtr polygons_;
+    jsk_recognition_msgs::PolygonArray::ConstPtr polygons_;
     boost::mutex mutex_;
     ////////////////////////////////////////////////////////
     // parameters

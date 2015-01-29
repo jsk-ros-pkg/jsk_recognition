@@ -295,7 +295,7 @@ namespace jsk_perception
   }
 
   void ColorHistogramLabelMatch::histogramCallback(
-    const jsk_pcl_ros::ColorHistogram::ConstPtr& histogram_msg)
+    const jsk_recognition_msgs::ColorHistogram::ConstPtr& histogram_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
     //histogram_ = histogram_msg->histogram;

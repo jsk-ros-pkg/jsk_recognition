@@ -38,7 +38,7 @@
 #include <image_transport/image_transport.h>
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
-#include <jsk_perception/Circle2DArray.h>
+#include <jsk_recognition_msgs/Circle2DArray.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <image_view2/ImageMarker2.h>
@@ -86,10 +86,10 @@ namespace jsk_perception
       cv::HoughCircles(gray_image, circles, CV_HOUGH_GRADIENT,
                        dp_, gray_image.rows / 4, edge_threshold_, voting_threshold_,
                        min_circle_radius_, max_circle_radius_);
-      jsk_perception::Circle2DArray circles_msg;
+      jsk_recognition_msgs::Circle2DArray circles_msg;
       circles_msg.header = image->header;
       for (size_t i = 0; i < circles.size(); i++) {
-        jsk_perception::Circle2D circle;
+        jsk_recognition_msgs::Circle2D circle;
         circle.header = image->header;
         circle.radius = circles[i][2];
         circle.x = circles[i][0];
@@ -143,7 +143,7 @@ namespace jsk_perception
         boost::bind (&HoughCircleDetector::configCallback, this, _1, _2);
       srv_->setCallback (f);
       it_.reset(new image_transport::ImageTransport(nh_));
-      circle_pub_ = pnh_.advertise<jsk_perception::Circle2DArray>("output", 1);
+      circle_pub_ = pnh_.advertise<jsk_recognition_msgs::Circle2DArray>("output", 1);
       marker_pub_ = pnh_.advertise<image_view2::ImageMarker2>("image_marker", 1);
       image_sub_ = it_->subscribe("", 1, &HoughCircleDetector::imageCallback, this);
     }

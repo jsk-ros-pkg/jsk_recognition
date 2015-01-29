@@ -50,13 +50,13 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // publishers
     ////////////////////////////////////////////////////////
-    pub_indices_ = advertise<ClusterPointIndices>(
+    pub_indices_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(
       *pnh_, "output", 1);
-    pub_coefficients_ = advertise<ModelCoefficientsArray>(
+    pub_coefficients_ = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(
       *pnh_, "output_coefficients", 1);
-    pub_outlier_removed_indices_ = advertise<ClusterPointIndices>(
+    pub_outlier_removed_indices_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(
       *pnh_, "output_outlier_removed", 1);
-    pub_outlier_removed_coefficients_ = advertise<ModelCoefficientsArray>(
+    pub_outlier_removed_coefficients_ = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(
       *pnh_, "output_outlier_removed_coefficients", 1);
     ////////////////////////////////////////////////////////
     // dynamic reconfigure
@@ -347,8 +347,8 @@ namespace jsk_pcl_ros
     const std::vector<pcl::ModelCoefficients::Ptr> coefficients,
     const std_msgs::Header& header)
   {
-    ClusterPointIndices output_ros_msg;
-    ModelCoefficientsArray output_ros_coefficients_msg;
+    jsk_recognition_msgs::ClusterPointIndices output_ros_msg;
+    jsk_recognition_msgs::ModelCoefficientsArray output_ros_coefficients_msg;
     output_ros_msg.header = header;
     output_ros_coefficients_msg.header = header;
     for (size_t i = 0; i < inliers.size(); i++) {
@@ -377,7 +377,7 @@ namespace jsk_pcl_ros
   
   void EdgeDepthRefinement::refine(
     const sensor_msgs::PointCloud2ConstPtr &input,
-    const jsk_pcl_ros::ClusterPointIndicesConstPtr &indices)
+    const jsk_recognition_msgs::ClusterPointIndicesConstPtr &indices)
   {
     boost::mutex::scoped_lock lock(mutex_);
     pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);

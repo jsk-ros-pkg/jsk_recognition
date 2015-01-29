@@ -39,8 +39,8 @@
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl_ros/point_cloud.h>
 #include <sensor_msgs/PointCloud2.h>
-#include <jsk_pcl_ros/Int32Stamped.h>
-#include <jsk_pcl_ros/ClusterPointIndices.h>
+#include <jsk_recognition_msgs/Int32Stamped.h>
+#include <jsk_recognition_msgs/ClusterPointIndices.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 #include <jsk_topic_tools/connection_based_nodelet.h>
@@ -50,17 +50,17 @@ namespace jsk_pcl_ros
   class SelectedClusterPublisher: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
-    typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, jsk_pcl_ros::ClusterPointIndices, jsk_pcl_ros::Int32Stamped> SyncPolicy;
+    typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, jsk_recognition_msgs::ClusterPointIndices, jsk_recognition_msgs::Int32Stamped> SyncPolicy;
   protected:
     ros::Publisher pub_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<jsk_pcl_ros::ClusterPointIndices> sub_indices_;
-    message_filters::Subscriber<jsk_pcl_ros::Int32Stamped> sub_index_;
+    message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_indices_;
+    message_filters::Subscriber<jsk_recognition_msgs::Int32Stamped> sub_index_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
 
     virtual void extract(const sensor_msgs::PointCloud2::ConstPtr& input,
-                         const jsk_pcl_ros::ClusterPointIndices::ConstPtr& indices,
-                         const jsk_pcl_ros::Int32Stamped::ConstPtr& index);
+                         const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices,
+                         const jsk_recognition_msgs::Int32Stamped::ConstPtr& index);
     virtual void subscribe();
     virtual void unsubscribe();
   private:

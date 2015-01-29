@@ -44,9 +44,9 @@
 
 #include "jsk_pcl_ros/pcl_util.h"
 #include "jsk_pcl_ros/geo_util.h"
-#include <jsk_pcl_ros/BoundingBoxArray.h>
-#include <jsk_pcl_ros/ClusterPointIndices.h>
-#include <jsk_pcl_ros/ModelCoefficientsArray.h>
+#include <jsk_recognition_msgs/BoundingBoxArray.h>
+#include <jsk_recognition_msgs/ClusterPointIndices.h>
+#include <jsk_recognition_msgs/ModelCoefficientsArray.h>
 #include <jsk_pcl_ros/BoundingBoxFilterConfig.h>
 #include "jsk_topic_tools/connection_based_nodelet.h"
 
@@ -58,8 +58,8 @@ namespace jsk_pcl_ros
     typedef jsk_pcl_ros::BoundingBoxFilterConfig Config;
 
     typedef message_filters::sync_policies::ExactTime<
-      BoundingBoxArray,
-      ClusterPointIndices
+      jsk_recognition_msgs::BoundingBoxArray,
+      jsk_recognition_msgs::ClusterPointIndices
       > SyncPolicy;
 
   protected:
@@ -68,8 +68,8 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     virtual void onInit();
     virtual void filter(
-      const BoundingBoxArray::ConstPtr& box_array_msg,
-      const ClusterPointIndices::ConstPtr& indices_msg);
+      const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& box_array_msg,
+      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg);
     virtual void configCallback(Config &config, uint32_t level);
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
@@ -79,8 +79,8 @@ namespace jsk_pcl_ros
     // ROS varariables
     ////////////////////////////////////////////////////////
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
-    message_filters::Subscriber<BoundingBoxArray> sub_box_;
-    message_filters::Subscriber<ClusterPointIndices> sub_indices_;
+    message_filters::Subscriber<jsk_recognition_msgs::BoundingBoxArray> sub_box_;
+    message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_indices_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     ros::Publisher filtered_box_pub_;
     ros::Publisher filtered_indices_pub_;

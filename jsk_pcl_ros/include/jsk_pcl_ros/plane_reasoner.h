@@ -38,9 +38,9 @@
 #define JSK_PCL_ROS_PLANE_REASONER_H_
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
-#include "jsk_pcl_ros/ClusterPointIndices.h"
-#include "jsk_pcl_ros/PolygonArray.h"
-#include "jsk_pcl_ros/ModelCoefficientsArray.h"
+#include "jsk_recognition_msgs/ClusterPointIndices.h"
+#include "jsk_recognition_msgs/PolygonArray.h"
+#include "jsk_recognition_msgs/ModelCoefficientsArray.h"
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -68,9 +68,9 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     typedef message_filters::sync_policies::ExactTime<
     sensor_msgs::PointCloud2,
-    ClusterPointIndices,
-    ModelCoefficientsArray,
-    PolygonArray> SyncPolicy;
+    jsk_recognition_msgs::ClusterPointIndices,
+    jsk_recognition_msgs::ModelCoefficientsArray,
+    jsk_recognition_msgs::PolygonArray> SyncPolicy;
     typedef jsk_pcl_ros::PlaneReasonerConfig Config;
     typedef pcl::PointXYZRGB PointT;
     
@@ -89,9 +89,9 @@ namespace jsk_pcl_ros
     
     virtual void reason(
       const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
-      const ClusterPointIndices::ConstPtr& inliers_msg,
-      const ModelCoefficientsArray::ConstPtr& coefficients_msg,
-      const PolygonArray::ConstPtr& polygons_msg);
+      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& inliers_msg,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg,
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons_msg);
 
     virtual void configCallback (Config &config, uint32_t level);
 
@@ -130,9 +130,9 @@ namespace jsk_pcl_ros
     // ROS variables
     ////////////////////////////////////////////////////////
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<ClusterPointIndices> sub_inliers_;
-    message_filters::Subscriber<ModelCoefficientsArray> sub_coefficients_;
-    message_filters::Subscriber<PolygonArray> sub_polygons_;
+    message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_inliers_;
+    message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
+    message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygons_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     tf::TransformListener* tf_listener_;

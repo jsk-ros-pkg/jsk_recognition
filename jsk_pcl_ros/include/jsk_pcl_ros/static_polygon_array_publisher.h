@@ -41,8 +41,8 @@
 #include <sensor_msgs/PointCloud2.h>
 
 #include <pcl_ros/pcl_nodelet.h>
-#include <jsk_pcl_ros/PolygonArray.h>
-#include <jsk_pcl_ros/ModelCoefficientsArray.h>
+#include <jsk_recognition_msgs/PolygonArray.h>
+#include <jsk_recognition_msgs/ModelCoefficientsArray.h>
 
 #include <nodelet/nodelet.h>
 #include <topic_tools/shape_shifter.h>
@@ -52,7 +52,7 @@
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
-#include <jsk_pcl_ros/Int32Stamped.h>
+#include <jsk_recognition_msgs/Int32Stamped.h>
 #include <std_msgs/Header.h>
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <jsk_topic_tools/connection_based_nodelet.h>
@@ -66,13 +66,13 @@ namespace jsk_pcl_ros
   public:
     typedef message_filters::sync_policies::ApproximateTime<
     sensor_msgs::PointCloud2,
-    Int32Stamped > SyncPolicy;
+    jsk_recognition_msgs::Int32Stamped > SyncPolicy;
 
   protected:
     ros::Publisher polygon_pub_, coefficients_pub_;
     ros::Subscriber sub_;
-    jsk_pcl_ros::PolygonArray polygons_;
-    jsk_pcl_ros::ModelCoefficientsArray coefficients_;
+    jsk_recognition_msgs::PolygonArray polygons_;
+    jsk_recognition_msgs::ModelCoefficientsArray coefficients_;
     ros::Timer periodic_timer_;
     bool use_periodic_;
     bool use_message_;
@@ -81,7 +81,7 @@ namespace jsk_pcl_ros
     std::vector<std::string> frame_ids_;
     ros::Timer timer_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<Int32Stamped> sub_trigger_;
+    message_filters::Subscriber<jsk_recognition_msgs::Int32Stamped> sub_trigger_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     virtual void onInit();
     virtual void inputCallback(const sensor_msgs::PointCloud2::ConstPtr& msg);
@@ -91,7 +91,7 @@ namespace jsk_pcl_ros
     virtual double getXMLDoubleValue(XmlRpc::XmlRpcValue val);
     virtual PCLModelCoefficientMsg polygonToModelCoefficients(const geometry_msgs::PolygonStamped& polygon);
     virtual void triggerCallback(const sensor_msgs::PointCloud2::ConstPtr& input,
-                                 const Int32Stamped::ConstPtr& trigger);
+                                 const jsk_recognition_msgs::Int32Stamped::ConstPtr& trigger);
     virtual void subscribe();
     virtual void unsubscribe();
   private:

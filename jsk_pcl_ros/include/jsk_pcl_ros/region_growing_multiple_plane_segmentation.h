@@ -45,9 +45,9 @@
 #include <message_filters/synchronizer.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include "jsk_pcl_ros/geo_util.h"
-#include "jsk_pcl_ros/PolygonArray.h"
-#include "jsk_pcl_ros/ClusterPointIndices.h"
-#include "jsk_pcl_ros/ModelCoefficientsArray.h"
+#include "jsk_recognition_msgs/PolygonArray.h"
+#include "jsk_recognition_msgs/ClusterPointIndices.h"
+#include "jsk_recognition_msgs/ModelCoefficientsArray.h"
 
 namespace jsk_pcl_ros
 {

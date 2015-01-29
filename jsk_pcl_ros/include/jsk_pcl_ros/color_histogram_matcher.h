@@ -42,10 +42,10 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 
-#include <jsk_pcl_ros/ColorHistogram.h>
-#include <jsk_pcl_ros/ColorHistogramArray.h>
+#include <jsk_recognition_msgs/ColorHistogram.h>
+#include <jsk_recognition_msgs/ColorHistogramArray.h>
 #include <sensor_msgs/PointCloud2.h>
-#include <jsk_pcl_ros/ClusterPointIndices.h>
+#include <jsk_recognition_msgs/ClusterPointIndices.h>
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <dynamic_reconfigure/server.h>
 #include <jsk_pcl_ros/ColorHistogramMatcherConfig.h>
@@ -58,7 +58,7 @@ namespace jsk_pcl_ros
   {
   public:
     typedef message_filters::sync_policies::ExactTime< sensor_msgs::PointCloud2,
-                                                       jsk_pcl_ros::ClusterPointIndices > SyncPolicy;
+                                                       jsk_recognition_msgs::ClusterPointIndices > SyncPolicy;
     typedef ColorHistogramMatcherConfig Config;
     enum ComparePolicy {
       USE_HUE,
@@ -70,11 +70,11 @@ namespace jsk_pcl_ros
     virtual void onInit();
     virtual void feature(
       const sensor_msgs::PointCloud2::ConstPtr& input_cloud,
-      const jsk_pcl_ros::ClusterPointIndices::ConstPtr& input_indices);
+      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices);
     virtual void reference(
       const sensor_msgs::PointCloud2::ConstPtr& input_cloud);
     virtual void referenceHistogram(
-      const jsk_pcl_ros::ColorHistogram::ConstPtr& input_histogram);
+      const jsk_recognition_msgs::ColorHistogram::ConstPtr& input_histogram);
     virtual void computeHistogram(const pcl::PointCloud<pcl::PointXYZHSV>& cloud,
                                   std::vector<float>& output,
                                   const ComparePolicy policy);
@@ -86,7 +86,7 @@ namespace jsk_pcl_ros
     boost::mutex mutex_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<jsk_pcl_ros::ClusterPointIndices> sub_indices_;
+    message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_indices_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     ros::Subscriber reference_sub_;
     ros::Subscriber reference_histogram_sub_;

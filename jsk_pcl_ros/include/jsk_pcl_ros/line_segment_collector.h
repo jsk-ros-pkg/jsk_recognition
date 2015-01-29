@@ -43,16 +43,16 @@
 #define JSK_PCL_ROS_LINE_SEGMENT_COLLECTOR_H_
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
-#include <jsk_pcl_ros/ClusterPointIndices.h>
-#include <jsk_pcl_ros/ModelCoefficientsArray.h>
+#include <jsk_recognition_msgs/ClusterPointIndices.h>
+#include <jsk_recognition_msgs/ModelCoefficientsArray.h>
 #include <sensor_msgs/JointState.h>
 #include "jsk_pcl_ros/line_segment_detector.h"
 #include <jsk_topic_tools/time_accumulator.h>
 #include <jsk_pcl_ros/LineSegmentCollectorConfig.h>
 #include <dynamic_reconfigure/server.h>
 #include "jsk_pcl_ros/geo_util.h"
-#include <jsk_pcl_ros/PolygonArray.h>
-#include <jsk_pcl_ros/TimeRange.h>
+#include <jsk_recognition_msgs/PolygonArray.h>
+#include <jsk_recognition_msgs/TimeRange.h>
 
 namespace jsk_pcl_ros
 {
@@ -109,8 +109,8 @@ namespace jsk_pcl_ros
     LineSegmentCollector(): DiagnosticNodelet("LineSegmentCollector") { }
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
-      ClusterPointIndices,
-      ModelCoefficientsArray> SyncPolicy;
+      jsk_recognition_msgs::ClusterPointIndices,
+      jsk_recognition_msgs::ModelCoefficientsArray> SyncPolicy;
     enum RotateType {
       ROTATION_SPINDLE, ROTATION_TILT, ROTATION_TILT_TWO_WAY
     };
@@ -124,14 +124,14 @@ namespace jsk_pcl_ros
                                     std::vector<LineSegment::Ptr> new_segments);
     virtual void collect(
       const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
-      const ClusterPointIndices::ConstPtr& indices_msg,
-      const ModelCoefficientsArray::ConstPtr& coefficients_msg);
+      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg);
     virtual void subscribe();
     virtual void unsubscribe();
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void triggerCallback(
-      const TimeRange::ConstPtr& trigger);
+      const jsk_recognition_msgs::TimeRange::ConstPtr& trigger);
     virtual void cleanupBuffers(
       const ros::Time& stamp);
     virtual void publishBeforePlaneSegmentation(
@@ -152,8 +152,8 @@ namespace jsk_pcl_ros
     boost::mutex mutex_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
-    message_filters::Subscriber<ClusterPointIndices> sub_indices_;
-    message_filters::Subscriber<ModelCoefficientsArray> sub_coefficients_;
+    message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_indices_;
+    message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
     ros::Publisher pub_point_cloud_;
     ros::Publisher pub_inliers_;
     ros::Publisher pub_coefficients_;
@@ -169,13 +169,13 @@ namespace jsk_pcl_ros
     std::string fixed_frame_id_;
     RotateType rotate_type_;
     TimeStampedVector<sensor_msgs::PointCloud2::ConstPtr> pointclouds_buffer_;
-    TimeStampedVector<ClusterPointIndices::ConstPtr> indices_buffer_;
-    TimeStampedVector<ModelCoefficientsArray::ConstPtr> coefficients_buffer_;
+    TimeStampedVector<jsk_recognition_msgs::ClusterPointIndices::ConstPtr> indices_buffer_;
+    TimeStampedVector<jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr> coefficients_buffer_;
     TimeStampedVector<LineSegment::Ptr> segments_buffer_;
     std::vector<LineSegmentCluster::Ptr> segment_clusters_;
     double segment_connect_normal_threshold_;
     double ewma_tau_;
-    TimeRange::ConstPtr time_range_;
+    jsk_recognition_msgs::TimeRange::ConstPtr time_range_;
     ////////////////////////////////////////////////////////
     // plane estimation
     ////////////////////////////////////////////////////////

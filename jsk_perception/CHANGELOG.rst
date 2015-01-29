@@ -2,6 +2,10 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* add image_view2
+
 0.2.0 (2015-01-29)
 ------------------
 

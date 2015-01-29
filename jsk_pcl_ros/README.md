@@ -59,6 +59,41 @@ time end
 Represent range of time.
 
 ## nodelets
+### jsk\_pcl/HintedStickFInder
+![](images/hinted_stick_finder.png)
+
+Detect a stick from pointcloud and line in 2-D image as hiint.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Input pointcloud
+
+* `~input/camera_info` (`sensor_msgs/CameraInfo`)
+
+  Camera parameter where hint line is defined
+
+* `~input/hint/line` (`geometry_msgs/PolygonStamped`)
+
+  Hint line described in 2-D image.
+
+#### Publishing Topic
+* `~debug/line_filtered_indices` (`pcl_msgs/PointIndices`)
+
+  Indices of input pointcloud which is filtered by hint line.
+
+* `~debug/line_filtered_normal` (`sensor_msgs/PointCloud`)
+
+  Normal pointcloud of filtered pointcloud.
+
+* `~debug/cylinder_marker` (`visualization_marker/Marker`)
+
+  Marker topic to visualize detected stick
+
+* `~debug/cylinder_pose` (`geometry_msgs/PoseStamped`)
+
+  Pose of detected stick.
+
 ### jsk\_pcl/RGBColorFilter
 Filter pointcloud based on RGB range.
 

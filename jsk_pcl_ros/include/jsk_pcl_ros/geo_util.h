@@ -329,6 +329,27 @@ namespace jsk_pcl_ros
     bbox.pose.orientation.w = 1.0;
     return bbox;
   }
+
+  class Cylinder                // infinite
+  {
+  public:
+    typedef boost::shared_ptr<Cylinder> Ptr;
+    Cylinder(Eigen::Vector3f point, Eigen::Vector3f direction, double radius);
+
+    virtual void filterPointCloud(const pcl::PointCloud<pcl::PointXYZ>& cloud,
+                                  const double threshold,
+                                  pcl::PointIndices& output);
+    virtual void estimateCenterAndHeight(const pcl::PointCloud<pcl::PointXYZ>& cloud,
+                                         const pcl::PointIndices& indices,
+                                         Eigen::Vector3f& center,
+                                         double& height);
+  protected:
+    Eigen::Vector3f point_;
+    Eigen::Vector3f direction_;
+    double radius_;
+  private:
+    
+  };
   
 }
 

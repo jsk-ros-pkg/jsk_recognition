@@ -553,10 +553,11 @@ namespace jsk_pcl_ros
     pcl::PCDReader reader;
     reader.read(template_file_ + ".pcd", *template_cloud_);
     const std::string pose_yaml = template_file_ + "_poses.yaml";
+   YAML::Node doc;
+#ifdef USE_OLD_YAML
     std::ifstream pose_fin;
     pose_fin.open(pose_yaml.c_str(), std::ifstream::in);
     YAML::Parser parser(pose_fin);
-    YAML::Node doc;
     while (parser.GetNextDocument(doc)) {
       const YAML::Node& template_pose_yaml = doc["template_poses"];
       for (size_t i = 0; i < template_pose_yaml.size(); i++) {
@@ -576,6 +577,11 @@ namespace jsk_pcl_ros
       }
     }
     pose_fin.close();
+#else
+     // yaml-cpp is greater than 0.5.0
+     doc = YAML::LoadFile(pose_yaml);
+#endif
+
     
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =

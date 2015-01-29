@@ -45,8 +45,13 @@ namespace jsk_pcl_ros
   Eigen::Affine3f affineFromYAMLNode(const YAML::Node& pose)
   {
     float x, y, z, rx, ry, rz, rw;
+#ifdef USE_OLD_YAML
     pose[0] >> x; pose[1] >> y; pose[2] >> z;
     pose[3] >> rx; pose[4] >> ry; pose[5] >> rz; pose[6] >> rw;
+#else
+    x = pose[0].as<float>(); y = pose[1].as<float>(); z = pose[2].as<float>();
+    rx= pose[3].as<float>(); ry= pose[4].as<float>(); rz= pose[5].as<float>(); rw = pose[6].as<float>();
+#endif
     Eigen::Vector3f p(x, y, z);
     Eigen::Quaternionf q(rw, rx, ry, rz);
     Eigen::Affine3f trans = Eigen::Translation3f(p) * Eigen::AngleAxisf(q);

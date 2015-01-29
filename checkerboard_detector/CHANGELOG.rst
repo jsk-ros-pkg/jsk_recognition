@@ -2,6 +2,9 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.1.34 (2015-01-29)
 -------------------
 * [jsk_perception, checkerboard_detector] Remove dependency to jsk_pcl_ros

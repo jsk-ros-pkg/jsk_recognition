@@ -2,6 +2,9 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.1.34 (2015-01-29)
 -------------------
 * depending on cv_bridge is recommended, see http://wiki.ros.org/indigo/Migration#OpenCV

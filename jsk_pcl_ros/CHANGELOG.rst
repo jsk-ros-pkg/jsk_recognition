@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.2 (2015-01-30)
+------------------
 * [jsk_pcl_ros] Add HintedStickFinder to detect stick with human interfaction
 * Contributors: Kei Okada, Ryohei Ueda
 

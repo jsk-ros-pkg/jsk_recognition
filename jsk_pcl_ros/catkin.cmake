@@ -301,9 +301,12 @@ add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 
 generate_messages(DEPENDENCIES ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs)
 
+get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+message("flags: ${CMAKE_CXX_FLAGS}")
+
 catkin_package(
     DEPENDS pcl
-    CATKIN_DEPENDS pcl_ros message_runtime ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs
+    CATKIN_DEPENDS pcl_ros message_runtime ${PCL_MSGS} sensor_msgs geometry_msgs
     INCLUDE_DIRS include
     LIBRARIES jsk_pcl_ros
 )

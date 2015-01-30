@@ -1,6 +1,31 @@
 # jsk_perception
 
 ## nodes and nodelets
+### jsk\_perception/DilateMaskImage
+![](images/dilate_mask_image.png)
+
+Dilate binary image.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/Image`)
+
+  Input image
+
+#### Publishing Topic
+* `~output` (`sensor_msgs/Image`)
+
+  Output dilated image.
+
+#### Parameters
+* `~dilate_method` (`0`, `1` or `2`, default: `0`)
+
+  Method to dilate image. 0 means rectangular box model,
+  1 meand cross model and 2 means ellipse.
+
+* `~dilate_size` (Integer, default: `1`)
+
+  Size to dilate
+
 ### jsk\_perception/GridLabel
 ![](images/grid_label.jpg)
 

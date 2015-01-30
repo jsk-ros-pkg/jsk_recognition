@@ -33,71 +33,85 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_perception/dilate_mask_image.h"
+#include "jsk_perception/dilate_erode_mask_image.h"
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/opencv.hpp>
 #include <sensor_msgs/image_encodings.h>
 
 namespace jsk_perception
 {
-  void DilateMaskImage::onInit()
+  void MorphologicalImageOperatorNodelet::onInit()
   {
     DiagnosticNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
-        &DilateMaskImage::configCallback, this, _1, _2);
+        &MorphologicalImageOperatorNodelet::configCallback, this, _1, _2);
     srv_->setCallback (f);
 
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
   }
 
-  void DilateMaskImage::subscribe()
+  void MorphologicalImageOperatorNodelet::subscribe()
   {
-    sub_ = pnh_->subscribe("input", 1, &DilateMaskImage::dilate, this);
+    sub_ = pnh_->subscribe(
+      "input", 1, &MorphologicalImageOperatorNodelet::imageCallback, this);
   }
 
-  void DilateMaskImage::unsubscribe()
+  void MorphologicalImageOperatorNodelet::unsubscribe()
   {
     sub_.shutdown();
   }
 
-  void DilateMaskImage::configCallback(Config &config, uint32_t level)
+  void MorphologicalImageOperatorNodelet::configCallback(
+    Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    dilation_method_ = config.dilation_method;
-    dilation_size_ = config.dilation_size;
+    method_ = config.method;
+    size_ = config.size;
   }
   
-  void DilateMaskImage::dilate(
+  void MorphologicalImageOperatorNodelet::imageCallback(
     const sensor_msgs::Image::ConstPtr& image_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
     cv::Mat image = cv_bridge::toCvShare(image_msg, image_msg->encoding)->image;
-    int dilation_type;
-    if (dilation_method_ == 0) {
-      dilation_type = cv::MORPH_RECT;
+    int type;
+    if (method_ == 0) {
+      type = cv::MORPH_RECT;
     }
-    else if (dilation_method_ == 1) {
-      dilation_type = cv::MORPH_CROSS;
+    else if (method_ == 1) {
+      type = cv::MORPH_CROSS;
     }
-    else if (dilation_method_ == 2) {
-      dilation_type = cv::MORPH_ELLIPSE;
+    else if (method_ == 2) {
+      type = cv::MORPH_ELLIPSE;
     }
-    cv::Mat dilated_image;
+    cv::Mat output_image;
+    
     cv::Mat element = cv::getStructuringElement(
-      dilation_type,
-      cv::Size(2 * dilation_size_ + 1, 2 * dilation_size_+1),
-      cv::Point(dilation_size_, dilation_size_));
-
-    cv::dilate(image, dilated_image, element);
+      type,
+      cv::Size(2 * size_ + 1, 2 * size_+1),
+      cv::Point(size_, size_));
+    apply(image, output_image, element);
     pub_.publish(
       cv_bridge::CvImage(image_msg->header,
                          sensor_msgs::image_encodings::MONO8,
-                         dilated_image).toImageMsg());
+                         output_image).toImageMsg());
   }
-    
+
+  void DilateMaskImage::apply(
+    const cv::Mat& input, cv::Mat& output, const cv::Mat& element)
+  {
+    cv::dilate(input, output, element);
+  }
+
+  void ErodeMaskImage::apply(
+    const cv::Mat& input, cv::Mat& output, const cv::Mat& element)
+  {
+    cv::erode(input, output, element);
+  }
 }
 
 #include <pluginlib/class_list_macros.h>
 PLUGINLIB_EXPORT_CLASS (jsk_perception::DilateMaskImage, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_perception::ErodeMaskImage, nodelet::Nodelet);

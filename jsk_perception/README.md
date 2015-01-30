@@ -1,6 +1,31 @@
 # jsk_perception
 
 ## nodes and nodelets
+### jsk\_perception/ErodeMaskImage
+![](images/erode_mask_image.png)
+
+Erode binary image.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/Image`)
+
+  Input image
+
+#### Publishing Topic
+* `~output` (`sensor_msgs/Image`)
+
+  Output eroded image.
+
+#### Parameters
+* `~erode_method` (`0`, `1` or `2`, default: `0`)
+
+  Method to erode image. 0 means rectangular box model,
+  1 meand cross model and 2 means ellipse.
+
+* `~erode_size` (Integer, default: `1`)
+
+  Size to erode
+
 ### jsk\_perception/DilateMaskImage
 ![](images/dilate_mask_image.png)
 

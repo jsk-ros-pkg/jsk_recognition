@@ -2,6 +2,13 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.2.1 (2015-01-30)
+------------------
+* Merge pull request #672 from k-okada/add_image_view2
+  add image_view2
+* [jsk_pcl_ros] add jsk_recognition_msgs to catkin_package:DEPEND
+* [jsk_pcl_ros] Add HintedStickFinder to detect stick with human interfaction
+
 0.2.0 (2015-01-29)
 ------------------
 

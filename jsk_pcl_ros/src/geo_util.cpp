@@ -1061,5 +1061,48 @@ namespace jsk_pcl_ros
     ret.dimensions.z = dimensions_[2];
     return ret;
   }
+
+  Cylinder::Cylinder(Eigen::Vector3f point, Eigen::Vector3f direction, double radius):
+    point_(point), direction_(direction), radius_(radius)
+  {
+
+  }
+
+  void Cylinder::filterPointCloud(const pcl::PointCloud<pcl::PointXYZ>& cloud,
+                                  const double threshold,
+                                  pcl::PointIndices& output)
+  {
+    Line line(direction_, point_);
+    output.indices.clear();
+    for (size_t i = 0; i < cloud.points.size(); i++) {
+      Eigen::Vector3f p = cloud.points[i].getVector3fMap();
+      double d = line.distanceToPoint(p);
+      if (d < radius_ + threshold && d > radius_ - threshold) {
+        output.indices.push_back(i);
+      }
+    }
+  }
+
+  void Cylinder::estimateCenterAndHeight(const pcl::PointCloud<pcl::PointXYZ>& cloud,
+                                         const pcl::PointIndices& indices,
+                                         Eigen::Vector3f& center,
+                                         double& height)
+  {
+    Line line(direction_, point_);
+    Vertices points;
+    for (size_t i = 0; i < indices.indices.size(); i++) {
+      int point_index = indices.indices[i];
+      points.push_back(cloud.points[point_index].getVector3fMap());
+    }
+    PointPair min_max = line.findEndPoints(points);
+    Eigen::Vector3f min_point = min_max.get<0>();
+    Eigen::Vector3f max_point = min_max.get<1>();
+    Eigen::Vector3f min_point_projected, max_point_projected;
+    line.foot(min_point, min_point_projected);
+    line.foot(max_point, max_point_projected);
+    height = (min_point_projected - max_point_projected).norm();
+    center = (min_point_projected + max_point_projected) / 2.0;
+  }
+
   
 }

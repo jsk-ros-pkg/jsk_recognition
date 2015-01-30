@@ -2,9 +2,15 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_perception] add posedetection_msgs
+* add image_view2 to depends
+* Contributors: Kei Okada
+
 0.2.1 (2015-01-30)
 ------------------
-* add image_view2
+* add image_view2 to depends
 
 0.2.0 (2015-01-29)
 ------------------

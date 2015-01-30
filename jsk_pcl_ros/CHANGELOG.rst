@@ -2,6 +2,11 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros] Add HintedStickFinder to detect stick with human interfaction
+* Contributors: Kei Okada, Ryohei Ueda
+
 0.2.1 (2015-01-30)
 ------------------
 * Merge pull request #672 from k-okada/add_image_view2

@@ -87,9 +87,15 @@ namespace jsk_pcl_ros
       const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
       const ConvexPolygon::Ptr polygon,
       pcl::PointIndices& output_indices);
-    virtual void fittingCylinder(
+    virtual void normalEstimate(
       const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
       const pcl::PointIndices::Ptr indices,
+      pcl::PointCloud<pcl::Normal>& normals,
+      pcl::PointCloud<pcl::PointXYZ>& normals_cloud);
+    
+    virtual void fittingCylinder(
+      const pcl::PointCloud<pcl::PointXYZ>::Ptr& filtered_cloud,
+      const pcl::PointCloud<pcl::Normal>::Ptr& cloud_nromals,
       const Eigen::Vector3f& a,
       const Eigen::Vector3f& b);
     
@@ -116,6 +122,8 @@ namespace jsk_pcl_ros
     int max_iteration_;
     double eps_angle_;
     double min_probability_;
+    int cylinder_fitting_trial_;
+    int min_inliers_;
   private:
     
   };

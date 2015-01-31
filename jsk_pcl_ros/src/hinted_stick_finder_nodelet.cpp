@@ -94,7 +94,8 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     image_geometry::PinholeCameraModel model;
     model.fromCameraInfo(camera_info_msg);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud
+      (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*cloud_msg, *cloud);
     // convert 2-D point into 3-D ray
     Eigen::Vector3f a, b;
@@ -103,32 +104,40 @@ namespace jsk_pcl_ros
       (new pcl::PointIndices);
     
     filterPointCloud(cloud, polygon, *candidate_indices);
-    fittingCylinder(cloud, candidate_indices,  a, b);
-    // publish filtered cloud
+    pcl::PointCloud<pcl::Normal>::Ptr normals
+      (new pcl::PointCloud<pcl::Normal>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr normals_cloud
+      (new pcl::PointCloud<pcl::PointXYZ>);
+    normalEstimate(cloud, candidate_indices, *normals, *normals_cloud);
+    fittingCylinder(normals_cloud, normals,  a, b);
   }
 
-  void HintedStickFinder::fittingCylinder(
+  void HintedStickFinder::normalEstimate(
     const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
     const pcl::PointIndices::Ptr indices,
-    const Eigen::Vector3f& a,
-    const Eigen::Vector3f& b)
+    pcl::PointCloud<pcl::Normal>& normals,
+    pcl::PointCloud<pcl::PointXYZ>& normals_cloud)
   {
-    // 1. normal estimation
     pcl::NormalEstimationOMP<pcl::PointXYZ, pcl::Normal> ne;
     ne.setInputCloud(cloud);
     ne.setIndices(indices);
-    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ> ());
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree
+      (new pcl::search::KdTree<pcl::PointXYZ> ());
     ne.setSearchMethod(tree);
-    pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
     ne.setRadiusSearch (0.03);
-    ne.compute (*cloud_normals);
-
+    ne.compute (normals);
     pcl::ExtractIndices<pcl::PointXYZ> ex;
     ex.setInputCloud(cloud);
     ex.setIndices(indices);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    ex.filter(*filtered_cloud);
-    
+    ex.filter(normals_cloud);
+  }
+  
+  void HintedStickFinder::fittingCylinder(
+    const pcl::PointCloud<pcl::PointXYZ>::Ptr& filtered_cloud,
+    const pcl::PointCloud<pcl::Normal>::Ptr& cloud_normals,
+    const Eigen::Vector3f& a,
+    const Eigen::Vector3f& b)
+  {
     pcl::SACSegmentationFromNormals<pcl::PointXYZ, pcl::Normal> seg;
     pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
     pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
@@ -145,58 +154,61 @@ namespace jsk_pcl_ros
     seg.setProbability(min_probability_);
     seg.setInputCloud(filtered_cloud);
     seg.setInputNormals(cloud_normals);
-    seg.segment(*inliers, *coefficients);
-    if (inliers->indices.size() > 0) {
-      Cylinder::Ptr cylinder(new Cylinder(Eigen::Vector3f(
-                                            coefficients->values[0],
-                                            coefficients->values[1],
-                                            coefficients->values[2]),
-                                          Eigen::Vector3f(
-                                           coefficients->values[3],
-                                           coefficients->values[4],
-                                           coefficients->values[5]),
-                                          coefficients->values[6]));
-      pcl::PointIndices::Ptr cylinder_indices
-        (new pcl::PointIndices);
-      cylinder->filterPointCloud(*filtered_cloud,
-                                 outlier_threshold_,
-                                 *cylinder_indices);
-      double height = 0;
-      Eigen::Vector3f center;
-      cylinder->estimateCenterAndHeight(
-        *filtered_cloud, *cylinder_indices,
-        center, height);
-      Eigen::Vector3f uz = Eigen::Vector3f(
-        coefficients->values[3],
-        coefficients->values[4],
-        coefficients->values[5]).normalized();
-      // build maker
-      visualization_msgs::Marker marker;
-      cylinder->toMarker(marker, center, uz, height);
-      pcl_conversions::fromPCL(cloud->header, marker.header);
-      pub_cylinder_marker_.publish(marker);
-      geometry_msgs::PoseStamped pose;
-      pose.header = marker.header;
-      pose.pose = marker.pose;
-      pub_cylinder_pose_.publish(pose);
+    for (size_t i = 0; i < cylinder_fitting_trial_; i++) {
+      seg.segment(*inliers, *coefficients);
+      if (inliers->indices.size() > min_inliers_) {
+        Cylinder::Ptr cylinder(new Cylinder(Eigen::Vector3f(
+                                              coefficients->values[0],
+                                              coefficients->values[1],
+                                              coefficients->values[2]),
+                                            Eigen::Vector3f(
+                                              coefficients->values[3],
+                                              coefficients->values[4],
+                                              coefficients->values[5]),
+                                            coefficients->values[6]));
+        pcl::PointIndices::Ptr cylinder_indices
+          (new pcl::PointIndices);
+        cylinder->filterPointCloud(*filtered_cloud,
+                                   outlier_threshold_,
+                                   *cylinder_indices);
+        double height = 0;
+        Eigen::Vector3f center;
+        cylinder->estimateCenterAndHeight(
+          *filtered_cloud, *cylinder_indices,
+          center, height);
+        Eigen::Vector3f uz = Eigen::Vector3f(
+          coefficients->values[3],
+          coefficients->values[4],
+          coefficients->values[5]).normalized();
+        // build maker
+        visualization_msgs::Marker marker;
+        cylinder->toMarker(marker, center, uz, height);
+        pcl_conversions::fromPCL(filtered_cloud->header, marker.header);
+        pub_cylinder_marker_.publish(marker);
+        geometry_msgs::PoseStamped pose;
+        pose.header = marker.header;
+        pose.pose = marker.pose;
+        pub_cylinder_pose_.publish(pose);
 
-      PCLIndicesMsg ros_inliers;
-      pcl_conversions::fromPCL(*inliers, ros_inliers);
-      pub_inliers_.publish(ros_inliers);
-      PCLModelCoefficientMsg ros_coefficients;
-      ros_coefficients.header = pcl_conversions::fromPCL(coefficients->header);
-      ros_coefficients.values.push_back(center[0]);
-      ros_coefficients.values.push_back(center[1]);
-      ros_coefficients.values.push_back(center[2]);
-      ros_coefficients.values.push_back(coefficients->values[3]);
-      ros_coefficients.values.push_back(coefficients->values[4]);
-      ros_coefficients.values.push_back(coefficients->values[5]);
-      ros_coefficients.values.push_back(coefficients->values[6]);
-      ros_coefficients.values.push_back(height);
-      pub_coefficients_.publish(ros_coefficients);
-    }
-    else {
-      NODELET_WARN("failed to detect cylinder");
+        PCLIndicesMsg ros_inliers;
+        pcl_conversions::fromPCL(*inliers, ros_inliers);
+        pub_inliers_.publish(ros_inliers);
+        PCLModelCoefficientMsg ros_coefficients;
+        ros_coefficients.header = pcl_conversions::fromPCL(coefficients->header);
+        ros_coefficients.values.push_back(center[0]);
+        ros_coefficients.values.push_back(center[1]);
+        ros_coefficients.values.push_back(center[2]);
+        ros_coefficients.values.push_back(coefficients->values[3]);
+        ros_coefficients.values.push_back(coefficients->values[4]);
+        ros_coefficients.values.push_back(coefficients->values[5]);
+        ros_coefficients.values.push_back(coefficients->values[6]);
+        ros_coefficients.values.push_back(height);
+        pub_coefficients_.publish(ros_coefficients);
+        return;
+      }
+      else {
+        NODELET_WARN("failed to detect cylinder [%lu/%d]", i, cylinder_fitting_trial_);
+      }
     }
   }
   
@@ -259,6 +271,8 @@ namespace jsk_pcl_ros
     max_iteration_ = config.max_iteration;
     eps_angle_ = config.eps_angle;
     min_probability_ = config.min_probability;
+    cylinder_fitting_trial_ = config.cylinder_fitting_trial;
+    min_inliers_ = config.min_inliers;
   }
 }
 

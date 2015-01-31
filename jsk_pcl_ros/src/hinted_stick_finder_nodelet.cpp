@@ -166,31 +166,15 @@ namespace jsk_pcl_ros
       cylinder->estimateCenterAndHeight(
         *filtered_cloud, *cylinder_indices,
         center, height);
+      Eigen::Vector3f uz = Eigen::Vector3f(
+        coefficients->values[3],
+        coefficients->values[4],
+        coefficients->values[5]).normalized();
       // build maker
       visualization_msgs::Marker marker;
-      marker.type = visualization_msgs::Marker::CYLINDER;
+      cylinder->toMarker(marker, center, uz, height);
       pcl_conversions::fromPCL(cloud->header, marker.header);
-      marker.pose.position.x = center[0];
-      marker.pose.position.y = center[1];
-      marker.pose.position.z = center[2];
-      Eigen::Vector3f uz = Eigen::Vector3f(coefficients->values[3],
-                                           coefficients->values[4],
-                                           coefficients->values[5]).normalized();
-      Eigen::Vector3f orig_z(0, 0, 1);
-      Eigen::Quaternionf q;
-      q.setFromTwoVectors(orig_z, uz);
-      marker.pose.orientation.x = q.x();
-      marker.pose.orientation.y = q.y();
-      marker.pose.orientation.z = q.z();
-      marker.pose.orientation.w = q.w();
-      marker.scale.x = coefficients->values[6] * 2;
-      marker.scale.y = coefficients->values[6] * 2;
-      marker.scale.z = height;
-      marker.color.a = 1.0;
-      marker.color.g = 1.0;
-      marker.color.b = 1.0;
       pub_cylinder_marker_.publish(marker);
-
       geometry_msgs::PoseStamped pose;
       pose.header = marker.header;
       pose.pose = marker.pose;

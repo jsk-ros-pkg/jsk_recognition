@@ -11,9 +11,6 @@ env:
   - ROS_DISTRO=hydro  ROSWS=wstool BUILDER=catkin  BUILD_PKGS="jsk_perception checkerboard_detector resized_image_transport imagesift"  USE_DEB=true NOT_TEST_INSTALL=true
   - ROS_DISTRO=indigo  ROSWS=wstool BUILDER=catkin BUILD_PKGS="jsk_perception checkerboard_detector resized_image_transport imagesift"  USE_DEB=true NOT_TEST_INSTALL=true
 matrix:
-  allow_failures:
-  - env: ROS_DISTRO=indigo  ROSWS=wstool BUILDER=catkin BUILD_PKGS="jsk_pcl_ros"  USE_DEB=true NOT_TEST_INSTALL=true
-  - env: ROS_DISTRO=indigo  ROSWS=wstool BUILDER=catkin BUILD_PKGS="jsk_perception checkerboard_detector resized_image_transport imagesift"  USE_DEB=true NOT_TEST_INSTALL=true
 before_script:
   - export ROS_PARALLEL_JOBS="-j1 -l1"
 script: source .travis/travis.sh

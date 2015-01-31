@@ -34,33 +34,31 @@
  *********************************************************************/
 
 
-#ifndef JSK_PCL_ROS_MASK_IMAGE_TO_ROI_H_
-#define JSK_PCL_ROS_MASK_IMAGE_TO_ROI_H_
+#ifndef JSK_PERCEPTION_ROI_TO_MASK_IMAGE_H_
+#define JSK_PERCEPTION_ROI_TO_MASK_IMAGE_H_
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/Image.h>
+#include <cv_bridge/cv_bridge.h>
+#include <opencv2/opencv.hpp>
+#include <sensor_msgs/image_encodings.h>
 
-namespace jsk_pcl_ros
+namespace jsk_perception
 {
-  class MaskImageToROI: public jsk_topic_tools::DiagnosticNodelet
+  class ROIToMaskImage: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    MaskImageToROI(): DiagnosticNodelet("MaskImageToROI") {}
+    ROIToMaskImage(): DiagnosticNodelet("ROIToMaskImage") {}
   protected:
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual void convert(const sensor_msgs::Image::ConstPtr& mask_msg);
-    virtual void infoCallback(
+    virtual void convert(
       const sensor_msgs::CameraInfo::ConstPtr& info_msg);
 
-    ros::Subscriber sub_mask_;
-    ros::Subscriber sub_info_;
     ros::Publisher pub_;
-    boost::mutex mutex_;
-    sensor_msgs::CameraInfo::ConstPtr latest_camera_info_;
-    
+    ros::Subscriber sub_;
   private:
     
   };

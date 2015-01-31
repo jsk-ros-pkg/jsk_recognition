@@ -33,32 +33,58 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#include "jsk_perception/mask_image_to_rect.h"
+#include <opencv2/opencv.hpp>
+#include <sensor_msgs/image_encodings.h>
+#include <cv_bridge/cv_bridge.h>
 
-#ifndef JSK_PCL_ROS_MASK_IMAGE_TO_RECT_H_
-#define JSK_PCL_ROS_MASK_IMAGE_TO_RECT_H_
-
-#include <jsk_topic_tools/diagnostic_nodelet.h>
-#include <sensor_msgs/CameraInfo.h>
-#include <sensor_msgs/Image.h>
-#include <geometry_msgs/PolygonStamped.h>
-
-namespace jsk_pcl_ros
+namespace jsk_perception
 {
-  class MaskImageToRect: public jsk_topic_tools::DiagnosticNodelet
+  void MaskImageToRect::onInit()
   {
-  public:
-    MaskImageToRect(): DiagnosticNodelet("MaskImageToRect") {}
-  protected:
-    virtual void onInit();
-    virtual void subscribe();
-    virtual void unsubscribe();
-    virtual void convert(const sensor_msgs::Image::ConstPtr& mask_msg);
-    ros::Subscriber sub_mask_;
-    ros::Publisher pub_;
-    
-  private:
-    
-  };
+    DiagnosticNodelet::onInit();
+    pub_ = advertise<geometry_msgs::PolygonStamped>(*pnh_, "output", 1);
+  }
+
+  void MaskImageToRect::subscribe()
+  {
+    sub_mask_ = pnh_->subscribe("input", 1, &MaskImageToRect::convert, this);
+  }
+
+  void MaskImageToRect::unsubscribe()
+  {
+    sub_mask_.shutdown();
+  }
+
+  void MaskImageToRect::convert(
+    const sensor_msgs::Image::ConstPtr& mask_msg)
+  {
+    vital_checker_->poke();
+    std::vector<cv::Point> indices;
+    cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(
+      mask_msg, sensor_msgs::image_encodings::MONO8);
+    cv::Mat mask = cv_ptr->image;
+    for (size_t j = 0; j < mask.rows; j++) {
+      for (size_t i = 0; i < mask.cols; i++) {
+        if (mask.at<uchar>(j, i) == 255) {
+          indices.push_back(cv::Point(i, j));
+        }
+      }
+    }
+    cv::Rect mask_rect = cv::boundingRect(indices);
+    geometry_msgs::PolygonStamped rect;
+    rect.header = mask_msg->header;
+    geometry_msgs::Point32 min_pt, max_pt;
+    min_pt.x = mask_rect.x;
+    min_pt.y = mask_rect.y;
+    max_pt.x = mask_rect.x + mask_rect.width;
+    max_pt.y = mask_rect.y + mask_rect.height;
+    rect.polygon.points.push_back(min_pt);
+    rect.polygon.points.push_back(max_pt);
+    pub_.publish(rect);
+  }
+  
 }
 
-#endif
+#include <pluginlib/class_list_macros.h>
+PLUGINLIB_EXPORT_CLASS (jsk_perception::MaskImageToRect, nodelet::Nodelet);

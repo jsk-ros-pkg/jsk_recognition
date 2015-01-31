@@ -1,4 +1,32 @@
 <library path="lib/libjsk_perception">
+  <class name="jsk_perception/ROIToMaskImage"
+         type="jsk_perception::ROIToMaskImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/ROIToRect"
+         type="jsk_perception::ROIToRect"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/MaskImageToRect"
+         type="jsk_perception::MaskImageToRect"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/MaskImageToROI"
+         type="jsk_perception::MaskImageToROI"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/RectToMaskImage"
+         type="jsk_perception::RectToMaskImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/RectToROI"
+         type="jsk_perception::RectToROI"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/PolygonToMaskImage"
+         type="jsk_perception::PolygonToMaskImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/ErodeMaskImage"
          type="jsk_perception::ErodeMaskImage"
          base_class_type="nodelet::Nodelet">

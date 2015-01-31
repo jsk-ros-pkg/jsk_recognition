@@ -33,43 +33,32 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/roi_to_rect.h"
 
-namespace jsk_pcl_ros
+#ifndef JSK_PERCEPTION_ROI_TO_RECT_H_
+#define JSK_PERCEPTION_ROI_TO_RECT_H_
+
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <geometry_msgs/PolygonStamped.h>
+#include <sensor_msgs/CameraInfo.h>
+
+namespace jsk_perception
 {
-  void ROIToRect::onInit()
+  class ROIToRect: public jsk_topic_tools::DiagnosticNodelet
   {
-    DiagnosticNodelet::onInit();
-    pub_ = advertise<geometry_msgs::PolygonStamped>(
-      *pnh_, "output", 1);
-  }
+  public:
+    ROIToRect(): DiagnosticNodelet("ROIToRect") {}
+  protected:
+    virtual void onInit();
+    virtual void subscribe();
+    virtual void unsubscribe();
+    virtual void convert(
+      const sensor_msgs::CameraInfo::ConstPtr& roi_msg);
 
-  void ROIToRect::subscribe()
-  {
-    sub_ = pnh_->subscribe("input", 1, &ROIToRect::convert, this);
-  }
-
-  void ROIToRect::unsubscribe()
-  {
-    sub_.shutdown();
-  }
-
-  void ROIToRect::convert(
-    const sensor_msgs::CameraInfo::ConstPtr& roi_msg)
-  {
-    vital_checker_->poke();
-    geometry_msgs::PolygonStamped rect;
-    rect.header = roi_msg->header;
-    geometry_msgs::Point32 min_pt, max_pt;
-    min_pt.x = roi_msg->roi.x_offset;
-    min_pt.y = roi_msg->roi.y_offset;
-    max_pt.x = roi_msg->roi.x_offset + roi_msg->roi.width;
-    max_pt.y = roi_msg->roi.y_offset + roi_msg->roi.height;
-    rect.polygon.points.push_back(min_pt);
-    rect.polygon.points.push_back(max_pt);
-    pub_.publish(rect);
-  }
+    ros::Publisher pub_;
+    ros::Subscriber sub_;
+  private:
+    
+  };
 }
 
-#include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::ROIToRect, nodelet::Nodelet);
+#endif

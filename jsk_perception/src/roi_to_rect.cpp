@@ -33,39 +33,43 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#include "jsk_perception/roi_to_rect.h"
 
-#ifndef JSK_PCL_ROS_RECT_TO_MASK_IMAGE_H_
-#define JSK_PCL_ROS_RECT_TO_MASK_IMAGE_H_
-
-#include <jsk_topic_tools/diagnostic_nodelet.h>
-#include <geometry_msgs/PolygonStamped.h>
-#include <sensor_msgs/Image.h>
-#include <sensor_msgs/CameraInfo.h>
-#include <opencv2/opencv.hpp>
-
-namespace jsk_pcl_ros
+namespace jsk_perception
 {
-  class RectToMaskImage: public jsk_topic_tools::DiagnosticNodelet
+  void ROIToRect::onInit()
   {
-  public:
-    RectToMaskImage(): DiagnosticNodelet("RectToMaskImag") {}
-  protected:
-    virtual void onInit();
-    virtual void subscribe();
-    virtual void unsubscribe();
-    virtual void convert(
-      const geometry_msgs::PolygonStamped::ConstPtr& rect_msg);
-    virtual void infoCallback(
-      const sensor_msgs::CameraInfo::ConstPtr& info_msg);
+    DiagnosticNodelet::onInit();
+    pub_ = advertise<geometry_msgs::PolygonStamped>(
+      *pnh_, "output", 1);
+  }
 
-    boost::mutex mutex_;
-    ros::Publisher pub_;
-    ros::Subscriber sub_;
-    ros::Subscriber sub_info_;
-    sensor_msgs::CameraInfo::ConstPtr camera_info_;
-  private:
-    
-  };
+  void ROIToRect::subscribe()
+  {
+    sub_ = pnh_->subscribe("input", 1, &ROIToRect::convert, this);
+  }
+
+  void ROIToRect::unsubscribe()
+  {
+    sub_.shutdown();
+  }
+
+  void ROIToRect::convert(
+    const sensor_msgs::CameraInfo::ConstPtr& roi_msg)
+  {
+    vital_checker_->poke();
+    geometry_msgs::PolygonStamped rect;
+    rect.header = roi_msg->header;
+    geometry_msgs::Point32 min_pt, max_pt;
+    min_pt.x = roi_msg->roi.x_offset;
+    min_pt.y = roi_msg->roi.y_offset;
+    max_pt.x = roi_msg->roi.x_offset + roi_msg->roi.width;
+    max_pt.y = roi_msg->roi.y_offset + roi_msg->roi.height;
+    rect.polygon.points.push_back(min_pt);
+    rect.polygon.points.push_back(max_pt);
+    pub_.publish(rect);
+  }
 }
 
-#endif
+#include <pluginlib/class_list_macros.h>
+PLUGINLIB_EXPORT_CLASS (jsk_perception::ROIToRect, nodelet::Nodelet);

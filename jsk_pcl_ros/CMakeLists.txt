@@ -267,24 +267,9 @@ jsk_pcl_nodelet(src/plane_concatenator_nodelet.cpp
   "jsk_pcl/PlaneConcatenator" "plane_concatenator")
 jsk_pcl_nodelet(src/add_color_from_image_nodelet.cpp
   "jsk_pcl/AddColorFromImage" "add_color_from_image")
-jsk_pcl_nodelet(src/rect_to_roi_nodelet.cpp
-  "jsk_pcl/RectToROI" "rect_to_roi")
-jsk_pcl_nodelet(src/rect_to_mask_image_nodelet.cpp
-  "jsk_pcl/RectToMaskImage" "rect_to_mask_image")
-jsk_pcl_nodelet(src/torus_finder_nodelet.cpp
-  "jsk_pcl/TorusFinder" "torus_finder")
-jsk_pcl_nodelet(src/mask_image_to_roi_nodelet.cpp
-  "jsk_pcl/MaskImageToROI" "mask_image_to_roi")
-jsk_pcl_nodelet(src/mask_image_to_rect_nodelet.cpp
-  "jsk_pcl/MaskImageToRect" "mask_image_to_rect")
-jsk_pcl_nodelet(src/roi_to_rect_nodelet.cpp
-  "jsk_pcl/ROIToRect" "roi_to_rect")
-jsk_pcl_nodelet(src/roi_to_mask_image_nodelet.cpp
-  "jsk_pcl/ROIToMaskImage" "roi_to_mask_image")
+jsk_pcl_nodelet(src/torus_finder_nodelet.cpp "jsk_pcl/TorusFinder" "torus_finder")
 jsk_pcl_nodelet(src/mask_image_filter_nodelet.cpp
   "jsk_pcl/MaskImageFilter" "mask_image_filter")
-jsk_pcl_nodelet(src/polygon_to_mask_image_nodelet.cpp
-  "jsk_pcl/PolygonToMaskImage" "polygon_to_mask_image")
 jsk_pcl_nodelet(src/add_point_indices_nodelet.cpp
   "jsk_pcl/AddPointIndices" "add_point_indices")
 jsk_pcl_nodelet(src/find_object_on_plane_nodelet.cpp "jsk_pcl/FindObjectOnPlane" "find_object_on_plane")

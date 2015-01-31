@@ -59,7 +59,7 @@
 #include <pcl/ModelCoefficients.h>
 #include <pcl/filters/project_inliers.h>
 #include <pcl/surface/concave_hull.h>
-
+#include <visualization_msgs/Marker.h>
 #include "jsk_pcl_ros/pcl_util.h"
 
 namespace jsk_pcl_ros
@@ -343,6 +343,10 @@ namespace jsk_pcl_ros
                                          const pcl::PointIndices& indices,
                                          Eigen::Vector3f& center,
                                          double& height);
+    virtual void toMarker(visualization_msgs::Marker& marker,
+                          const Eigen::Vector3f& center,
+                          const Eigen::Vector3f& uz,
+                          const double height);
   protected:
     Eigen::Vector3f point_;
     Eigen::Vector3f direction_;

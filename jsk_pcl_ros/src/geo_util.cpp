@@ -1104,5 +1104,28 @@ namespace jsk_pcl_ros
     center = (min_point_projected + max_point_projected) / 2.0;
   }
 
+  void Cylinder::toMarker(visualization_msgs::Marker& marker,
+                          const Eigen::Vector3f& center,
+                          const Eigen::Vector3f& uz,
+                          const double height)
+  {
+    marker.type = visualization_msgs::Marker::CYLINDER;
+    marker.pose.position.x = center[0];
+    marker.pose.position.y = center[1];
+    marker.pose.position.z = center[2];
+    Eigen::Vector3f orig_z(0, 0, 1);
+    Eigen::Quaternionf q;
+    q.setFromTwoVectors(orig_z, uz);
+    marker.pose.orientation.x = q.x();
+    marker.pose.orientation.y = q.y();
+    marker.pose.orientation.z = q.z();
+    marker.pose.orientation.w = q.w();
+    marker.scale.x = radius_ * 2;
+    marker.scale.y = radius_ * 2;
+    marker.scale.z = height;
+    marker.color.a = 1.0;
+    marker.color.g = 1.0;
+    marker.color.b = 1.0;
+  }
   
 }

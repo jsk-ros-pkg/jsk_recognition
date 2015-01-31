@@ -102,6 +102,36 @@ Detect a stick from pointcloud and line in 2-D image as hiint.
   Coefficients of detected stick. The coefficients are
   `[cx, cy, cz, dx, dy, dz, r, h]`.
 
+#### Parameters
+* `~min_radis` (Double, default: `0.05`)
+* `~max_radis` (Double, default: `0.2`)
+
+  Minium and maximum radius of cylinder fitting.
+
+* `~filter_distance` (Double, default: `0.2`)
+
+  Distance from hint line to points which cna be candidate.
+
+* `~outlier_threshold` (Double, default: `0.01`)
+
+  Outlier threshold in cylinder fitting.
+
+* `~max_iteration` (Integer, default: `100`)
+
+  Maximum number of iteraoitn in cylinder fitting
+
+* `~min_probability` (Integer, default: `0.8`)
+
+  Required minimum probability of cylinder fitting
+
+* `~cylinder_fitting_trial` (Integer, default: `3`)
+
+  The number of cylinder fitting trials when no cylinder is found
+
+* `~min_inliers` (Integer, default: `10`)
+
+  Minimum number of inliers in cylinder fitting.
+
 ### jsk\_pcl/RGBColorFilter
 Filter pointcloud based on RGB range.
 

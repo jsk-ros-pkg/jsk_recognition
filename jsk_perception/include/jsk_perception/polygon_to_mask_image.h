@@ -34,8 +34,8 @@
  *********************************************************************/
 
 
-#ifndef JSK_PCL_ROS_POLYGON_TO_MASK_IMAGE_H_
-#define JSK_PCL_ROS_POLYGON_TO_MASK_IMAGE_H_
+#ifndef JSK_PERCEPTION_POLYGON_TO_MASK_IMAGE_H_
+#define JSK_PERCEPTION_POLYGON_TO_MASK_IMAGE_H_
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <geometry_msgs/PolygonStamped.h>
@@ -43,7 +43,7 @@
 #include <sensor_msgs/Image.h>
 #include <image_geometry/pinhole_camera_model.h>
 
-namespace jsk_pcl_ros
+namespace jsk_perception
 {
   class PolygonToMaskImage: public jsk_topic_tools::DiagnosticNodelet
   {

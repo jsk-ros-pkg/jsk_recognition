@@ -33,64 +33,44 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/rect_to_mask_image.h"
-#include <cv_bridge/cv_bridge.h>
-#include <sensor_msgs/image_encodings.h>
+#include "jsk_perception/roi_to_mask_image.h"
 
-namespace jsk_pcl_ros
+namespace jsk_perception
 {
-  void RectToMaskImage::onInit()
+  void ROIToMaskImage::onInit()
   {
     DiagnosticNodelet::onInit();
-    pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+    pub_ = advertise<sensor_msgs::Image>(
+      *pnh_, "output", 1);
   }
 
-  void RectToMaskImage::subscribe()
+  void ROIToMaskImage::subscribe()
   {
-    sub_ = pnh_->subscribe("input", 1, &RectToMaskImage::convert, this);
-    sub_info_ = pnh_->subscribe("input/camera_info", 1,
-                                &RectToMaskImage::infoCallback, this);
+    sub_ = pnh_->subscribe("input", 1, &ROIToMaskImage::convert, this);
   }
 
-  void RectToMaskImage::unsubscribe()
+  void ROIToMaskImage::unsubscribe()
   {
     sub_.shutdown();
-    sub_info_.shutdown();
   }
 
-  void RectToMaskImage::convert(
-    const geometry_msgs::PolygonStamped::ConstPtr& rect_msg)
-  {
-    boost::mutex::scoped_lock lock(mutex_);
-    if (camera_info_) {
-      cv::Mat mask_image = cv::Mat::zeros(camera_info_->height,
-                                          camera_info_->width,
-                                          CV_8UC1);
-      geometry_msgs::Point32 P0 = rect_msg->polygon.points[0];
-      geometry_msgs::Point32 P1 = rect_msg->polygon.points[1];
-      double min_x = std::max(std::min(P0.x, P1.x), 0.0f);
-      double max_x = std::max(P0.x, P1.x);
-      double min_y = std::max(std::min(P0.y, P1.y), 0.0f);
-      double max_y = std::max(P0.y, P1.y);
-      double width = std::min(max_x - min_x, camera_info_->width - min_x);
-      double height = std::min(max_y - min_y, camera_info_->height - min_y);
-      cv::Rect region(min_x, min_y, width, height);
-      cv::rectangle(mask_image, region, cv::Scalar(255), CV_FILLED);
-      pub_.publish(cv_bridge::CvImage(
-                     rect_msg->header,
-                     sensor_msgs::image_encodings::MONO8,
-                     mask_image).toImageMsg());
-    }
-  }
-
-  
-  void RectToMaskImage::infoCallback(
+  void ROIToMaskImage::convert(
     const sensor_msgs::CameraInfo::ConstPtr& info_msg)
   {
-    boost::mutex::scoped_lock lock(mutex_);
-    camera_info_ = info_msg;
+    cv::Mat mask_image = cv::Mat::zeros(info_msg->height,
+                                        info_msg->width,
+                                        CV_8UC1);
+    cv::Rect rect(info_msg->roi.x_offset,
+                  info_msg->roi.y_offset,
+                  info_msg->roi.width,
+                  info_msg->roi.height);
+    cv::rectangle(mask_image, rect, cv::Scalar(255), CV_FILLED);
+    pub_.publish(cv_bridge::CvImage(
+                   info_msg->header,
+                   sensor_msgs::image_encodings::MONO8,
+                   mask_image).toImageMsg());
   }
 }
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::RectToMaskImage, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_perception::ROIToMaskImage, nodelet::Nodelet);

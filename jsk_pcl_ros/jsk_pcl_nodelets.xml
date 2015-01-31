@@ -11,40 +11,12 @@
          type="jsk_pcl_ros::AddPointIndices"
          base_class_type="nodelet::Nodelet">
   </class>
-  <class name="jsk_pcl/PolygonToMaskImage"
-         type="jsk_pcl_ros::PolygonToMaskImage"
-         base_class_type="nodelet::Nodelet">
-  </class>
   <class name="jsk_pcl/MaskImageFilter"
          type="jsk_pcl_ros::MaskImageFilter"
          base_class_type="nodelet::Nodelet">
   </class>
-  <class name="jsk_pcl/ROIToMaskImage"
-         type="jsk_pcl_ros::ROIToMaskImage"
-         base_class_type="nodelet::Nodelet">
-  </class>
-  <class name="jsk_pcl/ROIToRect"
-         type="jsk_pcl_ros::ROIToRect"
-         base_class_type="nodelet::Nodelet">
-  </class>
-  <class name="jsk_pcl/MaskImageToRect"
-         type="jsk_pcl_ros::MaskImageToRect"
-         base_class_type="nodelet::Nodelet">
-  </class>
-  <class name="jsk_pcl/MaskImageToROI"
-         type="jsk_pcl_ros::MaskImageToROI"
-         base_class_type="nodelet::Nodelet">
-  </class>
-  <class name="jsk_pcl/RectToMaskImage"
-         type="jsk_pcl_ros::RectToMaskImage"
-         base_class_type="nodelet::Nodelet">
-  </class>
   <class name="jsk_pcl/TorusFinder"
          type="jsk_pcl_ros::TorusFinder"
-         base_class_type="nodelet::Nodelet">
-  </class>
-  <class name="jsk_pcl/RectToROI"
-         type="jsk_pcl_ros::RectToROI"
          base_class_type="nodelet::Nodelet">
   </class>
   <class name="jsk_pcl/AddColorFromImage"

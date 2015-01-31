@@ -105,6 +105,14 @@ jsk_perception_nodelet(src/add_mask_image.cpp "jsk_perception/AddMaskImage" "add
 jsk_perception_nodelet(src/multiply_mask_image.cpp "jsk_perception/MultiplyMaskImage" "multiply_mask_image")
 jsk_perception_nodelet(src/dilate_erode_mask_image.cpp "jsk_perception/DilateMaskImage" "dilate_mask_image")
 jsk_perception_nodelet(src/dilate_erode_mask_image.cpp "jsk_perception/ErodeMaskImage" "erode_mask_image")
+jsk_perception_nodelet(src/rect_to_mask_image.cpp "jsk_perception/RectToMaskImage" "rect_to_mask_image")
+jsk_perception_nodelet(src/mask_image_to_roi.cpp "jsk_perception/MaskImageToROI" "mask_image_to_roi")
+jsk_perception_nodelet(src/mask_image_to_rect.cpp "jsk_perception/MaskImageToRect" "mask_image_to_rect")
+jsk_perception_nodelet(src/roi_to_rect.cpp "jsk_perception/ROIToRect" "roi_to_rect")
+jsk_perception_nodelet(src/roi_to_mask_image.cpp "jsk_pcl/ROIToMaskImage" "roi_to_mask_image")
+jsk_perception_nodelet(src/polygon_to_mask_image.cpp "jsk_perception/PolygonToMaskImage" "polygon_to_mask_image")
+jsk_perception_nodelet(src/rect_to_roi.cpp "jsk_perception/RectToROI" "rect_to_roi")
+
 # compiling jsk_perception library for nodelet
 add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
   ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels/slic.cpp

@@ -64,8 +64,8 @@ namespace jsk_pcl_ros
       *pnh_, "output/cylinder_pose", 1);
     pub_inliers_ = advertise<PCLIndicesMsg>(
       *pnh_, "output/inliers", 1);
-    pub_coefficients_ = advertise<PCLIndicesMsg>(
-      *pnh_, "output/inliers", 1);
+    pub_coefficients_ = advertise<PCLModelCoefficientMsg>(
+      *pnh_, "output/coefficients", 1);
   }
 
   void HintedStickFinder::subscribe()

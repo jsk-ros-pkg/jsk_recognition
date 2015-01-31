@@ -34,31 +34,35 @@
  *********************************************************************/
 
 
-#ifndef JSK_PCL_ROS_ROI_TO_MASK_IMAGE_H_
-#define JSK_PCL_ROS_ROI_TO_MASK_IMAGE_H_
+#ifndef JSK_PERCEPTION_RECT_TO_MASK_IMAGE_H_
+#define JSK_PERCEPTION_RECT_TO_MASK_IMAGE_H_
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
-#include <sensor_msgs/CameraInfo.h>
+#include <geometry_msgs/PolygonStamped.h>
 #include <sensor_msgs/Image.h>
-#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/CameraInfo.h>
 #include <opencv2/opencv.hpp>
-#include <sensor_msgs/image_encodings.h>
 
-namespace jsk_pcl_ros
+namespace jsk_perception
 {
-  class ROIToMaskImage: public jsk_topic_tools::DiagnosticNodelet
+  class RectToMaskImage: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    ROIToMaskImage(): DiagnosticNodelet("ROIToMaskImage") {}
+    RectToMaskImage(): DiagnosticNodelet("RectToMaskImag") {}
   protected:
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
     virtual void convert(
+      const geometry_msgs::PolygonStamped::ConstPtr& rect_msg);
+    virtual void infoCallback(
       const sensor_msgs::CameraInfo::ConstPtr& info_msg);
 
+    boost::mutex mutex_;
     ros::Publisher pub_;
     ros::Subscriber sub_;
+    ros::Subscriber sub_info_;
+    sensor_msgs::CameraInfo::ConstPtr camera_info_;
   private:
     
   };

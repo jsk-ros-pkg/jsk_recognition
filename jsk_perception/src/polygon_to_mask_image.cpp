@@ -33,62 +33,69 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/rect_to_roi.h"
+#include "jsk_perception/polygon_to_mask_image.h"
+#include <opencv2/opencv.hpp>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
 
-namespace jsk_pcl_ros
+namespace jsk_perception
 {
-  void RectToROI::onInit()
+  void PolygonToMaskImage::onInit()
   {
     DiagnosticNodelet::onInit();
-    pub_ = advertise<sensor_msgs::CameraInfo>(*pnh_, "output", 1);
+    pub_ = advertise<sensor_msgs::Image>(
+      *pnh_, "output", 1);
   }
 
-  void RectToROI::subscribe()
+  void PolygonToMaskImage::subscribe()
   {
-    sub_rect_ = pnh_->subscribe(
-      "input", 1, &RectToROI::rectCallback, this);
-    sub_info_ = pnh_->subscribe(
-      "input/camera_info", 1, &RectToROI::infoCallback, this);
+    sub_info_ = pnh_->subscribe("input/camera_info", 1,
+                                &PolygonToMaskImage::infoCallback, this);
+    sub_ = pnh_->subscribe("input", 1,
+                           &PolygonToMaskImage::convert, this);
   }
 
-  void RectToROI::unsubscribe()
+  void PolygonToMaskImage::unsubscribe()
   {
-    sub_rect_.shutdown();
     sub_info_.shutdown();
+    sub_.shutdown();
   }
-  
-  void RectToROI::infoCallback(
+
+  void PolygonToMaskImage::infoCallback(
     const sensor_msgs::CameraInfo::ConstPtr& info_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    latest_camera_info_ = info_msg;
+    camera_info_ = info_msg;
   }
 
-  void RectToROI::rectCallback(
-    const geometry_msgs::PolygonStamped::ConstPtr& rect_msg)
+  void PolygonToMaskImage::convert(
+    const geometry_msgs::PolygonStamped::ConstPtr& polygon_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    if (latest_camera_info_) {
-      sensor_msgs::CameraInfo roi(*latest_camera_info_);
-      geometry_msgs::Point32 P0 = rect_msg->polygon.points[0];
-      geometry_msgs::Point32 P1 = rect_msg->polygon.points[1];
-      double min_x = std::max(std::min(P0.x, P1.x), 0.0f);
-      double max_x = std::max(P0.x, P1.x);
-      double min_y = std::max(std::min(P0.y, P1.y), 0.0f);
-      double max_y = std::max(P0.y, P1.y);
-      double width = std::min(max_x - min_x, latest_camera_info_->width - min_x);
-      double height = std::min(max_y - min_y, latest_camera_info_->height - min_y);
-      roi.roi.x_offset = (int)min_x;
-      roi.roi.y_offset = (int)min_y;
-      roi.roi.height = height;
-      roi.roi.width = width;
-      pub_.publish(roi);
-    }
-    else {
-      NODELET_ERROR("camera info is not yet available");
+    vital_checker_->poke();
+    if (camera_info_) {
+      image_geometry::PinholeCameraModel model;
+      model.fromCameraInfo(camera_info_);
+      cv::Mat mask_image = cv::Mat::zeros(camera_info_->height,
+                                          camera_info_->width,
+                                          CV_8UC1);
+      std::vector<cv::Point> points;
+      // we expect same tf frame
+      if (polygon_msg->polygon.points.size() >= 3) {
+        for (size_t i = 0; i < polygon_msg->polygon.points.size(); i++) {
+          geometry_msgs::Point32 p = polygon_msg->polygon.points[i];
+          cv::Point uv = model.project3dToPixel(cv::Point3d(p.x, p.y, p.z));
+          points.push_back(uv);
+        }
+        cv::fillConvexPoly(mask_image, &(points[0]), points.size(), cv::Scalar(255));
+      }
+      pub_.publish(cv_bridge::CvImage(polygon_msg->header,
+                                      sensor_msgs::image_encodings::MONO8,
+                                      mask_image).toImageMsg());
     }
   }
+
 }
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::RectToROI, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_perception::PolygonToMaskImage, nodelet::Nodelet);

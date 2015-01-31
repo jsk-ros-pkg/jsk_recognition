@@ -33,44 +33,72 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/roi_to_mask_image.h"
+#include "jsk_perception/mask_image_to_roi.h"
+#include <opencv2/opencv.hpp>
+#include <sensor_msgs/image_encodings.h>
+#include <cv_bridge/cv_bridge.h>
 
-namespace jsk_pcl_ros
+namespace jsk_perception
 {
-  void ROIToMaskImage::onInit()
+  void MaskImageToROI::onInit()
   {
     DiagnosticNodelet::onInit();
-    pub_ = advertise<sensor_msgs::Image>(
-      *pnh_, "output", 1);
+    pub_ = advertise<sensor_msgs::CameraInfo>(*pnh_, "output", 1);
   }
 
-  void ROIToMaskImage::subscribe()
+  void MaskImageToROI::subscribe()
   {
-    sub_ = pnh_->subscribe("input", 1, &ROIToMaskImage::convert, this);
+    sub_mask_ = pnh_->subscribe("input", 1, &MaskImageToROI::convert, this);
+    sub_info_ = pnh_->subscribe("input/camera_info", 1,
+                                &MaskImageToROI::infoCallback, this);
   }
 
-  void ROIToMaskImage::unsubscribe()
+  void MaskImageToROI::unsubscribe()
   {
-    sub_.shutdown();
+    sub_mask_.shutdown();
+    sub_info_.shutdown();
   }
 
-  void ROIToMaskImage::convert(
+  void MaskImageToROI::infoCallback(
     const sensor_msgs::CameraInfo::ConstPtr& info_msg)
   {
-    cv::Mat mask_image = cv::Mat::zeros(info_msg->height,
-                                        info_msg->width,
-                                        CV_8UC1);
-    cv::Rect rect(info_msg->roi.x_offset,
-                  info_msg->roi.y_offset,
-                  info_msg->roi.width,
-                  info_msg->roi.height);
-    cv::rectangle(mask_image, rect, cv::Scalar(255), CV_FILLED);
-    pub_.publish(cv_bridge::CvImage(
-                   info_msg->header,
-                   sensor_msgs::image_encodings::MONO8,
-                   mask_image).toImageMsg());
+    vital_checker_->poke();
+    boost::mutex::scoped_lock lock(mutex_);
+    latest_camera_info_ = info_msg;
   }
+
+  void MaskImageToROI::convert(
+    const sensor_msgs::Image::ConstPtr& mask_msg)
+  {
+    vital_checker_->poke();
+    boost::mutex::scoped_lock lock(mutex_);
+    if (latest_camera_info_) {
+      sensor_msgs::CameraInfo camera_info(*latest_camera_info_);
+      std::vector<cv::Point> indices;
+      cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(
+        mask_msg, sensor_msgs::image_encodings::MONO8);
+      cv::Mat mask = cv_ptr->image;
+      for (size_t j = 0; j < mask.rows; j++) {
+        for (size_t i = 0; i < mask.cols; i++) {
+          if (mask.at<uchar>(j, i) == 255) {
+            indices.push_back(cv::Point(i, j));
+          }
+        }
+      }
+      cv::Rect mask_rect = cv::boundingRect(indices);
+      camera_info.roi.x_offset = mask_rect.x;
+      camera_info.roi.y_offset = mask_rect.y;
+      camera_info.roi.width = mask_rect.width;
+      camera_info.roi.height = mask_rect.height;
+      camera_info.header = mask_msg->header;
+      pub_.publish(camera_info);
+    }
+    else {
+      NODELET_ERROR("camera info is not yet available");
+    }
+  }
+  
 }
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::ROIToMaskImage, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_perception::MaskImageToROI, nodelet::Nodelet);

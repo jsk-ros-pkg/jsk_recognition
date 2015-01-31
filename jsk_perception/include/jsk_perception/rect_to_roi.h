@@ -34,14 +34,14 @@
  *********************************************************************/
 
 
-#ifndef JSK_PCL_ROS_RECT_TO_ROI_H_
-#define JSK_PCL_ROS_RECT_TO_ROI_H_
+#ifndef JSK_PERCEPTION_RECT_TO_ROI_H_
+#define JSK_PERCEPTION_RECT_TO_ROI_H_
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <geometry_msgs/PolygonStamped.h>
 
-namespace jsk_pcl_ros
+namespace jsk_perception
 {
   class RectToROI: public jsk_topic_tools::DiagnosticNodelet
   {

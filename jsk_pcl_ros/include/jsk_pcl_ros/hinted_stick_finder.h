@@ -105,6 +105,8 @@ namespace jsk_pcl_ros
     ros::Publisher pub_line_filtered_normal_;
     ros::Publisher pub_cylinder_marker_;
     ros::Publisher pub_cylinder_pose_;
+    ros::Publisher pub_inliers_;
+    ros::Publisher pub_coefficients_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     
     double max_radius_;

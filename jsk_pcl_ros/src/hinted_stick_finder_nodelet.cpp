@@ -62,6 +62,10 @@ namespace jsk_pcl_ros
       *pnh_, "debug/cylinder_marker", 1);
     pub_cylinder_pose_ = advertise<geometry_msgs::PoseStamped>(
       *pnh_, "output/cylinder_pose", 1);
+    pub_inliers_ = advertise<PCLIndicesMsg>(
+      *pnh_, "output/inliers", 1);
+    pub_coefficients_ = advertise<PCLIndicesMsg>(
+      *pnh_, "output/inliers", 1);
   }
 
   void HintedStickFinder::subscribe()
@@ -143,14 +147,6 @@ namespace jsk_pcl_ros
     seg.setInputNormals(cloud_normals);
     seg.segment(*inliers, *coefficients);
     if (inliers->indices.size() > 0) {
-      NODELET_INFO("coefficients: [%f, %f, %f, %f, %f, %f, %f]",
-                   coefficients->values[0],
-                   coefficients->values[1],
-                   coefficients->values[2],
-                   coefficients->values[3],
-                   coefficients->values[4],
-                   coefficients->values[5],
-                   coefficients->values[6]);
       Cylinder::Ptr cylinder(new Cylinder(Eigen::Vector3f(
                                             coefficients->values[0],
                                             coefficients->values[1],
@@ -199,6 +195,21 @@ namespace jsk_pcl_ros
       pose.header = marker.header;
       pose.pose = marker.pose;
       pub_cylinder_pose_.publish(pose);
+
+      PCLIndicesMsg ros_inliers;
+      pcl_conversions::fromPCL(*inliers, ros_inliers);
+      pub_inliers_.publish(ros_inliers);
+      PCLModelCoefficientMsg ros_coefficients;
+      ros_coefficients.header = pcl_conversions::fromPCL(coefficients->header);
+      ros_coefficients.values.push_back(center[0]);
+      ros_coefficients.values.push_back(center[1]);
+      ros_coefficients.values.push_back(center[2]);
+      ros_coefficients.values.push_back(coefficients->values[3]);
+      ros_coefficients.values.push_back(coefficients->values[4]);
+      ros_coefficients.values.push_back(coefficients->values[5]);
+      ros_coefficients.values.push_back(coefficients->values[6]);
+      ros_coefficients.values.push_back(height);
+      pub_coefficients_.publish(ros_coefficients);
     }
     else {
       NODELET_WARN("failed to detect cylinder");

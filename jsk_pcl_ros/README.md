@@ -94,6 +94,14 @@ Detect a stick from pointcloud and line in 2-D image as hiint.
 
   Pose of detected stick.
 
+* `~output/inliers` (`pcl_msgs/PointIndices`)
+
+  Inliers of detected stick.
+* `~output/coefficients` (`pcl_msgs/ModelCoefficients`)
+
+  Coefficients of detected stick. The coefficients are
+  `[cx, cy, cz, dx, dy, dz, r, h]`.
+
 ### jsk\_pcl/RGBColorFilter
 Filter pointcloud based on RGB range.
 

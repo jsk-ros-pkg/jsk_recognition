@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.3 (2015-02-02)
+------------------
 * add CATKIN_DEPENDS
 * [jsk_recognition_msgs] Add new message for occupancy grid for more
   simple usage

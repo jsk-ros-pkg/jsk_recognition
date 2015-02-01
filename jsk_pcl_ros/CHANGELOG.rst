@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.3 (2015-02-02)
+------------------
 * [jsk_pcl_ros] Add ~min_inliers and ~cylinder_fitting_trial parameter to
   try cylinder fitting severeal times in HintedStickFinder
 * [jsk_pcl_ros] Implement utility function to generate cylinder marker

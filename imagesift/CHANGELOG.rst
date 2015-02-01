@@ -2,8 +2,8 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.3 (2015-02-02)
+------------------
 * Remove rosbuild files
 * Contributors: Ryohei Ueda
 

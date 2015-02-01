@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.3 (2015-02-02)
+------------------
 * [jsk_pcl_ros, jsk_perception] Move mask image operation to jsk_perception
 * Remove rosbuild files
 * [jsk_perception] Add ErodeMaskImage nodelet

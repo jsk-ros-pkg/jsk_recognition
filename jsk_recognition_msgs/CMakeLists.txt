@@ -46,5 +46,5 @@ generate_messages(
   std_msgs sensor_msgs geometry_msgs pcl_msgs
 )
 catkin_package(
-  # CATKIN_DEPENDS other_catkin_pkg
+  CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs pcl_msgs
 )

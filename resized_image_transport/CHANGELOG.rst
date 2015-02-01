@@ -2,6 +2,11 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Remove rosbuild files
+* Contributors: Ryohei Ueda
+
 0.2.2 (2015-01-30)
 ------------------
 

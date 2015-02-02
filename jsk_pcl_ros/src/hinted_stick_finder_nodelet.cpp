@@ -109,7 +109,7 @@ namespace jsk_pcl_ros
     pcl::PointCloud<pcl::PointXYZ>::Ptr normals_cloud
       (new pcl::PointCloud<pcl::PointXYZ>);
     normalEstimate(cloud, candidate_indices, *normals, *normals_cloud);
-    fittingCylinder(normals_cloud, normals,  a, b);
+    fittingCylinder(normals_cloud, normals, a, b);
   }
 
   void HintedStickFinder::normalEstimate(
@@ -130,6 +130,22 @@ namespace jsk_pcl_ros
     ex.setInputCloud(cloud);
     ex.setIndices(indices);
     ex.filter(normals_cloud);
+  }
+
+  bool HintedStickFinder::rejected2DHint(
+    const Cylinder::Ptr& cylinder,
+    const Eigen::Vector3f& a,
+    const Eigen::Vector3f& b)
+  {
+    Eigen::Vector3f hint_dir((b - a));
+    hint_dir[2] = 0;
+    hint_dir.normalize();
+    Eigen::Vector3f cylinder_dir(cylinder->getDirection());
+    cylinder_dir[2] = 0;
+    cylinder_dir.normalize();
+    double ang = acos(cylinder_dir.dot(hint_dir));
+    NODELET_INFO("angle: %f", ang);
+    return !(ang < eps_2d_angle_ || (M_PI - ang) < eps_2d_angle_);
   }
   
   void HintedStickFinder::fittingCylinder(
@@ -176,39 +192,39 @@ namespace jsk_pcl_ros
         cylinder->estimateCenterAndHeight(
           *filtered_cloud, *cylinder_indices,
           center, height);
-        Eigen::Vector3f uz = Eigen::Vector3f(
-          coefficients->values[3],
-          coefficients->values[4],
-          coefficients->values[5]).normalized();
-        // build maker
-        visualization_msgs::Marker marker;
-        cylinder->toMarker(marker, center, uz, height);
-        pcl_conversions::fromPCL(filtered_cloud->header, marker.header);
-        pub_cylinder_marker_.publish(marker);
-        geometry_msgs::PoseStamped pose;
-        pose.header = marker.header;
-        pose.pose = marker.pose;
-        pub_cylinder_pose_.publish(pose);
-
-        PCLIndicesMsg ros_inliers;
-        pcl_conversions::fromPCL(*inliers, ros_inliers);
-        pub_inliers_.publish(ros_inliers);
-        PCLModelCoefficientMsg ros_coefficients;
-        ros_coefficients.header = pcl_conversions::fromPCL(coefficients->header);
-        ros_coefficients.values.push_back(center[0]);
-        ros_coefficients.values.push_back(center[1]);
-        ros_coefficients.values.push_back(center[2]);
-        ros_coefficients.values.push_back(coefficients->values[3]);
-        ros_coefficients.values.push_back(coefficients->values[4]);
-        ros_coefficients.values.push_back(coefficients->values[5]);
-        ros_coefficients.values.push_back(coefficients->values[6]);
-        ros_coefficients.values.push_back(height);
-        pub_coefficients_.publish(ros_coefficients);
+        if (!rejected2DHint(cylinder, a, b)) {
+          Eigen::Vector3f uz = Eigen::Vector3f(
+            coefficients->values[3],
+            coefficients->values[4],
+            coefficients->values[5]).normalized();
+          // build maker
+          visualization_msgs::Marker marker;
+          cylinder->toMarker(marker, center, uz, height);
+          pcl_conversions::fromPCL(filtered_cloud->header, marker.header);
+          pub_cylinder_marker_.publish(marker);
+          geometry_msgs::PoseStamped pose;
+          pose.header = marker.header;
+          pose.pose = marker.pose;
+          pub_cylinder_pose_.publish(pose);
+          
+          PCLIndicesMsg ros_inliers;
+          pcl_conversions::fromPCL(*inliers, ros_inliers);
+          pub_inliers_.publish(ros_inliers);
+          PCLModelCoefficientMsg ros_coefficients;
+          ros_coefficients.header = pcl_conversions::fromPCL(coefficients->header);
+          ros_coefficients.values.push_back(center[0]);
+          ros_coefficients.values.push_back(center[1]);
+          ros_coefficients.values.push_back(center[2]);
+          ros_coefficients.values.push_back(coefficients->values[3]);
+          ros_coefficients.values.push_back(coefficients->values[4]);
+          ros_coefficients.values.push_back(coefficients->values[5]);
+          ros_coefficients.values.push_back(coefficients->values[6]);
+          ros_coefficients.values.push_back(height);
+          pub_coefficients_.publish(ros_coefficients);
         return;
+        }
       }
-      else {
-        NODELET_WARN("failed to detect cylinder [%lu/%d]", i, cylinder_fitting_trial_);
-      }
+      NODELET_WARN("failed to detect cylinder [%lu/%d]", i, cylinder_fitting_trial_);
     }
   }
   
@@ -273,6 +289,7 @@ namespace jsk_pcl_ros
     min_probability_ = config.min_probability;
     cylinder_fitting_trial_ = config.cylinder_fitting_trial;
     min_inliers_ = config.min_inliers;
+    eps_2d_angle_ = config.eps_2d_angle;
   }
 }
 

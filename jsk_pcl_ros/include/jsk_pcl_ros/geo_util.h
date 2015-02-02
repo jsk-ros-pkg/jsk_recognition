@@ -347,6 +347,7 @@ namespace jsk_pcl_ros
                           const Eigen::Vector3f& center,
                           const Eigen::Vector3f& uz,
                           const double height);
+    virtual Eigen::Vector3f getDirection();
   protected:
     Eigen::Vector3f point_;
     Eigen::Vector3f direction_;

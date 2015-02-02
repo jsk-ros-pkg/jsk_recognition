@@ -1013,6 +1013,20 @@ This nodelet tracks the target pointcloud.
 
   If this parameter is true, do not publish tf frame.
 
+* `~enable_cache` (Boolean, default: `false`)
+
+  Enable caching of nearest-neighbor search
+
+* `~cache_size_x` (Double, default: `0.01`)
+* `~cache_size_y` (Double, default: `0.01`)
+* `~cache_size_z` (Double, default: `0.01`)
+
+  Resolution of cache voxel grid.
+
+* `~max_distance` (Double, default: `1.0`)
+
+  Maximum distance between points to take into account when computing likelihood
+
 #### Sample
 
 run the below command.

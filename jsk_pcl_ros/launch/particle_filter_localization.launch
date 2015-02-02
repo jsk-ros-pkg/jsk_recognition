@@ -15,7 +15,7 @@
         args="standalone pcl/VoxelGrid">
     <remap from="~input" to="full_laser_cloud_from_root/output" />
     <rosparam>
-      leaf_size: 0.02
+      leaf_size: 0.01
       filter_limit_min: -1000
       filter_limit_max: 1000
     </rosparam>
@@ -42,7 +42,8 @@
       not_use_reference_centroid: true
       use_hsv: false
       reversed: true
-      particle_num: 400
+      particle_num: 1000
+      max_distance: 1.0
     </rosparam>
   </node>
 </launch>

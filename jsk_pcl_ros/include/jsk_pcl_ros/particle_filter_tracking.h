@@ -346,6 +346,147 @@ namespace pcl
       }
     private:
     };
+
+    template <typename PointInT>
+    class CachedApproxNearestPairPointCloudCoherence: public ApproxNearestPairPointCloudCoherence<PointInT>
+    {
+    public:
+      typedef typename ApproxNearestPairPointCloudCoherence<PointInT>::PointCoherencePtr PointCoherencePtr;
+      typedef typename ApproxNearestPairPointCloudCoherence<PointInT>::PointCloudInConstPtr PointCloudInConstPtr;
+      //using NearestPairPointCloudCoherence<PointInT>::search_;
+      using ApproxNearestPairPointCloudCoherence<PointInT>::maximum_distance_;
+      using ApproxNearestPairPointCloudCoherence<PointInT>::target_input_;
+      using ApproxNearestPairPointCloudCoherence<PointInT>::point_coherences_;
+      using ApproxNearestPairPointCloudCoherence<PointInT>::coherence_name_;
+      using ApproxNearestPairPointCloudCoherence<PointInT>::new_target_;
+      using ApproxNearestPairPointCloudCoherence<PointInT>::getClassName;
+      using ApproxNearestPairPointCloudCoherence<PointInT>::search_;
+      
+      /** \brief empty constructor */
+      CachedApproxNearestPairPointCloudCoherence (const double bin_x,
+                                                  const double bin_y,
+                                                  const double bin_z) : 
+        ApproxNearestPairPointCloudCoherence<PointInT> (),
+        bin_x_(bin_x), bin_y_(bin_y), bin_z_(bin_z)
+      {
+        coherence_name_ = "CachedApproxNearestPairPointCloudCoherence";
+      }
+      
+    protected:
+      /** \brief compute the nearest pairs and compute coherence using point_coherences_ */
+      virtual void
+      computeCoherence (const PointCloudInConstPtr &cloud, const IndicesConstPtr &indices, float &w_j)
+      {
+        boost::mutex::scoped_lock lock(cache_mutex_);
+        double val = 0.0;
+        //for (size_t i = 0; i < indices->size (); i++)
+        for (size_t i = 0; i < cloud->points.size (); i++)
+        {
+          PointInT input_point = cloud->points[i];
+          int xi, yi, zi;
+          computeBin(input_point.getVector3fMap(), xi, yi, zi);
+          int k_index;
+          if (checkCache(xi, yi, zi)) {
+            k_index = getCachedIndex(xi, yi, zi);
+          }
+          else {
+            float k_distance = 0.0; // dummy
+            search_->approxNearestSearch(input_point, k_index, k_distance);
+            registerCache(k_index, xi, yi, zi);
+          }
+          PointInT target_point = target_input_->points[k_index];
+          float dist = (target_point.getVector3fMap() - input_point.getVector3fMap()).norm();
+          if (dist < maximum_distance_)
+          {
+            double coherence_val = 1.0;
+            for (size_t i = 0; i < point_coherences_.size (); i++)
+            {
+              PointCoherencePtr coherence = point_coherences_[i];  
+              double w = coherence->compute (input_point, target_point);
+              coherence_val *= w;
+            }
+            val += coherence_val;
+          }
+        }
+        w_j = - static_cast<float> (val);
+        //ROS_INFO("hit: %d", counter);
+      }
+
+      virtual void computeBin(
+        const Eigen::Vector3f& p, int& xi, int& yi, int& zi)
+      {
+        xi = (int)(p[0]/bin_x_);
+        yi = (int)(p[1]/bin_y_);
+        zi = (int)(p[2]/bin_z_);
+      }
+      
+      virtual void registerCache(int k_index, int bin_x, int bin_y, int bin_z)
+      {
+        //boost::mutex::scoped_lock lock(cache_mutex_);
+        if (cache_.find(bin_x) == cache_.end()) {
+          cache_[bin_x] = std::map<int, std::map<int, int> >();
+        }
+        if (cache_[bin_x].find(bin_y) == cache_[bin_x].end()) {
+          cache_[bin_x][bin_y] = std::map<int, int>();
+        }
+        cache_[bin_x][bin_y][bin_z] = k_index;
+      }
+      
+      virtual int getCachedIndex(int bin_x, int bin_y, int bin_z)
+      {
+        //boost::mutex::scoped_lock lock(cache_mutex_);
+        return cache_[bin_x][bin_y][bin_z];
+      }
+      
+      virtual bool checkCache(int bin_x, int bin_y, int bin_z)
+      {
+        //boost::mutex::scoped_lock lock(cache_mutex_);
+        if (cache_.find(bin_x) == cache_.end()) {
+          return false;
+        }
+        else {
+          if (cache_[bin_x].find(bin_y) == cache_[bin_x].end()) {
+            return false;
+          }
+          else {
+            if (cache_[bin_x][bin_y].find(bin_z) == cache_[bin_x][bin_y].end()) {
+              return false;
+            }
+            else {
+              return true;
+            }
+          }
+        }
+      }
+      
+      virtual void clearCache()
+      {
+        boost::mutex::scoped_lock lock(cache_mutex_);
+        cache_ = CacheMap();
+      }
+
+      virtual bool initCompute()
+      {
+        if (!ApproxNearestPairPointCloudCoherence<PointInT>::initCompute ())
+        {
+          PCL_ERROR ("[pcl::%s::initCompute] PointCloudCoherence::Init failed.\n", getClassName ().c_str ());
+          //deinitCompute ();
+          return false;
+        }
+        clearCache();
+        return true;
+      }
+      
+      //typename boost::shared_ptr<pcl::search::Octree<PointInT> > search_;
+      typedef std::map<int, std::map<int, std::map<int, int> > > CacheMap;
+      CacheMap cache_;
+      boost::mutex cache_mutex_;
+      double bin_x_;
+      double bin_y_;
+      double bin_z_;
+      
+    };
+
     
   }
   

@@ -4,6 +4,8 @@ find_package(catkin REQUIRED
   std_msgs sensor_msgs geometry_msgs message_generation pcl_msgs)
 add_message_files(
   FILES
+  SimpleOccupancyGrid.msg
+  SimpleOccupancyGridArray.msg
   PolygonArray.msg
   ClusterPointIndices.msg
   ParallelEdgeArray.msg
@@ -44,5 +46,5 @@ generate_messages(
   std_msgs sensor_msgs geometry_msgs pcl_msgs
 )
 catkin_package(
-  # CATKIN_DEPENDS other_catkin_pkg
+  CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs pcl_msgs
 )

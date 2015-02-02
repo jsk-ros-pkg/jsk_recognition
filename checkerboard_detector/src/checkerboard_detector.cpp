@@ -1,6 +1,6 @@
 // -*- mode: c++; indent-tabs-mode: nil; c-basic-offset: 4; -*-
 // Software License Agreement (BSD License)
-// Copyright (c) 2008, Willow Garage, Inc.
+// Copyright (c) 2008, JSK Lab, Inc.
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //   * Redistributions of source code must retain the above copyright notice,

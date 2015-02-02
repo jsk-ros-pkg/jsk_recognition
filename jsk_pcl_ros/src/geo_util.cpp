@@ -1127,5 +1127,9 @@ namespace jsk_pcl_ros
     marker.color.g = 1.0;
     marker.color.b = 1.0;
   }
-  
+
+  Eigen::Vector3f Cylinder::getDirection()
+  {
+    return direction_;
+  }
 }

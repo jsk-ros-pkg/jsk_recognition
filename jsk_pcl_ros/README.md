@@ -132,6 +132,10 @@ Detect a stick from pointcloud and line in 2-D image as hiint.
 
   Minimum number of inliers in cylinder fitting.
 
+*`~eps_2d_angle` (Double, default: `0.1`)
+
+  Threshold between hint line and detected stick. This evaluation is done in 2-D coordinate system.
+
 ### jsk\_pcl/RGBColorFilter
 Filter pointcloud based on RGB range.
 

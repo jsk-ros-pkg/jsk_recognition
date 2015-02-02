@@ -98,6 +98,19 @@ namespace jsk_pcl_ros
       const pcl::PointCloud<pcl::Normal>::Ptr& cloud_nromals,
       const Eigen::Vector3f& a,
       const Eigen::Vector3f& b);
+
+    /** @brief
+     * Check direction of cylinder in 2-D image coordinate system and if it is
+     * larger than eps_2d_angle_, return false
+     *
+     * @param cylinder Cylinder object
+     * @param a 3-D ray to start point of 2-D line
+     * @param b 3-D ray to end point of 2-D line
+     */
+    virtual bool rejected2DHint(
+      const Cylinder::Ptr& cylinder,
+      const Eigen::Vector3f& a,
+      const Eigen::Vector3f& b);
     
     boost::mutex mutex_;
     
@@ -124,6 +137,7 @@ namespace jsk_pcl_ros
     double min_probability_;
     int cylinder_fitting_trial_;
     int min_inliers_;
+    double eps_2d_angle_;
   private:
     
   };

@@ -1639,22 +1639,22 @@ roslaunch jsk_pcl_ros tf_transform_cloud.launch
 ![](images/depth_calibration.png)
 ### Two Main Steps:
 
-*  `1. Camera Intrisic Calibration: Intrisic Calibration` `Please refer to ros RGB camera calibration tutorial` >> `http://wiki.ros.org/camera_calibration/Tutorials/MonocularCalibration`
+*  `1. Camera Intrisic Calibration: Intrisic Calibration` `Please refer to ros RGB camera calibration tutorial` >> [ros wiki](http://wiki.ros.org/camera_calibration/Tutorials/MonocularCalibration)
 
 *  `2. Depth Calibration: Depth Calibration` related to the distance z, optical frame pixel u v and global pixel offset.
 
 ### You need:
    
 *   Chessboard: Make sure ur Application Range, if u wanna use camera in short range(0.5m~2m) choose small chessboard, otherwise plz choose a larger one. 
-*   Depth Camera: Kinect one, Xtion, Primesense. (There may be some problem when using primesense, check `http://answers.ros.org/question/197318/openni2_launch-doesnt-work-with-carmine-109-connected-to-usb30/?comment=198397#comment-198397` to install the newest openni2, perhaps u need to do `apt-get remove libopenni2-0` first)
+*   Depth Camera: Kinect one, Xtion, Primesense. (There may be some problem when using primesense, check [here](http://answers.ros.org/question/197318/openni2_launch-doesnt-work-with-carmine-109-connected-to-usb30/?comment=198397#comment-198397) to install the newest openni2, perhaps u need to do `apt-get remove libopenni2-0` first)
 *   Good PC with ubuntu and ros installed:  We only tested in Lenovo thinkpad series.
-*   jsk\_pcl\_ros:   `https://github.com/jsk-ros-pkg/jsk_recognition/tree/master/jsk_pcl_ros`
+*   jsk\_pcl\_ros:   [jsk package](ttps://github.com/jsk-ros-pkg/jsk_recognition/tree/master/jsk_pcl_ros)
 
 ### Camera Intrisic Calibration:
 
-* Please follow `http://wiki.ros.org/camera_calibration/Tutorials/MonocularCalibration` tutorial and when u finished calibration(4 features become green), wait patiently until u can click upload, calibration file will be right there in `~/.ros/camera_info/***.yaml` waiting.  Check the `openni2_launch.launch` file or `openni2_local.launch` if u use JSK package to edit the path.
+* Please follow [this](http://wiki.ros.org/camera_calibration/Tutorials/MonocularCalibration) tutorial and when u finished calibration(4 features become green), wait patiently until u can click upload, calibration file will be right there in `~/.ros/camera_info/***.yaml` waiting.  Check the `openni2_launch.launch` file or `openni2_local.launch` if u use JSK package to edit the path.
 
-* For Details Please Refer to `Zhang, Zhengyou. "A flexible new technique for camera calibration." Pattern Analysis and Machine Intelligence, IEEE Transactions on 22.11 (2000): 1330-1334.`
+* For Details Please Refer to [this](http://citeseerx.ist.psu.edu/viewdoc/download;jsessionid=5A82FAA90B9414360C604CB73796CCD6?doi=10.1.1.220.534&rep=rep1&type=pdf)`Zhang, Zhengyou. "A flexible new technique for camera calibration." Pattern Analysis and Machine Intelligence, IEEE Transactions on 22.11 (2000): 1330-1334.`
 
 ###Depth Calibration(Available only in jsk\_pcl\_ros package):
 We assume the intrisic calibration has been performed well.

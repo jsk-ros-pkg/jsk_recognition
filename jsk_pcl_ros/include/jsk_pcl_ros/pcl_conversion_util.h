@@ -42,7 +42,7 @@
 #include <geometry_msgs/Point32.h>
 #include <eigen_conversions/eigen_msg.h>
 #include <tf_conversions/tf_eigen.h>
-
+#include <pcl/range_image/range_image_planar.h>
 #if ROS_VERSION_MINIMUM(1, 10, 0)
 // hydro and later
 typedef pcl_msgs::PointIndices PCLIndicesMsg;
@@ -53,8 +53,22 @@ typedef pcl::PointIndices PCLIndicesMsg;
 typedef pcl::ModelCoefficients PCLModelCoefficientMsg;
 #endif
 
+#include <opencv2/opencv.hpp>
+
 namespace jsk_pcl_ros
 {
+
+  /** @brief
+   * Convert pcl::RangeImage to cv::Mat. Distance is normalized
+   * to 0-1 and colorized.
+   *
+   * @param range_image instance of pcl::RangeImage
+   * @param mat instance of cv::Mat, converted cv::Mat is set into
+   *        this argument.
+   */
+  void rangeImageToCvMat(const pcl::RangeImage& range_image,
+                         cv::Mat& mat);
+  
   template<class FromT, class ToT>
   void pointFromXYZToVector(const FromT& msg,
                             ToT& p)

@@ -32,32 +32,58 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
+
+#define BOOST_PARAMETER_MAX_ARITY 7
+#include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <pcl/range_image/range_image_planar.h>
 #include "jsk_pcl_ros/border_estimator.h"
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
 
 namespace jsk_pcl_ros
 {
   void BorderEstimator::onInit()
   {
     ConnectionBasedNodelet::onInit();
+    // planar or spherical
+    pnh_->param("model_type", model_type_, std::string("planar"));
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    typename dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (&BorderEstimator::configCallback, this, _1, _2);
+    srv_->setCallback (f);
+
     pub_border_ = advertise<PCLIndicesMsg>(*pnh_, "output_border_indices", 1);
     pub_veil_ = advertise<PCLIndicesMsg>(*pnh_, "output_veil_indices", 1);
     pub_shadow_ = advertise<PCLIndicesMsg>(*pnh_, "output_shadow_indices", 1);
+    pub_range_image_ = advertise<sensor_msgs::Image>(
+      *pnh_, "output_range_image", 1);
+    pub_cloud_ = advertise<sensor_msgs::PointCloud2>(
+      *pnh_, "output_cloud", 1);
   }
 
   void BorderEstimator::subscribe()
   {
-    sub_point_.subscribe(*pnh_, "input", 1);
-    sub_camera_info_.subscribe(*pnh_, "input_camera_info", 1);
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-    sync_->connectInput(sub_point_, sub_camera_info_);
-    sync_->registerCallback(boost::bind(&BorderEstimator::estimate, this, _1, _2));
+    if (model_type_ == "planar") {
+      sub_point_.subscribe(*pnh_, "input", 1);
+      sub_camera_info_.subscribe(*pnh_, "input_camera_info", 1);
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+      sync_->connectInput(sub_point_, sub_camera_info_);
+      sync_->registerCallback(boost::bind(&BorderEstimator::estimate, this, _1, _2));
+    }
+    else if (model_type_ == "laser") {
+      sub_ = pnh_->subscribe("input", 1, &BorderEstimator::estimate, this);
+    }
   }
 
   void BorderEstimator::unsubscribe()
   {
-    sub_point_.unsubscribe();
-    sub_camera_info_.unsubscribe();
+    if (model_type_ == "planar") {
+      sub_point_.unsubscribe();
+      sub_camera_info_.unsubscribe();
+    }
+    else if (model_type_ == "laser") {
+      sub_.shutdown();
+    }
   }
   
   void BorderEstimator::publishCloud(
@@ -69,6 +95,63 @@ namespace jsk_pcl_ros
     msg.header = header;
     msg.indices = inlier.indices;
     pub.publish(msg);
+  }
+
+  void BorderEstimator::estimate(
+    const sensor_msgs::PointCloud2::ConstPtr& msg)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::fromROSMsg(*msg, *cloud);
+    pcl::RangeImage range_image;
+    range_image.createFromPointCloud(
+      *cloud,
+      angular_resolution_,
+      max_angle_width_, max_angle_height_,
+      Eigen::Affine3f::Identity(),
+      pcl::RangeImage::CAMERA_FRAME,
+      noise_level_,
+      min_range_,
+      border_size_);
+    range_image.setUnseenToMaxRange();
+    computeBorder(range_image, msg->header);
+  }
+
+  void BorderEstimator::computeBorder(
+    const pcl::RangeImage& range_image,
+    const std_msgs::Header& header)
+  {
+    pcl::RangeImageBorderExtractor border_extractor (&range_image);
+    pcl::PointCloud<pcl::BorderDescription> border_descriptions;
+    border_extractor.compute (border_descriptions);
+    pcl::PointIndices border_indices, veil_indices, shadow_indices;
+    for (int y = 0; y < (int)range_image.height; ++y) {
+      for (int x = 0; x < (int)range_image.width; ++x) {
+        if (border_descriptions.points[y*range_image.width + x].traits[pcl::BORDER_TRAIT__OBSTACLE_BORDER]) {
+          border_indices.indices.push_back (y*range_image.width + x);
+        }
+        if (border_descriptions.points[y*range_image.width + x].traits[pcl::BORDER_TRAIT__VEIL_POINT]) {
+          veil_indices.indices.push_back (y*range_image.width + x);
+        }
+        if (border_descriptions.points[y*range_image.width + x].traits[pcl::BORDER_TRAIT__SHADOW_BORDER]) {
+          shadow_indices.indices.push_back (y*range_image.width + x);
+        }
+      }
+    }
+    publishCloud(pub_border_, border_indices, header);
+    publishCloud(pub_veil_, veil_indices, header);
+    publishCloud(pub_shadow_, shadow_indices, header);
+    cv::Mat image;
+    rangeImageToCvMat(range_image, image);
+    pub_range_image_.publish(
+      cv_bridge::CvImage(header,
+                         sensor_msgs::image_encodings::BGR8,
+                         image).toImageMsg());
+    // publish pointcloud
+    sensor_msgs::PointCloud2 ros_cloud;
+    pcl::toROSMsg(range_image, ros_cloud);
+    ros_cloud.header = header;
+    pub_cloud_.publish(ros_cloud);
   }
   
   void BorderEstimator::estimate(
@@ -95,26 +178,18 @@ namespace jsk_pcl_ros
                                                    fx, fy,
                                                    dummytrans);
     range_image.setUnseenToMaxRange();
-    pcl::RangeImageBorderExtractor border_extractor (&range_image);
-    pcl::PointCloud<pcl::BorderDescription> border_descriptions;
-    border_extractor.compute (border_descriptions);
-    pcl::PointIndices border_indices, veil_indices, shadow_indices;
-    for (int y = 0; y < (int)range_image.height; ++y) {
-      for (int x = 0; x < (int)range_image.width; ++x) {
-        if (border_descriptions.points[y*range_image.width + x].traits[pcl::BORDER_TRAIT__OBSTACLE_BORDER]) {
-          border_indices.indices.push_back (y*range_image.width + x);
-        }
-        if (border_descriptions.points[y*range_image.width + x].traits[pcl::BORDER_TRAIT__VEIL_POINT]) {
-          veil_indices.indices.push_back (y*range_image.width + x);
-        }
-        if (border_descriptions.points[y*range_image.width + x].traits[pcl::BORDER_TRAIT__SHADOW_BORDER]) {
-          shadow_indices.indices.push_back (y*range_image.width + x);
-        }
-      }
-    }
-    publishCloud(pub_border_, border_indices, msg->header);
-    publishCloud(pub_veil_, veil_indices, msg->header);
-    publishCloud(pub_shadow_, shadow_indices, msg->header);
+    computeBorder(range_image, msg->header);
+  }
+
+  void BorderEstimator::configCallback(Config &config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    noise_level_ = config.noise_level;
+    min_range_ = config.min_range;
+    border_size_ = config.border_size;
+    angular_resolution_ = config.angular_resolution;
+    max_angle_height_ = config.max_angle_height;
+    max_angle_width_ = config.max_angle_width;
   }
 }
 

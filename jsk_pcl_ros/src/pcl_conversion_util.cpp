@@ -34,9 +34,40 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/pcl_conversion_util.h"
+#include <pcl/visualization/common/float_image_utils.h>
 
 namespace jsk_pcl_ros
 {
+
+  void rangeImageToCvMat(const pcl::RangeImage& range_image,
+                         cv::Mat& image)
+  {
+    float min_range, max_range;
+    range_image.getMinMaxRanges(min_range, max_range);
+    float min_max_range = max_range - min_range;
+
+    image = cv::Mat(range_image.height, range_image.width, CV_8UC3);
+    unsigned char r,g,b;
+    for (int y=0; y < range_image.height; y++) {
+      for (int x=0; x<range_image.width; x++) {
+        pcl::PointWithRange rangePt = range_image.getPoint(x,y);
+        if (!pcl_isfinite(rangePt.range)) {
+          pcl::visualization::FloatImageUtils::getColorForFloat(
+            rangePt.range, r, g, b);
+        }
+        else {
+          float value = (rangePt.range - min_range) / min_max_range;
+          pcl::visualization::FloatImageUtils::getColorForFloat(
+            value, r, g, b);
+        }
+        image.at<cv::Vec3b>(y,x)[0] = b;
+        image.at<cv::Vec3b>(y,x)[1] = g;
+        image.at<cv::Vec3b>(y,x)[2] = r;
+      }
+    }
+    return;
+  }
+  
   void convertEigenAffine3(const Eigen::Affine3d& from,
                            Eigen::Affine3f& to)
   {

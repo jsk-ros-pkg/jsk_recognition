@@ -100,7 +100,7 @@ Convert pointcloud into range image and detect border
 #### Parameters
 * `~model_type` (String, default: `planar`)
 
-  Choose model type of range image by this topic. `planar` or `laser` is
+  Choose model type of range image by this topic. `planar`, `laser` or `sphere` is
   allowed.
 
 * `~angular_resolution` (Double, default: `-0.5`)
@@ -1707,8 +1707,8 @@ roslaunch jsk_pcl_ros tf_transform_cloud.launch
 *  `2. Depth Calibration: Depth Calibration` related to the distance z, optical frame pixel u v and global pixel offset.
 
 ### You need:
-   
-*   Chessboard: Make sure ur Application Range, if u wanna use camera in short range(0.5m~2m) choose small chessboard, otherwise plz choose a larger one. 
+
+*   Chessboard: Make sure ur Application Range, if u wanna use camera in short range(0.5m~2m) choose small chessboard, otherwise plz choose a larger one.
 *   Depth Camera: Kinect one, Xtion, Primesense. (There may be some problem when using primesense, check [here](http://answers.ros.org/question/197318/openni2_launch-doesnt-work-with-carmine-109-connected-to-usb30/?comment=198397#comment-198397) to install the newest openni2, perhaps u need to do `apt-get remove libopenni2-0` first)
 *   Good PC with ubuntu and ros installed:  We only tested in Lenovo thinkpad series.
 *   jsk\_pcl\_ros:   [jsk package](ttps://github.com/jsk-ros-pkg/jsk_recognition/tree/master/jsk_pcl_ros)

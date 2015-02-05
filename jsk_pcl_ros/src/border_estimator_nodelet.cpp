@@ -36,6 +36,7 @@
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <pcl/range_image/range_image_planar.h>
+#include <pcl/range_image/range_image_spherical.h>
 #include "jsk_pcl_ros/border_estimator.h"
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
@@ -104,6 +105,9 @@ namespace jsk_pcl_ros
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*msg, *cloud);
     pcl::RangeImage range_image;
+    if (model_type_ == "sphere") {
+      range_image = pcl::RangeImageSpherical();
+    }
     range_image.createFromPointCloud(
       *cloud,
       angular_resolution_,

@@ -53,12 +53,14 @@ namespace jsk_pcl_ros
   class CentroidPublisher: public pcl_ros::PCLNodelet
   {
   protected:
-    ros::Subscriber sub_input_;
-    tf::TransformBroadcaster br;
-    std::string frame;
-    virtual void extract(const sensor_msgs::PointCloud2ConstPtr &input);
-  private:
     virtual void onInit();
+    virtual void extract(const sensor_msgs::PointCloud2ConstPtr &input);
+    
+    ros::Subscriber sub_input_;
+    tf::TransformBroadcaster br_;
+    std::string frame_;
+    
+  private:
   };
 }
 

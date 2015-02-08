@@ -50,18 +50,18 @@ namespace jsk_pcl_ros
     tf::Transform transform;
     transform.setOrigin(tf::Vector3(center[0], center[1], center[2]));
     transform.setRotation(tf::createIdentityQuaternion());
-    br.sendTransform(tf::StampedTransform(transform, input->header.stamp,
-                                          input->header.frame_id, frame));
+    br_.sendTransform(tf::StampedTransform(transform, input->header.stamp,
+                                           input->header.frame_id, frame_));
   }
   
   void CentroidPublisher::onInit(void)
   {
     PCLNodelet::onInit();
     sub_input_ = pnh_->subscribe("input", 1, &CentroidPublisher::extract, this);
-    if (!pnh_->getParam("frame", frame))
+    if (!pnh_->getParam("frame", frame_))
     {
       ROS_WARN("~frame is not specified, using %s", getName().c_str());
-      frame = getName();
+      frame_ = getName();
     }
   }
 }

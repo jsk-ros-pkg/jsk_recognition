@@ -48,18 +48,26 @@
 #include <pcl/common/centroid.h>
 #include <pcl/filters/extract_indices.h>
 
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+
 namespace jsk_pcl_ros
 {
-  class CentroidPublisher: public pcl_ros::PCLNodelet
+  class CentroidPublisher: public jsk_topic_tools::DiagnosticNodelet
   {
+  public:
+    CentroidPublisher(): DiagnosticNodelet("CentroidPublisher") {}
   protected:
     virtual void onInit();
+    virtual void subscribe();
+    virtual void unsubscribe();
     virtual void extract(const sensor_msgs::PointCloud2ConstPtr &input);
     
     ros::Subscriber sub_input_;
     tf::TransformBroadcaster br_;
     std::string frame_;
-    
+    bool publish_tf_;
+    ros::Publisher pub_pose_;
+    ros::Publisher pub_point_;
   private:
   };
 }

@@ -32,38 +32,78 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-
+#define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/centroid_publisher.h"
-#include <pluginlib/class_list_macros.h>
 
+#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/PointStamped.h>
 
 #include <pcl/common/centroid.h>
+#include "jsk_pcl_ros/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros
 {
-  void CentroidPublisher::extract(const sensor_msgs::PointCloud2ConstPtr &input)
+  void CentroidPublisher::extract(const sensor_msgs::PointCloud2ConstPtr& input)
   {
     pcl::PointCloud<pcl::PointXYZ> cloud_xyz;
     pcl::fromROSMsg(*input, cloud_xyz);
     Eigen::Vector4f center;
     pcl::compute3DCentroid(cloud_xyz, center);
-    tf::Transform transform;
-    transform.setOrigin(tf::Vector3(center[0], center[1], center[2]));
-    transform.setRotation(tf::createIdentityQuaternion());
-    br_.sendTransform(tf::StampedTransform(transform, input->header.stamp,
-                                           input->header.frame_id, frame_));
+    if (publish_tf_) {
+      tf::Transform transform;
+      transform.setOrigin(tf::Vector3(center[0], center[1], center[2]));
+      transform.setRotation(tf::createIdentityQuaternion());
+      br_.sendTransform(tf::StampedTransform(transform, input->header.stamp,
+                                             input->header.frame_id, frame_));
+    }
+    geometry_msgs::PoseStamped pose;
+    pose.pose.orientation.w = 1.0;
+    pose.pose.position.x = center[0];
+    pose.pose.position.y = center[1];
+    pose.pose.position.z = center[2];
+    pose.header = input->header;
+    pub_pose_.publish(pose);
+    geometry_msgs::PointStamped point;
+    point.point.x = center[0];
+    point.point.y = center[1];
+    point.point.z = center[2];
+    point.header = input->header;
+    pub_point_.publish(point);
+  }
+
+  void CentroidPublisher::subscribe()
+  {
+    sub_input_ = pnh_->subscribe("input", 1, &CentroidPublisher::extract, this);
+  }
+
+  void CentroidPublisher::unsubscribe()
+  {
+    sub_input_.shutdown();
   }
   
   void CentroidPublisher::onInit(void)
   {
-    PCLNodelet::onInit();
-    sub_input_ = pnh_->subscribe("input", 1, &CentroidPublisher::extract, this);
-    if (!pnh_->getParam("frame", frame_))
-    {
-      ROS_WARN("~frame is not specified, using %s", getName().c_str());
-      frame_ = getName();
+    DiagnosticNodelet::onInit();
+    pnh_->param("publish_tf", publish_tf_, false);
+    if (publish_tf_) {
+      if (!pnh_->getParam("frame", frame_))
+      {
+        ROS_WARN("~frame is not specified, using %s", getName().c_str());
+        frame_ = getName();
+      }
+      // do not use DiagnosticNodelet functionality when ~publish_tf is false
+      pub_pose_ = pnh_->advertise<geometry_msgs::PoseStamped>("output/pose", 1);
+      pub_point_ = pnh_->advertise<geometry_msgs::PointStamped>(
+        "output/point", 1);
+      subscribe();
+    }
+    else {
+      pub_pose_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output/pose", 1);
+      pub_point_ = advertise<geometry_msgs::PointStamped>(
+        *pnh_, "output/point", 1);
     }
   }
 }
 
+#include <pluginlib/class_list_macros.h>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::CentroidPublisher, nodelet::Nodelet);

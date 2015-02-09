@@ -357,7 +357,7 @@ Add color to pointcloud (no need to be organized) from image and camera info.
   Output colored pointcloud.
 
 ### jsk\_pcl/PlaneConcatenator
-![](image/plane_concatenator.png)
+![](images/plane_concatenator.png)
 
 Concatenate near planes and build new set of planes.
 

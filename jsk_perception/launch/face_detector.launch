@@ -1,0 +1,9 @@
+<launch>
+  <node pkg="uvc_camera" type="uvc_camera_node" name="uvc_camera_node" />
+  <node pkg="jsk_perception" type="face_detector" name="face_detector">
+    <remap from="image" to="image_raw" />
+  </node>
+  <node pkg="image_view" type="image_view" name="face_view" >
+    <remap from="image" to="face_detector/image" />
+  </node>
+</launch>

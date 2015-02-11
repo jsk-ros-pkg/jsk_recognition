@@ -110,6 +110,11 @@ macro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
     jsk_pcl_nodelet_sources jsk_pcl_nodelet_executables)
 endmacro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
 
+macro(jsk_pcl_util_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
+  jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
+    jsk_pcl_util_nodelet_sources jsk_pcl_util_nodelet_executables)
+endmacro(jsk_pcl_util_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
+
 add_definitions("-O2 -g")
 
 # pcl_ros::Filter based class is not working...
@@ -162,9 +167,9 @@ jsk_pcl_nodelet(src/multi_plane_extraction_nodelet.cpp
   "jsk_pcl/MultiPlaneExtraction" "multi_plane_extraction")
 jsk_pcl_nodelet(src/selected_cluster_publisher_nodelet.cpp
   "jsk_pcl/SelectedClusterPublisher" "selected_cluster_publisher")
-jsk_pcl_nodelet(src/plane_rejector_nodelet.cpp
+jsk_pcl_util_nodelet(src/plane_rejector_nodelet.cpp
   "jsk_pcl/PlaneRejector" "plane_rejector")
-jsk_pcl_nodelet(src/static_polygon_array_publisher_nodelet.cpp
+jsk_pcl_util_nodelet(src/static_polygon_array_publisher_nodelet.cpp
   "jsk_pcl/StaticPolygonArrayPublisher" "static_polygon_array_publisher")
 jsk_pcl_nodelet(src/polygon_array_transformer_nodelet.cpp
   "jsk_pcl/PolygonArrayTransformer" "polygon_array_transformer_nodelet")
@@ -178,7 +183,7 @@ jsk_pcl_nodelet(src/environment_plane_modeling_nodelet.cpp
   "jsk_pcl/EnvironmentPlaneModeling" "environment_plane_modeling")
 jsk_pcl_nodelet(src/color_histogram_matcher_nodelet.cpp
   "jsk_pcl/ColorHistogramMatcher" "color_histogram_matcher")
-jsk_pcl_nodelet(src/polygon_appender_nodelet.cpp
+jsk_pcl_util_nodelet(src/polygon_appender_nodelet.cpp
   "jsk_pcl/PolygonAppender" "polygon_appender")
 
 jsk_pcl_nodelet(src/grid_sampler_nodelet.cpp
@@ -193,7 +198,7 @@ jsk_pcl_nodelet(src/organize_pointcloud_nodelet.cpp
   "jsk_pcl/OrganizePointCloud" "organize_pointcloud")
 jsk_pcl_nodelet(src/depth_image_creator_nodelet.cpp
   "jsk_pcl/DepthImageCreator" "depth_image_creator")
-jsk_pcl_nodelet(src/polygon_array_wrapper_nodelet.cpp
+jsk_pcl_util_nodelet(src/polygon_array_wrapper_nodelet.cpp
   "jsk_pcl/PolygonArrayWrapper" "polygon_array_wrapper")
 jsk_pcl_nodelet(src/border_estimator_nodelet.cpp
   "jsk_pcl/BorderEstimator" "border_estimator")
@@ -222,7 +227,7 @@ jsk_pcl_nodelet(src/bounding_box_filter_nodelet.cpp
   "jsk_pcl/BoundingBoxFilter" "bounding_box_filter")
 jsk_pcl_nodelet(src/organized_pass_through_nodelet.cpp
   "jsk_pcl/OrganizedPassThrough" "organized_pass_through")
-jsk_pcl_nodelet(src/plane_reasoner_nodelet.cpp
+jsk_pcl_util_nodelet(src/plane_reasoner_nodelet.cpp
   "jsk_pcl/PlaneReasoner" "plane_reasoner")
 jsk_pcl_nodelet(src/joint_state_static_filter_nodelet.cpp
   "jsk_pcl/JointStateStaticFilter" "joint_state_static_filter")
@@ -264,7 +269,7 @@ jsk_pcl_nodelet(src/incremental_model_registration_nodelet.cpp
   "jsk_pcl/IncrementalModelRegistration" "incremental_model_registration")
 jsk_pcl_nodelet(src/supervoxel_segmentation_nodelet.cpp
   "jsk_pcl/SupervoxelSegmentation" "supervoxel_segmentation")
-jsk_pcl_nodelet(src/plane_concatenator_nodelet.cpp
+jsk_pcl_util_nodelet(src/plane_concatenator_nodelet.cpp
   "jsk_pcl/PlaneConcatenator" "plane_concatenator")
 jsk_pcl_nodelet(src/add_color_from_image_nodelet.cpp
   "jsk_pcl/AddColorFromImage" "add_color_from_image")
@@ -276,16 +281,32 @@ jsk_pcl_nodelet(src/add_point_indices_nodelet.cpp
 jsk_pcl_nodelet(src/find_object_on_plane_nodelet.cpp "jsk_pcl/FindObjectOnPlane" "find_object_on_plane")
 jsk_pcl_nodelet(src/hinted_stick_finder_nodelet.cpp
   "jsk_pcl/HintedStickFinder" "hinted_stick_finder")
-add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources}
+
+add_library(jsk_pcl_ros_base SHARED
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
   src/pcl_conversion_util.cpp src/pcl_util.cpp
   src/pointcloud_moveit_filter.cpp
   src/tf_listener_singleton.cpp
   src/viewpoint_sampler.cpp)
-target_link_libraries(jsk_pcl_ros ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
-add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 
-generate_messages(DEPENDENCIES ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs)
+add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
+add_library(jsk_pcl_ros_util SHARED ${jsk_pcl_util_nodelet_sources})
+
+target_link_libraries(jsk_pcl_ros
+  ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp
+  jsk_pcl_ros_base)
+target_link_libraries(jsk_pcl_ros_util
+  ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp
+  jsk_pcl_ros_base)
+target_link_libraries(jsk_pcl_ros_base
+  ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
+
+add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
+add_dependencies(jsk_pcl_ros_util ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
+add_dependencies(jsk_pcl_ros_base ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
+
+generate_messages(DEPENDENCIES
+  ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs)
 
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 message("flags: ${CMAKE_CXX_FLAGS}")
@@ -294,16 +315,17 @@ catkin_package(
     DEPENDS pcl
     CATKIN_DEPENDS pcl_ros message_runtime ${PCL_MSGS} sensor_msgs geometry_msgs
     INCLUDE_DIRS include
-    LIBRARIES jsk_pcl_ros
+    LIBRARIES jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_util
 )
 
 install(DIRECTORY include/${PROJECT_NAME}/
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
-
-install(TARGETS jsk_pcl_ros ${jsk_pcl_nodelet_executables}
-        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+install(TARGETS jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_util
+  ${jsk_pcl_nodelet_executables}
+  ${jsk_pcl_util_nodelet_executables}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 
 install(FILES jsk_pcl_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 install(DIRECTORY launch

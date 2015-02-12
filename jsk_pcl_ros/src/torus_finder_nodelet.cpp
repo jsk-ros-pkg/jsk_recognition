@@ -98,15 +98,21 @@ namespace jsk_pcl_ros
     seg.segment(*inliers, *coefficients);
     NODELET_INFO("input points: %lu", cloud->points.size());
     if (inliers->indices.size() > min_size_) {
+      // check direction. Torus should direct to origin of pointcloud
+      // always.
+      Eigen::Vector3f dir(coefficients->values[4],
+                          coefficients->values[5],
+                          coefficients->values[6]);
+      if (dir.dot(Eigen::Vector3f::UnitZ()) > 0) {
+        dir = - dir;
+      }
+      
       Eigen::Affine3f pose = Eigen::Affine3f::Identity();
       Eigen::Vector3f pos = Eigen::Vector3f(coefficients->values[0],
                                             coefficients->values[1],
                                             coefficients->values[2]);
       Eigen::Quaternionf rot;
-      rot.setFromTwoVectors(Eigen::Vector3f::UnitZ(),
-                            Eigen::Vector3f(coefficients->values[4],
-                                            coefficients->values[5],
-                                            coefficients->values[6]));
+      rot.setFromTwoVectors(Eigen::Vector3f::UnitZ(), dir);
       pose = pose * Eigen::Translation3f(pos) * Eigen::AngleAxisf(rot);
       PCLIndicesMsg ros_inliers;
       ros_inliers.indices = inliers->indices;

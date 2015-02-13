@@ -122,7 +122,22 @@ Convert pointcloud into range image and detect border
 * `~max_angle_width` (Double, default: `2pi`)
   Maximum angle width of range image. Only does `laser` model use this parameter.
 
-### jsk\_pcl/HintedStickFInder
+### jsk\_pcl/PointCloudToClusterPointIndices
+Just convert pointcloud to `jsk_recognition_msgs/ClusterPointIndices`.
+This nodelet is useful to compute bounding box of pointcloud by ClusterPointIndicesDecomposer.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Input pointcloud
+
+#### Publishing Topic
+* `~output` (`jsk_recognition_msgs/ClusterPointIndices`)
+
+  Output cluster indices.
+
+
+### jsk\_pcl/HintedStickFinder
 ![](images/hinted_stick_finder.png)
 
 Detect a stick from pointcloud and line in 2-D image as hiint.

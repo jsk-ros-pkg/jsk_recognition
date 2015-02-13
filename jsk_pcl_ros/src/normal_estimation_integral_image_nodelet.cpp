@@ -51,7 +51,7 @@ namespace jsk_pcl_ros
     srv_->setCallback (f);
 
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
-    
+    pub_with_xyz_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_with_xyz", 1);
   }
 
   void NormalEstimationIntegralImage::subscribe()
@@ -111,6 +111,26 @@ namespace jsk_pcl_ros
     sensor_msgs::PointCloud2 ros_output;
     pcl::toROSMsg(output, ros_output);
     pub_.publish(ros_output);
+
+    // concatenate
+    pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr concat(new pcl::PointCloud<pcl::PointXYZRGBNormal>());
+    concat->points.resize(output.points.size());
+    for (size_t i = 0; i < output.points.size(); i++) {
+      pcl::PointXYZRGBNormal point;
+      point.x = input->points[i].x;
+      point.y = input->points[i].y;
+      point.z = input->points[i].z;
+      point.rgb = input->points[i].rgb;
+      point.normal_x = output.points[i].normal_x;
+      point.normal_y = output.points[i].normal_y;
+      point.normal_z = output.points[i].normal_z;
+      point.curvature = output.points[i].curvature;
+      concat->points[i] = point;
+    }
+    concat->header = input->header;
+    sensor_msgs::PointCloud2 ros_output_with_xyz;
+    pcl::toROSMsg(*concat, ros_output_with_xyz);
+    pub_with_xyz_.publish(ros_output_with_xyz);
   }
   
 }

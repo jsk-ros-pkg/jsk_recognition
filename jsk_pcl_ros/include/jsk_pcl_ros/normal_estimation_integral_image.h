@@ -54,6 +54,7 @@ namespace jsk_pcl_ros
   protected:
     ros::Subscriber sub_input_;
     ros::Publisher pub_;
+    ros::Publisher pub_with_xyz_;
     boost::mutex mutex_;
     int estimation_method_;
     bool depth_dependent_smoothing_;

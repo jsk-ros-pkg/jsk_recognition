@@ -52,8 +52,8 @@
       publish_tf: false
     </rosparam>
   </node>
-  <node pkg="jsk_pcl_ros" type="boxArray_to_box.py"
-        name="boxArray_to_box">
+  <node pkg="jsk_pcl_ros" type="box_array_to_box.py"
+        name="box_array_to_box">
     <remap from="bounding_box_array" to="/cluster_decomposer_one/boxes" />
   </node>
   <node pkg="jsk_pcl_ros" type="calculate_polygon_from_imu.py"

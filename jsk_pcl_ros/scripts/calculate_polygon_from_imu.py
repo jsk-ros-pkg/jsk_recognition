@@ -11,7 +11,7 @@ except:
     import roslib;roslib.load_manifest(PKG)
 
 import math
-from sensor_msgs.msg import Imu, CameraInfo
+from sensor_msgs.msg import Imu, CameraInfo, PointCloud2
 from jsk_recognition_msgs.msg import PolygonArray
 from jsk_recognition_msgs.msg import ModelCoefficientsArray
 from geometry_msgs.msg import *
@@ -42,6 +42,9 @@ def imu_cb(imu):
 def camerainfo_cb(info):
     global header
     header = info.header
+def point_cb(point):
+    global header
+    header = point.header
     
 if __name__ == "__main__":
     rospy.init_node('calc_imu_plane', anonymous=True)
@@ -49,4 +52,5 @@ if __name__ == "__main__":
     MArrayPub = rospy.Publisher('model_coefficients_array', ModelCoefficientsArray)
     rospy.Subscriber("imu_data", Imu, imu_cb)
     rospy.Subscriber("camera_info", CameraInfo, camerainfo_cb)
+    rospy.Subscriber("points", PointCloud2, point_cb)
     rospy.spin()

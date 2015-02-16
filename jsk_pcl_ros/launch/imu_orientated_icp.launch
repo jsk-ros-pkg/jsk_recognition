@@ -26,7 +26,7 @@
   <node pkg="nodelet" type="nodelet" name="pointcloud_server"
           args="load jsk_pcl/PointcloudDatabaseServer /$(arg MANAGER)">
     <rosparam subst_value="true">
-      models: ["$(find drc_task_common)/pcds/drill.pcd",
+      models: ["$(find drc_task_common)/pcds/drill_full.pcd",
       ]
     </rosparam>
   </node>
@@ -59,7 +59,8 @@
   <node pkg="jsk_pcl_ros" type="calculate_polygon_from_imu.py"
         name="calc_polygon">
     <remap from="imu_data" to="$(arg IMU)" />
-    <remap from="camera_info" to="$(arg INPUT_INFO)" />
+    <!-- <remap from="camera_info" to="$(arg INPUT_INFO)" />-->
+    <remap from="points" to="$(arg INPUT)" />
   </node>
 </launch>
 

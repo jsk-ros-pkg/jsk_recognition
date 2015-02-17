@@ -40,6 +40,9 @@ namespace resized_image_transport
 
     ros::Publisher image_pub_;
     ros::Subscriber image_sub_;
+    
+    ros::Publisher width_scale_pub_;
+    ros::Publisher height_scale_pub_;
 
     double resize_x_, resize_y_;
     int dst_width_, dst_height_;

@@ -1,5 +1,7 @@
 #include <resized_image_transport/image_processing_nodelet.h>
 
+#include <std_msgs/Float32.h>
+
 namespace resized_image_transport
 {
   void ImageProcessing::onInit() {
@@ -70,6 +72,8 @@ namespace resized_image_transport
       image_pub_ = pnh.advertise<sensor_msgs::Image>("output/image", max_queue_size_);
       image_sub_ = pnh.subscribe("input/image", max_queue_size_, &ImageProcessing::image_cb, this);
     }
+    width_scale_pub_ = pnh.advertise<std_msgs::Float32>("output/width_scale", max_queue_size_);
+    height_scale_pub_ = pnh.advertise<std_msgs::Float32>("output/height_scale", max_queue_size_);
   }
 
   void ImageProcessing::snapshot_msg_cb (const std_msgs::EmptyConstPtr msg) {
@@ -118,10 +122,18 @@ namespace resized_image_transport
       }else{
 	image_pub_.publish(dst_img);
       }
-	  
+
+      // TODO: it does not support dst_width_ and dst_height_
+      std_msgs::Float32 width_scale;
+      width_scale.data = resize_x_;
+      std_msgs::Float32 height_scale;
+      height_scale.data = resize_y_;
+      width_scale_pub_.publish(width_scale);
+      height_scale_pub_.publish(height_scale);
+      
       out_times.push_front((now - last_publish_time_).toSec());
       out_bytes.push_front(dst_img->step * dst_img->height);
-
+      
       last_publish_time_ = now;
     } catch( cv::Exception& e ) {
       ROS_ERROR("%s", e.what());

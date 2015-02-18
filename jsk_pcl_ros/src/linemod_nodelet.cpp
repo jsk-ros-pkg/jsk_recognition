@@ -592,7 +592,7 @@ namespace jsk_pcl_ros
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     pub_detect_mask_ = advertise<sensor_msgs::Image>(*pnh_, "output/mask", 1);
     pub_pose_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output/pose", 1);
-    pub_original_template_cloud_ = advertise<geometry_msgs::PoseStamped>(
+    pub_original_template_cloud_ = advertise<sensor_msgs::PointCloud2>(
       *pnh_, "output/template", 1);
   }
 

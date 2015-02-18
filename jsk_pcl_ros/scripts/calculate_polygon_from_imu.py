@@ -37,7 +37,7 @@ def imu_cb(imu):
     temp_header.seq = header.seq
     PStamped.header =temp_header
     PArrayPub.publish(PolygonArray(temp_header, [PStamped]))
-    MStamped = ModelCoefficients(temp_header, (ax, ay, az,0))
+    MStamped = ModelCoefficients(temp_header, (-ax, -ay, -az,0))
     MArrayPub.publish(ModelCoefficientsArray(temp_header, [MStamped]))
 def camerainfo_cb(info):
     global header

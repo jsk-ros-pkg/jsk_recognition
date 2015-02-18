@@ -173,14 +173,17 @@ namespace jsk_pcl_ros
     for (size_t i = 0; i < cylinder_fitting_trial_; i++) {
       seg.segment(*inliers, *coefficients);
       if (inliers->indices.size() > min_inliers_) {
+        Eigen::Vector3f dir(coefficients->values[3],
+                            coefficients->values[4],
+                            coefficients->values[5]);
+        if (dir.dot(Eigen::Vector3f(0, -1, 0)) < 0) {
+          dir = -dir;
+        }
         Cylinder::Ptr cylinder(new Cylinder(Eigen::Vector3f(
                                               coefficients->values[0],
                                               coefficients->values[1],
                                               coefficients->values[2]),
-                                            Eigen::Vector3f(
-                                              coefficients->values[3],
-                                              coefficients->values[4],
-                                              coefficients->values[5]),
+                                            dir,
                                             coefficients->values[6]));
         pcl::PointIndices::Ptr cylinder_indices
           (new pcl::PointIndices);
@@ -194,9 +197,7 @@ namespace jsk_pcl_ros
           center, height);
         if (!rejected2DHint(cylinder, a, b)) {
           Eigen::Vector3f uz = Eigen::Vector3f(
-            coefficients->values[3],
-            coefficients->values[4],
-            coefficients->values[5]).normalized();
+            dir).normalized();
           // build maker
           visualization_msgs::Marker marker;
           cylinder->toMarker(marker, center, uz, height);
@@ -215,9 +216,9 @@ namespace jsk_pcl_ros
           ros_coefficients.values.push_back(center[0]);
           ros_coefficients.values.push_back(center[1]);
           ros_coefficients.values.push_back(center[2]);
-          ros_coefficients.values.push_back(coefficients->values[3]);
-          ros_coefficients.values.push_back(coefficients->values[4]);
-          ros_coefficients.values.push_back(coefficients->values[5]);
+          ros_coefficients.values.push_back(dir[0]);
+          ros_coefficients.values.push_back(dir[1]);
+          ros_coefficients.values.push_back(dir[2]);
           ros_coefficients.values.push_back(coefficients->values[6]);
           ros_coefficients.values.push_back(height);
           pub_coefficients_.publish(ros_coefficients);

@@ -277,26 +277,26 @@
          base_class_type="nodelet::Nodelet">
     <description>Nodelet to rotate sensor_msgs/Image</description>
   </class>
-  <class name="jsk_pcl/NodeletPointCloudThrottle" type="NodeletPointCloudThrottle"
-         base_class_type="nodelet::Nodelet">
-    <description>
-    </description>
-  </class>
-  <class name="jsk_pcl/NodeletImageThrottle" type="NodeletImageThrottle"
-         base_class_type="nodelet::Nodelet">
-    <description>
-    </description>
-  </class>
-  <class name="jsk_pcl/NodeletImageMUX" type="NodeletImageMUX"
-         base_class_type="nodelet::Nodelet">
-    <description>
-    </description>
-  </class>
-  <class name="jsk_pcl/NodeletImageDEMUX" type="NodeletImageDEMUX"
-         base_class_type="nodelet::Nodelet">
-    <description>
-    </description>
-  </class>
+  <!-- <class name="jsk_pcl/NodeletPointCloudThrottle" type="NodeletPointCloudThrottle" -->
+  <!--        base_class_type="nodelet::Nodelet"> -->
+  <!--   <description> -->
+  <!--   </description> -->
+  <!-- </class> -->
+  <!-- <class name="jsk_pcl/NodeletImageThrottle" type="NodeletImageThrottle" -->
+  <!--        base_class_type="nodelet::Nodelet"> -->
+  <!--   <description> -->
+  <!--   </description> -->
+  <!-- </class> -->
+  <!-- <class name="jsk_pcl/NodeletImageMUX" type="NodeletImageMUX" -->
+  <!--        base_class_type="nodelet::Nodelet"> -->
+  <!--   <description> -->
+  <!--   </description> -->
+  <!-- </class> -->
+  <!-- <class name="jsk_pcl/NodeletImageDEMUX" type="NodeletImageDEMUX" -->
+  <!--        base_class_type="nodelet::Nodelet"> -->
+  <!--   <description> -->
+  <!--   </description> -->
+  <!-- </class> -->
 
   <class name="jsk_pcl/ParticleFilterTracking" type="jsk_pcl_ros::ParticleFilterTracking"
          base_class_type="nodelet::Nodelet">
@@ -428,12 +428,12 @@
       jsk_pcl_ros::ColorizeMapRandomForest
     </description>
   </class>
-  <class name="jsk_pcl/OrganizePointCloud" type="jsk_pcl_ros::OrganizePointCloud"
-         base_class_type="nodelet::Nodelet">
-    <description>
-      jsk_pcl_ros::OrganizePointCloud
-    </description>
-  </class>
+  <!-- <class name="jsk_pcl/OrganizePointCloud" type="jsk_pcl_ros::OrganizePointCloud" -->
+  <!--        base_class_type="nodelet::Nodelet"> -->
+  <!--   <description> -->
+  <!--     jsk_pcl_ros::OrganizePointCloud -->
+  <!--   </description> -->
+  <!-- </class> -->
 </library>
 <library path="libjsk_pcl_ros_moveit">
   <class name="jsk_pcl/PointCloudMoveitFilter"

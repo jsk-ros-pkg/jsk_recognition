@@ -130,14 +130,14 @@ jsk_pcl_nodelet(src/voxel_grid_downsample_decoder_nodelet.cpp "jsk_pcl/VoxelGrid
 jsk_pcl_nodelet(src/snapit_nodelet.cpp "jsk_pcl/Snapit" "snapit")
 jsk_pcl_nodelet(src/keypoints_publisher_nodelet.cpp "jsk_pcl/KeypointsPublisher" "keypoints_publisher")
 jsk_pcl_nodelet(src/hinted_plane_detector_nodelet.cpp "jsk_pcl/HintedPlaneDetector" "hinted_plane_detector")
-jsk_pcl_nodelet(src/pointcloud_throttle_nodelet.cpp "jsk_pcl/NodeletPointCloudThrottle" "point_cloud_throttle")
+# jsk_pcl_nodelet(src/pointcloud_throttle_nodelet.cpp "jsk_pcl/NodeletPointCloudThrottle" "point_cloud_throttle")
 jsk_pcl_nodelet(src/centroid_publisher_nodelet.cpp "jsk_pcl/CentroidPublisher" "centroid_publisher")
-jsk_pcl_nodelet(src/image_throttle_nodelet.cpp
-  "jsk_pcl/NodeletImageThrottle" "image_throttle")
-jsk_pcl_nodelet(src/image_mux_nodelet.cpp
-  "jsk_pcl/NodeletImageMUX" "image_mux")
-jsk_pcl_nodelet(src/image_demux_nodelet.cpp
-  "jsk_pcl/NodeletImageDEMUX" "image_demux")
+# jsk_pcl_nodelet(src/image_throttle_nodelet.cpp
+#   "jsk_pcl/NodeletImageThrottle" "image_throttle")
+# jsk_pcl_nodelet(src/image_mux_nodelet.cpp
+#   "jsk_pcl/NodeletImageMUX" "image_mux")
+# jsk_pcl_nodelet(src/image_demux_nodelet.cpp
+#   "jsk_pcl/NodeletImageDEMUX" "image_demux")
 jsk_pcl_nodelet(src/image_rotate_nodelet.cpp
   "jsk_pcl/ImageRotateNodelet" "image_rotate")
 jsk_pcl_nodelet(src/octree_change_publisher_nodelet.cpp
@@ -200,8 +200,8 @@ jsk_pcl_nodelet(src/delay_pointcloud_nodelet.cpp
   "jsk_pcl/DelayPointCloud" "delay_pointcloud")
 jsk_pcl_nodelet(src/depth_image_error_nodelet.cpp
   "jsk_pcl/DepthImageError" "depth_image_error")
-jsk_pcl_nodelet(src/organize_pointcloud_nodelet.cpp
-  "jsk_pcl/OrganizePointCloud" "organize_pointcloud")
+# jsk_pcl_nodelet(src/organize_pointcloud_nodelet.cpp
+#   "jsk_pcl/OrganizePointCloud" "organize_pointcloud")
 jsk_pcl_nodelet(src/depth_image_creator_nodelet.cpp
   "jsk_pcl/DepthImageCreator" "depth_image_creator")
 jsk_pcl_util_nodelet(src/polygon_array_wrapper_nodelet.cpp

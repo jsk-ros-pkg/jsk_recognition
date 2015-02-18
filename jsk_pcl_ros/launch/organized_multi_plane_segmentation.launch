@@ -322,10 +322,10 @@
     <node pkg="nodelet" type="nodelet" name="pointcloud_server"
           args="load jsk_pcl/PointcloudDatabaseServer /$(arg MANAGER)">
       <rosparam subst_value="true">
-        pcds: ["$(find jsk_data)/pcds/cup_kinect.pcd",
-                 "$(find jsk_data)/pcds/hand_drill_kinect.pcd",
-                 "$(find jsk_data)/pcds/takenoko_drill_kinect.pcd",
-                 "$(find jsk_data)/pcds/ps3_controller_kinect.pcd"]
+        <!-- models: ["$(find jsk_data)/pcds/cup_kinect.pcd", -->
+        <!--          "$(find jsk_data)/pcds/hand_drill_kinect.pcd", -->
+        <!--          "$(find jsk_data)/pcds/takenoko_drill_kinect.pcd", -->
+        <!--          "$(find jsk_data)/pcds/ps3_controller_kinect.pcd"] -->
       </rosparam>
     </node>
   </group>

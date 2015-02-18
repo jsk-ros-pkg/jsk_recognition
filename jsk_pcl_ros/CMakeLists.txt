@@ -278,8 +278,8 @@ jsk_pcl_nodelet(src/add_color_from_image_nodelet.cpp
 jsk_pcl_nodelet(src/torus_finder_nodelet.cpp "jsk_pcl/TorusFinder" "torus_finder")
 jsk_pcl_nodelet(src/mask_image_filter_nodelet.cpp
   "jsk_pcl/MaskImageFilter" "mask_image_filter")
-jsk_pcl_nodelet(src/mask_image_cluster_indices_concatenator_nodelet.cpp
-  "jsk_pcl/MaskImageClusterIndicesConcatenator" "mask_image_cluster_indices_concatenator")
+jsk_pcl_nodelet(src/mask_image_cluster_filter_nodelet.cpp
+  "jsk_pcl/MaskImageClusterFilter" "mask_image_cluster_filter")
 jsk_pcl_nodelet(src/add_point_indices_nodelet.cpp
   "jsk_pcl/AddPointIndices" "add_point_indices")
 jsk_pcl_nodelet(src/find_object_on_plane_nodelet.cpp "jsk_pcl/FindObjectOnPlane" "find_object_on_plane")

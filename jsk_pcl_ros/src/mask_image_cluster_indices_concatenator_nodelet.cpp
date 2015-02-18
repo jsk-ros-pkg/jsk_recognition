@@ -34,7 +34,7 @@
  *********************************************************************/
 
 #define BOOST_PARAMETER_MAX_ARITY 7
-#include "jsk_pcl_ros/mask_image_cluster_indices_concatenator.h"
+#include "jsk_pcl_ros/mask_image_cluster_filter.h"
 #include <cv_bridge/cv_bridge.h>
 #include <image_geometry/pinhole_camera_model.h>
 #include "jsk_pcl_ros/pcl_conversion_util.h"
@@ -44,27 +44,27 @@
 
 namespace jsk_pcl_ros
 {
-  void MaskImageClusterIndicesConcatenator::onInit()
+  void MaskImageClusterFilter::onInit()
   {
     DiagnosticNodelet::onInit();
     pub_ = advertise<PCLIndicesMsg>(
       *pnh_, "output", 1);
   }
 
-  void MaskImageClusterIndicesConcatenator::subscribe()
+  void MaskImageClusterFilter::subscribe()
   {
     sub_image_ = pnh_->subscribe("input/mask", 1,
-                                 &MaskImageClusterIndicesConcatenator::imageCalback, this);
+                                 &MaskImageClusterFilter::imageCalback, this);
     sub_info_ = pnh_->subscribe("input/camera_info", 1,
-                                &MaskImageClusterIndicesConcatenator::infoCalback, this);
+                                &MaskImageClusterFilter::infoCalback, this);
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_target_.subscribe(*pnh_, "target", 1); 
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
     sync_->connectInput(sub_input_, sub_target_);
-    sync_->registerCallback(boost::bind(&MaskImageClusterIndicesConcatenator::concat, this, _1, _2));
+    sync_->registerCallback(boost::bind(&MaskImageClusterFilter::concat, this, _1, _2));
   }
   
-  void MaskImageClusterIndicesConcatenator::unsubscribe()
+  void MaskImageClusterFilter::unsubscribe()
   {
     sub_image_.shutdown();
     sub_info_.shutdown();
@@ -72,14 +72,14 @@ namespace jsk_pcl_ros
     sub_target_.unsubscribe();
   }
   
-  void MaskImageClusterIndicesConcatenator::infoCalback(
+  void MaskImageClusterFilter::infoCalback(
     const sensor_msgs::CameraInfo::ConstPtr& info_ms)
   {
     boost::mutex::scoped_lock lock(mutex_);
     camera_info_ = info_ms;
   }
 
-  void MaskImageClusterIndicesConcatenator::imageCalback(
+  void MaskImageClusterFilter::imageCalback(
     const sensor_msgs::Image::ConstPtr& mask_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
@@ -88,7 +88,7 @@ namespace jsk_pcl_ros
     mask_image_ = cv_ptr->image;
   }
 
-  void MaskImageClusterIndicesConcatenator::concat(
+  void MaskImageClusterFilter::concat(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
     const jsk_recognition_msgs::ClusterPointIndicesConstPtr &indices_input)
   {
@@ -136,6 +136,6 @@ namespace jsk_pcl_ros
 }
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::MaskImageClusterIndicesConcatenator, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::MaskImageClusterFilter, nodelet::Nodelet);
 
 

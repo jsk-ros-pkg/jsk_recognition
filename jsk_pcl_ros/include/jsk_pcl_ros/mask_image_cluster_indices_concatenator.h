@@ -50,10 +50,10 @@
 
 namespace jsk_pcl_ros
 {
-  class MaskImageClusterIndicesConcatenator: public jsk_topic_tools::DiagnosticNodelet
+  class MaskImageClusterFilter: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    MaskImageClusterIndicesConcatenator(): DiagnosticNodelet("MaskImageClusterIndicesConcatenator") {}
+    MaskImageClusterFilter(): DiagnosticNodelet("MaskImageClusterFilter") {}
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
       jsk_recognition_msgs::ClusterPointIndices > SyncPolicy;

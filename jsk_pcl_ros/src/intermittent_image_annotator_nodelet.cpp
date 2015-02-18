@@ -395,6 +395,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     snapshot_buffer_.clear();
+    return true;
   }
 
   bool IntermittentImageAnnotator::requestCallback(

@@ -1,0 +1,36 @@
+<launch>
+  <arg name="INPUT_IMAGE" default="/multisense/left/image_rect_color" />
+  <arg name="INPUT_CAMERA_INFO" default="/multisense/left/camera_info" />
+  <arg name="INPUT_POINT_CLOUD" default="/tilt_laser_listener/output_cloud" />
+  <arg name="CAMERA_FRAME" default="multisense/left_camera_optical_frame" />
+  <node pkg="image_view2" type="image_view2"  name="image_view2">
+    <remap from="image" to="$(arg INPUT_IMAGE)" />
+  </node>
+  <node pkg="jsk_perception" type="rect_to_mask_image" name="rect_to_mask_image">
+    <remap from="~input" to="$(arg INPUT_IMAGE)/screenrectangle" />
+    <remap from="~input/camera_info" to="$(arg INPUT_CAMERA_INFO)" />
+  </node>
+    <node pkg="jsk_pcl_ros" type="tf_transform_cloud" name="laser_cloud_from_camera_frame">
+    <remap from="~input" to="$(arg INPUT_POINT_CLOUD)" />
+    <rosparam subst_value="true">
+      target_frame_id: $(arg CAMERA_FRAME)
+    </rosparam>
+  </node>
+
+  <node pkg="jsk_pcl_ros" type="mask_image_filter" name="mask_image_filter">
+    <remap from="~input" to="laser_cloud_from_camera_frame/output" />
+    <remap from="~input/mask" to="rect_to_mask_image/output"/>
+    <remap from="~input/camera_info" to="$(arg INPUT_CAMERA_INFO)" />
+  </node>
+  <node pkg="nodelet" type="nodelet" name="mask_image_filter_points"
+        args="standalone pcl/ExtractIndices">
+    <remap from="~input" to="laser_cloud_from_camera_frame/output" />
+    <remap from="~indices" to="mask_image_filter/output" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="torus_finder" name="handle_detector">
+    <remap from="~input" to="mask_image_filter_points/output" />
+  </node>
+  <node pkg="image_view" type="image_view" name="mask_image_view">
+    <remap from="image" to="rect_to_mask_image/output" />
+  </node>
+</launch>

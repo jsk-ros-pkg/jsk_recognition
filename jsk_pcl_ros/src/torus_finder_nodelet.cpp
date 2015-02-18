@@ -103,7 +103,7 @@ namespace jsk_pcl_ros
       Eigen::Vector3f dir(coefficients->values[4],
                           coefficients->values[5],
                           coefficients->values[6]);
-      if (dir.dot(Eigen::Vector3f::UnitZ()) > 0) {
+      if (dir.dot(Eigen::Vector3f::UnitZ()) < 0) {
         dir = - dir;
       }
       

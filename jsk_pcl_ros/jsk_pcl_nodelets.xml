@@ -54,6 +54,10 @@
          type="jsk_pcl_ros::MaskImageFilter"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_pcl/MaskImageClusterFilter"
+         type="jsk_pcl_ros::MaskImageClusterFilter"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_pcl/TorusFinder"
          type="jsk_pcl_ros::TorusFinder"
          base_class_type="nodelet::Nodelet">

@@ -1165,13 +1165,30 @@ ResizePointsPublisher resizes PointCloud generated from depth images. It keeps *
 
 ### jsk\_pcl/PointcloudScreenpoint
 #### What is this
+![](launch/images/pointcloud_screenpoint_3people.png)
+
+Use pointcloud from kinect
+
+![](launch/images/pointcloud_screenpoint_kinect.png)
+
+Use pointcloud from laser
+
+![](launch/images/pointcloud_screenpoint_laser.png)
+
+Use amplifiered pointclouds published by laser
+
+![](launch/images/pointcloud_screenpoint_disparity_laser.png)
+
+
 This is a nodelet to convert (u, v) coordinate on a image to 3-D point.
 It retrieves 3-D environment as pointcloud.
+
+[pointcloud_screenpoint_sample.launch](launch/pointcloud_screenpoint_sample.launch) is a sample launch file.
 
 #### Subscribing Topics
 * `~points` (`sensor_msgs/PointCloud2`):
 
-   Input pointcloud to represent 3-D environment it should be organized.
+   Pointcloud source to estimate 3D points that the user wantedt to specify on a 2D screen
 * `~point` (`geometry_msgs/PointStamped`):
 
    Input point to represent (u, v) image coordinate and this topic is enabled only if `~use_point` parameter is set `True`.

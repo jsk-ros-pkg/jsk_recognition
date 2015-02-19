@@ -1,3 +1,0 @@
- - builder: rosmake
- - builder: sphinx
-   name: roslaunch scripts

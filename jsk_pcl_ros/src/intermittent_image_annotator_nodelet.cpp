@@ -308,84 +308,103 @@ namespace jsk_pcl_ros
     }
     
   }
+
+  void IntermittentImageAnnotator::waitForNextImage()
+  {
+    ros::Time now = ros::Time::now();
+    ros::Rate r(10);
+    while (ros::ok()) {
+      {
+        boost::mutex::scoped_lock lock(mutex_);
+        if (latest_image_msg_ && latest_image_msg_->header.stamp > now) {
+          return;
+        }
+      }
+      r.sleep();
+    }
+  }
  
- bool IntermittentImageAnnotator::shutterCallback(
+  bool IntermittentImageAnnotator::shutterCallback(
     std_srvs::Empty::Request& req,
     std_srvs::Empty::Response& res)
   {
-    boost::mutex::scoped_lock lock(mutex_);
-    if (latest_camera_info_msg_) {
-      SnapshotInformation::Ptr
-        info (new SnapshotInformation());
-      // resolve tf
-      try {
-        if (listener_->waitForTransform(
-              fixed_frame_id_,
-              latest_camera_info_msg_->header.frame_id,
-              latest_camera_info_msg_->header.stamp,
-              ros::Duration(1.0))) {
-          tf::StampedTransform transform;
-          listener_->lookupTransform(fixed_frame_id_,
-                                     latest_camera_info_msg_->header.frame_id,
-                                     latest_camera_info_msg_->header.stamp,
-                                     transform);
-          cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(
-            latest_image_msg_,
-            sensor_msgs::image_encodings::BGR8);
-          Eigen::Affine3d eigen_transform;
-          image_geometry::PinholeCameraModel camera;
-          camera.fromCameraInfo(latest_camera_info_msg_);
-          tf::transformTFToEigen(transform, eigen_transform);
-          info->camera_pose_ = eigen_transform;
-          info->camera_ = camera;
-          info->image_ = cv_ptr->image;
-          if (store_pointcloud_) {
-            // use pointcloud
-            if (!latest_cloud_msg_) {
-              NODELET_ERROR("no pointcloud is available");
-              return false;
-            }
-            // transform pointcloud to fixed frame
-            pcl::PointCloud<pcl::PointXYZRGB>::Ptr 
+    
+    waitForNextImage();
+    {
+      boost::mutex::scoped_lock lock(mutex_);
+      if (latest_camera_info_msg_) {
+        SnapshotInformation::Ptr
+          info (new SnapshotInformation());
+        // resolve tf
+        try {
+          if (listener_->waitForTransform(
+                fixed_frame_id_,
+                latest_camera_info_msg_->header.frame_id,
+                latest_camera_info_msg_->header.stamp,
+                ros::Duration(1.0))) {
+            tf::StampedTransform transform;
+            listener_->lookupTransform(fixed_frame_id_,
+                                       latest_camera_info_msg_->header.frame_id,
+                                       latest_camera_info_msg_->header.stamp,
+                                       transform);
+            cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(
+              latest_image_msg_,
+              sensor_msgs::image_encodings::BGR8);
+            Eigen::Affine3d eigen_transform;
+            image_geometry::PinholeCameraModel camera;
+            camera.fromCameraInfo(latest_camera_info_msg_);
+            tf::transformTFToEigen(transform, eigen_transform);
+            info->camera_pose_ = eigen_transform;
+            info->camera_ = camera;
+            info->image_ = cv_ptr->image;
+            if (store_pointcloud_) {
+              // use pointcloud
+              if (!latest_cloud_msg_) {
+                NODELET_ERROR("no pointcloud is available");
+                return false;
+              }
+              // transform pointcloud to fixed frame
+              pcl::PointCloud<pcl::PointXYZRGB>::Ptr 
                 nontransformed_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-            pcl::PointCloud<pcl::PointXYZRGB>::Ptr 
+              pcl::PointCloud<pcl::PointXYZRGB>::Ptr 
                 transformed_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-            pcl::fromROSMsg(*latest_cloud_msg_, *nontransformed_cloud);
-            if (pcl_ros::transformPointCloud(fixed_frame_id_, 
-                                             *nontransformed_cloud,
-                                             *transformed_cloud,
-                                             *listener_)) {
-              info->cloud_ = transformed_cloud;
+              pcl::fromROSMsg(*latest_cloud_msg_, *nontransformed_cloud);
+              if (pcl_ros::transformPointCloud(fixed_frame_id_, 
+                                               *nontransformed_cloud,
+                                               *transformed_cloud,
+                                               *listener_)) {
+                info->cloud_ = transformed_cloud;
+              }
+              else {
+                NODELET_ERROR("failed to transform pointcloud");
+                return false;
+              }
             }
-            else {
-              NODELET_ERROR("failed to transform pointcloud");
-              return false;
-            }
+            snapshot_buffer_.push_back(info);
+            return true;
           }
-          snapshot_buffer_.push_back(info);
-          return true;
+          else {
+            NODELET_ERROR("failed to resolve tf from %s to %s",
+                          fixed_frame_id_.c_str(),
+                          latest_camera_info_msg_->header.frame_id.c_str());
+            return false;
+          }
         }
-        else {
-          NODELET_ERROR("failed to resolve tf from %s to %s",
-                        fixed_frame_id_.c_str(),
-                        latest_camera_info_msg_->header.frame_id.c_str());
+        catch (tf2::ConnectivityException &e)
+        {
+          NODELET_ERROR("Transform error: %s", e.what());
+          return false;
+        }
+        catch (tf2::InvalidArgumentException &e)
+        {
+          NODELET_ERROR("Transform error: %s", e.what());
           return false;
         }
       }
-      catch (tf2::ConnectivityException &e)
-      {
-        NODELET_ERROR("Transform error: %s", e.what());
+      else {
+        NODELET_ERROR("not yet camera message is available");
         return false;
       }
-      catch (tf2::InvalidArgumentException &e)
-      {
-        NODELET_ERROR("Transform error: %s", e.what());
-        return false;
-      }
-    }
-    else {
-      NODELET_ERROR("not yet camera message is available");
-      return false;
     }
   }
 

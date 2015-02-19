@@ -71,12 +71,33 @@ namespace jsk_pcl_ros
     virtual void subscribe();
     virtual void unsubscribe();
     virtual void configCallback(Config &config, uint32_t level);
-    
+
+    /** @brief
+     * Synchronized message callback
+     */
     virtual void detect(
       const geometry_msgs::PolygonStamped::ConstPtr& polygon_msg,
       const sensor_msgs::CameraInfo::ConstPtr& camera_info_msg,
       const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
 
+    /** @brief
+     * Non synchronized message callback for ~input pointcloud.
+     */
+    virtual void cloudCallback(
+      const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
+
+    /** @brief
+     * Non synchronized message callback for ~input/hint/line
+     */
+    virtual void hintCallback(
+      const geometry_msgs::PolygonStamped::ConstPtr& hint_msg);
+
+    /** @brief
+     * Non synchronized message callback for ~input/camera_info
+     */
+    virtual void infoCallback(
+      const sensor_msgs::CameraInfo::ConstPtr& info_msg);
+    
     virtual ConvexPolygon::Ptr polygonFromLine(
       const geometry_msgs::PolygonStamped::ConstPtr& polygon_msg,
       const image_geometry::PinholeCameraModel& model,
@@ -126,6 +147,10 @@ namespace jsk_pcl_ros
     ros::Publisher pub_cylinder_pose_;
     ros::Publisher pub_inliers_;
     ros::Publisher pub_coefficients_;
+    // params from continuous_mode
+    ros::Subscriber sub_no_sync_cloud_;
+    ros::Subscriber sub_no_sync_camera_info_;
+    ros::Subscriber sub_no_sync_polygon_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     
     double max_radius_;
@@ -138,6 +163,21 @@ namespace jsk_pcl_ros
     int cylinder_fitting_trial_;
     int min_inliers_;
     double eps_2d_angle_;
+    
+    /** @brief
+     *  True if use ~input has normal fields.
+     */
+    bool use_normal_;
+
+    /** @brief
+     *  Run in continuous mode. continuous mode means this nodelet does not synchronize
+     *  hint and input messages but keep processing with old hint information.
+     */
+    bool not_synchronize_;
+    
+    sensor_msgs::CameraInfo::ConstPtr latest_camera_info_;
+    geometry_msgs::PolygonStamped::ConstPtr latest_hint_;
+    
   private:
     
   };

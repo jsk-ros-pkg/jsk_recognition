@@ -136,7 +136,6 @@ This nodelet is useful to compute bounding box of pointcloud by ClusterPointIndi
 
   Output cluster indices.
 
-
 ### jsk\_pcl/HintedHandleEstimator
 ![](images/hinted_handle_estimator.png)
 
@@ -178,63 +177,6 @@ Detect a handle grasp pose from pointcloud and point as hint.
 * `~arm_w` (Float, default: `0.1`)
 * `~arm_d` (Float, default: `0.01`)
 
-
-
-### jsk\_pcl/RGBColorFilter
-Filter pointcloud based on RGB range.
-
-#### Subscribing Topic
-* `~input` (`sensor_msgs/PointCloud2`)
-
-  Input pointcloud. rgb field is required.
-
-* `~indices` (`pcl_msgs/PointIndices`)
-
-  Indices of pointcloud. only available if `~use_indices` is true.
-
-#### Publishing Topic
-* `~output` (`sensor_msgs/PointCloud2`)
-
-  Filtered pointcloud.
-
-#### Parameters
-* `~r_max` (Integer, default: `255`)
-* `~r_min` (Integer, default: `0`)
-* `~g_max` (Integer, default: `255`)
-* `~g_min` (Integer, default: `0`)
-* `~b_max` (Integer, default: `255`)
-* `~b_min` (Integer, default: `0`)
-
-  Color range to filter.
-
-### jsk\_pcl/HSIColorFilter
-![](images/hsi_color_filter.png)
-
-Filter pointcloud based on HSI range.
-
-#### Subscribing Topic
-* `~input` (`sensor_msgs/PointCloud2`)
-
-  Input pointcloud. rgb field is required.
-
-* `~indices` (`pcl_msgs/PointIndices`)
-
-  Indices of pointcloud. only available if `~use_indices` is true.
-
-#### Publishing Topic
-* `~output` (`sensor_msgs/PointCloud2`)
-
-  Filtered pointcloud.
-
-#### Parameters
-* `~h_max` (Integer, default: `127`)
-* `~h_min` (Integer, default: `-128`)
-* `~s_max` (Integer, default: `255`)
-* `~s_min` (Integer, default: `0`)
-* `~i_max` (Integer, default: `255`)
-* `~i_min` (Integer, default: `0`)
-
-   Color range to filter.
 
 
 ### jsk\_pcl/HintedStickFinder
@@ -314,7 +256,61 @@ Detect a stick from pointcloud and line in 2-D image as hiint.
 
   Threshold between hint line and detected stick. This evaluation is done in 2-D coordinate system.
 
+### jsk\_pcl/RGBColorFilter
+Filter pointcloud based on RGB range.
 
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Input pointcloud. rgb field is required.
+
+* `~indices` (`pcl_msgs/PointIndices`)
+
+  Indices of pointcloud. only available if `~use_indices` is true.
+
+#### Publishing Topic
+* `~output` (`sensor_msgs/PointCloud2`)
+
+  Filtered pointcloud.
+
+#### Parameters
+* `~r_max` (Integer, default: `255`)
+* `~r_min` (Integer, default: `0`)
+* `~g_max` (Integer, default: `255`)
+* `~g_min` (Integer, default: `0`)
+* `~b_max` (Integer, default: `255`)
+* `~b_min` (Integer, default: `0`)
+
+  Color range to filter.
+
+### jsk\_pcl/HSIColorFilter
+![](images/hsi_color_filter.png)
+
+Filter pointcloud based on HSI range.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Input pointcloud. rgb field is required.
+
+* `~indices` (`pcl_msgs/PointIndices`)
+
+  Indices of pointcloud. only available if `~use_indices` is true.
+
+#### Publishing Topic
+* `~output` (`sensor_msgs/PointCloud2`)
+
+  Filtered pointcloud.
+
+#### Parameters
+* `~h_max` (Integer, default: `127`)
+* `~h_min` (Integer, default: `-128`)
+* `~s_max` (Integer, default: `255`)
+* `~s_min` (Integer, default: `0`)
+* `~i_max` (Integer, default: `255`)
+* `~i_min` (Integer, default: `0`)
+
+   Color range to filter.
 
 ### jsk\_pcl/AddPointIndices
 add two different `pcl_msgs/PointIndices` into one indices.

@@ -58,6 +58,15 @@ namespace jsk_pcl_ros
                                                       *pnh_, "handle_pose", 1);
     pub_length_ = advertise<std_msgs::Float64>( 
                                                *pnh_, "handle_length", 1);
+    pub_debug_marker_ = advertise<visualization_msgs::Marker>(*pnh_, "debug_marker", 1);
+    pub_debug_marker_array_ = advertise<visualization_msgs::MarkerArray>(*pnh_, "debug_marker_array", 1);
+    handle = handle_model();
+    pnh_->param("finger_l", handle.finger_l, 0.03);
+    pnh_->param("finger_d", handle.finger_d, 0.02);
+    pnh_->param("finger_w", handle.finger_w, 0.01);
+    pnh_->param("arm_l", handle.arm_l, 0.05);
+    pnh_->param("arm_d", handle.arm_d, 0.02);
+    pnh_->param("arm_w", handle.arm_w, 0.1);
   }
 
   void HintedHandleEstimator::subscribe()
@@ -79,8 +88,6 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
     const geometry_msgs::PointStampedConstPtr &point_msg)
   {
-
-    ROS_INFO("debug");
     boost::mutex::scoped_lock lock(mutex_);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::Normal>::Ptr cloud_normals(new pcl::PointCloud<pcl::Normal>);
@@ -89,19 +96,17 @@ namespace jsk_pcl_ros
     std::vector<int> pointIdxNKNSearch(K);
     std::vector<float> pointNKNSquaredDistance(K);
     pcl::search::KdTree<pcl::PointXYZ>::Ptr kd_tree(new pcl::search::KdTree<pcl::PointXYZ>);
-    double finger_t = 0.02;
-    double finger_w = 0.01;
-    double arm_t = 0.05;
-    double finger_d = 0.05;
-    
+
     pcl::fromROSMsg(*cloud_msg, *cloud);
     geometry_msgs::PointStamped transed_point;
     ros::Time now = ros::Time::now();
-    try{
+    try
+      {
       listener_.waitForTransform(cloud->header.frame_id, point_msg->header.frame_id, now, ros::Duration(1.0));
       listener_.transformPoint(cloud->header.frame_id, now, *point_msg, point_msg->header.frame_id, transed_point);
     }
-    catch (tf::TransformException ex){
+    catch(tf::TransformException ex)
+      {
       ROS_ERROR("%s", ex.what());
       return;
     }
@@ -113,22 +118,22 @@ namespace jsk_pcl_ros
     //remove too far cloud
     pass.setInputCloud(cloud);
     pass.setFilterFieldName("x");
-    pass.setFilterLimits(searchPoint.x - 3*arm_t, searchPoint.x + 3*arm_t);
+    pass.setFilterLimits(searchPoint.x - 3*handle.arm_w, searchPoint.x + 3*handle.arm_w);
     pass.filter(*cloud);
     pass.setInputCloud(cloud);
     pass.setFilterFieldName("y");
-    pass.setFilterLimits(searchPoint.y - 3*arm_t, searchPoint.y + 3*arm_t);
+    pass.setFilterLimits(searchPoint.y - 3*handle.arm_w, searchPoint.y + 3*handle.arm_w);
     pass.filter(*cloud);
     pass.setInputCloud(cloud);
     pass.setFilterFieldName("z");
-    pass.setFilterLimits(searchPoint.z - 3*arm_t, searchPoint.z + 3*arm_t);
+    pass.setFilterLimits(searchPoint.z - 3*handle.arm_w, searchPoint.z + 3*handle.arm_w);
     pass.filter(*cloud);
 
     if(cloud->points.size() < 10){
       ROS_INFO("points are too small");
       return;
     }
-    if (1){ //estimate_normal
+    if(1){ //estimate_normal
       pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
       ne.setInputCloud(cloud);
       ne.setSearchMethod(kd_tree);
@@ -139,7 +144,7 @@ namespace jsk_pcl_ros
     else{ //use normal of msg
       
     }
-    if ( ! (kd_tree->nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)) {
+    if(! (kd_tree->nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)) {
       ROS_INFO("kdtree failed");
       return;
     }
@@ -192,20 +197,20 @@ namespace jsk_pcl_ros
 
       pcl::PassThrough<pcl::PointXYZ> pass;
       pcl::PointCloud<pcl::PointXYZ>::Ptr points_z(new pcl::PointCloud<pcl::PointXYZ>), points_yz(new pcl::PointCloud<pcl::PointXYZ>), points_xyz(new pcl::PointCloud<pcl::PointXYZ>);
-      pass.setInputCloud (output_cloud);
+      pass.setInputCloud(output_cloud);
       pass.setFilterFieldName("y");
-      pass.setFilterLimits(-arm_t*3, arm_t*3);
+      pass.setFilterLimits(-handle.arm_w*2, handle.arm_w*2);
       pass.filter(*points_z);
-      pass.setInputCloud (points_z);
+      pass.setInputCloud(points_z);
       pass.setFilterFieldName("z");
-      pass.setFilterLimits(-finger_w, finger_w);
+      pass.setFilterLimits(-handle.finger_d, handle.finger_d);
       pass.filter(*points_yz);
-      pass.setInputCloud (points_yz);
+      pass.setInputCloud(points_yz);
       pass.setFilterFieldName("x");
-      pass.setFilterLimits(-0.2, finger_d);
+      pass.setFilterLimits(-(handle.arm_l-handle.finger_l), handle.finger_l);
       pass.filter(*points_xyz);
       pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
-      for (size_t index=0; index<points_xyz->size(); index++){
+      for(size_t index=0; index<points_xyz->size(); index++){
         points_xyz->points[index].x = points_xyz->points[index].z = 0;
       }
       if(points_xyz->points.size() == 0){ROS_INFO("points are empty");return;}
@@ -214,12 +219,11 @@ namespace jsk_pcl_ros
       std::vector<float> pointRadiusSquaredDistance;
       pcl::PointXYZ search_point_tree;
       search_point_tree.x=search_point_tree.y=search_point_tree.z=0;
-      if ( kdtree.radiusSearch (search_point_tree, 10, pointIdxRadiusSearch, pointRadiusSquaredDistance) > 0 ){
+      if( kdtree.radiusSearch(search_point_tree, 10, pointIdxRadiusSearch, pointRadiusSquaredDistance) > 0 ){
         double before_w=10, temp_w;
-        for (size_t index = 0; index < pointIdxRadiusSearch.size (); ++index){
+        for(size_t index = 0; index < pointIdxRadiusSearch.size(); ++index){
           temp_w =sqrt(pointRadiusSquaredDistance[index]);
-          if(temp_w - before_w > finger_t){
-            ROS_INFO("break driven, index, %td", index);
+          if(temp_w - before_w > handle.finger_w){
             break;
           }
           before_w=temp_w;
@@ -257,6 +261,8 @@ namespace jsk_pcl_ros
     std_msgs::Float64 min_width_msg;
     min_width_msg.data = min_width;
     pub_pose_.publish(handle_pose_stamped);
+    pub_debug_marker_.publish(debug_hand_marker);
+    pub_debug_marker_array_.publish(make_handle_array(handle_pose_stamped, handle));
     pub_length_.publish(min_width_msg);
   }
 }

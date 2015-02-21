@@ -144,7 +144,7 @@ namespace jsk_pcl_ros
     else{ //use normal of msg
       
     }
-    if(! (kd_tree->nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)) {
+    if(! (kd_tree->nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)){
       ROS_INFO("kdtree failed");
       return;
     }
@@ -155,6 +155,7 @@ namespace jsk_pcl_ros
     float v_y = cloud_normals->points[pointIdxNKNSearch[0]].normal_y;
     float v_z = cloud_normals->points[pointIdxNKNSearch[0]].normal_z;
     double theta = acos(v_x);
+    // use normal for estimating handle direction
     tf::Quaternion normal(0, v_z/NORM(0, v_y, v_z) * cos(theta/2), -v_y/NORM(0, v_y, v_z) * cos(theta/2), sin(theta/2));
     tf::Quaternion final_quaternion = normal;
     double min_theta_index = 0;
@@ -168,7 +169,8 @@ namespace jsk_pcl_ros
     debug_hand_marker.pose.orientation.w = 1;
     debug_hand_marker.scale.x=0.003;
     tf::Matrix3x3 best_mat;
-    for(double theta_=0; theta_<3.14/2;
+    //search 180 degree and calc the shortest direction
+    for(double theta_=0; theta_<3.14/2; 
         theta_+=3.14/2/30){
       tf::Quaternion rotate_(sin(theta_), 0, 0, cos(theta_));
       tf::Quaternion temp_qua = normal * rotate_;
@@ -223,8 +225,8 @@ namespace jsk_pcl_ros
         double before_w=10, temp_w;
         for(size_t index = 0; index < pointIdxRadiusSearch.size(); ++index){
           temp_w =sqrt(pointRadiusSquaredDistance[index]);
-          if(temp_w - before_w > handle.finger_w){
-            break;
+          if(temp_w - before_w > handle.finger_w*2){
+            break; // there are small space for finger
           }
           before_w=temp_w;
         }
@@ -234,6 +236,7 @@ namespace jsk_pcl_ros
           min_qua = temp_qua;
           best_mat = temp_mat;
         }
+        //for debug view
         geometry_msgs::Point temp_point;
         std_msgs::ColorRGBA temp_color;
         temp_color.r=0; temp_color.g=0; temp_color.b=1; temp_color.a=1;

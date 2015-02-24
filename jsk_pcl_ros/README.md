@@ -152,16 +152,16 @@ Detect a handle grasp pose from pointcloud and point as hint.
 
 #### Publishing Topic
 * `handle_pose` (`geometry_msgs::PoseStamped`)
-  
+
   estimated handle pose
-  
+
 * `handle_length` (`std_msgs::Float64`)
 
   estimated handle length
-  
+
 * `debug_marker` (`visualization_msgs::Marker`)
-  
-  the result of calculating handle direction  
+
+  the result of calculating handle direction
 
 * `debug_marker_array` (`visualization_msg::MarkerArray`)
 
@@ -1860,7 +1860,48 @@ Checking the Rviz output when you find the calibrated pointcloud overlaps the Po
 
 * Finish and Check it again.
 
+### jsk\_pcl/SphericalPointCloudSimulator
+![](images/spherical_pointcloud_simulator.h)
 
+Simulate a pointcloud which is acquired by spindle laser. Sensor model is
+spherical laser.
+
+#### Subscribing Topics
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  This topic is only used to synchronize timestamp of `~output` pointcloud
+  to certain pointcloud. If no `~frame_id` is specified, frame_id of `~input`
+  is copied to `~output`.
+
+#### Publishing Topics
+* `~output` (`sensor_msgs/PointCloud2`)
+
+  Simulated pointcloud.
+
+#### Parameters
+* `~frame_id` (String, default: None)
+
+  frame_id of output pointcloud. If not specified, frame\_id of `~input` is copied.
+* `~r` (Double, default: `3.0`)
+
+  Radius of spherical model.
+* `~min_phi` (Double, default: `0.0`)
+
+  Minimum angle of scanning plane.
+* `~max_phi` (Double, default: `2pi`)
+
+  Maximum angle of scanning plane.
+* `~scan_range` (Double, default: `4.7`)
+
+  Scan range of laser. The default value is same to hokuyo's parameter.
+* `~scan_num` (Integer, default: `1081`)
+
+  The number of points in one scan of laser.
+  The default value is same to hokuyo's parameter.
+* `~fps` (Double, default: `40`)
+
+  Fps of laser sensor.
+  The default value is same to hokuyo's parameter.
 
 ## To Test Some Samples
 

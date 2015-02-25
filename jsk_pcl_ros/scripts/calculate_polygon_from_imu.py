@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import rospy
-
+import numpy as np
 PKG='jsk_pcl_ros'
 
 import imp
@@ -37,7 +37,9 @@ def imu_cb(imu):
     temp_header.seq = header.seq
     PStamped.header =temp_header
     PArrayPub.publish(PolygonArray(temp_header, [PStamped]))
-    MStamped = ModelCoefficients(temp_header, (-ax, -ay, -az,0))
+    normal_array = np.array([ax, ay, az, 0])
+    normal_array = normal_array / np.linalg.norm(x)
+    MStamped = ModelCoefficients(temp_header, normal_array)
     MArrayPub.publish(ModelCoefficientsArray(temp_header, [MStamped]))
 def camerainfo_cb(info):
     global header

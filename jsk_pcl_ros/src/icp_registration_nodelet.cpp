@@ -48,6 +48,7 @@ namespace jsk_pcl_ros
 {
   void ICPRegistration::onInit()
   {
+    pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
     ConnectionBasedNodelet::onInit();
     tf_listener_ = TfListenerSingleton::getInstance();
     ////////////////////////////////////////////////////////
@@ -55,10 +56,10 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (
+      boost::bind(
         &ICPRegistration::configCallback, this, _1, _2);
     srv_->setCallback (f);
-    
+    pnh_->param("use_normal", use_normal_, false);
     pnh_->param("align_box", align_box_, false);
     pnh_->param("synchronize_reference", synchronize_reference_, false);
     ////////////////////////////////////////////////////////
@@ -404,6 +405,10 @@ namespace jsk_pcl_ros
     Eigen::Affine3d& output_transform)
   {
     pcl::IterativeClosestPoint<PointT, PointT> icp;
+    if (use_normal_) {
+      pcl::IterativeClosestPointWithNormals<PointT, PointT> icp_with_normal;
+      icp = icp_with_normal;
+    }
     // icp.setInputSource(cloud);
     // icp.setInputTarget(reference_cloud_);
     if (algorithm_ == 1) {

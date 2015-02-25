@@ -187,8 +187,11 @@ namespace jsk_pcl_ros
         normal[2] = coefficients->coefficients[nearest_plane_index].values[2];
         normal = normal.normalized();
         z_axis[0] = 0; z_axis[1] = 0; z_axis[2] = 1;
-        Eigen::Vector3f rotation_axis = z_axis.cross(normal).normalized();
-        double theta = acos(z_axis.dot(normal));
+        Eigen::Quaternionf rot;
+        rot.setFromTwoVectors(z_axis, normal);
+        Eigen::AngleAxisf rotation_angle_axis(rot);
+        Eigen::Vector3f rotation_axis = rotation_angle_axis.axis();
+        double theta = rotation_angle_axis.angle();
         if (isnan(theta) ||
             isnan(rotation_axis[0]) ||
             isnan(rotation_axis[1]) ||
@@ -199,9 +202,7 @@ namespace jsk_pcl_ros
                         normal[0], normal[1], normal[2]);
         }
         else {
-          Eigen::Matrix3f m = Eigen::Matrix3f::Identity();
-          m = m * Eigen::AngleAxisf(theta, rotation_axis);
-          
+          Eigen::Matrix3f m = Eigen::Matrix3f::Identity() * rot;
           if (use_pca_) {
             // first project points to the plane
             pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud

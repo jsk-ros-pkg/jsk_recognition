@@ -42,6 +42,7 @@
 
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
 
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl/point_types.h>
@@ -55,15 +56,18 @@ namespace jsk_pcl_ros
   {
   public:
     typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> SyncPolicy;
+    typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> ASyncPolicy;
   protected:
     ros::Publisher pub_;
     int maximum_queue_size_;
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
+    boost::shared_ptr<message_filters::Synchronizer<ASyncPolicy> > async_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_xyz_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_normal_;
     virtual void concatenate(const sensor_msgs::PointCloud2::ConstPtr& xyz, const sensor_msgs::PointCloud2::ConstPtr& normal);
     virtual void subscribe();
     virtual void unsubscribe();
+    bool use_async_;
   private:
     virtual void onInit();
     

@@ -42,11 +42,11 @@
 #include <jsk_pcl_ros/OrganizedEdgeDetectorConfig.h>
 #include <dynamic_reconfigure/server.h>
 #include <image_transport/image_transport.h>
-#include "jsk_pcl_ros/connection_based_nodelet.h"
+#include "jsk_topic_tools/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
 {
-  class OrganizedEdgeDetector: public ConnectionBasedNodelet
+  class OrganizedEdgeDetector: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     typedef pcl::PointXYZRGB PointT;

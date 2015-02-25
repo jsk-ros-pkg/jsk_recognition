@@ -64,7 +64,6 @@ namespace jsk_pcl_ros
     }
 
     pnh_->param("publish_clouds", publish_clouds_, false);
-    
     pnh_->param("align_boxes", align_boxes_, false);
     pnh_->param("use_pca", use_pca_, false);
     pc_pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "debug_output", 1);
@@ -225,6 +224,10 @@ namespace jsk_pcl_ros
             // flip axis to satisfy right-handed system
             if (m.col(0).cross(m.col(1)).dot(m.col(2)) < 0) {
               m.col(0) = - m.col(0);
+            }
+            if (m.col(1).dot(Eigen::Vector3f::UnitZ()) < 0) {
+              // rotate around z
+              m = m * Eigen::AngleAxisf(M_PI, Eigen::Vector3f::UnitZ());
             }
           }
             

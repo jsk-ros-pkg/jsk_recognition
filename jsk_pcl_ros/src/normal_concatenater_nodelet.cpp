@@ -80,6 +80,7 @@ namespace jsk_pcl_ros
   {
     ConnectionBasedNodelet::onInit();
     pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
+    pnh_->param("use_async", use_async_, false);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     if (!pnh_->getParam("max_queue_size", maximum_queue_size_)) {
       maximum_queue_size_ = 100;
@@ -88,11 +89,18 @@ namespace jsk_pcl_ros
 
   void NormalConcatenater::subscribe()
   {
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(maximum_queue_size_);
     sub_xyz_.subscribe(*pnh_, "input", 1);
     sub_normal_.subscribe(*pnh_, "normal", 1);
-    sync_->connectInput(sub_xyz_, sub_normal_);
-    sync_->registerCallback(boost::bind(&NormalConcatenater::concatenate, this, _1, _2));
+    if (use_async_) {
+      async_ = boost::make_shared<message_filters::Synchronizer<ASyncPolicy> >(maximum_queue_size_);
+      async_->connectInput(sub_xyz_, sub_normal_);
+      async_->registerCallback(boost::bind(&NormalConcatenater::concatenate, this, _1, _2));
+    }
+    else {
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(maximum_queue_size_);
+      sync_->connectInput(sub_xyz_, sub_normal_);
+      sync_->registerCallback(boost::bind(&NormalConcatenater::concatenate, this, _1, _2));
+    }
   }
 
   void NormalConcatenater::unsubscribe()

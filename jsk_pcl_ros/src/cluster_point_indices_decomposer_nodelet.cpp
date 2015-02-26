@@ -215,19 +215,23 @@ namespace jsk_pcl_ros
             proj.setModelCoefficients(plane_coefficients);
             proj.setInputCloud(segmented_cloud);
             proj.filter(*projected_cloud);
-
-            pcl::PCA<pcl::PointXYZRGB> pca;
-            pca.setInputCloud(projected_cloud);
-            Eigen::Matrix3f eigen = pca.getEigenVectors();
-            m.col(0) = eigen.col(0);
-            m.col(1) = eigen.col(1);
-            // flip axis to satisfy right-handed system
-            if (m.col(0).cross(m.col(1)).dot(m.col(2)) < 0) {
-              m.col(0) = - m.col(0);
+            if (projected_cloud->points.size() >= 3) {
+              pcl::PCA<pcl::PointXYZRGB> pca;
+              pca.setInputCloud(projected_cloud);
+              Eigen::Matrix3f eigen = pca.getEigenVectors();
+              m.col(0) = eigen.col(0);
+              m.col(1) = eigen.col(1);
+              // flip axis to satisfy right-handed system
+              if (m.col(0).cross(m.col(1)).dot(m.col(2)) < 0) {
+                m.col(0) = - m.col(0);
+              }
+              if (m.col(1).dot(Eigen::Vector3f::UnitZ()) < 0) {
+                // rotate around z
+                m = m * Eigen::AngleAxisf(M_PI, Eigen::Vector3f::UnitZ());
+              }
             }
-            if (m.col(1).dot(Eigen::Vector3f::UnitZ()) < 0) {
-              // rotate around z
-              m = m * Eigen::AngleAxisf(M_PI, Eigen::Vector3f::UnitZ());
+            else {
+              NODELET_ERROR("Too small indices for PCA computation");
             }
           }
             

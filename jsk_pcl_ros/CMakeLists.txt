@@ -64,6 +64,7 @@ add_service_files(FILES SwitchTopic.srv
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/SphericalPointCloudSimulator.cfg
   cfg/BorderEstimator.cfg
   cfg/HintedStickFinder.cfg
   cfg/HintedPlaneDetector.cfg
@@ -171,6 +172,8 @@ jsk_pcl_nodelet(src/multi_plane_extraction_nodelet.cpp
   "jsk_pcl/MultiPlaneExtraction" "multi_plane_extraction")
 jsk_pcl_nodelet(src/selected_cluster_publisher_nodelet.cpp
   "jsk_pcl/SelectedClusterPublisher" "selected_cluster_publisher")
+jsk_pcl_util_nodelet(src/spherical_pointcloud_simulator_nodelet.cpp
+  "jsk_pcl/SphericalPointCloudSimulator" "spherical_pointcloud_simulator")
 jsk_pcl_util_nodelet(src/plane_rejector_nodelet.cpp
   "jsk_pcl/PlaneRejector" "plane_rejector")
 jsk_pcl_util_nodelet(src/pointcloud_to_cluster_point_indices_nodelet.cpp

@@ -3,6 +3,10 @@
          type="jsk_pcl_ros::SphericalPointCloudSimulator"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_pcl/PlanarPointCloudSimulator"
+         type="jsk_pcl_ros::PlanarPointCloudSimulatorNodelet"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_pcl/PolygonArrayWrapper" type="jsk_pcl_ros::PolygonArrayWrapper"
          base_class_type="nodelet::Nodelet">
     <description>

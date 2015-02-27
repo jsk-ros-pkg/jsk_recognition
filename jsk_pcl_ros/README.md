@@ -1903,6 +1903,28 @@ spherical laser.
   Fps of laser sensor.
   The default value is same to hokuyo's parameter.
 
+### jsk\_pcl/PlanarlPointCloudSimulator
+![](images/planar_pointcloud_simulator.h)
+
+Simulate a pointcloud which is acquired by cameras such as stereo camera and kinect.
+Sensor model is pinhole camera model.
+
+#### Subscribing Topics
+* `~input` (`sensor_msgs/CameraInfo`)
+
+  Camera info to simulate pointcloud.
+
+#### Publishing Topics
+* `~output` (`sensor_msgs/PointCloud2`)
+
+  Simulated pointcloud.
+
+#### Parameters
+* `~distance` (Double, default: `1.0`)
+
+  Distance to pointcloud from origin along z-axis.
+
+
 ## To Test Some Samples
 
 Please be careful about the nodelet manager name when execute some sample launches.

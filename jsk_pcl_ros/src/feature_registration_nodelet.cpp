@@ -87,7 +87,7 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& feature_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    NODELET_INFO("update reference");
+    NODELET_DEBUG("update reference");
     reference_cloud_.reset(new pcl::PointCloud<pcl::PointNormal>);
     reference_feature_.reset(new pcl::PointCloud<pcl::FPFHSignature33>);
     pcl::fromROSMsg(*cloud_msg, *reference_cloud_);
@@ -127,10 +127,13 @@ namespace jsk_pcl_ros
     pcl::SampleConsensusPrerejective<pcl::PointNormal,
                                      pcl::PointNormal,
                                      pcl::FPFHSignature33> align;
-    align.setInputSource(cloud);
-    align.setSourceFeatures(feature);
-    align.setInputTarget(reference_cloud_);
-    align.setTargetFeatures(reference_feature_);
+    
+    align.setInputSource(reference_cloud_);
+    align.setSourceFeatures(reference_feature_);
+
+    align.setInputTarget(cloud);
+    align.setTargetFeatures(feature);
+
     align.setMaximumIterations(max_iterations_); // Number of RANSAC iterations
     align.setNumberOfSamples(3); // Number of points to sample for generating/prerejecting a pose
     align.setCorrespondenceRandomness(correspondence_randomness_); // Number of nearest features to use
@@ -149,6 +152,10 @@ namespace jsk_pcl_ros
       ros_pose.header = cloud_msg->header;
       pub_pose_.publish(ros_pose);
 
+      pcl::PointCloud<pcl::PointNormal>::Ptr
+        result_cloud (new pcl::PointCloud<pcl::PointNormal>);
+      pcl::transformPointCloud(
+        *reference_cloud_, *result_cloud, transformation);
       sensor_msgs::PointCloud2 ros_cloud;
       pcl::toROSMsg(*object_aligned, ros_cloud);
       ros_cloud.header = cloud_msg->header;
@@ -156,6 +163,9 @@ namespace jsk_pcl_ros
       
       //pcl::console::print_info ("Inliers: %i/%i\n", align.getInliers ().size (), object->size ());
     
+    }
+    else {
+      NODELET_WARN("failed to align pointcloud");
     }
 
   }

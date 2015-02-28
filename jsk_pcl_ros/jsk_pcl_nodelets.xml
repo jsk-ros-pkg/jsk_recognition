@@ -46,11 +46,11 @@
   </class>
 </library>
 <library path="libjsk_pcl_ros">
-  <class name="jsk_pcl_ros/FeatureRegistration"
+  <class name="jsk_pcl/FeatureRegistration"
          type="jsk_pcl_ros::FeatureRegistration"
          base_class_type="nodelet::Nodelet">
   </class>
-  <class name="jsk_pcl_ros/FindObjectOnPlane"
+  <class name="jsk_pcl/FindObjectOnPlane"
          type="jsk_pcl_ros::FindObjectOnPlane"
          base_class_type="nodelet::Nodelet">
   </class>

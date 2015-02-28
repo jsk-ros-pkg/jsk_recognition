@@ -1,0 +1,132 @@
+<launch>
+  <node pkg="image_view2" name="attention_viewer" type="image_view2">
+    <remap from="image" to="/multisense/left/image_rect_color" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="rect_to_mask_image" name="rect_to_mask_image">
+    <remap from="~input/camera_info" to="/multisense/left/camera_info" />
+    <remap from="~input" to="/multisense/left/image_rect_color/screenrectangle" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="mask_image_filter" name="mask_image_filter">
+    <remap from="~input" to="/multisense/organized_point_cloud2_colored"/>
+    <remap from="~input/mask" to="rect_to_mask_image/output"/>
+    <remap from="~input/camera_info" to="/multisense/left/camera_info" />
+  </node>
+  <arg name="INPUT_CLOUD" value="/filtered_cloud" />
+
+  <node pkg="nodelet" type="nodelet" name="pointcloud_server_org"
+        args="standalone pcl/PCDReader">
+    <rosparam subst_value="true">
+      publish_rate: 1
+      tf_frame: "map"
+      filename: "$(find drc_task_common)/pcds/drill.pcd"
+    </rosparam>
+  </node>
+  <node pkg="topic_tools" type="relay" name="pointcloud_server"
+        args=" pointcloud_server_org/output pointcloud_server/output" />
+  <node pkg="nodelet" type="nodelet" name="pointcloud_server" if="false"
+        args="standalone pcl/VoxelGrid">
+    <remap from="~input" to="pointcloud_server_org/output"/>
+    <rosparam subst_value="true">
+      filter_limit_min: -10
+      filter_limit_max: 10
+      leaf_size: 0.01
+    </rosparam>
+  </node>
+  <!-- apply normal estimation to output of db -->
+  <node pkg="nodelet" type="nodelet" name="template_normal_estimation"
+	args="standalone pcl/NormalEstimation">
+    <remap from="~input" to="pointcloud_server/output" />
+    <rosparam>
+      k_search: 0
+      radius_search: 0.1
+      # 0 -> ANN, 1 -> FLANN, 2 -> Organized
+      spatial_locator: 0
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="normal_concatenater" name="template_normal_concat">
+    <remap from="~input" to="pointcloud_server/output" />
+    <remap from="~normal" to="template_normal_estimation/output" />
+    <rosparam>
+      use_async: true
+    </rosparam>
+  </node>
+  
+  <node pkg="nodelet" type="nodelet" name="template_fpfh"
+        args="standalone pcl/FPFHEstimationOMP">
+    <remap from="~input" to="template_normal_concat/output"/>
+    <remap from="~normals" to="template_normal_concat/output"/>
+    <remap from="~surface" to="template_normal_concat/output"/>
+    <rosparam>
+      use_surface: true
+      radius_search: 0.01
+      k_search: 0
+      spatial_locator: 0
+    </rosparam>
+  </node>
+
+  <!-- input -->
+  <!-- apply normal estimation to output of db -->
+  <!-- <node pkg="jsk_pcl_ros" type="normal_estimation_integral_image" name="normal_estimation"> -->
+  <!--   <remap from="~input" to="$(arg INPUT_CLOUD)" /> -->
+  <!-- </node> -->
+  <node pkg="nodelet" type="nodelet" name="normal_estimation"
+	args="standalone pcl/NormalEstimation">
+    <remap from="~input" to="downsample/output" />
+    <rosparam>
+      k_search: 0
+      radius_search: 0.1
+      # 0 -> ANN, 1 -> FLANN, 2 -> Organized
+      spatial_locator: 0
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="normal_concatenater" name="normal_concat">
+    <remap from="~input" to="downsample/output" />
+    <remap from="~normal" to="normal_estimation/output" />
+    <remap from="~output" to="normal_estimation/output_with_xyz" />
+    <rosparam>
+      use_async: true
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="downsample"
+        args="standalone pcl/PassThrough">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <rosparam subst_value="true">
+      filter_limit_min: -10
+      filter_limit_max: 10
+      leaf_size: 0.01
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="downsample"
+        args="standalone pcl/VoxelGrid" if="false">
+    <remap from="~input" to="normal_estimation/output_with_xyz" />
+    <rosparam subst_value="true">
+      filter_limit_min: -10
+      filter_limit_max: 10
+      leaf_size: 0.01
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="fpfh"
+        args="standalone pcl/FPFHEstimationOMP">
+    <remap from="~input" to="normal_estimation/output_with_xyz"/>
+    <remap from="~normals" to="normal_estimation/output_with_xyz"/>
+    <remap from="~surface" to="normal_estimation/output_with_xyz"/>
+    <rosparam>
+      use_surface: true
+      radius_search: 0.01
+      k_search: 0
+      spatial_locator: 0
+    </rosparam>
+  </node>
+
+  <node pkg="jsk_pcl_ros" type="feature_registration" name="feature_registration" output="screen">
+    <remap from="~input" to="normal_estimation/output_with_xyz"/>
+    <remap from="~input/feature" to="fpfh/output" />
+    <remap from="~input/reference/cloud" to="template_normal_concat/output"/>
+    <remap from="~input/reference/feature" to="template_fpfh/output" />
+    <rosparam>
+      similarity_threshold: 0.9
+    </rosparam>
+  </node>
+
+</launch>

@@ -64,6 +64,7 @@ add_service_files(FILES SwitchTopic.srv
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/UniformSampling.cfg
   cfg/PlanarPointCloudSimulator.cfg
   cfg/SphericalPointCloudSimulator.cfg
   cfg/BorderEstimator.cfg
@@ -300,7 +301,8 @@ jsk_pcl_nodelet(src/hinted_stick_finder_nodelet.cpp
   "jsk_pcl/HintedStickFinder" "hinted_stick_finder")
 jsk_pcl_nodelet(src/feature_registration_nodelet.cpp
   "jsk_pcl/FeatureRegistration" "feature_registration")
-
+jsk_pcl_nodelet(src/uniform_sampling_nodelet.cpp
+  "jsk_pcl/UniformSampling" "uniform_sampling")
 add_library(jsk_pcl_ros_base SHARED
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
   src/pcl_conversion_util.cpp src/pcl_util.cpp

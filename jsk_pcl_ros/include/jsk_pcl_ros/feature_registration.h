@@ -42,6 +42,7 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
 
 #include <dynamic_reconfigure/server.h>
 #include <jsk_pcl_ros/FeatureRegistrationConfig.h>
@@ -61,8 +62,7 @@ namespace jsk_pcl_ros
   {
   public:
     typedef FeatureRegistrationConfig Config;
-    typedef message_filters::sync_policies::ExactTime<
-    sensor_msgs::PointCloud2,
+    typedef message_filters::sync_policies::ApproximateTime<
     sensor_msgs::PointCloud2,
     sensor_msgs::PointCloud2> SyncPolicy;
     FeatureRegistration(): DiagnosticNodelet("FeatureRegistration") {};

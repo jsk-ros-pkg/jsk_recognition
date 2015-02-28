@@ -101,6 +101,7 @@ generate_dynamic_reconfigure_options(
   cfg/BoundingBoxFilter.cfg
   cfg/LINEMODDetector.cfg
   cfg/SupervoxelSegmentation.cfg
+  cfg/FeatureRegistration.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -297,6 +298,8 @@ jsk_pcl_nodelet(src/add_point_indices_nodelet.cpp
 jsk_pcl_nodelet(src/find_object_on_plane_nodelet.cpp "jsk_pcl/FindObjectOnPlane" "find_object_on_plane")
 jsk_pcl_nodelet(src/hinted_stick_finder_nodelet.cpp
   "jsk_pcl/HintedStickFinder" "hinted_stick_finder")
+jsk_pcl_nodelet(src/feature_registration_nodelet.cpp
+  "jsk_pcl/FeatureRegistration" "feature_registration")
 
 add_library(jsk_pcl_ros_base SHARED
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp

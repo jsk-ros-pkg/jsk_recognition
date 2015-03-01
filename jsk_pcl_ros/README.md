@@ -59,6 +59,33 @@ time end
 Represent range of time.
 
 ## nodelets
+### jsk\_pcl/PointCloudLocalization
+Localize 6d pose of robot using ICP registration of pointcloud.
+It publishes tf transformation from gloabl frame to odometory frame like acml does.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Input pointcloud to align.
+
+#### Publishing Topic
+* `~output` (`sensor_msgs/PointCloud2`)
+
+  Concatenated pointcloud.
+
+#### Parameters
+* `~tf_rate` (Double, default: `20.0`)
+
+  Frequency to publish tf transformations.
+* `~cloud_rate` (Double, default: `10.0`)
+
+  Frequency to publish `~output` topic.
+
+#### Using Services
+* `~icp_align` (`jsk_pcl_ros/ICPAlign`)
+
+  ICP service to align pointcloud
+
 ### jsk\_pcl/UniformSampling
 Sample pointloud in the manner of uniform sampling.
 

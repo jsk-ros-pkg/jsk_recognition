@@ -303,6 +303,8 @@ jsk_pcl_nodelet(src/feature_registration_nodelet.cpp
   "jsk_pcl/FeatureRegistration" "feature_registration")
 jsk_pcl_nodelet(src/uniform_sampling_nodelet.cpp
   "jsk_pcl/UniformSampling" "uniform_sampling")
+jsk_pcl_nodelet(src/pointcloud_localization_nodelet.cpp
+  "jsk_pcl/PointCloudLocalization" "pointcloud_localization")
 add_library(jsk_pcl_ros_base SHARED
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
   src/pcl_conversion_util.cpp src/pcl_util.cpp

@@ -1343,6 +1343,9 @@ It retrieves 3-D environment as pointcloud.
    And the region should be rectangular.
    If `~use_sync` parameter is set `True`,
 
+* `~poly` (`geometry_msgs/PolygonStamped`):`
+
+  Input polygonal region in image local coordinates.
 * `~point_array` (`sensor_msgs/PointCloud2`):
 
    Input points to represent series of (u, v) image coordinate and this
@@ -1358,7 +1361,9 @@ It retrieves 3-D environment as pointcloud.
 * `~output` (`sensor_msgs/PointCloud`):
 
    The topic to be used to publish series of points as a result of screenpoint.
+* `~output_poly` (`geometry_msgs/PolygonStamped`)
 
+   Projected points of `~poly`.
 #### Advertising Servicies
 * `~screen_to_point` (`jsk_pcl_ros::TransformScreenpoint`)
 
@@ -1392,6 +1397,9 @@ geometry_msgs/Vector3 vector
 * `~use_rect` (Boolean, default: `False`):
 
    Enable `~polygon` topic.
+* `~use_poly` (Boolean, default: `False`):
+
+   Enable `~poly` topic.
 * `~use_point` (Boolean, default: `False`):
 
    Enable `~point` topic.

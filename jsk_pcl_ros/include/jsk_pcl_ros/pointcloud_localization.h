@@ -97,6 +97,10 @@ namespace jsk_pcl_ros
      */
     virtual bool isFirstTime();
 
+    virtual void applyDownsampling(
+      pcl::PointCloud<pcl::PointXYZ>::Ptr in_cloud,
+      pcl::PointCloud<pcl::PointXYZ>& out_cloud);
+
     boost::mutex mutex_;
     ros::Subscriber sub_;
     ros::Publisher pub_cloud_;
@@ -114,6 +118,12 @@ namespace jsk_pcl_ros
      */
     std::string global_frame_;
     std::string odom_frame_;
+
+    /**
+     * @brief
+     * Resolution of voxel grid
+     */
+    double leaf_size_;
     tf::Transform localize_tramsform_;
     bool first_time_;
   private:

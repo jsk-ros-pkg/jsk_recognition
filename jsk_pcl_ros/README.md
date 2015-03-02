@@ -80,7 +80,9 @@ It publishes tf transformation from gloabl frame to odometory frame like acml do
 * `~cloud_rate` (Double, default: `10.0`)
 
   Frequency to publish `~output` topic.
+* `~leaf_size` (Double, default: `0.01`)
 
+  Resolution of voxel grid downsampling.
 #### Using Services
 * `~icp_align` (`jsk_pcl_ros/ICPAlign`)
 

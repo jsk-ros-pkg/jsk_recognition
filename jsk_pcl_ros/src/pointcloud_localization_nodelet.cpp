@@ -38,6 +38,7 @@
 #include <jsk_pcl_ros/ICPAlign.h>
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <pcl_ros/transforms.h>
+#include <pcl/filters/voxel_grid.h>
 
 namespace jsk_pcl_ros
 {
@@ -49,6 +50,7 @@ namespace jsk_pcl_ros
     localize_tramsform_.setIdentity();
     pnh_->param("global_frame", global_frame_, std::string("map"));
     pnh_->param("odom_frame", odom_frame_, std::string("odom"));
+    pnh_->param("leaf_size", leaf_size_, 0.01);
     double cloud_rate;
     pnh_->param("cloud_rate", cloud_rate, 10.0);
     double tf_rate;
@@ -79,6 +81,16 @@ namespace jsk_pcl_ros
     // dummy
   }
 
+  void PointCloudLocalization::applyDownsampling(
+    pcl::PointCloud<pcl::PointXYZ>::Ptr in_cloud,
+    pcl::PointCloud<pcl::PointXYZ>& out_cloud)
+  {
+    pcl::VoxelGrid<pcl::PointXYZ> vg;
+    vg.setInputCloud(in_cloud);
+    vg.setLeafSize(leaf_size_, leaf_size_, leaf_size_);
+    vg.filter(out_cloud);
+  }
+  
   void PointCloudLocalization::cloudTimerCallback(
     const ros::TimerEvent& event)
   {
@@ -149,51 +161,80 @@ namespace jsk_pcl_ros
     }
     {
       boost::mutex::scoped_lock lock(mutex_);
-
-      pcl::PointCloud<pcl::PointXYZ>::Ptr local_cloud (new pcl::PointCloud<pcl::PointXYZ>);
-      pcl::fromROSMsg(*latest_cloud_, *local_cloud);
-      if (tf_listener_->waitForTransform(
-            latest_cloud_->header.frame_id,
-            global_frame_,
-            latest_cloud_->header.stamp,
-            ros::Duration(10.0))) {
-        pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud (new pcl::PointCloud<pcl::PointXYZ>);
-        pcl_ros::transformPointCloud(global_frame_,
-                                     *local_cloud,
-                                     *input_cloud,
-                                     *tf_listener_);
-        if (isFirstTime()) {
-          all_cloud_ = input_cloud;
-          first_time_ = false;
-        }
-        else {
-          // run ICP
-          ros::ServiceClient client = pnh_->serviceClient<jsk_pcl_ros::ICPAlign>("icp_align");
-          jsk_pcl_ros::ICPAlign icp_srv;
-          pcl::toROSMsg(*input_cloud, icp_srv.request.reference_cloud);
-          pcl::toROSMsg(*all_cloud_, icp_srv.request.target_cloud);
-          if (client.call(icp_srv)) {
-            Eigen::Affine3f transform;
-            tf::poseMsgToEigen(icp_srv.response.result.pose, transform);
-            Eigen::Vector3f transform_pos(transform.translation());
-            float roll, pitch, yaw;
-            pcl::getEulerAngles(transform, roll, pitch, yaw);
-            NODELET_INFO("aligned parameter --");
-            NODELET_INFO("  pos: [%f, %f, %f]", transform_pos[0], transform_pos[1], transform_pos[2]);
-            NODELET_INFO("  rot: [%f, %f, %f]", roll, pitch, yaw);
-            pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_input_cloud (new pcl::PointCloud<pcl::PointXYZ>);
-            pcl::transformPointCloud(*input_cloud, *transformed_input_cloud, transform);
-            *all_cloud_ = *all_cloud_ + *input_cloud;
-            // update localize_tramsform_
-            tf::Transform icp_transform;
-            tf::transformEigenToTF(transform, icp_transform);
-            localize_tramsform_ = localize_tramsform_ * icp_transform;
+      try {
+        pcl::PointCloud<pcl::PointXYZ>::Ptr
+          local_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::fromROSMsg(*latest_cloud_, *local_cloud);
+        if (tf_listener_->waitForTransform(
+              latest_cloud_->header.frame_id,
+              global_frame_,
+              latest_cloud_->header.stamp,
+              ros::Duration(10.0))) {
+          pcl::PointCloud<pcl::PointXYZ>::Ptr
+            input_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+          pcl_ros::transformPointCloud(global_frame_,
+                                       *local_cloud,
+                                       *input_cloud,
+                                       *tf_listener_);
+          pcl::PointCloud<pcl::PointXYZ>::Ptr
+            input_downsampled_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+          applyDownsampling(input_cloud, *input_downsampled_cloud);
+          if (isFirstTime()) {
+            all_cloud_ = input_downsampled_cloud;
+            first_time_ = false;
           }
           else {
-            NODELET_ERROR("Failed to call ~icp_align");
-            return false;
+            // run ICP
+            ros::ServiceClient client
+              = pnh_->serviceClient<jsk_pcl_ros::ICPAlign>("icp_align");
+            jsk_pcl_ros::ICPAlign icp_srv;
+            pcl::toROSMsg(*input_downsampled_cloud,
+                          icp_srv.request.reference_cloud);
+            pcl::toROSMsg(*all_cloud_,
+                          icp_srv.request.target_cloud);
+            if (client.call(icp_srv)) {
+              Eigen::Affine3f transform;
+              tf::poseMsgToEigen(icp_srv.response.result.pose, transform);
+              Eigen::Vector3f transform_pos(transform.translation());
+              float roll, pitch, yaw;
+              pcl::getEulerAngles(transform, roll, pitch, yaw);
+              NODELET_INFO("aligned parameter --");
+              NODELET_INFO("  - pos: [%f, %f, %f]",
+                           transform_pos[0],
+                           transform_pos[1],
+                           transform_pos[2]);
+              NODELET_INFO("  - rot: [%f, %f, %f]", roll, pitch, yaw);
+              pcl::PointCloud<pcl::PointXYZ>::Ptr
+                transformed_input_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+              pcl::transformPointCloud(*input_cloud,
+                                       *transformed_input_cloud,
+                                       transform);
+              pcl::PointCloud<pcl::PointXYZ>::Ptr
+                concatenated_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+              *concatenated_cloud = *all_cloud_ + *transformed_input_cloud;
+              // update *all_cloud
+              applyDownsampling(concatenated_cloud, *all_cloud_);
+              // update localize_tramsform_
+              tf::Transform icp_transform;
+              tf::transformEigenToTF(transform, icp_transform);
+              localize_tramsform_ = localize_tramsform_ * icp_transform;
+            }
+            else {
+              NODELET_ERROR("Failed to call ~icp_align");
+              return false;
+            }
           }
         }
+      }
+      catch (tf2::ConnectivityException &e)
+      {
+        NODELET_ERROR("Transform error: %s", e.what());
+        return false;
+      }
+      catch (tf2::InvalidArgumentException &e)
+      {
+        NODELET_ERROR("Transform error: %s", e.what());
+        return false;
       }
     }
   }

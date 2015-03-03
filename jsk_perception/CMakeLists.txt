@@ -143,10 +143,10 @@ add_dependencies(color_histogram_sliding_matcher       ${PROJECT_NAME}_gencfg ${
 
 
 add_custom_command(
- OUTPUT  ${PROJECT_SOURCE_DIR}/template
+ OUTPUT  ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/template
  DEPENDS ${PROJECT_SOURCE_DIR}/src/eusmodel_template_gen.l
- COMMAND ${PROJECT_SOURCE_DIR}/src/eusmodel_template_gen.sh)
-add_custom_target(eusmodel_template ALL DEPENDS ${PROJECT_SOURCE_DIR}/template)
+ COMMAND ${PROJECT_SOURCE_DIR}/src/eusmodel_template_gen.sh  ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION})
+add_custom_target(eusmodel_template ALL DEPENDS ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/template)
 
 install(TARGETS camshiftdemo virtual_camera_mono point_pose_extractor white_balance_converter hough_lines rectangle_detector calc_flow color_histogram_sliding_matcher ${PROJECT_NAME}
   ${jsk_perception_nodelet_executables}

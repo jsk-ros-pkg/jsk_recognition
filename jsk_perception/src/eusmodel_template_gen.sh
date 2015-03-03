@@ -1,5 +1,13 @@
 #!/bin/bash -x
 
+DEVEL_SHARE_DIR=$1
+if [ ! -e "$DEVEL_SHARE_DIR" ]; then
+    echo "DEVEL_SHARE_DIR not found. aborting..."
+    return -1
+fi
+
+DEVEL_TEMPLATE_DIR=$DEVEL_SHARE_DIR/template
+
 cd `rospack find jsk_perception`
 mkdir -p launch
 mkdir -p template
@@ -17,3 +25,5 @@ done
 
 $ROSEUS ./src/eusmodel_template_gen.l
 (cd sample; $ROSEUS ./pose_detector_auto_gen_sample.l "(progn (generate-launcher) (exit))")
+
+mv -f template $DEVEL_TEMPLATE_DIR

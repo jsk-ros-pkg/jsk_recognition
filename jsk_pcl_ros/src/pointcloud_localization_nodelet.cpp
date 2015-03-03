@@ -108,7 +108,7 @@ namespace jsk_pcl_ros
   void PointCloudLocalization::tfTimerCallback(
     const ros::TimerEvent& event)
   {
-    boost::mutex::scoped_lock lock(mutex_);
+    boost::mutex::scoped_lock lock(tf_mutex_);
     ros::Time stamp = event.current_real;
     tf_broadcast_.sendTransform(tf::StampedTransform(localize_tramsform_,
                                                      stamp,
@@ -117,54 +117,18 @@ namespace jsk_pcl_ros
   }
 
   void PointCloudLocalization::cloudCallback(
-      const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
+    const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    //NODELET_INFO("cloudCallback");
     latest_cloud_ = cloud_msg;
-    cloud_updated_ = true;
-  }
-
-  bool PointCloudLocalization::waitForNewPointCloud()
-  {
-    {
-      boost::mutex::scoped_lock lock(mutex_);
-      cloud_updated_ = false;
-    }
-    ros::Rate r(10);
-    
-    while (ros::ok()) {
-      {
-        boost::mutex::scoped_lock lock(mutex_);
-        if (cloud_updated_) {
-          return true;
-        }
-      }
-      r.sleep();
-    }
-  }
-
-  bool PointCloudLocalization::isFirstTime()
-  {
-    return first_time_;
-  }
-
-  bool PointCloudLocalization::localizationRequest(
-    std_srvs::Empty::Request& req,
-    std_srvs::Empty::Response& res)
-  {
-    NODELET_INFO("localize!");
-    NODELET_INFO("waiting for new pointcloud");
-    
-    if (!waitForNewPointCloud()) {
-      NODELET_ERROR("failed to get pointcloud");
-      return false;
-    }
-    {
-      boost::mutex::scoped_lock lock(mutex_);
+    if (localize_requested_){
+      NODELET_INFO("localization is requested");
       try {
         pcl::PointCloud<pcl::PointXYZ>::Ptr
           local_cloud (new pcl::PointCloud<pcl::PointXYZ>);
         pcl::fromROSMsg(*latest_cloud_, *local_cloud);
+        NODELET_INFO("waiting for tf transformation");
         if (tf_listener_->waitForTransform(
               latest_cloud_->header.frame_id,
               global_frame_,
@@ -217,26 +181,47 @@ namespace jsk_pcl_ros
               // update localize_tramsform_
               tf::Transform icp_transform;
               tf::transformEigenToTF(transform, icp_transform);
-              localize_tramsform_ = localize_tramsform_ * icp_transform;
+              {
+                boost::mutex::scoped_lock tf_lock(tf_mutex_);
+                localize_tramsform_ = localize_tramsform_ * icp_transform;
+              }
             }
             else {
               NODELET_ERROR("Failed to call ~icp_align");
-              return false;
+              return;
             }
           }
+          localize_requested_ = false;
+        }
+        else {
+          NODELET_WARN("No tf transformation is available");
         }
       }
       catch (tf2::ConnectivityException &e)
       {
         NODELET_ERROR("Transform error: %s", e.what());
-        return false;
+        return;
       }
       catch (tf2::InvalidArgumentException &e)
       {
         NODELET_ERROR("Transform error: %s", e.what());
-        return false;
+        return;
       }
     }
+  }
+
+  bool PointCloudLocalization::isFirstTime()
+  {
+    return first_time_;
+  }
+
+  bool PointCloudLocalization::localizationRequest(
+    std_srvs::Empty::Request& req,
+    std_srvs::Empty::Response& res)
+  {
+    NODELET_INFO("localize!");
+    localize_requested_ = true;
+    return true;
   }
 }
 

@@ -52,7 +52,7 @@ namespace jsk_pcl_ros
   {
   public:
     PointCloudLocalization():
-      first_time_(true), DiagnosticNodelet("PointCloudLocalization") {}
+      first_time_(true), localize_requested_(false), DiagnosticNodelet("PointCloudLocalization") {}
   protected:
     virtual void onInit();
     virtual void subscribe();
@@ -88,12 +88,6 @@ namespace jsk_pcl_ros
       const ros::TimerEvent& event);
     
     /**
-     * @brief
-     * Block until getting new pointcloud.
-     */
-    virtual bool waitForNewPointCloud();
-    
-    /**
      */
     virtual bool isFirstTime();
 
@@ -102,6 +96,7 @@ namespace jsk_pcl_ros
       pcl::PointCloud<pcl::PointXYZ>& out_cloud);
 
     boost::mutex mutex_;
+    boost::mutex tf_mutex_;
     ros::Subscriber sub_;
     ros::Publisher pub_cloud_;
     tf::TransformListener* tf_listener_;
@@ -111,7 +106,7 @@ namespace jsk_pcl_ros
     pcl::PointCloud<pcl::PointXYZ>::Ptr all_cloud_;
     sensor_msgs::PointCloud2::ConstPtr latest_cloud_;
     tf::TransformBroadcaster tf_broadcast_;
-    bool cloud_updated_;
+    bool localize_requested_;
     /**
      * @brief
      * Publishes tf transformation of global_frame_ -> odom_frame_

@@ -242,8 +242,8 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     dimensions_[0][0] = box->dimensions.x;
-    dimensions_[0][1] = box->dimensions.x;
-    dimensions_[0][2] = box->dimensions.x;
+    dimensions_[0][1] = box->dimensions.y;
+    dimensions_[0][2] = box->dimensions.z;
     frame_id_list_[0] = box->header.frame_id;
     tf::poseMsgToEigen(box->pose, pose_list_[0]);
   }
@@ -367,30 +367,46 @@ namespace jsk_pcl_ros
       for (size_t i = 0; i < pose_list_.size(); i++) {
         sensor_msgs::PointCloud2 transformed_cloud;
         std::string frame_id = frame_id_list_[i];
-        if (pcl_ros::transformPointCloud(frame_id, *msg, transformed_cloud,
-                                         *tf_listener_)) {
-          pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-          pcl::fromROSMsg(transformed_cloud, *cloud);
-          pcl::CropBox<pcl::PointXYZ> crop_box(false);
-          pcl::PointIndices::Ptr indices (new pcl::PointIndices);
-          Eigen::Vector4f max_points(dimensions_[i][0]/2,
-                                     dimensions_[i][1]/2,
-                                     dimensions_[i][2]/2,
-                                     0);
-          Eigen::Vector4f min_points(-dimensions_[i][0]/2,
-                                     -dimensions_[i][1]/2,
-                                     -dimensions_[i][2]/2,
-                                     0);
-        
-          float roll, pitch, yaw;
-          pcl::getEulerAngles(pose_list_[i], roll, pitch, yaw);
-          crop_box.setInputCloud(cloud);
-          crop_box.setMax(max_points);
-          crop_box.setMin(min_points);
-          crop_box.setTranslation(pose_list_[i].translation());
-          crop_box.setRotation(Eigen::Vector3f(roll, pitch, yaw));
-          crop_box.filter(indices->indices);
-          all_indices = addIndices(*all_indices, *indices);
+        if (tf_listener_->waitForTransform(frame_id,
+                                           msg->header.frame_id,
+                                           msg->header.stamp,
+                                           ros::Duration(10.0))) {
+          if (pcl_ros::transformPointCloud(frame_id, *msg, transformed_cloud,
+                                           *tf_listener_)) {
+            pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+            pcl::fromROSMsg(transformed_cloud, *cloud);
+            pcl::CropBox<pcl::PointXYZ> crop_box(false);
+            pcl::PointIndices::Ptr indices (new pcl::PointIndices);
+            NODELET_DEBUG("max_points: [%f, %f, %f]", dimensions_[i][0]/2,
+                          dimensions_[i][1]/2,
+                          dimensions_[i][2]/2);
+            NODELET_DEBUG("min_points: [%f, %f, %f]", 
+                          -dimensions_[i][0]/2,
+                          -dimensions_[i][1]/2,
+                          -dimensions_[i][2]/2);
+            Eigen::Vector4f max_points(dimensions_[i][0]/2,
+                                       dimensions_[i][1]/2,
+                                       dimensions_[i][2]/2,
+                                       0);
+            Eigen::Vector4f min_points(-dimensions_[i][0]/2,
+                                       -dimensions_[i][1]/2,
+                                       -dimensions_[i][2]/2,
+                                       0);
+            float roll, pitch, yaw;
+            pcl::getEulerAngles(pose_list_[i], roll, pitch, yaw);
+            crop_box.setInputCloud(cloud);
+            crop_box.setMax(max_points);
+            crop_box.setMin(min_points);
+            crop_box.setTranslation(pose_list_[i].translation());
+            crop_box.setRotation(Eigen::Vector3f(roll, pitch, yaw));
+            crop_box.filter(indices->indices);
+            all_indices = addIndices(*all_indices, *indices);
+          }
+        }
+        else {
+          NODELET_ERROR("Failed to lookup transformation from %s to %s",
+                        frame_id.c_str(), msg->header.frame_id.c_str());
+          return;
         }
       }
       PCLIndicesMsg indices_msg;
@@ -406,7 +422,7 @@ namespace jsk_pcl_ros
       NODELET_ERROR("Transform error: %s", e.what());
     }
   }
-  
+
   void AttentionClipper::clip(const sensor_msgs::CameraInfo::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);

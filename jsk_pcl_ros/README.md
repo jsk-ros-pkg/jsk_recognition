@@ -59,6 +59,126 @@ time end
 Represent range of time.
 
 ## nodelets
+### jsk\_pcl/PointCloudLocalization
+Localize 6d pose of robot using ICP registration of pointcloud.
+It publishes tf transformation from gloabl frame to odometory frame like acml does.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Input pointcloud to align.
+
+#### Publishing Topic
+* `~output` (`sensor_msgs/PointCloud2`)
+
+  Concatenated pointcloud.
+
+#### Parameters
+* `~tf_rate` (Double, default: `20.0`)
+
+  Frequency to publish tf transformations.
+* `~cloud_rate` (Double, default: `10.0`)
+
+  Frequency to publish `~output` topic.
+* `~leaf_size` (Double, default: `0.01`)
+
+  Resolution of voxel grid downsampling.
+#### Using Services
+* `~icp_align` (`jsk_pcl_ros/ICPAlign`)
+
+  ICP service to align pointcloud
+
+### jsk\_pcl/UniformSampling
+Sample pointloud in the manner of uniform sampling.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Input pointcloud
+
+#### Publishing Topic
+* `~output` (`pcl_msgs/PointIndices`)
+
+  Sampled indices
+
+#### Parameters
+* `~search_radius` (Double, default: `0.01`)
+
+  Sampling radius to apply uniform samplng.
+
+### jsk\_pcl/FeatureRegistration
+Align pointcloud using 3d feature. Currently only FPFH is supported.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+   Input pointcloud. The type of point is `pcl::PointNormal`.
+* `~input/feature` (`sensor_msgs/PointCloud2`)
+
+   Input feature. The type of point is `pcl::FPFHSignature33`.
+* `~input/reference/cloud` (`sensor_msgs/PointCloud2`)
+
+   Reference pointcloud. The type of point is `pcl::PointNormal`.
+* `~input/reference/feature` (`sensor_msgs/PointCloud2`)
+
+   Reference feature. The type of point is `pcl::FPFHSignature33`.
+
+#### Publishing Topic
+* `~output` (`geometry_msgs/PoseStamped`)
+
+  Transformation to align reference cloud to input cloud.
+* `~output/cloud` (`sensor_msgs/PointCloud`)
+
+  Reference pointCloud which is aligned to input cloud.
+
+#### Parameters
+* `~max_iterations` (Integer, default: `1000`)
+
+  Maximum number of iterations.
+* `~correspondence_randomness` (Integer, default: `2`)
+
+  Number of nearest features to use
+* `~similarity_threshold` (Double, default: `0.9`)
+
+  Polygonal edge length similarity threshold
+* `~max_correspondence_distance` (Double, default: `0.0075`)
+
+  inlier threshold
+* `~inlier_fraction` (Double, default: `0.25`)
+
+  inlier fraction
+
+### jsk\_pcl/GeometricConsistencyGrouping
+Estimate model position using Geometric Consisteny Grouping technique
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Scene pointcloud. The type is `pcl::PointNormal`.
+* `~input/feature` (`sensor_msgs/PointCloud2`)
+
+  Scene feature. currently SHOT352 is supported.
+
+* `~input/reference` (`sensor_msgs/PointCloud2`)
+
+  Model pointcloud. The type is `pcl::PointNormal`.
+* `~input/reference/feature` (`sensor_msgs/PointCloud2`)
+
+  Model feature. currently SHOT352 is supported.
+
+#### Publishing Topic
+* `~output` (`geometry_msgs/PoseStamped`)
+
+  Pose of recognized object
+
+#### Parameters
+* `~gc_size` (Double, default: `0.01`)
+
+  Size of cluster
+* `~gc_thresh` (Double, default: `5.0`)
+
+  Threshold of clustering
+
 ### jsk\_pcl/BorderEstimator
 ![](images/border_estimator.png)
 
@@ -136,6 +256,48 @@ This nodelet is useful to compute bounding box of pointcloud by ClusterPointIndi
 
   Output cluster indices.
 
+### jsk\_pcl/HintedHandleEstimator
+![](images/hinted_handle_estimator.png)
+
+Detect a handle grasp pose from pointcloud and point as hint.
+
+#### Subscribing Topic
+* `~cloud` (`sensor_msgs/PointCloud2`)
+
+  Input pointcloud
+
+* `~point` (`geometry_msgs/PointStamped`)
+
+  3D Point (You can get from rviz "Publish Point" or image_view2)
+
+#### Publishing Topic
+* `handle_pose` (`geometry_msgs::PoseStamped`)
+
+  estimated handle pose
+
+* `handle_length` (`std_msgs::Float64`)
+
+  estimated handle length
+
+* `debug_marker` (`visualization_msgs::Marker`)
+
+  the result of calculating handle direction
+
+* `debug_marker_array` (`visualization_msg::MarkerArray`)
+
+  estimated handle visualization
+
+#### Parameters
+![](images/hinted_handle_estimator_pr2_hand.png)
+
+* `~finger_l` (Float, default: `0.03`)
+* `~finger_w` (Float, default: `0.01`)
+* `~finger_d` (Float, default: `0.02`)
+* `~arm_l` (Float, default: `0.05`)
+* `~arm_w` (Float, default: `0.1`)
+* `~arm_d` (Float, default: `0.01`)
+
+
 
 ### jsk\_pcl/HintedStickFinder
 ![](images/hinted_stick_finder.png)
@@ -210,9 +372,17 @@ Detect a stick from pointcloud and line in 2-D image as hiint.
 
   Minimum number of inliers in cylinder fitting.
 
-*`~eps_2d_angle` (Double, default: `0.1`)
+* `~eps_2d_angle` (Double, default: `0.1`)
 
   Threshold between hint line and detected stick. This evaluation is done in 2-D coordinate system.
+
+* `~not_synchronize` (Boolean, default: `False`)
+
+  Do not synchronize `~input`, `~input/camera_info` and `~input/hint/line` if this parameter is `True`.
+  `~input/camera_info` and `~input/hint/line` are stored in nodelet and latest of the messages are used for new `~input` pointcloud.
+* `~use_normal` (Boolean, default: `False`)
+
+  Do not run normal estimation inside of the nodelet and use normal fields of `~input` are used.
 
 ### jsk\_pcl/RGBColorFilter
 Filter pointcloud based on RGB range.
@@ -310,6 +480,31 @@ Extract indices of pointcloud which is masked by mask image. The pointcloud is n
 * `~output` (`pcl_msgs/PointIndices`)
 
   Indices of the points masked by `~input/mask`.
+
+
+### jsk\_pcl/MaskImageClusterIndicesConcatenator
+![](images/mask_image_cluster_indices_concatenator.png)
+
+Segment Clouds with mask_image and Clustering Methods(example. SuperVoxel).
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Input point cloud.
+* `~target` (`jsk_recognition_msgs/ClusterPointIndices`)
+
+  Result of Some Clustering methods
+* `~input/mask` (`sensor_msgs/Image`)
+
+  Mask image.
+* `~input/camera_info` (`sensor_msgs/CameraInfo`)
+
+  Camera parameters of the image.
+
+#### Publishing Topic
+* `~output` (`pcl_msgs/PointIndices`)
+
+  Indices of the points masked with `~input/mask` and '~target'.
 
 ### jsk\_pcl/TorusFInder
 ![](images/torus_finder.png)
@@ -1140,13 +1335,30 @@ ResizePointsPublisher resizes PointCloud generated from depth images. It keeps *
 
 ### jsk\_pcl/PointcloudScreenpoint
 #### What is this
+![](launch/images/pointcloud_screenpoint_3people.png)
+
+Use pointcloud from kinect
+
+![](launch/images/pointcloud_screenpoint_kinect.png)
+
+Use pointcloud from laser
+
+![](launch/images/pointcloud_screenpoint_laser.png)
+
+Use amplifiered pointclouds published by laser
+
+![](launch/images/pointcloud_screenpoint_disparity_laser.png)
+
+
 This is a nodelet to convert (u, v) coordinate on a image to 3-D point.
 It retrieves 3-D environment as pointcloud.
+
+[pointcloud_screenpoint_sample.launch](launch/pointcloud_screenpoint_sample.launch) is a sample launch file.
 
 #### Subscribing Topics
 * `~points` (`sensor_msgs/PointCloud2`):
 
-   Input pointcloud to represent 3-D environment it should be organized.
+   Pointcloud source to estimate 3D points that the user wantedt to specify on a 2D screen
 * `~point` (`geometry_msgs/PointStamped`):
 
    Input point to represent (u, v) image coordinate and this topic is enabled only if `~use_point` parameter is set `True`.
@@ -1160,6 +1372,9 @@ It retrieves 3-D environment as pointcloud.
    And the region should be rectangular.
    If `~use_sync` parameter is set `True`,
 
+* `~poly` (`geometry_msgs/PolygonStamped`):`
+
+  Input polygonal region in image local coordinates.
 * `~point_array` (`sensor_msgs/PointCloud2`):
 
    Input points to represent series of (u, v) image coordinate and this
@@ -1175,7 +1390,9 @@ It retrieves 3-D environment as pointcloud.
 * `~output` (`sensor_msgs/PointCloud`):
 
    The topic to be used to publish series of points as a result of screenpoint.
+* `~output_poly` (`geometry_msgs/PolygonStamped`)
 
+   Projected points of `~poly`.
 #### Advertising Servicies
 * `~screen_to_point` (`jsk_pcl_ros::TransformScreenpoint`)
 
@@ -1209,6 +1426,9 @@ geometry_msgs/Vector3 vector
 * `~use_rect` (Boolean, default: `False`):
 
    Enable `~polygon` topic.
+* `~use_poly` (Boolean, default: `False`):
+
+   Enable `~poly` topic.
 * `~use_point` (Boolean, default: `False`):
 
    Enable `~point` topic.
@@ -1768,6 +1988,69 @@ Checking the Rviz output when you find the calibrated pointcloud overlaps the Po
 
 * Finish and Check it again.
 
+### jsk\_pcl/SphericalPointCloudSimulator
+![](images/spherical_pointcloud_simulator.h)
+
+Simulate a pointcloud which is acquired by spindle laser. Sensor model is
+spherical laser.
+
+#### Subscribing Topics
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  This topic is only used to synchronize timestamp of `~output` pointcloud
+  to certain pointcloud. If no `~frame_id` is specified, frame_id of `~input`
+  is copied to `~output`.
+
+#### Publishing Topics
+* `~output` (`sensor_msgs/PointCloud2`)
+
+  Simulated pointcloud.
+
+#### Parameters
+* `~frame_id` (String, default: None)
+
+  frame_id of output pointcloud. If not specified, frame\_id of `~input` is copied.
+* `~r` (Double, default: `3.0`)
+
+  Radius of spherical model.
+* `~min_phi` (Double, default: `0.0`)
+
+  Minimum angle of scanning plane.
+* `~max_phi` (Double, default: `2pi`)
+
+  Maximum angle of scanning plane.
+* `~scan_range` (Double, default: `4.7`)
+
+  Scan range of laser. The default value is same to hokuyo's parameter.
+* `~scan_num` (Integer, default: `1081`)
+
+  The number of points in one scan of laser.
+  The default value is same to hokuyo's parameter.
+* `~fps` (Double, default: `40`)
+
+  Fps of laser sensor.
+  The default value is same to hokuyo's parameter.
+
+### jsk\_pcl/PlanarlPointCloudSimulator
+![](images/planar_pointcloud_simulator.h)
+
+Simulate a pointcloud which is acquired by cameras such as stereo camera and kinect.
+Sensor model is pinhole camera model.
+
+#### Subscribing Topics
+* `~input` (`sensor_msgs/CameraInfo`)
+
+  Camera info to simulate pointcloud.
+
+#### Publishing Topics
+* `~output` (`sensor_msgs/PointCloud2`)
+
+  Simulated pointcloud.
+
+#### Parameters
+* `~distance` (Double, default: `1.0`)
+
+  Distance to pointcloud from origin along z-axis.
 
 
 ## To Test Some Samples

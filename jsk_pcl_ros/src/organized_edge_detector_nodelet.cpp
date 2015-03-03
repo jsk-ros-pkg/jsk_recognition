@@ -43,13 +43,12 @@
 #include <sensor_msgs/image_encodings.h>
 
 #include <opencv2/opencv.hpp>
-#include <jsk_pcl_ros/ClusterPointIndices.h>
+#include <jsk_recognition_msgs/ClusterPointIndices.h>
 
 namespace jsk_pcl_ros
 {
   void OrganizedEdgeDetector::onInit()
   {
-    PCLNodelet::onInit();
     ////////////////////////////////////////////////////////
     // indices publishers
     ////////////////////////////////////////////////////////
@@ -66,7 +65,7 @@ namespace jsk_pcl_ros
     pub_all_edges_indices_
       = advertise<PCLIndicesMsg>(*pnh_, "output_indices", 1);
     pub_straight_edges_indices_
-      = advertise<jsk_pcl_ros::ClusterPointIndices>(*pnh_, 
+      = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, 
         "output_straight_edges_indices", 1);
     ////////////////////////////////////////////////////////
     // pointcloud publishers
@@ -237,7 +236,7 @@ namespace jsk_pcl_ros
     const std::vector<std::vector<int> > indices)
   {
     // output as cluster indices
-    jsk_pcl_ros::ClusterPointIndices ros_msg;
+    jsk_recognition_msgs::ClusterPointIndices ros_msg;
     ros_msg.header = header;
     ros_msg.cluster_indices.resize(indices.size());
     for (size_t i = 0; i < indices.size(); i++) {

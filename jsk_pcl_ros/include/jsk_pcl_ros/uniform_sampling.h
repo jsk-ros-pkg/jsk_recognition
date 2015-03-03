@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Ryohei Ueda and JSK Lab
+ *  Copyright (c) 2015, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,43 +33,36 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_NORMAL_CONCATENATER_H_
-#define JSK_PCL_ROS_NORMAL_CONCATENATER_H_
 
-#include <ros/ros.h>
-#include <ros/names.h>
-#include <sensor_msgs/PointCloud2.h>
+#ifndef JSK_PCL_ROS_UNIFORM_SAMPLING_H_
+#define JSK_PCL_ROS_UNIFORM_SAMPLING_H_
 
-#include <message_filters/time_synchronizer.h>
-#include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/approximate_time.h>
-
-#include <pcl_ros/pcl_nodelet.h>
-#include <pcl/point_types.h>
-#include <pcl/common/centroid.h>
-#include <pcl/filters/extract_indices.h>
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include <jsk_pcl_ros/UniformSamplingConfig.h>
+#include <dynamic_reconfigure/server.h>
 
 namespace jsk_pcl_ros
 {
-  class NormalConcatenater: public jsk_topic_tools::ConnectionBasedNodelet
+  class UniformSampling: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> SyncPolicy;
-    typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> ASyncPolicy;
+    typedef UniformSamplingConfig Config;
+    UniformSampling(): DiagnosticNodelet("UniformSampling") {}
   protected:
-    ros::Publisher pub_;
-    int maximum_queue_size_;
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
-    boost::shared_ptr<message_filters::Synchronizer<ASyncPolicy> > async_;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_xyz_;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_normal_;
-    virtual void concatenate(const sensor_msgs::PointCloud2::ConstPtr& xyz, const sensor_msgs::PointCloud2::ConstPtr& normal);
+    virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    bool use_async_;
+    virtual void configCallback(Config& config, uint32_t level);
+    virtual void sampling(const sensor_msgs::PointCloud2::ConstPtr& msg);
+
+    boost::mutex mutex_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    ros::Publisher pub_;
+    ros::Subscriber sub_;
+
+    double search_radius_;
   private:
-    virtual void onInit();
     
   };
 }

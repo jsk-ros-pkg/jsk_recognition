@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Ryohei Ueda and JSK Lab
+ *  Copyright (c) 2015, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,43 +33,71 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_NORMAL_CONCATENATER_H_
-#define JSK_PCL_ROS_NORMAL_CONCATENATER_H_
 
-#include <ros/ros.h>
-#include <ros/names.h>
+#ifndef JSK_PCL_ROS_PLANAR_POINTCLOUD_SIMULATOR_H_
+#define JSK_PCL_ROS_PLANAR_POINTCLOUD_SIMULATOR_H_
+
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include <jsk_pcl_ros/PlanarPointCloudSimulatorConfig.h>
+#include <dynamic_reconfigure/server.h>
 #include <sensor_msgs/PointCloud2.h>
-
-#include <message_filters/time_synchronizer.h>
-#include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/approximate_time.h>
-
-#include <pcl_ros/pcl_nodelet.h>
-#include <pcl/point_types.h>
-#include <pcl/common/centroid.h>
-#include <pcl/filters/extract_indices.h>
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <sensor_msgs/CameraInfo.h>
 
 namespace jsk_pcl_ros
 {
-  class NormalConcatenater: public jsk_topic_tools::ConnectionBasedNodelet
+  /** @brief
+   * Utility class to generate pointcloud of depth camera and stereo
+   * camera.
+   */
+  class PlanarPointCloudSimulator
   {
   public:
-    typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> SyncPolicy;
-    typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> ASyncPolicy;
+    typedef boost::shared_ptr<PlanarPointCloudSimulator> Ptr;
+    PlanarPointCloudSimulator();
+    virtual ~PlanarPointCloudSimulator();
+
+    /** @brief
+     * Generate a pointcloud according to width, height and distance.
+     */
+    virtual void generate(
+      const sensor_msgs::CameraInfo& info, double distance,
+      pcl::PointCloud<pcl::PointXYZ>& cloud);
   protected:
-    ros::Publisher pub_;
-    int maximum_queue_size_;
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
-    boost::shared_ptr<message_filters::Synchronizer<ASyncPolicy> > async_;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_xyz_;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_normal_;
-    virtual void concatenate(const sensor_msgs::PointCloud2::ConstPtr& xyz, const sensor_msgs::PointCloud2::ConstPtr& normal);
+  private:
+    
+  };
+  
+  /** @brief
+   * Nodelet implementation of jsk_pcl/PlanarPointCloudSimulator
+   */
+  class PlanarPointCloudSimulatorNodelet:
+    public jsk_topic_tools::DiagnosticNodelet
+  {
+  public:
+    typedef PlanarPointCloudSimulatorConfig Config;
+    PlanarPointCloudSimulatorNodelet():
+      DiagnosticNodelet("PlanarPointCloudSimulatorNodelet") {}
+  protected:
+    virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    bool use_async_;
+
+    /** @brief
+     * Callback function for ~input.
+     */
+    virtual void generate(
+      const sensor_msgs::CameraInfo::ConstPtr& info_msg);
+
+    virtual void configCallback(Config &config, uint32_t level);
+
+    boost::mutex mutex_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    ros::Subscriber sub_;
+    ros::Publisher pub_;
+    PlanarPointCloudSimulator impl_;
+    double distance_;
   private:
-    virtual void onInit();
     
   };
 }

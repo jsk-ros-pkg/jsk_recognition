@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Ryohei Ueda and JSK Lab
+ *  Copyright (c) 2015, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,45 +33,60 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_NORMAL_CONCATENATER_H_
-#define JSK_PCL_ROS_NORMAL_CONCATENATER_H_
+#define BOOST_PARAMETER_MAX_ARITY 7
+#include "jsk_pcl_ros/uniform_sampling.h"
+#include <pcl/keypoints/uniform_sampling.h>
 
-#include <ros/ros.h>
-#include <ros/names.h>
-#include <sensor_msgs/PointCloud2.h>
-
-#include <message_filters/time_synchronizer.h>
-#include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/approximate_time.h>
-
-#include <pcl_ros/pcl_nodelet.h>
-#include <pcl/point_types.h>
-#include <pcl/common/centroid.h>
-#include <pcl/filters/extract_indices.h>
-#include <jsk_topic_tools/connection_based_nodelet.h>
 
 namespace jsk_pcl_ros
 {
-  class NormalConcatenater: public jsk_topic_tools::ConnectionBasedNodelet
+  void UniformSampling::onInit()
   {
-  public:
-    typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> SyncPolicy;
-    typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> ASyncPolicy;
-  protected:
-    ros::Publisher pub_;
-    int maximum_queue_size_;
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
-    boost::shared_ptr<message_filters::Synchronizer<ASyncPolicy> > async_;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_xyz_;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_normal_;
-    virtual void concatenate(const sensor_msgs::PointCloud2::ConstPtr& xyz, const sensor_msgs::PointCloud2::ConstPtr& normal);
-    virtual void subscribe();
-    virtual void unsubscribe();
-    bool use_async_;
-  private:
-    virtual void onInit();
-    
-  };
+    DiagnosticNodelet::onInit();
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    typename dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (&UniformSampling::configCallback, this, _1, _2);
+    srv_->setCallback (f);
+
+    pub_ = advertise<PCLIndicesMsg>(*pnh_, "output", 1);
+  }
+
+  void UniformSampling::subscribe()
+  {
+    sub_ = pnh_->subscribe("input", 1, &UniformSampling::sampling, this);
+  }
+
+  void UniformSampling::unsubscribe()
+  {
+    sub_.shutdown();
+  }
+
+  void UniformSampling::configCallback(Config& config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    search_radius_ = config.search_radius;
+  }
+
+  void UniformSampling::sampling(
+    const sensor_msgs::PointCloud2::ConstPtr& msg)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr
+      cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<int> indices;
+    pcl::fromROSMsg(*msg, *cloud);
+    pcl::UniformSampling<pcl::PointXYZ> uniform_sampling;
+    uniform_sampling.setInputCloud(cloud);
+    uniform_sampling.setRadiusSearch(search_radius_);
+    uniform_sampling.compute(indices);
+    PCLIndicesMsg ros_indices;
+    for (size_t i = 0; i < indices.points.size(); i++) {
+      ros_indices.indices.push_back(indices.points[i]);
+    }
+    ros_indices.header = msg->header;
+    pub_.publish(ros_indices);
+  }
 }
 
-#endif
+#include <pluginlib/class_list_macros.h>
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::UniformSampling, nodelet::Nodelet);

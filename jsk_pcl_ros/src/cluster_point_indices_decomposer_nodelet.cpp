@@ -64,7 +64,6 @@ namespace jsk_pcl_ros
     }
 
     pnh_->param("publish_clouds", publish_clouds_, false);
-    
     pnh_->param("align_boxes", align_boxes_, false);
     pnh_->param("use_pca", use_pca_, false);
     pc_pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "debug_output", 1);
@@ -187,8 +186,11 @@ namespace jsk_pcl_ros
         normal[2] = coefficients->coefficients[nearest_plane_index].values[2];
         normal = normal.normalized();
         z_axis[0] = 0; z_axis[1] = 0; z_axis[2] = 1;
-        Eigen::Vector3f rotation_axis = z_axis.cross(normal).normalized();
-        double theta = acos(z_axis.dot(normal));
+        Eigen::Quaternionf rot;
+        rot.setFromTwoVectors(z_axis, normal);
+        Eigen::AngleAxisf rotation_angle_axis(rot);
+        Eigen::Vector3f rotation_axis = rotation_angle_axis.axis();
+        double theta = rotation_angle_axis.angle();
         if (isnan(theta) ||
             isnan(rotation_axis[0]) ||
             isnan(rotation_axis[1]) ||
@@ -199,9 +201,7 @@ namespace jsk_pcl_ros
                         normal[0], normal[1], normal[2]);
         }
         else {
-          Eigen::Matrix3f m = Eigen::Matrix3f::Identity();
-          m = m * Eigen::AngleAxisf(theta, rotation_axis);
-          
+          Eigen::Matrix3f m = Eigen::Matrix3f::Identity() * rot;
           if (use_pca_) {
             // first project points to the plane
             pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud
@@ -215,15 +215,23 @@ namespace jsk_pcl_ros
             proj.setModelCoefficients(plane_coefficients);
             proj.setInputCloud(segmented_cloud);
             proj.filter(*projected_cloud);
-
-            pcl::PCA<pcl::PointXYZRGB> pca;
-            pca.setInputCloud(projected_cloud);
-            Eigen::Matrix3f eigen = pca.getEigenVectors();
-            m.col(0) = eigen.col(0);
-            m.col(1) = eigen.col(1);
-            // flip axis to satisfy right-handed system
-            if (m.col(0).cross(m.col(1)).dot(m.col(2)) < 0) {
-              m.col(0) = - m.col(0);
+            if (projected_cloud->points.size() >= 3) {
+              pcl::PCA<pcl::PointXYZRGB> pca;
+              pca.setInputCloud(projected_cloud);
+              Eigen::Matrix3f eigen = pca.getEigenVectors();
+              m.col(0) = eigen.col(0);
+              m.col(1) = eigen.col(1);
+              // flip axis to satisfy right-handed system
+              if (m.col(0).cross(m.col(1)).dot(m.col(2)) < 0) {
+                m.col(0) = - m.col(0);
+              }
+              if (m.col(1).dot(Eigen::Vector3f::UnitZ()) < 0) {
+                // rotate around z
+                m = m * Eigen::AngleAxisf(M_PI, Eigen::Vector3f::UnitZ());
+              }
+            }
+            else {
+              NODELET_ERROR("Too small indices for PCA computation");
             }
           }
             

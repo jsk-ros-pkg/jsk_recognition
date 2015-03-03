@@ -64,6 +64,10 @@ add_service_files(FILES SwitchTopic.srv
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/GeometricConsistencyGrouping.cfg
+  cfg/UniformSampling.cfg
+  cfg/PlanarPointCloudSimulator.cfg
+  cfg/SphericalPointCloudSimulator.cfg
   cfg/BorderEstimator.cfg
   cfg/HintedStickFinder.cfg
   cfg/HintedPlaneDetector.cfg
@@ -99,11 +103,12 @@ generate_dynamic_reconfigure_options(
   cfg/BoundingBoxFilter.cfg
   cfg/LINEMODDetector.cfg
   cfg/SupervoxelSegmentation.cfg
+  cfg/FeatureRegistration.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
 
 macro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
   jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
@@ -115,7 +120,11 @@ macro(jsk_pcl_util_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name
     jsk_pcl_util_nodelet_sources jsk_pcl_util_nodelet_executables)
 endmacro(jsk_pcl_util_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
 
-add_definitions("-O2 -g")
+if ($ENV{TRAVIS_JOB_ID})
+  add_definitions("-O2 -g")
+else ($ENV{TRAVIS_JOB_ID})
+  add_definitions("-O0")
+endif ($ENV{TRAVIS_JOB_ID})
 
 # pcl_ros::Filter based class is not working...
 # https://github.com/ros-perception/perception_pcl/issues/9
@@ -126,14 +135,14 @@ jsk_pcl_nodelet(src/voxel_grid_downsample_decoder_nodelet.cpp "jsk_pcl/VoxelGrid
 jsk_pcl_nodelet(src/snapit_nodelet.cpp "jsk_pcl/Snapit" "snapit")
 jsk_pcl_nodelet(src/keypoints_publisher_nodelet.cpp "jsk_pcl/KeypointsPublisher" "keypoints_publisher")
 jsk_pcl_nodelet(src/hinted_plane_detector_nodelet.cpp "jsk_pcl/HintedPlaneDetector" "hinted_plane_detector")
-jsk_pcl_nodelet(src/pointcloud_throttle_nodelet.cpp "jsk_pcl/NodeletPointCloudThrottle" "point_cloud_throttle")
+# jsk_pcl_nodelet(src/pointcloud_throttle_nodelet.cpp "jsk_pcl/NodeletPointCloudThrottle" "point_cloud_throttle")
 jsk_pcl_nodelet(src/centroid_publisher_nodelet.cpp "jsk_pcl/CentroidPublisher" "centroid_publisher")
-jsk_pcl_nodelet(src/image_throttle_nodelet.cpp
-  "jsk_pcl/NodeletImageThrottle" "image_throttle")
-jsk_pcl_nodelet(src/image_mux_nodelet.cpp
-  "jsk_pcl/NodeletImageMUX" "image_mux")
-jsk_pcl_nodelet(src/image_demux_nodelet.cpp
-  "jsk_pcl/NodeletImageDEMUX" "image_demux")
+# jsk_pcl_nodelet(src/image_throttle_nodelet.cpp
+#   "jsk_pcl/NodeletImageThrottle" "image_throttle")
+# jsk_pcl_nodelet(src/image_mux_nodelet.cpp
+#   "jsk_pcl/NodeletImageMUX" "image_mux")
+# jsk_pcl_nodelet(src/image_demux_nodelet.cpp
+#   "jsk_pcl/NodeletImageDEMUX" "image_demux")
 jsk_pcl_nodelet(src/image_rotate_nodelet.cpp
   "jsk_pcl/ImageRotateNodelet" "image_rotate")
 jsk_pcl_nodelet(src/octree_change_publisher_nodelet.cpp
@@ -167,13 +176,17 @@ jsk_pcl_nodelet(src/multi_plane_extraction_nodelet.cpp
   "jsk_pcl/MultiPlaneExtraction" "multi_plane_extraction")
 jsk_pcl_nodelet(src/selected_cluster_publisher_nodelet.cpp
   "jsk_pcl/SelectedClusterPublisher" "selected_cluster_publisher")
+jsk_pcl_util_nodelet(src/spherical_pointcloud_simulator_nodelet.cpp
+  "jsk_pcl/SphericalPointCloudSimulator" "spherical_pointcloud_simulator")
+jsk_pcl_util_nodelet(src/planar_pointcloud_simulator_nodelet.cpp
+  "jsk_pcl/PlanarPointCloudSimulator" "planar_pointcloud_simulator")
 jsk_pcl_util_nodelet(src/plane_rejector_nodelet.cpp
   "jsk_pcl/PlaneRejector" "plane_rejector")
 jsk_pcl_util_nodelet(src/pointcloud_to_cluster_point_indices_nodelet.cpp
   "jsk_pcl/PointCloudToClusterPointIndices" "pointcloud_to_cluster_point_indices")
 jsk_pcl_util_nodelet(src/static_polygon_array_publisher_nodelet.cpp
   "jsk_pcl/StaticPolygonArrayPublisher" "static_polygon_array_publisher")
-jsk_pcl_nodelet(src/polygon_array_transformer_nodelet.cpp
+jsk_pcl_util_nodelet(src/polygon_array_transformer_nodelet.cpp
   "jsk_pcl/PolygonArrayTransformer" "polygon_array_transformer_nodelet")
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
   jsk_pcl_nodelet(src/colorize_segmented_RF_nodelet.cpp
@@ -196,8 +209,8 @@ jsk_pcl_nodelet(src/delay_pointcloud_nodelet.cpp
   "jsk_pcl/DelayPointCloud" "delay_pointcloud")
 jsk_pcl_nodelet(src/depth_image_error_nodelet.cpp
   "jsk_pcl/DepthImageError" "depth_image_error")
-jsk_pcl_nodelet(src/organize_pointcloud_nodelet.cpp
-  "jsk_pcl/OrganizePointCloud" "organize_pointcloud")
+# jsk_pcl_nodelet(src/organize_pointcloud_nodelet.cpp
+#   "jsk_pcl/OrganizePointCloud" "organize_pointcloud")
 jsk_pcl_nodelet(src/depth_image_creator_nodelet.cpp
   "jsk_pcl/DepthImageCreator" "depth_image_creator")
 jsk_pcl_util_nodelet(src/polygon_array_wrapper_nodelet.cpp
@@ -259,6 +272,8 @@ jsk_pcl_nodelet(src/point_indices_to_mask_image_nodelet.cpp
   "jsk_pcl/PointIndicesToMaskImage" "point_indices_to_mask_image")
 jsk_pcl_nodelet(src/mask_image_to_point_indices_nodelet.cpp
   "jsk_pcl/MaskImageToPointIndices" "mask_image_to_point_indices")
+jsk_pcl_nodelet(src/hinted_handle_estimator_nodelet.cpp
+  "jsk_pcl/HintedHandleEstimator" "hinted_handle_estimator")
 jsk_pcl_nodelet(src/capture_stereo_synchronizer_nodelet.cpp
   "jsk_pcl/CaptureStereoSynchronizer" "capture_stereo_synchronizer")
 jsk_pcl_nodelet(src/linemod_nodelet.cpp
@@ -278,19 +293,28 @@ jsk_pcl_nodelet(src/add_color_from_image_nodelet.cpp
 jsk_pcl_nodelet(src/torus_finder_nodelet.cpp "jsk_pcl/TorusFinder" "torus_finder")
 jsk_pcl_nodelet(src/mask_image_filter_nodelet.cpp
   "jsk_pcl/MaskImageFilter" "mask_image_filter")
+jsk_pcl_nodelet(src/mask_image_cluster_filter_nodelet.cpp
+  "jsk_pcl/MaskImageClusterFilter" "mask_image_cluster_filter")
 jsk_pcl_nodelet(src/add_point_indices_nodelet.cpp
   "jsk_pcl/AddPointIndices" "add_point_indices")
 jsk_pcl_nodelet(src/find_object_on_plane_nodelet.cpp "jsk_pcl/FindObjectOnPlane" "find_object_on_plane")
 jsk_pcl_nodelet(src/hinted_stick_finder_nodelet.cpp
   "jsk_pcl/HintedStickFinder" "hinted_stick_finder")
-
+jsk_pcl_nodelet(src/feature_registration_nodelet.cpp
+  "jsk_pcl/FeatureRegistration" "feature_registration")
+jsk_pcl_nodelet(src/uniform_sampling_nodelet.cpp
+  "jsk_pcl/UniformSampling" "uniform_sampling")
+jsk_pcl_nodelet(src/pointcloud_localization_nodelet.cpp
+  "jsk_pcl/PointCloudLocalization" "pointcloud_localization")
+jsk_pcl_nodelet(src/geometric_consistency_grouping_nodelet.cpp
+  "jsk_pcl/GeometricConsistencyGrouping" "geometric_consistency_grouping")
 add_library(jsk_pcl_ros_base SHARED
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
   src/pcl_conversion_util.cpp src/pcl_util.cpp
-  src/pointcloud_moveit_filter.cpp
+
   src/tf_listener_singleton.cpp
   src/viewpoint_sampler.cpp)
-
+add_library(jsk_pcl_ros_moveit SHARED src/pointcloud_moveit_filter.cpp)
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
 add_library(jsk_pcl_ros_util SHARED ${jsk_pcl_util_nodelet_sources})
 
@@ -302,10 +326,14 @@ target_link_libraries(jsk_pcl_ros_util
   jsk_pcl_ros_base)
 target_link_libraries(jsk_pcl_ros_base
   ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
+target_link_libraries(jsk_pcl_ros_moveit
+  ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
 
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 add_dependencies(jsk_pcl_ros_util ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 add_dependencies(jsk_pcl_ros_base ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
+add_dependencies(jsk_pcl_ros_moveit ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
+
 
 generate_messages(DEPENDENCIES
   ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs)
@@ -317,12 +345,12 @@ catkin_package(
     DEPENDS pcl
     CATKIN_DEPENDS pcl_ros message_runtime ${PCL_MSGS} sensor_msgs geometry_msgs
     INCLUDE_DIRS include
-    LIBRARIES jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_util
+    LIBRARIES jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_util jsk_pcl_ros_moveit
 )
 
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
-install(TARGETS jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_util
+install(TARGETS jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_util jsk_pcl_ros_moveit
   ${jsk_pcl_nodelet_executables}
   ${jsk_pcl_util_nodelet_executables}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

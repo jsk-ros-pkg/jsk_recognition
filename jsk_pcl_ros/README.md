@@ -1029,7 +1029,7 @@ We expect to use jsk\_pcl/ROIClipper with jsk\_pcl/AttentionClipper to get ROI i
 
   Image of ROI.
 
-* `~output/point_indices` (`pcl_msgs/PointIndices`)
+* `~output/cloud_indices` (`pcl_msgs/PointIndices`)
 
   The indices of the pointcloud which is inside of the interest 3-D region.
 

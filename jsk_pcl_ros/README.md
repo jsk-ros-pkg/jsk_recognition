@@ -60,6 +60,8 @@ Represent range of time.
 
 ## nodelets
 ### jsk\_pcl/PointCloudLocalization
+![](images/pointcloud_localization.png)
+
 Localize 6d pose of robot using ICP registration of pointcloud.
 It publishes tf transformation from gloabl frame to odometory frame like acml does.
 

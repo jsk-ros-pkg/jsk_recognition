@@ -51,6 +51,7 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
+#include <jsk_pcl_ros/SnapFootstep.h>
 
 namespace jsk_pcl_ros
 {
@@ -86,7 +87,9 @@ namespace jsk_pcl_ros
       const std::vector<ConvexPolygon::Ptr>& convexes);
     virtual geometry_msgs::PoseStamped alignPose(
       Eigen::Affine3f& pose, ConvexPolygon::Ptr convex);
-
+    virtual bool footstepAlignServiceCallback(
+      jsk_pcl_ros::SnapFootstep::Request& req,
+      jsk_pcl_ros::SnapFootstep::Response& res);
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
@@ -101,6 +104,8 @@ namespace jsk_pcl_ros
     ros::Subscriber polygon_align_sub_;
     ros::Subscriber convex_align_sub_;
     ros::Subscriber convex_align_polygon_sub_;
+    bool use_service_;
+    ros::ServiceServer align_footstep_srv_;
     jsk_recognition_msgs::PolygonArray::ConstPtr polygons_;
     boost::mutex mutex_;
     ////////////////////////////////////////////////////////

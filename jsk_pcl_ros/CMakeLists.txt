@@ -37,6 +37,7 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport nodelet cv_bridge
   ${ML_CLASSIFIERS} sklearn jsk_topic_tools
   image_geometry
+  jsk_footstep_msgs
   laser_assembler moveit_ros_perception)
 # only run in hydro
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
@@ -48,6 +49,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 
 add_service_files(FILES SwitchTopic.srv
+  SnapFootstep.srv
   SetDepthCalibrationParameter.srv
   TransformScreenpoint.srv
   CheckCircle.srv
@@ -336,7 +338,7 @@ add_dependencies(jsk_pcl_ros_moveit ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencf
 
 
 generate_messages(DEPENDENCIES
-  ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs)
+  ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_footstep_msgs)
 
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 message("flags: ${CMAKE_CXX_FLAGS}")

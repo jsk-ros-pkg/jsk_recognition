@@ -52,7 +52,7 @@
 #include <eigen_conversions/eigen_msg.h>
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <visualization_msgs/MarkerArray.h>
-#include <algorithm>  
+#include <algorithm>
 
 namespace jsk_pcl_ros
 {
@@ -60,12 +60,18 @@ namespace jsk_pcl_ros
   {
     DiagnosticNodelet::onInit();
     tf_listener_.reset(new tf::TransformListener());
+    pnh_->param("use_service", use_service_, false);
     polygon_aligned_pub_ = advertise<geometry_msgs::PoseStamped>(
       *pnh_, "output/plane_aligned", 1);
     convex_aligned_pub_ = advertise<geometry_msgs::PoseStamped>(
       *pnh_, "output/convex_aligned", 1);
     convex_aligned_pose_array_pub_ = advertise<geometry_msgs::PoseArray>(
       *pnh_, "output/convex_aligned_pose_array", 1);
+    if (use_service_) {
+      subscribe();
+      align_footstep_srv_ = pnh_->advertiseService(
+        "align_footstep", &SnapIt::footstepAlignServiceCallback, this);
+    }
   }
 
   void SnapIt::subscribe()
@@ -88,10 +94,12 @@ namespace jsk_pcl_ros
 
   void SnapIt::unsubscribe()
   {
-    sub_polygons_.unsubscribe();
-    sub_coefficients_.unsubscribe();
-    polygon_align_sub_.shutdown();
-    convex_align_sub_.shutdown();
+    if (!use_service_) {
+      sub_polygons_.unsubscribe();
+      sub_coefficients_.unsubscribe();
+      polygon_align_sub_.shutdown();
+      convex_align_sub_.shutdown();
+    }
   }
   
   void SnapIt::polygonCallback(
@@ -139,6 +147,43 @@ namespace jsk_pcl_ros
     else {
       polygon_aligned_pub_.publish(pose_msg);
     }
+  }
+
+  bool SnapIt::footstepAlignServiceCallback(
+    jsk_pcl_ros::SnapFootstep::Request& req,
+    jsk_pcl_ros::SnapFootstep::Response& res)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    jsk_footstep_msgs::FootstepArray input_footsteps = req.input;
+    res.output.header = input_footsteps.header;
+    std::vector<ConvexPolygon::Ptr> convexes
+      = createConvexes(input_footsteps.header.frame_id,
+                       input_footsteps.header.stamp,
+                       polygons_);
+    for (size_t i = 0; i < input_footsteps.footsteps.size(); i++) {
+      jsk_footstep_msgs::Footstep footstep = input_footsteps.footsteps[i];
+      Eigen::Affine3d pose_eigend;
+      Eigen::Affine3f pose_eigen;
+      tf::poseMsgToEigen(footstep.pose, pose_eigen);
+      Eigen::Vector3f pose_point(pose_eigen.translation());
+      int min_index = findNearestConvex(pose_point, convexes);
+      jsk_footstep_msgs::Footstep aligned_footstep;
+      if (min_index != -1) {
+        ConvexPolygon::Ptr min_convex = convexes[min_index];
+        geometry_msgs::PoseStamped aligned_pose = alignPose(pose_eigen, min_convex);
+        aligned_footstep.pose = aligned_pose.pose;
+      }
+      else {
+        aligned_footstep.pose = footstep.pose;
+        //convex_aligned_pub_.publish(pose_msg); // shoud we publish this?
+      }
+      aligned_footstep.leg = footstep.leg;
+      aligned_footstep.dimensions = footstep.dimensions;
+      aligned_footstep.duration = footstep.duration;
+      aligned_footstep.footstep_group = footstep.footstep_group;
+      res.output.footsteps.push_back(aligned_footstep);
+    }
+    return true;
   }
 
   void SnapIt::convexAlignPolygonCallback(

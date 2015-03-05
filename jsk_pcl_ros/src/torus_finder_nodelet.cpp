@@ -53,6 +53,7 @@ namespace jsk_pcl_ros
     pub_torus_ = advertise<jsk_recognition_msgs::Torus>(*pnh_, "output", 1);
     pub_torus_array_ = advertise<jsk_recognition_msgs::TorusArray>(*pnh_, "output/array", 1);
     pub_inliers_ = advertise<PCLIndicesMsg>(*pnh_, "output/inliers", 1);
+    pub_pose_stamped_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output/pose", 1);
     pub_coefficients_ = advertise<PCLModelCoefficientMsg>(
       *pnh_, "output/coefficients", 1);
   }
@@ -132,6 +133,11 @@ namespace jsk_pcl_ros
       torus_array_msg.header = cloud_msg->header;
       torus_array_msg.toruses.push_back(torus_msg);
       pub_torus_array_.publish(torus_array_msg);
+      // publish pose stamped
+      geometry_msgs::PoseStamped pose_stamped;
+      pose_stamped.header = torus_msg.header;
+      pose_stamped.pose = torus_msg.pose;
+      pub_pose_stamped_.publish(pose_stamped);
     }
     else {
       

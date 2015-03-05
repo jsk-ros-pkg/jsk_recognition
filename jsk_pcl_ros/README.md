@@ -530,6 +530,10 @@ Find a torus out of pointcloud based on RANSAC with 3-D circle model.
 
   Array of torus. It will be used for visualization.
 
+* `~output/posie` (`geometry_msgs/PoseStamped`)
+
+  Publish result of detection as `geometry_msgs/PoseStamped`
+
 #### Parameters
 * `~min_radius` (Double, default: `0.1`)
 * `~max_radius` (Double, default: `1.0`)

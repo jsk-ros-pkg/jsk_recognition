@@ -43,6 +43,7 @@
 #include <jsk_recognition_msgs/Torus.h>
 #include <jsk_pcl_ros/TorusFinderConfig.h>
 #include <dynamic_reconfigure/server.h>
+#include <geometry_msgs/PoseStamped.h>
 namespace jsk_pcl_ros
 {
   class TorusFinder: public jsk_topic_tools::DiagnosticNodelet
@@ -66,6 +67,7 @@ namespace jsk_pcl_ros
     ros::Publisher pub_torus_array_;
     ros::Publisher pub_inliers_;
     ros::Publisher pub_coefficients_;
+    ros::Publisher pub_pose_stamped_;
     boost::mutex mutex_;
 
     ////////////////////////////////////////////////////////

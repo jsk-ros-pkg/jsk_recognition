@@ -62,6 +62,7 @@ namespace jsk_pcl_ros
         }
       }
     }
+    pnh_->param("use_normal", use_normal_, false);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&TorusFinder::configCallback, this, _1, _2);
@@ -101,10 +102,15 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud
-      (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointNormal>::Ptr cloud
+      (new pcl::PointCloud<pcl::PointNormal>);
     pcl::fromROSMsg(*cloud_msg, *cloud);
-    pcl::SACSegmentation<pcl::PointXYZ> seg;
+    pcl::SACSegmentation<pcl::PointNormal> seg;
+    if (use_normal_) {
+      pcl::SACSegmentationFromNormals<pcl::PointNormal, pcl::PointNormal> seg_normal;
+      seg_normal.setInputNormals(cloud);
+      seg = seg_normal;
+    }
     seg.setOptimizeCoefficients (true);
     seg.setInputCloud(cloud);
     seg.setRadiusLimits(min_radius_, max_radius_);

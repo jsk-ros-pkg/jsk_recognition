@@ -35,7 +35,7 @@
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/torus_finder.h"
 #include "jsk_pcl_ros/pcl_conversion_util.h"
-
+#include <jsk_topic_tools/rosparam_utils.h>
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
@@ -45,11 +45,28 @@ namespace jsk_pcl_ros
   void TorusFinder::onInit()
   {
     DiagnosticNodelet::onInit();
+    pnh_->param("use_hint", use_hint_, false);
+    if (use_hint_) {
+      if (pnh_->hasParam("initial_axis_hint")) {
+        std::vector<double> axis;
+        jsk_topic_tools::readVectorParameter(*pnh_, "initial_axis_hint", axis);
+        if (axis.size() == 3) {
+          hint_axis_[0] = axis[0];
+          hint_axis_[1] = axis[1];
+          hint_axis_[2] = axis[2];
+        }
+        else {
+          hint_axis_[0] = 0;
+          hint_axis_[1] = 0;
+          hint_axis_[2] = 1;
+        }
+      }
+    }
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&TorusFinder::configCallback, this, _1, _2);
     srv_->setCallback (f);
-    
+
     pub_torus_ = advertise<jsk_recognition_msgs::Torus>(*pnh_, "output", 1);
     pub_torus_array_ = advertise<jsk_recognition_msgs::TorusArray>(*pnh_, "output/array", 1);
     pub_inliers_ = advertise<PCLIndicesMsg>(*pnh_, "output/inliers", 1);
@@ -66,8 +83,9 @@ namespace jsk_pcl_ros
     outlier_threshold_ = config.outlier_threshold;
     max_iterations_ = config.max_iterations;
     min_size_ = config.min_size;
+    eps_hint_angle_ = config.eps_hint_angle;
   }
-  
+
   void TorusFinder::subscribe()
   {
     sub_ = pnh_->subscribe("input", 1, &TorusFinder::segment, this);
@@ -94,6 +112,10 @@ namespace jsk_pcl_ros
     seg.setDistanceThreshold (outlier_threshold_);
     seg.setMaxIterations (max_iterations_);
     seg.setModelType(pcl::SACMODEL_CIRCLE3D);
+    if (use_hint_) {
+      seg.setAxis(hint_axis_);
+      seg.setEpsAngle(eps_hint_angle_);
+    }
     pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
     pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
     seg.segment(*inliers, *coefficients);

@@ -81,10 +81,10 @@ namespace jsk_pcl_ros
     double outlier_threshold_;
     double eps_hint_angle_;
     bool use_hint_;
+    bool use_normal_;
     int max_iterations_;
     int min_size_;
   private:
-    
   };
 }
 

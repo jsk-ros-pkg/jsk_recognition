@@ -45,6 +45,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <jsk_pcl_ros/UpdateOffset.h>
 
 namespace jsk_pcl_ros
 {
@@ -52,7 +53,8 @@ namespace jsk_pcl_ros
   {
   public:
     PointCloudLocalization():
-      first_time_(true), localize_requested_(false), DiagnosticNodelet("PointCloudLocalization") {}
+      first_time_(true), localize_requested_(false),
+      DiagnosticNodelet("PointCloudLocalization") {}
   protected:
     virtual void onInit();
     virtual void subscribe();
@@ -88,9 +90,19 @@ namespace jsk_pcl_ros
       const ros::TimerEvent& event);
     
     /**
+     * @brief
+     * return true if it is the first time to localize
      */
     virtual bool isFirstTime();
 
+    /**
+     * @brief
+     * callback function for ~update_offset service
+     */
+    virtual bool updateOffsetCallback(
+      jsk_pcl_ros::UpdateOffset::Request& req,
+      jsk_pcl_ros::UpdateOffset::Response& res);
+    
     virtual void applyDownsampling(
       pcl::PointCloud<pcl::PointXYZ>::Ptr in_cloud,
       pcl::PointCloud<pcl::PointXYZ>& out_cloud);
@@ -101,6 +113,7 @@ namespace jsk_pcl_ros
     ros::Publisher pub_cloud_;
     tf::TransformListener* tf_listener_;
     ros::ServiceServer localization_srv_;
+    ros::ServiceServer update_offset_srv_;
     ros::Timer cloud_timer_;
     ros::Timer tf_timer_;
     pcl::PointCloud<pcl::PointXYZ>::Ptr all_cloud_;
@@ -119,7 +132,7 @@ namespace jsk_pcl_ros
      * Resolution of voxel grid
      */
     double leaf_size_;
-    tf::Transform localize_tramsform_;
+    tf::Transform localize_transform_;
     bool first_time_;
   private:
     

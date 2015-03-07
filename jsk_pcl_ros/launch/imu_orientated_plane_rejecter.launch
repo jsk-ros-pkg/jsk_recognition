@@ -24,8 +24,6 @@
   <node pkg="jsk_pcl_ros" type="calculate_polygon_from_imu.py"
         name="calc_polygon">
     <remap from="imu_data" to="$(arg IMU)" />
-    <remap from="camera_info" to="$(arg INPUT_INFO)" />
-    <!-- <remap from="points" to="$(arg INPUT)" /> -->
   </node>
 
   <node pkg="jsk_pcl_ros" type="multi_plane_extraction"

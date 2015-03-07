@@ -90,6 +90,15 @@ It publishes tf transformation from gloabl frame to odometory frame like acml do
 
   ICP service to align pointcloud
 
+#### Advertising Services
+* `~localize` (`std_srvs/Empty`)
+
+  Run localization
+* `~update_offset` (`jsk_pcl_ros/UpdateOffset`)
+
+  Update transformation between odom frame and global frame manuaaly.
+  Currently no tf is resolved.
+
 ### jsk\_pcl/UniformSampling
 Sample pointloud in the manner of uniform sampling.
 

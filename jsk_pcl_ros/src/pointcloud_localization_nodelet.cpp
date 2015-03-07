@@ -46,8 +46,8 @@ namespace jsk_pcl_ros
   {
     DiagnosticNodelet::onInit();
     tf_listener_ = TfListenerSingleton::getInstance();
-    // initialize localize_tramsform_ as identity
-    localize_tramsform_.setIdentity();
+    // initialize localize_transform_ as identity
+    localize_transform_.setIdentity();
     pnh_->param("global_frame", global_frame_, std::string("map"));
     pnh_->param("odom_frame", odom_frame_, std::string("odom"));
     pnh_->param("leaf_size", leaf_size_, 0.01);
@@ -60,6 +60,8 @@ namespace jsk_pcl_ros
     sub_ = pnh_->subscribe("input", 1, &PointCloudLocalization::cloudCallback, this);
     localization_srv_ = pnh_->advertiseService(
       "localize", &PointCloudLocalization::localizationRequest, this);
+    update_offset_srv_ = pnh_->advertiseService(
+      "update_offset", &PointCloudLocalization::updateOffsetCallback, this);
 
     // timer to publish cloud
     cloud_timer_ = pnh_->createTimer(
@@ -110,7 +112,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(tf_mutex_);
     ros::Time stamp = event.current_real;
-    tf_broadcast_.sendTransform(tf::StampedTransform(localize_tramsform_,
+    tf_broadcast_.sendTransform(tf::StampedTransform(localize_transform_,
                                                      stamp,
                                                      global_frame_,
                                                      odom_frame_));
@@ -178,12 +180,12 @@ namespace jsk_pcl_ros
               *concatenated_cloud = *all_cloud_ + *transformed_input_cloud;
               // update *all_cloud
               applyDownsampling(concatenated_cloud, *all_cloud_);
-              // update localize_tramsform_
+              // update localize_transform_
               tf::Transform icp_transform;
               tf::transformEigenToTF(transform, icp_transform);
               {
                 boost::mutex::scoped_lock tf_lock(tf_mutex_);
-                localize_tramsform_ = localize_tramsform_ * icp_transform;
+                localize_transform_ = localize_transform_ * icp_transform;
               }
             }
             else {
@@ -220,7 +222,22 @@ namespace jsk_pcl_ros
     std_srvs::Empty::Response& res)
   {
     NODELET_INFO("localize!");
+    boost::mutex::scoped_lock lock(mutex_);
     localize_requested_ = true;
+    return true;
+  }
+
+  bool PointCloudLocalization::updateOffsetCallback(
+    jsk_pcl_ros::UpdateOffset::Request& req,
+    jsk_pcl_ros::UpdateOffset::Response& res)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    geometry_msgs::TransformStamped next_pose = req.transformation;
+    // convert geometry_msgs::TransformStamped into tf::Transform
+    tf::StampedTransform tf_transform;
+    tf::transformStampedMsgToTF(next_pose, tf_transform);
+    // TODO: resolve tf
+    localize_transform_ = tf_transform;
     return true;
   }
 }

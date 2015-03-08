@@ -60,13 +60,17 @@ namespace jsk_pcl_ros
 {
   class PointcloudScreenpoint : public pcl_ros::PCLNodelet
   {
-    typedef message_filters::sync_policies::ApproximateTime< sensor_msgs::PointCloud2,
-                                                             geometry_msgs::PolygonStamped > PolygonApproxSyncPolicy;
+    typedef message_filters::sync_policies::ApproximateTime<
+      sensor_msgs::PointCloud2,
+      geometry_msgs::PolygonStamped > PolygonApproxSyncPolicy;
 
-    typedef message_filters::sync_policies::ApproximateTime< sensor_msgs::PointCloud2,
-                                                             geometry_msgs::PointStamped > PointApproxSyncPolicy;
-    typedef message_filters::sync_policies::ApproximateTime< sensor_msgs::PointCloud2,
-                                                             sensor_msgs::PointCloud2 > PointCloudApproxSyncPolicy;
+    typedef message_filters::sync_policies::ApproximateTime<
+      sensor_msgs::PointCloud2,
+      geometry_msgs::PointStamped > PointApproxSyncPolicy;
+    typedef message_filters::sync_policies::ApproximateTime<
+      sensor_msgs::PointCloud2,
+      sensor_msgs::PointCloud2 > PointCloudApproxSyncPolicy;
+
 
   private:
     message_filters::Subscriber < sensor_msgs::PointCloud2 > points_sub_;
@@ -84,10 +88,10 @@ namespace jsk_pcl_ros
     ros::Publisher pub_point_;
     ros::Publisher pub_polygon_;
     ros::ServiceServer srv_;
-    pcl::PointCloud<pcl::PointXYZ> pts;
+    pcl::PointCloud<pcl::PointXYZ> pts_;
     std_msgs::Header header_;
 
-    bool use_rect, use_point, use_sync, use_point_array, use_poly;
+    bool use_rect_, use_point_, use_sync_, use_point_array_, use_poly_;
     
     pcl::NormalEstimation< pcl::PointXYZ, pcl::Normal > n3d_;
 #if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )

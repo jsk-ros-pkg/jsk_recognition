@@ -19,8 +19,8 @@ while not rospy.is_shutdown():
         image_message = bridge.cv2_to_imgmsg(image, encoding="bgr8")
         image_message.header.stamp = rospy.Time.now()
         pub.publish(image_message)
-    except Exception, e:
+    except IOError, e:
         rospy.loginfo("cannot read the image at %s" % file_name)
         rospy.loginfo(e.message)
     rate.sleep()
-    
+

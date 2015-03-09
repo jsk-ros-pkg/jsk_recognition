@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
-import rospy
-from sensor_msgs.msg import Image
 import cv2
+
+import rospy
 import cv_bridge
+from sensor_msgs.msg import Image
+
 
 rospy.init_node("image_publisher")
 

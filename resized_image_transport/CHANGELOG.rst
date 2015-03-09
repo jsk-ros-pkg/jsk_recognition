@@ -2,8 +2,8 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.4 (2015-03-08)
+------------------
 * [resized_image_transport] Publish scale information
 * Contributors: Ryohei Ueda
 

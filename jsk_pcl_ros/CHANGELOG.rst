@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.4 (2015-03-08)
+------------------
 * [jsk_pcl_ros] Fix coding style of PointcloudScreenpoint
 * [jsk_pcl_ros] add ~update_offset service to update localizatoin
   transformation manually

@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.4 (2015-03-08)
+------------------
 * [jsk_perception] Add simple script to publish image file into ros image
 * Fix license: WillowGarage -> JSK Lab
 * Contributors: Ryohei Ueda

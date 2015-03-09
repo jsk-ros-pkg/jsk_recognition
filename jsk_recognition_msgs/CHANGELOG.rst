@@ -2,6 +2,11 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_recognition_msgs] Add resolution to SimpleOccupancyGrid
+* Contributors: Ryohei Ueda
+
 0.2.3 (2015-02-02)
 ------------------
 * add CATKIN_DEPENDS

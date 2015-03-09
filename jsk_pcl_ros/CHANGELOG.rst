@@ -2,6 +2,107 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros] Fix coding style of PointcloudScreenpoint
+* [jsk_pcl_ros] add ~update_offset service to update localizatoin
+  transformation manually
+* [jsk_pcl_ros] Add ~use_normal parameter to TorusFinder
+* [jsk_pcl_ros] Add hint axis parameter for TorusFinder
+  [jsk_pcl_ros] Publish PoseStamped from TorusFinder
+* [jsk_pcl_ros] Add service interface to snap footstep to planes in SnapIt
+* [jsk_pcl_ros] Publish PoseStamped from TorusFinder
+* [jsk_pcl_ros] Add image to PointCloudLocalization document
+* [jsk_pcl_ros] Wait tranfrosmtion of tf when clipping pointcloud and
+  fix to use y and z dimension of bounding box in AttentionClipper
+* [jsk_pcl_ros] Publish PointIndices from ROIClipper to satisfy ROI region
+* [jsk_pcl_ros] Fix PointCloudLocalization to work
+* [jsk_pcl_ros] Add voxel grid downsampling to keep pointcloud resolution
+  constant
+* [jsk_pcl_ros] Add PointCloudLocalization for simple SLAM
+* [jsk_pcl_ros] Support geometry_msgs/PolygonStamped in SnapIt
+* [jsk_pcl_ros] Support polygon input in PointcloudScreenPoint
+* [jsk_pcl_ros] Add GeometricConsistencyGrouping nodele
+* [jsk_pcl_ros] Add UniformSampling
+* [jsk_pcl_ros] Fix FeatureRegistration
+* [jsk_pcl_ros] Add FeatureRegistration to register pointclouds using 3D feature
+* [jsk_pcl_ros] Add PlanarPointCloudSimulator
+* [jsk_pcl_ros] Do not apply PCA for small pointclouds
+* Merge pull request `#737 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/737>`_ from garaemon/spherical-cloud-simulator
+  [jsk_pcl_ros] Add SphericalPointCloudSimulator nodelet to simulate spindle laser scanner
+* [jsk_pcl_ros] Add SphericalPointCloudSimulator nodelet to simulate
+  pindle laser scanner
+* [jsk_pcl_ros] Add ~use_async parameter to NormalConcatenater
+* [jsk_pcl_ros] Fix direction of y-axis of bounding box to direct toward z-axis of pointcloud
+* [jsk_pcl_ros] Support normal in ICPRegistration nodelet
+* add simple_edge_detector_and_tracker.launch
+* [jsk_pcl_ros] add PCL_INCLUDE_DIRS to suppress error of compiling organized_edge_detector
+* [jsk_pcl_ros] repair include filed of organized_edge_detector
+* [jsk_pcl_ros] Use Eigen::Quaternionf::setFromTwoVectors to align box on plane
+* change reversed imu plane direction
+* Merge pull request `#728 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/728>`_ from YuOhara/add_hinted_handle_estimator
+  Add hinted handle estimator
+* add comments
+* add_debug_visualizer
+* add hinted_handle_estimator
+* fix missing include def
+* [jsk_pcl_ros] Optimized HintedStickFinder
+  1. Use input pointcloud with normal not to run normal estimation in
+  HintedStickFinder
+  2. Add ~not_synchronize parameter to keep processing without more hint
+* [jsk_pcl_ros] Move documentation about
+  pointcloud_screenpoint_sample.launch from index.rst to README.md.
+  And deprecate sphinx documentation.
+* [jsk_pcl_ros] Wait for next new image in shutter callback in IntermittentImageAnnotator
+* [jsk_pcl_ros] Deprecate several nodelets
+* Merge pull request `#717 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/717>`_ from YuOhara/remove_bags_in_libname
+  remove bag in libname
+* Merge pull request `#711 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/711>`_ from YuOhara/add_mask_image_indices_concatator
+  Add mask image indices concatator
+* reversed plane direction
+* [jsk_pcl_ros] Return true in clear callback of IntermittentImageAnnotator
+* add imu_orientated_plane_rejector
+* remove bag in libname
+* renamed file name
+* rename mask_image_cluster_indices_concatenator to mask_image_cluster_filter
+* Merge remote-tracking branch 'origin/master' into add_mask_image_indices_concatator
+* [jsk_pcl_ros] Compile without optimization on travis
+* [jsk_pcl_ros] Add launch file for torus finder
+* [jsk_pcl_ros] Separate moveit filter into libjsk_pcl_ros_moveit
+* add topic to sync timestamp
+* changed sample_launch for concat indices
+* add indices concatenator_node with mask
+* renamed node
+* add imu_orientated plane detector and launch for icp-use
+* [jsk_pcl_ros] changed miss params and comment in data_names out of git
+* [jsk_pcl_ros] Add debug printing for tiem stamp confusing problem of resize_point_cloud
+* [jsk_pcl_ros] Fix advertise type for template pointcloud:
+  geometry_msgs/PoseStamped -> sensor_msgs/PointCloud2
+* [jsk_pcl_ros] Fix torus direciton to orient to sensor origin
+* [jsk_pcl_ros] Fix detected stick direction always directs to -y upper
+* [jsk_pcl_ros] Add PointCloudToClusterPointIndices nodelet
+* [jsk_pcl_ros] Publish PointXYZRGBNormal pointcloud from NormalEstimationIntegralImage
+* [jsk_pcl_ros] torus should directs to origin always in TorusFinder
+* [jsk_pcl_ros] Separate output library into 3 libraries in order to
+  reduce memory usage of linking
+* [jsk_pcl_ros] Fix README.md
+* [jsk_pcl_ros] Publish geometry_msgs/PoseStamped and
+  geometry_msgs/PointStamped from CentroidPublisher
+* [jsk_pcl_ros] Fix coding style of CentroidPublisher
+* [jsk_pcl_ros] Support spherical projection model in BorderEstimator
+* Merge remote-tracking branch 'refs/remotes/origin/master' into range-image
+* [jsk_pcl_ros] Support laser model in BorderEstimator and update document
+* depth_calibration tutorial with link markup
+* add depth calibration tutorial
+* add depth calibration tutorial
+* Merge pull request `#687 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/687>`_ from garaemon/cached-particle-filter
+  [jsk_pcl_ros] Cache result o nearest-negihbor search
+* [jsk_pcl_ros] Cache result o nearest-negihbor search
+* Merge remote-tracking branch 'refs/remotes/origin/master' into 2d-reject
+* [jsk_pcl_ros] Check direction of detected stick and hint line in 2-D image coordinate
+* Fix license: WillowGarage -> JSK Lab
+* Contributors: Yuto Inagaki, JSK Lab Member, Ryohei Ueda, Yu Ohara, Xiangyu Chen
+
 0.2.3 (2015-02-02)
 ------------------
 * [jsk_pcl_ros] Add ~min_inliers and ~cylinder_fitting_trial parameter to
@@ -470,7 +571,7 @@ Changelog for package jsk_pcl_ros
 * use colorCategory20 function to colorize pointcloud in ClusterPointIndicesDecomposer
 * visualizing connection of planes with lines in OrganizedMultiPlaneSegmentation
 * use rosparam_utils of jsk_topic_tools in StaticPolygonArrayPublisher
-* Contributors: Ryohei Ueda, wesleypchan, ohara
+* Contributors: Ryohei Ueda, wesleypchan, Yu Ohara
 
 0.1.17 (2014-09-07)
 -------------------
@@ -718,7 +819,7 @@ Changelog for package jsk_pcl_ros
 * make paritcal_filter_tracking_nodelet publish tracked object tf trasnformation
 * add two launch files to run openni on remote machine
 * add octree_change_detector
-* Contributors: Ryo Terasawa, Chan Wesley, Shunichi Nozawa, Yuto Inagaki, Masaki Murooka, Ryohei Ueda, Yohei Kakiuchi, Yusuke Furuta, Kei Okada
+* Contributors: Chan Wesley, Shunichi Nozawa, Yuto Inagaki, Masaki Murooka, Ryo Terasawa, Ryohei Ueda, Yohei Kakiuchi, Yusuke Furuta, Kei Okada
 
 0.1.4 (2014-04-25)
 ------------------

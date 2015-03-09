@@ -2,6 +2,12 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_perception] Add simple script to publish image file into ros image
+* Fix license: WillowGarage -> JSK Lab
+* Contributors: Ryohei Ueda
+
 0.2.3 (2015-02-02)
 ------------------
 * [jsk_pcl_ros, jsk_perception] Move mask image operation to jsk_perception

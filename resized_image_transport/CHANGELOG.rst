@@ -2,6 +2,11 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [resized_image_transport] Publish scale information
+* Contributors: Ryohei Ueda
+
 0.2.3 (2015-02-02)
 ------------------
 * Remove rosbuild files

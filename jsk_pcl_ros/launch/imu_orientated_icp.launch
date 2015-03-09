@@ -42,9 +42,9 @@
         output="screen">
     <remap from="~input" to="$(arg INPUT)" />
     <remap from="~target" to="/add_cluster/output" />
-    <remap from="~align_planes" to="/polygon_transformer/output_polygons" />
+    <remap from="~align_planes" to="ensynced_planes" />
     <remap from="~align_planes_coefficients"
-           to="/polygon_transformer/output_coefficients" />
+           to="ensynced_planes_coefficients" />
     <rosparam>
       align_boxes: true
       use_pca: true
@@ -59,8 +59,12 @@
   <node pkg="jsk_pcl_ros" type="calculate_polygon_from_imu.py"
         name="calc_polygon">
     <remap from="imu_data" to="$(arg IMU)" />
-    <!-- <remap from="camera_info" to="$(arg INPUT_INFO)" />-->
-    <remap from="points" to="$(arg INPUT)" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="plane_time_ensync_for_recognition.py" name="time_ensync" >
+    <remap from="timer" to="$(arg INPUT)" />
+    <remap from="planes" to="polygon_transformer/output_polygons" />
+    <remap from="planes_coefficients"
+           to="polygon_transformer/output_coefficients" />
   </node>
 </launch>
 

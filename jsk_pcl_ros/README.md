@@ -493,7 +493,7 @@ Extract indices of pointcloud which is masked by mask image. The pointcloud is n
   Indices of the points masked by `~input/mask`.
 
 
-### jsk\_pcl/MaskImageClusterIndicesConcatenator
+### jsk\_pcl/MaskImageClusterFilter
 ![](images/mask_image_cluster_indices_concatenator.png)
 
 Segment Clouds with mask_image and Clustering Methods(example. SuperVoxel).

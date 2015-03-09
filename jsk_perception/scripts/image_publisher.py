@@ -11,7 +11,7 @@ rospy.init_node("image_publisher")
 
 rate = rospy.Rate(rospy.get_param("rate", 1))
 file_name = rospy.get_param("~file_name", "image.png")
-pub = rospy.Publisher("~output", Image)
+pub = rospy.Publisher("~output", Image, queue_size=1)
 bridge = cv_bridge.CvBridge()
 while not rospy.is_shutdown():
     try:

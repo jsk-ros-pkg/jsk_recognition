@@ -130,12 +130,14 @@ namespace jsk_pcl_ros
         pcl::PointCloud<pcl::PointXYZ>::Ptr
           local_cloud (new pcl::PointCloud<pcl::PointXYZ>);
         pcl::fromROSMsg(*latest_cloud_, *local_cloud);
-        NODELET_INFO("waiting for tf transformation");
+        NODELET_INFO("waiting for tf transformation from %s tp %s",
+                     latest_cloud_->header.frame_id.c_str(),
+                     global_frame_.c_str());
         if (tf_listener_->waitForTransform(
               latest_cloud_->header.frame_id,
               global_frame_,
               latest_cloud_->header.stamp,
-              ros::Duration(10.0))) {
+              ros::Duration(1.0))) {
           pcl::PointCloud<pcl::PointXYZ>::Ptr
             input_cloud (new pcl::PointCloud<pcl::PointXYZ>);
           pcl_ros::transformPointCloud(global_frame_,

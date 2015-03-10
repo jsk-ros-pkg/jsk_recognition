@@ -4,8 +4,8 @@ namespace resized_image_transport
 {
   void ImageResizer::onInit(){
     initNodeHandle();
-    initReconfigure();
     initParams();
+    initReconfigure();
     initPublishersAndSubscribers();
   }
 

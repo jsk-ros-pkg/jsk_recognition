@@ -275,6 +275,8 @@ jsk_pcl_nodelet(src/point_indices_to_mask_image_nodelet.cpp
   "jsk_pcl/PointIndicesToMaskImage" "point_indices_to_mask_image")
 jsk_pcl_nodelet(src/mask_image_to_point_indices_nodelet.cpp
   "jsk_pcl/MaskImageToPointIndices" "mask_image_to_point_indices")
+jsk_pcl_nodelet(src/organized_pointcloud_to_point_indices_nodelet.cpp
+  "jsk_pcl/OrganizedPointCloudToPointIndices" "organized_pointcloud_to_point_indices")
 jsk_pcl_nodelet(src/hinted_handle_estimator_nodelet.cpp
   "jsk_pcl/HintedHandleEstimator" "hinted_handle_estimator")
 jsk_pcl_nodelet(src/capture_stereo_synchronizer_nodelet.cpp

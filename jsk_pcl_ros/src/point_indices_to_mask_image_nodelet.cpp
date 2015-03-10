@@ -42,6 +42,7 @@ namespace jsk_pcl_ros
   void PointIndicesToMaskImage::onInit()
   {
     DiagnosticNodelet::onInit();
+    pnh_->param("approximate_sync", approximate_sync_, false);
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
   }
 
@@ -49,10 +50,17 @@ namespace jsk_pcl_ros
   {
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_image_.subscribe(*pnh_, "input/image", 1);
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-    sync_->connectInput(sub_input_, sub_image_);
-    sync_->registerCallback(boost::bind(&PointIndicesToMaskImage::mask,
-                                        this, _1, _2));
+    if (approximate_sync_) {
+      async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(100);
+      async_->connectInput(sub_input_, sub_image_);
+      async_->registerCallback(boost::bind(&PointIndicesToMaskImage::mask, this, _1, _2));
+    }
+    else {
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+      sync_->connectInput(sub_input_, sub_image_);
+      sync_->registerCallback(boost::bind(&PointIndicesToMaskImage::mask,
+					  this, _1, _2));
+    }
   }
   
   void PointIndicesToMaskImage::unsubscribe()
@@ -73,7 +81,7 @@ namespace jsk_pcl_ros
       int index = indices_msg->indices[i];
       int width_index = index % width;
       int height_index = index / width;
-      ROS_INFO("w, h = %d, &d", width_index, height_index);
+      ROS_INFO("w, h = %d, %d", width_index, height_index);
       mask_image.at<uchar>(height_index, width_index) = 255;
     }
     cv_bridge::CvImage mask_bridge(indices_msg->header,

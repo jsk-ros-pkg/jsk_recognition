@@ -43,16 +43,20 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
 
 namespace jsk_pcl_ros
 {
   class PointIndicesToMaskImage: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
+    typedef message_filters::sync_policies::ApproximateTime<
+    PCLIndicesMsg,
+    sensor_msgs::Image > ApproximateSyncPolicy;
     typedef message_filters::sync_policies::ExactTime<
       PCLIndicesMsg,
       sensor_msgs::Image > SyncPolicy;
-  
+
     PointIndicesToMaskImage(): DiagnosticNodelet("PointIndicesToMaskImage") { }
   protected:
     ////////////////////////////////////////////////////////
@@ -70,8 +74,10 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
+    bool approximate_sync_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
-    message_filters::Subscriber<PCLIndicesMsg> sub_input_;
+    boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> >async_; 
+   message_filters::Subscriber<PCLIndicesMsg> sub_input_;
     message_filters::Subscriber<sensor_msgs::Image> sub_image_;
     ros::Publisher pub_;
   private:

@@ -94,6 +94,10 @@
          type="jsk_pcl_ros::MaskImageToPointIndices"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_pcl/OrganizedPointCloudToPointIndices"
+         type="jsk_pcl_ros::OrganizedPointCloudToPointIndices"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_pcl/IncrementalModelRegistration"
          type="jsk_pcl_ros::IncrementalModelRegistration"
          base_class_type="nodelet::Nodelet">

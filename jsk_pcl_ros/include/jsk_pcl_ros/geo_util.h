@@ -47,6 +47,7 @@
 #include <boost/thread.hpp>
 #include <geometry_msgs/Polygon.h>
 #include <jsk_recognition_msgs/BoundingBox.h>
+#include <jsk_recognition_msgs/SimpleOccupancyGrid.h>
 #include <boost/tuple/tuple.hpp>
 
 ////////////////////////////////////////////////////////
@@ -156,6 +157,7 @@ namespace jsk_pcl_ros
     virtual void toCoefficients(std::vector<float>& output);
     virtual std::vector<float> toCoefficients();
     virtual double getD();
+    virtual Eigen::Affine3f coordinates();
   protected:
     Eigen::Vector3f normal_;
     double d_;
@@ -234,6 +236,7 @@ namespace jsk_pcl_ros
     virtual ConvexPolygon flipConvex();
     virtual Eigen::Vector3f getCentroid();
     virtual Ptr magnify(const double scale_factor);
+    virtual Ptr magnifyByDistance(const double distance);
         
     static ConvexPolygon fromROSMsg(const geometry_msgs::Polygon& polygon);
     bool distanceSmallerThan(
@@ -288,6 +291,26 @@ namespace jsk_pcl_ros
       }
     }
   }
+
+  class GridPlane
+  {
+  public:
+    typedef boost::shared_ptr<GridPlane> Ptr;
+    GridPlane(ConvexPolygon::Ptr plane);
+    virtual ~GridPlane();
+    virtual void fillCellsFromPointCloud(
+      const pcl::PointCloud<pcl::PointNormal>& cloud,
+      double distance_threshold);
+    virtual double getResolution() { return resolution_; }
+    virtual jsk_recognition_msgs::SimpleOccupancyGrid toROSMsg();
+  protected:
+    ConvexPolygon::Ptr convex_;
+    Vertices cells_;
+    double resolution_;
+  private:
+    
+  };
+
   
   class Cube
   {

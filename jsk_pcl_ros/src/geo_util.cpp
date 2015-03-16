@@ -40,6 +40,7 @@
 #include <cfloat>
 #include <pcl/surface/ear_clipping.h>
 #include <pcl/conversions.h>
+#include <boost/tuple/tuple_comparison.hpp>
 // #define DEBUG_GEO_UTIL
 namespace jsk_pcl_ros
 {
@@ -264,18 +265,27 @@ namespace jsk_pcl_ros
     normal_ = Eigen::Vector3f(coefficients[0], coefficients[1], coefficients[2]);
     d_ = coefficients[3] / normal_.norm();
     normal_.normalize();
+    initializeCoordinates();
+  }
+
+  Plane::Plane(const boost::array<float, 4>& coefficients)
+  {
+    normal_ = Eigen::Vector3f(coefficients[0], coefficients[1], coefficients[2]);
+    d_ = coefficients[3] / normal_.norm();
+    normal_.normalize();
+    initializeCoordinates();
   }
 
   Plane::Plane(Eigen::Vector3f normal, double d) :
     normal_(normal.normalized()), d_(d / normal.norm())
   {
-    
+    initializeCoordinates();
   }
   
   Plane::Plane(Eigen::Vector3f normal, Eigen::Vector3f p) :
     normal_(normal.normalized()), d_(- normal.dot(p) / normal.norm())
   {
-    
+    initializeCoordinates();
   }
           
   
@@ -444,13 +454,19 @@ namespace jsk_pcl_ros
     return d_;
   }
 
-  Eigen::Affine3f Plane::coordinates()
+  void Plane::initializeCoordinates()
   {
     Eigen::Quaternionf rot;
     rot.setFromTwoVectors(Eigen::Vector3f::UnitZ(), getNormal());
-    return Eigen::Affine3f::Identity() * rot * Eigen::Translation3f(0, 0, d_);
+    plane_coordinates_
+      = Eigen::Affine3f::Identity() * rot * Eigen::Translation3f(0, 0, d_);
   }
-
+  
+  Eigen::Affine3f Plane::coordinates()
+  {
+    return plane_coordinates_;
+  }
+  
   Polygon Polygon::createPolygonWithSkip(const Vertices& vertices)
   {
     const double thr = 0.01;
@@ -1010,8 +1026,8 @@ namespace jsk_pcl_ros
     return isInside(foot_point);
   }
 
-  GridPlane::GridPlane(ConvexPolygon::Ptr plane):
-    convex_(plane), cells_(0), resolution_(0.02)
+  GridPlane::GridPlane(ConvexPolygon::Ptr plane, const double resolution):
+    convex_(plane), resolution_(resolution)
   {
 
   }
@@ -1021,6 +1037,35 @@ namespace jsk_pcl_ros
 
   }
 
+  GridPlane::IndexPair GridPlane::projectLocalPointAsIndexPair(
+    const Eigen::Vector3f& p)
+  {
+    double offset_x = p[0] + 0.5 * resolution_;
+    double offset_y = p[1] + 0.5 * resolution_;
+    return boost::make_tuple<int, int>(std::ceil(offset_x / resolution_),
+                                       std::ceil(offset_y / resolution_));
+  }
+
+  void GridPlane::addIndexPair(IndexPair pair)
+  {
+    cells_.insert(pair);
+  }
+
+  Eigen::Vector3f GridPlane::unprojectIndexPairAsLocalPoint(
+    const IndexPair& pair)
+  {
+    return Eigen::Vector3f(pair.get<0>() * resolution_,
+                           pair.get<1>() * resolution_,
+                           0);
+  }
+
+  Eigen::Vector3f GridPlane::unprojectIndexPairAsGlobalPoint(
+    const IndexPair& pair)
+  {
+    Eigen::Vector3f local_point = unprojectIndexPairAsLocalPoint(pair);
+    return convex_->coordinates() * local_point;
+  }
+  
   void GridPlane::fillCellsFromPointCloud(
     const pcl::PointCloud<pcl::PointNormal>& cloud,
     double distance_threshold)
@@ -1034,12 +1079,11 @@ namespace jsk_pcl_ros
         Eigen::Vector3f ep = p.getVector3fMap();
         if (convex_->isProjectableInside(ep)) {
           if (convex_->distanceSmallerThan(ep, distance_threshold)) {
-            // TODO: Do not register points near
             // ep is reprented in global frame
             // need to convert to local coordinates
             Eigen::Vector3f local_ep = inv_local_coordinates * ep;
-            local_ep[2] = 0;     // ...??
-            cells_.push_back(local_ep);
+            IndexPair pair = projectLocalPointAsIndexPair(local_ep);
+            addIndexPair(pair);
           }
         }
       }
@@ -1057,8 +1101,11 @@ namespace jsk_pcl_ros
     ros_msg.coefficients[2] = coeff[2];
     ros_msg.coefficients[3] = -coeff[3]; // is it correct...??
     ros_msg.resolution = resolution_;
-    for (size_t i = 0; i < cells_.size(); i++) {
-      Eigen::Vector3f c = cells_[i];
+    for (std::set<IndexPair>::iterator it = cells_.begin();
+         it != cells_.end();
+         ++it) {
+      IndexPair pair = *it;
+      Eigen::Vector3f c = unprojectIndexPairAsLocalPoint(pair);
       geometry_msgs::Point p;
       pointFromVectorToXYZ<Eigen::Vector3f, geometry_msgs::Point>(
         c, p);

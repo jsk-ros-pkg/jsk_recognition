@@ -441,7 +441,14 @@ namespace jsk_pcl_ros
 
   double Plane::getD() 
   {
-  return d_;
+    return d_;
+  }
+
+  Eigen::Affine3f Plane::coordinates()
+  {
+    Eigen::Quaternionf rot;
+    rot.setFromTwoVectors(Eigen::Vector3f::UnitZ(), getNormal());
+    return Eigen::Affine3f::Identity() * rot * Eigen::Translation3f(0, 0, d_);
   }
 
   Polygon Polygon::createPolygonWithSkip(const Vertices& vertices)
@@ -948,6 +955,23 @@ namespace jsk_pcl_ros
     return true;
   }
 
+  ConvexPolygon::Ptr ConvexPolygon::magnifyByDistance(const double distance)
+  {
+    // compute centroid
+    Eigen::Vector3f centroid(0, 0, 0);
+    for (size_t i = 0; i < vertices_.size(); i++) {
+      centroid = centroid + vertices_[i];
+    }
+    centroid = centroid / vertices_.size();
+
+    Vertices new_vertices;
+    for (size_t i = 0; i < vertices_.size(); i++) {
+      new_vertices.push_back((vertices_[i] - centroid).normalized() * distance + vertices_[i]);
+    }
+    ConvexPolygon::Ptr ret (new ConvexPolygon(new_vertices));
+    return ret;
+  }
+  
   ConvexPolygon::Ptr ConvexPolygon::magnify(const double scale_factor)
   {
     // compute centroid
@@ -984,6 +1008,63 @@ namespace jsk_pcl_ros
     Eigen::Vector3f foot_point;
     Plane::project(p, foot_point);
     return isInside(foot_point);
+  }
+
+  GridPlane::GridPlane(ConvexPolygon::Ptr plane):
+    convex_(plane), cells_(0), resolution_(0.02)
+  {
+
+  }
+
+  GridPlane::~GridPlane()
+  {
+
+  }
+
+  void GridPlane::fillCellsFromPointCloud(
+    const pcl::PointCloud<pcl::PointNormal>& cloud,
+    double distance_threshold)
+  {
+    Eigen::Affine3f local_coordinates = convex_->coordinates();
+    Eigen::Affine3f inv_local_coordinates = local_coordinates.inverse();
+    ROS_INFO("fillCellsFromPointCloud -> ");
+    for (size_t i = 0; i < cloud.points.size(); i++) {
+      pcl::PointNormal p = cloud.points[i];
+      if (pcl_isfinite(p.x) && pcl_isfinite(p.y) && pcl_isfinite(p.z)) {
+        Eigen::Vector3f ep = p.getVector3fMap();
+        if (convex_->isProjectableInside(ep)) {
+          if (convex_->distanceSmallerThan(ep, distance_threshold)) {
+            // TODO: Do not register points near
+            // ep is reprented in global frame
+            // need to convert to local coordinates
+            Eigen::Vector3f local_ep = inv_local_coordinates * ep;
+            local_ep[2] = 0;     // ...??
+            cells_.push_back(local_ep);
+          }
+        }
+      }
+    }
+    ROS_INFO("fillCellsFromPointCloud <- ");
+  }
+
+  jsk_recognition_msgs::SimpleOccupancyGrid GridPlane::toROSMsg()
+  {
+    jsk_recognition_msgs::SimpleOccupancyGrid ros_msg;
+    std::vector<float> coeff;
+    convex_->toCoefficients(coeff);
+    ros_msg.coefficients[0] = coeff[0];
+    ros_msg.coefficients[1] = coeff[1];
+    ros_msg.coefficients[2] = coeff[2];
+    ros_msg.coefficients[3] = -coeff[3]; // is it correct...??
+    ros_msg.resolution = resolution_;
+    for (size_t i = 0; i < cells_.size(); i++) {
+      Eigen::Vector3f c = cells_[i];
+      geometry_msgs::Point p;
+      pointFromVectorToXYZ<Eigen::Vector3f, geometry_msgs::Point>(
+        c, p);
+      ros_msg.cells.push_back(p);
+    }
+    return ros_msg;
   }
   
   Cube::Cube(const Eigen::Vector3f& pos, const Eigen::Quaternionf& rot):

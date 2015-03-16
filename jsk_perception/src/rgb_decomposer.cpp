@@ -62,6 +62,10 @@ namespace jsk_perception
   void RGBDecomposer::decompose(
     const sensor_msgs::Image::ConstPtr& image_msg)
   {
+    if ((image_msg->width == 0) && (image_msg->height == 0)) {
+        ROS_WARN("invalid image input");
+        return;
+    }
     cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(
       image_msg, image_msg->encoding);
     cv::Mat image = cv_ptr->image;

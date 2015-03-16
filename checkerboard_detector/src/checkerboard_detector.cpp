@@ -96,6 +96,7 @@ public:
     boost::mutex mutexcalib;
     ros::NodeHandle _node;
     int dimx, dimy;
+    bool use_P;
     double fRectSize[2];
 
     //////////////////////////////////////////////////////////////////////////////
@@ -106,6 +107,7 @@ public:
         _node.param("verbose", verbose, 1);
         _node.param("maxboard", maxboard, -1);
         _node.param("invert_color", invert_color, false);
+        _node.param("use_P", use_P, false);
         char str[32];
         int index = 0;
 
@@ -377,14 +379,14 @@ public:
         }
         // check all the value of R is zero or not
         // if zero, normalzie it
-        if (std::equal(cam_info.R.begin() + 1, cam_info.R.end(), cam_info.R.begin())) {
+        if (use_P || std::equal(cam_info.R.begin() + 1, cam_info.R.end(), cam_info.R.begin())) {
             cam_info.R[0] = 1.0;
             cam_info.R[4] = 1.0;
             cam_info.R[8] = 1.0;
         }
         // check all the value of K is zero or not
         // if zero, copy all the value from P
-        if (std::equal(cam_info.K.begin() + 1, cam_info.K.end(), cam_info.K.begin())) {
+        if (use_P || std::equal(cam_info.K.begin() + 1, cam_info.K.end(), cam_info.K.begin())) {
             cam_info.K[0] = cam_info.P[0];
             cam_info.K[1] = cam_info.P[1];
             cam_info.K[2] = cam_info.P[2];

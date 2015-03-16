@@ -434,7 +434,15 @@ namespace jsk_pcl_ros
       corr_projection->setFocalLengths(model.fx(), model.fy());
       corr_projection->setCameraCenters(model.cx(), model.cy());
     }
+    if (reference->points.empty ()) {
+      NODELET_ERROR("Input Reference Cloud is empty!");
+      return DBL_MAX;
+    }
     icp.setInputSource(reference);
+    if (cloud->points.empty ()) {
+      NODELET_ERROR("Input Target Cloud is empty!");
+      return DBL_MAX;
+    }
     icp.setInputTarget(cloud);
     icp.setMaxCorrespondenceDistance (correspondence_distance_);
     icp.setMaximumIterations (max_iteration_);

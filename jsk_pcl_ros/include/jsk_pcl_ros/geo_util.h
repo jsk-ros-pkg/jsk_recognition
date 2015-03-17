@@ -284,7 +284,7 @@ namespace jsk_pcl_ros
         // convert pointcloud to vertices
         Vertices vs;
         for (size_t i = 0; i < convex_cloud->points.size(); i++) {
-          Eigen::Vector3f v = convex_cloud->points[i].getVector3fMap();
+          Eigen::Vector3f v(convex_cloud->points[i].getVector3fMap());
           vs.push_back(v);
         }
         return ConvexPolygon::Ptr(new ConvexPolygon(vs));
@@ -309,8 +309,8 @@ namespace jsk_pcl_ros
    * The width and height of the cell is equivalent to resolution_,
    * and the value of cells_ represents a center point.
    * (i, j) means rectanglar region of (x, y) which satisfies followings:
-   * i * resolution - 0.5 * resolution < x <= i * resolution + 0.5 * resolution
-   * j * resolution - 0.5 * resolution < y <= j * resolution + 0.5 * resolution
+   * i * resolution - 0.5 * resolution <= x < i * resolution + 0.5 * resolution
+   * j * resolution - 0.5 * resolution <= y < j * resolution + 0.5 * resolution
    * 
    *
    */
@@ -322,7 +322,7 @@ namespace jsk_pcl_ros
     GridPlane(ConvexPolygon::Ptr plane, const double resolution);
     virtual ~GridPlane();
     virtual void fillCellsFromPointCloud(
-      const pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
+      pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
       double distance_threshold);
     virtual double getResolution() { return resolution_; }
     virtual jsk_recognition_msgs::SimpleOccupancyGrid toROSMsg();

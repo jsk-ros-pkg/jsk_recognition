@@ -60,22 +60,26 @@ namespace jsk_pcl_ros
       boost::bind (&EnvironmentPlaneModeling::configCallback, this, _1, _2);
     srv_->setCallback (f);
 
-    debug_magnified_polygons_
+    pub_debug_magnified_polygons_
       = pnh_->advertise<jsk_recognition_msgs::PolygonArray>(
         "debug/magnified_polygons", 1);
+    pub_debug_convex_point_cloud_
+      = pnh_->advertise<sensor_msgs::PointCloud2>(
+        "debug/convex_cloud", 1);
     pub_grid_map_
       = pnh_->advertise<jsk_recognition_msgs::SimpleOccupancyGridArray>(
         "output", 1);
     sub_cloud_.subscribe(*pnh_, "input", 1);
+    sub_full_cloud_.subscribe(*pnh_, "input/full_cloud", 1);
     sub_indices_.subscribe(*pnh_, "input/indices", 1);
     sub_polygons_.subscribe(*pnh_, "input/polygons", 1);
     sub_coefficients_.subscribe(*pnh_, "input/coefficients", 1);
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-    sync_->connectInput(sub_cloud_, sub_polygons_,
+    sync_->connectInput(sub_cloud_, sub_full_cloud_, sub_polygons_,
                         sub_coefficients_, sub_indices_);
     sync_->registerCallback(
       boost::bind(&EnvironmentPlaneModeling::inputCallback,
-                  this, _1, _2, _3, _4));
+                  this, _1, _2, _3, _4, _5));
   }
 
   void EnvironmentPlaneModeling::configCallback(Config &config, uint32_t level)
@@ -88,23 +92,29 @@ namespace jsk_pcl_ros
 
   void EnvironmentPlaneModeling::printInputData(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
+    const sensor_msgs::PointCloud2::ConstPtr& full_cloud_msg,
     const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon_msg,
     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg,
     const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg)
   {
     NODELET_INFO("Input data --");
     NODELET_INFO("  Number of points -- %d", cloud_msg->width * cloud_msg->height);
-    NODELET_INFO("  Number of Clusters: -- %lu", indices_msg->cluster_indices.size());
+    NODELET_INFO("  Number of full points -- %d", full_cloud_msg->width * full_cloud_msg->height);
+    NODELET_INFO("  Number of clusters: -- %lu", indices_msg->cluster_indices.size());
     NODELET_INFO("  Frame Id: %s", cloud_msg->header.frame_id.c_str());
   } 
 
   bool EnvironmentPlaneModeling::isValidFrameIds(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
+    const sensor_msgs::PointCloud2::ConstPtr& full_cloud_msg,
     const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon_msg,
     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg,
     const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg)
   {
     std::string frame_id = cloud_msg->header.frame_id;
+    if (full_cloud_msg->header.frame_id != frame_id) {
+      return false;
+    }
     if (polygon_msg->header.frame_id != frame_id) {
       return false;
     }
@@ -134,6 +144,7 @@ namespace jsk_pcl_ros
   
   void EnvironmentPlaneModeling::inputCallback(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
+    const sensor_msgs::PointCloud2::ConstPtr& full_cloud_msg,
     const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon_msg,
     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg,
     const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg)
@@ -141,31 +152,54 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
 
     // check frame_id
-    if (!isValidFrameIds(cloud_msg, polygon_msg, coefficients_msg, indices_msg)) {
+    if (!isValidFrameIds(cloud_msg, full_cloud_msg, polygon_msg, coefficients_msg, indices_msg)) {
       NODELET_FATAL("frame_id is not correct");
       return;
     }
     // first, print all the information about ~inputs
-    printInputData(cloud_msg, polygon_msg, coefficients_msg, indices_msg);
+    printInputData(cloud_msg, full_cloud_msg, polygon_msg, coefficients_msg, indices_msg);
 
     
     pcl::PointCloud<pcl::PointNormal>::Ptr cloud (new pcl::PointCloud<pcl::PointNormal>);
     pcl::fromROSMsg(*cloud_msg, *cloud);
+
+    pcl::PointCloud<pcl::PointNormal>::Ptr full_cloud (new pcl::PointCloud<pcl::PointNormal>);
+    pcl::fromROSMsg(*full_cloud_msg, *full_cloud);
     
     // convert to jsk_pcl_ros::ConvexPolygon
     std::vector<ConvexPolygon::Ptr> convexes = convertToConvexPolygons(cloud, indices_msg, coefficients_msg);
     // magnify convexes
     std::vector<ConvexPolygon::Ptr> magnified_convexes = magnifyConvexes(convexes);
-
+    publishConvexPolygonsBoundaries(pub_debug_convex_point_cloud_, cloud_msg->header, magnified_convexes);
     // Publish magnified convexes for debug
-    publishConvexPolygons(debug_magnified_polygons_, cloud_msg->header, magnified_convexes);
+    publishConvexPolygons(pub_debug_magnified_polygons_, cloud_msg->header, magnified_convexes);
 
     // build GridMaps
-    std::vector<GridPlane::Ptr> grid_planes = buildGridPlanes(cloud, magnified_convexes);
+    std::vector<GridPlane::Ptr> grid_planes = buildGridPlanes(full_cloud, magnified_convexes);
 
     publishGridMaps(pub_grid_map_, cloud_msg->header, grid_planes);
   }
 
+  void EnvironmentPlaneModeling::publishConvexPolygonsBoundaries(
+    ros::Publisher& pub,
+    const std_msgs::Header& header,
+    std::vector<ConvexPolygon::Ptr>& convexes)
+  {
+    pcl::PointCloud<pcl::PointXYZ>::Ptr
+      boundary_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    for (size_t i = 0; i < convexes.size(); i++) {
+      pcl::PointCloud<pcl::PointXYZ>::Ptr
+        one_boundary_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+      convexes[i]->boundariesToPointCloud<pcl::PointXYZ>(
+        *one_boundary_cloud);
+      *boundary_cloud = *boundary_cloud + *one_boundary_cloud;
+    }
+    sensor_msgs::PointCloud2 ros_cloud;
+    pcl::toROSMsg(*boundary_cloud, ros_cloud);
+    ros_cloud.header = header;
+    pub.publish(ros_cloud);
+  }
+  
   void EnvironmentPlaneModeling::publishGridMaps(
       ros::Publisher& pub,
       const std_msgs::Header& header,
@@ -183,14 +217,11 @@ namespace jsk_pcl_ros
   
   
   std::vector<GridPlane::Ptr> EnvironmentPlaneModeling::buildGridPlanes(
-    const pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
+    pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
     std::vector<ConvexPolygon::Ptr> convexes)
   {
     std::vector<GridPlane::Ptr> ret(convexes.size());
-    
-#ifdef _OPENMP
-#pragma omp parallel for
-#endif
+//#pragma omp parallel for
     for (size_t i = 0; i < convexes.size(); i++) {
       GridPlane::Ptr grid(new GridPlane(convexes[i], resolution_));
       grid->fillCellsFromPointCloud(cloud, distance_threshold_);
@@ -223,6 +254,7 @@ namespace jsk_pcl_ros
     std::vector<ConvexPolygon::Ptr> ret(0);
     for (size_t i = 0; i < convexes.size(); i++) {
       ret.push_back(convexes[i]->magnifyByDistance(magnify_distance_));
+      //ret.push_back(convexes[i]->magnify(magnify_distance_));
     }
     return ret;
   }

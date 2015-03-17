@@ -460,7 +460,7 @@ namespace jsk_pcl_ros
     Eigen::Quaternionf rot;
     rot.setFromTwoVectors(Eigen::Vector3f::UnitZ(), getNormal());
     plane_coordinates_
-      = Eigen::Affine3f::Identity() * rot * Eigen::Translation3f(0, 0, d_);
+      = Eigen::Affine3f::Identity() * rot * Eigen::Translation3f(0, 0, - d_);
   }
   
   Eigen::Affine3f Plane::coordinates()
@@ -975,16 +975,15 @@ namespace jsk_pcl_ros
   ConvexPolygon::Ptr ConvexPolygon::magnifyByDistance(const double distance)
   {
     // compute centroid
-    Eigen::Vector3f centroid(0, 0, 0);
+    Eigen::Vector3f c = centroid();
+    Vertices new_vertices(vertices_.size());
     for (size_t i = 0; i < vertices_.size(); i++) {
-      centroid = centroid + vertices_[i];
+      new_vertices[i] = (vertices_[i] - c).normalized() * distance + vertices_[i];
+      // ROS_INFO("old v: [%f, %f, %f]", vertices_[i][0], vertices_[i][1], vertices_[i][2]);
+      // ROS_INFO("new v: [%f, %f, %f]", new_vertices[i][0], new_vertices[i][1], new_vertices[i][2]);
+      // ROS_INFO("");
     }
-    centroid = centroid / vertices_.size();
-
-    Vertices new_vertices;
-    for (size_t i = 0; i < vertices_.size(); i++) {
-      new_vertices.push_back((vertices_[i] - centroid).normalized() * distance + vertices_[i]);
-    }
+    
     ConvexPolygon::Ptr ret (new ConvexPolygon(new_vertices));
     return ret;
   }
@@ -992,16 +991,10 @@ namespace jsk_pcl_ros
   ConvexPolygon::Ptr ConvexPolygon::magnify(const double scale_factor)
   {
     // compute centroid
-    Eigen::Vector3f centroid(0, 0, 0);
-    for (size_t i = 0; i < vertices_.size(); i++) {
-      centroid = centroid + vertices_[i];
-    }
-    centroid = centroid / vertices_.size();
-
+    Eigen::Vector3f c = centroid();
     Vertices new_vertices;
     for (size_t i = 0; i < vertices_.size(); i++) {
-      new_vertices.push_back((vertices_[i] - centroid) * scale_factor
-                             + centroid);
+      new_vertices.push_back((vertices_[i] - c) * scale_factor + c);
     }
     ConvexPolygon::Ptr ret (new ConvexPolygon(new_vertices));
     return ret;
@@ -1043,8 +1036,8 @@ namespace jsk_pcl_ros
   {
     double offset_x = p[0] + 0.5 * resolution_;
     double offset_y = p[1] + 0.5 * resolution_;
-    return boost::make_tuple<int, int>(std::ceil(offset_x / resolution_),
-                                       std::ceil(offset_y / resolution_));
+    return boost::make_tuple<int, int>(std::floor(offset_x / resolution_),
+                                       std::floor(offset_y / resolution_));
   }
 
   void GridPlane::addIndexPair(IndexPair pair)
@@ -1068,16 +1061,25 @@ namespace jsk_pcl_ros
   }
   
   void GridPlane::fillCellsFromPointCloud(
-    const pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
+    pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
     double distance_threshold)
   {
     Eigen::Affine3f local_coordinates = convex_->coordinates();
     Eigen::Affine3f inv_local_coordinates = local_coordinates.inverse();
+    std::vector<Polygon::Ptr> triangles = convex_->decomposeToTriangles();
     
     pcl::ExtractPolygonalPrismData<pcl::PointNormal> prism_extract;
     pcl::PointCloud<pcl::PointNormal>::Ptr
       hull_cloud (new pcl::PointCloud<pcl::PointNormal>);
+    pcl::PointCloud<pcl::PointNormal>::Ptr
+      rehull_cloud (new pcl::PointCloud<pcl::PointNormal>);
     convex_->boundariesToPointCloud<pcl::PointNormal>(*hull_cloud);
+    pcl::ConvexHull<pcl::PointNormal> chull;
+    chull.setDimension(2);
+    chull.setInputCloud (hull_cloud);
+    
+    hull_cloud->points.push_back(hull_cloud->points[0]);
+    
     prism_extract.setInputCloud(cloud);
     prism_extract.setHeightLimits(-distance_threshold, distance_threshold);
     prism_extract.setInputPlanarHull(hull_cloud);
@@ -1085,12 +1087,28 @@ namespace jsk_pcl_ros
     prism_extract.segment(output_indices);
     
     for (size_t i = 0; i < output_indices.indices.size(); i++) {
+      //for (size_t i = 0; i < cloud->points.size(); i++) {
       int point_index = output_indices.indices[i];
       pcl::PointNormal p = cloud->points[point_index];
       Eigen::Vector3f ep = p.getVector3fMap();
-      Eigen::Vector3f local_ep = inv_local_coordinates * ep;
-      IndexPair pair = projectLocalPointAsIndexPair(local_ep);
-      addIndexPair(pair);
+      // double check
+      // if (convex_->distanceSmallerThan(ep, distance_threshold)) {
+      //   // check is inside or not
+      //   Eigen::Vector3f foot;
+      //   convex_->project(ep, foot);
+      //   bool inside = false;
+      //   for (size_t j = 0; j < triangles.size(); j++) {
+      //     if (triangles[j]->isInside(foot)) {
+      //       inside = true;
+      //       break;
+      //     }
+      //   }
+      //   if (inside) {
+        Eigen::Vector3f local_ep = inv_local_coordinates * ep;
+        IndexPair pair = projectLocalPointAsIndexPair(local_ep);
+        addIndexPair(pair);
+//        }
+//    }
     }
   }
   
@@ -1099,10 +1117,11 @@ namespace jsk_pcl_ros
     jsk_recognition_msgs::SimpleOccupancyGrid ros_msg;
     std::vector<float> coeff;
     convex_->toCoefficients(coeff);
+    //ROS_INFO("coef: [%f, %f, %f, %f]", coeff[0], coeff[1], coeff[2], coeff[3]);
     ros_msg.coefficients[0] = coeff[0];
     ros_msg.coefficients[1] = coeff[1];
     ros_msg.coefficients[2] = coeff[2];
-    ros_msg.coefficients[3] = -coeff[3]; // is it correct...??
+    ros_msg.coefficients[3] = coeff[3]; // is it correct...??
     ros_msg.resolution = resolution_;
     for (std::set<IndexPair>::iterator it = cells_.begin();
          it != cells_.end();

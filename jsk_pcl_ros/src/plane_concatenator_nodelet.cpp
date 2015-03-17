@@ -118,7 +118,7 @@ namespace jsk_pcl_ros
         Plane::Ptr target_plane = planes[j];
         if (focused_plane->angle(*target_plane) < connect_angular_threshold_) {
           // second, check distance
-          bool is_near_enough = isNearPointCloud(kdtree, all_clouds[j]);
+          bool is_near_enough = isNearPointCloud(kdtree, all_clouds[j], target_plane);
           if (is_near_enough) {
             connection_map[i].push_back(j);
           }
@@ -213,15 +213,26 @@ namespace jsk_pcl_ros
   
   bool PlaneConcatenator::isNearPointCloud(
     pcl::KdTreeFLANN<PointT>& kdtree,
-    pcl::PointCloud<PointT>::Ptr cloud)
+    pcl::PointCloud<PointT>::Ptr cloud,
+    Plane::Ptr target_plane)
   {
+    pcl::PointCloud<PointT>::ConstPtr input_cloud = kdtree.getInputCloud();
     for (size_t i = 0; i < cloud->points.size(); i++) {
       PointT p = cloud->points[i];
       std::vector<int> k_indices;
       std::vector<float> k_sqr_distances;
       if (kdtree.radiusSearch(p, connect_distance_threshold_,
                               k_indices, k_sqr_distances, 1) > 0) {
-        return true;
+        // Decompose distance into pependicular distance and parallel distance
+        const PointT near_p = input_cloud->points[k_indices[0]];
+        Eigen::Affine3f plane_coordinates = target_plane->coordinates();
+        Eigen::Vector3f plane_local_p = plane_coordinates.inverse() * p.getVector3fMap();
+        Eigen::Vector3f plane_local_near_p = plane_coordinates.inverse() * near_p.getVector3fMap();
+        Eigen::Vector3f plane_local_diff = plane_local_near_p - plane_local_p;
+        double perpendicular_distance = std::abs(plane_local_diff[2]);
+        if (perpendicular_distance < connect_perpendicular_distance_threshold_) {
+          return true;
+        }
       }
     }
     return false;
@@ -233,6 +244,7 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     connect_angular_threshold_ = config.connect_angular_threshold;
     connect_distance_threshold_ = config.connect_distance_threshold;
+    connect_perpendicular_distance_threshold_ = config.connect_perpendicular_distance_threshold;
     ransac_refinement_max_iteration_ = config.ransac_refinement_max_iteration;
     ransac_refinement_outlier_threshold_
       = config.ransac_refinement_outlier_threshold;

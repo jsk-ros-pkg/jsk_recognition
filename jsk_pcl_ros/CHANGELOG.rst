@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.5 (2015-03-17)
+------------------
 * [jsk_pcl_ros] Optimize GridPlane::fillCellsFromPointCloud by using
   pcl::ExtractPolygonalPrismData and now it's much much faster than before
 * [jsk_pcl_ros] Use pair of index to represent cells of grid

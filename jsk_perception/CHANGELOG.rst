@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.5 (2015-03-17)
+------------------
 * check target cloud data ifnot invalid
 * Validate image message without image array (width == 0 and height == 0)
 * Enhance: more specific error exception

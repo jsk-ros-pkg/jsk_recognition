@@ -2,8 +2,8 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.5 (2015-03-17)
+------------------
 * [checkerboard_detector] add ~use_P to use P instead of K as intrinsic
   parameter for illegal camera info such as multisense
 * Contributors: Ryohei Ueda

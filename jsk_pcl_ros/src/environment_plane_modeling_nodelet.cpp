@@ -161,7 +161,7 @@ namespace jsk_pcl_ros
     publishConvexPolygons(debug_magnified_polygons_, cloud_msg->header, magnified_convexes);
 
     // build GridMaps
-    std::vector<GridPlane::Ptr> grid_planes = buildGridPlanes(*cloud, magnified_convexes);
+    std::vector<GridPlane::Ptr> grid_planes = buildGridPlanes(cloud, magnified_convexes);
 
     publishGridMaps(pub_grid_map_, cloud_msg->header, grid_planes);
   }
@@ -183,7 +183,7 @@ namespace jsk_pcl_ros
   
   
   std::vector<GridPlane::Ptr> EnvironmentPlaneModeling::buildGridPlanes(
-    const pcl::PointCloud<pcl::PointNormal>& cloud,
+    const pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
     std::vector<ConvexPolygon::Ptr> convexes)
   {
     std::vector<GridPlane::Ptr> ret(convexes.size());

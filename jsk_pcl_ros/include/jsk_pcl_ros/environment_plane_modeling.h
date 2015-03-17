@@ -163,7 +163,7 @@ namespace jsk_pcl_ros
      * make GridPlane from ConvexPolygon and PointCloud
      */
     virtual std::vector<GridPlane::Ptr> buildGridPlanes(
-      const pcl::PointCloud<pcl::PointNormal>& cloud,
+      const pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
       std::vector<ConvexPolygon::Ptr> convexes);
     
     boost::mutex mutex_;

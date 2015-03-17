@@ -322,7 +322,7 @@ namespace jsk_pcl_ros
     GridPlane(ConvexPolygon::Ptr plane, const double resolution);
     virtual ~GridPlane();
     virtual void fillCellsFromPointCloud(
-      const pcl::PointCloud<pcl::PointNormal>& cloud,
+      const pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
       double distance_threshold);
     virtual double getResolution() { return resolution_; }
     virtual jsk_recognition_msgs::SimpleOccupancyGrid toROSMsg();

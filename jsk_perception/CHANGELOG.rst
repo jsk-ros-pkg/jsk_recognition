@@ -2,6 +2,15 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* check target cloud data ifnot invalid
+* Validate image message without image array (width == 0 and height == 0)
+* Enhance: more specific error exception
+* Change to avoid SyntaxWarning about not assigning rospy.Publisher argument queue_size
+* Change import libs with reasonable order (thirdparty -> ros)
+* Contributors: Yu Ohara, Kentaro Wada
+
 0.2.4 (2015-03-08)
 ------------------
 * [jsk_perception] Add simple script to publish image file into ros image

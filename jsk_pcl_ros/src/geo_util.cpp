@@ -587,6 +587,57 @@ namespace jsk_pcl_ros
   bool Polygon::isTriangle() {
     return vertices_.size() == 3;
   }
+
+  pcl::PointCloud<pcl::PointNormal>::Ptr Polygon::samplePoints(double grid_size)
+  {
+    pcl::PointCloud<pcl::PointNormal>::Ptr
+      ret (new pcl::PointCloud<pcl::PointNormal>);
+    double min_x = DBL_MAX;
+    double min_y = DBL_MAX;
+    double max_x = - DBL_MAX;
+    double max_y = - DBL_MAX;
+    
+    Eigen::Affine3f inv_coords = coordinates().inverse();
+    for (size_t i = 0; i < vertices_.size(); i++) {
+      // Convert vertices into local coordinates
+      Eigen::Vector3f local_point = inv_coords * vertices_[i];
+      min_x = ::fmin(local_point[0], min_x);
+      min_y = ::fmin(local_point[1], min_y);
+      max_x = ::fmax(local_point[0], max_x);
+      max_y = ::fmax(local_point[1], max_y);
+    }
+    // ROS_INFO("min_x: %f", min_x);
+    // ROS_INFO("min_y: %f", min_y);
+    // ROS_INFO("max_x: %f", max_x);
+    // ROS_INFO("max_y: %f", max_y);
+    // Decompose into triangle first for optimization
+    std::vector<Polygon::Ptr> triangles = decomposeToTriangles();
+    for (double x = min_x; x < max_x; x += grid_size) {
+      for (double y = min_y; y < max_y; y += grid_size) {
+        Eigen::Vector3f candidate(x, y, 0);
+        Eigen::Vector3f candidate_global = coordinates() * candidate;
+        // check candidate is inside of the polygon or not
+        bool insidep = false;
+        for (size_t i = 0; i < triangles.size(); i++) {
+          if (triangles[i]->isInside(candidate_global)) {
+            insidep = true;
+            break;
+          }
+        }
+        if (insidep) {
+          pcl::PointNormal p;
+          p.x = candidate_global[0];
+          p.y = candidate_global[1];
+          p.z = candidate_global[2];
+          p.normal_x = normal_[0];
+          p.normal_y = normal_[1];
+          p.normal_z = normal_[2];
+          ret->points.push_back(p);
+        }
+      }
+    }
+    return ret;
+  }
   
   size_t Polygon::getNumVertices() {
     return vertices_.size();

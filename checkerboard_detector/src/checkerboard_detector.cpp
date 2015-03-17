@@ -377,6 +377,11 @@ public:
             cam_info.distortion_model = "plumb_bob";
             cam_info.D.resize(5, 0);
         }
+        if (use_P) {
+            for (size_t i = 0; i < cam_info.D.size(); i++) {
+                cam_info.D[i] = 0.0;
+            }
+        }
         // check all the value of R is zero or not
         // if zero, normalzie it
         if (use_P || std::equal(cam_info.R.begin() + 1, cam_info.R.end(), cam_info.R.begin())) {

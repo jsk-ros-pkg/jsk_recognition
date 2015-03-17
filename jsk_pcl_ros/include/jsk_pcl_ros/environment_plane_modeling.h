@@ -178,6 +178,9 @@ namespace jsk_pcl_ros
     virtual std::vector<GridPlane::Ptr> buildGridPlanes(
       pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
       std::vector<ConvexPolygon::Ptr> convexes);
+
+    virtual std::vector<GridPlane::Ptr> morphologicalFiltering(
+      std::vector<GridPlane::Ptr>& raw_grid_maps);
     
     boost::mutex mutex_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
@@ -188,6 +191,7 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
     ros::Publisher pub_debug_magnified_polygons_;
     ros::Publisher pub_debug_convex_point_cloud_;
+    ros::Publisher pub_debug_raw_grid_map_;
     ros::Publisher pub_grid_map_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     
@@ -195,10 +199,10 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // Parametersp
     ////////////////////////////////////////////////////////
-    
     double magnify_distance_;
     double distance_threshold_;
     double resolution_;
+    int morphological_filter_size_;
   private:
   };
 }

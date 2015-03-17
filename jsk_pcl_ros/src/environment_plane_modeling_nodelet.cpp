@@ -66,6 +66,9 @@ namespace jsk_pcl_ros
     pub_debug_convex_point_cloud_
       = pnh_->advertise<sensor_msgs::PointCloud2>(
         "debug/convex_cloud", 1);
+    pub_debug_raw_grid_map_
+      = pnh_->advertise<jsk_recognition_msgs::SimpleOccupancyGridArray>(
+        "debug/raw_grid_map", 1);
     pub_grid_map_
       = pnh_->advertise<jsk_recognition_msgs::SimpleOccupancyGridArray>(
         "output", 1);
@@ -88,6 +91,7 @@ namespace jsk_pcl_ros
     magnify_distance_ = config.magnify_distance;
     distance_threshold_ = config.distance_threshold;
     resolution_ = config.resolution;
+    morphological_filter_size_ = config.morphological_filter_size;
   }
 
   void EnvironmentPlaneModeling::printInputData(
@@ -175,11 +179,28 @@ namespace jsk_pcl_ros
     publishConvexPolygons(pub_debug_magnified_polygons_, cloud_msg->header, magnified_convexes);
 
     // build GridMaps
-    std::vector<GridPlane::Ptr> grid_planes = buildGridPlanes(full_cloud, magnified_convexes);
+    std::vector<GridPlane::Ptr> raw_grid_planes = buildGridPlanes(full_cloud, magnified_convexes);
+    
+    publishGridMaps(pub_debug_raw_grid_map_, cloud_msg->header, raw_grid_planes);
 
-    publishGridMaps(pub_grid_map_, cloud_msg->header, grid_planes);
+    std::vector<GridPlane::Ptr> morphological_filtered_grid_planes
+      = morphologicalFiltering(raw_grid_planes);
+    publishGridMaps(pub_grid_map_, cloud_msg->header, morphological_filtered_grid_planes);
   }
 
+  std::vector<GridPlane::Ptr> EnvironmentPlaneModeling::morphologicalFiltering(
+    std::vector<GridPlane::Ptr>& raw_grid_maps)
+  {
+    std::vector<GridPlane::Ptr> ret;
+    for (size_t i = 0; i < raw_grid_maps.size(); i++) {
+      GridPlane::Ptr eroded_grid_map = raw_grid_maps[i]->erode(morphological_filter_size_);
+      GridPlane::Ptr dilated_grid_map = eroded_grid_map->dilate(morphological_filter_size_);
+      ret.push_back(dilated_grid_map);
+    }
+    return ret;
+  }
+
+  
   void EnvironmentPlaneModeling::publishConvexPolygonsBoundaries(
     ros::Publisher& pub,
     const std_msgs::Header& header,

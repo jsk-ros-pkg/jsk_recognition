@@ -326,7 +326,7 @@ namespace jsk_pcl_ros
       double distance_threshold);
     virtual double getResolution() { return resolution_; }
     virtual jsk_recognition_msgs::SimpleOccupancyGrid toROSMsg();
-    
+    virtual bool isOccupied(const IndexPair& pair);    
     /**
      * @brief
      * Project 3-D point to GridPlane::IndexPair.
@@ -351,6 +351,18 @@ namespace jsk_pcl_ros
      * Add IndexPair to this instance.
      */
     virtual void addIndexPair(IndexPair pair);
+
+    /**
+     * @brief
+     * Erode grid cells with specified number of pixels
+     */
+    virtual GridPlane::Ptr erode(int num);
+
+    /**
+     * @brief
+     * Dilate grid cells with specified number of pixels
+     */
+    virtual GridPlane::Ptr dilate(int num);
   protected:
     ConvexPolygon::Ptr convex_;
     std::set<IndexPair> cells_;

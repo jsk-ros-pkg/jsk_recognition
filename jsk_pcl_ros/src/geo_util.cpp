@@ -1045,6 +1045,59 @@ namespace jsk_pcl_ros
     cells_.insert(pair);
   }
 
+  GridPlane::Ptr GridPlane::erode(int num)
+  {
+    GridPlane::Ptr ret (new GridPlane(convex_, resolution_));
+    for (std::set<IndexPair>::iterator it = cells_.begin();
+         it != cells_.end();
+         ++it) {
+      IndexPair the_index = *it;
+      for (int xi = - num; xi <= num; xi++) {
+        for (int yi = - num; yi <= num; yi++) {
+          if (abs(xi) + abs(yi) <= num) {
+            IndexPair new_pair = boost::make_tuple<int, int>(
+              the_index.get<0>() + xi,
+              the_index.get<1>() + yi);
+            ret->cells_.insert(new_pair);
+          }
+        }
+      }
+    }
+    return ret;
+  }
+
+  GridPlane::Ptr GridPlane::dilate(int num)
+  {
+    GridPlane::Ptr ret (new GridPlane(convex_, resolution_));
+    for (std::set<IndexPair>::iterator it = cells_.begin();
+         it != cells_.end();
+         ++it) {
+      IndexPair the_index = *it;
+      bool should_removed = false;
+      for (int xi = - num; xi <= num; xi++) {
+        for (int yi = - num; yi <= num; yi++) {
+          if (abs(xi) + abs(yi) <= num) {
+            IndexPair check_pair = boost::make_tuple<int, int>(
+              the_index.get<0>() + xi,
+              the_index.get<1>() + yi);
+            if (!isOccupied(check_pair)) {
+              should_removed = true;
+            }
+          }
+        }
+      }
+      if (!should_removed) {
+        ret->cells_.insert(the_index);
+      }
+    }
+    return ret;
+  }
+
+  bool GridPlane::isOccupied(const IndexPair& pair)
+  {
+    return cells_.find(pair) != cells_.end();
+  }
+  
   Eigen::Vector3f GridPlane::unprojectIndexPairAsLocalPoint(
     const IndexPair& pair)
   {

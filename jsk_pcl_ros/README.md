@@ -608,6 +608,9 @@ Concatenate near planes and build new set of planes.
 * `~connect_distance_threshold` (Double, default: `0.1`)
 
    Euclidean distance threshold to regard two planes as near.
+* `~connect_perpendicular_distance_threshold` (Double, default: `0.1`)
+
+   Distance threshold to connect two planes in perpendicular direction.
 * `~ransac_refinement_max_iteration` (Integer, default: `100`)
 
   The maximum number of iteration of RANSAC refinement.
@@ -617,6 +620,7 @@ Concatenate near planes and build new set of planes.
 * `~ransac_refinement_eps_angle` (Double, default: `0.1`)
 
   Eps angle threshold of RANSAC refinment using normal direction of the plane.
+
 ### jsk\_pcl/SupervoxelSegmentation
 ![](images/supervoxel_segmentation.png)
 

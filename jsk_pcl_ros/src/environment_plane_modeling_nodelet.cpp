@@ -83,6 +83,7 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     magnify_distance_ = config.magnify_distance;
     distance_threshold_ = config.distance_threshold;
+    resolution_ = config.resolution;
   }
 
   void EnvironmentPlaneModeling::printInputData(
@@ -191,7 +192,7 @@ namespace jsk_pcl_ros
 #pragma omp parallel for
 #endif
     for (size_t i = 0; i < convexes.size(); i++) {
-      GridPlane::Ptr grid(new GridPlane(convexes[i]));
+      GridPlane::Ptr grid(new GridPlane(convexes[i], resolution_));
       grid->fillCellsFromPointCloud(cloud, distance_threshold_);
       ret[i] = grid;
     }

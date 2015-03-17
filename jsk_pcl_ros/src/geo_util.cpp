@@ -41,6 +41,7 @@
 #include <pcl/surface/ear_clipping.h>
 #include <pcl/conversions.h>
 #include <boost/tuple/tuple_comparison.hpp>
+#include <pcl/segmentation/extract_polygonal_prism_data.h>
 // #define DEBUG_GEO_UTIL
 namespace jsk_pcl_ros
 {
@@ -1067,30 +1068,32 @@ namespace jsk_pcl_ros
   }
   
   void GridPlane::fillCellsFromPointCloud(
-    const pcl::PointCloud<pcl::PointNormal>& cloud,
+    const pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
     double distance_threshold)
   {
     Eigen::Affine3f local_coordinates = convex_->coordinates();
     Eigen::Affine3f inv_local_coordinates = local_coordinates.inverse();
-    ROS_INFO("fillCellsFromPointCloud -> ");
-    for (size_t i = 0; i < cloud.points.size(); i++) {
-      pcl::PointNormal p = cloud.points[i];
-      if (pcl_isfinite(p.x) && pcl_isfinite(p.y) && pcl_isfinite(p.z)) {
-        Eigen::Vector3f ep = p.getVector3fMap();
-        if (convex_->isProjectableInside(ep)) {
-          if (convex_->distanceSmallerThan(ep, distance_threshold)) {
-            // ep is reprented in global frame
-            // need to convert to local coordinates
-            Eigen::Vector3f local_ep = inv_local_coordinates * ep;
-            IndexPair pair = projectLocalPointAsIndexPair(local_ep);
-            addIndexPair(pair);
-          }
-        }
-      }
+    
+    pcl::ExtractPolygonalPrismData<pcl::PointNormal> prism_extract;
+    pcl::PointCloud<pcl::PointNormal>::Ptr
+      hull_cloud (new pcl::PointCloud<pcl::PointNormal>);
+    convex_->boundariesToPointCloud<pcl::PointNormal>(*hull_cloud);
+    prism_extract.setInputCloud(cloud);
+    prism_extract.setHeightLimits(-distance_threshold, distance_threshold);
+    prism_extract.setInputPlanarHull(hull_cloud);
+    pcl::PointIndices output_indices;
+    prism_extract.segment(output_indices);
+    
+    for (size_t i = 0; i < output_indices.indices.size(); i++) {
+      int point_index = output_indices.indices[i];
+      pcl::PointNormal p = cloud->points[point_index];
+      Eigen::Vector3f ep = p.getVector3fMap();
+      Eigen::Vector3f local_ep = inv_local_coordinates * ep;
+      IndexPair pair = projectLocalPointAsIndexPair(local_ep);
+      addIndexPair(pair);
     }
-    ROS_INFO("fillCellsFromPointCloud <- ");
   }
-
+  
   jsk_recognition_msgs::SimpleOccupancyGrid GridPlane::toROSMsg()
   {
     jsk_recognition_msgs::SimpleOccupancyGrid ros_msg;

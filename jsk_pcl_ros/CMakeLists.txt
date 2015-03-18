@@ -67,6 +67,7 @@ add_service_files(FILES SwitchTopic.srv
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/PolygonMagnifier.cfg
   cfg/PolygonPointsSampler.cfg
   cfg/GeometricConsistencyGrouping.cfg
   cfg/UniformSampling.cfg
@@ -184,6 +185,8 @@ jsk_pcl_util_nodelet(src/spherical_pointcloud_simulator_nodelet.cpp
   "jsk_pcl/SphericalPointCloudSimulator" "spherical_pointcloud_simulator")
 jsk_pcl_util_nodelet(src/polygon_points_sampler_nodelet.cpp
   "jsk_pcl/PolygonPointsSampler" "polygon_points_sampler")
+jsk_pcl_util_nodelet(src/polygon_magnifier_nodelet.cpp
+  "jsk_pcl/PolygonMagnifier" "polygon_magnifier")
 jsk_pcl_util_nodelet(src/planar_pointcloud_simulator_nodelet.cpp
   "jsk_pcl/PlanarPointCloudSimulator" "planar_pointcloud_simulator")
 jsk_pcl_util_nodelet(src/plane_rejector_nodelet.cpp

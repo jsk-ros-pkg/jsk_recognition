@@ -1,4 +1,8 @@
 <library path="libjsk_pcl_ros_util">
+  <class name="jsk_pcl/PolygonPointsSampler"
+         type="jsk_pcl_ros::PolygonPointsSampler"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_pcl/SphericalPointCloudSimulator"
          type="jsk_pcl_ros::SphericalPointCloudSimulator"
          base_class_type="nodelet::Nodelet">

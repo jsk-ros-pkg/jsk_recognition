@@ -181,6 +181,7 @@ namespace jsk_pcl_ros
     virtual ~Polygon();
     virtual std::vector<Polygon::Ptr> decomposeToTriangles();
     virtual bool isTriangle();
+    virtual pcl::PointCloud<pcl::PointNormal>::Ptr samplePoints(double grid_size);
     virtual size_t getNumVertices();
     virtual size_t getFarestPointIndex(const Eigen::Vector3f& O);
     virtual Eigen::Vector3f directionAtPoint(size_t i);

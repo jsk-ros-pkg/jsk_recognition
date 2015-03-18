@@ -3,6 +3,10 @@
          type="jsk_pcl_ros::PolygonPointsSampler"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_pcl/PolygonMagnifier"
+         type="jsk_pcl_ros::PolygonMagnifier"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_pcl/SphericalPointCloudSimulator"
          type="jsk_pcl_ros::SphericalPointCloudSimulator"
          base_class_type="nodelet::Nodelet">

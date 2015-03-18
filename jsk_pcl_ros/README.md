@@ -621,6 +621,24 @@ Concatenate near planes and build new set of planes.
 
   Eps angle threshold of RANSAC refinment using normal direction of the plane.
 
+### jsk\_pcl/PolygonMagnifier
+Magnify polygons by specified length.
+
+#### Subscribing Topic
+* `~input` (`jsk_recognition_msgs/PolygonArray`)
+
+  Input polygons
+
+#### Publishing Topic
+* `~output` (`jsk_recognition_msgs/PolygonArray`)
+
+  Output magnified polygons
+
+#### Parameters
+* `~magnify_distance` (Double, default: `0.2`)
+
+  Length to scale polygon
+
 ### jsk\_pcl/PolygonPointsSampler
 ![](images/polygon_points_sampler.png)
 

@@ -34,6 +34,7 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/tf_listener_singleton.h"
+#include <boost/format.hpp>
 
 namespace jsk_pcl_ros
 {
@@ -55,6 +56,25 @@ namespace jsk_pcl_ros
     }
   }
 
+  tf::StampedTransform lookupTransformWithDuration(
+    tf::TransformListener* listener,
+    const std::string& from_frame,
+    const std::string& to_frame,
+    const ros::Time& stamp,
+    ros::Duration duration)
+  {
+    if (listener->waitForTransform(from_frame, to_frame, stamp, duration)) {
+      tf::StampedTransform transform;
+      listener->lookupTransform(
+        from_frame, to_frame, stamp, transform);
+      return transform;
+    }
+    throw tf2::TransformException(
+      (boost::format("Failed to lookup transformation from %s to %s")
+       % from_frame.c_str() % to_frame.c_str()).str().c_str());
+      
+  }
+  
   tf::TransformListener* TfListenerSingleton::instance_;
   boost::mutex TfListenerSingleton::mutex_;
 }

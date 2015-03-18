@@ -53,6 +53,14 @@ namespace jsk_pcl_ros
     TfListenerSingleton(TfListenerSingleton const&){};
     TfListenerSingleton& operator=(TfListenerSingleton const&){};
   };
+
+  // tf Utility
+  tf::StampedTransform lookupTransformWithDuration(
+    tf::TransformListener* listener,
+    const std::string& from_frame,
+    const std::string& to_frame,
+    const ros::Time& stamp,
+    ros::Duration duration);
 }
 
 #endif

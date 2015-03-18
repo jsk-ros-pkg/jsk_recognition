@@ -63,8 +63,10 @@
 
 #include "jsk_pcl_ros/pcl_util.h"
 #include <jsk_recognition_msgs/SimpleOccupancyGridArray.h>
+#include <jsk_recognition_msgs/BoundingBoxArray.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include "jsk_pcl_ros/geo_util.h"
+#include "jsk_pcl_ros/tf_listener_singleton.h"
 
 namespace jsk_pcl_ros
 {
@@ -181,6 +183,25 @@ namespace jsk_pcl_ros
 
     virtual std::vector<GridPlane::Ptr> morphologicalFiltering(
       std::vector<GridPlane::Ptr>& raw_grid_maps);
+
+    virtual void boundingBoxCallback(
+      const jsk_recognition_msgs::BoundingBox::ConstPtr& box_array);
+
+    virtual std::vector<GridPlane::Ptr> completeFootprintRegion(
+      const std_msgs::Header& header,
+      std::vector<GridPlane::Ptr>& grid_maps);
+
+    virtual int lookupGroundPlaneForFootprint(
+      const std::string& footprint_frame_id, const std_msgs::Header& header,
+      const std::vector<GridPlane::Ptr>& grid_maps);
+    
+    virtual int lookupGroundPlaneForFootprint(
+      const Eigen::Affine3f& pose, const std::vector<GridPlane::Ptr>& grid_maps);
+
+    virtual GridPlane::Ptr completeGridMapByBoundingBox(
+      const jsk_recognition_msgs::BoundingBox::ConstPtr& box,
+      const std_msgs::Header& header,
+      GridPlane::Ptr grid_map);
     
     boost::mutex mutex_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
@@ -189,20 +210,25 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_indices_;
     message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygons_;
     message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
+    ros::Subscriber sub_leg_bbox_;
     ros::Publisher pub_debug_magnified_polygons_;
     ros::Publisher pub_debug_convex_point_cloud_;
     ros::Publisher pub_debug_raw_grid_map_;
     ros::Publisher pub_grid_map_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
-    
-    
+    tf::TransformListener* tf_listener_;
+    jsk_recognition_msgs::BoundingBox::ConstPtr latest_leg_bounding_box_;
+    std::vector<std::string> footprint_frames_;
     ////////////////////////////////////////////////////////
-    // Parametersp
+    // Parameters
     ////////////////////////////////////////////////////////
     double magnify_distance_;
     double distance_threshold_;
     double resolution_;
     int morphological_filter_size_;
+    bool complete_footprint_region_;
+    double footprint_plane_distance_threshold_;
+    double footprint_plane_angular_threshold_;
   private:
   };
 }

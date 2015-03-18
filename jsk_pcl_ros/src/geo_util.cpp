@@ -256,11 +256,14 @@ namespace jsk_pcl_ros
     return (foot_point - point).norm();
   }
 
-  // double Segment::distance(const Segment& other)
-  // {
+  bool Segment::intersect(Plane& plane, Eigen::Vector3f& point) const
+  {
+    double x = - (plane.getNormal().dot(origin_) + plane.getD()) / (plane.getNormal().dot(direction_));
+    point = direction_ * x + origin_;
+    double r = dividingRatio(point);
+    return 0 <= r && r <= 1.0;
+  }
     
-  // }
-  
   Plane::Plane(const std::vector<float>& coefficients)
   {
     normal_ = Eigen::Vector3f(coefficients[0], coefficients[1], coefficients[2]);
@@ -1148,6 +1151,25 @@ namespace jsk_pcl_ros
   {
     return cells_.find(pair) != cells_.end();
   }
+
+  bool GridPlane::isOccupied(const Eigen::Vector3f& p)
+  {
+    IndexPair pair = projectLocalPointAsIndexPair(p);
+    return isOccupied(pair);
+  }
+
+  bool GridPlane::isOccupiedGlobal(const Eigen::Vector3f& p)
+  {
+    Eigen::Affine3f inv_coords = convex_->coordinates().inverse();
+    return isOccupied(inv_coords * p);
+  }
+
+  GridPlane::Ptr GridPlane::clone()
+  {
+    GridPlane::Ptr ret (new GridPlane(convex_, resolution_));
+    ret->cells_ = cells_;
+    return ret;
+  }
   
   Eigen::Vector3f GridPlane::unprojectIndexPairAsLocalPoint(
     const IndexPair& pair)
@@ -1162,6 +1184,58 @@ namespace jsk_pcl_ros
   {
     Eigen::Vector3f local_point = unprojectIndexPairAsLocalPoint(pair);
     return convex_->coordinates() * local_point;
+  }
+
+  void GridPlane::fillCellsFromCube(Cube& cube)
+  {
+    ConvexPolygon::Ptr intersect_polygon = cube.intersectConvexPolygon(*convex_);
+    // 1. transform vertices into local coordinates
+    // 2. compute min-max
+    // 3. compute candidates
+    // 4. filter candidates
+
+    // 1. transform vertices into local coordinates
+    Vertices local_vertices;
+    Vertices global_vertices = intersect_polygon->getVertices();
+    Eigen::Affine3f inv_coords = convex_->coordinates().inverse();
+    for (size_t i = 0; i < global_vertices.size(); i++) {
+      local_vertices.push_back(inv_coords * global_vertices[i]);
+    }
+    
+    // 2. compute min-max
+    double min_x = DBL_MAX;
+    double min_y = DBL_MAX;
+    double max_x = - DBL_MAX;
+    double max_y = - DBL_MAX;
+    for (size_t i = 0; i < local_vertices.size(); i++) {
+      min_x = ::fmin(min_x, local_vertices[i][0]);
+      min_y = ::fmin(min_y, local_vertices[i][1]);
+      max_x = ::fmax(max_x, local_vertices[i][0]);
+      max_y = ::fmax(max_y, local_vertices[i][1]);
+    }
+    // ROS_INFO("x: [%f~%f]", min_x, max_x);
+    // ROS_INFO("y: [%f~%f]", min_y, max_y);
+    // 3. compute candidates
+    std::vector<Polygon::Ptr> triangles
+      = intersect_polygon->decomposeToTriangles();
+    for (double x = min_x; x <= max_x; x += resolution_) {
+      for (double y = min_y; y <= max_y; y += resolution_) {
+        Eigen::Vector3f local_p(x, y, 0);
+        Eigen::Vector3f p = convex_->coordinates() * local_p;
+        // 4. filter candidates
+        bool insidep = false;
+        for (size_t i = 0; i < triangles.size(); i++) {
+          if (triangles[i]->isInside(p)) {
+            insidep = true;
+            break;
+          }
+        }
+        if (insidep) {
+          IndexPair pair = projectLocalPointAsIndexPair(local_p);
+          addIndexPair(pair);
+        }
+      }
+    }
   }
   
   void GridPlane::fillCellsFromPointCloud(
@@ -1195,24 +1269,9 @@ namespace jsk_pcl_ros
       int point_index = output_indices.indices[i];
       pcl::PointNormal p = cloud->points[point_index];
       Eigen::Vector3f ep = p.getVector3fMap();
-      // double check
-      // if (convex_->distanceSmallerThan(ep, distance_threshold)) {
-      //   // check is inside or not
-      //   Eigen::Vector3f foot;
-      //   convex_->project(ep, foot);
-      //   bool inside = false;
-      //   for (size_t j = 0; j < triangles.size(); j++) {
-      //     if (triangles[j]->isInside(foot)) {
-      //       inside = true;
-      //       break;
-      //     }
-      //   }
-      //   if (inside) {
         Eigen::Vector3f local_ep = inv_local_coordinates * ep;
         IndexPair pair = projectLocalPointAsIndexPair(local_ep);
         addIndexPair(pair);
-//        }
-//    }
     }
   }
   
@@ -1300,6 +1359,86 @@ namespace jsk_pcl_ros
 
   }
 
+  std::vector<Segment::Ptr> Cube::edges()
+  {
+    std::vector<Segment::Ptr> ret;
+    Eigen::Vector3f A = pos_
+      + rot_ * ((+ dimensions_[0] * Eigen::Vector3f::UnitX()) +
+                (- dimensions_[1] * Eigen::Vector3f::UnitY()) +
+                (+ dimensions_[2] * Eigen::Vector3f::UnitZ())) / 2.0;
+    Eigen::Vector3f B = pos_
+      + rot_ * ((+ dimensions_[0] * Eigen::Vector3f::UnitX()) +
+                (+ dimensions_[1] * Eigen::Vector3f::UnitY()) +
+                (+ dimensions_[2] * Eigen::Vector3f::UnitZ())) / 2.0;
+    Eigen::Vector3f C = pos_
+      + rot_ * ((- dimensions_[0] * Eigen::Vector3f::UnitX()) +
+                (+ dimensions_[1] * Eigen::Vector3f::UnitY()) +
+                (+ dimensions_[2] * Eigen::Vector3f::UnitZ())) / 2.0;
+    Eigen::Vector3f D = pos_
+      + rot_ * ((- dimensions_[0] * Eigen::Vector3f::UnitX()) +
+                (- dimensions_[1] * Eigen::Vector3f::UnitY()) +
+                (+ dimensions_[2] * Eigen::Vector3f::UnitZ())) / 2.0;
+    Eigen::Vector3f E = pos_
+      + rot_ * ((+ dimensions_[0] * Eigen::Vector3f::UnitX()) +
+                (- dimensions_[1] * Eigen::Vector3f::UnitY()) +
+                (- dimensions_[2] * Eigen::Vector3f::UnitZ())) / 2.0;
+    Eigen::Vector3f F = pos_
+      + rot_ * ((+ dimensions_[0] * Eigen::Vector3f::UnitX()) +
+                (+ dimensions_[1] * Eigen::Vector3f::UnitY()) +
+                (- dimensions_[2] * Eigen::Vector3f::UnitZ())) / 2.0;
+    Eigen::Vector3f G = pos_
+      + rot_ * ((- dimensions_[0] * Eigen::Vector3f::UnitX()) +
+                (+ dimensions_[1] * Eigen::Vector3f::UnitY()) +
+                (- dimensions_[2] * Eigen::Vector3f::UnitZ())) / 2.0;
+    Eigen::Vector3f H = pos_
+      + rot_ * ((- dimensions_[0] * Eigen::Vector3f::UnitX()) +
+                (- dimensions_[1] * Eigen::Vector3f::UnitY()) +
+                (- dimensions_[2] * Eigen::Vector3f::UnitZ())) / 2.0;
+    
+    ret.push_back(Segment::Ptr(new Segment(A, B)));
+    ret.push_back(Segment::Ptr(new Segment(B, C)));
+    ret.push_back(Segment::Ptr(new Segment(C, D)));
+    ret.push_back(Segment::Ptr(new Segment(D, A)));
+    ret.push_back(Segment::Ptr(new Segment(E, F)));
+    ret.push_back(Segment::Ptr(new Segment(F, G)));
+    ret.push_back(Segment::Ptr(new Segment(G, H)));
+    ret.push_back(Segment::Ptr(new Segment(H, E)));
+    ret.push_back(Segment::Ptr(new Segment(A, E)));
+    ret.push_back(Segment::Ptr(new Segment(B, F)));
+    ret.push_back(Segment::Ptr(new Segment(C, G)));
+    ret.push_back(Segment::Ptr(new Segment(D, H)));
+    return ret;
+  } 
+  
+  ConvexPolygon::Ptr Cube::intersectConvexPolygon(Plane& plane)
+  {
+    std::vector<Segment::Ptr> candidate_edges = edges();
+    Vertices intersects;
+    for (size_t i = 0; i < candidate_edges.size(); i++) {
+      Segment::Ptr edge = candidate_edges[i];
+      Eigen::Vector3f p;
+      if (edge->intersect(plane, p)) {
+        intersects.push_back(p);
+      }
+    }
+    //ROS_INFO("%lu intersects", intersects.size());
+    // Compute convex hull
+    pcl::ConvexHull<pcl::PointXYZ> chull;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr chull_input
+      = verticesToPointCloud<pcl::PointXYZ>(intersects);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr chull_cloud
+      (new pcl::PointCloud<pcl::PointXYZ>);
+    chull.setDimension(2);
+    chull.setInputCloud(chull_input);
+    {
+      boost::mutex::scoped_lock lock(global_chull_mutex);
+      chull.reconstruct(*chull_cloud);
+    }
+    
+    return ConvexPolygon::Ptr(
+      new ConvexPolygon(pointCloudToVertices(*chull_cloud)));
+  }
+  
   jsk_recognition_msgs::BoundingBox Cube::toROSMsg()
   {
     jsk_recognition_msgs::BoundingBox ret;

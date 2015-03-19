@@ -62,7 +62,6 @@
 #include <pcl/surface/concave_hull.h>
 #include <visualization_msgs/Marker.h>
 #include "jsk_pcl_ros/pcl_util.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -98,7 +97,12 @@ namespace jsk_pcl_ros
     typename pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
     for (size_t i = 0; i < v.size(); i++) {
       PointT p;
-      pointFromVectorToXYZ<Eigen::Vector3f, PointT>(v[i], p);
+      // Do not use pointFromVectorToXYZ in order not to depend on
+      // pcl_conversion_util
+      //pointFromVectorToXYZ<Eigen::Vector3f, PointT>(v[i], p);
+      p.x = v[i][0];
+      p.y = v[i][1];
+      p.z = v[i][2];
       cloud->points.push_back(p);
     }
     return cloud;

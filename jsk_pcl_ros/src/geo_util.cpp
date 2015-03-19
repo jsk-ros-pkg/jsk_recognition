@@ -418,6 +418,17 @@ namespace jsk_pcl_ros
     project(p, output);
     pointFromVectorToVector<Eigen::Vector3f, Eigen::Vector3d>(output_f, output);
   }
+
+  void Plane::project(const Eigen::Affine3f& pose, Eigen::Affine3f& output)
+  {
+    Eigen::Vector3f p(pose.translation());
+    Eigen::Vector3f output_p;
+    project(p, output_p);
+    Eigen::Quaternionf rot;
+    rot.setFromTwoVectors(pose.rotation() * Eigen::Vector3f::UnitZ(),
+                          coordinates().rotation() * Eigen::Vector3f::UnitZ());
+    output = Eigen::Affine3f::Identity() * Eigen::Translation3f(output_p) * rot;
+  }
   
   Plane Plane::transform(const Eigen::Affine3d& transform)
   {
@@ -904,6 +915,17 @@ namespace jsk_pcl_ros
   void ConvexPolygon::projectOnPlane(const Eigen::Vector3f& p, Eigen::Vector3f& output)
   {
     Plane::project(p, output);
+  }
+
+  void ConvexPolygon::projectOnPlane(const Eigen::Affine3f& pose, Eigen::Affine3f& output)
+  {
+    Eigen::Vector3f p(pose.translation());
+    Eigen::Vector3f output_p;
+    projectOnPlane(p, output_p);
+    Eigen::Quaternionf rot;
+    rot.setFromTwoVectors(pose.rotation() * Eigen::Vector3f::UnitZ(),
+                          coordinates().rotation() * Eigen::Vector3f::UnitZ());
+    output = Eigen::Affine3f::Identity() * Eigen::Translation3f(output_p) * rot;
   }
 
   ConvexPolygon ConvexPolygon::flipConvex()

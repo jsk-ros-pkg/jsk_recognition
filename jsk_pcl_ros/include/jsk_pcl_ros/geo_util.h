@@ -194,6 +194,7 @@ namespace jsk_pcl_ros
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3d& output);
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3f& output);
     virtual void project(const Eigen::Vector3f& p, Eigen::Vector3d& output);
+    virtual void project(const Eigen::Affine3f& pose, Eigen::Affine3f& output);
     virtual Eigen::Vector3f getNormal();
     virtual Eigen::Vector3f getPointOnPlane();
     virtual Plane transform(const Eigen::Affine3d& transform);
@@ -277,6 +278,7 @@ namespace jsk_pcl_ros
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3f& output);
     virtual void project(const Eigen::Vector3f& p, Eigen::Vector3d& output);
     virtual void projectOnPlane(const Eigen::Vector3f& p, Eigen::Vector3f& output);
+    virtual void projectOnPlane(const Eigen::Affine3f& p, Eigen::Affine3f& output);
     virtual bool isProjectableInside(const Eigen::Vector3f& p);
     // p should be a point on the plane
     virtual ConvexPolygon flipConvex();

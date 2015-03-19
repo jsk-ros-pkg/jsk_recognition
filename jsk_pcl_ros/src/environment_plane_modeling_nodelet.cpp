@@ -74,7 +74,9 @@ namespace jsk_pcl_ros
     pub_grid_map_
       = pnh_->advertise<jsk_recognition_msgs::SimpleOccupancyGridArray>(
         "output", 1);
-
+    pub_snapped_move_base_simple_goal_ = pnh_->advertise<geometry_msgs::PoseStamped>(
+      "/footstep_simple/goal", 1);
+    
     if (complete_footprint_region_) {
       tf_listener_ = TfListenerSingleton::getInstance();
           
@@ -86,7 +88,9 @@ namespace jsk_pcl_ros
         *pnh_, "footprint_frames", footprint_frames_);
       
     }
-    
+    sub_move_base_simple_goal_ = pnh_->subscribe(
+      "/move_base_simple/goal", 1,
+      &EnvironmentPlaneModeling::moveBaseSimpleGoalCallback, this);
     sub_cloud_.subscribe(*pnh_, "input", 1);
     sub_full_cloud_.subscribe(*pnh_, "input/full_cloud", 1);
     sub_indices_.subscribe(*pnh_, "input/indices", 1);
@@ -164,6 +168,58 @@ namespace jsk_pcl_ros
     return true;
   }
 
+  void EnvironmentPlaneModeling::moveBaseSimpleGoalCallback(
+    const geometry_msgs::PoseStamped::ConstPtr& msg)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    if (latest_grid_maps_.size() == 0) {
+      NODELET_WARN("not yet grid maps are available");
+      return;
+    }
+
+    tf::StampedTransform tf_transform = lookupTransformWithDuration(
+      tf_listener_,
+      latest_global_header_.frame_id,
+      msg->header.frame_id,
+      latest_global_header_.stamp,
+      ros::Duration(1.0));
+    
+    Eigen::Affine3f local_coords, transform;
+    tf::poseMsgToEigen(msg->pose, local_coords);
+    tf::transformTFToEigen(tf_transform, transform);
+    Eigen::Affine3f global_coords = transform * local_coords;
+
+    // lookup suitable grid
+    double max_height = - DBL_MAX;
+    GridPlane::Ptr max_grid;
+    Eigen::Affine3f max_projected_coords = Eigen::Affine3f::Identity();
+    for (size_t i = 0; i < latest_grid_maps_.size(); i++) {
+      GridPlane::Ptr target_grid = latest_grid_maps_[i];
+      Eigen::Affine3f projected_coords;
+      target_grid->getPolygon()->projectOnPlane(global_coords, projected_coords);
+      Eigen::Vector3f projected_point(projected_coords.translation());
+      if (target_grid->isOccupiedGlobal(projected_point)) {
+        double height = projected_point[2];
+        if (max_height < height) {
+          max_height = height;
+          max_grid = target_grid;
+          max_projected_coords = projected_coords;
+        }
+      }
+    }
+    if (max_grid) {
+      // publish it
+      geometry_msgs::PoseStamped ros_coords;
+      tf::poseEigenToMsg(max_projected_coords, ros_coords.pose);
+      ros_coords.header.stamp = msg->header.stamp;
+      ros_coords.header.frame_id = latest_global_header_.frame_id;
+      pub_snapped_move_base_simple_goal_.publish(ros_coords);
+    }
+    else {
+      NODELET_ERROR("Failed to find corresponding grid");
+    }
+  }
+  
   void EnvironmentPlaneModeling::boundingBoxCallback(
     const jsk_recognition_msgs::BoundingBox::ConstPtr& box)
   {
@@ -228,6 +284,8 @@ namespace jsk_pcl_ros
     
     publishGridMaps(pub_grid_map_, cloud_msg->header,
                     result_grid_planes);
+    latest_global_header_ = cloud_msg->header;
+    latest_grid_maps_ = result_grid_planes;
   }
 
   int EnvironmentPlaneModeling::lookupGroundPlaneForFootprint(

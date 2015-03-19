@@ -202,6 +202,9 @@ namespace jsk_pcl_ros
       const jsk_recognition_msgs::BoundingBox::ConstPtr& box,
       const std_msgs::Header& header,
       GridPlane::Ptr grid_map);
+
+    virtual void moveBaseSimpleGoalCallback(
+      const geometry_msgs::PoseStamped::ConstPtr& msg);
     
     boost::mutex mutex_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
@@ -211,14 +214,18 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygons_;
     message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
     ros::Subscriber sub_leg_bbox_;
+    ros::Subscriber sub_move_base_simple_goal_;
     ros::Publisher pub_debug_magnified_polygons_;
     ros::Publisher pub_debug_convex_point_cloud_;
     ros::Publisher pub_debug_raw_grid_map_;
     ros::Publisher pub_grid_map_;
+    ros::Publisher pub_snapped_move_base_simple_goal_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     tf::TransformListener* tf_listener_;
     jsk_recognition_msgs::BoundingBox::ConstPtr latest_leg_bounding_box_;
     std::vector<std::string> footprint_frames_;
+    std::vector<GridPlane::Ptr> latest_grid_maps_;
+    std_msgs::Header latest_global_header_;
     ////////////////////////////////////////////////////////
     // Parameters
     ////////////////////////////////////////////////////////

@@ -120,6 +120,8 @@ namespace jsk_pcl_ros
     sensor_msgs::PointCloud2::ConstPtr latest_cloud_;
     tf::TransformBroadcaster tf_broadcast_;
     bool localize_requested_;
+    bool initialize_from_tf_;
+    std::string initialize_tf_;
     /**
      * @brief
      * Publishes tf transformation of global_frame_ -> odom_frame_

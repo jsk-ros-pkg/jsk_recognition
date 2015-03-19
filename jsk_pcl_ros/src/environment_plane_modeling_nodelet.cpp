@@ -233,23 +233,20 @@ namespace jsk_pcl_ros
   int EnvironmentPlaneModeling::lookupGroundPlaneForFootprint(
     const Eigen::Affine3f& pose, const std::vector<GridPlane::Ptr>& grid_maps)
   {
-    Eigen::Vector3f foot_z = (pose * Eigen::Vector3f::UnitZ()).normalized();
-    double foot_d = Eigen::Vector3f(pose.translation()).norm();
+    Eigen::Vector3f foot_z = (pose.rotation() * Eigen::Vector3f::UnitZ()).normalized();
+    Eigen::Vector3f foot_p(pose.translation());
     for (size_t i = 0; i < grid_maps.size(); i++) {
       GridPlane::Ptr grid = grid_maps[i];
       Eigen::Vector3f normal = grid->getPolygon()->getNormal();
-      if (std::abs(normal.dot(foot_z)) < cos(footprint_plane_angular_threshold_)) {
-        // compare d parameter
-        // check the orientation of vector
-        double d = grid->getPolygon()->getD();
-        if (normal.dot(foot_z) < 0) {
-          d = -d;
-        }
-        if (fabs(foot_d - d) < footprint_plane_distance_threshold_) {
-          // check the location is already occupide
+      if (std::abs(normal.dot(foot_z)) > cos(footprint_plane_angular_threshold_)) {
+        // compare distance
+        if (grid->getPolygon()->distanceToPoint(foot_p) < footprint_plane_distance_threshold_) {
           Eigen::Vector3f foot_center(pose.translation());
           if (!grid->isOccupiedGlobal(foot_center)) {
             return i;
+          }
+          else {
+            NODELET_INFO("Foot print is already occupied");
           }
           // NB: else break?
         }

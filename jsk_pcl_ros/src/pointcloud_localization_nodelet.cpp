@@ -51,6 +51,10 @@ namespace jsk_pcl_ros
     pnh_->param("global_frame", global_frame_, std::string("map"));
     pnh_->param("odom_frame", odom_frame_, std::string("odom"));
     pnh_->param("leaf_size", leaf_size_, 0.01);
+    pnh_->param("initialize_from_tf", initialize_from_tf_, false);
+    if (initialize_from_tf_) {
+      pnh_->param("initialize_tf", initialize_tf_, std::string("odom_on_ground"));
+    }
     double cloud_rate;
     pnh_->param("cloud_rate", cloud_rate, 10.0);
     double tf_rate;
@@ -111,11 +115,24 @@ namespace jsk_pcl_ros
     const ros::TimerEvent& event)
   {
     boost::mutex::scoped_lock lock(tf_mutex_);
+    try {
     ros::Time stamp = event.current_real;
+    if (initialize_from_tf_ && first_time_) {
+      // Update localize_transform_ to points initialize_tf
+      tf::StampedTransform transform = lookupTransformWithDuration(
+        tf_listener_,
+        initialize_tf_, odom_frame_, stamp, ros::Duration(1.0));
+      localize_transform_ = transform;
+
+    }
     tf_broadcast_.sendTransform(tf::StampedTransform(localize_transform_,
                                                      stamp,
                                                      global_frame_,
                                                      odom_frame_));
+    }
+    catch (tf2::TransformException& e) {
+      NODELET_FATAL("Failed to lookup transformation: %s", e.what());
+    }
   }
 
   void PointCloudLocalization::cloudCallback(

@@ -61,7 +61,6 @@ namespace jsk_pcl_ros
     srv_->setCallback (f);
 
     pnh_->param("complete_footprint_region", complete_footprint_region_, false);
-    
     pub_debug_magnified_polygons_
       = pnh_->advertise<jsk_recognition_msgs::PolygonArray>(
         "debug/magnified_polygons", 1);
@@ -235,57 +234,61 @@ namespace jsk_pcl_ros
     const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    
-    // check frame_id
-    if (!isValidFrameIds(cloud_msg, full_cloud_msg, polygon_msg, coefficients_msg, indices_msg)) {
-      NODELET_FATAL("frame_id is not correct");
-      return;
-    }
-    if (complete_footprint_region_ && !latest_leg_bounding_box_) {
-      NODELET_ERROR("Bounding Box for Footprint is not yet ready");
-      return;
-    }
-    // first, print all the information about ~inputs
-    printInputData(cloud_msg, full_cloud_msg, polygon_msg, coefficients_msg, indices_msg);
+    try {
+      // check frame_id
+      if (!isValidFrameIds(cloud_msg, full_cloud_msg, polygon_msg, coefficients_msg, indices_msg)) {
+        NODELET_FATAL("frame_id is not correct");
+        return;
+      }
+      if (complete_footprint_region_ && !latest_leg_bounding_box_) {
+        NODELET_ERROR("Bounding Box for Footprint is not yet ready");
+        return;
+      }
+      // first, print all the information about ~inputs
+      printInputData(cloud_msg, full_cloud_msg, polygon_msg, coefficients_msg, indices_msg);
 
     
-    pcl::PointCloud<pcl::PointNormal>::Ptr cloud (new pcl::PointCloud<pcl::PointNormal>);
-    pcl::fromROSMsg(*cloud_msg, *cloud);
+      pcl::PointCloud<pcl::PointNormal>::Ptr cloud (new pcl::PointCloud<pcl::PointNormal>);
+      pcl::fromROSMsg(*cloud_msg, *cloud);
 
-    pcl::PointCloud<pcl::PointNormal>::Ptr full_cloud (new pcl::PointCloud<pcl::PointNormal>);
-    pcl::fromROSMsg(*full_cloud_msg, *full_cloud);
+      pcl::PointCloud<pcl::PointNormal>::Ptr full_cloud (new pcl::PointCloud<pcl::PointNormal>);
+      pcl::fromROSMsg(*full_cloud_msg, *full_cloud);
     
-    // convert to jsk_pcl_ros::ConvexPolygon
-    std::vector<ConvexPolygon::Ptr> convexes = convertToConvexPolygons(cloud, indices_msg, coefficients_msg);
-    // magnify convexes
-    std::vector<ConvexPolygon::Ptr> magnified_convexes = magnifyConvexes(convexes);
-    publishConvexPolygonsBoundaries(pub_debug_convex_point_cloud_, cloud_msg->header, magnified_convexes);
-    // Publish magnified convexes for debug
-    publishConvexPolygons(pub_debug_magnified_polygons_, cloud_msg->header, magnified_convexes);
+      // convert to jsk_pcl_ros::ConvexPolygon
+      std::vector<ConvexPolygon::Ptr> convexes = convertToConvexPolygons(cloud, indices_msg, coefficients_msg);
+      // magnify convexes
+      std::vector<ConvexPolygon::Ptr> magnified_convexes = magnifyConvexes(convexes);
+      publishConvexPolygonsBoundaries(pub_debug_convex_point_cloud_, cloud_msg->header, magnified_convexes);
+      // Publish magnified convexes for debug
+      publishConvexPolygons(pub_debug_magnified_polygons_, cloud_msg->header, magnified_convexes);
 
-    // build GridMaps
-    std::vector<GridPlane::Ptr> raw_grid_planes = buildGridPlanes(full_cloud, magnified_convexes);
+      // build GridMaps
+      std::vector<GridPlane::Ptr> raw_grid_planes = buildGridPlanes(full_cloud, magnified_convexes);
     
-    publishGridMaps(pub_debug_raw_grid_map_, cloud_msg->header, raw_grid_planes);
+      publishGridMaps(pub_debug_raw_grid_map_, cloud_msg->header, raw_grid_planes);
 
-    std::vector<GridPlane::Ptr> morphological_filtered_grid_planes
-      = morphologicalFiltering(raw_grid_planes);
-    std::vector<GridPlane::Ptr> result_grid_planes;
+      std::vector<GridPlane::Ptr> morphological_filtered_grid_planes
+        = morphologicalFiltering(raw_grid_planes);
+      std::vector<GridPlane::Ptr> result_grid_planes;
     
     
-    if (complete_footprint_region_) { // complete footprint region if needed
-      result_grid_planes
-        = completeFootprintRegion(cloud_msg->header,
-                                  morphological_filtered_grid_planes);
+      if (complete_footprint_region_) { // complete footprint region if needed
+        result_grid_planes
+          = completeFootprintRegion(cloud_msg->header,
+                                    morphological_filtered_grid_planes);
+      }
+      else {
+        result_grid_planes = morphological_filtered_grid_planes;
+      }
+    
+      publishGridMaps(pub_grid_map_, cloud_msg->header,
+                      result_grid_planes);
+      latest_global_header_ = cloud_msg->header;
+      latest_grid_maps_ = result_grid_planes;
     }
-    else {
-      result_grid_planes = morphological_filtered_grid_planes;
+    catch (tf2::TransformException& e) {
+      NODELET_ERROR("Failed to lookup transformation: %s", e.what());
     }
-    
-    publishGridMaps(pub_grid_map_, cloud_msg->header,
-                    result_grid_planes);
-    latest_global_header_ = cloud_msg->header;
-    latest_grid_maps_ = result_grid_planes;
   }
 
   int EnvironmentPlaneModeling::lookupGroundPlaneForFootprint(
@@ -480,8 +483,12 @@ namespace jsk_pcl_ros
   {
     std::vector<ConvexPolygon::Ptr> ret(0);
     for (size_t i = 0; i < convexes.size(); i++) {
-      ret.push_back(convexes[i]->magnifyByDistance(magnify_distance_));
-      //ret.push_back(convexes[i]->magnify(magnify_distance_));
+      ConvexPolygon::Ptr new_convex = convexes[i]->magnifyByDistance(magnify_distance_);
+      // check orientation
+      if (new_convex->getNormal().dot(Eigen::Vector3f::UnitZ()) < 0) {
+        new_convex = boost::make_shared<ConvexPolygon>(new_convex->flipConvex());
+      }
+      ret.push_back(new_convex);
     }
     return ret;
   }
@@ -492,7 +499,6 @@ namespace jsk_pcl_ros
     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg)
   {
     std::vector<ConvexPolygon::Ptr> convexes(0);
-
     for (size_t i = 0; i < indices_msg->cluster_indices.size(); i++) {
       pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
       inliers->indices = indices_msg->cluster_indices[i].indices;
@@ -500,7 +506,7 @@ namespace jsk_pcl_ros
       coefficients->values = coefficients_msg->coefficients[i].values;
       ConvexPolygon::Ptr convex
         = convexFromCoefficientsAndInliers<pcl::PointNormal>(
-          cloud, inliers, coefficients);
+          cloud, inliers, coefficients);        
       convexes.push_back(convex);
     }
     

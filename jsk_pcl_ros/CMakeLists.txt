@@ -183,6 +183,8 @@ jsk_pcl_nodelet(src/selected_cluster_publisher_nodelet.cpp
   "jsk_pcl/SelectedClusterPublisher" "selected_cluster_publisher")
 jsk_pcl_util_nodelet(src/spherical_pointcloud_simulator_nodelet.cpp
   "jsk_pcl/SphericalPointCloudSimulator" "spherical_pointcloud_simulator")
+jsk_pcl_util_nodelet(src/polygon_flipper_nodelet.cpp
+  "jsk_pcl/PolygonFlipper" "polygon_flipper")
 jsk_pcl_util_nodelet(src/polygon_points_sampler_nodelet.cpp
   "jsk_pcl/PolygonPointsSampler" "polygon_points_sampler")
 jsk_pcl_util_nodelet(src/polygon_magnifier_nodelet.cpp

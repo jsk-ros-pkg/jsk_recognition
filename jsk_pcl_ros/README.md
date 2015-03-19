@@ -639,6 +639,25 @@ Magnify polygons by specified length.
 
   Length to scale polygon
 
+### jsk\_pcl/PolygonPointsFlipper
+
+Flip `jsk_recognition_msgs/PolygonArray` to specified sensor_frame.
+
+#### Subscribing Topic
+* `~input/polygons` (`jsk_recognition_msgs/PolygonArray`)
+* `~input/coefficients` (`jsk_recognition_msgs/ModelCoefficientsArray`)
+
+  Input polygons.
+#### Publishing Topic
+* `~output/polygons` (`jsk_recognition_msgs/PolygonArray`)
+* `~output/coefficients` (`jsk_recognition_msgs/ModelCoefficientsArray`)
+
+  Output flipped polygons which look at the origin of sensor_frame.
+#### Parameter
+* `~sensor_frame` (String)
+
+   frame_id of sensor for polygons to look at.
+
 ### jsk\_pcl/PolygonPointsSampler
 ![](images/polygon_points_sampler.png)
 

@@ -925,16 +925,26 @@ namespace jsk_pcl_ros
     Eigen::Quaternionf rot;
     rot.setFromTwoVectors(pose.rotation() * Eigen::Vector3f::UnitZ(),
                           coordinates().rotation() * Eigen::Vector3f::UnitZ());
-    output = Eigen::Affine3f::Identity() * Eigen::Translation3f(output_p) * rot;
+    Eigen::Quaternionf coords_rot(coordinates().rotation());
+    // ROS_INFO("rot: [%f, %f, %f, %f]", rot.x(), rot.y(), rot.z(), rot.w());
+    // ROS_INFO("coords_rot: [%f, %f, %f, %f]", coords_rot.x(), coords_rot.y(), coords_rot.z(), coords_rot.w());
+    // ROS_INFO("normal: [%f, %f, %f]", normal_[0], normal_[1], normal_[2]);
+    // Eigen::Affine3f::Identity() * 
+    output = Eigen::Translation3f(output_p) * pose.rotation() * rot;
   }
 
   ConvexPolygon ConvexPolygon::flipConvex()
   {
-    std::vector<Eigen::Vector3f, Eigen::aligned_allocator<Eigen::Vector3f> >
-      new_vertices;
-    new_vertices.resize(vertices_.size());
-    std::reverse_copy(vertices_.begin(), vertices_.end(), std::back_inserter(new_vertices));
-    return ConvexPolygon(new_vertices);
+    Vertices new_vertices;
+    std::reverse_copy(vertices_.begin(), vertices_.end(),
+                      std::back_inserter(new_vertices));
+    std::vector<float> reversed_coefficients(4);
+    reversed_coefficients[0] = - normal_[0];
+    reversed_coefficients[1] = - normal_[1];
+    reversed_coefficients[2] = - normal_[2];
+    reversed_coefficients[3] = - d_;
+    
+    return ConvexPolygon(new_vertices, reversed_coefficients);
   }
   
   void ConvexPolygon::project(const Eigen::Vector3f& p, Eigen::Vector3f& output)

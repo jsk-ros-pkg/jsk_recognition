@@ -48,18 +48,20 @@
 
 #include "jsk_pcl_ros/geo_util.h"
 #include "jsk_pcl_ros/grid_map.h"
-
+#include <jsk_topic_tools/rosparam_utils.h>
 namespace jsk_pcl_ros
 {
   void EnvironmentPlaneModeling::onInit()
   {
     DiagnosticNodelet::onInit();
-
+    
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&EnvironmentPlaneModeling::configCallback, this, _1, _2);
     srv_->setCallback (f);
 
+    pnh_->param("complete_footprint_region", complete_footprint_region_, false);
+    
     pub_debug_magnified_polygons_
       = pnh_->advertise<jsk_recognition_msgs::PolygonArray>(
         "debug/magnified_polygons", 1);
@@ -72,6 +74,19 @@ namespace jsk_pcl_ros
     pub_grid_map_
       = pnh_->advertise<jsk_recognition_msgs::SimpleOccupancyGridArray>(
         "output", 1);
+
+    if (complete_footprint_region_) {
+      tf_listener_ = TfListenerSingleton::getInstance();
+          
+      sub_leg_bbox_ = pnh_->subscribe(
+        "input/leg_bounding_box", 1,
+        &EnvironmentPlaneModeling::boundingBoxCallback, this);
+      
+      jsk_topic_tools::readVectorParameter(
+        *pnh_, "footprint_frames", footprint_frames_);
+      
+    }
+    
     sub_cloud_.subscribe(*pnh_, "input", 1);
     sub_full_cloud_.subscribe(*pnh_, "input/full_cloud", 1);
     sub_indices_.subscribe(*pnh_, "input/indices", 1);
@@ -92,6 +107,8 @@ namespace jsk_pcl_ros
     distance_threshold_ = config.distance_threshold;
     resolution_ = config.resolution;
     morphological_filter_size_ = config.morphological_filter_size;
+    footprint_plane_angular_threshold_ = config.footprint_plane_angular_threshold;
+    footprint_plane_distance_threshold_ = config.footprint_plane_distance_threshold;
   }
 
   void EnvironmentPlaneModeling::printInputData(
@@ -106,6 +123,7 @@ namespace jsk_pcl_ros
     NODELET_INFO("  Number of full points -- %d", full_cloud_msg->width * full_cloud_msg->height);
     NODELET_INFO("  Number of clusters: -- %lu", indices_msg->cluster_indices.size());
     NODELET_INFO("  Frame Id: %s", cloud_msg->header.frame_id.c_str());
+    NODELET_INFO("  Complete Footprint: %s", complete_footprint_region_? "true": "false");
   } 
 
   bool EnvironmentPlaneModeling::isValidFrameIds(
@@ -145,6 +163,13 @@ namespace jsk_pcl_ros
     }
     return true;
   }
+
+  void EnvironmentPlaneModeling::boundingBoxCallback(
+    const jsk_recognition_msgs::BoundingBox::ConstPtr& box)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    latest_leg_bounding_box_ = box;
+  }
   
   void EnvironmentPlaneModeling::inputCallback(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
@@ -154,10 +179,14 @@ namespace jsk_pcl_ros
     const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-
+    
     // check frame_id
     if (!isValidFrameIds(cloud_msg, full_cloud_msg, polygon_msg, coefficients_msg, indices_msg)) {
       NODELET_FATAL("frame_id is not correct");
+      return;
+    }
+    if (complete_footprint_region_ && !latest_leg_bounding_box_) {
+      NODELET_ERROR("Bounding Box for Footprint is not yet ready");
       return;
     }
     // first, print all the information about ~inputs
@@ -185,9 +214,131 @@ namespace jsk_pcl_ros
 
     std::vector<GridPlane::Ptr> morphological_filtered_grid_planes
       = morphologicalFiltering(raw_grid_planes);
-    publishGridMaps(pub_grid_map_, cloud_msg->header, morphological_filtered_grid_planes);
+    std::vector<GridPlane::Ptr> result_grid_planes;
+    
+    
+    if (complete_footprint_region_) { // complete footprint region if needed
+      result_grid_planes
+        = completeFootprintRegion(cloud_msg->header,
+                                  morphological_filtered_grid_planes);
+    }
+    else {
+      result_grid_planes = morphological_filtered_grid_planes;
+    }
+    
+    publishGridMaps(pub_grid_map_, cloud_msg->header,
+                    result_grid_planes);
   }
 
+  int EnvironmentPlaneModeling::lookupGroundPlaneForFootprint(
+    const Eigen::Affine3f& pose, const std::vector<GridPlane::Ptr>& grid_maps)
+  {
+    Eigen::Vector3f foot_z = (pose * Eigen::Vector3f::UnitZ()).normalized();
+    double foot_d = Eigen::Vector3f(pose.translation()).norm();
+    for (size_t i = 0; i < grid_maps.size(); i++) {
+      GridPlane::Ptr grid = grid_maps[i];
+      Eigen::Vector3f normal = grid->getPolygon()->getNormal();
+      if (std::abs(normal.dot(foot_z)) < cos(footprint_plane_angular_threshold_)) {
+        // compare d parameter
+        // check the orientation of vector
+        double d = grid->getPolygon()->getD();
+        if (normal.dot(foot_z) < 0) {
+          d = -d;
+        }
+        if (fabs(foot_d - d) < footprint_plane_distance_threshold_) {
+          // check the location is already occupide
+          Eigen::Vector3f foot_center(pose.translation());
+          if (!grid->isOccupiedGlobal(foot_center)) {
+            return i;
+          }
+          // NB: else break?
+        }
+      }
+    }
+    return -1;
+  }
+
+  int EnvironmentPlaneModeling::lookupGroundPlaneForFootprint(
+    const std::string& footprint_frame, const std_msgs::Header& header,
+    const std::vector<GridPlane::Ptr>& grid_maps)
+  {
+    // first, lookup location of frames
+    tf::StampedTransform transform
+      = lookupTransformWithDuration(tf_listener_,
+                                    header.frame_id, footprint_frame,
+                                    header.stamp,
+                                    ros::Duration(1.0));
+    Eigen::Affine3f eigen_transform;
+    tf::transformTFToEigen(transform, eigen_transform);
+    // lookup ground plane for the foot
+    return lookupGroundPlaneForFootprint(eigen_transform, grid_maps);
+  }
+
+  GridPlane::Ptr EnvironmentPlaneModeling::completeGridMapByBoundingBox(
+      const jsk_recognition_msgs::BoundingBox::ConstPtr& box,
+      const std_msgs::Header& header,
+      GridPlane::Ptr grid_map)
+  {
+    // resolve tf
+    tf::StampedTransform tf_transform = lookupTransformWithDuration(
+      tf_listener_,
+      header.frame_id,
+      box->header.frame_id,
+      header.stamp,
+      ros::Duration(1.0));
+    Eigen::Affine3f transform;
+    tf::transformTFToEigen(tf_transform, transform);
+    Eigen::Affine3f local_pose;
+    tf::poseMsgToEigen(box->pose, local_pose);
+    Eigen::Affine3f global_pose = transform * local_pose;
+    std::vector<double> dimensions;
+    dimensions.push_back(box->dimensions.x);
+    dimensions.push_back(box->dimensions.y);
+    dimensions.push_back(box->dimensions.z);
+    Cube::Ptr cube (new Cube(Eigen::Vector3f(global_pose.translation()),
+                             Eigen::Quaternionf(global_pose.rotation()),
+                             dimensions));
+    GridPlane::Ptr completed_grid_map = grid_map->clone();
+    completed_grid_map->fillCellsFromCube(*cube);
+    return completed_grid_map;
+  }
+  
+  std::vector<GridPlane::Ptr> EnvironmentPlaneModeling::completeFootprintRegion(
+    const std_msgs::Header& header, std::vector<GridPlane::Ptr>& grid_maps)
+  {
+    try {
+      std::vector<GridPlane::Ptr> completed_grid_maps(grid_maps.size());
+      std::set<int> ground_plane_indices;
+      for (size_t i = 0; i < footprint_frames_.size(); i++) {
+        std::string footprint_frame = footprint_frames_[i];
+        int grid_index = lookupGroundPlaneForFootprint(
+          footprint_frame, header, grid_maps);
+        if (grid_index != -1) {
+          NODELET_INFO("Found ground plane for %s: %d", footprint_frame.c_str(), grid_index);
+          ground_plane_indices.insert(grid_index);
+        }
+        else {
+          NODELET_WARN("Cannnot find ground plane for %s: %d", footprint_frame.c_str(), grid_index);
+        }
+      }
+      for (size_t i = 0; i < grid_maps.size(); i++) {
+        if (ground_plane_indices.find(i) == ground_plane_indices.end()) {
+          // It's not a ground plane, just copy the original
+          completed_grid_maps[i] = grid_maps[i];
+        }
+        else {
+          completed_grid_maps[i] = completeGridMapByBoundingBox(
+            latest_leg_bounding_box_, header, grid_maps[i]);
+        }
+      }
+      return completed_grid_maps;
+    }
+    catch (tf2::TransformException& e) {
+      NODELET_FATAL("Failed to lookup transformation: %s", e.what());
+      return std::vector<GridPlane::Ptr>();
+    }
+  }
+  
   std::vector<GridPlane::Ptr> EnvironmentPlaneModeling::morphologicalFiltering(
     std::vector<GridPlane::Ptr>& raw_grid_maps)
   {

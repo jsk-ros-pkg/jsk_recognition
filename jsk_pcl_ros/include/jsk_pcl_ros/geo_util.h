@@ -62,11 +62,16 @@
 #include <pcl/surface/concave_hull.h>
 #include <visualization_msgs/Marker.h>
 #include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_pcl_ros/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros
 {
   typedef std::vector<Eigen::Vector3f,
                       Eigen::aligned_allocator<Eigen::Vector3f> > Vertices;
+
+  // Prototype definition
+  class Plane;
+  class Cube;
   
   ////////////////////////////////////////////////////////
   // compute quaternion from 3 unit vector
@@ -75,12 +80,44 @@ namespace jsk_pcl_ros
   Eigen::Quaternionf rotFrom3Axis(const Eigen::Vector3f& ex,
                                   const Eigen::Vector3f& ey,
                                   const Eigen::Vector3f& ez);
+
   typedef Eigen::Vector3f Point;
   typedef Eigen::Vector3f Vertex;
   typedef std::vector<Eigen::Vector3f,
                       Eigen::aligned_allocator<Eigen::Vector3f> > Vertices;
   typedef boost::tuple<Point, Point> PointPair;
   typedef boost::tuple<size_t, size_t> PointIndexPair;
+
+  /**
+   * @brief
+   * Compute PointCloud from Vertices
+   */
+  template<class PointT>
+  typename pcl::PointCloud<PointT>::Ptr verticesToPointCloud(const Vertices& v)
+  {
+    typename pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
+    for (size_t i = 0; i < v.size(); i++) {
+      PointT p;
+      pointFromVectorToXYZ<Eigen::Vector3f, PointT>(v[i], p);
+      cloud->points.push_back(p);
+    }
+    return cloud;
+  }
+
+  /**
+   * @brief
+   * Compute Vertices from PointCloud
+   */
+  template<class PointT>
+  Vertices pointCloudToVertices(const pcl::PointCloud<PointT>& cloud)
+  {
+    Vertices vs;
+    for (size_t i = 0; i < cloud.points.size(); i++) {
+      vs.push_back(cloud.points[i].getVector3fMap());
+    }
+    return vs;
+  }
+
   
   // (infinite) line
   class Line
@@ -122,6 +159,7 @@ namespace jsk_pcl_ros
     virtual void foot(const Eigen::Vector3f& point, Eigen::Vector3f& output) const;
     virtual double dividingRatio(const Eigen::Vector3f& point) const;
     virtual double distance(const Eigen::Vector3f& point) const;
+    virtual bool intersect(Plane& plane, Eigen::Vector3f& point) const;
     //virtual double distance(const Segment& other);
   protected:
     Eigen::Vector3f from_, to_;
@@ -322,12 +360,26 @@ namespace jsk_pcl_ros
     typedef boost::tuple<int, int> IndexPair;
     GridPlane(ConvexPolygon::Ptr plane, const double resolution);
     virtual ~GridPlane();
+    virtual GridPlane::Ptr clone(); // shallow copy
     virtual void fillCellsFromPointCloud(
       pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
       double distance_threshold);
+    virtual void fillCellsFromCube(Cube& cube);
     virtual double getResolution() { return resolution_; }
     virtual jsk_recognition_msgs::SimpleOccupancyGrid toROSMsg();
-    virtual bool isOccupied(const IndexPair& pair);    
+    virtual bool isOccupied(const IndexPair& pair);
+    /**
+     * @brief
+     * p should be local coordinate
+     */
+    virtual bool isOccupied(const Eigen::Vector3f& p);
+
+    /**
+     * @brief
+     * p should be global coordinate
+     */
+    virtual bool isOccupiedGlobal(const Eigen::Vector3f& p);
+    
     /**
      * @brief
      * Project 3-D point to GridPlane::IndexPair.
@@ -361,6 +413,12 @@ namespace jsk_pcl_ros
 
     /**
      * @brief
+     * return ConvexPolygon pointer of this instance.
+     */
+    virtual ConvexPolygon::Ptr getPolygon() { return convex_; }
+    
+    /**
+     * @brief
      * Dilate grid cells with specified number of pixels
      */
     virtual GridPlane::Ptr dilate(int num);
@@ -383,6 +441,8 @@ namespace jsk_pcl_ros
     Cube(const Eigen::Vector3f& pos, // centroid
          const Line& line_a, const Line& line_b, const Line& line_c);
     virtual ~Cube();
+    std::vector<Segment::Ptr> edges();
+    ConvexPolygon::Ptr intersectConvexPolygon(Plane& plane);
     std::vector<double> getDimensions() const { return dimensions_; };
     void setDimensions(const std::vector<double>& new_dimensions) {
       dimensions_[0] = new_dimensions[0];

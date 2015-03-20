@@ -1058,6 +1058,19 @@ namespace jsk_pcl_ros
     return true;
   }
 
+  double ConvexPolygon::distanceFromVertices(const Eigen::Vector3f& p)
+  {
+    double min_distance = DBL_MAX;
+    for (size_t i = 0; i < vertices_.size(); i++) {
+      Eigen::Vector3f v = vertices_[i];
+      double d = (p - v).norm();
+      if (d < min_distance) {
+        min_distance = d;
+      }
+    }
+    return min_distance;
+  }
+  
   ConvexPolygon::Ptr ConvexPolygon::magnifyByDistance(const double distance)
   {
     // compute centroid

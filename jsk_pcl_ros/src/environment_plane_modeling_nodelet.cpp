@@ -290,12 +290,14 @@ namespace jsk_pcl_ros
       NODELET_ERROR("Failed to lookup transformation: %s", e.what());
     }
   }
-
+  
   int EnvironmentPlaneModeling::lookupGroundPlaneForFootprint(
     const Eigen::Affine3f& pose, const std::vector<GridPlane::Ptr>& grid_maps)
   {
     Eigen::Vector3f foot_z = (pose.rotation() * Eigen::Vector3f::UnitZ()).normalized();
     Eigen::Vector3f foot_p(pose.translation());
+    double min_distance = DBL_MAX;
+    int min_index = -1;
     for (size_t i = 0; i < grid_maps.size(); i++) {
       GridPlane::Ptr grid = grid_maps[i];
       Eigen::Vector3f normal = grid->getPolygon()->getNormal();
@@ -304,16 +306,22 @@ namespace jsk_pcl_ros
         if (grid->getPolygon()->distanceToPoint(foot_p) < footprint_plane_distance_threshold_) {
           Eigen::Vector3f foot_center(pose.translation());
           if (!grid->isOccupiedGlobal(foot_center)) {
-            return i;
+            // check distance to point
+            double d = grid->getPolygon()->distanceFromVertices(foot_center);
+            if (d < min_distance) {
+              min_distance = d;
+              min_index = i;
+            }
           }
           else {
             NODELET_INFO("Foot print is already occupied");
+            return -1;
           }
           // NB: else break?
         }
       }
     }
-    return -1;
+    return min_index;
   }
 
   int EnvironmentPlaneModeling::lookupGroundPlaneForFootprint(

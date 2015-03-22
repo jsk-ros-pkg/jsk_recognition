@@ -104,8 +104,8 @@ namespace jsk_pcl_ros
       jsk_pcl_ros::UpdateOffset::Response& res);
     
     virtual void applyDownsampling(
-      pcl::PointCloud<pcl::PointXYZ>::Ptr in_cloud,
-      pcl::PointCloud<pcl::PointXYZ>& out_cloud);
+      pcl::PointCloud<pcl::PointNormal>::Ptr in_cloud,
+      pcl::PointCloud<pcl::PointNormal>& out_cloud);
 
     boost::mutex mutex_;
     boost::mutex tf_mutex_;
@@ -116,7 +116,7 @@ namespace jsk_pcl_ros
     ros::ServiceServer update_offset_srv_;
     ros::Timer cloud_timer_;
     ros::Timer tf_timer_;
-    pcl::PointCloud<pcl::PointXYZ>::Ptr all_cloud_;
+    pcl::PointCloud<pcl::PointNormal>::Ptr all_cloud_;
     sensor_msgs::PointCloud2::ConstPtr latest_cloud_;
     tf::TransformBroadcaster tf_broadcast_;
     bool localize_requested_;
@@ -133,6 +133,7 @@ namespace jsk_pcl_ros
      * @brief
      * Resolution of voxel grid
      */
+    bool use_normal_;
     double leaf_size_;
     tf::Transform localize_transform_;
     bool first_time_;

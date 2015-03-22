@@ -46,6 +46,8 @@ namespace jsk_pcl_ros
     sensor_msgs::PointCloud2 output;
     try
     {
+      tf_listener_->waitForTransform(target_frame_id_, input->header.frame_id,
+                                     input->header.stamp, ros::Duration(duration_));
       if (pcl_ros::transformPointCloud(target_frame_id_, *input, output,
                                        *tf_listener_)) {
         pub_cloud_.publish(output);
@@ -69,6 +71,7 @@ namespace jsk_pcl_ros
     {
       ROS_WARN("~target_frame_id is not specified, using %s", "/base_footprint");
     }
+    pnh_->param("duration", duration_, 1.0);
     tf_listener_ = TfListenerSingleton::getInstance();
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
   }

@@ -2022,7 +2022,9 @@ This nodelet will republish the pointcloud which is transformed with the designa
 
 #### Parameters
 * `~target_frame_id` (string): The frame_id to transform pointcloud.
+* `~duration` (Double, default: `1.0`)
 
+  Second to wait for transformation
 #### Sample
 Plug the depth sensor which can be launched by openni.launch and run the below command.
 

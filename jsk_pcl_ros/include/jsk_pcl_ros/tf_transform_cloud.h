@@ -62,6 +62,8 @@ namespace jsk_pcl_ros
     virtual void transform(const sensor_msgs::PointCloud2ConstPtr &input);
     virtual void subscribe();
     virtual void unsubscribe();
+    
+    double duration_;
   private:
     virtual void onInit();
   };

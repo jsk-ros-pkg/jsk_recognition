@@ -85,6 +85,10 @@ It publishes tf transformation from gloabl frame to odometory frame like acml do
 * `~leaf_size` (Double, default: `0.01`)
 
   Resolution of voxel grid downsampling.
+* `~use_normal` (Bool, default: `false`)
+
+  Support normal.
+
 #### Using Services
 * `~icp_align` (`jsk_pcl_ros/ICPAlign`)
 

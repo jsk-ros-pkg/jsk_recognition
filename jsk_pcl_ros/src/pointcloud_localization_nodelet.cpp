@@ -44,6 +44,7 @@ namespace jsk_pcl_ros
 {
   void PointCloudLocalization::onInit()
   {
+    pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
     DiagnosticNodelet::onInit();
     tf_listener_ = TfListenerSingleton::getInstance();
     // initialize localize_transform_ as identity
@@ -55,6 +56,7 @@ namespace jsk_pcl_ros
     if (initialize_from_tf_) {
       pnh_->param("initialize_tf", initialize_tf_, std::string("odom_on_ground"));
     }
+    pnh_->param("use_normal", use_normal_, false);
     double cloud_rate;
     pnh_->param("cloud_rate", cloud_rate, 10.0);
     double tf_rate;
@@ -88,10 +90,10 @@ namespace jsk_pcl_ros
   }
 
   void PointCloudLocalization::applyDownsampling(
-    pcl::PointCloud<pcl::PointXYZ>::Ptr in_cloud,
-    pcl::PointCloud<pcl::PointXYZ>& out_cloud)
+    pcl::PointCloud<pcl::PointNormal>::Ptr in_cloud,
+    pcl::PointCloud<pcl::PointNormal>& out_cloud)
   {
-    pcl::VoxelGrid<pcl::PointXYZ> vg;
+    pcl::VoxelGrid<pcl::PointNormal> vg;
     vg.setInputCloud(in_cloud);
     vg.setLeafSize(leaf_size_, leaf_size_, leaf_size_);
     vg.filter(out_cloud);
@@ -144,8 +146,8 @@ namespace jsk_pcl_ros
     if (localize_requested_){
       NODELET_INFO("localization is requested");
       try {
-        pcl::PointCloud<pcl::PointXYZ>::Ptr
-          local_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::PointCloud<pcl::PointNormal>::Ptr
+          local_cloud (new pcl::PointCloud<pcl::PointNormal>);
         pcl::fromROSMsg(*latest_cloud_, *local_cloud);
         NODELET_INFO("waiting for tf transformation from %s tp %s",
                      latest_cloud_->header.frame_id.c_str(),
@@ -155,14 +157,22 @@ namespace jsk_pcl_ros
               global_frame_,
               latest_cloud_->header.stamp,
               ros::Duration(1.0))) {
-          pcl::PointCloud<pcl::PointXYZ>::Ptr
-            input_cloud (new pcl::PointCloud<pcl::PointXYZ>);
-          pcl_ros::transformPointCloud(global_frame_,
-                                       *local_cloud,
-                                       *input_cloud,
-                                       *tf_listener_);
-          pcl::PointCloud<pcl::PointXYZ>::Ptr
-            input_downsampled_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+          pcl::PointCloud<pcl::PointNormal>::Ptr
+            input_cloud (new pcl::PointCloud<pcl::PointNormal>);
+          if (use_normal_) {
+            pcl_ros::transformPointCloudWithNormals(global_frame_,
+                                                    *local_cloud,
+                                                    *input_cloud,
+                                                    *tf_listener_);
+          }
+          else {
+            pcl_ros::transformPointCloud(global_frame_,
+                                         *local_cloud,
+                                         *input_cloud,
+                                         *tf_listener_);
+          }
+          pcl::PointCloud<pcl::PointNormal>::Ptr
+            input_downsampled_cloud (new pcl::PointCloud<pcl::PointNormal>);
           applyDownsampling(input_cloud, *input_downsampled_cloud);
           if (isFirstTime()) {
             all_cloud_ = input_downsampled_cloud;
@@ -189,13 +199,20 @@ namespace jsk_pcl_ros
                            transform_pos[1],
                            transform_pos[2]);
               NODELET_INFO("  - rot: [%f, %f, %f]", roll, pitch, yaw);
-              pcl::PointCloud<pcl::PointXYZ>::Ptr
-                transformed_input_cloud (new pcl::PointCloud<pcl::PointXYZ>);
-              pcl::transformPointCloud(*input_cloud,
-                                       *transformed_input_cloud,
-                                       transform);
-              pcl::PointCloud<pcl::PointXYZ>::Ptr
-                concatenated_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+              pcl::PointCloud<pcl::PointNormal>::Ptr
+                transformed_input_cloud (new pcl::PointCloud<pcl::PointNormal>);
+              if (use_normal_) {
+                pcl::transformPointCloudWithNormals(*input_cloud,
+                                                    *transformed_input_cloud,
+                                                    transform);
+              }
+              else {
+                pcl::transformPointCloud(*input_cloud,
+                                         *transformed_input_cloud,
+                                         transform);
+              }
+              pcl::PointCloud<pcl::PointNormal>::Ptr
+                concatenated_cloud (new pcl::PointCloud<pcl::PointNormal>);
               *concatenated_cloud = *all_cloud_ + *transformed_input_cloud;
               // update *all_cloud
               applyDownsampling(concatenated_cloud, *all_cloud_);

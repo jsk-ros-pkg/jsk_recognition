@@ -293,6 +293,7 @@ namespace jsk_pcl_ros
       const Eigen::Vector3f& p, double distance_threshold,
       double& output_distance);
     bool allEdgesLongerThan(double thr);
+    double distanceFromVertices(const Eigen::Vector3f& p);
     geometry_msgs::Polygon toROSMsg();
   protected:
     

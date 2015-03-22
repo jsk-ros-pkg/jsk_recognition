@@ -39,6 +39,7 @@
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <pcl_ros/transforms.h>
 #include <pcl/filters/voxel_grid.h>
+#include <pcl/filters/passthrough.h>
 
 namespace jsk_pcl_ros
 {
@@ -55,6 +56,10 @@ namespace jsk_pcl_ros
     pnh_->param("initialize_from_tf", initialize_from_tf_, false);
     if (initialize_from_tf_) {
       pnh_->param("initialize_tf", initialize_tf_, std::string("odom_on_ground"));
+    }
+    pnh_->param("clip_unseen_pointcloud", clip_unseen_pointcloud_, false);
+    if (clip_unseen_pointcloud_) {
+      pnh_->param("sensor_frame", sensor_frame_, std::string("BODY"));
     }
     pnh_->param("use_normal", use_normal_, false);
     double cloud_rate;
@@ -183,10 +188,54 @@ namespace jsk_pcl_ros
             ros::ServiceClient client
               = pnh_->serviceClient<jsk_pcl_ros::ICPAlign>("icp_align");
             jsk_pcl_ros::ICPAlign icp_srv;
+
+            if (clip_unseen_pointcloud_) {
+              // Before running ICP, remove pointcloud where we cannot see
+              // First, transform reference pointcloud, that is all_cloud_, into
+              // sensor frame.
+              // And after that, remove points which are x < 0.
+              tf::StampedTransform global_sensor_tf_transform
+                = lookupTransformWithDuration(
+                  tf_listener_,
+                  global_frame_,
+                  sensor_frame_,
+                  cloud_msg->header.stamp,
+                  ros::Duration(1.0));
+              Eigen::Affine3f global_sensor_transform;
+              tf::transformTFToEigen(global_sensor_tf_transform,
+                                     global_sensor_transform);
+              pcl::PointCloud<pcl::PointNormal>::Ptr sensor_cloud
+                (new pcl::PointCloud<pcl::PointNormal>);
+              pcl::transformPointCloudWithNormals(
+                *all_cloud_,
+                *sensor_cloud,
+                global_sensor_transform.inverse());
+              // Remove negative-x points
+              pcl::PassThrough<pcl::PointNormal> pass;
+              pass.setInputCloud(sensor_cloud);
+              pass.setFilterFieldName("x");
+              pass.setFilterLimits(0.0, 100.0);
+              pcl::PointCloud<pcl::PointNormal>::Ptr filtered_cloud
+                (new pcl::PointCloud<pcl::PointNormal>);
+              pass.filter(*filtered_cloud);
+              NODELET_INFO("clipping: %lu -> %lu", sensor_cloud->points.size(), filtered_cloud->points.size());
+              // Convert the pointcloud to global frame again
+              pcl::PointCloud<pcl::PointNormal>::Ptr global_filtered_cloud
+                (new pcl::PointCloud<pcl::PointNormal>);
+              pcl::transformPointCloudWithNormals(
+                *filtered_cloud,
+                *global_filtered_cloud,
+                global_sensor_transform);
+              pcl::toROSMsg(*global_filtered_cloud,
+                            icp_srv.request.target_cloud);
+            }
+            else {
+              pcl::toROSMsg(*all_cloud_,
+                            icp_srv.request.target_cloud);
+            }
             pcl::toROSMsg(*input_downsampled_cloud,
                           icp_srv.request.reference_cloud);
-            pcl::toROSMsg(*all_cloud_,
-                          icp_srv.request.target_cloud);
+            
             if (client.call(icp_srv)) {
               Eigen::Affine3f transform;
               tf::poseMsgToEigen(icp_srv.response.result.pose, transform);

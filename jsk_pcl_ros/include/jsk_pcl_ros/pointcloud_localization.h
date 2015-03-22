@@ -120,6 +120,8 @@ namespace jsk_pcl_ros
     sensor_msgs::PointCloud2::ConstPtr latest_cloud_;
     tf::TransformBroadcaster tf_broadcast_;
     bool localize_requested_;
+    std::string sensor_frame_;
+    bool clip_unseen_pointcloud_;
     bool initialize_from_tf_;
     std::string initialize_tf_;
     /**

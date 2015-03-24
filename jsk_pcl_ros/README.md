@@ -1190,6 +1190,9 @@ Extract the points above the planes between `~min_height` and `~max_height`.
 * `~output_nonplane_cloud` (`sensor_msgs/PointCloud2`):
 
    Pointcloud above the planes is not between `~min_height` and `~max_height`.
+* `~output/indices` (`pcl_msgs/PointIndices`)
+
+  PointIndices of points which are between `~min_height` and `~max_height`.
 
 #### Parameters
 * `~min_height` (Double, default: `0.0`)
@@ -1199,16 +1202,18 @@ Extract the points above the planes between `~min_height` and `~max_height`.
 * `~max_queue_size` (Integer, default: `100`)
 
    Queue length for subscribing topics.
-
 * `~use_indices` (Bool, default: `True`)
 
    Use indices of planar regions to filter if it's set true.
    You can disable this parameter to filter pointcloud which is not the same pointcloud
    to segment planes
-
 * `~magnify` (Double, default: `0.0`)
 
-  Magnify planes by this parameter. The unit is m.
+   Magnify planes by this parameter. The unit is m.
+* `~use_async` (Boolean, default: `False`)
+
+  Approximate sync input topics.
+
 ### jsk\_pcl/RegionGrowingMultiplePlaneSegmentation
 ![jsk_pcl/RegionGrowingMultiplePlaneSegmentation](images/region_growing_multiple_plane_segmentation.png).
 

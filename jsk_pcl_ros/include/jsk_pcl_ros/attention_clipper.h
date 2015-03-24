@@ -100,6 +100,7 @@ namespace jsk_pcl_ros
     std::vector<std::string> frame_id_list_;
     Vertices dimensions_;
     bool use_multiple_attention_;
+    bool negative_;
   private:
     
   };

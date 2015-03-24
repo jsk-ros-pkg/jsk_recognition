@@ -1092,6 +1092,9 @@ to see the object.
   `~initial_rot_list` should follow `[[rx, ry, rz], ...]` and
   `~dimensions` should follow `[[x, y, z], ...]`.
   Available only if `~use_multiple_attention` is true.
+* `~negative` (Boolean, default: `False`)
+
+  Publish points which are not inside of attention regions if this parameter is true.
 ### jsk\_pcl/ROIClipper
 #### What Is This
 ![](images/attention_clipper.png)

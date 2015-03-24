@@ -45,13 +45,14 @@
 #include <jsk_topic_tools/rosparam_utils.h>
 #include "jsk_pcl_ros/pcl_util.h"
 #include <algorithm>
-
+#include <set>
 namespace jsk_pcl_ros
 {
   void AttentionClipper::onInit()
   {
     DiagnosticNodelet::onInit();
     tf_listener_ = TfListenerSingleton::getInstance();
+    pnh_->param("negative", negative_, false);
     pnh_->param("use_multiple_attention", use_multiple_attention_, false);
     if (!use_multiple_attention_) {
       Eigen::Affine3f pose = Eigen::Affine3f::Identity();
@@ -408,6 +409,17 @@ namespace jsk_pcl_ros
                         frame_id.c_str(), msg->header.frame_id.c_str());
           return;
         }
+      }
+      if (negative_) {
+        // Publish indices which is NOT inside of box.
+        pcl::PointIndices::Ptr tmp_indices (new pcl::PointIndices);
+        std::set<int> positive_indices(all_indices->indices.begin(), all_indices->indices.end());
+        for (size_t i = 0; i < msg->width * msg->height; i++) {
+          if (positive_indices.find(i) == positive_indices.end()) {
+            tmp_indices->indices.push_back(i);
+          }
+        }
+        all_indices = tmp_indices;
       }
       PCLIndicesMsg indices_msg;
       pcl_conversions::fromPCL(*all_indices, indices_msg);

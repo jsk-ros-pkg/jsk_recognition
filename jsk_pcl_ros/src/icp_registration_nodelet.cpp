@@ -43,6 +43,7 @@
 #include "jsk_pcl_ros/transform_pointcloud_in_bounding_box.h"
 #include <image_geometry/pinhole_camera_model.h>
 #include <pcl/registration/correspondence_estimation_organized_projection.h>
+#include <pcl/registration/correspondence_estimation_normal_shooting.h>
 
 namespace jsk_pcl_ros
 {
@@ -433,7 +434,9 @@ namespace jsk_pcl_ros
         corr_projection (new pcl::registration::CorrespondenceEstimationOrganizedProjection<PointT, PointT, float>);
       corr_projection->setFocalLengths(model.fx(), model.fy());
       corr_projection->setCameraCenters(model.cx(), model.cy());
+      icp.setCorrespondenceEstimation(corr_projection);
     }
+    
     if (reference->points.empty ()) {
       NODELET_ERROR("Input Reference Cloud is empty!");
       return DBL_MAX;

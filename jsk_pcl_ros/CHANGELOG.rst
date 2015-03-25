@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.6 (2015-03-25)
+------------------
 * [jsk_pcl_ros] Publish point with RGB from PolygonPointsSampler
 * [jsk_pcl_ros] Set CorrespondenceEstimationOrganizedProjection correctly
 * [jsk_pcl_ros] Support ~negative parameter to publish point indices which

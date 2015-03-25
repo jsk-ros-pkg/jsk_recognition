@@ -2,6 +2,9 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.2.5 (2015-03-17)
 ------------------
 * check target cloud data ifnot invalid
@@ -9,7 +12,7 @@ Changelog for package jsk_perception
 * Enhance: more specific error exception
 * Change to avoid SyntaxWarning about not assigning rospy.Publisher argument queue_size
 * Change import libs with reasonable order (thirdparty -> ros)
-* Contributors: Yu Ohara, Kentaro Wada
+* Contributors: Kentaro Wada, Yu Ohara
 
 0.2.4 (2015-03-08)
 ------------------

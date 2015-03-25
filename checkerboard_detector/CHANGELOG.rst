@@ -2,6 +2,11 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [checkerboard_detector] Fill D of camera parameter by zero if ~use_P is true
+* Contributors: Ryohei Ueda
+
 0.2.5 (2015-03-17)
 ------------------
 * [checkerboard_detector] add ~use_P to use P instead of K as intrinsic

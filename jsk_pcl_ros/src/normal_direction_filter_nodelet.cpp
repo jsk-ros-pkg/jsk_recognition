@@ -82,7 +82,7 @@ namespace jsk_pcl_ros
     else {
       sub_input_.subscribe(*pnh_, "input", 1);
       sub_imu_.subscribe(*pnh_, "input_imu", 1);
-      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(200);
       sync_->connectInput(sub_input_, sub_imu_);
       sync_->registerCallback(boost::bind(&NormalDirectionFilter::filter, this, _1, _2));
     }

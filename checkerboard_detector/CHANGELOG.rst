@@ -2,6 +2,9 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.2.6 (2015-03-25)
 ------------------
 * [checkerboard_detector] Fill D of camera parameter by zero if ~use_P is true

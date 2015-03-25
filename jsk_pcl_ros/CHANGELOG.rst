@@ -2,6 +2,12 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros] Longer queue size for NormalDirectionFilter
+* [jsk_pcl_ros] Implement GridPlane::fromROSMsg method
+* Contributors: Ryohei Ueda
+
 0.2.6 (2015-03-25)
 ------------------
 * [jsk_pcl_ros] Publish point with RGB from PolygonPointsSampler
@@ -42,7 +48,7 @@ Changelog for package jsk_pcl_ros
 * add approx sync mode to point indices to mask image
 * [jsk_pcl_ros]fix miss-name in README
 * [jsk_pcl_ros]change ensync timing for plane
-* Contributors: Ryohei Ueda, JSK Lab Member, Yu Ohara, Yuto Inagaki
+* Contributors: Ryohei Ueda, Yuto Inagaki, JSK Lab Member, Yu Ohara
 
 0.2.4 (2015-03-08)
 ------------------
@@ -143,7 +149,7 @@ Changelog for package jsk_pcl_ros
 * Merge remote-tracking branch 'refs/remotes/origin/master' into 2d-reject
 * [jsk_pcl_ros] Check direction of detected stick and hint line in 2-D image coordinate
 * Fix license: WillowGarage -> JSK Lab
-* Contributors: Ryohei Ueda, Yuto Inagaki, JSK Lab Member, Yu Ohara, Xiangyu Chen
+* Contributors: Ryohei Ueda, JSK Lab Member, Xiangyu Chen, Yu Ohara, Yuto Inagaki
 
 0.2.3 (2015-02-02)
 ------------------
@@ -251,7 +257,7 @@ Changelog for package jsk_pcl_ros
 * [jsk_pcl_ros] nodelet to add color to pointcloud from image
 * add none result publisher when reference is empty
 * [jsk_pcl_ros] Publish pose of matched template in LINEMOD
-* Contributors: Ryohei Ueda, Hiroaki Yaguchi, JSK Lab Member, Yu Ohara, Yuto Inagaki
+* Contributors: Ryohei Ueda, Yuto Inagaki, Hiroaki Yaguchi, JSK Lab Member, Yu Ohara
 
 0.1.32 (2015-01-12)
 -------------------
@@ -394,7 +400,7 @@ Changelog for package jsk_pcl_ros
 * changet pointcloud_screen_point not to use jsconnection_based_nodelet
 * Use jsk_topic_tools::ConnectionBasedNodelet in BilateralFilter,
   BorderEstimator, BoundingBoxFilter and so on
-* Contributors: Ryohei Ueda, Shunichi Nozawa, Yu Ohara, Yuto Inagaki
+* Contributors: Ryohei Ueda, Shunichi Nozawa, Yuto Inagaki, Yu Ohara
 
 0.1.26 (2014-11-23)
 -------------------
@@ -861,7 +867,7 @@ Changelog for package jsk_pcl_ros
 * make paritcal_filter_tracking_nodelet publish tracked object tf trasnformation
 * add two launch files to run openni on remote machine
 * add octree_change_detector
-* Contributors: Ryo Terasawa, Chan Wesley, Shunichi Nozawa, Yuto Inagaki, Masaki Murooka, Ryohei Ueda, Yohei Kakiuchi, Yusuke Furuta, Kei Okada
+* Contributors: Chan Wesley, Shunichi Nozawa, Yuto Inagaki, Masaki Murooka, Yohei Kakiuchi, Ryohei Ueda, Ryo Terasawa, Yusuke Furuta, Kei Okada
 
 0.1.4 (2014-04-25)
 ------------------

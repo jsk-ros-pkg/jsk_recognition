@@ -108,11 +108,11 @@ namespace jsk_pcl_ros
       return;
     }
     // Sample points... 
-    pcl::PointCloud<pcl::PointNormal>::Ptr cloud (new pcl::PointCloud<pcl::PointNormal>);
+    pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGBNormal>);
     for (size_t i = 0; i < polygon_msg->polygons.size(); i++) {
       Polygon polygon = Polygon::fromROSMsg(polygon_msg->polygons[i].polygon);
-      pcl::PointCloud<pcl::PointNormal>::Ptr one_cloud
-        = polygon.samplePoints(grid_size_);
+      pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr one_cloud
+        = polygon.samplePoints<pcl::PointXYZRGBNormal>(grid_size_);
       *cloud = *cloud + *one_cloud;
     }
     sensor_msgs::PointCloud2 ros_cloud;

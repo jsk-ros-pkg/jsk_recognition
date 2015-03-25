@@ -198,6 +198,7 @@ namespace jsk_pcl_ros
     virtual Eigen::Vector3f getNormal();
     virtual Eigen::Vector3f getPointOnPlane();
     virtual Plane transform(const Eigen::Affine3d& transform);
+    virtual Plane transform(const Eigen::Affine3f& transform);
     virtual void toCoefficients(std::vector<float>& output);
     virtual std::vector<float> toCoefficients();
     virtual double getD();

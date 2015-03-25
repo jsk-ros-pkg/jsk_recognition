@@ -1061,6 +1061,7 @@ namespace jsk_pcl_ros
     return polygon;
   }
 
+
   bool ConvexPolygon::isProjectableInside(const Eigen::Vector3f& p)
   {
     Eigen::Vector3f foot_point;
@@ -1292,6 +1293,39 @@ namespace jsk_pcl_ros
     }
     return ros_msg;
   }
+
+  GridPlane GridPlane::fromROSMsg(
+    const jsk_recognition_msgs::SimpleOccupancyGrid& rosmsg,
+    const Eigen::Affine3f& offset = Eigen::Affine3f::Identity())
+  {
+    boost::mutex::scoped_lock lock(global_chull_mutex);
+    Plane plane(rosmsg.coefficients);
+    pcl::PointCloud<pcl::PointNormal>::Ptr
+      vertices (new pcl::PointCloud<pcl::PointNormal>);
+    for (size_t i = 0; i < rosmsg.cells.size(); i++) {
+      Eigen::Vector3f local_p(rosmsg.cells[i].x, rosmsg.cells[i].y, 0);
+      Eigen::Vector3f global_p = offset * plane.coordinates() * local_p;
+      pcl::PointNormal p;
+      p.x = global_p[0];
+      p.y = global_p[1];
+      p.z = global_p[2];
+      vertices->points.push_back(p);
+    }
+    pcl::ConvexHull<pcl::PointNormal> chull;
+    chull.setDimension(2);
+    chull.setInputCloud (vertices);
+    pcl::PointCloud<pcl::PointNormal>::Ptr
+      convex_vertices_cloud (new pcl::PointCloud<pcl::PointNormal>);
+    chull.reconstruct (*convex_vertices_cloud);
+
+    Vertices convex_vertices
+      = pointCloudToVertices<pcl::PointNormal>(*convex_vertices_cloud);
+    ConvexPolygon::Ptr convex(new ConvexPolygon(convex_vertices));
+    GridPlane ret(convex, rosmsg.resolution);
+    ret.fillCellsFromPointCloud(vertices, rosmsg.resolution);
+    return ret;
+  }
+
   
   Cube::Cube(const Eigen::Vector3f& pos, const Eigen::Quaternionf& rot):
     pos_(pos), rot_(rot)

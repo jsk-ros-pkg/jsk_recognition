@@ -335,7 +335,7 @@ namespace jsk_pcl_ros
     virtual Eigen::Vector3f getCentroid();
     virtual Ptr magnify(const double scale_factor);
     virtual Ptr magnifyByDistance(const double distance);
-        
+    
     static ConvexPolygon fromROSMsg(const geometry_msgs::Polygon& polygon);
     bool distanceSmallerThan(
       const Eigen::Vector3f& p, double distance_threshold);
@@ -424,7 +424,16 @@ namespace jsk_pcl_ros
     virtual void fillCellsFromCube(Cube& cube);
     virtual double getResolution() { return resolution_; }
     virtual jsk_recognition_msgs::SimpleOccupancyGrid toROSMsg();
+    /**
+     * @brief
+     * Construct GridPlane object from
+     * jsk_recognition_msgs::SimpleOccupancyGrid.
+     */
+    static GridPlane fromROSMsg(
+      const jsk_recognition_msgs::SimpleOccupancyGrid& rosmsg,
+      const Eigen::Affine3f& offset);
     virtual bool isOccupied(const IndexPair& pair);
+    
     /**
      * @brief
      * p should be local coordinate

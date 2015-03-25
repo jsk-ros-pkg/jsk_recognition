@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.7 (2015-03-26)
+------------------
 * [jsk_pcl_ros] Longer queue size for NormalDirectionFilter
 * [jsk_pcl_ros] Implement GridPlane::fromROSMsg method
 * Contributors: Ryohei Ueda

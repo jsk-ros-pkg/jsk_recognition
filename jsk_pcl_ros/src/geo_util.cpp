@@ -429,6 +429,13 @@ namespace jsk_pcl_ros
                           coordinates().rotation() * Eigen::Vector3f::UnitZ());
     output = Eigen::Affine3f::Identity() * Eigen::Translation3f(output_p) * rot;
   }
+
+  Plane Plane::transform(const Eigen::Affine3f& transform)
+  {
+    Eigen::Affine3d transform_d;
+    convertEigenAffine3(transform, transform_d);
+    return this->transform(transform_d);
+  }
   
   Plane Plane::transform(const Eigen::Affine3d& transform)
   {
@@ -1299,12 +1306,12 @@ namespace jsk_pcl_ros
     const Eigen::Affine3f& offset = Eigen::Affine3f::Identity())
   {
     boost::mutex::scoped_lock lock(global_chull_mutex);
-    Plane plane(rosmsg.coefficients);
+    Plane plane = Plane(rosmsg.coefficients).transform(offset);
     pcl::PointCloud<pcl::PointNormal>::Ptr
       vertices (new pcl::PointCloud<pcl::PointNormal>);
     for (size_t i = 0; i < rosmsg.cells.size(); i++) {
       Eigen::Vector3f local_p(rosmsg.cells[i].x, rosmsg.cells[i].y, 0);
-      Eigen::Vector3f global_p = offset * plane.coordinates() * local_p;
+      Eigen::Vector3f global_p = plane.coordinates() * local_p;
       pcl::PointNormal p;
       p.x = global_p[0];
       p.y = global_p[1];
@@ -1321,6 +1328,10 @@ namespace jsk_pcl_ros
     Vertices convex_vertices
       = pointCloudToVertices<pcl::PointNormal>(*convex_vertices_cloud);
     ConvexPolygon::Ptr convex(new ConvexPolygon(convex_vertices));
+    // Check orientation
+    if (!convex->isSameDirection(plane)) {
+      convex = boost::make_shared<ConvexPolygon>(convex->flipConvex());
+    }
     GridPlane ret(convex, rosmsg.resolution);
     ret.fillCellsFromPointCloud(vertices, rosmsg.resolution);
     return ret;

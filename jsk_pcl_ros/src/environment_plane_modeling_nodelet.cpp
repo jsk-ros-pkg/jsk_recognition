@@ -72,7 +72,7 @@ namespace jsk_pcl_ros
         "debug/raw_grid_map", 1);
     pub_grid_map_
       = pnh_->advertise<jsk_recognition_msgs::SimpleOccupancyGridArray>(
-        "output", 1);
+        "output", 1, true);
     pub_snapped_move_base_simple_goal_ = pnh_->advertise<geometry_msgs::PoseStamped>(
       "/footstep_simple/goal", 1);
     

@@ -70,6 +70,9 @@ namespace jsk_pcl_ros
     pub_debug_raw_grid_map_
       = pnh_->advertise<jsk_recognition_msgs::SimpleOccupancyGridArray>(
         "debug/raw_grid_map", 1);
+    pub_debug_noeroded_grid_map_
+      = pnh_->advertise<jsk_recognition_msgs::SimpleOccupancyGridArray>(
+        "debug/noeroded_grid_map", 1);
     pub_grid_map_
       = pnh_->advertise<jsk_recognition_msgs::SimpleOccupancyGridArray>(
         "output", 1, true);
@@ -110,6 +113,7 @@ namespace jsk_pcl_ros
     distance_threshold_ = config.distance_threshold;
     resolution_ = config.resolution;
     morphological_filter_size_ = config.morphological_filter_size;
+    erode_filter_size_ = config.erode_filter_size;
     footprint_plane_angular_threshold_ = config.footprint_plane_angular_threshold;
     footprint_plane_distance_threshold_ = config.footprint_plane_distance_threshold;
   }
@@ -269,26 +273,43 @@ namespace jsk_pcl_ros
 
       std::vector<GridPlane::Ptr> morphological_filtered_grid_planes
         = morphologicalFiltering(raw_grid_planes);
+      
+      publishGridMaps(pub_debug_noeroded_grid_map_, cloud_msg->header,
+                      morphological_filtered_grid_planes);
+      
+      std::vector<GridPlane::Ptr> eroded_grid_planes
+        = erodeFiltering(morphological_filtered_grid_planes);
       std::vector<GridPlane::Ptr> result_grid_planes;
-    
-    
+      
       if (complete_footprint_region_) { // complete footprint region if needed
         result_grid_planes
           = completeFootprintRegion(cloud_msg->header,
-                                    morphological_filtered_grid_planes);
+                                    eroded_grid_planes);
       }
       else {
-        result_grid_planes = morphological_filtered_grid_planes;
-      }
-    
+        result_grid_planes = eroded_grid_planes;
+     }
+
       publishGridMaps(pub_grid_map_, cloud_msg->header,
                       result_grid_planes);
+      
       latest_global_header_ = cloud_msg->header;
       latest_grid_maps_ = result_grid_planes;
     }
     catch (tf2::TransformException& e) {
       NODELET_ERROR("Failed to lookup transformation: %s", e.what());
     }
+  }
+
+  std::vector<GridPlane::Ptr> EnvironmentPlaneModeling::erodeFiltering(
+      std::vector<GridPlane::Ptr>& grid_maps)
+  {
+    std::vector<GridPlane::Ptr> ret;
+    for (size_t i = 0; i < grid_maps.size(); i++) {
+      GridPlane::Ptr eroded_grid_map = grid_maps[i]->erode(erode_filter_size_);
+      ret.push_back(eroded_grid_map);
+    }
+    return ret;
   }
   
   int EnvironmentPlaneModeling::lookupGroundPlaneForFootprint(
@@ -410,9 +431,9 @@ namespace jsk_pcl_ros
   {
     std::vector<GridPlane::Ptr> ret;
     for (size_t i = 0; i < raw_grid_maps.size(); i++) {
-      GridPlane::Ptr eroded_grid_map = raw_grid_maps[i]->erode(morphological_filter_size_);
-      GridPlane::Ptr dilated_grid_map = eroded_grid_map->dilate(morphological_filter_size_);
-      ret.push_back(dilated_grid_map);
+      GridPlane::Ptr dilated_grid_map = raw_grid_maps[i]->dilate(morphological_filter_size_);
+      GridPlane::Ptr eroded_grid_map = dilated_grid_map->erode(morphological_filter_size_);
+      ret.push_back(eroded_grid_map);
     }
     return ret;
   }

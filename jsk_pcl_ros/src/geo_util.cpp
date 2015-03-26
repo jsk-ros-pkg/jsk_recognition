@@ -1101,7 +1101,7 @@ namespace jsk_pcl_ros
     cells_.insert(pair);
   }
 
-  GridPlane::Ptr GridPlane::erode(int num)
+  GridPlane::Ptr GridPlane::dilate(int num)
   {
     GridPlane::Ptr ret (new GridPlane(convex_, resolution_));
     for (std::set<IndexPair>::iterator it = cells_.begin();
@@ -1122,7 +1122,7 @@ namespace jsk_pcl_ros
     return ret;
   }
 
-  GridPlane::Ptr GridPlane::dilate(int num)
+  GridPlane::Ptr GridPlane::erode(int num)
   {
     GridPlane::Ptr ret (new GridPlane(convex_, resolution_));
     for (std::set<IndexPair>::iterator it = cells_.begin();

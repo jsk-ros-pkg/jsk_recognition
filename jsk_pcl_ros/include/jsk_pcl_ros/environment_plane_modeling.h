@@ -190,6 +190,9 @@ namespace jsk_pcl_ros
     virtual std::vector<GridPlane::Ptr> completeFootprintRegion(
       const std_msgs::Header& header,
       std::vector<GridPlane::Ptr>& grid_maps);
+    
+    virtual std::vector<GridPlane::Ptr> erodeFiltering(
+      std::vector<GridPlane::Ptr>& grid_maps);
 
     virtual int lookupGroundPlaneForFootprint(
       const std::string& footprint_frame_id, const std_msgs::Header& header,
@@ -218,6 +221,7 @@ namespace jsk_pcl_ros
     ros::Publisher pub_debug_magnified_polygons_;
     ros::Publisher pub_debug_convex_point_cloud_;
     ros::Publisher pub_debug_raw_grid_map_;
+    ros::Publisher pub_debug_noeroded_grid_map_;
     ros::Publisher pub_grid_map_;
     ros::Publisher pub_snapped_move_base_simple_goal_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
@@ -234,6 +238,7 @@ namespace jsk_pcl_ros
     double resolution_;
     int morphological_filter_size_;
     bool complete_footprint_region_;
+    int erode_filter_size_;
     double footprint_plane_distance_threshold_;
     double footprint_plane_angular_threshold_;
   private:

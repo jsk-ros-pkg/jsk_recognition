@@ -42,6 +42,10 @@
 #include <pcl/conversions.h>
 #include <boost/tuple/tuple_comparison.hpp>
 #include <pcl/segmentation/extract_polygonal_prism_data.h>
+#include <boost/foreach.hpp>
+#include <boost/range/irange.hpp>
+
+
 // #define DEBUG_GEO_UTIL
 namespace jsk_pcl_ros
 {
@@ -1239,10 +1243,11 @@ namespace jsk_pcl_ros
       }
     }
   }
-  
+
   void GridPlane::fillCellsFromPointCloud(
     pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
-    double distance_threshold)
+    double distance_threshold,
+    std::set<int>& non_plane_indices)
   {
     Eigen::Affine3f local_coordinates = convex_->coordinates();
     Eigen::Affine3f inv_local_coordinates = local_coordinates.inverse();
@@ -1263,18 +1268,35 @@ namespace jsk_pcl_ros
     prism_extract.setInputCloud(cloud);
     prism_extract.setHeightLimits(-distance_threshold, distance_threshold);
     prism_extract.setInputPlanarHull(hull_cloud);
+    // output_indices is set of indices which are on plane
     pcl::PointIndices output_indices;
     prism_extract.segment(output_indices);
+    std::set<int> output_set(output_indices.indices.begin(),
+                             output_indices.indices.end());
+    for (size_t i = 0; i < cloud->points.size(); i++) {
+      if (output_set.find(i) != output_set.end()) {
+        non_plane_indices.insert(i);
+      }
+    }
+
     
     for (size_t i = 0; i < output_indices.indices.size(); i++) {
       //for (size_t i = 0; i < cloud->points.size(); i++) {
       int point_index = output_indices.indices[i];
       pcl::PointNormal p = cloud->points[point_index];
       Eigen::Vector3f ep = p.getVector3fMap();
-        Eigen::Vector3f local_ep = inv_local_coordinates * ep;
-        IndexPair pair = projectLocalPointAsIndexPair(local_ep);
-        addIndexPair(pair);
+      Eigen::Vector3f local_ep = inv_local_coordinates * ep;
+      IndexPair pair = projectLocalPointAsIndexPair(local_ep);
+      addIndexPair(pair);
     }
+  }
+  
+  void GridPlane::fillCellsFromPointCloud(
+    pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
+    double distance_threshold)
+  {
+    std::set<int> dummy;
+    fillCellsFromPointCloud(cloud, distance_threshold, dummy);
   }
   
   jsk_recognition_msgs::SimpleOccupancyGrid GridPlane::toROSMsg()

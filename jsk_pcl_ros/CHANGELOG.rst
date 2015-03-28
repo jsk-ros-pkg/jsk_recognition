@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.8 (2015-03-29)
+------------------
 * [jsk_pcl_ros] Publish point indices which do not belong to any polygons
   in EnvironmentPlaneModeling
 * [jsk_pcl_ros] Erode grid maps as c-space padding in EnvironmentPlaneModeling

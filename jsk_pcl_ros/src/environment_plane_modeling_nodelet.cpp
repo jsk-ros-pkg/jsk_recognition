@@ -79,7 +79,7 @@ namespace jsk_pcl_ros
     pub_snapped_move_base_simple_goal_ = pnh_->advertise<geometry_msgs::PoseStamped>(
       "/footstep_simple/goal", 1);
     pub_non_plane_indices_ = pnh_->advertise<PCLIndicesMsg>(
-      "output/non_plane_indices_", 1);
+      "output/non_plane_indices", 1);
     if (complete_footprint_region_) {
       tf_listener_ = TfListenerSingleton::getInstance();
           

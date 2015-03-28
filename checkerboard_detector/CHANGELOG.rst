@@ -5,8 +5,8 @@ Changelog for package checkerboard_detector
 0.2.8 (2015-03-29)
 ------------------
 
-Forthcoming
------------
+0.2.9 (2015-03-29)
+------------------
 * 0.2.8
 * Update Changelog
 * Contributors: Ryohei Ueda

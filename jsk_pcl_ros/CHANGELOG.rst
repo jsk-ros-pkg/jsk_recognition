@@ -11,8 +11,8 @@ Changelog for package jsk_pcl_ros
 * [jsk_pcl_ros] Check orientation of plane in GridPlane::fromROSMsg
 * Contributors: Ryohei Ueda
 
-Forthcoming
------------
+0.2.9 (2015-03-29)
+------------------
 * 0.2.8
 * Update Changelog
 * [jsk_pcl_ros] Publish point indices which do not belong to any polygons

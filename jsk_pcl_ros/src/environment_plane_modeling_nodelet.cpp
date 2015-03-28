@@ -78,7 +78,8 @@ namespace jsk_pcl_ros
         "output", 1, true);
     pub_snapped_move_base_simple_goal_ = pnh_->advertise<geometry_msgs::PoseStamped>(
       "/footstep_simple/goal", 1);
-    
+    pub_non_plane_indices_ = pnh_->advertise<PCLIndicesMsg>(
+      "output/non_plane_indices_", 1);
     if (complete_footprint_region_) {
       tf_listener_ = TfListenerSingleton::getInstance();
           
@@ -267,10 +268,15 @@ namespace jsk_pcl_ros
       publishConvexPolygons(pub_debug_magnified_polygons_, cloud_msg->header, magnified_convexes);
 
       // build GridMaps
-      std::vector<GridPlane::Ptr> raw_grid_planes = buildGridPlanes(full_cloud, magnified_convexes);
-    
+      std::set<int> non_plane_indices;
+      std::vector<GridPlane::Ptr> raw_grid_planes = buildGridPlanes(full_cloud, magnified_convexes, non_plane_indices);
+      
       publishGridMaps(pub_debug_raw_grid_map_, cloud_msg->header, raw_grid_planes);
-
+      PCLIndicesMsg ros_non_plane_indices;
+      ros_non_plane_indices.indices = std::vector<int>(non_plane_indices.begin(),
+                                                       non_plane_indices.end());
+      ros_non_plane_indices.header = cloud_msg->header;
+      pub_non_plane_indices_.publish(ros_non_plane_indices);
       std::vector<GridPlane::Ptr> morphological_filtered_grid_planes
         = morphologicalFiltering(raw_grid_planes);
       
@@ -477,13 +483,15 @@ namespace jsk_pcl_ros
   
   std::vector<GridPlane::Ptr> EnvironmentPlaneModeling::buildGridPlanes(
     pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
-    std::vector<ConvexPolygon::Ptr> convexes)
+    std::vector<ConvexPolygon::Ptr> convexes,
+    std::set<int>& non_plane_indices)
   {
     std::vector<GridPlane::Ptr> ret(convexes.size());
 //#pragma omp parallel for
     for (size_t i = 0; i < convexes.size(); i++) {
       GridPlane::Ptr grid(new GridPlane(convexes[i], resolution_));
-      grid->fillCellsFromPointCloud(cloud, distance_threshold_);
+      grid->fillCellsFromPointCloud(cloud, distance_threshold_,
+                                    non_plane_indices);
       ret[i] = grid;
     }
     return ret;

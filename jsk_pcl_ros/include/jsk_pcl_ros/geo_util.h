@@ -422,6 +422,10 @@ namespace jsk_pcl_ros
     virtual void fillCellsFromPointCloud(
       pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
       double distance_threshold);
+    virtual void fillCellsFromPointCloud(
+      pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
+      double distance_threshold,
+      std::set<int>& non_plane_indices);
     virtual void fillCellsFromCube(Cube& cube);
     virtual double getResolution() { return resolution_; }
     virtual jsk_recognition_msgs::SimpleOccupancyGrid toROSMsg();

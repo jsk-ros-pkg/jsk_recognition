@@ -5,6 +5,12 @@ Changelog for package jsk_recognition
 0.2.8 (2015-03-29)
 ------------------
 
+Forthcoming
+-----------
+* 0.2.8
+* Update Changelog
+* Contributors: Ryohei Ueda
+
 0.2.7 (2015-03-26)
 ------------------
 

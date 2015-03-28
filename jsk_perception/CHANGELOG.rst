@@ -5,6 +5,12 @@ Changelog for package jsk_perception
 0.2.8 (2015-03-29)
 ------------------
 
+Forthcoming
+-----------
+* 0.2.8
+* Update Changelog
+* Contributors: Ryohei Ueda
+
 0.2.7 (2015-03-26)
 ------------------
 
@@ -18,7 +24,7 @@ Changelog for package jsk_perception
 * Enhance: more specific error exception
 * Change to avoid SyntaxWarning about not assigning rospy.Publisher argument queue_size
 * Change import libs with reasonable order (thirdparty -> ros)
-* Contributors: Kentaro Wada, Yu Ohara
+* Contributors: Yu Ohara, Kentaro Wada
 
 0.2.4 (2015-03-08)
 ------------------

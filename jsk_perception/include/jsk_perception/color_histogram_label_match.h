@@ -45,6 +45,7 @@
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include <message_filters/pass_through.h>
 #include <jsk_perception/ColorHistogramLabelMatchConfig.h>
 #include <dynamic_reconfigure/server.h>
 
@@ -62,6 +63,10 @@ namespace jsk_perception
       sensor_msgs::Image,         // label
       sensor_msgs::Image          // mask
       > SyncPolicy;
+    typedef message_filters::sync_policies::ApproximateTime<
+      sensor_msgs::Image,         // image
+      sensor_msgs::Image         // label
+      > SyncPolicyWithoutMask;
 
     ColorHistogramLabelMatch(): DiagnosticNodelet("ColorHistogramLabelMatch") {}
   protected:
@@ -72,6 +77,9 @@ namespace jsk_perception
       const sensor_msgs::Image::ConstPtr& image_msg,
       const sensor_msgs::Image::ConstPtr& label_msg,
       const sensor_msgs::Image::ConstPtr& mask_msg);
+    virtual void match(
+      const sensor_msgs::Image::ConstPtr& image_msg,
+      const sensor_msgs::Image::ConstPtr& label_msg);
     virtual void histogramCallback(
       const jsk_recognition_msgs::ColorHistogram::ConstPtr& histogram_msg);
     virtual bool isMasked(const cv::Mat& original_image,
@@ -89,9 +97,11 @@ namespace jsk_perception
     float coef_threshold_;
     float masked_coefficient_;
     int threshold_method_;
+    bool use_mask_;
     boost::mutex mutex_;
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicyWithoutMask> > sync_wo_mask_;
     message_filters::Subscriber<sensor_msgs::Image> sub_image_;
     message_filters::Subscriber<sensor_msgs::Image> sub_label_;
     message_filters::Subscriber<sensor_msgs::Image> sub_mask_;

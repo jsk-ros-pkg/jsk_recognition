@@ -324,8 +324,11 @@ Compute histogram of single channel image.
   Minimum and maximum value of histogram
 
 ### jsk\_perception/ColorHistogramLabelMatch
+![](images/color_histogram_label_match.png)
 
 Compute similar region of image to specified histogram based on superpixels image.
+
+Sample is `color_histogram_label_match_sample.launch`.
 
 #### Input Topic
 * `~input/histogram` (`jsk_recognition_msgs/ColorHistogram`)
@@ -368,6 +371,9 @@ Compute similar region of image to specified histogram based on superpixels imag
 * `~coef_threshold`
 
   Threshold used in binalization.
+* `~use_mask` (Default: `false`)
+
+  Do not use mask image if this parameter is false.
 
 ### jsk\_perception/BlobDetector
 ![](images/blob_detector.png)

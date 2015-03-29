@@ -44,6 +44,7 @@
 #include <pcl/segmentation/extract_polygonal_prism_data.h>
 #include <boost/foreach.hpp>
 #include <boost/range/irange.hpp>
+#include <boost/math/special_functions/round.hpp>
 
 
 // #define DEBUG_GEO_UTIL
@@ -483,7 +484,7 @@ namespace jsk_pcl_ros
   void Plane::initializeCoordinates()
   {
     Eigen::Quaternionf rot;
-    rot.setFromTwoVectors(Eigen::Vector3f::UnitZ(), getNormal());
+    rot.setFromTwoVectors(Eigen::Vector3f::UnitZ(), normal_);
     plane_coordinates_
       = Eigen::Affine3f::Identity() * rot * Eigen::Translation3f(0, 0, - d_);
   }
@@ -872,25 +873,43 @@ namespace jsk_pcl_ros
 
   }
   
-  void ConvexPolygon::projectOnPlane(const Eigen::Vector3f& p, Eigen::Vector3f& output)
+  void ConvexPolygon::projectOnPlane(
+    const Eigen::Vector3f& p, Eigen::Vector3f& output)
   {
     Plane::project(p, output);
   }
 
-  void ConvexPolygon::projectOnPlane(const Eigen::Affine3f& pose, Eigen::Affine3f& output)
+  void ConvexPolygon::projectOnPlane(
+    const Eigen::Affine3f& pose, Eigen::Affine3f& output)
   {
     Eigen::Vector3f p(pose.translation());
     Eigen::Vector3f output_p;
     projectOnPlane(p, output_p);
+    // ROS_INFO("[ConvexPolygon::projectOnPlane] p: [%f, %f, %f]",
+    //          p[0], p[1], p[2]);
+    // ROS_INFO("[ConvexPolygon::projectOnPlane] output_p: [%f, %f, %f]",
+    //          output_p[0], output_p[1], output_p[2]);
     Eigen::Quaternionf rot;
     rot.setFromTwoVectors(pose.rotation() * Eigen::Vector3f::UnitZ(),
                           coordinates().rotation() * Eigen::Vector3f::UnitZ());
     Eigen::Quaternionf coords_rot(coordinates().rotation());
-    // ROS_INFO("rot: [%f, %f, %f, %f]", rot.x(), rot.y(), rot.z(), rot.w());
-    // ROS_INFO("coords_rot: [%f, %f, %f, %f]", coords_rot.x(), coords_rot.y(), coords_rot.z(), coords_rot.w());
-    // ROS_INFO("normal: [%f, %f, %f]", normal_[0], normal_[1], normal_[2]);
-    // Eigen::Affine3f::Identity() * 
-    output = Eigen::Translation3f(output_p) * pose.rotation() * rot;
+    Eigen::Quaternionf pose_rot(pose.rotation());
+    // ROS_INFO("[ConvexPolygon::projectOnPlane] rot: [%f, %f, %f, %f]",
+    //          rot.x(), rot.y(), rot.z(), rot.w());
+    // ROS_INFO("[ConvexPolygon::projectOnPlane] coords_rot: [%f, %f, %f, %f]",
+    //          coords_rot.x(), coords_rot.y(), coords_rot.z(), coords_rot.w());
+    // ROS_INFO("[ConvexPolygon::projectOnPlane] pose_rot: [%f, %f, %f, %f]",
+    //          pose_rot.x(), pose_rot.y(), pose_rot.z(), pose_rot.w());
+    // ROS_INFO("[ConvexPolygon::projectOnPlane] normal: [%f, %f, %f]", normal_[0], normal_[1], normal_[2]);
+    // Eigen::Affine3f::Identity() *
+    // output.translation() = Eigen::Translation3f(output_p);
+    // output.rotation() = rot * pose.rotation();
+    //output = Eigen::Translation3f(output_p) * rot * pose.rotation();
+    output = Eigen::Affine3f(rot * pose.rotation());
+    output.pretranslate(output_p);
+    // Eigen::Vector3f projected_point = output * Eigen::Vector3f(0, 0, 0);
+    // ROS_INFO("[ConvexPolygon::projectOnPlane] output: [%f, %f, %f]",
+    //          projected_point[0], projected_point[1], projected_point[2]);
   }
 
   ConvexPolygon ConvexPolygon::flipConvex()
@@ -1096,8 +1115,10 @@ namespace jsk_pcl_ros
   {
     double offset_x = p[0] + 0.5 * resolution_;
     double offset_y = p[1] + 0.5 * resolution_;
-    return boost::make_tuple<int, int>(std::floor(offset_x / resolution_),
-                                       std::floor(offset_y / resolution_));
+    // return boost::make_tuple<int, int>(std::floor(offset_x / resolution_),
+    //                                    std::floor(offset_y / resolution_));
+    return boost::make_tuple<int, int>(boost::math::round(p[0] / resolution_),
+                                       boost::math::round(p[1] / resolution_));
   }
 
   void GridPlane::addIndexPair(IndexPair pair)
@@ -1155,7 +1176,17 @@ namespace jsk_pcl_ros
 
   bool GridPlane::isOccupied(const IndexPair& pair)
   {
-    return cells_.find(pair) != cells_.end();
+    bool result = cells_.find(pair) != cells_.end();
+    // Verbosing for debug
+    // ROS_INFO("Checking index pair (%d, %d)", pair.get<0>(), pair.get<1>());
+    // ROS_INFO("Result: %d", result);
+    // ROS_INFO("cells are:");
+    // for (IndexPairSet::iterator it = cells_.begin();
+    //      it != cells_.end();
+    //      ++it) {
+    //   ROS_INFO("  (%d, %d)", it->get<0>(), it->get<1>());
+    // }
+    return result;
   }
 
   bool GridPlane::isOccupied(const Eigen::Vector3f& p)
@@ -1166,8 +1197,7 @@ namespace jsk_pcl_ros
 
   bool GridPlane::isOccupiedGlobal(const Eigen::Vector3f& p)
   {
-    Eigen::Affine3f inv_coords = convex_->coordinates().inverse();
-    return isOccupied(inv_coords * p);
+    return isOccupied(convex_->coordinates().inverse() * p);
   }
 
   GridPlane::Ptr GridPlane::clone()
@@ -1329,6 +1359,20 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(global_chull_mutex);
     Plane plane = Plane(rosmsg.coefficients).transform(offset);
+    // ROS_INFO("[GridPlane::fromROSMsg] c: [%f, %f, %f, %f]",
+    //          rosmsg.coefficients[0],
+    //          rosmsg.coefficients[1],
+    //          rosmsg.coefficients[2],
+    //          rosmsg.coefficients[3]);
+    // ROS_INFO("[GridPlane::fromROSMsg] transformed c: [%f, %f, %f, %f]",
+    //          plane.toCoefficients()[0],
+    //          plane.toCoefficients()[1],
+    //          plane.toCoefficients()[2],
+    //          plane.toCoefficients()[3]);
+    Eigen::Affine3f plane_coords = plane.coordinates();
+    Eigen::Vector3f plane_origin(plane_coords.translation());
+    // ROS_INFO_EIGEN_VECTOR3("[GridPlane::fromROSMsg] plane_origin",
+    //                        plane_origin);
     pcl::PointCloud<pcl::PointNormal>::Ptr
       vertices (new pcl::PointCloud<pcl::PointNormal>);
     for (size_t i = 0; i < rosmsg.cells.size(); i++) {
@@ -1338,10 +1382,13 @@ namespace jsk_pcl_ros
       p.x = global_p[0];
       p.y = global_p[1];
       p.z = global_p[2];
+      // ROS_INFO("[%f, %f, %f] => [%f, %f, %f]",
+      //          local_p[0], local_p[1], local_p[2],
+      //          global_p[0], global_p[1], global_p[2]);
       vertices->points.push_back(p);
     }
     pcl::ConvexHull<pcl::PointNormal> chull;
-    chull.setDimension(2);
+    //chull.setDimension(2);
     chull.setInputCloud (vertices);
     pcl::PointCloud<pcl::PointNormal>::Ptr
       convex_vertices_cloud (new pcl::PointCloud<pcl::PointNormal>);
@@ -1352,10 +1399,24 @@ namespace jsk_pcl_ros
     ConvexPolygon::Ptr convex(new ConvexPolygon(convex_vertices));
     // Check orientation
     if (!convex->isSameDirection(plane)) {
-      convex = boost::make_shared<ConvexPolygon>(convex->flipConvex());
+      // ROS_INFO("[GridPlane::fromROSMsg] flip convex");
+      //convex = boost::make_shared<ConvexPolygon>(convex->flipConvex());
+      Vertices reversed_convex_vertices;
+      std::reverse_copy(convex_vertices.begin(), convex_vertices.end(),
+                        std::back_inserter(reversed_convex_vertices));
+      convex.reset(new ConvexPolygon(reversed_convex_vertices));
     }
+    Eigen::Vector3f convex_origin(convex->coordinates().translation());
+    Eigen::Vector3f convex_normal = convex->getNormal();
+    // ROS_INFO_EIGEN_VECTOR3("[GridPlane::fromROSMsg] convex_origin",
+    //                        convex_origin);
+    // ROS_INFO_EIGEN_VECTOR3("[GridPlane::fromROSMsg] convex_normal",
+    //                        convex_normal);
     GridPlane ret(convex, rosmsg.resolution);
-    ret.fillCellsFromPointCloud(vertices, rosmsg.resolution);
+    //ROS_INFO("resolution: %f", ret.resolution_);
+    ret.fillCellsFromPointCloud(vertices, 1000.0);
+    // ROS_INFO("cell size: %lu", ret.cells_.size());
+    // ROS_INFO("original cell size: %lu", rosmsg.cells.size());
     return ret;
   }
 

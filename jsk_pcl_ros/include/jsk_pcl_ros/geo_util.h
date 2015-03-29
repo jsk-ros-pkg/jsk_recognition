@@ -47,6 +47,7 @@
 #include <boost/thread.hpp>
 #include <geometry_msgs/Polygon.h>
 #include <jsk_recognition_msgs/BoundingBox.h>
+#include <jsk_recognition_msgs/SimpleOccupancyGrid.h>
 #include <boost/tuple/tuple.hpp>
 
 ////////////////////////////////////////////////////////
@@ -66,6 +67,10 @@ namespace jsk_pcl_ros
 {
   typedef std::vector<Eigen::Vector3f,
                       Eigen::aligned_allocator<Eigen::Vector3f> > Vertices;
+
+  // Prototype definition
+  class Plane;
+  class Cube;
   
   ////////////////////////////////////////////////////////
   // compute quaternion from 3 unit vector
@@ -74,12 +79,49 @@ namespace jsk_pcl_ros
   Eigen::Quaternionf rotFrom3Axis(const Eigen::Vector3f& ex,
                                   const Eigen::Vector3f& ey,
                                   const Eigen::Vector3f& ez);
+
   typedef Eigen::Vector3f Point;
   typedef Eigen::Vector3f Vertex;
   typedef std::vector<Eigen::Vector3f,
                       Eigen::aligned_allocator<Eigen::Vector3f> > Vertices;
   typedef boost::tuple<Point, Point> PointPair;
   typedef boost::tuple<size_t, size_t> PointIndexPair;
+
+  /**
+   * @brief
+   * Compute PointCloud from Vertices
+   */
+  template<class PointT>
+  typename pcl::PointCloud<PointT>::Ptr verticesToPointCloud(const Vertices& v)
+  {
+    typename pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
+    for (size_t i = 0; i < v.size(); i++) {
+      PointT p;
+      // Do not use pointFromVectorToXYZ in order not to depend on
+      // pcl_conversion_util
+      //pointFromVectorToXYZ<Eigen::Vector3f, PointT>(v[i], p);
+      p.x = v[i][0];
+      p.y = v[i][1];
+      p.z = v[i][2];
+      cloud->points.push_back(p);
+    }
+    return cloud;
+  }
+
+  /**
+   * @brief
+   * Compute Vertices from PointCloud
+   */
+  template<class PointT>
+  Vertices pointCloudToVertices(const pcl::PointCloud<PointT>& cloud)
+  {
+    Vertices vs;
+    for (size_t i = 0; i < cloud.points.size(); i++) {
+      vs.push_back(cloud.points[i].getVector3fMap());
+    }
+    return vs;
+  }
+
   
   // (infinite) line
   class Line
@@ -121,6 +163,7 @@ namespace jsk_pcl_ros
     virtual void foot(const Eigen::Vector3f& point, Eigen::Vector3f& output) const;
     virtual double dividingRatio(const Eigen::Vector3f& point) const;
     virtual double distance(const Eigen::Vector3f& point) const;
+    virtual bool intersect(Plane& plane, Eigen::Vector3f& point) const;
     //virtual double distance(const Segment& other);
   protected:
     Eigen::Vector3f from_, to_;
@@ -132,6 +175,7 @@ namespace jsk_pcl_ros
   public:
     typedef boost::shared_ptr<Plane> Ptr;
     Plane(const std::vector<float>& coefficients);
+    Plane(const boost::array<float, 4>& coefficients);
     Plane(Eigen::Vector3f normal, double d);
     Plane(Eigen::Vector3f normal, Eigen::Vector3f p);
     virtual ~Plane();
@@ -150,15 +194,20 @@ namespace jsk_pcl_ros
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3d& output);
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3f& output);
     virtual void project(const Eigen::Vector3f& p, Eigen::Vector3d& output);
+    virtual void project(const Eigen::Affine3f& pose, Eigen::Affine3f& output);
     virtual Eigen::Vector3f getNormal();
     virtual Eigen::Vector3f getPointOnPlane();
     virtual Plane transform(const Eigen::Affine3d& transform);
+    virtual Plane transform(const Eigen::Affine3f& transform);
     virtual void toCoefficients(std::vector<float>& output);
     virtual std::vector<float> toCoefficients();
     virtual double getD();
+    virtual Eigen::Affine3f coordinates();
   protected:
+    virtual void initializeCoordinates();
     Eigen::Vector3f normal_;
     double d_;
+    Eigen::Affine3f plane_coordinates_;
   private:
   };
 
@@ -176,6 +225,57 @@ namespace jsk_pcl_ros
     virtual ~Polygon();
     virtual std::vector<Polygon::Ptr> decomposeToTriangles();
     virtual bool isTriangle();
+    template <class PointT>
+    typename pcl::PointCloud<PointT>::Ptr samplePoints(double grid_size)
+    {
+      typename pcl::PointCloud<PointT>::Ptr
+        ret (new pcl::PointCloud<PointT>);
+      double min_x = DBL_MAX;
+      double min_y = DBL_MAX;
+      double max_x = - DBL_MAX;
+      double max_y = - DBL_MAX;
+    
+      Eigen::Affine3f inv_coords = coordinates().inverse();
+      for (size_t i = 0; i < vertices_.size(); i++) {
+        // Convert vertices into local coordinates
+        Eigen::Vector3f local_point = inv_coords * vertices_[i];
+        min_x = ::fmin(local_point[0], min_x);
+        min_y = ::fmin(local_point[1], min_y);
+        max_x = ::fmax(local_point[0], max_x);
+        max_y = ::fmax(local_point[1], max_y);
+      }
+      // ROS_INFO("min_x: %f", min_x);
+      // ROS_INFO("min_y: %f", min_y);
+      // ROS_INFO("max_x: %f", max_x);
+      // ROS_INFO("max_y: %f", max_y);
+      // Decompose into triangle first for optimization
+      std::vector<Polygon::Ptr> triangles = decomposeToTriangles();
+      for (double x = min_x; x < max_x; x += grid_size) {
+        for (double y = min_y; y < max_y; y += grid_size) {
+          Eigen::Vector3f candidate(x, y, 0);
+          Eigen::Vector3f candidate_global = coordinates() * candidate;
+          // check candidate is inside of the polygon or not
+          bool insidep = false;
+          for (size_t i = 0; i < triangles.size(); i++) {
+            if (triangles[i]->isInside(candidate_global)) {
+              insidep = true;
+              break;
+            }
+          }
+          if (insidep) {
+            PointT p;
+            p.x = candidate_global[0];
+            p.y = candidate_global[1];
+            p.z = candidate_global[2];
+            p.normal_x = normal_[0];
+            p.normal_y = normal_[1];
+            p.normal_z = normal_[2];
+            ret->points.push_back(p);
+          }
+        }
+      }
+      return ret;
+    }
     virtual size_t getNumVertices();
     virtual size_t getFarestPointIndex(const Eigen::Vector3f& O);
     virtual Eigen::Vector3f directionAtPoint(size_t i);
@@ -229,12 +329,14 @@ namespace jsk_pcl_ros
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3f& output);
     virtual void project(const Eigen::Vector3f& p, Eigen::Vector3d& output);
     virtual void projectOnPlane(const Eigen::Vector3f& p, Eigen::Vector3f& output);
+    virtual void projectOnPlane(const Eigen::Affine3f& p, Eigen::Affine3f& output);
     virtual bool isProjectableInside(const Eigen::Vector3f& p);
     // p should be a point on the plane
     virtual ConvexPolygon flipConvex();
     virtual Eigen::Vector3f getCentroid();
     virtual Ptr magnify(const double scale_factor);
-        
+    virtual Ptr magnifyByDistance(const double distance);
+    
     static ConvexPolygon fromROSMsg(const geometry_msgs::Polygon& polygon);
     bool distanceSmallerThan(
       const Eigen::Vector3f& p, double distance_threshold);
@@ -242,6 +344,7 @@ namespace jsk_pcl_ros
       const Eigen::Vector3f& p, double distance_threshold,
       double& output_distance);
     bool allEdgesLongerThan(double thr);
+    double distanceFromVertices(const Eigen::Vector3f& p);
     geometry_msgs::Polygon toROSMsg();
   protected:
     
@@ -278,7 +381,7 @@ namespace jsk_pcl_ros
         // convert pointcloud to vertices
         Vertices vs;
         for (size_t i = 0; i < convex_cloud->points.size(); i++) {
-          Eigen::Vector3f v = convex_cloud->points[i].getVector3fMap();
+          Eigen::Vector3f v(convex_cloud->points[i].getVector3fMap());
           vs.push_back(v);
         }
         return ConvexPolygon::Ptr(new ConvexPolygon(vs));
@@ -288,6 +391,116 @@ namespace jsk_pcl_ros
       }
     }
   }
+
+  /**
+   * @brief
+   * Grid based representation of planar region.
+   *
+   * Each cell represents a square region as belows:
+   *        +--------+
+   *        |        |
+   *        |   +    |
+   *        |        |
+   *        +--------+
+   *
+   * The width and height of the cell is equivalent to resolution_,
+   * and the value of cells_ represents a center point.
+   * (i, j) means rectanglar region of (x, y) which satisfies followings:
+   * i * resolution - 0.5 * resolution <= x < i * resolution + 0.5 * resolution
+   * j * resolution - 0.5 * resolution <= y < j * resolution + 0.5 * resolution
+   * 
+   *
+   */
+  class GridPlane
+  {
+  public:
+    typedef boost::shared_ptr<GridPlane> Ptr;
+    typedef boost::tuple<int, int> IndexPair;
+    GridPlane(ConvexPolygon::Ptr plane, const double resolution);
+    virtual ~GridPlane();
+    virtual GridPlane::Ptr clone(); // shallow copy
+    virtual void fillCellsFromPointCloud(
+      pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
+      double distance_threshold);
+    virtual void fillCellsFromPointCloud(
+      pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
+      double distance_threshold,
+      std::set<int>& non_plane_indices);
+    virtual void fillCellsFromCube(Cube& cube);
+    virtual double getResolution() { return resolution_; }
+    virtual jsk_recognition_msgs::SimpleOccupancyGrid toROSMsg();
+    /**
+     * @brief
+     * Construct GridPlane object from
+     * jsk_recognition_msgs::SimpleOccupancyGrid.
+     */
+    static GridPlane fromROSMsg(
+      const jsk_recognition_msgs::SimpleOccupancyGrid& rosmsg,
+      const Eigen::Affine3f& offset);
+    virtual bool isOccupied(const IndexPair& pair);
+    
+    /**
+     * @brief
+     * p should be local coordinate
+     */
+    virtual bool isOccupied(const Eigen::Vector3f& p);
+
+    /**
+     * @brief
+     * p should be global coordinate
+     */
+    virtual bool isOccupiedGlobal(const Eigen::Vector3f& p);
+    
+    /**
+     * @brief
+     * Project 3-D point to GridPlane::IndexPair.
+     * p should be represented in local coordinates.
+     */
+    virtual IndexPair projectLocalPointAsIndexPair(const Eigen::Vector3f& p);
+
+    /**
+     * @brief
+     * Unproject GridPlane::IndexPair to 3-D local point.
+     */
+    virtual Eigen::Vector3f unprojectIndexPairAsLocalPoint(const IndexPair& pair);
+
+    /**
+     * @brief
+     * Unproject GridPlane::IndexPair to 3-D global point.
+     */
+    virtual Eigen::Vector3f unprojectIndexPairAsGlobalPoint(const IndexPair& pair);
+
+    /**
+     * @brief
+     * Add IndexPair to this instance.
+     */
+    virtual void addIndexPair(IndexPair pair);
+
+    /**
+     * @brief
+     * Erode grid cells with specified number of pixels
+     */
+    virtual GridPlane::Ptr erode(int num);
+
+    /**
+     * @brief
+     * return ConvexPolygon pointer of this instance.
+     */
+    virtual ConvexPolygon::Ptr getPolygon() { return convex_; }
+    
+    /**
+     * @brief
+     * Dilate grid cells with specified number of pixels
+     */
+    virtual GridPlane::Ptr dilate(int num);
+  protected:
+    ConvexPolygon::Ptr convex_;
+    std::set<IndexPair> cells_;
+    double resolution_;
+  private:
+    
+  };
+
   
   class Cube
   {
@@ -299,6 +512,8 @@ namespace jsk_pcl_ros
     Cube(const Eigen::Vector3f& pos, // centroid
          const Line& line_a, const Line& line_b, const Line& line_c);
     virtual ~Cube();
+    std::vector<Segment::Ptr> edges();
+    ConvexPolygon::Ptr intersectConvexPolygon(Plane& plane);
     std::vector<double> getDimensions() const { return dimensions_; };
     void setDimensions(const std::vector<double>& new_dimensions) {
       dimensions_[0] = new_dimensions[0];

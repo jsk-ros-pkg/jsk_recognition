@@ -1,7 +1,8 @@
+// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Yuto Inagaki and JSK Lab
+ *  Copyright (c) 2015, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,58 +34,40 @@
  *********************************************************************/
 
 
-#include "jsk_pcl_ros/tf_transform_cloud.h"
-#include <pluginlib/class_list_macros.h>
+#ifndef JSK_PCL_ROS_POLYGON_MAGNIFIER_H_
+#define JSK_PCL_ROS_POLYGON_MAGNIFIER_H_
 
-#include <tf2_ros/buffer_client.h>
-#include <pcl/common/centroid.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+
+#include <jsk_pcl_ros/PolygonMagnifierConfig.h>
+#include <dynamic_reconfigure/server.h>
+
+#include <jsk_recognition_msgs/PolygonArray.h>
 
 namespace jsk_pcl_ros
 {
-  void TfTransformCloud::transform(const sensor_msgs::PointCloud2ConstPtr &input)
+  class PolygonMagnifier: public jsk_topic_tools::DiagnosticNodelet
   {
-    sensor_msgs::PointCloud2 output;
-    try
-    {
-      tf_listener_->waitForTransform(target_frame_id_, input->header.frame_id,
-                                     input->header.stamp, ros::Duration(duration_));
-      if (pcl_ros::transformPointCloud(target_frame_id_, *input, output,
-                                       *tf_listener_)) {
-        pub_cloud_.publish(output);
-      }
-    }
-    catch (tf2::ConnectivityException &e)
-    {
-      NODELET_ERROR("Transform error: %s", e.what());
-    }
-    catch (tf2::InvalidArgumentException &e)
-    {
-      NODELET_ERROR("Transform error: %s", e.what());
-    }
-  }
-
-  void TfTransformCloud::onInit(void)
-  {
-    ConnectionBasedNodelet::onInit();
+  public:
+    typedef boost::shared_ptr<PolygonMagnifier> Ptr;
+    typedef PolygonMagnifierConfig Config;
+    PolygonMagnifier(): DiagnosticNodelet("PolygonMagnifier") {}
+  protected:
+    virtual void onInit();
+    virtual void subscribe();
+    virtual void unsubscribe();
+    virtual void magnify(
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon_msg);
+    virtual void configCallback(
+      Config& config, uint32_t level);
+    ros::Subscriber sub_;
+    ros::Publisher pub_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    boost::mutex mutex_;
+    double magnify_distance_;
+  private:
     
-    if (!pnh_->getParam("target_frame_id", target_frame_id_))
-    {
-      ROS_WARN("~target_frame_id is not specified, using %s", "/base_footprint");
-    }
-    pnh_->param("duration", duration_, 1.0);
-    tf_listener_ = TfListenerSingleton::getInstance();
-    pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
-  }
-
-  void TfTransformCloud::subscribe()
-  {
-    sub_cloud_ = pnh_->subscribe("input", 1, &TfTransformCloud::transform, this);
-  }
-
-  void TfTransformCloud::unsubscribe()
-  {
-    sub_cloud_.shutdown();
-  }
+  };
 }
 
-PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::TfTransformCloud, nodelet::Nodelet);
+#endif

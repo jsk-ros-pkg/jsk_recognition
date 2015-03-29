@@ -32,49 +32,62 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-
-#include "jsk_pcl_ros/tf_listener_singleton.h"
-#include <boost/format.hpp>
+#define BOOST_PARAMETER_MAX_ARITY 7
+#include "jsk_pcl_ros/organized_pointcloud_to_point_indices.h"
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
 
 namespace jsk_pcl_ros
 {
-  tf::TransformListener* TfListenerSingleton::getInstance()
+  void OrganizedPointCloudToPointIndices::onInit()
   {
-    boost::mutex::scoped_lock lock(mutex_);
-    if (!instance_) {
-      ROS_INFO("instantiating tf::TransformListener");
-      instance_ = new tf::TransformListener();
-    }
-    return instance_;
+    DiagnosticNodelet::onInit();
+    pub_ = advertise<PCLIndicesMsg>(*pnh_, "output", 1);
   }
 
-  void TfListenerSingleton::destroy()
+  void OrganizedPointCloudToPointIndices::subscribe()
   {
-    boost::mutex::scoped_lock lock(mutex_);
-    if (instance_) {
-      delete instance_;
+    sub_ = pnh_->subscribe("input", 1,
+                           &OrganizedPointCloudToPointIndices::indices,
+                           this);
+  }
+
+  void OrganizedPointCloudToPointIndices::unsubscribe()
+  {
+    sub_.shutdown();
+  }
+
+  void OrganizedPointCloudToPointIndices::updateDiagnostic(
+    diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    if (vital_checker_->isAlive()) {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                   "OrganizedPointCloudToPointIndices running");
+    }
+    else {
+      jsk_topic_tools::addDiagnosticErrorSummary(
+        "OrganizedPointCloudToPointIndices", vital_checker_, stat);
     }
   }
 
-  tf::StampedTransform lookupTransformWithDuration(
-    tf::TransformListener* listener,
-    const std::string& from_frame,
-    const std::string& to_frame,
-    const ros::Time& stamp,
-    ros::Duration duration)
+  void OrganizedPointCloudToPointIndices::indices(
+    const sensor_msgs::PointCloud2::ConstPtr& point_msg)
   {
-    if (listener->waitForTransform(from_frame, to_frame, stamp, duration)) {
-      tf::StampedTransform transform;
-      listener->lookupTransform(
-        from_frame, to_frame, stamp, transform);
-      return transform;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr pc(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::fromROSMsg(*point_msg, *pc);
+    if(pc->isOrganized()){
+      PCLIndicesMsg indices_msg;
+      indices_msg.header = point_msg->header;
+      for (size_t i = 0; i < pc->points.size(); i++)
+        if (!isnan(pc->points[i].x) && !isnan(pc->points[i].y) && !isnan(pc->points[i].z))
+          indices_msg.indices.push_back(i);
+      pub_.publish(indices_msg);
+    }else{
+      ROS_ERROR("Input Pointcloud is not organized");
     }
-    throw tf2::TransformException(
-      (boost::format("Failed to lookup transformation from %s to %s")
-       % from_frame.c_str() % to_frame.c_str()).str().c_str());
-      
   }
-  
-  tf::TransformListener* TfListenerSingleton::instance_;
-  boost::mutex TfListenerSingleton::mutex_;
 }
+
+#include <pluginlib/class_list_macros.h>
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::OrganizedPointCloudToPointIndices, nodelet::Nodelet);

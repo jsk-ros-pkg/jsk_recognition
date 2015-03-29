@@ -1,8 +1,8 @@
-// -*- mode: C++ -*-
+// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Yuto Inagaki and JSK Lab
+ *  Copyright (c) 2015, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,39 +33,57 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_TF_TRANSFORMCLOUD_H_
-#define JSK_PCL_ROS_TF_TRANSFORMCLOUD_H_
 
-// ros
-#include <ros/ros.h>
-#include <ros/names.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <tf/transform_broadcaster.h>
-#include <pcl_ros/transforms.h>
+#ifndef JSK_PCL_ROS_POLYGON_POINTS_SAMPLER_H_
+#define JSK_PCL_ROS_POLYGON_POINTS_SAMPLER_H_
 
-// pcl
-#include <pcl_ros/pcl_nodelet.h>
-#include <pcl/point_types.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include "jsk_pcl_ros/geo_util.h"
 
-#include <jsk_topic_tools/connection_based_nodelet.h>
-#include "jsk_pcl_ros/tf_listener_singleton.h"
+#include <jsk_pcl_ros/PolygonPointsSamplerConfig.h>
+#include <dynamic_reconfigure/server.h>
 
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
+
+#include <jsk_recognition_msgs/PolygonArray.h>
+#include <jsk_recognition_msgs/ModelCoefficientsArray.h>
 namespace jsk_pcl_ros
 {
-  class TfTransformCloud: public jsk_topic_tools::ConnectionBasedNodelet
+  class PolygonPointsSampler: public jsk_topic_tools::DiagnosticNodelet
   {
+  public:
+    typedef boost::shared_ptr<PolygonPointsSampler> Ptr;
+    typedef PolygonPointsSamplerConfig Config;
+    
+    typedef message_filters::sync_policies::ExactTime<
+      jsk_recognition_msgs::PolygonArray,
+      jsk_recognition_msgs::ModelCoefficientsArray > SyncPolicy;
+    
+    PolygonPointsSampler(): DiagnosticNodelet("PolygonPointsSampler") {}
   protected:
-    ros::Subscriber sub_cloud_;
-    ros::Publisher  pub_cloud_;
-    std::string target_frame_id_;
-    tf::TransformListener* tf_listener_;
-    virtual void transform(const sensor_msgs::PointCloud2ConstPtr &input);
+    virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
+    virtual void sample(
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon_msg,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg);
+    virtual void configCallback(Config& config, uint32_t level);
+    virtual bool isValidMessage(
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon_msg,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg);
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
+    message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygons_;
+    message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
     
-    double duration_;
+    boost::mutex mutex_;
+    ros::Publisher pub_;
+    double grid_size_;
+    
   private:
-    virtual void onInit();
+    
   };
 }
 

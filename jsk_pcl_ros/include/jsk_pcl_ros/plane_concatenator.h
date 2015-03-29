@@ -83,7 +83,8 @@ namespace jsk_pcl_ros
     virtual void configCallback(Config &config, uint32_t level);
     virtual bool isNearPointCloud(
       pcl::KdTreeFLANN<PointT>& kdtree,
-      pcl::PointCloud<PointT>::Ptr cloud);
+      pcl::PointCloud<PointT>::Ptr cloud,
+      Plane::Ptr target_plane);
     virtual pcl::ModelCoefficients::Ptr refinement(
       pcl::PointCloud<PointT>::Ptr cloud,
       pcl::PointIndices::Ptr indices,
@@ -106,6 +107,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     double connect_angular_threshold_;
     double connect_distance_threshold_;
+    double connect_perpendicular_distance_threshold_;
     int ransac_refinement_max_iteration_;
     double ransac_refinement_outlier_threshold_;
     double ransac_refinement_eps_distance_;

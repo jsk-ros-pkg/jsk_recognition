@@ -2,6 +2,29 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.2.8 (2015-03-29)
+------------------
+
+0.2.9 (2015-03-29)
+------------------
+* 0.2.8
+* Update Changelog
+* Contributors: Ryohei Ueda
+
+0.2.7 (2015-03-26)
+------------------
+
+0.2.6 (2015-03-25)
+------------------
+* [checkerboard_detector] Fill D of camera parameter by zero if ~use_P is true
+* Contributors: Ryohei Ueda
+
+0.2.5 (2015-03-17)
+------------------
+* [checkerboard_detector] add ~use_P to use P instead of K as intrinsic
+  parameter for illegal camera info such as multisense
+* Contributors: Ryohei Ueda
+
 0.2.4 (2015-03-08)
 ------------------
 * Fix license: WillowGarage -> JSK Lab

@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, JSK Lab
+ *  Copyright (c) 2015, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,48 +33,55 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+
+#ifndef JSK_PCL_ROS_POLYGON_FLIPPER_H_
+#define JSK_PCL_ROS_POLYGON_FLIPPER_H_
+
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_msgs/PolygonArray.h>
+#include <jsk_recognition_msgs/ModelCoefficientsArray.h>
+#include <jsk_recognition_msgs/ClusterPointIndices.h>
+
+#include "jsk_pcl_ros/geo_util.h"
 #include "jsk_pcl_ros/tf_listener_singleton.h"
-#include <boost/format.hpp>
+
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
 
 namespace jsk_pcl_ros
 {
-  tf::TransformListener* TfListenerSingleton::getInstance()
+  class PolygonFlipper: public jsk_topic_tools::DiagnosticNodelet
   {
-    boost::mutex::scoped_lock lock(mutex_);
-    if (!instance_) {
-      ROS_INFO("instantiating tf::TransformListener");
-      instance_ = new tf::TransformListener();
-    }
-    return instance_;
-  }
+  public:
+    typedef boost::shared_ptr<PolygonFlipper> Ptr;
+    typedef message_filters::sync_policies::ExactTime<
+      jsk_recognition_msgs::PolygonArray,
+      jsk_recognition_msgs::ClusterPointIndices,
+      jsk_recognition_msgs::ModelCoefficientsArray > SyncPolicy;
+    PolygonFlipper(): DiagnosticNodelet("PolygonFlipper") {}
+  protected:
+    virtual void onInit();
+    virtual void subscribe();
+    virtual void unsubscribe();
 
-  void TfListenerSingleton::destroy()
-  {
-    boost::mutex::scoped_lock lock(mutex_);
-    if (instance_) {
-      delete instance_;
-    }
-  }
-
-  tf::StampedTransform lookupTransformWithDuration(
-    tf::TransformListener* listener,
-    const std::string& from_frame,
-    const std::string& to_frame,
-    const ros::Time& stamp,
-    ros::Duration duration)
-  {
-    if (listener->waitForTransform(from_frame, to_frame, stamp, duration)) {
-      tf::StampedTransform transform;
-      listener->lookupTransform(
-        from_frame, to_frame, stamp, transform);
-      return transform;
-    }
-    throw tf2::TransformException(
-      (boost::format("Failed to lookup transformation from %s to %s")
-       % from_frame.c_str() % to_frame.c_str()).str().c_str());
-      
-  }
-  
-  tf::TransformListener* TfListenerSingleton::instance_;
-  boost::mutex TfListenerSingleton::mutex_;
+    virtual void flip(
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon_msg,
+      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg);
+    
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
+    message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygons_;
+    message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_indices_;
+    message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
+    ros::Publisher pub_polygons_;
+    ros::Publisher pub_indices_;
+    ros::Publisher pub_coefficients_;
+    tf::TransformListener* tf_listener_;
+    std::string sensor_frame_;
+  private:
+    
+  };
 }
+
+#endif

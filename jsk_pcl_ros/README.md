@@ -85,6 +85,10 @@ It publishes tf transformation from gloabl frame to odometory frame like acml do
 * `~leaf_size` (Double, default: `0.01`)
 
   Resolution of voxel grid downsampling.
+* `~use_normal` (Bool, default: `false`)
+
+  Support normal.
+
 #### Using Services
 * `~icp_align` (`jsk_pcl_ros/ICPAlign`)
 
@@ -608,6 +612,9 @@ Concatenate near planes and build new set of planes.
 * `~connect_distance_threshold` (Double, default: `0.1`)
 
    Euclidean distance threshold to regard two planes as near.
+* `~connect_perpendicular_distance_threshold` (Double, default: `0.1`)
+
+   Distance threshold to connect two planes in perpendicular direction.
 * `~ransac_refinement_max_iteration` (Integer, default: `100`)
 
   The maximum number of iteration of RANSAC refinement.
@@ -617,6 +624,63 @@ Concatenate near planes and build new set of planes.
 * `~ransac_refinement_eps_angle` (Double, default: `0.1`)
 
   Eps angle threshold of RANSAC refinment using normal direction of the plane.
+
+### jsk\_pcl/PolygonMagnifier
+Magnify polygons by specified length.
+
+#### Subscribing Topic
+* `~input` (`jsk_recognition_msgs/PolygonArray`)
+
+  Input polygons
+
+#### Publishing Topic
+* `~output` (`jsk_recognition_msgs/PolygonArray`)
+
+  Output magnified polygons
+
+#### Parameters
+* `~magnify_distance` (Double, default: `0.2`)
+
+  Length to scale polygon
+
+### jsk\_pcl/PolygonPointsFlipper
+
+Flip `jsk_recognition_msgs/PolygonArray` to specified sensor_frame.
+
+#### Subscribing Topic
+* `~input/polygons` (`jsk_recognition_msgs/PolygonArray`)
+* `~input/coefficients` (`jsk_recognition_msgs/ModelCoefficientsArray`)
+
+  Input polygons.
+#### Publishing Topic
+* `~output/polygons` (`jsk_recognition_msgs/PolygonArray`)
+* `~output/coefficients` (`jsk_recognition_msgs/ModelCoefficientsArray`)
+
+  Output flipped polygons which look at the origin of sensor_frame.
+#### Parameter
+* `~sensor_frame` (String)
+
+   frame_id of sensor for polygons to look at.
+
+### jsk\_pcl/PolygonPointsSampler
+![](images/polygon_points_sampler.png)
+
+Sampling points with fixed grid size on polygons.
+
+#### Subscribing Topic
+* `~input/polygons` (`jsk_recognition_msgs/PolygonArray`)
+* `~input/coefficients` (`jsk_recognition_msgs/ModelCoefficientsArray`)
+  Input polygons where be sampled
+
+#### Publishing Topic
+* `~output` (`sensor_msgs/PointCloud2`)
+
+  Sampled pointcloud
+
+#### Parameters
+* `~grid_size` (Double, default: `0.01`)
+
+  Sampling grid size.
 ### jsk\_pcl/SupervoxelSegmentation
 ![](images/supervoxel_segmentation.png)
 
@@ -917,6 +981,20 @@ organized pointcloud.
 
   Output indices converted from the mask image.
 
+### jsk\_pcl/OrganizedPointCloudToPointIndices
+A nodelet to convert organized PointCloud (`sensor_msgs::PointCloud2`) to `pcl_msgs/PointIndices` for
+organized pointcloud.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Input organized pointcloud.
+
+#### Publishing Topic
+* `~output` (`pcl_msgs/PointIndices`)
+
+  Output indices converted from the organized pointcloud.
+
 ### jsk\_pcl/PointIndicesToMaskImage
 #### What Is This
 ![](images/point_indices_to_mask_image.png)
@@ -1014,6 +1092,9 @@ to see the object.
   `~initial_rot_list` should follow `[[rx, ry, rz], ...]` and
   `~dimensions` should follow `[[x, y, z], ...]`.
   Available only if `~use_multiple_attention` is true.
+* `~negative` (Boolean, default: `False`)
+
+  Publish points which are not inside of attention regions if this parameter is true.
 ### jsk\_pcl/ROIClipper
 #### What Is This
 ![](images/attention_clipper.png)
@@ -1112,6 +1193,9 @@ Extract the points above the planes between `~min_height` and `~max_height`.
 * `~output_nonplane_cloud` (`sensor_msgs/PointCloud2`):
 
    Pointcloud above the planes is not between `~min_height` and `~max_height`.
+* `~output/indices` (`pcl_msgs/PointIndices`)
+
+  PointIndices of points which are between `~min_height` and `~max_height`.
 
 #### Parameters
 * `~min_height` (Double, default: `0.0`)
@@ -1121,16 +1205,18 @@ Extract the points above the planes between `~min_height` and `~max_height`.
 * `~max_queue_size` (Integer, default: `100`)
 
    Queue length for subscribing topics.
-
 * `~use_indices` (Bool, default: `True`)
 
    Use indices of planar regions to filter if it's set true.
    You can disable this parameter to filter pointcloud which is not the same pointcloud
    to segment planes
-
 * `~magnify` (Double, default: `0.0`)
 
-  Magnify planes by this parameter. The unit is m.
+   Magnify planes by this parameter. The unit is m.
+* `~use_async` (Boolean, default: `False`)
+
+  Approximate sync input topics.
+
 ### jsk\_pcl/RegionGrowingMultiplePlaneSegmentation
 ![jsk_pcl/RegionGrowingMultiplePlaneSegmentation](images/region_growing_multiple_plane_segmentation.png).
 
@@ -1948,7 +2034,9 @@ This nodelet will republish the pointcloud which is transformed with the designa
 
 #### Parameters
 * `~target_frame_id` (string): The frame_id to transform pointcloud.
+* `~duration` (Double, default: `1.0`)
 
+  Second to wait for transformation
 #### Sample
 Plug the depth sensor which can be launched by openni.launch and run the below command.
 

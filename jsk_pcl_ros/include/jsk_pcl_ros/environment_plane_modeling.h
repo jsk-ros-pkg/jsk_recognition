@@ -61,283 +61,188 @@
 
 #include <jsk_topic_tools/time_accumulator.h>
 
-#include "jsk_pcl_ros/grid_map.h"
 #include "jsk_pcl_ros/pcl_util.h"
-
-#include <jsk_recognition_msgs/SparseOccupancyGridArray.h>
+#include <jsk_recognition_msgs/SimpleOccupancyGridArray.h>
+#include <jsk_recognition_msgs/BoundingBoxArray.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_pcl_ros/tf_listener_singleton.h"
 
 namespace jsk_pcl_ros
 {
-  class EnvironmentPlaneModeling: public pcl_ros::PCLNodelet
+
+  // Helper classes
+
+  /**
+   * @brief
+   * Nodelet implementation of jsk_pcl/EnvironmentPlaneModeling
+   */
+  class EnvironmentPlaneModeling: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    typedef pcl::PointXYZRGB PointT;
     typedef EnvironmentPlaneModelingConfig Config;
+    
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
-      jsk_recognition_msgs::ClusterPointIndices,
+      sensor_msgs::PointCloud2,
       jsk_recognition_msgs::PolygonArray,
       jsk_recognition_msgs::ModelCoefficientsArray,
-      jsk_recognition_msgs::PolygonArray,
-      jsk_recognition_msgs::ModelCoefficientsArray> SyncPolicy;
-    typedef message_filters::sync_policies::ExactTime<
-      sensor_msgs::PointCloud2,
-      jsk_recognition_msgs::ClusterPointIndices,
-      jsk_recognition_msgs::PolygonArray,
-      jsk_recognition_msgs::ModelCoefficientsArray
-      > SyncPolicyWithoutStaticPolygon;
-    typedef message_filters::sync_policies::ExactTime<
-      jsk_recognition_msgs::PolygonArray,
-      jsk_recognition_msgs::ModelCoefficientsArray
-      > PolygonSyncPolicy;
+      jsk_recognition_msgs::ClusterPointIndices > SyncPolicy;
+    EnvironmentPlaneModeling(): DiagnosticNodelet("EnvironmentPlaneModeling") {}
   protected:
     virtual void onInit();
-    virtual void estimateOcclusion(
-      const pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
-      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices,
-      const std::vector<pcl::PointCloud<PointT>::Ptr>& segmented_cloud,
-      std::vector<GridMap::Ptr>& grid_maps,
-      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
-      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
-      const jsk_recognition_msgs::PolygonArray::ConstPtr& static_polygons,
-      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& static_coefficients,
-      jsk_recognition_msgs::PolygonArray::Ptr result_polygons,
-      jsk_recognition_msgs::ModelCoefficientsArray::Ptr result_coefficients,
-      pcl::PointCloud<PointT>::Ptr result_pointcloud,
-      jsk_recognition_msgs::ClusterPointIndices::Ptr result_indices);
-    
-    template <class A, class B>
-    bool isValidHeaders(
-      const std::vector<A>& as, const std::vector<B>& bs);
-    bool isValidInput();
+
+    /**
+     * @brief
+     * subscription callback function of jsk_topic_tools::DiagnosticNodelet.
+     * This method is empty method because EnvironmentPlaneModeling needs to always run
+     */
+    virtual void subscribe() {}
+
+    /**
+     * @brief
+     * unsubscription callback function of jsk_topic_tools::DiagnosticNodelet.
+     * This method is empty method because EnvironmentPlaneModeling needs to always run
+     */
+    virtual void unsubscribe() {}
+
+    /**
+     * @brief
+     * main callback function
+     */
     virtual void inputCallback(
-      const sensor_msgs::PointCloud2::ConstPtr& input,
-      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices,
-      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
-      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
-      const jsk_recognition_msgs::PolygonArray::ConstPtr& static_polygons,
-      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& static_coefficients);
-    virtual void configCallback(Config &config, uint32_t level);
-    virtual bool lockCallback();
-    virtual bool startBuildEnvironmentCallback(
-      std_srvs::Empty::Request& req,
-      std_srvs::Empty::Response& res);
-    virtual bool stopBuildEnvironmentCallback(
-      std_srvs::Empty::Request& req,
-      std_srvs::Empty::Response& res);
+      const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
+      const sensor_msgs::PointCloud2::ConstPtr& full_cloud_msg,
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon_msg,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg,
+      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg);
 
-    virtual bool dummyLockCallback(EnvironmentLock::Request& req,
-                                   EnvironmentLock::Response& res);
-    virtual bool polygonOnEnvironmentCallback(PolygonOnEnvironment::Request& req,
-                                              PolygonOnEnvironment::Response& res);
-    virtual bool primitiveLockCallback(std_srvs::Empty::Request& req,
-                                       std_srvs::Empty::Response& res);
-    virtual bool primitiveUnlockCallback(std_srvs::Empty::Request& req,
-                                         std_srvs::Empty::Response& res);
-    virtual bool clearMapCallback(std_srvs::Empty::Request& req,
-                                  std_srvs::Empty::Response& res);
-    virtual bool registerToHistoryCallback(std_srvs::Empty::Request& req,
-                                           std_srvs::Empty::Response& res);
-    virtual bool registerCompletionToHistoryCallback(
-      std_srvs::Empty::Request& req,
-      std_srvs::Empty::Response& res);
-    virtual void appendGridMaps(std::vector<GridMap::Ptr>& old_maps,
-                                std::vector<GridMap::Ptr>& new_maps);
-    virtual bool polygonNearEnoughToPointCloud(
-      const size_t plane_i,
-      const pcl::PointCloud<PointT>::Ptr sampled_point_cloud);
-    virtual void samplePolygonToPointCloud(
-      const geometry_msgs::PolygonStamped sample_polygon,
-      pcl::PointCloud<PointT>::Ptr output,
-      double sampling_param);
-    
-    virtual void decomposePointCloud(
-      const pcl::PointCloud<PointT>::Ptr& input,
-      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices,
-      std::vector<pcl::PointCloud<PointT>::Ptr>& output);
-    virtual void internalPointDivide(const PointT& A, const PointT& B,
-                                     const double ratio,
-                                     PointT& output);
+    virtual void printInputData(
+      const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
+      const sensor_msgs::PointCloud2::ConstPtr& full_cloud_msg,
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon_msg,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg,
+      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg);
 
-    virtual void downsizeGridMaps(std::vector<GridMap::Ptr>& maps);
-    
-    virtual void extendConvexPolygon(
-      const geometry_msgs::PolygonStamped& static_polygon,
-      const PCLModelCoefficientMsg& coefficients,
-      const geometry_msgs::PolygonStamped& nearest_polygon,
-      geometry_msgs::PolygonStamped& output_polygon);
-    virtual void updateAppendingInfo(const int env_plane_index,
-                                     const size_t static_plane_index,
-                                     std::map<int, std::set<size_t> >& result);
-    virtual void buildGridMap(
-      const std::vector<pcl::PointCloud<PointT>::Ptr>& segmented_clouds,
-      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
-      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
-      std::vector<GridMap::Ptr>& grid_maps);
-    virtual void publishGridMap(
+
+    virtual bool isValidFrameIds(
+      const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
+      const sensor_msgs::PointCloud2::ConstPtr& full_cloud_msg,
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon_msg,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg,
+      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg);
+
+    virtual std::vector<ConvexPolygon::Ptr> convertToConvexPolygons(
+      const pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
+      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg);
+
+    virtual void publishConvexPolygonsBoundaries(
       ros::Publisher& pub,
       const std_msgs::Header& header,
-      const std::vector<GridMap::Ptr> grid_maps);
-    virtual void publishGridMapPolygon(
-      ros::Publisher& pub_polygons,
-      ros::Publisher& pub_coefficients,
+      std::vector<ConvexPolygon::Ptr>& convexes);
+    
+    /**
+     * @brief
+     * Callback method of dynamic reconfigure
+     */
+    virtual void configCallback(Config &config, uint32_t level);
+
+    /**
+     * @brief
+     * Publish array of ConvexPolygon::Ptr by using specified publisher
+     */
+    virtual void publishConvexPolygons(
+      ros::Publisher& pub,
       const std_msgs::Header& header,
-      const std::vector<GridMap::Ptr> grid_maps);
-    // find the nearest plane to static_polygon and static_coefficient
-    // from polygons and coefficients
-    virtual int findNearestPolygon(
-      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
-      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
-      const geometry_msgs::PolygonStamped& static_polygon,
-      const PCLModelCoefficientMsg& static_coefficient);
-
-    virtual void fillEstimatedRegionByPointCloud
-    (const std_msgs::Header& header,
-     const pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
-     const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices,
-     const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
-     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
-     const jsk_recognition_msgs::PolygonArray::ConstPtr& static_polygons,
-     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& static_coefficients,
-     const jsk_recognition_msgs::PolygonArray& result_polygons,
-     const std::map<int, std::set<size_t> >& estimation_summary,
-     pcl::PointCloud<PointT>::Ptr all_cloud,
-     jsk_recognition_msgs::ClusterPointIndices& all_indices,
-     std::vector<GridMap::Ptr> grid_maps);
-
-    virtual void inputCallback(
-      const sensor_msgs::PointCloud2::ConstPtr& input,
-      const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices,
-      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
-      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients);
+      std::vector<ConvexPolygon::Ptr>& convexes);
     
-    virtual void copyClusterPointIndices
-    (const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices,
-     jsk_recognition_msgs::ClusterPointIndices& output);
-    virtual void computePolygonCentroid(
-      const geometry_msgs::PolygonStamped msg,
-      pcl::PointXYZRGB& output);
-    virtual void addIndices(const size_t start, const size_t end,
-                            PCLIndicesMsg& output);
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
-    // for historical_accumulation_
-    virtual int findCorrespondGridMap(
-      const std::vector<float>& coefficients,
-      const geometry_msgs::Polygon& polygon);
-    virtual int findNearGridMapFromCoefficients(
-      const std::vector<GridMap::Ptr>& maps, GridMap::Ptr map);
-    virtual void registerGridMap(const GridMap::Ptr new_grid_map);
-    virtual void selectionGridMaps();
-    virtual pcl::PointCloud<EnvironmentPlaneModeling::PointT>::Ptr
-    projectCloud(
-    const pcl::PointCloud<PointT>::Ptr input_cloud,
-    const std::vector<float> input_coefficient);
+    /**
+     * @brief
+     * Publish array of GridPlane::Ptr by using specified publisher
+     */
+    virtual void publishGridMaps(
+      ros::Publisher& pub,
+      const std_msgs::Header& header,
+      std::vector<GridPlane::Ptr>& grids);
+    
+    /**
+     * @brief
+     * Magnify ConvexPolygons according to maginify_distance_ parameter.
+     */
+    virtual std::vector<ConvexPolygon::Ptr> magnifyConvexes(
+      std::vector<ConvexPolygon::Ptr>& convexes);
 
-    virtual void staticPolygonCallback(
-      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
-      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients);
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr samplePointCloudOnPolygon(
-      const geometry_msgs::PolygonStamped& candidate_polygon,
-      const PCLModelCoefficientMsg& candidate_polygon_coefficients);
-    virtual void completeGridMap(
-    const pcl::PointCloud<pcl::PointXYZRGB>::Ptr input,
-    const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices,
-    const std::vector<pcl::PointCloud<PointT>::Ptr>& segmented_cloud,
-    const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
-    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
-    const jsk_recognition_msgs::PolygonArray::ConstPtr& static_polygons,
-    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& static_coefficients,
-    std::vector<GridMap::Ptr>& output_grid_maps);
-        
-    ////////////////////////////////////////////////////////
-    // ROS variables
-    ////////////////////////////////////////////////////////
+    /**
+     * @brief
+     * make GridPlane from ConvexPolygon and PointCloud
+     */
+    virtual std::vector<GridPlane::Ptr> buildGridPlanes(
+      pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
+      std::vector<ConvexPolygon::Ptr> convexes,
+      std::set<int>& non_plane_indices);
+
+    virtual std::vector<GridPlane::Ptr> morphologicalFiltering(
+      std::vector<GridPlane::Ptr>& raw_grid_maps);
+
+    virtual void boundingBoxCallback(
+      const jsk_recognition_msgs::BoundingBox::ConstPtr& box_array);
+
+    virtual std::vector<GridPlane::Ptr> completeFootprintRegion(
+      const std_msgs::Header& header,
+      std::vector<GridPlane::Ptr>& grid_maps);
+    
+    virtual std::vector<GridPlane::Ptr> erodeFiltering(
+      std::vector<GridPlane::Ptr>& grid_maps);
+
+    virtual int lookupGroundPlaneForFootprint(
+      const std::string& footprint_frame_id, const std_msgs::Header& header,
+      const std::vector<GridPlane::Ptr>& grid_maps);
+    
+    virtual int lookupGroundPlaneForFootprint(
+      const Eigen::Affine3f& pose, const std::vector<GridPlane::Ptr>& grid_maps);
+
+    virtual GridPlane::Ptr completeGridMapByBoundingBox(
+      const jsk_recognition_msgs::BoundingBox::ConstPtr& box,
+      const std_msgs::Header& header,
+      GridPlane::Ptr grid_map);
+
+    virtual void moveBaseSimpleGoalCallback(
+      const geometry_msgs::PoseStamped::ConstPtr& msg);
+    
     boost::mutex mutex_;
-    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
-    
-    // synchronized subscription
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
-    boost::shared_ptr<
-      message_filters::Synchronizer<SyncPolicyWithoutStaticPolygon> >
-    sync_without_static_;
-    boost::shared_ptr<
-      message_filters::Synchronizer<PolygonSyncPolicy> > sync_static_polygon_;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_cloud_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_full_cloud_;
     message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_indices_;
     message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygons_;
     message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
-    message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_static_polygons_;
-    message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_static_coefficients_;
-    ros::ServiceServer lock_service_;
-    ros::ServiceServer polygon_on_environment_service_;
-    ros::ServiceServer primitive_lock_service_;
-    ros::ServiceServer primitive_unlock_service_;
-    ros::ServiceServer clear_map_service_;
-    ros::ServiceServer register_to_history_service_;
-    ros::ServiceServer register_completion_to_history_service_;
-    ros::ServiceServer start_build_environment_service_;
-    ros::ServiceServer stop_build_environment_service_;
-    ros::Publisher debug_polygon_pub_;
-    ros::Publisher debug_env_polygon_pub_;
-    ros::Publisher debug_pointcloud_pub_;
-    ros::Publisher debug_env_pointcloud_pub_;
-    ros::Publisher debug_grid_map_completion_pub_;
-    ros::Publisher old_map_polygon_pub_;
-    ros::Publisher old_map_polygon_coefficients_pub_;
-    ros::Publisher occlusion_result_polygons_pub_;
-    ros::Publisher occlusion_result_coefficients_pub_;
-    ros::Publisher occlusion_result_pointcloud_pub_;
-    ros::Publisher occlusion_result_indices_pub_;
-    ros::Publisher grid_map_array_pub_;
-    ros::Publisher old_map_pub_;
-    // member variables to store the latest messages
-    sensor_msgs::PointCloud2::ConstPtr latest_input_;
-    jsk_recognition_msgs::ClusterPointIndices::ConstPtr latest_input_indices_;
-    jsk_recognition_msgs::PolygonArray::ConstPtr latest_input_polygons_;
-    jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr latest_input_coefficients_;
-    jsk_recognition_msgs::PolygonArray::ConstPtr latest_static_polygons_;
-    jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr latest_static_coefficients_;
-    
-    // member variables to keep the messasge which we process
-    sensor_msgs::PointCloud2::ConstPtr processing_input_;
-    jsk_recognition_msgs::ClusterPointIndices::ConstPtr processing_input_indices_;
-    jsk_recognition_msgs::PolygonArray::ConstPtr processing_input_polygons_;
-    jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr processing_input_coefficients_;
-    jsk_recognition_msgs::PolygonArray::ConstPtr processing_static_polygons_;
-    jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr processing_static_coefficients_;
-    jsk_recognition_msgs::PolygonArray::ConstPtr completion_static_polygons_;
-    jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr completion_static_coefficients_;
-    
-    std::vector<pcl::KdTreeFLANN<pcl::PointXYZ>::Ptr> kdtrees_;
-    uint32_t environment_id_;
-    double distance_thr_;
-    double sampling_d_;
-    double resolution_size_;
-    // parameters for occlusion
-    double plane_distance_threshold_;
-    double plane_angle_threshold_;
-    // grid map
-    double grid_map_distance_threshold_;
-    double grid_map_angle_threshold_;
-    bool continuous_estimation_;
-    bool history_accumulation_;
-    bool history_statical_rejection_;
-    bool estimate_occlusion_;
-    bool use_static_polygons_;
-    int static_generation_;
-    int required_vote_;
-    int decrease_grid_map_;
-    bool register_next_map_;
-    bool register_completion_next_map_;
-    std::vector<GridMap::Ptr> grid_maps_;
-    std::vector<GridMap::Ptr> old_grid_maps_;
-    jsk_topic_tools::TimeAccumulator occlusion_estimate_time_acc_;
-    jsk_topic_tools::TimeAccumulator grid_building_time_acc_;
-    jsk_topic_tools::TimeAccumulator kdtree_building_time_acc_;
-    jsk_topic_tools::TimeAccumulator polygon_collision_check_time_acc_;
-    boost::shared_ptr<diagnostic_updater::Updater> diagnostic_updater_;
-    int generation_;
+    ros::Subscriber sub_leg_bbox_;
+    ros::Subscriber sub_move_base_simple_goal_;
+    ros::Publisher pub_debug_magnified_polygons_;
+    ros::Publisher pub_debug_convex_point_cloud_;
+    ros::Publisher pub_debug_raw_grid_map_;
+    ros::Publisher pub_debug_noeroded_grid_map_;
+    ros::Publisher pub_grid_map_;
+    ros::Publisher pub_non_plane_indices_;
+    ros::Publisher pub_snapped_move_base_simple_goal_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    tf::TransformListener* tf_listener_;
+    jsk_recognition_msgs::BoundingBox::ConstPtr latest_leg_bounding_box_;
+    std::vector<std::string> footprint_frames_;
+    std::vector<GridPlane::Ptr> latest_grid_maps_;
+    std_msgs::Header latest_global_header_;
+    ////////////////////////////////////////////////////////
+    // Parameters
+    ////////////////////////////////////////////////////////
+    double magnify_distance_;
+    double distance_threshold_;
+    double resolution_;
+    int morphological_filter_size_;
+    bool complete_footprint_region_;
+    int erode_filter_size_;
+    double footprint_plane_distance_threshold_;
+    double footprint_plane_angular_threshold_;
   private:
   };
 }

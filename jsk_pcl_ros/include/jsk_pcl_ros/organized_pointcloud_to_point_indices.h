@@ -1,7 +1,8 @@
+// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Yuto Inagaki and JSK Lab
+ *  Copyright (c) 2014, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,58 +34,39 @@
  *********************************************************************/
 
 
-#include "jsk_pcl_ros/tf_transform_cloud.h"
-#include <pluginlib/class_list_macros.h>
+#ifndef JSK_PCL_ROS_ORGANIZED_POINTCLOUD_TO_POINT_INDICES_H_
+#define JSK_PCL_ROS_ORGANIZED_POINTCLOUD_TO_POINT_INDICES_H_
 
-#include <tf2_ros/buffer_client.h>
-#include <pcl/common/centroid.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <sensor_msgs/PointCloud2.h>
+#include "jsk_pcl_ros/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros
 {
-  void TfTransformCloud::transform(const sensor_msgs::PointCloud2ConstPtr &input)
+  class OrganizedPointCloudToPointIndices: public jsk_topic_tools::DiagnosticNodelet
   {
-    sensor_msgs::PointCloud2 output;
-    try
-    {
-      tf_listener_->waitForTransform(target_frame_id_, input->header.frame_id,
-                                     input->header.stamp, ros::Duration(duration_));
-      if (pcl_ros::transformPointCloud(target_frame_id_, *input, output,
-                                       *tf_listener_)) {
-        pub_cloud_.publish(output);
-      }
-    }
-    catch (tf2::ConnectivityException &e)
-    {
-      NODELET_ERROR("Transform error: %s", e.what());
-    }
-    catch (tf2::InvalidArgumentException &e)
-    {
-      NODELET_ERROR("Transform error: %s", e.what());
-    }
-  }
+  public:
+    OrganizedPointCloudToPointIndices(): DiagnosticNodelet("OrganizedPointCloudToPointIndices") { }
+  protected:
+    ////////////////////////////////////////////////////////
+    // methods
+    ////////////////////////////////////////////////////////
+    virtual void onInit();
+    virtual void subscribe();
+    virtual void unsubscribe();
+    virtual void updateDiagnostic(
+      diagnostic_updater::DiagnosticStatusWrapper &stat);
+    virtual void indices(
+      const sensor_msgs::PointCloud2::ConstPtr& point_msg);
 
-  void TfTransformCloud::onInit(void)
-  {
-    ConnectionBasedNodelet::onInit();
-    
-    if (!pnh_->getParam("target_frame_id", target_frame_id_))
-    {
-      ROS_WARN("~target_frame_id is not specified, using %s", "/base_footprint");
-    }
-    pnh_->param("duration", duration_, 1.0);
-    tf_listener_ = TfListenerSingleton::getInstance();
-    pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
-  }
+    ////////////////////////////////////////////////////////
+    // ROS variables
+    ////////////////////////////////////////////////////////
+    ros::Subscriber sub_;
+    ros::Publisher pub_;
+  private:
 
-  void TfTransformCloud::subscribe()
-  {
-    sub_cloud_ = pnh_->subscribe("input", 1, &TfTransformCloud::transform, this);
-  }
-
-  void TfTransformCloud::unsubscribe()
-  {
-    sub_cloud_.shutdown();
-  }
+  };
 }
 
-PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::TfTransformCloud, nodelet::Nodelet);
+#endif

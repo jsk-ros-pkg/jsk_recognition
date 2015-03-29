@@ -67,6 +67,8 @@ add_service_files(FILES SwitchTopic.srv
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/PolygonMagnifier.cfg
+  cfg/PolygonPointsSampler.cfg
   cfg/GeometricConsistencyGrouping.cfg
   cfg/UniformSampling.cfg
   cfg/PlanarPointCloudSimulator.cfg
@@ -181,6 +183,12 @@ jsk_pcl_nodelet(src/selected_cluster_publisher_nodelet.cpp
   "jsk_pcl/SelectedClusterPublisher" "selected_cluster_publisher")
 jsk_pcl_util_nodelet(src/spherical_pointcloud_simulator_nodelet.cpp
   "jsk_pcl/SphericalPointCloudSimulator" "spherical_pointcloud_simulator")
+jsk_pcl_util_nodelet(src/polygon_flipper_nodelet.cpp
+  "jsk_pcl/PolygonFlipper" "polygon_flipper")
+jsk_pcl_util_nodelet(src/polygon_points_sampler_nodelet.cpp
+  "jsk_pcl/PolygonPointsSampler" "polygon_points_sampler")
+jsk_pcl_util_nodelet(src/polygon_magnifier_nodelet.cpp
+  "jsk_pcl/PolygonMagnifier" "polygon_magnifier")
 jsk_pcl_util_nodelet(src/planar_pointcloud_simulator_nodelet.cpp
   "jsk_pcl/PlanarPointCloudSimulator" "planar_pointcloud_simulator")
 jsk_pcl_util_nodelet(src/plane_rejector_nodelet.cpp
@@ -190,7 +198,7 @@ jsk_pcl_util_nodelet(src/pointcloud_to_cluster_point_indices_nodelet.cpp
 jsk_pcl_util_nodelet(src/static_polygon_array_publisher_nodelet.cpp
   "jsk_pcl/StaticPolygonArrayPublisher" "static_polygon_array_publisher")
 jsk_pcl_util_nodelet(src/polygon_array_transformer_nodelet.cpp
-  "jsk_pcl/PolygonArrayTransformer" "polygon_array_transformer_nodelet")
+  "jsk_pcl/PolygonArrayTransformer" "polygon_array_transformer")
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
   jsk_pcl_nodelet(src/colorize_segmented_RF_nodelet.cpp
     "jsk_pcl/ColorizeRandomForest" "colorize_random_forest_result")
@@ -275,6 +283,8 @@ jsk_pcl_nodelet(src/point_indices_to_mask_image_nodelet.cpp
   "jsk_pcl/PointIndicesToMaskImage" "point_indices_to_mask_image")
 jsk_pcl_nodelet(src/mask_image_to_point_indices_nodelet.cpp
   "jsk_pcl/MaskImageToPointIndices" "mask_image_to_point_indices")
+jsk_pcl_nodelet(src/organized_pointcloud_to_point_indices_nodelet.cpp
+  "jsk_pcl/OrganizedPointCloudToPointIndices" "organized_pointcloud_to_point_indices")
 jsk_pcl_nodelet(src/hinted_handle_estimator_nodelet.cpp
   "jsk_pcl/HintedHandleEstimator" "hinted_handle_estimator")
 jsk_pcl_nodelet(src/capture_stereo_synchronizer_nodelet.cpp

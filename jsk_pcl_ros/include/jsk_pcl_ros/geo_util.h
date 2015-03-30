@@ -63,6 +63,12 @@
 #include <visualization_msgs/Marker.h>
 #include "jsk_pcl_ros/pcl_util.h"
 
+// Utitlity macros
+inline void ROS_INFO_EIGEN_VECTOR3(const std::string& prefix,
+                                   const Eigen::Vector3f& v) {
+  ROS_INFO("%s: [%f, %f, %f]", prefix.c_str(), v[0], v[1], v[2]);
+}
+
 namespace jsk_pcl_ros
 {
   typedef std::vector<Eigen::Vector3f,
@@ -117,7 +123,8 @@ namespace jsk_pcl_ros
   {
     Vertices vs;
     for (size_t i = 0; i < cloud.points.size(); i++) {
-      vs.push_back(cloud.points[i].getVector3fMap());
+      Eigen::Vector3f p(cloud.points[i].getVector3fMap());
+      vs.push_back(p);
     }
     return vs;
   }
@@ -328,8 +335,10 @@ namespace jsk_pcl_ros
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3d& output);
     virtual void project(const Eigen::Vector3d& p, Eigen::Vector3f& output);
     virtual void project(const Eigen::Vector3f& p, Eigen::Vector3d& output);
-    virtual void projectOnPlane(const Eigen::Vector3f& p, Eigen::Vector3f& output);
-    virtual void projectOnPlane(const Eigen::Affine3f& p, Eigen::Affine3f& output);
+    virtual void projectOnPlane(const Eigen::Vector3f& p,
+                                Eigen::Vector3f& output);
+    virtual void projectOnPlane(const Eigen::Affine3f& p,
+                                Eigen::Affine3f& output);
     virtual bool isProjectableInside(const Eigen::Vector3f& p);
     // p should be a point on the plane
     virtual ConvexPolygon flipConvex();
@@ -416,6 +425,7 @@ namespace jsk_pcl_ros
   public:
     typedef boost::shared_ptr<GridPlane> Ptr;
     typedef boost::tuple<int, int> IndexPair;
+    typedef std::set<IndexPair> IndexPairSet;
     GridPlane(ConvexPolygon::Ptr plane, const double resolution);
     virtual ~GridPlane();
     virtual GridPlane::Ptr clone(); // shallow copy
@@ -495,7 +505,7 @@ namespace jsk_pcl_ros
     virtual GridPlane::Ptr dilate(int num);
   protected:
     ConvexPolygon::Ptr convex_;
-    std::set<IndexPair> cells_;
+    IndexPairSet cells_;
     double resolution_;
   private:
     

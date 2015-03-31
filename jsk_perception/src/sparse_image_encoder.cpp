@@ -25,6 +25,7 @@ class SparseImageEncoder: public nodelet::Nodelet
   ros::NodeHandle _ln;
   int _subscriber_count;
   double _rate;
+  bool _print_point_num;
 
   void imageCallback(const sensor_msgs::ImageConstPtr& msg){
     do_work(msg, msg->header.frame_id);
@@ -56,6 +57,14 @@ class SparseImageEncoder: public nodelet::Nodelet
             else           _spr_img_ptr->data16.push_back( (x << 8)  | y );
           }
         }
+      }
+
+      // print number of point if enabled
+      if (_print_point_num) {
+        int size = 0;
+        if (useData32) size = _spr_img_ptr->data32.size();
+        else size = _spr_img_ptr->data16.size();
+        NODELET_INFO("%d point encoded.", size);
       }
 
       // publish sparse image message
@@ -103,6 +112,7 @@ public:
     _spr_img_pub = _nh.advertise<jsk_recognition_msgs::SparseImage>("sparse_image", 10, connect_cb, disconnect_cb);
     _spr_img_ptr = boost::make_shared<jsk_recognition_msgs::SparseImage>();
     _ln.param("rate", _rate, 3.0);
+    _ln.param("print_point_num", _print_point_num, false);
   } // end of onInit function
 }; // end of SparseImageEncoder class definition
 } // end of jsk_perception namespace

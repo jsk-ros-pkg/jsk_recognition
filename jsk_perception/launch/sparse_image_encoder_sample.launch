@@ -1,0 +1,8 @@
+<launch>
+  <group ns="/openni/rgb">
+    <include file="$(jsk_perception)/launch/edge_detector.launch" />
+    <include file="$(jsk_perception)/launch/sparse_image_encoder.launch">
+      <arg name="print_point_num" value="true" />
+    </include>
+  </group>
+</launch>

@@ -359,49 +359,56 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    NODELET_INFO("clipPointcloud");
     vital_checker_->poke();
     try {
       // 1. transform pointcloud
       // 2. crop by boundingbox
       // 3. publish indices
       pcl::PointIndices::Ptr all_indices (new pcl::PointIndices);
-      for (size_t i = 0; i < pose_list_.size(); i++) {
-        sensor_msgs::PointCloud2 transformed_cloud;
-        std::string frame_id = frame_id_list_[i];
+      if (pose_list_.size() > 0) {
+        std::string frame_id = frame_id_list_[0];
         if (tf_listener_->waitForTransform(frame_id,
                                            msg->header.frame_id,
                                            msg->header.stamp,
-                                           ros::Duration(10.0))) {
+                                           ros::Duration(1.0))) {
+          sensor_msgs::PointCloud2 transformed_cloud;
+          pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+          pcl::fromROSMsg(transformed_cloud, *cloud);
           if (pcl_ros::transformPointCloud(frame_id, *msg, transformed_cloud,
                                            *tf_listener_)) {
-            pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-            pcl::fromROSMsg(transformed_cloud, *cloud);
-            pcl::CropBox<pcl::PointXYZ> crop_box(false);
-            pcl::PointIndices::Ptr indices (new pcl::PointIndices);
-            NODELET_DEBUG("max_points: [%f, %f, %f]", dimensions_[i][0]/2,
-                          dimensions_[i][1]/2,
-                          dimensions_[i][2]/2);
-            NODELET_DEBUG("min_points: [%f, %f, %f]", 
-                          -dimensions_[i][0]/2,
-                          -dimensions_[i][1]/2,
-                          -dimensions_[i][2]/2);
-            Eigen::Vector4f max_points(dimensions_[i][0]/2,
-                                       dimensions_[i][1]/2,
-                                       dimensions_[i][2]/2,
-                                       0);
-            Eigen::Vector4f min_points(-dimensions_[i][0]/2,
-                                       -dimensions_[i][1]/2,
-                                       -dimensions_[i][2]/2,
-                                       0);
-            float roll, pitch, yaw;
-            pcl::getEulerAngles(pose_list_[i], roll, pitch, yaw);
-            crop_box.setInputCloud(cloud);
-            crop_box.setMax(max_points);
-            crop_box.setMin(min_points);
-            crop_box.setTranslation(pose_list_[i].translation());
-            crop_box.setRotation(Eigen::Vector3f(roll, pitch, yaw));
-            crop_box.filter(indices->indices);
-            all_indices = addIndices(*all_indices, *indices);
+            for (size_t i = 0; i < pose_list_.size(); i++) {
+              if (frame_id != frame_id_list_[i]) {
+                NODELET_FATAL("box array should have same frame_id");
+                return;
+              }
+              pcl::CropBox<pcl::PointXYZ> crop_box(false);
+              pcl::PointIndices::Ptr indices (new pcl::PointIndices);
+              NODELET_DEBUG("max_points: [%f, %f, %f]", dimensions_[i][0]/2,
+                            dimensions_[i][1]/2,
+                            dimensions_[i][2]/2);
+              NODELET_DEBUG("min_points: [%f, %f, %f]", 
+                            -dimensions_[i][0]/2,
+                            -dimensions_[i][1]/2,
+                            -dimensions_[i][2]/2);
+              Eigen::Vector4f max_points(dimensions_[i][0]/2,
+                                         dimensions_[i][1]/2,
+                                         dimensions_[i][2]/2,
+                                         0);
+              Eigen::Vector4f min_points(-dimensions_[i][0]/2,
+                                         -dimensions_[i][1]/2,
+                                         -dimensions_[i][2]/2,
+                                         0);
+              float roll, pitch, yaw;
+              pcl::getEulerAngles(pose_list_[i], roll, pitch, yaw);
+              crop_box.setInputCloud(cloud);
+              crop_box.setMax(max_points);
+              crop_box.setMin(min_points);
+              crop_box.setTranslation(pose_list_[i].translation());
+              crop_box.setRotation(Eigen::Vector3f(roll, pitch, yaw));
+              crop_box.filter(indices->indices);
+              all_indices = addIndices(*all_indices, *indices);
+            }
           }
         }
         else {

@@ -162,7 +162,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: multisense/left_camera_optical_frame
+    Fixed Frame: left_camera_optical_frame
     Frame Rate: 30
   Name: root
   Tools:

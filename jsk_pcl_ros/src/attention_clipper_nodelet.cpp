@@ -359,7 +359,7 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    NODELET_INFO("clipPointcloud");
+    NODELET_DEBUG("clipPointcloud");
     vital_checker_->poke();
     try {
       // 1. transform pointcloud

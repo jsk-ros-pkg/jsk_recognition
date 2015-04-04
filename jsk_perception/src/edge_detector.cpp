@@ -107,15 +107,15 @@ class EdgeDetector: public nodelet::Nodelet
 public:
     void onInit() {
       nh_ = getNodeHandle();
-      it_.reset(new image_transport::ImageTransport(nh_));
       subscriber_count_ = 0;
-      image_transport::SubscriberStatusCallback connect_cb    = boost::bind(&EdgeDetector::connectCb, this, _1);
-      image_transport::SubscriberStatusCallback disconnect_cb = boost::bind(&EdgeDetector::disconnectCb, this, _1);
-      img_pub_ = image_transport::ImageTransport(ros::NodeHandle(nh_, "edge")).advertise("image", 1, connect_cb, disconnect_cb);
-
       dynamic_reconfigure::Server<jsk_perception::EdgeDetectorConfig>::CallbackType f =
         boost::bind(&EdgeDetector::reconfigureCallback, this, _1, _2);
       srv.setCallback(f);
+      it_.reset(new image_transport::ImageTransport(nh_));
+      image_transport::SubscriberStatusCallback connect_cb    = boost::bind(&EdgeDetector::connectCb, this, _1);
+      image_transport::SubscriberStatusCallback disconnect_cb = boost::bind(&EdgeDetector::disconnectCb, this, _1);
+      img_pub_ = image_transport::ImageTransport(ros::NodeHandle(nh_, "edge")).advertise("image", 1, connect_cb, disconnect_cb);
+      
     }
   
 };

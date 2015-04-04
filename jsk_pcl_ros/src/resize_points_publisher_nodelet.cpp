@@ -27,6 +27,7 @@ namespace jsk_pcl_ros
     int step_x_, step_y_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<PCLIndicesMsg> sub_indices_;
+    ros::Subscriber sub_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     ros::Publisher pub_;
     bool not_use_rgb_;
@@ -45,10 +46,11 @@ namespace jsk_pcl_ros
 
     void subscribe()
     {
-      sub_input_.subscribe(*pnh_, "input", 1);
+      
       if (use_indices_) {
-        sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(10);
+        sub_input_.subscribe(*pnh_, "input", 1);
         sub_indices_.subscribe(*pnh_, "indices", 1);
+        sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(10);
         sync_->connectInput(sub_input_, sub_indices_);
         if (!not_use_rgb_) {
           sync_->registerCallback(boost::bind(&ResizePointsPublisher::filter<pcl::PointXYZRGB>, this, _1, _2));
@@ -59,19 +61,26 @@ namespace jsk_pcl_ros
       }
       else {
         if (!not_use_rgb_) {
-          sub_input_.registerCallback(&ResizePointsPublisher::filter<pcl::PointXYZRGB>, this);
+          sub_ = pnh_->subscribe(
+            "input", 1,
+            &ResizePointsPublisher::filter<pcl::PointXYZRGB>, this);
         }
         else {
-          sub_input_.registerCallback(&ResizePointsPublisher::filter<pcl::PointXYZ>, this);
+          sub_ = pnh_->subscribe(
+            "input", 1,
+            &ResizePointsPublisher::filter<pcl::PointXYZ>, this);
         }
       }
     }
 
     void unsubscribe()
     {
-      sub_input_.unsubscribe();
       if (use_indices_) {
+        sub_input_.unsubscribe();
         sub_indices_.unsubscribe();
+      }
+      else {
+        sub_.shutdown();
       }
     }
     

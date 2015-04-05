@@ -142,4 +142,10 @@
       Nodelet to decode from an array of sparse matrix to image.
     </description>
   </class>
+  <class name="jsk_perception/FisheyeToPanorama" type="jsk_perception::FisheyeToPanorama"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Nodelet to convert fisheye image to panorama.
+    </description>
+  </class>
 </library>

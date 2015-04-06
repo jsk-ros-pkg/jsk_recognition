@@ -90,13 +90,36 @@ namespace jsk_pcl_ros
   void TorusFinder::subscribe()
   {
     sub_ = pnh_->subscribe("input", 1, &TorusFinder::segment, this);
+    sub_points_ = pnh_->subscribe("input/polygon", 1, &TorusFinder::segmentFromPoints, this);
   }
 
   void TorusFinder::unsubscribe()
   {
     sub_.shutdown();
+    sub_points_.shutdown();
   }
 
+  void TorusFinder::segmentFromPoints(
+    const geometry_msgs::PolygonStamped::ConstPtr& polygon_msg)
+  {
+    // Convert to pointcloud and call it
+    // No normal
+    pcl::PointCloud<pcl::PointNormal>::Ptr cloud
+      (new pcl::PointCloud<pcl::PointNormal>);
+    for (size_t i = 0; i < polygon_msg->polygon.points.size(); i++) {
+      geometry_msgs::Point32 p = polygon_msg->polygon.points[i];
+      pcl::PointNormal pcl_point;
+      pcl_point.x = p.x;
+      pcl_point.y = p.y;
+      pcl_point.z = p.z;
+      cloud->points.push_back(pcl_point);
+    }
+    sensor_msgs::PointCloud2 ros_cloud;
+    pcl::toROSMsg(*cloud, ros_cloud);
+    ros_cloud.header = polygon_msg->header;
+    segment(boost::make_shared<sensor_msgs::PointCloud2>(ros_cloud));
+  }
+  
   void TorusFinder::segment(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {

@@ -1,0 +1,16 @@
+<launch>
+  <node type="nm33_node" pkg="opt_camera" name="nm33_camera"/>
+
+  <node type="nodelet" pkg="nodelet" name="fisheye_manager" args="manager"/>
+  <node type="nodelet" pkg="nodelet" name="fisheye_to_panorama"
+	args="load jsk_perception/FisheyeToPanorama fisheye_manager" output="screen">
+    <remap from="~input" to="/camera/omni/image_raw"/>
+    <remap from="~input_camera_info" to="/camera/omni/camera_info"/>
+  </node>
+  <node type="image_view" pkg="image_view" name="fisheye_image_view">
+    <remap from="image" to="/camera/omni/image_raw"/>
+  </node>
+  <node type="image_view" pkg="image_view" name="undistorted_image_view">
+    <remap from="image" to="/fisheye_to_panorama/output_bilinear"/>
+  </node>
+</launch>

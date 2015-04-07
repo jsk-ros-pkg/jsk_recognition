@@ -530,6 +530,9 @@ Find a torus out of pointcloud based on RANSAC with 3-D circle model.
 * `~input` (`sensor_msgs/PointCloud`)
 
   Input pointcloud. You may need to choose good candidates of pointcloud.
+* `~input/polygon` (`geometry_msgs/PolygonStampedd`)
+
+  Input polygon. You can use `geometry_msgs/PolygonStampedd` instead of `sensor_msgs/PointCloud`
 
 #### Publishing Topic
 

@@ -45,6 +45,7 @@
 #include <dynamic_reconfigure/server.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <Eigen/Core>
+#include <geometry_msgs/PolygonStamped.h>
 
 namespace jsk_pcl_ros
 {
@@ -58,6 +59,7 @@ namespace jsk_pcl_ros
     virtual void subscribe();
     virtual void unsubscribe();
     virtual void segment(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
+    virtual void segmentFromPoints(const geometry_msgs::PolygonStamped::ConstPtr& polygon_msg);
     virtual void configCallback(Config &config, uint32_t level);
     
     ////////////////////////////////////////////////////////
@@ -65,6 +67,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     ros::Subscriber sub_;
+    ros::Subscriber sub_points_;
     ros::Publisher pub_torus_;
     ros::Publisher pub_torus_array_;
     ros::Publisher pub_inliers_;

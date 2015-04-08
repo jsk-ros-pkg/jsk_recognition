@@ -139,6 +139,11 @@
          base_class_type="nodelet::Nodelet">
     Generate mask image out of point indices
   </class>
+  <class name="jsk_pcl/MaskImageToDepthConsideredMaskImage"
+         type="jsk_pcl_ros::MaskImageToDepthConsideredMaskImage"
+         base_class_type="nodelet::Nodelet">
+    Generate depth considered mask image out of mask image
+  </class>
   
   <class name="jsk_pcl/ROIClipper"
          type="jsk_pcl_ros::ROIClipper"

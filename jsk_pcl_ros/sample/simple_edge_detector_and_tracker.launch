@@ -1,8 +1,8 @@
 <launch>
-  <arg name="input_depth_image" default="/kinect2/depth_highres/image" />
-  <arg name="input_rgb_image" default="/kinect2/rgb/image" />
-  <arg name="input_point" default="/kinect2/depth_highres/points" />
-  <arg name="input_info" default="/kinect2/rgb/camera_info" />
+  <arg name="input_depth_image" default="depth/image" />
+  <arg name="input_rgb_image" default="rgb/image_rect_color" />
+  <arg name="input_point" default="depth/points" />
+  <arg name="input_info" default="rgb/camera_info" />
 
   <node pkg="jsk_pcl_ros" type="border_estimator" name="border_estimator"
 	output="screen">
@@ -16,15 +16,22 @@
   </node>
 
   <node pkg="image_view" type="image_view" name="edge_view" >
-    <remap from="image" to="/edge/image" />
+    <remap from="image" to="edge/image" />
   </node>
   
+  <!-- relay image to pcl_nodelet name space -->
+  <node pkg="topic_tools" type="relay" name="edge_relay"
+        args="in out">
+    <remap from="in" to="edge/image"/>
+    <remap from="out" to="pcl_nodelet/edge/image" />
+  </node>
+
   <group ns="pcl_nodelet">
     <node pkg="nodelet" type="nodelet"
           name="mask2pi"
           args="standalone jsk_pcl/MaskImageToPointIndices"
           output="screen" clear_params="true">
-      <remap from="~input" to="/edge/image" />
+      <remap from="~input" to="edge/image" />
       <rosparam>
         filter_field_name: z
         filter_limit_min: 0.0
@@ -36,8 +43,8 @@
 
   <node pkg="nodelet" type="nodelet" name="indices_add"
 	args="standalone jsk_pcl/AddPointIndices">
-    <remap from="~input/src1" to="/pcl_nodelet/mask2pi/output" />
-    <remap from="~input/src2" to="/border_estimator/output_border_indices" />
+    <remap from="~input/src1" to="pcl_nodelet/mask2pi/output" />
+    <remap from="~input/src2" to="border_estimator/output_border_indices" />
     <rosparam>
       approximate_sync: true
       use_indices: true
@@ -49,7 +56,7 @@
   <node pkg="nodelet" type="nodelet" name="added"
 	args="standalone pcl/ExtractIndices">
     <remap from="~input" to="$(arg input_point)" />
-    <remap from="~indices" to="/pcl_nodelet/mask2pi/output" />
+    <remap from="~indices" to="pcl_nodelet/mask2pi/output" />
     <rosparam>
       approximate_sync: true
       use_indices: true
@@ -59,7 +66,7 @@
   </node>
 
   <include file="$(find jsk_pcl_ros)/launch/tracking.launch">
-    <arg name="input_point" default="/added/output" />
+    <arg name="input_point" value="added/output" />
     <!-- <arg name="input_point" default="/pcl_nodelet/candidate_points/output" /> -->
     <arg name="voxel_grid_filter_limit_min" value="0.0"/>
     <arg name="voxel_grid_filter_limit_max" value="5.0"/>

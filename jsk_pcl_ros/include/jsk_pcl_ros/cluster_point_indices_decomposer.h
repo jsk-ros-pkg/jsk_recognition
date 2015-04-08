@@ -130,6 +130,7 @@ namespace jsk_pcl_ros
     tf::TransformBroadcaster br_;
     std::string tf_prefix_;
     
+    bool force_to_flip_z_axis_;
     bool publish_clouds_;
     bool publish_tf_;
     bool align_boxes_;

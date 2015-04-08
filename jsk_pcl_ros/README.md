@@ -1753,6 +1753,9 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 * `~use_pca` (Boolean, default: `False`):
 
    Run PCA algorithm on each cluster to estimate x and y direction.
+* `~force_to_flip_z_axis` (Boolean, default: `False`)
+
+   Flip z axis direction if this value is true.
 
 ### jsk\_pcl/ClusterPointIndicesDecomposerZAxis
 #### What Is This

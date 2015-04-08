@@ -303,6 +303,15 @@ namespace jsk_pcl_ros {
       NODELET_ERROR("failed to detect by plane fitting filtering");
       return false;
     }
+    // Check direction of plane_coefficients
+    Eigen::Vector3f plane_normal(plane_coefficients->values[0], plane_coefficients->values[1], plane_coefficients->values[2]);
+    if (plane_normal.dot(Eigen::Vector3f::UnitZ()) > 0) {
+      // flip
+      plane_coefficients->values[0] = -plane_coefficients->values[0];
+      plane_coefficients->values[1] = -plane_coefficients->values[1];
+      plane_coefficients->values[2] = -plane_coefficients->values[2];
+      plane_coefficients->values[3] = -plane_coefficients->values[3];
+    }
     // filtering by euclidean clustering
     pcl::PointIndices::Ptr euclidean_filtered_indices(new pcl::PointIndices);
     euclideanFilter(input_cloud, plane_inliers, hint_convex,

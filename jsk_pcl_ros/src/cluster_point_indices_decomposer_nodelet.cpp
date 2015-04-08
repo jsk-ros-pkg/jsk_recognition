@@ -66,6 +66,7 @@ namespace jsk_pcl_ros
     pnh_->param("publish_clouds", publish_clouds_, false);
     pnh_->param("align_boxes", align_boxes_, false);
     pnh_->param("use_pca", use_pca_, false);
+    pnh_->param("force_to_flip_z_axis", force_to_flip_z_axis_, true);
     pc_pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "debug_output", 1);
     box_pub_ = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "boxes", 1);
   }
@@ -181,13 +182,19 @@ namespace jsk_pcl_ros
       }
       else {
         Eigen::Vector3f normal, z_axis;
-        normal[0] = coefficients->coefficients[nearest_plane_index].values[0];
-        normal[1] = coefficients->coefficients[nearest_plane_index].values[1];
-        normal[2] = coefficients->coefficients[nearest_plane_index].values[2];
+        if (force_to_flip_z_axis_) {
+          normal[0] = - coefficients->coefficients[nearest_plane_index].values[0];
+          normal[1] = - coefficients->coefficients[nearest_plane_index].values[1];
+          normal[2] = - coefficients->coefficients[nearest_plane_index].values[2];
+        }
+        else {
+          normal[0] = coefficients->coefficients[nearest_plane_index].values[0];
+          normal[1] = coefficients->coefficients[nearest_plane_index].values[1];
+          normal[2] = coefficients->coefficients[nearest_plane_index].values[2];
+        }
         normal = normal.normalized();
-        z_axis[0] = 0; z_axis[1] = 0; z_axis[2] = 1;
         Eigen::Quaternionf rot;
-        rot.setFromTwoVectors(z_axis, normal);
+        rot.setFromTwoVectors(Eigen::Vector3f::UnitZ(), normal);
         Eigen::AngleAxisf rotation_angle_axis(rot);
         Eigen::Vector3f rotation_axis = rotation_angle_axis.axis();
         double theta = rotation_angle_axis.angle();
@@ -225,7 +232,7 @@ namespace jsk_pcl_ros
               if (m.col(0).cross(m.col(1)).dot(m.col(2)) < 0) {
                 m.col(0) = - m.col(0);
               }
-              if (m.col(1).dot(Eigen::Vector3f::UnitZ()) < 0) {
+              if (m.col(0).dot(Eigen::Vector3f::UnitX()) < 0) {
                 // rotate around z
                 m = m * Eigen::AngleAxisf(M_PI, Eigen::Vector3f::UnitZ());
               }

@@ -2,14 +2,25 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.2.8 (2015-03-29)
-------------------
+Forthcoming
+-----------
+* [jsk_perception] add Simple Fisheye to Panorama
+* [jsk_perception] changed order of dynamic reconfigure
+* [jsk_perception] default max value of histogram should be 256 to include 255 pixel
+* [jsk_perception] print number of point when encoding sparse image
+* [jsk_perception] Publish empty camera info from image_publisher.py
+* [jsk_perception] Add sample for ColorHistogramLabelMatch
+* [jsk_perception] Add documentation about ColorHistogramLabelMatch
+* Contributors: Yuki Furuta, Kamada Hitoshi, Kentaro Wada, Ryohei Ueda, Yuto Inagaki
 
 0.2.9 (2015-03-29)
 ------------------
 * 0.2.8
 * Update Changelog
 * Contributors: Ryohei Ueda
+
+0.2.8 (2015-03-29)
+------------------
 
 0.2.7 (2015-03-26)
 ------------------

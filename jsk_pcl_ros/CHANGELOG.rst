@@ -2,8 +2,26 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.2.8 (2015-03-29)
+Forthcoming
+-----------
+* [jsk_pcl_ros] generalize namespace of launch value
+* [jsk_pcl_ros] Add option to flip z axis direction
+* [jsk_pcl_ros] Add geometry_msgs/PolygonStamped input for TorusFinder
+* [jsk_pcl_ros] Use simple ros::Subscriber for ResizePointsPublisher
+* [jsk_pcl_ros] remove bags in launch
+* [jsk_pcl_ros] Supress debug message of AttentionClipper
+* [jsk_pcl_ros] change tf fixed frame of config file
+* [jsk_pcl_ros] Better caching to handle different frame_id well in attention_clipper
+* [jsk_pcl_ros] Resolve tf only once in attention clipper
+* [jsk_pcl_ros] Fix projection bug around ConvexPolygon::projectOnPlane
+* [jsk_pcl_ros] Fix typo in EnvironmentPlaneModeling
+* Contributors: Ryohei Ueda, Yu Ohara
+
+
+0.2.9 (2015-03-29)
 ------------------
+* 0.2.8
+* Update Changelog
 * [jsk_pcl_ros] Publish point indices which do not belong to any polygons
   in EnvironmentPlaneModeling
 * [jsk_pcl_ros] Erode grid maps as c-space padding in EnvironmentPlaneModeling
@@ -11,10 +29,8 @@ Changelog for package jsk_pcl_ros
 * [jsk_pcl_ros] Check orientation of plane in GridPlane::fromROSMsg
 * Contributors: Ryohei Ueda
 
-0.2.9 (2015-03-29)
+0.2.8 (2015-03-29)
 ------------------
-* 0.2.8
-* Update Changelog
 * [jsk_pcl_ros] Publish point indices which do not belong to any polygons
   in EnvironmentPlaneModeling
 * [jsk_pcl_ros] Erode grid maps as c-space padding in EnvironmentPlaneModeling

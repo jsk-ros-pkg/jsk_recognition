@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.10 (2015-04-09)
+-------------------
 * [jsk_pcl_ros] generalize namespace of launch value
 * [jsk_pcl_ros] Add option to flip z axis direction
 * [jsk_pcl_ros] Add geometry_msgs/PolygonStamped input for TorusFinder

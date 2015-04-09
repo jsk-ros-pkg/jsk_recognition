@@ -2,8 +2,8 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.10 (2015-04-09)
+-------------------
 * [checkerboard_detector/capture.launch] remove bags in launch
 * Contributors: Yu Ohara
 

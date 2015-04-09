@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.10 (2015-04-09)
+-------------------
 * [jsk_perception] add Simple Fisheye to Panorama
 * [jsk_perception] changed order of dynamic reconfigure
 * [jsk_perception] default max value of histogram should be 256 to include 255 pixel

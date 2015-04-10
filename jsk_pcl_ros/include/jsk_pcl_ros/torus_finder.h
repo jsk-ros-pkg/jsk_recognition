@@ -79,6 +79,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // Parameters
     ////////////////////////////////////////////////////////
+    std::string algorithm_;
     double min_radius_;
     double max_radius_;
     double outlier_threshold_;
@@ -87,6 +88,8 @@ namespace jsk_pcl_ros
     bool use_normal_;
     int max_iterations_;
     int min_size_;
+    bool voxel_grid_sampling_;
+    double voxel_size_;
   private:
   };
 }

@@ -65,10 +65,10 @@ namespace jsk_perception
     virtual void subscribe();
     virtual void unsubscribe();
     inline double interpolate(double rate, double first, double second){return (1.0 - rate) * first + rate * second;};
-    virtual void rectify(const sensor_msgs::Image::ConstPtr& image_msg);
-    
+    virtual void rectify(const sensor_msgs::Image::ConstPtr& image_msg, const sensor_msgs::CameraInfo::ConstPtr& camera_info_msg);
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
-    ros::Subscriber sub_image_;
+    message_filters::Subscriber<sensor_msgs::Image> sub_image_;
+    message_filters::Subscriber<sensor_msgs::CameraInfo> sub_camera_info_;
     ros::Publisher pub_undistorted_image_;
     ros::Publisher pub_undistorted_bilinear_image_;
   private:

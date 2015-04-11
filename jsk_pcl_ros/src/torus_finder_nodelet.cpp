@@ -39,6 +39,7 @@
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
+#include <pcl/filters/voxel_grid.h>
 
 namespace jsk_pcl_ros
 {
@@ -85,6 +86,9 @@ namespace jsk_pcl_ros
     max_iterations_ = config.max_iterations;
     min_size_ = config.min_size;
     eps_hint_angle_ = config.eps_hint_angle;
+    algorithm_ = config.algorithm;
+    voxel_grid_sampling_ = config.voxel_grid_sampling;
+    voxel_size_ = config.voxel_size;
   }
 
   void TorusFinder::subscribe()
@@ -128,16 +132,50 @@ namespace jsk_pcl_ros
     pcl::PointCloud<pcl::PointNormal>::Ptr cloud
       (new pcl::PointCloud<pcl::PointNormal>);
     pcl::fromROSMsg(*cloud_msg, *cloud);
+
+    if (voxel_grid_sampling_) {
+      pcl::PointCloud<pcl::PointNormal>::Ptr downsampled_cloud
+      (new pcl::PointCloud<pcl::PointNormal>);
+      pcl::VoxelGrid<pcl::PointNormal> sor;
+      sor.setInputCloud (cloud);
+      sor.setLeafSize (voxel_size_, voxel_size_, voxel_size_);
+      sor.filter (*downsampled_cloud);
+      cloud = downsampled_cloud;
+    }
+    
     pcl::SACSegmentation<pcl::PointNormal> seg;
     if (use_normal_) {
       pcl::SACSegmentationFromNormals<pcl::PointNormal, pcl::PointNormal> seg_normal;
       seg_normal.setInputNormals(cloud);
       seg = seg_normal;
     }
+
+    
     seg.setOptimizeCoefficients (true);
     seg.setInputCloud(cloud);
     seg.setRadiusLimits(min_radius_, max_radius_);
-    seg.setMethodType(pcl::SAC_RANSAC);
+    if (algorithm_ == "RANSAC") {
+      seg.setMethodType(pcl::SAC_RANSAC);
+    }
+    else if (algorithm_ == "LMEDS") {
+      seg.setMethodType(pcl::SAC_LMEDS);
+    }
+    else if (algorithm_ == "MSAC") {
+      seg.setMethodType(pcl::SAC_MSAC);
+    }
+    else if (algorithm_ == "RRANSAC") {
+      seg.setMethodType(pcl::SAC_RRANSAC);
+    }
+    else if (algorithm_ == "RMSAC") {
+      seg.setMethodType(pcl::SAC_RMSAC);
+    }
+    else if (algorithm_ == "MLESAC") {
+      seg.setMethodType(pcl::SAC_MLESAC);
+    }
+    else if (algorithm_ == "PROSAC") {
+      seg.setMethodType(pcl::SAC_PROSAC);
+    }
+    
     seg.setDistanceThreshold (outlier_threshold_);
     seg.setMaxIterations (max_iterations_);
     seg.setModelType(pcl::SACMODEL_CIRCLE3D);

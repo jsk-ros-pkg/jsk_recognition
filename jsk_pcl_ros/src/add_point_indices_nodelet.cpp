@@ -83,6 +83,7 @@ namespace jsk_pcl_ros
     c->header = a.header;
     PCLIndicesMsg ros_indices;
     pcl_conversions::fromPCL(*c, ros_indices);
+    ros_indices.header = src1->header;
     pub_.publish(ros_indices);
   }
 }

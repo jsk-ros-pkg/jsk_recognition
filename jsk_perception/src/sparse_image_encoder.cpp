@@ -64,7 +64,7 @@ class SparseImageEncoder: public nodelet::Nodelet
         int size = 0;
         if (useData32) size = _spr_img_ptr->data32.size();
         else size = _spr_img_ptr->data16.size();
-        NODELET_INFO("%d point encoded.", size);
+        NODELET_INFO("%d point encoded. encoded area per is %f%\n", size, (100 * ((double) size)/(msg->height* msg->width)));
       }
 
       // publish sparse image message

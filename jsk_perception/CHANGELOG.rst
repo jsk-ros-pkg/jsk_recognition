@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.11 (2015-04-13)
+-------------------
 * add encoded points rate
 * Contributors: Kamada Hitoshi
 

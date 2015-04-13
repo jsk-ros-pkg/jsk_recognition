@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.11 (2015-04-13)
+-------------------
 * [jsk_pcl_ros] Add argument to specify manager name to multi_resolution_pointcloud.launch
 * [jsk_pcl_ros] Add several methods and add voxel grid filter to estimate torus
 * [jsk_pcl_ros] Keep exact timestamp in AddPointIndices

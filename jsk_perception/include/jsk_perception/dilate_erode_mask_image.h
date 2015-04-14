@@ -67,6 +67,7 @@ namespace jsk_perception
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     int method_;
     int size_;
+    int iterations_;
   private:
 
   };

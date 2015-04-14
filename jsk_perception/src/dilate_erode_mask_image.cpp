@@ -69,13 +69,14 @@ namespace jsk_perception
     boost::mutex::scoped_lock lock(mutex_);
     method_ = config.method;
     size_ = config.size;
+    iterations_ = config.iterations;
   }
   
   void MorphologicalImageOperatorNodelet::imageCallback(
     const sensor_msgs::Image::ConstPtr& image_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    cv::Mat image = cv_bridge::toCvShare(image_msg, image_msg->encoding)->image;
+    cv::Mat image = cv_bridge::toCvShare(image_msg, sensor_msgs::image_encodings::MONO8)->image;
     int type;
     if (method_ == 0) {
       type = cv::MORPH_RECT;
@@ -102,13 +103,13 @@ namespace jsk_perception
   void DilateMaskImage::apply(
     const cv::Mat& input, cv::Mat& output, const cv::Mat& element)
   {
-    cv::dilate(input, output, element);
+    cv::dilate(input, output, element, /*anchor=*/cv::Point(-1,-1), iterations_);
   }
 
   void ErodeMaskImage::apply(
     const cv::Mat& input, cv::Mat& output, const cv::Mat& element)
   {
-    cv::erode(input, output, element);
+    cv::erode(input, output, element, /*anchor=*/cv::Point(-1,-1), iterations_);
   }
 }
 

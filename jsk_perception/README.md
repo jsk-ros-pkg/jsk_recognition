@@ -137,6 +137,10 @@ Erode binary image.
 
   Size to erode
 
+* `~erode_iterations` (Integer, default: `1`)
+
+  Iterations to erode image.
+
 ### jsk\_perception/DilateMaskImage
 ![](images/dilate_mask_image.png)
 
@@ -161,6 +165,10 @@ Dilate binary image.
 * `~dilate_size` (Integer, default: `1`)
 
   Size to dilate
+
+* `~dilate_iterations` (Integer, default: `1`)
+
+  Iterations to dilate image.
 
 ### jsk\_perception/GridLabel
 ![](images/grid_label.jpg)

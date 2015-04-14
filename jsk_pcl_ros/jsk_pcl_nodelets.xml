@@ -318,6 +318,14 @@
          base_class_type="nodelet::Nodelet">
     <description>Nodelet to rotate sensor_msgs/Image</description>
   </class>
+    <class name="jsk_pcl/ConvexConnectedVoxels"
+         type="jsk_pcl_ros::ConvexConnectedVoxels"
+         base_class_type="nodelet::Nodelet">
+      <description>
+	Nodelet to auto segment using supervoxel and integer label the unknown voxel using convexity
+      </description>
+  </class>
+  
   <!-- <class name="jsk_pcl/NodeletPointCloudThrottle" type="NodeletPointCloudThrottle" -->
   <!--        base_class_type="nodelet::Nodelet"> -->
   <!--   <description> -->

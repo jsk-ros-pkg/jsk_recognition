@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/krishneel/ros/hydro/src/jsk-ros-pkg/jsk_recognition/jsk_pcl_ros/build/devel/setup.sh

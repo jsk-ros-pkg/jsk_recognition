@@ -321,9 +321,13 @@ jsk_pcl_nodelet(src/pointcloud_localization_nodelet.cpp
   "jsk_pcl/PointCloudLocalization" "pointcloud_localization")
 jsk_pcl_nodelet(src/geometric_consistency_grouping_nodelet.cpp
   "jsk_pcl/GeometricConsistencyGrouping" "geometric_consistency_grouping")
+jsk_pcl_nodelet(src/convex_connected_voxels_nodelet.cpp
+  "jsk_pcl/ConvexConnectedVoxels" "convex_connected_voxels")
+
 add_library(jsk_pcl_ros_base SHARED
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
   src/pcl_conversion_util.cpp src/pcl_util.cpp
+  src/region_adjacency_graph.cpp
 
   src/tf_listener_singleton.cpp
   src/viewpoint_sampler.cpp)

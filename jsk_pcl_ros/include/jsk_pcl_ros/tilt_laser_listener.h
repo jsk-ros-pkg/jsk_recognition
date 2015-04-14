@@ -109,6 +109,8 @@ namespace jsk_pcl_ros
     bool use_laser_assembler_;
     boost::mutex mutex_;
     TimeStampedVector<StampedJointAngle::Ptr> buffer_;
+    int skip_number_;
+    int skip_counter_;
   private:
     
   };

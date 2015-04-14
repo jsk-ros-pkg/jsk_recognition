@@ -47,7 +47,7 @@ namespace jsk_pcl_ros
   void TiltLaserListener::onInit()
   {
     DiagnosticNodelet::onInit();
-
+    skip_counter_ = 0;
     if (pnh_->hasParam("joint_name")) {
       pnh_->getParam("joint_name", joint_name_);
     }
@@ -57,6 +57,7 @@ namespace jsk_pcl_ros
     }
     pnh_->param("overwrap_angle", overwrap_angle_, 0.0);
     std::string laser_type;
+    pnh_->param("skip_number", skip_number_, 1);
     pnh_->param("laser_type", laser_type, std::string("tilt_half_down"));
     if (laser_type == "tilt_half_up") {
       laser_type_ = TILT_HALF_UP;
@@ -130,13 +131,15 @@ namespace jsk_pcl_ros
     range.end = end;
     trigger_pub_.publish(range);
     if (use_laser_assembler_) {
-      laser_assembler::AssembleScans2 srv;
-      srv.request.begin = start;
-      srv.request.end = end;
-      assemble_cloud_srv_.call(srv);
-      sensor_msgs::PointCloud2 output_cloud = srv.response.cloud;
-      output_cloud.header.stamp = stamp;
-      cloud_pub_.publish(output_cloud);
+      if (skip_counter_++ % skip_number_ == 0) {
+        laser_assembler::AssembleScans2 srv;
+        srv.request.begin = start;
+        srv.request.end = end;
+        assemble_cloud_srv_.call(srv);
+        sensor_msgs::PointCloud2 output_cloud = srv.response.cloud;
+        output_cloud.header.stamp = stamp;
+        cloud_pub_.publish(output_cloud);
+      }
     }
   }
   

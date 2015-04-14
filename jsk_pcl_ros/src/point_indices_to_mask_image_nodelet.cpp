@@ -81,7 +81,6 @@ namespace jsk_pcl_ros
       int index = indices_msg->indices[i];
       int width_index = index % width;
       int height_index = index / width;
-      ROS_INFO("w, h = %d, %d", width_index, height_index);
       mask_image.at<uchar>(height_index, width_index) = 255;
     }
     cv_bridge::CvImage mask_bridge(indices_msg->header,

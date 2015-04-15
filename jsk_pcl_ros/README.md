@@ -1608,6 +1608,9 @@ You can choose several types of tilt/spindle lasers such as tilt-laser of PR2, i
    Clear cache and restart collecting data.
 
 #### Parameters
+* `~skip_number` (Integer, default: `1`):
+
+   Skip publishing and calling laser assembler per `~skip_number`.
 * `~use_laser_assembler` (Boolean, default: `False`):
 
    Enable `~output_cloud` and `~assemble_scans2`.

@@ -45,7 +45,7 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
-#include <jsk_pcl_ros/DepthFilterConfig.h>
+#include <jsk_pcl_ros/MaskImageToDepthConsideredMaskImageConfig.h>
 
 namespace jsk_pcl_ros
 {
@@ -58,7 +58,7 @@ namespace jsk_pcl_ros
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
       sensor_msgs::Image > SyncPolicy;
-    typedef jsk_pcl_ros::DepthFilterConfig Config;
+    typedef jsk_pcl_ros::MaskImageToDepthConsideredMaskImageConfig Config;
 
     MaskImageToDepthConsideredMaskImage(): DiagnosticNodelet("MaskImageToDepthConsideredMaskImage") { }
   protected:

@@ -44,8 +44,18 @@ namespace jsk_pcl_ros
   {
     DiagnosticNodelet::onInit();
     pnh_->param("approximate_sync", approximate_sync_, false);
-    pnh_->param("extract_num", extract_num, 500);
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+    //    pnh_->param("extract_num", extract_num, 500);
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (
+        &MaskImageToDepthConsideredMaskImage::configCallback, this, _1, _2);
+    srv_->setCallback (f);
+  }
+
+  void MaskImageToDepthConsideredMaskImage::configCallback(Config &config, uint32_t level){
+    boost::mutex::scoped_lock lock(mutex_);
+    extract_num_=config.extract_num;
   }
 
   void MaskImageToDepthConsideredMaskImage::subscribe()
@@ -76,7 +86,6 @@ namespace jsk_pcl_ros
      const sensor_msgs::PointCloud2::ConstPtr& point_cloud2_msg,
      const sensor_msgs::Image::ConstPtr& image_msg)
   {
-    ROS_INFO("a");
     vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZ>::Ptr
       cloud (new pcl::PointCloud<pcl::PointXYZ>);
@@ -86,8 +95,6 @@ namespace jsk_pcl_ros
 
     int width = image_msg->width;
     int height = image_msg->height;
-    ROS_INFO("w:%d h:%d   pcl w:%d h:%d", width, height , point_cloud2_msg->width, point_cloud2_msg->height);
-    ROS_INFO("b");
     pcl::PointXYZ nan_point;
     nan_point.x = NAN;
     nan_point.y = NAN;
@@ -95,7 +102,6 @@ namespace jsk_pcl_ros
     cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy
       (image_msg, sensor_msgs::image_encodings::MONO8);
     cv::Mat mask = cv_ptr->image;
-    ROS_INFO("c");
     edge_cloud->is_dense = false;
     edge_cloud->points.resize(width * height);
     edge_cloud->width = width;
@@ -111,14 +117,15 @@ namespace jsk_pcl_ros
       }
     }
     cv::Mat mask_image = cv::Mat::zeros(height, width, CV_8UC1);
-    ROS_INFO("kd start");
     pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
     kdtree.setInputCloud(edge_cloud);
     pcl::PointXYZ zero;
     std::vector<int> near_indices;
     std::vector<float> near_distances;
-    kdtree.nearestKSearch(zero, extract_num, near_indices, near_distances);
-    for(int idx=0; idx< extract_num; idx++){
+    kdtree.nearestKSearch(zero, extract_num_, near_indices, near_distances);
+    ROS_INFO("directed num of extract points:%d   num of nearestKSearch points:%d", extract_num_, ((int) near_indices.size()));
+    int ext_num=std::min(extract_num_, ((int) near_indices.size()));
+    for(int idx=0; idx< ext_num; idx++){
       int x=near_indices.at(idx)%width;
       int y=near_indices.at(idx)/width;
       mask_image.at<uchar>(y, x)=255;
@@ -127,7 +134,6 @@ namespace jsk_pcl_ros
                                    sensor_msgs::image_encodings::MONO8,
                                    mask_image);
     pub_.publish(mask_bridge.toImageMsg());
-    ROS_INFO("finish");
   }
 
   void MaskImageToDepthConsideredMaskImage::updateDiagnostic(

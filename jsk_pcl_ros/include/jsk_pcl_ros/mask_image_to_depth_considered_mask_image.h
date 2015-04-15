@@ -39,11 +39,13 @@
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/Image.h>
+#include <dynamic_reconfigure/server.h>
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include <jsk_pcl_ros/DepthFilterConfig.h>
 
 namespace jsk_pcl_ros
 {
@@ -56,6 +58,7 @@ namespace jsk_pcl_ros
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
       sensor_msgs::Image > SyncPolicy;
+    typedef jsk_pcl_ros::DepthFilterConfig Config;
 
     MaskImageToDepthConsideredMaskImage(): DiagnosticNodelet("MaskImageToDepthConsideredMaskImage") { }
   protected:
@@ -71,12 +74,15 @@ namespace jsk_pcl_ros
     (
      const sensor_msgs::PointCloud2::ConstPtr& point_cloud2_msg,
      const sensor_msgs::Image::ConstPtr& image_msg);
+    virtual void configCallback(Config &config, uint32_t level);
   
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     bool approximate_sync_;
-    int extract_num;
+    int extract_num_;
+    boost::mutex mutex_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> >async_; 
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;

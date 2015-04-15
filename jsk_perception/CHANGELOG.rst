@@ -2,6 +2,11 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.2.11 (2015-04-13)
+-------------------
+* add encoded points rate
+* Contributors: Kamada Hitoshi
+
 0.2.10 (2015-04-09)
 -------------------
 * [jsk_perception] add Simple Fisheye to Panorama
@@ -11,7 +16,7 @@ Changelog for package jsk_perception
 * [jsk_perception] Publish empty camera info from image_publisher.py
 * [jsk_perception] Add sample for ColorHistogramLabelMatch
 * [jsk_perception] Add documentation about ColorHistogramLabelMatch
-* Contributors: Yuki Furuta, Kamada Hitoshi, Kentaro Wada, Ryohei Ueda, Yuto Inagaki
+* Contributors: Yuki Furuta, Ryohei Ueda, Yuto Inagaki, Kamada Hitoshi, Kentaro Wada
 
 0.2.9 (2015-03-29)
 ------------------
@@ -35,7 +40,7 @@ Changelog for package jsk_perception
 * Enhance: more specific error exception
 * Change to avoid SyntaxWarning about not assigning rospy.Publisher argument queue_size
 * Change import libs with reasonable order (thirdparty -> ros)
-* Contributors: Yu Ohara, Kentaro Wada
+* Contributors: Kentaro Wada, Yu Ohara
 
 0.2.4 (2015-03-08)
 ------------------

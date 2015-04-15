@@ -327,7 +327,7 @@ Compute histogram of single channel image.
   The number of bins of histogram
 
 * `~min_value` (Double, default: `0.0`)
-* `~max_value`(Double, default: `255.0`)
+* `~max_value`(Double, default: `256.0`)
 
   Minimum and maximum value of histogram
 

@@ -106,6 +106,7 @@ generate_dynamic_reconfigure_options(
   cfg/EdgebasedCubeFinder.cfg
   cfg/MultiPlaneSACSegmentation.cfg
   cfg/BoundingBoxFilter.cfg
+  cfg/MaskImageToDepthConsideredMaskImage.cfg
   cfg/LINEMODDetector.cfg
   cfg/SupervoxelSegmentation.cfg
   cfg/FeatureRegistration.cfg
@@ -281,6 +282,8 @@ jsk_pcl_nodelet(src/roi_clipper_nodelet.cpp
   "jsk_pcl/ROIClipper" "roi_clipper")
 jsk_pcl_nodelet(src/point_indices_to_mask_image_nodelet.cpp
   "jsk_pcl/PointIndicesToMaskImage" "point_indices_to_mask_image")
+jsk_pcl_nodelet(src/mask_image_to_depth_considered_mask_image_nodelet.cpp
+  "jsk_pcl/MaskImageToDepthConsideredMaskImage" "mask_image_to_depth_considered_mask_image")
 jsk_pcl_nodelet(src/mask_image_to_point_indices_nodelet.cpp
   "jsk_pcl/MaskImageToPointIndices" "mask_image_to_point_indices")
 jsk_pcl_nodelet(src/organized_pointcloud_to_point_indices_nodelet.cpp

@@ -1022,6 +1022,33 @@ of organized pointcloud and original `sensor_msgs/Image`.
 
    Mask image to get `~input` indices from the origina limage.
 
+### jsk\_pcl/MaskImageToDepthConsideredMaskImage
+#### What Is This
+
+jsk_pcl/MaskImageToDepthConsideredMaskImage generates mask image at close range from `sensor_msgs/PointCloud2` and `sensor_msgs/Image` of mask image.
+
+#### Subscribing Topic
+
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Depth information of image. Width and height of this data must be same with ~input/image.
+
+* `~input/image` (`sensor_msgs/Image`)
+
+  Input mask image. 
+
+#### Publishing Topic
+
+* `~output `(`sensor_msg/Image`)
+
+  Output mask Image.  Points at close range is extracted.
+
+#### Publishing Topic
+
+* `~extract_num (Int, default: `500`)
+
+  Num of extract points in mask image.
+
 ### jsk\_pcl/AttentionClipper
 #### What Is This
 ![](images/attention_clipper.png)

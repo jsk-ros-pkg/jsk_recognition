@@ -1037,17 +1037,25 @@ jsk_pcl/MaskImageToDepthConsideredMaskImage generates mask image at close range 
 
   Input mask image. 
 
+* `~input/maskregion` (`sensor_msgs/Image`)
+
+  Input mask region.(To use interactively, use interaction_mode:grabcut_rect of image_view2.)
+
 #### Publishing Topic
 
 * `~output `(`sensor_msg/Image`)
 
   Output mask Image.  Points at close range is extracted.
 
-#### Publishing Topic
+#### Parameter
 
 * `~extract_num (Int, default: `500`)
 
   Num of extract points in mask image.
+
+* `~use_mask_region (Bool, default: True)
+
+  Whether use msk region option or not. If true, only selected region of mask image is extracted.
 
 ### jsk\_pcl/AttentionClipper
 #### What Is This

@@ -75,6 +75,7 @@ namespace jsk_pcl_ros
      const sensor_msgs::PointCloud2::ConstPtr& point_cloud2_msg,
      const sensor_msgs::Image::ConstPtr& image_msg);
     virtual void configCallback(Config &config, uint32_t level);
+    virtual void mask_region_callback(const sensor_msgs::Image::ConstPtr& msg);
   
     ////////////////////////////////////////////////////////
     // ROS variables
@@ -88,6 +89,13 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<sensor_msgs::Image> sub_image_;
     ros::Publisher pub_;
+    ros::Subscriber sub_;
+    int region_width_;
+    int region_height_;
+    int region_x_off_;
+    int region_y_off_;
+    bool use_mask_region_;
+
   private:
   
   };

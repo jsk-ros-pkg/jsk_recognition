@@ -1,4 +1,8 @@
 <library path="lib/libjsk_perception">
+  <class name="jsk_perception/MaskImageGenerator"
+         type="jsk_perception::MaskImageGenerator"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/ROIToMaskImage"
          type="jsk_perception::ROIToMaskImage"
          base_class_type="nodelet::Nodelet">

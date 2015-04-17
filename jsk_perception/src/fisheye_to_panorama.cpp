@@ -57,11 +57,14 @@ namespace jsk_perception
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&FisheyeToPanorama::configCallback, this, _1, _2);
     srv_->setCallback (f);
+
+    scale_ = 1.0;
   }
 
   void FisheyeToPanorama::configCallback(Config &new_config, uint32_t level)
   {
     max_degree_ = new_config.degree;
+    scale_ = new_config.scale;
   }
 
 
@@ -163,13 +166,13 @@ namespace jsk_perception
                                                                  image_msg->encoding,
                                                                  undistorted_bilinear).toImageMsg());
     }else{
-      cv::Mat undistorted(int(l * tan_max_radian * 2), int(l * tan_max_radian * 2), CV_8UC3);
+      cv::Mat undistorted(int(l * tan_max_radian * 2 * scale_), int(l * tan_max_radian * 2 * scale_), CV_8UC3);
       int center_x = distorted.rows/2, center_y = distorted.cols/2;
-      int un_center_x = undistorted.rows/2, un_center_y = undistorted.cols/2;
+      int un_center_x = undistorted.rows/(2 * scale_), un_center_y = undistorted.cols/(2*scale_);
 
       for(int i = 0; i < undistorted.rows; ++i){
         for(int j = 0; j < undistorted.cols; ++j){
-          int diff_x = i-un_center_x, diff_y = j-un_center_y;
+          int diff_x = i/scale_-un_center_x, diff_y = j/scale_-un_center_y;
           float radius = sqrt(pow(diff_x, 2) + pow(diff_y, 2));
           float radian = atan(radius/l);
           if( radian < absolute_max_radian ){

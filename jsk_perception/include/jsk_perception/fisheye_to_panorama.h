@@ -77,6 +77,7 @@ namespace jsk_perception
     ros::Publisher pub_undistorted_bilinear_image_;
     bool use_panorama_;
     float max_degree_;
+    float scale_;
   private:
     
   };

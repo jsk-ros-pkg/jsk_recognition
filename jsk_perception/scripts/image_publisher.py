@@ -31,5 +31,9 @@ while not rospy.is_shutdown():
     except IOError, e:
         rospy.loginfo("cannot read the image at %s" % file_name)
         rospy.loginfo(e.message)
+    except AttributeError, e:
+        rospy.logerr("Did you set properly ~file_name param ?")
+        rospy.loginfo(e.message)
+        exit()
     rate.sleep()
 

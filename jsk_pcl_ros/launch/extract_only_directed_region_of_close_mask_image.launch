@@ -28,10 +28,13 @@
   <node pkg="image_view2" type="image_view2" name="interactive_view" >
     <remap from="image" to="/edge_detect/image" />
     <rosparam>
-      interaction_mode: grabcut_rect
+      interaction_mode: rectangle
     </rosparam>
   </node>
-
+  <node pkg="jsk_perception" type="rect_to_mask_image" name="rect_to_mask_image">
+    <remap from="~input" to="/edge_detect/image/screenrectangle" />
+    <remap from="~input/camera_info" to="/image_resizer/camera_info" />
+  </node>
   <node name="depth_mask_manager" pkg="nodelet" type="nodelet" args="manager" output="screen" />
   <node name="mask_depth_nodelet" pkg="nodelet" type="nodelet"
         args="load jsk_pcl/MaskImageToDepthConsideredMaskImage depth_mask_manager"
@@ -39,7 +42,7 @@
     <remap from="~input" to="/multi_resized_points2" />
     <remap from="~input/image" to="/edge_detect/image" />
     <remap from="~output" to="/depth/mask" />
-    <remap from="~input/maskregion" to="/edge_detect/image/foreground" />
+    <remap from="~input/maskregion" to="/rect_to_mask_image/output" />
   </node>
   <node pkg="image_view" type="image_view" name="depth_mask_view" >
     <remap from="image" to="/depth/mask" />
@@ -51,6 +54,13 @@
     <remap from="sparse_image" to="sparse/image" />
     <param name="rate" value="1.0" />
     <param name="print_point_num" value="true" />
+  </node>
+  <node pkg="jsk_perception" type="apply_mask_image" name="apply">
+    <remap from="~input" to="/edge_detect/image" />
+    <remap from="~input/mask" to="/rect_to_mask_image/output" />
+  </node>
+  <node pkg="image_view" type="image_view" name="masked_view" >
+    <remap from="image" to="apply/output" />
   </node>
 
   <include file="$(find jsk_perception)/launch/sparse_image_decoder.launch">

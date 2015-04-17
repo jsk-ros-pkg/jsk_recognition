@@ -46,6 +46,7 @@
 #include <message_filters/sync_policies/approximate_time.h>
 #include <message_filters/pass_through.h>
 #include <dynamic_reconfigure/server.h>
+#include <jsk_perception/FisheyeConfig.h>
 
 #include <opencv2/opencv.hpp>
 
@@ -58,9 +59,12 @@ namespace jsk_perception
       sensor_msgs::Image,         // image
       sensor_msgs::CameraInfo        // camera info
       > SyncPolicy;
+    typedef jsk_perception::FisheyeConfig Config;
 
     FisheyeToPanorama(): DiagnosticNodelet("FisheyeToPanorama") {}
   protected:
+    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
+    void configCallback(Config &new_config, uint32_t level);
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
@@ -71,6 +75,8 @@ namespace jsk_perception
     ros::Subscriber sub_image_;
     ros::Publisher pub_undistorted_image_;
     ros::Publisher pub_undistorted_bilinear_image_;
+    bool use_panorama_;
+    float max_degree_;
   private:
     
   };

@@ -47,11 +47,23 @@ namespace jsk_perception
   void FisheyeToPanorama::onInit()
   {
     DiagnosticNodelet::onInit();
+    pnh_->param("use_panorama", use_panorama_, false);
     pub_undistorted_image_ = advertise<sensor_msgs::Image>(
       *pnh_, "output", 1);
-    pub_undistorted_bilinear_image_ = advertise<sensor_msgs::Image>(
-      *pnh_, "output_bilinear", 1);
+    if(use_panorama_)
+      pub_undistorted_bilinear_image_ = advertise<sensor_msgs::Image>(*pnh_, "output_bilinear", 1);
+
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (&FisheyeToPanorama::configCallback, this, _1, _2);
+    srv_->setCallback (f);
   }
+
+  void FisheyeToPanorama::configCallback(Config &new_config, uint32_t level)
+  {
+    max_degree_ = new_config.degree;
+  }
+
 
   void FisheyeToPanorama::subscribe()
   {
@@ -66,15 +78,17 @@ namespace jsk_perception
 
   void FisheyeToPanorama::rectify(const sensor_msgs::Image::ConstPtr& image_msg)
   {
-    float max_degree = 60;
+    float max_degree = max_degree_;
     float max_radian = max_degree * 3.14159265 /180.0;
     float tan_max_radian = tan(max_radian);
     const float K = 341.656050955;
+    const float absolute_max_degree = 85;
+    const float absolute_max_radian = absolute_max_degree * 3.14159265 /180.0;
     float max_radius = max_radian * K;
     cv::Mat distorted = cv_bridge::toCvCopy(image_msg, sensor_msgs::image_encodings::BGR8)->image;
     int l = distorted.rows / 2;
 
-    if(false){
+    if(use_panorama_){
       cv::Mat undistorted(l, l*4, CV_8UC3);
       cv::Mat undistorted_bilinear(l, l*4, CV_8UC3);
       for(int i = 0; i < undistorted.rows; ++i){
@@ -151,27 +165,25 @@ namespace jsk_perception
     }else{
       cv::Mat undistorted(int(l * tan_max_radian * 2), int(l * tan_max_radian * 2), CV_8UC3);
       int center_x = distorted.rows/2, center_y = distorted.cols/2;
+      int un_center_x = undistorted.rows/2, un_center_y = undistorted.cols/2;
 
-      for(int i = 0; i < distorted.rows; ++i){
-        for(int j = 0; j < distorted.cols; ++j){
-          float radius = sqrt((i-center_x)*(i-center_x) + (j-center_y)*(j-center_y));
-          float radian = radius/K;
-          if( radian < max_radian ){
-            float theta = radian;
-            float new_radius = distorted.rows/2 * tan(theta);
-            float multi = 0, new_x, new_y;
+      for(int i = 0; i < undistorted.rows; ++i){
+        for(int j = 0; j < undistorted.cols; ++j){
+          int diff_x = i-un_center_x, diff_y = j-un_center_y;
+          float radius = sqrt(pow(diff_x, 2) + pow(diff_y, 2));
+          float radian = atan(radius/l);
+          if( radian < absolute_max_radian ){
+            float multi = 0, new_x = center_x, new_y = center_y;
             if(radius){
-              multi = new_radius / radius;
-              new_x = (i-center_x) * multi + center_x * tan_max_radian;
-              new_y = (j-center_y) * multi + center_y * tan_max_radian;
-            }else{
-              new_x = center_x * tan_max_radian;
-              new_y = center_y * tan_max_radian;
+              // float new_radius = radian * K; 
+              multi = radian * K / radius;
+              new_x += diff_x * multi;
+              new_y += diff_y * multi;
             }
 
             for(int c = 0; c < undistorted.channels(); ++c){
-              undistorted.data[ int(new_x) * undistorted.step + int(new_y) * undistorted.elemSize() + c ]
-                = distorted.data[ i * distorted.step + j * distorted.elemSize() + c];
+              undistorted.data[  i * undistorted.step + j * undistorted.elemSize() + c ]
+                = distorted.data[ int(new_x) * distorted.step + int(new_y) * distorted.elemSize() + c];
             }
           }
         }

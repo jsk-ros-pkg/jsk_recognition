@@ -41,7 +41,8 @@ generate_dynamic_reconfigure_options(
   cfg/HoughCircles.cfg
   cfg/ColorHistogramSlidingMatcher.cfg
   cfg/BackgroundSubstraction.cfg
-  cfg/GrabCut.cfg)
+  cfg/GrabCut.cfg
+  cfg/Fisheye.cfg)
 
 add_service_files(FILES EuclideanSegment.srv  SetTemplate.srv  WhiteBalancePoints.srv  WhiteBalance.srv)
 

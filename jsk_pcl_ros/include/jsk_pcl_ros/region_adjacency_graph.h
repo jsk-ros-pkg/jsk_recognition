@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
@@ -33,10 +32,6 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-=======
-// Copyright (C) 2015 by Krishneel Chaudhary @ JSK Lab, The University
-// of Tokyo
->>>>>>> e59c86f... Convex Connected Voxel
 
 #ifndef _REGION_ADJACENCY_GRAPH_H_
 #define _REGION_ADJACENCY_GRAPH_H_
@@ -50,27 +45,25 @@
 
 // PCL header directives
 #include <pcl/point_cloud.h>
+#include <pcl/features/vfh.h>
 
 // boost header directives
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/config.hpp>
 
-// PCL Feature
-#include <pcl/features/vfh.h>
+#include <string>
+#include <map>
 
-namespace jsk_pcl_ros {
-   
-   class RegionAdjacencyGraph {
-   public:
-      typedef pcl::PointXYZRGB PointT;
-      
+namespace jsk_pcl_ros
+{
+   class RegionAdjacencyGraph
+   {
     private:
       struct VertexProperty {
          int v_index;
          pcl::PointXYZ v_center;
          int v_label;
-       
          VertexProperty(
             int i = -1,
             pcl::PointXYZ center = pcl::PointXYZ(-1, -1, -1),
@@ -97,9 +90,9 @@ namespace jsk_pcl_ros {
          Graph>::vertex_iterator VertexIterator;
       typedef typename boost::graph_traits<
          Graph>::vertex_descriptor VertexDescriptor;
-   
-      Graph graph;
-
+      typedef pcl::PointXYZRGB PointT;
+      Graph graph_;
+      
       void sampleRandomPointsFromCloudCluster(
          pcl::PointCloud<PointT>::Ptr,
          pcl::PointCloud<pcl::Normal>::Ptr,
@@ -130,7 +123,6 @@ namespace jsk_pcl_ros {
 
     public:
       RegionAdjacencyGraph();
-      
       virtual void generateRAG(
          const std::vector<pcl::PointCloud<PointT>::Ptr> &,
          const std::vector<pcl::PointCloud<pcl::Normal>::Ptr> &,

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
@@ -33,40 +32,38 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-=======
-// Copyright (C) 2015 by Krishneel Chaudhary @ JSK Lab, The University
-// of Tokyo
->>>>>>> e59c86f... Convex Connected Voxel
 
 #include <jsk_pcl_ros/convex_connected_voxels.h>
 
-namespace jsk_pcl_ros {
-   
-    void ConvexConnectedVoxels::onInit() {
+namespace jsk_pcl_ros
+{   
+    void ConvexConnectedVoxels::onInit()
+    {
        DiagnosticNodelet::onInit();
        this->pub_indices_ = advertise<
           jsk_recognition_msgs::ClusterPointIndices>(
-             nh_, "/convex_connected_voxels/output/indices", 1);
+             *pnh_, "/convex_connected_voxels/output/indices", 1);
     }
 
-    void ConvexConnectedVoxels::subscribe() {
-       this->sub_indices_ = nh_.subscribe(
+    void ConvexConnectedVoxels::subscribe()
+    {
+       this->sub_indices_ = pnh_->subscribe(
           "/supervoxel_segmentation/output/indices",
           sizeof(char), &ConvexConnectedVoxels::indices_cb, this);
-       this->sub_cloud_ = nh_.subscribe(
+       this->sub_cloud_ = pnh_->subscribe(
           "/supervoxel_segmentation/output/cloud",
           sizeof(char), &ConvexConnectedVoxels::cloud_cb, this);
     }
-
    
-    void ConvexConnectedVoxels::unsubscribe() {
+    void ConvexConnectedVoxels::unsubscribe()
+    {
        sub_cloud_.shutdown();
        sub_indices_.shutdown();
     }
 
-   
     void ConvexConnectedVoxels::updateDiagnostic(
-       diagnostic_updater::DiagnosticStatusWrapper &stat) {
+       diagnostic_updater::DiagnosticStatusWrapper &stat)
+    {
        if (vital_checker_->isAlive()) {
           stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
                        "ConvexConnectedVoxels running");
@@ -75,16 +72,16 @@ namespace jsk_pcl_ros {
              "ConvexConnectedVoxels", vital_checker_, stat);
        }
     }
-
    
     void ConvexConnectedVoxels::cloud_cb(
-       const sensor_msgs::PointCloud2::ConstPtr &cloud_msg) {
+       const sensor_msgs::PointCloud2::ConstPtr &cloud_msg)
+    {
+       // ROS_INFO("PROCESSING CLOUD CALLBACK");
        
-       boost::mutex::scoped_lock lock(this->mutex_);
+       // boost::mutex::scoped_lock lock(this->mutex_);
        // vital_checker_->poke();
        pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
        pcl::fromROSMsg(*cloud_msg, *cloud);
-       
        std::vector<pcl::PointCloud<PointT>::Ptr> cloud_clusters;
        std::vector<pcl::PointCloud<pcl::Normal>::Ptr> normal_clusters;
        pcl::PointCloud<pcl::PointXYZ>::Ptr centroids(
@@ -93,7 +90,6 @@ namespace jsk_pcl_ros {
           cloud, this->indices_, cloud_clusters, normal_clusters, centroids);
        std::vector<std::vector<int> > neigbour_idx;
        this->nearestNeigborSearch(centroids, neigbour_idx, 4);
-       
        boost::shared_ptr<jsk_pcl_ros::RegionAdjacencyGraph> rag(
           new jsk_pcl_ros::RegionAdjacencyGraph);
        rag->generateRAG(
@@ -108,13 +104,14 @@ namespace jsk_pcl_ros {
        std::map<int, pcl::PointIndices> _indices;
        this->getConvexLabelCloudIndices(
           cloud_clusters, cloud, labelMD, _indices);
-
        std::vector<pcl::PointIndices> all_indices;
        for (std::map<int, pcl::PointIndices>::iterator it = _indices.begin();
             it != _indices.end(); it++) {
           all_indices.push_back((*it).second);
        }
-       
+
+       // ROS_INFO("Size: %ld", _indices.size());
+
        jsk_recognition_msgs::ClusterPointIndices ros_indices;
        ros_indices.cluster_indices = pcl_conversions::convertToROSPointIndices(
           all_indices, cloud_msg->header);
@@ -122,10 +119,10 @@ namespace jsk_pcl_ros {
        pub_indices_.publish(ros_indices);
     }
 
-
     void ConvexConnectedVoxels::indices_cb(
-       const jsk_recognition_msgs::ClusterPointIndices &indices_msg) {
-       boost::mutex::scoped_lock lock(this->mutex_);
+       const jsk_recognition_msgs::ClusterPointIndices &indices_msg)
+    {
+       // boost::mutex::scoped_lock lock(this->mutex_);
        vital_checker_->poke();
        this->indices_.clear();
        std::vector<pcl_msgs::PointIndices> indices =
@@ -136,15 +133,15 @@ namespace jsk_pcl_ros {
           this->indices_.push_back(_index);
        }
     }
-
    
     void ConvexConnectedVoxels::segmentCloud(
         const pcl::PointCloud<PointT>::Ptr cloud,
         const std::vector<pcl::PointIndices> &indices,
         std::vector<pcl::PointCloud<PointT>::Ptr> &cloud_clusters,
         std::vector<pcl::PointCloud<pcl::Normal>::Ptr> &normal_clusters,
-        pcl::PointCloud<pcl::PointXYZ>::Ptr centroids) {
-       // boost::mutex::scoped_lock lock(this->mutex_);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr centroids)
+    {
+        boost::mutex::scoped_lock lock(this->mutex_);
         pcl::ExtractIndices<PointT>::Ptr eifilter(
            new pcl::ExtractIndices<PointT>);
         eifilter->setInputCloud(cloud);
@@ -177,9 +174,8 @@ namespace jsk_pcl_ros {
     void ConvexConnectedVoxels::estimatePointCloudNormals(
        const pcl::PointCloud<PointT>::Ptr cloud,
        pcl::PointCloud<pcl::Normal>::Ptr s_normal,
-       const int k,
-       const double radius,
-       bool ksearch) {
+       const int k, const double radius, bool ksearch)
+    {
        pcl::NormalEstimationOMP<PointT, pcl::Normal> ne;
        ne.setInputCloud(cloud);
        ne.setNumberOfThreads(8);
@@ -197,9 +193,8 @@ namespace jsk_pcl_ros {
     void ConvexConnectedVoxels::nearestNeigborSearch(
       pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
       std::vector<std::vector<int> > &pointIndices,
-      const int k,
-      const double radius,
-      bool isneigbour) {
+      const int k, const double radius, bool isneigbour)
+    {
       pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
       kdtree.setInputCloud(cloud);
       std::vector<std::vector<float> > pointSquaredDistance;
@@ -219,12 +214,12 @@ namespace jsk_pcl_ros {
       }
     }
 
-
-void ConvexConnectedVoxels::getConvexLabelCloudIndices(
+   void ConvexConnectedVoxels::getConvexLabelCloudIndices(
        const std::vector<pcl::PointCloud<PointT>::Ptr> &cloud_clusters,
        pcl::PointCloud<PointT>::Ptr cloud,
        const std::vector<int> &labelMD,
-       std::map<int, pcl::PointIndices> &all_indices) {
+       std::map<int, pcl::PointIndices> &all_indices)
+   {
        int icounter = 0;
        for (int i = 0; i < cloud_clusters.size(); i++) {
           int _idx = labelMD.at(i); 

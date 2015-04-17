@@ -52,7 +52,7 @@ namespace jsk_pcl_ros
       *pnh_, "output/cloud", 1);
   }
 
-   void SupervoxelSegmentation::subscribe()
+  void SupervoxelSegmentation::subscribe()
   {
     sub_ = pnh_->subscribe("input", 1, &SupervoxelSegmentation::segment, this);
   }

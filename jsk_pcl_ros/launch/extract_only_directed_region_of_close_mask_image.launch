@@ -1,0 +1,58 @@
+<launch>
+  <arg name="input_image" default="/multisense/left/image_rect_color" />
+  <arg name="input_points" default="/multisense/organized_image_points2" />
+  <param name="approximate_sync" value="true" />
+
+  <node name="multipoints_resize_manager" pkg="nodelet" type="nodelet"
+        args="manager" />
+  <node pkg="nodelet" type="nodelet" name="multi_resizer"
+        args="load jsk_pcl/ResizePointsPublisher multipoints_resize_manager" output="screen">
+    <remap from="~input" to="$(arg input_points)" />
+    <remap from="~output" to="/multi_resized_points2" />
+    <param name="not_use_rgb" value="True" />
+  </node>
+
+  <arg name="RESIZE_RATE" default="0.5" />
+  <node pkg="resized_image_transport" type="image_resizer" name="image_resizer"
+        output="screen" >
+    <remap from="~input/image" to="$(arg input_image)" />
+    <remap from="~output/image" to="~image_rect" />
+    <param name="resize_scale_x" value="$(arg RESIZE_RATE)" />
+    <param name="resize_scale_y" value="$(arg RESIZE_RATE)" />
+  </node>
+
+  <node pkg="jsk_perception" type="edge_detector" name="edge_detector" output="screen">
+   <remap from="image" to="/image_resizer/image_rect" />
+    <remap from="/edge/image" to="/edge_detect/image" />
+  </node>
+  <node pkg="image_view2" type="image_view2" name="interactive_view" >
+    <remap from="image" to="/edge_detect/image" />
+    <rosparam>
+      interaction_mode: grabcut_rect
+    </rosparam>
+  </node>
+
+  <node name="depth_mask_manager" pkg="nodelet" type="nodelet" args="manager" output="screen" />
+  <node name="mask_depth_nodelet" pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/MaskImageToDepthConsideredMaskImage depth_mask_manager"
+        output="screen">
+    <remap from="~input" to="/multi_resized_points2" />
+    <remap from="~input/image" to="/edge_detect/image" />
+    <remap from="~output" to="/depth/mask" />
+    <remap from="~input/maskregion" to="/edge_detect/image/foreground" />
+  </node>
+  <node pkg="image_view" type="image_view" name="depth_mask_view" >
+    <remap from="image" to="/depth/mask" />
+  </node>
+
+  <node pkg="jsk_perception" type="sparse_image_encoder" name="sparse_image_encoder"
+        output="screen">
+    <remap from="image" to="/depth/mask" />
+    <remap from="sparse_image" to="sparse/image" />
+    <param name="rate" value="1.0" />
+    <param name="print_point_num" value="true" />
+  </node>
+
+  <include file="$(find jsk_perception)/launch/sparse_image_decoder.launch">
+  </include>
+</launch>

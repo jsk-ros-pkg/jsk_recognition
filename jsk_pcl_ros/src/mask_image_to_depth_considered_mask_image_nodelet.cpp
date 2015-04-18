@@ -243,7 +243,7 @@ namespace jsk_pcl_ros
       }
     }
     else {
-      ROS_INFO("ERROR: Image and Points have different width and height.");
+      ROS_ERROR ("ERROR: Image and Points have different width and height.");
     }
   }
 

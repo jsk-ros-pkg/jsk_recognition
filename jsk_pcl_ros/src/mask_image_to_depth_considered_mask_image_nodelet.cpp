@@ -62,6 +62,7 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     extract_num_ = config.extract_num;
     use_mask_region_ = config.use_mask_region;
+    in_the_order_of_depth_ = config.in_the_order_of_depth;
   }
 
 
@@ -102,12 +103,12 @@ namespace jsk_pcl_ros
     if (approximate_sync_) {
       async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(100);
       async_->connectInput(sub_input_, sub_image_);
-      async_->registerCallback(boost::bind(&MaskImageToDepthConsideredMaskImage::considerdepth, this, _1, _2));
+      async_->registerCallback(boost::bind(&MaskImageToDepthConsideredMaskImage::extractmask, this, _1, _2));
     }
     else {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
       sync_->connectInput(sub_input_, sub_image_);
-      sync_->registerCallback(boost::bind(&MaskImageToDepthConsideredMaskImage::considerdepth,
+      sync_->registerCallback(boost::bind(&MaskImageToDepthConsideredMaskImage::extractmask,
 					  this, _1, _2));
     }
   }
@@ -118,88 +119,126 @@ namespace jsk_pcl_ros
     sub_image_.unsubscribe();
   }
 
-  void MaskImageToDepthConsideredMaskImage::considerdepth
+  void MaskImageToDepthConsideredMaskImage::extractmask
   (
      const sensor_msgs::PointCloud2::ConstPtr& point_cloud2_msg,
      const sensor_msgs::Image::ConstPtr& image_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (point_cloud2_msg->width == image_msg->width && point_cloud2_msg->height == image_msg->height){
-      vital_checker_->poke();
-      pcl::PointCloud<pcl::PointXYZ>::Ptr
-        cloud (new pcl::PointCloud<pcl::PointXYZ>);
-      pcl::fromROSMsg(*point_cloud2_msg, *cloud);
-      pcl::PointCloud<pcl::PointXYZ>::Ptr
-        edge_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+      if (in_the_order_of_depth_ == true){
+        vital_checker_->poke();
+        pcl::PointCloud<pcl::PointXYZ>::Ptr
+          cloud (new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::fromROSMsg(*point_cloud2_msg, *cloud);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr
+          edge_cloud (new pcl::PointCloud<pcl::PointXYZ>);
 
-      int width = image_msg->width;
-      int height = image_msg->height;
-      bool points_exist = false;
-      pcl::PointXYZ nan_point;
-      nan_point.x = NAN;
-      nan_point.y = NAN;
-      nan_point.z = NAN;
-      cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy
-        (image_msg, sensor_msgs::image_encodings::MONO8);
-      cv::Mat mask = cv_ptr->image;
-      edge_cloud->is_dense = false;
-      edge_cloud->points.resize(width * height);
-      edge_cloud->width = width;
-      edge_cloud->height = height;
-      if (use_mask_region_ == false || region_width_ == 0 || region_height_ == 0){
-        for (size_t j = 0; j < mask.rows; j++) {
-          for (size_t i = 0; i < mask.cols; i++) {
-            if (mask.at<uchar>(j, i) != 0) {//if white
-              points_exist = true;
-              edge_cloud->points[j * width + i] = cloud->points[j * width + i];
+        int width = image_msg->width;
+        int height = image_msg->height;
+        bool points_exist = false;
+        pcl::PointXYZ nan_point;
+        nan_point.x = NAN;
+        nan_point.y = NAN;
+        nan_point.z = NAN;
+        cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy
+          (image_msg, sensor_msgs::image_encodings::MONO8);
+        cv::Mat mask = cv_ptr->image;
+        edge_cloud->is_dense = false;
+        edge_cloud->points.resize(width * height);
+        edge_cloud->width = width;
+        edge_cloud->height = height;
+        if (use_mask_region_ == false || region_width_ == 0 || region_height_ == 0){
+          for (size_t j = 0; j < mask.rows; j++) {
+            for (size_t i = 0; i < mask.cols; i++) {
+              if (mask.at<uchar>(j, i) != 0) {//if white
+                points_exist = true;
+                edge_cloud->points[j * width + i] = cloud->points[j * width + i];
+              }
+              else {
+                edge_cloud->points[j * width + i] = nan_point;
+              }
             }
-            else {
+          }
+        }
+        else {
+          ROS_INFO("directed region width:%d height:%d", region_width_, region_height_);
+          //set nan_point to all points first.
+          for (size_t j = 0; j < mask.rows; j++) {
+            for (size_t i = 0; i < mask.cols; i++) {
               edge_cloud->points[j * width + i] = nan_point;
             }
           }
+          int x_end = region_x_off_+ region_width_;
+          int y_end = region_y_off_+ region_height_;
+          for (size_t j = region_y_off_; j < y_end; j++) {
+            for (size_t i = region_x_off_; i < x_end; i++) {
+              if (mask.at<uchar>(j, i) != 0) {//if white
+                points_exist = true;
+                edge_cloud->points[j * width + i] = cloud->points[j * width + i];
+              }
+            }
+          }
+        }
+
+        if (points_exist) {
+          cv::Mat mask_image = cv::Mat::zeros(height, width, CV_8UC1);
+          pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
+          kdtree.setInputCloud(edge_cloud);
+          pcl::PointXYZ zero;
+          std::vector<int> near_indices;
+          std::vector<float> near_distances;
+          kdtree.nearestKSearch(zero, extract_num_, near_indices, near_distances);
+          ROS_INFO("directed num of extract points:%d   num of nearestKSearch points:%d", extract_num_, ((int) near_indices.size()));
+          int ext_num=std::min(extract_num_, ((int) near_indices.size()));
+          for (int idx = 0; idx < ext_num; idx++) {
+            int x = near_indices.at(idx) % width;
+            int y = near_indices.at(idx) / width;
+            mask_image.at<uchar>(y, x) = 255;
+          }
+          cv_bridge::CvImage mask_bridge(point_cloud2_msg->header,
+                                         sensor_msgs::image_encodings::MONO8,
+                                         mask_image);
+          pub_.publish(mask_bridge.toImageMsg());
         }
       }
       else {
-        ROS_INFO("directed region width:%d height:%d", region_width_, region_height_);
-        //set nan_point to all points first.
-        for (size_t j = 0; j < mask.rows; j++) {
-          for (size_t i = 0; i < mask.cols; i++) {
-            edge_cloud->points[j * width + i] = nan_point;
-          }
-        }
-        int x_end = region_x_off_+ region_width_;
-        int y_end = region_y_off_+ region_height_;
-        for (size_t j = region_y_off_; j < y_end; j++) {
-          for (size_t i = region_x_off_; i < x_end; i++) {
-            if (mask.at<uchar>(j, i) != 0) {//if white
-              points_exist = true;
-              edge_cloud->points[j * width + i] = cloud->points[j * width + i];
-            }
-            else {
-              edge_cloud->points[j * width + i] = nan_point;
+        cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy
+          (image_msg, sensor_msgs::image_encodings::MONO8);
+        cv::Mat mask = cv_ptr->image;
+        cv::Mat tmp_mask = cv::Mat::zeros(image_msg->height, image_msg->width, CV_8UC1);
+        int data_len=image_msg->width * image_msg->height;
+        int cnt = 0;
+        if (use_mask_region_ ==false || region_width_ == 0 || region_height_ == 0){
+          for (size_t j = 0; j < mask.rows; j++) {
+            for (size_t i = 0; i < mask.cols; i++) {
+              if (mask.at<uchar>(j, i) != 0) {//if white
+                cnt++;
+                if (std::min(extract_num_ , data_len) > cnt) {
+                  tmp_mask.at<uchar>(j, i) = mask.at<uchar>(j, i);
+                }
+              }
             }
           }
         }
-      }
-
-      if (points_exist) {
-        cv::Mat mask_image = cv::Mat::zeros(height, width, CV_8UC1);
-        pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
-        kdtree.setInputCloud(edge_cloud);
-        pcl::PointXYZ zero;
-        std::vector<int> near_indices;
-        std::vector<float> near_distances;
-        kdtree.nearestKSearch(zero, extract_num_, near_indices, near_distances);
-        ROS_INFO("directed num of extract points:%d   num of nearestKSearch points:%d", extract_num_, ((int) near_indices.size()));
-        int ext_num=std::min(extract_num_, ((int) near_indices.size()));
-        for (int idx = 0; idx < ext_num; idx++) {
-          int x = near_indices.at(idx) % width;
-          int y = near_indices.at(idx) / width;
-          mask_image.at<uchar>(y, x) = 255;
+        else {
+          ROS_INFO("directed region width:%d height:%d", region_width_, region_height_);
+          int x_end = region_x_off_ + region_width_;
+          int y_end = region_y_off_ + region_height_;
+          for (size_t j = region_y_off_; j < y_end; j++) {
+            for (size_t i = region_x_off_; i < x_end; i++) {
+              if (mask.at<uchar>(j, i) != 0) {//if white
+                cnt++;
+                if (std::min(extract_num_ , data_len) > cnt) {
+                  tmp_mask.at<uchar>(j, i) = mask.at<uchar>(j, i);
+                }
+              }
+            }
+          }
         }
         cv_bridge::CvImage mask_bridge(point_cloud2_msg->header,
                                        sensor_msgs::image_encodings::MONO8,
-                                       mask_image);
+                                       tmp_mask);
         pub_.publish(mask_bridge.toImageMsg());
       }
     }

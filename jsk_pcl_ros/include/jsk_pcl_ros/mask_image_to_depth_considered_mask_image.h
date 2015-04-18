@@ -70,7 +70,7 @@ namespace jsk_pcl_ros
     virtual void unsubscribe();
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
-    virtual void considerdepth
+    virtual void extractmask
     (
      const sensor_msgs::PointCloud2::ConstPtr& point_cloud2_msg,
      const sensor_msgs::Image::ConstPtr& image_msg);
@@ -95,6 +95,7 @@ namespace jsk_pcl_ros
     int region_x_off_;
     int region_y_off_;
     bool use_mask_region_;
+    bool in_the_order_of_depth_;
 
   private:
   

@@ -2179,6 +2179,23 @@ spherical laser.
   Fps of laser sensor.
   The default value is same to hokuyo's parameter.
 
+### jsk\_pcl/FisheyeSpherePublisher
+![](images/fisheye_rviz.h)
+
+Show the sphere generated from fisheye image.
+This was tested with Prosilica GC 2450C + nm30 lens
+
+#### Subscribing Topics
+* `~input` (`sensor_msgs/Image`)
+  Fisheye Image
+
+#### Publishing Topics
+* `~output` (`sensor_msgs/PointCloud2`)
+
+  Sphere pointcloud.
+
+
+
 ### jsk\_pcl/PlanarlPointCloudSimulator
 ![](images/planar_pointcloud_simulator.h)
 

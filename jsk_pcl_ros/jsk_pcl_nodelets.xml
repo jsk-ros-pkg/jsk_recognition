@@ -409,6 +409,13 @@
       publish the centroid of the pointcloud to /tf
     </description>
   </class>
+  <class name="jsk_pcl/FisheyeSpherePublisher"
+         type="jsk_pcl_ros::FisheyeSpherePublisher"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      publish sphere pointcloud generated from fisheye
+    </description>
+  </class>
   <class name="jsk_pcl/VoxelGridDownsampleManager" type="jsk_pcl_ros::VoxelGridDownsampleManager"
          base_class_type="nodelet::Nodelet">
     <description>

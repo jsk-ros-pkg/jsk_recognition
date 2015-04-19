@@ -24,6 +24,7 @@ endif()
 
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
+  cfg/ProjectImagePoint.cfg
   cfg/MaskImageGenerator.cfg
   cfg/MorphologicalMaskImageOperator.cfg
   cfg/BlobDetector.cfg
@@ -116,6 +117,7 @@ jsk_perception_nodelet(src/roi_to_mask_image.cpp "jsk_perception/ROIToMaskImage"
 jsk_perception_nodelet(src/polygon_to_mask_image.cpp "jsk_perception/PolygonToMaskImage" "polygon_to_mask_image")
 jsk_perception_nodelet(src/rect_to_roi.cpp "jsk_perception/RectToROI" "rect_to_roi")
 jsk_perception_nodelet(src/mask_image_generator.cpp "jsk_perception/MaskImageGenerator" "mask_image_generator")
+jsk_perception_nodelet(src/project_image_point.cpp "jsk_perception/ProjectImagePoint" "project_image_point")
 
 # compiling jsk_perception library for nodelet
 add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}

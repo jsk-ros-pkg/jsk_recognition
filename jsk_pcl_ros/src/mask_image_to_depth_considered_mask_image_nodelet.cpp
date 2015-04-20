@@ -243,7 +243,7 @@ namespace jsk_pcl_ros
       }
     }
     else {
-      ROS_ERROR ("ERROR: Image and Points have different width and height.");
+      ROS_ERROR ("ERROR: Different width and height. Points[width:%d height:%d] Image[width:%d height:%d]", point_cloud2_msg->width, point_cloud2_msg->height, image_msg->width, image_msg->height);
     }
   }
 

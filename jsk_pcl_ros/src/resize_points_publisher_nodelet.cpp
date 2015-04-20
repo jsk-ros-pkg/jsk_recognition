@@ -16,17 +16,22 @@
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <jsk_topic_tools/connection_based_nodelet.h>
 
+#include <dynamic_reconfigure/server.h>
+#include <jsk_pcl_ros/ResizePointsPublisherConfig.h>
+
 namespace jsk_pcl_ros
 {
   class ResizePointsPublisher : public jsk_topic_tools::ConnectionBasedNodelet
   {
     typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2,
                                                       PCLIndicesMsg> SyncPolicy;
+    typedef jsk_pcl_ros::ResizePointsPublisherConfig Config;
 
   private:
     int step_x_, step_y_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<PCLIndicesMsg> sub_indices_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> >  srv_;
     ros::Subscriber sub_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     ros::Publisher pub_;
@@ -36,12 +41,20 @@ namespace jsk_pcl_ros
     void onInit () {
       ConnectionBasedNodelet::onInit();
       pnh_->param("use_indices", use_indices_, false);
-      pnh_->param("step_x", step_x_, 2);
-      NODELET_INFO("step_x : %d", step_x_);
-      pnh_->param("step_y", step_y_, 2);
-      NODELET_INFO("step_y : %d", step_y_);
       pnh_->param("not_use_rgb", not_use_rgb_, false);
+      srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+      dynamic_reconfigure::Server<Config>::CallbackType f =
+        boost::bind (
+                     &ResizePointsPublisher::configCallback, this, _1, _2);
+      srv_->setCallback (f);
       pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+
+    }
+
+    void configCallback(Config &config, uint32_t level){
+      boost::mutex::scoped_lock lock(mutex_);
+      step_x_=config.step_x;
+      step_y_=config.step_y;
     }
 
     void subscribe()

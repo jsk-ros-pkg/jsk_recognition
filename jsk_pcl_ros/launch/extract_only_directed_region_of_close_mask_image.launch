@@ -1,7 +1,7 @@
 <launch>
   <arg name="input_image" default="/multisense/left/image_rect_color" />
   <arg name="input_points" default="/multisense/organized_image_points2" />
-  <arg name="use_interactive_view" default="false" />
+  <arg name="use_interactive_view" default="true" />
   <arg if = "$(arg use_interactive_view)"
        name = "mask_region" value = "/rect_to_mask_image/output" />
   <arg unless = "$(arg use_interactive_view)"

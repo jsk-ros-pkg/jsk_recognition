@@ -34,51 +34,39 @@
  *********************************************************************/
 
 
-#ifndef JSK_PERCEPTION_FISHEYE_TO_PANORAMA_H_
-#define JSK_PERCEPTION_FISHEYE_TO_PANORAMA_H_
+#ifndef JSK_PERCEPTION_MASK_IMAGE_GENERATOR_H_
+#define JSK_PERCEPTION_MASK_IMAGE_GENERATOR_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_perception/MaskImageGeneratorConfig.h>
 #include <sensor_msgs/Image.h>
-#include <sensor_msgs/CameraInfo.h>
-
-#include <message_filters/subscriber.h>
-#include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/approximate_time.h>
-#include <message_filters/pass_through.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <dynamic_reconfigure/server.h>
-#include <jsk_perception/FisheyeConfig.h>
-
-#include <opencv2/opencv.hpp>
 
 namespace jsk_perception
 {
-  class FisheyeToPanorama: public jsk_topic_tools::DiagnosticNodelet
+  class MaskImageGenerator: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    typedef message_filters::sync_policies::ApproximateTime<
-      sensor_msgs::Image,         // image
-      sensor_msgs::CameraInfo        // camera info
-      > SyncPolicy;
-    typedef jsk_perception::FisheyeConfig Config;
-
-    FisheyeToPanorama(): DiagnosticNodelet("FisheyeToPanorama") {}
+    typedef boost::shared_ptr<MaskImageGenerator> Ptr;
+    typedef MaskImageGeneratorConfig Config;
+    MaskImageGenerator(): DiagnosticNodelet("MaskImageGenerator") {}
   protected:
-    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
-    void configCallback(Config &new_config, uint32_t level);
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    inline double interpolate(double rate, double first, double second){return (1.0 - rate) * first + rate * second;};
-    virtual void rectify(const sensor_msgs::Image::ConstPtr& image_msg);
+    virtual void generate(const sensor_msgs::Image::ConstPtr& msg);
+    virtual void configCallback(Config &config, uint32_t level);
+
+    boost::mutex mutex_;
+    ros::Subscriber sub_;
+    ros::Publisher pub_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
-    ros::Subscriber sub_image_;
-    ros::Publisher pub_undistorted_image_;
-    ros::Publisher pub_undistorted_bilinear_image_;
-    bool use_panorama_;
-    bool simple_panorama_;
-    float max_degree_;
-    float scale_;
+    // Parameters
+    int offset_x_;
+    int offset_y_;
+    int width_;
+    int height_;
   private:
     
   };

@@ -1,8 +1,8 @@
-// -*- mode: c++ -*-
+// -*- mode: C++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2015, JSK Lab
+ *  Copyright (c) 2013, Ryohei Ueda and JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,54 +33,46 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#ifndef JSK_PCL_ROS_FISHEYE_SHPHERE_PUBLISHER_H_
+#define JSK_PCL_ROS_FISHEYE_SHPHERE_PUBLISHER_H_
 
-#ifndef JSK_PERCEPTION_FISHEYE_TO_PANORAMA_H_
-#define JSK_PERCEPTION_FISHEYE_TO_PANORAMA_H_
-
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+// ros
+#include <ros/ros.h>
+#include <ros/names.h>
 #include <sensor_msgs/Image.h>
-#include <sensor_msgs/CameraInfo.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <tf/transform_broadcaster.h>
 
-#include <message_filters/subscriber.h>
-#include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/approximate_time.h>
-#include <message_filters/pass_through.h>
+// pcl
+#include <pcl_ros/pcl_nodelet.h>
+#include <pcl/point_types.h>
+#include <pcl/common/centroid.h>
+#include <pcl/filters/extract_indices.h>
+
+#include <jsk_pcl_ros/FisheyeSphereConfig.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <dynamic_reconfigure/server.h>
-#include <jsk_perception/FisheyeConfig.h>
 
-#include <opencv2/opencv.hpp>
-
-namespace jsk_perception
+namespace jsk_pcl_ros
 {
-  class FisheyeToPanorama: public jsk_topic_tools::DiagnosticNodelet
+  class FisheyeSpherePublisher: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    typedef message_filters::sync_policies::ApproximateTime<
-      sensor_msgs::Image,         // image
-      sensor_msgs::CameraInfo        // camera info
-      > SyncPolicy;
-    typedef jsk_perception::FisheyeConfig Config;
-
-    FisheyeToPanorama(): DiagnosticNodelet("FisheyeToPanorama") {}
+    typedef FisheyeSphereConfig Config;
+    FisheyeSpherePublisher(): DiagnosticNodelet("FisheyeSpherePublisher") {}
   protected:
-    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
-    void configCallback(Config &new_config, uint32_t level);
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    inline double interpolate(double rate, double first, double second){return (1.0 - rate) * first + rate * second;};
-    virtual void rectify(const sensor_msgs::Image::ConstPtr& image_msg);
-    
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
+    virtual void extract(const sensor_msgs::ImageConstPtr &input);
+    virtual void configCallback(Config &config, uint32_t level);
+
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     ros::Subscriber sub_image_;
-    ros::Publisher pub_undistorted_image_;
-    ros::Publisher pub_undistorted_bilinear_image_;
-    bool use_panorama_;
-    bool simple_panorama_;
-    float max_degree_;
-    float scale_;
+    ros::Publisher pub_sphere_;
+    float downsample_rate_;
+    float sphere_radius_;
   private:
-    
   };
 }
 

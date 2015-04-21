@@ -24,6 +24,8 @@ endif()
 
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
+  cfg/ProjectImagePoint.cfg
+  cfg/MaskImageGenerator.cfg
   cfg/MorphologicalMaskImageOperator.cfg
   cfg/BlobDetector.cfg
   cfg/SingleChannelHistogram.cfg
@@ -41,7 +43,8 @@ generate_dynamic_reconfigure_options(
   cfg/HoughCircles.cfg
   cfg/ColorHistogramSlidingMatcher.cfg
   cfg/BackgroundSubstraction.cfg
-  cfg/GrabCut.cfg)
+  cfg/GrabCut.cfg
+  cfg/Fisheye.cfg)
 
 add_service_files(FILES EuclideanSegment.srv  SetTemplate.srv  WhiteBalancePoints.srv  WhiteBalance.srv)
 
@@ -110,10 +113,15 @@ jsk_perception_nodelet(src/rect_to_mask_image.cpp "jsk_perception/RectToMaskImag
 jsk_perception_nodelet(src/mask_image_to_roi.cpp "jsk_perception/MaskImageToROI" "mask_image_to_roi")
 jsk_perception_nodelet(src/mask_image_to_rect.cpp "jsk_perception/MaskImageToRect" "mask_image_to_rect")
 jsk_perception_nodelet(src/roi_to_rect.cpp "jsk_perception/ROIToRect" "roi_to_rect")
-jsk_perception_nodelet(src/roi_to_mask_image.cpp "jsk_pcl/ROIToMaskImage" "roi_to_mask_image")
+jsk_perception_nodelet(src/roi_to_mask_image.cpp "jsk_perception/ROIToMaskImage" "roi_to_mask_image")
 jsk_perception_nodelet(src/polygon_to_mask_image.cpp "jsk_perception/PolygonToMaskImage" "polygon_to_mask_image")
 jsk_perception_nodelet(src/rect_to_roi.cpp "jsk_perception/RectToROI" "rect_to_roi")
+<<<<<<< HEAD
 jsk_perception_nodelet(src/skeletonization_nodelet.cpp "jsk_perception/Skeletonization" "skeletonization")
+=======
+jsk_perception_nodelet(src/mask_image_generator.cpp "jsk_perception/MaskImageGenerator" "mask_image_generator")
+jsk_perception_nodelet(src/project_image_point.cpp "jsk_perception/ProjectImagePoint" "project_image_point")
+>>>>>>> 035210d7e64144613d924a35f7ad77aa40342ef1
 
 # compiling jsk_perception library for nodelet
 add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}

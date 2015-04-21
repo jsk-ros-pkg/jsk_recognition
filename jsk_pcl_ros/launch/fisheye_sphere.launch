@@ -1,0 +1,17 @@
+<launch>
+  <node pkg="jsk_perception" type="image_publisher.py" name="image_publisher">
+    <param name="file_name" value="$(env HOME)/frame0000.jpg"/>
+    <remap from="~output" to="/camera/image_rect_color"/>
+  </node>
+
+  <node type="nodelet" pkg="nodelet" name="fisheye_manager" args="manager"/>
+
+  <node type="nodelet" pkg="nodelet" name="fisheye_sphere_publisher"
+        args="standalone jsk_pcl/FisheyeSpherePublisher" output="screen">
+    <remap from="~input" to="/camera/image_rect_color"/>
+  </node>
+
+  <node type="static_transform_publisher" pkg="tf" name="tf_pub" args="0 0 0 0 0 0  base fisheye 100"/>
+
+  <node type="rviz" pkg="rviz" name="rviz"/>
+</launch>

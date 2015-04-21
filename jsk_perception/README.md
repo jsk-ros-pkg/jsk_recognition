@@ -2,6 +2,32 @@
 
 ## nodes and nodelets
 
+### jsk\_pcl/ProjectImagePoint
+![](images/project_image_point.png)
+
+Convert image local coordinates (represented as `geomery_msgs/PointStamped`) into 3-D point.
+Z value of the point is specified via dyanmci_reconfigure API.
+
+#### Subscribing Topic
+* `~input` (`geometry_msgs/PointStamped`)
+
+  Input point in image local coordinates.
+* `~input/camera_info` (`sensor_msgs/CameraInfo`)
+
+  Camera parameter of the original image.
+
+#### Publishing Topic
+* `~output` (`geometry_msgs/PointStamped`)
+
+  Output point and the value is scaled to satisfy specified z value.
+* `~output/ray` (`geometry_msgs/Vector3Stamped`)
+
+  3-D ray vector of the point of image local coordinates.
+#### Parameters
+* `~z` (Double, default: `2.0`)
+
+  Z value of projected point.
+
 ### jsk\_pcl/RectToROI
 Convert rectangle (`geometry_msgs/Polygon`) into ROI with camera info (`sensor_msgs/CameraInfo`).
 
@@ -51,6 +77,25 @@ We expect it will be used with image_view2.
 
   Mask image.
 
+### jsk\_perception/MaskImageGenerator
+Simply generate a mask image according to ~input image and dynamic reconfigure parameters.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/Image`)
+
+  Input image and it's used to know original width and height.
+
+#### Publishing Topic
+* `~output` (`sensor_msgs/Image`)
+
+  Output mask image.
+
+#### Parameters
+* `~offset_x` (Int, default: `0`)
+* `~offset_y` (Int, default: `0`)
+* `~width` (Int, default: `256`)
+* `~height` (Int, default: `256`)
+  Coordinates of top left point and size of mask image.
 
 ### jsk\_perception/PolygonToMaskImage
 ![](images/polygon_to_mask_image.png)
@@ -441,3 +486,35 @@ Multiply (bitwise) two mask image into one mask image.
 * `~approximate_sync` (Bool, default: `false`)
 
   Approximately synchronize `~input/src1` and `~input/src2` if it's true.
+
+### jsk\_perception/FisheyeToPanorama
+This nodelet will publish Rectified or Panoramized Fisheye Image.
+We recomend you to set scale factor as small as possible to reduce calculation.
+This  was tested with Prosilica GC2450C and NM30 lens.
+Below pictures show rectify image system.
+![](images/fisheye_readme.png)
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/Image`)
+
+  Input mask images.
+#### Publishing Topic
+* `~output` (`sensor_msgs/Image`)
+
+  Rectified or Panoramized Image
+
+* `~output_biliner` (`sensor_msgs/Image`)
+
+  When Simaple Panorama Mode, publish Panoramized Image
+
+#### Parameters
+* `~use_panorama` (Bool, default: `false`)
+
+  If true=> publish Parnorama View Image
+  If false=> publish Rectified View Image
+
+* `~simple_panorama` (Bool, default: `false`)
+
+  This is effective only when use_panorama = true
+  If true => show Simple Panorama View
+  If false => show Calcurated Panorama View

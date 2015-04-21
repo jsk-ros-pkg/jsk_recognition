@@ -1024,8 +1024,9 @@ of organized pointcloud and original `sensor_msgs/Image`.
 
 ### jsk\_pcl/MaskImageToDepthConsideredMaskImage
 #### What Is This
+![](images/mask_image_to_depth_considered_mask_image.png)
 
-jsk_pcl/MaskImageToDepthConsideredMaskImage generates mask image at close range from `sensor_msgs/PointCloud2` and `sensor_msgs/Image` of mask image.
+jsk_pcl/MaskImageToDepthConsideredMaskImage extracts directed area of mask image in the order of depth from `sensor_msgs/PointCloud2` and `sensor_msgs/Image` of mask image. Example is at jsk_pcl_ros/launch/extract_only_directed_region_of_close_mask_image.launch .
 
 #### Subscribing Topic
 
@@ -1035,7 +1036,7 @@ jsk_pcl/MaskImageToDepthConsideredMaskImage generates mask image at close range 
 
 * `~input/image` (`sensor_msgs/Image`)
 
-  Input mask image. 
+  Input mask image.
 
 * `~input/maskregion` (`sensor_msgs/Image`)
 
@@ -2177,6 +2178,23 @@ spherical laser.
 
   Fps of laser sensor.
   The default value is same to hokuyo's parameter.
+
+### jsk\_pcl/FisheyeSpherePublisher
+![](images/fisheye_rviz.h)
+
+Show the sphere generated from fisheye image.
+This was tested with Prosilica GC 2450C + nm30 lens
+
+#### Subscribing Topics
+* `~input` (`sensor_msgs/Image`)
+  Fisheye Image
+
+#### Publishing Topics
+* `~output` (`sensor_msgs/PointCloud2`)
+
+  Sphere pointcloud.
+
+
 
 ### jsk\_pcl/PlanarlPointCloudSimulator
 ![](images/planar_pointcloud_simulator.h)

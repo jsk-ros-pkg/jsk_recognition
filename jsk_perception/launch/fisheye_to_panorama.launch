@@ -1,16 +1,26 @@
 <launch>
-  <node type="nm33_node" pkg="opt_camera" name="nm33_camera"/>
+  <node pkg="tf" type="static_transform_publisher" name="tf_pub" args="0 0 0 0 0 0 base fisheye 100"/>
+
+  <node pkg="jsk_perception" type="fisheye_ray.py" name="click_to_pose">
+    <remap from="clicked_point" to="/camera/image_rect_color/screenpoint"/>
+    <remap from="camera_info" to="/camera/camera_info"/>
+  </node>
 
   <node type="nodelet" pkg="nodelet" name="fisheye_manager" args="manager"/>
   <node type="nodelet" pkg="nodelet" name="fisheye_to_panorama"
-	args="load jsk_perception/FisheyeToPanorama fisheye_manager" output="screen">
-    <remap from="~input" to="/camera/omni/image_raw"/>
-    <remap from="~input_camera_info" to="/camera/omni/camera_info"/>
+        args="load jsk_perception/FisheyeToPanorama fisheye_manager" output="screen">
+    <remap from="~input" to="/camera/image_rect_color"/>
+    <param name="use_panorama" value="true"/>
   </node>
-  <node type="image_view" pkg="image_view" name="fisheye_image_view">
-    <remap from="image" to="/camera/omni/image_raw"/>
+  <node type="nodelet" pkg="nodelet" name="fisheye_sphere"
+        args="load jsk_pcl/FisheyeSpherePublisher fisheye_manager" output="screen">
+    <remap from="~input" to="/camera/image_rect_color"/>
+  </node>
+  <node type="image_view2" pkg="image_view2" name="fisheye_image_view">
+    <remap from="image" to="/camera/image_rect_color"/>
   </node>
   <node type="image_view" pkg="image_view" name="undistorted_image_view">
-    <remap from="image" to="/fisheye_to_panorama/output_bilinear"/>
+    <remap from="image" to="/fisheye_to_panorama/output"/>
   </node>
+  <node type="rviz" pkg="rviz" name="rviz"/>
 </launch>

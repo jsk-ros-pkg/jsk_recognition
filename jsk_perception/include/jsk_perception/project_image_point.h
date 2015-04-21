@@ -34,51 +34,45 @@
  *********************************************************************/
 
 
-#ifndef JSK_PERCEPTION_FISHEYE_TO_PANORAMA_H_
-#define JSK_PERCEPTION_FISHEYE_TO_PANORAMA_H_
+#ifndef JSK_PERCEPTION_PROJECT_IMAGE_POINT_H_
+#define JSK_PERCEPTION_PROJECT_IMAGE_POINT_H_
+
+#include <sensor_msgs/CameraInfo.h>
+#include <geometry_msgs/PointStamped.h>
+#include <geometry_msgs/Vector3Stamped.h>
+
+#include <image_geometry/pinhole_camera_model.h>
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
-#include <sensor_msgs/Image.h>
-#include <sensor_msgs/CameraInfo.h>
-
-#include <message_filters/subscriber.h>
-#include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/approximate_time.h>
-#include <message_filters/pass_through.h>
 #include <dynamic_reconfigure/server.h>
-#include <jsk_perception/FisheyeConfig.h>
-
-#include <opencv2/opencv.hpp>
+#include <jsk_perception/ProjectImagePointConfig.h>
 
 namespace jsk_perception
 {
-  class FisheyeToPanorama: public jsk_topic_tools::DiagnosticNodelet
+  class ProjectImagePoint: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    typedef message_filters::sync_policies::ApproximateTime<
-      sensor_msgs::Image,         // image
-      sensor_msgs::CameraInfo        // camera info
-      > SyncPolicy;
-    typedef jsk_perception::FisheyeConfig Config;
-
-    FisheyeToPanorama(): DiagnosticNodelet("FisheyeToPanorama") {}
+    typedef boost::shared_ptr<ProjectImagePoint> Ptr;
+    typedef ProjectImagePointConfig Config;
+    ProjectImagePoint(): DiagnosticNodelet("ProjectImagePoint") {}
+    
   protected:
-    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
-    void configCallback(Config &new_config, uint32_t level);
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    inline double interpolate(double rate, double first, double second){return (1.0 - rate) * first + rate * second;};
-    virtual void rectify(const sensor_msgs::Image::ConstPtr& image_msg);
+    virtual void project(const geometry_msgs::PointStamped::ConstPtr& msg);
+    virtual void cameraInfoCallback(const sensor_msgs::CameraInfo::ConstPtr& msg);
+    virtual void configCallback(Config& config, uint32_t level);
     
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
-    ros::Subscriber sub_image_;
-    ros::Publisher pub_undistorted_image_;
-    ros::Publisher pub_undistorted_bilinear_image_;
-    bool use_panorama_;
-    bool simple_panorama_;
-    float max_degree_;
-    float scale_;
+    boost::mutex mutex_;
+    ros::Subscriber sub_;
+    ros::Subscriber sub_camera_info_;
+    ros::Publisher pub_;
+    ros::Publisher pub_vector_;
+    sensor_msgs::CameraInfo::ConstPtr camera_info_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    double z_;
+    
   private:
     
   };

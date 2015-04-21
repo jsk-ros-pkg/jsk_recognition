@@ -45,13 +45,17 @@
 
 // PCL header directives
 #include <pcl/point_cloud.h>
+<<<<<<< HEAD
 #include <pcl/features/vfh.h>
+=======
+>>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
 
 // boost header directives
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/config.hpp>
 
+<<<<<<< HEAD
 #include <string>
 #include <map>
 
@@ -59,11 +63,26 @@ namespace jsk_pcl_ros
 {
    class RegionAdjacencyGraph
    {
+=======
+// PCL Feature
+#include <pcl/features/vfh.h>
+
+namespace jsk_pcl_ros {
+   
+   class RegionAdjacencyGraph {
+   public:
+      typedef pcl::PointXYZRGB PointT;
+      
+>>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
     private:
       struct VertexProperty {
          int v_index;
          pcl::PointXYZ v_center;
          int v_label;
+<<<<<<< HEAD
+=======
+       
+>>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
          VertexProperty(
             int i = -1,
             pcl::PointXYZ center = pcl::PointXYZ(-1, -1, -1),
@@ -90,9 +109,15 @@ namespace jsk_pcl_ros
          Graph>::vertex_iterator VertexIterator;
       typedef typename boost::graph_traits<
          Graph>::vertex_descriptor VertexDescriptor;
+<<<<<<< HEAD
       typedef pcl::PointXYZRGB PointT;
       Graph graph_;
       
+=======
+   
+      Graph graph;
+
+>>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
       void sampleRandomPointsFromCloudCluster(
          pcl::PointCloud<PointT>::Ptr,
          pcl::PointCloud<pcl::Normal>::Ptr,
@@ -123,6 +148,10 @@ namespace jsk_pcl_ros
 
     public:
       RegionAdjacencyGraph();
+<<<<<<< HEAD
+=======
+      
+>>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
       virtual void generateRAG(
          const std::vector<pcl::PointCloud<PointT>::Ptr> &,
          const std::vector<pcl::PointCloud<pcl::Normal>::Ptr> &,

@@ -35,7 +35,6 @@
 
 #include <jsk_pcl_ros/region_adjacency_graph.h>
 
-<<<<<<< HEAD
 namespace jsk_pcl_ros
 {   
     RegionAdjacencyGraph::RegionAdjacencyGraph()
@@ -43,26 +42,13 @@ namespace jsk_pcl_ros
        
     }
    
-=======
-namespace jsk_pcl_ros {
-   
-    RegionAdjacencyGraph::RegionAdjacencyGraph() {
-       
-    }
-
-
->>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
     void RegionAdjacencyGraph::generateRAG(
        const std::vector<pcl::PointCloud<PointT>::Ptr> &cloud_clusters,
        const std::vector<pcl::PointCloud<pcl::Normal>::Ptr>  &normal_clusters,
        const pcl::PointCloud<pcl::PointXYZ>::Ptr centroids,
        std::vector<std::vector<int> > &neigbor_indices,
-<<<<<<< HEAD
        const int edge_weight_criteria)
     {
-=======
-       const int edge_weight_criteria) {
->>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
        if (cloud_clusters.empty() || normal_clusters.empty() ||
            centroids->empty() || neigbor_indices.empty()) {
           ROS_ERROR("ERROR: Cannot Generate RAG of empty data...");
@@ -72,13 +58,8 @@ namespace jsk_pcl_ros {
        if (cloud_clusters.size() == neigbor_indices.size()) {
           std::vector<VertexDescriptor> vertex_descriptor;
           for (int j = 0; j < centroids->size(); j++) {
-<<<<<<< HEAD
              VertexDescriptor v_des = boost::add_vertex(
                 VertexProperty(j, centroids->points[j], -1), this->graph_);
-=======
-             VertexDescriptor v_des = add_vertex(
-                VertexProperty(j, centroids->points[j], -1), this->graph);
->>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
              vertex_descriptor.push_back(v_des);
           }
           for (int j = 0; j < neigbor_indices.size(); j++) {
@@ -165,17 +146,10 @@ namespace jsk_pcl_ros {
                 if (r_vd != vd) {
                    bool found = false;
                    EdgeDescriptor e_descriptor;
-<<<<<<< HEAD
                    tie(e_descriptor, found) = boost::edge(r_vd, vd, this->graph_);
                    if (!found) {
                       boost::add_edge(
                          r_vd, vd, EdgeProperty(distance), this->graph_);
-=======
-                   tie(e_descriptor, found) = edge(r_vd, vd, graph);
-                   if (!found) {
-                      boost::add_edge(
-                         r_vd, vd, EdgeProperty(distance), this->graph);
->>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
                    }
                 }
              }
@@ -188,15 +162,9 @@ namespace jsk_pcl_ros {
     template<typename T>
     T RegionAdjacencyGraph::getCloudClusterWeightFunction(
        const std::vector<std::vector<Eigen::Vector3f> > &_points,
-<<<<<<< HEAD
        const std::vector<std::vector<Eigen::Vector3f> > &_normal)
     {
 #define ANGLE_THRESHOLD (10)
-=======
-       const std::vector<std::vector<Eigen::Vector3f> > &_normal) {
-#define ANGLE_THRESHOLD (10)
-
->>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
        if (_points.size() == 2 && _points.size() == _normal.size()) {
           T weights_ = -1.0f;
           int concave_ = 0;
@@ -246,12 +214,8 @@ namespace jsk_pcl_ros {
     float RegionAdjacencyGraph::getVectorAngle(
        const Eigen::Vector3f &vector1,
        const Eigen::Vector3f &vector2,
-<<<<<<< HEAD
        bool indegree)
     {
-=======
-       bool indegree) {
->>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
        float angle_ = acos(vector1.dot(vector2));
        if (indegree) {
           return angle_ * 180/M_PI;
@@ -265,12 +229,8 @@ namespace jsk_pcl_ros {
        const Eigen::Vector3f &center_point,
        const Eigen::Vector3f &n1_point,
        const Eigen::Vector3f &center_normal,
-<<<<<<< HEAD
        const Eigen::Vector3f &neigbour_normal)
     {
-=======
-       const Eigen::Vector3f &neigbour_normal) {
->>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
        Eigen::Vector3f difference_ = center_point - n1_point;
        difference_ /= difference_.norm();
        T convexityc = static_cast<T>(center_normal.dot(difference_) -
@@ -278,21 +238,13 @@ namespace jsk_pcl_ros {
        return convexityc;
     }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
     void RegionAdjacencyGraph::sampleRandomPointsFromCloudCluster(
        pcl::PointCloud<PointT>::Ptr cloud,
        pcl::PointCloud<pcl::Normal>::Ptr normal,
        std::vector<Eigen::Vector3f> &point_vector,
        std::vector<Eigen::Vector3f> &normal_vector,
-<<<<<<< HEAD
        int gen_sz)
     {
-=======
-       int gen_sz) {
->>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
        for (int i = 0; i < std::max(gen_sz, (int)cloud->size()); i++) {
           int _idx = rand() % cloud->size();
           Eigen::Vector3f cv = cloud->points[_idx].getVector3fMap();
@@ -305,7 +257,6 @@ namespace jsk_pcl_ros {
        }
     }
 
-<<<<<<< HEAD
     void RegionAdjacencyGraph::splitMergeRAG(
        const int _threshold)
     {
@@ -336,63 +287,23 @@ namespace jsk_pcl_ros {
                 } else {
                    if (this->graph_[*ai].v_label == -1) {
                       this->graph_[*ai].v_label = this->graph_[*i].v_label;
-=======
-    void RegionAdjacencyGraph::splitMergeRAG(const int _threshold) {
-       if (num_vertices(this->graph) == 0) {
-          ROS_ERROR("ERROR: Cannot Merge Empty RAG ...");
-          return;
-       }
-       IndexMap index_map = get(boost::vertex_index, this->graph);
-       EdgePropertyAccess edge_weights = get(boost::edge_weight, this->graph);
-       VertexIterator i, end;
-       int label = -1;
-       for (tie(i, end) = vertices(this->graph); i != end; i++) {
-          if (this->graph[*i].v_label == -1) {
-             graph[*i].v_label = ++label;
-          }
-          AdjacencyIterator ai, a_end;
-          tie(ai, a_end) = adjacent_vertices(*i, this->graph);
-          for (; ai != a_end; ++ai) {
-             bool found = false;
-             EdgeDescriptor e_descriptor;
-             tie(e_descriptor, found) = edge(*i, *ai, this->graph);
-             if (found) {
-                EdgeValue edge_val = boost::get(
-                   boost::edge_weight, this->graph, e_descriptor);
-                float weights_ = edge_val;
-                if (weights_ < _threshold) {
-                   remove_edge(e_descriptor, this->graph);
-                } else {
-                   if (this->graph[*ai].v_label == -1) {
-                      this->graph[*ai].v_label = this->graph[*i].v_label;
->>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
                    }
                 }
              }
           }
        }
 #ifdef DEBUG
-<<<<<<< HEAD
        // this->printGraph(this->graph_);
        std::cout << "\nPRINT INFO. \n --Graph Size: "
                  << num_vertices(this->graph_) <<
-=======
-       // this->printGraph(this->graph);
-       std::cout << "\nPRINT INFO. \n --Graph Size: "
-                 << num_vertices(graph) <<
->>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
           std::endl << "--Total Label: " << label << "\n\n";
 #endif  // DEBUG
     }
 
     int RegionAdjacencyGraph::getCommonNeigbour(
        const std::vector<int> &c1_neigbour,
-<<<<<<< HEAD
        const std::vector<int> &c2_neigbour)
     {
-=======
-       const std::vector<int> &c2_neigbour) {
->>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
        int commonIndex = -1;
        for (int j = 0; j < c1_neigbour.size(); j++) {
           int c1_val = c1_neigbour[j];
@@ -408,30 +319,18 @@ namespace jsk_pcl_ros {
     }
 
     void RegionAdjacencyGraph::getCloudClusterLabels(
-<<<<<<< HEAD
        std::vector<int> &labelMD)
     {
        labelMD.clear();
        VertexIterator i, end;
        for (tie(i, end) = vertices(this->graph_); i != end; ++i) {
           labelMD.push_back(static_cast<int>(this->graph_[*i].v_label));
-=======
-       std::vector<int> &labelMD) {
-       labelMD.clear();
-       VertexIterator i, end;
-       for (tie(i, end) = vertices(this->graph); i != end; ++i) {
-          labelMD.push_back(static_cast<int>(this->graph[*i].v_label));
->>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
        }
     }
 
     void RegionAdjacencyGraph::printGraph(
-<<<<<<< HEAD
        const Graph &_graph)
     {
-=======
-       const Graph &_graph) {
->>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
        VertexIterator i, end;
        for (tie(i, end) = vertices(_graph); i != end; ++i) {
           AdjacencyIterator ai, a_end;
@@ -443,12 +342,8 @@ namespace jsk_pcl_ros {
     void RegionAdjacencyGraph::computeCloudClusterRPYHistogram(
        const pcl::PointCloud<PointT>::Ptr _cloud,
        const pcl::PointCloud<pcl::Normal>::Ptr _normal,
-<<<<<<< HEAD
        cv::Mat &_histogram)
     {
-=======
-       cv::Mat &_histogram) {
->>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
        pcl::VFHEstimation<PointT,
                           pcl::Normal,
                           pcl::VFHSignature308> vfh;

@@ -33,23 +33,16 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-<<<<<<< HEAD
 
-=======
->>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
 #ifndef _CONVEX_CONNECTED_VOXELS_H_
 #define _CONVEX_CONNECTED_VOXELS_H_
 
 #include <jsk_pcl_ros/region_adjacency_graph.h>
 #include <jsk_recognition_msgs/ClusterPointIndices.h>
 #include <jsk_pcl_ros/pcl_conversion_util.h>
-<<<<<<< HEAD
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 
 // ROS header directives
-=======
-
->>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
 #include <ros/ros.h>
 #include <ros/console.h>
 
@@ -80,7 +73,6 @@
 #include <pcl/common/impl/common.hpp>
 #include <pcl/registration/distances.h>
 
-<<<<<<< HEAD
 #include <map>
 #include <string>
 
@@ -89,14 +81,6 @@ namespace jsk_pcl_ros
 {
    class ConvexConnectedVoxels: public jsk_topic_tools::DiagnosticNodelet
    {
-=======
-// JSK Nodelet
-#include <jsk_topic_tools/diagnostic_nodelet.h>
-
-namespace jsk_pcl_ros {
-   class ConvexConnectedVoxels: public jsk_topic_tools::DiagnosticNodelet {
-
->>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
     public:
       ConvexConnectedVoxels() : DiagnosticNodelet("ConvexConnectedVoxels") {}
       typedef pcl::PointXYZRGB PointT;
@@ -106,10 +90,6 @@ namespace jsk_pcl_ros {
          const sensor_msgs::PointCloud2::ConstPtr &);
       void indices_cb(
          const jsk_recognition_msgs::ClusterPointIndices &);
-<<<<<<< HEAD
-=======
-
->>>>>>> cdd7daa769f6acee5bbf910c6484b4051550a796
       void segmentCloud(
          const pcl::PointCloud<PointT>::Ptr,
          const std::vector<pcl::PointIndices> &,

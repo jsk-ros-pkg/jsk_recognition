@@ -24,6 +24,8 @@ endif()
 
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
+  cfg/ProjectImagePoint.cfg
+  cfg/MaskImageGenerator.cfg
   cfg/MorphologicalMaskImageOperator.cfg
   cfg/BlobDetector.cfg
   cfg/SingleChannelHistogram.cfg
@@ -42,7 +44,7 @@ generate_dynamic_reconfigure_options(
   cfg/ColorHistogramSlidingMatcher.cfg
   cfg/BackgroundSubstraction.cfg
   cfg/GrabCut.cfg
- cfg/Fisheye.cfg)
+  cfg/Fisheye.cfg)
 
 add_service_files(FILES EuclideanSegment.srv  SetTemplate.srv  WhiteBalancePoints.srv  WhiteBalance.srv)
 
@@ -111,9 +113,11 @@ jsk_perception_nodelet(src/rect_to_mask_image.cpp "jsk_perception/RectToMaskImag
 jsk_perception_nodelet(src/mask_image_to_roi.cpp "jsk_perception/MaskImageToROI" "mask_image_to_roi")
 jsk_perception_nodelet(src/mask_image_to_rect.cpp "jsk_perception/MaskImageToRect" "mask_image_to_rect")
 jsk_perception_nodelet(src/roi_to_rect.cpp "jsk_perception/ROIToRect" "roi_to_rect")
-jsk_perception_nodelet(src/roi_to_mask_image.cpp "jsk_pcl/ROIToMaskImage" "roi_to_mask_image")
+jsk_perception_nodelet(src/roi_to_mask_image.cpp "jsk_perception/ROIToMaskImage" "roi_to_mask_image")
 jsk_perception_nodelet(src/polygon_to_mask_image.cpp "jsk_perception/PolygonToMaskImage" "polygon_to_mask_image")
 jsk_perception_nodelet(src/rect_to_roi.cpp "jsk_perception/RectToROI" "rect_to_roi")
+jsk_perception_nodelet(src/mask_image_generator.cpp "jsk_perception/MaskImageGenerator" "mask_image_generator")
+jsk_perception_nodelet(src/project_image_point.cpp "jsk_perception/ProjectImagePoint" "project_image_point")
 jsk_perception_nodelet(src/skeletonization_nodelet.cpp "jsk_perception/Skeletonization" "skeletonization")
 
 # compiling jsk_perception library for nodelet
@@ -135,7 +139,6 @@ target_link_libraries(rectangle_detector       ${catkin_LIBRARIES} ${OpenCV_LIBR
 target_link_libraries(calc_flow                ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 target_link_libraries(color_histogram_sliding_matcher  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 target_link_libraries(oriented_gradient_node   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} oriented_gradient)
-
 
 add_dependencies(camshiftdemo             ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 add_dependencies(virtual_camera_mono      ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)

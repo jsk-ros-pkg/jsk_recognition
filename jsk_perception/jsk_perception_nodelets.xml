@@ -148,4 +148,10 @@
       Nodelet to convert fisheye image to panorama.
     </description>
   </class>
+    <class name="jsk_perception/Skeletonization" type="jsk_perception::Skeletonization"
+           base_class_type="nodelet::Nodelet">
+    <description>
+      Nodelet to thin the pixels to single dimension
+    </description>
+  </class>
 </library>

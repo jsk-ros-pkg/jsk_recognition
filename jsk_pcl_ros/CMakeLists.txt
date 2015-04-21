@@ -107,6 +107,7 @@ generate_dynamic_reconfigure_options(
   cfg/MultiPlaneSACSegmentation.cfg
   cfg/BoundingBoxFilter.cfg
   cfg/MaskImageToDepthConsideredMaskImage.cfg
+  cfg/ResizePointsPublisher.cfg
   cfg/LINEMODDetector.cfg
   cfg/SupervoxelSegmentation.cfg
   cfg/FeatureRegistration.cfg

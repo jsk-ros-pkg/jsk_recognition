@@ -173,9 +173,11 @@ namespace jsk_pcl_ros
           int y_end = region_y_off_+ region_height_;
           for (size_t j = region_y_off_; j < y_end; j++) {
             for (size_t i = region_x_off_; i < x_end; i++) {
-              if (mask.at<uchar>(j, i) != 0) {//if white
-                points_exist = true;
-                edge_cloud->points[j * width + i] = cloud->points[j * width + i];
+              if (i < image_msg->width && j <image_msg->height){
+                if (mask.at<uchar>(j, i) != 0) {//if white
+                  points_exist = true;
+                  edge_cloud->points[j * width + i] = cloud->points[j * width + i];
+                }
               }
             }
           }
@@ -227,10 +229,12 @@ namespace jsk_pcl_ros
           int y_end = region_y_off_ + region_height_;
           for (size_t j = region_y_off_; j < y_end; j++) {
             for (size_t i = region_x_off_; i < x_end; i++) {
-              if (mask.at<uchar>(j, i) != 0) {//if white
-                cnt++;
-                if (std::min(extract_num_ , data_len) > cnt) {
-                  tmp_mask.at<uchar>(j, i) = mask.at<uchar>(j, i);
+              if (i < image_msg->width && j <image_msg->height){
+                if (mask.at<uchar>(j, i) != 0) {//if white
+                  cnt++;
+                  if (std::min(extract_num_ , data_len) > cnt) {
+                    tmp_mask.at<uchar>(j, i) = mask.at<uchar>(j, i);
+                  }
                 }
               }
             }

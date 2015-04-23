@@ -265,7 +265,7 @@ namespace jsk_pcl_ros
       NODELET_FATAL("no reference is specified");
       jsk_recognition_msgs::ICPResult result;
       result.name = std::string("NONE");
-      result.score = 0.0;
+      result.score = DBL_MAX;
       result.header = box_msg->header;
       result.pose = box_msg->pose;
       pub_icp_result.publish(result);

@@ -56,7 +56,7 @@ namespace jsk_perception
 
     void Skeletonization::unsubscribe()
     {
-       NODELET_DEBUG("Subscribing to image topic.");
+       NODELET_DEBUG("Unsubscribing from ROS topic.");
        this->sub_.shutdown();
     }
 

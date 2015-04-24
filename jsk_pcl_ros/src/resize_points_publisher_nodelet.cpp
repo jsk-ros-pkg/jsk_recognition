@@ -19,6 +19,9 @@
 #include <dynamic_reconfigure/server.h>
 #include <jsk_pcl_ros/ResizePointsPublisherConfig.h>
 
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+
 namespace jsk_pcl_ros
 {
   class ResizePointsPublisher : public jsk_topic_tools::ConnectionBasedNodelet
@@ -33,6 +36,7 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<PCLIndicesMsg> sub_indices_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> >  srv_;
     ros::Subscriber sub_;
+    ros::Subscriber resizedmask_sub_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     ros::Publisher pub_;
     bool not_use_rgb_;
@@ -48,13 +52,36 @@ namespace jsk_pcl_ros
                      &ResizePointsPublisher::configCallback, this, _1, _2);
       srv_->setCallback (f);
       pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
-
+      resizedmask_sub_ = pnh_->subscribe("input/mask", 1, &ResizePointsPublisher::resizedmaskCallback, this);
     }
 
-    void configCallback(Config &config, uint32_t level){
+    void configCallback(Config &config, uint32_t level) {
       boost::mutex::scoped_lock lock(mutex_);
-      step_x_=config.step_x;
-      step_y_=config.step_y;
+      step_x_ = config.step_x;
+      step_y_ = config.step_y;
+    }
+
+    void resizedmaskCallback (const sensor_msgs::Image::ConstPtr& msg) {
+      boost::mutex::scoped_lock lock(mutex_);
+      cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy
+        (msg, sensor_msgs::image_encodings::MONO8);
+      cv::Mat mask = cv_ptr->image;
+      int maskwidth = mask.cols;
+      int maskheight = mask.rows;
+      int cnt = 0;
+      for (size_t j = 0; j < maskheight; j++){
+        for (size_t i = 0; i < maskwidth; i++){
+          if (mask.at<uchar>(j, i) != 0){
+            cnt++;
+          }
+        }
+      }
+      int surface_per = ((double) cnt) / (maskwidth * maskheight) * 100;
+      step_x_ = surface_per /10;
+      if (step_x_ < 1) {
+        step_x_ = 1;
+      }
+      step_y_ = step_x_;
     }
 
     void subscribe()

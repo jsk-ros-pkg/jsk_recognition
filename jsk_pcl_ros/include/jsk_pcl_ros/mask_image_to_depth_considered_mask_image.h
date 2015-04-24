@@ -94,6 +94,11 @@ namespace jsk_pcl_ros
     int region_height_;
     int region_x_off_;
     int region_y_off_;
+    double region_width_ratio_;
+    double region_height_ratio_;
+    double region_x_off_ratio_;
+    double region_y_off_ratio_;
+    bool use_region_ratio_;
     bool use_mask_region_;
     bool in_the_order_of_depth_;
 

@@ -76,9 +76,13 @@ namespace jsk_pcl_ros
     int tmp_x_off = 0;
     int tmp_y_off = 0;
     bool flag = true;
-    for (size_t j = 0; j < mask.rows; j++) {
-      for (size_t i = 0; i < mask.cols; i++) {
+    int maskwidth = mask.cols;
+    int maskheight = mask.rows;
+    int cnt = 0;
+    for (size_t j = 0; j < maskheight; j++) {
+      for (size_t i = 0; i < maskwidth; i++) {
         if (mask.at<uchar>(j, i) != 0) {
+          cnt++;
           if (flag == true) {
             tmp_x_off = i;
             tmp_y_off = j;
@@ -88,11 +92,13 @@ namespace jsk_pcl_ros
             tmp_width = i-tmp_x_off + 1;
             tmp_height = j-tmp_y_off + 1;
           }}}}
-    ROS_INFO("mask resion callback: width:%d height:%d x_off:%d y_off:%d", tmp_width, tmp_height, tmp_x_off, tmp_y_off);
-    region_width_ = tmp_width;
-    region_height_ = tmp_height;
-    region_x_off_ = tmp_x_off;
-    region_y_off_ = tmp_y_off;
+    NODELET_INFO("mask_image_to_depth_considered_mask_image_nodelet : tmp width:%d height:%d x_off:%d y_off:%d", tmp_width, tmp_height, tmp_x_off, tmp_y_off);
+    region_width_ratio_ = ((double) tmp_width) / maskwidth;
+    region_height_ratio_ = ((double) tmp_height) / maskheight;
+    region_x_off_ratio_ = ((double) tmp_x_off) / maskwidth;
+    region_y_off_ratio_ = ((double) tmp_y_off) / maskheight;
+    use_region_ratio_ = true;
+    NODELET_INFO("mask_image_to_depth_considered_mask_image_nodelet : next region width_ratio:%f height_ratio:%f x_off_ratio:%f y_off_ratio:%f", region_width_ratio_, region_height_ratio_, region_x_off_ratio_, region_y_off_ratio_);
   }
 
 
@@ -125,8 +131,8 @@ namespace jsk_pcl_ros
      const sensor_msgs::Image::ConstPtr& image_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    if (point_cloud2_msg->width == image_msg->width && point_cloud2_msg->height == image_msg->height){
-      if (in_the_order_of_depth_ == true){
+    if (point_cloud2_msg->width == image_msg->width && point_cloud2_msg->height == image_msg->height) {
+      if (in_the_order_of_depth_ == true) {
         vital_checker_->poke();
         pcl::PointCloud<pcl::PointXYZ>::Ptr
           cloud (new pcl::PointCloud<pcl::PointXYZ>);
@@ -148,7 +154,13 @@ namespace jsk_pcl_ros
         edge_cloud->points.resize(width * height);
         edge_cloud->width = width;
         edge_cloud->height = height;
-        if (use_mask_region_ == false || region_width_ == 0 || region_height_ == 0){
+        if (use_region_ratio_) {
+          region_width_ = width * region_width_ratio_;
+          region_height_ = height * region_height_ratio_;
+          region_x_off_ = width * region_x_off_ratio_;
+          region_y_off_ = height * region_y_off_ratio_;
+        }
+        if (use_mask_region_ == false || region_width_ == 0 || region_height_ == 0) {
           for (size_t j = 0; j < mask.rows; j++) {
             for (size_t i = 0; i < mask.cols; i++) {
               if (mask.at<uchar>(j, i) != 0) {//if white
@@ -173,7 +185,7 @@ namespace jsk_pcl_ros
           int y_end = region_y_off_+ region_height_;
           for (size_t j = region_y_off_; j < y_end; j++) {
             for (size_t i = region_x_off_; i < x_end; i++) {
-              if (i < image_msg->width && j <image_msg->height){
+              if (i < image_msg->width && j <image_msg->height) {
                 if (mask.at<uchar>(j, i) != 0) {//if white
                   points_exist = true;
                   edge_cloud->points[j * width + i] = cloud->points[j * width + i];
@@ -211,7 +223,7 @@ namespace jsk_pcl_ros
         cv::Mat tmp_mask = cv::Mat::zeros(image_msg->height, image_msg->width, CV_8UC1);
         int data_len=image_msg->width * image_msg->height;
         int cnt = 0;
-        if (use_mask_region_ ==false || region_width_ == 0 || region_height_ == 0){
+        if (use_mask_region_ ==false || region_width_ == 0 || region_height_ == 0) {
           for (size_t j = 0; j < mask.rows; j++) {
             for (size_t i = 0; i < mask.cols; i++) {
               if (mask.at<uchar>(j, i) != 0) {//if white

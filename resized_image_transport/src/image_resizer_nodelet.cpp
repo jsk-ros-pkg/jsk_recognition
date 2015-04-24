@@ -3,10 +3,13 @@
 namespace resized_image_transport
 {
   void ImageResizer::onInit(){
+    raw_width_ = 0;
+    raw_height_ = 0;
     initNodeHandle();
     initParams();
     initReconfigure();
     initPublishersAndSubscribers();
+    sub_ = pnh.subscribe("input/mask", 1, &ImageResizer::mask_region_callback, this);
   }
 
   void ImageResizer::initReconfigure(){
@@ -33,6 +36,44 @@ namespace resized_image_transport
     }else{
       ROS_ERROR("unknown interpolation method");
     }
+  }
+
+  void ImageResizer::mask_region_callback(const sensor_msgs::Image::ConstPtr& msg){
+    boost::mutex::scoped_lock lock(mutex_);
+    cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy
+      (msg, sensor_msgs::image_encodings::MONO8);
+    cv::Mat mask = cv_ptr->image;
+    int step_x, step_y, ox, oy;
+    int pixel_x = 0;
+    int pixel_y = 0;
+    int maskwidth = mask.cols;
+    int maskheight = mask.rows;
+    int cnt = 0;
+    for (size_t j = 0; j < maskheight; j++){
+      for (size_t i = 0; i < maskwidth; i++){
+        if (mask.at<uchar>(j, i) != 0){
+          cnt++;
+        }
+      }
+    }
+    int surface_per = ((double) cnt) / (maskwidth * maskheight) * 100;
+    step_x = surface_per /10;
+    if (step_x < 1) {
+      step_x = 1;
+    }
+    step_y = step_x;
+
+    //raw image wo step de bunkatu pixel dasu
+    ox = step_x / 2;
+    oy = step_y / 2;
+    for (int i = ox; i < raw_width_; i += step_x){
+      pixel_x++;
+    }
+    for (int i = oy; i < raw_height_; i += step_y){
+      pixel_y++;
+    }
+    resize_x_ = ((double) pixel_x) / raw_width_;
+    resize_y_ = ((double) pixel_y) / raw_height_;
   }
 
   void ImageResizer::config_cb ( ImageResizerConfig &config, uint32_t level) {
@@ -67,7 +108,12 @@ namespace resized_image_transport
     cv_bridge::CvImagePtr cv_img = cv_bridge::toCvCopy(src_img);
 
     cv::Mat tmpmat(height, width, cv_img->image.type());
+    if (raw_width_ == 0){
+      raw_width_ = tmpmat.cols;
+      raw_height_ = tmpmat.rows;
+    }
     cv::resize(cv_img->image, tmpmat, cv::Size(width, height), 0, 0, interpolation_);
+    ROS_INFO("mat rows:%d cols:%d", tmpmat.rows, tmpmat.cols);
     cv_img->image = tmpmat;
 
     dst_img = cv_img->toImageMsg();

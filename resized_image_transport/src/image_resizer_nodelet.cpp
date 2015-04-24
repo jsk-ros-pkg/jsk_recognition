@@ -2,7 +2,7 @@
 
 namespace resized_image_transport
 {
-  void ImageResizer::onInit(){
+  void ImageResizer::onInit() {
     raw_width_ = 0;
     raw_height_ = 0;
     initNodeHandle();
@@ -12,33 +12,33 @@ namespace resized_image_transport
     sub_ = pnh.subscribe("input/mask", 1, &ImageResizer::mask_region_callback, this);
   }
 
-  void ImageResizer::initReconfigure(){
+  void ImageResizer::initReconfigure() {
     ReconfigureServer::CallbackType f
       = boost::bind(&ImageResizer::config_cb, this, _1, _2);
     reconfigure_server_.setCallback(f);
   }
 
-  void ImageResizer::initParams(){
+  void ImageResizer::initParams() {
     ImageProcessing::initParams();
     period_ = ros::Duration(1.0);
     std::string interpolation_method;
     pnh.param<std::string>("interpolation", interpolation_method, "LINEAR");
     if(interpolation_method == "NEAREST"){
       interpolation_ = cv::INTER_NEAREST;
-    }else if(interpolation_method == "LINEAR"){
+    }else if(interpolation_method == "LINEAR") {
       interpolation_ = cv::INTER_LINEAR;
-    }else if(interpolation_method == "AREA"){
+    }else if(interpolation_method == "AREA") {
       interpolation_ = cv::INTER_AREA;
-    }else if(interpolation_method == "CUBIC"){
+    }else if(interpolation_method == "CUBIC") {
       interpolation_ = cv::INTER_CUBIC;
-    }else if(interpolation_method == "LANCZOS4"){
+    }else if(interpolation_method == "LANCZOS4") {
       interpolation_ = cv::INTER_LANCZOS4;
     }else{
       ROS_ERROR("unknown interpolation method");
     }
   }
 
-  void ImageResizer::mask_region_callback(const sensor_msgs::Image::ConstPtr& msg){
+  void ImageResizer::mask_region_callback(const sensor_msgs::Image::ConstPtr& msg) {
     boost::mutex::scoped_lock lock(mutex_);
     cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy
       (msg, sensor_msgs::image_encodings::MONO8);
@@ -49,9 +49,9 @@ namespace resized_image_transport
     int maskwidth = mask.cols;
     int maskheight = mask.rows;
     int cnt = 0;
-    for (size_t j = 0; j < maskheight; j++){
-      for (size_t i = 0; i < maskwidth; i++){
-        if (mask.at<uchar>(j, i) != 0){
+    for (size_t j = 0; j < maskheight; j++) {
+      for (size_t i = 0; i < maskwidth; i++) {
+        if (mask.at<uchar>(j, i) != 0) {
           cnt++;
         }
       }
@@ -66,10 +66,10 @@ namespace resized_image_transport
     //raw image wo step de bunkatu pixel dasu
     ox = step_x / 2;
     oy = step_y / 2;
-    for (int i = ox; i < raw_width_; i += step_x){
+    for (int i = ox; i < raw_width_; i += step_x) {
       pixel_x++;
     }
-    for (int i = oy; i < raw_height_; i += step_y){
+    for (int i = oy; i < raw_height_; i += step_y) {
       pixel_y++;
     }
     resize_x_ = ((double) pixel_x) / raw_width_;
@@ -91,10 +91,11 @@ namespace resized_image_transport
   void ImageResizer::process(const sensor_msgs::ImageConstPtr &src_img, const sensor_msgs::CameraInfoConstPtr &src_info,
 			 sensor_msgs::ImagePtr &dst_img, sensor_msgs::CameraInfo &dst_info){
     int image_width, image_height;
-    if(use_camera_info_){
+    if(use_camera_info_) {
       image_width = src_info->width;
       image_height = src_info->height;
-    }else{
+    }
+    else {
       image_width = src_img->width;
       image_height = src_img->height;
     }
@@ -108,7 +109,7 @@ namespace resized_image_transport
     cv_bridge::CvImagePtr cv_img = cv_bridge::toCvCopy(src_img);
 
     cv::Mat tmpmat(height, width, cv_img->image.type());
-    if (raw_width_ == 0){
+    if (raw_width_ == 0) {
       raw_width_ = tmpmat.cols;
       raw_height_ = tmpmat.rows;
     }
@@ -117,7 +118,7 @@ namespace resized_image_transport
     cv_img->image = tmpmat;
 
     dst_img = cv_img->toImageMsg();
-    if(use_camera_info_){
+    if (use_camera_info_) {
       dst_info = *src_info;
       dst_info.height = height;
       dst_info.width = width;

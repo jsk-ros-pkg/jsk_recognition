@@ -55,13 +55,13 @@ namespace jsk_pcl_ros
       resizedmask_sub_ = pnh_->subscribe("input/mask", 1, &ResizePointsPublisher::resizedmaskCallback, this);
     }
 
-    void configCallback(Config &config, uint32_t level){
+    void configCallback(Config &config, uint32_t level) {
       boost::mutex::scoped_lock lock(mutex_);
       step_x_ = config.step_x;
       step_y_ = config.step_y;
     }
 
-    void resizedmaskCallback (const sensor_msgs::Image::ConstPtr& msg){
+    void resizedmaskCallback (const sensor_msgs::Image::ConstPtr& msg) {
       boost::mutex::scoped_lock lock(mutex_);
       cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy
         (msg, sensor_msgs::image_encodings::MONO8);

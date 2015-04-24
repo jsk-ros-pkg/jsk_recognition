@@ -60,12 +60,14 @@ namespace jsk_perception
     srv_->setCallback (f);
 
     scale_ = 0.5;
+    upside_down_ = false;
   }
 
   void FisheyeToPanorama::configCallback(Config &new_config, uint32_t level)
   {
     max_degree_ = new_config.degree;
     scale_ = new_config.scale;
+    upside_down_ = new_config.upside_down;
   }
 
 
@@ -176,7 +178,10 @@ namespace jsk_perception
             int x = K * phi * cos(theta) + center_x;
             int y = K * phi * sin(theta) + center_y;
             for(int c = 0; c < undistorted.channels(); ++c){
-              undistorted.data[  (undistorted.rows - 1 -i) * undistorted.step + j * undistorted.elemSize() + c ]
+	      int index = undistorted.rows - 1 - i;
+	      if( upside_down_ )
+		index = i;
+              undistorted.data[ i  * undistorted.step + j * undistorted.elemSize() + c ]
                 = distorted.data[ x * distorted.step + y * distorted.elemSize() + c];
             }
           }

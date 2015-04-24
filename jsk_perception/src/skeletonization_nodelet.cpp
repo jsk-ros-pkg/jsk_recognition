@@ -114,7 +114,7 @@ namespace jsk_perception
        cv::Mat marker = cv::Mat::zeros(img.size(), CV_32F);
        for (int i = 1; i < img.rows-1; i++) {
           for (int j = 1; j < img.cols-1; j++) {
-             float *val = new float[9];
+             float val[9] = {};
              int icounter = 0;
              for (int y = -1; y <= 1; y++) {
                 for (int x = -1; x <= 1; x++) {
@@ -139,7 +139,6 @@ namespace jsk_perception
              if (A == 1 && (B >= 2 && B <= 6) && !m1 && !m2) {
                 marker.at<float>(i, j) = sizeof(char);
              }
-             free(val);
           }
        }
        cv::bitwise_not(marker, marker);

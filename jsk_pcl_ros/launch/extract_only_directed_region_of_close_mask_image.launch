@@ -13,14 +13,16 @@
   <node pkg="nodelet" type="nodelet" name="multi_resizer"
         args="load jsk_pcl/ResizePointsPublisher multipoints_resize_manager" output="screen">
     <remap from="~input" to="$(arg input_points)" />
+    <remap from="~input/mask" to="$(arg mask_region)" />
     <remap from="~output" to="/multi_resized_points2" />
     <param name="not_use_rgb" value="True" />
   </node>
 
-  <arg name="RESIZE_RATE" default="0.5" />
+  <arg name="RESIZE_RATE" default="1" />
   <node pkg="resized_image_transport" type="image_resizer" name="image_resizer"
         output="screen" >
     <remap from="~input/image" to="$(arg input_image)" />
+    <remap from="~input/mask" to="$(arg mask_region)" />
     <remap from="~output/image" to="~image_rect" />
     <param name="resize_scale_x" value="$(arg RESIZE_RATE)" />
     <param name="resize_scale_y" value="$(arg RESIZE_RATE)" />
@@ -30,11 +32,8 @@
    <remap from="image" to="/image_resizer/image_rect" />
     <remap from="/edge/image" to="/edge_detect/image" />
   </node>
-  <node pkg="image_view2" type="image_view2" name="interactive_view" >
+  <node pkg="image_view" type="image_view" name="interactive_view" >
     <remap from="image" to="/edge_detect/image" />
-    <rosparam>
-      interaction_mode: rectangle
-    </rosparam>
   </node>
 
   <node pkg="jsk_perception" type="mask_image_generator" name="mask_image_generator"
@@ -43,7 +42,7 @@
   </node>
 
   <node pkg="jsk_perception" type="rect_to_mask_image" name="rect_to_mask_image">
-    <remap from="~input" to="/edge_detect/image/screenrectangle" />
+    <remap from="~input" to="/depth/mask/screenrectangle" />
     <remap from="~input/camera_info" to="/image_resizer/camera_info" />
   </node>
 
@@ -56,8 +55,11 @@
     <remap from="~output" to="/depth/mask" />
     <remap from="~input/maskregion" to="$(arg mask_region)" />
   </node>
-  <node pkg="image_view" type="image_view" name="depth_mask_view" >
+  <node pkg="image_view2" type="image_view2" name="depth_mask_view" >
     <remap from="image" to="/depth/mask" />
+    <rosparam>
+      interaction_mode: rectangle
+    </rosparam>
   </node>
 
   <node pkg="jsk_perception" type="sparse_image_encoder" name="sparse_image_encoder"

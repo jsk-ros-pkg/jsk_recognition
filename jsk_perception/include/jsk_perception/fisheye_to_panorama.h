@@ -79,6 +79,7 @@ namespace jsk_perception
     bool simple_panorama_;
     float max_degree_;
     float scale_;
+    float upside_down_;
   private:
     
   };

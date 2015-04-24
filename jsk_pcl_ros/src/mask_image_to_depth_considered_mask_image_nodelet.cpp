@@ -76,9 +76,13 @@ namespace jsk_pcl_ros
     int tmp_x_off = 0;
     int tmp_y_off = 0;
     bool flag = true;
-    for (size_t j = 0; j < mask.rows; j++) {
-      for (size_t i = 0; i < mask.cols; i++) {
+    int maskwidth = mask.cols;
+    int maskheight = mask.rows;
+    int cnt = 0;
+    for (size_t j = 0; j < maskheight; j++) {
+      for (size_t i = 0; i < maskwidth; i++) {
         if (mask.at<uchar>(j, i) != 0) {
+          cnt++;
           if (flag == true) {
             tmp_x_off = i;
             tmp_y_off = j;
@@ -88,11 +92,13 @@ namespace jsk_pcl_ros
             tmp_width = i-tmp_x_off + 1;
             tmp_height = j-tmp_y_off + 1;
           }}}}
-    ROS_INFO("mask resion callback: width:%d height:%d x_off:%d y_off:%d", tmp_width, tmp_height, tmp_x_off, tmp_y_off);
-    region_width_ = tmp_width;
-    region_height_ = tmp_height;
-    region_x_off_ = tmp_x_off;
-    region_y_off_ = tmp_y_off;
+    ROS_INFO("mask_image_to_depth nodelet : tmp width:%d height:%d x_off:%d y_off:%d", tmp_width, tmp_height, tmp_x_off, tmp_y_off);
+    region_width_ratio_ = ((double) tmp_width) / maskwidth;
+    region_height_ratio_ = ((double) tmp_height) / maskheight;
+    region_x_off_ratio_ = ((double) tmp_x_off) / maskwidth;
+    region_y_off_ratio_ = ((double) tmp_y_off) / maskheight;
+    use_region_ratio_ = true;
+    ROS_INFO("mask_image_to_depth nodelet : next region width_ratio:%f height_ratio:%f x_off_ratio:%f y_off_ratio:%f", region_width_ratio_, region_height_ratio_, region_x_off_ratio_, region_y_off_ratio_);
   }
 
 
@@ -148,6 +154,12 @@ namespace jsk_pcl_ros
         edge_cloud->points.resize(width * height);
         edge_cloud->width = width;
         edge_cloud->height = height;
+        if (use_region_ratio_){
+          region_width_ = width * region_width_ratio_;
+          region_height_ = height * region_height_ratio_;
+          region_x_off_ = width * region_x_off_ratio_;
+          region_y_off_ = height * region_y_off_ratio_;
+        }
         if (use_mask_region_ == false || region_width_ == 0 || region_height_ == 0){
           for (size_t j = 0; j < mask.rows; j++) {
             for (size_t i = 0; i < mask.cols; i++) {

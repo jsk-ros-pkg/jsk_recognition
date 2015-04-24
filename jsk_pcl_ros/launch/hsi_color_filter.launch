@@ -39,8 +39,8 @@
       <param name="h_limit_min" value="$(arg h_min)" />
       <param name="s_limit_max" value="$(arg s_max)" />
       <param name="s_limit_min" value="$(arg s_min)" />
-      <param name="i_limit_max" value="$(arg i_max)" />
-      <param name="i_limit_min" value="$(arg i_min)" />
+      <param name="v_limit_max" value="$(arg i_max)" />
+      <param name="v_limit_min" value="$(arg i_min)" />
     </node>
     <node pkg="nodelet" type="nodelet" name="euclidean_clustering$(arg FILTER_NAME_SUFFIX)"
           args="load jsk_pcl/EuclideanClustering $(arg manager)" output="screen">

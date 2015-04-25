@@ -6,7 +6,7 @@ find_package(catkin REQUIRED COMPONENTS
   mk message_generation std_msgs sensor_msgs geometry_msgs cv_bridge
   image_geometry image_transport image_view2 driver_base dynamic_reconfigure cmake_modules
   roscpp nodelet rostest tf rospack
-  jsk_topic_tools pcl_ros)
+  jsk_topic_tools pcl_ros jsk_pcl_ros)
 find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 
@@ -44,9 +44,10 @@ generate_dynamic_reconfigure_options(
   cfg/ColorHistogramSlidingMatcher.cfg
   cfg/BackgroundSubstraction.cfg
   cfg/GrabCut.cfg
-  cfg/Fisheye.cfg)
+  cfg/Fisheye.cfg
+  cfg/TrainedObjectDetector.cfg)
 
-add_service_files(FILES EuclideanSegment.srv  SetTemplate.srv  WhiteBalancePoints.srv  WhiteBalance.srv)
+add_service_files(FILES EuclideanSegment.srv  SetTemplate.srv  WhiteBalancePoints.srv  WhiteBalance.srv NonMaximumSuppression.srv)
 
 generate_messages(
   DEPENDENCIES std_msgs sensor_msgs geometry_msgs jsk_recognition_msgs
@@ -119,11 +120,13 @@ jsk_perception_nodelet(src/rect_to_roi.cpp "jsk_perception/RectToROI" "rect_to_r
 jsk_perception_nodelet(src/mask_image_generator.cpp "jsk_perception/MaskImageGenerator" "mask_image_generator")
 jsk_perception_nodelet(src/project_image_point.cpp "jsk_perception/ProjectImagePoint" "project_image_point")
 jsk_perception_nodelet(src/skeletonization_nodelet.cpp "jsk_perception/Skeletonization" "skeletonization")
+jsk_perception_nodelet(src/trained_object_detector.cpp "jsk_perception/TrainedObjectDetector" "trained_object_detector")
 
 # compiling jsk_perception library for nodelet
 add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
   ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels/slic.cpp
-  src/image_utils.cpp)
+  src/image_utils.cpp
+  src/histogram_of_oriented_gradients.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 

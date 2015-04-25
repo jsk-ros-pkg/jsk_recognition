@@ -53,14 +53,20 @@
     <remap from="~input" to="/multi_resized_points2" />
     <remap from="~input/image" to="/edge_detect/image" />
     <remap from="~output" to="/depth/mask" />
+    <remap from="~applyoutput" to="/depth/mask/apply" />
     <remap from="~input/maskregion" to="$(arg mask_region)" />
   </node>
   <node pkg="image_view2" type="image_view2" name="depth_mask_view" >
     <remap from="image" to="/depth/mask" />
     <rosparam>
       interaction_mode: rectangle
+      region_continuous_publish: false
     </rosparam>
   </node>
+  <node pkg="image_view" type="image_view" name="applied_depth_mask_view" >
+    <remap from="image" to="/depth/mask/apply" />
+  </node>
+
 
   <node pkg="jsk_perception" type="sparse_image_encoder" name="sparse_image_encoder"
         output="screen">
@@ -72,12 +78,4 @@
 
   <include file="$(find jsk_perception)/launch/sparse_image_decoder.launch">
   </include>
-
-  <node pkg="jsk_perception" type="apply_mask_image" name="apply">
-    <remap from="~input" to="/edge_detect/image" />
-    <remap from="~input/mask" to="$(arg mask_region)" />
-  </node>
-  <node pkg="image_view" type="image_view" name="masked_view" >
-    <remap from="image" to="apply/output" />
-  </node>
 </launch>

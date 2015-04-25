@@ -57,7 +57,8 @@ namespace resized_image_transport
       }
     }
     int surface_per = ((double) cnt) / (maskwidth * maskheight) * 100;
-    step_x = surface_per /10;
+    // step_x = surface_per /10;
+    step_x = sqrt (surface_per);
     if (step_x < 1) {
       step_x = 1;
     }

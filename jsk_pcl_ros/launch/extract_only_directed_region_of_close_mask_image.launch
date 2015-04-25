@@ -16,6 +16,8 @@
     <remap from="~input/mask" to="$(arg mask_region)" />
     <remap from="~output" to="/multi_resized_points2" />
     <param name="not_use_rgb" value="True" />
+    <param name="step_x" value="1" />
+    <param name="step_y" value="1" />
   </node>
 
   <arg name="RESIZE_RATE" default="1" />

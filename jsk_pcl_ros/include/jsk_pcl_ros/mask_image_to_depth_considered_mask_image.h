@@ -89,6 +89,7 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<sensor_msgs::Image> sub_image_;
     ros::Publisher pub_;
+    ros::Publisher applypub_;
     ros::Subscriber sub_;
     int region_width_;
     int region_height_;

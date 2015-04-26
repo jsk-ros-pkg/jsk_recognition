@@ -1,0 +1,15 @@
+<launch>
+  <node pkg="jsk_perception" type="edge_detector" name="edge_detector">
+    <remap from="image" to="/camera/rgb/image_rect_color" />
+  </node>
+  <node pkg="jsk_perception" type="dilate_mask_image" name="dilate_mask_image">
+    <remap from="~input" to="/edge/image" />
+  </node>
+  <node pkg="jsk_perception" type="skeletonization" name="skeletonization">
+    <remap from="~input" to="/dilate_mask_image/output" />
+  </node>
+  <node pkg="image_view" type="image_view" name="edge_view" >
+    <remap from="image" to="/edge/image" />
+  </node>
+  <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="edge_reconfigure" />
+</launch>

@@ -304,7 +304,15 @@ namespace jsk_pcl_ros
     pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(*msg, *cloud);
     Eigen::Affine3f offset = Eigen::Affine3f::Identity();
-    jsk_recognition_msgs::ICPResult result = alignPointcloudWithReferences(cloud, offset, msg->header);
+    // remove nan
+    pcl::PointCloud<PointT>::Ptr non_nan_cloud (new pcl::PointCloud<PointT>);
+    for (size_t i = 0; i < cloud->points.size(); i++) {
+      PointT p = cloud->points[i];
+      if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
+        non_nan_cloud->points.push_back(p);
+      }
+    }
+    jsk_recognition_msgs::ICPResult result = alignPointcloudWithReferences(non_nan_cloud, offset, msg->header);
     pub_icp_result.publish(result);
   }
   
@@ -518,7 +526,14 @@ namespace jsk_pcl_ros
     reference_cloud_list_.resize(0);
     pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(*msg, *cloud);
-    reference_cloud_list_.push_back(cloud);
+    pcl::PointCloud<PointT>::Ptr non_nan_cloud (new pcl::PointCloud<PointT>);
+    for (size_t i = 0; i < cloud->points.size(); i++) {
+      PointT p = cloud->points[i];
+      if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
+        non_nan_cloud->points.push_back(p);
+      }
+    }
+    reference_cloud_list_.push_back(non_nan_cloud);
   }
 
   void ICPRegistration::referenceArrayCallback(

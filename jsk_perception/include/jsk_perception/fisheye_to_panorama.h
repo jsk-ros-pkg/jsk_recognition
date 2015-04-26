@@ -80,6 +80,7 @@ namespace jsk_perception
     float max_degree_;
     float scale_;
     float upside_down_;
+    double offset_degree_;
   private:
     
   };

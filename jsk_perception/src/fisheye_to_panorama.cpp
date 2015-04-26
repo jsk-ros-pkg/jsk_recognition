@@ -61,6 +61,7 @@ namespace jsk_perception
 
     scale_ = 0.5;
     upside_down_ = false;
+    offset_degree_ = 180.0;
   }
 
   void FisheyeToPanorama::configCallback(Config &new_config, uint32_t level)
@@ -68,6 +69,7 @@ namespace jsk_perception
     max_degree_ = new_config.degree;
     scale_ = new_config.scale;
     upside_down_ = new_config.upside_down;
+    offset_degree_ = new_config.offset_degree;
   }
 
 
@@ -167,8 +169,10 @@ namespace jsk_perception
                                                                    image_msg->encoding,
                                                                    undistorted_bilinear).toImageMsg());
       }else{
-        cv::Mat undistorted(int(l * 1.0 / tan_min_radian*scale_), int(l *  2.0 * PI*scale_), CV_8UC3);
+        cv::Mat undistorted(int(l * 1.0 / tan_min_radian*scale_), int(l *  2.0 * PI * scale_), CV_8UC3);
         int center_x = distorted.rows/2, center_y = distorted.cols/2;
+
+	int offset_jndex = offset_degree_ / 180.0 * PI * l * scale_;
         for(int i = 0; i < undistorted.rows; ++i){
           for(int j = 0; j < undistorted.cols; ++j){
             float phi = PI / 2;
@@ -181,7 +185,10 @@ namespace jsk_perception
 	      int index = undistorted.rows - 1 - i;
 	      if( upside_down_ )
 		index = i;
-              undistorted.data[ i  * undistorted.step + j * undistorted.elemSize() + c ]
+	      int jndex = j + offset_jndex;
+	      if(jndex > undistorted.cols - 1)
+		jndex -= undistorted.cols - 1;
+              undistorted.data[ index  * undistorted.step + jndex * undistorted.elemSize() + c ]
                 = distorted.data[ x * distorted.step + y * distorted.elemSize() + c];
             }
           }

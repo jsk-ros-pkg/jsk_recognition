@@ -1,0 +1,36 @@
+
+#ifndef JSK_PERCEPTION_SLIDING_WINDOW_OBJECT_DETECTOR_H
+#define JSK_PERCEPTION_SLIDING_WINDOW_OBJECT_DETECTOR_H
+
+#include <jsk_perception/histogram_of_oriented_gradients.h>
+#include <jsk_recognition_msgs/ClusterPointIndices.h>
+// #include <jsk_pcl_ros/pcl_conversion_util.h>
+
+#include <dynamic_reconfigure/server.h>
+#include <object_recognition/ObjectDetectionConfig.h>
+
+#include <pcl/point_types.h>
+
+#include <ros/ros.h>
+#include <image_transport/image_transport.h>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+#include <sensor_msgs/PointCloud2.h>
+
+#include <map>
+#include <vector>
+#include <string>
+
+namespace jsk_perception
+{
+   class SlidingWindowObjectDetector
+   {
+    public:
+       SlidingWindowObjectDetector();
+
+   };
+
+} // namespace jsk_perception
+
+
+#endif  // JSK_PERCEPTION_SLIDING_WINDOW_OBJECT_DETECTOR_H

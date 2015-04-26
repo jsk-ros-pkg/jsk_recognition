@@ -1,0 +1,98 @@
+<launch>
+  <node pkg="image_view2" name="attention_viewer" type="image_view2">
+    <remap from="image" to="/multisense/left/image_rect_color" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="rect_to_roi" name="rect_to_roi">
+    <remap from="~input/camera_info" to="/multisense/left/camera_info" />
+    <remap from="~input" to="/multisense/left/image_rect_color/screenrectangle" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="rect_to_mask_image" name="rect_to_mask_image">
+    <remap from="~input/camera_info" to="/multisense/left/camera_info" />
+    <remap from="~input" to="/multisense/left/image_rect_color/screenrectangle" />
+  </node>
+  <node pkg="image_view" type="image_view" name="mask_viewer">
+    <remap from="image" to="roi_clipper/output" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="tf_transform_cloud" name="laser_cloud_from_camera_frame">
+    <remap from="~input" to="/full_cloud2" />
+    <rosparam>
+      target_frame_id: multisense/left_camera_optical_frame
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="roi_clipper" name="roi_clipper" output="screen">
+    <param name="not_sync" value="true" />
+    <remap from="~input/image" to="multisense/left/image_rect_color" />
+    <remap from="~input/camera_info" to="rect_to_roi/output" />
+    <remap from="~input/cloud" to="laser_cloud_from_camera_frame/output"/>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="voxelgrid"
+        args="standalone pcl/VoxelGrid">
+    <remap from="~input" to="laser_cloud_from_camera_frame/output" />
+    <rosparam>
+      filter_limit_min: -1000
+      filter_limit_max: 1000
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="normal_estimation"
+        args="standalone pcl/NormalEstimationOMP" output="screen">
+    <remap from="~input" to="voxelgrid/output" />
+    <rosparam>
+        radius_search: 0.1
+        k_search: 0
+        # 0, => ANN, 1 => FLANN, 2 => Organized
+        spatial_locator: 1
+        max_queue_size: 1
+    </rosparam>
+  </node>
+
+
+  <node pkg="jsk_pcl_ros" type="normal_concatenater" name="normal_concatenater" output="screen">
+    <remap from="~input" to="voxelgrid/output" />
+    <remap from="~normal" to="normal_estimation/output" />
+  </node>
+
+  <node pkg="jsk_pcl_ros" type="hinted_plane_detector" name="hinted_plane_detection">
+    <remap from="~input" to="normal_concatenater/output" />
+    <remap from="~input/hint/cloud" to="roi_clipper/output/cloud" />
+  </node>
+
+  <!-- convert to polygon array to apply other stuff -->
+  <node pkg="jsk_pcl_ros" type="polygon_array_wrapper" name="polygon_array_wrapper">
+    <remap from="~input_polygon" to="hinted_plane_detection/output/polygon" />
+    <remap from="~input_coefficients" to="hinted_plane_detection/output/coefficients" />
+  </node>
+
+  <node pkg="jsk_pcl_ros" name="plane_extraction" type="multi_plane_extraction">
+    <remap from="~input" to="/laser_cloud_from_camera_frame/output" />
+    <remap from="~input_polygons" to="polygon_array_wrapper/output_polygons" />
+    <remap from="~input_coefficients" to="polygon_array_wrapper/output_coefficients" />
+    <rosparam>
+      use_indices: false
+      min_height: 0.025
+      max_height: 0.2
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="euclidean_clustering" name="euclidean_clustering">
+    <remap from="~input" to="/plane_extraction/output" />
+    <rosparam>
+      tolerance: 0.02
+      min_size: 10
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="cluster_point_indices_decomposer" name="object_clusters_on_plane">
+    <remap from="~input" to="/plane_extraction/output" />
+    <remap from="~target" to="/euclidean_clustering/output" />
+    <remap from="~align_planes" to="polygon_array_wrapper/output_polygons" />
+    <remap from="~align_planes_coefficients"
+           to="polygon_array_wrapper/output_coefficients" />
+    <rosparam>
+      align_boxes: true
+      use_pca: true
+      publish_clouds: false
+      publish_tf: false
+    </rosparam>
+  </node>
+  
+</launch>

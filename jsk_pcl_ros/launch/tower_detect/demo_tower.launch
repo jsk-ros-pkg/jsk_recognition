@@ -1,0 +1,6 @@
+<launch>
+  <include file="$(find jsk_pcl_ros)/launch/tower_detect/tower_tf.launch" />
+  <include file="$(find jsk_pcl_ros)/launch/tower_detect/kinect.launch" />
+  <include file="$(find jsk_pcl_ros)/launch/tower_detect/tower_pcl.launch" />
+  <include file="$(find jsk_pcl_ros)/launch/tower_detect/tower_web.launch" />
+</launch>

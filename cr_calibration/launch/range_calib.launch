@@ -1,0 +1,24 @@
+<launch>
+  <arg name="namespace" default="$(optenv ROS_NAMESPACE '')" />
+  <group ns="$(arg namespace)/range">
+    <node name="range_calibrator"
+          pkg="camera_calibration"
+          type="cameracalibrator.py"
+          args="--size=8x6 --square=0.108 --fix-principal-point"
+          output="screen"
+          clear_params="true">
+      <!-- add "\-\-use-rational" to args -->
+      <remap from="image" to="intensity/image_raw" />
+      <remap from="camera/set_camera_info" to="camera_info" />
+    </node>
+    <!--
+    <node name="range_proc" pkg="image_proc" type="image_proc"
+          output="screen" clear_params="true">
+      <remap from="image_raw" to="intensity/image_raw" />
+      <remap from="intensity/camera_info" to="camera_info" />
+    </node>
+    -->
+    <!-- test calibration result -->
+    <!-- rosrun camera_calibration cameracheck.py monocular:=/CR/range -->
+  </group>
+</launch>

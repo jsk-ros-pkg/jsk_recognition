@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+            
+    <link rel="stylesheet" href="css/html5-doctor-reset-stylesheet.min.css" type="text/css"></link>
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    
+    <link rel="stylesheet/less" type="text/css" href="less/tower_detect_viewer.less" />
+    <script src="js/less.min.js" type="text/javascript"></script>
+  </head>
+  <body ontouchmove="event.preventDefault()">
+    
+    <div id="canvas-area">
+      <div id="loader" style="display: none;">
+        <p class="loading-message">通信中...</p>
+      </div>
+      <div id="debug" style="display: none;"> <!-- disable in default -->
+        <p id="message" class="debug-message"></p>
+        <p id="state" class="debug-message"></p>
+        <p id="cluster-num-message" class="debug-message"></p>
+        <div class="graph-container">
+          <div id="graph-placeholder" class="graph-placeholder"></div>
+        </div>
+      </div>
+      <div id="question-area">
+        <a id="question-button" data-toggle="modal" href="#question-modal">
+          <img id="question-button-image" src="images/hatena.png" />
+        </a>
+      </div>
+      <div id="mjpeg"></div>
+    </div>
+
+    <div class="modal fade" id="confirm-modal" tabindex="-1" role="dialog"
+         aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close"
+                    data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">確認</h4>
+          </div>
+          <div class="modal-body">
+            <p>あなたは<span class="label clicked-tower-name"></span>タワーをクリックしました。</p>
+            <p><span class="label clicked-tower-name"></span>タワーの上にシャーレを移動させてよいですか?</p>
+          </div>
+          <div class="modal-footer">
+            <p class="modal-yes-no-line">
+              <button type="button" id="confirm-modal-yes-button"
+                      class="btn btn-primary btn-lg btn-block">はい</button>
+              <button type="button" data-dismiss="modal" class="btn btn-danger btn-lg btn-block">
+                いいえ</button>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="alert-modal" tabindex="-1" role="dialog"
+         aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close"
+                    data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title"><span class="label label-danger">!!! 警告 !!!</span></h4>
+          </div>
+          <div class="modal-body">
+            <p><span class="label clicked-tower-name"></span>タワーの上にはすでにシャーレがおいてあります。</p>
+            <p>他のタワーを選択してください</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-lg btn-block btn-primary">
+              閉じる</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal fade" id="question-modal" tabindex="-1" role="dialog"
+         aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close"
+                    data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">ヘルプ</h4>
+          </div>
+          <div class="modal-body">
+            <div class="introduction">
+              <div class="panel panel-success">
+                <div class="panel-heading">
+                  <h3 class="panel-title">
+                    使い方
+                  </h3>
+                </div>
+                <div class="panel-body">
+                  <ul class="list-group">
+                    <li class="list-group-item">
+                      1. シャーレを置くタワーを選択してください
+                    </li>
+                    <li class="list-group-item">
+                      2. 確認の画面が出てくるので、「はい」と答えると、ロボットが動き出します
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="modal-settings">
+              <div class="panel panel-info">
+                <div class="panel-heading">
+                  <h3 class="panel-title">
+                    設定
+                  </h3>
+                </div>
+                <div class="panel-body">
+                  <ul class="list-group">
+                    <li class="list-group-item list-higher-item">
+                    デバッグモード
+                    <button type="button" class="pull-right btn btn-default list-button"
+                            id="debug-button">
+                      無効
+                    </button>
+                    </li>
+                    <li class="list-group-item list-higher-item">
+                    全画面表示
+                    <button type="button" class="pull-right btn btn-default list-button"
+                            data-dismiss="modal"
+                            id="fullscreen-button">
+                      全画面表示にする
+                    </button>
+                    </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+            <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <script type="text/javascript" src="./js/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="./js/jquery.flot.js"></script>
+    <script type="text/javascript" src="./bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="./js/eventemitter2.min.js"></script>
+    <script type="text/javascript" src="./js/mjpegcanvas.js"></script>
+    <script type="text/javascript" src="./js/roslib.min.js"></script>
+    <script type="text/javascript" src="./js/sonic.js"></script>
+    <script type="text/javascript" src="./js/tower_detect_viewer.js"></script>
+  </body>
+</html>

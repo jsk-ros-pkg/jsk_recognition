@@ -1,0 +1,27 @@
+<launch>
+  <arg name="CAMERA" default="/multisense" />
+  <include file="$(find checkerboard_detector)/capture.launch">
+    <arg name="CAMERA" value="/multisense/left" />
+  </include>
+  <node pkg="jsk_pcl_ros" type="capture_stereo_synchronizer" name="capture_stereo_synchronizer"
+        output="screen">
+    <remap from="~input/pose" to="/capture_board_pose" />
+    <remap from="~input/mask" to="mask_image/output" />
+    <remap from="~input/mask_indices" to="attention_clipper/output/point_indices" />
+    <remap from="~input/left_image" to="$(arg CAMERA)/left/image_rect_color" />
+    <remap from="~input/left_camera_info" to="$(arg CAMERA)/left/camera_info" />
+    <!-- it's not good... -->
+    <remap from="~input/right_camera_info" to="$(arg CAMERA)/right/image_rect/camera_info" />
+    <remap from="~input/disparity" to="$(arg CAMERA)/left/disparity_image" />
+  </node>
+  <node pkg="jsk_rviz_plugins" type="capture_rviz_text.py" name="capture_rviz_text" output="screen">
+    <remap from="capture_count" to="capture_stereo_synchronizer/output/count" />
+  </node>
+  <node pkg="rviz" type="rviz" name="capture_rviz" args="-d $(find jsk_pcl_ros)/config/multisense_capture_data.rviz" />
+  <!-- for multisense -->
+  <node pkg="rostopic" type="rostopic" name="right_image_subscriber"
+        args="hz /multisense/right/image_rect" />
+  <node pkg="rosbag" type="record" name="capture_rosbag"
+        args="-o multisense_capture -e '/capture_stereo_synchronizer/output/.*'"
+        />
+</launch>

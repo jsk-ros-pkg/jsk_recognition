@@ -1,0 +1,30 @@
+<launch>
+  <node pkg="jsk_pcl_ros" type="supervoxel_segmentation"
+	name="supervoxel_segmentation" output="screen">
+    <remap from="~input" to="/multisense/organized_image_points2_color"/>
+    <rosparam>
+      color_importance: 4.0
+      spatial_importance: 2.7
+      normal_importance: 5.0
+      seed_resolution: 0.3
+      voxel_resolution: 0.006
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="cluster_point_indices_decomposer"
+	name="supervoxel_segmentation_decomposer">
+    <remap from="~input" to="supervoxel_segmentation/output/cloud" />
+    <remap from="~target" to="supervoxel_segmentation/output/indices" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="convex_connected_voxels"
+	name="convex_connected_voxels" output="screen">
+  </node>
+  <node pkg="jsk_pcl_ros" type="cluster_point_indices_decomposer"
+	name="convex_connected_voxels_decomposer">
+    <remap from="~input" to="supervoxel_segmentation/output/cloud" />
+    <remap from="~target" to="/convex_connected_voxels/output/indices" />
+  </node>
+  <node name="rqt_reconfigure" pkg="rqt_reconfigure"
+	type="rqt_reconfigure" output="screen" >
+
+  </node>
+</launch>

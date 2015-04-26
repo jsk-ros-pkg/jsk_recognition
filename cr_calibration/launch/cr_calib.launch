@@ -1,0 +1,38 @@
+<launch>
+  <arg name="namespace" default="$(optenv ROS_NAMESPACE /)" />
+  <group ns="$(arg namespace)">
+    <!-- range image proc -->
+    <node name="range_proc" pkg="image_proc" type="image_proc"
+          output="screen" clear_params="true" ns="range">
+      <remap from="image_raw" to="intensity/image_raw" />
+      <remap from="intensity/camera_info" to="camera_info" />
+    </node>
+    <!-- synchronize -->
+    <node name="sync_node"
+          pkg="stereo_synchronizer"
+          type="stereo_synchronizer"
+          output="screen" clear_params="true">
+      <remap from="left_raw/image_raw" to="wide_stereo/left/image_rect" />
+      <remap from="left_raw/camera_info" to="wide_stereo/left/camera_info" />
+      <remap from="left" to="calib_sync/left" />
+      <remap from="right_raw/image_raw" to="range/image_rect" />
+      <remap from="right_raw/camera_info" to="range/camera_info" />
+      <remap from="right" to="calib_sync/range" />
+    </node>
+    <node name="iveiw"
+          pkg="image_view"
+          type="image_view" >
+      <remap from="image" to="range/image_rect" />
+    </node>
+    <!-- calibration node -->
+    <node name="cr_calib"
+          pkg="cr_calibration"
+          type="cr_calibration.py"
+          args="--size 8x6 --square 0.108"
+          output="screen" clear_params="true"
+          ns="calib_sync">
+      <remap from="left/image_rect" to="left/image_raw" />
+      <remap from="range/image_rect" to="range/image_raw" />
+    </node>
+  </group>
+</launch>

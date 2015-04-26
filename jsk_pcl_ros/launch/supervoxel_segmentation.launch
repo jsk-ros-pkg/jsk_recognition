@@ -1,0 +1,10 @@
+<launch>
+  <node pkg="jsk_pcl_ros" type="supervoxel_segmentation" name="supervoxel_segmentation"
+        output="screen">
+    <remap from="~input" to="/multisense/organized_image_points2_color" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="cluster_point_indices_decomposer" name="supervoxel_segmentation_decomposer">
+    <remap from="~input" to="supervoxel_segmentation/output/cloud" />
+    <remap from="~target" to="supervoxel_segmentation/output/indices" />
+  </node>
+</launch>

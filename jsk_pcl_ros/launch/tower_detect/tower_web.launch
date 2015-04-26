@@ -1,0 +1,22 @@
+<launch>
+  <node pkg="mjpeg_server" type="mjpeg_server"
+        name="mjpeg_server"
+        output="screen"
+        clear_params="true">
+   <param name="quality" value="100" />
+  </node>
+  <!-- <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" /> -->
+  <node name="roswww" pkg="roswww" type="webserver.py" />
+  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
+  <node pkg="jsk_pcl_ros" type="tower_detect_viewer_server.py"
+        name="tower_detect_viewer_server"
+        output="screen">
+    <param name="radius" value="0.075" />
+  </node>
+  <node pkg="image_view2" type="image_view2" name="image_view2"
+        respawn="true">
+    <param name="tf_timeout" value="10.0" />
+    <remap from="image" to="/camera/rgb/image_rect_color" />
+    <remap from="camera_info" to="/camera/rgb/camera_info" />
+  </node>
+</launch>

@@ -1,0 +1,25 @@
+all: build/SLIC-Superpixels
+
+INSTALL_DIR ?= ${CURDIR}
+GIT_DIR = build/patched-SLIC-Superpixels
+PATCH_DIR = $(CURDIR)
+GIT_URL = https://github.com/garaemon/SLIC-Superpixels.git
+#GIT_REVISION = 315.2.0
+GIT_PATCH   =
+
+MK_DIR       = $(shell rospack find mk)
+NUM_OF_CPUS = $(shell grep -c '^processor' /proc/cpuinfo)
+
+include $(MK_DIR)/git_checkout.mk
+
+disable_ssl:
+	git config --global http.sslVerify false
+
+clean:
+	-cd $(GIT_DIR) && make clean
+
+download: disable_ssl
+	git clone $(GIT_URL) $(GIT_DIR); (cd ${GIT_DIR}; git checkout $(GIT_REVISION) up; rm -f `rospack find jsk_perception`/installed)
+
+installed: disable_ssl $(GIT_DIR) $(GIT_PATCH)
+	touch installed

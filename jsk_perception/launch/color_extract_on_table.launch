@@ -1,0 +1,50 @@
+<launch>
+  <node pkg="jsk_perception" name="plane_detector"
+        type="plane_detector" output="screen"
+        clear_params="true" >
+    <remap from="points_in" to="/passthroughz/output" />
+    <param name="use_normal" value="true" />
+    <remap from="points_out" to="~/points_out" />
+  </node>
+
+  <node name="pcl_manager" pkg="nodelet" type="nodelet"
+        args="manager" output="screen" />
+
+  <node pkg="nodelet" type="nodelet" name="passthroughz" args="load
+    pcl/PassThrough pcl_manager" output="screen" clear_params="true">
+    <remap from="~input" to="/camera/rgb/points" />
+
+    <rosparam>
+      filter_field_name: z
+      filter_limit_min: 0.0
+      filter_limit_max: 3.5
+      filter_limit_negative: False
+    </rosparam>
+  </node>
+
+  <!-- extract color -->
+  <node pkg="jsk_perception" name="color_extractor"
+        type="color_extractor" output="screen"
+        clear_params="true" >
+    <remap from="~input" to="/plane_detector/points_out"/>
+    <param name="use_h" value="true"/>
+    <param name="h_min" value="335.0"/>
+    <param name="h_max" value="45.0"/>
+    <param name="s_min" value="0.3"/>
+    <param name="s_max" value="1.0"/>
+    <param name="v_min" value="0.14"/>
+    <param name="v_max" value="0.75"/>
+  </node>
+
+  <!-- euclidean clustering service -->
+  <node pkg="jsk_perception" name="euclidean_clustering"
+        type="euclidean_clustering" output="screen"
+        clear_params="true">
+    <remap from="~input" to="/color_extractor/output" />
+    <param name="publish_array" value="true" />
+    <param name="tolerance" value="0.02" />
+    <param name="max_size" value="3000" />
+    <param name="min_size" value="50" />
+  </node>
+
+</launch>

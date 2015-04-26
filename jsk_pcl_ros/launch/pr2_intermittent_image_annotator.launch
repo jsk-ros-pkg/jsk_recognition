@@ -1,0 +1,19 @@
+<launch>
+  <node pkg="jsk_pcl_ros"
+        type="intermittent_image_annotator"
+        name="intermittent_image_annotator"
+        output="screen">
+    <remap from="~input/image" to="/openni_c2/rgb/image_rect_color" />
+    <remap from="/openni_c2/rgb/camera_info" to="/openni/rgb/camera_info" />
+    <remap from="~input/cloud" to="/openni_c2/depth_registered/points" />
+    <rosparam>
+      store_pointcloud: true
+      keep_organized: true
+    </rosparam>
+    <param name="fixed_frame_id" value="odom_combined" />
+  </node>
+  <node pkg="image_view2" type="image_view2"
+        name="intermittent_image_view">
+    <remap from="image" to="intermittent_image_annotator/output" />
+  </node>
+</launch>

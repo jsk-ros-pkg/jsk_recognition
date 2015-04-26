@@ -1,0 +1,65 @@
+<launch>
+  <!-- nodelet name is /camera_nodelet_manager -->
+  <arg name="input_point" default="/camera/depth_registered/points" />
+  <arg name="voxel_grid_filter_limit_min" default="0.0"/>
+  <arg name="voxel_grid_filter_limit_max" default="5.0"/>
+  <arg name="voxel_grid_filter_field_name" default="z"/>
+  <arg name="voxel_grid_leaf_size" default="0.02"/>
+  <arg name="create_manager" default="true" />
+  <arg name="manager" default="tracking_manager" />
+  <arg name="align_box" default="false" />
+  <arg name="renew_box" default="/bounding_box_marker/selected_box" />
+  <arg name="BASE_FRAME_ID" default="NONE" />
+  <arg name="track_target_name" default="track_result" />
+    <node if="$(arg create_manager)"
+          pkg="nodelet" type="nodelet" name="$(arg manager)"
+          args="manager" output="screen"/>
+
+    <node pkg="nodelet" type="nodelet"
+          name="voxelgrid"
+          args="standalone pcl/VoxelGrid"
+          output="screen" clear_params="true">
+      <remap from="~input" to="$(arg input_point)" />
+      <param name="filter_limit_min" value="$(arg voxel_grid_filter_limit_min)" />
+      <param name="filter_limit_max" value="$(arg voxel_grid_filter_limit_max)" />
+      <param name="filter_limit_field_name" value="$(arg voxel_grid_filter_field_name)" />
+      <param name="leaf_size" value="$(arg voxel_grid_leaf_size)" />
+      <!-- <rosparam> -->
+      <!--   filter_field_name: z -->
+      <!--   filter_limit_min: 0.0 -->
+      <!--   filter_limit_max: 5.0 -->
+      <!--   leaf_size: 0.01 -->
+      <!-- </rosparam> -->
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="particle_filter_tracker"
+          args="standalone jsk_pcl/ParticleFilterTracking"
+          output="screen" clear_params="true">
+      <remap from="~input" to="voxelgrid/output" />
+      <param name="track_target_name" value="$(arg track_target_name)" />
+      <param name="align_box" value="$(arg align_box)" />
+      <remap from="~renew_model" to="selected_cloud_downsampler/output" />
+      <remap from="~renew_box" to="$(arg renew_box)" />
+      <param name="BASE_FRAME_ID" value="$(arg BASE_FRAME_ID)" />
+
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="selected_cloud_downsampler"
+          args="standalone pcl/VoxelGrid"
+          output="screen" clear_params="true">
+      <remap from="~input" to="selected_pointcloud" />
+      <param name="filter_limit_min" value="$(arg voxel_grid_filter_limit_min)" />
+      <param name="filter_limit_max" value="$(arg voxel_grid_filter_limit_max)" />
+      <param name="filter_limit_field_name" value="$(arg voxel_grid_filter_field_name)" />
+      <param name="leaf_size" value="$(arg voxel_grid_leaf_size)" />
+      <!-- <rosparam> -->
+      <!--   filter_field_name: z -->
+      <!--   filter_limit_min: 0.0 -->
+      <!--   filter_limit_max: 5.0 -->
+      <!--   leaf_size: 0.01 -->
+      <!-- </rosparam> -->
+    </node>
+    <node pkg="jsk_pcl_ros" name="renew_tracking" type="renew_tracking.py" if="false">
+      <remap from="selected_pointcloud" to="selected_cloud_downsampler/output" />
+    </node>
+</launch>

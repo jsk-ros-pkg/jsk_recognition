@@ -1,0 +1,108 @@
+<launch>
+  <arg name="input_point" default="/camera/depth_registered/points"/>
+  <arg name="voxel_grid_filter_limit_min" default="0.0"/>
+  <arg name="voxel_grid_filter_limit_max" default="5.0"/>
+  <arg name="voxel_grid_leaf_size" default="0.005"/>
+
+  <arg name="DEFAULT_NAMESPACE" default="pcl_nodelet"/>
+  <arg name="create_manager" default="true" />
+  <arg name="manager" default="pcl_nodelet_manager" />
+
+  <group ns="$(arg DEFAULT_NAMESPACE)">
+    <node if="$(arg create_manager)"
+          pkg="nodelet" type="nodelet" name="$(arg manager)"
+          args="manager" output="screen"/>
+
+    <node pkg="nodelet" type="nodelet" name="voxel_grid"
+          args="load pcl/VoxelGrid $(arg manager)"
+          output="screen"
+          clear_params="true"
+        respawn="false">
+      <remap from="~input" to="$(arg input_point)"/>
+      <param name="filter_limit_min" value="$(arg voxel_grid_filter_limit_min)" />
+      <param name="filter_limit_max" value="$(arg voxel_grid_filter_limit_max)" />
+      <param name="leaf_size" value="$(arg voxel_grid_leaf_size)" />
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="ground_segmentation" args="load pcl/SACSegmentation $(arg manager)"
+          output="screen"
+          clear_params="true"
+          respawn="false">
+      <remap from="~input" to="voxel_grid/output" />
+      <rosparam>
+        model_type: 9
+        distance_threshold: 0.05
+        max_iterations: 10000
+        method_type: 0
+        optimize_coefficients: true
+        max_queue_size: 20
+        min_inliers: 100
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="project_inliers" args="load pcl/ProjectInliers $(arg manager)">
+      <remap from="~input" to="voxel_grid/output"/>
+      <remap from="~indices" to="ground_segmentation/inliers" />
+      <remap from="~model" to="ground_segmentation/model" />
+      <rosparam>
+        model_type: 9
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="convex_hull" args="load pcl/ConvexHull2D $(arg manager)">
+      <remap from="~input" to="project_inliers/output" />
+    </node>
+    <node pkg="nodelet" type="nodelet" name="extract_nonground_indices" args="load pcl/ExtractIndices $(arg manager)" output="screen" respawn="true">
+      <remap from="~input"   to="voxel_grid/output" />
+      <remap from="~indices" to="ground_segmentation/inliers" />
+      <rosparam>
+        negative: true
+        max_queue_size: 5000
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="normal_estimate"
+          args="load pcl/NormalEstimationOMP $(arg manager)"
+          clear_params="true">
+      <remap from="~input" to="extract_nonground_indices/output" />
+      <!-- <remap from="~output" to="/normal_concat/input" /> -->
+      <rosparam>
+        radius_search: 0
+        k_search: 10
+        # 0, => ANN, 1 => FLANN, 2 => Organized
+        spatial_locator: 2
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="polygon_array_wrapper"
+          args="load jsk_pcl/PolygonArrayWrapper $(arg manager)"
+          output="screen">
+      <remap from="~input_polygon" to="convex_hull/output_polygon" />
+      <remap from="~input_coefficients" to="ground_segmentation/model" />
+    </node>
+    <node pkg="nodelet" type="nodelet" name="normal_concat"
+          args="load jsk_pcl/NormalConcatenater $(arg manager)"
+          clear_params="true">
+      <remap from="~input" to="extract_nonground_indices/output"/>
+      <remap from="~normal" to="normal_estimate/output"/>
+    </node>
+     <node pkg="nodelet" type="nodelet"
+          name="clustering"
+          args="load jsk_pcl/EuclideanClustering $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="extract_nonground_indices/output" />
+      <rosparam>
+         tolerance: 0.1
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="cluster_decomposer"
+          args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="extract_nonground_indices/output" />
+      <remap from="~target" to="clustering/output" />
+      <remap from="~align_planes" to="polygon_array_wrapper/output_polygons" />
+      <remap from="~align_planes_coefficients" to="polygon_array_wrapper/output_coefficients" />
+      <rosparam>
+        align_boxes: true
+        use_pca: true
+      </rosparam>
+    </node>
+  </group>
+</launch>

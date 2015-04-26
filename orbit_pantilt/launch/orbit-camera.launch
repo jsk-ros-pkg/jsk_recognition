@@ -1,0 +1,29 @@
+<launch>
+  <arg name="device" default="/dev/video1" />
+  
+  <include file="$(find roseus_tutorials)/launch/usb-camera.launch">
+    <arg name="device" value="$(arg device)" />
+    <arg name="frame_id" value="orbit_camera_tilt_link"/>
+    <arg name="camera_info_url" value="file://$(find orbit_pantilt)/launch/orbit-camera.yaml" />
+  </include>
+
+  <node pkg="orbit_pantilt" name="orbit_pantilt" type="orbit_pantilt"
+        output="screen" >
+    <param name="device" value="$(arg device)" />
+    <param name="pan_ratio"  value="40" />
+    <param name="tilt_raito" value="40" />
+  </node>
+
+  <param name="orbit_robot_description" textfile="$(find orbit_pantilt)/model/orbit_camera.urdf"/>
+  <node pkg="robot_state_publisher" type="robot_state_publisher"
+        name="orbit_robot_state_publisher" >
+    <remap from="robot_description" to="orbit_robot_description" />
+    <remap from="joint_states" to="orbit_pantilt/joint_states" />
+  </node>
+
+  <node name="publish_orbit_marker" pkg="roseus" type="roseus"
+        args="$(find orbit_pantilt)/euslisp/publish-orbit-marker.l" />
+
+  <node name="image_view" pkg="image_view" type="image_view" args="image:=/image_rect_color" />
+
+</launch>

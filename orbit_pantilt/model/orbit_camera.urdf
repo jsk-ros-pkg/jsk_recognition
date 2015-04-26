@@ -1,0 +1,76 @@
+<robot name="orbit_camera">
+  <link name="orbit_base_link">
+    <visual>
+      <origin xyz="0 0 0.02" />
+      <geometry>
+        <sphere radius="0.045" />
+      </geometry>
+      <material name="gray1">
+        <color rgba="0.1 0.1 0.1 1.0" />
+      </material>
+    </visual>
+  </link>
+
+  <joint name="stick_joint" type="fixed">
+    <parent link="orbit_base_link" />
+    <child link="orbit_stick_link" />
+    <origin xyz="0.01 0 0.05" rpy="0 0 0" />
+  </joint>
+
+  <link name="orbit_stick_link">
+    <visual>
+      <origin xyz="0 0 0.11" />
+      <geometry>
+        <cylinder length="0.22" radius="0.007" />
+      </geometry>
+      <material name="gray2">
+        <color rgba="0.2 0.2 0.2 1.0" />
+      </material>
+    </visual>
+  </link>
+
+  <joint name="pan" type="continuous">
+    <parent link="orbit_stick_link" />
+    <child link="orbit_camera_pan_link" />
+    <origin xyz="0 0 0.22" rpy="0 0 0" />
+    <axis xyz="0 0 1" />
+  </joint>
+
+  <link name="orbit_camera_pan_link">
+    <visual>
+      <origin xyz="0 0 0.035" />
+      <geometry>
+        <sphere radius="0.035" />
+      </geometry>
+      <material name="black">
+        <color rgba="0 0 0 1.0" />
+      </material>
+    </visual>
+  </link>
+
+  <joint name="tilt" type="continuous">
+    <parent link="orbit_camera_pan_link" />
+    <child link="orbit_camera_tilt_link" />
+    <origin xyz="0 0 0.035" rpy="-1.57 0 -1.57" />
+    <axis xyz="0 1 0" />
+  </joint>
+
+  <link name="orbit_camera_tilt_link">
+    <visual>
+      <origin xyz="0 0 0.02" rpy="0 0 0" />
+      <geometry>
+        <cylinder length="0.05" radius="0.01" />
+      </geometry>
+      <material name="gray3">
+        <color rgba="0.3 0.3 0.3 1.0" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.006" rpy="0 1.57 0" />
+      <geometry>
+        <cylinder length="0.01" radius="0.033" />
+      </geometry>
+    </visual>
+  </link>
+
+</robot>

@@ -1,0 +1,80 @@
+<launch>
+  <arg name="CAMERA" default="/multisense/left" />
+  <arg name="CAMERA_FRAME_ID" default="left_camera_optical_frame" />
+  <arg name="Z_OFFSET" default="-0.155" />
+  <group ns="cb_white" clear_params="true">
+    <param name="display" type="int" value="0"/>
+    <param name="rect0_size_x" type="double" value="0.05"/>
+    <param name="rect0_size_y" type="double" value="0.05"/>
+    <param name="grid0_size_x" type="int" value="3"/>
+    <param name="grid0_size_y" type="int" value="5"/>
+    <param name="board_type" value="acircle" />
+    <param name="use_P" value="true" />
+    <param name="invert_color" value="false" />
+    <param name="type0" type="string" value="data/ricebox.kinbody.xml"/>
+    <node pkg="checkerboard_detector" name="checkerboard_detector"
+          type="checkerboard_detector">
+      <remap from="camera_info" to="$(arg CAMERA)/camera_info"/>
+      <remap from="image" to="$(arg CAMERA)/image_rect_color"/>
+    </node>
+    <node pkg="jsk_topic_tools"
+          type="static_transform_pose_stamped"
+          name="offset_center"
+          args="0.125 0.375 $(arg Z_OFFSET) 3.14 0 0 objectdetection_pose /capture_board_pose" />
+  </group>
+
+  <group ns="cb_black" clear_params="true">
+    <param name="display" type="int" value="0"/>
+    <param name="rect0_size_x" type="double" value="0.05"/>
+    <param name="rect0_size_y" type="double" value="0.05"/>
+    <param name="grid0_size_x" type="int" value="3"/>
+    <param name="grid0_size_y" type="int" value="5"/>
+    <param name="board_type" value="acircle" />
+    <param name="invert_color" value="true" />
+    <param name="type0" type="string" value="data/ricebox.kinbody.xml"/>
+    <param name="use_P" value="true" />
+    <node pkg="checkerboard_detector" name="checkerboard_detector"
+          type="checkerboard_detector">
+      <remap from="camera_info" to="$(arg CAMERA)/camera_info"/>
+      <remap from="image" to="$(arg CAMERA)/image_rect_color"/>
+    </node>
+    <node pkg="jsk_topic_tools"
+          type="static_transform_pose_stamped"
+          name="offset_center"
+          args="0.125 -0.2 $(arg Z_OFFSET) 3.14 0 0 objectdetection_pose /capture_board_pose" />
+  </group>
+
+  <!-- clip -->
+  <node pkg="jsk_pcl_ros" type="attention_clipper" name="attention_clipper"
+        output="screen">
+    <remap from="~input/pose" to="/capture_board_pose" />
+    <remap from="~input" to="$(arg CAMERA)/camera_info" />
+    <remap from="~input/points" to="/multisense/organized_image_points2_color" />
+    <rosparam subst_value="true">
+      use_multiple_attention: false
+      frame_id: $(arg CAMERA_FRAME_ID)
+      dimension_x: 0.2
+      dimension_y: 0.2
+      dimension_z: 0.5
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="extract_indices_manager" args="manager">
+  </node>
+  <node pkg="nodelet" type="nodelet" name="extract_indices" args="load pcl/ExtractIndices extract_indices_manager">
+    <remap from="~input" to="/multisense/organized_image_points2_color" />
+    <remap from="~indices" to="attention_clipper/output/point_indices" />
+    <param name="use_indices" value="true" />
+  </node>
+
+  <node pkg="jsk_pcl_ros" type="point_indices_to_mask_image" name="mask_image" output="log">
+    <remap from="~input" to="attention_clipper/output/point_indices" />
+    <remap from="~input/image" to="$(arg CAMERA)/image_rect_color" />
+  </node>
+  <node pkg="image_view" type="image_view" name="mask_image_view">
+    <remap from="image" to="mask_image/output"/>
+  </node>
+  <node pkg="image_view" type="image_view" name="original_image_view">
+      <remap from="image" to="$(arg CAMERA)/image_rect_color"/>
+  </node>
+</launch>

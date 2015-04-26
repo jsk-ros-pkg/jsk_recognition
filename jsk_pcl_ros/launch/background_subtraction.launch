@@ -1,0 +1,29 @@
+<!-- -*- mode: xml -*- -->
+<launch>
+  <arg name="INPUT" default="/bgsub_input"/>
+  <arg name="OUTPUT" default="/bgsub_output"/>
+  <arg name="TARGET" default="/target"/>
+  <arg name="DEFAULT_NAMESPACE" default="background_subtraction"/>
+
+  <arg name="create_manager" default="true" />
+  <arg name="manager" default="background_sub_manager" />
+
+  <group ns="$(arg DEFAULT_NAMESPACE)">
+    <node if="$(arg create_manager)"
+          pkg="nodelet" type="nodelet" name="$(arg manager)"
+          args="manager" output="screen"/>
+
+    <node pkg="nodelet" type="nodelet"
+          name="bg_substract"
+          args="load pcl/SegmentDifferences $(arg manager)"
+          output="log" clear_params="true">
+      <remap from="~input" to="$(arg INPUT)" />
+      <remap from="~target" to="$(arg TARGET)" />
+      <remap from="~output" to="$(arg OUTPUT)" />
+      <rosparam>
+        max_queue_size: 30
+        distance_threshold: 0.003
+      </rosparam>
+    </node>
+  </group>
+</launch>

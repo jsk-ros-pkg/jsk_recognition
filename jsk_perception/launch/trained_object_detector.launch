@@ -1,0 +1,9 @@
+<launch>
+  <node pkg="jsk_perception" type="trained_object_detector" name="trained_object_detector">
+    <remap from="input" to="/camera/rgb/image_rect_color" />
+  </node>
+  <node pkg="image_view" type="image_view" name="edge_view" >
+    <remap from="image" to="/trained_object_detector/output/image" />
+  </node>
+  <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="edge_reconfigure" />
+</launch>

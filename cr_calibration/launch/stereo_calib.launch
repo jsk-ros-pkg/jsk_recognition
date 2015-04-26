@@ -1,0 +1,26 @@
+<launch>
+  <arg name="namespace" default="$(optenv ROS_NAMESPACE '')" />
+  <group ns="$(arg namespace)/wide_stereo">
+    <node name="stereo_calibrator"
+          pkg="camera_calibration"
+          type="cameracalibrator.py"
+          args="--size=8x6 --square=0.108 --approximate=0.01"
+          output="screen"
+          clear_params="true">
+      <!-- add "\-\-use-rational" to args -->
+      <!-- for stereo_synchronizer -->
+      <remap from="left" to="left_raw/image_raw" />
+      <remap from="right" to="right_raw/image_raw" />
+      <remap from="left_camera" to="left_raw" />
+      <remap from="right_camera" to="right_raw" />
+      <!-- for not stereo_synchronizer
+      <remap from="left" to="left/image_raw" />
+      <remap from="right" to="right/image_raw" />
+      <remap from="left_camera" to="left" />
+      <remap from="right_camera" to="right" />
+      -->
+    </node>
+    <!-- for checking calibration -->
+    <!-- rosrun camera_calibration cameracheck.py stereo:=/CR/wide_stereo -->
+  </group>
+</launch>

@@ -1,0 +1,20 @@
+<launch>
+  <arg name="LAUNCH_MANAGER" default="true" />
+  <arg name="MANAGER" default="manager" />
+  <node pkg="nodelet" type="nodelet" name="$(arg MANAGER)"
+        args="manager"
+        if="$(arg LAUNCH_MANAGER)"
+        alaunch-prefix="xterm -e gdb --args"
+        output="screen"/>
+  <node pkg="nodelet" type="nodelet" name="footstep_polygon_publisher"
+        clear_params="true"
+        args="load jsk_pcl/StaticPolygonArrayPublisher /$(arg
+              MANAGER)">
+    <remap from="~input" to="/camera_remote/depth_registered/points" />
+    <rosparam>
+      use_message: true
+      frame_ids: [RLEG_LINK5, LLEG_LINK5]
+      polygon_array: [[[0.178558, -0.077564, -0.10611],[-0.082795, -0.077564, -0.10611],[-0.082795, 0.057564, -0.10611], [0.178558, 0.057564, -0.10611]],[[0.178558, 0.077564, -0.10611],[-0.082795, 0.077564, -0.10611],[-0.082795, -0.057564, -0.10611], [0.178558, -0.057564, -0.10611]]]
+    </rosparam>
+  </node>
+</launch>

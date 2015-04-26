@@ -1,0 +1,49 @@
+CR Capture calibration
+
+You have to finish 3 processes listed below.
+step 1) stereo camera calibration
+step 2) mono camera calibration for range sensor
+step 3) measurement for external parameter between stereo camera and range sensor
+
+Topics needed for this calibration are listed below.
+Topics from stereo camera are required to be synchronized.
+(you can use stereo_synchronizer for synchronizing camera topics)
+
+/CAMERA_NAMESPACE/stereo/left/image_raw
+/CAMERA_NAMESPACE/stereo/left/camera_info
+/CAMERA_NAMESPACE/stereo/right/image_raw
+/CAMERA_NAMESPACE/stereo/right/camera_info
+/CAMERA_NAMESPACE/range/intensity/image_raw
+/CAMERA_NAMESPACE/range/camera_info
+
+
+step 1) stereo camera calibration
+  * Required topics
+  /CAMERA_NAMESPACE/stereo/left/image_raw
+  /CAMERA_NAMESPACE/stereo/right/image_raw
+  
+  $ roslaunch cr_calibration stereo_calib.launch
+     (You should set topics and calibration board size
+      depend on your environment.)
+  
+step 2) mono camera calibration for range sensor
+  * Required topic
+  /CAMERA_NAMESPACE/range/intensity/image_raw
+  
+  $ roslaunch cr_calibration range_calib.launch
+     (You should set topics and calibration board size
+      depend on your environment. )
+  
+step 3) measurement for external parameter between stereo camera and range sensor
+  * Required topics
+    Each camera_info topics should publish values which 
+     were measured in step 1) and step 2)
+
+  /CAMERA_NAMESPACE/stereo/left/image_rect
+  /CAMERA_NAMESPACE/stereo/left/camera_info
+  /CAMERA_NAMESPACE/range/intensity/image_raw
+  /CAMERA_NAMESPACE/range/camera_info
+  
+  $ roslaunch cr_calibration cr_calib.launch
+     (You should set topics and calibration board size
+      depend on your environment. )

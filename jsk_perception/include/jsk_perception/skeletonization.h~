@@ -1,0 +1,34 @@
+#ifndef JSK_PERCEPTION_SKELETONIZATION_H
+#define JSK_PERCEPTION_SKELETONIZATION_H
+
+// ROS Header Directives
+#include <ros/ros.h>
+#include <ros/console.h>
+
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <sensor_msgs/Image.h>
+
+// OpenCV Header Directives
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
+namespace jsk_perception: public jsk_topic_tools::DiagnosticNodelet {
+   class Skeletonization {
+
+    public:
+      Skeletonization() : DiagnosticNodelet("Skeletonization") {}
+
+    protected:
+      virtual void onInit();
+      virtual void subscribe();
+      virtual void unsubscribe();
+      virtual void image_cb(
+         const sensor_msgs::Image::ConstPtr&);
+      
+    private:
+      
+   };
+}
+
+#endif  // JSK_PERCEPTION_SKELETONIZATION_H
+

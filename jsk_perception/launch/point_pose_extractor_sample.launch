@@ -1,0 +1,29 @@
+<launch>
+  <arg name="feature_node" default="imagesift" />
+  <arg name="launch_camera" default="true" />
+  <arg name="image" default="image_rect_color" />
+  <arg name="camera_info" default="camera_info" />
+  <node if="$(arg launch_camera)" name="uvc_camera" pkg="uvc_camera" type="uvc_camera_node"
+        respawn="false" output="screen">
+    <param name="camera_info_url" value="file://$(find roseus_tutorials)/launch/usb-camera.yaml"/>
+    <param name="device" value="/dev/video0"/>
+    <param name="width" value="640" />
+    <param name="height" value="480" />
+    <param name="frame_id" value="uvc_camera"/>
+    <param name="frame_id" value="uvc_camera"/>
+  </node>
+
+  <node if="$(arg launch_camera)" name="image_proc" pkg="image_proc" type="image_proc"
+respawn="true">
+  </node>
+
+  <node name="imagefeature" pkg="imagesift" type="$(arg feature_node)"
+respawn="false" output="screen" launch-prefix="nice -n 10">
+    <remap from="image" to="$(arg image)" />
+    <remap from="camera_info" to="$(arg camera_info)" />
+  </node>
+
+  <node name="point_pose_extractor" pkg="jsk_perception" type="point_pose_extractor"
+respawn="false" output="screen"/>
+
+</launch>

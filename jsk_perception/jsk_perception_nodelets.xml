@@ -1,0 +1,171 @@
+<library path="lib/libjsk_perception">
+  <class name="jsk_perception/ProjectImagePoint"
+         type="jsk_perception::ProjectImagePoint"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/MaskImageGenerator"
+         type="jsk_perception::MaskImageGenerator"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/ROIToMaskImage"
+         type="jsk_perception::ROIToMaskImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/ROIToRect"
+         type="jsk_perception::ROIToRect"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/MaskImageToRect"
+         type="jsk_perception::MaskImageToRect"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/MaskImageToROI"
+         type="jsk_perception::MaskImageToROI"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/RectToMaskImage"
+         type="jsk_perception::RectToMaskImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/RectToROI"
+         type="jsk_perception::RectToROI"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/PolygonToMaskImage"
+         type="jsk_perception::PolygonToMaskImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/ErodeMaskImage"
+         type="jsk_perception::ErodeMaskImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/DilateMaskImage"
+         type="jsk_perception::DilateMaskImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/BlobDetector"
+         type="jsk_perception::BlobDetector"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/SingleChannelHistogram"
+         type="jsk_perception::SingleChannelHistogram"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/ColorHistogramLabelMatch"
+         type="jsk_perception::ColorHistogramLabelMatch"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/AddMaskImage" type="jsk_perception::AddMaskImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/MultiplyMaskImage"
+         type="jsk_perception::MultiplyMaskImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/ApplyMaskImage" type="jsk_perception::ApplyMaskImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/UnapplyMaskImage" type="jsk_perception::UnapplyMaskImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/GridLabel" type="jsk_perception::GridLabel"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/ColorizeLabels" type="jsk_perception::ColorizeLabels"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
+  <class name="jsk_perception/SnakeSegmentation" type="jsk_perception::SnakeSegmentation"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
+  <class name="jsk_perception/ContourFinder" type="jsk_perception::ContourFinder"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
+  <class name="jsk_perception/HSVDecomposer" type="jsk_perception::HSVDecomposer"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
+  <class name="jsk_perception/LabDecomposer" type="jsk_perception::LabDecomposer"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/YCCDecomposer" type="jsk_perception::YCCDecomposer"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/RGBDecomposer" type="jsk_perception::RGBDecomposer"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
+  <class name="jsk_perception/GrabCut" type="jsk_perception::GrabCut"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      GrabCut segmentation
+    </description>
+  </class>
+  <class name="jsk_perception/BackgroundSubstraction" type="jsk_perception::BackgroundSubstraction"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      background substraction
+    </description>
+  </class>
+  <class name="jsk_perception/SLICSuperPixels" type="jsk_perception::SLICSuperPixels"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      compute superpixels
+    </description>
+  </class>
+  <class name="jsk_perception/HoughCircleDetector" type="HoughCircleDetector"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      nodelet to detect circles based on hough transformation
+    </description>
+  </class>
+  <class name="jsk_perception/ColorHistogram" type="ColorHistogram"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Nodelet to compute histogram
+    </description>
+  </class>
+  <class name="jsk_perception/EdgeDetector" type="EdgeDetector"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Nodelet to detect edges
+    </description>
+  </class>
+  <class name="jsk_perception/SparseImageEncoder" type="SparseImageEncoder"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Nodelet to encode image to an array of sparse matrix.
+    </description>
+  </class>
+  <class name="jsk_perception/SparseImageDecoder" type="SparseImageDecoder"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Nodelet to decode from an array of sparse matrix to image.
+    </description>
+  </class>
+  <class name="jsk_perception/FisheyeToPanorama" type="jsk_perception::FisheyeToPanorama"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Nodelet to convert fisheye image to panorama.
+    </description>
+  </class>
+  <class name="jsk_perception/Skeletonization" type="jsk_perception::Skeletonization"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Nodelet to thin the pixels to single dimension
+    </description>
+  </class>
+  <class name="jsk_perception/SlidingWindowObjectDetector" type="jsk_perception::SlidingWindowObjectDetector"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Base class for object detection via supervised learning
+    </description>
+  </class>
+</library>

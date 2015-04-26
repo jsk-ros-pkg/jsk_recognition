@@ -1,0 +1,9 @@
+<launch>
+  <node pkg="jsk_perception" type="edge_detector" name="edge_detector">
+    <remap from="image" to="image_rect_color" />
+  </node>
+  <node pkg="image_view" type="image_view" name="edge_view" >
+    <remap from="image" to="edge/image" />
+  </node>
+  <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="edge_reconfigure" />
+</launch>

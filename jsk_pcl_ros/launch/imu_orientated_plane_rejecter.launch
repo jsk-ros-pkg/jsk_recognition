@@ -1,0 +1,49 @@
+<launch>
+  <arg name="CAMERA_FRAME_ID" default="/multisense/left_camera_optical_frame" />
+  <arg name="INPUT" default="/multisense/resize_1_2/points" />
+  <arg name="INPUT_INFO" default="/multisense/left/camera_info" />
+  <arg name="IMU" default="/multisense/imu/imu_data" />
+  <arg name="LAUNCH_MANAGER" default="true" />
+  <arg name="MANAGER" default="plane_rejection_manager" />
+  <group if="$(arg LAUNCH_MANAGER)">
+    <node pkg="nodelet" type="nodelet" name="$(arg MANAGER)"
+          args="manager"
+          output="screen"/>
+  </group>
+
+  <node pkg="nodelet" type="nodelet" name="polygon_transformer"
+        args="load jsk_pcl/PolygonArrayTransformer /$(arg MANAGER)">
+    <remap from="~input_polygons" to="/polygon_array"/>
+    <remap from="~input_coefficients" to="/model_coefficients_array" />
+    <param name="frame_id" value="$(arg CAMERA_FRAME_ID)" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="box_array_to_box.py"
+        name="box_array_to_box">
+    <remap from="bounding_box_array" to="/cluster_decomposer_one/boxes" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="calculate_polygon_from_imu.py"
+        name="calc_polygon">
+    <remap from="imu_data" to="$(arg IMU)" />
+  </node>
+
+  <node pkg="jsk_pcl_ros" type="multi_plane_extraction"
+        name="plane_extraction" >
+    <param name="use_indices" value="false" />
+    <remap from="~input" to="$(arg INPUT)" />
+    <remap from="~input_polygons" to="/polygon_transformer/output_polygons" />
+    <remap from="~input_coefficients" to="/polygon_transformer/output_coefficients" />
+  </node>
+  
+  <!-- <node pkg="nodelet" type="nodelet" -->
+  <!--       name="plane_extraction" -->
+  <!--       args="load jsk_pcl/MultiPlaneExtraction $(arg MANAGER)" -->
+  <!--       output="screen"> -->
+  <!--   <param name="use_indices" value="false" /> -->
+  <!--   <remap from="~input" to="$(arg INPUT)" /> -->
+  <!--   <remap from="~input_polygons" to="/polygon_transformer/output_polygons" /> -->
+  <!--   <remap from="~input_coefficients" to="/polygon_transformer/output_coefficients" /> -->
+  <!-- </node> -->
+  
+</launch>
+
+

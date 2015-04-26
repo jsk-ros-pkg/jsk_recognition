@@ -1,0 +1,46 @@
+<launch>
+  <arg name="image" default="/camera/rgb/image_rect_color" />
+  <arg name="info" default="/camera/rgb/camera_info" />
+  <arg name="points" default="/camera/depth_registered/points"/>
+  <arg name="USE_SYNC" default="false" />
+  <arg name="PUBLISH_POINTS" default="true" />
+  <arg name="cloud_machine" default="localhost"/>
+  <machine name="localhost" address="localhost" />
+
+  <node name="color_histogram_sliding_matcher" pkg="jsk_perception" type="color_histogram_sliding_matcher"
+respawn="false" output="screen" launch-prefix="nice -n 10">
+    <remap from="image" to="$(arg image)" />
+    <remap from="camera_info" to="$(arg info)" />
+    <param name="standard_height" value="24" />
+    <param name="standard_width" value="12" />
+    <param name="coefficient_threshold" value="0.5" />
+  </node>
+  <node name="screenpoint_manager" pkg="nodelet"
+        type="nodelet" args="manager" output="screen"
+        machine="$(arg cloud_machine)" respawn="true"/>
+  <node name="pointcloud_screenpoint_nodelet" pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/PointcloudScreenpoint screenpoint_manager"
+        output="screen" clear_params="true" respawn="true"
+        machine="$(arg cloud_machine)">
+    <remap from="~points" to="$(arg points)" />
+    <remap from="~rect" to="best_polygon" /> 
+    <rosparam>
+      queue_size: 4
+      crop_size: 10
+      search_size: 16
+      use_rect: true
+      use_point_array: true
+      use_point: true
+      publish_point: true
+    </rosparam>
+    <param name="use_sync" value="$(arg USE_SYNC)" />
+    <param name="publish_points" value="$(arg PUBLISH_POINTS)" />
+  </node>
+  <node pkg="jsk_interactive_marker"
+        type="bounding_box_marker"
+        name="bounding_box_color_histogram"
+        output="screen"
+        >
+    <remap from="~bounding_box_array" to="/best_box" />
+  </node>
+</launch>

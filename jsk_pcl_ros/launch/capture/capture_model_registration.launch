@@ -1,0 +1,50 @@
+<launch>
+  <arg name="LINEMOD_TRAIN" default="true" />
+  <arg name="BAG_FILE" default="/home/lueda/multisense_capture_2014-12-30-13-40-27.bag" />
+  <include file="$(find jsk_pcl_ros)/launch/capture/capture_stereo_synchronizer_player.launch" />
+  <node pkg="nodelet" type="nodelet" name="extract_indices_manager"
+        args="manager" />
+  <node pkg="nodelet" type="nodelet" name="extract_indices"
+        args="load pcl/ExtractIndices extract_indices_manager">
+    <remap from="~input" to="/stereo/points2" />
+    <remap from="~indices" to="/capture_stereo_synchronizer/output/mask_indices" />
+    <rosparam>
+      use_indices: true
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="incremental_model_registration"
+        name="incremental_model_registration" output="screen">
+    <remap from="~input" to="/stereo/points2" />
+    <remap from="~input/indices" to="/capture_stereo_synchronizer/output/mask_indices" />
+    <remap from="~input/pose" to="/capture_stereo_synchronizer/output/pose" />
+    <remap from="~icp_service" to="icp_registration/icp_align" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="icp_registration" name="icp_registration" output="screen">
+    <rosparam>
+      use_flipped_initial_pose: false
+      max_iteration: 10000
+      correspondence_distance: 0.001
+      transform_epsilon: 0.01
+      euclidean_fittness_epsilon: 0.01
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="linemod_trainer" name="linemod_trainer" output="screen">
+    <remap from="~input" to="incremental_model_registration/output/registered" />
+    <remap from="~input/info" to="/capture_stereo_synchronizer/output/left_camera_info" />
+    <rosparam>
+      sample_viewpoint: true
+      sample_viewpoint_radius_min: 1.2
+      sample_viewpoint_radius_max: 1.6
+    </rosparam>
+  </node>
+  <node pkg="image_view" type="image_view" name="sample_viewer">
+    <remap from="image" to="linemod_trainer/output/range_image" />
+  </node>
+    <node pkg="image_view" type="image_view" name="sample_color_viewer">
+    <remap from="image" to="linemod_trainer/output/colored_range_image" />
+  </node>
+  <node pkg="rviz" type="rviz" name="registration_rviz"
+        args="-d $(find jsk_pcl_ros)/config/multisense_capture_model_training.rviz" />
+  <node pkg="jsk_pcl_ros" type="capture_train_linemod.sh" name="capture_train_linemod_script"
+        args="$(arg BAG_FILE)"/>
+</launch>

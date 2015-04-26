@@ -1,0 +1,16 @@
+<launch>
+  <include file="$(find jsk_data)/launch/pr2_play.launch">
+    <arg name="bagfile_names" value="$(find jsk_data)/large/2014_05_12_610_clothes.bag"/>
+    <arg name="rosbag_option" value="--clock -l"/>
+  </include>
+
+  <include file="$(find jsk_pcl_ros)/launch/calculate_normal.launch">
+    <arg name="input_point" value="/openni/depth_registered/points"/>
+    <arg name="voxel_grid_filter_limit_min" value="0.0"/>
+    <arg name="voxel_grid_filter_limit_max" value="5.0"/>
+    <arg name="voxel_grid_leaf_size" value="0.01"/>
+  </include>
+  
+
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find jsk_pcl_ros)/sample/rviz/2014_05_12_610_clothes.rviz"/>
+</launch>

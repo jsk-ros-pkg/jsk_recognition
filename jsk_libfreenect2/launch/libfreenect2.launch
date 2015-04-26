@@ -1,0 +1,84 @@
+<launch>
+  <!-- do not use rectified images, camera parameter is wrong... -->
+  <arg name="camera" default="camera" />
+  <arg name="manager" default="camera_nodelet_manager" />
+  <group ns="$(arg camera)">
+    <node pkg="nodelet" type="nodelet" args="manager" name="$(arg manager)" output="screen"/>
+    <node pkg="nodelet" type="nodelet" args="load jsk_libfreenect2/Driver /$(arg camera)/$(arg manager)"
+          name="driver">
+      <param name="rgb_camera_info_url" value="" />
+      <param name="depth_camera_info_url" value="" />
+      <remap from="depth/image_raw" to="depth/image_rect"/>
+      <remap from="ir/image_raw" to="ir/image_rect"/>
+    </node>
+    <group ns="rgb">
+      <node pkg="image_proc" type="image_proc" name="image_proc" output="screen"/>
+    </group>
+    <!-- <group ns="depth"> -->
+    <!--   <node pkg="nodelet" type="nodelet" args="load image_proc/rectify /$(arg camera)/$(arg manager)2" -->
+    <!--         output="screen" -->
+    <!--         name="depth_image_rect"> -->
+    <!--     <renmap from="image_mono" to="image_raw" /> -->
+    <!--   </node> -->
+    <!-- </group> -->
+    <!-- <group ns="ir"> -->
+    <!--   <node pkg="nodelet" type="nodelet" args="load image_proc/rectify /$(arg camera)/$(arg manager)2" -->
+    <!--         output="screen" -->
+    <!--         name="ir_image_rect"> -->
+    <!--     <remap from="image_mono" to="image_raw" /> -->
+    <!--   </node> -->
+    <!-- </group> -->
+
+    <!-- registerd images -->
+    
+    <!-- original registered_image -->
+    <node name="depth_image_register"
+          pkg="nodelet" type="nodelet"
+          args="load depth_image_proc/register /$(arg camera)/$(arg manager)"
+          output="screen">
+      <remap from="rgb/camera_info" to="rgb_1_2/camera_info" />
+    </node>
+
+    <!-- non registerd points -->
+    <group ns="depth">
+      <node pkg="nodelet" type="nodelet"
+            args="load depth_image_proc/point_cloud_xyz /$(arg camera)/$(arg manager)"
+            output="screen"
+            name="depth_point_xyz">
+      </node>
+    </group>
+    
+    <node pkg="nodelet" type="nodelet" args="load depth_image_proc/point_cloud_xyzrgb /$(arg camera)/$(arg manager)" output="screen"
+          name="depth_point_xyzrgb">
+    </node>
+    <node pkg="tf" type="static_transform_publisher" name="freenect_tf_frame"
+          args="0.053018 0.022749 0.026190 0.010748 -0.000448 0.004077 0.999934 openni_rgb_optical_frame openni_depth_optical_frame 10" />
+  </group>
+  <!-- 0.5 rgb -->
+  <include file="$(find resized_image_transport)/launch/resized_image_transport.launch">
+    <arg name="CAMERA_NS" value="$(arg camera)" />
+    <arg name="INPUT_IMAGE" value="/$(arg camera)/rgb/image_rect_color" />
+    <arg name="OUTPUT_IMAGE" value="/$(arg camera)/rgb_1_2/image_rect_color" />
+    <arg name="NAME" value="rgb_1_2" />
+    <arg name="RESIZE_RATE" value="0.5" />
+  </include>
+
+  <!-- 0.25 rgb -->
+  <include file="$(find resized_image_transport)/launch/resized_image_transport.launch">
+    <arg name="CAMERA_NS" value="$(arg camera)" />
+    <arg name="INPUT_IMAGE" value="/$(arg camera)/rgb/image_rect_color" />
+    <arg name="OUTPUT_IMAGE" value="/$(arg camera)/rgb_1_4/image_rect_color" />
+    <arg name="NAME" value="rgb_1_4" />
+    <arg name="RESIZE_RATE" value="0.25" />
+  </include>
+
+  <!-- 0.125 rgb -->
+  <include file="$(find resized_image_transport)/launch/resized_image_transport.launch">
+    <arg name="CAMERA_NS" value="$(arg camera)" />
+    <arg name="INPUT_IMAGE" value="/$(arg camera)/rgb/image_rect_color" />
+    <arg name="OUTPUT_IMAGE" value="/$(arg camera)/rgb_1_8/image_rect_color" />
+    <arg name="NAME" value="rgb_1_8" />
+    <arg name="RESIZE_RATE" value="0.125" />
+  </include>
+  
+</launch>

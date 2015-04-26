@@ -1,0 +1,210 @@
+<launch>
+  <remap from="/diagnostics" to="/diagnostics_pcl" />
+  <remap from="/diagnostics_agg" to="/diagnostics_pcl_agg" />
+  <arg name="BASE_FRAME_ID" default="odom" />
+  <arg name="RUN_SELF_FILTER" default="false"/>
+  <arg name="SELF_FILTER_PARAM" default="$(find jsk_pr2_startup)/jsk_pr2_sensors/tilt_self_filter.yaml" />
+  <arg name="JOINT_STATIC_FILTER" default="false" />
+  <arg name="FILTER_JOINT_PARAM" value="$(find jsk_pcl_ros)/config/pr2_sensor_joint.yaml" />
+  <arg name="INPUT" default="/move_group/filtered_cloud" />
+  <arg name="ICP_REGISTRATION" default="false" />
+  <arg name="MODEL_FILE" default="$(find jsk_data)/pcds/hand_drill_kinect.pcd" />
+  <arg name="LAUNCH_MANAGER" default="true" />
+  <arg name="MANAGER" default="organized_multi_plane_manager" />
+  <arg name="ESTIMATE_OCCLUSION" default="false" />
+  <arg name="COLOR_HISTOGRAM" default="false" />
+  <arg name="HANDLE_ESTIMATOR" default="false" />
+  <arg name="MACHINE" default="localhost"/>
+  <arg name="GDB" default="false" />
+  <arg name="SAVE_SELECTED_CLOUD" default="false" />
+  <machine name="localhost" address="localhost" />
+  <group if="$(arg LAUNCH_MANAGER)">
+    <node pkg="nodelet" type="nodelet" name="$(arg MANAGER)"
+          args="manager"
+          machine="$(arg MACHINE)"
+          if="$(arg GDB)"
+          launch-prefix="xterm -e gdb --args"
+          output="screen"/>
+    <node pkg="nodelet" type="nodelet" name="$(arg MANAGER)"
+          args="manager"
+          machine="$(arg MACHINE)"
+          unless="$(arg GDB)"
+          output="screen"/>
+  </group>
+
+  
+  <node pkg="nodelet" type="nodelet" name="organized_pass_through_x"
+        args="load jsk_pcl/OrganizedPassThrough /$(arg MANAGER)">
+    <remap from="~input" to="$(arg INPUT)" />
+    <!-- suppose QVGA -->
+    <rosparam>
+      filter_field: 0
+      min_index: 40
+      max_index: 280
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="organized_pass_through_y"
+        args="load jsk_pcl/OrganizedPassThrough /$(arg MANAGER)">
+    <remap from="~input" to="organized_pass_through_x/output" />
+    <!-- suppose QVGA -->
+    <rosparam>
+      filter_field: 1
+      min_index: 40
+      max_index: 200
+    </rosparam>
+  </node>
+    
+  <node pkg="nodelet" type="nodelet" name="pass_through_z"
+        args="load pcl/PassThrough /$(arg MANAGER)">
+    <remap from="~input" to="organized_pass_through_y/output" />
+    <!-- suppose QVGA -->
+    <rosparam>
+      filter_field_name: z
+      filter_limit_min: 0
+      filter_limit_max: 1.9
+      keep_organized: true
+    </rosparam>
+  </node>
+  
+  <node pkg="nodelet" type="nodelet" name="input_relay"
+        machine="$(arg MACHINE)"
+        args="load jsk_topic_tools/Relay $(arg MANAGER)">
+    <!-- <remap from="~input" to="$(arg INPUT)" unless="$(arg RUN_SELF_FILTER)" /> -->
+    <remap from="~input" to="pass_through_z/output" />
+    <remap from="~input" to="openni_cloud_self_filter/cloud_out" if="$(arg RUN_SELF_FILTER)" />
+    <remap from="~output" to="~raw_output" if="$(arg JOINT_STATIC_FILTER)" />
+  </node>
+  
+  <node pkg="nodelet" type="nodelet" name="joint_static_filter"
+        if="$(arg JOINT_STATIC_FILTER)"
+        machine="$(arg MACHINE)"
+        args="load jsk_pcl/JointStateStaticFilter /$(arg MANAGER)">
+    <remap from="~input_joint_state" to="/joint_states" />
+    <remap from="~input" to="input_relay/raw_output"/>
+    <remap from="~output" to="input_relay/output" />
+    <rosparam command="load" file="$(arg FILTER_JOINT_PARAM)" />
+  </node>
+  
+  <node pkg="nodelet" type="nodelet" name="multi_plane_estimate"
+        machine="$(arg MACHINE)"
+        args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg MANAGER)"
+        clear_params="false">
+    <remap from="~input" to="input_relay/output"/>
+    <rosparam>
+      max_curvature: 0.01
+      estimate_normal: true
+      min_size: 100
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="footstep_polygon_publisher"
+        clear_params="true"
+        args="load jsk_pcl/StaticPolygonArrayPublisher /$(arg MANAGER)">
+    <remap from="~input" to="/camera_remote/depth_registered/points" />
+    <rosparam>
+      use_message: true
+      frame_ids: [RLEG_LINK5, LLEG_LINK5]
+      polygon_array: [[[0.188558, -0.127564, -0.10611],[-0.082795, -0.127564, -0.10611],[-0.082795, 0.057564, -0.10611], [0.188558, 0.057564, -0.10611]],
+                      [[0.188558, 0.127564, -0.10611],[-0.082795, 0.127564, -0.10611],[-0.082795, -0.057564, -0.10611], [0.188558, -0.057564, -0.10611]]]
+    </rosparam>
+  </node>
+
+  <!-- only use ground planes... -->
+  <node pkg="nodelet" type="nodelet" name="ground_wall_separator"
+        args="load jsk_pcl/PlaneReasoner /$(arg MANAGER)">
+    <remap from="~input" to="input_relay/output"/>
+    <remap from="~input_inliers" to="/multi_plane_estimate/output_refined"/>
+    <remap from="~input_coefficients" to="/multi_plane_estimate/output_refined_coefficients"/>
+    <remap from="~input_polygons" to="/multi_plane_estimate/output_refined_polygon"/>
+    <rosparam>
+      global_frame_id: odom
+    </rosparam>
+  </node>
+  
+  <node pkg="jsk_pcl_ros" type="environment_plane_modeling"
+        name="env_server" respawn="true"
+        output="screen">
+    <remap from="~input" to="transform_input/output" />
+    <remap from="~indices" to="/ground_wall_separator/output/horizontal/inliers" />
+    <remap from="~input_polygons" to="/estimated_plane_respected_to_odom/output_polygons" />
+    <remap from="~input_coefficients" to="/estimated_plane_respected_to_odom/output_coefficients" />
+    <remap from="~input_static_polygons" to="/footstep_respected_to_odom/output_polygons" />
+    <remap from="~input_static_coefficients" to="/footstep_respected_to_odom/output_coefficients" />
+    <rosparam>
+      plane_distance_threshold: 0.04
+      resolution_size: 0.02
+    </rosparam>
+  </node>
+
+  
+  <node pkg="nodelet" type="nodelet" name="footstep_respected_to_odom"
+        args="load jsk_pcl/PolygonArrayTransformer /$(arg MANAGER)">
+    <remap from="~input_polygons" to="footstep_polygon_publisher/output_polygons" />
+    <remap from="~input_coefficients" to="footstep_polygon_publisher/output_coefficients" />
+    <param name="frame_id" value="$(arg BASE_FRAME_ID)" />
+  </node>
+  <node pkg="nodelet" type="nodelet" name="transform_input"
+        machine="$(arg MACHINE)"
+        args="load jsk_pcl/TfTransformCloud $(arg MANAGER)">
+    <remap from="~input" to="input_relay/output" />
+    <param name="target_frame_id" value="$(arg BASE_FRAME_ID)" />
+  </node>
+  
+  <node pkg="nodelet" type="nodelet"
+        name="cluster_decomposer"
+        machine="$(arg MACHINE)"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)"
+        output="screen">
+    <remap from="~input" to="input_relay/output" />
+    <remap from="~target" to="/multi_plane_estimate/output" />
+    <rosparam>
+      publish_clouds: false
+      publish_tf: false
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        name="cluster_decomposer2"
+        machine="$(arg MACHINE)"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)"
+        output="screen">
+    <remap from="~input" to="input_relay/output" />
+    <remap from="~target" to="/multi_plane_estimate/output_nonconnected" />
+    <rosparam>
+      publish_clouds: false
+      publish_tf: false
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet"
+        name="plane_extraction"
+        machine="$(arg MACHINE)"
+        args="load jsk_pcl/MultiPlaneExtraction $(arg MANAGER)"
+        output="screen">
+    <remap from="~input" to="input_relay/output" />
+    <remap from="~indices" to="/multi_plane_estimate/output_refined" />
+    <remap from="~input_polygons" to="/multi_plane_estimate/output_refined_polygon" />
+    <remap from="~input_coefficients" to="/multi_plane_estimate/output_refined_coefficients" />
+  </node>
+  <node pkg="nodelet" type="nodelet" name="estimated_plane_respected_to_odom"
+          args="load jsk_pcl/PolygonArrayTransformer /$(arg MANAGER)">
+    <remap from="~input_polygons" to="ground_wall_separator/output/horizontal/polygons" />
+    <remap from="~input_coefficients" to="ground_wall_separator/output/horizontal/coefficients" />
+    <param name="frame_id" value="odom" />
+  </node>
+
+  <node pkg="diagnostic_aggregator" type="aggregator_node"
+        respawn="true"
+        name="pcl_diagnostic_aggregator">
+    <rosparam>
+      pub_rate: 1.0
+      analyzers:
+        recognition:
+          type: diagnostic_aggregator/GenericAnalyzer
+          path: Footstep Recognition
+          startswith: 'organized_multi_plane_manager'
+          timeout: 10
+    </rosparam>
+  </node>
+  <node pkg="rqt_robot_monitor" type="rqt_robot_monitor"
+        name="pcl_diagnostics_monitor" />
+</launch>

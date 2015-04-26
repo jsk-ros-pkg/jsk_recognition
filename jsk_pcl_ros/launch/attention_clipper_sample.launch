@@ -1,0 +1,24 @@
+<launch>
+  <node pkg="jsk_pcl_ros" type="attention_clipper" name="attention_clipper" output="screen">
+    <remap from="~input" to="/camera/rgb/camera_info" />
+    <rosparam>
+      use_multiple_attention: true
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="roi_clipper" name="roi_attention_clipper" output="screen">
+    <remap from="~input/image" to="/camera/rgb/image_rect_color" />
+    <remap from="~input/camera_info" to="attention_clipper/output" />
+  </node>
+  <node pkg="image_view" type="image_view" name="roi_image_view">
+    <remap from="image" to="roi_attention_clipper/output" />
+  </node>
+  <node pkg="image_view" type="image_view" name="mask_image_view">
+    <remap from="image" to="attention_clipper/output/mask" />
+  </node>
+  <node pkg="image_view" type="image_view" name="original_image_view">
+    <remap from="image" to="/camera/rgb/image_rect_color" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="attention_pose_set.py"
+        output="screen"
+        name="attention_pose_set" />
+</launch>

@@ -1,0 +1,71 @@
+<launch>
+  <arg name="CAMERA_FRAME_ID" default="/multisense/left_camera_optical_frame" />
+  <arg name="INPUT" default="/filtered_cloud/output" />
+  <arg name="INPUT_INFO" default="/multisense/left/camera_info" />
+  <arg name="IMU" default="/multisense/imu/imu_data" />
+  <arg name="LAUNCH_MANAGER" default="true" />
+  <arg name="MANAGER" default="icp_manager" />
+  <group if="$(arg LAUNCH_MANAGER)">
+    <node pkg="nodelet" type="nodelet" name="$(arg MANAGER)"
+          args="manager"
+          output="screen"/>
+  </group>
+  <node pkg="nodelet" type="nodelet" name="add_cluster"
+        args="load jsk_pcl/PointCloudToClusterPointIndices $(arg MANAGER)"
+        output="screen" >
+    <remap from="~input" to="$(arg INPUT)" />
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="icp_registration"
+        args="load jsk_pcl/ICPRegistration /$(arg MANAGER)">
+    <param name="align_box" value="true" />
+    <remap from="~input" to="$(arg INPUT)" />
+    <remap from="~input_box" to="/bounding_box" />
+    <remap from="~input_reference_array" to="pointcloud_server/output" />
+  </node>
+  <node pkg="nodelet" type="nodelet" name="pointcloud_server"
+          args="load jsk_pcl/PointcloudDatabaseServer /$(arg MANAGER)">
+    <rosparam subst_value="true">
+      models: ["$(find drc_task_common)/pcds/drill_full.pcd",
+      ]
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="polygon_transformer"
+        args="load jsk_pcl/PolygonArrayTransformer /$(arg MANAGER)">
+    <remap from="~input_polygons" to="/polygon_array"/>
+    <remap from="~input_coefficients" to="/model_coefficients_array" />
+    <param name="frame_id" value="$(arg CAMERA_FRAME_ID)" />
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        name="cluster_decomposer_one"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)"
+        output="screen">
+    <remap from="~input" to="$(arg INPUT)" />
+    <remap from="~target" to="/add_cluster/output" />
+    <remap from="~align_planes" to="ensynced_planes" />
+    <remap from="~align_planes_coefficients"
+           to="ensynced_planes_coefficients" />
+    <rosparam>
+      align_boxes: true
+      use_pca: true
+      publish_clouds: false
+      publish_tf: false
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="box_array_to_box.py"
+        name="box_array_to_box">
+    <remap from="bounding_box_array" to="/cluster_decomposer_one/boxes" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="calculate_polygon_from_imu.py"
+        name="calc_polygon">
+    <remap from="imu_data" to="$(arg IMU)" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="plane_time_ensync_for_recognition.py" name="time_ensync" >
+    <remap from="timer" to="$(arg INPUT)" />
+    <remap from="planes" to="polygon_transformer/output_polygons" />
+    <remap from="planes_coefficients"
+           to="polygon_transformer/output_coefficients" />
+  </node>
+</launch>
+
+

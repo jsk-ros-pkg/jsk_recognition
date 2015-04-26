@@ -1,0 +1,75 @@
+<!-- -*- mode: xml -*- -->
+<launch>
+  <!--
+  $ roslaunch openni_launch openni.launch    ;; start kinect camera
+  $ rosrun rqt_reconfigure rqt_reconfigure   ;; parameter settings
+  $ roslaunch jsk_pcl_ros rgb_color_filter.launch DEFAULT_NAMESPACE:=/camera/depth_registered INPUT:=points
+  ;; subscribe camera/depth_registered/rgb_output
+  ;; subscribe tf and find /target
+  -->
+  <arg name="INPUT" default="rgb_input"/>
+  <arg name="OUTPUT" default="rgb_output"/>
+  <arg name="CENTROID_FRAME" default="target"/>
+  <arg name="DEFAULT_NAMESPACE" default="RGB_color_filter"/>
+
+  <arg name="r_max" default="255" />
+  <arg name="r_min" default="0" />
+  <arg name="g_max" default="255" />
+  <arg name="g_min" default="0" />
+  <arg name="b_max" default="255" />
+  <arg name="b_min" default="0" />
+
+  <arg name="create_manager" default="true" />
+  <arg name="manager" default="rgb_filter_manager" />
+
+  <group ns="$(arg DEFAULT_NAMESPACE)">
+    <node if="$(arg create_manager)"
+          pkg="nodelet" type="nodelet" name="$(arg manager)"
+          args="manager" output="screen"/>
+    <node pkg="nodelet" type="nodelet" name="zfilter"
+          args="load pcl/PassThrough $(arg manager)" output="screen">
+      <remap from="~input" to="$(arg INPUT)" />
+      <rosparam>
+        filter_field_name: z
+        filter_limit_min: 0.0
+        filter_limit_max: 3.0
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="rgb_filter"
+          args="load jsk_pcl/RGBColorFilter $(arg manager)" output="screen">
+      <remap from="~input" to="zfilter/output" />
+      <remap from="~output" to="$(arg OUTPUT)" />
+      <rosparam>
+        use_indices: false
+      </rosparam>
+      <param name="r_limit_max" value="$(arg r_max)" />
+      <param name="r_limit_min" value="$(arg r_min)" />
+      <param name="g_limit_max" value="$(arg g_max)" />
+      <param name="g_limit_min" value="$(arg g_min)" />
+      <param name="b_limit_max" value="$(arg b_max)" />
+      <param name="b_limit_min" value="$(arg b_min)" />
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="euclidean_clustering"
+          args="load jsk_pcl/EuclideanClustering $(arg manager)" output="screen">
+      <remap from="~input" to="$(arg OUTPUT)" />
+      <rosparam>
+        tolerance: 0.02
+        min_size: 500
+      </rosparam>
+    </node>
+
+    <node pkg="nodelet" type="nodelet"
+          name="cluster_decomposer"
+          args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="$(arg OUTPUT)" />
+      <remap from="~target" to="euclidean_clustering/output" />
+      <rosparam>
+      </rosparam>
+    </node>
+
+    
+  </group>
+
+</launch>

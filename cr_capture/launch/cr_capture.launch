@@ -1,0 +1,11 @@
+<!-- -*- mode: xml -*- -->
+<launch>
+  <include file="$(find cr_capture)/launch/camera1394.launch"/>
+  <include file="$(find cr_capture)/launch/swissranger_sr4000.launch"/>
+  <include file="$(find cr_capture)/launch/cr_node.launch"/>
+  <!-- add your external parameter -->
+  <!--
+  <node name="static_tf_publisher" pkg="tf" type="static_transform_publisher"
+	args="0.044259, 0.005629, -0.054134 -0.011721, 0.045505, 0.008159, 0.998862 /LEFT_CAMERA /SR4000 30" />
+  -->
+</launch>

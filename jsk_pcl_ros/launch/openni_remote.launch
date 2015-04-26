@@ -1,0 +1,112 @@
+<launch>
+  <arg name="camera" default="camera" />
+  <arg name="camera_remote" default="camera_remote" />
+  <arg name="rgb_camera_info_url"   default="" />
+  <arg name="depth_camera_info_url" default="" />
+
+  <include file="$(find openni_launch)/launch/openni.launch">
+    <arg name="publish_tf" value="false" />
+    <arg name="camera" value="$(arg camera_remote)" />
+    <arg name="depth_registration" value="true" />
+    <arg name="load_driver" value="false" />
+    <arg name="rgb_camera_info_url" value="$(arg rgb_camera_info_url)" />
+    <arg name="depth_camera_info_url" value="$(arg depth_camera_info_url)" />
+  </include>
+  
+  <!-- half points -->
+  <group ns="$(arg camera_remote)">
+    <node pkg="nodelet"
+          type="nodelet"
+          name="depth_registered_half"
+          args="load jsk_pcl/ResizePointsPublisher $(arg camera_remote)_nodelet_manager">
+      <remap from="~input" to="depth_registered/points" />
+      <remap from="~output" to="~points" />
+      <param name="step_x" value="2" />
+      <param name="step_y" value="2" />
+    </node>
+    <node pkg="nodelet"
+          type="nodelet"
+          name="depth_half"
+          args="load jsk_pcl/ResizePointsPublisher $(arg camera_remote)_nodelet_manager">
+      <remap from="~input" to="depth/points" />
+      <remap from="~output" to="~points" />
+      <param name="not_use_rgb" value="true" />
+      <param name="step_x" value="2" />
+      <param name="step_y" value="2" />
+    </node>
+    <node pkg="nodelet"
+          type="nodelet"
+          name="depth_registered_quater"
+          args="load jsk_pcl/ResizePointsPublisher $(arg camera_remote)_nodelet_manager">
+      <remap from="~input" to="depth_registered/points" />
+      <remap from="~output" to="~points" />
+      <param name="step_x" value="4" />
+      <param name="step_y" value="4" />
+    </node>
+    <node pkg="nodelet"
+          type="nodelet"
+          name="depth_quater"
+          args="load jsk_pcl/ResizePointsPublisher $(arg camera_remote)_nodelet_manager">
+      <remap from="~input" to="depth/points" />
+      <remap from="~output" to="~points" />
+      <param name="not_use_rgb" value="true" />
+      <param name="step_x" value="4" />
+      <param name="step_y" value="4" />
+    </node>
+    <!--            -->
+    <!-- resize rgb -->
+    <!--            -->
+    <node pkg="nodelet"
+          type="nodelet"
+          name="rgb_half"
+          args="load resized_image_transport/ImageResizer $(arg camera_remote)_nodelet_manager">
+      <param name="resize_scale_x" value="0.5" />
+      <param name="resize_scale_y" value="0.5" />
+      <remap from="~input/image" to="rgb/image_rect_color" />
+      <remap from="~output/image" to="~image_rect_color" />
+    </node>
+    <node pkg="nodelet"
+          type="nodelet"
+          name="rgb_quater"
+          args="load resized_image_transport/ImageResizer $(arg camera_remote)_nodelet_manager">
+      <param name="resize_scale_x" value="0.25" />
+      <param name="resize_scale_y" value="0.25" />
+      <remap from="~input/image" to="rgb/image_rect_color" />
+      <remap from="~output/image" to="~image_rect_color" />
+    </node>
+  </group>
+
+  <!-- camera_info and image relaying -->
+  <group ns="$(arg camera_remote)">
+    <group ns="rgb">
+      <node pkg="topic_tools"
+	    type="relay"
+	    name="relay_camera_info"
+	    args="/$(arg camera)/rgb/camera_info /$(arg camera_remote)/rgb/camera_info" />
+      <node pkg="topic_tools"
+	    type="relay"
+	    name="relay_image_raw"
+	    args="/$(arg camera)/rgb/image_raw /$(arg camera_remote)/rgb/image_raw" />
+    </group>
+    <group ns="depth">
+      <node pkg="topic_tools"
+	    type="relay"
+	    name="relay_camera_info"
+	    args="/$(arg camera)/depth/camera_info /$(arg camera_remote)/depth/camera_info" />
+      <node pkg="topic_tools"
+	    type="relay"
+	    name="relay_image_raw"
+	    args="/$(arg camera)/depth/image_raw /$(arg camera_remote)/depth/image_raw" />
+    </group>
+    <group ns="depth_registered">
+      <node pkg="topic_tools"
+	    type="relay"
+	    name="relay_camera_info"
+	    args="/$(arg camera)/depth_registered/camera_info /$(arg camera_remote)/depth_registered/camera_info " />
+      <node pkg="topic_tools"
+	    type="relay"
+	    name="relay_image_raw"
+            args="/$(arg camera)/depth_registered/image_raw /$(arg camera_remote)/depth_registered/image_raw" />
+    </group>
+  </group>
+</launch>

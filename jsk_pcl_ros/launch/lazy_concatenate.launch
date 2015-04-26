@@ -1,0 +1,126 @@
+<launch>
+  <node name="lazy_manager"
+        pkg="nodelet"
+        type="nodelet" args="manager" output="screen"/>
+  <arg name="INPUT" default="/points" />
+  <group ns="lazy">
+    <!-- separate the pointcloud into 10 pointclouds -->
+    <node name="splitter0" pkg="nodelet" type="nodelet"
+          args="load pcl/PassThrough /lazy_manager"
+          output="screen" clear_params="true">
+      <remap from="~input" to="$(arg INPUT)" />
+      <rosparam>
+        filter_field_name: x
+        filter_limit_min: 0.0
+        filter_limit_max: 1.0
+      </rosparam>
+    </node>
+    <node name="splitter1" pkg="nodelet" type="nodelet"
+          args="load pcl/PassThrough /lazy_manager"
+          output="screen" clear_params="true">
+      <remap from="~input" to="$(arg INPUT)" />
+      <rosparam>
+        filter_field_name: x
+        filter_limit_min: 1.0
+        filter_limit_max: 2.0
+      </rosparam>
+    </node>
+    <node name="splitter3" pkg="nodelet" type="nodelet"
+          args="load pcl/PassThrough /lazy_manager"
+          output="screen" clear_params="true">
+      <remap from="~input" to="$(arg INPUT)" />
+      <rosparam>
+        filter_field_name: x
+        filter_limit_min: 2.0
+        filter_limit_max: 3.0
+      </rosparam>
+    </node>
+    <node name="splitter4" pkg="nodelet" type="nodelet"
+          args="load pcl/PassThrough /lazy_manager"
+          output="screen" clear_params="true">
+      <remap from="~input" to="$(arg INPUT)" />
+      <rosparam>
+        filter_field_name: x
+        filter_limit_min: 3.0
+        filter_limit_max: 4.0
+      </rosparam>
+    </node>
+    <node name="splitter5" pkg="nodelet" type="nodelet"
+          args="load pcl/PassThrough /lazy_manager"
+          output="screen" clear_params="true">
+      <remap from="~input" to="$(arg INPUT)" />
+      <rosparam>
+        filter_field_name: x
+        filter_limit_min: 4.0
+        filter_limit_max: 5.0
+      </rosparam>
+    </node>
+    <node name="splitter6" pkg="nodelet" type="nodelet"
+          args="load pcl/PassThrough /lazy_manager"
+          output="screen" clear_params="true">
+      <remap from="~input" to="$(arg INPUT)" />
+      <rosparam>
+        filter_field_name: x
+        filter_limit_min: 5.0
+        filter_limit_max: 6.0
+      </rosparam>
+    </node>
+    <node name="splitter7" pkg="nodelet" type="nodelet"
+          args="load pcl/PassThrough /lazy_manager"
+          output="screen" clear_params="true">
+      <remap from="~input" to="$(arg INPUT)" />
+      <rosparam>
+        filter_field_name: x
+        filter_limit_min: 6.0
+        filter_limit_max: 7.0
+      </rosparam>
+    </node>
+    <node name="splitter8" pkg="nodelet" type="nodelet"
+          args="load pcl/PassThrough /lazy_manager"
+          output="screen" clear_params="true">
+      <remap from="~input" to="$(arg INPUT)" />
+      <rosparam>
+        filter_field_name: x
+        filter_limit_min: 7.0
+        filter_limit_max: 8.0
+      </rosparam>
+    </node>
+    <node name="splitter9" pkg="nodelet" type="nodelet"
+          args="load pcl/PassThrough /lazy_manager"
+          output="screen" clear_params="true">
+      <remap from="~input" to="$(arg INPUT)" />
+      <rosparam>
+        filter_field_name: x
+        filter_limit_min: 8.0
+        filter_limit_max: 9.0
+      </rosparam>
+    </node>
+
+    <node name="lazy_nodelet" pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/LazyConcatenater /lazy_manager"
+          output="screen" clear_params="true">
+      <rosparam>
+        enable_input_topic0: true
+        enable_input_topic1: true
+        enable_input_topic2: true
+        enable_input_topic3: true
+        enable_input_topic4: true
+        enable_input_topic5: true
+        enable_input_topic6: true
+        enable_input_topic7: true
+        enable_input_topic8: true
+        enable_input_topic9: true
+        input_topic0: "/lazy/splitter0/output"
+        input_topic1: "/lazy/splitter1/output"
+        input_topic2: "/lazy/splitter2/output"
+        input_topic3: "/lazy/splitter3/output"
+        input_topic4: "/lazy/splitter4/output"
+        input_topic5: "/lazy/splitter5/output"
+        input_topic6: "/lazy/splitter6/output"
+        input_topic7: "/lazy/splitter7/output"
+        input_topic8: "/lazy/splitter8/output"
+        input_topic9: "/lazy/splitter9/output"
+      </rosparam>
+    </node>
+  </group>
+</launch>

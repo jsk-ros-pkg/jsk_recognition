@@ -1,0 +1,10 @@
+<launch>
+  <node pkg="usb_cam" type="usb_cam_node" name="usb_cam" />
+  <node pkg="jsk_perception" type="hough_circles" name="hough_circles">
+    <remap from="image" to="/usb_cam/image_raw" />
+    <remap from="~image_marker" to="/image_marker" />
+  </node>
+  <node pkg="image_view2" type="image_view2" name="image_view2">
+    <remap from="image" to="/usb_cam/image_raw" />
+  </node>
+</launch>

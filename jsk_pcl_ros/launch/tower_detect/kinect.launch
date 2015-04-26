@@ -1,0 +1,10 @@
+<launch>
+  
+  <include file="$(find openni_launch)/launch/openni.launch">
+    <arg name="depth_registration" value="true"/>
+  </include>
+  <group if="false">
+    <node name="$(anon rviz)" pkg="rviz" type="rviz">
+    </node>
+  </group>
+</launch>

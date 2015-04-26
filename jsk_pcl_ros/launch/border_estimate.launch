@@ -1,0 +1,32 @@
+<launch>
+  <node pkg="jsk_pcl_ros" type="tf_transform_cloud" name="laser_cloud_from_camera_frame">
+    <remap from="~input" to="/full_cloud2" />
+    <rosparam>
+      target_frame_id: multisense/left_camera_optical_frame
+    </rosparam>
+  </node>
+
+  <node pkg="jsk_pcl_ros" type="border_estimator" name="border_estimator"
+        output="screen">
+    <remap from="~input" to="/laser_cloud_from_camera_frame/output" />
+    <remap from="~input_camera_info" to="/camera/rgb/camera_info" if="false"/>
+    <rosparam>
+      model_type: "laser"
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="border_points"
+        args="standalone pcl/ExtractIndices">
+    <remap from="~input" to="/border_estimator/output_cloud" />
+    <remap from="~indices" to="border_estimator/output_border_indices" />
+  </node>
+  <node pkg="nodelet" type="nodelet" name="veil_points"
+        args="standalone pcl/ExtractIndices">
+    <remap from="~input" to="/border_estimator/output_cloud" />
+    <remap from="~indices" to="border_estimator/output_veil_indices" />
+  </node>
+  <node pkg="nodelet" type="nodelet" name="shadow_points"
+        args="standalone pcl/ExtractIndices">
+    <remap from="~input" to="/border_estimator/output_cloud" />
+    <remap from="~indices" to="border_estimator/output_shadow_indices" />
+  </node>
+</launch>

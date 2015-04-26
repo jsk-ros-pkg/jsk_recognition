@@ -1,0 +1,30 @@
+<launch>
+  <node pkg="jsk_pcl_ros" type="static_polygon_array_publisher"
+        name="static_polygon_array_publisher">
+    <rosparam>
+      use_periodic: true
+      frame_ids: [odom, odom2]
+      polygon_array: [[[0.5188558, -0.5127564, -0.0],[-0.5082795, -0.5127564, 0.0],[-0.5082795, 0.5057564, 0.0], [0.5188558, 0.5057564, 0.0]],
+                      [[0.5188558, 0.5127564, 1.0],[-0.5082795, 0.5127564, 1.0],[-0.5082795, -0.5057564, 1.0], [0.5188558, -0.5057564, 1.0]]]
+    </rosparam>
+  </node>
+
+  <node pkg="jsk_pcl_ros" type="snapit"
+        name="snapit" output="screen">
+    <remap from="~input/polygons" to="static_polygon_array_publisher/output_polygons" />
+    <remap from="~input/polygon_coefficients"
+           to="static_polygon_array_publisher/output_coefficients" />
+  </node>
+  <node pkg="tf" type="static_transform_publisher"
+        name="static_transform_publisher"
+        args="0 0 1 0 0.2 0 odom2 odom 10">
+  </node>
+  <node pkg="jsk_pcl_ros" type="snapit_sample_pose_publisher.py"
+        name="snapit_sample_pose_publisher" if="false"/>
+  <node pkg="jsk_interactive_marker" type="marker_6dof" name="marker">
+    <rosparam>
+      frame_id: odom
+    </rosparam>
+    <remap from="~pose" to="snapit/input/convex_align" />
+  </node>
+</launch>

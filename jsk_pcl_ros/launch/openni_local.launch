@@ -1,0 +1,9 @@
+<launch>
+  <arg name="rgb_camera_info_url"   default="" />
+  <arg name="depth_camera_info_url" default="" />
+  <include file="$(find openni_launch)/launch/openni.launch">
+    <arg name="depth_registration" value="true" />
+    <arg name="rgb_camera_info_url" value="$(arg rgb_camera_info_url)" />
+    <arg name="depth_camera_info_url" value="$(arg depth_camera_info_url)" />
+  </include>
+</launch>

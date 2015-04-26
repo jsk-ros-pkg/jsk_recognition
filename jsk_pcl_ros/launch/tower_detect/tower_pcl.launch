@@ -1,0 +1,93 @@
+<launch>
+  <!-- nodeletの名前は/camera_nodelet_manager -->
+  <arg name="manager" default="/camera_nodelet_manager" />
+  <arg name="input_point" default="/camera/depth_registered/points" />
+  <!-- 注目する領域の点群だけ抜き出す -->
+  <group ns="pcl_nodelet">
+    <node pkg="nodelet" type="nodelet"
+          name="passthrough_z"
+          args="load pcl/PassThrough $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="$(arg input_point)" />
+      <rosparam>
+        filter_field_name: z
+        filter_limit_min: 1.2
+        #filter_limit_max: 1.5
+        filter_limit_max: 1.85
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="passthrough_y"
+          args="load pcl/PassThrough $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="/pcl_nodelet/passthrough_z/output" />
+      <rosparam>
+        filter_field_name: y
+        filter_limit_min: -0.4
+        filter_limit_max: 0.0
+        #filter_limit_max: 0.4
+     </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="passthrough_x"
+          args="load pcl/PassThrough $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="/pcl_nodelet/passthrough_y/output" />
+      <rosparam>
+        filter_field_name: x
+        filter_limit_min: -0.25
+        filter_limit_max: 0.25
+      </rosparam>
+    </node>
+
+    <node pkg="nodelet" type="nodelet"
+          name="clustering"
+          args="load jsk_pcl/EuclideanClustering $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="/pcl_nodelet/passthrough_x/output" />
+      <rosparam>
+        min_size: 500
+      </rosparam>
+    </node>
+
+   <node pkg="nodelet" type="nodelet"
+          name="cluster_decomposer"
+          args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="/pcl_nodelet/passthrough_x/output" />
+      <remap from="~target" to="/pcl_nodelet/clustering/output" />
+      <rosparam>
+      </rosparam>
+    </node>
+    
+
+    <node pkg="nodelet" type="nodelet"
+          name="centroid_publisher00"
+          args="load jsk_pcl/CentroidPublisher $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="/pcl_nodelet/cluster_decomposer/output00" />
+      <rosparam>
+        frame: cluster00
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="centroid_publisher01"
+          args="load jsk_pcl/CentroidPublisher $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="/pcl_nodelet/cluster_decomposer/output01" />
+      <rosparam>
+        frame: cluster01
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="centroid_publisher02"
+          args="load jsk_pcl/CentroidPublisher $(arg manager)"
+          output="screen" clear_params="true">
+      <remap from="~input" to="/pcl_nodelet/cluster_decomposer/output02" />
+      <rosparam>
+        frame: cluster02
+      </rosparam>
+    </node>
+
+  </group>                      <!-- pcl_nodelet -->
+</launch>

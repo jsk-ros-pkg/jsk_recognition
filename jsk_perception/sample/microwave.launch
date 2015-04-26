@@ -1,0 +1,28 @@
+<launch>
+  <!-- for kinect camera -->
+  <!--start sift on kinect (faked narrow left) -->
+  <group ns="/openni/rgb">
+  <node name="throttle" pkg="topic_tools"
+        type="throttle" args="messages image_rect 2.0"/>
+
+  <node name="sift" pkg="imagesift" type="imagesift"
+        launch-prefix="nice -n +10">
+    <remap from="image" to="image_rect_throttle" />
+  </node>
+
+  <node name="image_vieww" pkg="image_view"
+        type="image_view" output="screen" >
+    <remap from="image" to="microwave_range/debug_image" />
+  </node>
+
+  <node pkg="jsk_perception" type="point_pose_extractor"
+        name="microwave_range">
+    <param name="template_filename" value="$(find jsk_perception)/sample/73b1-microwave.png" />
+    <param name="window_name" value="microwave_range" /> <!-- name of type -->
+    <param name="object_width" value="0.084" />
+    <param name="object_height" value="0.22" />
+    <param name="viewer_window" value="true" />
+    <remap from="ObjectDetection" to="/ObjectDetection" />
+  </node>
+  </group>
+</launch>

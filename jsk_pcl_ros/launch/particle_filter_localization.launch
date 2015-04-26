@@ -1,0 +1,49 @@
+<launch>
+  <node pkg="jsk_pcl_ros" type="tf_transform_cloud" name="full_laser_cloud_from_root">
+    <remap from="~input" to="/full_cloud2" />
+    <rosparam>
+      target_frame_id: multisense/head_root
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="tf_transform_cloud" name="scan_cloud_from_root">
+    <remap from="~input" to="/multisense/lidar_scan_cloud_filtered" />
+    <rosparam>
+      target_frame_id: multisense/head_root
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="downsampled_full_cloud"
+        args="standalone pcl/VoxelGrid">
+    <remap from="~input" to="full_laser_cloud_from_root/output" />
+    <rosparam>
+      leaf_size: 0.01
+      filter_limit_min: -1000
+      filter_limit_max: 1000
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="downsampled_scan"
+        args="standalone pcl/VoxelGrid">
+    <remap from="~input" to="scan_cloud_from_root/output" />
+    <rosparam>
+      leaf_size: 0.01
+      filter_limit_min: -1000
+      filter_limit_max: 1000
+    </rosparam>
+  </node>
+
+  <!-- need to downsample? -->
+  <node pkg="jsk_topic_tools" type="snapshot" name="full_cloud_snapshot">
+    <remap from="~input" to="downsampled_full_cloud/output" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="particle_filter_tracking" name="pfilter_localization" output="screen"
+        alaunch-prefix="xterm -e gdb --args">
+    <remap from="~input" to="downsampled_scan/output" />
+    <remap from="~renew_model" to="full_cloud_snapshot/output" />
+    <rosparam>
+      not_use_reference_centroid: true
+      use_hsv: false
+      reversed: true
+      particle_num: 1000
+      max_distance: 1.0
+    </rosparam>
+  </node>
+</launch>

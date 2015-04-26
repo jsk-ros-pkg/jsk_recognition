@@ -1,0 +1,90 @@
+<launch>
+  <arg name="USE_HEAD_POINTCLOUD" default="true" />
+  <arg name="USE_LHAND_POINTCLOUD" default="true" />
+  <arg name="USE_RHAND_POINTCLOUD" default="true" />
+
+  <arg name="HEAD_SELECTED" default="/laser/full_cloud2_raw_selected"/>
+  <arg name="HEAD_TOPIC" default="['/laser/full_cloud2_raw']"/>
+
+  <arg name="LHAND_SELECTED" default="/sandia_hands/l_hand/points2_selected"/>
+  <arg name="LHAND_TOPIC" default="/sandia_hands/l_hand/points2_dummy /sandia_hands/l_hand/points2"/>
+
+  <arg name="RHAND_SELECTED" default="/sandia_hands/r_hand/points2_selected"/>
+  <arg name="RHAND_TOPIC" default="/sandia_hands/r_hand/points2_dummy /sandia_hands/r_hand/points2"/>
+
+  <arg name="BASE_FRAME" default="pelvis" />
+  <arg name="HEAD_NODELET_MANAGER" default="/pointcloud_roi/pcl_roi_robot_manager"/>
+
+  <arg name="GDB" default="false" />
+
+  <group ns="pointcloud_roi">
+    <!-- we will have add_grid at /pointcloud_roi/add_grid -->
+    <!-- mux -->
+    <node if="$(arg USE_HEAD_POINTCLOUD)"
+	  pkg="nodelet" type="nodelet"
+          name="head_pointcloud_mux"
+          args="load jsk_topic_tools/MUX $(arg HEAD_NODELET_MANAGER)"
+          output="screen" clear_params="true">
+      <rosparam subst_value="True">
+        topics: $(arg HEAD_TOPIC)
+      </rosparam>
+      <remap from="~output" to="$(arg HEAD_SELECTED)" />
+    </node>
+
+    <node if="$(arg USE_LHAND_POINTCLOUD)"
+	  pkg="topic_tools" type="mux" name="l_hand_pointcloud_mux"
+          args="$(arg LHAND_SELECTED) $(arg LHAND_TOPIC)">
+      <remap from="mux" to="l_hand_pointcloud_mux"/>
+    </node>
+    <node if="$(arg USE_RHAND_POINTCLOUD)"
+	  pkg="topic_tools" type="mux" name="r_hand_pointcloud_mux"
+          args="$(arg RHAND_SELECTED) $(arg RHAND_TOPIC)">
+      <remap from="mux" to="r_hand_pointcloud_mux"/>
+    </node>
+    
+    <!-- voxel_grid -->
+    <node pkg="nodelet" type="nodelet"
+          name="pcl_roi_robot_manager" args="manager"
+          launch-prefix="xterm -e gdb --args"
+          if="$(arg GDB)"
+          output="screen"/>
+    <node pkg="nodelet" type="nodelet"
+          name="pcl_roi_robot_manager" args="manager"
+          unless="$(arg GDB)"
+          output="screen"/>
+
+    <node if="$(arg USE_HEAD_POINTCLOUD)"
+	  pkg="nodelet" type="nodelet"
+          name="voxel_grid_manager"
+          args="load jsk_pcl/VoxelGridDownsampleManager $(arg HEAD_NODELET_MANAGER)"
+          output="screen" clear_params="true">
+      <param name="base_frame" value="$(arg BASE_FRAME)"/>
+      <param name="max_points" value="100"/>
+      <param name="rate" value="0.1"/>
+
+      <remap from="~input" to="$(arg HEAD_SELECTED)" />
+      <remap from="~add_grid" to="add_grid"/>
+    </node>
+    
+    <node if="$(arg USE_LHAND_POINTCLOUD)"
+	  pkg="nodelet" type="nodelet"
+          name="l_hand_voxel_grid_manager"
+          args="load jsk_pcl/VoxelGridDownsampleManager /pointcloud_roi/pcl_roi_robot_manager"
+          output="screen" clear_params="true">
+      <param name="base_frame" value="$(arg BASE_FRAME)"/>
+      <remap from="~input" to="$(arg LHAND_SELECTED)" />
+      <remap from="~add_grid" to="add_grid"/>
+    </node>
+
+    <node if="$(arg USE_RHAND_POINTCLOUD)"
+	  pkg="nodelet" type="nodelet"
+          name="r_hand_voxel_grid_manager"
+          args="load jsk_pcl/VoxelGridDownsampleManager /pointcloud_roi/pcl_roi_robot_manager"
+          output="screen" clear_params="true">
+      <param name="base_frame" value="$(arg BASE_FRAME)"/>
+      <remap from="~input" to="$(arg RHAND_SELECTED)" />
+      <remap from="~add_grid" to="add_grid"/>
+    </node>
+    
+  </group>
+</launch>

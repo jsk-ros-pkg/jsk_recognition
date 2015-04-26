@@ -37,7 +37,7 @@
 #include <sensor_msgs/image_encodings.h>
 #include <cv_bridge/cv_bridge.h>
 #include <pcl/kdtree/kdtree_flann.h>
-
+#include <pcl/filters/impl/filter.hpp>
 
 namespace jsk_pcl_ros
 {
@@ -140,10 +140,11 @@ namespace jsk_pcl_ros
         pcl::fromROSMsg(*point_cloud2_msg, *cloud);
         pcl::PointCloud<pcl::PointXYZ>::Ptr
           edge_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr
+          nan_removed_edge_cloud (new pcl::PointCloud<pcl::PointXYZ>);
 
         int width = image_msg->width;
         int height = image_msg->height;
-        bool points_exist = false;
         pcl::PointXYZ nan_point;
         nan_point.x = NAN;
         nan_point.y = NAN;
@@ -165,7 +166,6 @@ namespace jsk_pcl_ros
           for (size_t j = 0; j < mask.rows; j++) {
             for (size_t i = 0; i < mask.cols; i++) {
               if (mask.at<uchar>(j, i) != 0) {//if white
-                points_exist = true;
                 edge_cloud->points[j * width + i] = cloud->points[j * width + i];
               }
               else {
@@ -188,15 +188,15 @@ namespace jsk_pcl_ros
             for (size_t i = region_x_off_; i < x_end; i++) {
               if (i < image_msg->width && j <image_msg->height) {
                 if (mask.at<uchar>(j, i) != 0) {//if white
-                  points_exist = true;
                   edge_cloud->points[j * width + i] = cloud->points[j * width + i];
                 }
               }
             }
           }
         }
-
-        if (points_exist) {
+        std::vector<int> indices;
+        pcl::removeNaNFromPointCloud (*edge_cloud, *nan_removed_edge_cloud, indices);
+        if (nan_removed_edge_cloud->points.size() != 0) {
           cv::Mat mask_image = cv::Mat::zeros(height, width, CV_8UC1);
           pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
           kdtree.setInputCloud(edge_cloud);

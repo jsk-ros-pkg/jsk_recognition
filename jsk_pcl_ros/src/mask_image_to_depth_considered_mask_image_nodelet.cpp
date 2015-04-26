@@ -46,6 +46,7 @@ namespace jsk_pcl_ros
     DiagnosticNodelet::onInit();
     pnh_->param("approximate_sync", approximate_sync_, false);
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+    applypub_ = advertise<sensor_msgs::Image>(*pnh_, "applyoutput", 1);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
@@ -214,6 +215,22 @@ namespace jsk_pcl_ros
                                          sensor_msgs::image_encodings::MONO8,
                                          mask_image);
           pub_.publish(mask_bridge.toImageMsg());
+          if (use_mask_region_ == false || region_width_ == 0 | region_height_ == 0) {
+            applypub_.publish(mask_bridge.toImageMsg());
+          }
+          else {
+            int min_x = region_x_off_;
+            int min_y = region_y_off_;
+            int max_x = region_width_ + region_x_off_ -1;
+            int max_y = region_height_ + region_y_off_ -1;
+            NODELET_INFO("minx:%d miny:%d maxx:%d maxy:%d", min_x, min_y, max_x, max_y);
+            cv::Rect region = cv::Rect(min_x, min_y, std::max(max_x - min_x, 0), std::max(max_y - min_y, 0));
+            cv::Mat clipped_mask_image = mask_image(region);
+            cv_bridge::CvImage clipped_mask_bridge(point_cloud2_msg->header,
+                                           sensor_msgs::image_encodings::MONO8,
+                                           clipped_mask_image);
+            applypub_.publish(clipped_mask_bridge.toImageMsg());
+          }
         }
       }
       else {
@@ -256,6 +273,22 @@ namespace jsk_pcl_ros
                                        sensor_msgs::image_encodings::MONO8,
                                        tmp_mask);
         pub_.publish(mask_bridge.toImageMsg());
+        if (use_mask_region_ == false || region_width_ == 0 | region_height_ == 0) {
+          applypub_.publish(mask_bridge.toImageMsg());
+        }
+        else {
+          int min_x = region_x_off_;
+          int min_y = region_y_off_;
+          int max_x = region_width_ + region_x_off_ -1;
+          int max_y = region_height_ + region_y_off_ -1;
+          cv::Rect region = cv::Rect(min_x, min_y, std::max(max_x - min_x, 0), std::max(max_y - min_y, 0));
+          cv::Mat clipped_mask_image = tmp_mask (region);
+          NODELET_INFO("minx:%d miny:%d maxx:%d maxy:%d", min_x, min_y, max_x, max_y);
+          cv_bridge::CvImage clipped_mask_bridge(point_cloud2_msg->header,
+                                                 sensor_msgs::image_encodings::MONO8,
+                                                 clipped_mask_image);
+          applypub_.publish(clipped_mask_bridge.toImageMsg());
+        }
       }
     }
     else {

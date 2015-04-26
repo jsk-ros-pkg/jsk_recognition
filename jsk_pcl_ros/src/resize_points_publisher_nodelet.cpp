@@ -77,7 +77,8 @@ namespace jsk_pcl_ros
         }
       }
       int surface_per = ((double) cnt) / (maskwidth * maskheight) * 100;
-      step_x_ = surface_per /10;
+      // step_x_ = surface_per /10;
+      step_x_ = sqrt(surface_per);
       if (step_x_ < 1) {
         step_x_ = 1;
       }

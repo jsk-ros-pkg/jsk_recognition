@@ -12,6 +12,7 @@ add_message_files(
   ParallelEdge.msg
   TimeRange.msg
   Rect.msg
+  RectArray.msg
   SparseOccupancyGridCell.msg
   Circle2DArray.msg
   BoundingBox.msg

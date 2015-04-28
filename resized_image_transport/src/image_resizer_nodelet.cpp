@@ -13,9 +13,10 @@ namespace resized_image_transport
   }
 
   void ImageResizer::initReconfigure() {
+    reconfigure_server_ = boost::make_shared <dynamic_reconfigure::Server<ImageResizerConfig> > (pnh);
     ReconfigureServer::CallbackType f
       = boost::bind(&ImageResizer::config_cb, this, _1, _2);
-    reconfigure_server_.setCallback(f);
+    reconfigure_server_->setCallback(f);
   }
 
   void ImageResizer::initParams() {

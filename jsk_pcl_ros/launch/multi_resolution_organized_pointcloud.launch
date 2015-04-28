@@ -1,10 +1,13 @@
 <launch>
   <arg name="NAMESPACE" default="multiresolution_pointcloud" />
   <arg name="INPUT" default="/multisense/organized_image_points2_color" />
+  <arg name="INPUT_LEFT_IMAGE" default="/multisense/left/image_rect_color" />
+  <arg name="INPUT_DEPTH" default="/multisense/depth" />
   <arg name="RUN_MANAGER" default="true" />
   <arg name="MANAGER" default="manager" />
   <group ns="$(arg NAMESPACE)">
     <node pkg="nodelet" type="nodelet" name="manager" args="$(arg MANAGER)" if="$(arg RUN_MANAGER)"/>
+    <!-- PointClouds -->
     <node pkg="nodelet" type="nodelet" name="resize_1_1"
           args="load jsk_topic_tools/Relay $(arg MANAGER)">
       <remap from="~input" to="$(arg INPUT)" />
@@ -37,6 +40,85 @@
         step_y: 8
       </rosparam>
     </node>
+    <!-- Images -->
+    <group ns="resize_1_1">
+      <node pkg="nodelet" type="nodelet" name="left_resizer"
+            args="load jsk_topic_tools/Relay $(arg MANAGER)">
+        <remap from="~input" to="$(arg INPUT_LEFT_IMAGE)" />
+        <remap from="~output" to="left/image_rect_color" />
+      </node>
+      <node pkg="nodelet" type="nodelet" name="depth_resizer"
+            args="load jsk_topic_tools/Relay $(arg MANAGER)">
+        <remap from="~input" to="$(arg INPUT_DEPTH)" />
+        <remap from="~output" to="depth" />
+      </node>
+    </group>
+    <group ns="resize_1_2">
+      <node pkg="nodelet" type="nodelet" name="left_resizer"
+            args="load resized_image_transport/ImageResizer /$(arg NAMESPACE)/$(arg MANAGER)">
+        <remap from="~input/image" to="/$(arg NAMESPACE)/resize_1_1/left/image_rect_color" />
+        <remap from="~output/image" to="left/image_rect_color" />
+        <rosparam>
+          use_camera_info: true
+          resize_scale_x: 0.5
+          resize_scale_y: 0.5
+        </rosparam>
+      </node>
+      <node pkg="nodelet" type="nodelet" name="depth_resizer"
+            args="load resized_image_transport/ImageResizer /$(arg NAMESPACE)/$(arg MANAGER)">
+        <remap from="~input/image" to="/$(arg NAMESPACE)/resize_1_1/depth" />
+        <remap from="~output/image" to="depth" />
+        <rosparam>
+          use_camera_info: false
+          resize_scale_x: 0.5
+          resize_scale_y: 0.5
+        </rosparam>
+      </node>
+    </group>
+    <group ns="resize_1_4">
+      <node pkg="nodelet" type="nodelet" name="left_resizer"
+            args="load resized_image_transport/ImageResizer /$(arg NAMESPACE)/$(arg MANAGER)">
+        <remap from="~input/image" to="/$(arg NAMESPACE)/resize_1_1/left/image_rect_color" />
+        <remap from="~output/image" to="left/image_rect_color" />
+        <rosparam>
+          use_camera_info: true
+          resize_scale_x: 0.25
+          resize_scale_y: 0.25
+        </rosparam>
+      </node>
+      <node pkg="nodelet" type="nodelet" name="depth_resizer"
+            args="load resized_image_transport/ImageResizer /$(arg NAMESPACE)/$(arg MANAGER)">
+        <remap from="~input/image" to="/$(arg NAMESPACE)/resize_1_1/depth" />
+        <remap from="~output/image" to="depth" />
+        <rosparam>
+          use_camera_info: false
+          resize_scale_x: 0.25
+          resize_scale_y: 0.25
+        </rosparam>
+      </node>
+    </group>
+    <group ns="resize_1_8">
+      <node pkg="nodelet" type="nodelet" name="left_resizer"
+            args="load resized_image_transport/ImageResizer /$(arg NAMESPACE)/$(arg MANAGER)">
+        <remap from="~input/image" to="/$(arg NAMESPACE)/resize_1_1/left/image_rect_color" />
+        <remap from="~output/image" to="left/image_rect_color" />
+        <rosparam>
+          use_camera_info: true
+          resize_scale_x: 0.125
+          resize_scale_y: 0.125
+        </rosparam>
+      </node>
+      <node pkg="nodelet" type="nodelet" name="depth_resizer"
+            args="load resized_image_transport/ImageResizer /$(arg NAMESPACE)/$(arg MANAGER)">
+        <remap from="~input/image" to="/$(arg NAMESPACE)/resize_1_1/depth" />
+        <remap from="~output/image" to="depth" />
+        <rosparam>
+          use_camera_info: false
+          resize_scale_x: 0.125
+          resize_scale_y: 0.125
+        </rosparam>
+      </node>
+    </group>
   </group>
              
 </launch>

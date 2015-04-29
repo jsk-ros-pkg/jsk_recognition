@@ -861,7 +861,9 @@ public:
     // from ros messages to keypoint and pin hole camera model
     features2keypoint (msg->features, sourceimg_keypoints, sourceimg_descriptors);
     pcam.fromCameraInfo(msg->info);
-
+    if ( cv::countNonZero(pcam.intrinsicMatrix()) == 0 ) {
+      ROS_FATAL("intrinsic matrix is zero, your camera info looks invalid");
+    }
     if ( !_initialized ) {
       // make template images from camera info
       initialize();

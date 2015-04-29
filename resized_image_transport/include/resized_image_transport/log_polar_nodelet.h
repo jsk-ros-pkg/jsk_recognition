@@ -13,7 +13,7 @@ namespace resized_image_transport
   public:
   protected:
     typedef dynamic_reconfigure::Server<LogPolarConfig> ReconfigureServer;
-    ReconfigureServer reconfigure_server_;
+    boost::shared_ptr<ReconfigureServer> reconfigure_server_;
 
     bool inverse_log_polar_;
     double log_polar_scale_;

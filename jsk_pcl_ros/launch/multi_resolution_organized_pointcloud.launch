@@ -2,6 +2,7 @@
   <arg name="NAMESPACE" default="multiresolution_pointcloud" />
   <arg name="INPUT" default="/multisense/organized_image_points2_color" />
   <arg name="INPUT_LEFT_IMAGE" default="/multisense/left/image_rect_color" />
+  <arg name="INPUT_LEFT_CAMERA_INFO" default="/multisense/left/camera_info" />
   <arg name="INPUT_DEPTH" default="/multisense/depth" />
   <arg name="RUN_MANAGER" default="true" />
   <arg name="MANAGER" default="manager" />
@@ -43,12 +44,27 @@
     <!-- Images -->
     <group ns="resize_1_1">
       <node pkg="nodelet" type="nodelet" name="left_resizer"
-            args="load jsk_topic_tools/Relay $(arg MANAGER)">
+            args="load jsk_topic_tools/Relay /$(arg NAMESPACE)/$(arg MANAGER)">
         <remap from="~input" to="$(arg INPUT_LEFT_IMAGE)" />
         <remap from="~output" to="left/image_rect_color" />
       </node>
+      <node pkg="nodelet" type="nodelet" name="left_compressed_relay"
+            args="load jsk_topic_tools/Relay /$(arg NAMESPACE)/$(arg MANAGER)">
+        <remap from="~input" to="$(arg INPUT_LEFT_IMAGE)/compressed" />
+        <remap from="~output" to="left/image_rect_color/compressed" />
+      </node>
+      <node pkg="nodelet" type="nodelet" name="left_theora_relay"
+            args="load jsk_topic_tools/Relay /$(arg NAMESPACE)/$(arg MANAGER)">
+        <remap from="~input" to="$(arg INPUT_LEFT_IMAGE)/theora" />
+        <remap from="~output" to="left/image_rect_color/theora" />
+      </node>
+      <node pkg="nodelet" type="nodelet" name="left_camera_info_resizer"
+            args="load jsk_topic_tools/Relay /$(arg NAMESPACE)/$(arg MANAGER)">
+        <remap from="~input" to="$(arg INPUT_LEFT_CAMERA_INFO)" />
+        <remap from="~output" to="left/camera_info" />
+      </node>
       <node pkg="nodelet" type="nodelet" name="depth_resizer"
-            args="load jsk_topic_tools/Relay $(arg MANAGER)">
+            args="load jsk_topic_tools/Relay /$(arg NAMESPACE)/$(arg MANAGER)">
         <remap from="~input" to="$(arg INPUT_DEPTH)" />
         <remap from="~output" to="depth" />
       </node>

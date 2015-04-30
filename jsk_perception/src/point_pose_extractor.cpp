@@ -29,22 +29,22 @@ namespace enc = sensor_msgs::image_encodings;
 bool _first_sample_change;
 
 void features2keypoint (posedetection_msgs::Feature0D features,
-			std::vector<cv::KeyPoint>& keypoints,
-			cv::Mat& descriptors){
+                        std::vector<cv::KeyPoint>& keypoints,
+                        cv::Mat& descriptors){
   keypoints.resize(features.scales.size());
   descriptors.create(features.scales.size(),features.descriptor_dim,CV_32FC1);
   std::vector<cv::KeyPoint>::iterator keypoint_it = keypoints.begin();
   for ( int i=0; keypoint_it != keypoints.end(); ++keypoint_it, ++i ) {
     *keypoint_it = cv::KeyPoint(cv::Point2f(features.positions[i*2+0],
-					    features.positions[i*2+1]),
-				features.descriptor_dim, // size
-				features.orientations[i], //angle
-				0, // resonse
-				features.scales[i] // octave
-				);
+                                            features.positions[i*2+1]),
+                                features.descriptor_dim, // size
+                                features.orientations[i], //angle
+                                0, // resonse
+                                features.scales[i] // octave
+                                );
     for (int j = 0; j < features.descriptor_dim; j++){
       descriptors.at<float>(i,j) =
-	features.descriptors[i*features.descriptor_dim+j];
+        features.descriptors[i*features.descriptor_dim+j];
     }
   }
 }
@@ -59,8 +59,8 @@ public:
   cv::Mat _template_descriptors;
   int _original_width_size;
   int _original_height_size;
-  double _template_width;	// width of template [m]
-  double _template_height;	// height of template [m]
+  double _template_width;       // width of template [m]
+  double _template_height;      // height of template [m]
   tf::Transform _relativepose;
   cv::Mat _affine_matrix;
   std::string _window_name;
@@ -74,17 +74,17 @@ public:
   Matching_Template(){
   }
   Matching_Template(cv::Mat img,
-		    std::string matching_frame,
-		    int original_width_size,
-		    int original_height_size,
-		    double template_width,
-		    double template_height,
-		    tf::Transform relativepose,
-		    cv::Mat affine_matrix,
-		    double reprojection_threshold,
-		    double distanceratio_threshold,
-		    std::string window_name,
-		    bool autosize){
+                    std::string matching_frame,
+                    int original_width_size,
+                    int original_height_size,
+                    double template_width,
+                    double template_height,
+                    tf::Transform relativepose,
+                    cv::Mat affine_matrix,
+                    double reprojection_threshold,
+                    double distanceratio_threshold,
+                    std::string window_name,
+                    bool autosize){
 
     _template_img = img.clone();
     _matching_frame = matching_frame;
@@ -118,7 +118,7 @@ public:
 
   bool check_template (){
     if (_template_img.empty() && _template_keypoints.size() == 0 &&
-	_template_descriptors.empty()){
+        _template_descriptors.empty()){
       return false;
     }
     else {
@@ -150,14 +150,14 @@ public:
       //      cv::drawKeypoints (tmp, _template_keypoints, dst, cv::Scalar::all(1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
       //      cv::drawKeypoints (tmp, _template_keypoints, dst);
       // cv::warpPerspective(_template_img, dst, M_inv,
-      // 			  cv::Size(_original_width_size, _original_height_size),
-      // 			  CV_INTER_LINEAR, IPL_BORDER_CONSTANT, 0);
+      //                          cv::Size(_original_width_size, _original_height_size),
+      //                          CV_INTER_LINEAR, IPL_BORDER_CONSTANT, 0);
       for (int i = 0; i < (int)_template_keypoints.size(); i++){
-	cv::Point2f pt;
-	cv::Mat pt_mat(cv::Size(1,1), CV_32FC2, &pt);
-	cv::Mat pt_src_mat(cv::Size(1,1), CV_32FC2, &_template_keypoints.at(i).pt);
-	cv::perspectiveTransform (pt_src_mat, pt_mat, M_inv);
-	_template_keypoints.at(i).pt = pt_mat.at<cv::Point2f>(0,0);
+        cv::Point2f pt;
+        cv::Mat pt_mat(cv::Size(1,1), CV_32FC2, &pt);
+        cv::Mat pt_src_mat(cv::Size(1,1), CV_32FC2, &_template_keypoints.at(i).pt);
+        cv::perspectiveTransform (pt_src_mat, pt_mat, M_inv);
+        _template_keypoints.at(i).pt = pt_mat.at<cv::Point2f>(0,0);
       }
       //      cvSetMouseCallback (_window_name.c_str(), &PointPoseExtractor::cvmousecb, this);
       //      _template_img = dst;
@@ -176,12 +176,12 @@ public:
     if(osize <= n){
       slog_table.resize(n+1);
       if(osize == 0){
-	slog_table[0] = -1;
-	slog_table[1] = log(1.0);
-	osize = 2;
+        slog_table[0] = -1;
+        slog_table[1] = log(1.0);
+        osize = 2;
       }
       for(int i = osize; i <= n; i++ ){
-	slog_table[i] = slog_table[i-1] + log(i);
+        slog_table[i] = slog_table[i-1] + log(i);
       }
     }
     return slog_table[n];
@@ -196,35 +196,35 @@ public:
     for( j = m+1; j <= n; j++ ){
       sum = 0;
       for( i = j; i <= n; i++ ){
-	pi = (i-m) * lp_badsupp + (n-i+m) * lp_badsupp1 +
-	  log_fac( n - m ) - log_fac( i - m ) - log_fac( n - i );
-	sum += exp( pi );
+        pi = (i-m) * lp_badsupp + (n-i+m) * lp_badsupp1 +
+          log_fac( n - m ) - log_fac( i - m ) - log_fac( n - i );
+        sum += exp( pi );
       }
       if( sum < p_badxform )
-	break;
+        break;
     }
     return j;
   }
 
 
   bool estimate_od (ros::ServiceClient client, cv::Mat src_img,
-		    std::vector<cv::KeyPoint> sourceimg_keypoints,
-		    image_geometry::PinholeCameraModel pcam,
-		    double err_thr, cv::Mat &stack_img,
-		    cv::flann::Index* ft, posedetection_msgs::Object6DPose* o6p){
+                    std::vector<cv::KeyPoint> sourceimg_keypoints,
+                    image_geometry::PinholeCameraModel pcam,
+                    double err_thr, cv::Mat &stack_img,
+                    cv::flann::Index* ft, posedetection_msgs::Object6DPose* o6p){
 
     if ( _template_keypoints.size()== 0 &&
-	 _template_descriptors.empty() ){
+         _template_descriptors.empty() ){
       set_template(client);
     }
     if ( _template_keypoints.size()== 0 &&
-	 _template_descriptors.empty() ) {
+         _template_descriptors.empty() ) {
       ROS_ERROR ("Template image was not set.");
       return false;
     }
     // stacked image
     cv::Size stack_size  = cv::Size(MAX(src_img.cols,_template_img.cols),
-				    src_img.rows+_template_img.rows);
+                                    src_img.rows+_template_img.rows);
     stack_img = cv::Mat(stack_size,CV_8UC3);
     stack_img = cv::Scalar(0);
     cv::Mat stack_img_tmp(stack_img,cv::Rect(0,0,_template_img.cols,_template_img.rows));
@@ -243,8 +243,8 @@ public:
     std::vector<int> queryIdxs,trainIdxs;
     for ( unsigned int j = 0; j < _template_keypoints.size(); j++ ) {
       if ( m_dists.at<float>(j,0) < m_dists.at<float>(j,1) * _distanceratio_threshold) {
-	queryIdxs.push_back(j);
-	trainIdxs.push_back(m_indices.at<int>(j,0));
+        queryIdxs.push_back(j);
+        trainIdxs.push_back(m_indices.at<int>(j,0));
       }
     }
     if ( queryIdxs.size() == 0 ) {
@@ -260,7 +260,7 @@ public:
     std::vector<uchar> mask((int)pt2.size());
 
     if ( pt1.size() > 4 ) {
-	  // ToDO for curve face
+          // ToDO for curve face
       H = cv::findHomography(cv::Mat(pt1), cv::Mat(pt2), mask, CV_RANSAC, _reprojection_threshold);
     }
 
@@ -272,12 +272,12 @@ public:
       cv::perspectiveTransform (pt_src_mat, pt_mat, _affine_matrix);
       pt_orig = pt_mat.at<cv::Point2f>(0,0);
       if ( mask.at(j)){
-	cv::line(stack_img, pt_orig, pt2.at(j)+cv::Point2f(0,_template_img.rows),
-		 CV_RGB(0,255,0), 1,8,0);
+        cv::line(stack_img, pt_orig, pt2.at(j)+cv::Point2f(0,_template_img.rows),
+                 CV_RGB(0,255,0), 1,8,0);
       }
       else {
-	cv::line(stack_img, pt_orig, pt2.at(j)+cv::Point2f(0,_template_img.rows),
-		 CV_RGB(255,0,255), 1,8,0);
+        cv::line(stack_img, pt_orig, pt2.at(j)+cv::Point2f(0,_template_img.rows),
+                 CV_RGB(255,0,255), 1,8,0);
       }
     }
     int inlier_sum = 0;
@@ -313,14 +313,14 @@ public:
     ROS_INFO("  _correspondances.size: %d", (int)_correspondances.size());
     for (int j = 0; j < (int)_correspondances.size(); j++){
       cv::circle(stack_img, cv::Point2f(_correspondances.at(j).x, _correspondances.at(j).y + _template_img.size().height),
-		 8, CV_RGB(255,0,0), -1);
+                 8, CV_RGB(255,0,0), -1);
     }
 
     ROS_INFO("    inlier_sum:%d   min_lier:%d", inlier_sum, min_inlier((int)pt2.size(), 4, 0.10, 0.01));
     if ((cv::countNonZero( H ) == 0) || (inlier_sum < min_inlier((int)pt2.size(), 4, 0.10, 0.01))){
       ROS_INFO("    inlier_sum < min_lier return-from estimate-od");
       if( _window_name != "" )
-	cv::imshow(_window_name, stack_img);
+        cv::imshow(_window_name, stack_img);
       return false;
     }
 
@@ -335,14 +335,14 @@ public:
     _type = _type + "_" + std::string(chr);
 
     cv::Point2f corners2d[4] = {cv::Point2f(0,0),
-				cv::Point2f(_original_width_size,0),
-				cv::Point2f(_original_width_size,_original_height_size),
-				cv::Point2f(0,_original_height_size)};
+                                cv::Point2f(_original_width_size,0),
+                                cv::Point2f(_original_width_size,_original_height_size),
+                                cv::Point2f(0,_original_height_size)};
     cv::Mat corners2d_mat (cv::Size(4, 1), CV_32FC2, corners2d);
     cv::Point3f corners3d[4] = {cv::Point3f(0,0,0),
-				cv::Point3f(0,_template_width,0),
-				cv::Point3f(_template_height,_template_width,0),
-				cv::Point3f(_template_height,0,0)};
+                                cv::Point3f(0,_template_width,0),
+                                cv::Point3f(_template_height,_template_width,0),
+                                cv::Point3f(_template_height,0,0)};
     cv::Mat corners3d_mat (cv::Size(4, 1), CV_32FC3, corners3d);
 
     cv::Mat corners2d_mat_trans;
@@ -356,8 +356,8 @@ public:
 
     cv::solvePnP (corners3d_mat, corners2d_mat_trans, 
                   pcam.intrinsicMatrix(),
-		  zero_distortion_mat,//if unrectified: pcam.distortionCoeffs()
-		  rvec, tvec);
+                  zero_distortion_mat,//if unrectified: pcam.distortionCoeffs()
+                  rvec, tvec);
 
     tf::Transform checktf, resulttf;
 
@@ -372,12 +372,12 @@ public:
     resulttf = checktf * _relativepose;
 
     ROS_INFO( "      tx: (%0.2lf,%0.2lf,%0.2lf) rx: (%0.2lf,%0.2lf,%0.2lf)",
-	      resulttf.getOrigin().getX(),
-	      resulttf.getOrigin().getY(),
-	      resulttf.getOrigin().getZ(),
-    	      resulttf.getRotation().getAxis().x() * resulttf.getRotation().getAngle(),
-    	      resulttf.getRotation().getAxis().y() * resulttf.getRotation().getAngle(),
-    	      resulttf.getRotation().getAxis().z() * resulttf.getRotation().getAngle());
+              resulttf.getOrigin().getX(),
+              resulttf.getOrigin().getY(),
+              resulttf.getOrigin().getZ(),
+              resulttf.getRotation().getAxis().x() * resulttf.getRotation().getAngle(),
+              resulttf.getRotation().getAxis().y() * resulttf.getRotation().getAngle(),
+              resulttf.getRotation().getAxis().z() * resulttf.getRotation().getAngle());
 
     o6p->pose.position.x = resulttf.getOrigin().getX();
     o6p->pose.position.y = resulttf.getOrigin().getY();
@@ -392,20 +392,20 @@ public:
     std::vector<cv::Point2f> projected_top;
     {
       tf::Vector3 coords[8] = {tf::Vector3(0,0,0),
-			       tf::Vector3(0, _template_width, 0),
-			       tf::Vector3(_template_height, _template_width,0),
-			       tf::Vector3(_template_height, 0, 0),
-			       tf::Vector3(0, 0, -0.03),
-			       tf::Vector3(0, _template_width, -0.03),
-			       tf::Vector3(_template_height, _template_width, -0.03),
-			       tf::Vector3(_template_height, 0, -0.03)};
+                               tf::Vector3(0, _template_width, 0),
+                               tf::Vector3(_template_height, _template_width,0),
+                               tf::Vector3(_template_height, 0, 0),
+                               tf::Vector3(0, 0, -0.03),
+                               tf::Vector3(0, _template_width, -0.03),
+                               tf::Vector3(_template_height, _template_width, -0.03),
+                               tf::Vector3(_template_height, 0, -0.03)};
 
       projected_top = std::vector<cv::Point2f>(8);
 
       for(int i=0; i<8; i++) {
-	coords[i] = checktf * coords[i];
-	cv::Point3f pt(coords[i].getX(), coords[i].getY(), coords[i].getZ());
-	projected_top[i] = pcam.project3dToPixel(pt);
+        coords[i] = checktf * coords[i];
+        cv::Point3f pt(coords[i].getX(), coords[i].getY(), coords[i].getZ());
+        projected_top[i] = pcam.project3dToPixel(pt);
       }
     }
 
@@ -414,9 +414,9 @@ public:
       max_x = max_y = -1e9;
       min_x = min_y = 1e9;
       for (int j = 0; j < 4; j++){
-	cv::Point2f pt = corners2d_mat_trans.at<cv::Point2f>(0,j);
-	max_x = std::max(max_x, pt.x), max_y = std::max(max_y, pt.y);
-	min_x = std::min(min_x, pt.x), min_y = std::min(min_y, pt.y);
+        cv::Point2f pt = corners2d_mat_trans.at<cv::Point2f>(0,j);
+        max_x = std::max(max_x, pt.x), max_y = std::max(max_y, pt.y);
+        min_x = std::min(min_x, pt.x), min_y = std::min(min_y, pt.y);
       }
       if((max_x - min_x) < 30 || (max_y - min_y) < 30 ||
          src_img.rows < (max_x - min_x)/2 || src_img.cols < (max_y - min_y)/2){
@@ -429,7 +429,7 @@ public:
     bool err_success = true;
     for (int j = 0; j < 4; j++){
       double err = sqrt(pow((corners2d_mat_trans.at<cv::Point2f>(0,j).x - projected_top.at(j).x), 2) +
-		      pow((corners2d_mat_trans.at<cv::Point2f>(0,j).y - projected_top.at(j).y), 2));
+                      pow((corners2d_mat_trans.at<cv::Point2f>(0,j).y - projected_top.at(j).y), 2));
       err_sum += err;
     }
     if (err_sum > err_thr){
@@ -439,12 +439,12 @@ public:
     // draw lines around the detected object
     for (int j = 0; j < corners2d_mat_trans.cols; j++){
       cv::Point2f p1(corners2d_mat_trans.at<cv::Point2f>(0,j).x,
-		     corners2d_mat_trans.at<cv::Point2f>(0,j).y+_template_img.rows);
+                     corners2d_mat_trans.at<cv::Point2f>(0,j).y+_template_img.rows);
       cv::Point2f p2(corners2d_mat_trans.at<cv::Point2f>(0,(j+1)%corners2d_mat_trans.cols).x,
-		     corners2d_mat_trans.at<cv::Point2f>(0,(j+1)%corners2d_mat_trans.cols).y+_template_img.rows);
+                     corners2d_mat_trans.at<cv::Point2f>(0,(j+1)%corners2d_mat_trans.cols).y+_template_img.rows);
       cv::line (stack_img, p1, p2, CV_RGB(255, 0, 0),
-		(err_success?4:1), // width
-		CV_AA, 0);
+                (err_success?4:1), // width
+                CV_AA, 0);
     }
 
     // draw 3d cube model
@@ -452,14 +452,14 @@ public:
       int cnt = 8;
       std::vector<cv::Point2f> ps(cnt);
       for(int i=0; i<cnt; i++)
-	ps[i] = cv::Point2f(projected_top[i].x,
-			    projected_top[i].y+_template_img.rows);
+        ps[i] = cv::Point2f(projected_top[i].x,
+                            projected_top[i].y+_template_img.rows);
 
       int draw_width = ( err_success ? 3 : 1);
       for(int i=0; i<4; i++) {
-	cv::line (stack_img, ps[i], ps[(i+1)%4], CV_RGB(0, 0, 255), draw_width, CV_AA, 0);
-	cv::line (stack_img, ps[i+4], ps[(i+1)%4+4], CV_RGB(0, 0, 255), draw_width, CV_AA, 0);
-	cv::line (stack_img, ps[i], ps[i+4], CV_RGB(0, 0, 255), draw_width, CV_AA, 0);
+        cv::line (stack_img, ps[i], ps[(i+1)%4], CV_RGB(0, 0, 255), draw_width, CV_AA, 0);
+        cv::line (stack_img, ps[i+4], ps[(i+1)%4+4], CV_RGB(0, 0, 255), draw_width, CV_AA, 0);
+        cv::line (stack_img, ps[i], ps[i+4], CV_RGB(0, 0, 255), draw_width, CV_AA, 0);
       }
     }
 
@@ -467,16 +467,16 @@ public:
     if ( err_success )
     {
       tf::Vector3 coords[4] = { tf::Vector3(0,0,0),
-				tf::Vector3(0.05,0,0),
-				tf::Vector3(0,0.05,0),
-				tf::Vector3(0,0,0.05)};
+                                tf::Vector3(0.05,0,0),
+                                tf::Vector3(0,0.05,0),
+                                tf::Vector3(0,0,0.05)};
       std::vector<cv::Point2f> ps(4);
 
       for(int i=0; i<4; i++) {
-	coords[i] = resulttf * coords[i];
-	cv::Point3f pt(coords[i].getX(), coords[i].getY(), coords[i].getZ());	
-	ps[i] = pcam.project3dToPixel(pt);
-	ps[i].y += _template_img.rows; // draw on camera image
+        coords[i] = resulttf * coords[i];
+        cv::Point3f pt(coords[i].getX(), coords[i].getY(), coords[i].getZ());   
+        ps[i] = pcam.project3dToPixel(pt);
+        ps[i].y += _template_img.rows; // draw on camera image
       }
 
       cv::line (stack_img, ps[0], ps[1], CV_RGB(255, 0, 0), 3, CV_AA, 0);
@@ -492,8 +492,8 @@ public:
       x = stack_img.size().width - 16*17*text_scale; // 16pt * 17
       y = _template_img.size().height - (16 + 2)*text_scale*6;
       cv::putText (stack_img, text, cv::Point(x, y),
-		   0, text_scale, CV_RGB(0, 255, 0),
-		   2, 8, false);
+                   0, text_scale, CV_RGB(0, 255, 0),
+                   2, 8, false);
       ROS_INFO("      %s < %f (threshold)", text.c_str(), err_thr );
     }
     // for debug window
@@ -561,7 +561,7 @@ public:
 
     for (int i = 0; i < 4; i++){
       pt1.push_back(cv::Point2d((int)mt->_correspondances.at(i).x,
-				(int)mt->_correspondances.at(i).y + mt->_template_img.size().height));
+                                (int)mt->_correspondances.at(i).y + mt->_template_img.size().height));
     }
     cv::Rect rect = cv::boundingRect(cv::Mat(pt1));
     double scale = std::max(width, height) / 500.0;
@@ -589,7 +589,7 @@ public:
 
     for (int i = 0; i < (int)pt1.size(); i++){
       pt2.push_back(cv::Point2d((int)pt1.at(i).x - rect.x,
-				(int)pt1.at(i).y - rect.y - mt->_template_img.size().height));
+                                (int)pt1.at(i).y - rect.y - mt->_template_img.size().height));
     }
     // cv::Mat mask_img = cv::Mat::zeros(tmp_template.size(), CV_8UC3);
     // cv::fillConvexPoly(mask_img, pt2.begin(), (int)pt2.size(), CV_RGB(255, 255, 255));
@@ -602,21 +602,21 @@ public:
 
     Matching_Template* tmplt = 
       new Matching_Template (tmp_warp_template, "sample",
-			     tmp_warp_template.size().width, tmp_warp_template.size().height,
-			     width, height,
-			     tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0)),
-			     M,
-			     mt->_reprojection_threshold,
-			     mt->_distanceratio_threshold,
-			     _first_sample_change ? window_name : mt->_window_name,
-			     cv::getWindowProperty(mt->_window_name, CV_WND_PROP_AUTOSIZE));
+                             tmp_warp_template.size().width, tmp_warp_template.size().height,
+                             width, height,
+                             tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0)),
+                             M,
+                             mt->_reprojection_threshold,
+                             mt->_distanceratio_threshold,
+                             _first_sample_change ? window_name : mt->_window_name,
+                             cv::getWindowProperty(mt->_window_name, CV_WND_PROP_AUTOSIZE));
 
     mt->_correspondances.clear();
     _templates.push_back(tmplt);
     cv::namedWindow(_first_sample_change ? window_name : mt->_window_name,
-		    cv::getWindowProperty(mt->_window_name, CV_WND_PROP_AUTOSIZE));
+                    cv::getWindowProperty(mt->_window_name, CV_WND_PROP_AUTOSIZE));
     cvSetMouseCallback (_first_sample_change ? window_name.c_str() : mt->_window_name.c_str(),
-			&cvmousecb, static_cast<void *>(_templates.back()));
+                        &cvmousecb, static_cast<void *>(_templates.back()));
     _first_sample_change = true;
   }
 
@@ -629,9 +629,9 @@ public:
       ROS_INFO("add correspondence (%d, %d)", (int)pt.x, (int)pt.y);
       mt->_correspondances.push_back(pt);
       if ((int)mt->_correspondances.size() >= 4){
-	make_template_from_mousecb(mt);
-	mt->_correspondances.clear();
-	ROS_INFO("reset");
+        make_template_from_mousecb(mt);
+        mt->_correspondances.clear();
+        ROS_INFO("reset");
       }
       break;
     }
@@ -718,20 +718,20 @@ public:
 
 
   cv::Mat make_homography(cv::Mat src, cv::Mat rvec, cv::Mat tvec,
-			  double template_width, double template_height, cv::Size &size){
+                          double template_width, double template_height, cv::Size &size){
 
     cv::Point3f coner[4] = {cv::Point3f(-(template_width/2.0), -(template_height/2.0),0),
-			    cv::Point3f(template_width/2.0,-(template_height/2.0),0),
-			    cv::Point3f(template_width/2.0,template_height/2.0,0),
-			    cv::Point3f(-(template_width/2.0),template_height/2.0,0)};
+                            cv::Point3f(template_width/2.0,-(template_height/2.0),0),
+                            cv::Point3f(template_width/2.0,template_height/2.0,0),
+                            cv::Point3f(-(template_width/2.0),template_height/2.0,0)};
     cv::Mat coner_mat (cv::Size(4, 1), CV_32FC3, coner);
     std::vector<cv::Point2f> coner_img_points;
 
     cv::Mat zero_distortion_mat = cv::Mat::zeros(4, 1, CV_64FC1);
     cv::projectPoints(coner_mat, rvec, tvec,
                       pcam.intrinsicMatrix(),
-		      zero_distortion_mat, // pcam.distortionCoeffs(),
-		      coner_img_points);
+                      zero_distortion_mat, // pcam.distortionCoeffs(),
+                      coner_img_points);
     float x_min = 10000, x_max = 0;
     float y_min = 10000, y_max = 0;
     for (int i = 0; i < (int)coner_img_points.size(); i++){
@@ -744,14 +744,14 @@ public:
     std::vector<cv::Point2f> coner_img_points_trans;
     for (int i = 0; i < (int)coner_img_points.size(); i++){
       cv::Point2f pt_tmp(coner_img_points.at(i).x - x_min,
-			 coner_img_points.at(i).y - y_min);
+                         coner_img_points.at(i).y - y_min);
       coner_img_points_trans.push_back(pt_tmp);
     }
 
     cv::Point2f template_points[4] = {cv::Point2f(0,0),
-				      cv::Point2f(src.size().width,0),
-				      cv::Point2f(src.size().width,src.size().height),
-				      cv::Point2f(0,src.size().height)};
+                                      cv::Point2f(src.size().width,0),
+                                      cv::Point2f(src.size().width,src.size().height),
+                                      cv::Point2f(0,src.size().height)};
     cv::Mat template_points_mat (cv::Size(4, 1), CV_32FC2, template_points);
 
     size = cv::Size(x_max - x_min, y_max - y_min);
@@ -760,94 +760,94 @@ public:
 
 
   int make_warped_images (cv::Mat src, std::vector<cv::Mat> &imgs,
-			  std::vector<cv:: Mat> &Mvec,
-			  double template_width, double template_height,
-			  double th_step, double phi_step){
+                          std::vector<cv:: Mat> &Mvec,
+                          double template_width, double template_height,
+                          double th_step, double phi_step){
 
     std::vector<cv::Size> sizevec;
 
     for (int i = (int)((-3.14/4.0)/th_step); i*th_step < 3.14/4.0; i++){
       for (int j = (int)((-3.14/4.0)/phi_step); j*phi_step < 3.14/4.0; j++){
-	double fR3[3], fT3[3];
-	cv::Mat rvec(3, 1, CV_64FC1, fR3);
-	cv::Mat tvec(3, 1, CV_64FC1, fT3);
+        double fR3[3], fT3[3];
+        cv::Mat rvec(3, 1, CV_64FC1, fR3);
+        cv::Mat tvec(3, 1, CV_64FC1, fT3);
 
-	tf::Quaternion quat;
-	quat.setEuler(0, th_step*i, phi_step*j);
-	fR3[0] = quat.getAxis().x() * quat.getAngle();
-	fR3[1] = quat.getAxis().y() * quat.getAngle();
-	fR3[2] = quat.getAxis().z() * quat.getAngle();
-	fT3[0] = 0;
-	fT3[1] = 0;
-	fT3[2] = 0.5;
+        tf::Quaternion quat;
+        quat.setEuler(0, th_step*i, phi_step*j);
+        fR3[0] = quat.getAxis().x() * quat.getAngle();
+        fR3[1] = quat.getAxis().y() * quat.getAngle();
+        fR3[2] = quat.getAxis().z() * quat.getAngle();
+        fT3[0] = 0;
+        fT3[1] = 0;
+        fT3[2] = 0.5;
 
-	cv::Mat M;
-	cv::Size size;
-	M = make_homography(src, rvec, tvec, template_width, template_height, size);
-	Mvec.push_back(M);
-	sizevec.push_back(size);
+        cv::Mat M;
+        cv::Size size;
+        M = make_homography(src, rvec, tvec, template_width, template_height, size);
+        Mvec.push_back(M);
+        sizevec.push_back(size);
       }
     }
 
     for (int i = 0; i < (int)Mvec.size(); i++){
       cv::Mat dst;
       cv::warpPerspective(src, dst, Mvec.at(i), sizevec.at(i),
-			  CV_INTER_LINEAR, IPL_BORDER_CONSTANT, 0);
+                          CV_INTER_LINEAR, IPL_BORDER_CONSTANT, 0);
       imgs.push_back(dst);
     }
     return 0;
   }
 
   bool add_new_template(cv::Mat img, std::string typestr, tf::Transform relative_pose,
-			double template_width, double template_height,
-			double theta_step=5.0, double phi_step=5.0)
+                        double template_width, double template_height,
+                        double theta_step=5.0, double phi_step=5.0)
   {
     std::vector<cv::Mat> imgs;
     std::vector<cv::Mat> Mvec;
     make_warped_images(img, imgs, Mvec,
-		       template_width, template_height, theta_step, phi_step);
+                       template_width, template_height, theta_step, phi_step);
 
     for (int i = 0; i < (int)imgs.size(); i++){
       std::string type = typestr;
       if(imgs.size() > 1) {
-	char chr[20];
-	sprintf(chr, "%d", i);
-	type += "_" + std::string(chr);
+        char chr[20];
+        sprintf(chr, "%d", i);
+        type += "_" + std::string(chr);
       }
 
       Matching_Template * tmplt = 
-	new Matching_Template(imgs.at(i), type,
-			      img.size().width, img.size().height,
-			      template_width, template_height,
-			      relative_pose, Mvec.at(i),
-			      _reprojection_threshold,
-			      _distanceratio_threshold,
-			      (_viewer ? type : ""), _autosize);
+        new Matching_Template(imgs.at(i), type,
+                              img.size().width, img.size().height,
+                              template_width, template_height,
+                              relative_pose, Mvec.at(i),
+                              _reprojection_threshold,
+                              _distanceratio_threshold,
+                              (_viewer ? type : ""), _autosize);
       _templates.push_back(tmplt);
       if( _viewer )
-	cv::namedWindow(type, _autosize ? CV_WINDOW_AUTOSIZE : 0);
+        cv::namedWindow(type, _autosize ? CV_WINDOW_AUTOSIZE : 0);
       cvSetMouseCallback (type.c_str(), &cvmousecb, static_cast<void *>(_templates.back()));
     }
     return true;
   }
 
   bool settemplate_cb (jsk_perception::SetTemplate::Request &req,
-		       jsk_perception::SetTemplate::Response &res){
+                       jsk_perception::SetTemplate::Response &res){
       cv_bridge::CvImagePtr cv_ptr;
       cv_ptr = cv_bridge::toCvCopy(req.image, enc::BGR8);
       cv::Mat img(cv_ptr->image);
 
       tf::Transform transform(tf::Quaternion(req.relativepose.orientation.x,
-					     req.relativepose.orientation.y,
-					     req.relativepose.orientation.z,
-					     req.relativepose.orientation.w),
-			      tf::Vector3(req.relativepose.position.x,
-					  req.relativepose.position.y,
-					  req.relativepose.position.z));
+                                             req.relativepose.orientation.y,
+                                             req.relativepose.orientation.z,
+                                             req.relativepose.orientation.w),
+                              tf::Vector3(req.relativepose.position.x,
+                                          req.relativepose.position.y,
+                                          req.relativepose.position.z));
 
       // add the image to template list 
       add_new_template(img, req.type, transform,
-		       req.dimx, req.dimy, 1.0, 1.0);
+                       req.dimx, req.dimy, 1.0, 1.0);
       return true;
   }
 
@@ -885,26 +885,26 @@ public:
       // matching and detect object
       ROS_INFO("_templates size: %d", (int)_templates.size());
       for (int i = 0; i < (int)_templates.size(); i++){
-	posedetection_msgs::Object6DPose o6p;
+        posedetection_msgs::Object6DPose o6p;
 
-	cv::Mat debug_img;
-	if (_templates.at(i)->estimate_od(_client, src_img, sourceimg_keypoints, pcam, _err_thr, debug_img, ft, &o6p))
-	  vo6p.push_back(o6p);
+        cv::Mat debug_img;
+        if (_templates.at(i)->estimate_od(_client, src_img, sourceimg_keypoints, pcam, _err_thr, debug_img, ft, &o6p))
+          vo6p.push_back(o6p);
 
-	// for debug Image topic
-	cv_bridge::CvImage out_msg;
-	out_msg.header   = msg->image.header;
-	out_msg.encoding = "bgr8";
-	out_msg.image    = debug_img;
-	_debug_pub.publish(out_msg.toImageMsg());
+        // for debug Image topic
+        cv_bridge::CvImage out_msg;
+        out_msg.header   = msg->image.header;
+        out_msg.encoding = "bgr8";
+        out_msg.image    = debug_img;
+        _debug_pub.publish(out_msg.toImageMsg());
       }
       delete ft;
       if (((int)vo6p.size() != 0) || pnod) {
-	od.header.stamp = msg->image.header.stamp;
-	od.header.frame_id = msg->image.header.frame_id;
-	od.objects = vo6p;
-	_pub.publish(od);
-	_pub_agg.publish(od);
+        od.header.stamp = msg->image.header.stamp;
+        od.header.frame_id = msg->image.header.frame_id;
+        od.objects = vo6p;
+        _pub.publish(od);
+        _pub_agg.publish(od);
         // Publish result as geometry_msgs/PoseStamped. But it can only contain one object
         geometry_msgs::PoseStamped pose_msg;
         pose_msg.header = od.header;
@@ -919,47 +919,47 @@ public:
   }
 
   /* if there are subscribers of the output topic -> do work
-	 else if -> unregister all topics this node subscribing
+         else if -> unregister all topics this node subscribing
    */
   void check_subscribers()
   {
-	if(_pub.getNumSubscribers() == 0 && _initialized) {
-	  if(_sub)
-		_sub.shutdown();
+        if(_pub.getNumSubscribers() == 0 && _initialized) {
+          if(_sub)
+                _sub.shutdown();
           static int i = 0;
           if ( i++ % 100 == 0 ) {
               ROS_INFO("wait for subscriberes ... %s", _pub.getTopic().c_str());
           }
-	} else {
-	  if(!_sub)
-		_sub = _n.subscribe("ImageFeature0D", 1,
-				    &PointPoseExtractor::imagefeature_cb, this);
-	}
+        } else {
+          if(!_sub)
+                _sub = _n.subscribe("ImageFeature0D", 1,
+                                    &PointPoseExtractor::imagefeature_cb, this);
+        }
   }
 
   /* callback for dynamic reconfigure */
   void dyn_conf_callback(jsk_perception::point_pose_extractorConfig &config,
-			 uint32_t level) {
+                         uint32_t level) {
     std::cout << "id = " << config.template_id << std::endl;
     std::cout << "lvl = " << level << std::endl;
     if((int)_templates.size() <= config.template_id) {
       ROS_WARN("template_id is invalid");
       config.template_id = 0;
       if(_templates.size() != 0)
-	config.frame_id = _templates[0]->_matching_frame;
+        config.frame_id = _templates[0]->_matching_frame;
     } else {
       Matching_Template* tmpl = _templates[config.template_id];
       if(config.frame_id == tmpl->_matching_frame) {
-	ROS_WARN("update params");
-	tmpl->_reprojection_threshold = config.reprojection_threshold;
-	tmpl->_distanceratio_threshold = config.distanceratio_threshold;
-	_err_thr = config.error_threshold;
+        ROS_WARN("update params");
+        tmpl->_reprojection_threshold = config.reprojection_threshold;
+        tmpl->_distanceratio_threshold = config.distanceratio_threshold;
+        _err_thr = config.error_threshold;
       } else {
-	ROS_WARN("get params");
-	config.frame_id = tmpl->_matching_frame;
-	config.reprojection_threshold = tmpl->_reprojection_threshold;
-	config.distanceratio_threshold = tmpl->_distanceratio_threshold;
-	config.error_threshold = _err_thr;
+        ROS_WARN("get params");
+        config.frame_id = tmpl->_matching_frame;
+        config.reprojection_threshold = tmpl->_reprojection_threshold;
+        config.distanceratio_threshold = tmpl->_distanceratio_threshold;
+        config.error_threshold = _err_thr;
       }
     }
   }
@@ -981,9 +981,9 @@ int main (int argc, char **argv){
 
   ros::Rate r(10); // 10 hz
   while(ros::ok()) {
-	ros::spinOnce();
-	matcher.check_subscribers();
-	r.sleep();
+        ros::spinOnce();
+        matcher.check_subscribers();
+        r.sleep();
   }
 
   return 0;

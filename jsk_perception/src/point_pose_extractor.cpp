@@ -222,7 +222,6 @@ public:
       ROS_ERROR ("Template image was not set.");
       return false;
     }
-
     // stacked image
     cv::Size stack_size  = cv::Size(MAX(src_img.cols,_template_img.cols),
 				    src_img.rows+_template_img.rows);
@@ -311,13 +310,15 @@ public:
     }
 
     // draw correspondances
-    ROS_INFO("_correspondances.size: %d", (int)_correspondances.size());
+    ROS_INFO("  _correspondances.size: %d", (int)_correspondances.size());
     for (int j = 0; j < (int)_correspondances.size(); j++){
       cv::circle(stack_img, cv::Point2f(_correspondances.at(j).x, _correspondances.at(j).y + _template_img.size().height),
 		 8, CV_RGB(255,0,0), -1);
     }
 
+    ROS_INFO("    inlier_sum:%d   min_lier:%d", inlier_sum, min_inlier((int)pt2.size(), 4, 0.10, 0.01));
     if ((cv::countNonZero( H ) == 0) || (inlier_sum < min_inlier((int)pt2.size(), 4, 0.10, 0.01))){
+      ROS_INFO("    inlier_sum < min_lier return-from estimate-od");
       if( _window_name != "" )
 	cv::imshow(_window_name, stack_img);
       return false;
@@ -370,7 +371,7 @@ public:
 
     resulttf = checktf * _relativepose;
 
-    ROS_INFO( "tx: (%0.2lf,%0.2lf,%0.2lf) rx: (%0.2lf,%0.2lf,%0.2lf)",
+    ROS_INFO( "      tx: (%0.2lf,%0.2lf,%0.2lf) rx: (%0.2lf,%0.2lf,%0.2lf)",
 	      resulttf.getOrigin().getX(),
 	      resulttf.getOrigin().getY(),
 	      resulttf.getOrigin().getZ(),
@@ -418,8 +419,9 @@ public:
 	min_x = std::min(min_x, pt.x), min_y = std::min(min_y, pt.y);
       }
       if((max_x - min_x) < 30 || (max_y - min_y) < 30 ||
-	 src_img.rows < (max_x - min_x)/2 || src_img.cols < (max_y - min_y)/2){
-	return false;
+         src_img.rows < (max_x - min_x)/2 || src_img.cols < (max_y - min_y)/2){
+        ROS_INFO("        matched region is too big or small (2< && <30) width:%d height:%d return-from estimate-od", max_x - min_x, max_y - min_y);
+        return false;
       }
     }
 
@@ -431,9 +433,9 @@ public:
       err_sum += err;
     }
     if (err_sum > err_thr){
+      ROS_INFO("          err_sum:%d > err_thr:%d return-from estimate-od", err_sum, err_thr);
       err_success = false;
     }
-
     // draw lines around the detected object
     for (int j = 0; j < corners2d_mat_trans.cols; j++){
       cv::Point2f p1(corners2d_mat_trans.at<cv::Point2f>(0,j).x,
@@ -492,7 +494,7 @@ public:
       cv::putText (stack_img, text, cv::Point(x, y),
 		   0, text_scale, CV_RGB(0, 255, 0),
 		   2, 8, false);
-      ROS_INFO( " %s < %f (threshold)", text.c_str(), err_thr );
+      ROS_INFO("      %s < %f (threshold)", text.c_str(), err_thr );
     }
     // for debug window
     if( _window_name != "" )

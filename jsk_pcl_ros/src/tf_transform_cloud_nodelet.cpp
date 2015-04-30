@@ -46,11 +46,22 @@ namespace jsk_pcl_ros
     sensor_msgs::PointCloud2 output;
     try
     {
-      tf_listener_->waitForTransform(target_frame_id_, input->header.frame_id,
-                                     input->header.stamp, ros::Duration(duration_));
-      if (pcl_ros::transformPointCloud(target_frame_id_, *input, output,
-                                       *tf_listener_)) {
-        pub_cloud_.publish(output);
+      if (use_latest_tf_) {
+        sensor_msgs::PointCloud2 latest_pointcloud(*input);
+        latest_pointcloud.header.stamp = ros::Time(0);
+        if (pcl_ros::transformPointCloud(target_frame_id_, latest_pointcloud, output,
+                                         *tf_listener_)) {
+          output.header.stamp = input->header.stamp;
+          pub_cloud_.publish(output);
+        }
+      }
+      else {
+        tf_listener_->waitForTransform(target_frame_id_, input->header.frame_id,
+                                       input->header.stamp, ros::Duration(duration_));
+        if (pcl_ros::transformPointCloud(target_frame_id_, *input, output,
+                                         *tf_listener_)) {
+          pub_cloud_.publish(output);
+        }
       }
     }
     catch (tf2::ConnectivityException &e)
@@ -72,6 +83,7 @@ namespace jsk_pcl_ros
       ROS_WARN("~target_frame_id is not specified, using %s", "/base_footprint");
     }
     pnh_->param("duration", duration_, 1.0);
+    pnh_->param("use_latest_tf", use_latest_tf_, false);
     tf_listener_ = TfListenerSingleton::getInstance();
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
   }

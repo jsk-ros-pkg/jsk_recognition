@@ -2082,6 +2082,10 @@ This nodelet will republish the pointcloud which is transformed with the designa
 * `~duration` (Double, default: `1.0`)
 
   Second to wait for transformation
+* `~use_latest_tf` (Bool, default: `false`)
+
+  If this parameter is true, ignore timestamp of tf to transform pointcloud.
+
 #### Sample
 Plug the depth sensor which can be launched by openni.launch and run the below command.
 

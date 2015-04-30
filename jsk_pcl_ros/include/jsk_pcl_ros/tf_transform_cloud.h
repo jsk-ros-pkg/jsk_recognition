@@ -64,6 +64,7 @@ namespace jsk_pcl_ros
     virtual void unsubscribe();
     
     double duration_;
+    bool use_latest_tf_;
   private:
     virtual void onInit();
   };

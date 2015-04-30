@@ -46,6 +46,7 @@ namespace jsk_pcl_ros
 
   void MultiPlaneExtraction::onInit()
   {
+    pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
     DiagnosticNodelet::onInit();
     pnh_->param("use_indices", use_indices_, true);
     pnh_->param("use_async", use_async_, false);

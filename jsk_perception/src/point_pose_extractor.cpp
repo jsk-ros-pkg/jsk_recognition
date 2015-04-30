@@ -7,6 +7,7 @@
 #include <posedetection_msgs/ImageFeature0D.h>
 #include <posedetection_msgs/ObjectDetection.h>
 #include <posedetection_msgs/Object6DPose.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Quaternion.h>
 #include <sensor_msgs/image_encodings.h>
@@ -509,7 +510,7 @@ class PointPoseExtractor
   ros::Subscriber _sub;
   ros::ServiceServer _server;
   ros::ServiceClient _client;
-  ros::Publisher _pub, _pub_agg;
+  ros::Publisher _pub, _pub_agg, _pub_pose;
   image_transport::Publisher _debug_pub;
   double _reprojection_threshold;
   double _distanceratio_threshold;
@@ -530,6 +531,7 @@ public:
     _client = _n.serviceClient<posedetection_msgs::Feature0DDetect>("Feature0DDetect");
     _pub = _n.advertise<posedetection_msgs::ObjectDetection>("ObjectDetection", 10);
     _pub_agg = _n.advertise<posedetection_msgs::ObjectDetection>("ObjectDetection_agg", 10);
+    _pub_pose = _n.advertise<geometry_msgs::PoseStamped>("object_pose", 10);
     _debug_pub = it.advertise("debug_image", 1);
     _server = _n.advertiseService("SetTemplate", &PointPoseExtractor::settemplate_cb, this);
     _initialized = false;
@@ -901,6 +903,11 @@ public:
 	od.objects = vo6p;
 	_pub.publish(od);
 	_pub_agg.publish(od);
+        // Publish result as geometry_msgs/PoseStamped. But it can only contain one object
+        geometry_msgs::PoseStamped pose_msg;
+        pose_msg.header = od.header;
+        pose_msg.pose = od.objects[0].pose;
+        _pub_pose.publish(pose_msg);
       }
     }
     // BOOST_FOREACH(Matching_Template* mt, _templates) {

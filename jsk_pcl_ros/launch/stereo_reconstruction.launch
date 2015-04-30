@@ -56,4 +56,9 @@
       queue_size: 100
     </rosparam>
   </node>
+  <node pkg="nodelet" type="nodelet" name="point_relay"
+        args="load jsk_topic_tools/Relay $(arg MANAGER)">
+    <remap from="~input" to="organized_image_points2_color" />
+    <remap from="~output" to="points" />
+  </node>
 </launch>

@@ -1125,11 +1125,13 @@ to see the object.
 * `~initial_rot_list` (Array of array of double, default: `None`)
 * `~frame_id_list` (Array of string, default: `None`)
 * `~dimensions` (Array of array of double, default: `None`)
+* `~prefixes` (Array of string, default: `None`)
 
-  Position, Rotation, frame id and Dimensions of multiple attention regions respectively.
+  Position, Rotation, frame id ,prefix and Dimensions of multiple attention regions respectively.
   `~iniital_pos_list` should follow `[[x, y, z], ...]`,
   `~initial_rot_list` should follow `[[rx, ry, rz], ...]` and
   `~dimensions` should follow `[[x, y, z], ...]`.
+  `~prefixes` `[prefix1, prefix2, ...]`. These prefixes will add to the /point_indices and advertise
   Available only if `~use_multiple_attention` is true.
 * `~negative` (Boolean, default: `False`)
 

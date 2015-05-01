@@ -37,6 +37,7 @@
 #include <rospack/rospack.h>
 #include <opencv/highgui.h>
 #include <cv_bridge/cv_bridge.h>
+#pragma message "Compiling " __FILE__ "..."
 #include <posedetection_msgs/Feature0DDetect.h>
 #include <posedetection_msgs/ImageFeature0D.h>
 #include <posedetection_msgs/ObjectDetection.h>
@@ -190,9 +191,7 @@ public:
         cv::Point2f pt;
         cv::Mat pt_mat(cv::Size(1,1), CV_32FC2, &pt);
         cv::Mat pt_src_mat(cv::Size(1,1), CV_32FC2, &_template_keypoints.at(i).pt);
-        //cv::perspectiveTransform (pt_src_mat, pt_mat, M_inv);
-        // TODO why is this needed?
-        pt_mat = pt_src_mat;
+        cv::perspectiveTransform (pt_src_mat, pt_mat, M_inv);
         _template_keypoints.at(i).pt = pt_mat.at<cv::Point2f>(0,0);
       }
       //      cvSetMouseCallback (_window_name.c_str(), &PointPoseExtractor::cvmousecb, this);
@@ -243,7 +242,7 @@ public:
   }
 
 
-  bool estimate_od_old (ros::ServiceClient client, cv::Mat src_img,
+  bool estimate_od (ros::ServiceClient client, cv::Mat src_img,
                     std::vector<cv::KeyPoint> sourceimg_keypoints,
                     image_geometry::PinholeCameraModel pcam,
                     double err_thr, cv::Mat &stack_img,
@@ -456,7 +455,7 @@ public:
       }
       if((max_x - min_x) < 30 || (max_y - min_y) < 30 ||
          src_img.rows < (max_x - min_x)/2 || src_img.cols < (max_y - min_y)/2){
-        ROS_INFO("        matched region is too big or small (2< && <30) width:%f height:%f return-from estimate-od", max_x - min_x, max_y - min_y);
+        ROS_INFO("        matched region is too big or small (2< && <30) width:%d height:%d return-from estimate-od", max_x - min_x, max_y - min_y);
         return false;
       }
     }
@@ -469,7 +468,7 @@ public:
       err_sum += err;
     }
     if (err_sum > err_thr){
-      ROS_INFO("          err_sum:%d > err_thr:%f return-from estimate-od", err_sum, err_thr);
+      ROS_INFO("          err_sum:%d > err_thr:%d return-from estimate-od", err_sum, err_thr);
       err_success = false;
     }
     // draw lines around the detected object
@@ -538,211 +537,6 @@ public:
 
     return err_success;
   }
-
-  // Based on OpenCV tutorials
-  // http://docs.opencv.org/doc/tutorials/features2d/feature_homography/feature_homography.html#feature-homography
-  bool estimate_od (ros::ServiceClient client,
-                    const cv::Mat& src_img,
-                    const std::vector<cv::KeyPoint>& sourceimg_keypoints,
-                    const cv::Mat& sourceimg_descriptors,
-                    const image_geometry::PinholeCameraModel& pcam,
-                    double err_thr, cv::Mat& img_matches,
-                    posedetection_msgs::Object6DPose& o6p){
-    if ( _template_keypoints.size()== 0 &&
-         _template_descriptors.empty() ){
-      set_template(client);
-    }
-    if ( _template_keypoints.size()== 0 &&
-         _template_descriptors.empty() ) {
-      ROS_ERROR ("Template image was not set.");
-      return false;
-    }
-
-    //cv::FlannBasedMatcher matcher;
-    cv::BFMatcher matcher(cv::NORM_L2);
-    std::vector<cv::DMatch> matches;
-    matcher.match(_template_descriptors, sourceimg_descriptors, matches);
-    double max_dist = 0;
-    double min_dist = 100;
-    //-- Quick calculation of max and min distances between keypoints
-    for (int i = 0; i < _template_descriptors.rows; i++) {
-      double dist = matches[i].distance;
-      if( dist < min_dist ) min_dist = dist;
-      if( dist > max_dist ) max_dist = dist;
-    }
-    ROS_INFO("-- Max dist : %f \n", max_dist );
-    ROS_INFO("-- Min dist : %f \n", min_dist );
-
-    std::vector< cv::DMatch > good_matches;
-
-    for (int i = 0; i < _template_descriptors.rows; i++) {
-      if (matches[i].distance < 3 * min_dist) {
-        good_matches.push_back(matches[i]);
-      }
-    }
-
-    cv::drawMatches(_template_img, _template_keypoints,
-                    src_img, sourceimg_keypoints,
-                    good_matches, img_matches,
-                    cv::Scalar::all(-1), cv::Scalar::all(-1),
-                    std::vector<char>(),
-                    cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
-    
-    //-- Localize the object
-    std::vector<cv::Point2f> obj;
-    std::vector<cv::Point2f> scene;
-
-    for (int i = 0; i < good_matches.size(); i++) {
-      //-- Get the keypoints from the good matches
-      obj.push_back(_template_keypoints[ good_matches[i].queryIdx ].pt);
-      scene.push_back(sourceimg_keypoints[ good_matches[i].trainIdx ].pt);
-    }
-    if ( obj.size() <= 4 ) {
-      ROS_ERROR("The number of keypoints are too small");
-      return false;
-    }
-    cv::Mat H = cv::findHomography(obj, scene, CV_RANSAC);
-    cv::Point2f corners2d[4] = {cv::Point2f(0,0),
-                                cv::Point2f(_original_width_size,0),
-                                cv::Point2f(_original_width_size,_original_height_size),
-                                cv::Point2f(0,_original_height_size)};
-    cv::Mat corners2d_mat (cv::Size(4, 1), CV_32FC2, corners2d);
-    cv::Point3f corners3d[4] = {cv::Point3f(0,0,0),
-                                cv::Point3f(0,_template_width,0),
-                                cv::Point3f(_template_height,_template_width,0),
-                                cv::Point3f(_template_height,0,0)};
-    cv::Mat corners3d_mat (cv::Size(4, 1), CV_32FC3, corners3d);
-
-    cv::Mat corners2d_mat_trans;
-
-    cv::perspectiveTransform (corners2d_mat, corners2d_mat_trans, H);
-
-    double fR3[3], fT3[3];
-    cv::Mat rvec(3, 1, CV_64FC1, fR3);
-    cv::Mat tvec(3, 1, CV_64FC1, fT3);
-    cv::Mat zero_distortion_mat = cv::Mat::zeros(4, 1, CV_64FC1);
-
-    cv::solvePnP (corners3d_mat, corners2d_mat_trans, 
-                  pcam.intrinsicMatrix(),
-                  zero_distortion_mat,//if unrectified: pcam.distortionCoeffs()
-                  rvec, tvec);
-    tf::Transform checktf, resulttf;
-
-    checktf.setOrigin( tf::Vector3(fT3[0], fT3[1], fT3[2] ) );
-
-    double rx = fR3[0], ry = fR3[1], rz = fR3[2];
-    tf::Quaternion quat;
-    double angle = cv::norm(rvec);
-    quat.setRotation(tf::Vector3(rx/angle, ry/angle, rz/angle), angle);
-    checktf.setRotation( quat );
-
-    resulttf = checktf * _relativepose;
-
-    ROS_INFO( "      tx: (%0.2lf,%0.2lf,%0.2lf) rx: (%0.2lf,%0.2lf,%0.2lf)",
-              resulttf.getOrigin().getX(),
-              resulttf.getOrigin().getY(),
-              resulttf.getOrigin().getZ(),
-              resulttf.getRotation().getAxis().x() * resulttf.getRotation().getAngle(),
-              resulttf.getRotation().getAxis().y() * resulttf.getRotation().getAngle(),
-              resulttf.getRotation().getAxis().z() * resulttf.getRotation().getAngle());
-
-    o6p.pose.position.x = resulttf.getOrigin().getX();
-    o6p.pose.position.y = resulttf.getOrigin().getY();
-    o6p.pose.position.z = resulttf.getOrigin().getZ();
-    o6p.pose.orientation.w = resulttf.getRotation().w();
-    o6p.pose.orientation.x = resulttf.getRotation().x();
-    o6p.pose.orientation.y = resulttf.getRotation().y();
-    o6p.pose.orientation.z = resulttf.getRotation().z();
-    o6p.type = _matching_frame; // _type
-
-    
-    
-    // debug drawing
-    //-- Get the corners from the image_1 ( the object to be "detected" )
-    std::vector<cv::Point2f> obj_corners(4);
-    obj_corners[0] = cv::Point(0,0);
-    obj_corners[1] = cv::Point(_template_img.cols, 0);
-    obj_corners[2] = cv::Point(_template_img.cols, _template_img.rows);
-    obj_corners[3] = cv::Point(0, _template_img.rows);
-    std::vector<cv::Point2f> scene_corners(4);
-    cv::perspectiveTransform(obj_corners, scene_corners, H);
-    
-    //-- Draw lines between the corners (the mapped object in the scene - image_2 )
-    for (size_t i = 0; i < obj_corners.size(); i++) {
-      ROS_INFO("obj corner[%lu]: [%f, %f]",
-               i, obj_corners[i].x, obj_corners[i].y);
-    }
-    for (size_t i = 0; i < scene_corners.size(); i++) {
-      ROS_INFO("scene corner[%lu]: [%f, %f]",
-               i, scene_corners[i].x, scene_corners[i].y);
-    }
-    cv::line(img_matches,
-             scene_corners[0] + cv::Point2f(_template_img.cols, 0),
-             scene_corners[1] + cv::Point2f(_template_img.cols, 0),
-             cv::Scalar(0, 255, 0), 4);
-    cv::line(img_matches,
-             scene_corners[1] + cv::Point2f(_template_img.cols, 0),
-             scene_corners[2] + cv::Point2f(_template_img.cols, 0),
-             cv::Scalar(0, 255, 0), 4);
-    cv::line(img_matches,
-             scene_corners[2] + cv::Point2f(_template_img.cols, 0),
-             scene_corners[3] + cv::Point2f(_template_img.cols, 0),
-             cv::Scalar(0, 255, 0), 4);
-    cv::line(img_matches,
-             scene_corners[3] + cv::Point2f(_template_img.cols, 0),
-             scene_corners[0] + cv::Point2f(_template_img.cols, 0),
-             cv::Scalar(0, 255, 0), 4);
-    
-    { // check if the matched region does not too big or too small
-      float max_x, max_y, min_x, min_y;
-      max_x = max_y = -1e9;
-      min_x = min_y = 1e9;
-      for (int j = 0; j < 4; j++){
-        cv::Point2f pt = corners2d_mat_trans.at<cv::Point2f>(0,j);
-        max_x = std::max(max_x, pt.x), max_y = std::max(max_y, pt.y);
-        min_x = std::min(min_x, pt.x), min_y = std::min(min_y, pt.y);
-      }
-      if((max_x - min_x) < 30 || (max_y - min_y) < 30 ||
-         src_img.rows < (max_x - min_x)/2 || src_img.cols < (max_y - min_y)/2){
-        ROS_INFO("        matched region is too big or small (2< && <30) width:%f height:%f return-from estimate-od", max_x - min_x, max_y - min_y);
-        return false;
-      }
-    }
-    std::vector<cv::Point2f> projected_top;
-    {
-      tf::Vector3 coords[8] = {tf::Vector3(0,0,0),
-                               tf::Vector3(0, _template_width, 0),
-                               tf::Vector3(_template_height, _template_width,0),
-                               tf::Vector3(_template_height, 0, 0),
-                               tf::Vector3(0, 0, -0.03),
-                               tf::Vector3(0, _template_width, -0.03),
-                               tf::Vector3(_template_height, _template_width, -0.03),
-                               tf::Vector3(_template_height, 0, -0.03)};
-
-      projected_top = std::vector<cv::Point2f>(8);
-
-      for(int i=0; i<8; i++) {
-        coords[i] = checktf * coords[i];
-        cv::Point3f pt(coords[i].getX(), coords[i].getY(), coords[i].getZ());
-        projected_top[i] = pcam.project3dToPixel(pt);
-      }
-    }
-
-    double err_sum = 0;
-    bool err_success = true;
-    for (int j = 0; j < 4; j++){
-      double err = sqrt(pow((corners2d_mat_trans.at<cv::Point2f>(0,j).x - projected_top.at(j).x), 2) +
-                      pow((corners2d_mat_trans.at<cv::Point2f>(0,j).y - projected_top.at(j).y), 2));
-      err_sum += err;
-    }
-    if (err_sum > err_thr){
-      ROS_INFO("          err_sum:%d > err_thr:%f return-from estimate-od", err_sum, err_thr);
-      err_success = false;
-    }
-
-    return err_success;
-  }
-  
 };  // the end of difinition of class Matching_Template
 
 
@@ -1065,7 +859,6 @@ public:
                               _distanceratio_threshold,
                               (_viewer ? type : ""), _autosize);
       _templates.push_back(tmplt);
-      cv::imshow("template", imgs.at(i));
       if( _viewer )
         cv::namedWindow(type, _autosize ? CV_WINDOW_AUTOSIZE : 0);
       cvSetMouseCallback (type.c_str(), &cvmousecb, static_cast<void *>(_templates.back()));
@@ -1121,16 +914,16 @@ public:
       ROS_INFO ("The number of keypoints in source image is less than 2");
     }
     else {
+      // make KDTree
+      cv::flann::Index *ft = new cv::flann::Index(sourceimg_descriptors, cv::flann::KDTreeIndexParams(1));
+
       // matching and detect object
       ROS_INFO("_templates size: %d", (int)_templates.size());
       for (int i = 0; i < (int)_templates.size(); i++){
         posedetection_msgs::Object6DPose o6p;
 
         cv::Mat debug_img;
-        if (_templates.at(i)->estimate_od(_client,
-                                          src_img, sourceimg_keypoints,
-                                          sourceimg_descriptors,
-                                          pcam, _err_thr, debug_img, o6p))
+        if (_templates.at(i)->estimate_od(_client, src_img, sourceimg_keypoints, pcam, _err_thr, debug_img, ft, &o6p))
           vo6p.push_back(o6p);
 
         // for debug Image topic
@@ -1140,7 +933,7 @@ public:
         out_msg.image    = debug_img;
         _debug_pub.publish(out_msg.toImageMsg());
       }
-
+      delete ft;
       if (((int)vo6p.size() != 0) || pnod) {
         od.header.stamp = msg->image.header.stamp;
         od.header.frame_id = msg->image.header.frame_id;

@@ -65,7 +65,7 @@ namespace jsk_pcl_ros
                                               initial_pos[1],
                                               initial_pos[2]);
       }
-    
+
       std::vector<double> initial_rot;
       if (jsk_topic_tools::readVectorParameter(*pnh_,
                                                "initial_rot",
@@ -79,7 +79,7 @@ namespace jsk_pcl_ros
           * Eigen::AngleAxisf(initial_rot[2],
                               Eigen::Vector3f::UnitZ());
       }
-    
+
       // parameter
       // backward compatibility
       double dimension_x, dimension_y, dimension_z;
@@ -105,6 +105,7 @@ namespace jsk_pcl_ros
       jsk_topic_tools::readVectorParameter(*pnh_, "initial_rot_list",
                                            initial_rot_list);
       jsk_topic_tools::readVectorParameter(*pnh_, "dimensions", dimensions);
+      jsk_topic_tools::readVectorParameter(*pnh_, "prefixes", prefixes_);
       if (initial_pos_list.size() != 0) {
         initializePoseList(initial_pos_list.size());
         for (size_t i = 0; i < initial_pos_list.size(); i++) {
@@ -163,6 +164,21 @@ namespace jsk_pcl_ros
                                                 dimensions[i][2]));
         }
       }
+
+      // ~prefixes
+      //   -> [left_hand, right_hand ...]
+      if (prefixes_.size() != 0) {
+        // error check
+        if (prefixes_.size() != dimensions.size()) {
+          NODELET_FATAL(
+            "the size of ~prefixes and ~dimensions are different");
+          return;
+        }
+        for(int i = 0; i < prefixes_.size(); i++){
+          multiple_pub_indices_.push_back(advertise<PCLIndicesMsg>(*pnh_, prefixes_[i]+std::string("/point_indices"), 1));
+        }
+      }
+
       jsk_topic_tools::readVectorParameter(*pnh_, "frame_id_list", frame_id_list_);
     }
     pub_camera_info_ = advertise<sensor_msgs::CameraInfo>(*pnh_, "output", 1);
@@ -179,7 +195,7 @@ namespace jsk_pcl_ros
       pose_list_[i].setIdentity();
     }
   }
-  
+
   void AttentionClipper::subscribe()
   {
     sub_ = pnh_->subscribe("input", 1, &AttentionClipper::clip, this);
@@ -206,7 +222,7 @@ namespace jsk_pcl_ros
     sub_pose_.shutdown();
     sub_box_.shutdown();
   }
-  
+
   Vertices AttentionClipper::cubeVertices(Eigen::Vector3f& dimension)
   {
     Vertices nonoffsetted_vertices;
@@ -296,7 +312,7 @@ namespace jsk_pcl_ros
     }
     pub_bounding_box_array_.publish(box_array);
   }
-  
+
   void AttentionClipper::computeROI(
     const sensor_msgs::CameraInfo::ConstPtr& msg,
     std::vector<cv::Point2d>& points,
@@ -318,7 +334,7 @@ namespace jsk_pcl_ros
       if (uv.x > msg->width) {
         uv.x = msg->width;
       }
-      
+
       if (uv.y > msg->height) {
         uv.y = msg->height;
       }
@@ -331,7 +347,7 @@ namespace jsk_pcl_ros
       if (min_v > uv.y) {
         min_v = uv.y;
       }
-      
+
       if (max_v < uv.y) {
         max_v = uv.y;
       }
@@ -392,7 +408,7 @@ namespace jsk_pcl_ros
         NODELET_DEBUG("max_points: [%f, %f, %f]", dimensions_[i][0]/2,
                       dimensions_[i][1]/2,
                       dimensions_[i][2]/2);
-        NODELET_DEBUG("min_points: [%f, %f, %f]", 
+        NODELET_DEBUG("min_points: [%f, %f, %f]",
                       -dimensions_[i][0]/2,
                       -dimensions_[i][1]/2,
                       -dimensions_[i][2]/2);
@@ -421,7 +437,14 @@ namespace jsk_pcl_ros
             non_nan_indices.indices.push_back(indices->indices[i]);
           }
         }
-        all_indices = addIndices(*all_indices, non_nan_indices);
+        if(prefixes_.size()){
+          PCLIndicesMsg indices_msg;
+          pcl_conversions::fromPCL(*indices, indices_msg);
+          indices_msg.header = msg->header;
+          multiple_pub_indices_[i].publish(indices_msg);
+        }
+
+        all_indices = addIndices(*all_indices, *indices);
       }
       if (negative_) {
         // Publish indices which is NOT inside of box.
@@ -507,7 +530,7 @@ namespace jsk_pcl_ros
       NODELET_ERROR("Transform error: %s", e.what());
     }
   }
-  
+
   void AttentionClipper::updateDiagnostic(
     diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
@@ -520,7 +543,7 @@ namespace jsk_pcl_ros
         "AttentionClipper", vital_checker_, stat);
     }
   }
-  
+
 }
 
 #include <pluginlib/class_list_macros.h>

@@ -428,7 +428,15 @@ namespace jsk_pcl_ros
         crop_box.setTranslation(pose_list_[i].translation());
         crop_box.setRotation(Eigen::Vector3f(roll, pitch, yaw));
         crop_box.filter(indices->indices);
-
+        // indices->indices may include NaN and inf points
+        // https://github.com/jsk-ros-pkg/jsk_recognition/issues/888
+        pcl::PointIndices non_nan_indices;
+        for (size_t i = 0; i < indices->indices.size(); i++) {
+          pcl::PointXYZ p = cloud->points[indices->indices[i]];
+          if (pcl_isfinite(p.x) && pcl_isfinite(p.y) && pcl_isfinite(p.z)) {
+            non_nan_indices.indices.push_back(indices->indices[i]);
+          }
+        }
         if(prefixes_.size()){
           PCLIndicesMsg indices_msg;
           pcl_conversions::fromPCL(*indices, indices_msg);

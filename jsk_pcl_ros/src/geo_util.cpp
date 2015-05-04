@@ -756,6 +756,9 @@ namespace jsk_pcl_ros
   
   std::vector<Polygon::Ptr> Polygon::decomposeToTriangles()
   {
+    if (cached_triangles_.size() != 0) {
+      return cached_triangles_;
+    }
     std::vector<Polygon::Ptr> ret;
 
     // if this polygon is triangle, return immediately
@@ -797,6 +800,7 @@ namespace jsk_pcl_ros
       }
       ret.push_back(Polygon::Ptr(new Polygon(vs, toCoefficients())));
     }
+    cached_triangles_ = ret;
     return ret;
   }
 

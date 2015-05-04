@@ -96,7 +96,7 @@ namespace jsk_pcl_ros
     double angle_offset_;
     tf::TransformListener* tf_listener_;
     bool use_imu_;
-    
+    int queue_size_;
   private:
     
   };

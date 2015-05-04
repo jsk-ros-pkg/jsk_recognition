@@ -439,12 +439,12 @@ namespace jsk_pcl_ros
         }
         if(prefixes_.size()){
           PCLIndicesMsg indices_msg;
-          pcl_conversions::fromPCL(*indices, indices_msg);
+          pcl_conversions::fromPCL(non_nan_indices, indices_msg);
           indices_msg.header = msg->header;
           multiple_pub_indices_[i].publish(indices_msg);
         }
 
-        all_indices = addIndices(*all_indices, *indices);
+        all_indices = addIndices(*all_indices, non_nan_indices);
       }
       if (negative_) {
         // Publish indices which is NOT inside of box.

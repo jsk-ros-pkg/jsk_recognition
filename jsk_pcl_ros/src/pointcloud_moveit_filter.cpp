@@ -32,7 +32,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-
+#include <jsk_topic_tools/log_utils.h>
 #include "jsk_pcl_ros/pointcloud_moveit_filter.h"
 
 namespace jsk_pcl_ros
@@ -68,7 +68,7 @@ namespace jsk_pcl_ros
       readXmlParam(params, "padding_scale", &scale_);
       readXmlParam(params, "point_subsample", &point_subsample_);
       if (!params.hasMember("filtered_cloud_topic")) {
-        ROS_ERROR("filtered_cloud_topic is required");
+        JSK_ROS_ERROR("filtered_cloud_topic is required");
         return false;
       }
       else {
@@ -83,7 +83,7 @@ namespace jsk_pcl_ros
     }
     catch (XmlRpc::XmlRpcException& ex)
     {
-      ROS_ERROR("XmlRpc Exception: %s", ex.getMessage().c_str());
+      JSK_ROS_ERROR("XmlRpc Exception: %s", ex.getMessage().c_str());
       return false;
     }
     
@@ -108,7 +108,7 @@ namespace jsk_pcl_ros
     ShapeTransformCache::const_iterator it = transform_cache_.find(h);
     if (it == transform_cache_.end())
     {
-      ROS_ERROR("Internal error. Shape filter handle %u not found", h);
+      JSK_ROS_ERROR("Internal error. Shape filter handle %u not found", h);
       return false;
     }
     transform = it->second;
@@ -121,7 +121,7 @@ namespace jsk_pcl_ros
     if (shape_mask_)
       h = shape_mask_->addShape(shape, scale_, padding_);
     else
-      ROS_ERROR("Shape filter not yet initialized!");
+      JSK_ROS_ERROR("Shape filter not yet initialized!");
     return h;
   }
 
@@ -158,7 +158,7 @@ namespace jsk_pcl_ros
             &PointCloudMoveitFilter::cloudMsgCallback<pcl::PointXYZ>,
             this, _1));
       }
-      ROS_INFO("Listening to '%s' using message filter with target frame '%s'",
+      JSK_ROS_INFO("Listening to '%s' using message filter with target frame '%s'",
                point_cloud_topic_.c_str(),
                point_cloud_filter_->getTargetFramesString().c_str());
     }
@@ -175,7 +175,7 @@ namespace jsk_pcl_ros
           boost::bind(&PointCloudMoveitFilter::cloudMsgCallback<pcl::PointXYZ>,
                       this, _1));
       }
-      ROS_INFO("Listening to '%s'", point_cloud_topic_.c_str());
+      JSK_ROS_INFO("Listening to '%s'", point_cloud_topic_.c_str());
     }
   }
 

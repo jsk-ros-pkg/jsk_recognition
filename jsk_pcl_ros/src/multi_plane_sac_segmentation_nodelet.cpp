@@ -56,7 +56,7 @@ namespace jsk_pcl_ros
     pnh_->param("use_imu_perpendicular", use_imu_perpendicular_, false);
     
     if (use_imu_perpendicular_ && use_imu_parallel_) {
-      NODELET_ERROR("Cannot use ~use_imu_perpendicular and ~use_imu_parallel at the same time");
+      JSK_NODELET_ERROR("Cannot use ~use_imu_perpendicular and ~use_imu_parallel at the same time");
       return;
     }
     if (use_imu_perpendicular_ || use_imu_parallel_) {
@@ -105,7 +105,7 @@ namespace jsk_pcl_ros
                                           this, _1, _2));
     }
     else if (use_clusters_) {
-      NODELET_INFO("use clusters");
+      JSK_NODELET_INFO("use clusters");
       sub_input_.subscribe(*pnh_, "input", 1);
       sub_clusters_.subscribe(*pnh_, "input_clusters", 1);
       sync_cluster_
@@ -164,7 +164,7 @@ namespace jsk_pcl_ros
     *rest_normal = *normal;
     int counter = 0;
     while (true) {
-      NODELET_INFO("apply RANSAC: %d", counter);
+      JSK_NODELET_INFO("apply RANSAC: %d", counter);
       ++counter;
       pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
       pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
@@ -216,7 +216,7 @@ namespace jsk_pcl_ros
         }
         seg.segment (*inliers, *coefficients);
       }
-      NODELET_INFO("inliers: %lu", inliers->indices.size());
+      JSK_NODELET_INFO("inliers: %lu", inliers->indices.size());
       if (inliers->indices.size() >= min_inliers_) {
         output_inliers.push_back(inliers);
         output_coefficients.push_back(coefficients);
@@ -250,7 +250,7 @@ namespace jsk_pcl_ros
         ex_normal.filter(*next_rest_normal);
       }
       if (next_rest_cloud->points.size() < min_points_) {
-        NODELET_INFO("no more enough points are left");
+        JSK_NODELET_INFO("no more enough points are left");
         return;
       }
       rest_cloud = next_rest_cloud;
@@ -363,13 +363,13 @@ namespace jsk_pcl_ros
       publishResult(msg->header, inliers, coefficients, convexes);                     
     }
     catch (tf2::ConnectivityException &e) {
-      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
     catch (tf2::InvalidArgumentException &e) {
-      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
     catch (tf2::ExtrapolationException& e) {
-      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
     
   }

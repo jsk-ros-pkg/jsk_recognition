@@ -84,7 +84,7 @@ namespace jsk_pcl_ros
           indices_msg.indices.push_back(i);
       pub_.publish(indices_msg);
     }else{
-      ROS_ERROR("Input Pointcloud is not organized");
+      JSK_ROS_ERROR("Input Pointcloud is not organized");
     }
   }
 }

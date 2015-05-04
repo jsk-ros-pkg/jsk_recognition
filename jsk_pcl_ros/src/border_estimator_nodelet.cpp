@@ -163,7 +163,7 @@ namespace jsk_pcl_ros
     const sensor_msgs::CameraInfo::ConstPtr& info)
   {
     if (msg->height == 1) {
-      NODELET_ERROR("[BorderEstimator::estimate] pointcloud must be organized");
+      JSK_NODELET_ERROR("[BorderEstimator::estimate] pointcloud must be organized");
       return;
     }
     pcl::RangeImagePlanar range_image;

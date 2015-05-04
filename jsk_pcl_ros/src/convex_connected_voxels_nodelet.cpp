@@ -76,7 +76,7 @@ namespace jsk_pcl_ros
     void ConvexConnectedVoxels::cloud_cb(
        const sensor_msgs::PointCloud2::ConstPtr &cloud_msg)
     {
-       // ROS_INFO("PROCESSING CLOUD CALLBACK");
+       // JSK_ROS_INFO("PROCESSING CLOUD CALLBACK");
        
        // boost::mutex::scoped_lock lock(this->mutex_);
        // vital_checker_->poke();
@@ -110,7 +110,7 @@ namespace jsk_pcl_ros
           all_indices.push_back((*it).second);
        }
 
-       // ROS_INFO("Size: %ld", _indices.size());
+       // JSK_ROS_INFO("Size: %ld", _indices.size());
 
        jsk_recognition_msgs::ClusterPointIndices ros_indices;
        ros_indices.cluster_indices = pcl_conversions::convertToROSPointIndices(

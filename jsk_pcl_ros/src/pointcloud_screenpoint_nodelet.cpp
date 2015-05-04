@@ -33,6 +33,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#include <jsk_topic_tools/log_utils.h>
 #include "jsk_pcl_ros/pointcloud_screenpoint.h"
 #include <pcl_conversions/pcl_conversions.h>
 
@@ -134,7 +135,7 @@ bool jsk_pcl_ros::PointcloudScreenpoint::checkpoint (pcl::PointCloud< pcl::Point
   if ((x < 0) || (y < 0) || (x >= in_pts.width) || (y >= in_pts.height)) return false;
   pcl::PointXYZ p = in_pts.points[in_pts.width * y + x];
   // search near points
-  ROS_INFO_STREAM("Request: screenpoint ("<<x<<","<<y<<")="<<"(" << p.x << ", " <<p.y << ", " <<p.z <<")");
+  JSK_ROS_INFO_STREAM("Request: screenpoint ("<<x<<","<<y<<")="<<"(" << p.x << ", " <<p.y << ", " <<p.z <<")");
   //return !(isnan (p.x) || ( (p.x == 0.0) && (p.y == 0.0) && (p.z == 0.0)));
 
   if ( !isnan (p.x) && ((p.x != 0.0) || (p.y != 0.0) || (p.z == 0.0)) ) {
@@ -150,7 +151,7 @@ bool jsk_pcl_ros::PointcloudScreenpoint::extract_point (pcl::PointCloud< pcl::Po
 
   x = reqx < 0.0 ? ceil(reqx - 0.5) : floor(reqx + 0.5);
   y = reqy < 0.0 ? ceil(reqy - 0.5) : floor(reqy + 0.5);
-  ROS_WARN("Request : %d %d", x, y);
+  JSK_ROS_WARN("Request : %d %d", x, y);
 
   if (checkpoint (in_pts, x, y, resx, resy, resz)) {
     return true;
@@ -185,10 +186,10 @@ bool jsk_pcl_ros::PointcloudScreenpoint::extract_point (pcl::PointCloud< pcl::Po
 bool jsk_pcl_ros::PointcloudScreenpoint::screenpoint_cb (jsk_pcl_ros::TransformScreenpoint::Request &req,
                                                          jsk_pcl_ros::TransformScreenpoint::Response &res)
 {
-  ROS_DEBUG("PointcloudScreenpoint::screenpoint_cb");
+  JSK_ROS_DEBUG("PointcloudScreenpoint::screenpoint_cb");
   boost::mutex::scoped_lock lock(this->mutex_callback_);
   if ( pts_.points.size() == 0 ) {
-    ROS_ERROR("no point cloud was received");
+    JSK_ROS_ERROR("no point cloud was received");
     return false;
   }
 
@@ -241,7 +242,7 @@ bool jsk_pcl_ros::PointcloudScreenpoint::screenpoint_cb (jsk_pcl_ros::TransformS
 }
 
 void jsk_pcl_ros::PointcloudScreenpoint::points_cb(const sensor_msgs::PointCloud2ConstPtr &msg) {
-  //ROS_DEBUG("PointcloudScreenpoint::points_cb");
+  //JSK_ROS_DEBUG("PointcloudScreenpoint::points_cb");
   //boost::mutex::scoped_lock lock(this->mutex_callback_);
   header_ = msg->header;
   pcl::fromROSMsg (*msg, pts_);

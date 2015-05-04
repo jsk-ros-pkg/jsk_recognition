@@ -138,7 +138,7 @@ namespace jsk_pcl_ros
                                                      odom_frame_));
     }
     catch (tf2::TransformException& e) {
-      NODELET_FATAL("Failed to lookup transformation: %s", e.what());
+      JSK_NODELET_FATAL("Failed to lookup transformation: %s", e.what());
     }
   }
 
@@ -146,15 +146,15 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    //NODELET_INFO("cloudCallback");
+    //JSK_NODELET_INFO("cloudCallback");
     latest_cloud_ = cloud_msg;
     if (localize_requested_){
-      NODELET_INFO("localization is requested");
+      JSK_NODELET_INFO("localization is requested");
       try {
         pcl::PointCloud<pcl::PointNormal>::Ptr
           local_cloud (new pcl::PointCloud<pcl::PointNormal>);
         pcl::fromROSMsg(*latest_cloud_, *local_cloud);
-        NODELET_INFO("waiting for tf transformation from %s tp %s",
+        JSK_NODELET_INFO("waiting for tf transformation from %s tp %s",
                      latest_cloud_->header.frame_id.c_str(),
                      global_frame_.c_str());
         if (tf_listener_->waitForTransform(
@@ -218,7 +218,7 @@ namespace jsk_pcl_ros
               pcl::PointCloud<pcl::PointNormal>::Ptr filtered_cloud
                 (new pcl::PointCloud<pcl::PointNormal>);
               pass.filter(*filtered_cloud);
-              NODELET_INFO("clipping: %lu -> %lu", sensor_cloud->points.size(), filtered_cloud->points.size());
+              JSK_NODELET_INFO("clipping: %lu -> %lu", sensor_cloud->points.size(), filtered_cloud->points.size());
               // Convert the pointcloud to global frame again
               pcl::PointCloud<pcl::PointNormal>::Ptr global_filtered_cloud
                 (new pcl::PointCloud<pcl::PointNormal>);
@@ -242,12 +242,12 @@ namespace jsk_pcl_ros
               Eigen::Vector3f transform_pos(transform.translation());
               float roll, pitch, yaw;
               pcl::getEulerAngles(transform, roll, pitch, yaw);
-              NODELET_INFO("aligned parameter --");
-              NODELET_INFO("  - pos: [%f, %f, %f]",
+              JSK_NODELET_INFO("aligned parameter --");
+              JSK_NODELET_INFO("  - pos: [%f, %f, %f]",
                            transform_pos[0],
                            transform_pos[1],
                            transform_pos[2]);
-              NODELET_INFO("  - rot: [%f, %f, %f]", roll, pitch, yaw);
+              JSK_NODELET_INFO("  - rot: [%f, %f, %f]", roll, pitch, yaw);
               pcl::PointCloud<pcl::PointNormal>::Ptr
                 transformed_input_cloud (new pcl::PointCloud<pcl::PointNormal>);
               if (use_normal_) {
@@ -274,24 +274,24 @@ namespace jsk_pcl_ros
               }
             }
             else {
-              NODELET_ERROR("Failed to call ~icp_align");
+              JSK_NODELET_ERROR("Failed to call ~icp_align");
               return;
             }
           }
           localize_requested_ = false;
         }
         else {
-          NODELET_WARN("No tf transformation is available");
+          JSK_NODELET_WARN("No tf transformation is available");
         }
       }
       catch (tf2::ConnectivityException &e)
       {
-        NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+        JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
         return;
       }
       catch (tf2::InvalidArgumentException &e)
       {
-        NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+        JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
         return;
       }
     }
@@ -306,7 +306,7 @@ namespace jsk_pcl_ros
     std_srvs::Empty::Request& req,
     std_srvs::Empty::Response& res)
   {
-    NODELET_INFO("localize!");
+    JSK_NODELET_INFO("localize!");
     boost::mutex::scoped_lock lock(mutex_);
     localize_requested_ = true;
     return true;

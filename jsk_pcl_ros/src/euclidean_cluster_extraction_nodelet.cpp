@@ -88,7 +88,7 @@ namespace jsk_pcl_ros
     result.header = input->header;
     if (cogs_.size() != 0 && cogs_.size() == cluster_indices.size()) {
       // tracking the labels
-      //ROS_INFO("computing distance matrix");
+      //JSK_ROS_INFO("computing distance matrix");
       // compute distance matrix
       // D[i][j] --> distance between the i-th previous cluster
       //             and the current j-th cluster
@@ -298,7 +298,7 @@ namespace jsk_pcl_ros
         for (size_t j = 0; j < new_cogs.size(); j++)
         {
           double distance = D[i * cogs.size() + j];
-          //ROS_INFO("distance %lux%lu: %f", i, j, distance);
+          //JSK_ROS_INFO("distance %lux%lu: %f", i, j, distance);
           if (distance < minimum_distance)
           {
             minimum_distance = distance;
@@ -309,7 +309,7 @@ namespace jsk_pcl_ros
       }
       if (minimum_distance > label_tracking_tolerance)
       {
-        // ROS_WARN("minimum tracking distance exceeds tolerance: %f > %f",
+        // JSK_ROS_WARN("minimum tracking distance exceeds tolerance: %f > %f",
         //          minimum_distance, label_tracking_tolerance);
         std::vector<int> dummy;
         return dummy;

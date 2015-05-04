@@ -78,7 +78,7 @@ namespace jsk_pcl_ros
     rip.createFromPointCloudWithFixedSize(*cloud, cloud->width, cloud->height,
 					  319.5, 239.5, 525.0, 525.0, static_cast<Eigen::Affine3f>(Eigen::Translation3f(0.0, 0.0, 0.0)));
     rip.setUnseenToMaxRange();
-    ROS_INFO_STREAM("Built range image " << rip.width << "x" << rip.height);
+    JSK_ROS_INFO_STREAM("Built range image " << rip.width << "x" << rip.height);
 
     pcl::NarfKeypoint narf;
     narf.setRangeImageBorderExtractor(&ribe);

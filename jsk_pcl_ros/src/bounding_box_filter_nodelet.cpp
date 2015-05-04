@@ -101,7 +101,7 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
 
     if (box_array_msg->boxes.size() != indices_msg->cluster_indices.size()) {
-      NODELET_ERROR(
+      JSK_NODELET_ERROR(
         "the size of message ~input_box and ~input_indices are different");
       return;
     }

@@ -45,7 +45,7 @@
 #include <boost/foreach.hpp>
 #include <boost/range/irange.hpp>
 #include <boost/math/special_functions/round.hpp>
-
+#include <jsk_topic_tools/log_utils.h>
 
 // #define DEBUG_GEO_UTIL
 namespace jsk_pcl_ros
@@ -203,14 +203,14 @@ namespace jsk_pcl_ros
         min_alpha = alpha;
       }
     }
-    // ROS_INFO("min: %f", min_alpha);
-    // ROS_INFO("max: %f", max_alpha);
+    // JSK_ROS_INFO("min: %f", min_alpha);
+    // JSK_ROS_INFO("max: %f", max_alpha);
     return boost::make_tuple<Point, Point>(min_alpha_point, max_alpha_point);
   }
 
   void Line::print()
   {
-    ROS_INFO("d: [%f, %f, %f], p: [%f, %f, %f]", direction_[0], direction_[1], direction_[2],
+    JSK_ROS_INFO("d: [%f, %f, %f], p: [%f, %f, %f]", direction_[0], direction_[1], direction_[2],
              origin_[0], origin_[1], origin_[2]);
   }
 
@@ -599,12 +599,12 @@ namespace jsk_pcl_ros
     Eigen::Vector3f OB = B - O;
     Eigen::Vector3f n = (OA.normalized()).cross(OB.normalized());
     if (n.norm() == 0) {
-      // ROS_ERROR("normal is 0");
-      // ROS_ERROR("O: [%f, %f, %f]", O[0], O[1], O[2]);
-      // ROS_ERROR("A: [%f, %f, %f]", A[0], A[1], A[2]);
-      // ROS_ERROR("B: [%f, %f, %f]", B[0], B[1], B[2]);
-      // ROS_ERROR("OA: [%f, %f, %f]", OA[0], OA[1], OA[2]);
-      // ROS_ERROR("OB: [%f, %f, %f]", OB[0], OB[1], OB[2]);
+      // JSK_ROS_ERROR("normal is 0");
+      // JSK_ROS_ERROR("O: [%f, %f, %f]", O[0], O[1], O[2]);
+      // JSK_ROS_ERROR("A: [%f, %f, %f]", A[0], A[1], A[2]);
+      // JSK_ROS_ERROR("B: [%f, %f, %f]", B[0], B[1], B[2]);
+      // JSK_ROS_ERROR("OA: [%f, %f, %f]", OA[0], OA[1], OA[2]);
+      // JSK_ROS_ERROR("OB: [%f, %f, %f]", OB[0], OB[1], OB[2]);
       //exit(1);
     }
     return n.normalized();
@@ -642,7 +642,7 @@ namespace jsk_pcl_ros
           rest_vertices.push_back(vertices_[i]);
         }
         else {
-          ROS_ERROR("removed: %lu", i);
+          JSK_ROS_ERROR("removed: %lu", i);
         }
       }
       i = nextIndex(i);
@@ -661,22 +661,22 @@ namespace jsk_pcl_ros
     Polygon::Ptr rest_candidate = candidate.get<1>();
     // first check direction
     Eigen::Vector3f the_direction = directionAtPoint(index);
-    //ROS_INFO("direction: [%f, %f, %f]", the_direction[0], the_direction[1], the_direction[2]);
+    //JSK_ROS_INFO("direction: [%f, %f, %f]", the_direction[0], the_direction[1], the_direction[2]);
     if (the_direction.norm() == 0.0) {
-      ROS_ERROR("malformed polygon");
+      JSK_ROS_ERROR("malformed polygon");
       exit(1);
     }
     if (direction.dot(the_direction) < 0) {
 #ifdef DEBUG_GEO_UTIL
-      ROS_INFO("triangle is not same direction");
-      ROS_INFO("direction: [%f, %f, %f]", direction[0], direction[1], direction[2]);
-      ROS_INFO("the_direction: [%f, %f, %f]",
+      JSK_ROS_INFO("triangle is not same direction");
+      JSK_ROS_INFO("direction: [%f, %f, %f]", direction[0], direction[1], direction[2]);
+      JSK_ROS_INFO("the_direction: [%f, %f, %f]",
                the_direction[0],
                the_direction[1],
                the_direction[2]);
       for (size_t i = 0; i < vertices_.size(); i++) {
         Eigen::Vector3f v = directionAtPoint(i);
-        ROS_INFO("the_direction[%lu]: [%f, %f, %f]",
+        JSK_ROS_INFO("the_direction[%lu]: [%f, %f, %f]",
                  i, v[0], v[1], v[2]);
       // other direction
       }
@@ -705,16 +705,16 @@ namespace jsk_pcl_ros
           Eigen::Vector3f Bcross = AB.normalized().cross(BP.normalized()).normalized();
           Eigen::Vector3f Ccross = BC.normalized().cross(CP.normalized()).normalized();
 #ifdef DEBUG_GEO_UTIL
-          ROS_INFO("P: [%f, %f, %f]", P[0], P[1], P[2]);
-          ROS_INFO("A: [%f, %f, %f]", A[0], A[1], A[2]);
-          ROS_INFO("B: [%f, %f, %f]", B[0], B[1], B[2]);
-          ROS_INFO("C: [%f, %f, %f]", C[0], C[1], C[2]);
-          ROS_INFO("Across: [%f, %f, %f]", Across[0], Across[1], Across[2]);
-          ROS_INFO("Bcross: [%f, %f, %f]", Bcross[0], Bcross[1], Bcross[2]);
-          ROS_INFO("Ccross: [%f, %f, %f]", Ccross[0], Ccross[1], Ccross[2]);
-          ROS_INFO("Across-Bcross: %f", Across.dot(Bcross));
-          ROS_INFO("Bcross-Ccross: %f", Bcross.dot(Ccross));
-          ROS_INFO("Ccross-Across: %f", Ccross.dot(Across));
+          JSK_ROS_INFO("P: [%f, %f, %f]", P[0], P[1], P[2]);
+          JSK_ROS_INFO("A: [%f, %f, %f]", A[0], A[1], A[2]);
+          JSK_ROS_INFO("B: [%f, %f, %f]", B[0], B[1], B[2]);
+          JSK_ROS_INFO("C: [%f, %f, %f]", C[0], C[1], C[2]);
+          JSK_ROS_INFO("Across: [%f, %f, %f]", Across[0], Across[1], Across[2]);
+          JSK_ROS_INFO("Bcross: [%f, %f, %f]", Bcross[0], Bcross[1], Bcross[2]);
+          JSK_ROS_INFO("Ccross: [%f, %f, %f]", Ccross[0], Ccross[1], Ccross[2]);
+          JSK_ROS_INFO("Across-Bcross: %f", Across.dot(Bcross));
+          JSK_ROS_INFO("Bcross-Ccross: %f", Bcross.dot(Ccross));
+          JSK_ROS_INFO("Ccross-Across: %f", Ccross.dot(Across));
 #endif
           if (((Across.dot(Bcross) > 0 &&
                 Bcross.dot(Ccross) > 0 &&
@@ -722,12 +722,12 @@ namespace jsk_pcl_ros
                (Across.dot(Bcross) < 0 &&
                 Bcross.dot(Ccross) < 0 &&
                 Ccross.dot(Across) < 0))) {
-            // ROS_ERROR("%lu -- %lu is inside", index, i);
+            // JSK_ROS_ERROR("%lu -- %lu is inside", index, i);
             return false;
           }
           // ConvexPolygon convex_triangle(triangle_candidate->vertices_);
           // if (convex_triangle.isInside(v)) {
-          //   //ROS_INFO("vertices is inside of the polygon");
+          //   //JSK_ROS_INFO("vertices is inside of the polygon");
           //   return false;
           // }
         }
@@ -741,7 +741,7 @@ namespace jsk_pcl_ros
 #ifdef DEBUG_GEO_UTIL
     for (size_t i = 0; i < getNumVertices(); i++) {
       Eigen::Vector3f n = directionAtPoint(i);
-      ROS_INFO("n[%lu] [%f, %f, %f]", i, n[0], n[1], n[2]);
+      JSK_ROS_INFO("n[%lu] [%f, %f, %f]", i, n[0], n[1], n[2]);
     }
 #endif
     Eigen::Vector3f n0 = directionAtPoint(0);
@@ -889,22 +889,22 @@ namespace jsk_pcl_ros
     Eigen::Vector3f p(pose.translation());
     Eigen::Vector3f output_p;
     projectOnPlane(p, output_p);
-    // ROS_INFO("[ConvexPolygon::projectOnPlane] p: [%f, %f, %f]",
+    // JSK_ROS_INFO("[ConvexPolygon::projectOnPlane] p: [%f, %f, %f]",
     //          p[0], p[1], p[2]);
-    // ROS_INFO("[ConvexPolygon::projectOnPlane] output_p: [%f, %f, %f]",
+    // JSK_ROS_INFO("[ConvexPolygon::projectOnPlane] output_p: [%f, %f, %f]",
     //          output_p[0], output_p[1], output_p[2]);
     Eigen::Quaternionf rot;
     rot.setFromTwoVectors(pose.rotation() * Eigen::Vector3f::UnitZ(),
                           coordinates().rotation() * Eigen::Vector3f::UnitZ());
     Eigen::Quaternionf coords_rot(coordinates().rotation());
     Eigen::Quaternionf pose_rot(pose.rotation());
-    // ROS_INFO("[ConvexPolygon::projectOnPlane] rot: [%f, %f, %f, %f]",
+    // JSK_ROS_INFO("[ConvexPolygon::projectOnPlane] rot: [%f, %f, %f, %f]",
     //          rot.x(), rot.y(), rot.z(), rot.w());
-    // ROS_INFO("[ConvexPolygon::projectOnPlane] coords_rot: [%f, %f, %f, %f]",
+    // JSK_ROS_INFO("[ConvexPolygon::projectOnPlane] coords_rot: [%f, %f, %f, %f]",
     //          coords_rot.x(), coords_rot.y(), coords_rot.z(), coords_rot.w());
-    // ROS_INFO("[ConvexPolygon::projectOnPlane] pose_rot: [%f, %f, %f, %f]",
+    // JSK_ROS_INFO("[ConvexPolygon::projectOnPlane] pose_rot: [%f, %f, %f, %f]",
     //          pose_rot.x(), pose_rot.y(), pose_rot.z(), pose_rot.w());
-    // ROS_INFO("[ConvexPolygon::projectOnPlane] normal: [%f, %f, %f]", normal_[0], normal_[1], normal_[2]);
+    // JSK_ROS_INFO("[ConvexPolygon::projectOnPlane] normal: [%f, %f, %f]", normal_[0], normal_[1], normal_[2]);
     // Eigen::Affine3f::Identity() *
     // output.translation() = Eigen::Translation3f(output_p);
     // output.rotation() = rot * pose.rotation();
@@ -912,7 +912,7 @@ namespace jsk_pcl_ros
     output = Eigen::Affine3f(rot * pose.rotation());
     output.pretranslate(output_p);
     // Eigen::Vector3f projected_point = output * Eigen::Vector3f(0, 0, 0);
-    // ROS_INFO("[ConvexPolygon::projectOnPlane] output: [%f, %f, %f]",
+    // JSK_ROS_INFO("[ConvexPolygon::projectOnPlane] output: [%f, %f, %f]",
     //          projected_point[0], projected_point[1], projected_point[2]);
   }
 
@@ -1061,9 +1061,9 @@ namespace jsk_pcl_ros
     Vertices new_vertices(vertices_.size());
     for (size_t i = 0; i < vertices_.size(); i++) {
       new_vertices[i] = (vertices_[i] - c).normalized() * distance + vertices_[i];
-      // ROS_INFO("old v: [%f, %f, %f]", vertices_[i][0], vertices_[i][1], vertices_[i][2]);
-      // ROS_INFO("new v: [%f, %f, %f]", new_vertices[i][0], new_vertices[i][1], new_vertices[i][2]);
-      // ROS_INFO("");
+      // JSK_ROS_INFO("old v: [%f, %f, %f]", vertices_[i][0], vertices_[i][1], vertices_[i][2]);
+      // JSK_ROS_INFO("new v: [%f, %f, %f]", new_vertices[i][0], new_vertices[i][1], new_vertices[i][2]);
+      // JSK_ROS_INFO("");
     }
     
     ConvexPolygon::Ptr ret (new ConvexPolygon(new_vertices));
@@ -1182,13 +1182,13 @@ namespace jsk_pcl_ros
   {
     bool result = cells_.find(pair) != cells_.end();
     // Verbosing for debug
-    // ROS_INFO("Checking index pair (%d, %d)", pair.get<0>(), pair.get<1>());
-    // ROS_INFO("Result: %d", result);
-    // ROS_INFO("cells are:");
+    // JSK_ROS_INFO("Checking index pair (%d, %d)", pair.get<0>(), pair.get<1>());
+    // JSK_ROS_INFO("Result: %d", result);
+    // JSK_ROS_INFO("cells are:");
     // for (IndexPairSet::iterator it = cells_.begin();
     //      it != cells_.end();
     //      ++it) {
-    //   ROS_INFO("  (%d, %d)", it->get<0>(), it->get<1>());
+    //   JSK_ROS_INFO("  (%d, %d)", it->get<0>(), it->get<1>());
     // }
     return result;
   }
@@ -1253,8 +1253,8 @@ namespace jsk_pcl_ros
       max_x = ::fmax(max_x, local_vertices[i][0]);
       max_y = ::fmax(max_y, local_vertices[i][1]);
     }
-    // ROS_INFO("x: [%f~%f]", min_x, max_x);
-    // ROS_INFO("y: [%f~%f]", min_y, max_y);
+    // JSK_ROS_INFO("x: [%f~%f]", min_x, max_x);
+    // JSK_ROS_INFO("y: [%f~%f]", min_y, max_y);
     // 3. compute candidates
     std::vector<Polygon::Ptr> triangles
       = intersect_polygon->decomposeToTriangles();
@@ -1338,7 +1338,7 @@ namespace jsk_pcl_ros
     jsk_recognition_msgs::SimpleOccupancyGrid ros_msg;
     std::vector<float> coeff;
     convex_->toCoefficients(coeff);
-    //ROS_INFO("coef: [%f, %f, %f, %f]", coeff[0], coeff[1], coeff[2], coeff[3]);
+    //JSK_ROS_INFO("coef: [%f, %f, %f, %f]", coeff[0], coeff[1], coeff[2], coeff[3]);
     ros_msg.coefficients[0] = coeff[0];
     ros_msg.coefficients[1] = coeff[1];
     ros_msg.coefficients[2] = coeff[2];
@@ -1363,19 +1363,19 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(global_chull_mutex);
     Plane plane = Plane(rosmsg.coefficients).transform(offset);
-    // ROS_INFO("[GridPlane::fromROSMsg] c: [%f, %f, %f, %f]",
+    // JSK_ROS_INFO("[GridPlane::fromROSMsg] c: [%f, %f, %f, %f]",
     //          rosmsg.coefficients[0],
     //          rosmsg.coefficients[1],
     //          rosmsg.coefficients[2],
     //          rosmsg.coefficients[3]);
-    // ROS_INFO("[GridPlane::fromROSMsg] transformed c: [%f, %f, %f, %f]",
+    // JSK_ROS_INFO("[GridPlane::fromROSMsg] transformed c: [%f, %f, %f, %f]",
     //          plane.toCoefficients()[0],
     //          plane.toCoefficients()[1],
     //          plane.toCoefficients()[2],
     //          plane.toCoefficients()[3]);
     Eigen::Affine3f plane_coords = plane.coordinates();
     Eigen::Vector3f plane_origin(plane_coords.translation());
-    // ROS_INFO_EIGEN_VECTOR3("[GridPlane::fromROSMsg] plane_origin",
+    // JSK_ROS_INFO_EIGEN_VECTOR3("[GridPlane::fromROSMsg] plane_origin",
     //                        plane_origin);
     pcl::PointCloud<pcl::PointNormal>::Ptr
       vertices (new pcl::PointCloud<pcl::PointNormal>);
@@ -1386,7 +1386,7 @@ namespace jsk_pcl_ros
       p.x = global_p[0];
       p.y = global_p[1];
       p.z = global_p[2];
-      // ROS_INFO("[%f, %f, %f] => [%f, %f, %f]",
+      // JSK_ROS_INFO("[%f, %f, %f] => [%f, %f, %f]",
       //          local_p[0], local_p[1], local_p[2],
       //          global_p[0], global_p[1], global_p[2]);
       vertices->points.push_back(p);
@@ -1403,7 +1403,7 @@ namespace jsk_pcl_ros
     ConvexPolygon::Ptr convex(new ConvexPolygon(convex_vertices));
     // Check orientation
     if (!convex->isSameDirection(plane)) {
-      // ROS_INFO("[GridPlane::fromROSMsg] flip convex");
+      // JSK_ROS_INFO("[GridPlane::fromROSMsg] flip convex");
       //convex = boost::make_shared<ConvexPolygon>(convex->flipConvex());
       Vertices reversed_convex_vertices;
       std::reverse_copy(convex_vertices.begin(), convex_vertices.end(),
@@ -1412,15 +1412,15 @@ namespace jsk_pcl_ros
     }
     Eigen::Vector3f convex_origin(convex->coordinates().translation());
     Eigen::Vector3f convex_normal = convex->getNormal();
-    // ROS_INFO_EIGEN_VECTOR3("[GridPlane::fromROSMsg] convex_origin",
+    // JSK_ROS_INFO_EIGEN_VECTOR3("[GridPlane::fromROSMsg] convex_origin",
     //                        convex_origin);
-    // ROS_INFO_EIGEN_VECTOR3("[GridPlane::fromROSMsg] convex_normal",
+    // JSK_ROS_INFO_EIGEN_VECTOR3("[GridPlane::fromROSMsg] convex_normal",
     //                        convex_normal);
     GridPlane ret(convex, rosmsg.resolution);
-    //ROS_INFO("resolution: %f", ret.resolution_);
+    //JSK_ROS_INFO("resolution: %f", ret.resolution_);
     ret.fillCellsFromPointCloud(vertices, 1000.0);
-    // ROS_INFO("cell size: %lu", ret.cells_.size());
-    // ROS_INFO("original cell size: %lu", rosmsg.cells.size());
+    // JSK_ROS_INFO("cell size: %lu", ret.cells_.size());
+    // JSK_ROS_INFO("original cell size: %lu", rosmsg.cells.size());
     return ret;
   }
 
@@ -1547,7 +1547,7 @@ namespace jsk_pcl_ros
         intersects.push_back(p);
       }
     }
-    //ROS_INFO("%lu intersects", intersects.size());
+    //JSK_ROS_INFO("%lu intersects", intersects.size());
     // Compute convex hull
     pcl::ConvexHull<pcl::PointXYZ> chull;
     pcl::PointCloud<pcl::PointXYZ>::Ptr chull_input

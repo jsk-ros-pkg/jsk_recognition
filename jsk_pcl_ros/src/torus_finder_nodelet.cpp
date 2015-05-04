@@ -186,7 +186,7 @@ namespace jsk_pcl_ros
     pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
     pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
     seg.segment(*inliers, *coefficients);
-    NODELET_INFO("input points: %lu", cloud->points.size());
+    JSK_NODELET_INFO("input points: %lu", cloud->points.size());
     if (inliers->indices.size() > min_size_) {
       // check direction. Torus should direct to origin of pointcloud
       // always.
@@ -230,7 +230,7 @@ namespace jsk_pcl_ros
     }
     else {
       
-      NODELET_INFO("failed to find torus");
+      JSK_NODELET_INFO("failed to find torus");
     }
   }
 }

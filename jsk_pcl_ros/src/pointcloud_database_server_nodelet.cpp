@@ -33,6 +33,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#include <jsk_topic_tools/log_utils.h>
 #include "jsk_pcl_ros/pointcloud_database_server.h"
 #include <jsk_topic_tools/rosparam_utils.h>
 #include <pcl/io/pcd_io.h>
@@ -75,7 +76,7 @@ namespace jsk_pcl_ros
     pub_points_ = pnh_->advertise<jsk_recognition_msgs::PointsArray>("output", 1);
     if (!jsk_topic_tools::readVectorParameter(*pnh_, "models", pcd_files)
         || pcd_files.size() == 0) {
-      NODELET_FATAL("no models is specified");
+      JSK_NODELET_FATAL("no models is specified");
       return;
     }
 

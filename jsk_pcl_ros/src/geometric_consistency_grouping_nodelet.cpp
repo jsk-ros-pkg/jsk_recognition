@@ -150,7 +150,7 @@ namespace jsk_pcl_ros
                 Eigen::aligned_allocator<Eigen::Matrix4f> > rototranslations;
     gc_clusterer.recognize(rototranslations, clustered_corrs);
     if (rototranslations.size() > 0) {
-      NODELET_INFO("detected %lu objects", rototranslations.size());
+      JSK_NODELET_INFO("detected %lu objects", rototranslations.size());
       Eigen::Matrix4f result_mat = rototranslations[0];
       Eigen::Affine3f affine(result_mat);
       geometry_msgs::PoseStamped ros_pose;
@@ -159,7 +159,7 @@ namespace jsk_pcl_ros
       pub_output_.publish(ros_pose);
     }
     else {
-      NODELET_WARN("Failed to find object");
+      JSK_NODELET_WARN("Failed to find object");
     }
     
   }

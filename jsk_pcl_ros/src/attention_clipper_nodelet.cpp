@@ -110,7 +110,7 @@ namespace jsk_pcl_ros
         initializePoseList(initial_pos_list.size());
         for (size_t i = 0; i < initial_pos_list.size(); i++) {
           if (initial_pos_list[i].size() != 3) {
-            NODELET_FATAL("element of ~initial_pos_list should be [x, y, z]");
+            JSK_NODELET_FATAL("element of ~initial_pos_list should be [x, y, z]");
             return;
           }
           pose_list_[i].translation() = Eigen::Vector3f(initial_pos_list[i][0],
@@ -124,7 +124,7 @@ namespace jsk_pcl_ros
         // error check
         if (initial_pos_list.size() != 0 &&
             initial_rot_list.size() != initial_pos_list.size()) {
-          NODELET_FATAL(
+          JSK_NODELET_FATAL(
             "the size of ~initial_pos_list and ~initial_rot_list are different");
           return;
         }
@@ -133,7 +133,7 @@ namespace jsk_pcl_ros
         }
         for (size_t i = 0; i < initial_rot_list.size(); i++) {
           if (initial_rot_list[i].size() != 3) {
-            NODELET_FATAL("element of ~initial_rot_list should be [rx, ry, rz]");
+            JSK_NODELET_FATAL("element of ~initial_rot_list should be [rx, ry, rz]");
             return;
           }
           pose_list_[i] = pose_list_[i]
@@ -151,7 +151,7 @@ namespace jsk_pcl_ros
         // error check
         if (pose_list_.size() != 0 &&
             pose_list_.size() != dimensions.size()) {
-          NODELET_FATAL(
+          JSK_NODELET_FATAL(
             "the size of ~dimensions and ~initial_pos_list or ~initial_rot_list are different");
           return;
         }
@@ -170,7 +170,7 @@ namespace jsk_pcl_ros
       if (prefixes_.size() != 0) {
         // error check
         if (prefixes_.size() != dimensions.size()) {
-          NODELET_FATAL(
+          JSK_NODELET_FATAL(
             "the size of ~prefixes and ~dimensions are different");
           return;
         }
@@ -375,7 +375,7 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    NODELET_DEBUG("clipPointcloud");
+    JSK_NODELET_DEBUG("clipPointcloud");
     vital_checker_->poke();
     try {
       // 1. transform pointcloud
@@ -405,10 +405,10 @@ namespace jsk_pcl_ros
         pcl::transformPointCloud(*input_cloud, *cloud, transform);
         pcl::CropBox<pcl::PointXYZ> crop_box(false);
         pcl::PointIndices::Ptr indices (new pcl::PointIndices);
-        NODELET_DEBUG("max_points: [%f, %f, %f]", dimensions_[i][0]/2,
+        JSK_NODELET_DEBUG("max_points: [%f, %f, %f]", dimensions_[i][0]/2,
                       dimensions_[i][1]/2,
                       dimensions_[i][2]/2);
-        NODELET_DEBUG("min_points: [%f, %f, %f]",
+        JSK_NODELET_DEBUG("min_points: [%f, %f, %f]",
                       -dimensions_[i][0]/2,
                       -dimensions_[i][1]/2,
                       -dimensions_[i][2]/2);
@@ -464,10 +464,10 @@ namespace jsk_pcl_ros
       publishBoundingBox(msg->header);
     }
     catch (tf2::ConnectivityException &e) {
-      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
     catch (tf2::InvalidArgumentException &e) {
-      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
   }
 
@@ -481,7 +481,7 @@ namespace jsk_pcl_ros
       cv::Mat all_mask_image = cv::Mat::zeros(msg->height, msg->width, CV_8UC1);
       bool model_success_p = model.fromCameraInfo(msg);
       if (!model_success_p) {
-        ROS_ERROR("failed to create camera model");
+        JSK_ROS_ERROR("failed to create camera model");
         return;
       }
       for (size_t i = 0; i < pose_list_.size(); i++) {
@@ -524,10 +524,10 @@ namespace jsk_pcl_ros
       publishBoundingBox(msg->header);
     }
     catch (tf2::ConnectivityException &e) {
-      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
     catch (tf2::InvalidArgumentException &e) {
-      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
   }
 

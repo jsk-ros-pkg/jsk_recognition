@@ -1211,6 +1211,9 @@ It can filters pointcloud based on **static** direction and direction based on i
 * `~direction` (Double Array, required):
 
    if `~use_imu` is false, the direction should be specified with this parmaeter.
+* `~queue_size` (Integer, default: `200`):
+
+   The length of input queue.
 
 ### jsk\_pcl/MultiPlaneExtraction
 ![MultiPlaneExtraction](images/multi_plane_extraction.png)

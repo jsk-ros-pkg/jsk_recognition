@@ -62,7 +62,7 @@ namespace jsk_pcl_ros
       boost::bind (
         &NormalDirectionFilter::configCallback, this, _1, _2);
     srv_->setCallback (f);
-    
+    pnh_->param("queue_size", queue_size_, 200);
     pub_ = advertise<PCLIndicesMsg>(*pnh_, "output", 1);
   }
 
@@ -82,7 +82,7 @@ namespace jsk_pcl_ros
     else {
       sub_input_.subscribe(*pnh_, "input", 1);
       sub_imu_.subscribe(*pnh_, "input_imu", 1);
-      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(200);
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
       sync_->connectInput(sub_input_, sub_imu_);
       sync_->registerCallback(boost::bind(&NormalDirectionFilter::filter, this, _1, _2));
     }

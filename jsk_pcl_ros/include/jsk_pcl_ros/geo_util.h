@@ -231,6 +231,9 @@ namespace jsk_pcl_ros
             const std::vector<float>& coefficients);
     virtual ~Polygon();
     virtual std::vector<Polygon::Ptr> decomposeToTriangles();
+    virtual void clearTriangleDecompositionCache() {
+      cached_triangles_.clear();
+    }
     virtual bool isTriangle();
     template <class PointT>
     typename pcl::PointCloud<PointT>::Ptr samplePoints(double grid_size)
@@ -257,6 +260,7 @@ namespace jsk_pcl_ros
       // ROS_INFO("max_y: %f", max_y);
       // Decompose into triangle first for optimization
       std::vector<Polygon::Ptr> triangles = decomposeToTriangles();
+
       for (double x = min_x; x < max_x; x += grid_size) {
         for (double y = min_y; y < max_y; y += grid_size) {
           Eigen::Vector3f candidate(x, y, 0);
@@ -311,9 +315,10 @@ namespace jsk_pcl_ros
         output.points[i] = p;
       }
     }
-
+    
   protected:
     Vertices vertices_;
+    std::vector<Polygon::Ptr> cached_triangles_;
   private:
     
   };
@@ -356,7 +361,7 @@ namespace jsk_pcl_ros
     double distanceFromVertices(const Eigen::Vector3f& p);
     geometry_msgs::Polygon toROSMsg();
   protected:
-    
+
   private:
   };
 

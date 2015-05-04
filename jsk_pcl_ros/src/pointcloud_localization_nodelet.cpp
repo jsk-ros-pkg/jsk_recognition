@@ -286,12 +286,12 @@ namespace jsk_pcl_ros
       }
       catch (tf2::ConnectivityException &e)
       {
-        NODELET_ERROR("Transform error: %s", e.what());
+        NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
         return;
       }
       catch (tf2::InvalidArgumentException &e)
       {
-        NODELET_ERROR("Transform error: %s", e.what());
+        NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
         return;
       }
     }

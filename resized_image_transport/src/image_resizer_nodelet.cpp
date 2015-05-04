@@ -116,7 +116,7 @@ namespace resized_image_transport
       raw_height_ = tmpmat.rows;
     }
     cv::resize(cv_img->image, tmpmat, cv::Size(width, height), 0, 0, interpolation_);
-    ROS_INFO("mat rows:%d cols:%d", tmpmat.rows, tmpmat.cols);
+    NODELET_DEBUG("mat rows:%d cols:%d", tmpmat.rows, tmpmat.cols);
     cv_img->image = tmpmat;
 
     dst_img = cv_img->toImageMsg();

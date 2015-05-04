@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.12 (2015-05-04)
+-------------------
 * [jsk_pcl_ros] fix attention clipper non nan part
 * [jsk_pcl_ros] Add getRadius method to Cylinder
 * [jsk_pcl_ros] Remove nan indices from AttentionClipper

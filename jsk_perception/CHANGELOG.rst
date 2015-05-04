@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.12 (2015-05-04)
+-------------------
 * Revert "[jsk_perception/point_pose_extractor] Use OpenCV's matcher class to estimate mathcing"
 * [jsk_perception/point_pose_extractor] Use OpenCV's matcher class to
   estimate mathcing

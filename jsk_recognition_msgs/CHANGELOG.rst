@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.12 (2015-05-04)
+-------------------
 * JSK Recognition Msg for handling Array of 2D Rects
 * Contributors: iKrishneel
 

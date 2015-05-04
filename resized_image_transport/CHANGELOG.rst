@@ -2,6 +2,15 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [resized_image_transport] Fix dynamic_reconfigure name in LogPolar
+* [resized_image_transport] Pass private nodehandle to dynamic_reconfigure to set handle the name of dynamic_reconfigrue in nodelet correctly
+* [resized_image_transport] change from linear to non-linear
+* rename to NODELET info and short fix
+* [resized_image_transport] image_resizer_nodelet resize rate feedback
+* Contributors: Kamada Hitoshi, Ryohei Ueda
+
 0.2.11 (2015-04-13)
 -------------------
 

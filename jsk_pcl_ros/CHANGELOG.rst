@@ -2,6 +2,57 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros] fix attention clipper non nan part
+* [jsk_pcl_ros] Add getRadius method to Cylinder
+* [jsk_pcl_ros] Remove nan indices from AttentionClipper
+* [jsk_pcl_ros] add prefixes params to publish each indices in AttentionClipper
+* [jsk_pcl_ros] Set pcl verbosity level to ERROR in multi_plane_extraction
+* [jsk_pcl_ros] Relay organized point cloud to "points" topic in stereo_reconstruction.launch
+* [jsk_pcl_ros] Ignore tf timestamp in TfTransformPointCloud if ~use_latest_tf is set
+* [jsk_pcl_ros] Add stereo_reconstruction.launch to reconstruct stereo
+  pointcloud from color images and depth image
+* [jsk_pcl_ros] Relay compressed images too in multi_resolution_organized_pointcloud.launch
+* [jsk_pcl_ros/mask_image_to_depth_considered_mask_image.cpp] add pcl::removeNaNFromPointCloud
+* [jsk_pcl_ros] Resize images in addition to pointcloud
+* change input image_points topic to /image_points_color
+* [jsk_pcl_ros]change icp result when none reference
+* [jsk_pcl_ros] remove nan point before icp kdtree search
+* chnage ros-param
+* change from linear to non-linear
+* modify extract_only_directed_region_of_close_mask_image.launch
+* add apply mask image publisher in mask_image_to_depth_considered_mask_image.cpp
+* change default parameter of extract num
+* rename to NODELET info and short fix
+* [jsk_pcl_ros] modify extract_only_directed_region_of_close_mask_image.launch
+* [jsk_pcl_ros] resize_points_publisher_nodelet resize rate feedback
+* [jsk_pcl_ros] mask_image_to_depth_considered_mask_image_nodelet resize rate feedback
+* change default parameter
+* rosparam to dynamic-reconfigure
+* check if current point is in directed region
+* change ROS_ERROR message
+* [jsk_pcl_ros] remove duplicate declaration of dependencies
+* enable selection of config direction method
+* ROS_INFO to ROS_ERROR
+* modify README and add image
+* [jsk_pcl_ros] add in_the_order_of_depth config
+* [jsk_pcl_ros] Add fisheye sphere pub
+* Changes to the syntax
+* Changes to syntax
+* Changes and modification of syntax
+* Changes as to the files
+* [jsk_pcl_ros] Use rectangle mode for image_view2 in extract_only_directed_region_of_close_mask_image.launch
+* add extract_only_directed_region_of_close_mask_image.launch
+* [jsk_pcl_ros] extract only directed region of mask image
+* changed config name and README
+* add dynamic reconfigure config
+* [jsk_pcl_ros] Add parameter to skip publishing assembled cloud
+* mask image to mask image which is at close range
+* Added a launch file for rtabmap mapping with multisense.
+* [jsk_pcl_ros] remove unneeded ROS_INFO line
+* Contributors: HRP2, Kamada Hitoshi, Kentaro Wada, Ryohei Ueda, Yohei Kakiuchi, Yoshimaru Tanaka, Yu Ohara, Yuto Inagaki, aginika, iKrishneel
+
 0.2.11 (2015-04-13)
 -------------------
 * [jsk_pcl_ros] Add argument to specify manager name to multi_resolution_pointcloud.launch

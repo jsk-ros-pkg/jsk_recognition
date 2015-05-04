@@ -2,6 +2,44 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Revert "[jsk_perception/point_pose_extractor] Use OpenCV's matcher class to estimate mathcing"
+* [jsk_perception/point_pose_extractor] Use OpenCV's matcher class to
+  estimate mathcing
+* [jsk_perception/point_pose_extractor] Add license header
+* [jsk_perception] Untabify point_pose_extractor.cpp
+* [jsk_perception/point_pose_extractor] Publish PoseStamped from
+  point_pose_extractor result
+* add ROS_INFO
+* [jsk_perception] check if pcam.intrinsicMatrix is valid
+* [jsk_perception] Download drill trained data in compiling time
+* Removed opencv non-free header directive
+  Corrected the nodelet name in CMakeLists.txt
+* Corrected the nodelet name in CMakeLists.txt
+* Removed opencv non-free header directive
+* Nodelet for Edge, Contour Thinning and Nodelet for Sliding window object detector
+* [jsk_perception] add Fisheye Rotate parameter
+* add upside down option to cfg
+* add Fisheye Ray Publisher
+* [jsk_perception] Add ProjectImagePoint nodelet to project image local
+  coordinates into 3-D point
+* [jsk_perception] Update README for fisheye
+* [jsk_perception] update Fisheye To Panoarama
+* [jsk_perception] Modify typo
+* [jsk_perception] Add MaskImageGenerator
+* add scale command to shrink the output and make faster
+* add cfg
+* [jsk_perception] Add fisheye rectify
+* [jsk_perception] Add attributeError message to image_publisher.py
+* [jsk_perception] Fix README.md about erode/dilate nodelets
+* Merge pull request #834 from wkentaro/update-readme-for-pr-811
+  [jsk_perception] Update README for histogram max_value of SingleChannelHistogram
+* [jsk_perception] Update README for histogram max_value of SingleChannelHistogram
+* [jsk_perception] Update README for iterations param of Dilate/ErodeMaskImage
+* [jsk_perception] Add iteration param to DilateMaskImage & ErodeMaskImage
+* Contributors: Kamada Hitoshi, Kentaro Wada, Ryohei Ueda, Yuto Inagaki, iKrishneel
+
 0.2.11 (2015-04-13)
 -------------------
 * add encoded points rate

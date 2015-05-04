@@ -231,11 +231,11 @@ class ImageRotateNodelet : public nodelet::Nodelet
     }
     catch (tf2::TransformException &e)
     {
-      NODELET_ERROR("Transform error: %s", e.what());
+      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
     catch (...)
     {
-      NODELET_ERROR("Transform error");
+      NODELET_ERROR("[%s] Transform error", __PRETTY_FUNCTION__);
     }
 
 

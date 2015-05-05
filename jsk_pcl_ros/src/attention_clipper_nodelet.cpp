@@ -463,6 +463,9 @@ namespace jsk_pcl_ros
       pub_indices_.publish(indices_msg);
       publishBoundingBox(msg->header);
     }
+    catch (tf2::TransformException &e) {
+      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+    } 
     catch (tf2::ConnectivityException &e) {
       NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
@@ -523,6 +526,9 @@ namespace jsk_pcl_ros
       pub_mask_.publish(mask_bridge.toImageMsg());
       publishBoundingBox(msg->header);
     }
+    catch (tf2::TransformException &e) {
+      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+    } 
     catch (tf2::ConnectivityException &e) {
       NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }

@@ -237,6 +237,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     double magnify_distance_;
     double distance_threshold_;
+    double normal_threshold_;
     double resolution_;
     int morphological_filter_size_;
     bool complete_footprint_region_;

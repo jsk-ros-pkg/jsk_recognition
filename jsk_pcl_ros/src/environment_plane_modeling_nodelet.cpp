@@ -112,6 +112,7 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     magnify_distance_ = config.magnify_distance;
     distance_threshold_ = config.distance_threshold;
+    normal_threshold_ = config.normal_threshold;
     resolution_ = config.resolution;
     morphological_filter_size_ = config.morphological_filter_size;
     erode_filter_size_ = config.erode_filter_size;
@@ -491,6 +492,7 @@ namespace jsk_pcl_ros
     for (size_t i = 0; i < convexes.size(); i++) {
       GridPlane::Ptr grid(new GridPlane(convexes[i], resolution_));
       grid->fillCellsFromPointCloud(cloud, distance_threshold_,
+                                    normal_threshold_,
                                     non_plane_indices);
       ret[i] = grid;
     }

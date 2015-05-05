@@ -72,6 +72,10 @@ namespace jsk_pcl_ros
     {
       NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
+    catch (...)
+    {
+      NODELET_ERROR("[%s] Unknown transform error", __PRETTY_FUNCTION__);
+    }
   }
 
   void TfTransformCloud::onInit(void)

@@ -90,7 +90,7 @@ namespace jsk_pcl_ros
      size_t i,
      pcl::PointCloud<pcl::PointXYZRGB>& debug_output);
     
-    virtual void computeBoundingBox
+    virtual bool computeBoundingBox
     (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
      const std_msgs::Header header,
      const Eigen::Vector4f center,

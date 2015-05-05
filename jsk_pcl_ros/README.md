@@ -2240,7 +2240,23 @@ Merges the voxels initially segmented using SuperVoxel Segmentation into high le
 
   Output is set of merged voxel indices
 
+### jsk\_pcl/NormalFlipToFrame
+Flip normal direction towards specified frame.
 
+#### Subscribing Topics
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Input pointcloud. It should have normal fields.
+
+#### Publishing Topics
+* `~output` (`sensor_msgs/PointCloud2`)
+
+  Output pointcloud whose normal vector orients toward specified frame by `~frame_id`.
+
+#### Parameters
+* `~frame_id` (String, **required**)
+
+  Frame ID which to be oriented by normal vectors.
 
 ## To Test Some Samples
 

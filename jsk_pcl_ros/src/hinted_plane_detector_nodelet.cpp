@@ -137,7 +137,7 @@ namespace jsk_pcl_ros {
     
     ConvexPolygon::Ptr convex;
     
-    if (detectHintPlane(hint_cloud, convex)) {
+    if (detectHintPlane(hint_cloud, convex) && convex) {
       if (detectLargerPlane(input_cloud, convex)) {
         NODELET_INFO("success to detect!");
       }

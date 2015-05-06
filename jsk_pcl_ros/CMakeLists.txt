@@ -331,6 +331,8 @@ jsk_pcl_nodelet(src/geometric_consistency_grouping_nodelet.cpp
   "jsk_pcl/GeometricConsistencyGrouping" "geometric_consistency_grouping")
 jsk_pcl_nodelet(src/convex_connected_voxels_nodelet.cpp
   "jsk_pcl/ConvexConnectedVoxels" "convex_connected_voxels")
+jsk_pcl_nodelet(src/normal_estimation_omp_nodelet.cpp
+  "jsk_pcl/NormalEstimationOMP" "normal_estimation_omp")
 
 add_library(jsk_pcl_ros_base SHARED
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp

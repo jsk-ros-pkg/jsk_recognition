@@ -49,6 +49,7 @@ namespace jsk_pcl_ros
     if (!pnh_->getParam("frame_id", frame_id_)) {
       NODELET_FATAL("[%s] no ~frame_id is specified", __PRETTY_FUNCTION__);
     }
+    pnh_->param("strict_tf", strict_tf_, false);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
   }
 
@@ -70,11 +71,18 @@ namespace jsk_pcl_ros
     pcl::fromROSMsg(*cloud_msg, *cloud);
     // check tf is available
     try {
+      ros::Time stamp;
+      if (strict_tf_) {
+        stamp = cloud_msg->header.stamp;
+      }
+      else {
+        stamp = ros::Time(0);
+      }
       tf::StampedTransform sensor_transform_tf
         = lookupTransformWithDuration(
           tf_listener_, cloud_msg->header.frame_id,
           frame_id_,
-          cloud_msg->header.stamp,
+          stamp,
           ros::Duration(1.0));
       Eigen::Affine3f sensor_transform;
       tf::transformTFToEigen(sensor_transform_tf, sensor_transform);

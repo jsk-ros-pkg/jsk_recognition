@@ -58,6 +58,7 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_;
     std::string frame_id_;
     tf::TransformListener* tf_listener_;
+    bool strict_tf_;
   private:
     
   };

@@ -1,0 +1,53 @@
+#ifndef _OBJECT_DETECTOR_TRAINER_H_
+#define _OBJECT_DETECTOR_TRAINER_H_
+
+#include <jsk_perception/histogram_of_oriented_gradients.h>
+// #include <object_recognition/local_binary_patterns.h>
+
+#include <ros/ros.h>
+#include <ros/console.h>
+
+#include <opencv2/opencv.hpp>
+
+#include <vector>
+#include <string>
+#include <fstream>
+
+namespace jsk_perception
+{
+   class SlidingWindowObjectDetectorTrainer: public HOGFeatureDescriptor
+                                             // public LocalBinaryPatterns
+   {
+    private:
+      ros::NodeHandle nh_;
+      
+      int swindow_x_;
+      int swindow_y_;
+      std::string dataset_path_;
+
+      std::string object_dataset_filename_;
+      std::string nonobject_dataset_filename_;
+      std::string trained_classifier_name_;
+   
+      boost::shared_ptr<cv::SVM> supportVectorMachine_;
+      void writeTrainingManifestToDirectory(cv::FileStorage &);
+      virtual void concatenateCVMat(
+         const cv::Mat &, const cv::Mat &, cv::Mat &, bool = true);
+
+    public:
+      SlidingWindowObjectDetectorTrainer();
+      // :DiagnosticNodelet("SlidingWindowObjectDetectorTrainer");
+      
+      virtual void trainObjectClassifier(
+         std::string, std::string);
+      virtual void readDataset(
+         std::string, cv::Mat &,
+         cv::Mat &, bool = false, const int = 0);
+      virtual void extractFeatures(
+         cv::Mat &, cv::Mat &);
+      virtual void trainBinaryClassSVM(
+         const cv::Mat &, const cv::Mat &);
+   };
+}
+
+#endif  // _OBJECT_DETECTOR_TRAINER_H_

@@ -8,16 +8,17 @@
   <arg name="create_manager" default="true" />
   <arg name="MANAGER" default="nodelet_manager" />
   <arg name="manager" default="/pcl_nodelet/$(arg MANAGER)" />
+  <arg name="MACHINE" default="" />
 
   <group ns="pcl_nodelet">
     <node if="$(arg create_manager)"
           pkg="nodelet" type="nodelet" name="$(arg MANAGER)"
-          args="manager" output="screen"/>
+          args="manager" output="screen" machine="$(arg MACHINE)"/>
 
     <node pkg="nodelet" type="nodelet"
           name="voxelgrid"
           args="load pcl/VoxelGrid $(arg manager)"
-          output="screen" clear_params="true">
+          output="screen" clear_params="true" machine="$(arg MACHINE)">
       <remap from="~input" to="$(arg input_point)" />
       <param name="filter_limit_min" value="$(arg voxel_grid_filter_limit_min)" />
       <param name="filter_limit_max" value="$(arg voxel_grid_filter_limit_max)" />
@@ -26,7 +27,7 @@
     <node pkg="nodelet" type="nodelet"
           name="octree_change_detector"
           args="load jsk_pcl/OctreeChangePublisher $(arg manager)"
-          output="screen" clear_params="true">
+          output="screen" clear_params="true" machine="$(arg MACHINE)">
       <remap from="~input" to="/pcl_nodelet/voxelgrid/output" />
       <param name="resolution" value="$(arg octree_resolution)"/>
       <param name="noise_filter" value="$(arg octree_noise_filter)"/>

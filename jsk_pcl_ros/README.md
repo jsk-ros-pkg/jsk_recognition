@@ -2285,6 +2285,9 @@ Flip normal direction towards specified frame.
 * `~frame_id` (String, **required**)
 
   Frame ID which to be oriented by normal vectors.
+* `~strict_tf` (Bool, default: `false`)
+
+  Do not take into account timestamp if this parameter is false.
 
 ## To Test Some Samples
 

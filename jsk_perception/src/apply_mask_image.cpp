@@ -91,7 +91,7 @@ namespace jsk_perception
     cv::Mat clipped_mask = mask(region);
     pub_mask_.publish(cv_bridge::CvImage(
                         mask_msg->header,
-                        mask_msg->encoding,
+                        "mono8",
                         clipped_mask).toImageMsg());
 
     cv::Mat clipped_image = image(region);

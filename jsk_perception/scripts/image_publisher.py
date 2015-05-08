@@ -23,8 +23,10 @@ rospy.init_node("image_publisher")
 dynamic_reconfigure.server.Server(ImagePublisherConfig, _cb_dyn_reconfig)
 file_name = rospy.get_param("~file_name")
 rate = rospy.Rate(rospy.get_param("rate", 1))
+if_publish_info = rospy.get_param("~publish_info", True)
 pub = rospy.Publisher("~output", Image, queue_size=1)
-pub_info = rospy.Publisher("~output/camera_info", CameraInfo, queue_size=1)
+if if_publish_info:
+    pub_info = rospy.Publisher("~output/camera_info", CameraInfo, queue_size=1)
 bridge = cv_bridge.CvBridge()
 while not rospy.is_shutdown():
     try:
@@ -40,7 +42,8 @@ while not rospy.is_shutdown():
         info.header.frame_id = "camera"
         info.width = image_message.width
         info.height = image_message.height
-        pub_info.publish(info)
+        if if_publish_info:
+            pub_info.publish(info)
         pub.publish(image_message)
     except IOError, e:
         rospy.loginfo("cannot read the image at %s" % file_name)

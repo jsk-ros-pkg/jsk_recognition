@@ -1,16 +1,28 @@
 #!/usr/bin/env python
+import os
 
 import cv2
 
 import rospy
 import cv_bridge
+import dynamic_reconfigure.server
+
+from jsk_perception.cfg import ImagePublisherConfig
 from sensor_msgs.msg import Image, CameraInfo
+
+
+def _cb_dyn_reconfig(config, level):
+    global file_name
+    file_name = config['file_name']
+    config['file_name'] = os.path.abspath(file_name)
+    return config
 
 
 rospy.init_node("image_publisher")
 
+dynamic_reconfigure.server.Server(ImagePublisherConfig, _cb_dyn_reconfig)
+file_name = rospy.get_param("~file_name")
 rate = rospy.Rate(rospy.get_param("rate", 1))
-file_name = rospy.get_param("~file_name", "image.png")
 pub = rospy.Publisher("~output", Image, queue_size=1)
 pub_info = rospy.Publisher("~output/camera_info", CameraInfo, queue_size=1)
 bridge = cv_bridge.CvBridge()
@@ -18,6 +30,8 @@ while not rospy.is_shutdown():
     try:
         now = rospy.Time.now()
         image = cv2.imread(file_name)
+        if image is None:
+            raise IOError('image value is None')
         image_message = bridge.cv2_to_imgmsg(image, encoding="bgr8")
         image_message.header.stamp = now
         image_message.header.frame_id = "camera"

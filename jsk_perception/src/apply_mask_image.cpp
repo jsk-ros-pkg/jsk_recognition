@@ -34,6 +34,7 @@
  *********************************************************************/
 
 #include "jsk_perception/apply_mask_image.h"
+#include <sensor_msgs/image_encodings.h>
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include "jsk_perception/image_utils.h"
@@ -77,8 +78,25 @@ namespace jsk_perception
     const sensor_msgs::Image::ConstPtr& mask_msg)
   {
     vital_checker_->poke();
-    cv::Mat image = cv_bridge::toCvShare(image_msg,
-                                         image_msg->encoding)->image;
+    cv::Mat image;
+    if (sensor_msgs::image_encodings::hasAlpha(image_msg->encoding)) {
+      // BGRA or RGBA
+      cv::Mat image_raw = cv_bridge::toCvShare(image_msg,
+                                               image_msg->encoding)->image;
+      if (image_msg->encoding == sensor_msgs::image_encodings::BGRA8 ||
+          image_msg->encoding == sensor_msgs::image_encodings::BGRA16) {
+        cv::cvtColor(image_raw, image, cv::COLOR_BGRA2BGR);
+        image_raw.copyTo(image);
+      } else if (image_msg->encoding == sensor_msgs::image_encodings::RGBA8 ||
+                 image_msg->encoding == sensor_msgs::image_encodings::RGBA16) {
+        cv::cvtColor(image_raw, image, cv::COLOR_RGBA2BGR);
+        image_raw.copyTo(image);
+      }
+    } else {
+      // BGR, RGB or GRAY
+      image = cv_bridge::toCvShare(image_msg,
+                                   image_msg->encoding)->image;
+    }
     cv::Mat mask = cv_bridge::toCvShare(mask_msg, "mono8")->image;
     if (image.cols != mask.cols || image.rows != mask.rows) {
       NODELET_ERROR("size of image and mask is different");
@@ -97,10 +115,21 @@ namespace jsk_perception
     cv::Mat clipped_image = image(region);
     cv::Mat masked_image;
     clipped_image.copyTo(masked_image, clipped_mask);
+    cv::Mat output_image;
+    if (image_msg->encoding == sensor_msgs::image_encodings::BGRA8 ||
+        image_msg->encoding == sensor_msgs::image_encodings::BGRA16) {
+      cv::cvtColor(masked_image, output_image, cv::COLOR_BGR2BGRA);
+    } else if (image_msg->encoding == sensor_msgs::image_encodings::RGBA8 ||
+               image_msg->encoding == sensor_msgs::image_encodings::RGBA16) {
+      cv::cvtColor(masked_image, output_image, cv::COLOR_RGB2RGBA);
+    } else {
+      // BGR, RGB or GRAY
+      masked_image.copyTo(output_image);
+    }
     pub_image_.publish(cv_bridge::CvImage(
                          image_msg->header,
                          image_msg->encoding,
-                         masked_image).toImageMsg());
+                         output_image).toImageMsg());
   }
 }
 

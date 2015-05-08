@@ -73,6 +73,18 @@ namespace jsk_perception
     else if (image_msg->encoding == sensor_msgs::image_encodings::RGB8) {
       cv::cvtColor(image, hsv_image, CV_RGB2HSV);
     }
+    else if (image_msg->encoding == sensor_msgs::image_encodings::BGRA8 ||
+             image_msg->encoding == sensor_msgs::image_encodings::BGRA16) {
+      cv::Mat tmp_image;
+      cv::cvtColor(image, tmp_image, CV_BGRA2BGR);
+      cv::cvtColor(tmp_image, hsv_image, CV_BGR2HSV);
+    }
+    else if (image_msg->encoding == sensor_msgs::image_encodings::RGBA8 ||
+             image_msg->encoding == sensor_msgs::image_encodings::RGBA16) {
+      cv::Mat tmp_image;
+      cv::cvtColor(image, tmp_image, CV_RGBA2BGR);
+      cv::cvtColor(tmp_image, hsv_image, CV_BGR2HSV);
+    }
     else {
       NODELET_ERROR("unsupported format to HSV: %s", image_msg->encoding.c_str());
       return;

@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, JSK Lab
+ *  Copyright (c) 2015, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,49 +33,45 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <jsk_topic_tools/log_utils.h>
-#include "jsk_pcl_ros/tf_listener_singleton.h"
-#include <boost/format.hpp>
 
+#ifndef JSK_PCL_ROS_NORMAL_ESTIMATION_OMP_H_
+#define JSK_PCL_ROS_NORMAL_ESTIMATION_OMP_H_
+
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <pcl_ros/FeatureConfig.h>
+#include <dynamic_reconfigure/server.h>
+#include <pcl_conversions/pcl_conversions.h>
 namespace jsk_pcl_ros
 {
-  tf::TransformListener* TfListenerSingleton::getInstance()
+  class NormalEstimationOMP: public jsk_topic_tools::DiagnosticNodelet
   {
-    boost::mutex::scoped_lock lock(mutex_);
-    if (!instance_) {
-      JSK_ROS_INFO("instantiating tf::TransformListener");
-      instance_ = new tf::TransformListener(ros::Duration(30.0));
-    }
-    return instance_;
-  }
+  public:
+    typedef boost::shared_ptr<NormalEstimationOMP> Ptr;
+    typedef pcl_ros::FeatureConfig Config;
+    NormalEstimationOMP(): DiagnosticNodelet("NormalEstimationOMP") {}
+    
+  protected:
 
-  void TfListenerSingleton::destroy()
-  {
-    boost::mutex::scoped_lock lock(mutex_);
-    if (instance_) {
-      delete instance_;
-    }
-  }
-
-  tf::StampedTransform lookupTransformWithDuration(
-    tf::TransformListener* listener,
-    const std::string& from_frame,
-    const std::string& to_frame,
-    const ros::Time& stamp,
-    ros::Duration duration)
-  {
-    if (listener->waitForTransform(from_frame, to_frame, stamp, duration)) {
-      tf::StampedTransform transform;
-      listener->lookupTransform(
-        from_frame, to_frame, stamp, transform);
-      return transform;
-    }
-    throw tf2::TransformException(
-      (boost::format("Failed to lookup transformation from %s to %s")
-       % from_frame.c_str() % to_frame.c_str()).str().c_str());
-      
-  }
-  
-  tf::TransformListener* TfListenerSingleton::instance_;
-  boost::mutex TfListenerSingleton::mutex_;
+    virtual void onInit();
+    virtual void subscribe();
+    virtual void unsubscribe();
+    virtual void estimate(
+      const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
+    virtual void configCallback(
+      Config& config, uint32_t level);
+    
+    boost::mutex mutex_;
+    ros::Publisher pub_;
+    ros::Publisher pub_with_xyz_;
+    ros::Subscriber sub_;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    int k_;
+    double search_radius_;
+    
+  private:
+    
+  };
 }
+
+#endif

@@ -62,6 +62,10 @@
          type="jsk_pcl_ros::PointCloudLocalization"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_pcl/NormalFlipToFrame"
+         type="jsk_pcl_ros::NormalFlipToFrame"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_pcl/FeatureRegistration"
          type="jsk_pcl_ros::FeatureRegistration"
          base_class_type="nodelet::Nodelet">
@@ -482,6 +486,11 @@
          base_class_type="nodelet::Nodelet">
     <description>
       jsk_pcl_ros::ColorizeMapRandomForest
+    </description>
+  </class>
+  <class name="jsk_pcl/NormalEstimationOMP" type="jsk_pcl_ros::NormalEstimationOMP"
+         base_class_type="nodelet::Nodelet">
+    <description>
     </description>
   </class>
   <!-- <class name="jsk_pcl/OrganizePointCloud" type="jsk_pcl_ros::OrganizePointCloud" -->

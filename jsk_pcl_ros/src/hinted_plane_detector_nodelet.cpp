@@ -50,6 +50,7 @@
 namespace jsk_pcl_ros {
   
   void HintedPlaneDetector::onInit() {
+    pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
     DiagnosticNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -137,7 +138,7 @@ namespace jsk_pcl_ros {
     
     ConvexPolygon::Ptr convex;
     
-    if (detectHintPlane(hint_cloud, convex)) {
+    if (detectHintPlane(hint_cloud, convex) && convex) {
       if (detectLargerPlane(input_cloud, convex)) {
         JSK_NODELET_INFO("success to detect!");
       }

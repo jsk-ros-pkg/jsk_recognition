@@ -83,7 +83,7 @@ namespace jsk_pcl_ros
       assemble_cloud_srv_
         = pnh_->serviceClient<laser_assembler::AssembleScans2>("assemble_scans2");
       cloud_pub_
-        = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_cloud", 1);
+        = pnh_->advertise<sensor_msgs::PointCloud2>("output_cloud", 1);
     }
     prev_angle_ = 0;
     prev_velocity_ = 0;
@@ -92,17 +92,17 @@ namespace jsk_pcl_ros
       "clear_cache", &TiltLaserListener::clearCacheCallback,
       this);
     trigger_pub_ = advertise<jsk_recognition_msgs::TimeRange>(*pnh_, "output", 1);
-    
+    sub_ = pnh_->subscribe("input", 1, &TiltLaserListener::jointCallback, this);
   }
 
   void TiltLaserListener::subscribe()
   {
-    sub_ = pnh_->subscribe("input", 1, &TiltLaserListener::jointCallback, this);
+    
   }
 
   void TiltLaserListener::unsubscribe()
   {
-    sub_.shutdown();
+
   }
 
   void TiltLaserListener::updateDiagnostic(

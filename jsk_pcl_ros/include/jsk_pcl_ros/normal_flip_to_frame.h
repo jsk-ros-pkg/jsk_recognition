@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, JSK Lab
+ *  Copyright (c) 2015, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,49 +33,35 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <jsk_topic_tools/log_utils.h>
+
+#ifndef JSK_PCL_ROS_NORMAL_FLIP_TO_FRAME_H_
+#define JSK_PCL_ROS_NORMAL_FLIP_TO_FRAME_H_
+
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <sensor_msgs/PointCloud2.h>
 #include "jsk_pcl_ros/tf_listener_singleton.h"
-#include <boost/format.hpp>
 
 namespace jsk_pcl_ros
 {
-  tf::TransformListener* TfListenerSingleton::getInstance()
+  class NormalFlipToFrame: public jsk_topic_tools::DiagnosticNodelet
   {
-    boost::mutex::scoped_lock lock(mutex_);
-    if (!instance_) {
-      JSK_ROS_INFO("instantiating tf::TransformListener");
-      instance_ = new tf::TransformListener(ros::Duration(30.0));
-    }
-    return instance_;
-  }
+  public:
+    typedef boost::shared_ptr<NormalFlipToFrame> Ptr;
+    NormalFlipToFrame(): DiagnosticNodelet("NormalFlipToFrame") {}
+  protected:
+    virtual void onInit();
+    virtual void subscribe();
+    virtual void unsubscribe();
+    virtual void flip(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
 
-  void TfListenerSingleton::destroy()
-  {
-    boost::mutex::scoped_lock lock(mutex_);
-    if (instance_) {
-      delete instance_;
-    }
-  }
-
-  tf::StampedTransform lookupTransformWithDuration(
-    tf::TransformListener* listener,
-    const std::string& from_frame,
-    const std::string& to_frame,
-    const ros::Time& stamp,
-    ros::Duration duration)
-  {
-    if (listener->waitForTransform(from_frame, to_frame, stamp, duration)) {
-      tf::StampedTransform transform;
-      listener->lookupTransform(
-        from_frame, to_frame, stamp, transform);
-      return transform;
-    }
-    throw tf2::TransformException(
-      (boost::format("Failed to lookup transformation from %s to %s")
-       % from_frame.c_str() % to_frame.c_str()).str().c_str());
-      
-  }
-  
-  tf::TransformListener* TfListenerSingleton::instance_;
-  boost::mutex TfListenerSingleton::mutex_;
+    ros::Publisher pub_;
+    ros::Subscriber sub_;
+    std::string frame_id_;
+    tf::TransformListener* tf_listener_;
+    bool strict_tf_;
+  private:
+    
+  };
 }
+
+#endif

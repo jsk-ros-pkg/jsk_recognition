@@ -186,6 +186,7 @@ namespace jsk_pcl_ros
       = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "output/box_array", 1);
     pub_mask_ = advertise<sensor_msgs::Image>(*pnh_, "output/mask", 1);
     pub_indices_ = advertise<PCLIndicesMsg>(*pnh_, "output/point_indices", 1);
+    pub_cluster_indices_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output/cluster_point_indices", 1);
   }
 
   void AttentionClipper::initializePoseList(size_t num)
@@ -382,6 +383,7 @@ namespace jsk_pcl_ros
       // 2. crop by boundingbox
       // 3. publish indices
       pcl::PointIndices::Ptr all_indices (new pcl::PointIndices);
+      jsk_recognition_msgs::ClusterPointIndices cluster_indices_msg;
       std::map<std::string, tf::StampedTransform> transforms;
       for (size_t i = 0; i < pose_list_.size(); i++) {
         std::string frame_id = frame_id_list_[i];
@@ -437,9 +439,10 @@ namespace jsk_pcl_ros
             non_nan_indices.indices.push_back(indices->indices[i]);
           }
         }
+	PCLIndicesMsg indices_msg;
+	pcl_conversions::fromPCL(non_nan_indices, indices_msg);
+	cluster_indices_msg.cluster_indices.push_back(indices_msg);
         if(prefixes_.size()){
-          PCLIndicesMsg indices_msg;
-          pcl_conversions::fromPCL(non_nan_indices, indices_msg);
           indices_msg.header = msg->header;
           multiple_pub_indices_[i].publish(indices_msg);
         }
@@ -459,10 +462,14 @@ namespace jsk_pcl_ros
       }
       PCLIndicesMsg indices_msg;
       pcl_conversions::fromPCL(*all_indices, indices_msg);
-      indices_msg.header = msg->header;
+      cluster_indices_msg.header = indices_msg.header = msg->header;
       pub_indices_.publish(indices_msg);
+      pub_cluster_indices_.publish(cluster_indices_msg);
       publishBoundingBox(msg->header);
     }
+    catch (tf2::TransformException &e) {
+      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+    } 
     catch (tf2::ConnectivityException &e) {
       JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
@@ -523,6 +530,9 @@ namespace jsk_pcl_ros
       pub_mask_.publish(mask_bridge.toImageMsg());
       publishBoundingBox(msg->header);
     }
+    catch (tf2::TransformException &e) {
+      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+    } 
     catch (tf2::ConnectivityException &e) {
       JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }

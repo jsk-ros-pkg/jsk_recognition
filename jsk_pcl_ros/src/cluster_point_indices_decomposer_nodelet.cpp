@@ -161,7 +161,7 @@ namespace jsk_pcl_ros
     return nearest_index;
   }
 
-  void ClusterPointIndicesDecomposer::computeBoundingBox
+  bool ClusterPointIndicesDecomposer::computeBoundingBox
   (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
    const std_msgs::Header header,
    const Eigen::Vector4f center,
@@ -239,6 +239,7 @@ namespace jsk_pcl_ros
             }
             else {
               JSK_NODELET_ERROR("Too small indices for PCA computation");
+              return false;
             }
           }
             
@@ -281,6 +282,7 @@ namespace jsk_pcl_ros
     bounding_box.dimensions.x = xwidth;
     bounding_box.dimensions.y = ywidth;
     bounding_box.dimensions.z = zwidth;
+    return true;
   }
 
   void ClusterPointIndicesDecomposer::addToDebugPointCloud
@@ -360,7 +362,11 @@ namespace jsk_pcl_ros
       addToDebugPointCloud(segmented_cloud, i, debug_output);
       
       jsk_recognition_msgs::BoundingBox bounding_box;
-      computeBoundingBox(segmented_cloud, input->header, center, planes, coefficients, bounding_box);
+      bool successp = computeBoundingBox(
+        segmented_cloud, input->header, center, planes, coefficients, bounding_box);
+      if (!successp) {
+        return;
+      }
       bounding_box_array.boxes.push_back(bounding_box);
     }
     

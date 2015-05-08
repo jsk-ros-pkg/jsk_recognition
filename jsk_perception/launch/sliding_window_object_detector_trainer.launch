@@ -1,0 +1,17 @@
+<launch>
+  <node pkg="jsk_perception" type="sliding_window_object_detector_trainer_node"
+	name="sliding_window_object_detector_trainer" output="screen">
+    <param name="dataset_path" value="dataset/" type="str" />
+    <remap from="dataset_path" to="/sliding_window_object_detector_trainer/dataset_path"/>
+    <param name="object_dataset_filename" value="train.txt" type="str" />
+    <remap from="object_dataset_filename" to="/sliding_window_object_detector_trainer/object_dataset_filename"/>
+    <param name="nonobject_dataset_filename" value="negative.txt" type="str" />
+    <remap from="nonobject_dataset_filename" to="/sliding_window_object_detector_trainer/nonobject_dataset_filename" />
+    <param name="classifier_name" value="drill_svm.xml" type="str" />
+    <remap from="classifier_name" to="/sliding_window_object_detector_trainer/classifier_name"/>
+    <param name="swindow_x" value="32" type="double" />
+    <remap from="swindow_x" to="/sliding_window_object_detector_trainer/swindow_x"/>
+    <param name="swindow_y" value="64" type="double" />
+    <remap from="swindow_y" to="/sliding_window_object_detector_trainer/swindow_y"/>
+  </node>
+</launch>

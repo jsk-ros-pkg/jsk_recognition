@@ -1283,6 +1283,16 @@ namespace jsk_pcl_ros
     double distance_threshold,
     std::set<int>& non_plane_indices)
   {
+    fillCellsFromPointCloud(
+      cloud, distance_threshold, M_PI / 2.0, non_plane_indices);
+  }
+  
+  void GridPlane::fillCellsFromPointCloud(
+    pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
+    double distance_threshold,
+    double normal_threshold,
+    std::set<int>& non_plane_indices)
+  {
     Eigen::Affine3f local_coordinates = convex_->coordinates();
     Eigen::Affine3f inv_local_coordinates = local_coordinates.inverse();
     std::vector<Polygon::Ptr> triangles = convex_->decomposeToTriangles();
@@ -1307,9 +1317,15 @@ namespace jsk_pcl_ros
     prism_extract.segment(output_indices);
     std::set<int> output_set(output_indices.indices.begin(),
                              output_indices.indices.end());
+    Eigen::Vector3f n = convex_->getNormal();
     for (size_t i = 0; i < cloud->points.size(); i++) {
       if (output_set.find(i) != output_set.end()) {
-        non_plane_indices.insert(i);
+        // check normal
+        pcl::PointNormal p = cloud->points[i];
+        Eigen::Vector3f n_p = p.getNormalVector3fMap();
+        if (std::abs(n.dot(n_p)) > cos(normal_threshold)) {
+          non_plane_indices.insert(i);
+        }
       }
     }
 

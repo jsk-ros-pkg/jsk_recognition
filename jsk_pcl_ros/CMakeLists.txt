@@ -137,6 +137,8 @@ endif ($ENV{TRAVIS_JOB_ID})
 # pcl_ros::Filter based class is not working...
 # https://github.com/ros-perception/perception_pcl/issues/9
 jsk_pcl_nodelet(src/pointcloud_screenpoint_nodelet.cpp "jsk_pcl/PointcloudScreenpoint" "pointcloud_screenpoint")
+jsk_pcl_nodelet(src/normal_flip_to_frame_nodelet.cpp "jsk_pcl/NormalFlipToFrame"
+  "normal_flip_to_frame")
 jsk_pcl_nodelet(src/particle_filter_tracking_nodelet.cpp "jsk_pcl/ParticleFilterTracking" "particle_filter_tracking")
 jsk_pcl_nodelet(src/voxel_grid_downsample_manager_nodelet.cpp "jsk_pcl/VoxelGridDownsampleManager" "voxel_grid_downsample_manager")
 jsk_pcl_nodelet(src/voxel_grid_downsample_decoder_nodelet.cpp "jsk_pcl/VoxelGridDownsampleDecoder" "voxel_grid_downsample_decoder")
@@ -329,6 +331,8 @@ jsk_pcl_nodelet(src/geometric_consistency_grouping_nodelet.cpp
   "jsk_pcl/GeometricConsistencyGrouping" "geometric_consistency_grouping")
 jsk_pcl_nodelet(src/convex_connected_voxels_nodelet.cpp
   "jsk_pcl/ConvexConnectedVoxels" "convex_connected_voxels")
+jsk_pcl_nodelet(src/normal_estimation_omp_nodelet.cpp
+  "jsk_pcl/NormalEstimationOMP" "normal_estimation_omp")
 
 add_library(jsk_pcl_ros_base SHARED
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp

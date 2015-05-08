@@ -79,8 +79,7 @@ namespace jsk_perception
     vital_checker_->poke();
     cv::Mat image = cv_bridge::toCvShare(image_msg,
                                          image_msg->encoding)->image;
-    cv::Mat mask = cv_bridge::toCvShare(mask_msg,
-                                        mask_msg->encoding)->image;
+    cv::Mat mask = cv_bridge::toCvShare(mask_msg, "mono8")->image;
     if (image.cols != mask.cols || image.rows != mask.rows) {
       NODELET_ERROR("size of image and mask is different");
       NODELET_ERROR("image: %dx%dx", image.cols, image.rows);

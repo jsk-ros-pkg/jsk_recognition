@@ -90,7 +90,7 @@ namespace jsk_pcl_ros
         longest_index = i;
       }
     }
-    NODELET_INFO_STREAM("longest index is: " << longest_index);
+    JSK_NODELET_INFO_STREAM("longest index is: " << longest_index);
     HandleType handle_type;
     // detect the handle type
     if (longest_index == 2) {
@@ -128,7 +128,7 @@ namespace jsk_pcl_ros
                                        const jsk_recognition_msgs::BoundingBox::ConstPtr& box_msg)
   {
     if (handle_type == NO_HANDLE) {
-      NODELET_ERROR("failed to estimate handle");
+      JSK_NODELET_ERROR("failed to estimate handle");
     }
     else if (handle_type == HANDLE_SMALL_ENOUGH_LIE_ON_PLANE_Y_LONGEST) {
       handleSmallEnoughLieOnPlane(cloud_msg, box_msg, true);

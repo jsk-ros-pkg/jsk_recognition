@@ -194,13 +194,13 @@ namespace jsk_pcl_ros
         ros_out.row_step = ros_out.point_step * ros_out.width;
         ros_out.is_dense = input->is_dense;
 #if DEBUG
-        NODELET_INFO("%dx%d (%d %d)(%d %d) -> %dx%d %d", width,height, ox, oy, sx, sy,
+        JSK_NODELET_INFO("%dx%d (%d %d)(%d %d) -> %dx%d %d", width,height, ox, oy, sx, sy,
                  ros_out.width, ros_out.height, ex_indices.size());
 #endif
         pub_.publish(ros_out);
-        NODELET_INFO("%s:: input header stamp is [%f]", getName().c_str(),
+        JSK_NODELET_INFO("%s:: input header stamp is [%f]", getName().c_str(),
                      input->header.stamp.toSec());
-        NODELET_INFO("%s:: output header stamp is [%f]", getName().c_str(),
+        JSK_NODELET_INFO("%s:: output header stamp is [%f]", getName().c_str(),
                      ros_out.header.stamp.toSec());
       }
       

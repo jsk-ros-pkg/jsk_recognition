@@ -116,7 +116,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (!polygons_) {
-      NODELET_ERROR("no polygon is ready");
+      JSK_NODELET_ERROR("no polygon is ready");
       polygon_aligned_pub_.publish(pose_msg);
       return;
     }
@@ -193,7 +193,7 @@ namespace jsk_pcl_ros
     geometry_msgs::PoseArray pose_array;
     pose_array.header = poly_msg->header;
     if (!polygons_) {
-      NODELET_ERROR("no polygon is ready");
+      JSK_NODELET_ERROR("no polygon is ready");
       return;
     }
     std::vector<ConvexPolygon::Ptr> convexes
@@ -205,7 +205,7 @@ namespace jsk_pcl_ros
       Eigen::Vector3f pose_point(p.x, p.y, p.z);
       int min_index = findNearestConvex(pose_point, convexes);
       if (min_index == -1) {
-        NODELET_ERROR("cannot project onto convex");
+        JSK_NODELET_ERROR("cannot project onto convex");
         return;
       }
       else {
@@ -246,7 +246,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (!polygons_) {
-      NODELET_ERROR("no polygon is ready");
+      JSK_NODELET_ERROR("no polygon is ready");
       convex_aligned_pub_.publish(pose_msg);
       return;
     }
@@ -332,15 +332,15 @@ namespace jsk_pcl_ros
     }
     catch (tf2::ConnectivityException &e)
     {
-      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
     catch (tf2::InvalidArgumentException &e)
     {
-      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
     catch (tf2::ExtrapolationException &e)
     {
-      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
     return result;
   }

@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-
+#include <jsk_topic_tools/log_utils.h>
 #include "jsk_pcl_ros/particle_filter_tracking.h"
 #include <pcl/tracking/impl/distance_coherence.hpp>
 #include <pcl/tracking/impl/approx_nearest_pair_point_cloud_coherence.hpp>
@@ -203,7 +203,7 @@ namespace jsk_pcl_ros
     default_step_covariance_[5] = config.default_step_covariance_yaw;
     if (tracker_ || reversed_tracker_) 
     {
-      NODELET_INFO("update tracker parameter");
+      JSK_NODELET_INFO("update tracker parameter");
       tracker_set_step_noise_covariance(default_step_covariance_);
       tracker_set_iteration_num(iteration_num_);
       tracker_set_resample_likelihood_thr(resample_likelihood_thr_);
@@ -323,11 +323,11 @@ namespace jsk_pcl_ros
         tracker_reset_tracking();
       }
       track_target_set_ = true;
-      NODELET_INFO("RESET TARGET MODEL");
+      JSK_NODELET_INFO("RESET TARGET MODEL");
     }
     else {
       track_target_set_ = false;
-      NODELET_ERROR("TARGET MODEL POINTS SIZE IS 0 !! Stop TRACKING");
+      JSK_NODELET_ERROR("TARGET MODEL POINTS SIZE IS 0 !! Stop TRACKING");
     }
   } 
   
@@ -345,7 +345,7 @@ namespace jsk_pcl_ros
       //frame_id_ = base_frame_id_;
     }
     catch(tf::TransformException ex) {
-      NODELET_ERROR("%s",ex.what());
+      JSK_NODELET_ERROR("%s",ex.what());
       tfTransformation = tf::Transform(tf::Quaternion(0, 0, 0, 1));
     }
     tfTransformation = tf::Transform(tfTransformationStamped.getBasis(),
@@ -421,7 +421,7 @@ namespace jsk_pcl_ros
     const Eigen::Affine3f& trans)
   {
     Eigen::Vector3f pos = trans.translation();
-    NODELET_INFO("trans: [%f, %f, %f]", pos[0], pos[1], pos[2]);
+    JSK_NODELET_INFO("trans: [%f, %f, %f]", pos[0], pos[1], pos[2]);
     if (reversed_) {
       reversed_tracker_->setTrans(trans);
     }

@@ -193,7 +193,7 @@ namespace jsk_pcl_ros
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr hull_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
       geometry_msgs::Polygon the_polygon = polygons->polygons[plane_i].polygon;
       if (the_polygon.points.size() <= 2) {
-        NODELET_WARN("too small polygon");
+        JSK_NODELET_WARN("too small polygon");
         continue;
       }
       // compute centroid first

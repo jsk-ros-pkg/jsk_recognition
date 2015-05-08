@@ -115,13 +115,13 @@ namespace jsk_pcl_ros
       new_histogram = USE_HUE_AND_SATURATION;
     }
     else {
-      ROS_WARN("unknown histogram method");
+      JSK_ROS_WARN("unknown histogram method");
       return;
     }
     if (new_histogram != policy_) {
       policy_ = new_histogram;
       reference_set_ = false;
-      ROS_WARN("histogram method is reset, please specify histogram again");
+      JSK_ROS_WARN("histogram method is reset, please specify histogram again");
     }
   }
 
@@ -132,7 +132,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (!reference_set_) {
-      NODELET_WARN("reference histogram is not available yet");
+      JSK_NODELET_WARN("reference histogram is not available yet");
       return;
     }
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr pcl_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
@@ -185,7 +185,7 @@ namespace jsk_pcl_ros
     unsigned long count_points=0;
     for (size_t i = 0; i < input_indices->cluster_indices.size(); i++) {
       const double coefficient = bhattacharyyaCoefficient(histograms[i], reference_histogram_);
-      NODELET_DEBUG_STREAM("coefficient: " << i << "::" << coefficient);
+      JSK_NODELET_DEBUG_STREAM("coefficient: " << i << "::" << coefficient);
       if(publish_colored_cloud_){
 	int tmp_point_size = input_indices->cluster_indices[i].indices.size();
 	double color_standard;
@@ -250,7 +250,7 @@ namespace jsk_pcl_ros
         }
       }
     }
-    NODELET_DEBUG("best coefficients: %f, %d", best_coefficient, best_index);
+    JSK_NODELET_DEBUG("best coefficients: %f, %d", best_coefficient, best_index);
     //show coefficience with points
     sensor_msgs::PointCloud2 p_msg;
     if(publish_colored_cloud_){
@@ -277,7 +277,7 @@ namespace jsk_pcl_ros
   double ColorHistogramMatcher::bhattacharyyaCoefficient(const std::vector<float>& a, const std::vector<float>& b)
   {
     if (a.size() != b.size()) {
-      NODELET_ERROR("the bin size of histograms do not match");
+      JSK_NODELET_ERROR("the bin size of histograms do not match");
       return 0.0;
     }
     double sum = 0.0;
@@ -362,7 +362,7 @@ namespace jsk_pcl_ros
     pcl::PointCloudXYZRGBtoXYZHSV(pcl_cloud, hsv_cloud);
     computeHistogram(hsv_cloud, hist, policy_);
     reference_histogram_ = hist;
-    NODELET_INFO("update reference");
+    JSK_NODELET_INFO("update reference");
     reference_set_ = true;
     jsk_recognition_msgs::ColorHistogram ros_histogram;
     ros_histogram.header = input_cloud->header;
@@ -374,7 +374,7 @@ namespace jsk_pcl_ros
     const jsk_recognition_msgs::ColorHistogram::ConstPtr& input_histogram)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    NODELET_INFO("update reference");
+    JSK_NODELET_INFO("update reference");
     reference_histogram_ = input_histogram->histogram;
     reference_histogram_pub_.publish(input_histogram);
     reference_set_ = true;

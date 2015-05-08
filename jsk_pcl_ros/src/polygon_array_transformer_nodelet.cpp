@@ -45,7 +45,7 @@ namespace jsk_pcl_ros
   {
     ConnectionBasedNodelet::onInit();
     if (!pnh_->getParam("frame_id", frame_id_)) {
-      NODELET_FATAL("~frame_id is not specified");
+      JSK_NODELET_FATAL("~frame_id is not specified");
       return;
     }
     listener_ = TfListenerSingleton::getInstance();
@@ -105,7 +105,7 @@ namespace jsk_pcl_ros
     result.header.stamp = coefficient.header.stamp;
     result.header.frame_id = frame_id_;
     transformed_plane.toCoefficients(result.values);
-    NODELET_DEBUG("[%f, %f, %f, %f] => [%f, %f, %f, %f]",
+    JSK_NODELET_DEBUG("[%f, %f, %f, %f] => [%f, %f, %f, %f]",
                   coefficient.values[0], coefficient.values[1], coefficient.values[2], coefficient.values[3],
                   result.values[0], result.values[1], result.values[2], result.values[3]);
   }
@@ -135,7 +135,7 @@ namespace jsk_pcl_ros
                                           const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients)
   {
     if (polygons->polygons.size() != coefficients->coefficients.size()) {
-      NODELET_ERROR("the size of polygons(%lu) does not match with the size of coefficients(%lu)",
+      JSK_NODELET_ERROR("the size of polygons(%lu) does not match with the size of coefficients(%lu)",
                     polygons->polygons.size(),
                     coefficients->coefficients.size());
       return;
@@ -152,7 +152,7 @@ namespace jsk_pcl_ros
       PCLModelCoefficientMsg coefficient = coefficients->coefficients[i];
 
       if (polygon.header.frame_id != coefficient.header.frame_id) {
-        NODELET_ERROR("frame_id of polygon[%lu] is %s and frame_id of coefficient[%lu] is %s, they does not point to the same frame_id",
+        JSK_NODELET_ERROR("frame_id of polygon[%lu] is %s and frame_id of coefficient[%lu] is %s, they does not point to the same frame_id",
                       i, polygon.header.frame_id.c_str(),
                       i, coefficient.header.frame_id.c_str());
         return;
@@ -199,7 +199,7 @@ namespace jsk_pcl_ros
         }
       }
       else {
-        NODELET_ERROR("cannot lookup transform from %s to %s at %f",
+        JSK_NODELET_ERROR("cannot lookup transform from %s to %s at %f",
                       frame_id_.c_str(), coefficient.header.frame_id.c_str(),
                       coefficient.header.stamp.toSec());
         return;

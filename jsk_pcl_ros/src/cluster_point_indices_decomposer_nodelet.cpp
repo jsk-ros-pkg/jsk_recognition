@@ -58,7 +58,7 @@ namespace jsk_pcl_ros
     if (!pnh_->getParam("tf_prefix", tf_prefix_))
     {
       if (publish_tf_) {
-        ROS_WARN("~tf_prefix is not specified, using %s", getName().c_str());
+        JSK_ROS_WARN("~tf_prefix is not specified, using %s", getName().c_str());
       }
       tf_prefix_ = getName();
     }
@@ -178,7 +178,7 @@ namespace jsk_pcl_ros
       int nearest_plane_index = findNearestPlane(center, planes, coefficients);
       if (nearest_plane_index == -1) {
         segmented_cloud_transformed = segmented_cloud;
-        NODELET_ERROR("no planes to align boxes are given");
+        JSK_NODELET_ERROR("no planes to align boxes are given");
       }
       else {
         Eigen::Vector3f normal, z_axis;
@@ -203,7 +203,7 @@ namespace jsk_pcl_ros
             isnan(rotation_axis[1]) ||
             isnan(rotation_axis[2])) {
           segmented_cloud_transformed = segmented_cloud;
-          NODELET_ERROR("cannot compute angle to align the point cloud: [%f, %f, %f], [%f, %f, %f]",
+          JSK_NODELET_ERROR("cannot compute angle to align the point cloud: [%f, %f, %f], [%f, %f, %f]",
                         z_axis[0], z_axis[1], z_axis[2],
                         normal[0], normal[1], normal[2]);
         }
@@ -238,7 +238,7 @@ namespace jsk_pcl_ros
               }
             }
             else {
-              NODELET_ERROR("Too small indices for PCA computation");
+              JSK_NODELET_ERROR("Too small indices for PCA computation");
               return false;
             }
           }
@@ -394,7 +394,7 @@ namespace jsk_pcl_ros
         for (size_t i = publishers_.size(); i < num; i++)
         {
             std::string topic_name = (boost::format("output%02u") % (i)).str();
-            ROS_INFO("advertising %s", topic_name.c_str());
+            JSK_ROS_INFO("advertising %s", topic_name.c_str());
             ros::Publisher publisher = pnh_->advertise<sensor_msgs::PointCloud2>(topic_name, 1);
             publishers_.push_back(publisher);
         }

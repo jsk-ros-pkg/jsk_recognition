@@ -50,7 +50,7 @@ namespace jsk_pcl_ros
                                               "joint_names",
                                               joint_names_) ||
         joint_names_.size() == 0) {
-      NODELET_FATAL("NO ~joint_names is specified");
+      JSK_NODELET_FATAL("NO ~joint_names is specified");
       return;
     }
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
@@ -76,14 +76,14 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    NODELET_DEBUG("Pointcloud Callback");
+    JSK_NODELET_DEBUG("Pointcloud Callback");
     vital_checker_->poke();
     if (isStatic(msg->header.stamp)) {
-      ROS_DEBUG("static");
+      JSK_ROS_DEBUG("static");
       pub_.publish(msg);
     }
     else {
-      ROS_DEBUG("not static");
+      JSK_ROS_DEBUG("not static");
     }
     diagnostic_updater_->update();
   }
@@ -125,7 +125,7 @@ namespace jsk_pcl_ros
         min_diff = diff;
       }
     }
-    NODELET_DEBUG("min_diff: %f", min_diff);
+    JSK_NODELET_DEBUG("min_diff: %f", min_diff);
     return min_value;
   }
   
@@ -133,11 +133,11 @@ namespace jsk_pcl_ros
     const sensor_msgs::JointState::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    NODELET_DEBUG("jointCallback");
+    JSK_NODELET_DEBUG("jointCallback");
     // filter out joints based on joint names
     std::vector<double> joints = filterJointState(msg);
     if (joints.size() == 0) {
-      NODELET_DEBUG("cannot find the joints from the input message");
+      JSK_NODELET_DEBUG("cannot find the joints from the input message");
       return;
     }
     joint_vital_->poke();
@@ -146,7 +146,7 @@ namespace jsk_pcl_ros
     if (previous_joints_.size() > 0) {
       // compute velocity
       for (size_t i = 0; i < previous_joints_.size(); i++) {
-        // NODELET_INFO("[%s] diff: %f", joint_names_[i].c_str(),
+        // JSK_NODELET_INFO("[%s] diff: %f", joint_names_[i].c_str(),
         //              fabs(previous_joints_[i] - joints[i]));
         if (fabs(previous_joints_[i] - joints[i]) > eps_) {
           buf_.push_front(boost::make_tuple<ros::Time, bool>(

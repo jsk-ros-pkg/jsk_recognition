@@ -72,7 +72,7 @@ namespace jsk_pcl_ros
           minimum_index = j;
         }
       }
-      // ROS_INFO("%lu => %lu", i, minimum_index);
+      // JSK_ROS_INFO("%lu => %lu", i, minimum_index);
       output_array[i] = indices_array[minimum_index];
       z_values[minimum_index] = DBL_MAX;
     }

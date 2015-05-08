@@ -33,6 +33,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#include <jsk_topic_tools/log_utils.h>
 #include "jsk_pcl_ros/tf_listener_singleton.h"
 #include <boost/format.hpp>
 
@@ -42,7 +43,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (!instance_) {
-      ROS_INFO("instantiating tf::TransformListener");
+      JSK_ROS_INFO("instantiating tf::TransformListener");
       instance_ = new tf::TransformListener(ros::Duration(30.0));
     }
     return instance_;

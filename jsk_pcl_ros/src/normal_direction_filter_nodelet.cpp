@@ -47,7 +47,7 @@ namespace jsk_pcl_ros
     if (!use_imu_) {
       std::vector<double> direction;
       if (!jsk_topic_tools::readVectorParameter(*pnh_, "direction", direction)) {
-        NODELET_ERROR("You need to specify ~direction");
+        JSK_NODELET_ERROR("You need to specify ~direction");
         return;
       }
       pointFromVectorToVector<std::vector<double>, Eigen::Vector3f>(
@@ -157,15 +157,15 @@ namespace jsk_pcl_ros
     }
     catch (tf2::ConnectivityException &e)
     {
-      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
     catch (tf2::InvalidArgumentException &e)
     {
-      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
     catch (tf2::ExtrapolationException &e)
     {
-      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
   }
   

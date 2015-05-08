@@ -73,9 +73,9 @@ namespace jsk_pcl_ros
     cv_ptr = cv_bridge::toCvCopy(depth_image, sensor_msgs::image_encodings::TYPE_32FC1);
     cv::Mat cv_depth_image = cv_ptr->image;
     double depth_from_depth_sensor = cv_depth_image.at<float>((int)uv_point->point.y, (int)uv_point->point.x);
-    NODELET_INFO("timestamp diff is %f", (depth_image->header.stamp - uv_point->header.stamp).toSec());
-    NODELET_INFO("(u, v) = (%d, %d)", (int)uv_point->point.x, (int)uv_point->point.y);
-    NODELET_INFO("(z, d) = (%f, %f)", uv_point->point.z, depth_from_depth_sensor);
+    JSK_NODELET_INFO("timestamp diff is %f", (depth_image->header.stamp - uv_point->header.stamp).toSec());
+    JSK_NODELET_INFO("(u, v) = (%d, %d)", (int)uv_point->point.x, (int)uv_point->point.y);
+    JSK_NODELET_INFO("(z, d) = (%f, %f)", uv_point->point.z, depth_from_depth_sensor);
     if (! isnan(depth_from_depth_sensor)) {
       jsk_recognition_msgs::DepthErrorResult result;
       result.header.frame_id = depth_image->header.frame_id;

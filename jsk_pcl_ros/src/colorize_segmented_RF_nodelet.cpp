@@ -31,6 +31,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
+#include <jsk_topic_tools/log_utils.h>
 #include "jsk_pcl_ros/colorize_segmented_RF.h"
 #include <pluginlib/class_list_macros.h>
 
@@ -51,19 +52,19 @@ namespace jsk_pcl_ros
     sum_num_ = 100;
     if (!pnh_->getParam("rs", tmp_radius))
       {
-        ROS_WARN("~rs is not specified, set 1");
+        JSK_ROS_WARN("~rs is not specified, set 1");
       }
     if (!pnh_->getParam("po", tmp_pass))
       {
-        ROS_WARN("~po is not specified, set 1");
+        JSK_ROS_WARN("~po is not specified, set 1");
       }
     if (!pnh_->getParam("po2", tmp_pass2))
       {
-        ROS_WARN("~po is not specified, set 1");
+        JSK_ROS_WARN("~po is not specified, set 1");
       }
     if (!pnh_->getParam("sum_num", sum_num_))
       {
-        ROS_WARN("~sum_num is not specified, set 1");
+        JSK_ROS_WARN("~sum_num is not specified, set 1");
       }
 
     radius_search_ = tmp_radius;
@@ -102,7 +103,7 @@ namespace jsk_pcl_ros
     int cluster_num = 0;
     for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); ++it)
       {
-        ROS_INFO("Calculate time %d / %ld", cluster_num  , cluster_indices.size());
+        JSK_ROS_INFO("Calculate time %d / %ld", cluster_num  , cluster_indices.size());
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_cluster (new pcl::PointCloud<pcl::PointXYZRGB>);
         for (std::vector<int>::const_iterator pit = it->indices.begin (); pit != it->indices.end (); pit++)
           cloud_cluster->points.push_back (cloud->points[*pit]);
@@ -211,14 +212,14 @@ namespace jsk_pcl_ros
           if(client.call(srv))
             if (atoi(srv.response.classifications[0].c_str()) == 0)
               result_counter += 1;
-          ROS_INFO("response result : %s", srv.response.classifications[0].c_str());
+          JSK_ROS_INFO("response result : %s", srv.response.classifications[0].c_str());
         }
 
         if(result_counter >= call_counter / 2){
-          ROS_INFO("Cloth %d / %d", result_counter, call_counter);
+          JSK_ROS_INFO("Cloth %d / %d", result_counter, call_counter);
         }
         else{
-          ROS_INFO("Not Cloth %d / %d", result_counter, call_counter);
+          JSK_ROS_INFO("Not Cloth %d / %d", result_counter, call_counter);
         }
 
         for (int i = 0; i < cloud_cluster->points.size(); i++){

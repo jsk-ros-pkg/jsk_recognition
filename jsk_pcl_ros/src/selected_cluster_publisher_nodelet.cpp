@@ -69,7 +69,7 @@ namespace jsk_pcl_ros
                                          const jsk_recognition_msgs::Int32Stamped::ConstPtr& index)
   {
     if (indices->cluster_indices.size() <= index->data) {
-      NODELET_ERROR("the selected index %d is out of clusters array %lu",
+      JSK_NODELET_ERROR("the selected index %d is out of clusters array %lu",
                     index->data,
                     indices->cluster_indices.size());
       return;

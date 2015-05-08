@@ -131,7 +131,7 @@ namespace jsk_pcl_ros
          != coefficients_msg->coefficients.size()) ||
         (inliers_msg->cluster_indices.size()
          != polygons_msg->polygons.size())) {
-      NODELET_FATAL("the size of inliers, coefficients and polygons are not same");
+      JSK_NODELET_FATAL("the size of inliers, coefficients and polygons are not same");
       return;
     }
     vital_checker_->poke();
@@ -225,9 +225,9 @@ namespace jsk_pcl_ros
         pointFromVectorToVector<Eigen::Vector3d, Eigen::Vector3f>(up_d, up);
         Plane::Ptr plane = plane_info.get<2>();
         double angle = plane->angle(up);
-        // ROS_INFO("axis: [%f, %f, %f]", up[0], up[1], up[2]);
-        // ROS_INFO("plane: [%f, %f, %f, %f]", plane_info.get<1>()->values[0], plane_info.get<1>()->values[1], plane_info.get<1>()->values[2], plane_info.get<1>()->values[3]);
-        // ROS_INFO("angle: %f", angle);
+        // JSK_ROS_INFO("axis: [%f, %f, %f]", up[0], up[1], up[2]);
+        // JSK_ROS_INFO("plane: [%f, %f, %f, %f]", plane_info.get<1>()->values[0], plane_info.get<1>()->values[1], plane_info.get<1>()->values[2], plane_info.get<1>()->values[3]);
+        // JSK_ROS_INFO("angle: %f", angle);
         if (fabs(angle - reference_angle) < thrshold) {
           ret.push_back(plane_info);
         }

@@ -52,7 +52,7 @@ namespace jsk_pcl_ros
       pnh_->getParam("joint_name", joint_name_);
     }
     else {
-      NODELET_ERROR("no ~joint_state is specified");
+      JSK_NODELET_ERROR("no ~joint_state is specified");
       return;
     }
     pnh_->param("overwrap_angle", overwrap_angle_, 0.0);
@@ -75,7 +75,7 @@ namespace jsk_pcl_ros
       laser_type_ = INFINITE_SPINDLE_HALF;
     }
     else {
-      NODELET_ERROR("unknown ~laser_type: %s", laser_type.c_str());
+      JSK_NODELET_ERROR("unknown ~laser_type: %s", laser_type.c_str());
       return;
     }
     pnh_->param("use_laser_assembler", use_laser_assembler_, false);

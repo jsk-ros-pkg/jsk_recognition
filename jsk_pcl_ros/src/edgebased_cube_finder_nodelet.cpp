@@ -152,7 +152,7 @@ namespace jsk_pcl_ros
     original_points.push_back(b_candidates.get<1>());
     for (size_t i = 0; i < original_points.size(); i++) {
       Eigen::Vector3f p = original_points[i];
-      ROS_INFO("[foot_point] [%f, %f, %f]", p[0], p[1], p[2]);
+      JSK_ROS_INFO("[foot_point] [%f, %f, %f]", p[0], p[1], p[2]);
     }
     
     Vertices foot_points;
@@ -176,8 +176,8 @@ namespace jsk_pcl_ros
         min_alpha_point = foot_points[i];
       }
     }
-    ROS_INFO("min_alpha_point: [%f, %f, %f]", min_alpha_point[0], min_alpha_point[1], min_alpha_point[2]);
-    ROS_INFO("max_alpha_point: [%f, %f, %f]", max_alpha_point[0], max_alpha_point[1], max_alpha_point[2]);
+    JSK_ROS_INFO("min_alpha_point: [%f, %f, %f]", min_alpha_point[0], min_alpha_point[1], min_alpha_point[2]);
+    JSK_ROS_INFO("max_alpha_point: [%f, %f, %f]", max_alpha_point[0], max_alpha_point[1], max_alpha_point[2]);
     return boost::make_tuple(min_alpha_point, max_alpha_point);
   }
 
@@ -214,13 +214,13 @@ namespace jsk_pcl_ros
     Line::Ptr axis = line_a->midLine(*line_b);
     Eigen::Vector3f center;
     axis->getOrigin(center);
-    ROS_INFO("line_a:");
+    JSK_ROS_INFO("line_a:");
     line_a->print();
-    ROS_INFO("line_b:");
+    JSK_ROS_INFO("line_b:");
     line_b->print();
-    ROS_INFO("axis:");
+    JSK_ROS_INFO("axis:");
     axis->print();
-    ROS_INFO("r: %f", r);
+    JSK_ROS_INFO("r: %f", r);
     
     // before evaluation, we fix line_a and line_b to be parallel
     // against line_c and axis.
@@ -230,13 +230,13 @@ namespace jsk_pcl_ros
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_ptr = cloud.makeShared();
     computeCentroid(cloud_ptr, indices_pair_.get<0>(), centroid_a);
     computeCentroid(cloud_ptr, indices_pair_.get<1>(), centroid_b);
-    ROS_INFO("centroid_a: [%f, %f, %f]", centroid_a[0], centroid_a[1], centroid_a[2]);
-    ROS_INFO("centroid_b: [%f, %f, %f]", centroid_b[0], centroid_b[1], centroid_b[2]);
+    JSK_ROS_INFO("centroid_a: [%f, %f, %f]", centroid_a[0], centroid_a[1], centroid_a[2]);
+    JSK_ROS_INFO("centroid_b: [%f, %f, %f]", centroid_b[0], centroid_b[1], centroid_b[2]);
     Line::Ptr line_a_aligned = axis->parallelLineOnAPoint(centroid_a);
     Line::Ptr line_b_aligned = axis->parallelLineOnAPoint(centroid_b);
-    ROS_INFO("line_a_aligned:");
+    JSK_ROS_INFO("line_a_aligned:");
     line_a_aligned->print();
-    ROS_INFO("line_b_aligned:");
+    JSK_ROS_INFO("line_b_aligned:");
     line_b_aligned->print();
     
     Vertices line_a_points, line_b_points;
@@ -251,7 +251,7 @@ namespace jsk_pcl_ros
     Line::Ptr max_line_c;
     PointPair max_line_c_a_points, max_line_c_b_points;
     for (size_t i = 0; i < resolution_; i++) {
-      ROS_INFO("estimate i: %lu", i);
+      JSK_ROS_INFO("estimate i: %lu", i);
       double theta = dt * i + min_angle_;
       Eigen::Vector3f point_on_x;
       line_a->foot(center, point_on_x);
@@ -312,13 +312,13 @@ namespace jsk_pcl_ros
       *axis,
       max_line_c_a_points,
       max_line_c_b_points);
-    ROS_INFO("end_point: [%f, %f, %f]", axis_end_points.get<0>()[0], axis_end_points.get<0>()[1], axis_end_points.get<0>()[2]);
-    ROS_INFO("end_point: [%f, %f, %f]", axis_end_points.get<1>()[0], axis_end_points.get<1>()[1], axis_end_points.get<1>()[2]);
+    JSK_ROS_INFO("end_point: [%f, %f, %f]", axis_end_points.get<0>()[0], axis_end_points.get<0>()[1], axis_end_points.get<0>()[2]);
+    JSK_ROS_INFO("end_point: [%f, %f, %f]", axis_end_points.get<1>()[0], axis_end_points.get<1>()[1], axis_end_points.get<1>()[2]);
     Eigen::Vector3f midpoint
       = (axis_end_points.get<0>() + axis_end_points.get<1>()) / 2.0;
     double z_dimension = (axis_end_points.get<0>() - midpoint).norm() * 2;
     // compute cube
-    ROS_INFO("midpoint: [%f, %f, %f]", midpoint[0], midpoint[1], midpoint[2]);
+    JSK_ROS_INFO("midpoint: [%f, %f, %f]", midpoint[0], midpoint[1], midpoint[2]);
     cube_.reset(new Cube(midpoint, *line_a_aligned, *line_b_aligned, *max_line_c));
     std::vector<double> dimensions = cube_->getDimensions();
     dimensions[2] = z_dimension;
@@ -354,7 +354,7 @@ namespace jsk_pcl_ros
         // if (convex->area() > convex_area_threshold_ &&
         //     convex->allEdgesLongerThan(convex_edge_threshold_)) {
         //int inliers = countInliers(cloud, convex);
-        //ROS_INFO("inliers: %d", inliers);
+        //JSK_ROS_INFO("inliers: %d", inliers);
         //if (inliers > min_inliers_) {
         if (true) {
           output_indices.push_back(i);
@@ -507,7 +507,7 @@ namespace jsk_pcl_ros
       line_a_aligned->parallelLineNormal(*line_b_aligned, distance_vector);
       double distance = distance_vector.norm();
       //double distance = line_a_aligned->distance(*line_b_aligned);
-      ROS_INFO("d: %f", distance);
+      JSK_ROS_INFO("d: %f", distance);
       if (distance < parallel_edge_distance_max_threshold_ &&
           distance > parallel_edge_distance_min_threshold_) {
         filtered_indices_pairs.push_back(pairs[i]);
@@ -535,7 +535,7 @@ namespace jsk_pcl_ros
         magnified_convex->projectOnPlane(ep, foot);
         if (magnified_convex->isInside(foot) && convex->distanceSmallerThan(ep, outlier_threshold_)) {
         //if (magnified_convex->isInside(foot) && (ep - foot).norm()) {
-          //NODELET_INFO("distance: %f", (ep - foot).norm());
+          //JSK_NODELET_INFO("distance: %f", (ep - foot).norm());
           indices->indices.push_back(i);
         }
       }
@@ -680,9 +680,9 @@ namespace jsk_pcl_ros
     ey.normalize();
     ez.normalize();
 
-    ROS_INFO("ex: [%f, %f, %f]", ex[0], ex[1], ex[2]);
-    ROS_INFO("ey: [%f, %f, %f]", ey[0], ey[1], ey[2]);
-    ROS_INFO("ez: [%f, %f, %f]", ez[0], ez[1], ez[2]);
+    JSK_ROS_INFO("ex: [%f, %f, %f]", ex[0], ex[1], ex[2]);
+    JSK_ROS_INFO("ey: [%f, %f, %f]", ey[0], ey[1], ey[2]);
+    JSK_ROS_INFO("ez: [%f, %f, %f]", ez[0], ez[1], ez[2]);
     
     if (ex.cross(ey).dot(ez) < 0) {
       ez = -ez;
@@ -765,7 +765,7 @@ namespace jsk_pcl_ros
     }
     else {
       double theta = fabs(acos(dot));
-      NODELET_INFO("theta: %f", pcl::rad2deg(theta));
+      JSK_NODELET_INFO("theta: %f", pcl::rad2deg(theta));
       if (fabs(theta - M_PI / 2.0) < pcl::deg2rad(20.0)) {
         return true;
       }
@@ -882,7 +882,7 @@ namespace jsk_pcl_ros
      marker.header = input_cloud->header;
      marker.scale.x = 0.01;
      marker.type = visualization_msgs::Marker::LINE_LIST;
-     NODELET_INFO("%lu parallel edge groups", input_edges->edge_groups.size());
+     JSK_NODELET_INFO("%lu parallel edge groups", input_edges->edge_groups.size());
      geometry_msgs::PoseArray pose_array;
      pose_array.header = input_cloud->header;
      jsk_recognition_msgs::BoundingBoxArray ros_output;
@@ -892,11 +892,11 @@ namespace jsk_pcl_ros
        jsk_recognition_msgs::ParallelEdge parallel_edge = input_edges->edge_groups[i];
 
        if (parallel_edge.cluster_indices.size() <= 1) {
-         NODELET_ERROR("parallel edge group has only %lu edges",
+         JSK_NODELET_ERROR("parallel edge group has only %lu edges",
                        parallel_edge.cluster_indices.size());
          continue;
        }
-       NODELET_INFO("%lu parallel edge groups has %lu edges",
+       JSK_NODELET_INFO("%lu parallel edge groups has %lu edges",
                     i, parallel_edge.cluster_indices.size());
        ////////////////////////////////////////////////////////
        // first convert all the pcl_msgs/PointIndices to pcl::PointIndices
@@ -950,7 +950,7 @@ namespace jsk_pcl_ros
            = addIndices(*filtered_cube_candidate_indices,
                         *filtered_indices);       
            
-         // ROS_INFO("%lu -> %lu", cloud->points.size(), filtered_cloud->points.size());
+         // JSK_ROS_INFO("%lu -> %lu", cloud->points.size(), filtered_cloud->points.size());
          // *all_filtered_cloud = *all_filtered_cloud + *filtered_cloud;
          // // 2. estimate a plane parallel to the convex using RANSAC
          // pcl::ModelCoefficients::Ptr
@@ -1010,12 +1010,12 @@ namespace jsk_pcl_ros
         //   }
         //   else {
         //     // failed to estimate perpendicular plane
-        //     ROS_INFO("failed to estimate perpendicular plane");
+        //     JSK_ROS_INFO("failed to estimate perpendicular plane");
         //   }
         // }
         // else {
         //   // failed to estimate parallel plane
-        //   ROS_INFO("failed to estimate parallel plane");
+        //   JSK_ROS_INFO("failed to estimate parallel plane");
         // }
 //      }
       
@@ -1065,10 +1065,10 @@ namespace jsk_pcl_ros
          polygon_array.polygons.push_back(first_polygon_ros);
        }
       // std::vector<CubeHypothesis::Ptr> hypothesis_list;
-      // NODELET_INFO("building hypothesis");
-      // NODELET_INFO("pair size: %lu", pairs.size());
+      // JSK_NODELET_INFO("building hypothesis");
+      // JSK_NODELET_INFO("pair size: %lu", pairs.size());
       // for (size_t j = 0; j < pairs.size(); j++) {
-      //   NODELET_INFO("j -> %lu", j);
+      //   JSK_NODELET_INFO("j -> %lu", j);
       //   IndicesPair pair = pairs[j];
       //   CoefficientsPair cpair = coefficients_pair[j];
       //   PlanarCubeHypothesis::Ptr
@@ -1080,12 +1080,12 @@ namespace jsk_pcl_ros
       //   //hypothesis_list.push_back(planar_hypothesis);
       //   hypothesis_list.push_back(diagnoal_hypothesis);
       // }
-      // NODELET_INFO("estimating hypothesis");
+      // JSK_NODELET_INFO("estimating hypothesis");
       // for (size_t j = 0; j < hypothesis_list.size(); j++) {
       //   hypothesis_list[j]->estimate(*cloud);
       // }
       // // find max evaluated
-      // NODELET_INFO("find max hypothesis");
+      // JSK_NODELET_INFO("find max hypothesis");
       // CubeHypothesis::Ptr max_hypothesis;
       // double max_eval = -DBL_MAX;
       // for (size_t i = 0; i < hypothesis_list.size(); i++) {
@@ -1094,7 +1094,7 @@ namespace jsk_pcl_ros
       //     max_hypothesis = hypothesis_list[i];
       //   }
       // }
-      // NODELET_INFO("convert to ros msg");
+      // JSK_NODELET_INFO("convert to ros msg");
       // BoundingBox msg = max_hypothesis->getCube()->toROSMsg();
       // msg.header = input_cloud->header;
       // ros_output.boxes.push_back(msg);
@@ -1127,12 +1127,12 @@ namespace jsk_pcl_ros
     const std::vector<pcl::ModelCoefficients::Ptr>& coefficients)
   {
     if (indices.size() != coefficients.size()) {
-      NODELET_ERROR("size of indices and coefficients are not same");
+      JSK_NODELET_ERROR("size of indices and coefficients are not same");
       return std::vector<IndicesCoefficientsTriple>();
     }
 
     if (indices.size() <= 2 && coefficients.size() <= 2) {
-      NODELET_WARN("[EdgebasedCubeFinder::tripleIndicesAndCoefficients] no enough canddiates");
+      JSK_NODELET_WARN("[EdgebasedCubeFinder::tripleIndicesAndCoefficients] no enough canddiates");
       return std::vector<IndicesCoefficientsTriple>();
     }
     std::vector<IndicesCoefficientsTriple> ret;

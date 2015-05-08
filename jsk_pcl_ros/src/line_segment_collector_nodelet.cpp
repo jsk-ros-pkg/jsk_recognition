@@ -132,7 +132,7 @@ namespace jsk_pcl_ros
     srv_->setCallback (f);
     
     if (!pnh_->getParam("fixed_frame_id", fixed_frame_id_)) {
-      NODELET_ERROR("no ~fixed_frame_id is specified");
+      JSK_NODELET_ERROR("no ~fixed_frame_id is specified");
       return;
     }
 
@@ -148,7 +148,7 @@ namespace jsk_pcl_ros
       rotate_type_ = ROTATION_SPINDLE;
     }
     else {
-      NODELET_ERROR("unknown ~rotate_type: %s", rotate_type_str.c_str());
+      JSK_NODELET_ERROR("unknown ~rotate_type: %s", rotate_type_str.c_str());
       return;
     }
     
@@ -260,7 +260,7 @@ namespace jsk_pcl_ros
       }
       // else {
       //   if (segment_clusters_.size() != 0) {
-      //     NODELET_INFO("dot: %f", delta_dot);
+      //     JSK_NODELET_INFO("dot: %f", delta_dot);
       //   }
       // }
     }
@@ -269,7 +269,7 @@ namespace jsk_pcl_ros
       return LineSegmentCluster::Ptr();
     }
     else {
-      //ROS_INFO("max angle: %f", acos(max_dot) * 180.0 / M_PI);
+      //JSK_ROS_INFO("max angle: %f", acos(max_dot) * 180.0 / M_PI);
       return segment_clusters_[max_index];
     }
   }
@@ -353,7 +353,7 @@ namespace jsk_pcl_ros
       const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    //NODELET_INFO("buffer length: %lu", pointclouds_buffer_.size());
+    //JSK_NODELET_INFO("buffer length: %lu", pointclouds_buffer_.size());
     pointclouds_buffer_.push_back(cloud_msg);
     indices_buffer_.push_back(indices_msg);
     coefficients_buffer_.push_back(coefficients_msg);

@@ -66,11 +66,11 @@ namespace jsk_pcl_ros
     }
     catch (tf2::ConnectivityException &e)
     {
-      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
     catch (tf2::InvalidArgumentException &e)
     {
-      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
     catch (...)
     {
@@ -84,7 +84,7 @@ namespace jsk_pcl_ros
     
     if (!pnh_->getParam("target_frame_id", target_frame_id_))
     {
-      ROS_WARN("~target_frame_id is not specified, using %s", "/base_footprint");
+      JSK_ROS_WARN("~target_frame_id is not specified, using %s", "/base_footprint");
     }
     pnh_->param("duration", duration_, 1.0);
     pnh_->param("use_latest_tf", use_latest_tf_, false);

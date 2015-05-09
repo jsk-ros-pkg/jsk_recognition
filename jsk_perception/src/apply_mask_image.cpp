@@ -86,11 +86,9 @@ namespace jsk_perception
       if (image_msg->encoding == sensor_msgs::image_encodings::BGRA8 ||
           image_msg->encoding == sensor_msgs::image_encodings::BGRA16) {
         cv::cvtColor(image_raw, image, cv::COLOR_BGRA2BGR);
-        image_raw.copyTo(image);
       } else if (image_msg->encoding == sensor_msgs::image_encodings::RGBA8 ||
                  image_msg->encoding == sensor_msgs::image_encodings::RGBA16) {
         cv::cvtColor(image_raw, image, cv::COLOR_RGBA2BGR);
-        image_raw.copyTo(image);
       }
     } else {
       // BGR, RGB or GRAY
@@ -121,7 +119,7 @@ namespace jsk_perception
       cv::cvtColor(masked_image, output_image, cv::COLOR_BGR2BGRA);
     } else if (image_msg->encoding == sensor_msgs::image_encodings::RGBA8 ||
                image_msg->encoding == sensor_msgs::image_encodings::RGBA16) {
-      cv::cvtColor(masked_image, output_image, cv::COLOR_RGB2RGBA);
+      cv::cvtColor(masked_image, output_image, cv::COLOR_BGR2RGBA);
     } else {
       // BGR, RGB or GRAY
       masked_image.copyTo(output_image);

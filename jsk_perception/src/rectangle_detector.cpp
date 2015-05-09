@@ -6,6 +6,7 @@
 // https://raw.github.com/bsdnoobz/opencv-code/master/quad-segmentation.cpp
 
 #include <ros/ros.h>
+#include <jsk_topic_tools/log_utils.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <jsk_recognition_msgs/LineArray.h>
@@ -134,7 +135,7 @@ class RectangleDetector
 
                 if (approx.size() != 4)
                     {
-                        ROS_ERROR("The object is not quadrilateral!");
+                        JSK_ROS_ERROR("The object is not quadrilateral!");
                         return ;
                     }
 
@@ -181,7 +182,7 @@ class RectangleDetector
             }
         catch (cv::Exception &e)
             {
-                ROS_ERROR("Image processing error: %s %s %s %i", e.err.c_str(), e.func.c_str(), e.file.c_str(), e.line);
+                JSK_ROS_ERROR("Image processing error: %s %s %s %i", e.err.c_str(), e.func.c_str(), e.file.c_str(), e.line);
             }
     }
 

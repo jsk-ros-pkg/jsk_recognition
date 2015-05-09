@@ -1,5 +1,5 @@
-
 #include <jsk_perception/sliding_window_object_detector.h>
+#include <jsk_topic_tools/log_utils.h>
 #include <jsk_recognition_msgs/Rect.h>
 #include <jsk_perception/NonMaximumSuppression.h>
 
@@ -35,7 +35,7 @@ namespace jsk_perception
    
    void SlidingWindowObjectDetector::unsubscribe()
    {
-      NODELET_DEBUG("Unsubscribing from ROS topic.");
+      JSK_NODELET_DEBUG("Unsubscribing from ROS topic.");
       this->sub_.shutdown();
    }
 
@@ -46,7 +46,7 @@ namespace jsk_perception
       try {
          cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
       } catch (cv_bridge::Exception& e) {
-         ROS_ERROR("cv_bridge exception: %s", e.what());
+         JSK_ROS_ERROR("cv_bridge exception: %s", e.what());
          return;
       }
       cv::Mat image;
@@ -77,7 +77,7 @@ namespace jsk_perception
       const float scale, const int scale_counter, const int incrementor)
    {
       if (image.empty()) {
-         ROS_ERROR("--INPUT IMAGE IS EMPTY");
+         JSK_ROS_ERROR("--INPUT IMAGE IS EMPTY");
          return image;
       }
       cv::Size nwsize = wsize;
@@ -175,7 +175,7 @@ namespace jsk_perception
             bbox.push_back(brect);
          }
       } else {
-         ROS_ERROR("Failed to call NonMaximumSuppression Module");
+         JSK_ROS_ERROR("Failed to call NonMaximumSuppression Module");
          return std::vector<cv::Rect_<int> >();
       }
       return bbox;
@@ -205,7 +205,7 @@ namespace jsk_perception
          this->supportVectorMachine_->save(
             (this->model_name_).c_str());
       } catch(std::exception &e) {
-         ROS_ERROR("--ERROR: %s", e.what());
+         JSK_ROS_ERROR("--ERROR: %s", e.what());
       }
    }
 
@@ -213,7 +213,7 @@ namespace jsk_perception
       std::string filename, std::vector<cv::Mat> &dataset_img, cv::Mat &labelMD,
       bool is_usr_label, const int usr_label)
    {
-      ROS_INFO("--READING DATASET IMAGE");
+      JSK_ROS_INFO("--READING DATASET IMAGE");
       std::ifstream infile;
       infile.open(filename.c_str(), std::ios::in);
       char buffer[255];
@@ -256,7 +256,7 @@ namespace jsk_perception
    void SlidingWindowObjectDetector::extractFeatures(
       const std::vector<cv::Mat> &dataset_img, cv::Mat &featureMD)
    {
-      ROS_INFO("--EXTRACTING IMAGE FEATURES");
+      JSK_ROS_INFO("--EXTRACTING IMAGE FEATURES");
       for (std::vector<cv::Mat>::const_iterator it = dataset_img.begin();
            it != dataset_img.end(); it++) {
          cv::Mat img = *it;
@@ -274,7 +274,7 @@ namespace jsk_perception
       const cv::Mat &featureMD, const cv::Mat &labelMD)
    {
       // std::cout << featureMD.size() << labelMD.size() << std::endl;
-      ROS_INFO("--TRAINING CLASSIFIER");
+      JSK_ROS_INFO("--TRAINING CLASSIFIER");
       cv::SVMParams svm_param = cv::SVMParams();
       svm_param.svm_type = cv::SVM::NU_SVC;
       svm_param.kernel_type = cv::SVM::RBF;

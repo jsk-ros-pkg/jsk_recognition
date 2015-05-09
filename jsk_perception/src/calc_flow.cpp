@@ -3,7 +3,7 @@
 //
 #include <ros/ros.h>
 #include <ros/names.h>
-
+#include <jsk_topic_tools/log_utils.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/fill_image.h>
@@ -48,18 +48,18 @@ public:
     bool prevImg_update_required = false;
     if((flow.cols != (int)img->width) ||
        (flow.rows != (int)img->height)) {
-      ROS_INFO("make flow");
+      JSK_ROS_INFO("make flow");
       cv_ptr->image.copyTo(flow);
       prevImg_update_required = true;
     }
     if(prevImg_update_required) {
       cv_ptr->image.copyTo(prevImg);
       prevImg_update_required = false;
-      ROS_INFO("return");
+      JSK_ROS_INFO("return");
       return;
     }
     //
-    //ROS_INFO("subscribe image");
+    //JSK_ROS_INFO("subscribe image");
     //prevImg.
     //cv::Mat *nextImg = new cv::Mat(ipl_);
     cv::Mat nextImg(img->height, img->width, CV_8UC1);

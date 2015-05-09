@@ -1,4 +1,5 @@
 #include <ros/ros.h>
+#include <jsk_topic_tools/log_utils.h>
 #include <geometry_msgs/PolygonStamped.h>
 #include <dynamic_reconfigure/server.h>
 #include <jsk_perception/camshiftdemoConfig.h>
@@ -174,7 +175,7 @@ public:
       }
     catch (cv_bridge::Exception error)
       {
-        ROS_ERROR("error");
+        JSK_ROS_ERROR("error");
       }
 
     frame.copyTo(image_);
@@ -235,7 +236,7 @@ public:
 	  pub_result_.publish(result_msg);
 
 	} catch (...) {
-	  ROS_WARN("illegal tracBox = x:%f y:%f width:%f height:%f angle:%f",
+	  JSK_ROS_WARN("illegal tracBox = x:%f y:%f width:%f height:%f angle:%f",
 		   trackBox_.center.x, trackBox_.center.y,
 		   trackBox_.size.width, trackBox_.size.height,
 		   trackBox_.angle);
@@ -352,7 +353,7 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "camshiftdemo");
   ros::NodeHandle n;
   if (n.resolveName("image") == "/image") {
-    ROS_WARN("%s: image has not been remapped! Typical command-line usage:\n"
+    JSK_ROS_WARN("%s: image has not been remapped! Typical command-line usage:\n"
              "\t$ ./%s image:=<image topic>", argv[0], argv[0]);
   }
 

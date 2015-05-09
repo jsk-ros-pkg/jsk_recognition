@@ -21,7 +21,6 @@ def _cb_dyn_reconfig(config, level):
 rospy.init_node("image_publisher")
 
 dynamic_reconfigure.server.Server(ImagePublisherConfig, _cb_dyn_reconfig)
-file_name = rospy.get_param("~file_name")
 rate = rospy.Rate(rospy.get_param("rate", 1))
 if_publish_info = rospy.get_param("~publish_info", True)
 pub = rospy.Publisher("~output", Image, queue_size=1)

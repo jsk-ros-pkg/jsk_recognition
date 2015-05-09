@@ -6,7 +6,7 @@ import cv2
 import rospy
 import cv_bridge
 from sensor_msgs.msg import Image
-from std_msgs.msg import String
+from std_msgs.msg import String, Float32
 
 
 class ImageTimeDiff(object):
@@ -34,18 +34,19 @@ class ImageTimeDiff(object):
     def _cb_start(self, msg):
         stamp = rospy.Time.now()
         namespace = msg.data
-        pub = rospy.Publisher('~output/{0}'.format(namespace),
-                              Image,
-                              queue_size=1)
-        pub_debug = rospy.Publisher('~debug/{0}'.format(namespace),
-                                    Image, queue_size=1)
+        pub_diff = rospy.Publisher(
+            '~output/{0}/diff'.format(namespace), Float32, queue_size=1)
+        pub_diff_img = rospy.Publisher(
+            '~output/{0}/diff_image'.format(namespace), Image, queue_size=1)
+        pub_debug = rospy.Publisher(
+            '~debug/{0}'.format(namespace), Image, queue_size=1)
         while self.imgmsg is None or self.imgmsg.header.stamp < stamp:
             # wait for image at the same time
             rospy.sleep(0.1)
         imgmsg = self.imgmsg
         bridge = cv_bridge.CvBridge()
         img = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='mono8')
-        self.pub_stored[namespace] = pub, img, pub_debug
+        self.pub_stored[namespace] = img, pub_diff, pub_diff_img, pub_debug
 
     def _cb_stop(self, msg):
         namespace = msg.data
@@ -58,10 +59,13 @@ class ImageTimeDiff(object):
         bridge = cv_bridge.CvBridge()
         img = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='mono8')
         pub_stored = self.pub_stored
-        for ns, (pub_diff, img_stored, pub_debug) in pub_stored.items():
+        for ns, (img_stored, pub_diff, pub_diff_img, pub_debug) \
+                in pub_stored.items():
             # compute diff for all publications
-            diff = cv2.absdiff(img, img_stored)
-            pub_diff.publish(bridge.cv2_to_imgmsg(diff))
+            diff_img = cv2.absdiff(img, img_stored)
+            pub_diff_img.publish(bridge.cv2_to_imgmsg(diff_img))
+            diff = diff_img.sum() / diff_img.size
+            pub_diff.publish(data=diff)
             pub_debug.publish(bridge.cv2_to_imgmsg(img_stored))
 
     def spin(self):

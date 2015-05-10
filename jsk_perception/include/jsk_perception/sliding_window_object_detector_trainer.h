@@ -1,13 +1,21 @@
-#ifndef _OBJECT_DETECTOR_TRAINER_H_
-#define _OBJECT_DETECTOR_TRAINER_H_
+#ifndef _SLIDING_WINDOW_OBJECT_DETECTOR_TRAINER_H_
+#define _SLIDING_WINDOW_OBJECT_DETECTOR_TRAINER_H_
 
 #include <jsk_perception/histogram_of_oriented_gradients.h>
-// #include <object_recognition/local_binary_patterns.h>
 
 #include <ros/ros.h>
 #include <ros/console.h>
+#include <rosbag/bag.h>
+#include <rosbag/view.h>
 
+#include <boost/foreach.hpp>
 #include <opencv2/opencv.hpp>
+
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/CameraInfo.h>
+#include <sensor_msgs/image_encodings.h>
+#include <image_transport/image_transport.h>
+#include <cv_bridge/cv_bridge.h>
 
 #include <vector>
 #include <string>
@@ -23,12 +31,16 @@ namespace jsk_perception
       
       int swindow_x_;
       int swindow_y_;
+      int hist_hbin_;
+      int hist_sbin_;
+      
       std::string dataset_path_;
 
       std::string object_dataset_filename_;
       std::string nonobject_dataset_filename_;
       std::string trained_classifier_name_;
-   
+
+      boost::shared_ptr<rosbag::Bag> rosbag_;
       boost::shared_ptr<cv::SVM> supportVectorMachine_;
       void writeTrainingManifestToDirectory(cv::FileStorage &);
       virtual void concatenateCVMat(
@@ -41,13 +53,18 @@ namespace jsk_perception
       virtual void trainObjectClassifier(
          std::string, std::string);
       virtual void readDataset(
-         std::string, cv::Mat &,
+         std::string, std::string, cv::Mat &,
          cv::Mat &, bool = false, const int = 0);
       virtual void extractFeatures(
          cv::Mat &, cv::Mat &);
       virtual void trainBinaryClassSVM(
          const cv::Mat &, const cv::Mat &);
+
+      // temp placed here
+      virtual void computeHSHistogram(
+         cv::Mat &, cv::Mat &, const int = 64, const int = 32, bool = true);
+  
    };
 }
 
-#endif  // _OBJECT_DETECTOR_TRAINER_H_
+#endif  // _SLIDING_WINDOW_OBJECT_DETECTOR_TRAINER_H_

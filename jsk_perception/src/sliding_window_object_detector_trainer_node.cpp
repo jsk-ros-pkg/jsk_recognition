@@ -34,16 +34,14 @@ namespace jsk_perception
    void SlidingWindowObjectDetectorTrainer::trainObjectClassifier(
       std::string pfilename, std::string nfilename)
    {
-      // reading the positive training image
-      std::vector<cv::Mat> pdataset_img;
       cv::Mat featureMD;
       cv::Mat labelMD;
-      this->readDataset(pfilename, featureMD, labelMD, true, 1);
+      std::string topic_name = "/dataset/roi";
+      this->readDataset(pfilename, topic_name, featureMD, labelMD, true, 1);
       JSK_ROS_INFO("Info: Total Object Sample: %d", featureMD.rows);
-    
-      // reading the negative training image
-      std::vector<cv::Mat> ndataset_img;
-      this->readDataset(nfilename, featureMD, labelMD, true, -1);
+      
+      topic_name = "/dataset/background/roi";
+      this->readDataset(nfilename, topic_name, featureMD, labelMD, true, -1);
       JSK_ROS_INFO("Info: Total Training Features: %d", featureMD.rows);
     
       try {
@@ -51,46 +49,42 @@ namespace jsk_perception
          this->supportVectorMachine_->save(
             this->trained_classifier_name_.c_str());
       } catch(std::exception &e) {
-         JSK_ROS_ERROR("--ERROR: %s", e.what());
+         JSK_ROS_ERROR("--ERROR: PLEASE CHECK YOUR DATA \n%s", e.what());
+         std::_Exit(EXIT_FAILURE);
       }
    }
 
    void SlidingWindowObjectDetectorTrainer::readDataset(
-      std::string filename, cv::Mat &featureMD, cv::Mat &labelMD,
-      bool is_usr_label, const int usr_label) {
+      std::string filename, std::string topic_name, cv::Mat &featureMD,
+      cv::Mat &labelMD, bool is_usr_label, const int usr_label) {
       JSK_ROS_INFO("--READING DATASET IMAGE");
-      std::ifstream infile;
-      infile.open(filename.c_str(), std::ios::in);
-      char buffer[255];
-
-      std::cout << "FileName: " << filename << std::endl;
-      
-      if (!infile.eof()) {
-         while (infile.good()) {
-            infile.getline(buffer, 255);
-            std::string _line(buffer);
-            if (!_line.empty()) {
-               std::istringstream iss(_line);
-               std::string _path;
-               iss >> _path;
-               cv::Mat img = cv::imread(this->dataset_path_+ _path,
-                                        CV_LOAD_IMAGE_COLOR);
-               float label;
-               if (!is_usr_label) {
-                  std::string _label;
-                  iss >> _label;
-                  label = std::atoi(_label.c_str());
-               } else {
-                  label = static_cast<float>(usr_label);
-               }
-               if (img.data) {
-                  labelMD.push_back(label);
-                  this->extractFeatures(img, featureMD);
-               }
+      try {
+         rosbag_ = boost::shared_ptr<rosbag::Bag>(new rosbag::Bag);
+         this->rosbag_->open(filename, rosbag::bagmode::Read);
+         JSK_ROS_INFO("Bag Found and Opened Successfully...");
+         std::vector<std::string> topics;
+         topics.push_back(std::string(topic_name));
+         rosbag::View view(*rosbag_, rosbag::TopicQuery(topics));
+         BOOST_FOREACH(rosbag::MessageInstance const m, view) {
+            sensor_msgs::Image::ConstPtr img_msg = m.instantiate<
+               sensor_msgs::Image>();
+            cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(
+               img_msg, sensor_msgs::image_encodings::BGR8);
+            if (cv_ptr->image.data) {
+               cv::Mat image = cv_ptr->image.clone();
+               float label = static_cast<float>(usr_label);
+               labelMD.push_back(label);
+               this->extractFeatures(image, featureMD);
+               cv::imshow("image", image);
+               cv::waitKey(3);
+            } else {
+               JSK_ROS_WARN("-> NO IMAGE");
             }
          }
-      } else {
-         JSK_ROS_ERROR("INPUT FILE NOT FOUND");
+         this->rosbag_->close();
+      } catch (ros::Exception &e) {
+         JSK_ROS_ERROR("ERROR: Bag File:%s not found..\n%s",
+                   filename.c_str(), e.what());
          std::_Exit(EXIT_FAILURE);
       }
    }
@@ -104,10 +98,11 @@ namespace jsk_perception
       if (img.data) {
          cv::resize(img, img, cv::Size(this->swindow_x_, this->swindow_y_));
          cv::Mat hog_feature = this->computeHOG(img);
-         // cv::Mat lbp_feature = this->computeLBP(
-         //   img, cv::Size(8, 8), 10, false, true);
-         cv::Mat _feature = hog_feature;
-         // this->concatenateCVMat(hog_feature, lbp_feature, _feature, true);
+         cv::Mat hsv_feature;
+         this->computeHSHistogram(img, hsv_feature, 16, 16, true);
+         hsv_feature = hsv_feature.reshape(1, 1);
+         cv::Mat _feature;
+         this->concatenateCVMat(hog_feature, hsv_feature, _feature, true);
          featureMD.push_back(_feature);
       }
       cv::imshow("image", img);
@@ -120,11 +115,11 @@ namespace jsk_perception
       JSK_ROS_INFO("--TRAINING CLASSIFIER");
       cv::SVMParams svm_param = cv::SVMParams();
       svm_param.svm_type = cv::SVM::NU_SVC;
-      svm_param.kernel_type = cv::SVM::LINEAR;
+      svm_param.kernel_type = cv::SVM::RBF;
       svm_param.degree = 0.0;
       svm_param.gamma = 0.90;
       svm_param.coef0 = 0.50;
-      svm_param.C = 100;
+      svm_param.C = 1;
       svm_param.nu = 0.70;
       svm_param.p = 1.0;
       svm_param.class_weights = NULL;
@@ -185,10 +180,10 @@ namespace jsk_perception
 
       fs <<  "FeatureInfo" << "{";
       fs << "HOG" << 1;
-      fs << "LBP" << 0;
+      // fs << "LBP" << 0;
       // fs << "SIFT" << 0;
       // fs << "SURF" << 0;
-      fs << "COLOR_HISTOGRAM" << 0;
+      fs << "COLOR_HISTOGRAM" << 1;
       fs << "}";
     
       fs <<  "SlidingWindowInfo" << "{";
@@ -201,6 +196,26 @@ namespace jsk_perception
       fs << "nonobject_dataset_filename" << this->nonobject_dataset_filename_;
       fs << "dataset_path" << this->dataset_path_;  // only path to neg
       fs << "}";
+   }
+   
+   void SlidingWindowObjectDetectorTrainer::computeHSHistogram(
+      cv::Mat &src, cv::Mat &hist, const int hBin, const int sBin, bool is_norm)
+   {
+      if (src.empty()) {
+         return;
+      }
+      cv::Mat hsv;
+      cv::cvtColor(src, hsv, CV_BGR2HSV);
+      int histSize[] = {hBin, sBin};
+      float h_ranges[] = {0, 180};
+      float s_ranges[] = {0, 256};
+      const float* ranges[] = {h_ranges, s_ranges};
+      int channels[] = {0, 1};
+      cv::calcHist(
+         &hsv, 1, channels, cv::Mat(), hist, 2, histSize, ranges, true, false);
+      if (is_norm) {
+         cv::normalize(hist, hist, 0, 1, cv::NORM_MINMAX, -1, cv::Mat());
+      }
    }
 }  // namespace jsk_perception
 

@@ -14,9 +14,9 @@ latest_camera_info=None
 pub = rospy.Publisher("~output", PoseStamped, queue_size=1)
 pub_p = rospy.Publisher("~output_point", PointStamped, queue_size=1)
 
-# def camera_info_cb(msg):
-#     global latest_camera_info
-#     latest_camera_info = msg;
+def camera_info_cb(msg):
+    global latest_camera_info
+    latest_camera_info = msg;
 
 def image_cb(msg):
     global latest_image

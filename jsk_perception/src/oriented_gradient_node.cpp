@@ -5,6 +5,7 @@
 #include <string>
 
 #include <ros/ros.h>
+#include <jsk_topic_tools/log_utils.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
@@ -40,7 +41,7 @@ class OrientedGradientNode {
     try {
       cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
     } catch (cv_bridge::Exception& e) {
-      ROS_ERROR("cv_bridge exception: %s", e.what());
+      JSK_ROS_ERROR("cv_bridge exception: %s", e.what());
       return;
     }
 

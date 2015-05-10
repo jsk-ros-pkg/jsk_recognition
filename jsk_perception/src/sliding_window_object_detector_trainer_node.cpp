@@ -1,4 +1,4 @@
-
+#include <jsk_topic_tools/log_utils.h>
 #include <jsk_perception/sliding_window_object_detector_trainer.h>
 
 #include <iostream>
@@ -13,12 +13,12 @@ namespace jsk_perception
       nh_.getParam("classifier_name", this->trained_classifier_name_);
       nh_.getParam("swindow_x", this->swindow_x_);
       nh_.getParam("swindow_y", this->swindow_y_);
-      
-      ROS_INFO("--Training Classifier");
+
+      JSK_ROS_INFO("--Training Classifier");
       std::string pfilename = dataset_path_ + this->object_dataset_filename_;
       std::string nfilename = dataset_path_ + this->nonobject_dataset_filename_;
       trainObjectClassifier(pfilename, nfilename);
-      ROS_INFO("--Trained Successfully..");
+      JSK_ROS_INFO("--Trained Successfully..");
 
       /*write the training manifest*/
       std::string mainfest_filename = "sliding_window_trainer_manifest.xml";
@@ -38,18 +38,18 @@ namespace jsk_perception
       cv::Mat labelMD;
       std::string topic_name = "/dataset/roi";
       this->readDataset(pfilename, topic_name, featureMD, labelMD, true, 1);
-      ROS_INFO("Info: Total Object Sample: %d", featureMD.rows);
+      JSK_ROS_INFO("Info: Total Object Sample: %d", featureMD.rows);
       
       topic_name = "/dataset/background/roi";
       this->readDataset(nfilename, topic_name, featureMD, labelMD, true, -1);
-      ROS_INFO("Info: Total Training Features: %d", featureMD.rows);
+      JSK_ROS_INFO("Info: Total Training Features: %d", featureMD.rows);
     
       try {
          this->trainBinaryClassSVM(featureMD, labelMD);
          this->supportVectorMachine_->save(
             this->trained_classifier_name_.c_str());
       } catch(std::exception &e) {
-         ROS_ERROR("--ERROR: PLEASE CHECK YOUR DATA \n%s", e.what());
+         JSK_ROS_ERROR("--ERROR: PLEASE CHECK YOUR DATA \n%s", e.what());
          std::_Exit(EXIT_FAILURE);
       }
    }
@@ -57,11 +57,11 @@ namespace jsk_perception
    void SlidingWindowObjectDetectorTrainer::readDataset(
       std::string filename, std::string topic_name, cv::Mat &featureMD,
       cv::Mat &labelMD, bool is_usr_label, const int usr_label) {
-      ROS_INFO("--READING DATASET IMAGE");
+      JSK_ROS_INFO("--READING DATASET IMAGE");
       try {
          rosbag_ = boost::shared_ptr<rosbag::Bag>(new rosbag::Bag);
          this->rosbag_->open(filename, rosbag::bagmode::Read);
-         ROS_INFO("Bag Found and Opened Successfully...");
+         JSK_ROS_INFO("Bag Found and Opened Successfully...");
          std::vector<std::string> topics;
          topics.push_back(std::string(topic_name));
          rosbag::View view(*rosbag_, rosbag::TopicQuery(topics));
@@ -78,12 +78,12 @@ namespace jsk_perception
                cv::imshow("image", image);
                cv::waitKey(3);
             } else {
-               ROS_WARN("-> NO IMAGE");
+               JSK_ROS_WARN("-> NO IMAGE");
             }
          }
          this->rosbag_->close();
       } catch (ros::Exception &e) {
-         ROS_ERROR("ERROR: Bag File:%s not found..\n%s",
+         JSK_ROS_ERROR("ERROR: Bag File:%s not found..\n%s",
                    filename.c_str(), e.what());
          std::_Exit(EXIT_FAILURE);
       }
@@ -94,7 +94,7 @@ namespace jsk_perception
  */
    void SlidingWindowObjectDetectorTrainer::extractFeatures(
       cv::Mat &img, cv::Mat &featureMD) {
-      ROS_INFO("--EXTRACTING IMAGE FEATURES.");
+      JSK_ROS_INFO("--EXTRACTING IMAGE FEATURES.");
       if (img.data) {
          cv::resize(img, img, cv::Size(this->swindow_x_, this->swindow_y_));
          cv::Mat hog_feature = this->computeHOG(img);
@@ -112,7 +112,7 @@ namespace jsk_perception
    void SlidingWindowObjectDetectorTrainer::trainBinaryClassSVM(
       const cv::Mat &featureMD, const cv::Mat &labelMD)
    {
-      ROS_INFO("--TRAINING CLASSIFIER");
+      JSK_ROS_INFO("--TRAINING CLASSIFIER");
       cv::SVMParams svm_param = cv::SVMParams();
       svm_param.svm_type = cv::SVM::NU_SVC;
       svm_param.kernel_type = cv::SVM::RBF;
@@ -221,7 +221,7 @@ namespace jsk_perception
 
 int main(int argc, char *argv[]) {
     ros::init(argc, argv, "sliding_window_object_detector_trainer_node");
-    ROS_INFO("RUNNING NODELET %s", "sliding_window_object_detector_trainer");
+    JSK_ROS_INFO("RUNNING NODELET %s", "sliding_window_object_detector_trainer");
     jsk_perception::SlidingWindowObjectDetectorTrainer run_trainer;
     ros::spin();
     return 0;    

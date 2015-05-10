@@ -1,4 +1,5 @@
 #include <nodelet/nodelet.h>
+#include <jsk_topic_tools/log_utils.h>
 #include <jsk_perception/EdgeDetectorConfig.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
@@ -73,19 +74,19 @@ class EdgeDetector: public nodelet::Nodelet
             }
         catch (cv::Exception &e)
             {
-                NODELET_ERROR("Image processing error: %s %s %s %i", e.err.c_str(), e.func.c_str(), e.file.c_str(), e.line);
+                JSK_NODELET_ERROR("Image processing error: %s %s %s %i", e.err.c_str(), e.func.c_str(), e.file.c_str(), e.line);
             }
     }
 
     void subscribe()
     {
-        NODELET_DEBUG("Subscribing to image topic.");
+        JSK_NODELET_DEBUG("Subscribing to image topic.");
         img_sub_ = it_->subscribe("image", 3, &EdgeDetector::imageCallback, this);
     }
 
     void unsubscribe()
     {
-        NODELET_DEBUG("Unsubscribing from image topic.");
+        JSK_NODELET_DEBUG("Unsubscribing from image topic.");
         img_sub_.shutdown();
     }
 

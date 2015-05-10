@@ -1,6 +1,7 @@
 // @brief calc oriented gradent
 // @author Hiroaki Yaguchi, JSK
 #include "jsk_perception/oriented_gradient.hpp"
+#include <jsk_topic_tools/log_utils.h>
 
 namespace jsk_perception {
 

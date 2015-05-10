@@ -66,7 +66,7 @@ namespace jsk_perception
     cv::Mat output_image = cv::Mat::zeros(label_image_msg->height,
                                           label_image_msg->width,
                                           CV_8UC3);
-    ROS_INFO("%dx%d", label_image_msg->width, label_image_msg->height);
+    JSK_ROS_INFO("%dx%d", label_image_msg->width, label_image_msg->height);
     for (size_t j = 0; j < label_image.rows; ++j) {
       for (size_t i = 0; i < label_image.cols; ++i) {
         int label = label_image.at<int>(j, i);

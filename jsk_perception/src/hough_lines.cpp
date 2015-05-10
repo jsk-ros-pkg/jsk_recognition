@@ -1,4 +1,5 @@
 #include <ros/ros.h>
+#include <jsk_topic_tools/log_utils.h>
 #include <jsk_perception/HoughLinesConfig.h>
 #include <jsk_recognition_msgs/LineArray.h>
 #include <image_transport/image_transport.h>
@@ -59,7 +60,7 @@ class HoughLines
                 cv::Mat in_image = cv_bridge::toCvShare(msg, msg->encoding)->image;
 
                 if (msg->encoding != enc::MONO8) {
-                    ROS_ERROR("Hough Lines assume monochrome image for input");
+                    JSK_ROS_ERROR("Hough Lines assume monochrome image for input");
                     return;
                 }
 
@@ -67,7 +68,7 @@ class HoughLines
                 cvtColor(in_image, out_image, CV_GRAY2BGR);
 
                 // Do the work
-                ROS_INFO_STREAM("Hough Lines : rho:" << _rho << ", tehta:" << _theta << ", threshold:" <<  _threshold << ", minLineLength:" <<  _minLineLength << ", maxLineGap" <<  _maxLineGap);
+                JSK_ROS_INFO_STREAM("Hough Lines : rho:" << _rho << ", tehta:" << _theta << ", threshold:" <<  _threshold << ", minLineLength:" <<  _minLineLength << ", maxLineGap" <<  _maxLineGap);
 #if 1
                 std::vector<cv::Vec4i> lines;
                 cv::HoughLinesP( in_image, lines, _rho, _theta*CV_PI/180 , _threshold, _minLineLength, _maxLineGap );
@@ -110,19 +111,19 @@ class HoughLines
             }
         catch (cv::Exception &e)
             {
-                ROS_ERROR("Image processing error: %s %s %s %i", e.err.c_str(), e.func.c_str(), e.file.c_str(), e.line);
+                JSK_ROS_ERROR("Image processing error: %s %s %s %i", e.err.c_str(), e.func.c_str(), e.file.c_str(), e.line);
             }
     }
 
     void subscribe()
     {
-        ROS_DEBUG("Subscribing to image topic.");
+        JSK_ROS_DEBUG("Subscribing to image topic.");
         img_sub_ = it_.subscribe("image", 3, &HoughLines::imageCallback, this);
     }
 
     void unsubscribe()
     {
-        ROS_DEBUG("Unsubscribing from image topic.");
+        JSK_ROS_DEBUG("Unsubscribing from image topic.");
         img_sub_.shutdown();
     }
 

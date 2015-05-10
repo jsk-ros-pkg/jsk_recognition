@@ -4,6 +4,7 @@
   <node pkg="jsk_perception" type="fisheye_ray.py" name="click_to_pose">
     <remap from="clicked_point" to="/camera/image_rect_color/screenpoint"/>
     <remap from="camera_info" to="/camera/camera_info"/>
+    <remap from="image" to="/camera/image_raw"/>
   </node>
 
   <node type="nodelet" pkg="nodelet" name="fisheye_manager" args="manager"/>

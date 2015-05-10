@@ -1,11 +1,14 @@
 <launch>
-<group>
-  <node pkg="jsk_perception" type="sliding_window_object_detector" name="sliding_window_object_detector" output="screen">
-  </node>
-  <node pkg="jsk_perception" type="non_maximum_suppression.py" name="non_maximum_suppression" output="screen">
-    <remap from="non_maximum_suppression" to="/sliding_window_object_detector/non_maximum_suppression" />
-  </node>
-</group>
+  <group>
+    <node pkg="jsk_perception" type="sliding_window_object_detector" name="sliding_window_object_detector" output="screen">
+      <remap from="~input" to="/camera/rgb/image_rect_color" />
+      <param name="run_type"  value="DETECTOR" type="str"/>
+      <param name="trainer_manifest"  value="sliding_window_trainer_manifest.xml" type="str"/>
+    </node>
+    <node pkg="jsk_perception" type="non_maximum_suppression.py" name="non_maximum_suppression" output="screen">
+      <remap from="non_maximum_suppression" to="/sliding_window_object_detector/non_maximum_suppression" />
+    </node>
+  </group>
   <node pkg="image_view" type="image_view" name="detector" >
     <remap from="image" to="/sliding_window_object_detector/output/image" />
   </node>

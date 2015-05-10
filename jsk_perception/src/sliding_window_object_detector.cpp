@@ -1,3 +1,4 @@
+// @author Krishneel Chaudhary, JSK
 
 #include <jsk_perception/sliding_window_object_detector.h>
 #include <jsk_recognition_msgs/Rect.h>
@@ -17,9 +18,42 @@ namespace jsk_perception
          jsk_perception::SlidingWindowObjectDetectorConfig>::CallbackType f =
          boost::bind(&SlidingWindowObjectDetector::configCallback, this, _1, _2);
       this->srv_->setCallback(f);
+      
+      pnh_->getParam("run_type", this->run_type_);
+      pnh_->getParam("trainer_manifest", this->trainer_manifest_filename_);
 
+      ROS_INFO("RUN TYPE: %s", run_type_.c_str());
+      ROS_INFO("LOADED TRAINER MANIFEST: %s", trainer_manifest_filename_.c_str());
+
+      this->readTrainingManifestFromDirectory();
       loadTrainedDetectorModel();
-
+      if (this->run_type_.compare("BOOTSTRAPER") == 0) {
+         try {
+            std::string _topic = "/dataset/background/roi";
+            boost::shared_ptr<rosbag::Bag> tmp_bag(new rosbag::Bag);
+            tmp_bag->open(this->ndataset_path_, rosbag::bagmode::Read);
+            ROS_INFO("Bag Found and Opened Successfully ...");
+            std::vector<std::string> topics;
+            topics.push_back(_topic);
+            rosbag::View view(*tmp_bag, rosbag::TopicQuery(topics));
+            std::vector<sensor_msgs::Image> tmp_imgs;
+            BOOST_FOREACH(rosbag::MessageInstance const m, view) {
+               sensor_msgs::Image::ConstPtr img_msg = m.instantiate<
+               sensor_msgs::Image>();
+               tmp_imgs.push_back(*img_msg);
+            }
+            tmp_bag->close();
+            this->rosbag_ = boost::shared_ptr<rosbag::Bag>(new rosbag::Bag);
+            this->rosbag_->open(this->ndataset_path_, rosbag::bagmode::Write);
+            for (std::vector<sensor_msgs::Image>::iterator it = tmp_imgs.begin();
+                 it != tmp_imgs.end(); it++) {
+               this->rosbag_->write(_topic, ros::Time::now(), *it);
+            }
+         } catch (ros::Exception &e) {
+            ROS_ERROR("ERROR: Bag File not found..\n%s", e.what());
+            std::_Exit(EXIT_FAILURE);
+         }         
+      }
       this->pub_rects_ = advertise<jsk_recognition_msgs::RectArray>(
          *pnh_, "output/rects", 1);
       this->pub_image_ = advertise<sensor_msgs::Image>(
@@ -27,20 +61,19 @@ namespace jsk_perception
    }
 
    void SlidingWindowObjectDetector::subscribe()
-   {      
-      this->sub_ = pnh_->subscribe(
-         "/camera/rgb/image_rect_color", 1,
-         &SlidingWindowObjectDetector::imageCb, this);
+   {
+      ROS_INFO("Subscribing...");
+      this->sub_image_ = pnh_->subscribe(
+         "input", 1, &SlidingWindowObjectDetector::imageCb, this);
    }
    
    void SlidingWindowObjectDetector::unsubscribe()
    {
       NODELET_DEBUG("Unsubscribing from ROS topic.");
-      this->sub_.shutdown();
+      this->sub_image_.shutdown();
    }
-
-   void SlidingWindowObjectDetector::imageCb(
-      const sensor_msgs::ImageConstPtr& msg)
+   
+   void SlidingWindowObjectDetector::imageCb(const sensor_msgs::ImageConstPtr& msg)
    {
       cv_bridge::CvImagePtr cv_ptr;
       try {
@@ -48,7 +81,7 @@ namespace jsk_perception
       } catch (cv_bridge::Exception& e) {
          ROS_ERROR("cv_bridge exception: %s", e.what());
          return;
-      }
+      }      
       cv::Mat image;
       cv::Size isize = cv_ptr->image.size();
       // control params
@@ -58,53 +91,81 @@ namespace jsk_perception
       const int incrementor = this->incrementor_;
       cv::resize(cv_ptr->image, image, cv::Size(
                     isize.width/downsize, isize.height/downsize));
-      std::vector<cv::Rect_<int> > bb_rects = this->runObjectRecognizer(
-         image, cv::Size(this->swindow_x, this->swindow_y),
-         scale, img_stack, incrementor);
-
-      jsk_recognition_msgs::RectArray jsk_rect_array;
-      this->convertCvRectToJSKRectArray(
-         bb_rects, jsk_rect_array, downsize, isize);
-      jsk_rect_array.header = msg->header;
-      cv_bridge::CvImage img_bridge(
-         msg->header, sensor_msgs::image_encodings::BGR8, image);
-      this->pub_rects_.publish(jsk_rect_array);
-      this->pub_image_.publish(img_bridge.toImageMsg());
+      std::multimap<float, cv::Rect_<int> > detection_info =
+         this->runSlidingWindowDetector(image, cv::Size(
+                                      this->swindow_x, this->swindow_y),
+                                   scale, img_stack, incrementor);
+      cv::Mat dimg = image.clone();
+      ROS_INFO("--Info Size: %ld", detection_info.size());
+      for (std::multimap<float, cv::Rect_<int> >::iterator
+              it = detection_info.begin(); it != detection_info.end(); it++) {
+         cv::rectangle(dimg, it->second, cv::Scalar(0, 0, 255), 2);
+      }
+      if (this->run_type_.compare("DETECTOR") == 0) {
+         const float nms_threshold = 0.01;
+         std::vector<cv::Rect_<int> > object_rects = this->nonMaximumSuppression(
+            detection_info, nms_threshold);
+         cv::Mat bimg = image.clone();
+         for (std::vector<cv::Rect_<int> >::iterator it = object_rects.begin();
+              it != object_rects.end(); it++) {
+            this->setBoundingBoxLabel(bimg, *it);
+            cv::rectangle(bimg, *it, cv::Scalar(0, 255, 0), 1);
+         }
+         jsk_recognition_msgs::RectArray jsk_rect_array;
+         this->convertCvRectToJSKRectArray(
+            object_rects, jsk_rect_array, downsize, isize);
+         jsk_rect_array.header = msg->header;
+         cv_bridge::CvImagePtr out_msg(new cv_bridge::CvImage);
+         out_msg->header = msg->header;
+         out_msg->encoding = sensor_msgs::image_encodings::BGR8;
+         out_msg->image = bimg.clone();
+         this->pub_rects_.publish(jsk_rect_array);
+         this->pub_image_.publish(out_msg->toImageMsg());
+      } else if (this->run_type_.compare("BOOTSTRAPER") == 0) {
+         for (std::multimap<float, cv::Rect_<int> >::const_iterator
+                 it = detection_info.begin(); it != detection_info.end(); it++) {
+            cv::Mat roi = image(it->second).clone();
+            cv::resize(
+               roi, roi, cv::Size(
+                  roi.cols * this->downsize_, roi.rows * this->downsize_));
+            if (roi.data) {
+               ROS_INFO("Writing to bag file");
+               cv_bridge::CvImagePtr write_roi(new cv_bridge::CvImage);
+               write_roi->header = msg->header;
+               write_roi->encoding = sensor_msgs::image_encodings::BGR8;
+               write_roi->image = roi.clone();
+               this->rosbag_->write("/dataset/background/roi",
+                                    ros::Time::now(), write_roi->toImageMsg());
+               cv::imshow("write_roi", roi);
+               cv::waitKey(3);
+            }
+         }
+      } else {
+         this->pub_image_.publish(cv_ptr->toImageMsg());
+         ROS_ERROR("NODELET RUNTYPE IS NOT SET.");
+         std::_Exit(EXIT_FAILURE);
+      }
    }
-   
-   std::vector<cv::Rect_<int> >  SlidingWindowObjectDetector::runObjectRecognizer(
-      cv::Mat &image, const cv::Size wsize,
-      const float scale, const int scale_counter, const int incrementor)
+
+   std::multimap<float, cv::Rect_<int> >
+   SlidingWindowObjectDetector::runSlidingWindowDetector(
+      const cv::Mat &image, const cv::Size wsize, const float scale,
+      const int scale_counter, const int incrementor)
    {
       if (image.empty()) {
          ROS_ERROR("--INPUT IMAGE IS EMPTY");
-         return image;
+         return std::multimap<float, cv::Rect_<int> >();
       }
       cv::Size nwsize = wsize;
       int scounter = 0;
       std::multimap<float, cv::Rect_<int> > detection_info;
+      int sw_incrementor = incrementor;
       while (scounter++ < scale_counter) {
-         this->objectRecognizer(image, detection_info, nwsize, incrementor);
+         this->objectRecognizer(image, detection_info, nwsize, sw_incrementor);
          this->pyramidialScaling(nwsize, scale);
+         sw_incrementor += (sw_incrementor * scale);
       }
-      cv::Mat dimg = image.clone();
-      for (std::multimap<float, cv::Rect_<int> >::iterator
-              it = detection_info.begin(); it != detection_info.end(); it++) {
-         cv::rectangle(dimg, it->second, cv::Scalar(0, 255, 0), 2);
-      }
-      const float nms_threshold = 0.05;
-      std::vector<cv::Rect_<int> > object_rects = this->nonMaximumSuppression(
-         detection_info, nms_threshold);
-      cv::Mat bimg = image.clone();
-      for (std::vector<cv::Rect_<int> >::iterator it = object_rects.begin();
-           it != object_rects.end(); it++) {
-         cv::rectangle(bimg, *it, cv::Scalar(0, 0, 255), 2);
-      }
-      image = bimg.clone();
-      // cv::imshow("Initial Detection", dimg);
-      // cv::imshow("Final Detection", bimg);
-      // cv::waitKey(3);
-      return object_rects;
+      return detection_info;
    }
 
    void SlidingWindowObjectDetector::objectRecognizer(
@@ -118,11 +179,15 @@ namespace jsk_perception
                 (rect.y + rect.height <= image.rows)) {
                cv::Mat roi = image(rect).clone();
                cv::GaussianBlur(roi, roi, cv::Size(3, 3), 1.0);
-             
                cv::resize(roi, roi, cv::Size(this->swindow_x, this->swindow_y));
-               cv::Mat roi_feature = this->computeHOG(roi);
+               cv::Mat hog_feature = this->computeHOG(roi);
+               cv::Mat hsv_feature;
+               this->computeHSHistogram(roi, hsv_feature, 16, 16, true);
+               hsv_feature = hsv_feature.reshape(1, 1);
+               cv::Mat _feature = hog_feature;
+               this->concatenateCVMat(hog_feature, hsv_feature, _feature);
                float response = this->supportVectorMachine_->predict(
-                  roi_feature, false);
+                  _feature, false);
                if (response == 1) {
                   detection_info.insert(std::make_pair(response, rect));
                } else {
@@ -133,6 +198,29 @@ namespace jsk_perception
       }
    }
 
+   /**
+    * color histogram temp placed here
+    */
+   void SlidingWindowObjectDetector::computeHSHistogram(
+      cv::Mat &src, cv::Mat &hist, const int hBin, const int sBin, bool is_norm)
+   {
+      if (src.empty()) {
+         return;
+      }
+      cv::Mat hsv;
+      cv::cvtColor(src, hsv, CV_BGR2HSV);
+      int histSize[] = {hBin, sBin};
+      float h_ranges[] = {0, 180};
+      float s_ranges[] = {0, 256};
+      const float* ranges[] = {h_ranges, s_ranges};
+      int channels[] = {0, 1};
+      cv::calcHist(
+         &hsv, 1, channels, cv::Mat(), hist, 2, histSize, ranges, true, false);
+      if (is_norm) {
+         cv::normalize(hist, hist, 0, 1, cv::NORM_MINMAX, -1, cv::Mat());
+      }
+   }
+   
    void SlidingWindowObjectDetector::pyramidialScaling(
       cv::Size &wsize, const float scale)
    {
@@ -181,128 +269,6 @@ namespace jsk_perception
       return bbox;
    }
 
-   void SlidingWindowObjectDetector::trainObjectClassifier()
-   {
-      // reading the positive training image
-      std::string pfilename = dataset_path_ + "dataset/train.txt";
-      std::vector<cv::Mat> pdataset_img;
-      cv::Mat labelMD;
-      this->readDataset(pfilename, pdataset_img, labelMD, true, 1);
-
-      // reading the negative training image
-      std::string nfilename = dataset_path_ + "dataset/negative.txt";
-      std::vector<cv::Mat> ndataset_img;
-      this->readDataset(nfilename, ndataset_img, labelMD, true, -1);
-
-      pdataset_img.insert(
-         pdataset_img.end(), ndataset_img.begin(), ndataset_img.end());
-       
-      cv::Mat featureMD;
-      this->extractFeatures(pdataset_img, featureMD);
-      
-      try {
-         this->trainBinaryClassSVM(featureMD, labelMD);
-         this->supportVectorMachine_->save(
-            (this->model_name_).c_str());
-      } catch(std::exception &e) {
-         ROS_ERROR("--ERROR: %s", e.what());
-      }
-   }
-
-   void SlidingWindowObjectDetector::readDataset(
-      std::string filename, std::vector<cv::Mat> &dataset_img, cv::Mat &labelMD,
-      bool is_usr_label, const int usr_label)
-   {
-      ROS_INFO("--READING DATASET IMAGE");
-      std::ifstream infile;
-      infile.open(filename.c_str(), std::ios::in);
-      char buffer[255];
-      if (!infile.eof()) {
-         while (infile.good()) {
-            infile.getline(buffer, 255);
-            std::string _line(buffer);
-            if (!_line.empty()) {
-               std::istringstream iss(_line);
-               std::string _path;
-               iss >> _path;
-               cv::Mat img = cv::imread(this->dataset_path_+ _path,
-                                        CV_LOAD_IMAGE_COLOR);
-               float label;
-               if (!is_usr_label) {
-                  std::string _label;
-                  iss >> _label;
-                  label = std::atoi(_label.c_str());
-               } else {
-                  label = static_cast<float>(usr_label);
-               }
-               if (img.data) {
-                  labelMD.push_back(label);
-                  dataset_img.push_back(img);
-               }
-            }
-         }
-      }
-   }
-
-   void SlidingWindowObjectDetector::loadTrainedDetectorModel()
-   {
-      this->supportVectorMachine_ = boost::shared_ptr<cv::SVM>(new cv::SVM);
-      this->supportVectorMachine_->load(this->model_name_.c_str());
-   }
-
-/**
- * currently programmed using fixed sized image
- */
-   void SlidingWindowObjectDetector::extractFeatures(
-      const std::vector<cv::Mat> &dataset_img, cv::Mat &featureMD)
-   {
-      ROS_INFO("--EXTRACTING IMAGE FEATURES");
-      for (std::vector<cv::Mat>::const_iterator it = dataset_img.begin();
-           it != dataset_img.end(); it++) {
-         cv::Mat img = *it;
-         cv::resize(img, img, cv::Size(this->swindow_x, this->swindow_y));
-         if (img.data) {
-            cv::Mat _feature = this->computeHOG(img);
-            featureMD.push_back(_feature);
-         }
-         cv::imshow("image", img);
-         cv::waitKey(3);
-      }
-   }
-
-   void SlidingWindowObjectDetector::trainBinaryClassSVM(
-      const cv::Mat &featureMD, const cv::Mat &labelMD)
-   {
-      // std::cout << featureMD.size() << labelMD.size() << std::endl;
-      ROS_INFO("--TRAINING CLASSIFIER");
-      cv::SVMParams svm_param = cv::SVMParams();
-      svm_param.svm_type = cv::SVM::NU_SVC;
-      svm_param.kernel_type = cv::SVM::RBF;
-      svm_param.degree = 0.0;
-      svm_param.gamma = 0.90;
-      svm_param.coef0 = 0.50;
-      svm_param.C = 100;
-      svm_param.nu = 0.70;
-      svm_param.p = 1.0;
-      svm_param.class_weights = NULL;
-      svm_param.term_crit.type = CV_TERMCRIT_ITER | CV_TERMCRIT_EPS;
-      svm_param.term_crit.max_iter = 1e6;
-      svm_param.term_crit.epsilon = 1e-6;
-      cv::ParamGrid paramGrid = cv::ParamGrid();
-      paramGrid.min_val = 0;
-      paramGrid.max_val = 0;
-      paramGrid.step = 1;
-
-      this->supportVectorMachine_->train_auto
-         (featureMD, labelMD, cv::Mat(), cv::Mat(), svm_param, 10,
-          paramGrid, cv::SVM::get_default_grid(cv::SVM::GAMMA),
-          cv::SVM::get_default_grid(cv::SVM::P),
-          cv::SVM::get_default_grid(cv::SVM::NU),
-          cv::SVM::get_default_grid(cv::SVM::COEF),
-          cv::SVM::get_default_grid(cv::SVM::DEGREE),
-          true);
-   }
-
    void SlidingWindowObjectDetector::concatenateCVMat(
       const cv::Mat &mat_1, const cv::Mat &mat_2,
       cv::Mat &featureMD, bool iscolwise)
@@ -329,7 +295,7 @@ namespace jsk_perception
          }
       }
    }
-
+   
    void SlidingWindowObjectDetector::convertCvRectToJSKRectArray(
       const std::vector<cv::Rect_<int> > &bounding_boxes,
       jsk_recognition_msgs::RectArray &jsk_rects,
@@ -345,7 +311,70 @@ namespace jsk_perception
          jsk_rects.rects.push_back(j_r);
       }
    }
+   
+   void SlidingWindowObjectDetector::loadTrainedDetectorModel()
+   {
+      try {
+         ROS_INFO("--Loading Trained SVM Classifier");
+         this->supportVectorMachine_ = boost::shared_ptr<cv::SVM>(new cv::SVM);
+         this->supportVectorMachine_->load(this->model_name_.c_str());
+         ROS_INFO("--Classifier Loaded Successfully");
+      } catch(cv::Exception &e) {
+         ROS_ERROR("--ERROR: Fail to load Classifier \n%s", e.what());
+         std::_Exit(EXIT_FAILURE);
+      }
+   }
+   
+   void SlidingWindowObjectDetector::readTrainingManifestFromDirectory()
+   {
+      cv::FileStorage fs = cv::FileStorage(
+         this->trainer_manifest_filename_, cv::FileStorage::READ);
+      if (!fs.isOpened()) {
+         ROS_ERROR("TRAINER MANIFEST NOT FOUND..");
+         std::_Exit(EXIT_FAILURE);
+      }
+      cv::FileNode n = fs["TrainerInfo"];
+      std::string ttype = n["trainer_type"];
+      std::string tpath = n["trainer_path"];
+      this->model_name_ = tpath;   // classifier path
+    
+      n = fs["FeatureInfo"];       // features used
+      int hog = static_cast<int>(n["HOG"]);
+      int lbp = static_cast<int>(n["LBP"]);
 
+      n = fs["SlidingWindowInfo"];  // window size
+      int sw_x = static_cast<int>(n["swindow_x"]);
+      int sw_y = static_cast<int>(n["swindow_y"]);
+      this->swindow_x = sw_x;
+      this->swindow_y = sw_y;
+    
+      n = fs["TrainingDatasetDirectoryInfo"];
+      std::string pfile = n["object_dataset_filename"];
+      std::string nfile = n["nonobject_dataset_filename"];
+      std::string dataset_path = n["dataset_path"];
+      this->object_dataset_filename_ = pfile;  // object dataset
+      this->nonobject_dataset_filename_ = nfile;
+      this->ndataset_path_ = dataset_path + nfile;  // ~/.ros/dir/negative/x.bag
+   }
+
+   void SlidingWindowObjectDetector::setBoundingBoxLabel(
+      cv::Mat& im, cv::Rect_<int> rect, const std::string label)
+   {
+      int fontface = cv::FONT_HERSHEY_SIMPLEX;
+      double scale = 0.2;
+      int thickness = 1;
+      int baseline = 0;
+      cv::Size text = cv::getTextSize(
+         label, fontface, scale, thickness, &baseline);
+      cv::Point pt = cv::Point(
+         rect.x + (rect.width-text.width), rect.y + (rect.height+text.height));
+      cv::rectangle(im, pt + cv::Point(0, baseline),
+                    pt + cv::Point(text.width, -text.height),
+                    CV_RGB(0, 0, 255), CV_FILLED);
+      cv::putText(im, label, pt,
+                  fontface, scale, CV_RGB(255, 0, 0), thickness, 8);
+   }
+   
    void SlidingWindowObjectDetector::configCallback(
       jsk_perception::SlidingWindowObjectDetectorConfig &config, uint32_t level)
    {
@@ -353,13 +382,11 @@ namespace jsk_perception
       this->scale_ = static_cast<float>(config.scaling_factor);
       this->stack_size_ = static_cast<int>(config.stack_size);
       this->incrementor_ = config.sliding_window_increment;
-      this->model_name_ = config.svm_model_name;
-      this->dataset_path_ = config.dataset_directory;
+      this->downsize_ = config.image_downsize;
       
       // currently fixed variables
-      this->swindow_x = config.sliding_window_width;
-      this->swindow_y = config.sliding_window_height;
-      this->downsize_ = config.image_downsize;
+      // this->swindow_x = config.sliding_window_width;
+      // this->swindow_y = config.sliding_window_height;
    }
 }  // namespace jsk_perception
 

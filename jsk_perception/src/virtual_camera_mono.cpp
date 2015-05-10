@@ -1,4 +1,5 @@
 #include <ros/ros.h>
+#include <jsk_topic_tools/log_utils.h>
 #include <image_transport/image_transport.h>
 #include <image_geometry/pinhole_camera_model.h>
 #include <tf/transform_listener.h>
@@ -66,7 +67,7 @@ public:
       image = cv_ptr->image;
     }
     catch (cv_bridge::Exception& ex) {
-      ROS_ERROR("[virtual_camera_mono] Failed to convert image");
+      JSK_ROS_ERROR("[virtual_camera_mono] Failed to convert image");
       return;
     }
 
@@ -76,12 +77,12 @@ public:
     tf_broadcaster_.sendTransform(trans_);
 
     //
-    ROS_INFO("transform image.");
+    JSK_ROS_INFO("transform image.");
     //IplImage *outimage = cvCloneImage(image); // need to release
     cv::Mat outimage = image.clone();
     if (TransformImage(image, outimage, trans_, poly_, cam_model_)) {
       //
-      ROS_INFO("publish image and transform.");
+      JSK_ROS_INFO("publish image and transform.");
       sensor_msgs::CameraInfo virtual_info = *info_msg;
       //sensor_msgs::Image::Ptr img_msg = bridge_.cvToImgMsg(outimage, "bgr8");
       cv_ptr->image = outimage;
@@ -161,7 +162,7 @@ public:
       cv::warpPerspective (src, dest, map_matrix2, dest.size(), cv::INTER_LINEAR);
       //cvReleaseImage(&rectified);
     } catch ( std::runtime_error e ) {
-      // ROS_ERROR("%s",e.what());
+      // JSK_ROS_ERROR("%s",e.what());
       return false;
     }
     return true;

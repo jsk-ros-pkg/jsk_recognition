@@ -85,7 +85,7 @@ namespace jsk_perception
       pub_.publish(roi);
     }
     else {
-      NODELET_ERROR("camera info is not yet available");
+      JSK_NODELET_ERROR("camera info is not yet available");
     }
   }
 }

@@ -74,7 +74,7 @@ namespace jsk_perception
       cv::cvtColor(image, ycc_image, CV_RGB2YCrCb);
     }
     else {
-      NODELET_ERROR("unsupported format to YCC: %s", image_msg->encoding.c_str());
+      JSK_NODELET_ERROR("unsupported format to YCC: %s", image_msg->encoding.c_str());
       return;
     }
     cv::split(ycc_image, ycc_planes);

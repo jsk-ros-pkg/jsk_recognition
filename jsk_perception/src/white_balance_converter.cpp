@@ -1,4 +1,5 @@
 #include <ros/ros.h>
+#include <jsk_topic_tools/log_utils.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/PointCloud2.h>
 
@@ -40,14 +41,14 @@ public:
     if (pnh.hasParam("parameter_matrix")) {
       XmlRpc::XmlRpcValue param_val;
       pnh.getParam("parameter_matrix", param_val);
-      // ROS_INFO("MATRIX %d", param_val.size());
+      // JSK_ROS_INFO("MATRIX %d", param_val.size());
       if (param_val.getType() == XmlRpc::XmlRpcValue::TypeArray && param_val.size() == 48) {
         for ( int i = 0; i < 48; i++) {
           pmat[i] = param_val[i];
         }
       }
       for ( int i = 0; i < 12; i++ ) {
-        ROS_INFO("[%f, %f, %f, %f]", pmat[4*i + 0], pmat[4*i + 1], pmat[4*i + 2], pmat[4*i + 3]);
+        JSK_ROS_INFO("[%f, %f, %f, %f]", pmat[4*i + 0], pmat[4*i + 1], pmat[4*i + 2], pmat[4*i + 3]);
       }
     }
 
@@ -75,10 +76,10 @@ public:
         break;
       }
     }
-    //ROS_INFO("offst = %d", rgb_offset);
+    //JSK_ROS_INFO("offst = %d", rgb_offset);
 
     if ( rgb_offset < 0 ) {
-      ROS_WARN("point cloud didn't have rgb field");
+      JSK_ROS_WARN("point cloud didn't have rgb field");
       return false;
     }
 
@@ -125,9 +126,9 @@ public:
         ( pmat[4*i + 2] * refb ) +
         pmat[4*i + 3] ;
     }
-    ROS_INFO("%f %f %f %f", cmat[0], cmat[1], cmat[2], cmat[3]);
-    ROS_INFO("%f %f %f %f", cmat[4], cmat[5], cmat[6], cmat[7]);
-    ROS_INFO("%f %f %f %f", cmat[8], cmat[9], cmat[10], cmat[11]);
+    JSK_ROS_INFO("%f %f %f %f", cmat[0], cmat[1], cmat[2], cmat[3]);
+    JSK_ROS_INFO("%f %f %f %f", cmat[4], cmat[5], cmat[6], cmat[7]);
+    JSK_ROS_INFO("%f %f %f %f", cmat[8], cmat[9], cmat[10], cmat[11]);
 
     Eigen::Matrix4d mat;
     mat(0,0) = cmat[0]; mat(0,1) = cmat[1]; mat(0,2) = cmat[2];  mat(0,3) = cmat[3];
@@ -140,9 +141,9 @@ public:
     cmat[4] = imat(1, 0); cmat[5] = imat(1, 1); cmat[6]  = imat(1, 2); cmat[7]  = imat(1, 3);
     cmat[8] = imat(2, 0); cmat[9] = imat(2, 1); cmat[10] = imat(2, 2); cmat[11] = imat(2, 3);
 
-    ROS_INFO("%f %f %f %f", cmat[0], cmat[1], cmat[2], cmat[3]);
-    ROS_INFO("%f %f %f %f", cmat[4], cmat[5], cmat[6], cmat[7]);
-    ROS_INFO("%f %f %f %f", cmat[8], cmat[9], cmat[10], cmat[11]);
+    JSK_ROS_INFO("%f %f %f %f", cmat[0], cmat[1], cmat[2], cmat[3]);
+    JSK_ROS_INFO("%f %f %f %f", cmat[4], cmat[5], cmat[6], cmat[7]);
+    JSK_ROS_INFO("%f %f %f %f", cmat[8], cmat[9], cmat[10], cmat[11]);
   }
 };
 

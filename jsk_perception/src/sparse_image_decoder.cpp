@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include <nodelet/nodelet.h>
+#include <jsk_topic_tools/log_utils.h>
 #include <image_transport/image_transport.h>
 #include <pluginlib/class_list_macros.h>
 #include <sensor_msgs/image_encodings.h>
@@ -45,7 +46,7 @@ class SparseImageDecoder: public nodelet::Nodelet
       if (length <= 0) {
         useData32 = true;
         length = msg->data32.size();
-        NODELET_DEBUG("use data32 array");
+        JSK_NODELET_DEBUG("use data32 array");
       }
       _img_ptr->data.resize(_img_ptr->width * _img_ptr->height);
       // decode sparse image -> image
@@ -67,17 +68,17 @@ class SparseImageDecoder: public nodelet::Nodelet
       _img_pub.publish(*_img_ptr);
     } // end of try
     catch (...) {
-      NODELET_ERROR("making sparse image error");
+      JSK_NODELET_ERROR("making sparse image error");
     }
   } // end of do_work function
 
   void subscribe() {
-    NODELET_DEBUG("Subscribing to image topic.");
+    JSK_NODELET_DEBUG("Subscribing to image topic.");
     _spr_img_sub = _nh.subscribe("sparse_image", 3, &SparseImageDecoder::imageCallback, this);
   }
 
   void unsubscribe() {
-    NODELET_DEBUG("Unsubscribing from image topic.");
+    JSK_NODELET_DEBUG("Unsubscribing from image topic.");
     _spr_img_sub.shutdown();
   }
 

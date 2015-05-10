@@ -284,6 +284,10 @@ Apply mask image to original image and visualize it. It's a utlity to visualize 
 
   Approximately synchronize inputs if it's true.
 
+* `~mask_black_to_transparent` (Bool, default: `false`)
+
+  Change black region of mask image to transparent and publish RGBA8 image as `~output` if its' true.
+
 ### jsk\_perception/UnpplyMaskImage
 ![](images/apply_unapply_mask_image.png)
 

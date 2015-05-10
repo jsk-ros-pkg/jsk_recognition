@@ -45,6 +45,7 @@ namespace jsk_perception
   {
     DiagnosticNodelet::onInit();
     pnh_->param("approximate_sync", approximate_sync_, false);
+    pnh_->param("mask_black_to_transparent", mask_black_to_transparent_, false);
     pub_image_ = advertise<sensor_msgs::Image>(
       *pnh_, "output", 1);
     pub_mask_ = advertise<sensor_msgs::Image>(
@@ -113,21 +114,61 @@ namespace jsk_perception
     cv::Mat clipped_image = image(region);
     cv::Mat masked_image;
     clipped_image.copyTo(masked_image, clipped_mask);
+
     cv::Mat output_image;
-    if (image_msg->encoding == sensor_msgs::image_encodings::BGRA8 ||
-        image_msg->encoding == sensor_msgs::image_encodings::BGRA16) {
-      cv::cvtColor(masked_image, output_image, cv::COLOR_BGR2BGRA);
-    } else if (image_msg->encoding == sensor_msgs::image_encodings::RGBA8 ||
+    if (mask_black_to_transparent_) {
+      if (sensor_msgs::image_encodings::isMono(image_msg->encoding)) {       // isMono
+        cv::cvtColor(masked_image, output_image, CV_GRAY2BGRA);
+      }
+      else if (image_msg->encoding == sensor_msgs::image_encodings::BGR8 ||  // isBGR
+               image_msg->encoding == sensor_msgs::image_encodings::BGR16) {
+        cv::cvtColor(masked_image, output_image, CV_BGR2BGRA);
+      }
+      else if (image_msg->encoding == sensor_msgs::image_encodings::RGB8 ||  // isRGB
+               image_msg->encoding == sensor_msgs::image_encodings::RGB16) {
+        cv::cvtColor(masked_image, output_image, CV_RGB2BGRA);
+      }
+      else if (image_msg->encoding == sensor_msgs::image_encodings::BGRA8 ||  // isBGRA
+               image_msg->encoding == sensor_msgs::image_encodings::BGRA16) {
+        cv::cvtColor(masked_image, output_image, CV_BGR2BGRA);
+      }
+      else if (image_msg->encoding == sensor_msgs::image_encodings::RGBA8 ||  // isRGBA
                image_msg->encoding == sensor_msgs::image_encodings::RGBA16) {
-      cv::cvtColor(masked_image, output_image, cv::COLOR_BGR2RGBA);
-    } else {
-      // BGR, RGB or GRAY
-      masked_image.copyTo(output_image);
+        cv::cvtColor(masked_image, output_image, CV_BGR2RGBA);
+      }
+      else {
+        NODELET_ERROR("unexpected image encoding");
+      }
+      for (size_t j=0; j<clipped_mask.rows; j++) {
+        for (int i=0; i<clipped_mask.cols; i++) {
+          if (clipped_mask.at<uchar>(j, i) == 0) {
+            cv::Vec4b color = output_image.at<cv::Vec4b>(j, i);
+            color[3] = 0;  // mask black -> transparent
+            output_image.at<cv::Vec4b>(j, i) = color;
+          }
+        }
+      }
+      pub_image_.publish(cv_bridge::CvImage(
+            image_msg->header,
+            sensor_msgs::image_encodings::BGRA8,
+            output_image).toImageMsg());
     }
-    pub_image_.publish(cv_bridge::CvImage(
-                         image_msg->header,
-                         image_msg->encoding,
-                         output_image).toImageMsg());
+    else {
+      if (image_msg->encoding == sensor_msgs::image_encodings::BGRA8 ||
+          image_msg->encoding == sensor_msgs::image_encodings::BGRA16) {
+        cv::cvtColor(masked_image, output_image, cv::COLOR_BGR2BGRA);
+      } else if (image_msg->encoding == sensor_msgs::image_encodings::RGBA8 ||
+          image_msg->encoding == sensor_msgs::image_encodings::RGBA16) {
+        cv::cvtColor(masked_image, output_image, cv::COLOR_BGR2RGBA);
+      } else {
+        // BGR, RGB or GRAY
+        masked_image.copyTo(output_image);
+      }
+      pub_image_.publish(cv_bridge::CvImage(
+            image_msg->header,
+            image_msg->encoding,
+            output_image).toImageMsg());
+    }
   }
 }
 

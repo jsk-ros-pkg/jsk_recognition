@@ -50,6 +50,5 @@ while not rospy.is_shutdown():
     except AttributeError, e:
         rospy.logerr("Did you set properly ~file_name param ?")
         rospy.loginfo(e.message)
-        exit()
     rate.sleep()
 

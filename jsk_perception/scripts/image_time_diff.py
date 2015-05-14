@@ -6,7 +6,7 @@ import cv2
 import rospy
 import cv_bridge
 from sensor_msgs.msg import Image
-from std_msgs.msg import String, Float32
+from std_msgs.msg import String, Float32Stamped
 
 
 class ImageTimeDiff(object):
@@ -35,7 +35,7 @@ class ImageTimeDiff(object):
         stamp = rospy.Time.now()
         namespace = msg.data
         pub_diff = rospy.Publisher(
-            '~output/{0}/diff'.format(namespace), Float32, queue_size=1)
+            '~output/{0}/diff'.format(namespace), Float32Stamped, queue_size=1)
         pub_diff_img = rospy.Publisher(
             '~output/{0}/diff_image'.format(namespace), Image, queue_size=1)
         pub_debug = rospy.Publisher(
@@ -64,8 +64,10 @@ class ImageTimeDiff(object):
             # compute diff for all publications
             diff_img = cv2.absdiff(img, img_stored)
             pub_diff_img.publish(bridge.cv2_to_imgmsg(diff_img))
-            diff = diff_img.sum() / diff_img.size
-            pub_diff.publish(data=diff)
+            diff_msg = Float32Stamped()
+            diff_msg.header.stamp = imgmsg.header.stamp
+            diff_msg.data = diff_img.sum() / diff_img.size
+            pub_diff.publish(diff_msg)
             pub_debug.publish(bridge.cv2_to_imgmsg(img_stored))
 
     def spin(self):

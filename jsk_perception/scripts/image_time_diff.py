@@ -13,7 +13,8 @@ class ImageTimeDiff(object):
     """Publish difference between stored image and current input one
 
     Publications:
-        * ~output/{namespace}: diff between stored image and current input
+        * ~output/{namespace}/diff: diff per pixel
+        * ~output/{namespace}/diff_image: diff image
 
     Subscriptions:
         * ~input: input raw image

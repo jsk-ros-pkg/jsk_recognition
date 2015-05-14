@@ -234,6 +234,7 @@ namespace jsk_pcl_ros
     virtual void clearTriangleDecompositionCache() {
       cached_triangles_.clear();
     }
+    virtual Eigen::Vector3f getNormalFromVertices();
     virtual bool isTriangle();
     template <class PointT>
     typename pcl::PointCloud<PointT>::Ptr samplePoints(double grid_size)

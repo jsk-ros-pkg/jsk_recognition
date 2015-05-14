@@ -178,7 +178,7 @@ namespace jsk_pcl_ros
           Eigen::Vector3f coefficient_normal(plane_coefficients->values[0],
                                              plane_coefficients->values[1],
                                              plane_coefficients->values[2]);
-          if (convex->getNormal().dot(coefficient_normal) < 0) {
+          if (convex->getNormalFromVertices().dot(coefficient_normal) < 0) {
             convex = boost::make_shared<ConvexPolygon>(convex->flipConvex());
           }
           geometry_msgs::PolygonStamped polygon;

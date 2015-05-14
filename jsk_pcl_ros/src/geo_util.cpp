@@ -804,6 +804,17 @@ namespace jsk_pcl_ros
     return ret;
   }
 
+  Eigen::Vector3f Polygon::getNormalFromVertices()
+  {
+    if (vertices_.size() >= 3) {
+      return (vertices_[1] - vertices_[0]).cross(vertices_[2] - vertices_[0]).normalized();
+    }
+    else {
+      JSK_ROS_ERROR("the number of vertices is not enough");
+      return Eigen::Vector3f(0, 0, 0);
+    }
+  }
+
   size_t Polygon::previousIndex(size_t i)
   {
     if (i == 0) {

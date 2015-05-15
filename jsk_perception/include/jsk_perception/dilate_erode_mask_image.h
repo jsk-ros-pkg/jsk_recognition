@@ -37,41 +37,12 @@
 #ifndef JSK_PERCEPTION_DILATE_ERODE_MASK_IMAGE_H_
 #define JSK_PERCEPTION_DILATE_ERODE_MASK_IMAGE_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
-#include <sensor_msgs/Image.h>
-#include <dynamic_reconfigure/server.h>
-#include <jsk_perception/MorphologicalMaskImageOperatorConfig.h>
+#include "jsk_perception/morphological_operator.h"
 #include <opencv2/opencv.hpp>
 
 namespace jsk_perception
 {
-  
-  class MorphologicalImageOperatorNodelet:
-    public jsk_topic_tools::DiagnosticNodelet
-  {
-  public:
-    typedef jsk_perception::MorphologicalMaskImageOperatorConfig Config;
-    MorphologicalImageOperatorNodelet(const std::string& name):
-      DiagnosticNodelet(name) {}
-  protected:
-    virtual void onInit();
-    virtual void subscribe();
-    virtual void unsubscribe();
-    virtual void configCallback(Config &config, uint32_t level);
-    virtual void imageCallback(const sensor_msgs::Image::ConstPtr& image_msg);
-    virtual void apply(const cv::Mat& input, cv::Mat& output, const cv::Mat& element) = 0;
-    
-    boost::mutex mutex_;
-    ros::Subscriber sub_;
-    ros::Publisher pub_;
-    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
-    int method_;
-    int size_;
-    int iterations_;
-  private:
 
-  };
-  
   class DilateMaskImage: public MorphologicalImageOperatorNodelet
   {
   public:

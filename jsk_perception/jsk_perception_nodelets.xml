@@ -43,6 +43,26 @@
          type="jsk_perception::DilateMaskImage"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_perception/Opening"
+         type="jsk_perception::Opening"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/Closing"
+         type="jsk_perception::Closing"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/MorphologicalGradient"
+         type="jsk_perception::MorphologicalGradient"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/TopHat"
+         type="jsk_perception::TopHat"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/BlackHat"
+         type="jsk_perception::BlackHat"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/BlobDetector"
          type="jsk_perception::BlobDetector"
          base_class_type="nodelet::Nodelet">

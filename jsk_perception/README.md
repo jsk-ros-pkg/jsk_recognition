@@ -157,65 +157,10 @@ Convert a mask image into geometry_msgs::PolygonStamped.
 
   PolygonStamped message which only contains two points. Minimum point and Maximum point to represent bounding box in image.
 
-### jsk\_perception/ErodeMaskImage
+
+### jsk\_perception/ErodeMaskImage, DilateMaskImage, Opening, Closing, MorphologicalGradient, TopHat, BlackHat
 ![](images/erode_mask_image.png)
-
-Erode binary image.
-
-#### Subscribing Topic
-* `~input` (`sensor_msgs/Image`)
-
-  Input image
-
-#### Publishing Topic
-* `~output` (`sensor_msgs/Image`)
-
-  Output eroded image.
-
-#### Parameters
-* `~method` (`0`, `1` or `2`, default: `0`)
-
-  Method to erode image. 0 means rectangular box model,
-  1 meand cross model and 2 means ellipse.
-
-* `~size` (Integer, default: `1`)
-
-  Size to erode
-
-* `~iterations` (Integer, default: `1`)
-
-  Iterations to erode image.
-
-### jsk\_perception/DilateMaskImage
 ![](images/dilate_mask_image.png)
-
-Dilate binary image.
-
-#### Subscribing Topic
-* `~input` (`sensor_msgs/Image`)
-
-  Input image
-
-#### Publishing Topic
-* `~output` (`sensor_msgs/Image`)
-
-  Output dilated image.
-
-#### Parameters
-* `~method` (`0`, `1` or `2`, default: `0`)
-
-  Method to dilate image. 0 means rectangular box model,
-  1 meand cross model and 2 means ellipse.
-
-* `~size` (Integer, default: `1`)
-
-  Size to dilate
-
-* `~iterations` (Integer, default: `1`)
-
-  Iterations to dilate image.
-
-### jsk\_perception/Opening, Closing, MorphologicalGradient, TopHat, BlackHat
 ![](images/morphological_operator.png)
 
 Apply morphological transformations.

@@ -41,6 +41,7 @@ add_message_files(
   Line.msg
   ICPResult.msg
   ImageDifferenceValue.msg
+  Cue.msg
   )
 
 generate_messages(

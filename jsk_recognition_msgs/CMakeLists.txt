@@ -32,7 +32,6 @@ add_message_files(
   RotatedRect.msg
   DepthCalibrationParameter.msg
   Int32Stamped.msg
-  Float32Stamped.msg
   BoundingBoxMovement.msg
   SnapItRequest.msg
   Circle2D.msg
@@ -41,6 +40,7 @@ add_message_files(
   ColorHistogramArray.msg
   Line.msg
   ICPResult.msg
+  ImageDifferenceValue.msg
   )
 
 generate_messages(

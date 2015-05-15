@@ -36,11 +36,11 @@
          base_class_type="nodelet::Nodelet">
   </class>
   <class name="jsk_perception/ErodeMaskImage"
-         type="jsk_perception::ErodeMaskImage"
+         type="jsk_perception::Erode"
          base_class_type="nodelet::Nodelet">
   </class>
   <class name="jsk_perception/DilateMaskImage"
-         type="jsk_perception::DilateMaskImage"
+         type="jsk_perception::Dilate"
          base_class_type="nodelet::Nodelet">
   </class>
   <class name="jsk_perception/Opening"

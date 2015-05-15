@@ -83,6 +83,18 @@ namespace jsk_perception
     int operation_;
   };
 
+  class Erode: public MorphologicalImageOperator
+  {
+  public:
+    Erode(): MorphologicalImageOperator("Erode", cv::MORPH_ERODE) {}
+  };
+
+  class Dilate: public MorphologicalImageOperator
+  {
+  public:
+    Dilate(): MorphologicalImageOperator("Dilate", cv::MORPH_DILATE) {}
+  };
+
   class Opening: public MorphologicalImageOperator
   {
   public:

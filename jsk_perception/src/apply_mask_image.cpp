@@ -80,21 +80,16 @@ namespace jsk_perception
   {
     vital_checker_->poke();
     cv::Mat image;
-    if (sensor_msgs::image_encodings::hasAlpha(image_msg->encoding)) {
-      // BGRA or RGBA
-      cv::Mat image_raw = cv_bridge::toCvShare(image_msg,
-                                               image_msg->encoding)->image;
-      if (image_msg->encoding == sensor_msgs::image_encodings::BGRA8 ||
-          image_msg->encoding == sensor_msgs::image_encodings::BGRA16) {
-        cv::cvtColor(image_raw, image, cv::COLOR_BGRA2BGR);
-      } else if (image_msg->encoding == sensor_msgs::image_encodings::RGBA8 ||
-                 image_msg->encoding == sensor_msgs::image_encodings::RGBA16) {
-        cv::cvtColor(image_raw, image, cv::COLOR_RGBA2BGR);
-      }
-    } else {
-      // BGR, RGB or GRAY
-      image = cv_bridge::toCvShare(image_msg,
-                                   image_msg->encoding)->image;
+    if (isBGRA(image_msg->encoding)) {
+      cv::Mat tmp_image = cv_bridge::toCvShare(image_msg, image_msg->encoding)->image;
+      cv::cvtColor(tmp_image, image, cv::COLOR_BGRA2BGR);
+    }
+    else if (isRGBA(image_msg->encoding)) {
+      cv::Mat tmp_image = cv_bridge::toCvShare(image_msg, image_msg->encoding)->image;
+      cv::cvtColor(tmp_image, image, cv::COLOR_RGBA2BGR);
+    }
+    else {  // BGR, RGB or GRAY
+      image = cv_bridge::toCvShare(image_msg, image_msg->encoding)->image;
     }
     cv::Mat mask = cv_bridge::toCvShare(mask_msg, "mono8")->image;
     if (image.cols != mask.cols || image.rows != mask.rows) {
@@ -117,27 +112,14 @@ namespace jsk_perception
 
     cv::Mat output_image;
     if (mask_black_to_transparent_) {
-      if (sensor_msgs::image_encodings::isMono(image_msg->encoding)) {       // isMono
+      if (sensor_msgs::image_encodings::isMono(image_msg->encoding)) {
         cv::cvtColor(masked_image, output_image, CV_GRAY2BGRA);
       }
-      else if (image_msg->encoding == sensor_msgs::image_encodings::BGR8 ||  // isBGR
-               image_msg->encoding == sensor_msgs::image_encodings::BGR16) {
-        cv::cvtColor(masked_image, output_image, CV_BGR2BGRA);
-      }
-      else if (image_msg->encoding == sensor_msgs::image_encodings::RGB8 ||  // isRGB
-               image_msg->encoding == sensor_msgs::image_encodings::RGB16) {
+      else if (isRGB(image_msg->encoding)) {
         cv::cvtColor(masked_image, output_image, CV_RGB2BGRA);
       }
-      else if (image_msg->encoding == sensor_msgs::image_encodings::BGRA8 ||  // isBGRA
-               image_msg->encoding == sensor_msgs::image_encodings::BGRA16) {
+      else {  // BGR, BGRA or RGBA
         cv::cvtColor(masked_image, output_image, CV_BGR2BGRA);
-      }
-      else if (image_msg->encoding == sensor_msgs::image_encodings::RGBA8 ||  // isRGBA
-               image_msg->encoding == sensor_msgs::image_encodings::RGBA16) {
-        cv::cvtColor(masked_image, output_image, CV_BGR2RGBA);
-      }
-      else {
-        NODELET_ERROR("unexpected image encoding");
       }
       for (size_t j=0; j<clipped_mask.rows; j++) {
         for (int i=0; i<clipped_mask.cols; i++) {
@@ -148,20 +130,20 @@ namespace jsk_perception
           }
         }
       }
+      // publish bgr8 image
       pub_image_.publish(cv_bridge::CvImage(
             image_msg->header,
             sensor_msgs::image_encodings::BGRA8,
             output_image).toImageMsg());
     }
     else {
-      if (image_msg->encoding == sensor_msgs::image_encodings::BGRA8 ||
-          image_msg->encoding == sensor_msgs::image_encodings::BGRA16) {
+      if (isBGRA(image_msg->encoding)) {
         cv::cvtColor(masked_image, output_image, cv::COLOR_BGR2BGRA);
-      } else if (image_msg->encoding == sensor_msgs::image_encodings::RGBA8 ||
-          image_msg->encoding == sensor_msgs::image_encodings::RGBA16) {
+      }
+      else if (isRGBA(image_msg->encoding)) {
         cv::cvtColor(masked_image, output_image, cv::COLOR_BGR2RGBA);
-      } else {
-        // BGR, RGB or GRAY
+      }
+      else {  // BGR, RGB or GRAY
         masked_image.copyTo(output_image);
       }
       pub_image_.publish(cv_bridge::CvImage(

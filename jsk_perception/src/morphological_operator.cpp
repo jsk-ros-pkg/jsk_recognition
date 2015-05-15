@@ -111,6 +111,8 @@ namespace jsk_perception
 }
 
 #include <pluginlib/class_list_macros.h>
+PLUGINLIB_EXPORT_CLASS (jsk_perception::Dilate, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_perception::Erode, nodelet::Nodelet);
 PLUGINLIB_EXPORT_CLASS (jsk_perception::Opening, nodelet::Nodelet);
 PLUGINLIB_EXPORT_CLASS (jsk_perception::Closing, nodelet::Nodelet);
 PLUGINLIB_EXPORT_CLASS (jsk_perception::MorphologicalGradient, nodelet::Nodelet);

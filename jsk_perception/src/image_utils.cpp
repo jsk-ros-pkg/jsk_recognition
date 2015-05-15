@@ -34,6 +34,9 @@
  *********************************************************************/
 
 #include "jsk_perception/image_utils.h"
+#include <sensor_msgs/image_encodings.h>
+
+namespace enc = sensor_msgs::image_encodings;
 
 namespace jsk_perception
 {
@@ -56,4 +59,26 @@ namespace jsk_perception
     
     return cv::Rect(min_x, min_y, std::max(max_x - min_x, 0), std::max(max_y - min_y, 0));
   }
+
+  // Utility functions for inspecting an encoding string
+  bool isBGR(const std::string& encoding)
+  {
+    return encoding == enc::BGR8 || encoding == enc::BGR16;
+  }
+
+  bool isRGB(const std::string& encoding)
+  {
+    return encoding == enc::RGB8 || encoding == enc::RGB16;
+  }
+
+  bool isBGRA(const std::string& encoding)
+  {
+    return encoding == enc::BGRA8 || encoding == enc::BGRA16;
+  }
+
+  bool isRGBA(const std::string& encoding)
+  {
+    return encoding == enc::RGBA8 || encoding == enc::RGBA16;
+  }
+
 }

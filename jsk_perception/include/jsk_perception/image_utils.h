@@ -42,6 +42,10 @@
 namespace jsk_perception
 {
   cv::Rect boundingRectOfMaskImage(const cv::Mat& image);
+  bool isBGR(const std::string& encoding);
+  bool isRGB(const std::string& encoding);
+  bool isBGRA(const std::string& encoding);
+  bool isRGBA(const std::string& encoding);
 }
 
 #endif

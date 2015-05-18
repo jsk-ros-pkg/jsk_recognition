@@ -48,6 +48,7 @@ generate_dynamic_reconfigure_options(
   cfg/Fisheye.cfg
   cfg/SlidingWindowObjectDetector.cfg
   cfg/ImagePublisher.cfg
+  cfg/GaussianBlur.cfg
 )
 
 add_service_files(FILES EuclideanSegment.srv  SetTemplate.srv  WhiteBalancePoints.srv  WhiteBalance.srv NonMaximumSuppression.srv)
@@ -130,6 +131,7 @@ jsk_perception_nodelet(src/mask_image_generator.cpp "jsk_perception/MaskImageGen
 jsk_perception_nodelet(src/project_image_point.cpp "jsk_perception/ProjectImagePoint" "project_image_point")
 jsk_perception_nodelet(src/skeletonization_nodelet.cpp "jsk_perception/Skeletonization" "skeletonization")
 jsk_perception_nodelet(src/sliding_window_object_detector.cpp "jsk_perception/SlidingWindowObjectDetector" "sliding_window_object_detector")
+jsk_perception_nodelet(src/gaussian_blur.cpp "jsk_perception/GaussianBlur" "gaussian_blur")
 
 # compiling jsk_perception library for nodelet
 add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}

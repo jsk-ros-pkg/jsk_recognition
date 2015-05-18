@@ -188,4 +188,8 @@
       Base class for object detection via supervised learning
     </description>
   </class>
+  <class name="jsk_perception/GaussianBlur"
+         type="jsk_perception::GaussianBlur"
+         base_class_type="nodelet::Nodelet">
+  </class>
 </library>

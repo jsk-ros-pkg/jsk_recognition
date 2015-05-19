@@ -52,7 +52,7 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 #include <jsk_pcl_ros/SnapFootstep.h>
-
+#include "jsk_pcl_ros/tf_listener_singleton.h"
 namespace jsk_pcl_ros
 {
   class SnapIt: public jsk_topic_tools::DiagnosticNodelet
@@ -93,7 +93,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
-    boost::shared_ptr<tf::TransformListener> tf_listener_;
+    tf::TransformListener* tf_listener_;
     message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygons_;
     message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolygonPolicy> >sync_polygon_;

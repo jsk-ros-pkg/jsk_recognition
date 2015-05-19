@@ -59,7 +59,7 @@ namespace jsk_pcl_ros
   void SnapIt::onInit()
   {
     DiagnosticNodelet::onInit();
-    tf_listener_.reset(new tf::TransformListener());
+    tf_listener_ = TfListenerSingleton::getInstance();
     pnh_->param("use_service", use_service_, false);
     polygon_aligned_pub_ = advertise<geometry_msgs::PoseStamped>(
       *pnh_, "output/plane_aligned", 1);
@@ -308,14 +308,16 @@ namespace jsk_pcl_ros
       for (size_t i = 0; i < polygons->polygons.size(); i++) {
         geometry_msgs::PolygonStamped polygon = polygons->polygons[i];
         Vertices vertices;
+        
+        tf::StampedTransform transform = lookupTransformWithDuration(
+          tf_listener_,
+          polygon.header.frame_id, frame_id, stamp, ros::Duration(5.0));
         for (size_t j = 0; j < polygon.polygon.points.size(); j++) {
           Eigen::Vector4d p;
           p[0] = polygon.polygon.points[j].x;
           p[1] = polygon.polygon.points[j].y;
           p[2] = polygon.polygon.points[j].z;
           p[3] = 1;
-          tf::StampedTransform transform;
-          tf_listener_->lookupTransform(polygon.header.frame_id, frame_id, stamp, transform);
           Eigen::Affine3d eigen_transform;
           tf::transformTFToEigen(transform, eigen_transform);
           Eigen::Vector4d transformed_pointd = eigen_transform.inverse() * p;
@@ -332,15 +334,15 @@ namespace jsk_pcl_ros
     }
     catch (tf2::ConnectivityException &e)
     {
-      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      JSK_NODELET_ERROR("Transform error: %s", e.what());
     }
     catch (tf2::InvalidArgumentException &e)
     {
-      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      JSK_NODELET_ERROR("Transform error: %s", e.what());
     }
     catch (tf2::ExtrapolationException &e)
     {
-      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      JSK_NODELET_ERROR("Transform error: %s", e.what());
     }
     return result;
   }

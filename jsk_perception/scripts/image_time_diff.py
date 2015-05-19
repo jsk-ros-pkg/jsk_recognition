@@ -6,9 +6,12 @@ import cv2
 import rospy
 import cv_bridge
 import message_filters
+import dynamic_reconfigure.server
+
 from std_msgs.msg import Header
 from sensor_msgs.msg import Image
 from jsk_recognition_msgs.msg import ImageDifferenceValue
+from jsk_perception.cfg import ImageTimeDiffConfig
 
 
 class ImageTimeDiff(object):
@@ -26,7 +29,8 @@ class ImageTimeDiff(object):
 
     """
     def __init__(self):
-        self.s_threshold = rospy.get_param('~saturation_threshold', 0)
+        dynamic_reconfigure.server.Server(ImageTimeDiffConfig,
+                                          self._cb_dyn_reconfig)
         sub_hue = message_filters.Subscriber('~input/hue', Image)
         sub_saturation = message_filters.Subscriber('~input/saturation', Image)
         ts = message_filters.TimeSynchronizer([sub_hue, sub_saturation], 10)
@@ -35,6 +39,10 @@ class ImageTimeDiff(object):
         rospy.Subscriber('~stop', Header, self._cb_stop)
         self.pub_stored = None
         self.input = None
+
+    def _cb_dyn_reconfig(self, config, level):
+        self.s_threshold = config['saturation_threshold']
+        return config
 
     def _cb_input(self, imgmsg_hue, imgmsg_saturation):
         self.input = (imgmsg_hue, imgmsg_saturation)

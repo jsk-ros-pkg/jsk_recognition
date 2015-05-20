@@ -192,4 +192,8 @@
          type="jsk_perception::GaussianBlur"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_perception/KMeans"
+         type="jsk_perception::KMeans"
+         base_class_type="nodelet::Nodelet">
+  </class>
 </library>

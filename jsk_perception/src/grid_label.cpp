@@ -82,7 +82,7 @@ namespace jsk_perception
     boost::mutex::scoped_lock lock(mutex_);
     cv::Mat label = cv::Mat::zeros(info_msg->height,
                                    info_msg->width,
-                                   CV_32SC1); // int
+                                   CV_8UC1); // int
     makeLabel(label, info_msg->header);
   }
 
@@ -92,7 +92,7 @@ namespace jsk_perception
     boost::mutex::scoped_lock lock(mutex_);
     cv::Mat label = cv::Mat::zeros(image_msg->height,
                                    image_msg->width,
-                                   CV_32SC1); // int
+                                   CV_8UC1); // int
     makeLabel(label, image_msg->header);
   }
 
@@ -109,7 +109,7 @@ namespace jsk_perception
       }
     }
     pub_.publish(cv_bridge::CvImage(header,
-                                    sensor_msgs::image_encodings::TYPE_32SC1,
+                                    sensor_msgs::image_encodings::MONO8,
                                     label).toImageMsg());
   }
     

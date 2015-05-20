@@ -5,48 +5,64 @@ import cv2
 
 import rospy
 import cv_bridge
+import message_filters
+import dynamic_reconfigure.server
+
 from std_msgs.msg import Header
 from sensor_msgs.msg import Image
 from jsk_recognition_msgs.msg import ImageDifferenceValue
+from jsk_perception.cfg import ImageTimeDiffConfig
 
 
 class ImageTimeDiff(object):
     """Publish difference between stored image and current input one
 
     Publications:
-        * ~output/diff: diff per pixel
+        * ~output/diff: diff per pixel: 0 - 1
         * ~output/diff_image: diff image
 
     Subscriptions:
-        * ~input: input raw image
+        * ~input/hue: input hue image
+        * ~input/saturation: input saturation image
         * ~start: msg to store image and start comparing
         * ~stop: msg to relase image and stop comparing
 
     """
     def __init__(self):
-        rospy.Subscriber('~input', Image, self._cb_image)
+        dynamic_reconfigure.server.Server(ImageTimeDiffConfig,
+                                          self._cb_dyn_reconfig)
+        sub_hue = message_filters.Subscriber('~input/hue', Image)
+        sub_saturation = message_filters.Subscriber('~input/saturation', Image)
+        ts = message_filters.TimeSynchronizer([sub_hue, sub_saturation], 10)
+        ts.registerCallback(self._cb_input)
         rospy.Subscriber('~start', Header, self._cb_start)
         rospy.Subscriber('~stop', Header, self._cb_stop)
         self.pub_stored = None
-        self.imgmsg = None
+        self.input = None
 
-    def _cb_image(self, imgmsg):
-        self.imgmsg = imgmsg
+    def _cb_dyn_reconfig(self, config, level):
+        self.s_threshold = config['saturation_threshold']
+        return config
+
+    def _cb_input(self, imgmsg_hue, imgmsg_saturation):
+        self.input = (imgmsg_hue, imgmsg_saturation)
 
     def _cb_start(self, header):
-        while header.stamp > self.imgmsg.header.stamp:
+        while ( (self.input is None) or
+                (header.stamp > self.input[0].header.stamp) ):
             rospy.sleep(0.1)
-        imgmsg = self.imgmsg
+        imgmsg_hue, imgmsg_saturation = self.input
         bridge = cv_bridge.CvBridge()
-        img = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='mono8')
+        hue = bridge.imgmsg_to_cv2(imgmsg_hue, desired_encoding='mono8')
+        saturation = bridge.imgmsg_to_cv2(imgmsg_saturation,
+                                          desired_encoding='mono8')
         pub_diff = rospy.Publisher('~output/diff',
                                    ImageDifferenceValue,
                                    queue_size=1)
         pub_diff_img = rospy.Publisher('~output/diff_image',
                                        Image,
                                        queue_size=1)
-        pub_debug = rospy.Publisher('~debug', Image, queue_size=1)
-        self.pub_stored = img, pub_diff, pub_diff_img, pub_debug
+        self.pub_stored = (hue, saturation, pub_diff, pub_diff_img)
 
     def _cb_stop(self, header):
         while header.stamp > self.imgmsg.header.stamp:
@@ -54,21 +70,28 @@ class ImageTimeDiff(object):
         self.pub_stored = None
 
     def spin_once(self):
-        if (self.imgmsg is None) or (self.pub_stored is None):
+        if (self.input is None) or (self.pub_stored is None):
             return
-        imgmsg = self.imgmsg
+        imgmsg_hue, imgmsg_saturation = self.input
         pub_stored = self.pub_stored
         bridge = cv_bridge.CvBridge()
-        img = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='mono8')
-        img_stored, pub_diff, pub_diff_img, pub_debug = pub_stored
+        hue = bridge.imgmsg_to_cv2(imgmsg_hue, desired_encoding='mono8')
+        saturation = bridge.imgmsg_to_cv2(imgmsg_saturation,
+                                          desired_encoding='mono8')
+        hue_stored, saturation_stored, pub_diff, pub_diff_img = pub_stored
         # compute diff and publish the result
-        diff_img = cv2.absdiff(img, img_stored)
+        diff_img = cv2.absdiff(hue, hue_stored)
         diff_msg = ImageDifferenceValue()
-        diff_msg.header.stamp = imgmsg.header.stamp
-        diff_msg.difference = diff_img.sum() / diff_img.size / 255.
+        diff_msg.header.stamp = imgmsg_hue.header.stamp
+        mask = ( (saturation_stored > self.s_threshold) &
+                 (saturation > self.s_threshold) )
+        mask = mask.reshape((mask.shape[0], mask.shape[1]))
+        filtered_diff_img = diff_img[mask]
+        diff_msg.difference = ( filtered_diff_img.sum()
+                                / filtered_diff_img.size
+                                / 255. )
         pub_diff.publish(diff_msg)
-        pub_diff_img.publish(bridge.cv2_to_imgmsg(diff_img))
-        pub_debug.publish(bridge.cv2_to_imgmsg(img_stored))
+        pub_diff_img.publish(bridge.cv2_to_imgmsg(diff_img, encoding='mono8'))
 
     def spin(self):
         rate = rospy.Rate(rospy.get_param('rate', 10))

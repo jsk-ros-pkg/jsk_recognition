@@ -266,9 +266,9 @@ Generate labels of grid.
   If `use_camera_info` is true, `sensor_msgs/CameraInfo` will be used.
   If `use_camera_info` is false, `sensor_msgs/Image` will be used.
 #### Publishing Topic
-* `~output` (`sensor_msgs/Image (CV_32SC1)`)
+* `~output` (`sensor_msgs/Image (CV_8UC1)`)
 
-  Output labels as image. Encoding is `CV_32SC1`.
+  Output labels as image. Encoding is `CV_8UC1`.
 #### Parameters
 * `~label_size` (Integer, default: `32`)
 

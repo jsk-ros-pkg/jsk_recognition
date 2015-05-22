@@ -47,6 +47,7 @@ namespace jsk_pcl_ros
     DiagnosticNodelet::onInit();
     pub_ = advertise<PCLIndicesMsg>(
       *pnh_, "output", 1);
+    DiagnosticNodelet::onInitPostProcess();
   }
 
   void MaskImageFilter::subscribe()

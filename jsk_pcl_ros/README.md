@@ -1285,6 +1285,12 @@ Extract the points above the planes between `~min_height` and `~max_height`.
 * `~use_async` (Boolean, default: `False`)
 
   Approximate sync input topics.
+* `~use_sensor_frame` (Boolean, default: `False`)
+
+  Use sensor viewpoint
+* `~sensor_frame` (String, default: `head_root`)
+
+  Specify frame_id of sensor origin.
 
 ### jsk\_pcl/RegionGrowingMultiplePlaneSegmentation
 ![jsk_pcl/RegionGrowingMultiplePlaneSegmentation](images/region_growing_multiple_plane_segmentation.png).

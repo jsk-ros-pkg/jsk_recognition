@@ -59,7 +59,11 @@ namespace jsk_pcl_ros
     if (!pnh_->getParam("max_queue_size", maximum_queue_size_)) {
       maximum_queue_size_ = 100;
     }
-
+    pnh_->param("use_sensor_frame", use_sensor_frame_, false);
+    if (use_sensor_frame_) {
+      pnh_->param("sensor_frame", sensor_frame_, std::string("head_root"));
+      tf_listener_ = TfListenerSingleton::getInstance();
+    }
     ////////////////////////////////////////////////////////
     // Dynamic Reconfigure
     ////////////////////////////////////////////////////////
@@ -156,7 +160,32 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();
-    
+    Eigen::Vector3f viewpoint;
+    try {
+      if (use_sensor_frame_) {
+        tf::StampedTransform transform
+          = lookupTransformWithDuration(tf_listener_,
+                                        input->header.frame_id,
+                                        sensor_frame_,
+                                        input->header.stamp,
+                                        ros::Duration(5.0));
+        Eigen::Affine3f sensor_pose;
+        tf::transformTFToEigen(transform, sensor_pose);
+        viewpoint = Eigen::Vector3f(sensor_pose.translation());
+      }
+    }
+    catch (tf2::ConnectivityException &e)
+    {
+      JSK_NODELET_ERROR("Transform error: %s", e.what());
+    }
+    catch (tf2::InvalidArgumentException &e)
+    {
+      JSK_NODELET_ERROR("Transform error: %s", e.what());
+    }
+    catch (...)
+    {
+      JSK_NODELET_ERROR("Unknown transform error");
+    }
     // convert all to the pcl types
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr nonplane_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
@@ -190,6 +219,7 @@ namespace jsk_pcl_ros
     for (size_t plane_i = 0; plane_i < coefficients->coefficients.size(); plane_i++) {
 
       pcl::ExtractPolygonalPrismData<pcl::PointXYZRGB> prism_extract;
+      prism_extract.setViewPoint(viewpoint[0], viewpoint[1], viewpoint[2]);
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr hull_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
       geometry_msgs::Polygon the_polygon = polygons->polygons[plane_i].polygon;
       if (the_polygon.points.size() <= 2) {

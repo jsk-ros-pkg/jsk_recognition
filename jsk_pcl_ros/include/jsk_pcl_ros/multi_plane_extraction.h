@@ -38,7 +38,6 @@
 #include <ros/ros.h>
 #include <ros/names.h>
 #include <pcl_ros/pcl_nodelet.h>
-
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
@@ -53,6 +52,7 @@
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <jsk_topic_tools/vital_checker.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
+#include "jsk_pcl_ros/tf_listener_singleton.h"
 
 namespace jsk_pcl_ros
 {
@@ -127,11 +127,14 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // Parameters
     ////////////////////////////////////////////////////////
+    tf::TransformListener* tf_listener_;
     bool use_async_;
     int maximum_queue_size_;
     double min_height_, max_height_;
     bool use_indices_;
     double maginify_;
+    bool use_sensor_frame_;
+    std::string sensor_frame_;
   private:
     
     

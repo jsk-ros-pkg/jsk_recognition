@@ -24,7 +24,7 @@ namespace resized_image_transport
     void initParams();
     void config_cb (LogPolarConfig &config, uint32_t level);
     void process(const sensor_msgs::ImageConstPtr &src_img, const sensor_msgs::CameraInfoConstPtr &src_info,
-		 sensor_msgs::ImagePtr &dst_img, sensor_msgs::CameraInfo &dst_info);
+                 sensor_msgs::ImagePtr &dst_img, sensor_msgs::CameraInfo &dst_info);
   };
 }
 #endif

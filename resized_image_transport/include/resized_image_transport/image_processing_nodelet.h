@@ -74,23 +74,23 @@ namespace resized_image_transport
       out_times(boost::circular_buffer<double>(100)),
       in_bytes(boost::circular_buffer<double>(100)),
       out_bytes(boost::circular_buffer<double>(100))
-	{ }
-      ~ImageProcessing() { }
+      { }
+    ~ImageProcessing() { }
     
   protected:
     virtual void process(const sensor_msgs::ImageConstPtr &src_img, const sensor_msgs::CameraInfoConstPtr &src_info,
-			 sensor_msgs::ImagePtr &dst_img, sensor_msgs::CameraInfo &dst_info) = 0;
+                         sensor_msgs::ImagePtr &dst_img, sensor_msgs::CameraInfo &dst_info) = 0;
 
     void snapshot_msg_cb (const std_msgs::EmptyConstPtr msg);
 
     bool snapshot_srv_cb (std_srvs::Empty::Request &req,
-			  std_srvs::Empty::Response &res);
-		    
+                          std_srvs::Empty::Response &res);
+        
     void image_cb(const sensor_msgs::ImageConstPtr &img);
 
 
     void callback(const sensor_msgs::ImageConstPtr &img,
-		  const sensor_msgs::CameraInfoConstPtr &info);
+                  const sensor_msgs::CameraInfoConstPtr &info);
   };
 }
 

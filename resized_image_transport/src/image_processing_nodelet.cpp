@@ -70,7 +70,7 @@ namespace resized_image_transport
       cp_ = it_->advertiseCamera("output/image", max_queue_size_);
 
       cs_ = it_->subscribeCamera("input/image", max_queue_size_,
-				 &ImageProcessing::callback, this);
+                                 &ImageProcessing::callback, this);
     }else{
       image_pub_ = pnh.advertise<sensor_msgs::Image>("output/image", max_queue_size_);
       image_sub_ = pnh.subscribe("input/image", max_queue_size_, &ImageProcessing::image_cb, this);
@@ -85,7 +85,7 @@ namespace resized_image_transport
   }
 
   bool ImageProcessing::snapshot_srv_cb (std_srvs::Empty::Request &req,
-					 std_srvs::Empty::Response &res) {
+                                         std_srvs::Empty::Response &res) {
     boost::mutex::scoped_lock lock(mutex_);
 
     publish_once_ = true;
@@ -97,7 +97,7 @@ namespace resized_image_transport
   }
 
   void ImageProcessing::callback(const sensor_msgs::ImageConstPtr &img,
-				 const sensor_msgs::CameraInfoConstPtr &info) {
+                                 const sensor_msgs::CameraInfoConstPtr &info) {
     boost::mutex::scoped_lock lock(mutex_);
     ros::Time now = ros::Time::now();
     ROS_DEBUG("image processing callback");
@@ -116,13 +116,13 @@ namespace resized_image_transport
       sensor_msgs::ImagePtr dst_img;
       sensor_msgs::CameraInfo dst_info;
       process(img, info, dst_img, dst_info);
-	
+  
 
       if(use_camera_info_){
-	cp_.publish(dst_img,
-		    boost::make_shared<sensor_msgs::CameraInfo> (dst_info));
+        cp_.publish(dst_img,
+                    boost::make_shared<sensor_msgs::CameraInfo> (dst_info));
       }else{
-	image_pub_.publish(dst_img);
+        image_pub_.publish(dst_img);
       }
 
       // TODO: it does not support dst_width_ and dst_height_
@@ -155,8 +155,8 @@ namespace resized_image_transport
       std::for_each( in_times.begin(), in_times.end(), (in_time_std_dev += (boost::lambda::_1 - in_time_mean)*(boost::lambda::_1 - in_time_mean) ) );
       in_time_std_dev = sqrt(in_time_std_dev/in_time_n);
       if ( in_time_n > 1 ) {
-	in_time_min_delta = *std::min_element(in_times.begin(), in_times.end());
-	in_time_max_delta = *std::max_element(in_times.begin(), in_times.end());
+        in_time_min_delta = *std::min_element(in_times.begin(), in_times.end());
+        in_time_max_delta = *std::max_element(in_times.begin(), in_times.end());
       }
 
       std::for_each( out_times.begin(), out_times.end(), (out_time_mean += boost::lambda::_1) );
@@ -165,8 +165,8 @@ namespace resized_image_transport
       std::for_each( out_times.begin(), out_times.end(), (out_time_std_dev += (boost::lambda::_1 - out_time_mean)*(boost::lambda::_1 - out_time_mean) ) );
       out_time_std_dev = sqrt(out_time_std_dev/out_time_n);
       if ( out_time_n > 1 ) {
-	out_time_min_delta = *std::min_element(out_times.begin(), out_times.end());
-	out_time_max_delta = *std::max_element(out_times.begin(), out_times.end());
+        out_time_min_delta = *std::min_element(out_times.begin(), out_times.end());
+        out_time_max_delta = *std::max_element(out_times.begin(), out_times.end());
       }
 
       double in_byte_mean = 0, out_byte_mean = 0;
@@ -176,16 +176,16 @@ namespace resized_image_transport
       out_byte_mean /= duration;
 
       if (verbose_) {
-	NODELET_INFO_STREAM(" in  bandwidth: " << std::fixed << std::setw(11) << std::setprecision(3)  << in_byte_mean/1000*8
-			    << " Kbps rate:"   << std::fixed << std::setw(7) << std::setprecision(3) << in_time_rate
-			    << " hz min:"      << std::fixed << std::setw(7) << std::setprecision(3) << in_time_min_delta
-			    << " s max: "    << std::fixed << std::setw(7) << std::setprecision(3) << in_time_max_delta
-			    << " s std_dev: "<< std::fixed << std::setw(7) << std::setprecision(3) << in_time_std_dev << "s n: " << in_time_n);
-	NODELET_INFO_STREAM(" out bandwidth: " << std::fixed << std::setw(11) << std::setprecision(3)  << out_byte_mean/1000*8
-			    << " kbps rate:"   << std::fixed << std::setw(7) << std::setprecision(3) << out_time_rate
-			    << " hz min:"      << std::fixed << std::setw(7) << std::setprecision(3) << out_time_min_delta
-			    << " s max: "    << std::fixed << std::setw(7) << std::setprecision(3) << out_time_max_delta
-			    << " s std_dev: "<< std::fixed << std::setw(7) << std::setprecision(3) << out_time_std_dev << "s n: " << out_time_n);
+        NODELET_INFO_STREAM(" in  bandwidth: " << std::fixed << std::setw(11) << std::setprecision(3)  << in_byte_mean/1000*8
+                            << " Kbps rate:"   << std::fixed << std::setw(7) << std::setprecision(3) << in_time_rate
+                            << " hz min:"      << std::fixed << std::setw(7) << std::setprecision(3) << in_time_min_delta
+                            << " s max: "    << std::fixed << std::setw(7) << std::setprecision(3) << in_time_max_delta
+                            << " s std_dev: "<< std::fixed << std::setw(7) << std::setprecision(3) << in_time_std_dev << "s n: " << in_time_n);
+        NODELET_INFO_STREAM(" out bandwidth: " << std::fixed << std::setw(11) << std::setprecision(3)  << out_byte_mean/1000*8
+                            << " kbps rate:"   << std::fixed << std::setw(7) << std::setprecision(3) << out_time_rate
+                            << " hz min:"      << std::fixed << std::setw(7) << std::setprecision(3) << out_time_min_delta
+                            << " s max: "    << std::fixed << std::setw(7) << std::setprecision(3) << out_time_max_delta
+                            << " s std_dev: "<< std::fixed << std::setw(7) << std::setprecision(3) << out_time_std_dev << "s n: " << out_time_n);
       }
       in_times.clear();
       in_bytes.clear();

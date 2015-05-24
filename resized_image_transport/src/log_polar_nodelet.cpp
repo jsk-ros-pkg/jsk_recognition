@@ -46,7 +46,7 @@ namespace resized_image_transport
 
   
   void LogPolar::process(const sensor_msgs::ImageConstPtr &src_img, const sensor_msgs::CameraInfoConstPtr &src_info,
-			 sensor_msgs::ImagePtr &dst_img, sensor_msgs::CameraInfo &dst_info){
+                         sensor_msgs::ImagePtr &dst_img, sensor_msgs::CameraInfo &dst_info){
     int image_width, image_height;
     if(use_camera_info_){
       image_width = src_info->width;

@@ -56,7 +56,10 @@ namespace resized_image_transport
     }
     NODELET_INFO("camera = %s", cam.c_str());
     NODELET_INFO("image = %s", img.c_str());
-
+    
+    width_scale_pub_ = pnh.advertise<std_msgs::Float32>("output/width_scale", max_queue_size_);
+    height_scale_pub_ = pnh.advertise<std_msgs::Float32>("output/height_scale", max_queue_size_);
+    
     if (use_snapshot_) {
       publish_once_ = false;
       srv_ = pnh.advertiseService("snapshot", &ImageProcessing::snapshot_srv_cb, this);
@@ -72,8 +75,7 @@ namespace resized_image_transport
       image_pub_ = pnh.advertise<sensor_msgs::Image>("output/image", max_queue_size_);
       image_sub_ = pnh.subscribe("input/image", max_queue_size_, &ImageProcessing::image_cb, this);
     }
-    width_scale_pub_ = pnh.advertise<std_msgs::Float32>("output/width_scale", max_queue_size_);
-    height_scale_pub_ = pnh.advertise<std_msgs::Float32>("output/height_scale", max_queue_size_);
+    
   }
 
   void ImageProcessing::snapshot_msg_cb (const std_msgs::EmptyConstPtr msg) {

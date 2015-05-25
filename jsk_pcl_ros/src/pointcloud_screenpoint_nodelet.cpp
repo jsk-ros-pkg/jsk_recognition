@@ -370,6 +370,10 @@ void jsk_pcl_ros::PointcloudScreenpoint::poly_cb(const geometry_msgs::PolygonSta
     geometry_msgs::Point32 p = array_ptr->polygon.points[i];
     float rx, ry, rz;
     bool ret = extract_point (pts_, p.x, p.y, rx, ry, rz);
+    if (!ret) {
+      JSK_NODELET_ERROR("Failed to project point");
+      return;
+    }
     geometry_msgs::Point32 p_projected;
     p_projected.x = rx;
     p_projected.y = ry;

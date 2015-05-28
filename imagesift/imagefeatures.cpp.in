@@ -71,6 +71,7 @@ class SiftNode
   image_transport::Subscriber _subImage;
   ros::ServiceServer _srvDetect;
   Subscriber _subInfo;
+  Publisher _pubFeatures;
   Publisher _pubSift;
   posedetection_msgs::ImageFeature0D _sift_msg;
   bool _bInfoInitialized;
@@ -101,6 +102,7 @@ public:
     ROS_INFO("detector:%s extractor:%s\n",  _detector_name.c_str() ,_extractor_name.c_str() );
     _detector = cv::FeatureDetector::create(_detector_name.c_str());
     _extractor = cv::DescriptorExtractor::create(_extractor_name.c_str());
+    _pubFeatures = _node.advertise<posedetection_msgs::Feature0D>("Feature0D",1);
     _pubSift = _node.advertise<posedetection_msgs::ImageFeature0D>("ImageFeature0D",1);
     ros::NodeHandle pnh("~");
     pnh.param("use_mask", _useMask, false);
@@ -235,18 +237,18 @@ public:
   void imageCb(const sensor_msgs::ImageConstPtr& msg_ptr,
                 const sensor_msgs::ImageConstPtr& mask_ptr)
   {
-    if(_pubSift.getNumSubscribers()==0){
+    if(_pubSift.getNumSubscribers()==0 && _pubFeatures.getNumSubscribers()==0){
       ROS_DEBUG("number of subscribers is 0, ignoring image");
       return;
     }
+    detect(_sift_msg.features, *msg_ptr, mask_ptr);
+    _pubFeatures.publish(_sift_msg.features);
+
     if(!_bInfoInitialized) {
       ROS_DEBUG("camera info not initialized, ignoring image");
       return;
     }
-
-    detect(_sift_msg.features, *msg_ptr, mask_ptr);
     _sift_msg.image = *msg_ptr; // probably copying pointers so don't use after this call
-
     {
       boost::mutex::scoped_lock lock(_mutex); // needed for camerainfo
       _pubSift.publish(_sift_msg);

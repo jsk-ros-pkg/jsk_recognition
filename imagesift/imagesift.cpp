@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; indent-tabs-mode: nil; -*-
+// vim: tabstop=4 shiftwidth=4:
 // Copyright (C) 2008 Rosen Diankov (rdiankov@cs.cmu.edu)
 //
 // This program is free software: you can redistribute it and/or modify
@@ -58,6 +59,7 @@ class SiftNode
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > _sync;
     ros::ServiceServer _srvDetect;
     Subscriber _subInfo;
+    Publisher _pubFeatures;
     Publisher _pubSift;
     posedetection_msgs::ImageFeature0D _sift_msg;
     bool _bInfoInitialized;
@@ -70,6 +72,7 @@ public:
         ros::NodeHandle pnh("~");
         pnh.param("use_mask", _useMask, false);
         
+        _pubFeatures = _node.advertise<posedetection_msgs::Feature0D>("Feature0D",1);
         _pubSift = _node.advertise<posedetection_msgs::ImageFeature0D>("ImageFeature0D",1);
         _srvDetect = _node.advertiseService("Feature0DDetect",&SiftNode::detectCb,this);
         if (!_useMask) {
@@ -195,18 +198,18 @@ public:
     void imageCb(const sensor_msgs::ImageConstPtr& msg_ptr,
                  const sensor_msgs::ImageConstPtr& mask_ptr)
     {
-        if(_pubSift.getNumSubscribers()==0){ 
+        if(_pubFeatures.getNumSubscribers()==0 && _pubSift.getNumSubscribers()==0) {
             ROS_DEBUG("number of subscribers is 0, ignoring image");
             return;
         }
+        detect(_sift_msg.features,*msg_ptr, mask_ptr);
+        _pubFeatures.publish(_sift_msg.features);
+
         if(!_bInfoInitialized) {
             ROS_DEBUG("camera info not initialized, ignoring image");
             return;
         }
-
-        detect(_sift_msg.features,*msg_ptr, mask_ptr);
         _sift_msg.image = *msg_ptr; // probably copying pointers so don't use after this call
-
         {
             boost::mutex::scoped_lock lock(_mutex); // needed for camerainfo
             _pubSift.publish(_sift_msg);

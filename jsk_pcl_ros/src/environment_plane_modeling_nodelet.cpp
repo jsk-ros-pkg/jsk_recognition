@@ -491,9 +491,11 @@ namespace jsk_pcl_ros
 //#pragma omp parallel for
     for (size_t i = 0; i < convexes.size(); i++) {
       GridPlane::Ptr grid(new GridPlane(convexes[i], resolution_));
-      grid->fillCellsFromPointCloud(cloud, distance_threshold_,
-                                    normal_threshold_,
-                                    non_plane_indices);
+      size_t num = grid->fillCellsFromPointCloud(cloud, distance_threshold_,
+                                                 normal_threshold_,
+                                                 non_plane_indices);
+      JSK_NODELET_INFO("%lu plane contains %lu points",
+                       i, num);
       ret[i] = grid;
     }
     return ret;

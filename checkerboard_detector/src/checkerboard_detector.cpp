@@ -85,7 +85,8 @@ public:
     ros::Publisher _pubCornerPoint;
     ros::Publisher _pubPolygonArray;
     ros::ServiceServer _srvDetect;
-
+    int message_throttle_;
+    int message_throttle_counter_;
     string frame_id; // tf frame id
     bool invert_color;
     int display, verbose, maxboard;
@@ -108,6 +109,7 @@ public:
         _node.param("maxboard", maxboard, -1);
         _node.param("invert_color", invert_color, false);
         _node.param("use_P", use_P, false);
+        _node.param("message_throttle", message_throttle_, 1);
         char str[32];
         int index = 0;
 
@@ -296,15 +298,19 @@ public:
     {
         ROS_WARN("The topic Image has been deprecated.  Please change your launch file to use image instead.");
         boost::mutex::scoped_lock lock(this->mutexcalib);
-        if( Detect(_objdetmsg,*msg,this->_camInfoMsg) ) {
-            if (_objdetmsg.objects.size() > 0) {
-                geometry_msgs::PoseStamped pose;
-                pose.header = _objdetmsg.header;
-                pose.pose = _objdetmsg.objects[0].pose;
-                _pubPoseStamped.publish(pose);
+        ++message_throttle_counter_;
+        if (message_throttle_counter_ % message_throttle_ == 0) {
+            message_throttle_counter_ = 0;
+            if( Detect(_objdetmsg,*msg,this->_camInfoMsg) ) {
+                if (_objdetmsg.objects.size() > 0) {
+                    geometry_msgs::PoseStamped pose;
+                    pose.header = _objdetmsg.header;
+                    pose.pose = _objdetmsg.objects[0].pose;
+                    _pubPoseStamped.publish(pose);
+                }
+                _pubDetection.publish(_objdetmsg);
+                publishPolygonArray(_objdetmsg);
             }
-            _pubDetection.publish(_objdetmsg);
-            publishPolygonArray(_objdetmsg);
         }
     }
 
@@ -313,15 +319,19 @@ public:
     void image_cb(const sensor_msgs::ImageConstPtr &msg)
     {
         boost::mutex::scoped_lock lock(this->mutexcalib);
-        if( Detect(_objdetmsg,*msg,this->_camInfoMsg) ) {
-            if (_objdetmsg.objects.size() > 0) {
-                geometry_msgs::PoseStamped pose;
-                pose.header = _objdetmsg.header;
-                pose.pose = _objdetmsg.objects[0].pose;
-                _pubPoseStamped.publish(pose);
+        ++message_throttle_counter_;
+        if (message_throttle_counter_ % message_throttle_ == 0) {
+            message_throttle_counter_ = 0;
+            if( Detect(_objdetmsg,*msg,this->_camInfoMsg) ) {
+                if (_objdetmsg.objects.size() > 0) {
+                    geometry_msgs::PoseStamped pose;
+                    pose.header = _objdetmsg.header;
+                    pose.pose = _objdetmsg.objects[0].pose;
+                    _pubPoseStamped.publish(pose);
+                }
+                _pubDetection.publish(_objdetmsg);
+                publishPolygonArray(_objdetmsg);
             }
-            _pubDetection.publish(_objdetmsg);
-            publishPolygonArray(_objdetmsg);
         }
     }
 

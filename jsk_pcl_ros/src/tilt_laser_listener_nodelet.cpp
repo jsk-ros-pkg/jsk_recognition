@@ -119,7 +119,7 @@ namespace jsk_pcl_ros
     buffer_.clear();
     return true;
   }
-  
+
   void TiltLaserListener::publishTimeRange(
     const ros::Time& stamp,
     const ros::Time& start,
@@ -135,14 +135,23 @@ namespace jsk_pcl_ros
         laser_assembler::AssembleScans2 srv;
         srv.request.begin = start;
         srv.request.end = end;
-        assemble_cloud_srv_.call(srv);
-        sensor_msgs::PointCloud2 output_cloud = srv.response.cloud;
-        output_cloud.header.stamp = stamp;
-        cloud_pub_.publish(output_cloud);
+        try {
+          if (assemble_cloud_srv_.call(srv)) {
+            sensor_msgs::PointCloud2 output_cloud = srv.response.cloud;
+            output_cloud.header.stamp = stamp;
+            cloud_pub_.publish(output_cloud);
+          }
+          else {
+            JSK_NODELET_ERROR("Failed to call assemble cloud service");
+          }
+        }
+        catch (...) {
+          JSK_NODELET_ERROR("Exception in calling assemble cloud service");
+        }
       }
     }
   }
-  
+
   void TiltLaserListener::processTiltHalfUp(
     const ros::Time& stamp, const double& joint_angle)
   {

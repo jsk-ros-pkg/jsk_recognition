@@ -435,14 +435,14 @@ namespace jsk_pcl_ros
     GridPlane(ConvexPolygon::Ptr plane, const double resolution);
     virtual ~GridPlane();
     virtual GridPlane::Ptr clone(); // shallow copy
-    virtual void fillCellsFromPointCloud(
+    virtual size_t fillCellsFromPointCloud(
       pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
       double distance_threshold);
-    virtual void fillCellsFromPointCloud(
+    virtual size_t fillCellsFromPointCloud(
       pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
       double distance_threshold,
       std::set<int>& non_plane_indices);
-    virtual void fillCellsFromPointCloud(
+    virtual size_t fillCellsFromPointCloud(
       pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
       double distance_threshold,
       double normal_threshold,

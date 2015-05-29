@@ -1289,16 +1289,16 @@ namespace jsk_pcl_ros
     }
   }
 
-  void GridPlane::fillCellsFromPointCloud(
+  size_t GridPlane::fillCellsFromPointCloud(
     pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
     double distance_threshold,
     std::set<int>& non_plane_indices)
   {
-    fillCellsFromPointCloud(
+    return fillCellsFromPointCloud(
       cloud, distance_threshold, M_PI / 2.0, non_plane_indices);
   }
   
-  void GridPlane::fillCellsFromPointCloud(
+  size_t GridPlane::fillCellsFromPointCloud(
     pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
     double distance_threshold,
     double normal_threshold,
@@ -1350,14 +1350,15 @@ namespace jsk_pcl_ros
       IndexPair pair = projectLocalPointAsIndexPair(local_ep);
       addIndexPair(pair);
     }
+    return output_indices.indices.size();
   }
   
-  void GridPlane::fillCellsFromPointCloud(
+  size_t GridPlane::fillCellsFromPointCloud(
     pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
     double distance_threshold)
   {
     std::set<int> dummy;
-    fillCellsFromPointCloud(cloud, distance_threshold, dummy);
+    return fillCellsFromPointCloud(cloud, distance_threshold, dummy);
   }
   
   jsk_recognition_msgs::SimpleOccupancyGrid GridPlane::toROSMsg()

@@ -1318,7 +1318,7 @@ namespace jsk_pcl_ros
     chull.setDimension(2);
     chull.setInputCloud (hull_cloud);
     
-    hull_cloud->points.push_back(hull_cloud->points[0]);
+    // hull_cloud->points.push_back(hull_cloud->points[0]);
     
     prism_extract.setInputCloud(cloud);
     prism_extract.setHeightLimits(-distance_threshold, distance_threshold);

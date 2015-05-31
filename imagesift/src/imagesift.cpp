@@ -14,6 +14,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#include "imagesift/imagesift.h"
 #include <ros/node_handle.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
@@ -43,31 +44,9 @@
 using namespace std;
 using namespace ros;
 
-class SiftNode
+namespace imagesift
 {
-    typedef message_filters::sync_policies::ExactTime<
-        sensor_msgs::Image,
-        sensor_msgs::Image > SyncPolicy;
-
-    boost::mutex _mutex;
-    ros::NodeHandle _node;
-    image_transport::ImageTransport _it;
-    image_transport::Subscriber _subImage;
-    // for useMask
-    boost::shared_ptr<image_transport::SubscriberFilter> _subImageWithMask;
-        boost::shared_ptr<image_transport::SubscriberFilter> _subMask;
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > _sync;
-    ros::ServiceServer _srvDetect;
-    Subscriber _subInfo;
-    Publisher _pubFeatures;
-    Publisher _pubSift;
-    posedetection_msgs::ImageFeature0D _sift_msg;
-    bool _bInfoInitialized;
-    bool _useMask;
-public:
-    ros::Time lasttime;
-
-    SiftNode() : _it(_node)
+    SiftNode::SiftNode() : _it(_node)
     {
         ros::NodeHandle pnh("~");
         pnh.param("use_mask", _useMask, false);
@@ -89,20 +68,21 @@ public:
         _bInfoInitialized = false;
     }
 
-    void infoCb(const sensor_msgs::CameraInfoConstPtr& msg_ptr)
+    void SiftNode::infoCb(const sensor_msgs::CameraInfoConstPtr& msg_ptr)
     {
         boost::mutex::scoped_lock lock(_mutex);
         _sift_msg.info = *msg_ptr;
         _bInfoInitialized = true;
     }
 
-    bool detectCb(posedetection_msgs::Feature0DDetect::Request& req, posedetection_msgs::Feature0DDetect::Response& res)
+    bool SiftNode::detectCb(posedetection_msgs::Feature0DDetect::Request& req,
+                            posedetection_msgs::Feature0DDetect::Response& res)
     {
         return detect(res.features,req.image, sensor_msgs::Image::ConstPtr());
     }
 
-    bool detect(posedetection_msgs::Feature0D& features, const sensor_msgs::Image& imagemsg,
-                const sensor_msgs::Image::ConstPtr& mask_ptr)
+    bool SiftNode::detect(posedetection_msgs::Feature0D& features, const sensor_msgs::Image& imagemsg,
+                          const sensor_msgs::Image::ConstPtr& mask_ptr)
     {
         boost::mutex::scoped_lock lock(_mutex);
         Image imagesift = NULL;
@@ -195,8 +175,8 @@ public:
         return true;
     }
 
-    void imageCb(const sensor_msgs::ImageConstPtr& msg_ptr,
-                 const sensor_msgs::ImageConstPtr& mask_ptr)
+    void SiftNode::imageCb(const sensor_msgs::ImageConstPtr& msg_ptr,
+                           const sensor_msgs::ImageConstPtr& mask_ptr)
     {
         if(_pubFeatures.getNumSubscribers()==0 && _pubSift.getNumSubscribers()==0) {
             ROS_DEBUG("number of subscribers is 0, ignoring image");
@@ -216,11 +196,11 @@ public:
         }
     }
     
-    void imageCb(const sensor_msgs::ImageConstPtr& msg_ptr)
+    void SiftNode::imageCb(const sensor_msgs::ImageConstPtr& msg_ptr)
     {
         imageCb(msg_ptr, sensor_msgs::ImageConstPtr());
     }
-};
+}
 
 int main(int argc, char **argv)
 {
@@ -228,7 +208,7 @@ int main(int argc, char **argv)
     if(!ros::master::check())
         return 1;
     
-    boost::shared_ptr<SiftNode> siftnode(new SiftNode());
+    boost::shared_ptr<imagesift::SiftNode> siftnode(new imagesift::SiftNode());
     
     ros::spin();
     siftnode.reset();

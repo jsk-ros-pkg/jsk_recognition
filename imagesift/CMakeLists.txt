@@ -9,7 +9,7 @@ find_package(OpenCV)
 catkin_package(
     CATKIN_DEPENDS roscpp sensor_msgs posedetection_msgs image_transport cv_bridge 
     LIBRARIES
-    INCLUDE_DIRS
+    INCLUDE_DIRS include
     DEPENDS OpenCV libsiftfast
 )
 
@@ -18,7 +18,7 @@ set(ENV{PKG_CONFIG_PATH} ${CATKIN_DEVEL_PREFIX}/lib/pkgconfig:$ENV{PKG_CONFIG_PA
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(siftfast libsiftfast REQUIRED)
 
-include_directories(${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${siftfast_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${siftfast_INCLUDE_DIRS})
 link_directories(${siftfast_LIBRARY_DIRS})
 link_libraries(${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${siftfast_LIBRARIES})
 
@@ -27,8 +27,8 @@ macro(jsk_feature detector extractor exec_name)
   list(APPEND jsk_exec ${exec_name})
   set(DETECTOR ${detector})
   set(EXTRACTOR ${extractor})
-  configure_file(imagefeatures.cpp.in ${exec_name}.cpp) #${CMAKE_CURRENT_BINARY_DIR}/
-  add_executable(${exec_name} ${exec_name}.cpp)
+  configure_file(src/imagefeatures.cpp.in src/${exec_name}.cpp) #${CMAKE_CURRENT_BINARY_DIR}/
+  add_executable(${exec_name} src/${exec_name}.cpp)
   set_target_properties(${exec_name} PROPERTIES COMPILE_FLAGS "-msse2 -O3" LINK_FLAGS "-msse2 -O3")
   if($ENV{ROS_DISTRO} STREQUAL "groovy" OR $ENV{ROS_DISTRO} STREQUAL "hydro")
     set_target_properties(${exec_name} PROPERTIES COMPILE_FLAGS "-DOPENCV_NON_FREE")
@@ -43,7 +43,7 @@ jsk_feature("SIFT" "SURF" "imagesift_surf")
 jsk_feature("SIFT" "SIFT" "imagesift_sift")
 
 
-add_executable(imagesift imagesift.cpp)
+add_executable(imagesift src/imagesift.cpp)
 set_target_properties(imagesift PROPERTIES COMPILE_FLAGS "-msse2 -O3" LINK_FLAGS "-msse2 -O3")
 add_dependencies(imagesift libsiftfast)
 add_dependencies(imagesift posedetection_msgs_generate_messages_cpp libsiftfast)

@@ -1,0 +1,25 @@
+<launch>
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <param name="file_name" value="$(find jsk_perception)/sample/ros_fuerte.jpg" />
+  </node>
+
+  <node name="imagesift"
+        pkg="imagesift" type="imagesift">
+    <remap from="image" to="image_publisher/output" />
+    <remap from="camera_info" to="image_publisher/output/camera_info" />
+  </node>
+
+  <node name="nodelet_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager" />
+  <node name="imagesift"
+        pkg="nodelet" type="nodelet"
+        args="load imagesift/ImageSift nodelet_manager">
+    <remap from="image" to="image_publisher/output" />
+    <remap from="camera_info" to="image_publisher/output/camera_info" />
+  </node>
+
+  <node name="feature0d_view"
+        pkg="posedetection_msgs" type="feature0d_view" />
+</launch>

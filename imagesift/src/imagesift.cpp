@@ -49,14 +49,13 @@ namespace imagesift
     void SiftNode::onInit()
     {
         DiagnosticNodelet::onInit();
-        _nh = ros::NodeHandle();
-        _it.reset(new image_transport::ImageTransport(_nh));
+        _it.reset(new image_transport::ImageTransport(*nh_));
 
         pnh_->param("use_mask", _useMask, false);
         
-        _pubFeatures = advertise<posedetection_msgs::Feature0D>(_nh, "Feature0D", 1);
-        _pubSift = advertise<posedetection_msgs::ImageFeature0D>(_nh, "ImageFeature0D", 1);
-        _srvDetect = _nh.advertiseService("Feature0DDetect", &SiftNode::detectCb, this);
+        _pubFeatures = advertise<posedetection_msgs::Feature0D>(*nh_, "Feature0D", 1);
+        _pubSift = advertise<posedetection_msgs::ImageFeature0D>(*nh_, "ImageFeature0D", 1);
+        _srvDetect = nh_->advertiseService("Feature0DDetect", &SiftNode::detectCb, this);
         lasttime = ros::Time::now();
         _bInfoInitialized = false;
     }
@@ -67,13 +66,13 @@ namespace imagesift
             _subImage = _it->subscribe("image", 1, &SiftNode::imageCb, this);
         }
         else {
-            _subImageWithMask.subscribe(_nh, "image", 1);
-            _subMask.subscribe(_nh, "mask", 1);
+            _subImageWithMask.subscribe(*nh_, "image", 1);
+            _subMask.subscribe(*nh_, "mask", 1);
             _sync = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
             _sync->connectInput(_subImageWithMask, _subMask);
             _sync->registerCallback(boost::bind(&SiftNode::imageCb, this, _1, _2));
         }
-        _subInfo = _nh.subscribe("camera_info", 1, &SiftNode::infoCb, this);
+        _subInfo = nh_->subscribe("camera_info", 1, &SiftNode::infoCb, this);
     }
 
     void SiftNode::unsubscribe()

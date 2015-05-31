@@ -69,7 +69,6 @@ namespace imagesift
     bool _bInfoInitialized;
     bool _useMask;
     boost::mutex _mutex;
-    ros::NodeHandle _nh;
     boost::shared_ptr<image_transport::ImageTransport> _it;
     image_transport::Subscriber _subImage;
     // for useMask

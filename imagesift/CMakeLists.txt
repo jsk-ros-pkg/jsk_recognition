@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(imagesift)
 
-find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs posedetection_msgs image_transport cv_bridge
-  jsk_perception)
+find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs posedetection_msgs image_transport cv_bridge cmake_modules
+  jsk_perception nodelet jsk_topic_tools)
 
 find_package(OpenCV)
 
 catkin_package(
-    CATKIN_DEPENDS roscpp sensor_msgs posedetection_msgs image_transport cv_bridge 
-    LIBRARIES
+    CATKIN_DEPENDS roscpp sensor_msgs posedetection_msgs image_transport cv_bridge
+    LIBRARIES ${PROJECT_NAME}
     INCLUDE_DIRS include
     DEPENDS OpenCV libsiftfast
 )
@@ -42,15 +42,27 @@ jsk_feature("BRISK" "BRISK" "imagebrisk")
 jsk_feature("SIFT" "SURF" "imagesift_surf")
 jsk_feature("SIFT" "SIFT" "imagesift_sift")
 
+jsk_nodelet(src/imagesift.cpp
+  "imagesift/ImageSift"
+  "imagesift_exec"
+  nodelet_sources nodelet_executables)
+set_target_properties("imagesift_exec" PROPERTIES OUTPUT_NAME "imagesift")
 
-add_executable(imagesift src/imagesift.cpp)
-set_target_properties(imagesift PROPERTIES COMPILE_FLAGS "-msse2 -O3" LINK_FLAGS "-msse2 -O3")
-add_dependencies(imagesift libsiftfast)
-add_dependencies(imagesift posedetection_msgs_generate_messages_cpp libsiftfast)
+add_library(${PROJECT_NAME} SHARED ${nodelet_sources})
+
+add_definitions("-O2 -g")
+include_directories(include ${catkin_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBS})
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg)
 
 
-install(TARGETS imagesift ${jsk_exec} 
+install(TARGETS ${PROJECT_NAME} ${jsk_exec} ${imagesift_nodelet_executables}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+
+install(FILES nodelet.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

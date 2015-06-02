@@ -100,6 +100,7 @@ namespace jsk_pcl_ros
       polygon_align_sub_.shutdown();
       convex_align_sub_.shutdown();
     }
+    polygons_.reset();
   }
   
   void SnapIt::polygonCallback(
@@ -139,6 +140,7 @@ namespace jsk_pcl_ros
         min_distance = d;
       }
     }
+    
     if (min_convex) {
       geometry_msgs::PoseStamped aligned_pose = alignPose(pose_eigen, min_convex);
       aligned_pose.header = pose_msg->header;

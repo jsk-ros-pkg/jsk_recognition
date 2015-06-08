@@ -1,6 +1,7 @@
 #include <resized_image_transport/image_processing_nodelet.h>
 
 #include <std_msgs/Float32.h>
+#include <image_transport/camera_common.h>
 
 namespace resized_image_transport
 {
@@ -31,9 +32,8 @@ namespace resized_image_transport
     NODELET_INFO("width : %d", dst_width_);
     pnh.param("height", dst_height_, 0);
     NODELET_INFO("height : %d", dst_height_);
-
+    pnh.param("use_camera_subscriber", use_camera_subscriber_, false);
     pnh.param("max_queue_size", max_queue_size_, 5);
-
     pnh.param("use_snapshot", use_snapshot_, false);
     pnh.param("use_messages", use_messages_, true);
     if (use_messages_) {
@@ -68,9 +68,20 @@ namespace resized_image_transport
 
     if ( use_camera_info_ ){
       cp_ = it_->advertiseCamera("output/image", max_queue_size_);
-
-      cs_ = it_->subscribeCamera("input/image", max_queue_size_,
-                                 &ImageProcessing::callback, this);
+      if (use_camera_subscriber_) {
+        cs_ = it_->subscribeCamera("input/image", max_queue_size_,
+                                   &ImageProcessing::callback, this);
+      }
+      else {
+        camera_info_sub_ = nh.subscribe(image_transport::getCameraInfoTopic(pnh.resolveName("input/image")),
+                                        1,
+                                        &ImageProcessing::info_cb,
+                                        this);
+        image_nonsync_sub_ = it_->subscribe("input/image",
+                                            1,
+                                            &ImageProcessing::image_nonsync_cb,
+                                            this);
+      }
     }else{
       image_pub_ = pnh.advertise<sensor_msgs::Image>("output/image", max_queue_size_);
       image_sub_ = pnh.subscribe("input/image", max_queue_size_, &ImageProcessing::image_cb, this);
@@ -92,6 +103,23 @@ namespace resized_image_transport
     return true;
   }
 
+  void ImageProcessing::info_cb(const sensor_msgs::CameraInfoConstPtr &msg) {
+    boost::mutex::scoped_lock lock(mutex_);
+    info_msg_ = msg;
+  }
+
+  void ImageProcessing::image_nonsync_cb(const sensor_msgs::ImageConstPtr& msg) {
+    {
+      boost::mutex::scoped_lock lock(mutex_);
+      if (!info_msg_) {
+        NODELET_WARN_THROTTLE(1, "camera info is not yet available");
+        return;
+      }
+    }
+    callback(msg, info_msg_);
+  }
+    
+  
   void ImageProcessing::image_cb(const sensor_msgs::ImageConstPtr &img){
     callback(img, sensor_msgs::CameraInfo::ConstPtr());
   }

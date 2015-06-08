@@ -40,13 +40,17 @@ namespace resized_image_transport
 
     ros::Publisher image_pub_;
     ros::Subscriber image_sub_;
-    
+    image_transport::Subscriber image_nonsync_sub_;
+    ros::Subscriber camera_info_sub_;
     ros::Publisher width_scale_pub_;
     ros::Publisher height_scale_pub_;
 
+    sensor_msgs::CameraInfoConstPtr info_msg_;
+    
     double resize_x_, resize_y_;
     int dst_width_, dst_height_;
     int max_queue_size_;
+    bool use_camera_subscriber_;
     bool use_snapshot_;
     bool publish_once_;
     bool use_messages_;
@@ -87,8 +91,8 @@ namespace resized_image_transport
                           std_srvs::Empty::Response &res);
         
     void image_cb(const sensor_msgs::ImageConstPtr &img);
-
-
+    void info_cb(const sensor_msgs::CameraInfoConstPtr &info);
+    void image_nonsync_cb(const sensor_msgs::ImageConstPtr &img);
     void callback(const sensor_msgs::ImageConstPtr &img,
                   const sensor_msgs::CameraInfoConstPtr &info);
   };

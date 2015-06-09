@@ -66,7 +66,7 @@ namespace resized_image_transport
       sub_ = pnh.subscribe("snapshot", 1, &ImageProcessing::snapshot_msg_cb, this);
     }
 
-    if ( use_camera_info_ ){
+    if (use_camera_info_) {
       cp_ = it_->advertiseCamera("output/image", max_queue_size_);
       if (use_camera_subscriber_) {
         cs_ = it_->subscribeCamera("input/image", max_queue_size_,
@@ -82,7 +82,8 @@ namespace resized_image_transport
                                             &ImageProcessing::image_nonsync_cb,
                                             this);
       }
-    }else{
+    }
+    else {
       image_pub_ = pnh.advertise<sensor_msgs::Image>("output/image", max_queue_size_);
       image_sub_ = pnh.subscribe("input/image", max_queue_size_, &ImageProcessing::image_cb, this);
     }
@@ -133,7 +134,7 @@ namespace resized_image_transport
       ROS_DEBUG("number of subscribers is 0, ignoring image");
       return;
     }
-    if ( use_messages_ && now - last_publish_time_ < period_ ) {
+    if (use_messages_ && now - last_publish_time_ < period_) {
       ROS_DEBUG("to reduce load, ignoring image");
       return;
     }
@@ -146,10 +147,11 @@ namespace resized_image_transport
       process(img, info, dst_img, dst_info);
   
 
-      if(use_camera_info_){
+      if (use_camera_info_) {
         cp_.publish(dst_img,
                     boost::make_shared<sensor_msgs::CameraInfo> (dst_info));
-      }else{
+      }
+      else {
         image_pub_.publish(dst_img);
       }
 
@@ -165,13 +167,14 @@ namespace resized_image_transport
       out_bytes.push_front(dst_img->step * dst_img->height);
       
       last_publish_time_ = now;
-    } catch( cv::Exception& e ) {
+    }
+    catch (cv::Exception& e) {
       ROS_ERROR("%s", e.what());
     }
 
 
     float duration =  (now - last_rosinfo_time_).toSec();
-    if ( duration > 2 ) {
+    if (duration > 2) {
       int in_time_n = in_times.size();
       int out_time_n = out_times.size();
       double in_time_mean = 0, in_time_rate = 1.0, in_time_std_dev = 0.0, in_time_max_delta, in_time_min_delta;
@@ -182,7 +185,7 @@ namespace resized_image_transport
       in_time_rate /= in_time_mean;
       std::for_each( in_times.begin(), in_times.end(), (in_time_std_dev += (boost::lambda::_1 - in_time_mean)*(boost::lambda::_1 - in_time_mean) ) );
       in_time_std_dev = sqrt(in_time_std_dev/in_time_n);
-      if ( in_time_n > 1 ) {
+      if (in_time_n > 1) {
         in_time_min_delta = *std::min_element(in_times.begin(), in_times.end());
         in_time_max_delta = *std::max_element(in_times.begin(), in_times.end());
       }
@@ -192,7 +195,7 @@ namespace resized_image_transport
       out_time_rate /= out_time_mean;
       std::for_each( out_times.begin(), out_times.end(), (out_time_std_dev += (boost::lambda::_1 - out_time_mean)*(boost::lambda::_1 - out_time_mean) ) );
       out_time_std_dev = sqrt(out_time_std_dev/out_time_n);
-      if ( out_time_n > 1 ) {
+      if (out_time_n > 1) {
         out_time_min_delta = *std::min_element(out_times.begin(), out_times.end());
         out_time_max_delta = *std::max_element(out_times.begin(), out_times.end());
       }
@@ -224,7 +227,7 @@ namespace resized_image_transport
 
     last_subscribe_time_ = now;
 
-    if(use_snapshot_) {
+    if (use_snapshot_) {
       publish_once_ = false;
     }
   }

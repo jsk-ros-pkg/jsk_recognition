@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.13 (2015-06-11)
+-------------------
 * [jsk_pcl_ros/SnapIt] Reset cached polygons when unsubscribe() is called
 * [jsk_pcl_ros] Do not die even if failed to call laser assemble in TiltLaserListener
 * [jsk_pcl_ros] Do not close convex polygon when building grid plane

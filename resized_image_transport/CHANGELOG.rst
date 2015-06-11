@@ -2,8 +2,8 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.13 (2015-06-11)
+-------------------
 * [resized_image_transport] Fix coding style of image_processing_nodelet.cpp
 * [resized_image_transport] Do not require synchronized input topics of
   camera info and image unless ~use_camera_subscriber is true

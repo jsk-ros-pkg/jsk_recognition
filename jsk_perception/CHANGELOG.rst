@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.13 (2015-06-11)
+-------------------
 * [jsk_perception] Use dynamic_reconfigure in ImageTimeDiff
 * [jsk_perception] Update image_time_diff to use hue/saturation
 * [jsk_perception] Add Kmeans section to README

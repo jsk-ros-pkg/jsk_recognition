@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.13 (2015-06-11)
+-------------------
 * [jsk_perception] Use ImageDifferenceValue.msg instead of Float32Stamped.msg
 * [jsk_recognition_msgs] Add Float32Stamped.msg
 * Contributors: Kentaro Wada

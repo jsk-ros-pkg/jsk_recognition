@@ -2,6 +2,16 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [resized_image_transport] Fix coding style of image_processing_nodelet.cpp
+* [resized_image_transport] Do not require synchronized input topics of
+  camera info and image unless ~use_camera_subscriber is true
+* [resized_image_transport] untabify source code
+* [resized_image_transport] Advertise publishers before subscribing topics
+* [resized_image_transport] Supress output from image_resizer
+* Contributors: Ryohei Ueda
+
 0.2.12 (2015-05-04)
 -------------------
 * [resized_image_transport] Fix dynamic_reconfigure name in LogPolar

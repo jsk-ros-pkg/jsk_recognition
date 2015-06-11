@@ -2,6 +2,12 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [checkerboard_detector] Add message_throttle parameter
+* [checkerboard_detector] Description in package.xml valid html.
+* Contributors: Isaac IY Saito, Ryohei Ueda
+
 0.2.12 (2015-05-04)
 -------------------
 

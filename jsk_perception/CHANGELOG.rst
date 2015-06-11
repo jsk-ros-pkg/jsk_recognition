@@ -2,6 +2,49 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_perception] Use dynamic_reconfigure in ImageTimeDiff
+* [jsk_perception] Update image_time_diff to use hue/saturation
+* [jsk_perception] Add Kmeans section to README
+* [jek_perception] Add kmeans
+* [jsk_perception] Add GaussignBlur section to README
+* [jsk_perception] Add gaussian_blur
+* [jsk_perception] Update README.md for squashing dilate/erode
+* [jsk_perception] Squash erode/dilate to morphological_operator
+* [jsk_perception] Update README.md for morphological operators
+* [jsk_perception] Add advanced morphological transformations
+* [jsk_perception] Use isBGR/isRGB/isBGRA/isRGBA in ApplyMaskImage
+* [jsk_perception] Add isBGR/isRGB/isBGRA/isRGBA
+* [jsk_perception] Use header to synchronize in ImageTimeDiff
+* [jsk_perception] Update image_time_diff.py to use ImageDifferenceValue.msg
+* [jsk_perception] Update docs of image_time_diff for output
+* [jsk_perception] Publish with stamp in image_time_diff
+* [jsk_perception/image_publisher] Do not exit program even though no file is found
+* uncomment camera_info_cb
+* add subscription of image_raw
+* Updated Sliding window detector.
+  - Removed the trainer
+  - Added Bootstraper
+* [jsk_perception] Update README for #927
+* [jsk_perception] Enable apply_mask convert mask black to transparent
+* Changed from reading saved image from directory to RosBag files
+* [jsk_perception] Use jsk_topic_tools/log_utils.h for JSK_ROS_INFO,
+  JSK_NODELET_INFO and so on
+* [jsk_perception] add diff per pixel to ImageTimeDiff
+* [jsk_perception] Fix bug in apply_mask in converting BGRA/RGBA input image
+* [jsk_perception] remove no need get_param in image_publisher
+* [jsk_perception] Enable HSVDecomposer to handle BGRA/RGBA image
+* [jsk_perception] Enable ApplyMask handle BGRA/RGBA image
+* [jsk_perception] ApplyMask Mono8 encoding to publish mask
+* [jsk_perception] Add publish_info param to image_publisher
+* [jsk_perception] Add dynamic_reconfigure feature to ImagePublisher
+* [jsk_perception] Publish the difference between start and current image
+* [jsk_perception][ApplyMaskImage] mask image should be mono8
+* Node to for training the classifier for Sliding Window Object Detector
+* [jsk_perception] Ignore trained_data directory from git filesystem
+* Contributors: Kentaro Wada, Ryohei Ueda, Eisoku Kuroiwa, Krishneel Chaudhary
+
 0.2.12 (2015-05-04)
 -------------------
 * Revert "[jsk_perception/point_pose_extractor] Use OpenCV's matcher class to estimate mathcing"

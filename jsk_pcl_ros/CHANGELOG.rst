@@ -2,6 +2,46 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros/SnapIt] Reset cached polygons when unsubscribe() is called
+* [jsk_pcl_ros] Do not die even if failed to call laser assemble in TiltLaserListener
+* [jsk_pcl_ros] Do not close convex polygon when building grid plane
+* [jsk_pcl_ros] Add debug message about grid plane construction in EnvironmentPlaneModeling
+* [jsk_pcl_ros] Do not publish projected polygon if it failed to estimate 3d point in ScreenPoint
+* [jsk_pcl_ros] Support ~always_subscribe in mask_image_filter
+* [jsk_pcl_ros] Add ~sensor_frame to MultiPlaneExtraction
+* [jsk_pcl_ros] Add waitForTransform to snapit tf resolvance
+* [jsk_pcl_ros/RegionGrowingMultiplePlaneSegmentation] Fix computation of
+  normal to decide order of vertices by comparing normals from vertices and coefficients
+* [jsk_pcl_ros] Untabify attention clipper
+* [jsk_pcl_ros/MultiPlaneExtraction] Support negative value for
+  magnification of plane
+* [jsk_pcl_ros/octree_change_detector] add MACHINE tag to octree_change_detector.launch
+* [jsk_pcl_ros] Add ~strict_tf parameter to NormalFlipToFrame to ignore
+  timestamp correctness
+* add topics for other recognition nodes
+* [jsk_pcl_ros] Add NormalEstimationOMP like pcl_ros but it can handle
+  timestamp correctly
+* [jsk_pcl_ros/EnvironemntPlaneModeling] Add normal direction threshold
+* [jsk_pcl_ros/TfTransformPointCloud] Ignore all error in tf conversion
+* [jsk_pcl_ros/HintedPlaneDetector] Supress warning messages about pointcloud fields
+* [jsk_pcl_ros]add exceptions around tf
+* [jsk_pcl_ros] Check if hint convex is valid in HintedPlaneDetector
+* [jsk_pcl_ros] Do not publish results if it failes to compute PCA in
+  ClusterPointIndicesDecomposer
+* [jsk_pcl_ros] Longer TF cache time for TreansformListener which created
+  via TFListenerSingleton
+* [jsk_pcl_ros/TiltLaserListener] Do not unsubscribe input topics if no
+  needed, change it to always subscribe input joint states
+* [jsk_pcl_ros] Add new nodelet: NormalFlipToFrame to align direction of
+  normal to specified frame_id
+* [jsk_pcl_ros] Use jsk_topic_tools/log_utils.h
+* [jsk_pcl_ros] Add ~queue_size parameter to NormalDirectionFilter
+* [jsk_pcl_ros] Add class and method name to tf error
+* [jsk_pcl_ros] Cache result of triangle decomposition
+* Contributors: Ryohei Ueda, YuOhara, Yuki Furuta
+
 0.2.12 (2015-05-04)
 -------------------
 * [jsk_pcl_ros] fix attention clipper non nan part

@@ -35,6 +35,8 @@
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/tilt_laser_listener.h"
 #include <laser_assembler/AssembleScans2.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <jsk_topic_tools/time_accumulator.h>
 
 namespace jsk_pcl_ros
 {
@@ -78,10 +80,17 @@ namespace jsk_pcl_ros
       JSK_NODELET_ERROR("unknown ~laser_type: %s", laser_type.c_str());
       return;
     }
+    pnh_->param("not_use_laser_assembler_service", not_use_laser_assembler_service_, false);
     pnh_->param("use_laser_assembler", use_laser_assembler_, false);
     if (use_laser_assembler_) {
-      assemble_cloud_srv_
-        = pnh_->serviceClient<laser_assembler::AssembleScans2>("assemble_scans2");
+      if (not_use_laser_assembler_service_) {
+        sub_cloud_
+          = pnh_->subscribe("input/cloud", 100, &TiltLaserListener::cloudCallback, this);
+      }
+      else {
+        assemble_cloud_srv_
+          = pnh_->serviceClient<laser_assembler::AssembleScans2>("assemble_scans2");
+      }
       cloud_pub_
         = pnh_->advertise<sensor_msgs::PointCloud2>("output_cloud", 1);
     }
@@ -105,10 +114,11 @@ namespace jsk_pcl_ros
 
   }
 
-  void TiltLaserListener::updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat)
+  void TiltLaserListener::cloudCallback(
+    const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
-
+    boost::mutex::scoped_lock lock(cloud_mutex_);
+    cloud_buffer_.push_back(msg);
   }
 
   bool TiltLaserListener::clearCacheCallback(
@@ -120,6 +130,37 @@ namespace jsk_pcl_ros
     return true;
   }
 
+  void TiltLaserListener::getPointCloudFromLocalBuffer(
+    const std::vector<sensor_msgs::PointCloud2::ConstPtr>& target_clouds,
+    sensor_msgs::PointCloud2& output_cloud)
+  {
+    if (target_clouds.size() > 0) {
+      output_cloud.fields = target_clouds[0]->fields;
+      output_cloud.is_bigendian = target_clouds[0]->is_bigendian;
+      output_cloud.is_dense = true;
+      output_cloud.point_step = target_clouds[0]->point_step;
+      size_t point_num = 0;
+      size_t data_num = 0;
+      for (size_t i = 0; i < target_clouds.size(); i++) {
+        data_num += target_clouds[i]->row_step;
+        point_num += target_clouds[i]->width * target_clouds[i]->height;
+      }
+      output_cloud.data.reserve(data_num);
+      for (size_t i = 0; i < target_clouds.size(); i++) {
+        std::copy(target_clouds[i]->data.begin(),
+                  target_clouds[i]->data.end(),
+                  std::back_inserter(output_cloud.data));
+      }
+      output_cloud.header.frame_id = target_clouds[0]->header.frame_id;
+      output_cloud.width = point_num;
+      output_cloud.height = 1;
+      output_cloud.row_step = data_num;
+    }
+    else {
+      JSK_NODELET_WARN("target_clouds size is 0");
+    }
+  }
+  
   void TiltLaserListener::publishTimeRange(
     const ros::Time& stamp,
     const ros::Time& start,
@@ -136,13 +177,33 @@ namespace jsk_pcl_ros
         srv.request.begin = start;
         srv.request.end = end;
         try {
-          if (assemble_cloud_srv_.call(srv)) {
-            sensor_msgs::PointCloud2 output_cloud = srv.response.cloud;
-            output_cloud.header.stamp = stamp;
-            cloud_pub_.publish(output_cloud);
+          if (!not_use_laser_assembler_service_) {
+            if (assemble_cloud_srv_.call(srv)) {
+              sensor_msgs::PointCloud2 output_cloud = srv.response.cloud;
+              output_cloud.header.stamp = stamp;
+              cloud_pub_.publish(output_cloud);
+            }
+            else {
+              JSK_NODELET_ERROR("Failed to call assemble cloud service");
+            }
           }
           else {
-            JSK_NODELET_ERROR("Failed to call assemble cloud service");
+            // Assemble cloud from local buffer
+            std::vector<sensor_msgs::PointCloud2::ConstPtr> target_clouds;
+            {
+              boost::mutex::scoped_lock lock(cloud_mutex_);
+              for (size_t i = 0; i < cloud_buffer_.size(); i++) {
+                ros::Time the_stamp = cloud_buffer_[i]->header.stamp;
+                if (the_stamp > start && the_stamp < end) {
+                  target_clouds.push_back(cloud_buffer_[i]);
+                }
+              }
+              cloud_buffer_.removeBefore(start);
+            }
+            sensor_msgs::PointCloud2 output_cloud;
+            getPointCloudFromLocalBuffer(target_clouds, output_cloud);
+            output_cloud.header.stamp = stamp;
+            cloud_pub_.publish(output_cloud);
           }
         }
         catch (...) {

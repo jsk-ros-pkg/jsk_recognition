@@ -80,9 +80,6 @@ namespace jsk_perception
     cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(
       image_msg, image_msg->encoding);
     cv::Mat image = cv_ptr->image;
-    if (isRGB(image_msg->encoding)) {
-      cv::cvtColor(image, image, CV_RGB2BGR);
-    }
 
     cv::Mat reshaped_img = image.reshape(1, image.cols * image.rows);
     cv::Mat reshaped_img32f;

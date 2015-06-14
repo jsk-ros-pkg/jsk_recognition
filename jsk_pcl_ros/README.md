@@ -1629,6 +1629,9 @@ You can choose several types of tilt/spindle lasers such as tilt-laser of PR2, i
 * `~input`(`sensor_msgs/JointState`):
 
    Joint angles of laser actuator.
+* `~input/cloud`(`sensor_msgs/PointCloud2`):
+
+   Input scan pointcloud, it only used if ~not_use_laser_assembler_service and ~use_laser_assembler is true.
 
 #### Publishing Topics
 * `~output` (`jsk_recognition_msgs/TimeRange`):
@@ -1659,6 +1662,9 @@ You can choose several types of tilt/spindle lasers such as tilt-laser of PR2, i
 * `~use_laser_assembler` (Boolean, default: `False`):
 
    Enable `~output_cloud` and `~assemble_scans2`.
+* `~not_use_laser_assembler_service` (Boolean, default: `False`)
+
+   When it is true, do not use laser_assembler service but assemble scan pointcloud locally.
 * `~joint_name` (String, **required**):
 
    Joint name of actuator to rotate laser.

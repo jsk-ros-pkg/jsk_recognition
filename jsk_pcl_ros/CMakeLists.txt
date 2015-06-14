@@ -48,6 +48,10 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 
+# For kinfu
+find_package(PCL QUIET COMPONENTS gpu_kinfu_large_scale)
+
+
 add_service_files(FILES SwitchTopic.srv
   UpdateOffset.srv
   SnapFootstep.srv
@@ -129,9 +133,9 @@ macro(jsk_pcl_util_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name
 endmacro(jsk_pcl_util_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
 
 if ($ENV{TRAVIS_JOB_ID})
-  add_definitions("-O2 -g")
+  add_definitions("-O2 -g -std=c++0x")
 else ($ENV{TRAVIS_JOB_ID})
-  add_definitions("-O0")
+  add_definitions("-O0 -std=c++0x")
 endif ($ENV{TRAVIS_JOB_ID})
 
 # pcl_ros::Filter based class is not working...
@@ -333,6 +337,11 @@ jsk_pcl_nodelet(src/convex_connected_voxels_nodelet.cpp
   "jsk_pcl/ConvexConnectedVoxels" "convex_connected_voxels")
 jsk_pcl_nodelet(src/normal_estimation_omp_nodelet.cpp
   "jsk_pcl/NormalEstimationOMP" "normal_estimation_omp")
+if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
+  jsk_pcl_nodelet(src/kinfu_nodelet.cpp
+    "jsk_pcl/Kinfu" "kinfu")
+  include_directories(/usr/local/cuda/include)
+endif (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
 
 add_library(jsk_pcl_ros_base SHARED
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
@@ -346,6 +355,7 @@ add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
 add_library(jsk_pcl_ros_util SHARED ${jsk_pcl_util_nodelet_sources})
 
 target_link_libraries(jsk_pcl_ros
+  ${PCL_GPU_KINFU_LARGE_SCALE_LIBRARY}
   ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp
   jsk_pcl_ros_base)
 target_link_libraries(jsk_pcl_ros_util

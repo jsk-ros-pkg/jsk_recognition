@@ -2295,6 +2295,25 @@ Flip normal direction towards specified frame.
 
   Do not take into account timestamp if this parameter is false.
 
+### jsk\_pcl/Kinfu
+Publishes camera pose using pcl/KinfuLS
+
+#### Subscribing Topics
+* `~input/info` (`sensor_msgs/CameraInfo`)
+
+  Intrinsic camera parameter of depth image
+* `~input/depth` (`sensor_msgs/Image`)
+
+  Depth image in m and the format should be 32FC1
+* `~input/color` (`sensor_msgs/Image`)
+
+  RGB color image (not yet used)
+
+#### Publishing Topics
+* `~output` (`geometry_msgs/PoseStamped`)
+
+  Pose of camera
+
 ## To Test Some Samples
 
 Please be careful about the nodelet manager name when execute some sample launches.

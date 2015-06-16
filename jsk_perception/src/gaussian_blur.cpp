@@ -81,9 +81,6 @@ namespace jsk_perception
     cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(
       image_msg, image_msg->encoding);
     cv::Mat image = cv_ptr->image;
-    if (image_msg->encoding == sensor_msgs::image_encodings::RGB8) {
-      cv::cvtColor(image, image, CV_RGB2BGR);
-    }
     cv::Mat applied_image;
     if (kernel_size_ % 2 == 1) {
       cv::GaussianBlur(image, applied_image, cv::Size(kernel_size_, kernel_size_), sigma_x_, sigma_y_);

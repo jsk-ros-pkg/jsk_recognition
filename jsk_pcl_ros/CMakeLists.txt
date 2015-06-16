@@ -354,10 +354,17 @@ add_library(jsk_pcl_ros_moveit SHARED src/pointcloud_moveit_filter.cpp)
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
 add_library(jsk_pcl_ros_util SHARED ${jsk_pcl_util_nodelet_sources})
 
-target_link_libraries(jsk_pcl_ros
-  ${PCL_GPU_KINFU_LARGE_SCALE_LIBRARY}
-  ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp
-  jsk_pcl_ros_base)
+if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
+  target_link_libraries(jsk_pcl_ros
+    ${PCL_GPU_KINFU_LARGE_SCALE_LIBRARY}
+    ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp
+    jsk_pcl_ros_base)
+else (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
+  target_link_libraries(jsk_pcl_ros
+    ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp
+    jsk_pcl_ros_base)
+endif (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
+
 target_link_libraries(jsk_pcl_ros_util
   ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp
   jsk_pcl_ros_base)

@@ -2319,6 +2319,9 @@ Publishes camera pose using pcl/KinfuLS
 * `~output` (`geometry_msgs/PoseStamped`)
 
   Pose of camera
+* `~output/cloud` (`sensor_msgs/PointCloud2`)
+
+  Registered scene pointcloud
 
 ## To Test Some Samples
 

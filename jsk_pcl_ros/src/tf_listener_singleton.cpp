@@ -59,8 +59,8 @@ namespace jsk_pcl_ros
 
   tf::StampedTransform lookupTransformWithDuration(
     tf::TransformListener* listener,
-    const std::string& from_frame,
     const std::string& to_frame,
+    const std::string& from_frame,
     const ros::Time& stamp,
     ros::Duration duration)
   {

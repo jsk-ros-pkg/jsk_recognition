@@ -493,6 +493,11 @@
     <description>
     </description>
   </class>
+  <class name="jsk_pcl/Kinfu" type="jsk_pcl_ros::Kinfu"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
   <!-- <class name="jsk_pcl/OrganizePointCloud" type="jsk_pcl_ros::OrganizePointCloud" -->
   <!--        base_class_type="nodelet::Nodelet"> -->
   <!--   <description> -->

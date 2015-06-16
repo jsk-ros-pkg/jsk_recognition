@@ -1,0 +1,7 @@
+<launch>
+  <node pkg="jsk_pcl_ros" type="kinfu" name="kinfu" output="screen">
+    <remap from="~input/depth" to="/multisense/depth" />
+    <remap from="~input/color" to="/multisense/left/image_rect_color" />
+    <remap from="~input/info" to="/multisense/left/camera_info" />
+  </node>
+</launch>

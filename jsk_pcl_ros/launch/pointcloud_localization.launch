@@ -1,0 +1,54 @@
+<launch>
+  <arg name="INPUT" default="/self_filtered_cloud" />
+  <group ns="localization">
+    <node pkg="nodelet" type="nodelet" name="manager" args="manager" output="screen"/>
+    <node pkg="nodelet" type="nodelet" name="x_filter"
+          args="load pcl/PassThrough manager">
+      <remap from="~input" to="$(arg INPUT)" />
+      <rosparam>
+        input_frame_id: ground
+        filter_field_name: x
+        filter_limit_min: -3.0
+        filter_limit_max: 3.0
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="y_filter"
+          args="load pcl/PassThrough manager">
+      <remap from="~input" to="x_filter/output" />
+      <rosparam>
+        input_frame_id: ground
+        filter_field_name: y
+        filter_limit_min: -3.0
+        filter_limit_max: 3.0
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="z_filter"
+          args="load pcl/PassThrough manager">
+      <remap from="~input" to="y_filter/output" />
+      <rosparam>
+        input_frame_id: ground
+        filter_field_name: z
+        filter_limit_min: -1.0
+        filter_limit_max: 1.0
+      </rosparam>
+    </node>
+    
+    <node pkg="nodelet" type="nodelet" name="pointcloud_localization"
+          args="load jsk_pcl/PointCloudLocalization manager">
+      <remap from="~input" to="z_filter/output" />
+      <rosparam>
+        use_normal: false
+      </rosparam>
+      <remap from="~icp_align" to="icp_client/icp_align" />
+    </node>
+    <node pkg="nodelet" type="nodelet"  name="icp_client"
+          args="load jsk_pcl/ICPRegistration manager">
+      <rosparam>
+        use_flipped_initial_pose: false
+        max_iteration: 1000
+        correspondence_distance: 0.1
+      </rosparam>
+    </node>
+    
+  </group>
+</launch>

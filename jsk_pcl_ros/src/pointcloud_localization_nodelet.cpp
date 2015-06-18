@@ -145,6 +145,7 @@ namespace jsk_pcl_ros
   void PointCloudLocalization::cloudCallback(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
+    vital_checker_->poke();
     boost::mutex::scoped_lock lock(mutex_);
     //JSK_NODELET_INFO("cloudCallback");
     latest_cloud_ = cloud_msg;

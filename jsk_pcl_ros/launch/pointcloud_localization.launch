@@ -49,6 +49,14 @@
         correspondence_distance: 0.1
       </rosparam>
     </node>
-    
+  <node pkg="nodelet" type="nodelet"
+        name="downsample_for_visuzliation"
+        args="load pcl/VoxelGrid manager">
+    <remap from="~input" to="pointcloud_localization/output" />
+    <rosparam>
+      leaf_size: 0.1
+    </rosparam>
+  </node>
+
   </group>
 </launch>

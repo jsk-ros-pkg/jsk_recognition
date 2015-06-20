@@ -1,0 +1,31 @@
+# Travis Continuous Integration Configuration File, based on ..
+#   Generic MoveIt Travis Continuous Integration Configuration File
+#   Works with all MoveIt! repositories/branches
+#   Author: Dave Coleman, Jonathan Bohren
+language:
+  - cpp
+  - python
+python:
+  - "2.7"
+compiler:
+  - gcc
+env:
+  - ROS_DISTRO=hydro AFTER_INSTALL=""
+  - ROS_DISTRO=hydro AFTER_INSTALL="mongodb-clients"
+  - ROS_DISTRO=hydro AFTER_INSTALL="ros-hydro-roseus"
+  - ROS_DISTRO=hydro BEFORE_SCRIPT="pwd; git clone http://github.com/jsk-ros-pkg/jsk_common_msgs"
+  - ROS_DISTRO=hydro USE_JENKINS="true"
+  - ROS_DISTRO=indigo BUILDER='not-compile'
+  - ROS_DISTRO=indigo BUILDER='not-compile' TRAVIS_REPO_SLUG=jsk-ros-pkg/jsk_travis
+  - ROS_DISTRO=indigo BUILDER='not-compile' TRAVIS_REPO_SLUG=jsk-ros-pkg/jsk_travis TRAVIS_BRANCH=master TRAVIS_COMMIT=''  TRAVIS_PULL_REQUEST=''
+  - ROS_DISTRO=jade BUILDER='not-compile'
+  - ROS_DISTRO=jade BUILDER='not-compile' TRAVIS_REPO_SLUG=jsk-ros-pkg/jsk_travis
+  - ROS_DISTRO=jade BUILDER='not-compile' TRAVIS_REPO_SLUG=jsk-ros-pkg/jsk_travis TRAVIS_BRANCH=master TRAVIS_COMMIT=''  TRAVIS_PULL_REQUEST=''
+before_script:
+  - mkdir .travis; cp * .travis # need to copy, since directory starting from . is ignoreed by catkin build
+  - find . -name CATKIN_IGNORE -exec rm {} \;
+  - if [ "$BEFORE_SCRIPT" != "" ]; then sh -c "${BEFORE_SCRIPT}"; fi
+script:
+  - if [ "${ROS_DISTRO}" = "indigo" -o "${USE_JENKINS}" = "true" ] ; then sed -i 's@cat .travis/travis.sh@cat travis.sh@' .travis/travis_jenkins.py; fi
+  - source .travis/travis.sh
+  - if [ "${AFTER_INSTALL}" != "" ] ; then sudo apt-get install -f ${AFTER_INSTALL}; fi

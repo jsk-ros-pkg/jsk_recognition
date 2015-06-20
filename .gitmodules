@@ -1,3 +1,0 @@
-[submodule ".travis"]
-	path = .travis
-	url = git://github.com/jsk-ros-pkg/jsk_travis

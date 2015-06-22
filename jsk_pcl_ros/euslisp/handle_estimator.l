@@ -1,5 +1,6 @@
 #!/usr/bin/env roseus
 
+(ros::load-ros-manifest "jsk_recognition_msgs")
 (ros::load-ros-manifest "jsk_pcl_ros")
 
 (defclass handle-estimator
@@ -50,8 +51,8 @@
    (ros::advertise *candidate-preapproach-topic* geometry_msgs::PoseArray)
    
    ;;subscribe
-   (ros::subscribe (format nil "~A/input_box" *nodename*) jsk_pcl_ros::BoundingBox #'send self :estimate)
-   (ros::subscribe (format nil "~A/selected_index" *nodename*) jsk_pcl_ros::Int32Stamped #'send self :selected-index-callback)
+   (ros::subscribe (format nil "~A/input_box" *nodename*) jsk_recognition_msgs::BoundingBox #'send self :estimate)
+   (ros::subscribe (format nil "~A/selected_index" *nodename*) jsk_recognition_msgs::Int32Stamped #'send self :selected-index-callback)
 
    (setq *tfl* (instance ros::transform-listener :init))
    (setq *camera-frame* (ros::get-param "~camera_frame" "head_mount_link"))

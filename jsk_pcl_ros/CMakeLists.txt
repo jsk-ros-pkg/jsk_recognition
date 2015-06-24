@@ -132,6 +132,11 @@ macro(jsk_pcl_util_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name
     jsk_pcl_util_nodelet_sources jsk_pcl_util_nodelet_executables)
 endmacro(jsk_pcl_util_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
 
+if ($ENV{TRAVIS_JOB_ID})
+  add_definitions("-O2 -g")
+else ($ENV{TRAVIS_JOB_ID})
+  add_definitions("-O0")
+endif ($ENV{TRAVIS_JOB_ID})
 
 # pcl_ros::Filter based class is not working...
 # https://github.com/ros-perception/perception_pcl/issues/9

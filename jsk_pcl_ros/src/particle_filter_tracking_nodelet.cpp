@@ -147,7 +147,9 @@ namespace jsk_pcl_ros
        (new pcl::search::Octree<PointT>(octree_resolution));
     //boost::shared_ptr<pcl::search::KdTree<PointT> > search(new pcl::search::KdTree<PointT>());
     coherence->setSearchMethod(search);
-    coherence->setMaximumDistance(octree_resolution);
+    double max_distance;
+    pnh_->param("max_distance", max_distance, 0.01);
+    coherence->setMaximumDistance(max_distance);
 
     tracker_set_cloud_coherence(coherence);
 

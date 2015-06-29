@@ -37,6 +37,7 @@
 #ifndef IMAGESIFT_SIFT_NODE_H_
 #define IMAGESIFT_SIFT_NODE_H_
 
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <ros/node_handle.h>
 #include <sensor_msgs/Image.h>
 #include <posedetection_msgs/ImageFeature0D.h>
@@ -56,24 +57,23 @@
 
 namespace imagesift
 {
-  class SiftNode
+  class SiftNode: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::Image,
       sensor_msgs::Image > SyncPolicy;
     ros::Time lasttime;
-    SiftNode();
+    SiftNode(): DiagnosticNodelet("SiftNode") {}
   protected:
     bool _bInfoInitialized;
     bool _useMask;
     boost::mutex _mutex;
-    ros::NodeHandle _node;
-    image_transport::ImageTransport _it;
+    boost::shared_ptr<image_transport::ImageTransport> _it;
     image_transport::Subscriber _subImage;
     // for useMask
-    boost::shared_ptr<image_transport::SubscriberFilter> _subImageWithMask;
-        boost::shared_ptr<image_transport::SubscriberFilter> _subMask;
+    message_filters::Subscriber<sensor_msgs::Image> _subImageWithMask;
+    message_filters::Subscriber<sensor_msgs::Image> _subMask;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > _sync;
     ros::ServiceServer _srvDetect;
     ros::Subscriber _subInfo;
@@ -81,6 +81,9 @@ namespace imagesift
     ros::Publisher _pubSift;
     posedetection_msgs::ImageFeature0D _sift_msg;
 
+    virtual void onInit();
+    virtual void subscribe();
+    virtual void unsubscribe();
     void infoCb(const sensor_msgs::CameraInfoConstPtr& msg_ptr);
     bool detectCb(posedetection_msgs::Feature0DDetect::Request& req,
                   posedetection_msgs::Feature0DDetect::Response& res);

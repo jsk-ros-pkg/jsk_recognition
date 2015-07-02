@@ -80,8 +80,8 @@ namespace jsk_pcl_ros
       }
       tf::StampedTransform sensor_transform_tf
         = lookupTransformWithDuration(
-          tf_listener_, cloud_msg->header.frame_id,
-          frame_id_,
+          tf_listener_, frame_id_,
+          cloud_msg->header.frame_id,
           stamp,
           ros::Duration(1.0));
       Eigen::Affine3f sensor_transform;

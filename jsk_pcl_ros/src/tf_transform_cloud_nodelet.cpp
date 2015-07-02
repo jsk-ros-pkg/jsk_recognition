@@ -43,6 +43,7 @@ namespace jsk_pcl_ros
 {
   void TfTransformCloud::transform(const sensor_msgs::PointCloud2ConstPtr &input)
   {
+    vital_checker_->poke();
     sensor_msgs::PointCloud2 output;
     try
     {
@@ -66,21 +67,21 @@ namespace jsk_pcl_ros
     }
     catch (tf2::ConnectivityException &e)
     {
-      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      JSK_NODELET_ERROR("Transform error: %s", e.what());
     }
     catch (tf2::InvalidArgumentException &e)
     {
-      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      JSK_NODELET_ERROR("Transform error: %s", e.what());
     }
     catch (...)
     {
-      NODELET_ERROR("[%s] Unknown transform error", __PRETTY_FUNCTION__);
+      NODELET_ERROR("Unknown transform error");
     }
   }
 
   void TfTransformCloud::onInit(void)
   {
-    ConnectionBasedNodelet::onInit();
+    DiagnosticNodelet::onInit();
     
     if (!pnh_->getParam("target_frame_id", target_frame_id_))
     {

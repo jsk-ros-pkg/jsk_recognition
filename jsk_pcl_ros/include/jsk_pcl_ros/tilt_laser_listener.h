@@ -73,6 +73,8 @@ namespace jsk_pcl_ros
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
+    virtual void updateDiagnostic(
+      diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void jointCallback(const sensor_msgs::JointState::ConstPtr& msg);
     virtual void processTiltHalfUp(const ros::Time& stamp, const double& value);
     virtual void processTiltHalfDown(const ros::Time& stamp, const double& value);
@@ -100,7 +102,8 @@ namespace jsk_pcl_ros
     ros::Publisher cloud_pub_;
     ros::ServiceServer clear_cache_service_;
     ros::ServiceClient assemble_cloud_srv_;
-    
+    jsk_topic_tools::VitalChecker::Ptr cloud_vital_checker_;
+
     ////////////////////////////////////////////////////////
     // parameters
     ////////////////////////////////////////////////////////

@@ -101,6 +101,10 @@ namespace jsk_pcl_ros
       "clear_cache", &TiltLaserListener::clearCacheCallback,
       this);
     trigger_pub_ = advertise<jsk_recognition_msgs::TimeRange>(*pnh_, "output", 1);
+    double vital_rate;
+    pnh_->param("vital_rate", vital_rate, 1.0);
+    cloud_vital_checker_.reset(
+      new jsk_topic_tools::VitalChecker(1 / vital_rate));
     sub_ = pnh_->subscribe("input", 1, &TiltLaserListener::jointCallback, this);
   }
 
@@ -114,10 +118,40 @@ namespace jsk_pcl_ros
 
   }
 
+  void TiltLaserListener::updateDiagnostic(
+    diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    boost::mutex::scoped_lock lock(cloud_mutex_);
+    if (vital_checker_->isAlive()) {
+      if (not_use_laser_assembler_service_ && 
+          use_laser_assembler_) {
+        if (cloud_vital_checker_->isAlive()) {
+          stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                       getName() + " running");
+        }
+        else {
+          stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,
+                       "~input/cloud is not activate");
+        }
+        stat.add("scan queue", cloud_buffer_.size());
+      }
+      else {
+        stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                     getName() + " running");
+      }
+      
+    }
+    else {
+      jsk_topic_tools::addDiagnosticErrorSummary(
+        name_, vital_checker_, stat);
+    }
+  }
+
   void TiltLaserListener::cloudCallback(
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(cloud_mutex_);
+    cloud_vital_checker_->poke();
     cloud_buffer_.push_back(msg);
   }
 
@@ -319,10 +353,10 @@ namespace jsk_pcl_ros
     const sensor_msgs::JointState::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    vital_checker_->poke();
     for (size_t i = 0; i < msg->name.size(); i++) {
       std::string name = msg->name[i];
       if (name == joint_name_) {
+        vital_checker_->poke();
         if (laser_type_ == TILT_HALF_UP) {
           processTiltHalfUp(msg->header.stamp, msg->position[i]);
         }

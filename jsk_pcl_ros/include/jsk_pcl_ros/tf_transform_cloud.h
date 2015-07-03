@@ -47,13 +47,15 @@
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl/point_types.h>
 
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include "jsk_pcl_ros/tf_listener_singleton.h"
 
 namespace jsk_pcl_ros
 {
-  class TfTransformCloud: public jsk_topic_tools::ConnectionBasedNodelet
+  class TfTransformCloud: public jsk_topic_tools::DiagnosticNodelet
   {
+  public:
+    TfTransformCloud(): DiagnosticNodelet("TfTransformCloud") {}
   protected:
     ros::Subscriber sub_cloud_;
     ros::Publisher  pub_cloud_;

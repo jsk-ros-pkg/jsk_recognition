@@ -65,6 +65,7 @@ namespace jsk_pcl_ros
     ros::Publisher pub_;
     ros::Publisher pub_with_xyz_;
     ros::Subscriber sub_;
+    std::string sensor_frame_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     int k_;
     double search_radius_;

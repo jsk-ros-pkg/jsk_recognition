@@ -74,8 +74,6 @@ namespace jsk_pcl_ros
       pcl::PointIndices& indices);
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void configCallback (Config &config, uint32_t level);
     ////////////////////////////////////////////////////////
     // ROS variables

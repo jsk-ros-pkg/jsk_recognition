@@ -185,12 +185,6 @@ namespace jsk_pcl_ros
     pub_.publish(ros_indices);
   }
 
-  void NormalDirectionFilter::updateDiagnostic(
-    diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-
-  }
-  
 }
 
 #include <pluginlib/class_list_macros.h>

@@ -21,6 +21,8 @@
 
 // dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
+#include <jsk_topic_tools/timered_diagnostic_updater.h>
+#include <jsk_topic_tools/diagnostic_utils.h>
 
 namespace resized_image_transport
 {
@@ -66,6 +68,12 @@ namespace resized_image_transport
     boost::circular_buffer<double> in_bytes;
     boost::circular_buffer<double> out_bytes;
 
+    jsk_topic_tools::VitalChecker::Ptr image_vital_;
+    jsk_topic_tools::VitalChecker::Ptr info_vital_;
+    jsk_topic_tools::TimeredDiagnosticUpdater::Ptr diagnostic_updater_;
+
+    virtual void updateDiagnostic(
+      diagnostic_updater::DiagnosticStatusWrapper &stat);
     void onInit();
     void initNodeHandle();
     void initReconfigure();

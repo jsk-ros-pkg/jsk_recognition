@@ -48,6 +48,12 @@ namespace resized_image_transport
   }
 
   void ImageProcessing::initPublishersAndSubscribers(){
+    double vital_rate;
+    pnh.param("vital_rate", vital_rate, 1.0);
+    image_vital_.reset(
+      new jsk_topic_tools::VitalChecker(1 / vital_rate));
+    info_vital_.reset(
+      new jsk_topic_tools::VitalChecker(1 / vital_rate));
     it_ = new image_transport::ImageTransport(pnh);
     std::string img = nh.resolveName("image");
     std::string cam = nh.resolveName("camera");
@@ -96,12 +102,6 @@ namespace resized_image_transport
       getName(),
       boost::bind(
         &ImageProcessing::updateDiagnostic, this, _1));
-    double vital_rate;
-    pnh.param("vital_rate", vital_rate, 1.0);
-    image_vital_.reset(
-      new jsk_topic_tools::VitalChecker(1 / vital_rate));
-    info_vital_.reset(
-      new jsk_topic_tools::VitalChecker(1 / vital_rate));
     diagnostic_updater_->start();
 
 

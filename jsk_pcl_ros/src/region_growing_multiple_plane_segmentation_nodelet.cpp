@@ -156,7 +156,10 @@ namespace jsk_pcl_ros
       setCondifionFunctionParameter(angular_threshold_, distance_threshold_);
       cec.setConditionFunction(
         &RegionGrowingMultiplePlaneSegmentation::regionGrowingFunction);
+      //ros::Time before = ros::Time::now();
       cec.segment (*clusters);
+      // ros::Time end = ros::Time::now();
+      // ROS_INFO("segment took %f sec", (before - end).toSec());
     }
     // estimate planes
     std::vector<pcl::PointIndices::Ptr> all_inliers;
@@ -205,12 +208,6 @@ namespace jsk_pcl_ros
     pub_polygons_.publish(ros_polygon);
   }
 
-  void RegionGrowingMultiplePlaneSegmentation::updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-
-  }
-  
   double RegionGrowingMultiplePlaneSegmentation::global_angular_threshold = 0.0;
   double RegionGrowingMultiplePlaneSegmentation::global_distance_threshold = 0.0;
   boost::mutex RegionGrowingMultiplePlaneSegmentation::global_custom_condigion_function_mutex;

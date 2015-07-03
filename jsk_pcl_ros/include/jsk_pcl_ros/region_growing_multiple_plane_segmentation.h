@@ -75,8 +75,6 @@ namespace jsk_pcl_ros
       const sensor_msgs::PointCloud2::ConstPtr& msg,
       const sensor_msgs::PointCloud2::ConstPtr& normal_msg);
     virtual void configCallback (Config &config, uint32_t level);
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
     ////////////////////////////////////////////////////////
     // static methods
     ////////////////////////////////////////////////////////

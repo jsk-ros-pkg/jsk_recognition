@@ -1082,8 +1082,8 @@ namespace jsk_pcl_ros
     Vertices new_vertices(vertices_.size());
     for (size_t i = 0; i < vertices_.size(); i++) {
       new_vertices[i] = (vertices_[i] - c).normalized() * distance + vertices_[i];
-      JSK_ROS_INFO("old v: [%f, %f, %f]", vertices_[i][0], vertices_[i][1], vertices_[i][2]);
-      JSK_ROS_INFO("new v: [%f, %f, %f]", new_vertices[i][0], new_vertices[i][1], new_vertices[i][2]);
+      // JSK_ROS_INFO("old v: [%f, %f, %f]", vertices_[i][0], vertices_[i][1], vertices_[i][2]);
+      // JSK_ROS_INFO("new v: [%f, %f, %f]", new_vertices[i][0], new_vertices[i][1], new_vertices[i][2]);
       // JSK_ROS_INFO("");
     }
     
@@ -1326,16 +1326,19 @@ namespace jsk_pcl_ros
     pcl::PointCloud<pcl::PointNormal>::Ptr
       rehull_cloud (new pcl::PointCloud<pcl::PointNormal>);
     convex_->boundariesToPointCloud<pcl::PointNormal>(*hull_cloud);
-    pcl::ConvexHull<pcl::PointNormal> chull;
-    chull.setDimension(2);
-    chull.setInputCloud (hull_cloud);
-    chull.reconstruct(*hull_output);
-    // hull_cloud->points.push_back(hull_cloud->points[0]);
+    // pcl::ConvexHull<pcl::PointNormal> chull;
+    // chull.setDimension(2);
+    // chull.setInputCloud (hull_cloud);
+    // chull.reconstruct(*hull_output);
+    
+    // it's important to make it sure to close the loop of
+    // convex hull
+    hull_cloud->points.push_back(hull_cloud->points[0]);
     
     prism_extract.setInputCloud(cloud);
     prism_extract.setHeightLimits(-distance_threshold, distance_threshold);
-    //prism_extract.setInputPlanarHull(hull_cloud);
-    prism_extract.setInputPlanarHull(hull_output);
+    prism_extract.setInputPlanarHull(hull_cloud);
+    //prism_extract.setInputPlanarHull(hull_output);
     // output_indices is set of indices which are on plane
     pcl::PointIndices output_indices;
     prism_extract.segment(output_indices);
@@ -1383,7 +1386,7 @@ namespace jsk_pcl_ros
     ros_msg.coefficients[0] = coeff[0];
     ros_msg.coefficients[1] = coeff[1];
     ros_msg.coefficients[2] = coeff[2];
-    ros_msg.coefficients[3] = coeff[3]; // is it correct...??
+    ros_msg.coefficients[3] = coeff[3];
     ros_msg.resolution = resolution_;
     for (std::set<IndexPair>::iterator it = cells_.begin();
          it != cells_.end();

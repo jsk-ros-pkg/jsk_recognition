@@ -223,6 +223,8 @@ namespace jsk_pcl_ros
     ros::Publisher pub_debug_convex_point_cloud_;
     ros::Publisher pub_debug_raw_grid_map_;
     ros::Publisher pub_debug_noeroded_grid_map_;
+    ros::Publisher pub_debug_plane_coords_;
+    ros::Publisher pub_debug_magnified_plane_coords_;
     ros::Publisher pub_grid_map_;
     ros::Publisher pub_non_plane_indices_;
     ros::Publisher pub_snapped_move_base_simple_goal_;

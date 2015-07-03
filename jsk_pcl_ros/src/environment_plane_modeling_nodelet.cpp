@@ -45,7 +45,7 @@
 #include <jsk_recognition_msgs/SparseOccupancyGridArray.h>
 
 #include <pluginlib/class_list_macros.h>
-
+#include <geometry_msgs/PoseArray.h>
 #include "jsk_pcl_ros/geo_util.h"
 #include "jsk_pcl_ros/grid_map.h"
 #include <jsk_topic_tools/rosparam_utils.h>
@@ -73,6 +73,12 @@ namespace jsk_pcl_ros
     pub_debug_noeroded_grid_map_
       = pnh_->advertise<jsk_recognition_msgs::SimpleOccupancyGridArray>(
         "debug/noeroded_grid_map", 1);
+    pub_debug_plane_coords_
+      = pnh_->advertise<geometry_msgs::PoseArray>(
+        "debug/plane_poses", 1);
+    pub_debug_magnified_plane_coords_
+      = pnh_->advertise<geometry_msgs::PoseArray>(
+        "debug/magnified_plane_poses", 1);
     pub_grid_map_
       = pnh_->advertise<jsk_recognition_msgs::SimpleOccupancyGridArray>(
         "output", 1, true);
@@ -267,7 +273,30 @@ namespace jsk_pcl_ros
       publishConvexPolygonsBoundaries(pub_debug_convex_point_cloud_, cloud_msg->header, magnified_convexes);
       // Publish magnified convexes for debug
       publishConvexPolygons(pub_debug_magnified_polygons_, cloud_msg->header, magnified_convexes);
-
+      // publish pose_array for debug
+      {
+        geometry_msgs::PoseArray pose_array;
+        pose_array.header = cloud_msg->header;
+        for (size_t i = 0; i < convexes.size(); i++) {
+          Eigen::Affine3f pose = convexes[i]->coordinates();
+          geometry_msgs::Pose ros_pose;
+          tf::poseEigenToMsg(pose, ros_pose);
+          pose_array.poses.push_back(ros_pose);
+        }
+        pub_debug_plane_coords_.publish(pose_array);
+      }
+      {
+        geometry_msgs::PoseArray pose_array;
+        pose_array.header = cloud_msg->header;
+        for (size_t i = 0; i < magnified_convexes.size(); i++) {
+          Eigen::Affine3f pose = magnified_convexes[i]->coordinates();
+          geometry_msgs::Pose ros_pose;
+          tf::poseEigenToMsg(pose, ros_pose);
+          pose_array.poses.push_back(ros_pose);
+        }
+        pub_debug_magnified_plane_coords_.publish(pose_array);
+      }
+      
       // build GridMaps
       std::set<int> non_plane_indices;
       std::vector<GridPlane::Ptr> raw_grid_planes = buildGridPlanes(full_cloud, magnified_convexes, non_plane_indices);
@@ -524,9 +553,10 @@ namespace jsk_pcl_ros
   {
     std::vector<ConvexPolygon::Ptr> ret(0);
     for (size_t i = 0; i < convexes.size(); i++) {
-      ConvexPolygon::Ptr new_convex = convexes[i]->magnifyByDistance(magnify_distance_);
+      ConvexPolygon::Ptr vertices_convex(new ConvexPolygon(convexes[i]->getVertices()));
+      ConvexPolygon::Ptr new_convex = vertices_convex->magnifyByDistance(magnify_distance_);
       // check orientation
-      if (new_convex->getNormal().dot(Eigen::Vector3f::UnitZ()) < 0) {
+      if (new_convex->getNormalFromVertices().dot(Eigen::Vector3f::UnitZ()) < 0) {
         new_convex = boost::make_shared<ConvexPolygon>(new_convex->flipConvex());
       }
       ret.push_back(new_convex);
@@ -547,7 +577,7 @@ namespace jsk_pcl_ros
       coefficients->values = coefficients_msg->coefficients[i].values;
       ConvexPolygon::Ptr convex
         = convexFromCoefficientsAndInliers<pcl::PointNormal>(
-          cloud, inliers, coefficients);        
+          cloud, inliers, coefficients);
       convexes.push_back(convex);
     }
     

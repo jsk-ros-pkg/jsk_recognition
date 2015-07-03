@@ -485,8 +485,18 @@ namespace jsk_pcl_ros
   {
     Eigen::Quaternionf rot;
     rot.setFromTwoVectors(Eigen::Vector3f::UnitZ(), normal_);
+    double c = normal_[2];
+    double z = 0.0;
+    // ax + by + cz + d = 0
+    // z = - d / c (when x = y = 0)
+    if (c == 0.0) {             // its not good
+      z = 0.0;
+    }
+    else {
+      z = - d_ / c;
+    }
     plane_coordinates_
-      = Eigen::Affine3f::Identity() * rot * Eigen::Translation3f(0, 0, - d_);
+      = Eigen::Affine3f::Identity() * rot * Eigen::Translation3f(0, 0, z);
   }
   
   Eigen::Affine3f Plane::coordinates()
@@ -1072,8 +1082,8 @@ namespace jsk_pcl_ros
     Vertices new_vertices(vertices_.size());
     for (size_t i = 0; i < vertices_.size(); i++) {
       new_vertices[i] = (vertices_[i] - c).normalized() * distance + vertices_[i];
-      // JSK_ROS_INFO("old v: [%f, %f, %f]", vertices_[i][0], vertices_[i][1], vertices_[i][2]);
-      // JSK_ROS_INFO("new v: [%f, %f, %f]", new_vertices[i][0], new_vertices[i][1], new_vertices[i][2]);
+      JSK_ROS_INFO("old v: [%f, %f, %f]", vertices_[i][0], vertices_[i][1], vertices_[i][2]);
+      JSK_ROS_INFO("new v: [%f, %f, %f]", new_vertices[i][0], new_vertices[i][1], new_vertices[i][2]);
       // JSK_ROS_INFO("");
     }
     
@@ -1306,23 +1316,26 @@ namespace jsk_pcl_ros
   {
     Eigen::Affine3f local_coordinates = convex_->coordinates();
     Eigen::Affine3f inv_local_coordinates = local_coordinates.inverse();
-    std::vector<Polygon::Ptr> triangles = convex_->decomposeToTriangles();
+    //std::vector<Polygon::Ptr> triangles = convex_->decomposeToTriangles();
     
     pcl::ExtractPolygonalPrismData<pcl::PointNormal> prism_extract;
     pcl::PointCloud<pcl::PointNormal>::Ptr
       hull_cloud (new pcl::PointCloud<pcl::PointNormal>);
+    pcl::PointCloud<pcl::PointNormal>::Ptr
+      hull_output (new pcl::PointCloud<pcl::PointNormal>);
     pcl::PointCloud<pcl::PointNormal>::Ptr
       rehull_cloud (new pcl::PointCloud<pcl::PointNormal>);
     convex_->boundariesToPointCloud<pcl::PointNormal>(*hull_cloud);
     pcl::ConvexHull<pcl::PointNormal> chull;
     chull.setDimension(2);
     chull.setInputCloud (hull_cloud);
-    
+    chull.reconstruct(*hull_output);
     // hull_cloud->points.push_back(hull_cloud->points[0]);
     
     prism_extract.setInputCloud(cloud);
     prism_extract.setHeightLimits(-distance_threshold, distance_threshold);
-    prism_extract.setInputPlanarHull(hull_cloud);
+    //prism_extract.setInputPlanarHull(hull_cloud);
+    prism_extract.setInputPlanarHull(hull_output);
     // output_indices is set of indices which are on plane
     pcl::PointIndices output_indices;
     prism_extract.segment(output_indices);

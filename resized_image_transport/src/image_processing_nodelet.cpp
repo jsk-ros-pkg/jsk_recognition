@@ -88,11 +88,27 @@ namespace resized_image_transport
       image_sub_ = pnh.subscribe("input/image", max_queue_size_, &ImageProcessing::image_cb, this);
     }
     
+    // Diagnostics
+    diagnostic_updater_.reset(
+      new jsk_topic_tools::TimeredDiagnosticUpdater(pnh, ros::Duration(1.0)));
+    diagnostic_updater_->setHardwareID(getName());
+    diagnostic_updater_->add(
+      getName(),
+      boost::bind(
+        &ImageProcessing::updateDiagnostic, this, _1));
+    double vital_rate;
+    pnh.param("vital_rate", vital_rate, 1.0);
+    image_vital_.reset(
+      new jsk_topic_tools::VitalChecker(1 / vital_rate));
+    info_vital_.reset(
+      new jsk_topic_tools::VitalChecker(1 / vital_rate));
+    diagnostic_updater_->start();
+
+
   }
 
   void ImageProcessing::snapshot_msg_cb (const std_msgs::EmptyConstPtr msg) {
     boost::mutex::scoped_lock lock(mutex_);
-
     publish_once_ = true;
   }
 
@@ -106,12 +122,14 @@ namespace resized_image_transport
 
   void ImageProcessing::info_cb(const sensor_msgs::CameraInfoConstPtr &msg) {
     boost::mutex::scoped_lock lock(mutex_);
+    info_vital_->poke();
     info_msg_ = msg;
   }
 
   void ImageProcessing::image_nonsync_cb(const sensor_msgs::ImageConstPtr& msg) {
     {
       boost::mutex::scoped_lock lock(mutex_);
+      image_vital_->poke();
       if (!info_msg_) {
         NODELET_WARN_THROTTLE(1, "camera info is not yet available");
         return;
@@ -120,8 +138,95 @@ namespace resized_image_transport
     callback(msg, info_msg_);
   }
     
+  void ImageProcessing::updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    // common
+    stat.add("use_camera_info", use_camera_info_);
+    stat.add("use_snapshot", use_snapshot_);
+    stat.add("input image", pnh.resolveName("input/image"));
+    stat.add("output image", pnh.resolveName("output/image"));
+    // summary
+    if (!image_vital_->isAlive()) {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,
+                   "no image input. Is " + pnh.resolveName("input/image") + " active?");
+    }
+    else {
+      if (use_camera_info_) {
+        if (!info_vital_->isAlive()) {
+          stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,
+                       "no info input. Is " + camera_info_sub_.getTopic() + " active?");
+        }
+        else {
+          stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                       "running");
+        }
+        stat.add("input info", camera_info_sub_.getTopic());
+        stat.add("info_last_received_time", info_vital_->lastAliveTimeRelative());
+      }
+      else {
+        stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                     "running");
+      }
+    }
+    stat.add("image_last_received_time", image_vital_->lastAliveTimeRelative());
+    ros::Time now = ros::Time::now();
+    float duration =  (now - last_rosinfo_time_).toSec();
+    int in_time_n = in_times.size();
+    int out_time_n = out_times.size();
+    double in_time_mean = 0, in_time_rate = 1.0, in_time_std_dev = 0.0, in_time_max_delta, in_time_min_delta;
+    double out_time_mean = 0, out_time_rate = 1.0, out_time_std_dev = 0.0, out_time_max_delta, out_time_min_delta;
+
+    std::for_each( in_times.begin(), in_times.end(), (in_time_mean += boost::lambda::_1) );
+    in_time_mean /= in_time_n;
+    in_time_rate /= in_time_mean;
+    std::for_each( in_times.begin(), in_times.end(), (in_time_std_dev += (boost::lambda::_1 - in_time_mean)*(boost::lambda::_1 - in_time_mean) ) );
+    in_time_std_dev = sqrt(in_time_std_dev/in_time_n);
+    if (in_time_n > 1) {
+      in_time_min_delta = *std::min_element(in_times.begin(), in_times.end());
+      in_time_max_delta = *std::max_element(in_times.begin(), in_times.end());
+    }
+
+    std::for_each( out_times.begin(), out_times.end(), (out_time_mean += boost::lambda::_1) );
+    out_time_mean /= out_time_n;
+    out_time_rate /= out_time_mean;
+    std::for_each( out_times.begin(), out_times.end(), (out_time_std_dev += (boost::lambda::_1 - out_time_mean)*(boost::lambda::_1 - out_time_mean) ) );
+    out_time_std_dev = sqrt(out_time_std_dev/out_time_n);
+    if (out_time_n > 1) {
+      out_time_min_delta = *std::min_element(out_times.begin(), out_times.end());
+      out_time_max_delta = *std::max_element(out_times.begin(), out_times.end());
+    }
+
+    double in_byte_mean = 0, out_byte_mean = 0;
+    std::for_each( in_bytes.begin(), in_bytes.end(), (in_byte_mean += boost::lambda::_1) );
+    std::for_each( out_bytes.begin(), out_bytes.end(), (out_byte_mean += boost::lambda::_1) );
+    in_byte_mean /= duration;
+    out_byte_mean /= duration;
+    stat.add("compressed rate", in_byte_mean / out_byte_mean);
+    stat.add("input bandwidth (Kbps)", in_byte_mean / 1000 * 8);
+    stat.add("input bandwidth (Mbps)", in_byte_mean / 1000 / 1000 * 8);
+    stat.add("input rate (hz)", in_time_rate);
+    stat.add("input min delta (s)", in_time_min_delta);
+    stat.add("input max delta (s)", in_time_max_delta);
+    stat.add("input std_dev delta (s)", in_time_std_dev);
+    stat.add("input times (n)", in_time_n);
+    stat.add("output bandwidth (Kbps)", out_byte_mean / 1000 * 8);
+    stat.add("output bandwidth (Mbps)", out_byte_mean / 1000 / 1000 * 8);
+    stat.add("output rate (hz)", out_time_rate);
+    stat.add("output min delta (s)", out_time_min_delta);
+    stat.add("output max delta (s)", out_time_max_delta);
+    stat.add("output std_dev delta (s)", out_time_std_dev);
+    stat.add("output times (n)", out_time_n);
+    in_times.clear();
+    in_bytes.clear();
+    out_times.clear();
+    out_bytes.clear();
+    last_rosinfo_time_ = now;
+
+  }
   
   void ImageProcessing::image_cb(const sensor_msgs::ImageConstPtr &img){
+    image_vital_->poke();
     callback(img, sensor_msgs::CameraInfo::ConstPtr());
   }
 
@@ -170,59 +275,6 @@ namespace resized_image_transport
     }
     catch (cv::Exception& e) {
       ROS_ERROR("%s", e.what());
-    }
-
-
-    float duration =  (now - last_rosinfo_time_).toSec();
-    if (duration > 2) {
-      int in_time_n = in_times.size();
-      int out_time_n = out_times.size();
-      double in_time_mean = 0, in_time_rate = 1.0, in_time_std_dev = 0.0, in_time_max_delta, in_time_min_delta;
-      double out_time_mean = 0, out_time_rate = 1.0, out_time_std_dev = 0.0, out_time_max_delta, out_time_min_delta;
-
-      std::for_each( in_times.begin(), in_times.end(), (in_time_mean += boost::lambda::_1) );
-      in_time_mean /= in_time_n;
-      in_time_rate /= in_time_mean;
-      std::for_each( in_times.begin(), in_times.end(), (in_time_std_dev += (boost::lambda::_1 - in_time_mean)*(boost::lambda::_1 - in_time_mean) ) );
-      in_time_std_dev = sqrt(in_time_std_dev/in_time_n);
-      if (in_time_n > 1) {
-        in_time_min_delta = *std::min_element(in_times.begin(), in_times.end());
-        in_time_max_delta = *std::max_element(in_times.begin(), in_times.end());
-      }
-
-      std::for_each( out_times.begin(), out_times.end(), (out_time_mean += boost::lambda::_1) );
-      out_time_mean /= out_time_n;
-      out_time_rate /= out_time_mean;
-      std::for_each( out_times.begin(), out_times.end(), (out_time_std_dev += (boost::lambda::_1 - out_time_mean)*(boost::lambda::_1 - out_time_mean) ) );
-      out_time_std_dev = sqrt(out_time_std_dev/out_time_n);
-      if (out_time_n > 1) {
-        out_time_min_delta = *std::min_element(out_times.begin(), out_times.end());
-        out_time_max_delta = *std::max_element(out_times.begin(), out_times.end());
-      }
-
-      double in_byte_mean = 0, out_byte_mean = 0;
-      std::for_each( in_bytes.begin(), in_bytes.end(), (in_byte_mean += boost::lambda::_1) );
-      std::for_each( out_bytes.begin(), out_bytes.end(), (out_byte_mean += boost::lambda::_1) );
-      in_byte_mean /= duration;
-      out_byte_mean /= duration;
-
-      if (verbose_) {
-        NODELET_INFO_STREAM(" in  bandwidth: " << std::fixed << std::setw(11) << std::setprecision(3)  << in_byte_mean/1000*8
-                            << " Kbps rate:"   << std::fixed << std::setw(7) << std::setprecision(3) << in_time_rate
-                            << " hz min:"      << std::fixed << std::setw(7) << std::setprecision(3) << in_time_min_delta
-                            << " s max: "    << std::fixed << std::setw(7) << std::setprecision(3) << in_time_max_delta
-                            << " s std_dev: "<< std::fixed << std::setw(7) << std::setprecision(3) << in_time_std_dev << "s n: " << in_time_n);
-        NODELET_INFO_STREAM(" out bandwidth: " << std::fixed << std::setw(11) << std::setprecision(3)  << out_byte_mean/1000*8
-                            << " kbps rate:"   << std::fixed << std::setw(7) << std::setprecision(3) << out_time_rate
-                            << " hz min:"      << std::fixed << std::setw(7) << std::setprecision(3) << out_time_min_delta
-                            << " s max: "    << std::fixed << std::setw(7) << std::setprecision(3) << out_time_max_delta
-                            << " s std_dev: "<< std::fixed << std::setw(7) << std::setprecision(3) << out_time_std_dev << "s n: " << out_time_n);
-      }
-      in_times.clear();
-      in_bytes.clear();
-      out_times.clear();
-      out_bytes.clear();
-      last_rosinfo_time_ = now;
     }
 
     last_subscribe_time_ = now;

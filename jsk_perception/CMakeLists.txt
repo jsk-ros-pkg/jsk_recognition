@@ -38,7 +38,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   tf
-)
+  libcmt)
 
 find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 
@@ -168,6 +168,7 @@ macro(jsk_add_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
   jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
     ${PROJECT_NAME}_nodelet_sources ${PROJECT_NAME}_nodelet_executables)
 endmacro()
+
 jsk_add_nodelet(src/bounding_box_to_rect.cpp "jsk_perception/BoundingBoxToRect" "bounding_box_to_rect")
 jsk_add_nodelet(src/rect_array_actual_size_filter.cpp "jsk_perception/RectArrayActualSizeFilter" "rect_array_actual_size_filter")
 jsk_add_nodelet(src/rect_array_to_density_image.cpp "jsk_perception/RectArrayToDensityImage" "rect_array_to_density_image")
@@ -229,6 +230,7 @@ if(OPENMP_FOUND)
   jsk_add_nodelet(src/saliency_map_generator_node.cpp "jsk_perception/SaliencyMapGenerator" "saliency_map_generator")
   jsk_add_nodelet(src/skeletonization_nodelet.cpp "jsk_perception/Skeletonization" "skeletonization")
 endif()
+jsk_add_nodelet(src/consensus_tracking.cpp "jsk_perception/CMTNodelet" "consensus_tracking")
 
 # robot_self_filter is released on version greater than indigo
 find_package(robot_self_filter QUIET)
@@ -248,7 +250,8 @@ add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
   slic/slic.cpp
   src/histogram_of_oriented_gradients.cpp
   )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${robot_self_filter_LIBRARIES} yaml-cpp)
+
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${robot_self_filter_LIBRARIES} yaml-cpp  libcmt)
 if(robot_self_filter_FOUND)
   include_directories(${robot_self_filter_INCLUDE_DIRS})
   target_link_libraries(${PROJECT_NAME} ${robot_self_filter_LIBRARIES})

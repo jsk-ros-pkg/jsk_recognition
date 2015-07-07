@@ -42,6 +42,7 @@
 #include <sensor_msgs/CameraInfo.h>
 
 #include <jsk_perception/FisheyeConfig.h>
+#include <jsk_recognition_msgs/Rect.h>
 #include <libcmt/CMT.h>
 
 #include <opencv2/opencv.hpp>
@@ -53,16 +54,25 @@ namespace jsk_perception
   public:
 
     CMTNodelet(): DiagnosticNodelet("CMTNodelet") {}
+
   protected:
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
     inline double interpolate(double rate, double first, double second){return (1.0 - rate) * first + rate * second;};
     virtual void tracking(const sensor_msgs::Image::ConstPtr& image_msg);
-    
+    void reset_rect(jsk_recognition_msgs::Rect rc);
+
     ros::Subscriber sub_image_;
+    ros::Subscriber sub_rect_;
     ros::Publisher pub_image_;
     bool first_initialize_;
+    bool show_window_;
+
+    cv::Point2f init_top_left_;
+    cv::Point2f init_bottom_right_;
+
+
     CMT cmt;
  private:
     

@@ -66,6 +66,7 @@ namespace jsk_perception
     ros::Subscriber sub_image_;
     ros::Subscriber sub_rect_;
     ros::Publisher pub_image_;
+    ros::Publisher pub_mask_image_;
     bool first_initialize_;
     bool show_window_;
 

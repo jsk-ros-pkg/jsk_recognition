@@ -1,0 +1,27 @@
+<launch>
+  <arg name="camera_namespace" default="kinect_head_c2"/>
+  <arg name="input_image" default="/$(arg camera_namespace)/rgb/image_rect_color"/>
+  <arg name="input_cloud" default="/$(arg camera_namespace)/depth_registered/points"/>
+  <arg name="input_camera_info" default="/$(arg camera_namespace)/rgb/camera_info"/>
+  
+  <node pkg="jsk_perception" name="cmt" type="cmt">
+    <remap from="~input" to="$(arg input_image)"/>
+    <param name="show_window" value="false"/>
+    <param name="topleft_x" value="100"/>
+    <param name="topleft_x" value="100"/>
+    <param name="bottomright_x" value="200"/>
+    <param name="bottomright_y" value="200"/>
+  </node>
+
+  <node pkg="jsk_pcl_ros" type="mask_image_filter" name="mask_image_filter">
+    <remap from="~input" to="$(arg input_cloud)" />
+    <remap from="~input/mask" to="cmt/mask_output"/>
+    <remap from="~input/camera_info" to="$(arg input_camera_info)" />
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="mask_image_filter_points"
+        args="standalone pcl/ExtractIndices">
+    <remap from="~input" to="$(arg input_cloud)" />
+    <remap from="~indices" to="mask_image_filter/output" />
+  </node>
+</launch>

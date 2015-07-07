@@ -43,6 +43,7 @@
 
 #include <jsk_perception/FisheyeConfig.h>
 #include <jsk_recognition_msgs/Rect.h>
+#include <geometry_msgs/PolygonStamped.h>
 #include <libcmt/CMT.h>
 
 #include <opencv2/opencv.hpp>
@@ -61,10 +62,13 @@ namespace jsk_perception
     inline double interpolate(double rate, double first, double second){return (1.0 - rate) * first + rate * second;};
     virtual void tracking(const sensor_msgs::Image::ConstPtr& image_msg);
     void reset_rect(jsk_recognition_msgs::Rect rc);
-
+    void reset_rect_with_poly(geometry_msgs::PolygonStamped poly);
+ 
     ros::Subscriber sub_image_;
     ros::Subscriber sub_rect_;
+    ros::Subscriber sub_rect_poly_;
     ros::Publisher pub_image_;
+    ros::Publisher pub_mask_image_;
     bool first_initialize_;
     bool show_window_;
 

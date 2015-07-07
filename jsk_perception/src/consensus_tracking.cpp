@@ -58,18 +58,29 @@ namespace jsk_perception
     pnh_->param("bottomright_y", bottomright_y, 200);
     pub_image_ = advertise<sensor_msgs::Image>(
       *pnh_, "output", 1);
+    pub_mask_image_ = advertise<sensor_msgs::Image>(
+      *pnh_, "mask_output", 1);
 
     first_initialize_ = true;
     
     init_top_left_ = cv::Point2f(topleft_x, topleft_y);
     init_bottom_right_ = cv::Point2f(bottomright_x, bottomright_y);
-    sub_rect_ = pnh_->subscribe("set_rect", 1, &CMTNodelet::reset_rect, this);
+    sub_rect_ = pnh_->subscribe("set_rect", 1, &ConsensusTracking::reset_rect, this);
+    sub_rect_poly_ = pnh_->subscribe("set_poly", 1, &ConsensusTracking::reset_rect_with_poly, this);
   }
 
-  void CMTNodelet::reset_rect(jsk_recognition_msgs::Rect rc)
+  void ConsensusTracking::reset_rect(jsk_recognition_msgs::Rect rc)
   {
     init_top_left_ = cv::Point2f(rc.x - rc.width/2, rc.y - rc.height/2);
     init_bottom_right_ = cv::Point2f(rc.x + rc.width/2, rc.y + rc.height/2);
+    
+    first_initialize_ = true;
+  }
+
+  void ConsensusTracking::reset_rect_with_poly(geometry_msgs::PolygonStamped poly)
+  {
+    init_top_left_ = cv::Point2f(poly.polygon.points[0].x, poly.polygon.points[0].y);
+    init_bottom_right_ = cv::Point2f(poly.polygon.points[1].x, poly.polygon.points[1].y);
     
     first_initialize_ = true;
   }
@@ -103,6 +114,24 @@ namespace jsk_perception
     cv::line(input_msg, cmt.topRight, cmt.bottomRight, cv::Scalar(0,30,255));
     cv::line(input_msg, cmt.bottomRight, cmt.bottomLeft, cv::Scalar(0,30,255));
     cv::line(input_msg, cmt.bottomLeft, cmt.topLeft, cv::Scalar(0,30,255));
+
+    cv::Point diff = cmt.topLeft - cmt.bottomLeft;
+    cv::Point center2 = cmt.topLeft+cmt.bottomRight;
+    cv::Point2f center = cv::Point2f(center2.x/2, center2.y/2);
+    cv::Size2f size = cv::Size2f(cv::norm(cmt.topLeft-cmt.topRight), cv::norm(cmt.topLeft-cmt.bottomLeft));
+    cv::RotatedRect rRect = cv::RotatedRect ( center, size, asin(diff.x/cv::norm(diff))* 180 / 3.14159265);
+
+    cv::Point2f vertices2f[4];
+    cv::Point vertices[4];
+    rRect.points(vertices2f);
+    for(int i = 0; i < 4; ++i){
+      vertices[i] = vertices2f[i];
+    }
+    cv::Mat mask_image = cv::Mat::zeros(input_msg.size().height, input_msg.size().width,CV_8UC1);
+    cv::fillConvexPoly(mask_image,
+                       vertices,
+                       4,
+                       cv::Scalar(255));
     
     if(show_window_)
       imshow("frame", input_msg);
@@ -110,6 +139,9 @@ namespace jsk_perception
     pub_image_.publish(cv_bridge::CvImage(image_msg->header,
                                           image_msg->encoding,
                                           input_msg).toImageMsg());
+    pub_mask_image_.publish(cv_bridge::CvImage(image_msg->header,
+                                               sensor_msgs::image_encodings::MONO8,
+                                               mask_image).toImageMsg());
   }
 }
 

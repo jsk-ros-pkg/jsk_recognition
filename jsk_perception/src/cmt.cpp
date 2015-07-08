@@ -66,12 +66,21 @@ namespace jsk_perception
     init_top_left_ = cv::Point2f(topleft_x, topleft_y);
     init_bottom_right_ = cv::Point2f(bottomright_x, bottomright_y);
     sub_rect_ = pnh_->subscribe("set_rect", 1, &CMTNodelet::reset_rect, this);
+    sub_rect_poly_ = pnh_->subscribe("set_poly", 1, &CMTNodelet::reset_rect_with_poly, this);
   }
 
   void CMTNodelet::reset_rect(jsk_recognition_msgs::Rect rc)
   {
     init_top_left_ = cv::Point2f(rc.x - rc.width/2, rc.y - rc.height/2);
     init_bottom_right_ = cv::Point2f(rc.x + rc.width/2, rc.y + rc.height/2);
+    
+    first_initialize_ = true;
+  }
+
+  void CMTNodelet::reset_rect_with_poly(geometry_msgs::PolygonStamped poly)
+  {
+    init_top_left_ = cv::Point2f(poly.polygon.points[0].x, poly.polygon.points[0].y);
+    init_bottom_right_ = cv::Point2f(poly.polygon.points[1].x, poly.polygon.points[1].y);
     
     first_initialize_ = true;
   }

@@ -4,7 +4,7 @@
   <arg name="input_cloud" default="/$(arg camera_namespace)/depth_registered/points"/>
   <arg name="input_camera_info" default="/$(arg camera_namespace)/rgb/camera_info"/>
   
-  <node pkg="jsk_perception" name="cmt" type="cmt">
+  <node pkg="jsk_perception" name="cmt" type="consensus_tracking">
     <remap from="~input" to="$(arg input_image)"/>
     <param name="show_window" value="false"/>
     <param name="topleft_x" value="100"/>

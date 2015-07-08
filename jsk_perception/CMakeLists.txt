@@ -37,8 +37,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospack
   sensor_msgs
   std_msgs
-  tf
-  libcmt)
+  tf)
 
 find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 
@@ -77,6 +76,8 @@ add_custom_target(install_trained_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts
 # ------------------------------------------------------------------------------------
 # Catkin setup
 # ------------------------------------------------------------------------------------
+include(FindPkgConfig)
+pkg_check_modules(libcmt REQUIRED libcmt)
 
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
@@ -150,7 +151,8 @@ if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/slic/slic.cpp)
 endif()
 
 # Build nodelet executables
-include_directories(include ${catkin_INCLUDE_DIRS} ${Eigen_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} slic)
+include_directories(include ${catkin_INCLUDE_DIRS} ${Eigen_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} slic ${libcmt_INCLUDE_DIRS})
+link_directories(${libcmt_LIBRARY_DIRS})
 
 file(GLOB ${PROJECT_NAME}_node_scripts ${PROJECT_SOURCE_DIR}/node_scripts/*)
 foreach(_node_script ${${PROJECT_NAME}_node_scripts})
@@ -251,7 +253,7 @@ add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
   src/histogram_of_oriented_gradients.cpp
   )
 
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${robot_self_filter_LIBRARIES} yaml-cpp  libcmt)
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${robot_self_filter_LIBRARIES} ${libcmt_LIBRARIES} yaml-cpp)
 if(robot_self_filter_FOUND)
   include_directories(${robot_self_filter_INCLUDE_DIRS})
   target_link_libraries(${PROJECT_NAME} ${robot_self_filter_LIBRARIES})

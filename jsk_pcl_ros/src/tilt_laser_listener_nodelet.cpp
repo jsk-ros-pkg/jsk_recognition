@@ -226,6 +226,9 @@ namespace jsk_pcl_ros
             std::vector<sensor_msgs::PointCloud2::ConstPtr> target_clouds;
             {
               boost::mutex::scoped_lock lock(cloud_mutex_);
+              if (cloud_buffer_.size() == 0) {
+                return;
+              }
               for (size_t i = 0; i < cloud_buffer_.size(); i++) {
                 ros::Time the_stamp = cloud_buffer_[i]->header.stamp;
                 if (the_stamp > start && the_stamp < end) {

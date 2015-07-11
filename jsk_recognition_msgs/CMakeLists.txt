@@ -18,6 +18,7 @@ add_message_files(
   BoundingBox.msg
   SparseOccupancyGridColumn.msg
   SparseOccupancyGrid.msg
+  Histogram.msg
   ColorHistogram.msg
   DepthErrorResult.msg
   BoundingBoxArray.msg

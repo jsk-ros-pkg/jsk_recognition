@@ -59,6 +59,7 @@ namespace jsk_pcl_ros
     }
     pnh_->param("overwrap_angle", overwrap_angle_, 0.0);
     std::string laser_type;
+    pnh_->param("clear_assembled_scans", clear_assembled_scans_, false);
     pnh_->param("skip_number", skip_number_, 1);
     pnh_->param("laser_type", laser_type, std::string("tilt_half_down"));
     if (laser_type == "tilt_half_up") {
@@ -235,7 +236,12 @@ namespace jsk_pcl_ros
                   target_clouds.push_back(cloud_buffer_[i]);
                 }
               }
-              cloud_buffer_.removeBefore(start);
+              if (clear_assembled_scans_) {
+                cloud_buffer_.removeBefore(end);
+              }
+              else {
+                cloud_buffer_.removeBefore(start);
+              }
             }
             sensor_msgs::PointCloud2 output_cloud;
             getPointCloudFromLocalBuffer(target_clouds, output_cloud);
@@ -293,7 +299,12 @@ namespace jsk_pcl_ros
         if (change_count == 2) {
           ros::Time start_time = buffer_[i]->header.stamp;
           publishTimeRange(stamp, start_time, stamp);
-          buffer_.removeBefore(buffer_[i-1]->header.stamp);
+          if (clear_assembled_scans_) {
+            buffer_.removeBefore(stamp);
+          }
+          else {
+            buffer_.removeBefore(buffer_[i-1]->header.stamp);
+          }
           break;
         }
         direction = current_direction;
@@ -331,14 +342,24 @@ namespace jsk_pcl_ros
           if (velocity > 0) {
             if (buffer_[i-1]->getValue() < fmod(threshold - overwrap_angle_, 2.0 * M_PI)) {
               publishTimeRange(stamp, buffer_[i-1]->header.stamp, stamp);
-              buffer_.removeBefore(buffer_[i-1]->header.stamp);
+              if (clear_assembled_scans_) {
+                buffer_.removeBefore(stamp);
+              }
+              else {
+                buffer_.removeBefore(buffer_[i-1]->header.stamp);
+              }
               break;
             }
           }
           else if (velocity < 0) {
             if (buffer_[i-1]->getValue() > fmod(threshold + overwrap_angle_, 2.0 * M_PI)) {
               publishTimeRange(stamp, buffer_[i-1]->header.stamp, stamp);
-              buffer_.removeBefore(buffer_[i-1]->header.stamp);
+              if (clear_assembled_scans_) {
+                buffer_.removeBefore(stamp);
+              }
+              else {
+                buffer_.removeBefore(buffer_[i-1]->header.stamp);
+              }
               break;
             }
           }

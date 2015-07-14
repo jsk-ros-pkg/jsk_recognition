@@ -163,6 +163,8 @@ namespace jsk_pcl_ros
     double correspondence_distance_;
     double transform_epsilon_;
     double euclidean_fittness_epsilon_;
+    double ransac_iterations_;
+    double ransac_outlier_threshold_;
     sensor_msgs::CameraInfo::ConstPtr camera_info_msg_;
     
     ////////////////////////////////////////////////////////

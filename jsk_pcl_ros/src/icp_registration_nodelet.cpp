@@ -171,6 +171,8 @@ namespace jsk_pcl_ros
     transform_epsilon_ = config.transform_epsilon;
     euclidean_fittness_epsilon_ = config.euclidean_fittness_epsilon;
     rotation_epsilon_ = config.rotation_epsilon;
+    ransac_iterations_ = config.ransac_iterations;
+    ransac_outlier_threshold_ = config.ransac_outlier_threshold;
     maximum_optimizer_iterations_ = config.maximum_optimizer_iterations;
   }
 
@@ -459,6 +461,8 @@ namespace jsk_pcl_ros
     icp.setMaximumIterations (max_iteration_);
     icp.setTransformationEpsilon (transform_epsilon_);
     icp.setEuclideanFitnessEpsilon (euclidean_fittness_epsilon_);
+    icp.setRANSACIterations(ransac_iterations_);
+    icp.setRANSACOutlierRejectionThreshold(ransac_outlier_threshold_);
     pcl::PointCloud<PointT> final;
     icp.align(final);
     pcl::transformPointCloud(final, *output_cloud, offset);

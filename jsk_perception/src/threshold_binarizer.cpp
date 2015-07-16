@@ -43,11 +43,11 @@ namespace jsk_perception
 {
   ThresholdBinarizer::ThresholdBinarizer(): DiagnosticNodelet("ThresholdBinarizer")
   {
-    thre_lower = 0;
-    thre_upper = 255;
+    thre_lower_ = 0;
+    thre_upper_ = 255;
     cv::namedWindow ("TrackbarWindow", CV_WINDOW_AUTOSIZE);
-    cv::createTrackbar ("TrackbarLower", "TrackbarWindow", &thre_lower, 256, 0);
-    cv::createTrackbar ("TrackbarUpper", "TrackbarWindow", &thre_upper, 256, 0);
+    cv::createTrackbar ("TrackbarLower", "TrackbarWindow", &thre_lower_, 256, 0);
+    cv::createTrackbar ("TrackbarUpper", "TrackbarWindow", &thre_upper_, 256, 0);
     cv::startWindowThread();
   }
 
@@ -80,8 +80,8 @@ namespace jsk_perception
     cv::Mat binary_image_lower, binary_image_upper, binary_image;
 
     cv::waitKey(10);
-    cv::threshold(image, binary_image_lower, thre_lower-1, 255, cv::THRESH_BINARY);
-    cv::threshold(image, binary_image_upper, thre_upper-1, 255, cv::THRESH_BINARY_INV);
+    cv::threshold(image, binary_image_lower, thre_lower_-1, 255, cv::THRESH_BINARY);
+    cv::threshold(image, binary_image_upper, thre_upper_-1, 255, cv::THRESH_BINARY_INV);
     cv:bitwise_and(binary_image_lower, binary_image_upper, binary_image);
     pub_.publish(cv_bridge::CvImage(image_msg->header,
                                     sensor_msgs::image_encodings::MONO8,

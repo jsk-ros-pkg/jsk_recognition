@@ -54,7 +54,7 @@ namespace jsk_perception
     virtual void binarize(const sensor_msgs::Image::ConstPtr& image_msg);
     ros::Subscriber sub_;
     ros::Publisher pub_;
-    int thre_lower, thre_upper;
+    int thre_lower_, thre_upper_;
   private:
     
   };

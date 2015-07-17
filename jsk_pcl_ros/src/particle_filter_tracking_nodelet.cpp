@@ -402,13 +402,23 @@ namespace jsk_pcl_ros
   void ParticleFilterTracking::renew_model_with_marker_topic_cb(const visualization_msgs::Marker &marker)
   {
     if(marker.type == visualization_msgs::Marker::TRIANGLE_LIST && !marker.points.empty()){
+      ROS_INFO("Reset Tracker Model with renew_model_with_marker_topic_cb");
       pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>);
       markerMsgToPointCloud(marker,
                             marker_to_pointcloud_sampling_nums_,
                             *cloud
                             );
+
+      Eigen::Affine3f trans;
+      tf::poseMsgToEigen(marker.pose, trans);
+      pcl::transformPointCloud(*cloud, *cloud, trans);
+
       frame_id_ = marker.header.frame_id;
       reset_tracking_target_model(cloud);
+    }else{
+      JSK_ROS_ERROR(" Marker Models type is not TRIANGLE ");
+      JSK_ROS_ERROR("   OR   ");
+      JSK_ROS_ERROR(" Marker Points is empty ");
     }
   }
 

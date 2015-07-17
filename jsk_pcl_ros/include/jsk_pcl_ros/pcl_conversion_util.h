@@ -122,6 +122,11 @@ namespace jsk_pcl_ros
     std::vector<double> cumulative_areas;
     double total_area = 0;
 
+    if (input_marker.points.size() != input_marker.colors.size()){
+      ROS_ERROR("Color and Points nums is different in markerMsgToPointCloud");
+      return;
+    }
+
     //Gether the triangle areas
     for (int i = 0; i < (int)input_marker.points.size()/3; i++){
       geometry_msgs::Point p0_1;
@@ -149,23 +154,39 @@ namespace jsk_pcl_ros
 
       //Get Target Triangle
       PointT p;
+      std_msgs::ColorRGBA color;
       geometry_msgs::Point p0 = input_marker.points[index*3];
       geometry_msgs::Point p1 = input_marker.points[index*3+1];
       geometry_msgs::Point p2 = input_marker.points[index*3+2];
+      std_msgs::ColorRGBA c0= input_marker.colors[index*3];
+      std_msgs::ColorRGBA c1 = input_marker.colors[index*3+1];
+      std_msgs::ColorRGBA c2 = input_marker.colors[index*3+2];
       r = rand() * (1.0  / (RAND_MAX + 1.0));
 
       geometry_msgs::Point point_on_p1_p2;
       point_on_p1_p2.x = p1.x*r + p2.x*(1.0 - r);
-      point_on_p1_p2.y =  p1.y*r + p2.y*(1.0 - r);
-      point_on_p1_p2.z =  p1.z*r + p2.z*(1.0 - r);
+      point_on_p1_p2.y = p1.y*r + p2.y*(1.0 - r);
+      point_on_p1_p2.z = p1.z*r + p2.z*(1.0 - r);
+
+      color.r = c1.r*r + c2.r*(1.0 - r);
+      color.g = c1.g*r + c2.g*(1.0 - r);
+      color.b = c1.b*r + c2.b*(1.0 - r);
+
       r = sqrt(rand() * (1.0  / (RAND_MAX + 1.0)));
       geometry_msgs::Point target;
       target.x = point_on_p1_p2.x*r + p0.x*(1.0 - r);
       target.y = point_on_p1_p2.y*r + p0.y*(1.0 - r);
       target.z = point_on_p1_p2.z*r + p0.z*(1.0 - r);
+      color.r = color.r*r + c0.r*(1.0 - r);
+      color.g = color.g*r + c0.g*(1.0 - r);
+      color.b = color.b*r + c0.b*(1.0 - r);
       p.x = target.x;
       p.y = target.y;
       p.z = target.z;
+      p.r = color.r * 256;
+      p.g = color.g * 256;
+      p.b = color.b * 256;
+      
       output_cloud.points.push_back(p);
     }
     output_cloud.width = sample_nums;

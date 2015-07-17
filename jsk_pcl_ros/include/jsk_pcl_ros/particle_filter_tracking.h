@@ -500,7 +500,7 @@ namespace jsk_pcl_ros
   class ParticleFilterTracking: public pcl_ros::PCLNodelet
   {
   public:
-    typedef pcl::PointXYZRGBA PointT;
+    typedef pcl::PointXYZRGB PointT;
     typedef ParticleFilterTrackingConfig Config;
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,

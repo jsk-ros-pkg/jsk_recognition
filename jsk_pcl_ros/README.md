@@ -1357,7 +1357,12 @@ This nodelet tracks the target pointcloud.
 
 * `~renew_model` (`sensor_msgs/PointCloud2`)
 
-  Reference pointcloud to tracke.
+  Reference pointcloud to track.
+
+* `~renew_model_with_marker` (`visualization_msgs/Marker`)
+
+  Reference marker model to track. This will convert marker model to pointcloud.
+  You need to pass the marker whose type is TRIANGLE_LIST and it should have the color.
 
 * `~renew_box` (`jsk_recognition_msgs/BoundingBox`)
 

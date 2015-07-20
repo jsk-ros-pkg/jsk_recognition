@@ -498,6 +498,11 @@
     <description>
     </description>
   </class>
+  <class name="jsk_pcl/BeliefCloudFilter" type="jsk_pcl_ros::BeliefCloudFilter"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
   <class name="jsk_pcl/Kinfu" type="jsk_pcl_ros::Kinfu"
          base_class_type="nodelet::Nodelet">
     <description>

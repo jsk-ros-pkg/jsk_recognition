@@ -340,6 +340,8 @@ jsk_pcl_nodelet(src/convex_connected_voxels_nodelet.cpp
   "jsk_pcl/ConvexConnectedVoxels" "convex_connected_voxels")
 jsk_pcl_nodelet(src/normal_estimation_omp_nodelet.cpp
   "jsk_pcl/NormalEstimationOMP" "normal_estimation_omp")
+jsk_pcl_nodelet(src/belief_cloud_filter_nodelet.cpp
+  "jsk_pcl/BeliefCloudFilter" "belief_cloud_filter")
 if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
   jsk_pcl_nodelet(src/kinfu_nodelet.cpp
     "jsk_pcl/Kinfu" "kinfu")

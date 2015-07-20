@@ -11,6 +11,9 @@
   <arg name="renew_box" default="/bounding_box_marker/selected_box" />
   <arg name="BASE_FRAME_ID" default="NONE" />
   <arg name="track_target_name" default="track_result" />
+
+  <arg name="track_with_model_sample" default="false" />
+
     <node if="$(arg create_manager)"
           pkg="nodelet" type="nodelet" name="$(arg manager)"
           args="manager" output="screen"/>
@@ -62,4 +65,6 @@
     <node pkg="jsk_pcl_ros" name="renew_tracking" type="renew_tracking.py" if="false">
       <remap from="selected_pointcloud" to="selected_cloud_downsampler/output" />
     </node>
+
+    <node pkg="jsk_pcl_ros" name="marker_model_tracking" type="marker_model_tracking.l" if="$(arg track_with_model_sample)"/>
 </launch>

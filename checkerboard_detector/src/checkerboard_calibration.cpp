@@ -29,7 +29,7 @@
 
 #include <boost/thread/mutex.hpp>
 
-#include "opencv/cv.h"
+#include "opencv/cv.hpp"
 #include "opencv/highgui.h"
 #include "cv_bridge/cv_bridge.h"
 #include "sensor_msgs/image_encodings.h"

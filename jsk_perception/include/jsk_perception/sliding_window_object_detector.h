@@ -95,7 +95,11 @@ namespace jsk_perception
       
       std::string model_name_;
       std::string dataset_path_;
+#if CV_MAJOR_VERSION >= 3 // http://answers.opencv.org/question/46770/cvknearest-missing-in-300-cvmlknearest-abstract/
+      cv::Ptr<cv::ml::SVM> supportVectorMachine_;
+#else
       boost::shared_ptr<cv::SVM> supportVectorMachine_;
+#endif
       boost::shared_ptr<dynamic_reconfigure::Server<
          jsk_perception::SlidingWindowObjectDetectorConfig> > srv_;
       boost::shared_ptr<rosbag::Bag> rosbag_;

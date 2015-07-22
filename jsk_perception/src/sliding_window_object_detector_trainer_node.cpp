@@ -4,9 +4,14 @@
 #include <iostream>
 namespace jsk_perception
 {
-   SlidingWindowObjectDetectorTrainer::SlidingWindowObjectDetectorTrainer() :
-      supportVectorMachine_(new cv::SVM)
+   SlidingWindowObjectDetectorTrainer::SlidingWindowObjectDetectorTrainer()
+#if CV_MAJOR_VERSION < 3
+     : supportVectorMachine_(new cv::SVM)
+#endif
    {
+#if CV_MAJOR_VERSION >= 3
+      this->supportVectorMachine_ = cv::ml::SVM::create();
+#endif
       nh_.getParam("dataset_path", this->dataset_path_);
       nh_.getParam("object_dataset_filename", this->object_dataset_filename_);
       nh_.getParam("nonobject_dataset_filename", this->nonobject_dataset_filename_);
@@ -113,6 +118,36 @@ namespace jsk_perception
       const cv::Mat &featureMD, const cv::Mat &labelMD)
    {
       JSK_ROS_INFO("--TRAINING CLASSIFIER");
+#if CV_MAJOR_VERSION >= 3
+      this->supportVectorMachine_->setType(cv::ml::SVM::NU_SVC);
+      //this->supportVectorMachine_->setKernelType(cv::ml::SVM::RBF);
+      this->supportVectorMachine_->setDegree(0.0);
+      this->supportVectorMachine_->setGamma(0.90);
+      this->supportVectorMachine_->setCoef0(0.50);
+      this->supportVectorMachine_->setC(1);
+      this->supportVectorMachine_->setNu(0.70);
+      this->supportVectorMachine_->setP(1.0);
+      //this->supportVectorMachine_->setClassWeights(NULL);
+      cv::TermCriteria term_crit;
+      term_crit.type = CV_TERMCRIT_ITER | CV_TERMCRIT_EPS;
+      term_crit.maxCount = 1e6;
+      term_crit.epsilon = 1e-6;
+      this->supportVectorMachine_->setTermCriteria(term_crit);
+      cv::ml::ParamGrid paramGrid = cv::ml::ParamGrid();
+      paramGrid.minVal = 0;
+      paramGrid.maxVal = 0;
+      paramGrid.logStep = 1;
+
+      cv::Ptr<cv::ml::TrainData> train = cv::ml::TrainData::create(featureMD, cv::ml::ROW_SAMPLE, labelMD, cv::Mat(), cv::Mat()); // ROW_SAMPLE ? COL_SAMPLE ?
+      this->supportVectorMachine_->trainAuto
+        (train, 10,
+         paramGrid, cv::ml::SVM::getDefaultGrid(cv::ml::SVM::GAMMA),
+         cv::ml::SVM::getDefaultGrid(cv::ml::SVM::P),
+         cv::ml::SVM::getDefaultGrid(cv::ml::SVM::NU),
+         cv::ml::SVM::getDefaultGrid(cv::ml::SVM::COEF),
+         cv::ml::SVM::getDefaultGrid(cv::ml::SVM::DEGREE),
+          true);
+#else
       cv::SVMParams svm_param = cv::SVMParams();
       svm_param.svm_type = cv::SVM::NU_SVC;
       svm_param.kernel_type = cv::SVM::RBF;
@@ -141,6 +176,7 @@ namespace jsk_perception
           cv::SVM::get_default_grid(cv::SVM::COEF),
           cv::SVM::get_default_grid(cv::SVM::DEGREE),
           true);
+#endif
    }
 
    void SlidingWindowObjectDetectorTrainer::concatenateCVMat(

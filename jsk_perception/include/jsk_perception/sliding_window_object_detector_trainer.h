@@ -41,7 +41,11 @@ namespace jsk_perception
       std::string trained_classifier_name_;
 
       boost::shared_ptr<rosbag::Bag> rosbag_;
+#if CV_MAJOR_VERSION >= 3 // http://answers.opencv.org/question/46770/cvknearest-missing-in-300-cvmlknearest-abstract/
+      cv::Ptr<cv::ml::SVM> supportVectorMachine_;
+#else
       boost::shared_ptr<cv::SVM> supportVectorMachine_;
+#endif
       void writeTrainingManifestToDirectory(cv::FileStorage &);
       virtual void concatenateCVMat(
          const cv::Mat &, const cv::Mat &, cv::Mat &, bool = true);

@@ -2135,7 +2135,9 @@ This nodelet will republish the pointcloud which is transformed with the designa
 * `~use_latest_tf` (Bool, default: `false`)
 
   If this parameter is true, ignore timestamp of tf to transform pointcloud.
+* `~tf_queue_size` (Int, default: `10`)
 
+  Queue size of tf message filter to synchronize tf and `~input` topic.
 #### Sample
 Plug the depth sensor which can be launched by openni.launch and run the below command.
 

@@ -57,8 +57,6 @@ namespace jsk_pcl_ros
         }
       }
       else {
-        tf_listener_->waitForTransform(target_frame_id_, input->header.frame_id,
-                                       input->header.stamp, ros::Duration(duration_));
         if (pcl_ros::transformPointCloud(target_frame_id_, *input, output,
                                          *tf_listener_)) {
           pub_cloud_.publish(output);
@@ -89,18 +87,34 @@ namespace jsk_pcl_ros
     }
     pnh_->param("duration", duration_, 1.0);
     pnh_->param("use_latest_tf", use_latest_tf_, false);
+    pnh_->param("tf_queue_size", tf_queue_size_, 10);
     tf_listener_ = TfListenerSingleton::getInstance();
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
   }
 
   void TfTransformCloud::subscribe()
   {
-    sub_cloud_ = pnh_->subscribe("input", 1, &TfTransformCloud::transform, this);
+    if (use_latest_tf_) {
+      sub_cloud_ = pnh_->subscribe("input", 1, &TfTransformCloud::transform, this);
+    }
+    else {
+      sub_cloud_message_filters_.subscribe(*pnh_, "input", 10);
+      tf_filter_.reset(new tf::MessageFilter<sensor_msgs::PointCloud2>(sub_cloud_message_filters_,
+                                                                       *tf_listener_,
+                                                                       target_frame_id_,
+                                                                       tf_queue_size_));
+      tf_filter_->registerCallback(boost::bind(&TfTransformCloud::transform, this, _1));
+    }
   }
 
   void TfTransformCloud::unsubscribe()
   {
-    sub_cloud_.shutdown();
+    if (use_latest_tf_) {
+      sub_cloud_.shutdown();
+    }
+    else {
+      sub_cloud_message_filters_.unsubscribe();
+    }
   }
 }
 

@@ -1471,6 +1471,10 @@ This nodelet tracks the target pointcloud.
 
   Enable caching of nearest-neighbor search
 
+* `~enable_organized` (Boolean, default: `false`)
+
+  Enable using Organized nearest-neighbor search
+
 * `~cache_size_x` (Double, default: `0.01`)
 * `~cache_size_y` (Double, default: `0.01`)
 * `~cache_size_z` (Double, default: `0.01`)

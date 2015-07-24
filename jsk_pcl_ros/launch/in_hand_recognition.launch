@@ -1,0 +1,23 @@
+<launch>
+  <arg name="pcd_file" default="$(find drc_task_common)/pcds/drill.pcd" />
+  <arg name="info" default="/multisense/depth/camera_info" /> 
+  <arg name="input_cloud" default="/multisense/resize_1_4/points" /> 
+  <node pkg="jsk_pcl_ros" type="in_hand_recognition_manager.py" name="in_hand_recognition_manager">
+    <remap from="~input/result" to="icp_registration/output_pose"/>
+  </node>
+  <node pkg="jsk_pcl_ros" type="pcd_reader_with_pose" name="pcd_reader_with_pose">
+    <param name="pcd_file" value="$(arg pcd_file)" />
+    <remap from="~input" to="in_hand_recognition_manager/output/recognition" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="depth_image_creator" name="depth_image_creator">
+    <remap from="~input" to="pcd_reader_with_pose/output" />
+    <remap from="~info" to="$(arg info)" />
+    <param name="use_asynchronous" value="true" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="icp_registration" name="icp_registration" >
+    <remap from="~input_reference" to="depth_image_creator/output_cloud"/>
+    <remap from="~input_reference_array" to="in_hand_recognition_manager/dummy_array"/>
+    <remap from="~input" to="$(arg input_cloud)"/>
+    <remap from="~input/camera_info" to="$(arg info)" />
+  </node>
+</launch>

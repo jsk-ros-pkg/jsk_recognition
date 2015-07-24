@@ -345,6 +345,8 @@ if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
     "jsk_pcl/Kinfu" "kinfu")
   include_directories(/usr/local/cuda/include)
 endif (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
+jsk_pcl_nodelet(src/pcd_reader_with_pose_nodelet.cpp
+  "jsk_pcl/PCDReaderWithPose" "pcd_reader_with_pose")
 
 add_library(jsk_pcl_ros_base SHARED
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp

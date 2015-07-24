@@ -1,0 +1,72 @@
+#!/usr/bin/env python
+
+# program for recognition in hand
+# depends on the node-structure of icp_registration
+# suppose that robot does not move throughout recognizing
+
+import rospy
+
+PKG='jsk_pcl_ros'
+
+import imp
+try:
+    imp.find_module(PKG)
+except:
+    import roslib;roslib.load_manifest(PKG)
+
+from geometry_msgs.msg import PoseStamped, Pose
+from sensor_msgs.msg import PointCloud2
+from jsk_recognition_msgs.msg import PointsArray
+from tf.transformations import *
+
+teacher_pose_stamped = None
+
+def pose_teacher_cb(pose_stamped):
+    global teacher_pose_stamped
+    teacher_pose_stamped = pose_stamped
+    InputPosePub.publish(teacher_pose_stamped)
+    # pub pose and save pose
+def get_mat_from_pose(pose):
+    return concatenate_matrices(
+      translation_matrix([pose.position.x, pose.position.y, pose.position.z]),
+      quaternion_matrix([pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w])
+      )
+def get_pose_from_mat(mat):
+    translation = translation_from_matrix(mat)
+    rotation = quaternion_from_matrix(mat)
+    pose = Pose()
+    pose.position.x = translation[0]
+    pose.position.y = translation[1]
+    pose.position.z = translation[2]
+    pose.orientation.x = rotation[0]
+    pose.orientation.y = rotation[1]
+    pose.orientation.z = rotation[2]
+    pose.orientation.w = rotation[3]
+    return pose
+    
+def pose_diff_cb(pose_stamped):
+    global teacher_pose_stamped
+    # add diff and pub
+    if (not teacher_pose_stamped):
+        rospy.info ("teacher is empty")
+        return
+    # DummyArrayPub.publish(PointsArray()) # register empty clouds to stop recognition
+    teacher_pose_mat = (get_mat_from_pose(teacher_pose_stamped.pose))
+    diff_pose_mat = (get_mat_from_pose(pose_stamped.pose))
+    new_pose_mat = concatenate_matrices(diff_pose_mat, teacher_pose_mat)
+    new_pose_stamped = PoseStamped()
+    new_pose_stamped.pose = get_pose_from_mat(new_pose_mat)
+    new_pose_stamped.header = pose_stamped.header
+    new_pose_stamped.header.frame_id = teacher_pose_stamped.header.frame_id
+    OutputPosePub.publish(new_pose_stamped)
+    teachear_pose_stamped = None
+
+if __name__ == "__main__":
+    rospy.init_node("in_hand_recognition_manager")
+    InputPosePub = rospy.Publisher("~output/recognition", PoseStamped)
+    OutputPosePub = rospy.Publisher("~output", PoseStamped)
+    DummyArrayPub = rospy.Publisher("~dummy_array", PointsArray)
+    rospy.Subscriber("~input", PoseStamped, pose_teacher_cb)
+    rospy.Subscriber("~input/result", PoseStamped, pose_diff_cb)
+    rospy.spin()
+

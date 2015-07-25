@@ -121,6 +121,7 @@ namespace jsk_pcl_ros
     TimeStampedVector<sensor_msgs::PointCloud2::ConstPtr> cloud_buffer_;
     int skip_number_;
     int skip_counter_;
+    int max_queue_size_;
   private:
     
   };

@@ -61,6 +61,7 @@ namespace jsk_pcl_ros
     std::string laser_type;
     pnh_->param("skip_number", skip_number_, 1);
     pnh_->param("laser_type", laser_type, std::string("tilt_half_down"));
+    pnh_->param("max_queue_size", max_queue_size_, 100);
     if (laser_type == "tilt_half_up") {
       laser_type_ = TILT_HALF_UP;
     }
@@ -85,7 +86,7 @@ namespace jsk_pcl_ros
     if (use_laser_assembler_) {
       if (not_use_laser_assembler_service_) {
         sub_cloud_
-          = pnh_->subscribe("input/cloud", 100, &TiltLaserListener::cloudCallback, this);
+          = pnh_->subscribe("input/cloud", max_queue_size_, &TiltLaserListener::cloudCallback, this);
       }
       else {
         assemble_cloud_srv_
@@ -105,7 +106,7 @@ namespace jsk_pcl_ros
     pnh_->param("vital_rate", vital_rate, 1.0);
     cloud_vital_checker_.reset(
       new jsk_topic_tools::VitalChecker(1 / vital_rate));
-    sub_ = pnh_->subscribe("input", 1, &TiltLaserListener::jointCallback, this);
+    sub_ = pnh_->subscribe("input", max_queue_size_, &TiltLaserListener::jointCallback, this);
   }
 
   void TiltLaserListener::subscribe()

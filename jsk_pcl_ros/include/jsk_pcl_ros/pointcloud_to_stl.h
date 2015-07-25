@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Yuto Inagaki and JSK Lab
+ *  Copyright (c) 2015, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,48 +33,62 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_TF_TRANSFORMCLOUD_H_
-#define JSK_PCL_ROS_TF_TRANSFORMCLOUD_H_
+#ifndef JSK_PCL_ROS_POINTCLOUD_TO_STL_H_
+#define JSK_PCL_ROS_POINTCLOUD_TO_STL_H_
 
 // ros
 #include <ros/ros.h>
 #include <ros/names.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <tf/transform_broadcaster.h>
-#include <pcl_ros/transforms.h>
+#include <jsk_pcl_ros/SetPointCloud2.h>
+#include <visualization_msgs/Marker.h>
 
 // pcl
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl/point_types.h>
-
-#include <jsk_topic_tools/diagnostic_nodelet.h>
-#include "jsk_pcl_ros/tf_listener_singleton.h"
-
-#include <tf/message_filter.h>
-#include <message_filters/subscriber.h>
+#include <pcl/surface/organized_fast_mesh.h>
 
 namespace jsk_pcl_ros
 {
-  class TfTransformCloud: public jsk_topic_tools::DiagnosticNodelet
+  class PointCloudToSTL: public pcl_ros::PCLNodelet
   {
   public:
-    TfTransformCloud(): DiagnosticNodelet("TfTransformCloud") {}
+    PointCloudToSTL(){}
   protected:
-    ros::Subscriber sub_cloud_;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_cloud_message_filters_;
-    ros::Publisher  pub_cloud_;
-    std::string target_frame_id_;
-    tf::TransformListener* tf_listener_;
-    boost::shared_ptr<tf::MessageFilter<sensor_msgs::PointCloud2> > tf_filter_;
-    virtual void transform(const sensor_msgs::PointCloud2ConstPtr &input);
-    virtual void subscribe();
-    virtual void unsubscribe();
-    
-    double duration_;
-    bool use_latest_tf_;
-    int tf_queue_size_;
-  private:
     virtual void onInit();
+    virtual void cloudCallback(const sensor_msgs::PointCloud2::ConstPtr& input);
+    virtual void exportSTL(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr  &cloud);
+    virtual bool createSTL(jsk_pcl_ros::SetPointCloud2::Request &req,
+                           jsk_pcl_ros::SetPointCloud2::Response &res);
+    virtual bool createURDF(jsk_pcl_ros::SetPointCloud2::Request &req,
+                            jsk_pcl_ros::SetPointCloud2::Response &res);
+    virtual bool spawnURDF(jsk_pcl_ros::SetPointCloud2::Request &req,
+                           jsk_pcl_ros::SetPointCloud2::Response &res);
+    
+    ros::Publisher pub_mesh_;
+    ros::Subscriber sub_input_;
+    ros::ServiceServer create_stl_srv_;
+    ros::ServiceServer create_urdf_srv_;
+    ros::ServiceServer spawn_urdf_srv_;
+
+    std::string frame_;
+    double search_radius_;
+    double mu_;
+    int maximum_nearest_neighbors_;
+    double maximum_surface_angle_;
+    double minimum_angle_;
+    double maximum_angle_;
+    bool normal_consistency_;
+    bool store_shadow_faces_;
+
+    double triangle_pixel_size_;
+    double max_edge_length_;
+    std::string file_name_;
+    std::string latest_output_path_;
+    pcl::OrganizedFastMesh<pcl::PointXYZRGB> ofm;
+
+  private:
   };
 }
 

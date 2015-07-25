@@ -38,6 +38,7 @@
 #define JSK_PERCEPTION_BACKGROUND_SUBSTRACTION_H_
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <opencv/cv.hpp>
 #include <opencv2/opencv.hpp>
 #include <image_transport/image_transport.h>
 #include <image_transport/subscriber_filter.h>
@@ -79,7 +80,12 @@ namespace jsk_perception
     ////////////////////////////////////////////////////////
     // Parameters
     ////////////////////////////////////////////////////////
+    // http://stackoverflow.com/questions/28847289/error-cannot-declare-variable-bg-to-be-of-abstract-type-cvbackgroundsubtra
+#if CV_MAJOR_VERSION >= 3
+    cv::Ptr<cv::BackgroundSubtractorMOG2> bg_;
+#else
     cv::BackgroundSubtractorMOG2 bg_;
+#endif
     bool detect_shadows_;
     int nmixtures_;
     double background_ratio_;

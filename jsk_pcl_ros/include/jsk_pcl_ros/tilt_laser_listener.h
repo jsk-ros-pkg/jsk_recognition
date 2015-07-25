@@ -115,6 +115,7 @@ namespace jsk_pcl_ros
     ros::Time start_time_;
     bool use_laser_assembler_;
     bool not_use_laser_assembler_service_;
+    bool clear_assembled_scans_;
     boost::mutex mutex_;
     boost::mutex cloud_mutex_;
     TimeStampedVector<StampedJointAngle::Ptr> buffer_;

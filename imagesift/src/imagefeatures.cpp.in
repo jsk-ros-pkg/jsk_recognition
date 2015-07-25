@@ -45,6 +45,7 @@
 #ifdef OPENCV_NON_FREE
 #include <opencv2/nonfree/nonfree.hpp> // SIFT・SURFモジュール用
 #endif
+#include <opencv2/features2d/features2d.hpp>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
@@ -100,8 +101,13 @@ public:
     _detector_name="@DETECTOR@";
     _extractor_name="@EXTRACTOR@";
     ROS_INFO("detector:%s extractor:%s\n",  _detector_name.c_str() ,_extractor_name.c_str() );
+#if CV_MAJOR_VERSION >= 3
+    _detector = cv::@DETECTOR@::create();
+    _extractor = cv::@EXTRACTOR@::create();
+#else
     _detector = cv::FeatureDetector::create(_detector_name.c_str());
     _extractor = cv::DescriptorExtractor::create(_extractor_name.c_str());
+#endif
     _pubFeatures = _node.advertise<posedetection_msgs::Feature0D>("Feature0D",1);
     _pubSift = _node.advertise<posedetection_msgs::ImageFeature0D>("ImageFeature0D",1);
     ros::NodeHandle pnh("~");

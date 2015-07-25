@@ -35,7 +35,9 @@
 
 #include "jsk_perception/snake_segmentation.h"
 #include <opencv2/opencv.hpp>
+#if CV_MAJOR_VERSION < 3
 #include <opencv2/legacy/legacy.hpp>
+#endif
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 
@@ -84,6 +86,9 @@ namespace jsk_perception
   void SnakeSegmentation::segment(
     const sensor_msgs::Image::ConstPtr& image_msg)
   {
+#if CV_MAJOR_VERSION >= 3
+    JSK_ROS_ERROR("cvSnakeImage is not supported in OpenCV3");
+#else
     vital_checker_->poke();
     boost::mutex::scoped_lock lock(mutex_);
     cv::Mat input = cv_bridge::toCvCopy(
@@ -127,10 +132,12 @@ namespace jsk_perception
       cv::line(debug_image, points[i - 1], points[i], cv::Scalar(0, 100, 0), 2);
       cv::circle(debug_image, points[i], 2, cv::Scalar(100, 0, 0), 1);
     }
+
     pub_debug_.publish(cv_bridge::CvImage(
                          image_msg->header,
                          sensor_msgs::image_encodings::BGR8,
                          debug_image).toImageMsg());
+#endif
   }
 }
 

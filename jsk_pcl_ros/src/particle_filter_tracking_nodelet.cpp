@@ -175,7 +175,11 @@ namespace jsk_pcl_ros
     else {
       sub_update_model_ = pnh_->subscribe(
         "renew_model", 1, &ParticleFilterTracking::renew_model_topic_cb,this);
+      sub_update_with_marker_model_
+        = pnh_->subscribe("renew_model_with_marker", 1, &ParticleFilterTracking::renew_model_with_marker_topic_cb, this);
     }
+
+    pnh_->param("marker_to_pointcloud_sampling_nums", marker_to_pointcloud_sampling_nums_, 10000);
     renew_model_srv_
       = pnh_->advertiseService(
         "renew_model", &ParticleFilterTracking::renew_model_cb, this);
@@ -295,7 +299,7 @@ namespace jsk_pcl_ros
     if (base_frame_id_.compare("NONE") != 0) {
       tf::Transform transform_result
         = change_pointcloud_frame(new_target_cloud);
-      reference_transform_ = transform_result * reference_transform_;;      
+      reference_transform_ = transform_result * reference_transform_;;
     }
 
     if (!recieved_target_cloud->points.empty()) {
@@ -394,6 +398,30 @@ namespace jsk_pcl_ros
     frame_id_ = pc.header.frame_id;
     reset_tracking_target_model(new_target_cloud);
   }
+
+  void ParticleFilterTracking::renew_model_with_marker_topic_cb(const visualization_msgs::Marker &marker)
+  {
+    if(marker.type == visualization_msgs::Marker::TRIANGLE_LIST && !marker.points.empty()){
+      ROS_INFO("Reset Tracker Model with renew_model_with_marker_topic_cb");
+      pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>);
+      markerMsgToPointCloud(marker,
+                            marker_to_pointcloud_sampling_nums_,
+                            *cloud
+                            );
+
+      Eigen::Affine3f trans;
+      tf::poseMsgToEigen(marker.pose, trans);
+      pcl::transformPointCloud(*cloud, *cloud, trans);
+
+      frame_id_ = marker.header.frame_id;
+      reset_tracking_target_model(cloud);
+    }else{
+      JSK_ROS_ERROR(" Marker Models type is not TRIANGLE ");
+      JSK_ROS_ERROR("   OR   ");
+      JSK_ROS_ERROR(" Marker Points is empty ");
+    }
+  }
+
   void ParticleFilterTracking::renew_model_with_box_topic_cb(
     const sensor_msgs::PointCloud2::ConstPtr &pc_ptr,
     const jsk_recognition_msgs::BoundingBox::ConstPtr &bb_ptr)

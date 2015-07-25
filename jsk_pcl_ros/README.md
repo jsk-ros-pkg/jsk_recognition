@@ -1357,7 +1357,12 @@ This nodelet tracks the target pointcloud.
 
 * `~renew_model` (`sensor_msgs/PointCloud2`)
 
-  Reference pointcloud to tracke.
+  Reference pointcloud to track.
+
+* `~renew_model_with_marker` (`visualization_msgs/Marker`)
+
+  Reference marker model to track. This will convert marker model to pointcloud.
+  You need to pass the marker whose type is TRIANGLE_LIST and it should have the color.
 
 * `~renew_box` (`jsk_recognition_msgs/BoundingBox`)
 
@@ -1659,6 +1664,9 @@ You can choose several types of tilt/spindle lasers such as tilt-laser of PR2, i
 * `~max_queue_size` (Integer, default: `100`):
 
   Queu size of subscription.
+* `~clear_assembled_scans` (Bool, default: `false`)
+
+   Do not use assembled scans twice.
 * `~skip_number` (Integer, default: `1`):
 
    Skip publishing and calling laser assembler per `~skip_number`.
@@ -2130,7 +2138,9 @@ This nodelet will republish the pointcloud which is transformed with the designa
 * `~use_latest_tf` (Bool, default: `false`)
 
   If this parameter is true, ignore timestamp of tf to transform pointcloud.
+* `~tf_queue_size` (Int, default: `10`)
 
+  Queue size of tf message filter to synchronize tf and `~input` topic.
 #### Sample
 Plug the depth sensor which can be launched by openni.launch and run the below command.
 

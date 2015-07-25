@@ -1661,6 +1661,9 @@ You can choose several types of tilt/spindle lasers such as tilt-laser of PR2, i
    Clear cache and restart collecting data.
 
 #### Parameters
+* `~max_queue_size` (Integer, default: `100`):
+
+  Queu size of subscription.
 * `~clear_assembled_scans` (Bool, default: `false`)
 
    Do not use assembled scans twice.

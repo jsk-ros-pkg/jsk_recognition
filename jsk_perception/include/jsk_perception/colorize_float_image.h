@@ -33,59 +33,33 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_HEIGHTMAP_CONVERTER_H_
-#define JSK_PCL_ROS_HEIGHTMAP_CONVERTER_H_
+#ifndef JSK_PERCEPTION_COLORIZE_FLOAT_IMAAGE_H_
+#define JSK_PERCEPTION_COLORIZE_FLOAT_IMAAGE_H_
 
+#include <sensor_msgs/Image.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_topic_tools/color_utils.h>
+#include <cv_bridge/cv_bridge.h>
 
-#include <sensor_msgs/PointCloud2.h>
-#include <jsk_pcl_ros/HeightmapConverterConfig.h>
-#include <dynamic_reconfigure/server.h>
-#include <opencv2/opencv.hpp>
-#include <pcl/point_types.h>
-#include <pcl/point_cloud.h>
-
-namespace jsk_pcl_ros
+namespace jsk_perception
 {
-
-  class HeightmapConverter: public jsk_topic_tools::DiagnosticNodelet
+  class ColorizeFloatImage: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    typedef boost::shared_ptr<HeightmapConverter> Ptr;
-    typedef HeightmapConverterConfig Config;
-    HeightmapConverter(): DiagnosticNodelet("HeightmapConverter") {}
+    ColorizeFloatImage(): DiagnosticNodelet("ColorizeFloatImage") {}
   protected:
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual void configCallback(Config &config, uint32_t level);
-    virtual void convert(const sensor_msgs::PointCloud2::ConstPtr& msg);
-    inline cv::Point toIndex(const pcl::PointXYZ& p) const
-    {
-      if (p.x > max_x_ || p.x < min_x_ ||
-          p.y > max_y_ || p.y < min_y_) {
-        return cv::Point(-1, -1);
-      }
-      const float offsetted_x = p.x - min_x_;
-      const float offsetted_y = p.y - min_y_;
-      const float dx = (max_x_ - min_x_) / resolution_x_;
-      const float dy = (max_y_ - min_y_) / resolution_y_;
-      return cv::Point(std::floor(offsetted_x / dx),
-                       std::floor(offsetted_y / dy));
-    }
+    virtual void colorize(
+      const sensor_msgs::Image::ConstPtr& msg);
 
-    boost::mutex mutex_;
     ros::Publisher pub_;
     ros::Subscriber sub_;
-    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
-    double min_x_;
-    double max_x_;
-    double min_y_;
-    double max_y_;
-    int resolution_x_;
-    int resolution_y_;
-    int max_queue_size_;
+  private:
+    
   };
+
 }
 
 #endif

@@ -2,6 +2,20 @@
 
 ## nodes and nodelets
 
+### jsk\_pcl/ColorizeFloatImage
+![](../jsk_pcl_ros/images/heightmap_converter.png)
+
+Colorize float image with heatmap gradation.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/Image`)
+
+  Float(32FC1) image.
+#### Publishing Topic
+* `~output` (`sensor_msgs/Image`)
+
+  RGB8 image with heatmap gradation.
+
 ### jsk\_pcl/ProjectImagePoint
 ![](images/project_image_point.png)
 

@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2015, JSK Lab
+ *  Copyright (c) 2014, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,84 +32,75 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
+
 #define BOOST_PARAMETER_MAX_ARITY 7
-#include "jsk_pcl_ros/heightmap_converter.h"
+
+#include "jsk_pcl_ros/heightmap_to_pointcloud.h"
 #include <pcl_conversions/pcl_conversions.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
-#include <jsk_topic_tools/color_utils.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 
 namespace jsk_pcl_ros
 {
-  void HeightmapConverter::onInit()
+  void HeightmapToPointCloud::onInit()
   {
     DiagnosticNodelet::onInit();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&HeightmapConverter::configCallback, this, _1, _2);
+      boost::bind (&HeightmapToPointCloud::configCallback, this, _1, _2);
     srv_->setCallback (f);
 
-    pnh_->param("max_queue_size", max_queue_size_, 10);
-    pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
-  }
-  
-  void HeightmapConverter::subscribe()
-  {
-    sub_ = pnh_->subscribe("input", max_queue_size_, &HeightmapConverter::convert, this);
+    pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
   }
 
-  void HeightmapConverter::unsubscribe()
+  void HeightmapToPointCloud::subscribe()
+  {
+    sub_ = pnh_->subscribe("input", 1, &HeightmapToPointCloud::convert, this);
+  }
+
+  void HeightmapToPointCloud::unsubscribe()
   {
     sub_.shutdown();
   }
 
-  void HeightmapConverter::convert(const sensor_msgs::PointCloud2::ConstPtr& msg)
-  {
-    boost::mutex::scoped_lock lock(mutex_);
-    vital_checker_->poke();
-    /* float image */
-    cv::Mat height_map = cv::Mat(resolution_y_, resolution_x_, CV_32FC1);
-    height_map = cv::Scalar::all(- FLT_MAX);
-    pcl::PointCloud<pcl::PointXYZ> cloud;
-    pcl::fromROSMsg(*msg, cloud);
-    float max_height = - FLT_MAX;
-    float min_height = FLT_MAX;
-    for (size_t i = 0; i < cloud.points.size(); i++) {
-      pcl::PointXYZ p = cloud.points[i];
-      if (isnan(p.x) || isnan(p.y) || isnan(p.z)) {
-        continue;
-      }
-      cv::Point index = toIndex(p);
-      if (index.x >= 0 && index.x < resolution_x_ && 
-          index.y >= 0 && index.y < resolution_y_) {
-        /* Store min/max value for colorization */
-        max_height = std::max(max_height, p.z);
-        min_height = std::min(min_height, p.z);
-        if (height_map.at<float>(index.y, index.x) < p.z) {
-          height_map.at<float>(index.y, index.x) = p.z;
-        }
-      }
-    }
-    // Convert to sensor_msgs/Image
-    cv_bridge::CvImage height_map_image(msg->header,
-                                        sensor_msgs::image_encodings::TYPE_32FC1,
-                                        height_map);
-    pub_.publish(height_map_image.toImageMsg());
-  }
-
-  void HeightmapConverter::configCallback(Config &config, uint32_t level)
+  void HeightmapToPointCloud::configCallback(Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mutex_);
     min_x_ = config.min_x;
     max_x_ = config.max_x;
     min_y_ = config.min_y;
     max_y_ = config.max_y;
-    resolution_x_ = config.resolution_x;
-    resolution_y_ = config.resolution_y;
   }
 
+  void HeightmapToPointCloud::convert(const sensor_msgs::Image::ConstPtr& msg)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    cv::Mat float_image = cv_bridge::toCvShare(msg, sensor_msgs::image_encodings::TYPE_32FC1)->image;
+    pcl::PointCloud<pcl::PointXYZ> cloud;
+    cloud.points.reserve(float_image.rows * float_image.cols);
+    double dx = (max_x_ - min_x_) / float_image.cols;
+    double dy = (max_y_ - min_y_) / float_image.rows;
+    for (size_t j = 0; j < float_image.rows; j++) {
+      for (size_t i = 0; i < float_image.cols; i++) {
+        float v = float_image.at<float>(j, i);
+        pcl::PointXYZ p;
+        if (v != -FLT_MAX) {
+          p.y = j * dy + min_y_;
+          p.x = i * dx + min_x_;
+          p.z = v;
+          cloud.points.push_back(p);
+        }
+      }
+    }
+    sensor_msgs::PointCloud2 ros_cloud;
+    pcl::toROSMsg(cloud, ros_cloud);
+    ros_cloud.header = msg->header;
+    pub_.publish(ros_cloud);
+  }
 }
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::HeightmapConverter,
-                        nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::HeightmapToPointCloud, nodelet::Nodelet);
+

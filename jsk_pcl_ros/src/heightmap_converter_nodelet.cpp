@@ -51,7 +51,6 @@ namespace jsk_pcl_ros
 
     pnh_->param("max_queue_size", max_queue_size_, 10);
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
-    pub_colorized_ = advertise<sensor_msgs::Image>(*pnh_, "output/colorized", 1);
   }
   
   void HeightmapConverter::subscribe()
@@ -96,26 +95,6 @@ namespace jsk_pcl_ros
                                         sensor_msgs::image_encodings::TYPE_32FC1,
                                         height_map);
     pub_.publish(height_map_image.toImageMsg());
-    if (pub_colorized_.getNumSubscribers() > 0) {
-      /* RGB8 image */
-      cv::Mat color_map = cv::Mat::zeros(resolution_y_, resolution_x_, CV_8UC3);
-      for (size_t j = 0; j < resolution_y_; j++) {
-        for (size_t i = 0; i < resolution_x_; i++) {
-          float h = height_map.at<float>(j, i);
-          if (h != - FLT_MAX) { /* valid data */
-            float v = (h - min_height) / (max_height - min_height);
-            std_msgs::ColorRGBA c = jsk_topic_tools::heatColor(v);
-            color_map.at<cv::Vec3b>(j, i) = cv::Vec3b(c.r * 255, c.g * 255, c.b * 255);
-          }
-          else {
-            color_map.at<cv::Vec3b>(j, i) = cv::Vec3b(0, 0, 0);
-          }
-        }
-      }
-      pub_colorized_.publish(cv_bridge::CvImage(msg->header,
-                                                sensor_msgs::image_encodings::RGB8,
-                                                color_map).toImageMsg());
-    }
   }
 
   void HeightmapConverter::configCallback(Config &config, uint32_t level)

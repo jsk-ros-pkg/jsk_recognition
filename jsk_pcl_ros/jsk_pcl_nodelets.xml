@@ -1,4 +1,15 @@
 <library path="libjsk_pcl_ros_util">
+  <class name="jsk_pcl/ColorizeDistanceFromPlane" type="jsk_pcl_ros::ColorizeDistanceFromPlane"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      colorize pointcloud according to the distance from the nearest plane
+    </description>
+  </class>
+  <class name="jsk_pcl/ColorizeHeight2DMapping" type="jsk_pcl_ros::ColorizeHeight2DMapping"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
   <class name="jsk_pcl/PolygonPointsSampler"
          type="jsk_pcl_ros::PolygonPointsSampler"
          base_class_type="nodelet::Nodelet">
@@ -479,12 +490,6 @@
          base_class_type="nodelet::Nodelet">
     <description>
       jsk_pcl_ros::ColorizeRandomForest
-    </description>
-  </class>
-  <class name="jsk_pcl/ColorizeDistanceFromPlane" type="jsk_pcl_ros::ColorizeDistanceFromPlane"
-         base_class_type="nodelet::Nodelet">
-    <description>
-      colorize pointcloud according to the distance from the nearest plane
     </description>
   </class>
   <class name="jsk_pcl/ColorizeMapRandomForest" type="jsk_pcl_ros::ColorizeMapRandomForest"

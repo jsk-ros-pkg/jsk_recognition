@@ -258,8 +258,10 @@ jsk_pcl_nodelet(src/parallel_edge_finder_nodelet.cpp
   "jsk_pcl/ParallelEdgeFinder" "parallel_edge_finder")
 jsk_pcl_nodelet(src/edgebased_cube_finder_nodelet.cpp
   "jsk_pcl/EdgebasedCubeFinder" "edgebased_cube_finder")
-jsk_pcl_nodelet(src/colorize_distance_from_plane_nodelet.cpp
+jsk_pcl_util_nodelet(src/colorize_distance_from_plane_nodelet.cpp
   "jsk_pcl/ColorizeDistanceFromPlane" "colorize_distance_from_plane")
+jsk_pcl_util_nodelet(src/colorize_height_2d_mapping_nodelet.cpp
+  "jsk_pcl/ColorizeHeight2DMapping" "colorize_height_2d_mapping")
 jsk_pcl_nodelet(src/multi_plane_sac_segmentation_nodelet.cpp
   "jsk_pcl/MultiPlaneSACSegmentation" "multi_plane_sac_segmentation")
 jsk_pcl_nodelet(src/bounding_box_filter_nodelet.cpp

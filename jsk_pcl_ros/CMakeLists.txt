@@ -72,6 +72,7 @@ add_service_files(FILES SwitchTopic.srv
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
   cfg/HeightmapConverter.cfg
+  cfg/HeightmapToPointCloud.cfg
   cfg/PolygonMagnifier.cfg
   cfg/PolygonPointsSampler.cfg
   cfg/GeometricConsistencyGrouping.cfg
@@ -345,6 +346,8 @@ jsk_pcl_nodelet(src/normal_estimation_omp_nodelet.cpp
   "jsk_pcl/NormalEstimationOMP" "normal_estimation_omp")
 jsk_pcl_nodelet(src/heightmap_converter_nodelet.cpp
   "jsk_pcl/HeightmapConverter" "heightmap_converter")
+jsk_pcl_nodelet(src/heightmap_to_pointcloud_nodelet.cpp
+  "jsk_pcl/HeightmapToPointCloud" "heightmap_to_pointcloud")
 if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
   jsk_pcl_nodelet(src/kinfu_nodelet.cpp
     "jsk_pcl/Kinfu" "kinfu")

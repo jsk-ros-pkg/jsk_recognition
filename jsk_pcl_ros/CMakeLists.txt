@@ -71,6 +71,7 @@ add_service_files(FILES SwitchTopic.srv
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/HeightmapMorphologicalFiltering.cfg
   cfg/HeightmapConverter.cfg
   cfg/HeightmapToPointCloud.cfg
   cfg/PolygonMagnifier.cfg
@@ -348,6 +349,8 @@ jsk_pcl_nodelet(src/heightmap_converter_nodelet.cpp
   "jsk_pcl/HeightmapConverter" "heightmap_converter")
 jsk_pcl_nodelet(src/heightmap_to_pointcloud_nodelet.cpp
   "jsk_pcl/HeightmapToPointCloud" "heightmap_to_pointcloud")
+jsk_pcl_nodelet(src/heightmap_morphological_filtering_nodelet.cpp
+  "jsk_pcl/HeightmapMorphologicalFiltering" "heightmap_morphological_filtering")
 if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
   jsk_pcl_nodelet(src/kinfu_nodelet.cpp
     "jsk_pcl/Kinfu" "kinfu")

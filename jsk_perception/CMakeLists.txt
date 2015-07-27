@@ -106,6 +106,7 @@ jsk_perception_nodelet(src/ycc_decomposer.cpp "jsk_perception/YCCDecomposer" "yc
 jsk_perception_nodelet(src/contour_finder.cpp "jsk_perception/ContourFinder" "contour_finder")
 jsk_perception_nodelet(src/snake_segmentation.cpp "jsk_perception/SnakeSegmentation" "snake_segmentation")
 jsk_perception_nodelet(src/colorize_labels.cpp "jsk_perception/ColorizeLabels" "colorize_labels")
+jsk_perception_nodelet(src/colorize_float_image.cpp "jsk_perception/ColorizeFloatImage" "colorize_float_image")
 jsk_perception_nodelet(src/grid_label.cpp "jsk_perception/GridLabel" "grid_label")
 jsk_perception_nodelet(src/color_histogram_label_match.cpp "jsk_perception/ColorHistogramLabelMatch" "color_histogram_label_match")
 jsk_perception_nodelet(src/apply_mask_image.cpp "jsk_perception/ApplyMaskImage" "apply_mask_image")

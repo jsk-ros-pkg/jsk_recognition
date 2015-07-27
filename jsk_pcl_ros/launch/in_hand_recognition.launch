@@ -12,12 +12,14 @@
   <node pkg="jsk_pcl_ros" type="depth_image_creator" name="depth_image_creator">
     <remap from="~input" to="pcd_reader_with_pose/output" />
     <remap from="~info" to="$(arg info)" />
+    <param name="scale_depth" value="2.0" />
     <param name="use_asynchronous" value="true" />
   </node>
-  <node pkg="jsk_pcl_ros" type="icp_registration" name="icp_registration" >
+  <node pkg="jsk_pcl_ros" type="icp_registration" name="icp_registration" output="screen" >
     <remap from="~input_reference" to="depth_image_creator/output_cloud"/>
     <remap from="~input_reference_array" to="in_hand_recognition_manager/dummy_array"/>
     <remap from="~input" to="$(arg input_cloud)"/>
     <remap from="~input/camera_info" to="$(arg info)" />
+    <param name="use_flipped_score_" value="false" />
   </node>
 </launch>

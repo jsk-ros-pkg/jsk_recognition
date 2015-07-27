@@ -59,6 +59,57 @@ time end
 Represent range of time.
 
 ## nodelets
+### jsk\_pcl/HeightmapConverter
+![](images/heightmap_converter.png)
+
+Convert a pointcloud(`sensor_msgs/PointCloud2`) into heightmap representation (`sensor_msgs/Image`).
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Input pointcloud
+
+#### Publishing Topic
+* `~output` (`sensor_msgs/Image`)
+
+  fields of the image is `CV_32FC1(float)` and if a pixel is not observed, it is filled by `-FLT_MAX`.
+
+#### Parameters
+* `~resolution_x` (Integer, default: `400`)
+* `~resolution_y` (Integer, default: `400`)
+
+  Resolution of height map
+
+* `~min_x` (Double, default: `-2.0`)
+* `~max_x` (Double, default: `2.0`)
+* `~min_y` (Double, default: `-2.0`)
+* `~max_y` (Double, default: `2.0`)
+ 
+  Minimum and maximum value of heightmap dimension.
+
+### jsk\_pcl/HeightmapToPointCloud
+![](images/heightmap_to_pointcloud.png)
+
+Convert a heightmapt to poincloud.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/Image`)
+
+  Input heightmap.
+
+#### Publishing Topic
+* `~output` (`sensor_msgs/PointCloud2`)
+
+  Output pointcloud.
+
+#### Parameters
+* `~min_x` (Double, default: `-2.0`)
+* `~max_x` (Double, default: `2.0`)
+* `~min_y` (Double, default: `-2.0`)
+* `~max_y` (Double, default: `2.0`)
+ 
+  Minimum and maximum value of heightmap dimension.
+
 ### jsk\_pcl/NormalEstimationOMP
 This nodelet is almost same to `pcl/NormalEstimationOMP` of `pcl_ros` package,
 but it can handle timestamp correctly.
@@ -1661,6 +1712,9 @@ You can choose several types of tilt/spindle lasers such as tilt-laser of PR2, i
    Clear cache and restart collecting data.
 
 #### Parameters
+* `~max_queue_size` (Integer, default: `100`):
+
+  Queu size of subscription.
 * `~clear_assembled_scans` (Bool, default: `false`)
 
    Do not use assembled scans twice.
@@ -1849,6 +1903,24 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 ### jsk\_pcl/ClusterPointIndicesDecomposerZAxis
 #### What Is This
 This nodelet is almost same to jsk\_pcl/ClusterPointIndicesDecomposer, however it always sort clusters in z direction.
+
+### jsk\_pcl/ColorizeHeight2DMapping
+![](images/colorize_height_2d_mapping.png)
+
+Utility nodelet to visualize heightmap as pointcloud.
+It just set all the z of points 0 and assign z to intensity.
+
+#### Subscribing Topics
+* `~input` (`sensor_msgs/PointCloud2`)
+
+
+  Input pointcloud.
+
+#### Publishing Topics
+* `~output` (`sensor_msgs/PointCloud2`)
+
+  Output pointcloud. z values of points are 0 and intensity of points
+  has z value.
 
 ### jsk\_pcl/CentroidPublisher
 #### What Is This

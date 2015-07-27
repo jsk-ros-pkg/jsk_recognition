@@ -71,6 +71,8 @@ add_service_files(FILES SwitchTopic.srv
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/HeightmapConverter.cfg
+  cfg/HeightmapToPointCloud.cfg
   cfg/PolygonMagnifier.cfg
   cfg/PolygonPointsSampler.cfg
   cfg/GeometricConsistencyGrouping.cfg
@@ -258,8 +260,10 @@ jsk_pcl_nodelet(src/parallel_edge_finder_nodelet.cpp
   "jsk_pcl/ParallelEdgeFinder" "parallel_edge_finder")
 jsk_pcl_nodelet(src/edgebased_cube_finder_nodelet.cpp
   "jsk_pcl/EdgebasedCubeFinder" "edgebased_cube_finder")
-jsk_pcl_nodelet(src/colorize_distance_from_plane_nodelet.cpp
+jsk_pcl_util_nodelet(src/colorize_distance_from_plane_nodelet.cpp
   "jsk_pcl/ColorizeDistanceFromPlane" "colorize_distance_from_plane")
+jsk_pcl_util_nodelet(src/colorize_height_2d_mapping_nodelet.cpp
+  "jsk_pcl/ColorizeHeight2DMapping" "colorize_height_2d_mapping")
 jsk_pcl_nodelet(src/multi_plane_sac_segmentation_nodelet.cpp
   "jsk_pcl/MultiPlaneSACSegmentation" "multi_plane_sac_segmentation")
 jsk_pcl_nodelet(src/bounding_box_filter_nodelet.cpp
@@ -340,6 +344,10 @@ jsk_pcl_nodelet(src/convex_connected_voxels_nodelet.cpp
   "jsk_pcl/ConvexConnectedVoxels" "convex_connected_voxels")
 jsk_pcl_nodelet(src/normal_estimation_omp_nodelet.cpp
   "jsk_pcl/NormalEstimationOMP" "normal_estimation_omp")
+jsk_pcl_nodelet(src/heightmap_converter_nodelet.cpp
+  "jsk_pcl/HeightmapConverter" "heightmap_converter")
+jsk_pcl_nodelet(src/heightmap_to_pointcloud_nodelet.cpp
+  "jsk_pcl/HeightmapToPointCloud" "heightmap_to_pointcloud")
 if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
   jsk_pcl_nodelet(src/kinfu_nodelet.cpp
     "jsk_pcl/Kinfu" "kinfu")

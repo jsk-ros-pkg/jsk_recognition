@@ -96,6 +96,11 @@
     <description>
     </description>
   </class>
+  <class name="jsk_perception/ColorizeFloatImage" type="jsk_perception::ColorizeFloatImage"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
   <class name="jsk_perception/SnakeSegmentation" type="jsk_perception::SnakeSegmentation"
          base_class_type="nodelet::Nodelet">
     <description>

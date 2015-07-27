@@ -18,9 +18,9 @@ from geometry_msgs.msg import PoseStamped, Pose
 from sensor_msgs.msg import PointCloud2
 from jsk_recognition_msgs.msg import PointsArray
 from tf.transformations import *
+import tf
 
 teacher_pose_stamped = None
-
 def pose_teacher_cb(pose_stamped):
     global teacher_pose_stamped
     teacher_pose_stamped = pose_stamped
@@ -51,13 +51,18 @@ def pose_diff_cb(pose_stamped):
         rospy.info ("teacher is empty")
         return
     # DummyArrayPub.publish(PointsArray()) # register empty clouds to stop recognition
-    teacher_pose_mat = (get_mat_from_pose(teacher_pose_stamped.pose))
+    try:
+        teacher_pose_stamped.header.stamp = rospy.Time(0)
+        teacher_pose_stamped_recog_frame = listener.transformPose(pose_stamped.header.frame_id, teacher_pose_stamped)
+    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException), e:
+        print "tf error: %s" % e
+        return
+    teacher_pose_mat = (get_mat_from_pose(teacher_pose_stamped_recog_frame.pose))
     diff_pose_mat = (get_mat_from_pose(pose_stamped.pose))
     new_pose_mat = concatenate_matrices(diff_pose_mat, teacher_pose_mat)
     new_pose_stamped = PoseStamped()
     new_pose_stamped.pose = get_pose_from_mat(new_pose_mat)
     new_pose_stamped.header = pose_stamped.header
-    new_pose_stamped.header.frame_id = teacher_pose_stamped.header.frame_id
     OutputPosePub.publish(new_pose_stamped)
     teachear_pose_stamped = None
 
@@ -65,6 +70,7 @@ if __name__ == "__main__":
     rospy.init_node("in_hand_recognition_manager")
     InputPosePub = rospy.Publisher("~output/recognition", PoseStamped)
     OutputPosePub = rospy.Publisher("~output", PoseStamped)
+    listener = tf.TransformListener()
     DummyArrayPub = rospy.Publisher("~dummy_array", PointsArray)
     rospy.Subscriber("~input", PoseStamped, pose_teacher_cb)
     rospy.Subscriber("~input/result", PoseStamped, pose_diff_cb)

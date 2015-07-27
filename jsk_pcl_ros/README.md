@@ -84,7 +84,7 @@ Convert a pointcloud(`sensor_msgs/PointCloud2`) into heightmap representation (`
 * `~max_x` (Double, default: `2.0`)
 * `~min_y` (Double, default: `-2.0`)
 * `~max_y` (Double, default: `2.0`)
- 
+
   Minimum and maximum value of heightmap dimension.
 
 ### jsk\_pcl/HeightmapToPointCloud
@@ -107,8 +107,32 @@ Convert a heightmapt to poincloud.
 * `~max_x` (Double, default: `2.0`)
 * `~min_y` (Double, default: `-2.0`)
 * `~max_y` (Double, default: `2.0`)
- 
+
   Minimum and maximum value of heightmap dimension.
+
+### jsk\_pcl/HeightmapMorphologicalFiltering
+![](images/heightmap_morphological_filtering.png)
+
+Apply morphological fintering and average filter to fill small holes in pointcloud
+which is represented as heightmap.
+
+#### Subscribing Topic
+* `~input` (`sensor_msgs/Image`)
+
+  Input heightmap. Hole should be represented as `-FLT_MAX` or `nan`.
+
+#### Publishing Topic
+* `~output` (`sensor_msgs/Image`)
+
+  Output heightmap.
+
+#### Parameters
+* `~max_queue_size` (Integer, default: `10`)
+
+  Max queue size of subscription callback.
+* `~mask_size` (Integer, default: `2`)
+
+  Size of kernel operator of average filtering.
 
 ### jsk\_pcl/NormalEstimationOMP
 This nodelet is almost same to `pcl/NormalEstimationOMP` of `pcl_ros` package,

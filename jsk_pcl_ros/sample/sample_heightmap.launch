@@ -1,0 +1,28 @@
+<launch>
+  <node pkg="jsk_pcl_ros" type="heightmap_converter" name="heightmap_converter">
+    <remap from="~input" to="pointcloud_model_generator/output" />
+  </node>
+  <node pkg="jsk_perception" type="colorize_float_image" name="colorize_raw_heightmap">
+    <remap from="~input" to="heightmap_converter/output" />
+  </node>
+  <node pkg="image_view" type="image_view" name="image_view">
+    <remap from="image" to="colorize_raw_heightmap/output" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="heightmap_morphological_filtering" name="complete_hole"
+        output="screen">
+    <remap from="~input" to="heightmap_converter/output" />
+  </node>
+  <node pkg="jsk_perception" type="colorize_float_image" name="colorize_filtered_heightmap">
+    <remap from="~input" to="complete_hole/output" />
+  </node>
+  <node pkg="image_view" type="image_view" name="filtered_image_view">
+    <remap from="image" to="colorize_filtered_heightmap/output" />
+  </node>
+  <node pkg="jsk_footstep_planner" type="pointcloud_model_generator_node"
+        name="pointcloud_model_generator">
+    <rosparam>
+      model: stairs
+    </rosparam>
+  </node>
+
+</launch>

@@ -38,23 +38,24 @@
 
 #include <pcl_ros/pcl_nodelet.h>
 #include "jsk_pcl_ros/tf_listener_singleton.h"
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_ros/transforms.h>
 
 namespace jsk_pcl_ros
 {
-  class PCDReaderWithPose: public jsk_topic_tools::ConnectionBasedNodelet
+  class PCDReaderWithPose: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
+    PCDReaderWithPose(): DiagnosticNodelet("PCDReaderWithPose") {}
   typedef pcl::PointXYZRGBNormal PointT;
   protected:
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
     virtual void poseCallback(
-      geometry_msgs::PoseStamped msg);
+      const geometry_msgs::PoseStamped::ConstPtr& msg);
     ros::Publisher pub_cloud_;
     ros::Subscriber sub_teacher_;
     //pcl::PointCloud<PointT>::Ptr template_cloud_;

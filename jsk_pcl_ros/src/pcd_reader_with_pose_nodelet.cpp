@@ -46,7 +46,7 @@ namespace jsk_pcl_ros
   void PCDReaderWithPose::onInit()
   {
     pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
-    ConnectionBasedNodelet::onInit();
+    DiagnosticNodelet::onInit();
     std::string file_name;
     pnh_->param("pcd_file", file_name, std::string(""));
     if (file_name == std::string("") || pcl::io::loadPCDFile (file_name, template_cloud_) == -1){
@@ -66,19 +66,15 @@ namespace jsk_pcl_ros
   {
   }
   void PCDReaderWithPose::poseCallback(
-    geometry_msgs::PoseStamped pose_stamped)
+    const geometry_msgs::PoseStamped::ConstPtr& pose_stamped)
   {
     ros::Time now = ros::Time::now();
-    Eigen::Affine3d pose_eigend;
-    tf::poseMsgToEigen(pose_stamped.pose, pose_eigend);
+    Eigen::Affine3f pose_eigen;
+    tf::poseMsgToEigen(pose_stamped->pose, pose_eigen);
     sensor_msgs::PointCloud2 ros_out;
-    Eigen::Matrix4d transformd = pose_eigend.matrix();
-    Eigen::Matrix4f transform;
-    convertMatrix4<Eigen::Matrix4d, Eigen::Matrix4f>(
-      transformd,
-      transform);
+    Eigen::Matrix4f transform = pose_eigen.matrix();
     pcl_ros::transformPointCloud(transform ,template_cloud_, ros_out);
-    ros_out.header = pose_stamped.header;
+    ros_out.header = pose_stamped->header;
     pub_cloud_.publish(ros_out);
   }
 }

@@ -2409,7 +2409,7 @@ Publishes camera pose using pcl/KinfuLS
 Publish cloud with given pose
 
 #### Parameters
-* `pcd_file` (Strng)
+* `~pcd_file` (Strng)
 file name of pcd for publish
 
 #### Subscribing Topocs

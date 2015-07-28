@@ -69,6 +69,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     mask_size_ = config.mask_size;
+    max_variance_ = config.max_variance;
   }
 
   void HeightmapMorphologicalFiltering::filter(
@@ -79,12 +80,12 @@ namespace jsk_pcl_ros
     cv::Mat input = cv_bridge::toCvShare(
       msg, sensor_msgs::image_encodings::TYPE_32FC1)->image;
     cv::Mat filtered_image = input.clone();
+
     for (size_t j = 0; j < input.rows; j++) {
       for (size_t i = 0; i < input.cols; i++) {
         float v = input.at<float>(j, i);
         if (isnan(v) || v == -FLT_MAX) { // Need to filter
-          size_t found_count = 0;
-          float sum = 0.0;
+          Accumulator acc;
           for (int jj = - mask_size_; jj <= mask_size_; jj++) {
             int target_j = j + jj;
             if (target_j >= 0 && target_j < input.rows) {
@@ -94,17 +95,19 @@ namespace jsk_pcl_ros
                   if (std::abs(jj) + std::abs(ii) <= mask_size_) {
                     float vv = input.at<float>(target_j, target_i);
                     if (!isnan(vv) && vv != -FLT_MAX) {
-                      found_count++;
-                      sum += vv;
+                      acc(vv);
                     }
                   }
                 }
               }
             }
           }
-          if (found_count != 0) {
-            float newv = sum / found_count;
-            filtered_image.at<float>(j, i) = newv;
+          if (boost::accumulators::count(acc) != 0) {
+            float newv = boost::accumulators::mean(acc);
+            float variance = boost::accumulators::variance(acc);
+            if (variance < max_variance_) {
+              filtered_image.at<float>(j, i) = newv;
+            }
           }
         }
       }

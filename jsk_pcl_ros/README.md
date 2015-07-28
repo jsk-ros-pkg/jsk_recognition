@@ -127,13 +127,15 @@ which is represented as heightmap.
   Output heightmap.
 
 #### Parameters
-* `~max_queue_size` (Integer, default: `10`)
+* `~max_queue_size` (Integer, default: `10`):
 
   Max queue size of subscription callback.
-* `~mask_size` (Integer, default: `2`)
+* `~mask_size` (Integer, default: `2`):
 
   Size of kernel operator of average filtering.
+* `~max_variance` (Double, default: `0.1`):
 
+  Allowable max variance in kernel operator
 ### jsk\_pcl/NormalEstimationOMP
 This nodelet is almost same to `pcl/NormalEstimationOMP` of `pcl_ros` package,
 but it can handle timestamp correctly.

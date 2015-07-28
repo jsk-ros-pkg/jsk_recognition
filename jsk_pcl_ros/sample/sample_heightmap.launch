@@ -15,6 +15,9 @@
   <node pkg="jsk_perception" type="colorize_float_image" name="colorize_filtered_heightmap">
     <remap from="~input" to="complete_hole/output" />
   </node>
+  <node pkg="jsk_pcl_ros" type="heightmap_to_pointcloud" name="completed_pointcloud">
+    <remap from="~input" to="complete_hole/output" />
+  </node>
   <node pkg="image_view" type="image_view" name="filtered_image_view">
     <remap from="image" to="colorize_filtered_heightmap/output" />
   </node>

@@ -42,7 +42,11 @@
 #include <opencv2/opencv.hpp>
 #include <jsk_pcl_ros/HeightmapMorphologicalFilteringConfig.h>
 #include <dynamic_reconfigure/server.h>
-
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/variance.hpp>
+#include <boost/accumulators/statistics/count.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
 namespace jsk_pcl_ros
 {
   class HeightmapMorphologicalFiltering: public jsk_topic_tools::DiagnosticNodelet
@@ -50,6 +54,12 @@ namespace jsk_pcl_ros
   public:
     typedef boost::shared_ptr<HeightmapMorphologicalFiltering> Ptr;
     typedef HeightmapMorphologicalFilteringConfig Config;
+    typedef boost::accumulators::accumulator_set<
+      float,
+      boost::accumulators::stats<
+        boost::accumulators::tag::variance,
+        boost::accumulators::tag::count,
+        boost::accumulators::tag::mean> >  Accumulator;
     HeightmapMorphologicalFiltering(): DiagnosticNodelet("HeightmapMorphologicalFiltering") {}
   protected:
     virtual void onInit();
@@ -63,6 +73,7 @@ namespace jsk_pcl_ros
     ros::Publisher pub_;
     ros::Subscriber sub_;
     int mask_size_;
+    double max_variance_;
     int max_queue_size_;
   };
 }

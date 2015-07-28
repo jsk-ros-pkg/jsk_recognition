@@ -523,12 +523,20 @@
     <description>
     </description>
   </class>
+
   <!-- <class name="jsk_pcl/OrganizePointCloud" type="jsk_pcl_ros::OrganizePointCloud" -->
   <!--        base_class_type="nodelet::Nodelet"> -->
   <!--   <description> -->
   <!--     jsk_pcl_ros::OrganizePointCloud -->
   <!--   </description> -->
   <!-- </class> -->
+  <class name="jsk_pcl/PCDReaderWithPose" type="jsk_pcl_ros::PCDReaderWithPose"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      reconstract template pointcloud with recognized_pose
+    </description>
+  </class>
+
 </library>
 <library path="libjsk_pcl_ros_moveit">
   <class name="jsk_pcl/PointCloudMoveitFilter"

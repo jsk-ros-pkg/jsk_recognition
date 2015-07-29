@@ -117,7 +117,9 @@ namespace jsk_pcl_ros
     
     //Setup coherence object for tracking
     bool enable_cache;
+    bool enable_organized;
     pnh_->param("enable_cache", enable_cache, false);
+    pnh_->param("enable_organized", enable_organized, false);
     ApproxNearestPairPointCloudCoherence<PointT>::Ptr coherence;
     if (enable_cache) {
       double cache_bin_size_x, cache_bin_size_y, cache_bin_size_z;
@@ -126,6 +128,8 @@ namespace jsk_pcl_ros
       pnh_->param("cache_size_z", cache_bin_size_z, 0.01);
       coherence.reset(new CachedApproxNearestPairPointCloudCoherence<PointT>(
                         cache_bin_size_x, cache_bin_size_y, cache_bin_size_z));
+    }else if(enable_organized){
+      coherence.reset(new OrganizedNearestPairPointCloudCoherence<PointT>());
     }
     else {
       coherence.reset(new ApproxNearestPairPointCloudCoherence<PointT>());

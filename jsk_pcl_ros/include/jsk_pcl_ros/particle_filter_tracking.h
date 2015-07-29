@@ -490,8 +490,40 @@ namespace pcl
     };
 
     
-  }
-  
+    template <typename PointInT>
+    class OrganizedNearestPairPointCloudCoherence: public NearestPairPointCloudCoherence<PointInT>
+    {
+    public:
+      using NearestPairPointCloudCoherence<PointInT>::target_input_;
+      using NearestPairPointCloudCoherence<PointInT>::new_target_;
+      using NearestPairPointCloudCoherence<PointInT>::getClassName;
+      typename boost::shared_ptr<pcl::search::OrganizedNeighbor<PointInT> > search_;
+    protected:
+      virtual bool initCompute ()
+      {
+	if (!PointCloudCoherence<PointInT>::initCompute ())
+	  {
+	    PCL_ERROR ("[pcl::%s::initCompute] PointCloudCoherence::Init failed.\n", getClassName ().c_str ());
+	    //deinitCompute ();
+	    return (false);
+	  }
+	
+	// initialize tree
+	if (!search_)
+	  search_.reset (new pcl::search::OrganizedNeighbor<PointInT> (false));
+      
+	if (new_target_ && target_input_)
+	  {
+	    search_->setInputCloud (target_input_);
+	    if (!search_->isValid())
+	      return false;
+	    new_target_ = false;
+	  }
+      
+	return true;
+      }
+    };
+  }  
 }
 
 using namespace pcl::tracking;

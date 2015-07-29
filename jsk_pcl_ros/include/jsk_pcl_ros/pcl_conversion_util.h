@@ -193,6 +193,11 @@ namespace jsk_pcl_ros
     output_cloud.height = 1;
   }
 
+  inline bool isValidPoint(const pcl::PointXYZ& p)
+  {
+    return !isnan(p.x) && !isnan(p.y) && !isnan(p.z);
+  }
+
 }
 // extend pcl_conversions package's toPCL and fromPCL functions
 namespace pcl_conversions

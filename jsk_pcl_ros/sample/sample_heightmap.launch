@@ -1,6 +1,7 @@
 <launch>
   <node pkg="jsk_pcl_ros" type="heightmap_converter" name="heightmap_converter">
     <remap from="~input" to="pointcloud_model_generator/output" />
+    <!-- <remap from="~input" to="odom_cloud_distance_filtered/output" /> -->
   </node>
   <node pkg="jsk_perception" type="colorize_float_image" name="colorize_raw_heightmap">
     <remap from="~input" to="heightmap_converter/output" />
@@ -26,6 +27,23 @@
     <rosparam>
       model: stairs
     </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="heightmap_time_accumulation" name="acc">
+    <remap from="~input" to="complete_hole/output" />
+    <remap from="~input/prev_pointcloud" to="prev_cloud/output" />
+    <rosparam>
+      center_frame_id: odom
+      fixed_frame_id: odom
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="heightmap_to_pointcloud" name="prev_cloud">
+    <remap from="~input" to="acc/output" />
+  </node>
+  <node pkg="jsk_perception" type="colorize_float_image" name="acc_color">
+    <remap from="~input" to="acc/output" />
+  </node>
+  <node pkg="image_view" type="image_view" name="acc_image_view">
+    <remap from="image" to="acc_color/output" />
   </node>
 
 </launch>

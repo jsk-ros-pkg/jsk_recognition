@@ -74,6 +74,7 @@ generate_dynamic_reconfigure_options(
   cfg/HeightmapMorphologicalFiltering.cfg
   cfg/HeightmapConverter.cfg
   cfg/HeightmapToPointCloud.cfg
+  cfg/HeightmapTimeAccumulation.cfg
   cfg/PolygonMagnifier.cfg
   cfg/PolygonPointsSampler.cfg
   cfg/GeometricConsistencyGrouping.cfg
@@ -351,6 +352,8 @@ jsk_pcl_nodelet(src/heightmap_to_pointcloud_nodelet.cpp
   "jsk_pcl/HeightmapToPointCloud" "heightmap_to_pointcloud")
 jsk_pcl_nodelet(src/heightmap_morphological_filtering_nodelet.cpp
   "jsk_pcl/HeightmapMorphologicalFiltering" "heightmap_morphological_filtering")
+jsk_pcl_nodelet(src/heightmap_time_accumulation_nodelet.cpp
+  "jsk_pcl/HeightmapTimeAccumulation" "heightmap_time_accumulation")
 if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
   jsk_pcl_nodelet(src/kinfu_nodelet.cpp
     "jsk_pcl/Kinfu" "kinfu")

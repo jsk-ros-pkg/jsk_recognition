@@ -136,6 +136,36 @@ which is represented as heightmap.
 * `~max_variance` (Double, default: `0.1`):
 
   Allowable max variance in kernel operator
+
+### jsk\_pcl/HeightmapTimeAccumulation
+![](images/heightmap_time_accumulation.png)
+
+
+Accumulate heightmap in time series and construct a new heightmap.
+
+#### Subscription Topic
+* `~input` (`sensor_msgs/Image`)
+
+  Input new heightmap(t=k).
+* `~input/prev_pointcloud` (`sensor_msgs/PointCloud2`)
+
+  Accumulated heightmap represented in pointcloud from 0 to k-1 step.
+
+#### Publishing Topic
+* `~output` (`sensor_msgs/Image`)
+
+
+  Accumulated heightmap.
+
+#### Parameters
+* `~min_x` (Double, default: `-2.0`)
+* `~max_x` (Double, default: `2.0`)
+* `~min_y` (Double, default: `-2.0`)
+* `~max_y` (Double, default: `2.0`)
+
+  Minimum and maximum value of heightmap dimension.
+
+
 ### jsk\_pcl/NormalEstimationOMP
 This nodelet is almost same to `pcl/NormalEstimationOMP` of `pcl_ros` package,
 but it can handle timestamp correctly.

@@ -46,11 +46,11 @@ namespace jsk_pcl_ros
   void HeightmapTimeAccumulation::onInit()
   {
     ConnectionBasedNodelet::onInit();
-    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
-    typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&HeightmapTimeAccumulation::configCallback, this, _1, _2);
-    srv_->setCallback (f);
-
+    pub_config_ = pnh_->advertise<jsk_recognition_msgs::HeightmapConfig>(
+      "output/config", 1, true);
+    sub_config_ = pnh_->subscribe(
+      getHeightmapConfigTopic(pnh_->resolveName("input")), 1,
+      &HeightmapTimeAccumulation::configCallback, this);
     if (!pnh_->getParam("center_frame_id", center_frame_id_)) {
       JSK_NODELET_FATAL("no ~center_frame_id is specified");
       return;
@@ -129,6 +129,10 @@ namespace jsk_pcl_ros
     const sensor_msgs::Image::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    if (!config_) {
+      JSK_NODELET_ERROR("no ~input/config is yet available");
+      return;
+    }
     tf::StampedTransform tf_transform;
     tf_->lookupTransform(fixed_frame_id_, center_frame_id_,
                          msg->header.stamp,
@@ -166,13 +170,16 @@ namespace jsk_pcl_ros
     // TODO: should check timestamp
   }
 
-  void HeightmapTimeAccumulation::configCallback(Config& config, uint32_t level)
+  void HeightmapTimeAccumulation::configCallback(
+    const jsk_recognition_msgs::HeightmapConfig::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    min_x_ = config.min_x;
-    max_x_ = config.max_x;
-    min_y_ = config.min_y;
-    max_y_ = config.max_y;
+    config_ = msg;
+    min_x_ = msg->min_x;
+    max_x_ = msg->max_x;
+    min_y_ = msg->min_y;
+    max_y_ = msg->max_y;
+    pub_config_.publish(msg);
   }
 
 }

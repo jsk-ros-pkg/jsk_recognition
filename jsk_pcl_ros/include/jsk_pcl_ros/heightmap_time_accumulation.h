@@ -38,8 +38,7 @@
 #define JSK_PCL_ROS_HEIGHTMAP_TIME_ACCUMULATION_H_
 
 #include <jsk_topic_tools/connection_based_nodelet.h>
-#include <jsk_pcl_ros/HeightmapToPointCloudConfig.h>
-#include <dynamic_reconfigure/server.h>
+#include <jsk_recognition_msgs/HeightmapConfig.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/Image.h>
 #include <opencv2/opencv.hpp>
@@ -47,14 +46,15 @@
 #include <tf/transform_listener.h>
 #include <tf/message_filter.h>
 #include <message_filters/subscriber.h>
+#include "jsk_pcl_ros/heightmap_utils.h"
 
 namespace jsk_pcl_ros
 {
-  class HeightmapTimeAccumulation: public jsk_topic_tools::ConnectionBasedNodelet
+  class HeightmapTimeAccumulation:
+    public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     typedef boost::shared_ptr<HeightmapTimeAccumulation> Ptr;
-    typedef HeightmapToPointCloudConfig Config;
     HeightmapTimeAccumulation(): ConnectionBasedNodelet() {}
   protected:
     virtual void onInit();
@@ -67,7 +67,8 @@ namespace jsk_pcl_ros
     virtual cv::Point toIndex(const pcl::PointXYZ& p, const cv::Mat& map);
     virtual bool isValidIndex(const cv::Point& index, const cv::Mat& map);
     virtual bool isValidCell(const cv::Point& index, const cv::Mat& map);
-    virtual void configCallback(Config& config, uint32_t level);
+    virtual void configCallback(
+      const jsk_recognition_msgs::HeightmapConfig::ConstPtr& config);
     virtual void prevPointCloud(
       const sensor_msgs::PointCloud2::ConstPtr& msg);
     boost::mutex mutex_;
@@ -77,15 +78,17 @@ namespace jsk_pcl_ros
     std::string fixed_frame_id_;
     cv::Mat accumulated_heightmap_;
     ros::Publisher pub_output_;
+    ros::Publisher pub_config_;
     boost::shared_ptr<tf::MessageFilter<sensor_msgs::Image> > tf_filter_;
     message_filters::Subscriber<sensor_msgs::Image> sub_heightmap_;
     ros::Subscriber sub_previous_pointcloud_;
+    ros::Subscriber sub_config_;
     pcl::PointCloud<pcl::PointXYZ> prev_cloud_;
+    jsk_recognition_msgs::HeightmapConfig::ConstPtr config_;
     double min_x_;
     double min_y_;
     double max_x_;
     double max_y_;
-    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     int tf_queue_size_;
   private:
   };

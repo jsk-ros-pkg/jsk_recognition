@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, JSK Lab
+ *  Copyright (c) 2015, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -34,43 +34,17 @@
  *********************************************************************/
 
 
-#ifndef JSK_PCL_ROS_HEIGHTMAP_TO_POINTCLOUD_H_
-#define JSK_PCL_ROS_HEIGHTMAP_TO_POINTCLOUD_H_
+#ifndef JSK_PCL_ROS_HEIGHTMAP_UTILS_H_
+#define JSK_PCL_ROS_HEIGHTMAP_UTILS_H_
 
-
-#include <jsk_topic_tools/diagnostic_nodelet.h>
-#include <dynamic_reconfigure/server.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <sensor_msgs/Image.h>
-#include "jsk_pcl_ros/heightmap_utils.h"
+#include <jsk_recognition_msgs/HeightmapConfig.h>
 
 namespace jsk_pcl_ros
 {
-  class HeightmapToPointCloud: public jsk_topic_tools::DiagnosticNodelet
+  inline std::string getHeightmapConfigTopic(const std::string& base_topic)
   {
-  public:
-    typedef boost::shared_ptr<HeightmapToPointCloud> Ptr;
-    HeightmapToPointCloud(): DiagnosticNodelet("HeightmapToPointCloud") {}
-    
-  protected:
-    virtual void onInit();
-    virtual void subscribe();
-    virtual void unsubscribe();
-    virtual void convert(const sensor_msgs::Image::ConstPtr& msg);
-    virtual void configCallback(
-      const jsk_recognition_msgs::HeightmapConfig::ConstPtr& msg);
-    jsk_recognition_msgs::HeightmapConfig::ConstPtr config_msg_;
-    boost::mutex mutex_;
-    ros::Publisher pub_;
-    ros::Publisher pub_config_;
-    ros::Subscriber sub_;
-    ros::Subscriber sub_config_;
-    double min_x_;
-    double max_x_;
-    double min_y_;
-    double max_y_;
-  };
+    return base_topic + "/config";
+  }
 }
-
 
 #endif

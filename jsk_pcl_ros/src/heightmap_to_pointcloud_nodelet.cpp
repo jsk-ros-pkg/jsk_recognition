@@ -87,8 +87,8 @@ namespace jsk_pcl_ros
         float v = float_image.at<float>(j, i);
         pcl::PointXYZ p;
         if (v != -FLT_MAX) {
-          p.y = j * dy + min_y_;
-          p.x = i * dx + min_x_;
+          p.y = j * dy + min_y_ + dy / 2.0;
+          p.x = i * dx + min_x_ + dx / 2.0;
           p.z = v;
           cloud.points.push_back(p);
         }

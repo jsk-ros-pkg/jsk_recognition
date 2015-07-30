@@ -187,6 +187,7 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     prev_from_center_to_fixed_ = Eigen::Affine3f::Identity();
     prev_cloud_.points.clear();
+    return true;
   }
 }
 

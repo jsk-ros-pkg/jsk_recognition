@@ -42,11 +42,13 @@
 #include <opencv2/opencv.hpp>
 #include <jsk_pcl_ros/HeightmapMorphologicalFilteringConfig.h>
 #include <dynamic_reconfigure/server.h>
+#include <jsk_recognition_msgs/HeightmapConfig.h>
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
 #include <boost/accumulators/statistics/variance.hpp>
 #include <boost/accumulators/statistics/count.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
+
 namespace jsk_pcl_ros
 {
   class HeightmapMorphologicalFiltering: public jsk_topic_tools::DiagnosticNodelet
@@ -67,11 +69,13 @@ namespace jsk_pcl_ros
     virtual void unsubscribe();
     virtual void filter(const sensor_msgs::Image::ConstPtr& msg);
     virtual void configCallback(Config& config, uint32_t level);
-
+    virtual void configTopicCallback(const jsk_recognition_msgs::HeightmapConfig::ConstPtr& msg);
     boost::mutex mutex_;
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     ros::Publisher pub_;
+    ros::Publisher pub_config_;
     ros::Subscriber sub_;
+    ros::Subscriber sub_config_;
     int mask_size_;
     double max_variance_;
     int max_queue_size_;

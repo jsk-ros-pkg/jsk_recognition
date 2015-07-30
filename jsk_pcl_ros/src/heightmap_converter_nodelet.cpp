@@ -44,14 +44,14 @@ namespace jsk_pcl_ros
   void HeightmapConverter::onInit()
   {
     DiagnosticNodelet::onInit();
+    pub_config_ = pnh_->advertise<jsk_recognition_msgs::HeightmapConfig>(
+      "output/config", 1, true);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&HeightmapConverter::configCallback, this, _1, _2);
     srv_->setCallback (f);
 
     pnh_->param("max_queue_size", max_queue_size_, 10);
-    pub_config_ = pnh_->advertise<jsk_recognition_msgs::HeightmapConfig>(
-      "output/config", 1, true);
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
   }
   

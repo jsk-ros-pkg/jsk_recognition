@@ -152,7 +152,6 @@ namespace jsk_pcl_ros
         cv::Point index = toIndex(p, new_heightmap);
         if (isValidIndex(index, new_heightmap)) {
           if (!isValidCell(index, new_heightmap)) {
-            JSK_ROS_INFO("overwrite (%d, %d)", index.x, index.y);
             new_heightmap.at<float>(index.y, index.x) = p.z;
           }
         }

@@ -44,6 +44,7 @@
 #include <opencv2/opencv.hpp>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
+#include <jsk_recognition_msgs/HeightmapConfig.h>
 
 namespace jsk_pcl_ros
 {
@@ -76,6 +77,7 @@ namespace jsk_pcl_ros
 
     boost::mutex mutex_;
     ros::Publisher pub_;
+    ros::Publisher pub_config_;
     ros::Subscriber sub_;
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     double min_x_;

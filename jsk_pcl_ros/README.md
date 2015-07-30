@@ -74,6 +74,9 @@ Convert a pointcloud(`sensor_msgs/PointCloud2`) into heightmap representation (`
 
   fields of the image is `CV_32FC1(float)` and if a pixel is not observed, it is filled by `-FLT_MAX`.
 
+* `~output/config` (`jsk_recognition_msgs/HeightmapConfig`)
+
+  Config topic.
 #### Parameters
 * `~resolution_x` (Integer, default: `400`)
 * `~resolution_y` (Integer, default: `400`)
@@ -96,20 +99,18 @@ Convert a heightmapt to poincloud.
 * `~input` (`sensor_msgs/Image`)
 
   Input heightmap.
+* `~input/config` (`jsk_recognition_msgs/HeightmapConfig`)
+
+  Config topic.
 
 #### Publishing Topic
 * `~output` (`sensor_msgs/PointCloud2`)
 
   Output pointcloud.
 
-#### Parameters
-* `~min_x` (Double, default: `-2.0`)
-* `~max_x` (Double, default: `2.0`)
-* `~min_y` (Double, default: `-2.0`)
-* `~max_y` (Double, default: `2.0`)
+* `~output/config` (`jsk_recognition_msgs/HeightmapConfig`)
 
-  Minimum and maximum value of heightmap dimension.
-
+  Config topic.
 ### jsk\_pcl/HeightmapMorphologicalFiltering
 ![](images/heightmap_morphological_filtering.png)
 
@@ -150,21 +151,18 @@ Accumulate heightmap in time series and construct a new heightmap.
 * `~input/prev_pointcloud` (`sensor_msgs/PointCloud2`)
 
   Accumulated heightmap represented in pointcloud from 0 to k-1 step.
+* `~input/config` (`jsk_recognition_msgs/HeightmapConfig`)
+
+  Config topic.
 
 #### Publishing Topic
 * `~output` (`sensor_msgs/Image`)
 
-
   Accumulated heightmap.
 
-#### Parameters
-* `~min_x` (Double, default: `-2.0`)
-* `~max_x` (Double, default: `2.0`)
-* `~min_y` (Double, default: `-2.0`)
-* `~max_y` (Double, default: `2.0`)
+* `~output/config` (`jsk_recognition_msgs/HeightmapConfig`)
 
-  Minimum and maximum value of heightmap dimension.
-
+  Config topic.
 
 ### jsk\_pcl/NormalEstimationOMP
 This nodelet is almost same to `pcl/NormalEstimationOMP` of `pcl_ros` package,

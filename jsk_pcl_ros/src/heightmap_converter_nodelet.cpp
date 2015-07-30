@@ -50,6 +50,8 @@ namespace jsk_pcl_ros
     srv_->setCallback (f);
 
     pnh_->param("max_queue_size", max_queue_size_, 10);
+    pub_config_ = pnh_->advertise<jsk_recognition_msgs::HeightmapConfig>(
+      "output/config", 1, true);
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
   }
   
@@ -106,6 +108,12 @@ namespace jsk_pcl_ros
     max_y_ = config.max_y;
     resolution_x_ = config.resolution_x;
     resolution_y_ = config.resolution_y;
+    jsk_recognition_msgs::HeightmapConfig heightmap_config;
+    heightmap_config.min_x = min_x_;
+    heightmap_config.min_y = min_y_;
+    heightmap_config.max_x = max_x_;
+    heightmap_config.max_y = max_y_;
+    pub_config_.publish(heightmap_config);
   }
 
 }

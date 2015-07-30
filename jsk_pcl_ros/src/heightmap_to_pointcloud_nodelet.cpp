@@ -47,11 +47,11 @@ namespace jsk_pcl_ros
   void HeightmapToPointCloud::onInit()
   {
     DiagnosticNodelet::onInit();
-    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
-    typename dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&HeightmapToPointCloud::configCallback, this, _1, _2);
-    srv_->setCallback (f);
-
+    pub_config_ = pnh_->advertise<jsk_recognition_msgs::HeightmapConfig>(
+      "output/config", 1);
+    sub_config_ = pnh_->subscribe(
+      getHeightmapConfigTopic(pnh_->resolveName("input")), 1,
+      &HeightmapToPointCloud::configCallback, this);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
   }
 
@@ -65,18 +65,25 @@ namespace jsk_pcl_ros
     sub_.shutdown();
   }
 
-  void HeightmapToPointCloud::configCallback(Config &config, uint32_t level)
+  void HeightmapToPointCloud::configCallback(
+    const jsk_recognition_msgs::HeightmapConfig::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    min_x_ = config.min_x;
-    max_x_ = config.max_x;
-    min_y_ = config.min_y;
-    max_y_ = config.max_y;
+    config_msg_ = msg;
+    min_x_ = msg->min_x;
+    max_x_ = msg->max_x;
+    min_y_ = msg->min_y;
+    max_y_ = msg->max_y;
+    pub_config_.publish(msg);
   }
 
   void HeightmapToPointCloud::convert(const sensor_msgs::Image::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    if (!config_msg_) {
+      JSK_NODELET_ERROR("no ~input/config is yet available");
+      return;
+    }
     cv::Mat float_image = cv_bridge::toCvShare(msg, sensor_msgs::image_encodings::TYPE_32FC1)->image;
     pcl::PointCloud<pcl::PointXYZ> cloud;
     cloud.points.reserve(float_image.rows * float_image.cols);

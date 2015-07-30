@@ -68,7 +68,6 @@ namespace jsk_pcl_ros
       "input/prev_pointcloud", 5, 
       &HeightmapTimeAccumulation::prevPointCloud, this);
     sub_heightmap_.subscribe(*pnh_, "input", 10);
-    
     tf_filter_.reset(new tf::MessageFilter<sensor_msgs::Image>(
                        sub_heightmap_,
                        *tf_,
@@ -77,6 +76,7 @@ namespace jsk_pcl_ros
     tf_filter_->registerCallback(
       boost::bind(
         &HeightmapTimeAccumulation::accumulate, this, _1));
+    srv_reset_ = pnh_->advertiseService("reset", &HeightmapTimeAccumulation::resetCallback, this);
   }
   
   void HeightmapTimeAccumulation::subscribe()
@@ -142,10 +142,10 @@ namespace jsk_pcl_ros
     cv::Mat new_heightmap = cv_bridge::toCvShare(
       msg, sensor_msgs::image_encodings::TYPE_32FC1)->image;
     // Transform prev_cloud_ to current frame
-    Eigen::Affine3f from_prev_to_current 
+    Eigen::Affine3f from_prev_to_current
       = prev_from_center_to_fixed_.inverse() * from_center_to_fixed;
     pcl::PointCloud<pcl::PointXYZ> transformed_pointcloud;
-    pcl::transformPointCloud(prev_cloud_, transformed_pointcloud, from_prev_to_current);
+    pcl::transformPointCloud(prev_cloud_, transformed_pointcloud, from_prev_to_current.inverse());
     for (size_t i = 0; i < transformed_pointcloud.points.size(); i++) {
       pcl::PointXYZ p = transformed_pointcloud.points[i];
       if (isValidPoint(p)) {
@@ -181,6 +181,13 @@ namespace jsk_pcl_ros
     pub_config_.publish(msg);
   }
 
+  bool HeightmapTimeAccumulation::resetCallback(std_srvs::Empty::Request& req,
+                                                std_srvs::Empty::Response& res)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    prev_from_center_to_fixed_ = Eigen::Affine3f::Identity();
+    prev_cloud_.points.clear();
+  }
 }
 
 #include <pluginlib/class_list_macros.h>

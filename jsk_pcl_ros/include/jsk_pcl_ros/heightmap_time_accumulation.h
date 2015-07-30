@@ -47,6 +47,7 @@
 #include <tf/message_filter.h>
 #include <message_filters/subscriber.h>
 #include "jsk_pcl_ros/heightmap_utils.h"
+#include <std_srvs/Empty.h>
 
 namespace jsk_pcl_ros
 {
@@ -71,6 +72,9 @@ namespace jsk_pcl_ros
       const jsk_recognition_msgs::HeightmapConfig::ConstPtr& config);
     virtual void prevPointCloud(
       const sensor_msgs::PointCloud2::ConstPtr& msg);
+    virtual bool resetCallback(std_srvs::Empty::Request& req,
+                               std_srvs::Empty::Response& res);
+
     boost::mutex mutex_;
     tf::TransformListener* tf_;
     Eigen::Affine3f prev_from_center_to_fixed_;
@@ -79,6 +83,7 @@ namespace jsk_pcl_ros
     cv::Mat accumulated_heightmap_;
     ros::Publisher pub_output_;
     ros::Publisher pub_config_;
+    ros::ServiceServer srv_reset_;
     boost::shared_ptr<tf::MessageFilter<sensor_msgs::Image> > tf_filter_;
     message_filters::Subscriber<sensor_msgs::Image> sub_heightmap_;
     ros::Subscriber sub_previous_pointcloud_;

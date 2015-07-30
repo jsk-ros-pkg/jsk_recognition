@@ -167,6 +167,11 @@ Accumulate heightmap in time series and construct a new heightmap.
 
   Config topic.
 
+#### Advertising Service
+* `~seset` (`std_srvs/Empty`)
+
+  Reset heightmap cache.
+
 ### jsk\_pcl/NormalEstimationOMP
 This nodelet is almost same to `pcl/NormalEstimationOMP` of `pcl_ros` package,
 but it can handle timestamp correctly.

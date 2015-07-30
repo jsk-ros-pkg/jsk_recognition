@@ -121,6 +121,9 @@ which is represented as heightmap.
 * `~input` (`sensor_msgs/Image`)
 
   Input heightmap. Hole should be represented as `-FLT_MAX` or `nan`.
+* `~output/config` (`jsk_recognition_msgs/HeightmapConfig`)
+
+  Config topic.
 
 #### Publishing Topic
 * `~output` (`sensor_msgs/Image`)

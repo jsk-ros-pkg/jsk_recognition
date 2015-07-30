@@ -35,6 +35,7 @@
 
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/heightmap_morphological_filtering.h"
+#include "jsk_pcl_ros/heightmap_utils.h"
 #include <sensor_msgs/image_encodings.h>
 
 namespace jsk_pcl_ros
@@ -42,14 +43,18 @@ namespace jsk_pcl_ros
   void HeightmapMorphologicalFiltering::onInit()
   {
     DiagnosticNodelet::onInit();
+    pub_config_ = pnh_->advertise<jsk_recognition_msgs::HeightmapConfig>("output/config",
+                                                                         1, true);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&HeightmapMorphologicalFiltering::configCallback, this, _1, _2);
     srv_->setCallback (f);
 
     pnh_->param("max_queue_size", max_queue_size_, 10);
-    
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+    sub_config_ = pnh_->subscribe(getHeightmapConfigTopic(pnh_->resolveName("input")), 1,
+                                  &HeightmapMorphologicalFiltering::configTopicCallback,
+                                  this);
   }
 
   void HeightmapMorphologicalFiltering::subscribe()
@@ -62,6 +67,11 @@ namespace jsk_pcl_ros
   void HeightmapMorphologicalFiltering::unsubscribe()
   {
     sub_.shutdown();
+  }
+
+  void HeightmapMorphologicalFiltering::configTopicCallback(const jsk_recognition_msgs::HeightmapConfig::ConstPtr& msg)
+  {
+    pub_config_.publish(msg);
   }
 
   void HeightmapMorphologicalFiltering::configCallback(

@@ -816,7 +816,10 @@ Sampling points with fixed grid size on polygons.
 #### Publishing Topic
 * `~output` (`sensor_msgs/PointCloud2`)
 
-  Sampled pointcloud
+  Sampled pointcloud (`pcl::PointXYZRGBNormal`).
+* `~output_xyz` (`sensor_msgs/PointCloud2`)
+
+  Sampled pointcloud (`pcl::PointXYZ`).
 
 #### Parameters
 * `~grid_size` (Double, default: `0.01`)

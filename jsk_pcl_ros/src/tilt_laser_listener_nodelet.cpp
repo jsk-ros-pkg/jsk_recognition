@@ -334,14 +334,14 @@ namespace jsk_pcl_ros
       for (size_t i = buffer_.size() - 1; i > 0; i--) {
         // find jump first
         if (!jumped) {
-          double direction = buffer_[i-1]->getValue() - buffer_[i]->getValue();
+          double direction = fmod(buffer_[i-1]->getValue(), 2.0 * M_PI) - fmod(buffer_[i]->getValue(), 2.0 * M_PI);
           if (direction * velocity > 0) {
             jumped = true;
           }
         }
         else {                  // already jumped
           if (velocity > 0) {
-            if (buffer_[i-1]->getValue() < fmod(threshold - overwrap_angle_, 2.0 * M_PI)) {
+            if (fmod(buffer_[i-1]->getValue(), 2.0 * M_PI) < fmod(threshold - overwrap_angle_, 2.0 * M_PI)) {
               publishTimeRange(stamp, buffer_[i-1]->header.stamp, stamp);
               if (clear_assembled_scans_) {
                 buffer_.removeBefore(stamp);
@@ -353,7 +353,7 @@ namespace jsk_pcl_ros
             }
           }
           else if (velocity < 0) {
-            if (buffer_[i-1]->getValue() > fmod(threshold + overwrap_angle_, 2.0 * M_PI)) {
+            if (fmod(buffer_[i-1]->getValue(), 2.0 * M_PI) > fmod(threshold + overwrap_angle_, 2.0 * M_PI)) {
               publishTimeRange(stamp, buffer_[i-1]->header.stamp, stamp);
               if (clear_assembled_scans_) {
                 buffer_.removeBefore(stamp);

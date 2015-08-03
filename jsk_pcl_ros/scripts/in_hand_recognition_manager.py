@@ -19,8 +19,10 @@ from sensor_msgs.msg import PointCloud2
 from jsk_recognition_msgs.msg import PointsArray
 from tf.transformations import *
 import tf
+from std_srvs import srv
 
 teacher_pose_stamped = None
+renew_flag = False
 def pose_teacher_cb(pose_stamped):
     global teacher_pose_stamped
     teacher_pose_stamped = pose_stamped
@@ -45,7 +47,7 @@ def get_pose_from_mat(mat):
     return pose
     
 def pose_diff_cb(pose_stamped):
-    global teacher_pose_stamped
+    global teacher_pose_stamped, renew_flag
     # add diff and pub
     if (not teacher_pose_stamped):
         rospy.info ("teacher is empty")
@@ -54,7 +56,7 @@ def pose_diff_cb(pose_stamped):
     try:
         teacher_pose_stamped.header.stamp = rospy.Time(0)
         teacher_pose_stamped_recog_frame = listener.transformPose(pose_stamped.header.frame_id, teacher_pose_stamped)
-    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException), e:
+    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException, tf.Exception), e:
         print "tf error: %s" % e
         return
     teacher_pose_mat = (get_mat_from_pose(teacher_pose_stamped_recog_frame.pose))
@@ -64,8 +66,20 @@ def pose_diff_cb(pose_stamped):
     new_pose_stamped.pose = get_pose_from_mat(new_pose_mat)
     new_pose_stamped.header = pose_stamped.header
     OutputPosePub.publish(new_pose_stamped)
-    teachear_pose_stamped = None
-
+    # teachear_pose_stamped = None
+    if renew_flag:
+        try:
+            new_pose_stamped.header.stamp = rospy.Time(0)
+            new_pose_stamped_for_renew = listener.transformPose(teacher_pose_stamped.header.frame_id, new_pose_stamped)
+        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException, tf.Exception), e:
+            print "tf error: %s" % e
+            return
+        pose_teacher_cb(new_pose_stamped_for_renew)
+        renew_flag = False
+def renew_cb(req):
+    global renew_flag
+    renew_flag = True
+    return srv.EmptyResponse()
 if __name__ == "__main__":
     rospy.init_node("in_hand_recognition_manager")
     InputPosePub = rospy.Publisher("~output/recognition", PoseStamped)
@@ -74,5 +88,6 @@ if __name__ == "__main__":
     DummyArrayPub = rospy.Publisher("~dummy_array", PointsArray)
     rospy.Subscriber("~input", PoseStamped, pose_teacher_cb)
     rospy.Subscriber("~input/result", PoseStamped, pose_diff_cb)
+    rospy.Service("~renew", srv.Empty, renew_cb)
     rospy.spin()
 

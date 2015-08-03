@@ -2,6 +2,9 @@
   <arg name="pcd_file" default="$(find drc_task_common)/pcds/drill.pcd" />
   <arg name="info" default="/multisense/depth/camera_info" /> 
   <arg name="input_cloud" default="/multisense/resize_1_4/points" /> 
+  <arg name="self_filter_param" default="$(find jsk_hrp2_ros_bridge)/config/$(env ROBOT)_self_filter.yaml" />
+  <arg name="use_self_filter_for_sensor" default="true" />
+  <arg name="use_self_filter_for_template" default="false" />
   <node pkg="jsk_pcl_ros" type="in_hand_recognition_manager.py" name="in_hand_recognition_manager">
     <remap from="~input/result" to="icp_registration/output_pose"/>
   </node>
@@ -15,10 +18,24 @@
     <param name="scale_depth" value="2.0" />
     <param name="use_asynchronous" value="true" />
   </node>
+  <node pkg="pr2_navigation_self_filter" type="self_filter" name="self_filter_sensor" output="screen"
+        if="$(arg use_self_filter_for_sensor)">
+    <remap from="cloud_in" to="$(arg input_cloud)" />
+    <remap from="cloud_out" to="~self_filtered_cloud" />
+    <rosparam command="load" file="$(arg self_filter_param)" />
+  </node>
+  <node pkg="pr2_navigation_self_filter" type="self_filter" name="self_filter_template" output="screen"
+        if="$(arg use_self_filter_for_template)">
+    <remap from="cloud_in" to="depth_image_creator/output_cloud" />
+    <remap from="cloud_out" to="~self_filtered_cloud" />
+    <rosparam command="load" file="$(arg self_filter_param)" />
+  </node>
   <node pkg="jsk_pcl_ros" type="icp_registration" name="icp_registration" output="screen" >
-    <remap from="~input_reference" to="depth_image_creator/output_cloud"/>
+    <remap if="$(arg use_self_filter_for_template)" from="~input_reference" to="self_filter_template/self_filtered_cloud"/>
+    <remap unless="$(arg use_self_filter_for_template)" from="~input_reference" to="depth_image_creator/output_cloud"/>
     <remap from="~input_reference_array" to="in_hand_recognition_manager/dummy_array"/>
-    <remap from="~input" to="$(arg input_cloud)"/>
+    <remap if="$(arg use_self_filter_for_sensor)" from="~input" to="self_filter_sensor/self_filtered_cloud"/>
+    <remap unless="$(arg use_self_filter_for_sensor)" from="~input" to="$(arg input_cloud)"/>
     <remap from="~input/camera_info" to="$(arg info)" />
     <param name="use_flipped_score_" value="false" />
   </node>

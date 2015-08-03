@@ -18,7 +18,7 @@
           - from: ~input
             to: $(arg INPUT_LEFT_CAMERA_INFO)
           - from: ~output
-            to: $(arg NAME_PREFIX)left/camera_info
+            to: left/camera_info
       - unless: $(arg USE_COMPRESS)
         name: $(arg NAME_PREFIX)left_image_rect_color_relay
         type: jsk_topic_tools/Relay
@@ -26,7 +26,7 @@
           - from: ~input
             to: $(arg INPUT_LEFT_IMAGE)
           - from: ~output
-            to: $(arg NAME_PREFIX)left/image_rect_color
+            to: left/image_rect_color
       - if: $(arg RELAY_DEPTH)
         name: $(arg NAME_PREFIX)depth_relay
         type: jsk_topic_tools/Relay
@@ -34,7 +34,7 @@
           - from: ~input
             to: $(arg INPUT_DEPTH)
           - from: ~output
-            to: $(arg NAME_PREFIX)depth
+            to: depth
       - if: $(arg USE_COMPRESS)
         name: $(arg NAME_PREFIX)left_image_rect_color_relay
         type: jsk_topic_tools/Relay
@@ -42,34 +42,34 @@
           - from: ~input
             to: $(arg INPUT_LEFT_IMAGE)/$(arg COMPRESSED_TYPE)
           - from: ~output
-            to: $(arg NAME_PREFIX)left/image_rect_color_compressed/$(arg COMPRESSED_TYPE)
+            to: left/image_rect_color_compressed/$(arg COMPRESSED_TYPE)
       - name: $(arg NAME_PREFIX)point_cloud_xyz
         type: depth_image_proc/point_cloud_xyz
         remappings:
           - from: image_rect
-            to: $(arg NAME_PREFIX)depth
+            to: depth
           - from: camera_info
-            to: $(arg NAME_PREFIX)left/camera_info
+            to: left/camera_info
           - from: points
-            to: $(arg NAME_PREFIX)organized_image_points2
+            to: organized_image_points2
       - name: $(arg NAME_PREFIX)point_cloud_xyzrgb
         type: depth_image_proc/point_cloud_xyzrgb
         remappings:
           - from: rgb/camera_info
-            to: $(arg NAME_PREFIX)left/camera_info
+            to: left/camera_info
           - from: rgb/image_rect_color
-            to: $(arg NAME_PREFIX)left/image_rect_color
+            to: left/image_rect_color
           - from: depth_registered/image_rect
-            to: $(arg NAME_PREFIX)depth
+            to: depth
           - from: depth_registered/points
-            to: $(arg NAME_PREFIX)organized_image_points2_color
+            to: organized_image_points2_color
       - name: $(arg NAME_PREFIX)point_relay
         type: jsk_topic_tools/Relay
         remappings:
           - from: ~input
-            to: $(arg NAME_PREFIX)organized_image_points2_color
+            to: organized_image_points2_color
           - from: ~output
-            to: $(arg NAME_PREFIX)points
+            to: points
     </rosparam>
   </group>
   <!-- If compressed image used, realy /compressed images and republish them -->

@@ -66,9 +66,15 @@ def pose_diff_cb(pose_stamped):
     new_pose_stamped.pose = get_pose_from_mat(new_pose_mat)
     new_pose_stamped.header = pose_stamped.header
     OutputPosePub.publish(new_pose_stamped)
-    teachear_pose_stamped = None
+    # teachear_pose_stamped = None
     if renew_flag:
-        pose_teacher_cb(new_pose_stamped)
+        try:
+            new_pose_stamped.header.stamp = rospy.Time(0)
+            new_pose_stamped_for_renew = listener.transformPose(teacher_pose_stamped.header.frame_id, new_pose_stamped)
+        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException, tf.Exception), e:
+            print "tf error: %s" % e
+            return
+        pose_teacher_cb(new_pose_stamped_for_renew)
         renew_flag = False
 def renew_cb(req):
     global renew_flag

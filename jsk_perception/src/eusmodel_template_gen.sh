@@ -23,7 +23,12 @@ do
     fi
 done
 
-$ROSEUS ./src/eusmodel_template_gen.l
+if [ -x $ROSEUS ]; then
+    $ROSEUS ./src/eusmodel_template_gen.l
+else
+    echo "ROSEUS binary not found"
+    return -1
+fi
 (cd sample; $ROSEUS ./pose_detector_auto_gen_sample.l "(progn (generate-launcher) (exit))")
 
 mv -f template $DEVEL_TEMPLATE_DIR

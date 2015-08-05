@@ -16,12 +16,12 @@
 
     <node if="$(arg create_manager)"
           pkg="nodelet" type="nodelet" name="$(arg manager)"
-          args="manager" output="screen"/>
+          args="manager" output="screen" respawn="true"/>
 
     <node pkg="nodelet" type="nodelet"
           name="voxelgrid"
-          args="standalone pcl/VoxelGrid"
-          output="screen" clear_params="true">
+          args="load pcl/VoxelGrid $(arg manager)"
+          output="screen" clear_params="true" respawn="true">
       <remap from="~input" to="$(arg input_point)" />
       <param name="filter_limit_min" value="$(arg voxel_grid_filter_limit_min)" />
       <param name="filter_limit_max" value="$(arg voxel_grid_filter_limit_max)" />
@@ -36,8 +36,8 @@
     </node>
     <node pkg="nodelet" type="nodelet"
           name="particle_filter_tracker"
-          args="standalone jsk_pcl/ParticleFilterTracking"
-          output="screen" clear_params="true">
+          args="load jsk_pcl/ParticleFilterTracking $(arg manager)"
+          output="screen" clear_params="true" respawn="true">
       <remap from="~input" to="voxelgrid/output" />
       <param name="track_target_name" value="$(arg track_target_name)" />
       <param name="align_box" value="$(arg align_box)" />
@@ -48,8 +48,8 @@
     </node>
     <node pkg="nodelet" type="nodelet"
           name="selected_cloud_downsampler"
-          args="standalone pcl/VoxelGrid"
-          output="screen" clear_params="true">
+          args="load pcl/VoxelGrid $(arg manager)"
+          output="screen" clear_params="true" respawn="true">
       <remap from="~input" to="selected_pointcloud" />
       <param name="filter_limit_min" value="$(arg voxel_grid_filter_limit_min)" />
       <param name="filter_limit_max" value="$(arg voxel_grid_filter_limit_max)" />

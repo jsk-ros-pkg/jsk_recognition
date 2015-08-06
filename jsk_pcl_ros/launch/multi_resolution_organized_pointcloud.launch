@@ -6,6 +6,7 @@
   <arg name="INPUT_DEPTH" default="/multisense/depth" />
   <arg name="RUN_MANAGER" default="true" />
   <arg name="MANAGER" default="manager" />
+  <arg name="THROTTLE_RATE" default="1" />
   <group ns="$(arg NAMESPACE)">
     <node pkg="jsk_topic_tools" type="standalone_complexed_nodelet" name="manager"
           output="screen"
@@ -69,6 +70,13 @@
                 to: $(arg INPUT_DEPTH)
               - from: ~output
                 to: depth
+          - name: resize_1_1/left_throttle
+            type: jsk_topic_tools/LightweightThrottle
+            remappings:
+              - from: ~input
+                to: left/image_rect_color
+              - from: ~output
+                to: left/image_rect_color/throttle
           - name: resize_1_2/left_resizer
             type: resized_image_transport/ImageResizer
             remappings:
@@ -83,6 +91,13 @@
                 to: /$(arg NAMESPACE)/resize_1_1/depth
               - from: ~output/image
                 to: depth
+          - name: resize_1_2/left_throttle
+            type: jsk_topic_tools/LightweightThrottle
+            remappings:
+              - from: ~input
+                to: left/image_rect_color
+              - from: ~output
+                to: left/image_rect_color/throttle
           - name: resize_1_4/left_resizer
             type: resized_image_transport/ImageResizer
             remappings:
@@ -97,6 +112,13 @@
                 to: /$(arg NAMESPACE)/resize_1_1/depth
               - from: ~output/image
                 to: depth
+          - name: resize_1_4/left_throttle
+            type: jsk_topic_tools/LightweightThrottle
+            remappings:
+              - from: ~input
+                to: left/image_rect_color
+              - from: ~output
+                to: left/image_rect_color/throttle
           - name: resize_1_8/left_resizer
             type: resized_image_transport/ImageResizer
             remappings:
@@ -111,7 +133,14 @@
                 to: /$(arg NAMESPACE)/resize_1_1/depth
               - from: ~output/image
                 to: depth
-               
+          - name: resize_1_8/left_throttle
+            type: jsk_topic_tools/LightweightThrottle
+            remappings:
+              - from: ~input
+                to: left/image_rect_color
+              - from: ~output
+                to: left/image_rect_color/throttle
+
       </rosparam>
     </node>
     <!-- PointClouds -->
@@ -135,6 +164,13 @@
       </rosparam>
     </group>
     <!-- Images -->
+    <group ns="resize_1_1">
+      <group ns="left_throttle">
+        <rosparam subst_value="true">
+          update_rate: $(arg THROTTLE_RATE)
+        </rosparam>
+      </group>
+    </group>
     <group ns="resize_1_2">
       <group ns="left_resizer">
         <rosparam>
@@ -148,6 +184,11 @@
           use_camera_info: false
           resize_scale_x: 0.5
           resize_scale_y: 0.5
+        </rosparam>
+      </group>
+      <group ns="left_throttle">
+        <rosparam subst_value="true">
+          update_rate: $(arg THROTTLE_RATE)
         </rosparam>
       </group>
     </group>
@@ -166,6 +207,11 @@
           resize_scale_y: 0.25
         </rosparam>
       </group>
+      <group ns="left_throttle">
+        <rosparam subst_value="true">
+          update_rate: $(arg THROTTLE_RATE)
+        </rosparam>
+      </group>
     </group>
     <group ns="resize_1_8">
       <group ns="left_resizer">
@@ -180,6 +226,11 @@
           use_camera_info: false
           resize_scale_x: 0.125
           resize_scale_y: 0.125
+        </rosparam>
+      </group>
+      <group ns="left_throttle">
+        <rosparam subst_value="true">
+          update_rate: $(arg THROTTLE_RATE)
         </rosparam>
       </group>
     </group>

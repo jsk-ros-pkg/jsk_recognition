@@ -18,7 +18,7 @@
             remappings:
               - from: ~input
                 to: $(arg INPUT)
-                fomr: ~output
+              - from: ~output
                 to: points
           - name: resize_1_2
             type: jsk_pcl/ResizePointsPublisher

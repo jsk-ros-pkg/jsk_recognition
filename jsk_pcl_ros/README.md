@@ -1973,6 +1973,30 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 #### What Is This
 This nodelet is almost same to jsk\_pcl/ClusterPointIndicesDecomposer, however it always sort clusters in z direction.
 
+### jsk\_pcl/PoseWithCovarianceStampedToGaussianPointCloud
+![](images/pose_with_covariance_stamped_to_gaussian_pointcloud.png)
+
+Visualize `geometry_msgs/PoseWithCovarianceStamped` as gaussian pointcloud.
+Pointcloud is computed within a region of 3 sigma.
+
+#### Subscribing Topics
+* `~input` (`geometry_msgs/PoseWithCovarianceStamped`)
+
+  Input pose
+
+#### Publishing Topics
+* `~output` (`sensor_msgs/PointCloud2`)
+
+  Output pointcloud
+
+#### Parameters
+* `~cut_plane` (default: `xy`)
+
+  You can choose a plane to compute gaussian distribution from `xy`, `yz` or `zx`.
+* `~resolution` (default: `0.01`)
+
+  Sampling distance between each poiint in pointcloud.
+
 ### jsk\_pcl/ColorizeHeight2DMapping
 ![](images/colorize_height_2d_mapping.png)
 

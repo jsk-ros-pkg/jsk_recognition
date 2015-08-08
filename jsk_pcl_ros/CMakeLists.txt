@@ -71,6 +71,7 @@ add_service_files(FILES SwitchTopic.srv
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/PoseWithCovarianceStampedToGaussianPointCloud.cfg
   cfg/HeightmapMorphologicalFiltering.cfg
   cfg/HeightmapConverter.cfg
   cfg/HeightmapToPointCloud.cfg
@@ -195,6 +196,8 @@ jsk_pcl_nodelet(src/multi_plane_extraction_nodelet.cpp
   "jsk_pcl/MultiPlaneExtraction" "multi_plane_extraction")
 jsk_pcl_nodelet(src/selected_cluster_publisher_nodelet.cpp
   "jsk_pcl/SelectedClusterPublisher" "selected_cluster_publisher")
+jsk_pcl_util_nodelet(src/pose_with_covariance_stamped_to_gaussian_pointcloud_nodelet.cpp
+  "jsk_pcl/PoseWithCovarianceStampedToGaussianPointCloud" "pose_with_covariance_stamped_to_gaussian_pointcloud")
 jsk_pcl_util_nodelet(src/spherical_pointcloud_simulator_nodelet.cpp
   "jsk_pcl/SphericalPointCloudSimulator" "spherical_pointcloud_simulator")
 jsk_pcl_util_nodelet(src/polygon_flipper_nodelet.cpp

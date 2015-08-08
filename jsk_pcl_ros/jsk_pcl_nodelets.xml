@@ -1,4 +1,8 @@
 <library path="libjsk_pcl_ros_util">
+  <class name="jsk_pcl/PoseWithCovarianceStampedToGaussianPointCloud" 
+         type="jsk_pcl_ros::PoseWithCovarianceStampedToGaussianPointCloud"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_pcl/ColorizeDistanceFromPlane" type="jsk_pcl_ros::ColorizeDistanceFromPlane"
          base_class_type="nodelet::Nodelet">
     <description>

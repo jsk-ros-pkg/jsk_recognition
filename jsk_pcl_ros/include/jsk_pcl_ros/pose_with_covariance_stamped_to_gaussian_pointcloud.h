@@ -65,7 +65,9 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_;
     std::string cut_plane_;
     double threshold_;
-    double resolution_;
+    std::string normalize_method_;
+    double normalize_value_;
+    int sampling_num_;
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
   };
 }

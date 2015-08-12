@@ -68,7 +68,7 @@ namespace jsk_pcl_ros
                                                                 const Eigen::Matrix2f& S_inv)
   {
     Eigen::Vector2f diff = input - mean;
-    return 1 / (2 * M_PI * S.determinant()) * exp(- 0.5 * (diff.transpose() * S_inv * diff)[0]);
+    return 1 / (2 * M_PI * sqrt(S.determinant())) * exp(- 0.5 * (diff.transpose() * S_inv * diff)[0]);
   }
 
   void PoseWithCovarianceStampedToGaussianPointCloud::convert(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)

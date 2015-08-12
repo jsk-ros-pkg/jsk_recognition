@@ -94,6 +94,21 @@ namespace jsk_pcl_ros
     return cloud_array;
   }
 
+
+  template <class T>
+  pcl::PointCloud<pcl::PointXYZ>::Ptr convertToXYZCloud(const pcl::PointCloud<T>& cloud)
+  {
+    pcl::PointCloud<pcl::PointXYZ>::Ptr output(new pcl::PointCloud<pcl::PointXYZ>);
+    output->points.resize(cloud.points.size());
+    for (size_t i = 0; i < cloud.points.size(); i++) {
+      pcl::PointXYZ p;
+      p.x = cloud.points[i].x;
+      p.y = cloud.points[i].y;
+      p.z = cloud.points[i].z;
+      output->points[i] = p;
+    }
+    return output;
+  }
   
   template<class T>
   void appendVector(std::vector<T>& a, const std::vector<T>& b)

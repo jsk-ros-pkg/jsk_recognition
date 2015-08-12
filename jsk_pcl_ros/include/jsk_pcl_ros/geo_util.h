@@ -61,7 +61,9 @@
 #include <pcl/filters/project_inliers.h>
 #include <pcl/surface/concave_hull.h>
 #include <visualization_msgs/Marker.h>
+
 #include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_pcl_ros/random_util.h"
 
 // Utitlity macros
 inline void ROS_INFO_EIGEN_VECTOR3(const std::string& prefix,
@@ -234,27 +236,19 @@ namespace jsk_pcl_ros
     virtual void clearTriangleDecompositionCache() {
       cached_triangles_.clear();
     }
+    
     virtual Eigen::Vector3f getNormalFromVertices();
     virtual bool isTriangle();
+    Eigen::Vector3f randomSampleLocalPoint(boost::mt19937& random_generator);
+    virtual void getLocalMinMax(double& min_x, double& min_y,
+                                double& max_x, double& max_y);
     template <class PointT>
     typename pcl::PointCloud<PointT>::Ptr samplePoints(double grid_size)
     {
       typename pcl::PointCloud<PointT>::Ptr
         ret (new pcl::PointCloud<PointT>);
-      double min_x = DBL_MAX;
-      double min_y = DBL_MAX;
-      double max_x = - DBL_MAX;
-      double max_y = - DBL_MAX;
-    
-      Eigen::Affine3f inv_coords = coordinates().inverse();
-      for (size_t i = 0; i < vertices_.size(); i++) {
-        // Convert vertices into local coordinates
-        Eigen::Vector3f local_point = inv_coords * vertices_[i];
-        min_x = ::fmin(local_point[0], min_x);
-        min_y = ::fmin(local_point[1], min_y);
-        max_x = ::fmax(local_point[0], max_x);
-        max_y = ::fmax(local_point[1], max_y);
-      }
+      double min_x, min_y, max_x, max_y;
+      getLocalMinMax(min_x, min_y, max_x, max_y);
       // ROS_INFO("min_x: %f", min_x);
       // ROS_INFO("min_y: %f", min_y);
       // ROS_INFO("max_x: %f", max_x);
@@ -302,7 +296,9 @@ namespace jsk_pcl_ros
     virtual bool isInside(const Eigen::Vector3f& p);
     size_t previousIndex(size_t i);
     size_t nextIndex(size_t i);
+    
     static Polygon fromROSMsg(const geometry_msgs::Polygon& polygon);
+    static Polygon::Ptr fromROSMsgPtr(const geometry_msgs::Polygon& polygon);
     static Polygon createPolygonWithSkip(const Vertices& vertices);
     virtual bool isConvex();
     virtual Eigen::Vector3f centroid();

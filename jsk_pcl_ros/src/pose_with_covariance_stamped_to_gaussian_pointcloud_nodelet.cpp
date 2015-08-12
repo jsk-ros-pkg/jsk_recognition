@@ -68,7 +68,12 @@ namespace jsk_pcl_ros
                                                                 const Eigen::Matrix2f& S_inv)
   {
     Eigen::Vector2f diff = input - mean;
-    return 1 / (2 * M_PI * sqrt(S.determinant())) * exp(- 0.5 * (diff.transpose() * S_inv * diff)[0]);
+    if (normalize_method_ == "normalize_area") {
+      return normalize_value_ * 1 / (2 * M_PI * sqrt(S.determinant())) * exp(- 0.5 * (diff.transpose() * S_inv * diff)[0]);
+    }
+    else if (normalize_method_ == "normalize_height") {
+      return normalize_value_ * exp(- 0.5 * (diff.transpose() * S_inv * diff)[0]);
+    }
   }
 
   void PoseWithCovarianceStampedToGaussianPointCloud::convert(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
@@ -102,8 +107,10 @@ namespace jsk_pcl_ros
       }
     }
     Eigen::Matrix2f S_inv = S.inverse();
-    for (double x = - 3.0 * max_sigma; x <= 3.0 * max_sigma; x += resolution_) {
-      for (double y = - 3.0 * max_sigma; y <= 3.0 * max_sigma; y += resolution_) {
+    double dx = 6.0 * max_sigma / sampling_num_;
+    double dy = 6.0 * max_sigma / sampling_num_;
+    for (double x = - 3.0 * max_sigma; x <= 3.0 * max_sigma; x += dx) {
+      for (double y = - 3.0 * max_sigma; y <= 3.0 * max_sigma; y += dy) {
         Eigen::Vector2f diff(x, y);
         Eigen::Vector2f input = diff + mean;
         float z = gaussian(input, mean, S, S_inv);
@@ -151,7 +158,9 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     cut_plane_ = config.cut_plane;
-    resolution_ = config.resolution;
+    sampling_num_ = config.sampling_num;
+    normalize_value_ = config.normalize_value;
+    normalize_method_ = config.normalize_method;
   }
                                                                      
 }

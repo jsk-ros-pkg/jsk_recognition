@@ -133,17 +133,17 @@ namespace jsk_pcl_ros
         else if (cut_plane_ == "flipped_xy") {
           p.x = input[0];
           p.y = input[1];
-          p.z = - (z + msg->pose.pose.position.z);
+          p.z = -z + msg->pose.pose.position.z;
         }
         else if (cut_plane_ == "flipped_yz") {
           p.y = input[0];
           p.z = input[1];
-          p.x = - (z + msg->pose.pose.position.x);
+          p.x = -z + msg->pose.pose.position.x;
         }
         else if (cut_plane_ == "flipped_zx") {
           p.z = input[0];
           p.x = input[1];
-          p.y = - (z + msg->pose.pose.position.y);
+          p.y = -z + msg->pose.pose.position.y;
         }
         cloud->points.push_back(p);
       }

@@ -223,7 +223,8 @@
                 (substringp tp (send obj :type))) ;; found target
         (add-to-xlist (send obj :pose))
         ))
-    (setq covlst (calc-covariance))
+    (setf covlst (calc-covariance))
+    ;; (setq covlst (calc-covariance))
     ;; (ros::ros-info "covlst:~A" covlst)
     (send tmp-pose :position :x (read relative-pose-stream nil))
     (send tmp-pose :position :y (read relative-pose-stream nil))
@@ -247,11 +248,16 @@
     (setf (elt tmp-cov 0) (car covlst))
     (setf (elt tmp-cov 7) (cadr covlst))
     (setf (elt tmp-cov 14) (caddr covlst))
-
-    (send tmp-posewithcovariancestamped :header (send object-name :header))
-    (send tmp-posewithcovariancestamped :pose :pose (send tmp-posestamped :pose))
-    (send tmp-posewithcovariancestamped :pose :covariance tmp-cov)
-    (ros::publish "/simplecov" tmp-posewithcovariancestamped)
+    (unless (eq (car covlst) 0.0)
+      (ros::ros-info "simplecov x:~A y:~A z:~A" (car covlst) (cadr covlst) (caddr covlst))
+      (setf (elt tmp-cov 21) 0.1)
+      (setf (elt tmp-cov 28) 0.1)
+      (setf (elt tmp-cov 35) 0.1)
+      (send tmp-posewithcovariancestamped :header (send object-name :header))
+      (send tmp-posewithcovariancestamped :pose :pose (send tmp-posestamped :pose))
+      (send tmp-posewithcovariancestamped :pose :covariance tmp-cov)
+      (ros::publish "/simplecov" tmp-posewithcovariancestamped)
+      )
     ))
 
 

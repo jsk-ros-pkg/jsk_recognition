@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.14 (2015-08-13)
+-------------------
 * [jsk_perception] pub posewithcovariancestamped
 * [jsk_perception] Add nodelet ColorizeFloatImage to colorize generic float image
 * sliding_window_object_detector : opencv3 has different API for cv::ml::SVM

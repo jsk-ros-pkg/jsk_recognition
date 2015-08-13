@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.14 (2015-08-13)
+-------------------
 * [jsk_pcl_ros/PoseWithCovarianceStampedtoGussianPointCloud] Add new
   normalize method: normalize_area and normalize_height
 * [jsk_pcl_ros/PoseWithCovarianceStampedtoGussianPointCloud] Fix to apply sqrt

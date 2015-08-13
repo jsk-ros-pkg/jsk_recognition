@@ -2,8 +2,8 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.14 (2015-08-13)
+-------------------
 * CMakeLists.txt, imagefeatures.cpp.in: a lot of detector is not available on opencv3
 * [imagesift] modify mask region when mask region has no region
 * [imagesift] Add sample of imagesift

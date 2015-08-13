@@ -2,6 +2,24 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_perception] pub posewithcovariancestamped
+* [jsk_perception] Add nodelet ColorizeFloatImage to colorize generic float image
+* sliding_window_object_detector : opencv3 has different API for cv::ml::SVM
+* src/virtual_camera_mono: use cv.hpp and opencv2 code for cv::getPerspectiveTransform
+* src/snake_segmentation: snake (legacy.hpp) is disabled on opencv3
+* src/point_pose_extractor: use cv.hpp
+* linemode is moved to opencv_contrib, disabled for now (only for opencv3)
+* src/calc_flow.cpp: use cv.hpp instead of cv.h
+* background_substraction: cv::BackgroundSubtractorMOG2 is abstract type for opencv3
+* CMakeLists.txt: depends on cv_bridge, not opencv (jsk_perception)
+* [jsk_perception] Update readme
+* [jsk_perception] Add simple_classifier*
+* [jsk_perception] Scripts for bof and its hist extractor
+* do not convert image encode in kmeans and gaussian_blur
+* Contributors: Kei Okada, Kentaro Wada, Ryohei Ueda, Hitoshi Kamada, Masaki Murooka
+
 0.2.13 (2015-06-11)
 -------------------
 * [jsk_perception] Use dynamic_reconfigure in ImageTimeDiff

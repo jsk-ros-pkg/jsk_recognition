@@ -2,6 +2,15 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_recognition_msgs] Add value field to BoundingBox to represent likelihood
+* [jsk_recognition_msgs] HistogramWithRange message to represent rich histogram
+  data
+* [jsk_pcl_ros] Add config topic to chain heightmap configuration
+* [jsk_perception] Scripts for bof and its hist extractor
+* Contributors: Kentaro Wada, Ryohei Ueda
+
 0.2.13 (2015-06-11)
 -------------------
 * [jsk_perception] Use ImageDifferenceValue.msg instead of Float32Stamped.msg

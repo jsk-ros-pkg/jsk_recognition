@@ -2,6 +2,12 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* CMakeLists.txt: depends on cv_bridge, not opencv checkerboard_detector
+* src/checkerboard_calibration.cpp: use cv.hpp instead of cv.h
+* Contributors: Kei Okada
+
 0.2.13 (2015-06-11)
 -------------------
 * [checkerboard_detector] Add message_throttle parameter

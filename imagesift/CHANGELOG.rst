@@ -2,6 +2,15 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* CMakeLists.txt, imagefeatures.cpp.in: a lot of detector is not available on opencv3
+* [imagesift] modify mask region when mask region has no region
+* [imagesift] Add sample of imagesift
+* [imagesift] Use super class nodehandler
+* [imagesift] Make imagesift as nodelet
+* Contributors: Kei Okada, Kentaro Wada, Hitoshi Kamada
+
 0.2.13 (2015-06-11)
 -------------------
 * [imagesift] Add header file of imagesift

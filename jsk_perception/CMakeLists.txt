@@ -168,11 +168,12 @@ add_dependencies(rectangle_detector       ${PROJECT_NAME}_gencfg ${PROJECT_NAME}
 add_dependencies(color_histogram_sliding_matcher       ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 
 
-#add_custom_command(
-#  OUTPUT  ${PROJECT_SOURCE_DIR}/template
-#  DEPENDS ${PROJECT_SOURCE_DIR}/src/eusmodel_template_gen.l
-#  COMMAND ${PROJECT_SOURCE_DIR}/src/eusmodel_template_gen.sh)
-#add_custom_target(eusmodel_template ALL DEPENDS ${PROJECT_SOURCE_DIR}/template)
+add_custom_command(
+ OUTPUT  ${PROJECT_SOURCE_DIR}/template
+ DEPENDS ${PROJECT_SOURCE_DIR}/src/eusmodel_template_gen.l
+ COMMAND ${PROJECT_SOURCE_DIR}/src/eusmodel_template_gen.sh
+ WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+add_custom_target(eusmodel_template ALL DEPENDS ${PROJECT_SOURCE_DIR}/template)
 
 # Download model data
 execute_process(

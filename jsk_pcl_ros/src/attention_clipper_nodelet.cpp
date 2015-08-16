@@ -433,10 +433,10 @@ namespace jsk_pcl_ros
         // indices->indices may include NaN and inf points
         // https://github.com/jsk-ros-pkg/jsk_recognition/issues/888
         pcl::PointIndices non_nan_indices;
-        for (size_t i = 0; i < indices->indices.size(); i++) {
-          pcl::PointXYZ p = cloud->points[indices->indices[i]];
+        for (size_t j = 0; j < indices->indices.size(); j++) {
+          pcl::PointXYZ p = cloud->points[indices->indices[j]];
           if (pcl_isfinite(p.x) && pcl_isfinite(p.y) && pcl_isfinite(p.z)) {
-            non_nan_indices.indices.push_back(indices->indices[i]);
+            non_nan_indices.indices.push_back(indices->indices[j]);
           }
         }
         PCLIndicesMsg indices_msg;
@@ -467,15 +467,9 @@ namespace jsk_pcl_ros
       pub_cluster_indices_.publish(cluster_indices_msg);
       publishBoundingBox(msg->header);
     }
-    catch (tf2::TransformException &e) {
+    catch (std::runtime_error &e) {
       NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     } 
-    catch (tf2::ConnectivityException &e) {
-      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
-    }
-    catch (tf2::InvalidArgumentException &e) {
-      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
-    }
   }
 
   void AttentionClipper::clip(const sensor_msgs::CameraInfo::ConstPtr& msg)
@@ -530,15 +524,9 @@ namespace jsk_pcl_ros
       pub_mask_.publish(mask_bridge.toImageMsg());
       publishBoundingBox(msg->header);
     }
-    catch (tf2::TransformException &e) {
+    catch (std::runtime_error &e) {
       NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     } 
-    catch (tf2::ConnectivityException &e) {
-      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
-    }
-    catch (tf2::InvalidArgumentException &e) {
-      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
-    }
   }
 
   void AttentionClipper::updateDiagnostic(

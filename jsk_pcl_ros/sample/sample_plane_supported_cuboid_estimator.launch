@@ -1,0 +1,49 @@
+<launch>
+  <node pkg="jsk_pcl_ros" type="sample_simulate_tabletop_cloud.py"
+        name="sample_simulate_tabletop_cloud" />
+  <node pkg="jsk_pcl_ros" type="plane_supported_cuboid_estimator"
+        name="plane_supported_cuboid_estimator" output="screen"
+        >
+    <remap from="~input" to="sample_simulate_tabletop_cloud/output"/>
+    <remap from="~input/polygon" to="sample_simulate_tabletop_cloud/output/polygon" />
+    <remap from="~input/coefficients" to="sample_simulate_tabletop_cloud/output/coef" />
+    <rosparam>
+      init_local_position_z_min: 0.01
+      init_local_position_z_max: 0.25
+      step_x_variance: 0.02
+      step_y_variance: 0.02
+      step_z_variance: 0.00001
+      step_roll_variance: 0.000001
+      step_pitch_variance: 0.000001
+      step_yaw_variance: 0.001
+      step_dx_variance: 0.000000001
+      step_dy_variance: 0.000000001
+      step_dz_variance: 0.000000001
+      init_dx_variance: 0.000000001
+      init_dy_variance: 0.000000001
+      init_dz_variance: 0.000000001
+      init_dx_mean: 0.2
+      init_dy_mean: 0.2
+      init_dz_mean: 0.2
+      particle_num: 10000
+    </rosparam>
+  </node>
+  <node pkg="jsk_rqt_plugins" type="rqt_histogram_plot" name="x_histogram"
+        args="/plane_supported_cuboid_estimator/output/histogram/global/x" />
+  <node pkg="jsk_rqt_plugins" type="rqt_histogram_plot" name="y_histogram"
+        args="/plane_supported_cuboid_estimator/output/histogram/global/y" />
+  <node pkg="jsk_rqt_plugins" type="rqt_histogram_plot" name="z_histogram"
+        args="/plane_supported_cuboid_estimator/output/histogram/global/z" />
+  <node pkg="jsk_rqt_plugins" type="rqt_histogram_plot" name="roll_histogram"
+        args="/plane_supported_cuboid_estimator/output/histogram/global/roll" />
+  <node pkg="jsk_rqt_plugins" type="rqt_histogram_plot" name="pitch_histogram"
+        args="/plane_supported_cuboid_estimator/output/histogram/global/pitch" />
+  <node pkg="jsk_rqt_plugins" type="rqt_histogram_plot" name="yaw_histogram"
+        args="/plane_supported_cuboid_estimator/output/histogram/global/yaw" />
+  <node pkg="jsk_rqt_plugins" type="rqt_histogram_plot" name="dx_histogram"
+        args="/plane_supported_cuboid_estimator/output/histogram/dx" />
+  <node pkg="jsk_rqt_plugins" type="rqt_histogram_plot" name="dy_histogram"
+        args="/plane_supported_cuboid_estimator/output/histogram/dy" />
+  <node pkg="jsk_rqt_plugins" type="rqt_histogram_plot" name="dz_histogram"
+        args="/plane_supported_cuboid_estimator/output/histogram/dz" />
+</launch>

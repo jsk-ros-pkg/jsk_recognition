@@ -78,6 +78,10 @@
   </class>
 </library>
 <library path="libjsk_pcl_ros">
+  <class name="jsk_pcl/PlaneSupportedCuboidEstimator"
+         type="jsk_pcl_ros::PlaneSupportedCuboidEstimator"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_pcl/PointCloudLocalization"
          type="jsk_pcl_ros::PointCloudLocalization"
          base_class_type="nodelet::Nodelet">

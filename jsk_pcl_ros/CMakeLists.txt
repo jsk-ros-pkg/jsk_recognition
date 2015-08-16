@@ -71,6 +71,7 @@ add_service_files(FILES SwitchTopic.srv
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/PlaneSupportedCuboidEstimator.cfg
   cfg/PoseWithCovarianceStampedToGaussianPointCloud.cfg
   cfg/HeightmapMorphologicalFiltering.cfg
   cfg/HeightmapConverter.cfg
@@ -163,6 +164,8 @@ jsk_pcl_nodelet(src/fisheye_sphere_publisher_nodelet.cpp "jsk_pcl/FisheyeSphereP
 #   "jsk_pcl/NodeletImageMUX" "image_mux")
 # jsk_pcl_nodelet(src/image_demux_nodelet.cpp
 #   "jsk_pcl/NodeletImageDEMUX" "image_demux")
+jsk_pcl_nodelet(src/plane_supported_cuboid_estimator_nodelet.cpp
+  "jsk_pcl/PlaneSupportedCuboidEstimator" "plane_supported_cuboid_estimator")
 jsk_pcl_nodelet(src/image_rotate_nodelet.cpp
   "jsk_pcl/ImageRotateNodelet" "image_rotate")
 jsk_pcl_nodelet(src/octree_change_publisher_nodelet.cpp
@@ -367,6 +370,7 @@ jsk_pcl_nodelet(src/pcd_reader_with_pose_nodelet.cpp
 
 add_library(jsk_pcl_ros_base SHARED
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
+  src/random_util.cpp
   src/pcl_conversion_util.cpp src/pcl_util.cpp
   src/region_adjacency_graph.cpp
 

@@ -2504,6 +2504,70 @@ Publishes camera pose using pcl/KinfuLS
 
   Registered scene pointcloud
 
+### jsk\_pcl/PlaneSupportedCuboidEstimator
+![](images/plane_supported_cuboid_estimator.png)
+
+Estimate a cuboid on a plane. Plane information is used as hint.
+It uses particle filter to estimate pose of cuboid.
+
+#### Subscribing Topics
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Input pointcloud
+* `~input/polygon` (`jsk_recognition_msgs/PolygonArray`)
+* `~input/coefficients` (`jsk_recognition_msgs/ModelCoefficientsArray`)
+
+  Planes which may support cuboid object
+
+#### Publishing Topics
+* `~output/result` (`jsk_recognition_msgs/BoundingBoxArray`)
+
+  Result of estimation as bonding box.
+* `~output/particles` (`sensor_msgs/PointCloud2`)
+
+  Particles as pointcloud (xyzi)
+* `~output/histogram/global/x` (`jsk_recognition_msgs/HistogramWithRange`)
+* `~output/histogram/global/y` (`jsk_recognition_msgs/HistogramWithRange`)
+* `~output/histogram/global/z` (`jsk_recognition_msgs/HistogramWithRange`)
+* `~output/histogram/global/roll` (`jsk_recognition_msgs/HistogramWithRange`)
+* `~output/histogram/global/pitch` (`jsk_recognition_msgs/HistogramWithRange`)
+* `~output/histogram/global/yaw` (`jsk_recognition_msgs/HistogramWithRange`)
+* `~output/histogram/dx` (`jsk_recognition_msgs/HistogramWithRange`)
+* `~output/histogram/dy` (`jsk_recognition_msgs/HistogramWithRange`)
+* `~output/histogram/dz` (`jsk_recognition_msgs/HistogramWithRange`)
+
+  Histograms of particles for each dimension
+
+#### Advertising Services
+* `~reset` (`std_srvs/Empty`)
+
+  Reset particles filters.
+
+#### Parameters
+* `~init_local_position_z_min`
+* `~init_local_position_z_max`
+* `~use_init_world_position_z_model`
+* `~init_local_orientation_roll_variance`
+* `~init_local_orientation_pitch_variance`
+* `~init_local_orientation_yaw_mean`
+* `~init_local_orientation_yaw_variance`
+* `~init_dx_mean`
+* `~init_dx_variance`
+* `~init_dy_mean`
+* `~init_dy_variance`
+* `~init_dz_mean`
+* `~init_dz_variance`
+* `~particle_num`
+* `~step_x_variance`
+* `~step_y_variance`
+* `~step_z_variance`
+* `~step_roll_variance`
+* `~step_pitch_variance`
+* `~step_yaw_variance`
+* `~step_dx_variance`
+* `~step_dy_variance`
+* `~step_dz_variance`
+
 ### jsk\_pcl/PCDReaderWithPose
 Publish cloud with given pose
 

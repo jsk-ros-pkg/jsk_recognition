@@ -624,6 +624,41 @@ namespace jsk_pcl_ros
     return vertices_.size() == 3;
   }
 
+  void Polygon::getLocalMinMax(double& min_x, double& min_y,
+                               double& max_x, double& max_y)
+  {
+    min_x = DBL_MAX;
+    min_y = DBL_MAX;
+    max_x = - DBL_MAX;
+    max_y = - DBL_MAX;
+    
+    Eigen::Affine3f inv_coords = coordinates().inverse();
+    for (size_t i = 0; i < vertices_.size(); i++) {
+      // Convert vertices into local coordinates
+      Eigen::Vector3f local_point = inv_coords * vertices_[i];
+      min_x = ::fmin(local_point[0], min_x);
+      min_y = ::fmin(local_point[1], min_y);
+      max_x = ::fmax(local_point[0], max_x);
+      max_y = ::fmax(local_point[1], max_y);
+    }
+  }
+  
+  Eigen::Vector3f Polygon::randomSampleLocalPoint(boost::mt19937& random_generator)
+  {
+    // Compute min/max point
+    double min_x, min_y, max_x, max_y;
+    getLocalMinMax(min_x, min_y, max_x, max_y);
+    std::vector<Polygon::Ptr> triangles = decomposeToTriangles();
+    while (true) {
+      double x = randomUniform(min_x, max_x, random_generator);
+      double y = randomUniform(min_y, max_y, random_generator);
+      Eigen::Vector3f v(x, y, 0);
+      if (isInside(v)) {
+        return v;
+      }
+    }
+  }
+
   size_t Polygon::getNumVertices() {
     return vertices_.size();
   }
@@ -855,6 +890,18 @@ namespace jsk_pcl_ros
       vertices.push_back(v);
     }
     return Polygon(vertices);
+  }
+
+  Polygon::Ptr Polygon::fromROSMsgPtr(const geometry_msgs::Polygon& polygon)
+  {
+    Vertices vertices;
+    for (size_t i = 0; i < polygon.points.size(); i++) {
+      Eigen::Vector3f v;
+      pointFromXYZToVector<geometry_msgs::Point32, Eigen::Vector3f>(
+        polygon.points[i], v);
+      vertices.push_back(v);
+    }
+    return Polygon::Ptr(new Polygon(vertices));
   }
   
   bool Polygon::isInside(const Eigen::Vector3f& p)

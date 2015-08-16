@@ -126,7 +126,7 @@ generate_dynamic_reconfigure_options(
 find_package(OpenCV REQUIRED core imgproc)
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
-
+link_libraries(${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
 macro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
   jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
     jsk_pcl_nodelet_sources jsk_pcl_nodelet_executables)
@@ -387,19 +387,12 @@ else (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
     jsk_pcl_ros_base)
 endif (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
 
-target_link_libraries(jsk_pcl_ros_util
-  ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp
-  jsk_pcl_ros_base)
-target_link_libraries(jsk_pcl_ros_base
-  ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
-target_link_libraries(jsk_pcl_ros_moveit
-  ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
-
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 add_dependencies(jsk_pcl_ros_util ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 add_dependencies(jsk_pcl_ros_base ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 add_dependencies(jsk_pcl_ros_moveit ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
-
+add_executable(bench_ransac_plane_estimation bench/bench_ransac_plane_estimation.cpp)
+target_link_libraries(bench_ransac_plane_estimation jsk_pcl_ros)
 
 generate_messages(DEPENDENCIES
   ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_footstep_msgs)

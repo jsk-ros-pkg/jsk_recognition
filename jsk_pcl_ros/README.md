@@ -2574,6 +2574,15 @@ It uses particle filter to estimate pose of cuboid.
 * `~range_likelihood_local_max_z`
 
   Allowed inimum and maximum distance from plane.
+* `~use_occlusion_likelihood` (default: `False`)
+
+  Take occlusion into acount when compute likelihood.
+* `~min_inliers` (default: `10`)
+
+  Minimum number of inliers.
+* `~outlier_distance` (default: `0.01`)
+
+  Threshold to regard points as inlier.
 
 ### jsk\_pcl/PCDReaderWithPose
 Publish cloud with given pose

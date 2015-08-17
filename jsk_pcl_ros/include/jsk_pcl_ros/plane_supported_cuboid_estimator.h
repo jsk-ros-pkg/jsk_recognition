@@ -165,6 +165,30 @@ namespace pcl
         return box;
       }
 
+      inline std::set<int> visibleFaceIndices(const Eigen::Vector3f local_view_point) const
+      {
+        std::set<int> visible_faces;
+        if (local_view_point[0] > 0) {
+          visible_faces.insert(0);
+        }
+        else {
+          visible_faces.insert(2);
+        }
+        if (local_view_point[1] > 0) {
+          visible_faces.insert(1);
+        }
+        else {
+          visible_faces.insert(3);
+        }
+        if (local_view_point[2] > 0) {
+          visible_faces.insert(4);
+        }
+        else {
+          visible_faces.insert(5);
+        }
+        return visible_faces;
+      }
+
       // V should be on local coordinates.
       inline double distanceToPlane(const Eigen::Vector3f& v, const int plane_index) const
       {
@@ -207,12 +231,6 @@ namespace pcl
         return std::abs(n.dot(v) + d) / sqrt(n.dot(n) + d * d);
       }
 
-      inline int nearestPlaneIndex2(const Eigen::Vector3f& local_v) const
-      {
-        return 0;
-      }
-
-      // cube 
       inline int nearestPlaneIndex(const Eigen::Vector3f& local_v) const
       {
         const float x = local_v[0];
@@ -401,6 +419,8 @@ namespace jsk_pcl_ros
     bool use_range_likelihood_;
     double range_likelihood_local_min_z_;
     double range_likelihood_local_max_z_;
+    bool use_occlusion_likelihood_;
+    std::string sensor_frame_;
     boost::mt19937 random_generator_;
 
     pcl::tracking::ROSCollaborativeParticleFilterTracker<pcl::PointXYZ, pcl::tracking::ParticleCuboid>::Ptr tracker_;

@@ -12,7 +12,7 @@
       init_local_position_z_max: 0.25
       step_x_variance: 0.02
       step_y_variance: 0.02
-      step_z_variance: 0.00001
+      step_z_variance: 0.0001
       step_roll_variance: 0.000001
       step_pitch_variance: 0.000001
       step_yaw_variance: 0.001
@@ -26,6 +26,10 @@
       init_dy_mean: 0.2
       init_dz_mean: 0.2
       particle_num: 10000
+      use_occlusion_likelihood: false
+      use_range_likelihood: true
+      range_likelihood_local_min_z: 0.01
+      range_likelihood_local_max_z: 0.3
     </rosparam>
   </node>
   <node pkg="jsk_rqt_plugins" type="rqt_histogram_plot" name="x_histogram"

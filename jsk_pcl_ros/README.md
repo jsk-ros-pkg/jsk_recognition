@@ -2567,6 +2567,13 @@ It uses particle filter to estimate pose of cuboid.
 * `~step_dx_variance`
 * `~step_dy_variance`
 * `~step_dz_variance`
+* `~use_range_likelihood` (default: `False`)
+
+  Set to true if you want to update likelihood based on geometry respected to plane.
+* `~range_likelihood_local_min_z`
+* `~range_likelihood_local_max_z`
+
+  Allowed inimum and maximum distance from plane.
 
 ### jsk\_pcl/PCDReaderWithPose
 Publish cloud with given pose

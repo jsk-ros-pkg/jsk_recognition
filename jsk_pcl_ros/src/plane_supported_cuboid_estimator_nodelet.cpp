@@ -261,10 +261,9 @@ namespace jsk_pcl_ros
       likelihood *= 0.0;
     }
     Eigen::Affine3f p_coords = p.toEigenMatrix();
-    Eigen::Affine3f p_inv_coords = p_coords.inverse();
-    float local_z = p_inv_coords.translation()[2];
-    
-    //likelihood *= binaryLikelihood(local_z, init_local_position_z_min_, init_local_position_z_max_);
+    // Local distance from plane
+    float local_z = p.plane->distanceToPoint(Eigen::Vector3f(p_coords.translation()));
+    likelihood *= binaryLikelihood(local_z, range_likelihood_local_min_z_, range_likelihood_local_max_z_);
     return likelihood;
   }
 
@@ -324,8 +323,10 @@ namespace jsk_pcl_ros
   void PlaneSupportedCuboidEstimator::likelihood(pcl::PointCloud<pcl::PointXYZ>::ConstPtr input,
                                                  pcl::tracking::ParticleCuboid& p)
   {
-    double range_likelihood = rangeLikelihood(p);
-    range_likelihood = 1.0;
+    double range_likelihood = 1.0;
+    if (use_range_likelihood_) {
+      range_likelihood = rangeLikelihood(p);
+    }
     //p.weight = std::abs(p.z);
     if (range_likelihood == 0.0) {
       p.weight = range_likelihood;
@@ -417,6 +418,9 @@ namespace jsk_pcl_ros
     step_dx_variance_ = config.step_dx_variance;
     step_dy_variance_ = config.step_dy_variance;
     step_dz_variance_ = config.step_dz_variance;
+    use_range_likelihood_ = config.use_range_likelihood;
+    range_likelihood_local_min_z_ = config.range_likelihood_local_min_z;
+    range_likelihood_local_max_z_ = config.range_likelihood_local_max_z;
   }
 
   bool PlaneSupportedCuboidEstimator::resetCallback(std_srvs::EmptyRequest& req,

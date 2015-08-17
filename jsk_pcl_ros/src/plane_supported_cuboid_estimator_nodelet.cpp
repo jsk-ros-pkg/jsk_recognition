@@ -54,6 +54,7 @@ namespace jsk_pcl_ros
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&PlaneSupportedCuboidEstimator::configCallback, this, _1, _2);
     srv_->setCallback (f);
+    pnh_->param("sensor_frame", sensor_frame_, std::string(""));
     pub_result_ = pnh_->advertise<jsk_recognition_msgs::BoundingBoxArray>("output/result", 1);
     pub_particles_ = pnh_->advertise<sensor_msgs::PointCloud2>("output/particles", 1);
     pub_candidate_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>("output/candidate_cloud", 1);
@@ -302,14 +303,29 @@ namespace jsk_pcl_ros
     Eigen::Affine3f pose_inv = pose.inverse();
     double error = 1.0;
     size_t inliners = 0;
+    const Eigen::Vector3f vp(1000, 1000, 1000);
+    const Eigen::Vector3f local_vp = pose_inv * vp;
+    std::set<int> visible_faces = p.visibleFaceIndices(local_vp);
     for (size_t i = 0; i < candidate_cloud_->points.size(); i++) {
       Eigen::Vector3f v = candidate_cloud_->points[i].getVector3fMap();
       Eigen::Vector3f local_v = pose_inv * v;
       // Brute force
-      double d = p.distanceToPlane(local_v, p.nearestPlaneIndex(local_v));
-      if (d < 0.1) {
-        error *= 1 / (1 + pow(d, 2));
-        ++inliners;
+      if (use_occlusion_likelihood_) {
+        int nearest_index = p.nearestPlaneIndex(local_v);
+        if (visible_faces.find(nearest_index) != visible_faces.end()) {
+          double d = p.distanceToPlane(local_v, nearest_index);
+          if (d < 0.1) {
+            error *= 1 / (1 + pow(d, 2));
+            ++inliners;
+          }
+        }
+      }
+      else {
+        double d = p.distanceToPlane(local_v, p.nearestPlaneIndex(local_v));
+        if (d < 0.1) {
+          error *= 1 / (1 + pow(d, 2));
+          ++inliners;
+        }
       }
     }
     if (inliners < 10) {
@@ -421,6 +437,7 @@ namespace jsk_pcl_ros
     use_range_likelihood_ = config.use_range_likelihood;
     range_likelihood_local_min_z_ = config.range_likelihood_local_min_z;
     range_likelihood_local_max_z_ = config.range_likelihood_local_max_z;
+    use_occlusion_likelihood_ = config.use_occlusion_likelihood;
   }
 
   bool PlaneSupportedCuboidEstimator::resetCallback(std_srvs::EmptyRequest& req,

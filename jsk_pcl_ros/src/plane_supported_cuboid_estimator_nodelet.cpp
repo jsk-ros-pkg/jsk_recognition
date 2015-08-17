@@ -314,7 +314,7 @@ namespace jsk_pcl_ros
         int nearest_index = p.nearestPlaneIndex(local_v);
         if (visible_faces.find(nearest_index) != visible_faces.end()) {
           double d = p.distanceToPlane(local_v, nearest_index);
-          if (d < 0.1) {
+          if (d < outlier_distance_) {
             error *= 1 / (1 + pow(d, 2));
             ++inliners;
           }
@@ -322,13 +322,13 @@ namespace jsk_pcl_ros
       }
       else {
         double d = p.distanceToPlane(local_v, p.nearestPlaneIndex(local_v));
-        if (d < 0.1) {
+        if (d < outlier_distance_) {
           error *= 1 / (1 + pow(d, 2));
           ++inliners;
         }
       }
     }
-    if (inliners < 10) {
+    if (inliners < min_inliers_) {
       return 0;
     }
     else {
@@ -438,6 +438,8 @@ namespace jsk_pcl_ros
     range_likelihood_local_min_z_ = config.range_likelihood_local_min_z;
     range_likelihood_local_max_z_ = config.range_likelihood_local_max_z;
     use_occlusion_likelihood_ = config.use_occlusion_likelihood;
+    min_inliers_ = config.min_inliers;
+    outlier_distance_ = config.outlier_distance;
   }
 
   bool PlaneSupportedCuboidEstimator::resetCallback(std_srvs::EmptyRequest& req,

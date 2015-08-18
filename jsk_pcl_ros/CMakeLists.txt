@@ -38,6 +38,7 @@ find_package(catkin REQUIRED COMPONENTS
   ${ML_CLASSIFIERS} sklearn jsk_topic_tools
   image_geometry
   jsk_footstep_msgs
+  interactive_markers
   laser_assembler moveit_ros_perception)
 # only run in hydro
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
@@ -71,6 +72,7 @@ add_service_files(FILES SwitchTopic.srv
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/InteractiveCuboidLikelihood.cfg
   cfg/PlaneSupportedCuboidEstimator.cfg
   cfg/PoseWithCovarianceStampedToGaussianPointCloud.cfg
   cfg/HeightmapMorphologicalFiltering.cfg
@@ -166,6 +168,8 @@ jsk_pcl_nodelet(src/fisheye_sphere_publisher_nodelet.cpp "jsk_pcl/FisheyeSphereP
 #   "jsk_pcl/NodeletImageDEMUX" "image_demux")
 jsk_pcl_nodelet(src/plane_supported_cuboid_estimator_nodelet.cpp
   "jsk_pcl/PlaneSupportedCuboidEstimator" "plane_supported_cuboid_estimator")
+jsk_pcl_nodelet(src/interactive_cuboid_likelihood_nodelet.cpp
+  "jsk_pcl/InteractiveCuboidLikelihood" "interactive_cuboid_likelihood")
 jsk_pcl_nodelet(src/image_rotate_nodelet.cpp
   "jsk_pcl/ImageRotateNodelet" "image_rotate")
 jsk_pcl_nodelet(src/octree_change_publisher_nodelet.cpp

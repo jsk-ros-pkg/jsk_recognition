@@ -1,8 +1,13 @@
 <launch>
   <node pkg="jsk_pcl_ros" type="sample_simulate_tabletop_cloud.py"
         name="sample_simulate_tabletop_cloud" />
+  <node pkg="jsk_pcl_ros" type="interactive_cuboid_likelihood"
+        name="interactive_cuboid_likelihood" output="screen"
+        >
+    <remap from="~input" to="plane_supported_cuboid_estimator/output/candidate_cloud" />
+  </node>
   <node pkg="jsk_pcl_ros" type="plane_supported_cuboid_estimator"
-        name="plane_supported_cuboid_estimator" output="screen"
+        name="plane_supported_cuboid_estimator" output="log"
         >
     <remap from="~input" to="sample_simulate_tabletop_cloud/output"/>
     <remap from="~input/polygon" to="sample_simulate_tabletop_cloud/output/polygon" />

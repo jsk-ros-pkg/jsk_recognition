@@ -105,6 +105,13 @@ namespace pcl
         return getTransformation(x, y, z, roll, pitch, yaw);
       }
 
+      inline void fromEigen(const Eigen::Affine3f& pose) 
+      {
+        Eigen::Vector3f pos(pose.translation());
+        getEulerAngles(pose, roll, pitch, yaw);
+        getVector3fMap() = pos;
+      }
+
       inline void zero()
       {
         x = y = z = roll = pitch = yaw = dx = dy = dz = weight = 0.0;
@@ -323,6 +330,105 @@ namespace pcl
 
 namespace jsk_pcl_ros
 {
+
+  // Utility function to compute likelihood
+  inline double binaryLikelihood(double v, double min, double max)
+  {
+    if (v < min) {
+      return 0;
+    }
+    else if (v > max) {
+      return 0;
+    }
+    else {
+      return 1;
+    }
+  }
+  
+  template <class Config>
+  double rangeLikelihood(const pcl::tracking::ParticleCuboid& p,
+                         pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud,
+                         const Config& config)
+  {
+    double likelihood = 1.0;
+    if (!p.plane) {
+      // Do nothing
+    }
+    else if (p.plane->isInside(p.getVector3fMap())) {
+      likelihood *= 1.0;
+    }
+    else {
+      likelihood *= 0.0;
+    }
+    Eigen::Affine3f p_coords = p.toEigenMatrix();
+    // Local distance from plane
+    float local_z = p.plane->distanceToPoint(Eigen::Vector3f(p_coords.translation()));
+    likelihood *= binaryLikelihood(local_z, config.range_likelihood_local_min_z, config.range_likelihood_local_max_z);
+    return likelihood;
+  }
+  
+  template <class Config>
+  double distanceFromPlaneBasedError(
+    const pcl::tracking::ParticleCuboid& p,
+    pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud,
+    const Config& config)
+  {
+    Eigen::Affine3f pose = p.toEigenMatrix();
+    Eigen::Affine3f pose_inv = pose.inverse();
+    double error = 1.0;
+    size_t inliners = 0;
+    const Eigen::Vector3f vp(1000, 1000, 1000);
+    const Eigen::Vector3f local_vp = pose_inv * vp;
+    std::set<int> visible_faces = p.visibleFaceIndices(local_vp);
+    for (size_t i = 0; i < cloud->points.size(); i++) {
+      Eigen::Vector3f v = cloud->points[i].getVector3fMap();
+      Eigen::Vector3f local_v = pose_inv * v;
+      // Brute force
+      if (config.use_occlusion_likelihood) {
+        int nearest_index = p.nearestPlaneIndex(local_v);
+        if (visible_faces.find(nearest_index) != visible_faces.end()) {
+          double d = p.distanceToPlane(local_v, nearest_index);
+          if (d < config.outlier_distance) {
+            error *= 1 / (1 + pow(d, 2));
+            ++inliners;
+          }
+        }
+      }
+      else {
+        double d = p.distanceToPlane(local_v, p.nearestPlaneIndex(local_v));
+        if (d < config.outlier_distance) {
+          error *= 1 / (1 + pow(d, 2));
+          ++inliners;
+        }
+      }
+    }
+    if (inliners < config.min_inliers) {
+      return 0;
+    }
+    else {
+      return error * inliners;
+    }
+  }
+
+  
+  template <class Config>
+  double computeLikelihood(const pcl::tracking::ParticleCuboid& p,
+                           pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud,
+                           const Config& config)
+  {
+    double range_likelihood = 1.0;
+    if (config.use_range_likelihood) {
+      range_likelihood = rangeLikelihood(p, cloud, config);
+    }
+    //p.weight = std::abs(p.z);
+    if (range_likelihood == 0.0) {
+     return range_likelihood;
+    }
+    else {
+      return range_likelihood * distanceFromPlaneBasedError(p, cloud, config);
+    }    
+  }
+  
   class PlaneSupportedCuboidEstimator: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
@@ -354,14 +460,9 @@ namespace jsk_pcl_ros
     // Likelihood
     virtual void likelihood(pcl::PointCloud<pcl::PointXYZ>::ConstPtr input,
                             pcl::tracking::ParticleCuboid& p);
-    virtual double rangeLikelihood(const pcl::tracking::ParticleCuboid& p);
-    virtual double binaryLikelihood(double v, double min, double max);
-    virtual double computeNumberOfPoints(
-      const pcl::tracking::ParticleCuboid& p);
     virtual void publishHistogram(ParticleCloud::Ptr particles, int index,
                                   ros::Publisher& pub,
                                   const std_msgs::Header& header);
-    virtual double distanceFromPlaneBasedError(const Particle& p);
     virtual pcl::PointCloud<pcl::PointXYZI>::Ptr convertParticlesToXYZI(ParticleCloud::Ptr particles);
     virtual bool resetCallback(std_srvs::EmptyRequest& req,
                                std_srvs::EmptyResponse& res);
@@ -389,6 +490,7 @@ namespace jsk_pcl_ros
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     // Parameters for initialization of particles
     // local position z is sampled by uniform distribution
+    Config config_;
     double init_local_position_z_min_;
     double init_local_position_z_max_;
     bool use_init_world_position_z_model_;

@@ -2510,6 +2510,9 @@ Publishes camera pose using pcl/KinfuLS
 Estimate a cuboid on a plane. Plane information is used as hint.
 It uses particle filter to estimate pose of cuboid.
 
+`jsk_pcl/InteractiveCuboidLikelihood` is a helper nodelet
+to confirm likelihood function behaves as expected.
+
 #### Subscribing Topics
 * `~input` (`sensor_msgs/PointCloud2`)
 

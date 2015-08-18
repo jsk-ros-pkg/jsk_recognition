@@ -51,10 +51,18 @@ namespace jsk_pcl_ros
       boost::bind (&InteractiveCuboidLikelihood::configCallback, this, _1, _2);
     srv_->setCallback (f);
     sub_ = pnh_->subscribe("input", 1, &InteractiveCuboidLikelihood::likelihood, this);
+    // Cuboid
     server_.reset(new interactive_markers::InteractiveMarkerServer(getName()));
     visualization_msgs::InteractiveMarker int_marker = particleToInteractiveMarker(particle_);
     server_->insert(int_marker, boost::bind(&InteractiveCuboidLikelihood::processFeedback, this, _1));
     server_->applyChanges();
+
+    // SupportPlane
+    plane_server_.reset(new interactive_markers::InteractiveMarkerServer(getName() + "_plane"));
+    plane_pose_ = Eigen::Affine3f::Identity();
+    visualization_msgs::InteractiveMarker plane_int_marker = planeInteractiveMarker();
+    plane_server_->insert(plane_int_marker, boost::bind(&InteractiveCuboidLikelihood::processPlaneFeedback, this, _1));
+    plane_server_->applyChanges();
   }
 
   void InteractiveCuboidLikelihood::subscribe()
@@ -75,6 +83,13 @@ namespace jsk_pcl_ros
     tf::poseMsgToEigen(feedback->pose, pose);
     particle_.fromEigen(pose);
   }
+  
+  void InteractiveCuboidLikelihood::processPlaneFeedback(
+    const visualization_msgs::InteractiveMarkerFeedback::ConstPtr& feedback)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    tf::poseMsgToEigen(feedback->pose, plane_pose_);
+  }
 
   void InteractiveCuboidLikelihood::likelihood(
     const sensor_msgs::PointCloud2::ConstPtr& msg)
@@ -88,7 +103,16 @@ namespace jsk_pcl_ros
                                     ros::Duration(0.0));
     Eigen::Vector3f vp;
     tf::vectorTFToEigen(transform.getOrigin(), vp);
-
+    Vertices vertices;
+    vertices.push_back(Eigen::Vector3f(plane_pose_ * (Eigen::Vector3f::UnitX() + Eigen::Vector3f::UnitY())));
+    vertices.push_back(Eigen::Vector3f(plane_pose_ * (- Eigen::Vector3f::UnitX() + Eigen::Vector3f::UnitY())));
+    vertices.push_back(Eigen::Vector3f(plane_pose_ * (- Eigen::Vector3f::UnitX() - Eigen::Vector3f::UnitY())));
+    vertices.push_back(Eigen::Vector3f(plane_pose_ * (Eigen::Vector3f::UnitX() - Eigen::Vector3f::UnitY())));
+    Polygon::Ptr plane(new Polygon(vertices));
+    particle_.plane = plane;
+    for (size_t i = 0; i < vertices.size(); i++) {
+      ROS_INFO("v: [%f, %f, %f]", vertices[i][0], vertices[i][1], vertices[i][2]);
+    }
     double l = computeLikelihood(particle_, cloud, vp, config_);
     NODELET_INFO("likelihood: %f", l);
     std_msgs::Float32 float_msg;
@@ -111,6 +135,55 @@ namespace jsk_pcl_ros
     }
   }
 
+  visualization_msgs::InteractiveMarker
+  InteractiveCuboidLikelihood::planeInteractiveMarker()
+  {
+    visualization_msgs::InteractiveMarker int_marker;
+    int_marker.header.frame_id = frame_id_;
+    int_marker.header.stamp = ros::Time::now();
+    int_marker.name = getName() + "_plane";
+        visualization_msgs::InteractiveMarkerControl control;
+    control.orientation.w = 1;
+    control.orientation.x = 1;
+    control.orientation.y = 0;
+    control.orientation.z = 0;
+    control.interaction_mode = visualization_msgs::InteractiveMarkerControl::ROTATE_AXIS;
+    int_marker.controls.push_back(control);
+    control.interaction_mode = visualization_msgs::InteractiveMarkerControl::MOVE_AXIS;
+    int_marker.controls.push_back(control);
+
+    control.orientation.w = 1;
+    control.orientation.x = 0;
+    control.orientation.y = 1;
+    control.orientation.z = 0;
+    control.interaction_mode = visualization_msgs::InteractiveMarkerControl::ROTATE_AXIS;
+    int_marker.controls.push_back(control);
+    control.interaction_mode = visualization_msgs::InteractiveMarkerControl::MOVE_AXIS;
+    int_marker.controls.push_back(control);
+
+    control.orientation.w = 1;
+    control.orientation.x = 0;
+    control.orientation.y = 0;
+    control.orientation.z = 1;
+    control.interaction_mode = visualization_msgs::InteractiveMarkerControl::ROTATE_AXIS;
+    int_marker.controls.push_back(control);
+    control.interaction_mode = visualization_msgs::InteractiveMarkerControl::MOVE_AXIS;
+    int_marker.controls.push_back(control);
+    visualization_msgs::InteractiveMarkerControl box_control;
+    box_control.always_visible = true;
+    visualization_msgs::Marker plane_marker;
+    plane_marker.type = visualization_msgs::Marker::CUBE;
+    plane_marker.scale.x = 1.0;
+    plane_marker.scale.y = 1.0;
+    plane_marker.scale.z = 0.01;
+    plane_marker.color.r = 1.0;
+    plane_marker.color.a = 1.0;
+    plane_marker.pose.orientation.w = 1.0;
+    box_control.markers.push_back(plane_marker);
+    int_marker.controls.push_back(box_control);
+    return int_marker;
+  }
+  
   visualization_msgs::Marker
   InteractiveCuboidLikelihood::particleToMarker(
     const Particle& p)
@@ -128,23 +201,6 @@ namespace jsk_pcl_ros
     return marker;
   }
   
-  visualization_msgs::Marker
-  InteractiveCuboidLikelihood::particleToSupportPlaneMarker(
-    const Particle& p)
-  {
-    visualization_msgs::Marker marker;
-    marker.type = visualization_msgs::Marker::CUBE;
-    marker.scale.x = 0.3;
-    marker.scale.y = 0.3;
-    marker.scale.z = 0.01;
-    marker.pose.position.z = - p.dz / 2.0;
-    marker.color.r = 0.8;
-    marker.color.g = 1.0;
-    marker.color.b = 0.2;
-    marker.color.a = 0.5;
-    return marker;
-  }
-
   visualization_msgs::InteractiveMarker InteractiveCuboidLikelihood::particleToInteractiveMarker(const Particle& p)
   {
     visualization_msgs::InteractiveMarker int_marker;
@@ -184,11 +240,11 @@ namespace jsk_pcl_ros
     visualization_msgs::InteractiveMarkerControl box_control;
     box_control.always_visible = true;
     box_control.markers.push_back(particleToMarker(particle_));
-    box_control.markers.push_back(particleToSupportPlaneMarker(particle_));
     int_marker.controls.push_back(box_control);
-    
     return int_marker;
   }
+
+  
   
 }
 

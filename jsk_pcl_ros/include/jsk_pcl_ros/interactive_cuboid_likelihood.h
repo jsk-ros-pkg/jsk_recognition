@@ -60,13 +60,15 @@ namespace jsk_pcl_ros
     virtual void unsubscribe();
     virtual void likelihood(const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void processFeedback(const visualization_msgs::InteractiveMarkerFeedback::ConstPtr& feedback);
+    virtual void processPlaneFeedback(const visualization_msgs::InteractiveMarkerFeedback::ConstPtr& feedback);
     virtual void configCallback(Config& config, uint32_t level);
     virtual visualization_msgs::Marker particleToMarker(const Particle& p);
-    virtual visualization_msgs::Marker particleToSupportPlaneMarker(const Particle& p);
     virtual visualization_msgs::InteractiveMarker particleToInteractiveMarker(const Particle& p);
+    virtual visualization_msgs::InteractiveMarker planeInteractiveMarker();
     boost::mutex mutex_;
     ros::Publisher pub_;
     ros::Subscriber sub_;
+    Eigen::Affine3f plane_pose_;
     std::string frame_id_;
     Particle particle_;
     Config config_;
@@ -74,6 +76,7 @@ namespace jsk_pcl_ros
     Eigen::Vector3f viewpoint_;
     std::string sensor_frame_;
     boost::shared_ptr<interactive_markers::InteractiveMarkerServer> server_;
+    boost::shared_ptr<interactive_markers::InteractiveMarkerServer> plane_server_;
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
   private:
     

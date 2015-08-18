@@ -206,6 +206,20 @@ namespace tf
     Eigen::Affine3d eigen_d;
     jsk_pcl_ros::convertEigenAffine3(eigen, eigen_d);
     transformEigenToTF(eigen_d, t);
-    
+  }
+
+  void vectorTFToEigen(const tf::Vector3& t, Eigen::Vector3f& e)
+  {
+    Eigen::Vector3d d;
+    tf::vectorTFToEigen(t, d);
+    e[0] = d[0];
+    e[1] = d[1];
+    e[2] = d[2];
+  }
+  
+  void vectorEigenToTF(const Eigen::Vector3f& e, tf::Vector3& t)
+  {
+    Eigen::Vector3d d(e[0], e[1], e[2]);
+    tf::vectorEigenToTF(d, t);
   }
 }

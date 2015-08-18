@@ -45,6 +45,7 @@
 #include <dynamic_reconfigure/server.h>
 #include "jsk_pcl_ros/geo_util.h"
 #include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_pcl_ros/tf_listener_singleton.h"
 
 // ROS messages
 #include <jsk_recognition_msgs/PolygonArray.h>
@@ -371,14 +372,14 @@ namespace jsk_pcl_ros
   double distanceFromPlaneBasedError(
     const pcl::tracking::ParticleCuboid& p,
     pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud,
+    const Eigen::Vector3f& viewpoint,
     const Config& config)
   {
     Eigen::Affine3f pose = p.toEigenMatrix();
     Eigen::Affine3f pose_inv = pose.inverse();
     double error = 1.0;
-    size_t inliners = 0;
-    const Eigen::Vector3f vp(1000, 1000, 1000);
-    const Eigen::Vector3f local_vp = pose_inv * vp;
+    size_t inliers = 0;
+    const Eigen::Vector3f local_vp = pose_inv * viewpoint;
     std::set<int> visible_faces = p.visibleFaceIndices(local_vp);
     for (size_t i = 0; i < cloud->points.size(); i++) {
       Eigen::Vector3f v = cloud->points[i].getVector3fMap();
@@ -389,24 +390,25 @@ namespace jsk_pcl_ros
         if (visible_faces.find(nearest_index) != visible_faces.end()) {
           double d = p.distanceToPlane(local_v, nearest_index);
           if (d < config.outlier_distance) {
-            error *= 1 / (1 + pow(d, 2));
-            ++inliners;
+            error *= 1 / (1 + pow(d, config.plane_distance_error_power));
+            ++inliers;
           }
         }
       }
       else {
         double d = p.distanceToPlane(local_v, p.nearestPlaneIndex(local_v));
         if (d < config.outlier_distance) {
-          error *= 1 / (1 + pow(d, 2));
-          ++inliners;
+          error *= 1 / (1 + pow(d, config.plane_distance_error_power));
+          ++inliers;
         }
       }
     }
-    if (inliners < config.min_inliers) {
+    ROS_INFO("inliers: %lu", inliers);
+    if (inliers < config.min_inliers) {
       return 0;
     }
     else {
-      return error * inliners;
+      return error * inliers;
     }
   }
 
@@ -414,6 +416,7 @@ namespace jsk_pcl_ros
   template <class Config>
   double computeLikelihood(const pcl::tracking::ParticleCuboid& p,
                            pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud,
+                           const Eigen::Vector3f& viewpoint,
                            const Config& config)
   {
     double range_likelihood = 1.0;
@@ -425,7 +428,7 @@ namespace jsk_pcl_ros
      return range_likelihood;
     }
     else {
-      return range_likelihood * distanceFromPlaneBasedError(p, cloud, config);
+      return range_likelihood * distanceFromPlaneBasedError(p, cloud, viewpoint, config);
     }    
   }
   
@@ -526,7 +529,8 @@ namespace jsk_pcl_ros
     double outlier_distance_;
     std::string sensor_frame_;
     boost::mt19937 random_generator_;
-
+    tf::TransformListener* tf_;
+    Eigen::Vector3f viewpoint_;
     pcl::tracking::ROSCollaborativeParticleFilterTracker<pcl::PointXYZ, pcl::tracking::ParticleCuboid>::Ptr tracker_;
   private:
     

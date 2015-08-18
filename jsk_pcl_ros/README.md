@@ -2586,7 +2586,9 @@ to confirm likelihood function behaves as expected.
 * `~outlier_distance` (default: `0.01`)
 
   Threshold to regard points as inlier.
+* `~sensor_frame` (default: `odom`)
 
+  Frame ID of sensor frame. It is used to compute viewpoint and occlusion.
 ### jsk\_pcl/PCDReaderWithPose
 Publish cloud with given pose
 

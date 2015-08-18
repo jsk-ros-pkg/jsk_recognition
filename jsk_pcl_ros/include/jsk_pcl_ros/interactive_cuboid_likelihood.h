@@ -70,6 +70,9 @@ namespace jsk_pcl_ros
     std::string frame_id_;
     Particle particle_;
     Config config_;
+    tf::TransformListener* tf_;
+    Eigen::Vector3f viewpoint_;
+    std::string sensor_frame_;
     boost::shared_ptr<interactive_markers::InteractiveMarkerServer> server_;
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
   private:

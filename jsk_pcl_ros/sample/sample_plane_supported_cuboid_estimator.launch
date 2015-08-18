@@ -5,10 +5,14 @@
         name="interactive_cuboid_likelihood" output="screen"
         >
     <remap from="~input" to="plane_supported_cuboid_estimator/output/candidate_cloud" />
+    <param name="sensor_frame" value="sensor_frame" />
   </node>
+  <node pkg="tf" type="static_transform_publisher" name="sensor_frame_publisher"
+        args="0 0 2.0 0 0 0 odom sensor_frame 100" />
   <node pkg="jsk_pcl_ros" type="plane_supported_cuboid_estimator"
         name="plane_supported_cuboid_estimator" output="log"
         >
+    <param name="sensor_frame" value="sensor_frame" />
     <remap from="~input" to="sample_simulate_tabletop_cloud/output"/>
     <remap from="~input/polygon" to="sample_simulate_tabletop_cloud/output/polygon" />
     <remap from="~input/coefficients" to="sample_simulate_tabletop_cloud/output/coef" />

@@ -42,9 +42,11 @@ namespace jsk_pcl_ros
   void InteractiveCuboidLikelihood::onInit()
   {
     DiagnosticNodelet::onInit();
+    tf_ = TfListenerSingleton::getInstance();
     pub_ = pnh_->advertise<std_msgs::Float32>("output", 1);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     pnh_->param("frame_id", frame_id_, std::string("odom"));
+    pnh_->param("sensor_frame", sensor_frame_, std::string("odom"));
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&InteractiveCuboidLikelihood::configCallback, this, _1, _2);
     srv_->setCallback (f);
@@ -80,8 +82,15 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*msg, *cloud);
-    double l = computeLikelihood(particle_, cloud, config_);
-    JSK_ROS_INFO("likelihood: %f", l);
+    tf::StampedTransform transform
+      = lookupTransformWithDuration(tf_, sensor_frame_, msg->header.frame_id,
+                                    ros::Time(0.0),
+                                    ros::Duration(0.0));
+    Eigen::Vector3f vp;
+    tf::vectorTFToEigen(transform.getOrigin(), vp);
+
+    double l = computeLikelihood(particle_, cloud, vp, config_);
+    NODELET_INFO("likelihood: %f", l);
     std_msgs::Float32 float_msg;
     float_msg.data = l;
     pub_.publish(float_msg);
@@ -90,7 +99,6 @@ namespace jsk_pcl_ros
   void InteractiveCuboidLikelihood::configCallback(
     Config& config, uint32_t level)
   {
-    
     boost::mutex::scoped_lock lock(mutex_);
     config_ = config;
     particle_.dx = config_.dx;

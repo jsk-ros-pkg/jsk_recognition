@@ -2,6 +2,9 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.2.14 (2015-08-13)
 -------------------
 * [jsk_recognition_msgs] Add value field to BoundingBox to represent likelihood

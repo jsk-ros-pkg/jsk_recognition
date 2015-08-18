@@ -2,6 +2,9 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.2.14 (2015-08-13)
 -------------------
 * src/log_polar_nodelet.cpp : convert fro milimage to cvmat

@@ -2,6 +2,14 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge pull request `#1058 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1058>`_ from garaemon/uncomment-generate-template
+  Uncomment generate template
+* [jsk_perception] Add executable flag to eusmodel_template_gen.l
+* [jsk_perception] uncomment generate template
+* Contributors: JSK-PR2, Ryohei Ueda
+
 0.2.14 (2015-08-13)
 -------------------
 * [jsk_perception] pub posewithcovariancestamped

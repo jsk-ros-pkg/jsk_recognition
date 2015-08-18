@@ -2,6 +2,27 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Add ~min_inliers and
+  ~outlier_distance parameter
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Take occlusion into account
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Add ~use_range_likelihood to
+  toggle use likelihood based on geometric constraint
+* Merge pull request `#1054 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1054>`_ from garaemon/plane-supported-cuboid-estimator
+  [jsk_pcl_ros/PlaneSupportedCuboidestimator] Add new nodelet to estimate cuboid on plane based on bayesian recursive estimation
+* [jsk_pcl_ros/PlaneSupportedCuboidestimator] Add new nodelet to estimate
+  cuboid on plane based on bayesian recursive estimation, especially
+  particle filter is used.
+* [jsk_pcl_ros] Add simple code and script to bench RANSAC based plane estimation
+* [jsk_pcl_ros/AttentionClipper] Fix compilation warning:
+  1. fixing name confliction of iteration index
+  2. Use std::runtime_error to catch exception
+* [jsk_pcl_ros] Super simple script to plot gaussian. It is useful to
+  determin several parameters based on normal distribution
+* [jsk_pcl_ros] fix flip option
+* Contributors: Ryohei Ueda, Hitoshi Kamada
+
 0.2.14 (2015-08-13)
 -------------------
 * [jsk_pcl_ros/PoseWithCovarianceStampedtoGussianPointCloud] Add new

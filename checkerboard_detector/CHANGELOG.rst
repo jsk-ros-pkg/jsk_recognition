@@ -2,6 +2,9 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.2.14 (2015-08-13)
 -------------------
 * CMakeLists.txt: depends on cv_bridge, not opencv checkerboard_detector

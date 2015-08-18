@@ -2,6 +2,11 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add cmake_modules
+* Contributors: Kei Okada
+
 0.2.14 (2015-08-13)
 -------------------
 * CMakeLists.txt, imagefeatures.cpp.in: a lot of detector is not available on opencv3

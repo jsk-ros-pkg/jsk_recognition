@@ -521,12 +521,6 @@ namespace jsk_pcl_ros
     double step_dz_variance_;
     
     int particle_num_;
-    bool use_range_likelihood_;
-    double range_likelihood_local_min_z_;
-    double range_likelihood_local_max_z_;
-    bool use_occlusion_likelihood_;
-    int min_inliers_;
-    double outlier_distance_;
     std::string sensor_frame_;
     boost::mt19937 random_generator_;
     tf::TransformListener* tf_;

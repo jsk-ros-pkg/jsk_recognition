@@ -235,6 +235,8 @@ namespace tf
   void transformEigenToMsg(Eigen::Affine3f& eigen, geometry_msgs::Transform& msg);
   void transformTFToEigen(const tf::Transform& t, Eigen::Affine3f& eigen);
   void transformEigenToTF(Eigen::Affine3f& eigen , tf::Transform& t);
+  void vectorTFToEigen(const tf::Vector3& t, Eigen::Vector3f& e);
+  void vectorEigenToTF(const Eigen::Vector3f& e, tf::Vector3& t);
 }
 
 #endif

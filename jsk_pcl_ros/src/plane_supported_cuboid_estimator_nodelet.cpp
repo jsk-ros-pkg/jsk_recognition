@@ -50,11 +50,12 @@ namespace jsk_pcl_ros
   void PlaneSupportedCuboidEstimator::onInit()
   {
     DiagnosticNodelet::onInit();
+    tf_ = TfListenerSingleton::getInstance();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&PlaneSupportedCuboidEstimator::configCallback, this, _1, _2);
     srv_->setCallback (f);
-    pnh_->param("sensor_frame", sensor_frame_, std::string(""));
+    pnh_->param("sensor_frame", sensor_frame_, std::string("odom"));
     pub_result_ = pnh_->advertise<jsk_recognition_msgs::BoundingBoxArray>("output/result", 1);
     pub_particles_ = pnh_->advertise<sensor_msgs::PointCloud2>("output/particles", 1);
     pub_candidate_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>("output/candidate_cloud", 1);
@@ -96,6 +97,13 @@ namespace jsk_pcl_ros
       JSK_NODELET_WARN("Not yet polygon is available");
       return;
     }
+
+    // viewpoint
+    tf::StampedTransform transform
+      = lookupTransformWithDuration(tf_, sensor_frame_, msg->header.frame_id,
+                                    ros::Time(0.0),
+                                    ros::Duration(0.0));
+    tf::vectorTFToEigen(transform.getOrigin(), viewpoint_);
     if (!tracker_) {
       pcl::PointCloud<pcl::tracking::ParticleCuboid>::Ptr particles = initParticles();
       tracker_.reset(new pcl::tracking::ROSCollaborativeParticleFilterTracker<pcl::PointXYZ, pcl::tracking::ParticleCuboid>);
@@ -167,7 +175,7 @@ namespace jsk_pcl_ros
   }
 
   pcl::PointCloud<pcl::PointXYZI>::Ptr PlaneSupportedCuboidEstimator::convertParticlesToXYZI(ParticleCloud::Ptr particles)
- { 
+  { 
     pcl::PointCloud<pcl::PointXYZI>::Ptr output(new pcl::PointCloud<pcl::PointXYZI>);
     output->points.resize(particles->points.size());
     for (size_t i = 0; i < particles->points.size(); i++) {
@@ -243,7 +251,7 @@ namespace jsk_pcl_ros
                                                  pcl::tracking::ParticleCuboid& p)
   {
     //p.weight = computeLikelihood(p, input, config_);
-    p.weight = computeLikelihood(p, candidate_cloud_, config_);
+    p.weight = computeLikelihood(p, candidate_cloud_, viewpoint_, config_);
   }
   
   void PlaneSupportedCuboidEstimator::polygonCallback(

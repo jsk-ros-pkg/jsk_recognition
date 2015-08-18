@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.15 (2015-08-18)
+-------------------
 * [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Add ~min_inliers and
   ~outlier_distance parameter
 * [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Take occlusion into account

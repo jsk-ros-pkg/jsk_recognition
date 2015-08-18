@@ -179,19 +179,19 @@ namespace pcl
         if (local_view_point[0] > 0) {
           visible_faces.insert(0);
         }
-        else {
+        else if (local_view_point[0] < 0) {
           visible_faces.insert(2);
         }
         if (local_view_point[1] > 0) {
           visible_faces.insert(1);
         }
-        else {
+        else if (local_view_point[1] < 0) {
           visible_faces.insert(3);
         }
         if (local_view_point[2] > 0) {
           visible_faces.insert(4);
         }
-        else {
+        else if (local_view_point[2] < 0) {
           visible_faces.insert(5);
         }
         return visible_faces;

@@ -337,12 +337,6 @@ namespace jsk_pcl_ros
     step_dx_variance_ = config.step_dx_variance;
     step_dy_variance_ = config.step_dy_variance;
     step_dz_variance_ = config.step_dz_variance;
-    use_range_likelihood_ = config.use_range_likelihood;
-    range_likelihood_local_min_z_ = config.range_likelihood_local_min_z;
-    range_likelihood_local_max_z_ = config.range_likelihood_local_max_z;
-    use_occlusion_likelihood_ = config.use_occlusion_likelihood;
-    min_inliers_ = config.min_inliers;
-    outlier_distance_ = config.outlier_distance;
   }
 
   bool PlaneSupportedCuboidEstimator::resetCallback(std_srvs::EmptyRequest& req,

@@ -913,8 +913,8 @@ namespace jsk_pcl_ros
       Eigen::Vector3f cross0 = (A - C).cross(p - A);
       Eigen::Vector3f cross1 = (B - A).cross(p - B);
       Eigen::Vector3f cross2 = (C - B).cross(p - C);
-      if (cross0.dot(cross1) > 0 &&
-          cross1.dot(cross2) > 0) {
+      if (cross0.dot(cross1) >= 0 &&
+          cross1.dot(cross2) >= 0) {
         return true;
       }
       else {

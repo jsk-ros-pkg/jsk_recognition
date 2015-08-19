@@ -7,8 +7,17 @@
     <remap from="~input" to="plane_supported_cuboid_estimator/output/candidate_cloud" />
     <param name="sensor_frame" value="sensor_frame" />
   </node>
-  <node pkg="tf" type="static_transform_publisher" name="sensor_frame_publisher"
-        args="0 0 2.0 0 0 0 odom sensor_frame 100" />
+  <node pkg="jsk_interactive_marker" type="marker_6dof" name="sensor_frame">
+    <rosparam>
+      publish_tf: true
+      tf_frame: sensor_frame
+      frame_id: odom
+      object_x: 0.1
+      object_y: 0.1
+      object_z: 0.1
+      initial_z: 3.0
+    </rosparam>
+  </node>
   <node pkg="jsk_pcl_ros" type="plane_supported_cuboid_estimator"
         name="plane_supported_cuboid_estimator" output="log"
         >
@@ -35,7 +44,7 @@
       init_dy_mean: 0.2
       init_dz_mean: 0.2
       particle_num: 10000
-      use_occlusion_likelihood: false
+      use_occlusion_likelihood: true
       use_range_likelihood: true
       range_likelihood_local_min_z: 0.01
       range_likelihood_local_max_z: 0.3

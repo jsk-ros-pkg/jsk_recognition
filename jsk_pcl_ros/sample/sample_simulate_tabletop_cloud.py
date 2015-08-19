@@ -124,7 +124,8 @@ if __name__ == "__main__":
     pub_coef = rospy.Publisher("~output/coef", ModelCoefficientsArray)
     r = rospy.Rate(10)
     counter = 0
-    model_index = 2
+    model_index = 0
+    reset = True
     while not rospy.is_shutdown():
         points = generatePoints(model_index)
         header = Header()
@@ -136,7 +137,7 @@ if __name__ == "__main__":
         pub_polygon.publish(polygon)
         pub_coef.publish(coef)
         counter = counter + 1
-        if counter > 1.0 / r.sleep_dur.to_sec() * 10:
+        if reset and counter > 1.0 / r.sleep_dur.to_sec() * 10:
             reset = rospy.ServiceProxy("/plane_supported_cuboid_estimator/reset", Empty)
             counter = 0
             model_index = model_index + 1

@@ -355,18 +355,38 @@ namespace jsk_pcl_ros
     if (!p.plane) {
       // Do nothing
     }
-    else if (p.plane->isInside(p.getVector3fMap())) {
-      likelihood *= 1.0;
-    }
     else {
-      likelihood *= 0.0;
+      Eigen::Vector3f projected_point;
+      p.plane->project(Eigen::Vector3f(p.getVector3fMap()), projected_point);
+      if (p.plane->isInside(projected_point)) {
+        likelihood *= 1.0;
+      }
+      else {
+        likelihood = 0.0;
+      }
     }
-    Eigen::Affine3f p_coords = p.toEigenMatrix();
-    // Local distance from plane
-    float local_z = p.plane->distanceToPoint(Eigen::Vector3f(p_coords.translation()));
+    float local_z = p.plane->distanceToPoint(Eigen::Vector3f(p.getVector3fMap()));
+    // ROS_INFO("local_z: %f", local_z);
     likelihood *= binaryLikelihood(local_z, config.range_likelihood_local_min_z, config.range_likelihood_local_max_z);
     return likelihood;
   }
+
+  template <class Config>
+  double supportPlaneAngularLikelihood(
+    const pcl::tracking::ParticleCuboid& p,
+    const Config& config)
+  {
+    if (config.use_support_plane_angular_likelihood) {
+      double cos_likelihood = (p.toEigenMatrix().rotation() * Eigen::Vector3f::UnitZ()).dot(p.plane->getNormal());
+      // ROS_INFO("cos_likelihood: %f", cos_likelihood);
+      return pow(std::abs(cos_likelihood),
+                 config.support_plane_angular_likelihood_weight_power);
+    }
+    else {
+      return 1.0;
+    }
+  }
+
   
   template <class Config>
   double distanceFromPlaneBasedError(
@@ -403,7 +423,7 @@ namespace jsk_pcl_ros
         }
       }
     }
-    ROS_INFO("inliers: %lu", inliers);
+    // ROS_INFO("inliers: %lu", inliers);
     if (inliers < config.min_inliers) {
       return 0;
     }
@@ -428,7 +448,7 @@ namespace jsk_pcl_ros
      return range_likelihood;
     }
     else {
-      return range_likelihood * distanceFromPlaneBasedError(p, cloud, viewpoint, config);
+      return range_likelihood * distanceFromPlaneBasedError(p, cloud, viewpoint, config) * supportPlaneAngularLikelihood(p, config);
     }    
   }
   
@@ -521,12 +541,6 @@ namespace jsk_pcl_ros
     double step_dz_variance_;
     
     int particle_num_;
-    bool use_range_likelihood_;
-    double range_likelihood_local_min_z_;
-    double range_likelihood_local_max_z_;
-    bool use_occlusion_likelihood_;
-    int min_inliers_;
-    double outlier_distance_;
     std::string sensor_frame_;
     boost::mt19937 random_generator_;
     tf::TransformListener* tf_;

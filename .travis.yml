@@ -1,6 +1,7 @@
 language:
   - cpp
   - python
+sudo: false                     # Use container
 python:
   - "2.7"
 compiler:
@@ -14,7 +15,7 @@ env:
   - ROS_DISTRO=indigo  ROSWS=wstool BUILDER=catkin BUILD_PKGS="jsk_perception checkerboard_detector resized_image_transport imagesift"  USE_DEB=true NOT_TEST_INSTALL=true ROS_PARALLEL_JOBS="-j8"
   - ROS_DISTRO=indigo  ROSWS=wstool BUILDER=catkin BEFORE_SCRIPT="git clone -b indigo https://github.com/ros-perception/vision_opencv.git" EXTRA_DEB="ros-indigo-opencv3" USE_DEB=true NOT_TEST_INSTALL=true ROS_PARALLEL_JOBS="-j8"
 matrix:
-script: source .travis/travis.sh
+script: source travis/travis.sh
 notifications:
   email:
     on_success: always

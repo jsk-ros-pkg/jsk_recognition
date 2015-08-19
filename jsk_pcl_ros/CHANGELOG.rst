@@ -2,6 +2,17 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Compute likelihood based on plane-detection-sensor
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Remove unused parameters from class member
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] More correct border condition about occlusion
+* Remove files which added by mistake
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Support sensor_frame via  ~sensor_frame parameter
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Separate likelihood computation parameters from particlefilter parameter to cleanup dynamic_reconfigure parameters
+* [jsk_pcl_ros] Add InteractiveCuboidLikelihood to confirm behavior of likelihood function of PlaneSupportedCuboidEstimator by interactive server
+* Contributors: Ryohei Ueda
+
 0.2.15 (2015-08-18)
 -------------------
 * [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Add ~min_inliers and

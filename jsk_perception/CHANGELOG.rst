@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.16 (2015-08-19)
+-------------------
 * [CMakeLists.txt] we can not use rospack within cmake process
 * Contributors: Kei Okada
 

@@ -171,9 +171,15 @@ add_dependencies(color_histogram_sliding_matcher       ${PROJECT_NAME}_gencfg ${
 add_custom_command(
  OUTPUT  ${PROJECT_SOURCE_DIR}/template
  DEPENDS ${PROJECT_SOURCE_DIR}/src/eusmodel_template_gen.l
- COMMAND ${PROJECT_SOURCE_DIR}/src/eusmodel_template_gen.sh
+ COMMAND roseus ${PROJECT_SOURCE_DIR}/src/eusmodel_template_gen.l
  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-add_custom_target(eusmodel_template ALL DEPENDS ${PROJECT_SOURCE_DIR}/template)
+add_custom_command(
+ OUTPUT  ${PROJECT_SOURCE_DIR}/sample/rimokon-pose.launch ${PROJECT_SOURCE_DIR}/sample/milktea-box.launch
+ DEPENDS ${PROJECT_SOURCE_DIR}/sample/pose_detector_auto_gen_sample.l
+ COMMAND roseus ./pose_detector_auto_gen_sample.l \"(progn\ (generate-launcher)\ (exit))\"
+ WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/sample)
+
+add_custom_target(eusmodel_template ALL DEPENDS ${PROJECT_SOURCE_DIR}/sample/rimokon-pose.launch ${PROJECT_SOURCE_DIR}/sample/milktea-box.launch)
 
 # Download model data
 execute_process(

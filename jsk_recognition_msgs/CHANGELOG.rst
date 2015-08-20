@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.17 (2015-08-21)
+-------------------
 * [jsk_recognition_msgs/PolygonArray] Add lebels and likelihood for
   colorizing on rviz
 * Contributors: Ryohei Ueda

@@ -2594,6 +2594,11 @@ to confirm likelihood function behaves as expected.
 ![](images/boundingbox_occlusion_rejector.png)
 Rejects bounding boxes which occludes target object.
 
+sample
+```
+$ roslaunch sample_boundingbox_occlusion_rejector.launch
+```
+
 #### Publishing Topics
 * `~output` (`jsk_recognition_msgs/BoundingBoxArray`)
 

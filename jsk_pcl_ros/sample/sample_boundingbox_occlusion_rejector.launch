@@ -40,4 +40,5 @@
   <node pkg="image_view" type="image_view" name="candidate_image_view">
     <remap from="image" to="boundingbox_occlusion_rejector/output/candidate_image" />
   </node>
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find jsk_pcl_ros)/config/sample_boundingbox_occlusion_rejector.rviz" />
 </launch>

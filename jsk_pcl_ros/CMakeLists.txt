@@ -377,13 +377,12 @@ add_library(jsk_pcl_ros_base SHARED
   src/random_util.cpp
   src/pcl_conversion_util.cpp src/pcl_util.cpp
   src/region_adjacency_graph.cpp
-
   src/tf_listener_singleton.cpp
   src/viewpoint_sampler.cpp)
 add_library(jsk_pcl_ros_moveit SHARED src/pointcloud_moveit_filter.cpp)
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
 add_library(jsk_pcl_ros_util SHARED ${jsk_pcl_util_nodelet_sources})
-
+target_link_libraries(jsk_pcl_ros_util jsk_pcl_ros_base)
 if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
   target_link_libraries(jsk_pcl_ros
     ${PCL_GPU_KINFU_LARGE_SCALE_LIBRARY}

@@ -349,6 +349,7 @@ namespace jsk_pcl_ros
     virtual Ptr magnifyByDistance(const double distance);
     
     static ConvexPolygon fromROSMsg(const geometry_msgs::Polygon& polygon);
+    static ConvexPolygon::Ptr fromROSMsgPtr(const geometry_msgs::Polygon& polygon);
     bool distanceSmallerThan(
       const Eigen::Vector3f& p, double distance_threshold);
     bool distanceSmallerThan(

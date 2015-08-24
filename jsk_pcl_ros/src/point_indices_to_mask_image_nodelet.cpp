@@ -59,7 +59,7 @@ namespace jsk_pcl_ros
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
       sync_->connectInput(sub_input_, sub_image_);
       sync_->registerCallback(boost::bind(&PointIndicesToMaskImage::mask,
-					  this, _1, _2));
+                                          this, _1, _2));
     }
   }
   

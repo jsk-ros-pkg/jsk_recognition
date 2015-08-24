@@ -133,7 +133,7 @@ namespace pcl
       }
 
       // a[i]
-      inline float operator [] (unsigned int i)
+      inline float operator [] (unsigned int i) const
       {
         switch (i)
         {
@@ -327,7 +327,41 @@ namespace pcl
     }
     
   } // tracking
+
+  
+  template<>
+  class DefaultPointRepresentation<pcl::tracking::ParticleCuboid>: public PointRepresentation<pcl::tracking::ParticleCuboid>
+  {
+  public:
+    DefaultPointRepresentation()
+    {
+      nr_dimensions_ = 10;
+    }
+
+    virtual void
+    copyToFloatArray (const pcl::tracking::ParticleCuboid &p, float * out) const
+    {
+      for (int i = 0; i < nr_dimensions_; ++i)
+        out[i] = p[i];
+    }
+  };
+  
 } // pcl
+
+// These registration is required to convert
+// pcl::PointCloud<pcl::tracking::ParticleCuboid> to PCLPointCloud2.
+// And pcl::fromROSMsg and pcl::toROSMsg depends on PCLPointCloud2
+// conversions.
+POINT_CLOUD_REGISTER_POINT_STRUCT (pcl::tracking::_ParticleCuboid,
+                                   (float, x, x)
+                                   (float, y, y)
+                                   (float, z, z)
+                                   (float, roll, roll)
+                                   (float, pitch, pitch)
+                                   (float, yaw, yaw)
+                                   (float, weight, weight)
+  )
+POINT_CLOUD_REGISTER_POINT_WRAPPER(pcl::tracking::ParticleCuboid, pcl::tracking::_ParticleCuboid)
 
 namespace jsk_pcl_ros
 {
@@ -486,7 +520,6 @@ namespace jsk_pcl_ros
     virtual void publishHistogram(ParticleCloud::Ptr particles, int index,
                                   ros::Publisher& pub,
                                   const std_msgs::Header& header);
-    virtual pcl::PointCloud<pcl::PointXYZI>::Ptr convertParticlesToXYZI(ParticleCloud::Ptr particles);
     virtual bool resetCallback(std_srvs::EmptyRequest& req,
                                std_srvs::EmptyResponse& res);
 

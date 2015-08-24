@@ -214,29 +214,13 @@ namespace jsk_pcl_ros
     publishHistogram(particles, 7, pub_histogram_dy_, msg->header);
     publishHistogram(particles, 8, pub_histogram_dz_, msg->header);
     // Publish particles
-    pcl::PointCloud<pcl::PointXYZI>::Ptr particles_xyz = convertParticlesToXYZI(particles);
     sensor_msgs::PointCloud2 ros_particles;
-    pcl::toROSMsg(*particles_xyz, ros_particles);
+    pcl::toROSMsg(*particles, ros_particles);
     ros_particles.header = msg->header;
     pub_particles_.publish(ros_particles);
 
   }
 
-  pcl::PointCloud<pcl::PointXYZI>::Ptr PlaneSupportedCuboidEstimator::convertParticlesToXYZI(ParticleCloud::Ptr particles)
-  { 
-    pcl::PointCloud<pcl::PointXYZI>::Ptr output(new pcl::PointCloud<pcl::PointXYZI>);
-    output->points.resize(particles->points.size());
-    for (size_t i = 0; i < particles->points.size(); i++) {
-      pcl::PointXYZI p;
-      p.x = particles->points[i].x;
-      p.y = particles->points[i].y;
-      p.z = particles->points[i].z;
-      p.intensity = particles->points[i].weight;
-      output->points[i] = p;
-    }
-    return output;
-  }
-  
   void PlaneSupportedCuboidEstimator::publishHistogram(
     ParticleCloud::Ptr particles, int index, ros::Publisher& pub, const std_msgs::Header& header)
   {

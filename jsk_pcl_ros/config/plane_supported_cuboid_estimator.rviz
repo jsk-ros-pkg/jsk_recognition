@@ -89,7 +89,7 @@ Visualization Manager:
         Min Value: 3.33985e-05
         Value: true
       Axis: Z
-      Channel Name: intensity
+      Channel Name: weight
       Class: rviz/PointCloud2
       Color: 255; 255; 255
       Color Transformer: Intensity
@@ -97,7 +97,7 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: true
       Max Color: 255; 255; 255
-      Max Intensity: 0.000393938
+      Max Intensity: 0.000244659
       Min Color: 0; 0; 0
       Min Intensity: 0
       Name: PointCloud2
@@ -233,22 +233,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 4.97496
+      Distance: 4.18889
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.281005
-        Y: 0.82649
-        Z: 1.69744
+        X: 0.234068
+        Y: 0.456175
+        Z: 0.736286
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.0347982
+      Pitch: 0.309798
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 5.11825
+      Yaw: 5.18825
     Saved: ~
 Window Geometry:
   Displays:
@@ -266,5 +266,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1794
-  X: 252
+  X: 245
   Y: 316

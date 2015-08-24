@@ -176,6 +176,8 @@ jsk_pcl_nodelet(src/octree_change_publisher_nodelet.cpp
   "jsk_pcl/OctreeChangePublisher" "octree_change_publisher")
 jsk_pcl_nodelet(src/tf_transform_cloud_nodelet.cpp
   "jsk_pcl/TfTransformCloud" "tf_transform_cloud")
+jsk_pcl_nodelet(src/tf_transform_bounding_box_nodelet.cpp
+  "jsk_pcl/TfTransformBoundingBox" "tf_transform_bounding_box")
 jsk_pcl_nodelet(src/color_filter_nodelet.cpp
   "jsk_pcl/RGBColorFilter" "rgb_color_filter")
 jsk_pcl_nodelet(src/color_filter_nodelet.cpp

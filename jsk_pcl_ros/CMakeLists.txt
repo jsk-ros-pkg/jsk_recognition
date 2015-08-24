@@ -306,6 +306,8 @@ jsk_pcl_nodelet(src/normal_direction_filter_nodelet.cpp
   "jsk_pcl/NormalDirectionFilter" "normal_direction_filter")
 jsk_pcl_nodelet(src/attention_clipper_nodelet.cpp
   "jsk_pcl/AttentionClipper" "attention_clipper")
+jsk_pcl_nodelet(src/boundingbox_occlusion_rejector_nodelet.cpp
+  "jsk_pcl/BoundingBoxOcclusionRejector" "boundingbox_occlusion_rejector")
 jsk_pcl_nodelet(src/roi_clipper_nodelet.cpp
   "jsk_pcl/ROIClipper" "roi_clipper")
 jsk_pcl_nodelet(src/point_indices_to_mask_image_nodelet.cpp

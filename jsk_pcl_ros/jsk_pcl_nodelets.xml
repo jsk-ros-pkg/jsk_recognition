@@ -187,6 +187,10 @@
          base_class_type="nodelet::Nodelet">
     Publish ROI of attention reagion
   </class>
+  <class name="jsk_pcl/BoundingBoxOcclusionRejector"
+         type="jsk_pcl_ros::BoundingBoxOcclusionRejector"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_pcl/NormalDirectionFilter"
          type="jsk_pcl_ros::NormalDirectionFilter"
          base_class_type="nodelet::Nodelet">

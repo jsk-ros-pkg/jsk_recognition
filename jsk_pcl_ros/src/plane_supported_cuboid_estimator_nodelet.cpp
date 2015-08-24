@@ -89,6 +89,48 @@ namespace jsk_pcl_ros
 
   }
 
+  size_t PlaneSupportedCuboidEstimator::getNearestPolygon(
+    const Particle& p,
+    const std::vector<ConvexPolygon::Ptr>& polygons)
+  {
+    size_t min_index = 0;
+    double min_distance = DBL_MAX;
+    Eigen::Vector3f inp = p.getVector3fMap();
+    for (size_t i = 0; i < polygons.size(); i++) {
+      ConvexPolygon::Ptr polygon = polygons[i];
+      Eigen::Vector3f p;
+      polygon->project(inp, p);
+      double d = (p - inp).norm();
+      if (d < min_distance) {
+        min_distance = d;
+        min_index = i;
+      }
+    }
+    return min_index;
+  }
+  
+  void PlaneSupportedCuboidEstimator::updateParticlePolygonRelationship(
+    ParticleCloud::Ptr particles)
+  {
+    if (latest_polygon_msg_->polygons.size() == 0) {
+      NODELET_ERROR("no valid polygons, skip update relationship");
+      return;
+    }
+    // First convert all the jsk_recognition_msgs::PolygonArray into
+    // jsk_pcl_ros::Polygon::Ptr.
+    std::vector<ConvexPolygon::Ptr> polygons(latest_polygon_msg_->polygons.size());
+    for (size_t i = 0; i < latest_polygon_msg_->polygons.size(); i++) {
+      ConvexPolygon::Ptr polygon = ConvexPolygon::fromROSMsgPtr(latest_polygon_msg_->polygons[i].polygon);
+      polygons[i] = polygon;
+    }
+
+    // Second, compute distances and assing polygons.
+    for (size_t i = 0; i < particles->points.size(); i++) {
+      size_t nearest_index = getNearestPolygon(particles->points[i], polygons);
+      particles->points[i].plane = polygons[nearest_index];
+    }
+  }
+  
   void PlaneSupportedCuboidEstimator::cloudCallback(
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
@@ -146,6 +188,11 @@ namespace jsk_pcl_ros
       pcl::toROSMsg(*candidate_cloud_, ros_candidate_cloud);
       ros_candidate_cloud.header = msg->header;
       pub_candidate_cloud_.publish(ros_candidate_cloud);
+      if (support_plane_updated_) {
+        // Compute assignment between particles and polygons
+        NODELET_INFO("polygon updated");
+        updateParticlePolygonRelationship(tracker_->getParticles());
+      }
       tracker_->compute();
       Particle result = tracker_->getResult();
       jsk_recognition_msgs::BoundingBoxArray box_array;
@@ -154,6 +201,7 @@ namespace jsk_pcl_ros
       box_array.boxes[0].header = msg->header;
       pub_result_.publish(box_array);
     }
+    support_plane_updated_ = false;
     ParticleCloud::Ptr particles = tracker_->getParticles();
     // Publish histograms
     publishHistogram(particles, 0, pub_histogram_global_x_, msg->header);
@@ -261,6 +309,7 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     latest_polygon_msg_ = polygon_msg;
     latest_coefficients_msg_ = coef_msg;
+    support_plane_updated_ = true;
   }
 
   size_t PlaneSupportedCuboidEstimator::chooseUniformRandomPlaneIndex()

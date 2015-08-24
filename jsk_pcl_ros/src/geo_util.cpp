@@ -1065,6 +1065,18 @@ namespace jsk_pcl_ros
     }
     return ConvexPolygon(vertices);
   }
+  
+  ConvexPolygon::Ptr ConvexPolygon::fromROSMsgPtr(const geometry_msgs::Polygon& polygon)
+  {
+    Vertices vertices;
+    for (size_t i = 0; i < polygon.points.size(); i++) {
+      Eigen::Vector3f p;
+      pointFromXYZToVector<geometry_msgs::Point32, Eigen::Vector3f>(
+        polygon.points[i], p);
+      vertices.push_back(p);
+    }
+    return ConvexPolygon::Ptr(new ConvexPolygon(vertices));
+  }
 
   bool ConvexPolygon::distanceSmallerThan(const Eigen::Vector3f& p,
                                           double distance_threshold)

@@ -40,17 +40,24 @@ namespace jsk_pcl_ros
 {
   double randomGaussian(double mean, double var, boost::mt19937& gen)
   {
-    boost::normal_distribution<> dst(mean, sqrt(var));
-    boost::variate_generator<
-      boost::mt19937&,
-      boost::normal_distribution<> > rand(gen, dst);
-    return rand();
+    if (var == 0.0) {
+      return mean;
+    }
+    else {  
+      boost::normal_distribution<> dst(mean, sqrt(var));
+      boost::variate_generator<
+        boost::mt19937&,
+        boost::normal_distribution<> > rand(gen, dst);
+      return rand();
+    }
   }
   
   double randomUniform(double min, double max, boost::mt19937& gen)
   {
-    // std::cout << min << " -- " << max << std::endl;
-    boost::uniform_real<> dst(min, max);
+    // Ensure min < max
+    double amin = std::min(min, max);
+    double amax = std::max(min, max);
+    boost::uniform_real<> dst(amin, amax);
     boost::variate_generator<
       boost::mt19937&,
       boost::uniform_real<> > rand(gen, dst);

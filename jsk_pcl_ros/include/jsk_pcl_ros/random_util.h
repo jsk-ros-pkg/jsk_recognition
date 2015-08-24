@@ -41,7 +41,17 @@
 
 namespace jsk_pcl_ros
 {
+  /**
+   * @brief
+   * Return a random value according to gaussian distribution.
+   * If variance is zero, it just returns mean.
+   */
   double randomGaussian(double mean, double var, boost::mt19937& gen);
+
+  /**
+   * @brief
+   * Return a random value according to uniform distribution.
+   */
   double randomUniform(double min, double max, boost::mt19937& gen);
 }
 

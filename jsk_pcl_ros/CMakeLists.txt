@@ -402,11 +402,25 @@ add_dependencies(jsk_pcl_ros_moveit ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencf
 add_executable(bench_ransac_plane_estimation bench/bench_ransac_plane_estimation.cpp)
 target_link_libraries(bench_ransac_plane_estimation jsk_pcl_ros)
 
+file(GLOB _headers ${PROJECT_SOURCE_DIR}/include/jsk_pcl_ros/*.h)
+set(_include_headers "")
+foreach(_header ${_headers})
+  string(FIND "${_header}" kinfu IS_KINFU)
+  string(FIND "${_header}" point_types IS_POINT_TYPES)
+  if (${IS_KINFU} EQUAL -1 AND ${IS_POINT_TYPES} EQUAL -1)
+    set(_include_headers "${_include_headers}#include \"${_header}\"\n")
+  endif()
+endforeach()
+configure_file(src/build_check.cpp.in build_check.cpp)
+add_executable(build_check build_check.cpp)
+target_link_libraries(build_check jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_util jsk_pcl_ros_moveit)
 generate_messages(DEPENDENCIES
   ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_footstep_msgs)
 
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 message("flags: ${CMAKE_CXX_FLAGS}")
+
+
 
 catkin_package(
     DEPENDS pcl

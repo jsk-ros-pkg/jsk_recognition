@@ -407,6 +407,7 @@ add_executable(bench_ransac_plane_estimation bench/bench_ransac_plane_estimation
 target_link_libraries(bench_ransac_plane_estimation jsk_pcl_ros)
 
 file(GLOB _headers ${PROJECT_SOURCE_DIR}/include/jsk_pcl_ros/*.h)
+list(SORT _headers)
 set(_include_headers "")
 foreach(_header ${_headers})
   string(FIND "${_header}" kinfu IS_KINFU)

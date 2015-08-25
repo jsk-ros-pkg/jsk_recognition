@@ -2,7 +2,7 @@
   <node pkg="jsk_pcl_ros" type="sample_simulate_tabletop_cloud.py"
         name="sample_simulate_tabletop_cloud" />
   <node pkg="jsk_pcl_ros" type="interactive_cuboid_likelihood"
-        name="interactive_cuboid_likelihood" output="screen"
+        name="interactive_cuboid_likelihood" output="log"
         >
     <remap from="~input" to="plane_supported_cuboid_estimator/output/candidate_cloud" />
     <param name="sensor_frame" value="sensor_frame" />
@@ -15,7 +15,7 @@
       object_x: 0.1
       object_y: 0.1
       object_z: 0.1
-      initial_z: 3.0
+      initial_z: 1.0
     </rosparam>
   </node>
   <node pkg="jsk_pcl_ros" type="plane_supported_cuboid_estimator"
@@ -47,7 +47,7 @@
       use_occlusion_likelihood: true
       use_range_likelihood: true
       range_likelihood_local_min_z: 0.01
-      range_likelihood_local_max_z: 0.3
+      range_likelihood_local_max_z: 0.25
     </rosparam>
   </node>
   <node pkg="jsk_rqt_plugins" type="rqt_histogram_plot" name="x_histogram"
@@ -68,4 +68,5 @@
         args="/plane_supported_cuboid_estimator/output/histogram/dy" />
   <node pkg="jsk_rqt_plugins" type="rqt_histogram_plot" name="dz_histogram"
         args="/plane_supported_cuboid_estimator/output/histogram/dz" />
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find jsk_pcl_ros)/config/plane_supported_cuboid_estimator.rviz" />
 </launch>

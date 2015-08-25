@@ -133,7 +133,7 @@ namespace pcl
       }
 
       // a[i]
-      inline float operator [] (unsigned int i)
+      inline float operator [] (unsigned int i) const
       {
         switch (i)
         {
@@ -327,7 +327,41 @@ namespace pcl
     }
     
   } // tracking
+
+  
+  template<>
+  class DefaultPointRepresentation<pcl::tracking::ParticleCuboid>: public PointRepresentation<pcl::tracking::ParticleCuboid>
+  {
+  public:
+    DefaultPointRepresentation()
+    {
+      nr_dimensions_ = 10;
+    }
+
+    virtual void
+    copyToFloatArray (const pcl::tracking::ParticleCuboid &p, float * out) const
+    {
+      for (int i = 0; i < nr_dimensions_; ++i)
+        out[i] = p[i];
+    }
+  };
+  
 } // pcl
+
+// These registration is required to convert
+// pcl::PointCloud<pcl::tracking::ParticleCuboid> to PCLPointCloud2.
+// And pcl::fromROSMsg and pcl::toROSMsg depends on PCLPointCloud2
+// conversions.
+POINT_CLOUD_REGISTER_POINT_STRUCT (pcl::tracking::_ParticleCuboid,
+                                   (float, x, x)
+                                   (float, y, y)
+                                   (float, z, z)
+                                   (float, roll, roll)
+                                   (float, pitch, pitch)
+                                   (float, yaw, yaw)
+                                   (float, weight, weight)
+  )
+POINT_CLOUD_REGISTER_POINT_WRAPPER(pcl::tracking::ParticleCuboid, pcl::tracking::_ParticleCuboid)
 
 namespace jsk_pcl_ros
 {
@@ -486,9 +520,24 @@ namespace jsk_pcl_ros
     virtual void publishHistogram(ParticleCloud::Ptr particles, int index,
                                   ros::Publisher& pub,
                                   const std_msgs::Header& header);
-    virtual pcl::PointCloud<pcl::PointXYZI>::Ptr convertParticlesToXYZI(ParticleCloud::Ptr particles);
     virtual bool resetCallback(std_srvs::EmptyRequest& req,
                                std_srvs::EmptyResponse& res);
+
+    /**
+     * @brief
+     * Compute the nearest polygon to the particle `p'.
+     */
+    virtual size_t getNearestPolygon(
+      const Particle& p,
+      const std::vector<ConvexPolygon::Ptr>& polygons);
+    /**
+     * @brief
+     * Compute distances between particles and polygons and assing each particle
+     * to the nearest polygon.
+     * This method is called only if the "polygon sensor" measurement is updated.
+     * For simplicity, this method expects convex polygon.
+     */
+    virtual void updateParticlePolygonRelationship(ParticleCloud::Ptr particles);
     boost::mutex mutex_;
     ros::Subscriber sub_cloud_;
     ros::Publisher pub_result_;
@@ -545,6 +594,7 @@ namespace jsk_pcl_ros
     boost::mt19937 random_generator_;
     tf::TransformListener* tf_;
     Eigen::Vector3f viewpoint_;
+    bool support_plane_updated_;
     pcl::tracking::ROSCollaborativeParticleFilterTracker<pcl::PointXYZ, pcl::tracking::ParticleCuboid>::Ptr tracker_;
   private:
     

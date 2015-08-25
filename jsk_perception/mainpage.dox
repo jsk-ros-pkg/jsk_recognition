@@ -2,7 +2,7 @@
 \mainpage
 \htmlinclude manifest.html
 
-\b jsk_perception is ... 
+\b jsk_perception is a collaction of (mainly) 2D vision node/nodelets
 
 \section nodeapi Node API
 

@@ -3,7 +3,7 @@
     <rosparam>
       publish_tf: true
       tf_frame: sensor_frame
-      frame_id: odom
+      frame_id: world
       object_x: 0.1
       object_y: 0.1
       object_z: 0.1
@@ -13,7 +13,7 @@
   <node pkg="jsk_interactive_marker" type="marker_6dof" name="target_frame">
     <rosparam>
       publish_tf: false
-      frame_id: sensor_frame
+      frame_id: world
       object_x: 0.1
       object_y: 0.1
       object_z: 0.1
@@ -29,10 +29,22 @@
     <remap from="~input" to="dummy_camera/camera_info" />
     <remap from="~input/candidate_pose" to="target_frame/pose" />
   </node>
+  <node pkg="jsk_pcl_ros" type="tf_transform_bounding_box_array" name="sensor_target">
+    <remap from="~input" to="sample_boundingbox_occlusion_rejector/output/target_boxes" />
+    <rosparam>
+      target_frame_id: sensor_frame
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="tf_transform_bounding_box_array" name="sensor_candidate">
+    <remap from="~input" to="sample_boundingbox_occlusion_rejector/output/candidate_boxes" />
+    <rosparam>
+      target_frame_id: sensor_frame
+    </rosparam>
+  </node>
   <node pkg="jsk_pcl_ros" type="boundingbox_occlusion_rejector" name="boundingbox_occlusion_rejector">
     <remap from="~input/camera_info" to="dummy_camera/camera_info" />
-    <remap from="~input/target_boxes" to="sample_boundingbox_occlusion_rejector/output/target_boxes" />
-    <remap from="~input/candidate_boxes" to="sample_boundingbox_occlusion_rejector/output/candidate_boxes" />    
+    <remap from="~input/target_boxes" to="sensor_target/output" />
+    <remap from="~input/candidate_boxes" to="sensor_candidate/output" />
   </node>
   <node pkg="image_view" type="image_view" name="image_view">
     <remap from="image" to="boundingbox_occlusion_rejector/output/target_image" />

@@ -1,8 +1,8 @@
-// -*- mode: C++ -*-
+// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, yuto_inagaki and JSK Lab
+ *  Copyright (c) 2015, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,58 +33,40 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef __JSK_PCL_COLORIZE_SEGMENTED_RF__
-#define __JSK_PCL_COLORIZE_SEGMENTED_RF__
+#ifndef JSK_PCL_ROS_TF_TRANFORM_BOUNDING_BOX_H_
+#define JSK_PCL_ROS_TF_TRANFORM_BOUNDING_BOX_H_
 
-// ros
-#include <ros/ros.h>
-#include <ros/names.h>
-#include <jsk_recognition_msgs/PointsArray.h>
-// pcl
-#include <pcl_ros/pcl_nodelet.h>
-#include <pcl/point_types.h>
-#include <pcl/ModelCoefficients.h>
-#include <pcl/point_types.h>
-#include <pcl/sample_consensus/method_types.h>
-#include <pcl/sample_consensus/model_types.h>
-#include <pcl/filters/passthrough.h>
-#include <pcl/segmentation/sac_segmentation.h>
-#include <pcl/common/centroid.h>
-#include <pcl/common/impl/common.hpp>
-#include <pcl/filters/extract_indices.h>
-#include <pcl/features/normal_3d.h>
-#include <pcl/kdtree/kdtree.h>
-#include <pcl/segmentation/extract_clusters.h>
-#include <pcl/features/fpfh_omp.h>
-#include <ml_classifiers/ClassifyData.h>
-#include <ml_classifiers/ClassDataPoint.h>
-#include <math.h>
-#include <stdlib.h>
+
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <jsk_recognition_msgs/BoundingBox.h>
+
+#include "jsk_pcl_ros/tf_listener_singleton.h"
+#include <message_filters/subscriber.h>
+#include <tf/message_filter.h>
 
 namespace jsk_pcl_ros
 {
-  class ColorizeRandomForest: public pcl_ros::PCLNodelet
-  {
-  protected:
-    ros::Subscriber sub_input_;
-    ros::Publisher pub_;
-    ros::Publisher pub2_;
 
-    double angular_threshold_;
-    double mps_distance_threshold_;
-    double approx_threshold_;
-    double max_depth_change_factor_;
-    double normal_smoothingsize_;
-    double refinement_threshold_;
-    float radius_search_;
-    float pass_offset_;
-    float pass_offset2_;
-    int min_inliers_;
-    int sum_num_;
-  private:
+  class TfTransformBoundingBox: public jsk_topic_tools::DiagnosticNodelet
+  {
+  public:
+    TfTransformBoundingBox(): DiagnosticNodelet("TfTransformBoundingBox") {}
+  protected:
     virtual void onInit();
-    void extract(const sensor_msgs::PointCloud2 cloud);
+    virtual void subscribe();
+    virtual void unsubscribe();
+    virtual void transform(const jsk_recognition_msgs::BoundingBox::ConstPtr& msg);
+    
+    ros::Subscriber sub_;
+    message_filters::Subscriber<jsk_recognition_msgs::BoundingBox> sub_filter_;
+    ros::Publisher pub_;
+    std::string target_frame_id_;
+    tf::TransformListener* tf_listener_;
+    boost::shared_ptr<tf::MessageFilter<jsk_recognition_msgs::BoundingBox> > tf_filter_;
+    bool use_latest_tf_;
+    int tf_queue_size_;
   };
 }
+
 
 #endif

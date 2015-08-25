@@ -19,22 +19,28 @@
               - from: ~input
                 to: $(arg INPUT)
               - from: ~output
-                to: points
+                to: ~points
           - name: resize_1_2
             type: jsk_pcl/ResizePointsPublisher
             remappings:
               - from: ~input
                 to: resize_1_1/points
+              - from: ~output
+                to: ~points
           - name: resize_1_4
             type: jsk_pcl/ResizePointsPublisher
             remappings:
               - from: ~input
                 to: resize_1_1/points
+              - from: ~output
+                to: ~points
           - name: resize_1_8
             type: jsk_pcl/ResizePointsPublisher
             remappings:
               - from: ~input
                 to: resize_1_1/points
+              - from: ~output
+                to: ~points
           - name: resize_1_1/left_relay
             type: jsk_topic_tools/Relay
             remappings:
@@ -149,7 +155,6 @@
         step_x: 2
         step_y: 2
       </rosparam>
-      <remap from="~output" to="~points" />
     </group>
     <group ns="resize_1_4">
       <rosparam>

@@ -39,6 +39,62 @@
 namespace jsk_pcl_ros
 {
   // Do nothing
+  void ExtractCuboidParticlesTopN::onInit()
+  {
+    DiagnosticNodelet::onInit();
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    typename dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (&ExtractCuboidParticlesTopN::configCallback, this, _1, _2);
+    srv_->setCallback (f);
+    pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+  }
+
+  void ExtractCuboidParticlesTopN::subscribe()
+  {
+    sub_ = pnh_->subscribe("input", 1, &ExtractCuboidParticlesTopN::extract, this);
+  }
+
+  void ExtractCuboidParticlesTopN::unsubscribe()
+  {
+    sub_.shutdown();
+  }
+
+  void ExtractCuboidParticlesTopN::configCallback(Config& config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    top_n_ratio_ = config.top_n_ratio;
+  }
+
+  void ExtractCuboidParticlesTopN::extract(const sensor_msgs::PointCloud2::ConstPtr& msg)
+  {
+    vital_checker_->poke();
+    boost::mutex::scoped_lock lock(mutex_);
+    typename pcl::PointCloud<pcl::tracking::ParticleCuboid>::Ptr cloud(new pcl::PointCloud<pcl::tracking::ParticleCuboid>);
+    typename pcl::PointCloud<pcl::tracking::ParticleCuboid>::Ptr cloud_filtered(new pcl::PointCloud<pcl::tracking::ParticleCuboid>);
+    pcl::fromROSMsg(*msg, *cloud);
+    // Sort particles
+    std::sort(cloud->points.begin(), cloud->points.end(),
+    compareParticleWeight<pcl::tracking::ParticleCuboid>);
+    // Take top-n points
+    double sum = 0;
+    pcl::PointIndices::Ptr indices(new pcl::PointIndices);
+    size_t i = 0;
+    while (sum < top_n_ratio_ && i < cloud->points.size()) {
+            //new_particles.push_back(cloud->points[i]);
+        indices->indices.push_back((int)i);
+        sum += cloud->points[i].weight;
+        i++;
+      }
+    pcl::ExtractIndices<pcl::tracking::ParticleCuboid> ex;
+    ex.setInputCloud(cloud);
+    ex.setIndices(indices);
+    ex.filter(*cloud_filtered);
+    sensor_msgs::PointCloud2 ros_cloud;
+    pcl::toROSMsg(*cloud_filtered, ros_cloud);
+    ros_cloud.header = msg->header;
+    pub_.publish(ros_cloud);
+  }
+  
 }
 
 #include <pluginlib/class_list_macros.h>

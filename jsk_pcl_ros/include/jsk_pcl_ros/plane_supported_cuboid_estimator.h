@@ -85,15 +85,35 @@ namespace pcl
         };
         float data_c[8];
       };
-      jsk_pcl_ros::Polygon::Ptr plane;
+      
+      //jsk_pcl_ros::Polygon::Ptr plane;
+      int plane_index;
     };
     
     struct EIGEN_ALIGN16 ParticleCuboid : public _ParticleCuboid
     {
+
+      // Copy constructor
+      inline ParticleCuboid(const ParticleCuboid& obj)
+      {
+        x = obj.x;
+        y = obj.y;
+        z = obj.z;
+        roll = obj.roll;
+        pitch = obj.pitch;
+        yaw = obj.yaw;
+        dx = obj.dx;
+        dy = obj.dy;
+        dz = obj.dz;
+        weight = obj.weight;
+        plane_index = obj.plane_index;
+      }
+      
       inline ParticleCuboid()
       {
         x = y = z = roll = pitch = yaw = dx = dy = dz = weight = 0.0;
         data[3] = 1.0f;
+        plane_index = -1;
       }
       inline ParticleCuboid (float _x, float _y, float _z, float _roll, float _pitch, float _yaw)
       {
@@ -382,6 +402,9 @@ POINT_CLOUD_REGISTER_POINT_STRUCT (pcl::tracking::_ParticleCuboid,
                                    (float, roll, roll)
                                    (float, pitch, pitch)
                                    (float, yaw, yaw)
+                                   (float, dx, dx)
+                                   (float, dy, dy)
+                                   (float, dz, dz)
                                    (float, weight, weight)
   )
 POINT_CLOUD_REGISTER_POINT_WRAPPER(pcl::tracking::ParticleCuboid, pcl::tracking::_ParticleCuboid)
@@ -410,23 +433,25 @@ namespace jsk_pcl_ros
   template <class Config>
   double rangeLikelihood(const pcl::tracking::ParticleCuboid& p,
                          pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud,
+                         const std::vector<Polygon::Ptr>& planes,
                          const Config& config)
   {
     double likelihood = 1.0;
-    if (!p.plane) {
+    Polygon::Ptr plane = planes[p.plane_index];
+    if (p.plane_index == -1) {
       // Do nothing
     }
     else {
       Eigen::Vector3f projected_point;
-      p.plane->project(Eigen::Vector3f(p.getVector3fMap()), projected_point);
-      if (p.plane->isInside(projected_point)) {
+      plane->project(Eigen::Vector3f(p.getVector3fMap()), projected_point);
+      if (plane->isInside(projected_point)) {
         likelihood *= 1.0;
       }
       else {
         likelihood = 0.0;
       }
     }
-    float local_z = p.plane->distanceToPoint(Eigen::Vector3f(p.getVector3fMap()));
+    float local_z = plane->distanceToPoint(Eigen::Vector3f(p.getVector3fMap()));
     likelihood *= binaryLikelihood(local_z, config.range_likelihood_local_min_z, config.range_likelihood_local_max_z);
     return likelihood;
   }
@@ -434,10 +459,12 @@ namespace jsk_pcl_ros
   template <class Config>
   double supportPlaneAngularLikelihood(
     const pcl::tracking::ParticleCuboid& p,
+    const std::vector<Polygon::Ptr>& planes,
     const Config& config)
   {
+    Polygon::Ptr plane = planes[p.plane_index];
     if (config.use_support_plane_angular_likelihood) {
-      double cos_likelihood = (p.toEigenMatrix().rotation() * Eigen::Vector3f::UnitZ()).dot(p.plane->getNormal());
+      double cos_likelihood = (p.toEigenMatrix().rotation() * Eigen::Vector3f::UnitZ()).dot(plane->getNormal());
       // ROS_INFO("cos_likelihood: %f", cos_likelihood);
       return pow(std::abs(cos_likelihood),
                  config.support_plane_angular_likelihood_weight_power);
@@ -494,18 +521,19 @@ namespace jsk_pcl_ros
   double computeLikelihood(const pcl::tracking::ParticleCuboid& p,
                            pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud,
                            const Eigen::Vector3f& viewpoint,
+                           const std::vector<Polygon::Ptr>& polygons,
                            const Config& config)
   {
     double range_likelihood = 1.0;
     if (config.use_range_likelihood) {
-      range_likelihood = rangeLikelihood(p, cloud, config);
+      range_likelihood = rangeLikelihood(p, cloud, polygons, config);
     }
     //p.weight = std::abs(p.z);
     if (range_likelihood == 0.0) {
      return range_likelihood;
     }
     else {
-      return range_likelihood * distanceFromPlaneBasedError(p, cloud, viewpoint, config) * supportPlaneAngularLikelihood(p, config);
+      return range_likelihood * distanceFromPlaneBasedError(p, cloud, viewpoint, config) * supportPlaneAngularLikelihood(p, polygons, config);
     }    
   }
   
@@ -619,8 +647,8 @@ namespace jsk_pcl_ros
     Eigen::Vector3f viewpoint_;
     bool support_plane_updated_;
     pcl::tracking::ROSCollaborativeParticleFilterTracker<pcl::PointXYZ, pcl::tracking::ParticleCuboid>::Ptr tracker_;
+    std::vector<Polygon::Ptr> polygons_;
   private:
-    
   };
 }
 

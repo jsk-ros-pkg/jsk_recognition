@@ -116,18 +116,21 @@ namespace jsk_pcl_ros
       NODELET_ERROR("no valid polygons, skip update relationship");
       return;
     }
-    // First convert all the jsk_recognition_msgs::PolygonArray into
-    // jsk_pcl_ros::Polygon::Ptr.
-    std::vector<ConvexPolygon::Ptr> polygons(latest_polygon_msg_->polygons.size());
+
+    // The order of convexes and polygons_ should be same
+    // because it is inside of critical section.
+    std::vector<ConvexPolygon::Ptr> convexes;
     for (size_t i = 0; i < latest_polygon_msg_->polygons.size(); i++) {
       ConvexPolygon::Ptr polygon = ConvexPolygon::fromROSMsgPtr(latest_polygon_msg_->polygons[i].polygon);
-      polygons[i] = polygon;
+      convexes.push_back(polygon);
     }
 
+    
     // Second, compute distances and assing polygons.
     for (size_t i = 0; i < particles->points.size(); i++) {
-      size_t nearest_index = getNearestPolygon(particles->points[i], polygons);
-      particles->points[i].plane = polygons[nearest_index];
+      size_t nearest_index = getNearestPolygon(particles->points[i], convexes);
+      //particles->points[i].plane = polygons[nearest_index];
+      particles->points[i].plane_index = (int)nearest_index;
     }
   }
   
@@ -141,6 +144,13 @@ namespace jsk_pcl_ros
       return;
     }
 
+    // Update polygons_ vector
+    polygons_.clear();
+    for (size_t i = 0; i < latest_polygon_msg_->polygons.size(); i++) {
+      Polygon::Ptr polygon = Polygon::fromROSMsgPtr(latest_polygon_msg_->polygons[i].polygon);
+      polygons_.push_back(polygon);
+    }
+    
     // viewpoint
     tf::StampedTransform transform
       = lookupTransformWithDuration(tf_, sensor_frame_, msg->header.frame_id,
@@ -276,7 +286,7 @@ namespace jsk_pcl_ros
     sampled_particle.dx = randomGaussian(p.dx, step_dx_variance_, random_generator_);
     sampled_particle.dy = randomGaussian(p.dy, step_dy_variance_, random_generator_);
     sampled_particle.dz = randomGaussian(p.dz, step_dz_variance_, random_generator_);
-    sampled_particle.plane = p.plane;
+    sampled_particle.plane_index = p.plane_index;
     sampled_particle.weight = p.weight;
     return sampled_particle;
   }
@@ -285,7 +295,7 @@ namespace jsk_pcl_ros
                                                  pcl::tracking::ParticleCuboid& p)
   {
     //p.weight = computeLikelihood(p, input, config_);
-    p.weight = computeLikelihood(p, candidate_cloud_, viewpoint_, config_);
+    p.weight = computeLikelihood(p, candidate_cloud_, viewpoint_, polygons_, config_);
   }
   
   void PlaneSupportedCuboidEstimator::polygonCallback(
@@ -339,7 +349,7 @@ namespace jsk_pcl_ros
       p_local.dz = randomGaussian(
         init_dz_mean_, init_dz_variance_, random_generator_);
       pcl::tracking::ParticleCuboid p_global = p_local * polygon->coordinates();
-      p_global.plane = polygon;
+      p_global.plane_index = plane_i;
       particles->points[i] = p_global;
     }
     return particles;

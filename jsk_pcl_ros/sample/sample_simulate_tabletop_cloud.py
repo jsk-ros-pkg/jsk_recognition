@@ -72,6 +72,18 @@ def generatePoints3():
     
     return plane_points + object_points
 
+def generatePointsDoor():
+    plane_points = []
+    object_points = []
+    dx = 0.02
+    for y in np.arange(-0.5, 0.5, dx):
+        for z in np.arange(0, 2, dx):
+            plane_points.append([0.0, y, z])
+    for y in np.arange(0.2, 0.4, dx):
+        for z in np.arange(0.8, 0.9, dx):
+            object_points.append([-0.1, y, z])
+    return plane_points + object_points
+
 def generatePoints(model_index):
     if model_index == 0:
         return generatePoints0()
@@ -81,39 +93,33 @@ def generatePoints(model_index):
         return generatePoints2()
     elif model_index == 3:
         return generatePoints3()
+    elif model_index == 4:
+        return generatePointsDoor()
 
-def generatePolygons(header):
+def generatePolygons(header, model_index):
     polygon = PolygonArray()
     polygon.header = header
     polygon.polygons = [PolygonStamped()]
     polygon.polygons[0].header = header;
-    # Rectangle
-    polygon.polygons[0].polygon.points = [Point32(x=1.0, y=1.0), Point32(x=-1.0, y=1.0),
-                                          Point32(x=-1.0, y=-1.0), Point32(x=1.0, y=-1.0)]
-    # polygon.polygons[0].polygon.points = [Point32(x=2.0, y=1.0), Point32(x=-2.0, y=1.0),
-    #                                       Point32(x=-2.0, y=-1.0), Point32(x=2.0, y=-1.0)]
-    # circle
-    # for i in range(100):
-    #     theta = i / 100.0 * 2.0 * pi
-    #     x = 1.0 * cos(theta)
-    #     y = 1.0 * sin(theta)
-    #     polygon.polygons[0].polygon.points.append(Point32(x=x, y=y))
-    # star
-    # polygon.polygons[0].polygon.points = [Point32(x= .0000, y= 1.0000),
-    #                                       Point32(x= .2245, y= .3090),
-    #                                       Point32(x= .9511, y= .3090),
-    #                                       Point32(x= .3633, y= -.1180),
-    #                                       Point32(x= .5878, y= -.8090),
-    #                                       Point32(x= .0000, y= -.3820),
-    #                                       Point32(x= -.5878, y= -.8090),
-    #                                       Point32(x= -.3633, y= -.1180),
-    #                                       Point32(x= -.9511, y= .3090),
-    #                                       Point32(x= -.2245, y= .3090)]
     coef = ModelCoefficientsArray()
     coef.coefficients = [ModelCoefficients()]
     coef.header = header
-    coef.coefficients[0].header = header
-    coef.coefficients[0].values = [0, 0, 1, 0]
+    if model_index in [0, 1, 2, 3]:
+        # Rectangle
+        polygon.polygons[0].polygon.points = [Point32(x=1.0, y=1.0),
+                                              Point32(x=-1.0, y=1.0),
+                                              Point32(x=-1.0, y=-1.0),
+                                              Point32(x=1.0, y=-1.0)]
+        coef.coefficients[0].header = header
+        coef.coefficients[0].values = [0, 0, 1, 0]
+    elif model_index == 4:
+        polygon.polygons[0].polygon.points = [Point32(x=0.0, y=-0.5, z=0.0),
+                                              Point32(x=0.0, y=-0.5, z=2.0),
+                                              Point32(x=0.0, y=0.5, z=2.0),
+                                              Point32(x=0.0, y=0.5, z=0.0)]
+        # polygon.polygons[0].polygon.points.reverse()
+        coef.coefficients[0].header = header
+        coef.coefficients[0].values = [-1, 0, 0, 0]
     return (polygon, coef)
     
 
@@ -124,8 +130,8 @@ if __name__ == "__main__":
     pub_coef = rospy.Publisher("~output/coef", ModelCoefficientsArray)
     r = rospy.Rate(10)
     counter = 0
-    model_index = 0
-    reset = True
+    model_index = 4
+    reset = False
     while not rospy.is_shutdown():
         points = generatePoints(model_index)
         header = Header()
@@ -133,7 +139,7 @@ if __name__ == "__main__":
         header.stamp = rospy.Time.now()
         msg = create_cloud_xyz32(header, points)
         pub.publish(msg)
-        (polygon, coef) = generatePolygons(header)
+        (polygon, coef) = generatePolygons(header, model_index)
         pub_polygon.publish(polygon)
         pub_coef.publish(coef)
         counter = counter + 1
@@ -141,7 +147,7 @@ if __name__ == "__main__":
             reset = rospy.ServiceProxy("/plane_supported_cuboid_estimator/reset", Empty)
             counter = 0
             model_index = model_index + 1
-            if model_index >= 4:
+            if model_index >= 5:
                 model_index = 0
             reset()
         r.sleep()

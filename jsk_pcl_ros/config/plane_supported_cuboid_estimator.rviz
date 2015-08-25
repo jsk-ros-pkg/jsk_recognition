@@ -4,13 +4,8 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /PointCloud22
-        - /PointCloud23
-        - /BoundingBoxArray1
-        - /OverlayImage1
-        - /OverlayImage2
-        - /OverlayImage3
-        - /InteractiveMarkers1
+        - /InteractiveMarkers2
+        - /PointCloud24
       Splitter Ratio: 0.5
     Tree Height: 539
   - Class: rviz/Selection
@@ -68,7 +63,7 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: false
       Max Color: 0; 255; 0
-      Max Intensity: 0.2
+      Max Intensity: 1.98
       Min Color: 0; 0; 0
       Min Intensity: 0
       Name: PointCloud2
@@ -97,7 +92,7 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: true
       Max Color: 255; 255; 255
-      Max Intensity: 0.000244659
+      Max Intensity: 0.000166227
       Min Color: 0; 0; 0
       Min Intensity: 0
       Name: PointCloud2
@@ -152,10 +147,10 @@ Visualization Manager:
       Use rainbow: true
       Value: true
     - Class: jsk_rviz_plugin/BoundingBoxArray
-      Enabled: true
+      Enabled: false
       Name: BoundingBoxArray
       Topic: /plane_supported_cuboid_estimator/output/result
-      Value: true
+      Value: false
       alpha: 0.8
       auto color: false
       color: 25; 255; 0
@@ -163,30 +158,30 @@ Visualization Manager:
       only edge: true
       show coords: false
     - Class: jsk_rviz_plugin/OverlayImage
-      Enabled: true
+      Enabled: false
       Name: OverlayImage
       Topic: /plane_supported_cuboid_estimator/output/histogram/global/x/histogram_image
-      Value: true
+      Value: false
       alpha: 0.8
       height: 128
       left: 10
       top: 10
       width: 300
     - Class: jsk_rviz_plugin/OverlayImage
-      Enabled: true
+      Enabled: false
       Name: OverlayImage
       Topic: /plane_supported_cuboid_estimator/output/histogram/global/y/histogram_image
-      Value: true
+      Value: false
       alpha: 0.8
       height: 128
       left: 320
       top: 10
       width: 300
     - Class: jsk_rviz_plugin/OverlayImage
-      Enabled: true
+      Enabled: false
       Name: OverlayImage
       Topic: /plane_supported_cuboid_estimator/output/histogram/global/z/histogram_image
-      Value: true
+      Value: false
       alpha: 0.8
       height: 128
       left: 630
@@ -207,6 +202,44 @@ Visualization Manager:
       Show Descriptions: true
       Show Visual Aids: false
       Update Topic: /sensor_frame/update
+      Value: true
+    - Class: rviz/InteractiveMarkers
+      Enable Transparency: true
+      Enabled: false
+      Name: InteractiveMarkers
+      Show Axes: false
+      Show Descriptions: true
+      Show Visual Aids: false
+      Update Topic: /interactive_cuboid_likelihood/update
+      Value: false
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: ""
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PointCloud2
+      Position Transformer: ""
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.01
+      Style: Flat Squares
+      Topic: /top_n_particles/output
+      Use Fixed Frame: true
+      Use rainbow: true
       Value: true
   Enabled: true
   Global Options:
@@ -233,22 +266,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 4.18889
+      Distance: 2.44006
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.234068
-        Y: 0.456175
-        Z: 0.736286
+        X: -0.549055
+        Y: -0.228494
+        Z: 0.867147
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.309798
+      Pitch: 0.599798
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 5.18825
+      Yaw: 2.37326
     Saved: ~
 Window Geometry:
   Displays:
@@ -266,5 +299,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1794
-  X: 245
-  Y: 316
+  X: 299
+  Y: 563

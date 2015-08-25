@@ -411,6 +411,7 @@ add_executable(bench_ransac_plane_estimation bench/bench_ransac_plane_estimation
 target_link_libraries(bench_ransac_plane_estimation jsk_pcl_ros)
 
 file(GLOB _headers ${PROJECT_SOURCE_DIR}/include/jsk_pcl_ros/*.h)
+list(SORT _headers)
 set(_include_headers "")
 foreach(_header ${_headers})
   string(FIND "${_header}" kinfu IS_KINFU)
@@ -419,6 +420,11 @@ foreach(_header ${_headers})
     set(_include_headers "${_include_headers}#include \"${_header}\"\n")
   endif()
 endforeach()
+execute_process(
+  COMMAND ${PROJECT_SOURCE_DIR}/scripts/build_check_helper.py ${PROJECT_SOURCE_DIR}/jsk_pcl_nodelets.xml
+  OUTPUT_VARIABLE _class_instances
+  )
+
 configure_file(src/build_check.cpp.in build_check.cpp)
 add_executable(build_check build_check.cpp)
 target_link_libraries(build_check jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_util jsk_pcl_ros_moveit)
@@ -427,8 +433,6 @@ generate_messages(DEPENDENCIES
 
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 message("flags: ${CMAKE_CXX_FLAGS}")
-
-
 
 catkin_package(
     DEPENDS pcl

@@ -293,6 +293,11 @@ namespace jsk_pcl_ros
       size_t index,
       const Eigen::Vector3f& direction);
     virtual PtrPair separatePolygon(size_t index);
+    /**
+     * @brief
+     * return true if p is inside of polygon.
+     * p should be in global coordinates.
+     */
     virtual bool isInside(const Eigen::Vector3f& p);
     size_t previousIndex(size_t i);
     size_t nextIndex(size_t i);
@@ -311,6 +316,8 @@ namespace jsk_pcl_ros
         p.x = v[0]; p.y = v[1]; p.z = v[2];
         output.points[i] = p;
       }
+      output.height = 1;
+      output.width = output.points.size();
     }
     
   protected:

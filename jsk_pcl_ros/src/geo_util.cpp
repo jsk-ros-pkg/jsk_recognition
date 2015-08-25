@@ -47,6 +47,269 @@
 #include <boost/math/special_functions/round.hpp>
 #include <jsk_topic_tools/log_utils.h>
 
+
+#include <pcl/point_types.h>
+#include <pcl/surface/processing.h>
+
+namespace pcl
+{
+
+  /** \brief The ear clipping triangulation algorithm.
+    * The code is inspired by Flavien Brebion implementation, which is
+    * in n^3 and does not handle holes.
+    * \author Nicolas Burrus
+    * \ingroup surface
+    */
+  class PCL_EXPORTS EarClippingPatched : public MeshProcessing
+  {
+    public:
+      typedef boost::shared_ptr<EarClippingPatched> Ptr;
+      typedef boost::shared_ptr<const EarClippingPatched> ConstPtr;
+
+      using MeshProcessing::input_mesh_;
+      using MeshProcessing::initCompute;
+      /** \brief Empty constructor */
+      EarClippingPatched () : MeshProcessing (), points_ ()
+      { 
+      };
+
+    protected:
+      /** \brief a Pointer to the point cloud data. */
+      pcl::PointCloud<pcl::PointXYZ>::Ptr points_;
+
+      /** \brief This method should get called before starting the actual computation. */
+      bool
+      initCompute ();
+
+      /** \brief The actual surface reconstruction method. 
+        * \param[out] output the output polygonal mesh 
+        */
+      void
+      performProcessing (pcl::PolygonMesh &output);
+
+      /** \brief Triangulate one polygon. 
+        * \param[in] vertices the set of vertices
+        * \param[out] output the resultant polygonal mesh
+        */
+      void
+      triangulate (const Vertices& vertices, PolygonMesh& output);
+
+      /** \brief Compute the signed area of a polygon. 
+        * \param[in] vertices the vertices representing the polygon 
+        */
+      float
+      area (const std::vector<uint32_t>& vertices);
+
+      /** \brief Check if the triangle (u,v,w) is an ear. 
+        * \param[in] u the first triangle vertex 
+        * \param[in] v the second triangle vertex 
+        * \param[in] w the third triangle vertex 
+        * \param[in] vertices a set of input vertices
+        */
+      bool
+      isEar (int u, int v, int w, const std::vector<uint32_t>& vertices);
+
+      /** \brief Check if p is inside the triangle (u,v,w). 
+        * \param[in] u the first triangle vertex 
+        * \param[in] v the second triangle vertex 
+        * \param[in] w the third triangle vertex 
+        * \param[in] p the point to check
+        */
+      bool
+      isInsideTriangle (const Eigen::Vector3f& u,
+                        const Eigen::Vector3f& v,
+                        const Eigen::Vector3f& w,
+                        const Eigen::Vector3f& p);
+
+      /** \brief Compute the cross product between 2D vectors.
+       * \param[in] p1 the first 2D vector
+       * \param[in] p2 the first 2D vector
+       */
+      float
+      crossProduct (const Eigen::Vector2f& p1, const Eigen::Vector2f& p2) const
+      {
+        return p1[0]*p2[1] - p1[1]*p2[0];
+      }
+
+  };
+
+}
+
+#include <pcl/surface/ear_clipping.h>
+#include <pcl/conversions.h>
+#include <pcl/pcl_config.h>
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+bool
+pcl::EarClippingPatched::initCompute ()
+{
+  points_.reset (new pcl::PointCloud<pcl::PointXYZ>);
+
+  if (!MeshProcessing::initCompute ())
+    return (false);
+  fromPCLPointCloud2 (input_mesh_->cloud, *points_);
+
+  return (true);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl::EarClippingPatched::performProcessing (PolygonMesh& output)
+{
+  output.polygons.clear ();
+  output.cloud = input_mesh_->cloud;
+  for (int i = 0; i < static_cast<int> (input_mesh_->polygons.size ()); ++i)
+    triangulate (input_mesh_->polygons[i], output);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl::EarClippingPatched::triangulate (const Vertices& vertices, PolygonMesh& output)
+{
+  const int n_vertices = static_cast<const int> (vertices.vertices.size ());
+
+  if (n_vertices < 3)
+    return;
+  else if (n_vertices == 3)
+  {
+    output.polygons.push_back( vertices );
+    return;
+  }
+
+  std::vector<uint32_t> remaining_vertices (n_vertices);
+  if (area (vertices.vertices) > 0) // clockwise?
+    remaining_vertices = vertices.vertices;
+  else
+    for (int v = 0; v < n_vertices; v++)
+      remaining_vertices[v] = vertices.vertices[n_vertices - 1 - v];
+
+  // Avoid closed loops.
+  if (remaining_vertices.front () == remaining_vertices.back ())
+    remaining_vertices.erase (remaining_vertices.end () - 1);
+
+  // null_iterations avoids infinite loops if the polygon is not simple.
+  for (int u = static_cast<int> (remaining_vertices.size ()) - 1, null_iterations = 0;
+      remaining_vertices.size () > 2 && null_iterations < static_cast<int >(remaining_vertices.size () * 2);
+      ++null_iterations, u = (u+1) % static_cast<int> (remaining_vertices.size ()))
+  {
+    int v = (u + 1) % static_cast<int> (remaining_vertices.size ());
+    int w = (u + 2) % static_cast<int> (remaining_vertices.size ());
+
+    if (isEar (u, v, w, remaining_vertices))
+    {
+      Vertices triangle;
+      triangle.vertices.resize (3);
+      triangle.vertices[0] = remaining_vertices[u];
+      triangle.vertices[1] = remaining_vertices[v];
+      triangle.vertices[2] = remaining_vertices[w];
+      output.polygons.push_back (triangle);
+      remaining_vertices.erase (remaining_vertices.begin () + v);
+      null_iterations = 0;
+    }
+  }
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+float
+pcl::EarClippingPatched::area (const std::vector<uint32_t>& vertices)
+{
+    //if the polygon is projected onto the xy-plane, the area of the polygon is determined
+    //by the trapeze formula of Gauss. However this fails, if the projection is one 'line'.
+    //Therefore the following implementation determines the area of the flat polygon in 3D-space
+    //using Stoke's law: http://code.activestate.com/recipes/578276-3d-polygon-area/
+
+    int n = static_cast<int> (vertices.size ());
+    float area = 0.0f;
+    Eigen::Vector3f prev_p, cur_p;
+    Eigen::Vector3f total (0,0,0);
+    Eigen::Vector3f unit_normal;
+
+    if (n > 3)
+    {
+        for (int prev = n - 1, cur = 0; cur < n; prev = cur++)
+        {
+            prev_p = points_->points[vertices[prev]].getVector3fMap();
+            cur_p = points_->points[vertices[cur]].getVector3fMap();
+
+            total += prev_p.cross( cur_p );
+        }
+
+        //unit_normal is unit normal vector of plane defined by the first three points
+        prev_p = points_->points[vertices[1]].getVector3fMap() - points_->points[vertices[0]].getVector3fMap();
+        cur_p = points_->points[vertices[2]].getVector3fMap() - points_->points[vertices[0]].getVector3fMap();
+        unit_normal = (prev_p.cross(cur_p)).normalized();
+
+        area = total.dot( unit_normal );
+    }
+
+    return area * 0.5f; 
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+bool
+pcl::EarClippingPatched::isEar (int u, int v, int w, const std::vector<uint32_t>& vertices)
+{
+  Eigen::Vector3f p_u, p_v, p_w;
+  p_u = points_->points[vertices[u]].getVector3fMap();
+  p_v = points_->points[vertices[v]].getVector3fMap();
+  p_w = points_->points[vertices[w]].getVector3fMap();
+
+  const float eps = 1e-15f;
+  Eigen::Vector3f p_uv, p_uw;
+  p_uv = p_v - p_u;
+  p_uw = p_w - p_u;
+
+  // Avoid flat triangles.
+  if ((p_uv.cross(p_uw)).norm() < eps)
+    return (false);
+
+  Eigen::Vector3f p;
+  // Check if any other vertex is inside the triangle.
+  for (int k = 0; k < static_cast<int> (vertices.size ()); k++)
+  {
+    if ((k == u) || (k == v) || (k == w))
+      continue;
+    p = points_->points[vertices[k]].getVector3fMap();
+
+    if (isInsideTriangle (p_u, p_v, p_w, p))
+      return (false);
+  }
+  return (true);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+bool
+pcl::EarClippingPatched::isInsideTriangle (const Eigen::Vector3f& u,
+                                    const Eigen::Vector3f& v,
+                                    const Eigen::Vector3f& w,
+                                    const Eigen::Vector3f& p)
+{
+  // see http://www.blackpawn.com/texts/pointinpoly/default.html
+  // Barycentric Coordinates
+  Eigen::Vector3f v0 = w - u;
+  Eigen::Vector3f v1 = v - u;
+  Eigen::Vector3f v2 = p - u;
+
+  // Compute dot products
+  float dot00 = v0.dot(v0);
+  float dot01 = v0.dot(v1);
+  float dot02 = v0.dot(v2);
+  float dot11 = v1.dot(v1);
+  float dot12 = v1.dot(v2);
+
+  // Compute barycentric coordinates
+  float invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+  float a = (dot11 * dot02 - dot01 * dot12) * invDenom;
+  float b = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+  // Check if point is in triangle
+  return (a >= 0) && (b >= 0) && (a + b < 1);
+}
+
+
+
 // #define DEBUG_GEO_UTIL
 namespace jsk_pcl_ros
 {
@@ -652,9 +915,10 @@ namespace jsk_pcl_ros
     while (true) {
       double x = randomUniform(min_x, max_x, random_generator);
       double y = randomUniform(min_y, max_y, random_generator);
-      Eigen::Vector3f v(x, y, 0);
+      Eigen::Vector3f local_v = Eigen::Vector3f(x, y, 0);
+      Eigen::Vector3f v = coordinates() * local_v;
       if (isInside(v)) {
-        return v;
+        return local_v;
       }
     }
   }
@@ -812,7 +1076,7 @@ namespace jsk_pcl_ros
       return ret;
     }
 
-    pcl::EarClipping clip;
+    pcl::EarClippingPatched clip;
     // convert
     pcl::PolygonMesh::Ptr input_mesh (new pcl::PolygonMesh);
     pcl::PCLPointCloud2 mesh_cloud;
@@ -822,7 +1086,7 @@ namespace jsk_pcl_ros
     for (size_t i = 0; i < vertices_.size(); i++) {
       mesh_vertices[0].vertices.push_back(i);
     }
-    mesh_vertices[0].vertices.push_back(0); // close
+    //mesh_vertices[0].vertices.push_back(0); // close
     mesh_pcl_cloud.height = 1;
     mesh_pcl_cloud.width = mesh_pcl_cloud.points.size();
     pcl::toPCLPointCloud2<pcl::PointXYZ>(mesh_pcl_cloud, mesh_cloud);
@@ -832,6 +1096,7 @@ namespace jsk_pcl_ros
     clip.setInputMesh(input_mesh);
     pcl::PolygonMesh output;
     clip.process(output);
+    assert(output.polygons.size() != 0);
     // convert to Polygon instances
     for (size_t i = 0; i < output.polygons.size(); i++) {
       pcl::Vertices output_polygon_vertices = output.polygons[i];
@@ -910,9 +1175,14 @@ namespace jsk_pcl_ros
       Eigen::Vector3f A = vertices_[0];
       Eigen::Vector3f B = vertices_[1];
       Eigen::Vector3f C = vertices_[2];
-      Eigen::Vector3f cross0 = (A - C).cross(p - A);
-      Eigen::Vector3f cross1 = (B - A).cross(p - B);
-      Eigen::Vector3f cross2 = (C - B).cross(p - C);
+      // Eigen::Vector3f cross0 = (A - C).cross(p - A);
+      // Eigen::Vector3f cross1 = (B - A).cross(p - B);
+      // Eigen::Vector3f cross2 = (C - B).cross(p - C);
+      
+      Eigen::Vector3f cross0 = (B - A).cross(p - A);
+      Eigen::Vector3f cross1 = (C - B).cross(p - B);
+      Eigen::Vector3f cross2 = (A - C).cross(p - C);
+      
       if (cross0.dot(cross1) >= 0 &&
           cross1.dot(cross2) >= 0) {
         return true;

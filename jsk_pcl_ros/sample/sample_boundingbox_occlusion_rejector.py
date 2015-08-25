@@ -10,13 +10,16 @@ candidate_pose = None
 def candidatePoseCallback(msg):
     global candidate_pose
     candidate_pose = msg.pose
+    
 def callback(msg):
     if not candidate_pose:
         return
     target_array = BoundingBoxArray()
-    target_array.header = msg.header
+    target_array.header.stamp = msg.header.stamp
+    target_array.header.frame_id = "world"
     target = BoundingBox()
-    target.header = msg.header
+    target.header.stamp = msg.header.stamp
+    target.header.frame_id = "world"
     target.pose = candidate_pose
     target.dimensions.x = 0.2
     target.dimensions.y = 0.2
@@ -24,13 +27,15 @@ def callback(msg):
     target_array.boxes = [target]
     pub_target.publish(target_array)
     candidate_array = BoundingBoxArray()
-    candidate_array.header = msg.header
+    candidate_array.header.stamp = msg.header.stamp
+    candidate_array.header.frame_id = "world"
     for x in [-0.2, -0.1, 0.0, 0.1, 0.2]:
         for y in [-0.2, -0.1, 0.0, 0.1, 0.2]:
             for z in [-0.2, -0.1, 0.0, 0.1, 0.2]:
                 candidate = BoundingBox()
-                candidate.header = msg.header
-                candidate.pose.position.z = 1 + z
+                candidate.header.stamp = msg.header.stamp
+                candidate.header.frame_id = "world"
+                candidate.pose.position.z = 2 + z
                 candidate.pose.position.x = x
                 candidate.pose.position.y = y
                 candidate.pose.orientation.w = 1.0

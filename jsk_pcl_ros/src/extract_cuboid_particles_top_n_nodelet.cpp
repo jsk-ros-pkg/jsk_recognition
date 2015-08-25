@@ -35,6 +35,7 @@
 
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/extract_cuboid_particles_top_n.h"
+#include "jsk_pcl_ros/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -47,6 +48,7 @@ namespace jsk_pcl_ros
       boost::bind (&ExtractCuboidParticlesTopN::configCallback, this, _1, _2);
     srv_->setCallback (f);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    pub_box_array_ = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "output/box_array", 1);
   }
 
   void ExtractCuboidParticlesTopN::subscribe()
@@ -84,7 +86,7 @@ namespace jsk_pcl_ros
         indices->indices.push_back((int)i);
         sum += cloud->points[i].weight;
         i++;
-      }
+    }
     pcl::ExtractIndices<pcl::tracking::ParticleCuboid> ex;
     ex.setInputCloud(cloud);
     ex.setIndices(indices);
@@ -93,6 +95,31 @@ namespace jsk_pcl_ros
     pcl::toROSMsg(*cloud_filtered, ros_cloud);
     ros_cloud.header = msg->header;
     pub_.publish(ros_cloud);
+    publishBoxArray(*cloud_filtered, msg->header);
+  }
+
+  void ExtractCuboidParticlesTopN::publishBoxArray(
+    const pcl::PointCloud<pcl::tracking::ParticleCuboid>& particles,
+    const std_msgs::Header& header)
+  {
+    if (pub_box_array_.getNumSubscribers() > 0) {
+      jsk_recognition_msgs::BoundingBoxArray box_array;
+      box_array.header = header;
+      box_array.boxes.resize(particles.points.size());
+      for (size_t i = 0; i < particles.points.size(); i++) {
+        pcl::tracking::ParticleCuboid p = particles.points[i];
+        jsk_recognition_msgs::BoundingBox box;
+        box.header = header;
+        Eigen::Affine3f pose = p.toEigenMatrix();
+        tf::poseEigenToMsg(pose, box.pose);
+        box.dimensions.x = p.dx;
+        box.dimensions.y = p.dy;
+        box.dimensions.z = p.dz;
+        box.value = p.weight;
+        box_array.boxes[i] = box;
+      }
+      pub_box_array_.publish(box_array);
+    }
   }
   
 }

@@ -74,6 +74,7 @@ add_service_files(FILES SwitchTopic.srv
 generate_dynamic_reconfigure_options(
   cfg/InteractiveCuboidLikelihood.cfg
   cfg/PlaneSupportedCuboidEstimator.cfg
+  cfg/ExtractParticlesTopNBase.cfg
   cfg/PoseWithCovarianceStampedToGaussianPointCloud.cfg
   cfg/HeightmapMorphologicalFiltering.cfg
   cfg/HeightmapConverter.cfg
@@ -168,6 +169,8 @@ jsk_pcl_nodelet(src/fisheye_sphere_publisher_nodelet.cpp "jsk_pcl/FisheyeSphereP
 #   "jsk_pcl/NodeletImageDEMUX" "image_demux")
 jsk_pcl_nodelet(src/plane_supported_cuboid_estimator_nodelet.cpp
   "jsk_pcl/PlaneSupportedCuboidEstimator" "plane_supported_cuboid_estimator")
+jsk_pcl_nodelet(src/extract_cuboid_particles_top_n_nodelet.cpp
+  "jsk_pcl/ExtractCuboidParticlesTopN" "extract_cuboid_particles_top_n")
 jsk_pcl_nodelet(src/interactive_cuboid_likelihood_nodelet.cpp
   "jsk_pcl/InteractiveCuboidLikelihood" "interactive_cuboid_likelihood")
 jsk_pcl_nodelet(src/image_rotate_nodelet.cpp

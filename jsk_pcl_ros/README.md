@@ -2590,6 +2590,25 @@ to confirm likelihood function behaves as expected.
 
   Frame ID of sensor frame. It is used to compute viewpoint and occlusion.
 
+### jsk\_pcl/ExtractCuboidParticlesTopN
+Extract top-N particles of `pcl::tracking::ParticleCuboid`.
+
+#### Publishing Topics
+* `~output` (`sensor_msgs/PointCloud2`)
+
+  Top-N Particles.
+
+#### Subscribing Topics
+* `~input` (`sensor_msgs/PointCloud2`)
+
+  Particle cloud of `pcl::tracking::ParticleCuboid`.
+  All the weights are expected to be normalized.
+
+#### Parameters
+* `top_n_ratio` (default: `0.9`)
+
+  Ratio of top-N.
+
 ### jsk\_pcl/BoundingBoxOcclusionRejector
 ![](images/boundingbox_occlusion_rejector.png)
 Rejects bounding boxes which occludes target object.

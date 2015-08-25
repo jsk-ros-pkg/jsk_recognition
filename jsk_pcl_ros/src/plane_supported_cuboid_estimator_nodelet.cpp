@@ -135,6 +135,7 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    NODELET_INFO("cloudCallback");
     if (!latest_polygon_msg_ || !latest_coefficients_msg_) {
       JSK_NODELET_WARN("Not yet polygon is available");
       return;
@@ -147,6 +148,7 @@ namespace jsk_pcl_ros
                                     ros::Duration(0.0));
     tf::vectorTFToEigen(transform.getOrigin(), viewpoint_);
     if (!tracker_) {
+      NODELET_INFO("initTracker");
       pcl::PointCloud<pcl::tracking::ParticleCuboid>::Ptr particles = initParticles();
       tracker_.reset(new pcl::tracking::ROSCollaborativeParticleFilterTracker<pcl::PointXYZ, pcl::tracking::ParticleCuboid>);
       tracker_->setCustomSampleFunc(boost::bind(&PlaneSupportedCuboidEstimator::sample, this, _1));
@@ -169,7 +171,7 @@ namespace jsk_pcl_ros
           boundaries (new pcl::PointCloud<pcl::PointXYZ>);
         polygon->boundariesToPointCloud<pcl::PointXYZ>(*boundaries);
         prism_extract.setInputCloud(cloud);
-        //prism_extract.setViewPoint(0, 0, -1.0); // 適当
+        prism_extract.setViewPoint(viewpoint_[0], viewpoint_[1], viewpoint_[2]);
         prism_extract.setHeightLimits(init_local_position_z_min_, init_local_position_z_max_);
         prism_extract.setInputPlanarHull(boundaries);
         pcl::PointIndices output_indices;

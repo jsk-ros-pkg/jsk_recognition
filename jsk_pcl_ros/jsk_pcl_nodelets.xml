@@ -505,6 +505,9 @@
   <class name="jsk_pcl/TfTransformBoundingBox" type="jsk_pcl_ros::TfTransformBoundingBox"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_pcl/TfTransformBoundingBoxArray" type="jsk_pcl_ros::TfTransformBoundingBoxArray"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_pcl/ColorizeRandomForest" type="jsk_pcl_ros::ColorizeRandomForest"
          base_class_type="nodelet::Nodelet">
     <description>

@@ -39,6 +39,7 @@
 
 int main(int argc, char** argv)
 {
+  @_class_instances@
   std::cout << "Hello World" << std::endl;
   return 0;
 }

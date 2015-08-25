@@ -37,20 +37,47 @@
 #ifndef JSK_PCL_ROS_EXTRACT_CUBOID_PARTICLES_TOP_N_BASE_H_
 #define JSK_PCL_ROS_EXTRACT_CUBOID_PARTICLES_TOP_N_BASE_H_
 
-#include "jsk_pcl_ros/extract_particles_top_n_base.h"
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include "jsk_pcl_ros/plane_supported_cuboid_estimator.h"
+#include <dynamic_reconfigure/server.h>
+#include <jsk_pcl_ros/ExtractParticlesTopNBaseConfig.h>
+#include <pcl/pcl_base.h>
+#include <pcl/impl/pcl_base.hpp>
+#include <pcl/filters/extract_indices.h>
+#include <pcl/filters/impl/extract_indices.hpp>
 
 namespace jsk_pcl_ros
 {
-  class ExtractCuboidParticlesTopN: public ExtractParticlesTopNBase<pcl::tracking::ParticleCuboid>
+  template <class PARTICLE_T>
+  bool compareParticleWeight(const PARTICLE_T& a, const PARTICLE_T& b)
+  {
+    return a.weight > b.weight;
+  }
+
+  
+  class ExtractCuboidParticlesTopN: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef boost::shared_ptr<ExtractCuboidParticlesTopN> Ptr;
-    ExtractCuboidParticlesTopN(): ExtractParticlesTopNBase<pcl::tracking::ParticleCuboid>("ExtractCuboidParticlesTopN") {}
+    typedef ExtractParticlesTopNBaseConfig Config;
+    ExtractCuboidParticlesTopN(): DiagnosticNodelet("ExtractCuboidParticlesTopN") {}
   protected:
+    virtual void onInit();
+    virtual void subscribe();
+    virtual void unsubscribe();
+    virtual void extract(const sensor_msgs::PointCloud2::ConstPtr& msg);
+    virtual void configCallback(Config& config, uint32_t level);
+
+    boost::mutex mutex_;
+    ros::Publisher pub_;
+    ros::Subscriber sub_;
+    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
+    double top_n_ratio_;
+    
   private:
     
   };
+  
 }
 
 #endif

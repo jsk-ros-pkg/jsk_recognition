@@ -109,11 +109,14 @@ namespace jsk_pcl_ros
     vertices.push_back(Eigen::Vector3f(plane_pose_ * (- Eigen::Vector3f::UnitX() - Eigen::Vector3f::UnitY())));
     vertices.push_back(Eigen::Vector3f(plane_pose_ * (Eigen::Vector3f::UnitX() - Eigen::Vector3f::UnitY())));
     Polygon::Ptr plane(new Polygon(vertices));
-    particle_.plane = plane;
+    //particle_.plane = plane;
+    particle_.plane_index = 0;
+    std::vector<Polygon::Ptr> polygons;
+    polygons.push_back(plane);
     for (size_t i = 0; i < vertices.size(); i++) {
       ROS_INFO("v: [%f, %f, %f]", vertices[i][0], vertices[i][1], vertices[i][2]);
     }
-    double l = computeLikelihood(particle_, cloud, vp, config_);
+    double l = computeLikelihood(particle_, cloud, vp, polygons, config_);
     NODELET_INFO("likelihood: %f", l);
     std_msgs::Float32 float_msg;
     float_msg.data = l;

@@ -46,6 +46,8 @@
 #include "jsk_pcl_ros/geo_util.h"
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include "jsk_pcl_ros/tf_listener_singleton.h"
+#include <algorithm>
+
 
 // ROS messages
 #include <jsk_recognition_msgs/PolygonArray.h>
@@ -173,31 +175,52 @@ namespace pcl
         return box;
       }
 
-      inline std::set<int> visibleFaceIndices(const Eigen::Vector3f local_view_point) const
+      inline std::vector<int> visibleFaceIndices(const Eigen::Vector3f local_view_point) const
       {
-        std::set<int> visible_faces;
+        std::vector<int> visible_faces;
+        visible_faces.reserve(3);
         if (local_view_point[0] > 0) {
-          visible_faces.insert(0);
+          visible_faces.push_back(0);
         }
         else if (local_view_point[0] < 0) {
-          visible_faces.insert(2);
+          visible_faces.push_back(2);
         }
         if (local_view_point[1] > 0) {
-          visible_faces.insert(1);
+          visible_faces.push_back(1);
         }
         else if (local_view_point[1] < 0) {
-          visible_faces.insert(3);
+          visible_faces.push_back(3);
         }
         if (local_view_point[2] > 0) {
-          visible_faces.insert(4);
+          visible_faces.push_back(4);
         }
         else if (local_view_point[2] < 0) {
-          visible_faces.insert(5);
+          visible_faces.push_back(5);
         }
         return visible_faces;
       }
 
+      inline double distanceNearestToPlaneWithOcclusion(
+        const Eigen::Vector3f& v,
+        const std::vector<int>& visible_faces) const
+      {
+        double min_distance = DBL_MAX;
+        int nearest_plane_index = nearestPlaneIndex(v);
+        // If the face is visible, use distance-to-plane
+        if (std::find(visible_faces.begin(), visible_faces.end(),
+                      nearest_plane_index)
+            != visible_faces.end()) {
+          return distanceToPlane(v, nearest_plane_index);
+        }
+        else {
+          // If not the face is visible, use distance from centroid
+          // It's an approximated distance.
+          return (getVector3fMap() - v).norm();
+        }
+      }
+      
       // V should be on local coordinates.
+      // TODO: update to take into boundary account
       inline double distanceToPlane(const Eigen::Vector3f& v, const int plane_index) const
       {
         Eigen::Vector3f n;
@@ -273,7 +296,7 @@ namespace pcl
     inline ParticleCuboid operator* (const ParticleCuboid& p, const Eigen::Affine3f& transform)
     {
       Eigen::Affine3f particle_affine = p.toEigenMatrix();
-      Eigen::Affine3f transformed_affine = particle_affine * transform;
+      Eigen::Affine3f transformed_affine = transform * particle_affine;
       ParticleCuboid new_p;
       new_p.x = transformed_affine.translation()[0];
       new_p.y = transformed_affine.translation()[1];
@@ -367,6 +390,10 @@ namespace jsk_pcl_ros
 {
 
   // Utility function to compute likelihood
+  /**
+   * @brief
+   * return 1.0 if v satisfies min < v < max, return 0 otherwise.
+   */
   inline double binaryLikelihood(double v, double min, double max)
   {
     if (v < min) {
@@ -400,7 +427,6 @@ namespace jsk_pcl_ros
       }
     }
     float local_z = p.plane->distanceToPoint(Eigen::Vector3f(p.getVector3fMap()));
-    // ROS_INFO("local_z: %f", local_z);
     likelihood *= binaryLikelihood(local_z, config.range_likelihood_local_min_z, config.range_likelihood_local_max_z);
     return likelihood;
   }
@@ -434,19 +460,16 @@ namespace jsk_pcl_ros
     double error = 1.0;
     size_t inliers = 0;
     const Eigen::Vector3f local_vp = pose_inv * viewpoint;
-    std::set<int> visible_faces = p.visibleFaceIndices(local_vp);
+    std::vector<int> visible_faces = p.visibleFaceIndices(local_vp);
     for (size_t i = 0; i < cloud->points.size(); i++) {
       Eigen::Vector3f v = cloud->points[i].getVector3fMap();
       Eigen::Vector3f local_v = pose_inv * v;
       // Brute force
       if (config.use_occlusion_likelihood) {
-        int nearest_index = p.nearestPlaneIndex(local_v);
-        if (visible_faces.find(nearest_index) != visible_faces.end()) {
-          double d = p.distanceToPlane(local_v, nearest_index);
-          if (d < config.outlier_distance) {
-            error *= 1 / (1 + pow(d, config.plane_distance_error_power));
-            ++inliers;
-          }
+        double d = p.distanceNearestToPlaneWithOcclusion(local_v, visible_faces);
+        if (d < config.outlier_distance) {
+          error *= 1 / (1 + pow(d, config.plane_distance_error_power));
+          ++inliers;
         }
       }
       else {

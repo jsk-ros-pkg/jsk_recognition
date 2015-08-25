@@ -15,7 +15,8 @@
       object_x: 0.1
       object_y: 0.1
       object_z: 0.1
-      initial_z: 1.0
+      initial_z: 2.0
+      initial_x: -0.5
     </rosparam>
   </node>
   <node pkg="jsk_pcl_ros" type="plane_supported_cuboid_estimator"
@@ -28,9 +29,9 @@
     <rosparam>
       init_local_position_z_min: 0.01
       init_local_position_z_max: 0.25
-      step_x_variance: 0.02
-      step_y_variance: 0.02
-      step_z_variance: 0.0001
+      step_x_variance: 0.0001
+      step_y_variance: 0.002
+      step_z_variance: 0.002
       step_roll_variance: 0.000001
       step_pitch_variance: 0.000001
       step_yaw_variance: 0.001
@@ -40,15 +41,19 @@
       init_dx_variance: 0.000000001
       init_dy_variance: 0.000000001
       init_dz_variance: 0.000000001
-      init_dx_mean: 0.2
-      init_dy_mean: 0.2
-      init_dz_mean: 0.2
+      init_dx_mean: 0.1
+      init_dy_mean: 0.1
+      init_dz_mean: 0.1
       particle_num: 10000
       use_occlusion_likelihood: true
       use_range_likelihood: true
       range_likelihood_local_min_z: 0.01
-      range_likelihood_local_max_z: 0.25
+      range_likelihood_local_max_z: 0.1
     </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="extract_cuboid_particles_top_n" name="top_n_particles"
+        launch-prefix="xterm -e gdb --args">
+    <remap from="~input" to="plane_supported_cuboid_estimator/output/particles" />
   </node>
   <node pkg="jsk_rqt_plugins" type="rqt_histogram_plot" name="x_histogram"
         args="/plane_supported_cuboid_estimator/output/histogram/global/x" />

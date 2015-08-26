@@ -8,7 +8,9 @@
 
   </description>
   <author>Manabu Saito</author>
+  <author email="ueda@jsk.t.u-tokyo.ac.jp">Ryohei Ueda</author>
   <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
+  <maintainer email="ueda@jsk.t.u-tokyo.ac.jp">Ryohei Ueda</maintainer>
 
   <license>BSD</license>
   <url>http://ros.org/wiki/jsk_perception</url>

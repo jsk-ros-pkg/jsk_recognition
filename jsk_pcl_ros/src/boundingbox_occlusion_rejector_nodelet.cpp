@@ -52,42 +52,57 @@ namespace jsk_pcl_ros
 
   void BoundingBoxOcclusionRejector::subscribe()
   {
-    sub_camera_info_.subscribe(*pnh_, "input/camera_info", 1);
-    sub_target_boxes_.subscribe(*pnh_, "input/target_boxes", 1);
-    sub_candidate_boxes_.subscribe(*pnh_, "input/candidate_boxes", 1);
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-    sync_->connectInput(sub_camera_info_, sub_target_boxes_, sub_candidate_boxes_);
-    sync_->registerCallback(boost::bind(&BoundingBoxOcclusionRejector::reject,
-                                        this, _1, _2, _3));
+    sub_camera_info_ = pnh_->subscribe("input/camera_info", 1, &BoundingBoxOcclusionRejector::infoCallback, this);
+    sub_target_boxes_ = pnh_->subscribe("input/target_boxes", 1, &BoundingBoxOcclusionRejector::targetBoxesCallback, this);
+    sub_candidate_boxes_ = pnh_->subscribe("input/candidate_boxes", 1, &BoundingBoxOcclusionRejector::reject, this);
   }
 
   void BoundingBoxOcclusionRejector::unsubscribe()
   {
-    sub_camera_info_.unsubscribe();
-    sub_target_boxes_.unsubscribe();
-    sub_candidate_boxes_.unsubscribe();
+    sub_camera_info_.shutdown();
+    sub_target_boxes_.shutdown();
+    sub_candidate_boxes_.shutdown();
   }
 
+  void BoundingBoxOcclusionRejector::infoCallback(
+    const sensor_msgs::CameraInfo::ConstPtr& info_msg)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    latest_info_msg_ = info_msg;
+  }
+
+  void BoundingBoxOcclusionRejector::targetBoxesCallback(
+    const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& target_boxes_msg)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    latest_target_boxes_msg_ = target_boxes_msg;
+  }
+
+  
   void BoundingBoxOcclusionRejector::reject(
-    const sensor_msgs::CameraInfo::ConstPtr& info_msg,
-    const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& target_boxes_msg,
     const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& candidate_boxes_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+
+    if (!latest_info_msg_ || !latest_target_boxes_msg_) {
+      NODELET_ERROR("No camera info or target_boxes is available");
+      return;
+    }
+    
     // All the header should be same
-    if (info_msg->header.frame_id != target_boxes_msg->header.frame_id ||
-        target_boxes_msg->header.frame_id != candidate_boxes_msg->header.frame_id) {
-      ROS_ERROR("Different frame_id");
+    if (latest_info_msg_->header.frame_id != latest_target_boxes_msg_->header.frame_id ||
+        latest_target_boxes_msg_->header.frame_id != candidate_boxes_msg->header.frame_id) {
+      NODELET_ERROR("Different frame_id");
       return;
     }
 
     image_geometry::PinholeCameraModel model;
-    model.fromCameraInfo(*info_msg);
-    cv::Mat image = cv::Mat::zeros(info_msg->height, info_msg->width, CV_8UC1);
+    model.fromCameraInfo(*latest_info_msg_);
+    cv::Mat image = cv::Mat::zeros(latest_info_msg_->height, latest_info_msg_->width, CV_8UC1);
     std::vector<std::vector<cv::Point2i> > faces;
     // Draw target boxes
-    for (size_t i = 0; i < target_boxes_msg->boxes.size(); i++) {
-      jsk_recognition_msgs::BoundingBox box = target_boxes_msg->boxes[i];
+    for (size_t i = 0; i < latest_target_boxes_msg_->boxes.size(); i++) {
+      jsk_recognition_msgs::BoundingBox box = latest_target_boxes_msg_->boxes[i];
       // Get vertices
       std::vector<cv::Point3d> vertices = getVertices(box);
       std::vector<cv::Point2i> projected_vertices = projectVertices(vertices, model);
@@ -105,7 +120,7 @@ namespace jsk_pcl_ros
     // Publish image
     if (pub_target_image_.getNumSubscribers() > 0) {
       cv_bridge::CvImage target_image_bridge(
-        info_msg->header,
+        latest_info_msg_->header,
         sensor_msgs::image_encodings::MONO8,
         image);
       pub_target_image_.publish(target_image_bridge.toImageMsg());
@@ -115,7 +130,7 @@ namespace jsk_pcl_ros
     std::vector<size_t> candidate_indices;
     for (size_t i = 0; i < candidate_boxes_msg->boxes.size(); i++) {
       //cv::Mat copied_image = image.clone();
-      cv::Mat candidate_image = cv::Mat::zeros(info_msg->height, info_msg->width, CV_8UC1);
+      cv::Mat candidate_image = cv::Mat::zeros(latest_info_msg_->height, latest_info_msg_->width, CV_8UC1);
       jsk_recognition_msgs::BoundingBox box = candidate_boxes_msg->boxes[i];
       // Get vertices
       std::vector<cv::Point3d> vertices = getVertices(box);
@@ -126,7 +141,7 @@ namespace jsk_pcl_ros
         one_face.push_back(projected_faces[j]);
         cv::fillPoly(candidate_image, one_face, cv::Scalar(255));
         if (pub_candidate_image_.getNumSubscribers() > 0) {
-          pub_candidate_image_.publish(cv_bridge::CvImage(info_msg->header, sensor_msgs::image_encodings::MONO8,
+          pub_candidate_image_.publish(cv_bridge::CvImage(latest_info_msg_->header, sensor_msgs::image_encodings::MONO8,
                                                           candidate_image).toImageMsg());
         }
       }

@@ -41,11 +41,6 @@
 #include <jsk_recognition_msgs/BoundingBoxArray.h>
 #include <sensor_msgs/CameraInfo.h>
 
-#include <message_filters/subscriber.h>
-#include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/exact_time.h>
-#include <message_filters/sync_policies/approximate_time.h>
-
 #include <cv_bridge/cv_bridge.h>
 #include <image_geometry/pinhole_camera_model.h>
 #include "jsk_pcl_ros/tf_listener_singleton.h"
@@ -56,10 +51,6 @@ namespace jsk_pcl_ros
   {
   public:
     typedef boost::shared_ptr<BoundingBoxOcclusionRejector> Ptr;
-    typedef message_filters::sync_policies::ExactTime<
-      sensor_msgs::CameraInfo,
-      jsk_recognition_msgs::BoundingBoxArray,
-      jsk_recognition_msgs::BoundingBoxArray> SyncPolicy;
     BoundingBoxOcclusionRejector(): DiagnosticNodelet("BoundingBoxOcclusionRejector"){}
 
   protected:
@@ -67,9 +58,11 @@ namespace jsk_pcl_ros
     virtual void subscribe();
     virtual void unsubscribe();
     virtual void reject(
-      const sensor_msgs::CameraInfo::ConstPtr& info_msg,
-      const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& target_boxes_msg,
       const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& candidate_boxes_msg);
+    virtual void infoCallback(
+      const sensor_msgs::CameraInfo::ConstPtr& info_msg);
+    virtual void targetBoxesCallback(
+      const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& target_boxes_msg);
     virtual std::vector<cv::Point2i> projectVertices(const std::vector<cv::Point3d>& vertices,
                                                      const image_geometry::PinholeCameraModel& model);
     virtual std::vector<cv::Point3d> getVertices(const jsk_recognition_msgs::BoundingBox& box);
@@ -80,10 +73,11 @@ namespace jsk_pcl_ros
     ros::Publisher pub_target_image_;
     ros::Publisher pub_candidate_image_;
     tf::TransformListener* tf_listener_;
-    message_filters::Subscriber<sensor_msgs::CameraInfo> sub_camera_info_;
-    message_filters::Subscriber<jsk_recognition_msgs::BoundingBoxArray> sub_target_boxes_;
-    message_filters::Subscriber<jsk_recognition_msgs::BoundingBoxArray> sub_candidate_boxes_;
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
+    ros::Subscriber sub_camera_info_;
+    ros::Subscriber sub_target_boxes_;
+    ros::Subscriber sub_candidate_boxes_;
+    sensor_msgs::CameraInfo::ConstPtr latest_info_msg_;
+    jsk_recognition_msgs::BoundingBoxArray::ConstPtr latest_target_boxes_msg_;
     
   private:
     

@@ -139,7 +139,7 @@ namespace pcl
       {
         x = y = z = roll = pitch = yaw = dx = dy = dz = weight = 0.0;
       }
-      inline float volume()
+      inline float volume() const
       {
         return dx * dy * dz;
       }
@@ -474,6 +474,19 @@ namespace jsk_pcl_ros
     }
   }
 
+
+  template <class Config>
+  double inverseVolumeLikelihood(
+    const pcl::tracking::ParticleCuboid& p,
+    const Config& config)
+  {
+    if (config.use_inverse_volume_likelihood) {
+      return 1.0 / p.volume();
+    }
+    else {
+      return 1.0;
+    }
+  }
   
   template <class Config>
   double distanceFromPlaneBasedError(
@@ -533,7 +546,9 @@ namespace jsk_pcl_ros
      return range_likelihood;
     }
     else {
-      return range_likelihood * distanceFromPlaneBasedError(p, cloud, viewpoint, config) * supportPlaneAngularLikelihood(p, polygons, config);
+      return (range_likelihood * distanceFromPlaneBasedError(p, cloud, viewpoint, config)
+              * supportPlaneAngularLikelihood(p, polygons, config)
+              * inverseVolumeLikelihood(p, config));
     }    
   }
   

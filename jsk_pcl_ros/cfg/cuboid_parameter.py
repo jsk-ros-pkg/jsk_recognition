@@ -21,6 +21,7 @@ gen.add("outlier_distance", double_t, 0, "", 0.1, 0.0, 1.0)
 gen.add("plane_distance_error_power", double_t, 0, "", 2, 0, 10)
 gen.add("use_support_plane_angular_likelihood", bool_t, 0, "", False)
 gen.add("support_plane_angular_likelihood_weight_power", double_t, 0, "", 1.0, 0.0, 10.0)
+gen.add("use_inverse_volume_likelihood", bool_t, 0, "", False)
 
 # CMake do not know dependency between this script and
 # PlaneSupportedCuboidEstimator.cfg and InteractiveCuboidLikelihood.cfg.

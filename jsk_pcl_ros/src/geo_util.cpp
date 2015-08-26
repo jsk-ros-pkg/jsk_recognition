@@ -759,7 +759,7 @@ namespace jsk_pcl_ros
       z = - d_ / c;
     }
     plane_coordinates_
-      = Eigen::Affine3f::Identity() * rot * Eigen::Translation3f(0, 0, z);
+      = Eigen::Affine3f::Identity() * Eigen::Translation3f(0, 0, z) * rot;
   }
   
   Eigen::Affine3f Plane::coordinates()
@@ -917,8 +917,18 @@ namespace jsk_pcl_ros
       double y = randomUniform(min_y, max_y, random_generator);
       Eigen::Vector3f local_v = Eigen::Vector3f(x, y, 0);
       Eigen::Vector3f v = coordinates() * local_v;
+      // ROS_INFO_THROTTLE(1.0, "x: %f -- %f", min_x, max_x);
+      // ROS_INFO_THROTTLE(1.0, "y: %f -- %f", min_y, max_y);
+      // ROS_INFO_THROTTLE(1.0, "sampled point: [%f, %f]", x, y);
+      // for (size_t i = 0; i < vertices_.size(); i++) {
+      //   Eigen::Vector3f v = coordinates().inverse() * vertices_[i];
+      //   ROS_INFO("v: [%f, %f, %f]", v[0], v[1], v[2]);
+      // }
       if (isInside(v)) {
         return local_v;
+      }
+      else {
+        // ROS_INFO_THROTTLE(1.0, "outside");
       }
     }
   }
@@ -1182,7 +1192,6 @@ namespace jsk_pcl_ros
       Eigen::Vector3f cross0 = (B - A).cross(p - A);
       Eigen::Vector3f cross1 = (C - B).cross(p - B);
       Eigen::Vector3f cross2 = (A - C).cross(p - C);
-      
       if (cross0.dot(cross1) >= 0 &&
           cross1.dot(cross2) >= 0) {
         return true;

@@ -283,9 +283,12 @@ namespace jsk_pcl_ros
     sampled_particle.roll = randomGaussian(p.roll, step_roll_variance_, random_generator_);
     sampled_particle.pitch = randomGaussian(p.pitch, step_pitch_variance_, random_generator_);
     sampled_particle.yaw = randomGaussian(p.yaw, step_yaw_variance_, random_generator_);
-    sampled_particle.dx = randomGaussian(p.dx, step_dx_variance_, random_generator_);
-    sampled_particle.dy = randomGaussian(p.dy, step_dy_variance_, random_generator_);
-    sampled_particle.dz = randomGaussian(p.dz, step_dz_variance_, random_generator_);
+    sampled_particle.dx = std::max(randomGaussian(p.dx, step_dx_variance_, random_generator_),
+                                   min_dx_);
+    sampled_particle.dy = std::max(randomGaussian(p.dy, step_dy_variance_, random_generator_),
+                                   min_dy_);
+    sampled_particle.dz = std::max(randomGaussian(p.dz, step_dz_variance_, random_generator_),
+                                   min_dz_);
     sampled_particle.plane_index = p.plane_index;
     sampled_particle.weight = p.weight;
     return sampled_particle;
@@ -382,6 +385,9 @@ namespace jsk_pcl_ros
     step_dx_variance_ = config.step_dx_variance;
     step_dy_variance_ = config.step_dy_variance;
     step_dz_variance_ = config.step_dz_variance;
+    min_dx_ = config.min_dx;
+    min_dy_ = config.min_dy;
+    min_dz_ = config.min_dz;
   }
 
   bool PlaneSupportedCuboidEstimator::resetCallback(std_srvs::EmptyRequest& req,

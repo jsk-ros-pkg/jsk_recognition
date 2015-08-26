@@ -4,7 +4,8 @@ import rospy
 from sensor_msgs.msg import PointCloud2
 from sensor_msgs.point_cloud2 import create_cloud_xyz32
 from std_msgs.msg import Header
-from jsk_recognition_msgs.msg import PolygonArray, ModelCoefficientsArray
+from jsk_recognition_msgs.msg import (PolygonArray, ModelCoefficientsArray,
+                                      BoundingBox, BoundingBoxArray)
 from pcl_msgs.msg import ModelCoefficients
 from geometry_msgs.msg import PolygonStamped, Point32
 from std_srvs.srv import Empty
@@ -123,11 +124,32 @@ def generatePolygons(header, model_index):
     return (polygon, coef)
     
 
+def candidateBoxes(header, model_index):
+    box_array = BoundingBoxArray()
+    box_array.header.stamp = header.stamp
+    box_array.header.frame_id = "odom"
+    dx = 0.1
+    for y in np.arange(0.0, 0.6, dx):
+        for z in np.arange(0.7, 1.0, dx):
+            for x in np.arange(0.0, -0.5, -dx):
+                box = BoundingBox()
+                box.header = box_array.header
+                box.pose.orientation.w = 1.0
+                box.pose.position.x = x
+                box.pose.position.y = y
+                box.pose.position.z = z
+                box.dimensions.x = 0.1
+                box.dimensions.y = 0.1
+                box.dimensions.z = 0.1
+                box_array.boxes.append(box)
+    return box_array
+
 if __name__ == "__main__":
     rospy.init_node("sample_simulate_tabletop_cloud")
     pub = rospy.Publisher("~output", PointCloud2)
     pub_polygon = rospy.Publisher("~output/polygon", PolygonArray)
     pub_coef = rospy.Publisher("~output/coef", ModelCoefficientsArray)
+    pub_boxes = rospy.Publisher("~output/candidate_boxes", BoundingBoxArray)
     r = rospy.Rate(10)
     counter = 0
     model_index = 4
@@ -143,6 +165,7 @@ if __name__ == "__main__":
         pub_polygon.publish(polygon)
         pub_coef.publish(coef)
         counter = counter + 1
+        pub_boxes.publish(candidateBoxes(header, model_index))
         if reset and counter > 1.0 / r.sleep_dur.to_sec() * 10:
             reset = rospy.ServiceProxy("/plane_supported_cuboid_estimator/reset", Empty)
             counter = 0

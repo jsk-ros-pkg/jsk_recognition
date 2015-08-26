@@ -157,6 +157,7 @@ namespace jsk_pcl_ros
                                     ros::Time(0.0),
                                     ros::Duration(0.0));
     tf::vectorTFToEigen(transform.getOrigin(), viewpoint_);
+
     if (!tracker_) {
       NODELET_INFO("initTracker");
       pcl::PointCloud<pcl::tracking::ParticleCuboid>::Ptr particles = initParticles();
@@ -180,6 +181,7 @@ namespace jsk_pcl_ros
         pcl::PointCloud<pcl::PointXYZ>::Ptr
           boundaries (new pcl::PointCloud<pcl::PointXYZ>);
         polygon->boundariesToPointCloud<pcl::PointXYZ>(*boundaries);
+        boundaries->points.push_back(boundaries->points[0]);
         prism_extract.setInputCloud(cloud);
         prism_extract.setViewPoint(viewpoint_[0], viewpoint_[1], viewpoint_[2]);
         prism_extract.setHeightLimits(init_local_position_z_min_, init_local_position_z_max_);
@@ -200,6 +202,7 @@ namespace jsk_pcl_ros
       pcl::toROSMsg(*candidate_cloud_, ros_candidate_cloud);
       ros_candidate_cloud.header = msg->header;
       pub_candidate_cloud_.publish(ros_candidate_cloud);
+      tree_.setInputCloud(candidate_cloud_);
       if (support_plane_updated_) {
         // Compute assignment between particles and polygons
         NODELET_INFO("polygon updated");
@@ -297,8 +300,7 @@ namespace jsk_pcl_ros
   void PlaneSupportedCuboidEstimator::likelihood(pcl::PointCloud<pcl::PointXYZ>::ConstPtr input,
                                                  pcl::tracking::ParticleCuboid& p)
   {
-    //p.weight = computeLikelihood(p, input, config_);
-    p.weight = computeLikelihood(p, candidate_cloud_, viewpoint_, polygons_, config_);
+    p.weight = computeLikelihood(p, candidate_cloud_, tree_, viewpoint_, polygons_, config_);
   }
   
   void PlaneSupportedCuboidEstimator::polygonCallback(
@@ -330,6 +332,7 @@ namespace jsk_pcl_ros
       polygons[i] = polygon;
     }
     for (size_t i = 0; i < particle_num_; i++) {
+      ROS_INFO("sampling %lu", i);
       pcl::tracking::ParticleCuboid p_local;
       size_t plane_i = chooseUniformRandomPlaneIndex();
       Polygon::Ptr polygon = polygons[plane_i];

@@ -46,6 +46,8 @@
 #include <pcl/filters/extract_indices.h>
 #include <pcl/filters/impl/extract_indices.hpp>
 
+#include <jsk_recognition_msgs/BoundingBoxArray.h>
+
 namespace jsk_pcl_ros
 {
   template <class PARTICLE_T>
@@ -66,10 +68,14 @@ namespace jsk_pcl_ros
     virtual void subscribe();
     virtual void unsubscribe();
     virtual void extract(const sensor_msgs::PointCloud2::ConstPtr& msg);
+    virtual void publishBoxArray(
+      const pcl::PointCloud<pcl::tracking::ParticleCuboid>& particles,
+      const std_msgs::Header& header);
     virtual void configCallback(Config& config, uint32_t level);
-
+    
     boost::mutex mutex_;
     ros::Publisher pub_;
+    ros::Publisher pub_box_array_;
     ros::Subscriber sub_;
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     double top_n_ratio_;

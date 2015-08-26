@@ -36,6 +36,7 @@
 #include "jsk_pcl_ros/icp_registration.h"
 #include <pcl/registration/icp.h>
 #include <pcl/registration/gicp.h>
+#include <pcl/registration/ndt.h>
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 #include <eigen_conversions/eigen_msg.h>
 #include <pcl/common/transforms.h>
@@ -174,6 +175,9 @@ namespace jsk_pcl_ros
     ransac_iterations_ = config.ransac_iterations;
     ransac_outlier_threshold_ = config.ransac_outlier_threshold;
     maximum_optimizer_iterations_ = config.maximum_optimizer_iterations;
+    ndt_resolution_ = config.ndt_resolution;
+    ndt_step_size_ = config.ndt_step_size;
+    ndt_outlier_ratio_ = config.ndt_outlier_ratio;
   }
 
   bool ICPRegistration::alignWithBoxService(
@@ -407,8 +411,55 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     camera_info_msg_ = msg;
   }
-  
+
   double ICPRegistration::alignPointcloud(
+    pcl::PointCloud<PointT>::Ptr& cloud,
+    pcl::PointCloud<PointT>::Ptr& reference,
+    const Eigen::Affine3f& offset,
+    pcl::PointCloud<PointT>::Ptr& output_cloud,
+    Eigen::Affine3d& output_transform)
+  {
+    if (algorithm_ == 0 || algorithm_ == 1) {
+      return alignPointcloudWithICP(cloud, reference, offset, output_cloud, output_transform);
+    }
+    else {
+      return alignPointcloudWithNDT(cloud, reference, offset, output_cloud, output_transform);
+    }
+  }
+
+  
+  double ICPRegistration::alignPointcloudWithNDT(
+    pcl::PointCloud<PointT>::Ptr& cloud,
+    pcl::PointCloud<PointT>::Ptr& reference,
+    const Eigen::Affine3f& offset,
+    pcl::PointCloud<PointT>::Ptr& output_cloud,
+    Eigen::Affine3d& output_transform)
+  {
+    pcl::NormalDistributionsTransform<PointT, PointT> ndt;
+    if (reference->points.empty ()) {
+      JSK_NODELET_ERROR("Input Reference Cloud is empty!");
+      return DBL_MAX;
+    }
+    ndt.setInputSource(reference);
+    if (cloud->points.empty ()) {
+      JSK_NODELET_ERROR("Input Target Cloud is empty!");
+      return DBL_MAX;
+    }
+    ndt.setInputTarget(cloud);
+    pcl::PointCloud<PointT> final;
+    ndt.align(final);
+    pcl::transformPointCloud(final, *output_cloud, offset);
+    Eigen::Matrix4f transformation = ndt.getFinalTransformation ();
+    Eigen::Matrix4d transformation_d;
+    convertMatrix4<Eigen::Matrix4f, Eigen::Matrix4d>(
+      transformation, transformation_d);
+    Eigen::Affine3d offsetd;
+    convertEigenAffine3(offset, offsetd);
+    output_transform = offsetd * Eigen::Affine3d(transformation_d);
+    return ndt.getFitnessScore();
+  }
+  
+  double ICPRegistration::alignPointcloudWithICP(
     pcl::PointCloud<PointT>::Ptr& cloud,
     pcl::PointCloud<PointT>::Ptr& reference,
     const Eigen::Affine3f& offset,

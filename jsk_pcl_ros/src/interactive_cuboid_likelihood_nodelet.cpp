@@ -116,7 +116,9 @@ namespace jsk_pcl_ros
     for (size_t i = 0; i < vertices.size(); i++) {
       ROS_INFO("v: [%f, %f, %f]", vertices[i][0], vertices[i][1], vertices[i][2]);
     }
-    double l = computeLikelihood(particle_, cloud, vp, polygons, config_);
+    pcl::KdTreeFLANN<pcl::PointXYZ> tree;
+    tree.setInputCloud(cloud);
+    double l = computeLikelihood(particle_, cloud, tree, vp, polygons, config_);
     NODELET_INFO("likelihood: %f", l);
     std_msgs::Float32 float_msg;
     float_msg.data = l;

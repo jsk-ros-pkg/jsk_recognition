@@ -313,13 +313,26 @@ namespace jsk_pcl_ros
     support_plane_updated_ = true;
   }
 
-  size_t PlaneSupportedCuboidEstimator::chooseUniformRandomPlaneIndex()
+  size_t PlaneSupportedCuboidEstimator::chooseUniformRandomPlaneIndex(const std::vector<Polygon::Ptr>& polygons)
   {
-    boost::uniform_smallint<> dst(0, latest_coefficients_msg_->coefficients.size() - 1);
-    boost::variate_generator<
-      boost::mt19937&, boost::uniform_smallint<>
-      > rand(random_generator_, dst);
-    return (size_t)rand();
+    // randomly select plane according to their area
+    std::vector<double> area_table(polygons.size());
+    double sum = 0;
+    for (size_t i = 0; i < latest_polygon_msg_->polygons.size(); i++) {
+      area_table[i] = polygons[i]->area();
+      sum += area_table[i];
+    }
+    double val = randomUniform(0, sum, random_generator_);
+    double bin_start = 0.0;
+    for (size_t i = 0; i < latest_polygon_msg_->polygons.size(); i++) {
+      if (val >= bin_start && val < bin_start + area_table[i]) {
+        return i;
+      }
+      bin_start += area_table[i];
+    }
+    // Unexpected region here
+    NODELET_ERROR("should not reach here, failed to select plane randomly");
+    return 0;
   }
   
   pcl::PointCloud<pcl::tracking::ParticleCuboid>::Ptr PlaneSupportedCuboidEstimator::initParticles()
@@ -332,31 +345,33 @@ namespace jsk_pcl_ros
       polygons[i] = polygon;
     }
     for (size_t i = 0; i < particle_num_; i++) {
-      ROS_INFO("sampling %lu", i);
-      pcl::tracking::ParticleCuboid p_local;
-      size_t plane_i = chooseUniformRandomPlaneIndex();
-      Polygon::Ptr polygon = polygons[plane_i];
-      Eigen::Vector3f v = polygon->randomSampleLocalPoint(random_generator_);
-      v[2] = randomUniform(
-        init_local_position_z_min_, init_local_position_z_max_,
-        random_generator_);
-      p_local.getVector3fMap() = v;
-      p_local.roll = randomGaussian(
-        0, init_local_orientation_roll_variance_, random_generator_);
-      p_local.pitch = randomGaussian(
-        0, init_local_orientation_pitch_variance_, random_generator_);
-      p_local.yaw = randomGaussian(init_local_orientation_yaw_mean_,
-                                   init_local_orientation_yaw_variance_,
-                                   random_generator_);
-      p_local.dx = randomGaussian(
-        init_dx_mean_, init_dx_variance_, random_generator_);
-      p_local.dy = randomGaussian(
-        init_dy_mean_, init_dy_variance_, random_generator_);
-      p_local.dz = randomGaussian(
-        init_dz_mean_, init_dz_variance_, random_generator_);
-      pcl::tracking::ParticleCuboid p_global = p_local * polygon->coordinates();
-      p_global.plane_index = plane_i;
-      particles->points[i] = p_global;
+      while (true) {
+        pcl::tracking::ParticleCuboid p_local;
+        size_t plane_i = chooseUniformRandomPlaneIndex(polygons);
+        Polygon::Ptr polygon = polygons[plane_i];
+        Eigen::Vector3f v = polygon->randomSampleLocalPoint(random_generator_);
+        v[2] = randomUniform(init_local_position_z_min_, init_local_position_z_max_,
+                             random_generator_);
+        p_local.getVector3fMap() = v;
+        p_local.roll = randomGaussian(0, init_local_orientation_roll_variance_, random_generator_);
+        p_local.pitch = randomGaussian(0, init_local_orientation_pitch_variance_, random_generator_);
+        p_local.yaw = randomGaussian(init_local_orientation_yaw_mean_,
+                                     init_local_orientation_yaw_variance_,
+                                     random_generator_);
+        p_local.dx = randomGaussian(init_dx_mean_, init_dx_variance_, random_generator_);
+        p_local.dy = randomGaussian(init_dy_mean_, init_dy_variance_, random_generator_);
+        p_local.dz = randomGaussian(init_dz_mean_, init_dz_variance_, random_generator_);
+        pcl::tracking::ParticleCuboid p_global =  p_local * polygon->coordinates();
+        if (use_init_world_position_z_model_) {
+          if (p_global.z < init_world_position_z_min_ ||
+              p_global.z > init_world_position_z_max_) {
+            continue;
+          }
+        }
+        p_global.plane_index = plane_i;
+        particles->points[i] = p_global;
+        break;
+      }
     }
     return particles;
   }
@@ -368,6 +383,8 @@ namespace jsk_pcl_ros
     init_local_position_z_min_ = config.init_local_position_z_min;
     init_local_position_z_max_ = config.init_local_position_z_max;
     use_init_world_position_z_model_ = config.use_init_world_position_z_model;
+    init_world_position_z_min_ = config.init_world_position_z_min;
+    init_world_position_z_max_ = config.init_world_position_z_max;
     init_local_orientation_roll_variance_ = config.init_local_orientation_roll_variance;
     init_local_orientation_pitch_variance_ = config.init_local_orientation_pitch_variance;
     init_local_orientation_yaw_mean_ = config.init_local_orientation_yaw_mean;

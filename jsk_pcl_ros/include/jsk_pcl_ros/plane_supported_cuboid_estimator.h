@@ -600,7 +600,7 @@ namespace jsk_pcl_ros
     virtual void cloudCallback(
       const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual pcl::PointCloud<pcl::tracking::ParticleCuboid>::Ptr initParticles();
-    virtual size_t chooseUniformRandomPlaneIndex();
+    virtual size_t chooseUniformRandomPlaneIndex(const std::vector<Polygon::Ptr>& polygons);
     virtual void configCallback(Config& config, uint32_t level);
     
     // For particle filtering
@@ -657,6 +657,8 @@ namespace jsk_pcl_ros
     double init_local_position_z_min_;
     double init_local_position_z_max_;
     bool use_init_world_position_z_model_;
+    double init_world_position_z_min_;
+    double init_world_position_z_max_;
     double init_local_orientation_roll_variance_;
     double init_local_orientation_pitch_variance_;
     

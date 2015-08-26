@@ -139,9 +139,15 @@ namespace pcl
       {
         x = y = z = roll = pitch = yaw = dx = dy = dz = weight = 0.0;
       }
+      
       inline float volume() const
       {
         return dx * dy * dz;
+      }
+
+      inline float area() const
+      {
+        return (dx * dy + dy * dz + dz * dx) * 2.0;
       }
 
       static pcl::tracking::ParticleCuboid
@@ -476,12 +482,13 @@ namespace jsk_pcl_ros
 
 
   template <class Config>
-  double inverseVolumeLikelihood(
+  double surfaceAreaLikelihood(
     const pcl::tracking::ParticleCuboid& p,
     const Config& config)
   {
-    if (config.use_inverse_volume_likelihood) {
-      return 1.0 / p.volume();
+    if (config.use_surface_area_likelihood) {
+      double v = p.area();
+      return 1.0 / (1.0 + pow(v, config.surface_area_error_power));
     }
     else {
       return 1.0;
@@ -548,7 +555,7 @@ namespace jsk_pcl_ros
     else {
       return (range_likelihood * distanceFromPlaneBasedError(p, cloud, viewpoint, config)
               * supportPlaneAngularLikelihood(p, polygons, config)
-              * inverseVolumeLikelihood(p, config));
+              * surfaceAreaLikelihood(p, config));
     }    
   }
   
@@ -654,6 +661,10 @@ namespace jsk_pcl_ros
     double step_dx_variance_;
     double step_dy_variance_;
     double step_dz_variance_;
+
+    double min_dx_;
+    double min_dy_;
+    double min_dz_;
     
     int particle_num_;
     std::string sensor_frame_;

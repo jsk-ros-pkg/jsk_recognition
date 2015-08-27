@@ -147,7 +147,7 @@ namespace jsk_pcl_ros
     int_marker.header.frame_id = frame_id_;
     int_marker.header.stamp = ros::Time::now();
     int_marker.name = getName() + "_plane";
-        visualization_msgs::InteractiveMarkerControl control;
+    visualization_msgs::InteractiveMarkerControl control;
     control.orientation.w = 1;
     control.orientation.x = 1;
     control.orientation.y = 0;

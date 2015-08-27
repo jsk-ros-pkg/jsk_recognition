@@ -520,6 +520,12 @@ namespace jsk_pcl_ros
   double Segment::distance(const Eigen::Vector3f& point) const
   {
     Eigen::Vector3f foot_point;
+    return distance(point, foot_point);
+  }
+
+  double Segment::distance(const Eigen::Vector3f& point,
+                           Eigen::Vector3f& foot_point) const
+  {
     foot(point, foot_point);
     return (foot_point - point).norm();
   }
@@ -933,6 +939,47 @@ namespace jsk_pcl_ros
     }
   }
 
+  std::vector<Segment::Ptr> Polygon::edges() const
+  {
+    std::vector<Segment::Ptr> ret;
+    ret.reserve(vertices_.size());
+    for (size_t i = 0; i < vertices_.size() - 1; i++) {
+      // edge between i and i+1
+      ret.push_back(Segment::Ptr(new Segment(vertices_[i], vertices_[i+1])));
+    }
+    // edge between [-1] and [0]
+    ret.push_back(Segment::Ptr(new Segment(vertices_[vertices_.size() - 1], vertices_[0])));
+    return ret;
+  }
+  
+  Eigen::Vector3f Polygon::nearestPoint(const Eigen::Vector3f& p,
+                                        double& distance)
+  {
+    Eigen::Vector3f projected_p;
+    Plane::project(p, projected_p);
+    if (isInside(projected_p)) {
+      distance = (p - projected_p).norm();
+      return projected_p;
+    }
+    else {
+      std::vector<Segment::Ptr> boundary_edges = edges();
+      double min_distnace = DBL_MAX;
+      Eigen::Vector3f nearest_point;
+      // brute-force searching
+      for (size_t i = 0; i < boundary_edges.size(); i++) {
+        Segment::Ptr edge = boundary_edges[i];
+        Eigen::Vector3f foot;
+        double d = edge->distance(p, foot);
+        if (min_distnace > d) {
+          nearest_point = foot;
+          min_distnace = d;
+        }
+      }
+      distance = min_distnace;
+      return nearest_point;
+    }
+  }
+  
   size_t Polygon::getNumVertices() {
     return vertices_.size();
   }
@@ -1810,7 +1857,7 @@ namespace jsk_pcl_ros
   Cube::Cube(const Eigen::Vector3f& pos, const Eigen::Quaternionf& rot):
     pos_(pos), rot_(rot)
   {
-    
+    dimensions_.resize(3);
   }
 
   Cube::Cube(const Eigen::Vector3f& pos, const Eigen::Quaternionf& rot,
@@ -1961,6 +2008,89 @@ namespace jsk_pcl_ros
     ret.dimensions.y = dimensions_[1];
     ret.dimensions.z = dimensions_[2];
     return ret;
+  }
+
+  Vertices Cube::vertices()
+  {
+    Vertices vs;
+    vs.push_back(buildVertex(0.5, 0.5, 0.5));
+    vs.push_back(buildVertex(-0.5, 0.5, 0.5));
+    vs.push_back(buildVertex(-0.5, -0.5, 0.5));
+    vs.push_back(buildVertex(0.5, -0.5, 0.5));
+    vs.push_back(buildVertex(0.5, 0.5, -0.5));
+    vs.push_back(buildVertex(-0.5, 0.5, -0.5));
+    vs.push_back(buildVertex(-0.5, -0.5, -0.5));
+    vs.push_back(buildVertex(0.5, -0.5, -0.5));
+    return vs;
+  }
+    
+  
+  Polygon::Ptr Cube::buildFace(const Eigen::Vector3f v0,
+                               const Eigen::Vector3f v1,
+                               const Eigen::Vector3f v2,
+                               const Eigen::Vector3f v3)
+  {
+    Vertices vs;
+    vs.push_back(v0);
+    vs.push_back(v1);
+    vs.push_back(v2);
+    vs.push_back(v3);
+    Polygon::Ptr(new Polygon(vs));
+  }
+  
+  std::vector<Polygon::Ptr> Cube::faces()
+  {
+    std::vector<Polygon::Ptr> fs(6);
+    Vertices vs = vertices();
+    Eigen::Vector3f A = vs[0];
+    Eigen::Vector3f B = vs[1];
+    Eigen::Vector3f C = vs[2];
+    Eigen::Vector3f D = vs[3];
+    Eigen::Vector3f E = vs[4];
+    Eigen::Vector3f F = vs[5];
+    Eigen::Vector3f G = vs[6];
+    Eigen::Vector3f H = vs[7];
+    Vertices vs0, vs1, vs2, vs3, vs4, vs5, vs6;
+    vs0.push_back(A); vs0.push_back(E); vs0.push_back(F); vs0.push_back(B);
+    vs1.push_back(B); vs1.push_back(F); vs1.push_back(G); vs1.push_back(C);
+    vs2.push_back(C); vs2.push_back(G); vs2.push_back(H); vs2.push_back(D);
+    vs3.push_back(D); vs3.push_back(H); vs3.push_back(E); vs3.push_back(A);
+    vs4.push_back(A); vs4.push_back(B); vs4.push_back(C); vs4.push_back(D);
+    vs5.push_back(E); vs5.push_back(H); vs5.push_back(G); vs5.push_back(F);
+    fs[0].reset(new Polygon(vs0));
+    fs[1].reset(new Polygon(vs1));
+    fs[2].reset(new Polygon(vs2));
+    fs[3].reset(new Polygon(vs3));
+    fs[4].reset(new Polygon(vs4));
+    fs[5].reset(new Polygon(vs5));
+    return fs;
+  }
+
+  Eigen::Vector3f Cube::buildVertex(double i, double j, double k)
+  {
+    Eigen::Vector3f local = (Eigen::Vector3f::UnitX() * i * dimensions_[0] +
+                             Eigen::Vector3f::UnitY() * j * dimensions_[1] +
+                             Eigen::Vector3f::UnitZ() * k * dimensions_[2]);
+    return Eigen::Translation3f(pos_) * rot_ * local;
+  }
+  
+  Eigen::Vector3f Cube::nearestPoint(const Eigen::Vector3f& p,
+                                     double& distance)
+  {
+    std::vector<Polygon::Ptr> current_faces = faces();
+    double min_distance = DBL_MAX;
+    Eigen::Vector3f min_point;
+    for (size_t i = 0; i < current_faces.size(); i++) {
+      Polygon::Ptr f = current_faces[i];
+      double d;
+      Eigen::Vector3f q = f->nearestPoint(p, d);
+      if (min_distance > d) {
+        min_distance = d;
+        min_point = q;
+      }
+    }
+    distance = min_distance;
+    return min_point;
   }
 
   Cylinder::Cylinder(Eigen::Vector3f point, Eigen::Vector3f direction, double radius):

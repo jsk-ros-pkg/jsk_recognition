@@ -410,6 +410,8 @@ add_dependencies(jsk_pcl_ros_base ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 add_dependencies(jsk_pcl_ros_moveit ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 add_executable(bench_ransac_plane_estimation bench/bench_ransac_plane_estimation.cpp)
 target_link_libraries(bench_ransac_plane_estimation jsk_pcl_ros)
+add_executable(sample_cube_nearest_point sample/src/sample_cube_nearest_point.cpp)
+target_link_libraries(sample_cube_nearest_point jsk_pcl_ros_base)
 
 file(GLOB _headers ${PROJECT_SOURCE_DIR}/include/jsk_pcl_ros/*.h)
 list(SORT _headers)

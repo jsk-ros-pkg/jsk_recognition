@@ -131,6 +131,7 @@ namespace jsk_pcl_ros
     return vs;
   }
 
+  // geoemtry classes
   
   // (infinite) line
   class Line
@@ -172,6 +173,7 @@ namespace jsk_pcl_ros
     virtual void foot(const Eigen::Vector3f& point, Eigen::Vector3f& output) const;
     virtual double dividingRatio(const Eigen::Vector3f& point) const;
     virtual double distance(const Eigen::Vector3f& point) const;
+    virtual double distance(const Eigen::Vector3f& point, Eigen::Vector3f& foot_point) const;
     virtual bool intersect(Plane& plane, Eigen::Vector3f& point) const;
     //virtual double distance(const Segment& other);
   protected:
@@ -282,6 +284,34 @@ namespace jsk_pcl_ros
       }
       return ret;
     }
+
+    /**
+     * @brief
+     * get all the edges as point of Segment.
+     */
+    std::vector<Segment::Ptr> edges() const;
+    
+    /**
+     * @brief
+     * Compute nearest point from p on this polygon.
+     * 
+     * This method first project p onth the polygon and
+     * if the projected point is inside of polygon,
+     * the projected point is the nearest point.
+     * If not, distances between the point and edges are
+     * computed and search the nearest point.
+     *
+     * In case of searching edges, it is achieved in brute-force
+     * searching and if the number of edges is huge, it may take
+     * a lot of time to compute.
+     *
+     * This method cannot be used for const instance because
+     * triangle decomposition will change the cache in the instance.
+     *
+     * Distance between p and nearest point is stored in distance.
+     */
+    virtual Eigen::Vector3f nearestPoint(const Eigen::Vector3f& p,
+                                         double& distance);
     virtual size_t getNumVertices();
     virtual size_t getFarestPointIndex(const Eigen::Vector3f& O);
     virtual Eigen::Vector3f directionAtPoint(size_t i);
@@ -546,10 +576,53 @@ namespace jsk_pcl_ros
       dimensions_[2] = new_dimensions[2];
     }
     jsk_recognition_msgs::BoundingBox toROSMsg();
+
+    /**
+     * @brief
+     * returns vertices as an array of Eigen::Vectro3f.
+     * The order of the vertices is:
+     * [1, 1, 1], [-1, 1, 1], [-1, -1, 1], [1, -1, 1],
+     * [1, 1, -1], [-1, 1, -1], [-1, -1, -1], [1, -1, -1].
+     */
+    Vertices vertices();
+    
+    /**
+     * @brief
+     * returns all the 6 faces as Polygon::Ptr.
+     * TODO: is it should be ConvexPolygon?
+     */
+    std::vector<Polygon::Ptr> faces();
+
+    /**
+     * @brief
+     * compute minimum distance from point p to cube surface.
+     *
+     * Distance computation depends on Polygon::nearestPoint and
+     * this methods just searches a face which resutnrs the smallest
+     * distance.
+     */
+    virtual Eigen::Vector3f nearestPoint(const Eigen::Vector3f& p,
+                                         double& distance);
   protected:
     Eigen::Vector3f pos_;
     Eigen::Quaternionf rot_;
     std::vector<double> dimensions_;
+
+    /**
+     * @brief
+     * A helper method to build polygon from 4 vertices.
+     */
+    virtual Polygon::Ptr buildFace(const Eigen::Vector3f v0,
+                                   const Eigen::Vector3f v1,
+                                   const Eigen::Vector3f v2,
+                                   const Eigen::Vector3f v3);
+
+    /**
+     * @brief
+     * A helper method to build vertex from x-y-z relatiev coordinates.
+     */
+    virtual Eigen::Vector3f buildVertex(double i, double j, double k);
+    
   private:
     
   };

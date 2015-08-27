@@ -520,6 +520,12 @@ namespace jsk_pcl_ros
   double Segment::distance(const Eigen::Vector3f& point) const
   {
     Eigen::Vector3f foot_point;
+    return distance(point, foot_point);
+  }
+
+  double Segment::distance(const Eigen::Vector3f& point,
+                           Eigen::Vector3f& foot_point) const
+  {
     foot(point, foot_point);
     return (foot_point - point).norm();
   }
@@ -933,6 +939,46 @@ namespace jsk_pcl_ros
     }
   }
 
+  std::vector<Segment::Ptr> Polygon::edges() const
+  {
+    std::vector<Segment::Ptr> ret(vertices_.size());
+    for (size_t i = 0; i < vertices_.size() - 1; i++) {
+      // edge between i and i+1
+      ret.push_back(Segment::Ptr(new Segment(vertices_[i], vertices_[i+1])));
+    }
+    // edge between [-1] and [0]
+    ret.push_back(Segment::Ptr(new Segment(vertices_[vertices_.size() - 1], vertices_[0])));
+    return ret;
+  }
+  
+  Eigen::Vector3f Polygon::nearestPoint(const Eigen::Vector3f& p,
+                                        double& distance)
+  {
+    Eigen::Vector3f projected_p;
+    Plane::project(p, projected_p);
+    if (isInside(projected_p)) {
+      distance = (p - projected_p).norm();
+      return projected_p;
+    }
+    else {
+      std::vector<Segment::Ptr> boundary_edges = edges();
+      double min_distnace = DBL_MAX;
+      Eigen::Vector3f nearest_point;
+      // brute-force searching
+      for (size_t i = 0; i < boundary_edges.size(); i++) {
+        Segment::Ptr edge = boundary_edges[i];
+        Eigen::Vector3f foot;
+        double d = edge->distance(p, foot);
+        if (min_distnace > d) {
+          nearest_point = foot;
+          min_distnace = d;
+        }
+      }
+      distance = min_distnace;
+      return nearest_point;
+    }
+  }
+  
   size_t Polygon::getNumVertices() {
     return vertices_.size();
   }

@@ -131,6 +131,7 @@ namespace jsk_pcl_ros
     return vs;
   }
 
+  // geoemtry classes
   
   // (infinite) line
   class Line
@@ -172,6 +173,7 @@ namespace jsk_pcl_ros
     virtual void foot(const Eigen::Vector3f& point, Eigen::Vector3f& output) const;
     virtual double dividingRatio(const Eigen::Vector3f& point) const;
     virtual double distance(const Eigen::Vector3f& point) const;
+    virtual double distance(const Eigen::Vector3f& point, Eigen::Vector3f& foot_point) const;
     virtual bool intersect(Plane& plane, Eigen::Vector3f& point) const;
     //virtual double distance(const Segment& other);
   protected:
@@ -282,6 +284,34 @@ namespace jsk_pcl_ros
       }
       return ret;
     }
+
+    /**
+     * @brief
+     * get all the edges as point of Segment.
+     */
+    std::vector<Segment::Ptr> edges() const;
+    
+    /**
+     * @brief
+     * Compute nearest point from p on this polygon.
+     * 
+     * This method first project p onth the polygon and
+     * if the projected point is inside of polygon,
+     * the projected point is the nearest point.
+     * If not, distances between the point and edges are
+     * computed and search the nearest point.
+     *
+     * In case of searching edges, it is achieved in brute-force
+     * searching and if the number of edges is huge, it may take
+     * a lot of time to compute.
+     *
+     * This method cannot be used for const instance because
+     * triangle decomposition will change the cache in the instance.
+     *
+     * Distance between p and nearest point is stored in distance.
+     */
+    virtual Eigen::Vector3f nearestPoint(const Eigen::Vector3f& p,
+                                         double& distance);
     virtual size_t getNumVertices();
     virtual size_t getFarestPointIndex(const Eigen::Vector3f& O);
     virtual Eigen::Vector3f directionAtPoint(size_t i);

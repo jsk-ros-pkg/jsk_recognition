@@ -2009,6 +2009,82 @@ namespace jsk_pcl_ros
     return ret;
   }
 
+  Vertices Cube::vertices()
+  {
+    Vertices vs;
+    vs.push_back(buildVertex(1, 1, 1));
+    vs.push_back(buildVertex(-1, 1, 1));
+    vs.push_back(buildVertex(-1, -1, 1));
+    vs.push_back(buildVertex(1, -1, 1));
+    vs.push_back(buildVertex(1, 1, -1));
+    vs.push_back(buildVertex(-1, 1, -1));
+    vs.push_back(buildVertex(-1, -1, -1));
+    vs.push_back(buildVertex(1, -1, -1));
+    return vs;
+  }
+    
+  
+  Polygon::Ptr Cube::buildFace(const Eigen::Vector3f v0,
+                               const Eigen::Vector3f v1,
+                               const Eigen::Vector3f v2,
+                               const Eigen::Vector3f v3)
+  {
+    Vertices vs;
+    vs.push_back(v0);
+    vs.push_back(v1);
+    vs.push_back(v2);
+    vs.push_back(v3);
+    Polygon::Ptr(new Polygon(vs));
+  }
+  
+  std::vector<Polygon::Ptr> Cube::faces()
+  {
+    std::vector<Polygon::Ptr> fs;
+    Vertices vs = vertices();
+    Eigen::Vector3f A = vs[0];
+    Eigen::Vector3f B = vs[1];
+    Eigen::Vector3f C = vs[2];
+    Eigen::Vector3f D = vs[3];
+    Eigen::Vector3f E = vs[4];
+    Eigen::Vector3f F = vs[5];
+    Eigen::Vector3f G = vs[6];
+    Eigen::Vector3f H = vs[7];
+    fs.push_back(buildFace(A, E, F, B));
+    fs.push_back(buildFace(B, F, G, C));
+    fs.push_back(buildFace(C, G, H, D));
+    fs.push_back(buildFace(D, H, E, A));
+    fs.push_back(buildFace(A, B, C, D));
+    fs.push_back(buildFace(E, H, G, F));
+    return fs;
+  }
+
+  Eigen::Vector3f Cube::buildVertex(double i, double j, double k)
+  {
+    Eigen::Vector3f local = (Eigen::Vector3f::UnitX() * i * dimensions_[0] +
+                             Eigen::Vector3f::UnitY() * j * dimensions_[1] +
+                             Eigen::Vector3f::UnitZ() * k * dimensions_[2]);
+    return Eigen::Translation3f(pos_) * rot_ * local;
+  }
+  
+  Eigen::Vector3f Cube::nearestPoint(const Eigen::Vector3f& p,
+                                     double& distance)
+  {
+    std::vector<Polygon::Ptr> current_faces = faces();
+    double min_distance = DBL_MAX;
+    Eigen::Vector3f min_point;
+    for (size_t i = 0; i < current_faces.size(); i++) {
+      Polygon::Ptr f = current_faces[i];
+      double d;
+      Eigen::Vector3f q = f->nearestPoint(p, d);
+      if (min_distance > d) {
+        min_distance = d;
+        min_point = q;
+      }
+    }
+    distance = min_distance;
+    return min_point;
+  }
+
   Cylinder::Cylinder(Eigen::Vector3f point, Eigen::Vector3f direction, double radius):
     point_(point), direction_(direction), radius_(radius)
   {

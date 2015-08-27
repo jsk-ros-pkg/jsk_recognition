@@ -576,10 +576,53 @@ namespace jsk_pcl_ros
       dimensions_[2] = new_dimensions[2];
     }
     jsk_recognition_msgs::BoundingBox toROSMsg();
+
+    /**
+     * @brief
+     * returns vertices as an array of Eigen::Vectro3f.
+     * The order of the vertices is:
+     * [1, 1, 1], [-1, 1, 1], [-1, -1, 1], [1, -1, 1],
+     * [1, 1, -1], [-1, 1, -1], [-1, -1, -1], [1, -1, -1].
+     */
+    Vertices vertices();
+    
+    /**
+     * @brief
+     * returns all the 6 faces as Polygon::Ptr.
+     * TODO: is it should be ConvexPolygon?
+     */
+    std::vector<Polygon::Ptr> faces();
+
+    /**
+     * @brief
+     * compute minimum distance from point p to cube surface.
+     *
+     * Distance computation depends on Polygon::nearestPoint and
+     * this methods just searches a face which resutnrs the smallest
+     * distance.
+     */
+    virtual Eigen::Vector3f nearestPoint(const Eigen::Vector3f& p,
+                                         double& distance);
   protected:
     Eigen::Vector3f pos_;
     Eigen::Quaternionf rot_;
     std::vector<double> dimensions_;
+
+    /**
+     * @brief
+     * A helper method to build polygon from 4 vertices.
+     */
+    virtual Polygon::Ptr buildFace(const Eigen::Vector3f v0,
+                                   const Eigen::Vector3f v1,
+                                   const Eigen::Vector3f v2,
+                                   const Eigen::Vector3f v3);
+
+    /**
+     * @brief
+     * A helper method to build vertex from x-y-z relatiev coordinates.
+     */
+    virtual Eigen::Vector3f buildVertex(double i, double j, double k);
+    
   private:
     
   };

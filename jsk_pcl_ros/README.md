@@ -2615,12 +2615,12 @@ to confirm likelihood function behaves as expected.
 Extract top-N particles of `pcl::tracking::ParticleCuboid`.
 
 #### Publishing Topics
-* `~output` (`sensor_msgs/PointCloud2`)
+* `~output` (`pcl_msgs/PointIndices`)
 
-  Top-N Particles.
+  Top-N particles indices.
 * `~output/box_array` (`jsk_recognition_msgs/BoundingBoxArray`)
 
-  Top-N Particles as BoundingBoxArray.
+  Top-N particles as BoundingBoxArray.
 
 #### Subscribing Topics
 * `~input` (`sensor_msgs/PointCloud2`)

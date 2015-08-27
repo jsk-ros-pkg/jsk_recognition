@@ -36,6 +36,7 @@
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/extract_cuboid_particles_top_n.h"
 #include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_pcl_ros/pcl_ros_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -47,7 +48,7 @@ namespace jsk_pcl_ros
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&ExtractCuboidParticlesTopN::configCallback, this, _1, _2);
     srv_->setCallback (f);
-    pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    pub_ = advertise<pcl_msgs::PointIndices>(*pnh_, "output", 1);
     pub_box_array_ = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "output/box_array", 1);
   }
 
@@ -91,10 +92,7 @@ namespace jsk_pcl_ros
     ex.setInputCloud(cloud);
     ex.setIndices(indices);
     ex.filter(*cloud_filtered);
-    sensor_msgs::PointCloud2 ros_cloud;
-    pcl::toROSMsg(*cloud_filtered, ros_cloud);
-    ros_cloud.header = msg->header;
-    pub_.publish(ros_cloud);
+    publishPointIndices(pub_, *indices, msg->header);
     publishBoxArray(*cloud_filtered, msg->header);
   }
 

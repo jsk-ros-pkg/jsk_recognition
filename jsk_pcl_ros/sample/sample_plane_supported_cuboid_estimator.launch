@@ -55,6 +55,10 @@
   <node pkg="jsk_pcl_ros" type="extract_cuboid_particles_top_n" name="top_n_particles">
     <remap from="~input" to="plane_supported_cuboid_estimator/output/particles" />
   </node>
+  <node pkg="nodelet" type="nodelet" name="top_n_particles_points" args="standalone pcl/ExtractIndices">
+    <remap from="~input" to="plane_supported_cuboid_estimator/output/particles" />
+    <remap from="~indices" to="top_n_particles/output" />
+  </node>
   <node pkg="jsk_interactive_marker" type="dummy_camera.py" name="dummy_camera">
     <rosparam>
       frame_id: sensor_frame

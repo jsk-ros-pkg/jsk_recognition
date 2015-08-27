@@ -3,7 +3,8 @@ Panels:
     Help Height: 78
     Name: Displays
     Property Tree Widget:
-      Expanded: ~
+      Expanded:
+        - /TopNParticles1/Status1
       Splitter Ratio: 0.5
     Tree Height: 539
   - Class: rviz/Selection
@@ -90,7 +91,7 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: true
       Max Color: 255; 255; 255
-      Max Intensity: 0.000273039
+      Max Intensity: 0.000156014
       Min Color: 0; 0; 0
       Min Intensity: 0
       Name: Particles
@@ -217,7 +218,7 @@ Visualization Manager:
         Min Value: -10
         Value: true
       Axis: Z
-      Channel Name: intensity
+      Channel Name: weight
       Class: rviz/PointCloud2
       Color: 255; 255; 255
       Color Transformer: Intensity
@@ -225,7 +226,7 @@ Visualization Manager:
       Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 4096
+      Max Intensity: 0.000159746
       Min Color: 0; 0; 0
       Min Intensity: 0
       Name: TopNParticles
@@ -235,7 +236,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.01
       Style: Flat Squares
-      Topic: /top_n_particles/output
+      Topic: /top_n_particles_points/output
       Use Fixed Frame: true
       Use rainbow: true
       Value: false
@@ -344,5 +345,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1794
-  X: 388
+  X: 381
   Y: 384

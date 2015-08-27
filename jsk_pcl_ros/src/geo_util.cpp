@@ -941,7 +941,8 @@ namespace jsk_pcl_ros
 
   std::vector<Segment::Ptr> Polygon::edges() const
   {
-    std::vector<Segment::Ptr> ret(vertices_.size());
+    std::vector<Segment::Ptr> ret;
+    ret.reserve(vertices_.size());
     for (size_t i = 0; i < vertices_.size() - 1; i++) {
       // edge between i and i+1
       ret.push_back(Segment::Ptr(new Segment(vertices_[i], vertices_[i+1])));
@@ -1856,7 +1857,7 @@ namespace jsk_pcl_ros
   Cube::Cube(const Eigen::Vector3f& pos, const Eigen::Quaternionf& rot):
     pos_(pos), rot_(rot)
   {
-    
+    dimensions_.resize(3);
   }
 
   Cube::Cube(const Eigen::Vector3f& pos, const Eigen::Quaternionf& rot,
@@ -2012,14 +2013,14 @@ namespace jsk_pcl_ros
   Vertices Cube::vertices()
   {
     Vertices vs;
-    vs.push_back(buildVertex(1, 1, 1));
-    vs.push_back(buildVertex(-1, 1, 1));
-    vs.push_back(buildVertex(-1, -1, 1));
-    vs.push_back(buildVertex(1, -1, 1));
-    vs.push_back(buildVertex(1, 1, -1));
-    vs.push_back(buildVertex(-1, 1, -1));
-    vs.push_back(buildVertex(-1, -1, -1));
-    vs.push_back(buildVertex(1, -1, -1));
+    vs.push_back(buildVertex(0.5, 0.5, 0.5));
+    vs.push_back(buildVertex(-0.5, 0.5, 0.5));
+    vs.push_back(buildVertex(-0.5, -0.5, 0.5));
+    vs.push_back(buildVertex(0.5, -0.5, 0.5));
+    vs.push_back(buildVertex(0.5, 0.5, -0.5));
+    vs.push_back(buildVertex(-0.5, 0.5, -0.5));
+    vs.push_back(buildVertex(-0.5, -0.5, -0.5));
+    vs.push_back(buildVertex(0.5, -0.5, -0.5));
     return vs;
   }
     
@@ -2039,7 +2040,7 @@ namespace jsk_pcl_ros
   
   std::vector<Polygon::Ptr> Cube::faces()
   {
-    std::vector<Polygon::Ptr> fs;
+    std::vector<Polygon::Ptr> fs(6);
     Vertices vs = vertices();
     Eigen::Vector3f A = vs[0];
     Eigen::Vector3f B = vs[1];
@@ -2049,12 +2050,19 @@ namespace jsk_pcl_ros
     Eigen::Vector3f F = vs[5];
     Eigen::Vector3f G = vs[6];
     Eigen::Vector3f H = vs[7];
-    fs.push_back(buildFace(A, E, F, B));
-    fs.push_back(buildFace(B, F, G, C));
-    fs.push_back(buildFace(C, G, H, D));
-    fs.push_back(buildFace(D, H, E, A));
-    fs.push_back(buildFace(A, B, C, D));
-    fs.push_back(buildFace(E, H, G, F));
+    Vertices vs0, vs1, vs2, vs3, vs4, vs5, vs6;
+    vs0.push_back(A); vs0.push_back(E); vs0.push_back(F); vs0.push_back(B);
+    vs1.push_back(B); vs1.push_back(F); vs1.push_back(G); vs1.push_back(C);
+    vs2.push_back(C); vs2.push_back(G); vs2.push_back(H); vs2.push_back(D);
+    vs3.push_back(D); vs3.push_back(H); vs3.push_back(E); vs3.push_back(A);
+    vs4.push_back(A); vs4.push_back(B); vs4.push_back(C); vs4.push_back(D);
+    vs5.push_back(E); vs5.push_back(H); vs5.push_back(G); vs5.push_back(F);
+    fs[0].reset(new Polygon(vs0));
+    fs[1].reset(new Polygon(vs1));
+    fs[2].reset(new Polygon(vs2));
+    fs[3].reset(new Polygon(vs3));
+    fs[4].reset(new Polygon(vs4));
+    fs[5].reset(new Polygon(vs5));
     return fs;
   }
 

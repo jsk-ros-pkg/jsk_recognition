@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find jsk_pcl_ros)/config/sample_cube_nearest_point.rviz" />
+  <node pkg="jsk_pcl_ros" type="sample_cube_nearest_point" name="sample_cube_nearest_point" output="screen"/>
+</launch>

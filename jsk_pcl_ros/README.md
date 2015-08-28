@@ -1767,6 +1767,9 @@ You can choose several types of tilt/spindle lasers such as tilt-laser of PR2, i
    Assembled pointcloud according to time range
    of `~output`. this require `~assemble_scans2`
    service of [laser_assembler](http://wiki.ros.org/laser_assembler).
+* `~output_velocity` (`geometry_msgs/TwistStamped`)
+
+   Velocity of rotating laser. it is only published when `~twist_frame_id` is provided.
 
 #### Using Services
 * `~assemble_scans2` (`laser_assembler/AssembleScans2`):
@@ -1790,6 +1793,9 @@ You can choose several types of tilt/spindle lasers such as tilt-laser of PR2, i
 * `~skip_number` (Integer, default: `1`):
 
    Skip publishing and calling laser assembler per `~skip_number`.
+* `~twist_frame_id`
+
+  Frame id used in twist velocity.
 * `~use_laser_assembler` (Boolean, default: `False`):
 
    Enable `~output_cloud` and `~assemble_scans2`.

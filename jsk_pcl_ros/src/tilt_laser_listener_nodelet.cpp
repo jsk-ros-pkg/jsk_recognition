@@ -57,6 +57,7 @@ namespace jsk_pcl_ros
       JSK_NODELET_ERROR("no ~joint_state is specified");
       return;
     }
+    pnh_->getParam("twist_frame_id", twist_frame_id_);
     pnh_->param("overwrap_angle", overwrap_angle_, 0.0);
     std::string laser_type;
     pnh_->param("clear_assembled_scans", clear_assembled_scans_, false);
@@ -96,6 +97,7 @@ namespace jsk_pcl_ros
       cloud_pub_
         = pnh_->advertise<sensor_msgs::PointCloud2>("output_cloud", 1);
     }
+    twist_pub_ = pnh_->advertise<geometry_msgs::TwistStamped>("output_velocity", 1);
     prev_angle_ = 0;
     prev_velocity_ = 0;
     start_time_ = ros::Time::now();
@@ -207,6 +209,33 @@ namespace jsk_pcl_ros
     range.start = start;
     range.end = end;
     trigger_pub_.publish(range);
+
+    // publish velocity
+    // only publish if twist_frame_id is not empty
+    if (!twist_frame_id_.empty()) {
+      // simply compute from the latest velocity
+      if (buffer_.size() >= 2) {
+        // at least, we need two joint angles to
+        // compute velocity
+        StampedJointAngle::Ptr latest = buffer_[buffer_.size() - 1];
+        StampedJointAngle::Ptr last_second = buffer_[buffer_.size() - 2];
+        double value_diff = latest->getValue() - last_second->getValue();
+        double time_diff = (latest->header.stamp - last_second->header.stamp).toSec();
+        double velocity = value_diff / time_diff;
+        geometry_msgs::TwistStamped twist;
+        twist.header.frame_id = twist_frame_id_;
+        twist.header.stamp = latest->header.stamp;
+        if (laser_type_ == INFINITE_SPINDLE_HALF || // roll laser
+            laser_type_ == INFINITE_SPINDLE) {
+          twist.twist.angular.x = velocity;
+        }
+        else {                  // tilt laser
+          twist.twist.angular.y = velocity;
+        }
+        twist_pub_.publish(twist);
+      }
+    }
+
     if (use_laser_assembler_) {
       if (skip_counter_++ % skip_number_ == 0) {
         laser_assembler::AssembleScans2 srv;

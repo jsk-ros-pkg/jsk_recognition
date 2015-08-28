@@ -42,6 +42,7 @@
 #include <jsk_recognition_msgs/TimeRange.h>
 #include "jsk_pcl_ros/line_segment_collector.h"
 #include <std_srvs/Empty.h>
+#include <geometry_msgs/TwistStamped.h>
 
 namespace jsk_pcl_ros
 {
@@ -100,6 +101,7 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_cloud_;
     ros::Publisher trigger_pub_;
     ros::Publisher cloud_pub_;
+    ros::Publisher twist_pub_;
     ros::ServiceServer clear_cache_service_;
     ros::ServiceClient assemble_cloud_srv_;
     jsk_topic_tools::VitalChecker::Ptr cloud_vital_checker_;
@@ -111,6 +113,7 @@ namespace jsk_pcl_ros
     std::string joint_name_;
     double prev_angle_;
     double prev_velocity_;
+    double start_angle_;
     double overwrap_angle_;
     ros::Time start_time_;
     bool use_laser_assembler_;
@@ -123,6 +126,7 @@ namespace jsk_pcl_ros
     int skip_number_;
     int skip_counter_;
     int max_queue_size_;
+    std::string twist_frame_id_;
   private:
     
   };

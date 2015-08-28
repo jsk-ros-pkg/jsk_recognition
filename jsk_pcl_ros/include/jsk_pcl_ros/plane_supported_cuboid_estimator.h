@@ -61,7 +61,7 @@
 // pcl
 #include <pcl/tracking/tracking.h>
 #include <pcl/point_cloud.h>
-#include "jsk_pcl_ros/ros_collaborative_particle_filter.h"
+#include "jsk_pcl_ros/pcl/simple_particle_filter.h"
 #include <pcl/kdtree/kdtree_flann.h>
 
 namespace pcl

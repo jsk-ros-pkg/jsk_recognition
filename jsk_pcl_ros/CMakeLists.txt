@@ -210,6 +210,8 @@ jsk_pcl_nodelet(src/multi_plane_extraction_nodelet.cpp
   "jsk_pcl/MultiPlaneExtraction" "multi_plane_extraction")
 jsk_pcl_nodelet(src/selected_cluster_publisher_nodelet.cpp
   "jsk_pcl/SelectedClusterPublisher" "selected_cluster_publisher")
+jsk_pcl_util_nodelet(src/polygon_array_distance_likelihood_nodelet.cpp
+  "jsk_pcl/PolygonArrayDistanceLikelihood" "polygon_array_distance_likelihood")
 jsk_pcl_util_nodelet(src/pose_with_covariance_stamped_to_gaussian_pointcloud_nodelet.cpp
   "jsk_pcl/PoseWithCovarianceStampedToGaussianPointCloud" "pose_with_covariance_stamped_to_gaussian_pointcloud")
 jsk_pcl_util_nodelet(src/spherical_pointcloud_simulator_nodelet.cpp

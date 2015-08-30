@@ -1,3 +1,0 @@
-- builder: doxygen
-  # See http://wiki.ros.org/Doxygen for default file_patterns
-  file_patterns: '*.c *.cpp *h *.cc *.hh *.py *.dox *.md'

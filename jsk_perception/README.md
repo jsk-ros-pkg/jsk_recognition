@@ -1,7 +1,3 @@
-<!-- please do not remove this, this is very important for rosdoc_lite -->
-\mainpage
-<!-- please do not remove this, this is very important for rosdoc_lite -->
-
 # jsk_perception
 
 ## nodes and nodelets

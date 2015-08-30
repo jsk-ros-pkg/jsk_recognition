@@ -59,6 +59,26 @@ time end
 Represent range of time.
 
 ## nodelets
+### jsk\_pcl/PolygonArrayAreaLikelihood
+Compute likelihood based on area.
+Near polygon is, larger likelihood is.
+The likelihood is determined by `1/(1+d^2)` where `d` is difference between area and expected area.
+
+#### Subscribing Topic
+* `~input` (`jsk_recognition_msgs/PolygonArray`)
+
+  Input polygon array.
+
+#### Publishing Topic
+* `~input` (`jsk_recognition_msgs/PolygonArray`)
+
+  Input polygon array.
+
+#### Parameters
+* `~area` (default: `1.0`)
+
+  Expected size of area of polygon.
+
 ### jsk\_pcl/PolygonArrayAngleLikelihood
 Compute likelihood based on distance.
 Near polygon is, larger likelihood is.

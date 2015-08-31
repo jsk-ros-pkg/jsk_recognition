@@ -390,6 +390,7 @@ jsk_pcl_nodelet(src/pcd_reader_with_pose_nodelet.cpp
 
 add_library(jsk_pcl_ros_base SHARED
   src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
+  src/pcl/ear_clipping_patched.cpp
   src/random_util.cpp
   src/pcl_ros_util.cpp
   src/pcl_conversion_util.cpp src/pcl_util.cpp

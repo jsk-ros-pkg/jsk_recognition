@@ -11,6 +11,8 @@ Provide an overview of your package.
 
 \section codeapi Code API
 
+(README.md)[README.md]
+
 <!--
 Provide links to specific auto-generated API documentation within your
 package that is of particular interest to a reader. Doxygen will

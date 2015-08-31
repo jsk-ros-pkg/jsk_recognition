@@ -300,7 +300,9 @@ namespace jsk_pcl_ros
   void PlaneSupportedCuboidEstimator::likelihood(pcl::PointCloud<pcl::PointXYZ>::ConstPtr input,
                                                  pcl::tracking::ParticleCuboid& p)
   {
-    p.weight = computeLikelihood(p, candidate_cloud_, tree_, viewpoint_, polygons_, config_);
+    p.weight = computeLikelihood(p, candidate_cloud_, tree_, viewpoint_,
+                                 polygons_, latest_polygon_msg_->likelihood,
+                                 config_);
   }
   
   void PlaneSupportedCuboidEstimator::polygonCallback(
@@ -320,6 +322,9 @@ namespace jsk_pcl_ros
     double sum = 0;
     for (size_t i = 0; i < latest_polygon_msg_->polygons.size(); i++) {
       area_table[i] = polygons[i]->area();
+      if (use_init_polygon_likelihood_) {
+        area_table[i] = area_table[i] * latest_polygon_msg_->likelihood[i];
+      }
       sum += area_table[i];
     }
     double val = randomUniform(0, sum, random_generator_);
@@ -408,6 +413,7 @@ namespace jsk_pcl_ros
     min_dx_ = config.min_dx;
     min_dy_ = config.min_dy;
     min_dz_ = config.min_dz;
+    use_init_polygon_likelihood_ = config.use_init_polygon_likelihood;
   }
 
   bool PlaneSupportedCuboidEstimator::resetCallback(std_srvs::EmptyRequest& req,

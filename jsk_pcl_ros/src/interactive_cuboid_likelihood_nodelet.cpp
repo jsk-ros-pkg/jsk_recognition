@@ -118,7 +118,8 @@ namespace jsk_pcl_ros
     }
     pcl::KdTreeFLANN<pcl::PointXYZ> tree;
     tree.setInputCloud(cloud);
-    double l = computeLikelihood(particle_, cloud, tree, vp, polygons, config_);
+    std::vector<float> polygon_likelihood(1, 1.0);
+    double l = computeLikelihood(particle_, cloud, tree, vp, polygons, polygon_likelihood, config_);
     NODELET_INFO("likelihood: %f", l);
     std_msgs::Float32 float_msg;
     float_msg.data = l;

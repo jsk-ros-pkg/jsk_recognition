@@ -48,7 +48,7 @@
 #include <message_filters/synchronizer.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
-
+#include <jsk_recognition_msgs/PlotData.h>
 #include "one_data_stat.h"
 
 using namespace jsk_pcl_ros;
@@ -72,6 +72,12 @@ typedef message_filters::sync_policies::ExactTime<
  * publishers for image visualization.
  */
 ros::Publisher pub_error_image, pub_variance_image, pub_stddev_image, pub_mean_image;
+
+/**
+ * @brief
+ * publishers for plot data
+ */
+ros::Publisher pub_error_plot, pub_variance_plot, pub_stddev_plot;
 
 /**
  * @brief
@@ -122,7 +128,22 @@ void publishImage(const cv::Mat& image, ros::Publisher& pub)
   header.stamp = ros::Time::now();
   pub.publish(cv_bridge::CvImage(header, sensor_msgs::image_encodings::TYPE_32FC1, image).toImageMsg());
 }
-  
+
+void publishPlotData(const std::vector<OneDataStat::Ptr>& stats,
+                     ros::Publisher& pub,
+                     boost::function<double(OneDataStat&)> accessor)
+{
+  jsk_recognition_msgs::PlotData msg;
+  for (size_t i = 0; i < stats.size(); i++) {
+    if (i % 8 == 0) {
+      if (stats[i]->count() > 2) {
+        msg.xs.push_back(stats[i]->mean());
+        msg.ys.push_back(accessor(*stats[i]));
+      }
+    }
+  }
+  pub.publish(msg);
+}
 
 void dataCallback(
   const sensor_msgs::CameraInfo::ConstPtr& camera_info_msg,
@@ -130,10 +151,10 @@ void dataCallback(
   const sensor_msgs::PointCloud2::ConstPtr& point_cloud_msg)
 {
   boost::mutex::scoped_lock lock(mutex);
-  if (!ground_truth) {
-    ROS_ERROR("no ground truth pointcloud");
-    return;
-  }
+  // if (!ground_truth) {
+  //   ROS_ERROR("no ground truth pointcloud");
+  //   return;
+  // }
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
   pcl::fromROSMsg(*point_cloud_msg, *cloud);
 
@@ -172,6 +193,8 @@ void dataCallback(
   publishImage(mean_image, pub_mean_image);
   publishImage(variance_image, pub_variance_image);
   publishImage(stddev_image, pub_stddev_image);
+  publishPlotData(stats, pub_variance_plot, &variance);
+  publishPlotData(stats, pub_stddev_plot, &stddev);
 }
 
 int main(int argc, char** argv)
@@ -183,7 +206,10 @@ int main(int argc, char** argv)
   pub_variance_image = nh.advertise<sensor_msgs::Image>("output/variance_image", 1);
   pub_stddev_image = nh.advertise<sensor_msgs::Image>("output/stddev_image", 1);
   pub_mean_image = nh.advertise<sensor_msgs::Image>("output/mean_image", 1);
-  ros::Subscriber sub_ground_truth = nh.subscribe("input/ground_truth", 1, &groundTruthCallback);
+  pub_error_plot = nh.advertise<jsk_recognition_msgs::PlotData>("output/error_plot", 1);
+  pub_variance_plot = nh.advertise<jsk_recognition_msgs::PlotData>("output/variance_plot", 1);
+  pub_stddev_plot = nh.advertise<jsk_recognition_msgs::PlotData>("output/stddev_plot", 1);
+  //ros::Subscriber sub_ground_truth = nh.subscribe("input/ground_truth", 1, &groundTruthCallback);
   message_filters::Subscriber<sensor_msgs::CameraInfo> sub_camera_info;
   message_filters::Subscriber<sensor_msgs::Image> sub_left_image;
   message_filters::Subscriber<sensor_msgs::PointCloud2> sub_point_cloud;

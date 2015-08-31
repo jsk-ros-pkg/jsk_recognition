@@ -428,7 +428,8 @@ target_link_libraries(sample_cube_nearest_point jsk_pcl_ros_base)
 
 # tool/ directory
 add_executable(range_sensor_error_visualization tool/range_sensor_error_visualization.cpp)
-target_link_libraries(range_sensor_error_visualization)
+add_executable(depth_camera_error_visualization tool/depth_camera_error_visualization.cpp)
+target_link_libraries(depth_camera_error_visualization jsk_pcl_ros)
 
 file(GLOB _headers ${PROJECT_SOURCE_DIR}/include/jsk_pcl_ros/*.h)
 list(SORT _headers)

@@ -347,7 +347,7 @@ namespace jsk_pcl_ros
     double min_dx_;
     double min_dy_;
     double min_dz_;
-    
+    bool use_init_polygon_likelihood_;
     int particle_num_;
     std::string sensor_frame_;
     boost::mt19937 random_generator_;

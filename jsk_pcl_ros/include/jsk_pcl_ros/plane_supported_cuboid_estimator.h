@@ -201,6 +201,18 @@ namespace jsk_pcl_ros
     }
   }
 
+  template <class Config>
+  double planeLikelihood(const pcl::tracking::ParticleCuboid& p,
+                         const std::vector<float>& polygon_likelihood,
+                         const Config& config)
+  {
+    if (config.use_polygon_likelihood) {
+      return polygon_likelihood[p.plane_index];
+    }
+    else {
+      return 1.0;
+    }
+  }
   
   template <class Config>
   double computeLikelihood(const pcl::tracking::ParticleCuboid& p,
@@ -208,6 +220,7 @@ namespace jsk_pcl_ros
                            pcl::KdTreeFLANN<pcl::PointXYZ>& tree,
                            const Eigen::Vector3f& viewpoint,
                            const std::vector<Polygon::Ptr>& polygons,
+                           const std::vector<float>& polygon_likelihood,
                            const Config& config)
   {
     double range_likelihood = 1.0;
@@ -221,7 +234,8 @@ namespace jsk_pcl_ros
     else {
       return (range_likelihood * distanceFromPlaneBasedError(p, cloud, tree, viewpoint, config)
               * supportPlaneAngularLikelihood(p, polygons, config)
-              * surfaceAreaLikelihood(p, config));
+              * surfaceAreaLikelihood(p, config)
+              * planeLikelihood(p, polygon_likelihood, config));
     }    
   }
   

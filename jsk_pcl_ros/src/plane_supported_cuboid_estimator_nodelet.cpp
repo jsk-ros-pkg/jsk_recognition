@@ -300,7 +300,9 @@ namespace jsk_pcl_ros
   void PlaneSupportedCuboidEstimator::likelihood(pcl::PointCloud<pcl::PointXYZ>::ConstPtr input,
                                                  pcl::tracking::ParticleCuboid& p)
   {
-    p.weight = computeLikelihood(p, candidate_cloud_, tree_, viewpoint_, polygons_, config_);
+    p.weight = computeLikelihood(p, candidate_cloud_, tree_, viewpoint_,
+                                 polygons_, latest_polygon_msg_->likelihood,
+                                 config_);
   }
   
   void PlaneSupportedCuboidEstimator::polygonCallback(

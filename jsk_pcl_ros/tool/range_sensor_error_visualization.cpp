@@ -80,6 +80,7 @@ public:
   virtual double max() const { return boost::accumulators::max(acc_); }
   virtual double count() const { return boost::accumulators::count(acc_); }
   virtual double variance() const { return boost::accumulators::variance(acc_); }
+  virtual double stddev() const { return sqrt(variance()); }
   
 protected:
   Accumulator acc_;
@@ -124,11 +125,20 @@ double count(const OneDataStat& d)
 
 /**
  * @brief
- * wrapper function for variancecount method for boost::function
+ * wrapper function for variance method for boost::function
  */
 double variance(const OneDataStat& d)
 {
   return d.variance();
+}
+
+/**
+ * @brief
+ * wrapper function for stddev method for boost::function
+ */
+double stddev(const OneDataStat& d)
+{
+  return d.stddev();
 }
 
 
@@ -168,15 +178,15 @@ std::vector<OneDataStat::Ptr> g_data;
 
 /**
  * @brief
- * publisher for mean and variance images
+ * publisher for mean, variance and standard deviation images
  */
-ros::Publisher pub_mean, pub_variance;
+ros::Publisher pub_mean, pub_variance, pub_stddev;
 
 /**
  * @brief
- * publisher for variance values for plotting
+ * publisher for variance and standard deviation values for plotting
  */
-ros::Publisher pub_variance_plot;
+ros::Publisher pub_variance_plot, pub_stddev_plot;
 
 /**
  * @brief
@@ -218,21 +228,29 @@ void callback(const sensor_msgs::LaserScan::ConstPtr& msg)
     // because no stats can be computed with one message.
     cv::Mat mean_image(1, msg->ranges.size(), CV_32FC1);
     cv::Mat variance_image(1, msg->ranges.size(), CV_32FC1);
+    cv::Mat stddev_image(1, msg->ranges.size(), CV_32FC1);
     generateImage(g_data, mean_image, &mean);
     generateImage(g_data, variance_image, &variance);
+    generateImage(g_data, stddev_image, &stddev);
     publishImage(mean_image, pub_mean);
     publishImage(variance_image, pub_variance);
+    publishImage(stddev_image, pub_stddev);
 
     jsk_recognition_msgs::PlotData plot_data;
+    jsk_recognition_msgs::PlotData plot_stddev_data;
     for (size_t i = 0; i < g_data.size(); i++) {
       double x = g_data[i]->mean();
       double y = g_data[i]->variance();
+      double stddev = g_data[i]->stddev();
       if (y < 100) {            // 10cm
         plot_data.xs.push_back(x);
         plot_data.ys.push_back(y);
+        plot_stddev_data.xs.push_back(x);
+        plot_stddev_data.ys.push_back(stddev);
       }
     }
     pub_variance_plot.publish(plot_data);
+    pub_stddev_plot.publish(plot_stddev_data);
   }
 }
 
@@ -244,7 +262,9 @@ int main(int argc, char** argv)
   // Setup publishers before subscribe topic
   pub_mean = pnh.advertise<sensor_msgs::Image>("output/mean", 1);
   pub_variance = pnh.advertise<sensor_msgs::Image>("output/variance", 1);
+  pub_stddev = pnh.advertise<sensor_msgs::Image>("output/stddev", 1);
   pub_variance_plot = pnh.advertise<jsk_recognition_msgs::PlotData>("output/variance_plot", 1);
+  pub_stddev_plot = pnh.advertise<jsk_recognition_msgs::PlotData>("output/stddev_plot", 1);
   ros::Subscriber sub = pnh.subscribe("input", 1, &callback);
   ros::spin();
 

@@ -151,7 +151,7 @@ void callback(const sensor_msgs::LaserScan::ConstPtr& msg)
       double x = g_data[i]->mean();
       double y = g_data[i]->variance();
       double stddev = g_data[i]->stddev();
-      if (y < 100) {            // 10cm
+      if (x > 1.0 && x < 40 && stddev < 0.100) {            // 10cm
         plot_data.xs.push_back(x);
         plot_data.ys.push_back(y);
         plot_stddev_data.xs.push_back(x);

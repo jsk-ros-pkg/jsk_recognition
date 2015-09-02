@@ -176,6 +176,7 @@ namespace jsk_pcl_ros
     virtual double distance(const Eigen::Vector3f& point, Eigen::Vector3f& foot_point) const;
     virtual bool intersect(Plane& plane, Eigen::Vector3f& point) const;
     //virtual double distance(const Segment& other);
+    friend std::ostream& operator<<(std::ostream& os, const Segment& seg);
   protected:
     Eigen::Vector3f from_, to_;
   private:
@@ -564,6 +565,8 @@ namespace jsk_pcl_ros
     Cube(const Eigen::Vector3f& pos, const Eigen::Quaternionf& rot);
     Cube(const Eigen::Vector3f& pos, const Eigen::Quaternionf& rot,
          const std::vector<double>& dimensions);
+    Cube(const Eigen::Vector3f& pos, const Eigen::Quaternionf& rot,
+         const Eigen::Vector3f& dimensions);
     Cube(const Eigen::Vector3f& pos, // centroid
          const Line& line_a, const Line& line_b, const Line& line_c);
     virtual ~Cube();

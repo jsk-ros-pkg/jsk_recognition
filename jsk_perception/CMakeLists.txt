@@ -181,12 +181,6 @@ add_custom_command(
 
 add_custom_target(eusmodel_template ALL DEPENDS ${PROJECT_SOURCE_DIR}/sample/rimokon-pose.launch ${PROJECT_SOURCE_DIR}/sample/milktea-box.launch)
 
-# Download model data
-execute_process(
-  COMMAND mkdir -p ${PROJECT_SOURCE_DIR}/trained_data)
-execute_process(
-  COMMAND wget -q --timestamping "https://drive.google.com/uc?id=0B5hRAGKTOm_KWW11R0FTX0xjTDg&export=download" -O ${PROJECT_SOURCE_DIR}/trained_data/drill_svm.xml)
-
 install(TARGETS camshiftdemo virtual_camera_mono point_pose_extractor white_balance_converter hough_lines rectangle_detector calc_flow color_histogram_sliding_matcher ${PROJECT_NAME}
   ${jsk_perception_nodelet_executables}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

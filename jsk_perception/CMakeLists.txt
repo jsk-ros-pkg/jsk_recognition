@@ -170,8 +170,8 @@ add_dependencies(color_histogram_sliding_matcher       ${PROJECT_NAME}_gencfg ${
 
 add_custom_command(
  OUTPUT  ${PROJECT_SOURCE_DIR}/template
- DEPENDS ${PROJECT_SOURCE_DIR}/src/eusmodel_template_gen.l
- COMMAND roseus ${PROJECT_SOURCE_DIR}/src/eusmodel_template_gen.l
+ DEPENDS ${PROJECT_SOURCE_DIR}/euslisp/eusmodel_template_gen.l
+ COMMAND roseus ${PROJECT_SOURCE_DIR}/euslisp/eusmodel_template_gen.l
  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 add_custom_command(
  OUTPUT  ${PROJECT_SOURCE_DIR}/sample/rimokon-pose.launch ${PROJECT_SOURCE_DIR}/sample/milktea-box.launch

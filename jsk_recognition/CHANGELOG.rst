@@ -2,6 +2,12 @@
 Changelog for package jsk_recognition
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_recognition_utils] Introduce new package jsk_recognition_utils
+  in order to use utility libraries defined in jsk_pcl_ros in jsk_perception
+* Contributors: Ryohei Ueda
+
 0.2.17 (2015-08-21)
 -------------------
 

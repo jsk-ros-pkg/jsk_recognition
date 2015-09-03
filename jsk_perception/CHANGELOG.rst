@@ -2,6 +2,23 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_perception] Do not specify sexp from cmake, just write in file
+* [jsk_perception] Add .gitignore about auto-generated files
+* [jsk_perception] Add template directory to run eusmodel_template_gen.l correctly
+* [jsk_perception] Add PolygonArrayToLabelImage nodelet
+* [jsk_perception] Move matchtemplate.py from src to scripts
+* [jsk_perception] Move eusmodel_template_gen.l location from src to euslisp
+* [jsk_perception] Do not download trained data in compilation time and
+  add script to donload them
+* [jsk_perception] use sphinx for rosdoc
+* Revert "[jsk_perception] Add rosdoc.yaml to overwrite default file_patterns"
+* [package.xml] Updatae Author
+* [jsk_perception] use README.md as mainpage.doc
+* [jsk_perception] Add rosdoc.yaml to overwrite default file_patterns
+* Contributors: Kei Okada, Kentaro Wada, Ryohei Ueda
+
 0.2.17 (2015-08-21)
 -------------------
 

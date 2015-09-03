@@ -1,19 +1,15 @@
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Changelog for package jsk_recognition_msgs
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Changelog for package jsk_recognition_utils
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Forthcoming
 -----------
-* [jsk_recognition_msgs] Add script to convert
-  jsk_recognition_msgs/PlotData into csv
-* [jsk_pcl_ros] Add tool to visualize variance of raser scan
+* [jsk_recognition_utils] Introduce new package jsk_recognition_utils
+  in order to use utility libraries defined in jsk_pcl_ros in jsk_perception
 * Contributors: Ryohei Ueda
 
 0.2.17 (2015-08-21)
 -------------------
-* [jsk_recognition_msgs/PolygonArray] Add lebels and likelihood for
-  colorizing on rviz
-* Contributors: Ryohei Ueda
 
 0.2.16 (2015-08-19)
 -------------------
@@ -23,23 +19,12 @@ Forthcoming
 
 0.2.14 (2015-08-13)
 -------------------
-* [jsk_recognition_msgs] Add value field to BoundingBox to represent likelihood
-* [jsk_recognition_msgs] HistogramWithRange message to represent rich histogram
-  data
-* [jsk_pcl_ros] Add config topic to chain heightmap configuration
-* [jsk_perception] Scripts for bof and its hist extractor
-* Contributors: Kentaro Wada, Ryohei Ueda
 
 0.2.13 (2015-06-11)
 -------------------
-* [jsk_perception] Use ImageDifferenceValue.msg instead of Float32Stamped.msg
-* [jsk_recognition_msgs] Add Float32Stamped.msg
-* Contributors: Kentaro Wada
 
 0.2.12 (2015-05-04)
 -------------------
-* JSK Recognition Msg for handling Array of 2D Rects
-* Contributors: iKrishneel
 
 0.2.11 (2015-04-13)
 -------------------
@@ -48,12 +33,6 @@ Forthcoming
 -------------------
 
 0.2.9 (2015-03-29)
-------------------
-* 0.2.8
-* Update Changelog
-* Contributors: Ryohei Ueda
-
-0.2.8 (2015-03-29)
 ------------------
 
 0.2.7 (2015-03-26)
@@ -67,34 +46,24 @@ Forthcoming
 
 0.2.4 (2015-03-08)
 ------------------
-* [jsk_recognition_msgs] Add resolution to SimpleOccupancyGrid
-* Contributors: Ryohei Ueda
 
 0.2.3 (2015-02-02)
 ------------------
-* add CATKIN_DEPENDS
-* [jsk_recognition_msgs] Add new message for occupancy grid for more
-  simple usage
-* Contributors: Ryohei Ueda, Kei Okada
 
-0.2.2 (2015-01-30)
-------------------
+0.2.2 (2015-01-30 19:29)
+------------------------
 
-0.2.1 (2015-01-30)
-------------------
+0.2.1 (2015-01-30 00:35)
+------------------------
 
-0.2.0 (2015-01-29)
-------------------
+0.2.0 (2015-01-29 12:20)
+------------------------
 
-0.1.34 (2015-01-29)
--------------------
-* [jsk_pcl_ros, jsk_perception] Use jsk_recognition_msgs
-* Contributors: Ryohei Ueda
+0.1.34 (2015-01-29 11:53)
+-------------------------
 
 0.1.33 (2015-01-24)
 -------------------
-* [jsk_recognition_msgs] Add jsk_recognition_msgs
-* Contributors: Ryohei Ueda
 
 0.1.32 (2015-01-12)
 -------------------

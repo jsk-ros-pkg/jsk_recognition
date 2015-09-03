@@ -169,13 +169,13 @@ namespace jsk_pcl_ros
     else {
       double error = 0.0;
       size_t inliers = 0;
+      Cube::Ptr cube = p.toCube();
+      std::vector<Polygon::Ptr> faces = cube->faces();
       for (size_t i = 0; i < candidate_point_indices.size(); i++) {
         int index = candidate_point_indices[i];
         Eigen::Vector3f v = cloud->points[index].getVector3fMap();
-        Eigen::Vector3f local_v = pose_inv * v;
-        
         if (config.use_occlusion_likelihood) {
-          double d = p.distanceNearestToPlaneWithOcclusion(local_v, visible_faces);
+          double d = p.distanceNearestToPlaneWithOcclusion(v, visible_faces, faces);
           if (d < config.outlier_distance) {
             //error *= 1 / (1 + pow(d, config.plane_distance_error_power));
             error += pow(d, config.plane_distance_error_power);
@@ -183,6 +183,7 @@ namespace jsk_pcl_ros
           }
         }
         else {
+          Eigen::Vector3f local_v = pose_inv * v;
           double d = p.distanceToPlane(local_v, p.nearestPlaneIndex(local_v));
           if (d < config.outlier_distance) {
             //error *= 1 / (1 + pow(d, config.plane_distance_error_power));

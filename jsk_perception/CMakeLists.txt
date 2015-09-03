@@ -128,6 +128,7 @@ jsk_perception_nodelet(src/mask_image_to_rect.cpp "jsk_perception/MaskImageToRec
 jsk_perception_nodelet(src/roi_to_rect.cpp "jsk_perception/ROIToRect" "roi_to_rect")
 jsk_perception_nodelet(src/roi_to_mask_image.cpp "jsk_perception/ROIToMaskImage" "roi_to_mask_image")
 jsk_perception_nodelet(src/polygon_to_mask_image.cpp "jsk_perception/PolygonToMaskImage" "polygon_to_mask_image")
+jsk_perception_nodelet(src/polygon_array_to_label_image.cpp "jsk_perception/PolygonArrayToLabelImage" "polygon_array_to_label_image")
 jsk_perception_nodelet(src/rect_to_roi.cpp "jsk_perception/RectToROI" "rect_to_roi")
 jsk_perception_nodelet(src/mask_image_generator.cpp "jsk_perception/MaskImageGenerator" "mask_image_generator")
 jsk_perception_nodelet(src/project_image_point.cpp "jsk_perception/ProjectImagePoint" "project_image_point")
@@ -171,8 +172,8 @@ add_dependencies(color_histogram_sliding_matcher       ${PROJECT_NAME}_gencfg ${
 add_custom_command(
  OUTPUT ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng8.launch
  ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng2.launch
- DEPENDS ${PROJECT_SOURCE_DIR}/src/eusmodel_template_gen.l
- COMMAND roseus ${PROJECT_SOURCE_DIR}/src/eusmodel_template_gen.l
+ DEPENDS ${PROJECT_SOURCE_DIR}/euslisp/eusmodel_template_gen.l
+ COMMAND roseus ${PROJECT_SOURCE_DIR}/euslisp/eusmodel_template_gen.l
  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 add_custom_command(
  OUTPUT  ${PROJECT_SOURCE_DIR}/sample/rimokon-pose.launch ${PROJECT_SOURCE_DIR}/sample/milktea-box.launch

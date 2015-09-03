@@ -279,6 +279,12 @@ namespace jsk_pcl_ros
     double r = dividingRatio(point);
     return 0 <= r && r <= 1.0;
   }
+
+  std::ostream& operator<<(std::ostream& os, const Segment& seg)
+  {
+    os << "[" << seg.from_[0] << ", " << seg.from_[1] << ", " << seg.from_[2] << "] -- "
+       << "[" << seg.to_[0] << ", " << seg.to_[1] << ", " << seg.to_[2] << "]";
+  }
     
   Plane::Plane(const std::vector<float>& coefficients)
   {
@@ -1607,6 +1613,15 @@ namespace jsk_pcl_ros
     pos_(pos), rot_(rot), dimensions_(dimensions)
   {
     
+  }
+  Cube::Cube(const Eigen::Vector3f& pos, const Eigen::Quaternionf& rot,
+             const Eigen::Vector3f& dimensions):
+    pos_(pos), rot_(rot)
+  {
+    dimensions_.resize(3);
+    dimensions_[0] = dimensions[0];
+    dimensions_[1] = dimensions[1];
+    dimensions_[2] = dimensions[2];
   }
 
   Cube::Cube(const Eigen::Vector3f& pos,

@@ -113,9 +113,9 @@ namespace jsk_pcl_ros
     particle_.plane_index = 0;
     std::vector<Polygon::Ptr> polygons;
     polygons.push_back(plane);
-    for (size_t i = 0; i < vertices.size(); i++) {
-      ROS_INFO("v: [%f, %f, %f]", vertices[i][0], vertices[i][1], vertices[i][2]);
-    }
+    // for (size_t i = 0; i < vertices.size(); i++) {
+    //   ROS_INFO("v: [%f, %f, %f]", vertices[i][0], vertices[i][1], vertices[i][2]);
+    // }
     pcl::KdTreeFLANN<pcl::PointXYZ> tree;
     tree.setInputCloud(cloud);
     std::vector<float> polygon_likelihood(1, 1.0);

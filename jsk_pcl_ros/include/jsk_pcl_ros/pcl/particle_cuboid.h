@@ -205,22 +205,21 @@ namespace pcl
 
       inline double distanceNearestToPlaneWithOcclusion(
         const Eigen::Vector3f& v,
-        const std::vector<int>& visible_faces) const
+        const std::vector<int>& visible_faces,
+        std::vector<jsk_pcl_ros::Polygon::Ptr>& faces) const
       {
         double min_distance = DBL_MAX;
-        int nearest_plane_index = nearestPlaneIndex(v);
-        // If the face is visible, use distance-to-plane
-        if (std::find(visible_faces.begin(), visible_faces.end(),
-                      nearest_plane_index)
-            != visible_faces.end()) {
-          return distanceToPlane(v, nearest_plane_index);
+        for (size_t i = 0; i < visible_faces.size(); i++) {
+          jsk_pcl_ros::Polygon::Ptr face = faces[visible_faces[i]];
+          double d;
+          face->nearestPoint(v, d);
+          if (min_distance > d) {
+            min_distance = d;
+          }
         }
-        else {
-          // If not the face is visible, use distance from centroid
-          // It's an approximated distance.
-          return (getVector3fMap() - v).norm();
-        }
+        return min_distance;
       }
+
       
       // V should be on local coordinates.
       // TODO: update to take into boundary account
@@ -293,9 +292,20 @@ namespace pcl
         }
       }
       
+      inline jsk_pcl_ros::Cube::Ptr toCube() const
+    {
+      Eigen::Affine3f pose = toEigenMatrix();
+      Eigen::Vector3f dimensions(dx, dy, dz);
+      jsk_pcl_ros::Cube::Ptr cube(new jsk_pcl_ros::Cube(Eigen::Vector3f(pose.translation()),
+                                                        Eigen::Quaternionf(pose.rotation()),
+                                                        dimensions));
+      return cube;
+    }
+
+
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     };
-    
+
     inline ParticleCuboid operator* (const ParticleCuboid& p, const Eigen::Affine3f& transform)
     {
       Eigen::Affine3f particle_affine = p.toEigenMatrix();

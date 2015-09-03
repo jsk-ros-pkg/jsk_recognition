@@ -65,6 +65,9 @@
 #include "jsk_recognition_utils/pcl_util.h"
 #include "jsk_recognition_utils/random_util.h"
 
+#include <jsk_recognition_msgs/PolygonArray.h>
+#include "jsk_recognition_utils/sensor_model/camera_depth_sensor.h"
+
 // Utitlity macros
 inline void ROS_INFO_EIGEN_VECTOR3(const std::string& prefix,
                                    const Eigen::Vector3f& v) {
@@ -336,6 +339,39 @@ namespace jsk_recognition_utils
     static Polygon fromROSMsg(const geometry_msgs::Polygon& polygon);
     static Polygon::Ptr fromROSMsgPtr(const geometry_msgs::Polygon& polygon);
     static Polygon createPolygonWithSkip(const Vertices& vertices);
+
+    /**
+     * @brief
+     * convert jsk_recognition_msgs::PolygonArray
+     * to std::vector<Polygon::Ptr>.
+     * It requires offset transformation in the 2nd argument.
+     */
+    static std::vector<Polygon::Ptr> fromROSMsg(const jsk_recognition_msgs::PolygonArray& msg,
+                                                const Eigen::Affine3f& offset);
+    
+    /**
+     * @brief
+     * transform Polygon with given transform.
+     * cached triangles is cleared.
+     */
+    virtual void transformBy(const Eigen::Affine3d& transform);
+
+    /**
+     * @brief
+     * transform Polygon with given transform.
+     * cached triangles is cleared.
+     */
+    virtual void transformBy(const Eigen::Affine3f& transform);
+    
+    /**
+     * @brief
+     * generate mask image of the polygon.
+     * if all the points are outside of field-of-view, 
+     * returns false.
+     */
+    virtual bool maskImage(const jsk_recognition_utils::CameraDepthSensor& model,
+                           cv::Mat& image) const;
+    
     virtual bool isConvex();
     virtual Eigen::Vector3f centroid();
     template<class PointT> void boundariesToPointCloud(

@@ -33,29 +33,45 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_POINTCLOUD_SENSOR_MODEL_H_
-#define JSK_PCL_ROS_POINTCLOUD_SENSOR_MODEL_H_
 
-namespace jsk_pcl_ros
+#ifndef JSK_PERCEPTION_TABLETOP_COLOR_DIFFERENCE_LIKELIHOOD_H_
+#define JSK_PERCEPTION_TABLETOP_COLOR_DIFFERENCE_LIKELIHOOD_H_
+
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/CameraInfo.h>
+#include <jsk_recognition_msgs/PolygonArray.h>
+#include <jsk_recognition_utils/tf_listener_singleton.h>
+#include <jsk_topic_tools/log_utils.h>
+#include <tf/message_filter.h>
+#include <message_filters/subscriber.h>
+#include <jsk_recognition_utils/geo_util.h>
+
+namespace jsk_perception
 {
-  /**
-   * @brief
-   * Super class for sensor model.
-   * It provides pure virtual method for common interfaces.
-   */
-  class PointCloudSensorModel
+  class TabletopColorDifferenceLikelihood: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    typedef boost::shared_ptr<PointCloudSensorModel> Ptr;
-    
-    /**
-     * @brief
-     * Return the expected number of points according to distance and area.
-     */
-    virtual double expectedPointCloudNum(double distance, double area) = 0;
+    TabletopColorDifferenceLikelihood(): DiagnosticNodelet("TabletopColorDifferenceLikelihood") {}
   protected:
+    virtual void onInit();
+    virtual void subscribe();
+    virtual void unsubscribe();
+    virtual void infoCallback(const sensor_msgs::CameraInfo::ConstPtr& msg);
+    virtual void polygonCallback(const jsk_recognition_msgs::PolygonArray::ConstPtr& msg);
+    virtual void imageCallback(const sensor_msgs::Image::ConstPtr& msg);
+
+    boost::mutex mutex_;
+    sensor_msgs::CameraInfo::ConstPtr latest_info_msg_;
+    jsk_recognition_msgs::PolygonArray::ConstPtr latest_polygon_msg_;
+    tf::TransformListener* tf_listener_;
+    ros::Publisher pub_;
+    ros::Subscriber sub_info_;
+    ros::Subscriber sub_polygons_;
+    message_filters::Subscriber<sensor_msgs::Image> sub_image_;
+    boost::shared_ptr<tf::MessageFilter<sensor_msgs::Image> > tf_filter_;
+    int tf_queue_size_;
   private:
-    
   };
 }
 

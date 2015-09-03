@@ -51,6 +51,7 @@
 #include <pcl/point_types.h>
 #include <pcl/surface/processing.h>
 #include "jsk_recognition_utils/pcl/ear_clipping_patched.h"
+#include "jsk_recognition_utils/sensor_model_utils.h"
 
 // #define DEBUG_GEO_UTIL
 namespace jsk_recognition_utils
@@ -850,6 +851,59 @@ namespace jsk_recognition_utils
     }
   }
 
+  void Polygon::transformBy(const Eigen::Affine3d& transform)
+  {
+    Eigen::Affine3f float_affine;
+    convertEigenAffine3(transform, float_affine);
+    transformBy(float_affine);
+  }
+
+  void Polygon::transformBy(const Eigen::Affine3f& transform)
+  {
+    // 1. clear cached_triangles_
+    // 2. transform vertices_
+    // 3. update normal_ and d_
+    // 3. update plane_coordinates_
+    cached_triangles_.clear();
+    for (size_t i = 0; i < vertices_.size(); i++) {
+      vertices_[i] = transform * vertices_[i];
+    }
+    // compute normal and d
+    normal_ = (vertices_[1] - vertices_[0]).cross(vertices_[2] - vertices_[0]).normalized();
+    d_ = - normal_.dot(vertices_[0]) / normal_.norm();
+    initializeCoordinates();
+  }
+  
+  bool Polygon::maskImage(const jsk_recognition_utils::CameraDepthSensor& model,
+                          cv::Mat& image) const
+  {
+    std::vector<cv::Point> projected_vertices
+      = project3DPointstoPixel(model.getPinholeCameraModel(), vertices_);
+    bool all_outside = true;
+    // check some of vertices is inside of FoV
+    for (size_t i = 0; i < projected_vertices.size(); i++) {
+      if (model.isInside(projected_vertices[i])) {
+        all_outside = false;
+      }
+    }
+    image = model.image(CV_8UC1);
+    // check all the v is positive
+    for (size_t i = 0; i < vertices_.size(); i++) {
+      if (vertices_[i][2] < 0) {
+        return false;
+      }
+    }
+    const cv::Point* element_points[1] = {&projected_vertices[0]};
+    int number_of_points = (int)projected_vertices.size();
+    // Is it should be cv::fillPoly?
+    cv::fillPoly(image, 
+                 element_points,
+                 &number_of_points,
+                 1,
+                 cv::Scalar(255));
+    return !all_outside;
+  }
+
   bool Polygon::isConvex()
   {
 #ifdef DEBUG_GEO_UTIL
@@ -972,6 +1026,18 @@ namespace jsk_recognition_utils
       vertices.push_back(v);
     }
     return Polygon::Ptr(new Polygon(vertices));
+  }
+
+  std::vector<Polygon::Ptr> Polygon::fromROSMsg(const jsk_recognition_msgs::PolygonArray& msg,
+                                                const Eigen::Affine3f& offset)
+  {
+    std::vector<Polygon::Ptr> ret;
+    for (size_t i = 0; i < msg.polygons.size(); i++) {
+      Polygon::Ptr polygon = Polygon::fromROSMsgPtr(msg.polygons[i].polygon);
+      polygon->transformBy(offset);
+      ret.push_back(polygon);
+    }
+    return ret;
   }
   
   bool Polygon::isInside(const Eigen::Vector3f& p)

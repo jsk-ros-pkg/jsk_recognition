@@ -33,14 +33,14 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_CAMERA_DEPTH_SENSOR_H_
-#define JSK_PCL_ROS_CAMERA_DEPTH_SENSOR_H_
+#ifndef JSK_RECOGNITION_UTILS_CAMERA_DEPTH_SENSOR_H_
+#define JSK_RECOGNITION_UTILS_CAMERA_DEPTH_SENSOR_H_
 
-#include "jsk_pcl_ros/sensor_model/pointcloud_sensor_model.h"
+#include "jsk_recognition_utils/sensor_model/pointcloud_sensor_model.h"
 #include <sensor_msgs/CameraInfo.h>
 #include <image_geometry/pinhole_camera_model.h>
 
-namespace jsk_pcl_ros
+namespace jsk_recognition_utils
 {
   class CameraDepthSensor: public PointCloudSensorModel
   {
@@ -50,7 +50,27 @@ namespace jsk_pcl_ros
     
     virtual void setCameraInfo(const sensor_msgs::CameraInfo& info)
     {
+      camera_info_ = info;
       model_.fromCameraInfo(info);
+    }
+    
+    /**
+     * @brief
+     * get instance of image_geometry::PinholeCameraModel.
+     */
+    virtual image_geometry::PinholeCameraModel getPinholeCameraModel() const
+    {
+      return model_;
+    }
+
+    /**
+     * @brief
+     * return true if point p is inside of field-of-view.
+     */
+    virtual bool isInside(const cv::Point& p) const
+    {
+      return (p.x >= 0 && p.x < camera_info_.width &&
+              p.y >= 0 && p.y < camera_info_.height);
     }
 
     /**
@@ -64,9 +84,47 @@ namespace jsk_pcl_ros
       double f = model_.fx();
       return f*f / (distance*distance) * area;
     }
+
+    /**
+     * @brief
+     * return an image from internal camera parameter.
+     */
+    virtual cv::Mat image(const int type) const
+    {
+      return cv::Mat::zeros(camera_info_.height, camera_info_.width, type);
+    }
+
+    /**
+     * @brief
+     * width of camera in pixels.
+     */
+    virtual int width() const
+    {
+      return camera_info_.width;
+    }
+
+    /**
+     * @brief
+     * height of camera in pixels.
+     */
+    virtual int height() const
+    {
+      return camera_info_.height;
+    }
+
+    /**
+     * @brief
+     * force point to be inside of field of view.
+     */
+    virtual cv::Point limit2DPoint(const cv::Point& p) const
+    {
+      return cv::Point(std::min(std::max(p.x, 0), width()),
+                       std::min(std::max(p.y, 0), height()));
+    }
+
   protected:
     image_geometry::PinholeCameraModel model_;
-    
+    sensor_msgs::CameraInfo camera_info_;
   private:
     
   };

@@ -1,8 +1,8 @@
-// -*- mode: c++ -*-
+// -*- mode: C++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2015, JSK Lab
+ *  Copyright (c) 2014, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,14 +33,23 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_PCL_UTIL_H_
-#define JSK_PCL_ROS_PCL_UTIL_H_
-#pragma warning "jsk_pcl_ros/pcl_util.h is deprecated"
-#include <jsk_recognition_utils/pcl_util.h>
-namespace jsk_pcl_ros
+#include "jsk_recognition_utils/grid_index.h"
+
+namespace jsk_recognition_utils
 {
-  using namespace jsk_recognition_utils;
+  GridIndex::GridIndex(): x(0), y(0)
+  {
+
+  }
+
+  GridIndex::GridIndex(int _x, int _y): x(_x), y(_y)
+  {
+
+  }
+  
+  GridIndex::~GridIndex()
+  {
+
+  }
+
 }
-
-#endif
-

@@ -33,14 +33,25 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_PCL_UTIL_H_
-#define JSK_PCL_ROS_PCL_UTIL_H_
-#pragma warning "jsk_pcl_ros/pcl_util.h is deprecated"
-#include <jsk_recognition_utils/pcl_util.h>
-namespace jsk_pcl_ros
+
+#ifndef JSK_RECOGNITION_UTILS_RANDOM_UTIL_H_
+#define JSK_RECOGNITION_UTILS_RANDOM_UTIL_H_
+#include <boost/random.hpp>
+
+namespace jsk_recognition_utils
 {
-  using namespace jsk_recognition_utils;
+  /**
+   * @brief
+   * Return a random value according to gaussian distribution.
+   * If variance is zero, it just returns mean.
+   */
+  double randomGaussian(double mean, double var, boost::mt19937& gen);
+
+  /**
+   * @brief
+   * Return a random value according to uniform distribution.
+   */
+  double randomUniform(double min, double max, boost::mt19937& gen);
 }
 
 #endif
-

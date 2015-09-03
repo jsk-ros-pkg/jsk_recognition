@@ -33,14 +33,37 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_PCL_UTIL_H_
-#define JSK_PCL_ROS_PCL_UTIL_H_
-#pragma warning "jsk_pcl_ros/pcl_util.h is deprecated"
-#include <jsk_recognition_utils/pcl_util.h>
-namespace jsk_pcl_ros
+#ifndef JSK_RECOGNITION_UTILS_SENSOR_MODEL_UTILS_H_
+#define JSK_RECOGNITION_UTILS_SENSOR_MODEL_UTILS_H_
+
+#include <image_geometry/pinhole_camera_model.h>
+#include "jsk_recognition_utils/geo_util.h"
+
+namespace jsk_recognition_utils
 {
-  using namespace jsk_recognition_utils;
+
+  /**
+   * @brief
+   * Project 3d point represented in Eigen::Vector3f to 2d point
+   * using model.
+   */
+  inline cv::Point
+  project3DPointToPixel(const image_geometry::PinholeCameraModel& model,
+                        const Eigen::Vector3f& p)
+  {
+    return model.project3dToPixel(cv::Point3d(p[0], p[1], p[2]));
+  }
+
+  /**
+   * @brief
+   * Project array of 3d point represented in Eigen::Vector3f to 2d point
+   * using model.
+   */
+  std::vector<cv::Point>
+  project3DPointstoPixel(const image_geometry::PinholeCameraModel& model,
+                         const Vertices& vertices);
+                         
 }
 
-#endif
 
+#endif

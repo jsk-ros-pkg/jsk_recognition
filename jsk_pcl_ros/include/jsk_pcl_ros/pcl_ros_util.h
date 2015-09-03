@@ -33,31 +33,14 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-
-/**
- * This file defines several utilities for pcl <--> ros bridging.
- */
-
 #ifndef JSK_PCL_ROS_PCL_ROS_UTIL_H_
 #define JSK_PCL_ROS_PCL_ROS_UTIL_H_
-
-#include <ros/ros.h>
-
-#include <std_msgs/Header.h>
-#include <pcl_msgs/PointIndices.h>
-
-#include <pcl/PointIndices.h>
-
+#pragma warning "jsk_pcl_ros/pcl_ros_util.h is deprecated"
+#include <jsk_recognition_utils/pcl_ros_util.h>
 namespace jsk_pcl_ros
 {
-  /**
-   * @brief
-   * Convert pcl::PointIndices to pcl_msgs::PointIndices
-   * and publish it with overriding header.
-   */
-  void publishPointIndices(ros::Publisher& pub,
-                           const pcl::PointIndices& indices,
-                           const std_msgs::Header& header);
+  using namespace jsk_recognition_utils;
 }
 
 #endif
+

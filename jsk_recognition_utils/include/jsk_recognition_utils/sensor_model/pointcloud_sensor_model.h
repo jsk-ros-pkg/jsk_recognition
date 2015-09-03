@@ -33,14 +33,30 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_PCL_UTIL_H_
-#define JSK_PCL_ROS_PCL_UTIL_H_
-#pragma warning "jsk_pcl_ros/pcl_util.h is deprecated"
-#include <jsk_recognition_utils/pcl_util.h>
-namespace jsk_pcl_ros
+#ifndef JSK_RECOGNITION_UTILS_POINTCLOUD_SENSOR_MODEL_H_
+#define JSK_RECOGNITION_UTILS_POINTCLOUD_SENSOR_MODEL_H_
+
+namespace jsk_recognition_utils
 {
-  using namespace jsk_recognition_utils;
+  /**
+   * @brief
+   * Super class for sensor model.
+   * It provides pure virtual method for common interfaces.
+   */
+  class PointCloudSensorModel
+  {
+  public:
+    typedef boost::shared_ptr<PointCloudSensorModel> Ptr;
+    
+    /**
+     * @brief
+     * Return the expected number of points according to distance and area.
+     */
+    virtual double expectedPointCloudNum(double distance, double area) const = 0;
+  protected:
+  private:
+    
+  };
 }
 
 #endif
-

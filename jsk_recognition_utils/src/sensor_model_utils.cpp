@@ -33,30 +33,20 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_POINTCLOUD_SENSOR_MODEL_H_
-#define JSK_PCL_ROS_POINTCLOUD_SENSOR_MODEL_H_
+#include "jsk_recognition_utils/sensor_model_utils.h"
 
-namespace jsk_pcl_ros
+namespace jsk_recognition_utils
 {
-  /**
-   * @brief
-   * Super class for sensor model.
-   * It provides pure virtual method for common interfaces.
-   */
-  class PointCloudSensorModel
+  std::vector<cv::Point>
+  project3DPointstoPixel(const image_geometry::PinholeCameraModel& model,
+                         const Vertices& vertices)
   {
-  public:
-    typedef boost::shared_ptr<PointCloudSensorModel> Ptr;
-    
-    /**
-     * @brief
-     * Return the expected number of points according to distance and area.
-     */
-    virtual double expectedPointCloudNum(double distance, double area) = 0;
-  protected:
-  private:
-    
-  };
-}
+    std::vector<cv::Point> ret;
+    for (size_t i = 0; i < vertices.size(); i++) {
+      cv::Point p = project3DPointToPixel(model, vertices[i]);
+      ret.push_back(p);
+    }
+    return ret;
+  }
 
-#endif
+}

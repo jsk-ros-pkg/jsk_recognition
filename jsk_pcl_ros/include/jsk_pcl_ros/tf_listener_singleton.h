@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, JSK Lab
+ *  Copyright (c) 2015, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,34 +33,14 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-
 #ifndef JSK_PCL_ROS_TF_LISTENER_SINGLETON_H_
 #define JSK_PCL_ROS_TF_LISTENER_SINGLETON_H_
-
-#include <tf/transform_listener.h>
-
+#pragma warning "jsk_pcl_ros/tf_listener_singleton.h is deprecated"
+#include <jsk_recognition_utils/tf_listener_singleton.h>
 namespace jsk_pcl_ros
 {
-  class TfListenerSingleton
-  {
-  public:
-    static tf::TransformListener* getInstance();
-    static void destroy();
-  protected:
-    static tf::TransformListener* instance_;
-    static boost::mutex mutex_;
-  private:
-    TfListenerSingleton(TfListenerSingleton const&){};
-    TfListenerSingleton& operator=(TfListenerSingleton const&){};
-  };
-
-  // tf Utility
-  tf::StampedTransform lookupTransformWithDuration(
-    tf::TransformListener* listener,
-    const std::string& to_frame,
-    const std::string& from_frame,
-    const ros::Time& stamp,
-    ros::Duration duration);
+  using namespace jsk_recognition_utils;
 }
 
 #endif
+

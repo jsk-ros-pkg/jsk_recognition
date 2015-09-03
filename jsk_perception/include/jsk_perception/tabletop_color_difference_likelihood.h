@@ -33,34 +33,46 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/random_util.h"
-#include <iostream>
 
-namespace jsk_pcl_ros
+#ifndef JSK_PERCEPTION_TABLETOP_COLOR_DIFFERENCE_LIKELIHOOD_H_
+#define JSK_PERCEPTION_TABLETOP_COLOR_DIFFERENCE_LIKELIHOOD_H_
+
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/CameraInfo.h>
+#include <jsk_recognition_msgs/PolygonArray.h>
+#include <jsk_recognition_utils/tf_listener_singleton.h>
+#include <jsk_topic_tools/log_utils.h>
+#include <tf/message_filter.h>
+#include <message_filters/subscriber.h>
+#include <jsk_recognition_utils/geo_util.h>
+
+namespace jsk_perception
 {
-  double randomGaussian(double mean, double var, boost::mt19937& gen)
+  class TabletopColorDifferenceLikelihood: public jsk_topic_tools::DiagnosticNodelet
   {
-    if (var == 0.0) {
-      return mean;
-    }
-    else {  
-      boost::normal_distribution<> dst(mean, sqrt(var));
-      boost::variate_generator<
-        boost::mt19937&,
-        boost::normal_distribution<> > rand(gen, dst);
-      return rand();
-    }
-  }
-  
-  double randomUniform(double min, double max, boost::mt19937& gen)
-  {
-    // Ensure min < max
-    double amin = std::min(min, max);
-    double amax = std::max(min, max);
-    boost::uniform_real<> dst(amin, amax);
-    boost::variate_generator<
-      boost::mt19937&,
-      boost::uniform_real<> > rand(gen, dst);
-    return rand();
-  }
+  public:
+    TabletopColorDifferenceLikelihood(): DiagnosticNodelet("TabletopColorDifferenceLikelihood") {}
+  protected:
+    virtual void onInit();
+    virtual void subscribe();
+    virtual void unsubscribe();
+    virtual void infoCallback(const sensor_msgs::CameraInfo::ConstPtr& msg);
+    virtual void polygonCallback(const jsk_recognition_msgs::PolygonArray::ConstPtr& msg);
+    virtual void imageCallback(const sensor_msgs::Image::ConstPtr& msg);
+
+    boost::mutex mutex_;
+    sensor_msgs::CameraInfo::ConstPtr latest_info_msg_;
+    jsk_recognition_msgs::PolygonArray::ConstPtr latest_polygon_msg_;
+    tf::TransformListener* tf_listener_;
+    ros::Publisher pub_;
+    ros::Subscriber sub_info_;
+    ros::Subscriber sub_polygons_;
+    message_filters::Subscriber<sensor_msgs::Image> sub_image_;
+    boost::shared_ptr<tf::MessageFilter<sensor_msgs::Image> > tf_filter_;
+    int tf_queue_size_;
+  private:
+  };
 }
+
+#endif

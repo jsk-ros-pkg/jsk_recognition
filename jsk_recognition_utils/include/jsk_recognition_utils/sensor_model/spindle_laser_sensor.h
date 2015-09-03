@@ -33,18 +33,51 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/pcl_ros_util.h"
-#include <pcl_conversions/pcl_conversions.h>
+#ifndef JSK_RECOGNITION_UTILS_SPINDLE_LASER_SENSOR_H_
+#define JSK_RECOGNITION_UTILS_SPINDLE_LASER_SENSOR_H_
 
-namespace jsk_pcl_ros
+#include "jsk_recognition_utils/sensor_model/pointcloud_sensor_model.h"
+
+namespace jsk_recognition_utils
 {
-  void publishPointIndices(
-    ros::Publisher& pub, const pcl::PointIndices& indices, const std_msgs::Header& header)
+  class SpindleLaserSensor: public PointCloudSensorModel
   {
-    pcl_msgs::PointIndices msg;
-    //pcl_conversions::moveFromPCL does not support const indices
-    msg.indices = indices.indices;
-    msg.header = header;
-    pub.publish(msg);
-  }
+  public:
+    typedef boost::shared_ptr<SpindleLaserSensor> Ptr;
+    
+    SpindleLaserSensor(const double min_angle, const double max_angle,
+                       const size_t point_sample):
+      min_angle_(min_angle), max_angle_(max_angle),
+      point_sample_(point_sample) { }
+    
+    virtual void setSpindleVelocity(const double velocity)
+    {
+      spindle_velocity_ = spindle_velocity;
+    }
+
+    /**
+     * @brief
+     * Return the expected number of points according to distance and area.
+     * it is calculated according to:
+     * \frac{N}{2 \pi \Delta \phi}\frac{1}{r^2}s
+     * \Delta \phi = \frac{2 \pi}{\omega}
+     */
+    virtual double expectedPointCloudNum(double distance, double area) const
+    {
+      assert(spindle_velocity_ != 0.0);
+      double dphi = 2.0 * M_PI / spindle_velocity_;
+      return point_sample_ / (2.0 * M_PI * dphi) / (distance * distance) * area;
+    }
+    
+  protected:
+    
+    double spindle_velocity_;
+    double min_angle_;
+    double max_angle_;
+    size_t point_sample_;
+  private:
+    
+  };
 }
+
+#endif 

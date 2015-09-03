@@ -23,14 +23,8 @@ else()
   set(ML_CLASSIFIERS ml_classifiers) ## hydro and later
 endif()
 
-find_package(PkgConfig)
-pkg_check_modules(yaml_cpp yaml-cpp REQUIRED)
-IF(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
-## indigo yaml-cpp : 0.5.0 /  hydro yaml-cpp : 0.3.0
-  add_definitions("-DUSE_OLD_YAML")
-ENDIF()
-
 find_package(catkin REQUIRED COMPONENTS
+  jsk_recognition_utils
   dynamic_reconfigure pcl_ros nodelet message_generation genmsg
   ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs
   eigen_conversions tf_conversions tf2_ros tf
@@ -52,6 +46,12 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}
 # For kinfu
 find_package(PCL QUIET COMPONENTS gpu_kinfu_large_scale)
 
+find_package(PkgConfig)
+pkg_check_modules(yaml_cpp yaml-cpp REQUIRED)
+IF(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
+## indigo yaml-cpp : 0.5.0 /  hydro yaml-cpp : 0.3.0
+  add_definitions("-DUSE_OLD_YAML")
+ENDIF()
 
 add_service_files(FILES SwitchTopic.srv
   UpdateOffset.srv
@@ -389,13 +389,7 @@ jsk_pcl_nodelet(src/pcd_reader_with_pose_nodelet.cpp
   "jsk_pcl/PCDReaderWithPose" "pcd_reader_with_pose")
 
 add_library(jsk_pcl_ros_base SHARED
-  src/grid_index.cpp src/grid_map.cpp src/grid_line.cpp src/geo_util.cpp
-  src/pcl/ear_clipping_patched.cpp
-  src/random_util.cpp
-  src/pcl_ros_util.cpp
-  src/pcl_conversion_util.cpp src/pcl_util.cpp
   src/region_adjacency_graph.cpp
-  src/tf_listener_singleton.cpp
   src/viewpoint_sampler.cpp)
 add_library(jsk_pcl_ros_moveit SHARED src/pointcloud_moveit_filter.cpp)
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})

@@ -1,8 +1,8 @@
-// -*- mode: C++ -*-
+// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, JSK Lab
+ *  Copyright (c) 2015, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,23 +33,18 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/grid_index.h"
+#include "jsk_recognition_utils/pcl_ros_util.h"
+#include <pcl_conversions/pcl_conversions.h>
 
-namespace jsk_pcl_ros
+namespace jsk_recognition_utils
 {
-  GridIndex::GridIndex(): x(0), y(0)
+  void publishPointIndices(
+    ros::Publisher& pub, const pcl::PointIndices& indices, const std_msgs::Header& header)
   {
-
+    pcl_msgs::PointIndices msg;
+    //pcl_conversions::moveFromPCL does not support const indices
+    msg.indices = indices.indices;
+    msg.header = header;
+    pub.publish(msg);
   }
-
-  GridIndex::GridIndex(int _x, int _y): x(_x), y(_y)
-  {
-
-  }
-  
-  GridIndex::~GridIndex()
-  {
-
-  }
-
 }

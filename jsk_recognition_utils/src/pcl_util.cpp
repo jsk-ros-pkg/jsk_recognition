@@ -33,11 +33,11 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
 #include <set>
 #include <algorithm>
 
-namespace jsk_pcl_ros
+namespace jsk_recognition_utils
 {
   //static boost::mutex global_chull_mutex;
   boost::mutex global_chull_mutex;

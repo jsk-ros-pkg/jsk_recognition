@@ -33,8 +33,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 #define BOOST_PARAMETER_MAX_ARITY 7
-#include "jsk_pcl_ros/geo_util.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/geo_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <algorithm>
 #include <iterator>
 #include <cfloat>
@@ -50,10 +50,10 @@
 
 #include <pcl/point_types.h>
 #include <pcl/surface/processing.h>
-#include "jsk_pcl_ros/pcl/ear_clipping_patched.h"
+#include "jsk_recognition_utils/pcl/ear_clipping_patched.h"
 
 // #define DEBUG_GEO_UTIL
-namespace jsk_pcl_ros
+namespace jsk_recognition_utils
 {
   Eigen::Quaternionf rotFrom3Axis(const Eigen::Vector3f& ex,
                                   const Eigen::Vector3f& ey,

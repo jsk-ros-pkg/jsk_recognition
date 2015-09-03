@@ -1,4 +1,4 @@
-// -*- mode: C++ -*-
+// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
@@ -33,49 +33,49 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/grid_line.h"
+#include <jsk_topic_tools/log_utils.h>
+#include "jsk_recognition_utils/tf_listener_singleton.h"
+#include <boost/format.hpp>
 
-namespace jsk_pcl_ros
+namespace jsk_recognition_utils
 {
-  GridLine::GridLine(const pcl::PointXYZRGB a, const pcl::PointXYZRGB b)
-    : from(a.getVector3fMap()), to(b.getVector3fMap()), d_(from - to)
+  tf::TransformListener* TfListenerSingleton::getInstance()
   {
-    d_.normalized();
+    boost::mutex::scoped_lock lock(mutex_);
+    if (!instance_) {
+      JSK_ROS_INFO("instantiating tf::TransformListener");
+      instance_ = new tf::TransformListener(ros::Duration(30.0));
+    }
+    return instance_;
+  }
+
+  void TfListenerSingleton::destroy()
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    if (instance_) {
+      delete instance_;
+    }
+  }
+
+  tf::StampedTransform lookupTransformWithDuration(
+    tf::TransformListener* listener,
+    const std::string& to_frame,
+    const std::string& from_frame,
+    const ros::Time& stamp,
+    ros::Duration duration)
+  {
+    if (listener->waitForTransform(from_frame, to_frame, stamp, duration)) {
+      tf::StampedTransform transform;
+      listener->lookupTransform(
+        from_frame, to_frame, stamp, transform);
+      return transform;
+    }
+    throw tf2::TransformException(
+      (boost::format("Failed to lookup transformation from %s to %s")
+       % from_frame.c_str() % to_frame.c_str()).str().c_str());
+      
   }
   
-  GridLine::~GridLine()
-  {
-
-  }
-
-  // bool GridLine::penetrateGrid(const Eigen::Vector3f A,
-  //                              const Eigen::Vector3f B,
-  //                              const Eigen::Vector3f C,
-  //                              const Eigen::Vector3f D)
-  // {
-  //   Eigen::Vector3f Across = (A - from).cross(d_);
-  //   Eigen::Vector3f Bcross = (B - from).cross(d_);
-  //   Eigen::Vector3f Ccross = (C - from).cross(d_);
-  //   Eigen::Vector3f Dcross = (D - from).cross(d_);
-  //   bool ab_direction = Across.dot(Bcross) < 0;
-  //   bool ac_direction = Across.dot(Ccross) < 0;
-  //   bool ad_direction = Across.dot(Dcross) < 0;
-  //   if ((ab_direction == ac_direction) && (ab_direction == ad_direction)) {
-  //     return false;
-  //   }
-  //   else {
-  //     return true;
-  //   }
-  // }
-  
-  bool GridLine::penetrateGrid(const pcl::PointXYZRGB& A,
-                               const pcl::PointXYZRGB& B,
-                               const pcl::PointXYZRGB& C,
-                               const pcl::PointXYZRGB& D)
-  {
-    return penetrateGrid(A.getVector3fMap(),
-                         B.getVector3fMap(),
-                         C.getVector3fMap(),
-                         D.getVector3fMap());
-  }
+  tf::TransformListener* TfListenerSingleton::instance_;
+  boost::mutex TfListenerSingleton::mutex_;
 }

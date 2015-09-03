@@ -33,10 +33,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <pcl/visualization/common/float_image_utils.h>
 
-namespace jsk_pcl_ros
+namespace jsk_recognition_utils
 {
 
   void rangeImageToCvMat(const pcl::RangeImage& range_image,
@@ -170,13 +170,13 @@ namespace tf
   {
     Eigen::Affine3d eigen_d;
     poseMsgToEigen(msg, eigen_d);
-    jsk_pcl_ros::convertEigenAffine3(eigen_d, eigen);
+    jsk_recognition_utils::convertEigenAffine3(eigen_d, eigen);
   }
   
   void poseEigenToMsg(Eigen::Affine3f& eigen, geometry_msgs::Pose& msg)
   {
     Eigen::Affine3d eigen_d;
-    jsk_pcl_ros::convertEigenAffine3(eigen, eigen_d);
+    jsk_recognition_utils::convertEigenAffine3(eigen, eigen_d);
     poseEigenToMsg(eigen_d, msg);
   }
 
@@ -184,13 +184,13 @@ namespace tf
   {
     Eigen::Affine3d eigen_d;
     transformMsgToEigen(msg, eigen_d);
-    jsk_pcl_ros::convertEigenAffine3(eigen_d, eigen);
+    jsk_recognition_utils::convertEigenAffine3(eigen_d, eigen);
   }
   
   void transformEigenToMsg(Eigen::Affine3f& eigen, geometry_msgs::Transform& msg)
   {
     Eigen::Affine3d eigen_d;
-    jsk_pcl_ros::convertEigenAffine3(eigen_d, eigen);
+    jsk_recognition_utils::convertEigenAffine3(eigen_d, eigen);
     transformEigenToMsg(eigen_d, msg);
   }
 
@@ -198,13 +198,13 @@ namespace tf
   {
     Eigen::Affine3d eigen_d;
     transformTFToEigen(t, eigen_d);
-    jsk_pcl_ros::convertEigenAffine3(eigen_d, eigen);
+    jsk_recognition_utils::convertEigenAffine3(eigen_d, eigen);
   }
 
   void transformEigenToTF(Eigen::Affine3f& eigen , tf::Transform& t)
   {
     Eigen::Affine3d eigen_d;
-    jsk_pcl_ros::convertEigenAffine3(eigen, eigen_d);
+    jsk_recognition_utils::convertEigenAffine3(eigen, eigen_d);
     transformEigenToTF(eigen_d, t);
   }
 

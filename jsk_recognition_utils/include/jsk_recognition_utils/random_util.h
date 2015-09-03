@@ -33,18 +33,25 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/pcl_ros_util.h"
-#include <pcl_conversions/pcl_conversions.h>
 
-namespace jsk_pcl_ros
+#ifndef JSK_RECOGNITION_UTILS_RANDOM_UTIL_H_
+#define JSK_RECOGNITION_UTILS_RANDOM_UTIL_H_
+#include <boost/random.hpp>
+
+namespace jsk_recognition_utils
 {
-  void publishPointIndices(
-    ros::Publisher& pub, const pcl::PointIndices& indices, const std_msgs::Header& header)
-  {
-    pcl_msgs::PointIndices msg;
-    //pcl_conversions::moveFromPCL does not support const indices
-    msg.indices = indices.indices;
-    msg.header = header;
-    pub.publish(msg);
-  }
+  /**
+   * @brief
+   * Return a random value according to gaussian distribution.
+   * If variance is zero, it just returns mean.
+   */
+  double randomGaussian(double mean, double var, boost::mt19937& gen);
+
+  /**
+   * @brief
+   * Return a random value according to uniform distribution.
+   */
+  double randomUniform(double min, double max, boost::mt19937& gen);
 }
+
+#endif

@@ -35,6 +35,10 @@
          type="jsk_perception::PolygonToMaskImage"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_perception/PolygonArrayToLabelImage"
+         type="jsk_perception::PolygonArrayToLabelImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/ErodeMaskImage"
          type="jsk_perception::Erode"
          base_class_type="nodelet::Nodelet">

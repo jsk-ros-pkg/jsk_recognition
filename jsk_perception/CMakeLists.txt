@@ -128,6 +128,7 @@ jsk_perception_nodelet(src/mask_image_to_rect.cpp "jsk_perception/MaskImageToRec
 jsk_perception_nodelet(src/roi_to_rect.cpp "jsk_perception/ROIToRect" "roi_to_rect")
 jsk_perception_nodelet(src/roi_to_mask_image.cpp "jsk_perception/ROIToMaskImage" "roi_to_mask_image")
 jsk_perception_nodelet(src/polygon_to_mask_image.cpp "jsk_perception/PolygonToMaskImage" "polygon_to_mask_image")
+jsk_perception_nodelet(src/polygon_array_to_label_image.cpp "jsk_perception/PolygonArrayToLabelImage" "polygon_array_to_label_image")
 jsk_perception_nodelet(src/rect_to_roi.cpp "jsk_perception/RectToROI" "rect_to_roi")
 jsk_perception_nodelet(src/mask_image_generator.cpp "jsk_perception/MaskImageGenerator" "mask_image_generator")
 jsk_perception_nodelet(src/project_image_point.cpp "jsk_perception/ProjectImagePoint" "project_image_point")

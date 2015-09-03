@@ -44,8 +44,9 @@
 
 using namespace jsk_pcl_ros;
 
-Cube cube(Eigen::Vector3f(0, 0, 0),
-          Eigen::Quaternionf(0, 0, 0, 1));
+Cube cube(Eigen::Vector3f(1, 0, 0),
+          Eigen::Quaternionf(0.108755, 0.088921, 0.108755, 0.984092),
+          Eigen::Vector3f(0.3, 0.3, 0.3));
   
 ros::Publisher pub_nearest_point;
 void processFeedbackCB(const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback)
@@ -68,11 +69,6 @@ int main(int argc, char** argv)
   ros::NodeHandle nh("~");
   pub_nearest_point = nh.advertise<geometry_msgs::PointStamped>("nearest_point", 1);
   interactive_markers::InteractiveMarkerServer server("sample_cube_nearest_point");
-  std::vector<double> dimensions(3);
-  dimensions[0] = 0.3;
-  dimensions[1] = 0.3;
-  dimensions[2] = 0.3;
-  cube.setDimensions(dimensions);
   
   visualization_msgs::InteractiveMarker int_marker;
   int_marker.header.frame_id = "world";

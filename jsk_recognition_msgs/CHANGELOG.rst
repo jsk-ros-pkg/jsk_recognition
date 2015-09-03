@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.18 (2015-09-04)
+-------------------
 * [jsk_recognition_msgs] Add script to convert
   jsk_recognition_msgs/PlotData into csv
 * [jsk_pcl_ros] Add tool to visualize variance of raser scan

@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.18 (2015-09-04)
+-------------------
 * [jsk_perception] Do not specify sexp from cmake, just write in file
 * [jsk_perception] Add .gitignore about auto-generated files
 * [jsk_perception] Add template directory to run eusmodel_template_gen.l correctly

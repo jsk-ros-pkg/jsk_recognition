@@ -60,6 +60,8 @@ namespace jsk_pcl_ros
       *pnh_, "output/inliers", 1);
     pub_coefficients_ = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(
       *pnh_, "output/coefficients", 1);
+    pub_clustering_result_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(
+      *pnh_, "output/clustering_result", 1);
   }
 
   void RegionGrowingMultiplePlaneSegmentation::subscribe()
@@ -161,6 +163,14 @@ namespace jsk_pcl_ros
       // ros::Time end = ros::Time::now();
       // ROS_INFO("segment took %f sec", (before - end).toSec());
     }
+    // Publish raw cluster information 
+    // pcl::IndicesCluster is typdefed as std::vector<pcl::PointIndices>
+    jsk_recognition_msgs::ClusterPointIndices ros_clustering_result;
+    ros_clustering_result.cluster_indices
+      = pcl_conversions::convertToROSPointIndices(*clusters, msg->header);
+    ros_clustering_result.header = msg->header;
+    pub_clustering_result_.publish(ros_clustering_result);
+
     // estimate planes
     std::vector<pcl::PointIndices::Ptr> all_inliers;
     std::vector<pcl::ModelCoefficients::Ptr> all_coefficients;

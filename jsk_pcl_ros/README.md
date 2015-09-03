@@ -1493,15 +1493,18 @@ and evaluation function of connectivity if based on the following equation:
    normal pointcloud of `~input`
 
 #### Publishing Topics
+* `~output/clustering_result` (`jsk_recognition_msgs/ClusterPointIndices`):
+
+  Result of region growing as cluster.
 * `~output/inliers` (`jsk_recognition_msgs/ClusterPointIndices`):
 
-   Set of indices of the polygons.
+  Set of indices of the polygons.
 * `~output/coefficients` (`jsk_recognition_msgs/ModelCoefficientsArray`):
 
-   Array of coefficients of the polygons.
+  Array of coefficients of the polygons.
 * `~output/polygons` (`jsk_recognition_msgs/PolygonArray`):
 
-   Polygons
+  Polygons
 
 #### Parameters
 * `~angular_threshold` (Double, default: `0.04`)

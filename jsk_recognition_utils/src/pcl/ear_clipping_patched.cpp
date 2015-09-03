@@ -33,7 +33,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/pcl/ear_clipping_patched.h"
+#include "jsk_recognition_utils/pcl/ear_clipping_patched.h"
 #include <pcl/surface/ear_clipping.h>
 #include <pcl/conversions.h>
 #include <pcl/pcl_config.h>

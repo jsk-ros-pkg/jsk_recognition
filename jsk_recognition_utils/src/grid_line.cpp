@@ -1,8 +1,8 @@
-// -*- mode: c++ -*-
+// -*- mode: C++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2015, JSK Lab
+ *  Copyright (c) 2014, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,14 +33,49 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_PCL_UTIL_H_
-#define JSK_PCL_ROS_PCL_UTIL_H_
-#pragma warning "jsk_pcl_ros/pcl_util.h is deprecated"
-#include <jsk_recognition_utils/pcl_util.h>
-namespace jsk_pcl_ros
+#include "jsk_recognition_utils/grid_line.h"
+
+namespace jsk_recognition_utils
 {
-  using namespace jsk_recognition_utils;
+  GridLine::GridLine(const pcl::PointXYZRGB a, const pcl::PointXYZRGB b)
+    : from(a.getVector3fMap()), to(b.getVector3fMap()), d_(from - to)
+  {
+    d_.normalized();
+  }
+  
+  GridLine::~GridLine()
+  {
+
+  }
+
+  // bool GridLine::penetrateGrid(const Eigen::Vector3f A,
+  //                              const Eigen::Vector3f B,
+  //                              const Eigen::Vector3f C,
+  //                              const Eigen::Vector3f D)
+  // {
+  //   Eigen::Vector3f Across = (A - from).cross(d_);
+  //   Eigen::Vector3f Bcross = (B - from).cross(d_);
+  //   Eigen::Vector3f Ccross = (C - from).cross(d_);
+  //   Eigen::Vector3f Dcross = (D - from).cross(d_);
+  //   bool ab_direction = Across.dot(Bcross) < 0;
+  //   bool ac_direction = Across.dot(Ccross) < 0;
+  //   bool ad_direction = Across.dot(Dcross) < 0;
+  //   if ((ab_direction == ac_direction) && (ab_direction == ad_direction)) {
+  //     return false;
+  //   }
+  //   else {
+  //     return true;
+  //   }
+  // }
+  
+  bool GridLine::penetrateGrid(const pcl::PointXYZRGB& A,
+                               const pcl::PointXYZRGB& B,
+                               const pcl::PointXYZRGB& C,
+                               const pcl::PointXYZRGB& D)
+  {
+    return penetrateGrid(A.getVector3fMap(),
+                         B.getVector3fMap(),
+                         C.getVector3fMap(),
+                         D.getVector3fMap());
+  }
 }
-
-#endif
-

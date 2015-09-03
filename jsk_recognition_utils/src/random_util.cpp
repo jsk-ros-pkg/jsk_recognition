@@ -33,10 +33,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/random_util.h"
+#include "jsk_recognition_utils/random_util.h"
 #include <iostream>
 
-namespace jsk_pcl_ros
+namespace jsk_recognition_utils
 {
   double randomGaussian(double mean, double var, boost::mt19937& gen)
   {

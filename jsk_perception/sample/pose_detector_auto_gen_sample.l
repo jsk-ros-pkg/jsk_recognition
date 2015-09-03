@@ -74,3 +74,6 @@
 )
 (warn ";; (test-detection-result)~%")
 
+(generate-launcher)
+(exit)
+

@@ -178,10 +178,11 @@ add_custom_command(
 add_custom_command(
  OUTPUT  ${PROJECT_SOURCE_DIR}/sample/rimokon-pose.launch ${PROJECT_SOURCE_DIR}/sample/milktea-box.launch
  DEPENDS ${PROJECT_SOURCE_DIR}/sample/pose_detector_auto_gen_sample.l
- COMMAND roseus ./pose_detector_auto_gen_sample.l \"(progn\ (generate-launcher)\ (exit))\"
+ COMMAND roseus ./pose_detector_auto_gen_sample.l
  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/sample)
 
-add_custom_target(eusmodel_template ALL DEPENDS ${PROJECT_SOURCE_DIR}/sample/rimokon-pose.launch ${PROJECT_SOURCE_DIR}/sample/milktea-box.launch
+add_custom_target(eusmodel_template ALL DEPENDS 
+  ${PROJECT_SOURCE_DIR}/sample/rimokon-pose.launch ${PROJECT_SOURCE_DIR}/sample/milktea-box.launch
   ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng8.launch
   ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng2.launch)
 

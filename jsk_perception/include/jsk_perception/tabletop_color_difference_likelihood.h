@@ -46,31 +46,87 @@
 #include <tf/message_filter.h>
 #include <message_filters/subscriber.h>
 #include <jsk_recognition_utils/geo_util.h>
-
+#include <jsk_perception/TabletopColorDifferenceLikelihoodConfig.h>
+#include <dynamic_reconfigure/server.h>
+#include <jsk_recognition_msgs/HistogramWithRangeBin.h>
 namespace jsk_perception
 {
   class TabletopColorDifferenceLikelihood: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
+    typedef TabletopColorDifferenceLikelihoodConfig Config;
     TabletopColorDifferenceLikelihood(): DiagnosticNodelet("TabletopColorDifferenceLikelihood") {}
   protected:
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
     virtual void infoCallback(const sensor_msgs::CameraInfo::ConstPtr& msg);
-    virtual void polygonCallback(const jsk_recognition_msgs::PolygonArray::ConstPtr& msg);
     virtual void imageCallback(const sensor_msgs::Image::ConstPtr& msg);
+    virtual void polygonCallback(const jsk_recognition_msgs::PolygonArray::ConstPtr& msg);
+    virtual void configCallback(Config& config, uint32_t level);
+    
+    virtual void debugPolygonImage(const jsk_recognition_utils::CameraDepthSensor& model,
+                                   cv::Mat& image,
+                                   jsk_recognition_utils::Polygon::Ptr polygon,
+                                   size_t pi) const;
+
+    /**
+     * @brief
+     * compute a distance between pixels.
+     * if cyclic_value_ is true, it take into account two direction.
+     */
+    inline virtual unsigned char computePixelDistance(const unsigned char from, const unsigned char to) const
+    {
+      if (cyclic_value_) {
+        unsigned char diff = (unsigned char)std::abs((int)from - (int)to);
+        unsigned char reverse_diff = pixel_max_value_ - diff;
+        return (unsigned char)std::min(diff, reverse_diff);
+      }
+      else {
+        return (unsigned char)std::abs((int)from - (int)to);
+      }
+    }
+
+    /**
+     *
+     */
+    inline virtual unsigned char computePixelHistogramDistance(const unsigned char from,
+                                                               const std::vector<jsk_recognition_msgs::HistogramWithRangeBin>& bins)
+    {
+      unsigned char diff = 255;
+      for (size_t i = 0; i < bins.size(); i++) {
+        jsk_recognition_msgs::HistogramWithRangeBin bin = bins[i];
+        if (bin.min_value < from && bin.max_value > from) {
+          return 0;
+        }
+        else {
+          unsigned char min_direction_distance = computePixelDistance(from, (unsigned char)bin.min_value);
+          unsigned char max_direction_distance = computePixelDistance(from, (unsigned char)bin.max_value);
+          diff = std::min(std::min(min_direction_distance, max_direction_distance),
+                          diff);
+        }
+      }
+      return diff;
+    }
 
     boost::mutex mutex_;
+    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     sensor_msgs::CameraInfo::ConstPtr latest_info_msg_;
     jsk_recognition_msgs::PolygonArray::ConstPtr latest_polygon_msg_;
     tf::TransformListener* tf_listener_;
     ros::Publisher pub_;
+    ros::Publisher pub_debug_polygon_;
+    ros::Publisher pub_debug_histogram_image_;
     ros::Subscriber sub_info_;
     ros::Subscriber sub_polygons_;
     message_filters::Subscriber<sensor_msgs::Image> sub_image_;
     boost::shared_ptr<tf::MessageFilter<sensor_msgs::Image> > tf_filter_;
     int tf_queue_size_;
+    bool cyclic_value_;
+    int pixel_max_value_;
+    int pixel_min_value_;
+    int bin_size_;
+    double histogram_top_n_ratio_;
   private:
   };
 }

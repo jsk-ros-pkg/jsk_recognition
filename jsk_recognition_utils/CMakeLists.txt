@@ -49,6 +49,7 @@ add_library(jsk_recognition_utils SHARED
   src/tf_listener_singleton.cpp
   src/pcl/ear_clipping_patched.cpp
   src/sensor_model_utils.cpp
+  src/cv_utils.cpp
   )
 
 install(TARGETS jsk_recognition_utils

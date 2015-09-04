@@ -25,6 +25,7 @@ add_definitions("-g -O2")
 
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
+  cfg/TabletopColorDifferenceLikelihood.cfg
   cfg/ProjectImagePoint.cfg
   cfg/MaskImageGenerator.cfg
   cfg/MorphologicalMaskImageOperator.cfg

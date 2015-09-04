@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.0 (2015-09-04)
+------------------
 * [jsk_perception/CMakeLists.txt] set ROS_PACKAGE_PATH before run roseus using package://
 * [jsk_recognition_utils] Introduce new package jsk_recognition_utils in order to use utility libraries defined in jsk_pcl_ros in jsk_perception
 * Contributors: Kei Okada, Ryohei Ueda

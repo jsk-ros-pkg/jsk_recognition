@@ -2,6 +2,9 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.2.18 (2015-09-04)
 -------------------
 * [jsk_recognition_msgs] Add script to convert

@@ -27,12 +27,12 @@
   </node>
 
   <node pkg="jsk_pcl_ros" type="mask_image_cluster_filter" name="mask_image_cluster_filter">
-    <remap from="~input" to="supervoxel_segmentation/output/cloud"/>    
+    <remap from="~input" to="supervoxel_segmentation/output/cloud"/>
     <remap from="~target" to="supervoxel_segmentation/output/indices" />
     <remap from="~input/mask" to="rect_to_mask_image/output"/>
     <remap from="~input/camera_info" to="$(arg INPUT_CAMERA_INFO)" />
   </node>
-  
+
   <node pkg="nodelet" type="nodelet" name="filtered_cloud"
         args="standalone pcl/ExtractIndices">
     <remap from="~input" to="$(arg INPUT_POINT_CLOUD)"/>

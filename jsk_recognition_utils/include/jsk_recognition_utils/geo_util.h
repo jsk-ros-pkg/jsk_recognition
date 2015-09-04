@@ -372,6 +372,13 @@ namespace jsk_recognition_utils
     virtual bool maskImage(const jsk_recognition_utils::CameraDepthSensor& model,
                            cv::Mat& image) const;
     
+    /**
+     * @brief
+     * draw line of polygons on image.
+     */
+    virtual void drawLineToImage(const jsk_recognition_utils::CameraDepthSensor& model,
+                                 cv::Mat& image,
+                                 const cv::Scalar& color) const;
     virtual bool isConvex();
     virtual Eigen::Vector3f centroid();
     template<class PointT> void boundariesToPointCloud(

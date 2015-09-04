@@ -904,6 +904,27 @@ namespace jsk_recognition_utils
     return !all_outside;
   }
 
+  void Polygon::drawLineToImage(const jsk_recognition_utils::CameraDepthSensor& model,
+                                cv::Mat& image,
+                                const cv::Scalar& color) const
+  {
+    std::vector<cv::Point> projected_vertices
+      = project3DPointstoPixel(model.getPinholeCameraModel(), vertices_);
+    
+    for (size_t i = 0; i < projected_vertices.size() - 1; i++) {
+      cv::Point from = projected_vertices[i];
+      cv::Point to = projected_vertices[i+1];
+      if (model.isInside(from) || model.isInside(to)) {
+        cv::line(image, from, to, color);
+      }
+    }
+    cv::Point from = projected_vertices[projected_vertices.size() - 1];
+    cv::Point to = projected_vertices[0];
+    if (model.isInside(from) || model.isInside(to)) {
+      cv::line(image, from, to, color);
+    }
+  }
+
   bool Polygon::isConvex()
   {
 #ifdef DEBUG_GEO_UTIL

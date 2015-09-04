@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.1 (2015-09-04)
+------------------
 * Add README.md to jsk_recognition_utils
 * Contributors: Ryohei Ueda
 

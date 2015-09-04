@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.1 (2015-09-04)
+------------------
 * [jsk_pcl_ros, jsk_perception] Fix dependency of jsk_recognition_utils for child packages
   like jsk_rviz_plugins
 * Contributors: Ryohei Ueda

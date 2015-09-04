@@ -17,6 +17,11 @@ ROS nodes to compute local features of 2-D images. It supports SIFT, SURF, STAR,
 ---
 ROS messages for jsk\_pcl\_ros and jsk\_perception.
 
+[jsk\_recognition\_utils](https://github.com/jsk-ros-pkg/jsk_recognition/tree/master/jsk_recognition_utils)
+---
+C++ library about sensor model, geometrical modeling and perception.
+
+
 [jsk\_pcl\_ros](https://github.com/jsk-ros-pkg/jsk_recognition/tree/master/jsk_pcl_ros)
 ---
 ROS nodelets for pointcloud perception.

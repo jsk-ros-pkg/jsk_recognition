@@ -60,7 +60,7 @@ generate_messages(
 )
 
 catkin_package(
-  CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs message_runtime jsk_recognition_msgs
+  CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs message_runtime jsk_recognition_msgs jsk_recognition_utils
   DEPENDS
   INCLUDE_DIRS include
   LIBRARIES jsk_perception

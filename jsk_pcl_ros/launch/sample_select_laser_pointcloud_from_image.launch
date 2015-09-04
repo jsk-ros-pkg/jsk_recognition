@@ -2,7 +2,6 @@
   <arg name="INPUT_IMAGE" default="/multisense/left/image_rect_color"/>
   <arg name="INPUT_CAMERA_INFO" default="/multisense/left/camera_info"/>
   <arg name="INPUT_POINT_CLOUD" default="/multisense/resize_1_1/points" />
-  <arg name="DEBUG_VIEW" default="false" />
   <node pkg="image_view2" type="image_view2" name="image_view2">
     <remap from="image" to="/multisense/left/image_rect_color" />
   </node>

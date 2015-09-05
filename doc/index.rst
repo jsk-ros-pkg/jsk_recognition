@@ -11,7 +11,9 @@ The code is open source, and `available on github`_.
 
 This repository contains following ros packages:
 
+
 .. toctree::
    :maxdepth: 1
 
    jsk_perception/index
+   jsk_pcl_ros/index

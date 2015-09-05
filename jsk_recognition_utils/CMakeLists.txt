@@ -50,6 +50,7 @@ add_library(jsk_recognition_utils SHARED
   src/pcl/ear_clipping_patched.cpp
   src/sensor_model_utils.cpp
   src/cv_utils.cpp
+  src/geo/line.cpp
   )
 
 install(TARGETS jsk_recognition_utils

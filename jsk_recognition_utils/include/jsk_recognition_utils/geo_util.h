@@ -67,6 +67,8 @@
 
 #include <jsk_recognition_msgs/PolygonArray.h>
 #include "jsk_recognition_utils/sensor_model/camera_depth_sensor.h"
+#include "jsk_recognition_utils/types.h"
+#include "jsk_recognition_utils/geo/line.h"
 
 // Utitlity macros
 inline void ROS_INFO_EIGEN_VECTOR3(const std::string& prefix,
@@ -90,14 +92,6 @@ namespace jsk_recognition_utils
   Eigen::Quaternionf rotFrom3Axis(const Eigen::Vector3f& ex,
                                   const Eigen::Vector3f& ey,
                                   const Eigen::Vector3f& ez);
-
-  typedef Eigen::Vector3f Point;
-  typedef Eigen::Vector3f Vertex;
-  typedef std::vector<Eigen::Vector3f,
-                      Eigen::aligned_allocator<Eigen::Vector3f> > Vertices;
-  typedef boost::tuple<Point, Point> PointPair;
-  typedef boost::tuple<size_t, size_t> PointIndexPair;
-
   /**
    * @brief
    * Compute PointCloud from Vertices
@@ -136,38 +130,6 @@ namespace jsk_recognition_utils
 
   // geoemtry classes
   
-  // (infinite) line
-  class Line
-  {
-  public:
-    typedef boost::shared_ptr<Line> Ptr;
-    Line(const Eigen::Vector3f& direction, const Eigen::Vector3f& origin);
-    virtual void getDirection(Eigen::Vector3f& output) const;
-    virtual Eigen::Vector3f getDirection() const;
-    virtual void getOrigin(Eigen::Vector3f& output) const;
-    virtual double distanceToPoint(const Eigen::Vector3f& from) const;
-    virtual double distanceToPoint(const Eigen::Vector3f& from, Eigen::Vector3f& foot) const;
-    virtual double distance(const Line& other) const;
-    virtual void foot(const Eigen::Vector3f& point, Eigen::Vector3f& output) const;
-    virtual double angle(const Line& other) const;
-    virtual bool isParallel(const Line& other, double angle_threshold = 0.1) const;
-    virtual bool isPerpendicular(const Line& other, double angle_threshold = 0.1) const;
-    virtual Ptr midLine(const Line& other) const;
-    virtual Ptr parallelLineOnAPoint(const Eigen::Vector3f& p) const;
-    virtual PointPair findEndPoints(const Vertices& points) const;
-    virtual double computeAlpha(const Point& p) const;
-    virtual bool isSameDirection(const Line& other) const;
-    virtual Line::Ptr flip();
-    virtual void parallelLineNormal(const Line& other, Eigen::Vector3f& output) const;
-    static Ptr fromCoefficients(const std::vector<float>& coefficients);
-    virtual void print();
-    virtual void point(double alpha, Eigen::Vector3f& ouptut);
-  protected:
-    Eigen::Vector3f direction_;
-    Eigen::Vector3f origin_;
-  private:
-  };
-
   class Segment: public Line
   {
   public:

@@ -26,7 +26,7 @@ version = '1.0'
 release = '1.0'
 language = 'en'
 
-exclude_patterns = ['_build']
+exclude_patterns = ['_build', 'venv', 'README.md']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.

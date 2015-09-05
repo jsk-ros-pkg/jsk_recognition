@@ -2,6 +2,13 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros] use arguments in order to change a behavior
+* [jsk_pcl_ros] remove unused arguments
+* [jsk_pcl_ros] remove unused white spaces
+* Contributors: eisoku9618
+
 0.3.1 (2015-09-04)
 ------------------
 * [jsk_pcl_ros, jsk_perception] Fix dependency of jsk_recognition_utils for child packages

@@ -45,7 +45,7 @@
 #include <jsk_topic_tools/log_utils.h>
 #include <tf/message_filter.h>
 #include <message_filters/subscriber.h>
-#include <jsk_recognition_utils/geo_util.h>
+#include <jsk_recognition_utils/geo/polygon.h>
 #include <jsk_perception/TabletopColorDifferenceLikelihoodConfig.h>
 #include <dynamic_reconfigure/server.h>
 #include <jsk_recognition_msgs/HistogramWithRangeBin.h>

@@ -32,21 +32,33 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-#define BOOST_PARAMETER_MAX_ARITY 7
-#include "jsk_recognition_utils/sensor_model_utils.h"
+
+#ifndef JSK_RECOGNITION_UTILS_GEO_SEGMENT_H_
+#define JSK_RECOGNITION_UTILS_GEO_SEGMENT_H_
+
+#include <iostream>
+#include "jsk_recognition_utils/geo/line.h"
+
 
 namespace jsk_recognition_utils
 {
-  std::vector<cv::Point>
-  project3DPointstoPixel(const image_geometry::PinholeCameraModel& model,
-                         const Vertices& vertices)
+  class Plane;
+  class Segment: public Line
   {
-    std::vector<cv::Point> ret;
-    for (size_t i = 0; i < vertices.size(); i++) {
-      cv::Point p = project3DPointToPixel(model, vertices[i]);
-      ret.push_back(p);
-    }
-    return ret;
-  }
-
+  public:
+    typedef boost::shared_ptr<Segment> Ptr;
+    Segment(const Eigen::Vector3f& from, const Eigen::Vector3f to);
+    virtual void foot(const Eigen::Vector3f& point, Eigen::Vector3f& output) const;
+    virtual double dividingRatio(const Eigen::Vector3f& point) const;
+    virtual double distance(const Eigen::Vector3f& point) const;
+    virtual double distance(const Eigen::Vector3f& point, Eigen::Vector3f& foot_point) const;
+    virtual bool intersect(Plane& plane, Eigen::Vector3f& point) const;
+    //virtual double distance(const Segment& other);
+    friend std::ostream& operator<<(std::ostream& os, const Segment& seg);
+  protected:
+    Eigen::Vector3f from_, to_;
+  private:
+  };
 }
+
+#endif

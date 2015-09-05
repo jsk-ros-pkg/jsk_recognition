@@ -32,21 +32,73 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-#define BOOST_PARAMETER_MAX_ARITY 7
-#include "jsk_recognition_utils/sensor_model_utils.h"
 
+#define BOOST_PARAMETER_MAX_ARITY 7
+
+#include "jsk_recognition_utils/geo/segment.h"
+#include "jsk_recognition_utils/geo_util.h"
 namespace jsk_recognition_utils
 {
-  std::vector<cv::Point>
-  project3DPointstoPixel(const image_geometry::PinholeCameraModel& model,
-                         const Vertices& vertices)
+  Segment::Segment(const Eigen::Vector3f& from, const Eigen::Vector3f to):
+    Line(from - to, from), from_(from), to_(to)
   {
-    std::vector<cv::Point> ret;
-    for (size_t i = 0; i < vertices.size(); i++) {
-      cv::Point p = project3DPointToPixel(model, vertices[i]);
-      ret.push_back(p);
+    
+  }
+
+  double Segment::dividingRatio(const Eigen::Vector3f& point) const
+  {
+    if (to_[0] != from_[0]) {
+      return (point[0] - from_[0]) / (to_[0] - from_[0]);
     }
-    return ret;
+    else if (to_[1] != from_[1]) {
+      return (point[1] - from_[1]) / (to_[1] - from_[1]);
+    }
+    else {
+      return (point[2] - from_[2]) / (to_[2] - from_[2]);
+    }
+  }
+  
+  void Segment::foot(const Eigen::Vector3f& from, Eigen::Vector3f& output) const
+  {
+    Eigen::Vector3f foot_point;
+    Line::foot(from, foot_point);
+    double r = dividingRatio(foot_point);
+    if (r < 0.0) {
+      output = from_;
+    }
+    else if (r > 1.0) {
+      output = to_;
+    }
+    else {
+      output = foot_point;
+    }
+  }
+
+  double Segment::distance(const Eigen::Vector3f& point) const
+  {
+    Eigen::Vector3f foot_point;
+    return distance(point, foot_point);
+  }
+
+  double Segment::distance(const Eigen::Vector3f& point,
+                           Eigen::Vector3f& foot_point) const
+  {
+    foot(point, foot_point);
+    return (foot_point - point).norm();
+  }
+
+  bool Segment::intersect(Plane& plane, Eigen::Vector3f& point) const
+  {
+    double x = - (plane.getNormal().dot(origin_) + plane.getD()) / (plane.getNormal().dot(direction_));
+    point = direction_ * x + origin_;
+    double r = dividingRatio(point);
+    return 0 <= r && r <= 1.0;
+  }
+
+  std::ostream& operator<<(std::ostream& os, const Segment& seg)
+  {
+    os << "[" << seg.from_[0] << ", " << seg.from_[1] << ", " << seg.from_[2] << "] -- "
+       << "[" << seg.to_[0] << ", " << seg.to_[1] << ", " << seg.to_[2] << "]";
   }
 
 }

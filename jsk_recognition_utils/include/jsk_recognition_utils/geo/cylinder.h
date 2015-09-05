@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2015, JSK Lab
+ *  Copyright (c) 2014, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,21 +32,44 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-#define BOOST_PARAMETER_MAX_ARITY 7
-#include "jsk_recognition_utils/sensor_model_utils.h"
+
+#ifndef JSK_RECOGNITION_UTILS_GEO_CYLINDER_H_
+#define JSK_RECOGNITION_UTILS_GEO_CYLINDER_H_
+
+#include <Eigen/Geometry>
+#include <pcl/point_cloud.h>
+#include <pcl/PointIndices.h>
+#include <pcl/point_types.h>
+#include <visualization_msgs/Marker.h>
 
 namespace jsk_recognition_utils
 {
-  std::vector<cv::Point>
-  project3DPointstoPixel(const image_geometry::PinholeCameraModel& model,
-                         const Vertices& vertices)
+  class Cylinder                // infinite
   {
-    std::vector<cv::Point> ret;
-    for (size_t i = 0; i < vertices.size(); i++) {
-      cv::Point p = project3DPointToPixel(model, vertices[i]);
-      ret.push_back(p);
-    }
-    return ret;
-  }
+  public:
+    typedef boost::shared_ptr<Cylinder> Ptr;
+    Cylinder(Eigen::Vector3f point, Eigen::Vector3f direction, double radius);
 
+    virtual void filterPointCloud(const pcl::PointCloud<pcl::PointXYZ>& cloud,
+                                  const double threshold,
+                                  pcl::PointIndices& output);
+    virtual void estimateCenterAndHeight(const pcl::PointCloud<pcl::PointXYZ>& cloud,
+                                         const pcl::PointIndices& indices,
+                                         Eigen::Vector3f& center,
+                                         double& height);
+    virtual void toMarker(visualization_msgs::Marker& marker,
+                          const Eigen::Vector3f& center,
+                          const Eigen::Vector3f& uz,
+                          const double height);
+    virtual Eigen::Vector3f getDirection();
+    virtual double getRadius() { return radius_; }
+  protected:
+    Eigen::Vector3f point_;
+    Eigen::Vector3f direction_;
+    double radius_;
+  private:
+    
+  };
 }
+
+#endif

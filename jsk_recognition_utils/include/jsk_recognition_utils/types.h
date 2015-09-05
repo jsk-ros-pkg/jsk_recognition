@@ -32,21 +32,22 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-#define BOOST_PARAMETER_MAX_ARITY 7
-#include "jsk_recognition_utils/sensor_model_utils.h"
+
+#ifndef JSK_RECOGNITION_UTILS_TYPES_H_
+#define JSK_RECOGNITION_UTILS_TYPES_H_
+
+#include <Eigen/Geometry>
+#include <boost/tuple/tuple.hpp>
+#include <vector>
 
 namespace jsk_recognition_utils
 {
-  std::vector<cv::Point>
-  project3DPointstoPixel(const image_geometry::PinholeCameraModel& model,
-                         const Vertices& vertices)
-  {
-    std::vector<cv::Point> ret;
-    for (size_t i = 0; i < vertices.size(); i++) {
-      cv::Point p = project3DPointToPixel(model, vertices[i]);
-      ret.push_back(p);
-    }
-    return ret;
-  }
-
+  typedef Eigen::Vector3f Point;
+  typedef Eigen::Vector3f Vertex;
+  typedef std::vector<Eigen::Vector3f,
+                      Eigen::aligned_allocator<Eigen::Vector3f> > Vertices;
+  typedef boost::tuple<Point, Point> PointPair;
+  typedef boost::tuple<size_t, size_t> PointIndexPair;
 }
+
+#endif

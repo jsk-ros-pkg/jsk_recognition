@@ -50,6 +50,14 @@ add_library(jsk_recognition_utils SHARED
   src/pcl/ear_clipping_patched.cpp
   src/sensor_model_utils.cpp
   src/cv_utils.cpp
+  src/geo/line.cpp
+  src/geo/segment.cpp
+  src/geo/plane.cpp
+  src/geo/polygon.cpp
+  src/geo/convex_polygon.cpp
+  src/geo/cube.cpp
+  src/geo/cylinder.cpp
+  src/geo/grid_plane.cpp
   )
 
 install(TARGETS jsk_recognition_utils

@@ -72,6 +72,7 @@
 #include "jsk_recognition_utils/geo/segment.h"
 #include "jsk_recognition_utils/geo/plane.h"
 #include "jsk_recognition_utils/geo/polygon.h"
+#include "jsk_recognition_utils/geo/convex_polygon.h"
 
 // Utitlity macros
 inline void ROS_INFO_EIGEN_VECTOR3(const std::string& prefix,
@@ -135,90 +136,6 @@ namespace jsk_recognition_utils
 
   std::vector<Plane::Ptr> convertToPlanes(
     std::vector<pcl::ModelCoefficients::Ptr>);
-  
-  
-  class ConvexPolygon: public Polygon
-  {
-  public:
-    typedef boost::shared_ptr<ConvexPolygon> Ptr;
-    typedef Eigen::Vector3f Vertex;
-    typedef std::vector<Eigen::Vector3f,
-                        Eigen::aligned_allocator<Eigen::Vector3f> > Vertices;
-    // vertices should be CW
-    ConvexPolygon(const Vertices& vertices);
-    ConvexPolygon(const Vertices& vertices,
-                  const std::vector<float>& coefficients);
-    //virtual Polygon flip();
-    virtual void project(const Eigen::Vector3f& p, Eigen::Vector3f& output);
-    virtual void project(const Eigen::Vector3d& p, Eigen::Vector3d& output);
-    virtual void project(const Eigen::Vector3d& p, Eigen::Vector3f& output);
-    virtual void project(const Eigen::Vector3f& p, Eigen::Vector3d& output);
-    virtual void projectOnPlane(const Eigen::Vector3f& p,
-                                Eigen::Vector3f& output);
-    virtual void projectOnPlane(const Eigen::Affine3f& p,
-                                Eigen::Affine3f& output);
-    virtual bool isProjectableInside(const Eigen::Vector3f& p);
-    // p should be a point on the plane
-    virtual ConvexPolygon flipConvex();
-    virtual Eigen::Vector3f getCentroid();
-    virtual Ptr magnify(const double scale_factor);
-    virtual Ptr magnifyByDistance(const double distance);
-    
-    static ConvexPolygon fromROSMsg(const geometry_msgs::Polygon& polygon);
-    static ConvexPolygon::Ptr fromROSMsgPtr(const geometry_msgs::Polygon& polygon);
-    bool distanceSmallerThan(
-      const Eigen::Vector3f& p, double distance_threshold);
-    bool distanceSmallerThan(
-      const Eigen::Vector3f& p, double distance_threshold,
-      double& output_distance);
-    bool allEdgesLongerThan(double thr);
-    double distanceFromVertices(const Eigen::Vector3f& p);
-    geometry_msgs::Polygon toROSMsg();
-  protected:
-
-  private:
-  };
-
-  template<class PointT>
-  ConvexPolygon::Ptr convexFromCoefficientsAndInliers(
-    const typename pcl::PointCloud<PointT>::Ptr cloud,
-    const pcl::PointIndices::Ptr inliers,
-    const pcl::ModelCoefficients::Ptr coefficients) {
-    typedef typename pcl::PointCloud<PointT> POINTCLOUD;
-    typename POINTCLOUD::Ptr projected_cloud(new pcl::PointCloud<PointT>);
-    // check inliers has enough points
-    if (inliers->indices.size() == 0) {
-      return ConvexPolygon::Ptr();
-    }
-    // project inliers based on coefficients
-    pcl::ProjectInliers<PointT> proj;
-    proj.setModelType(pcl::SACMODEL_PERPENDICULAR_PLANE);
-    proj.setInputCloud(cloud);
-    proj.setModelCoefficients(coefficients);
-    proj.setIndices(inliers);
-    proj.filter(*projected_cloud);
-    // compute convex with giant mutex
-    {
-      boost::mutex::scoped_lock lock(global_chull_mutex);
-      typename POINTCLOUD::Ptr convex_cloud(new pcl::PointCloud<PointT>);
-      pcl::ConvexHull<PointT> chull;
-      chull.setDimension(2);
-      chull.setInputCloud (projected_cloud);
-      chull.reconstruct (*convex_cloud);
-      if (convex_cloud->points.size() > 0) {
-        // convert pointcloud to vertices
-        Vertices vs;
-        for (size_t i = 0; i < convex_cloud->points.size(); i++) {
-          Eigen::Vector3f v(convex_cloud->points[i].getVector3fMap());
-          vs.push_back(v);
-        }
-        return ConvexPolygon::Ptr(new ConvexPolygon(vs));
-      }
-      else {
-        return ConvexPolygon::Ptr();
-      }
-    }
-  }
 
   /**
    * @brief

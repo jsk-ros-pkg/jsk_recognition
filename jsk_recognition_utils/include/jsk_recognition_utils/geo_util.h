@@ -69,6 +69,7 @@
 #include "jsk_recognition_utils/sensor_model/camera_depth_sensor.h"
 #include "jsk_recognition_utils/types.h"
 #include "jsk_recognition_utils/geo/line.h"
+#include "jsk_recognition_utils/geo/segment.h"
 
 // Utitlity macros
 inline void ROS_INFO_EIGEN_VECTOR3(const std::string& prefix,
@@ -129,23 +130,6 @@ namespace jsk_recognition_utils
   }
 
   // geoemtry classes
-  
-  class Segment: public Line
-  {
-  public:
-    typedef boost::shared_ptr<Segment> Ptr;
-    Segment(const Eigen::Vector3f& from, const Eigen::Vector3f to);
-    virtual void foot(const Eigen::Vector3f& point, Eigen::Vector3f& output) const;
-    virtual double dividingRatio(const Eigen::Vector3f& point) const;
-    virtual double distance(const Eigen::Vector3f& point) const;
-    virtual double distance(const Eigen::Vector3f& point, Eigen::Vector3f& foot_point) const;
-    virtual bool intersect(Plane& plane, Eigen::Vector3f& point) const;
-    //virtual double distance(const Segment& other);
-    friend std::ostream& operator<<(std::ostream& os, const Segment& seg);
-  protected:
-    Eigen::Vector3f from_, to_;
-  private:
-  };
 
   class Plane
   {

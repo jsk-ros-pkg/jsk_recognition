@@ -51,6 +51,7 @@ add_library(jsk_recognition_utils SHARED
   src/sensor_model_utils.cpp
   src/cv_utils.cpp
   src/geo/line.cpp
+  src/geo/segment.cpp
   )
 
 install(TARGETS jsk_recognition_utils

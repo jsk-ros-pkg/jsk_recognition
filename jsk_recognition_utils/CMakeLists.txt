@@ -56,6 +56,7 @@ add_library(jsk_recognition_utils SHARED
   src/geo/polygon.cpp
   src/geo/convex_polygon.cpp
   src/geo/cube.cpp
+  src/geo/cylinder.cpp
   )
 
 install(TARGETS jsk_recognition_utils

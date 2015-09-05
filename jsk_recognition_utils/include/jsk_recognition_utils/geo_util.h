@@ -74,6 +74,7 @@
 #include "jsk_recognition_utils/geo/polygon.h"
 #include "jsk_recognition_utils/geo/convex_polygon.h"
 #include "jsk_recognition_utils/geo/cube.h"
+#include "jsk_recognition_utils/geo/cylinder.h"
 
 // Utitlity macros
 inline void ROS_INFO_EIGEN_VECTOR3(const std::string& prefix,
@@ -267,35 +268,7 @@ namespace jsk_recognition_utils
     bbox.pose.position.z = (minpt[2] + maxpt[2]) / 2.0;
     bbox.pose.orientation.w = 1.0;
     return bbox;
-  }
-
-  class Cylinder                // infinite
-  {
-  public:
-    typedef boost::shared_ptr<Cylinder> Ptr;
-    Cylinder(Eigen::Vector3f point, Eigen::Vector3f direction, double radius);
-
-    virtual void filterPointCloud(const pcl::PointCloud<pcl::PointXYZ>& cloud,
-                                  const double threshold,
-                                  pcl::PointIndices& output);
-    virtual void estimateCenterAndHeight(const pcl::PointCloud<pcl::PointXYZ>& cloud,
-                                         const pcl::PointIndices& indices,
-                                         Eigen::Vector3f& center,
-                                         double& height);
-    virtual void toMarker(visualization_msgs::Marker& marker,
-                          const Eigen::Vector3f& center,
-                          const Eigen::Vector3f& uz,
-                          const double height);
-    virtual Eigen::Vector3f getDirection();
-    virtual double getRadius() { return radius_; }
-  protected:
-    Eigen::Vector3f point_;
-    Eigen::Vector3f direction_;
-    double radius_;
-  private:
-    
-  };
-  
+  }  
 }
 
 #endif

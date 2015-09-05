@@ -33,6 +33,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#define BOOST_PARAMETER_MAX_ARITY 7
+
 #include "jsk_recognition_utils/geo/segment.h"
 #include "jsk_recognition_utils/geo_util.h"
 namespace jsk_recognition_utils

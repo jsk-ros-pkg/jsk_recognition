@@ -32,7 +32,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-
+#define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_recognition_utils/sensor_model_utils.h"
 
 namespace jsk_recognition_utils

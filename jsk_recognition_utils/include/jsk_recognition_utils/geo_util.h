@@ -70,6 +70,7 @@
 #include "jsk_recognition_utils/types.h"
 #include "jsk_recognition_utils/geo/line.h"
 #include "jsk_recognition_utils/geo/segment.h"
+#include "jsk_recognition_utils/geo/plane.h"
 
 // Utitlity macros
 inline void ROS_INFO_EIGEN_VECTOR3(const std::string& prefix,
@@ -130,47 +131,6 @@ namespace jsk_recognition_utils
   }
 
   // geoemtry classes
-
-  class Plane
-  {
-  public:
-    typedef boost::shared_ptr<Plane> Ptr;
-    Plane(const std::vector<float>& coefficients);
-    Plane(const boost::array<float, 4>& coefficients);
-    Plane(Eigen::Vector3f normal, double d);
-    Plane(Eigen::Vector3f normal, Eigen::Vector3f p);
-    virtual ~Plane();
-    virtual Plane flip();
-    virtual Plane::Ptr faceToOrigin();
-    virtual bool isSameDirection(const Plane& another);
-    virtual bool isSameDirection(const Eigen::Vector3f& another_normal);
-    virtual double signedDistanceToPoint(const Eigen::Vector4f p);
-    virtual double distanceToPoint(const Eigen::Vector4f p);
-    virtual double signedDistanceToPoint(const Eigen::Vector3f p);
-    virtual double distanceToPoint(const Eigen::Vector3f p);
-    virtual double distance(const Plane& another);
-    virtual double angle(const Plane& another);
-    virtual double angle(const Eigen::Vector3f& vector);
-    virtual void project(const Eigen::Vector3f& p, Eigen::Vector3f& output);
-    virtual void project(const Eigen::Vector3d& p, Eigen::Vector3d& output);
-    virtual void project(const Eigen::Vector3d& p, Eigen::Vector3f& output);
-    virtual void project(const Eigen::Vector3f& p, Eigen::Vector3d& output);
-    virtual void project(const Eigen::Affine3f& pose, Eigen::Affine3f& output);
-    virtual Eigen::Vector3f getNormal();
-    virtual Eigen::Vector3f getPointOnPlane();
-    virtual Plane transform(const Eigen::Affine3d& transform);
-    virtual Plane transform(const Eigen::Affine3f& transform);
-    virtual void toCoefficients(std::vector<float>& output);
-    virtual std::vector<float> toCoefficients();
-    virtual double getD();
-    virtual Eigen::Affine3f coordinates();
-  protected:
-    virtual void initializeCoordinates();
-    Eigen::Vector3f normal_;
-    double d_;
-    Eigen::Affine3f plane_coordinates_;
-  private:
-  };
 
   std::vector<Plane::Ptr> convertToPlanes(
     std::vector<pcl::ModelCoefficients::Ptr>);

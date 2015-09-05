@@ -52,6 +52,7 @@ add_library(jsk_recognition_utils SHARED
   src/cv_utils.cpp
   src/geo/line.cpp
   src/geo/segment.cpp
+  src/geo/plane.cpp
   )
 
 install(TARGETS jsk_recognition_utils

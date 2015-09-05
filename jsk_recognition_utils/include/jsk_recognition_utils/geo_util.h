@@ -75,6 +75,7 @@
 #include "jsk_recognition_utils/geo/convex_polygon.h"
 #include "jsk_recognition_utils/geo/cube.h"
 #include "jsk_recognition_utils/geo/cylinder.h"
+#include "jsk_recognition_utils/geo/grid_plane.h"
 
 // Utitlity macros
 inline void ROS_INFO_EIGEN_VECTOR3(const std::string& prefix,
@@ -84,13 +85,6 @@ inline void ROS_INFO_EIGEN_VECTOR3(const std::string& prefix,
 
 namespace jsk_recognition_utils
 {
-  typedef std::vector<Eigen::Vector3f,
-                      Eigen::aligned_allocator<Eigen::Vector3f> > Vertices;
-
-  // Prototype definition
-  class Plane;
-  class Cube;
-  
   ////////////////////////////////////////////////////////
   // compute quaternion from 3 unit vector
   // these vector should be normalized and diagonal
@@ -138,121 +132,6 @@ namespace jsk_recognition_utils
 
   std::vector<Plane::Ptr> convertToPlanes(
     std::vector<pcl::ModelCoefficients::Ptr>);
-
-  /**
-   * @brief
-   * Grid based representation of planar region.
-   *
-   * Each cell represents a square region as belows:
-   *        +--------+
-   *        |        |
-   *        |   +    |
-   *        |        |
-   *        +--------+
-   *
-   * The width and height of the cell is equivalent to resolution_,
-   * and the value of cells_ represents a center point.
-   * (i, j) means rectanglar region of (x, y) which satisfies followings:
-   * i * resolution - 0.5 * resolution <= x < i * resolution + 0.5 * resolution
-   * j * resolution - 0.5 * resolution <= y < j * resolution + 0.5 * resolution
-   * 
-   *
-   */
-  class GridPlane
-  {
-  public:
-    typedef boost::shared_ptr<GridPlane> Ptr;
-    typedef boost::tuple<int, int> IndexPair;
-    typedef std::set<IndexPair> IndexPairSet;
-    GridPlane(ConvexPolygon::Ptr plane, const double resolution);
-    virtual ~GridPlane();
-    virtual GridPlane::Ptr clone(); // shallow copy
-    virtual size_t fillCellsFromPointCloud(
-      pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
-      double distance_threshold);
-    virtual size_t fillCellsFromPointCloud(
-      pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
-      double distance_threshold,
-      std::set<int>& non_plane_indices);
-    virtual size_t fillCellsFromPointCloud(
-      pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
-      double distance_threshold,
-      double normal_threshold,
-      std::set<int>& non_plane_indices);
-    virtual void fillCellsFromCube(Cube& cube);
-    virtual double getResolution() { return resolution_; }
-    virtual jsk_recognition_msgs::SimpleOccupancyGrid toROSMsg();
-    /**
-     * @brief
-     * Construct GridPlane object from
-     * jsk_recognition_msgs::SimpleOccupancyGrid.
-     */
-    static GridPlane fromROSMsg(
-      const jsk_recognition_msgs::SimpleOccupancyGrid& rosmsg,
-      const Eigen::Affine3f& offset);
-    virtual bool isOccupied(const IndexPair& pair);
-    
-    /**
-     * @brief
-     * p should be local coordinate
-     */
-    virtual bool isOccupied(const Eigen::Vector3f& p);
-
-    /**
-     * @brief
-     * p should be global coordinate
-     */
-    virtual bool isOccupiedGlobal(const Eigen::Vector3f& p);
-    
-    /**
-     * @brief
-     * Project 3-D point to GridPlane::IndexPair.
-     * p should be represented in local coordinates.
-     */
-    virtual IndexPair projectLocalPointAsIndexPair(const Eigen::Vector3f& p);
-
-    /**
-     * @brief
-     * Unproject GridPlane::IndexPair to 3-D local point.
-     */
-    virtual Eigen::Vector3f unprojectIndexPairAsLocalPoint(const IndexPair& pair);
-
-    /**
-     * @brief
-     * Unproject GridPlane::IndexPair to 3-D global point.
-     */
-    virtual Eigen::Vector3f unprojectIndexPairAsGlobalPoint(const IndexPair& pair);
-
-    /**
-     * @brief
-     * Add IndexPair to this instance.
-     */
-    virtual void addIndexPair(IndexPair pair);
-
-    /**
-     * @brief
-     * Erode grid cells with specified number of pixels
-     */
-    virtual GridPlane::Ptr erode(int num);
-
-    /**
-     * @brief
-     * return ConvexPolygon pointer of this instance.
-     */
-    virtual ConvexPolygon::Ptr getPolygon() { return convex_; }
-    
-    /**
-     * @brief
-     * Dilate grid cells with specified number of pixels
-     */
-    virtual GridPlane::Ptr dilate(int num);
-  protected:
-    ConvexPolygon::Ptr convex_;
-    IndexPairSet cells_;
-    double resolution_;
-  private:
-    
-  };
 
   template <class PointT>
   jsk_recognition_msgs::BoundingBox boundingBoxFromPointCloud(const pcl::PointCloud<PointT>& cloud)

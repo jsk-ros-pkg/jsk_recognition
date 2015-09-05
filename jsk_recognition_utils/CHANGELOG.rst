@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.2 (2015-09-05)
+------------------
 * add yaml-cpp to depends
 * Merge pull request `#1151 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1151>`_ from garaemon/use-histograms
   [jsk_perception] Use histograms to compute distance in TabletopColorDifferenceLikelihood

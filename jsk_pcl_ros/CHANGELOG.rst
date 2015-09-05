@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.2 (2015-09-05)
+------------------
 * [jsk_pcl_ros] use arguments in order to change a behavior
 * [jsk_pcl_ros] remove unused arguments
 * [jsk_pcl_ros] remove unused white spaces

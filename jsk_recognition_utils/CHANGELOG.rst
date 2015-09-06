@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.3 (2015-09-06)
+------------------
 * [jsk_recognition_utils] Depends on visualization_msgs
 * [jsk_recognition_utils] Separate grid_plane.h from geo_util.h
 * [jsk_recognition_utils] Separate cylinder.h from geo_util.h

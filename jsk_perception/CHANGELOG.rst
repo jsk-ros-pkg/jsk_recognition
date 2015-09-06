@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.3 (2015-09-06)
+------------------
 * [jsk_perception] README.md -> readthedocs.org
 * Revert "[jsk_perception] use sphinx for rosdoc"
   This reverts commit 9e4ba233599b21c6422ec9a45f395b460c53264d.

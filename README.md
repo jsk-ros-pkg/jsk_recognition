@@ -1,5 +1,9 @@
-jsk\_recognition [![Build Status](https://travis-ci.org/jsk-ros-pkg/jsk_recognition.png)](https://travis-ci.org/jsk-ros-pkg/jsk_recognition)
+jsk\_recognition
 ===============
+
+[![Build Status](https://travis-ci.org/jsk-ros-pkg/jsk_recognition.png)](https://travis-ci.org/jsk-ros-pkg/jsk_recognition)
+[![Read the Docs](https://readthedocs.org/projects/pip/badge/?version=latest)](https://jsk-recognition.readthedocs.org)
+
 
 jsk_recognition is a stack for the perception packages which are used in JSK lab.
 

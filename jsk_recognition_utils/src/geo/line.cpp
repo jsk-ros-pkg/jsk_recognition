@@ -61,6 +61,11 @@ namespace jsk_recognition_utils
     output = origin_;
   }
 
+  Eigen::Vector3f Line::getOrigin() const
+  {
+    return origin_;
+  }
+  
   void Line::foot(const Eigen::Vector3f& point, Eigen::Vector3f& output) const
   {
     const double alpha = computeAlpha(point);

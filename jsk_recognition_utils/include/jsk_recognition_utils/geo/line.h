@@ -42,31 +42,155 @@
 
 namespace jsk_recognition_utils
 {
-  // (infinite) line
+  /**
+   * @brief
+   * Class to represent 3-D straight line.
+   */
   class Line
   {
   public:
     typedef boost::shared_ptr<Line> Ptr;
+    
+    /**
+     * @brief
+     * Construct a line from direction vector and a point on the line.
+     *
+     * @param direction direction of the line. non-normalized vector is allowed.
+     * @param origin point on the line.
+     */
     Line(const Eigen::Vector3f& direction, const Eigen::Vector3f& origin);
+
+    /**
+     * @brief
+     * get normalized direction vector of the line and assign it to output.
+     */
     virtual void getDirection(Eigen::Vector3f& output) const;
+
+    /**
+     * @brief
+     * get normalized direction vector of the line.
+     */
     virtual Eigen::Vector3f getDirection() const;
+
+    /**
+     * @brief
+     * get origin of the line and assing it to output.
+     */
     virtual void getOrigin(Eigen::Vector3f& output) const;
+
+    /**
+     * @brief
+     * get origin of the line.
+     */
+    virtual Eigen::Vector3f getOrigin() const;
+
+    /**
+     * @brief
+     * compute a distance to a point
+     */
     virtual double distanceToPoint(const Eigen::Vector3f& from) const;
-    virtual double distanceToPoint(const Eigen::Vector3f& from, Eigen::Vector3f& foot) const;
+
+    /**
+     * @brief
+     * compute a distance to a point and foot point will be assigned to foot.
+     */
+    virtual double distanceToPoint(const Eigen::Vector3f& from,
+                                   Eigen::Vector3f& foot) const;
+
+    /**
+     * @brief
+     * compute a distance to line.
+     */
     virtual double distance(const Line& other) const;
+
+    /**
+     * @brief
+     * compute a point which gives perpendicular projection.
+     */
     virtual void foot(const Eigen::Vector3f& point, Eigen::Vector3f& output) const;
+
+    /**
+     * @brief
+     * compute angle between a given line.
+     */
     virtual double angle(const Line& other) const;
+
+    /**
+     * @brief
+     * return true if given line is parallel.
+     * angle_threshold is error tolerance.
+     */
     virtual bool isParallel(const Line& other, double angle_threshold = 0.1) const;
+    
+    /**
+     * @brief
+     * return true if given line is perpendicular.
+     * angle_threshold is error tolerance.
+     */
     virtual bool isPerpendicular(const Line& other, double angle_threshold = 0.1) const;
+
+    /**
+     * @brief
+     * compute a middle line between given line.
+     */
     virtual Ptr midLine(const Line& other) const;
+
+    /**
+     * @brief
+     * compute a line on a point, whose direction is same to the
+     * current line.
+     */
     virtual Ptr parallelLineOnAPoint(const Eigen::Vector3f& p) const;
+
+    /**
+     * @brief
+     * Extract end points from the points on the lines.
+     */
     virtual PointPair findEndPoints(const Vertices& points) const;
+
+    /**
+     * @ brief
+     * Let equation of line's scale factor a.
+     * 
+     *  x = a d + p
+     * where d is a normalized direction vector and p is a point on the vector.
+     */
     virtual double computeAlpha(const Point& p) const;
+
+    /**
+     * @ brief
+     * Return true if given line is towards the same direction.
+     */
     virtual bool isSameDirection(const Line& other) const;
+
+    /**
+     * @ brief
+     * flip direction of line.
+     */
     virtual Line::Ptr flip();
+
+    /**
+     * @brief
+     * compute a perpendicular line of two lines from origin_
+     */
     virtual void parallelLineNormal(const Line& other, Eigen::Vector3f& output) const;
+
+    /**
+     * @brief
+     * Instantiate Line from array of float.
+     */
     static Ptr fromCoefficients(const std::vector<float>& coefficients);
+
+    /**
+     * @brief
+     * Print Line information
+     */
     virtual void print();
+    
+    /**
+     * @brief
+     * Compute a point on normal from alpha parameter.
+     */
     virtual void point(double alpha, Eigen::Vector3f& ouptut);
   protected:
     Eigen::Vector3f direction_;

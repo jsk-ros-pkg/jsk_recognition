@@ -2,6 +2,19 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_recognition_utils] Depends on visualization_msgs
+* [jsk_recognition_utils] Separate grid_plane.h from geo_util.h
+* [jsk_recognition_utils] Separate cylinder.h from geo_util.h
+* [jsk_recognition_utils] Separate cube.h from geo_util.h
+* [jsk_recognition_utils] Separate convex_polygon.h from geo_util.h
+* [jsk_recognition_utils] Separate polygon.h from geo_util.h
+* [jsk_recognition_utils] Separate plane.h from geo_util.h
+* [jsk_recognition_utils] Separate segment.h from geo_util.h
+* [jsk_recognition_utils] Separate line.h from geo_util.h
+* Contributors: Ryohei Ueda
+
 0.3.2 (2015-09-05)
 ------------------
 * add yaml-cpp to depends

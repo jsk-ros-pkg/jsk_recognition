@@ -2,6 +2,12 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros] README.md -> readthedocs.org
+  Closes `#330 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/330>`_
+* Contributors: Kentaro Wada
+
 0.3.2 (2015-09-05)
 ------------------
 * [jsk_pcl_ros] use arguments in order to change a behavior

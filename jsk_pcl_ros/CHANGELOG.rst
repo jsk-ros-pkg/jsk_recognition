@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.4 (2015-09-07)
+------------------
 * Swap doc soft links (to make 'Edit on GitHub' work)
 * ColorizeFloatImage correct image link
   Closes https://github.com/jsk-ros-pkg/jsk_recognition/issues/1165

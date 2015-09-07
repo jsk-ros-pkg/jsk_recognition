@@ -52,3 +52,6 @@ Deprecated packages
 
 [orbit\_pantilt](https://github.com/jsk-ros-pkg/jsk_recognition/tree/master/orbit_pantilt)
 ---
+Documentation for jsk\_recognition
+----------------------------------
+You will find documentation about nodes and types of jsk\_recognition at [the Read the Docs site](https://jsk-recognition.readthedocs.org).

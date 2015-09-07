@@ -2,6 +2,15 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge pull request `#1168 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1168>`_ from k-okada/add_yaml
+  jsk_recognition_utils: forget to add include to install
+* jsk_recognition_utils: forget to add include to install
+* [jsk_recognition_utils/README] Add link to doxygen documentation
+* [jsk_recognition_utils/Line] Add documentation
+* Contributors: Kei Okada, Ryohei Ueda
+
 0.3.3 (2015-09-06)
 ------------------
 * [jsk_recognition_utils] Depends on visualization_msgs

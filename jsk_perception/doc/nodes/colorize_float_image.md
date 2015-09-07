@@ -1,5 +1,5 @@
 # ColorizeFloatImage
-![](../jsk_pcl_ros/images/heightmap_converter.png)
+![](images/heightmap_converter.png)
 
 Colorize float image with heatmap gradation.
 

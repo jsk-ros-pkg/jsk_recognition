@@ -2,6 +2,9 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.3.4 (2015-09-07)
 ------------------
 * Merge pull request `#1168 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1168>`_ from k-okada/add_yaml

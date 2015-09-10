@@ -441,8 +441,10 @@ execute_process(
   )
 
 configure_file(src/build_check.cpp.in build_check.cpp)
-add_executable(build_check build_check.cpp)
+add_executable(build_check EXCLUDE_FROM_ALL build_check.cpp)
 target_link_libraries(build_check jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_util jsk_pcl_ros_moveit)
+add_dependencies(run_tests build_check)
+
 generate_messages(DEPENDENCIES
   ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_footstep_msgs)
 

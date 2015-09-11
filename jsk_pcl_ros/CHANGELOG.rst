@@ -2,6 +2,12 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros] Do not compile build_check.cpp in normal compilation time,
+  just in run_tests
+* Contributors: Ryohei Ueda
+
 0.3.5 (2015-09-09)
 ------------------
 

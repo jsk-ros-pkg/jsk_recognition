@@ -78,3 +78,9 @@ You can choose several types of tilt/spindle lasers such as tilt-laser of PR2, i
 
    overwrap angle offset when detecting time range.
    Only available in `infinite_spindle` and `infinite_spindle_half`.
+
+## Troubleshooting
+* tilt_laser_listener don't publish `~output_cloud` when `~laser_type` is `infinite_spindle` or `infinite_spindle_half`
+
+   tilt_laser_listener checks `~input/velocity` of `~joint_name` to determine direciton of spindle.
+   If the velocity is 0, tilt_laser_listener does not publish `~output_cloud`.

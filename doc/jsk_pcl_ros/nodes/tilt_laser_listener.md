@@ -82,5 +82,4 @@ You can choose several types of tilt/spindle lasers such as tilt-laser of PR2, i
 ## Troubleshooting
 * tilt_laser_listener don't publish `~output_cloud` when `~laser_type` is `infinite_spindle` or `infinite_spindle_half`
 
-   tilt_laser_listener checks `~input/velocity` of `~joint_name` to determine direciton of spindle.
-   If the velocity is 0, tilt_laser_listener does not publish `~output_cloud`.
+  tilt_laser_listener doesn't publish ~output_cloud when ~laser_type is infinite_spindle or infinite_spindle_half if velocity field of ~input is not valid.

@@ -13,6 +13,7 @@ catkin_package(
     DEPENDS OpenCV libsiftfast
 )
 
+catkin_python_setup()
 
 set(ENV{PKG_CONFIG_PATH} ${CATKIN_DEVEL_PREFIX}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH})
 find_package(PkgConfig REQUIRED)

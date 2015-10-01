@@ -126,6 +126,7 @@ generate_dynamic_reconfigure_options(
   cfg/SupervoxelSegmentation.cfg
   cfg/FeatureRegistration.cfg
   cfg/FisheyeSphere.cfg
+  cfg/MovingLeastSquareSmoothing.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -161,6 +162,7 @@ jsk_pcl_nodelet(src/keypoints_publisher_nodelet.cpp "jsk_pcl/KeypointsPublisher"
 jsk_pcl_nodelet(src/hinted_plane_detector_nodelet.cpp "jsk_pcl/HintedPlaneDetector" "hinted_plane_detector")
 # jsk_pcl_nodelet(src/pointcloud_throttle_nodelet.cpp "jsk_pcl/NodeletPointCloudThrottle" "point_cloud_throttle")
 jsk_pcl_nodelet(src/centroid_publisher_nodelet.cpp "jsk_pcl/CentroidPublisher" "centroid_publisher")
+jsk_pcl_nodelet(src/moving_least_square_smoothing_nodelet.cpp "jsk_pcl/MovingLeastSquareSmoothing" "moving_least_square_smoothing")
 jsk_pcl_nodelet(src/fisheye_sphere_publisher_nodelet.cpp "jsk_pcl/FisheyeSpherePublisher" "fisheye_sphere_publisher")
 # jsk_pcl_nodelet(src/image_throttle_nodelet.cpp
 #   "jsk_pcl/NodeletImageThrottle" "image_throttle")

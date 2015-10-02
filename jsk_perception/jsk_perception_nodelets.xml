@@ -209,4 +209,8 @@
          type="jsk_perception::KMeans"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_perception/CMTNodelet"
+         type="jsk_perception::CMTNodelet"
+         base_class_type="nodelet::Nodelet">
+  </class>
 </library>

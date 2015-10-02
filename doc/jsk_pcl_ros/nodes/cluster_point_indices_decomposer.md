@@ -28,10 +28,10 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
    Array of oriented bounding box for each segmented cluster.
 
 ## Parameters
-* `~publish_tf` (Boolean, default: `True`):
+* `~publish_tf` (Boolean, default: `False`):
 
    Toggle tf publishing.
-* `~publish_clouds` (Boolean, default: `True`):
+* `~publish_clouds` (Boolean, default: `False`):
 
    Toggle `~output%02d` topics.
 * `~align_boxes` (Boolean, default: `False`):

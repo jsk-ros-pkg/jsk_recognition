@@ -17,7 +17,7 @@
 (defvar filtered-objectdetection (instance posedetection_msgs::ObjectDetection :init))
 (send filtered-objectdetection :header :frame_id *map-id*)
 
-(defparameter kfs-lst nil)
+(defparameter *kfs-lst* nil)
 
 (defvar object-width nil)
 (defvar object-height nil)
@@ -30,10 +30,18 @@
 (defmethod kalman-filters
   (:init
    (&key (pos (float-vector 0 0 0)) (yaw (float-vector 0)))
-   (setq kfp (instance kalman-filter :init :state-dim 3 :measure-dim 3))
-   (setq kfr (instance kalman-filter :init :state-dim 1 :measure-dim 1))
-   (send kfp :x pos)
-   (send kfr :x (float-vector yaw))
+   ;; (setq kfp (instance kalman-filter :init :state-dim 3 :measure-dim 3))
+   ;; (setq kfr (instance kalman-filter :init :state-dim 1 :measure-dim 1))
+   ;; (send kfp :x pos)
+   ;; (send kfr :x (float-vector yaw))
+   (setq kfp (instance kalman-filter :init :state-dim 6 :measure-dim 3 :r-variance 1000 :q-variance 1))
+   ;;   (send kfp :A (make-array (list 3 3)))
+   ;; (send kfp :A #2f((1 0 0 1 0 0) (0 1 0 0 1 0) (0 0 1 0 0 1) (0 0 0 1 0 0) (0 0 0 0 1 0) (0 0 0 0 0 1)))
+   (send kfp :x (float-vector (elt pos 0) (elt pos 1) (elt pos 2) 0 0 0))
+   (setq kfr (instance kalman-filter :init :state-dim 2 :measure-dim 1 :q-variance 0.1))
+   ;;   (send kfr :A (make-array (list 2 2)))
+   ;; (send kfr :A #2f((1 1) (0 1)))
+   (send kfr :x (float-vector yaw 0))
    )
   (:pos
    (p)
@@ -46,9 +54,15 @@
   (:proc
    (z1 z2)
    (let (h1 h2)
-     (setq h1 (send kfp :proc z1))
-     (setq h2 (send kfr :proc (float-vector z2)))
+     (setq h1 (send kfp :proc z1 :adaptive t :m 30))
+     (setq h2 (send kfr :proc (float-vector z2) :adaptive t :m 30))
+     ;; (setq h1 (send kfp :proc z1))
+     ;; (setq h2 (send kfr :proc (float-vector z2)))
      (list h1 h2))
+   )
+  (:P
+   ()
+   (send kfp :P)
    )
   )
 
@@ -62,6 +76,12 @@
         (frame (send msg :header :frame_id))
         (tp (get target-obj :type))
         tmp-obj-lst stamp trans)
+    (print (list "tp" tp))
+    (print (list "frame" frame))
+    (print (list "target-obj" target-obj))
+    (setq *tpp* tp)
+    (setq *framee* frame)
+    (setq *to* target-obj)
     (ros::ros-info "object detection callback target ~A(~A), frame ~A, object ~A"
                    tp (stringp tp) frame target-obj)
     (dolist (obj obj-lst)
@@ -137,6 +157,109 @@
                                        :lifetime marker-life :id 2)
                                       )))))))
 
+(defparameter *poselist* nil)
+(defun add-to-xlist (x)
+  (setq *poselist* (append *poselist* (list x)))
+  (cond
+   ((> (length *poselist*) 10)
+    (setq *poselist* (cdr *poselist*))
+    )
+   (t
+    nil)))
+
+(defun calc-covariance ()
+  (let ((x-cov 0)
+        (y-cov 0)
+        (z-cov 0)
+        (x-ave 0)
+        (y-ave 0)
+        (z-ave 0))
+    ;; (ros::ros-info "poselist:~A" *poselist*)
+    (dolist (pose *poselist*)
+      (setq x-ave (+ x-ave (send pose :position :x)))
+      (setq y-ave (+ y-ave (send pose :position :y)))
+      (setq z-ave (+ z-ave (send pose :position :z)))
+      )
+    (setq x-ave (/ (* 1.0 x-ave) (length *poselist*)))
+    (setq y-ave (/ (* 1.0 y-ave) (length *poselist*)))
+    (setq z-ave (/ (* 1.0 z-ave) (length *poselist*)))
+    ;; (ros::ros-info "x-ave:~A" x-ave)
+    (dolist (pose *poselist*)
+      (setq x-cov (+ x-cov
+                     (* (- (send pose :position :x) x-ave) (- (send pose :position :x) x-ave))))
+      (setq y-cov (+ y-cov
+                     (* (- (send pose :position :y) y-ave) (- (send pose :position :y) y-ave))))
+      (setq z-cov (+ z-cov
+                     (* (- (send pose :position :z) z-ave) (- (send pose :position :z) z-ave))))
+      )
+    (setq x-cov (/ (* 1.0 x-cov) (length *poselist*)))
+    (setq y-cov (/ (* 1.0 y-cov) (length *poselist*)))
+    (setq z-cov (/ (* 1.0 z-cov) (length *poselist*)))
+    ;; too small
+    (setq x-cov (* x-cov 100))
+    (setq y-cov (* y-cov 100))
+    (setq z-cov (* z-cov 100))
+    ;; (ros::ros-info "x-cov:~A" x-cov)
+    ;;    (return-from calc-covariance (list x-cov y-cov z-cov))
+    (list x-cov y-cov z-cov)
+    ))
+
+
+(defun simply-calc-covariance-and-pub-PoseStamped-and-PoseWithCovarianceStamped
+  (target-obj &key (object-name map-frame-objectdetection))
+  (let* ((mf-obj-lst (send object-name :objects))
+        (tmp-posestamped (instance geometry_msgs::PoseStamped :init))
+        (tp (get target-obj :type))
+        (relative-pose-stream (make-string-input-stream relative-pose-str))
+        (tmp-pose (instance geometry_msgs::Pose :init))
+        covlst
+        (tmp-posewithcovariancestamped (instance geometry_msgs::PoseWithCovarianceStamped :init))
+        (tmp-cov (send tmp-posewithcovariancestamped :pose :covariance))
+        )
+    ;; (ros::ros-info "mf-obj-lst:~A" mf-obj-lst)
+    ;; currently considered only 1 kind of data comes
+    (dolist (obj mf-obj-lst)
+      (when (or (not (stringp tp))
+                (substringp tp (send obj :type))) ;; found target
+        (add-to-xlist (send obj :pose))
+        ))
+    (setf covlst (calc-covariance))
+    ;; (setq covlst (calc-covariance))
+    ;; (ros::ros-info "covlst:~A" covlst)
+    (send tmp-pose :position :x (read relative-pose-stream nil))
+    (send tmp-pose :position :y (read relative-pose-stream nil))
+    (send tmp-pose :position :z (read relative-pose-stream nil))
+    (send tmp-pose :orientation :x (read relative-pose-stream nil))
+    (send tmp-pose :orientation :y (read relative-pose-stream nil))
+    (send tmp-pose :orientation :z (read relative-pose-stream nil))
+    (send tmp-pose :orientation :w (read relative-pose-stream nil))
+    (setq inverse-trans (send (send (ros::tf-pose->coords tmp-pose) :inverse-transformation)
+                              :translate (float-vector (* (/ object-height 2.0) 1000) (* (/ object-width 2.0) 1000) 0)))
+    (dolist (obj mf-obj-lst)
+      (when (or (not (stringp tp))
+                (substringp tp (send obj :type))) ;; found target
+        (let ((tmp-coords (send (ros::tf-pose->coords (send obj :pose)) :copy-worldcoords)))
+          (send tmp-coords :transform inverse-trans)
+          (send tmp-posestamped :pose (ros::coords->tf-pose tmp-coords))
+          ;;(send tmp-posestamped :pose (send obj :pose))
+          (send tmp-posestamped :header (send object-name :header))
+          )))
+
+    (setf (elt tmp-cov 0) (car covlst))
+    (setf (elt tmp-cov 7) (cadr covlst))
+    (setf (elt tmp-cov 14) (caddr covlst))
+    (unless (eq (car covlst) 0.0)
+      (ros::ros-info "simplecov x:~A y:~A z:~A" (car covlst) (cadr covlst) (caddr covlst))
+      (setf (elt tmp-cov 21) 0.1)
+      (setf (elt tmp-cov 28) 0.1)
+      (setf (elt tmp-cov 35) 0.1)
+      (send tmp-posewithcovariancestamped :header (send object-name :header))
+      (send tmp-posewithcovariancestamped :pose :pose (send tmp-posestamped :pose))
+      (send tmp-posewithcovariancestamped :pose :covariance tmp-cov)
+      (ros::publish "/simplecov" tmp-posewithcovariancestamped)
+      )
+    ))
+
 
 (defun kalman-filter
   nil
@@ -144,7 +267,7 @@
         (flag t)
         )
     (dolist (obj mf-obj-lst)
-      (dolist (kf kfs-lst)
+      (dolist (kf *kfs-lst*)
         (cond
          ((equal (get kf :type) (send obj :type))
           (let ((ps (send (ros::tf-pose->coords (send obj :pose)) :pos))
@@ -173,7 +296,7 @@
                   tmp-fo
                   )
               (setf (get tmp-kfs :type) (send obj :type))
-              (setq kfs-lst (append kfs-lst (list tmp-kfs)))
+              (setq *kfs-lst* (append *kfs-lst* (list tmp-kfs)))
               (send filtered-objectdetection :objects (append (send filtered-objectdetection :objects) (list obj)))
               ))))
     (send filtered-objectdetection :header (send map-frame-objectdetection :header))
@@ -233,13 +356,13 @@
 ;;     )
 ;;   )
 
-(defun publish-attention (target-obj &key (object-name map-frame-objectdetection))
+(defun pub-PoseStamped-and-PoseWithCovarianceStamped (target-obj &key (object-name map-frame-objectdetection))
   (let ((mf-obj-lst (send object-name :objects))
         (tmp-posestamped (instance geometry_msgs::PoseStamped :init))
+        (tmp-posewithcovariancestamped (instance geometry_msgs::PoseWithCovarianceStamped :init))
         (relative-pose-stream (make-string-input-stream relative-pose-str))
         (tmp-pose (instance geometry_msgs::Pose :init))
         (tp (get target-obj :type)))
-
 
     (ros::unsubscribe "/openni_c2/rgb/image_rect_color")
 
@@ -263,6 +386,46 @@
           (send tmp-posestamped :header (send object-name :header))
           )))
 
+    (unless (null *kfs-lst*)
+      (let ((cov (send (car *kfs-lst*) :P))
+            (tmp-cov (send tmp-posewithcovariancestamped :pose :covariance)))
+        (setq *pwc* tmp-cov)
+        (setq *cov* cov)
+
+        ;; (setf (elt tmp-cov 0) (/ (elt (matrix-row cov 0) 0) 1000000.0))
+        ;; (setf (elt tmp-cov 1) (/ (elt (matrix-row cov 0) 1) 1000000.0))
+        ;; (setf (elt tmp-cov 2) (/ (elt (matrix-row cov 0) 2) 1000000.0))
+        ;; (setf (elt tmp-cov 6) (/ (elt (matrix-row cov 1) 0) 1000000.0))
+        ;; (setf (elt tmp-cov 7) (/ (elt (matrix-row cov 1) 1) 1000000.0))
+        ;; (setf (elt tmp-cov 8) (/ (elt (matrix-row cov 1) 2) 1000000.0))
+        ;; (setf (elt tmp-cov 12) (/ (elt (matrix-row cov 2) 0) 1000000.0))
+        ;; (setf (elt tmp-cov 13) (/ (elt (matrix-row cov 2) 1) 1000000.0))
+        ;; (setf (elt tmp-cov 14) (/ (elt (matrix-row cov 2) 2) 1000000.0))
+        (setf (elt tmp-cov 0) (/ (elt (matrix-row cov 0) 0) 100.0))
+        (setf (elt tmp-cov 1) (/ (elt (matrix-row cov 0) 1) 100.0))
+        (setf (elt tmp-cov 2) (/ (elt (matrix-row cov 0) 2) 100.0))
+        (setf (elt tmp-cov 6) (/ (elt (matrix-row cov 1) 0) 100.0))
+        (setf (elt tmp-cov 7) (/ (elt (matrix-row cov 1) 1) 100.0))
+        (setf (elt tmp-cov 8) (/ (elt (matrix-row cov 1) 2) 100.0))
+        (setf (elt tmp-cov 12) (/ (elt (matrix-row cov 2) 0) 100.0))
+        (setf (elt tmp-cov 13) (/ (elt (matrix-row cov 2) 1) 100.0))
+        (setf (elt tmp-cov 14) (/ (elt (matrix-row cov 2) 2) 100.0))
+        ;; (setf (elt tmp-cov 0) 0.3)
+        ;; (setf (elt tmp-cov 7) 0.3)
+        ;; (setf (elt tmp-cov 14) 0.3)
+        (setf (elt tmp-cov 21) 0.1)
+        (setf (elt tmp-cov 28) 0.1)
+        (setf (elt tmp-cov 35) 0.1)
+
+        (ros::ros-info "estimated covariance of adaptive kalmanfilter:~A" cov)
+        (ros::ros-info "poswithcovariance: ~A" tmp-cov)
+
+        (send tmp-posewithcovariancestamped :header (send object-name :header))
+        (send tmp-posewithcovariancestamped :pose :pose (send tmp-posestamped :pose))
+        (send tmp-posewithcovariancestamped :pose :covariance tmp-cov)
+        ;; (print-ros-msg tmp-posewithcovariancestamped)
+        (ros::publish "/posewithcovstamped" tmp-posewithcovariancestamped)
+        ))
     (ros::publish "/attention_clipper/input/pose" tmp-posestamped)
     ))
 
@@ -285,7 +448,6 @@
     (ros::publish "/attention_clipper/input/pose" tmp-pose-stamped)
     ))
 
-
 (defun pub-cb (target-obj marker-life force msg)
   (let ((filter-obj))
     (detection-interface-objectdetection force target-obj msg)
@@ -295,7 +457,8 @@
       (publish-marker target-obj marker-life :frame *map-id*)
       (publish-marker target-obj marker-life :frame *map-id* :object-name filtered-objectdetection
                       :publish-name "/filtered")
-      (publish-attention target-obj)
+      (pub-PoseStamped-and-PoseWithCovarianceStamped target-obj)
+      (simply-calc-covariance-and-pub-PoseStamped-and-PoseWithCovarianceStamped target-obj)
       ;;       (publish-2Dpointcloud kfp)
       ;; (ros::ros-info "cur-coords:(~A ~A ~A)"
       ;;                (send (send (send cur-coords :pose) :position) :x)
@@ -366,6 +529,8 @@
     (ros::advertise "/norm/pose" std_msgs::Float32 1)
     (ros::advertise "/norm/rot" std_msgs::Float32 1)
     (ros::advertise "/attention_clipper/input/pose" geometry_msgs::PoseStamped 1)
+    (ros::advertise "/posewithcovstamped" geometry_msgs::PoseWithCovarianceStamped 1)
+    (ros::advertise "/simplecov" geometry_msgs::PoseWithCovarianceStamped 1)
     (ros::advertise-service "targetobj" posedetection_msgs::TargetObj #'target-obj-cb)
     (setq object-width (ros::get-param "~object_width" 0.2))
     (setq object-height (ros::get-param "~object_height" 0.2))

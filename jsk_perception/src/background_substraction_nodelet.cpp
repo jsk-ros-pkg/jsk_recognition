@@ -54,15 +54,31 @@ namespace jsk_perception
   void BackgroundSubstraction::configCallback(Config& config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mutex_);
+#if CV_MAJOR_VERSION >= 3
+    bg_ = cv::createBackgroundSubtractorMOG2();
+#else
     bg_ = cv::BackgroundSubtractorMOG2();
+#endif
     nmixtures_ = config.nmixtures;
     detect_shadows_ = config.detect_shadows;
+#if CV_MAJOR_VERSION >= 3
+    bg_->setNMixtures(nmixtures_);
+#else
     bg_.set("nmixtures", nmixtures_);
+#endif
     if (detect_shadows_) {
+#if CV_MAJOR_VERSION >= 3
+      bg_->setDetectShadows(1);
+#else
       bg_.set("detectShadows", 1);
+#endif
     }
     else {
+#if CV_MAJOR_VERSION >= 3
+      bg_->setDetectShadows(1);
+#else
       bg_.set("detectShadows", 0);
+#endif
     }
   }
   
@@ -101,7 +117,11 @@ namespace jsk_perception
     cv::Mat image = cv_ptr->image;
     cv::Mat fg;
     std::vector <std::vector<cv::Point > > contours;
+#if CV_MAJOR_VERSION >= 3
+    bg_->apply(image, fg);
+#else
     bg_(image, fg);
+#endif
     sensor_msgs::Image::Ptr diff_image
       = cv_bridge::CvImage(image_msg->header,
                            sensor_msgs::image_encodings::MONO8,

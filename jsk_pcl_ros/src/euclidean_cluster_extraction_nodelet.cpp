@@ -35,6 +35,9 @@
 #include <pluginlib/class_list_macros.h>
 #include "jsk_pcl_ros/euclidean_cluster_extraction_nodelet.h" 
 
+using namespace std;
+using namespace pcl;
+
 namespace jsk_pcl_ros
 {
 

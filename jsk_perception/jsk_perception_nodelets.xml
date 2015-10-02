@@ -35,6 +35,14 @@
          type="jsk_perception::PolygonToMaskImage"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_perception/PolygonArrayToLabelImage"
+         type="jsk_perception::PolygonArrayToLabelImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/TabletopColorDifferenceLikelihood"
+         type="jsk_perception::TabletopColorDifferenceLikelihood"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/ErodeMaskImage"
          type="jsk_perception::Erode"
          base_class_type="nodelet::Nodelet">
@@ -92,6 +100,11 @@
          base_class_type="nodelet::Nodelet">
   </class>
   <class name="jsk_perception/ColorizeLabels" type="jsk_perception::ColorizeLabels"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
+  <class name="jsk_perception/ColorizeFloatImage" type="jsk_perception::ColorizeFloatImage"
          base_class_type="nodelet::Nodelet">
     <description>
     </description>

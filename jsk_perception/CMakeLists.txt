@@ -6,9 +6,9 @@ find_package(catkin REQUIRED COMPONENTS
   mk message_generation std_msgs sensor_msgs geometry_msgs cv_bridge
   image_geometry image_transport image_view2 driver_base dynamic_reconfigure cmake_modules
   roscpp nodelet rostest tf rospack
-  jsk_topic_tools pcl_ros)
+  jsk_topic_tools pcl_ros
+  jsk_recognition_utils)
 
-find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 
 find_package(Eigen REQUIRED)
@@ -24,9 +24,11 @@ endif()
 
 include(FindPkgConfig)
 pkg_check_modules(libcmt REQUIRED libcmt)
+add_definitions("-g -O2")
 
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
+  cfg/TabletopColorDifferenceLikelihood.cfg
   cfg/ProjectImagePoint.cfg
   cfg/MaskImageGenerator.cfg
   cfg/MorphologicalMaskImageOperator.cfg
@@ -62,8 +64,8 @@ generate_messages(
 )
 
 catkin_package(
-  CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs message_runtime jsk_recognition_msgs
-  DEPENDS OpenCV
+  CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs message_runtime jsk_recognition_msgs jsk_recognition_utils
+  DEPENDS
   INCLUDE_DIRS include
   LIBRARIES jsk_perception
 )
@@ -110,6 +112,7 @@ jsk_perception_nodelet(src/ycc_decomposer.cpp "jsk_perception/YCCDecomposer" "yc
 jsk_perception_nodelet(src/contour_finder.cpp "jsk_perception/ContourFinder" "contour_finder")
 jsk_perception_nodelet(src/snake_segmentation.cpp "jsk_perception/SnakeSegmentation" "snake_segmentation")
 jsk_perception_nodelet(src/colorize_labels.cpp "jsk_perception/ColorizeLabels" "colorize_labels")
+jsk_perception_nodelet(src/colorize_float_image.cpp "jsk_perception/ColorizeFloatImage" "colorize_float_image")
 jsk_perception_nodelet(src/grid_label.cpp "jsk_perception/GridLabel" "grid_label")
 jsk_perception_nodelet(src/color_histogram_label_match.cpp "jsk_perception/ColorHistogramLabelMatch" "color_histogram_label_match")
 jsk_perception_nodelet(src/apply_mask_image.cpp "jsk_perception/ApplyMaskImage" "apply_mask_image")
@@ -131,6 +134,7 @@ jsk_perception_nodelet(src/mask_image_to_rect.cpp "jsk_perception/MaskImageToRec
 jsk_perception_nodelet(src/roi_to_rect.cpp "jsk_perception/ROIToRect" "roi_to_rect")
 jsk_perception_nodelet(src/roi_to_mask_image.cpp "jsk_perception/ROIToMaskImage" "roi_to_mask_image")
 jsk_perception_nodelet(src/polygon_to_mask_image.cpp "jsk_perception/PolygonToMaskImage" "polygon_to_mask_image")
+jsk_perception_nodelet(src/polygon_array_to_label_image.cpp "jsk_perception/PolygonArrayToLabelImage" "polygon_array_to_label_image")
 jsk_perception_nodelet(src/rect_to_roi.cpp "jsk_perception/RectToROI" "rect_to_roi")
 jsk_perception_nodelet(src/mask_image_generator.cpp "jsk_perception/MaskImageGenerator" "mask_image_generator")
 jsk_perception_nodelet(src/project_image_point.cpp "jsk_perception/ProjectImagePoint" "project_image_point")
@@ -138,6 +142,7 @@ jsk_perception_nodelet(src/skeletonization_nodelet.cpp "jsk_perception/Skeletoni
 jsk_perception_nodelet(src/sliding_window_object_detector.cpp "jsk_perception/SlidingWindowObjectDetector" "sliding_window_object_detector")
 jsk_perception_nodelet(src/gaussian_blur.cpp "jsk_perception/GaussianBlur" "gaussian_blur")
 jsk_perception_nodelet(src/kmeans.cpp "jsk_perception/KMeans" "kmeans")
+jsk_perception_nodelet(src/tabletop_color_difference_likelihood.cpp "jsk_perception/TabletopColorDifferenceLikelihood" "tabletop_color_difference_likelihood")
 
 # compiling jsk_perception library for nodelet
 add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
@@ -149,18 +154,18 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 
 
-target_link_libraries(camshiftdemo             ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-target_link_libraries(linemod                  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-target_link_libraries(virtual_camera_mono      ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-target_link_libraries(point_pose_extractor     ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
-target_link_libraries(edge_detector            ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-target_link_libraries(white_balance_converter  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-target_link_libraries(hough_lines              ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-target_link_libraries(rectangle_detector       ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
-target_link_libraries(calc_flow                ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-target_link_libraries(color_histogram_sliding_matcher  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-target_link_libraries(oriented_gradient_node   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} oriented_gradient)
-target_link_libraries(sliding_window_object_detector_trainer_node ${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+target_link_libraries(camshiftdemo             ${catkin_LIBRARIES})
+target_link_libraries(linemod                  ${catkin_LIBRARIES})
+target_link_libraries(virtual_camera_mono      ${catkin_LIBRARIES})
+target_link_libraries(point_pose_extractor     ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(edge_detector            ${catkin_LIBRARIES})
+target_link_libraries(white_balance_converter  ${catkin_LIBRARIES})
+target_link_libraries(hough_lines              ${catkin_LIBRARIES})
+target_link_libraries(rectangle_detector       ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(calc_flow                ${catkin_LIBRARIES})
+target_link_libraries(color_histogram_sliding_matcher  ${catkin_LIBRARIES})
+target_link_libraries(oriented_gradient_node   ${catkin_LIBRARIES} ${Boost_LIBRARIES} oriented_gradient)
+target_link_libraries(sliding_window_object_detector_trainer_node ${PROJECT_NAME} ${catkin_LIBRARIES})
 
 add_dependencies(camshiftdemo             ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 add_dependencies(virtual_camera_mono      ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
@@ -171,17 +176,22 @@ add_dependencies(rectangle_detector       ${PROJECT_NAME}_gencfg ${PROJECT_NAME}
 add_dependencies(color_histogram_sliding_matcher       ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 
 
-#add_custom_command(
-#  OUTPUT  ${PROJECT_SOURCE_DIR}/template
-#  DEPENDS ${PROJECT_SOURCE_DIR}/src/eusmodel_template_gen.l
-#  COMMAND ${PROJECT_SOURCE_DIR}/src/eusmodel_template_gen.sh)
-#add_custom_target(eusmodel_template ALL DEPENDS ${PROJECT_SOURCE_DIR}/template)
+add_custom_command(
+ OUTPUT ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng8.launch
+ ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng2.launch
+ DEPENDS ${PROJECT_SOURCE_DIR}/euslisp/eusmodel_template_gen.l
+ COMMAND ROS_PACKAGE_PATH=${PROJECT_SOURCE_DIR}:$ENV{ROS_PACKAGE_PATH} roseus ${PROJECT_SOURCE_DIR}/euslisp/eusmodel_template_gen.l
+ WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+add_custom_command(
+ OUTPUT  ${PROJECT_SOURCE_DIR}/sample/rimokon-pose.launch ${PROJECT_SOURCE_DIR}/sample/milktea-box.launch
+ DEPENDS ${PROJECT_SOURCE_DIR}/sample/pose_detector_auto_gen_sample.l
+ COMMAND ROS_PACKAGE_PATH=${PROJECT_SOURCE_DIR}:$ENV{ROS_PACKAGE_PATH} roseus ./pose_detector_auto_gen_sample.l
+ WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/sample)
 
-# Download model data
-execute_process(
-  COMMAND mkdir -p ${PROJECT_SOURCE_DIR}/trained_data)
-execute_process(
-  COMMAND wget -q --timestamping "https://drive.google.com/uc?id=0B5hRAGKTOm_KWW11R0FTX0xjTDg&export=download" -O ${PROJECT_SOURCE_DIR}/trained_data/drill_svm.xml)
+add_custom_target(eusmodel_template ALL DEPENDS
+  ${PROJECT_SOURCE_DIR}/sample/rimokon-pose.launch ${PROJECT_SOURCE_DIR}/sample/milktea-box.launch
+  ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng8.launch
+  ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng2.launch)
 
 install(TARGETS camshiftdemo virtual_camera_mono point_pose_extractor white_balance_converter hough_lines rectangle_detector calc_flow color_histogram_sliding_matcher ${PROJECT_NAME}
   ${jsk_perception_nodelet_executables}

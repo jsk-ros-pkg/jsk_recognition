@@ -10,7 +10,7 @@
 #include <image_transport/image_transport.h>
 #include <image_transport/subscriber_filter.h>
 
-#include <cv.h>
+#include <cv.hpp>
 #include <cv_bridge/cv_bridge.h>
 
 #include <stdlib.h>

@@ -80,6 +80,7 @@ namespace jsk_pcl_ros
     
     boost::mutex mutex_;
     ros::Publisher pub_;
+    ros::Publisher pub_xyz_;
     double grid_size_;
     
   private:

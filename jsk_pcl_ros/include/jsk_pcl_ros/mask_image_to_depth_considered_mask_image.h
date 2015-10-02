@@ -34,8 +34,8 @@
  *********************************************************************/
 
 
-#ifndef JSK_PCL_ROS_POINT_INDICES_TO_MASK_IMAGE_H_
-#define JSK_PCL_ROS_POINT_INDICES_TO_MASK_IMAGE_H_
+#ifndef JSK_PCL_ROS_MASK_IMAGE_TO_DEPTH_CONSIDERED_MASK_IMAGE_H_
+#define JSK_PCL_ROS_MASK_IMAGE_TO_DEPTH_CONSIDERED_MASK_IMAGE_H_
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/Image.h>

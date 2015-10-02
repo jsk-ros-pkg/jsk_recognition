@@ -1,0 +1,12 @@
+<launch>
+  <arg name="container_path" />
+  <arg name="output_path" default="$(find jsk_perception)/trained_data" />
+
+  <node name="imagesift"
+        pkg="imagesift" type="imagesift" />
+  <node name="create_feature0d_dataset"
+        pkg="jsk_perception" type="create_feature0d_dataset.py"
+        output="screen"
+        args="$(arg container_path)
+              -O $(arg output_path)/feature0d_dataset.pkl.gz" />
+</launch>

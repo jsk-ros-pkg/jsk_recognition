@@ -68,9 +68,6 @@
 
 #include <jsk_topic_tools/connection_based_nodelet.h>
 
-using namespace std;
-using namespace pcl;
-
 namespace jsk_pcl_ros
 {
   class EuclideanClustering : public jsk_topic_tools::ConnectionBasedNodelet

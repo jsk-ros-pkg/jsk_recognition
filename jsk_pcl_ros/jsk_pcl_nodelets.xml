@@ -187,6 +187,11 @@
          base_class_type="nodelet::Nodelet">
     Generate mask image out of point indices
   </class>
+  <class name="jsk_pcl/ExtractIndices"
+         type="jsk_pcl_ros::ExtractIndices"
+         base_class_type="nodelet::Nodelet">
+    Extract point cloud with point indices
+  </class>
   <class name="jsk_pcl/MaskImageToDepthConsideredMaskImage"
          type="jsk_pcl_ros::MaskImageToDepthConsideredMaskImage"
          base_class_type="nodelet::Nodelet">

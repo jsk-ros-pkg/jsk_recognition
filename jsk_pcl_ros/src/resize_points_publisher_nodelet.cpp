@@ -198,10 +198,10 @@ namespace jsk_pcl_ros
                  ros_out.width, ros_out.height, ex_indices.size());
 #endif
         pub_.publish(ros_out);
-        JSK_NODELET_INFO("%s:: input header stamp is [%f]", getName().c_str(),
-                     input->header.stamp.toSec());
-        JSK_NODELET_INFO("%s:: output header stamp is [%f]", getName().c_str(),
-                     ros_out.header.stamp.toSec());
+        JSK_NODELET_DEBUG("%s:: input header stamp is [%f]", getName().c_str(),
+                          input->header.stamp.toSec());
+        JSK_NODELET_DEBUG("%s:: output header stamp is [%f]", getName().c_str(),
+                          ros_out.header.stamp.toSec());
       }
       
     }

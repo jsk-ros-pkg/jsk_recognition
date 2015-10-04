@@ -37,6 +37,7 @@
 #include "jsk_pcl_ros/normal_estimation_omp.h"
 #include <pcl/point_types.h>
 #include <pcl/features/normal_3d_omp.h>
+#include <pcl/registration/lum.h>
 
 namespace jsk_pcl_ros
 {
@@ -50,6 +51,7 @@ namespace jsk_pcl_ros
     srv_->setCallback (f);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     pub_with_xyz_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_with_xyz", 1);
+    pub_pose_with_covariance_stamped_ = advertise<geometry_msgs::PoseWithCovarianceStamped>(*pnh_, "output_pose_with_covariance_stamped", 1);
   }
 
   void NormalEstimationOMP::subscribe()
@@ -97,6 +99,8 @@ namespace jsk_pcl_ros
     pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr
       normal_xyz(new pcl::PointCloud<pcl::PointXYZRGBNormal>);
     normal_xyz->points.resize(cloud->points.size());
+    Eigen::Vector3f ave = Eigen::Vector3f::Zero();
+    Eigen::Matrix3f cov = Eigen::Matrix3f::Zero();
     for (size_t i = 0; i < normal_xyz->points.size(); i++) {
       pcl::PointXYZRGBNormal p;
       p.x = cloud->points[i].x;
@@ -106,12 +110,57 @@ namespace jsk_pcl_ros
       p.normal_y = normal_cloud->points[i].normal_y;
       p.normal_z = normal_cloud->points[i].normal_z;
       normal_xyz->points[i] = p;
+      Eigen::Vector3f nv = Eigen::Vector3f(normal_cloud->points[i].normal_x, normal_cloud->points[i].normal_y, normal_cloud->points[i].normal_z);
+      ave += nv;
+      cov += nv * nv.transpose();
     }
 
+    ave = ave / normal_xyz->points.size();
+    cov = cov / normal_xyz->points.size() - ave * ave.transpose(); /* V[X] = E[X^2] - E[X]^2 */
     sensor_msgs::PointCloud2 ros_normal_xyz_cloud;
     pcl::toROSMsg(*normal_xyz, ros_normal_xyz_cloud);
     ros_normal_xyz_cloud.header = cloud_msg->header;
     pub_with_xyz_.publish(ros_normal_xyz_cloud);
+    geometry_msgs::PoseWithCovarianceStamped pose_with_covariance_stamped_msg;
+    {
+      Eigen::Matrix3f covariance_matrix;
+      Eigen::Vector4f centroid;
+      pcl::computeMeanAndCovarianceMatrix(*cloud, covariance_matrix, centroid);
+      /* set geometry_msgs::PoseWithCovarianceStamped.pose.pose */
+      {
+        geometry_msgs::Point tmp_p;
+        geometry_msgs::Quaternion tmp_quat;
+        tmp_p.x = centroid(0);
+        tmp_p.y = centroid(1);
+        tmp_p.z = centroid(2);
+        Eigen::Vector3f ex, ey, ez;
+        ez = ave;
+        ex = Eigen::Vector3f::UnitY().cross(ez);
+        ey = ez.cross(ex);
+        Eigen::Matrix3f m;
+        m << ex.normalized(), ey.normalized(), ez.normalized();
+        Eigen::Quaternionf quat = Eigen::Quaternionf(m);
+        tmp_quat.x = quat.x();
+        tmp_quat.y = quat.y();
+        tmp_quat.z = quat.z();
+        tmp_quat.w = quat.w();
+        pose_with_covariance_stamped_msg.pose.pose.position = tmp_p;
+        pose_with_covariance_stamped_msg.pose.pose.orientation = tmp_quat;
+      }
+      /* set geometry_msgs::PoseWithCovarianceStamped.pose.covariance */
+      {
+        Eigen::Matrix6f tmp_cov = Eigen::Matrix6f::Zero();
+        tmp_cov.block<3, 3>(0, 0) = covariance_matrix;
+        tmp_cov.block<3, 3>(3, 3) = cov;
+        for (size_t i = 0; i < 6; i++) {
+          for (size_t j = 0; j < 6; j++) {
+            pose_with_covariance_stamped_msg.pose.covariance[i*6+j] = tmp_cov(i, j);
+          }
+        }
+      }
+    }
+    pose_with_covariance_stamped_msg.header = cloud_msg->header;
+    pub_pose_with_covariance_stamped_.publish(pose_with_covariance_stamped_msg);
   }
 }
 

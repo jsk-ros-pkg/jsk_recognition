@@ -42,6 +42,7 @@
 #include <pcl_ros/FeatureConfig.h>
 #include <dynamic_reconfigure/server.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
 namespace jsk_pcl_ros
 {
   class NormalEstimationOMP: public jsk_topic_tools::DiagnosticNodelet
@@ -64,6 +65,7 @@ namespace jsk_pcl_ros
     boost::mutex mutex_;
     ros::Publisher pub_;
     ros::Publisher pub_with_xyz_;
+    ros::Publisher pub_pose_with_covariance_stamped_;
     ros::Subscriber sub_;
     std::string sensor_frame_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;

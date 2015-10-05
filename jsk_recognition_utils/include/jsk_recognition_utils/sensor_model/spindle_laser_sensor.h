@@ -46,8 +46,10 @@ namespace jsk_recognition_utils
     typedef boost::shared_ptr<SpindleLaserSensor> Ptr;
     
     SpindleLaserSensor(const double min_angle, const double max_angle,
+                       const double laser_freq,
                        const size_t point_sample):
       min_angle_(min_angle), max_angle_(max_angle),
+      laser_freq_(laser_freq),
       point_sample_(point_sample) { }
     
     virtual void setSpindleVelocity(const double velocity)
@@ -66,7 +68,7 @@ namespace jsk_recognition_utils
     {
       assert(spindle_velocity_ != 0.0);
       double dphi = 2.0 * M_PI / spindle_velocity_;
-      return point_sample_ / (2.0 * M_PI * dphi) / (distance * distance) * area;
+      return point_sample_ * laser_freq_ / (2.0 * dphi) / (distance * distance) * area;
     }
     
   protected:

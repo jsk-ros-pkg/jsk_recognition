@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>jsk_recognition</name>
-  <version>0.2.13</version>
+  <version>0.3.6</version>
   <description>
    <p>Metapackage that contains recognition package for jsk-ros-pkg</p>
   </description>
@@ -24,6 +24,7 @@
   <run_depend>jsk_perception</run_depend>
   <run_depend>resized_image_transport</run_depend>
   <run_depend>jsk_recognition_msgs</run_depend>
+  <run_depend>jsk_recognition_utils</run_depend>
   <export>
     <metapackage/>
   </export>

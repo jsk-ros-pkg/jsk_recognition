@@ -71,7 +71,8 @@ namespace resized_image_transport
       log_polar_flags += CV_WARP_INVERSE_MAP;
     }
     cvLogPolar( &src, dst, cvPoint2D32f(image_width/2, image_height/2), log_polar_scale_, log_polar_flags);
-    cv_img->image = dst;
+    // http://answers.opencv.org/question/23440/any-way-to-convert-iplimage-to-cvmat-in-opencv-300/
+    cv_img->image = cv::cvarrToMat(dst);
 
     dst_img = cv_img->toImageMsg();
     if(use_camera_info_){

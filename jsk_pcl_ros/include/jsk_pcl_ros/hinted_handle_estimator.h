@@ -39,6 +39,7 @@
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <jsk_recognition_msgs/ClusterPointIndices.h>
+#include <jsk_recognition_msgs/SimpleHandle.h>
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Pose.h>
@@ -147,6 +148,7 @@ namespace jsk_pcl_ros
     boost::mutex mutex_;
     ros::Publisher pub_pose_;
     ros::Publisher pub_length_;
+    ros::Publisher pub_handle_;
     ros::Publisher pub_debug_marker_;
     ros::Publisher pub_debug_marker_array_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_cloud_;

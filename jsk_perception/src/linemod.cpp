@@ -57,6 +57,10 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 
+// linemod has been moved to opencv_contrib
+// http://code.opencv.org/projects/opencv/repository/revisions/1ad9827fc4ede1b9c42515569fcc5d8d1106a4ea
+#if CV_MAJOR_VERSION < 3
+
 // Function prototypes
 void subtractPlane(const cv::Mat& depth, cv::Mat& mask, std::vector<CvPoint>& chain, double f);
 
@@ -399,10 +403,12 @@ typedef message_filters::sync_policies::ApproximateTime<
   sensor_msgs::CameraInfo
   > SyncPolicy;
 
-
+#endif
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "linemod");
+  ROS_ERROR("linemod has been moved to opencv_contrib in OpenCV3");
+#if CV_MAJOR_VERSION < 3
   // Various settings and flags
   help();
   cv::namedWindow("color");
@@ -447,6 +453,7 @@ int main(int argc, char** argv)
   sync_->connectInput(sub_rgb_image, sub_depth_image,
                       sub_rgb_camera_info, sub_depth_camera_info);
   sync_->registerCallback(callback);
+#endif
   ros::spin();
   
   //printf("Focal length = %f\n", focal_length);
@@ -455,6 +462,7 @@ int main(int argc, char** argv)
   return 0;
 }
 
+#if CV_MAJOR_VERSION < 3
 static void reprojectPoints(const std::vector<cv::Point3d>& proj, std::vector<cv::Point3d>& real, double f)
 {
   real.resize(proj.size());
@@ -780,3 +788,4 @@ void drawResponse(const std::vector<cv::linemod::Template>& templates,
     }
   }
 }
+#endif

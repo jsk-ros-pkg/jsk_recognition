@@ -2,6 +2,55 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.6 (2015-09-11)
+------------------
+
+0.3.5 (2015-09-09)
+------------------
+
+0.3.4 (2015-09-07)
+------------------
+
+0.3.3 (2015-09-06)
+------------------
+
+0.3.2 (2015-09-05)
+------------------
+
+0.3.1 (2015-09-04)
+------------------
+
+0.3.0 (2015-09-04)
+------------------
+
+0.2.18 (2015-09-04)
+-------------------
+* [jsk_recognition_msgs] Add script to convert
+  jsk_recognition_msgs/PlotData into csv
+* [jsk_pcl_ros] Add tool to visualize variance of raser scan
+* Contributors: Ryohei Ueda
+
+0.2.17 (2015-08-21)
+-------------------
+* [jsk_recognition_msgs/PolygonArray] Add lebels and likelihood for
+  colorizing on rviz
+* Contributors: Ryohei Ueda
+
+0.2.16 (2015-08-19)
+-------------------
+
+0.2.15 (2015-08-18)
+-------------------
+
+0.2.14 (2015-08-13)
+-------------------
+* [jsk_recognition_msgs] Add value field to BoundingBox to represent likelihood
+* [jsk_recognition_msgs] HistogramWithRange message to represent rich histogram
+  data
+* [jsk_pcl_ros] Add config topic to chain heightmap configuration
+* [jsk_perception] Scripts for bof and its hist extractor
+* Contributors: Kentaro Wada, Ryohei Ueda
+
 0.2.13 (2015-06-11)
 -------------------
 * [jsk_perception] Use ImageDifferenceValue.msg instead of Float32Stamped.msg

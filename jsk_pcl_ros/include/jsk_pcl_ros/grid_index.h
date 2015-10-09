@@ -1,8 +1,8 @@
-// -*- mode: C++ -*-
+// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, JSK Lab
+ *  Copyright (c) 2015, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -35,28 +35,12 @@
 
 #ifndef JSK_PCL_ROS_GRID_INDEX_H_
 #define JSK_PCL_ROS_GRID_INDEX_H_
-
-#include <boost/shared_ptr.hpp>
-
-
+#pragma warning "jsk_pcl_ros/grid_index.h is deprecated"
+#include <jsk_recognition_utils/grid_index.h>
 namespace jsk_pcl_ros
 {
-
-  class GridIndex
-  {
-  public:
-    typedef boost::shared_ptr<GridIndex> Ptr;
-    
-    GridIndex();
-    GridIndex(int _x, int _y);
-    virtual ~GridIndex();
-    int x;
-    int y;
-  protected:
-  private:
-    
-  };
-  
+  using namespace jsk_recognition_utils;
 }
 
 #endif
+

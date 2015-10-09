@@ -33,8 +33,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef __JSK_PCL_COLORIZE_RANDOM_FOREST__
-#define __JSK_PCL_COLORIZE_RANDOM_FOREST__
+#ifndef __JSK_PCL_COLORIZE_SEGMENTED_RF__
+#define __JSK_PCL_COLORIZE_SEGMENTED_RF__
 
 // ros
 #include <ros/ros.h>

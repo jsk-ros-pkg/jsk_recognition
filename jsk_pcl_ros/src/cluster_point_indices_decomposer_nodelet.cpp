@@ -64,6 +64,9 @@ namespace jsk_pcl_ros
     }
 
     pnh_->param("publish_clouds", publish_clouds_, false);
+    if (publish_clouds_) {
+      JSK_ROS_WARN("~output%%02d are not published before subscribed, you should subscribe ~debug_output in debuging.");
+    }
     pnh_->param("align_boxes", align_boxes_, false);
     pnh_->param("use_pca", use_pca_, false);
     pnh_->param("force_to_flip_z_axis", force_to_flip_z_axis_, true);

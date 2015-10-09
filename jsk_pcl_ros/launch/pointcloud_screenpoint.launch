@@ -1,5 +1,4 @@
 <launch>
-  <machine name="localhost" address="localhost"/>
   <arg name="cloud_machine" default="localhost"
        doc="point cloud processor machine" />
   <arg name="display_machine" default="localhost"

@@ -48,6 +48,7 @@ namespace jsk_pcl_ros
     srv_->setCallback (f);
 
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    pub_xyz_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_xyz", 1);
   }
 
   void PolygonPointsSampler::subscribe()
@@ -109,16 +110,29 @@ namespace jsk_pcl_ros
     }
     // Sample points... 
     pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGBNormal>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr xyz_cloud (new pcl::PointCloud<pcl::PointXYZ>);
     for (size_t i = 0; i < polygon_msg->polygons.size(); i++) {
       Polygon polygon = Polygon::fromROSMsg(polygon_msg->polygons[i].polygon);
       pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr one_cloud
         = polygon.samplePoints<pcl::PointXYZRGBNormal>(grid_size_);
+      pcl::PointCloud<pcl::PointXYZ> one_xyz_cloud;
+      one_xyz_cloud.points.resize(one_cloud->points.size());
+      for (size_t i = 0; i < one_cloud->points.size(); i++) {
+        pcl::PointXYZ p;
+        p.getVector3fMap() = one_cloud->points[i].getVector3fMap();
+        one_xyz_cloud.points[i] = p;
+      }
+      *xyz_cloud = *xyz_cloud + one_xyz_cloud;
       *cloud = *cloud + *one_cloud;
     }
     sensor_msgs::PointCloud2 ros_cloud;
     pcl::toROSMsg(*cloud, ros_cloud);
     ros_cloud.header = polygon_msg->header;
     pub_.publish(ros_cloud);
+    sensor_msgs::PointCloud2 ros_xyz_cloud;
+    pcl::toROSMsg(*xyz_cloud, ros_xyz_cloud);
+    ros_xyz_cloud.header = polygon_msg->header;
+    pub_xyz_.publish(ros_xyz_cloud);
   }
 
   

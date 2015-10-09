@@ -2,6 +2,258 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.6 (2015-09-11)
+------------------
+* [jsk_pcl_ros] Do not compile build_check.cpp in normal compilation time,
+  just in run_tests
+* Contributors: Ryohei Ueda
+
+0.3.5 (2015-09-09)
+------------------
+
+0.3.4 (2015-09-07)
+------------------
+* Swap doc soft links (to make 'Edit on GitHub' work)
+* ColorizeFloatImage correct image link
+  Closes https://github.com/jsk-ros-pkg/jsk_recognition/issues/1165
+* Contributors: Kentaro Wada
+
+0.3.3 (2015-09-06)
+------------------
+* [jsk_pcl_ros] README.md -> readthedocs.org
+  Closes `#330 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/330>`_
+* Contributors: Kentaro Wada
+
+0.3.2 (2015-09-05)
+------------------
+* [jsk_pcl_ros] use arguments in order to change a behavior
+* [jsk_pcl_ros] remove unused arguments
+* [jsk_pcl_ros] remove unused white spaces
+* Contributors: eisoku9618
+
+0.3.1 (2015-09-04)
+------------------
+* [jsk_pcl_ros, jsk_perception] Fix dependency of jsk_recognition_utils for child packages
+  like jsk_rviz_plugins
+* Contributors: Ryohei Ueda
+
+0.3.0 (2015-09-04)
+------------------
+* [jsk_recognition_utils] Introduce new package jsk_recognition_utils
+  in order to use utility libraries defined in jsk_pcl_ros in jsk_perception
+* Contributors: Ryohei Ueda
+
+0.2.18 (2015-09-04)
+-------------------
+* [jsk_recognition_utils] Introduce new package jsk_recognition_utils
+  in order to use utility libraries defined in jsk_pcl_ros in jsk_perception
+* [jsk_pcl_ros/RegionGrowingMultplePlaneSegmentation] Publish raw result of
+  region growing segmentation
+* [jsk_pcl_ros] Use distance based on polygon in order to take
+  into account occlusion
+* [jsk_pcl_ros] Remove outlier from laser range sensor in range_sensor_error_visualization
+* [jsk_pcl_ros] Visualize errors using scatter in depth_camera_error_visualization
+* [jsk_pcl_ros] Add tool to visualize error of stereo-based depth sensor
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Add
+  ~use_init_polygon_likelihood parameter to initialize particles according
+  to likelihood field of jsk_recognition_msgs/PolygonArray
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Add ~use_plane_likelihood
+  parameter to take into account likelihood field of jsk_recognition_msgs/PolygonArray
+* [jsk_pcl_ros] Separate definition of ParticleCuboid into another header
+* [jsk_pcl_ros] Publish standard deviation error of range sensor in range_sensor_error_visualization
+* [jsk_pcl_ros] Add nodelet to compte polygon likelihood based on area difference
+* [jsk_pcl_ros] Add nodelet to compte polygon likelihood based on angular
+  difference
+* [jsk_pcl_ros/PolygonArrayDistanceLikelihood] Compute polygon's likelihood
+  according to distance from specified frame_id.
+* [jsk_pcl_ros] Move EarClippingPatched to pcl/ directory
+* [jsk_pcl_ros] Add tool to visualize variance of raser scan
+* [jsk_pcl_ros] Rename ros_collaborative_particle_filter.h to pcl/simple_particle_filter.h
+* [jsk_pcl_ros] Add sensor model to compute expected number of points with
+  specific distance and area.
+* [jsk_pcl_ros/TiltLaserListener] Publish velocity of rotating laser
+* [jsk_pcl_ros] Fix small bugs about nearest distance computation and add sample
+* [jsk_pcl_ros/geo_util] Compute nearest point to a cube
+* [jsk_pcl_ros/geo_util] Compute nearest point to a polygon
+* [jsk_pcl_ros/InteractiveCuboidLikelihood] fix indent
+* [jsk_pcl_ros/ExtractCuboidParticlesTopN] Publish point indices instead
+  of particle pointcloud.
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Use world z coordinates to reject
+  unexpected initial particles
+* [jsk_pcl_ros/ICPRegistration] Support NDT based transformation estimation
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Use kdtree to search candidate
+  points roughly and close prism input hull to extract candidate points correctly
+* [jsk_pcl_ros] Add sample to collaborate particle filter based estimator
+  and occlusion free goal sampler
+* [jsk_pcl_ros/OcclusionBoundingBoxRejector] Do not synchronize input topics
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Use area instead of volume
+  to evaluate size of cuboid
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Use minimum covariance value
+  0.
+  It's mathematically no means but we can implement it by handling zero
+  as special case.
+* [jsk_pcl_ros] Fix computation of coordinates of polygon
+* [jsk_pcl_ros] Fix computation of coordinates of polygon
+* [jsk_pcl_ros/RegionGrowingMultiplePlaneSegmentation] Check direction of polygons
+  to direct to origin of pointcloud.
+* use resizer
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Add
+  inverse_volume_likelihood function
+* [jsk_pcl_ros/EuclideanClusterExtraction] Do not have `using namespace
+  std, pcl` in header file, it may effect other codes globally.
+* [jsk_pcl_ros] Sort headers of build_check.cpp order in alphabetical order
+* [jsk_pcl_ros/ColorizeSegmentedRF] Fix include guard not to collide with colorize_random_points_rf.h
+* [jsk_pcl_ros/MaskImageToDepthConsideredMaskImage] Fix include guard
+* [jsk_pcl_ros] Fix ExtractCuboidParticlesTopN by removing template super
+  class, which is too difficult to handle shared_ptr owenership.
+  And update build_check.cpp.in to instantiate all the nodelet classes
+  to check implementation of prototype definitions.
+* [jsk_pcl_ros/ExtractCuboidParticlesTopN] Publish particles as BoundingBoxArray
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Fix particle initialization
+  if plane coordinates is not equal to itentity and compute distance of
+  occluded points based on sphere approximation
+* [jsk_pcl_ros] Fix Polygon::decomposeToTriangles. EarClip of pcl
+  1.7.2 (hydro) has a fatal bug and copied the latest implementation from
+  current master and rename it as EarClipPatched.
+  We cam remove the codes after we deprecate hydro.
+* [jsk_pcl_ros] Update sample to use tf_transform_bounding_box_array
+* [jsk_pcl_ros] Add TfTransformBoundingBoxArray
+* multi_resolution_organized_pointcloud.launch
+* [jsk_pcl_ros] Add ExtractCuboidParticlesTopN to extract top-N particles
+* [jsk_pcl_ros] Add TfTransformBoundingBox like TfTransformPointCloud
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Register particle point in
+  order to convert to PCLPointCloud2 and it enables to publish all the
+  fields of ParticleCuboid as fields of sensor_msgs::PointCloud2
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Update relationship between
+  particles and polygons as polygon sensor measurement is updated
+* [jsk_pcl_ros] Run rviz in sample_boundingbox_occlusion_rejector.launch
+* [jsk_pcl_ros] Allow variance=0.0 in computing gaussian
+* [jsk_pcl_ros] Link libjsk_pcl_ros_util with libjsk_pcl_ros_base
+* [jsk_pcl_ros] Check all the methods and functions are implemented by
+  compiling build_check.cpp with all the headeres except for kinfu and
+  point_types.h.
+  build_check.cpp is automatically generated with all the header neames
+  and build_check.cpp.in.
+* [jsk_pcl_ros/BoundingBoxOcclusionRejector] Nodelet to reject bounding
+  box which occludes target objects.
+  This nodelet is good for occlusion-free goal planning
+* [jsk_pcl_ros/PointIndicesToMaskImage] untabify code
+* Contributors: Ryohei Ueda, Yu Ohara
+
+0.2.17 (2015-08-21)
+-------------------
+
+0.2.16 (2015-08-19)
+-------------------
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Compute likelihood based on plane-detection-sensor
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Remove unused parameters from class member
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] More correct border condition about occlusion
+* Remove files which added by mistake
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Support sensor_frame via  ~sensor_frame parameter
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Separate likelihood computation parameters from particlefilter parameter to cleanup dynamic_reconfigure parameters
+* [jsk_pcl_ros] Add InteractiveCuboidLikelihood to confirm behavior of likelihood function of PlaneSupportedCuboidEstimator by interactive server
+* Contributors: Ryohei Ueda
+
+0.2.15 (2015-08-18)
+-------------------
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Add ~min_inliers and
+  ~outlier_distance parameter
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Take occlusion into account
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Add ~use_range_likelihood to
+  toggle use likelihood based on geometric constraint
+* Merge pull request `#1054 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1054>`_ from garaemon/plane-supported-cuboid-estimator
+  [jsk_pcl_ros/PlaneSupportedCuboidestimator] Add new nodelet to estimate cuboid on plane based on bayesian recursive estimation
+* [jsk_pcl_ros/PlaneSupportedCuboidestimator] Add new nodelet to estimate
+  cuboid on plane based on bayesian recursive estimation, especially
+  particle filter is used.
+* [jsk_pcl_ros] Add simple code and script to bench RANSAC based plane estimation
+* [jsk_pcl_ros/AttentionClipper] Fix compilation warning:
+  1. fixing name confliction of iteration index
+  2. Use std::runtime_error to catch exception
+* [jsk_pcl_ros] Super simple script to plot gaussian. It is useful to
+  determin several parameters based on normal distribution
+* [jsk_pcl_ros] fix flip option
+* Contributors: Ryohei Ueda, Hitoshi Kamada
+
+0.2.14 (2015-08-13)
+-------------------
+* [jsk_pcl_ros/PoseWithCovarianceStampedtoGussianPointCloud] Add new
+  normalize method: normalize_area and normalize_height
+* [jsk_pcl_ros/PoseWithCovarianceStampedtoGussianPointCloud] Fix to apply sqrt
+* [jsk_pcl_ros/PoseWithCovarianceStampedtoGussianPointCloud] Add offset to z-height
+* [jsk_pcl_ros] Update image on readme about PoseWithCovarianceStampedToGaussianCloud
+* machine tag should defined in somewhere else, not here
+* [jsk_pcl_ros] Add new nodelet to convert geometry_msgs/PoseWithCovarianceStamped to PointCloud with
+  gaussian distribution
+* [jsk_pcl_ros] fix typo in multi_resolution_organized_pointcloud.launch
+* [jsk_pcl_ros/multi_resolution_organized_pointcloud.launch] Add throttled images
+* change frame for renew pose
+* add options for use self_filter
+* add srv to renew pose
+* change remapping for stereo resizer
+* [jsk_pcl_ros] Use fmod to detect jamp where tilt joint angle continues to inclease, such as gazebo simulation environment
+* [jsk_pcl_ros/PolygonPointsSampler] Publich cloud of pcl::PointXYZ
+* [jsk_pcl_ros/HeightmapTimeAccumulation] Fix to return true in reset callback
+* [jsk_pcl_ros/HeightmapTimeAccumulation] Add ~reset service to clear cache
+* [jsk_pcl_ros/HeightmapTimeAccumulation] Supress message
+* [jsk_pcl_ros] Rewrite multi_resolution_organized_pointcloud.launch with jsk_topic_tools/standalone_complexed_nodelet
+* [jsk_pcl_ros/HeightmapMorphologicalFiltering] Add config topic to simplify chain heightmap pileline
+* [jsk_pcl_ros] Add config topic to chain heightmap configuration
+* [jsk_pcl_ros/HeightmapToPointCloud] Fix x-y coordinate value to locate point
+  at the center of pixels
+* [jsk_pcl_ros] HeightmapTimeAccumulation nodelet to complete heightmap in time series
+* [jsk_pcl_ros] Update image of HeightmapMorphologicalFilitering to real
+  sensor data
+* [jsk_pcl_ros] Use boost::accumulators to compute mean and variance in HeightmapMorphologicalFiltering
+* [jsk_pcl_ros/HeightmapMorphologicalFiltering] Update sample image
+* [jsk_pcl_ros] Add HeightmapMorphologicalFiltering nodelet
+* Merge remote-tracking branch 'origin/master' into publish_cloud_with_pose
+* add node for read pcd with pose
+* [jsk_pcl_ros] Add HeightmapToPointCloud nodelet to convert heightmap to pointcloud
+* [jsk_perception] Add nodelet ColorizeFloatImage to colorize generic float image
+* [jsk_pcl_ros] Add HeightmapConverter to convert pointcloud to heightmap
+* [jsk_pcl_ros] Add ColorizeHeight2DMapping and move
+  ColorizeDistanceFromPlane to libjsk_pcl_util.so
+* [jsk_pcl_ros/TiltLaserListener] Add max_queue_size
+* [jsk_pcl_ros] add OrganizedNeighbor search method in ParticleFilterTracking
+* [jsk_pcl_ros/TfTransformCloud] Use tf::MessageFilter
+* [jsk_pcl_ros/stereo_reconstruction.launch] Fix several remappings
+* [jsk_pcl_ros] Update stereo_reconstruction.launch for the latest jsk_topic_tools
+* move model with pose and take color in condition
+* [jsk_pcl_ros] set tracking model with marker in particle_filter_tracker
+* [jsk_pcl_ros/TiltLaserListener] Add ~clear_assembled_scans parameter not to
+  publish same scans twice
+* [jsk_pcl_ros/ICPRegistration] Add parameters for RANSAC
+* [jsk_pcl_ros/TiltLaserListener] Do not publish empty pointcloud if buffer is empty
+* [jsk_pcl_ros] add pointcloud_to_stl nodelet
+* [jsk_pcl_ros] Fix optimization flag
+* [jsk_pcl_ros/EnvironmentPlaneModeling] Fix to make it sure to close the
+  loop of convex hull
+* [jsk_pcl_ros/EnvironmentPlaneModeling] Fix polygon orientation when
+  magnify it
+* [jsk_pcl_ros] Add diagnostics information to NormalDirectionFilter,
+  NormalEstimationOMP and RegionGrowingMultiplePlaneSegmentation
+* [jsk_pcl_ros/TfTransformCloud] Add diagnostic information
+* [jsk_pcl_ros/NormalFlip] Fix direction of normal flip
+* [jsk_pcl_ros/TiltLaserListener] Add diagnostic information
+* change default value of max_distance
+* fix particle filter tracker
+* edit to only remove -std option
+* fix c++ version mismatch problem with boost
+* [jsk_pcl_ros/handle_estimator.l] change jsk_pcl_ros msgs to jsk_recognition_msgs
+* [jsk_pcl_ros] Downsample registered pointcloud for visualization in pointcloud_localizaiton.launch
+* [jsk_pcl_ros/PointCloudLocalization] poke vital_checker for diagnostics
+* [jsk_pcl_ros] Add launch file to run pointcloud_localization
+* [jsk_pcl_ros] Remove model_file argument
+* [jsk_pcl_ros] Fix missing display_machine arg
+* [jsk_pcl_ros] Do not link gpu libraries if cmake fails to detect PCL_GPU modules
+* [jsk_pcl_ros/Kinfu] Publish transformation from map to odom
+* [jsk_pcl_ros] Add Kinfu nodelet
+* [jsk_pcl_ros/TiltLaserListener] Add ~not_use_laser_assembler_service
+  parameter not to use laser_assembler service API but assemble scan
+  pointcloud locally
+* Contributors: JSK Lab Member, Kei Okada, Kentaro Wada, Ryohei Ueda, Yu Ohara, Yuto Inagaki, Iori Kumagai, Wesley Chan
+
 0.2.13 (2015-06-11)
 -------------------
 * [jsk_pcl_ros/SnapIt] Reset cached polygons when unsubscribe() is called
@@ -40,7 +292,7 @@ Changelog for package jsk_pcl_ros
 * [jsk_pcl_ros] Add ~queue_size parameter to NormalDirectionFilter
 * [jsk_pcl_ros] Add class and method name to tf error
 * [jsk_pcl_ros] Cache result of triangle decomposition
-* Contributors: Ryohei Ueda, YuOhara, Yuki Furuta
+* Contributors: Ryohei Ueda, Yu Ohara, Yuki Furuta
 
 0.2.12 (2015-05-04)
 -------------------
@@ -91,7 +343,7 @@ Changelog for package jsk_pcl_ros
 * mask image to mask image which is at close range
 * Added a launch file for rtabmap mapping with multisense.
 * [jsk_pcl_ros] remove unneeded ROS_INFO line
-* Contributors: HRP2, Kamada Hitoshi, Kentaro Wada, Ryohei Ueda, Yohei Kakiuchi, Yoshimaru Tanaka, Yu Ohara, Yuto Inagaki, aginika, iKrishneel
+* Contributors: JSK Lab Member, Kamada Hitoshi, Kentaro Wada, Ryohei Ueda, Yohei Kakiuchi, Yoshimaru Tanaka, Yu Ohara, Yuto Inagaki, iKrishneel
 
 0.2.11 (2015-04-13)
 -------------------
@@ -753,7 +1005,7 @@ Changelog for package jsk_pcl_ros
 * use colorCategory20 function to colorize pointcloud in ClusterPointIndicesDecomposer
 * visualizing connection of planes with lines in OrganizedMultiPlaneSegmentation
 * use rosparam_utils of jsk_topic_tools in StaticPolygonArrayPublisher
-* Contributors: Ryohei Ueda, wesleypchan, Yu Ohara
+* Contributors: Ryohei Ueda, Wesley Chan, Yu Ohara
 
 0.1.17 (2014-09-07)
 -------------------

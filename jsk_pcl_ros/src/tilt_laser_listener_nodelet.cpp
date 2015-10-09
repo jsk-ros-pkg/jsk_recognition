@@ -57,10 +57,13 @@ namespace jsk_pcl_ros
       JSK_NODELET_ERROR("no ~joint_state is specified");
       return;
     }
+    pnh_->getParam("twist_frame_id", twist_frame_id_);
     pnh_->param("overwrap_angle", overwrap_angle_, 0.0);
     std::string laser_type;
+    pnh_->param("clear_assembled_scans", clear_assembled_scans_, false);
     pnh_->param("skip_number", skip_number_, 1);
     pnh_->param("laser_type", laser_type, std::string("tilt_half_down"));
+    pnh_->param("max_queue_size", max_queue_size_, 100);
     if (laser_type == "tilt_half_up") {
       laser_type_ = TILT_HALF_UP;
     }
@@ -85,7 +88,7 @@ namespace jsk_pcl_ros
     if (use_laser_assembler_) {
       if (not_use_laser_assembler_service_) {
         sub_cloud_
-          = pnh_->subscribe("input/cloud", 100, &TiltLaserListener::cloudCallback, this);
+          = pnh_->subscribe("input/cloud", max_queue_size_, &TiltLaserListener::cloudCallback, this);
       }
       else {
         assemble_cloud_srv_
@@ -94,6 +97,7 @@ namespace jsk_pcl_ros
       cloud_pub_
         = pnh_->advertise<sensor_msgs::PointCloud2>("output_cloud", 1);
     }
+    twist_pub_ = pnh_->advertise<geometry_msgs::TwistStamped>("output_velocity", 1);
     prev_angle_ = 0;
     prev_velocity_ = 0;
     start_time_ = ros::Time::now();
@@ -105,7 +109,7 @@ namespace jsk_pcl_ros
     pnh_->param("vital_rate", vital_rate, 1.0);
     cloud_vital_checker_.reset(
       new jsk_topic_tools::VitalChecker(1 / vital_rate));
-    sub_ = pnh_->subscribe("input", 1, &TiltLaserListener::jointCallback, this);
+    sub_ = pnh_->subscribe("input", max_queue_size_, &TiltLaserListener::jointCallback, this);
   }
 
   void TiltLaserListener::subscribe()
@@ -205,6 +209,33 @@ namespace jsk_pcl_ros
     range.start = start;
     range.end = end;
     trigger_pub_.publish(range);
+
+    // publish velocity
+    // only publish if twist_frame_id is not empty
+    if (!twist_frame_id_.empty()) {
+      // simply compute from the latest velocity
+      if (buffer_.size() >= 2) {
+        // at least, we need two joint angles to
+        // compute velocity
+        StampedJointAngle::Ptr latest = buffer_[buffer_.size() - 1];
+        StampedJointAngle::Ptr last_second = buffer_[buffer_.size() - 2];
+        double value_diff = latest->getValue() - last_second->getValue();
+        double time_diff = (latest->header.stamp - last_second->header.stamp).toSec();
+        double velocity = value_diff / time_diff;
+        geometry_msgs::TwistStamped twist;
+        twist.header.frame_id = twist_frame_id_;
+        twist.header.stamp = latest->header.stamp;
+        if (laser_type_ == INFINITE_SPINDLE_HALF || // roll laser
+            laser_type_ == INFINITE_SPINDLE) {
+          twist.twist.angular.x = velocity;
+        }
+        else {                  // tilt laser
+          twist.twist.angular.y = velocity;
+        }
+        twist_pub_.publish(twist);
+      }
+    }
+
     if (use_laser_assembler_) {
       if (skip_counter_++ % skip_number_ == 0) {
         laser_assembler::AssembleScans2 srv;
@@ -226,13 +257,21 @@ namespace jsk_pcl_ros
             std::vector<sensor_msgs::PointCloud2::ConstPtr> target_clouds;
             {
               boost::mutex::scoped_lock lock(cloud_mutex_);
+              if (cloud_buffer_.size() == 0) {
+                return;
+              }
               for (size_t i = 0; i < cloud_buffer_.size(); i++) {
                 ros::Time the_stamp = cloud_buffer_[i]->header.stamp;
                 if (the_stamp > start && the_stamp < end) {
                   target_clouds.push_back(cloud_buffer_[i]);
                 }
               }
-              cloud_buffer_.removeBefore(start);
+              if (clear_assembled_scans_) {
+                cloud_buffer_.removeBefore(end);
+              }
+              else {
+                cloud_buffer_.removeBefore(start);
+              }
             }
             sensor_msgs::PointCloud2 output_cloud;
             getPointCloudFromLocalBuffer(target_clouds, output_cloud);
@@ -290,7 +329,12 @@ namespace jsk_pcl_ros
         if (change_count == 2) {
           ros::Time start_time = buffer_[i]->header.stamp;
           publishTimeRange(stamp, start_time, stamp);
-          buffer_.removeBefore(buffer_[i-1]->header.stamp);
+          if (clear_assembled_scans_) {
+            buffer_.removeBefore(stamp);
+          }
+          else {
+            buffer_.removeBefore(buffer_[i-1]->header.stamp);
+          }
           break;
         }
         direction = current_direction;
@@ -319,23 +363,33 @@ namespace jsk_pcl_ros
       for (size_t i = buffer_.size() - 1; i > 0; i--) {
         // find jump first
         if (!jumped) {
-          double direction = buffer_[i-1]->getValue() - buffer_[i]->getValue();
+          double direction = fmod(buffer_[i-1]->getValue(), 2.0 * M_PI) - fmod(buffer_[i]->getValue(), 2.0 * M_PI);
           if (direction * velocity > 0) {
             jumped = true;
           }
         }
         else {                  // already jumped
           if (velocity > 0) {
-            if (buffer_[i-1]->getValue() < fmod(threshold - overwrap_angle_, 2.0 * M_PI)) {
+            if (fmod(buffer_[i-1]->getValue(), 2.0 * M_PI) < fmod(threshold - overwrap_angle_, 2.0 * M_PI)) {
               publishTimeRange(stamp, buffer_[i-1]->header.stamp, stamp);
-              buffer_.removeBefore(buffer_[i-1]->header.stamp);
+              if (clear_assembled_scans_) {
+                buffer_.removeBefore(stamp);
+              }
+              else {
+                buffer_.removeBefore(buffer_[i-1]->header.stamp);
+              }
               break;
             }
           }
           else if (velocity < 0) {
-            if (buffer_[i-1]->getValue() > fmod(threshold + overwrap_angle_, 2.0 * M_PI)) {
+            if (fmod(buffer_[i-1]->getValue(), 2.0 * M_PI) > fmod(threshold + overwrap_angle_, 2.0 * M_PI)) {
               publishTimeRange(stamp, buffer_[i-1]->header.stamp, stamp);
-              buffer_.removeBefore(buffer_[i-1]->header.stamp);
+              if (clear_assembled_scans_) {
+                buffer_.removeBefore(stamp);
+              }
+              else {
+                buffer_.removeBefore(buffer_[i-1]->header.stamp);
+              }
               break;
             }
           }

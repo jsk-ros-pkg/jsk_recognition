@@ -37,6 +37,7 @@
 #include <rospack/rospack.h>
 #include <opencv/highgui.h>
 #include <cv_bridge/cv_bridge.h>
+#include <opencv/cv.hpp>
 #pragma message "Compiling " __FILE__ "..."
 #include <posedetection_msgs/Feature0DDetect.h>
 #include <posedetection_msgs/ImageFeature0D.h>

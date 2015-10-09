@@ -134,6 +134,7 @@ namespace jsk_pcl_ros
     ros::Publisher pub_polygons_;
     ros::Publisher pub_inliers_;
     ros::Publisher pub_coefficients_;
+    ros::Publisher pub_clustering_result_;
     boost::mutex mutex_;
     
     ////////////////////////////////////////////////////////

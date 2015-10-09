@@ -2,13 +2,12 @@
   <arg name="INPUT_IMAGE" default="/multisense/left/image_rect_color"/>
   <arg name="INPUT_CAMERA_INFO" default="/multisense/left/camera_info"/>
   <arg name="INPUT_POINT_CLOUD" default="/multisense/resize_1_1/points" />
-  <arg name="DEBUG_VIEW" default="false" />
   <node pkg="image_view2" type="image_view2" name="image_view2">
-    <remap from="image" to="/multisense/left/image_rect_color" />
+    <remap from="image" to="$(arg INPUT_IMAGE)" />
   </node>
   <node pkg="jsk_perception" type="rect_to_mask_image"
         name="rect_to_mask_image" output="screen">
-    <remap from="~input" to="/multisense/left/image_rect_color/screenrectangle" />
+    <remap from="~input" to="$(arg INPUT_IMAGE)/screenrectangle" />
     <remap from="~input/camera_info" to="$(arg INPUT_CAMERA_INFO)" />
   </node>
   <node pkg="jsk_pcl_ros" type="mask_image_filter" name="mask_image_filter">
@@ -27,12 +26,12 @@
   </node>
 
   <node pkg="jsk_pcl_ros" type="mask_image_cluster_filter" name="mask_image_cluster_filter">
-    <remap from="~input" to="supervoxel_segmentation/output/cloud"/>    
+    <remap from="~input" to="supervoxel_segmentation/output/cloud"/>
     <remap from="~target" to="supervoxel_segmentation/output/indices" />
     <remap from="~input/mask" to="rect_to_mask_image/output"/>
     <remap from="~input/camera_info" to="$(arg INPUT_CAMERA_INFO)" />
   </node>
-  
+
   <node pkg="nodelet" type="nodelet" name="filtered_cloud"
         args="standalone pcl/ExtractIndices">
     <remap from="~input" to="$(arg INPUT_POINT_CLOUD)"/>

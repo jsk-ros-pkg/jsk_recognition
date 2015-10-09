@@ -50,6 +50,9 @@
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include "jsk_pcl_ros/tf_listener_singleton.h"
 
+#include <tf/message_filter.h>
+#include <message_filters/subscriber.h>
+
 namespace jsk_pcl_ros
 {
   class TfTransformCloud: public jsk_topic_tools::DiagnosticNodelet
@@ -58,15 +61,18 @@ namespace jsk_pcl_ros
     TfTransformCloud(): DiagnosticNodelet("TfTransformCloud") {}
   protected:
     ros::Subscriber sub_cloud_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_cloud_message_filters_;
     ros::Publisher  pub_cloud_;
     std::string target_frame_id_;
     tf::TransformListener* tf_listener_;
+    boost::shared_ptr<tf::MessageFilter<sensor_msgs::PointCloud2> > tf_filter_;
     virtual void transform(const sensor_msgs::PointCloud2ConstPtr &input);
     virtual void subscribe();
     virtual void unsubscribe();
     
     double duration_;
     bool use_latest_tf_;
+    int tf_queue_size_;
   private:
     virtual void onInit();
   };

@@ -4,7 +4,7 @@
 #include <image_geometry/pinhole_camera_model.h>
 #include <tf/transform_listener.h>
 #include <tf/transform_broadcaster.h>
-#include <opencv/cv.h>
+#include <opencv/cv.hpp>
 #include <opencv/highgui.h>
 #include <cv_bridge/cv_bridge.h>
 
@@ -134,7 +134,7 @@ public:
       }
 
       // warp from (cpoint in camera) to (vpoint in virtual camera)
-      CvPoint2D32f src_pnt[4], dst_pnt[4];
+      cv::Point2f src_pnt[4], dst_pnt[4];
       for(int i = 0; i < 4; i++) {
 	cv::Point3d xyz(target_poly[i].x(),target_poly[i].y(),target_poly[i].z());
 	cv::Point3d xyz_trans(target_poly_translated[i].x(),
@@ -142,15 +142,12 @@ public:
 			      target_poly_translated[i].z());
 	cv::Point2d uv,uv_trans;
 	uv = cam_model_.project3dToPixel(xyz);
-	src_pnt[i] = cvPoint2D32f (uv.x, uv.y);
+	src_pnt[i] = cv::Point (uv.x, uv.y);
 	uv_trans = cam_model_.project3dToPixel(xyz_trans);
-	dst_pnt[i] = cvPoint2D32f (uv_trans.x, uv_trans.y);
+	dst_pnt[i] = cv::Point (uv_trans.x, uv_trans.y);
       }
 
-      CvMat* map_matrix = cvCreateMat (3, 3, CV_32FC1);
-      cvGetPerspectiveTransform (src_pnt, dst_pnt, map_matrix);
-      cv::Mat map_matrix2(map_matrix);
-      
+      cv::Mat map_matrix = cv::getPerspectiveTransform (src_pnt, dst_pnt);
 
       // unrectified?
       //IplImage* rectified = cvCloneImage(src);
@@ -159,7 +156,7 @@ public:
       //cvWarpPerspective (rectified, dest, map_matrix, CV_INTER_LINEAR + CV_WARP_FILL_OUTLIERS, cvScalarAll (0));
       cv::Mat to_mat = src.clone();
       cam_model_.rectifyImage(src, to_mat);
-      cv::warpPerspective (src, dest, map_matrix2, dest.size(), cv::INTER_LINEAR);
+      cv::warpPerspective (src, dest, map_matrix, dest.size(), cv::INTER_LINEAR);
       //cvReleaseImage(&rectified);
     } catch ( std::runtime_error e ) {
       // JSK_ROS_ERROR("%s",e.what());

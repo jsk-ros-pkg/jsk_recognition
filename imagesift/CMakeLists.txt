@@ -13,6 +13,7 @@ catkin_package(
     DEPENDS OpenCV libsiftfast
 )
 
+catkin_python_setup()
 
 set(ENV{PKG_CONFIG_PATH} ${CATKIN_DEVEL_PREFIX}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH})
 find_package(PkgConfig REQUIRED)
@@ -36,11 +37,15 @@ macro(jsk_feature detector extractor exec_name)
   add_dependencies(${exec_name} posedetection_msgs_generate_messages_cpp libsiftfast)
 endmacro(jsk_feature detector extractor exec_name)
 
+message(STATUS "OpenCV_VERSION: ${OpenCV_VERSION}")
+if("${OpenCV_VERSION}" VERSION_LESS 3.0.0) # http://stackoverflow.com/questions/31509600/why-so-many-featuredetector-and-descriptorextractor-are-not-supported-in-opencv
 jsk_feature("SURF" "SURF" "imagesurf")
 jsk_feature("STAR" "SURF" "imagestar")
-jsk_feature("BRISK" "BRISK" "imagebrisk")
 jsk_feature("SIFT" "SURF" "imagesift_surf")
 jsk_feature("SIFT" "SIFT" "imagesift_sift")
+endif()
+jsk_feature("BRISK" "BRISK" "imagebrisk")
+
 
 jsk_nodelet(src/imagesift.cpp
   "imagesift/ImageSift"

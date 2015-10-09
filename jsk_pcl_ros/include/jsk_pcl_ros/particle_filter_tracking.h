@@ -40,8 +40,10 @@
 #include <ros/ros.h>
 #include <ros/names.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <visualization_msgs/Marker.h>
 #include <tf/transform_broadcaster.h>
 #include <tf_conversions/tf_eigen.h>
+#include <jsk_pcl_ros/pcl_conversion_util.h>
 // pcl
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl/point_types.h>
@@ -488,8 +490,40 @@ namespace pcl
     };
 
     
-  }
-  
+    template <typename PointInT>
+    class OrganizedNearestPairPointCloudCoherence: public NearestPairPointCloudCoherence<PointInT>
+    {
+    public:
+      using NearestPairPointCloudCoherence<PointInT>::target_input_;
+      using NearestPairPointCloudCoherence<PointInT>::new_target_;
+      using NearestPairPointCloudCoherence<PointInT>::getClassName;
+      typename boost::shared_ptr<pcl::search::OrganizedNeighbor<PointInT> > search_;
+    protected:
+      virtual bool initCompute ()
+      {
+	if (!PointCloudCoherence<PointInT>::initCompute ())
+	  {
+	    PCL_ERROR ("[pcl::%s::initCompute] PointCloudCoherence::Init failed.\n", getClassName ().c_str ());
+	    //deinitCompute ();
+	    return (false);
+	  }
+	
+	// initialize tree
+	if (!search_)
+	  search_.reset (new pcl::search::OrganizedNeighbor<PointInT> (false));
+      
+	if (new_target_ && target_input_)
+	  {
+	    search_->setInputCloud (target_input_);
+	    if (!search_->isValid())
+	      return false;
+	    new_target_ = false;
+	  }
+      
+	return true;
+      }
+    };
+  }  
 }
 
 using namespace pcl::tracking;
@@ -498,7 +532,7 @@ namespace jsk_pcl_ros
   class ParticleFilterTracking: public pcl_ros::PCLNodelet
   {
   public:
-    typedef pcl::PointXYZRGBA PointT;
+    typedef pcl::PointXYZRGB PointT;
     typedef ParticleFilterTrackingConfig Config;
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
@@ -527,6 +561,7 @@ namespace jsk_pcl_ros
 
     ros::Subscriber sub_;
     ros::Subscriber sub_update_model_;
+    ros::Subscriber sub_update_with_marker_model_;
 
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<jsk_recognition_msgs::BoundingBox> sub_box_;
@@ -551,6 +586,7 @@ namespace jsk_pcl_ros
     bool reversed_;
     bool not_use_reference_centroid_;
     bool not_publish_tf_;
+    int marker_to_pointcloud_sampling_nums_;
     virtual void config_callback(Config &config, uint32_t level);
     virtual void publish_particles();
     virtual void publish_result();
@@ -568,6 +604,7 @@ namespace jsk_pcl_ros
       const sensor_msgs::PointCloud2::ConstPtr &pc_ptr,
       const jsk_recognition_msgs::BoundingBox::ConstPtr &bb_ptr);
     virtual void renew_model_topic_cb(const sensor_msgs::PointCloud2 &pc);
+    virtual void renew_model_with_marker_topic_cb(const visualization_msgs::Marker &marker);
 
     ////////////////////////////////////////////////////////
     // Wrap particle filter methods

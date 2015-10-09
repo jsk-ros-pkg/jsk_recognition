@@ -14,6 +14,10 @@ find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 find_package(Eigen REQUIRED)
 include_directories(${Eigen_INCLUDE_DIRS})
 
+include(FindPkgConfig)
+pkg_check_modules(libcmt_pkg libcmt)
+
+
 FIND_PACKAGE( OpenMP REQUIRED)
 if(OPENMP_FOUND)
 message("OPENMP FOUND")
@@ -21,8 +25,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
-include(FindPkgConfig)
-pkg_check_modules(libcmt REQUIRED libcmt)
 add_definitions("-g -O2")
 
 # Dynamic reconfigure support
@@ -76,7 +78,7 @@ execute_process(
   MK_DIR=${mk_PREFIX}/share/mk installed
   RESULT_VARIABLE _make_failed)
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${libcmt_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels)
+include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels)
 add_executable(camshiftdemo src/camshiftdemo.cpp)
 add_executable(linemod src/linemod.cpp)
 add_executable(virtual_camera_mono src/virtual_camera_mono.cpp)
@@ -95,7 +97,9 @@ macro(jsk_perception_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_na
     jsk_perception_nodelet_sources jsk_perception_nodelet_executables)
 endmacro()
 jsk_perception_nodelet(src/edge_detector.cpp "jsk_perception/EdgeDetector" "edge_detector")
-jsk_perception_nodelet(src/cmt.cpp "jsk_perception/CMTNodelet" "cmt_node")
+if (libcmt_pkg_FOUND)
+  jsk_perception_nodelet(src/cmt.cpp "jsk_perception/CMTNodelet" "cmt_node")
+endif (libcmt_pkg_FOUND)
 jsk_perception_nodelet(src/sparse_image_encoder.cpp "jsk_perception/SparseImageEncoder" "sparse_image_encoder")
 jsk_perception_nodelet(src/sparse_image_decoder.cpp "jsk_perception/SparseImageDecoder" "sparse_image_decoder")
 jsk_perception_nodelet(src/color_histogram.cpp "jsk_perception/ColorHistogram" "color_histogram")
@@ -149,7 +153,13 @@ add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
   src/image_utils.cpp
   src/histogram_of_oriented_gradients.cpp
   )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${libcmt_LIBRARIES})
+if (libcmt_pkg_FOUND)
+  target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES}
+    ${libcmt_LIBRARY_DIRS}/lib${libcmt_LIBRARIES}.so)
+  include_directories({libcmt_INCLUDE_DIRS})
+else (libcmt_pkg_FOUND)
+  target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+endif (libcmt_pkg_FOUND)
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 
 

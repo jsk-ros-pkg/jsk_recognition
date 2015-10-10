@@ -38,7 +38,6 @@
 #include <opencv/highgui.h>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv/cv.hpp>
-#pragma message "Compiling " __FILE__ "..."
 #include <posedetection_msgs/Feature0DDetect.h>
 #include <posedetection_msgs/ImageFeature0D.h>
 #include <posedetection_msgs/ObjectDetection.h>
@@ -456,7 +455,7 @@ public:
       }
       if((max_x - min_x) < 30 || (max_y - min_y) < 30 ||
          src_img.rows < (max_x - min_x)/2 || src_img.cols < (max_y - min_y)/2){
-        JSK_ROS_INFO("        matched region is too big or small (2< && <30) width:%d height:%d return-from estimate-od", max_x - min_x, max_y - min_y);
+        JSK_ROS_INFO("        matched region is too big or small (2< && <30) width:%f height:%f return-from estimate-od", max_x - min_x, max_y - min_y);
         return false;
       }
     }
@@ -469,7 +468,7 @@ public:
       err_sum += err;
     }
     if (err_sum > err_thr){
-      JSK_ROS_INFO("          err_sum:%d > err_thr:%d return-from estimate-od", err_sum, err_thr);
+      JSK_ROS_INFO("          err_sum:%f > err_thr:%f return-from estimate-od", err_sum, err_thr);
       err_success = false;
     }
     // draw lines around the detected object

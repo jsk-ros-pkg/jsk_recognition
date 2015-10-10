@@ -1,5 +1,47 @@
 checkerboard_detector
 ====================
+![](images/checkerboard_detector.png)
+
+`checkerboard_detector` is an executabel to detect checker board.
+
+Subscribing Topics
+------------------
+* `~image` (`sensor_msgs/Image`)
+* `~camera_info` (`sensor_msgs/CameraInfo`)
+
+  Input image and camera info. Intrinsic camera parameter is
+  acquired from `~camera_info`.
+
+Publishing Topics
+-----------------
+* `ObjectDetection` (`posedetection_msgs/ObjectDetection`)
+* `objectdetection_pose` (`geometry_msgs/PoseStamped`)
+
+  Pose of checkerboard in `posedetection_msgs/ObjectDetection` and `geometry_msgs/PoseStamped`.
+* `corner_point` (`geometry_msgs/PointStamped`)
+
+  Corner points.
+* `polygons` (`jsk_recognition_msgs/PolygonArray`)
+
+  Publish checker board as `jsk_recognition_msgs/PolygonArray`. It is useful to visualize in rviz.
+
+Parameters
+----------
+* `display` (default: `0`)
+
+  Set `1` to enable debug view.
+* `board_type` (default: `chess`)
+
+  Type of marker. `chess`, `circle` and `acircle` are supported.
+
+* `rect%d_size_x`
+* `rect%d_size_y`
+
+  Size of checkerboard in m unit.
+* `grid%d_size_x`
+* `grid%d_size_y`
+
+  The number of grids in x and y axis.
 
 Trouble Shooting
 ----------------

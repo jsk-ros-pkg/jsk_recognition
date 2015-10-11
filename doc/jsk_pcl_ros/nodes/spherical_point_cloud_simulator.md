@@ -40,3 +40,9 @@ spherical laser.
 
   Fps of laser sensor.
   The default value is same to hokuyo's parameter.
+
+## Sample
+
+```
+roslaunch jsk_pcl_ros laser_camera_fov_sample.launch
+```

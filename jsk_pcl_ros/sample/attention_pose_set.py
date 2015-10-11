@@ -3,7 +3,7 @@
 import rospy
 import math
 from geometry_msgs.msg import PoseStamped
-from jsk_pcl_ros.msg import BoundingBox, BoundingBoxArray
+from jsk_recognition_msgs.msg import BoundingBox, BoundingBoxArray
 rospy.init_node("attention_pose_set")
 pub = rospy.Publisher("/attention_clipper/input/box_array", BoundingBoxArray)
 r = rospy.Rate(10)

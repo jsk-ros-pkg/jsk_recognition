@@ -1,0 +1,14 @@
+<launch>
+  <node pkg="jsk_pcl_ros" type="laser_camera_fov_sample.py" name="laser_camera_fov_sample" />
+  <node pkg="jsk_pcl_ros" type="spherical_pointcloud_simulator"
+        name="spherical_pointcloud_simulator">
+    <remap from="~input" to="laser_camera_fov_sample/cloud" />
+    <param name="frame_id" value="origin" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="planar_pointcloud_simulator"
+        name="planar_pointcloud_simulator">
+    <remap from="~input" to="laser_camera_fov_sample/info" />
+  </node>
+  <node pkg="rviz" type="rviz" name="rviz"
+        args="-d $(find jsk_pcl_ros)/config/laser_camera_fov_sample.rviz" />
+</launch>

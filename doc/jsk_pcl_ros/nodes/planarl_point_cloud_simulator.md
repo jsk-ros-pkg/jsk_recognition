@@ -19,3 +19,8 @@ Sensor model is pinhole camera model.
 
   Distance to pointcloud from origin along z-axis.
 
+## Sample
+
+```
+roslaunch jsk_pcl_ros laser_camera_fov_sample.launch
+```

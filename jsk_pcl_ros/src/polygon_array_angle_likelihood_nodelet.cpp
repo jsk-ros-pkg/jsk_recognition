@@ -84,7 +84,7 @@ namespace jsk_pcl_ros
       // respected from msg->header.frame_id
       tf::StampedTransform transform;
       tf_listener_->lookupTransform(
-        msg->header.frame_id, target_frame_id_, msg->header.stamp, transform);
+        target_frame_id_, msg->header.frame_id, msg->header.stamp, transform);
       Eigen::Affine3f pose;
       tf::transformTFToEigen(transform, pose);
 
@@ -107,7 +107,7 @@ namespace jsk_pcl_ros
       for (size_t i = 0; i < distances.size(); i++) {
         // double normalized_distance
         //   = (distances[i] - min_distance) / (max_distance - min_distance);
-        double likelihood = 1 / (1 + distances[i] * distances[i]);
+        double likelihood = 1 / (1 + (distances[i] - 1) * (distances[i] - 1));
         
         if (msg->likelihood.size() == 0) {
           new_msg.likelihood.push_back(likelihood);

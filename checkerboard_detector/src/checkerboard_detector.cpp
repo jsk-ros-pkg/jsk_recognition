@@ -207,7 +207,7 @@ public:
 
         if( display ) {
           cv::namedWindow("Checkerboard Detector",
-                          (display == 1? CV_WINDOW_AUTOSIZE : display));
+                          (display == 1? CV_WINDOW_NORMAL : display));
         }
 
         lasttime = ros::Time::now();

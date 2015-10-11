@@ -20,6 +20,8 @@ env:
   - ROS_DISTRO=indigo  ROSWS=wstool BUILDER=catkin USE_DEB=true NOT_TEST_INSTALL=true ROS_PARALLEL_JOBS="-j8" NO_SUDO="true"
   - ROS_DISTRO=indigo  ROSWS=wstool BUILDER=catkin BEFORE_SCRIPT="git clone -b indigo https://github.com/ros-perception/vision_opencv.git" EXTRA_DEB="ros-indigo-opencv3" USE_DEB=true NOT_TEST_INSTALL=true ROS_PARALLEL_JOBS="-j8" NO_SUDO="true"
 matrix:
+  allow_failures:
+    - env: ROS_DISTRO=indigo  ROSWS=wstool BUILDER=catkin BEFORE_SCRIPT="git clone -b indigo https://github.com/ros-perception/vision_opencv.git" EXTRA_DEB="ros-indigo-opencv3" USE_DEB=true NOT_TEST_INSTALL=true ROS_PARALLEL_JOBS="-j8" NO_SUDO="true"
 script:
   - source .travis/travis.sh
   - (cd doc && source setup.sh && make html)

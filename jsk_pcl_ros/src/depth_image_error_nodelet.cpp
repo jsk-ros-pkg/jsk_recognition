@@ -43,6 +43,7 @@ namespace jsk_pcl_ros
   void DepthImageError::onInit()
   {
     ConnectionBasedNodelet::onInit();
+    pnh_->param("approximate_sync", approximate_sync_, false);
     depth_error_publisher_ = advertise<jsk_recognition_msgs::DepthErrorResult>(*pnh_, "output", 1);
   }
 
@@ -51,17 +52,24 @@ namespace jsk_pcl_ros
     sub_image_.subscribe(*pnh_, "image", 1);
     sub_point_.subscribe(*pnh_, "point", 1);
     sub_camera_info_.subscribe(*pnh_, "camera_info", 1);
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(1000);
-    sync_->connectInput(sub_image_, sub_point_, sub_camera_info_);
-    sync_->registerCallback(boost::bind(&DepthImageError::calcError,
-                                        this, _1, _2, _3));
+    if (approximate_sync_) {
+      async_ = boost::make_shared<message_filters::Synchronizer<ASyncPolicy> >(1000);
+      async_->connectInput(sub_image_, sub_point_, sub_camera_info_);
+      async_->registerCallback(boost::bind(&DepthImageError::calcError,
+                                          this, _1, _2, _3));
+    }
+    else {
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(1000);
+      sync_->connectInput(sub_image_, sub_point_, sub_camera_info_);
+      sync_->registerCallback(boost::bind(&DepthImageError::calcError,
+                                          this, _1, _2, _3));
+    }
   }
 
   void DepthImageError::unsubscribe()
   {
     sub_image_.unsubscribe();
     sub_point_.unsubscribe();
-
   }
 
 

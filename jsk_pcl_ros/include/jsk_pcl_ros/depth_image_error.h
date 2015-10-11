@@ -60,6 +60,11 @@ namespace jsk_pcl_ros
     sensor_msgs::Image,
     geometry_msgs::PointStamped,
     sensor_msgs::CameraInfo
+     > ASyncPolicy;
+    typedef message_filters::sync_policies::ExactTime<
+    sensor_msgs::Image,
+    geometry_msgs::PointStamped,
+    sensor_msgs::CameraInfo
      > SyncPolicy;
     ros::Publisher depth_error_publisher_;
   protected:
@@ -72,7 +77,9 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<sensor_msgs::Image> sub_image_;
     message_filters::Subscriber<geometry_msgs::PointStamped> sub_point_;
     message_filters::Subscriber<sensor_msgs::CameraInfo> sub_camera_info_;
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    boost::shared_ptr<message_filters::Synchronizer<ASyncPolicy> > async_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
+    bool approximate_sync_;
   private:
   };
 }

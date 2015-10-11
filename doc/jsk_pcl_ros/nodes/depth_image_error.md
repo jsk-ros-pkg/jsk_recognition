@@ -2,6 +2,24 @@
 
 Compute error of depth image and corner point of checker board.
 
+## Subscribing Topic
+* `~image` (`sensor_msgs/Image`)
+* `~camera_info` (`sensor_msgs/CameraInfo`)
+  Input image and camera info.
+* `~point` (`geometry_msgs/PointStamped`)
+
+  Corner point of checkerboard.
+
+## Publishing Topic
+* `~output` (`jsk_recognition_msgs/DepthErrorResult`)
+
+  Error between depth image and `~point`.
+
+## Parameters
+* `~approximate_sync` (boolean, default: `false`)
+
+  Use approximate sync if it is true.
+
 ## Sample
 
 ```

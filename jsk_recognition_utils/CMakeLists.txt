@@ -25,6 +25,8 @@ catkin_package(
  CATKIN_DEPENDS jsk_recognition_msgs pcl_ros visualization_msgs
 )
 
+catkin_python_setup()
+
 find_package(OpenCV REQUIRED core imgproc)
 find_package(PkgConfig)
 pkg_check_modules(yaml_cpp yaml-cpp REQUIRED)

@@ -55,7 +55,7 @@ namespace jsk_pcl_ros
     pub_ = pnh.advertise<std_msgs::Bool>("collision_status", 1);
   }
 
-  void CollisionDetector::initSelfMask(ros::NodeHandle pn, ros::NodeHandle pnh)
+  void CollisionDetector::initSelfMask(const ros::NodeHandle& pn, const ros::NodeHandle& pnh)
   {
     // genearte urdf model
     std::string content;
@@ -71,10 +71,10 @@ namespace jsk_pcl_ros
     pnh.param<std::string>("root_link_id", root_link_id, "BODY");
     pnh.param<std::string>("world_frame_id", world_frame_id, "map");
 
-    pnh.param<double>("min_sensor_dist", min_sensor_dist_, 0.01);
+    pnh.param("min_sensor_dist", min_sensor_dist_, 0.01);
     double default_padding, default_scale;
-    pnh.param<double>("self_see_default_padding", default_padding, 0.01);
-    pnh.param<double>("self_see_default_scale", default_scale, 1.0);
+    pnh.param("self_see_default_padding", default_padding, 0.01);
+    pnh.param("self_see_default_scale", default_scale, 1.0);
     std::vector<robot_self_filter::LinkInfo> links;
     std::string link_names;
 
@@ -147,9 +147,11 @@ namespace jsk_pcl_ros
 
     // check containment for all point cloud
     bool contain_flag = false;
-    for(pcl::PointCloud<pcl::PointXYZ>::const_iterator it = cloud->begin(); it != cloud->end(); ++it) {
-      if(finite(it->x) && finite(it->y) && finite(it->z) &&
-         self_mask_->getMaskContainment(it->x, it->y, it->z) == robot_self_filter::INSIDE) {
+    pcl::PointXYZ p;
+    for(size_t i = 0; i < cloud->size(); i++) {
+      p = cloud->at(i);
+      if(finite(p.x) && finite(p.y) && finite(p.z) &&
+         self_mask_->getMaskContainment(p.x, p.y, p.z) == robot_self_filter::INSIDE) {
         contain_flag = true;
         break;
       }

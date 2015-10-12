@@ -64,7 +64,7 @@ namespace jsk_pcl_ros
     CollisionDetector();
 
   protected:
-    void initSelfMask(ros::NodeHandle pn, ros::NodeHandle pnh);
+    void initSelfMask(const ros::NodeHandle& pn, const ros::NodeHandle& pnh);
     void checkCollision(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg, const jsk_recognition_msgs::JointStateWithPose::ConstPtr& joint_msg);
 
     ros::Publisher pub_;

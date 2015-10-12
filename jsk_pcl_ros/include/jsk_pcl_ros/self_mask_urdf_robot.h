@@ -72,7 +72,7 @@ namespace robot_self_filter
       tf::poseKDLToTF(pose, output_pose);
     }
 
-    void updateRobotModel(std::map<std::string, double>& joint_angles, tf::Pose root_pose)
+    void updateRobotModel(std::map<std::string, double>& joint_angles, const tf::Pose& root_pose)
     {
       // for debug
       /* std::map<std::string, double> joint_angles; */
@@ -101,7 +101,7 @@ namespace robot_self_filter
       tf_broadcaster_.sendTransform(link_transforms);
     }
 
-    void assumeFrameFromJointAngle(sensor_msgs::JointState joint, geometry_msgs::PoseStamped pose)
+    void assumeFrameFromJointAngle(const sensor_msgs::JointState& joint, const geometry_msgs::PoseStamped& pose)
     {
       std::map<std::string, double> joint_angles;
       for (size_t i = 0; i < joint.name.size(); i++) {

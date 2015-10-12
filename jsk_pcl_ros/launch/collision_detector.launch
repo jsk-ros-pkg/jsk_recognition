@@ -46,6 +46,7 @@
       </rosparam>
       <param name="world_frame_id" value="gazebo_world" />
       <param name="root_link_id" value="WAIST_LINK0" />
+      <param name="publish_tf" value="true" />
     </node>
   </group>
 

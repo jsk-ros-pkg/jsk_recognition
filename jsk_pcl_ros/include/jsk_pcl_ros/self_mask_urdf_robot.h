@@ -30,6 +30,8 @@ namespace robot_self_filter
       root_link_id_(root_link_id),
       world_frame_id_(world_frame_id)
     {
+      ros::NodeHandle pnh("~");
+      pnh.param("publish_tf", publish_tf_, false);
       initKdlConfigure();
     }
 
@@ -84,21 +86,26 @@ namespace robot_self_filter
         ROS_DEBUG_STREAM("joint " << it->first << " : " << it->second);
       }
 
-      // publish tf of all links
-      std::vector<tf::StampedTransform> link_transforms;
       for(unsigned int i = 0 ; i < bodies_.size() ; i++) {
         std::string name = bodies_[i].name;
         updateChain(joint_angles, chain_map_[name], pose_map_[name]);
         pose_map_[name] = root_pose * pose_map_[name];
-        tf::Pose link_trans = pose_map_[name];
-        ros::Time stamp = ros::Time::now();
-        link_transforms.push_back(tf::StampedTransform(link_trans, stamp, world_frame_id_, "collision_detector/"+name));
-        ROS_DEBUG_STREAM("link trans [" << name <<
-                        "] pos=( " << link_trans.getOrigin().getX() << ", " << link_trans.getOrigin().getY() << ", " << link_trans.getOrigin().getZ() <<
-                        ")  rot=( " << link_trans.getRotation().getW() << ", " << link_trans.getRotation().getX() << ", " << link_trans.getRotation().getY() << ", " << link_trans.getRotation().getZ() << ")");
-
       }
-      tf_broadcaster_.sendTransform(link_transforms);
+
+      // publish tf of all links
+      if(publish_tf_) {
+        std::vector<tf::StampedTransform> link_transforms;
+        for(unsigned int i = 0 ; i < bodies_.size() ; i++) {
+          std::string name = bodies_[i].name;
+          tf::Pose link_trans = pose_map_[name];
+          ros::Time stamp = ros::Time::now();
+          link_transforms.push_back(tf::StampedTransform(link_trans, stamp, world_frame_id_, "collision_detector/"+name));
+          ROS_DEBUG_STREAM("link trans [" << name <<
+                           "] pos=( " << link_trans.getOrigin().getX() << ", " << link_trans.getOrigin().getY() << ", " << link_trans.getOrigin().getZ() <<
+                           ")  rot=( " << link_trans.getRotation().getW() << ", " << link_trans.getRotation().getX() << ", " << link_trans.getRotation().getY() << ", " << link_trans.getRotation().getZ() << ")");
+        }
+        tf_broadcaster_.sendTransform(link_transforms);
+      }
     }
 
     void assumeFrameFromJointAngle(const sensor_msgs::JointState& joint, const geometry_msgs::PoseStamped& pose)
@@ -128,9 +135,9 @@ namespace robot_self_filter
     std::map<std::string, KDL::Chain> chain_map_;
     std::map<std::string, tf::Pose> pose_map_;
     tf::TransformBroadcaster &tf_broadcaster_;
-
     std::string world_frame_id_;
     std::string root_link_id_;
+    bool publish_tf_;
   };
 
 }

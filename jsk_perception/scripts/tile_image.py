@@ -45,6 +45,6 @@ class TileImages(ConnectionBasedTransport):
 
 
 if __name__ == '__main__':
-    rospy.init_node('tile_images')
-    tile_images = TileImages()
+    rospy.init_node('tile_image')
+    tile_image = TileImages()
     rospy.spin()

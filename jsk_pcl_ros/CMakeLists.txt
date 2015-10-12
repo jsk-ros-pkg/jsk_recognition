@@ -69,7 +69,8 @@ add_service_files(FILES SwitchTopic.srv
   EnvironmentLock.srv
   PolygonOnEnvironment.srv
   ICPAlignWithBox.srv
-  ICPAlign.srv)
+  ICPAlign.srv
+  CheckCollision.srv)
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(

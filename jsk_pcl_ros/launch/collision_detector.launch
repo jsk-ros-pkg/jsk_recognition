@@ -10,7 +10,6 @@
       <remap from="~input" to="$(arg INPUT)" />
       <remap from="~input_joint" to="/collision_detector/joint" />
       <rosparam>
-        min_sensor_dist: 0.2
         self_see_default_padding: 0.0
         self_see_default_scale: 1.0
         self_see_links:

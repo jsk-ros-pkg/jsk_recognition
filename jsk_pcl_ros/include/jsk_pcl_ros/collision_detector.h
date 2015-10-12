@@ -38,10 +38,7 @@
 #define JSK_PCL_ROS_COLLISION_DETECTOR_H_
 
 #include <sensor_msgs/PointCloud2.h>
-#include <jsk_recognition_msgs/JointStateWithPose.h>
-#include <message_filters/subscriber.h>
-#include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/approximate_time.h>
+#include <jsk_pcl_ros/CheckCollision.h>
 
 #include <pcl/point_types.h>
 #include <pcl_ros/transforms.h>
@@ -57,27 +54,26 @@ namespace jsk_pcl_ros
   {
   public:
     typedef boost::shared_ptr<CollisionDetector> Ptr;
-    typedef message_filters::sync_policies::ApproximateTime<
-      sensor_msgs::PointCloud2,
-      jsk_recognition_msgs::JointStateWithPose > ApproximateSyncPolicy;
 
     CollisionDetector();
 
   protected:
     void initSelfMask(const ros::NodeHandle& pn, const ros::NodeHandle& pnh);
-    void checkCollision(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg, const jsk_recognition_msgs::JointStateWithPose::ConstPtr& joint_msg);
-
-    ros::Publisher pub_;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_pointcloud_;
-    message_filters::Subscriber<jsk_recognition_msgs::JointStateWithPose> sub_jointstate_;
-    boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> >async_;
+    bool checkCollision(const sensor_msgs::JointState& joint,
+                        const geometry_msgs::PoseStamped& pose);
+    void pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg);
+    bool serviceCallback(jsk_pcl_ros::CheckCollision::Request &req,
+                         jsk_pcl_ros::CheckCollision::Response &res);
+    ros::Subscriber sub_;
+    ros::ServiceServer service_;
 
     std::string world_frame_id_;
-
+    std::string cloud_frame_id_;
     robot_self_filter::SelfMaskUrdfRobot* self_mask_;
+    ros::Time cloud_stamp_;
+    pcl::PointCloud<pcl::PointXYZ> cloud_;
     tf::TransformListener tf_listener_;
     tf::TransformBroadcaster tf_broadcaster_;
-    double min_sensor_dist_;
   };
 }
 

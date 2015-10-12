@@ -45,14 +45,8 @@ namespace jsk_pcl_ros
     ros::NodeHandle pnh("~");
     initSelfMask(pn, pnh);
     pnh.param<std::string>("world_frame_id", world_frame_id_, "map");
-
-    sub_pointcloud_.subscribe(pnh, "input", 1);
-    sub_jointstate_.subscribe(pnh, "input_joint", 1);
-    async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(100);
-    async_->connectInput(sub_pointcloud_, sub_jointstate_);
-    async_->registerCallback(boost::bind(&CollisionDetector::checkCollision, this, _1, _2));
-
-    pub_ = pnh.advertise<std_msgs::Bool>("collision_status", 1);
+    sub_ = pnh.subscribe("input", 1, &CollisionDetector::pointcloudCallback, this);
+    service_ = pnh.advertiseService("check_collision", &CollisionDetector::serviceCallback, this);
   }
 
   void CollisionDetector::initSelfMask(const ros::NodeHandle& pn, const ros::NodeHandle& pnh)
@@ -71,7 +65,6 @@ namespace jsk_pcl_ros
     pnh.param<std::string>("root_link_id", root_link_id, "BODY");
     pnh.param<std::string>("world_frame_id", world_frame_id, "map");
 
-    pnh.param("min_sensor_dist", min_sensor_dist_, 0.01);
     double default_padding, default_scale;
     pnh.param("self_see_default_padding", default_padding, 0.01);
     pnh.param("self_see_default_scale", default_scale, 1.0);
@@ -120,36 +113,50 @@ namespace jsk_pcl_ros
     self_mask_ = new robot_self_filter::SelfMaskUrdfRobot(tf_listener_, tf_broadcaster_, links, urdf_model, root_link_id, world_frame_id);
   }
 
-  void CollisionDetector::checkCollision(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
-                                         const jsk_recognition_msgs::JointStateWithPose::ConstPtr& joint_msg)
+  void CollisionDetector::pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
+  {
+    ROS_DEBUG("update pointcloud.");
+
+    pcl::fromROSMsg(*msg, cloud_);
+    cloud_frame_id_ = msg->header.frame_id;
+    cloud_stamp_ = msg->header.stamp;
+  }
+
+  bool CollisionDetector::serviceCallback(jsk_pcl_ros::CheckCollision::Request &req,
+                                          jsk_pcl_ros::CheckCollision::Response &res)
+  {
+    sensor_msgs::JointState joint = req.joint;
+    geometry_msgs::PoseStamped pose = req.pose;
+    res.result = checkCollision(joint, pose);
+    return true;
+  }
+
+  bool CollisionDetector::checkCollision(const sensor_msgs::JointState& joint,
+                                         const geometry_msgs::PoseStamped& pose)
   {
     ROS_DEBUG("checkCollision is called.");
-
-    // convert point cloud
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::fromROSMsg(*cloud_msg, *cloud);
 
     // calculate the sensor transformation
     tf::StampedTransform sensor_to_world_tf;
     try {
-      tf_listener_.lookupTransform(world_frame_id_, cloud_msg->header.frame_id, cloud_msg->header.stamp, sensor_to_world_tf);
+      tf_listener_.lookupTransform(world_frame_id_, cloud_frame_id_, cloud_stamp_, sensor_to_world_tf);
     } catch(tf::TransformException& ex){
       ROS_ERROR_STREAM( "Transform error of sensor data: " << ex.what() << ", quitting callback");
-      return;
+      return false;
     }
 
     // transform point cloud
     Eigen::Matrix4f sensor_to_world;
     pcl_ros::transformAsMatrix(sensor_to_world_tf, sensor_to_world);
-    pcl::transformPointCloud(*cloud, *cloud, sensor_to_world);
+    pcl::transformPointCloud(cloud_, cloud_, sensor_to_world);
 
-    self_mask_->assumeFrameFromJointAngle(joint_msg->joint, joint_msg->pose);
+    self_mask_->assumeFrameFromJointAngle(joint, pose);
 
     // check containment for all point cloud
     bool contain_flag = false;
     pcl::PointXYZ p;
-    for(size_t i = 0; i < cloud->size(); i++) {
-      p = cloud->at(i);
+    for(size_t i = 0; i < cloud_.size(); i++) {
+      p = cloud_.at(i);
       if(finite(p.x) && finite(p.y) && finite(p.z) &&
          self_mask_->getMaskContainment(p.x, p.y, p.z) == robot_self_filter::INSIDE) {
         contain_flag = true;
@@ -162,10 +169,7 @@ namespace jsk_pcl_ros
     } else {
       ROS_INFO("no collision!");
     }
-
-    std_msgs::Bool contact_msg;
-    contact_msg.data = contain_flag;
-    pub_.publish(contact_msg);
+    return contain_flag;
   }
 }
 

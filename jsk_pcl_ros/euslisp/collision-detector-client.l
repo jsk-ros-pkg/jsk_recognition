@@ -4,7 +4,7 @@
 
 (ros::roseus-add-msgs "sensor_msgs")
 (ros::roseus-add-msgs "geometry_msgs")
-(ros::roseus-add-msgs "jsk_recognition_msgs")
+(ros::roseus-add-srvs "jsk_pcl_ros")
 (ros::roseus-add-msgs "jsk_rviz_plugins")
 
 (defun setup-robot
@@ -42,34 +42,34 @@
     )
   )
 
-(defun publish-robot-joint
+(defun request-collision-check
   ()
   (send *robot* :update-descendants)
   (let* ((tm (ros::time-now))
-         (msg (instance jsk_recognition_msgs::JointStateWithPose :init))
-         )
-    (send msg :header (instance std_msgs::Header :init :stamp tm))
-    (send msg :joint
+         (req (instance jsk_pcl_ros::CheckCollisionRequest :init))
+         res)
+    (send req :joint
           (instance sensor_msgs::JointState :init
                     :header (instance std_msgs::Header :init :stamp tm)
                     :name (send-all (send *robot* :joint-list) :name)
                     :position (mapcar #'deg2rad (coerce (send *robot* :angle-vector) cons))))
-    (send msg :pose
+    (send req :pose
           (instance geometry_msgs::PoseStamped :init
                     :header (instance std_msgs::header :init :frame_id "" :stamp tm)
                     :pose (ros::coords->tf-pose (send (car (send *robot* :links)) :worldcoords))))
-    (ros::publish "/collision_detector/joint" msg)
+    (setq res (ros::service-call "/collision_detector/collision_detector/check_collision" req))
+    (publish-collision-status (send res :result))
     )
   )
 
 (defun publish-collision-status
-  (msg)
+  (status)
   (let ((text-msg (instance jsk_rviz_plugins::OverlayText :init)))
     (send text-msg :bg_color :r 0.2)
     (send text-msg :bg_color :b 0.2)
     (send text-msg :bg_color :g 0.2)
     (send text-msg :bg_color :a 0.8)
-    (cond ((send msg :data)
+    (cond (status
            (send text-msg :text "Collision !!!")
            (send text-msg :fg_color :r 1.0)
            (send text-msg :fg_color :g 0.0)
@@ -88,19 +88,20 @@
 
 (defun main
   ()
-  (ros::rate 10)
+  (ros::rate 1)
   (do-until-key
    (set-random-angle-vector)
    (set-random-stand-pose)
-   (publish-robot-joint)
+   (request-collision-check)
    ;; (send *irtviewer* :draw-objects)
    (ros::spin-once)
    (ros::sleep)
    )
   )
 
-(ros::advertise "/collision_detector/joint" jsk_recognition_msgs::JointStateWithPose 1)
 (ros::advertise "/collision_status_text" jsk_rviz_plugins::OverlayText 1)
 (ros::subscribe "/collision_detector/collision_detector/collision_status" std_msgs::Bool #'publish-collision-status)
+(ros::wait-for-service "/collision_detector/collision_detector/check_collision")
+
 (setup-robot)
 (main)

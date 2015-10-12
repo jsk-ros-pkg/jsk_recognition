@@ -33,7 +33,8 @@ find_package(catkin REQUIRED COMPONENTS
   image_geometry
   jsk_footstep_msgs
   interactive_markers
-  laser_assembler moveit_ros_perception)
+  laser_assembler moveit_ros_perception
+  pr2_navigation_self_filter)
 # only run in hydro
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
   find_package(PCL REQUIRED)
@@ -422,6 +423,10 @@ target_link_libraries(jsk_pcl_ros_base
   ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
 target_link_libraries(jsk_pcl_ros_moveit
   ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
+
+add_executable(collision_detector src/collision_detector.cpp)
+target_link_libraries(collision_detector
+  ${pcl_ros_LIBRARIES} ${pr2_navigation_self_filter_LIBRARIES} ${kdl_parser_LIBRARIES} ${kdl_conversions_LIBRARIES} ${tf_conversions_LIBRARIES})
 
 # bench/ directory
 

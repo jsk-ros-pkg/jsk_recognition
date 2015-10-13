@@ -15,7 +15,7 @@
   </node>
 
   <!-- tile images -->
-  <node name="tile_images" pkg="jsk_perception" type="tile_images.py" output="screen">
+  <node name="tile_image" pkg="jsk_perception" type="tile_image.py" output="screen">
     <rosparam>
       input_topics: [img1/output, img2/output, img3/output, img4/output]
     </rosparam>
@@ -23,7 +23,7 @@
 
   <!-- visualize -->
   <node name="image_view" pkg="image_view" type="image_view">
-    <remap from="image" to="tile_images/output" />
+    <remap from="image" to="tile_image/output" />
   </node>
 
 </launch>

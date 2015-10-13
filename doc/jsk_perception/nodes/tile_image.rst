@@ -1,10 +1,10 @@
-tile_images.py
+tile_image.py
 ==============
 
 What is this?
 -------------
 
-.. image:: ./images/tile_images.png
+.. image:: ./images/tile_image.png
 
 Publish an image topic by tiling image topics specified.
 
@@ -30,7 +30,7 @@ Parameters
 
   input topic names should be specified like::
 
-    <node name="tile_images" pkg="jsk_perception" type="tile_images.py" output="screen">
+    <node name="tile_image" pkg="jsk_perception" type="tile_image.py" output="screen">
       <rosparam>
         input_topics: [img1/output, img2/output, img3/output, img4/output]
       </rosparam>
@@ -41,11 +41,11 @@ CLI
 ---
 ::
 
-    rosrun jsk_perception tile_images.py _input_topics:='[img1/output, img2/output]'
+    rosrun jsk_perception tile_image.py _input_topics:='[img1/output, img2/output]'
 
 
 Sample
 ------
 ::
 
-    roslaunch jsk_perception tile_images.launch
+    roslaunch jsk_perception tile_image.launch

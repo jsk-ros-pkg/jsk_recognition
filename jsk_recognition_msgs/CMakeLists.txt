@@ -47,6 +47,7 @@ add_message_files(
   ICPResult.msg
   ImageDifferenceValue.msg
   SimpleHandle.msg
+  WeightedPoseArray.msg
   )
 
 generate_messages(

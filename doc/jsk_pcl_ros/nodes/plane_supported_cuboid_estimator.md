@@ -11,6 +11,9 @@ to confirm likelihood function behaves as expected.
 * `~input` (`sensor_msgs/PointCloud2`)
 
   Input pointcloud
+* `~fast_input` (`sensor_msgs/PointCloud2`)
+
+  Fater input pointcloud
 * `~input/polygon` (`jsk_recognition_msgs/PolygonArray`)
 * `~input/coefficients` (`jsk_recognition_msgs/ModelCoefficientsArray`)
 
@@ -83,3 +86,7 @@ to confirm likelihood function behaves as expected.
 * `~sensor_frame` (default: `odom`)
 
   Frame ID of sensor frame. It is used to compute viewpoint and occlusion.
+* `~fast_cloud_threshold` (default: `2.0`)
+
+  If distance to object is smaller than
+  `~fast_cloud_threshold`, `~fast_input` will be used.

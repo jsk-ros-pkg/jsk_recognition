@@ -262,6 +262,10 @@ namespace jsk_pcl_ros
       const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coef_msg);
     virtual void cloudCallback(
       const sensor_msgs::PointCloud2::ConstPtr& msg);
+    virtual void estimate(
+      const sensor_msgs::PointCloud2::ConstPtr& msg);
+    virtual void fastCloudCallback(
+      const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual pcl::PointCloud<pcl::tracking::ParticleCuboid>::Ptr initParticles();
     virtual size_t chooseUniformRandomPlaneIndex(const std::vector<Polygon::Ptr>& polygons);
     virtual void configCallback(Config& config, uint32_t level);
@@ -294,6 +298,7 @@ namespace jsk_pcl_ros
     virtual void updateParticlePolygonRelationship(ParticleCloud::Ptr particles);
     boost::mutex mutex_;
     ros::Subscriber sub_cloud_;
+    ros::Subscriber sub_fast_cloud_;
     ros::Publisher pub_result_;
     ros::Publisher pub_particles_;
     ros::Publisher pub_candidate_cloud_;
@@ -348,6 +353,7 @@ namespace jsk_pcl_ros
     double min_dx_;
     double min_dy_;
     double min_dz_;
+    double fast_cloud_threshold_;
     bool use_init_polygon_likelihood_;
     int particle_num_;
     std::string sensor_frame_;

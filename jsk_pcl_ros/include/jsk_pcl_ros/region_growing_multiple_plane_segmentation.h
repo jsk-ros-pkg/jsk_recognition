@@ -145,6 +145,8 @@ namespace jsk_pcl_ros
     double max_curvature_;
     int min_size_;
     int max_size_;
+    double min_area_;
+    double max_area_;
     double cluster_tolerance_;
     double ransac_refine_outlier_distance_threshold_;
     int ransac_refine_max_iterations_;

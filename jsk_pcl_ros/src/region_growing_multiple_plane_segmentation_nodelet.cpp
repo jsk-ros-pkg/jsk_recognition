@@ -92,6 +92,8 @@ namespace jsk_pcl_ros
     max_curvature_ = config.max_curvature;
     min_size_ = config.min_size;
     max_size_ = config.max_size;
+    min_area_ = config.min_area;
+    max_area_ = config.max_area;
     cluster_tolerance_ = config.cluster_tolerance;
     ransac_refine_outlier_distance_threshold_
       = config.ransac_refine_outlier_distance_threshold;
@@ -187,6 +189,9 @@ namespace jsk_pcl_ros
           = convexFromCoefficientsAndInliers<pcl::PointXYZRGB>(
             cloud, plane_inliers, plane_coefficients);
         if (convex) {
+          if (min_area_ > convex->area() || convex->area() > max_area_) {
+            continue;
+          }
           {
             // check direction consistency of coefficients and convex
             Eigen::Vector3f coefficient_normal(plane_coefficients->values[0],

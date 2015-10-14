@@ -43,6 +43,12 @@ and evaluation function of connectivity if based on the following equation:
 * `~min_size` (Integer, default: `100`)
 
    The minimum number of the points of each plane.
+* `~min_area` (Double, default: `0.1`)
+
+   The minimum area of the convex areas.
+* `~max_area` (Double, default: `100`)
+
+   The max area of the convex areas.
 * `~cluster_tolerance` (Double, default: `0.1`)
 
    The spatial tolerance for new cluster candidates.

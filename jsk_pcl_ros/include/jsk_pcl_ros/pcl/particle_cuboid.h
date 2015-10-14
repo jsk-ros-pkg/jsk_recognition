@@ -223,7 +223,8 @@ namespace pcl
       
       // V should be on local coordinates.
       // TODO: update to take into boundary account
-      inline double distanceToPlane(const Eigen::Vector3f& v, const int plane_index) const
+      inline double signedDistanceToPlane(
+        const Eigen::Vector3f& v, const int plane_index) const
       {
         Eigen::Vector3f n;
         double d;
@@ -261,9 +262,17 @@ namespace pcl
         }
 
         }
-        return std::abs(n.dot(v) + d) / sqrt(n.dot(n) + d * d);
+        return (n.dot(v) + d) / sqrt(n.dot(n) + d * d);
       }
 
+      inline double distanceToPlane(
+        const Eigen::Vector3f& v, const int plane_index) const
+      {
+        return std::abs(signedDistanceToPlane(v, plane_index));
+      }
+
+
+      
       inline int nearestPlaneIndex(const Eigen::Vector3f& local_v) const
       {
         const float x = local_v[0];

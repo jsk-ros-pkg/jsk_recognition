@@ -161,6 +161,7 @@ namespace jsk_pcl_ros
     std::vector<float> candidate_point_distances;
     pcl::PointXYZ xyz_point;
     xyz_point.getVector3fMap() = p.getVector3fMap();
+    size_t inliers = 0;
     // roughly search near points by kdtree radius search
     tree.radiusSearch(xyz_point, r + config.outlier_distance, candidate_point_indices, candidate_point_distances);
     if (candidate_point_indices.size() < config.min_inliers) {
@@ -169,7 +170,7 @@ namespace jsk_pcl_ros
     else {
       //ROS_INFO("indices: %lu", candidate_point_indices.size());
       double error = 0.0;
-      size_t inliers = 0;
+      
       Cube::Ptr cube = p.toCube();
       std::vector<Polygon::Ptr> faces = cube->faces();
       for (size_t i = 0; i < candidate_point_indices.size(); i++) {
@@ -198,7 +199,15 @@ namespace jsk_pcl_ros
         return 0;
       }
       else {
-        return 1 / (1 + error / inliers);
+        double non_inlier_value = 1 / (1 + error / inliers);
+        if (config.use_inliers) {
+          // how to compute expected inliers...?
+          double inliers_err = p.volume() / config.expected_density - inliers;
+          return non_inlier_value * (1 / (1 + pow(inliers_err, config.inliers_power)));
+        }
+        else {
+          return non_inlier_value;
+        }
       }
     }
   }

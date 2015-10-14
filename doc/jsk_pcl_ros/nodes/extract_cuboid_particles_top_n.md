@@ -8,6 +8,9 @@ Extract top-N particles of `pcl::tracking::ParticleCuboid`.
 * `~output/box_array` (`jsk_recognition_msgs/BoundingBoxArray`)
 
   Top-N particles as BoundingBoxArray.
+* `~output/pose_array` (`jsk_recognition_msgs/WeightedPoseArray`)
+
+  Top-N particles as WeightedPoseArray.
 
 ## Subscribing Topics
 * `~input` (`sensor_msgs/PointCloud2`)

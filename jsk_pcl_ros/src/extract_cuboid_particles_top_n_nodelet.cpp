@@ -49,6 +49,7 @@ namespace jsk_pcl_ros
       boost::bind (&ExtractCuboidParticlesTopN::configCallback, this, _1, _2);
     srv_->setCallback (f);
     pub_ = advertise<pcl_msgs::PointIndices>(*pnh_, "output", 1);
+    pub_pose_array_ = advertise<jsk_recognition_msgs::WeightedPoseArray>(*pnh_, "output/pose_array", 1);
     pub_box_array_ = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "output/box_array", 1);
   }
 
@@ -94,6 +95,7 @@ namespace jsk_pcl_ros
     ex.filter(*cloud_filtered);
     publishPointIndices(pub_, *indices, msg->header);
     publishBoxArray(*cloud_filtered, msg->header);
+    publishPoseArray(*cloud_filtered, msg->header);
   }
 
   void ExtractCuboidParticlesTopN::publishBoxArray(
@@ -117,6 +119,26 @@ namespace jsk_pcl_ros
         box_array.boxes[i] = box;
       }
       pub_box_array_.publish(box_array);
+    }
+  }
+  
+  void ExtractCuboidParticlesTopN::publishPoseArray(
+    const pcl::PointCloud<pcl::tracking::ParticleCuboid>& particles,
+    const std_msgs::Header& header)
+  {
+    if (pub_box_array_.getNumSubscribers() > 0) {
+      jsk_recognition_msgs::WeightedPoseArray weighted_pose_array;
+      weighted_pose_array.header = header;
+      weighted_pose_array.poses.header = header;
+      for (size_t i = 0; i < particles.points.size(); i++) {
+        pcl::tracking::ParticleCuboid p = particles.points[i];
+        geometry_msgs::Pose ros_pose;
+        Eigen::Affine3f pose = p.toEigenMatrix();
+        tf::poseEigenToMsg(pose, ros_pose);
+        weighted_pose_array.poses.poses.push_back(ros_pose);
+        weighted_pose_array.weights.push_back(p.weight);
+      }
+      pub_pose_array_.publish(weighted_pose_array);
     }
   }
   

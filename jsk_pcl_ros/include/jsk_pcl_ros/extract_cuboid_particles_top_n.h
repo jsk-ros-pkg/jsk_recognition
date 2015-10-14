@@ -45,7 +45,7 @@
 #include <pcl/impl/pcl_base.hpp>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/filters/impl/extract_indices.hpp>
-
+#include <jsk_recognition_msgs/WeightedPoseArray.h>
 #include <jsk_recognition_msgs/BoundingBoxArray.h>
 
 namespace jsk_pcl_ros
@@ -71,11 +71,15 @@ namespace jsk_pcl_ros
     virtual void publishBoxArray(
       const pcl::PointCloud<pcl::tracking::ParticleCuboid>& particles,
       const std_msgs::Header& header);
+    virtual void publishPoseArray(
+      const pcl::PointCloud<pcl::tracking::ParticleCuboid>& particles,
+      const std_msgs::Header& header);
     virtual void configCallback(Config& config, uint32_t level);
     
     boost::mutex mutex_;
     ros::Publisher pub_;
     ros::Publisher pub_box_array_;
+    ros::Publisher pub_pose_array_;
     ros::Subscriber sub_;
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     double top_n_ratio_;

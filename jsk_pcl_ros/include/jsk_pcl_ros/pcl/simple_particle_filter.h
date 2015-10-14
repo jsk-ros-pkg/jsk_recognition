@@ -110,6 +110,10 @@ namespace pcl
         if (!input_) {
           std::cerr << "no input pointcloud" << std::endl;
         }
+
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
         for (size_t i = 0; i < particles_->points.size (); i++) {
           custom_likelihood_func_ (input_, particles_->points[i]);
         }

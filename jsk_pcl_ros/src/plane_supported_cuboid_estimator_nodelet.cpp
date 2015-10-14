@@ -122,13 +122,16 @@ namespace jsk_pcl_ros
 
     // The order of convexes and polygons_ should be same
     // because it is inside of critical section.
-    std::vector<ConvexPolygon::Ptr> convexes;
+    std::vector<ConvexPolygon::Ptr> convexes(latest_polygon_msg_->polygons.size());
     for (size_t i = 0; i < latest_polygon_msg_->polygons.size(); i++) {
       ConvexPolygon::Ptr polygon = ConvexPolygon::fromROSMsgPtr(latest_polygon_msg_->polygons[i].polygon);
-      convexes.push_back(polygon);
+      polygon->decomposeToTriangles();
+      convexes[i] = polygon;
     }
 
-    
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
     // Second, compute distances and assing polygons.
     for (size_t i = 0; i < particles->points.size(); i++) {
       size_t nearest_index = getNearestPolygon(particles->points[i], convexes);
@@ -159,9 +162,11 @@ namespace jsk_pcl_ros
     polygons_.clear();
     for (size_t i = 0; i < latest_polygon_msg_->polygons.size(); i++) {
       Polygon::Ptr polygon = Polygon::fromROSMsgPtr(latest_polygon_msg_->polygons[i].polygon);
+      polygon->decomposeToTriangles();
       polygons_.push_back(polygon);
     }
     
+    try {
     // viewpoint
     tf::StampedTransform transform
       = lookupTransformWithDuration(tf_, sensor_frame_, msg->header.frame_id,
@@ -219,7 +224,9 @@ namespace jsk_pcl_ros
         NODELET_INFO("polygon updated");
         updateParticlePolygonRelationship(tracker_->getParticles());
       }
+      ROS_INFO("start tracker_->compute()");
       tracker_->compute();
+      ROS_INFO("done tracker_->compute()");
       Particle result = tracker_->getResult();
       jsk_recognition_msgs::BoundingBoxArray box_array;
       box_array.header = msg->header;
@@ -244,6 +251,10 @@ namespace jsk_pcl_ros
     pcl::toROSMsg(*particles, ros_particles);
     ros_particles.header = msg->header;
     pub_particles_.publish(ros_particles);
+    }
+    catch (tf2::TransformException& e) {
+      JSK_ROS_ERROR("tf exception");
+    }
   }
   
   void PlaneSupportedCuboidEstimator::cloudCallback(

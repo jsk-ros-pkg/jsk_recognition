@@ -156,7 +156,7 @@ namespace jsk_pcl_ros
     Eigen::Affine3f pose_inv = pose.inverse();
     const Eigen::Vector3f local_vp = pose_inv * viewpoint;
     std::vector<int> visible_faces = p.visibleFaceIndices(local_vp);
-    double r = sqrt(p.dx * p.dx + p.dy * p.dy + p.dz * p.dz) / 2.0;
+    double r = sqrt(p.dx /2 * p.dx/2 + p.dy/2 * p.dy/2 + p.dz/2 * p.dz/2);
     std::vector<int> candidate_point_indices;
     std::vector<float> candidate_point_distances;
     pcl::PointXYZ xyz_point;
@@ -167,6 +167,7 @@ namespace jsk_pcl_ros
       return 0;
     }
     else {
+      //ROS_INFO("indices: %lu", candidate_point_indices.size());
       double error = 0.0;
       size_t inliers = 0;
       Cube::Ptr cube = p.toCube();

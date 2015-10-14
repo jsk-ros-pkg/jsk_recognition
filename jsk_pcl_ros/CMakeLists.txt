@@ -412,10 +412,15 @@ else (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
     jsk_pcl_ros_base)
 endif (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
 
+add_executable(collision_detector src/collision_detector.cpp)
+target_link_libraries(collision_detector
+  ${pcl_ros_LIBRARIES} ${pr2_navigation_self_filter_LIBRARIES} ${kdl_parser_LIBRARIES} ${kdl_conversions_LIBRARIES} ${tf_conversions_LIBRARIES})
+
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 add_dependencies(jsk_pcl_ros_util ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 add_dependencies(jsk_pcl_ros_base ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 add_dependencies(jsk_pcl_ros_moveit ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
+add_dependencies(collision_detector ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 
 target_link_libraries(jsk_pcl_ros_util
   ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp
@@ -425,9 +430,6 @@ target_link_libraries(jsk_pcl_ros_base
 target_link_libraries(jsk_pcl_ros_moveit
   ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
 
-add_executable(collision_detector src/collision_detector.cpp)
-target_link_libraries(collision_detector
-  ${pcl_ros_LIBRARIES} ${pr2_navigation_self_filter_LIBRARIES} ${kdl_parser_LIBRARIES} ${kdl_conversions_LIBRARIES} ${tf_conversions_LIBRARIES})
 
 # bench/ directory
 

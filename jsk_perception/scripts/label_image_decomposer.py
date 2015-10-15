@@ -61,6 +61,10 @@ class LabelImageDecomposer(ConnectionBasedTransport):
         imgs = []
         labels = np.unique(label_img)
         for label in labels:
+            if label == 0:
+                # should be skipped 0, because
+                # 0 is to label image as black region to mask image
+                continue
             img_tmp = img.copy()
             mask = label_img == label
             img_tmp[~mask] = 0

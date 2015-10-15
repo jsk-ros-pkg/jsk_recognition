@@ -10,7 +10,6 @@ import message_filters
 import rospy
 from sensor_msgs.msg import Image
 
-
 class LabelImageDecomposer(ConnectionBasedTransport):
     def __init__(self):
         super(LabelImageDecomposer, self).__init__()
@@ -26,8 +25,10 @@ class LabelImageDecomposer(ConnectionBasedTransport):
         use_async = rospy.get_param('~approximate_sync', False)
         jsk_loginfo('~approximate_sync: {}'.format(use_async))
         if use_async:
+            slop = rospy.get_param('~slop', 0.1)
+            jsk_loginfo('~slop: {}'.format(slop))
             async = message_filters.ApproximateTimeSynchronizer(
-                [self.sub_img, self.sub_label], queue_size=10, slop=0.1)
+                [self.sub_img, self.sub_label], queue_size=10, slop=slop)
             async.registerCallback(self._apply)
             if self._publish_tile:
                 async.registerCallback(self._apply_tile)

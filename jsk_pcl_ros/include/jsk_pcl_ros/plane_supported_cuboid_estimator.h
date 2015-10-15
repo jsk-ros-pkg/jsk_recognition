@@ -203,6 +203,9 @@ namespace jsk_pcl_ros
         }
       }
       // ROS_INFO("inliers: %lu", inliers);
+      // ROS_INFO("error: %f", error);
+      size_t expected_num = p.volume() / config.expected_density / config.expected_density / config.expected_density;
+      // ROS_INFO("expected: %lu", expected_num);
       if (inliers < config.min_inliers) {
         return 0;
       }
@@ -212,7 +215,9 @@ namespace jsk_pcl_ros
           // how to compute expected inliers...?
           // double inliers_err = std::abs(p.volume() / config.expected_density - inliers);
           // return non_inlier_value * (1 / (1 + pow(inliers_err, config.inliers_power)));
-          return non_inlier_value * 1 / (1 + exp(- config.inliers_power * (inliers)));
+          double inlier_likelihood = 1 / (1 + pow(expected_num - inliers, config.inliers_power));
+          // ROS_INFO("inlier likelihood: %f", inlier_likelihood);
+          return non_inlier_value * inlier_likelihood;
         }
         else {
           return non_inlier_value;

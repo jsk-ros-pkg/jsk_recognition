@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import math
-from StringIO import StringIO
 
 import cv2
 import matplotlib.pyplot as plt
@@ -33,9 +32,11 @@ def get_tile_image(imgs, tile_shape=None):
         plt.axis('off')
         plt.imshow(img_rgb)
 
-    f = StringIO()
-    plt.savefig(f, facecolor=(.9, .9, .9))
-    out_rgb = np.array(PIL.Image.open(f))
+    canvas = plt.get_current_fig_manager().canvas
+    canvas.draw()
+    pil_img = PIL.Image.fromstring('RGB',
+        canvas.get_width_height(), canvas.tostring_rgb())
+    out_rgb = np.array(pil_img)
     out_bgr = cv2.cvtColor(out_rgb, cv2.COLOR_RGB2BGR)
     plt.close()
     return out_bgr

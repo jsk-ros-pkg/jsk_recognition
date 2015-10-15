@@ -106,7 +106,9 @@ namespace jsk_pcl_ros
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void allocatePublishers(size_t num);
-
+    virtual void publishNegativeIndices(
+      const sensor_msgs::PointCloud2ConstPtr &input,
+      const jsk_recognition_msgs::ClusterPointIndicesConstPtr &indices_input);
     virtual void subscribe();
     virtual void unsubscribe();
     
@@ -126,7 +128,7 @@ namespace jsk_pcl_ros
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     boost::shared_ptr<message_filters::Synchronizer<SyncAlignPolicy> >sync_align_;
     std::vector<ros::Publisher> publishers_;
-    ros::Publisher pc_pub_, box_pub_, mask_pub_, label_pub_;
+    ros::Publisher pc_pub_, box_pub_, mask_pub_, label_pub_, negative_indices_pub_;
     tf::TransformBroadcaster br_;
     std::string tf_prefix_;
     

@@ -40,6 +40,9 @@
 #include <pcl/common/centroid.h>
 #include <pcl/common/common.h>
 #include <boost/format.hpp>
+#include <boost/range/adaptors.hpp>
+#include <boost/range/algorithm.hpp>
+#include <boost/range/irange.hpp>
 #include <pcl/registration/ia_ransac.h>
 #include <pcl/filters/project_inliers.h>
 #include <pcl/common/pca.h>
@@ -72,6 +75,7 @@ namespace jsk_pcl_ros
     pnh_->param("align_boxes", align_boxes_, false);
     pnh_->param("use_pca", use_pca_, false);
     pnh_->param("force_to_flip_z_axis", force_to_flip_z_axis_, true);
+    negative_indices_pub_ = advertise<pcl_msgs::PointIndices>(*pnh_, "negative_indices", 1);
     pc_pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "debug_output", 1);
     box_pub_ = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "boxes", 1);
     mask_pub_ = advertise<sensor_msgs::Image>(*pnh_, "mask", 1);
@@ -307,17 +311,42 @@ namespace jsk_pcl_ros
       debug_output.points.push_back(p);
     }
   }
-  
-  void ClusterPointIndicesDecomposer::extract
-  (const sensor_msgs::PointCloud2ConstPtr &input,
-   const jsk_recognition_msgs::ClusterPointIndicesConstPtr &indices_input,
-   const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
-   const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients)
+
+  void ClusterPointIndicesDecomposer::publishNegativeIndices(
+    const sensor_msgs::PointCloud2ConstPtr &input,
+    const jsk_recognition_msgs::ClusterPointIndicesConstPtr &indices_input)
   {
+    std::set<int> all_indices;
+    boost::copy(
+      boost::irange(0, (int)(input->width * input->height)),
+      std::inserter(all_indices, all_indices.begin()));
+    for (size_t i = 0; i < indices_input->cluster_indices.size(); i++) {
+      std::set<int> indices_set(indices_input->cluster_indices[i].indices.begin(),
+                                indices_input->cluster_indices[i].indices.end());
+      std::set<int> diff_indices;
+      std::set_difference(all_indices.begin(), all_indices.end(),
+                          indices_set.begin(), indices_set.end(),
+                          std::inserter(diff_indices, diff_indices.begin()));
+      all_indices = diff_indices;
+    }
+    // publish all_indices
+    pcl_msgs::PointIndices ros_indices;
+    ros_indices.indices = std::vector<int>(all_indices.begin(), all_indices.end());
+    ros_indices.header = input->header;
+    negative_indices_pub_.publish(ros_indices);
+  }
+    
+  void ClusterPointIndicesDecomposer::extract(
+    const sensor_msgs::PointCloud2ConstPtr &input,
+    const jsk_recognition_msgs::ClusterPointIndicesConstPtr &indices_input,
+    const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
+    const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients)
+  {
+    vital_checker_->poke();
     if (publish_clouds_) {
       allocatePublishers(indices_input->cluster_indices.size());
     }
-    vital_checker_->poke();
+    publishNegativeIndices(input, indices_input);
     pcl::ExtractIndices<pcl::PointXYZRGB> extract;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz (new pcl::PointCloud<pcl::PointXYZ>);

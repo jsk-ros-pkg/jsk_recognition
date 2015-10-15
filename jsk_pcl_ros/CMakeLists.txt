@@ -73,8 +73,7 @@ add_service_files(FILES SwitchTopic.srv
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
   cfg/PolygonArrayAreaLikelihood.cfg
-  cfg/InteractiveCuboidLikelihood.cfg
-  cfg/PlaneSupportedCuboidEstimator.cfg
+  cfg/cuboid_parameter.cfg
   cfg/ExtractParticlesTopNBase.cfg
   cfg/PoseWithCovarianceStampedToGaussianPointCloud.cfg
   cfg/HeightmapMorphologicalFiltering.cfg

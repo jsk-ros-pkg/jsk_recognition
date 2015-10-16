@@ -3,6 +3,7 @@ checkerboard_detector
 ![](images/checkerboard_detector.png)
 
 `checkerboard_detector` is an executabel to detect checker board.
+You can find marker patter in [jsk-ros-pkg/calibboard_sheet](https://github.com/jsk-ros-pkg/calibboard_sheet).
 
 Subscribing Topics
 ------------------
@@ -50,3 +51,8 @@ Trouble Shooting
   A. First check debug image and all the detected corner points correctly superimposed on camera view.
   * If the detected corner points is **not correct**, you need to modify checker board grid size (`grid_size` parameters).
   * If the detected corner points is **correct**, confirm checker board size (`rect_size` parmaeters) and intrinsic camera paramter is calibrated well.
+
+* Q. How many number of grids better?
+
+  A. I strongly recomment to choose `odd`x`even` or `even`x`odd`. Because if you choose `odd`x`odd` or `even`x`even`,
+  detector will have two potential poses.

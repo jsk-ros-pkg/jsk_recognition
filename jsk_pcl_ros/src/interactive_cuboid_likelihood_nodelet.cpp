@@ -36,6 +36,7 @@
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/interactive_cuboid_likelihood.h"
 #include "jsk_pcl_ros/pcl_conversion_util.h"
+#include <jsk_topic_tools/rosparam_utils.h>
 
 namespace jsk_pcl_ros
 {
@@ -47,6 +48,25 @@ namespace jsk_pcl_ros
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     pnh_->param("frame_id", frame_id_, std::string("odom"));
     pnh_->param("sensor_frame", sensor_frame_, std::string("odom"));
+
+    std::vector<double> initial_pos;
+    std::vector<double> initial_rot;
+    if (!jsk_topic_tools::readVectorParameter(*pnh_, "initial_pos", initial_pos)) {
+      initial_pos.push_back(0);
+      initial_pos.push_back(0);
+      initial_pos.push_back(0);
+    }
+    if (!jsk_topic_tools::readVectorParameter(*pnh_, "initial_rot", initial_rot)) {
+      initial_rot.push_back(0);
+      initial_rot.push_back(0);
+      initial_rot.push_back(0);
+    }
+    particle_.x = initial_pos[0];
+    particle_.y = initial_pos[1];
+    particle_.z = initial_pos[2];
+    particle_.roll = initial_rot[0];
+    particle_.pitch = initial_rot[1];
+    particle_.yaw = initial_rot[2];
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&InteractiveCuboidLikelihood::configCallback, this, _1, _2);
     srv_->setCallback (f);

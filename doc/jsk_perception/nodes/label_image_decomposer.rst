@@ -41,7 +41,11 @@ Parameters
 
   Whether to use approximate for input topics.
 
-* ``~publish_tile``
+* ``~publish_tile`` (Bool, default: ``False``)
 
   Whether to publish tile image with decomposed images.
 
+* ``~slop`` (Float, default: ``0.1``)
+
+  How many seconds you allowed about the difference of timestamp
+  when you specify ``~approximate_sync``.

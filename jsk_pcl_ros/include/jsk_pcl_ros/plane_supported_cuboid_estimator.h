@@ -119,7 +119,8 @@ namespace jsk_pcl_ros
   {
     Polygon::Ptr plane = planes[p.plane_index];
     if (config.use_support_plane_angular_likelihood) {
-      double cos_likelihood = (p.toEigenMatrix().rotation() * Eigen::Vector3f::UnitZ()).dot(plane->getNormal());
+      // double cos_likelihood = (p.toEigenMatrix().rotation() * Eigen::Vector3f::UnitZ()).dot(plane->getNormal());
+      double cos_likelihood = (p.toEigenMatrix().rotation() * Eigen::Vector3f::UnitX()).dot(plane->getNormal());
       // ROS_INFO("cos_likelihood: %f", cos_likelihood);
       return pow(std::abs(cos_likelihood),
                  config.support_plane_angular_likelihood_weight_power);

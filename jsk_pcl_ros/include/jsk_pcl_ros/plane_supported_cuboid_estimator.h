@@ -143,7 +143,7 @@ namespace jsk_pcl_ros
       return 1.0;
     }
   }
-  
+
   template <class Config>
   double distanceFromPlaneBasedError(
     const pcl::tracking::ParticleCuboid& p,
@@ -178,7 +178,7 @@ namespace jsk_pcl_ros
         Eigen::Vector3f v = cloud->points[index].getVector3fMap();
         if (config.use_occlusion_likelihood) {
           double d = p.distanceNearestToPlaneWithOcclusion(v, visible_faces, faces);
-          if (d < config.outlier_distance) {
+          if (d <= config.outlier_distance) {
             //error *= 1 / (1 + pow(d, config.plane_distance_error_power));
             error += pow(d, config.plane_distance_error_power);
             ++inliers;
@@ -186,8 +186,16 @@ namespace jsk_pcl_ros
         }
         else {
           Eigen::Vector3f local_v = pose_inv * v;
-          double d = p.distanceToPlane(local_v, p.nearestPlaneIndex(local_v));
-          if (d < config.outlier_distance) {
+          double d = p.signedDistanceToPlane(local_v, p.nearestPlaneIndex(local_v));
+          if (config.use_inside_points_distance_zero) {
+            if (d < 0) {
+              d = 0;
+            }
+          }
+          else {
+            d = std::abs(d);
+          }
+          if (d <= config.outlier_distance) {
             //error *= 1 / (1 + pow(d, config.plane_distance_error_power));
             error += pow(d, config.plane_distance_error_power);
             ++inliers;
@@ -195,6 +203,9 @@ namespace jsk_pcl_ros
         }
       }
       // ROS_INFO("inliers: %lu", inliers);
+      // ROS_INFO("error: %f", error);
+      size_t expected_num = p.volume() / config.expected_density / config.expected_density / config.expected_density;
+      // ROS_INFO("expected: %lu", expected_num);
       if (inliers < config.min_inliers) {
         return 0;
       }
@@ -202,8 +213,11 @@ namespace jsk_pcl_ros
         double non_inlier_value = 1 / (1 + error / inliers);
         if (config.use_inliers) {
           // how to compute expected inliers...?
-          double inliers_err = p.volume() / config.expected_density - inliers;
-          return non_inlier_value * (1 / (1 + pow(inliers_err, config.inliers_power)));
+          // double inliers_err = std::abs(p.volume() / config.expected_density - inliers);
+          // return non_inlier_value * (1 / (1 + pow(inliers_err, config.inliers_power)));
+          double inlier_likelihood = 1 / (1 + pow(expected_num - inliers, config.inliers_power));
+          // ROS_INFO("inlier likelihood: %f", inlier_likelihood);
+          return non_inlier_value * inlier_likelihood;
         }
         else {
           return non_inlier_value;
@@ -342,6 +356,9 @@ namespace jsk_pcl_ros
     
     double init_local_orientation_yaw_mean_;
     double init_local_orientation_yaw_variance_;
+
+    bool disable_init_roll_;
+    bool disable_init_pitch_;
 
     double init_dx_mean_;
     double init_dx_variance_;

@@ -218,6 +218,11 @@ namespace jsk_pcl_ros
       pcl::toROSMsg(*candidate_cloud_, ros_candidate_cloud);
       ros_candidate_cloud.header = msg->header;
       pub_candidate_cloud_.publish(ros_candidate_cloud);
+      // check the number of candidate points
+      if (candidate_cloud_->points.size() == 0) {
+        JSK_NODELET_ERROR("No candidate cloud");
+        return;
+      }
       tree_.setInputCloud(candidate_cloud_);
       if (support_plane_updated_) {
         // Compute assignment between particles and polygons
@@ -454,6 +459,12 @@ namespace jsk_pcl_ros
           }
         }
         p_global.plane_index = plane_i;
+        if (disable_init_pitch_) {
+          p_global.pitch = 0;
+        }
+        if (disable_init_roll_) {
+          p_global.roll = 0;
+        }
         particles->points[i] = p_global;
         break;
       }
@@ -495,6 +506,8 @@ namespace jsk_pcl_ros
     min_dz_ = config.min_dz;
     use_init_polygon_likelihood_ = config.use_init_polygon_likelihood;
     fast_cloud_threshold_ = config.fast_cloud_threshold;
+    disable_init_roll_ = config.disable_init_roll;
+    disable_init_pitch_ = config.disable_init_pitch;
   }
 
   bool PlaneSupportedCuboidEstimator::resetCallback(std_srvs::EmptyRequest& req,

@@ -1,0 +1,31 @@
+<launch>
+  <arg name="language" default="ja" />
+  <arg name="recog_engine" default="nict" />
+  <arg name="launch_audio_capture" default="true" />
+
+  <!-- retrieve audio data from microphone -->
+  <node name="audio_capture" pkg="audio_capture" type="audio_capture"
+        output="screen" if="$(arg launch_audio_capture)">
+    <param name="format" value="wave" />
+    <param name="channels" value="1" />
+    <param name="depth" value="16" />
+    <param name="sample_rate" value="16000" />
+    <remap from="audio" to="voice_raw" />
+  </node>
+
+  <!-- detect phrase using signal power -->
+  <node name="speech_detection" pkg="speech_recognition" type="speech_detection.py">
+    <param name="auto_adjust_duration" value="true" />
+    <param name="phrase_end_duration" value="0.8" />
+  </node>
+
+  <!-- recognize to text -->
+  <node name="rospeex_sr" pkg="rospeex_core" type="rospeex_sr.py" cwd="node">
+    <rosparam file="$(find speech_recognition)/config/sr_config.yaml" command="load" />
+  </node>
+  <node name="speech_recognition" pkg="speech_recognition" type="speech_recognition.py"
+        output="screen">
+    <param name="language" value="$(arg language)" />
+    <param name="recog_engine" value="$(arg recog_engine)" />
+  </node>
+</launch>

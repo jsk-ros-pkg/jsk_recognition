@@ -1,0 +1,26 @@
+<launch>
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <param name="~file_name" value="$(find jsk_perception)/sample/oreo_mega_stuf.jpg" />
+  </node>
+
+  <node name="imagesift"
+        pkg="imagesift" type="imagesift">
+    <remap from="image" to="image_publisher/output" />
+    <remap from="Feature0D" to="~output" />
+  </node>
+
+  <node name="bof_histogram_extractor"
+        pkg="jsk_perception" type="bof_histogram_extractor.py">
+    <remap from="~input" to="imagesift/output" />
+    <param name="~bof_data" value="$(find jsk_perception)/trained_data/apc2015_sample_bof.pkl.gz" />
+  </node>
+
+  <node name="simple_classifier"
+        pkg="jsk_perception" type="simple_classifier.py">
+    <remap from="~input" to="bof_histogram_extractor/output" />
+    <param name="~clf_path" value="$(find jsk_perception)/trained_data/apc2015_sample_clf.pkl.gz" />
+  </node>
+
+</launch>

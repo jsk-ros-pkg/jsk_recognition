@@ -77,10 +77,30 @@
     </node>
   </group>
   <group unless="$(arg ORGANIZED)">
+    <node pkg="nodelet" type="nodelet"
+          args="load pcl/NormalEstimationOMP $(arg MANAGER)"
+          name="laser_normal_estimation">
+      <remap from="~input" to="input_relay/output" />
+      <rosparam>
+        radius_search: 0
+        k_search: 40
+        # 0, => ANN, 1 => FLANN, 2 => Organized
+        spatial_locator: 1
+      </rosparam>
+    </node>
+    <!-- <node pkg="nodelet" type="nodelet" -->
+    <!--       args="load jsk_pcl/NormalConcatenater $(arg MANAGER)" -->
+    <!--       name="laser_normal_concat" -->
+    <!--       > -->
+    <!--   <remap from="~input" to="input_relay/output"/> -->
+    <!--   <remap from="~normal" to="laser_normal_estimation/output" /> -->
+    <!-- </node> -->
+    
     <node pkg="nodelet" type="nodelet" name="multi_plane_estimate"
           args="load jsk_pcl/RegionGrowingMultiplePlaneSegmentation $(arg MANAGER)" >
       <remap from="~input" to="input_relay/output" />
-      <remap from="~input_normal" to="input_relay/output" />
+      <remap from="~input_normal" to="laser_normal_estimation/output" />
+      <remap from="~output/clustering_result" to="~output_refined"/>
       <rosparam>
         # cluster_tolerance: 0.3
         max_curvature: 0.1

@@ -23,27 +23,8 @@
     <remap from="~input" to="$(arg INPUT)" />
     <param name="target_frame_id" value="$(arg LASER_FLAME_ID)" />
   </node>
-
-  <node pkg="nodelet" type="nodelet"
-        args="load pcl/NormalEstimationOMP laser_multiplane_manager"
-        name="laser_normal_estimation">t
-    <remap from="~input" to="laser_transform_input/output" />
-    <rosparam>
-      radius_search: 0
-      k_search: 40
-      # 0, => ANN, 1 => FLANN, 2 => Organized
-      spatial_locator: 1
-    </rosparam>
-  </node>
-  <node pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/NormalConcatenater laser_multiplane_manager"
-        name="laser_normal_concat"
-        >
-    <remap from="~input" to="laser_transform_input/output" />
-    <remap from="~normal" to="laser_normal_estimation/output" />
-  </node>
   <include file="$(find jsk_pcl_ros)/launch/organized_multi_plane_segmentation.launch">
-    <arg name="INPUT" value="laser_normal_concat/output" />
+    <arg name="INPUT" value="laser_transform_input/output" />
     <arg name="BASE_FRAME_ID" value="$(arg BASE_FRAME_ID)" />
     <arg name="RUN_SELF_FILTER" value="$(arg RUN_SELF_FILTER)"/>
     <arg name="SELF_FILTER_PARAM" value="$(arg SELF_FILTER_PARAM)" />

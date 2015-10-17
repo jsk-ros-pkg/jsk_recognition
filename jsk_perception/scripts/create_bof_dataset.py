@@ -14,20 +14,30 @@ from sklearn.preprocessing import normalize
 from jsk_recognition_utils import BagOfFeatures
 
 
-def cmd_extract_bof(data_path, output):
+def cmd_extract_bof(data_path, output, data_size=1):
     print('loading data')
     with gzip.open(data_path, 'rb') as f:
         descs = pickle.load(f)['descriptors']
+    # limit to specified data size to avoid memory error
+    n_data_all = len(descs)
+    n_data = int(data_size * n_data_all)
+    p = np.random.randint(0, len(descs), n_data)
+    descs = np.array(descs)[p]
     X = np.vstack(map(lambda x: np.array(x).reshape((-1, 128)), descs))
     del descs
     # extract feature
     print('fitting bag of features extractor')
     bof = BagOfFeatures()
-    bof.fit(X)
+    try:
+        bof.fit(X)
+    except MemoryError, e:
+        print('data_size: {} ({} * {})'.format(n_data, data_size, n_data_all))
+        print(e)
     # save bof extractor
     print('saving bof')
-    with gzip.open(bof_path, 'wb') as f:
+    with gzip.open(output, 'wb') as f:
         pickle.dump(bof, f)
+    print('done')
 
 
 def cmd_extract_bof_hist(data_path, bof_path, output):
@@ -44,8 +54,9 @@ def cmd_extract_bof_hist(data_path, bof_path, output):
     normalize(X, copy=False)
     dataset = Bunch(data=X, target=y, target_names=target_names)
     print('saving dataset')
-    with gzip.open(bof_hist_path, 'wb') as f:
+    with gzip.open(output, 'wb') as f:
         pickle.dump(dataset, f)
+    print('done')
 
 
 def main():
@@ -57,6 +68,8 @@ def main():
     bof_parser.add_argument('data_path', help='SIFT data path')
     bof_parser.add_argument('-O', '--output', default='bof.pkl.gz',
         help='bof feature extractor instance save path')
+    bof_parser.add_argument('-s', '--data-size', default=1, type=float,
+        help='data_size in 0 to 1')
     # extract_bof_hist command
     dataset_parser = subparsers.add_parser('extract_bof_hist',
         help='create BoF histogram dataset')
@@ -68,7 +81,9 @@ def main():
     args = parser.parse_args()
 
     if args.command == 'extract_bof':
-        cmd_extract_bof(data_path=args.data_path, output=args.output)
+        cmd_extract_bof(data_path=args.data_path,
+                        output=args.output,
+                        data_size=args.data_size)
     elif args.command == 'extract_bof_hist':
         cmd_extract_bof_hist(data_path=args.data_path,
                              bof_path=args.bof_path,

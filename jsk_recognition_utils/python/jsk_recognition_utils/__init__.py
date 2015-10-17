@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from .visualize import *
+from .feature import *
 from .mask import *
+from .visualize import *

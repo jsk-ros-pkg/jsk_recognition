@@ -4,6 +4,7 @@
 import math
 
 import cv2
+import numpy as np
 import siftfastpy
 
 
@@ -12,7 +13,7 @@ def get_sift_keypoints(img):
     Parameters
     ----------
     img: array-like
-        Img from which we get sift keypoints
+        Input image of shape ``(M, N)`` from which we get sift keypoints
 
     Returns
     -------
@@ -22,6 +23,10 @@ def get_sift_keypoints(img):
     desc: numpy.ndarray
         descriptors of each frame
     """
+    if type(img) is not np.ndarray:
+        img = np.array(img)
+    if len(img.shape) != 2:
+        raise ValueError('image should be 2d array: {}'.format(img.shape))
     siftimg = siftfastpy.Image(img.shape[1], img.shape[0])
     siftimg.SetData(img)
     frames, desc = siftfastpy.GetKeypoints(siftimg)

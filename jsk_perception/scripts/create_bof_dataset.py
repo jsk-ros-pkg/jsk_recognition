@@ -47,10 +47,12 @@ def cmd_extract_bof_hist(data_path, bof_path, output):
     descs, y, target_names = (dataset['descriptors'],
                               dataset['target'],
                               dataset['target_names'])
+    del dataset
     print('extracting feature')
     with gzip.open(bof_path, 'rb') as f:
         bof = pickle.load(f)
     X = bof.transform(descs)
+    del descs
     normalize(X, copy=False)
     dataset = Bunch(data=X, target=y, target_names=target_names)
     print('saving dataset')

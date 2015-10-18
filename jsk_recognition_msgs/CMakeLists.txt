@@ -9,6 +9,7 @@ add_message_files(
   BoundingBox.msg
   Circle2DArray.msg
   Circle2D.msg
+  ClassificationResult.msg
   ClusterPointIndices.msg
   ColorHistogramArray.msg
   ColorHistogram.msg

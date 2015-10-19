@@ -1,0 +1,167 @@
+<launch>
+  <arg name="NAMESPACE" default="multiresolution_stereo_image" />
+  <arg name="INPUT_LR" default="left" />  
+  <arg name="INPUT_IMAGE" default="/multisense/$(arg INPUT_LR)/image_rect_color" />
+  <arg name="INPUT_CAMERA_INFO" default="/multisense/$(arg INPUT_LR)/camera_info" />
+  <arg name="RUN_MANAGER" default="true" />
+  <arg name="MANAGER" default="manager" />
+  <arg name="THROTTLE_RATE" default="1" />
+  
+  <group ns="$(arg NAMESPACE)">
+    <node pkg="jsk_topic_tools" type="standalone_complexed_nodelet" name="$(arg INPUT_LR)_manager"
+          output="screen"
+          if="$(arg RUN_MANAGER)">
+      <rosparam subst_value="true">
+        nodelets:
+          - name: resize_1_1/$(arg INPUT_LR)_relay
+            type: jsk_topic_tools/Relay
+            remappings:
+              - from: ~input
+                to: $(arg INPUT_IMAGE)
+              - from: ~output
+                to: $(arg INPUT_LR)/image_rect_color
+          - name: resize_1_1/$(arg INPUT_LR)_compressed_relay
+            type: jsk_topic_tools/Relay
+            remappings:
+              - from: ~input
+                to: $(arg INPUT_IMAGE)/compressed
+              - from: ~output
+                to: $(arg INPUT_LR)/image_rect_color/compressed
+          - name: resize_1_1/$(arg INPUT_LR)_theora_relay
+            type: jsk_topic_tools/Relay
+            remappings:
+              - from: ~input
+                to: $(arg INPUT_IMAGE)/theora
+              - from: ~output
+                to: $(arg INPUT_LR)/image_rect_color/theora
+          - name: resize_1_1/$(arg INPUT_LR)_info_relay
+            type: jsk_topic_tools/Relay
+            remappings:
+              - from: ~input
+                to: $(arg INPUT_CAMERA_INFO)
+              - from: ~output
+                to: $(arg INPUT_LR)/camera_info
+          - name: resize_1_1/$(arg INPUT_LR)_throttle
+            type: jsk_topic_tools/LightweightThrottle
+            remappings:
+              - from: ~input
+                to: $(arg INPUT_LR)/image_rect_color
+              - from: ~output
+                to: $(arg INPUT_LR)/image_rect_color/throttle
+          - name: resize_1_2/$(arg INPUT_LR)_resizer
+            type: resized_image_transport/ImageResizer
+            remappings:
+              - from: ~input/image
+                to: /$(arg NAMESPACE)/resize_1_1/$(arg INPUT_LR)/image_rect_color
+              - from: ~output/image
+                to: $(arg INPUT_LR)/image_rect_color
+          - name: resize_1_2/$(arg INPUT_LR)_throttle
+            type: jsk_topic_tools/LightweightThrottle
+            remappings:
+              - from: ~input
+                to: $(arg INPUT_LR)/image_rect_color
+              - from: ~output
+                to: $(arg INPUT_LR)/image_rect_color/throttle
+          - name: resize_1_4/$(arg INPUT_LR)_resizer
+            type: resized_image_transport/ImageResizer
+            remappings:
+              - from: ~input/image
+                to: /$(arg NAMESPACE)/resize_1_1/$(arg INPUT_LR)/image_rect_color
+              - from: ~output/image
+                to: $(arg INPUT_LR)/image_rect_color
+          - name: resize_1_4/$(arg INPUT_LR)_throttle
+            type: jsk_topic_tools/LightweightThrottle
+            remappings:
+              - from: ~input
+                to: $(arg INPUT_LR)/image_rect_color
+              - from: ~output
+                to: $(arg INPUT_LR)/image_rect_color/throttle
+          - name: resize_1_8/$(arg INPUT_LR)_resizer
+            type: resized_image_transport/ImageResizer
+            remappings:
+              - from: ~input/image
+                to: /$(arg NAMESPACE)/resize_1_1/$(arg INPUT_LR)/image_rect_color
+              - from: ~output/image
+                to: $(arg INPUT_LR)/image_rect_color
+          - name: resize_1_8/$(arg INPUT_LR)_throttle
+            type: jsk_topic_tools/LightweightThrottle
+            remappings:
+              - from: ~input
+                to: $(arg INPUT_LR)/image_rect_color
+              - from: ~output
+                to: $(arg INPUT_LR)/image_rect_color/throttle
+
+      </rosparam>
+    </node>
+    <!-- PointClouds -->
+    <group ns="resize_1_2">
+      <rosparam>
+        step_x: 2
+        step_y: 2
+      </rosparam>
+    </group>
+    <group ns="resize_1_4">
+      <rosparam>
+        step_x: 4
+        step_y: 4
+      </rosparam>
+    </group>
+    <group ns="resize_1_8">
+      <rosparam>
+        step_x: 8
+        step_y: 8
+      </rosparam>
+    </group>
+    <!-- Images -->
+    <group ns="resize_1_1">
+      <group ns="$(arg INPUT_LR)_throttle">
+        <rosparam subst_value="true">
+          update_rate: $(arg THROTTLE_RATE)
+        </rosparam>
+      </group>
+    </group>
+    <group ns="resize_1_2">
+      <group ns="$(arg INPUT_LR)_resizer">
+        <rosparam>
+          use_camera_info: true
+          resize_scale_x: 0.5
+          resize_scale_y: 0.5
+        </rosparam>
+      </group>
+      <group ns="$(arg INPUT_LR)_throttle">
+        <rosparam subst_value="true">
+          update_rate: $(arg THROTTLE_RATE)
+        </rosparam>
+      </group>
+    </group>
+    <group ns="resize_1_4">
+      <group ns="$(arg INPUT_LR)_resizer">
+        <rosparam>
+          use_camera_info: true
+          resize_scale_x: 0.25
+          resize_scale_y: 0.25
+        </rosparam>
+      </group>
+      <group ns="$(arg INPUT_LR)_throttle">
+        <rosparam subst_value="true">
+          update_rate: $(arg THROTTLE_RATE)
+        </rosparam>
+      </group>
+    </group>
+    <group ns="resize_1_8">
+      <group ns="$(arg INPUT_LR)_resizer">
+        <rosparam>
+          use_camera_info: true
+          resize_scale_x: 0.125
+          resize_scale_y: 0.125
+        </rosparam>
+      </group>
+      <group ns="$(arg INPUT_LR)_throttle">
+        <rosparam subst_value="true">
+          update_rate: $(arg THROTTLE_RATE)
+        </rosparam>
+      </group>
+    </group>
+  </group>
+             
+</launch>

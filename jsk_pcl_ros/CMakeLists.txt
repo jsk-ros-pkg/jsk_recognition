@@ -355,6 +355,8 @@ if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
   include_directories(/usr/local/cuda/include)
 endif (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
 jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PCDReaderWithPose" "pcd_reader_with_pose")
+jsk_pcl_nodelet(src/target_adaptive_tracking_nodelet.cpp
+  "jsk_pcl/TargetAdaptiveTracking" "target_adaptive_tracking")
 jsk_pcl_nodelet(src/octree_voxel_grid_nodelet.cpp
   "jsk_pcl/OctreeVoxelGrid" "octree_voxel_grid")
 # robot_self_filter is released on version greater than indigo

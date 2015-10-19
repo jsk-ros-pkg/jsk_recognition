@@ -53,9 +53,11 @@
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <std_msgs/Header.h>
+#include <dynamic_reconfigure/server.h>
 #include <jsk_recognition_msgs/ClusterPointIndices.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <jsk_pcl_ros/pcl_conversion_util.h>
+#include <jsk_pcl_ros/TargetAdaptiveTrackingConfig.h>
 
 namespace jsk_pcl_ros
 {
@@ -91,9 +93,6 @@ namespace jsk_pcl_ros
       typedef boost::shared_ptr<Models> ModelsPtr;
       typedef pcl::tracking::ParticleXYZRPY PointXYZRPY;
       typedef std::vector<PointXYZRPY> MotionHistory;
-      // typedef boost::shared_ptr<SupervoxelSegmentation> Ptr;
-
-      ros::NodeHandle pnh_;
       typedef  message_filters::sync_policies::ApproximateTime<
          sensor_msgs::PointCloud2,
          geometry_msgs::PoseStamped> SyncPolicy;
@@ -110,6 +109,7 @@ namespace jsk_pcl_ros
       boost::shared_ptr<
          message_filters::Synchronizer<ObjectSyncPolicy> >obj_sync_;
 
+      // ros::NodeHandle pnh_;
       ros::Publisher pub_cloud_;
       ros::Publisher pub_templ_;
       ros::Publisher pub_sindices_;
@@ -153,6 +153,10 @@ namespace jsk_pcl_ros
       bool update_filter_template_;
       int history_window_size_;
       boost::mutex mutex_;
+
+      typedef jsk_pcl_ros::TargetAdaptiveTrackingConfig Config;
+      virtual void configCallback(Config &, uint32_t);
+      boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
       
    protected:
       virtual void onInit();
@@ -216,10 +220,6 @@ namespace jsk_pcl_ros
       template<typename T>
       void getRotationMatrixFromRPY(
          const PointXYZRPY &, Eigen::Matrix<T, 3, 3> &);
-      void estimatedCentroidClustering(
-         const std::multimap<uint32_t, Eigen::Vector3f> &,
-         pcl::PointCloud<PointT>::Ptr,
-         std::vector<uint32_t> &, std::vector<uint32_t> &);
       void computeLocalPairwiseFeautures(
          const std::map <uint32_t, pcl::Supervoxel<PointT>::Ptr> &,
          const std::map<uint32_t, std::vector<uint32_t> >&,
@@ -246,7 +246,6 @@ namespace jsk_pcl_ros
          const Eigen::Vector4f);
       template<typename T, typename U, typename V>
       cv::Scalar plotJetColour(T, U, V);
-
       void supervoxelSegmentation(
          const pcl::PointCloud<PointT>::Ptr,
          std::map<uint32_t, pcl::Supervoxel<PointT>::Ptr > &,
@@ -259,9 +258,6 @@ namespace jsk_pcl_ros
          const std::map<uint32_t, pcl::Supervoxel<PointT>::Ptr>,
          sensor_msgs::PointCloud2 &,
          jsk_recognition_msgs::ClusterPointIndices &,
-         const std_msgs::Header &);
-      std::vector<pcl_msgs::PointIndices> convertToROSPointIndices(
-         const std::vector<pcl::PointIndices>,
          const std_msgs::Header &);
       void targetDescriptiveSurfelsIndices(
          const jsk_recognition_msgs::ClusterPointIndices &,

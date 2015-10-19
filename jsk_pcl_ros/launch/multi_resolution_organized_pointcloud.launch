@@ -7,12 +7,14 @@
   <arg name="RUN_MANAGER" default="true" />
   <arg name="MANAGER" default="manager" />
   <arg name="THROTTLE_RATE" default="1" />
+  <arg name="NODELET_INDEX" default="0" />
   <group ns="$(arg NAMESPACE)">
-    <node pkg="jsk_topic_tools" type="standalone_complexed_nodelet" name="manager"
+    <node pkg="jsk_topic_tools" type="standalone_complexed_nodelet" name="$(arg MANAGER)"
           output="screen"
-          if="$(arg RUN_MANAGER)">
+          if="$(arg RUN_MANAGER)"/>
+    <group ns="$(arg MANAGER)"> <!-- to use same nodelet as images -->
       <rosparam subst_value="true">
-        nodelets:
+        nodelets_$(arg NODELET_INDEX):
           - name: resize_1_1
             type: jsk_topic_tools/Relay
             remappings:
@@ -70,7 +72,7 @@
               - from: ~output/image
                 to: depth
       </rosparam>
-    </node>
+    </group>
     <!-- PointClouds -->
     <group ns="resize_1_2">
       <rosparam>

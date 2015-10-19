@@ -8,7 +8,7 @@
   <arg name="THROTTLE_RATE" default="1" />
   
   <group ns="$(arg NAMESPACE)">
-    <node pkg="jsk_topic_tools" type="standalone_complexed_nodelet" name="$(arg INPUT_LR)_manager"
+    <node pkg="jsk_topic_tools" type="standalone_complexed_nodelet" name="manager"
           output="screen"
           if="$(arg RUN_MANAGER)">
       <rosparam subst_value="true">
@@ -163,5 +163,4 @@
       </group>
     </group>
   </group>
-             
 </launch>

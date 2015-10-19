@@ -1,0 +1,44 @@
+<launch>
+  <arg name="input_cloud" default="/camera/depth_registered/points" />
+  <arg name="model_cloud" default="/object_model/output/cloud" />
+  <arg name="background_cloud" default="/object_model/output/bkgd_cloud" />
+  <arg name="tracker_pose" default="/particle_filter_tracker/track_result_pose" />
+  <arg name="init_obj_pose" default="/object_model/output/pose" />
+  
+  <include file="$(find multilayer_object_tracking)/launch/object_model_annotation.launch" />
+  <!--<include file="$(find bounding_box_estimation)/launch/bounding_box_estimation.launch" />-->
+  <!-- <include file="$(find jsk_pcl_ros)/sample/tracking_sample.launch" /> -->
+  
+  <!-- <node pkg="pcl_filter_utils" type="pcl_filter_utils_node"  -->
+  <!-- 	name ="pcl_filter_utils" output="screen"> -->
+  <!--   <remap from="input" to="/camera/depth_registered/points"/> -->
+  <!--   <remap from="target" to="pcl_filter_utils/output/cloud" /> -->
+  <!-- </node>node> -->
+  
+  <node pkg="jsk_pcl_ros" type="target_adaptive_tracking" 
+  	name="target_adaptive_tracking" output="screen" respawn="false">
+    <remap from="input_cloud" to="/camera/depth_registered/points" />
+    <!-- <remap from="input_cloud" to="/pcl_filter_utils/output/cloud" /> -->
+    <remap from="input_obj_cloud" to="/object_model/output/cloud" />
+    <remap from="input_bkgd_cloud" to="/object_model/output/bkgd_cloud" />
+    <remap from="input_pose" to="/particle_filter_tracker/track_result_pose" />
+    <remap from="input_obj_pose" to="/object_model/output/pose" />
+  </node>
+
+  <!--   <node pkg="jsk_pcl_ros" type="target_adaptive_tracking" -->
+  <!-- 	name="target_adaptive_tracking" output="screen" respawn="false"> -->
+  <!--   <remap from="input_cloud" to="$(arg input_cloud)" /> -->
+  <!--   <remap from="input_obj_cloud" to="$(arg model_cloud)" /> -->
+  <!--   <remap from="input_bkgd_cloud" to="$(arg background_cloud)" /> -->
+  <!--   <remap from="input_pose" to="$(arg tracker_pose)" /> -->
+  <!--   <remap from="input_obj_pose" to="$(arg init_obj_pose)" /> -->
+  <!-- </node> -->
+  
+  <node pkg="jsk_pcl_ros" type="cluster_point_indices_decomposer" 
+	name="supervoxel_segmentation_decomposer" output="screen">
+    <remap from="~input" to="/multilayer_object_tracking/supervoxel/cloud" />
+    <remap from="~target" to="/multilayer_object_tracking/supervoxel/indices" />
+  </node>
+
+  <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_reconfigure"/>
+</launch>

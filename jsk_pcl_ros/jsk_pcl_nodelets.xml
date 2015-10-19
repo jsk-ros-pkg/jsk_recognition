@@ -590,7 +590,12 @@
       reconstract template pointcloud with recognized_pose
     </description>
   </class>
-
+  <class name="jsk_pcl/TargetAdaptiveTracking" type="jsk_pcl_ros::TargetAdaptiveTracking"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Nodelet to track object and update the appearance model online
+    </description>
+  </class>
 </library>
 <library path="libjsk_pcl_ros_moveit">
   <class name="jsk_pcl/PointCloudMoveitFilter"

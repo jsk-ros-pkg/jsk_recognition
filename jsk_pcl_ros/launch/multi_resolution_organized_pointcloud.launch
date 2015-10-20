@@ -1,12 +1,9 @@
 <launch>
   <arg name="NAMESPACE" default="multiresolution_pointcloud" />
   <arg name="INPUT" default="/multisense/organized_image_points2_color" />
-  <arg name="INPUT_LEFT_IMAGE" default="/multisense/left/image_rect_color" />
-  <arg name="INPUT_LEFT_CAMERA_INFO" default="/multisense/left/camera_info" />
   <arg name="INPUT_DEPTH" default="/multisense/depth" />
   <arg name="RUN_MANAGER" default="true" />
   <arg name="MANAGER" default="manager" />
-  <arg name="THROTTLE_RATE" default="1" />
   <arg name="NODELET_INDEX" default="0" />
   <group ns="$(arg NAMESPACE)">
     <node pkg="jsk_topic_tools" type="standalone_complexed_nodelet" name="$(arg MANAGER)"

@@ -19,3 +19,4 @@ This repository contains following ros packages:
    checkerboard_detector/index
    jsk_perception/index
    jsk_pcl_ros/index
+   tips

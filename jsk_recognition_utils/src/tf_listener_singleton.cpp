@@ -64,10 +64,17 @@ namespace jsk_recognition_utils
     const ros::Time& stamp,
     ros::Duration duration)
   {
-    if (listener->waitForTransform(from_frame, to_frame, stamp, duration)) {
+    if (listener->waitForTransform(
+          /*target_frame=*/to_frame,
+          /*source_frame=*/from_frame,
+          /*time=*/stamp,
+          /*polling_sleep_duration=*/duration)) {
       tf::StampedTransform transform;
       listener->lookupTransform(
-        from_frame, to_frame, stamp, transform);
+         /*traget_frame*/to_frame,
+         /*source_frame*/from_frame,
+         /*time*/stamp,
+         /*transform*/transform);
       return transform;
     }
     throw tf2::TransformException(

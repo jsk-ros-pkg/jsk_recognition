@@ -4,6 +4,15 @@ jsk\_recognition
 [![Build Status](https://travis-ci.org/jsk-ros-pkg/jsk_recognition.svg)](https://travis-ci.org/jsk-ros-pkg/jsk_recognition)
 [![Read the Docs](https://readthedocs.org/projects/pip/badge/?version=latest)](https://jsk-recognition.readthedocs.org)
 
+Deb Build Status
+------------
+
+Package | Indigo (Saucy) | Indigo (Trusty) |
+------- | -------------- | --------------- |
+jsk_recognition (32-bit) | [![Build Status](http://jenkins.ros.org/buildStatus/icon?job=ros-indigo-jsk-recognition_binarydeb_saucy_i386)](http://jenkins.ros.org/job/ros-indigo-jsk-recognition_binarydeb_saucy_i386/) | [![Build Status](http://jenkins.ros.org/buildStatus/icon?job=ros-indigo-jsk-recognition_binarydeb_trusty_i386)](http://jenkins.ros.org/job/ros-indigo-jsk-recognition_binarydeb_trusty_i386/)
+jsk_recognition (64-bit) | [![Build Status](http://jenkins.ros.org/buildStatus/icon?job=ros-indigo-jsk-recognition_binarydeb_saucy_amd64)](http://jenkins.ros.org/job/ros-indigo-jsk-recognition_binarydeb_saucy_amd64/) | [![Build Status](http://jenkins.ros.org/buildStatus/icon?job=ros-indigo-jsk-recognition_binarydeb_trusty_amd64)](http://jenkins.ros.org/job/ros-indigo-jsk-recognition_binarydeb_trusty_amd64/)
+
+
 Documentation for jsk\_recognition
 ----------------------------------
 You will find documentation about nodes and types of jsk\_recognition at [the Read the Docs site](https://jsk-recognition.readthedocs.org).

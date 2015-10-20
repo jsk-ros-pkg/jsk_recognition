@@ -1,7 +1,7 @@
 #ifndef JSK_PCL_ROS_SELF_MASK_URDF_ROBOT_
 #define JSK_PCL_ROS_SELF_MASK_URDF_ROBOT_
 
-#include <pr2_navigation_self_filter/self_mask.h>
+#include <robot_self_filter/self_mask.h>
 #include <kdl/tree.hpp>
 #include <kdl/chainjnttojacsolver.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>

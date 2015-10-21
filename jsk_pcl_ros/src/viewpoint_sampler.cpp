@@ -62,10 +62,10 @@ namespace jsk_pcl_ros
   void ViewpointSampler::next()
   {
     angle_ += angle_step_;
-    if (angle_ > angle_max_) {
+    if (angle_ > angle_max_ * 1.001) { // 1.001 for prevent rounding error
       angle_ = angle_min_;
       radius_ += radius_step_;
-      if (radius_ > radius_max_) {
+      if (radius_ > radius_max_ * 1.001) { // 1.001 for prevent rounding error
         radius_ = radius_min_;
         ++index_;
       }

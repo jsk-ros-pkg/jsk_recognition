@@ -1,18 +1,17 @@
 <launch>
   <arg name="NAMESPACE" default="multiresolution_pointcloud" />
   <arg name="INPUT" default="/multisense/organized_image_points2_color" />
-  <arg name="INPUT_LEFT_IMAGE" default="/multisense/left/image_rect_color" />
-  <arg name="INPUT_LEFT_CAMERA_INFO" default="/multisense/left/camera_info" />
   <arg name="INPUT_DEPTH" default="/multisense/depth" />
   <arg name="RUN_MANAGER" default="true" />
   <arg name="MANAGER" default="manager" />
-  <arg name="THROTTLE_RATE" default="1" />
+  <arg name="NODELET_INDEX" default="0" />
   <group ns="$(arg NAMESPACE)">
-    <node pkg="jsk_topic_tools" type="standalone_complexed_nodelet" name="manager"
+    <node pkg="jsk_topic_tools" type="standalone_complexed_nodelet" name="$(arg MANAGER)"
           output="screen"
-          if="$(arg RUN_MANAGER)">
+          if="$(arg RUN_MANAGER)"/>
+    <group ns="$(arg MANAGER)"> <!-- to use same nodelet as images -->
       <rosparam subst_value="true">
-        nodelets:
+        nodelets_$(arg NODELET_INDEX):
           - name: resize_1_1
             type: jsk_topic_tools/Relay
             remappings:
@@ -41,34 +40,6 @@
                 to: resize_1_1/points
               - from: ~output
                 to: ~points
-          - name: resize_1_1/left_relay
-            type: jsk_topic_tools/Relay
-            remappings:
-              - from: ~input
-                to: $(arg INPUT_LEFT_IMAGE)
-              - from: ~output
-                to: left/image_rect_color
-          - name: resize_1_1/left_compressed_relay
-            type: jsk_topic_tools/Relay
-            remappings:
-              - from: ~input
-                to: $(arg INPUT_LEFT_IMAGE)/compressed
-              - from: ~output
-                to: left/image_rect_color/compressed
-          - name: resize_1_1/left_theora_relay
-            type: jsk_topic_tools/Relay
-            remappings:
-              - from: ~input
-                to: $(arg INPUT_LEFT_IMAGE)/theora
-              - from: ~output
-                to: left/image_rect_color/theora
-          - name: resize_1_1/left_info_relay
-            type: jsk_topic_tools/Relay
-            remappings:
-              - from: ~input
-                to: $(arg INPUT_LEFT_CAMERA_INFO)
-              - from: ~output
-                to: left/camera_info
           - name: resize_1_1/depth_relay
             type: jsk_topic_tools/Relay
             remappings:
@@ -76,20 +47,6 @@
                 to: $(arg INPUT_DEPTH)
               - from: ~output
                 to: depth
-          - name: resize_1_1/left_throttle
-            type: jsk_topic_tools/LightweightThrottle
-            remappings:
-              - from: ~input
-                to: left/image_rect_color
-              - from: ~output
-                to: left/image_rect_color/throttle
-          - name: resize_1_2/left_resizer
-            type: resized_image_transport/ImageResizer
-            remappings:
-              - from: ~input/image
-                to: /$(arg NAMESPACE)/resize_1_1/left/image_rect_color
-              - from: ~output/image
-                to: left/image_rect_color
           - name: resize_1_2/depth_resizer
             type: resized_image_transport/ImageResizer
             remappings:
@@ -97,20 +54,6 @@
                 to: /$(arg NAMESPACE)/resize_1_1/depth
               - from: ~output/image
                 to: depth
-          - name: resize_1_2/left_throttle
-            type: jsk_topic_tools/LightweightThrottle
-            remappings:
-              - from: ~input
-                to: left/image_rect_color
-              - from: ~output
-                to: left/image_rect_color/throttle
-          - name: resize_1_4/left_resizer
-            type: resized_image_transport/ImageResizer
-            remappings:
-              - from: ~input/image
-                to: /$(arg NAMESPACE)/resize_1_1/left/image_rect_color
-              - from: ~output/image
-                to: left/image_rect_color
           - name: resize_1_4/depth_resizer
             type: resized_image_transport/ImageResizer
             remappings:
@@ -118,20 +61,6 @@
                 to: /$(arg NAMESPACE)/resize_1_1/depth
               - from: ~output/image
                 to: depth
-          - name: resize_1_4/left_throttle
-            type: jsk_topic_tools/LightweightThrottle
-            remappings:
-              - from: ~input
-                to: left/image_rect_color
-              - from: ~output
-                to: left/image_rect_color/throttle
-          - name: resize_1_8/left_resizer
-            type: resized_image_transport/ImageResizer
-            remappings:
-              - from: ~input/image
-                to: /$(arg NAMESPACE)/resize_1_1/left/image_rect_color
-              - from: ~output/image
-                to: left/image_rect_color
           - name: resize_1_8/depth_resizer
             type: resized_image_transport/ImageResizer
             remappings:
@@ -139,16 +68,8 @@
                 to: /$(arg NAMESPACE)/resize_1_1/depth
               - from: ~output/image
                 to: depth
-          - name: resize_1_8/left_throttle
-            type: jsk_topic_tools/LightweightThrottle
-            remappings:
-              - from: ~input
-                to: left/image_rect_color
-              - from: ~output
-                to: left/image_rect_color/throttle
-
       </rosparam>
-    </node>
+    </group>
     <!-- PointClouds -->
     <group ns="resize_1_2">
       <rosparam>
@@ -168,64 +89,26 @@
         step_y: 8
       </rosparam>
     </group>
-    <!-- Images -->
-    <group ns="resize_1_1">
-      <group ns="left_throttle">
-        <rosparam subst_value="true">
-          update_rate: $(arg THROTTLE_RATE)
-        </rosparam>
-      </group>
-    </group>
+    <!-- Depth Images -->
     <group ns="resize_1_2">
-      <group ns="left_resizer">
-        <rosparam>
-          use_camera_info: true
-          resize_scale_x: 0.5
-          resize_scale_y: 0.5
-        </rosparam>
-      </group>
       <group ns="depth_resizer">
         <rosparam>
           use_camera_info: false
           resize_scale_x: 0.5
           resize_scale_y: 0.5
-        </rosparam>
-      </group>
-      <group ns="left_throttle">
-        <rosparam subst_value="true">
-          update_rate: $(arg THROTTLE_RATE)
         </rosparam>
       </group>
     </group>
     <group ns="resize_1_4">
-      <group ns="left_resizer">
-        <rosparam>
-          use_camera_info: true
-          resize_scale_x: 0.25
-          resize_scale_y: 0.25
-        </rosparam>
-      </group>
       <group ns="depth_resizer">
         <rosparam>
           use_camera_info: false
           resize_scale_x: 0.25
           resize_scale_y: 0.25
-        </rosparam>
-      </group>
-      <group ns="left_throttle">
-        <rosparam subst_value="true">
-          update_rate: $(arg THROTTLE_RATE)
         </rosparam>
       </group>
     </group>
     <group ns="resize_1_8">
-      <group ns="left_resizer">
-        <rosparam>
-          use_camera_info: true
-          resize_scale_x: 0.125
-          resize_scale_y: 0.125
-        </rosparam>
-      </group>
       <group ns="depth_resizer">
         <rosparam>
           use_camera_info: false
@@ -233,12 +116,6 @@
           resize_scale_y: 0.125
         </rosparam>
       </group>
-      <group ns="left_throttle">
-        <rosparam subst_value="true">
-          update_rate: $(arg THROTTLE_RATE)
-        </rosparam>
-      </group>
     </group>
   </group>
-             
 </launch>

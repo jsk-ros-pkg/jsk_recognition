@@ -62,6 +62,7 @@ add_library(jsk_recognition_utils SHARED
   src/geo/cylinder.cpp
   src/geo/grid_plane.cpp
   )
+add_executable(echo_tf_lookup_transform test/echo_tf_lookup_transform.cpp)
 
 install(TARGETS jsk_recognition_utils
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

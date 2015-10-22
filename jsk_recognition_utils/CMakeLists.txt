@@ -64,7 +64,7 @@ add_library(jsk_recognition_utils SHARED
   )
 add_executable(echo_tf_lookup_transform test/echo_tf_lookup_transform.cpp)
 
-install(TARGETS jsk_recognition_utils
+install(TARGETS jsk_recognition_utils echo_tf_lookup_transform
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})

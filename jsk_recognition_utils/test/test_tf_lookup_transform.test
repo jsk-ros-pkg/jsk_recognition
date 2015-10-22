@@ -1,11 +1,20 @@
 <launch>
 
+  <arg name="LAUNCH_RVIZ" default="false" />
+
   <node name="tf_publisher"
         pkg="tf" type="static_transform_publisher"
         args="0 0 1 0 0 0 base head 10" />
 
-  <node name="rviz"
-        pkg="rviz" type="rviz"
-        args="-d test_tf_lookup_transform.rviz" />
+  <test test-name="test_stdout" pkg="jsk_tools" type="test_stdout.py">
+    <param name="command" value="rosrun jsk_recognition_utils echo_tf_lookup_transform base head" />
+    <param name="stdout" value="frame_id: head, child_frame_id: base, pos: 0 0 -1, rot: 0 0 0 1" />
+  </test>
+
+  <group if="$(arg LAUNCH_RVIZ)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_recognition_utils)/test/test_tf_lookup_transform.rviz" />
+  </group>
 
 </launch>

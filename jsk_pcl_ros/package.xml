@@ -45,8 +45,11 @@
   <build_depend>roscpp_tutorials</build_depend>
   <build_depend>jsk_footstep_msgs</build_depend>
   <build_depend>jsk_recognition_utils</build_depend>
+  <build_depend>robot_self_filter</build_depend>
   <run_depend>roscpp_tutorials</run_depend>
   <run_depend>jsk_topic_tools</run_depend>
+  <build_depend>kdl_parser</build_depend>
+  <build_depend>kdl_conversions</build_depend>
 
   <!-- <run_depend>pcl</run_depend> -->
   <run_depend>eigen_conversions</run_depend>
@@ -92,6 +95,9 @@
   <build_depend>interactive_markers</build_depend>
   <run_depend>interactive_markers</run_depend>
   <run_depend>jsk_recognition_utils</run_depend>
+  <run_depend>robot_self_filter</run_depend>
+  <run_depend>kdl_parser</run_depend>
+  <run_depend>kdl_conversions</run_depend>
   <export>
     <nodelet plugin="${prefix}/jsk_pcl_nodelets.xml"/>
     <cpp lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ljsk_pcl_ros" cflags="-I${prefix}/include"/>

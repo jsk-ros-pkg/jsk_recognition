@@ -305,9 +305,8 @@ namespace jsk_pcl_ros
     box_array.header.stamp = header.stamp;
     for (size_t i = 0; i < pose_list_.size(); i++) {
       jsk_recognition_msgs::BoundingBox box;
-      box.header.stamp = header.stamp;
-      box.header.frame_id = frame_id_list_[i];
-      tf::poseEigenToMsg(pose_list_[i], box.pose);
+      box.header = header;
+      tf::poseEigenToMsg(transformed_pose_list_[i], box.pose);
       jsk_pcl_ros::pointFromVectorToXYZ(dimensions_[i], box.dimensions);
       box_array.boxes.push_back(box);
     }
@@ -390,21 +389,19 @@ namespace jsk_pcl_ros
         // check transform cache
         if (transforms.find(frame_id) == transforms.end()) {
           tf::StampedTransform new_transform = lookupTransformWithDuration(
-            tf_listener_,
-            frame_id, msg->header.frame_id,
-            msg->header.stamp,
-            ros::Duration(1.0));
-          transforms[frame_id] = new_transform;
+            /*listener=*/tf_listener_,
+            /*to_frame=*/frame_id,                // box origin
+            /*from_frame=*/msg->header.frame_id,  // sensor origin
+            /*time=*/msg->header.stamp,
+            /*duration=*/ros::Duration(1.0));
+          transforms[frame_id] = new_transform; // sensor to box
         }
         tf::StampedTransform tf_transform = transforms[frame_id];
         Eigen::Affine3f transform;
         tf::transformTFToEigen(tf_transform, transform);
         pcl::PointCloud<pcl::PointXYZ>::Ptr
           cloud(new pcl::PointCloud<pcl::PointXYZ>);
-        pcl::PointCloud<pcl::PointXYZ>::Ptr
-          input_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-        pcl::fromROSMsg(*msg, *input_cloud);
-        pcl::transformPointCloud(*input_cloud, *cloud, transform);
+        pcl::fromROSMsg(*msg, *cloud);
         pcl::CropBox<pcl::PointXYZ> crop_box(false);
         pcl::PointIndices::Ptr indices (new pcl::PointIndices);
         JSK_NODELET_DEBUG("max_points: [%f, %f, %f]", dimensions_[i][0]/2,
@@ -423,11 +420,13 @@ namespace jsk_pcl_ros
                                    -dimensions_[i][2]/2,
                                    0);
         float roll, pitch, yaw;
-        pcl::getEulerAngles(pose_list_[i], roll, pitch, yaw);
+        Eigen::Affine3f transformed_box_pose = transform * pose_list_[i];
+        transformed_pose_list_.push_back(transformed_box_pose);
+        pcl::getEulerAngles(transformed_box_pose, roll, pitch, yaw);
         crop_box.setInputCloud(cloud);
         crop_box.setMax(max_points);
         crop_box.setMin(min_points);
-        crop_box.setTranslation(pose_list_[i].translation());
+        crop_box.setTranslation(transformed_box_pose.translation());
         crop_box.setRotation(Eigen::Vector3f(roll, pitch, yaw));
         crop_box.filter(indices->indices);
         // indices->indices may include NaN and inf points

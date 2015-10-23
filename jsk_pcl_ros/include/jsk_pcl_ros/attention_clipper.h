@@ -100,6 +100,7 @@ namespace jsk_pcl_ros
     Vertices vertices_;
     // for multiple attention
     std::vector<Eigen::Affine3f> pose_list_;
+    std::vector<Eigen::Affine3f> transformed_pose_list_;
     std::vector<std::string> frame_id_list_;
     Vertices dimensions_;
     std::vector<std::string > prefixes_;

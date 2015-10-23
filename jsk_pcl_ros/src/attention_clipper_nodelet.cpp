@@ -305,9 +305,8 @@ namespace jsk_pcl_ros
     box_array.header.stamp = header.stamp;
     for (size_t i = 0; i < pose_list_.size(); i++) {
       jsk_recognition_msgs::BoundingBox box;
-      box.header.stamp = header.stamp;
-      box.header.frame_id = frame_id_list_[i];
-      tf::poseEigenToMsg(pose_list_[i], box.pose);
+      box.header = header;
+      tf::poseEigenToMsg(transformed_pose_list_[i], box.pose);
       jsk_pcl_ros::pointFromVectorToXYZ(dimensions_[i], box.dimensions);
       box_array.boxes.push_back(box);
     }
@@ -390,11 +389,11 @@ namespace jsk_pcl_ros
         // check transform cache
         if (transforms.find(frame_id) == transforms.end()) {
           tf::StampedTransform new_transform = lookupTransformWithDuration(
-            tf_listener_,
-            frame_id,           // box origin
-            msg->header.frame_id, // sensor origin
-            msg->header.stamp,
-            ros::Duration(1.0));
+            /*listener=*/tf_listener_,
+            /*to_frame=*/frame_id,                // box origin
+            /*from_frame=*/msg->header.frame_id,  // sensor origin
+            /*time=*/msg->header.stamp,
+            /*duration=*/ros::Duration(1.0));
           transforms[frame_id] = new_transform; // sensor to box
         }
         tf::StampedTransform tf_transform = transforms[frame_id];
@@ -422,6 +421,7 @@ namespace jsk_pcl_ros
                                    0);
         float roll, pitch, yaw;
         Eigen::Affine3f transformed_box_pose = transform * pose_list_[i];
+        transformed_pose_list_.push_back(transformed_box_pose);
         pcl::getEulerAngles(transformed_box_pose, roll, pitch, yaw);
         crop_box.setInputCloud(cloud);
         crop_box.setMax(max_points);

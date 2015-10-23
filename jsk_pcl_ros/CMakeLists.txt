@@ -33,7 +33,11 @@ find_package(catkin REQUIRED COMPONENTS
   image_geometry
   jsk_footstep_msgs
   interactive_markers
-  laser_assembler moveit_ros_perception
+  laser_assembler
+  moveit_ros_perception
+  octomap_server
+  octomap_ros
+  octomap_msgs
   )
 # only run in hydro
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
@@ -421,6 +425,9 @@ if(${robot_self_filter_FOUND})
   target_link_libraries(collision_detector
     ${pcl_ros_LIBRARIES} ${robot_self_filter_LIBRARIES} ${kdl_parser_LIBRARIES} ${kdl_conversions_LIBRARIES} ${tf_conversions_LIBRARIES})
   add_dependencies(collision_detector ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
+  add_executable(octomap_server_contact src/octomap_server_node.cpp src/OctomapServerContact.cpp)
+  target_link_libraries(octomap_server_contact ${robot_self_filter_LIBRARIES} ${octomap_server_LIBRARIES})
+  add_dependencies(octomap_server_contact ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 else(${robot_self_filter_FOUND})
   message(AUTHOR_WARNING "robot_self_filter is NOT found. collision_detector is NOT compiled.")
 endif(${robot_self_filter_FOUND})
@@ -460,10 +467,14 @@ set(_include_headers "")
 foreach(_header ${_headers})
   string(FIND "${_header}" kinfu IS_KINFU)
   string(FIND "${_header}" point_types IS_POINT_TYPES)
-  # Exclude self_mask_urdf_robot.h and collision_detector.h. These headers are used only in collision_detector, which is not nodelet.
+  # Exclude self_mask_urdf_robot.h. These headers are used only in collision_detector and octomap_server_contact, which is not nodelet.
   string(FIND "${_header}" self_mask_urdf_robot IS_SELF_MASK_URDF_ROBOT)
   string(FIND "${_header}" collision_detector IS_COLLISION_DETECTOR)
-  if (${IS_KINFU} EQUAL -1 AND ${IS_POINT_TYPES} EQUAL -1 AND ${IS_SELF_MASK_URDF_ROBOT} EQUAL -1 AND ${IS_COLLISION_DETECTOR} EQUAL -1)
+  string(FIND "${_header}" self_mask_named_link IS_SELF_MASK_NAMED_LINK)
+  string(FIND "${_header}" OctomapServerContact IS_OCTOMAP_SERVER_CONTACT)
+  if (${IS_KINFU} EQUAL -1 AND ${IS_POINT_TYPES} EQUAL -1 AND
+      ${IS_SELF_MASK_URDF_ROBOT} EQUAL -1 AND ${IS_COLLISION_DETECTOR} EQUAL -1 AND
+      ${IS_SELF_MASK_NAMED_LINK} EQUAL -1 AND ${IS_OCTOMAP_SERVER_CONTACT} EQUAL -1)
     set(_include_headers "${_include_headers}#include \"${_header}\"\n")
   endif()
 endforeach()

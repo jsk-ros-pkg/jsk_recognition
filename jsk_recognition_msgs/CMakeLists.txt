@@ -49,6 +49,8 @@ add_message_files(
   TorusArray.msg
   Torus.msg
   WeightedPoseArray.msg
+  ContactSensor.msg
+  ContactSensorArray.msg
   )
 
 generate_messages(

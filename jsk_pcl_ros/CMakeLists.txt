@@ -33,7 +33,7 @@ find_package(catkin REQUIRED COMPONENTS
   image_geometry
   jsk_footstep_msgs
   interactive_markers
-  laser_assembler moveit_ros_perception
+  laser_assembler
   )
 # only run in hydro
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
@@ -435,8 +435,10 @@ target_link_libraries(jsk_pcl_ros_util
   jsk_pcl_ros_base)
 target_link_libraries(jsk_pcl_ros_base
   ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
+# moveit_ros_perception is excluded from catkin COMPONENTS because of collision about octomap dependency
+find_package(moveit_ros_perception)
 target_link_libraries(jsk_pcl_ros_moveit
-  ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
+  ${catkin_LIBRARIES} ${moveit_ros_perception_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
 
 
 # bench/ directory

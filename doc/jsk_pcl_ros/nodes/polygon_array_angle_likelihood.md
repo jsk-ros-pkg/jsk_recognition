@@ -1,5 +1,5 @@
 # PolygonArrayAngleLikelihood
-Compute likelihood based on distance.
+Compute likelihood based on angular distance.
 Near polygon is, larger likelihood is.
 The likelihood is determined by `1/(1+d^2)` where `d` is a angular difference from `~target_frame_id` to the polygon.
 
@@ -20,3 +20,6 @@ The likelihood is determined by `1/(1+d^2)` where `d` is a angular difference fr
 * `~tf_queue_size`
 
   Queue size of tf message filter
+* `~axis` (Default: `[1, 0, 0]`)
+
+  Reference direction in `~target_frame_id` coordinates system.

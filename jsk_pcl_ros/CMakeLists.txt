@@ -33,7 +33,7 @@ find_package(catkin REQUIRED COMPONENTS
   image_geometry
   jsk_footstep_msgs
   interactive_markers
-  laser_assembler moveit_ros_perception
+  laser_assembler
   )
 # only run in hydro
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
@@ -396,7 +396,8 @@ jsk_pcl_nodelet(src/pcd_reader_with_pose_nodelet.cpp
 add_library(jsk_pcl_ros_base SHARED
   src/region_adjacency_graph.cpp
   src/viewpoint_sampler.cpp)
-add_library(jsk_pcl_ros_moveit SHARED src/pointcloud_moveit_filter.cpp)
+# pointcloud_moveit_filter is deprecated. Please use robot_self_filter.
+# add_library(jsk_pcl_ros_moveit SHARED src/pointcloud_moveit_filter.cpp)
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
 add_library(jsk_pcl_ros_util SHARED ${jsk_pcl_util_nodelet_sources})
 target_link_libraries(jsk_pcl_ros_util jsk_pcl_ros_base)
@@ -428,15 +429,15 @@ endif(${robot_self_filter_FOUND})
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 add_dependencies(jsk_pcl_ros_util ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 add_dependencies(jsk_pcl_ros_base ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
-add_dependencies(jsk_pcl_ros_moveit ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
+# add_dependencies(jsk_pcl_ros_moveit ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 
 target_link_libraries(jsk_pcl_ros_util
   ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp
   jsk_pcl_ros_base)
 target_link_libraries(jsk_pcl_ros_base
   ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
-target_link_libraries(jsk_pcl_ros_moveit
-  ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
+# target_link_libraries(jsk_pcl_ros_moveit
+#   ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
 
 
 # bench/ directory
@@ -474,7 +475,7 @@ execute_process(
 
 configure_file(src/build_check.cpp.in build_check.cpp)
 add_executable(build_check EXCLUDE_FROM_ALL build_check.cpp)
-target_link_libraries(build_check jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_util jsk_pcl_ros_moveit)
+target_link_libraries(build_check jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_util)
 add_dependencies(run_tests build_check)
 
 generate_messages(DEPENDENCIES
@@ -487,12 +488,12 @@ catkin_package(
     DEPENDS pcl
     CATKIN_DEPENDS pcl_ros message_runtime ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_recognition_utils
     INCLUDE_DIRS include
-    LIBRARIES jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_util jsk_pcl_ros_moveit
+    LIBRARIES jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_util
 )
 
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
-install(TARGETS jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_util jsk_pcl_ros_moveit
+install(TARGETS jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_util
   ${jsk_pcl_nodelet_executables}
   ${jsk_pcl_util_nodelet_executables}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

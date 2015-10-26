@@ -13,9 +13,9 @@ from jsk_topic_tools import ConnectionBasedTransport
 from jsk_recognition_msgs.msg import VectorArray, ClassificationResult
 
 
-class SimpleClassifier(ConnectionBasedTransport):
+class ScikitLearnClassifier(ConnectionBasedTransport):
     def __init__(self):
-        super(SimpleClassifier, self).__init__()
+        super(ScikitLearnClassifier, self).__init__()
         self._init_classifier()
         self._pub = self.advertise('~output', ClassificationResult,
                                    queue_size=1)
@@ -49,6 +49,6 @@ class SimpleClassifier(ConnectionBasedTransport):
 
 
 if __name__ == '__main__':
-    rospy.init_node('simple_classifier')
-    simple_clf = SimpleClassifier()
+    rospy.init_node('sklearn_classifier')
+    sklearn_clf = ScikitLearnClassifier()
     rospy.spin()

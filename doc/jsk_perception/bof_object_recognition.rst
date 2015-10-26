@@ -30,9 +30,9 @@ Tools
   - extract BoF from descriptor features.
   - extract BoF Histogram from descriptor features.
 
-- scripts/simple_classifier_trainer.py
+- scripts/sklearn_classifier_trainer.py
 
-  - train simple classifier with specified dataset and classifier model.
+  - train classifier in `scikit-learn <http://scikit-learn.org>`_ with specified dataset and classifier model.
 
 
 Example
@@ -58,7 +58,7 @@ Example
         -O `rospack find jsk_perception`/trained_data/apc2015_sample_bof_hist.pkl.gz
 
     # train classifier
-    $ rosrun jsk_perception simple_classifier_trainer.py \
+    $ rosrun jsk_perception sklearn_classifier_trainer.py \
         `rospack find jsk_perception`/trained_data/apc2015_sample_bof_hist.pkl.gz \
         -O `rospack find jsk_perception`/trained_data/apc2015_sample_clf.pkl.gz
 
@@ -66,7 +66,7 @@ Example
     $ roslaunch jsk_perception apc2015_object_recognition_sample.launch
 
     # check the result
-    $ rostopic echo /simple_classifier/output
+    $ rostopic echo /sklearn_classifier/output
     data: oreo_mega_stuf
     ...
 

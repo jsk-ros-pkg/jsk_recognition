@@ -67,6 +67,7 @@
   <run_depend>nodelet</run_depend>
   <run_depend>pcl_ros</run_depend>
   <run_depend>posedetection_msgs</run_depend>
+  <run_depend>python-gdown</run_depend>
   <run_depend>rosbuild</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>roseus</run_depend>

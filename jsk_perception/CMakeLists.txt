@@ -206,3 +206,4 @@ install(DIRECTORY include/${PROJECT_NAME}/
 install(FILES jsk_perception_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 add_rostest(test/sparse_image.test)
+add_rostest(test/test_label_image_decomposer_slop.test)

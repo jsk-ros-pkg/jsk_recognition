@@ -1,0 +1,23 @@
+<launch>
+
+  <node name="raw_image"
+        pkg="jsk_perception" type="image_publisher.py">
+    <param name="file_name" value="$(find jsk_perception)/sample/laugh_out_loud_joke_book.jpg" />
+  </node>
+
+  <node name="mask_image"
+        pkg="jsk_perception" type="image_publisher.py">
+    <param name="file_name" value="$(find jsk_perception)/sample/laugh_out_loud_joke_book_mask.jpg" />
+  </node>
+
+  <node name="label_image"
+        pkg="jsk_perception" type="mask_image_to_label.py">
+    <remap from="~input" to="mask_image/output" />
+  </node>
+
+  <node name="colorize_labels"
+        pkg="jsk_perception" type="colorize_labels">
+    <remap from="~input" to="label_image/output" />
+  </node>
+
+</launch>

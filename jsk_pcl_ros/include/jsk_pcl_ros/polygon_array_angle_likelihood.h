@@ -41,6 +41,7 @@
 
 #include <tf/message_filter.h>
 #include <message_filters/subscriber.h>
+#include <Eigen/Geometry>
 
 namespace jsk_pcl_ros
 {
@@ -63,6 +64,7 @@ namespace jsk_pcl_ros
     std::string target_frame_id_;
     int tf_queue_size_;
     boost::mutex mutex_;
+    Eigen::Vector3f axis_;
   private:
     
   };

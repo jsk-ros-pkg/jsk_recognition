@@ -51,7 +51,7 @@ namespace jsk_pcl_ros
       return;
     }
     pnh_->param("tf_queue_size", tf_queue_size_, 10);
-    std::vector<double> axis;
+    std::vector<double> axis(3);
     if (!jsk_topic_tools::readVectorParameter(*pnh_, "axis", axis)) {
       axis[0] = 1;
       axis[1] = 0;

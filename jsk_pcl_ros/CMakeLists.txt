@@ -33,7 +33,8 @@ find_package(catkin REQUIRED COMPONENTS
   image_geometry
   jsk_footstep_msgs
   interactive_markers
-  laser_assembler moveit_ros_perception)
+  laser_assembler
+  )
 # only run in hydro
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
   find_package(PCL REQUIRED)
@@ -68,7 +69,8 @@ add_service_files(FILES SwitchTopic.srv
   EnvironmentLock.srv
   PolygonOnEnvironment.srv
   ICPAlignWithBox.srv
-  ICPAlign.srv)
+  ICPAlign.srv
+  CheckCollision.srv)
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
@@ -411,6 +413,20 @@ else (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
     jsk_pcl_ros_base)
 endif (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
 
+# check existence of robot_self_filter package because robot_self_filter is not installed by apt
+pkg_check_modules(robot_self_filter robot_self_filter QUIET)
+if(${robot_self_filter_FOUND})
+  message(AUTHOR_WARNING "robot_self_filter is found. collision_detector is compiled.")
+  link_directories(${catkin_LIBRARY_DIRS})
+  include_directories(include ${robot_self_filter_INCLUDE_DIRS})
+  add_executable(collision_detector src/collision_detector.cpp)
+  target_link_libraries(collision_detector
+    ${pcl_ros_LIBRARIES} ${robot_self_filter_LIBRARIES} ${kdl_parser_LIBRARIES} ${kdl_conversions_LIBRARIES} ${tf_conversions_LIBRARIES})
+  add_dependencies(collision_detector ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
+else(${robot_self_filter_FOUND})
+  message(AUTHOR_WARNING "robot_self_filter is NOT found. collision_detector is NOT compiled.")
+endif(${robot_self_filter_FOUND})
+
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 add_dependencies(jsk_pcl_ros_util ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 add_dependencies(jsk_pcl_ros_base ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
@@ -421,8 +437,11 @@ target_link_libraries(jsk_pcl_ros_util
   jsk_pcl_ros_base)
 target_link_libraries(jsk_pcl_ros_base
   ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
+# moveit_ros_perception is excluded from catkin COMPONENTS because of collision about octomap dependency
+find_package(moveit_ros_perception)
 target_link_libraries(jsk_pcl_ros_moveit
-  ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
+  ${catkin_LIBRARIES} ${moveit_ros_perception_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
+
 
 # bench/ directory
 
@@ -445,7 +464,10 @@ set(_include_headers "")
 foreach(_header ${_headers})
   string(FIND "${_header}" kinfu IS_KINFU)
   string(FIND "${_header}" point_types IS_POINT_TYPES)
-  if (${IS_KINFU} EQUAL -1 AND ${IS_POINT_TYPES} EQUAL -1)
+  # Exclude self_mask_urdf_robot.h and collision_detector.h. These headers are used only in collision_detector, which is not nodelet.
+  string(FIND "${_header}" self_mask_urdf_robot IS_SELF_MASK_URDF_ROBOT)
+  string(FIND "${_header}" collision_detector IS_COLLISION_DETECTOR)
+  if (${IS_KINFU} EQUAL -1 AND ${IS_POINT_TYPES} EQUAL -1 AND ${IS_SELF_MASK_URDF_ROBOT} EQUAL -1 AND ${IS_COLLISION_DETECTOR} EQUAL -1)
     set(_include_headers "${_include_headers}#include \"${_header}\"\n")
   endif()
 endforeach()

@@ -1,0 +1,33 @@
+<launch>
+  <arg name="LAUNCH_OPENNI" default="true" />
+  <arg name="RUN_RVIZ" default="true" />
+  <arg name="INSERT_TO_GAZEBO" default="true" />
+  <arg name="RUN_GAZEBO" default="true" />
+
+  <arg name="INPUT" default="/camera/depth_registered/points" />
+  <arg name="BASE_FRAME_ID" default="camera_link" />
+
+  <include if="$(arg LAUNCH_OPENNI)"
+           file="$(find openni_launch)/launch/openni.launch" >
+    <arg name="depth_registration" value="true" />
+  </include>
+
+  <node if="$(arg RUN_RVIZ)"
+        name="rviz" pkg="rviz" type="rviz" />
+
+  <include file="$(find jsk_pcl_ros)/launch/organized_multi_plane_segmentation.launch" >
+    <arg name="BASE_FRAME_ID" value="$(arg BASE_FRAME_ID)" />
+    <arg name="INPUT" value="$(arg INPUT)" />
+  </include>
+
+  <node pkg="jsk_pcl_ros" type="pointcloud_to_stl"
+        name="pointcloud_to_stl" />
+
+  <node if="$(arg INSERT_TO_GAZEBO)"
+        pkg="hrpsys_gazebo_tutorials" type="spawn_selected_pointcloud_to_gazebo.py"
+        name="spawn_model" />
+
+  <node if="$(arg RUN_GAZEBO)"
+        pkg="gazebo_ros" type="gazebo"
+        name="$(anon gazebo)" />
+</launch>

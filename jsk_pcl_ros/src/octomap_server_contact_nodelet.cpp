@@ -33,16 +33,18 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <jsk_pcl_ros/OctomapServerContact.h>
+#define BOOST_PARAMETER_MAX_ARITY 7
+#include "jsk_pcl_ros/octomap_server_contact.h"
 #include <algorithm>
 
 using namespace octomap;
 using octomap_msgs::Octomap;
 
-namespace octomap_server {
-
+namespace jsk_pcl_ros
+{
   OctomapServerContact::OctomapServerContact(const ros::NodeHandle &privateNh)
   : OctomapServer(privateNh),
+    DiagnosticNodelet("OctomapServerContact"),
     m_octreeContact(NULL),
     m_offsetVisualizeUnknown(0),
     m_occupancyMinX(-std::numeric_limits<double>::max()),
@@ -514,4 +516,11 @@ namespace octomap_server {
     ROS_DEBUG("Map publishing in OctomapServer took %f sec", totalElapsed);
   }
 
+  void OctomapServerContact::onInit(void)
+  {
+    DiagnosticNodelet::onInit();
+  }
 }
+
+#include <pluginlib/class_list_macros.h>
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::OctomapServerContact, nodelet::Nodelet);

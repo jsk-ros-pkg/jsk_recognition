@@ -36,25 +36,35 @@
 #ifndef OCTOMAP_SERVER_OCTOMAPSERVER_CONTACT_H_
 #define OCTOMAP_SERVER_OCTOMAPSERVER_CONTACT_H_
 
+#include <ros/ros.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+
 #include <octomap_server/OctomapServer.h>
 #include <jsk_pcl_ros/OcTreeContact.h>
 #include <jsk_recognition_msgs/ContactSensorArray.h>
 #include <jsk_pcl_ros/self_mask_named_link.h>
 
+using octomap_server::OctomapServer;
 
-namespace octomap_server {
-  class OctomapServerContact : public OctomapServer
+namespace jsk_pcl_ros
+{
+  class OctomapServerContact : public OctomapServer,
+                               public jsk_topic_tools::DiagnosticNodelet
   {
    public:
      OctomapServerContact(const ros::NodeHandle& privateNh = ros::NodeHandle("~"));
      virtual ~OctomapServerContact();
 
-     void initContactSensor(const ros::NodeHandle& privateNh);
-     void insertContactSensor(const std::vector<jsk_recognition_msgs::ContactSensor>& datas);
+     virtual void initContactSensor(const ros::NodeHandle& privateNh);
+     virtual void insertContactSensor(const std::vector<jsk_recognition_msgs::ContactSensor>& datas);
      virtual void insertContactSensorCallback(const jsk_recognition_msgs::ContactSensorArray::ConstPtr& msg);
 
-     void publishAll(const ros::Time& rostime);
+     virtual void publishAll(const ros::Time& rostime);
+     virtual void subscribe() {};
+     virtual void unsubscribe() {};
 
+   protected:
+     virtual void onInit();
      ros::Publisher m_unknownPointCloudPub, m_umarkerPub;
      message_filters::Subscriber<jsk_recognition_msgs::ContactSensorArray> m_contactSensorSub;
      boost::shared_ptr<tf::MessageFilter<jsk_recognition_msgs::ContactSensorArray> > m_tfContactSensorSub;

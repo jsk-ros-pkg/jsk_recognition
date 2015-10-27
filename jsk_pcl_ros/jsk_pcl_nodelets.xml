@@ -11,6 +11,10 @@
          type="jsk_pcl_ros::PolygonArrayAngleLikelihood"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_pcl/PolygonArrayFootAngleLikelihood" 
+         type="jsk_pcl_ros::PolygonArrayFootAngleLikelihood"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_pcl/PoseWithCovarianceStampedToGaussianPointCloud" 
          type="jsk_pcl_ros::PoseWithCovarianceStampedToGaussianPointCloud"
          base_class_type="nodelet::Nodelet">

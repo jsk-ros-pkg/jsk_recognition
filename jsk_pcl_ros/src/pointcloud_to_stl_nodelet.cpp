@@ -152,7 +152,7 @@ namespace jsk_pcl_ros
     ros::Time now_time = ros::Time::now();
     std::stringstream ss;
     if (file_name_.length())
-      ss << "/home/aginika/ros/hydro/src/jsk-ros-pkg/jsk_recognition/jsk_pcl_ros/temp.stl";//file_name_.c_str();
+      ss << file_name_.c_str();
     else
       ss << "/tmp/" << now_time.toNSec() << "_pointcloud.stl";
     

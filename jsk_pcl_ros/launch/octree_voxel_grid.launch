@@ -16,6 +16,7 @@
           args="standalone jsk_pcl/OctreeVoxelGrid"
           output="screen" clear_params="true">
       <remap from="~input" to="$(arg INPUT)" />
+      <param name="publish_marker" value="true" />
     </node>
   </group>
 </launch>

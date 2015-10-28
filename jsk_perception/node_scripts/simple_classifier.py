@@ -10,14 +10,13 @@ from sklearn.preprocessing import normalize
 
 import rospy
 from jsk_topic_tools import ConnectionBasedTransport
-from jsk_recognition_msgs.msg import Histogram, ClassificationResult
+from jsk_recognition_msgs.msg import VectorArray, ClassificationResult
 
 
 class SimpleClassifier(ConnectionBasedTransport):
     def __init__(self):
         super(SimpleClassifier, self).__init__()
         self._init_classifier()
-        self.input = Histogram()
         self._pub = self.advertise('~output', ClassificationResult,
                                    queue_size=1)
 
@@ -27,15 +26,13 @@ class SimpleClassifier(ConnectionBasedTransport):
             self.clf = pickle.load(f)
 
     def subscribe(self):
-        self.sub_hist = rospy.Subscriber('~input', Histogram, self._predict)
+        self.sub_hist = rospy.Subscriber('~input', VectorArray, self._predict)
 
     def unsubscribe(self):
         self.sub_hist.unregister()
 
     def _predict(self, msg):
-        if not (len(msg.histogram) > 0):
-            return
-        X = np.array([msg.histogram])
+        X = np.array(msg.data).reshape((-1, msg.vector_dim))
         normalize(X, copy=False)
         y_proba = self.clf.predict_proba(X)
         y_pred = np.argmax(y_proba, axis=-1)

@@ -48,6 +48,7 @@ add_message_files(
   TimeRange.msg
   TorusArray.msg
   Torus.msg
+  VectorArray.msg
   WeightedPoseArray.msg
   )
 

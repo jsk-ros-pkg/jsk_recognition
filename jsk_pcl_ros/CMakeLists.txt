@@ -220,6 +220,8 @@ jsk_pcl_util_nodelet(src/polygon_array_area_likelihood_nodelet.cpp
   "jsk_pcl/PolygonArrayAreaLikelihood" "polygon_array_area_likelihood")
 jsk_pcl_util_nodelet(src/polygon_array_angle_likelihood_nodelet.cpp
   "jsk_pcl/PolygonArrayAngleLikelihood" "polygon_array_angle_likelihood")
+jsk_pcl_util_nodelet(src/polygon_array_foot_angle_likelihood_nodelet.cpp
+  "jsk_pcl/PolygonArrayFootAngleLikelihood" "polygon_array_foot_angle_likelihood")
 jsk_pcl_util_nodelet(src/pose_with_covariance_stamped_to_gaussian_pointcloud_nodelet.cpp
   "jsk_pcl/PoseWithCovarianceStampedToGaussianPointCloud" "pose_with_covariance_stamped_to_gaussian_pointcloud")
 jsk_pcl_util_nodelet(src/spherical_pointcloud_simulator_nodelet.cpp

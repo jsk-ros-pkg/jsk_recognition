@@ -42,18 +42,17 @@ namespace jsk_pcl_ros
 {
   void OctreeVoxelGrid::generateVoxelCloud(const sensor_msgs::PointCloud2ConstPtr& input_msg)
   {
+    boost::mutex::scoped_lock lock(mutex_);
+
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz (new pcl::PointCloud<pcl::PointXYZ> ());
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz_filtered (new pcl::PointCloud<pcl::PointXYZ> ());
 
     pcl::fromROSMsg(*input_msg, *cloud_xyz);
 
-    bool show_statistics = false;
-    double point_resolution = 0.1;
-    double octree_resolution = 0.1;
     pcl::io::compression_Profiles_e compressionProfile = pcl::io::MANUAL_CONFIGURATION;
 
     // instantiate point cloud compression for encoding and decoding
-    pcl::io::OctreePointCloudCompression<pcl::PointXYZ> PointCloudEncoder(compressionProfile, show_statistics, point_resolution, octree_resolution);
+    pcl::io::OctreePointCloudCompression<pcl::PointXYZ> PointCloudEncoder(compressionProfile, show_statistics_, point_resolution_, octree_resolution_);
     pcl::io::OctreePointCloudCompression<pcl::PointXYZ> PointCloudDecoder;
 
     std::stringstream compressed_data;
@@ -78,9 +77,23 @@ namespace jsk_pcl_ros
     sub_input_.shutdown();
   }
 
+  void OctreeVoxelGrid::configCallback(Config &config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    octree_resolution_ = config.octree_resolution;
+    point_resolution_ = config.point_resolution;
+    show_statistics_ = config.show_statistics;
+  }
+
   void OctreeVoxelGrid::onInit(void)
   {
     DiagnosticNodelet::onInit();
+
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (&OctreeVoxelGrid::configCallback, this, _1, _2);
+    srv_->setCallback (f);
+
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
   }
 }

@@ -40,28 +40,39 @@
 #include <ros/ros.h>
 #include <ros/names.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <dynamic_reconfigure/server.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 
 // pcl
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl/point_types.h>
 #include <pcl/compression/octree_pointcloud_compression.h>
-
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include "jsk_pcl_ros/OctreeVoxelGridConfig.h"
 
 namespace jsk_pcl_ros
 {
-  class OctreeVoxelGrid: public jsk_topic_tools::DiagnosticNodelet
+  class OctreeVoxelGrid : public jsk_topic_tools::DiagnosticNodelet
   {
   public:
+    typedef jsk_pcl_ros::OctreeVoxelGridConfig Config;
     OctreeVoxelGrid(): DiagnosticNodelet("OctreeVoxelGrid") {}
   protected:
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
+    virtual void configCallback(Config &config, uint32_t level);
     virtual void generateVoxelCloud(const sensor_msgs::PointCloud2ConstPtr& input);
 
     ros::Subscriber sub_input_;
     ros::Publisher pub_cloud_;
+
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    boost::mutex mutex_;
+
+    double octree_resolution_;
+    double point_resolution_;
+    bool show_statistics_;
+
   private:
   };
 }

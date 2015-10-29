@@ -1,0 +1,7 @@
+# This file is rospeex sr config file.
+# These parameters mesans,
+# google_api_key: if you want to use google speech api in rospeex,
+#                 you MUST get google api key from following site.
+#                 https://console.developers.google.com
+
+google_api_key: XXXXXXXXXXX

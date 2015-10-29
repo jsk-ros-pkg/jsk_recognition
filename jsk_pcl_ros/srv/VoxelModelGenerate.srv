@@ -1,0 +1,5 @@
+visualization_msgs/Marker voxel
+string name
+string filename
+---
+bool result

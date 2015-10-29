@@ -61,16 +61,10 @@ namespace jsk_pcl_ros
     virtual void exportSTL(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr  &cloud);
     virtual bool createSTL(jsk_pcl_ros::SetPointCloud2::Request &req,
                            jsk_pcl_ros::SetPointCloud2::Response &res);
-    virtual bool createURDF(jsk_pcl_ros::SetPointCloud2::Request &req,
-                            jsk_pcl_ros::SetPointCloud2::Response &res);
-    virtual bool spawnURDF(jsk_pcl_ros::SetPointCloud2::Request &req,
-                           jsk_pcl_ros::SetPointCloud2::Response &res);
-    
+
     ros::Publisher pub_mesh_;
     ros::Subscriber sub_input_;
     ros::ServiceServer create_stl_srv_;
-    ros::ServiceServer create_urdf_srv_;
-    ros::ServiceServer spawn_urdf_srv_;
 
     std::string frame_;
     double search_radius_;

@@ -48,6 +48,7 @@
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl/point_types.h>
 #include <pcl/compression/octree_pointcloud_compression.h>
+#include <pcl/filters/voxel_grid.h>
 #include "jsk_pcl_ros/OctreeVoxelGridConfig.h"
 
 namespace jsk_pcl_ros

@@ -44,19 +44,27 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz (new pcl::PointCloud<pcl::PointXYZ> ());
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz_voxeled (new pcl::PointCloud<pcl::PointXYZ> ());
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz_filtered (new pcl::PointCloud<pcl::PointXYZ> ());
     pcl::fromROSMsg(*input_msg, *cloud_xyz);
 
     pcl::io::compression_Profiles_e compressionProfile = pcl::io::MANUAL_CONFIGURATION;
+    bool down_sampling = true;
     // instantiate point cloud compression for encoding and decoding
-    pcl::io::OctreePointCloudCompression<pcl::PointXYZ> PointCloudEncoder(compressionProfile, show_statistics_,  point_resolution_,  octree_resolution_);
+    pcl::io::OctreePointCloudCompression<pcl::PointXYZ> PointCloudEncoder(compressionProfile, show_statistics_,  point_resolution_,  octree_resolution_, down_sampling);
     pcl::io::OctreePointCloudCompression<pcl::PointXYZ> PointCloudDecoder;
 
     std::stringstream compressed_data;
     // compress point cloud
     PointCloudEncoder.encodePointCloud(cloud_xyz, compressed_data);
     // decompress point cloud
-    PointCloudDecoder.decodePointCloud(compressed_data, cloud_xyz_filtered);
+    PointCloudDecoder.decodePointCloud(compressed_data, cloud_xyz_voxeled);
+
+    // filter with voxel grid
+    pcl::VoxelGrid<pcl::PointXYZ> filter;
+    filter.setInputCloud (cloud_xyz_voxeled);
+    filter.setLeafSize (octree_resolution_, octree_resolution_, octree_resolution_);
+    filter.filter (*cloud_xyz_filtered);
 
     // publish point cloud
     sensor_msgs::PointCloud2 output_msg;

@@ -54,3 +54,19 @@ Voxel grided clouds are published with topics `/octree_voxel_grid/octgrid/output
 ```
 roslaunch jsk_pcl_ros octree_voxel_grid.launch
 ```
+
+## Application
+* URDF model generation
+![](images/generate_urdf.png)
+
+Launch a server of `jsk_pcl_ros/VoxelModelGenerate` typed service.
+In the service callback, a urdf model is generated from `visualization_msgs/Marker` typed data.
+```
+rosrun jsk_pcl_ros scripts/voxel_urdf_generator.py
+```
+
+Request a `jsk_pcl_ros/VoxelModelGenerate` typed service from Marker topic, which represents voxels.
+`~publish_marker` should be `True`.
+```
+rosrun jsk_pcl_ros voxel_urdf_client.py input:=/octree_voxel_grid/octgrid/output_marker
+```

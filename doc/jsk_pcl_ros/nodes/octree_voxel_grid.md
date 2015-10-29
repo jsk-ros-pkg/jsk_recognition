@@ -56,10 +56,11 @@ roslaunch jsk_pcl_ros octree_voxel_grid.launch
 ```
 
 ## Application
-* URDF model generation
+### URDF model generation
 ![](images/generate_urdf.png)
 
 Launch a server of `jsk_pcl_ros/VoxelModelGenerate` typed service.
+This node is launched in octree_voxel_grid.launch by default.
 In the service callback, a urdf model is generated from `visualization_msgs/Marker` typed data.
 ```
 rosrun jsk_pcl_ros scripts/voxel_urdf_generator.py
@@ -67,6 +68,40 @@ rosrun jsk_pcl_ros scripts/voxel_urdf_generator.py
 
 Request a `jsk_pcl_ros/VoxelModelGenerate` typed service from Marker topic, which represents voxels.
 `~publish_marker` should be `True`.
+Urdf model file `/tmp/test.urdf` is generated.
 ```
 rosrun jsk_pcl_ros voxel_urdf_client.py input:=/octree_voxel_grid/octgrid/output_marker
 ```
+
+### Voxel model insertion into gazebo
+![](images/gazebo_model_insert.png)
+
+Plug the openni depth sensor such as xtion.
+
+Launch openni and get point cloud.
+```
+roslaunch openni_launch openni.launch depth_registration:=true
+```
+Launch gazebo.
+```
+rosrun gazebo_ros gazebo
+```
+Launch the segmentation program to get point cloud belonging to one object.
+```
+roslaunch jsk_pcl_ros organized_multi_plane_segmentation.launch INPUT:=/camera/depth_registered/points
+```
+Launch the octree filter program to get voxel-grided cloud.
+```
+roslaunch jsk_pcl_ros octree_voxel_grid.launch INPUT:=/selected_pointcloud
+```
+Launch node to request model geneartion and insert the generated model into gazebo.
+```
+rosrun jsk_pcl_ros voxel_urdf_client.py input:=/octree_voxel_grid/octgrid/output_marker --gazebo true
+```
+Launch rviz. Select the segmentated point cloud by clicking bounding box.
+The selected point cloud is published as `selected_pointcloud` and passed to OctreeVoxelGrid.
+```
+rosrun rviz rviz
+```
+
+

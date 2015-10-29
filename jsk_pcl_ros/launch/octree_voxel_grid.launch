@@ -2,7 +2,7 @@
 <launch>
   <arg name="INPUT" default="/camera/depth/points" />
   <arg name="DEFAULT_NAMESPACE" default="octree_voxel_grid" />
-  <arg name="RUN_URDF_GENERATOR" default="true" />
+  <arg name="RUN_URDF_GENERATOR" default="false" />
 
   <arg name="create_manager" default="true" />
   <arg name="manager" default="octree_voxel_grid_manger" />

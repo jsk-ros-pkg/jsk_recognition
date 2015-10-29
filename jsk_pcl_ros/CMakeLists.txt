@@ -128,6 +128,7 @@ generate_dynamic_reconfigure_options(
   cfg/FeatureRegistration.cfg
   cfg/FisheyeSphere.cfg
   cfg/MovingLeastSquareSmoothing.cfg
+  cfg/TargetAdaptiveTrackingConfig.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -394,7 +395,8 @@ if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
 endif (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
 jsk_pcl_nodelet(src/pcd_reader_with_pose_nodelet.cpp
   "jsk_pcl/PCDReaderWithPose" "pcd_reader_with_pose")
-
+jsk_pcl_nodelet(src/target_adaptive_tracking_nodelet.cpp
+  "jsk_pcl/TargetAdaptiveTracking" "target_adaptive_tracking")
 add_library(jsk_pcl_ros_base SHARED
   src/region_adjacency_graph.cpp
   src/viewpoint_sampler.cpp)

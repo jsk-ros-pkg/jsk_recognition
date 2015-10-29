@@ -20,14 +20,14 @@ def generateURDFModel(req):
     f.write('''<robot name="%s">
 ''' % req.name)
 
-    first_link_flag = True
     marker = req.voxel
+    # add root link, which is dummy
+    root_link_name = "root_link"
+    f.write('''  <link name="%s" />
+''' % root_link_name)
     for i in range(len(marker.points)):
         point = marker.points[i]
         link_name = "link%d" % i
-        # first link is treated as the root link
-        if first_link_flag:
-            root_link_name = link_name
         # add new link
         f.write('''  <link name="%s">
     <inertial>
@@ -60,9 +60,8 @@ def generateURDFModel(req):
                   marker.scale.x, marker.scale.y, marker.scale.z,
                   link_name, link_name))
         # add a fixed joint between the new link and the root link
-        if not first_link_flag:
-            joint_name = "joint%d" % i
-            f.write('''  <joint name="%s" type="fixed">
+        joint_name = "joint%d" % i
+        f.write('''  <joint name="%s" type="fixed">
     <origin xyz="%f %f %f"/>
     <parent link="%s"/>
     <child link="%s"/>
@@ -70,7 +69,6 @@ def generateURDFModel(req):
 ''' % (joint_name,
        point.x, point.y, point.z,
        root_link_name, link_name))
-        first_link_flag = False
 
     # write final line
     f.write('''</robot>

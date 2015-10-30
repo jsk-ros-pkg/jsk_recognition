@@ -595,6 +595,10 @@
     </description>
   </class>
 
+  <class name="jsk_pcl/OctomapServerContact"
+         type="jsk_pcl_ros::OctomapServerContact"
+         base_class_type="nodelet::Nodelet">
+  </class>
 </library>
 <library path="libjsk_pcl_ros_moveit">
   <class name="jsk_pcl/PointCloudMoveitFilter"

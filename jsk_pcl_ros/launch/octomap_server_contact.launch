@@ -1,0 +1,72 @@
+<!--
+  Example launch file for octomap_server mapping:
+  Listens to incoming PointCloud2 data and incrementally builds an octomap.
+  The data is sent out in different representations.
+
+  Copy this file into your workspace and adjust as needed, see
+  www.ros.org/wiki/octomap_server for details
+-->
+<launch>
+  <arg name="INPUT" default="/camera/depth/points"/>
+  <arg name="DEFAULT_NAMESPACE" default="octomap"/>
+
+  <group ns="$(arg DEFAULT_NAMESPACE)">
+    <param name="robot_description" textfile="$(find hrpsys_gazebo_tutorials)/environment_models/Cube/Cube.urdf" />
+
+    <node pkg="nodelet" type="nodelet" name="resize_points_publisher"
+          args="standalone jsk_pcl/ResizePointsPublisher" output="screen">
+      <remap from="~input" to="$(arg INPUT)" />
+      <remap from="~output" to="$(arg INPUT)_resized" />
+      <param name="step_x" value="4" />
+      <param name="step_y" value="4" />
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="octomap_server"
+          args="standalone jsk_pcl/OctomapServerContact" output="screen">
+      <param name="resolution" value="0.05" />
+
+      <!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
+      <param name="frame_id" type="string" value="gazebo_world"/>
+
+      <!-- maximum range to integrate (speedup!) -->
+      <param name="sensor_model/max_range" value="5.0" />
+
+      <!-- data source to integrate (PointCloud2) -->
+      <remap from="cloud_in" to="$(arg INPUT)_resized" />
+
+      <!-- color -->
+      <param name="color/r" value="1.0" />
+      <param name="color/g" value="0.0" />
+      <param name="color/b" value="0.0" />
+      <param name="color/a" value="1.0" />
+      <param name="color_free/r" value="0.0" />
+      <param name="color_free/g" value="1.0" />
+      <param name="color_free/b" value="0.0" />
+      <param name="color_free/a" value="1.0" />
+      <param name="color_unkown/r" value="0.5" />
+      <param name="color_unkown/g" value="0.5" />
+      <param name="color_unkown/b" value="0.7" />
+      <param name="color_unkown/a" value="1.0" />
+
+      <rosparam command="load" file="$(find jsk_pcl_ros)/config/contact_sensor_config.yaml" />
+
+      <!-- Sensor Input PassThrough Filter Params -->
+      <param name="occupancy_min_x" value="-1.0" />
+      <param name="occupancy_max_x" value="1.0" />
+      <param name="occupancy_min_y" value="-1.0" />
+      <param name="occupancy_max_y" value="1.0" />
+      <param name="occupancy_min_z" value="0.0" />
+      <param name="occupancy_max_z" value="2.0" />
+      <param name="pointcloud_min_x" value="-5.0" />
+      <param name="pointcloud_max_x" value="5.0" />
+      <param name="pointcloud_min_y" value="-5.0" />
+      <param name="pointcloud_max_y" value="5.0" />
+      <param name="pointcloud_min_z" value="-5.0" />
+      <param name="pointcloud_max_z" value="5.0" />
+    </node>
+
+    <node pkg="jsk_pcl_ros" type="test_contact_sensor.py" name="test_contact_sensor"
+          output="screen" />
+  </group>
+
+</launch>

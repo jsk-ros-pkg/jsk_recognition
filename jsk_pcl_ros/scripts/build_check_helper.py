@@ -18,7 +18,8 @@ with open(sys.argv[1]) as f:
                               "jsk_pcl_ros::ColorizeRandomForest",
                               "jsk_pcl_ros::Kinfu",
                               "jsk_pcl_ros::ResizePointsPublisher",
-                              "jsk_pcl_ros::OrganizedEdgeDetector"]:
+                              "jsk_pcl_ros::OrganizedEdgeDetector",
+                              "jsk_pcl_ros::OctomapServerContact"]:
             print "%s instance_%d;" % (class_name, counter)
             counter = counter + 1
     

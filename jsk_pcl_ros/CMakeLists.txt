@@ -128,6 +128,7 @@ generate_dynamic_reconfigure_options(
   cfg/FeatureRegistration.cfg
   cfg/FisheyeSphere.cfg
   cfg/MovingLeastSquareSmoothing.cfg
+  cfg/OctreeChangePublisher.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)

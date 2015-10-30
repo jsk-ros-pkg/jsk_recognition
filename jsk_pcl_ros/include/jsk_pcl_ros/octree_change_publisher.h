@@ -39,6 +39,8 @@
 // ros
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <dynamic_reconfigure/server.h>
+#include <jsk_pcl_ros/OctreeChangePublisherConfig.h>
 #include <pcl_conversions/pcl_conversions.h>
 
 // pcl
@@ -52,20 +54,25 @@ namespace jsk_pcl_ros
 {
   class OctreeChangePublisher: public jsk_topic_tools::ConnectionBasedNodelet
   {
+  public:
+    typedef OctreeChangePublisherConfig Config;
   protected:
     int counter_;
     int noise_filter_;
     double resolution_;
+    boost::mutex mtx_;
 
     ros::Subscriber sub_;
     ros::Publisher diff_pub_;
     pcl::octree::OctreePointCloudChangeDetector<pcl::PointXYZRGB> *octree_;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr filtered_cloud;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
 
     virtual void
     cloud_cb (const sensor_msgs::PointCloud2 &pc);
     virtual void subscribe();
     virtual void unsubscribe();
+    virtual void config_callback(Config &config, uint32_t level);
   private:
     virtual void onInit();
   };

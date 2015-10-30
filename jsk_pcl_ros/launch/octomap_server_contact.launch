@@ -13,16 +13,16 @@
   <group ns="$(arg DEFAULT_NAMESPACE)">
     <param name="robot_description" textfile="$(find hrpsys_gazebo_tutorials)/environment_models/Cube/Cube.urdf" />
 
-    <node  name="resize_points_publisher"
-           pkg="jsk_pcl_ros" type="resize_points_publisher">
+    <node pkg="nodelet" type="nodelet" name="resize_points_publisher"
+          args="standalone jsk_pcl/ResizePointsPublisher" output="screen">
       <remap from="~input" to="$(arg INPUT)" />
       <remap from="~output" to="$(arg INPUT)_resized" />
       <param name="step_x" value="4" />
       <param name="step_y" value="4" />
     </node>
 
-    <node pkg="jsk_pcl_ros" type="octomap_server_contact" name="octomap_server"
-          output="screen">
+    <node pkg="nodelet" type="nodelet" name="octomap_server"
+          args="standalone jsk_pcl/OctomapServerContact" output="screen">
       <param name="resolution" value="0.05" />
 
       <!-- fixed map frame (set to 'map' if SLAM or localization running!) -->

@@ -30,21 +30,9 @@ and other voxel filtered functions output the other position such as the centroi
    Publish voxel grided clouds as `visualization_msgs/Marker` topic.
 
 ## Dynamic Reconfigure Parameters
-* `~octree_resolution` (Double, default: `0.1`):
+* `~resolution` (Double, default: `0.1`):
 
-   Octree resolution passed to `OctreePointCloudCompression`.
-
-   See http://docs.pointclouds.org/trunk/classpcl_1_1io_1_1_octree_point_cloud_compression.html.
-* `~point_resolution` (Double, default: `0.1`):
-
-   Point resolution passed to `OctreePointCloudCompression`.
-
-   See http://docs.pointclouds.org/trunk/classpcl_1_1io_1_1_octree_point_cloud_compression.html.
-* `~show_statistics` (Boolean, default: `false`):
-
-   Show statistics in `OctreePointCloudCompression`.
-
-   See http://docs.pointclouds.org/trunk/classpcl_1_1io_1_1_octree_point_cloud_compression.html.  
+   Resolution of voxel grid.
 
 ## Sample
 Plug the depth sensor which can be launched by openni.launch and run the below command.

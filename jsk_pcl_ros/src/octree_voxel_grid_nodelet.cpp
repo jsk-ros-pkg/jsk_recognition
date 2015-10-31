@@ -43,32 +43,29 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz (new pcl::PointCloud<pcl::PointXYZ> ());
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz_voxeled (new pcl::PointCloud<pcl::PointXYZ> ());
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz_filtered (new pcl::PointCloud<pcl::PointXYZ> ());
-    pcl::fromROSMsg(*input_msg, *cloud_xyz);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ> ());
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_voxeled (new pcl::PointCloud<pcl::PointXYZ> ());
+    pcl::fromROSMsg(*input_msg, *cloud);
 
-    pcl::io::compression_Profiles_e compressionProfile = pcl::io::MANUAL_CONFIGURATION;
-    bool down_sampling = true;
-    // instantiate point cloud compression for encoding and decoding
-    pcl::io::OctreePointCloudCompression<pcl::PointXYZ> PointCloudEncoder(compressionProfile, show_statistics_,  point_resolution_,  octree_resolution_, down_sampling);
-    pcl::io::OctreePointCloudCompression<pcl::PointXYZ> PointCloudDecoder;
-
-    std::stringstream compressed_data;
-    // compress point cloud
-    PointCloudEncoder.encodePointCloud(cloud_xyz, compressed_data);
-    // decompress point cloud
-    PointCloudDecoder.decodePointCloud(compressed_data, cloud_xyz_voxeled);
-
-    // filter with voxel grid
-    pcl::VoxelGrid<pcl::PointXYZ> filter;
-    filter.setInputCloud (cloud_xyz_voxeled);
-    filter.setLeafSize (octree_resolution_, octree_resolution_, octree_resolution_);
-    filter.filter (*cloud_xyz_filtered);
+    // generate octree
+    pcl::octree::OctreePointCloud<pcl::PointXYZ> octree(resolution_);
+    // add point cloud to octree
+    octree.setInputCloud(cloud);
+    octree.addPointsFromInputCloud();
+    // get points where grid is occupied
+    pcl::octree::OctreePointCloud<pcl::PointXYZ>::AlignedPointTVector point_vec;
+    octree.getOccupiedVoxelCenters(point_vec);
+    // put points into point cloud
+    cloud_voxeled->width = point_vec.size();
+    cloud_voxeled->height = 1;
+    for (int i = 0; i < point_vec.size(); i++) {
+      pcl::PointXYZ p(point_vec[i].x, point_vec[i].y, point_vec[i].z);
+      cloud_voxeled->push_back(p);
+    }
 
     // publish point cloud
     sensor_msgs::PointCloud2 output_msg;
-    toROSMsg(*cloud_xyz_filtered, output_msg);
+    toROSMsg(*cloud_voxeled, output_msg);
     output_msg.header = input_msg->header;
     pub_cloud_.publish(output_msg);
 
@@ -76,16 +73,16 @@ namespace jsk_pcl_ros
     if (publish_marker_flag_) {
       visualization_msgs::Marker marker_msg;
       marker_msg.type = visualization_msgs::Marker::CUBE_LIST;
-      marker_msg.scale.x = octree_resolution_;
-      marker_msg.scale.y = octree_resolution_;
-      marker_msg.scale.z = octree_resolution_;
+      marker_msg.scale.x = resolution_;
+      marker_msg.scale.y = resolution_;
+      marker_msg.scale.z = resolution_;
       marker_msg.header = input_msg->header;
       marker_msg.pose.orientation.w = 1.0;
       marker_msg.color = jsk_topic_tools::colorCategory20(0);
 
       pcl::PointXYZ p;
-      for (size_t i = 0; i < cloud_xyz_filtered->size(); i++) {
-        p = cloud_xyz_filtered->at(i);
+      for (size_t i = 0; i < cloud_voxeled->size(); i++) {
+        p = cloud_voxeled->at(i);
         geometry_msgs::Point point_ros;
         point_ros.x = p.x;
         point_ros.y = p.y;
@@ -110,9 +107,8 @@ namespace jsk_pcl_ros
   void OctreeVoxelGrid::configCallback(Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    octree_resolution_ = config.octree_resolution;
-    point_resolution_ = config.point_resolution;
-    show_statistics_ = config.show_statistics;
+    double resolution_min = 0.001;
+    resolution_ = std::max(config.resolution, resolution_min);
   }
 
   void OctreeVoxelGrid::onInit(void)

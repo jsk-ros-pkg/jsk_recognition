@@ -47,8 +47,7 @@
 // pcl
 #include <pcl_ros/pcl_nodelet.h>
 #include <pcl/point_types.h>
-#include <pcl/compression/octree_pointcloud_compression.h>
-#include <pcl/filters/voxel_grid.h>
+#include <pcl/octree/octree_pointcloud.h>
 #include "jsk_pcl_ros/OctreeVoxelGridConfig.h"
 
 namespace jsk_pcl_ros
@@ -72,9 +71,7 @@ namespace jsk_pcl_ros
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
 
-    double octree_resolution_;
-    double point_resolution_;
-    bool show_statistics_;
+    double resolution_;
 
     bool publish_marker_flag_;
   };

@@ -139,6 +139,7 @@ generate_dynamic_reconfigure_options(
 find_package(OpenCV REQUIRED core imgproc)
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
+link_directories(${catkin_LIBRARY_DIRS})
 
 macro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
   jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
@@ -400,21 +401,15 @@ if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
 endif (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
 jsk_pcl_nodelet(src/pcd_reader_with_pose_nodelet.cpp
   "jsk_pcl/PCDReaderWithPose" "pcd_reader_with_pose")
-
 # check existence of robot_self_filter package because robot_self_filter is not installed by apt
 pkg_check_modules(robot_self_filter robot_self_filter QUIET)
 if(robot_self_filter_FOUND)
-  message(AUTHOR_WARNING "robot_self_filter is found. collision_detector is compiled.")
-  link_directories(${catkin_LIBRARY_DIRS})
-  include_directories(include ${robot_self_filter_INCLUDE_DIRS})
-  add_executable(collision_detector src/collision_detector.cpp)
-  target_link_libraries(collision_detector
-    ${pcl_ros_LIBRARIES} ${robot_self_filter_LIBRARIES} ${kdl_parser_LIBRARIES} ${kdl_conversions_LIBRARIES} ${tf_conversions_LIBRARIES})
-  add_dependencies(collision_detector ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
+  jsk_pcl_nodelet(src/collision_detector_nodelet.cpp
+    "jsk_pcl/CollisionDetector" "collision_detector")
   jsk_pcl_nodelet(src/octomap_server_contact_nodelet.cpp
     "jsk_pcl/OctomapServerContact" "octomap_server_contact")
 else(robot_self_filter_FOUND)
-  message(AUTHOR_WARNING "robot_self_filter is NOT found. collision_detector is NOT compiled.")
+  message(AUTHOR_WARNING "robot_self_filter is NOT found. some nodelet depending on robot_self_filter will not be compiled.")
 endif(robot_self_filter_FOUND)
 
 add_library(jsk_pcl_ros_base SHARED
@@ -435,7 +430,6 @@ else (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
     jsk_pcl_ros_base)
 endif (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
 if (robot_self_filter_FOUND)
-  link_directories(${catkin_LIBRARY_DIRS})
   include_directories(include ${robot_self_filter_INCLUDE_DIRS})
   target_link_libraries(jsk_pcl_ros ${robot_self_filter_LIBRARIES})
 endif (robot_self_filter_FOUND)

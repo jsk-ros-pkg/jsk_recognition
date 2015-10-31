@@ -599,6 +599,11 @@
          type="jsk_pcl_ros::OctomapServerContact"
          base_class_type="nodelet::Nodelet">
   </class>
+
+  <class name="jsk_pcl/CollisionDetector"
+         type="jsk_pcl_ros::CollisionDetector"
+         base_class_type="nodelet::Nodelet">
+  </class>
 </library>
 <library path="libjsk_pcl_ros_moveit">
   <class name="jsk_pcl/PointCloudMoveitFilter"

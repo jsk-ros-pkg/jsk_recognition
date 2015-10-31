@@ -62,7 +62,7 @@ namespace jsk_pcl_ros
     std::string content;
     urdf::Model urdf_model;
     if (nh_->getParam("robot_description", content)) {
-      if(!urdf_model.initString(content)) {
+      if (!urdf_model.initString(content)) {
         JSK_NODELET_ERROR("Unable to parse URDF description!");
       }
     }
@@ -78,35 +78,35 @@ namespace jsk_pcl_ros
     std::vector<robot_self_filter::LinkInfo> links;
     std::string link_names;
 
-    if(!pnh_->hasParam("self_see_links")) {
+    if (!pnh_->hasParam("self_see_links")) {
       JSK_NODELET_WARN("No links specified for self filtering.");
     } else {
       XmlRpc::XmlRpcValue ssl_vals;;
       pnh_->getParam("self_see_links", ssl_vals);
-      if(ssl_vals.getType() != XmlRpc::XmlRpcValue::TypeArray) {
+      if (ssl_vals.getType() != XmlRpc::XmlRpcValue::TypeArray) {
         JSK_NODELET_WARN("Self see links need to be an array");
       } else {
-        if(ssl_vals.size() == 0) {
+        if (ssl_vals.size() == 0) {
           JSK_NODELET_WARN("No values in self see links array");
         } else {
-          for(int i = 0; i < ssl_vals.size(); i++) {
+          for (int i = 0; i < ssl_vals.size(); i++) {
             robot_self_filter::LinkInfo li;
-            if(ssl_vals[i].getType() != XmlRpc::XmlRpcValue::TypeStruct) {
+            if (ssl_vals[i].getType() != XmlRpc::XmlRpcValue::TypeStruct) {
               JSK_NODELET_WARN("Self see links entry %d is not a structure.  Stopping processing of self see links",i);
               break;
             }
-            if(!ssl_vals[i].hasMember("name")) {
+            if (!ssl_vals[i].hasMember("name")) {
               JSK_NODELET_WARN("Self see links entry %d has no name.  Stopping processing of self see links",i);
               break;
             }
             li.name = std::string(ssl_vals[i]["name"]);
-            if(!ssl_vals[i].hasMember("padding")) {
+            if (!ssl_vals[i].hasMember("padding")) {
               JSK_NODELET_DEBUG("Self see links entry %d has no padding.  Assuming default padding of %g",i,default_padding);
               li.padding = default_padding;
             } else {
               li.padding = ssl_vals[i]["padding"];
             }
-            if(!ssl_vals[i].hasMember("scale")) {
+            if (!ssl_vals[i].hasMember("scale")) {
               JSK_NODELET_DEBUG("Self see links entry %d has no scale.  Assuming default scale of %g",i,default_scale);
               li.scale = default_scale;
             } else {
@@ -149,7 +149,7 @@ namespace jsk_pcl_ros
     tf::StampedTransform sensor_to_world_tf;
     try {
       tf_listener_.lookupTransform(world_frame_id_, cloud_frame_id_, cloud_stamp_, sensor_to_world_tf);
-    } catch(tf::TransformException& ex){
+    } catch (tf::TransformException& ex) {
       JSK_NODELET_ERROR_STREAM( "Transform error of sensor data: " << ex.what() << ", quitting callback");
       return false;
     }
@@ -164,16 +164,16 @@ namespace jsk_pcl_ros
     // check containment for all point cloud
     bool contain_flag = false;
     pcl::PointXYZ p;
-    for(size_t i = 0; i < cloud_.size(); i++) {
+    for (size_t i = 0; i < cloud_.size(); i++) {
       p = cloud_.at(i);
-      if(finite(p.x) && finite(p.y) && finite(p.z) &&
+      if (finite(p.x) && finite(p.y) && finite(p.z) &&
          self_mask_->getMaskContainment(p.x, p.y, p.z) == robot_self_filter::INSIDE) {
         contain_flag = true;
         break;
       }
     }
 
-    if(contain_flag) {
+    if (contain_flag) {
       JSK_NODELET_INFO("collision!");
     } else {
       JSK_NODELET_INFO("no collision!");

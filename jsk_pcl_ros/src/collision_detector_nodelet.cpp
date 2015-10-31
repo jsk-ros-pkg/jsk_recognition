@@ -122,6 +122,7 @@ namespace jsk_pcl_ros
 
   void CollisionDetector::pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
+    boost::mutex::scoped_lock lock(mutex_);
     JSK_NODELET_DEBUG("update pointcloud.");
 
     pcl::fromROSMsg(*msg, cloud_);
@@ -141,6 +142,7 @@ namespace jsk_pcl_ros
   bool CollisionDetector::checkCollision(const sensor_msgs::JointState& joint,
                                          const geometry_msgs::PoseStamped& pose)
   {
+    boost::mutex::scoped_lock lock(mutex_);
     JSK_NODELET_DEBUG("checkCollision is called.");
 
     // calculate the sensor transformation

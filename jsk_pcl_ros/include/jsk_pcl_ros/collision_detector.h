@@ -68,6 +68,7 @@ namespace jsk_pcl_ros
     virtual void pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual bool serviceCallback(jsk_pcl_ros::CheckCollision::Request &req,
                                  jsk_pcl_ros::CheckCollision::Response &res);
+    boost::mutex mutex_;
     ros::Subscriber sub_;
     ros::ServiceServer service_;
 

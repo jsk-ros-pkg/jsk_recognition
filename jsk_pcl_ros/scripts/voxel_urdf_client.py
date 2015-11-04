@@ -10,6 +10,8 @@ from jsk_pcl_ros.srv import VoxelModelGenerate
 
 def markerCallback(marker_msg):
     global cb_flag
+    if not (args.loop or (not cb_flag)):
+        return
     # request service to generate a model
     if args.type == 'urdf':
         rospy.loginfo("Request the urdf modelgeneration.")
@@ -18,7 +20,7 @@ def markerCallback(marker_msg):
             return
     elif args.type == 'eus':
         rospy.loginfo("Request the eus model generation.")
-        if not eus_srv(voxel=marker_msg, name="test_model", filename="/tmp/test.l"):
+        if not eus_srv(voxel=marker_msg, name="test_model", filename="/tmp/test.urdf"):
             rospy.logwarn("Request of the eus model generation failed.")
             return
     else:
@@ -46,11 +48,15 @@ def main():
     rospy.init_node("voxel_urdf_client")
     # parse argument
     parser = argparse.ArgumentParser()
-    parser.add_argument('--gazebo', default=False)
     parser.add_argument('--model', default=False)
     parser.add_argument('--loop', default=True)
+    parser.add_argument('--gazebo', default=False)
     parser.add_argument('--type', default='urdf')
     args = parser.parse_args(rospy.myargv()[1:])
+    if type(args.loop) != bool:
+        args.loop = (args.loop in ['TRUE', 'True', 'true', 't', '1'])
+    if type(args.gazebo) != bool:
+        args.gazebo = (args.gazebo in ['TRUE', 'True', 'true', 't', '1'])
 
     marker_sub = rospy.Subscriber("input", Marker, markerCallback, queue_size=1)
     urdf_srv = rospy.ServiceProxy("/generate_voxel_urdf", VoxelModelGenerate)

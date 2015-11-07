@@ -68,7 +68,7 @@ namespace jsk_pcl_ros
     ros::Publisher pub_cloud_;
     ros::Publisher pub_marker_;
 
-    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
 
     double resolution_;

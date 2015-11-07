@@ -75,7 +75,8 @@ add_service_files(FILES SwitchTopic.srv
   PolygonOnEnvironment.srv
   ICPAlignWithBox.srv
   ICPAlign.srv
-  CheckCollision.srv)
+  CheckCollision.srv
+  VoxelModelGenerate.srv)
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
@@ -133,6 +134,7 @@ generate_dynamic_reconfigure_options(
   cfg/FeatureRegistration.cfg
   cfg/FisheyeSphere.cfg
   cfg/MovingLeastSquareSmoothing.cfg
+  cfg/OctreeVoxelGrid.cfg
   cfg/OctreeChangePublisher.cfg
   )
 
@@ -400,6 +402,8 @@ if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
 endif (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
 jsk_pcl_nodelet(src/pcd_reader_with_pose_nodelet.cpp
   "jsk_pcl/PCDReaderWithPose" "pcd_reader_with_pose")
+jsk_pcl_nodelet(src/octree_voxel_grid_nodelet.cpp
+  "jsk_pcl/OctreeVoxelGrid" "octree_voxel_grid")
 
 # check existence of robot_self_filter package because robot_self_filter is not installed by apt
 pkg_check_modules(robot_self_filter robot_self_filter QUIET)
@@ -506,7 +510,7 @@ target_link_libraries(build_check jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_util 
 add_dependencies(run_tests build_check)
 
 generate_messages(DEPENDENCIES
-  ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_footstep_msgs)
+  ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_footstep_msgs visualization_msgs)
 
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 message("flags: ${CMAKE_CXX_FLAGS}")

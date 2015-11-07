@@ -35,7 +35,7 @@
 
 #define BOOST_PARAMETER_MAX_ARITY 7
 
-#include "jsk_pcl_ros/polygon_array_angle_likelihood.h"
+#include "jsk_pcl_ros/polygon_array_foot_angle_likelihood.h"
 #include "jsk_pcl_ros/tf_listener_singleton.h"
 #include "jsk_pcl_ros/geo_util.h"
 #include "jsk_pcl_ros/pcl_conversion_util.h"
@@ -43,7 +43,7 @@
 
 namespace jsk_pcl_ros
 {
-  void PolygonArrayAngleLikelihood::onInit()
+  void PolygonArrayFootAngleLikelihood::onInit()
   {
     DiagnosticNodelet::onInit();
     if (!pnh_->getParam("target_frame_id", target_frame_id_)) {
@@ -64,7 +64,7 @@ namespace jsk_pcl_ros
     pub_ = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "output", 1);
   }
 
-  void PolygonArrayAngleLikelihood::subscribe()
+  void PolygonArrayFootAngleLikelihood::subscribe()
   {
     sub_.subscribe(*pnh_, "input", 10);
     tf_filter_.reset(new tf::MessageFilter<jsk_recognition_msgs::PolygonArray>(
@@ -73,15 +73,15 @@ namespace jsk_pcl_ros
                        target_frame_id_,
                        tf_queue_size_));
     tf_filter_->registerCallback(
-      boost::bind(&PolygonArrayAngleLikelihood::likelihood, this, _1));
+      boost::bind(&PolygonArrayFootAngleLikelihood::likelihood, this, _1));
   }
 
-  void PolygonArrayAngleLikelihood::unsubscribe()
+  void PolygonArrayFootAngleLikelihood::unsubscribe()
   {
     sub_.unsubscribe();
   }
 
-  void PolygonArrayAngleLikelihood::likelihood(
+  void PolygonArrayFootAngleLikelihood::likelihood(
     const jsk_recognition_msgs::PolygonArray::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
@@ -98,19 +98,16 @@ namespace jsk_pcl_ros
       Eigen::Affine3f pose;
       tf::transformTFToEigen(transform, pose);
 
-      // Use x
       Eigen::Vector3f reference_axis = pose.rotation() * axis_;
 
-      double min_distance = DBL_MAX;
-      double max_distance = - DBL_MAX;
       std::vector<double> distances; 
       for (size_t i = 0; i < msg->polygons.size(); i++) {
         Polygon::Ptr polygon = Polygon::fromROSMsgPtr(msg->polygons[i].polygon);
-        Eigen::Vector3f n = polygon->getNormal();
-        double distance = std::abs(reference_axis.dot(n));
-        min_distance = std::min(distance, min_distance);
-        max_distance = std::max(distance, max_distance);
-        distances.push_back(distance);
+        double distance;
+        Eigen::Vector3f foot = polygon->nearestPoint(pose.translation(), distance);
+        Eigen::Vector3f foot_dir = (foot - pose.translation()).normalized();
+        double ang_distance = std::abs(reference_axis.dot(foot_dir));
+        distances.push_back(ang_distance);
       }
 
       // Normalization
@@ -137,5 +134,5 @@ namespace jsk_pcl_ros
 }
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::PolygonArrayAngleLikelihood,
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::PolygonArrayFootAngleLikelihood,
                         nodelet::Nodelet);

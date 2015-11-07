@@ -1,5 +1,5 @@
-# PolygonArrayAngleLikelihood
-Compute likelihood based on angular distance.
+# PolygonArrayFootAngleLikelihood
+Compute likelihood based on angular distance of foot from specified frame_id.
 Near polygon is, larger likelihood is.
 The likelihood is determined by `1/(1+d^2)` where `d` is a angular difference from `~target_frame_id` to the polygon.
 

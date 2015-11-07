@@ -36,3 +36,19 @@ class BagOfFeatures(object):
             indices = indices[mask == False]
         return histogram
 
+
+def decompose_descriptors_with_label(descriptors, positions, label_img,
+                                     skip_zero_label=False):
+    descriptors = descriptors.reshape((-1, 128))
+    positions = positions.reshape((-1, 2))
+    assert descriptors.shape[0] == positions.shape[0]
+
+    decomposed = {}
+    positions = np.round(positions).astype(int)
+    labels = label_img[positions[:, 1], positions[:, 0]]
+    for label in np.unique(labels):
+        if skip_zero_label and (label == 0):
+            continue
+        decomposed[label] = descriptors[labels == label].reshape(-1)
+
+    return decomposed

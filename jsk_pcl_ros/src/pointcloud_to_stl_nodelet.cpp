@@ -152,7 +152,7 @@ namespace jsk_pcl_ros
     ros::Time now_time = ros::Time::now();
     std::stringstream ss;
     if (file_name_.length())
-      ss << "/home/aginika/ros/hydro/src/jsk-ros-pkg/jsk_recognition/jsk_pcl_ros/temp.stl";//file_name_.c_str();
+      ss << file_name_.c_str();
     else
       ss << "/tmp/" << now_time.toNSec() << "_pointcloud.stl";
     
@@ -218,17 +218,6 @@ namespace jsk_pcl_ros
     res.output = latest_output_path_;
   }
 
-  bool PointCloudToSTL::createURDF(jsk_pcl_ros::SetPointCloud2::Request &req,
-                                   jsk_pcl_ros::SetPointCloud2::Response &res)
-  {
-  }
-
-  bool PointCloudToSTL::spawnURDF(jsk_pcl_ros::SetPointCloud2::Request &req,
-                                  jsk_pcl_ros::SetPointCloud2::Response &res)
-  {
-  }
-
-
   void PointCloudToSTL::onInit(void)
   {
     PCLNodelet::onInit();
@@ -248,10 +237,6 @@ namespace jsk_pcl_ros
     sub_input_ = pnh_->subscribe("input", 1, &PointCloudToSTL::cloudCallback, this);
     create_stl_srv_
       = pnh_->advertiseService("create_stl", &PointCloudToSTL::createSTL, this);
-    create_urdf_srv_
-      = pnh_->advertiseService("create_urdf", &PointCloudToSTL::createURDF, this);
-    spawn_urdf_srv_
-      = pnh_->advertiseService("spawn_urdf", &PointCloudToSTL::spawnURDF, this);
 
     pub_mesh_ = pnh_->advertise<visualization_msgs::Marker>("pc_stl_mesh", 1);
 

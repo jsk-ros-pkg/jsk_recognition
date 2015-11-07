@@ -384,6 +384,7 @@ namespace jsk_pcl_ros
       pcl::PointIndices::Ptr all_indices (new pcl::PointIndices);
       jsk_recognition_msgs::ClusterPointIndices cluster_indices_msg;
       std::map<std::string, tf::StampedTransform> transforms;
+      transformed_pose_list_.clear();
       for (size_t i = 0; i < pose_list_.size(); i++) {
         std::string frame_id = frame_id_list_[i];
         // check transform cache

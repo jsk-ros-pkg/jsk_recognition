@@ -1,4 +1,4 @@
-// -*- mode: C++ -*-
+// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
@@ -33,56 +33,55 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_POINTCLOUD_TO_STL_H_
-#define JSK_PCL_ROS_POINTCLOUD_TO_STL_H_
+#ifndef OCTOMAP_SERVER_OCTOMAPSERVER_CONTACT_H_
+#define OCTOMAP_SERVER_OCTOMAPSERVER_CONTACT_H_
 
-// ros
 #include <ros/ros.h>
-#include <ros/names.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <tf/transform_broadcaster.h>
-#include <jsk_pcl_ros/SetPointCloud2.h>
-#include <visualization_msgs/Marker.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 
-// pcl
-#include <pcl_ros/pcl_nodelet.h>
-#include <pcl/point_types.h>
-#include <pcl/surface/organized_fast_mesh.h>
+#include <octomap_server/OctomapServer.h>
+#include <jsk_pcl_ros/OcTreeContact.h>
+#include <jsk_recognition_msgs/ContactSensorArray.h>
+#include <jsk_pcl_ros/self_mask_named_link.h>
+
+using octomap_server::OctomapServer;
 
 namespace jsk_pcl_ros
 {
-  class PointCloudToSTL: public pcl_ros::PCLNodelet
+  class OctomapServerContact : public OctomapServer,
+                               public jsk_topic_tools::DiagnosticNodelet
   {
-  public:
-    PointCloudToSTL(){}
-  protected:
-    virtual void onInit();
-    virtual void cloudCallback(const sensor_msgs::PointCloud2::ConstPtr& input);
-    virtual void exportSTL(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr  &cloud);
-    virtual bool createSTL(jsk_pcl_ros::SetPointCloud2::Request &req,
-                           jsk_pcl_ros::SetPointCloud2::Response &res);
+   public:
+     OctomapServerContact(const ros::NodeHandle& privateNh = ros::NodeHandle("~"));
+     virtual ~OctomapServerContact();
 
-    ros::Publisher pub_mesh_;
-    ros::Subscriber sub_input_;
-    ros::ServiceServer create_stl_srv_;
+     virtual void initContactSensor(const ros::NodeHandle& privateNh);
+     virtual void insertContactSensor(const std::vector<jsk_recognition_msgs::ContactSensor>& datas);
+     virtual void insertContactSensorCallback(const jsk_recognition_msgs::ContactSensorArray::ConstPtr& msg);
 
-    std::string frame_;
-    double search_radius_;
-    double mu_;
-    int maximum_nearest_neighbors_;
-    double maximum_surface_angle_;
-    double minimum_angle_;
-    double maximum_angle_;
-    bool normal_consistency_;
-    bool store_shadow_faces_;
+     virtual void publishAll(const ros::Time& rostime);
+     virtual void subscribe() {};
+     virtual void unsubscribe() {};
 
-    double triangle_pixel_size_;
-    double max_edge_length_;
-    std::string file_name_;
-    std::string latest_output_path_;
-    pcl::OrganizedFastMesh<pcl::PointXYZRGB> ofm;
+   protected:
+     virtual void onInit();
+     ros::Publisher m_unknownPointCloudPub, m_umarkerPub;
+     message_filters::Subscriber<jsk_recognition_msgs::ContactSensorArray> m_contactSensorSub;
+     boost::shared_ptr<tf::MessageFilter<jsk_recognition_msgs::ContactSensorArray> > m_tfContactSensorSub;
+     ros::ServiceServer m_octomapBinaryService, m_octomapFullService, m_clearBBXService, m_resetService;
 
-  private:
+     std_msgs::ColorRGBA m_colorUnknown;
+
+     double m_offsetVisualizeUnknown;
+
+     double m_occupancyMinX;
+     double m_occupancyMaxX;
+     double m_occupancyMinY;
+     double m_occupancyMaxY;
+
+     robot_self_filter::SelfMaskNamedLink* m_selfMask;
+
+     octomap::OcTreeContact* m_octreeContact;
   };
 }
 

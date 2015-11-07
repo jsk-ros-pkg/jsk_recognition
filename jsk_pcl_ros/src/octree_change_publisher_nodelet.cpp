@@ -46,6 +46,11 @@ namespace jsk_pcl_ros
     pnh_->param("resolution", resolution_, 0.02);
     pnh_->param("noise_filter", noise_filter_, 2);
 
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> >(*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind(&OctreeChangePublisher::config_callback, this, _1, _2);
+    srv_->setCallback(f);
+
     octree_ = new pcl::octree::OctreePointCloudChangeDetector<pcl::PointXYZRGB>(resolution_);
 
     filtered_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>);
@@ -63,12 +68,25 @@ namespace jsk_pcl_ros
     sub_.shutdown();
   }
 
+  void OctreeChangePublisher::config_callback(Config &config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock(mtx_);
+    if(resolution_ != config.resolution){
+      resolution_ = config.resolution;
+      octree_ = new pcl::octree::OctreePointCloudChangeDetector<pcl::PointXYZRGB>(resolution_);
+      counter_ = 0;
+    }
+
+    noise_filter_ = config.noise_filter;
+  }
+
   void OctreeChangePublisher::cloud_cb(const sensor_msgs::PointCloud2 &pc)
   {
     if(pc.fields.size() <= 0){
       return;
     }
 
+    boost::mutex::scoped_lock lock(mtx_);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
     std::vector<int> indices;
     pcl::fromROSMsg(pc, *cloud);

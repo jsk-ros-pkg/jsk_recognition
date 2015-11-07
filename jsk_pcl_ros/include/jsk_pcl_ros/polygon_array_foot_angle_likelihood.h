@@ -1,4 +1,4 @@
-// -*- mode: C++ -*-
+// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
@@ -33,56 +33,40 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_PCL_ROS_POINTCLOUD_TO_STL_H_
-#define JSK_PCL_ROS_POINTCLOUD_TO_STL_H_
+#ifndef JSK_PCL_ROS_POLYGON_ARRAY_FOOT_ANGLE_LIKELIHOOD_H_
+#define JSK_PCL_ROS_POLYGON_ARRAY_FOOT_ANGLE_LIKELIHOOD_H_
 
-// ros
-#include <ros/ros.h>
-#include <ros/names.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <tf/transform_broadcaster.h>
-#include <jsk_pcl_ros/SetPointCloud2.h>
-#include <visualization_msgs/Marker.h>
+#include <jsk_recognition_msgs/PolygonArray.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 
-// pcl
-#include <pcl_ros/pcl_nodelet.h>
-#include <pcl/point_types.h>
-#include <pcl/surface/organized_fast_mesh.h>
+#include <tf/message_filter.h>
+#include <message_filters/subscriber.h>
+#include <Eigen/Geometry>
 
 namespace jsk_pcl_ros
 {
-  class PointCloudToSTL: public pcl_ros::PCLNodelet
+  class PolygonArrayFootAngleLikelihood: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    PointCloudToSTL(){}
+    typedef boost::shared_ptr<PolygonArrayFootAngleLikelihood> Ptr;
+    PolygonArrayFootAngleLikelihood(): DiagnosticNodelet("PolygonArrayFootAngleLikelihood") {}
+
   protected:
     virtual void onInit();
-    virtual void cloudCallback(const sensor_msgs::PointCloud2::ConstPtr& input);
-    virtual void exportSTL(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr  &cloud);
-    virtual bool createSTL(jsk_pcl_ros::SetPointCloud2::Request &req,
-                           jsk_pcl_ros::SetPointCloud2::Response &res);
+    virtual void subscribe();
+    virtual void unsubscribe();
+    virtual void likelihood(const jsk_recognition_msgs::PolygonArray::ConstPtr& msg);
 
-    ros::Publisher pub_mesh_;
-    ros::Subscriber sub_input_;
-    ros::ServiceServer create_stl_srv_;
-
-    std::string frame_;
-    double search_radius_;
-    double mu_;
-    int maximum_nearest_neighbors_;
-    double maximum_surface_angle_;
-    double minimum_angle_;
-    double maximum_angle_;
-    bool normal_consistency_;
-    bool store_shadow_faces_;
-
-    double triangle_pixel_size_;
-    double max_edge_length_;
-    std::string file_name_;
-    std::string latest_output_path_;
-    pcl::OrganizedFastMesh<pcl::PointXYZRGB> ofm;
-
+    message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_;
+    ros::Publisher pub_;
+    boost::shared_ptr<tf::MessageFilter<jsk_recognition_msgs::PolygonArray> > tf_filter_;
+    tf::TransformListener* tf_listener_;
+    std::string target_frame_id_;
+    int tf_queue_size_;
+    boost::mutex mutex_;
+    Eigen::Vector3f axis_;
   private:
+    
   };
 }
 

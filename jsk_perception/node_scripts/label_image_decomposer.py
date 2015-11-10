@@ -4,13 +4,18 @@
 import numpy as np
 
 import cv_bridge
-from jsk_recognition_utils import bounding_rect_of_mask, get_tile_image
-from jsk_topic_tools import ConnectionBasedTransport, jsk_loginfo
+from jsk_recognition_utils import bounding_rect_of_mask
+from jsk_recognition_utils import get_tile_image
+from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools import jsk_loginfo
+from jsk_topic_tools import warn_no_remap
 import message_filters
 import rospy
 from sensor_msgs.msg import Image
 
+
 class LabelImageDecomposer(ConnectionBasedTransport):
+
     def __init__(self):
         super(LabelImageDecomposer, self).__init__()
         self.pub_img = self.advertise('~output', Image, queue_size=5)
@@ -22,6 +27,7 @@ class LabelImageDecomposer(ConnectionBasedTransport):
     def subscribe(self):
         self.sub_img = message_filters.Subscriber('~input', Image)
         self.sub_label = message_filters.Subscriber('~input/label', Image)
+        warn_no_remap('~input', '~input/label')
         use_async = rospy.get_param('~approximate_sync', False)
         jsk_loginfo('~approximate_sync: {}'.format(use_async))
         if use_async:

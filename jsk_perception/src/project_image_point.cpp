@@ -34,6 +34,8 @@
  *********************************************************************/
 
 #include "jsk_perception/project_image_point.h"
+#include <boost/assign.hpp>
+#include <jsk_topic_tools/log_utils.h>
 
 namespace jsk_perception
 {
@@ -57,6 +59,8 @@ namespace jsk_perception
     sub_camera_info_ = pnh_->subscribe("input/camera_info", 1,
                                        &ProjectImagePoint::cameraInfoCallback,
                                        this);
+    ros::V_string names = boost::assign::list_of("~input")("~input/camera_info");
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void ProjectImagePoint::unsubscribe()

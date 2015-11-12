@@ -35,6 +35,8 @@
 
 
 #include "jsk_perception/gaussian_blur.h"
+#include <boost/assign.hpp>
+#include <jsk_topic_tools/log_utils.h>
 #include <sensor_msgs/image_encodings.h>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/opencv.hpp>
@@ -56,6 +58,8 @@ namespace jsk_perception
   void GaussianBlur::subscribe()
   {
     sub_ = pnh_->subscribe("input", 1, &GaussianBlur::apply, this);
+    ros::V_string names = boost::assign::list_of("~input");
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void GaussianBlur::unsubscribe()

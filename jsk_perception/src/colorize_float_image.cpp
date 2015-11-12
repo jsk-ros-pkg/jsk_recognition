@@ -34,6 +34,8 @@
  *********************************************************************/
 
 #include "jsk_perception/colorize_float_image.h"
+#include <boost/assign.hpp>
+#include <jsk_topic_tools/log_utils.h>
 #include <sensor_msgs/image_encodings.h>
 
 namespace jsk_perception
@@ -48,6 +50,8 @@ namespace jsk_perception
   void ColorizeFloatImage::subscribe()
   {
     sub_ = pnh_->subscribe("input", 1, &ColorizeFloatImage::colorize, this);
+    ros::V_string names = boost::assign::list_of("~input");
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void ColorizeFloatImage::unsubscribe()

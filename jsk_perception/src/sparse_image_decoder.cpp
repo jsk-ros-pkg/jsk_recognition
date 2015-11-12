@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/assign.hpp>
 #include <vector>
 #include <iostream>
 
@@ -75,6 +76,8 @@ class SparseImageDecoder: public nodelet::Nodelet
   void subscribe() {
     JSK_NODELET_DEBUG("Subscribing to image topic.");
     _spr_img_sub = _nh.subscribe("sparse_image", 3, &SparseImageDecoder::imageCallback, this);
+    ros::V_string names = boost::assign::list_of("sparse_image");
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void unsubscribe() {

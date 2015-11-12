@@ -47,6 +47,7 @@ namespace jsk_perception
     pub_h_ = advertise<sensor_msgs::Image>(*pnh_, "output/hue", 1);
     pub_s_ = advertise<sensor_msgs::Image>(*pnh_, "output/saturation", 1);
     pub_v_ = advertise<sensor_msgs::Image>(*pnh_, "output/value", 1);
+    onInitPostProcess();
   }
 
   void HSVDecomposer::subscribe()

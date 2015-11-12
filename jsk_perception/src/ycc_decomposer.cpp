@@ -47,6 +47,7 @@ namespace jsk_perception
     pub_y_ = advertise<sensor_msgs::Image>(*pnh_, "output/y", 1);
     pub_cr_ = advertise<sensor_msgs::Image>(*pnh_, "output/cr", 1);
     pub_cb_ = advertise<sensor_msgs::Image>(*pnh_, "output/cb", 1);
+    onInitPostProcess();
   }
 
   void YCCDecomposer::subscribe()

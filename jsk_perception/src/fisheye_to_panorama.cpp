@@ -62,6 +62,7 @@ namespace jsk_perception
     scale_ = 0.5;
     upside_down_ = false;
     offset_degree_ = 180.0;
+    onInitPostProcess();
   }
 
   void FisheyeToPanorama::configCallback(Config &new_config, uint32_t level)

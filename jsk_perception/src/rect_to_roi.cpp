@@ -41,6 +41,7 @@ namespace jsk_perception
   {
     DiagnosticNodelet::onInit();
     pub_ = advertise<sensor_msgs::CameraInfo>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void RectToROI::subscribe()

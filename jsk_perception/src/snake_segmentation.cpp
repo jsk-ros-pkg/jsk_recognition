@@ -53,6 +53,7 @@ namespace jsk_perception
     srv_->setCallback (f);
 
     pub_debug_ = advertise<sensor_msgs::Image>(*pnh_, "debug", 1);
+    onInitPostProcess();
   }
 
   void SnakeSegmentation::configCallback (Config &config, uint32_t level)

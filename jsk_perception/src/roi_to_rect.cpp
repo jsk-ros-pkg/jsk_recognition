@@ -42,6 +42,7 @@ namespace jsk_perception
     DiagnosticNodelet::onInit();
     pub_ = advertise<geometry_msgs::PolygonStamped>(
       *pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void ROIToRect::subscribe()

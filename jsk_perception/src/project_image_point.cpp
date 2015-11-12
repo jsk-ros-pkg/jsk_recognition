@@ -48,7 +48,8 @@ namespace jsk_perception
     pub_ = advertise<geometry_msgs::PointStamped>(*pnh_, "output", 1);
     pub_vector_ = advertise<geometry_msgs::Vector3Stamped>(
       *pnh_, "output/ray", 1);
-  }
+    onInitPostProcess();
+ }
 
   void ProjectImagePoint::subscribe()
   {

@@ -51,6 +51,7 @@ namespace jsk_perception
     srv_->setCallback (f);
 
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void KMeans::subscribe()

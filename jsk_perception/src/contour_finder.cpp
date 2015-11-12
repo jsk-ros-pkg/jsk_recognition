@@ -46,6 +46,7 @@ namespace jsk_perception
     DiagnosticNodelet::onInit();
     pub_debug_image_ = advertise<sensor_msgs::Image>(*pnh_, "debug", 1);
     pub_convex_image_ = advertise<sensor_msgs::Image>(*pnh_, "output/convex", 1);
+    onInitPostProcess();
   }
 
   void ContourFinder::subscribe()

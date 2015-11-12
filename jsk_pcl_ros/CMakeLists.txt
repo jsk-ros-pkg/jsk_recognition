@@ -285,10 +285,10 @@ jsk_pcl_nodelet(src/region_growing_multiple_plane_segmentation_nodelet.cpp
   "region_growing_multiple_plane_segmentation")
 
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
-  IF(${PCL_VERSION} VERSION_GREATER "1.7.1")
+  IF(${PCL_VERSION} VERSION_GREATER "1.7.2")
     jsk_pcl_nodelet(src/organized_edge_detector_nodelet.cpp
       "jsk_pcl/OrganizedEdgeDetector" "organized_edge_detector")
-  ENDIF(${PCL_VERSION} VERSION_GREATER "1.7.1")
+  ENDIF(${PCL_VERSION} VERSION_GREATER "1.7.2")
 endif(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
 
 jsk_pcl_nodelet(src/edge_depth_refinement_nodelet.cpp

@@ -16,13 +16,24 @@ addons:
     packages:
       - python-pip
 env:
-  - ROS_DISTRO=hydro   ROSWS=wstool BUILDER=catkin USE_DEB=true NOT_TEST_INSTALL=true ROS_PARALLEL_JOBS="-j8" USE_JENKINS="true" NO_SUDO="true"
-  - ROS_DISTRO=indigo  ROSWS=wstool BUILDER=catkin USE_DEB=true NOT_TEST_INSTALL=true ROS_PARALLEL_JOBS="-j8" NO_SUDO="true"
-  - ROS_DISTRO=indigo  ROSWS=wstool BUILDER=catkin BEFORE_SCRIPT="git clone -b indigo https://github.com/ros-perception/vision_opencv.git" EXTRA_DEB="ros-indigo-opencv3" USE_DEB=true NOT_TEST_INSTALL=true ROS_PARALLEL_JOBS="-j8" NO_SUDO="true"
-  - ROS_DISTRO=jade    ROSWS=wstool BUILDER=catkin USE_DEB=false NOT_TEST_INSTALL=true ROS_PARALLEL_JOBS="-j8" NO_SUDO="true"
+  global:
+    - ROSWS=wstool
+    - BUILDER=catkin
+    - ROS_PARALLEL_JOBS="-j8"
+    - ROS_PARALLEL_TEST_JOBS="-j1"
+    - CATKIN_PARALLEL_TEST_JOBS="-j1"
+    - NOT_TEST_INSTALL=true
+    - NO_SUDO=true
+    - USE_JENKINS=true
+    - USE_DEB=false
+  matrix:
+    - ROS_DISTRO=hydro
+    - ROS_DISTRO=indigo
+    - ROS_DISTRO=indigo BEFORE_SCRIPT="git clone -b indigo https://github.com/ros-perception/vision_opencv.git" EXTRA_DEB="ros-indigo-opencv3"
+    - ROS_DISTRO=jade
 matrix:
   allow_failures:
-    - env: ROS_DISTRO=indigo  ROSWS=wstool BUILDER=catkin BEFORE_SCRIPT="git clone -b indigo https://github.com/ros-perception/vision_opencv.git" EXTRA_DEB="ros-indigo-opencv3" USE_DEB=true NOT_TEST_INSTALL=true ROS_PARALLEL_JOBS="-j8" NO_SUDO="true"
+    - env: ROS_DISTRO=indigo BEFORE_SCRIPT="git clone -b indigo https://github.com/ros-perception/vision_opencv.git" EXTRA_DEB="ros-indigo-opencv3"
 script:
   - source .travis/travis.sh
   - (cd doc && source setup.sh && make html)

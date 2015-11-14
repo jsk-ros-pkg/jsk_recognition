@@ -79,6 +79,7 @@ add_service_files(FILES SwitchTopic.srv
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/VoxelGridLargeScale.cfg
   cfg/PolygonArrayAreaLikelihood.cfg
   cfg/cuboid_parameter.cfg
   cfg/ExtractParticlesTopNBase.cfg
@@ -394,6 +395,8 @@ jsk_pcl_nodelet(src/heightmap_morphological_filtering_nodelet.cpp
   "jsk_pcl/HeightmapMorphologicalFiltering" "heightmap_morphological_filtering")
 jsk_pcl_nodelet(src/heightmap_time_accumulation_nodelet.cpp
   "jsk_pcl/HeightmapTimeAccumulation" "heightmap_time_accumulation")
+jsk_pcl_nodelet(src/voxel_grid_large_scale_nodelet.cpp
+  "jsk_pcl/VoxelGridLargeScale" "voxel_grid_large_scale")
 if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
   jsk_pcl_nodelet(src/kinfu_nodelet.cpp
     "jsk_pcl/Kinfu" "kinfu")

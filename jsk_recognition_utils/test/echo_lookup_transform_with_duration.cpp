@@ -1,6 +1,7 @@
 #include <iostream>
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
+#include "jsk_recognition_utils/tf_listener_singleton.h"
 
 
 void printTF(tf::StampedTransform& transform) {
@@ -13,11 +14,11 @@ void printTF(tf::StampedTransform& transform) {
 
 int main(int argc, char* argv[]) {
   if (argc < 3) {
-    std::cout << "Usage: echo_tf_lookup_transform source_frame target_frame" << std::endl;
+    std::cout << "Usage: echo_lookup_transform_with_duration from_frame to_frame" << std::endl;
     return 1;
   }
 
-  ros::init(argc, argv, "echo_tf_lookup_transform");
+  ros::init(argc, argv, "echo_lookup_transform_with_duration");
 
   boost::mutex mutex;
   tf::TransformListener* tf_listener;
@@ -26,18 +27,17 @@ int main(int argc, char* argv[]) {
   tf_listener = new tf::TransformListener(ros::Duration(30.0));
   mutex.unlock();
 
-  std::string source_frame(argv[1]);
-  std::string target_frame(argv[2]);
-
-  tf_listener->waitForTransform(target_frame, source_frame, ros::Time(), ros::Duration(1.0));
+  std::string from_frame(argv[1]);
+  std::string to_frame(argv[2]);
 
   tf::StampedTransform transform;
-  std::cerr << "lookupTransform(target_frame=" << target_frame  << ", source_frame=" << source_frame << ")" << std::endl;
-  tf_listener->lookupTransform(
-    /*target_frame=*/target_frame,
-    /*source_frame=*/source_frame,
+  std::cerr << "lookupTransformWithDuration(to_frame=" << to_frame  << ", from_frame=" << from_frame << ")" << std::endl;
+  transform = jsk_recognition_utils::lookupTransformWithDuration(
+    /*listener=*/tf_listener,
+    /*to_frame=*/to_frame,
+    /*from_frame=*/from_frame,
     /*time=*/ros::Time(),
-    /*transform=*/transform);
+    /*duration=*/ros::Duration(1.0));
   printTF(transform);
 
   ros::spinOnce();

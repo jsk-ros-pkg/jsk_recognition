@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros
   pcl_msgs
   eigen_conversions
+  rostest
   tf_conversions
   tf
   tf2_ros
@@ -38,7 +39,7 @@ ENDIF()
 include_directories(
   ${catkin_INCLUDE_DIRS} include
 )
-link_libraries(${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES}  yaml-cpp)
+link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES}  yaml-cpp)
 
 add_library(jsk_recognition_utils SHARED
   src/grid_index.cpp
@@ -63,8 +64,11 @@ add_library(jsk_recognition_utils SHARED
   src/geo/grid_plane.cpp
   )
 add_executable(echo_tf_lookup_transform test/echo_tf_lookup_transform.cpp)
+add_executable(echo_lookup_transform_with_duration test/echo_lookup_transform_with_duration.cpp)
 
-install(TARGETS jsk_recognition_utils
+add_rostest(test/test_tf_lookup_transform.test)
+
+install(TARGETS jsk_recognition_utils echo_tf_lookup_transform echo_lookup_transform_with_duration
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})

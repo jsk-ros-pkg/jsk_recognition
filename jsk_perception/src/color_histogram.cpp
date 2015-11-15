@@ -46,6 +46,7 @@ namespace jsk_perception
     h_hist_size_ = new_config.hue_histogram_bin;
     s_hist_size_ = new_config.saturation_histogram_bin;
     i_hist_size_ = new_config.intensity_histogram_bin;
+    onInitPostProcess();
   }
     
   void ColorHistogram::onInit()

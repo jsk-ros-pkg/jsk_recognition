@@ -50,6 +50,7 @@ namespace jsk_perception
       *pnh_, "output", 1);
     pub_mask_ = advertise<sensor_msgs::Image>(
       *pnh_, "output/mask", 1);
+    onInitPostProcess();
   }
 
   void ApplyMaskImage::subscribe()

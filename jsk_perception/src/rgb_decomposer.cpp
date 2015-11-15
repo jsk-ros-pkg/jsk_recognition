@@ -47,6 +47,7 @@ namespace jsk_perception
     pub_r_ = advertise<sensor_msgs::Image>(*pnh_, "output/red", 1);
     pub_g_ = advertise<sensor_msgs::Image>(*pnh_, "output/green", 1);
     pub_b_ = advertise<sensor_msgs::Image>(*pnh_, "output/blue", 1);
+    onInitPostProcess();
   }
 
   void RGBDecomposer::subscribe()

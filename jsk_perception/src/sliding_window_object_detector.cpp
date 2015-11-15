@@ -58,6 +58,7 @@ namespace jsk_perception
          *pnh_, "output/rects", 1);
       this->pub_image_ = advertise<sensor_msgs::Image>(
          *pnh_, "output/image", 1);
+      onInitPostProcess();
    }
 
    void SlidingWindowObjectDetector::subscribe()

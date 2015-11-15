@@ -51,6 +51,7 @@ namespace jsk_perception
     
     pnh_->param("use_camera_info", use_camera_info_, false);
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void GridLabel::subscribe()

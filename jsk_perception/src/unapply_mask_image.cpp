@@ -47,6 +47,7 @@ namespace jsk_perception
     pnh_->param("approximate_sync", approximate_sync_, false);
     pub_image_ = advertise<sensor_msgs::Image>(
       *pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void UnapplyMaskImage::subscribe()

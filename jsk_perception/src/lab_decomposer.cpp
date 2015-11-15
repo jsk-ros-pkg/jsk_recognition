@@ -47,6 +47,7 @@ namespace jsk_perception
     pub_l_ = advertise<sensor_msgs::Image>(*pnh_, "output/l", 1);
     pub_a_ = advertise<sensor_msgs::Image>(*pnh_, "output/a", 1);
     pub_b_ = advertise<sensor_msgs::Image>(*pnh_, "output/b", 1);
+    onInitPostProcess();
   }
 
   void LabDecomposer::subscribe()

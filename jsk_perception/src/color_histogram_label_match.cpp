@@ -55,6 +55,7 @@ namespace jsk_perception
       *pnh_, "output/coefficient_image", 1);
     pub_result_ = advertise<sensor_msgs::Image>(
       *pnh_, "output/extracted_region", 1);
+    onInitPostProcess();
   }
 
   void ColorHistogramLabelMatch::subscribe()

@@ -67,6 +67,8 @@ add_executable(echo_tf_lookup_transform test/echo_tf_lookup_transform.cpp)
 
 catkin_add_gtest(test_cv_utils src/tests/test_cv_utils.cpp)
 target_link_libraries(test_cv_utils ${PROJECT_NAME} ${OpenCV_LIBRARIES})
+catkin_add_gtest(test_rgb_colors src/tests/test_rgb_colors.cpp)
+target_link_libraries(test_rgb_colors ${PROJECT_NAME} ${OpenCV_LIBRARIES})
 
 install(TARGETS jsk_recognition_utils
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

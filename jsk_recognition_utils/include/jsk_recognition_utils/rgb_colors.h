@@ -33,48 +33,18 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_perception/colorize_labels.h"
-#include <jsk_recognition_utils/cv_utils.h>
-#include <cv_bridge/cv_bridge.h>
+#ifndef JSK_RECOGNITION_UTILS_RGB_COLORS_H_
+#define JSK_RECOGNITION_UTILS_RGB_COLORS_H_
+
+#include "jsk_recognition_utils/rgb_colors.h"
 #include <opencv2/opencv.hpp>
-#include <sensor_msgs/image_encodings.h>
 
-namespace jsk_perception
+
+namespace jsk_recognition_utils
 {
-  void ColorizeLabels::onInit()
-  {
-    DiagnosticNodelet::onInit();
-    pub_ = advertise<sensor_msgs::Image>(
-      *pnh_, "output", 1);
-    onInitPostProcess();
-  }
 
-  void ColorizeLabels::subscribe()
-  {
-    sub_ = pnh_->subscribe("input", 1, &ColorizeLabels::colorize, this);
-  }
+  cv::Vec3d getRGBColor(const int color);
 
-  void ColorizeLabels::unsubscribe()
-  {
-    sub_.shutdown();
-  }
-
-  void ColorizeLabels::colorize(
-    const sensor_msgs::Image::ConstPtr& label_image_msg)
-  {
-    cv::Mat label_image = cv_bridge::toCvShare(
-      label_image_msg, label_image_msg->encoding)->image;
-    JSK_ROS_INFO("%dx%d", label_image_msg->width, label_image_msg->height);
-    cv::Mat output_image;
-    jsk_recognition_utils::labelToRGB(label_image, output_image);
-    cv::cvtColor(output_image, output_image, CV_RGB2BGR);
-    pub_.publish(
-      cv_bridge::CvImage(
-        label_image_msg->header,
-        sensor_msgs::image_encodings::BGR8,
-        output_image).toImageMsg());
-  }
 }
 
-#include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS (jsk_perception::ColorizeLabels, nodelet::Nodelet);
+#endif

@@ -34,6 +34,7 @@
  *********************************************************************/
 
 #include "jsk_recognition_utils/cv_utils.h"
+#include "jsk_recognition_utils/rgb_colors.h"
 
 namespace jsk_recognition_utils
 {
@@ -127,4 +128,22 @@ namespace jsk_recognition_utils
     cv::rectangle(image, cv::Point(left, height), cv::Point(right, height - top),
                   color, CV_FILLED);
   }
+
+  void labelToRGB(const cv::Mat src, cv::Mat& dst)
+  {
+    dst = cv::Mat::zeros(src.rows, src.cols, CV_8UC3);
+    for (size_t j = 0; j < src.rows; ++j) {
+      for (size_t i = 0; i < src.cols; ++i) {
+        int label = src.at<int>(j, i);
+        if (label == 0) {  // background label
+          dst.at<cv::Vec3b>(j, i) = cv::Vec3b(0, 0, 0);
+        }
+        else {
+          cv::Vec3d rgb = jsk_recognition_utils::getRGBColor(label);
+          dst.at<cv::Vec3b>(j, i) = cv::Vec3b(int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255));
+        }
+      }
+    }
+  }
+
 }

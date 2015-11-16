@@ -1,0 +1,26 @@
+<launch>
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <param name="file_name" value="$(find jsk_perception)/sample/ros_fuerte.jpg" />
+  </node>
+
+  <node name="imagesift"
+        pkg="imagesift" type="imagesift">
+    <remap from="image" to="image_publisher/output" />
+    <remap from="camera_info" to="image_publisher/output/camera_info" />
+  </node>
+
+  <node name="transform"
+        pkg="topic_tools" type="transform"
+        args="/Feature0D/descriptors /Feature0D/desc_num std_msgs/Int64 len(m) --wait-for-start" />
+
+  <test test-name="stdout_0"
+        name="stdout_0"
+        pkg="jsk_tools" type="test_stdout.py">
+    <param name="command" value="sleep 3; rostopic echo /Feature0D/desc_num/data -n1" />
+    <param name="shell" value="true" />
+    <param name="stdout_line0" type="str" value="105728" />
+  </test>
+
+</launch>

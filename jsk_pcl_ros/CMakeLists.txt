@@ -521,9 +521,17 @@ install(DIRECTORY launch
 
 if (CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
+  # install test data by a script
   add_custom_target(install_test_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.sh)
   if(TARGET tests)
     add_dependencies(tests install_test_data)
   endif()
-  add_rostest(test/test_attention_clipper.test DEPENDENCIES install_test_data)
+  # check ros distro >= indigo
+  execute_process(
+    COMMAND python -c "import sys; sys.exit(ord('$ENV{ROS_DISTRO}'[0]) >= ord('indigo'[0]))"
+    RESULT_VARIABLE DISTRO_GE_INDIGO)
+  if(${DISTRO_GE_INDIGO})
+    # because of unreleased topic_tools/transform on hydro
+    add_rostest(test/test_attention_clipper.test DEPENDENCIES install_test_data)
+  endif()
 endif()

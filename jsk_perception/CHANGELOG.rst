@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.7 (2015-11-19)
+------------------
 * Use gcc -z defs to check undefined symbols in shared
   objects (jsk_recognitoin_utils, jsk_pcl_ros, jsk_perception).
   build_check.cpp cannot run on the environment using  multiple processes

@@ -2,8 +2,8 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.7 (2015-11-19)
+------------------
 * [imagesift] Test nodelet and topic /ImageFeature0D also
 * [imagesift] Add rostest for imagesift
 * [imagesift] Validation of input image shape

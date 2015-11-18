@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.7 (2015-11-19)
+------------------
 * Merge pull request `#1276 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1276>`_ from mmurooka/add-octomap-contact
   [jsk_pcl_ros] Add octomap contact
 * [jsk_recognition_msgs] Add VectorArray.msg

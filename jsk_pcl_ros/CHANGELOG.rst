@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.7 (2015-11-19)
+------------------
 * [jsk_pcl_ros] Test attention_clipper by rostest
 * [jsk_pcl_ros] Run test only on indigo
   Because of unreleased topic_tools/transform

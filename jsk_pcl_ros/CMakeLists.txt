@@ -521,5 +521,9 @@ install(DIRECTORY launch
 
 if (CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
-  add_rostest(test/test_attention_clipper.test)
+  add_custom_target(install_test_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.sh)
+  if(TARGET tests)
+    add_dependencies(tests install_test_data)
+  endif()
+  add_rostest(test/test_attention_clipper.test DEPENDENCIES install_test_data)
 endif()

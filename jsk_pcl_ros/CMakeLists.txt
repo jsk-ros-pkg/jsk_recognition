@@ -533,5 +533,6 @@ if (CATKIN_ENABLE_TESTING)
   if(${DISTRO_GE_INDIGO})
     # because of unreleased topic_tools/transform on hydro
     add_rostest(test/test_attention_clipper.test DEPENDENCIES install_test_data)
+    add_rostest(test/test_euclidean_segmentation.test DEPENDENCIES install_test_data)
   endif()
 endif()

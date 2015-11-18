@@ -62,6 +62,7 @@ namespace jsk_perception
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
     pub_debug_histogram_image_ = advertise<sensor_msgs::Image>(*pnh_, "debug/histogram_image", 1);
     pub_debug_polygon_ = advertise<sensor_msgs::Image>(*pnh_, "debug/polygon_image", 1);
+    onInitPostProcess();
   }
 
   void TabletopColorDifferenceLikelihood::subscribe()

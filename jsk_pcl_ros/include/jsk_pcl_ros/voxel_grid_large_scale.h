@@ -33,52 +33,35 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-
-#ifndef JSK_PCL_ROS_COLLISION_DETECTOR_H_
-#define JSK_PCL_ROS_COLLISION_DETECTOR_H_
+#ifndef JSK_PCL_ROS_VOXEL_GRID_LARGE_SCALE_H_
+#define JSK_PCL_ROS_VOXEL_GRID_LARGE_SCALE_H_
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/PointCloud2.h>
-#include <jsk_pcl_ros/CheckCollision.h>
-
-#include <pcl/point_types.h>
-#include <pcl_ros/transforms.h>
-#include <tf/transform_listener.h>
-#include <tf/transform_broadcaster.h>
-#include <std_msgs/Bool.h>
-
-#include <jsk_pcl_ros/self_mask_urdf_robot.h>
+#include <dynamic_reconfigure/server.h>
+#include <jsk_pcl_ros/VoxelGridLargeScaleConfig.h>
 
 namespace jsk_pcl_ros
 {
-  class CollisionDetector: public jsk_topic_tools::DiagnosticNodelet
+  class VoxelGridLargeScale: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    typedef boost::shared_ptr<CollisionDetector> Ptr;
-    CollisionDetector(): DiagnosticNodelet("CollisionDetector") {}
-
+    typedef VoxelGridLargeScaleConfig Config;
+    VoxelGridLargeScale(): DiagnosticNodelet("VoxelGridLargeScale") { }
   protected:
     virtual void onInit();
+    virtual void filter(const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void subscribe();
     virtual void unsubscribe();
+    virtual void configCallback(Config& config, uint32_t level);
 
-    virtual void initSelfMask();
-    virtual bool checkCollision(const sensor_msgs::JointState& joint,
-                                const geometry_msgs::PoseStamped& pose);
-    virtual void pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg);
-    virtual bool serviceCallback(jsk_pcl_ros::CheckCollision::Request &req,
-                                 jsk_pcl_ros::CheckCollision::Response &res);
     boost::mutex mutex_;
     ros::Subscriber sub_;
-    ros::ServiceServer service_;
-
-    std::string world_frame_id_;
-    std::string cloud_frame_id_;
-    robot_self_filter::SelfMaskUrdfRobot* self_mask_;
-    ros::Time cloud_stamp_;
-    pcl::PointCloud<pcl::PointXYZ> cloud_;
-    tf::TransformListener tf_listener_;
-    tf::TransformBroadcaster tf_broadcaster_;
+    ros::Publisher pub_;
+    double leaf_size_;
+    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
+  private:
+    
   };
 }
 

@@ -43,6 +43,7 @@ namespace jsk_perception
   {
     DiagnosticNodelet::onInit();
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void RectToMaskImage::subscribe()

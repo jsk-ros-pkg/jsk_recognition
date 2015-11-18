@@ -1,0 +1,81 @@
+<launch>
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <param name="file_name" value="$(find jsk_perception)/sample/ros_fuerte.jpg" />
+  </node>
+
+
+  <!-- test imagesift executable >>>>>>>>>>>>>>>>>>  -->
+
+  <node name="imagesift_exec"
+        pkg="imagesift" type="imagesift">
+    <remap from="image" to="image_publisher/output" />
+    <remap from="camera_info" to="image_publisher/output/camera_info" />
+    <remap from="Feature0D" to="~Feature0D" />
+    <remap from="ImageFeature0D" to="~ImageFeature0D" />
+  </node>
+
+  <node name="transform_0"
+        pkg="topic_tools" type="transform"
+        args="/imagesift_exec/Feature0D/descriptors /imagesift_exec/Feature0D/desc_num std_msgs/Int64 len(m) --wait-for-start" />
+  <node name="transform_1"
+        pkg="topic_tools" type="transform"
+        args="/imagesift_exec/ImageFeature0D/features/descriptors /imagesift_exec/ImageFeature0D/features/desc_num std_msgs/Int64 len(m) --wait-for-start" />
+
+  <test test-name="stdout_0"
+        name="stdout_0"
+        pkg="jsk_tools" type="test_stdout.py">
+    <param name="command" value="sleep 3; rostopic echo /imagesift_exec/Feature0D/desc_num/data -n1" />
+    <param name="shell" value="true" />
+    <param name="stdout_line0" type="str" value="105728" />
+  </test>
+  <test test-name="stdout_1"
+        name="stdout_1"
+        pkg="jsk_tools" type="test_stdout.py">
+    <param name="command" value="sleep 3; rostopic echo /imagesift_exec/ImageFeature0D/features/desc_num/data -n1" />
+    <param name="shell" value="true" />
+    <param name="stdout_line0" type="str" value="105728" />
+  </test>
+
+  <!-- test imagesift executable <<<<<<<<<<<<<<<<<<  -->
+
+
+  <!-- test imagesift nodelet <<<<<<<<<<<<<<<<<<  -->
+  <node name="nodelet_manager"
+        pkg="nodelet" type="nodelet" args="manager" />
+  <arg name="MANAGER" value="nodelet_manager" />
+
+  <node name="imagesift_nodelet"
+        pkg="nodelet" type="nodelet"
+        args="load imagesift/ImageSift $(arg MANAGER)">
+    <remap from="image" to="image_publisher/output" />
+    <remap from="camera_info" to="image_publisher/output/camera_info" />
+    <remap from="Feature0D" to="~Feature0D" />
+    <remap from="ImageFeature0D" to="~ImageFeature0D" />
+  </node>
+
+  <node name="transform_2"
+        pkg="topic_tools" type="transform"
+        args="/imagesift_nodelet/Feature0D/descriptors /imagesift_nodelet/Feature0D/desc_num std_msgs/Int64 len(m) --wait-for-start" />
+  <node name="transform_3"
+        pkg="topic_tools" type="transform"
+        args="/imagesift_nodelet/ImageFeature0D/features/descriptors /imagesift_nodelet/ImageFeature0D/features/desc_num std_msgs/Int64 len(m) --wait-for-start" />
+
+  <test test-name="stdout_2"
+        name="stdout_2"
+        pkg="jsk_tools" type="test_stdout.py">
+    <param name="command" value="sleep 3; rostopic echo /imagesift_nodelet/Feature0D/desc_num/data -n1" />
+    <param name="shell" value="true" />
+    <param name="stdout_line0" type="str" value="105728" />
+  </test>
+  <test test-name="stdout_3"
+        name="stdout_3"
+        pkg="jsk_tools" type="test_stdout.py">
+    <param name="command" value="sleep 3; rostopic echo /imagesift_nodelet/ImageFeature0D/features/desc_num/data -n1" />
+    <param name="shell" value="true" />
+    <param name="stdout_line0" type="str" value="105728" />
+  </test>
+  <!-- test imagesift nodelet <<<<<<<<<<<<<<<<<<  -->
+
+</launch>

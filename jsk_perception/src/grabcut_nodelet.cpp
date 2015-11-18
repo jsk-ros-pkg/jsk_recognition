@@ -56,6 +56,7 @@ namespace jsk_perception
       = advertise<sensor_msgs::Image>(*pnh_, "output/foreground_mask", 1);
     pub_background_mask_
       = advertise<sensor_msgs::Image>(*pnh_, "output/background_mask", 1);
+    onInitPostProcess();
   }
 
   void GrabCut::subscribe()

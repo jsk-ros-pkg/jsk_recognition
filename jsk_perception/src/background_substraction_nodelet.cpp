@@ -49,6 +49,7 @@ namespace jsk_perception
     
     image_pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
     
+    onInitPostProcess();
   }
 
   void BackgroundSubstraction::configCallback(Config& config, uint32_t level)

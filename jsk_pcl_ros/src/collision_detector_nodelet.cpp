@@ -39,68 +39,75 @@
 
 namespace jsk_pcl_ros
 {
-  CollisionDetector::CollisionDetector()
+  void CollisionDetector::onInit()
   {
-    ros::NodeHandle pn;
-    ros::NodeHandle pnh("~");
-    initSelfMask(pn, pnh);
-    pnh.param<std::string>("world_frame_id", world_frame_id_, "map");
-    sub_ = pnh.subscribe("input", 1, &CollisionDetector::pointcloudCallback, this);
-    service_ = pnh.advertiseService("check_collision", &CollisionDetector::serviceCallback, this);
+    DiagnosticNodelet::onInit();
+    initSelfMask();
+    pnh_->param<std::string>("world_frame_id", world_frame_id_, "map");
+    sub_ = pnh_->subscribe("input", 1, &CollisionDetector::pointcloudCallback, this);
+    service_ = pnh_->advertiseService("check_collision", &CollisionDetector::serviceCallback, this);
   }
 
-  void CollisionDetector::initSelfMask(const ros::NodeHandle& pn, const ros::NodeHandle& pnh)
+  void CollisionDetector::subscribe()
+  {
+  }
+
+  void CollisionDetector::unsubscribe()
+  {
+  }
+
+  void CollisionDetector::initSelfMask()
   {
     // genearte urdf model
     std::string content;
     urdf::Model urdf_model;
-    if (pn.getParam("robot_description", content)) {
-      if(!urdf_model.initString(content)) {
-        ROS_ERROR("Unable to parse URDF description!");
+    if (nh_->getParam("robot_description", content)) {
+      if (!urdf_model.initString(content)) {
+        JSK_NODELET_ERROR("Unable to parse URDF description!");
       }
     }
 
     std::string root_link_id;
     std::string world_frame_id;
-    pnh.param<std::string>("root_link_id", root_link_id, "BODY");
-    pnh.param<std::string>("world_frame_id", world_frame_id, "map");
+    pnh_->param<std::string>("root_link_id", root_link_id, "BODY");
+    pnh_->param<std::string>("world_frame_id", world_frame_id, "map");
 
     double default_padding, default_scale;
-    pnh.param("self_see_default_padding", default_padding, 0.01);
-    pnh.param("self_see_default_scale", default_scale, 1.0);
+    pnh_->param("self_see_default_padding", default_padding, 0.01);
+    pnh_->param("self_see_default_scale", default_scale, 1.0);
     std::vector<robot_self_filter::LinkInfo> links;
     std::string link_names;
 
-    if(!pnh.hasParam("self_see_links")) {
-      ROS_WARN("No links specified for self filtering.");
+    if (!pnh_->hasParam("self_see_links")) {
+      JSK_NODELET_WARN("No links specified for self filtering.");
     } else {
       XmlRpc::XmlRpcValue ssl_vals;;
-      pnh.getParam("self_see_links", ssl_vals);
-      if(ssl_vals.getType() != XmlRpc::XmlRpcValue::TypeArray) {
-        ROS_WARN("Self see links need to be an array");
+      pnh_->getParam("self_see_links", ssl_vals);
+      if (ssl_vals.getType() != XmlRpc::XmlRpcValue::TypeArray) {
+        JSK_NODELET_WARN("Self see links need to be an array");
       } else {
-        if(ssl_vals.size() == 0) {
-          ROS_WARN("No values in self see links array");
+        if (ssl_vals.size() == 0) {
+          JSK_NODELET_WARN("No values in self see links array");
         } else {
-          for(int i = 0; i < ssl_vals.size(); i++) {
+          for (int i = 0; i < ssl_vals.size(); i++) {
             robot_self_filter::LinkInfo li;
-            if(ssl_vals[i].getType() != XmlRpc::XmlRpcValue::TypeStruct) {
-              ROS_WARN("Self see links entry %d is not a structure.  Stopping processing of self see links",i);
+            if (ssl_vals[i].getType() != XmlRpc::XmlRpcValue::TypeStruct) {
+              JSK_NODELET_WARN("Self see links entry %d is not a structure.  Stopping processing of self see links",i);
               break;
             }
-            if(!ssl_vals[i].hasMember("name")) {
-              ROS_WARN("Self see links entry %d has no name.  Stopping processing of self see links",i);
+            if (!ssl_vals[i].hasMember("name")) {
+              JSK_NODELET_WARN("Self see links entry %d has no name.  Stopping processing of self see links",i);
               break;
             }
             li.name = std::string(ssl_vals[i]["name"]);
-            if(!ssl_vals[i].hasMember("padding")) {
-              ROS_DEBUG("Self see links entry %d has no padding.  Assuming default padding of %g",i,default_padding);
+            if (!ssl_vals[i].hasMember("padding")) {
+              JSK_NODELET_DEBUG("Self see links entry %d has no padding.  Assuming default padding of %g",i,default_padding);
               li.padding = default_padding;
             } else {
               li.padding = ssl_vals[i]["padding"];
             }
-            if(!ssl_vals[i].hasMember("scale")) {
-              ROS_DEBUG("Self see links entry %d has no scale.  Assuming default scale of %g",i,default_scale);
+            if (!ssl_vals[i].hasMember("scale")) {
+              JSK_NODELET_DEBUG("Self see links entry %d has no scale.  Assuming default scale of %g",i,default_scale);
               li.scale = default_scale;
             } else {
               li.scale = ssl_vals[i]["scale"];
@@ -115,7 +122,8 @@ namespace jsk_pcl_ros
 
   void CollisionDetector::pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
-    ROS_DEBUG("update pointcloud.");
+    boost::mutex::scoped_lock lock(mutex_);
+    JSK_NODELET_DEBUG("update pointcloud.");
 
     pcl::fromROSMsg(*msg, cloud_);
     cloud_frame_id_ = msg->header.frame_id;
@@ -134,14 +142,15 @@ namespace jsk_pcl_ros
   bool CollisionDetector::checkCollision(const sensor_msgs::JointState& joint,
                                          const geometry_msgs::PoseStamped& pose)
   {
-    ROS_DEBUG("checkCollision is called.");
+    boost::mutex::scoped_lock lock(mutex_);
+    JSK_NODELET_DEBUG("checkCollision is called.");
 
     // calculate the sensor transformation
     tf::StampedTransform sensor_to_world_tf;
     try {
       tf_listener_.lookupTransform(world_frame_id_, cloud_frame_id_, cloud_stamp_, sensor_to_world_tf);
-    } catch(tf::TransformException& ex){
-      ROS_ERROR_STREAM( "Transform error of sensor data: " << ex.what() << ", quitting callback");
+    } catch (tf::TransformException& ex) {
+      JSK_NODELET_ERROR_STREAM( "Transform error of sensor data: " << ex.what() << ", quitting callback");
       return false;
     }
 
@@ -155,28 +164,23 @@ namespace jsk_pcl_ros
     // check containment for all point cloud
     bool contain_flag = false;
     pcl::PointXYZ p;
-    for(size_t i = 0; i < cloud_.size(); i++) {
+    for (size_t i = 0; i < cloud_.size(); i++) {
       p = cloud_.at(i);
-      if(finite(p.x) && finite(p.y) && finite(p.z) &&
+      if (finite(p.x) && finite(p.y) && finite(p.z) &&
          self_mask_->getMaskContainment(p.x, p.y, p.z) == robot_self_filter::INSIDE) {
         contain_flag = true;
         break;
       }
     }
 
-    if(contain_flag) {
-      ROS_INFO("collision!");
+    if (contain_flag) {
+      JSK_NODELET_INFO("collision!");
     } else {
-      ROS_INFO("no collision!");
+      JSK_NODELET_INFO("no collision!");
     }
     return contain_flag;
   }
 }
 
-using namespace jsk_pcl_ros;
-int main(int argc, char** argv)
-{
-  ros::init(argc, argv, "collision_detector");
-  CollisionDetector collisionDetector;
-  ros::spin();
-}
+#include <pluginlib/class_list_macros.h>
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::CollisionDetector, nodelet::Nodelet);

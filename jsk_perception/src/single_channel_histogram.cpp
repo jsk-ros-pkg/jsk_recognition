@@ -51,6 +51,7 @@ namespace jsk_perception
     
     pub_ = advertise<jsk_recognition_msgs::ColorHistogram>(
       *pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void SingleChannelHistogram::subscribe()

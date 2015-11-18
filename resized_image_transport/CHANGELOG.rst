@@ -2,6 +2,9 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.3.6 (2015-09-11)
 ------------------
 

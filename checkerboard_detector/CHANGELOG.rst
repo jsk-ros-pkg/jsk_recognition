@@ -2,6 +2,14 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [checkerboard_detector] Add soft link to doc
+* [checkerboard_detector] Use resizable debug window
+* [checkerboard_detector] Remove build_depend to dynamic_tf_publisher
+* [checkerboard_detector] Add launch for murooka board and update document
+* Contributors: Kentaro Wada, Ryohei Ueda
+
 0.3.6 (2015-09-11)
 ------------------
 

@@ -45,7 +45,8 @@
   <build_depend>roscpp_tutorials</build_depend>
   <build_depend>jsk_footstep_msgs</build_depend>
   <build_depend>jsk_recognition_utils</build_depend>
-  <build_depend>robot_self_filter</build_depend>
+  <!-- robot_self_filter is not installed by apt -->
+  <!-- <build_depend>robot_self_filter</build_depend> -->
   <run_depend>roscpp_tutorials</run_depend>
   <run_depend>jsk_topic_tools</run_depend>
   <build_depend>kdl_parser</build_depend>
@@ -100,7 +101,8 @@
   <build_depend>interactive_markers</build_depend>
   <run_depend>interactive_markers</run_depend>
   <run_depend>jsk_recognition_utils</run_depend>
-  <run_depend>robot_self_filter</run_depend>
+  <!-- robot_self_filter is not installed by apt -->
+  <!-- <run_depend>robot_self_filter</run_depend> -->
   <run_depend>kdl_parser</run_depend>
   <run_depend>kdl_conversions</run_depend>
   <run_depend>nav_msgs</run_depend>

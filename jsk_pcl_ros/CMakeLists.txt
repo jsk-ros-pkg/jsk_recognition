@@ -518,3 +518,21 @@ install(TARGETS jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_util jsk_pcl_ros_moveit
 install(FILES jsk_pcl_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 install(DIRECTORY launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
+if (CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  # install test data by a script
+  add_custom_target(install_test_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.sh)
+  if(TARGET tests)
+    add_dependencies(tests install_test_data)
+  endif()
+  # check ros distro >= indigo
+  execute_process(
+    COMMAND python -c "import sys; sys.exit(ord('$ENV{ROS_DISTRO}'[0]) >= ord('indigo'[0]))"
+    RESULT_VARIABLE DISTRO_GE_INDIGO)
+  if(${DISTRO_GE_INDIGO})
+    # because of unreleased topic_tools/transform on hydro
+    add_rostest(test/test_attention_clipper.test DEPENDENCIES install_test_data)
+    add_rostest(test/test_euclidean_segmentation.test DEPENDENCIES install_test_data)
+  endif()
+endif()

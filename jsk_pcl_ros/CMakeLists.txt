@@ -141,7 +141,7 @@ find_package(OpenCV REQUIRED core imgproc)
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
-
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
 macro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
   jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
     jsk_pcl_nodelet_sources jsk_pcl_nodelet_executables)
@@ -492,15 +492,6 @@ foreach(_header ${_headers})
     set(_include_headers "${_include_headers}#include \"${_header}\"\n")
   endif()
 endforeach()
-execute_process(
-  COMMAND ${PROJECT_SOURCE_DIR}/scripts/build_check_helper.py ${PROJECT_SOURCE_DIR}/jsk_pcl_nodelets.xml
-  OUTPUT_VARIABLE _class_instances
-  )
-
-configure_file(src/build_check.cpp.in build_check.cpp)
-add_executable(build_check EXCLUDE_FROM_ALL build_check.cpp)
-target_link_libraries(build_check jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_util jsk_pcl_ros_moveit)
-add_dependencies(run_tests build_check)
 
 generate_messages(DEPENDENCIES
   ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_footstep_msgs)

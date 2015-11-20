@@ -74,7 +74,7 @@ namespace jsk_pcl_ros
 
     std::string world_frame_id_;
     std::string cloud_frame_id_;
-    robot_self_filter::SelfMaskUrdfRobot* self_mask_;
+    boost::shared_ptr<robot_self_filter::SelfMaskUrdfRobot> self_mask_;
     ros::Time cloud_stamp_;
     pcl::PointCloud<pcl::PointXYZ> cloud_;
     tf::TransformListener tf_listener_;

@@ -117,7 +117,7 @@ namespace jsk_pcl_ros
         }
       }
     }
-    self_mask_ = new robot_self_filter::SelfMaskUrdfRobot(tf_listener_, tf_broadcaster_, links, urdf_model, root_link_id, world_frame_id);
+    self_mask_ = boost::shared_ptr<robot_self_filter::SelfMaskUrdfRobot>(new robot_self_filter::SelfMaskUrdfRobot(tf_listener_, tf_broadcaster_, links, urdf_model, root_link_id, world_frame_id));
   }
 
   void CollisionDetector::pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)

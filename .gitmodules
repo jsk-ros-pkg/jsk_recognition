@@ -1,3 +1,4 @@
 [submodule ".travis"]
 	path = .travis
-	url = git://github.com/jsk-ros-pkg/jsk_travis
+	url = git://github.com/k-okada/jsk_travis
+	version = remove_missing

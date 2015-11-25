@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import numpy as np
+
 import cv_bridge
 from jsk_recognition_utils.depth import split_fore_background
 from jsk_topic_tools import jsk_logwarn
@@ -15,7 +17,11 @@ class SplitForeBackground(ConnectionBasedTransport):
     def __init__(self):
         super(SplitForeBackground, self).__init__()
         self.fg_pub_ = self.advertise('~output/fg', Image, queue_size=10)
+        self.fg_mask_pub_ = self.advertise(
+            '~output/fg_mask', Image, queue_size=10)
         self.bg_pub_ = self.advertise('~output/bg', Image, queue_size=10)
+        self.bg_mask_pub_ = self.advertise(
+            '~output/bg_mask', Image, queue_size=10)
 
     def subscribe(self):
         self.sub_ = message_filters.Subscriber('~input', Image)
@@ -51,6 +57,12 @@ class SplitForeBackground(ConnectionBasedTransport):
             bridge.cv2_to_imgmsg(fg, encoding=img_msg.encoding))
         self.bg_pub_.publish(
             bridge.cv2_to_imgmsg(bg, encoding=img_msg.encoding))
+        fg_mask = (fg_mask * 255).astype(np.uint8)
+        bg_mask = (bg_mask * 255).astype(np.uint8)
+        self.fg_mask_pub_.publish(
+            bridge.cv2_to_imgmsg(fg_mask, encoding='mono8'))
+        self.bg_mask_pub_.publish(
+            bridge.cv2_to_imgmsg(bg_mask, encoding='mono8'))
 
 
 if __name__ == '__main__':

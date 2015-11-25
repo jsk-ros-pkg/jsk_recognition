@@ -144,7 +144,7 @@ namespace jsk_pcl_ros
         }
       }
     }
-    m_selfMask = new robot_self_filter::SelfMaskNamedLink(m_tfListener, links);
+    m_selfMask = boost::shared_ptr<robot_self_filter::SelfMaskNamedLink>(new robot_self_filter::SelfMaskNamedLink(m_tfListener, links));
   }
 
   void OctomapServerContact::insertContactSensor(const std::vector<jsk_recognition_msgs::ContactSensor> &datas) {

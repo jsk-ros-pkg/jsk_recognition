@@ -2,7 +2,7 @@
 
 import rospy
 from std_msgs.msg import Header
-from octomap_msgs.msg import ContactSensor, ContactSensorArray
+from jsk_recognition_msgs.msg import ContactSensor, ContactSensorArray
 from geometry_msgs.msg import Pose
 
 if __name__ == '__main__':

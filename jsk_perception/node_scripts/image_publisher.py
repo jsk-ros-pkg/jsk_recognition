@@ -23,6 +23,7 @@ rospy.init_node("image_publisher")
 dynamic_reconfigure.server.Server(ImagePublisherConfig, _cb_dyn_reconfig)
 rate = rospy.Rate(rospy.get_param("rate", 1))
 if_publish_info = rospy.get_param("~publish_info", True)
+frame_id = rospy.get_param("~frame_id", "camera")
 pub = rospy.Publisher("~output", Image, queue_size=1)
 if if_publish_info:
     pub_info = rospy.Publisher("~output/camera_info", CameraInfo, queue_size=1)
@@ -35,13 +36,13 @@ while not rospy.is_shutdown():
             raise IOError('image value is None')
         image_message = bridge.cv2_to_imgmsg(image, encoding="bgr8")
         image_message.header.stamp = now
-        image_message.header.frame_id = "camera"
-        info = CameraInfo()
-        info.header.stamp = now
-        info.header.frame_id = "camera"
-        info.width = image_message.width
-        info.height = image_message.height
+        image_message.header.frame_id = frame_id
         if if_publish_info:
+            info = CameraInfo()
+            info.header.stamp = now
+            info.header.frame_id = frame_id
+            info.width = image_message.width
+            info.height = image_message.height
             pub_info.publish(info)
         pub.publish(image_message)
     except IOError, e:

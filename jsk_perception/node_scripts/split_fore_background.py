@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import numpy as np
+
 import cv_bridge
 from jsk_recognition_utils.depth import split_fore_background
 from jsk_topic_tools import jsk_logwarn
@@ -30,16 +32,21 @@ class SplitForeBackground(ConnectionBasedTransport):
 
     def _apply(self, img_msg, depth_msg):
         # validation
-        if depth_msg.encoding != '16UC1':
+        if depth_msg.encoding == '16UC1':
             jsk_logwarn('Unsupported depth image encoding: {0}'
                         .format(depth_msg.encoding))
-            return
         if not (img_msg.height == depth_msg.height and
                 img_msg.width == depth_msg.width):
             return
         # split fg/bg and get each mask
         bridge = cv_bridge.CvBridge()
         depth = bridge.imgmsg_to_cv2(depth_msg)
+        if depth_msg.encoding == '32FC1':
+            # convert float to int (handle 32FC1 as 16UC1)
+            depth = depth.copy()
+            depth[np.isnan(depth)] = 0
+            depth *= 255
+            depth = depth.astype(np.uint8)
         fg_mask, bg_mask = split_fore_background(depth)
         # publish cropped
         img = bridge.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')

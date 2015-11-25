@@ -17,14 +17,6 @@ This package provides some programs as nodelet.
 .. toctree::
    :glob:
    :maxdepth: 1
-   :caption: types
-
-   ./types/*
-
-
-.. toctree::
-   :glob:
-   :maxdepth: 1
    :caption: nodes and nodelets
 
    ./nodes/*

@@ -36,7 +36,8 @@ class SplitForeBackground(ConnectionBasedTransport):
 
     def _apply(self, img_msg, depth_msg):
         # validation
-        if depth_msg.encoding == '16UC1':
+        supported_encodings = {'16UC1', '32FC1'}
+        if depth_msg.encoding not in supported_encodings:
             jsk_logwarn('Unsupported depth image encoding: {0}'
                         .format(depth_msg.encoding))
         if not (img_msg.height == depth_msg.height and

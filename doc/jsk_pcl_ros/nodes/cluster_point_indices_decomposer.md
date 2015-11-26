@@ -22,6 +22,10 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
    Series of topics for each pointcloud cluster.
    This is published only when `publish_clouds` is `true`.
 
+* `/tf` (`tf2_msgs/TFMessage`)
+
+   Transformation of each decomposed points' center of gravity.
+
 * `~debug_output` (`sensor_msgs/PointCloud2`):
 
    Concatenate all the clusters into one pointcloud and colorize each cluster to see the result of segmentation.

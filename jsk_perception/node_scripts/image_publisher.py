@@ -7,49 +7,53 @@ import rospy
 import cv_bridge
 import dynamic_reconfigure.server
 
+from jsk_topic_tools import jsk_logwarn
 from jsk_perception.cfg import ImagePublisherConfig
 from sensor_msgs.msg import Image, CameraInfo
 
 
-def _cb_dyn_reconfig(config, level):
-    global file_name
-    file_name = config['file_name']
-    config['file_name'] = os.path.abspath(file_name)
-    return config
+class ImagePublisher(object):
 
+    def __init__(self):
+        dynamic_reconfigure.server.Server(
+            ImagePublisherConfig, self._cb_dyn_reconfig)
+        self.frame_id = rospy.get_param('~frame_id', 'camera')
+        self.pub = rospy.Publisher('~output', Image, queue_size=1)
+        self.publish_info = rospy.get_param('~publish_info', True)
+        if self.publish_info:
+            self.pub_info = rospy.Publisher(
+                '~output/camera_info', CameraInfo, queue_size=1)
 
-rospy.init_node("image_publisher")
+    def _cb_dyn_reconfig(self, config, level):
+        self.file_name = config['file_name']
+        config['file_name'] = os.path.abspath(self.file_name)
+        return config
 
-dynamic_reconfigure.server.Server(ImagePublisherConfig, _cb_dyn_reconfig)
-rate = rospy.Rate(rospy.get_param("rate", 1))
-if_publish_info = rospy.get_param("~publish_info", True)
-frame_id = rospy.get_param("~frame_id", "camera")
-pub = rospy.Publisher("~output", Image, queue_size=1)
-if if_publish_info:
-    pub_info = rospy.Publisher("~output/camera_info", CameraInfo, queue_size=1)
-bridge = cv_bridge.CvBridge()
-while not rospy.is_shutdown():
-    try:
+    def publish(self):
         now = rospy.Time.now()
-        image = cv2.imread(file_name)
-        if image is None:
-            raise IOError('image value is None')
-        image_message = bridge.cv2_to_imgmsg(image, encoding="bgr8")
-        image_message.header.stamp = now
-        image_message.header.frame_id = frame_id
-        if if_publish_info:
+        bridge = cv_bridge.CvBridge()
+        img = cv2.imread(self.file_name)
+        if img is None:
+            jsk_logwarn('cannot read the image at {}'
+                        .format(self.file_name))
+            return
+        imgmsg = bridge.cv2_to_imgmsg(img, encoding="bgr8")
+        imgmsg.header.stamp = now
+        imgmsg.header.frame_id = self.frame_id
+        self.pub.publish(imgmsg)
+        if self.publish_info:
             info = CameraInfo()
             info.header.stamp = now
-            info.header.frame_id = frame_id
-            info.width = image_message.width
-            info.height = image_message.height
-            pub_info.publish(info)
-        pub.publish(image_message)
-    except IOError, e:
-        rospy.loginfo("cannot read the image at %s" % file_name)
-        rospy.loginfo(e.message)
-    except AttributeError, e:
-        rospy.logerr("Did you set properly ~file_name param ?")
-        rospy.loginfo(e.message)
-    rate.sleep()
+            info.header.frame_id = self.frame_id
+            info.width = imgmsg.width
+            info.height = imgmsg.height
+            self.pub_info.publish(info)
 
+
+if __name__ == '__main__':
+    rospy.init_node('image_publisher')
+    rate = rospy.Rate(rospy.get_param('rate', 1))
+    img_pub = ImagePublisher()
+    while not rospy.is_shutdown():
+        img_pub.publish()
+        rate.sleep()

@@ -34,6 +34,8 @@
  *********************************************************************/
 
 #include "jsk_perception/contour_finder.h"
+#include <boost/assign.hpp>
+#include <jsk_topic_tools/log_utils.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <opencv2/opencv.hpp>
@@ -52,6 +54,8 @@ namespace jsk_perception
   void ContourFinder::subscribe()
   {
     sub_ = pnh_->subscribe("input", 1, &ContourFinder::segment, this);
+    ros::V_string names = boost::assign::list_of("~input");
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void ContourFinder::unsubscribe()

@@ -34,6 +34,8 @@
  *********************************************************************/
 
 #include "jsk_perception/roi_to_rect.h"
+#include <boost/assign.hpp>
+#include <jsk_topic_tools/log_utils.h>
 
 namespace jsk_perception
 {
@@ -48,6 +50,8 @@ namespace jsk_perception
   void ROIToRect::subscribe()
   {
     sub_ = pnh_->subscribe("input", 1, &ROIToRect::convert, this);
+    ros::V_string names = boost::assign::list_of("~input");
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void ROIToRect::unsubscribe()

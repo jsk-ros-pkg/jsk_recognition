@@ -34,6 +34,8 @@
  *********************************************************************/
 
 #include "jsk_perception/polygon_to_mask_image.h"
+#include <boost/assign.hpp>
+#include <jsk_topic_tools/log_utils.h>
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
@@ -54,6 +56,8 @@ namespace jsk_perception
                                 &PolygonToMaskImage::infoCallback, this);
     sub_ = pnh_->subscribe("input", 1,
                            &PolygonToMaskImage::convert, this);
+    ros::V_string names = boost::assign::list_of("~input")("~input/camera_info");
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void PolygonToMaskImage::unsubscribe()

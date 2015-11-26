@@ -35,6 +35,8 @@
 
 #include "jsk_perception/colorize_labels.h"
 #include <jsk_recognition_utils/cv_utils.h>
+#include <jsk_topic_tools/log_utils.h>
+#include <boost/assign.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/opencv.hpp>
 #include <sensor_msgs/image_encodings.h>
@@ -52,6 +54,8 @@ namespace jsk_perception
   void ColorizeLabels::subscribe()
   {
     sub_ = pnh_->subscribe("input", 1, &ColorizeLabels::colorize, this);
+    ros::V_string names = boost::assign::list_of("~input");
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void ColorizeLabels::unsubscribe()

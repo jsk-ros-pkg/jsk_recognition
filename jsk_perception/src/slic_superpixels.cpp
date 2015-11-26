@@ -35,6 +35,8 @@
 
 #include "jsk_perception/slic_superpixels.h"
 #include "slic.h"
+#include <boost/assign.hpp>
+#include <jsk_topic_tools/log_utils.h>
 #include <sensor_msgs/image_encodings.h>
 
 namespace jsk_perception
@@ -56,6 +58,9 @@ namespace jsk_perception
     pub_debug_mean_color_ = pnh_.advertise<sensor_msgs::Image>("debug/mean_color", 1);
     pub_debug_center_grid_ = pnh_.advertise<sensor_msgs::Image>("debug/center_grid", 1);
     image_sub_ = it_->subscribe("", 1, &SLICSuperPixels::imageCallback, this);
+
+    ros::V_string names = boost::assign::list_of("image");
+    jsk_topic_tools::warnNoRemap(names);
   }
   
   void SLICSuperPixels::imageCallback(const sensor_msgs::Image::ConstPtr& image)

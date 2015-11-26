@@ -31,3 +31,11 @@ Publishing Topic
 * ``~output/bg`` (``sensor_msgs/Image``)
 
   Background image.
+
+* ``~output/fg_mask`` (``sensor_msgs/Image``, encoding: ``8UC1``)
+
+  Mask image to extract foreground.
+
+* ``~output/bg_mask`` (``sensor_msgs/Image``, encoding: ``8UC1``)
+
+  Mask image to extract background

@@ -20,6 +20,8 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 * `~output%02d` (`sensor_msgs/PointCloud2`):
 
    Series of topics for each pointcloud cluster.
+   This is published only when `publish_clouds` is `true`.
+
 * `~debug_output` (`sensor_msgs/PointCloud2`):
 
    Concatenate all the clusters into one pointcloud and colorize each cluster to see the result of segmentation.

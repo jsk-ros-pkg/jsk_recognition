@@ -16,7 +16,7 @@ Subscribing Topic
 
   Raw image.
 
-* ``~input/depth`` (``sensor_msgs/Image``, encoding: ``16UC1``)
+* ``~input/depth`` (``sensor_msgs/Image``, encoding: ``16UC1`` or ``32FC1``)
 
   Depth image.
 

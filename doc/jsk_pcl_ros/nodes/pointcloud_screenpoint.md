@@ -1,18 +1,18 @@
 # PointcloudScreenpoint
 ## What is this
-![](launch/images/pointcloud_screenpoint_3people.png)
+![](images/pointcloud_screenpoint_3people.png)
 
 Use pointcloud from kinect
 
-![](launch/images/pointcloud_screenpoint_kinect.png)
+![](images/pointcloud_screenpoint_kinect.png)
 
 Use pointcloud from laser
 
-![](launch/images/pointcloud_screenpoint_laser.png)
+![](images/pointcloud_screenpoint_laser.png)
 
 Use amplifiered pointclouds published by laser
 
-![](launch/images/pointcloud_screenpoint_disparity_laser.png)
+![](images/pointcloud_screenpoint_disparity_laser.png)
 
 
 This is a nodelet to convert (u, v) coordinate on a image to 3-D point.

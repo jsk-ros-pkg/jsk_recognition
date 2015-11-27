@@ -50,6 +50,10 @@ namespace jsk_pcl_ros
     srv_->setCallback (f);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     pub_with_xyz_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_with_xyz", 1);
+    pub_latest_time_ = advertise<std_msgs::Float32>(
+      *pnh_, "output/latest_time", 1);
+    pub_average_time_ = advertise<std_msgs::Float32>(
+      *pnh_, "output/average_time", 1);
   }
 
   void NormalEstimationOMP::subscribe()
@@ -75,43 +79,51 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr
-      cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-    pcl::fromROSMsg(*cloud_msg, *cloud);
-    pcl::NormalEstimationOMP<pcl::PointXYZRGB, pcl::Normal> impl;
-    impl.setInputCloud(cloud);
-    pcl::search::KdTree<pcl::PointXYZRGB>::Ptr
-      tree (new pcl::search::KdTree<pcl::PointXYZRGB> ());
-    impl.setSearchMethod (tree);
-    impl.setKSearch(k_);
-    impl.setRadiusSearch(search_radius_);
-    pcl::PointCloud<pcl::Normal>::Ptr
-      normal_cloud(new pcl::PointCloud<pcl::Normal>);
-    impl.compute(*normal_cloud);
+    {
+      jsk_recognition_utils::ScopedWallDurationReporter r = timer_.reporter();
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr
+        cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+      pcl::fromROSMsg(*cloud_msg, *cloud);
+      pcl::NormalEstimationOMP<pcl::PointXYZRGB, pcl::Normal> impl;
+      impl.setInputCloud(cloud);
+      pcl::search::KdTree<pcl::PointXYZRGB>::Ptr
+        tree (new pcl::search::KdTree<pcl::PointXYZRGB> ());
+      impl.setSearchMethod (tree);
+      impl.setKSearch(k_);
+      impl.setRadiusSearch(search_radius_);
+      pcl::PointCloud<pcl::Normal>::Ptr
+        normal_cloud(new pcl::PointCloud<pcl::Normal>);
+      impl.compute(*normal_cloud);
 
-    sensor_msgs::PointCloud2 ros_normal_cloud;
-    pcl::toROSMsg(*normal_cloud, ros_normal_cloud);
-    ros_normal_cloud.header = cloud_msg->header;
-    pub_.publish(ros_normal_cloud);
+      sensor_msgs::PointCloud2 ros_normal_cloud;
+      pcl::toROSMsg(*normal_cloud, ros_normal_cloud);
+      ros_normal_cloud.header = cloud_msg->header;
+      pub_.publish(ros_normal_cloud);
 
-    pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr
-      normal_xyz(new pcl::PointCloud<pcl::PointXYZRGBNormal>);
-    normal_xyz->points.resize(cloud->points.size());
-    for (size_t i = 0; i < normal_xyz->points.size(); i++) {
-      pcl::PointXYZRGBNormal p;
-      p.x = cloud->points[i].x;
-      p.y = cloud->points[i].y;
-      p.z = cloud->points[i].z;
-      p.normal_x = normal_cloud->points[i].normal_x;
-      p.normal_y = normal_cloud->points[i].normal_y;
-      p.normal_z = normal_cloud->points[i].normal_z;
-      normal_xyz->points[i] = p;
+      pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr
+        normal_xyz(new pcl::PointCloud<pcl::PointXYZRGBNormal>);
+      normal_xyz->points.resize(cloud->points.size());
+      for (size_t i = 0; i < normal_xyz->points.size(); i++) {
+        pcl::PointXYZRGBNormal p;
+        p.x = cloud->points[i].x;
+        p.y = cloud->points[i].y;
+        p.z = cloud->points[i].z;
+        p.normal_x = normal_cloud->points[i].normal_x;
+        p.normal_y = normal_cloud->points[i].normal_y;
+        p.normal_z = normal_cloud->points[i].normal_z;
+        normal_xyz->points[i] = p;
+      }
+
+      sensor_msgs::PointCloud2 ros_normal_xyz_cloud;
+      pcl::toROSMsg(*normal_xyz, ros_normal_xyz_cloud);
+      ros_normal_xyz_cloud.header = cloud_msg->header;
+      pub_with_xyz_.publish(ros_normal_xyz_cloud);
     }
-
-    sensor_msgs::PointCloud2 ros_normal_xyz_cloud;
-    pcl::toROSMsg(*normal_xyz, ros_normal_xyz_cloud);
-    ros_normal_xyz_cloud.header = cloud_msg->header;
-    pub_with_xyz_.publish(ros_normal_xyz_cloud);
+    std_msgs::Float32 latest_time, average_time;
+    latest_time.data = timer_.latestSec();
+    average_time.data = timer_.meanSec();
+    pub_latest_time_.publish(latest_time);
+    pub_average_time_.publish(average_time);
   }
 }
 

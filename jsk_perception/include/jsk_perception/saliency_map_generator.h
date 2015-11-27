@@ -31,7 +31,7 @@ namespace jsk_perception
       void getIntensity(cv::Mat, cv::Mat, cv::Mat, cv::Mat, bool);
       
       int num_threads_;
-
+      bool print_fps_;
       double start_;
       int counter_;
       

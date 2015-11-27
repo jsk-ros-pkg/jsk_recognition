@@ -7,6 +7,7 @@ namespace jsk_perception
    {
       DiagnosticNodelet::onInit();
       pnh_->getParam("num_threads", this->num_threads_);
+      pnh_->getParam("fps", this->print_fps_);
       this->pub_image_ = advertise<sensor_msgs::Image>(*pnh_,
          "/saliency_map_generator/output/saliency_map", 1);
       onInitPostProcess();
@@ -43,19 +44,19 @@ namespace jsk_perception
       this->computeSaliencyImpl(image, saliency_map);
       cv::cvtColor(saliency_map, saliency_map, CV_GRAY2BGR);
 
-      this->counter_++;
-      double sec = (omp_get_wtime() - this->start_) /
-         static_cast<double>(this->num_threads_);
-      double fps = static_cast<double>(this->counter_) / sec;
-      fps = ceil(fps * 100) / 100;
-      
-      if (this->counter_ == (INT_MAX)) {
-         this->counter_ = 0;
+      if (this->print_fps_) {
+         this->counter_++;
+         double sec = (omp_get_wtime() - this->start_) /
+            static_cast<double>(this->num_threads_);
+         double fps = static_cast<double>(this->counter_) / sec;
+         fps = ceil(fps * 100) / 100;      
+         if (this->counter_ == (INT_MAX)) {
+            this->counter_ = 0;
+         }
+         cv::putText(saliency_map, "FPS: " + boost::lexical_cast<std::string>(fps),
+                     cv::Point(30, 30), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8,
+                     cv::Scalar(200, 200, 250), 1, CV_AA);
       }
-      cv::putText(saliency_map, "FPS: " + boost::lexical_cast<std::string>(fps),
-                  cv::Point(30, 30), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8,
-                  cv::Scalar(200, 200, 250), 1, CV_AA);
-      
       cv_bridge::CvImage pub_img(image_msg->header,
                                  image_msg->encoding,
                                  saliency_map);

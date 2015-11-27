@@ -139,7 +139,7 @@ jsk_perception_nodelet(src/sliding_window_object_detector.cpp "jsk_perception/Sl
 jsk_perception_nodelet(src/gaussian_blur.cpp "jsk_perception/GaussianBlur" "gaussian_blur")
 jsk_perception_nodelet(src/kmeans.cpp "jsk_perception/KMeans" "kmeans")
 jsk_perception_nodelet(src/tabletop_color_difference_likelihood.cpp "jsk_perception/TabletopColorDifferenceLikelihood" "tabletop_color_difference_likelihood")
-
+jsk_perception_nodelet(src/saliency_map_generator_node.cpp "jsk_perception/SaliencyMapGenerator" "saliency_map_generator")
 # compiling jsk_perception library for nodelet
 add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
   ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels/slic.cpp

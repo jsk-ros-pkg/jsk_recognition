@@ -201,6 +201,12 @@
       Base class for object detection via supervised learning
     </description>
   </class>
+  <class name="jsk_perception/SaliencyMapGenerator" type="jsk_perception::SaliencyMapGenerator"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Nodelet to compute saliency map
+    </description>
+  </class>
   <class name="jsk_perception/GaussianBlur"
          type="jsk_perception::GaussianBlur"
          base_class_type="nodelet::Nodelet">

@@ -164,6 +164,10 @@ namespace jsk_pcl_ros
       "track_result", 1);
     pose_stamped_publisher_ = pnh_->advertise<geometry_msgs::PoseStamped>(
       "track_result_pose", 1);
+    pub_latest_time_ = pnh_->advertise<std_msgs::Float32>(
+      "output/latest_time", 1);
+    pub_average_time_ = pnh_->advertise<std_msgs::Float32>(
+      "output/average_time", 1);
     //Set subscribe setting
     sub_ = pnh_->subscribe("input", 1, &ParticleFilterTracking::cloud_cb,this);
     if (align_box_) {
@@ -376,20 +380,28 @@ namespace jsk_pcl_ros
       std::vector<int> indices;
       pcl::fromROSMsg(pc, *cloud);
       cloud->is_dense = false;
-      pcl::removeNaNFromPointCloud(*cloud, *cloud, indices);
-      if (base_frame_id_.compare("NONE")!=0) {
-        change_pointcloud_frame(cloud);
+      {
+        jsk_recognition_utils::ScopedWallDurationReporter r = timer_.reporter();
+        pcl::removeNaNFromPointCloud(*cloud, *cloud, indices);
+        if (base_frame_id_.compare("NONE")!=0) {
+          change_pointcloud_frame(cloud);
+        }
+        cloud_pass_downsampled_.reset(new pcl::PointCloud<PointT>);
+        pcl::copyPointCloud(*cloud, *cloud_pass_downsampled_);
+        if (!cloud_pass_downsampled_->points.empty()) {
+          boost::mutex::scoped_lock lock(mtx_);
+          tracker_set_input_cloud(cloud_pass_downsampled_);
+          tracker_compute();
+          publish_particles();
+          publish_result();
+        }
+        new_cloud_ = true;
       }
-      cloud_pass_downsampled_.reset(new pcl::PointCloud<PointT>);
-      pcl::copyPointCloud(*cloud, *cloud_pass_downsampled_);
-      if (!cloud_pass_downsampled_->points.empty()) {
-        boost::mutex::scoped_lock lock(mtx_);
-        tracker_set_input_cloud(cloud_pass_downsampled_);
-        tracker_compute();
-        publish_particles();
-        publish_result();
-      }
-      new_cloud_ = true;
+      std_msgs::Float32 latest_time, average_time;
+      latest_time.data = timer_.latestSec();
+      average_time.data = timer_.meanSec();
+      pub_latest_time_.publish(latest_time);
+      pub_average_time_.publish(average_time);
     }
   }
 

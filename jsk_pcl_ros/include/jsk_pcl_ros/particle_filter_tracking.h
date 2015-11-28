@@ -75,7 +75,8 @@
 #include <pcl/tracking/particle_filter.h>
 #include <pcl/tracking/impl/tracking.hpp>
 #include <pcl/tracking/impl/particle_filter.hpp>
-
+#include <jsk_recognition_utils/time_util.h>
+#include <std_msgs/Float32.h>
 // This namespace follows PCL coding style
 namespace pcl
 {
@@ -539,6 +540,7 @@ namespace jsk_pcl_ros
       jsk_recognition_msgs::BoundingBox > SyncPolicy;
     typedef ParticleFilterTracker<PointT, ParticleXYZRPY>::PointCloudStatePtr
     PointCloudStatePtr;
+    ParticleFilterTracking(): timer_(10) {}
   protected:
     pcl::PointCloud<PointT>::Ptr cloud_pass_;
     pcl::PointCloud<PointT>::Ptr cloud_pass_downsampled_;
@@ -562,7 +564,10 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_;
     ros::Subscriber sub_update_model_;
     ros::Subscriber sub_update_with_marker_model_;
-
+    ros::Publisher pub_latest_time_;
+    ros::Publisher pub_average_time_;
+    jsk_recognition_utils::WallDurationTimer timer_;
+    
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<jsk_recognition_msgs::BoundingBox> sub_box_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
@@ -587,6 +592,7 @@ namespace jsk_pcl_ros
     bool not_use_reference_centroid_;
     bool not_publish_tf_;
     int marker_to_pointcloud_sampling_nums_;
+    
     virtual void config_callback(Config &config, uint32_t level);
     virtual void publish_particles();
     virtual void publish_result();

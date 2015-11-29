@@ -48,7 +48,8 @@ namespace jsk_pcl_ros
   {
     pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
     // not implemented yet
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
+    
     track_target_set_ = false;
     new_cloud_ = false;
     
@@ -80,7 +81,9 @@ namespace jsk_pcl_ros
     pnh_->getParam("octree_resolution", octree_resolution);
     pnh_->param("align_box", align_box_, false);
     pnh_->param("BASE_FRAME_ID", base_frame_id_, std::string("NONE"));
-    
+    if (base_frame_id_.compare("NONE") != 0) {
+      listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
+    }
     target_cloud_.reset(new pcl::PointCloud<PointT>());
     pnh_->param("not_use_reference_centroid", not_use_reference_centroid_,
                 false);
@@ -350,10 +353,10 @@ namespace jsk_pcl_ros
     tf::StampedTransform tfTransformationStamped;
     ros::Time now = ros::Time::now();
     try {
-      listener_.waitForTransform(base_frame_id_, frame_id_, now,
-                                 ros::Duration(2.0));
-      listener_.lookupTransform(base_frame_id_, frame_id_, now,
-                                tfTransformationStamped);
+      listener_->waitForTransform(base_frame_id_, frame_id_, now,
+                                  ros::Duration(2.0));
+      listener_->lookupTransform(base_frame_id_, frame_id_, now,
+                                 tfTransformationStamped);
       //frame_id_ = base_frame_id_;
     }
     catch(tf::TransformException ex) {

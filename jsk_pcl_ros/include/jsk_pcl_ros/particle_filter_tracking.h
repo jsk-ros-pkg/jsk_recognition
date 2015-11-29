@@ -44,8 +44,9 @@
 #include <tf/transform_broadcaster.h>
 #include <tf_conversions/tf_eigen.h>
 #include <jsk_pcl_ros/pcl_conversion_util.h>
+#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_recognition_utils/tf_listener_singleton.h>
 // pcl
-#include <pcl_ros/pcl_nodelet.h>
 #include <pcl/point_types.h>
 #include <pcl/common/centroid.h>
 #include <pcl/common/transforms.h>
@@ -530,7 +531,7 @@ namespace pcl
 using namespace pcl::tracking;
 namespace jsk_pcl_ros
 {
-  class ParticleFilterTracking: public pcl_ros::PCLNodelet
+  class ParticleFilterTracking: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     typedef pcl::PointXYZRGB PointT;
@@ -576,7 +577,7 @@ namespace jsk_pcl_ros
     ros::Publisher pose_stamped_publisher_;
     ros::ServiceServer renew_model_srv_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
-    tf::TransformListener listener_;
+    tf::TransformListener* listener_;
     
     ////////////////////////////////////////////////////////
     // parameters
@@ -642,6 +643,10 @@ namespace jsk_pcl_ros
     virtual void tracker_reset_tracking();
     virtual void tracker_set_input_cloud(pcl::PointCloud<PointT>::Ptr input);
     virtual void tracker_compute();
+
+    virtual void subscribe() {}
+    virtual void unsubscribe() {}    
+    
   private:
     virtual void onInit();
 

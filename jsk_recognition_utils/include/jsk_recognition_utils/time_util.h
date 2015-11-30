@@ -33,52 +33,41 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#include <ros/ros.h>
+#include <boost/circular_buffer.hpp>
 
-#ifndef JSK_PCL_ROS_NORMAL_ESTIMATION_OMP_H_
-#define JSK_PCL_ROS_NORMAL_ESTIMATION_OMP_H_
-
-#include <jsk_topic_tools/diagnostic_nodelet.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <pcl_ros/FeatureConfig.h>
-#include <dynamic_reconfigure/server.h>
-#include <pcl_conversions/pcl_conversions.h>
-#include <jsk_recognition_utils/time_util.h>
-#include <std_msgs/Float32.h>
-
-namespace jsk_pcl_ros
+namespace jsk_recognition_utils
 {
-  class NormalEstimationOMP: public jsk_topic_tools::DiagnosticNodelet
+  class WallDurationTimer;
+  
+  class ScopedWallDurationReporter
   {
   public:
-    typedef boost::shared_ptr<NormalEstimationOMP> Ptr;
-    typedef pcl_ros::FeatureConfig Config;
-    NormalEstimationOMP(): DiagnosticNodelet("NormalEstimationOMP"), timer_(10) {}
-    
+    typedef boost::shared_ptr<ScopedWallDurationReporter> Ptr;
+    ScopedWallDurationReporter(WallDurationTimer* parent);
+    virtual ~ScopedWallDurationReporter();
   protected:
-
-    virtual void onInit();
-    virtual void subscribe();
-    virtual void unsubscribe();
-    virtual void estimate(
-      const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
-    virtual void configCallback(
-      Config& config, uint32_t level);
-    
-    boost::mutex mutex_;
-    ros::Publisher pub_;
-    ros::Publisher pub_with_xyz_;
-    ros::Publisher pub_latest_time_;
-    ros::Publisher pub_average_time_;
-    jsk_recognition_utils::WallDurationTimer timer_;
-    ros::Subscriber sub_;
-    std::string sensor_frame_;
-    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
-    int k_;
-    double search_radius_;
-    
+    WallDurationTimer* parent_;
+    ros::WallTime start_time_;
   private:
     
   };
+  
+  class WallDurationTimer
+  {
+  public:
+    typedef boost::shared_ptr<WallDurationTimer> Ptr;
+    WallDurationTimer(const int max_num);
+    virtual void report(ros::WallDuration& duration);
+    virtual ScopedWallDurationReporter reporter();
+    virtual void clearBuffer();
+    virtual double meanSec();
+    virtual double latestSec();
+    virtual size_t sampleNum();
+  protected:
+    const int max_num_;
+    boost::circular_buffer<ros::WallDuration> buffer_;
+  private:
+  };
+  
 }
-
-#endif

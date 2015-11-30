@@ -30,6 +30,15 @@ and evaluation function of connectivity if based on the following equation:
 
   Polygons
 
+* `~output/latest_time` (`std_msgs/Float32`)
+
+  latest computation time
+
+* `~output/average_time` (`std_msgs/Float32`)
+
+  average computation time
+
+
 ## Parameters
 * `~angular_threshold` (Double, default: `0.04`)
 

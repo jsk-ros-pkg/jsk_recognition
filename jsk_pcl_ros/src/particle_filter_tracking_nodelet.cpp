@@ -48,7 +48,8 @@ namespace jsk_pcl_ros
   {
     pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
     // not implemented yet
-    PCLNodelet::onInit();
+    ConnectionBasedNodelet::onInit();
+    
     track_target_set_ = false;
     new_cloud_ = false;
     
@@ -80,7 +81,9 @@ namespace jsk_pcl_ros
     pnh_->getParam("octree_resolution", octree_resolution);
     pnh_->param("align_box", align_box_, false);
     pnh_->param("BASE_FRAME_ID", base_frame_id_, std::string("NONE"));
-    
+    if (base_frame_id_.compare("NONE") != 0) {
+      listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
+    }
     target_cloud_.reset(new pcl::PointCloud<PointT>());
     pnh_->param("not_use_reference_centroid", not_use_reference_centroid_,
                 false);
@@ -164,6 +167,10 @@ namespace jsk_pcl_ros
       "track_result", 1);
     pose_stamped_publisher_ = pnh_->advertise<geometry_msgs::PoseStamped>(
       "track_result_pose", 1);
+    pub_latest_time_ = pnh_->advertise<std_msgs::Float32>(
+      "output/latest_time", 1);
+    pub_average_time_ = pnh_->advertise<std_msgs::Float32>(
+      "output/average_time", 1);
     //Set subscribe setting
     sub_ = pnh_->subscribe("input", 1, &ParticleFilterTracking::cloud_cb,this);
     if (align_box_) {
@@ -346,10 +353,10 @@ namespace jsk_pcl_ros
     tf::StampedTransform tfTransformationStamped;
     ros::Time now = ros::Time::now();
     try {
-      listener_.waitForTransform(base_frame_id_, frame_id_, now,
-                                 ros::Duration(2.0));
-      listener_.lookupTransform(base_frame_id_, frame_id_, now,
-                                tfTransformationStamped);
+      listener_->waitForTransform(base_frame_id_, frame_id_, now,
+                                  ros::Duration(2.0));
+      listener_->lookupTransform(base_frame_id_, frame_id_, now,
+                                 tfTransformationStamped);
       //frame_id_ = base_frame_id_;
     }
     catch(tf::TransformException ex) {
@@ -376,20 +383,28 @@ namespace jsk_pcl_ros
       std::vector<int> indices;
       pcl::fromROSMsg(pc, *cloud);
       cloud->is_dense = false;
-      pcl::removeNaNFromPointCloud(*cloud, *cloud, indices);
-      if (base_frame_id_.compare("NONE")!=0) {
-        change_pointcloud_frame(cloud);
+      {
+        jsk_recognition_utils::ScopedWallDurationReporter r = timer_.reporter();
+        pcl::removeNaNFromPointCloud(*cloud, *cloud, indices);
+        if (base_frame_id_.compare("NONE")!=0) {
+          change_pointcloud_frame(cloud);
+        }
+        cloud_pass_downsampled_.reset(new pcl::PointCloud<PointT>);
+        pcl::copyPointCloud(*cloud, *cloud_pass_downsampled_);
+        if (!cloud_pass_downsampled_->points.empty()) {
+          boost::mutex::scoped_lock lock(mtx_);
+          tracker_set_input_cloud(cloud_pass_downsampled_);
+          tracker_compute();
+          publish_particles();
+          publish_result();
+        }
+        new_cloud_ = true;
       }
-      cloud_pass_downsampled_.reset(new pcl::PointCloud<PointT>);
-      pcl::copyPointCloud(*cloud, *cloud_pass_downsampled_);
-      if (!cloud_pass_downsampled_->points.empty()) {
-        boost::mutex::scoped_lock lock(mtx_);
-        tracker_set_input_cloud(cloud_pass_downsampled_);
-        tracker_compute();
-        publish_particles();
-        publish_result();
-      }
-      new_cloud_ = true;
+      std_msgs::Float32 latest_time, average_time;
+      latest_time.data = timer_.latestSec();
+      average_time.data = timer_.meanSec();
+      pub_latest_time_.publish(latest_time);
+      pub_average_time_.publish(average_time);
     }
   }
 

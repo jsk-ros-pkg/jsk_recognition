@@ -33,52 +33,59 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#include "jsk_recognition_utils/time_util.h"
 
-#ifndef JSK_PCL_ROS_NORMAL_ESTIMATION_OMP_H_
-#define JSK_PCL_ROS_NORMAL_ESTIMATION_OMP_H_
-
-#include <jsk_topic_tools/diagnostic_nodelet.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <pcl_ros/FeatureConfig.h>
-#include <dynamic_reconfigure/server.h>
-#include <pcl_conversions/pcl_conversions.h>
-#include <jsk_recognition_utils/time_util.h>
-#include <std_msgs/Float32.h>
-
-namespace jsk_pcl_ros
+namespace jsk_recognition_utils
 {
-  class NormalEstimationOMP: public jsk_topic_tools::DiagnosticNodelet
+  ScopedWallDurationReporter::ScopedWallDurationReporter(WallDurationTimer* parent):
+    parent_(parent), start_time_(ros::WallTime::now())
   {
-  public:
-    typedef boost::shared_ptr<NormalEstimationOMP> Ptr;
-    typedef pcl_ros::FeatureConfig Config;
-    NormalEstimationOMP(): DiagnosticNodelet("NormalEstimationOMP"), timer_(10) {}
-    
-  protected:
 
-    virtual void onInit();
-    virtual void subscribe();
-    virtual void unsubscribe();
-    virtual void estimate(
-      const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
-    virtual void configCallback(
-      Config& config, uint32_t level);
-    
-    boost::mutex mutex_;
-    ros::Publisher pub_;
-    ros::Publisher pub_with_xyz_;
-    ros::Publisher pub_latest_time_;
-    ros::Publisher pub_average_time_;
-    jsk_recognition_utils::WallDurationTimer timer_;
-    ros::Subscriber sub_;
-    std::string sensor_frame_;
-    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
-    int k_;
-    double search_radius_;
-    
-  private:
-    
-  };
+  }
+  
+  ScopedWallDurationReporter::~ScopedWallDurationReporter()
+  {
+    ros::WallTime end_time = ros::WallTime::now();
+    ros::WallDuration d = end_time - start_time_;
+    parent_->report(d);
+  }
+
+  WallDurationTimer::WallDurationTimer(const int max_num):
+    max_num_(max_num), buffer_(max_num)
+  {
+  }
+  
+  void WallDurationTimer::report(ros::WallDuration& duration)
+  {
+    buffer_.push_back(duration);
+  }
+
+  ScopedWallDurationReporter WallDurationTimer::reporter()
+  {
+    return ScopedWallDurationReporter(this);
+  }
+
+  double WallDurationTimer::latestSec()
+  {
+    return buffer_[buffer_.size() - 1].toSec();
+  }
+  
+  void WallDurationTimer::clearBuffer()
+  {
+    buffer_.clear();
+  }
+
+  double WallDurationTimer::meanSec()
+  {
+    double secs = 0.0;
+    for (size_t i = 0; i < buffer_.size(); i++) {
+      secs += buffer_[i].toSec();
+    }
+    return secs / buffer_.size();
+  }
+
+  size_t WallDurationTimer::sampleNum()
+  {
+    return buffer_.size();
+  }
 }
-
-#endif

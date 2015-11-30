@@ -63,6 +63,7 @@ add_library(jsk_recognition_utils SHARED
   src/geo/cube.cpp
   src/geo/cylinder.cpp
   src/geo/grid_plane.cpp
+  src/time_util.cpp
   )
 
 add_rostest_gtest(test_tf_listener_singleton test/test_tf_listener_singleton.test src/tests/test_tf_listener_singleton.cpp)

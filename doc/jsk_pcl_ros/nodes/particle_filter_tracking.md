@@ -35,6 +35,15 @@ This nodelet tracks the target pointcloud.
 
   Particles during tracking. Only x, y and z are available.
 
+* `~output/latest_time` (`std_msgs/Float32`)
+
+  latest computation time
+
+* `~output/average_time` (`std_msgs/Float32`)
+
+  average computation time
+
+
 ##### Advertising Servicies
 * `~renew_model` (`jsk_pcl_ros/SetPointCloud2`)
 

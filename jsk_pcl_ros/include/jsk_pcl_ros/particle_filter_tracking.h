@@ -46,6 +46,7 @@
 #include <jsk_pcl_ros/pcl_conversion_util.h>
 #include <jsk_topic_tools/connection_based_nodelet.h>
 #include <jsk_recognition_utils/tf_listener_singleton.h>
+#include <boost/circular_buffer.hpp>
 // pcl
 #include <pcl/point_types.h>
 #include <pcl/common/centroid.h>
@@ -541,7 +542,7 @@ namespace jsk_pcl_ros
       jsk_recognition_msgs::BoundingBox > SyncPolicy;
     typedef ParticleFilterTracker<PointT, ParticleXYZRPY>::PointCloudStatePtr
     PointCloudStatePtr;
-    ParticleFilterTracking(): timer_(10) {}
+    ParticleFilterTracking(): timer_(10), distance_error_buffer_(100), angle_error_buffer_(100) {}
   protected:
     pcl::PointCloud<PointT>::Ptr cloud_pass_;
     pcl::PointCloud<PointT>::Ptr cloud_pass_downsampled_;
@@ -567,7 +568,12 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_update_with_marker_model_;
     ros::Publisher pub_latest_time_;
     ros::Publisher pub_average_time_;
+    ros::Publisher pub_rms_distance_;
+    ros::Publisher pub_rms_angle_;
     jsk_recognition_utils::WallDurationTimer timer_;
+    Eigen::Affine3f initial_pose_;
+    boost::circular_buffer<double> distance_error_buffer_;
+    boost::circular_buffer<double> angle_error_buffer_;
     
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<jsk_recognition_msgs::BoundingBox> sub_box_;
@@ -602,7 +608,13 @@ namespace jsk_pcl_ros
       const pcl::PointCloud<PointT>::ConstPtr &new_target_cloud);
     virtual tf::Transform change_pointcloud_frame(
       pcl::PointCloud<PointT>::Ptr cloud);
-
+    virtual double rms(boost::circular_buffer<double>& buffer) {
+      double res = 0.0;
+      for (size_t i = 0; i < buffer.size(); i++) {
+        res += buffer[i] * buffer[i];
+      }
+      return sqrt(res / buffer.size());
+    }
     virtual void cloud_cb(const sensor_msgs::PointCloud2 &pc);
     virtual bool renew_model_cb(
       jsk_pcl_ros::SetPointCloud2::Request &req,

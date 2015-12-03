@@ -171,6 +171,10 @@ namespace jsk_pcl_ros
       "output/latest_time", 1);
     pub_average_time_ = pnh_->advertise<std_msgs::Float32>(
       "output/average_time", 1);
+    pub_rms_angle_ = pnh_->advertise<std_msgs::Float32>(
+      "output/rms_angle_error", 1);
+    pub_rms_distance_ = pnh_->advertise<std_msgs::Float32>(
+      "output/rms_distance_error", 1);
     //Set subscribe setting
     sub_ = pnh_->subscribe("input", 1, &ParticleFilterTracking::cloud_cb,this);
     if (align_box_) {
@@ -286,6 +290,19 @@ namespace jsk_pcl_ros
     result_pointcloud2.header.frame_id = reference_frame_id();
     result_pointcloud2.header.stamp = stamp_;
     track_result_publisher_.publish(result_pointcloud2);
+
+    Eigen::Affine3f diff_trans = transformation.inverse() * initial_pose_;
+    double distance_error = Eigen::Vector3f(diff_trans.translation()).norm();
+    double angle_error = Eigen::AngleAxisf(diff_trans.rotation()).angle();
+    distance_error_buffer_.push_back(distance_error);
+    angle_error_buffer_.push_back(angle_error);
+    double distance_rms = rms(distance_error_buffer_);
+    double angle_rms = rms(angle_error_buffer_);
+    std_msgs::Float32 ros_distance_rms, ros_angle_rms;
+    ros_distance_rms.data = distance_rms;
+    ros_angle_rms.data = angle_rms;
+    pub_rms_distance_.publish(ros_distance_rms);
+    pub_rms_angle_.publish(ros_angle_rms);
   }
   
   std::string ParticleFilterTracking::reference_frame_id()
@@ -336,6 +353,7 @@ namespace jsk_pcl_ros
         tracker_set_reference_cloud(transed_ref);
         tracker_set_trans(trans);
         tracker_reset_tracking();
+        initial_pose_ = Eigen::Affine3f(trans);
       }
       track_target_set_ = true;
       JSK_NODELET_INFO("RESET TARGET MODEL");

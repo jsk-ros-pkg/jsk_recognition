@@ -23,7 +23,7 @@
 
   <node name="transform_0"
         pkg="topic_tools" type="transform"
-        args="/euclidean_clustering/cluster_num /euclidean_clustering/cluster_num_assert std_msgs/Bool 'm.data > 30' --wait-for-start" />
+        args="/euclidean_clustering/cluster_num /euclidean_clustering/cluster_num_assert std_msgs/Bool 'm.data > 20' --wait-for-start" />
   <node name="transform_1"
         pkg="topic_tools" type="transform"
         args="/euclidean_clustering/output/cluster_indices /euclidean_clustering/output/cluster_indices_assert std_msgs/Bool 'len(m) > 30' --wait-for-start" />

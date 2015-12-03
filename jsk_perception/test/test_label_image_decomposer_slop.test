@@ -4,7 +4,8 @@
 
   <node name="label_image_delayed"
         pkg="jsk_tools" type="delay_timestamp.py">
-    <remap from="~input" to="label_image/output" />
+    <remap from="~input" to="label_image/label" />
+    <remap from="~output" to="~label" />
     <rosparam>
       delay: 1
       msg_name: sensor_msgs/Image
@@ -14,8 +15,8 @@
   <!-- test slop 0.1 -->
   <node name="label_image_decomposer_0"
         pkg="jsk_perception" type="label_image_decomposer.py">
-    <remap from="~input" to="raw_image/output" />
-    <remap from="~input/label" to="label_image_delayed/output" />
+    <remap from="~input" to="raw_image_bgr/image_color" />
+    <remap from="~input/label" to="label_image_delayed/label" />
     <rosparam>
       approximate_sync: true
       slop: 0.1
@@ -31,8 +32,8 @@
   <!-- test slop 1.1 -->
   <node name="label_image_decomposer_1"
         pkg="jsk_perception" type="label_image_decomposer.py">
-    <remap from="~input" to="raw_image/output" />
-    <remap from="~input/label" to="label_image_delayed/output" />
+    <remap from="~input" to="raw_image_bgr/image_color" />
+    <remap from="~input/label" to="label_image_delayed/label" />
     <rosparam>
       approximate_sync: true
       slop: 1.1

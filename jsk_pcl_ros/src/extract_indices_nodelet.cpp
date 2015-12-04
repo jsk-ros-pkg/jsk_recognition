@@ -37,7 +37,7 @@
 #include "jsk_pcl_ros/extract_indices.h"
 #include "jsk_pcl_ros/pcl_conversion_util.h"
 
-#include <pcl/filters/extract_indices.h>
+#include "jsk_pcl_ros/pcl/extract_indices_patch.h"
 #include <pcl_conversions/pcl_conversions.h>
 #include <sensor_msgs/PointCloud2.h>
 

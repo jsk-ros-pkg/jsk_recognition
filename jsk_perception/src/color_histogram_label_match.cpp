@@ -34,6 +34,8 @@
  *********************************************************************/
 
 #include "jsk_perception/color_histogram_label_match.h"
+#include <boost/assign.hpp>
+#include <jsk_topic_tools/log_utils.h>
 #include <cv_bridge/cv_bridge.h>
 #include <jsk_topic_tools/color_utils.h>
 #include <sensor_msgs/image_encodings.h>
@@ -55,15 +57,18 @@ namespace jsk_perception
       *pnh_, "output/coefficient_image", 1);
     pub_result_ = advertise<sensor_msgs::Image>(
       *pnh_, "output/extracted_region", 1);
+    onInitPostProcess();
   }
 
   void ColorHistogramLabelMatch::subscribe()
   {
     sub_image_.subscribe(*pnh_, "input", 1);
     sub_label_.subscribe(*pnh_, "input/label", 1);
+    ros::V_string names = boost::assign::list_of("~input")("~input/label");
     if (use_mask_) {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
       sub_mask_.subscribe(*pnh_, "input/mask", 1);
+      names.push_back("~input/mask");
       sync_->connectInput(sub_image_, sub_label_, sub_mask_);
       sync_->registerCallback(
         boost::bind(
@@ -78,6 +83,8 @@ namespace jsk_perception
     }
     sub_histogram_ = pnh_->subscribe(
       "input/histogram", 1, &ColorHistogramLabelMatch::histogramCallback, this);
+    names.push_back("~input/histogram");
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void ColorHistogramLabelMatch::unsubscribe()

@@ -42,6 +42,9 @@
 #include <pcl_ros/FeatureConfig.h>
 #include <dynamic_reconfigure/server.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <jsk_recognition_utils/time_util.h>
+#include <std_msgs/Float32.h>
+
 namespace jsk_pcl_ros
 {
   class NormalEstimationOMP: public jsk_topic_tools::DiagnosticNodelet
@@ -49,7 +52,7 @@ namespace jsk_pcl_ros
   public:
     typedef boost::shared_ptr<NormalEstimationOMP> Ptr;
     typedef pcl_ros::FeatureConfig Config;
-    NormalEstimationOMP(): DiagnosticNodelet("NormalEstimationOMP") {}
+    NormalEstimationOMP(): DiagnosticNodelet("NormalEstimationOMP"), timer_(10) {}
     
   protected:
 
@@ -64,6 +67,9 @@ namespace jsk_pcl_ros
     boost::mutex mutex_;
     ros::Publisher pub_;
     ros::Publisher pub_with_xyz_;
+    ros::Publisher pub_latest_time_;
+    ros::Publisher pub_average_time_;
+    jsk_recognition_utils::WallDurationTimer timer_;
     ros::Subscriber sub_;
     std::string sensor_frame_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;

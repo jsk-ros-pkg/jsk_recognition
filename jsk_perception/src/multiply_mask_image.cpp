@@ -34,6 +34,8 @@
  *********************************************************************/
 
 #include <jsk_perception/multiply_mask_image.h>
+#include <boost/assign.hpp>
+#include <jsk_topic_tools/log_utils.h>
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
@@ -46,6 +48,7 @@ namespace jsk_perception
     pnh_->param("approximate_sync", approximate_sync_, false);
     pub_ = advertise<sensor_msgs::Image>(
       *pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void MultiplyMaskImage::subscribe()
@@ -62,6 +65,8 @@ namespace jsk_perception
       sync_->connectInput(sub_src1_, sub_src2_);
       sync_->registerCallback(boost::bind(&MultiplyMaskImage::multiply, this, _1, _2));
     }
+    ros::V_string names = boost::assign::list_of("~input/src1")("~input/src2");
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void MultiplyMaskImage::unsubscribe()

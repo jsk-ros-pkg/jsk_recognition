@@ -2,6 +2,127 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.7 (2015-11-19)
+------------------
+* [jsk_pcl_ros] Test attention_clipper by rostest
+* [jsk_pcl_ros] Run test only on indigo
+  Because of unreleased topic_tools/transform
+* [jsk_pcl_ros] Download test data while catkin run_tests
+* [jsk_pcl_ros] Test AttentionClipper with bagfile
+* Use gcc -z defs to check undefined symbols in shared
+  objects (jsk_recognitoin_utils, jsk_pcl_ros, jsk_perception).
+  build_check.cpp cannot run on the environment using  multiple processes
+  because of invoking libjsk_pcl_ros.so link.
+* [jsk_pcl_ros] Add VoxelGridLargeScale
+* Merge pull request `#1297 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1297>`_ from mmurooka/collision-detector-nodelet
+  [jsk_pcl_ros] Make CollisionDetector nodelet
+* Use pcl::PointCloud2 for various Point types
+  Closes `#1304 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1304>`_
+* 1.7.1 does not contain organized_edge_detector
+  see https://github.com/jsk-ros-pkg/jsk_recognition/pull/245#issuecomment-153711241
+* fix coding style of collision_detector_nodelet.cpp
+* add mutex lock in CollisionDetector
+* fix launch file to use nodelet.
+* fix minor bug about robot_self_filter headers in build check.
+* make collsion_detector nodelet.
+* Merge pull request `#1276 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1276>`_ from mmurooka/add-octomap-contact
+  [jsk_pcl_ros] Add octomap contact
+* run OctomapServerContact nodelet in sample launch file.
+* exclude OctomapServerContact class from build check because this class is not compiled when robot_self_filter is not found.
+* change octomap_server_contact as nodelet.
+* Merge pull request `#1278 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1278>`_ from aginika/add-octree-change-publlisher-cfg
+  [jsk_pcl_ros] add cfg for OctreeChangePublisher
+* Merge remote-tracking branch 'origin/master' into foot-likelihood
+* add sample launch file and document of pointcloud_to_stl
+* [jsk_pcl_ros] Initialize transformed_pose_list\_ in callback
+  This fixes debug box pose which won't change on rviz.
+* [jsk_pcl_ros] Add PolygonArrayFootAngleLikelihood
+* delete unused servie in pointcloud_to_stl.
+* use specified filename in pointcloud_to_stl.
+* remove moveit_ros_perception from catkin component in CMakeList.txt.
+* [jsk_pcl_ros/PolygonArrayAngleLikelihood] Add ~axis paraemter to specify reference
+  axis
+* add samples for octomap_server_contact
+* add octomap server sources and add dependency for that.
+* [jsk_pcl_ros] add cfg for OctreeChangePublisher
+* Merge pull request `#1213 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1213>`_ from mmurooka/add-collision-detector
+  [jsk_pcl_ros] Add collision detector
+* [jsk_pcl_ros] Publish transformed bounding box array
+* [jsk_pcl_ros] Do not use transformPointCloud and fix order of tf transformation
+  Closes https://github.com/jsk-ros-pkg/jsk_recognition/pull/1273
+* do not compile collision_detector when robot_self_filter is not found
+* [jsk_pcl_ros]commit for prevventing rounding error
+* use robot_self_filter package for self_mask instead of pr2_navigation_self_filter.
+* [jsk_pcl_ros] Remove unused arguments
+* [jsk_pcl_ros] Fix ns for throttle and resizer in stereo pipeline
+* [jsk_pcl_ros] Rename multisense stereo nodes in nodelet to distinguish image_rect and image_rect_color
+* [jsk_pcl_ros] Separate nodes and rosparam for using same manager with RUN_MANAGER=false
+* [jsk_tilt_laser] Separate resume resize_1_8 points
+* [jsk_tilt_laser] Separate camera stereo image pipeline
+* [jsk_pcl_ros] Add launch for multi resolution image not only left camera
+* move normal estimation position
+* [jsk_pck_ros] change name of laser
+* reuse codes in organized_multi_plane_segmentation
+* [jsk_pcl_ros] Add sample launch to detect door handle by PlaneSupportedCuboidEstimator
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Fix axis to compute angular likelihood tu supported plane
+* [jsk_pcl_ros/InteractiveCuboidLikelihood] Add ~init_pos and  ~init_rot parameter
+* [jsk_pcl_ros/PlaneSupportedCuboidParameter] Fix inlier likelihood computation
+* [jsk_pcl_ros] Add use_inside_points_distance_zero parameter to PlaneSupportedCuboidEstimator
+* [jsk_pcl_ros/ClusterPointIndicesDecomposer] Publish indices which are
+  not included in input indices
+* [jsk_pcl_ros] Remove InteractiveCuboidLikelihood.cfg and
+  PlaneSupportedCuboidEstimator.cfg and generate files from one file
+  because CMake cannot understand dependency between cfg files
+* [jsk_pcl_ros] Convert cluster point indices to label image
+* [jsk_pcl_ros] Convert cluster point indices to mask image
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Add function to compute
+  signed distance to plane
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Add likelihood computation based on the number of inliers
+* [jsk_pcl_ros/ExtractCuboidParticlesTopN] Publish result as WeightedPoseArray
+* add dependency to message generation
+* [jsk_pcl_ros] Increase max value of max_size for EuclideanClustering
+* [jsk_pcl_ros] Use OpenMP in PlaneSupportedCuboidEstimator
+* [jsk_pcl_ros] set a min-max limit to convex size in RegionGrowingMultiplaneSegmentaion
+* [jsk_pcl_ros] set a unique name to a node
+* [jsk_pcl_ros] add a polygon_array_transformer example launch
+* [jsk_pcl_ros/PlaneSupportedCuboidEstimator] Add ~fast_input to use laser
+  based cloud and stereo based cloud
+* Merge pull request `#1208 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1208>`_ from aginika/modify-to-jsk-recog-msgs
+  [jsk_pcl_ros] modify from jsk_pcl_ros.msg to jsk-recog-msgs
+* add option to select whether to publish tf or not
+* use service for checking collision instead of topic
+* use const call by reference.
+* add launch file and sample client.
+* add collision_detector source files
+* [jsk_pcl_ros/PolygonArrayAngleLikelihood] Fix error computation
+* [jsk_pcl_ros] Add sample to visualize FOV of laser and stereo camera
+* [jsk_pcl_ros] Add scripts for DepthErrorResult
+* modify to jsk-recog-msgs
+* [jsk_pcl_ros/DepthImageError] Add `~approximate_sync` parameter.
+  Synchronize timestamp exactly for stereo camera.
+* [jsk_pcl_ros] Add document about DepthImageError
+* use target_link_libraries instead of link_libraries.
+* Merge pull request `#1189 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1189>`_ from wkentaro/pi-to-pc
+  [jsk_pcl_ros] ExtractIndices as a simple cli/nodelet to apply indices to cloud
+* add MovingLeastSquares Smoothing
+* [jsk_pcl_ros] Set #define BOOST_PARAMETER_MAX_ARITY
+* [jsk_pcl_ros] Add jsk_pcl/ExtractIndices
+  usage:
+  rosrun jsk_pcl_ros extract_indices \
+  ~input:=/kinect2/qhd/points \
+  ~indices:=/attention_clipper/obj1/point_indices
+  param:
+  keep_organized: false
+  negative: false
+  max_queue_size: 10
+  approximate_sync: false
+* [jsk_pcl_ros/ResizePointsPublisher] Supress debug message
+* [jsk_pcl_ros] Warn about clouds in ClusterPointIndicesDecomposer
+  Close https://github.com/jsk-ros-pkg/jsk_recognition/issues/1187
+* [jsk_pcl_ros] add max size
+* add new output msg for handle estimate
+* Contributors: Eisoku Kuroiwa, JSK Lab Member, Kei Okada, Kentaro Wada, MasakiMurooka, Ryohei Ueda, Your Name, Yu Ohara, Yuto Inagaki, hrpuser, Iori Kumagai, Masaki Murooka
+
 0.3.6 (2015-09-11)
 ------------------
 * [jsk_pcl_ros] Do not compile build_check.cpp in normal compilation time,

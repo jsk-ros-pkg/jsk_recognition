@@ -35,6 +35,8 @@
 
 
 #include "jsk_perception/morphological_operator.h"
+#include <boost/assign.hpp>
+#include <jsk_topic_tools/log_utils.h>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/opencv.hpp>
 #include <sensor_msgs/image_encodings.h>
@@ -52,12 +54,15 @@ namespace jsk_perception
     srv_->setCallback (f);
 
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void MorphologicalImageOperatorNodelet::subscribe()
   {
     sub_ = pnh_->subscribe(
       "input", 1, &MorphologicalImageOperatorNodelet::imageCallback, this);
+    ros::V_string names = boost::assign::list_of("~input");
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void MorphologicalImageOperatorNodelet::unsubscribe()

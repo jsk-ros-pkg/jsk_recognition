@@ -79,6 +79,7 @@ add_service_files(FILES SwitchTopic.srv
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/VoxelGridLargeScale.cfg
   cfg/PolygonArrayAreaLikelihood.cfg
   cfg/cuboid_parameter.cfg
   cfg/ExtractParticlesTopNBase.cfg
@@ -140,7 +141,8 @@ generate_dynamic_reconfigure_options(
 find_package(OpenCV REQUIRED core imgproc)
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
-
+link_directories(${catkin_LIBRARY_DIRS})
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
 macro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
   jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
     jsk_pcl_nodelet_sources jsk_pcl_nodelet_executables)
@@ -286,10 +288,10 @@ jsk_pcl_nodelet(src/region_growing_multiple_plane_segmentation_nodelet.cpp
   "region_growing_multiple_plane_segmentation")
 
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
-  IF(${PCL_VERSION} VERSION_GREATER "1.7.1")
+  IF(${PCL_VERSION} VERSION_GREATER "1.7.2")
     jsk_pcl_nodelet(src/organized_edge_detector_nodelet.cpp
       "jsk_pcl/OrganizedEdgeDetector" "organized_edge_detector")
-  ENDIF(${PCL_VERSION} VERSION_GREATER "1.7.1")
+  ENDIF(${PCL_VERSION} VERSION_GREATER "1.7.2")
 endif(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
 
 jsk_pcl_nodelet(src/edge_depth_refinement_nodelet.cpp
@@ -394,6 +396,8 @@ jsk_pcl_nodelet(src/heightmap_morphological_filtering_nodelet.cpp
   "jsk_pcl/HeightmapMorphologicalFiltering" "heightmap_morphological_filtering")
 jsk_pcl_nodelet(src/heightmap_time_accumulation_nodelet.cpp
   "jsk_pcl/HeightmapTimeAccumulation" "heightmap_time_accumulation")
+jsk_pcl_nodelet(src/voxel_grid_large_scale_nodelet.cpp
+  "jsk_pcl/VoxelGridLargeScale" "voxel_grid_large_scale")
 if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
   jsk_pcl_nodelet(src/kinfu_nodelet.cpp
     "jsk_pcl/Kinfu" "kinfu")
@@ -403,21 +407,15 @@ jsk_pcl_nodelet(src/pcd_reader_with_pose_nodelet.cpp
   "jsk_pcl/PCDReaderWithPose" "pcd_reader_with_pose")
 jsk_pcl_nodelet(src/octree_voxel_grid_nodelet.cpp
   "jsk_pcl/OctreeVoxelGrid" "octree_voxel_grid")
-
 # check existence of robot_self_filter package because robot_self_filter is not installed by apt
 pkg_check_modules(robot_self_filter robot_self_filter QUIET)
 if(robot_self_filter_FOUND)
-  message(AUTHOR_WARNING "robot_self_filter is found. collision_detector is compiled.")
-  link_directories(${catkin_LIBRARY_DIRS})
-  include_directories(include ${robot_self_filter_INCLUDE_DIRS})
-  add_executable(collision_detector src/collision_detector.cpp)
-  target_link_libraries(collision_detector
-    ${pcl_ros_LIBRARIES} ${robot_self_filter_LIBRARIES} ${kdl_parser_LIBRARIES} ${kdl_conversions_LIBRARIES} ${tf_conversions_LIBRARIES})
-  add_dependencies(collision_detector ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
+  jsk_pcl_nodelet(src/collision_detector_nodelet.cpp
+    "jsk_pcl/CollisionDetector" "collision_detector")
   jsk_pcl_nodelet(src/octomap_server_contact_nodelet.cpp
     "jsk_pcl/OctomapServerContact" "octomap_server_contact")
 else(robot_self_filter_FOUND)
-  message(AUTHOR_WARNING "robot_self_filter is NOT found. collision_detector is NOT compiled.")
+  message(AUTHOR_WARNING "robot_self_filter is NOT found. some nodelet depending on robot_self_filter will not be compiled.")
 endif(robot_self_filter_FOUND)
 
 add_library(jsk_pcl_ros_base SHARED
@@ -438,7 +436,6 @@ else (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
     jsk_pcl_ros_base)
 endif (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
 if (robot_self_filter_FOUND)
-  link_directories(${catkin_LIBRARY_DIRS})
   include_directories(include ${robot_self_filter_INCLUDE_DIRS})
   target_link_libraries(jsk_pcl_ros ${robot_self_filter_LIBRARIES})
 endif (robot_self_filter_FOUND)
@@ -482,10 +479,10 @@ foreach(_header ${_headers})
   string(FIND "${_header}" point_types IS_POINT_TYPES)
   if(robot_self_filter_FOUND)
     # Exclude some headers because they include robot_self_filter headers.
-    set(self_mask_urdf_robot -1)
-    set(collision_detector -1)
-    set(self_mask_named_link -1)
-    set(octomap_server_contact -1)
+    set(IS_SELF_MASK_URDF_ROBOT -1)
+    set(IS_COLLISION_DETECTOR -1)
+    set(IS_SELF_MASK_NAMED_LINK -1)
+    set(IS_OCTOMAP_SERVER_CONTACT -1)
   else(robot_self_filter_FOUND)
     string(FIND "${_header}" self_mask_urdf_robot IS_SELF_MASK_URDF_ROBOT)
     string(FIND "${_header}" collision_detector IS_COLLISION_DETECTOR)
@@ -498,15 +495,6 @@ foreach(_header ${_headers})
     set(_include_headers "${_include_headers}#include \"${_header}\"\n")
   endif()
 endforeach()
-execute_process(
-  COMMAND ${PROJECT_SOURCE_DIR}/scripts/build_check_helper.py ${PROJECT_SOURCE_DIR}/jsk_pcl_nodelets.xml
-  OUTPUT_VARIABLE _class_instances
-  )
-
-configure_file(src/build_check.cpp.in build_check.cpp)
-add_executable(build_check EXCLUDE_FROM_ALL build_check.cpp)
-target_link_libraries(build_check jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_util jsk_pcl_ros_moveit)
-add_dependencies(run_tests build_check)
 
 generate_messages(DEPENDENCIES
   ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_footstep_msgs)
@@ -533,3 +521,22 @@ install(TARGETS jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_util jsk_pcl_ros_moveit
 install(FILES jsk_pcl_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 install(DIRECTORY launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
+if (CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  # install test data by a script
+  add_custom_target(install_test_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.sh)
+  if(TARGET tests)
+    add_dependencies(tests install_test_data)
+  endif()
+  # check ros distro >= indigo
+  execute_process(
+    COMMAND python -c "import sys; sys.exit(ord('$ENV{ROS_DISTRO}'[0]) >= ord('indigo'[0]))"
+    RESULT_VARIABLE DISTRO_GE_INDIGO)
+  if(${DISTRO_GE_INDIGO})
+    # because of unreleased topic_tools/transform on hydro
+    add_rostest(test/test_attention_clipper.test DEPENDENCIES install_test_data)
+    add_rostest(test/test_euclidean_segmentation.test DEPENDENCIES install_test_data)
+    add_rostest(test/test_extract_indices.test DEPENDENCIES install_test_data)
+  endif()
+endif()

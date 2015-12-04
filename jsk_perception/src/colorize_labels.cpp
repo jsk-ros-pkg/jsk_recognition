@@ -34,7 +34,9 @@
  *********************************************************************/
 
 #include "jsk_perception/colorize_labels.h"
-#include <jsk_topic_tools/color_utils.h>
+#include <jsk_recognition_utils/cv_utils.h>
+#include <jsk_topic_tools/log_utils.h>
+#include <boost/assign.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/opencv.hpp>
 #include <sensor_msgs/image_encodings.h>
@@ -46,11 +48,14 @@ namespace jsk_perception
     DiagnosticNodelet::onInit();
     pub_ = advertise<sensor_msgs::Image>(
       *pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void ColorizeLabels::subscribe()
   {
     sub_ = pnh_->subscribe("input", 1, &ColorizeLabels::colorize, this);
+    ros::V_string names = boost::assign::list_of("~input");
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void ColorizeLabels::unsubscribe()
@@ -63,23 +68,10 @@ namespace jsk_perception
   {
     cv::Mat label_image = cv_bridge::toCvShare(
       label_image_msg, label_image_msg->encoding)->image;
-    cv::Mat output_image = cv::Mat::zeros(label_image_msg->height,
-                                          label_image_msg->width,
-                                          CV_8UC3);
     JSK_ROS_INFO("%dx%d", label_image_msg->width, label_image_msg->height);
-    for (size_t j = 0; j < label_image.rows; ++j) {
-      for (size_t i = 0; i < label_image.cols; ++i) {
-        int label = label_image.at<int>(j, i);
-        if (label == 0) {
-          output_image.at<cv::Vec3b>(j, i) = cv::Vec3b(0, 0, 0);
-        }
-        else {
-          std_msgs::ColorRGBA rgba = jsk_topic_tools::colorCategory20(label);
-          output_image.at<cv::Vec3b>(j, i)
-            = cv::Vec3b(int(rgba.b * 255), int(rgba.g * 255), int(rgba.r * 255));
-        }
-      }
-    }
+    cv::Mat output_image;
+    jsk_recognition_utils::labelToRGB(label_image, output_image);
+    cv::cvtColor(output_image, output_image, CV_RGB2BGR);
     pub_.publish(
       cv_bridge::CvImage(
         label_image_msg->header,

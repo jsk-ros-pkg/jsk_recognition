@@ -4,8 +4,7 @@
         pkg="tf" type="static_transform_publisher"
         args="0 0 1 0 0 0 base head 10" />
 
-  <node name="rviz"
-        pkg="rviz" type="rviz"
-        args="-d test_tf_lookup_transform.rviz" />
+  <test test-name="test_tf_listener_singleton"
+        pkg="jsk_recognition_utils" type="test_tf_listener_singleton" />
 
 </launch>

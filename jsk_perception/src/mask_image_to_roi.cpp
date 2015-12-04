@@ -34,6 +34,8 @@
  *********************************************************************/
 
 #include "jsk_perception/mask_image_to_roi.h"
+#include <boost/assign.hpp>
+#include <jsk_topic_tools/log_utils.h>
 #include <opencv2/opencv.hpp>
 #include <sensor_msgs/image_encodings.h>
 #include <cv_bridge/cv_bridge.h>
@@ -44,6 +46,7 @@ namespace jsk_perception
   {
     DiagnosticNodelet::onInit();
     pub_ = advertise<sensor_msgs::CameraInfo>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void MaskImageToROI::subscribe()
@@ -51,6 +54,8 @@ namespace jsk_perception
     sub_mask_ = pnh_->subscribe("input", 1, &MaskImageToROI::convert, this);
     sub_info_ = pnh_->subscribe("input/camera_info", 1,
                                 &MaskImageToROI::infoCallback, this);
+    ros::V_string names = boost::assign::list_of("~input")("~input/camera_info");
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void MaskImageToROI::unsubscribe()

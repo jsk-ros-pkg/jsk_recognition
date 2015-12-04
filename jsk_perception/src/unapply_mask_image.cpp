@@ -34,6 +34,8 @@
  *********************************************************************/
 
 #include "jsk_perception/unapply_mask_image.h"
+#include <boost/assign.hpp>
+#include <jsk_topic_tools/log_utils.h>
 #include <sensor_msgs/image_encodings.h>
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
@@ -47,6 +49,7 @@ namespace jsk_perception
     pnh_->param("approximate_sync", approximate_sync_, false);
     pub_image_ = advertise<sensor_msgs::Image>(
       *pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void UnapplyMaskImage::subscribe()
@@ -63,6 +66,8 @@ namespace jsk_perception
       sync_->connectInput(sub_image_, sub_mask_);
       sync_->registerCallback(boost::bind(&UnapplyMaskImage::apply, this, _1, _2));
     }
+    ros::V_string names = boost::assign::list_of("~input")("~input/mask");
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void UnapplyMaskImage::unsubscribe()

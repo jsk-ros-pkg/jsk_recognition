@@ -34,6 +34,8 @@
  *********************************************************************/
 
 #include "jsk_perception/background_substraction.h"
+#include <boost/assign.hpp>
+#include <jsk_topic_tools/log_utils.h>
 
 namespace jsk_perception
 {
@@ -49,6 +51,7 @@ namespace jsk_perception
     
     image_pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
     
+    onInitPostProcess();
   }
 
   void BackgroundSubstraction::configCallback(Config& config, uint32_t level)
@@ -86,6 +89,8 @@ namespace jsk_perception
   {
     it_.reset(new image_transport::ImageTransport(*pnh_));
     sub_ = it_->subscribe("image", 1, &BackgroundSubstraction::substract, this);
+    ros::V_string names = boost::assign::list_of("image");
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void BackgroundSubstraction::unsubscribe()

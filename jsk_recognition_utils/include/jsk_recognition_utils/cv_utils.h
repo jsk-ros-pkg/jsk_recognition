@@ -93,6 +93,13 @@ namespace jsk_recognition_utils
                             float max_width_value,
                             float max_height_value,
                             cv::Scalar color);
+
+  /**
+   * @brief
+   * convert label image to rgb one.
+   */
+  void labelToRGB(const cv::Mat src, cv::Mat& dst);
+
 }
 
 #endif

@@ -34,6 +34,7 @@
  *********************************************************************/
 
 #include "jsk_perception/color_histogram.h"
+#include <jsk_topic_tools/log_utils.h>
 
 namespace jsk_perception
 {
@@ -46,6 +47,7 @@ namespace jsk_perception
     h_hist_size_ = new_config.hue_histogram_bin;
     s_hist_size_ = new_config.saturation_histogram_bin;
     i_hist_size_ = new_config.intensity_histogram_bin;
+    onInitPostProcess();
   }
     
   void ColorHistogram::onInit()
@@ -78,10 +80,12 @@ namespace jsk_perception
 
   void ColorHistogram::subscribe()
   {
+    ros::V_string names;
     if (!use_mask_) {
       it_.reset(new image_transport::ImageTransport(nh_));
       image_sub_.subscribe(*it_, "", 1);
       rectangle_sub_.subscribe(nh_, "screenrectangle", 1);
+      names.push_back("screenrectangle");
       sync_
         = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(10);
       sync_->connectInput(image_sub_, rectangle_sub_);
@@ -92,6 +96,7 @@ namespace jsk_perception
       it_.reset(new image_transport::ImageTransport(nh_));
       image_sub_.subscribe(*it_, "", 1);
       image_mask_sub_.subscribe(*it_, "mask", 1);
+      names.push_back("mask");
       mask_sync_
         = boost::make_shared<message_filters::Synchronizer<
         MaskSyncPolicy> >(100);
@@ -100,6 +105,7 @@ namespace jsk_perception
         boost::bind(
           &ColorHistogram::extractMask, this, _1, _2));
     }
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void ColorHistogram::unsubscribe()

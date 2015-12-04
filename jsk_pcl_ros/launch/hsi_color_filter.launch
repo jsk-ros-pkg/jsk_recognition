@@ -21,7 +21,7 @@
   <arg name="i_min" default="0" />
 
   <arg name="create_manager" default="true" />
-  <arg name="manager" default="hsi_filter_manager" />
+  <arg name="manager" default="hsi_filter_manager$(arg FILTER_NAME_SUFFIX)" />
 
   <group ns="$(arg DEFAULT_NAMESPACE)">
     <node if="$(arg create_manager)"

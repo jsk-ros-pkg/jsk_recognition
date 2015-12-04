@@ -35,6 +35,7 @@
 
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include <Eigen/Geometry>
+#include <boost/assign.hpp>
 #include <jsk_recognition_utils/pcl_conversion_util.h>
 #include "jsk_perception/tabletop_color_difference_likelihood.h"
 #include <cv_bridge/cv_bridge.h>
@@ -43,6 +44,7 @@
 #include <jsk_recognition_utils/sensor_model_utils.h>
 #include <jsk_recognition_utils/color_utils.h>
 #include <jsk_topic_tools/color_utils.h>
+#include <jsk_topic_tools/log_utils.h>
 #include <jsk_recognition_utils/cv_utils.h>
 #include <sstream>
 
@@ -62,6 +64,7 @@ namespace jsk_perception
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
     pub_debug_histogram_image_ = advertise<sensor_msgs::Image>(*pnh_, "debug/histogram_image", 1);
     pub_debug_polygon_ = advertise<sensor_msgs::Image>(*pnh_, "debug/polygon_image", 1);
+    onInitPostProcess();
   }
 
   void TabletopColorDifferenceLikelihood::subscribe()
@@ -71,6 +74,8 @@ namespace jsk_perception
     sub_polygons_ = pnh_->subscribe("input/polygons", 1, 
                                     &TabletopColorDifferenceLikelihood::polygonCallback, this);
     sub_image_.subscribe(*pnh_, "input", 1);
+    ros::V_string names = boost::assign::list_of("~input")("~input/camera_info")("~input/polygons");
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void TabletopColorDifferenceLikelihood::unsubscribe()

@@ -1,0 +1,49 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/publish_fixed_images.launch" />
+
+  <node name="label_image_delayed"
+        pkg="jsk_tools" type="delay_timestamp.py">
+    <remap from="~input" to="label_image/label" />
+    <remap from="~output" to="~label" />
+    <rosparam>
+      delay: 1
+      msg_name: sensor_msgs/Image
+    </rosparam>
+  </node>
+
+  <!-- test slop 0.1 -->
+  <node name="label_image_decomposer_0"
+        pkg="jsk_perception" type="label_image_decomposer.py">
+    <remap from="~input" to="raw_image_bgr/image_color" />
+    <remap from="~input/label" to="label_image_delayed/label" />
+    <rosparam>
+      approximate_sync: true
+      slop: 0.1
+    </rosparam>
+  </node>
+  <test test-name="test_stdout_0"
+        pkg="jsk_tools" type="test_stdout.py">
+    <param name="command" value="timeout 10 rostopic echo /label_image_decomposer_0/output/header/frame_id -n1 || true" />
+    <param name="stdout" value="" />
+    <param name="shell" value="true" />
+  </test>
+
+  <!-- test slop 1.1 -->
+  <node name="label_image_decomposer_1"
+        pkg="jsk_perception" type="label_image_decomposer.py">
+    <remap from="~input" to="raw_image_bgr/image_color" />
+    <remap from="~input/label" to="label_image_delayed/label" />
+    <rosparam>
+      approximate_sync: true
+      slop: 1.1
+    </rosparam>
+  </node>
+  <test test-name="test_stdout_1"
+        pkg="jsk_tools" type="test_stdout.py">
+    <param name="command" value="timeout 10 rostopic echo /label_image_decomposer_1/output/header/frame_id -n1 || true" />
+    <param name="stdout_line0" value="camera" />
+    <param name="shell" value="true" />
+  </test>
+
+</launch>

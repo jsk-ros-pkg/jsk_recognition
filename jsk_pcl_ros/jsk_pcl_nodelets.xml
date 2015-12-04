@@ -586,6 +586,11 @@
     <description>
     </description>
   </class>
+  <class name="jsk_pcl/VoxelGridLargeScale" type="jsk_pcl_ros::VoxelGridLargeScale"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
 
   <!-- <class name="jsk_pcl/OrganizePointCloud" type="jsk_pcl_ros::OrganizePointCloud" -->
   <!--        base_class_type="nodelet::Nodelet"> -->
@@ -602,6 +607,11 @@
 
   <class name="jsk_pcl/OctomapServerContact"
          type="jsk_pcl_ros::OctomapServerContact"
+         base_class_type="nodelet::Nodelet">
+  </class>
+
+  <class name="jsk_pcl/CollisionDetector"
+         type="jsk_pcl_ros::CollisionDetector"
          base_class_type="nodelet::Nodelet">
   </class>
 </library>

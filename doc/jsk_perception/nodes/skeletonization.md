@@ -12,8 +12,9 @@ For more information refer to [Wikipedia - Zhang-Suen thinning algorithm](http:/
 
   Currently only supports "MONO8" (single channel 8 bit grayscale)
 
+
 ## Publishing Topic
 * `~output` (`sensor_msgs/Image`)
 
   float image containing skeleton info of the input image. 1 presents the skeleton.
-
+  The output is the message with encoding type of 32FC1. You may need rviz or latest image_view to display them.

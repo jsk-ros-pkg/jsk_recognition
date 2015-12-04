@@ -406,6 +406,9 @@ jsk_pcl_nodelet(src/pcd_reader_with_pose_nodelet.cpp
   "jsk_pcl/PCDReaderWithPose" "pcd_reader_with_pose")
 # check existence of robot_self_filter package because robot_self_filter is not installed by apt
 pkg_check_modules(robot_self_filter robot_self_filter QUIET)
+# apt package of robot_self_filter is now released, but the required PRs is not merged yet.
+# So, nodelets which depend on robot_self_filter is not built temporary.
+set(robot_self_filter_FOUND FALSE)
 if(robot_self_filter_FOUND)
   jsk_pcl_nodelet(src/collision_detector_nodelet.cpp
     "jsk_pcl/CollisionDetector" "collision_detector")

@@ -134,6 +134,7 @@ generate_dynamic_reconfigure_options(
   cfg/FeatureRegistration.cfg
   cfg/FisheyeSphere.cfg
   cfg/MovingLeastSquareSmoothing.cfg
+  cfg/OctreeVoxelGrid.cfg
   cfg/OctreeChangePublisher.cfg
   )
 
@@ -404,6 +405,8 @@ if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
 endif (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
 jsk_pcl_nodelet(src/pcd_reader_with_pose_nodelet.cpp
   "jsk_pcl/PCDReaderWithPose" "pcd_reader_with_pose")
+jsk_pcl_nodelet(src/octree_voxel_grid_nodelet.cpp
+  "jsk_pcl/OctreeVoxelGrid" "octree_voxel_grid")
 # check existence of robot_self_filter package because robot_self_filter is not installed by apt
 pkg_check_modules(robot_self_filter robot_self_filter QUIET)
 if(robot_self_filter_FOUND)

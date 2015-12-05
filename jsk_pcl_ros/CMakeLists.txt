@@ -177,16 +177,9 @@ jsk_pcl_nodelet(src/voxel_grid_downsample_decoder_nodelet.cpp "jsk_pcl/VoxelGrid
 jsk_pcl_nodelet(src/snapit_nodelet.cpp "jsk_pcl/Snapit" "snapit")
 jsk_pcl_nodelet(src/keypoints_publisher_nodelet.cpp "jsk_pcl/KeypointsPublisher" "keypoints_publisher")
 jsk_pcl_nodelet(src/hinted_plane_detector_nodelet.cpp "jsk_pcl/HintedPlaneDetector" "hinted_plane_detector")
-# jsk_pcl_nodelet(src/pointcloud_throttle_nodelet.cpp "jsk_pcl/NodeletPointCloudThrottle" "point_cloud_throttle")
 jsk_pcl_nodelet(src/centroid_publisher_nodelet.cpp "jsk_pcl/CentroidPublisher" "centroid_publisher")
 jsk_pcl_nodelet(src/moving_least_square_smoothing_nodelet.cpp "jsk_pcl/MovingLeastSquareSmoothing" "moving_least_square_smoothing")
 jsk_pcl_nodelet(src/fisheye_sphere_publisher_nodelet.cpp "jsk_pcl/FisheyeSpherePublisher" "fisheye_sphere_publisher")
-# jsk_pcl_nodelet(src/image_throttle_nodelet.cpp
-#   "jsk_pcl/NodeletImageThrottle" "image_throttle")
-# jsk_pcl_nodelet(src/image_mux_nodelet.cpp
-#   "jsk_pcl/NodeletImageMUX" "image_mux")
-# jsk_pcl_nodelet(src/image_demux_nodelet.cpp
-#   "jsk_pcl/NodeletImageDEMUX" "image_demux")
 jsk_pcl_nodelet(src/plane_supported_cuboid_estimator_nodelet.cpp
   "jsk_pcl/PlaneSupportedCuboidEstimator" "plane_supported_cuboid_estimator")
 jsk_pcl_nodelet(src/extract_cuboid_particles_top_n_nodelet.cpp

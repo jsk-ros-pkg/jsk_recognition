@@ -414,16 +414,17 @@ jsk_pcl_nodelet(src/pcd_reader_with_pose_nodelet.cpp
   "jsk_pcl/PCDReaderWithPose" "pcd_reader_with_pose")
 jsk_pcl_nodelet(src/octree_voxel_grid_nodelet.cpp
   "jsk_pcl/OctreeVoxelGrid" "octree_voxel_grid")
-# check existence of robot_self_filter package because robot_self_filter is not installed by apt
-pkg_check_modules(robot_self_filter robot_self_filter QUIET)
-if(robot_self_filter_FOUND)
-  jsk_pcl_nodelet(src/collision_detector_nodelet.cpp
-    "jsk_pcl/CollisionDetector" "collision_detector")
-  jsk_pcl_nodelet(src/octomap_server_contact_nodelet.cpp
-    "jsk_pcl/OctomapServerContact" "octomap_server_contact")
-else(robot_self_filter_FOUND)
-  message(AUTHOR_WARNING "robot_self_filter is NOT found. some nodelet depending on robot_self_filter will not be compiled.")
-endif(robot_self_filter_FOUND)
+# # FIXME: does not work without https://github.com/PR2/robot_self_filter/pull/4
+# # check existence of robot_self_filter package because robot_self_filter is not installed by apt
+# pkg_check_modules(robot_self_filter robot_self_filter QUIET)
+# if(robot_self_filter_FOUND)
+#   jsk_pcl_nodelet(src/collision_detector_nodelet.cpp
+#     "jsk_pcl/CollisionDetector" "collision_detector")
+#   jsk_pcl_nodelet(src/octomap_server_contact_nodelet.cpp
+#     "jsk_pcl/OctomapServerContact" "octomap_server_contact")
+# else(robot_self_filter_FOUND)
+#   message(AUTHOR_WARNING "robot_self_filter is NOT found. some nodelet depending on robot_self_filter will not be compiled.")
+# endif(robot_self_filter_FOUND)
 
 add_library(jsk_pcl_ros_base SHARED
   src/region_adjacency_graph.cpp

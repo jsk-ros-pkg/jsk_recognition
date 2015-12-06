@@ -220,5 +220,6 @@ install(FILES jsk_perception_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DES
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   add_rostest(test/sparse_image.test)
+  add_rostest(test/slic_super_pixels.test)
   add_rostest(test/test_label_image_decomposer_slop.test)
 endif()

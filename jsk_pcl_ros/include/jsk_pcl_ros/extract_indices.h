@@ -50,7 +50,6 @@ namespace jsk_pcl_ros
   class ExtractIndices: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    typedef pcl::PointXYZRGB PointT;
     typedef message_filters::sync_policies::ExactTime<
       PCLIndicesMsg,
       sensor_msgs::PointCloud2 > SyncPolicy;

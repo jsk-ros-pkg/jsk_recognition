@@ -12,7 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   jsk_recognition_msgs
   mk message_generation std_msgs sensor_msgs geometry_msgs cv_bridge
   image_geometry image_transport image_view2 driver_base dynamic_reconfigure cmake_modules
-  roscpp nodelet rostest tf rospack
+  roscpp nodelet tf rospack
   jsk_topic_tools pcl_ros
   jsk_recognition_utils)
 
@@ -213,5 +213,8 @@ install(DIRECTORY include/${PROJECT_NAME}/
 
 install(FILES jsk_perception_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
-add_rostest(test/sparse_image.test)
-add_rostest(test/test_label_image_decomposer_slop.test)
+if(CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  add_rostest(test/sparse_image.test)
+  add_rostest(test/test_label_image_decomposer_slop.test)
+endif()

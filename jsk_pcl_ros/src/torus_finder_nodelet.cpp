@@ -229,7 +229,14 @@ namespace jsk_pcl_ros
       pub_pose_stamped_.publish(pose_stamped);
     }
     else {
-      
+      jsk_recognition_msgs::Torus torus_msg;
+      torus_msg.header = cloud_msg->header;
+      torus_msg.failure = true;
+      pub_torus_.publish(torus_msg);
+      jsk_recognition_msgs::TorusArray torus_array_msg;
+      torus_array_msg.header = cloud_msg->header;
+      torus_array_msg.toruses.push_back(torus_msg);
+      pub_torus_array_.publish(torus_array_msg);
       JSK_NODELET_INFO("failed to find torus");
     }
   }

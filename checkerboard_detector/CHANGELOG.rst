@@ -2,6 +2,9 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.3.7 (2015-11-19)
 ------------------
 * [checkerboard_detector] Add soft link to doc

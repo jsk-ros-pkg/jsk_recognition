@@ -2,6 +2,11 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use ccache if installed to make it fast to generate object file
+* Contributors: Kentaro Wada
+
 0.3.7 (2015-11-19)
 ------------------
 * [imagesift] Test nodelet and topic /ImageFeature0D also

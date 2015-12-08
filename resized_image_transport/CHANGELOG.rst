@@ -2,6 +2,11 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use ccache if installed to make it fast to generate object file
+* Contributors: Kentaro Wada
+
 0.3.7 (2015-11-19)
 ------------------
 

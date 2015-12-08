@@ -2,6 +2,45 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros] Remove lisp-style comments
+* [jsk_pcl_ros] Add Failure flag to Torus message
+* [jsk_pcl_ros] Remove unused codes
+* [jsk_pcl_ros] Make test for euclidean segmentation reliable
+* [jsk_pcl_ros] Make test for euclidean segmentation reliable
+* [jsk_pcl_ros] Add jsk_tools as test_depend
+* [jsk_pcl_ros/organized_multi_plane_segmentation.launch] Remove rqt_robot_monitor
+* [jsk_pcl_ros] Use patched ExtractIndices on pcl
+  Closes https://github.com/jsk-ros-pkg/jsk_recognition/issues/1337
+* Use pcl::PointCloud2 for various Point types
+  Closes `#1304 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1304>`_
+* Use ccache if installed to make it fast to generate object file
+* [jsk_pcl_ros] Make test for euclidean segmentation reliable
+* [jsk_pcl_ros/ParticleFilterTracking] Publish RMS error of distance and angle
+* [jsk_pcl_ros/ParticleFilterTracking] Do not use pcl_ros::PCLNodelet
+  in order to remove dependency to tf if possible
+* [jsk_pcl_ros/ParticleFilterTracking] Measure computation time
+* [jsk_recognition_utils, jsk_pcl_ros] Measure time to compute
+  NormalEstimationOMP and RegionGriwongMultiplePlaneSegmentation.
+  Add utility class to measure time: jsk_recognition_utils::WallDurationTimer
+* [jsk_pcl_ros] Remove no need image files
+* [jsk_pcl_ros/launch/hsi_color_filter.launch] Add suffix for manager name to enable multiple hsi_color_filter.launch. Previously, manager name conflict occurred.
+* fix the ros message package in test_contact_sensor.py
+* use shared ptr for self_mask instance.
+* [jsk_pcl_ros] ExtractIndices keep_organized test
+* Revert "Use pcl::PointCloud2 for various Point types"
+  This reverts commit dc615cb15ea16beb7a95b7f5b472e57611890a37.
+* merge origin/master
+* fix coding style.
+* use OctreePointCloud function instead of OctreePointCloudCompression.
+* use VoxelGrid filter to remove duplicate cloud outputed from octree compression.
+* publish OctreeVoxelGrid as marker.
+* introduce dynamic reconfigure into OctreeVoxelGrid to set resolution.
+* add sample launch file of octree_voxel_grid.
+* add octree_voxel_grid nodelet.
+* Contributors: Kentaro Wada, Ryohei Ueda, Shunichi Nozawa, Masaki Murooka
+
 0.3.7 (2015-11-19)
 ------------------
 * [jsk_pcl_ros] Test attention_clipper by rostest

@@ -2,6 +2,28 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_perception] Add CATKIN_ENABLE_TESTING if block
+* Use ccache if installed to make it fast to generate object file
+* [jsk_perception] Refactor publish_fixed_images.launch and fix test
+* [jsk_perception] Test split_fore_background.py
+* [jsk_perception] Fix header of split_fore_background
+* [jsk_perception] Refactor publish_fixed_images.launch and fix test
+* [jsk_perception] Specify encoding by rosparam in image_publisher.py
+* [jsk_perception] Refactor image_publisher.py
+* [jsk_perception] Fix supported encodings of split_fore_background.py
+  It supports both 16UC1 and 32FC1.
+* [jsk_perception] Fix supported encodings of split_fore_background.py
+  It supports both 16UC1 and 32FC1.
+* [jsk_perception] Add warnNoRemap in ``subscribe()``
+* [split fore background] add conversion for depth image format 32FC1
+* [jsk_perception] Set frame_id by rosparam
+* [jsk_perception] Publish mask also in SplitForeBackground
+* add applying blur to output image on edge detector
+* [jsk_perception] Split FG/BG with local depth max
+* Contributors: Kei Okada, Kentaro Wada, Shingo Kitagawa, Yohei Kakiuchi
+
 0.3.7 (2015-11-19)
 ------------------
 * Use gcc -z defs to check undefined symbols in shared

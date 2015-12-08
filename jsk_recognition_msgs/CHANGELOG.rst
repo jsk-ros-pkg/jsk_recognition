@@ -2,6 +2,13 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros] Add Failure flag to Torus message
+* Remove types on docs for jsk_pcl_ros
+  See http://docs.ros.org/indigo/api/jsk_recognition_msgs/html/index-msg.html for message types
+* Contributors: Kentaro Wada, Ryohei Ueda
+
 0.3.7 (2015-11-19)
 ------------------
 * Merge pull request `#1276 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1276>`_ from mmurooka/add-octomap-contact

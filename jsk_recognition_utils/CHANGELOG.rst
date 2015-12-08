@@ -2,6 +2,15 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use ccache if installed to make it fast to generate object file
+* [jsk_recognition_utils, jsk_pcl_ros] Measure time to compute
+  NormalEstimationOMP and RegionGriwongMultiplePlaneSegmentation.
+  Add utility class to measure time: jsk_recognition_utils::WallDurationTimer
+* [jsk_recognition_utils] Split fore/background with depth
+* Contributors: Kei Okada, Kentaro Wada, Ryohei Ueda
+
 0.3.7 (2015-11-19)
 ------------------
 * Use gcc -z defs to check undefined symbols in shared

@@ -71,6 +71,8 @@ namespace jsk_pcl_ros
 
     pub_torus_ = advertise<jsk_recognition_msgs::Torus>(*pnh_, "output", 1);
     pub_torus_array_ = advertise<jsk_recognition_msgs::TorusArray>(*pnh_, "output/array", 1);
+    pub_torus_with_failure_ = advertise<jsk_recognition_msgs::Torus>(*pnh_, "output/with_failure", 1);
+    pub_torus_array_with_failure_ = advertise<jsk_recognition_msgs::TorusArray>(*pnh_, "output/with_failure/array", 1);
     pub_inliers_ = advertise<PCLIndicesMsg>(*pnh_, "output/inliers", 1);
     pub_pose_stamped_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output/pose", 1);
     pub_coefficients_ = advertise<PCLModelCoefficientMsg>(
@@ -227,16 +229,18 @@ namespace jsk_pcl_ros
       pose_stamped.header = torus_msg.header;
       pose_stamped.pose = torus_msg.pose;
       pub_pose_stamped_.publish(pose_stamped);
+      pub_torus_array_with_failure_.publish(torus_array_msg);
+      pub_torus_with_failure_.publish(torus_msg);
     }
     else {
       jsk_recognition_msgs::Torus torus_msg;
       torus_msg.header = cloud_msg->header;
       torus_msg.failure = true;
-      pub_torus_.publish(torus_msg);
+      pub_torus_with_failure_.publish(torus_msg);
       jsk_recognition_msgs::TorusArray torus_array_msg;
       torus_array_msg.header = cloud_msg->header;
       torus_array_msg.toruses.push_back(torus_msg);
-      pub_torus_array_.publish(torus_array_msg);
+      pub_torus_array_with_failure_.publish(torus_array_msg);
       JSK_NODELET_INFO("failed to find torus");
     }
   }

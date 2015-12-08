@@ -70,6 +70,8 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_points_;
     ros::Publisher pub_torus_;
     ros::Publisher pub_torus_array_;
+    ros::Publisher pub_torus_with_failure_;
+    ros::Publisher pub_torus_array_with_failure_;
     ros::Publisher pub_inliers_;
     ros::Publisher pub_coefficients_;
     ros::Publisher pub_pose_stamped_;

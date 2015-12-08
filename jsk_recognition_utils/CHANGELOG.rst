@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.8 (2015-12-08)
+------------------
 * Use ccache if installed to make it fast to generate object file
 * [jsk_recognition_utils, jsk_pcl_ros] Measure time to compute
   NormalEstimationOMP and RegionGriwongMultiplePlaneSegmentation.

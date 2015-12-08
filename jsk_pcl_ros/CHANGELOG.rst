@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.8 (2015-12-08)
+------------------
 * [jsk_pcl_ros] Remove lisp-style comments
 * [jsk_pcl_ros] Add Failure flag to Torus message
 * [jsk_pcl_ros] Remove unused codes

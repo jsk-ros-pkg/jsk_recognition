@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.8 (2015-12-08)
+------------------
 * [jsk_pcl_ros] Add Failure flag to Torus message
 * Remove types on docs for jsk_pcl_ros
   See http://docs.ros.org/indigo/api/jsk_recognition_msgs/html/index-msg.html for message types

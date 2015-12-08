@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.8 (2015-12-08)
+------------------
 * [jsk_perception] Add CATKIN_ENABLE_TESTING if block
 * Use ccache if installed to make it fast to generate object file
 * [jsk_perception] Refactor publish_fixed_images.launch and fix test

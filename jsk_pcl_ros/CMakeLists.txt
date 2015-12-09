@@ -36,7 +36,7 @@ find_package(catkin REQUIRED COMPONENTS
   ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs
   eigen_conversions tf_conversions tf2_ros tf
   image_transport nodelet cv_bridge
-  ${ML_CLASSIFIERS} sklearn jsk_topic_tools
+  sklearn jsk_topic_tools
   image_geometry
   jsk_footstep_msgs
   interactive_markers
@@ -47,6 +47,8 @@ find_package(catkin REQUIRED COMPONENTS
   kdl_parser
   kdl_conversions
   )
+find_package(PkgConfig)
+pkg_check_modules(${ML_CLASSIFIERS} ml_classifiers QUIET)
 # only run in hydro
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
   find_package(PCL REQUIRED)
@@ -59,7 +61,6 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}
 # For kinfu
 find_package(PCL QUIET COMPONENTS gpu_kinfu_large_scale)
 
-find_package(PkgConfig)
 pkg_check_modules(yaml_cpp yaml-cpp REQUIRED)
 IF(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
 ## indigo yaml-cpp : 0.5.0 /  hydro yaml-cpp : 0.3.0
@@ -255,10 +256,12 @@ jsk_pcl_util_nodelet(src/pointcloud_to_stl_nodelet.cpp
   "jsk_pcl/PointCloudToSTL" "pointcloud_to_stl")
 
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
-  jsk_pcl_nodelet(src/colorize_segmented_RF_nodelet.cpp
-    "jsk_pcl/ColorizeRandomForest" "colorize_random_forest_result")
-  jsk_pcl_nodelet(src/colorize_random_points_RF_nodelet.cpp
-    "jsk_pcl/ColorizeMapRandomForest" "colorize_random_foreset_result2")
+  if(ml_classifiers_FOUND)
+    jsk_pcl_nodelet(src/colorize_segmented_RF_nodelet.cpp
+      "jsk_pcl/ColorizeRandomForest" "colorize_random_forest_result")
+    jsk_pcl_nodelet(src/colorize_random_points_RF_nodelet.cpp
+      "jsk_pcl/ColorizeMapRandomForest" "colorize_random_foreset_result2")
+  endif(ml_classifiers_FOUND)
 endif()
 jsk_pcl_nodelet(src/environment_plane_modeling_nodelet.cpp
   "jsk_pcl/EnvironmentPlaneModeling" "environment_plane_modeling")

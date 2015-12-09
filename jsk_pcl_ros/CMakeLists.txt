@@ -24,19 +24,13 @@ else()
   set(PCL_MSGS pcl_msgs) ## hydro and later
 endif()
 
-if($ENV{ROS_DISTRO} STREQUAL "groovy")
-  set(ML_CLASSIFIERS )
-else()
-  set(ML_CLASSIFIERS ml_classifiers) ## hydro and later
-endif()
-
 find_package(catkin REQUIRED COMPONENTS
   jsk_recognition_utils
   dynamic_reconfigure pcl_ros nodelet message_generation genmsg
   ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs
   eigen_conversions tf_conversions tf2_ros tf
   image_transport nodelet cv_bridge
-  ${ML_CLASSIFIERS} sklearn jsk_topic_tools
+  sklearn jsk_topic_tools
   image_geometry
   jsk_footstep_msgs
   interactive_markers
@@ -254,12 +248,6 @@ jsk_pcl_util_nodelet(src/polygon_array_transformer_nodelet.cpp
 jsk_pcl_util_nodelet(src/pointcloud_to_stl_nodelet.cpp
   "jsk_pcl/PointCloudToSTL" "pointcloud_to_stl")
 
-if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
-  jsk_pcl_nodelet(src/colorize_segmented_RF_nodelet.cpp
-    "jsk_pcl/ColorizeRandomForest" "colorize_random_forest_result")
-  jsk_pcl_nodelet(src/colorize_random_points_RF_nodelet.cpp
-    "jsk_pcl/ColorizeMapRandomForest" "colorize_random_foreset_result2")
-endif()
 jsk_pcl_nodelet(src/environment_plane_modeling_nodelet.cpp
   "jsk_pcl/EnvironmentPlaneModeling" "environment_plane_modeling")
 jsk_pcl_nodelet(src/color_histogram_matcher_nodelet.cpp

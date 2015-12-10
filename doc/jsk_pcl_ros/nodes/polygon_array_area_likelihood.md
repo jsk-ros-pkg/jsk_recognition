@@ -9,9 +9,9 @@ The likelihood is determined by `1/(1+d^2)` where `d` is difference between area
   Input polygon array.
 
 ## Publishing Topic
-* `~input` (`jsk_recognition_msgs/PolygonArray`)
+* `~output` (`jsk_recognition_msgs/PolygonArray`)
 
-  Input polygon array.
+  Output polygon array.
 
 ## Parameters
 * `~area` (default: `1.0`)

@@ -9,9 +9,9 @@ The likelihood is determined by `1/(1+d^2)` where `d` is a angular difference fr
   Input polygon array.
 
 ## Publishing Topic
-* `~input` (`jsk_recognition_msgs/PolygonArray`)
+* `~output` (`jsk_recognition_msgs/PolygonArray`)
 
-  Input polygon array.
+  Output polygon array.
 
 ## Parameters
 * `~target_frame_id` (required)

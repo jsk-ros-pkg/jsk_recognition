@@ -284,6 +284,8 @@ jsk_pcl_nodelet(src/depth_image_creator_nodelet.cpp
   "jsk_pcl/DepthImageCreator" "depth_image_creator")
 jsk_pcl_util_nodelet(src/polygon_array_wrapper_nodelet.cpp
   "jsk_pcl/PolygonArrayWrapper" "polygon_array_wrapper")
+jsk_pcl_util_nodelet(src/polygon_array_unwrapper_nodelet.cpp
+  "jsk_pcl/PolygonArrayUnwrapper" "polygon_array_unwrapper")
 jsk_pcl_nodelet(src/border_estimator_nodelet.cpp
   "jsk_pcl/BorderEstimator" "border_estimator")
 jsk_pcl_nodelet(src/region_growing_multiple_plane_segmentation_nodelet.cpp

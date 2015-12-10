@@ -57,6 +57,9 @@
       into jsk_pcl_ros::PolygonArray and jsk_pcl_ros::ModelCoefficientsArray
     </description>
   </class>
+  <class name="jsk_pcl/PolygonArrayUnwrapper" type="jsk_pcl_ros::PolygonArrayUnwrapper"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_pcl/PolygonAppender" type="jsk_pcl_ros::PolygonAppender"
          base_class_type="nodelet::Nodelet">
     <description>append jsk_pcl_ros/PolygonArray </description>

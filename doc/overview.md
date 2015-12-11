@@ -1,5 +1,13 @@
 # Overview of jsk_recognition
 
+## Nodelet based designe
+Programs in jsk_recognition is written as nodelet to overcome communication overhead
+and they will not be activated until output topics is subscribed by other nodes.
+
+The nodelets in jsk_recognition inherit
+[`jsk_topic_tools::ConnectionBasedNodelet`](http://docs.ros.org/indigo/api/jsk_topic_tools/html/classjsk__topic__tools_1_1ConnectionBasedNodelet.html).
+The superclass provides functionarity "Do not subscribe input topics if no output is required".
+
 ## Representation of subset of image and pointcloud
 jsk_recognition uses mask image, point indices and so on to
 represent subset of image and pointcloud.

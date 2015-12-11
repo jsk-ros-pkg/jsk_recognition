@@ -1,6 +1,8 @@
 // @author Krishneel Chaudhary, JSK
 
 #include <jsk_perception/sliding_window_object_detector.h>
+#include <boost/assign.hpp>
+#include <jsk_topic_tools/log_utils.h>
 #include <jsk_recognition_msgs/Rect.h>
 #include <jsk_perception/NonMaximumSuppression.h>
 
@@ -58,6 +60,7 @@ namespace jsk_perception
          *pnh_, "output/rects", 1);
       this->pub_image_ = advertise<sensor_msgs::Image>(
          *pnh_, "output/image", 1);
+      onInitPostProcess();
    }
 
    void SlidingWindowObjectDetector::subscribe()
@@ -65,6 +68,8 @@ namespace jsk_perception
       ROS_INFO("Subscribing...");
       this->sub_image_ = pnh_->subscribe(
          "input", 1, &SlidingWindowObjectDetector::imageCb, this);
+      ros::V_string names = boost::assign::list_of("~input");
+      jsk_topic_tools::warnNoRemap(names);
    }
    
    void SlidingWindowObjectDetector::unsubscribe()

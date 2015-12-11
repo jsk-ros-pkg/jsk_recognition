@@ -2,6 +2,19 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.8 (2015-12-08)
+------------------
+* Use ccache if installed to make it fast to generate object file
+* Contributors: Kentaro Wada
+
+0.3.7 (2015-11-19)
+------------------
+* [imagesift] Test nodelet and topic /ImageFeature0D also
+* [imagesift] Add rostest for imagesift
+* [imagesift] Validation of input image shape
+* [imagesift] Python lib to wrap siftfastpy
+* Contributors: Kentaro Wada
+
 0.3.6 (2015-09-11)
 ------------------
 * [imagesift] Add doc

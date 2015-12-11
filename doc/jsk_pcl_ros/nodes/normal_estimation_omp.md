@@ -15,6 +15,14 @@ but it can handle timestamp correctly.
 
   Output pointcloud, point type is `pcl::XYZRGBNormal`.
 
+* `~output/latest_time` (`std_msgs/Float32`)
+
+  latest computation time
+
+* `~output/average_time` (`std_msgs/Float32`)
+
+  average computation time
+
 ## Parameters
 * `~k_search`
 

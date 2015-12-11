@@ -45,6 +45,7 @@ namespace jsk_perception
        
        this->pub_image_ = advertise<sensor_msgs::Image>(
           *pnh_, "image_output", 1);
+      onInitPostProcess();
     }
    
     void Skeletonization::subscribe()

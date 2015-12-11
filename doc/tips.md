@@ -9,3 +9,18 @@ If your machine does not have enough memory, please use smaller number of CPUs t
 ```
 catkin build -p1 -j1
 ```
+
+## Want to use with newer or older PCL or OpenCV
+You just need to re-compile all the packages which depend on PCL or OpenCV.
+For example, if yor are using pcl 1.8, you need to recompile
+`jsk_pcl_ros`, `pcl_ros`, `pcl_conversions`, `navfn` and so on.
+
+`rosdep what-needs` may help you.
+
+```
+$ rosdep what-needs libpcl-all
+octomap_server
+pcl_conversions
+snap_map_icp
+pcl_ros
+```

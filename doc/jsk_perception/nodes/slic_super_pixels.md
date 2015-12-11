@@ -7,7 +7,7 @@ jsk\_perception use implementation of https://github.com/PSMM/SLIC-Superpixels, 
 Output of this node is an image and each value means label index.
 
 ## Subscribing Topic
-* `~input` (`sensor_msgs/Image`)
+* `image` (`sensor_msgs/Image`)
 
   Input image.
 ## Publishing Topic

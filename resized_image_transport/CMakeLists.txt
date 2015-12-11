@@ -2,6 +2,13 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(resized_image_transport)
 
+# Use ccache if installed to make it fast to generate object files
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+endif(CCACHE_FOUND)
+
 find_package(catkin REQUIRED COMPONENTS cv_bridge sensor_msgs image_transport
   std_srvs message_generation dynamic_reconfigure
   nodelet

@@ -2,6 +2,40 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.8 (2015-12-08)
+------------------
+* Use ccache if installed to make it fast to generate object file
+* [jsk_recognition_utils, jsk_pcl_ros] Measure time to compute
+  NormalEstimationOMP and RegionGriwongMultiplePlaneSegmentation.
+  Add utility class to measure time: jsk_recognition_utils::WallDurationTimer
+* [jsk_recognition_utils] Split fore/background with depth
+* Contributors: Kei Okada, Kentaro Wada, Ryohei Ueda
+
+0.3.7 (2015-11-19)
+------------------
+* Use gcc -z defs to check undefined symbols in shared
+  objects (jsk_recognitoin_utils, jsk_pcl_ros, jsk_perception).
+  build_check.cpp cannot run on the environment using  multiple processes
+  because of invoking libjsk_pcl_ros.so link.
+* Merge pull request `#1319 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1319>`_ from wkentaro/146-various-rgb-colors
+  [jsk_recognition_utils] Add labelToRGB with 146 rgb colors
+* Merge pull request `#1324 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1324>`_ from wkentaro/test-tf-listener-singleton
+  [jsk_recognition_utils] Test tf_listener_singleton.cpp
+* [jsk_recognition_utils] Test rgb_colors.cpp
+* [jsk_recognition_utils] Test labelToRGB
+* [jsk_recognition_utils] 146 rgb colors
+* [jsk_recognition_utils] Test tf_listener_singleton.cpp
+* [jsk_recognition_utils] Add labelToRGB
+* [jsk_recognition_utils] 146 rgb colors
+* [jsk_recognition_utils] Util to decompose descriptors with label
+* [jsk_recognition_utils] Test tf::Transformer::lookupTransformation
+* [jsk_recognition_utils] Bag of Features as python module
+* [jsk_recognition_utils] Handle canvas to get safely plot image
+* [jsk_recognition_utils] Add bounding_rect_of_mask
+* [jsk_recognition_utils] Add jsk_recognition_utils.get_tile_image()
+* [jsk_recognition_utils] Fix laser model
+* Contributors: Kei Okada, Kentaro Wada, Ryohei Ueda
+
 0.3.6 (2015-09-11)
 ------------------
 

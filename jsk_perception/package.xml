@@ -1,6 +1,6 @@
 <package>
   <name>jsk_perception</name>
-  <version>0.3.6</version>
+  <version>0.3.8</version>
 
   <description>
 
@@ -68,6 +68,7 @@
   <run_depend>nodelet</run_depend>
   <run_depend>pcl_ros</run_depend>
   <run_depend>posedetection_msgs</run_depend>
+  <run_depend>python-dlib</run_depend>
   <run_depend>python-gdown</run_depend>
   <run_depend>rosbuild</run_depend>
   <run_depend>roscpp</run_depend>

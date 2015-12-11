@@ -1,7 +1,8 @@
+// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Ryohei Ueda and JSK Lab
+ *  Copyright (c) 2015, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,9 +33,36 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <nodelet_topic_tools/nodelet_demux.h>
-#include <sensor_msgs/Image.h>
-#include <pluginlib/class_list_macros.h>
+#ifndef JSK_PCL_ROS_VOXEL_GRID_LARGE_SCALE_H_
+#define JSK_PCL_ROS_VOXEL_GRID_LARGE_SCALE_H_
 
-typedef nodelet::NodeletDEMUX<sensor_msgs::Image> NodeletImageDEMUX;
-PLUGINLIB_EXPORT_CLASS (NodeletImageDEMUX, nodelet::Nodelet);
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <dynamic_reconfigure/server.h>
+#include <jsk_pcl_ros/VoxelGridLargeScaleConfig.h>
+
+namespace jsk_pcl_ros
+{
+  class VoxelGridLargeScale: public jsk_topic_tools::DiagnosticNodelet
+  {
+  public:
+    typedef VoxelGridLargeScaleConfig Config;
+    VoxelGridLargeScale(): DiagnosticNodelet("VoxelGridLargeScale") { }
+  protected:
+    virtual void onInit();
+    virtual void filter(const sensor_msgs::PointCloud2::ConstPtr& msg);
+    virtual void subscribe();
+    virtual void unsubscribe();
+    virtual void configCallback(Config& config, uint32_t level);
+
+    boost::mutex mutex_;
+    ros::Subscriber sub_;
+    ros::Publisher pub_;
+    double leaf_size_;
+    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
+  private:
+    
+  };
+}
+
+#endif

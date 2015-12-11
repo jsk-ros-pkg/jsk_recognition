@@ -2,6 +2,13 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(jsk_pcl_ros)
 
+# Use ccache if installed to make it fast to generate object files
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+endif(CCACHE_FOUND)
+
 if($ENV{ROS_DISTRO} STREQUAL "groovy")
   # update package.xml, in groovy we need to add pcl to package.xml
   execute_process(COMMAND sed -i s@<run_depend>pcl_ros</run_depend>@<run_depend>pcl_ros</run_depend><run_depend>pcl</run_depend>@g ${PROJECT_SOURCE_DIR}/package.xml)
@@ -34,6 +41,11 @@ find_package(catkin REQUIRED COMPONENTS
   jsk_footstep_msgs
   interactive_markers
   laser_assembler
+  octomap_server
+  octomap_ros
+  octomap_msgs
+  kdl_parser
+  kdl_conversions
   )
 # only run in hydro
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
@@ -74,6 +86,7 @@ add_service_files(FILES SwitchTopic.srv
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
+  cfg/VoxelGridLargeScale.cfg
   cfg/PolygonArrayAreaLikelihood.cfg
   cfg/cuboid_parameter.cfg
   cfg/ExtractParticlesTopNBase.cfg
@@ -128,13 +141,15 @@ generate_dynamic_reconfigure_options(
   cfg/FeatureRegistration.cfg
   cfg/FisheyeSphere.cfg
   cfg/MovingLeastSquareSmoothing.cfg
+  cfg/OctreeVoxelGrid.cfg
   cfg/OctreeChangePublisher.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
-
+link_directories(${catkin_LIBRARY_DIRS})
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
 macro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
   jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
     jsk_pcl_nodelet_sources jsk_pcl_nodelet_executables)
@@ -162,16 +177,9 @@ jsk_pcl_nodelet(src/voxel_grid_downsample_decoder_nodelet.cpp "jsk_pcl/VoxelGrid
 jsk_pcl_nodelet(src/snapit_nodelet.cpp "jsk_pcl/Snapit" "snapit")
 jsk_pcl_nodelet(src/keypoints_publisher_nodelet.cpp "jsk_pcl/KeypointsPublisher" "keypoints_publisher")
 jsk_pcl_nodelet(src/hinted_plane_detector_nodelet.cpp "jsk_pcl/HintedPlaneDetector" "hinted_plane_detector")
-# jsk_pcl_nodelet(src/pointcloud_throttle_nodelet.cpp "jsk_pcl/NodeletPointCloudThrottle" "point_cloud_throttle")
 jsk_pcl_nodelet(src/centroid_publisher_nodelet.cpp "jsk_pcl/CentroidPublisher" "centroid_publisher")
 jsk_pcl_nodelet(src/moving_least_square_smoothing_nodelet.cpp "jsk_pcl/MovingLeastSquareSmoothing" "moving_least_square_smoothing")
 jsk_pcl_nodelet(src/fisheye_sphere_publisher_nodelet.cpp "jsk_pcl/FisheyeSpherePublisher" "fisheye_sphere_publisher")
-# jsk_pcl_nodelet(src/image_throttle_nodelet.cpp
-#   "jsk_pcl/NodeletImageThrottle" "image_throttle")
-# jsk_pcl_nodelet(src/image_mux_nodelet.cpp
-#   "jsk_pcl/NodeletImageMUX" "image_mux")
-# jsk_pcl_nodelet(src/image_demux_nodelet.cpp
-#   "jsk_pcl/NodeletImageDEMUX" "image_demux")
 jsk_pcl_nodelet(src/plane_supported_cuboid_estimator_nodelet.cpp
   "jsk_pcl/PlaneSupportedCuboidEstimator" "plane_supported_cuboid_estimator")
 jsk_pcl_nodelet(src/extract_cuboid_particles_top_n_nodelet.cpp
@@ -280,10 +288,10 @@ jsk_pcl_nodelet(src/region_growing_multiple_plane_segmentation_nodelet.cpp
   "region_growing_multiple_plane_segmentation")
 
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
-  IF(${PCL_VERSION} VERSION_GREATER "1.7.1")
+  IF(${PCL_VERSION} VERSION_GREATER "1.7.2")
     jsk_pcl_nodelet(src/organized_edge_detector_nodelet.cpp
       "jsk_pcl/OrganizedEdgeDetector" "organized_edge_detector")
-  ENDIF(${PCL_VERSION} VERSION_GREATER "1.7.1")
+  ENDIF(${PCL_VERSION} VERSION_GREATER "1.7.2")
 endif(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
 
 jsk_pcl_nodelet(src/edge_depth_refinement_nodelet.cpp
@@ -388,6 +396,8 @@ jsk_pcl_nodelet(src/heightmap_morphological_filtering_nodelet.cpp
   "jsk_pcl/HeightmapMorphologicalFiltering" "heightmap_morphological_filtering")
 jsk_pcl_nodelet(src/heightmap_time_accumulation_nodelet.cpp
   "jsk_pcl/HeightmapTimeAccumulation" "heightmap_time_accumulation")
+jsk_pcl_nodelet(src/voxel_grid_large_scale_nodelet.cpp
+  "jsk_pcl/VoxelGridLargeScale" "voxel_grid_large_scale")
 if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
   jsk_pcl_nodelet(src/kinfu_nodelet.cpp
     "jsk_pcl/Kinfu" "kinfu")
@@ -395,6 +405,18 @@ if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
 endif (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
 jsk_pcl_nodelet(src/pcd_reader_with_pose_nodelet.cpp
   "jsk_pcl/PCDReaderWithPose" "pcd_reader_with_pose")
+jsk_pcl_nodelet(src/octree_voxel_grid_nodelet.cpp
+  "jsk_pcl/OctreeVoxelGrid" "octree_voxel_grid")
+# check existence of robot_self_filter package because robot_self_filter is not installed by apt
+pkg_check_modules(robot_self_filter robot_self_filter QUIET)
+if(robot_self_filter_FOUND)
+  jsk_pcl_nodelet(src/collision_detector_nodelet.cpp
+    "jsk_pcl/CollisionDetector" "collision_detector")
+  jsk_pcl_nodelet(src/octomap_server_contact_nodelet.cpp
+    "jsk_pcl/OctomapServerContact" "octomap_server_contact")
+else(robot_self_filter_FOUND)
+  message(AUTHOR_WARNING "robot_self_filter is NOT found. some nodelet depending on robot_self_filter will not be compiled.")
+endif(robot_self_filter_FOUND)
 
 add_library(jsk_pcl_ros_base SHARED
   src/region_adjacency_graph.cpp
@@ -413,20 +435,10 @@ else (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
     ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp
     jsk_pcl_ros_base)
 endif (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
-
-# check existence of robot_self_filter package because robot_self_filter is not installed by apt
-pkg_check_modules(robot_self_filter robot_self_filter QUIET)
-if(${robot_self_filter_FOUND})
-  message(AUTHOR_WARNING "robot_self_filter is found. collision_detector is compiled.")
-  link_directories(${catkin_LIBRARY_DIRS})
+if (robot_self_filter_FOUND)
   include_directories(include ${robot_self_filter_INCLUDE_DIRS})
-  add_executable(collision_detector src/collision_detector.cpp)
-  target_link_libraries(collision_detector
-    ${pcl_ros_LIBRARIES} ${robot_self_filter_LIBRARIES} ${kdl_parser_LIBRARIES} ${kdl_conversions_LIBRARIES} ${tf_conversions_LIBRARIES})
-  add_dependencies(collision_detector ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
-else(${robot_self_filter_FOUND})
-  message(AUTHOR_WARNING "robot_self_filter is NOT found. collision_detector is NOT compiled.")
-endif(${robot_self_filter_FOUND})
+  target_link_libraries(jsk_pcl_ros ${robot_self_filter_LIBRARIES})
+endif (robot_self_filter_FOUND)
 
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 add_dependencies(jsk_pcl_ros_util ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
@@ -465,22 +477,24 @@ set(_include_headers "")
 foreach(_header ${_headers})
   string(FIND "${_header}" kinfu IS_KINFU)
   string(FIND "${_header}" point_types IS_POINT_TYPES)
-  # Exclude self_mask_urdf_robot.h and collision_detector.h. These headers are used only in collision_detector, which is not nodelet.
-  string(FIND "${_header}" self_mask_urdf_robot IS_SELF_MASK_URDF_ROBOT)
-  string(FIND "${_header}" collision_detector IS_COLLISION_DETECTOR)
-  if (${IS_KINFU} EQUAL -1 AND ${IS_POINT_TYPES} EQUAL -1 AND ${IS_SELF_MASK_URDF_ROBOT} EQUAL -1 AND ${IS_COLLISION_DETECTOR} EQUAL -1)
+  if(robot_self_filter_FOUND)
+    # Exclude some headers because they include robot_self_filter headers.
+    set(IS_SELF_MASK_URDF_ROBOT -1)
+    set(IS_COLLISION_DETECTOR -1)
+    set(IS_SELF_MASK_NAMED_LINK -1)
+    set(IS_OCTOMAP_SERVER_CONTACT -1)
+  else(robot_self_filter_FOUND)
+    string(FIND "${_header}" self_mask_urdf_robot IS_SELF_MASK_URDF_ROBOT)
+    string(FIND "${_header}" collision_detector IS_COLLISION_DETECTOR)
+    string(FIND "${_header}" self_mask_named_link IS_SELF_MASK_NAMED_LINK)
+    string(FIND "${_header}" octomap_server_contact IS_OCTOMAP_SERVER_CONTACT)
+  endif(robot_self_filter_FOUND)
+  if (${IS_KINFU} EQUAL -1 AND ${IS_POINT_TYPES} EQUAL -1 AND
+      ${IS_SELF_MASK_URDF_ROBOT} EQUAL -1 AND ${IS_COLLISION_DETECTOR} EQUAL -1 AND
+      ${IS_SELF_MASK_NAMED_LINK} EQUAL -1 AND ${IS_OCTOMAP_SERVER_CONTACT} EQUAL -1)
     set(_include_headers "${_include_headers}#include \"${_header}\"\n")
   endif()
 endforeach()
-execute_process(
-  COMMAND ${PROJECT_SOURCE_DIR}/scripts/build_check_helper.py ${PROJECT_SOURCE_DIR}/jsk_pcl_nodelets.xml
-  OUTPUT_VARIABLE _class_instances
-  )
-
-configure_file(src/build_check.cpp.in build_check.cpp)
-add_executable(build_check EXCLUDE_FROM_ALL build_check.cpp)
-target_link_libraries(build_check jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_util jsk_pcl_ros_moveit)
-add_dependencies(run_tests build_check)
 
 generate_messages(DEPENDENCIES
   ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_footstep_msgs)
@@ -507,3 +521,22 @@ install(TARGETS jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_util jsk_pcl_ros_moveit
 install(FILES jsk_pcl_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 install(DIRECTORY launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
+if (CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  # install test data by a script
+  add_custom_target(install_test_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.sh)
+  if(TARGET tests)
+    add_dependencies(tests install_test_data)
+  endif()
+  # check ros distro >= indigo
+  execute_process(
+    COMMAND python -c "import sys; sys.exit(ord('$ENV{ROS_DISTRO}'[0]) >= ord('indigo'[0]))"
+    RESULT_VARIABLE DISTRO_GE_INDIGO)
+  if(${DISTRO_GE_INDIGO})
+    # because of unreleased topic_tools/transform on hydro
+    add_rostest(test/test_attention_clipper.test DEPENDENCIES install_test_data)
+    add_rostest(test/test_euclidean_segmentation.test DEPENDENCIES install_test_data)
+    add_rostest(test/test_extract_indices.test DEPENDENCIES install_test_data)
+  endif()
+endif()

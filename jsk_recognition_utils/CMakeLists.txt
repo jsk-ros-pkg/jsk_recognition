@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(jsk_recognition_utils)
 
+# Use ccache if installed to make it fast to generate object files
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+endif(CCACHE_FOUND)
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -9,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros
   pcl_msgs
   eigen_conversions
+  rostest
   tf_conversions
   tf
   tf2_ros
@@ -34,7 +42,7 @@ IF(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
 ## indigo yaml-cpp : 0.5.0 /  hydro yaml-cpp : 0.3.0
   add_definitions("-DUSE_OLD_YAML")
 ENDIF()
-
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
 include_directories(
   ${catkin_INCLUDE_DIRS} include
 )
@@ -53,6 +61,7 @@ add_library(jsk_recognition_utils SHARED
   src/pcl/ear_clipping_patched.cpp
   src/sensor_model_utils.cpp
   src/cv_utils.cpp
+  src/rgb_colors.cpp
   src/geo/line.cpp
   src/geo/segment.cpp
   src/geo/plane.cpp
@@ -61,8 +70,16 @@ add_library(jsk_recognition_utils SHARED
   src/geo/cube.cpp
   src/geo/cylinder.cpp
   src/geo/grid_plane.cpp
+  src/time_util.cpp
   )
-add_executable(echo_tf_lookup_transform test/echo_tf_lookup_transform.cpp)
+
+add_rostest_gtest(test_tf_listener_singleton test/test_tf_listener_singleton.test src/tests/test_tf_listener_singleton.cpp)
+target_link_libraries(test_tf_listener_singleton ${PROJECT_NAME} ${catkin_LIBRARIES})
+
+catkin_add_gtest(test_cv_utils src/tests/test_cv_utils.cpp)
+target_link_libraries(test_cv_utils ${PROJECT_NAME} ${OpenCV_LIBRARIES})
+catkin_add_gtest(test_rgb_colors src/tests/test_rgb_colors.cpp)
+target_link_libraries(test_rgb_colors ${PROJECT_NAME} ${OpenCV_LIBRARIES})
 
 install(TARGETS jsk_recognition_utils
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

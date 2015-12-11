@@ -48,6 +48,8 @@
 #include "jsk_recognition_msgs/PolygonArray.h"
 #include "jsk_recognition_msgs/ClusterPointIndices.h"
 #include "jsk_recognition_msgs/ModelCoefficientsArray.h"
+#include <jsk_recognition_utils/time_util.h>
+#include <std_msgs/Float32.h>
 
 namespace jsk_pcl_ros
 {
@@ -62,7 +64,7 @@ namespace jsk_pcl_ros
       sensor_msgs::PointCloud2,
       sensor_msgs::PointCloud2 > NormalSyncPolicy;
     RegionGrowingMultiplePlaneSegmentation()
-      : DiagnosticNodelet("RegionGrowingMultiplePlaneSegmentation") {}
+      : DiagnosticNodelet("RegionGrowingMultiplePlaneSegmentation"), timer_(10) {}
     
   protected:
     ////////////////////////////////////////////////////////
@@ -135,8 +137,10 @@ namespace jsk_pcl_ros
     ros::Publisher pub_inliers_;
     ros::Publisher pub_coefficients_;
     ros::Publisher pub_clustering_result_;
+    ros::Publisher pub_latest_time_;
+    ros::Publisher pub_average_time_;
     boost::mutex mutex_;
-    
+    jsk_recognition_utils::WallDurationTimer timer_;
     ////////////////////////////////////////////////////////
     // Parameters
     ////////////////////////////////////////////////////////

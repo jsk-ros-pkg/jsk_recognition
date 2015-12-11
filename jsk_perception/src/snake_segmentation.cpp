@@ -34,6 +34,8 @@
  *********************************************************************/
 
 #include "jsk_perception/snake_segmentation.h"
+#include <boost/assign.hpp>
+#include <jsk_topic_tools/log_utils.h>
 #include <opencv2/opencv.hpp>
 #if CV_MAJOR_VERSION < 3
 #include <opencv2/legacy/legacy.hpp>
@@ -53,6 +55,7 @@ namespace jsk_perception
     srv_->setCallback (f);
 
     pub_debug_ = advertise<sensor_msgs::Image>(*pnh_, "debug", 1);
+    onInitPostProcess();
   }
 
   void SnakeSegmentation::configCallback (Config &config, uint32_t level)
@@ -76,6 +79,8 @@ namespace jsk_perception
   void SnakeSegmentation::subscribe()
   {
     sub_ = pnh_->subscribe("input", 1, &SnakeSegmentation::segment, this);
+    ros::V_string names = boost::assign::list_of("~input");
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void SnakeSegmentation::unsubscribe()

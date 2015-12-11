@@ -1,7 +1,8 @@
+// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Ryohei Ueda and JSK Lab
+ *  Copyright (c) 2015, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,10 +33,48 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <nodelet_topic_tools/nodelet_mux.h>
-#include <message_filters/subscriber.h>
-#include <sensor_msgs/Image.h>
-#include <pluginlib/class_list_macros.h>
+#ifndef JSK_PCL_ROS_OCTREE_VOXEL_GRID_H_
+#define JSK_PCL_ROS_OCTREE_VOXEL_GRID_H_
 
-typedef nodelet::NodeletMUX<sensor_msgs::Image, message_filters::Subscriber<sensor_msgs::Image> > NodeletImageMUX;
-PLUGINLIB_EXPORT_CLASS (NodeletImageMUX, nodelet::Nodelet);
+// ros
+#include <ros/ros.h>
+#include <ros/names.h>
+#include <dynamic_reconfigure/server.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <visualization_msgs/Marker.h>
+
+// pcl
+#include <pcl_ros/pcl_nodelet.h>
+#include <pcl/point_types.h>
+#include <pcl/octree/octree_pointcloud.h>
+#include "jsk_pcl_ros/OctreeVoxelGridConfig.h"
+
+namespace jsk_pcl_ros
+{
+  class OctreeVoxelGrid : public jsk_topic_tools::DiagnosticNodelet
+  {
+  public:
+    typedef jsk_pcl_ros::OctreeVoxelGridConfig Config;
+    OctreeVoxelGrid(): DiagnosticNodelet("OctreeVoxelGrid") {}
+  protected:
+    virtual void onInit();
+    virtual void subscribe();
+    virtual void unsubscribe();
+    virtual void configCallback(Config &config, uint32_t level);
+    virtual void generateVoxelCloud(const sensor_msgs::PointCloud2ConstPtr& input);
+
+    ros::Subscriber sub_input_;
+    ros::Publisher pub_cloud_;
+    ros::Publisher pub_marker_;
+
+    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
+    boost::mutex mutex_;
+
+    double resolution_;
+
+    bool publish_marker_flag_;
+  };
+}
+
+#endif // JSK_PCL_ROS_OCTREE_VOXEL_GRID_H_

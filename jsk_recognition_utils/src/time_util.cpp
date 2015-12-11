@@ -1,7 +1,8 @@
+// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Ryohei Ueda and JSK Lab
+ *  Copyright (c) 2015, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,9 +33,59 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <nodelet_topic_tools/nodelet_throttle.h>
-#include <sensor_msgs/Image.h>
-#include <pluginlib/class_list_macros.h>
+#include "jsk_recognition_utils/time_util.h"
 
-typedef nodelet_topic_tools::NodeletThrottle<sensor_msgs::Image> NodeletImageThrottle;
-PLUGINLIB_EXPORT_CLASS (NodeletImageThrottle, nodelet::Nodelet);
+namespace jsk_recognition_utils
+{
+  ScopedWallDurationReporter::ScopedWallDurationReporter(WallDurationTimer* parent):
+    parent_(parent), start_time_(ros::WallTime::now())
+  {
+
+  }
+  
+  ScopedWallDurationReporter::~ScopedWallDurationReporter()
+  {
+    ros::WallTime end_time = ros::WallTime::now();
+    ros::WallDuration d = end_time - start_time_;
+    parent_->report(d);
+  }
+
+  WallDurationTimer::WallDurationTimer(const int max_num):
+    max_num_(max_num), buffer_(max_num)
+  {
+  }
+  
+  void WallDurationTimer::report(ros::WallDuration& duration)
+  {
+    buffer_.push_back(duration);
+  }
+
+  ScopedWallDurationReporter WallDurationTimer::reporter()
+  {
+    return ScopedWallDurationReporter(this);
+  }
+
+  double WallDurationTimer::latestSec()
+  {
+    return buffer_[buffer_.size() - 1].toSec();
+  }
+  
+  void WallDurationTimer::clearBuffer()
+  {
+    buffer_.clear();
+  }
+
+  double WallDurationTimer::meanSec()
+  {
+    double secs = 0.0;
+    for (size_t i = 0; i < buffer_.size(); i++) {
+      secs += buffer_[i].toSec();
+    }
+    return secs / buffer_.size();
+  }
+
+  size_t WallDurationTimer::sampleNum()
+  {
+    return buffer_.size();
+  }
+}

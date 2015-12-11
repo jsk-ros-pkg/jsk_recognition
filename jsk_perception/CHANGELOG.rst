@@ -2,6 +2,74 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.8 (2015-12-08)
+------------------
+* [jsk_perception] Add CATKIN_ENABLE_TESTING if block
+* Use ccache if installed to make it fast to generate object file
+* [jsk_perception] Refactor publish_fixed_images.launch and fix test
+* [jsk_perception] Test split_fore_background.py
+* [jsk_perception] Fix header of split_fore_background
+* [jsk_perception] Refactor publish_fixed_images.launch and fix test
+* [jsk_perception] Specify encoding by rosparam in image_publisher.py
+* [jsk_perception] Refactor image_publisher.py
+* [jsk_perception] Fix supported encodings of split_fore_background.py
+  It supports both 16UC1 and 32FC1.
+* [jsk_perception] Fix supported encodings of split_fore_background.py
+  It supports both 16UC1 and 32FC1.
+* [jsk_perception] Add warnNoRemap in ``subscribe()``
+* [split fore background] add conversion for depth image format 32FC1
+* [jsk_perception] Set frame_id by rosparam
+* [jsk_perception] Publish mask also in SplitForeBackground
+* add applying blur to output image on edge detector
+* [jsk_perception] Split FG/BG with local depth max
+* Contributors: Kei Okada, Kentaro Wada, Shingo Kitagawa, Yohei Kakiuchi
+
+0.3.7 (2015-11-19)
+------------------
+* Use gcc -z defs to check undefined symbols in shared
+  objects (jsk_recognitoin_utils, jsk_pcl_ros, jsk_perception).
+  build_check.cpp cannot run on the environment using  multiple processes
+  because of invoking libjsk_pcl_ros.so link.
+* Merge pull request `#1320 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1320>`_ from wkentaro/colorize_labels-with-146-colors
+  [jsk_perception] ColorizeLabels support 20->146 labels
+* [jsk_perception] ColorizeLabels support 20->146 labels
+* [jsk_perception] Call onInitPostProcess() in last of onInit()
+* [jsk_perception] Warn no remapping for input topics
+* [jsk_perception] Test whether get topic msg
+* [jsk_perception] FastRCNN: (new node)
+* [jsk_perception] Test label image decomposer async
+* [jsk_perception] Rename SimpleClassifier -> ScikitLearnClassifier
+* [jsk_perception] Download trained_data for apc recognition sample
+* [jsk_perception] Sort build_depend & run_depend
+* [jsk_perception] Publish VectorArray in simple_classifier
+* [jsk_perception] Publish VectorArray in bof_histogram_extractor
+* [jsk_perception] Convert mask to label image
+* [jsk_perception] Convert mask to label image
+* [jsk_perception] Make connection based and use ClassificationResult.msg
+* [jsk_perception] Care about data size when creating bof data
+* [jsk_perception] Specify data size when creating bof data
+* [jsk_perception] Update BoF object recognition sample
+* [jsk_perception] Extract bof histogram with ConnectionBasedTransport
+* [jsk_perception] Create bof & bof_hist dataset
+* [jsk_perception] Creating sift dataset script
+* [jsk_perception] Move ros node scripts/ -> node_scripts/
+  Closes `#1239 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1239>`_
+* Merge pull request `#1236 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1236>`_ from wkentaro/slop-param
+  [jsk_perception] slop as param for label_image_decomposer
+* Merge pull request `#1235 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1235>`_ from wkentaro/skip-0-label-image-decomposer
+  [jsk_perception] Skip 0 label in label_image_decomposer
+* [jsk_perception] slop as param for label_image_decomposer
+* [jsk_perception] Skip 0 label in label_image_decomposer
+* [jsk_perception] Debug output about params
+* [jsk_perception] Add LabelImageDecomposer
+* [jsk_perception] Rename tile_images -> tile_image
+* [jsk_perception] Use ConnectionBasedTransport and get_tile_image()
+* [jsk_perception/point_pose_extractor] Remove pragma message in compiling
+  and fix format warning
+* add oriented_gradient and oriented_gradient_node to install target and export libraries
+* [jsk_perception] Add tile_images.py
+* Contributors: Hiroaki Yaguchi, Kei Okada, Kentaro Wada, Ryohei Ueda
+
 0.3.6 (2015-09-11)
 ------------------
 

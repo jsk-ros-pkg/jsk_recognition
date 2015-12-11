@@ -44,8 +44,10 @@
 #include <tf/transform_broadcaster.h>
 #include <tf_conversions/tf_eigen.h>
 #include <jsk_pcl_ros/pcl_conversion_util.h>
+#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_recognition_utils/tf_listener_singleton.h>
+#include <boost/circular_buffer.hpp>
 // pcl
-#include <pcl_ros/pcl_nodelet.h>
 #include <pcl/point_types.h>
 #include <pcl/common/centroid.h>
 #include <pcl/common/transforms.h>
@@ -75,7 +77,8 @@
 #include <pcl/tracking/particle_filter.h>
 #include <pcl/tracking/impl/tracking.hpp>
 #include <pcl/tracking/impl/particle_filter.hpp>
-
+#include <jsk_recognition_utils/time_util.h>
+#include <std_msgs/Float32.h>
 // This namespace follows PCL coding style
 namespace pcl
 {
@@ -529,7 +532,7 @@ namespace pcl
 using namespace pcl::tracking;
 namespace jsk_pcl_ros
 {
-  class ParticleFilterTracking: public pcl_ros::PCLNodelet
+  class ParticleFilterTracking: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     typedef pcl::PointXYZRGB PointT;
@@ -539,6 +542,7 @@ namespace jsk_pcl_ros
       jsk_recognition_msgs::BoundingBox > SyncPolicy;
     typedef ParticleFilterTracker<PointT, ParticleXYZRPY>::PointCloudStatePtr
     PointCloudStatePtr;
+    ParticleFilterTracking(): timer_(10), distance_error_buffer_(100), angle_error_buffer_(100) {}
   protected:
     pcl::PointCloud<PointT>::Ptr cloud_pass_;
     pcl::PointCloud<PointT>::Ptr cloud_pass_downsampled_;
@@ -562,7 +566,15 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_;
     ros::Subscriber sub_update_model_;
     ros::Subscriber sub_update_with_marker_model_;
-
+    ros::Publisher pub_latest_time_;
+    ros::Publisher pub_average_time_;
+    ros::Publisher pub_rms_distance_;
+    ros::Publisher pub_rms_angle_;
+    jsk_recognition_utils::WallDurationTimer timer_;
+    Eigen::Affine3f initial_pose_;
+    boost::circular_buffer<double> distance_error_buffer_;
+    boost::circular_buffer<double> angle_error_buffer_;
+    
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<jsk_recognition_msgs::BoundingBox> sub_box_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
@@ -571,7 +583,7 @@ namespace jsk_pcl_ros
     ros::Publisher pose_stamped_publisher_;
     ros::ServiceServer renew_model_srv_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
-    tf::TransformListener listener_;
+    tf::TransformListener* listener_;
     
     ////////////////////////////////////////////////////////
     // parameters
@@ -587,6 +599,7 @@ namespace jsk_pcl_ros
     bool not_use_reference_centroid_;
     bool not_publish_tf_;
     int marker_to_pointcloud_sampling_nums_;
+    
     virtual void config_callback(Config &config, uint32_t level);
     virtual void publish_particles();
     virtual void publish_result();
@@ -595,7 +608,13 @@ namespace jsk_pcl_ros
       const pcl::PointCloud<PointT>::ConstPtr &new_target_cloud);
     virtual tf::Transform change_pointcloud_frame(
       pcl::PointCloud<PointT>::Ptr cloud);
-
+    virtual double rms(boost::circular_buffer<double>& buffer) {
+      double res = 0.0;
+      for (size_t i = 0; i < buffer.size(); i++) {
+        res += buffer[i] * buffer[i];
+      }
+      return sqrt(res / buffer.size());
+    }
     virtual void cloud_cb(const sensor_msgs::PointCloud2 &pc);
     virtual bool renew_model_cb(
       jsk_pcl_ros::SetPointCloud2::Request &req,
@@ -636,6 +655,10 @@ namespace jsk_pcl_ros
     virtual void tracker_reset_tracking();
     virtual void tracker_set_input_cloud(pcl::PointCloud<PointT>::Ptr input);
     virtual void tracker_compute();
+
+    virtual void subscribe() {}
+    virtual void unsubscribe() {}    
+    
   private:
     virtual void onInit();
 

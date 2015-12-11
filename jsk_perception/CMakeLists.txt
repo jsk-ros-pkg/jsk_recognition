@@ -1,11 +1,18 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(jsk_perception)
 
+# Use ccache if installed to make it fast to generate object files
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+endif(CCACHE_FOUND)
+
 find_package(catkin REQUIRED COMPONENTS
   jsk_recognition_msgs
   mk message_generation std_msgs sensor_msgs geometry_msgs cv_bridge
   image_geometry image_transport image_view2 driver_base dynamic_reconfigure cmake_modules
-  roscpp nodelet rostest tf rospack
+  roscpp nodelet tf rospack
   jsk_topic_tools pcl_ros
   jsk_recognition_utils)
 
@@ -22,7 +29,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
 add_definitions("-g -O2")
-
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
   cfg/TabletopColorDifferenceLikelihood.cfg
@@ -173,6 +180,7 @@ target_link_libraries(rectangle_detector       ${catkin_LIBRARIES} ${Boost_LIBRA
 target_link_libraries(calc_flow                ${catkin_LIBRARIES})
 target_link_libraries(color_histogram_sliding_matcher  ${catkin_LIBRARIES})
 target_link_libraries(oriented_gradient_node   ${catkin_LIBRARIES} ${Boost_LIBRARIES} oriented_gradient)
+target_link_libraries(oriented_gradient   ${catkin_LIBRARIES} ${Boost_LIBRARIES} oriented_gradient)
 target_link_libraries(sliding_window_object_detector_trainer_node ${PROJECT_NAME} ${catkin_LIBRARIES})
 
 add_dependencies(camshiftdemo             ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
@@ -196,7 +204,7 @@ add_custom_command(
  COMMAND ROS_PACKAGE_PATH=${PROJECT_SOURCE_DIR}:$ENV{ROS_PACKAGE_PATH} roseus ./pose_detector_auto_gen_sample.l
  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/sample)
 
-add_custom_target(eusmodel_template ALL DEPENDS 
+add_custom_target(eusmodel_template ALL DEPENDS
   ${PROJECT_SOURCE_DIR}/sample/rimokon-pose.launch ${PROJECT_SOURCE_DIR}/sample/milktea-box.launch
   ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng8.launch
   ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng2.launch)
@@ -217,4 +225,8 @@ install(DIRECTORY include/${PROJECT_NAME}/
 
 install(FILES jsk_perception_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
-add_rostest(test/sparse_image.test)
+if(CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  add_rostest(test/sparse_image.test)
+  add_rostest(test/test_label_image_decomposer_slop.test)
+endif()

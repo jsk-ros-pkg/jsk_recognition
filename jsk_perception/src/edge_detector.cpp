@@ -30,14 +30,24 @@ class EdgeDetector: public nodelet::Nodelet
     double _threshold2;
     int _apertureSize;
     bool _L2gradient;
+    bool _apply_blur_pre;
+    bool _apply_blur_post;
+    int  _postBlurSize;
+    double  _postBlurSigma;
 
     void reconfigureCallback(jsk_perception::EdgeDetectorConfig &new_config, uint32_t level)
     {
         config_ = new_config;
         _threshold1 = config_.threshold1;
         _threshold2 = config_.threshold2;
-        _apertureSize = config_.apertureSize;
+        _apertureSize = 2*((config_.apertureSize/2)) + 1;
         _L2gradient = config_.L2gradient;
+
+        _apply_blur_pre  = config_.apply_blur_pre;
+        _apply_blur_post = config_.apply_blur_post;
+        _postBlurSize    = 2*((config_.postBlurSize)/2) + 1;
+        _postBlurSigma   = config_.postBlurSigma;
+
         if (subscriber_count_)
             { // @todo Could do this without an interruption at some point.
                 unsubscribe();
@@ -65,9 +75,14 @@ class EdgeDetector: public nodelet::Nodelet
 		}else{
 		  out_image = in_image;
 		}
-                cv::blur(out_image, out_image, cv::Size(_apertureSize,_apertureSize));
+                if(_apply_blur_pre) {
+                  cv::blur(out_image, out_image, cv::Size(_apertureSize,_apertureSize));
+                }
                 cv::Canny(out_image, out_image, _threshold1, _threshold2, _apertureSize, _L2gradient);
-
+                if(_apply_blur_post) {
+                  cv::GaussianBlur(out_image, out_image, cv::Size(_postBlurSize, _postBlurSize),
+                                   _postBlurSigma, _postBlurSigma); // 0.3*(ksize/2 - 1) + 0.8
+                }
                 // Publish the image.
                 sensor_msgs::Image::Ptr out_img = cv_bridge::CvImage(msg->header, enc::MONO8, out_image).toImageMsg();
                 img_pub_.publish(out_img);

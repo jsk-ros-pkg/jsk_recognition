@@ -28,10 +28,12 @@ to see the object.
 * `~output` (`sensor_msgs/CameraInfo`)
 
   This camera info is same with `~input` except for roi field.
+  (only when `~input` is published.)
 
 * `~output/mask` (`sensor_msgs/Image`)
 
   Mask image to mask the regions of specified interest.
+  (only when `~input` is published.)
 
 * `~output/point_indices` (`pcl_msgs/PointIndices`)
 

@@ -1,7 +1,8 @@
+// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Ryohei Ueda and JSK Lab
+ *  Copyright (c) 2015, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,9 +33,41 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <nodelet_topic_tools/nodelet_throttle.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <pluginlib/class_list_macros.h>
+#include <ros/ros.h>
+#include <boost/circular_buffer.hpp>
 
-typedef nodelet_topic_tools::NodeletThrottle<sensor_msgs::PointCloud2> NodeletPointCloudThrottle;
-PLUGINLIB_EXPORT_CLASS (NodeletPointCloudThrottle, nodelet::Nodelet);
+namespace jsk_recognition_utils
+{
+  class WallDurationTimer;
+  
+  class ScopedWallDurationReporter
+  {
+  public:
+    typedef boost::shared_ptr<ScopedWallDurationReporter> Ptr;
+    ScopedWallDurationReporter(WallDurationTimer* parent);
+    virtual ~ScopedWallDurationReporter();
+  protected:
+    WallDurationTimer* parent_;
+    ros::WallTime start_time_;
+  private:
+    
+  };
+  
+  class WallDurationTimer
+  {
+  public:
+    typedef boost::shared_ptr<WallDurationTimer> Ptr;
+    WallDurationTimer(const int max_num);
+    virtual void report(ros::WallDuration& duration);
+    virtual ScopedWallDurationReporter reporter();
+    virtual void clearBuffer();
+    virtual double meanSec();
+    virtual double latestSec();
+    virtual size_t sampleNum();
+  protected:
+    const int max_num_;
+    boost::circular_buffer<ros::WallDuration> buffer_;
+  private:
+  };
+  
+}

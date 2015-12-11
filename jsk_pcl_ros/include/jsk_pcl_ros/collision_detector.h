@@ -37,6 +37,7 @@
 #ifndef JSK_PCL_ROS_COLLISION_DETECTOR_H_
 #define JSK_PCL_ROS_COLLISION_DETECTOR_H_
 
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <jsk_pcl_ros/CheckCollision.h>
 
@@ -50,26 +51,30 @@
 
 namespace jsk_pcl_ros
 {
-  class CollisionDetector
+  class CollisionDetector: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef boost::shared_ptr<CollisionDetector> Ptr;
-
-    CollisionDetector();
+    CollisionDetector(): DiagnosticNodelet("CollisionDetector") {}
 
   protected:
-    void initSelfMask(const ros::NodeHandle& pn, const ros::NodeHandle& pnh);
-    bool checkCollision(const sensor_msgs::JointState& joint,
-                        const geometry_msgs::PoseStamped& pose);
-    void pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg);
-    bool serviceCallback(jsk_pcl_ros::CheckCollision::Request &req,
-                         jsk_pcl_ros::CheckCollision::Response &res);
+    virtual void onInit();
+    virtual void subscribe();
+    virtual void unsubscribe();
+
+    virtual void initSelfMask();
+    virtual bool checkCollision(const sensor_msgs::JointState& joint,
+                                const geometry_msgs::PoseStamped& pose);
+    virtual void pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg);
+    virtual bool serviceCallback(jsk_pcl_ros::CheckCollision::Request &req,
+                                 jsk_pcl_ros::CheckCollision::Response &res);
+    boost::mutex mutex_;
     ros::Subscriber sub_;
     ros::ServiceServer service_;
 
     std::string world_frame_id_;
     std::string cloud_frame_id_;
-    robot_self_filter::SelfMaskUrdfRobot* self_mask_;
+    boost::shared_ptr<robot_self_filter::SelfMaskUrdfRobot> self_mask_;
     ros::Time cloud_stamp_;
     pcl::PointCloud<pcl::PointXYZ> cloud_;
     tf::TransformListener tf_listener_;

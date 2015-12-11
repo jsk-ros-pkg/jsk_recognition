@@ -32,6 +32,7 @@ add_definitions("-g -O2")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
+  cfg/PolygonArrayColorLikelihood.cfg
   cfg/PolygonArrayColorHistogram.cfg
   cfg/TabletopColorDifferenceLikelihood.cfg
   cfg/ProjectImagePoint.cfg
@@ -100,6 +101,7 @@ macro(jsk_perception_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_na
   jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
     jsk_perception_nodelet_sources jsk_perception_nodelet_executables)
 endmacro()
+jsk_perception_nodelet(src/polygon_array_color_likelihood.cpp "jsk_perception/PolygonArrayColorLikelihood" "polygon_array_color_likelihood")
 jsk_perception_nodelet(src/polygon_array_color_histogram.cpp "jsk_perception/PolygonArrayColorHistogram" "polygon_array_color_histogram")
 jsk_perception_nodelet(src/edge_detector.cpp "jsk_perception/EdgeDetector" "edge_detector")
 jsk_perception_nodelet(src/sparse_image_encoder.cpp "jsk_perception/SparseImageEncoder" "sparse_image_encoder")

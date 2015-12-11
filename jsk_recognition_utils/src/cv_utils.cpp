@@ -70,6 +70,18 @@ namespace jsk_recognition_utils
     return bins;
   }
 
+  cv::MatND
+  HistogramWithRangeBinArrayTocvMatND(
+    const std::vector<jsk_recognition_msgs::HistogramWithRangeBin>& histogram)
+  {
+    cv::MatND ret(1, histogram.size(), CV_32F);
+    for (size_t i = 0; i < histogram.size(); i++) {
+      jsk_recognition_msgs::HistogramWithRangeBin bin = histogram[i];
+      ret.at<float>(0, i) = bin.count;
+    }
+    return ret;
+  }
+
   bool compareHistogramWithRangeBin(const jsk_recognition_msgs::HistogramWithRangeBin& left,
                                     const jsk_recognition_msgs::HistogramWithRangeBin& right)
   {

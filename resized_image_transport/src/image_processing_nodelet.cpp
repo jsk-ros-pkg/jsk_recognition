@@ -6,15 +6,10 @@
 namespace resized_image_transport
 {
   void ImageProcessing::onInit() {
-    initNodeHandle();
+    DiagnosticNodelet::onInit();
     initReconfigure();
     initParams();
     initPublishersAndSubscribers();
-  }
-
-  void ImageProcessing::initNodeHandle(){
-    nh = getNodeHandle();
-    pnh = getPrivateNodeHandle();
   }
 
   void ImageProcessing::initReconfigure(){
@@ -23,66 +18,64 @@ namespace resized_image_transport
   void ImageProcessing::initParams(){
     publish_once_ = true;
 
-    pnh.param("resize_scale_x", resize_x_, 1.0);
+    pnh_->param("resize_scale_x", resize_x_, 1.0);
     NODELET_INFO("resize_scale_x : %f", resize_x_);
-    pnh.param("resize_scale_y", resize_y_, 1.0);
+    pnh_->param("resize_scale_y", resize_y_, 1.0);
     NODELET_INFO("resize_scale_y : %f", resize_y_);
 
-    pnh.param("width", dst_width_, 0);
+    pnh_->param("width", dst_width_, 0);
     NODELET_INFO("width : %d", dst_width_);
-    pnh.param("height", dst_height_, 0);
+    pnh_->param("height", dst_height_, 0);
     NODELET_INFO("height : %d", dst_height_);
-    pnh.param("use_camera_subscriber", use_camera_subscriber_, false);
-    pnh.param("max_queue_size", max_queue_size_, 5);
-    pnh.param("use_snapshot", use_snapshot_, false);
-    pnh.param("use_messages", use_messages_, true);
+    pnh_->param("use_camera_subscriber", use_camera_subscriber_, false);
+    pnh_->param("max_queue_size", max_queue_size_, 5);
+    pnh_->param("use_snapshot", use_snapshot_, false);
+    pnh_->param("use_messages", use_messages_, true);
     if (use_messages_) {
       double d_period;
-      pnh.param("period", d_period, 1.0);
+      pnh_->param("period", d_period, 1.0);
       period_ = ros::Duration(d_period);
       NODELET_INFO("use_messages : %d", use_messages_);
       NODELET_INFO("message period : %f", period_.toSec());
     }
-    pnh.param("use_bytes", use_bytes_, false);
-    pnh.param("use_camera_info", use_camera_info_, true);
+    pnh_->param("use_bytes", use_bytes_, false);
+    pnh_->param("use_camera_info", use_camera_info_, true);
   }
 
-  void ImageProcessing::initPublishersAndSubscribers(){
-    double vital_rate;
-    pnh.param("vital_rate", vital_rate, 1.0);
-    image_vital_.reset(
-      new jsk_topic_tools::VitalChecker(1 / vital_rate));
-    info_vital_.reset(
-      new jsk_topic_tools::VitalChecker(1 / vital_rate));
-    it_ = new image_transport::ImageTransport(pnh);
-    std::string img = nh.resolveName("image");
-    std::string cam = nh.resolveName("camera");
-    if (img.at(0) == '/') {
-      img.erase(0, 1);
-    }
-    NODELET_INFO("camera = %s", cam.c_str());
-    NODELET_INFO("image = %s", img.c_str());
-    
-    width_scale_pub_ = pnh.advertise<std_msgs::Float32>("output/width_scale", max_queue_size_);
-    height_scale_pub_ = pnh.advertise<std_msgs::Float32>("output/height_scale", max_queue_size_);
-    
+  void ImageProcessing::unsubscribe()
+  {
     if (use_snapshot_) {
-      publish_once_ = false;
-      srv_ = pnh.advertiseService("snapshot", &ImageProcessing::snapshot_srv_cb, this);
-      sub_ = pnh.subscribe("snapshot", 1, &ImageProcessing::snapshot_msg_cb, this);
+      sub_.shutdown();
     }
-
     if (use_camera_info_) {
-      cp_ = it_->advertiseCamera("output/image", max_queue_size_);
+      if (use_camera_subscriber_) {
+        cs_.shutdown();
+      }
+      else {
+        camera_info_sub_.shutdown();
+        image_nonsync_sub_.shutdown();
+      }
+    }
+    else {
+      image_sub_.shutdown();
+    }
+  }
+  
+  void ImageProcessing::subscribe()
+  {
+    if (use_snapshot_) {
+      sub_ = pnh_->subscribe("snapshot", 1, &ImageProcessing::snapshot_msg_cb, this);
+    }
+    if (use_camera_info_) {
       if (use_camera_subscriber_) {
         cs_ = it_->subscribeCamera("input/image", max_queue_size_,
                                    &ImageProcessing::callback, this);
       }
       else {
-        camera_info_sub_ = nh.subscribe(image_transport::getCameraInfoTopic(pnh.resolveName("input/image")),
-                                        1,
-                                        &ImageProcessing::info_cb,
-                                        this);
+        camera_info_sub_ = nh_->subscribe(image_transport::getCameraInfoTopic(pnh_->resolveName("input/image")),
+                                          1,
+                                          &ImageProcessing::info_cb,
+                                          this);
         image_nonsync_sub_ = it_->subscribe("input/image",
                                             1,
                                             &ImageProcessing::image_nonsync_cb,
@@ -90,21 +83,42 @@ namespace resized_image_transport
       }
     }
     else {
-      image_pub_ = pnh.advertise<sensor_msgs::Image>("output/image", max_queue_size_);
-      image_sub_ = pnh.subscribe("input/image", max_queue_size_, &ImageProcessing::image_cb, this);
+      image_sub_ = pnh_->subscribe("input/image", max_queue_size_, &ImageProcessing::image_cb, this);
+    }
+  }
+
+
+  void ImageProcessing::initPublishersAndSubscribers(){
+    double vital_rate;
+    pnh_->param("vital_rate", vital_rate, 1.0);
+    image_vital_.reset(
+      new jsk_topic_tools::VitalChecker(1 / vital_rate));
+    info_vital_.reset(
+      new jsk_topic_tools::VitalChecker(1 / vital_rate));
+    it_ = new image_transport::ImageTransport(*pnh_);
+    std::string img = nh_->resolveName("image");
+    std::string cam = nh_->resolveName("camera");
+    if (img.at(0) == '/') {
+      img.erase(0, 1);
+    }
+    NODELET_INFO("camera = %s", cam.c_str());
+    NODELET_INFO("image = %s", img.c_str());
+    
+    width_scale_pub_ = advertise<std_msgs::Float32>(*pnh_, "output/width_scale", max_queue_size_);
+    height_scale_pub_ = advertise<std_msgs::Float32>(*pnh_, "output/height_scale", max_queue_size_);
+    
+    if (use_snapshot_) {
+      publish_once_ = false;
+      srv_ = pnh_->advertiseService("snapshot", &ImageProcessing::snapshot_srv_cb, this);
+    }
+
+    if (use_camera_info_) {
+      cp_ = advertiseCamera(*pnh_, *it_, "output/image", max_queue_size_);
+    }
+    else {
+      image_pub_ = advertise<sensor_msgs::Image>(*pnh_, "output/image", max_queue_size_);
     }
     
-    // Diagnostics
-    diagnostic_updater_.reset(
-      new jsk_topic_tools::TimeredDiagnosticUpdater(pnh, ros::Duration(1.0)));
-    diagnostic_updater_->setHardwareID(getName());
-    diagnostic_updater_->add(
-      getName(),
-      boost::bind(
-        &ImageProcessing::updateDiagnostic, this, _1));
-    diagnostic_updater_->start();
-
-
   }
 
   void ImageProcessing::snapshot_msg_cb (const std_msgs::EmptyConstPtr msg) {
@@ -144,12 +158,12 @@ namespace resized_image_transport
     // common
     stat.add("use_camera_info", use_camera_info_);
     stat.add("use_snapshot", use_snapshot_);
-    stat.add("input image", pnh.resolveName("input/image"));
-    stat.add("output image", pnh.resolveName("output/image"));
+    stat.add("input image", pnh_->resolveName("input/image"));
+    stat.add("output image", pnh_->resolveName("output/image"));
     // summary
     if (!image_vital_->isAlive()) {
       stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,
-                   "no image input. Is " + pnh.resolveName("input/image") + " active?");
+                   "no image input. Is " + pnh_->resolveName("input/image") + " active?");
     }
     else {
       if (use_camera_info_) {

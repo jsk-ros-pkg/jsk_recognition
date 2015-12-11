@@ -213,4 +213,12 @@
          type="jsk_perception::RobotToMaskImage"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_perception/PolygonArrayColorHistogram"
+         type="jsk_perception::PolygonArrayColorHistogram"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/PolygonArrayColorLikelihood"
+         type="jsk_perception::PolygonArrayColorLikelihood"
+         base_class_type="nodelet::Nodelet">
+  </class>
 </library>

@@ -402,7 +402,8 @@ namespace jsk_pcl_ros
       pcl::fromROSMsg(pc, *cloud);
       cloud->is_dense = false;
       {
-        jsk_recognition_utils::ScopedWallDurationReporter r = timer_.reporter();
+        jsk_recognition_utils::ScopedWallDurationReporter r
+          = timer_.reporter(pub_latest_time_, pub_average_time_);
         pcl::removeNaNFromPointCloud(*cloud, *cloud, indices);
         if (base_frame_id_.compare("NONE")!=0) {
           change_pointcloud_frame(cloud);
@@ -418,11 +419,6 @@ namespace jsk_pcl_ros
         }
         new_cloud_ = true;
       }
-      std_msgs::Float32 latest_time, average_time;
-      latest_time.data = timer_.latestSec();
-      average_time.data = timer_.meanSec();
-      pub_latest_time_.publish(latest_time);
-      pub_average_time_.publish(average_time);
     }
   }
 

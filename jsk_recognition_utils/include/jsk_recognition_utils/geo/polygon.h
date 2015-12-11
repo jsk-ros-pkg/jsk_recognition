@@ -201,7 +201,8 @@ namespace jsk_recognition_utils
      */
     virtual void drawLineToImage(const jsk_recognition_utils::CameraDepthSensor& model,
                                  cv::Mat& image,
-                                 const cv::Scalar& color) const;
+                                 const cv::Scalar& color,
+                                 const int line_width = 1) const;
     virtual bool isConvex();
     virtual Eigen::Vector3f centroid();
     template<class PointT> void boundariesToPointCloud(

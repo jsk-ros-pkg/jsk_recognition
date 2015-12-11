@@ -61,6 +61,14 @@ namespace jsk_recognition_utils
 
   /**
    * @brief
+   * convert jsk_recognition_msgs::HistogramimageWithRangeBin array to cv::MatND
+   */
+  cv::MatND
+  HistogramWithRangeBinArrayTocvMatND(
+    const std::vector<jsk_recognition_msgs::HistogramWithRangeBin>& histogram);
+  
+  /**
+   * @brief
    * return true if left.count is larger than right.count.
    */
   bool compareHistogramWithRangeBin(const jsk_recognition_msgs::HistogramWithRangeBin& left,

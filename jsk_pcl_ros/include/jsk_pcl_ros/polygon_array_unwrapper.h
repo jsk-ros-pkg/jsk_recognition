@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2015, JSK Lab
+ *  Copyright (c) 2014, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,49 +33,48 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <ros/ros.h>
-#include <boost/circular_buffer.hpp>
 
-namespace jsk_recognition_utils
+#ifndef JSK_PCL_ROS_POLYGON_ARRAY_UNWRAPPER_H_
+#define JSK_PCL_ROS_POLYGON_ARRAY_UNWRAPPER_H_
+
+#include <pcl_ros/pcl_nodelet.h>
+
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
+
+#include "jsk_pcl_ros/pcl_conversion_util.h"
+
+#include <geometry_msgs/PolygonStamped.h>
+#include <jsk_recognition_msgs/PolygonArray.h>
+#include <jsk_recognition_msgs/ModelCoefficientsArray.h>
+#include <jsk_topic_tools/connection_based_nodelet.h>
+
+namespace jsk_pcl_ros
 {
-  class WallDurationTimer;
-  
-  class ScopedWallDurationReporter
+  class PolygonArrayUnwrapper: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
-    typedef boost::shared_ptr<ScopedWallDurationReporter> Ptr;
-    ScopedWallDurationReporter(WallDurationTimer* parent);
-    ScopedWallDurationReporter(WallDurationTimer* parent,
-                               ros::Publisher& pub_latest,
-                               ros::Publisher& pub_average);
-    virtual ~ScopedWallDurationReporter();
+    typedef message_filters::sync_policies::ExactTime<
+    jsk_recognition_msgs::PolygonArray,
+    jsk_recognition_msgs::ModelCoefficientsArray>
+    SyncPolicy;
+
   protected:
-    WallDurationTimer* parent_;
-    ros::WallTime start_time_;
-    ros::Publisher pub_latest_, pub_average_;
-    const bool is_publish_;
+    virtual void onInit();
+    virtual void subscribe();
+    virtual void unsubscribe();
+    virtual void unwrap(
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon,
+      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients);
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygon_;
+    message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
+    ros::Publisher pub_polygon_;
+    ros::Publisher pub_coefficients_;
   private:
     
   };
-  
-  class WallDurationTimer
-  {
-  public:
-    typedef boost::shared_ptr<WallDurationTimer> Ptr;
-    WallDurationTimer(const int max_num);
-    virtual void report(ros::WallDuration& duration);
-    virtual ScopedWallDurationReporter reporter();
-    virtual ScopedWallDurationReporter reporter(
-      ros::Publisher& pub_latest,
-      ros::Publisher& pub_average);
-    virtual void clearBuffer();
-    virtual double meanSec();
-    virtual double latestSec();
-    virtual size_t sampleNum();
-  protected:
-    const int max_num_;
-    boost::circular_buffer<ros::WallDuration> buffer_;
-  private:
-  };
-  
 }
+
+#endif

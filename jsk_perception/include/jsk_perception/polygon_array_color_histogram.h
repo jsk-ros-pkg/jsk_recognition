@@ -34,64 +34,58 @@
  *********************************************************************/
 
 
-#ifndef JSK_PCL_ROS_TORUS_FINDER_H_
-#define JSK_PCL_ROS_TORUS_FINDER_H_
+#ifndef JSK_PERCEPTION_POLYGON_ARRAY_COLOR_HISTOGRAM_H_
+#define JSK_PERCEPTION_POLYGON_ARRAY_COLOR_HISTOGRAM_H_
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <jsk_recognition_msgs/TorusArray.h>
-#include <jsk_recognition_msgs/Torus.h>
-#include <jsk_pcl_ros/TorusFinderConfig.h>
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/CameraInfo.h>
+#include <jsk_recognition_msgs/PolygonArray.h>
+#include <jsk_recognition_utils/tf_listener_singleton.h>
+#include <jsk_recognition_utils/geo/polygon.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/sync_policies/exact_time.h>
+#include <message_filters/sync_policies/approximate_time.h>
+#include <jsk_perception/PolygonArrayColorHistogramConfig.h>
 #include <dynamic_reconfigure/server.h>
-#include <geometry_msgs/PoseStamped.h>
-#include <Eigen/Core>
-#include <geometry_msgs/PolygonStamped.h>
 
-namespace jsk_pcl_ros
+namespace jsk_perception
 {
-  class TorusFinder: public jsk_topic_tools::DiagnosticNodelet
+  class PolygonArrayColorHistogram: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    typedef TorusFinderConfig Config;
-    TorusFinder(): DiagnosticNodelet("TorusFinder") {}
+    typedef message_filters::sync_policies::ApproximateTime<
+    sensor_msgs::Image,
+    jsk_recognition_msgs::PolygonArray > ApproximateSyncPolicy;
+    typedef jsk_perception::PolygonArrayColorHistogramConfig Config;
+    PolygonArrayColorHistogram(): DiagnosticNodelet("PolygonArrayColorHistogram") {}
   protected:
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual void segment(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
-    virtual void segmentFromPoints(const geometry_msgs::PolygonStamped::ConstPtr& polygon_msg);
-    virtual void configCallback(Config &config, uint32_t level);
-    
-    ////////////////////////////////////////////////////////
-    // ROS variables
-    ////////////////////////////////////////////////////////
-    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
-    ros::Subscriber sub_;
-    ros::Subscriber sub_points_;
-    ros::Publisher pub_torus_;
-    ros::Publisher pub_torus_array_;
-    ros::Publisher pub_torus_with_failure_;
-    ros::Publisher pub_torus_array_with_failure_;
-    ros::Publisher pub_inliers_;
-    ros::Publisher pub_coefficients_;
-    ros::Publisher pub_pose_stamped_;
-    boost::mutex mutex_;
-    Eigen::Vector3f hint_axis_;
+    virtual void infoCallback(const sensor_msgs::CameraInfo::ConstPtr& msg);
+    virtual void compute(const sensor_msgs::Image::ConstPtr& image_msg,
+                         const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon_msg);
+    virtual void debugPolygonImage(
+      const jsk_recognition_utils::CameraDepthSensor& model,
+      cv::Mat& image, jsk_recognition_utils::Polygon::Ptr polygon, size_t pi) const;
 
-    ////////////////////////////////////////////////////////
-    // Parameters
-    ////////////////////////////////////////////////////////
-    std::string algorithm_;
-    double min_radius_;
-    double max_radius_;
-    double outlier_threshold_;
-    double eps_hint_angle_;
-    bool use_hint_;
-    bool use_normal_;
-    int max_iterations_;
-    int min_size_;
-    bool voxel_grid_sampling_;
-    double voxel_size_;
+    virtual void configCallback(Config &config, uint32_t level);
+
+    boost::mutex mutex_;
+    ros::Publisher pub_;
+    ros::Publisher pub_debug_polygon_;
+    ros::Subscriber sub_info_;
+    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
+    sensor_msgs::CameraInfo::ConstPtr info_;
+    message_filters::Subscriber<sensor_msgs::Image> sub_image_;
+    message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygon_;
+    boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> > async_;
+    tf::TransformListener* tf_listener_;
+    int max_queue_size_;
+    int bin_size_;
+    int pixel_min_value_, pixel_max_value_;
+    int debug_line_width_;
   private:
   };
 }

@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2015, JSK Lab
+ *  Copyright (c) 2014, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,49 +33,51 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <ros/ros.h>
-#include <boost/circular_buffer.hpp>
+#include "jsk_pcl_ros/polygon_array_unwrapper.h"
 
-namespace jsk_recognition_utils
+namespace jsk_pcl_ros
 {
-  class WallDurationTimer;
-  
-  class ScopedWallDurationReporter
+  void PolygonArrayUnwrapper::onInit()
   {
-  public:
-    typedef boost::shared_ptr<ScopedWallDurationReporter> Ptr;
-    ScopedWallDurationReporter(WallDurationTimer* parent);
-    ScopedWallDurationReporter(WallDurationTimer* parent,
-                               ros::Publisher& pub_latest,
-                               ros::Publisher& pub_average);
-    virtual ~ScopedWallDurationReporter();
-  protected:
-    WallDurationTimer* parent_;
-    ros::WallTime start_time_;
-    ros::Publisher pub_latest_, pub_average_;
-    const bool is_publish_;
-  private:
-    
-  };
-  
-  class WallDurationTimer
+    ConnectionBasedNodelet::onInit();
+    pub_polygon_ = advertise<geometry_msgs::PolygonStamped>(
+      *pnh_, "output_polygon", 1);
+    pub_coefficients_
+      = advertise<pcl_msgs::ModelCoefficients>(
+        *pnh_,
+        "output_coefficients", 1);
+  }
+
+  void PolygonArrayUnwrapper::subscribe()
   {
-  public:
-    typedef boost::shared_ptr<WallDurationTimer> Ptr;
-    WallDurationTimer(const int max_num);
-    virtual void report(ros::WallDuration& duration);
-    virtual ScopedWallDurationReporter reporter();
-    virtual ScopedWallDurationReporter reporter(
-      ros::Publisher& pub_latest,
-      ros::Publisher& pub_average);
-    virtual void clearBuffer();
-    virtual double meanSec();
-    virtual double latestSec();
-    virtual size_t sampleNum();
-  protected:
-    const int max_num_;
-    boost::circular_buffer<ros::WallDuration> buffer_;
-  private:
-  };
+    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+    sub_polygon_.subscribe(*pnh_, "input_polygons", 1);
+    sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
+    sync_->connectInput(sub_polygon_, sub_coefficients_);
+    sync_->registerCallback(boost::bind(
+                              &PolygonArrayUnwrapper::unwrap,
+                              this, _1, _2));
+  }
+
+  void PolygonArrayUnwrapper::unsubscribe()
+  {
+    sub_polygon_.unsubscribe();
+    sub_coefficients_.unsubscribe();
+  }
+  
+  void PolygonArrayUnwrapper::unwrap(
+    const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
+    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients)
+  {
+    if (polygons->polygons.size() > 0) {
+      geometry_msgs::PolygonStamped polygon_msg = polygons->polygons[0];
+      pcl_msgs::ModelCoefficients coefficients_msg = coefficients->coefficients[0];
+      pub_polygon_.publish(polygon_msg);
+      pub_coefficients_.publish(coefficients_msg);
+    }
+  }
   
 }
+
+#include <pluginlib/class_list_macros.h>
+PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::PolygonArrayUnwrapper, nodelet::Nodelet);

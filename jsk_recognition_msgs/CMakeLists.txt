@@ -19,6 +19,7 @@ add_message_files(
   Histogram.msg
   HistogramWithRangeBin.msg
   HistogramWithRange.msg
+  HistogramWithRangeArray.msg
   ICPResult.msg
   ImageDifferenceValue.msg
   Int32Stamped.msg

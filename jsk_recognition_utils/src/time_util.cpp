@@ -34,11 +34,24 @@
  *********************************************************************/
 
 #include "jsk_recognition_utils/time_util.h"
+#include <std_msgs/Float32.h>
 
 namespace jsk_recognition_utils
 {
   ScopedWallDurationReporter::ScopedWallDurationReporter(WallDurationTimer* parent):
-    parent_(parent), start_time_(ros::WallTime::now())
+    parent_(parent), start_time_(ros::WallTime::now()),
+    is_publish_(false)
+  {
+
+  }
+
+  ScopedWallDurationReporter::ScopedWallDurationReporter(
+    WallDurationTimer* parent,
+    ros::Publisher& pub_latest,
+    ros::Publisher& pub_average):
+    parent_(parent), start_time_(ros::WallTime::now()),
+    pub_latest_(pub_latest), pub_average_(pub_average),
+    is_publish_(true)
   {
 
   }
@@ -48,6 +61,14 @@ namespace jsk_recognition_utils
     ros::WallTime end_time = ros::WallTime::now();
     ros::WallDuration d = end_time - start_time_;
     parent_->report(d);
+    if (is_publish_) {
+      std_msgs::Float32 ros_latest;
+      ros_latest.data = parent_->latestSec();
+      pub_latest_.publish(ros_latest);
+      std_msgs::Float32 ros_average;
+      ros_average.data = parent_->meanSec();
+      pub_average_.publish(ros_latest);
+    }
   }
 
   WallDurationTimer::WallDurationTimer(const int max_num):
@@ -63,6 +84,13 @@ namespace jsk_recognition_utils
   ScopedWallDurationReporter WallDurationTimer::reporter()
   {
     return ScopedWallDurationReporter(this);
+  }
+
+  ScopedWallDurationReporter WallDurationTimer::reporter(
+    ros::Publisher& pub_latest,
+    ros::Publisher& pub_average)
+  {
+    return ScopedWallDurationReporter(this, pub_latest, pub_average);
   }
 
   double WallDurationTimer::latestSec()

@@ -80,7 +80,8 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();
     {
-      jsk_recognition_utils::ScopedWallDurationReporter r = timer_.reporter();
+      jsk_recognition_utils::ScopedWallDurationReporter r
+        = timer_.reporter(pub_latest_time_, pub_average_time_);
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr
         cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
       pcl::fromROSMsg(*cloud_msg, *cloud);
@@ -119,11 +120,6 @@ namespace jsk_pcl_ros
       ros_normal_xyz_cloud.header = cloud_msg->header;
       pub_with_xyz_.publish(ros_normal_xyz_cloud);
     }
-    std_msgs::Float32 latest_time, average_time;
-    latest_time.data = timer_.latestSec();
-    average_time.data = timer_.meanSec();
-    pub_latest_time_.publish(latest_time);
-    pub_average_time_.publish(average_time);
   }
 }
 

@@ -60,7 +60,7 @@ namespace jsk_perception
     ros::Subscriber sub_;
     ros::Publisher pub_;
 
-    robot_self_filter::SelfMask<pcl::PointXYZ>* self_mask_;
+    boost::shared_ptr<robot_self_filter::SelfMask<pcl::PointXYZ> > self_mask_;
     tf::TransformListener tf_listener_;
 
     double max_robot_dist_;

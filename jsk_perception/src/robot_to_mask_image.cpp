@@ -133,7 +133,7 @@ namespace jsk_perception
         }
       }
     }
-    self_mask_ = new robot_self_filter::SelfMask<pcl::PointXYZ>(tf_listener_, links);
+    self_mask_ = boost::shared_ptr<robot_self_filter::SelfMask<pcl::PointXYZ> >(new robot_self_filter::SelfMask<pcl::PointXYZ>(tf_listener_, links));
   }
 }
 

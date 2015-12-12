@@ -27,7 +27,7 @@ env:
     - ROS_DISTRO=hydro  USE_DEB=false
     - ROS_DISTRO=indigo USE_DEB=true
     - ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT="git clone -b indigo https://github.com/ros-perception/vision_opencv.git" EXTRA_DEB="ros-indigo-opencv3"
-    - ROS_DISTRO=jade   USE_DEB=true
+    - ROS_DISTRO=jade   USE_DEB=false
 matrix:
   allow_failures:
     - env: ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT="git clone -b indigo https://github.com/ros-perception/vision_opencv.git" EXTRA_DEB="ros-indigo-opencv3"

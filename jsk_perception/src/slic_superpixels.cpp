@@ -44,6 +44,7 @@ namespace jsk_perception
       
   void SLICSuperPixels::onInit()
   {
+    JSK_ROS_WARN("Maybe this node does not work for large size images with segfault.");
     nh_ = ros::NodeHandle(getNodeHandle(), "image");
     pnh_ = getPrivateNodeHandle();
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (pnh_);

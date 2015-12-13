@@ -9,8 +9,8 @@
   <node name="slic_super_pixels"
         pkg="jsk_perception" type="slic_super_pixels" />
 
-  <test test-name="test_topic_published"
-        name="test_topic_published"
+  <test test-name="test_slic_super_pixels"
+        name="test_slic_super_pixels"
         pkg="jsk_tools" type="test_topic_published.py">
     <rosparam>
       topic_0: /slic_super_pixels/output

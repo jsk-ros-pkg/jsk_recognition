@@ -46,6 +46,7 @@ namespace jsk_pcl_ros
   void TorusFinder::onInit()
   {
     DiagnosticNodelet::onInit();
+    pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
     pnh_->param("use_hint", use_hint_, false);
     if (use_hint_) {
       if (pnh_->hasParam("initial_axis_hint")) {

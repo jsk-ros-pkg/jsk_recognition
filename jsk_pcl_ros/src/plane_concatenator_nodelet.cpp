@@ -46,7 +46,7 @@ namespace jsk_pcl_ros
   void PlaneConcatenator::onInit()
   {
     DiagnosticNodelet::onInit();
-
+    pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (

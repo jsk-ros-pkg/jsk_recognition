@@ -1,0 +1,5 @@
+min_sensor_dist: .2
+self_see_default_padding: 0.0
+self_see_default_scale: 1.0
+self_see_links:
+  - name: nil_link

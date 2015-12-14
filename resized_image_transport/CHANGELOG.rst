@@ -2,8 +2,8 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.9 (2015-12-14)
+------------------
 * [resized_image_transport] Use jsk_topic_tools::DiagnosticNodelet to omit
   meaningless computation
 * Contributors: Ryohei Ueda

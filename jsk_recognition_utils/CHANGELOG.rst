@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.9 (2015-12-14)
+------------------
 * [jsk_perception] Compute polygon likelihood based on color histogram.
 * [jsk_perception] Add PolygonArrayColorHistogram
 * [jsk_recognition_utils] Better API to measure and publish computation time

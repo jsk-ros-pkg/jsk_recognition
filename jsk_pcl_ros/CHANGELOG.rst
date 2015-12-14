@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.9 (2015-12-14)
+------------------
 * [jsk_pcl_ros] Remove cuboid_parameter.cfg and add
   InteractiveCuboidLikelihood.cfg and PlaneSupportedCuboidEstimator.cfg.
   This commit give up to re-use definition of dynamic_reconfigure because

@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.9 (2015-12-14)
+------------------
 * [jsk_perception] Test slop with test_topic_published.py
   Depends on https://github.com/jsk-ros-pkg/jsk_common/pull/1254
 * [jsk_perception] Specific test name for each test files

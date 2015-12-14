@@ -89,7 +89,8 @@ add_service_files(FILES SwitchTopic.srv
 generate_dynamic_reconfigure_options(
   cfg/VoxelGridLargeScale.cfg
   cfg/PolygonArrayAreaLikelihood.cfg
-  cfg/cuboid_parameter.cfg
+  cfg/PlaneSupportedCuboidEstimator.cfg
+  cfg/InteractiveCuboidLikelihood.cfg
   cfg/ExtractParticlesTopNBase.cfg
   cfg/PoseWithCovarianceStampedToGaussianPointCloud.cfg
   cfg/HeightmapMorphologicalFiltering.cfg

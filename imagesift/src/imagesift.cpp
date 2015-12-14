@@ -114,7 +114,7 @@ namespace imagesift
                 return false;
             
             if(imagesift != NULL && (imagesift->cols!=imagemsg.width || imagesift->rows!=imagemsg.height)) {
-                ROS_INFO("clear sift resources");
+                ROS_DEBUG("clear sift resources");
                 DestroyAllImages();
                 imagesift = NULL;
             }
@@ -191,7 +191,7 @@ namespace imagesift
         FreeKeypoints(keypts);
         DestroyAllImages();
 
-        ROS_INFO("imagesift: image: %d(size=%lu), num: %d, sift time: %.3fs, total: %.3fs", imagemsg.header.seq,
+        ROS_DEBUG("imagesift: image: %d(size=%lu), num: %d, sift time: %.3fs, total: %.3fs", imagemsg.header.seq,
                  imagemsg.data.size(),  numkeys,
                  (float)(ros::Time::now()-siftbasetime).toSec(), (float)(ros::Time::now()-lasttime).toSec());
         lasttime = ros::Time::now();

@@ -42,6 +42,7 @@
 #include <jsk_recognition_utils/sensor_model_utils.h>
 #include <jsk_recognition_utils/cv_utils.h>
 #include <sensor_msgs/image_encodings.h>
+#include <jsk_recognition_utils/pcl_ros_util.h>
 
 namespace jsk_perception
 {
@@ -112,6 +113,14 @@ namespace jsk_perception
     boost::mutex::scoped_lock lock(mutex_);
     if (!info_) {
       JSK_NODELET_WARN("No camera_info is available");
+      return;
+    }
+    // check frame_id
+    if (!jsk_recognition_utils::isSameFrameId(image_msg->header.frame_id,
+                                              polygon_msg->header.frame_id)) {
+      JSK_NODELET_ERROR("frame_id does not match. image: %s, polygon: %s",
+                        image_msg->header.frame_id.c_str(),
+                        polygon_msg->header.frame_id.c_str());
       return;
     }
     try 

@@ -2,7 +2,7 @@ jsk\_recognition
 ===============
 
 [![Build Status](https://travis-ci.org/jsk-ros-pkg/jsk_recognition.svg)](https://travis-ci.org/jsk-ros-pkg/jsk_recognition)
-[![Read the Docs](https://readthedocs.org/projects/pip/badge/?version=latest)](https://jsk-recognition.readthedocs.org)
+[![Read the Docs](https://readthedocs.org/projects/jsk-docs/badge/?version=latest)](http://jsk-docs.readthedocs.org/en/latest/jsk_recognition/doc/index.html)
 
 Deb Build Status
 ------------

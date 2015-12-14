@@ -113,6 +113,8 @@ namespace jsk_pcl_ros
     double ransac_refinement_eps_distance_;
     double ransac_refinement_eps_angle_;
     int min_size_;
+    double min_area_;
+    double max_area_;
   private:
     
   };

@@ -25,12 +25,12 @@ env:
     - USE_JENKINS=true
   matrix:
     - ROS_DISTRO=hydro  USE_DEB=false
-    - ROS_DISTRO=indigo USE_DEB=true
-    - ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT="git clone -b indigo https://github.com/ros-perception/vision_opencv.git" EXTRA_DEB="ros-indigo-opencv3"
+    # FIXME: this is HOTFIX for https://github.com/jsk-ros-pkg/jsk_recognition/pull/1403#issuecomment-164432875
+    - ROS_DISTRO=indigo USE_DEB=false BEFORE_SCRIPT="git clone -b indigo https://github.com/ros-perception/vision_opencv.git" EXTRA_DEB="ros-indigo-opencv3"
     - ROS_DISTRO=jade   USE_DEB=false
 matrix:
   allow_failures:
-    - env: ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT="git clone -b indigo https://github.com/ros-perception/vision_opencv.git" EXTRA_DEB="ros-indigo-opencv3"
+    - env: ROS_DISTRO=indigo USE_DEB=false BEFORE_SCRIPT="git clone -b indigo https://github.com/ros-perception/vision_opencv.git" EXTRA_DEB="ros-indigo-opencv3"
 script:
   - source .travis/travis.sh
   - (cd doc && source setup.sh && make html)

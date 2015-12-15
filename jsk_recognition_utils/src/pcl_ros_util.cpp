@@ -47,4 +47,24 @@ namespace jsk_recognition_utils
     msg.header = header;
     pub.publish(msg);
   }
+
+  bool isSameFrameId(const std::string& a, const std::string& b)
+  {
+    // we can ignore the first /
+    std::string aa;
+    if (a.length() > 0 && a[0] == '/') {
+      aa = a.substr(1, a.length() - 1);
+    }
+    else {
+      aa = a;
+    }
+    std::string bb;
+    if (b.length() > 0 && b[0] == '/') {
+      bb = b.substr(1, b.length() - 1);
+    }
+    else {
+      bb = b;
+    }
+    return aa == bb;
+  }
 }

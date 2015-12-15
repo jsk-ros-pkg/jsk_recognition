@@ -37,7 +37,8 @@
 #include <pluginlib/class_list_macros.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/segmentation/extract_polygonal_prism_data.h>
-
+#include <jsk_recognition_utils/pcl_ros_util.h>
+#include <jsk_topic_tools/log_utils.h>
 #include <pcl/filters/project_inliers.h>
 #include <set>
 
@@ -160,6 +161,35 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();
+    // check header
+    if (use_indices_) {
+      if(!jsk_recognition_utils::isSameFrameId(input->header.frame_id,
+                                               indices->header.frame_id) ||
+         !jsk_recognition_utils::isSameFrameId(input->header.frame_id,
+                                               coefficients->header.frame_id) ||
+         !jsk_recognition_utils::isSameFrameId(input->header.frame_id,
+                                               polygons->header.frame_id)) {
+        JSK_NODELET_ERROR("frame_id does not match. cloud: %s, indices: %s, coefficients: %s, polygons: %s",
+                          input->header.frame_id.c_str(),
+                          indices->header.frame_id.c_str(),
+                          coefficients->header.frame_id.c_str(),
+                          polygons->header.frame_id.c_str());
+        return;
+      }
+    }
+    else {
+      if(!jsk_recognition_utils::isSameFrameId(input->header.frame_id,
+                                               coefficients->header.frame_id) ||
+         !jsk_recognition_utils::isSameFrameId(input->header.frame_id,
+                                               polygons->header.frame_id)) {
+        JSK_NODELET_ERROR("frame_id does not match. cloud: %s, coefficients: %s, polygons: %s",
+                          input->header.frame_id.c_str(),
+                          coefficients->header.frame_id.c_str(),
+                          polygons->header.frame_id.c_str());
+        return;
+      }
+    }
+  
     Eigen::Vector3f viewpoint;
     try {
       if (use_sensor_frame_) {

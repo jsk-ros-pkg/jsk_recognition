@@ -46,7 +46,7 @@ namespace jsk_pcl_ros
   void PlaneConcatenator::onInit()
   {
     DiagnosticNodelet::onInit();
-
+    pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
@@ -138,7 +138,9 @@ namespace jsk_pcl_ros
            ++it) {
         new_one_indices = addIndices(*new_one_indices, *all_indices[*it]);
       }
-      new_indices.push_back(new_one_indices);
+      if (new_one_indices->indices.size() > min_size_) {
+        new_indices.push_back(new_one_indices);
+      }
     }
     
     // refinement
@@ -156,21 +158,31 @@ namespace jsk_pcl_ros
     new_ros_indices.header = cloud_msg->header;
     new_ros_coefficients.header = cloud_msg->header;
     new_ros_polygons.header = cloud_msg->header;
-    new_ros_indices.cluster_indices
-      = pcl_conversions::convertToROSPointIndices(new_indices, cloud_msg->header);
-    new_ros_coefficients.coefficients
-      = pcl_conversions::convertToROSModelCoefficients(
-        new_refined_coefficients, cloud_msg->header);
-    
     for (size_t i = 0; i < new_indices.size(); i++) {
       ConvexPolygon::Ptr convex
         = convexFromCoefficientsAndInliers<PointT>(
           cloud, new_indices[i], new_refined_coefficients[i]);
-      geometry_msgs::PolygonStamped polygon;
-      polygon.polygon = convex->toROSMsg();
-      polygon.header = cloud_msg->header;
-      new_ros_polygons.polygons.push_back(polygon);
+      if (convex->area() > min_area_ && convex->area() < max_area_) {
+        geometry_msgs::PolygonStamped polygon;
+        polygon.polygon = convex->toROSMsg();
+        polygon.header = cloud_msg->header;
+        new_ros_polygons.polygons.push_back(polygon);
+        pcl_msgs::PointIndices ros_indices;
+        ros_indices.header = cloud_msg->header;
+        ros_indices.indices = new_indices[i]->indices;
+        new_ros_indices.cluster_indices.push_back(ros_indices);
+        pcl_msgs::ModelCoefficients ros_coefficients;
+        ros_coefficients.header = cloud_msg->header;
+        ros_coefficients.values = new_refined_coefficients[i]->values;
+        new_ros_coefficients.coefficients.push_back(ros_coefficients);
+      }
     }
+    
+    // new_ros_indices.cluster_indices
+    //   = pcl_conversions::convertToROSPointIndices(new_indices, cloud_msg->header);
+    // new_ros_coefficients.coefficients
+    //   = pcl_conversions::convertToROSModelCoefficients(
+    //     new_refined_coefficients, cloud_msg->header);
 
     pub_indices_.publish(new_ros_indices);
     pub_polygon_.publish(new_ros_polygons);
@@ -250,6 +262,8 @@ namespace jsk_pcl_ros
       = config.ransac_refinement_outlier_threshold;
     ransac_refinement_eps_angle_ = config.ransac_refinement_eps_angle;
     min_size_ = config.min_size;
+    min_area_ = config.min_area;
+    max_area_ = config.max_area;
   }
 
   void PlaneConcatenator::updateDiagnostic(

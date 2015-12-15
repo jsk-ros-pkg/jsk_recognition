@@ -57,6 +57,13 @@ namespace jsk_recognition_utils
   void publishPointIndices(ros::Publisher& pub,
                            const pcl::PointIndices& indices,
                            const std_msgs::Header& header);
+  
+  /**
+   * @brief
+   * Return true if a and b are the same frame_id
+   */
+  bool isSameFrameId(const std::string& a, const std::string& b);
+                     
 }
 
 #endif

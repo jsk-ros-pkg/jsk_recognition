@@ -37,3 +37,11 @@ Concatenate near planes and build new set of planes.
 * `~ransac_refinement_eps_angle` (Double, default: `0.1`)
 
   Eps angle threshold of RANSAC refinment using normal direction of the plane.
+* `~min_size` (default: `100`)
+
+  Minimum inlier of concatenated polygons.
+* `~min_area` (default: `0.1`)
+* `~max_area` (default: `100.0`)
+
+  Minimum and maximum area of concatenated polygons.
+

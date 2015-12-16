@@ -2,6 +2,28 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.9 (2015-12-14)
+------------------
+* [jsk_perception] Test slop with test_topic_published.py
+  Depends on https://github.com/jsk-ros-pkg/jsk_common/pull/1254
+* [jsk_perception] Specific test name for each test files
+* [jsk_perception] test_topic_published.py does not work on hydro travis/jenkins
+  Modified:
+  jsk_perception/CMakeLists.txt
+* [jsk_perception] Warn about segfault with large size image in SlicSuperpixel
+  Modified:
+  jsk_perception/src/slic_superpixels.cpp
+* [jsk_perception] Test slic_super_pixels
+* merge origin/master
+* use shared_ptr for self_mask instance.
+* Merge remote-tracking branch 'origin/master' into add-robot-mask
+* [jsk_perception] Clean up duplicated packages in package.xml
+* [jsk_perception] Compute polygon likelihood based on color histogram.
+* [jsk_perception] Add PolygonArrayColorHistogram
+* add sample launch file.
+* add robot_to_mask source files.
+* Contributors: Kentaro Wada, MasakiMurooka, Ryohei Ueda, Masaki Murooka
+
 0.3.8 (2015-12-08)
 ------------------
 * [jsk_perception] Add CATKIN_ENABLE_TESTING if block

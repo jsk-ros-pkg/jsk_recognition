@@ -2,6 +2,9 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.9 (2015-12-14)
+------------------
+
 0.3.8 (2015-12-08)
 ------------------
 * Use ccache if installed to make it fast to generate object file

@@ -2,6 +2,11 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.9 (2015-12-14)
+------------------
+* [checkerboard_detector] Rename doc soft link
+* Contributors: Kentaro Wada
+
 0.3.8 (2015-12-08)
 ------------------
 

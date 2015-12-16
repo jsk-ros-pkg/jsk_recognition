@@ -2,6 +2,26 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.9 (2015-12-14)
+------------------
+* [jsk_pcl_ros] Remove cuboid_parameter.cfg and add
+  InteractiveCuboidLikelihood.cfg and PlaneSupportedCuboidEstimator.cfg.
+  This commit give up to re-use definition of dynamic_reconfigure because
+  generate_dynamic_reconfigure_options automatically install cpp files
+  estimated from cfg files.
+  closes https://github.com/jsk-ros-pkg/jsk_recognition/issues/1401
+* [jsk_pcl_ros] Add PoygonArrayUnwrapper
+* [jsk_pcl_ros] Do not compile nodelets depending on ml_classifiers
+  if it is not found.
+  see `#1348 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1348>`_
+* [jsk_pcl_ros] Fix flipped negative\_ of ExtractIndices (bugfix)
+  I mistakenly take it as opposite negative and non negative.
+  I will send PR to pcl also.
+* [jsk_recognition_utils] Better API to measure and publish computation time
+* [jsk_pcl_ros/TorusFinder] Publish failure information to other topics
+  to keep comapatiblity
+* Contributors: Kentaro Wada, Ryohei Ueda
+
 0.3.8 (2015-12-08)
 ------------------
 * [jsk_pcl_ros] Remove lisp-style comments

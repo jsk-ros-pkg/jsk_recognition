@@ -2,6 +2,13 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.9 (2015-12-14)
+------------------
+* [jsk_perception] Compute polygon likelihood based on color histogram.
+* [jsk_perception] Add PolygonArrayColorHistogram
+* [jsk_recognition_utils] Better API to measure and publish computation time
+* Contributors: Ryohei Ueda
+
 0.3.8 (2015-12-08)
 ------------------
 * Use ccache if installed to make it fast to generate object file

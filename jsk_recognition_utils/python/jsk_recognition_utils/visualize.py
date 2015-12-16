@@ -4,12 +4,15 @@
 import math
 
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 import PIL
 
 
 def get_tile_image(imgs, tile_shape=None):
+
+    # import should be here to avoid import error on server
+    # caused by matplotlib's backend
+    import matplotlib.pyplot as plt  # noqa
 
     def get_tile_shape(img_num):
         x_num = 0

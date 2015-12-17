@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.10 (2015-12-17)
+-------------------
 * [jsk_recognition_utils] Fix import error on server caused by matplotlib
 * [jsk_pcl_ros] Check header.frame_id before resolving 3-D spacially
   Modified:

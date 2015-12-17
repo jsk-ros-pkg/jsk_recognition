@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.10 (2015-12-17)
+-------------------
 * [jsk_pcl_ros] Check md5 hash to check the test_data is latest
   For https://github.com/jsk-ros-pkg/jsk_recognition/issues/1413
   TODO: How to cache the test_data on jenkins/travis?

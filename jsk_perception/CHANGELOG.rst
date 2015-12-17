@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.10 (2015-12-17)
+-------------------
 * [jsk_perception] Add utils to save images by request or from bagfile
   I sent PR to upstream:
   - https://github.com/ros-perception/image_pipeline/pull/159

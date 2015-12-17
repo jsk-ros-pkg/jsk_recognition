@@ -36,7 +36,7 @@ find_package(catkin REQUIRED COMPONENTS
   ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs
   eigen_conversions tf_conversions tf2_ros tf
   image_transport nodelet cv_bridge
-  sklearn jsk_topic_tools
+  jsk_topic_tools
   image_geometry
   jsk_footstep_msgs
   interactive_markers

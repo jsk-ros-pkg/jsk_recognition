@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.11 (2015-12-18)
+-------------------
 * [jsk_pcl_ros] Do not include pcl headers in polygon_array_wrapper and polygon_array_unwrapper
 * [jsk_pcl_ros] Remove ccache prefix
 * [jsk_pcl_ros] Cache test_data to ROS home

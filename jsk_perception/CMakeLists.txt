@@ -76,14 +76,7 @@ catkin_package(
   LIBRARIES jsk_perception oriented_gradient
 )
 
-execute_process(
-  COMMAND cmake -E chdir ${CMAKE_CURRENT_BINARY_DIR}
-  make -f ${PROJECT_SOURCE_DIR}/Makefile.slic
-  INSTALL_DIR=${CATKIN_DEVEL_PREFIX}
-  MK_DIR=${mk_PREFIX}/share/mk installed
-  RESULT_VARIABLE _make_failed)
-
-include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels)
+include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} slic)
 link_directories(${catkin_LIBRARY_DIRS})
 add_executable(camshiftdemo src/camshiftdemo.cpp)
 add_executable(linemod src/linemod.cpp)
@@ -161,7 +154,7 @@ endif(robot_self_filter_FOUND)
 
 # compiling jsk_perception library for nodelet
 add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
-  ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels/slic.cpp
+  slic/slic.cpp
   src/image_utils.cpp
   src/histogram_of_oriented_gradients.cpp
   )

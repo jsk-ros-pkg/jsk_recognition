@@ -2,13 +2,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(jsk_pcl_ros)
 
-# Use ccache if installed to make it fast to generate object files
-find_program(CCACHE_FOUND ccache)
-if(CCACHE_FOUND)
-  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
-  set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
-endif(CCACHE_FOUND)
-
 if($ENV{ROS_DISTRO} STREQUAL "groovy")
   # update package.xml, in groovy we need to add pcl to package.xml
   execute_process(COMMAND sed -i s@<run_depend>pcl_ros</run_depend>@<run_depend>pcl_ros</run_depend><run_depend>pcl</run_depend>@g ${PROJECT_SOURCE_DIR}/package.xml)

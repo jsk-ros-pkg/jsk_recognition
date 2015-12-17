@@ -3,9 +3,13 @@
 import hashlib
 import os
 import shlex
+import shutil
 import subprocess
 
 import rospkg
+
+
+ROS_HOME = os.getenv('ROS_HOME', os.path.expanduser('~/.ros'))
 
 
 def extract_tgz(filename, cwd):
@@ -34,13 +38,20 @@ def install_test_data(filename, url, md5, compressed_bag=None):
     @param compressed_bag: relative path from data_dir to compressed bagfile
     """
     rp = rospkg.RosPack()
+    ros_data_dir = os.path.join(ROS_HOME, 'test_data')
+    if not os.path.exists(ros_data_dir):
+        os.mkdir(ros_data_dir)
     data_dir = os.path.join(rp.get_path('jsk_pcl_ros'), 'test_data')
+    cache_file = os.path.join(ros_data_dir, filename)
     output = os.path.join(data_dir, filename)
+    if os.path.exists(cache_file):
+        shutil.copy(cache_file, output)
     if os.path.exists(output) and check_md5sum(output, md5):
         print("[jsk_pcl_ros] '{}' is already latest version".format(output))
         return
     print("[jsk_pcl_ros] Installing '{}'".format(output))
     download_from_gdrive(url, output)
+    shutil.copy(output, cache_file)
     extract_tgz(output, cwd=data_dir)
     if compressed_bag is not None:
         compressed_bag = os.path.join(data_dir, compressed_bag)

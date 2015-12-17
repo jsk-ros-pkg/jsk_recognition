@@ -531,7 +531,7 @@ install(DIRECTORY launch
 if (CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   # install test data by a script
-  add_custom_target(install_test_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.sh)
+  add_custom_target(install_test_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.py)
   if(TARGET tests)
     add_dependencies(tests install_test_data)
   endif()

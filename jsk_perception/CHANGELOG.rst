@@ -2,6 +2,25 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_perception] Add utils to save images by request or from bagfile
+  I sent PR to upstream:
+  - https://github.com/ros-perception/image_pipeline/pull/159
+  - https://github.com/ros-perception/image_pipeline/pull/163
+  - https://github.com/ros-perception/image_pipeline/pull/164
+  Added:
+  jsk_perception/node_scripts/extract_images_sync
+  jsk_perception/node_scripts/image_saver_sync
+  jsk_perception/node_scripts/publish_header
+* [jsk_pcl_ros] Check header.frame_id before resolving 3-D spacially
+  Modified:
+  jsk_pcl_ros/src/multi_plane_extraction_nodelet.cpp
+  jsk_perception/src/polygon_array_color_histogram.cpp
+  jsk_recognition_utils/include/jsk_recognition_utils/pcl_ros_util.h
+  jsk_recognition_utils/src/pcl_ros_util.cpp
+* Contributors: Kentaro Wada, Ryohei Ueda
+
 0.3.9 (2015-12-14)
 ------------------
 * [jsk_perception] Test slop with test_topic_published.py

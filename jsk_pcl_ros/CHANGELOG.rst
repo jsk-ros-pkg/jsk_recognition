@@ -2,6 +2,40 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros] Check md5 hash to check the test_data is latest
+  For https://github.com/jsk-ros-pkg/jsk_recognition/issues/1413
+  TODO: How to cache the test_data on jenkins/travis?
+  Modified:
+  jsk_pcl_ros/CMakeLists.txt
+  Added:
+  jsk_pcl_ros/scripts/install_test_data.py
+* [jsk_pcl_ros] Quiet rosbag decompress and echo start/end
+  Modified:
+  jsk_pcl_ros/scripts/install_test_data.sh
+* [jsk_pcl_ros] Download test_data with quiet mode
+* [jsk_pcl_ros] Add script to extract one polygon which has the
+  best likelihood field
+  Added:
+  jsk_pcl_ros/scripts/extract_top_polygon_likelihood.py
+* [jsk_pcl_ros] Add launch file for valve detection without User Interaction
+  Added:
+  jsk_pcl_ros/config/drc_box_color.yaml
+  jsk_pcl_ros/launch/valve_detection.launch
+* [jsk_pcl_ros] Check header.frame_id before resolving 3-D spacially
+  Modified:
+  jsk_pcl_ros/src/multi_plane_extraction_nodelet.cpp
+  jsk_perception/src/polygon_array_color_histogram.cpp
+  jsk_recognition_utils/include/jsk_recognition_utils/pcl_ros_util.h
+  jsk_recognition_utils/src/pcl_ros_util.cpp
+* [jsk_pcl_ros] Set VerbosityLevel to ALWAYS to ignore error message
+  of RANSAC in PlaneConcatenator
+* [jsk_pcl_ros] More larger number of iteration in TorusFinder.
+  And set pcl verbosity level to WARN.
+* [jsk_pcl_ros] Add ~min_area and ~max_area to PlaneConcatenator
+* Contributors: Kentaro Wada, Ryohei Ueda
+
 0.3.9 (2015-12-14)
 ------------------
 * [jsk_pcl_ros] Remove cuboid_parameter.cfg and add

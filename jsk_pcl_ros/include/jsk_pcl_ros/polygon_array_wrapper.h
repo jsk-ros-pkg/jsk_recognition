@@ -37,13 +37,9 @@
 #ifndef JSK_PCL_ROS_POLYGON_ARRAY_WRAPPER_H_
 #define JSK_PCL_ROS_POLYGON_ARRAY_WRAPPER_H_
 
-#include <pcl_ros/pcl_nodelet.h>
-
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
-
-#include "jsk_pcl_ros/pcl_conversion_util.h"
 
 #include <geometry_msgs/PolygonStamped.h>
 #include <jsk_recognition_msgs/PolygonArray.h>
@@ -56,17 +52,17 @@ namespace jsk_pcl_ros
   {
   public:
     typedef message_filters::sync_policies::ExactTime<
-      geometry_msgs::PolygonStamped, PCLModelCoefficientMsg> SyncPolicy;
+      geometry_msgs::PolygonStamped, pcl_msgs::ModelCoefficients> SyncPolicy;
 
   protected:
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
     virtual void wrap(const geometry_msgs::PolygonStamped::ConstPtr& polygon,
-                      const PCLModelCoefficientMsg::ConstPtr& coefficients);
+                      const pcl_msgs::ModelCoefficients::ConstPtr& coefficients);
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     message_filters::Subscriber<geometry_msgs::PolygonStamped> sub_polygon_;
-    message_filters::Subscriber<PCLModelCoefficientMsg> sub_coefficients_;
+    message_filters::Subscriber<pcl_msgs::ModelCoefficients> sub_coefficients_;
     ros::Publisher pub_polygon_array_;
     ros::Publisher pub_coefficients_array_;
   private:

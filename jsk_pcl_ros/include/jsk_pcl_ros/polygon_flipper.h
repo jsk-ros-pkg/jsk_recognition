@@ -42,7 +42,7 @@
 #include <jsk_recognition_msgs/ModelCoefficientsArray.h>
 #include <jsk_recognition_msgs/ClusterPointIndices.h>
 
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 #include "jsk_pcl_ros/tf_listener_singleton.h"
 
 #include <message_filters/subscriber.h>

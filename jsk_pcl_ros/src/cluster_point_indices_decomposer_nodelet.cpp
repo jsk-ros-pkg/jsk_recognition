@@ -50,9 +50,9 @@
 #include <jsk_topic_tools/color_utils.h>
 #include <Eigen/Geometry> 
 
-#include "jsk_pcl_ros/geo_util.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
-#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_recognition_utils/geo_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -154,15 +154,15 @@ namespace jsk_pcl_ros
     int nearest_index = -1;
     for (size_t i = 0; i < coefficients->coefficients.size(); i++) {
       geometry_msgs::PolygonStamped polygon_msg = planes->polygons[i];
-      Vertices vertices;
+      jsk_recognition_utils::Vertices vertices;
       for (size_t j = 0; j < polygon_msg.polygon.points.size(); j++) {
-        Vertex v;
+        jsk_recognition_utils::Vertex v;
         v[0] = polygon_msg.polygon.points[j].x;
         v[1] = polygon_msg.polygon.points[j].y;
         v[2] = polygon_msg.polygon.points[j].z;
         vertices.push_back(v);
       }
-      ConvexPolygon p(vertices, coefficients->coefficients[i].values);
+      jsk_recognition_utils::ConvexPolygon p(vertices, coefficients->coefficients[i].values);
       double distance = p.distanceToPoint(center);
       if (distance < min_distance) {
         min_distance = distance;

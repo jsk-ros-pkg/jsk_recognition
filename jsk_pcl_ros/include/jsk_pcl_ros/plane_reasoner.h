@@ -50,7 +50,7 @@
 #include <dynamic_reconfigure/server.h>
 #include "jsk_pcl_ros/PlaneReasonerConfig.h"
 
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 
 namespace jsk_pcl_ros
 {

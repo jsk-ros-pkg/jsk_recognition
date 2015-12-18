@@ -50,7 +50,7 @@
 #include <sensor_msgs/PointCloud2.h>
 
 #include <image_geometry/pinhole_camera_model.h>
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 #include <dynamic_reconfigure/server.h>
 #include <jsk_pcl_ros/HintedStickFinderConfig.h>
 
@@ -98,7 +98,7 @@ namespace jsk_pcl_ros
     virtual void infoCallback(
       const sensor_msgs::CameraInfo::ConstPtr& info_msg);
     
-    virtual ConvexPolygon::Ptr polygonFromLine(
+    virtual jsk_recognition_utils::ConvexPolygon::Ptr polygonFromLine(
       const geometry_msgs::PolygonStamped::ConstPtr& polygon_msg,
       const image_geometry::PinholeCameraModel& model,
       Eigen::Vector3f& a,
@@ -106,7 +106,7 @@ namespace jsk_pcl_ros
     
     virtual void filterPointCloud(
       const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
-      const ConvexPolygon::Ptr polygon,
+      const jsk_recognition_utils::ConvexPolygon::Ptr polygon,
       pcl::PointIndices& output_indices);
     virtual void normalEstimate(
       const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
@@ -129,7 +129,7 @@ namespace jsk_pcl_ros
      * @param b 3-D ray to end point of 2-D line
      */
     virtual bool rejected2DHint(
-      const Cylinder::Ptr& cylinder,
+      const jsk_recognition_utils::Cylinder::Ptr& cylinder,
       const Eigen::Vector3f& a,
       const Eigen::Vector3f& b);
     

@@ -260,7 +260,7 @@ namespace jsk_pcl_ros
       Eigen::Vector3f centroid(0, 0, 0);
       for (size_t i = 0; i < the_polygon.points.size(); i++) {
         pcl::PointXYZRGB p;
-        pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZRGB>(
+        jsk_recognition_utils::pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZRGB>(
           the_polygon.points[i], p);
         centroid = centroid + p.getVector3fMap();
       }
@@ -268,7 +268,7 @@ namespace jsk_pcl_ros
       
       for (size_t i = 0; i < the_polygon.points.size(); i++) {
         pcl::PointXYZRGB p;
-        pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZRGB>(
+        jsk_recognition_utils::pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZRGB>(
           the_polygon.points[i], p);
         Eigen::Vector3f dir = (p.getVector3fMap() - centroid).normalized();
         p.getVector3fMap() = dir * maginify_ + p.getVector3fMap();
@@ -276,7 +276,7 @@ namespace jsk_pcl_ros
       }
       
       pcl::PointXYZRGB p_last;
-        pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZRGB>(
+        jsk_recognition_utils::pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZRGB>(
           the_polygon.points[0], p_last);
       hull_cloud->points.push_back(p_last);
       

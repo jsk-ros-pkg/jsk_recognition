@@ -37,7 +37,7 @@
 #include "jsk_pcl_ros/mask_image_cluster_filter.h"
 #include <cv_bridge/cv_bridge.h>
 #include <image_geometry/pinhole_camera_model.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <sensor_msgs/image_encodings.h>
 #include <pcl/filters/extract_indices.h>
 

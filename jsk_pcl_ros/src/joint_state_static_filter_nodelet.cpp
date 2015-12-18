@@ -35,6 +35,7 @@
 
 #include "jsk_pcl_ros/joint_state_static_filter.h"
 #include <jsk_topic_tools/rosparam_utils.h>
+#include <jsk_recognition_utils/pcl_util.h>
 
 namespace jsk_pcl_ros
 {
@@ -170,12 +171,12 @@ namespace jsk_pcl_ros
                      name_ + " running");
       }
       else {
-        addDiagnosticErrorSummary(
+        jsk_recognition_utils::addDiagnosticErrorSummary(
           name_, joint_vital_, stat);
       }
     }
     else {
-      addDiagnosticErrorSummary(
+      jsk_recognition_utils::addDiagnosticErrorSummary(
         name_, vital_checker_, stat);
     }
 

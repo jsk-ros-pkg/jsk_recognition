@@ -36,7 +36,7 @@
 #include "jsk_pcl_ros/edgebased_cube_finder.h"
 #include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/common/centroid.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <jsk_recognition_msgs/BoundingBoxArray.h>
 #include <geometry_msgs/PoseArray.h>
 #include <pcl/filters/extract_indices.h>
@@ -80,14 +80,14 @@ namespace jsk_pcl_ros
     ex.setIndices(indices);
     ex.filter(*target_cloud);
     pcl::compute3DCentroid(*target_cloud, centroid);
-    pointFromVectorToVector<Eigen::Vector4f, Eigen::Vector3f>(centroid, output);
+    jsk_recognition_utils::pointFromVectorToVector<Eigen::Vector4f, Eigen::Vector3f>(centroid, output);
   }
 
   void CubeHypothesis::getLinePoints(
-    const Line& line,
+    const jsk_recognition_utils::Line& line,
     const pcl::PointCloud<pcl::PointXYZRGB>& cloud,
     const pcl::PointIndices::Ptr indices,
-    Vertices& output)
+    jsk_recognition_utils::Vertices& output)
   {
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr points
       (new pcl::PointCloud<pcl::PointXYZRGB>);
@@ -104,22 +104,22 @@ namespace jsk_pcl_ros
     }
   }
 
-  ConvexPolygon::Ptr CubeHypothesis::buildConvexPolygon(
-    const PointPair& a_edge_pair, const PointPair& b_edge_pair)
+  jsk_recognition_utils::ConvexPolygon::Ptr CubeHypothesis::buildConvexPolygon(
+    const jsk_recognition_utils::PointPair& a_edge_pair, const jsk_recognition_utils::PointPair& b_edge_pair)
   {
-    Vertices vertices;
+    jsk_recognition_utils::Vertices vertices;
     vertices.push_back(a_edge_pair.get<0>());
     vertices.push_back(a_edge_pair.get<1>());
     vertices.push_back(b_edge_pair.get<1>());
     vertices.push_back(b_edge_pair.get<0>());
-    ConvexPolygon::Ptr convex (new ConvexPolygon(vertices));
+    jsk_recognition_utils::ConvexPolygon::Ptr convex (new jsk_recognition_utils::ConvexPolygon(vertices));
     return convex;
   }
   
   double CubeHypothesis::evaluatePointOnPlanes(
     const pcl::PointCloud<pcl::PointXYZRGB>& cloud,
-    ConvexPolygon& polygon_a,
-    ConvexPolygon& polygon_b)
+    jsk_recognition_utils::ConvexPolygon& polygon_a,
+    jsk_recognition_utils::ConvexPolygon& polygon_b)
   {
     std::vector<int> a_indices, b_indices;
     for (size_t i = 0; i < cloud.points.size(); i++) {
@@ -140,12 +140,12 @@ namespace jsk_pcl_ros
     return a_indices.size() + b_indices.size();
   }
   
-  PointPair CubeHypothesis::computeAxisEndPoints(
-    const Line& axis,
-    const PointPair& a_candidates,
-    const PointPair& b_candidates)
+  jsk_recognition_utils::PointPair CubeHypothesis::computeAxisEndPoints(
+    const jsk_recognition_utils::Line& axis,
+    const jsk_recognition_utils::PointPair& a_candidates,
+    const jsk_recognition_utils::PointPair& b_candidates)
   {
-    Vertices original_points;
+    jsk_recognition_utils::Vertices original_points;
     original_points.push_back(a_candidates.get<0>());
     original_points.push_back(a_candidates.get<1>());
     original_points.push_back(b_candidates.get<0>());
@@ -155,7 +155,7 @@ namespace jsk_pcl_ros
       JSK_ROS_INFO("[foot_point] [%f, %f, %f]", p[0], p[1], p[2]);
     }
     
-    Vertices foot_points;
+    jsk_recognition_utils::Vertices foot_points;
     for (size_t i = 0; i < original_points.size(); i++) {
       Eigen::Vector3f foot_point;
       axis.foot(original_points[i], foot_point);
@@ -201,17 +201,17 @@ namespace jsk_pcl_ros
     const pcl::PointCloud<pcl::PointXYZRGB>& cloud)
   {
     const double dt = (M_PI - 2.0 * min_angle_) / resolution_;
-    Line::Ptr line_a
-      = Line::fromCoefficients(coefficients_pair_.get<0>()->values);
-    Line::Ptr line_b
-      = Line::fromCoefficients(coefficients_pair_.get<1>()->values);
+    jsk_recognition_utils::Line::Ptr line_a
+      = jsk_recognition_utils::Line::fromCoefficients(coefficients_pair_.get<0>()->values);
+    jsk_recognition_utils::Line::Ptr line_b
+      = jsk_recognition_utils::Line::fromCoefficients(coefficients_pair_.get<1>()->values);
     if (!line_a->isSameDirection(*line_b)) {
       line_b = line_b->flip();
     }
     
     const double r2 = line_a->distance(*line_b);
     const double r = r2 / 2;
-    Line::Ptr axis = line_a->midLine(*line_b);
+    jsk_recognition_utils::Line::Ptr axis = line_a->midLine(*line_b);
     Eigen::Vector3f center;
     axis->getOrigin(center);
     JSK_ROS_INFO("line_a:");
@@ -232,24 +232,24 @@ namespace jsk_pcl_ros
     computeCentroid(cloud_ptr, indices_pair_.get<1>(), centroid_b);
     JSK_ROS_INFO("centroid_a: [%f, %f, %f]", centroid_a[0], centroid_a[1], centroid_a[2]);
     JSK_ROS_INFO("centroid_b: [%f, %f, %f]", centroid_b[0], centroid_b[1], centroid_b[2]);
-    Line::Ptr line_a_aligned = axis->parallelLineOnAPoint(centroid_a);
-    Line::Ptr line_b_aligned = axis->parallelLineOnAPoint(centroid_b);
+    jsk_recognition_utils::Line::Ptr line_a_aligned = axis->parallelLineOnAPoint(centroid_a);
+    jsk_recognition_utils::Line::Ptr line_b_aligned = axis->parallelLineOnAPoint(centroid_b);
     JSK_ROS_INFO("line_a_aligned:");
     line_a_aligned->print();
     JSK_ROS_INFO("line_b_aligned:");
     line_b_aligned->print();
     
-    Vertices line_a_points, line_b_points;
+    jsk_recognition_utils::Vertices line_a_points, line_b_points;
     getLinePoints(*line_a_aligned, cloud, indices_pair_.get<0>(),
                   line_a_points);
     getLinePoints(*line_b_aligned, cloud, indices_pair_.get<1>(),
                   line_b_points);
-    PointPair line_a_end_points = line_a->findEndPoints(line_a_points);
-    PointPair line_b_end_points = line_b->findEndPoints(line_b_points);
+    jsk_recognition_utils::PointPair line_a_end_points = line_a->findEndPoints(line_a_points);
+    jsk_recognition_utils::PointPair line_b_end_points = line_b->findEndPoints(line_b_points);
     double max_v = - DBL_MAX;
     double max_theta;
-    Line::Ptr max_line_c;
-    PointPair max_line_c_a_points, max_line_c_b_points;
+    jsk_recognition_utils::Line::Ptr max_line_c;
+    jsk_recognition_utils::PointPair max_line_c_a_points, max_line_c_b_points;
     for (size_t i = 0; i < resolution_; i++) {
       JSK_ROS_INFO("estimate i: %lu", i);
       double theta = dt * i + min_angle_;
@@ -269,7 +269,7 @@ namespace jsk_pcl_ros
         ey = ez.cross(ex).normalized();
       }
       Eigen::Vector3f point_on_y = center + r * ey;
-      Line::Ptr line_c = axis->parallelLineOnAPoint(point_on_y);
+      jsk_recognition_utils::Line::Ptr line_c = axis->parallelLineOnAPoint(point_on_y);
       // line_a, b, c are almost parallel and these 3 lines make
       // 2 planes.
       //  ------------------------ line_a
@@ -289,13 +289,13 @@ namespace jsk_pcl_ros
       line_c->foot(line_a_end_points.get<1>(), line_c_a_max_point);
       line_c->foot(line_b_end_points.get<0>(), line_c_b_min_point);
       line_c->foot(line_b_end_points.get<1>(), line_c_b_max_point);
-      PointPair line_c_a_end_points = boost::make_tuple(line_c_a_min_point,
+      jsk_recognition_utils::PointPair line_c_a_end_points = boost::make_tuple(line_c_a_min_point,
                                                         line_c_a_max_point);
-      PointPair line_c_b_end_points = boost::make_tuple(line_c_b_min_point,
+      jsk_recognition_utils::PointPair line_c_b_end_points = boost::make_tuple(line_c_b_min_point,
                                                         line_c_b_max_point);
-      ConvexPolygon::Ptr plane_a = buildConvexPolygon(line_a_end_points,
+      jsk_recognition_utils::ConvexPolygon::Ptr plane_a = buildConvexPolygon(line_a_end_points,
                                                       line_c_a_end_points);
-      ConvexPolygon::Ptr plane_b = buildConvexPolygon(line_b_end_points,
+      jsk_recognition_utils::ConvexPolygon::Ptr plane_b = buildConvexPolygon(line_b_end_points,
                                                       line_c_b_end_points);
       double v = evaluatePointOnPlanes(cloud, *plane_a, *plane_b);
       if (max_v < v) {
@@ -308,7 +308,7 @@ namespace jsk_pcl_ros
    }
     value_ = max_v;
     // estimate centroid
-    PointPair axis_end_points = computeAxisEndPoints(
+    jsk_recognition_utils::PointPair axis_end_points = computeAxisEndPoints(
       *axis,
       max_line_c_a_points,
       max_line_c_b_points);
@@ -319,7 +319,7 @@ namespace jsk_pcl_ros
     double z_dimension = (axis_end_points.get<0>() - midpoint).norm() * 2;
     // compute cube
     JSK_ROS_INFO("midpoint: [%f, %f, %f]", midpoint[0], midpoint[1], midpoint[2]);
-    cube_.reset(new Cube(midpoint, *line_a_aligned, *line_b_aligned, *max_line_c));
+    cube_.reset(new jsk_recognition_utils::Cube(midpoint, *line_a_aligned, *line_b_aligned, *max_line_c));
     std::vector<double> dimensions = cube_->getDimensions();
     dimensions[2] = z_dimension;
     cube_->setDimensions(dimensions);
@@ -327,7 +327,7 @@ namespace jsk_pcl_ros
 
   int EdgebasedCubeFinder::countInliers(
     const pcl::PointCloud<PointT>::Ptr cloud,
-    const ConvexPolygon::Ptr convex)
+    const jsk_recognition_utils::ConvexPolygon::Ptr convex)
   {
     int num = 0;
     for (size_t i = 0; i < cloud->points.size(); i++) {
@@ -344,12 +344,12 @@ namespace jsk_pcl_ros
   
   void EdgebasedCubeFinder::filterBasedOnConvex(
     const pcl::PointCloud<PointT>::Ptr cloud,
-    const std::vector<ConvexPolygon::Ptr>& convexes,
+    const std::vector<jsk_recognition_utils::ConvexPolygon::Ptr>& convexes,
     std::vector<int>& output_indices)
   {
     
     for (size_t i = 0; i < convexes.size(); i++) {
-      ConvexPolygon::Ptr convex = convexes[i];
+      jsk_recognition_utils::ConvexPolygon::Ptr convex = convexes[i];
       if (true) {
         // if (convex->area() > convex_area_threshold_ &&
         //     convex->allEdgesLongerThan(convex_edge_threshold_)) {
@@ -420,13 +420,13 @@ namespace jsk_pcl_ros
     sub_edges_.unsubscribe();
   }
 
-  Line::Ptr EdgebasedCubeFinder::midLineFromCoefficientsPair(
+  jsk_recognition_utils::Line::Ptr EdgebasedCubeFinder::midLineFromCoefficientsPair(
     const CoefficientsPair& pair)
   {
     pcl::ModelCoefficients::Ptr coefficients_a = pair.get<0>();
     pcl::ModelCoefficients::Ptr coefficients_b = pair.get<1>();
-    Line::Ptr line_a = Line::fromCoefficients(coefficients_a->values);
-    Line::Ptr line_b = Line::fromCoefficients(coefficients_b->values);
+    jsk_recognition_utils::Line::Ptr line_a = jsk_recognition_utils::Line::fromCoefficients(coefficients_a->values);
+    jsk_recognition_utils::Line::Ptr line_b = jsk_recognition_utils::Line::fromCoefficients(coefficients_b->values);
     return line_a->midLine(*line_b);
   }
 
@@ -442,11 +442,11 @@ namespace jsk_pcl_ros
     return ret;
   }
 
-  PointPair EdgebasedCubeFinder::minMaxPointOnLine(
-    const Line& line,
+  jsk_recognition_utils::PointPair EdgebasedCubeFinder::minMaxPointOnLine(
+    const jsk_recognition_utils::Line& line,
     const pcl::PointCloud<PointT>::Ptr cloud)
   {
-    Vertices points;
+    jsk_recognition_utils::Vertices points;
     for (size_t i = 0; i < cloud->points.size(); i++) {
       PointT p = cloud->points[i];
       Eigen::Vector3f eigen_p = p.getVector3fMap();
@@ -457,7 +457,7 @@ namespace jsk_pcl_ros
     return line.findEndPoints(points);
   }
   
-  ConvexPolygon::Ptr EdgebasedCubeFinder::convexFromPairs(
+  jsk_recognition_utils::ConvexPolygon::Ptr EdgebasedCubeFinder::convexFromPairs(
     const pcl::PointCloud<PointT>::Ptr cloud,
     const CoefficientsPair& coefficients_pair,
     const IndicesPair& indices_pair)
@@ -470,16 +470,16 @@ namespace jsk_pcl_ros
     pcl::PointCloud<PointT>::Ptr cloud_a = extractPointCloud(cloud, indices_a);
     pcl::PointCloud<PointT>::Ptr cloud_b = extractPointCloud(cloud, indices_b);
 
-    Line::Ptr line_a = Line::fromCoefficients(coefficients_a->values);
-    Line::Ptr line_b = Line::fromCoefficients(coefficients_b->values);
-    PointPair a_min_max = minMaxPointOnLine(*line_a, cloud_a);
-    PointPair b_min_max = minMaxPointOnLine(*line_b, cloud_b);
-    Vertices vertices;
+    jsk_recognition_utils::Line::Ptr line_a = jsk_recognition_utils::Line::fromCoefficients(coefficients_a->values);
+    jsk_recognition_utils::Line::Ptr line_b = jsk_recognition_utils::Line::fromCoefficients(coefficients_b->values);
+    jsk_recognition_utils::PointPair a_min_max = minMaxPointOnLine(*line_a, cloud_a);
+    jsk_recognition_utils::PointPair b_min_max = minMaxPointOnLine(*line_b, cloud_b);
+    jsk_recognition_utils::Vertices vertices;
     vertices.push_back(a_min_max.get<0>());
     vertices.push_back(a_min_max.get<1>());
     vertices.push_back(b_min_max.get<1>());
     vertices.push_back(b_min_max.get<0>());
-    ConvexPolygon::Ptr ret (new ConvexPolygon(vertices));
+    jsk_recognition_utils::ConvexPolygon::Ptr ret (new jsk_recognition_utils::ConvexPolygon(vertices));
     return ret;
   }
   
@@ -493,16 +493,16 @@ namespace jsk_pcl_ros
       CoefficientsPair coefficients = coefficients_pair[i];
       pcl::ModelCoefficients::Ptr coefficients_a = coefficients_pair[i].get<0>();
       pcl::ModelCoefficients::Ptr coefficients_b = coefficients_pair[i].get<1>();
-      Line::Ptr line_a = Line::fromCoefficients(coefficients_a->values);
-      Line::Ptr line_b = Line::fromCoefficients(coefficients_b->values);
+      jsk_recognition_utils::Line::Ptr line_a = jsk_recognition_utils::Line::fromCoefficients(coefficients_a->values);
+      jsk_recognition_utils::Line::Ptr line_b = jsk_recognition_utils::Line::fromCoefficients(coefficients_b->values);
 
       // force to align two lines
-      Line::Ptr axis = line_a->midLine(*line_b);
+      jsk_recognition_utils::Line::Ptr axis = line_a->midLine(*line_b);
       Eigen::Vector3f origin_a, origin_b;
       line_a->getOrigin(origin_a);
       line_b->getOrigin(origin_b);
-      Line::Ptr line_a_aligned = axis->parallelLineOnAPoint(origin_a);
-      Line::Ptr line_b_aligned = axis->parallelLineOnAPoint(origin_b);
+      jsk_recognition_utils::Line::Ptr line_a_aligned = axis->parallelLineOnAPoint(origin_a);
+      jsk_recognition_utils::Line::Ptr line_b_aligned = axis->parallelLineOnAPoint(origin_b);
       Eigen::Vector3f distance_vector;
       line_a_aligned->parallelLineNormal(*line_b_aligned, distance_vector);
       double distance = distance_vector.norm();
@@ -519,13 +519,13 @@ namespace jsk_pcl_ros
   //pcl::PointCloud<EdgebasedCubeFinder::PointT>::Ptr
   pcl::PointIndices::Ptr
   EdgebasedCubeFinder::preparePointCloudForRANSAC(
-    const ConvexPolygon::Ptr convex,
+    const jsk_recognition_utils::ConvexPolygon::Ptr convex,
     const CoefficientsPair& edge_coefficients_pair,
     const pcl::PointCloud<PointT>::Ptr cloud)
   {
     // extract the points which can be projected onto the convex.
     pcl::PointIndices::Ptr indices(new pcl::PointIndices);
-    ConvexPolygon::Ptr magnified_convex = convex->magnify(1.1);
+    jsk_recognition_utils::ConvexPolygon::Ptr magnified_convex = convex->magnify(1.1);
     pcl::PointCloud<PointT>::Ptr ret (new pcl::PointCloud<PointT>);
     for (size_t i = 0; i < cloud->points.size(); i++) {
       PointT p = cloud->points[i];
@@ -544,7 +544,7 @@ namespace jsk_pcl_ros
    }
 
    void EdgebasedCubeFinder::estimateParallelPlane(
-     const ConvexPolygon::Ptr convex,
+     const jsk_recognition_utils::ConvexPolygon::Ptr convex,
      const pcl::PointCloud<PointT>::Ptr filtered_cloud,
      pcl::PointIndices::Ptr output_inliers,
      pcl::ModelCoefficients::Ptr output_coefficients)
@@ -563,14 +563,14 @@ namespace jsk_pcl_ros
    }
 
    void EdgebasedCubeFinder::estimatePerpendicularPlane(
-     const ConvexPolygon::Ptr convex,
+     const jsk_recognition_utils::ConvexPolygon::Ptr convex,
      const CoefficientsPair& edge_coefficients,
      const pcl::PointCloud<PointT>::Ptr filtered_cloud,
      pcl::PointIndices::Ptr output_inliers,
      pcl::ModelCoefficients::Ptr output_coefficients)
    {
      Eigen::Vector3f normal_a = convex->getNormal();
-     Line::Ptr mid_line = midLineFromCoefficientsPair(edge_coefficients);
+     jsk_recognition_utils::Line::Ptr mid_line = midLineFromCoefficientsPair(edge_coefficients);
      Eigen::Vector3f normal_b;
      mid_line->getDirection(normal_b);
      Eigen::Vector3f normal = normal_a.cross(normal_b);
@@ -586,7 +586,7 @@ namespace jsk_pcl_ros
      seg.segment (*output_inliers, *output_coefficients);
    }
 
-  Cube::Ptr EdgebasedCubeFinder::cubeFromIndicesAndCoefficients(
+  jsk_recognition_utils::Cube::Ptr EdgebasedCubeFinder::cubeFromIndicesAndCoefficients(
     const pcl::PointCloud<EdgebasedCubeFinder::PointT>::Ptr cloud,
     const IndicesCoefficientsTriple& indices_coefficients_triple,
     pcl::PointCloud<EdgebasedCubeFinder::PointT>::Ptr points_on_edge)
@@ -597,12 +597,12 @@ namespace jsk_pcl_ros
     IndicesTriple indices_triple
       = indices_coefficients_triple.get<0>();
     // do we need to align lines...??
-    Line::Ptr mid_line
-      = Line::fromCoefficients(coefficients_triple.get<0>()->values);
-    Line::Ptr line_a
-      = Line::fromCoefficients(coefficients_triple.get<1>()->values);
-    Line::Ptr line_b
-      = Line::fromCoefficients(coefficients_triple.get<2>()->values);
+    jsk_recognition_utils::Line::Ptr mid_line
+      = jsk_recognition_utils::Line::fromCoefficients(coefficients_triple.get<0>()->values);
+    jsk_recognition_utils::Line::Ptr line_a
+      = jsk_recognition_utils::Line::fromCoefficients(coefficients_triple.get<1>()->values);
+    jsk_recognition_utils::Line::Ptr line_b
+      = jsk_recognition_utils::Line::fromCoefficients(coefficients_triple.get<2>()->values);
     // force to align
     if (!mid_line->isSameDirection(*line_a)) {
       line_a = line_a->flip();
@@ -610,7 +610,7 @@ namespace jsk_pcl_ros
     if (!mid_line->isSameDirection(*line_b)) {
       line_b = line_b->flip();
     }
-    Line::Ptr axis = line_a->midLine(*line_b);
+    jsk_recognition_utils::Line::Ptr axis = line_a->midLine(*line_b);
     
     pcl::PointCloud<PointT>::Ptr point_on_a
       = extractPointCloud(cloud,
@@ -626,16 +626,16 @@ namespace jsk_pcl_ros
     pcl::compute3DCentroid(*point_on_a, a_centroid4);
     pcl::compute3DCentroid(*point_on_b, b_centroid4);
     pcl::compute3DCentroid(*point_on_c, c_centroid4);
-    pointFromVectorToVector<Eigen::Vector4f, Eigen::Vector3f>(
+    jsk_recognition_utils::pointFromVectorToVector<Eigen::Vector4f, Eigen::Vector3f>(
       a_centroid4, a_centroid);
-    pointFromVectorToVector<Eigen::Vector4f, Eigen::Vector3f>(
+    jsk_recognition_utils::pointFromVectorToVector<Eigen::Vector4f, Eigen::Vector3f>(
       b_centroid4, b_centroid);
-    pointFromVectorToVector<Eigen::Vector4f, Eigen::Vector3f>(
+    jsk_recognition_utils::pointFromVectorToVector<Eigen::Vector4f, Eigen::Vector3f>(
       c_centroid4, c_centroid);
     
-    Line::Ptr line_a_aligned = axis->parallelLineOnAPoint(a_centroid);
-    Line::Ptr line_b_aligned = axis->parallelLineOnAPoint(b_centroid);
-    Line::Ptr mid_line_aligned = axis->parallelLineOnAPoint(c_centroid);
+    jsk_recognition_utils::Line::Ptr line_a_aligned = axis->parallelLineOnAPoint(a_centroid);
+    jsk_recognition_utils::Line::Ptr line_b_aligned = axis->parallelLineOnAPoint(b_centroid);
+    jsk_recognition_utils::Line::Ptr mid_line_aligned = axis->parallelLineOnAPoint(c_centroid);
     //Line::Ptr axis_aligned = axis->parallelLineOnAPoint(c_centroid);
     pcl::PointCloud<PointT>::Ptr all_points(new pcl::PointCloud<PointT>);
     *all_points = *point_on_a + *point_on_b;
@@ -656,7 +656,7 @@ namespace jsk_pcl_ros
     // points_on_edge->points.push_back(b_centroid_p);
     // points_on_edge->points.push_back(c_centroid_p);
       
-    PointPair min_max_points = minMaxPointOnLine(*axis, all_points);
+    jsk_recognition_utils::PointPair min_max_points = minMaxPointOnLine(*axis, all_points);
     PointT min_point, max_point;
     // min_point.x = min_max_points.get<0>()[0];
     // min_point.y = min_max_points.get<0>()[1];
@@ -688,12 +688,12 @@ namespace jsk_pcl_ros
       ez = -ez;
     }
     
-    Eigen::Quaternionf rot = rotFrom3Axis(ex, ey, ez);
+    Eigen::Quaternionf rot = jsk_recognition_utils::rotFrom3Axis(ex, ey, ez);
     std::vector<double> dimensions;
     dimensions.push_back(x_width);
     dimensions.push_back(y_width);
     dimensions.push_back(z_width);
-    Cube::Ptr ret (new Cube(center_point, rot, dimensions));
+    jsk_recognition_utils::Cube::Ptr ret (new jsk_recognition_utils::Cube(center_point, rot, dimensions));
     return ret;
   }
   
@@ -711,7 +711,7 @@ namespace jsk_pcl_ros
      jsk_recognition_msgs::BoundingBoxArray box_array;
      box_array.header = input_cloud->header;
      pose_array.header = input_cloud->header;
-     std::vector<Cube::Ptr> cubes;
+     std::vector<jsk_recognition_utils::Cube::Ptr> cubes;
      std::vector<pcl::PointIndices::Ptr> candidate_cluster_indices;
      for (size_t i = 0; i < input_edges->edge_groups.size(); i++) {
        jsk_recognition_msgs::ParallelEdge parallel_edge = input_edges->edge_groups[i];
@@ -731,7 +731,7 @@ namespace jsk_pcl_ros
          pcl_conversions::toPCL(input_cloud->header, points_on_edges->header);
          for (size_t j = 0; j < perpendicular_triples.size(); j++) {
            pcl::PointCloud<PointT>::Ptr points_on_edge(new pcl::PointCloud<PointT>);
-           Cube::Ptr cube = cubeFromIndicesAndCoefficients(
+           jsk_recognition_utils::Cube::Ptr cube = cubeFromIndicesAndCoefficients(
              cloud,
              perpendicular_triples[j],
              points_on_edge);
@@ -776,9 +776,9 @@ namespace jsk_pcl_ros
   }
   
   EdgebasedCubeFinder::EdgeRelation EdgebasedCubeFinder::perpendicularEdgeTriple(
-    const Line& edge_a,
-    const Line& edge_b,
-    const Line& edge_c)
+    const jsk_recognition_utils::Line& edge_a,
+    const jsk_recognition_utils::Line& edge_b,
+    const jsk_recognition_utils::Line& edge_c)
   {
     Eigen::Vector3f a_b_normal, a_c_normal;
     edge_a.parallelLineNormal(edge_b, a_b_normal);
@@ -819,12 +819,12 @@ namespace jsk_pcl_ros
         = triples[i].get<1>().get<1>();
       pcl::ModelCoefficients::Ptr c_coefficients
         = triples[i].get<1>().get<2>();
-      Line::Ptr edge_a
-        = Line::fromCoefficients(a_coefficients->values);
-      Line::Ptr edge_b
-        = Line::fromCoefficients(b_coefficients->values);
-      Line::Ptr edge_c
-        = Line::fromCoefficients(c_coefficients->values);
+      jsk_recognition_utils::Line::Ptr edge_a
+        = jsk_recognition_utils::Line::fromCoefficients(a_coefficients->values);
+      jsk_recognition_utils::Line::Ptr edge_b
+        = jsk_recognition_utils::Line::fromCoefficients(b_coefficients->values);
+      jsk_recognition_utils::Line::Ptr edge_c
+        = jsk_recognition_utils::Line::fromCoefficients(c_coefficients->values);
       // check if these three are perpendicular or not
       EdgeRelation relation = perpendicularEdgeTriple(*edge_a,
                                                       *edge_b,
@@ -921,9 +921,9 @@ namespace jsk_pcl_ros
        //   filtered_indices_pairs, filtered_coefficients_pairs);
 
        // convex based filtering...
-       std::vector<ConvexPolygon::Ptr> convexes;
+       std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> convexes;
        for (size_t j = 0; j < filtered_coefficients_pairs.size(); j++) {
-         ConvexPolygon::Ptr convex
+         jsk_recognition_utils::ConvexPolygon::Ptr convex
            = convexFromPairs(cloud, filtered_coefficients_pairs[j],
                              pairs[j]);
          convexes.push_back(convex);
@@ -934,7 +934,7 @@ namespace jsk_pcl_ros
        pcl::PointIndices::Ptr filtered_cube_candidate_indices(new pcl::PointIndices);
        for (size_t j = 0; j < filtered_indices.size(); j++) {
          int index = filtered_indices[j];
-         ConvexPolygon::Ptr target_convex = convexes[index];
+         jsk_recognition_utils::ConvexPolygon::Ptr target_convex = convexes[index];
          IndicesPair target_edge_indices_pair
            = filtered_indices_pairs[index];
          CoefficientsPair target_edge_coefficients_pair
@@ -947,7 +947,7 @@ namespace jsk_pcl_ros
          // *filtered_cube_candidate_indices
          //   = *filtered_indices + *filtered_cube_candidate_indices;
          filtered_cube_candidate_indices
-           = addIndices(*filtered_cube_candidate_indices,
+           = jsk_recognition_utils::addIndices(*filtered_cube_candidate_indices,
                         *filtered_indices);       
            
          // JSK_ROS_INFO("%lu -> %lu", cloud->points.size(), filtered_cloud->points.size());
@@ -962,8 +962,8 @@ namespace jsk_pcl_ros
          //                       parallel_plane_inliers,
          //                       parallel_plane_coefficients);
          // if (parallel_plane_inliers->indices.size() > 0) {
-         //   ConvexPolygon::Ptr parallel_convex
-         //     = convexFromCoefficientsAndInliers<PointT>(
+         //   jsk_recognition_utils::ConvexPolygon::Ptr parallel_convex
+         //     = jsk_recognition_utils::convexFromCoefficientsAndInliers<PointT>(
          //       filtered_cloud,
          //       parallel_plane_inliers,
          //       parallel_plane_coefficients);
@@ -978,8 +978,8 @@ namespace jsk_pcl_ros
          //                                perpendicular_plane_inliers,
          //                                perpendicular_plane_coefficients);
          //     if (perpendicular_plane_inliers->indices.size() > 0) {
-         //      ConvexPolygon::Ptr perpendicular_convex
-         //        = convexFromCoefficientsAndInliers<PointT>(
+         //      jsk_recognition_utils::ConvexPolygon::Ptr perpendicular_convex
+         //        = jsk_recognition_utils::convexFromCoefficientsAndInliers<PointT>(
          //          filtered_cloud,
          //          perpendicular_plane_inliers,
          //          perpendicular_plane_coefficients);
@@ -1021,7 +1021,7 @@ namespace jsk_pcl_ros
       
       // for (size_t j = 0; j < filtered_indices.size(); j++) {
       //   int pair_index = filtered_indices[j];
-      //   ConvexPolygon::Ptr convex = convexes[filtered_indices[j]];
+      //   jsk_recognition_utils::ConvexPolygon::Ptr convex = convexes[filtered_indices[j]];
         
       //   Vertices vs = convex->getVertices();
       //   for (size_t k = 0; k < vs.size(); k++) {
@@ -1052,7 +1052,7 @@ namespace jsk_pcl_ros
        // estimate cube
        pcl::PointIndices::Ptr first_inliers(new pcl::PointIndices);
        pcl::ModelCoefficients::Ptr first_coefficients(new pcl::ModelCoefficients);
-       ConvexPolygon::Ptr first_polygon
+       jsk_recognition_utils::ConvexPolygon::Ptr first_polygon
          = estimateConvexPolygon(
            cloud,
            filtered_cube_candidate_indices,
@@ -1157,7 +1157,7 @@ namespace jsk_pcl_ros
     return ret;
   }
   
-  ConvexPolygon::Ptr EdgebasedCubeFinder::estimateConvexPolygon(
+  jsk_recognition_utils::ConvexPolygon::Ptr EdgebasedCubeFinder::estimateConvexPolygon(
     const pcl::PointCloud<PointT>::Ptr cloud,
     const pcl::PointIndices::Ptr indices,
     pcl::ModelCoefficients::Ptr coefficients,
@@ -1178,11 +1178,11 @@ namespace jsk_pcl_ros
     // project points to the plane
     ////////////////////////////////////////////////////////
     if (inliers->indices.size() > 0) {
-      return convexFromCoefficientsAndInliers<PointT>(
+      return jsk_recognition_utils::convexFromCoefficientsAndInliers<PointT>(
         cloud, inliers, coefficients);
     }
     else {
-      return ConvexPolygon::Ptr();
+      return jsk_recognition_utils::ConvexPolygon::Ptr();
     }
   }
   

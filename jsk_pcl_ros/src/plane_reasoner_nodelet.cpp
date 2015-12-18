@@ -33,7 +33,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include "jsk_pcl_ros/plane_reasoner.h"
 #include <tf_conversions/tf_eigen.h>
 
@@ -144,7 +144,7 @@ namespace jsk_pcl_ros
     std::vector<pcl::ModelCoefficients::Ptr> coefficients
       = pcl_conversions::convertToPCLModelCoefficients(
         coefficients_msg->coefficients);
-    std::vector<Plane::Ptr> planes = convertToPlanes(coefficients);
+    std::vector<Plane::Ptr> planes = jsk_recognition_utils::convertToPlanes(coefficients);
     std::vector<geometry_msgs::PolygonStamped> polygons = polygons_msg->polygons;
     std::vector<PlaneInfoContainer> plane_infos
       = packInfo(inliers, coefficients, planes, polygons);
@@ -222,7 +222,7 @@ namespace jsk_pcl_ros
         Eigen::Affine3f eigen_transform_3f;
         Eigen::Vector3d up_d =  (eigen_transform.rotation() * Eigen::Vector3d(0, 0, 1));
         Eigen::Vector3f up;
-        pointFromVectorToVector<Eigen::Vector3d, Eigen::Vector3f>(up_d, up);
+        jsk_recognition_utils::pointFromVectorToVector<Eigen::Vector3d, Eigen::Vector3f>(up_d, up);
         Plane::Ptr plane = plane_info.get<2>();
         double angle = plane->angle(up);
         // JSK_ROS_INFO("axis: [%f, %f, %f]", up[0], up[1], up[2]);

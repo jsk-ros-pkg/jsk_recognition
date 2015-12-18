@@ -38,8 +38,8 @@
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
-#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -101,10 +101,11 @@ namespace jsk_pcl_ros
     std::vector<pcl::PointIndices::Ptr> all_indices
       = pcl_conversions::convertToPCLPointIndices(indices_msg->cluster_indices);
     std::vector<pcl::PointCloud<PointT>::Ptr> all_clouds
-      = convertToPointCloudArray<PointT>(cloud, all_indices);
-    std::vector<Plane::Ptr> planes = convertToPlanes(all_coefficients);
+      = jsk_recognition_utils::convertToPointCloudArray<PointT>(cloud, all_indices);
+    std::vector<jsk_recognition_utils::Plane::Ptr> planes
+      = jsk_recognition_utils::convertToPlanes(all_coefficients);
     // build connection map
-    IntegerGraphMap connection_map;
+    jsk_recognition_utils::IntegerGraphMap connection_map;
     for (size_t i = 0; i < nr_cluster; i++) {
       connection_map[i] = std::vector<int>();
       connection_map[i].push_back(i);
@@ -113,9 +114,9 @@ namespace jsk_pcl_ros
       pcl::PointCloud<PointT>::Ptr focused_cloud = all_clouds[i];
       kdtree.setInputCloud(focused_cloud);
       // look up near polygon
-      Plane::Ptr focused_plane = planes[i];
+      jsk_recognition_utils::Plane::Ptr focused_plane = planes[i];
       for (size_t j = i + 1; j < nr_cluster; j++) {
-        Plane::Ptr target_plane = planes[j];
+        jsk_recognition_utils::Plane::Ptr target_plane = planes[j];
         if (focused_plane->angle(*target_plane) < connect_angular_threshold_) {
           // second, check distance
           bool is_near_enough = isNearPointCloud(kdtree, all_clouds[j], target_plane);
@@ -126,7 +127,7 @@ namespace jsk_pcl_ros
       }
     }
     std::vector<std::set<int> > cloud_sets;
-    buildAllGroupsSetFromGraphMap(connection_map, cloud_sets);
+    jsk_recognition_utils::buildAllGroupsSetFromGraphMap(connection_map, cloud_sets);
     // build new indices
     std::vector<pcl::PointIndices::Ptr> new_indices;
     std::vector<pcl::ModelCoefficients::Ptr> new_coefficients;
@@ -136,7 +137,7 @@ namespace jsk_pcl_ros
       for (std::set<int>::iterator it = cloud_sets[i].begin();
            it != cloud_sets[i].end();
            ++it) {
-        new_one_indices = addIndices(*new_one_indices, *all_indices[*it]);
+        new_one_indices = jsk_recognition_utils::addIndices(*new_one_indices, *all_indices[*it]);
       }
       if (new_one_indices->indices.size() > min_size_) {
         new_indices.push_back(new_one_indices);
@@ -159,8 +160,8 @@ namespace jsk_pcl_ros
     new_ros_coefficients.header = cloud_msg->header;
     new_ros_polygons.header = cloud_msg->header;
     for (size_t i = 0; i < new_indices.size(); i++) {
-      ConvexPolygon::Ptr convex
-        = convexFromCoefficientsAndInliers<PointT>(
+      jsk_recognition_utils::ConvexPolygon::Ptr convex
+        = jsk_recognition_utils::convexFromCoefficientsAndInliers<PointT>(
           cloud, new_indices[i], new_refined_coefficients[i]);
       if (convex->area() > min_area_ && convex->area() < max_area_) {
         geometry_msgs::PolygonStamped polygon;
@@ -226,7 +227,7 @@ namespace jsk_pcl_ros
   bool PlaneConcatenator::isNearPointCloud(
     pcl::KdTreeFLANN<PointT>& kdtree,
     pcl::PointCloud<PointT>::Ptr cloud,
-    Plane::Ptr target_plane)
+    jsk_recognition_utils::Plane::Ptr target_plane)
   {
     pcl::PointCloud<PointT>::ConstPtr input_cloud = kdtree.getInputCloud();
     for (size_t i = 0; i < cloud->points.size(); i++) {

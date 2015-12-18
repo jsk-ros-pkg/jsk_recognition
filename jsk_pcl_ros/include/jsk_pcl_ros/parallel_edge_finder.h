@@ -42,13 +42,13 @@
 #include <jsk_recognition_msgs/ModelCoefficientsArray.h>
 #include <jsk_recognition_msgs/ClusterPointIndices.h>
 #include <jsk_pcl_ros/ParallelEdgeFinderConfig.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <dynamic_reconfigure/server.h>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 
 #include <jsk_topic_tools/connection_based_nodelet.h>
 

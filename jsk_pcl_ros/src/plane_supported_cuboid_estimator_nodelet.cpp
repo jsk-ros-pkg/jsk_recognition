@@ -36,9 +36,9 @@
 #define BOOST_PARAMETER_MAX_ARITY 7
 
 #include "jsk_pcl_ros/plane_supported_cuboid_estimator.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
-#include "jsk_pcl_ros/geo_util.h"
-#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
+#include "jsk_recognition_utils/geo_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
 #include <ctime>
 #include <pcl/segmentation/extract_polygonal_prism_data.h>
 #include <pcl/filters/extract_indices.h>
@@ -94,13 +94,13 @@ namespace jsk_pcl_ros
 
   size_t PlaneSupportedCuboidEstimator::getNearestPolygon(
     const Particle& p,
-    const std::vector<ConvexPolygon::Ptr>& polygons)
+    const std::vector<jsk_recognition_utils::ConvexPolygon::Ptr>& polygons)
   {
     size_t min_index = 0;
     double min_distance = DBL_MAX;
     Eigen::Vector3f inp = p.getVector3fMap();
     for (size_t i = 0; i < polygons.size(); i++) {
-      ConvexPolygon::Ptr polygon = polygons[i];
+      jsk_recognition_utils::ConvexPolygon::Ptr polygon = polygons[i];
       Eigen::Vector3f p;
       polygon->project(inp, p);
       double d = (p - inp).norm();
@@ -122,9 +122,9 @@ namespace jsk_pcl_ros
 
     // The order of convexes and polygons_ should be same
     // because it is inside of critical section.
-    std::vector<ConvexPolygon::Ptr> convexes(latest_polygon_msg_->polygons.size());
+    std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> convexes(latest_polygon_msg_->polygons.size());
     for (size_t i = 0; i < latest_polygon_msg_->polygons.size(); i++) {
-      ConvexPolygon::Ptr polygon = ConvexPolygon::fromROSMsgPtr(latest_polygon_msg_->polygons[i].polygon);
+      jsk_recognition_utils::ConvexPolygon::Ptr polygon = jsk_recognition_utils::ConvexPolygon::fromROSMsgPtr(latest_polygon_msg_->polygons[i].polygon);
       polygon->decomposeToTriangles();
       convexes[i] = polygon;
     }

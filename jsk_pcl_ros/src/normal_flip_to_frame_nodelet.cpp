@@ -36,7 +36,7 @@
 #define BOOST_PARAMETER_MAX_ARITY 7
 
 #include "jsk_pcl_ros/normal_flip_to_frame.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 
 
 namespace jsk_pcl_ros
@@ -104,7 +104,7 @@ namespace jsk_pcl_ros
                             cloud->points[i].normal_z);
           if ((s - p).dot(n) < 0) {
             pcl::PointXYZRGBNormal new_p;
-            pointFromVectorToXYZ<Eigen::Vector3f, pcl::PointXYZRGBNormal>(
+            jsk_recognition_utils::pointFromVectorToXYZ<Eigen::Vector3f, pcl::PointXYZRGBNormal>(
               p, new_p);
             new_p.rgb = cloud->points[i].rgb;
             new_p.normal_x = - n[0];

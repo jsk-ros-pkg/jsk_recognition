@@ -74,7 +74,7 @@ namespace jsk_pcl_ros
       return;
     }
     else {
-      pointFromVectorToVector(reference_axis, reference_axis_);
+      jsk_recognition_utils::pointFromVectorToVector(reference_axis, reference_axis_);
       reference_axis_.normalize();
     }
     

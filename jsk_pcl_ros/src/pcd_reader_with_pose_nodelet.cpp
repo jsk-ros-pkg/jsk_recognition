@@ -34,7 +34,7 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/pcd_reader_with_pose.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <eigen_conversions/eigen_msg.h>
 #include <pcl/common/transforms.h>
 #include <eigen_conversions/eigen_msg.h>

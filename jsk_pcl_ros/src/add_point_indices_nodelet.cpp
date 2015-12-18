@@ -79,7 +79,7 @@ namespace jsk_pcl_ros
     pcl::PointIndices a, b;
     pcl_conversions::toPCL(*src1, a);
     pcl_conversions::toPCL(*src2, b);
-    pcl::PointIndices::Ptr c = addIndices(a, b);
+    pcl::PointIndices::Ptr c = jsk_recognition_utils::addIndices(a, b);
     c->header = a.header;
     PCLIndicesMsg ros_indices;
     pcl_conversions::fromPCL(*c, ros_indices);

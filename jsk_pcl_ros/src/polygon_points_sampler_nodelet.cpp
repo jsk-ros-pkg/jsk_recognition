@@ -34,7 +34,7 @@
  *********************************************************************/
 
 #define BOOST_PARAMETER_MAX_ARITY 7
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include "jsk_pcl_ros/polygon_points_sampler.h"
 
 namespace jsk_pcl_ros
@@ -112,7 +112,8 @@ namespace jsk_pcl_ros
     pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGBNormal>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr xyz_cloud (new pcl::PointCloud<pcl::PointXYZ>);
     for (size_t i = 0; i < polygon_msg->polygons.size(); i++) {
-      Polygon polygon = Polygon::fromROSMsg(polygon_msg->polygons[i].polygon);
+      jsk_recognition_utils::Polygon polygon
+        = jsk_recognition_utils::Polygon::fromROSMsg(polygon_msg->polygons[i].polygon);
       pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr one_cloud
         = polygon.samplePoints<pcl::PointXYZRGBNormal>(grid_size_);
       pcl::PointCloud<pcl::PointXYZ> one_xyz_cloud;

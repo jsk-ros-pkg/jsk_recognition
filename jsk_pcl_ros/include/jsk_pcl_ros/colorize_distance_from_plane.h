@@ -48,7 +48,7 @@
 #include <jsk_recognition_msgs/PolygonArray.h>
 #include <dynamic_reconfigure/server.h>
 #include <jsk_pcl_ros/ColorizeDistanceFromPlaneConfig.h>
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 #include "jsk_topic_tools/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros
@@ -75,7 +75,7 @@ namespace jsk_pcl_ros
                           const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons);
 
     virtual double distanceToConvexes(
-      const PointT& p, const std::vector<ConvexPolygon::Ptr>& convexes);
+      const PointT& p, const std::vector<jsk_recognition_utils::ConvexPolygon::Ptr>& convexes);
     
     virtual uint32_t colorForDistance(const double d);
     

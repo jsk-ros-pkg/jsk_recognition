@@ -477,31 +477,6 @@ target_link_libraries(range_sensor_error_visualization jsk_pcl_ros)
 add_executable(depth_camera_error_visualization tool/depth_camera_error_visualization.cpp)
 target_link_libraries(depth_camera_error_visualization jsk_pcl_ros)
 
-file(GLOB _headers ${PROJECT_SOURCE_DIR}/include/jsk_pcl_ros/*.h)
-list(SORT _headers)
-set(_include_headers "")
-foreach(_header ${_headers})
-  string(FIND "${_header}" kinfu IS_KINFU)
-  string(FIND "${_header}" point_types IS_POINT_TYPES)
-  if(robot_self_filter_FOUND)
-    # Exclude some headers because they include robot_self_filter headers.
-    set(IS_SELF_MASK_URDF_ROBOT -1)
-    set(IS_COLLISION_DETECTOR -1)
-    set(IS_SELF_MASK_NAMED_LINK -1)
-    set(IS_OCTOMAP_SERVER_CONTACT -1)
-  else(robot_self_filter_FOUND)
-    string(FIND "${_header}" self_mask_urdf_robot IS_SELF_MASK_URDF_ROBOT)
-    string(FIND "${_header}" collision_detector IS_COLLISION_DETECTOR)
-    string(FIND "${_header}" self_mask_named_link IS_SELF_MASK_NAMED_LINK)
-    string(FIND "${_header}" octomap_server_contact IS_OCTOMAP_SERVER_CONTACT)
-  endif(robot_self_filter_FOUND)
-  if (${IS_KINFU} EQUAL -1 AND ${IS_POINT_TYPES} EQUAL -1 AND
-      ${IS_SELF_MASK_URDF_ROBOT} EQUAL -1 AND ${IS_COLLISION_DETECTOR} EQUAL -1 AND
-      ${IS_SELF_MASK_NAMED_LINK} EQUAL -1 AND ${IS_OCTOMAP_SERVER_CONTACT} EQUAL -1)
-    set(_include_headers "${_include_headers}#include \"${_header}\"\n")
-  endif()
-endforeach()
-
 generate_messages(DEPENDENCIES
   ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_footstep_msgs)
 

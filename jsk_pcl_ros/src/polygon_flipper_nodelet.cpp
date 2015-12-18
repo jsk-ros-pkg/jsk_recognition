@@ -35,7 +35,7 @@
 
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/polygon_flipper.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <algorithm>
 #include <iterator>
 
@@ -103,7 +103,7 @@ namespace jsk_pcl_ros
         tf::transformTFToEigen(tf_transform, sensor_transform);
         {
           // poygons
-          ConvexPolygon convex = ConvexPolygon::fromROSMsg(target_polygon.polygon);
+          jsk_recognition_utils::ConvexPolygon convex = jsk_recognition_utils::ConvexPolygon::fromROSMsg(target_polygon.polygon);
           Eigen::Vector3f polygon_normal = convex.getNormal();
           if (polygon_normal.dot(Eigen::Vector3f(sensor_transform.translation()))
               < 0) {

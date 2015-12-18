@@ -34,7 +34,7 @@
  *********************************************************************/
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/geometric_consistency_grouping.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <pcl/recognition/cg/geometric_consistency.h>
 #include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/kdtree/impl/kdtree_flann.hpp>

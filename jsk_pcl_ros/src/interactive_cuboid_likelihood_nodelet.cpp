@@ -35,7 +35,7 @@
 
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/interactive_cuboid_likelihood.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <jsk_topic_tools/rosparam_utils.h>
 
 namespace jsk_pcl_ros
@@ -123,7 +123,7 @@ namespace jsk_pcl_ros
                                     ros::Duration(0.0));
     Eigen::Vector3f vp;
     tf::vectorTFToEigen(transform.getOrigin(), vp);
-    Vertices vertices;
+    jsk_recognition_utils::Vertices vertices;
     vertices.push_back(Eigen::Vector3f(plane_pose_ * (Eigen::Vector3f::UnitX() + Eigen::Vector3f::UnitY())));
     vertices.push_back(Eigen::Vector3f(plane_pose_ * (- Eigen::Vector3f::UnitX() + Eigen::Vector3f::UnitY())));
     vertices.push_back(Eigen::Vector3f(plane_pose_ * (- Eigen::Vector3f::UnitX() - Eigen::Vector3f::UnitY())));

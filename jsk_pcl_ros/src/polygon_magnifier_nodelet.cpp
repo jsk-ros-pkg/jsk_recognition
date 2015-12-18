@@ -35,7 +35,7 @@
 
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/polygon_magnifier.h"
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -76,8 +76,8 @@ namespace jsk_pcl_ros
     for (size_t i = 0; i < msg->polygons.size(); i++) {
       geometry_msgs::PolygonStamped magnified_polygon;
       magnified_polygon.header = msg->polygons[i].header;
-      ConvexPolygon poly = ConvexPolygon::fromROSMsg(msg->polygons[i].polygon);
-      ConvexPolygon::Ptr magnified_poly = poly.magnifyByDistance(magnify_distance_);
+      jsk_recognition_utils::ConvexPolygon poly = jsk_recognition_utils::ConvexPolygon::fromROSMsg(msg->polygons[i].polygon);
+      jsk_recognition_utils::ConvexPolygon::Ptr magnified_poly = poly.magnifyByDistance(magnify_distance_);
       magnified_polygon.polygon = magnified_poly->toROSMsg();
       ret_polygon_array.polygons.push_back(magnified_polygon);
     }

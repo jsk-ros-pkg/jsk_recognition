@@ -38,9 +38,9 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <eigen_conversions/eigen_msg.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <visualization_msgs/Marker.h>
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 #include <pcl/filters/extract_indices.h>
 namespace jsk_pcl_ros
 {
@@ -180,11 +180,11 @@ namespace jsk_pcl_ros
       cv::Point3d O_3d;
       // convert to ros point
       geometry_msgs::Point A_ros, B_ros, C_ros, D_ros, O_ros;
-      pointFromXYZToXYZ<cv::Point3d, geometry_msgs::Point>(A_3d, A_ros);
-      pointFromXYZToXYZ<cv::Point3d, geometry_msgs::Point>(B_3d, B_ros);
-      pointFromXYZToXYZ<cv::Point3d, geometry_msgs::Point>(C_3d, C_ros);
-      pointFromXYZToXYZ<cv::Point3d, geometry_msgs::Point>(D_3d, D_ros);
-      pointFromXYZToXYZ<cv::Point3d, geometry_msgs::Point>(O_3d, O_ros);
+      jsk_recognition_utils::pointFromXYZToXYZ<cv::Point3d, geometry_msgs::Point>(A_3d, A_ros);
+      jsk_recognition_utils::pointFromXYZToXYZ<cv::Point3d, geometry_msgs::Point>(B_3d, B_ros);
+      jsk_recognition_utils::pointFromXYZToXYZ<cv::Point3d, geometry_msgs::Point>(C_3d, C_ros);
+      jsk_recognition_utils::pointFromXYZToXYZ<cv::Point3d, geometry_msgs::Point>(D_3d, D_ros);
+      jsk_recognition_utils::pointFromXYZToXYZ<cv::Point3d, geometry_msgs::Point>(O_3d, O_ros);
       // build edges
       visualization_msgs::Marker marker;
       marker.header.stamp = latest_image_msg_->header.stamp;
@@ -238,7 +238,7 @@ namespace jsk_pcl_ros
     Eigen::Vector3f C_global = posef * C_eigen;
     Eigen::Vector3f D_global = posef * D_eigen;
     Eigen::Vector3f O_global = posef.translation();
-    Vertices vertices0, vertices1, vertices2, vertices3;
+    jsk_recognition_utils::Vertices vertices0, vertices1, vertices2, vertices3;
     vertices0.push_back(O_global); vertices0.push_back(A_global); vertices0.push_back(D_global);
     vertices1.push_back(O_global); vertices1.push_back(B_global); vertices1.push_back(A_global);
     vertices2.push_back(O_global); vertices2.push_back(C_global); vertices2.push_back(B_global);

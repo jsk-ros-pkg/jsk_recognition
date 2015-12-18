@@ -34,7 +34,7 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/colorize_distance_from_plane.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -82,12 +82,12 @@ namespace jsk_pcl_ros
   
   double ColorizeDistanceFromPlane::distanceToConvexes(
     const PointT& p,
-    const std::vector<ConvexPolygon::Ptr>& convexes)
+    const std::vector<jsk_recognition_utils::ConvexPolygon::Ptr>& convexes)
   {
     Eigen::Vector3f v = p.getVector3fMap();
     double min_distance = DBL_MAX;
     for (size_t i = 0; i < convexes.size(); i++) {
-      ConvexPolygon::Ptr convex = convexes[i];
+      jsk_recognition_utils::ConvexPolygon::Ptr convex = convexes[i];
       if (!only_projectable_ || convex->isProjectableInside(v)) {
         double d = convex->distanceToPoint(v);
         if (d < min_distance) {
@@ -137,14 +137,14 @@ namespace jsk_pcl_ros
       = pcl_conversions::convertToPCLModelCoefficients(
         coefficients_msg->coefficients);
     
-    // first, build ConvexPolygon::Ptr
-    std::vector<ConvexPolygon::Ptr> convexes;
+    // first, build jsk_recognition_utils::ConvexPolygon::Ptr
+    std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> convexes;
     for (size_t i = 0; i < polygons->polygons.size(); i++) {
       if (polygons->polygons[i].polygon.points.size() > 0) {
-        ConvexPolygon convex =
-          ConvexPolygon::fromROSMsg(polygons->polygons[i].polygon);
-        ConvexPolygon::Ptr convex_ptr
-          = boost::make_shared<ConvexPolygon>(convex);
+        jsk_recognition_utils::ConvexPolygon convex =
+          jsk_recognition_utils::ConvexPolygon::fromROSMsg(polygons->polygons[i].polygon);
+        jsk_recognition_utils::ConvexPolygon::Ptr convex_ptr
+          = boost::make_shared<jsk_recognition_utils::ConvexPolygon>(convex);
         convexes.push_back(convex_ptr);
       }
       else {
@@ -158,7 +158,7 @@ namespace jsk_pcl_ros
     for (size_t i = 0; i < cloud->points.size(); i++) {
       PointT p = cloud->points[i];
       pcl::PointXYZRGB p_output;
-      pointFromXYZToXYZ<PointT, pcl::PointXYZRGB>(p, p_output);
+      jsk_recognition_utils::pointFromXYZToXYZ<PointT, pcl::PointXYZRGB>(p, p_output);
       double d = distanceToConvexes(p, convexes);
       if (d != DBL_MAX) {
         uint32_t color = colorForDistance(d);

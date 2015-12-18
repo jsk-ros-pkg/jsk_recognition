@@ -47,7 +47,7 @@
 #include <jsk_pcl_ros/LineSegmentDetectorConfig.h>
 #include <dynamic_reconfigure/server.h>
 #include <visualization_msgs/Marker.h>
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -67,7 +67,7 @@ namespace jsk_pcl_ros
       visualization_msgs::Marker& marker,
       const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
     //virtual Segment::Ptr toSegment();
-    virtual Line::Ptr toSegment();
+    virtual jsk_recognition_utils::Line::Ptr toSegment();
     pcl::PointIndices::Ptr getIndices() { return indices_; }
     pcl::ModelCoefficients::Ptr getCoefficients() { return coefficients_; }
     pcl::PointCloud<pcl::PointXYZ>::Ptr getPoints() { return points_; }

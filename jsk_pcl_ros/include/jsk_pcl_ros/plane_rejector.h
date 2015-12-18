@@ -55,14 +55,14 @@
 #include <jsk_recognition_msgs/ModelCoefficientsArray.h>
 #include "jsk_pcl_ros/PlaneRejectorConfig.h"
 
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <jsk_topic_tools/time_accumulator.h>
 #include <jsk_topic_tools/vital_checker.h>
 
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
 #include <jsk_topic_tools/rosparam_utils.h>
-#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
 #include <jsk_topic_tools/connection_based_nodelet.h>
 
 
@@ -105,9 +105,9 @@ namespace jsk_pcl_ros
     jsk_topic_tools::VitalChecker::Ptr vital_checker_;
     SeriesedBoolean::Ptr tf_success_;
     
-    Counter rejected_plane_counter_;
-    Counter passed_plane_counter_;
-    Counter input_plane_counter_;
+    jsk_recognition_utils::Counter rejected_plane_counter_;
+    jsk_recognition_utils::Counter passed_plane_counter_;
+    jsk_recognition_utils::Counter input_plane_counter_;
   private:
     
   };

@@ -44,7 +44,7 @@
 #include <message_filters/synchronizer.h>
 #include "jsk_pcl_ros/tf_listener_singleton.h"
 #include <eigen_conversions/eigen_msg.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <pcl/common/transforms.h>
 
 namespace jsk_pcl_ros
@@ -74,7 +74,7 @@ namespace jsk_pcl_ros
     Eigen::Matrix4f box_pose_respected_to_cloud_eigen_inversed_matrixf;
     Eigen::Matrix4d box_pose_respected_to_cloud_eigen_inversed_matrixd
       = box_pose_respected_to_cloud_eigend_inversed.matrix();
-    convertMatrix4<Eigen::Matrix4d, Eigen::Matrix4f>(
+    jsk_recognition_utils::convertMatrix4<Eigen::Matrix4d, Eigen::Matrix4f>(
       box_pose_respected_to_cloud_eigen_inversed_matrixd,
       box_pose_respected_to_cloud_eigen_inversed_matrixf);
     offset = Eigen::Affine3f(box_pose_respected_to_cloud_eigen_inversed_matrixf);

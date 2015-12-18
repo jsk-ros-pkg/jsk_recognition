@@ -38,7 +38,7 @@
 #define JSK_PCL_ROS_POLYGON_POINTS_SAMPLER_H_
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 
 #include <jsk_pcl_ros/PolygonPointsSamplerConfig.h>
 #include <dynamic_reconfigure/server.h>

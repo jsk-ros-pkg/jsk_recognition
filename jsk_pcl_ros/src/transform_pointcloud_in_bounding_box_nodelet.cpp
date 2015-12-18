@@ -36,7 +36,7 @@
 #include <jsk_topic_tools/log_utils.h>
 #include "jsk_pcl_ros/transform_pointcloud_in_bounding_box.h"
 #include <eigen_conversions/eigen_msg.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <pcl/common/transforms.h>
 
 namespace jsk_pcl_ros

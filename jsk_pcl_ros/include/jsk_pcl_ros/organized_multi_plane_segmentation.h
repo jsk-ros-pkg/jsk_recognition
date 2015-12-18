@@ -49,8 +49,8 @@
 #include "jsk_recognition_msgs/ModelCoefficientsArray.h"
 #include <jsk_topic_tools/time_accumulator.h>
 #include <jsk_topic_tools/vital_checker.h>
-#include "jsk_pcl_ros/pcl_util.h"
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
@@ -83,20 +83,20 @@ namespace jsk_pcl_ros
     virtual void connectPlanesMap(const pcl::PointCloud<PointT>::Ptr& input,
                                   const std::vector<pcl::ModelCoefficients>& model_coefficients,
                                   const std::vector<pcl::PointIndices>& boundary_indices,
-                                  IntegerGraphMap& connection_map);
+                                  jsk_recognition_utils::IntegerGraphMap& connection_map);
     virtual void buildConnectedPlanes(const pcl::PointCloud<PointT>::Ptr& input,
                                       const std_msgs::Header& header,
                                       const std::vector<pcl::PointIndices>& inlier_indices,
                                       const std::vector<pcl::PointIndices>& boundary_indices,
                                       const std::vector<pcl::ModelCoefficients>& model_coefficients,
-                                      const IntegerGraphMap& connection_map,
+                                      const jsk_recognition_utils::IntegerGraphMap& connection_map,
                                       std::vector<pcl::PointIndices>& output_indices,
                                       std::vector<pcl::ModelCoefficients>& output_coefficients,
                                       std::vector<pcl::PointCloud<PointT> >& output_boundary_clouds);
     virtual void forceToDirectOrigin(const std::vector<pcl::ModelCoefficients>& coefficients,
                                      std::vector<pcl::ModelCoefficients>& output_coefficients);
     virtual void publishMarkerOfConnection(
-      IntegerGraphMap connection_map,
+      jsk_recognition_utils::IntegerGraphMap connection_map,
       const pcl::PointCloud<PointT>::Ptr cloud,
       const std::vector<pcl::PointIndices>& inliers,
       const std_msgs::Header& header);
@@ -140,7 +140,7 @@ namespace jsk_pcl_ros
       const std::vector<pcl::ModelCoefficients>& input_coefficients,
       std::vector<pcl::PointIndices>& output_indices,
       std::vector<pcl::ModelCoefficients>& output_coefficients,
-      std::vector<ConvexPolygon::Ptr>& output_boundaries);
+      std::vector<jsk_recognition_utils::ConvexPolygon::Ptr>& output_boundaries);
 
     
     virtual void updateDiagnostics(const ros::TimerEvent& event);
@@ -192,8 +192,8 @@ namespace jsk_pcl_ros
     bool ransac_refine_coefficients_;
     double ransac_refine_outlier_distance_threshold_;
     
-    Counter original_plane_num_counter_;
-    Counter connected_plane_num_counter_;
+    jsk_recognition_utils::Counter original_plane_num_counter_;
+    jsk_recognition_utils::Counter connected_plane_num_counter_;
 
     
   private:

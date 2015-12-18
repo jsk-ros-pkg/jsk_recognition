@@ -37,8 +37,8 @@
 
 #include "jsk_pcl_ros/polygon_array_area_likelihood.h"
 #include "jsk_pcl_ros/tf_listener_singleton.h"
-#include "jsk_pcl_ros/geo_util.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/geo_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros
 {

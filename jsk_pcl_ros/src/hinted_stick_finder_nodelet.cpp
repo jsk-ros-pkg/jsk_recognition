@@ -34,7 +34,7 @@
  *********************************************************************/
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/hinted_stick_finder.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
@@ -151,7 +151,7 @@ namespace jsk_pcl_ros
     pcl::fromROSMsg(*cloud_msg, *cloud);
     // convert 2-D point into 3-D ray
     Eigen::Vector3f a, b;
-    ConvexPolygon::Ptr polygon = polygonFromLine(polygon_msg, model, a, b);
+    jsk_recognition_utils::ConvexPolygon::Ptr polygon = polygonFromLine(polygon_msg, model, a, b);
     pcl::PointIndices::Ptr candidate_indices
       (new pcl::PointIndices);
     
@@ -204,7 +204,7 @@ namespace jsk_pcl_ros
   }
 
   bool HintedStickFinder::rejected2DHint(
-    const Cylinder::Ptr& cylinder,
+    const jsk_recognition_utils::Cylinder::Ptr& cylinder,
     const Eigen::Vector3f& a,
     const Eigen::Vector3f& b)
   {
@@ -250,12 +250,12 @@ namespace jsk_pcl_ros
         if (dir.dot(Eigen::Vector3f(0, -1, 0)) < 0) {
           dir = -dir;
         }
-        Cylinder::Ptr cylinder(new Cylinder(Eigen::Vector3f(
-                                              coefficients->values[0],
-                                              coefficients->values[1],
-                                              coefficients->values[2]),
-                                            dir,
-                                            coefficients->values[6]));
+        jsk_recognition_utils::Cylinder::Ptr cylinder(new jsk_recognition_utils::Cylinder(Eigen::Vector3f(
+                                                                                            coefficients->values[0],
+                                                                                            coefficients->values[1],
+                                                                                            coefficients->values[2]),
+                                                                                          dir,
+                                                                                          coefficients->values[6]));
         pcl::PointIndices::Ptr cylinder_indices
           (new pcl::PointIndices);
         cylinder->filterPointCloud(*filtered_cloud,
@@ -302,7 +302,7 @@ namespace jsk_pcl_ros
   
   void HintedStickFinder::filterPointCloud(
     const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
-    const ConvexPolygon::Ptr polygon,
+    const jsk_recognition_utils::ConvexPolygon::Ptr polygon,
     pcl::PointIndices& output_indices)
   {
     output_indices.indices.clear();
@@ -323,7 +323,7 @@ namespace jsk_pcl_ros
   }
 
 
-  ConvexPolygon::Ptr HintedStickFinder::polygonFromLine(
+  jsk_recognition_utils::ConvexPolygon::Ptr HintedStickFinder::polygonFromLine(
     const geometry_msgs::PolygonStamped::ConstPtr& polygon_msg,
     const image_geometry::PinholeCameraModel& model,
     Eigen::Vector3f& a,
@@ -341,11 +341,11 @@ namespace jsk_pcl_ros
     Eigen::Vector3f far_a = 20.0 * a;
     Eigen::Vector3f far_b = 20.0 * b;
     Eigen::Vector3f O(0, 0, 0);
-    Vertices vertices;
+    jsk_recognition_utils::Vertices vertices;
     vertices.push_back(O);
     vertices.push_back(far_a);
     vertices.push_back(far_b);
-    ConvexPolygon::Ptr polygon (new ConvexPolygon(vertices));
+    jsk_recognition_utils::ConvexPolygon::Ptr polygon (new jsk_recognition_utils::ConvexPolygon(vertices));
     return polygon;
   }
 

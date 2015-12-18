@@ -46,7 +46,7 @@
 #include <message_filters/synchronizer.h>
 #include <dynamic_reconfigure/server.h>
 
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include "jsk_topic_tools/connection_based_nodelet.h"
 
 namespace jsk_pcl_ros

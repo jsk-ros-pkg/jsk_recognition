@@ -39,7 +39,7 @@
 
 #include <jsk_pcl_ros/region_adjacency_graph.h>
 #include <jsk_recognition_msgs/ClusterPointIndices.h>
-#include <jsk_pcl_ros/pcl_conversion_util.h>
+#include <jsk_recognition_utils/pcl_conversion_util.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 
 // ROS header directives

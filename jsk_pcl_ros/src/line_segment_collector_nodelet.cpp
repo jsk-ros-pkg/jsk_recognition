@@ -34,8 +34,8 @@
  *********************************************************************/
 #define BOOST_PARAMETER_MAX_ARITY 7 
 #include "jsk_pcl_ros/line_segment_collector.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
-#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
@@ -336,8 +336,8 @@ namespace jsk_pcl_ros
     jsk_recognition_msgs::PolygonArray ros_polygon;
     ros_polygon.header = header;
     for (size_t i = 0; i < all_indices.size(); i++) {
-      ConvexPolygon::Ptr convex
-        = convexFromCoefficientsAndInliers<pcl::PointXYZ>(
+      jsk_recognition_utils::ConvexPolygon::Ptr convex
+        = jsk_recognition_utils::convexFromCoefficientsAndInliers<pcl::PointXYZ>(
           cloud, all_indices[i], all_coefficients[i]);
       geometry_msgs::PolygonStamped polygon_stamped;
       polygon_stamped.header = header;

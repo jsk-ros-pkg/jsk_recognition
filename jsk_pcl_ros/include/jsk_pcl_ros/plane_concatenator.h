@@ -48,7 +48,7 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -84,7 +84,7 @@ namespace jsk_pcl_ros
     virtual bool isNearPointCloud(
       pcl::KdTreeFLANN<PointT>& kdtree,
       pcl::PointCloud<PointT>::Ptr cloud,
-      Plane::Ptr target_plane);
+      jsk_recognition_utils::Plane::Ptr target_plane);
     virtual pcl::ModelCoefficients::Ptr refinement(
       pcl::PointCloud<PointT>::Ptr cloud,
       pcl::PointIndices::Ptr indices,

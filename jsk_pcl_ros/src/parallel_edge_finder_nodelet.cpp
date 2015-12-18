@@ -34,7 +34,7 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/parallel_edge_finder.h"
-#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
 #include <jsk_recognition_msgs/ParallelEdgeArray.h>
 
 namespace jsk_pcl_ros
@@ -92,22 +92,22 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // first, build Line instances
     ////////////////////////////////////////////////////////
-    std::vector<Line::Ptr> lines;
+    std::vector<jsk_recognition_utils::Line::Ptr> lines;
     if (input_coefficients->coefficients.size() == 0) {
       return;
     }
     for (size_t i = 0; i < input_coefficients->coefficients.size(); i++) {
       std::vector<float> the_coefficients
         = input_coefficients->coefficients[i].values;
-      lines.push_back(Line::fromCoefficients(the_coefficients));
+      lines.push_back(jsk_recognition_utils::Line::fromCoefficients(the_coefficients));
     }
 
     std::map<int, std::vector<int> > parallel_map;
     for (size_t i = 0; i < lines.size() - 1; i++) {
       parallel_map[i] = std::vector<int>();
-      Line::Ptr the_line = lines[i];
+      jsk_recognition_utils::Line::Ptr the_line = lines[i];
       for (size_t j = i + 1; j < lines.size(); j++) {
-        Line::Ptr candidate_line = lines[j];
+        jsk_recognition_utils::Line::Ptr candidate_line = lines[j];
         if (the_line->isParallel(*candidate_line, angle_threshold_)) {
           parallel_map[i].push_back(j);
         }
@@ -130,12 +130,12 @@ namespace jsk_pcl_ros
         }
         else {
           std::set<int> new_parallel_set;
-          buildGroupFromGraphMap(parallel_map,
+          jsk_recognition_utils::buildGroupFromGraphMap(parallel_map,
                                  i,
                                  parallel_indices,
                                  new_parallel_set);
           parallel_groups_list.push_back(new_parallel_set);
-          addSet(listed_indices, new_parallel_set);
+          jsk_recognition_utils::addSet(listed_indices, new_parallel_set);
         }
       }
     }
@@ -193,7 +193,7 @@ namespace jsk_pcl_ros
       for (std::set<int>::iterator it = parallel_groups.begin();
            it != parallel_groups.end();
            ++it) {
-        indices_msg.indices = addIndices(
+        indices_msg.indices = jsk_recognition_utils::addIndices(
           indices_msg.indices,
           input_indices->cluster_indices[*it].indices);
       }

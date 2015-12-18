@@ -44,13 +44,13 @@
 #include <pcl/filters/project_inliers.h>
 #include <pcl/features/integral_image_normal.h>
 
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <pluginlib/class_list_macros.h>
 
 #include <boost/format.hpp>
 #include <pcl/common/centroid.h>
 #include <visualization_msgs/Marker.h>
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
@@ -142,7 +142,7 @@ namespace jsk_pcl_ros
     output_coefficients.resize(coefficients.size());
     for (size_t i = 0; i < coefficients.size(); i++) {
       pcl::ModelCoefficients plane_coefficient = coefficients[i];
-      Plane plane(coefficients[i].values);
+      jsk_recognition_utils::Plane plane(coefficients[i].values);
       
       Eigen::Vector3f p = plane.getPointOnPlane();
       Eigen::Vector3f n = plane.getNormal();
@@ -150,7 +150,7 @@ namespace jsk_pcl_ros
         output_coefficients[i] = plane_coefficient;
       }
       else {
-        Plane flip = plane.flip();
+        jsk_recognition_utils::Plane flip = plane.flip();
         pcl::ModelCoefficients new_coefficient;
         flip.toCoefficients(new_coefficient.values);
         output_coefficients[i] = new_coefficient;
@@ -196,7 +196,7 @@ namespace jsk_pcl_ros
     const pcl::PointCloud<PointT>::Ptr& input,
     const std::vector<pcl::ModelCoefficients>& model_coefficients,
     const std::vector<pcl::PointIndices>& boundary_indices,
-    IntegerGraphMap& connection_map)
+    jsk_recognition_utils::IntegerGraphMap& connection_map)
   {
     JSK_NODELET_DEBUG("size of model_coefficients: %lu", model_coefficients.size());
     if (model_coefficients.size() == 0) {
@@ -308,14 +308,14 @@ namespace jsk_pcl_ros
     const std::vector<pcl::PointIndices>& inlier_indices,
     const std::vector<pcl::PointIndices>& boundary_indices,
     const std::vector<pcl::ModelCoefficients>& model_coefficients,
-    const IntegerGraphMap& connection_map,
+    const jsk_recognition_utils::IntegerGraphMap& connection_map,
     std::vector<pcl::PointIndices>& output_indices,
     std::vector<pcl::ModelCoefficients>& output_coefficients,
     std::vector<pcl::PointCloud<PointT> >& output_boundary_clouds)
   { 
     std::vector<std::set<int> > cloud_sets;
     JSK_NODELET_DEBUG("connection_map:");
-    for (IntegerGraphMap::const_iterator it = connection_map.begin();
+    for (jsk_recognition_utils::IntegerGraphMap::const_iterator it = connection_map.begin();
          it != connection_map.end();
          ++it) {
       int from_index = it->first;
@@ -327,7 +327,7 @@ namespace jsk_pcl_ros
       JSK_NODELET_DEBUG("%s", ss.str().c_str());
     }
 
-    buildAllGroupsSetFromGraphMap(connection_map, cloud_sets);
+    jsk_recognition_utils::buildAllGroupsSetFromGraphMap(connection_map, cloud_sets);
     connected_plane_num_counter_.add(cloud_sets.size());
     for (size_t i = 0; i < cloud_sets.size(); i++) {
       pcl::PointIndices one_indices;
@@ -342,8 +342,8 @@ namespace jsk_pcl_ros
         pcl::PointIndices inlier = inlier_indices[*it];
         pcl::PointIndices boundary_inlier = boundary_indices[*it];
         // append indices...
-        one_indices = *addIndices(one_indices, inlier);
-        one_boundaries = *addIndices(one_boundaries, boundary_inlier);
+        one_indices = *jsk_recognition_utils::addIndices(one_indices, inlier);
+        one_boundaries = *jsk_recognition_utils::addIndices(one_boundaries, boundary_inlier);
       }
       if (one_indices.indices.size() == 0) {
         continue;
@@ -365,8 +365,8 @@ namespace jsk_pcl_ros
         = boost::make_shared<pcl::PointIndices>(one_boundaries);
       pcl::ModelCoefficients::Ptr coefficients_ptr
         = boost::make_shared<pcl::ModelCoefficients>(pcl_new_coefficients);
-      ConvexPolygon::Ptr convex
-        = convexFromCoefficientsAndInliers<PointT>(
+      jsk_recognition_utils::ConvexPolygon::Ptr convex
+        = jsk_recognition_utils::convexFromCoefficientsAndInliers<PointT>(
           input, indices_ptr, coefficients_ptr);
       if (convex) {
         pcl::PointCloud<PointT> chull_output;
@@ -487,7 +487,7 @@ namespace jsk_pcl_ros
   }
 
   void OrganizedMultiPlaneSegmentation::publishMarkerOfConnection(
-    IntegerGraphMap connection_map,
+    jsk_recognition_utils::IntegerGraphMap connection_map,
     const pcl::PointCloud<PointT>::Ptr cloud,
     const std::vector<pcl::PointIndices>& inliers,
     const std_msgs::Header& header)
@@ -505,7 +505,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // first, compute centroids for each clusters
     ////////////////////////////////////////////////////////
-    Vertices centroids;
+    jsk_recognition_utils::Vertices centroids;
     for (size_t i = 0; i < inliers.size(); i++) {
       pcl::PointIndices::Ptr target_inliers
         = boost::make_shared<pcl::PointIndices>(inliers[i]);
@@ -520,7 +520,7 @@ namespace jsk_pcl_ros
       centroids.push_back(centroid_3f);
     }
 
-    for (IntegerGraphMap::iterator it = connection_map.begin();
+    for (jsk_recognition_utils::IntegerGraphMap::iterator it = connection_map.begin();
          it != connection_map.end();
          ++it) {
       // from = i
@@ -532,9 +532,9 @@ namespace jsk_pcl_ros
         Eigen::Vector3f from_point = centroids[from_index];
         Eigen::Vector3f to_point = centroids[to_index];
         geometry_msgs::Point from_point_ros, to_point_ros;
-        pointFromVectorToXYZ<Eigen::Vector3f, geometry_msgs::Point>(
+        jsk_recognition_utils::pointFromVectorToXYZ<Eigen::Vector3f, geometry_msgs::Point>(
           from_point, from_point_ros);
-        pointFromVectorToXYZ<Eigen::Vector3f, geometry_msgs::Point>(
+        jsk_recognition_utils::pointFromVectorToXYZ<Eigen::Vector3f, geometry_msgs::Point>(
           to_point, to_point_ros);
         connection_marker.points.push_back(from_point_ros);
         connection_marker.points.push_back(to_point_ros);
@@ -577,7 +577,7 @@ namespace jsk_pcl_ros
     // segmentation by PCL organized multiplane segmentation
     // is not enough. we "connect" planes like graph problem.
     ////////////////////////////////////////////////////////
-    IntegerGraphMap connection_map;
+    jsk_recognition_utils::IntegerGraphMap connection_map;
     connectPlanesMap(input, model_coefficients, boundary_indices, connection_map);
     publishMarkerOfConnection(connection_map, input, inlier_indices, header);
     std::vector<pcl::PointIndices> output_nonrefined_indices;
@@ -606,7 +606,7 @@ namespace jsk_pcl_ros
     if (ransac_refine_coefficients_) {
       std::vector<pcl::PointIndices> refined_inliers;
       std::vector<pcl::ModelCoefficients> refined_coefficients;
-      std::vector<ConvexPolygon::Ptr> refined_convexes;
+      std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> refined_convexes;
       refineBasedOnRANSAC(
         input, output_nonrefined_indices, output_nonrefined_coefficients,
         refined_inliers, refined_coefficients, refined_convexes);
@@ -632,7 +632,7 @@ namespace jsk_pcl_ros
     const std::vector<pcl::ModelCoefficients>& input_coefficients,
     std::vector<pcl::PointIndices>& output_indices,
     std::vector<pcl::ModelCoefficients>& output_coefficients,
-    std::vector<ConvexPolygon::Ptr>& output_convexes)
+    std::vector<jsk_recognition_utils::ConvexPolygon::Ptr>& output_convexes)
   {
     jsk_topic_tools::ScopedTimer timer
       = ransac_refinement_time_acc_.scopedTimer();
@@ -663,7 +663,7 @@ namespace jsk_pcl_ros
         ////////////////////////////////////////////////////////
         // compute boundaries from convex hull of
         ////////////////////////////////////////////////////////
-        ConvexPolygon::Ptr convex = convexFromCoefficientsAndInliers<PointT>(
+        jsk_recognition_utils::ConvexPolygon::Ptr convex = jsk_recognition_utils::convexFromCoefficientsAndInliers<PointT>(
           input, refined_inliers, refined_coefficients);
         if (convex) {
           // check area threshold
@@ -750,7 +750,7 @@ namespace jsk_pcl_ros
       bool alivep = normal_estimation_vital_checker_->isAlive();
       if (alivep) {
         stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "NormalEstimation running");
-        addDiagnosticInformation(
+        jsk_recognition_utils::addDiagnosticInformation(
           "Time to estimate normal", normal_estimation_time_acc_, stat);
         // normal estimation parameters
         if (estimation_method_ == 0) {
@@ -803,10 +803,10 @@ namespace jsk_pcl_ros
     if (alivep) {
       stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
                    "PlaneSegmentation running");
-      addDiagnosticInformation(
+      jsk_recognition_utils::addDiagnosticInformation(
         "Time to segment planes", plane_segmentation_time_acc_, stat);
       if (ransac_refine_coefficients_) {
-        addDiagnosticInformation(
+        jsk_recognition_utils::addDiagnosticInformation(
           "Time to refine by RANSAC", ransac_refinement_time_acc_, stat);
       }
       stat.add("Minimum Inliers", min_size_);

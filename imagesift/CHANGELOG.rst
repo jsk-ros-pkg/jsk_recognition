@@ -2,6 +2,9 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.11 (2015-12-18)
+-------------------
+
 0.3.10 (2015-12-17)
 -------------------
 * [imagesift] INFO -> DEBUG to remove verbose output

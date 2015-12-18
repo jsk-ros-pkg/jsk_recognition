@@ -2,6 +2,11 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.11 (2015-12-18)
+-------------------
+* [jsk_perception] slic as submodule
+* Contributors: Ryohei Ueda
+
 0.3.10 (2015-12-17)
 -------------------
 * [jsk_perception] Add utils to save images by request or from bagfile

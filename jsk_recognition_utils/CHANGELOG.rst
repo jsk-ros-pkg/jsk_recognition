@@ -2,6 +2,9 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.11 (2015-12-18)
+-------------------
+
 0.3.10 (2015-12-17)
 -------------------
 * [jsk_recognition_utils] Fix import error on server caused by matplotlib

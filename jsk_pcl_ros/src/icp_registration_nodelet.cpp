@@ -41,7 +41,7 @@
 #include <eigen_conversions/eigen_msg.h>
 #include <pcl/common/transforms.h>
 #include <eigen_conversions/eigen_msg.h>
-#include "jsk_pcl_ros/transform_pointcloud_in_bounding_box.h"
+#include "jsk_pcl_ros_utils/transform_pointcloud_in_bounding_box.h"
 #include <image_geometry/pinhole_camera_model.h>
 #include <pcl/registration/correspondence_estimation_organized_projection.h>
 #include <pcl/registration/correspondence_estimation_normal_shooting.h>
@@ -193,7 +193,7 @@ namespace jsk_pcl_ros
     {
       Eigen::Affine3f offset;
       pcl::PointCloud<PointT>::Ptr output (new pcl::PointCloud<PointT>);
-      transformPointcloudInBoundingBox<PointT>(
+      jsk_pcl_ros_utils::transformPointcloudInBoundingBox<PointT>(
         req.target_box, req.target_cloud,
         *output, offset,
         *tf_listener_);
@@ -281,7 +281,7 @@ namespace jsk_pcl_ros
     {
       Eigen::Affine3f offset;
       pcl::PointCloud<PointT>::Ptr output (new pcl::PointCloud<PointT>);
-      transformPointcloudInBoundingBox<PointT>(
+      jsk_pcl_ros_utils::transformPointcloudInBoundingBox<PointT>(
         *box_msg, *msg,
         *output, offset,
         *tf_listener_);

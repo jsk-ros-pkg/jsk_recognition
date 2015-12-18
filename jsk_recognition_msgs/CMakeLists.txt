@@ -55,6 +55,10 @@ add_message_files(
   ContactSensorArray.msg
   )
 
+add_service_files(FILES
+  SetPointCloud2.srv
+  )
+
 generate_messages(
   DEPENDENCIES
   std_msgs sensor_msgs geometry_msgs pcl_msgs

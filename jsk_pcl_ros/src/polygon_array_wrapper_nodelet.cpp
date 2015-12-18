@@ -66,7 +66,7 @@ namespace jsk_pcl_ros
   
   void PolygonArrayWrapper::wrap(
     const geometry_msgs::PolygonStamped::ConstPtr& polygon,
-    const PCLModelCoefficientMsg::ConstPtr& coefficients)
+    const pcl_msgs::ModelCoefficients::ConstPtr& coefficients)
   {
     jsk_recognition_msgs::PolygonArray array_msg;
     array_msg.header = polygon->header;
@@ -76,7 +76,7 @@ namespace jsk_pcl_ros
 
     jsk_recognition_msgs::ModelCoefficientsArray coefficients_array;
     coefficients_array.header = coefficients->header;
-    PCLModelCoefficientMsg new_coefficients(*coefficients);
+    pcl_msgs::ModelCoefficients new_coefficients(*coefficients);
     coefficients_array.coefficients.push_back(new_coefficients);
     pub_coefficients_array_.publish(coefficients_array);
   }

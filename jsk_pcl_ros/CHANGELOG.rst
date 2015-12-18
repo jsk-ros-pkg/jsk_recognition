@@ -2,6 +2,16 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.11 (2015-12-18)
+-------------------
+* [jsk_pcl_ros] Do not include pcl headers in polygon_array_wrapper and polygon_array_unwrapper
+* [jsk_pcl_ros] Remove ccache prefix
+* [jsk_pcl_ros] Cache test_data to ROS home
+  Modified:
+  jsk_pcl_ros/scripts/install_test_data.py
+* [jsk_pcl_ros] Remove build_check.cpp.in
+* Contributors: Kentaro Wada, Ryohei Ueda
+
 0.3.10 (2015-12-17)
 -------------------
 * [jsk_pcl_ros] Check md5 hash to check the test_data is latest

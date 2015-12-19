@@ -6,12 +6,18 @@ from jsk_recognition_msgs.msg import PolygonArray, ModelCoefficientsArray
 from pcl_msgs.msg import ModelCoefficients
 from geometry_msgs.msg import PolygonStamped
 import message_filters
+from dynamic_reconfigure.server import Server
+from jsk_pcl_ros.cfg import ExtractTopPolygonLikelihoodConfig
 
 class ExtractTopPolygonLikelihood(ConnectionBasedTransport):
     def __init__(self):
         super(ExtractTopPolygonLikelihood, self).__init__()
+        self._srv = Server(ExtractTopPolygonLikelihoodConfig, self.config_callback)
         self._pub = self.advertise("~output", PolygonArray, queue_size=1)
         self._pub_coef = self.advertise("~output/coefficients", ModelCoefficientsArray, queue_size=1)
+    def config_callback(self, config, level):
+        self._min_likelihood = config.min_likelihood
+        return config
     def subscribe(self):
         self._sub = message_filters.Subscriber("~input", PolygonArray)
         self._sub_coef = message_filters.Subscriber("~input/coefficients", ModelCoefficientsArray)
@@ -28,6 +34,9 @@ class ExtractTopPolygonLikelihood(ConnectionBasedTransport):
             res.header = msg.header
             res.polygons = [msg.polygons[max_index]]
             res.likelihood = [msg.likelihood[max_index]]
+            if msg.likelihood[max_index] < self._min_likelihood:
+                rospy.loginfo("Igreno result because of too small likelihood")
+                return
             self._pub.publish(res)
             res_coef = ModelCoefficientsArray()
             res_coef.header = msg.header

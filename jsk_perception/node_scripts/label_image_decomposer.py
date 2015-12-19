@@ -20,7 +20,7 @@ class LabelImageDecomposer(ConnectionBasedTransport):
         super(LabelImageDecomposer, self).__init__()
         self.pub_img = self.advertise('~output', Image, queue_size=5)
         self._publish_tile = rospy.get_param('~publish_tile', False)
-        jsk_loginfo('~publish_info: {}'.format(self._publish_tile))
+        jsk_loginfo('~publish_tile: {}'.format(self._publish_tile))
         if self._publish_tile:
             self.pub_tile = self.advertise('~output/tile', Image, queue_size=5)
 

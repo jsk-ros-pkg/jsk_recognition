@@ -65,7 +65,7 @@
 #include <pcl/tracking/approx_nearest_pair_point_cloud_coherence.h>
 #include <pcl/tracking/nearest_pair_point_cloud_coherence.h>
 
-#include <jsk_pcl_ros/SetPointCloud2.h>
+#include <jsk_recognition_msgs/SetPointCloud2.h>
 #include <jsk_pcl_ros/ParticleFilterTrackingConfig.h>
 #include <jsk_recognition_msgs/BoundingBox.h>
 
@@ -617,8 +617,8 @@ namespace jsk_pcl_ros
     }
     virtual void cloud_cb(const sensor_msgs::PointCloud2 &pc);
     virtual bool renew_model_cb(
-      jsk_pcl_ros::SetPointCloud2::Request &req,
-      jsk_pcl_ros::SetPointCloud2::Response &response);
+      jsk_recognition_msgs::SetPointCloud2::Request &req,
+      jsk_recognition_msgs::SetPointCloud2::Response &response);
     virtual void renew_model_with_box_topic_cb(
       const sensor_msgs::PointCloud2::ConstPtr &pc_ptr,
       const jsk_recognition_msgs::BoundingBox::ConstPtr &bb_ptr);

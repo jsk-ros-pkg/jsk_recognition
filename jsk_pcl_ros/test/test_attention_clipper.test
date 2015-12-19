@@ -8,16 +8,11 @@
         args="$(find jsk_pcl_ros)/test_data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/vision.compressed.bag --clock --loop">
   </node>
 
-  <node name="nodelet_manager"
-        pkg="nodelet" type="nodelet"
-        args="manager" />
-
-  <arg name="MANAGER" value="nodelet_manager" />
   <arg name="INPUT_CLOUD" value="/kinect2_head/hd/points" />
 
   <node name="in_hand_clipper"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/AttentionClipper $(arg MANAGER)">
+        args="standalone jsk_pcl/AttentionClipper">
     <remap from="~input/points" to="$(arg INPUT_CLOUD)" />
     <rosparam>
       initial_pos: [0.0, -0.1, 0.3]
@@ -34,6 +29,7 @@
         args="/in_hand_clipper/output/point_indices /in_hand_clipper/output/point_indices_exists std_msgs/Bool 'len(m.indices) > 33000' --wait-for-start" />
 
   <test test-name="stdout_0"
+        time-limit="360"
         pkg="jsk_tools" type="test_stdout.py">
     <param name="~command" value="rostopic echo /in_hand_clipper/output/point_indices_exists/data -n1" />
     <param name="~stdout_line0" type="str" value="True" />

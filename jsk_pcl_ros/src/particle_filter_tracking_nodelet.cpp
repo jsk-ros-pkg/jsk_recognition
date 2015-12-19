@@ -468,8 +468,8 @@ namespace jsk_pcl_ros
   }
   
   bool ParticleFilterTracking::renew_model_cb(
-    jsk_pcl_ros::SetPointCloud2::Request &req,
-    jsk_pcl_ros::SetPointCloud2::Response &res)
+    jsk_recognition_msgs::SetPointCloud2::Request &req,
+    jsk_recognition_msgs::SetPointCloud2::Response &res)
   {
     pcl::PointCloud<PointT>::Ptr new_target_cloud(new pcl::PointCloud<PointT>());
     pcl::fromROSMsg(req.cloud, *new_target_cloud);

@@ -8,16 +8,11 @@
         args="$(find jsk_pcl_ros)/test_data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/vision.compressed.bag --clock --loop">
   </node>
 
-  <node name="nodelet_manager"
-        pkg="nodelet" type="nodelet"
-        args="manager" />
-
-  <arg name="MANAGER" value="nodelet_manager" />
   <arg name="INPUT_CLOUD" value="/kinect2_head/hd/points" />
 
   <node name="euclidean_clustering"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/EuclideanClustering $(arg MANAGER)">
+        args="standalone jsk_pcl/EuclideanClustering">
     <remap from="~input" to="$(arg INPUT_CLOUD)" />
   </node>
 
@@ -29,11 +24,13 @@
         args="/euclidean_clustering/output/cluster_indices /euclidean_clustering/output/cluster_indices_assert std_msgs/Bool 'len(m) > 20' --wait-for-start" />
 
   <test test-name="stdout_0"
+        time-limit="360"
         pkg="jsk_tools" type="test_stdout.py">
     <param name="~command" value="rostopic echo /euclidean_clustering/cluster_num_assert/data -n1" />
     <param name="~stdout_line0" type="str" value="True" />
   </test>
   <test test-name="stdout_1"
+        time-limit="360"
         pkg="jsk_tools" type="test_stdout.py">
     <param name="~command" value="rostopic echo /euclidean_clustering/output/cluster_indices_assert/data -n1" />
     <param name="~stdout_line0" type="str" value="True" />

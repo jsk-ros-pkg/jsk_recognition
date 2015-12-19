@@ -25,6 +25,10 @@ Extract the points above the planes between `~min_height` and `~max_height`.
   PointIndices of points which are between `~min_height` and `~max_height`.
 
 ## Parameters
+* `~keep_organized` (Bool, default: `false`)
+
+   Keep organized point cloud or not.
+
 * `~min_height` (Double, default: `0.0`)
 * `~max_height`(Double, default: `0.5`)
 
@@ -48,4 +52,4 @@ Extract the points above the planes between `~min_height` and `~max_height`.
   Use sensor viewpoint
 * `~sensor_frame` (String, default: `head_root`)
 
-  Specify frame_id of sensor origin.
+  Specify frame\_id of sensor origin.

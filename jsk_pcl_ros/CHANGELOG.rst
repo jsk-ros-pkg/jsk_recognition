@@ -2,6 +2,23 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros_utils] Introduce new package called jsk_pcl_ros_utils
+  in order to speed-up compilation of jsk_pcl_ros
+* Merge remote-tracking branch 'refs/remotes/garaemon/not-use-deprecated-headers' into refine-jsk-pcl-ros-util
+* [jsk_pcl_ros] move several nodelets to libjsk_pcl_ros_utils
+* [jsk_pcl_ros] Extract after copy in installing test data
+  Modified:
+  - jsk_pcl_ros/scripts/install_test_data.py
+* Merge remote-tracking branch 'refs/remotes/origin/master' into not-use-deprecated-headers
+  Conflicts:
+  jsk_pcl_ros/include/jsk_pcl_ros/polygon_array_unwrapper.h
+  jsk_pcl_ros/include/jsk_pcl_ros/polygon_array_wrapper.h
+* [jsk_pcl_ros] Do not use deprecated utility headers
+  see `#1430 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1430>`_
+* Contributors: Kentaro Wada, Ryohei Ueda
+
 0.3.11 (2015-12-18)
 -------------------
 * [jsk_pcl_ros] Do not include pcl headers in polygon_array_wrapper and polygon_array_unwrapper

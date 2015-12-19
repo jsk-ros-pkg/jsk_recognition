@@ -29,7 +29,7 @@ class LabelImageDecomposer(ConnectionBasedTransport):
         self.sub_label = message_filters.Subscriber('~input/label', Image)
         warn_no_remap('~input', '~input/label')
         use_async = rospy.get_param('~approximate_sync', False)
-        queue_size = ropsy.get_param('~queue_size', 10)
+        queue_size = rospy.get_param('~queue_size', 10)
         jsk_loginfo('~approximate_sync: {}, queue_size: {}'
                     .format(use_async, queue_size))
         if use_async:

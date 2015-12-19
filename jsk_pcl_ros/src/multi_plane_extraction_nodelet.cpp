@@ -60,6 +60,7 @@ namespace jsk_pcl_ros
     if (!pnh_->getParam("max_queue_size", maximum_queue_size_)) {
       maximum_queue_size_ = 100;
     }
+    pnh_->param("keep_organized", keep_organized_, false);
     pnh_->param("use_sensor_frame", use_sensor_frame_, false);
     if (use_sensor_frame_) {
       pnh_->param("sensor_frame", sensor_frame_, std::string("head_root"));
@@ -233,6 +234,7 @@ namespace jsk_pcl_ros
     
       pcl::ExtractIndices<pcl::PointXYZRGB> extract_nonplane;
       extract_nonplane.setNegative(true);
+      extract_nonplane.setKeepOrganized(keep_organized_);
       extract_nonplane.setInputCloud(input_cloud);
       extract_nonplane.setIndices(all_indices);
       extract_nonplane.filter(*nonplane_cloud);
@@ -302,6 +304,7 @@ namespace jsk_pcl_ros
     }
 
     pcl::ExtractIndices<pcl::PointXYZRGB> extract_all_indices;
+    extract_all_indices.setKeepOrganized(keep_organized_);
     extract_all_indices.setInputCloud(nonplane_cloud);
     extract_all_indices.setIndices(all_result_indices);
     extract_all_indices.filter(result_cloud);

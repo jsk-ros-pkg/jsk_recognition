@@ -46,7 +46,7 @@
 
 #include <pluginlib/class_list_macros.h>
 #include <geometry_msgs/PoseArray.h>
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 #include "jsk_pcl_ros/grid_map.h"
 #include <jsk_topic_tools/rosparam_utils.h>
 namespace jsk_pcl_ros
@@ -266,10 +266,10 @@ namespace jsk_pcl_ros
       pcl::PointCloud<pcl::PointNormal>::Ptr full_cloud (new pcl::PointCloud<pcl::PointNormal>);
       pcl::fromROSMsg(*full_cloud_msg, *full_cloud);
     
-      // convert to jsk_pcl_ros::ConvexPolygon
-      std::vector<ConvexPolygon::Ptr> convexes = convertToConvexPolygons(cloud, indices_msg, coefficients_msg);
+      // convert to jsk_recognition_utils::ConvexPolygon
+      std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> convexes = convertToConvexPolygons(cloud, indices_msg, coefficients_msg);
       // magnify convexes
-      std::vector<ConvexPolygon::Ptr> magnified_convexes = magnifyConvexes(convexes);
+      std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> magnified_convexes = magnifyConvexes(convexes);
       publishConvexPolygonsBoundaries(pub_debug_convex_point_cloud_, cloud_msg->header, magnified_convexes);
       // Publish magnified convexes for debug
       publishConvexPolygons(pub_debug_magnified_polygons_, cloud_msg->header, magnified_convexes);
@@ -418,7 +418,7 @@ namespace jsk_pcl_ros
     dimensions.push_back(box->dimensions.x);
     dimensions.push_back(box->dimensions.y);
     dimensions.push_back(box->dimensions.z);
-    Cube::Ptr cube (new Cube(Eigen::Vector3f(global_pose.translation()),
+    jsk_recognition_utils::Cube::Ptr cube (new Cube(Eigen::Vector3f(global_pose.translation()),
                              Eigen::Quaternionf(global_pose.rotation()),
                              dimensions));
     GridPlane::Ptr completed_grid_map = grid_map->clone();
@@ -478,7 +478,7 @@ namespace jsk_pcl_ros
   void EnvironmentPlaneModeling::publishConvexPolygonsBoundaries(
     ros::Publisher& pub,
     const std_msgs::Header& header,
-    std::vector<ConvexPolygon::Ptr>& convexes)
+    std::vector<jsk_recognition_utils::ConvexPolygon::Ptr>& convexes)
   {
     pcl::PointCloud<pcl::PointXYZ>::Ptr
       boundary_cloud (new pcl::PointCloud<pcl::PointXYZ>);
@@ -513,7 +513,7 @@ namespace jsk_pcl_ros
   
   std::vector<GridPlane::Ptr> EnvironmentPlaneModeling::buildGridPlanes(
     pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
-    std::vector<ConvexPolygon::Ptr> convexes,
+    std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> convexes,
     std::set<int>& non_plane_indices)
   {
     std::vector<GridPlane::Ptr> ret(convexes.size());
@@ -535,7 +535,7 @@ namespace jsk_pcl_ros
   void EnvironmentPlaneModeling::publishConvexPolygons(
     ros::Publisher& pub,
     const std_msgs::Header& header,
-    std::vector<ConvexPolygon::Ptr>& convexes)
+    std::vector<jsk_recognition_utils::ConvexPolygon::Ptr>& convexes)
   {
     jsk_recognition_msgs::PolygonArray polygon_array;
     polygon_array.header = header;
@@ -548,35 +548,35 @@ namespace jsk_pcl_ros
     pub.publish(polygon_array);
   }
 
-  std::vector<ConvexPolygon::Ptr> EnvironmentPlaneModeling::magnifyConvexes(
-    std::vector<ConvexPolygon::Ptr>& convexes)
+  std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> EnvironmentPlaneModeling::magnifyConvexes(
+    std::vector<jsk_recognition_utils::ConvexPolygon::Ptr>& convexes)
   {
-    std::vector<ConvexPolygon::Ptr> ret(0);
+    std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> ret(0);
     for (size_t i = 0; i < convexes.size(); i++) {
-      ConvexPolygon::Ptr vertices_convex(new ConvexPolygon(convexes[i]->getVertices()));
-      ConvexPolygon::Ptr new_convex = vertices_convex->magnifyByDistance(magnify_distance_);
+      jsk_recognition_utils::ConvexPolygon::Ptr vertices_convex(new jsk_recognition_utils::ConvexPolygon(convexes[i]->getVertices()));
+      jsk_recognition_utils::ConvexPolygon::Ptr new_convex = vertices_convex->magnifyByDistance(magnify_distance_);
       // check orientation
       if (new_convex->getNormalFromVertices().dot(Eigen::Vector3f::UnitZ()) < 0) {
-        new_convex = boost::make_shared<ConvexPolygon>(new_convex->flipConvex());
+        new_convex = boost::make_shared<jsk_recognition_utils::ConvexPolygon>(new_convex->flipConvex());
       }
       ret.push_back(new_convex);
     }
     return ret;
   }
   
-  std::vector<ConvexPolygon::Ptr> EnvironmentPlaneModeling::convertToConvexPolygons(
+  std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> EnvironmentPlaneModeling::convertToConvexPolygons(
     const pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
     const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg,
     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg)
   {
-    std::vector<ConvexPolygon::Ptr> convexes(0);
+    std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> convexes(0);
     for (size_t i = 0; i < indices_msg->cluster_indices.size(); i++) {
       pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
       inliers->indices = indices_msg->cluster_indices[i].indices;
       pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
       coefficients->values = coefficients_msg->coefficients[i].values;
-      ConvexPolygon::Ptr convex
-        = convexFromCoefficientsAndInliers<pcl::PointNormal>(
+      jsk_recognition_utils::ConvexPolygon::Ptr convex
+        = jsk_recognition_utils::convexFromCoefficientsAndInliers<pcl::PointNormal>(
           cloud, inliers, coefficients);
       convexes.push_back(convex);
     }

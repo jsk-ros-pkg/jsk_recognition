@@ -56,7 +56,7 @@
 
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
-#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
 #include <jsk_topic_tools/vital_checker.h>
 #include "jsk_topic_tools/diagnostic_nodelet.h"
 
@@ -138,7 +138,7 @@ namespace jsk_pcl_ros
     bool align_boxes_;
     bool use_pca_;
 
-    Counter cluster_counter_;
+    jsk_recognition_utils::Counter cluster_counter_;
     
   };
 

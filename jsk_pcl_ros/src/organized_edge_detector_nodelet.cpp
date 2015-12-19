@@ -34,11 +34,11 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/organized_edge_detector.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 
 #include <pcl/features/organized_edge_detection.h>
 #include <pcl/features/integral_image_normal.h>
-#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 
@@ -324,13 +324,13 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // build indices includes all the indices
     ////////////////////////////////////////////////////////
-    std::vector<int> tmp1 = addIndices(label_indices[0].indices,
+    std::vector<int> tmp1 = jsk_recognition_utils::addIndices(label_indices[0].indices,
                                        label_indices[1].indices);
-    std::vector<int> tmp2 = addIndices(tmp1,
+    std::vector<int> tmp2 = jsk_recognition_utils::addIndices(tmp1,
                                        label_indices[2].indices);
-    std::vector<int> tmp3 = addIndices(tmp2,
+    std::vector<int> tmp3 = jsk_recognition_utils::addIndices(tmp2,
                                        label_indices[3].indices);
-    std::vector<int> all = addIndices(tmp3,
+    std::vector<int> all = jsk_recognition_utils::addIndices(tmp3,
                                        label_indices[4].indices);
     if (use_straightline_detection_) {
       std::vector<std::vector<int> > straightline_indices;

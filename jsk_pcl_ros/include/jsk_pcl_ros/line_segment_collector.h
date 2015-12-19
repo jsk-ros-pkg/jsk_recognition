@@ -50,7 +50,7 @@
 #include <jsk_topic_tools/time_accumulator.h>
 #include <jsk_pcl_ros/LineSegmentCollectorConfig.h>
 #include <dynamic_reconfigure/server.h>
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 #include <jsk_recognition_msgs/PolygonArray.h>
 #include <jsk_recognition_msgs/TimeRange.h>
 

@@ -38,7 +38,7 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/io/io.h>
-#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
 #include <sstream>
 
 namespace jsk_pcl_ros
@@ -95,7 +95,7 @@ namespace jsk_pcl_ros
   // 4: direction.y
   // 5. direction.z
   ////////////////////////////////////////////////////////
-  Line::Ptr EdgeDepthRefinement::lineFromCoefficients(
+  jsk_recognition_utils::Line::Ptr EdgeDepthRefinement::lineFromCoefficients(
     const pcl::ModelCoefficients::Ptr coefficients)
   {
     Eigen::Vector3f p(coefficients->values[0],
@@ -104,7 +104,7 @@ namespace jsk_pcl_ros
     Eigen::Vector3f d(coefficients->values[3],
                       coefficients->values[4],
                       coefficients->values[5]);
-    Line::Ptr ret (new Line(d, p));
+    jsk_recognition_utils::Line::Ptr ret (new jsk_recognition_utils::Line(d, p));
     return ret;
   }
 
@@ -152,10 +152,10 @@ namespace jsk_pcl_ros
   }
 
   
-  Segment::Ptr EdgeDepthRefinement::segmentFromIndices(
+  jsk_recognition_utils::Segment::Ptr EdgeDepthRefinement::segmentFromIndices(
     const pcl::PointCloud<PointT>::Ptr& cloud,
     const std::vector<int>& indices,
-    const Line::Ptr& line)
+    const jsk_recognition_utils::Line::Ptr& line)
   {
     boost::tuple<int, int> min_max
       = findMinMaxIndex(cloud->width, cloud->height, indices);
@@ -166,7 +166,7 @@ namespace jsk_pcl_ros
     Eigen::Vector3f min_foot, max_foot;
     line->foot(min_point_f, min_foot);
     line->foot(max_point_f, max_foot);
-    Segment::Ptr segment (new Segment(min_foot, max_foot));
+    jsk_recognition_utils::Segment::Ptr segment (new jsk_recognition_utils::Segment(min_foot, max_foot));
     return segment;
   }
 
@@ -180,7 +180,7 @@ namespace jsk_pcl_ros
     for (std::set<int>::iterator it = duplicated_set.begin();
          it != duplicated_set.end();
          ++it) {
-      integrated_indices = addIndices(all_inliers[*it]->indices,
+      integrated_indices = jsk_recognition_utils::addIndices(all_inliers[*it]->indices,
                                       integrated_indices);
     }
     output_indices->indices = integrated_indices;
@@ -201,14 +201,14 @@ namespace jsk_pcl_ros
     std::vector<pcl::ModelCoefficients::Ptr> cnonduplicated_oefficients;
 
     // buildup Lines and Segments
-    std::vector<Line::Ptr> lines;
-    std::vector<Segment::Ptr> segments;
+    std::vector<jsk_recognition_utils::Line::Ptr> lines;
+    std::vector<jsk_recognition_utils::Segment::Ptr> segments;
     
     for (size_t i = 0; i < all_inliers.size(); i++) {
       pcl::PointIndices::Ptr the_inliers = all_inliers[i];
       pcl::ModelCoefficients::Ptr the_coefficients = all_coefficients[i];
-      Line::Ptr the_line = lineFromCoefficients(the_coefficients);
-      Segment::Ptr the_segment
+      jsk_recognition_utils::Line::Ptr the_line = lineFromCoefficients(the_coefficients);
+      jsk_recognition_utils::Segment::Ptr the_segment
         = segmentFromIndices(cloud, the_inliers->indices, the_line);
       lines.push_back(the_line);
       segments.push_back(the_segment);
@@ -221,11 +221,11 @@ namespace jsk_pcl_ros
     std::map<int, std::vector<int> > duplication_map;
     for (size_t i = 0; i < all_inliers.size() - 1; i++) {
       duplication_map[i] = std::vector<int>(); // add empty map
-      Line::Ptr the_line = lines[i];
-      Segment::Ptr the_segment = segments[i];
+      jsk_recognition_utils::Line::Ptr the_line = lines[i];
+      jsk_recognition_utils::Segment::Ptr the_segment = segments[i];
       for (size_t j = i + 1; j < all_inliers.size(); j++) {
-        Line::Ptr candidate_line = lines[j];
-        Segment::Ptr candidate_segment = segments[j];
+        jsk_recognition_utils::Line::Ptr candidate_line = lines[j];
+        jsk_recognition_utils::Segment::Ptr candidate_segment = segments[j];
         
         double angle_diff = the_line->angle(*candidate_line);
         if (duplication_angle_threshold_ > angle_diff) {
@@ -250,13 +250,13 @@ namespace jsk_pcl_ros
         }
         else {
           std::set<int> new_duplication_set;
-          buildGroupFromGraphMap(duplication_map,
+          jsk_recognition_utils::buildGroupFromGraphMap(duplication_map,
                                  i,
                                  duplication_list,
                                  new_duplication_set);
           duplication_set_list.push_back(new_duplication_set);
           // add new_duplication_set to duplicated_indices
-          addSet<int>(duplicated_indices, new_duplication_set);
+          jsk_recognition_utils::addSet<int>(duplicated_indices, new_duplication_set);
         }
       }
     }

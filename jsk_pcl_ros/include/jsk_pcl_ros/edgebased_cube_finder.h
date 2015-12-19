@@ -48,9 +48,9 @@
 #include <jsk_recognition_msgs/BoundingBoxArray.h>
 #include <jsk_recognition_msgs/ParallelEdgeArray.h>
 
-#include "jsk_pcl_ros/geo_util.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
-#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_recognition_utils/geo_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -89,17 +89,17 @@ namespace jsk_pcl_ros
                    const double outlier_threshold);
     virtual ~CubeHypothesis();
     virtual double getValue() { return value_; };
-    virtual Cube::Ptr getCube() { return cube_; };
+    virtual jsk_recognition_utils::Cube::Ptr getCube() { return cube_; };
     virtual void estimate(const pcl::PointCloud<pcl::PointXYZRGB>& cloud) = 0;
     
     virtual double evaluatePointOnPlanes(
       const pcl::PointCloud<pcl::PointXYZRGB>& cloud,
-      ConvexPolygon& polygon_a,
-      ConvexPolygon& polygon_b);
-    virtual PointPair computeAxisEndPoints(
-      const Line& axis,
-      const PointPair& a_candidates,
-      const PointPair& b_candidates);
+      jsk_recognition_utils::ConvexPolygon& polygon_a,
+      jsk_recognition_utils::ConvexPolygon& polygon_b);
+    virtual jsk_recognition_utils::PointPair computeAxisEndPoints(
+      const jsk_recognition_utils::Line& axis,
+      const jsk_recognition_utils::PointPair& a_candidates,
+      const jsk_recognition_utils::PointPair& b_candidates);
   protected:
     ////////////////////////////////////////////////////////
     // methods
@@ -107,12 +107,12 @@ namespace jsk_pcl_ros
     virtual void computeCentroid(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& cloud,
                                  const pcl::PointIndices::Ptr& indices,
                                  Eigen::Vector3f& output);
-    virtual void getLinePoints(const Line& line,
+    virtual void getLinePoints(const jsk_recognition_utils::Line& line,
                                const pcl::PointCloud<pcl::PointXYZRGB>& cloud,
                                const pcl::PointIndices::Ptr indices,
-                               Vertices& output);
-    virtual ConvexPolygon::Ptr buildConvexPolygon(
-      const PointPair& a_edge_pair, const PointPair& b_edge_pair);
+                               jsk_recognition_utils::Vertices& output);
+    virtual jsk_recognition_utils::ConvexPolygon::Ptr buildConvexPolygon(
+      const jsk_recognition_utils::PointPair& a_edge_pair, const jsk_recognition_utils::PointPair& b_edge_pair);
     
     ////////////////////////////////////////////////////////
     // variables
@@ -121,7 +121,7 @@ namespace jsk_pcl_ros
     const IndicesPair indices_pair_;
     const CoefficientsPair coefficients_pair_;
     double outlier_threshold_;
-    Cube::Ptr cube_;
+    jsk_recognition_utils::Cube::Ptr cube_;
   private:
   };
 
@@ -206,28 +206,28 @@ namespace jsk_pcl_ros
       const std::vector<pcl::ModelCoefficients::Ptr>& coefficients);
 
     virtual EdgeRelation perpendicularEdgeTriple(
-      const Line& edge_a,
-      const Line& edge_b,
-      const Line& edge_c);
+      const jsk_recognition_utils::Line& edge_a,
+      const jsk_recognition_utils::Line& edge_b,
+      const jsk_recognition_utils::Line& edge_c);
     
     
     virtual std::vector<IndicesCoefficientsTriple>
     filterPerpendicularEdgeTriples(
       const std::vector<IndicesCoefficientsTriple>& triples);
 
-    virtual Line::Ptr midLineFromCoefficientsPair(
+    virtual jsk_recognition_utils::Line::Ptr midLineFromCoefficientsPair(
       const CoefficientsPair& pair);
 
-    virtual ConvexPolygon::Ptr convexFromPairs(
+    virtual jsk_recognition_utils::ConvexPolygon::Ptr convexFromPairs(
       const pcl::PointCloud<PointT>::Ptr cloud,
       const CoefficientsPair& coefficients_pair,
       const IndicesPair& indices_pair);
     virtual int countInliers(
       const pcl::PointCloud<PointT>::Ptr cloud,
-      const ConvexPolygon::Ptr convex);
+      const jsk_recognition_utils::ConvexPolygon::Ptr convex);
     virtual void filterBasedOnConvex(
       const pcl::PointCloud<PointT>::Ptr cloud,
-      const std::vector<ConvexPolygon::Ptr>& convexes,
+      const std::vector<jsk_recognition_utils::ConvexPolygon::Ptr>& convexes,
       std::vector<int>& output_indices);
     virtual void filterPairsBasedOnParallelEdgeDistances(
       const std::vector<IndicesPair>& pairs,
@@ -235,7 +235,7 @@ namespace jsk_pcl_ros
       std::vector<IndicesPair>& filtered_indices_pairs,
       std::vector<CoefficientsPair>& filtered_coefficients_pairs);
 
-    virtual Cube::Ptr cubeFromIndicesAndCoefficients(
+    virtual jsk_recognition_utils::Cube::Ptr cubeFromIndicesAndCoefficients(
     const pcl::PointCloud<PointT>::Ptr cloud,
     const IndicesCoefficientsTriple& indices_coefficients_triple,
     pcl::PointCloud<EdgebasedCubeFinder::PointT>::Ptr points_on_edge);
@@ -244,18 +244,18 @@ namespace jsk_pcl_ros
       const pcl::PointCloud<PointT>::Ptr cloud,
       const pcl::PointIndices::Ptr indices);
     
-    virtual PointPair minMaxPointOnLine(
-      const Line& line,
+    virtual jsk_recognition_utils::PointPair minMaxPointOnLine(
+      const jsk_recognition_utils::Line& line,
       const pcl::PointCloud<PointT>::Ptr cloud);
     
     virtual void estimateParallelPlane(
-      const ConvexPolygon::Ptr convex,
+      const jsk_recognition_utils::ConvexPolygon::Ptr convex,
       const pcl::PointCloud<PointT>::Ptr filtered_cloud,
       pcl::PointIndices::Ptr output_inliers,
       pcl::ModelCoefficients::Ptr output_coefficients);
 
     virtual void estimatePerpendicularPlane(
-     const ConvexPolygon::Ptr convex,
+     const jsk_recognition_utils::ConvexPolygon::Ptr convex,
      const CoefficientsPair& edge_coefficients,
      const pcl::PointCloud<PointT>::Ptr filtered_cloud,
      pcl::PointIndices::Ptr output_inliers,
@@ -264,11 +264,11 @@ namespace jsk_pcl_ros
     //virtual pcl::PointCloud<EdgebasedCubeFinder::PointT>::Ptr
     virtual pcl::PointIndices::Ptr
     preparePointCloudForRANSAC(
-      const ConvexPolygon::Ptr convex,
+      const jsk_recognition_utils::ConvexPolygon::Ptr convex,
       const CoefficientsPair& edge_coefficients_pair,
       const pcl::PointCloud<PointT>::Ptr cloud);
 
-    virtual ConvexPolygon::Ptr
+    virtual jsk_recognition_utils::ConvexPolygon::Ptr
     estimateConvexPolygon(
       const pcl::PointCloud<PointT>::Ptr cloud,
       const pcl::PointIndices::Ptr indices,

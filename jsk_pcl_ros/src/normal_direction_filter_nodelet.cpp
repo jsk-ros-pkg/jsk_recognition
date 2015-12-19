@@ -34,7 +34,7 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/normal_direction_filter.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <jsk_topic_tools/rosparam_utils.h>
 #include <eigen_conversions/eigen_msg.h>
 
@@ -50,7 +50,7 @@ namespace jsk_pcl_ros
         JSK_NODELET_ERROR("You need to specify ~direction");
         return;
       }
-      pointFromVectorToVector<std::vector<double>, Eigen::Vector3f>(
+      jsk_recognition_utils::pointFromVectorToVector<std::vector<double>, Eigen::Vector3f>(
       direction, static_direction_);
     }
     else {
@@ -145,7 +145,7 @@ namespace jsk_pcl_ros
       Eigen::Vector3d imu_vectord;
       Eigen::Vector3f imu_vector;
       tf::vectorMsgToEigen(transformed_imu.vector, imu_vectord);
-      pointFromVectorToVector<Eigen::Vector3d, Eigen::Vector3f>(
+      jsk_recognition_utils::pointFromVectorToVector<Eigen::Vector3d, Eigen::Vector3f>(
         imu_vectord, imu_vector);
       imu_vector.normalize();
       pcl::PointIndices indices;

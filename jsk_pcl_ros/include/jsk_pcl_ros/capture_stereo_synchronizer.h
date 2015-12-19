@@ -50,7 +50,7 @@
 #include <stereo_msgs/DisparityImage.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <pcl_msgs/PointIndices.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros
 {

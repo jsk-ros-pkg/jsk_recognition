@@ -37,11 +37,11 @@
 #include <pcl/registration/icp.h>
 #include <pcl/registration/gicp.h>
 #include <pcl/registration/ndt.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <eigen_conversions/eigen_msg.h>
 #include <pcl/common/transforms.h>
 #include <eigen_conversions/eigen_msg.h>
-#include "jsk_pcl_ros/transform_pointcloud_in_bounding_box.h"
+#include "jsk_pcl_ros_utils/transform_pointcloud_in_bounding_box.h"
 #include <image_geometry/pinhole_camera_model.h>
 #include <pcl/registration/correspondence_estimation_organized_projection.h>
 #include <pcl/registration/correspondence_estimation_normal_shooting.h>
@@ -193,7 +193,7 @@ namespace jsk_pcl_ros
     {
       Eigen::Affine3f offset;
       pcl::PointCloud<PointT>::Ptr output (new pcl::PointCloud<PointT>);
-      transformPointcloudInBoundingBox<PointT>(
+      jsk_pcl_ros_utils::transformPointcloudInBoundingBox<PointT>(
         req.target_box, req.target_cloud,
         *output, offset,
         *tf_listener_);
@@ -281,7 +281,7 @@ namespace jsk_pcl_ros
     {
       Eigen::Affine3f offset;
       pcl::PointCloud<PointT>::Ptr output (new pcl::PointCloud<PointT>);
-      transformPointcloudInBoundingBox<PointT>(
+      jsk_pcl_ros_utils::transformPointcloudInBoundingBox<PointT>(
         *box_msg, *msg,
         *output, offset,
         *tf_listener_);
@@ -451,7 +451,7 @@ namespace jsk_pcl_ros
     pcl::transformPointCloud(final, *output_cloud, offset);
     Eigen::Matrix4f transformation = ndt.getFinalTransformation ();
     Eigen::Matrix4d transformation_d;
-    convertMatrix4<Eigen::Matrix4f, Eigen::Matrix4d>(
+    jsk_recognition_utils::convertMatrix4<Eigen::Matrix4f, Eigen::Matrix4d>(
       transformation, transformation_d);
     Eigen::Affine3d offsetd;
     convertEigenAffine3(offset, offsetd);
@@ -521,7 +521,7 @@ namespace jsk_pcl_ros
     // JSK_NODELET_INFO_STREAM("ICP score: " << icp.getFitnessScore());
     Eigen::Matrix4f transformation = icp.getFinalTransformation ();
     Eigen::Matrix4d transformation_d;
-    convertMatrix4<Eigen::Matrix4f, Eigen::Matrix4d>(
+    jsk_recognition_utils::convertMatrix4<Eigen::Matrix4f, Eigen::Matrix4d>(
       transformation, transformation_d);
     Eigen::Affine3d offsetd;
     convertEigenAffine3(offset, offsetd);

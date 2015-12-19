@@ -75,8 +75,8 @@ namespace jsk_pcl_ros
     pcl::ModelCoefficients::Ptr polygon_coefficients
       (new pcl::ModelCoefficients);
     pcl_conversions::toPCL(*polygon_3d_coefficient_msg, *polygon_coefficients);
-    jsk_pcl_ros::Plane::Ptr plane
-      (new jsk_pcl_ros::Plane(polygon_coefficients->values));
+    jsk_recognition_utils::Plane::Ptr plane
+      (new jsk_recognition_utils::Plane(polygon_coefficients->values));
     model.fromCameraInfo(info_msg);
     std::vector<cv::Point> all_points;
     for (int j = 0; j < object_image.rows; j++) {
@@ -153,7 +153,7 @@ namespace jsk_pcl_ros
     std::vector<double>& max_x,
     std::vector<double>& max_y,
     const image_geometry::PinholeCameraModel& model,
-    const jsk_pcl_ros::Plane::Ptr& plane)
+    const jsk_recognition_utils::Plane::Ptr& plane)
   {
     angles.clear();
     const double angle_step = 3;
@@ -206,7 +206,7 @@ namespace jsk_pcl_ros
 
   Eigen::Vector3f FindObjectOnPlane::rayPlaneInteersect(
     const cv::Point3d& ray,
-    const jsk_pcl_ros::Plane::Ptr& plane)
+    const jsk_recognition_utils::Plane::Ptr& plane)
   {
     Eigen::Vector3f n = plane->getNormal();
     Eigen::Vector3f d(ray.x, ray.y, ray.z);
@@ -218,7 +218,7 @@ namespace jsk_pcl_ros
     const cv::Point2d& ux_start,
     const cv::Point2d& ux_end,
     const image_geometry::PinholeCameraModel& model,
-    const jsk_pcl_ros::Plane::Ptr& plane)
+    const jsk_recognition_utils::Plane::Ptr& plane)
   {
     cv::Point3d start_ray = model.projectPixelTo3dRay(ux_start);
     cv::Point3d end_ray = model.projectPixelTo3dRay(ux_end);
@@ -238,7 +238,7 @@ namespace jsk_pcl_ros
     cv::Mat& out_image, const cv::Point2f& test_point, const double angle,
     const double max_x, const double max_y,
     const image_geometry::PinholeCameraModel& model,
-    const jsk_pcl_ros::Plane::Ptr& plane,
+    const jsk_recognition_utils::Plane::Ptr& plane,
     cv::Scalar color)
   {
     Eigen::Vector2f ux(cos(angle/180*M_PI), sin(angle/180*M_PI));
@@ -267,8 +267,8 @@ namespace jsk_pcl_ros
     std::vector<cv::Point2f>& search_points_2d)
   {
     JSK_NODELET_INFO("generateStartPoints");
-    jsk_pcl_ros::Plane::Ptr plane
-      (new jsk_pcl_ros::Plane(coefficients->values));
+    jsk_recognition_utils::Plane::Ptr plane
+      (new jsk_recognition_utils::Plane(coefficients->values));
     cv::Point3d ray = model.projectPixelTo3dRay(point_2d);
     Eigen::Vector3f projected_point = rayPlaneInteersect(ray, plane);
     const double resolution_step = 0.01;

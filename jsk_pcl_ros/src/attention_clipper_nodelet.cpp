@@ -41,9 +41,9 @@
 #include <sensor_msgs/image_encodings.h>
 #include <pcl/filters/crop_box.h>
 #include <pcl_ros/transforms.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <jsk_topic_tools/rosparam_utils.h>
-#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
 #include <algorithm>
 #include <set>
 namespace jsk_pcl_ros
@@ -224,9 +224,9 @@ namespace jsk_pcl_ros
     sub_box_.shutdown();
   }
 
-  Vertices AttentionClipper::cubeVertices(Eigen::Vector3f& dimension)
+  jsk_recognition_utils::Vertices AttentionClipper::cubeVertices(Eigen::Vector3f& dimension)
   {
-    Vertices nonoffsetted_vertices;
+    jsk_recognition_utils::Vertices nonoffsetted_vertices;
     nonoffsetted_vertices.push_back(
       Eigen::Vector3f(-dimension[0]/2, -dimension[1]/2, -dimension[2]/2));
     nonoffsetted_vertices.push_back(
@@ -307,7 +307,7 @@ namespace jsk_pcl_ros
       jsk_recognition_msgs::BoundingBox box;
       box.header = header;
       tf::poseEigenToMsg(transformed_pose_list_[i], box.pose);
-      jsk_pcl_ros::pointFromVectorToXYZ(dimensions_[i], box.dimensions);
+      jsk_recognition_utils::pointFromVectorToXYZ(dimensions_[i], box.dimensions);
       box_array.boxes.push_back(box);
     }
     pub_bounding_box_array_.publish(box_array);
@@ -447,7 +447,7 @@ namespace jsk_pcl_ros
           multiple_pub_indices_[i].publish(indices_msg);
         }
 
-        all_indices = addIndices(*all_indices, non_nan_indices);
+        all_indices = jsk_recognition_utils::addIndices(*all_indices, non_nan_indices);
       }
       if (negative_) {
         // Publish indices which is NOT inside of box.
@@ -500,8 +500,8 @@ namespace jsk_pcl_ros
                                         msg->header.stamp, transform);
           Eigen::Affine3f eigen_transform;
           tf::transformTFToEigen(transform, eigen_transform);
-          Vertices original_vertices = cubeVertices(dimensions_[i]);
-          Vertices vertices;
+          jsk_recognition_utils::Vertices original_vertices = cubeVertices(dimensions_[i]);
+          jsk_recognition_utils::Vertices vertices;
           for (size_t i = 0; i < original_vertices.size(); i++) {
             vertices.push_back(eigen_transform.inverse()
                                * (offset * original_vertices[i]));

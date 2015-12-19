@@ -61,8 +61,8 @@
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
 #include <Eigen/StdVector>
-#include "jsk_pcl_ros/pcl_util.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <jsk_topic_tools/vital_checker.h>
 #include <jsk_topic_tools/time_accumulator.h>
 
@@ -94,11 +94,11 @@ namespace jsk_pcl_ros
     int minsize_;
     int maxsize_;
     
-    jsk_pcl_ros::TimeredDiagnosticUpdater::Ptr diagnostic_updater_;
+    jsk_recognition_utils::TimeredDiagnosticUpdater::Ptr diagnostic_updater_;
     jsk_topic_tools::VitalChecker::Ptr vital_checker_;
     jsk_topic_tools::TimeAccumulator segmentation_acc_;
     jsk_topic_tools::TimeAccumulator kdtree_acc_;
-    Counter cluster_counter_;
+    jsk_recognition_utils::Counter cluster_counter_;
     
     // the list of COGs of each cluster
     Vector4fVector cogs_;

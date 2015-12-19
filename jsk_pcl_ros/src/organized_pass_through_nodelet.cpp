@@ -36,6 +36,8 @@
 #include "jsk_pcl_ros/organized_pass_through.h"
 #include <jsk_topic_tools/diagnostic_utils.h>
 #include <pcl/filters/extract_indices.h>
+#include <jsk_recognition_utils/pcl_util.h>
+
 namespace jsk_pcl_ros
 {
   OrganizedPassThrough::OrganizedPassThrough():
@@ -156,7 +158,7 @@ namespace jsk_pcl_ros
                                                 stat);
     }
     else {
-      addDiagnosticErrorSummary(
+      jsk_recognition_utils::addDiagnosticErrorSummary(
         "ClusterPointIndicesDecomposer", vital_checker_, stat);
     }
   }

@@ -46,6 +46,7 @@ def install_test_data(filename, url, md5, compressed_bag=None):
     output = os.path.join(data_dir, filename)
     if os.path.exists(cache_file):
         shutil.copy(cache_file, output)
+        extract_tgz(output, cwd=data_dir)
     if os.path.exists(output) and check_md5sum(output, md5):
         print("[jsk_pcl_ros] '{}' is already latest version".format(output))
         return

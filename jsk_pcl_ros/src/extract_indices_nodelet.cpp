@@ -35,7 +35,7 @@
 
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/extract_indices.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 
 #include "jsk_pcl_ros/pcl/extract_indices_patch.h"
 #include <pcl_conversions/pcl_conversions.h>

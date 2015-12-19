@@ -37,7 +37,7 @@
 #define JSK_PCL_ROS_EXTRACT_INDICES_H_
 
 #include "jsk_topic_tools/diagnostic_nodelet.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 
 #include <sensor_msgs/PointCloud2.h>
 #include <message_filters/subscriber.h>

@@ -34,7 +34,7 @@
  *********************************************************************/
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/torus_finder.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <jsk_topic_tools/rosparam_utils.h>
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>

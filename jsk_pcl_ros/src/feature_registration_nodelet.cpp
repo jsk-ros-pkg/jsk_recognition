@@ -39,7 +39,7 @@
 #include <pcl/features/fpfh_omp.h>
 #include <eigen_conversions/eigen_msg.h>
 #include <pcl_conversions/pcl_conversions.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros
 {

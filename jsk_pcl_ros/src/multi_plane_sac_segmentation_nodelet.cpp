@@ -38,7 +38,7 @@
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/filters/extract_indices.h>
-#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
 #include <eigen_conversions/eigen_msg.h>
 
 namespace jsk_pcl_ros
@@ -156,7 +156,7 @@ namespace jsk_pcl_ros
       const Eigen::Vector3f& imu_vector,
       std::vector<pcl::PointIndices::Ptr>& output_inliers,
       std::vector<pcl::ModelCoefficients::Ptr>& output_coefficients,
-      std::vector<ConvexPolygon::Ptr>& output_polygons)
+      std::vector<jsk_recognition_utils::ConvexPolygon::Ptr>& output_polygons)
   {
     pcl::PointCloud<PointT>::Ptr rest_cloud (new pcl::PointCloud<PointT>);
     pcl::PointCloud<pcl::Normal>::Ptr rest_normal (new pcl::PointCloud<pcl::Normal>);
@@ -220,7 +220,7 @@ namespace jsk_pcl_ros
       if (inliers->indices.size() >= min_inliers_) {
         output_inliers.push_back(inliers);
         output_coefficients.push_back(coefficients);
-        ConvexPolygon::Ptr convex = convexFromCoefficientsAndInliers<PointT>(
+        jsk_recognition_utils::ConvexPolygon::Ptr convex = jsk_recognition_utils::convexFromCoefficientsAndInliers<PointT>(
           input, inliers, coefficients);
         output_polygons.push_back(convex);
       }
@@ -272,7 +272,7 @@ namespace jsk_pcl_ros
     ex.setKeepOrganized(true);
     std::vector<pcl::PointIndices::Ptr> all_inliers;
     std::vector<pcl::ModelCoefficients::Ptr> all_coefficients;
-    std::vector<ConvexPolygon::Ptr> all_convexes;
+    std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> all_convexes;
     for (size_t i = 0; i < cluster_indices.size(); i++) {
       pcl::PointIndices::Ptr indices = cluster_indices[i];
       pcl::PointCloud<PointT>::Ptr cluster_cloud (new pcl::PointCloud<PointT>);
@@ -282,7 +282,7 @@ namespace jsk_pcl_ros
       ex.filter(*cluster_cloud);
       std::vector<pcl::PointIndices::Ptr> inliers;
       std::vector<pcl::ModelCoefficients::Ptr> coefficients;
-      std::vector<ConvexPolygon::Ptr> convexes;
+      std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> convexes;
       Eigen::Vector3f dummy_imu_vector;
       applyRecursiveRANSAC(cluster_cloud, normal, dummy_imu_vector, inliers, coefficients, convexes);
       appendVector(all_inliers, inliers);
@@ -296,7 +296,7 @@ namespace jsk_pcl_ros
     const std_msgs::Header& header,
     const std::vector<pcl::PointIndices::Ptr>& inliers,
     const std::vector<pcl::ModelCoefficients::Ptr>& coefficients,
-    const std::vector<ConvexPolygon::Ptr>& convexes)
+    const std::vector<jsk_recognition_utils::ConvexPolygon::Ptr>& convexes)
   {
     jsk_recognition_msgs::ClusterPointIndices ros_indices_output;
     jsk_recognition_msgs::ModelCoefficientsArray ros_coefficients_output;
@@ -351,13 +351,13 @@ namespace jsk_pcl_ros
       Eigen::Vector3d imu_vectord;
       Eigen::Vector3f imu_vector;
       tf::vectorMsgToEigen(transformed_stamped_imu.vector, imu_vectord);
-      pointFromVectorToVector<Eigen::Vector3d, Eigen::Vector3f>(
+      jsk_recognition_utils::pointFromVectorToVector<Eigen::Vector3d, Eigen::Vector3f>(
         imu_vectord, imu_vector);
       imu_vector = - imu_vector;
       
       std::vector<pcl::PointIndices::Ptr> inliers;
       std::vector<pcl::ModelCoefficients::Ptr> coefficients;
-      std::vector<ConvexPolygon::Ptr> convexes;
+      std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> convexes;
       applyRecursiveRANSAC(input, normal, imu_vector,
                            inliers, coefficients, convexes);
       publishResult(msg->header, inliers, coefficients, convexes);                     
@@ -385,7 +385,7 @@ namespace jsk_pcl_ros
     pcl::fromROSMsg(*msg_normal, *normal);
     std::vector<pcl::PointIndices::Ptr> inliers;
     std::vector<pcl::ModelCoefficients::Ptr> coefficients;
-    std::vector<ConvexPolygon::Ptr> convexes;
+    std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> convexes;
     Eigen::Vector3f dummy_imu_vector;
     applyRecursiveRANSAC(input, normal, dummy_imu_vector,
                          inliers, coefficients, convexes);

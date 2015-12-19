@@ -36,7 +36,7 @@
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/pointcloud_localization.h"
 #include <jsk_pcl_ros/ICPAlign.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <pcl_ros/transforms.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/passthrough.h>

@@ -48,8 +48,8 @@
 #include "jsk_recognition_msgs/PolygonArray.h"
 #include <dynamic_reconfigure/server.h>
 #include "jsk_pcl_ros/MultiPlaneExtractionConfig.h"
-#include "jsk_pcl_ros/pcl_util.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <jsk_topic_tools/vital_checker.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include "jsk_pcl_ros/tf_listener_singleton.h"
@@ -122,7 +122,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // Diagnostics Variables
     ////////////////////////////////////////////////////////
-    Counter plane_counter_;
+    jsk_recognition_utils::Counter plane_counter_;
     
     ////////////////////////////////////////////////////////
     // Parameters

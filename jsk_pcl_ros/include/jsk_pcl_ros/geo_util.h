@@ -35,7 +35,7 @@
 
 #ifndef JSK_PCL_ROS_GEO_UTIL_H_
 #define JSK_PCL_ROS_GEO_UTIL_H_
-#pragma warning "jsk_pcl_ros/geo_util.h is deprecated"
+#pragma warning "jsk_recognition_utils/geo_util.h is deprecated"
 #include <jsk_recognition_utils/geo_util.h>
 namespace jsk_pcl_ros
 {

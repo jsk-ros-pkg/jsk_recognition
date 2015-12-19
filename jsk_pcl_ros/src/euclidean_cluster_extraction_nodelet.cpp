@@ -34,6 +34,7 @@
 
 #include <pluginlib/class_list_macros.h>
 #include "jsk_pcl_ros/euclidean_cluster_extraction_nodelet.h" 
+#include <jsk_recognition_utils/pcl_util.h>
 
 using namespace std;
 using namespace pcl;
@@ -193,7 +194,7 @@ namespace jsk_pcl_ros
     // diagnostics
     ////////////////////////////////////////////////////////
     diagnostic_updater_.reset(
-      new TimeredDiagnosticUpdater(*pnh_, ros::Duration(1.0)));
+      new jsk_recognition_utils::TimeredDiagnosticUpdater(*pnh_, ros::Duration(1.0)));
     diagnostic_updater_->setHardwareID(getName());
     diagnostic_updater_->add(
       getName() + "::EuclideanClustering",
@@ -245,9 +246,9 @@ namespace jsk_pcl_ros
       diagnostic_msgs::DiagnosticStatus::OK,
       "EuclideanSegmentation running");
 
-      addDiagnosticInformation(
+      jsk_recognition_utils::addDiagnosticInformation(
         "Kdtree Construction", kdtree_acc_, stat);
-      addDiagnosticInformation(
+      jsk_recognition_utils::addDiagnosticInformation(
         "Euclidean Segmentation", segmentation_acc_, stat);
       stat.add("Cluster Num (Avg.)", cluster_counter_.mean());
       stat.add("Max Size of the cluster", maxsize_);
@@ -256,7 +257,7 @@ namespace jsk_pcl_ros
       stat.add("Tracking tolerance", label_tracking_tolerance);
     }
     else {
-      addDiagnosticErrorSummary(
+      jsk_recognition_utils::addDiagnosticErrorSummary(
         "EuclideanClustering", vital_checker_, stat);
     }
   }

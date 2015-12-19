@@ -32,7 +32,7 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include "jsk_pcl_ros/line_segment_detector.h"
 #include <visualization_msgs/Marker.h>
 #include <pcl/sample_consensus/method_types.h>
@@ -77,7 +77,7 @@ namespace jsk_pcl_ros
   {
   }
 
-  Line::Ptr LineSegment::toSegment()
+  jsk_recognition_utils::Line::Ptr LineSegment::toSegment()
   {
     // we suppose the first and the last point should be the end points
     // return Segment::Ptr(
@@ -88,8 +88,8 @@ namespace jsk_pcl_ros
     direction[0] = coefficients_->values[3];
     direction[1] = coefficients_->values[4];
     direction[2] = coefficients_->values[5];
-    return Line::Ptr(new Line(direction,
-                              points_->points[0].getVector3fMap()));
+    return jsk_recognition_utils::Line::Ptr(new jsk_recognition_utils::Line(direction,
+                                                                            points_->points[0].getVector3fMap()));
     // return Segment::Ptr(
     //   new Segment(
     //     points_->points[0].getVector3fMap(),
@@ -113,9 +113,9 @@ namespace jsk_pcl_ros
       }
     }
     geometry_msgs::Point a, b;
-    pointFromXYZToXYZ<pcl::PointXYZ, geometry_msgs::Point>(
+    jsk_recognition_utils::pointFromXYZToXYZ<pcl::PointXYZ, geometry_msgs::Point>(
       cloud->points[min_index], a);
-    pointFromXYZToXYZ<pcl::PointXYZ, geometry_msgs::Point>(
+    jsk_recognition_utils::pointFromXYZToXYZ<pcl::PointXYZ, geometry_msgs::Point>(
       cloud->points[max_index], b);
     marker.points.push_back(a);
     marker.points.push_back(b);
@@ -238,7 +238,7 @@ namespace jsk_pcl_ros
         if (result_indices->indices.size() > min_indices_) {
           line_indices.push_back(result_indices);
           line_coefficients.push_back(result_coefficients);
-          rest_indices = subIndices(*rest_indices, *result_indices);
+          rest_indices = jsk_recognition_utils::subIndices(*rest_indices, *result_indices);
         }
         else {
           break;

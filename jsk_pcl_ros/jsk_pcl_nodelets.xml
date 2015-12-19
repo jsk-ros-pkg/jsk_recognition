@@ -1,4 +1,63 @@
-<library path="libjsk_pcl_ros_util">
+<library path="libjsk_pcl_ros_utils">
+  <class name="jsk_pcl/PCDReaderWithPose" type="jsk_pcl_ros::PCDReaderWithPose"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      reconstract template pointcloud with recognized_pose
+    </description>
+  </class>
+  <class name="jsk_pcl/AddPointIndices"
+         type="jsk_pcl_ros::AddPointIndices"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl/MaskImageToPointIndices"
+         type="jsk_pcl_ros::MaskImageToPointIndices"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl/MaskImageToDepthConsideredMaskImage"
+         type="jsk_pcl_ros::MaskImageToDepthConsideredMaskImage"
+         base_class_type="nodelet::Nodelet">
+    Generate depth considered mask image out of mask image
+  </class>
+  <class name="jsk_pcl/TransformPointcloudInBoundingBox" type="jsk_pcl_ros::TransformPointcloudInBoundingBox"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      transform pointcloud whose origin is the center of bounding box;
+    </description>
+  </class>
+  <class name="jsk_pcl/DepthImageError" type="jsk_pcl_ros::DepthImageError"
+         base_class_type="nodelet::Nodelet">
+    <description>compute error of depth image</description>
+  </class>
+  <class name="jsk_pcl/DelayPointCloud" type="jsk_pcl_ros::DelayPointCloud"
+         base_class_type="nodelet::Nodelet">
+    <description>delay pointcloud messages</description>
+  </class>
+  <class name="jsk_pcl/NormalConcatenater" type="jsk_pcl_ros::NormalConcatenater"
+         base_class_type="nodelet::Nodelet">
+    <description>Concatenater normal to x, y, z and rgb pointcloud</description>
+  </class>
+  <class name="jsk_pcl/TfTransformCloud" type="jsk_pcl_ros::TfTransformCloud"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      publish transformed cloud with target id
+    </description>
+  </class>
+  <class name="jsk_pcl/TfTransformBoundingBox" type="jsk_pcl_ros::TfTransformBoundingBox"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl/TfTransformBoundingBoxArray" type="jsk_pcl_ros::TfTransformBoundingBoxArray"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl/NormalFlipToFrame"
+         type="jsk_pcl_ros::NormalFlipToFrame"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl/CentroidPublisher" type="jsk_pcl_ros::CentroidPublisher"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      publish the centroid of the pointcloud to /tf
+    </description>
+  </class>
   <class name="jsk_pcl/PolygonArrayDistanceLikelihood" 
          type="jsk_pcl_ros::PolygonArrayDistanceLikelihood"
          base_class_type="nodelet::Nodelet">
@@ -113,10 +172,6 @@
          type="jsk_pcl_ros::PointCloudLocalization"
          base_class_type="nodelet::Nodelet">
   </class>
-  <class name="jsk_pcl/NormalFlipToFrame"
-         type="jsk_pcl_ros::NormalFlipToFrame"
-         base_class_type="nodelet::Nodelet">
-  </class>
   <class name="jsk_pcl/FeatureRegistration"
          type="jsk_pcl_ros::FeatureRegistration"
          base_class_type="nodelet::Nodelet">
@@ -127,10 +182,6 @@
   </class>
   <class name="jsk_pcl/HintedStickFinder"
          type="jsk_pcl_ros::HintedStickFinder"
-         base_class_type="nodelet::Nodelet">
-  </class>
-  <class name="jsk_pcl/AddPointIndices"
-         type="jsk_pcl_ros::AddPointIndices"
          base_class_type="nodelet::Nodelet">
   </class>
   <class name="jsk_pcl/MaskImageFilter"
@@ -155,10 +206,6 @@
   </class>
   <class name="jsk_pcl/SupervoxelSegmentation"
          type="jsk_pcl_ros::SupervoxelSegmentation"
-         base_class_type="nodelet::Nodelet">
-  </class>
-  <class name="jsk_pcl/MaskImageToPointIndices"
-         type="jsk_pcl_ros::MaskImageToPointIndices"
          base_class_type="nodelet::Nodelet">
   </class>
   <class name="jsk_pcl/OrganizedPointCloudToPointIndices"
@@ -198,13 +245,7 @@
          type="jsk_pcl_ros::ExtractIndices"
          base_class_type="nodelet::Nodelet">
     Extract point cloud with point indices
-  </class>
-  <class name="jsk_pcl/MaskImageToDepthConsideredMaskImage"
-         type="jsk_pcl_ros::MaskImageToDepthConsideredMaskImage"
-         base_class_type="nodelet::Nodelet">
-    Generate depth considered mask image out of mask image
-  </class>
-  
+  </class>  
   <class name="jsk_pcl/ROIClipper"
          type="jsk_pcl_ros::ROIClipper"
          base_class_type="nodelet::Nodelet">
@@ -261,12 +302,6 @@
          base_class_type="nodelet::Nodelet">
     <description>
       database server storing pointcloud data
-    </description>
-  </class>
-  <class name="jsk_pcl/TransformPointcloudInBoundingBox" type="jsk_pcl_ros::TransformPointcloudInBoundingBox"
-         base_class_type="nodelet::Nodelet">
-    <description>
-      transform pointcloud whose origin is the center of bounding box;
     </description>
   </class>
   <class name="jsk_pcl/JointStateStaticFilter" type="jsk_pcl_ros::JointStateStaticFilter"
@@ -330,14 +365,6 @@
       border estimator for organized pointcloud
     </description>
   </class>
-  <class name="jsk_pcl/DepthImageError" type="jsk_pcl_ros::DepthImageError"
-         base_class_type="nodelet::Nodelet">
-    <description>compute error of depth image</description>
-  </class>
-  <class name="jsk_pcl/DelayPointCloud" type="jsk_pcl_ros::DelayPointCloud"
-         base_class_type="nodelet::Nodelet">
-    <description>delay pointcloud messages</description>
-  </class>
   <class name="jsk_pcl/HandleEstimator" type="jsk_pcl_ros::HandleEstimator"
          base_class_type="nodelet::Nodelet">
     <description>estimate handle from pointcloud</description>
@@ -373,10 +400,6 @@
   <class name="jsk_pcl/RegionGrowingSegmentation" type="jsk_pcl_ros::RegionGrowingSegmentation"
          base_class_type="nodelet::Nodelet">
     <description>segment pointcloud by region growing</description>
-  </class>
-  <class name="jsk_pcl/NormalConcatenater" type="jsk_pcl_ros::NormalConcatenater"
-         base_class_type="nodelet::Nodelet">
-    <description>Concatenater normal to x, y, z and rgb pointcloud</description>
   </class>
   <class name="jsk_pcl/ImageRotateNodelet" type="jsk_pcl_ros::ImageRotateNodelet"
          base_class_type="nodelet::Nodelet">
@@ -474,13 +497,6 @@
       decompose jsk_pcl_ros::ClusterPointIndices into PointCloud2 with sorting according to z axis
     </description>
   </class>
-
-  <class name="jsk_pcl/CentroidPublisher" type="jsk_pcl_ros::CentroidPublisher"
-         base_class_type="nodelet::Nodelet">
-    <description>
-      publish the centroid of the pointcloud to /tf
-    </description>
-  </class>
   <class name="jsk_pcl/MovingLeastSquareSmoothing" type="jsk_pcl_ros::MovingLeastSquareSmoothing"
          base_class_type="nodelet::Nodelet">
     <description>
@@ -529,18 +545,6 @@
     <description>
       OctreeChangePublisher nodelet node
     </description>
-  </class>
-  <class name="jsk_pcl/TfTransformCloud" type="jsk_pcl_ros::TfTransformCloud"
-         base_class_type="nodelet::Nodelet">
-    <description>
-      publish transformed cloud with target id
-    </description>
-  </class>
-  <class name="jsk_pcl/TfTransformBoundingBox" type="jsk_pcl_ros::TfTransformBoundingBox"
-         base_class_type="nodelet::Nodelet">
-  </class>
-  <class name="jsk_pcl/TfTransformBoundingBoxArray" type="jsk_pcl_ros::TfTransformBoundingBoxArray"
-         base_class_type="nodelet::Nodelet">
   </class>
   <class name="jsk_pcl/ColorizeRandomForest" type="jsk_pcl_ros::ColorizeRandomForest"
          base_class_type="nodelet::Nodelet">
@@ -601,13 +605,6 @@
   <!--     jsk_pcl_ros::OrganizePointCloud -->
   <!--   </description> -->
   <!-- </class> -->
-  <class name="jsk_pcl/PCDReaderWithPose" type="jsk_pcl_ros::PCDReaderWithPose"
-         base_class_type="nodelet::Nodelet">
-    <description>
-      reconstract template pointcloud with recognized_pose
-    </description>
-  </class>
-
   <class name="jsk_pcl/OctomapServerContact"
          type="jsk_pcl_ros::OctomapServerContact"
          base_class_type="nodelet::Nodelet">

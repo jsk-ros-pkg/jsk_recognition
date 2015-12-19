@@ -35,12 +35,12 @@
 
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/hinted_handle_estimator.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <pcl/features/normal_3d.h>
 #include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/common/transforms.h>
 #include <pcl/filters/passthrough.h>
-#include <jsk_pcl_ros/pcl_conversion_util.h>
+#include <jsk_recognition_utils/pcl_conversion_util.h>
 #include <eigen_conversions/eigen_msg.h>
 #include <tf/tf.h>
 #include <math.h>
@@ -192,7 +192,7 @@ namespace jsk_pcl_ros
       Eigen::Matrix4f box_pose_respected_to_cloud_eigen_inversed_matrixf;
       Eigen::Matrix4d box_pose_respected_to_cloud_eigen_inversed_matrixd
         = box_pose_respected_to_cloud_eigend_inversed.matrix();
-      jsk_pcl_ros::convertMatrix4<Eigen::Matrix4d, Eigen::Matrix4f>(
+      jsk_recognition_utils::convertMatrix4<Eigen::Matrix4d, Eigen::Matrix4f>(
                                                                     box_pose_respected_to_cloud_eigen_inversed_matrixd,
                                                                     box_pose_respected_to_cloud_eigen_inversed_matrixf);
       Eigen::Affine3f offset = Eigen::Affine3f(box_pose_respected_to_cloud_eigen_inversed_matrixf);

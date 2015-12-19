@@ -43,8 +43,8 @@
 #include <message_filters/synchronizer.h>
 #include <boost/random.hpp>
 #include <dynamic_reconfigure/server.h>
-#include "jsk_pcl_ros/geo_util.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/geo_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include "jsk_pcl_ros/tf_listener_singleton.h"
 #include <algorithm>
 
@@ -172,7 +172,7 @@ namespace jsk_pcl_ros
       //ROS_INFO("indices: %lu", candidate_point_indices.size());
       double error = 0.0;
       
-      Cube::Ptr cube = p.toCube();
+      jsk_recognition_utils::Cube::Ptr cube = p.toCube();
       std::vector<Polygon::Ptr> faces = cube->faces();
       for (size_t i = 0; i < candidate_point_indices.size(); i++) {
         int index = candidate_point_indices[i];
@@ -312,7 +312,7 @@ namespace jsk_pcl_ros
      */
     virtual size_t getNearestPolygon(
       const Particle& p,
-      const std::vector<ConvexPolygon::Ptr>& polygons);
+      const std::vector<jsk_recognition_utils::ConvexPolygon::Ptr>& polygons);
     /**
      * @brief
      * Compute distances between particles and polygons and assing each particle

@@ -43,7 +43,7 @@
 #include <visualization_msgs/Marker.h>
 #include <tf/transform_broadcaster.h>
 #include <tf_conversions/tf_eigen.h>
-#include <jsk_pcl_ros/pcl_conversion_util.h>
+#include <jsk_recognition_utils/pcl_conversion_util.h>
 #include <jsk_topic_tools/connection_based_nodelet.h>
 #include <jsk_recognition_utils/tf_listener_singleton.h>
 #include <boost/circular_buffer.hpp>

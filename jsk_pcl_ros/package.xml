@@ -55,6 +55,7 @@
   <build_depend>octomap_server</build_depend>
   <build_depend>octomap_msgs</build_depend>
   <build_depend>octomap_ros</build_depend>
+  <build_depend>jsk_pcl_ros_utils</build_depend>
 
   <!-- <run_depend>pcl</run_depend> -->
   <run_depend>eigen_conversions</run_depend>
@@ -108,6 +109,7 @@
   <run_depend>octomap_server</run_depend>
   <run_depend>octomap_msgs</run_depend>
   <run_depend>octomap_ros</run_depend>
+  <run_depend>jsk_pcl_ros_utils</run_depend>
   <test_depend>jsk_tools</test_depend>
   <export>
     <nodelet plugin="${prefix}/jsk_pcl_nodelets.xml"/>

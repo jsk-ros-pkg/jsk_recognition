@@ -126,6 +126,7 @@ generate_dynamic_reconfigure_options(
   cfg/MovingLeastSquareSmoothing.cfg
   cfg/OctreeVoxelGrid.cfg
   cfg/OctreeChangePublisher.cfg
+  cfg/ExtractTopPolygonLikelihood.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)

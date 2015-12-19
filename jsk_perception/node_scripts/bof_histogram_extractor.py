@@ -44,7 +44,7 @@ class BoFHistogramExtractor(ConnectionBasedTransport):
                 [self._sub_feature, self._sub_label], queue_size=10, slop=0.1)
         else:
             sync = message_filters.TimeSynchronizer(
-                [self._sub_feature, self._sub_feature], queue_size=10)
+                [self._sub_feature, self._sub_label], queue_size=10)
         jsk_logdebug('~approximate_sync: {}'.format(use_async))
         sync.registerCallback(self._apply)
 

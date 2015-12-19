@@ -234,8 +234,7 @@ jsk_pcl_util_nodelet(src/pcd_reader_with_pose_nodelet.cpp
 add_library(jsk_pcl_ros_utils SHARED ${jsk_pcl_util_nodelet_sources})
 add_dependencies(jsk_pcl_ros_utils ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 target_link_libraries(jsk_pcl_ros_utils
-  ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp
-  jsk_pcl_ros_base)
+  ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
 
 # bench/ directory
 # generate_messages(DEPENDENCIES

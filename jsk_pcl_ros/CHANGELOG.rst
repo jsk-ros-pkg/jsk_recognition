@@ -2,6 +2,12 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros] Longer timelimit
+* [jsk_pcl_ros] jsk_pcl_ros::SetPointCloud2 -> jsk_recognition_msgs::SetPointCloud2
+* Contributors: Ryohei Ueda
+
 0.3.12 (2015-12-19)
 -------------------
 * [jsk_pcl_ros_utils] Introduce new package called jsk_pcl_ros_utils

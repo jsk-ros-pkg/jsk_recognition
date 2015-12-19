@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.13 (2015-12-19)
+-------------------
 * [jsk_pcl_ros_utils] Remove jsk_pcl_ros_base
 * Contributors: Ryohei Ueda
 

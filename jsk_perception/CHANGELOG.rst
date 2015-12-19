@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.12 (2015-12-19)
+-------------------
 * Revert "[jsk_perception] slic as submodule"
 * Contributors: Ryohei Ueda
 

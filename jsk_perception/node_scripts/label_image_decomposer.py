@@ -29,18 +29,21 @@ class LabelImageDecomposer(ConnectionBasedTransport):
         self.sub_label = message_filters.Subscriber('~input/label', Image)
         warn_no_remap('~input', '~input/label')
         use_async = rospy.get_param('~approximate_sync', False)
-        jsk_loginfo('~approximate_sync: {}'.format(use_async))
+        queue_size = ropsy.get_param('~queue_size', 10)
+        jsk_loginfo('~approximate_sync: {}, queue_size: {}'
+                    .format(use_async, queue_size))
         if use_async:
             slop = rospy.get_param('~slop', 0.1)
             jsk_loginfo('~slop: {}'.format(slop))
             async = message_filters.ApproximateTimeSynchronizer(
-                [self.sub_img, self.sub_label], queue_size=10, slop=slop)
+                [self.sub_img, self.sub_label],
+                queue_size=queue_size, slop=slop)
             async.registerCallback(self._apply)
             if self._publish_tile:
                 async.registerCallback(self._apply_tile)
         else:
             sync = message_filters.TimeSynchronizer(
-                [self.sub_img, self.sub_label], queue_size=10)
+                [self.sub_img, self.sub_label], queue_size=queue_size)
             sync.registerCallback(self._apply)
             if self._publish_tile:
                 sync.registerCallback(self._apply_tile)

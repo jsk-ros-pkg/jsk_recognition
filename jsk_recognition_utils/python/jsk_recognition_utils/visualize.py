@@ -37,7 +37,7 @@ def get_tile_image(imgs, tile_shape=None):
 
     canvas = plt.get_current_fig_manager().canvas
     canvas.draw()
-    pil_img = PIL.Image.fromstring('RGB',
+    pil_img = PIL.Image.frombytes('RGB',
         canvas.get_width_height(), canvas.tostring_rgb())
     out_rgb = np.array(pil_img)
     out_bgr = cv2.cvtColor(out_rgb, cv2.COLOR_RGB2BGR)

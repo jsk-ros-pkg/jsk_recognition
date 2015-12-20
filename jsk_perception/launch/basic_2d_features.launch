@@ -1,0 +1,34 @@
+<launch>
+  <arg name="INPUT" default="/multisense_local/left/image_rect_color" />
+  <node pkg="jsk_perception" type="hsv_decomposer" name="hsv">
+    <remap from="~input" to="$(arg INPUT)" />
+  </node>
+  <node pkg="jsk_perception" type="lab_decomposer" name="lab">
+    <remap from="~input" to="$(arg INPUT)" />
+  </node>
+  <node pkg="jsk_perception" type="ycc_decomposer" name="ycc">
+    <remap from="~input" to="$(arg INPUT)" />
+  </node>
+  <node pkg="jsk_perception" type="kmeans" name="kmeans">
+    <remap from="~input" to="$(arg INPUT)" />
+  </node>
+  <node pkg="jsk_perception" type="edge_detector" name="edge">
+    <remap from="image" to="$(arg INPUT)" />
+  </node>
+  <node pkg="jsk_perception" type="gaussian_blur" name="gaussian_blur">
+    <remap from="~input" to="$(arg INPUT)" />
+  </node>
+  <node pkg="jsk_perception" type="tile_image.py" name="tile_image" output="screen">
+    <rosparam subst_value="true">
+      draw_topic_name: true
+      input_topics: [$(arg INPUT), 
+                     hsv/output/hue, hsv/output/saturation, hsv/output/value,
+                     lab/output/l, lab/output/a, lab/output/b,
+                     ycc/output/y, ycc/output/cr, ycc/output/cb,
+                     kmeans/output, edge/image, gaussian_blur/output]
+    </rosparam>
+  </node>
+  <node pkg="image_view" type="image_view" name="result_view">
+    <remap from="image" to="tile_image/output" />
+  </node>
+</launch>

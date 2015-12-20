@@ -230,6 +230,8 @@ install(DIRECTORY include/${PROJECT_NAME}/
 install(FILES jsk_perception_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 if(CATKIN_ENABLE_TESTING)
+  find_package(roslint REQUIRED)
+  roslint_python()
   find_package(rostest REQUIRED)
   # check ros distro >= indigo
   execute_process(

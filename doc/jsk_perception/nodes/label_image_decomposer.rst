@@ -45,7 +45,12 @@ Parameters
 
   Whether to publish tile image with decomposed images.
 
+* ``~queue_size`` (Int, default: ``10``)
+
+  How many messages you allow about the subscriber to keep in the queue.
+  This should be big when there is much difference about delay between two topics.
+
 * ``~slop`` (Float, default: ``0.1``)
 
-  How many seconds you allowed about the difference of timestamp
+  How many seconds you allow about the difference of timestamp
   when you specify ``~approximate_sync``.

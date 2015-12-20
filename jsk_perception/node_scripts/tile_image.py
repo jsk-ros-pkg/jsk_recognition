@@ -9,7 +9,9 @@ from jsk_topic_tools import ConnectionBasedTransport
 import message_filters
 import rospy
 from sensor_msgs.msg import Image
-import os
+import pkg_resources
+from distutils.version import StrictVersion
+
 
 class TileImages(ConnectionBasedTransport):
     def __init__(self):
@@ -19,10 +21,10 @@ class TileImages(ConnectionBasedTransport):
             rospy.logerr('need to specify input_topics')
             sys.exit(1)
         self.approximate_sync = rospy.get_param('~approximate_sync', True)
-        if os.environ['ROS_DISTRO'] == 'hydro' and self.approximate_sync:
+        if (StrictVersion(pkg_resources.get_distribution('message_filters').version) < StrictVersion('1.11.4') and
+            self.approximate_sync):
             rospy.logerr('hydro message_filters does not support approximate sync. Force to set ~approximate_sync=false')
             self.approximate_sync = False
-
         self.pub_img = self.advertise('~output', Image, queue_size=1)
 
     def subscribe(self):

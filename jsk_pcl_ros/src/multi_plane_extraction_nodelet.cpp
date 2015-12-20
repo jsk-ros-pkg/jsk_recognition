@@ -60,7 +60,6 @@ namespace jsk_pcl_ros
     if (!pnh_->getParam("max_queue_size", maximum_queue_size_)) {
       maximum_queue_size_ = 100;
     }
-    pnh_->param("keep_organized", keep_organized_, false);
     pnh_->param("use_sensor_frame", use_sensor_frame_, false);
     if (use_sensor_frame_) {
       pnh_->param("sensor_frame", sensor_frame_, std::string("head_root"));
@@ -129,6 +128,7 @@ namespace jsk_pcl_ros
     min_height_ = config.min_height;
     max_height_ = config.max_height;
     maginify_ = config.maginify;
+    keep_organized_ = config.keep_organized;
   }
 
   void MultiPlaneExtraction::updateDiagnostic(

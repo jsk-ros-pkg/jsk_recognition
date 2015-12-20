@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-
+import cv2
 import cv_bridge
 import jsk_recognition_utils
 from jsk_topic_tools import ConnectionBasedTransport
@@ -20,6 +20,7 @@ class TileImages(ConnectionBasedTransport):
         if not self.input_topics:
             rospy.logerr('need to specify input_topics')
             sys.exit(1)
+        self.draw_topic_name = rospy.get_param('~draw_topic_name', False)
         self.approximate_sync = rospy.get_param('~approximate_sync', True)
         if (StrictVersion(pkg_resources.get_distribution('message_filters').version) < StrictVersion('1.11.4') and
             self.approximate_sync):
@@ -47,8 +48,10 @@ class TileImages(ConnectionBasedTransport):
     def _apply(self, *msgs):
         bridge = cv_bridge.CvBridge()
         imgs = []
-        for msg in msgs:
+        for msg, topic in zip(msgs, self.input_topics):
             img = bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+            if self.draw_topic_name:
+                cv2.putText(img, topic, (0, 50), cv2.FONT_HERSHEY_PLAIN, 4, (0, 255, 0), 4)
             imgs.append(img)
         out_bgr = jsk_recognition_utils.get_tile_image(imgs)
         imgmsg = bridge.cv2_to_imgmsg(out_bgr, encoding='bgr8')

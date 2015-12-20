@@ -24,6 +24,11 @@
       transform pointcloud whose origin is the center of bounding box;
     </description>
   </class>
+  <class name="jsk_pcl/PointIndicesToMaskImage"
+         type="jsk_pcl_ros_utils::PointIndicesToMaskImage"
+         base_class_type="nodelet::Nodelet">
+    Generate mask image out of point indices
+  </class>
   <class name="jsk_pcl/DepthImageError" type="jsk_pcl_ros_utils::DepthImageError"
          base_class_type="nodelet::Nodelet">
     <description>compute error of depth image</description>

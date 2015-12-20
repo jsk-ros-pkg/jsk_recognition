@@ -72,6 +72,7 @@ namespace jsk_pcl_ros
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&MultiPlaneExtraction::configCallback, this, _1, _2);
     srv_->setCallback (f);
+    onInitPostProcess();
   }
 
   void MultiPlaneExtraction::subscribe()
@@ -128,6 +129,7 @@ namespace jsk_pcl_ros
     min_height_ = config.min_height;
     max_height_ = config.max_height;
     maginify_ = config.maginify;
+    keep_organized_ = config.keep_organized;
   }
 
   void MultiPlaneExtraction::updateDiagnostic(
@@ -233,6 +235,7 @@ namespace jsk_pcl_ros
     
       pcl::ExtractIndices<pcl::PointXYZRGB> extract_nonplane;
       extract_nonplane.setNegative(true);
+      extract_nonplane.setKeepOrganized(keep_organized_);
       extract_nonplane.setInputCloud(input_cloud);
       extract_nonplane.setIndices(all_indices);
       extract_nonplane.filter(*nonplane_cloud);
@@ -302,6 +305,7 @@ namespace jsk_pcl_ros
     }
 
     pcl::ExtractIndices<pcl::PointXYZRGB> extract_all_indices;
+    extract_all_indices.setKeepOrganized(keep_organized_);
     extract_all_indices.setInputCloud(nonplane_cloud);
     extract_all_indices.setIndices(all_result_indices);
     extract_all_indices.filter(result_cloud);

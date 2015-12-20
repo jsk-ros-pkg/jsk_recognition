@@ -129,6 +129,7 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     tf::TransformListener* tf_listener_;
     bool use_async_;
+    bool keep_organized_;
     int maximum_queue_size_;
     double min_height_, max_height_;
     bool use_indices_;

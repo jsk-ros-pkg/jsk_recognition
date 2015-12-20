@@ -92,6 +92,7 @@ namespace jsk_pcl_ros
     int min_size_;
     bool voxel_grid_sampling_;
     double voxel_size_;
+    bool done_initialization_;
   private:
   };
 }

@@ -66,6 +66,7 @@ namespace jsk_pcl_ros
       *pnh_, "output/latest_time", 1);
     pub_average_time_ = advertise<std_msgs::Float32>(
       *pnh_, "output/average_time", 1);
+    done_initialization_ = true;
   }
 
   void RegionGrowingMultiplePlaneSegmentation::subscribe()
@@ -127,6 +128,9 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& normal_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    if (!done_initialization_) {
+      return;
+    }
     vital_checker_->poke();
     {
       jsk_recognition_utils::ScopedWallDurationReporter r

@@ -236,11 +236,6 @@
          base_class_type="nodelet::Nodelet">
     Synchronize stereo messages for capture training data
   </class>
-  <class name="jsk_pcl/PointIndicesToMaskImage"
-         type="jsk_pcl_ros::PointIndicesToMaskImage"
-         base_class_type="nodelet::Nodelet">
-    Generate mask image out of point indices
-  </class>
   <class name="jsk_pcl/ExtractIndices"
          type="jsk_pcl_ros::ExtractIndices"
          base_class_type="nodelet::Nodelet">

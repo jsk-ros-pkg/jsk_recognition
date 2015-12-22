@@ -35,7 +35,9 @@ class ExtractTopPolygonLikelihood(ConnectionBasedTransport):
             res.polygons = [msg.polygons[max_index]]
             res.likelihood = [msg.likelihood[max_index]]
             if msg.likelihood[max_index] < self._min_likelihood:
-                rospy.loginfo("Igreno result because of too small likelihood")
+                rospy.loginfo("Ignore result because of too small likelihood: {0} < {1}".format(
+                    msg.likelihood[max_index],
+                    self._min_likelihood))
                 return
             self._pub.publish(res)
             res_coef = ModelCoefficientsArray()

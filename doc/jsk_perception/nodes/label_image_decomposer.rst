@@ -24,6 +24,8 @@ Subscribing Topic
 Publishing Topic
 ----------------
 
+**Default Topics**
+
 * ``~output`` (``sensor_msgs/Image``)
 
   Label image mask applied image.
@@ -33,10 +35,18 @@ Publishing Topic
   Applied label to raw image to visualize.
   It computes the average pixel value of each label and draw with edge line.
 
+**Optional Topics**
+
 * ``~output/tile`` (``sensor_msgs/Image``)
 
   Tile image listing decomposed images.
   This is published when ``~publish_tile`` is ``True``. See **Parameters**
+
+* ``~output/fg_mask``, ``~output/bg_mask`` (``sensor_msgs/Image``)
+
+  Mask image for foreground and background according to the value of label.
+  Currently, it assumes ``0`` value is background label.
+  This is published when ``~publish_mask`` is ``True``. See **Parameters**
 
 
 Parameters
@@ -49,6 +59,10 @@ Parameters
 * ``~publish_tile`` (Bool, default: ``False``)
 
   Whether to publish tile image with decomposed images.
+
+* ``~publish_mask`` (Bool, default: ``False``)
+
+  Whether to publish fore/background mask images.
 
 * ``~queue_size`` (Int, default: ``10``)
 

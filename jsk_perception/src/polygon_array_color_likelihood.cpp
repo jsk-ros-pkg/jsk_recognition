@@ -35,6 +35,8 @@
 
 #include "jsk_perception/polygon_array_color_likelihood.h"
 #include <jsk_recognition_utils/cv_utils.h>
+#include <yaml-cpp/yaml.h>
+#include <fstream>
 
 namespace jsk_perception
 {
@@ -43,6 +45,13 @@ namespace jsk_perception
     DiagnosticNodelet::onInit();
     pnh_->param("approximate_sync", approximate_sync_, false);
     pnh_->param("max_queue_size", max_queue_size_, 10);
+    std::string reference_file;
+    pnh_->param("reference_file", reference_file, std::string(""));
+    reference_from_file_ = !reference_file.empty();
+    if (reference_from_file_) {
+      JSK_ROS_INFO("Reading reference from %s", reference_file.c_str());
+      readReference(reference_file);
+    }
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
@@ -53,8 +62,10 @@ namespace jsk_perception
 
   void PolygonArrayColorLikelihood::subscribe()
   {
-    sub_reference_ = pnh_->subscribe(
-      "input/reference", 1, &PolygonArrayColorLikelihood::referenceCallback, this);
+    if (!reference_from_file_) {
+      sub_reference_ = pnh_->subscribe(
+       "input/reference", 1, &PolygonArrayColorLikelihood::referenceCallback, this);
+    }
     sub_polygon_.subscribe(*pnh_, "input/polygons", max_queue_size_);
     sub_histogram_.subscribe(*pnh_, "input/histograms", max_queue_size_);
     if (approximate_sync_) {
@@ -71,9 +82,51 @@ namespace jsk_perception
     }
   }
 
+  void PolygonArrayColorLikelihood::readReference(const std::string& file)
+  {
+    // The yaml format should be
+    // bins:
+    //   - 
+    //     min_value: xx
+    //     max_value: xx
+    //     count: xx
+    //   - 
+    //     min_value: xx
+    //     max_value: xx
+    //     count: xx
+    // ...
+    jsk_recognition_msgs::HistogramWithRange read_msg;
+ #ifdef USE_OLD_YAML
+    YAML::Node doc;
+    std::ifstream fin;
+    
+    fin.open(file.c_str(), std::ifstream::in);
+    YAML::Parser parser(fin);
+    while (parser.GetNextDocument(doc)) {
+      const YAML::Node& bins_yaml = doc["bins"];
+      for (size_t i = 0; i < bins_yaml.size(); i++) {
+        const YAML::Node& bin_yaml = bins_yaml[i];
+        const YAML::Node& min_value_yaml = bin_yaml["min_value"];
+        const YAML::Node& max_value_yaml = bin_yaml["max_value"];
+        const YAML::Node& count_yaml = bin_yaml["count"];
+        jsk_recognition_msgs::HistogramWithRangeBin bin;
+        min_value_yaml >> bin.min_value;
+        max_value_yaml >> bin.max_value;
+        count_yaml >> bin.count;
+        read_msg.bins.push_back(bin);
+      }
+    }
+ #else
+    JSK_ROS_FATAL("yaml 0.5 is not supported yet");
+ #endif
+    reference_ = boost::make_shared<jsk_recognition_msgs::HistogramWithRange>(read_msg);
+  }
+
   void PolygonArrayColorLikelihood::unsubscribe()
   {
-    sub_reference_.shutdown();
+    if (!reference_from_file_) {
+      sub_reference_.shutdown();
+    }
     sub_polygon_.unsubscribe();
     sub_histogram_.unsubscribe();
   }

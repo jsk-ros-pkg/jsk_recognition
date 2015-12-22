@@ -26,3 +26,20 @@ Compute polygon likelihood based on distance of histograms.
 * `~max_queue_size` (default: `10`)
 
   Max queue size
+
+* `~reference_file`
+
+  If this parameter is specified, PolygonArrayColorLikelihood reads reference histogram from
+  a yaml file instead of subscribing `~input/reference`.
+  The yaml file format is
+  ```yaml
+  bins:
+  - 
+    min_value: xx
+    max_value: xx
+    count: xx
+  - 
+    min_value: xx
+    max_value: xx
+    count: xx
+  ```

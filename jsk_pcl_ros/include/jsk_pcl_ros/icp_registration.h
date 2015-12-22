@@ -64,6 +64,9 @@ namespace jsk_pcl_ros
       jsk_recognition_msgs::BoundingBox > SyncPolicy;
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
+      geometry_msgs::PoseStamped > OffsetSyncPolicy;
+    typedef message_filters::sync_policies::ExactTime<
+      sensor_msgs::PointCloud2,
       sensor_msgs::PointCloud2
       > ReferenceSyncPolicy;
   protected:
@@ -77,6 +80,9 @@ namespace jsk_pcl_ros
     virtual void alignWithBox(
       const sensor_msgs::PointCloud2::ConstPtr& msg,
       const jsk_recognition_msgs::BoundingBox::ConstPtr& box_msg);
+    virtual void alignWithOffset(
+      const sensor_msgs::PointCloud2::ConstPtr& msg,
+      const geometry_msgs::PoseStamped::ConstPtr& pose_msg);
     virtual bool alignWithBoxService(
       jsk_pcl_ros::ICPAlignWithBox::Request& req, 
       jsk_pcl_ros::ICPAlignWithBox::Response& res);
@@ -152,9 +158,17 @@ namespace jsk_pcl_ros
     boost::mutex mutex_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<jsk_recognition_msgs::BoundingBox> sub_box_;
+    message_filters::Subscriber<geometry_msgs::PoseStamped> sub_offset_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    boost::shared_ptr<message_filters::Synchronizer<OffsetSyncPolicy> >sync_offset_;
     boost::shared_ptr<message_filters::Synchronizer<ReferenceSyncPolicy> > sync_reference_;
     tf::TransformListener* tf_listener_;
+    
+    /**
+     * @brief
+     * set via ~use_offset_pose parameter. default is false.
+     */
+    bool use_offset_pose_;
 
     /** @brief
      * Store value of ~use_normal.

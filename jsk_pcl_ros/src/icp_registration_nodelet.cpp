@@ -45,6 +45,7 @@
 #include <image_geometry/pinhole_camera_model.h>
 #include <pcl/registration/correspondence_estimation_organized_projection.h>
 #include <pcl/registration/correspondence_estimation_normal_shooting.h>
+#include <jsk_recognition_utils/pcl_ros_util.h>
 
 namespace jsk_pcl_ros
 {
@@ -64,6 +65,7 @@ namespace jsk_pcl_ros
     pnh_->param("use_normal", use_normal_, false);
     pnh_->param("align_box", align_box_, false);
     pnh_->param("synchronize_reference", synchronize_reference_, false);
+    pnh_->param("use_offset_pose", use_offset_pose_, false);
     ////////////////////////////////////////////////////////
     // Publishers
     ////////////////////////////////////////////////////////
@@ -114,6 +116,13 @@ namespace jsk_pcl_ros
         sync_->registerCallback(boost::bind(
                                             &ICPRegistration::alignWithBox,
                                             this, _1, _2));
+      }
+      else if (use_offset_pose_) {
+        sub_input_.subscribe(*pnh_, "input", 1);
+        sub_offset_.subscribe(*pnh_, "input_offset", 1);
+        sync_offset_ = boost::make_shared<message_filters::Synchronizer<OffsetSyncPolicy> >(100);
+        sync_offset_->connectInput(sub_input_, sub_offset_);
+        sync_offset_->registerCallback(boost::bind(&ICPRegistration::alignWithOffset, this, _1, _2));
       }
       else {
         sub_ = pnh_->subscribe("input", 1,
@@ -298,6 +307,52 @@ namespace jsk_pcl_ros
       JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
   }
+
+  void ICPRegistration::alignWithOffset(
+      const sensor_msgs::PointCloud2::ConstPtr& msg,
+      const geometry_msgs::PoseStamped::ConstPtr& offset_msg)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    if (reference_cloud_list_.size() == 0) {
+      JSK_NODELET_FATAL("no reference is specified");
+      jsk_recognition_msgs::ICPResult result;
+      result.name = std::string("NONE");
+      result.score = DBL_MAX;
+      result.header = offset_msg->header;
+      result.pose = offset_msg->pose;
+      pub_icp_result.publish(result);
+      return;
+    }
+    try
+    {
+      if (!jsk_recognition_utils::isSameFrameId(msg->header.frame_id,
+                                                offset_msg->header.frame_id)) {
+        JSK_NODELET_ERROR("frame_id does not match. cloud: %s, pose: %s",
+                          msg->header.frame_id.c_str(),
+                          offset_msg->header.frame_id.c_str());
+        return;
+      }
+      Eigen::Affine3f offset;
+      pcl::PointCloud<PointT>::Ptr input (new pcl::PointCloud<PointT>);
+      pcl::fromROSMsg(*msg, *input);
+      pcl::PointCloud<PointT>::Ptr output (new pcl::PointCloud<PointT>);
+      tf::poseMsgToEigen(offset_msg->pose, offset);
+      
+      Eigen::Affine3f inversed_offset = offset.inverse();
+      pcl::transformPointCloud(*input, *output, inversed_offset);
+      jsk_recognition_msgs::ICPResult result = alignPointcloudWithReferences(output, offset, msg->header);
+      pub_icp_result.publish(result);
+    }
+    catch (tf2::ConnectivityException &e)
+    {
+      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+    }
+    catch (tf2::InvalidArgumentException &e)
+    {
+      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+    }
+  }
+
 
   void ICPRegistration::align(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {

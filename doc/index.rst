@@ -19,5 +19,6 @@ This repository contains following ros packages:
    imagesift/index
    checkerboard_detector/index
    jsk_perception/index
+   jsk_pcl_ros_utils/index
    jsk_pcl_ros/index
    tips

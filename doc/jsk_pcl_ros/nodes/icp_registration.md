@@ -14,6 +14,9 @@ Register two pointclouds based on icp like registration technique.
 
   Array of reference pointcloud. ICPRegistration uses the reference
   which provides the best fitting score.
+* `~input_offset` (`geometry_msgs/PoseStamped`)
+
+  Offset of pose. It will only be subscribed if `~use_offset_pose` is true.
 * `~input_reference_add` (`sensor_msgs/PointCloud`)
 * `~input_box` (`jsk_recognition_msgs/BoundingBox`)
 * `~reference` (`sensor_msgs/PointCloud`)
@@ -32,6 +35,9 @@ Register two pointclouds based on icp like registration technique.
 * `~icp_align_with_box` (`jsk_recognition_msgs/ICPAlignWithBox`)
 
 ## Parameters
+* `~use_offset_pose` (default: `false`)
+
+  Enable `~input_offset` topic.
 * `~use_normal` (default: `false`)
 
   Use normal information in registration.

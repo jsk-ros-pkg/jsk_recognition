@@ -21,6 +21,12 @@ find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 find_package(Eigen REQUIRED)
 include_directories(${Eigen_INCLUDE_DIRS})
 
+pkg_check_modules(yaml_cpp yaml-cpp REQUIRED)
+IF(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
+## indigo yaml-cpp : 0.5.0 /  hydro yaml-cpp : 0.3.0
+  add_definitions("-DUSE_OLD_YAML")
+ENDIF()
+
 FIND_PACKAGE( OpenMP REQUIRED)
 if(OPENMP_FOUND)
 message("OPENMP FOUND")
@@ -165,7 +171,7 @@ add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
   src/image_utils.cpp
   src/histogram_of_oriented_gradients.cpp
   )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${robot_self_filter_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${robot_self_filter_LIBRARIES} yaml-cpp)
 if(robot_self_filter_FOUND)
   include_directories(${robot_self_filter_INCLUDE_DIRS})
   target_link_libraries(${PROJECT_NAME} ${robot_self_filter_LIBRARIES})

@@ -47,6 +47,7 @@
   <build_depend>std_msgs</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>robot_self_filter</build_depend>
+  <build_depend>yaml-cpp</build_depend>
 
   <run_depend>angles</run_depend>
   <run_depend>cv_bridge</run_depend>
@@ -79,6 +80,7 @@
   <run_depend>std_msgs</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>robot_self_filter</run_depend>
+  <run_depend>yaml-cpp</run_depend>
 
   <export>
     <nodelet plugin="${prefix}/jsk_perception_nodelets.xml"/>

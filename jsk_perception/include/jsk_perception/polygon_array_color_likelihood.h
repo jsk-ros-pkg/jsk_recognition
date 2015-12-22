@@ -74,6 +74,7 @@ namespace jsk_perception
     virtual void configCallback(Config &config, uint32_t level);
     virtual double compareHist(
       const cv::MatND& ref_hist, const cv::MatND& target_hist);
+    virtual void readReference(const std::string& file);
     boost::mutex mutex_;
     ros::Publisher pub_;
     ros::Subscriber sub_reference_;
@@ -86,6 +87,7 @@ namespace jsk_perception
     bool approximate_sync_;
     int max_queue_size_;
     int coefficient_method_;
+    bool reference_from_file_;
   private:
     
   };

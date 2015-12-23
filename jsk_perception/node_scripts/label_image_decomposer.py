@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+from skimage.color import label2rgb
+from skimage.segmentation import mark_boundaries
 
 import cv_bridge
 from jsk_recognition_utils import bounding_rect_of_mask
@@ -19,6 +21,9 @@ class LabelImageDecomposer(ConnectionBasedTransport):
     def __init__(self):
         super(LabelImageDecomposer, self).__init__()
         self.pub_img = self.advertise('~output', Image, queue_size=5)
+        self.pub_label_viz = self.advertise('~output/label_viz', Image,
+                                            queue_size=5)
+        # publish each region image. this can take time so optional.
         self._publish_tile = rospy.get_param('~publish_tile', False)
         jsk_loginfo('~publish_tile: {}'.format(self._publish_tile))
         if self._publish_tile:
@@ -56,12 +61,20 @@ class LabelImageDecomposer(ConnectionBasedTransport):
         bridge = cv_bridge.CvBridge()
         img = bridge.imgmsg_to_cv2(img_msg)
         label_img = bridge.imgmsg_to_cv2(label_msg)
-
+        # publish only valid label region
         applied = img.copy()
         applied[label_img == 0] = 0
         applied_msg = bridge.cv2_to_imgmsg(applied, encoding='bgr8')
         applied_msg.header = img_msg.header
         self.pub_img.publish(applied_msg)
+        # publish visualized label
+        label_viz_img = label2rgb(label_img, img, kind='avg', bg_label=0)
+        label_viz_img = mark_boundaries(label_viz_img, label_img, (0, 0, 1))
+        label_viz_img = (label_viz_img * 255).astype(np.uint8)
+        label_viz_msg = bridge.cv2_to_imgmsg(label_viz_img,
+                                             encoding=img_msg.encoding)
+        label_viz_msg.header = img_msg.header
+        self.pub_label_viz.publish(label_viz_msg)
 
     def _apply_tile(self, img_msg, label_msg):
         bridge = cv_bridge.CvBridge()

@@ -28,6 +28,11 @@ Publishing Topic
 
   Label image mask applied image.
 
+* ``~output/label_viz`` (``sensor_msgs/Image``)
+
+  Applied label to raw image to visualize.
+  It computes the average pixel value of each label and draw with edge line.
+
 * ``~output/tile`` (``sensor_msgs/Image``)
 
   Tile image listing decomposed images.

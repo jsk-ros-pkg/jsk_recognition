@@ -159,4 +159,9 @@
     <description>
     </description>
   </class>
+  <class name="jsk_pcl/PointCloudRelativeFromPoseStamped" type="jsk_pcl_ros_utils::PointCloudRelativeFromPoseStamped"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
 </library>

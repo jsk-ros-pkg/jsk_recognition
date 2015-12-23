@@ -82,6 +82,8 @@
   <run_depend>robot_self_filter</run_depend>
   <run_depend>yaml-cpp</run_depend>
 
+  <test_depend>roslint</test_depend>
+
   <export>
     <nodelet plugin="${prefix}/jsk_perception_nodelets.xml"/>
   </export>

@@ -35,7 +35,8 @@
 
   <test test-name="test_label_image_decomposer_slop"
         name="test_label_image_decomposer_slop"
-        pkg="jsk_tools" type="test_topic_published.py">
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="360">
     <rosparam>
       topic_0: /label_image_decomposer_0/output
       timeout_0: 10

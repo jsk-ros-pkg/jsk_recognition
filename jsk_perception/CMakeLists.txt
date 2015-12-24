@@ -9,12 +9,32 @@ if(CCACHE_FOUND)
 endif(CCACHE_FOUND)
 
 find_package(catkin REQUIRED COMPONENTS
+  angles
+  cmake_modules
+  cv_bridge
+  driver_base
+  dynamic_reconfigure
+  geometry_msgs
+  image_geometry
+  image_transport
+  image_view2
   jsk_recognition_msgs
-  mk message_generation std_msgs sensor_msgs geometry_msgs cv_bridge
-  image_geometry image_transport image_view2 driver_base dynamic_reconfigure cmake_modules
-  roscpp nodelet tf rospack
-  jsk_topic_tools pcl_ros
-  jsk_recognition_utils)
+  jsk_recognition_utils
+  jsk_topic_tools
+  message_generation
+  mk
+  nodelet
+  pcl_ros
+  posedetection_msgs
+  robot_self_filter
+  rosbuild
+  roscpp
+  roseus
+  rospack
+  sensor_msgs
+  std_msgs
+  tf
+)
 
 find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 

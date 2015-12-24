@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+from skimage.color import gray2rgb
 from skimage.color import label2rgb
 from skimage.segmentation import mark_boundaries
 
@@ -64,15 +65,19 @@ class LabelImageDecomposer(ConnectionBasedTransport):
         # publish only valid label region
         applied = img.copy()
         applied[label_img == 0] = 0
-        applied_msg = bridge.cv2_to_imgmsg(applied, encoding='bgr8')
+        applied_msg = bridge.cv2_to_imgmsg(applied, encoding=img_msg.encoding)
         applied_msg.header = img_msg.header
         self.pub_img.publish(applied_msg)
         # publish visualized label
-        label_viz_img = label2rgb(label_img, img, kind='avg', bg_label=0)
-        label_viz_img = mark_boundaries(label_viz_img, label_img, (0, 0, 1))
+        if img_msg.encoding in {'16UC1', '32SC1'}:
+            # do dynamic scaling to make it look nicely
+            min_value, max_value = img.min(), img.max()
+            img = (img - min_value) / (max_value - min_value) * 255
+            img = gray2rgb(img)
+        label_viz_img = label2rgb(label_img, img, bg_label=0)
+        label_viz_img = mark_boundaries(label_viz_img, label_img, (1, 0, 0))
         label_viz_img = (label_viz_img * 255).astype(np.uint8)
-        label_viz_msg = bridge.cv2_to_imgmsg(label_viz_img,
-                                             encoding=img_msg.encoding)
+        label_viz_msg = bridge.cv2_to_imgmsg(label_viz_img, encoding='rgb8')
         label_viz_msg.header = img_msg.header
         self.pub_label_viz.publish(label_viz_msg)
 

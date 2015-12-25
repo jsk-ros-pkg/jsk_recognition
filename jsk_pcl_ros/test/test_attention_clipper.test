@@ -28,7 +28,8 @@
         pkg="topic_tools" type="transform"
         args="/in_hand_clipper/output/point_indices /in_hand_clipper/output/point_indices_exists std_msgs/Bool 'len(m.indices) > 33000' --wait-for-start" />
 
-  <test test-name="stdout_0"
+  <test test-name="attention_clippser_stdout_0"
+        name="attention_clipper_stdout_0"
         time-limit="360"
         pkg="jsk_tools" type="test_stdout.py">
     <param name="~command" value="rostopic echo /in_hand_clipper/output/point_indices_exists/data -n1" />

@@ -24,12 +24,14 @@
         args="/euclidean_clustering/output/cluster_indices /euclidean_clustering/output/cluster_indices_assert std_msgs/Bool 'len(m) > 20' --wait-for-start" />
 
   <test test-name="test_euclidean_segmentation_cluster_num"
+        name="test_euclidean_segmentation_cluster_num"
         time-limit="360"
         pkg="jsk_tools" type="test_stdout.py">
     <param name="~command" value="rostopic echo /euclidean_clustering/cluster_num_assert/data -n1" />
     <param name="~stdout_line0" type="str" value="True" />
   </test>
   <test test-name="test_euclidean_segmentation_cluster_indices"
+        name="test_euclidean_segmentation_cluster_indices"
         time-limit="360"
         pkg="jsk_tools" type="test_stdout.py">
     <param name="~command" value="rostopic echo /euclidean_clustering/output/cluster_indices_assert/data -n1" />

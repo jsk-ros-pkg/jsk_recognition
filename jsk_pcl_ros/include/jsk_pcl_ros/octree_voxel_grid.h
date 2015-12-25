@@ -63,6 +63,8 @@ namespace jsk_pcl_ros
     virtual void unsubscribe();
     virtual void configCallback(Config &config, uint32_t level);
     virtual void generateVoxelCloud(const sensor_msgs::PointCloud2ConstPtr& input);
+    template <class PointT>
+    void generateVoxelCloudImpl(const sensor_msgs::PointCloud2ConstPtr& input);
 
     ros::Subscriber sub_input_;
     ros::Publisher pub_cloud_;
@@ -74,6 +76,7 @@ namespace jsk_pcl_ros
     double resolution_;
 
     bool publish_marker_flag_;
+    std::string point_type_;
   };
 }
 

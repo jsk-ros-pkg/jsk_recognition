@@ -96,17 +96,22 @@ namespace jsk_pcl_ros
   void OctreeVoxelGrid::generateVoxelCloud(const sensor_msgs::PointCloud2ConstPtr& input_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    if (point_type_ == "xyz") {
-      generateVoxelCloudImpl<pcl::PointXYZ>(input_msg);
+    if (resolution_ == 0.0) {
+      pub_cloud_.publish(input_msg);
     }
-    else if (point_type_ == "xyznormal") {
-      generateVoxelCloudImpl<pcl::PointNormal>(input_msg);
-    }
-    else if (point_type_ == "xyzrgb") {
-      generateVoxelCloudImpl<pcl::PointXYZRGB>(input_msg);
-    }
-    else if (point_type_ == "xyzrgbnormal") {
-      generateVoxelCloudImpl<pcl::PointXYZRGBNormal>(input_msg);
+    else {
+      if (point_type_ == "xyz") {
+        generateVoxelCloudImpl<pcl::PointXYZ>(input_msg);
+      }
+      else if (point_type_ == "xyznormal") {
+        generateVoxelCloudImpl<pcl::PointNormal>(input_msg);
+      }
+      else if (point_type_ == "xyzrgb") {
+        generateVoxelCloudImpl<pcl::PointXYZRGB>(input_msg);
+      }
+      else if (point_type_ == "xyzrgbnormal") {
+        generateVoxelCloudImpl<pcl::PointXYZRGBNormal>(input_msg);
+      }
     }
   }
 
@@ -123,8 +128,7 @@ namespace jsk_pcl_ros
   void OctreeVoxelGrid::configCallback(Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    double resolution_min = 0.001;
-    resolution_ = std::max(config.resolution, resolution_min);
+    resolution_ = config.resolution;
     point_type_ = config.point_type;
   }
 

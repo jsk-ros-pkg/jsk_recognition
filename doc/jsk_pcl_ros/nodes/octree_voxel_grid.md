@@ -32,7 +32,7 @@ and other voxel filtered functions output the other position such as the centroi
 ## Dynamic Reconfigure Parameters
 * `~resolution` (Double, default: `0.1`):
 
-   Resolution of voxel grid.
+   Resolution of voxel grid. If resolution is set as 0, it just relays input pointcloud.
 * `~point_type` (String, default: `xyz`):
 
   Choose point type from xyz, xyzrgb, xyznormal and xyzrgbnormal.

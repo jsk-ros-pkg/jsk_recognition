@@ -94,7 +94,9 @@ class LabelImageDecomposer(ConnectionBasedTransport):
             bg_mask = (bg_mask * 255).astype(np.uint8)
             fg_mask = (fg_mask * 255).astype(np.uint8)
             fg_mask_msg = bridge.cv2_to_imgmsg(fg_mask, encoding='mono8')
+            fg_mask_msg.header = img_msg.header
             bg_mask_msg = bridge.cv2_to_imgmsg(bg_mask, encoding='mono8')
+            bg_mask_msg.header = img_msg.header
             self.pub_fg_mask.publish(fg_mask_msg)
             self.pub_bg_mask.publish(bg_mask_msg)
 

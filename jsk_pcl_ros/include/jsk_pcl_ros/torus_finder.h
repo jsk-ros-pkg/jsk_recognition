@@ -46,6 +46,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <Eigen/Core>
 #include <geometry_msgs/PolygonStamped.h>
+#include <jsk_recognition_utils/time_util.h>
 
 namespace jsk_pcl_ros
 {
@@ -53,7 +54,7 @@ namespace jsk_pcl_ros
   {
   public:
     typedef TorusFinderConfig Config;
-    TorusFinder(): DiagnosticNodelet("TorusFinder") {}
+    TorusFinder(): timer_(10), DiagnosticNodelet("TorusFinder") {}
   protected:
     virtual void onInit();
     virtual void subscribe();
@@ -75,6 +76,9 @@ namespace jsk_pcl_ros
     ros::Publisher pub_inliers_;
     ros::Publisher pub_coefficients_;
     ros::Publisher pub_pose_stamped_;
+    ros::Publisher pub_latest_time_;
+    ros::Publisher pub_average_time_;
+    jsk_recognition_utils::WallDurationTimer timer_;
     boost::mutex mutex_;
     Eigen::Vector3f hint_axis_;
 

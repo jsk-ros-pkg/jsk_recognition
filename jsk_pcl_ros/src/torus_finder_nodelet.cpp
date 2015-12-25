@@ -78,6 +78,11 @@ namespace jsk_pcl_ros
     pub_pose_stamped_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output/pose", 1);
     pub_coefficients_ = advertise<PCLModelCoefficientMsg>(
       *pnh_, "output/coefficients", 1);
+    pub_latest_time_ = advertise<std_msgs::Float32>(
+      *pnh_, "output/latest_time", 1);
+    pub_average_time_ = advertise<std_msgs::Float32>(
+      *pnh_, "output/average_time", 1);
+
     done_initialization_ = true;
   }
 
@@ -139,7 +144,8 @@ namespace jsk_pcl_ros
     pcl::PointCloud<pcl::PointNormal>::Ptr cloud
       (new pcl::PointCloud<pcl::PointNormal>);
     pcl::fromROSMsg(*cloud_msg, *cloud);
-
+    jsk_recognition_utils::ScopedWallDurationReporter r
+      = timer_.reporter(pub_latest_time_, pub_average_time_);
     if (voxel_grid_sampling_) {
       pcl::PointCloud<pcl::PointNormal>::Ptr downsampled_cloud
       (new pcl::PointCloud<pcl::PointNormal>);

@@ -83,6 +83,10 @@ namespace jsk_pcl_ros
       "debug/result", 1);
     pub_icp_result = advertise<jsk_recognition_msgs::ICPResult>(*pnh_,
       "icp_result", 1);
+    pub_latest_time_ = advertise<std_msgs::Float32>(
+      *pnh_, "output/latest_time", 1);
+    pub_average_time_ = advertise<std_msgs::Float32>(
+      *pnh_, "output/average_time", 1);
     srv_icp_align_with_box_ = pnh_->advertiseService("icp_service", &ICPRegistration::alignWithBoxService, this);
     srv_icp_align_ = pnh_->advertiseService(
       "icp_align", &ICPRegistration::alignService, this);
@@ -193,7 +197,7 @@ namespace jsk_pcl_ros
     jsk_pcl_ros::ICPAlignWithBox::Request& req, 
     jsk_pcl_ros::ICPAlignWithBox::Response& res)
   {
-     boost::mutex::scoped_lock lock(mutex_);
+    boost::mutex::scoped_lock lock(mutex_);
     if (reference_cloud_list_.size() == 0) {
       JSK_NODELET_FATAL("no reference is specified");
       return false;
@@ -403,6 +407,8 @@ namespace jsk_pcl_ros
     const Eigen::Affine3f& offset,
     const std_msgs::Header& header)
   {
+    jsk_recognition_utils::ScopedWallDurationReporter r
+      = timer_.reporter(pub_latest_time_, pub_average_time_);
     double min_score = DBL_MAX;
     size_t max_index = 0;
     pcl::PointCloud<PointT>::Ptr best_transformed_cloud;

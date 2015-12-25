@@ -30,6 +30,15 @@ Register two pointclouds based on icp like registration technique.
 * `~debug/result` (`sensor_msgs/PointCloud`)
 * `~icp_result` (`jsk_recognition_msgs/ICPResult`)
 
+* `~output/latest_time` (`std_msgs/Float32`)
+
+  latest computation time
+
+* `~output/average_time` (`std_msgs/Float32`)
+
+  average computation time
+
+
 ## Advertising Services
 * `~icp_align` (`jsk_recognition_msgs/ICPAlign`)
 * `~icp_align_with_box` (`jsk_recognition_msgs/ICPAlignWithBox`)

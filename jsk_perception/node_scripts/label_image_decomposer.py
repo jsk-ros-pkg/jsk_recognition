@@ -24,6 +24,13 @@ class LabelImageDecomposer(ConnectionBasedTransport):
         self.pub_img = self.advertise('~output', Image, queue_size=5)
         self.pub_label_viz = self.advertise('~output/label_viz', Image,
                                             queue_size=5)
+        # publish masks of fg/bg by decomposing each label
+        self._publish_mask = rospy.get_param('~publish_mask', False)
+        if self._publish_mask:
+            self.pub_fg_mask = self.advertise('~output/fg_mask', Image,
+                                              queue_size=5)
+            self.pub_bg_mask = self.advertise('~output/bg_mask', Image,
+                                                    queue_size=5)
         # publish each region image. this can take time so optional.
         self._publish_tile = rospy.get_param('~publish_tile', False)
         jsk_loginfo('~publish_tile: {}'.format(self._publish_tile))
@@ -80,6 +87,16 @@ class LabelImageDecomposer(ConnectionBasedTransport):
         label_viz_msg = bridge.cv2_to_imgmsg(label_viz_img, encoding='rgb8')
         label_viz_msg.header = img_msg.header
         self.pub_label_viz.publish(label_viz_msg)
+        # publish mask
+        if self._publish_mask:
+            bg_mask = (label_img == 0)
+            fg_mask = ~bg_mask
+            bg_mask = (bg_mask * 255).astype(np.uint8)
+            fg_mask = (fg_mask * 255).astype(np.uint8)
+            fg_mask_msg = bridge.cv2_to_imgmsg(fg_mask, encoding='mono8')
+            bg_mask_msg = bridge.cv2_to_imgmsg(bg_mask, encoding='mono8')
+            self.pub_fg_mask.publish(fg_mask_msg)
+            self.pub_bg_mask.publish(bg_mask_msg)
 
     def _apply_tile(self, img_msg, label_msg):
         bridge = cv_bridge.CvBridge()

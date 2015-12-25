@@ -51,6 +51,8 @@
 #include <jsk_topic_tools/connection_based_nodelet.h>
 #include <jsk_recognition_msgs/PointsArray.h>
 #include <sensor_msgs/CameraInfo.h>
+#include <jsk_recognition_utils/time_util.h>
+#include <std_msgs/Float32.h>
 
 namespace jsk_pcl_ros
 {
@@ -69,6 +71,7 @@ namespace jsk_pcl_ros
       sensor_msgs::PointCloud2,
       sensor_msgs::PointCloud2
       > ReferenceSyncPolicy;
+    ICPRegistration(): timer_(10) { }
   protected:
     ////////////////////////////////////////////////////////
     // methosd
@@ -145,12 +148,14 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_sync_reference_;
     ros::Publisher pub_result_pose_;
     ros::Publisher pub_result_cloud_;
+    ros::Publisher pub_latest_time_;
+    ros::Publisher pub_average_time_;
     ros::Publisher pub_debug_source_cloud_,
       pub_debug_target_cloud_,
       pub_debug_result_cloud_,
       pub_debug_flipped_cloud_;
     ros::Publisher pub_icp_result;
-
+    jsk_recognition_utils::WallDurationTimer timer_;
     ros::ServiceServer srv_icp_align_with_box_;
     ros::ServiceServer srv_icp_align_;
     bool align_box_;

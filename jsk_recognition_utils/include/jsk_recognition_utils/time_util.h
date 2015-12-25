@@ -35,6 +35,7 @@
 
 #include <ros/ros.h>
 #include <boost/circular_buffer.hpp>
+#include <std_msgs/Float32.h>
 
 namespace jsk_recognition_utils
 {

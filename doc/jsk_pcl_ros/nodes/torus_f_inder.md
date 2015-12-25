@@ -34,6 +34,14 @@ Find a torus out of pointcloud based on RANSAC with 3-D circle model.
 
   Output of detection with failure information.
 
+* `~output/latest_time` (`std_msgs/Float32`)
+
+  latest computation time
+
+* `~output/average_time` (`std_msgs/Float32`)
+
+  average computation time
+
 
 ## Parameters
 * `~min_radius` (Double, default: `0.1`)

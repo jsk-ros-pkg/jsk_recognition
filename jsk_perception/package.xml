@@ -41,8 +41,6 @@
   <build_depend>roscpp</build_depend>
   <build_depend>roseus</build_depend>
   <build_depend>rospack</build_depend>
-  <build_depend>rospy</build_depend>
-  <build_depend>rostest</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>tf</build_depend>
@@ -75,7 +73,6 @@
   <run_depend>roseus</run_depend>
   <run_depend>rospack</run_depend>
   <run_depend>rospy</run_depend>
-  <run_depend>rostest</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>tf</run_depend>
@@ -83,6 +80,7 @@
   <run_depend>yaml-cpp</run_depend>
 
   <test_depend>roslint</test_depend>
+  <test_depend>rostest</test_depend>
 
   <test_depend>roslint</test_depend>
 

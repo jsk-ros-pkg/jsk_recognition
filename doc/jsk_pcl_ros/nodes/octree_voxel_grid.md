@@ -33,6 +33,9 @@ and other voxel filtered functions output the other position such as the centroi
 * `~resolution` (Double, default: `0.1`):
 
    Resolution of voxel grid.
+* `~point_type` (String, default: `xyz`):
+
+  Choose point type from xyz, xyzrgb, xyznormal and xyzrgbnormal.
 
 ## Sample
 Plug the depth sensor which can be launched by openni.launch and run the below command.

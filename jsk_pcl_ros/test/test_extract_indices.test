@@ -28,7 +28,8 @@
   <node name="transform_0"
         pkg="topic_tools" type="transform"
         args="/extract_indices/output/data /transform_0/output std_msgs/Bool 'len(m) > 8000000' --wait-for-start" />
-  <test test-name="stdout_0"
+  <test test-name="extract_indices_stdout_0"
+        name="extract_indices_stdout_0"
         time-limit="360"
         pkg="jsk_tools" type="test_stdout.py">
     <param name="~command" value="rostopic echo /transform_0/output -n1" />
@@ -39,7 +40,8 @@
   <node name="transform_1"
         pkg="topic_tools" type="transform"
         args="/extract_indices/output/height /transform_1/output std_msgs/Bool 'm > 1' --wait-for-start" />
-  <test test-name="stdout_1"
+  <test test-name="extract_indices_stdout_1"
+        name="extract_indices_stdout_1"
         time-limit="360"
         pkg="jsk_tools" type="test_stdout.py">
     <param name="~command" value="rostopic echo /transform_1/output -n1" />

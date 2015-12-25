@@ -36,6 +36,10 @@ and other voxel filtered functions output the other position such as the centroi
 * `~point_type` (String, default: `xyz`):
 
   Choose point type from xyz, xyzrgb, xyznormal and xyzrgbnormal.
+  
+* `~marker_color` (String, default: `z`)
+
+  Method to decide color of marker. z or flat can be selected.
 
 ## Sample
 Plug the depth sensor which can be launched by openni.launch and run the below command.

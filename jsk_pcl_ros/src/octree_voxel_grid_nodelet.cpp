@@ -36,6 +36,7 @@
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/octree_voxel_grid.h"
 #include <jsk_topic_tools/color_utils.h>
+#include <pcl/common/common.h>
 
 namespace jsk_pcl_ros
 {
@@ -77,8 +78,13 @@ namespace jsk_pcl_ros
       marker_msg.scale.z = resolution_;
       marker_msg.header = input_msg->header;
       marker_msg.pose.orientation.w = 1.0;
-      marker_msg.color = jsk_topic_tools::colorCategory20(0);
-
+      if (marker_color_ == "flat") {
+        marker_msg.color = jsk_topic_tools::colorCategory20(0);
+      }
+      
+      // compute min and max
+      Eigen::Vector4f minpt, maxpt;
+      pcl::getMinMax3D<PointT>(*cloud_voxeled, minpt, maxpt);
       PointT p;
       for (size_t i = 0; i < cloud_voxeled->size(); i++) {
         p = cloud_voxeled->at(i);
@@ -87,7 +93,12 @@ namespace jsk_pcl_ros
         point_ros.y = p.y;
         point_ros.z = p.z;
         marker_msg.points.push_back(point_ros);
-        marker_msg.colors.push_back(jsk_topic_tools::colorCategory20(0));
+        if (marker_color_ == "flat") {
+          marker_msg.colors.push_back(jsk_topic_tools::colorCategory20(0));
+        }
+        else if (marker_color_ == "z") {
+          marker_msg.colors.push_back(jsk_topic_tools::heatColor((p.z - minpt[2]) / (maxpt[2] - minpt[2])));
+        }
       }
       pub_marker_.publish(marker_msg);
     }
@@ -130,13 +141,13 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     resolution_ = config.resolution;
     point_type_ = config.point_type;
+    publish_marker_flag_ = config.publish_marker;
+    marker_color_ = config.marker_color;
   }
 
   void OctreeVoxelGrid::onInit(void)
   {
     DiagnosticNodelet::onInit();
-    pnh_->param("publish_marker", publish_marker_flag_, true);
-
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&OctreeVoxelGrid::configCallback, this, _1, _2);

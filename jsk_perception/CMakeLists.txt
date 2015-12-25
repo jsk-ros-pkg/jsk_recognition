@@ -237,6 +237,8 @@ install(FILES jsk_perception_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DES
 
 if(CATKIN_ENABLE_TESTING)
   find_package(roslint REQUIRED)
+  set(ROSLINT_CPP_OPTS "--filter=-whitespace/parens,-whitespace/braces")
+  roslint_cpp()
   roslint_python()
   find_package(rostest REQUIRED)
   # check ros distro >= indigo

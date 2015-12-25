@@ -26,7 +26,6 @@ find_package(catkin REQUIRED COMPONENTS
   nodelet
   pcl_ros
   posedetection_msgs
-  robot_self_filter
   rosbuild
   roscpp
   roseus
@@ -35,6 +34,16 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
 )
+
+# check ros distro >= indigo
+execute_process(
+  COMMAND python -c "import sys; sys.exit(ord('$ENV{ROS_DISTRO}'[0]) >= ord('indigo'[0]))"
+  RESULT_VARIABLE DISTRO_GE_INDIGO
+)
+if(DISTRO_GE_INDIGO)
+  # robot_self_filter is released on version greater than indigo
+  find_package(robot_self_filter)
+endif()
 
 find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 
@@ -259,10 +268,6 @@ if(CATKIN_ENABLE_TESTING)
   find_package(roslint REQUIRED)
   roslint_python()
   find_package(rostest REQUIRED)
-  # check ros distro >= indigo
-  execute_process(
-    COMMAND python -c "import sys; sys.exit(ord('$ENV{ROS_DISTRO}'[0]) >= ord('indigo'[0]))"
-    RESULT_VARIABLE DISTRO_GE_INDIGO)
   if(${DISTRO_GE_INDIGO})
     # FIXME: jsk_tools/test_topic_published.py does not work on hydro travis/jenkins
     # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260

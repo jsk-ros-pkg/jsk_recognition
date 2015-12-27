@@ -69,6 +69,9 @@ namespace jsk_pcl_ros
     typedef message_filters::sync_policies::ExactTime<
     sensor_msgs::PointCloud2,
     jsk_recognition_msgs::ClusterPointIndices > SyncPolicy;
+    typedef message_filters::sync_policies::ApproximateTime<
+    sensor_msgs::PointCloud2,
+    jsk_recognition_msgs::ClusterPointIndices > ApproximateSyncPolicy;
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
       jsk_recognition_msgs::ClusterPointIndices,
@@ -126,12 +129,15 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygons_;
     message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> >async_;
     boost::shared_ptr<message_filters::Synchronizer<SyncAlignPolicy> >sync_align_;
     std::vector<ros::Publisher> publishers_;
     ros::Publisher pc_pub_, box_pub_, mask_pub_, label_pub_, negative_indices_pub_;
     boost::shared_ptr<tf::TransformBroadcaster> br_;
     std::string tf_prefix_;
     
+    bool use_async_;
+    int queue_size_;
     bool force_to_flip_z_axis_;
     bool publish_clouds_;
     bool publish_tf_;

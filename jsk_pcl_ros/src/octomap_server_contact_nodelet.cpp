@@ -519,6 +519,7 @@ namespace jsk_pcl_ros
   void OctomapServerContact::onInit(void)
   {
     DiagnosticNodelet::onInit();
+    onInitPostProcess();
   }
 }
 

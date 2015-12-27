@@ -68,6 +68,7 @@ namespace jsk_pcl_ros
       *pnh_, "output/inliers", 1);
     pub_coefficients_ = advertise<PCLModelCoefficientMsg>(
       *pnh_, "output/coefficients", 1);
+    onInitPostProcess();
   }
 
   void HintedStickFinder::subscribe()

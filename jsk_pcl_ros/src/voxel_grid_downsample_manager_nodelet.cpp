@@ -234,6 +234,7 @@ namespace jsk_pcl_ros
     pub_encoded_ = advertise<jsk_recognition_msgs::SlicedPointCloud>(
       *pnh_, "output_encoded", 1);
     
+    onInitPostProcess();
   }
 
   void VoxelGridDownsampleManager::subscribe()

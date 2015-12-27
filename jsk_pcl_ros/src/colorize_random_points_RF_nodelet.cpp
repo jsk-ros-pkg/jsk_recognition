@@ -74,7 +74,8 @@ namespace jsk_pcl_ros
     pass_offset_ = tmp_pass;
     pass_offset2_ = tmp_pass2;
     sum_num_ = tmp_sum_num;
-  }
+    onInitPostProcess();
+ }
 
   void ColorizeMapRandomForest::subscribe()
   {

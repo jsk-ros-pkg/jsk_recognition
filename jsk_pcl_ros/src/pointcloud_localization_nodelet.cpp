@@ -82,6 +82,8 @@ namespace jsk_pcl_ros
     tf_timer_ = pnh_->createTimer(
       ros::Duration(1.0 / tf_rate),
       boost::bind(&PointCloudLocalization::tfTimerCallback, this, _1));
+
+    onInitPostProcess();
   }
 
   void PointCloudLocalization::subscribe()

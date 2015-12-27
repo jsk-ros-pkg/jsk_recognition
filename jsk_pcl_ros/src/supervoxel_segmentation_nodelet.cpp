@@ -50,6 +50,7 @@ namespace jsk_pcl_ros
       *pnh_, "output/indices", 1);
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(
       *pnh_, "output/cloud", 1);
+    onInitPostProcess();
   }
 
   void SupervoxelSegmentation::subscribe()

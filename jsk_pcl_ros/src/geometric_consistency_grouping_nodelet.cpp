@@ -58,6 +58,7 @@ namespace jsk_pcl_ros
     reference_sync_->registerCallback(
       boost::bind(&GeometricConsistencyGrouping::referenceCallback,
                   this, _1, _2));
+    onInitPostProcess();
   }
 
   void GeometricConsistencyGrouping::subscribe()

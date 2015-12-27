@@ -56,6 +56,8 @@ namespace jsk_pcl_ros
     filtered_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>);
 
     diff_pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "octree_change_result", 1);
+
+    onInitPostProcess();
   }
 
   void OctreeChangePublisher::subscribe()

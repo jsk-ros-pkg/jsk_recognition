@@ -140,6 +140,7 @@ namespace jsk_pcl_ros
     pub_coefficients_ = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(
       *pnh_, "output/coefficients", 1);
 
+    onInitPostProcess();
   }
 
   void LineSegmentDetector::configCallback(Config &config, uint32_t level)

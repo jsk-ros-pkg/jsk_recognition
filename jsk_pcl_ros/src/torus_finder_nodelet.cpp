@@ -84,6 +84,7 @@ namespace jsk_pcl_ros
       *pnh_, "output/average_time", 1);
 
     done_initialization_ = true;
+    onInitPostProcess();
   }
 
   void TorusFinder::configCallback(Config &config, uint32_t level)

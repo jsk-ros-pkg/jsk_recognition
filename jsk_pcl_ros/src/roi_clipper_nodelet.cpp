@@ -55,6 +55,7 @@ namespace jsk_pcl_ros
       pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output/cloud", 1);
       pub_cloud_indices_ = advertise<PCLIndicesMsg>(*pnh_, "output/cloud_indices", 1);
     }
+    onInitPostProcess();
   }
 
   void ROIClipper::subscribe()

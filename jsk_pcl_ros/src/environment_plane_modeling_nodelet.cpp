@@ -111,6 +111,8 @@ namespace jsk_pcl_ros
     sync_->registerCallback(
       boost::bind(&EnvironmentPlaneModeling::inputCallback,
                   this, _1, _2, _3, _4, _5));
+
+    onInitPostProcess();
   }
 
   void EnvironmentPlaneModeling::configCallback(Config &config, uint32_t level)

@@ -113,6 +113,7 @@ namespace jsk_pcl_ros
       boost::bind (&FisheyeSpherePublisher::configCallback, this, _1, _2);
     srv_->setCallback (f);
 
+    onInitPostProcess();
   }
 }
 

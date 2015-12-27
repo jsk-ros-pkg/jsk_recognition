@@ -76,7 +76,7 @@ namespace jsk_pcl_ros
     filtered_indices_pub_
       = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output_indices", 1);
 
-    
+    onInitPostProcess();
   }
 
   void BoundingBoxFilter::subscribe()

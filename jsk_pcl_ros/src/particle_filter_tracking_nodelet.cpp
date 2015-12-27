@@ -198,6 +198,8 @@ namespace jsk_pcl_ros
     renew_model_srv_
       = pnh_->advertiseService(
         "renew_model", &ParticleFilterTracking::renew_model_cb, this);
+
+    onInitPostProcess();
   }
 
   void ParticleFilterTracking::config_callback(Config &config, uint32_t level)

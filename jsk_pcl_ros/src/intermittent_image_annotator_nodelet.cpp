@@ -88,6 +88,7 @@ namespace jsk_pcl_ros
     clear_service_ = pnh_->advertiseService(
       "clear",
       &IntermittentImageAnnotator::clearCallback, this);
+    onInitPostProcess();
   }
 
   // we donnot use subscribe/unsubscribe on demand

@@ -160,6 +160,8 @@ namespace jsk_pcl_ros
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     pub_marker_ = advertise<visualization_msgs::Marker>(*pnh_, "output_marker", 1);
     pub_octree_resolution_ = advertise<std_msgs::Float32>(*pnh_, "output_resolution", 1);
+
+    onInitPostProcess();
   }
 }
 

@@ -110,6 +110,8 @@ namespace jsk_pcl_ros
     cloud_vital_checker_.reset(
       new jsk_topic_tools::VitalChecker(1 / vital_rate));
     sub_ = pnh_->subscribe("input", max_queue_size_, &TiltLaserListener::jointCallback, this);
+
+    onInitPostProcess();
   }
 
   void TiltLaserListener::subscribe()

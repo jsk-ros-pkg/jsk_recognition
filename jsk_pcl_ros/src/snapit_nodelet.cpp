@@ -72,6 +72,7 @@ namespace jsk_pcl_ros
       align_footstep_srv_ = pnh_->advertiseService(
         "align_footstep", &SnapIt::footstepAlignServiceCallback, this);
     }
+    onInitPostProcess();
   }
 
   void SnapIt::subscribe()

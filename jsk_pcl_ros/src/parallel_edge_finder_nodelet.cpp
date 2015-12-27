@@ -56,6 +56,7 @@ namespace jsk_pcl_ros
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&ParallelEdgeFinder::configCallback, this, _1, _2);
     srv_->setCallback (f);
+    onInitPostProcess();
   }
 
   void ParallelEdgeFinder::subscribe()

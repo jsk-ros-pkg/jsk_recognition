@@ -133,6 +133,7 @@ namespace jsk_pcl_ros
       boost::bind(&OrganizedMultiPlaneSegmentation::updateDiagnostics,
                   this,
                   _1));
+    onInitPostProcess();
   }
 
   void OrganizedMultiPlaneSegmentation::forceToDirectOrigin(

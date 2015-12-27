@@ -69,6 +69,7 @@ namespace jsk_pcl_ros
     pub_coefficients_
       = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(*pnh_, "output_coefficients", 1);
     pub_polygons_ = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "output_polygons", 1);
+    onInitPostProcess();
   }
 
   void MultiPlaneSACSegmentation::subscribe()

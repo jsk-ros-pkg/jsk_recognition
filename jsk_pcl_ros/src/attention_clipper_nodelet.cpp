@@ -187,6 +187,8 @@ namespace jsk_pcl_ros
     pub_mask_ = advertise<sensor_msgs::Image>(*pnh_, "output/mask", 1);
     pub_indices_ = advertise<PCLIndicesMsg>(*pnh_, "output/point_indices", 1);
     pub_cluster_indices_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output/cluster_point_indices", 1);
+
+    onInitPostProcess();
   }
 
   void AttentionClipper::initializePoseList(size_t num)

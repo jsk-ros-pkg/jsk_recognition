@@ -153,31 +153,31 @@
       compute superpixels
     </description>
   </class>
-  <class name="jsk_perception/HoughCircleDetector" type="HoughCircleDetector"
+  <class name="jsk_perception/HoughCircleDetector" type="jsk_perception::HoughCircleDetector"
          base_class_type="nodelet::Nodelet">
     <description>
       nodelet to detect circles based on hough transformation
     </description>
   </class>
-  <class name="jsk_perception/ColorHistogram" type="ColorHistogram"
+  <class name="jsk_perception/ColorHistogram" type="jsk_perception::ColorHistogram"
          base_class_type="nodelet::Nodelet">
     <description>
       Nodelet to compute histogram
     </description>
   </class>
-  <class name="jsk_perception/EdgeDetector" type="EdgeDetector"
+  <class name="jsk_perception/EdgeDetector" type="jsk_perception::EdgeDetector"
          base_class_type="nodelet::Nodelet">
     <description>
       Nodelet to detect edges
     </description>
   </class>
-  <class name="jsk_perception/SparseImageEncoder" type="SparseImageEncoder"
+  <class name="jsk_perception/SparseImageEncoder" type="jsk_perception::SparseImageEncoder"
          base_class_type="nodelet::Nodelet">
     <description>
       Nodelet to encode image to an array of sparse matrix.
     </description>
   </class>
-  <class name="jsk_perception/SparseImageDecoder" type="SparseImageDecoder"
+  <class name="jsk_perception/SparseImageDecoder" type="jsk_perception::SparseImageDecoder"
          base_class_type="nodelet::Nodelet">
     <description>
       Nodelet to decode from an array of sparse matrix to image.

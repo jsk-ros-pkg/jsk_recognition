@@ -9,7 +9,6 @@
 
 #include <dynamic_reconfigure/server.h>
 
-#include <pluginlib/class_list_macros.h>
 
 namespace enc = sensor_msgs::image_encodings;
 
@@ -137,5 +136,5 @@ public:
 };
 }
 
-typedef jsk_perception::EdgeDetector EdgeDetector;
-PLUGINLIB_DECLARE_CLASS (jsk_perception, EdgeDetector, EdgeDetector, nodelet::Nodelet);
+#include <pluginlib/class_list_macros.h>
+PLUGINLIB_EXPORT_CLASS(jsk_perception::EdgeDetector, nodelet::Nodelet);

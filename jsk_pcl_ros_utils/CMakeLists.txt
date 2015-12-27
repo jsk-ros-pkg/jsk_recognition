@@ -225,6 +225,8 @@ jsk_pcl_util_nodelet(src/mask_image_to_depth_considered_mask_image_nodelet.cpp
   "jsk_pcl/MaskImageToDepthConsideredMaskImage" "mask_image_to_depth_considered_mask_image")
 jsk_pcl_util_nodelet(src/mask_image_to_point_indices_nodelet.cpp
   "jsk_pcl/MaskImageToPointIndices" "mask_image_to_point_indices")
+jsk_pcl_util_nodelet(src/label_to_cluster_point_indices_nodelet.cpp
+  "jsk_pcl/LabelToClusterPointIndices" "label_to_cluster_point_indices")
 jsk_pcl_util_nodelet(src/plane_concatenator_nodelet.cpp
   "jsk_pcl/PlaneConcatenator" "plane_concatenator")
 jsk_pcl_util_nodelet(src/add_point_indices_nodelet.cpp

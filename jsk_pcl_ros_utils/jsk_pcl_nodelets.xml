@@ -13,6 +13,10 @@
          type="jsk_pcl_ros_utils::MaskImageToPointIndices"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_pcl/LabelToClusterPointIndices"
+         type="jsk_pcl_ros_utils::LabelToClusterPointIndices"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_pcl/MaskImageToDepthConsideredMaskImage"
          type="jsk_pcl_ros_utils::MaskImageToDepthConsideredMaskImage"
          base_class_type="nodelet::Nodelet">

@@ -37,6 +37,7 @@
 #include <jsk_recognition_msgs/ClusterPointIndices.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
+#include <boost/assign.hpp>
 #include <map>
 
 namespace jsk_pcl_ros_utils
@@ -55,6 +56,8 @@ namespace jsk_pcl_ros_utils
     sub_ = pnh_->subscribe("input", 1,
                            &LabelToClusterPointIndices::convert,
                            this);
+    ros::V_string names = boost::assign::list_of("~input");
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void LabelToClusterPointIndices::unsubscribe()

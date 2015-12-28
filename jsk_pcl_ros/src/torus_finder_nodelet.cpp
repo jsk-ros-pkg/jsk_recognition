@@ -139,6 +139,9 @@ namespace jsk_pcl_ros
   void TorusFinder::segment(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
+    if (!done_initialization_) {
+      return;
+    }
     boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();
     pcl::PointCloud<pcl::PointNormal>::Ptr cloud

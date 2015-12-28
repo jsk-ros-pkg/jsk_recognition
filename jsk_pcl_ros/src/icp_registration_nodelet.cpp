@@ -101,6 +101,7 @@ namespace jsk_pcl_ros
                                           &ICPRegistration::referenceAddCallback,
                                           this);
     }
+    done_init_ = true;
   }
 
   void ICPRegistration::subscribe()
@@ -280,6 +281,10 @@ namespace jsk_pcl_ros
       const jsk_recognition_msgs::BoundingBox::ConstPtr& box_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    if (!done_init_) {
+      JSK_NODELET_WARN("not yet initialized");
+      return;
+    }
     if (reference_cloud_list_.size() == 0) {
       JSK_NODELET_FATAL("no reference is specified");
       jsk_recognition_msgs::ICPResult result;
@@ -317,6 +322,10 @@ namespace jsk_pcl_ros
       const geometry_msgs::PoseStamped::ConstPtr& offset_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    if (!done_init_) {
+      JSK_NODELET_WARN("not yet initialized");
+      return;
+    }
     if (reference_cloud_list_.size() == 0) {
       JSK_NODELET_FATAL("no reference is specified");
       jsk_recognition_msgs::ICPResult result;
@@ -361,6 +370,10 @@ namespace jsk_pcl_ros
   void ICPRegistration::align(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    if (!done_init_) {
+      JSK_NODELET_WARN("not yet initialized");
+      return;
+    }
     if (reference_cloud_list_.size() == 0) {
       JSK_NODELET_FATAL("no reference is specified");
       return;
@@ -386,6 +399,10 @@ namespace jsk_pcl_ros
   {
     {
       boost::mutex::scoped_lock lock(mutex_);
+      if (!done_init_) {
+        JSK_NODELET_WARN("not yet initialized");
+        return;
+      }
       reference_cloud_list_.resize(0);
       pcl::PointCloud<PointT>::Ptr reference_cloud (new pcl::PointCloud<PointT>);
       pcl::fromROSMsg(*reference_msg, *reference_cloud);
@@ -639,6 +656,10 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    if (!done_init_) {
+      JSK_NODELET_WARN("not yet initialized");
+      return;
+    }
     reference_cloud_list_.resize(0);
     pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(*msg, *cloud);
@@ -656,6 +677,10 @@ namespace jsk_pcl_ros
     const jsk_recognition_msgs::PointsArray::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    if (!done_init_) {
+      JSK_NODELET_WARN("not yet initialized");
+      return;
+    }
     reference_cloud_list_.resize(0);
     for (size_t i = 0; i < msg->cloud_list.size(); i++) {
       pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
@@ -668,6 +693,10 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    if (!done_init_) {
+      JSK_NODELET_WARN("not yet initialized");
+      return;
+    }
     //reference_cloud_list_.resize(0); //not 0
     pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(*msg, *cloud);

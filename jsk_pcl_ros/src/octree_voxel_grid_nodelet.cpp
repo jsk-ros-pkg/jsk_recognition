@@ -35,6 +35,7 @@
 
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/octree_voxel_grid.h"
+#include <std_msgs/Float32.h>
 #include <jsk_topic_tools/color_utils.h>
 #include <pcl/common/common.h>
 
@@ -124,6 +125,9 @@ namespace jsk_pcl_ros
         generateVoxelCloudImpl<pcl::PointXYZRGBNormal>(input_msg);
       }
     }
+    std_msgs::Float32 resolution;
+    resolution.data = resolution_;
+    pub_octree_resolution_.publish(resolution);
   }
 
   void OctreeVoxelGrid::subscribe()
@@ -155,6 +159,7 @@ namespace jsk_pcl_ros
 
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     pub_marker_ = advertise<visualization_msgs::Marker>(*pnh_, "output_marker", 1);
+    pub_octree_resolution_ = advertise<std_msgs::Float32>(*pnh_, "output_resolution", 1);
   }
 }
 

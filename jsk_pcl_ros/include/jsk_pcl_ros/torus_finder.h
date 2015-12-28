@@ -54,7 +54,7 @@ namespace jsk_pcl_ros
   {
   public:
     typedef TorusFinderConfig Config;
-    TorusFinder(): timer_(10), DiagnosticNodelet("TorusFinder") {}
+    TorusFinder(): timer_(10), done_initialization_(false), DiagnosticNodelet("TorusFinder") {}
   protected:
     virtual void onInit();
     virtual void subscribe();

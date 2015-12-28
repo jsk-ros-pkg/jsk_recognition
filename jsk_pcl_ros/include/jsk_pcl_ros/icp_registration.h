@@ -71,7 +71,7 @@ namespace jsk_pcl_ros
       sensor_msgs::PointCloud2,
       sensor_msgs::PointCloud2
       > ReferenceSyncPolicy;
-    ICPRegistration(): timer_(10) { }
+    ICPRegistration(): timer_(10), done_init_(false) { }
   protected:
     ////////////////////////////////////////////////////////
     // methosd
@@ -211,6 +211,8 @@ namespace jsk_pcl_ros
     double ndt_resolution_;
     double ndt_step_size_;
     double ndt_outlier_ratio_;
+
+    bool done_init_;
   private:
     
   };

@@ -69,6 +69,7 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_input_;
     ros::Publisher pub_cloud_;
     ros::Publisher pub_marker_;
+    ros::Publisher pub_octree_resolution_;
 
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;

@@ -24,6 +24,10 @@ and other voxel filtered functions output the other position such as the centroi
 
    Voxel grided clouds.
 
+* `~output_resolution` (`std_msgs/Float32`)
+
+   Resolution of octree.
+
 ## Parameters
 * `~publish_marker` (Boolean, default: `true`):
 

@@ -53,6 +53,7 @@ add_message_files(
   WeightedPoseArray.msg
   ContactSensor.msg
   ContactSensorArray.msg
+  PlotDataArray.msg
   )
 
 add_service_files(FILES

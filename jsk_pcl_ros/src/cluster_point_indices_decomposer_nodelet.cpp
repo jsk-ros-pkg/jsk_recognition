@@ -60,6 +60,9 @@ namespace jsk_pcl_ros
   {
     DiagnosticNodelet::onInit();
     pnh_->param("publish_tf", publish_tf_, false);
+    if (publish_tf_) {
+      br_.reset(new tf::TransformBroadcaster);
+    }
     if (!pnh_->getParam("tf_prefix", tf_prefix_))
     {
       if (publish_tf_) {
@@ -395,9 +398,9 @@ namespace jsk_pcl_ros
         tf::Transform transform;
         transform.setOrigin(tf::Vector3(center[0], center[1], center[2]));
         transform.setRotation(tf::createIdentityQuaternion());
-        br_.sendTransform(tf::StampedTransform(transform, input->header.stamp,
-                                               input->header.frame_id,
-                                               tf_prefix_ + (boost::format("output%02u") % (i)).str()));
+        br_->sendTransform(tf::StampedTransform(transform, input->header.stamp,
+                                                input->header.frame_id,
+                                                tf_prefix_ + (boost::format("output%02u") % (i)).str()));
       }
       if (is_sensed_with_camera) {
         // create mask & label image from cluster indices

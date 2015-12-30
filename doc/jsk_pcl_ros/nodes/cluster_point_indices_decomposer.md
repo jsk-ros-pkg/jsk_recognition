@@ -17,14 +17,8 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
    The planes for bounding box to be aligned on.
 
 ## Publishing topics
-* `~output%02d` (`sensor_msgs/PointCloud2`):
 
-   Series of topics for each pointcloud cluster.
-   This is published only when `publish_clouds` is `true`.
-
-* `/tf` (`tf2_msgs/TFMessage`)
-
-   Transformation of each decomposed points' center of gravity.
+**Default Topics**
 
 * `~debug_output` (`sensor_msgs/PointCloud2`):
 
@@ -46,7 +40,26 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 
   Point indices which are not included in input indices.
 
+**Optional Topics**
+
+* `~output%02d` (`sensor_msgs/PointCloud2`):
+
+   Series of topics for each pointcloud cluster.
+   This is published only when `publish_clouds` is `true`.
+
+* `/tf` (`tf2_msgs/TFMessage`)
+
+   Transformation of each decomposed points' center of gravity.
+
 ## Parameters
+
+* `~approximate_sync` (Boolean, default: `False`):
+
+   Policy of synchronization, if `False` it synchornizes exactly,
+   else approximately.
+* `~queue_size` (Int, default: `100`):
+
+   Queue size of topic msgs for synchronization.
 * `~publish_tf` (Boolean, default: `False`):
 
    Toggle tf publishing.
@@ -60,6 +73,7 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 * `~use_pca` (Boolean, default: `False`):
 
    Run PCA algorithm on each cluster to estimate x and y direction.
+
 * `~force_to_flip_z_axis` (Boolean, default: `False`)
 
    Flip z axis direction if this value is true.

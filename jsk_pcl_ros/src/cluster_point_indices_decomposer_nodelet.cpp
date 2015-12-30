@@ -85,6 +85,8 @@ namespace jsk_pcl_ros
     box_pub_ = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "boxes", 1);
     mask_pub_ = advertise<sensor_msgs::Image>(*pnh_, "mask", 1);
     label_pub_ = advertise<sensor_msgs::Image>(*pnh_, "label", 1);
+
+    onInitPostProcess();
   }
 
   void ClusterPointIndicesDecomposer::subscribe()

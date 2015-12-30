@@ -60,6 +60,8 @@ namespace jsk_pcl_ros
       *pnh_, "output_range_image", 1);
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(
       *pnh_, "output_cloud", 1);
+
+    onInitPostProcess();
   }
 
   void BorderEstimator::subscribe()

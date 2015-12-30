@@ -44,6 +44,7 @@ namespace jsk_pcl_ros
   {
     DiagnosticNodelet::onInit();
     pub_ = advertise<PCLIndicesMsg>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void OrganizedPointCloudToPointIndices::subscribe()

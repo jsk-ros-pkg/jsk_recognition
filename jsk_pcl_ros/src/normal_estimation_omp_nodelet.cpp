@@ -54,6 +54,7 @@ namespace jsk_pcl_ros
       *pnh_, "output/latest_time", 1);
     pub_average_time_ = advertise<std_msgs::Float32>(
       *pnh_, "output/average_time", 1);
+    onInitPostProcess();
   }
 
   void NormalEstimationOMP::subscribe()

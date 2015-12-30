@@ -53,6 +53,7 @@ namespace jsk_pcl_ros
       srv_->setCallback (f);
       pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
       resizedmask_sub_ = pnh_->subscribe("input/mask", 1, &ResizePointsPublisher::resizedmaskCallback, this);
+      onInitPostProcess();
     }
 
     void configCallback(Config &config, uint32_t level) {

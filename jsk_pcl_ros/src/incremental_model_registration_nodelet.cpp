@@ -111,6 +111,7 @@ namespace jsk_pcl_ros
     sync_->registerCallback(boost::bind(
                               &IncrementalModelRegistration::newsampleCallback,
                               this, _1, _2, _3));
+    onInitPostProcess();
   }
 
   void IncrementalModelRegistration::transformPointCloudRepsectedToPose(

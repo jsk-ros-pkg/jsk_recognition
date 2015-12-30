@@ -45,6 +45,7 @@ namespace jsk_pcl_ros
     DiagnosticNodelet::onInit();
     pub_min_area_rect_image_ = advertise<sensor_msgs::Image>(
       *pnh_, "debug/min_area_rect_image", 1);
+    onInitPostProcess();
   }
 
   void FindObjectOnPlane::subscribe()

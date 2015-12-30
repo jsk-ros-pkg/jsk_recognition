@@ -102,6 +102,7 @@ namespace jsk_pcl_ros
                                           this);
     }
     done_init_ = true;
+    onInitPostProcess();
   }
 
   void ICPRegistration::subscribe()

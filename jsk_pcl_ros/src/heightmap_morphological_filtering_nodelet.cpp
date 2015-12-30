@@ -55,6 +55,8 @@ namespace jsk_pcl_ros
     sub_config_ = pnh_->subscribe(getHeightmapConfigTopic(pnh_->resolveName("input")), 1,
                                   &HeightmapMorphologicalFiltering::configTopicCallback,
                                   this);
+    onInitPostProcess();
+
   }
 
   void HeightmapMorphologicalFiltering::subscribe()

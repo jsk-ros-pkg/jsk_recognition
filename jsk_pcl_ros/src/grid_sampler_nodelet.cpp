@@ -48,7 +48,7 @@ namespace jsk_pcl_ros
       boost::bind (&GridSampler::configCallback, this, _1, _2);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     srv_->setCallback (f);
-    
+    onInitPostProcess();
   }
 
   void GridSampler::subscribe()

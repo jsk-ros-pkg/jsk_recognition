@@ -62,6 +62,7 @@ namespace jsk_pcl_ros
       boost::bind (
         &OrganizedPassThrough::configCallback, this, _1, _2);
     srv_->setCallback (f);
+    onInitPostProcess();
   }
 
   void OrganizedPassThrough::subscribe()

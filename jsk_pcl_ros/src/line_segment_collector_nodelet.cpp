@@ -162,6 +162,8 @@ namespace jsk_pcl_ros
     debug_pub_inliers_before_plane_
       = advertise<jsk_recognition_msgs::ClusterPointIndices>(
         *pnh_, "debug/connect_segments/inliers", 1);
+
+    onInitPostProcess();
   }
 
   void LineSegmentCollector::configCallback(Config &config, uint32_t level)

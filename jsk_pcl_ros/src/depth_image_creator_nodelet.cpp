@@ -81,6 +81,7 @@ void jsk_pcl_ros::DepthImageCreator::onInit () {
     service_ = pnh_->advertiseService("set_point_cloud",
                                       &DepthImageCreator::service_cb, this);
   }
+  onInitPostProcess();
 }
 
 void jsk_pcl_ros::DepthImageCreator::subscribe() {

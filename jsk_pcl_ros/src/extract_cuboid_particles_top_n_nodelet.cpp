@@ -51,6 +51,7 @@ namespace jsk_pcl_ros
     pub_ = advertise<pcl_msgs::PointIndices>(*pnh_, "output", 1);
     pub_pose_array_ = advertise<jsk_recognition_msgs::WeightedPoseArray>(*pnh_, "output/pose_array", 1);
     pub_box_array_ = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "output/box_array", 1);
+    onInitPostProcess();
   }
 
   void ExtractCuboidParticlesTopN::subscribe()

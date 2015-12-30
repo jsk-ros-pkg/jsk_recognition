@@ -43,7 +43,8 @@ namespace jsk_pcl_ros
        this->pub_indices_ = advertise<
           jsk_recognition_msgs::ClusterPointIndices>(
              *pnh_, "/convex_connected_voxels/output/indices", 1);
-    }
+       onInitPostProcess();
+   }
 
     void ConvexConnectedVoxels::subscribe()
     {

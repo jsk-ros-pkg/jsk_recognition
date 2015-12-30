@@ -56,7 +56,8 @@ namespace jsk_pcl_ros
 
     pub_preapproach_ = advertise<geometry_msgs::PoseArray>(*pnh_, "output_preapproach", 1);
     pub_selected_preapproach_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output_selected_preapproach", 1);
-    
+
+    onInitPostProcess();
   }
 
   void HandleEstimator::subscribe()

@@ -72,6 +72,7 @@ namespace jsk_pcl_ros
     sync_->connectInput(sub_depth_image_, sub_color_image_);
     sync_->registerCallback(boost::bind(&Kinfu::callback, this, _1, _2));
     sub_info_ = pnh_->subscribe("input/info", 1, &Kinfu::infoCallback, this);
+    onInitPostProcess();
   }
 
   void Kinfu::infoCallback(const sensor_msgs::CameraInfo::ConstPtr& info_msg)

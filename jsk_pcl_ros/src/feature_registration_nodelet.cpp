@@ -63,6 +63,7 @@ namespace jsk_pcl_ros
                                                   this, _1, _2));
     pub_pose_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output", 1);
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output/cloud", 1);
+    onInitPostProcess();
   }
 
   void FeatureRegistration::subscribe()

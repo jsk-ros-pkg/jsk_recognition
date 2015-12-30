@@ -49,6 +49,8 @@ namespace jsk_pcl_ros
     srv_->setCallback (f);
 
     pub_ = advertise<PCLIndicesMsg>(*pnh_, "output", 1);
+
+    onInitPostProcess();
   }
 
   void UniformSampling::subscribe()

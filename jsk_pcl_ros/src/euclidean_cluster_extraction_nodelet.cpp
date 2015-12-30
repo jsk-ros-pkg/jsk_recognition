@@ -223,6 +223,8 @@ namespace jsk_pcl_ros
     cluster_num_pub_ = advertise<jsk_recognition_msgs::Int32Stamped> (*pnh_, "cluster_num", 1);
     service_ = pnh_->advertiseService(pnh_->resolveName("euclidean_clustering"),
                                       &EuclideanClustering::serviceCallback, this);
+
+    onInitPostProcess();
   }
 
   void EuclideanClustering::subscribe()

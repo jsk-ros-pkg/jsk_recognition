@@ -51,6 +51,7 @@ namespace jsk_pcl_ros
     pnh_->param("max_queue_size", max_queue_size_, 10);
     pnh_->param("approximate_sync", approximate_sync_, false);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void ExtractIndices::subscribe()

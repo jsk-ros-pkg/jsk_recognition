@@ -64,6 +64,7 @@ namespace jsk_pcl_ros
     srv_->setCallback (f);
     pnh_->param("queue_size", queue_size_, 200);
     pub_ = advertise<PCLIndicesMsg>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
 

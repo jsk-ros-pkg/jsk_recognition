@@ -67,6 +67,7 @@ namespace jsk_pcl_ros
     pub_average_time_ = advertise<std_msgs::Float32>(
       *pnh_, "output/average_time", 1);
     done_initialization_ = true;
+    onInitPostProcess();
   }
 
   void RegionGrowingMultiplePlaneSegmentation::subscribe()

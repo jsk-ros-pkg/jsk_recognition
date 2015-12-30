@@ -80,6 +80,8 @@ namespace jsk_pcl_ros
     sub_fast_cloud_ = pnh_->subscribe("fast_input", 1, &PlaneSupportedCuboidEstimator::fastCloudCallback,
                                       this);
     srv_reset_ = pnh_->advertiseService("reset", &PlaneSupportedCuboidEstimator::resetCallback, this);
+
+    onInitPostProcess();
   }
 
   void PlaneSupportedCuboidEstimator::subscribe()

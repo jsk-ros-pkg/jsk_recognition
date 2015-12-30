@@ -399,6 +399,8 @@ namespace jsk_pcl_ros
       = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "debug_polygons", 1);
     pub_debug_clusers_
       = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "debug_clusters", 1);
+
+    onInitPostProcess();
   }
 
   void EdgebasedCubeFinder::subscribe()

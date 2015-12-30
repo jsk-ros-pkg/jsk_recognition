@@ -64,7 +64,8 @@ namespace jsk_pcl_ros
       = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output", 1);
     coefficient_points_pub_
       = advertise<sensor_msgs::PointCloud2>(*pnh_, "coefficient_points", 1);
-  }
+    onInitPostProcess();
+ }
 
   void ColorHistogramMatcher::subscribe()
   {

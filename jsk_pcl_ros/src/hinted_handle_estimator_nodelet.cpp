@@ -69,6 +69,7 @@ namespace jsk_pcl_ros
     pnh_->param("arm_l", handle.arm_l, 0.05);
     pnh_->param("arm_d", handle.arm_d, 0.02);
     pnh_->param("arm_w", handle.arm_w, 0.1);
+    onInitPostProcess();
   }
 
   void HintedHandleEstimator::subscribe()

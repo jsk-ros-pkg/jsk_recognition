@@ -45,6 +45,7 @@ namespace jsk_pcl_ros
     ConnectionBasedNodelet::onInit();
     pnh_->param("keep_organized", keep_organized_, false);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void SelectedClusterPublisher::subscribe()

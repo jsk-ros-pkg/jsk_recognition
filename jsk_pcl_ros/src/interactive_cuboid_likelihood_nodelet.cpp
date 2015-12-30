@@ -83,6 +83,7 @@ namespace jsk_pcl_ros
     visualization_msgs::InteractiveMarker plane_int_marker = planeInteractiveMarker();
     plane_server_->insert(plane_int_marker, boost::bind(&InteractiveCuboidLikelihood::processPlaneFeedback, this, _1));
     plane_server_->applyChanges();
+    onInitPostProcess();
   }
 
   void InteractiveCuboidLikelihood::subscribe()

@@ -55,6 +55,8 @@ namespace jsk_pcl_ros
       return;
     }
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+
+    onInitPostProcess();
   }
 
   void JointStateStaticFilter::subscribe()

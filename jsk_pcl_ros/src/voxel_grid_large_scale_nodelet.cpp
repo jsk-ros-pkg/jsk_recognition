@@ -52,6 +52,7 @@ namespace jsk_pcl_ros
       boost::bind(&VoxelGridLargeScale::configCallback, this, _1, _2);
     srv_->setCallback(f);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void VoxelGridLargeScale::subscribe()

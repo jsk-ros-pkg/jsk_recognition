@@ -302,5 +302,4 @@ namespace jsk_perception
 }
 
 #include <pluginlib/class_list_macros.h>
-typedef jsk_perception::ColorHistogram ColorHistogram;
-PLUGINLIB_DECLARE_CLASS (jsk_perception, ColorHistogram, ColorHistogram, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(jsk_perception::ColorHistogram, nodelet::Nodelet);

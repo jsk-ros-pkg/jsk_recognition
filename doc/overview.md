@@ -35,4 +35,4 @@ represent subset of image and pointcloud.
 
   Cluster point indices is a set of point indices.
 
-![](images/mask_image.png)
+[![](images/mask_image.png)](_images/mask_image.png)

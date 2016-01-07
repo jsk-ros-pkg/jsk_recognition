@@ -61,6 +61,20 @@ namespace jsk_pcl_ros
         nonnan_indices->indices.push_back(i);
       }
     }
+
+    if (nonnan_indices->indices.size() == 0) {
+      // if input points is 0, publish empty data as result
+      jsk_recognition_msgs::ClusterPointIndices result;
+      result.header = input->header;
+      result_pub_.publish(result);
+      // do nothing and return it
+      jsk_recognition_msgs::Int32Stamped::Ptr cluster_num_msg (new jsk_recognition_msgs::Int32Stamped);
+      cluster_num_msg->header = input->header;
+      cluster_num_msg->data = 0;
+      cluster_num_pub_.publish(cluster_num_msg);
+      return;
+    }
+    
     EuclideanClusterExtraction<pcl::PointXYZ> impl;
     {
       jsk_topic_tools::ScopedTimer timer = kdtree_acc_.scopedTimer();

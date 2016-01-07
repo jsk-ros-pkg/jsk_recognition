@@ -81,6 +81,7 @@ namespace jsk_pcl_ros
       marker_msg.pose.orientation.w = 1.0;
       if (marker_color_ == "flat") {
         marker_msg.color = jsk_topic_tools::colorCategory20(0);
+        marker_msg.color.a = marker_color_alpha_;
       }
       
       // compute min and max
@@ -100,6 +101,7 @@ namespace jsk_pcl_ros
         else if (marker_color_ == "z") {
           marker_msg.colors.push_back(jsk_topic_tools::heatColor((p.z - minpt[2]) / (maxpt[2] - minpt[2])));
         }
+        marker_msg.colors[marker_msg.colors.size() - 1].a = marker_color_alpha_;
       }
       pub_marker_.publish(marker_msg);
     }
@@ -110,6 +112,7 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     if (resolution_ == 0.0) {
       pub_cloud_.publish(input_msg);
+      
     }
     else {
       if (point_type_ == "xyz") {
@@ -123,6 +126,9 @@ namespace jsk_pcl_ros
       }
       else if (point_type_ == "xyzrgbnormal") {
         generateVoxelCloudImpl<pcl::PointXYZRGBNormal>(input_msg);
+      }
+      else {
+        JSK_NODELET_ERROR("unknown point type: %s", point_type_.c_str());
       }
     }
     std_msgs::Float32 resolution;
@@ -147,6 +153,7 @@ namespace jsk_pcl_ros
     point_type_ = config.point_type;
     publish_marker_flag_ = config.publish_marker;
     marker_color_ = config.marker_color;
+    marker_color_alpha_ = config.marker_color_alpha;
   }
 
   void OctreeVoxelGrid::onInit(void)

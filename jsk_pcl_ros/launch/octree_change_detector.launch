@@ -5,20 +5,10 @@
   <arg name="voxel_grid_leaf_size" default="0.01"/>
   <arg name="octree_resolution" default="0.02"/>
   <arg name="octree_noise_filter" default="2"/>
-  <arg name="create_manager" default="true" />
-  <arg name="MANAGER" default="nodelet_manager" />
-  <arg name="manager" default="/pcl_nodelet/$(arg MANAGER)" />
-  <arg name="MACHINE" default="" />
-
   <group ns="pcl_nodelet">
-    <node if="$(arg create_manager)"
-          pkg="nodelet" type="nodelet" name="$(arg MANAGER)"
-          args="manager" output="screen" machine="$(arg MACHINE)"/>
-
     <node pkg="nodelet" type="nodelet"
           name="voxelgrid"
-          args="load pcl/VoxelGrid $(arg manager)"
-          output="screen" clear_params="true" machine="$(arg MACHINE)">
+          args="standalone pcl/VoxelGrid">
       <remap from="~input" to="$(arg input_point)" />
       <param name="filter_limit_min" value="$(arg voxel_grid_filter_limit_min)" />
       <param name="filter_limit_max" value="$(arg voxel_grid_filter_limit_max)" />
@@ -26,11 +16,27 @@
     </node>
     <node pkg="nodelet" type="nodelet"
           name="octree_change_detector"
-          args="load jsk_pcl/OctreeChangePublisher $(arg manager)"
-          output="screen" clear_params="true" machine="$(arg MACHINE)">
+          args="standalone jsk_pcl/OctreeChangePublisher">
       <remap from="~input" to="/pcl_nodelet/voxelgrid/output" />
       <param name="resolution" value="$(arg octree_resolution)"/>
       <param name="noise_filter" value="$(arg octree_noise_filter)"/>
     </node>
+    <node pkg="nodelet" type="nodelet"
+          name="clustering"
+          args="standalone jsk_pcl/EuclideanClustering">
+      <remap from="~input" to="octree_change_detector/octree_change_result" />
+      <rosparam>
+         tolerance: 0.1
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet"
+          name="cluster_decomposer"
+          args="standalone jsk_pcl/ClusterPointIndicesDecomposer">
+      <remap from="~input" to="octree_change_detector/octree_change_result" />
+      <remap from="~target" to="clustering/output" />
+      <rosparam>
+      </rosparam>
+    </node>
+
   </group>
 </launch>

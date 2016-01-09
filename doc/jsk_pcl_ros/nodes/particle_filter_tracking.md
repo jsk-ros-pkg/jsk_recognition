@@ -9,6 +9,11 @@ This nodelet tracks the target pointcloud.
 
   Input pointcloud
 
+* `~input_change` (`sensor_msgs/PointCloud2`)
+
+  Input change pointcloud, which is only enabled when `~use_change_detection` is true.
+
+
 * `~renew_model` (`sensor_msgs/PointCloud2`)
 
   Reference pointcloud to track.
@@ -43,6 +48,14 @@ This nodelet tracks the target pointcloud.
 
   average computation time
 
+* `~output/velocity` (`geometry_msgs/TwistStamped`)
+
+  Velocity of object.
+
+* `~output/no_move` (`std_msgs/Bool`)
+* `~output/no_move_raw` (`std_msgs/Bool`)
+
+  These topics will be true if object looks stable.
 
 ##### Advertising Servicies
 * `~renew_model` (`jsk_pcl_ros/SetPointCloud2`)
@@ -148,6 +161,18 @@ This nodelet tracks the target pointcloud.
 
   Maximum distance between points to take into account when computing likelihood
 
+* `~use_change_detection` (Bool, default: `false`)
+
+  Use change detection to skip tracking when no change in pointcloud.
+
+* `~static_velocity_thr` (Double, default: `0.1`)
+
+  Velocity threshold to regard object is stable.
+
+* `~change_cloud_near_thr` (Double, default: `0.2`)
+
+  Distance threshold to trigger tracking when `~use_change_detection` is true.
+
 ## Sample
 
 run the below command.
@@ -158,3 +183,8 @@ roslaunch jsk_pcl_ros tracking_hydro.launch  #(When use hydro)
 ```
 
 Push the "Select" button at the top bar , drag and surround the target poincloud which you want to track in the rectangle area.Then, finally, push the "SelectPointCloudPublishActoin" button at SelectPointCloudPublishAction Panel. The tracker will start tracking the target.
+
+tabletop_tracking.launch is specialized for tracking tabletop objects.
+```
+roslaunch jsk_pcl_ros tabletop_tracking.launch
+```

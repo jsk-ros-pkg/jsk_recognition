@@ -32,12 +32,17 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#define BOOST_PARAMETER_MAX_ARITY 7
+
 #include <jsk_topic_tools/log_utils.h>
 #include "jsk_pcl_ros/particle_filter_tracking.h"
 #include <pcl/tracking/impl/distance_coherence.hpp>
 #include <pcl/tracking/impl/approx_nearest_pair_point_cloud_coherence.hpp>
 #include <pluginlib/class_list_macros.h>
 #include <jsk_topic_tools/rosparam_utils.h>
+#include <geometry_msgs/TwistStamped.h>
+#include <std_msgs/Bool.h>
+#include <pcl/kdtree/kdtree_flann.h>
 
 using namespace pcl::tracking;
 
@@ -157,7 +162,7 @@ namespace jsk_pcl_ros
     double max_distance;
     pnh_->param("max_distance", max_distance, 0.01);
     coherence->setMaximumDistance(max_distance);
-
+    pnh_->param("use_change_detection", use_change_detection_, false);
     tracker_set_cloud_coherence(coherence);
 
     //Set publish setting
@@ -175,8 +180,28 @@ namespace jsk_pcl_ros
       "output/rms_angle_error", 1);
     pub_rms_distance_ = pnh_->advertise<std_msgs::Float32>(
       "output/rms_distance_error", 1);
+    pub_velocity_ = pnh_->advertise<geometry_msgs::TwistStamped>(
+      "output/velocity", 1);
+    pub_no_move_raw_ = pnh_->advertise<std_msgs::Bool>(
+      "output/no_move_raw", 1);
+    pub_no_move_ = pnh_->advertise<std_msgs::Bool>(
+      "output/no_move", 1);
+    pub_skipped_ = pnh_->advertise<std_msgs::Bool>(
+      "output/skipped", 1);
     //Set subscribe setting
-    sub_ = pnh_->subscribe("input", 1, &ParticleFilterTracking::cloud_cb,this);
+    if (use_change_detection_) {
+      sub_input_cloud_.subscribe(*pnh_, "input", 4);
+      sub_change_cloud_.subscribe(*pnh_, "input_change", 4);
+      change_sync_ = boost::make_shared<message_filters::Synchronizer<SyncChangePolicy> >(100);
+      change_sync_->connectInput(sub_input_cloud_, sub_change_cloud_);
+      change_sync_->registerCallback(
+        boost::bind(
+          &ParticleFilterTracking::cloud_change_cb,
+          this, _1, _2));
+    }
+    else {
+      sub_ = pnh_->subscribe("input", 1, &ParticleFilterTracking::cloud_cb,this);
+    }
     if (align_box_) {
       sub_input_.subscribe(*pnh_, "renew_model", 1);
       sub_box_.subscribe(*pnh_, "renew_box", 1);
@@ -222,6 +247,8 @@ namespace jsk_pcl_ros
     default_step_covariance_[3] = config.default_step_covariance_roll;
     default_step_covariance_[4] = config.default_step_covariance_pitch;
     default_step_covariance_[5] = config.default_step_covariance_yaw;
+    static_velocity_thr_ = config.static_velocity_thr;
+    change_cloud_near_threshold_ = config.change_cloud_near_thr;
     if (tracker_ || reversed_tracker_) 
     {
       JSK_NODELET_INFO("update tracker parameter");
@@ -293,6 +320,28 @@ namespace jsk_pcl_ros
     result_pointcloud2.header.stamp = stamp_;
     track_result_publisher_.publish(result_pointcloud2);
 
+    if (counter_ > 0) {         // publish velocity
+      geometry_msgs::TwistStamped twist;
+      twist.header.frame_id = reference_frame_id();
+      twist.header.stamp = stamp_;
+      double dt = (stamp_ - prev_stamp_).toSec();
+      twist.twist.linear.x = (result.x - prev_result_.x) / dt;
+      twist.twist.linear.y = (result.y - prev_result_.y) / dt;
+      twist.twist.linear.z = (result.z - prev_result_.z) / dt;
+      twist.twist.angular.x = (result.roll - prev_result_.roll) / dt;
+      twist.twist.angular.y = (result.pitch - prev_result_.pitch) / dt;
+      twist.twist.angular.z = (result.yaw - prev_result_.yaw) / dt;
+      pub_velocity_.publish(twist);
+      Eigen::Vector3f vel(twist.twist.linear.x, twist.twist.linear.y, twist.twist.linear.z);
+      bool is_static = vel.norm() < static_velocity_thr_;
+      no_move_buffer_.addValue(is_static);
+      std_msgs::Bool no_move_raw, no_move;
+      no_move_raw.data = is_static;
+      no_move.data = no_move_buffer_.isAllTrueFilled();
+      pub_no_move_.publish(no_move);
+      pub_no_move_raw_.publish(no_move_raw);
+    }
+    
     Eigen::Affine3f diff_trans = transformation.inverse() * initial_pose_;
     double distance_error = Eigen::Vector3f(diff_trans.translation()).norm();
     double angle_error = Eigen::AngleAxisf(diff_trans.rotation()).angle();
@@ -305,6 +354,9 @@ namespace jsk_pcl_ros
     ros_angle_rms.data = angle_rms;
     pub_rms_distance_.publish(ros_distance_rms);
     pub_rms_angle_.publish(ros_angle_rms);
+    prev_result_ = result;
+    prev_stamp_ = stamp_;
+    ++counter_;
   }
   
   std::string ParticleFilterTracking::reference_frame_id()
@@ -392,6 +444,45 @@ namespace jsk_pcl_ros
     return tfTransformation;
   }
 
+  void ParticleFilterTracking::cloud_change_cb(const sensor_msgs::PointCloud2::ConstPtr &pc_msg,
+                                               const sensor_msgs::PointCloud2::ConstPtr &change_cloud_msg)
+  {
+    if (no_move_buffer_.isAllTrueFilled()) {
+      jsk_recognition_utils::ScopedWallDurationReporter r
+        = timer_.reporter(pub_latest_time_, pub_average_time_);
+      // change change_cloud
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr change_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+      pcl::fromROSMsg(*change_cloud_msg, *change_cloud);
+      if (change_cloud->points.size() == 0) {
+        stamp_ = pc_msg->header.stamp;
+        publish_result();
+        return;
+      }
+      pcl::KdTreeFLANN<pcl::PointXYZRGB> kdtree;
+      kdtree.setInputCloud(change_cloud);
+      std::vector<int> k_indices;
+      std::vector<float> k_sqr_distances;
+      pcl::PointXYZRGB p;
+      p.x = prev_result_.x;
+      p.y = prev_result_.y;
+      p.z = prev_result_.z;
+      if (kdtree.radiusSearch(p, change_cloud_near_threshold_, k_indices, k_sqr_distances, 1) > 0) {
+        JSK_NODELET_INFO("change detection triggered!");
+        // there is near pointcloud
+        cloud_cb(*pc_msg);
+        r.setIsEnabled(false);
+        no_move_buffer_.clear();
+      }
+      else {
+        // publish previous result
+        stamp_ = pc_msg->header.stamp;
+        publish_result();
+      }
+    }
+    else {
+      cloud_cb(*pc_msg);
+    }
+  }
   
   //OpenNI Grabber's cloud Callback function
   void ParticleFilterTracking::cloud_cb(const sensor_msgs::PointCloud2 &pc)
@@ -658,6 +749,8 @@ namespace jsk_pcl_ros
     else {
       reversed_tracker_->setReferenceCloud(ref);
     }
+    counter_ = 0;
+    no_move_buffer_.clear();
   }
 
   void ParticleFilterTracking::tracker_reset_tracking()

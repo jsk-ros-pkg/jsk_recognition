@@ -50,11 +50,14 @@ namespace jsk_recognition_utils
                                ros::Publisher& pub_latest,
                                ros::Publisher& pub_average);
     virtual ~ScopedWallDurationReporter();
+    virtual void setIsPublish(bool);
+    virtual void setIsEnabled(bool);
   protected:
     WallDurationTimer* parent_;
     ros::WallTime start_time_;
     ros::Publisher pub_latest_, pub_average_;
-    const bool is_publish_;
+    bool is_publish_;
+    bool is_enabled_;
   private:
     
   };

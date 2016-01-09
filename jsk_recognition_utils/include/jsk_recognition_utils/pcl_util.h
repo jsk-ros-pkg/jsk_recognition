@@ -230,9 +230,12 @@ namespace jsk_recognition_utils
     virtual ~SeriesedBoolean();
     virtual void addValue(bool val);
     virtual bool getValue();
+    virtual bool isAllTrueFilled();
+    virtual void clear();
   protected:
   private:
     boost::circular_buffer<bool> buf_;
+    const int buf_len_;
   };
 
   ////////////////////////////////////////////////////////

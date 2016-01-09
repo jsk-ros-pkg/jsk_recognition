@@ -79,6 +79,8 @@
 #include <pcl/tracking/impl/particle_filter.hpp>
 #include <jsk_recognition_utils/time_util.h>
 #include <std_msgs/Float32.h>
+#include <jsk_recognition_utils/pcl_util.h>
+
 // This namespace follows PCL coding style
 namespace pcl
 {
@@ -540,9 +542,12 @@ namespace jsk_pcl_ros
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
       jsk_recognition_msgs::BoundingBox > SyncPolicy;
+    typedef message_filters::sync_policies::ExactTime<
+      sensor_msgs::PointCloud2,
+      sensor_msgs::PointCloud2 > SyncChangePolicy;
     typedef ParticleFilterTracker<PointT, ParticleXYZRPY>::PointCloudStatePtr
     PointCloudStatePtr;
-    ParticleFilterTracking(): timer_(10), distance_error_buffer_(100), angle_error_buffer_(100) {}
+    ParticleFilterTracking(): timer_(10), distance_error_buffer_(100), angle_error_buffer_(100), no_move_buffer_(10) {}
   protected:
     pcl::PointCloud<PointT>::Ptr cloud_pass_;
     pcl::PointCloud<PointT>::Ptr cloud_pass_downsampled_;
@@ -561,6 +566,7 @@ namespace jsk_pcl_ros
     std::string base_frame_id_;
     std::string track_target_name_;
     ros::Time stamp_;
+    ros::Time prev_stamp_;
     tf::Transform reference_transform_;
 
     ros::Subscriber sub_;
@@ -570,14 +576,22 @@ namespace jsk_pcl_ros
     ros::Publisher pub_average_time_;
     ros::Publisher pub_rms_distance_;
     ros::Publisher pub_rms_angle_;
+    ros::Publisher pub_velocity_;
+    ros::Publisher pub_no_move_;
+    ros::Publisher pub_no_move_raw_;
+    ros::Publisher pub_skipped_;
     jsk_recognition_utils::WallDurationTimer timer_;
     Eigen::Affine3f initial_pose_;
     boost::circular_buffer<double> distance_error_buffer_;
     boost::circular_buffer<double> angle_error_buffer_;
-    
+
+    jsk_recognition_utils::SeriesedBoolean no_move_buffer_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<jsk_recognition_msgs::BoundingBox> sub_box_;
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_cloud_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_change_cloud_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncChangePolicy> > change_sync_;
     ros::Publisher particle_publisher_;
     ros::Publisher track_result_publisher_;
     ros::Publisher pose_stamped_publisher_;
@@ -588,18 +602,22 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // parameters
     ////////////////////////////////////////////////////////
+    bool use_change_detection_;
     int max_particle_num_;
     double delta_;
     double epsilon_;
     int iteration_num_;
     double resample_likelihood_thr_;
     ParticleXYZRPY bin_size_;
+    ParticleXYZRPY prev_result_;
+    int counter_;
     std::vector<double> default_step_covariance_;
     bool reversed_;
     bool not_use_reference_centroid_;
     bool not_publish_tf_;
     int marker_to_pointcloud_sampling_nums_;
-    
+    double static_velocity_thr_;
+    double change_cloud_near_threshold_;
     virtual void config_callback(Config &config, uint32_t level);
     virtual void publish_particles();
     virtual void publish_result();
@@ -616,6 +634,7 @@ namespace jsk_pcl_ros
       return sqrt(res / buffer.size());
     }
     virtual void cloud_cb(const sensor_msgs::PointCloud2 &pc);
+    virtual void cloud_change_cb(const sensor_msgs::PointCloud2::ConstPtr &pc, const sensor_msgs::PointCloud2::ConstPtr &chnage_cloud);
     virtual bool renew_model_cb(
       jsk_recognition_msgs::SetPointCloud2::Request &req,
       jsk_recognition_msgs::SetPointCloud2::Response &response);

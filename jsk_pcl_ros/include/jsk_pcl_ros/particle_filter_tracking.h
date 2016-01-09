@@ -504,26 +504,26 @@ namespace pcl
     protected:
       virtual bool initCompute ()
       {
-	if (!PointCloudCoherence<PointInT>::initCompute ())
-	  {
-	    PCL_ERROR ("[pcl::%s::initCompute] PointCloudCoherence::Init failed.\n", getClassName ().c_str ());
-	    //deinitCompute ();
-	    return (false);
-	  }
-	
-	// initialize tree
-	if (!search_)
-	  search_.reset (new pcl::search::OrganizedNeighbor<PointInT> (false));
+        if (!PointCloudCoherence<PointInT>::initCompute ())
+        {
+          PCL_ERROR ("[pcl::%s::initCompute] PointCloudCoherence::Init failed.\n", getClassName ().c_str ());
+          //deinitCompute ();
+          return (false);
+        }
+        
+        // initialize tree
+        if (!search_)
+          search_.reset (new pcl::search::OrganizedNeighbor<PointInT> (false));
+        
+        if (new_target_ && target_input_)
+        {
+          search_->setInputCloud (target_input_);
+          if (!search_->isValid())
+            return false;
+          new_target_ = false;
+        }
       
-	if (new_target_ && target_input_)
-	  {
-	    search_->setInputCloud (target_input_);
-	    if (!search_->isValid())
-	      return false;
-	    new_target_ = false;
-	  }
-      
-	return true;
+        return true;
       }
     };
   }  

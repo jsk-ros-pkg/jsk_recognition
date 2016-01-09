@@ -240,7 +240,7 @@ namespace jsk_recognition_utils
   }
 
   SeriesedBoolean::SeriesedBoolean(const int buf_len):
-    buf_(buf_len)
+    buf_(buf_len), buf_len_(buf_len)
   {
   }
   
@@ -251,6 +251,11 @@ namespace jsk_recognition_utils
   void SeriesedBoolean::addValue(bool val)
   {
     buf_.push_front(val);
+  }
+
+  bool SeriesedBoolean::isAllTrueFilled()
+  {
+    return (buf_.size() == buf_len_ && getValue());
   }
   
   bool SeriesedBoolean::getValue()
@@ -268,6 +273,11 @@ namespace jsk_recognition_utils
       }
       return true;
     }
+  }
+
+  void SeriesedBoolean::clear()
+  {
+    buf_.clear();
   }
 
   TimeredDiagnosticUpdater::TimeredDiagnosticUpdater(

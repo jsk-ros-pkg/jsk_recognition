@@ -59,6 +59,9 @@ class BoFHistogramExtractor(ConnectionBasedTransport):
         desc = desc.reshape((-1, feature_msg.descriptor_dim))
         pos = np.array(feature_msg.positions)
         pos = pos.reshape((-1, 2))
+        if label.sum() == 0:
+            jsk_logdebug('Skip image with only background label')
+            return
         decomposed = decompose_descriptors_with_label(
             descriptors=desc, positions=pos, label_img=label,
             skip_zero_label=True)

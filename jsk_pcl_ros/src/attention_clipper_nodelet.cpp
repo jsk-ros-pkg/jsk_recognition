@@ -524,7 +524,7 @@ namespace jsk_pcl_ros
                                      sensor_msgs::image_encodings::MONO8,
                                      all_mask_image);
       pub_mask_.publish(mask_bridge.toImageMsg());
-      publishBoundingBox(msg->header);
+      //publishBoundingBox(msg->header);
     }
     catch (std::runtime_error &e) {
       NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());

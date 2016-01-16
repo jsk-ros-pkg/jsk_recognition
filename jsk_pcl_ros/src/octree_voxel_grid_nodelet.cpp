@@ -101,6 +101,12 @@ namespace jsk_pcl_ros
         else if (marker_color_ == "z") {
           marker_msg.colors.push_back(jsk_topic_tools::heatColor((p.z - minpt[2]) / (maxpt[2] - minpt[2])));
         }
+        else if (marker_color_ == "x") {
+          marker_msg.colors.push_back(jsk_topic_tools::heatColor((p.x - minpt[0]) / (maxpt[0] - minpt[0])));
+        }
+        else if (marker_color_ == "y") {
+          marker_msg.colors.push_back(jsk_topic_tools::heatColor((p.y - minpt[1]) / (maxpt[1] - minpt[1])));
+        }
         marker_msg.colors[marker_msg.colors.size() - 1].a = marker_color_alpha_;
       }
       pub_marker_.publish(marker_msg);

@@ -43,7 +43,7 @@ and other voxel filtered functions output the other position such as the centroi
 
 * `~marker_color` (String, default: `z`)
 
-  Method to decide color of marker. z or flat can be selected.
+  Method to decide color of marker. z, x, y or flat can be selected.
 
 * `~marker_color_alpha` (Double, default: `0.8`)
 

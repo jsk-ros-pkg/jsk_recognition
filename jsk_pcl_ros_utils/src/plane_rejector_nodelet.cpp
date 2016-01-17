@@ -62,6 +62,7 @@ namespace jsk_pcl_ros_utils
       JSK_NODELET_FATAL("You need to specify ~processing_frame_id");
       return;
     }
+    pnh_->param("use_inliers", use_inliers_, false);
 
     std::vector<double> reference_axis;
     if (!jsk_topic_tools::readVectorParameter(
@@ -87,7 +88,11 @@ namespace jsk_pcl_ros_utils
       *pnh_, "output_polygons", 1);
     coefficients_pub_ = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(
       *pnh_, "output_coefficients", 1);
-
+    if (use_inliers_) {
+      inliers_pub_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output_inliers", 1);
+    }
+    else {
+    }
     diagnostics_timer_ = pnh_->createTimer(
       ros::Duration(1.0),
       boost::bind(&PlaneRejector::updateDiagnostics,
@@ -98,11 +103,21 @@ namespace jsk_pcl_ros_utils
 
   void PlaneRejector::subscribe()
   {
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-    sub_polygons_.subscribe(*pnh_, "input_polygons", 1);
-    sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
-    sync_->connectInput(sub_polygons_, sub_coefficients_);
-    sync_->registerCallback(boost::bind(&PlaneRejector::reject, this, _1, _2));
+    if (use_inliers_) {
+      sync_inlier_ = boost::make_shared<message_filters::Synchronizer<SyncInlierPolicy> >(100);
+      sub_polygons_.subscribe(*pnh_, "input_polygons", 1);
+      sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
+      sub_inliers_.subscribe(*pnh_, "input_inliers", 1);
+      sync_inlier_->connectInput(sub_polygons_, sub_coefficients_, sub_inliers_);
+      sync_inlier_->registerCallback(boost::bind(&PlaneRejector::reject, this, _1, _2, _3));
+    }
+    else {
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+      sub_polygons_.subscribe(*pnh_, "input_polygons", 1);
+      sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
+      sync_->connectInput(sub_polygons_, sub_coefficients_);
+      sync_->registerCallback(boost::bind(&PlaneRejector::reject, this, _1, _2));
+    }
   }
 
   void PlaneRejector::unsubscribe()
@@ -153,18 +168,29 @@ namespace jsk_pcl_ros_utils
   {
     boost::mutex::scoped_lock lock(mutex_);
     angle_thr_ = config.angle_thr;
+    angle_ = config.angle;
   }
   
   void PlaneRejector::reject(
     const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients)
   {
+    reject(polygons, coefficients, jsk_recognition_msgs::ClusterPointIndices::ConstPtr());
+  }
+
+  void PlaneRejector::reject(
+    const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
+    const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
+    const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& inliers)
+  {
     boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();
     jsk_recognition_msgs::PolygonArray result_polygons;
     jsk_recognition_msgs::ModelCoefficientsArray result_coefficients;
+    jsk_recognition_msgs::ClusterPointIndices result_inliers;
     result_polygons.header = polygons->header;
     result_coefficients.header = coefficients->header;
+    result_inliers.header = polygons->header;
     input_plane_counter_.add(polygons->polygons.size());
     int rejected_plane_counter = 0;
     int passed_plane_counter = 0;
@@ -188,11 +214,14 @@ namespace jsk_pcl_ros_utils
         Eigen::Vector3d eigen_transformed_plane_axis;
         tf::vectorMsgToEigen(transformed_plane_axis.vector,
                              eigen_transformed_plane_axis);
-        double ang = acos(eigen_transformed_plane_axis.normalized().dot(reference_axis_));
+        double ang = std::abs(acos(eigen_transformed_plane_axis.normalized().dot(reference_axis_)) - angle_);
         if (ang < angle_thr_) {
           ++passed_plane_counter;
           result_polygons.polygons.push_back(polygons->polygons[i]);
           result_coefficients.coefficients.push_back(coefficient);
+          if (use_inliers_) {
+            result_inliers.cluster_indices.push_back(inliers->cluster_indices[i]);
+          }
         }
         else {
           ++rejected_plane_counter;
@@ -206,6 +235,9 @@ namespace jsk_pcl_ros_utils
     passed_plane_counter_.add(passed_plane_counter);
     polygons_pub_.publish(result_polygons);
     coefficients_pub_.publish(result_coefficients);
+    if (use_inliers_) {
+      inliers_pub_.publish(result_inliers);
+    }
     diagnostic_updater_->update();
   }
   

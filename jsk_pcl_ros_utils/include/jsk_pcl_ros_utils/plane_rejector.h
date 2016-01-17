@@ -53,6 +53,7 @@
 
 #include <jsk_recognition_msgs/PolygonArray.h>
 #include <jsk_recognition_msgs/ModelCoefficientsArray.h>
+#include <jsk_recognition_msgs/ClusterPointIndices.h>
 #include "jsk_pcl_ros_utils/PlaneRejectorConfig.h"
 
 #include "jsk_recognition_utils/pcl_conversion_util.h"
@@ -73,11 +74,18 @@ namespace jsk_pcl_ros_utils
   public:
     typedef message_filters::sync_policies::ExactTime< jsk_recognition_msgs::PolygonArray,
                                                        jsk_recognition_msgs::ModelCoefficientsArray > SyncPolicy;
+    typedef message_filters::sync_policies::ExactTime< jsk_recognition_msgs::PolygonArray,
+                                                       jsk_recognition_msgs::ModelCoefficientsArray,
+                                                       jsk_recognition_msgs::ClusterPointIndices
+                                                       > SyncInlierPolicy;
     typedef jsk_pcl_ros_utils::PlaneRejectorConfig Config;
   protected:
     virtual void onInit();
     virtual void reject(const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
                         const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients);
+    virtual void reject(const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
+                        const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
+                        const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& inliers);
     virtual void configCallback (Config &config, uint32_t level);
 
     
@@ -89,9 +97,12 @@ namespace jsk_pcl_ros_utils
     
     message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygons_;
     message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_inliers_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncInlierPolicy> > sync_inlier_;
     
     bool use_tf2_;
+    bool use_inliers_;
     std::string processing_frame_id_;
     // axis
     Eigen::Vector3d reference_axis_;
@@ -99,7 +110,7 @@ namespace jsk_pcl_ros_utils
     tf::TransformListener* listener_;
     boost::mutex mutex_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
-    ros::Publisher polygons_pub_, coefficients_pub_;
+    ros::Publisher polygons_pub_, coefficients_pub_, inliers_pub_;
     ros::Timer diagnostics_timer_;
     boost::shared_ptr<diagnostic_updater::Updater> diagnostic_updater_;
     jsk_topic_tools::VitalChecker::Ptr vital_checker_;
@@ -108,6 +119,7 @@ namespace jsk_pcl_ros_utils
     jsk_recognition_utils::Counter rejected_plane_counter_;
     jsk_recognition_utils::Counter passed_plane_counter_;
     jsk_recognition_utils::Counter input_plane_counter_;
+    double angle_;
   private:
     
   };

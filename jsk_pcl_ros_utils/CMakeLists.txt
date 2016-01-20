@@ -160,81 +160,81 @@ else ($ENV{TRAVIS_JOB_ID})
   add_definitions("-O2 -g")
 endif ($ENV{TRAVIS_JOB_ID})
 
-jsk_pcl_util_nodelet(src/normal_flip_to_frame_nodelet.cpp "jsk_pcl/NormalFlipToFrame"
+jsk_pcl_util_nodelet(src/normal_flip_to_frame_nodelet.cpp "jsk_pcl_utils/NormalFlipToFrame"
   "normal_flip_to_frame")
-jsk_pcl_util_nodelet(src/centroid_publisher_nodelet.cpp "jsk_pcl/CentroidPublisher" "centroid_publisher")
+jsk_pcl_util_nodelet(src/centroid_publisher_nodelet.cpp "jsk_pcl_utils/CentroidPublisher" "centroid_publisher")
 jsk_pcl_util_nodelet(src/tf_transform_cloud_nodelet.cpp
-  "jsk_pcl/TfTransformCloud" "tf_transform_cloud")
+  "jsk_pcl_utils/TfTransformCloud" "tf_transform_cloud")
 jsk_pcl_util_nodelet(src/tf_transform_bounding_box_nodelet.cpp
-  "jsk_pcl/TfTransformBoundingBox" "tf_transform_bounding_box")
+  "jsk_pcl_utils/TfTransformBoundingBox" "tf_transform_bounding_box")
 jsk_pcl_util_nodelet(src/tf_transform_bounding_box_array_nodelet.cpp
-  "jsk_pcl/TfTransformBoundingBoxArray" "tf_transform_bounding_box_array")
+  "jsk_pcl_utils/TfTransformBoundingBoxArray" "tf_transform_bounding_box_array")
 jsk_pcl_util_nodelet(src/normal_concatenater_nodelet.cpp
-  "jsk_pcl/NormalConcatenater" "normal_concatenater")
+  "jsk_pcl_utils/NormalConcatenater" "normal_concatenater")
 jsk_pcl_util_nodelet(src/polygon_array_distance_likelihood_nodelet.cpp
-  "jsk_pcl/PolygonArrayDistanceLikelihood" "polygon_array_distance_likelihood")
+  "jsk_pcl_utils/PolygonArrayDistanceLikelihood" "polygon_array_distance_likelihood")
 jsk_pcl_util_nodelet(src/polygon_array_area_likelihood_nodelet.cpp
-  "jsk_pcl/PolygonArrayAreaLikelihood" "polygon_array_area_likelihood")
+  "jsk_pcl_utils/PolygonArrayAreaLikelihood" "polygon_array_area_likelihood")
 jsk_pcl_util_nodelet(src/polygon_array_angle_likelihood_nodelet.cpp
-  "jsk_pcl/PolygonArrayAngleLikelihood" "polygon_array_angle_likelihood")
+  "jsk_pcl_utils/PolygonArrayAngleLikelihood" "polygon_array_angle_likelihood")
 jsk_pcl_util_nodelet(src/polygon_array_foot_angle_likelihood_nodelet.cpp
-  "jsk_pcl/PolygonArrayFootAngleLikelihood" "polygon_array_foot_angle_likelihood")
+  "jsk_pcl_utils/PolygonArrayFootAngleLikelihood" "polygon_array_foot_angle_likelihood")
 jsk_pcl_util_nodelet(src/pose_with_covariance_stamped_to_gaussian_pointcloud_nodelet.cpp
-  "jsk_pcl/PoseWithCovarianceStampedToGaussianPointCloud" "pose_with_covariance_stamped_to_gaussian_pointcloud")
+  "jsk_pcl_utils/PoseWithCovarianceStampedToGaussianPointCloud" "pose_with_covariance_stamped_to_gaussian_pointcloud")
 jsk_pcl_util_nodelet(src/spherical_pointcloud_simulator_nodelet.cpp
-  "jsk_pcl/SphericalPointCloudSimulator" "spherical_pointcloud_simulator")
+  "jsk_pcl_utils/SphericalPointCloudSimulator" "spherical_pointcloud_simulator")
 jsk_pcl_util_nodelet(src/polygon_flipper_nodelet.cpp
-  "jsk_pcl/PolygonFlipper" "polygon_flipper")
+  "jsk_pcl_utils/PolygonFlipper" "polygon_flipper")
 jsk_pcl_util_nodelet(src/polygon_points_sampler_nodelet.cpp
-  "jsk_pcl/PolygonPointsSampler" "polygon_points_sampler")
+  "jsk_pcl_utils/PolygonPointsSampler" "polygon_points_sampler")
 jsk_pcl_util_nodelet(src/polygon_magnifier_nodelet.cpp
-  "jsk_pcl/PolygonMagnifier" "polygon_magnifier")
+  "jsk_pcl_utils/PolygonMagnifier" "polygon_magnifier")
 jsk_pcl_util_nodelet(src/planar_pointcloud_simulator_nodelet.cpp
-  "jsk_pcl/PlanarPointCloudSimulator" "planar_pointcloud_simulator")
+  "jsk_pcl_utils/PlanarPointCloudSimulator" "planar_pointcloud_simulator")
 jsk_pcl_util_nodelet(src/plane_rejector_nodelet.cpp
-  "jsk_pcl/PlaneRejector" "plane_rejector")
+  "jsk_pcl_utils/PlaneRejector" "plane_rejector")
 jsk_pcl_util_nodelet(src/pointcloud_to_cluster_point_indices_nodelet.cpp
-  "jsk_pcl/PointCloudToClusterPointIndices" "pointcloud_to_cluster_point_indices")
+  "jsk_pcl_utils/PointCloudToClusterPointIndices" "pointcloud_to_cluster_point_indices")
 jsk_pcl_util_nodelet(src/static_polygon_array_publisher_nodelet.cpp
-  "jsk_pcl/StaticPolygonArrayPublisher" "static_polygon_array_publisher")
+  "jsk_pcl_utils/StaticPolygonArrayPublisher" "static_polygon_array_publisher")
 jsk_pcl_util_nodelet(src/polygon_array_transformer_nodelet.cpp
-  "jsk_pcl/PolygonArrayTransformer" "polygon_array_transformer")
+  "jsk_pcl_utils/PolygonArrayTransformer" "polygon_array_transformer")
 jsk_pcl_util_nodelet(src/pointcloud_to_stl_nodelet.cpp
-  "jsk_pcl/PointCloudToSTL" "pointcloud_to_stl")
+  "jsk_pcl_utils/PointCloudToSTL" "pointcloud_to_stl")
 jsk_pcl_util_nodelet(src/polygon_appender_nodelet.cpp
-  "jsk_pcl/PolygonAppender" "polygon_appender")
+  "jsk_pcl_utils/PolygonAppender" "polygon_appender")
 jsk_pcl_util_nodelet(src/delay_pointcloud_nodelet.cpp
-  "jsk_pcl/DelayPointCloud" "delay_pointcloud")
+  "jsk_pcl_utils/DelayPointCloud" "delay_pointcloud")
 jsk_pcl_util_nodelet(src/depth_image_error_nodelet.cpp
-  "jsk_pcl/DepthImageError" "depth_image_error")
+  "jsk_pcl_utils/DepthImageError" "depth_image_error")
 jsk_pcl_util_nodelet(src/polygon_array_wrapper_nodelet.cpp
-  "jsk_pcl/PolygonArrayWrapper" "polygon_array_wrapper")
+  "jsk_pcl_utils/PolygonArrayWrapper" "polygon_array_wrapper")
 jsk_pcl_util_nodelet(src/polygon_array_unwrapper_nodelet.cpp
-  "jsk_pcl/PolygonArrayUnwrapper" "polygon_array_unwrapper")
+  "jsk_pcl_utils/PolygonArrayUnwrapper" "polygon_array_unwrapper")
 jsk_pcl_util_nodelet(src/colorize_distance_from_plane_nodelet.cpp
-  "jsk_pcl/ColorizeDistanceFromPlane" "colorize_distance_from_plane")
+  "jsk_pcl_utils/ColorizeDistanceFromPlane" "colorize_distance_from_plane")
 jsk_pcl_util_nodelet(src/colorize_height_2d_mapping_nodelet.cpp
-  "jsk_pcl/ColorizeHeight2DMapping" "colorize_height_2d_mapping")
+  "jsk_pcl_utils/ColorizeHeight2DMapping" "colorize_height_2d_mapping")
 jsk_pcl_util_nodelet(src/plane_reasoner_nodelet.cpp
-  "jsk_pcl/PlaneReasoner" "plane_reasoner")
+  "jsk_pcl_utils/PlaneReasoner" "plane_reasoner")
 jsk_pcl_util_nodelet(src/transform_pointcloud_in_bounding_box_nodelet.cpp
-  "jsk_pcl/TransformPointcloudInBoundingBox" "transform_pointcloud_in_bounding_box")
+  "jsk_pcl_utils/TransformPointcloudInBoundingBox" "transform_pointcloud_in_bounding_box")
 jsk_pcl_util_nodelet(src/point_indices_to_mask_image_nodelet.cpp
-  "jsk_pcl/PointIndicesToMaskImage" "point_indices_to_mask_image")
+  "jsk_pcl_utils/PointIndicesToMaskImage" "point_indices_to_mask_image")
 jsk_pcl_util_nodelet(src/mask_image_to_depth_considered_mask_image_nodelet.cpp
-  "jsk_pcl/MaskImageToDepthConsideredMaskImage" "mask_image_to_depth_considered_mask_image")
+  "jsk_pcl_utils/MaskImageToDepthConsideredMaskImage" "mask_image_to_depth_considered_mask_image")
 jsk_pcl_util_nodelet(src/mask_image_to_point_indices_nodelet.cpp
-  "jsk_pcl/MaskImageToPointIndices" "mask_image_to_point_indices")
+  "jsk_pcl_utils/MaskImageToPointIndices" "mask_image_to_point_indices")
 jsk_pcl_util_nodelet(src/label_to_cluster_point_indices_nodelet.cpp
-  "jsk_pcl/LabelToClusterPointIndices" "label_to_cluster_point_indices")
+  "jsk_pcl_utils/LabelToClusterPointIndices" "label_to_cluster_point_indices")
 jsk_pcl_util_nodelet(src/plane_concatenator_nodelet.cpp
-  "jsk_pcl/PlaneConcatenator" "plane_concatenator")
+  "jsk_pcl_utils/PlaneConcatenator" "plane_concatenator")
 jsk_pcl_util_nodelet(src/add_point_indices_nodelet.cpp
-  "jsk_pcl/AddPointIndices" "add_point_indices")
+  "jsk_pcl_utils/AddPointIndices" "add_point_indices")
 jsk_pcl_util_nodelet(src/pcd_reader_with_pose_nodelet.cpp
-  "jsk_pcl/PCDReaderWithPose" "pcd_reader_with_pose")
+  "jsk_pcl_utils/PCDReaderWithPose" "pcd_reader_with_pose")
 jsk_pcl_util_nodelet(src/pointcloud_relative_from_pose_stamped_nodelet.cpp
-  "jsk_pcl/PointCloudRelativeFromPoseStamped" "pointcloud_relative_from_pose_stamped")
+  "jsk_pcl_utils/PointCloudRelativeFromPoseStamped" "pointcloud_relative_from_pose_stamped")
 add_library(jsk_pcl_ros_utils SHARED ${jsk_pcl_util_nodelet_sources})
 add_dependencies(jsk_pcl_ros_utils ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 target_link_libraries(jsk_pcl_ros_utils

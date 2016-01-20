@@ -6,8 +6,6 @@
 (ros::roseus "marker-publish")
 (ros::roseus-add-msgs "posedetection_msgs")
 
-(defvar *detection-topic* "/openni/rgb/ObjectDetection")
-(defvar *base-frame-id* "/base_footprint")
 (defvar *map-id* "/map")
 (defvar *solve-tf* t)
 
@@ -19,9 +17,6 @@
 
 (defparameter *kfs-lst* nil)
 
-(defvar object-width nil)
-(defvar object-height nil)
-(defvar relative-pose-str nil)
 (defclass kalman-filters
   :super propertied-object
   :slots (kfp kfr)
@@ -512,7 +507,6 @@
 (defun only-perception (&key ((:type atype) nil) (tf-force nil)
                              (publish-objectdetection-marker t)
                              (marker-life 30)
-                             (detection-topic *detection-topic*)
                              (look-at nil)
                              ((:target-object target-obj) (make-cube 60 60 60))
                              )
@@ -532,15 +526,18 @@
     (ros::advertise "/posewithcovstamped" geometry_msgs::PoseWithCovarianceStamped 1)
     (ros::advertise "/simplecov" geometry_msgs::PoseWithCovarianceStamped 1)
     (ros::advertise-service "targetobj" posedetection_msgs::TargetObj #'target-obj-cb)
-    (setq object-width (ros::get-param "~object_width" 0.2))
-    (setq object-height (ros::get-param "~object_height" 0.2))
-    (setq relative-pose-str (ros::get-param "~relative_pose" "0 0 0 0 0 0 1"))
     (ros::subscribe "/openni_c2/rgb/image_rect_color"
                     sensor_msgs::Image #'attention-init)
     (ros::spin)
     )
   )
 
+;; set parameter
+(setq object-width (ros::get-param "~object_width" 0.2))
+(setq object-height (ros::get-param "~object_height" 0.2))
+(setq relative-pose-str (ros::get-param "~relative_pose" "0 0 0 0 0 0 1"))
+(setq detection-topic (ros::get-param "~detection_topic" "/kinect_head/rgb/ObjectDetection"))
+(setq *base-frame-id* (ros::get-param "~base_frame_id" "/base_footprint"))
 
 (only-perception)
 

@@ -166,6 +166,7 @@ jsk_pcl_nodelet(src/moving_least_square_smoothing_nodelet.cpp "jsk_pcl/MovingLea
 jsk_pcl_nodelet(src/fisheye_sphere_publisher_nodelet.cpp "jsk_pcl/FisheyeSpherePublisher" "fisheye_sphere_publisher")
 jsk_pcl_nodelet(src/plane_supported_cuboid_estimator_nodelet.cpp
   "jsk_pcl/PlaneSupportedCuboidEstimator" "plane_supported_cuboid_estimator")
+jsk_pcl_nodelet(src/extract_field_of_view_nodelet.cpp "jsk_pcl/ExtractFieldOfView" "extract_field_of_view")
 jsk_pcl_nodelet(src/extract_cuboid_particles_top_n_nodelet.cpp
   "jsk_pcl/ExtractCuboidParticlesTopN" "extract_cuboid_particles_top_n")
 jsk_pcl_nodelet(src/interactive_cuboid_likelihood_nodelet.cpp

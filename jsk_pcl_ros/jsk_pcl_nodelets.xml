@@ -609,6 +609,12 @@
          type="jsk_pcl_ros::CollisionDetector"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_pcl/ExtractFieldOfView" type="jsk_pcl_ros::ExtractFieldOfView"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      extract field of view
+    </description>
+  </class>
 </library>
 <library path="libjsk_pcl_ros_moveit">
   <class name="jsk_pcl/PointCloudMoveitFilter"

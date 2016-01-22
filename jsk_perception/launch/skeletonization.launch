@@ -1,15 +1,21 @@
 <launch>
+  <arg name="image" default="/camera/rgb/image_rect_color"/>
+  <arg name="num_threads" default="4" />
+  
   <node pkg="jsk_perception" type="edge_detector" name="edge_detector">
-    <remap from="image" to="/camera/rgb/image_rect_color" />
+    <remap from="image" to="$(arg image)" />
   </node>
   <node pkg="jsk_perception" type="dilate_mask_image" name="dilate_mask_image">
     <remap from="~input" to="/edge/image" />
   </node>
-  <node pkg="jsk_perception" type="skeletonization" name="skeletonization">
+  <node pkg="jsk_perception" type="skeletonization" name="skeletonization"
+	output="screen">
     <remap from="~input" to="/dilate_mask_image/output" />
+    <param name="num_threads" value="$(arg num_threads)" />
+    <remap from="num_threads" to="skeletonization/num_threads" />
   </node>
   <node pkg="image_view" type="image_view" name="edge_view" >
-    <remap from="image" to="/edge/image" />
+    <remap from="image" to="/skeletonization/image_output" />
   </node>
   <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="edge_reconfigure" />
 </launch>

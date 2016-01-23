@@ -1,6 +1,6 @@
 <launch>
   <node pkg="jsk_topic_tools" type="relay" name="input_relay">
-    <remap from="~input" to="/multisense_local/resize_1_4/points" />
+    <remap from="~input" to="/multisense/resize_1_4/points" />
   </node>
   <node pkg="jsk_pcl_ros" type="organized_multi_plane_segmentation" name="multi_plane_estimate">
     <remap from="~input" to="input_relay/output"/>
@@ -8,6 +8,9 @@
       max_curvature: 0.01
       estimate_normal: true
     </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros_utils" type="polygon_magnifier" name="polygon_magnifier">
+    <remap from="~input" to="multi_plane_estimate/output_refined_polygon" />
   </node>
   <node pkg="nodelet" type="nodelet"
         name="plane_extraction"
@@ -20,6 +23,7 @@
     <rosparam>
       use_sensor_frame: true
       sensor_frame: head_root
+      min_height: 0.03
     </rosparam>
   </node>
 
@@ -86,6 +90,26 @@
   </node>
 
   <node pkg="nodelet" type="nodelet"
+        name="octree_change_detector_euclidean_filter"
+        args="standalone jsk_pcl/EuclideanClustering">
+    <remap from="~input" to="octree_change_detector/octree_change_result" />
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        name="octree_change_detector_euclidean_filter_points"
+        args="standalone jsk_pcl/ClusterPointIndicesDecomposer"
+        output="screen">
+    <remap from="~input" to="octree_change_detector/octree_change_result" />
+    <remap from="~target" to="octree_change_detector_euclidean_filter/output" />
+    <rosparam>
+      align_boxes: false
+      use_pca: false
+      publish_clouds: false
+      publish_tf: false
+    </rosparam>
+  </node>
+
+  
+  <node pkg="nodelet" type="nodelet"
         name="voxelgrid"
         args="standalone jsk_pcl/OctreeVoxelGrid"
         output="screen" clear_params="true">
@@ -117,14 +141,64 @@
         output="screen" clear_params="true">
     <remap from="~input" to="voxelgrid/output" />
     <remap from="~input_change" to="octree_change_detector/octree_change_result" />
+    <remap from="~input_change" to="octree_change_detector_euclidean_filter_points/debug_output" />
     <remap from="~renew_model" to="model_voxelgrid/output" />
     <rosparam>
       max_particle_num: 1000
       use_change_detection: true
-      default_step_covariance_x: 0.00004
-      default_step_covariance_y: 0.00004
-      default_step_covariance_z: 0.00004
+      default_step_covariance_x: 0.0004
+      default_step_covariance_y: 0.0004
+      default_step_covariance_z: 0.0004
     </rosparam>
   </node>
-  
+  <node pkg="jsk_pcl_ros_utils" type="cloud_on_plane"
+        name="cloud_on_plane">
+    <remap from="~input" to="particle_filter_tracker/track_result" />
+    <remap from="~input/polygon" to="polygon_magnifier/output" />
+  </node>
+  <node pkg="jsk_pcl_ros_utils" type="cloud_on_plane_info.py"
+        name="cloud_on_plane_info">
+    <remap from="~input" to="cloud_on_plane/output" />
+    <rosparam>
+      left: 10
+      text_size: 24
+      top: 350
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="tracker_status_info.py" name="tracker_status_info">
+    <remap from="~input" to="particle_filter_tracker/output/tracker_status" />
+    <rosparam>
+      left: 10
+      text_size: 24
+      top: 300
+    </rosparam>
+  </node>
+  <node pkg="jsk_rviz_plugins" type="static_overlay_text.py" name="vel_min_text">
+    <rosparam>
+      text: 0 m/s
+      left: 80
+      top: 650
+    </rosparam>
+  </node>
+  <node pkg="jsk_rviz_plugins" type="static_overlay_text.py" name="vel_max_text">
+    <rosparam>
+      text: 0.3 m/s
+      left: 80
+      top: 550
+    </rosparam>
+  </node>
+  <node pkg="jsk_rviz_plugins" type="static_overlay_text.py" name="tm_min_text">
+    <rosparam>
+      text: 0 s
+      left: 80
+      top: 500
+    </rosparam>
+  </node>
+  <node pkg="jsk_rviz_plugins" type="static_overlay_text.py" name="tm_max_text">
+    <rosparam>
+      text: 0.1 s
+      left: 80
+      top: 400
+    </rosparam>
+  </node>
 </launch>

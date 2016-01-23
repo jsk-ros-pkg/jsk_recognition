@@ -1,51 +1,48 @@
 <launch>
-
-  <!-- load log -->
-  <rosparam command="load"
-            file="$(find jsk_pcl_ros)/test_data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/rosparam.yaml" />
-  <node name="rosbag_play"
-        pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros)/test_data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/vision.compressed.bag --clock --loop">
-  </node>
-
-  <arg name="INPUT_CLOUD" value="/kinect2_head/hd/points" />
-
-  <node name="organized_pointcloud_to_point_indices"
-        pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/OrganizedPointCloudToPointIndices">
-    <remap from="~input" to="$(arg INPUT_CLOUD)" />
-  </node>
-  <node name="extract_indices"
+  
+  <node name="even_extract_indices"
         pkg="nodelet" type="nodelet"
         args="standalone jsk_pcl/ExtractIndices">
-    <remap from="~input" to="$(arg INPUT_CLOUD)" />
-    <remap from="~indices" to="organized_pointcloud_to_point_indices/output" />
+    <remap from="~input" to="test_extract_indices/output" />
+    <remap from="~indices" to="test_extract_indices/output/even_indices" />
+    <rosparam>
+      keep_organized: false
+    </rosparam>
+  </node>
+  <node name="odd_extract_indices"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ExtractIndices">
+    <remap from="~input" to="test_extract_indices/output" />
+    <remap from="~indices" to="test_extract_indices/output/odd_indices" />
+    <rosparam>
+      keep_organized: false
+    </rosparam>
+  </node>
+  <node name="even_organized_extract_indices"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ExtractIndices">
+    <remap from="~input" to="test_extract_indices/output" />
+    <remap from="~indices" to="test_extract_indices/output/even_indices" />
     <rosparam>
       keep_organized: true
     </rosparam>
   </node>
-
-  <node name="transform_0"
-        pkg="topic_tools" type="transform"
-        args="/extract_indices/output/data /transform_0/output std_msgs/Bool 'len(m) > 8000000' --wait-for-start" />
-  <test test-name="extract_indices_stdout_0"
-        name="extract_indices_stdout_0"
+  <node name="odd_organized_extract_indices"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ExtractIndices">
+    <remap from="~input" to="test_extract_indices/output" />
+    <remap from="~indices" to="test_extract_indices/output/odd_indices" />
+    <rosparam>
+      keep_organized: true
+    </rosparam>
+  </node>
+  <test test-name="test_extract_indices"
+        name="test_extract_indices"
         time-limit="360"
-        pkg="jsk_tools" type="test_stdout.py">
-    <param name="~command" value="rostopic echo /transform_0/output -n1" />
-    <param name="~stdout_line0" type="str" value="data: True" />
+        pkg="jsk_pcl_ros" type="test_extract_indices">
+    <remap from="~input/even_result" to="even_extract_indices/output" />
+    <remap from="~input/odd_result" to="odd_extract_indices/output" />
+    <remap from="~input/even_organized_result" to="even_organized_extract_indices/output" />
+    <remap from="~input/odd_organized_result" to="odd_organized_extract_indices/output" />
   </test>
-
-  <!-- test for keep_organized: true -->
-  <node name="transform_1"
-        pkg="topic_tools" type="transform"
-        args="/extract_indices/output/height /transform_1/output std_msgs/Bool 'm > 1' --wait-for-start" />
-  <test test-name="extract_indices_stdout_1"
-        name="extract_indices_stdout_1"
-        time-limit="360"
-        pkg="jsk_tools" type="test_stdout.py">
-    <param name="~command" value="rostopic echo /transform_1/output -n1" />
-    <param name="~stdout_line0" type="str" value="data: True" />
-  </test>
-
 </launch>

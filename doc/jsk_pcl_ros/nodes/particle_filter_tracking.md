@@ -57,6 +57,11 @@ This nodelet tracks the target pointcloud.
 
   These topics will be true if object looks stable.
 
+* `~output/tracker_status` (`jsk_recognition_msgs/TrackerStatus`)
+
+  Current tracking status.
+
+
 ##### Advertising Servicies
 * `~renew_model` (`jsk_pcl_ros/SetPointCloud2`)
 

@@ -67,4 +67,21 @@ namespace jsk_recognition_utils
     }
     return aa == bb;
   }
+  
+  bool isSameFrameId(const std_msgs::Header& a, const std_msgs::Header& b)
+  {
+    return isSameFrameId(a.frame_id, b.frame_id);
+  }
+  
+  bool hasField(const std::string& field_name, const sensor_msgs::PointCloud2& msg)
+  {
+    for (size_t i = 0; i < msg.fields.size(); i++) {
+      sensor_msgs::PointField field = msg.fields[i];
+      if (field.name == field_name) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
 }

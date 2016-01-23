@@ -486,6 +486,9 @@ if (CATKIN_ENABLE_TESTING)
   if(TARGET tests)
     add_dependencies(tests install_test_data)
   endif()
+  add_rostest_gtest(test_extract_indices test/test_extract_indices.test test/test_extract_indices.cpp)
+  target_link_libraries(test_extract_indices ${catkin_LIBRARIES} ${GTEST_LIBRARIES})
+
   # check ros distro >= indigo
   execute_process(
     COMMAND python -c "import sys; sys.exit(ord('$ENV{ROS_DISTRO}'[0]) >= ord('indigo'[0]))"
@@ -494,6 +497,5 @@ if (CATKIN_ENABLE_TESTING)
     # because of unreleased topic_tools/transform on hydro
     add_rostest(test/test_attention_clipper.test DEPENDENCIES install_test_data)
     add_rostest(test/test_euclidean_segmentation.test DEPENDENCIES install_test_data)
-    add_rostest(test/test_extract_indices.test DEPENDENCIES install_test_data)
   endif()
 endif()

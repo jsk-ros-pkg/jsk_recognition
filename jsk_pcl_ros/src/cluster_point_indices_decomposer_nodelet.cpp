@@ -49,6 +49,7 @@
 #include <sensor_msgs/image_encodings.h>
 #include <jsk_topic_tools/color_utils.h>
 #include <Eigen/Geometry> 
+#include <geometry_msgs/PoseArray.h>
 
 #include "jsk_recognition_utils/geo_util.h"
 #include "jsk_recognition_utils/pcl_conversion_util.h"
@@ -85,6 +86,7 @@ namespace jsk_pcl_ros
     box_pub_ = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "boxes", 1);
     mask_pub_ = advertise<sensor_msgs::Image>(*pnh_, "mask", 1);
     label_pub_ = advertise<sensor_msgs::Image>(*pnh_, "label", 1);
+    centers_pub_ = advertise<geometry_msgs::PoseArray>(*pnh_, "centroid_pose_array", 1);
 
     onInitPostProcess();
   }
@@ -387,6 +389,8 @@ namespace jsk_pcl_ros
     pcl::PointCloud<pcl::PointXYZRGB> debug_output;
     jsk_recognition_msgs::BoundingBoxArray bounding_box_array;
     bounding_box_array.header = input->header;
+    geometry_msgs::PoseArray center_pose_array;
+    center_pose_array.header = input->header;
     for (size_t i = 0; i < sorted_indices.size(); i++)
     {
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
@@ -411,6 +415,17 @@ namespace jsk_pcl_ros
                                                 input->header.frame_id,
                                                 tf_prefix_ + (boost::format("output%02u") % (i)).str()));
       }
+      // centroid pose
+      geometry_msgs::Pose pose_msg;
+      pose_msg.position.x = center[0];
+      pose_msg.position.y = center[1];
+      pose_msg.position.z = center[2];
+      pose_msg.orientation.x = 0;
+      pose_msg.orientation.y = 0;
+      pose_msg.orientation.z = 0;
+      pose_msg.orientation.w = 1;
+      center_pose_array.poses.push_back(pose_msg);
+      // label
       if (is_sensed_with_camera) {
         // create mask & label image from cluster indices
         for (size_t j = 0; j < sorted_indices[i]->size(); j++) {
@@ -453,6 +468,7 @@ namespace jsk_pcl_ros
     debug_ros_output.header = input->header;
     debug_ros_output.is_dense = false;
     pc_pub_.publish(debug_ros_output);
+    centers_pub_.publish(center_pose_array);
     box_pub_.publish(bounding_box_array);
   }
   

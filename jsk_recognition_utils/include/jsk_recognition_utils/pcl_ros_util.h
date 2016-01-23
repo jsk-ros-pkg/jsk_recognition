@@ -67,9 +67,26 @@ namespace jsk_recognition_utils
 
   /**
    * @brief
+   * Return true if a and b have the same frame_id
+   */
+  bool isSameFrameId(const std_msgs::Header& a, const std_msgs::Header& b);
+
+  /**
+   * @brief
+   * Return true if a and b have the same frame_id
+   */
+  template<class T1, class T2>
+  bool isSameFrameId(const T1& a, const T2& b)
+  {
+    return isSameFrameId(a.header, b.header);
+  }
+  
+  /**
+   * @brief
    * check if sensor_msgs/PointCloud2 message has the specified field.
    */
   bool hasField(const std::string& field_name, const sensor_msgs::PointCloud2& msg);
+
 }
 
 #endif

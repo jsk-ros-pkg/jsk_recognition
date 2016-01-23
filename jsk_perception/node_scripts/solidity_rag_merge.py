@@ -115,7 +115,11 @@ def masked_slic(img, mask, n_segments, compactness):
     labels = slic(img, n_segments=n_segments, compactness=compactness)
     labels += 1
     n_labels = len(np.unique(labels))
-    mask = ndi.binary_closing(mask, structure=np.ones((3, 3)), iterations=1)
+    try:
+        mask = ndi.binary_closing(mask, structure=np.ones((3, 3)), iterations=1)
+    except IndexError, e:
+        rospy.logerr(e)
+        return
     labels[mask == 0] = 0  # set bg_label
     if len(np.unique(labels)) < n_labels - 2:
         sys.stderr.write('WARNING: number of label differs after masking.'
@@ -176,6 +180,8 @@ class SolidityRagMerge(ConnectionBasedTransport):
         roi = closed_mask_roi(mask)
         roi_labels = masked_slic(img=img[roi], mask=mask[roi],
                                  n_segments=20, compactness=30)
+        if roi_labels is None:
+            return
         labels = np.zeros(mask.shape, dtype=np.int32)
         # labels.fill(-1)  # set bg_label
         labels[roi] = roi_labels

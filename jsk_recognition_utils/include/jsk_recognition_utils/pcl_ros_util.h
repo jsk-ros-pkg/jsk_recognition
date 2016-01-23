@@ -63,7 +63,23 @@ namespace jsk_recognition_utils
    * Return true if a and b are the same frame_id
    */
   bool isSameFrameId(const std::string& a, const std::string& b);
-                     
+
+  /**
+   * @brief
+   * Return true if a and b have the same frame_id
+   */
+  bool isSameFrameId(const std_msgs::Header& a, const std_msgs::Header& b);
+
+  /**
+   * @brief
+   * Return true if a and b have the same frame_id
+   */
+  template<class T1, class T2>
+  bool isSameFrameId(const T1& a, const T2& b)
+  {
+    return isSameFrameId(a.header, b.header);
+  }
+  
 }
 
 #endif

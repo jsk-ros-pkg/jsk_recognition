@@ -81,3 +81,7 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 * `~force_to_flip_z_axis` (Boolean, default: `False`)
 
    Flip z axis direction if this value is true.
+
+* `~max_size`, `~min_size` (Int, default: `-1`, `-1`)
+
+   If positive value, ignores cluster which points size is external from (`clusterPointsSize` < `~min_size` or `clusterPointsSize` > `~max_size`).

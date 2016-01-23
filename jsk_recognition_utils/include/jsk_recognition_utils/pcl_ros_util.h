@@ -46,6 +46,7 @@
 #include <pcl_msgs/PointIndices.h>
 
 #include <pcl/PointIndices.h>
+#include <sensor_msgs/PointCloud2.h>
 
 namespace jsk_recognition_utils
 {
@@ -80,6 +81,12 @@ namespace jsk_recognition_utils
     return isSameFrameId(a.header, b.header);
   }
   
+  /**
+   * @brief
+   * check if sensor_msgs/PointCloud2 message has the specified field.
+   */
+  bool hasField(const std::string& field_name, const sensor_msgs::PointCloud2& msg);
+
 }
 
 #endif

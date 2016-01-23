@@ -78,7 +78,6 @@ namespace jsk_pcl_ros
     double marker_color_alpha_;
     
     bool publish_marker_flag_;
-    std::string point_type_;
     std::string marker_color_;
   };
 }

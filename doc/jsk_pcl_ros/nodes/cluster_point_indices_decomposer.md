@@ -36,6 +36,10 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 
    Mask image generated from cluster point indices.
 
+* `~centroid_pose_array` (`geometry_msgs/PoseArray`)
+
+   Each cloud's centroid poses.
+
 * `~negative_indices` (`pcl_msgs/PointIndices`)
 
   Point indices which are not included in input indices.

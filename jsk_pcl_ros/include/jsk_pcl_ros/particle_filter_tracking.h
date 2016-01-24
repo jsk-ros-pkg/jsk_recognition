@@ -80,7 +80,8 @@
 #include <jsk_recognition_utils/time_util.h>
 #include <std_msgs/Float32.h>
 #include <jsk_recognition_utils/pcl_util.h>
-
+#include <visualization_msgs/MarkerArray.h>
+#include <jsk_recognition_msgs/TrackerStatus.h>
 // This namespace follows PCL coding style
 namespace pcl
 {
@@ -577,9 +578,12 @@ namespace jsk_pcl_ros
     ros::Publisher pub_rms_distance_;
     ros::Publisher pub_rms_angle_;
     ros::Publisher pub_velocity_;
+    ros::Publisher pub_velocity_norm_;
     ros::Publisher pub_no_move_;
     ros::Publisher pub_no_move_raw_;
     ros::Publisher pub_skipped_;
+    ros::Publisher pub_change_cloud_marker_;
+    ros::Publisher pub_tracker_status_;
     jsk_recognition_utils::WallDurationTimer timer_;
     Eigen::Affine3f initial_pose_;
     boost::circular_buffer<double> distance_error_buffer_;
@@ -644,6 +648,10 @@ namespace jsk_pcl_ros
     virtual void renew_model_topic_cb(const sensor_msgs::PointCloud2 &pc);
     virtual void renew_model_with_marker_topic_cb(const visualization_msgs::Marker &marker);
 
+    virtual void publish_tracker_status(const std_msgs::Header& header,
+                                        const bool is_tracking);
+
+    
     ////////////////////////////////////////////////////////
     // Wrap particle filter methods
     ////////////////////////////////////////////////////////

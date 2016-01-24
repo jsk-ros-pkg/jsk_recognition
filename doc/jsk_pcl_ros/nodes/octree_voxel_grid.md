@@ -37,13 +37,9 @@ and other voxel filtered functions output the other position such as the centroi
 * `~resolution` (Double, default: `0.1`):
 
    Resolution of voxel grid. If resolution is set as 0, it just relays input pointcloud.
-* `~point_type` (String, default: `xyz`):
-
-  Choose point type from xyz, xyzrgb, xyznormal and xyzrgbnormal.
-
 * `~marker_color` (String, default: `z`)
 
-  Method to decide color of marker. z or flat can be selected.
+  Method to decide color of marker. z, x, y or flat can be selected.
 
 * `~marker_color_alpha` (Double, default: `0.8`)
 

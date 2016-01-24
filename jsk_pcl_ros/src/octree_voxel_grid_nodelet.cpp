@@ -38,6 +38,7 @@
 #include <std_msgs/Float32.h>
 #include <jsk_topic_tools/color_utils.h>
 #include <pcl/common/common.h>
+#include <jsk_recognition_utils/pcl_ros_util.h>
 
 namespace jsk_pcl_ros
 {
@@ -101,6 +102,12 @@ namespace jsk_pcl_ros
         else if (marker_color_ == "z") {
           marker_msg.colors.push_back(jsk_topic_tools::heatColor((p.z - minpt[2]) / (maxpt[2] - minpt[2])));
         }
+        else if (marker_color_ == "x") {
+          marker_msg.colors.push_back(jsk_topic_tools::heatColor((p.x - minpt[0]) / (maxpt[0] - minpt[0])));
+        }
+        else if (marker_color_ == "y") {
+          marker_msg.colors.push_back(jsk_topic_tools::heatColor((p.y - minpt[1]) / (maxpt[1] - minpt[1])));
+        }
         marker_msg.colors[marker_msg.colors.size() - 1].a = marker_color_alpha_;
       }
       pub_marker_.publish(marker_msg);
@@ -115,20 +122,22 @@ namespace jsk_pcl_ros
       
     }
     else {
-      if (point_type_ == "xyz") {
-        generateVoxelCloudImpl<pcl::PointXYZ>(input_msg);
-      }
-      else if (point_type_ == "xyznormal") {
-        generateVoxelCloudImpl<pcl::PointNormal>(input_msg);
-      }
-      else if (point_type_ == "xyzrgb") {
-        generateVoxelCloudImpl<pcl::PointXYZRGB>(input_msg);
-      }
-      else if (point_type_ == "xyzrgbnormal") {
+      if (jsk_recognition_utils::hasField("rgb", *input_msg) &&
+          jsk_recognition_utils::hasField("normal_x", *input_msg) &&
+          jsk_recognition_utils::hasField("normal_y", *input_msg) &&
+          jsk_recognition_utils::hasField("normal_z", *input_msg)) {
         generateVoxelCloudImpl<pcl::PointXYZRGBNormal>(input_msg);
       }
+      else if (jsk_recognition_utils::hasField("rgb", *input_msg)) {
+        generateVoxelCloudImpl<pcl::PointXYZRGB>(input_msg);
+      }
+      else if (jsk_recognition_utils::hasField("normal_x", *input_msg) &&
+               jsk_recognition_utils::hasField("normal_y", *input_msg) &&
+               jsk_recognition_utils::hasField("normal_z", *input_msg)) {
+        generateVoxelCloudImpl<pcl::PointNormal>(input_msg);
+      }
       else {
-        JSK_NODELET_ERROR("unknown point type: %s", point_type_.c_str());
+        generateVoxelCloudImpl<pcl::PointXYZ>(input_msg);
       }
     }
     std_msgs::Float32 resolution;
@@ -150,7 +159,6 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     resolution_ = config.resolution;
-    point_type_ = config.point_type;
     publish_marker_flag_ = config.publish_marker;
     marker_color_ = config.marker_color;
     marker_color_alpha_ = config.marker_color_alpha;

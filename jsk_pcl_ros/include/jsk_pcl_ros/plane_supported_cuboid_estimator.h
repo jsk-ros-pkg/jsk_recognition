@@ -336,6 +336,7 @@ namespace jsk_pcl_ros
     ros::Publisher pub_histogram_dx_;
     ros::Publisher pub_histogram_dy_;
     ros::Publisher pub_histogram_dz_;
+    ros::Publisher pub_result_pose_;
     ros::ServiceServer srv_reset_;
     message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygon_;
     message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
@@ -352,11 +353,15 @@ namespace jsk_pcl_ros
     bool use_init_world_position_z_model_;
     double init_world_position_z_min_;
     double init_world_position_z_max_;
+    double init_local_orientation_roll_mean_;
     double init_local_orientation_roll_variance_;
+    double init_local_orientation_pitch_mean_;
     double init_local_orientation_pitch_variance_;
-    
     double init_local_orientation_yaw_mean_;
     double init_local_orientation_yaw_variance_;
+    bool use_global_init_yaw_;
+    double init_global_orientation_yaw_mean_;
+    double init_global_orientation_yaw_variance_;
 
     bool disable_init_roll_;
     bool disable_init_pitch_;

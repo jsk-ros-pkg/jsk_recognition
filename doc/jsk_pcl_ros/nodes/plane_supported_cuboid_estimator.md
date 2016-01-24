@@ -47,10 +47,14 @@ to confirm likelihood function behaves as expected.
 * `~init_local_position_z_min`
 * `~init_local_position_z_max`
 * `~use_init_world_position_z_model`
+* `~init_local_orientation_roll_mean`
 * `~init_local_orientation_roll_variance`
+* `~init_local_orientation_pitch_mean`
 * `~init_local_orientation_pitch_variance`
 * `~init_local_orientation_yaw_mean`
 * `~init_local_orientation_yaw_variance`
+* `~init_global_orientation_yaw_mean`
+* `~init_global_orientation_yaw_variance`
 * `~init_dx_mean`
 * `~init_dx_variance`
 * `~init_dy_mean`
@@ -90,3 +94,9 @@ to confirm likelihood function behaves as expected.
 
   If distance to object is smaller than
   `~fast_cloud_threshold`, `~fast_input` will be used.
+
+* `~use_global_init_yaw` (default: `False`)
+
+  Enable `~init_global_orientation_yaw_mean` and `~init_global_orientation_yaw_variance`
+  to decide intial particle states.
+  

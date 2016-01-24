@@ -49,6 +49,8 @@ add_message_files(
   TimeRange.msg
   TorusArray.msg
   Torus.msg
+  TrackerStatus.msg
+  BoolStamped.msg
   VectorArray.msg
   WeightedPoseArray.msg
   ContactSensor.msg

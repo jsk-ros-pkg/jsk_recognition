@@ -182,6 +182,8 @@ namespace jsk_pcl_ros
       "output/rms_distance_error", 1);
     pub_velocity_ = pnh_->advertise<geometry_msgs::TwistStamped>(
       "output/velocity", 1);
+    pub_velocity_norm_ = pnh_->advertise<std_msgs::Float32>(
+      "output/velocity_norm", 1);
     pub_no_move_raw_ = pnh_->advertise<std_msgs::Bool>(
       "output/no_move_raw", 1);
     pub_no_move_ = pnh_->advertise<std_msgs::Bool>(
@@ -190,6 +192,10 @@ namespace jsk_pcl_ros
       "output/skipped", 1);
     //Set subscribe setting
     if (use_change_detection_) {
+      pub_change_cloud_marker_ = pnh_->advertise<visualization_msgs::MarkerArray>(
+        "output/change_marker", 1);
+      pub_tracker_status_ = pnh_->advertise<jsk_recognition_msgs::TrackerStatus>(
+        "output/tracker_status", 1);
       sub_input_cloud_.subscribe(*pnh_, "input", 4);
       sub_change_cloud_.subscribe(*pnh_, "input_change", 4);
       change_sync_ = boost::make_shared<message_filters::Synchronizer<SyncChangePolicy> >(100);
@@ -333,6 +339,9 @@ namespace jsk_pcl_ros
       twist.twist.angular.z = (result.yaw - prev_result_.yaw) / dt;
       pub_velocity_.publish(twist);
       Eigen::Vector3f vel(twist.twist.linear.x, twist.twist.linear.y, twist.twist.linear.z);
+      std_msgs::Float32 velocity_norm;
+      velocity_norm.data = vel.norm();
+      pub_velocity_norm_.publish(velocity_norm);
       bool is_static = vel.norm() < static_velocity_thr_;
       no_move_buffer_.addValue(is_static);
       std_msgs::Bool no_move_raw, no_move;
@@ -444,6 +453,15 @@ namespace jsk_pcl_ros
     return tfTransformation;
   }
 
+  void ParticleFilterTracking::publish_tracker_status(const std_msgs::Header& header,
+                                                      const bool is_tracking)
+  {
+    jsk_recognition_msgs::TrackerStatus tracker_status;
+    tracker_status.header = header;
+    tracker_status.is_tracking = is_tracking;
+    pub_tracker_status_.publish(tracker_status);
+  }
+  
   void ParticleFilterTracking::cloud_change_cb(const sensor_msgs::PointCloud2::ConstPtr &pc_msg,
                                                const sensor_msgs::PointCloud2::ConstPtr &change_cloud_msg)
   {
@@ -456,6 +474,7 @@ namespace jsk_pcl_ros
       if (change_cloud->points.size() == 0) {
         stamp_ = pc_msg->header.stamp;
         publish_result();
+        publish_tracker_status(pc_msg->header, false);
         return;
       }
       pcl::KdTreeFLANN<pcl::PointXYZRGB> kdtree;
@@ -472,14 +491,17 @@ namespace jsk_pcl_ros
         cloud_cb(*pc_msg);
         r.setIsEnabled(false);
         no_move_buffer_.clear();
+        publish_tracker_status(pc_msg->header, true);
       }
       else {
         // publish previous result
         stamp_ = pc_msg->header.stamp;
         publish_result();
+        publish_tracker_status(pc_msg->header, false);
       }
     }
     else {
+      publish_tracker_status(pc_msg->header, true);
       cloud_cb(*pc_msg);
     }
   }

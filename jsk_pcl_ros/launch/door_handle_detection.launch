@@ -3,13 +3,20 @@
   <node pkg="jsk_pcl_ros" type="tf_transform_cloud" name="odom_stereo">
     <remap from="~input" to="/multisense/resize_1_4/organized_image_points2_color" />
     <rosparam>
-      target_frame_id: ground
+      target_frame_id: odom
     </rosparam>
   </node>
-  <node pkg="jsk_pcl_ros" type="tf_transform_cloud" name="odom_laser">
+  <node pkg="jsk_pcl_ros" type="octree_voxel_grid" name="laser_downsample">
     <remap from="~input" to="/full_cloud2" />
     <rosparam>
-      target_frame_id: ground
+      resolution: 0.01
+    </rosparam>
+  </node>
+
+  <node pkg="jsk_pcl_ros" type="tf_transform_cloud" name="odom_laser">
+    <remap from="~input" to="laser_downsample/output" />
+    <rosparam>
+      target_frame_id: odom
     </rosparam>
   </node>
 
@@ -38,6 +45,7 @@
     <remap from="~input_normal" to="normal_direction_filter_points/output" />
     <rosparam>
       max_area: 5.0
+      min_area: 0.44
     </rosparam>
   </node>
   <node pkg="jsk_pcl_ros" type="multi_plane_extraction" name="multi_plane_extraction">
@@ -61,19 +69,48 @@
     <remap from="~input" to="/odom_stereo/output" />
     <remap from="~indices" to="organized_multi_plane_decomposer/negative_indices"/>
   </node>
-  <node pkg="jsk_pcl_ros" type="polygon_array_angle_likelihood" name="polygon_array_angle_likelihood">
-    <remap from="~input" to="region_growing_multiple_plane_segmentation/output/polygons" />
+  <node pkg="jsk_perception" type="hsv_decomposer" name="hsv_decomposer">
+    <remap from="~input" to="/multisense/left/image_rect_color" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="polygon_array_transformer" name="plane_camera_transformed">
+      <remap from="~input_polygons" to="region_growing_multiple_plane_segmentation/output/polygons"/>
+      <remap from="~input_coefficients" to="region_growing_multiple_plane_segmentation/output/coefficients"/>
+      <rosparam>
+        frame_id: left_camera_optical_frame
+      </rosparam>
+    </node>
+
+  <node pkg="jsk_perception" type="polygon_array_color_histogram" name="polygon_array_color_histogram">
+    <remap from="~input" to="plane_camera_transformed/output_polygons" />
+    <remap from="~input/info" to="/multisense/left/camera_info" />
+    <remap from="~input/image" to="hsv_decomposer/output/hue" />
     <rosparam>
-      target_frame_id: ground
+      bin_size: 50
     </rosparam>
   </node>
+  <node pkg="jsk_perception" type="polygon_array_color_likelihood" name="polygon_array_angle_likelihood">
+      <remap from="~input/polygons" to="region_growing_multiple_plane_segmentation/output/polygons" />
+      <remap from="~input/histograms" to="polygon_array_color_histogram/output" />
+      <remap from="~input/reference" to="selected_polygon_color_histogram/output/unwrap" />
+      <rosparam subst_value="true">
+        coefficient_method: 3 # bhattacharyya
+        reference_file: $(find jsk_pcl_ros)/config/drc_box_color2.yaml
+      </rosparam>
+    </node>
+
+  <!-- <node pkg="jsk_pcl_ros" type="polygon_array_angle_likelihood" name="polygon_array_angle_likelihood"> -->
+  <!--   <remap from="~input" to="region_growing_multiple_plane_segmentation/output/polygons" /> -->
+  <!--   <rosparam> -->
+  <!--     target_frame_id: ground -->
+  <!--   </rosparam> -->
+  <!-- </node> -->
   <node pkg="nodelet" type="nodelet" name="voxel_downsample"
         args="standalone pcl/VoxelGrid">
     <remap from="~input" to="normal_estimation/output_with_xyz" />
     <rosparam>
       leaf_size: 0.015
       filter_limit_min: 0.1
-      filter_limit_max: 100
+      filter_limit_max: 3
     </rosparam>
   </node>
   <node pkg="nodelet" type="nodelet" name="stereo_voxel_downsample"
@@ -82,7 +119,7 @@
     <rosparam>
       leaf_size: 0.02
       filter_limit_min: 0.1
-      filter_limit_max: 100
+      filter_limit_max: 10
     </rosparam>
   </node>
   <!-- <node pkg="jsk_pcl_ros" type="cluster_point_indices_decomposer" name="multi_plane_extraction_points"> -->
@@ -98,6 +135,7 @@
     <!-- <remap from="~input" to="normal_estimation/output_with_xyz"/> -->
     <remap from="~input" to="voxel_downsample/output"/>
     <remap from="~fast_input" to="stereo_voxel_downsample/output"/>
+    <remap from="~output/result_pose" to="/door_detection/door_handle" />
     <!-- <remap from="~input/polygon" to="region_growing_multiple_plane_segmentation/output/polygons" /> -->
     <remap from="~input/polygon" to="polygon_array_angle_likelihood/output" />
     <remap from="~input/coefficients" to="region_growing_multiple_plane_segmentation/output/coefficients" />
@@ -119,7 +157,7 @@
       step_dz_variance: 0.0000
       disable_init_roll: true
       disable_init_pitch: true
-
+      
       init_dx_variance: 0.0000
       init_dy_variance: 0.0000
       init_dz_variance: 0.0000

@@ -1,6 +1,6 @@
 <package>
   <name>jsk_pcl_ros</name>
-  <version>0.3.7</version>
+  <version>0.3.13</version>
   <description>jsk_pcl_ros</description>
   <maintainer email="youhei@jsk.t.u-tokyo.ac.jp">Youhei Kakiuchi</maintainer>
 
@@ -38,7 +38,6 @@
   <build_depend>rosboost_cfg</build_depend>
   <build_depend>cv_bridge</build_depend>
   <build_depend>ml_classifiers</build_depend>
-  <build_depend>sklearn</build_depend>
   <build_depend>diagnostic_updater</build_depend>
   <build_depend>diagnostic_msgs</build_depend>
   <build_depend>jsk_topic_tools</build_depend>
@@ -55,6 +54,7 @@
   <build_depend>octomap_server</build_depend>
   <build_depend>octomap_msgs</build_depend>
   <build_depend>octomap_ros</build_depend>
+  <build_depend>jsk_pcl_ros_utils</build_depend>
 
   <!-- <run_depend>pcl</run_depend> -->
   <run_depend>eigen_conversions</run_depend>
@@ -81,7 +81,6 @@
   <run_depend>rosboost_cfg</run_depend>
   <run_depend>cv_bridge</run_depend>
   <run_depend>ml_classifiers</run_depend>
-  <run_depend>sklearn</run_depend>
   <run_depend>diagnostic_updater</run_depend>
   <run_depend>diagnostic_msgs</run_depend>
   <build_depend>python-sklearn</build_depend>
@@ -97,6 +96,7 @@
   <build_depend>jsk_recognition_msgs</build_depend>
   <run_depend>jsk_recognition_msgs</run_depend>
   <run_depend>jsk_footstep_msgs</run_depend>
+  <run_depend>jsk_perception</run_depend>
   <build_depend>interactive_markers</build_depend>
   <run_depend>interactive_markers</run_depend>
   <run_depend>jsk_recognition_utils</run_depend>
@@ -108,6 +108,8 @@
   <run_depend>octomap_server</run_depend>
   <run_depend>octomap_msgs</run_depend>
   <run_depend>octomap_ros</run_depend>
+  <run_depend>jsk_pcl_ros_utils</run_depend>
+  <test_depend>jsk_tools</test_depend>
   <export>
     <nodelet plugin="${prefix}/jsk_pcl_nodelets.xml"/>
     <cpp lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ljsk_pcl_ros" cflags="-I${prefix}/include"/>

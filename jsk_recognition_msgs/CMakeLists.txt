@@ -19,6 +19,7 @@ add_message_files(
   Histogram.msg
   HistogramWithRangeBin.msg
   HistogramWithRange.msg
+  HistogramWithRangeArray.msg
   ICPResult.msg
   ImageDifferenceValue.msg
   Int32Stamped.msg
@@ -48,10 +49,17 @@ add_message_files(
   TimeRange.msg
   TorusArray.msg
   Torus.msg
+  TrackerStatus.msg
+  BoolStamped.msg
   VectorArray.msg
   WeightedPoseArray.msg
   ContactSensor.msg
   ContactSensorArray.msg
+  PlotDataArray.msg
+  )
+
+add_service_files(FILES
+  SetPointCloud2.srv
   )
 
 generate_messages(

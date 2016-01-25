@@ -53,6 +53,7 @@ namespace jsk_pcl_ros
       getHeightmapConfigTopic(pnh_->resolveName("input")), 1,
       &HeightmapToPointCloud::configCallback, this);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void HeightmapToPointCloud::subscribe()

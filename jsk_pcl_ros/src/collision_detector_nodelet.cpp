@@ -46,7 +46,8 @@ namespace jsk_pcl_ros
     pnh_->param<std::string>("world_frame_id", world_frame_id_, "map");
     sub_ = pnh_->subscribe("input", 1, &CollisionDetector::pointcloudCallback, this);
     service_ = pnh_->advertiseService("check_collision", &CollisionDetector::serviceCallback, this);
-  }
+    onInitPostProcess();
+ }
 
   void CollisionDetector::subscribe()
   {

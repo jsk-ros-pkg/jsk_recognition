@@ -2,6 +2,42 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.13 (2015-12-19)
+-------------------
+
+0.3.12 (2015-12-19)
+-------------------
+
+0.3.11 (2015-12-18)
+-------------------
+
+0.3.10 (2015-12-17)
+-------------------
+* [jsk_recognition_utils] Fix import error on server caused by matplotlib
+* [jsk_pcl_ros] Check header.frame_id before resolving 3-D spacially
+  Modified:
+  jsk_pcl_ros/src/multi_plane_extraction_nodelet.cpp
+  jsk_perception/src/polygon_array_color_histogram.cpp
+  jsk_recognition_utils/include/jsk_recognition_utils/pcl_ros_util.h
+  jsk_recognition_utils/src/pcl_ros_util.cpp
+* Contributors: Kentaro Wada, Ryohei Ueda
+
+0.3.9 (2015-12-14)
+------------------
+* [jsk_perception] Compute polygon likelihood based on color histogram.
+* [jsk_perception] Add PolygonArrayColorHistogram
+* [jsk_recognition_utils] Better API to measure and publish computation time
+* Contributors: Ryohei Ueda
+
+0.3.8 (2015-12-08)
+------------------
+* Use ccache if installed to make it fast to generate object file
+* [jsk_recognition_utils, jsk_pcl_ros] Measure time to compute
+  NormalEstimationOMP and RegionGriwongMultiplePlaneSegmentation.
+  Add utility class to measure time: jsk_recognition_utils::WallDurationTimer
+* [jsk_recognition_utils] Split fore/background with depth
+* Contributors: Kei Okada, Kentaro Wada, Ryohei Ueda
+
 0.3.7 (2015-11-19)
 ------------------
 * Use gcc -z defs to check undefined symbols in shared

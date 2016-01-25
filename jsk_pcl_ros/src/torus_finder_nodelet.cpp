@@ -34,7 +34,7 @@
  *********************************************************************/
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/torus_finder.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <jsk_topic_tools/rosparam_utils.h>
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
@@ -46,6 +46,7 @@ namespace jsk_pcl_ros
   void TorusFinder::onInit()
   {
     DiagnosticNodelet::onInit();
+    pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
     pnh_->param("use_hint", use_hint_, false);
     if (use_hint_) {
       if (pnh_->hasParam("initial_axis_hint")) {
@@ -71,10 +72,19 @@ namespace jsk_pcl_ros
 
     pub_torus_ = advertise<jsk_recognition_msgs::Torus>(*pnh_, "output", 1);
     pub_torus_array_ = advertise<jsk_recognition_msgs::TorusArray>(*pnh_, "output/array", 1);
+    pub_torus_with_failure_ = advertise<jsk_recognition_msgs::Torus>(*pnh_, "output/with_failure", 1);
+    pub_torus_array_with_failure_ = advertise<jsk_recognition_msgs::TorusArray>(*pnh_, "output/with_failure/array", 1);
     pub_inliers_ = advertise<PCLIndicesMsg>(*pnh_, "output/inliers", 1);
     pub_pose_stamped_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output/pose", 1);
     pub_coefficients_ = advertise<PCLModelCoefficientMsg>(
       *pnh_, "output/coefficients", 1);
+    pub_latest_time_ = advertise<std_msgs::Float32>(
+      *pnh_, "output/latest_time", 1);
+    pub_average_time_ = advertise<std_msgs::Float32>(
+      *pnh_, "output/average_time", 1);
+
+    done_initialization_ = true;
+    onInitPostProcess();
   }
 
   void TorusFinder::configCallback(Config &config, uint32_t level)
@@ -106,6 +116,9 @@ namespace jsk_pcl_ros
   void TorusFinder::segmentFromPoints(
     const geometry_msgs::PolygonStamped::ConstPtr& polygon_msg)
   {
+    if (!done_initialization_) {
+      return;
+    }
     // Convert to pointcloud and call it
     // No normal
     pcl::PointCloud<pcl::PointNormal>::Ptr cloud
@@ -127,12 +140,16 @@ namespace jsk_pcl_ros
   void TorusFinder::segment(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
+    if (!done_initialization_) {
+      return;
+    }
     boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();
     pcl::PointCloud<pcl::PointNormal>::Ptr cloud
       (new pcl::PointCloud<pcl::PointNormal>);
     pcl::fromROSMsg(*cloud_msg, *cloud);
-
+    jsk_recognition_utils::ScopedWallDurationReporter r
+      = timer_.reporter(pub_latest_time_, pub_average_time_);
     if (voxel_grid_sampling_) {
       pcl::PointCloud<pcl::PointNormal>::Ptr downsampled_cloud
       (new pcl::PointCloud<pcl::PointNormal>);
@@ -227,9 +244,18 @@ namespace jsk_pcl_ros
       pose_stamped.header = torus_msg.header;
       pose_stamped.pose = torus_msg.pose;
       pub_pose_stamped_.publish(pose_stamped);
+      pub_torus_array_with_failure_.publish(torus_array_msg);
+      pub_torus_with_failure_.publish(torus_msg);
     }
     else {
-      
+      jsk_recognition_msgs::Torus torus_msg;
+      torus_msg.header = cloud_msg->header;
+      torus_msg.failure = true;
+      pub_torus_with_failure_.publish(torus_msg);
+      jsk_recognition_msgs::TorusArray torus_array_msg;
+      torus_array_msg.header = cloud_msg->header;
+      torus_array_msg.toruses.push_back(torus_msg);
+      pub_torus_array_with_failure_.publish(torus_array_msg);
       JSK_NODELET_INFO("failed to find torus");
     }
   }

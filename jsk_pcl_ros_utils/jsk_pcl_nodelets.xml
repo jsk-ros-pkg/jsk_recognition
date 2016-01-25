@@ -1,0 +1,176 @@
+<library path="libjsk_pcl_ros_utils">
+  <class name="jsk_pcl_utils/PCDReaderWithPose" type="jsk_pcl_ros_utils::PCDReaderWithPose"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      reconstract template pointcloud with recognized_pose
+    </description>
+  </class>
+  <class name="jsk_pcl_utils/AddPointIndices"
+         type="jsk_pcl_ros_utils::AddPointIndices"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl_utils/MaskImageToPointIndices"
+         type="jsk_pcl_ros_utils::MaskImageToPointIndices"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl_utils/LabelToClusterPointIndices"
+         type="jsk_pcl_ros_utils::LabelToClusterPointIndices"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl_utils/MaskImageToDepthConsideredMaskImage"
+         type="jsk_pcl_ros_utils::MaskImageToDepthConsideredMaskImage"
+         base_class_type="nodelet::Nodelet">
+    Generate depth considered mask image out of mask image
+  </class>
+  <class name="jsk_pcl_utils/TransformPointcloudInBoundingBox" type="jsk_pcl_ros_utils::TransformPointcloudInBoundingBox"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      transform pointcloud whose origin is the center of bounding box;
+    </description>
+  </class>
+  <class name="jsk_pcl_utils/PointIndicesToMaskImage"
+         type="jsk_pcl_ros_utils::PointIndicesToMaskImage"
+         base_class_type="nodelet::Nodelet">
+    Generate mask image out of point indices
+  </class>
+  <class name="jsk_pcl_utils/DepthImageError" type="jsk_pcl_ros_utils::DepthImageError"
+         base_class_type="nodelet::Nodelet">
+    <description>compute error of depth image</description>
+  </class>
+  <class name="jsk_pcl_utils/DelayPointCloud" type="jsk_pcl_ros_utils::DelayPointCloud"
+         base_class_type="nodelet::Nodelet">
+    <description>delay pointcloud messages</description>
+  </class>
+  <class name="jsk_pcl_utils/NormalConcatenater" type="jsk_pcl_ros_utils::NormalConcatenater"
+         base_class_type="nodelet::Nodelet">
+    <description>Concatenater normal to x, y, z and rgb pointcloud</description>
+  </class>
+  <class name="jsk_pcl_utils/TfTransformCloud" type="jsk_pcl_ros_utils::TfTransformCloud"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      publish transformed cloud with target id
+    </description>
+  </class>
+  <class name="jsk_pcl_utils/TfTransformBoundingBox" type="jsk_pcl_ros_utils::TfTransformBoundingBox"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl_utils/TfTransformBoundingBoxArray" type="jsk_pcl_ros_utils::TfTransformBoundingBoxArray"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl_utils/NormalFlipToFrame"
+         type="jsk_pcl_ros_utils::NormalFlipToFrame"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl_utils/CentroidPublisher" type="jsk_pcl_ros_utils::CentroidPublisher"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      publish the centroid of the pointcloud to /tf
+    </description>
+  </class>
+  <class name="jsk_pcl_utils/PolygonArrayDistanceLikelihood" 
+         type="jsk_pcl_ros_utils::PolygonArrayDistanceLikelihood"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl_utils/PolygonArrayAreaLikelihood" 
+         type="jsk_pcl_ros_utils::PolygonArrayAreaLikelihood"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl_utils/PolygonArrayAngleLikelihood" 
+         type="jsk_pcl_ros_utils::PolygonArrayAngleLikelihood"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl_utils/PolygonArrayFootAngleLikelihood" 
+         type="jsk_pcl_ros_utils::PolygonArrayFootAngleLikelihood"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl_utils/PoseWithCovarianceStampedToGaussianPointCloud" 
+         type="jsk_pcl_ros_utils::PoseWithCovarianceStampedToGaussianPointCloud"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl_utils/ColorizeDistanceFromPlane" type="jsk_pcl_ros_utils::ColorizeDistanceFromPlane"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      colorize pointcloud according to the distance from the nearest plane
+    </description>
+  </class>
+  <class name="jsk_pcl_utils/ColorizeHeight2DMapping" type="jsk_pcl_ros_utils::ColorizeHeight2DMapping"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
+  <class name="jsk_pcl_utils/PolygonPointsSampler"
+         type="jsk_pcl_ros_utils::PolygonPointsSampler"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl_utils/PolygonFlipper"
+         type="jsk_pcl_ros_utils::PolygonFlipper"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl_utils/PolygonMagnifier"
+         type="jsk_pcl_ros_utils::PolygonMagnifier"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl_utils/SphericalPointCloudSimulator"
+         type="jsk_pcl_ros_utils::SphericalPointCloudSimulator"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl_utils/PlanarPointCloudSimulator"
+         type="jsk_pcl_ros_utils::PlanarPointCloudSimulatorNodelet"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl_utils/PolygonArrayWrapper" type="jsk_pcl_ros_utils::PolygonArrayWrapper"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      wrap geometry_msgs::PolygonStamped and pcl_msgs::ModelCoefficients
+      into jsk_pcl_ros_utils::PolygonArray and jsk_pcl_ros_utils::ModelCoefficientsArray
+    </description>
+  </class>
+  <class name="jsk_pcl_utils/PolygonArrayUnwrapper" type="jsk_pcl_ros_utils::PolygonArrayUnwrapper"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl_utils/PolygonAppender" type="jsk_pcl_ros_utils::PolygonAppender"
+         base_class_type="nodelet::Nodelet">
+    <description>append jsk_pcl_ros/PolygonArray </description>
+  </class>
+  <class name="jsk_pcl_utils/PolygonArrayTransformer" type="jsk_pcl_ros_utils::PolygonArrayTransformer"
+         base_class_type="nodelet::Nodelet">
+    <description>transform polygons to the specified tf frame</description>
+  </class>
+  <class name="jsk_pcl_utils/StaticPolygonArrayPublisher" type="jsk_pcl_ros_utils::StaticPolygonArrayPublisher"
+         base_class_type="nodelet::Nodelet">
+    <description>publish some static polygons as jsk_pcl_ros/PolygonArray message</description>
+  </class>
+  <class name="jsk_pcl_utils/PlaneRejector" type="jsk_pcl_ros_utils::PlaneRejector"
+         base_class_type="nodelet::Nodelet">
+    <description>rejects the planes which does not satisfy the parameters</description>
+  </class>
+    <class name="jsk_pcl_utils/PlaneReasoner" type="jsk_pcl_ros_utils::PlaneReasoner"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      group polygons into several groups like vertical planes, horizontal planes.
+    </description>
+  </class>
+  <class name="jsk_pcl_utils/PlaneConcatenator"
+         type="jsk_pcl_ros_utils::PlaneConcatenator"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl_utils/PointCloudToClusterPointIndices"
+         type="jsk_pcl_ros_utils::PointCloudToClusterPointIndices"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl_utils/PointCloudToSTL" type="jsk_pcl_ros_utils::PointCloudToSTL"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
+  <class name="jsk_pcl_utils/PointCloudRelativeFromPoseStamped" type="jsk_pcl_ros_utils::PointCloudRelativeFromPoseStamped"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
+  <class name="jsk_pcl/CloudOnPlane" type="jsk_pcl_ros_utils::CloudOnPlane"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
+</library>

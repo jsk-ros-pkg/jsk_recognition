@@ -2,6 +2,29 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.13 (2015-12-19)
+-------------------
+
+0.3.12 (2015-12-19)
+-------------------
+
+0.3.11 (2015-12-18)
+-------------------
+
+0.3.10 (2015-12-17)
+-------------------
+
+0.3.9 (2015-12-14)
+------------------
+* [resized_image_transport] Use jsk_topic_tools::DiagnosticNodelet to omit
+  meaningless computation
+* Contributors: Ryohei Ueda
+
+0.3.8 (2015-12-08)
+------------------
+* Use ccache if installed to make it fast to generate object file
+* Contributors: Kentaro Wada
+
 0.3.7 (2015-11-19)
 ------------------
 

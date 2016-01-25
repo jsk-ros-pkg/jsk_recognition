@@ -46,8 +46,8 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 
-#include "jsk_pcl_ros/pcl_conversion_util.h"
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 #include <jsk_pcl_ros/EdgeDepthRefinementConfig.h>
 #include <dynamic_reconfigure/server.h>
 #include <boost/tuple/tuple.hpp>
@@ -93,13 +93,13 @@ namespace jsk_pcl_ros
       std::vector<pcl::PointIndices::Ptr>& output_inliers,
       std::vector<pcl::ModelCoefficients::Ptr>& output_coefficients);
     
-    virtual Line::Ptr lineFromCoefficients(
+    virtual jsk_recognition_utils::Line::Ptr lineFromCoefficients(
       const pcl::ModelCoefficients::Ptr coefficients);
     
-    virtual Segment::Ptr segmentFromIndices(
+    virtual jsk_recognition_utils::Segment::Ptr segmentFromIndices(
       const pcl::PointCloud<PointT>::Ptr& cloud,
       const std::vector<int>& indices,
-      const Line::Ptr& line);
+      const jsk_recognition_utils::Line::Ptr& line);
     
     virtual void publishIndices(
       ros::Publisher& pub,

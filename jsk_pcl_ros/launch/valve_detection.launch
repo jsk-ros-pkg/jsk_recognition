@@ -1,0 +1,159 @@
+<launch>
+  <arg name="INTERACTIVE" default="false" />
+  <!-- Prepare pointcloud  -->
+  <node pkg="jsk_pcl_ros" type="tf_transform_cloud" name="odom_laser">
+    <remap from="~input" to="/full_cloud2" />
+    <rosparam>
+      target_frame_id: ground
+    </rosparam>
+  </node>
+
+  <node pkg="jsk_pcl_ros" type="normal_estimation_omp" name="normal_estimation">
+    <remap from="~input" to="/odom_laser/output" />
+    <rosparam>
+      k_search: 50
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="normal_direction_filter" name="normal_direction_filter">
+    <remap from="~input" to="normal_estimation/output_with_xyz" />
+    <remap from="~input_imu" to="/imu" />
+    <rosparam>
+      use_imu: false
+      direction: [0, 0, 1]
+      angle_offset: 1.57
+      eps_angle: 0.5
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="normal_direction_filter_points" args="standalone pcl/ExtractIndices">
+    <remap from="~input" to="normal_estimation/output_with_xyz" />
+    <remap from="~indices" to="normal_direction_filter/output" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="tf_transform_cloud" name="normal_direction_filter_points_camera">
+    <remap from="~input" to="normal_direction_filter_points/output"/>
+    <rosparam>
+      target_frame_id: left_camera_optical_frame
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="region_growing_multiple_plane_segmentation" name="region_growing_multiple_plane_segmentation">
+    <remap from="~input" to="normal_direction_filter_points/output" />
+    <remap from="~input_normal" to="normal_direction_filter_points/output" />
+    <rosparam>
+      max_area: 5.0
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="cluster_point_indices_decomposer"
+        name="region_growing_result_decomposer">
+    <remap from="~input" to="normal_direction_filter_points/output" />
+    <remap from="~target" to="region_growing_multiple_plane_segmentation/output/inliers"/>
+  </node>
+
+  <node pkg="jsk_pcl_ros" type="plane_concatenator" name="plane_concatenator" output="screen">
+    <remap from="~input" to="normal_direction_filter_points/output" />
+    <remap from="~input/indices" to="region_growing_multiple_plane_segmentation/output/inliers" />
+    <remap from="~input/polygons" to="region_growing_multiple_plane_segmentation/output/polygons" />
+    <remap from="~input/coefficients" to="region_growing_multiple_plane_segmentation/output/coefficients" />
+    <rosparam>
+      connect_distance_threshold: 0.2
+      min_area: 1.0
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="polygon_array_transformer" name="plane_concatenator_transformed">
+    <remap from="~input_polygons" to="plane_concatenator/output/polygons"/>
+    <remap from="~input_coefficients" to="plane_concatenator/output/coefficients"/>
+    <rosparam>
+      frame_id: left_camera_optical_frame
+    </rosparam>
+  </node>
+
+  <node pkg="jsk_pcl_ros" type="cluster_point_indices_decomposer" name="cluster_point_indices_decomposer">
+    <remap from="~input" to="normal_direction_filter_points/output" />
+    <remap from="~target" to="region_growing_multiple_plane_segmentation/output/clustering_result" />
+  </node>
+  <node pkg="jsk_perception" type="hsv_decomposer" name="hsv_decomposer">
+    <remap from="~input" to="/multisense_local/left/image_rect_color" />
+  </node>
+  <node pkg="jsk_perception" type="polygon_array_color_histogram" name="polygon_array_color_histogram">
+    <remap from="~input" to="plane_concatenator_transformed/output_polygons" />
+    <remap from="~input/info" to="/multisense_local/left/camera_info" />
+    <remap from="~input/image" to="hsv_decomposer/output/hue" />
+    <rosparam>
+      bin_size: 50
+    </rosparam>
+  </node>
+  <node pkg="jsk_perception" type="polygon_array_color_likelihood" name="polygon_array_color_likelihood">
+    <remap from="~input/polygons" to="plane_concatenator_transformed/output_polygons" />
+    <remap from="~input/histograms" to="polygon_array_color_histogram/output" />
+    <remap from="~input/reference" to="selected_polygon_color_histogram/output/unwrap" />
+    <rosparam>
+      coefficient_method: 3 # bhattacharyya
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="extract_top_polygon_likelihood.py" name="extract_top_polygon_likelihood">
+    <remap from="~input" to="polygon_array_color_likelihood/output" />
+    <remap from="~input/coefficients" to="/plane_concatenator_transformed/output_coefficients" />
+  </node>
+  <node pkg="image_view" type="image_view" name="polygon_array_color_histogram_debug_view">
+    <remap to="polygon_array_color_histogram/debug/polygon_image" from="image" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="multi_plane_extraction" name="multi_plane_extraction" output="screen">
+    <remap from="~input" to="normal_direction_filter_points_camera/output" />
+    <remap from="~input_polygons" to="extract_top_polygon_likelihood/output"/>
+    <remap from="~input_coefficients" to="extract_top_polygon_likelihood/output/coefficients"/>
+    <rosparam>
+      use_indices: false
+      use_sensor_frame: true
+      sensor_frame: head_root
+      min_height: 0.35
+      max_height: 0.5
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="euclidean_clustering" name="euclidean_clustering">
+    <remap from="~input" to="multi_plane_extraction/output" />
+    <rosparam>
+      tolerance: 0.05
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="cluster_point_indices_decomposer" name="euclidean_clustering_decomposer">
+    <remap from="~input" to="multi_plane_extraction/output" />
+    <remap from="~target" to="euclidean_clustering/output" />
+    <remap from="~align_planes" to="extract_top_polygon_likelihood/output" />
+    <remap from="~align_planes_coefficients" to="extract_top_polygon_likelihood/output/coefficients" />
+    <rosparam>
+      align_boxes: true
+      use_pca: true
+      publish_clouds: false
+      publish_tf: false
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="torus_finder" name="torus_finder">
+    <remap from="~input" to="euclidean_clustering_decomposer/debug_output" />
+    <rosparam>
+      max_iterations: 10000
+      voxel_grid_sampling: true
+      voxel_size: 0.005
+      min_size: 100
+    </rosparam>
+  </node>
+  <group if="$(arg INTERACTIVE)">
+    <node pkg="jsk_interactive_marker" type="polygon_marker" name="polygon_marker">
+      <remap from="~polygon_array" to="plane_concatenator_transformed/output_polygons" />
+    </node>
+    <node pkg="jsk_perception" type="polygon_array_color_histogram" name="selected_polygon_color_histogram">
+      <remap from="~input" to="polygon_marker/selected_polygon_array" />
+      <remap from="~input/info" to="/multisense_local/left/camera_info" />
+      <remap from="~input/image" to="hsv_decomposer/output/hue" />
+      <rosparam>
+        bin_size: 50
+      </rosparam>
+    </node>
+    <node pkg="jsk_perception" type="unwrap_histogram_with_range_array.py" name="unwral_selected_polygon_color_histogram">
+      <remap from="~input" to="selected_polygon_color_histogram/output"/>
+      <remap from="~output" to="selected_polygon_color_histogram/output/unwrap"/>
+    </node>
+  </group>
+  <group unless="$(arg INTERACTIVE)">
+    <node pkg="rostopic" name="selected_polygon_color_histogram" type="rostopic"
+          args="pub selected_polygon_color_histogram/output/unwrap jsk_recognition_msgs/HistogramWithRange -f $(find jsk_pcl_ros)/config/drc_box_color.yaml -r 1" 
+          />
+  </group>
+</launch>

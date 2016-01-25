@@ -38,9 +38,9 @@
 #define JSK_PCL_ROS_MULTI_PLANE_SEGMENTATION_H_
 
 #include <pcl_ros/pcl_nodelet.h>
-#include "jsk_pcl_ros/pcl_util.h"
-#include "jsk_pcl_ros/geo_util.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
+#include "jsk_recognition_utils/geo_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <dynamic_reconfigure/server.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -108,12 +108,12 @@ namespace jsk_pcl_ros
       const Eigen::Vector3f& imu_vector,
       std::vector<pcl::PointIndices::Ptr>& output_inliers,
       std::vector<pcl::ModelCoefficients::Ptr>& output_coefficients,
-      std::vector<ConvexPolygon::Ptr>& output_polygons);
+      std::vector<jsk_recognition_utils::ConvexPolygon::Ptr>& output_polygons);
     virtual void publishResult(
       const std_msgs::Header& header,
       const std::vector<pcl::PointIndices::Ptr>& inliers,
       const std::vector<pcl::ModelCoefficients::Ptr>& coefficients,
-      const std::vector<ConvexPolygon::Ptr>& convexes);
+      const std::vector<jsk_recognition_utils::ConvexPolygon::Ptr>& convexes);
     virtual void configCallback (Config &config, uint32_t level);
 
     virtual void subscribe();

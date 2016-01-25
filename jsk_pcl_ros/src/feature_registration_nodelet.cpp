@@ -39,7 +39,7 @@
 #include <pcl/features/fpfh_omp.h>
 #include <eigen_conversions/eigen_msg.h>
 #include <pcl_conversions/pcl_conversions.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -63,6 +63,7 @@ namespace jsk_pcl_ros
                                                   this, _1, _2));
     pub_pose_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output", 1);
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output/cloud", 1);
+    onInitPostProcess();
   }
 
   void FeatureRegistration::subscribe()

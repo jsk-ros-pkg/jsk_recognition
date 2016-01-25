@@ -1,0 +1,22 @@
+<!-- -*- mode: xml -*- -->
+<launch>
+  <arg name="INPUT" default="/camera/depth/points"/>
+  <arg name="DEFAULT_NAMESPACE" default="octree_voxel_grid"/>
+
+  <arg name="create_manager" default="true" />
+  <arg name="manager" default="octree_voxel_grid_manger" />
+
+  <group ns="$(arg DEFAULT_NAMESPACE)">
+    <node if="$(arg create_manager)"
+          pkg="nodelet" type="nodelet" name="$(arg manager)"
+          args="manager" output="screen"/>
+
+    <node pkg="nodelet" type="nodelet"
+          name="octgrid"
+          args="standalone jsk_pcl/OctreeVoxelGrid"
+          output="screen" clear_params="true">
+      <remap from="~input" to="$(arg INPUT)" />
+      <param name="publish_marker" value="true" />
+    </node>
+  </group>
+</launch>

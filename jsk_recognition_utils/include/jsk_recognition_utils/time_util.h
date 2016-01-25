@@ -35,6 +35,7 @@
 
 #include <ros/ros.h>
 #include <boost/circular_buffer.hpp>
+#include <std_msgs/Float32.h>
 
 namespace jsk_recognition_utils
 {
@@ -45,10 +46,18 @@ namespace jsk_recognition_utils
   public:
     typedef boost::shared_ptr<ScopedWallDurationReporter> Ptr;
     ScopedWallDurationReporter(WallDurationTimer* parent);
+    ScopedWallDurationReporter(WallDurationTimer* parent,
+                               ros::Publisher& pub_latest,
+                               ros::Publisher& pub_average);
     virtual ~ScopedWallDurationReporter();
+    virtual void setIsPublish(bool);
+    virtual void setIsEnabled(bool);
   protected:
     WallDurationTimer* parent_;
     ros::WallTime start_time_;
+    ros::Publisher pub_latest_, pub_average_;
+    bool is_publish_;
+    bool is_enabled_;
   private:
     
   };
@@ -60,6 +69,9 @@ namespace jsk_recognition_utils
     WallDurationTimer(const int max_num);
     virtual void report(ros::WallDuration& duration);
     virtual ScopedWallDurationReporter reporter();
+    virtual ScopedWallDurationReporter reporter(
+      ros::Publisher& pub_latest,
+      ros::Publisher& pub_average);
     virtual void clearBuffer();
     virtual double meanSec();
     virtual double latestSec();

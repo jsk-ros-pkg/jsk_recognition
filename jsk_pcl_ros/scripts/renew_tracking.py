@@ -10,7 +10,7 @@ except:
     import roslib;roslib.load_manifest(PKG)
 
 from sensor_msgs.msg import PointCloud2
-from jsk_pcl_ros.srv import SetPointCloud2
+from jsk_recognition_msgs.srv import SetPointCloud2
 
 def cloud_cb(cloud):
 

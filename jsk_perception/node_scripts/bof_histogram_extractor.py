@@ -44,7 +44,7 @@ class BoFHistogramExtractor(ConnectionBasedTransport):
                 [self._sub_feature, self._sub_label], queue_size=10, slop=0.1)
         else:
             sync = message_filters.TimeSynchronizer(
-                [self._sub_feature, self._sub_feature], queue_size=10)
+                [self._sub_feature, self._sub_label], queue_size=10)
         jsk_logdebug('~approximate_sync: {}'.format(use_async))
         sync.registerCallback(self._apply)
 
@@ -59,6 +59,9 @@ class BoFHistogramExtractor(ConnectionBasedTransport):
         desc = desc.reshape((-1, feature_msg.descriptor_dim))
         pos = np.array(feature_msg.positions)
         pos = pos.reshape((-1, 2))
+        if label.sum() == 0:
+            jsk_logdebug('Skip image with only background label')
+            return
         decomposed = decompose_descriptors_with_label(
             descriptors=desc, positions=pos, label_img=label,
             skip_zero_label=True)

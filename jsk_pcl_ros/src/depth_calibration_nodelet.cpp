@@ -73,6 +73,7 @@ namespace jsk_pcl_ros
       &DepthCalibration::setCalibrationParameter,
       this);
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
   
   void DepthCalibration::printModel()

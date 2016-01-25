@@ -1,0 +1,61 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""Save images of multiple topics with timestamp synchronization.
+
+Usage: rosrun image_view extract_images_sync _inputs:='[<topic_0>, <topic_1>]'
+"""
+
+import sys
+
+import cv2
+
+import cv_bridge
+import message_filters
+import rospy
+from sensor_msgs.msg import Image
+
+
+class ExtractImagesSync(object):
+
+    def __init__(self):
+        self.seq = 0
+        self.fname_fmt = rospy.get_param(
+            '~filename_format', 'frame%04i_%i.jpg')
+        img_topics = rospy.get_param('~inputs', None)
+        if img_topics is None:
+            rospy.logwarn("""\
+extract_images_sync: rosparam '~inputs' has not been specified! \
+Typical command-line usage:
+\t$ rosrun image_view extract_images_sync _inputs:=<image_topic>
+\t$ rosrun image_view extract_images_sync \
+_inputs:='[<image_topic>, <image_topic>]'""")
+            sys.exit(1)
+        if not isinstance(img_topics, list):
+            img_topics = [img_topics]
+        subs = []
+        for t in img_topics:
+            subs.append(message_filters.Subscriber(t, Image))
+        if rospy.get_param('~approximate_sync', False):
+            sync = message_filters.ApproximateTimeSynchronizer(
+                subs, queue_size=100, slop=.1)
+        else:
+            sync = message_filters.TimeSynchronizer(
+                subs, queue_size=100)
+        sync.registerCallback(self.save)
+
+    def save(self, *imgmsgs):
+        seq = self.seq
+        bridge = cv_bridge.CvBridge()
+        for i, imgmsg in enumerate(imgmsgs):
+            img = bridge.imgmsg_to_cv2(imgmsg)
+            fname = self.fname_fmt % (seq, i)
+            print('Save image as {0}'.format(fname))
+            cv2.imwrite(fname, img)
+        self.seq = seq + 1
+
+
+if __name__ == '__main__':
+    rospy.init_node('extract_images_sync')
+    extractor = ExtractImagesSync()
+    rospy.spin()

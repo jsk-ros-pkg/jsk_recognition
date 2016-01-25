@@ -42,8 +42,8 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 
-#include "jsk_pcl_ros/pcl_util.h"
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 #include <jsk_recognition_msgs/BoundingBoxArray.h>
 #include <jsk_recognition_msgs/ClusterPointIndices.h>
 #include <jsk_recognition_msgs/ModelCoefficientsArray.h>
@@ -89,10 +89,10 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // Diagnostics Variables
     ////////////////////////////////////////////////////////
-    TimeredDiagnosticUpdater::Ptr diagnostic_updater_;
+    jsk_recognition_utils::TimeredDiagnosticUpdater::Ptr diagnostic_updater_;
     jsk_topic_tools::VitalChecker::Ptr vital_checker_;
-    Counter remove_counter_;
-    Counter pass_counter_;
+    jsk_recognition_utils::Counter remove_counter_;
+    jsk_recognition_utils::Counter pass_counter_;
     
     ////////////////////////////////////////////////////////
     // Parameters

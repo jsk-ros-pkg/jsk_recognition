@@ -40,7 +40,7 @@
 #include <sensor_msgs/image_encodings.h>
 #include <opencv2/opencv.hpp>
 #include <image_geometry/pinhole_camera_model.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -55,6 +55,7 @@ namespace jsk_pcl_ros
       pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output/cloud", 1);
       pub_cloud_indices_ = advertise<PCLIndicesMsg>(*pnh_, "output/cloud_indices", 1);
     }
+    onInitPostProcess();
   }
 
   void ROIClipper::subscribe()

@@ -53,6 +53,8 @@ namespace jsk_pcl_ros
 
     pnh_->param("max_queue_size", max_queue_size_, 10);
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+
+    onInitPostProcess();
   }
   
   void HeightmapConverter::subscribe()

@@ -35,9 +35,9 @@
 
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/extract_indices.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 
-#include <pcl/filters/extract_indices.h>
+#include "jsk_pcl_ros/pcl/extract_indices_patch.h"
 #include <pcl_conversions/pcl_conversions.h>
 #include <sensor_msgs/PointCloud2.h>
 
@@ -51,6 +51,7 @@ namespace jsk_pcl_ros
     pnh_->param("max_queue_size", max_queue_size_, 10);
     pnh_->param("approximate_sync", approximate_sync_, false);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void ExtractIndices::subscribe()
@@ -83,24 +84,25 @@ namespace jsk_pcl_ros
   {
     vital_checker_->poke();
 
-    pcl::PointCloud<PointT>::Ptr input(new pcl::PointCloud<PointT>());
-    pcl::fromROSMsg(*cloud_msg, *input);
+    pcl::PCLPointCloud2::Ptr input(new pcl::PCLPointCloud2);
+    pcl_conversions::toPCL(*cloud_msg, *input);
     pcl::PointIndices::Ptr indices (new pcl::PointIndices ());
     pcl_conversions::toPCL(*indices_msg, *indices);
 
     // extract pointcloud with indices
-    pcl::ExtractIndices<PointT> extract;
+    pcl::ExtractIndices<pcl::PCLPointCloud2> extract;
     extract.setInputCloud(input);
     extract.setIndices(indices);
     extract.setKeepOrganized(keep_organized_);
     extract.setNegative(negative_);
-    pcl::PointCloud<PointT>::Ptr output(new pcl::PointCloud<PointT>());
-    extract.filter(*output);
+    pcl::PCLPointCloud2 output;
+    extract.filter(output);
 
-    sensor_msgs::PointCloud2::Ptr out_cloud(new sensor_msgs::PointCloud2);
-    pcl::toROSMsg(*output, *out_cloud);
-    out_cloud->header = cloud_msg->header;
-    pub_.publish(out_cloud);
+    sensor_msgs::PointCloud2 out_cloud_msg;
+    pcl_conversions::moveFromPCL(output, out_cloud_msg);
+
+    out_cloud_msg.header = cloud_msg->header;
+    pub_.publish(out_cloud_msg);
   }
 }
 

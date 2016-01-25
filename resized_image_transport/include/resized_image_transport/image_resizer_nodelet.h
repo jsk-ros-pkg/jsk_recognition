@@ -25,6 +25,9 @@ namespace resized_image_transport
     void config_cb (ImageResizerConfig &config, uint32_t level);
     void process(const sensor_msgs::ImageConstPtr &src_img, const sensor_msgs::CameraInfoConstPtr &src_info,
                  sensor_msgs::ImagePtr &dst_img, sensor_msgs::CameraInfo &dst_info);
+    virtual void subscribe();
+    virtual void unsubscribe();
+    
     ros::Subscriber sub_;
     int raw_width_, raw_height_;
   };

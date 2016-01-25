@@ -1,6 +1,7 @@
 <launch>
+  <arg name="INPUT_POINT_CLOUD" default="pointcloud_model_generator/output" />
   <node pkg="jsk_pcl_ros" type="heightmap_converter" name="heightmap_converter">
-    <remap from="~input" to="pointcloud_model_generator/output" />
+    <remap from="~input" to="$(arg INPUT_POINT_CLOUD)" />
     <!-- <remap from="~input" to="odom_cloud_distance_filtered/output" /> -->
   </node>
   <node pkg="jsk_perception" type="colorize_float_image" name="colorize_raw_heightmap">

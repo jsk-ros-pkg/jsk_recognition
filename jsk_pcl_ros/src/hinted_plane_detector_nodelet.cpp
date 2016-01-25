@@ -81,6 +81,7 @@ namespace jsk_pcl_ros {
       *pnh_, "output/inliers", 1);
     pub_coefficients_ = advertise<PCLModelCoefficientMsg>(
       *pnh_, "output/coefficients", 1);
+    onInitPostProcess();
   }
 
   void HintedPlaneDetector::subscribe()
@@ -136,7 +137,7 @@ namespace jsk_pcl_ros {
     
     // estimate plane out of hint_cloud
     
-    ConvexPolygon::Ptr convex;
+    jsk_recognition_utils::ConvexPolygon::Ptr convex;
     
     if (detectHintPlane(hint_cloud, convex) && convex) {
       if (detectLargerPlane(input_cloud, convex)) {
@@ -151,7 +152,7 @@ namespace jsk_pcl_ros {
   pcl::PointIndices::Ptr HintedPlaneDetector::getBestCluster(
     pcl::PointCloud<pcl::PointNormal>::Ptr input_cloud,
     const std::vector<pcl::PointIndices>& cluster_indices,
-    const ConvexPolygon::Ptr hint_convex)
+    const jsk_recognition_utils::ConvexPolygon::Ptr hint_convex)
   {
     Eigen::Vector3f center = hint_convex->centroid();
     double min_dist = DBL_MAX;
@@ -207,7 +208,7 @@ namespace jsk_pcl_ros {
   void HintedPlaneDetector::euclideanFilter(
     const pcl::PointCloud<pcl::PointNormal>::Ptr cloud,
     const pcl::PointIndices::Ptr indices,
-    const ConvexPolygon::Ptr hint_convex,
+    const jsk_recognition_utils::ConvexPolygon::Ptr hint_convex,
     pcl::PointIndices& output)
   {
     if (enable_density_filtering_) {
@@ -241,7 +242,7 @@ namespace jsk_pcl_ros {
 
   void HintedPlaneDetector::hintFilter(
     const pcl::PointCloud<pcl::PointNormal>::Ptr cloud,
-    const ConvexPolygon::Ptr hint_convex,
+    const jsk_recognition_utils::ConvexPolygon::Ptr hint_convex,
     pcl::PointIndices& output)
   {
     for (size_t i = 0; i < cloud->points.size(); i++) {
@@ -289,7 +290,7 @@ namespace jsk_pcl_ros {
   
   bool HintedPlaneDetector::detectLargerPlane(
     pcl::PointCloud<pcl::PointNormal>::Ptr input_cloud,
-    ConvexPolygon::Ptr hint_convex)
+    jsk_recognition_utils::ConvexPolygon::Ptr hint_convex)
   {
     pcl::PointIndices::Ptr candidate_inliers (new pcl::PointIndices);
     hintFilter(input_cloud, hint_convex, *candidate_inliers);
@@ -329,8 +330,8 @@ namespace jsk_pcl_ros {
       JSK_NODELET_ERROR("failed to detect by density filtering");
       return false;
     }
-    ConvexPolygon::Ptr convex
-      = convexFromCoefficientsAndInliers<pcl::PointNormal>(
+    jsk_recognition_utils::ConvexPolygon::Ptr convex
+      = jsk_recognition_utils::convexFromCoefficientsAndInliers<pcl::PointNormal>(
         input_cloud, density_filtered_indices, plane_coefficients);
     // publish to ROS
     publishPolygon(convex, pub_polygon_, pub_polygon_array_,
@@ -345,7 +346,7 @@ namespace jsk_pcl_ros {
   }
 
   void HintedPlaneDetector::publishPolygon(
-    const ConvexPolygon::Ptr convex,
+    const jsk_recognition_utils::ConvexPolygon::Ptr convex,
     ros::Publisher& pub_polygon,
     ros::Publisher& pub_polygon_array,
     const pcl::PCLHeader& header)
@@ -363,7 +364,7 @@ namespace jsk_pcl_ros {
   
   bool HintedPlaneDetector::detectHintPlane(
     pcl::PointCloud<pcl::PointXYZ>::Ptr hint_cloud,
-    ConvexPolygon::Ptr& convex)
+    jsk_recognition_utils::ConvexPolygon::Ptr& convex)
   {
     pcl::PointIndices::Ptr hint_inliers (new pcl::PointIndices);
     pcl::ModelCoefficients::Ptr hint_coefficients(new pcl::ModelCoefficients);
@@ -376,7 +377,7 @@ namespace jsk_pcl_ros {
     seg.setInputCloud(hint_cloud);
     seg.segment(*hint_inliers, *hint_coefficients);
     if (hint_inliers->indices.size() > hint_min_size_) { // good!
-      convex = convexFromCoefficientsAndInliers<pcl::PointXYZ>(
+      convex = jsk_recognition_utils::convexFromCoefficientsAndInliers<pcl::PointXYZ>(
         hint_cloud, hint_inliers, hint_coefficients);
       // publish hint results for debug/visualization
       publishPolygon(convex,

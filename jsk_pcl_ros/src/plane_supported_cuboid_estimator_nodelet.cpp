@@ -36,9 +36,9 @@
 #define BOOST_PARAMETER_MAX_ARITY 7
 
 #include "jsk_pcl_ros/plane_supported_cuboid_estimator.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
-#include "jsk_pcl_ros/geo_util.h"
-#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
+#include "jsk_recognition_utils/geo_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
 #include <ctime>
 #include <pcl/segmentation/extract_polygonal_prism_data.h>
 #include <pcl/filters/extract_indices.h>
@@ -58,6 +58,7 @@ namespace jsk_pcl_ros
     srv_->setCallback (f);
     pnh_->param("sensor_frame", sensor_frame_, std::string("odom"));
     pub_result_ = pnh_->advertise<jsk_recognition_msgs::BoundingBoxArray>("output/result", 1);
+    pub_result_pose_ = pnh_->advertise<geometry_msgs::PoseStamped>("output/result_pose", 1);
     pub_particles_ = pnh_->advertise<sensor_msgs::PointCloud2>("output/particles", 1);
     pub_candidate_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>("output/candidate_cloud", 1);
     pub_histogram_global_x_ = pnh_->advertise<jsk_recognition_msgs::HistogramWithRange>("output/histogram/global/x", 1);
@@ -80,6 +81,8 @@ namespace jsk_pcl_ros
     sub_fast_cloud_ = pnh_->subscribe("fast_input", 1, &PlaneSupportedCuboidEstimator::fastCloudCallback,
                                       this);
     srv_reset_ = pnh_->advertiseService("reset", &PlaneSupportedCuboidEstimator::resetCallback, this);
+
+    onInitPostProcess();
   }
 
   void PlaneSupportedCuboidEstimator::subscribe()
@@ -94,13 +97,13 @@ namespace jsk_pcl_ros
 
   size_t PlaneSupportedCuboidEstimator::getNearestPolygon(
     const Particle& p,
-    const std::vector<ConvexPolygon::Ptr>& polygons)
+    const std::vector<jsk_recognition_utils::ConvexPolygon::Ptr>& polygons)
   {
     size_t min_index = 0;
     double min_distance = DBL_MAX;
     Eigen::Vector3f inp = p.getVector3fMap();
     for (size_t i = 0; i < polygons.size(); i++) {
-      ConvexPolygon::Ptr polygon = polygons[i];
+      jsk_recognition_utils::ConvexPolygon::Ptr polygon = polygons[i];
       Eigen::Vector3f p;
       polygon->project(inp, p);
       double d = (p - inp).norm();
@@ -122,9 +125,9 @@ namespace jsk_pcl_ros
 
     // The order of convexes and polygons_ should be same
     // because it is inside of critical section.
-    std::vector<ConvexPolygon::Ptr> convexes(latest_polygon_msg_->polygons.size());
+    std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> convexes(latest_polygon_msg_->polygons.size());
     for (size_t i = 0; i < latest_polygon_msg_->polygons.size(); i++) {
-      ConvexPolygon::Ptr polygon = ConvexPolygon::fromROSMsgPtr(latest_polygon_msg_->polygons[i].polygon);
+      jsk_recognition_utils::ConvexPolygon::Ptr polygon = jsk_recognition_utils::ConvexPolygon::fromROSMsgPtr(latest_polygon_msg_->polygons[i].polygon);
       polygon->decomposeToTriangles();
       convexes[i] = polygon;
     }
@@ -238,6 +241,10 @@ namespace jsk_pcl_ros
       box_array.boxes.push_back(result.toBoundingBox());
       box_array.boxes[0].header = msg->header;
       pub_result_.publish(box_array);
+      geometry_msgs::PoseStamped pose;
+      pose.pose = box_array.boxes[0].pose;
+      pose.header = box_array.header;
+      pub_result_pose_.publish(pose);
     }
     support_plane_updated_ = false;
     ParticleCloud::Ptr particles = tracker_->getParticles();
@@ -443,8 +450,8 @@ namespace jsk_pcl_ros
         v[2] = randomUniform(init_local_position_z_min_, init_local_position_z_max_,
                              random_generator_);
         p_local.getVector3fMap() = v;
-        p_local.roll = randomGaussian(0, init_local_orientation_roll_variance_, random_generator_);
-        p_local.pitch = randomGaussian(0, init_local_orientation_pitch_variance_, random_generator_);
+        p_local.roll = randomGaussian(init_local_orientation_roll_mean_, init_local_orientation_roll_variance_, random_generator_);
+        p_local.pitch = randomGaussian(init_local_orientation_pitch_mean_, init_local_orientation_pitch_variance_, random_generator_);
         p_local.yaw = randomGaussian(init_local_orientation_yaw_mean_,
                                      init_local_orientation_yaw_variance_,
                                      random_generator_);
@@ -465,6 +472,12 @@ namespace jsk_pcl_ros
         if (disable_init_roll_) {
           p_global.roll = 0;
         }
+        if (use_global_init_yaw_) {
+          p_global.yaw = randomGaussian(init_global_orientation_yaw_mean_,
+                                        init_global_orientation_yaw_variance_,
+                                        random_generator_);
+        }
+        
         particles->points[i] = p_global;
         break;
       }
@@ -481,10 +494,15 @@ namespace jsk_pcl_ros
     use_init_world_position_z_model_ = config.use_init_world_position_z_model;
     init_world_position_z_min_ = config.init_world_position_z_min;
     init_world_position_z_max_ = config.init_world_position_z_max;
+    init_local_orientation_roll_mean_ = config.init_local_orientation_roll_mean;
     init_local_orientation_roll_variance_ = config.init_local_orientation_roll_variance;
+    init_local_orientation_pitch_mean_ = config.init_local_orientation_pitch_mean;
     init_local_orientation_pitch_variance_ = config.init_local_orientation_pitch_variance;
     init_local_orientation_yaw_mean_ = config.init_local_orientation_yaw_mean;
     init_local_orientation_yaw_variance_ = config.init_local_orientation_yaw_variance;
+    use_global_init_yaw_ = config.use_global_init_yaw;
+    init_global_orientation_yaw_mean_ = config.init_global_orientation_yaw_mean;
+    init_global_orientation_yaw_variance_ = config.init_global_orientation_yaw_variance;
     init_dx_mean_ = config.init_dx_mean;
     init_dx_variance_ = config.init_dx_variance;
     init_dy_mean_ = config.init_dy_mean;

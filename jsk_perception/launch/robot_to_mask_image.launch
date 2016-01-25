@@ -1,0 +1,10 @@
+<launch>
+  <group ns="robot_mask">
+    <param name="robot_description" textfile="$(find hrpsys_gazebo_tutorials)/environment_models/Cube/Cube.urdf" />
+    <node pkg="jsk_perception" type="robot_to_mask_image" name="robotmask"
+          output="screen">
+      <remap from="~input/camera_info" to="/camera/depth/camera_info" />
+      <rosparam command="load" file="$(find jsk_perception)/config/robot_mask_config.yaml" />
+    </node>
+  </group>
+</launch>

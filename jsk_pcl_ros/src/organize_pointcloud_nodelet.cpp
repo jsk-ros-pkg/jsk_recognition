@@ -82,6 +82,7 @@ namespace jsk_pcl_ros
     pnh_->param<double>("angle_width", angle_width, 120.0);
     pnh_->param<double>("angle_height", angle_height, 90.0);
     pnh_->param<int>("min_points", min_points, 1000);
+    onInitPostProcess();
   }
 
   void OrganizePointCloud::subscribe()

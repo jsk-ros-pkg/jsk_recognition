@@ -38,7 +38,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PointStamped.h>
 
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -105,6 +105,7 @@ namespace jsk_pcl_ros
       boost::bind(&MovingLeastSquareSmoothing::configCallback, this, _1, _2);
     srv_->setCallback(f);
     pub_ =advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 }
 

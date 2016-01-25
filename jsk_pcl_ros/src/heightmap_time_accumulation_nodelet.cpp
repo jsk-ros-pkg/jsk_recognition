@@ -77,6 +77,7 @@ namespace jsk_pcl_ros
       boost::bind(
         &HeightmapTimeAccumulation::accumulate, this, _1));
     srv_reset_ = pnh_->advertiseService("reset", &HeightmapTimeAccumulation::resetCallback, this);
+    onInitPostProcess();
   }
   
   void HeightmapTimeAccumulation::subscribe()

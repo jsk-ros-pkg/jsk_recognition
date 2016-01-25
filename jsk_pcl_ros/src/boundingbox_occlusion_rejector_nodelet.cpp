@@ -36,7 +36,7 @@
 #define BOOST_PARAMETER_MAX_ARITY 7
 
 #include "jsk_pcl_ros/boundingbox_occlusion_rejector.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <sensor_msgs/image_encodings.h>
 
 namespace jsk_pcl_ros
@@ -48,6 +48,7 @@ namespace jsk_pcl_ros
     pub_ = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "output", 1);
     pub_target_image_ = advertise<sensor_msgs::Image>(*pnh_, "output/target_image", 1);
     pub_candidate_image_ = advertise<sensor_msgs::Image>(*pnh_, "output/candidate_image", 1);
+    onInitPostProcess();
   }
 
   void BoundingBoxOcclusionRejector::subscribe()

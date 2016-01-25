@@ -1,0 +1,111 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""Save images of multiple topics with timestamp synchronization by request.
+
+Usage:
+    1. Request by service
+        $ rosrun image_view image_saver_sync _inputs:='[<topic_0>, <topic_1>]' \
+            _request_start_end:=true
+        $ rosservice call /image_saver_sync/save '{}'
+
+    2. Request by topic
+        $ rosrun image_view image_saver_sync _inputs:='[<topic_0>, <topic_1>]' \
+            _request_start_end:=true
+        $ rosrun image_view publish_header header:=/image_saver_sync/start
+        $ rosrun image_view publish_header header:=/image_saver_sync/end
+
+"""
+
+import sys
+
+import cv2
+
+import cv_bridge
+import message_filters
+import rospy
+from sensor_msgs.msg import Image
+from std_msgs.msg import Header
+from std_srvs.srv import Empty
+from std_srvs.srv import EmptyResponse
+
+
+class ImageSaverSync(object):
+
+    def __init__(self):
+        self.seq = 0
+        self.start_time, self.end_time = None, None
+        self.requested = False
+        self.fname_fmt = rospy.get_param(
+            '~filename_format', 'frame%04i_%i.jpg')
+        self.request_start_end = rospy.get_param('~request_start_end', False)
+        # initialize image subscribers
+        img_topics = rospy.get_param('~inputs', None)
+        if img_topics is None:
+            rospy.logwarn("""\
+image_saver_sync: rosparam '~inputs' has not been specified! \
+Typical command-line usage:
+\t$ rosrun image_view image_saver_sync _inputs:=<image_topic>
+\t$ rosrun image_view image_saver_sync \
+_inputs:='[<image_topic>, <image_topic>]'""")
+            sys.exit(1)
+        if not isinstance(img_topics, list):
+            img_topics = [img_topics]
+        subs = []
+        for t in img_topics:
+            subs.append(message_filters.Subscriber(t, Image))
+        if rospy.get_param('~approximate_sync', False):
+            sync = message_filters.ApproximateTimeSynchronizer(
+                subs, queue_size=100, slop=.1)
+        else:
+            sync = message_filters.TimeSynchronizer(
+                subs, queue_size=100)
+        sync.registerCallback(self.save)
+        if (self.request_start_end):
+            # initialize subscribers for header topic request
+            sub_start = rospy.Subscriber('~start', Header, self._cb_start)
+            sub_end = rospy.Subscriber('~end', Header, self._cb_end)
+        server_save = rospy.Service('~save', Empty, self._req_save)
+
+    def _cb_start(self, msg):
+        rospy.loginfo('Received start saving request')
+        self.start_time = msg.stamp
+        self.end_time = None
+
+    def _cb_end(self, msg):
+        rospy.loginfo('Received end saving request')
+        self.end_time = msg.stamp
+
+    def _req_save(self, req):
+        self.requested = True
+        return EmptyResponse()
+
+    def save(self, *imgmsgs):
+        # saving flag priority:
+        #  1. request by service.
+        #  2. request by topic about start and end.
+        if not self.requested:
+            if not self.request_start_end:
+                return
+            if self.start_time is None:
+                return
+            elif self.start_time > imgmsgs[0].header.stamp:
+                return
+            elif ((self.end_time is not None) and
+                (self.end_time < imgmsgs[0].header.stamp)):
+                return
+        seq = self.seq
+        bridge = cv_bridge.CvBridge()
+        for i, imgmsg in enumerate(imgmsgs):
+            img = bridge.imgmsg_to_cv2(imgmsg)
+            fname = self.fname_fmt % (seq, i)
+            print('Save image as {0}'.format(fname))
+            cv2.imwrite(fname, img)
+        self.requested = False
+        self.seq = seq + 1
+
+
+if __name__ == '__main__':
+    rospy.init_node('image_saver_sync')
+    saver = ImageSaverSync()
+    rospy.spin()

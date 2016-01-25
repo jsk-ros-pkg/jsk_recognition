@@ -33,8 +33,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/pcl_conversion_util.h"
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 #include "jsk_pcl_ros/region_growing_multiple_plane_segmentation.h"
 #include <pcl/segmentation/conditional_euclidean_clustering.h>
 #include <pcl/sample_consensus/method_types.h>
@@ -66,6 +66,8 @@ namespace jsk_pcl_ros
       *pnh_, "output/latest_time", 1);
     pub_average_time_ = advertise<std_msgs::Float32>(
       *pnh_, "output/average_time", 1);
+    done_initialization_ = true;
+    onInitPostProcess();
   }
 
   void RegionGrowingMultiplePlaneSegmentation::subscribe()
@@ -127,9 +129,13 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& normal_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    if (!done_initialization_) {
+      return;
+    }
     vital_checker_->poke();
     {
-      jsk_recognition_utils::ScopedWallDurationReporter r = timer_.reporter();
+      jsk_recognition_utils::ScopedWallDurationReporter r
+        = timer_.reporter(pub_latest_time_, pub_average_time_);
       pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>);
       pcl::PointCloud<pcl::Normal>::Ptr normal(new pcl::PointCloud<pcl::Normal>);
       pcl::fromROSMsg(*msg, *cloud);
@@ -191,8 +197,8 @@ namespace jsk_pcl_ros
         ransacEstimation(cloud, cluster,
                          *plane_inliers, *plane_coefficients);
         if (plane_inliers->indices.size() > 0) {
-          ConvexPolygon::Ptr convex
-            = convexFromCoefficientsAndInliers<pcl::PointXYZRGB>(
+          jsk_recognition_utils::ConvexPolygon::Ptr convex
+            = jsk_recognition_utils::convexFromCoefficientsAndInliers<pcl::PointXYZRGB>(
               cloud, plane_inliers, plane_coefficients);
           if (convex) {
             if (min_area_ > convex->area() || convex->area() > max_area_) {
@@ -204,7 +210,7 @@ namespace jsk_pcl_ros
                                                  plane_coefficients->values[1],
                                                  plane_coefficients->values[2]);
               if (convex->getNormalFromVertices().dot(coefficient_normal) < 0) {
-                convex = boost::make_shared<ConvexPolygon>(convex->flipConvex());
+                convex = boost::make_shared<jsk_recognition_utils::ConvexPolygon>(convex->flipConvex());
               }
             }
             // Normal should direct to origin
@@ -212,7 +218,7 @@ namespace jsk_pcl_ros
               Eigen::Vector3f p = convex->getPointOnPlane();
               Eigen::Vector3f n = convex->getNormal();
               if (p.dot(n) > 0) {
-                convex = boost::make_shared<ConvexPolygon>(convex->flipConvex());
+                convex = boost::make_shared<jsk_recognition_utils::ConvexPolygon>(convex->flipConvex());
                 Eigen::Vector3f new_normal = convex->getNormal();
                 plane_coefficients->values[0] = new_normal[0];
                 plane_coefficients->values[1] = new_normal[1];
@@ -244,11 +250,6 @@ namespace jsk_pcl_ros
       pub_coefficients_.publish(ros_coefficients);
       pub_polygons_.publish(ros_polygon);
     }
-    std_msgs::Float32 latest_time, average_time;
-    latest_time.data = timer_.latestSec();
-    average_time.data = timer_.meanSec();
-    pub_latest_time_.publish(latest_time);
-    pub_average_time_.publish(average_time);
   }
 
   double RegionGrowingMultiplePlaneSegmentation::global_angular_threshold = 0.0;

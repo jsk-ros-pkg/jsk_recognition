@@ -44,6 +44,7 @@
 #include "jsk_recognition_msgs/ModelCoefficientsArray.h"
 
 #include "sensor_msgs/PointCloud2.h"
+#include <dynamic_reconfigure/server.h>
 #include <pcl_ros/pcl_nodelet.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -56,9 +57,10 @@
 
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
-#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
 #include <jsk_topic_tools/vital_checker.h>
 #include "jsk_topic_tools/diagnostic_nodelet.h"
+#include "jsk_pcl_ros/ClusterPointIndicesDecomposerConfig.h"
 
 namespace jsk_pcl_ros
 {
@@ -66,9 +68,13 @@ namespace jsk_pcl_ros
   {
   public:
     ClusterPointIndicesDecomposer(): DiagnosticNodelet("ClusterPointIndicesDecomposer") { }
+    typedef jsk_pcl_ros::ClusterPointIndicesDecomposerConfig Config;
     typedef message_filters::sync_policies::ExactTime<
     sensor_msgs::PointCloud2,
     jsk_recognition_msgs::ClusterPointIndices > SyncPolicy;
+    typedef message_filters::sync_policies::ApproximateTime<
+    sensor_msgs::PointCloud2,
+    jsk_recognition_msgs::ClusterPointIndices > ApproximateSyncPolicy;
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
       jsk_recognition_msgs::ClusterPointIndices,
@@ -85,6 +91,9 @@ namespace jsk_pcl_ros
                                   std::vector<pcl::IndicesPtr> indices_array,
                                   std::vector<pcl::IndicesPtr> &output_array);
   protected:
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    boost::mutex mutex_;
+
     void addToDebugPointCloud
     (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
      size_t i,
@@ -103,6 +112,7 @@ namespace jsk_pcl_ros
                                  const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
                                  const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients);
 
+    virtual void configCallback (Config &config, uint32_t level);
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void allocatePublishers(size_t num);
@@ -126,19 +136,24 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygons_;
     message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> >async_;
     boost::shared_ptr<message_filters::Synchronizer<SyncAlignPolicy> >sync_align_;
     std::vector<ros::Publisher> publishers_;
-    ros::Publisher pc_pub_, box_pub_, mask_pub_, label_pub_, negative_indices_pub_;
-    tf::TransformBroadcaster br_;
+    ros::Publisher pc_pub_, box_pub_, mask_pub_, label_pub_, centers_pub_, negative_indices_pub_;
+    boost::shared_ptr<tf::TransformBroadcaster> br_;
     std::string tf_prefix_;
     
+    bool use_async_;
+    int queue_size_;
     bool force_to_flip_z_axis_;
     bool publish_clouds_;
     bool publish_tf_;
     bool align_boxes_;
     bool use_pca_;
+    int max_size_;
+    int min_size_;
 
-    Counter cluster_counter_;
+    jsk_recognition_utils::Counter cluster_counter_;
     
   };
 

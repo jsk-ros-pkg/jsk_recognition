@@ -7,7 +7,6 @@
 #include <nodelet/nodelet.h>
 #include <jsk_topic_tools/log_utils.h>
 #include <image_transport/image_transport.h>
-#include <pluginlib/class_list_macros.h>
 #include <sensor_msgs/image_encodings.h>
 #include <jsk_recognition_msgs/SparseImage.h>
 
@@ -121,5 +120,5 @@ public:
 }; // end of SparseImageEncoder class definition
 } // end of jsk_perception namespace
 
-typedef jsk_perception::SparseImageEncoder SparseImageEncoder;
-PLUGINLIB_DECLARE_CLASS (jsk_perception, SparseImageEncoder, SparseImageEncoder, nodelet::Nodelet);
+#include <pluginlib/class_list_macros.h>
+PLUGINLIB_EXPORT_CLASS(jsk_perception::SparseImageEncoder, nodelet::Nodelet);

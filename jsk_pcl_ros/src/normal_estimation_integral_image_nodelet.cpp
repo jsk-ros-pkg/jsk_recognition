@@ -52,6 +52,8 @@ namespace jsk_pcl_ros
 
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     pub_with_xyz_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_with_xyz", 1);
+
+    onInitPostProcess();
   }
 
   void NormalEstimationIntegralImage::subscribe()

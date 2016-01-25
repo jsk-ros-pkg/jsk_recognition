@@ -1,0 +1,26 @@
+<launch>
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <param name="file_name" value="$(find jsk_perception)/sample/oreo_mega_stuf.jpg" />
+    <rosparam>
+      publish_info: false
+    </rosparam>
+  </node>
+
+  <node name="image_to_label"
+        pkg="jsk_perception" type="image_to_label.py">
+    <remap from="~input" to="image_publisher/output" />
+  </node>
+
+  <test test-name="test_image_to_label"
+        name="test_image_to_label"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="360">
+    <rosparam>
+      topic_0: /image_to_label/output
+      timeout_0: 10
+    </rosparam>
+  </test>
+
+</launch>

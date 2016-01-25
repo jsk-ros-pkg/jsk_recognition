@@ -2,6 +2,132 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.13 (2015-12-19)
+-------------------
+* [jsk_pcl_ros] Longer timelimit
+* [jsk_pcl_ros] jsk_pcl_ros::SetPointCloud2 -> jsk_recognition_msgs::SetPointCloud2
+* Contributors: Ryohei Ueda
+
+0.3.12 (2015-12-19)
+-------------------
+* [jsk_pcl_ros_utils] Introduce new package called jsk_pcl_ros_utils
+  in order to speed-up compilation of jsk_pcl_ros
+* Merge remote-tracking branch 'refs/remotes/garaemon/not-use-deprecated-headers' into refine-jsk-pcl-ros-util
+* [jsk_pcl_ros] move several nodelets to libjsk_pcl_ros_utils
+* [jsk_pcl_ros] Extract after copy in installing test data
+  Modified:
+  - jsk_pcl_ros/scripts/install_test_data.py
+* Merge remote-tracking branch 'refs/remotes/origin/master' into not-use-deprecated-headers
+  Conflicts:
+  jsk_pcl_ros/include/jsk_pcl_ros/polygon_array_unwrapper.h
+  jsk_pcl_ros/include/jsk_pcl_ros/polygon_array_wrapper.h
+* [jsk_pcl_ros] Do not use deprecated utility headers
+  see `#1430 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1430>`_
+* Contributors: Kentaro Wada, Ryohei Ueda
+
+0.3.11 (2015-12-18)
+-------------------
+* [jsk_pcl_ros] Do not include pcl headers in polygon_array_wrapper and polygon_array_unwrapper
+* [jsk_pcl_ros] Remove ccache prefix
+* [jsk_pcl_ros] Cache test_data to ROS home
+  Modified:
+  jsk_pcl_ros/scripts/install_test_data.py
+* [jsk_pcl_ros] Remove build_check.cpp.in
+* Contributors: Kentaro Wada, Ryohei Ueda
+
+0.3.10 (2015-12-17)
+-------------------
+* [jsk_pcl_ros] Check md5 hash to check the test_data is latest
+  For https://github.com/jsk-ros-pkg/jsk_recognition/issues/1413
+  TODO: How to cache the test_data on jenkins/travis?
+  Modified:
+  jsk_pcl_ros/CMakeLists.txt
+  Added:
+  jsk_pcl_ros/scripts/install_test_data.py
+* [jsk_pcl_ros] Quiet rosbag decompress and echo start/end
+  Modified:
+  jsk_pcl_ros/scripts/install_test_data.sh
+* [jsk_pcl_ros] Download test_data with quiet mode
+* [jsk_pcl_ros] Add script to extract one polygon which has the
+  best likelihood field
+  Added:
+  jsk_pcl_ros/scripts/extract_top_polygon_likelihood.py
+* [jsk_pcl_ros] Add launch file for valve detection without User Interaction
+  Added:
+  jsk_pcl_ros/config/drc_box_color.yaml
+  jsk_pcl_ros/launch/valve_detection.launch
+* [jsk_pcl_ros] Check header.frame_id before resolving 3-D spacially
+  Modified:
+  jsk_pcl_ros/src/multi_plane_extraction_nodelet.cpp
+  jsk_perception/src/polygon_array_color_histogram.cpp
+  jsk_recognition_utils/include/jsk_recognition_utils/pcl_ros_util.h
+  jsk_recognition_utils/src/pcl_ros_util.cpp
+* [jsk_pcl_ros] Set VerbosityLevel to ALWAYS to ignore error message
+  of RANSAC in PlaneConcatenator
+* [jsk_pcl_ros] More larger number of iteration in TorusFinder.
+  And set pcl verbosity level to WARN.
+* [jsk_pcl_ros] Add ~min_area and ~max_area to PlaneConcatenator
+* Contributors: Kentaro Wada, Ryohei Ueda
+
+0.3.9 (2015-12-14)
+------------------
+* [jsk_pcl_ros] Remove cuboid_parameter.cfg and add
+  InteractiveCuboidLikelihood.cfg and PlaneSupportedCuboidEstimator.cfg.
+  This commit give up to re-use definition of dynamic_reconfigure because
+  generate_dynamic_reconfigure_options automatically install cpp files
+  estimated from cfg files.
+  closes https://github.com/jsk-ros-pkg/jsk_recognition/issues/1401
+* [jsk_pcl_ros] Add PoygonArrayUnwrapper
+* [jsk_pcl_ros] Do not compile nodelets depending on ml_classifiers
+  if it is not found.
+  see `#1348 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1348>`_
+* [jsk_pcl_ros] Fix flipped negative\_ of ExtractIndices (bugfix)
+  I mistakenly take it as opposite negative and non negative.
+  I will send PR to pcl also.
+* [jsk_recognition_utils] Better API to measure and publish computation time
+* [jsk_pcl_ros/TorusFinder] Publish failure information to other topics
+  to keep comapatiblity
+* Contributors: Kentaro Wada, Ryohei Ueda
+
+0.3.8 (2015-12-08)
+------------------
+* [jsk_pcl_ros] Remove lisp-style comments
+* [jsk_pcl_ros] Add Failure flag to Torus message
+* [jsk_pcl_ros] Remove unused codes
+* [jsk_pcl_ros] Make test for euclidean segmentation reliable
+* [jsk_pcl_ros] Make test for euclidean segmentation reliable
+* [jsk_pcl_ros] Add jsk_tools as test_depend
+* [jsk_pcl_ros/organized_multi_plane_segmentation.launch] Remove rqt_robot_monitor
+* [jsk_pcl_ros] Use patched ExtractIndices on pcl
+  Closes https://github.com/jsk-ros-pkg/jsk_recognition/issues/1337
+* Use pcl::PointCloud2 for various Point types
+  Closes `#1304 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1304>`_
+* Use ccache if installed to make it fast to generate object file
+* [jsk_pcl_ros] Make test for euclidean segmentation reliable
+* [jsk_pcl_ros/ParticleFilterTracking] Publish RMS error of distance and angle
+* [jsk_pcl_ros/ParticleFilterTracking] Do not use pcl_ros::PCLNodelet
+  in order to remove dependency to tf if possible
+* [jsk_pcl_ros/ParticleFilterTracking] Measure computation time
+* [jsk_recognition_utils, jsk_pcl_ros] Measure time to compute
+  NormalEstimationOMP and RegionGriwongMultiplePlaneSegmentation.
+  Add utility class to measure time: jsk_recognition_utils::WallDurationTimer
+* [jsk_pcl_ros] Remove no need image files
+* [jsk_pcl_ros/launch/hsi_color_filter.launch] Add suffix for manager name to enable multiple hsi_color_filter.launch. Previously, manager name conflict occurred.
+* fix the ros message package in test_contact_sensor.py
+* use shared ptr for self_mask instance.
+* [jsk_pcl_ros] ExtractIndices keep_organized test
+* Revert "Use pcl::PointCloud2 for various Point types"
+  This reverts commit dc615cb15ea16beb7a95b7f5b472e57611890a37.
+* merge origin/master
+* fix coding style.
+* use OctreePointCloud function instead of OctreePointCloudCompression.
+* use VoxelGrid filter to remove duplicate cloud outputed from octree compression.
+* publish OctreeVoxelGrid as marker.
+* introduce dynamic reconfigure into OctreeVoxelGrid to set resolution.
+* add sample launch file of octree_voxel_grid.
+* add octree_voxel_grid nodelet.
+* Contributors: Kentaro Wada, Ryohei Ueda, Shunichi Nozawa, Masaki Murooka
+
 0.3.7 (2015-11-19)
 ------------------
 * [jsk_pcl_ros] Test attention_clipper by rostest

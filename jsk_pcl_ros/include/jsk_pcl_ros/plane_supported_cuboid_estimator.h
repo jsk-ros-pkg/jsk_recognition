@@ -43,8 +43,8 @@
 #include <message_filters/synchronizer.h>
 #include <boost/random.hpp>
 #include <dynamic_reconfigure/server.h>
-#include "jsk_pcl_ros/geo_util.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/geo_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include "jsk_pcl_ros/tf_listener_singleton.h"
 #include <algorithm>
 
@@ -172,7 +172,7 @@ namespace jsk_pcl_ros
       //ROS_INFO("indices: %lu", candidate_point_indices.size());
       double error = 0.0;
       
-      Cube::Ptr cube = p.toCube();
+      jsk_recognition_utils::Cube::Ptr cube = p.toCube();
       std::vector<Polygon::Ptr> faces = cube->faces();
       for (size_t i = 0; i < candidate_point_indices.size(); i++) {
         int index = candidate_point_indices[i];
@@ -312,7 +312,7 @@ namespace jsk_pcl_ros
      */
     virtual size_t getNearestPolygon(
       const Particle& p,
-      const std::vector<ConvexPolygon::Ptr>& polygons);
+      const std::vector<jsk_recognition_utils::ConvexPolygon::Ptr>& polygons);
     /**
      * @brief
      * Compute distances between particles and polygons and assing each particle
@@ -336,6 +336,7 @@ namespace jsk_pcl_ros
     ros::Publisher pub_histogram_dx_;
     ros::Publisher pub_histogram_dy_;
     ros::Publisher pub_histogram_dz_;
+    ros::Publisher pub_result_pose_;
     ros::ServiceServer srv_reset_;
     message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygon_;
     message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
@@ -352,11 +353,15 @@ namespace jsk_pcl_ros
     bool use_init_world_position_z_model_;
     double init_world_position_z_min_;
     double init_world_position_z_max_;
+    double init_local_orientation_roll_mean_;
     double init_local_orientation_roll_variance_;
+    double init_local_orientation_pitch_mean_;
     double init_local_orientation_pitch_variance_;
-    
     double init_local_orientation_yaw_mean_;
     double init_local_orientation_yaw_variance_;
+    bool use_global_init_yaw_;
+    double init_global_orientation_yaw_mean_;
+    double init_global_orientation_yaw_variance_;
 
     bool disable_init_roll_;
     bool disable_init_pitch_;

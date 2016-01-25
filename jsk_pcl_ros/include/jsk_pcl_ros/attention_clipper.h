@@ -39,8 +39,8 @@
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/CameraInfo.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 #include "jsk_pcl_ros/tf_listener_singleton.h"
 #include <image_geometry/pinhole_camera_model.h>
 #include <jsk_recognition_msgs/ClusterPointIndices.h>
@@ -66,7 +66,7 @@ namespace jsk_pcl_ros
     virtual void boxCallback(const jsk_recognition_msgs::BoundingBox::ConstPtr& box);
     virtual void poseArrayCallback(const geometry_msgs::PoseArray::ConstPtr& pose);
     virtual void boxArrayCallback(const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& box);
-    virtual Vertices cubeVertices(Eigen::Vector3f& dimension);
+    virtual jsk_recognition_utils::Vertices cubeVertices(Eigen::Vector3f& dimension);
     virtual void subscribe();
     virtual void unsubscribe();
     virtual void updateDiagnostic(
@@ -97,12 +97,12 @@ namespace jsk_pcl_ros
     // parameters
     ////////////////////////////////////////////////////////
     // only cube is supported
-    Vertices vertices_;
+    jsk_recognition_utils::Vertices vertices_;
     // for multiple attention
     std::vector<Eigen::Affine3f> pose_list_;
     std::vector<Eigen::Affine3f> transformed_pose_list_;
     std::vector<std::string> frame_id_list_;
-    Vertices dimensions_;
+    jsk_recognition_utils::Vertices dimensions_;
     std::vector<std::string > prefixes_;
 
     bool use_multiple_attention_;

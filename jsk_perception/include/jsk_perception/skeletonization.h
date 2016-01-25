@@ -49,21 +49,23 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+#include <omp.h>
+
 namespace jsk_perception
 {
    class Skeletonization: public jsk_topic_tools::DiagnosticNodelet
    {
     public:
-      Skeletonization(): DiagnosticNodelet("Skeletonization") {}
-
+      Skeletonization(): DiagnosticNodelet("Skeletonization"),
+                         num_threads_(1) {}
+      virtual void imageCallback(const sensor_msgs::Image::ConstPtr&);
+      virtual void skeletonization(cv::Mat &);
+      
     protected:
       virtual void onInit();
       virtual void subscribe();
       virtual void unsubscribe();
-      virtual void imageCallback(const sensor_msgs::Image::ConstPtr&);
-      virtual void skeletonization(cv::Mat &);
-      virtual void iterativeThinning(
-         cv::Mat&, int);
+      virtual void iterativeThinning(cv::Mat&, int);
          
       boost::mutex mutex_;
       ros::Subscriber sub_;
@@ -71,6 +73,7 @@ namespace jsk_perception
       
     private:
       enum { EVEN, ODD };
+      int num_threads_;
    };
 }
 

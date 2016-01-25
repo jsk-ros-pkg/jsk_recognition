@@ -156,6 +156,7 @@ namespace jsk_pcl_ros
     previous_id_ = -1;
     // decoded output
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void VoxelGridDownsampleDecoder::subscribe()

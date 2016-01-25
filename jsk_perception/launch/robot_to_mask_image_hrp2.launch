@@ -1,0 +1,11 @@
+<launch>
+  <group ns="robot_mask">
+    <param name="robot_description" textfile="$(find hrpsys_gazebo_tutorials)/robot_models/HRP2JSK/HRP2JSK.urdf" />
+    <node pkg="jsk_perception" type="robot_to_mask_image" name="robotmask"
+          output="screen">
+      <param name="max_robot_dist" value="1.0" />
+      <remap from="~input/camera_info" to="/xtion/depth/camera_info" />
+      <rosparam command="load" file="$(find jsk_perception)/config/hrp2jsk_mask_config.yaml" />
+    </node>
+  </group>
+</launch>

@@ -51,7 +51,7 @@
 #include <jsk_pcl_ros/EnvironmentLock.h>
 #include <jsk_pcl_ros/PolygonOnEnvironment.h>
 
-#include <jsk_pcl_ros/pcl_conversion_util.h>
+#include <jsk_recognition_utils/pcl_conversion_util.h>
 #include <jsk_pcl_ros/EnvironmentPlaneModelingConfig.h>
 
 #include <diagnostic_updater/diagnostic_updater.h>
@@ -61,11 +61,11 @@
 
 #include <jsk_topic_tools/time_accumulator.h>
 
-#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
 #include <jsk_recognition_msgs/SimpleOccupancyGridArray.h>
 #include <jsk_recognition_msgs/BoundingBoxArray.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 #include "jsk_pcl_ros/tf_listener_singleton.h"
 
 namespace jsk_pcl_ros
@@ -132,7 +132,7 @@ namespace jsk_pcl_ros
       const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg,
       const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg);
 
-    virtual std::vector<ConvexPolygon::Ptr> convertToConvexPolygons(
+    virtual std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> convertToConvexPolygons(
       const pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
       const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg,
       const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg);
@@ -140,7 +140,7 @@ namespace jsk_pcl_ros
     virtual void publishConvexPolygonsBoundaries(
       ros::Publisher& pub,
       const std_msgs::Header& header,
-      std::vector<ConvexPolygon::Ptr>& convexes);
+      std::vector<jsk_recognition_utils::ConvexPolygon::Ptr>& convexes);
     
     /**
      * @brief
@@ -150,12 +150,12 @@ namespace jsk_pcl_ros
 
     /**
      * @brief
-     * Publish array of ConvexPolygon::Ptr by using specified publisher
+     * Publish array of jsk_recognition_utils::ConvexPolygon::Ptr by using specified publisher
      */
     virtual void publishConvexPolygons(
       ros::Publisher& pub,
       const std_msgs::Header& header,
-      std::vector<ConvexPolygon::Ptr>& convexes);
+      std::vector<jsk_recognition_utils::ConvexPolygon::Ptr>& convexes);
     
     /**
      * @brief
@@ -168,18 +168,18 @@ namespace jsk_pcl_ros
     
     /**
      * @brief
-     * Magnify ConvexPolygons according to maginify_distance_ parameter.
+     * Magnify jsk_recognition_utils::ConvexPolygons according to maginify_distance_ parameter.
      */
-    virtual std::vector<ConvexPolygon::Ptr> magnifyConvexes(
-      std::vector<ConvexPolygon::Ptr>& convexes);
+    virtual std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> magnifyConvexes(
+      std::vector<jsk_recognition_utils::ConvexPolygon::Ptr>& convexes);
 
     /**
      * @brief
-     * make GridPlane from ConvexPolygon and PointCloud
+     * make GridPlane from jsk_recognition_utils::ConvexPolygon and PointCloud
      */
     virtual std::vector<GridPlane::Ptr> buildGridPlanes(
       pcl::PointCloud<pcl::PointNormal>::Ptr& cloud,
-      std::vector<ConvexPolygon::Ptr> convexes,
+      std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> convexes,
       std::set<int>& non_plane_indices);
 
     virtual std::vector<GridPlane::Ptr> morphologicalFiltering(

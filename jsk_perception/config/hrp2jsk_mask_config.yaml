@@ -1,0 +1,37 @@
+min_sensor_dist: .2
+self_see_default_padding: 0.01
+self_see_default_scale: 1.0
+self_see_links:
+ # - name: BODY
+ # - name: CHEST_LINK0
+ # - name: CHEST_LINK1
+ # - name: HEAD_LINK0
+ # - name: HEAD_LINK1
+ - name: LARM_LINK0
+ - name: LARM_LINK1
+ - name: LARM_LINK2
+ - name: LARM_LINK3
+ - name: LARM_LINK4
+ - name: LARM_LINK5
+ - name: LARM_LINK6
+ # - name: RARM_LINK0
+ # - name: RARM_LINK1
+ # - name: RARM_LINK2
+ # - name: RARM_LINK3
+ # - name: RARM_LINK4
+ # - name: RARM_LINK5
+ # - name: RARM_LINK6
+ # - name: LLEG_LINK0
+ # - name: LLEG_LINK1
+ # - name: LLEG_LINK2
+ # - name: LLEG_LINK3
+ # - name: LLEG_LINK4
+ # - name: LLEG_LINK5
+ # - name: LLEG_LINK6
+ # - name: RLEG_LINK0
+ # - name: RLEG_LINK1
+ # - name: RLEG_LINK2
+ # - name: RLEG_LINK3
+ # - name: RLEG_LINK4
+ # - name: RLEG_LINK5
+ # - name: RLEG_LINK6

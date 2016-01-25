@@ -44,7 +44,7 @@
 #include <message_filters/sync_policies/approximate_time.h>
 #include <message_filters/synchronizer.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 #include "jsk_recognition_msgs/PolygonArray.h"
 #include "jsk_recognition_msgs/ClusterPointIndices.h"
 #include "jsk_recognition_msgs/ModelCoefficientsArray.h"
@@ -64,7 +64,9 @@ namespace jsk_pcl_ros
       sensor_msgs::PointCloud2,
       sensor_msgs::PointCloud2 > NormalSyncPolicy;
     RegionGrowingMultiplePlaneSegmentation()
-      : DiagnosticNodelet("RegionGrowingMultiplePlaneSegmentation"), timer_(10) {}
+      : DiagnosticNodelet("RegionGrowingMultiplePlaneSegmentation"), 
+        timer_(10), 
+        done_initialization_(false) {}
     
   protected:
     ////////////////////////////////////////////////////////
@@ -154,6 +156,7 @@ namespace jsk_pcl_ros
     double cluster_tolerance_;
     double ransac_refine_outlier_distance_threshold_;
     int ransac_refine_max_iterations_;
+    bool done_initialization_;
     ////////////////////////////////////////////////////////
     // static parameters
     ////////////////////////////////////////////////////////

@@ -2,6 +2,33 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.13 (2015-12-19)
+-------------------
+
+0.3.12 (2015-12-19)
+-------------------
+* [jsk_pcl_ros_utils] Introduce new package called jsk_pcl_ros_utils
+  in order to speed-up compilation of jsk_pcl_ros
+* Contributors: Ryohei Ueda
+
+0.3.11 (2015-12-18)
+-------------------
+
+0.3.10 (2015-12-17)
+-------------------
+
+0.3.9 (2015-12-14)
+------------------
+* [jsk_perception] Add PolygonArrayColorHistogram
+* Contributors: Ryohei Ueda
+
+0.3.8 (2015-12-08)
+------------------
+* [jsk_pcl_ros] Add Failure flag to Torus message
+* Remove types on docs for jsk_pcl_ros
+  See http://docs.ros.org/indigo/api/jsk_recognition_msgs/html/index-msg.html for message types
+* Contributors: Kentaro Wada, Ryohei Ueda
+
 0.3.7 (2015-11-19)
 ------------------
 * Merge pull request `#1276 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1276>`_ from mmurooka/add-octomap-contact

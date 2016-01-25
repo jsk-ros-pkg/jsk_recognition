@@ -15,8 +15,10 @@ This repository contains following ros packages:
 .. toctree::
    :maxdepth: 1
 
+   overview
    imagesift/index
    checkerboard_detector/index
    jsk_perception/index
+   jsk_pcl_ros_utils/index
    jsk_pcl_ros/index
    tips

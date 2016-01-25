@@ -47,7 +47,7 @@
 #include <pcl_msgs/ModelCoefficients.h>
 #include <image_geometry/pinhole_camera_model.h>
 #include <pcl_conversions/pcl_conversions.h>
-#include <jsk_pcl_ros/geo_util.h>
+#include <jsk_recognition_utils/geo_util.h>
 
 namespace jsk_pcl_ros
 {
@@ -80,22 +80,22 @@ namespace jsk_pcl_ros
       std::vector<double>& max_x,
       std::vector<double>& max_y,
       const image_geometry::PinholeCameraModel& model,
-      const jsk_pcl_ros::Plane::Ptr& plane);
+      const jsk_recognition_utils::Plane::Ptr& plane);
     virtual double drawAngle(
       cv::Mat& out_image, const cv::Point2f& test_point, const double angle,
       const double max_x, const double max_y,
       const image_geometry::PinholeCameraModel& model,
-      const jsk_pcl_ros::Plane::Ptr& plane,
+      const jsk_recognition_utils::Plane::Ptr& plane,
       cv::Scalar color);
     Eigen::Vector3f rayPlaneInteersect(
       const cv::Point3d& ray,
-      const jsk_pcl_ros::Plane::Ptr& plane);
+      const jsk_recognition_utils::Plane::Ptr& plane);
 
     virtual cv::Point2d getUyEnd(
       const cv::Point2d& ux_start,
       const cv::Point2d& ux_end,
       const image_geometry::PinholeCameraModel& model,
-      const jsk_pcl_ros::Plane::Ptr& plane);
+      const jsk_recognition_utils::Plane::Ptr& plane);
       
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
     message_filters::Subscriber<sensor_msgs::Image> sub_image_;

@@ -1,18 +1,60 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(jsk_perception)
 
+# Use ccache if installed to make it fast to generate object files
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+endif(CCACHE_FOUND)
+
 find_package(catkin REQUIRED COMPONENTS
+  angles
+  cmake_modules
+  cv_bridge
+  driver_base
+  dynamic_reconfigure
+  geometry_msgs
+  image_geometry
+  image_transport
+  image_view2
   jsk_recognition_msgs
-  mk message_generation std_msgs sensor_msgs geometry_msgs cv_bridge
-  image_geometry image_transport image_view2 driver_base dynamic_reconfigure cmake_modules
-  roscpp nodelet rostest tf rospack
-  jsk_topic_tools pcl_ros
-  jsk_recognition_utils)
+  jsk_recognition_utils
+  jsk_topic_tools
+  message_generation
+  mk
+  nodelet
+  pcl_ros
+  posedetection_msgs
+  rosbuild
+  roscpp
+  roseus
+  rospack
+  sensor_msgs
+  std_msgs
+  tf
+)
+
+# check ros distro >= indigo
+execute_process(
+  COMMAND python -c "import sys; sys.exit(ord('$ENV{ROS_DISTRO}'[0]) >= ord('indigo'[0]))"
+  RESULT_VARIABLE DISTRO_GE_INDIGO
+)
+if(DISTRO_GE_INDIGO)
+  # robot_self_filter is released on version greater than indigo
+  find_package(robot_self_filter)
+endif()
 
 find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 
 find_package(Eigen REQUIRED)
 include_directories(${Eigen_INCLUDE_DIRS})
+
+pkg_check_modules(yaml_cpp yaml-cpp REQUIRED)
+IF(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
+## indigo yaml-cpp : 0.5.0 /  hydro yaml-cpp : 0.3.0
+  add_definitions("-DUSE_OLD_YAML")
+ENDIF()
 
 FIND_PACKAGE( OpenMP REQUIRED)
 if(OPENMP_FOUND)
@@ -25,6 +67,8 @@ add_definitions("-g -O2")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
+  cfg/PolygonArrayColorLikelihood.cfg
+  cfg/PolygonArrayColorHistogram.cfg
   cfg/TabletopColorDifferenceLikelihood.cfg
   cfg/ProjectImagePoint.cfg
   cfg/MaskImageGenerator.cfg
@@ -75,6 +119,7 @@ execute_process(
   RESULT_VARIABLE _make_failed)
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels)
+link_directories(${catkin_LIBRARY_DIRS})
 add_executable(camshiftdemo src/camshiftdemo.cpp)
 add_executable(linemod src/linemod.cpp)
 add_executable(virtual_camera_mono src/virtual_camera_mono.cpp)
@@ -92,6 +137,8 @@ macro(jsk_perception_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_na
   jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
     jsk_perception_nodelet_sources jsk_perception_nodelet_executables)
 endmacro()
+jsk_perception_nodelet(src/polygon_array_color_likelihood.cpp "jsk_perception/PolygonArrayColorLikelihood" "polygon_array_color_likelihood")
+jsk_perception_nodelet(src/polygon_array_color_histogram.cpp "jsk_perception/PolygonArrayColorHistogram" "polygon_array_color_histogram")
 jsk_perception_nodelet(src/edge_detector.cpp "jsk_perception/EdgeDetector" "edge_detector")
 jsk_perception_nodelet(src/sparse_image_encoder.cpp "jsk_perception/SparseImageEncoder" "sparse_image_encoder")
 jsk_perception_nodelet(src/sparse_image_decoder.cpp "jsk_perception/SparseImageDecoder" "sparse_image_decoder")
@@ -140,13 +187,26 @@ jsk_perception_nodelet(src/gaussian_blur.cpp "jsk_perception/GaussianBlur" "gaus
 jsk_perception_nodelet(src/kmeans.cpp "jsk_perception/KMeans" "kmeans")
 jsk_perception_nodelet(src/tabletop_color_difference_likelihood.cpp "jsk_perception/TabletopColorDifferenceLikelihood" "tabletop_color_difference_likelihood")
 jsk_perception_nodelet(src/saliency_map_generator_node.cpp "jsk_perception/SaliencyMapGenerator" "saliency_map_generator")
+
+# check existence of robot_self_filter package because robot_self_filter is not installed by apt
+find_package(PkgConfig)
+pkg_check_modules(robot_self_filter robot_self_filter QUIET)
+if(robot_self_filter_FOUND)
+  message(AUTHOR_WARNING "robot_self_filter is found.")
+  jsk_perception_nodelet(src/robot_to_mask_image.cpp "jsk_perception/RobotToMaskImage" "robot_to_mask_image")
+endif(robot_self_filter_FOUND)
+
 # compiling jsk_perception library for nodelet
 add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
   ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels/slic.cpp
   src/image_utils.cpp
   src/histogram_of_oriented_gradients.cpp
   )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${robot_self_filter_LIBRARIES} yaml-cpp)
+if(robot_self_filter_FOUND)
+  include_directories(${robot_self_filter_INCLUDE_DIRS})
+  target_link_libraries(${PROJECT_NAME} ${robot_self_filter_LIBRARIES})
+endif(robot_self_filter_FOUND)
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 
 
@@ -206,5 +266,18 @@ install(DIRECTORY include/${PROJECT_NAME}/
 
 install(FILES jsk_perception_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
-add_rostest(test/sparse_image.test)
-add_rostest(test/test_label_image_decomposer_slop.test)
+if(CATKIN_ENABLE_TESTING)
+  find_package(roslint REQUIRED)
+  set(ROSLINT_CPP_OPTS "--filter=-whitespace/parens,-whitespace/braces")
+  roslint_cpp()
+  roslint_python()
+  find_package(rostest REQUIRED)
+  if(${DISTRO_GE_INDIGO})
+    # FIXME: jsk_tools/test_topic_published.py does not work on hydro travis/jenkins
+    # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
+    add_rostest(test/image_to_label.test)
+    add_rostest(test/slic_super_pixels.test)
+    add_rostest(test/test_label_image_decomposer_slop.test)
+  endif()
+  add_rostest(test/sparse_image.test)
+endif()

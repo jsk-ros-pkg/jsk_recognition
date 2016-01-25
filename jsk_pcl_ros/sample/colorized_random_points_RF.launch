@@ -6,7 +6,7 @@
     <arg name="depth_registration" value="true"/>
   </include>
 
-  <node pkg="sklearn" type="random_forest_server.py" name="random_forest_cloth_classifier" output="screen">
+  <node pkg="jsk_perception" type="random_forest_server.py" name="random_forest_cloth_classifier" output="screen">
     <param name="random_forest_train_file" value="$(find jsk_data)/pkls/random_region_FPFH_Average/random_forest.pkl"/>
   </node>
 

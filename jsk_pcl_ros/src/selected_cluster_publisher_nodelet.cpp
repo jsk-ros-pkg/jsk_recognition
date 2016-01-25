@@ -36,7 +36,7 @@
 #include <pluginlib/class_list_macros.h>
 #include <pcl/filters/extract_indices.h>
 
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -45,6 +45,7 @@ namespace jsk_pcl_ros
     ConnectionBasedNodelet::onInit();
     pnh_->param("keep_organized", keep_organized_, false);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void SelectedClusterPublisher::subscribe()

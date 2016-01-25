@@ -52,6 +52,21 @@
 
 namespace jsk_pcl_ros
 {
+  /**
+   * @brief
+   * Realtime change detection of pointcloud using octree. See paper below:
+   *
+   @INPROCEEDINGS{6224647, 
+   author={Kammerl, J. and Blodow, N. and Rusu, R.B. and Gedikli, S. and Beetz, M. and Steinbach, E.}, 
+   booktitle={Robotics and Automation (ICRA), 2012 IEEE International Conference on}, 
+   title={Real-time compression of point cloud streams}, 
+   year={2012}, 
+   pages={778-785}, 
+   keywords={cloud computing;data compression;tree data structures;coding complexity;coding precision;novel lossy compression approach;octree data structures;point cloud streams;real-time compression;spatial decomposition;temporal redundancy;Decoding;Encoding;Entropy;Octrees;Real time systems;Sensors}, 
+   doi={10.1109/ICRA.2012.6224647}, 
+   ISSN={1050-4729}, 
+   month={May},}
+   */
   class OctreeChangePublisher: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:

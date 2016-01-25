@@ -46,7 +46,7 @@ namespace jsk_perception
 
     public:
       SaliencyMapGenerator(): DiagnosticNodelet("SaliencyMapGenerator"),
-                              counter_(0) {}
+                              counter_(0), num_threads_(2) {}
       bool computeSaliencyImpl(cv::Mat, cv::Mat &);
       void setNumThreads(int);
       void callback(const sensor_msgs::Image::ConstPtr &);

@@ -72,6 +72,7 @@ namespace jsk_pcl_ros
       tf_prefix_ = getName();
     }
 
+    // fixed parameters
     pnh_->param("approximate_sync", use_async_, false);
     pnh_->param("queue_size", queue_size_, 100);
     pnh_->param("publish_clouds", publish_clouds_, false);
@@ -81,6 +82,12 @@ namespace jsk_pcl_ros
     pnh_->param("align_boxes", align_boxes_, false);
     pnh_->param("use_pca", use_pca_, false);
     pnh_->param("force_to_flip_z_axis", force_to_flip_z_axis_, true);
+    // dynamic_reconfigure
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> >(*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind(&ClusterPointIndicesDecomposer::configCallback, this, _1, _2);
+    srv_->setCallback(f);
+
     negative_indices_pub_ = advertise<pcl_msgs::PointIndices>(*pnh_, "negative_indices", 1);
     pc_pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "debug_output", 1);
     box_pub_ = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "boxes", 1);
@@ -89,6 +96,13 @@ namespace jsk_pcl_ros
     centers_pub_ = advertise<geometry_msgs::PoseArray>(*pnh_, "centroid_pose_array", 1);
 
     onInitPostProcess();
+  }
+
+  void ClusterPointIndicesDecomposer::configCallback(Config &config, uint32_t level)
+  {
+    boost::mutex::scoped_lock(mutex_);
+    max_size_ = config.max_size;
+    min_size_ = config.min_size;
   }
 
   void ClusterPointIndicesDecomposer::subscribe()
@@ -374,6 +388,15 @@ namespace jsk_pcl_ros
     for (size_t i = 0; i < indices_input->cluster_indices.size(); i++)
     {
       pcl::IndicesPtr vindices;
+      // skip indices with points size
+      if (min_size_ > 0 &&
+          indices_input->cluster_indices[i].indices.size() < min_size_) {
+        continue;
+      }
+      if (max_size_ > 0 &&
+          indices_input->cluster_indices[i].indices.size() > max_size_) {
+        continue;
+      }
       vindices.reset (new std::vector<int> (indices_input->cluster_indices[i].indices));
       converted_indices.push_back(vindices);
     }

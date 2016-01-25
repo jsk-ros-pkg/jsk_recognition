@@ -44,6 +44,7 @@
 #include "jsk_recognition_msgs/ModelCoefficientsArray.h"
 
 #include "sensor_msgs/PointCloud2.h"
+#include <dynamic_reconfigure/server.h>
 #include <pcl_ros/pcl_nodelet.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -59,6 +60,7 @@
 #include "jsk_recognition_utils/pcl_util.h"
 #include <jsk_topic_tools/vital_checker.h>
 #include "jsk_topic_tools/diagnostic_nodelet.h"
+#include "jsk_pcl_ros/ClusterPointIndicesDecomposerConfig.h"
 
 namespace jsk_pcl_ros
 {
@@ -66,6 +68,7 @@ namespace jsk_pcl_ros
   {
   public:
     ClusterPointIndicesDecomposer(): DiagnosticNodelet("ClusterPointIndicesDecomposer") { }
+    typedef jsk_pcl_ros::ClusterPointIndicesDecomposerConfig Config;
     typedef message_filters::sync_policies::ExactTime<
     sensor_msgs::PointCloud2,
     jsk_recognition_msgs::ClusterPointIndices > SyncPolicy;
@@ -88,6 +91,9 @@ namespace jsk_pcl_ros
                                   std::vector<pcl::IndicesPtr> indices_array,
                                   std::vector<pcl::IndicesPtr> &output_array);
   protected:
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    boost::mutex mutex_;
+
     void addToDebugPointCloud
     (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
      size_t i,
@@ -106,6 +112,7 @@ namespace jsk_pcl_ros
                                  const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
                                  const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients);
 
+    virtual void configCallback (Config &config, uint32_t level);
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void allocatePublishers(size_t num);
@@ -143,6 +150,8 @@ namespace jsk_pcl_ros
     bool publish_tf_;
     bool align_boxes_;
     bool use_pca_;
+    int max_size_;
+    int min_size_;
 
     jsk_recognition_utils::Counter cluster_counter_;
     

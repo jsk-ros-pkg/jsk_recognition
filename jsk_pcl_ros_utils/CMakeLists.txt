@@ -80,7 +80,8 @@ ENDIF()
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
-#   cfg/VoxelGridLargeScale.cfg
+  #   cfg/VoxelGridLargeScale.cfg
+  cfg/CloudOnPlane.cfg
   cfg/PolygonArrayAreaLikelihood.cfg
 #   cfg/PlaneSupportedCuboidEstimator.cfg
 #   cfg/InteractiveCuboidLikelihood.cfg
@@ -163,6 +164,8 @@ endif ($ENV{TRAVIS_JOB_ID})
 jsk_pcl_util_nodelet(src/normal_flip_to_frame_nodelet.cpp "jsk_pcl_utils/NormalFlipToFrame"
   "normal_flip_to_frame")
 jsk_pcl_util_nodelet(src/centroid_publisher_nodelet.cpp "jsk_pcl_utils/CentroidPublisher" "centroid_publisher")
+jsk_pcl_util_nodelet(src/cloud_on_plane_nodelet.cpp "jsk_pcl/CloudOnPlane"
+  "cloud_on_plane")
 jsk_pcl_util_nodelet(src/tf_transform_cloud_nodelet.cpp
   "jsk_pcl_utils/TfTransformCloud" "tf_transform_cloud")
 jsk_pcl_util_nodelet(src/tf_transform_bounding_box_nodelet.cpp

@@ -553,7 +553,7 @@ namespace jsk_pcl_ros
     pcl::PCDReader reader;
     reader.read(template_file_ + ".pcd", *template_cloud_);
     const std::string pose_yaml = template_file_ + "_poses.yaml";
-   YAML::Node doc;
+    YAML::Node doc;
 #ifdef USE_OLD_YAML
     std::ifstream pose_fin;
     pose_fin.open(pose_yaml.c_str(), std::ifstream::in);

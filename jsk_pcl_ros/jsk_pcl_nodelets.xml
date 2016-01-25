@@ -13,6 +13,11 @@
          type="jsk_pcl_ros_utils::MaskImageToPointIndices"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_pcl/PointIndicesToMaskImage"
+         type="jsk_pcl_ros_utils::PointIndicesToMaskImage"
+         base_class_type="nodelet::Nodelet">
+    Generate mask image out of point indices
+  </class>
   <class name="jsk_pcl/MaskImageToDepthConsideredMaskImage"
          type="jsk_pcl_ros_utils::MaskImageToDepthConsideredMaskImage"
          base_class_type="nodelet::Nodelet">

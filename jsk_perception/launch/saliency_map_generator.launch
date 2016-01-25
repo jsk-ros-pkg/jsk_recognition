@@ -1,0 +1,15 @@
+<launch>
+  <arg name="image" default="/camera/rgb/image_rect_color" />
+  <arg name="num_thread" default="8" />
+  <arg name="print_fps" default="true" />
+  
+  <node pkg="jsk_perception" type="saliency_map_generator"
+	name="saliency_map_generator" output="screen" >
+    <remap from="~input" to="$(arg image)" />
+    <param name="~num_threads" value="$(arg num_thread)" type="int" />
+    <param name="=~fps" value="$(arg print_fps)" type="bool" />
+  </node>
+  <node pkg="image_view" type="image_view" name="saliency_map_image" >
+    <remap from="image" to="/saliency_map_generator/output/saliency_map" />
+  </node>
+</launch>

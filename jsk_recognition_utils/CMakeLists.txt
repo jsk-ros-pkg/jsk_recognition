@@ -44,7 +44,7 @@ IF(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
 ENDIF()
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
 include_directories(
-  ${catkin_INCLUDE_DIRS} include
+  include ${catkin_INCLUDE_DIRS}
 )
 link_libraries(${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES}  yaml-cpp)
 

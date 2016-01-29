@@ -36,6 +36,9 @@ Parameters
       </rosparam>
     </node>
 
+* ``no_sync`` (type: ``Bool``, optional)
+
+  set ``no_sync`` parameter true if you do not want to synchronize timestamps of ``input_topics``
 
 CLI
 ---

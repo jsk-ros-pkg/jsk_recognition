@@ -21,6 +21,7 @@
   <node pkg="jsk_perception" type="tile_image.py" name="tile_image" output="screen">
     <rosparam subst_value="true">
       draw_topic_name: true
+      no_sync: true
       input_topics: [$(arg INPUT), 
                      hsv/output/hue, hsv/output/saturation, hsv/output/value,
                      lab/output/l, lab/output/a, lab/output/b,

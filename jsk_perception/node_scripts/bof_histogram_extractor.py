@@ -65,7 +65,10 @@ class BoFHistogramExtractor(ConnectionBasedTransport):
         decomposed = decompose_descriptors_with_label(
             descriptors=desc, positions=pos, label_img=label,
             skip_zero_label=True)
-        X = self.bof.transform(np.array(decomposed.values()))
+        X = np.array(decomposed.values())
+        if X.size == 0:
+            return
+        X = self.bof.transform(X)
         normalize(X, copy=False)
         self._pub.publish(
             VectorArray(

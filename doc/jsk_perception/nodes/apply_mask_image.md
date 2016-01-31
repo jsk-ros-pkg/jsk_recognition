@@ -24,6 +24,10 @@ Apply mask image to original image and visualize it. It's a utlity to visualize 
 
   Approximately synchronize inputs if it's true.
 
+* `~clip` (Bool, default: `true`)
+
+  Clip the max region of mask image or not.
+
 * `~mask_black_to_transparent` (Bool, default: `false`)
 
   Change black region of mask image to transparent and publish RGBA8 image as `~output` if its' true.

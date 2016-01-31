@@ -66,6 +66,7 @@ namespace jsk_perception
       const sensor_msgs::Image::ConstPtr& mask_msg);
 
     bool approximate_sync_;
+    bool clip_;
     bool mask_black_to_transparent_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
     boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> > async_;

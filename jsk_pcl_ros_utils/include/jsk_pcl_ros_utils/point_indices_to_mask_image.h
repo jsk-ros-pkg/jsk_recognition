@@ -75,6 +75,7 @@ namespace jsk_pcl_ros_utils
     // ROS variables
     ////////////////////////////////////////////////////////
     bool approximate_sync_;
+    int queue_size_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> >async_; 
    message_filters::Subscriber<PCLIndicesMsg> sub_input_;

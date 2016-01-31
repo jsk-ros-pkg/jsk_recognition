@@ -28,6 +28,11 @@ Apply mask image to original image and visualize it. It's a utlity to visualize 
 
   Clip the max region of mask image or not.
 
+* ``~queue_size`` (Int, default: ``100``)
+
+  How many messages you allow about the subscriber to keep in the queue.
+  This should be big when there is much difference about delay between two topics.
+
 * `~mask_black_to_transparent` (Bool, default: `false`)
 
   Change black region of mask image to transparent and publish RGBA8 image as `~output` if its' true.

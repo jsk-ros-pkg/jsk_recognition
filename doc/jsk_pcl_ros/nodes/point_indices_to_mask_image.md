@@ -21,3 +21,15 @@ of organized pointcloud and original `sensor_msgs/Image`.
 
 
    Mask image to get `~input` indices from the origina limage.
+
+
+## Parameters
+
+* `~approximate_sync` (Bool, default: `false`)
+
+  Approximately synchronize inputs if it's true.
+
+* `~queue_size` (Int, default: `100`)
+
+  How many messages you allow about the subscriber to keep in the queue.
+  This should be big when there is much difference about delay between two topics.

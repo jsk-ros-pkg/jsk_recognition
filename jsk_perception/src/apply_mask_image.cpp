@@ -49,6 +49,7 @@ namespace jsk_perception
     pnh_->param("approximate_sync", approximate_sync_, false);
     pnh_->param("clip", clip_, true);
     pnh_->param("mask_black_to_transparent", mask_black_to_transparent_, false);
+    pnh_->param("queue_size", queue_size_, 100);
     pub_image_ = advertise<sensor_msgs::Image>(
       *pnh_, "output", 1);
     pub_mask_ = advertise<sensor_msgs::Image>(
@@ -61,12 +62,12 @@ namespace jsk_perception
     sub_image_.subscribe(*pnh_, "input", 1);
     sub_mask_.subscribe(*pnh_, "input/mask", 1);
     if (approximate_sync_) {
-      async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(100);
+      async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
       async_->connectInput(sub_image_, sub_mask_);
       async_->registerCallback(boost::bind(&ApplyMaskImage::apply, this, _1, _2));
     }
     else {
-      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
       sync_->connectInput(sub_image_, sub_mask_);
       sync_->registerCallback(boost::bind(&ApplyMaskImage::apply, this, _1, _2));
     }

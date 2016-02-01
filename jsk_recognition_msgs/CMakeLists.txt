@@ -7,6 +7,7 @@ add_message_files(
   BoundingBoxArray.msg
   BoundingBoxMovement.msg
   BoundingBox.msg
+  BoundingBoxArrayWithCameraInfo.msg
   Circle2DArray.msg
   Circle2D.msg
   ClassificationResult.msg

@@ -53,6 +53,7 @@ namespace jsk_recognition_utils
          const Eigen::Vector3f& dimensions);
     Cube(const Eigen::Vector3f& pos, // centroid
          const Line& line_a, const Line& line_b, const Line& line_c);
+    Cube(const jsk_recognition_msgs::BoundingBox& box);
     virtual ~Cube();
     std::vector<Segment::Ptr> edges();
     ConvexPolygon::Ptr intersectConvexPolygon(Plane& plane);
@@ -72,6 +73,12 @@ namespace jsk_recognition_utils
      * [1, 1, -1], [-1, 1, -1], [-1, -1, -1], [1, -1, -1].
      */
     Vertices vertices();
+
+    /**
+     * @brief
+     * returns vertices transformed by pose_offset.
+     */
+    Vertices transformVertices(const Eigen::Affine3f& pose_offset);
     
     /**
      * @brief

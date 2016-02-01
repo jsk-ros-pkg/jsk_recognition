@@ -102,6 +102,18 @@ namespace jsk_recognition_utils
     rot_ = rotFrom3Axis(ex, ey, ez);
     axis->foot(pos, pos_);       // project
   }
+
+  Cube::Cube(const jsk_recognition_msgs::BoundingBox& box)
+  {
+    dimensions_.resize(3);
+    dimensions_[0] = box.dimensions.x;
+    dimensions_[1] = box.dimensions.y;
+    dimensions_[2] = box.dimensions.z;
+    Eigen::Affine3f pose;
+    tf::poseMsgToEigen(box.pose, pose);
+    pos_ = Eigen::Vector3f(pose.translation());
+    rot_ = Eigen::Quaternionf(pose.rotation()); // slow
+  }
   
   Cube::~Cube()
   {
@@ -217,7 +229,16 @@ namespace jsk_recognition_utils
     vs.push_back(buildVertex(0.5, -0.5, -0.5));
     return vs;
   }
-    
+
+  Vertices Cube::transformVertices(const Eigen::Affine3f& pose_offset)
+  {
+    Vertices vs = vertices();
+    Vertices transformed_vertices;
+    for (size_t i = 0; i < vs.size(); i++) {
+      transformed_vertices.push_back(pose_offset * vs[i]);
+    }
+    return transformed_vertices;
+  }
   
   Polygon::Ptr Cube::buildFace(const Eigen::Vector3f v0,
                                const Eigen::Vector3f v1,

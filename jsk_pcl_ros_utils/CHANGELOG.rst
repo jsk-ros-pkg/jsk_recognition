@@ -2,6 +2,58 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add ~queue_size option for synchronization
+  Modified:
+  - jsk_pcl_ros_utils/include/jsk_pcl_ros_utils/point_indices_to_mask_image.h
+  - jsk_pcl_ros_utils/src/point_indices_to_mask_image_nodelet.cpp
+* Merge pull request #1504 from garaemon/tracking-velocity
+  [jsk_pcl_ros] Publish current tracking status (running or idle) from     particle_fitler_tracking.
+* [jsk_pcl_ros_utils] Add CloudOnPlane and scripts to visualize them
+* [jsk_pcl_ros] Publish current tracking status (running or idle)
+  from particle_fitler_tracking.
+  And add some scripts to visualize them.
+* [jsk_pcl_ros_utils] Use jsk_pcl_utils prefix instead of jsk_pcl to prevent namespace conflict with jsk_pcl nodelets
+* [jsk_pcl_ros_utils] Support inliers in plane rejector
+  Modified:
+  - jsk_pcl_ros_utils/cfg/PlaneRejector.cfg
+  - jsk_pcl_ros_utils/include/jsk_pcl_ros_utils/plane_rejector.h
+  - jsk_pcl_ros_utils/src/plane_rejector_nodelet.cpp
+* [jsk_pcl_ros_utils] Document about LabelToClusterPointIndices
+* [jsk_pcl_ros_utils] Add doc symlink
+  Added:
+  - jsk_pcl_ros_utils/doc
+* [jsk_pcl_ros_utils] Add label to cluster point indices
+  Modified:
+  - jsk_pcl_ros_utils/CMakeLists.txt
+  - jsk_pcl_ros_utils/jsk_pcl_nodelets.xml
+  Added:
+  - jsk_pcl_ros_utils/include/jsk_pcl_ros_utils/label_to_cluster_point_indices.h
+  - jsk_pcl_ros_utils/src/label_to_cluster_point_indices_nodelet.cpp
+* [jsk_pcl_ros_utils] Remove sklearn from build_depend
+  Modified:
+  - jsk_pcl_ros_utils/package.xml
+  - jsk_pcl_ros_utils/CMakeLists.txt
+* [jsk_pcl_ros] Support offset specifying by geometry_msgs/PoseStamped in ICPRegistration
+  Modified:
+  - doc/index.rst
+  - doc/jsk_pcl_ros/nodes/icp_registration.md
+  - jsk_pcl_ros/include/jsk_pcl_ros/icp_registration.h
+  - jsk_pcl_ros/src/icp_registration_nodelet.cpp
+  - jsk_pcl_ros_utils/CMakeLists.txt
+  - jsk_pcl_ros_utils/jsk_pcl_nodelets.xml
+  Added:
+  - doc/jsk_pcl_ros_utils/index.rst
+  - doc/jsk_pcl_ros_utils/nodes/pointcloud_relative_form_pose_stamped.md
+  - jsk_pcl_ros_utils/include/jsk_pcl_ros_utils/pointcloud_relative_from_pose_stamped.h
+  - jsk_pcl_ros_utils/src/pointcloud_relative_from_pose_stamped_nodelet.cpp
+* [jsk_pcl_ros -> jsk_pcl_ros_utils] Left migration of PointIndicesToMaskImage
+  Modified:
+  jsk_pcl_ros/jsk_pcl_nodelets.xml
+  jsk_pcl_ros_utils/jsk_pcl_nodelets.xml
+* Contributors: Kentaro Wada, Ryohei Ueda, Iori Kumagai
+
 0.3.13 (2015-12-19)
 -------------------
 * [jsk_pcl_ros_utils] Remove jsk_pcl_ros_base

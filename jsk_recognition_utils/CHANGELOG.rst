@@ -2,6 +2,48 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_recognition_utils] Tile different size images with centerization
+  Modified:
+  - jsk_recognition_utils/python/jsk_recognition_utils/visualize.py
+* [jsk_perception] BoundingBoxToRectArray and rect_array_to_image_marker.py
+* jsk_recognition_utils/CMakeLists.txt: include_directories should have include/ before catkin_INCLUDE_DIRS
+* Merge remote-tracking branch 'origin/master' into auto-change-point-type
+* [jsk_pcl_ros] Publish current tracking status (running or idle)
+  from particle_fitler_tracking.
+  And add some scripts to visualize them.
+* [jsk_pcl_ros] Automatically detect point type in OctreeVoxelGrid
+  Modified:
+  - doc/jsk_pcl_ros/nodes/octree_voxel_grid.md
+  - jsk_pcl_ros/cfg/OctreeVoxelGrid.cfg
+  - jsk_pcl_ros/include/jsk_pcl_ros/octree_voxel_grid.h
+  - jsk_pcl_ros/src/octree_voxel_grid_nodelet.cpp
+  - jsk_recognition_utils/include/jsk_recognition_utils/pcl_ros_util.h
+  - jsk_recognition_utils/src/pcl_ros_util.cpp
+* [jsk_recognition_utils] Add SeriesedBoolean::isAllTrueFilled method
+  to check all the buffer is filled by true
+* [jsk_pcl_ros] Fix WallDurationTimer to publish correct average value
+* [jsk_pcl_ros] Publish computation time in icp_registration and torus_finder
+  Modified:
+  - doc/jsk_pcl_ros/nodes/icp_registration.md
+  - doc/jsk_pcl_ros/nodes/torus_f_inder.md
+  - jsk_pcl_ros/include/jsk_pcl_ros/icp_registration.h
+  - jsk_pcl_ros/include/jsk_pcl_ros/torus_finder.h
+  - jsk_pcl_ros/src/icp_registration_nodelet.cpp
+  - jsk_pcl_ros/src/torus_finder_nodelet.cpp
+  - jsk_recognition_utils/include/jsk_recognition_utils/time_util.h
+* [jsk_perception] Keep original resolution if all the input images has
+  same shape and add ~draw_input_topic parameter to draw topic name on
+  the tiled images
+  Modified:
+  - jsk_perception/node_scripts/tile_image.py
+  - jsk_recognition_utils/python/jsk_recognition_utils/visualize.py
+* [jsk_perception] Fix tile_image.py for hydro.
+  1. Disable approximate sync for hydro. it's not supported on hydro
+  2. Use PIL.Image.frombytes instead of PIL.Image.fromstring
+* Contributors: Kei Okada, Kentaro Wada, Ryohei Ueda
+
 0.3.13 (2015-12-19)
 -------------------
 

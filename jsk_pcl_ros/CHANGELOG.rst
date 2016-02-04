@@ -2,6 +2,260 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* add me to maintainer to get jenkins notification
+* remove code for groovy, ml_classifier is only available on hydro
+* [jsk_pcl_ros] ClusterPointIndicesDecomposer with max/min size
+  Modified:
+  - jsk_pcl_ros/CMakeLists.txt
+  - jsk_pcl_ros/include/jsk_pcl_ros/cluster_point_indices_decomposer.h
+  - jsk_pcl_ros/src/cluster_point_indices_decomposer_nodelet.cpp
+  Added:
+  - jsk_pcl_ros/cfg/ClusterPointIndicesDecomposer.cfg
+* List missing PointIndicesToMaskImage as nodelet
+  this node is moved to jsk_pcl_ros_utils
+  but this is necessary for compatibility.
+  Modified:
+  - jsk_pcl_ros/jsk_pcl_nodelets.xml
+* [jsk_pcl_ros] Simplify test case of ExtractIndices.
+  Do not depends on test data, just create dummy data in code on the fly.
+* [jsk_pcl_ros/ClusterPointIndicesDecomposer] Publish centroid pose_array
+  Modified:
+  - jsk_pcl_ros/include/jsk_pcl_ros/cluster_point_indices_decomposer.h
+  - jsk_pcl_ros/src/cluster_point_indices_decomposer_nodelet.cpp
+* [jsk_pcl_ros] Publish current tracking status (running or idle)
+  from particle_fitler_tracking.
+  And add some scripts to visualize them.
+* [jsk_pcl_ros] Automatically detect point type in OctreeVoxelGrid
+  Modified:
+  - doc/jsk_pcl_ros/nodes/octree_voxel_grid.md
+  - jsk_pcl_ros/cfg/OctreeVoxelGrid.cfg
+  - jsk_pcl_ros/include/jsk_pcl_ros/octree_voxel_grid.h
+  - jsk_pcl_ros/src/octree_voxel_grid_nodelet.cpp
+  - jsk_recognition_utils/include/jsk_recognition_utils/pcl_ros_util.h
+  - jsk_recognition_utils/src/pcl_ros_util.cpp
+* [jsk_pcl_ros] Fix indent of linemod_nodelet.cpp
+  Modified:
+  - jsk_pcl_ros/src/linemod_nodelet.cpp
+* [jsk_pcl_ros] Update PlaneSupportedCuboidEstimator to find
+  door handle
+  Modified:
+  - doc/jsk_pcl_ros/nodes/plane_supported_cuboid_estimator.md
+  - jsk_pcl_ros/cfg/PlaneSupportedCuboidEstimator.cfg
+  - jsk_pcl_ros/include/jsk_pcl_ros/plane_supported_cuboid_estimator.h
+  - jsk_pcl_ros/launch/door_handle_detection.launch
+  - jsk_pcl_ros/src/plane_supported_cuboid_estimator_nodelet.cpp
+* [jsk_pcl_ros] Use jsk_pcl_ros_utils namespace instead of jsk_pcl_ros namespace for jsk_pcl_ros_utils nodelets
+* [jsk_pcl_ros/OctreeVoxelGrid] Support coloring marker
+  in x and y axis values
+* [jsk_pcl_ros] Fix AttentionClipper SEGV by not calling
+  publishBoundingBox from camera info callback
+* [jsk_pcl_ros/OctreeChangeDetection] Add paper information
+* [jsk_pcl_ros] Add new feature to skip tracking according to
+  background substraction.
+  Sample launch is tabletop_tracking.launch
+  Now particle_filter_tracking can skip tracking when object looks stable
+  and difference pointcloud (which should be computed by
+  octree_change_detector)
+  are far from target object.
+* [jsk_pcl_ros] Untabify particle_fitler_tracking.h
+* [jsk_pcl_ros] Fix euclidean segmentation for empty input.
+  If input pointcloud is empty, publish empty result.
+* [jsk_pcl_ros] Add marker_color_alpha parameter to change
+  octree marker alpha
+* [jsk_pcl_ros] Update octree_change_detector.launch by removing
+  nodelet manager and machine tag
+* Merge pull request #1469 from wkentaro/add-on-init-post-process
+  [jsk_pcl_ros] Add onInitPostProcess
+* [jsk_pcl_ros] use <arg> to pass input point cloud
+* [jsk_pcl_ros] Add onInitPostProcess
+  Modified:
+  - jsk_pcl_ros/src/add_color_from_image_nodelet.cpp
+  - jsk_pcl_ros/src/attention_clipper_nodelet.cpp
+  - jsk_pcl_ros/src/bilateral_filter_nodelet.cpp
+  - jsk_pcl_ros/src/border_estimator_nodelet.cpp
+  - jsk_pcl_ros/src/bounding_box_filter_nodelet.cpp
+  - jsk_pcl_ros/src/boundingbox_occlusion_rejector_nodelet.cpp
+  - jsk_pcl_ros/src/capture_stereo_synchronizer_nodelet.cpp
+  - jsk_pcl_ros/src/cluster_point_indices_decomposer_nodelet.cpp
+  - jsk_pcl_ros/src/collision_detector_nodelet.cpp
+  - jsk_pcl_ros/src/color_histogram_matcher_nodelet.cpp
+  - jsk_pcl_ros/src/colorize_random_points_RF_nodelet.cpp
+  - jsk_pcl_ros/src/convex_connected_voxels_nodelet.cpp
+  - jsk_pcl_ros/src/depth_calibration_nodelet.cpp
+  - jsk_pcl_ros/src/depth_image_creator_nodelet.cpp
+  - jsk_pcl_ros/src/edge_depth_refinement_nodelet.cpp
+  - jsk_pcl_ros/src/edgebased_cube_finder_nodelet.cpp
+  - jsk_pcl_ros/src/environment_plane_modeling_nodelet.cpp
+  - jsk_pcl_ros/src/euclidean_cluster_extraction_nodelet.cpp
+  - jsk_pcl_ros/src/extract_cuboid_particles_top_n_nodelet.cpp
+  - jsk_pcl_ros/src/extract_indices_nodelet.cpp
+  - jsk_pcl_ros/src/feature_registration_nodelet.cpp
+  - jsk_pcl_ros/src/find_object_on_plane_nodelet.cpp
+  - jsk_pcl_ros/src/fisheye_sphere_publisher_nodelet.cpp
+  - jsk_pcl_ros/src/geometric_consistency_grouping_nodelet.cpp
+  - jsk_pcl_ros/src/grid_sampler_nodelet.cpp
+  - jsk_pcl_ros/src/handle_estimator_nodelet.cpp
+  - jsk_pcl_ros/src/heightmap_converter_nodelet.cpp
+  - jsk_pcl_ros/src/heightmap_morphological_filtering_nodelet.cpp
+  - jsk_pcl_ros/src/heightmap_time_accumulation_nodelet.cpp
+  - jsk_pcl_ros/src/heightmap_to_pointcloud_nodelet.cpp
+  - jsk_pcl_ros/src/hinted_handle_estimator_nodelet.cpp
+  - jsk_pcl_ros/src/hinted_plane_detector_nodelet.cpp
+  - jsk_pcl_ros/src/hinted_stick_finder_nodelet.cpp
+  - jsk_pcl_ros/src/icp_registration_nodelet.cpp
+  - jsk_pcl_ros/src/incremental_model_registration_nodelet.cpp
+  - jsk_pcl_ros/src/interactive_cuboid_likelihood_nodelet.cpp
+  - jsk_pcl_ros/src/intermittent_image_annotator_nodelet.cpp
+  - jsk_pcl_ros/src/joint_state_static_filter_nodelet.cpp
+  - jsk_pcl_ros/src/keypoints_publisher_nodelet.cpp
+  - jsk_pcl_ros/src/kinfu_nodelet.cpp
+  - jsk_pcl_ros/src/line_segment_collector_nodelet.cpp
+  - jsk_pcl_ros/src/line_segment_detector_nodelet.cpp
+  - jsk_pcl_ros/src/mask_image_cluster_filter_nodelet.cpp
+  - jsk_pcl_ros/src/moving_least_square_smoothing_nodelet.cpp
+  - jsk_pcl_ros/src/multi_plane_sac_segmentation_nodelet.cpp
+  - jsk_pcl_ros/src/normal_direction_filter_nodelet.cpp
+  - jsk_pcl_ros/src/normal_estimation_integral_image_nodelet.cpp
+  - jsk_pcl_ros/src/normal_estimation_omp_nodelet.cpp
+  - jsk_pcl_ros/src/octomap_server_contact_nodelet.cpp
+  - jsk_pcl_ros/src/octree_change_publisher_nodelet.cpp
+  - jsk_pcl_ros/src/octree_voxel_grid_nodelet.cpp
+  - jsk_pcl_ros/src/organize_pointcloud_nodelet.cpp
+  - jsk_pcl_ros/src/organized_edge_detector_nodelet.cpp
+  - jsk_pcl_ros/src/organized_multi_plane_segmentation_nodelet.cpp
+  - jsk_pcl_ros/src/organized_pass_through_nodelet.cpp
+  - jsk_pcl_ros/src/organized_pointcloud_to_point_indices_nodelet.cpp
+  - jsk_pcl_ros/src/parallel_edge_finder_nodelet.cpp
+  - jsk_pcl_ros/src/particle_filter_tracking_nodelet.cpp
+  - jsk_pcl_ros/src/plane_supported_cuboid_estimator_nodelet.cpp
+  - jsk_pcl_ros/src/pointcloud_localization_nodelet.cpp
+  - jsk_pcl_ros/src/region_growing_multiple_plane_segmentation_nodelet.cpp
+  - jsk_pcl_ros/src/region_growing_segmentation_nodelet.cpp
+  - jsk_pcl_ros/src/resize_points_publisher_nodelet.cpp
+  - jsk_pcl_ros/src/roi_clipper_nodelet.cpp
+  - jsk_pcl_ros/src/selected_cluster_publisher_nodelet.cpp
+  - jsk_pcl_ros/src/snapit_nodelet.cpp
+  - jsk_pcl_ros/src/supervoxel_segmentation_nodelet.cpp
+  - jsk_pcl_ros/src/tilt_laser_listener_nodelet.cpp
+  - jsk_pcl_ros/src/torus_finder_nodelet.cpp
+  - jsk_pcl_ros/src/uniform_sampling_nodelet.cpp
+  - jsk_pcl_ros/src/voxel_grid_downsample_decoder_nodelet.cpp
+  - jsk_pcl_ros/src/voxel_grid_downsample_manager_nodelet.cpp
+  - jsk_pcl_ros/src/voxel_grid_large_scale_nodelet.cpp
+* [jsk_pcl_ros] Support approximate sync and queue_size configuration
+  Modified:
+  - jsk_pcl_ros/include/jsk_pcl_ros/cluster_point_indices_decomposer.h
+  - jsk_pcl_ros/src/cluster_point_indices_decomposer_nodelet.cpp
+* [jsk_pcl_ros] Do not create tf::TransformBroadcaster in ClusterPointIndideceDecomposer
+  if not necessary
+  Modified:
+  - jsk_pcl_ros/include/jsk_pcl_ros/cluster_point_indices_decomposer.h
+  - jsk_pcl_ros/src/cluster_point_indices_decomposer_nodelet.cpp
+* [jsk_pcl_ros] Init icp after advertise all the topics
+  Modified:
+  - jsk_pcl_ros/include/jsk_pcl_ros/icp_registration.h
+  - jsk_pcl_ros/src/icp_registration_nodelet.cpp
+  - jsk_pcl_ros/src/torus_finder_nodelet.cpp
+* [jsk_pcl_ros] Fix to wait for initialization until start recognition in TorusFinder
+  Modified:
+  - jsk_pcl_ros/include/jsk_pcl_ros/torus_finder.h
+  - jsk_pcl_ros/src/octree_voxel_grid_nodelet.cpp
+* [jsk_pcl_ros] Publish current resolution of octree
+  Modified:
+  - doc/jsk_pcl_ros/nodes/octree_voxel_grid.md
+  - jsk_pcl_ros/include/jsk_pcl_ros/octree_voxel_grid.h
+* [jsk_pcl_ros] Better test names
+  Modified:
+  - jsk_pcl_ros/test/test_attention_clipper.test
+  - jsk_pcl_ros/test/test_extract_indices.test
+* [jsk_pcl_ros] Add ~marker_color to OctreeVoxelGrid
+  Modified:
+  - doc/jsk_pcl_ros/nodes/octree_voxel_grid.md
+  - jsk_pcl_ros/cfg/OctreeVoxelGrid.cfg
+  - jsk_pcl_ros/include/jsk_pcl_ros/octree_voxel_grid.h
+  - jsk_pcl_ros/src/octree_voxel_grid_nodelet.cpp
+* [jsk_pcl_ros] Publish computation time in icp_registration and torus_finder
+  Modified:
+  - doc/jsk_pcl_ros/nodes/icp_registration.md
+  - doc/jsk_pcl_ros/nodes/torus_f_inder.md
+  - jsk_pcl_ros/include/jsk_pcl_ros/icp_registration.h
+  - jsk_pcl_ros/include/jsk_pcl_ros/torus_finder.h
+  - jsk_pcl_ros/src/icp_registration_nodelet.cpp
+  - jsk_pcl_ros/src/torus_finder_nodelet.cpp
+  - jsk_recognition_utils/include/jsk_recognition_utils/time_util.h
+* [jsk_pcl_ros/OctreeVoxelGrid] Relay original pointcloud if ~resolution=0
+  Modified:
+  - doc/jsk_pcl_ros/nodes/octree_voxel_grid.md
+  - jsk_pcl_ros/src/octree_voxel_grid_nodelet.cpp
+* [jsk_pcl_ros] Add ~point_type parameter to octree voxel grid
+  Modified:
+  - doc/jsk_pcl_ros/nodes/octree_voxel_grid.md
+  - jsk_pcl_ros/cfg/OctreeVoxelGrid.cfg
+  - jsk_pcl_ros/include/jsk_pcl_ros/octree_voxel_grid.h
+  - jsk_pcl_ros/src/octree_voxel_grid_nodelet.cpp
+* [jsk_pcl_ros] Support offset specifying by geometry_msgs/PoseStamped in ICPRegistration
+  Modified:
+  - doc/index.rst
+  - doc/jsk_pcl_ros/nodes/icp_registration.md
+  - jsk_pcl_ros/include/jsk_pcl_ros/icp_registration.h
+  - jsk_pcl_ros/src/icp_registration_nodelet.cpp
+  - jsk_pcl_ros_utils/CMakeLists.txt
+  - jsk_pcl_ros_utils/jsk_pcl_nodelets.xml
+  Added:
+  - doc/jsk_pcl_ros_utils/index.rst
+  - doc/jsk_pcl_ros_utils/nodes/pointcloud_relative_form_pose_stamped.md
+  - jsk_pcl_ros_utils/include/jsk_pcl_ros_utils/pointcloud_relative_from_pose_stamped.h
+  - jsk_pcl_ros_utils/src/pointcloud_relative_from_pose_stamped_nodelet.cpp
+* [jsk_pcl_ros] More useful message in extract_top_polygon_likelihood.py
+  Modified:
+  - jsk_pcl_ros/scripts/extract_top_polygon_likelihood.py
+* [jsk_pcl_ros -> jsk_pcl_ros_utils] Left migration of PointIndicesToMaskImage
+  Modified:
+  jsk_pcl_ros/jsk_pcl_nodelets.xml
+  jsk_pcl_ros_utils/jsk_pcl_nodelets.xml
+* Merge pull request #1426 from wkentaro/merge-sklearn-to-jsk-perception
+  Merge sklearn to jsk_perception
+* [jsk_pcl_ros] Do not call callback until initialization done
+  Modified:
+  - jsk_pcl_ros/include/jsk_pcl_ros/region_growing_multiple_plane_segmentation.h
+  - jsk_pcl_ros/include/jsk_pcl_ros/torus_finder.h
+  - jsk_pcl_ros/src/region_growing_multiple_plane_segmentation_nodelet.cpp
+  - jsk_pcl_ros/src/torus_finder_nodelet.cpp
+* [jsk_pcl_ros/MultiPlaneExtraction] Call onInitPostProcess
+  Modified:
+  - jsk_pcl_ros/src/multi_plane_extraction_nodelet.cpp
+* [jsk_pcl_ros] Option keep_organized as dynamic parameter
+  Modified:
+  - jsk_pcl_ros/cfg/MultiPlaneExtraction.cfg
+  - jsk_pcl_ros/src/multi_plane_extraction_nodelet.cpp
+* [jsk_pcl_ros/MultiPlaneExtraction] Add option keep_organized: true
+  Modified:
+  - jsk_pcl_ros/include/jsk_pcl_ros/multi_plane_extraction.h
+  - jsk_pcl_ros/src/multi_plane_extraction_nodelet.cpp
+* [jsk_pcl_ros] Add dynamic_reconfigure API to extract_top_polygon_likelihood.py
+  Modified:
+  - jsk_pcl_ros/CMakeLists.txt
+  - jsk_pcl_ros/scripts/extract_top_polygon_likelihood.py
+  Added:
+  - jsk_pcl_ros/cfg/ExtractTopPolygonLikelihood.cfg
+* [jsk_pcl_ros] Rational test_name for euclidean_clustering
+  Modified:
+  - jsk_pcl_ros/test/test_euclidean_segmentation.test
+* Merge sklearn to jsk_perception
+  Modified:
+  jsk_pcl_ros/CMakeLists.txt
+  jsk_pcl_ros/package.xml
+  jsk_perception/package.xml
+  Added:
+  jsk_perception/node_scripts/random_forest_server.py
+  jsk_perception/sample/random_forest_client_sample.py
+  jsk_perception/sample/random_forest_sample.launch
+  jsk_perception/sample/random_forest_sample_data_x.txt
+  jsk_perception/sample/random_forest_sample_data_y.txt
+* Contributors: Eisoku Kuroiwa, Kei Okada, Kentaro Wada, Ryohei Ueda, Iori Kumagai
+
 0.3.13 (2015-12-19)
 -------------------
 * [jsk_pcl_ros] Longer timelimit

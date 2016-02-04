@@ -2,6 +2,16 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_perception] BoundingBoxToRectArray and rect_array_to_image_marker.py
+* [jsk_pcl_ros] Publish current tracking status (running or idle)
+  from particle_fitler_tracking.
+  And add some scripts to visualize them.
+* [jsk_recognition_msgs] Add min/max fields to  PlotDataArray
+* [jsk_recognition_msgs] Update PlotData message to support more 2d plotting
+* Contributors: Ryohei Ueda
+
 0.3.13 (2015-12-19)
 -------------------
 

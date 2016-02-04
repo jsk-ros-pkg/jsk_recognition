@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.14 (2016-02-04)
+-------------------
 * Add ~queue_size option for synchronization
   Modified:
   - jsk_pcl_ros_utils/include/jsk_pcl_ros_utils/point_indices_to_mask_image.h

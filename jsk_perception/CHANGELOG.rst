@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.14 (2016-02-04)
+-------------------
 * Merge pull request #1513 from garaemon/bounding-box-to-rect-array
   [jsk_perception] BoundingBoxToRectArray and rect_array_to_image_marker.py
 * Add ~queue_size option for synchronization

@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.14 (2016-02-04)
+-------------------
 * [jsk_recognition_utils] Tile different size images with centerization
   Modified:
   - jsk_recognition_utils/python/jsk_recognition_utils/visualize.py

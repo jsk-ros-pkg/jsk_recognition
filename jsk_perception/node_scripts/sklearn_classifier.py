@@ -37,15 +37,17 @@ class ScikitLearnClassifier(ConnectionBasedTransport):
         y_proba = self.clf.predict_proba(X)
         y_pred = np.argmax(y_proba, axis=-1)
         target_names = np.array(self.clf.target_names_)
-        self._pub.publish(ClassificationResult(
+        label_proba = [p[i] for p, i in zip(y_proba, y_pred)]
+        out_msg = ClassificationResult(
             header=msg.header,
             labels=y_pred,
             label_names=target_names[y_pred],
-            label_proba=y_proba[:, y_pred],
+            label_proba=label_proba,
             probabilities=y_proba.reshape(-1),
             classifier=self.clf.__str__(),
             target_names=target_names,
-        ))
+        )
+        self._pub.publish(out_msg)
 
 
 if __name__ == '__main__':

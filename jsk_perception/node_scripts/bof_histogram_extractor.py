@@ -24,6 +24,8 @@ class BoFHistogramExtractor(ConnectionBasedTransport):
     def __init__(self):
         super(BoFHistogramExtractor, self).__init__()
 
+        self.queue_size = rospy.get_param('~queue_size', 10)
+
         # load bag of features
         jsk_loginfo('Loading BoF data')
         bof_data = rospy.get_param('~bof_data', None)
@@ -41,10 +43,12 @@ class BoFHistogramExtractor(ConnectionBasedTransport):
         use_async = rospy.get_param('~approximate_sync', False)
         if use_async:
             sync = message_filters.ApproximateTimeSynchronizer(
-                [self._sub_feature, self._sub_label], queue_size=10, slop=0.1)
+                [self._sub_feature, self._sub_label],
+                queue_size=self.queue_size, slop=0.1)
         else:
             sync = message_filters.TimeSynchronizer(
-                [self._sub_feature, self._sub_label], queue_size=10)
+                [self._sub_feature, self._sub_label],
+                queue_size=self.queue_size)
         jsk_logdebug('~approximate_sync: {}'.format(use_async))
         sync.registerCallback(self._apply)
 

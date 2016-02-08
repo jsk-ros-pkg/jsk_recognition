@@ -19,7 +19,7 @@ class calc_flow_node {
 private:
   ros::NodeHandle nh_;
   image_transport::ImageTransport it_;
-  image_transport::CameraSubscriber camera_sub;
+  image_transport::Subscriber sub_;
   ros::Publisher result_pub_;
   std::string namespace_;
   cv::Mat prevImg;
@@ -30,13 +30,11 @@ public:
     //flow = new cv::Mat(0, 0, CV_8UC1);
 
     namespace_ = nh_.resolveName("camera");
-    camera_sub = it_.subscribeCamera(namespace_ + "/image", 10, &calc_flow_node::cameraCB, this);
     result_pub_ = nh_.advertise<sensor_msgs::Image> ("flow_image", 1);
-    //result_pub_ = nh_.advertise<sensor_msgs::PointCloud2> ("flow_vector", 1);
+    sub_ = it_.subscribe(namespace_ + "/image", 10, &calc_flow_node::imageCB, this);
   }
 
-  void cameraCB(const sensor_msgs::ImageConstPtr &img,
-                const sensor_msgs::CameraInfoConstPtr &info) {
+  void imageCB(const sensor_msgs::ImageConstPtr &img) {
     //IplImage *ipl_ = new IplImage();
     //ipl_ = cvCreateImage(cvSize(img->width, img->height), IPL_DEPTH_8U, 1);
     //sensor_msgs::CvBridge bridge;

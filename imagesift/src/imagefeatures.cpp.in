@@ -91,7 +91,7 @@ class SiftNode
   image_transport::SubscriberFilter _subImageSync;
   image_transport::SubscriberFilter _subMaskSync;
 public:
-  ros::Time lasttime;
+  ros::WallTime lasttime;
 
   SiftNode() : _it(_node)
   {
@@ -126,7 +126,7 @@ public:
       _subInfo = _node.subscribe("camera_info", 1, &SiftNode::infoCb, this);
       _srvDetect = _node.advertiseService("Feature0DDetect", &SiftNode::detectCb, this);
     }
-    lasttime = ros::Time::now();
+    lasttime = ros::WallTime::now();
     _bInfoInitialized = false;
   }
   virtual ~SiftNode() {
@@ -181,10 +181,10 @@ public:
 
 
     // compute SIFT or something
-    ros::Time siftbasetime = ros::Time::now();
+    ros::WallTime siftbasetime = ros::WallTime::now();
     vector<cv::KeyPoint> keypts;
     _detector->detect(roi_image, keypts);
-    ros::Time detect_end_time = ros::Time::now();
+    ros::WallTime detect_end_time = ros::WallTime::now();
 
     int numkeys = keypts.size();
     cv::Mat descriptor;
@@ -194,7 +194,7 @@ public:
       keypts[i].pt.x = keypts[i].pt.x  + roi.x;
       keypts[i].pt.y = keypts[i].pt.y  + roi.y;
     }
-    ros::Time extract_end_time = ros::Time::now();
+    ros::WallTime extract_end_time = ros::WallTime::now();
     // publish
     features.header = imagemsg.header;
     features.positions.resize(numkeys*2);
@@ -232,11 +232,11 @@ public:
 
     ROS_INFO("image_feature: image: %d(size=%lu), num: %d, feature time: %.3fs(keypoint-detect time: %.3fs, feature-extract time: %.3f, other time: %.3f), total: %.3fs", imagemsg.header.seq,
              imagemsg.data.size(),  numkeys,
-             (float)(ros::Time::now()-siftbasetime).toSec(),
-             (float)(detect_end_time-siftbasetime).toSec(), (float)(extract_end_time-detect_end_time).toSec(), (float)(ros::Time::now()-extract_end_time).toSec(),
-             (float)(ros::Time::now()-lasttime).toSec());
+             (float)(ros::WallTime::now()-siftbasetime).toSec(),
+             (float)(detect_end_time-siftbasetime).toSec(), (float)(extract_end_time-detect_end_time).toSec(), (float)(ros::WallTime::now()-extract_end_time).toSec(),
+             (float)(ros::WallTime::now()-lasttime).toSec());
 
-    lasttime = ros::Time::now() ;
+    lasttime = ros::WallTime::now() ;
     return true;
   }
 

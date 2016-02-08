@@ -56,7 +56,7 @@ namespace imagesift
         _pubFeatures = advertise<posedetection_msgs::Feature0D>(*nh_, "Feature0D", 1);
         _pubSift = advertise<posedetection_msgs::ImageFeature0D>(*nh_, "ImageFeature0D", 1);
         _srvDetect = nh_->advertiseService("Feature0DDetect", &SiftNode::detectCb, this);
-        lasttime = ros::Time::now();
+        lasttime = ros::WallTime::now();
         _bInfoInitialized = false;
     }
 
@@ -151,7 +151,7 @@ namespace imagesift
         }
 
         // compute SIFT
-        ros::Time siftbasetime = ros::Time::now();
+        ros::WallTime siftbasetime = ros::WallTime::now();
         Keypoint keypts = GetKeypoints(imagesift);
         // write the keys to the output
         int numkeys = 0;
@@ -193,8 +193,8 @@ namespace imagesift
 
         ROS_DEBUG("imagesift: image: %d(size=%lu), num: %d, sift time: %.3fs, total: %.3fs", imagemsg.header.seq,
                  imagemsg.data.size(),  numkeys,
-                 (float)(ros::Time::now()-siftbasetime).toSec(), (float)(ros::Time::now()-lasttime).toSec());
-        lasttime = ros::Time::now();
+                 (float)(ros::WallTime::now()-siftbasetime).toSec(), (float)(ros::WallTime::now()-lasttime).toSec());
+        lasttime = ros::WallTime::now();
         return true;
     }
 

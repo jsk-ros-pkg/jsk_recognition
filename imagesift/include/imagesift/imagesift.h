@@ -63,7 +63,7 @@ namespace imagesift
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::Image,
       sensor_msgs::Image > SyncPolicy;
-    ros::Time lasttime;
+    ros::WallTime lasttime;
     SiftNode(): DiagnosticNodelet("SiftNode") {}
   protected:
     bool _bInfoInitialized;

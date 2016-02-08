@@ -33,7 +33,7 @@ class EdgeDetector: public nodelet::Nodelet
     bool _apply_blur_post;
     int  _postBlurSize;
     double  _postBlurSigma;
-
+    bool initialized_;
     void reconfigureCallback(jsk_perception::EdgeDetectorConfig &new_config, uint32_t level)
     {
         config_ = new_config;
@@ -83,8 +83,10 @@ class EdgeDetector: public nodelet::Nodelet
                                    _postBlurSigma, _postBlurSigma); // 0.3*(ksize/2 - 1) + 0.8
                 }
                 // Publish the image.
-                sensor_msgs::Image::Ptr out_img = cv_bridge::CvImage(msg->header, enc::MONO8, out_image).toImageMsg();
-                img_pub_.publish(out_img);
+                if (initialized_) {
+                  sensor_msgs::Image::Ptr out_img = cv_bridge::CvImage(msg->header, enc::MONO8, out_image).toImageMsg();
+                  img_pub_.publish(out_img);
+                }
             }
         catch (cv::Exception &e)
             {
@@ -121,6 +123,7 @@ class EdgeDetector: public nodelet::Nodelet
 
 public:
     void onInit() {
+      initialized_ = false;
       nh_ = getNodeHandle();
       subscriber_count_ = 0;
       dynamic_reconfigure::Server<jsk_perception::EdgeDetectorConfig>::CallbackType f =
@@ -130,7 +133,7 @@ public:
       image_transport::SubscriberStatusCallback connect_cb    = boost::bind(&EdgeDetector::connectCb, this, _1);
       image_transport::SubscriberStatusCallback disconnect_cb = boost::bind(&EdgeDetector::disconnectCb, this, _1);
       img_pub_ = image_transport::ImageTransport(ros::NodeHandle(nh_, "edge")).advertise("image", 1, connect_cb, disconnect_cb);
-      
+      initialized_ = true;
     }
   
 };

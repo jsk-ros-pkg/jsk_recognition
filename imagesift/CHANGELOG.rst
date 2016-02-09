@@ -2,6 +2,11 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [imagesift] Use ros::WallTime to measure computation time
+* Contributors: Ryohei Ueda
+
 0.3.14 (2016-02-04)
 -------------------
 

@@ -2,6 +2,9 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.3.14 (2016-02-04)
 -------------------
 * Add ~queue_size option for synchronization

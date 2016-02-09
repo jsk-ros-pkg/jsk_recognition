@@ -2,6 +2,9 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.3.14 (2016-02-04)
 -------------------
 * [jsk_perception] BoundingBoxToRectArray and rect_array_to_image_marker.py

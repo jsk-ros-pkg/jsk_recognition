@@ -2,6 +2,17 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* U and V has strange library options; https://github.com/ros/rosdistro/pull/10436#issuecomment-180763393
+* [jsk_perception] Do not subscribe camera info in calc_flow
+* [jsk_perception] Add more 2d feature samples
+* Fix label probabilities output message
+  Modified:
+  - jsk_perception/node_scripts/sklearn_classifier.py
+* Add queue_size option for bof_histogram_extractor
+* Contributors: Kei Okada, Kentaro Wada, Ryohei Ueda
+
 0.3.14 (2016-02-04)
 -------------------
 * Merge pull request #1513 from garaemon/bounding-box-to-rect-array

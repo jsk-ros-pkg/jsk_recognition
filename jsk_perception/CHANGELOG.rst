@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.15 (2016-02-09)
+-------------------
 * U and V has strange library options; https://github.com/ros/rosdistro/pull/10436#issuecomment-180763393
 * [jsk_perception] Do not subscribe camera info in calc_flow
 * [jsk_perception] Add more 2d feature samples

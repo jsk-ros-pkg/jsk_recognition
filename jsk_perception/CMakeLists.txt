@@ -192,6 +192,17 @@ jsk_perception_nodelet(src/saliency_map_generator_node.cpp "jsk_perception/Salie
 # check existence of robot_self_filter package because robot_self_filter is not installed by apt
 find_package(PkgConfig)
 pkg_check_modules(robot_self_filter robot_self_filter QUIET)
+##
+execute_process(COMMAND lsb_release -cs OUTPUT_VARIABLE LSB_RELEASE_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+if("${LSB_RELESE_VERSION}" STREQUAL "utopic" OR "${LSB_RELESE_VERSION}" STREQUAL "vivid")
+  set(robot_self_filter_LIBRARIES2)
+  foreach(lib ${robot_self_filter_LIBRARIES})
+    string(REPLACE ":/" "/" lib ${lib})
+    list(APPEND robot_self_filter_LIBRARIES2 ${lib})
+  endforeach()
+  set(robot_self_filter_LIBRARIES ${robot_self_filter_LIBRARIES2})
+endif()
+##
 if(robot_self_filter_FOUND)
   message(AUTHOR_WARNING "robot_self_filter is found.")
   jsk_perception_nodelet(src/robot_to_mask_image.cpp "jsk_perception/RobotToMaskImage" "robot_to_mask_image")

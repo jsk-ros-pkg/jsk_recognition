@@ -371,8 +371,12 @@ jsk_pcl_util_nodelet_deprecated(src/pcd_reader_with_pose_nodelet.cpp
   "jsk_pcl/PCDReaderWithPose" "pcd_reader_with_pose")
 jsk_pcl_nodelet(src/octree_voxel_grid_nodelet.cpp
   "jsk_pcl/OctreeVoxelGrid" "octree_voxel_grid")
-# check existence of robot_self_filter package because robot_self_filter is not installed by apt
-pkg_check_modules(robot_self_filter robot_self_filter QUIET)
+# robot_self_filter is released on version greater than indigo
+find_package(robot_self_filter QUIET)
+if(NOT robot_self_filter_FOUND)
+  # check existence of robot_self_filter package because robot_self_filter is not installed by apt on version less than indigo
+  pkg_check_modules(robot_self_filter robot_self_filter QUIET)
+endif()
 if(robot_self_filter_FOUND)
   jsk_pcl_nodelet(src/collision_detector_nodelet.cpp
     "jsk_pcl/CollisionDetector" "collision_detector")

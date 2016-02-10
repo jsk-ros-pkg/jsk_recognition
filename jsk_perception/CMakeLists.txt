@@ -17,7 +17,6 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   image_geometry
   image_transport
-  image_view2
   jsk_recognition_msgs
   jsk_recognition_utils
   jsk_topic_tools

@@ -35,8 +35,7 @@ class TileImages(ConnectionBasedTransport):
         self.sub_img_list = []
         if self.no_sync:
             self.input_imgs = dict((topic, None) for topic in self.input_topics)
-            
-            self.sub_img_list = [rospy.Subscriber(topic, Image, self.simple_callback(topic)) for topic in self.input_topics]
+            self.sub_img_list = [rospy.Subscriber(topic, Image, self.simple_callback(topic), queue_size=1) for topic in self.input_topics]
         else:
             for i, input_topic in enumerate(self.input_topics):
                 sub_img = message_filters.Subscriber(input_topic, Image)

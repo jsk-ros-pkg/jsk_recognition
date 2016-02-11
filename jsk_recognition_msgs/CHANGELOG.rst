@@ -2,6 +2,9 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.3.15 (2016-02-09)
 -------------------
 
@@ -52,7 +55,7 @@ Changelog for package jsk_recognition_msgs
 * [jsk_recognition_msgs] Sort msg files in CMakeLists.txt
 * [jsk_recognition_msgs] Add WeightedPoseArray
 * add new output msg for handle estimate
-* Contributors: Kentaro Wada, MasakiMurooka, Ryohei Ueda, Yu Ohara
+* Contributors: Kentaro Wada, Masaki Murooka, Ryohei Ueda, Yu Ohara
 
 0.3.6 (2015-09-11)
 ------------------

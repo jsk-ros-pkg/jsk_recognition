@@ -2,6 +2,11 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros/CMakeLists.txt] call one of find_package or pkg_check_modules for robot_self_filter.
+* Contributors: Masaki Murooka
+
 0.3.15 (2016-02-09)
 -------------------
 
@@ -504,7 +509,7 @@ Changelog for package jsk_pcl_ros
   Close https://github.com/jsk-ros-pkg/jsk_recognition/issues/1187
 * [jsk_pcl_ros] add max size
 * add new output msg for handle estimate
-* Contributors: Eisoku Kuroiwa, JSK Lab Member, Kei Okada, Kentaro Wada, MasakiMurooka, Ryohei Ueda, Your Name, Yu Ohara, Yuto Inagaki, hrpuser, Iori Kumagai, Masaki Murooka
+* Contributors: Eisoku Kuroiwa, JSK Lab Member, Kei Okada, Kentaro Wada, Masaki Murooka, Ryohei Ueda, Your Name, Yu Ohara, Yuto Inagaki, hrpuser, Iori Kumagai
 
 0.3.6 (2015-09-11)
 ------------------

@@ -2,6 +2,17 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge pull request `#1531 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1531>`_ from k-okada/sed_package_xml
+  .travis.yml: sed package.xml to use opencv3
+* remove image_view2 from find_package(catkin)
+* [jsk_perception/CMakeLists.txt] call one of find_package or pkg_check_modules for robot_self_filter.
+* [jsk_perception] Set queue_size=1 for tile_image.py
+* [jsk_perception] Fix variable names in edge_detector.cpp
+* [jsk_perception] Publish result after initialization
+* Contributors: Kei Okada, Masaki Murooka, Ryohei Ueda
+
 0.3.15 (2016-02-09)
 -------------------
 * U and V has strange library options; https://github.com/ros/rosdistro/pull/10436#issuecomment-180763393
@@ -198,7 +209,7 @@ Changelog for package jsk_perception
 * [jsk_perception] Add PolygonArrayColorHistogram
 * add sample launch file.
 * add robot_to_mask source files.
-* Contributors: Kentaro Wada, MasakiMurooka, Ryohei Ueda, Masaki Murooka
+* Contributors: Kentaro Wada, Masaki Murooka, Ryohei Ueda
 
 0.3.8 (2015-12-08)
 ------------------

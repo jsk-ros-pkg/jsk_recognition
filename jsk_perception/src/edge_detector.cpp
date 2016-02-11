@@ -16,7 +16,7 @@ namespace jsk_perception {
 class EdgeDetector: public nodelet::Nodelet
 {
     jsk_perception::EdgeDetectorConfig config_;
-    dynamic_reconfigure::Server<jsk_perception::EdgeDetectorConfig> srv;
+    dynamic_reconfigure::Server<jsk_perception::EdgeDetectorConfig> srv_;
 
     image_transport::Publisher img_pub_;
     image_transport::Subscriber img_sub_;
@@ -25,27 +25,28 @@ class EdgeDetector: public nodelet::Nodelet
     ros::NodeHandle nh_;
     int subscriber_count_;
 
-    double _threshold1;
-    double _threshold2;
-    int _apertureSize;
-    bool _L2gradient;
-    bool _apply_blur_pre;
-    bool _apply_blur_post;
-    int  _postBlurSize;
-    double  _postBlurSigma;
-
+    double threshold1_;
+    double threshold2_;
+    int apertureSize_;
+    bool L2gradient_;
+    bool apply_blur_pre_;
+    bool apply_blur_post_;
+    int  postBlurSize_;
+    double  postBlurSigma_;
+    bool initialized_;
+  
     void reconfigureCallback(jsk_perception::EdgeDetectorConfig &new_config, uint32_t level)
     {
         config_ = new_config;
-        _threshold1 = config_.threshold1;
-        _threshold2 = config_.threshold2;
-        _apertureSize = 2*((config_.apertureSize/2)) + 1;
-        _L2gradient = config_.L2gradient;
+        threshold1_ = config_.threshold1;
+        threshold2_ = config_.threshold2;
+        apertureSize_ = 2*((config_.apertureSize/2)) + 1;
+        L2gradient_ = config_.L2gradient;
 
-        _apply_blur_pre  = config_.apply_blur_pre;
-        _apply_blur_post = config_.apply_blur_post;
-        _postBlurSize    = 2*((config_.postBlurSize)/2) + 1;
-        _postBlurSigma   = config_.postBlurSigma;
+        apply_blur_pre_  = config_.apply_blur_pre;
+        apply_blur_post_ = config_.apply_blur_post;
+        postBlurSize_    = 2*((config_.postBlurSize)/2) + 1;
+        postBlurSigma_   = config_.postBlurSigma;
 
         if (subscriber_count_)
             { // @todo Could do this without an interruption at some point.
@@ -56,10 +57,10 @@ class EdgeDetector: public nodelet::Nodelet
 
     void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     {
-        do_work(msg, msg->header.frame_id);
+        do_work(msg);
     }
 
-    void do_work(const sensor_msgs::ImageConstPtr& msg, const std::string input_frame_from_msg)
+    void do_work(const sensor_msgs::ImageConstPtr& msg)
     {
         // Transform the image.
         try
@@ -69,22 +70,24 @@ class EdgeDetector: public nodelet::Nodelet
 
                 // Do the work
                 cv::Mat out_image;
-		if(in_image.channels() >= 3){
-		  cv::cvtColor(in_image, out_image, CV_BGR2GRAY);
-		}else{
-		  out_image = in_image;
-		}
-                if(_apply_blur_pre) {
-                  cv::blur(out_image, out_image, cv::Size(_apertureSize,_apertureSize));
+                if(in_image.channels() >= 3){
+                  cv::cvtColor(in_image, out_image, CV_BGR2GRAY);
+                } else{
+                  out_image = in_image;
                 }
-                cv::Canny(out_image, out_image, _threshold1, _threshold2, _apertureSize, _L2gradient);
-                if(_apply_blur_post) {
-                  cv::GaussianBlur(out_image, out_image, cv::Size(_postBlurSize, _postBlurSize),
-                                   _postBlurSigma, _postBlurSigma); // 0.3*(ksize/2 - 1) + 0.8
+                if(apply_blur_pre_) {
+                  cv::blur(out_image, out_image, cv::Size(apertureSize_,apertureSize_));
+                }
+                cv::Canny(out_image, out_image, threshold1_, threshold2_, apertureSize_, L2gradient_);
+                if(apply_blur_post_) {
+                  cv::GaussianBlur(out_image, out_image, cv::Size(postBlurSize_, postBlurSize_),
+                                   postBlurSigma_, postBlurSigma_); // 0.3*(ksize/2 - 1) + 0.8
                 }
                 // Publish the image.
-                sensor_msgs::Image::Ptr out_img = cv_bridge::CvImage(msg->header, enc::MONO8, out_image).toImageMsg();
-                img_pub_.publish(out_img);
+                if (initialized_) {
+                  sensor_msgs::Image::Ptr out_img = cv_bridge::CvImage(msg->header, enc::MONO8, out_image).toImageMsg();
+                  img_pub_.publish(out_img);
+                }
             }
         catch (cv::Exception &e)
             {
@@ -121,16 +124,17 @@ class EdgeDetector: public nodelet::Nodelet
 
 public:
     void onInit() {
+      initialized_ = false;
       nh_ = getNodeHandle();
       subscriber_count_ = 0;
       dynamic_reconfigure::Server<jsk_perception::EdgeDetectorConfig>::CallbackType f =
         boost::bind(&EdgeDetector::reconfigureCallback, this, _1, _2);
-      srv.setCallback(f);
+      srv_.setCallback(f);
       it_.reset(new image_transport::ImageTransport(nh_));
       image_transport::SubscriberStatusCallback connect_cb    = boost::bind(&EdgeDetector::connectCb, this, _1);
       image_transport::SubscriberStatusCallback disconnect_cb = boost::bind(&EdgeDetector::disconnectCb, this, _1);
       img_pub_ = image_transport::ImageTransport(ros::NodeHandle(nh_, "edge")).advertise("image", 1, connect_cb, disconnect_cb);
-      
+      initialized_ = true;
     }
   
 };

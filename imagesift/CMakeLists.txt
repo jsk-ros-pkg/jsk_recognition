@@ -50,6 +50,7 @@ jsk_feature("SURF" "SURF" "imagesurf")
 jsk_feature("STAR" "SURF" "imagestar")
 jsk_feature("SIFT" "SURF" "imagesift_surf")
 jsk_feature("SIFT" "SIFT" "imagesift_sift")
+jsk_feature("ORB" "ORB" "imageorb")
 endif()
 jsk_feature("BRISK" "BRISK" "imagebrisk")
 

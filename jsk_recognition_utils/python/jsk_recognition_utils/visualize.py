@@ -50,7 +50,7 @@ def _tile_images(imgs, tile_shape, concatenated_image):
             if i >= len(imgs):
                 pass
             else:
-                concatenated_image[y*one_height:(y+1)*one_height,x*one_width:(x+1)*one_width] = imgs[i]
+                concatenated_image[y*one_height:(y+1)*one_height,x*one_width:(x+1)*one_width,] = imgs[i]
     return concatenated_image
 
 

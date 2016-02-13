@@ -37,6 +37,7 @@ class TileImages(ConnectionBasedTransport):
         if self.no_sync:
             self.input_imgs = dict((topic, None) for topic in self.input_topics)
             self.sub_img_list = [rospy.Subscriber(topic, Image, self.simple_callback(topic), queue_size=1) for topic in self.input_topics]
+            rospy.Timer(rospy.Duration(0.1), self.timer_callback)
         else:
             for i, input_topic in enumerate(self.input_topics):
                 sub_img = message_filters.Subscriber(input_topic, Image)
@@ -52,16 +53,30 @@ class TileImages(ConnectionBasedTransport):
     def unsubscribe(self):
         for sub in self.sub_img_list:
             sub.sub.unregister()
+    def timer_callback(self, event):
+        with self.lock:
+            if None not in self.input_imgs.values():
+                imgs = []
+                for topic in self.input_topics:
+                    imgs.append(self.input_imgs[topic])
+                self._append_images(imgs)
     def simple_callback(self, target_topic):
         def callback(msg):
             with self.lock:
-                self.input_imgs[target_topic] = msg
-                if all(self.input_imgs.values()):
-                    imgs = []
-                    for topic in self.input_topics:
-                        imgs.append(self.input_imgs[topic])
-                    self._apply(*imgs)
+                bridge = cv_bridge.CvBridge()
+                self.input_imgs[target_topic] = bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+                if self.draw_topic_name:
+                    cv2.putText(self.input_imgs[target_topic], target_topic, (0, 50), cv2.FONT_HERSHEY_PLAIN, 4, (0, 255, 0), 4)
         return callback
+    def _append_images(self, imgs):
+        if self.cache_img is None:
+            out_bgr = jsk_recognition_utils.get_tile_image(imgs)
+            self.cache_img = out_bgr
+        else:
+            out_bgr = jsk_recognition_utils.get_tile_image(imgs, tile_shape=None, result_img=self.cache_img)
+        bridge = cv_bridge.CvBridge()
+        imgmsg = bridge.cv2_to_imgmsg(out_bgr, encoding='bgr8')
+        self.pub_img.publish(imgmsg)
     def _apply(self, *msgs):
         bridge = cv_bridge.CvBridge()
         imgs = []
@@ -70,13 +85,7 @@ class TileImages(ConnectionBasedTransport):
             if self.draw_topic_name:
                 cv2.putText(img, topic, (0, 50), cv2.FONT_HERSHEY_PLAIN, 4, (0, 255, 0), 4)
             imgs.append(img)
-        if self.cache_img is None:
-            out_bgr = jsk_recognition_utils.get_tile_image(imgs)
-            self.cache_img = out_bgr
-        else:
-            out_bgr = jsk_recognition_utils.get_tile_image(imgs, tile_shape=None, result_img=self.cache_img)
-        imgmsg = bridge.cv2_to_imgmsg(out_bgr, encoding='bgr8')
-        self.pub_img.publish(imgmsg)
+        self._append_images(imgs)
 
 
 if __name__ == '__main__':

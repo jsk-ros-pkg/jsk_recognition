@@ -21,6 +21,7 @@ class TileImages(ConnectionBasedTransport):
         if not self.input_topics:
             rospy.logerr('need to specify input_topics')
             sys.exit(1)
+        self.cache_img = None
         self.draw_topic_name = rospy.get_param('~draw_topic_name', False)
         self.approximate_sync = rospy.get_param('~approximate_sync', True)
         self.no_sync = rospy.get_param('~no_sync', False)
@@ -69,7 +70,11 @@ class TileImages(ConnectionBasedTransport):
             if self.draw_topic_name:
                 cv2.putText(img, topic, (0, 50), cv2.FONT_HERSHEY_PLAIN, 4, (0, 255, 0), 4)
             imgs.append(img)
-        out_bgr = jsk_recognition_utils.get_tile_image(imgs)
+        if self.cache_img is None:
+            out_bgr = jsk_recognition_utils.get_tile_image(imgs)
+            self.cache_img = out_bgr
+        else:
+            out_bgr = jsk_recognition_utils.get_tile_image(imgs, tile_shape=None, result_img=self.cache_img)
         imgmsg = bridge.cv2_to_imgmsg(out_bgr, encoding='bgr8')
         self.pub_img.publish(imgmsg)
 

@@ -31,39 +31,35 @@ def centerize(src, dst_shape):
                pad_horizontal:pad_horizontal+w] = src
     return centerized
 
-
-def _tile_images(imgs, tile_shape):
+def _tile_images(imgs, tile_shape, concatenated_image):
     """Concatenate images whose sizes are same.
 
     @param imgs: image list which should be concatenated
     @param tile_shape: shape for which images should be concatenated
+    @param concatenated_image: returned image. if it is None, new image will be created.
     """
     x_num, y_num = tile_shape
-    concatenated_image = None
+    one_width = imgs[0].shape[1]
+    one_height = imgs[0].shape[0]
+    if concatenated_image is None:
+        concatenated_image = np.zeros((one_height * y_num, one_width * x_num, 3),
+                                      dtype=np.uint8)
     for y in range(y_num):
-        row_image = None
         for x in range(x_num):
             i = x + y * x_num
             if i >= len(imgs):
-                img = np.zeros(imgs[0].shape, dtype=np.uint8)
+                pass
             else:
-                img = imgs[i]
-            if row_image is None:
-                row_image = img
-            else:
-                row_image = cv2.hconcat([row_image, img])
-        if concatenated_image is None:
-            concatenated_image = row_image
-        else:
-            concatenated_image = cv2.vconcat([concatenated_image, row_image])
+                concatenated_image[y*one_height:(y+1)*one_height,x*one_width:(x+1)*one_width] = imgs[i]
     return concatenated_image
 
 
-def get_tile_image(imgs, tile_shape=None):
+def get_tile_image(imgs, tile_shape=None, result_img=None):
     """Concatenate images whose sizes are different.
 
     @param imgs: image list which should be concatenated
     @param tile_shape: shape for which images should be concatenated
+    @param result_img: numpy array to put result image
     """
     def get_tile_shape(img_num):
         x_num = 0
@@ -90,7 +86,7 @@ def get_tile_image(imgs, tile_shape=None):
         img = cv2.resize(img, (w, h))
         img = centerize(img, (max_height, max_width, 3))
         imgs[i] = img
-    return _tile_images(imgs, tile_shape)
+    return _tile_images(imgs, tile_shape, result_img)
 
 
 def color_category20(i):

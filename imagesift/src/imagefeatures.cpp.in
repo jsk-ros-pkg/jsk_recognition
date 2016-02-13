@@ -270,7 +270,7 @@ public:
 
 int main(int argc, char **argv)
 {
-  ros::init(argc,argv,"imagesift");
+  ros::init(argc,argv,"@EXEC_NAME@");
   if( !ros::master::check() )
         return 1;
 #ifdef OPENCV_NON_FREE

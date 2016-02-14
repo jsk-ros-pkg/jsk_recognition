@@ -35,6 +35,7 @@ macro(jsk_feature detector extractor exec_name)
   list(APPEND jsk_exec ${exec_name})
   set(DETECTOR ${detector})
   set(EXTRACTOR ${extractor})
+  set(EXEC_NAME ${exec_name})
   configure_file(src/imagefeatures.cpp.in src/${exec_name}.cpp) #${CMAKE_CURRENT_BINARY_DIR}/
   add_executable(${exec_name} src/${exec_name}.cpp)
   set_target_properties(${exec_name} PROPERTIES COMPILE_FLAGS "-msse2 -O3" LINK_FLAGS "-msse2 -O3")

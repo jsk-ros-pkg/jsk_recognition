@@ -265,4 +265,4 @@
    (ros::sleep))
   )
 
-;;(load "package://jsk_perception/euslisp/detection_interface_servicecall.l")
+(load "package://jsk_perception/euslisp/detection_interface_servicecall.l")

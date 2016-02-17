@@ -1,0 +1,58 @@
+<!-- -*- mode: xml -*- -->
+<launch>
+  <arg name="INPUT" default="/camera/depth/points"/>
+  <arg name="DEFAULT_NAMESPACE" default="collision_detector"/>
+
+  <group ns="$(arg DEFAULT_NAMESPACE)">
+    <param name="robot_description" textfile="$(find hrpsys_ros_bridge)/models/SampleRobot.urdf" />
+    <node pkg="nodelet" type="nodelet" name="collision_detector"
+          args="standalone jsk_pcl/CollisionDetector" output="screen">
+      <remap from="~input" to="$(arg INPUT)" />
+      <remap from="~input_joint" to="/collision_detector/joint" />
+      <rosparam>
+        self_see_default_padding: 0.0
+        self_see_default_scale: 1.0
+        self_see_links:
+        - name: WAIST_LINK0
+        - name: LLEG_LINK1
+        - name: LLEG_LINK2
+        - name: LLEG_LINK3
+        - name: LLEG_LINK4
+        - name: LLEG_LINK5
+        - name: LLEG_LINK6
+        - name: RLEG_LINK1
+        - name: RLEG_LINK2
+        - name: RLEG_LINK3
+        - name: RLEG_LINK4
+        - name: RLEG_LINK5
+        - name: RLEG_LINK6
+        - name: WAIST_LINK1
+        - name: WAIST_LINK2
+        - name: WAIST_LINK3
+        - name: LARM_LINK1
+        - name: LARM_LINK2
+        - name: LARM_LINK3
+        - name: LARM_LINK4
+        - name: LARM_LINK5
+        - name: LARM_LINK6
+        - name: LARM_LINK7
+        - name: RARM_LINK1
+        - name: RARM_LINK2
+        - name: RARM_LINK3
+        - name: RARM_LINK4
+        - name: RARM_LINK5
+        - name: RARM_LINK6
+        - name: RARM_LINK7
+      </rosparam>
+      <param name="world_frame_id" value="gazebo_world" />
+      <param name="root_link_id" value="WAIST_LINK0" />
+      <param name="publish_tf" value="true" />
+    </node>
+  </group>
+
+  <node pkg="roseus" type="roseus"
+        name="collision_detector_client"
+        args="$(find jsk_pcl_ros)/euslisp/collision-detector-client.l">
+  </node>
+
+</launch>

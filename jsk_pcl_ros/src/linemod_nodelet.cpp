@@ -54,8 +54,8 @@
 #include <pcl/kdtree/kdtree_flann.h>
 #include <yaml-cpp/yaml.h>
 #include <pcl/common/common.h>
-#include "jsk_pcl_ros/pcl_util.h"
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -553,7 +553,7 @@ namespace jsk_pcl_ros
     pcl::PCDReader reader;
     reader.read(template_file_ + ".pcd", *template_cloud_);
     const std::string pose_yaml = template_file_ + "_poses.yaml";
-   YAML::Node doc;
+    YAML::Node doc;
 #ifdef USE_OLD_YAML
     std::ifstream pose_fin;
     pose_fin.open(pose_yaml.c_str(), std::ifstream::in);
@@ -562,7 +562,7 @@ namespace jsk_pcl_ros
       const YAML::Node& template_pose_yaml = doc["template_poses"];
       for (size_t i = 0; i < template_pose_yaml.size(); i++) {
         const YAML::Node& pose = template_pose_yaml[i];
-        Eigen::Affine3f trans = affineFromYAMLNode(pose);
+        Eigen::Affine3f trans = jsk_recognition_utils::affineFromYAMLNode(pose);
         template_poses_.push_back(trans);
         // set template_bboxes
         pcl::PointCloud<pcl::PointXYZRGBA> transformed_cloud;
@@ -571,7 +571,7 @@ namespace jsk_pcl_ros
         // compute size of bounding box
         Eigen::Vector4f minpt, maxpt;
         pcl::getMinMax3D<pcl::PointXYZRGBA>(transformed_cloud, minpt, maxpt);
-        jsk_recognition_msgs::BoundingBox bbox = boundingBoxFromPointCloud(transformed_cloud);
+        jsk_recognition_msgs::BoundingBox bbox = jsk_recognition_utils::boundingBoxFromPointCloud(transformed_cloud);
         //JSK_ROS_INFO("bounding box size: [%f, %f, %f]", bbox.dimensions.x, bbox.dimensions.y, bbox.dimensions.z);
         template_bboxes_.push_back(bbox);
       }

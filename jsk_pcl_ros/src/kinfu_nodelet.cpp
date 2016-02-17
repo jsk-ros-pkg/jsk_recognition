@@ -35,7 +35,7 @@
 
 #include "jsk_pcl_ros/kinfu.h"
 #include <geometry_msgs/PoseStamped.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <pcl/common/transforms.h>
 #include <cv_bridge/cv_bridge.h>
 
@@ -72,6 +72,7 @@ namespace jsk_pcl_ros
     sync_->connectInput(sub_depth_image_, sub_color_image_);
     sync_->registerCallback(boost::bind(&Kinfu::callback, this, _1, _2));
     sub_info_ = pnh_->subscribe("input/info", 1, &Kinfu::infoCallback, this);
+    onInitPostProcess();
   }
 
   void Kinfu::infoCallback(const sensor_msgs::CameraInfo::ConstPtr& info_msg)

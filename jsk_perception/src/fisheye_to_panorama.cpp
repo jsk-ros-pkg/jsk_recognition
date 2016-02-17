@@ -34,11 +34,13 @@
  *********************************************************************/
 
 #include "jsk_perception/fisheye_to_panorama.h"
+#include <jsk_topic_tools/log_utils.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
 #include <algorithm>
 #include <math.h> 
+#include <boost/assign.hpp>
 
 #define PI 3.141592
 
@@ -62,6 +64,7 @@ namespace jsk_perception
     scale_ = 0.5;
     upside_down_ = false;
     offset_degree_ = 180.0;
+    onInitPostProcess();
   }
 
   void FisheyeToPanorama::configCallback(Config &new_config, uint32_t level)
@@ -76,6 +79,8 @@ namespace jsk_perception
   void FisheyeToPanorama::subscribe()
   {
     sub_image_ = pnh_->subscribe("input", 1, &FisheyeToPanorama::rectify, this);
+    ros::V_string names = boost::assign::list_of("~input");
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void FisheyeToPanorama::unsubscribe()

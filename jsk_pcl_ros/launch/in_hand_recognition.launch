@@ -1,0 +1,60 @@
+<launch>
+  <arg name="pcd_file" default="$(find drc_task_common)/pcds/drill.pcd" />
+  <arg name="info" default="/multisense/depth/camera_info" /> 
+  <arg name="input_cloud" default="/multisense/organized_image_points2_color" /> 
+  <arg name="self_filter_param" default="$(find jsk_hrp2_ros_bridge)/config/$(env ROBOT)_self_filter.yaml" />
+  <arg name="use_self_filter_for_sensor" default="true" />
+  <arg name="use_self_filter_for_template" default="false" />
+  <node pkg="jsk_pcl_ros" type="in_hand_recognition_manager.py" name="in_hand_recognition_manager">
+    <remap from="~input/result" to="icp_registration/output_pose"/>
+  </node>
+  <node pkg="jsk_pcl_ros" type="pcd_reader_with_pose" name="pcd_reader_with_pose">
+    <param name="pcd_file" value="$(arg pcd_file)" />
+    <remap from="~input" to="in_hand_recognition_manager/output/recognition" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="depth_image_creator" name="depth_image_creator">
+    <remap from="~input" to="pcd_reader_with_pose/output" />
+    <remap from="~info" to="$(arg info)" />
+    <param name="scale_depth" value="10.0" />
+    <param name="use_asynchronous" value="true" />
+  </node>
+  <node pkg="jsk_topic_tools" name="info_relay" type="relay">
+    <remap from="~input" to="$(arg info)" />
+    <remap from="~output" to="depth_image_creator/camera_info" />
+  </node>
+  <node pkg="resized_image_transport" name="resizer" type="image_resizer" >
+    <remap from="~input/image" to="depth_image_creator/output" />
+    <remap from="~output/image" to="resized/depth" />
+    <rosparam>
+      use_camera_info: true
+      resize_scale_x: 0.1
+      resize_scale_y: 0.1
+    </rosparam>
+  </node>
+  <node pkg="nodelet" name="depth_image_proc" type="nodelet"
+    args="standalone depth_image_proc/point_cloud_xyz">
+    <remap from="image_rect" to="resized/depth" />
+    <remap from="points" to="template/points" /> 
+  </node>
+  <node pkg="pr2_navigation_self_filter" type="self_filter" name="self_filter_sensor" output="screen"
+        if="$(arg use_self_filter_for_sensor)">
+    <remap from="cloud_in" to="$(arg input_cloud)" />
+    <remap from="cloud_out" to="~self_filtered_cloud" />
+    <rosparam command="load" file="$(arg self_filter_param)" />
+  </node>
+  <node pkg="pr2_navigation_self_filter" type="self_filter" name="self_filter_template" output="screen"
+        if="$(arg use_self_filter_for_template)">
+    <remap from="cloud_in" to="template/points" />
+    <remap from="cloud_out" to="~self_filtered_cloud" />
+    <rosparam command="load" file="$(arg self_filter_param)" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="icp_registration" name="icp_registration" output="screen" >
+    <remap if="$(arg use_self_filter_for_template)" from="~input_reference" to="self_filter_template/self_filtered_cloud"/>
+    <remap unless="$(arg use_self_filter_for_template)" from="~input_reference" to="template/points"/>
+    <remap from="~input_reference_array" to="in_hand_recognition_manager/dummy_array"/>
+    <remap if="$(arg use_self_filter_for_sensor)" from="~input" to="self_filter_sensor/self_filtered_cloud"/>
+    <remap unless="$(arg use_self_filter_for_sensor)" from="~input" to="$(arg input_cloud)"/>
+    <remap from="~input/camera_info" to="$(arg info)" />
+    <param name="use_flipped_initial_pose" value="false" />
+  </node>
+</launch>

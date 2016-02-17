@@ -33,7 +33,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 #include "jsk_pcl_ros/grid_sampler.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <pcl/common/common.h>
 
 #include <pluginlib/class_list_macros.h>
@@ -48,7 +48,7 @@ namespace jsk_pcl_ros
       boost::bind (&GridSampler::configCallback, this, _1, _2);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     srv_->setCallback (f);
-    
+    onInitPostProcess();
   }
 
   void GridSampler::subscribe()

@@ -47,7 +47,7 @@
 #include "jsk_pcl_ros/CallSnapIt.h"
 #include <tf/transform_listener.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
@@ -79,14 +79,14 @@ namespace jsk_pcl_ros
       const geometry_msgs::PoseStamped::ConstPtr& pose_msg);
     virtual void convexAlignPolygonCallback(
       const geometry_msgs::PolygonStamped::ConstPtr& poly_msg);
-    virtual std::vector<ConvexPolygon::Ptr> createConvexes(
+    virtual std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> createConvexes(
       const std::string& frame_id, const ros::Time& stamp,
       jsk_recognition_msgs::PolygonArray::ConstPtr polygons);
     virtual int findNearestConvex(
       const Eigen::Vector3f& pose_point, 
-      const std::vector<ConvexPolygon::Ptr>& convexes);
+      const std::vector<jsk_recognition_utils::ConvexPolygon::Ptr>& convexes);
     virtual geometry_msgs::PoseStamped alignPose(
-      Eigen::Affine3f& pose, ConvexPolygon::Ptr convex);
+      Eigen::Affine3f& pose, jsk_recognition_utils::ConvexPolygon::Ptr convex);
     virtual bool footstepAlignServiceCallback(
       jsk_pcl_ros::SnapFootstep::Request& req,
       jsk_pcl_ros::SnapFootstep::Response& res);

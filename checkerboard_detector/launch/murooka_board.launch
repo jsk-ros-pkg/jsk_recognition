@@ -1,0 +1,19 @@
+<launch>
+  <!--
+      launch file for detecting murooka-board 
+      murooka board has 6x5x0.03 chess board marker
+  -->
+  <group ns="checkerdetector" clear_params="true">
+    <param name="display" type="int" value="1"/>
+    <param name="rect0_size_x" type="double" value="0.03"/>
+    <param name="rect0_size_y" type="double" value="0.03"/>
+    <param name="grid0_size_x" type="int" value="6"/>
+    <param name="grid0_size_y" type="int" value="5"/>
+    <param name="board_type" value="chess" />
+    <param name="type0" type="string" value="data/ricebox.kinbody.xml"/>
+    <node pkg="checkerboard_detector" name="checkerboard_detector" type="checkerboard_detector" respawn="false" output="screen">
+      <remap from="camera_info" to="/multisense_local/left/camera_info"/>
+      <remap from="image" to="/multisense_local/left/image_rect_color"/>
+      </node>
+  </group>
+</launch>

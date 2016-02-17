@@ -1,0 +1,39 @@
+<launch>
+
+  <!-- load log -->
+  <rosparam command="load"
+            file="$(find jsk_pcl_ros)/test_data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/rosparam.yaml" />
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/test_data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/vision.compressed.bag --clock --loop">
+  </node>
+
+  <arg name="INPUT_CLOUD" value="/kinect2_head/hd/points" />
+
+  <node name="in_hand_clipper"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/AttentionClipper">
+    <remap from="~input/points" to="$(arg INPUT_CLOUD)" />
+    <rosparam>
+      initial_pos: [0.0, -0.1, 0.3]
+      initial_rot: [0, 0, 0]
+      dimension_x: 0.3
+      dimension_y: 0.2
+      dimension_z: 0.3
+      frame_id: right_custom_vacuum_link_base
+    </rosparam>
+  </node>
+
+  <node name="transform_0"
+        pkg="topic_tools" type="transform"
+        args="/in_hand_clipper/output/point_indices /in_hand_clipper/output/point_indices_exists std_msgs/Bool 'len(m.indices) > 33000' --wait-for-start" />
+
+  <test test-name="attention_clippser_stdout_0"
+        name="attention_clipper_stdout_0"
+        time-limit="360"
+        pkg="jsk_tools" type="test_stdout.py">
+    <param name="~command" value="rostopic echo /in_hand_clipper/output/point_indices_exists/data -n1" />
+    <param name="~stdout_line0" type="str" value="True" />
+  </test>
+
+</launch>

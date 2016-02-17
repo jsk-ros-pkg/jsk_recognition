@@ -50,7 +50,7 @@
 #include <eigen_conversions/eigen_msg.h>
 #include <tf_conversions/tf_eigen.h>
 #include <eigen_conversions/eigen_msg.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <visualization_msgs/MarkerArray.h>
 #include <algorithm>
 
@@ -72,6 +72,7 @@ namespace jsk_pcl_ros
       align_footstep_srv_ = pnh_->advertiseService(
         "align_footstep", &SnapIt::footstepAlignServiceCallback, this);
     }
+    onInitPostProcess();
   }
 
   void SnapIt::subscribe()
@@ -121,7 +122,7 @@ namespace jsk_pcl_ros
       polygon_aligned_pub_.publish(pose_msg);
       return;
     }
-    std::vector<ConvexPolygon::Ptr> convexes
+    std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> convexes
       = createConvexes(pose_msg->header.frame_id,
                        pose_msg->header.stamp,
                        polygons_);
@@ -131,9 +132,9 @@ namespace jsk_pcl_ros
     convertEigenAffine3(pose_eigend, pose_eigen);
     Eigen::Vector3f pose_point(pose_eigen.translation());
     double min_distance = DBL_MAX;
-    ConvexPolygon::Ptr min_convex;
+    jsk_recognition_utils::ConvexPolygon::Ptr min_convex;
     for (size_t i = 0; i < convexes.size(); i++) {
-      ConvexPolygon::Ptr convex = convexes[i];
+      jsk_recognition_utils::ConvexPolygon::Ptr convex = convexes[i];
       double d = convex->distanceToPoint(pose_point);
       if (d < min_distance) {
         min_convex = convex;
@@ -158,7 +159,7 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     jsk_footstep_msgs::FootstepArray input_footsteps = req.input;
     res.output.header = input_footsteps.header;
-    std::vector<ConvexPolygon::Ptr> convexes
+    std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> convexes
       = createConvexes(input_footsteps.header.frame_id,
                        input_footsteps.header.stamp,
                        polygons_);
@@ -171,7 +172,7 @@ namespace jsk_pcl_ros
       int min_index = findNearestConvex(pose_point, convexes);
       jsk_footstep_msgs::Footstep aligned_footstep;
       if (min_index != -1) {
-        ConvexPolygon::Ptr min_convex = convexes[min_index];
+        jsk_recognition_utils::ConvexPolygon::Ptr min_convex = convexes[min_index];
         geometry_msgs::PoseStamped aligned_pose = alignPose(pose_eigen, min_convex);
         aligned_footstep.pose = aligned_pose.pose;
       }
@@ -198,7 +199,7 @@ namespace jsk_pcl_ros
       JSK_NODELET_ERROR("no polygon is ready");
       return;
     }
-    std::vector<ConvexPolygon::Ptr> convexes
+    std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> convexes
       = createConvexes(poly_msg->header.frame_id,
                        poly_msg->header.stamp,
                        polygons_);
@@ -211,7 +212,7 @@ namespace jsk_pcl_ros
         return;
       }
       else {
-        ConvexPolygon::Ptr min_convex = convexes[min_index];
+        jsk_recognition_utils::ConvexPolygon::Ptr min_convex = convexes[min_index];
         Eigen::Affine3f pose_eigen = Eigen::Affine3f::Identity();
         pose_eigen.translate(pose_point);
         geometry_msgs::PoseStamped aligned_pose = alignPose(pose_eigen, min_convex);
@@ -224,13 +225,13 @@ namespace jsk_pcl_ros
   
   int SnapIt::findNearestConvex(
     const Eigen::Vector3f& pose_point, 
-    const std::vector<ConvexPolygon::Ptr>& convexes)
+    const std::vector<jsk_recognition_utils::ConvexPolygon::Ptr>& convexes)
   {
     int min_index = -1;
     double min_distance = DBL_MAX;
-    ConvexPolygon::Ptr min_convex;
+    jsk_recognition_utils::ConvexPolygon::Ptr min_convex;
     for (size_t i = 0; i < convexes.size(); i++) {
-      ConvexPolygon::Ptr convex = convexes[i];
+      jsk_recognition_utils::ConvexPolygon::Ptr convex = convexes[i];
       if (convex->isProjectableInside(pose_point)) {
         double d = convex->distanceToPoint(pose_point);
         if (d < min_distance) {
@@ -252,7 +253,7 @@ namespace jsk_pcl_ros
       convex_aligned_pub_.publish(pose_msg);
       return;
     }
-    std::vector<ConvexPolygon::Ptr> convexes
+    std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> convexes
       = createConvexes(pose_msg->header.frame_id,
                        pose_msg->header.stamp,
                        polygons_);
@@ -263,7 +264,7 @@ namespace jsk_pcl_ros
     Eigen::Vector3f pose_point(pose_eigen.translation());
     int min_index = findNearestConvex(pose_point, convexes);
     if (min_index != -1) {
-      ConvexPolygon::Ptr min_convex = convexes[min_index];
+      jsk_recognition_utils::ConvexPolygon::Ptr min_convex = convexes[min_index];
       geometry_msgs::PoseStamped aligned_pose = alignPose(pose_eigen, min_convex);
       aligned_pose.header = pose_msg->header;
       convex_aligned_pub_.publish(aligned_pose);
@@ -274,7 +275,7 @@ namespace jsk_pcl_ros
   }
 
   geometry_msgs::PoseStamped SnapIt::alignPose(
-    Eigen::Affine3f& pose, ConvexPolygon::Ptr convex)
+    Eigen::Affine3f& pose, jsk_recognition_utils::ConvexPolygon::Ptr convex)
   {
     Eigen::Affine3f aligned_pose(pose);
     Eigen::Vector3f original_point(pose.translation());
@@ -300,16 +301,16 @@ namespace jsk_pcl_ros
     return ret;
   }
   
-  std::vector<ConvexPolygon::Ptr> SnapIt::createConvexes(
+  std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> SnapIt::createConvexes(
     const std::string& frame_id, const ros::Time& stamp,
     jsk_recognition_msgs::PolygonArray::ConstPtr polygons)
   {
-    std::vector<ConvexPolygon::Ptr> result;
+    std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> result;
     try
     {
       for (size_t i = 0; i < polygons->polygons.size(); i++) {
         geometry_msgs::PolygonStamped polygon = polygons->polygons[i];
-        Vertices vertices;
+        jsk_recognition_utils::Vertices vertices;
         
         tf::StampedTransform transform = lookupTransformWithDuration(
           tf_listener_,
@@ -330,7 +331,7 @@ namespace jsk_pcl_ros
           vertices.push_back(transformed_point);
         }
         std::reverse(vertices.begin(), vertices.end());
-        ConvexPolygon::Ptr convex(new ConvexPolygon(vertices));
+        jsk_recognition_utils::ConvexPolygon::Ptr convex(new jsk_recognition_utils::ConvexPolygon(vertices));
         result.push_back(convex);
       }
     }

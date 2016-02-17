@@ -52,6 +52,7 @@ namespace jsk_pcl_ros
     input_.reset(new pcl::PointCloud<pcl::PointXYZ>);
     keypoints_pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "nerf_keypoints", 10);
     
+    onInitPostProcess();
   }
 
   void KeypointsPublisher::subscribe()

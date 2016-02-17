@@ -3,7 +3,7 @@
 namespace resized_image_transport
 {
   void LogPolar::onInit(){
-    initNodeHandle();
+    DiagnosticNodelet::onInit();
     initReconfigure();
     initParams();
     initPublishersAndSubscribers();
@@ -11,7 +11,7 @@ namespace resized_image_transport
   
 
   void LogPolar::initReconfigure(){
-    reconfigure_server_ = boost::make_shared <dynamic_reconfigure::Server<LogPolarConfig> > (pnh);
+    reconfigure_server_ = boost::make_shared <dynamic_reconfigure::Server<LogPolarConfig> > (*pnh_);
     ReconfigureServer::CallbackType f
       = boost::bind(&LogPolar::config_cb, this, _1, _2);
     reconfigure_server_->setCallback(f);
@@ -20,10 +20,10 @@ namespace resized_image_transport
   void LogPolar::initParams(){
     ImageProcessing::initParams();
     period_ = ros::Duration(1.0);
-    pnh.param("log_polar_scale", log_polar_scale_, 100.0);
+    pnh_->param("log_polar_scale", log_polar_scale_, 100.0);
     NODELET_INFO("log polar scale : %f", log_polar_scale_);
 
-    pnh.param("inverse_log_polar", inverse_log_polar_, false);
+    pnh_->param("inverse_log_polar", inverse_log_polar_, false);
     if (inverse_log_polar_){
       NODELET_INFO("log polar");
     }else{
@@ -71,7 +71,8 @@ namespace resized_image_transport
       log_polar_flags += CV_WARP_INVERSE_MAP;
     }
     cvLogPolar( &src, dst, cvPoint2D32f(image_width/2, image_height/2), log_polar_scale_, log_polar_flags);
-    cv_img->image = dst;
+    // http://answers.opencv.org/question/23440/any-way-to-convert-iplimage-to-cvmat-in-opencv-300/
+    cv_img->image = cv::cvarrToMat(dst);
 
     dst_img = cv_img->toImageMsg();
     if(use_camera_info_){

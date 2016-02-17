@@ -34,6 +34,8 @@
  *********************************************************************/
 
 #include "jsk_perception/rect_to_mask_image.h"
+#include <boost/assign.hpp>
+#include <jsk_topic_tools/log_utils.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 
@@ -43,6 +45,7 @@ namespace jsk_perception
   {
     DiagnosticNodelet::onInit();
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void RectToMaskImage::subscribe()
@@ -50,6 +53,8 @@ namespace jsk_perception
     sub_ = pnh_->subscribe("input", 1, &RectToMaskImage::convert, this);
     sub_info_ = pnh_->subscribe("input/camera_info", 1,
                                 &RectToMaskImage::infoCallback, this);
+    ros::V_string names = boost::assign::list_of("~input")("~input/camera_info");
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void RectToMaskImage::unsubscribe()

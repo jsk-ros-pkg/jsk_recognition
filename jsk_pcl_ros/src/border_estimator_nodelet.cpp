@@ -34,7 +34,7 @@
  *********************************************************************/
 
 #define BOOST_PARAMETER_MAX_ARITY 7
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <pcl/range_image/range_image_planar.h>
 #include <pcl/range_image/range_image_spherical.h>
 #include "jsk_pcl_ros/border_estimator.h"
@@ -60,6 +60,8 @@ namespace jsk_pcl_ros
       *pnh_, "output_range_image", 1);
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(
       *pnh_, "output_cloud", 1);
+
+    onInitPostProcess();
   }
 
   void BorderEstimator::subscribe()
@@ -146,7 +148,7 @@ namespace jsk_pcl_ros
     publishCloud(pub_veil_, veil_indices, header);
     publishCloud(pub_shadow_, shadow_indices, header);
     cv::Mat image;
-    rangeImageToCvMat(range_image, image);
+    jsk_recognition_utils::rangeImageToCvMat(range_image, image);
     pub_range_image_.publish(
       cv_bridge::CvImage(header,
                          sensor_msgs::image_encodings::BGR8,

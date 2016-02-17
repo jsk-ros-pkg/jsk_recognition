@@ -34,20 +34,26 @@
  *********************************************************************/
 
 #include "jsk_pcl_ros/cluster_point_indices_decomposer.h"
+#include <cv_bridge/cv_bridge.h>
 #include <pluginlib/class_list_macros.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/common/centroid.h>
 #include <pcl/common/common.h>
 #include <boost/format.hpp>
+#include <boost/range/adaptors.hpp>
+#include <boost/range/algorithm.hpp>
+#include <boost/range/irange.hpp>
 #include <pcl/registration/ia_ransac.h>
 #include <pcl/filters/project_inliers.h>
 #include <pcl/common/pca.h>
+#include <sensor_msgs/image_encodings.h>
 #include <jsk_topic_tools/color_utils.h>
 #include <Eigen/Geometry> 
+#include <geometry_msgs/PoseArray.h>
 
-#include "jsk_pcl_ros/geo_util.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
-#include "jsk_pcl_ros/pcl_util.h"
+#include "jsk_recognition_utils/geo_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -55,6 +61,9 @@ namespace jsk_pcl_ros
   {
     DiagnosticNodelet::onInit();
     pnh_->param("publish_tf", publish_tf_, false);
+    if (publish_tf_) {
+      br_.reset(new tf::TransformBroadcaster);
+    }
     if (!pnh_->getParam("tf_prefix", tf_prefix_))
     {
       if (publish_tf_) {
@@ -63,12 +72,37 @@ namespace jsk_pcl_ros
       tf_prefix_ = getName();
     }
 
+    // fixed parameters
+    pnh_->param("approximate_sync", use_async_, false);
+    pnh_->param("queue_size", queue_size_, 100);
     pnh_->param("publish_clouds", publish_clouds_, false);
+    if (publish_clouds_) {
+      JSK_ROS_WARN("~output%%02d are not published before subscribed, you should subscribe ~debug_output in debuging.");
+    }
     pnh_->param("align_boxes", align_boxes_, false);
     pnh_->param("use_pca", use_pca_, false);
     pnh_->param("force_to_flip_z_axis", force_to_flip_z_axis_, true);
+    // dynamic_reconfigure
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> >(*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind(&ClusterPointIndicesDecomposer::configCallback, this, _1, _2);
+    srv_->setCallback(f);
+
+    negative_indices_pub_ = advertise<pcl_msgs::PointIndices>(*pnh_, "negative_indices", 1);
     pc_pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "debug_output", 1);
     box_pub_ = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "boxes", 1);
+    mask_pub_ = advertise<sensor_msgs::Image>(*pnh_, "mask", 1);
+    label_pub_ = advertise<sensor_msgs::Image>(*pnh_, "label", 1);
+    centers_pub_ = advertise<geometry_msgs::PoseArray>(*pnh_, "centroid_pose_array", 1);
+
+    onInitPostProcess();
+  }
+
+  void ClusterPointIndicesDecomposer::configCallback(Config &config, uint32_t level)
+  {
+    boost::mutex::scoped_lock(mutex_);
+    max_size_ = config.max_size;
+    min_size_ = config.min_size;
   }
 
   void ClusterPointIndicesDecomposer::subscribe()
@@ -76,14 +110,19 @@ namespace jsk_pcl_ros
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_target_.subscribe(*pnh_, "target", 1);
     if (align_boxes_) {
-      sync_align_ = boost::make_shared<message_filters::Synchronizer<SyncAlignPolicy> >(100);
+      sync_align_ = boost::make_shared<message_filters::Synchronizer<SyncAlignPolicy> >(queue_size_);
       sub_polygons_.subscribe(*pnh_, "align_planes", 1);
       sub_coefficients_.subscribe(*pnh_, "align_planes_coefficients", 1);
       sync_align_->connectInput(sub_input_, sub_target_, sub_polygons_, sub_coefficients_);
       sync_align_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2, _3, _4));
     }
+    else if (use_async_) {
+      async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
+      async_->connectInput(sub_input_, sub_target_);
+      async_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2));
+    }
     else {
-      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
       sync_->connectInput(sub_input_, sub_target_);
       sync_->registerCallback(boost::bind(&ClusterPointIndicesDecomposer::extract, this, _1, _2));
     }
@@ -143,15 +182,15 @@ namespace jsk_pcl_ros
     int nearest_index = -1;
     for (size_t i = 0; i < coefficients->coefficients.size(); i++) {
       geometry_msgs::PolygonStamped polygon_msg = planes->polygons[i];
-      Vertices vertices;
+      jsk_recognition_utils::Vertices vertices;
       for (size_t j = 0; j < polygon_msg.polygon.points.size(); j++) {
-        Vertex v;
+        jsk_recognition_utils::Vertex v;
         v[0] = polygon_msg.polygon.points[j].x;
         v[1] = polygon_msg.polygon.points[j].y;
         v[2] = polygon_msg.polygon.points[j].z;
         vertices.push_back(v);
       }
-      ConvexPolygon p(vertices, coefficients->coefficients[i].values);
+      jsk_recognition_utils::ConvexPolygon p(vertices, coefficients->coefficients[i].values);
       double distance = p.distanceToPoint(center);
       if (distance < min_distance) {
         min_distance = distance;
@@ -300,17 +339,42 @@ namespace jsk_pcl_ros
       debug_output.points.push_back(p);
     }
   }
-  
-  void ClusterPointIndicesDecomposer::extract
-  (const sensor_msgs::PointCloud2ConstPtr &input,
-   const jsk_recognition_msgs::ClusterPointIndicesConstPtr &indices_input,
-   const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
-   const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients)
+
+  void ClusterPointIndicesDecomposer::publishNegativeIndices(
+    const sensor_msgs::PointCloud2ConstPtr &input,
+    const jsk_recognition_msgs::ClusterPointIndicesConstPtr &indices_input)
   {
+    std::set<int> all_indices;
+    boost::copy(
+      boost::irange(0, (int)(input->width * input->height)),
+      std::inserter(all_indices, all_indices.begin()));
+    for (size_t i = 0; i < indices_input->cluster_indices.size(); i++) {
+      std::set<int> indices_set(indices_input->cluster_indices[i].indices.begin(),
+                                indices_input->cluster_indices[i].indices.end());
+      std::set<int> diff_indices;
+      std::set_difference(all_indices.begin(), all_indices.end(),
+                          indices_set.begin(), indices_set.end(),
+                          std::inserter(diff_indices, diff_indices.begin()));
+      all_indices = diff_indices;
+    }
+    // publish all_indices
+    pcl_msgs::PointIndices ros_indices;
+    ros_indices.indices = std::vector<int>(all_indices.begin(), all_indices.end());
+    ros_indices.header = input->header;
+    negative_indices_pub_.publish(ros_indices);
+  }
+    
+  void ClusterPointIndicesDecomposer::extract(
+    const sensor_msgs::PointCloud2ConstPtr &input,
+    const jsk_recognition_msgs::ClusterPointIndicesConstPtr &indices_input,
+    const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
+    const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients)
+  {
+    vital_checker_->poke();
     if (publish_clouds_) {
       allocatePublishers(indices_input->cluster_indices.size());
     }
-    vital_checker_->poke();
+    publishNegativeIndices(input, indices_input);
     pcl::ExtractIndices<pcl::PointXYZRGB> extract;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz (new pcl::PointCloud<pcl::PointXYZ>);
@@ -324,6 +388,15 @@ namespace jsk_pcl_ros
     for (size_t i = 0; i < indices_input->cluster_indices.size(); i++)
     {
       pcl::IndicesPtr vindices;
+      // skip indices with points size
+      if (min_size_ > 0 &&
+          indices_input->cluster_indices[i].indices.size() < min_size_) {
+        continue;
+      }
+      if (max_size_ > 0 &&
+          indices_input->cluster_indices[i].indices.size() > max_size_) {
+        continue;
+      }
       vindices.reset (new std::vector<int> (indices_input->cluster_indices[i].indices));
       converted_indices.push_back(vindices);
     }
@@ -331,9 +404,16 @@ namespace jsk_pcl_ros
     sortIndicesOrder(cloud_xyz, converted_indices, sorted_indices);
     extract.setInputCloud(cloud);
 
+    // point cloud from camera not laser
+    bool is_sensed_with_camera = (input->height != 1);
+
+    cv::Mat mask = cv::Mat::zeros(input->height, input->width, CV_8UC1);
+    cv::Mat label = cv::Mat::zeros(input->height, input->width, CV_32SC1);
     pcl::PointCloud<pcl::PointXYZRGB> debug_output;
     jsk_recognition_msgs::BoundingBoxArray bounding_box_array;
     bounding_box_array.header = input->header;
+    geometry_msgs::PoseArray center_pose_array;
+    center_pose_array.header = input->header;
     for (size_t i = 0; i < sorted_indices.size(); i++)
     {
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
@@ -354,9 +434,32 @@ namespace jsk_pcl_ros
         tf::Transform transform;
         transform.setOrigin(tf::Vector3(center[0], center[1], center[2]));
         transform.setRotation(tf::createIdentityQuaternion());
-        br_.sendTransform(tf::StampedTransform(transform, input->header.stamp,
-                                               input->header.frame_id,
-                                               tf_prefix_ + (boost::format("output%02u") % (i)).str()));
+        br_->sendTransform(tf::StampedTransform(transform, input->header.stamp,
+                                                input->header.frame_id,
+                                                tf_prefix_ + (boost::format("output%02u") % (i)).str()));
+      }
+      // centroid pose
+      geometry_msgs::Pose pose_msg;
+      pose_msg.position.x = center[0];
+      pose_msg.position.y = center[1];
+      pose_msg.position.z = center[2];
+      pose_msg.orientation.x = 0;
+      pose_msg.orientation.y = 0;
+      pose_msg.orientation.z = 0;
+      pose_msg.orientation.w = 1;
+      center_pose_array.poses.push_back(pose_msg);
+      // label
+      if (is_sensed_with_camera) {
+        // create mask & label image from cluster indices
+        for (size_t j = 0; j < sorted_indices[i]->size(); j++) {
+          int index = sorted_indices[i]->data()[j];
+          int width_index = index % input->width;
+          int height_index = index / input->width;
+          mask.at<uchar>(height_index, width_index) = 255;
+          // 0 should be skipped,
+          // because it is to label image as the black region is to mask image
+          label.at<int>(height_index, width_index) = (int)i + 1;
+        }
       }
       // adding the pointcloud into debug_output
       addToDebugPointCloud(segmented_cloud, i, debug_output);
@@ -369,12 +472,26 @@ namespace jsk_pcl_ros
       }
       bounding_box_array.boxes.push_back(bounding_box);
     }
+
+    if (is_sensed_with_camera) {
+      // publish mask
+      cv_bridge::CvImage mask_bridge(indices_input->header,
+                                    sensor_msgs::image_encodings::MONO8,
+                                    mask);
+      mask_pub_.publish(mask_bridge.toImageMsg());
+      // publish label
+      cv_bridge::CvImage label_bridge(indices_input->header,
+                                      sensor_msgs::image_encodings::TYPE_32SC1,
+                                      label);
+      label_pub_.publish(label_bridge.toImageMsg());
+    }
     
     sensor_msgs::PointCloud2 debug_ros_output;
     pcl::toROSMsg(debug_output, debug_ros_output);
     debug_ros_output.header = input->header;
     debug_ros_output.is_dense = false;
     pc_pub_.publish(debug_ros_output);
+    centers_pub_.publish(center_pose_array);
     box_pub_.publish(bounding_box_array);
   }
   

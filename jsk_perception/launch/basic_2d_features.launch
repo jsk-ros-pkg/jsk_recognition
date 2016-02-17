@@ -1,0 +1,111 @@
+<launch>
+  <arg name="INPUT" default="/multisense_local/left/image_rect_color" />
+  <arg name="INPUT_CAMERA_INFO" default="/multisense_local/left/camera_info" />
+  <node pkg="jsk_topic_tools" type="relay" name="input_relay">
+    <remap from="~input" to="$(arg INPUT)" />
+  </node>
+  <node pkg="jsk_perception" type="hsv_decomposer" name="hsv">
+    <remap from="~input" to="input_relay/output" />
+  </node>
+  <node pkg="jsk_perception" type="lab_decomposer" name="lab">
+    <remap from="~input" to="input_relay/output" />
+  </node>
+  <node pkg="jsk_perception" type="ycc_decomposer" name="ycc">
+    <remap from="~input" to="input_relay/output" />
+  </node>
+  <node pkg="jsk_perception" type="kmeans" name="kmeans5">
+    <remap from="~input" to="input_relay/output" />
+    <rosparam>
+      n_clusters: 5
+    </rosparam>
+  </node>
+  <node pkg="jsk_perception" type="kmeans" name="kmeans10">
+    <remap from="~input" to="input_relay/output" />
+    <rosparam>
+      n_clusters: 10
+    </rosparam>
+  </node>
+  <node pkg="jsk_perception" type="kmeans" name="kmeans50">
+    <remap from="~input" to="input_relay/output" />
+    <rosparam>
+      n_clusters: 50
+    </rosparam>
+  </node>
+  <node pkg="jsk_perception" type="edge_detector" name="edge0">
+    <remap from="image" to="input_relay/output" />
+    <remap from="edge/image" to="~image" />
+    <rosparam>
+      threshold1: 100
+      threshold2: 200
+    </rosparam>
+  </node>
+  <node pkg="jsk_perception" type="edge_detector" name="edge1">
+    <remap from="image" to="input_relay/output" />
+    <remap from="edge/image" to="~image" />
+    <rosparam>
+      threshold1: 10
+      threshold2: 20
+    </rosparam>
+  </node>
+  <node pkg="jsk_perception" type="edge_detector" name="edge2">
+    <remap from="image" to="input_relay/output" />
+    <remap from="edge/image" to="~image" />
+    <rosparam>
+      threshold1: 30
+      threshold2: 60
+    </rosparam>
+  </node>
+  <node pkg="jsk_perception" type="gaussian_blur" name="gaussian_blur">
+    <remap from="~input" to="input_relay/output" />
+  </node>
+  <node pkg="imagesift" type="imagesift" name="sift">
+    <remap from="image" to="input_relay/output" />
+    <remap from="ImageFeature0D" to="~image_feature_0d" />
+    <remap from="Feature0D" to="~feature_0d" />
+    <remap from="camera_info" to="$(arg INPUT_CAMERA_INFO)" />
+  </node>
+  <node pkg="posedetection_msgs" type="feature0d_to_image" name="sift_image">
+    <remap from="ImageFeature0D" to="sift/image_feature_0d" />
+    <remap from="Feature0D" to="sift/feature_0d" />
+    <remap from="image" to="input_relay/output" />
+  </node>
+  <node pkg="imagesift" type="imagesurf" name="surf">
+    <remap from="image" to="input_relay/output" />
+    <remap from="Feature0D" to="sift/feature_0d" />
+    <remap from="ImageFeature0D" to="~image_feature_0d" />
+    <remap from="camera_info" to="$(arg INPUT_CAMERA_INFO)" />
+  </node>
+  <node pkg="posedetection_msgs" type="feature0d_to_image" name="surf_image">
+    <remap from="ImageFeature0D" to="surf/image_feature_0d" />
+    <remap from="Feature0D" to="surf/feature_0d" />
+    <remap from="image" to="input_relay/output" />
+  </node>
+  <node pkg="imagesift" type="imagebrisk" name="brisk">
+    <remap from="image" to="input_relay/output" />
+    <remap from="Feature0D" to="sift/feature_0d" />
+    <remap from="ImageFeature0D" to="~image_feature_0d" />
+    <remap from="camera_info" to="$(arg INPUT_CAMERA_INFO)" />
+  </node>
+  <node pkg="posedetection_msgs" type="feature0d_to_image" name="brisk_image">
+    <remap from="ImageFeature0D" to="brisk/image_feature_0d" />
+    <remap from="Feature0D" to="brisk/feature_0d" />
+    <remap from="image" to="input_relay/output" />
+  </node>
+  <node pkg="jsk_perception" type="tile_image.py" name="tile_image" output="screen">
+    <rosparam subst_value="true">
+      draw_topic_name: true
+      no_sync: true
+      input_topics: [input_relay/output, 
+                     hsv/output/hue, hsv/output/saturation, hsv/output/value,
+                     lab/output/l, lab/output/a, lab/output/b,
+                     ycc/output/y, ycc/output/cr, ycc/output/cb,
+                     kmeans5/output, kmeans10/output, kmeans50/output, 
+                     edge0/image, edge1/image, edge2/image,
+                     gaussian_blur/output,
+                     sift_image/output, surf_image/output, brisk_image/output]
+    </rosparam>
+  </node>
+  <node pkg="image_view" type="image_view" name="result_view">
+    <remap from="image" to="tile_image/output" />
+  </node>
+</launch>

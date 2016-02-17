@@ -1,0 +1,49 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/publish_fixed_images.launch" />
+
+  <node name="label_image_delayed"
+        pkg="jsk_tools" type="delay_timestamp.py">
+    <remap from="~input" to="label_image/label" />
+    <remap from="~output" to="~label" />
+    <rosparam>
+      delay: 1
+      msg_name: sensor_msgs/Image
+    </rosparam>
+  </node>
+
+  <!-- test not async -->
+  <node name="label_image_decomposer_0"
+        pkg="jsk_perception" type="label_image_decomposer.py">
+    <remap from="~input" to="raw_image_bgr/image_color" />
+    <remap from="~input/label" to="label_image_delayed/label" />
+    <rosparam>
+      approximate_sync: false
+    </rosparam>
+  </node>
+
+  <!-- test slop 1.1 -->
+  <node name="label_image_decomposer_1"
+        pkg="jsk_perception" type="label_image_decomposer.py">
+    <remap from="~input" to="raw_image_bgr/image_color" />
+    <remap from="~input/label" to="label_image_delayed/label" />
+    <rosparam>
+      approximate_sync: true
+      slop: 1.1
+    </rosparam>
+  </node>
+
+  <test test-name="test_label_image_decomposer_slop"
+        name="test_label_image_decomposer_slop"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="360">
+    <rosparam>
+      topic_0: /label_image_decomposer_0/output
+      timeout_0: 10
+      negative_0: true
+      topic_1: /label_image_decomposer_1/output
+      timeout_1: 10
+    </rosparam>
+  </test>
+
+</launch>

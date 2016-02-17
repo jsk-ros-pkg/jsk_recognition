@@ -1,6 +1,6 @@
 <package>
   <name>checkerboard_detector</name>
-  <version>0.2.13</version>
+  <version>0.3.16</version>
   <description>Uses opencv to find checkboards and compute their 6D poses with respect to the image. Requires the image to be calibrated.<br />
     Parameters:<br />
     <ul>
@@ -20,7 +20,6 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>roscpp</build_depend>
-  <build_depend>dynamic_tf_publisher</build_depend>
   <build_depend>rosconsole</build_depend>
   <build_depend>cv_bridge</build_depend>
   <build_depend>sensor_msgs</build_depend>

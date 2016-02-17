@@ -1,18 +1,56 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(jsk_perception)
 
-find_package(catkin REQUIRED COMPONENTS
-  jsk_recognition_msgs
-  mk message_generation std_msgs sensor_msgs geometry_msgs cv_bridge
-  image_geometry image_transport image_view2 driver_base dynamic_reconfigure cmake_modules
-  roscpp nodelet rostest tf rospack
-  jsk_topic_tools pcl_ros libcmt)
+# Use ccache if installed to make it fast to generate object files
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+endif(CCACHE_FOUND)
 
-find_package(OpenCV REQUIRED)
+find_package(catkin REQUIRED COMPONENTS
+  angles
+  cmake_modules
+  cv_bridge
+  driver_base
+  dynamic_reconfigure
+  geometry_msgs
+  image_geometry
+  image_transport
+  jsk_recognition_msgs
+  jsk_recognition_utils
+  jsk_topic_tools
+  message_generation
+  mk
+  nodelet
+  pcl_ros
+  posedetection_msgs
+  rosbuild
+  roscpp
+  roseus
+  rospack
+  sensor_msgs
+  std_msgs
+  tf
+  libcmt
+)
+
+# check ros distro >= indigo
+execute_process(
+  COMMAND python -c "import sys; sys.exit(ord('$ENV{ROS_DISTRO}'[0]) >= ord('indigo'[0]))"
+  RESULT_VARIABLE DISTRO_GE_INDIGO
+)
+
 find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 
 find_package(Eigen REQUIRED)
 include_directories(${Eigen_INCLUDE_DIRS})
+
+pkg_check_modules(yaml_cpp yaml-cpp REQUIRED)
+IF(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
+## indigo yaml-cpp : 0.5.0 /  hydro yaml-cpp : 0.3.0
+  add_definitions("-DUSE_OLD_YAML")
+ENDIF()
 
 FIND_PACKAGE( OpenMP REQUIRED)
 if(OPENMP_FOUND)
@@ -21,9 +59,13 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
-
+add_definitions("-g -O2")
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
+  cfg/PolygonArrayColorLikelihood.cfg
+  cfg/PolygonArrayColorHistogram.cfg
+  cfg/TabletopColorDifferenceLikelihood.cfg
   cfg/ProjectImagePoint.cfg
   cfg/MaskImageGenerator.cfg
   cfg/MorphologicalMaskImageOperator.cfg
@@ -59,10 +101,10 @@ generate_messages(
 )
 
 catkin_package(
-  CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs message_runtime jsk_recognition_msgs
-  DEPENDS OpenCV
+  CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs message_runtime jsk_recognition_msgs jsk_recognition_utils
+  DEPENDS
   INCLUDE_DIRS include
-  LIBRARIES jsk_perception
+  LIBRARIES jsk_perception oriented_gradient
 )
 
 execute_process(
@@ -72,7 +114,8 @@ execute_process(
   MK_DIR=${mk_PREFIX}/share/mk installed
   RESULT_VARIABLE _make_failed)
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels)
+include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels)
+link_directories(${catkin_LIBRARY_DIRS})
 add_executable(camshiftdemo src/camshiftdemo.cpp)
 add_executable(linemod src/linemod.cpp)
 add_executable(virtual_camera_mono src/virtual_camera_mono.cpp)
@@ -90,6 +133,9 @@ macro(jsk_perception_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_na
   jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
     jsk_perception_nodelet_sources jsk_perception_nodelet_executables)
 endmacro()
+jsk_perception_nodelet(src/bounding_box_to_rect.cpp "jsk_perception/BoundingBoxToRect" "bounding_box_to_rect")
+jsk_perception_nodelet(src/polygon_array_color_likelihood.cpp "jsk_perception/PolygonArrayColorLikelihood" "polygon_array_color_likelihood")
+jsk_perception_nodelet(src/polygon_array_color_histogram.cpp "jsk_perception/PolygonArrayColorHistogram" "polygon_array_color_histogram")
 jsk_perception_nodelet(src/edge_detector.cpp "jsk_perception/EdgeDetector" "edge_detector")
 jsk_perception_nodelet(src/cmt.cpp "jsk_perception/CMTNodelet" "cmt_node")
 jsk_perception_nodelet(src/sparse_image_encoder.cpp "jsk_perception/SparseImageEncoder" "sparse_image_encoder")
@@ -107,6 +153,7 @@ jsk_perception_nodelet(src/ycc_decomposer.cpp "jsk_perception/YCCDecomposer" "yc
 jsk_perception_nodelet(src/contour_finder.cpp "jsk_perception/ContourFinder" "contour_finder")
 jsk_perception_nodelet(src/snake_segmentation.cpp "jsk_perception/SnakeSegmentation" "snake_segmentation")
 jsk_perception_nodelet(src/colorize_labels.cpp "jsk_perception/ColorizeLabels" "colorize_labels")
+jsk_perception_nodelet(src/colorize_float_image.cpp "jsk_perception/ColorizeFloatImage" "colorize_float_image")
 jsk_perception_nodelet(src/grid_label.cpp "jsk_perception/GridLabel" "grid_label")
 jsk_perception_nodelet(src/color_histogram_label_match.cpp "jsk_perception/ColorHistogramLabelMatch" "color_histogram_label_match")
 jsk_perception_nodelet(src/apply_mask_image.cpp "jsk_perception/ApplyMaskImage" "apply_mask_image")
@@ -128,6 +175,7 @@ jsk_perception_nodelet(src/mask_image_to_rect.cpp "jsk_perception/MaskImageToRec
 jsk_perception_nodelet(src/roi_to_rect.cpp "jsk_perception/ROIToRect" "roi_to_rect")
 jsk_perception_nodelet(src/roi_to_mask_image.cpp "jsk_perception/ROIToMaskImage" "roi_to_mask_image")
 jsk_perception_nodelet(src/polygon_to_mask_image.cpp "jsk_perception/PolygonToMaskImage" "polygon_to_mask_image")
+jsk_perception_nodelet(src/polygon_array_to_label_image.cpp "jsk_perception/PolygonArrayToLabelImage" "polygon_array_to_label_image")
 jsk_perception_nodelet(src/rect_to_roi.cpp "jsk_perception/RectToROI" "rect_to_roi")
 jsk_perception_nodelet(src/mask_image_generator.cpp "jsk_perception/MaskImageGenerator" "mask_image_generator")
 jsk_perception_nodelet(src/project_image_point.cpp "jsk_perception/ProjectImagePoint" "project_image_point")
@@ -135,6 +183,21 @@ jsk_perception_nodelet(src/skeletonization_nodelet.cpp "jsk_perception/Skeletoni
 jsk_perception_nodelet(src/sliding_window_object_detector.cpp "jsk_perception/SlidingWindowObjectDetector" "sliding_window_object_detector")
 jsk_perception_nodelet(src/gaussian_blur.cpp "jsk_perception/GaussianBlur" "gaussian_blur")
 jsk_perception_nodelet(src/kmeans.cpp "jsk_perception/KMeans" "kmeans")
+jsk_perception_nodelet(src/tabletop_color_difference_likelihood.cpp "jsk_perception/TabletopColorDifferenceLikelihood" "tabletop_color_difference_likelihood")
+jsk_perception_nodelet(src/saliency_map_generator_node.cpp "jsk_perception/SaliencyMapGenerator" "saliency_map_generator")
+
+# robot_self_filter is released on version greater than indigo
+find_package(robot_self_filter QUIET)
+if(NOT robot_self_filter_FOUND)
+  # check existence of robot_self_filter package because robot_self_filter is not installed by apt on version less than indigo
+  find_package(PkgConfig)
+  pkg_check_modules(robot_self_filter robot_self_filter QUIET)
+endif()
+
+if(robot_self_filter_FOUND)
+  message(AUTHOR_WARNING "robot_self_filter is found.")
+  jsk_perception_nodelet(src/robot_to_mask_image.cpp "jsk_perception/RobotToMaskImage" "robot_to_mask_image")
+endif(robot_self_filter_FOUND)
 
 # compiling jsk_perception library for nodelet
 add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
@@ -142,22 +205,27 @@ add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
   src/image_utils.cpp
   src/histogram_of_oriented_gradients.cpp
   )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${robot_self_filter_LIBRARIES} yaml-cpp)
+if(robot_self_filter_FOUND)
+  include_directories(${robot_self_filter_INCLUDE_DIRS})
+  target_link_libraries(${PROJECT_NAME} ${robot_self_filter_LIBRARIES})
+endif(robot_self_filter_FOUND)
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 
 
-target_link_libraries(camshiftdemo             ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-target_link_libraries(linemod                  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-target_link_libraries(virtual_camera_mono      ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-target_link_libraries(point_pose_extractor     ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
-target_link_libraries(edge_detector            ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-target_link_libraries(white_balance_converter  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-target_link_libraries(hough_lines              ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-target_link_libraries(rectangle_detector       ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
-target_link_libraries(calc_flow                ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-target_link_libraries(color_histogram_sliding_matcher  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-target_link_libraries(oriented_gradient_node   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} oriented_gradient)
-target_link_libraries(sliding_window_object_detector_trainer_node ${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+target_link_libraries(camshiftdemo             ${catkin_LIBRARIES})
+target_link_libraries(linemod                  ${catkin_LIBRARIES})
+target_link_libraries(virtual_camera_mono      ${catkin_LIBRARIES})
+target_link_libraries(point_pose_extractor     ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(edge_detector            ${catkin_LIBRARIES})
+target_link_libraries(white_balance_converter  ${catkin_LIBRARIES})
+target_link_libraries(hough_lines              ${catkin_LIBRARIES})
+target_link_libraries(rectangle_detector       ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(calc_flow                ${catkin_LIBRARIES})
+target_link_libraries(color_histogram_sliding_matcher  ${catkin_LIBRARIES})
+target_link_libraries(oriented_gradient_node   ${catkin_LIBRARIES} ${Boost_LIBRARIES} oriented_gradient)
+target_link_libraries(oriented_gradient   ${catkin_LIBRARIES} ${Boost_LIBRARIES} oriented_gradient)
+target_link_libraries(sliding_window_object_detector_trainer_node ${PROJECT_NAME} ${catkin_LIBRARIES})
 
 add_dependencies(camshiftdemo             ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 add_dependencies(virtual_camera_mono      ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
@@ -168,19 +236,24 @@ add_dependencies(rectangle_detector       ${PROJECT_NAME}_gencfg ${PROJECT_NAME}
 add_dependencies(color_histogram_sliding_matcher       ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 
 
-#add_custom_command(
-#  OUTPUT  ${PROJECT_SOURCE_DIR}/template
-#  DEPENDS ${PROJECT_SOURCE_DIR}/src/eusmodel_template_gen.l
-#  COMMAND ${PROJECT_SOURCE_DIR}/src/eusmodel_template_gen.sh)
-#add_custom_target(eusmodel_template ALL DEPENDS ${PROJECT_SOURCE_DIR}/template)
+add_custom_command(
+ OUTPUT ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng8.launch
+ ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng2.launch
+ DEPENDS ${PROJECT_SOURCE_DIR}/euslisp/eusmodel_template_gen.l
+ COMMAND ROS_PACKAGE_PATH=${PROJECT_SOURCE_DIR}:$ENV{ROS_PACKAGE_PATH} roseus ${PROJECT_SOURCE_DIR}/euslisp/eusmodel_template_gen.l
+ WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+add_custom_command(
+ OUTPUT  ${PROJECT_SOURCE_DIR}/sample/rimokon-pose.launch ${PROJECT_SOURCE_DIR}/sample/milktea-box.launch
+ DEPENDS ${PROJECT_SOURCE_DIR}/sample/pose_detector_auto_gen_sample.l
+ COMMAND ROS_PACKAGE_PATH=${PROJECT_SOURCE_DIR}:$ENV{ROS_PACKAGE_PATH} roseus ./pose_detector_auto_gen_sample.l
+ WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/sample)
 
-# Download model data
-execute_process(
-  COMMAND mkdir -p ${PROJECT_SOURCE_DIR}/trained_data)
-execute_process(
-  COMMAND wget -q --timestamping "https://drive.google.com/uc?id=0B5hRAGKTOm_KWW11R0FTX0xjTDg&export=download" -O ${PROJECT_SOURCE_DIR}/trained_data/drill_svm.xml)
+add_custom_target(eusmodel_template ALL DEPENDS
+  ${PROJECT_SOURCE_DIR}/sample/rimokon-pose.launch ${PROJECT_SOURCE_DIR}/sample/milktea-box.launch
+  ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng8.launch
+  ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng2.launch)
 
-install(TARGETS camshiftdemo virtual_camera_mono point_pose_extractor white_balance_converter hough_lines rectangle_detector calc_flow color_histogram_sliding_matcher ${PROJECT_NAME}
+install(TARGETS camshiftdemo virtual_camera_mono point_pose_extractor white_balance_converter hough_lines rectangle_detector calc_flow color_histogram_sliding_matcher oriented_gradient oriented_gradient_node ${PROJECT_NAME}
   ${jsk_perception_nodelet_executables}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
@@ -196,4 +269,18 @@ install(DIRECTORY include/${PROJECT_NAME}/
 
 install(FILES jsk_perception_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
-add_rostest(test/sparse_image.test)
+if(CATKIN_ENABLE_TESTING)
+  find_package(roslint REQUIRED)
+  set(ROSLINT_CPP_OPTS "--filter=-whitespace/parens,-whitespace/braces")
+  roslint_cpp()
+  roslint_python()
+  find_package(rostest REQUIRED)
+  if(${DISTRO_GE_INDIGO})
+    # FIXME: jsk_tools/test_topic_published.py does not work on hydro travis/jenkins
+    # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
+    add_rostest(test/image_to_label.test)
+    add_rostest(test/slic_super_pixels.test)
+    add_rostest(test/test_label_image_decomposer_slop.test)
+  endif()
+  add_rostest(test/sparse_image.test)
+endif()

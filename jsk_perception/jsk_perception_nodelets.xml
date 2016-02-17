@@ -1,4 +1,8 @@
 <library path="lib/libjsk_perception">
+  <class name="jsk_perception/BoundingBoxToRect"
+         type="jsk_perception::BoundingBoxToRect"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/ProjectImagePoint"
          type="jsk_perception::ProjectImagePoint"
          base_class_type="nodelet::Nodelet">
@@ -33,6 +37,14 @@
   </class>
   <class name="jsk_perception/PolygonToMaskImage"
          type="jsk_perception::PolygonToMaskImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/PolygonArrayToLabelImage"
+         type="jsk_perception::PolygonArrayToLabelImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/TabletopColorDifferenceLikelihood"
+         type="jsk_perception::TabletopColorDifferenceLikelihood"
          base_class_type="nodelet::Nodelet">
   </class>
   <class name="jsk_perception/ErodeMaskImage"
@@ -96,6 +108,11 @@
     <description>
     </description>
   </class>
+  <class name="jsk_perception/ColorizeFloatImage" type="jsk_perception::ColorizeFloatImage"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
   <class name="jsk_perception/SnakeSegmentation" type="jsk_perception::SnakeSegmentation"
          base_class_type="nodelet::Nodelet">
     <description>
@@ -140,31 +157,31 @@
       compute superpixels
     </description>
   </class>
-  <class name="jsk_perception/HoughCircleDetector" type="HoughCircleDetector"
+  <class name="jsk_perception/HoughCircleDetector" type="jsk_perception::HoughCircleDetector"
          base_class_type="nodelet::Nodelet">
     <description>
       nodelet to detect circles based on hough transformation
     </description>
   </class>
-  <class name="jsk_perception/ColorHistogram" type="ColorHistogram"
+  <class name="jsk_perception/ColorHistogram" type="jsk_perception::ColorHistogram"
          base_class_type="nodelet::Nodelet">
     <description>
       Nodelet to compute histogram
     </description>
   </class>
-  <class name="jsk_perception/EdgeDetector" type="EdgeDetector"
+  <class name="jsk_perception/EdgeDetector" type="jsk_perception::EdgeDetector"
          base_class_type="nodelet::Nodelet">
     <description>
       Nodelet to detect edges
     </description>
   </class>
-  <class name="jsk_perception/SparseImageEncoder" type="SparseImageEncoder"
+  <class name="jsk_perception/SparseImageEncoder" type="jsk_perception::SparseImageEncoder"
          base_class_type="nodelet::Nodelet">
     <description>
       Nodelet to encode image to an array of sparse matrix.
     </description>
   </class>
-  <class name="jsk_perception/SparseImageDecoder" type="SparseImageDecoder"
+  <class name="jsk_perception/SparseImageDecoder" type="jsk_perception::SparseImageDecoder"
          base_class_type="nodelet::Nodelet">
     <description>
       Nodelet to decode from an array of sparse matrix to image.
@@ -188,6 +205,12 @@
       Base class for object detection via supervised learning
     </description>
   </class>
+  <class name="jsk_perception/SaliencyMapGenerator" type="jsk_perception::SaliencyMapGenerator"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Nodelet to compute saliency map
+    </description>
+  </class>
   <class name="jsk_perception/GaussianBlur"
          type="jsk_perception::GaussianBlur"
          base_class_type="nodelet::Nodelet">
@@ -198,6 +221,18 @@
   </class>
   <class name="jsk_perception/CMTNodelet"
          type="jsk_perception::CMTNodelet"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/RobotToMaskImage"
+         type="jsk_perception::RobotToMaskImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/PolygonArrayColorHistogram"
+         type="jsk_perception::PolygonArrayColorHistogram"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/PolygonArrayColorLikelihood"
+         type="jsk_perception::PolygonArrayColorLikelihood"
          base_class_type="nodelet::Nodelet">
   </class>
 </library>

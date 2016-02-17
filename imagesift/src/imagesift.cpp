@@ -56,7 +56,7 @@ namespace imagesift
         _pubFeatures = advertise<posedetection_msgs::Feature0D>(*nh_, "Feature0D", 1);
         _pubSift = advertise<posedetection_msgs::ImageFeature0D>(*nh_, "ImageFeature0D", 1);
         _srvDetect = nh_->advertiseService("Feature0DDetect", &SiftNode::detectCb, this);
-        lasttime = ros::Time::now();
+        lasttime = ros::WallTime::now();
         _bInfoInitialized = false;
     }
 
@@ -114,7 +114,7 @@ namespace imagesift
                 return false;
             
             if(imagesift != NULL && (imagesift->cols!=imagemsg.width || imagesift->rows!=imagemsg.height)) {
-                ROS_INFO("clear sift resources");
+                ROS_DEBUG("clear sift resources");
                 DestroyAllImages();
                 imagesift = NULL;
             }
@@ -124,6 +124,10 @@ namespace imagesift
             if (mask_ptr) {
                 cv::Mat mask = cv_bridge::toCvShare(mask_ptr, mask_ptr->encoding)->image;
                 region = jsk_perception::boundingRectOfMaskImage(mask);
+                ROS_DEBUG ("region x:%d y:%d width:%d height:%d", region.x, region.y, region.width, region.height);
+                if (region.width == 0 || region.height ==0) {
+                    region = cv::Rect(0, 0, imagemsg.width, imagemsg.height);
+                }
                 image = image(region);
             }
             else {
@@ -147,7 +151,7 @@ namespace imagesift
         }
 
         // compute SIFT
-        ros::Time siftbasetime = ros::Time::now();
+        ros::WallTime siftbasetime = ros::WallTime::now();
         Keypoint keypts = GetKeypoints(imagesift);
         // write the keys to the output
         int numkeys = 0;
@@ -187,10 +191,10 @@ namespace imagesift
         FreeKeypoints(keypts);
         DestroyAllImages();
 
-        ROS_INFO("imagesift: image: %d(size=%lu), num: %d, sift time: %.3fs, total: %.3fs", imagemsg.header.seq,
+        ROS_DEBUG("imagesift: image: %d(size=%lu), num: %d, sift time: %.3fs, total: %.3fs", imagemsg.header.seq,
                  imagemsg.data.size(),  numkeys,
-                 (float)(ros::Time::now()-siftbasetime).toSec(), (float)(ros::Time::now()-lasttime).toSec());
-        lasttime = ros::Time::now();
+                 (float)(ros::WallTime::now()-siftbasetime).toSec(), (float)(ros::WallTime::now()-lasttime).toSec());
+        lasttime = ros::WallTime::now();
         return true;
     }
 

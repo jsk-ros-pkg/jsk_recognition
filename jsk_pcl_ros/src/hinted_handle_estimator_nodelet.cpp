@@ -35,12 +35,12 @@
 
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/hinted_handle_estimator.h"
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <pcl/features/normal_3d.h>
 #include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/common/transforms.h>
 #include <pcl/filters/passthrough.h>
-#include <jsk_pcl_ros/pcl_conversion_util.h>
+#include <jsk_recognition_utils/pcl_conversion_util.h>
 #include <eigen_conversions/eigen_msg.h>
 #include <tf/tf.h>
 #include <math.h>
@@ -56,8 +56,10 @@ namespace jsk_pcl_ros
     DiagnosticNodelet::onInit();
     pub_pose_ = advertise<geometry_msgs::PoseStamped>(
                                                       *pnh_, "handle_pose", 1);
-    pub_length_ = advertise<std_msgs::Float64>( 
+    pub_length_ = advertise<std_msgs::Float64>(
                                                *pnh_, "handle_length", 1);
+    pub_handle_ = advertise<jsk_recognition_msgs::SimpleHandle>(
+                                               *pnh_, "handle", 1);
     pub_debug_marker_ = advertise<visualization_msgs::Marker>(*pnh_, "debug_marker", 1);
     pub_debug_marker_array_ = advertise<visualization_msgs::MarkerArray>(*pnh_, "debug_marker_array", 1);
     handle = handle_model();
@@ -67,6 +69,7 @@ namespace jsk_pcl_ros
     pnh_->param("arm_l", handle.arm_l, 0.05);
     pnh_->param("arm_d", handle.arm_d, 0.02);
     pnh_->param("arm_w", handle.arm_w, 0.1);
+    onInitPostProcess();
   }
 
   void HintedHandleEstimator::subscribe()
@@ -190,7 +193,7 @@ namespace jsk_pcl_ros
       Eigen::Matrix4f box_pose_respected_to_cloud_eigen_inversed_matrixf;
       Eigen::Matrix4d box_pose_respected_to_cloud_eigen_inversed_matrixd
         = box_pose_respected_to_cloud_eigend_inversed.matrix();
-      jsk_pcl_ros::convertMatrix4<Eigen::Matrix4d, Eigen::Matrix4f>(
+      jsk_recognition_utils::convertMatrix4<Eigen::Matrix4d, Eigen::Matrix4f>(
                                                                     box_pose_respected_to_cloud_eigen_inversed_matrixd,
                                                                     box_pose_respected_to_cloud_eigen_inversed_matrixf);
       Eigen::Affine3f offset = Eigen::Affine3f(box_pose_respected_to_cloud_eigen_inversed_matrixf);
@@ -266,7 +269,11 @@ namespace jsk_pcl_ros
     pub_pose_.publish(handle_pose_stamped);
     pub_debug_marker_.publish(debug_hand_marker);
     pub_debug_marker_array_.publish(make_handle_array(handle_pose_stamped, handle));
-    pub_length_.publish(min_width_msg);
+    jsk_recognition_msgs::SimpleHandle simple_handle;
+    simple_handle.header = handle_pose_stamped.header;
+    simple_handle.pose = handle_pose_stamped.pose;
+    simple_handle.handle_width = min_width;
+    pub_handle_.publish(simple_handle);
   }
 }
 

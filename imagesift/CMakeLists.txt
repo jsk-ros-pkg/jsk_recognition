@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(imagesift)
 
+# Use ccache if installed to make it fast to generate object files
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+endif(CCACHE_FOUND)
+
 find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs posedetection_msgs image_transport cv_bridge cmake_modules
   jsk_perception nodelet jsk_topic_tools)
 
@@ -13,6 +20,7 @@ catkin_package(
     DEPENDS OpenCV libsiftfast
 )
 
+catkin_python_setup()
 
 set(ENV{PKG_CONFIG_PATH} ${CATKIN_DEVEL_PREFIX}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH})
 find_package(PkgConfig REQUIRED)
@@ -27,6 +35,7 @@ macro(jsk_feature detector extractor exec_name)
   list(APPEND jsk_exec ${exec_name})
   set(DETECTOR ${detector})
   set(EXTRACTOR ${extractor})
+  set(EXEC_NAME ${exec_name})
   configure_file(src/imagefeatures.cpp.in src/${exec_name}.cpp) #${CMAKE_CURRENT_BINARY_DIR}/
   add_executable(${exec_name} src/${exec_name}.cpp)
   set_target_properties(${exec_name} PROPERTIES COMPILE_FLAGS "-msse2 -O3" LINK_FLAGS "-msse2 -O3")
@@ -36,11 +45,16 @@ macro(jsk_feature detector extractor exec_name)
   add_dependencies(${exec_name} posedetection_msgs_generate_messages_cpp libsiftfast)
 endmacro(jsk_feature detector extractor exec_name)
 
+message(STATUS "OpenCV_VERSION: ${OpenCV_VERSION}")
+if("${OpenCV_VERSION}" VERSION_LESS 3.0.0) # http://stackoverflow.com/questions/31509600/why-so-many-featuredetector-and-descriptorextractor-are-not-supported-in-opencv
 jsk_feature("SURF" "SURF" "imagesurf")
 jsk_feature("STAR" "SURF" "imagestar")
-jsk_feature("BRISK" "BRISK" "imagebrisk")
 jsk_feature("SIFT" "SURF" "imagesift_surf")
 jsk_feature("SIFT" "SIFT" "imagesift_sift")
+jsk_feature("ORB" "ORB" "imageorb")
+endif()
+jsk_feature("BRISK" "BRISK" "imagebrisk")
+
 
 jsk_nodelet(src/imagesift.cpp
   "imagesift/ImageSift"

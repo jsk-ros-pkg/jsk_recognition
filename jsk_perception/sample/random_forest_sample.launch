@@ -1,0 +1,10 @@
+<launch>
+  <!-- <arg name="" value=""/> -->
+  <!-- <param name="depth_registered" value="true"/> -->
+  <node pkg="jsk_perception" name="random_server" type="random_forest_server.py" args="" output="screen" clear_params="true">
+    <param name="random_forest_train_file" value="$(find jsk_perception)/sample/random_forest_sample_data_x.txt" />
+    <param name="random_forest_train_class_file" value="$(find jsk_perception)/sample/random_forest_sample_data_y.txt" />
+  </node>
+
+  <node pkg="jsk_perception" name="random_client" type="random_forest_client_sample.py" launch-prefix="xterm -e"/>
+</launch>

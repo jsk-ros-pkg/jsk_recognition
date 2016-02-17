@@ -2,6 +2,82 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.16 (2016-02-11)
+-------------------
+
+0.3.15 (2016-02-09)
+-------------------
+
+0.3.14 (2016-02-04)
+-------------------
+
+0.3.13 (2015-12-19)
+-------------------
+
+0.3.12 (2015-12-19)
+-------------------
+
+0.3.11 (2015-12-18)
+-------------------
+
+0.3.10 (2015-12-17)
+-------------------
+
+0.3.9 (2015-12-14)
+------------------
+* [checkerboard_detector] Rename doc soft link
+* Contributors: Kentaro Wada
+
+0.3.8 (2015-12-08)
+------------------
+
+0.3.7 (2015-11-19)
+------------------
+* [checkerboard_detector] Add soft link to doc
+* [checkerboard_detector] Use resizable debug window
+* [checkerboard_detector] Remove build_depend to dynamic_tf_publisher
+* [checkerboard_detector] Add launch for murooka board and update document
+* Contributors: Kentaro Wada, Ryohei Ueda
+
+0.3.6 (2015-09-11)
+------------------
+
+0.3.5 (2015-09-09)
+------------------
+
+0.3.4 (2015-09-07)
+------------------
+
+0.3.3 (2015-09-06)
+------------------
+
+0.3.2 (2015-09-05)
+------------------
+
+0.3.1 (2015-09-04)
+------------------
+
+0.3.0 (2015-09-04)
+------------------
+
+0.2.18 (2015-09-04)
+-------------------
+
+0.2.17 (2015-08-21)
+-------------------
+
+0.2.16 (2015-08-19)
+-------------------
+
+0.2.15 (2015-08-18)
+-------------------
+
+0.2.14 (2015-08-13)
+-------------------
+* CMakeLists.txt: depends on cv_bridge, not opencv checkerboard_detector
+* src/checkerboard_calibration.cpp: use cv.hpp instead of cv.h
+* Contributors: Kei Okada
+
 0.2.13 (2015-06-11)
 -------------------
 * [checkerboard_detector] Add message_throttle parameter

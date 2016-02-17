@@ -1,6 +1,8 @@
 // @author Krishneel Chaudhary, JSK
 
 #include <jsk_perception/sliding_window_object_detector.h>
+#include <boost/assign.hpp>
+#include <jsk_topic_tools/log_utils.h>
 #include <jsk_recognition_msgs/Rect.h>
 #include <jsk_perception/NonMaximumSuppression.h>
 
@@ -58,6 +60,7 @@ namespace jsk_perception
          *pnh_, "output/rects", 1);
       this->pub_image_ = advertise<sensor_msgs::Image>(
          *pnh_, "output/image", 1);
+      onInitPostProcess();
    }
 
    void SlidingWindowObjectDetector::subscribe()
@@ -65,6 +68,8 @@ namespace jsk_perception
       ROS_INFO("Subscribing...");
       this->sub_image_ = pnh_->subscribe(
          "input", 1, &SlidingWindowObjectDetector::imageCb, this);
+      ros::V_string names = boost::assign::list_of("~input");
+      jsk_topic_tools::warnNoRemap(names);
    }
    
    void SlidingWindowObjectDetector::unsubscribe()
@@ -186,8 +191,14 @@ namespace jsk_perception
                hsv_feature = hsv_feature.reshape(1, 1);
                cv::Mat _feature = hog_feature;
                this->concatenateCVMat(hog_feature, hsv_feature, _feature);
+#if CV_MAJOR_VERSION >= 3
+               cv::Mat _ret;
+               float response = this->supportVectorMachine_->predict(
+                                                                     _feature, _ret, false);
+#else
                float response = this->supportVectorMachine_->predict(
                   _feature, false);
+#endif
                if (response == 1) {
                   detection_info.insert(std::make_pair(response, rect));
                } else {
@@ -316,8 +327,13 @@ namespace jsk_perception
    {
       try {
          ROS_INFO("--Loading Trained SVM Classifier");
+#if CV_MAJOR_VERSION >= 3 // http://docs.opencv.org/master/d3/d46/classcv_1_1Algorithm.html
+         this->supportVectorMachine_ = cv::ml::SVM::create();
+         this->supportVectorMachine_ = cv::Algorithm::load<cv::ml::SVM>(this->model_name_);
+#else
          this->supportVectorMachine_ = boost::shared_ptr<cv::SVM>(new cv::SVM);
          this->supportVectorMachine_->load(this->model_name_.c_str());
+#endif
          ROS_INFO("--Classifier Loaded Successfully");
       } catch(cv::Exception &e) {
          ROS_ERROR("--ERROR: Fail to load Classifier \n%s", e.what());

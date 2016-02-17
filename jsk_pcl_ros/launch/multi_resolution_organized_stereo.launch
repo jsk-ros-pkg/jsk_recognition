@@ -1,0 +1,149 @@
+<launch>
+  <arg name="NAMESPACE" default="multiresolution_stereo_image" />
+  <arg name="INPUT_LR" default="left" />
+  <arg name="INPUT_IMAGE" default="/multisense/$(arg INPUT_LR)/image_rect_color" />
+  <arg name="INPUT_CAMERA_INFO" default="/multisense/$(arg INPUT_LR)/camera_info" />
+  <arg name="OUTPUT_IMAGE" default="image_rect_color"/>
+  <arg name="RUN_MANAGER" default="true" />
+  <arg name="MANAGER" default="manager" />
+  <arg name="THROTTLE_RATE" default="1" />
+  <arg name="NODELET_INDEX" default="0" />
+
+  <group ns="$(arg NAMESPACE)">
+    <node pkg="jsk_topic_tools" type="standalone_complexed_nodelet" name="manager"
+          output="screen"
+          if="$(arg RUN_MANAGER)"/>
+    <group ns="$(arg MANAGER)"> <!-- to use same nodelet as points/depth -->
+      <rosparam subst_value="true">
+        nodelets_$(arg NODELET_INDEX):
+          - name: resize_1_1/$(arg INPUT_LR)_$(arg OUTPUT_IMAGE)_relay
+            type: jsk_topic_tools/Relay
+            remappings:
+              - from: ~input
+                to: $(arg INPUT_IMAGE)
+              - from: ~output
+                to: $(arg INPUT_LR)/$(arg OUTPUT_IMAGE)
+          - name: resize_1_1/$(arg INPUT_LR)_$(arg OUTPUT_IMAGE)_compressed_relay
+            type: jsk_topic_tools/Relay
+            remappings:
+              - from: ~input
+                to: $(arg INPUT_IMAGE)/compressed
+              - from: ~output
+                to: $(arg INPUT_LR)/$(arg OUTPUT_IMAGE)/compressed
+          - name: resize_1_1/$(arg INPUT_LR)_$(arg OUTPUT_IMAGE)_theora_relay
+            type: jsk_topic_tools/Relay
+            remappings:
+              - from: ~input
+                to: $(arg INPUT_IMAGE)/theora
+              - from: ~output
+                to: $(arg INPUT_LR)/$(arg OUTPUT_IMAGE)/theora
+          - name: resize_1_1/$(arg INPUT_LR)_$(arg OUTPUT_IMAGE)_info_relay
+            type: jsk_topic_tools/Relay
+            remappings:
+              - from: ~input
+                to: $(arg INPUT_CAMERA_INFO)
+              - from: ~output
+                to: $(arg INPUT_LR)/camera_info
+          - name: resize_1_1/$(arg INPUT_LR)_$(arg OUTPUT_IMAGE)_throttle
+            type: jsk_topic_tools/LightweightThrottle
+            remappings:
+              - from: ~input
+                to: $(arg INPUT_LR)/$(arg OUTPUT_IMAGE)
+              - from: ~output
+                to: $(arg INPUT_LR)/$(arg OUTPUT_IMAGE)/throttle
+          - name: resize_1_2/$(arg INPUT_LR)_$(arg OUTPUT_IMAGE)_resizer
+            type: resized_image_transport/ImageResizer
+            remappings:
+              - from: ~input/image
+                to: /$(arg NAMESPACE)/resize_1_1/$(arg INPUT_LR)/$(arg OUTPUT_IMAGE)
+              - from: ~output/image
+                to: $(arg INPUT_LR)/$(arg OUTPUT_IMAGE)
+          - name: resize_1_2/$(arg INPUT_LR)_$(arg OUTPUT_IMAGE)_throttle
+            type: jsk_topic_tools/LightweightThrottle
+            remappings:
+              - from: ~input
+                to: $(arg INPUT_LR)/$(arg OUTPUT_IMAGE)
+              - from: ~output
+                to: $(arg INPUT_LR)/$(arg OUTPUT_IMAGE)/throttle
+          - name: resize_1_4/$(arg INPUT_LR)_$(arg OUTPUT_IMAGE)_resizer
+            type: resized_image_transport/ImageResizer
+            remappings:
+              - from: ~input/image
+                to: /$(arg NAMESPACE)/resize_1_1/$(arg INPUT_LR)/$(arg OUTPUT_IMAGE)
+              - from: ~output/image
+                to: $(arg INPUT_LR)/$(arg OUTPUT_IMAGE)
+          - name: resize_1_4/$(arg INPUT_LR)_$(arg OUTPUT_IMAGE)_throttle
+            type: jsk_topic_tools/LightweightThrottle
+            remappings:
+              - from: ~input
+                to: $(arg INPUT_LR)/$(arg OUTPUT_IMAGE)
+              - from: ~output
+                to: $(arg INPUT_LR)/$(arg OUTPUT_IMAGE)/throttle
+          - name: resize_1_8/$(arg INPUT_LR)_$(arg OUTPUT_IMAGE)_resizer
+            type: resized_image_transport/ImageResizer
+            remappings:
+              - from: ~input/image
+                to: /$(arg NAMESPACE)/resize_1_1/$(arg INPUT_LR)/$(arg OUTPUT_IMAGE)
+              - from: ~output/image
+                to: $(arg INPUT_LR)/$(arg OUTPUT_IMAGE)
+          - name: resize_1_8/$(arg INPUT_LR)_$(arg OUTPUT_IMAGE)_throttle
+            type: jsk_topic_tools/LightweightThrottle
+            remappings:
+              - from: ~input
+                to: $(arg INPUT_LR)/$(arg OUTPUT_IMAGE)
+              - from: ~output
+                to: $(arg INPUT_LR)/$(arg OUTPUT_IMAGE)/throttle
+      </rosparam>
+    </group>
+    <!-- Images -->
+    <group ns="resize_1_1">
+      <group ns="$(arg INPUT_LR)_$(arg OUTPUT_IMAGE)_throttle">
+        <rosparam subst_value="true">
+          update_rate: $(arg THROTTLE_RATE)
+        </rosparam>
+      </group>
+    </group>
+    <group ns="resize_1_2">
+      <group ns="$(arg INPUT_LR)_$(arg OUTPUT_IMAGE)_resizer">
+        <rosparam>
+          use_camera_info: true
+          resize_scale_x: 0.5
+          resize_scale_y: 0.5
+        </rosparam>
+      </group>
+      <group ns="$(arg INPUT_LR)_$(arg OUTPUT_IMAGE)_throttle">
+        <rosparam subst_value="true">
+          update_rate: $(arg THROTTLE_RATE)
+        </rosparam>
+      </group>
+    </group>
+    <group ns="resize_1_4">
+      <group ns="$(arg INPUT_LR)_$(arg OUTPUT_IMAGE)_resizer">
+        <rosparam>
+          use_camera_info: true
+          resize_scale_x: 0.25
+          resize_scale_y: 0.25
+        </rosparam>
+      </group>
+      <group ns="$(arg INPUT_LR)_$(arg OUTPUT_IMAGE)_throttle">
+        <rosparam subst_value="true">
+          update_rate: $(arg THROTTLE_RATE)
+        </rosparam>
+      </group>
+    </group>
+    <group ns="resize_1_8">
+      <group ns="$(arg INPUT_LR)_$(arg OUTPUT_IMAGE)_resizer">
+        <rosparam>
+          use_camera_info: true
+          resize_scale_x: 0.125
+          resize_scale_y: 0.125
+        </rosparam>
+      </group>
+      <group ns="$(arg INPUT_LR)_$(arg OUTPUT_IMAGE)_throttle">
+        <rosparam subst_value="true">
+          update_rate: $(arg THROTTLE_RATE)
+        </rosparam>
+      </group>
+    </group>
+  </group>
+</launch>

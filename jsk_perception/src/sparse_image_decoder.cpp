@@ -1,12 +1,12 @@
 #include <stdint.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/assign.hpp>
 #include <vector>
 #include <iostream>
 
 #include <nodelet/nodelet.h>
 #include <jsk_topic_tools/log_utils.h>
 #include <image_transport/image_transport.h>
-#include <pluginlib/class_list_macros.h>
 #include <sensor_msgs/image_encodings.h>
 #include <jsk_recognition_msgs/SparseImage.h>
 
@@ -75,6 +75,8 @@ class SparseImageDecoder: public nodelet::Nodelet
   void subscribe() {
     JSK_NODELET_DEBUG("Subscribing to image topic.");
     _spr_img_sub = _nh.subscribe("sparse_image", 3, &SparseImageDecoder::imageCallback, this);
+    ros::V_string names = boost::assign::list_of("sparse_image");
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void unsubscribe() {
@@ -108,5 +110,5 @@ public:
 }; // end of SparseImageDecoder class definition
 } // end of jsk_perception namespace
 
-typedef jsk_perception::SparseImageDecoder SparseImageDecoder;
-PLUGINLIB_DECLARE_CLASS (jsk_perception, SparseImageDecoder, SparseImageDecoder, nodelet::Nodelet);
+#include <pluginlib/class_list_macros.h>
+PLUGINLIB_EXPORT_CLASS(jsk_perception::SparseImageDecoder, nodelet::Nodelet);

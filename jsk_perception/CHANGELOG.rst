@@ -2,6 +2,374 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.16 (2016-02-11)
+-------------------
+* Merge pull request `#1531 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1531>`_ from k-okada/sed_package_xml
+  .travis.yml: sed package.xml to use opencv3
+* remove image_view2 from find_package(catkin)
+* [jsk_perception/CMakeLists.txt] call one of find_package or pkg_check_modules for robot_self_filter.
+* [jsk_perception] Set queue_size=1 for tile_image.py
+* [jsk_perception] Fix variable names in edge_detector.cpp
+* [jsk_perception] Publish result after initialization
+* Contributors: Kei Okada, Masaki Murooka, Ryohei Ueda
+
+0.3.15 (2016-02-09)
+-------------------
+* U and V has strange library options; https://github.com/ros/rosdistro/pull/10436#issuecomment-180763393
+* [jsk_perception] Do not subscribe camera info in calc_flow
+* [jsk_perception] Add more 2d feature samples
+* Fix label probabilities output message
+  Modified:
+  - jsk_perception/node_scripts/sklearn_classifier.py
+* Add queue_size option for bof_histogram_extractor
+* Contributors: Kei Okada, Kentaro Wada, Ryohei Ueda
+
+0.3.14 (2016-02-04)
+-------------------
+* Merge pull request #1513 from garaemon/bounding-box-to-rect-array
+  [jsk_perception] BoundingBoxToRectArray and rect_array_to_image_marker.py
+* Add ~queue_size option for synchronization
+  Modified:
+  - jsk_perception/include/jsk_perception/apply_mask_image.h
+  - jsk_perception/src/apply_mask_image.cpp
+* [jsk_perception/ApplyMask] Add option to clip mask image
+  Modified:
+  - jsk_perception/include/jsk_perception/apply_mask_image.h
+  - jsk_perception/src/apply_mask_image.cpp
+* [jsk_perception/tile_image.py] Add ~no_sync parameter to disable
+  synchronization of input topics.
+* [jsk_perception] Skip for empty sift features
+  Modified:
+  - jsk_perception/node_scripts/bof_histogram_extractor.py
+* [jsk_perception] BoundingBoxToRectArray and rect_array_to_image_marker.py
+* [jsk_perception] [kalman-filtered-objectdetection-marker.l] fix code
+* added default num_threads\_ value and modified readme.md
+* Merge branch 'master' of https://github.com/jsk-ros-pkg/jsk_recognition into saliency_map_generator
+  Conflicts:
+  jsk_perception/CMakeLists.txt
+* [jsk_perception] Except index error on SolidityRagMerge
+  Modified:
+  - jsk_perception/node_scripts/solidity_rag_merge.py
+* parallelized main loop
+* [jsk_perception/bof_histogram_extractor.py] Skip if only background image
+* [jsk_perception] Skip empty image
+* [jsk_perception] Publish info in sample launch file
+  Modified:
+  - jsk_perception/sample/publish_fixed_images.launch
+* [jsk_perception] Stop using deprecated PLUGINLIB_DECLARE_CLASS
+  Modified:
+  - jsk_perception/src/color_histogram.cpp
+  - jsk_perception/src/edge_detector.cpp
+  - jsk_perception/src/hough_circles.cpp
+  - jsk_perception/src/sparse_image_decoder.cpp
+  - jsk_perception/src/sparse_image_encoder.cpp
+* [jsk_perception] Add solidity_rag_merge
+  This is to find image region with high solidity.
+  Firstly, I will use this for vacuum gripper's approach point
+  decision making.
+  Added:
+  - jsk_perception/node_scripts/solidity_rag_merge.py
+* [jsk_perception] Set header correctly
+  Modified:
+  - jsk_perception/node_scripts/label_image_decomposer.py
+* Merge pull request #1457 from wkentaro/fix-unconfigured-cmake-packagexml
+  [jsk_perception] Fix unconfigured cmake and manifest
+* Merge pull request #1455 from wkentaro/publish-label-fg-bg
+  [jsk_perception] Publish label fg/bg decomposed masks
+* [jsk_perception] Check ROS_DISTRO for find_package of robot_self_filter
+* [jsk_perception] Fix unconfigured cmake and manifest
+  Modified:
+  - jsk_perception/CMakeLists.txt
+  - jsk_perception/package.xml
+* [jsk_perception] Keep original encoding and scale to visualize
+  Modified:
+  - jsk_perception/node_scripts/label_image_decomposer.py
+* [jsk_perception] ColorizeLabels info -> debug
+  Modified:
+  - jsk_perception/src/colorize_labels.cpp
+* [jsk_perception] Add roslint_cpp not as rostest
+  Modified:
+  jsk_perception/CMakeLists.txt
+* [jsk_perception] Publish label fg/bg decomposed masks
+  Modified:
+  - jsk_perception/node_scripts/label_image_decomposer.py
+* Merge pull request #1398 from wkentaro/roslint-test-for-node-scripts
+  [jsk_perception] Run roslint for python code
+* [jsk_perception] Visualize label in label_image_decomposer.py
+  Modified:
+  - jsk_perception/node_scripts/label_image_decomposer.py
+* [jsk_perception] Read reference color histogram from a yaml file in PolygonArrayColorLikelihood
+  to avoid race condition between input topics
+  Modified:
+  - doc/jsk_perception/nodes/polygon_array_color_likelihood.md
+  - jsk_perception/CMakeLists.txt
+  - jsk_perception/include/jsk_perception/polygon_array_color_likelihood.h
+  - jsk_perception/package.xml
+  - jsk_perception/src/polygon_array_color_likelihood.cpp
+* [jsk_perception] Keep original resolution if all the input images has
+  same shape and add ~draw_input_topic parameter to draw topic name on
+  the tiled images
+  Modified:
+  - jsk_perception/node_scripts/tile_image.py
+  - jsk_recognition_utils/python/jsk_recognition_utils/visualize.py
+* Merge pull request #1426 from wkentaro/merge-sklearn-to-jsk-perception
+  Merge sklearn to jsk_perception
+* [jsk_perception] Add basic_2d_features.launch to overview
+  effective technique
+  Added:
+  - jsk_perception/launch/basic_2d_features.launch
+* [jsk_perception] Run roslint for python code
+* Merge pull request #1438 from wkentaro/image-to-label
+  [jsk_perception] Add image_to_label.py
+* [jsk_perception] Use StrictVersions instead of ROS_DISTRO
+  Modified:
+  - jsk_perception/node_scripts/tile_image.py
+* [jsk_perception/label_image_decomposer.py] Fix typo
+  Modified:
+  - jsk_perception/node_scripts/label_image_decomposer.py
+* [jsk_perception/label_image_decomposer.py] Can specify queue_size
+  Modified:
+  - jsk_perception/node_scripts/label_image_decomposer.py
+* [jsk_perception] Fix typo
+  Modified:
+  - jsk_perception/node_scripts/label_image_decomposer.py
+* [jsk_perception] Fix tile_image.py for hydro.
+  1. Disable approximate sync for hydro. it's not supported on hydro
+  2. Use PIL.Image.frombytes instead of PIL.Image.fromstring
+* [jsk_perception] Add image_to_label.py
+  Added:
+  - jsk_perception/node_scripts/image_to_label.py
+* [jsk_perception] Fix typo in bof_histogram_extractor.py
+  Modified:
+  - jsk_perception/node_scripts/bof_histogram_extractor.py
+* Merge sklearn to jsk_perception
+  Modified:
+  jsk_pcl_ros/CMakeLists.txt
+  jsk_pcl_ros/package.xml
+  jsk_perception/package.xml
+  Added:
+  jsk_perception/node_scripts/random_forest_server.py
+  jsk_perception/sample/random_forest_client_sample.py
+  jsk_perception/sample/random_forest_sample.launch
+  jsk_perception/sample/random_forest_sample_data_x.txt
+  jsk_perception/sample/random_forest_sample_data_y.txt
+* added param for printing fps to frame
+* nodelet for computing image space saliency map
+* Contributors: Kamada Hitoshi, Kei Okada, Kentaro Wada, Ryohei Ueda, Krishneel Chaudhary
+
+0.3.13 (2015-12-19)
+-------------------
+
+0.3.12 (2015-12-19)
+-------------------
+* Revert "[jsk_perception] slic as submodule"
+* Contributors: Ryohei Ueda
+
+0.3.11 (2015-12-18)
+-------------------
+* [jsk_perception] slic as submodule
+* Contributors: Ryohei Ueda
+
+0.3.10 (2015-12-17)
+-------------------
+* [jsk_perception] Add utils to save images by request or from bagfile
+  I sent PR to upstream:
+  - https://github.com/ros-perception/image_pipeline/pull/159
+  - https://github.com/ros-perception/image_pipeline/pull/163
+  - https://github.com/ros-perception/image_pipeline/pull/164
+  Added:
+  jsk_perception/node_scripts/extract_images_sync
+  jsk_perception/node_scripts/image_saver_sync
+  jsk_perception/node_scripts/publish_header
+* [jsk_pcl_ros] Check header.frame_id before resolving 3-D spacially
+  Modified:
+  jsk_pcl_ros/src/multi_plane_extraction_nodelet.cpp
+  jsk_perception/src/polygon_array_color_histogram.cpp
+  jsk_recognition_utils/include/jsk_recognition_utils/pcl_ros_util.h
+  jsk_recognition_utils/src/pcl_ros_util.cpp
+* Contributors: Kentaro Wada, Ryohei Ueda
+
+0.3.9 (2015-12-14)
+------------------
+* [jsk_perception] Test slop with test_topic_published.py
+  Depends on https://github.com/jsk-ros-pkg/jsk_common/pull/1254
+* [jsk_perception] Specific test name for each test files
+* [jsk_perception] test_topic_published.py does not work on hydro travis/jenkins
+  Modified:
+  jsk_perception/CMakeLists.txt
+* [jsk_perception] Warn about segfault with large size image in SlicSuperpixel
+  Modified:
+  jsk_perception/src/slic_superpixels.cpp
+* [jsk_perception] Test slic_super_pixels
+* merge origin/master
+* use shared_ptr for self_mask instance.
+* Merge remote-tracking branch 'origin/master' into add-robot-mask
+* [jsk_perception] Clean up duplicated packages in package.xml
+* [jsk_perception] Compute polygon likelihood based on color histogram.
+* [jsk_perception] Add PolygonArrayColorHistogram
+* add sample launch file.
+* add robot_to_mask source files.
+* Contributors: Kentaro Wada, Masaki Murooka, Ryohei Ueda
+
+0.3.8 (2015-12-08)
+------------------
+* [jsk_perception] Add CATKIN_ENABLE_TESTING if block
+* Use ccache if installed to make it fast to generate object file
+* [jsk_perception] Refactor publish_fixed_images.launch and fix test
+* [jsk_perception] Test split_fore_background.py
+* [jsk_perception] Fix header of split_fore_background
+* [jsk_perception] Refactor publish_fixed_images.launch and fix test
+* [jsk_perception] Specify encoding by rosparam in image_publisher.py
+* [jsk_perception] Refactor image_publisher.py
+* [jsk_perception] Fix supported encodings of split_fore_background.py
+  It supports both 16UC1 and 32FC1.
+* [jsk_perception] Fix supported encodings of split_fore_background.py
+  It supports both 16UC1 and 32FC1.
+* [jsk_perception] Add warnNoRemap in ``subscribe()``
+* [split fore background] add conversion for depth image format 32FC1
+* [jsk_perception] Set frame_id by rosparam
+* [jsk_perception] Publish mask also in SplitForeBackground
+* add applying blur to output image on edge detector
+* [jsk_perception] Split FG/BG with local depth max
+* Contributors: Kei Okada, Kentaro Wada, Shingo Kitagawa, Yohei Kakiuchi
+
+0.3.7 (2015-11-19)
+------------------
+* Use gcc -z defs to check undefined symbols in shared
+  objects (jsk_recognitoin_utils, jsk_pcl_ros, jsk_perception).
+  build_check.cpp cannot run on the environment using  multiple processes
+  because of invoking libjsk_pcl_ros.so link.
+* Merge pull request `#1320 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1320>`_ from wkentaro/colorize_labels-with-146-colors
+  [jsk_perception] ColorizeLabels support 20->146 labels
+* [jsk_perception] ColorizeLabels support 20->146 labels
+* [jsk_perception] Call onInitPostProcess() in last of onInit()
+* [jsk_perception] Warn no remapping for input topics
+* [jsk_perception] Test whether get topic msg
+* [jsk_perception] FastRCNN: (new node)
+* [jsk_perception] Test label image decomposer async
+* [jsk_perception] Rename SimpleClassifier -> ScikitLearnClassifier
+* [jsk_perception] Download trained_data for apc recognition sample
+* [jsk_perception] Sort build_depend & run_depend
+* [jsk_perception] Publish VectorArray in simple_classifier
+* [jsk_perception] Publish VectorArray in bof_histogram_extractor
+* [jsk_perception] Convert mask to label image
+* [jsk_perception] Convert mask to label image
+* [jsk_perception] Make connection based and use ClassificationResult.msg
+* [jsk_perception] Care about data size when creating bof data
+* [jsk_perception] Specify data size when creating bof data
+* [jsk_perception] Update BoF object recognition sample
+* [jsk_perception] Extract bof histogram with ConnectionBasedTransport
+* [jsk_perception] Create bof & bof_hist dataset
+* [jsk_perception] Creating sift dataset script
+* [jsk_perception] Move ros node scripts/ -> node_scripts/
+  Closes `#1239 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1239>`_
+* Merge pull request `#1236 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1236>`_ from wkentaro/slop-param
+  [jsk_perception] slop as param for label_image_decomposer
+* Merge pull request `#1235 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1235>`_ from wkentaro/skip-0-label-image-decomposer
+  [jsk_perception] Skip 0 label in label_image_decomposer
+* [jsk_perception] slop as param for label_image_decomposer
+* [jsk_perception] Skip 0 label in label_image_decomposer
+* [jsk_perception] Debug output about params
+* [jsk_perception] Add LabelImageDecomposer
+* [jsk_perception] Rename tile_images -> tile_image
+* [jsk_perception] Use ConnectionBasedTransport and get_tile_image()
+* [jsk_perception/point_pose_extractor] Remove pragma message in compiling
+  and fix format warning
+* add oriented_gradient and oriented_gradient_node to install target and export libraries
+* [jsk_perception] Add tile_images.py
+* Contributors: Hiroaki Yaguchi, Kei Okada, Kentaro Wada, Ryohei Ueda
+
+0.3.6 (2015-09-11)
+------------------
+
+0.3.5 (2015-09-09)
+------------------
+
+0.3.4 (2015-09-07)
+------------------
+* Swap doc soft links (to make 'Edit on GitHub' work)
+* ColorizeFloatImage correct image link
+  Closes https://github.com/jsk-ros-pkg/jsk_recognition/issues/1165
+* Contributors: Kentaro Wada
+
+0.3.3 (2015-09-06)
+------------------
+* [jsk_perception] README.md -> readthedocs.org
+* Revert "[jsk_perception] use sphinx for rosdoc"
+  This reverts commit 9e4ba233599b21c6422ec9a45f395b460c53264d.
+* [jsk_perception/TabletopColorDifferenceLikelihood] Use geo/polygon.h
+  instead of geo_util.h
+* Contributors: Kentaro Wada, Ryohei Ueda
+
+0.3.2 (2015-09-05)
+------------------
+* [jsk_perception] Ignore autogenerated files
+* [jsk_perception] Use histograms to compute distance in TabletopColorDifferenceLikelihood
+* Contributors: Ryohei Ueda
+
+0.3.1 (2015-09-04)
+------------------
+* [jsk_pcl_ros, jsk_perception] Fix dependency of jsk_recognition_utils for child packages
+  like jsk_rviz_plugins
+* Contributors: Ryohei Ueda
+
+0.3.0 (2015-09-04)
+------------------
+* [jsk_perception/CMakeLists.txt] set ROS_PACKAGE_PATH before run roseus using package://
+* [jsk_recognition_utils] Introduce new package jsk_recognition_utils in order to use utility libraries defined in jsk_pcl_ros in jsk_perception
+* Contributors: Kei Okada, Ryohei Ueda
+
+0.2.18 (2015-09-04)
+-------------------
+* [jsk_perception] Do not specify sexp from cmake, just write in file
+* [jsk_perception] Add .gitignore about auto-generated files
+* [jsk_perception] Add template directory to run eusmodel_template_gen.l correctly
+* [jsk_perception] Add PolygonArrayToLabelImage nodelet
+* [jsk_perception] Move matchtemplate.py from src to scripts
+* [jsk_perception] Move eusmodel_template_gen.l location from src to euslisp
+* [jsk_perception] Do not download trained data in compilation time and
+  add script to donload them
+* [jsk_perception] use sphinx for rosdoc
+* Revert "[jsk_perception] Add rosdoc.yaml to overwrite default file_patterns"
+* [package.xml] Updatae Author
+* [jsk_perception] use README.md as mainpage.doc
+* [jsk_perception] Add rosdoc.yaml to overwrite default file_patterns
+* Contributors: Kei Okada, Kentaro Wada, Ryohei Ueda
+
+0.2.17 (2015-08-21)
+-------------------
+
+0.2.16 (2015-08-19)
+-------------------
+* [CMakeLists.txt] we can not use rospack within cmake process
+* Contributors: Kei Okada
+
+0.2.15 (2015-08-18)
+-------------------
+* Merge pull request `#1058 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1058>`_ from garaemon/uncomment-generate-template
+  Uncomment generate template
+* [jsk_perception] Add executable flag to eusmodel_template_gen.l
+* [jsk_perception] uncomment generate template
+* Contributors: JSK-PR2, Ryohei Ueda
+
+0.2.14 (2015-08-13)
+-------------------
+* [jsk_perception] pub posewithcovariancestamped
+* [jsk_perception] Add nodelet ColorizeFloatImage to colorize generic float image
+* sliding_window_object_detector : opencv3 has different API for cv::ml::SVM
+* src/virtual_camera_mono: use cv.hpp and opencv2 code for cv::getPerspectiveTransform
+* src/snake_segmentation: snake (legacy.hpp) is disabled on opencv3
+* src/point_pose_extractor: use cv.hpp
+* linemode is moved to opencv_contrib, disabled for now (only for opencv3)
+* src/calc_flow.cpp: use cv.hpp instead of cv.h
+* background_substraction: cv::BackgroundSubtractorMOG2 is abstract type for opencv3
+* CMakeLists.txt: depends on cv_bridge, not opencv (jsk_perception)
+* [jsk_perception] Update readme
+* [jsk_perception] Add simple_classifier*
+* [jsk_perception] Scripts for bof and its hist extractor
+* do not convert image encode in kmeans and gaussian_blur
+* Contributors: Kei Okada, Kentaro Wada, Ryohei Ueda, Hitoshi Kamada, Masaki Murooka
+
 0.2.13 (2015-06-11)
 -------------------
 * [jsk_perception] Use dynamic_reconfigure in ImageTimeDiff

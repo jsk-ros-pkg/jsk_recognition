@@ -1,6 +1,6 @@
 <package>
   <name>jsk_perception</name>
-  <version>0.2.13</version>
+  <version>0.3.16</version>
 
   <description>
 
@@ -8,71 +8,87 @@
 
   </description>
   <author>Manabu Saito</author>
+  <author email="ueda@jsk.t.u-tokyo.ac.jp">Ryohei Ueda</author>
   <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
+  <maintainer email="ueda@jsk.t.u-tokyo.ac.jp">Ryohei Ueda</maintainer>
 
   <license>BSD</license>
   <url>http://ros.org/wiki/jsk_perception</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>mk</build_depend>
-  <build_depend>git</build_depend>
-  <build_depend>rospy</build_depend>
-  <build_depend>std_msgs</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>geometry_msgs</build_depend>
+  <!-- sort in alphabetical order -->
+  <build_depend>angles</build_depend>
+  <build_depend>cmake_modules</build_depend>
   <build_depend>cv_bridge</build_depend>
-  <build_depend>image_geometry</build_depend>
-  <build_depend>image_transport</build_depend>
-  <build_depend>image_view2</build_depend>
   <build_depend>driver_base</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>eigen</build_depend>
-  <build_depend>roscpp</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>git</build_depend>
+  <build_depend>image_geometry</build_depend>
+  <build_depend>image_transport</build_depend>
+  <build_depend>image_view2</build_depend>
+  <build_depend>jsk_recognition_msgs</build_depend>
+  <build_depend>jsk_recognition_utils</build_depend>
+  <build_depend>jsk_topic_tools</build_depend>
   <build_depend>message_generation</build_depend>
-  <build_depend>rosbuild</build_depend>
-  <build_depend>cmake_modules</build_depend>
   <build_depend>mk</build_depend>
-  <build_depend>angles</build_depend>
   <build_depend>nodelet</build_depend>
-  <build_depend>rostest</build_depend>
+  <build_depend>pcl_ros</build_depend>
+  <build_depend>posedetection_msgs</build_depend>
+  <build_depend>rosbuild</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>roseus</build_depend>
   <build_depend>rospack</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>std_msgs</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>eigen</build_depend>
   <build_depend>jsk_recognition_msgs</build_depend>
   <build_depend>posedetection_msgs</build_depend>
   <build_depend>libcmt</build_depend>
+  <build_depend>robot_self_filter</build_depend>
+  <build_depend>yaml-cpp</build_depend>
 
-  <run_depend>rospy</run_depend>
-  <!-- <run_depend>roseus</run_depend> -->
-  <run_depend>std_msgs</run_depend>
-  <run_depend>sensor_msgs</run_depend>
-  <run_depend>geometry_msgs</run_depend>
+  <run_depend>angles</run_depend>
   <run_depend>cv_bridge</run_depend>
-  <run_depend>image_geometry</run_depend>
-  <run_depend>image_transport</run_depend>
-  <run_depend>image_view2</run_depend>
   <run_depend>driver_base</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>eigen</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>message_runtime</run_depend>
-  <run_depend>rosbuild</run_depend>
-  <run_depend>mk</run_depend>
-  <run_depend>angles</run_depend>
-  <run_depend>nodelet</run_depend>
-  <run_depend>rostest</run_depend>
-  <run_depend>rospack</run_depend>
-  <run_depend>tf</run_depend>
-  <run_depend>eigen</run_depend>
-  <build_depend>jsk_topic_tools</build_depend>
-  <run_depend>jsk_topic_tools</run_depend>
-  <build_depend>pcl_ros</build_depend>
-  <run_depend>pcl_ros</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>image_geometry</run_depend>
+  <run_depend>image_transport</run_depend>
+  <run_depend>image_view2</run_depend>
   <run_depend>jsk_recognition_msgs</run_depend>
+  <run_depend>jsk_recognition_utils</run_depend>
+  <run_depend>jsk_topic_tools</run_depend>
+  <run_depend>message_runtime</run_depend>
+  <run_depend>mk</run_depend>
+  <run_depend>ml_classifiers</run_depend>
+  <run_depend>nodelet</run_depend>
+  <run_depend>pcl_ros</run_depend>
   <run_depend>posedetection_msgs</run_depend>
   <run_depend>libcmt</run_depend>
-  
+  <run_depend>python-dlib</run_depend>
+  <run_depend>python-gdown</run_depend>
+  <run_depend>python-sklearn</run_depend>
+  <run_depend>rosbuild</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>roseus</run_depend>
+  <run_depend>rospack</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>robot_self_filter</run_depend>
+  <run_depend>yaml-cpp</run_depend>
+
+  <test_depend>roslint</test_depend>
+  <test_depend>rostest</test_depend>
+
+  <test_depend>roslint</test_depend>
+
   <export>
     <nodelet plugin="${prefix}/jsk_perception_nodelets.xml"/>
   </export>

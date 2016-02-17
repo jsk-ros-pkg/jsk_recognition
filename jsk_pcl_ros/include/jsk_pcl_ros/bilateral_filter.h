@@ -39,7 +39,7 @@
 
 #include <pcl_ros/publisher.h>
 #include <jsk_topic_tools/connection_based_nodelet.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <jsk_pcl_ros/BilateralFilterConfig.h>
 #include <dynamic_reconfigure/server.h>
 

@@ -1,0 +1,84 @@
+<launch>
+  <arg name="MANAGER" default="polygon_array_transformer_example" />
+  <arg name="INPUT_POINT_CLOUD" default="/full_cloud2" />
+
+  <node pkg="nodelet" type="nodelet" name="$(arg MANAGER)"
+        args="manager"
+        output="screen"/>
+
+  <node pkg="nodelet" type="nodelet" name="transform_cloud"
+        args="load jsk_pcl/TfTransformCloud $(arg MANAGER)">
+    <remap from="~input" to="$(arg INPUT_POINT_CLOUD)" />
+    <param name="target_frame_id" value="imu_floor" />
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="passthrough_z"
+        args="load pcl/PassThrough $(arg MANAGER)"
+        clear_params="true">
+    <remap from="~input" to="transform_cloud/output" />
+    <rosparam>
+      filter_field_name: z
+      filter_limit_min: -2.0
+      filter_limit_max: 3.0
+      filter_limit_negative: False
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="passthrough_y"
+        args="load pcl/PassThrough $(arg MANAGER)"
+        clear_params="true">
+    <remap from="~input" to="passthrough_z/output" />
+    <rosparam>
+      filter_field_name: y
+      filter_limit_min: -3.0
+      filter_limit_max: 3.0
+      filter_limit_negative: False
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="passthrough_x"
+        args="load pcl/PassThrough $(arg MANAGER)"
+        clear_params="true">
+    <remap from="~input" to="passthrough_y/output" />
+    <rosparam>
+      filter_field_name: x
+      filter_limit_min: -5.0
+      filter_limit_max: 10.0
+      filter_limit_negative: False
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="normal_estimation"
+        args="load jsk_pcl/NormalEstimationOMP $(arg MANAGER)"
+        clear_params="true">
+    <remap from="~input" to="passthrough_x/output" />
+    <rosparam>
+      k_search: 50
+      spatial_locator: 2
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="region_segment"
+        args="load jsk_pcl/RegionGrowingMultiplePlaneSegmentation $(arg MANAGER)"
+        clear_params="true">
+    <remap from="~input" to="normal_estimation/output_with_xyz" />
+    <remap from="~input_normal" to="normal_estimation/output_with_xyz" />
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="polygon_array_transformer"
+        args="load jsk_pcl/PolygonArrayTransformer $(arg MANAGER)"
+        clear_params="true">
+    <remap from="~input_polygons" to="region_segment/output/polygons" />
+    <remap from="~input_coefficients" to="region_segment/output/coefficients" />
+    <rosparam>
+      frame_id: map
+    </rosparam>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="snapshot"
+        args="load jsk_topic_tools/Snapshot $(arg MANAGER)"
+        clear_params="true">
+    <remap from="~input" to="polygon_array_transformer/output_polygons" />
+  </node>
+
+</launch>

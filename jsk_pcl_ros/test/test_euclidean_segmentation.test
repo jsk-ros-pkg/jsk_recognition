@@ -1,0 +1,41 @@
+<launch>
+
+  <!-- load log -->
+  <rosparam command="load"
+            file="$(find jsk_pcl_ros)/test_data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/rosparam.yaml" />
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/test_data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/vision.compressed.bag --clock --loop">
+  </node>
+
+  <arg name="INPUT_CLOUD" value="/kinect2_head/hd/points" />
+
+  <node name="euclidean_clustering"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/EuclideanClustering">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+  </node>
+
+  <node name="transform_0"
+        pkg="topic_tools" type="transform"
+        args="/euclidean_clustering/cluster_num /euclidean_clustering/cluster_num_assert std_msgs/Bool 'm.data > 20' --wait-for-start" />
+  <node name="transform_1"
+        pkg="topic_tools" type="transform"
+        args="/euclidean_clustering/output/cluster_indices /euclidean_clustering/output/cluster_indices_assert std_msgs/Bool 'len(m) > 20' --wait-for-start" />
+
+  <test test-name="test_euclidean_segmentation_cluster_num"
+        name="test_euclidean_segmentation_cluster_num"
+        time-limit="360"
+        pkg="jsk_tools" type="test_stdout.py">
+    <param name="~command" value="rostopic echo /euclidean_clustering/cluster_num_assert/data -n1" />
+    <param name="~stdout_line0" type="str" value="True" />
+  </test>
+  <test test-name="test_euclidean_segmentation_cluster_indices"
+        name="test_euclidean_segmentation_cluster_indices"
+        time-limit="360"
+        pkg="jsk_tools" type="test_stdout.py">
+    <param name="~command" value="rostopic echo /euclidean_clustering/output/cluster_indices_assert/data -n1" />
+    <param name="~stdout_line0" type="str" value="True" />
+  </test>
+
+</launch>

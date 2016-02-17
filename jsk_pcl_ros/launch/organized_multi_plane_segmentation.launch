@@ -1,6 +1,4 @@
 <launch>
-  <remap from="/diagnostics" to="/diagnostics_pcl" />
-  <remap from="/diagnostics_agg" to="/diagnostics_pcl_agg" />
   <arg name="BASE_FRAME_ID" default="odom" />
   <arg name="RUN_SELF_FILTER" default="false"/>
   <arg name="SELF_FILTER_PARAM" default="$(find jsk_pr2_startup)/jsk_pr2_sensors/tilt_self_filter.yaml" />
@@ -17,6 +15,7 @@
   <arg name="MACHINE" default="localhost"/>
   <arg name="GDB" default="false" />
   <arg name="SAVE_SELECTED_CLOUD" default="false" />
+  <arg name="ORGANIZED" default="true" />
   <machine name="localhost" address="localhost" />
   <group if="$(arg LAUNCH_MANAGER)">
     <node pkg="nodelet" type="nodelet" name="$(arg MANAGER)"
@@ -63,26 +62,67 @@
     <remap from="~output" to="input_relay/output" />
     <rosparam command="load" file="$(arg FILTER_JOINT_PARAM)" />
   </node>
-  
-  <node pkg="nodelet" type="nodelet" name="multi_plane_estimate"
-        machine="$(arg MACHINE)"
-        args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg MANAGER)"
-        clear_params="false">
-    <remap from="~input" to="input_relay/output"/>
-    <rosparam>
-      max_curvature: 0.01
-      estimate_normal: true
-    </rosparam>
-  </node>
-
+  <group if="$(arg ORGANIZED)">
+    <node pkg="nodelet" type="nodelet" name="multi_plane_estimate"
+          machine="$(arg MACHINE)"
+          args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg MANAGER)"
+          clear_params="false">
+      <remap from="~input" to="input_relay/output"/>
+      <rosparam>
+        max_curvature: 0.01
+        estimate_normal: true
+      </rosparam>
+    </node>
+  </group>
+  <group unless="$(arg ORGANIZED)">
+    <node pkg="nodelet" type="nodelet"
+          args="load pcl/NormalEstimationOMP $(arg MANAGER)"
+          name="laser_normal_estimation">
+      <remap from="~input" to="input_relay/output" />
+      <rosparam>
+        radius_search: 0
+        k_search: 40
+        # 0, => ANN, 1 => FLANN, 2 => Organized
+        spatial_locator: 1
+      </rosparam>
+    </node>
+    <!-- <node pkg="nodelet" type="nodelet" -->
+    <!--       args="load jsk_pcl/NormalConcatenater $(arg MANAGER)" -->
+    <!--       name="laser_normal_concat" -->
+    <!--       > -->
+    <!--   <remap from="~input" to="input_relay/output"/> -->
+    <!--   <remap from="~normal" to="laser_normal_estimation/output" /> -->
+    <!-- </node> -->
+    
+    <node pkg="nodelet" type="nodelet" name="multi_plane_estimate"
+          args="load jsk_pcl/RegionGrowingMultiplePlaneSegmentation $(arg MANAGER)" >
+      <remap from="~input" to="input_relay/output" />
+      <remap from="~input_normal" to="laser_normal_estimation/output" />
+      <remap from="~output/clustering_result" to="~output_refined"/>
+      <rosparam>
+        # cluster_tolerance: 0.3
+        max_curvature: 0.1
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="polygon_relay"
+          args="load jsk_topic_tools/Relay $(arg MANAGER)">
+      <remap from="~input" to="multi_plane_estimate/output/polygons" />
+      <remap from="~output" to="multi_plane_estimate/output_refined_polygon" />
+    </node>
+    <node pkg="nodelet" type="nodelet" name="coefficients_relay"
+          args="load jsk_topic_tools/Relay $(arg MANAGER)">
+      <remap from="~input" to="multi_plane_estimate/output/coefficients" />
+      <remap from="~output" to="multi_plane_estimate/output_refined_coefficients" />
+    </node>
+  </group>
   <node pkg="nodelet" type="nodelet" name="colorize_error"
         machine="$(arg MACHINE)"
         args="load jsk_pcl/ColorizeDistanceFromPlane $(arg MANAGER)"
         clear_params="false">
     <remap from="~input" to="input_relay/output"/>
     <remap from="~input_indices" to="multi_plane_estimate/output_refined"/>
-    <remap from="~input_coefficients" to="multi_plane_estimate/output_refined_coefficients"/>
-    <remap from="~input_polygons" to="/multi_plane_estimate/output_refined_polygon" />
+    <remap from="~input_coefficients" to="multi_plane_estimate/output_refined_coefficients"/>    
+    <remap from="~input_polygons" to="/multi_plane_estimate/output_refined_polygon"/>
   </node>
   
   <node pkg="nodelet" type="nodelet"
@@ -292,13 +332,6 @@
       <arg name="USE_PLANE" value="true" />
     </include>
   </group>
-  <node pkg="diagnostic_aggregator" type="aggregator_node"
-        respawn="true"
-        name="pcl_diagnostic_aggregator">
-  </node>
-  <node pkg="rqt_robot_monitor" type="rqt_robot_monitor"
-        name="pcl_diagnostics_monitor" />
-
   <group if="$(arg SAVE_SELECTED_CLOUD)">
     <node pkg="nodelet" type="nodelet" name="pointcloud_transform_in_box"
           args="load jsk_pcl/TransformPointcloudInBoundingBox /$(arg MANAGER)">

@@ -1,0 +1,21 @@
+<launch>
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <remap from="~output" to="image" />
+    <param name="file_name" value="$(find jsk_perception)/sample/ros_fuerte.jpg" />
+  </node>
+
+  <node name="slic_super_pixels"
+        pkg="jsk_perception" type="slic_super_pixels" />
+
+  <test test-name="test_slic_super_pixels"
+        name="test_slic_super_pixels"
+        pkg="jsk_tools" type="test_topic_published.py">
+    <rosparam>
+      topic_0: /slic_super_pixels/output
+      timeout_0: 10
+    </rosparam>
+  </test>
+
+</launch>

@@ -1,0 +1,41 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/publish_fixed_images.launch" />
+
+  <node name="split_fore_background_0"
+        pkg="jsk_perception" type="split_fore_background.py">
+    <remap from="~input" to="raw_image_bgr/image_color" />
+    <remap from="~input/depth" to="depth_image_16uc1/image_depth" />
+    <rosparam>
+      approximate_sync: true
+      always_subscribe: true
+    </rosparam>
+  </node>
+  <!-- test output message come -->
+  <test test-name="test_split_fore_background_0"
+        name="test_split_fore_background_0"
+        pkg="jsk_tools" type="test_stdout.py">
+    <param name="command" value="timeout 20 rostopic echo /split_fore_background_0/output/fg/header/frame_id -n1 || true" />
+    <param name="stdout_line0" value="camera" />
+    <param name="shell" value="true" />
+  </test>
+
+  <node name="split_fore_background_1"
+        pkg="jsk_perception" type="split_fore_background.py">
+    <remap from="~input" to="raw_image_bgr/image_color" />
+    <remap from="~input/depth" to="depth_image_32fc1/image_depth" />
+    <rosparam>
+      approximate_sync: true
+      always_subscribe: true
+    </rosparam>
+  </node>
+  <!-- test output message come -->
+  <test test-name="test_split_fore_background_1"
+        name="test_split_fore_background_1"
+        pkg="jsk_tools" type="test_stdout.py">
+    <param name="command" value="timout 20 rostopic echo /split_fore_background_1/output/fg/header/frame_id -n1 || true" />
+    <param name="stdout_line0" value="camera" />
+    <param name="shell" value="true" />
+  </test>
+
+</launch>

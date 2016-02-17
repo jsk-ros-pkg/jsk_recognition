@@ -1,0 +1,208 @@
+---
+header: 
+  seq: 2
+  stamp: 
+    secs: 1450095585
+    nsecs: 608708000
+  frame_id: left_camera_optical_frame
+bins: 
+  - 
+    min_value: 0.0
+    max_value: 3.59999990463
+    count: 0
+  - 
+    min_value: 3.59999990463
+    max_value: 7.19999980927
+    count: 0
+  - 
+    min_value: 7.19999980927
+    max_value: 10.7999992371
+    count: 0
+  - 
+    min_value: 10.7999992371
+    max_value: 14.3999996185
+    count: 0
+  - 
+    min_value: 14.3999996185
+    max_value: 18.0
+    count: 3
+  - 
+    min_value: 18.0
+    max_value: 21.5999984741
+    count: 20
+  - 
+    min_value: 21.5999984741
+    max_value: 25.1999988556
+    count: 11
+  - 
+    min_value: 25.1999988556
+    max_value: 28.7999992371
+    count: 36
+  - 
+    min_value: 28.7999992371
+    max_value: 32.3999977112
+    count: 65
+  - 
+    min_value: 32.3999977112
+    max_value: 36.0
+    count: 392
+  - 
+    min_value: 36.0
+    max_value: 39.5999984741
+    count: 383
+  - 
+    min_value: 39.5999984741
+    max_value: 43.1999969482
+    count: 4835
+  - 
+    min_value: 43.1999969482
+    max_value: 46.7999992371
+    count: 1812
+  - 
+    min_value: 46.7999992371
+    max_value: 50.3999977112
+    count: 9048
+  - 
+    min_value: 50.3999977112
+    max_value: 54.0
+    count: 2840
+  - 
+    min_value: 54.0
+    max_value: 57.5999984741
+    count: 10182
+  - 
+    min_value: 57.5999984741
+    max_value: 61.1999969482
+    count: 3968
+  - 
+    min_value: 61.1999969482
+    max_value: 64.7999954224
+    count: 10902
+  - 
+    min_value: 64.7999954224
+    max_value: 68.4000015259
+    count: 2287
+  - 
+    min_value: 68.4000015259
+    max_value: 72.0
+    count: 3247
+  - 
+    min_value: 72.0
+    max_value: 75.5999984741
+    count: 9037
+  - 
+    min_value: 75.5999984741
+    max_value: 79.1999969482
+    count: 615
+  - 
+    min_value: 79.1999969482
+    max_value: 82.7999954224
+    count: 415
+  - 
+    min_value: 82.7999954224
+    max_value: 86.3999938965
+    count: 352
+  - 
+    min_value: 86.3999938965
+    max_value: 90.0
+    count: 87
+  - 
+    min_value: 90.0
+    max_value: 93.5999984741
+    count: 183
+  - 
+    min_value: 93.5999984741
+    max_value: 97.1999969482
+    count: 122
+  - 
+    min_value: 97.1999969482
+    max_value: 100.799995422
+    count: 25
+  - 
+    min_value: 100.799995422
+    max_value: 104.399993896
+    count: 21
+  - 
+    min_value: 104.399993896
+    max_value: 108.0
+    count: 0
+  - 
+    min_value: 108.0
+    max_value: 111.599998474
+    count: 0
+  - 
+    min_value: 111.599998474
+    max_value: 115.199996948
+    count: 0
+  - 
+    min_value: 115.199996948
+    max_value: 118.799995422
+    count: 0
+  - 
+    min_value: 118.799995422
+    max_value: 122.399993896
+    count: 0
+  - 
+    min_value: 122.399993896
+    max_value: 126.0
+    count: 0
+  - 
+    min_value: 126.0
+    max_value: 129.599990845
+    count: 0
+  - 
+    min_value: 129.599990845
+    max_value: 133.199996948
+    count: 0
+  - 
+    min_value: 133.199996948
+    max_value: 136.800003052
+    count: 0
+  - 
+    min_value: 136.800003052
+    max_value: 140.399993896
+    count: 0
+  - 
+    min_value: 140.399993896
+    max_value: 144.0
+    count: 0
+  - 
+    min_value: 144.0
+    max_value: 147.599990845
+    count: 0
+  - 
+    min_value: 147.599990845
+    max_value: 151.199996948
+    count: 0
+  - 
+    min_value: 151.199996948
+    max_value: 154.800003052
+    count: 0
+  - 
+    min_value: 154.800003052
+    max_value: 158.399993896
+    count: 0
+  - 
+    min_value: 158.399993896
+    max_value: 162.0
+    count: 0
+  - 
+    min_value: 162.0
+    max_value: 165.599990845
+    count: 0
+  - 
+    min_value: 165.599990845
+    max_value: 169.199996948
+    count: 0
+  - 
+    min_value: 169.199996948
+    max_value: 172.799987793
+    count: 0
+  - 
+    min_value: 172.799987793
+    max_value: 176.399993896
+    count: 0
+  - 
+    min_value: 176.399993896
+    max_value: 180.0
+    count: 0

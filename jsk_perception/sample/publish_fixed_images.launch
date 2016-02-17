@@ -1,0 +1,72 @@
+<launch>
+
+  <node name="raw_image_bgr"
+        pkg="jsk_perception" type="image_publisher.py">
+    <remap from="~output" to="~image_color" />
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/kiva_pod_image_color.jpg
+      encoding: bgr8
+      publish_info: true
+    </rosparam>
+  </node>
+
+  <node name="raw_image_rgb"
+        pkg="jsk_perception" type="image_publisher.py">
+    <remap from="~output" to="~image_color" />
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/kiva_pod_image_color.jpg
+      encoding: rgb8
+      publish_info: true
+    </rosparam>
+  </node>
+
+  <node name="mask_image"
+        pkg="jsk_perception" type="image_publisher.py">
+    <remap from="~output" to="~mask" />
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/kiva_pod_mask.jpg
+      encoding: mono8
+      publish_info: true
+    </rosparam>
+  </node>
+
+  <node name="depth_image_16uc1"
+        pkg="jsk_perception" type="image_publisher.py">
+    <remap from="~output" to="~image_depth" />
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/kiva_pod_image_depth.jpg
+      encoding: 16UC1
+      publish_info: true
+    </rosparam>
+  </node>
+
+  <node name="depth_image_32fc1"
+        pkg="jsk_perception" type="image_publisher.py">
+    <remap from="~output" to="~image_depth" />
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/kiva_pod_image_depth.jpg
+      encoding: 32FC1
+      publish_info: true
+    </rosparam>
+  </node>
+
+  <node name="label_image"
+        pkg="jsk_perception" type="mask_image_to_label.py">
+    <remap from="~input" to="mask_image/mask" />
+    <remap from="~output" to="~label" />
+    <rosparam>
+      publish_info: true
+      always_subscribe: true
+    </rosparam>
+  </node>
+
+  <node name="colorize_labels"
+        pkg="jsk_perception" type="colorize_labels">
+    <remap from="~input" to="label_image/label" />
+    <remap from="~output" to="~image" />
+    <rosparam>
+      publish_info: true
+    </rosparam>
+  </node>
+
+</launch>

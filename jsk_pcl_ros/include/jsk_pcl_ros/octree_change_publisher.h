@@ -39,6 +39,8 @@
 // ros
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <dynamic_reconfigure/server.h>
+#include <jsk_pcl_ros/OctreeChangePublisherConfig.h>
 #include <pcl_conversions/pcl_conversions.h>
 
 // pcl
@@ -50,22 +52,42 @@
 
 namespace jsk_pcl_ros
 {
+  /**
+   * @brief
+   * Realtime change detection of pointcloud using octree. See paper below:
+   *
+   @INPROCEEDINGS{6224647, 
+   author={Kammerl, J. and Blodow, N. and Rusu, R.B. and Gedikli, S. and Beetz, M. and Steinbach, E.}, 
+   booktitle={Robotics and Automation (ICRA), 2012 IEEE International Conference on}, 
+   title={Real-time compression of point cloud streams}, 
+   year={2012}, 
+   pages={778-785}, 
+   keywords={cloud computing;data compression;tree data structures;coding complexity;coding precision;novel lossy compression approach;octree data structures;point cloud streams;real-time compression;spatial decomposition;temporal redundancy;Decoding;Encoding;Entropy;Octrees;Real time systems;Sensors}, 
+   doi={10.1109/ICRA.2012.6224647}, 
+   ISSN={1050-4729}, 
+   month={May},}
+   */
   class OctreeChangePublisher: public jsk_topic_tools::ConnectionBasedNodelet
   {
+  public:
+    typedef OctreeChangePublisherConfig Config;
   protected:
     int counter_;
     int noise_filter_;
     double resolution_;
+    boost::mutex mtx_;
 
     ros::Subscriber sub_;
     ros::Publisher diff_pub_;
     pcl::octree::OctreePointCloudChangeDetector<pcl::PointXYZRGB> *octree_;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr filtered_cloud;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
 
     virtual void
     cloud_cb (const sensor_msgs::PointCloud2 &pc);
     virtual void subscribe();
     virtual void unsubscribe();
+    virtual void config_callback(Config &config, uint32_t level);
   private:
     virtual void onInit();
   };

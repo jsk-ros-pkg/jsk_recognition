@@ -1,0 +1,29 @@
+<launch>
+
+  <!-- images -->
+  <node name="img1" pkg="jsk_perception" type="image_publisher.py">
+    <param name="file_name" type="str" value="$(find jsk_perception)/sample/ros_diamondback.jpg" />
+  </node>
+  <node name="img2" pkg="jsk_perception" type="image_publisher.py">
+    <param name="file_name" type="str" value="$(find jsk_perception)/sample/ros_fuerte.jpg" />
+  </node>
+  <node name="img3" pkg="jsk_perception" type="image_publisher.py">
+    <param name="file_name" type="str" value="$(find jsk_perception)/sample/ros_groovy.jpg " />
+  </node>
+  <node name="img4" pkg="jsk_perception" type="image_publisher.py">
+    <param name="file_name" type="str" value="$(find jsk_perception)/sample/turtlebot_big.jpg" />
+  </node>
+
+  <!-- tile images -->
+  <node name="tile_image" pkg="jsk_perception" type="tile_image.py" output="screen">
+    <rosparam>
+      input_topics: [img1/output, img2/output, img3/output, img4/output]
+    </rosparam>
+  </node>
+
+  <!-- visualize -->
+  <node name="image_view" pkg="image_view" type="image_view">
+    <remap from="image" to="tile_image/output" />
+  </node>
+
+</launch>

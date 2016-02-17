@@ -52,6 +52,8 @@ namespace jsk_pcl_ros
     srv_->setCallback (f);
 
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+
+    onInitPostProcess();
   }
 
   void BilateralFilter::subscribe()

@@ -44,8 +44,8 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
-#include "jsk_pcl_ros/pcl_conversion_util.h"
-#include "jsk_pcl_ros/geo_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
+#include "jsk_recognition_utils/geo_util.h"
 #include <geometry_msgs/PolygonStamped.h>
 #include <jsk_recognition_msgs/PolygonArray.h>
 #include <dynamic_reconfigure/server.h>
@@ -71,16 +71,16 @@ namespace jsk_pcl_ros {
       const sensor_msgs::PointCloud2::ConstPtr& hint_cloud_msg);
     virtual bool detectHintPlane(
       pcl::PointCloud<pcl::PointXYZ>::Ptr hint_cloud,
-      ConvexPolygon::Ptr& convex);
+      jsk_recognition_utils::ConvexPolygon::Ptr& convex);
     virtual bool detectLargerPlane(
       pcl::PointCloud<pcl::PointNormal>::Ptr input_cloud,
-      ConvexPolygon::Ptr hint_convex);
+      jsk_recognition_utils::ConvexPolygon::Ptr hint_convex);
     virtual pcl::PointIndices::Ptr getBestCluster(
       pcl::PointCloud<pcl::PointNormal>::Ptr input_cloud,
       const std::vector<pcl::PointIndices>& cluster_indices,
-      const ConvexPolygon::Ptr hint_convex);
+      const jsk_recognition_utils::ConvexPolygon::Ptr hint_convex);
     virtual void publishPolygon(
-      const ConvexPolygon::Ptr convex,
+      const jsk_recognition_utils::ConvexPolygon::Ptr convex,
       ros::Publisher& pub_polygon, ros::Publisher& pub_polygon_array,
       const pcl::PCLHeader& header);
     virtual void configCallback(Config &config, uint32_t level);
@@ -91,7 +91,7 @@ namespace jsk_pcl_ros {
     virtual void euclideanFilter(
       const pcl::PointCloud<pcl::PointNormal>::Ptr cloud,
       const pcl::PointIndices::Ptr indices,
-      const ConvexPolygon::Ptr hint_convex,
+      const jsk_recognition_utils::ConvexPolygon::Ptr hint_convex,
       pcl::PointIndices& output);
     virtual void planeFilter(
       const pcl::PointCloud<pcl::PointNormal>::Ptr cloud,
@@ -101,7 +101,7 @@ namespace jsk_pcl_ros {
       pcl::ModelCoefficients& coefficients);
     virtual void hintFilter(
       const pcl::PointCloud<pcl::PointNormal>::Ptr cloud,
-      const ConvexPolygon::Ptr hint_convex,
+      const jsk_recognition_utils::ConvexPolygon::Ptr hint_convex,
       pcl::PointIndices& output);
 
     ////////////////////////////////////////////////////////

@@ -37,7 +37,7 @@
 #ifndef JSK_PCL_ROS_LINEMOD_H_
 #define JSK_PCL_ROS_LINEMOD_H_
 
-#include "jsk_pcl_ros/pcl_conversion_util.h"
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <image_geometry/pinhole_camera_model.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <pcl/recognition/linemod/line_rgbd.h>

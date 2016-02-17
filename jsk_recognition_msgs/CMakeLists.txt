@@ -4,43 +4,63 @@ find_package(catkin REQUIRED
   std_msgs sensor_msgs geometry_msgs message_generation pcl_msgs)
 add_message_files(
   FILES
-  SimpleOccupancyGrid.msg
-  SimpleOccupancyGridArray.msg
-  PolygonArray.msg
-  ClusterPointIndices.msg
-  ParallelEdgeArray.msg
-  ParallelEdge.msg
-  TimeRange.msg
-  Rect.msg
-  RectArray.msg
-  SparseOccupancyGridCell.msg
-  Circle2DArray.msg
-  BoundingBox.msg
-  SparseOccupancyGridColumn.msg
-  SparseOccupancyGrid.msg
-  ColorHistogram.msg
-  DepthErrorResult.msg
   BoundingBoxArray.msg
-  PointsArray.msg
-  Torus.msg
-  SlicedPointCloud.msg
-  LineArray.msg
-  PosedCameraInfo.msg
-  TorusArray.msg
-  RotatedRectStamped.msg
-  ModelCoefficientsArray.msg
-  RotatedRect.msg
-  DepthCalibrationParameter.msg
-  Int32Stamped.msg
   BoundingBoxMovement.msg
-  SnapItRequest.msg
+  BoundingBox.msg
+  BoundingBoxArrayWithCameraInfo.msg
+  Circle2DArray.msg
   Circle2D.msg
-  SparseOccupancyGridArray.msg
-  SparseImage.msg
+  ClassificationResult.msg
+  ClusterPointIndices.msg
   ColorHistogramArray.msg
-  Line.msg
+  ColorHistogram.msg
+  DepthCalibrationParameter.msg
+  DepthErrorResult.msg
+  HeightmapConfig.msg
+  Histogram.msg
+  HistogramWithRangeBin.msg
+  HistogramWithRange.msg
+  HistogramWithRangeArray.msg
   ICPResult.msg
   ImageDifferenceValue.msg
+  Int32Stamped.msg
+  LineArray.msg
+  Line.msg
+  ModelCoefficientsArray.msg
+  ParallelEdgeArray.msg
+  ParallelEdge.msg
+  PlotData.msg
+  PointsArray.msg
+  PolygonArray.msg
+  PosedCameraInfo.msg
+  RectArray.msg
+  Rect.msg
+  RotatedRect.msg
+  RotatedRectStamped.msg
+  SimpleHandle.msg
+  SimpleOccupancyGridArray.msg
+  SimpleOccupancyGrid.msg
+  SlicedPointCloud.msg
+  SnapItRequest.msg
+  SparseImage.msg
+  SparseOccupancyGridArray.msg
+  SparseOccupancyGridCell.msg
+  SparseOccupancyGridColumn.msg
+  SparseOccupancyGrid.msg
+  TimeRange.msg
+  TorusArray.msg
+  Torus.msg
+  TrackerStatus.msg
+  BoolStamped.msg
+  VectorArray.msg
+  WeightedPoseArray.msg
+  ContactSensor.msg
+  ContactSensorArray.msg
+  PlotDataArray.msg
+  )
+
+add_service_files(FILES
+  SetPointCloud2.srv
   )
 
 generate_messages(
@@ -50,3 +70,6 @@ generate_messages(
 catkin_package(
   CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs pcl_msgs
 )
+
+install(DIRECTORY scripts
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

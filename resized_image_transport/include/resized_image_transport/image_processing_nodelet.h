@@ -23,16 +23,14 @@
 #include <dynamic_reconfigure/server.h>
 #include <jsk_topic_tools/timered_diagnostic_updater.h>
 #include <jsk_topic_tools/diagnostic_utils.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 
 namespace resized_image_transport
 {
-  class ImageProcessing : public nodelet::Nodelet
+  class ImageProcessing : public jsk_topic_tools::DiagnosticNodelet
   {
   public:
   protected:
-    ros::NodeHandle nh;
-    ros::NodeHandle pnh;
-    
     //publishser and subscriber
     image_transport::CameraSubscriber cs_;
     image_transport::CameraPublisher cp_;
@@ -75,17 +73,18 @@ namespace resized_image_transport
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
     void onInit();
-    void initNodeHandle();
     void initReconfigure();
     void initParams();
     void initPublishersAndSubscribers();
-
+    virtual void subscribe();
+    virtual void unsubscribe();
   public:
     ImageProcessing():
       in_times(boost::circular_buffer<double>(100)),
       out_times(boost::circular_buffer<double>(100)),
       in_bytes(boost::circular_buffer<double>(100)),
-      out_bytes(boost::circular_buffer<double>(100))
+      out_bytes(boost::circular_buffer<double>(100)),
+      DiagnosticNodelet("ImageProcessing")
       { }
     ~ImageProcessing() { }
     

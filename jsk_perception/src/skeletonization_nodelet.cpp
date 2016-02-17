@@ -38,13 +38,13 @@
 
 namespace jsk_perception
 {
-   
     void Skeletonization::onInit()
     {
        DiagnosticNodelet::onInit();
-       
+       pnh_->getParam("num_threads", this->num_threads_);
        this->pub_image_ = advertise<sensor_msgs::Image>(
           *pnh_, "image_output", 1);
+      onInitPostProcess();
     }
    
     void Skeletonization::subscribe()
@@ -112,6 +112,9 @@ namespace jsk_perception
           return;
        }
        cv::Mat marker = cv::Mat::zeros(img.size(), CV_32F);
+#ifdef _OPENMP
+#pragma omp parallel for collapse(2) num_threads(this->num_threads_)
+#endif
        for (int i = 1; i < img.rows-1; i++) {
           for (int j = 1; j < img.cols-1; j++) {
              float val[9] = {};

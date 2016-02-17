@@ -1,0 +1,45 @@
+<launch>
+
+  <node name="raw_image"
+        pkg="jsk_perception" type="image_publisher.py">
+    <param name="~file_name" value="$(find jsk_perception)/sample/laugh_out_loud_joke_book.jpg" />
+  </node>
+
+  <node name="mask_image"
+        pkg="jsk_perception" type="image_publisher.py">
+    <param name="~file_name" value="$(find jsk_perception)/sample/laugh_out_loud_joke_book_mask.jpg" />
+  </node>
+
+  <node name="label_image"
+        pkg="jsk_perception" type="mask_image_to_label.py">
+    <remap from="~input" to="mask_image/output" />
+  </node>
+
+  <node name="colorize_labels"
+        pkg="jsk_perception" type="colorize_labels">
+    <remap from="~input" to="label_image/output" />
+  </node>
+
+  <node name="imagesift"
+        pkg="imagesift" type="imagesift">
+    <remap from="image" to="raw_image/output" />
+    <remap from="Feature0D" to="~output" />
+  </node>
+
+  <node name="bof_histogram_extractor"
+        pkg="jsk_perception" type="bof_histogram_extractor.py">
+    <remap from="~input" to="imagesift/output" />
+    <remap from="~input/label" to="label_image/output" />
+    <param name="~bof_data" value="$(find jsk_perception)/trained_data/apc2015_sample_bof.pkl.gz" />
+    <rosparam>
+      approximate_sync: true
+    </rosparam>
+  </node>
+
+  <node name="sklearn_classifier"
+        pkg="jsk_perception" type="sklearn_classifier.py">
+    <remap from="~input" to="bof_histogram_extractor/output" />
+    <param name="~clf_path" value="$(find jsk_perception)/trained_data/apc2015_sample_clf.pkl.gz" />
+  </node>
+
+</launch>

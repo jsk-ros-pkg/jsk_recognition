@@ -1,0 +1,42 @@
+<launch>
+  <arg name="INPUT" default="full_cloud2" />
+  <arg name="LASER_FLAME_ID" default="left_camera_optical_frame" /> 
+
+  <!-- almost same as organized_multiplane_segmentation -->
+  <arg name="BASE_FRAME_ID" default="odom" />
+  <arg name="RUN_SELF_FILTER" default="false"/>
+  <arg name="SELF_FILTER_PARAM" default="$(find jsk_pr2_startup)/jsk_pr2_sensors/tilt_self_filter.yaml" />
+  <arg name="JOINT_STATIC_FILTER" default="false" />
+  <arg name="ICP_REGISTRATION" default="false" />
+  <arg name="PUBLISH_BOX_TF" default="false" />
+  <arg name="ESTIMATE_OCCLUSION" default="false" />
+  <arg name="HANDLE_ESTIMATOR" default="false" />
+  <arg name="MACHINE" default="localhost"/>
+  <arg name="SAVE_SELECTED_CLOUD" default="false" />
+
+  <node pkg="nodelet" type="nodelet" name="laser_multiplane_manager"
+        args="manager"
+        output="screen"/>  
+  <node pkg="nodelet" type="nodelet" name="laser_transform_input"
+        machine="$(arg MACHINE)"
+        args="load jsk_pcl/TfTransformCloud laser_multiplane_manager">
+    <remap from="~input" to="$(arg INPUT)" />
+    <param name="target_frame_id" value="$(arg LASER_FLAME_ID)" />
+  </node>
+  <include file="$(find jsk_pcl_ros)/launch/organized_multi_plane_segmentation.launch">
+    <arg name="INPUT" value="laser_transform_input/output" />
+    <arg name="BASE_FRAME_ID" value="$(arg BASE_FRAME_ID)" />
+    <arg name="RUN_SELF_FILTER" value="$(arg RUN_SELF_FILTER)"/>
+    <arg name="SELF_FILTER_PARAM" value="$(arg SELF_FILTER_PARAM)" />
+    <arg name="JOINT_STATIC_FILTER" value="$(arg JOINT_STATIC_FILTER)" />
+    <arg name="ICP_REGISTRATION" value="$(arg ICP_REGISTRATION)" />
+    <arg name="PUBLISH_BOX_TF" value="$(arg PUBLISH_BOX_TF)" />
+    <arg name="LAUNCH_MANAGER" value="false" />
+    <arg name="MANAGER" default="laser_multiplane_manager" />
+    <arg name="ESTIMATE_OCCLUSION" value="$(arg ESTIMATE_OCCLUSION)" />
+    <arg name="HANDLE_ESTIMATOR" value="$(arg HANDLE_ESTIMATOR)" />
+    <arg name="MACHINE" value="$(arg MACHINE)"/>
+    <arg name="SAVE_SELECTED_CLOUD" value="$(arg SAVE_SELECTED_CLOUD)" />
+    <arg name="ORGANIZED" value="false" />
+  </include>
+</launch>

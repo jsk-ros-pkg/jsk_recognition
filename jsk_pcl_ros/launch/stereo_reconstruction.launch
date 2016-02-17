@@ -5,31 +5,83 @@
   <arg name="INPUT_LEFT_IMAGE" />
   <arg name="INPUT_LEFT_CAMERA_INFO" />
   <arg name="INPUT_DEPTH" />
-
-  <!-- Relay camera_info -->
-  <node pkg="nodelet" type="nodelet" name="left_camera_info_relay"
-        args="load jsk_topic_tools/Relay $(arg MANAGER)">
-    <remap from="~input" to="$(arg INPUT_LEFT_CAMERA_INFO)" />
-    <remap from="~output" to="left/camera_info" />
-  </node>
-  
-  <!-- Prepare images -->
-  
-  <group unless="$(arg USE_COMPRESS)">
-    <node pkg="nodelet" type="nodelet" name="left_image_rect_color_relay"
-          args="load jsk_topic_tools/Relay $(arg MANAGER)">
-      <remap from="~input" to="$(arg INPUT_LEFT_IMAGE)" />
-      <remap from="~output" to="left/image_rect_color" />
-    </node>
+  <arg name="PARAM_COUNT" />
+  <arg name="NAME_PREFIX" />
+  <arg name="NO_SUB_NAMESPACE" default="false" />
+  <arg name="SUB_NAMESPACE" default=""/>
+  <arg name="RELAY_DEPTH" default="false" />
+  <group ns="$(arg MANAGER)">
+    <rosparam param="nodelets_$(arg PARAM_COUNT)" subst_value="true">
+      - name: $(arg NAME_PREFIX)left_camera_info_relay
+        type: jsk_topic_tools/Relay
+        remappings:
+          - from: ~input
+            to: $(arg INPUT_LEFT_CAMERA_INFO)
+          - from: ~output
+            to: left/camera_info
+      - unless: $(arg USE_COMPRESS)
+        name: $(arg NAME_PREFIX)left_image_rect_color_relay
+        type: jsk_topic_tools/Relay
+        remappings:
+          - from: ~input
+            to: $(arg INPUT_LEFT_IMAGE)
+          - from: ~output
+            to: left/image_rect_color
+      - if: $(arg RELAY_DEPTH)
+        name: $(arg NAME_PREFIX)depth_relay
+        type: jsk_topic_tools/Relay
+        remappings:
+          - from: ~input
+            to: $(arg INPUT_DEPTH)
+          - from: ~output
+            to: depth
+      - if: $(arg USE_COMPRESS)
+        name: $(arg NAME_PREFIX)left_image_rect_color_relay
+        type: jsk_topic_tools/Relay
+        remappings:
+          - from: ~input
+            to: $(arg INPUT_LEFT_IMAGE)/$(arg COMPRESSED_TYPE)
+          - from: ~output
+            to: left/image_rect_color_compressed/$(arg COMPRESSED_TYPE)
+      - name: $(arg NAME_PREFIX)point_cloud_xyz
+        type: depth_image_proc/point_cloud_xyz
+        remappings:
+          - from: image_rect
+            to: depth
+          - from: camera_info
+            to: left/camera_info
+          - from: points
+            to: organized_image_points2
+      - name: $(arg NAME_PREFIX)point_cloud_xyzrgb
+        type: depth_image_proc/point_cloud_xyzrgb
+        remappings:
+          - from: rgb/camera_info
+            to: left/camera_info
+          - from: rgb/image_rect_color
+            to: left/image_rect_color
+          - from: depth_registered/image_rect
+            to: depth
+          - from: depth_registered/points
+            to: organized_image_points2_color
+      - name: $(arg NAME_PREFIX)point_relay
+        type: jsk_topic_tools/Relay
+        remappings:
+          - from: ~input
+            to: organized_image_points2_color
+          - from: ~output
+            to: points
+    </rosparam>
   </group>
   <!-- If compressed image used, realy /compressed images and republish them -->
   <group if="$(arg USE_COMPRESS)">
-    <node pkg="nodelet" type="nodelet" name="left_image_rect_color_relay"
-          args="load jsk_topic_tools/Relay $(arg MANAGER)">
-      <remap from="~input" to="$(arg INPUT_LEFT_IMAGE)/$(arg COMPRESSED_TYPE)" />
-      <remap from="~output" to="left/image_rect_color_compressed/$(arg COMPRESSED_TYPE)" />
-    </node>
-    <node pkg="image_transport" type="republish" name="left_image_rect_color_decompress" args="$(arg COMPRESSED_TYPE)">
+    <group ns="$(arg NAME_PREFIX)" unless="$(arg NO_SUB_NAMESPACE)"> 
+      <node pkg="image_transport" type="republish" name="left_image_rect_color_decompress" args="$(arg COMPRESSED_TYPE)">
+        <remap from="in" to="left/image_rect_color_compressed" />
+        <remap from="out" to="left/image_rect_color" />
+        <remap from="left/image_rect_color_decompressed" to="left/image_rect_color"/>
+      </node>
+    </group>
+    <node pkg="image_transport" type="republish" name="left_image_rect_color_decompress" args="$(arg COMPRESSED_TYPE)" if="$(arg NO_SUB_NAMESPACE)">
       <remap from="in" to="left/image_rect_color_compressed" />
       <remap from="out" to="left/image_rect_color" />
       <remap from="left/image_rect_color_decompressed" to="left/image_rect_color"/>
@@ -37,28 +89,14 @@
   </group>
 
   <!-- PointCloud -->
-  <node pkg="nodelet" type="nodelet" name="point_cloud_xyz"
-        args="load depth_image_proc/point_cloud_xyz $(arg MANAGER)">
-    <remap from="camera_info" to="left/camera_info" />
-    <remap from="image_rect" to="$(arg INPUT_DEPTH)" />
-    <remap from="points" to="organized_image_points2" />
+  <group ns="point_cloud_xyz">
     <rosparam>
       queue_size: 100
     </rosparam>
-  </node>
-  <node pkg="nodelet" type="nodelet" name="point_cloud_xyzrgb"
-        args="load depth_image_proc/point_cloud_xyzrgb $(arg MANAGER)">
-    <remap from="rgb/camera_info" to="left/camera_info" />
-    <remap from="rgb/image_rect_color" to="left/image_rect_color" />
-    <remap from="depth_registered/image_rect" to="$(arg INPUT_DEPTH)" />
-    <remap from="depth_registered/points" to="organized_image_points2_color" />
+  </group>
+  <group ns="point_cloud_xyzrgb">
     <rosparam>
       queue_size: 100
     </rosparam>
-  </node>
-  <node pkg="nodelet" type="nodelet" name="point_relay"
-        args="load jsk_topic_tools/Relay $(arg MANAGER)">
-    <remap from="~input" to="organized_image_points2_color" />
-    <remap from="~output" to="points" />
-  </node>
+  </group>
 </launch>

@@ -1,0 +1,244 @@
+<launch>
+  <!-- Prepare pointcloud  -->
+  <node pkg="jsk_pcl_ros" type="tf_transform_cloud" name="odom_stereo">
+    <remap from="~input" to="/multisense/resize_1_4/organized_image_points2_color" />
+    <rosparam>
+      target_frame_id: odom
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="octree_voxel_grid" name="laser_downsample">
+    <remap from="~input" to="/full_cloud2" />
+    <rosparam>
+      resolution: 0.01
+    </rosparam>
+  </node>
+
+  <node pkg="jsk_pcl_ros" type="tf_transform_cloud" name="odom_laser">
+    <remap from="~input" to="laser_downsample/output" />
+    <rosparam>
+      target_frame_id: odom
+    </rosparam>
+  </node>
+
+  <node pkg="jsk_pcl_ros" type="normal_estimation_omp" name="normal_estimation">
+    <remap from="~input" to="/odom_laser/output" />
+    <rosparam>
+      k_search: 50
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="normal_direction_filter" name="normal_direction_filter">
+    <remap from="~input" to="normal_estimation/output_with_xyz" />
+    <remap from="~input_imu" to="/imu" />
+    <rosparam>
+      use_imu: false
+      direction: [0, 0, 1]
+      angle_offset: 1.57
+      eps_angle: 0.5
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="normal_direction_filter_points" args="standalone pcl/ExtractIndices">
+    <remap from="~input" to="normal_estimation/output_with_xyz" />
+    <remap from="~indices" to="normal_direction_filter/output" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="region_growing_multiple_plane_segmentation" name="region_growing_multiple_plane_segmentation">
+    <remap from="~input" to="normal_direction_filter_points/output" />
+    <remap from="~input_normal" to="normal_direction_filter_points/output" />
+    <rosparam>
+      max_area: 5.0
+      min_area: 0.44
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="multi_plane_extraction" name="multi_plane_extraction">
+    <remap from="~input" to="normal_estimation/output_with_xyz" />
+    <remap from="~input_polygons" to="region_growing_multiple_plane_segmentation/output/polygons" />
+    <remap from="~input_coefficients" to="region_growing_multiple_plane_segmentation/output/coefficients" />
+    <rosparam>
+      use_indices: false
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="organized_multi_plane_segmentation"
+        name="organized_multi_plane_segmentation">
+    <remap from="~input" to="/odom_stereo/output" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="cluster_point_indices_decomposer"
+        name="organized_multi_plane_decomposer">
+    <remap from="~input" to="/odom_stereo/output" />
+    <remap from="~target" to="organized_multi_plane_segmentation/output"/>
+  </node>
+  <node pkg="jsk_pcl_ros" type="extract_indices" name="non_plane_stereo_points">
+    <remap from="~input" to="/odom_stereo/output" />
+    <remap from="~indices" to="organized_multi_plane_decomposer/negative_indices"/>
+  </node>
+  <node pkg="jsk_perception" type="hsv_decomposer" name="hsv_decomposer">
+    <remap from="~input" to="/multisense/left/image_rect_color" />
+  </node>
+  <node pkg="jsk_pcl_ros" type="polygon_array_transformer" name="plane_camera_transformed">
+      <remap from="~input_polygons" to="region_growing_multiple_plane_segmentation/output/polygons"/>
+      <remap from="~input_coefficients" to="region_growing_multiple_plane_segmentation/output/coefficients"/>
+      <rosparam>
+        frame_id: left_camera_optical_frame
+      </rosparam>
+    </node>
+
+  <node pkg="jsk_perception" type="polygon_array_color_histogram" name="polygon_array_color_histogram">
+    <remap from="~input" to="plane_camera_transformed/output_polygons" />
+    <remap from="~input/info" to="/multisense/left/camera_info" />
+    <remap from="~input/image" to="hsv_decomposer/output/hue" />
+    <rosparam>
+      bin_size: 50
+    </rosparam>
+  </node>
+  <node pkg="jsk_perception" type="polygon_array_color_likelihood" name="polygon_array_angle_likelihood">
+      <remap from="~input/polygons" to="region_growing_multiple_plane_segmentation/output/polygons" />
+      <remap from="~input/histograms" to="polygon_array_color_histogram/output" />
+      <remap from="~input/reference" to="selected_polygon_color_histogram/output/unwrap" />
+      <rosparam subst_value="true">
+        coefficient_method: 3 # bhattacharyya
+        reference_file: $(find jsk_pcl_ros)/config/drc_box_color2.yaml
+      </rosparam>
+    </node>
+
+  <!-- <node pkg="jsk_pcl_ros" type="polygon_array_angle_likelihood" name="polygon_array_angle_likelihood"> -->
+  <!--   <remap from="~input" to="region_growing_multiple_plane_segmentation/output/polygons" /> -->
+  <!--   <rosparam> -->
+  <!--     target_frame_id: ground -->
+  <!--   </rosparam> -->
+  <!-- </node> -->
+  <node pkg="nodelet" type="nodelet" name="voxel_downsample"
+        args="standalone pcl/VoxelGrid">
+    <remap from="~input" to="normal_estimation/output_with_xyz" />
+    <rosparam>
+      leaf_size: 0.015
+      filter_limit_min: 0.1
+      filter_limit_max: 3
+    </rosparam>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="stereo_voxel_downsample"
+        args="standalone pcl/VoxelGrid">
+    <remap from="~input" to="non_plane_stereo_points/output" />
+    <rosparam>
+      leaf_size: 0.02
+      filter_limit_min: 0.1
+      filter_limit_max: 10
+    </rosparam>
+  </node>
+  <!-- <node pkg="jsk_pcl_ros" type="cluster_point_indices_decomposer" name="multi_plane_extraction_points"> -->
+  <!--   <remap from="~input" to="normal_estimation/output_with_xyz" /> -->
+  <!--   <remap from="~target" to="multi_plane_extraction/output/indices" /> -->
+  <!-- </node> -->
+  <node pkg="jsk_pcl_ros" type="plane_supported_cuboid_estimator"
+        name="plane_supported_cuboid_estimator" output="log"
+        alaunch-prefix="valgrind --tool=callgrind"
+        >
+    <!-- <param name="sensor_frame" value="left_camera_optical_frame" /> -->
+    <param name="sensor_frame" value="ground" />
+    <!-- <remap from="~input" to="normal_estimation/output_with_xyz"/> -->
+    <remap from="~input" to="voxel_downsample/output"/>
+    <remap from="~fast_input" to="stereo_voxel_downsample/output"/>
+    <remap from="~output/result_pose" to="/door_detection/door_handle" />
+    <!-- <remap from="~input/polygon" to="region_growing_multiple_plane_segmentation/output/polygons" /> -->
+    <remap from="~input/polygon" to="polygon_array_angle_likelihood/output" />
+    <remap from="~input/coefficients" to="region_growing_multiple_plane_segmentation/output/coefficients" />
+    <rosparam>
+      #init_local_position_z_min: 0.06
+      init_local_position_z_min: 0.04
+      init_local_position_z_max: 0.15
+      step_x_variance: 0.0002
+      step_y_variance: 0.0002
+      step_z_variance: 0.0002
+      # Roll and Pitch are static
+      step_roll_variance: 0.00
+      step_pitch_variance: 0.00
+      init_local_orientation_roll_variance: 0.0
+      init_local_orientation_pitch_variance: 0.1
+      step_yaw_variance: 0.001
+      step_dx_variance: 0.0000
+      step_dy_variance: 0.0000
+      step_dz_variance: 0.0000
+      disable_init_roll: true
+      disable_init_pitch: true
+      
+      init_dx_variance: 0.0000
+      init_dy_variance: 0.0000
+      init_dz_variance: 0.0000
+      init_dx_mean: 0.02
+      init_dy_mean: 0.12
+      init_dz_mean: 0.05
+      particle_num: 2000
+      use_init_world_position_z_model: true
+      use_support_plane_angular_likelihood: true
+      use_surface_area_likelihood: true # not mt safe
+      surface_error_power: 2.0
+      init_world_position_z_min: 0.7
+      use_occlusion_likelihood: false
+      use_range_likelihood: true
+      #range_likelihood_local_min_z: 0.06
+      range_likelihood_local_min_z: 0.04
+      range_likelihood_local_max_z: 0.1
+      outlier_distance: 0.01
+      fast_cloud_threshold: 1.5
+      use_init_polygon_likelihood: true
+      use_inliers: true
+      inliers_power: 0.01
+      min_inliers: 10
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="extract_cuboid_particles_top_n" name="top_n_particles">
+    <remap from="~input" to="plane_supported_cuboid_estimator/output/particles" />
+    <rosparam>
+      top_n_ratio: 0.5
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="interactive_cuboid_likelihood" name="interactive_cuboid_likelihood" output="screen"
+        if="false">
+    <remap from="~input" to="plane_supported_cuboid_estimator/output/candidate_cloud" />
+    <!-- <param name="sensor_frame" value="left_camera_optical_frame" /> -->
+    <param name="sensor_frame" value="ground" />
+    <param name="frame_id" value="ground" />
+    <rosparam>
+      init_local_position_z_min: 0.06
+      init_local_position_z_max: 0.15
+      step_x_variance: 0.0002
+      step_y_variance: 0.0002
+      step_z_variance: 0.0002
+      # Roll and Pitch are static
+      step_roll_variance: 0.00
+      step_pitch_variance: 0.00
+      init_local_orientation_roll_variance: 0.0
+      init_local_orientation_pitch_variance: 0
+      step_yaw_variance: 0.1
+      step_dx_variance: 0.0000
+      step_dy_variance: 0.0000
+      step_dz_variance: 0.0000
+      disable_init_roll: true
+      disable_init_pitch: true
+
+      init_dx_variance: 0.0000
+      init_dy_variance: 0.0000
+      init_dz_variance: 0.0000
+      dx: 0.05
+      dy: 0.12
+      dz: 0.05
+      particle_num: 2000
+      use_init_world_position_z_model: true
+      use_support_plane_angular_likelihood: false
+      use_surface_area_likelihood: false
+      surface_error_power: 2.0
+      init_world_position_z_min: 0.7
+      use_occlusion_likelihood: false
+      use_range_likelihood: false
+      range_likelihood_local_min_z: 0.06
+      range_likelihood_local_max_z: 0.1
+      outlier_distance: 0.03
+      fast_cloud_threshold: 2.0
+      use_init_polygon_likelihood: true
+      min_inliers: 10
+      initial_pos: [1.2, 0.2, 1]
+      initial_rot: [0, 0, 0.5]
+    </rosparam>
+  </node>
+  <node pkg="jsk_pcl_ros" type="cluster_point_indices_decomposer" name="cluster_point_indices_decomposer">
+    <remap from="~input" to="normal_direction_filter_points/output" />
+    <remap from="~target" to="region_growing_multiple_plane_segmentation/output/clustering_result" />
+  </node>
+</launch>

@@ -62,7 +62,8 @@ namespace jsk_pcl_ros
       *pnh_, "output/disparity", 1);
     pub_count_ = advertise<std_msgs::Int32>(
       *pnh_, "output/count", 1);
-  }
+    onInitPostProcess();
+ }
 
   bool CaptureStereoSynchronizer::checkNearPose(
     const geometry_msgs::Pose& new_pose)

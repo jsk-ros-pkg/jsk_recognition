@@ -1,0 +1,48 @@
+<launch>
+  
+  <node name="even_extract_indices"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ExtractIndices">
+    <remap from="~input" to="test_extract_indices/output" />
+    <remap from="~indices" to="test_extract_indices/output/even_indices" />
+    <rosparam>
+      keep_organized: false
+    </rosparam>
+  </node>
+  <node name="odd_extract_indices"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ExtractIndices">
+    <remap from="~input" to="test_extract_indices/output" />
+    <remap from="~indices" to="test_extract_indices/output/odd_indices" />
+    <rosparam>
+      keep_organized: false
+    </rosparam>
+  </node>
+  <node name="even_organized_extract_indices"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ExtractIndices">
+    <remap from="~input" to="test_extract_indices/output" />
+    <remap from="~indices" to="test_extract_indices/output/even_indices" />
+    <rosparam>
+      keep_organized: true
+    </rosparam>
+  </node>
+  <node name="odd_organized_extract_indices"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ExtractIndices">
+    <remap from="~input" to="test_extract_indices/output" />
+    <remap from="~indices" to="test_extract_indices/output/odd_indices" />
+    <rosparam>
+      keep_organized: true
+    </rosparam>
+  </node>
+  <test test-name="test_extract_indices"
+        name="test_extract_indices"
+        time-limit="360"
+        pkg="jsk_pcl_ros" type="test_extract_indices">
+    <remap from="~input/even_result" to="even_extract_indices/output" />
+    <remap from="~input/odd_result" to="odd_extract_indices/output" />
+    <remap from="~input/even_organized_result" to="even_organized_extract_indices/output" />
+    <remap from="~input/odd_organized_result" to="odd_organized_extract_indices/output" />
+  </test>
+</launch>

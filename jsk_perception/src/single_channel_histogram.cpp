@@ -34,6 +34,8 @@
  *********************************************************************/
 
 #include "jsk_perception/single_channel_histogram.h"
+#include <boost/assign.hpp>
+#include <jsk_topic_tools/log_utils.h>
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
 
@@ -51,13 +53,17 @@ namespace jsk_perception
     
     pub_ = advertise<jsk_recognition_msgs::ColorHistogram>(
       *pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void SingleChannelHistogram::subscribe()
   {
+    ros::V_string names;
     if (use_mask_) {
       sub_image_.subscribe(*pnh_, "input", 1);
       sub_mask_.subscribe(*pnh_, "input/mask", 1);
+      names.push_back("~input");
+      names.push_back("~input/mask");
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
       sync_->connectInput(sub_image_, sub_mask_);
       sync_->registerCallback(boost::bind(&SingleChannelHistogram::compute,
@@ -67,7 +73,9 @@ namespace jsk_perception
       sub_ = pnh_->subscribe("input", 1,
                              &SingleChannelHistogram::compute,
                              this);
+      names.push_back("~input");
     }
+    jsk_topic_tools::warnNoRemap(names);
   }
 
   void SingleChannelHistogram::unsubscribe()

@@ -5,15 +5,25 @@ namespace resized_image_transport
   void ImageResizer::onInit() {
     raw_width_ = 0;
     raw_height_ = 0;
-    initNodeHandle();
+    DiagnosticNodelet::onInit();
     initParams();
     initReconfigure();
     initPublishersAndSubscribers();
-    sub_ = pnh.subscribe("input/mask", 1, &ImageResizer::mask_region_callback, this);
+    
+  }
+
+  void ImageResizer::subscribe() {
+    ImageProcessing::subscribe();
+    sub_ = pnh_->subscribe("input/mask", 1, &ImageResizer::mask_region_callback, this);
+  }
+
+  void ImageResizer::unsubscribe() {
+    ImageProcessing::unsubscribe();
+    sub_.shutdown();
   }
 
   void ImageResizer::initReconfigure() {
-    reconfigure_server_ = boost::make_shared <dynamic_reconfigure::Server<ImageResizerConfig> > (pnh);
+    reconfigure_server_ = boost::make_shared <dynamic_reconfigure::Server<ImageResizerConfig> > (*pnh_);
     ReconfigureServer::CallbackType f
       = boost::bind(&ImageResizer::config_cb, this, _1, _2);
     reconfigure_server_->setCallback(f);
@@ -23,7 +33,7 @@ namespace resized_image_transport
     ImageProcessing::initParams();
     period_ = ros::Duration(1.0);
     std::string interpolation_method;
-    pnh.param<std::string>("interpolation", interpolation_method, "LINEAR");
+    pnh_->param<std::string>("interpolation", interpolation_method, "LINEAR");
     if(interpolation_method == "NEAREST"){
       interpolation_ = cv::INTER_NEAREST;
     }else if(interpolation_method == "LINEAR") {

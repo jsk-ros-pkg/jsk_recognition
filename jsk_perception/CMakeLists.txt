@@ -6,7 +6,7 @@ find_package(catkin REQUIRED COMPONENTS
   mk message_generation std_msgs sensor_msgs geometry_msgs cv_bridge
   image_geometry image_transport image_view2 driver_base dynamic_reconfigure cmake_modules
   roscpp nodelet rostest tf rospack
-  jsk_topic_tools pcl_ros)
+  jsk_topic_tools pcl_ros libcmt)
 
 find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem system signals)
@@ -21,9 +21,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
-
-include(FindPkgConfig)
-pkg_check_modules(libcmt REQUIRED libcmt)
 
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
@@ -75,7 +72,7 @@ execute_process(
   MK_DIR=${mk_PREFIX}/share/mk installed
   RESULT_VARIABLE _make_failed)
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${libcmt_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels)
+include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels)
 add_executable(camshiftdemo src/camshiftdemo.cpp)
 add_executable(linemod src/linemod.cpp)
 add_executable(virtual_camera_mono src/virtual_camera_mono.cpp)
@@ -145,7 +142,7 @@ add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
   src/image_utils.cpp
   src/histogram_of_oriented_gradients.cpp
   )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${libcmt_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 
 

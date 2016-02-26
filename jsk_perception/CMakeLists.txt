@@ -91,6 +91,7 @@ generate_dynamic_reconfigure_options(
   cfg/GaussianBlur.cfg
   cfg/KMeans.cfg
   cfg/ImageTimeDiff.cfg
+  cfg/SelectiveSearch.cfg
 )
 
 add_service_files(FILES EuclideanSegment.srv  SetTemplate.srv  WhiteBalancePoints.srv  WhiteBalance.srv NonMaximumSuppression.srv)

@@ -96,6 +96,7 @@ generate_dynamic_reconfigure_options(
   cfg/RGBColorFilter.cfg
   cfg/ImageRotate.cfg
   cfg/RegionGrowingSegmentation.cfg
+  cfg/ColorBasedRegionGrowingSegmentation.cfg
   cfg/OrganizedMultiPlaneSegmentation.cfg
   cfg/MultiPlaneExtraction.cfg
   cfg/NormalEstimationIntegralImage.cfg
@@ -193,7 +194,8 @@ jsk_pcl_nodelet(src/normal_estimation_integral_image_nodelet.cpp
   "jsk_pcl/NormalEstimationIntegralImage" "normal_estimation_integral_image")
 jsk_pcl_nodelet(src/region_growing_segmentation_nodelet.cpp
   "jsk_pcl/RegionGrowingSegmentation" "region_growing_segmentation")
-
+jsk_pcl_nodelet(src/color_based_region_growing_segmentation_nodelet.cpp
+  "jsk_pcl/ColorBasedRegionGrowingSegmentation" "color_based_region_growing_segmentation")
 jsk_pcl_nodelet(src/organized_multi_plane_segmentation_nodelet.cpp
   "jsk_pcl/OrganizedMultiPlaneSegmentation" "organized_multi_plane_segmentation")
 jsk_pcl_nodelet(src/multi_plane_extraction_nodelet.cpp

@@ -107,7 +107,9 @@ namespace jsk_pcl_ros
     }
     if (kinfu_->icpIsLost()) {
       kinfu_->reset();
+      initialized_ = false;
       JSK_NODELET_FATAL("kinfu is reset");
+      return;
     }
     
     if (!initial_camera_pose_acquired_) {

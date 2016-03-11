@@ -66,6 +66,7 @@ namespace jsk_pcl_ros
     snapshot_rate_ = pcl::device::kinfuLS::SNAPSHOT_RATE;
     pub_pose_ = pnh_->advertise<geometry_msgs::PoseStamped>("output", 1);
     pub_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>("output/cloud", 1);
+    srv_save_mesh_ = pnh_->advertiseService("save_mesh", &Kinfu::saveMeshService, this);
     sub_depth_image_.subscribe(*pnh_, "input/depth", 1);
     sub_color_image_.subscribe(*pnh_, "input/color", 1);
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
@@ -203,7 +204,41 @@ namespace jsk_pcl_ros
       }
     }
   }
-                       
+  bool Kinfu::saveMeshService(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res)
+  {
+    pcl::gpu::DeviceArray<pcl::PointXYZ> triangles_buffer_device_;
+    if (!marching_cubes_)
+      marching_cubes_ = pcl::gpu::kinfuLS::MarchingCubes::Ptr( new pcl::gpu::kinfuLS::MarchingCubes() );
+    pcl::gpu::DeviceArray<pcl::PointXYZ> triangles_device = marching_cubes_->run(kinfu_->volume(), triangles_buffer_device_);
+    boost::shared_ptr<pcl::PolygonMesh> mesh_ptr( new pcl::PolygonMesh() ); 
+    mesh_ptr = convertToMesh(triangles_device);
+    // cout << "Saving mesh to to 'mesh.ply'... " << flush;
+    pcl::io::savePLYFile("mesh.ply", *mesh_ptr);
+    return true;
+  }
+  boost::shared_ptr<pcl::PolygonMesh> Kinfu::convertToMesh(const pcl::gpu::DeviceArray<pcl::PointXYZ>& triangles)
+  {
+    if (triangles.empty())
+      return boost::shared_ptr<pcl::PolygonMesh>();
+
+    pcl::PointCloud<pcl::PointXYZ> cloud;
+    cloud.width  = (int)triangles.size();
+    cloud.height = 1;
+    triangles.download(cloud.points);
+    boost::shared_ptr<pcl::PolygonMesh> mesh_ptr( new pcl::PolygonMesh() );
+    pcl::toPCLPointCloud2(cloud, mesh_ptr->cloud);
+    mesh_ptr->polygons.resize (triangles.size() / 3);
+    for (size_t i = 0; i < mesh_ptr->polygons.size (); ++i)
+      {
+        pcl::Vertices v;
+        v.vertices.push_back(i*3+0);
+        v.vertices.push_back(i*3+2);
+        v.vertices.push_back(i*3+1);
+        mesh_ptr->polygons[i] = v;
+      }
+    return mesh_ptr;
+  }
+
 }
 
 #include <pluginlib/class_list_macros.h>

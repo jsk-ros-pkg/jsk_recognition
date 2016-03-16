@@ -38,12 +38,15 @@
 
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
+#include <std_srvs/Empty.h>
 #include <pcl/gpu/kinfu_large_scale/kinfu.h>
 #include <pcl/gpu/containers/initialization.h>
+#include <pcl/gpu/kinfu_large_scale/marching_cubes.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
 #include "jsk_pcl_ros/tf_listener_singleton.h"
 #include <tf/transform_broadcaster.h>
 
@@ -91,15 +94,20 @@ namespace jsk_pcl_ros
     virtual void callback(const sensor_msgs::Image::ConstPtr& depth_image,
                           const sensor_msgs::Image::ConstPtr& rgb_image);
     virtual void infoCallback(const sensor_msgs::CameraInfo::ConstPtr& info_msg);
-    
+    virtual bool saveMeshService(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
+ virtual boost::shared_ptr<pcl::PolygonMesh> convertToMesh(const pcl::gpu::DeviceArray<pcl::PointXYZ>& triangles);
+
     pcl::gpu::kinfuLS::KinfuTracker* kinfu_;
     pcl::gpu::kinfuLS::KinfuTracker::DepthMap depth_device_;
     pcl::gpu::kinfuLS::KinfuTracker::View colors_device_;
     pcl::gpu::DeviceArray<pcl::PointXYZ> cloud_buffer_device_;
+    pcl::gpu::DeviceArray<pcl::PointXYZ> triangles_buffer_device_;
+    pcl::gpu::kinfuLS::MarchingCubes::Ptr marching_cubes_;
     sensor_msgs::CameraInfo::ConstPtr info_msg_;
     ros::Subscriber sub_info_;
     ros::Publisher pub_pose_;
     ros::Publisher pub_cloud_;
+    ros::ServiceServer srv_save_mesh_;
     message_filters::Subscriber<sensor_msgs::Image> sub_depth_image_;
     message_filters::Subscriber<sensor_msgs::Image> sub_color_image_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;

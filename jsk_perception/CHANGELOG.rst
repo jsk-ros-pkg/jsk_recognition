@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.17 (2016-03-20)
+-------------------
 * remove dynamic_reconfigure.parameter_generator, which only used for rosbuild
 * [jsk_perception] binpack_rect_array.py to enumerate jsk_recognition_msgs/RectArray
 * [jsk_perception] Add selective_search.py

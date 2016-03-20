@@ -2,8 +2,8 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.17 (2016-03-20)
+-------------------
 * [imagesift] Set ros node name same to the executable name
 * [imagesift] Add ORB detector
 * Contributors: Ryohei Ueda

@@ -8,7 +8,7 @@
   </node>
         
   <node pkg="jsk_rqt_plugins" type="rqt_histogram_plot" name="red_histogram"
-        args="/usb_cam/image_raw/red_histogram/histogram"/>
+        args="/usb_cam/red_histogram/histogram"/>
   <node pkg="jsk_rqt_plugins" type="rqt_histogram_plot" name="hue_histogram"
-        args="/usb_cam/image_raw/hue_histogram/histogram"/>
+        args="/usb_cam/hue_histogram/histogram"/>
 </launch>

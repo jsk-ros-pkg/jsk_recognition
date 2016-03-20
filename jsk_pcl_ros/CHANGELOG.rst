@@ -2,6 +2,16 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* remove dynamic_reconfigure.parameter_generator, which only used for rosbuild
+* [jsk_pcl_ros/kinfu]add cfg for change kinfu params
+* [kinfu]add srv for save mesh
+* [kinfu] add initialization when icp is lost
+* [jsk_pck_ros] add options not pub tf
+* [jsk_pcl_ros/CMakeLists.txt] fix link libraries when building kinfu.
+* Contributors: Kei Okada, Masaki Murooka, Yu Ohara
+
 0.3.16 (2016-02-11)
 -------------------
 * [jsk_pcl_ros/CMakeLists.txt] call one of find_package or pkg_check_modules for robot_self_filter.

@@ -2,6 +2,9 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.3.17 (2016-03-20)
 -------------------
 * remove dynamic_reconfigure.parameter_generator, which only used for rosbuild

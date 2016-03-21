@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.18 (2016-03-21)
+-------------------
 * [jsk_pcl_ros/launch,scripts] add launch and script to generate the pointcloud cluster of objects.
 * Contributors: Masaki Murooka
 

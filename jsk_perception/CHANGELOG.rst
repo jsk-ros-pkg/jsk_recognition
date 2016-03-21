@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.18 (2016-03-21)
+-------------------
 * jsk_perception/CMakeLists.txt: remove depends to rosbuild
 * Contributors: Kei Okada
 

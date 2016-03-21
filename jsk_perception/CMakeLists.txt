@@ -25,7 +25,6 @@ find_package(catkin REQUIRED COMPONENTS
   nodelet
   pcl_ros
   posedetection_msgs
-  rosbuild
   roscpp
   roseus
   rospack

@@ -2,6 +2,12 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* remove rosbuild from run/build depend
+* remove dynamic_reconfigure.parameter_generator, which only used for rosbuild
+* Contributors: Kei Okada
+
 0.3.18 (2016-03-21)
 -------------------
 * jsk_perception/CMakeLists.txt: remove depends to rosbuild

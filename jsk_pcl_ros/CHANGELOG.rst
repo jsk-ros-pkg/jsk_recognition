@@ -2,6 +2,24 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.19 (2016-03-22)
+-------------------
+
+0.3.18 (2016-03-21)
+-------------------
+* [jsk_pcl_ros/launch,scripts] add launch and script to generate the pointcloud cluster of objects.
+* Contributors: Masaki Murooka
+
+0.3.17 (2016-03-20)
+-------------------
+* remove dynamic_reconfigure.parameter_generator, which only used for rosbuild
+* [jsk_pcl_ros/kinfu]add cfg for change kinfu params
+* [kinfu]add srv for save mesh
+* [kinfu] add initialization when icp is lost
+* [jsk_pck_ros] add options not pub tf
+* [jsk_pcl_ros/CMakeLists.txt] fix link libraries when building kinfu.
+* Contributors: Kei Okada, Masaki Murooka, Yu Ohara
+
 0.3.16 (2016-02-11)
 -------------------
 * [jsk_pcl_ros/CMakeLists.txt] call one of find_package or pkg_check_modules for robot_self_filter.

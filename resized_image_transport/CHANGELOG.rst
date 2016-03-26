@@ -2,6 +2,17 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.19 (2016-03-22)
+-------------------
+
+0.3.18 (2016-03-21)
+-------------------
+
+0.3.17 (2016-03-20)
+-------------------
+* remove dynamic_reconfigure.parameter_generator, which is only used for rosbuild
+* Contributors: Kei Okada
+
 0.3.16 (2016-02-11)
 -------------------
 

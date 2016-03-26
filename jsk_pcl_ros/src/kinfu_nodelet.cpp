@@ -64,8 +64,14 @@ namespace jsk_pcl_ros
     volume_size_ = pcl::device::kinfuLS::VOLUME_SIZE;
     shift_distance_ = pcl::device::kinfuLS::DISTANCE_THRESHOLD;
     snapshot_rate_ = pcl::device::kinfuLS::SNAPSHOT_RATE;
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind(
+        &Kinfu::configCallback, this, _1, _2);
+    srv_->setCallback (f);
     pub_pose_ = pnh_->advertise<geometry_msgs::PoseStamped>("output", 1);
     pub_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>("output/cloud", 1);
+    srv_save_mesh_ = pnh_->advertiseService("save_mesh", &Kinfu::saveMeshService, this);
     sub_depth_image_.subscribe(*pnh_, "input/depth", 1);
     sub_color_image_.subscribe(*pnh_, "input/color", 1);
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
@@ -98,16 +104,19 @@ namespace jsk_pcl_ros
                                                    info_msg_->height,
                                                    info_msg_->width);
       kinfu_->setInitialCameraPose(Eigen::Affine3f::Identity());
-      kinfu_->volume().setTsdfTruncDist (0.030f/*meters*/);
-      kinfu_->setIcpCorespFilteringParams (0.1f/*meters*/, sin ( pcl::deg2rad(20.f) ));
-      kinfu_->setCameraMovementThreshold(0.001f);
+      kinfu_->volume().setTsdfTruncDist (tsdf_trunc_dist_/*meters*/);
+      kinfu_->setIcpCorespFilteringParams (icp_dist_trans_/*meters*/, sin ( pcl::deg2rad(icp_dist_rot_) ));
+      kinfu_->setCameraMovementThreshold(camera_movement_thre_);
+
       kinfu_->setDepthIntrinsics (info_msg_->K[0], info_msg_->K[4], info_msg_->K[2], info_msg_->K[5]);
       initialized_ = true;
       initial_camera_pose_acquired_ = false;
     }
     if (kinfu_->icpIsLost()) {
       kinfu_->reset();
+      initialized_ = false;
       JSK_NODELET_FATAL("kinfu is reset");
+      return;
     }
     
     if (!initial_camera_pose_acquired_) {
@@ -201,7 +210,54 @@ namespace jsk_pcl_ros
       }
     }
   }
-                       
+  bool Kinfu::saveMeshService(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res)
+  {
+    pcl::gpu::DeviceArray<pcl::PointXYZ> triangles_buffer_device_;
+    if (!marching_cubes_)
+      marching_cubes_ = pcl::gpu::kinfuLS::MarchingCubes::Ptr( new pcl::gpu::kinfuLS::MarchingCubes() );
+    pcl::gpu::DeviceArray<pcl::PointXYZ> triangles_device = marching_cubes_->run(kinfu_->volume(), triangles_buffer_device_);
+    boost::shared_ptr<pcl::PolygonMesh> mesh_ptr( new pcl::PolygonMesh() ); 
+    mesh_ptr = convertToMesh(triangles_device);
+    // cout << "Saving mesh to to 'mesh.ply'... " << flush;
+    pcl::io::savePLYFile("mesh.ply", *mesh_ptr);
+    return true;
+  }
+  boost::shared_ptr<pcl::PolygonMesh> Kinfu::convertToMesh(const pcl::gpu::DeviceArray<pcl::PointXYZ>& triangles)
+  {
+    if (triangles.empty())
+      return boost::shared_ptr<pcl::PolygonMesh>();
+
+    pcl::PointCloud<pcl::PointXYZ> cloud;
+    cloud.width  = (int)triangles.size();
+    cloud.height = 1;
+    triangles.download(cloud.points);
+    boost::shared_ptr<pcl::PolygonMesh> mesh_ptr( new pcl::PolygonMesh() );
+    pcl::toPCLPointCloud2(cloud, mesh_ptr->cloud);
+    mesh_ptr->polygons.resize (triangles.size() / 3);
+    for (size_t i = 0; i < mesh_ptr->polygons.size (); ++i)
+      {
+        pcl::Vertices v;
+        v.vertices.push_back(i*3+0);
+        v.vertices.push_back(i*3+2);
+        v.vertices.push_back(i*3+1);
+        mesh_ptr->polygons[i] = v;
+      }
+    return mesh_ptr;
+  }
+  void Kinfu::configCallback(Config &config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    tsdf_trunc_dist_ = config.tsdf_trunc_dist;
+    icp_dist_trans_ = config.icp_dist_trans;
+    icp_dist_rot_ = config.icp_dist_rot;
+    camera_movement_thre_ = config.camera_movement_thre;
+    JSK_NODELET_INFO("kinfu config has changed");
+    if (initialized_) {
+      kinfu_->volume().setTsdfTruncDist (tsdf_trunc_dist_/*meters*/);
+      kinfu_->setIcpCorespFilteringParams (icp_dist_trans_/*meters*/, sin ( pcl::deg2rad(icp_dist_rot_) ));
+      kinfu_->setCameraMovementThreshold(camera_movement_thre_);
+    }
+  }
 }
 
 #include <pluginlib/class_list_macros.h>

@@ -2,6 +2,26 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.19 (2016-03-22)
+-------------------
+* remove rosbuild from run/build depend
+* remove dynamic_reconfigure.parameter_generator, which only used for rosbuild
+* Contributors: Kei Okada
+
+0.3.18 (2016-03-21)
+-------------------
+* jsk_perception/CMakeLists.txt: remove depends to rosbuild
+* Contributors: Kei Okada
+
+0.3.17 (2016-03-20)
+-------------------
+* remove dynamic_reconfigure.parameter_generator, which only used for rosbuild
+* [jsk_perception] binpack_rect_array.py to enumerate jsk_recognition_msgs/RectArray
+* [jsk_perception] Add selective_search.py
+* [jsk_perception] Use timer callback to speed up tile_image with no_sync:=true
+* [jsk_perception] Cache concatenated image to speed up
+* Contributors: Kei Okada, Ryohei Ueda
+
 0.3.16 (2016-02-11)
 -------------------
 * Merge pull request `#1531 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1531>`_ from k-okada/sed_package_xml

@@ -3,5 +3,11 @@
     <remap from="~input/depth" to="/multisense/depth" />
     <remap from="~input/color" to="/multisense/left/image_rect_color" />
     <remap from="~input/info" to="/multisense/left/camera_info" />
+    <rosparam>
+      tsdf_trunc_dist: 0.03
+      icp_dist_trans: 0.1
+      icp_dist_rot: 20
+      camera_movement_thre: 0.001
+    </rosparam>
   </node>
 </launch>

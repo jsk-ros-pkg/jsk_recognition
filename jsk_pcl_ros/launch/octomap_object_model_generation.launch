@@ -1,0 +1,104 @@
+<launch>
+  <!--
+      After launch this file, following two procedures are necessary to start the object model generation.
+      1. select object point with Publish Point Mode in Rviz
+      2. rosservice call /octomap_passthrough/request
+  -->
+
+  <arg name="SAVE_SELECTED_CLOUD" default="false" />
+
+  <arg name="INPUT" default="/laser_downsampler/output" />
+  <!-- <arg name="INPUT" default="/full_cloud2" /> -->
+
+  <arg name="OUTPUT" default="/object_pointcloud" />
+
+  <!-- publish bbox from selected point -->
+  <node pkg="jsk_pcl_ros" type="publish_clicked_point_bbox.py" name="publish_clicked_point_bbox" />
+  <node pkg="jsk_topic_tools" type="passthrough" name="octomap_passthrough">
+    <remap from="~input" to="$(arg INPUT)" />
+    <param name="default_duration" value="86400" />
+  </node>
+
+  <!-- publish point cloud in bbox -->
+  <node pkg="jsk_pcl_ros" type="attention_clipper" name="attention_clipper">
+    <remap from="~input/points" to="octomap_passthrough/output" />
+    <remap from="~input/box_array" to="bbox_with_clicked_point" />
+    <param name="use_multiple_attention" type="bool" value="true" />
+  </node>
+
+  <node pkg="jsk_pcl_ros" type="cluster_point_indices_decomposer" name="bbox_cluster_point_indices_decomposer">
+    <remap from="~input" to="$(arg INPUT)" />
+    <remap from="~target" to="/attention_clipper/output/cluster_point_indices" />
+  </node>
+
+  <!-- convert frame_id of pointcloud -->
+  <node pkg="jsk_pcl_ros_utils" type="tf_transform_cloud" name="tf_transform_for_octomap">
+    <remap from="~input" to="/bbox_cluster_point_indices_decomposer/debug_output" />
+    <param name="target_frame_id" type="string" value="left_camera_optical_frame" />
+  </node>
+
+  <!-- generate octomap -->
+  <!--node pkg="octomap_server" type="octomap_server_node" name="octomap_server"-->
+  <node pkg="jsk_pcl_ros" type="octomap_server_contact" name="octomap_server">
+    <remap from="cloud_in" to="tf_transform_for_octomap/output" />
+
+    <param name="sensor_model/max_range" value="2.0" />
+
+    <param name="resolution" value="0.05" />
+
+    <param name="frame_id" type="string" value="/odom" />
+    <param name="base_frame_id" type="string" value="/ground" />
+
+    <param name="filter_ground" type="bool" value="true" />
+    <param name="ground_filter/distance" type="double" value="0.04" />
+    <param name="ground_filter/angle" type="double" value="0.15" />
+
+    <param name="resolution" value="0.01" />
+  </node>
+
+  <!-- clustering -->
+  <node pkg="jsk_pcl_ros" type="euclidean_clustering" name="octomap_euclidean_clustering">
+    <remap from="~input" to="/octomap_point_cloud_centers" />
+    <rosparam>
+      tolerance: 0.02
+      min_size: 100
+    </rosparam>
+  </node>
+
+  <node pkg="jsk_pcl_ros" type="cluster_point_indices_decomposer" name="octomap_cluster_point_indices_decomposer">
+    <remap from="~input" to="/octomap_point_cloud_centers" />
+    <remap from="~target" to="/octomap_euclidean_clustering/output" />
+  </node>
+
+  <!-- selected point cloud -->
+  <node pkg="jsk_interactive_marker"
+        type="bounding_box_marker"
+        name="bounding_box_marker"
+        output="screen"
+        >
+    <remap from="~bounding_box_array" to="octomap_cluster_point_indices_decomposer/boxes" />
+  </node>
+
+  <node pkg="jsk_pcl_ros" type="selected_cluster_publisher"
+        name="selected_cloud"
+        output="screen">
+    <remap from="~input" to="/octomap_point_cloud_centers" />
+    <remap from="~indices" to="/octomap_euclidean_clustering/output" />
+    <remap from="~selected_index" to="/bounding_box_marker/selected_index" />
+    <remap from="~output" to="/selected_pointcloud" />
+  </node>
+
+  <!-- transform with bbox -->
+  <node pkg="jsk_pcl_ros" type="transform_pointcloud_in_bounding_box" name="pointcloud_transform_in_box" >
+    <remap from="~input" to="/selected_pointcloud" />
+    <remap from="~input_box" to="/bounding_box_marker/selected_box" />
+    <remap from="~output" to="$(arg OUTPUT)" />
+  </node>
+
+  <!-- save -->
+  <group if="$(arg SAVE_SELECTED_CLOUD)">
+    <node pkg="pcl_ros" type="pointcloud_to_pcd" name="pcd_saver">
+      <remap from="~input" to="/pointcloud_transform_in_box/output" />
+    </node>
+  </group>
+</launch>

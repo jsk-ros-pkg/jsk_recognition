@@ -1,0 +1,35 @@
+<launch>
+  <arg name="INPUT_IMAGE" default="/multisense_local/left/image_rect_color" />
+  <arg name="INPUT_DEPTH_IMAGE" default="/multisense/depth" />
+  <arg name="INPUT_CAMERA_INFO" default="/multisense_local/left/camera_info" />
+  <node pkg="image_view" type="image_view" name="input_image_view">
+    <remap from="image" to="$(arg INPUT_IMAGE)" />
+  </node>
+  <node pkg="image_view" type="image_view" name="input_depth_image_view">
+    <remap from="image" to="$(arg INPUT_DEPTH_IMAGE)" />
+  </node>
+  <node pkg="jsk_perception" type="selective_search.py" name="selective_search">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+  </node>
+  <node pkg="jsk_perception" type="rect_array_to_image_marker.py" name="rect_array_marker">
+    <remap from="~input" to="selective_search/output" />
+  </node>
+  <node pkg="image_view2" type="image_view2" name="selective_search_view"
+        launch-prefix="xterm -e gdb --args">
+    <remap from="image" to="$(arg INPUT_IMAGE)" />
+    <remap from="image_marker" to="rect_array_marker/output" />
+  </node>
+  <node pkg="jsk_perception" type="rect_array_actual_size_filter" name="rect_array_actual_size_filter"
+        output="screen">
+    <remap from="~input" to="selective_search/output" />
+    <remap from="~input/depth_image" to="$(arg INPUT_DEPTH_IMAGE)" />
+    <remap from="~input/info" to="$(arg INPUT_CAMERA_INFO)" />
+  </node>
+  <node pkg="jsk_perception" type="rect_array_to_image_marker.py" name="filtered_rect_array_marker">
+    <remap from="~input" to="rect_array_actual_size_filter/output" />
+  </node>
+  <node pkg="image_view2" type="image_view2" name="filtered_selective_search_view">
+    <remap from="image" to="$(arg INPUT_IMAGE)" />
+    <remap from="image_marker" to="filtered_rect_array_marker/output" />
+  </node>  
+</launch>

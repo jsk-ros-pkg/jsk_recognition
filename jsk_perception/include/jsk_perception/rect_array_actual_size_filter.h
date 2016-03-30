@@ -47,6 +47,7 @@
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include <opencv2/opencv.hpp>
 
 namespace jsk_perception
 {

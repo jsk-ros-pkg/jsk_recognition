@@ -80,8 +80,6 @@
   <test_depend>roslint</test_depend>
   <test_depend>rostest</test_depend>
 
-  <test_depend>roslint</test_depend>
-
   <export>
     <nodelet plugin="${prefix}/jsk_perception_nodelets.xml"/>
   </export>

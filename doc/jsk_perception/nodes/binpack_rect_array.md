@@ -1,4 +1,5 @@
 # binpack_rect_array.py
+![](images/binpack_rect_array.png)
 
 Pack `jsk_recognition_msgs/RectArray` to one image by solving 2-D binpack problem.
 

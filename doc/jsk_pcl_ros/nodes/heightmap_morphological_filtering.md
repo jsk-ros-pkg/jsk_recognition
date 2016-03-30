@@ -27,3 +27,15 @@ which is represented as heightmap.
 * `~max_variance` (Double, default: `0.1`):
 
   Allowable max variance in kernel operator
+* `~smooth_method` (default: `average`)
+
+  You can choose method of smoothing from `average` and `bilateral`.
+* `~bilateral_filter_size` (Integer, default: `7`)
+
+  Kernel size of bilateral filtering.
+* `~bilateral_sigma_color` (Double, default: `35`)
+
+  filter sigma of color space.
+* `~bilateral_sigma_space` (Double, default: `5`)
+
+  filter sigma of coordinate space.

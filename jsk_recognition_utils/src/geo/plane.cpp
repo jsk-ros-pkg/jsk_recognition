@@ -196,6 +196,14 @@ namespace jsk_recognition_utils
     pointFromVectorToVector<Eigen::Vector3f, Eigen::Vector3d>(output_f, output);
   }
 
+  void Plane::project(const Eigen::Affine3d& pose, Eigen::Affine3d& output)
+  {
+    Eigen::Affine3f pose_f, output_f;
+    convertEigenAffine3(pose, pose_f);
+    project(pose_f, output_f);
+    convertEigenAffine3(output_f, output);
+  }
+
   void Plane::project(const Eigen::Affine3f& pose, Eigen::Affine3f& output)
   {
     Eigen::Vector3f p(pose.translation());

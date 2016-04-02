@@ -30,13 +30,21 @@ matrix:
         - USE_DEB=true
         - BEFORE_SCRIPT="git clone -b indigo https://github.com/ros-perception/vision_opencv.git; find -iname package.xml -exec sed -i 's@libopencv-dev@opeencv3@' {} \;"
         - EXTRA_DEB="ros-indigo-opencv3"
-      allow_failures: true
     - os: linux
       dist: trusty
       sudo: required
       env:
         - ROS_DISTRO=jade
         - USE_DEB=false
+  allow_failures:
+    - os: linux
+      dist: trusty
+      sudo: required
+      env:
+        - ROS_DISTRO=indigo
+        - USE_DEB=true
+        - BEFORE_SCRIPT="git clone -b indigo https://github.com/ros-perception/vision_opencv.git; find -iname package.xml -exec sed -i 's@libopencv-dev@opeencv3@' {} \;"
+        - EXTRA_DEB="ros-indigo-opencv3"
 
 cache:
   directories:

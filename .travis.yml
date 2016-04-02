@@ -52,4 +52,4 @@ notifications:
 
 script:
   - source .travis/travis.sh
-  - (cd $TRAVIS_BUILD_DIR/doc && unset PYTHONPATH && source setup.sh && make html)
+  - (cd $TRAVIS_BUILD_DIR/doc && unset PYTHONPATH && source setup.sh &>/dev/null && make html &>/dev/null)

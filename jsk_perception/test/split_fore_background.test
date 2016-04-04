@@ -33,7 +33,7 @@
   <test test-name="test_split_fore_background_1"
         name="test_split_fore_background_1"
         pkg="jsk_tools" type="test_stdout.py">
-    <param name="command" value="timout 20 rostopic echo /split_fore_background_1/output/fg/header/frame_id -n1 || true" />
+    <param name="command" value="timeout 20 rostopic echo /split_fore_background_1/output/fg/header/frame_id -n1 || true" />
     <param name="stdout_line0" value="camera" />
     <param name="shell" value="true" />
   </test>

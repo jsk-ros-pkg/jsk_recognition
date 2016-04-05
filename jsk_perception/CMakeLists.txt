@@ -259,6 +259,10 @@ install(TARGETS camshiftdemo virtual_camera_mono point_pose_extractor white_bala
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+install(DIRECTORY node_scripts/ scripts/
+        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        USE_SOURCE_PERMISSIONS
+)
 
 install(DIRECTORY sample launch euslisp
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}

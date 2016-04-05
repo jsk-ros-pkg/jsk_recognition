@@ -69,6 +69,12 @@ def main():
         md5='9516566c66391835f85ac9cc44cbfc4b',
         compressed_bag='vision.bag',
     )
+    install_test_data(
+        filename='2016-04-06-08-16-08_img_cpi_decomposer.tgz',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vcjlrOUN5LWM3dXM&export=download',
+        md5='605a4e74f8dbdbdf33f66a48e713cf6d',
+        compressed_bag='2016-04-06-08-16-08_img_cpi_decomposer/vision.bag',
+    )
 
     print('[jsk_perception] Done installing test data')
 

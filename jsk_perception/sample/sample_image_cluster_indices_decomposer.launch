@@ -1,0 +1,18 @@
+<launch>
+
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_perception)/test_data/2016-04-06-08-16-08_img_cpi_decomposer/vision.bag --loop" />
+
+  <node name="image_cluster_indices_decomposer"
+        pkg="jsk_perception" type="image_cluster_indices_decomposer.py">
+    <remap from="~input" to="/kinect2_head/hd/image_color" />
+    <remap from="~input/cluster_indices" to="/bin_f_euclid_clustering/output" />
+  </node>
+
+  <node name="image_view"
+        pkg="image_view" type="image_view">
+    <remap from="image" to="image_cluster_indices_decomposer/output" />
+  </node>
+
+</launch>

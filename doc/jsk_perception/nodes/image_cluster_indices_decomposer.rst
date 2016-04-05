@@ -45,3 +45,15 @@ Parameters
 
   How many seconds you allow about the difference of timestamp
   when you specify ``~approximate_sync``.
+
+
+Sample
+------
+
+.. image:: ./images/sample_image_cluster_indices_decomposer.jpg
+   :width: 50%
+
+.. code-block:: bash
+
+  rosrun jsk_perception install_test_data.py
+  roslaunch sample_image_cluster_indices_decomposer.launch

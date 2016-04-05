@@ -114,10 +114,6 @@ execute_process(
   MK_DIR=${mk_PREFIX}/share/mk installed
   RESULT_VARIABLE _make_failed)
 
-# Install sample data
-execute_process(
-  COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
-
 include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels)
 link_directories(${catkin_LIBRARY_DIRS})
 add_executable(camshiftdemo src/camshiftdemo.cpp)
@@ -279,6 +275,11 @@ install(FILES jsk_perception_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DES
 
 if(CATKIN_ENABLE_TESTING)
   find_package(roslint REQUIRED)
+  # install test data by a script
+  add_custom_target(install_test_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.py)
+  if(TARGET tests)
+    add_dependencies(tests install_test_data)
+  endif()
   set(ROSLINT_CPP_OPTS "--filter=-whitespace/parens,-whitespace/braces")
   roslint_cpp()
   roslint_python()

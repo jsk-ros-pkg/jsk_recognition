@@ -1,36 +1,114 @@
-sudo: false
-language:
-  - cpp
-  - python
-python:
-  - "2.7"
-compiler:
-  - gcc
+language: generic
+
+env:
+  global:
+    - ROSWS=wstool
+    - BUILDER=catkin
+    - ROS_PARALLEL_JOBS="-j2"
+    - NOT_TEST_INSTALL=true
+    - USE_TRAVIS=true
+
+matrix:
+  include:
+    # hydro
+    - os: linux
+      dist: precise
+      sudo: required
+      env:
+        - ROS_DISTRO=hydro
+        - USE_DEB=false
+        - BUILD_PKGS="jsk_pcl_ros"
+    - os: linux
+      dist: precise
+      sudo: required
+      env:
+        - ROS_DISTRO=hydro
+        - USE_DEB=false
+        - BUILD_PKGS="jsk_perception"
+    - os: linux
+      dist: precise
+      sudo: required
+      env:
+        - ROS_DISTRO=hydro
+        - USE_DEB=false
+        - BUILD_PKGS="checkerboard_detector imagesift jsk_recognition_msgs jsk_recognition_utils posedetectiondb resized_image_transport"
+    # indigo
+    - os: linux
+      dist: trusty
+      sudo: required
+      env:
+        - ROS_DISTRO=indigo
+        - USE_DEB=true
+        - BUILD_PKGS="jsk_pcl_ros"
+    - os: linux
+      dist: trusty
+      sudo: required
+      env:
+        - ROS_DISTRO=indigo
+        - USE_DEB=true
+        - BUILD_PKGS="jsk_perception"
+    - os: linux
+      dist: trusty
+      sudo: required
+      env:
+        - ROS_DISTRO=indigo
+        - USE_DEB=true
+        - BUILD_PKGS="checkerboard_detector imagesift jsk_recognition_msgs jsk_recognition_utils posedetectiondb resized_image_transport"
+    # indigo + opencv
+    - os: linux
+      dist: trusty
+      sudo: required
+      env:
+        - ROS_DISTRO=indigo
+        - USE_DEB=true
+        - BEFORE_SCRIPT="git clone -b indigo https://github.com/ros-perception/vision_opencv.git; find -iname package.xml -exec sed -i 's@libopencv-dev@opeencv3@' {} \;"
+        - EXTRA_DEB="ros-indigo-opencv3"
+        - BUILD_PKGS="jsk_perception"
+    # jade
+    - os: linux
+      dist: trusty
+      sudo: required
+      env:
+        - ROS_DISTRO=jade
+        - USE_DEB=true
+        - BUILD_PKGS="jsk_pcl_ros"
+    - os: linux
+      dist: trusty
+      sudo: required
+      env:
+        - ROS_DISTRO=jade
+        - USE_DEB=true
+        - BUILD_PKGS="jsk_perception"
+    - os: linux
+      dist: trusty
+      sudo: required
+      env:
+        - ROS_DISTRO=jade
+        - USE_DEB=true
+        - BUILD_PKGS="checkerboard_detector imagesift jsk_recognition_msgs jsk_recognition_utils posedetectiondb resized_image_transport"
+  allow_failures:
+    - os: linux
+      dist: trusty
+      sudo: required
+      env:
+        - ROS_DISTRO=indigo
+        - USE_DEB=true
+        - BEFORE_SCRIPT="git clone -b indigo https://github.com/ros-perception/vision_opencv.git; find -iname package.xml -exec sed -i 's@libopencv-dev@opeencv3@' {} \;"
+        - EXTRA_DEB="ros-indigo-opencv3"
+        - BUILD_PKGS="jsk_perception"
+
+cache:
+  directories:
+    - $HOME/.ccache
+    - $HOME/.cache/pip
+    - $HOME/.ros/test_data
+
 notifications:
   email:
     on_success: always
     on_failure: always
   slack: jsk-robotics:Av7tc8wj3IWkLYvlTzHE7x2g
-addons:
-  apt:
-    packages:
-      - python-pip
-env:
-  global:
-    - ROSWS=wstool
-    - BUILDER=catkin
-    - ROS_PARALLEL_JOBS="-j8"
-    - NOT_TEST_INSTALL=true
-    - NO_SUDO=true
-    - USE_JENKINS=true
-  matrix:
-    - ROS_DISTRO=hydro  USE_DEB=false
-    - ROS_DISTRO=indigo USE_DEB=true
-    - ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT="git clone -b indigo https://github.com/ros-perception/vision_opencv.git; find -iname package.xml -exec sed -i 's@libopencv-dev@opeencv3@' {} \;" EXTRA_DEB="ros-indigo-opencv3"
-    - ROS_DISTRO=jade   USE_DEB=false
-matrix:
-  allow_failures:
-    - env: ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT="git clone -b indigo https://github.com/ros-perception/vision_opencv.git; find -iname package.xml -exec sed -i 's@libopencv-dev@opeencv3@' {} \;" EXTRA_DEB="ros-indigo-opencv3"
+
 script:
   - source .travis/travis.sh
-  - (cd doc && source setup.sh && make html)
+  - (cd $TRAVIS_BUILD_DIR/doc && unset PYTHONPATH && source setup.sh &>/dev/null && make html &>/dev/null)

@@ -30,3 +30,7 @@ Convert `jsk_recognition_msgs/BoundingBoxArray` to `jsk_recognition_msgs/RectArr
 * `~queue_size` (Int, default: `100`)
   How many messages you allow about the subscriber to keep in the queue.
 
+## Example
+![](images/bounding_box_to_rect_example.jpg)
+
+`roslaunch jsk_perception sample_bounding_box_to_rect.launch`

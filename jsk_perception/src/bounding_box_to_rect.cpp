@@ -45,6 +45,8 @@ namespace jsk_perception
   {
     DiagnosticNodelet::onInit();
     tf_listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
+    pnh_->param("queue_size", queue_size_, 100);
+    pnh_->param("approximate_sync", approximate_sync_, false);
     pnh_->param("tf_queue_size", tf_queue_size_, 10);
     pub_ = advertise<jsk_recognition_msgs::RectArray>(*pnh_, "output", 1);
     pub_internal_ = pnh_->advertise<jsk_recognition_msgs::BoundingBoxArrayWithCameraInfo>("internal", 1);
@@ -56,9 +58,15 @@ namespace jsk_perception
   {
     sub_info_.subscribe(*pnh_, "input/info", 1);
     sub_box_.subscribe(*pnh_, "input", 1);
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-    sync_->connectInput(sub_info_, sub_box_);
-    sync_->registerCallback(boost::bind(&BoundingBoxToRect::inputCallback, this, _1, _2));
+    if (approximate_sync_) {
+      async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_); 
+      async_->connectInput(sub_info_, sub_box_);
+      async_->registerCallback(boost::bind(&BoundingBoxToRect::inputCallback, this, _1, _2));
+    } else {
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
+      sync_->connectInput(sub_info_, sub_box_);
+      sync_->registerCallback(boost::bind(&BoundingBoxToRect::inputCallback, this, _1, _2));
+    }
   }
 
   void BoundingBoxToRect::unsubscribe()

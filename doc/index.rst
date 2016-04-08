@@ -28,3 +28,4 @@ ROS packages:
    jsk_perception/index
    jsk_pcl_ros/index
    jsk_pcl_ros_utils/index
+   jsk_recognition_utils/index

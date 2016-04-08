@@ -126,3 +126,24 @@ def color_category10(i):
               0x17becf)
     c = colors[i % 10]
     return ColorRGBA(r=(c >> 16) / 255.0, g=((c >> 8) & 255) / 255.0, b=(c & 255) / 255.0, a=1.0)
+
+
+def colorize_cluster_indices(image, cluster_indices, alpha=0.3, image_alpha=1):
+    from skimage.color import rgb2gray
+    from skimage.color import gray2rgb
+    from skimage.util import img_as_float
+    from skimage.color.colorlabel import DEFAULT_COLORS
+    from skimage.color.colorlabel import color_dict
+    image = img_as_float(rgb2gray(image))
+    image = gray2rgb(image) * image_alpha + (1 - image_alpha)
+    height, width = image.shape[:2]
+
+    n_colors = len(DEFAULT_COLORS)
+    indices_to_color = np.zeros((height * width, 3))
+    for i, indices in enumerate(cluster_indices):
+        color = color_dict[DEFAULT_COLORS[i % n_colors]]
+        indices_to_color[indices] = color
+    indices_to_color = indices_to_color.reshape((height, width, 3))
+    result = indices_to_color * alpha + image * (1 - alpha)
+    result = (result * 255).astype(np.uint8)
+    return result

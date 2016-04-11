@@ -1,0 +1,16 @@
+<launch>
+
+  <env name="DISPLAY" value="" />
+
+  <include file="$(find jsk_perception)/sample/sample_bounding_box_to_rect.launch" />
+
+  <test test-name="test_bounding_box_to_rect"
+        name="test_bounding_box_to_rect"
+        pkg="jsk_tools" type="test_topic_published.py">
+    <rosparam>
+      topic_0: /bbox_to_rect/output
+      timeout_0: 10
+    </rosparam>
+  </test>
+
+</launch>

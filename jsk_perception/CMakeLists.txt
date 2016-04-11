@@ -275,6 +275,11 @@ install(FILES jsk_perception_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DES
 
 if(CATKIN_ENABLE_TESTING)
   find_package(roslint REQUIRED)
+  # install test data by a script
+  add_custom_target(install_test_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.py)
+  if(TARGET tests)
+    add_dependencies(tests install_test_data)
+  endif()
   set(ROSLINT_CPP_OPTS "--filter=-whitespace/parens,-whitespace/braces")
   roslint_cpp()
   roslint_python()

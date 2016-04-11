@@ -82,6 +82,10 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     mask_size_ = config.mask_size;
     max_variance_ = config.max_variance;
+    smooth_method_ = config.smooth_method;
+    bilateral_filter_size_ = config.bilateral_filter_size;
+    bilateral_sigma_color_ = config.bilateral_sigma_color;
+    bilateral_sigma_space_ = config.bilateral_sigma_space;
   }
 
   void HeightmapMorphologicalFiltering::filter(
@@ -91,38 +95,43 @@ namespace jsk_pcl_ros
     vital_checker_->poke();
     cv::Mat input = cv_bridge::toCvShare(
       msg, sensor_msgs::image_encodings::TYPE_32FC1)->image;
-    cv::Mat filtered_image = input.clone();
-
-    for (size_t j = 0; j < input.rows; j++) {
-      for (size_t i = 0; i < input.cols; i++) {
-        float v = input.at<float>(j, i);
-        if (isnan(v) || v == -FLT_MAX) { // Need to filter
-          Accumulator acc;
-          for (int jj = - mask_size_; jj <= mask_size_; jj++) {
-            int target_j = j + jj;
-            if (target_j >= 0 && target_j < input.rows) {
-              for (int ii = - mask_size_; ii <= mask_size_; ii++) {
-                int target_i = i + ii;
-                if (target_i >= 0 && target_i < input.cols) {
-                  if (std::abs(jj) + std::abs(ii) <= mask_size_) {
-                    float vv = input.at<float>(target_j, target_i);
-                    if (!isnan(vv) && vv != -FLT_MAX) {
-                      acc(vv);
+    cv::Mat filtered_image;
+    if (smooth_method_ == "average") {
+      filtered_image = input.clone();
+      for (size_t j = 0; j < input.rows; j++) {
+        for (size_t i = 0; i < input.cols; i++) {
+          float v = input.at<float>(j, i);
+          if (isnan(v) || v == -FLT_MAX) { // Need to filter
+            Accumulator acc;
+            for (int jj = - mask_size_; jj <= mask_size_; jj++) {
+              int target_j = j + jj;
+              if (target_j >= 0 && target_j < input.rows) {
+                for (int ii = - mask_size_; ii <= mask_size_; ii++) {
+                  int target_i = i + ii;
+                  if (target_i >= 0 && target_i < input.cols) {
+                    if (std::abs(jj) + std::abs(ii) <= mask_size_) {
+                      float vv = input.at<float>(target_j, target_i);
+                      if (!isnan(vv) && vv != -FLT_MAX) {
+                        acc(vv);
+                      }
                     }
                   }
                 }
               }
             }
-          }
-          if (boost::accumulators::count(acc) != 0) {
-            float newv = boost::accumulators::mean(acc);
-            float variance = boost::accumulators::variance(acc);
-            if (variance < max_variance_) {
-              filtered_image.at<float>(j, i) = newv;
+            if (boost::accumulators::count(acc) != 0) {
+              float newv = boost::accumulators::mean(acc);
+              float variance = boost::accumulators::variance(acc);
+              if (variance < max_variance_) {
+                filtered_image.at<float>(j, i) = newv;
+              }
             }
           }
         }
       }
+    }
+    else if (smooth_method_ == "bilateral") {
+      cv::bilateralFilter(input, filtered_image, bilateral_filter_size_, bilateral_sigma_color_, bilateral_sigma_space_);
     }
     
     pub_.publish(cv_bridge::CvImage(

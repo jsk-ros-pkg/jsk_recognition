@@ -1,0 +1,16 @@
+<launch>
+
+  <env name="DISPLAY" value="" />
+
+  <include file="$(find jsk_perception)/sample/sample_image_cluster_indices_decomposer.launch" />
+
+  <test test-name="test_image_cluster_indices_decomposer"
+        name="test_image_cluster_indices_decomposer"
+        pkg="jsk_tools" type="test_topic_published.py">
+    <rosparam>
+      topic_0: /image_cluster_indices_decomposer/output
+      timeout_0: 10
+    </rosparam>
+  </test>
+
+</launch>

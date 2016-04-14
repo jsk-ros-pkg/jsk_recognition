@@ -16,6 +16,7 @@ Contents:
 
    overview
    tips
+   install_softkinetic_camera
 
 
 ROS packages:

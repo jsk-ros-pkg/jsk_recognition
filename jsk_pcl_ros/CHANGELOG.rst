@@ -2,6 +2,15 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros] add jsk_pcl version of tabletop_object_detector launch/config (`#1585 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1585>`_)
+  * [jsk_pcl_ros_utils/jsk_pcl_nodelets.xml] fix: pcl class name typo of CloudOnPlane
+  * [jsk_pcl_ros/sample/tabletop_object_detector.launch] add jsk version of tabletop_object_detector
+* [jsk_pcl_ros] Support bilateral filtering in HeightmapMorphologicalFiltering (`#1564 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1564>`_)
+* Install python executables
+* Contributors: Yuki Furuta, Kentaro Wada, Ryohei Ueda
+
 0.3.19 (2016-03-22)
 -------------------
 

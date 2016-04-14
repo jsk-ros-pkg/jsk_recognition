@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.20 (2016-04-14)
+-------------------
 * [jsk_recognition_utils] Support Affine3d project function in Plane (`#1576 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1576>`_)
 * [jsk_recognition_utils] Add multiple ClusterPointIndices to one (`#1581 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1581>`_)
   * Add multiple ClusterPointIndices to one

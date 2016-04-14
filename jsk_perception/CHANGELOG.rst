@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.20 (2016-04-14)
+-------------------
 * Add sample/test for image_cluster_indices_decomposer.py (`#1580 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1580>`_)
 * Add sample and test for BoundingBoxToRect (`#1577 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1577>`_)
   * Add sample for BoundingBoxToRect

@@ -1,6 +1,6 @@
 <package>
   <name>jsk_pcl_ros_utils</name>
-  <version>0.3.20</version>
+  <version>0.3.21</version>
   <description>jsk_pcl_ros</description>
   <maintainer email="ueda@jsk.t.u-tokyo.ac.jp">Ryohei Ueda</maintainer>
 

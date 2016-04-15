@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.21 (2016-04-15)
+-------------------
 * CMakeLists.txt: we do not have node_scripts/ (#1587)
 * Contributors: Kei Okada
 

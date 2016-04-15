@@ -9,7 +9,7 @@ namespace resized_image_transport
     initParams();
     initReconfigure();
     initPublishersAndSubscribers();
-    
+    onInitPostProcess();
   }
 
   void ImageResizer::subscribe() {

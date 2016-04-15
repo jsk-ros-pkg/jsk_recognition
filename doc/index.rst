@@ -9,20 +9,18 @@ The code is open source, and `available on github`_.
 .. _available on github: http://github.com/jsk-ros-pkg/jsk_recognition
 
 
-Contents:
-
 .. toctree::
    :maxdepth: 1
+   :caption: Contents
 
    overview
    tips
    install_softkinetic_camera
 
 
-ROS packages:
-
 .. toctree::
    :maxdepth: 1
+   :caption: ROS Packages
 
    checkerboard_detector/index
    imagesift/index

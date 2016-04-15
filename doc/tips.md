@@ -1,4 +1,4 @@
-# Tips
+# Tips & FAQs
 
 ## Cannot compile jsk_recognition because of "memory allocation error"
 `jsk_pcl_ros` and `jsk_perception` requires much memory to be compiled because of PCL.

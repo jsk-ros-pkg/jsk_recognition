@@ -1,0 +1,28 @@
+<launch>
+
+  <node name="virtual_camera"
+        pkg="jsk_perception" type="image_publisher.py">
+    <remap from="~output" to="~image" />
+    <remap from="~output/camera_info" to="~camera_info" />
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/ros_groovy.jpg
+    </rosparam>
+  </node>
+
+  <node name="image_resizer"
+        pkg="resized_image_transport" type="image_resizer">
+    <remap from="~input/image" to="virtual_camera/image" />
+  </node>
+
+  <test test-name="test_image_resizer"
+        name="test_image_resizer"
+        pkg="jsk_tools" type="test_topic_published.py">
+    <rosparam>
+      topic_0: /image_resizer/output/image
+      timeout_0: 10
+      topic_1: /image_resizer/output/camera_info
+      timeout_1: 10
+    </rosparam>
+  </test>
+
+</launch>

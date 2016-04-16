@@ -37,6 +37,9 @@
   <!-- <test_depend>sensor_msgs</test_depend> -->
   <!-- <test_depend>image_transport</test_depend> -->
   <!-- <test_depend>std_srvs</test_depend> -->
+  <test_depend>jsk_perception</test_depend>
+  <test_depend>jsk_tools</test_depend>
+  <test_depend>rostest</test_depend>
 
   <export>
     <nodelet plugin="${prefix}/nodelet.xml"/>

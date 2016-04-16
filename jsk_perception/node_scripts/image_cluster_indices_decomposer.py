@@ -31,7 +31,7 @@ class ImageClusterIndicesDecomposer(ConnectionBasedTransport):
 
     def unsubscribe(self):
         self._sub.unregister()
-        self._sub_rects.unregister()
+        self._sub_cpi.unregister()
 
     def _decompose(self, imgmsg, cpi_msg):
         bridge = cv_bridge.CvBridge()

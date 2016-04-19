@@ -21,13 +21,13 @@ class HOGFeatureDescriptor {
     
  private:
     virtual void histogramBinVoting(
-       const float &, int &, int &);
+	const float &, int &, int &);
     virtual void imageGradient(
-       const cv::Mat &, cv::Mat &);
+	const cv::Mat &, cv::Mat &);
     virtual cv::Mat blockGradient(
         const int, const int, const int, cv::Mat &);
     virtual void getHOG(
-       const cv::Mat &, cv::Mat &, cv::Mat &);
+	const cv::Mat &, cv::Mat &, cv::Mat &);
    
  public:
     HOGFeatureDescriptor(

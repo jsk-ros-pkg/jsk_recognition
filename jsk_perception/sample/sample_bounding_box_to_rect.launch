@@ -1,0 +1,37 @@
+<launch>
+
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_perception)/test_data/2016-04-05-17-19-43_draw_bbox/vision.bag --loop">
+  </node>
+
+  <arg name="INPUT_IMAGE" value="/kinect2_torso/hd/image_color" />
+  <arg name="INPUT_INFO" value="/kinect2_torso/hd/camera_info" />
+  <arg name="INPUT_BBOXES" value="bin_gtol_clipper/output/box_array" />
+
+  <arg name="MANAGER" value="bb_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet" args="manager"/>
+
+  <node name="bbox_to_rect"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/BoundingBoxToRect $(arg MANAGER)">
+    <remap from="~input" to="$(arg INPUT_BBOXES)"/>
+    <remap from="~input/info" to="$(arg INPUT_INFO)"/>
+  </node>
+
+  <node name="rect_array_to_image_marker"
+        pkg="jsk_perception"
+        type="rect_array_to_image_marker.py">
+    <remap from="~input" to="bbox_to_rect/output"/>
+  </node>
+
+  <node name="vis_image_with_rect"
+        pkg="image_view2"
+        type="image_view2">
+    <remap from="image" to="$(arg INPUT_IMAGE)" />
+    <remap from="camera_info" to="$(arg INPUT_INFO)"/>
+    <remap from="image_marker" to="rect_array_to_image_marker/output"/>
+  </node>
+
+</launch>

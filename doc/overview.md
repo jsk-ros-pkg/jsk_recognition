@@ -1,4 +1,4 @@
-# Overview of jsk_recognition
+# Overview
 
 ## Nodelet based designe
 Programs in jsk_recognition is written as nodelet to overcome communication overhead

@@ -1,6 +1,6 @@
 <package>
   <name>jsk_perception</name>
-  <version>0.3.19</version>
+  <version>0.3.21</version>
 
   <description>
 
@@ -79,8 +79,6 @@
 
   <test_depend>roslint</test_depend>
   <test_depend>rostest</test_depend>
-
-  <test_depend>roslint</test_depend>
 
   <export>
     <nodelet plugin="${prefix}/jsk_perception_nodelets.xml"/>

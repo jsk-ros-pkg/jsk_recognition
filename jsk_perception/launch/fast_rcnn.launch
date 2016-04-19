@@ -1,0 +1,16 @@
+<launch>
+
+  <arg name="INPUT_IMAGE" />
+
+  <node name="selective_search"
+        pkg="jsk_perception" type="selective_search.py">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+  </node>
+
+  <node name="fast_rcnn_caffenet"
+        pkg="jsk_perception" type="fast_rcnn_caffenet.py">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/rect_array" to="selective_search/output" />
+  </node>
+
+</launch>

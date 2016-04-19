@@ -61,6 +61,7 @@ add_definitions("-g -O2")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
+  cfg/RectArrayActualSizeFilter.cfg
   cfg/PolygonArrayColorLikelihood.cfg
   cfg/PolygonArrayColorHistogram.cfg
   cfg/TabletopColorDifferenceLikelihood.cfg
@@ -133,6 +134,7 @@ macro(jsk_perception_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_na
     jsk_perception_nodelet_sources jsk_perception_nodelet_executables)
 endmacro()
 jsk_perception_nodelet(src/bounding_box_to_rect.cpp "jsk_perception/BoundingBoxToRect" "bounding_box_to_rect")
+jsk_perception_nodelet(src/rect_array_actual_size_filter.cpp "jsk_perception/RectArrayActualSizeFilter" "rect_array_actual_size_filter")
 jsk_perception_nodelet(src/polygon_array_color_likelihood.cpp "jsk_perception/PolygonArrayColorLikelihood" "polygon_array_color_likelihood")
 jsk_perception_nodelet(src/polygon_array_color_histogram.cpp "jsk_perception/PolygonArrayColorHistogram" "polygon_array_color_histogram")
 jsk_perception_nodelet(src/edge_detector.cpp "jsk_perception/EdgeDetector" "edge_detector")
@@ -257,6 +259,10 @@ install(TARGETS camshiftdemo virtual_camera_mono point_pose_extractor white_bala
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+install(DIRECTORY node_scripts/ scripts/
+        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        USE_SOURCE_PERMISSIONS
+)
 
 install(DIRECTORY sample launch euslisp
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
@@ -269,6 +275,11 @@ install(FILES jsk_perception_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DES
 
 if(CATKIN_ENABLE_TESTING)
   find_package(roslint REQUIRED)
+  # install test data by a script
+  add_custom_target(install_test_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.py)
+  if(TARGET tests)
+    add_dependencies(tests install_test_data)
+  endif()
   set(ROSLINT_CPP_OPTS "--filter=-whitespace/parens,-whitespace/braces")
   roslint_cpp()
   roslint_python()
@@ -276,9 +287,13 @@ if(CATKIN_ENABLE_TESTING)
   if(${DISTRO_GE_INDIGO})
     # FIXME: jsk_tools/test_topic_published.py does not work on hydro travis/jenkins
     # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
+    add_rostest(test/draw_rect_array.test)
+    add_rostest(test/image_cluster_indices_decomposer.test)
     add_rostest(test/image_to_label.test)
+    add_rostest(test/selective_search.test)
     add_rostest(test/slic_super_pixels.test)
-    add_rostest(test/test_label_image_decomposer_slop.test)
+    add_rostest(test/split_fore_background.test)
+    add_rostest(test/label_image_decomposer_slop.test)
   endif()
   add_rostest(test/sparse_image.test)
 endif()

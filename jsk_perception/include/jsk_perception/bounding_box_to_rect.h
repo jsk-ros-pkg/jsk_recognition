@@ -58,7 +58,10 @@ namespace jsk_perception
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::CameraInfo,
       jsk_recognition_msgs::BoundingBoxArray > SyncPolicy;
-    
+    typedef message_filters::sync_policies::ApproximateTime<
+      sensor_msgs::CameraInfo,
+      jsk_recognition_msgs::BoundingBoxArray > ApproximateSyncPolicy;
+
     BoundingBoxToRect(): DiagnosticNodelet("BoundingBoxToRect") {}
   protected:
     virtual void onInit();
@@ -75,8 +78,11 @@ namespace jsk_perception
     message_filters::Subscriber<jsk_recognition_msgs::BoundingBoxArray> sub_box_;
     message_filters::Subscriber<jsk_recognition_msgs::BoundingBoxArrayWithCameraInfo> sub_box_with_info_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
+    boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> > async_;
     tf::TransformListener* tf_listener_;
+    bool approximate_sync_;
     int tf_queue_size_;
+    int queue_size_;
     boost::shared_ptr<tf::MessageFilter<jsk_recognition_msgs::BoundingBoxArrayWithCameraInfo> > tf_filter_;
     ros::Publisher pub_;
     ros::Publisher pub_internal_;

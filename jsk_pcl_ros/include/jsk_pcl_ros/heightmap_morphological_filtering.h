@@ -79,6 +79,10 @@ namespace jsk_pcl_ros
     int mask_size_;
     double max_variance_;
     int max_queue_size_;
+    std::string smooth_method_;
+    int bilateral_filter_size_;
+    double bilateral_sigma_color_;
+    double bilateral_sigma_space_;
   };
 }
 

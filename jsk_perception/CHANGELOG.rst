@@ -2,6 +2,57 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.21 (2016-04-15)
+-------------------
+
+0.3.20 (2016-04-14)
+-------------------
+* Add sample/test for image_cluster_indices_decomposer.py (`#1580 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1580>`_)
+* Add sample and test for BoundingBoxToRect (`#1577 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1577>`_)
+  * Add sample for BoundingBoxToRect
+  Modified:
+  - jsk_perception/CMakeLists.txt
+  Added:
+  - jsk_perception/sample/sample_bounding_box_to_rect.launch
+  - jsk_perception/scripts/install_sample_data.py
+  - jsk_perception/test_data/.gitignore
+  * Add test for BoundingBoxToRect
+  * add an example to the documentation
+  * modified document
+* [jsk_perception/bounding_box_to_rect] add rosparam approximate sync and queue_size (`#1583 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1583>`_)
+  * [jsk_perception/bounding_box_to_rect] add approximate sync and queue_size param
+  * [jsk_perception/bounding_box_to_rect] add parameters in doc
+* Visualize ClusterPointIndices for image (`#1579 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1579>`_)
+* Install python executables
+  * Install python executables
+* Refactor: Make test filenames consistent
+* Fix typo in 'test/test_split_fore_background.test'
+* Merge pull request `#1568 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1568>`_ from wkentaro/draw-rect-array
+  [jsk_perception/draw_rect_array.py] Draw rect_array onto a image
+* Add test for jsk_perception/draw_rect_array.py
+  Modified:
+  - jsk_perception/CMakeLists.txt
+  Added:
+  - jsk_perception/test/draw_rect_array.test
+* Documentize draw_rect_array.py
+* Draw rect_array onto a image
+  Added:
+  - jsk_perception/node_scripts/draw_rect_array.py
+* Add example for fast_rcnn_caffenet.py
+* Subscribe rect_array as object location proposals
+* Test jsk_perception/selective_search.py
+* Pass RGB image to dlib.find_candidate_object_locations
+  Modified:
+  - jsk_perception/node_scripts/selective_search.py
+* [jsk_perception] include opencv header in rect_array_actual_size_filter.h
+* [jsk_perception] Add RectArrayActualSizeFilter
+  Filtering array of rectangle regions based on actual size estimated from
+  depth image.
+* Remove duplicated roslint in test_depend
+  Modified:
+  - jsk_perception/package.xml
+* Contributors: Kei Okada, Kentaro Wada, Ryohei Ueda, Shingo Kitagawa, Yusuke Niitani
+
 0.3.19 (2016-03-22)
 -------------------
 * remove rosbuild from run/build depend

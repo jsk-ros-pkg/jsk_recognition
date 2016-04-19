@@ -113,7 +113,7 @@ namespace resized_image_transport
     }
 
     if (use_camera_info_) {
-      cp_ = advertiseCamera(*pnh_, *it_, "output/image", max_queue_size_);
+      cp_ = advertiseCamera(*pnh_, "output/image", max_queue_size_);
     }
     else {
       image_pub_ = advertise<sensor_msgs::Image>(*pnh_, "output/image", max_queue_size_);

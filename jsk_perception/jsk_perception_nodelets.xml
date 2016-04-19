@@ -3,6 +3,10 @@
          type="jsk_perception::BoundingBoxToRect"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_perception/RectArrayActualSizeFilter"
+         type="jsk_perception::RectArrayActualSizeFilter"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/ProjectImagePoint"
          type="jsk_perception::ProjectImagePoint"
          base_class_type="nodelet::Nodelet">

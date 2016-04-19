@@ -1,6 +1,6 @@
 <package>
   <name>resized_image_transport</name>
-  <version>0.3.19</version>
+  <version>0.3.21</version>
   <description>resized_image_transport</description>
 
   <maintainer email="youhei@jsk.t.u-tokyo.ac.jp">Yohei Kakiuchi</maintainer>
@@ -37,6 +37,9 @@
   <!-- <test_depend>sensor_msgs</test_depend> -->
   <!-- <test_depend>image_transport</test_depend> -->
   <!-- <test_depend>std_srvs</test_depend> -->
+  <test_depend>jsk_perception</test_depend>
+  <test_depend>jsk_tools</test_depend>
+  <test_depend>rostest</test_depend>
 
   <export>
     <nodelet plugin="${prefix}/nodelet.xml"/>

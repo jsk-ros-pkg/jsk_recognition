@@ -223,6 +223,10 @@
          type="jsk_perception::KMeans"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_perception/CMTNodelet"
+         type="jsk_perception::CMTNodelet"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/RobotToMaskImage"
          type="jsk_perception::RobotToMaskImage"
          base_class_type="nodelet::Nodelet">

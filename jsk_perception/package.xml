@@ -43,6 +43,10 @@
   <build_depend>sensor_msgs</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>tf</build_depend>
+  <build_depend>eigen</build_depend>
+  <build_depend>jsk_recognition_msgs</build_depend>
+  <build_depend>posedetection_msgs</build_depend>
+  <build_depend>libcmt</build_depend>
   <build_depend>robot_self_filter</build_depend>
   <build_depend>yaml-cpp</build_depend>
 
@@ -64,6 +68,7 @@
   <run_depend>nodelet</run_depend>
   <run_depend>pcl_ros</run_depend>
   <run_depend>posedetection_msgs</run_depend>
+  <run_depend>libcmt</run_depend>
   <run_depend>python-dlib</run_depend>
   <run_depend>python-gdown</run_depend>
   <run_depend>python-sklearn</run_depend>

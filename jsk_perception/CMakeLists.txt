@@ -31,6 +31,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   tf
+  libcmt
 )
 
 # check ros distro >= indigo
@@ -138,6 +139,7 @@ jsk_perception_nodelet(src/rect_array_actual_size_filter.cpp "jsk_perception/Rec
 jsk_perception_nodelet(src/polygon_array_color_likelihood.cpp "jsk_perception/PolygonArrayColorLikelihood" "polygon_array_color_likelihood")
 jsk_perception_nodelet(src/polygon_array_color_histogram.cpp "jsk_perception/PolygonArrayColorHistogram" "polygon_array_color_histogram")
 jsk_perception_nodelet(src/edge_detector.cpp "jsk_perception/EdgeDetector" "edge_detector")
+jsk_perception_nodelet(src/cmt.cpp "jsk_perception/CMTNodelet" "cmt_node")
 jsk_perception_nodelet(src/sparse_image_encoder.cpp "jsk_perception/SparseImageEncoder" "sparse_image_encoder")
 jsk_perception_nodelet(src/sparse_image_decoder.cpp "jsk_perception/SparseImageDecoder" "sparse_image_decoder")
 jsk_perception_nodelet(src/color_histogram.cpp "jsk_perception/ColorHistogram" "color_histogram")

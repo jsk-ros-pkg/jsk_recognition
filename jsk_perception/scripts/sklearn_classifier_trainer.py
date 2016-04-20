@@ -44,7 +44,7 @@ def main():
     print('fitting {0}'.format(args.classifier))
     clf.fit(X_train, y_train)
     clf.target_names_ = target_names
-    with gzip.open('clf.pkl.gz', 'wb') as f:
+    with gzip.open(args.output, 'wb') as f:
         pickle.dump(clf, f)
     y_pred = clf.predict(X_test)
     print('score of classifier: {}'.format(accuracy_score(y_test, y_pred)))

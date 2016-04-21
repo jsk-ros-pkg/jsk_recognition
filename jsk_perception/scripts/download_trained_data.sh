@@ -1,6 +1,5 @@
 #!/bin/sh
 
-mkdir -p $(rospack find jsk_perception)/trained_data
 TRAINED_DATA_DIR=$(rospack find jsk_perception)/trained_data
 
 # download svm trained_data for drc drill task

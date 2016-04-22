@@ -2,6 +2,9 @@
 
 TRAINED_DATA_DIR=$(rospack find jsk_perception)/trained_data
 
+echo "Downloading trained data"
+
+
 # download svm trained_data for drc drill task
 wget --timestamping "https://drive.google.com/uc?id=0B5hRAGKTOm_KWW11R0FTX0xjTDg&export=download" -O $TRAINED_DATA_DIR/drill_svm.xml
 
@@ -27,3 +30,6 @@ for file in ${files[@]}; do
   wget "https://github.com/Itseez/opencv_contrib/raw/3.1.0/modules/saliency/samples/ObjectnessTrainedModel/$file" \
     -O $TRAINED_DATA_DIR/ObjectnessTrainedModel/$file
 done
+
+
+echo "Finished downloading trained data"

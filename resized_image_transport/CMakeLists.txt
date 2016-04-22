@@ -28,6 +28,10 @@ catkin_package(
     LIBRARIES # TODO
 )
 
+if("${jsk_topic_tools_VERSION}" VERSION_LESS 2.0.10) # https://github.com/jsk-ros-pkg/jsk_common/pull/1346 changed since >= 2.0.10
+  add_definitions("-DUSE_2_0_9_ADVERTISE_CAMERA")
+endif()
+
 jsk_nodelet(src/image_resizer_nodelet.cpp
   "resized_image_transport/ImageResizer"
   "image_resizer"

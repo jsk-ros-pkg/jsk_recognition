@@ -41,6 +41,10 @@ execute_process(
 
 find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 
+find_package(OpenCV REQUIRED)
+message("OPENCV ${OpenCV_VERSION} FOUND")
+include_directories(${OpenCV_INCLUDE_DIRS})
+
 find_package(Eigen REQUIRED)
 include_directories(${Eigen_INCLUDE_DIRS})
 
@@ -183,6 +187,9 @@ jsk_perception_nodelet(src/skeletonization_nodelet.cpp "jsk_perception/Skeletoni
 jsk_perception_nodelet(src/sliding_window_object_detector.cpp "jsk_perception/SlidingWindowObjectDetector" "sliding_window_object_detector")
 jsk_perception_nodelet(src/gaussian_blur.cpp "jsk_perception/GaussianBlur" "gaussian_blur")
 jsk_perception_nodelet(src/kmeans.cpp "jsk_perception/KMeans" "kmeans")
+if(${OpenCV_VERSION} VERSION_GREATER "2.4.8")
+  jsk_perception_nodelet(src/bing.cpp "jsk_perception/Bing" "bing")
+endif()
 jsk_perception_nodelet(src/tabletop_color_difference_likelihood.cpp "jsk_perception/TabletopColorDifferenceLikelihood" "tabletop_color_difference_likelihood")
 jsk_perception_nodelet(src/saliency_map_generator_node.cpp "jsk_perception/SaliencyMapGenerator" "saliency_map_generator")
 
@@ -210,6 +217,10 @@ if(robot_self_filter_FOUND)
   include_directories(${robot_self_filter_INCLUDE_DIRS})
   target_link_libraries(${PROJECT_NAME} ${robot_self_filter_LIBRARIES})
 endif(robot_self_filter_FOUND)
+if(${OpenCV_VERSION} VERSION_GREATER "2.4.8")
+  include_directories(${OpenCV_INCLUDE_DIRS})
+  target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES})
+endif()
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 
 

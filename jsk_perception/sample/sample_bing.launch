@@ -1,0 +1,39 @@
+<launch>
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/object_detection_example_1.jpg
+      encoding: bgr8
+      publish_info: false
+    </rosparam>
+  </node>
+
+  <node name="bing"
+        pkg="jsk_perception" type="bing">
+    <remap from="~input" to="image_publisher/output" />
+  </node>
+
+  <node name="draw_rect_array"
+        pkg="jsk_perception" type="draw_rect_array.py">
+    <remap from="~input" to="image_publisher/output" />
+    <remap from="~input/rect_array" to="bing/output" />
+  </node>
+
+  <node name="image_view_0"
+        pkg="image_view" type="image_view">
+    <remap from="image" to="image_publisher/output" />
+  </node>
+  <node name="image_view_1"
+        pkg="image_view" type="image_view">
+    <remap from="image" to="bing/output/objectness" />
+    <rosparam>
+      do_dynamic_scaling: true
+    </rosparam>
+  </node>
+  <node name="image_view_2"
+        pkg="image_view" type="image_view">
+    <remap from="image" to="draw_rect_array/output" />
+  </node>
+
+</launch>

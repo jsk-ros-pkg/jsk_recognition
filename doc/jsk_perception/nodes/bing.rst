@@ -31,6 +31,14 @@ Publishing Topic
   Float image which describes objectness.
 
 
+Sample
+------
+
+.. code-block:: bash
+
+  roslaunch jsk_perception bing.test
+
+
 Reference
 ---------
 

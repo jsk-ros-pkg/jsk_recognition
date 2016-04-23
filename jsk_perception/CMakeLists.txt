@@ -187,7 +187,7 @@ jsk_perception_nodelet(src/skeletonization_nodelet.cpp "jsk_perception/Skeletoni
 jsk_perception_nodelet(src/sliding_window_object_detector.cpp "jsk_perception/SlidingWindowObjectDetector" "sliding_window_object_detector")
 jsk_perception_nodelet(src/gaussian_blur.cpp "jsk_perception/GaussianBlur" "gaussian_blur")
 jsk_perception_nodelet(src/kmeans.cpp "jsk_perception/KMeans" "kmeans")
-if(${OpenCV_VERSION} VERSION_GREATER "2.4.8")
+if(${OpenCV_VERSION} VERSION_GREATER "2.9.9")  # >= 3.0.0
   jsk_perception_nodelet(src/bing.cpp "jsk_perception/Bing" "bing")
 endif()
 jsk_perception_nodelet(src/tabletop_color_difference_likelihood.cpp "jsk_perception/TabletopColorDifferenceLikelihood" "tabletop_color_difference_likelihood")

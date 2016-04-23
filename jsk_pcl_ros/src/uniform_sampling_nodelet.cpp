@@ -35,7 +35,11 @@
 
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/uniform_sampling.h"
+#if ( PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION == 7)
 #include <pcl/keypoints/uniform_sampling.h>
+#elif ( PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION == 8)
+#include <pcl/filters/uniform_sampling.h>
+#endif
 
 
 namespace jsk_pcl_ros
@@ -75,16 +79,29 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     pcl::PointCloud<pcl::PointXYZ>::Ptr
       cloud (new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<int> indices;
     pcl::fromROSMsg(*msg, *cloud);
     pcl::UniformSampling<pcl::PointXYZ> uniform_sampling;
     uniform_sampling.setInputCloud(cloud);
     uniform_sampling.setRadiusSearch(search_radius_);
+#if ( PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION == 7)
+    pcl::PointCloud<int> indices;
     uniform_sampling.compute(indices);
+#elif ( PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION == 8)
+    pcl::PointCloud<pcl::PointXYZ> output;
+    uniform_sampling.filter(output);
+    pcl::PointIndicesPtr indices_ptr;
+    std::vector<int> &indices = *uniform_sampling.getIndices();
+#endif
     PCLIndicesMsg ros_indices;
+#if ( PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION == 7)
     for (size_t i = 0; i < indices.points.size(); i++) {
       ros_indices.indices.push_back(indices.points[i]);
     }
+#elif ( PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION == 8)
+    for (size_t i = 0; i < indices.size(); i++) {
+      ros_indices.indices.push_back(indices[i]);
+    }
+#endif
     ros_indices.header = msg->header;
     pub_.publish(ros_indices);
   }

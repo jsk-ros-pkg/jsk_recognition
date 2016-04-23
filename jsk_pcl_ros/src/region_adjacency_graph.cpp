@@ -147,7 +147,7 @@ namespace jsk_pcl_ros
                 if (r_vd != vd) {
                    bool found = false;
                    EdgeDescriptor e_descriptor;
-                   tie(e_descriptor, found) = boost::edge(r_vd, vd, this->graph_);
+                   boost::tie(e_descriptor, found) = boost::edge(r_vd, vd, this->graph_);
                    if (!found) {
                       boost::add_edge(
                          r_vd, vd, EdgeProperty(distance), this->graph_);
@@ -269,16 +269,16 @@ namespace jsk_pcl_ros
        EdgePropertyAccess edge_weights = get(boost::edge_weight, this->graph_);
        VertexIterator i, end;
        int label = -1;
-       for (tie(i, end) = vertices(this->graph_); i != end; i++) {
+       for (boost::tie(i, end) = vertices(this->graph_); i != end; i++) {
           if (this->graph_[*i].v_label == -1) {
              graph_[*i].v_label = ++label;
           }
           AdjacencyIterator ai, a_end;
-          tie(ai, a_end) = adjacent_vertices(*i, this->graph_);
+          boost::tie(ai, a_end) = adjacent_vertices(*i, this->graph_);
           for (; ai != a_end; ++ai) {
              bool found = false;
              EdgeDescriptor e_descriptor;
-             tie(e_descriptor, found) = boost::edge(*i, *ai, this->graph_);
+             boost::tie(e_descriptor, found) = boost::edge(*i, *ai, this->graph_);
              if (found) {
                 EdgeValue edge_val = boost::get(
                    boost::edge_weight, this->graph_, e_descriptor);
@@ -324,7 +324,7 @@ namespace jsk_pcl_ros
     {
        labelMD.clear();
        VertexIterator i, end;
-       for (tie(i, end) = vertices(this->graph_); i != end; ++i) {
+       for (boost::tie(i, end) = vertices(this->graph_); i != end; ++i) {
           labelMD.push_back(static_cast<int>(this->graph_[*i].v_label));
        }
     }
@@ -333,9 +333,9 @@ namespace jsk_pcl_ros
        const Graph &_graph)
     {
        VertexIterator i, end;
-       for (tie(i, end) = vertices(_graph); i != end; ++i) {
+       for (boost::tie(i, end) = vertices(_graph); i != end; ++i) {
           AdjacencyIterator ai, a_end;
-          tie(ai, a_end) = adjacent_vertices(*i, _graph);
+          boost::tie(ai, a_end) = adjacent_vertices(*i, _graph);
           std::cout << *i << "\t" << _graph[*i].v_label << std::endl;
        }
     }

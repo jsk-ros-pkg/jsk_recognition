@@ -245,23 +245,25 @@ add_dependencies(hough_lines              ${PROJECT_NAME}_gencfg ${PROJECT_NAME}
 add_dependencies(rectangle_detector       ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 add_dependencies(color_histogram_sliding_matcher       ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 
+# FIXME: actually, roseus executable is usable only on Linux
+if(GNU)
+  add_custom_command(
+  OUTPUT ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng8.launch
+  ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng2.launch
+  DEPENDS ${PROJECT_SOURCE_DIR}/euslisp/eusmodel_template_gen.l
+  COMMAND ROS_PACKAGE_PATH=${PROJECT_SOURCE_DIR}:$ENV{ROS_PACKAGE_PATH} roseus ${PROJECT_SOURCE_DIR}/euslisp/eusmodel_template_gen.l
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+  add_custom_command(
+  OUTPUT  ${PROJECT_SOURCE_DIR}/sample/rimokon-pose.launch ${PROJECT_SOURCE_DIR}/sample/milktea-box.launch
+  DEPENDS ${PROJECT_SOURCE_DIR}/sample/pose_detector_auto_gen_sample.l
+  COMMAND ROS_PACKAGE_PATH=${PROJECT_SOURCE_DIR}:$ENV{ROS_PACKAGE_PATH} roseus ./pose_detector_auto_gen_sample.l
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/sample)
 
-add_custom_command(
- OUTPUT ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng8.launch
- ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng2.launch
- DEPENDS ${PROJECT_SOURCE_DIR}/euslisp/eusmodel_template_gen.l
- COMMAND ROS_PACKAGE_PATH=${PROJECT_SOURCE_DIR}:$ENV{ROS_PACKAGE_PATH} roseus ${PROJECT_SOURCE_DIR}/euslisp/eusmodel_template_gen.l
- WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-add_custom_command(
- OUTPUT  ${PROJECT_SOURCE_DIR}/sample/rimokon-pose.launch ${PROJECT_SOURCE_DIR}/sample/milktea-box.launch
- DEPENDS ${PROJECT_SOURCE_DIR}/sample/pose_detector_auto_gen_sample.l
- COMMAND ROS_PACKAGE_PATH=${PROJECT_SOURCE_DIR}:$ENV{ROS_PACKAGE_PATH} roseus ./pose_detector_auto_gen_sample.l
- WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/sample)
-
-add_custom_target(eusmodel_template ALL DEPENDS
-  ${PROJECT_SOURCE_DIR}/sample/rimokon-pose.launch ${PROJECT_SOURCE_DIR}/sample/milktea-box.launch
-  ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng8.launch
-  ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng2.launch)
+  add_custom_target(eusmodel_template ALL DEPENDS
+    ${PROJECT_SOURCE_DIR}/sample/rimokon-pose.launch ${PROJECT_SOURCE_DIR}/sample/milktea-box.launch
+    ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng8.launch
+    ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng2.launch)
+endif()
 
 install(TARGETS camshiftdemo virtual_camera_mono point_pose_extractor white_balance_converter hough_lines rectangle_detector calc_flow color_histogram_sliding_matcher oriented_gradient oriented_gradient_node ${PROJECT_NAME}
   ${jsk_perception_nodelet_executables}

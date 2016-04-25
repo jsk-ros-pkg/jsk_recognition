@@ -304,7 +304,7 @@ if(CATKIN_ENABLE_TESTING)
     add_rostest(test/selective_search.test)
     add_rostest(test/slic_super_pixels.test)
     add_rostest(test/split_fore_background.test)
-    add_rostest(test/label_image_decomposer_slop.test)
+    add_rostest(test/label_image_decomposer.test)
     if(${OpenCV_VERSION} VERSION_GREATER "2.4.8")
       # download trained data for bing
       add_custom_target(install_trained_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/download_trained_data.sh)

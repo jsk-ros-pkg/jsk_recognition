@@ -1,0 +1,32 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/publish_fixed_images.launch" />
+
+  <test test-name="test_image_publisher"
+        name="test_image_publisher"
+        pkg="jsk_tools" type="test_topic_published.py">
+    <rosparam>
+      topic_0: /raw_image_bgr/image_color
+      timeout_0: 10
+      topic_1: /raw_image_bgr/camera_info
+      timeout_1: 10
+      topic_2: /raw_image_rgb/image_color
+      timeout_2: 10
+      topic_3: /raw_image_rgb/camera_info
+      timeout_3: 10
+      topic_4: /mask_image/mask
+      timeout_4: 10
+      topic_5: /mask_image/camera_info
+      timeout_5: 10
+      topic_6: /depth_image_16uc1/image_depth
+      timeout_6: 10
+      topic_7: /depth_image_16uc1/camera_info
+      timeout_7: 10
+      topic_8: /depth_image_32fc1/image_depth
+      timeout_8: 10
+      topic_9: /depth_image_32fc1/camera_info
+      timeout_9: 10
+    </rosparam>
+  </test>
+
+</launch>

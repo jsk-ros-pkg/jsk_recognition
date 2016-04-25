@@ -300,6 +300,7 @@ if(CATKIN_ENABLE_TESTING)
     # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
     add_rostest(test/draw_rect_array.test)
     add_rostest(test/image_cluster_indices_decomposer.test)
+    add_rostest(test/image_publisher.test)
     add_rostest(test/image_to_label.test)
     add_rostest(test/selective_search.test)
     add_rostest(test/slic_super_pixels.test)

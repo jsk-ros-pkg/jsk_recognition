@@ -28,6 +28,7 @@ env:
     - ROS_DISTRO=indigo USE_DEB=true
     - ROS_DISTRO=indigo USE_DEB=true ROS_REPOSITORY_PATH="http://packages.ros.org/ros/ubuntu"
     - ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT="git clone -b indigo https://github.com/ros-perception/vision_opencv.git; find -iname package.xml -exec sed -i 's@libopencv-dev@opeencv3@' {} \;" EXTRA_DEB="ros-indigo-opencv3"
+    - ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_pcl1.8.bash'
     - ROS_DISTRO=jade   USE_DEB=false
 matrix:
   allow_failures:

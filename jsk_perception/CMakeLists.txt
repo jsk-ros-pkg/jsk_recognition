@@ -302,6 +302,7 @@ if(CATKIN_ENABLE_TESTING)
   if(${DISTRO_GE_INDIGO})
     # FIXME: jsk_tools/test_topic_published.py does not work on hydro travis/jenkins
     # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
+    add_rostest(test/colorize_labels.test)
     add_rostest(test/draw_rect_array.test)
     add_rostest(test/image_cluster_indices_decomposer.test)
     add_rostest(test/image_publisher.test)

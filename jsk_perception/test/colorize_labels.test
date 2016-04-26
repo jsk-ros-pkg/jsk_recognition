@@ -1,0 +1,38 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/publish_fixed_images.launch" />
+
+  <node name="colorize_labels_exec"
+        pkg="jsk_perception" type="colorize_labels">
+    <remap from="~input" to="label_image/label" />
+  </node>
+
+  <arg name="MANAGER" value="a_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet" args="manager" />
+  <node name="colorize_labels_standalone"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_perception/ColorizeLabels">
+    <remap from="~input" to="label_image/label" />
+  </node>
+  <node name="colorize_labels_nodelet"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/ColorizeLabels $(arg MANAGER)">
+    <remap from="~input" to="label_image/label" />
+  </node>
+
+  <test test-name="test_colorize_labels"
+        name="test_colorize_labels"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /colorize_labels_exec/output
+      timeout_0: 10
+      topic_1: /colorize_labels_standalone/output
+      timeout_1: 10
+      topic_2: /colorize_labels_nodelet/output
+      timeout_2: 10
+    </rosparam>
+  </test>
+
+</launch>

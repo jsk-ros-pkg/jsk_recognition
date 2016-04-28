@@ -49,6 +49,7 @@ namespace jsk_pcl_ros
     cloud_.reset(new pcl::PointCloud<pcl::PointXYZRGB>);
     boost::filesystem::path path(file_name_);
     ext_ = path.extension().string();
+    stem_ = path.stem().string();
     if (ext_ == ".stl") 
     {
       pcl::io::loadPolygonFileSTL(file_name_, mesh_);
@@ -69,9 +70,9 @@ namespace jsk_pcl_ros
   PointCloudData::getROSPointCloud(ros::Time stamp)
   {
     sensor_msgs::PointCloud2 ros_out;
-    ros_out.header.stamp = stamp;
-    ros_out.header.frame_id = file_name_;
     pcl::toROSMsg(*cloud_, ros_out);
+    ros_out.header.stamp = stamp;
+    ros_out.header.frame_id = stem_;
     return ros_out;
   }
 

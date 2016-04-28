@@ -26,6 +26,12 @@
     <remap from="Feature0D" to="~output" />
   </node>
 
+  <node name="feature0d_to_image"
+        pkg="posedetection_msgs" type="feature0d_to_image">
+    <remap from="image" to="raw_image/output" />
+    <remap from="Feature0D" to="imagesift/output" />
+  </node>
+
   <node name="bof_histogram_extractor"
         pkg="jsk_perception" type="bof_histogram_extractor.py">
     <remap from="~input" to="imagesift/output" />
@@ -41,5 +47,9 @@
     <remap from="~input" to="bof_histogram_extractor/output" />
     <param name="~clf_path" value="$(find jsk_perception)/trained_data/apc2015_sample_clf.pkl.gz" />
   </node>
+
+  <node name="rqt_gui"
+        pkg="rqt_gui" type="rqt_gui"
+        args="--perspective-file $(find jsk_perception)/sample/config/apc2015_object_recognition_sample.perspective" />
 
 </launch>

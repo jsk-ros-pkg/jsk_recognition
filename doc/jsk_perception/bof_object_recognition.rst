@@ -63,7 +63,7 @@ Example
         -O `rospack find jsk_perception`/trained_data/apc2015_sample_clf.pkl.gz
 
     # run for novel image
-    $ roslaunch jsk_perception apc2015_object_recognition_sample.launch
+    $ roslaunch jsk_perception sample_bof_object_recognition.launch
 
     # check the result
     $ rostopic echo /sklearn_classifier/output

@@ -16,5 +16,13 @@ def main():
         ],
     )
 
+    download_data(
+        pkg_name=PKG,
+        path='test_data/drill.pcd',
+        url='http://www.jsk.t.u-tokyo.ac.jp/~ueda/dataset/2015/02/drill.pcd',
+        md5='b6ea8f7bd97fd1e88fb6af2f6cd42ac5',
+        extract=False,
+    )
+
 if __name__ == '__main__':
     main()

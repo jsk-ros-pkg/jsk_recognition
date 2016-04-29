@@ -79,6 +79,7 @@
   <run_depend>tf</run_depend>
   <run_depend>robot_self_filter</run_depend>
   <run_depend>yaml-cpp</run_depend>
+  <run_depend>jsk_data</run_depend>
 
   <test_depend>jsk_tools</test_depend>
   <test_depend>roslaunch</test_depend>

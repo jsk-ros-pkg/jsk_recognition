@@ -1,4 +1,4 @@
-# TorusFInder
+# TorusFinder
 ![](images/torus_finder.png)
 
 Find a torus out of pointcloud based on RANSAC with 3-D circle model.

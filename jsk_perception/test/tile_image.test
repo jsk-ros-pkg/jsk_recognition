@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_tile_image.launch">
+    <env name="DISPLAY" value="" />
+  </include>
+
+  <test test-name="test_tile_image"
+        name="test_tile_image"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="360">
+    <rosparam>
+      topic_0: /tile_image/output
+      timeout_0: 10
+    </rosparam>
+  </test>
+
+</launch>

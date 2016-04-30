@@ -19,6 +19,10 @@ You will find documentation about nodes and types of jsk\_recognition at [the Re
 
 jsk_recognition is a stack for the perception packages which are used in JSK lab.
 
+
+ROS packages
+------------
+
 ### [checkerboard\_detector](https://github.com/jsk-ros-pkg/jsk_recognition/tree/master/checkerboard_detector)
 ROS nodes to detect checkerboard. It supports chessboard pattern, circledots pattern and asymmetric
 circledots pattern.

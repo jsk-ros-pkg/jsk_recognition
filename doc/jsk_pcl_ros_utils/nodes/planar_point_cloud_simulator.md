@@ -1,4 +1,4 @@
-# PlanarlPointCloudSimulator
+# PlanarPointCloudSimulator
 ![](images/planar_pointcloud_simulator.h)
 
 Simulate a pointcloud which is acquired by cameras such as stereo camera and kinect.

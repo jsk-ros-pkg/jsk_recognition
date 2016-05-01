@@ -1,4 +1,4 @@
-# PolygonPointsFlipper
+# PolygonFlipper
 
 Flip `jsk_recognition_msgs/PolygonArray` to specified sensor_frame.
 

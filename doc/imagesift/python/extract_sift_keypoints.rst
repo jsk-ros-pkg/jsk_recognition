@@ -7,12 +7,8 @@ Sample is available at ``imagesift/sample/sift_keypoints.py``
 .. code-block:: python
 
   # load image
-  >>> import os
-  >>> import cv2
-  >>> import rospkg
-  >>> rp = rospkg.RosPack()
-  >>> imgpath = os.path.join(rp.get_path('jsk_perception'), 'sample/ros_fuerte.jpg')
-  >>> img = cv2.imread(imgpath, 0)  # gray-scale image
+  >>> from scipy.misc import lena
+  >>> img = lena()  # gray-scale image
 
   >>> import imagesift
 
@@ -23,6 +19,7 @@ Sample is available at ``imagesift/sample/sift_keypoints.py``
   >>> out = imagesift.draw_sift_frames(img, frames)
 
   # view image with opencv2 window
+  >>> import cv2
   >>> cv2.imshow('sift image', out)
   >>> cv2.waitKey(0)
 

@@ -9,7 +9,7 @@ if(CCACHE_FOUND)
 endif(CCACHE_FOUND)
 
 find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs posedetection_msgs image_transport cv_bridge cmake_modules
-  jsk_perception nodelet jsk_topic_tools)
+  jsk_recognition_utils nodelet jsk_topic_tools)
 
 find_package(OpenCV)
 

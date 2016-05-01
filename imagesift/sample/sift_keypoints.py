@@ -1,19 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
-
 import cv2
+from scipy.misc import lena
 
-import rospkg
 import imagesift
 
 
 def main():
-    rp = rospkg.RosPack()
-    imgpath = os.path.join(rp.get_path('jsk_perception'), 'sample/ros_fuerte.jpg')
-
-    img = cv2.imread(imgpath, 0)  # gray-scale image
+    img = lena()
 
     frames, desc = imagesift.get_sift_keypoints(img)
 

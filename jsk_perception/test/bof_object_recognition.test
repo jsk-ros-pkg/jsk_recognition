@@ -1,0 +1,21 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_bof_object_recognition.launch">
+    <env name="DISPLAY" value="" />
+  </include>
+
+  <test test-name="test_bof_object_recognition"
+        name="test_bof_object_recognition"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /imagesift/output
+      timeout_0: 30
+      topic_1: /bof_histogram_extractor/output
+      timeout_1: 30
+      topic_2: /sklearn_classifier/output
+      timeout_2: 30
+    </rosparam>
+  </test>
+
+</launch>

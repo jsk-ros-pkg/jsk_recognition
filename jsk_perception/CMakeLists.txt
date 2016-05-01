@@ -208,7 +208,6 @@ endif(robot_self_filter_FOUND)
 # compiling jsk_perception library for nodelet
 add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
   ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels/slic.cpp
-  src/image_utils.cpp
   src/histogram_of_oriented_gradients.cpp
   )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${robot_self_filter_LIBRARIES} yaml-cpp)

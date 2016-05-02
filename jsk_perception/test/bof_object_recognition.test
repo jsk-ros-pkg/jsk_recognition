@@ -1,7 +1,7 @@
 <launch>
 
   <include file="$(find jsk_perception)/sample/sample_bof_object_recognition.launch">
-    <env name="DISPLAY" value="" />
+    <arg name="gui" value="false" />
   </include>
 
   <test test-name="test_bof_object_recognition"

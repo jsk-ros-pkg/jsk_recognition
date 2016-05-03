@@ -1,4 +1,4 @@
-# PolygonToMaskImage
+# RobotToMaskImage
 ![](images/robot_to_mask_image.png)
 
 Convert robot model into mask image.

@@ -15,7 +15,7 @@
 
   <node name="image_view"
         pkg="image_view" type="image_view">
-    <remap from="image" to="fast_rcnn_caffenet/output" />
+    <remap from="image" to="fast_rcnn/output" />
   </node>
 
 </launch>

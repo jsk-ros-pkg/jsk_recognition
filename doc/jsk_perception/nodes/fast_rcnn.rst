@@ -1,14 +1,12 @@
-fast_rcnn_caffenet.py
-=====================
+fast_rcnn.py
+============
 
 What is this?
 -------------
 
-.. image:: ./images/fast_rcnn_caffenet.gif
+.. image:: ./images/fast_rcnn.gif
 
 Publish an image with object bounding boxes, scores and labels.
-
-Currently, the caffenet fast rcnn supports below objects.
 
 ::
 
@@ -44,6 +42,12 @@ Publishing Topic
 Parameters
 ----------
 
+* ``~model`` (String, **required**)
+
+  Network model name. (``vgg_cnn_m_1024`` or ``vgg16``)
+  ``vgg_cnn_m_1024`` is small network and requires ~2GB GPU memory.
+  ``vgg16`` is large network and requires ~5GB GPU memory.
+
 * ``~approximate_sync`` (Bool, default: ``False``)
 
   Whether to use approximate for input topics.
@@ -62,16 +66,9 @@ Parameters
 Example
 -------
 
-.. image:: images/fast_rcnn_caffenet_example.jpg
+.. image:: images/fast_rcnn_example.jpg
    :width: 50%
 
 .. code-block:: bash
 
   roslaunch jsk_perception sample_fast_rcnn.launch
-
-
-Install Fast-RCNN
------------------
-
-1. Follow the instruction `here <https://github.com/rbgirshick/fast-rcnn#installation-sufficient-for-the-demo>`_.
-2. Set environmental variable ``FRCN_ROOT`` as root for fast-rcnn dir.

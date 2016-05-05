@@ -84,11 +84,12 @@ namespace jsk_pcl_ros
       PointCloudData::Ptr data(new PointCloudData(pcd_files[i]));
       point_clouds_.push_back(data);
     }
-    timer_ = pnh_->createTimer(ros::Duration(1.0),
-                               boost::bind(
-                                           &PointcloudDatabaseServer::timerCallback,
-                                           this,
-                                           _1));
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind(
+        &PointcloudDatabaseServer::configCallback, this, _1, _2);
+    srv_->setCallback (f);
+    pnh_->getParam("duration", duration_);
   }
 
   void PointcloudDatabaseServer::timerCallback(const ros::TimerEvent& event)
@@ -100,6 +101,20 @@ namespace jsk_pcl_ros
                                                                       
     }
     pub_points_.publish(ros_out);
+  }
+
+  void PointcloudDatabaseServer::configCallback(Config &config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    duration_ = config.duration;
+    if (timer_) {
+      timer_.stop();
+    }
+    timer_ = pnh_->createTimer(ros::Duration(duration_),
+                               boost::bind(
+                                           &PointcloudDatabaseServer::timerCallback,
+                                           this,
+                                           _1));
   }
 }
 

@@ -110,6 +110,7 @@ generate_dynamic_reconfigure_options(
   cfg/OctreeChangePublisher.cfg
   cfg/ExtractTopPolygonLikelihood.cfg
   cfg/Kinfu.cfg
+  cfg/PointcloudDatabaseServer.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)

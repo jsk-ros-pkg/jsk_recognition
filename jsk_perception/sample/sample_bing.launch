@@ -1,5 +1,7 @@
 <launch>
 
+  <arg name="gui" default="true" />
+
   <node name="image_publisher"
         pkg="jsk_perception" type="image_publisher.py">
     <rosparam subst_value="true">
@@ -20,20 +22,22 @@
     <remap from="~input/rect_array" to="bing/output" />
   </node>
 
-  <node name="image_view_0"
-        pkg="image_view" type="image_view">
-    <remap from="image" to="image_publisher/output" />
-  </node>
-  <node name="image_view_1"
-        pkg="image_view" type="image_view">
-    <remap from="image" to="bing/output/objectness" />
-    <rosparam>
-      do_dynamic_scaling: true
-    </rosparam>
-  </node>
-  <node name="image_view_2"
-        pkg="image_view" type="image_view">
-    <remap from="image" to="draw_rect_array/output" />
-  </node>
+  <group if="$(arg gui)">
+    <node name="image_view_0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="image_publisher/output" />
+    </node>
+    <node name="image_view_1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="bing/output/objectness" />
+      <rosparam>
+        do_dynamic_scaling: true
+      </rosparam>
+    </node>
+    <node name="image_view_2"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="draw_rect_array/output" />
+    </node>
+  </group>
 
 </launch>

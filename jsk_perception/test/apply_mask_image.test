@@ -2,30 +2,9 @@
 
   <include file="$(find jsk_perception)/sample/publish_fixed_images.launch" />
 
-  <node name="apply_mask_image_exec"
-        pkg="jsk_perception" type="apply_mask_image">
-    <remap from="~input" to="raw_image_bgr/image_color" />
-    <remap from="~input/mask" to="mask_image/mask" />
-    <rosparam>
-      approximate_sync: true
-    </rosparam>
-  </node>
-
-  <arg name="MANAGER" value="nodelet_manager" />
-  <node name="$(arg MANAGER)"
-        pkg="nodelet" type="nodelet" args="manager" />
-  <node name="apply_mask_image_standalone"
+  <node name="apply_mask_image"
         pkg="nodelet" type="nodelet"
         args="standalone jsk_perception/ApplyMaskImage">
-    <remap from="~input" to="raw_image_bgr/image_color" />
-    <remap from="~input/mask" to="mask_image/mask" />
-    <rosparam>
-      approximate_sync: true
-    </rosparam>
-  </node>
-  <node name="apply_mask_image_nodelet"
-        pkg="nodelet" type="nodelet"
-        args="load jsk_perception/ApplyMaskImage $(arg MANAGER)">
     <remap from="~input" to="raw_image_bgr/image_color" />
     <remap from="~input/mask" to="mask_image/mask" />
     <rosparam>
@@ -36,14 +15,10 @@
   <test test-name="test_apply_mask_image"
         name="test_apply_mask_image"
         pkg="jsk_tools" type="test_topic_published.py"
-        time-limit="360">
+        retry="3">
     <rosparam>
-      topic_0: /apply_mask_image_exec/output
-      timeout_0: 10
-      topic_1: /apply_mask_image_standalone/output
-      timeout_1: 10
-      topic_2: /apply_mask_image_nodelet/output
-      timeout_2: 10
+      topic_0: /apply_mask_image/output
+      timeout_0: 30
     </rosparam>
   </test>
 

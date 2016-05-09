@@ -9,6 +9,7 @@ from jsk_topic_tools import ConnectionBasedTransport
 import rospy
 from sensor_msgs.msg import Image
 from jsk_recognition_msgs.msg import RectArray
+import jsk_recognition_utils
 import message_filters
 from skimage.color import rgb_colors
 
@@ -38,14 +39,14 @@ class DrawRectArray(ConnectionBasedTransport):
         self._sub_rects.unregister()
 
     def _draw(self, imgmsg, rects_msg):
-        colors = [v for v in rgb_colors.__dict__.values()
-                  if isinstance(v, tuple)]
+        n_colors = min(len(rects_msg.rects), 256)
+        cmap = jsk_recognition_utils.color.labelcolormap(N=n_colors)
 
         bridge = cv_bridge.CvBridge()
         img = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='bgr8')
 
         for i, r in enumerate(rects_msg.rects):
-            color = np.array(colors[i % len(colors)][:3])  # RGBA -> RGB
+            color = cmap[i % n_colors]
             color = (color * 255).astype(np.integer)
             color = (color[2], color[1], color[0])  # RGB -> BGR
             pt1 = (r.x, r.y)

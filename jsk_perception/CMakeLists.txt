@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   image_geometry
   image_transport
+  image_view2
   jsk_recognition_msgs
   jsk_recognition_utils
   jsk_topic_tools
@@ -317,7 +318,7 @@ if(CATKIN_ENABLE_TESTING)
     add_rostest(test/tile_image.test)
     add_rostest(test/label_image_decomposer.test)
     add_custom_target(install_trained_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/download_trained_data.sh)
-    if(${OpenCV_VERSION} VERSION_GREATER "2.4.8")
+    if(${OpenCV_VERSION} VERSION_GREATER "2.9.9")
       add_rostest(test/bing.test DEPENDENCIES install_trained_data)
     endif()
     add_rostest(test/bof_object_recognition.test DEPENDENCIES install_trained_data)

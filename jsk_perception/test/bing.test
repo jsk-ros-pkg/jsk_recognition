@@ -1,18 +1,18 @@
 <launch>
 
   <include file="$(find jsk_perception)/sample/sample_bing.launch">
-    <env name="DISPLAY" value="" />
+    <arg name="gui" value="false" />
   </include>
 
   <test test-name="test_bing"
         name="test_bing"
         pkg="jsk_tools" type="test_topic_published.py"
-        time-limit="360">
+        retry="3">
     <rosparam>
       topic_0: /bing/output
-      timeout_0: 10
+      timeout_0: 30
       topic_1: /bing/output/objectness
-      timeout_1: 10
+      timeout_1: 30
     </rosparam>
   </test>
 

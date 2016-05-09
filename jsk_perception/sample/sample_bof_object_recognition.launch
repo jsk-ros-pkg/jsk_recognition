@@ -1,5 +1,7 @@
 <launch>
 
+  <arg name="gui" default="true" />
+
   <node name="raw_image"
         pkg="jsk_perception" type="image_publisher.py">
     <param name="~file_name" value="$(find jsk_perception)/sample/laugh_out_loud_joke_book.jpg" />
@@ -48,8 +50,10 @@
     <param name="~clf_path" value="$(find jsk_perception)/trained_data/apc2015_sample_clf.pkl.gz" />
   </node>
 
-  <node name="rqt_gui"
-        pkg="rqt_gui" type="rqt_gui"
-        args="--perspective-file $(find jsk_perception)/sample/config/apc2015_object_recognition_sample.perspective" />
+  <group if="$(arg gui)">
+    <node name="rqt_gui"
+          pkg="rqt_gui" type="rqt_gui"
+          args="--perspective-file $(find jsk_perception)/sample/config/apc2015_object_recognition_sample.perspective" />
+  </group>
 
 </launch>

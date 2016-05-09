@@ -2,22 +2,9 @@
 
   <include file="$(find jsk_perception)/sample/publish_fixed_images.launch" />
 
-  <node name="colorize_float_image_exec"
-        pkg="jsk_perception" type="colorize_float_image">
-    <remap from="~input" to="depth_image_32fc1/image_depth" />
-  </node>
-
-  <arg name="MANAGER" value="a_manager" />
-  <node name="$(arg MANAGER)"
-        pkg="nodelet" type="nodelet" args="manager" />
-  <node name="colorize_float_image_standalone"
+  <node name="colorize_float_image"
         pkg="nodelet" type="nodelet"
         args="standalone jsk_perception/ColorizeLabels">
-    <remap from="~input" to="depth_image_32fc1/image_depth" />
-  </node>
-  <node name="colorize_float_image_nodelet"
-        pkg="nodelet" type="nodelet"
-        args="load jsk_perception/ColorizeLabels $(arg MANAGER)">
     <remap from="~input" to="depth_image_32fc1/image_depth" />
   </node>
 
@@ -26,12 +13,8 @@
         pkg="jsk_tools" type="test_topic_published.py"
         retry="3">
     <rosparam>
-      topic_0: /colorize_float_image_exec/output
-      timeout_0: 10
-      topic_1: /colorize_float_image_standalone/output
-      timeout_1: 10
-      topic_2: /colorize_float_image_nodelet/output
-      timeout_2: 10
+      topic_0: /colorize_float_image/output
+      timeout_0: 30
     </rosparam>
   </test>
 

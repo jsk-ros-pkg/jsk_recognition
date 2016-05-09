@@ -16,10 +16,10 @@
   <test test-name="test_selective_search"
         name="test_selective_search"
         pkg="jsk_tools" type="test_topic_published.py"
-        time-limit="360">
+        retry="3">
     <rosparam>
       topic_0: /selective_search/output
-      timeout_0: 10
+      timeout_0: 20
     </rosparam>
   </test>
 

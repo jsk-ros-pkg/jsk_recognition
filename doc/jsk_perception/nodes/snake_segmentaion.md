@@ -1,4 +1,5 @@
 # SnakeSegmentation
+![](images/snake_segmentation.png)
 
 Snake segmentation based on cvSnakeImage.
 

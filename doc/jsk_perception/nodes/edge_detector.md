@@ -7,7 +7,7 @@ Detect edge of input image.
   Input image.It isn't need to be gray scale.
 
 ## Publishing Topic
-* `~image` (`jsk_recognition_msgs/ColorHistogram`)
+* `~image` (`sensor_msgs/Image`)
 
   Edge image.
 

@@ -37,6 +37,8 @@
 #include "jsk_pcl_ros/pointcloud_database_server.h"
 #include <jsk_topic_tools/rosparam_utils.h>
 #include <pcl/io/pcd_io.h>
+#include <pcl/io/vtk_lib_io.h>
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros
 {
@@ -44,9 +46,18 @@ namespace jsk_pcl_ros
   PointCloudData::PointCloudData(const std::string fname):
     file_name_(fname)
   {
-    pcl::PCDReader reader;
     cloud_.reset(new pcl::PointCloud<pcl::PointXYZRGB>);
-    reader.read(file_name_, *cloud_);
+    boost::filesystem::path path(file_name_);
+    ext_ = path.extension().string();
+    if (ext_ == ".stl") 
+    {
+      pcl::io::loadPolygonFileSTL(file_name_, mesh_);
+      pcl::fromPCLPointCloud2(mesh_.cloud, *cloud_);
+    }
+    else
+    {
+      pcl::io::loadPCDFile(file_name_, *cloud_);
+    }
   }
 
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr PointCloudData::getPointCloud()
@@ -72,16 +83,15 @@ namespace jsk_pcl_ros
   void PointcloudDatabaseServer::onInit()
   {
     PCLNodelet::onInit();
-    std::vector<std::string> pcd_files;
     pub_points_ = pnh_->advertise<jsk_recognition_msgs::PointsArray>("output", 1);
-    if (!jsk_topic_tools::readVectorParameter(*pnh_, "models", pcd_files)
-        || pcd_files.size() == 0) {
+    if (!jsk_topic_tools::readVectorParameter(*pnh_, "models", files_)
+        || files_.size() == 0) {
       JSK_NODELET_FATAL("no models is specified");
       return;
     }
 
-    for (size_t i = 0; i< pcd_files.size(); i++) {
-      PointCloudData::Ptr data(new PointCloudData(pcd_files[i]));
+    for (size_t i = 0; i< files_.size(); i++) {
+      PointCloudData::Ptr data(new PointCloudData(files_[i]));
       point_clouds_.push_back(data);
     }
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);

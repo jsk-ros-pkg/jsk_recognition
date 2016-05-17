@@ -26,7 +26,7 @@ env:
   matrix:
     - ROS_DISTRO=hydro  USE_DEB=false
     - ROS_DISTRO=indigo USE_DEB=true
-    - ROS_DISTRO=indigo USE_DEB=true ROS_REPOSITORY_PATH="http://packages.ros.org/ros/ubuntu"
+    - ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_released_testing.bash' ROS_REPOSITORY_PATH="http://packages.ros.org/ros/ubuntu"
     - ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_opencv3.bash'
     - ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_pcl1.8.bash'
     - ROS_DISTRO=jade   USE_DEB=false

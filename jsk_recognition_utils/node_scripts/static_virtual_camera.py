@@ -1,7 +1,13 @@
 #!/usr/bin/env python
 
 import cv2
-from scipy.misc import face
+try:
+    from scipy.misc import face
+    img = face()[:, :, ::-1]
+except ImportError:
+    import numpy as np
+    from scipy.misc import lena
+    img = cv2.cvtColor(lena().astype(np.uint8), cv2.COLOR_GRAY2BGR)
 
 import cv_bridge
 import rospy
@@ -22,8 +28,6 @@ if __name__ == '__main__':
     pub_img = rospy.Publisher('~image_color', Image, queue_size=1)
     pub_info = rospy.Publisher('~camera_info', CameraInfo, queue_size=1)
 
-    img = face()
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
     bridge = cv_bridge.CvBridge()
     imgmsg = bridge.cv2_to_imgmsg(img, encoding='bgr8')
     imgmsg.header.frame_id = 'static_virtual_camera'

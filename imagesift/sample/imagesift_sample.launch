@@ -1,40 +1,32 @@
 <launch>
-  <!-- image publisher -->
-  <node name="image_publisher"
-        pkg="jsk_perception" type="image_publisher.py">
-    <param name="file_name" value="$(find jsk_perception)/sample/ros_fuerte.jpg" />
-  </node>
 
-  <!-- Use imagesift as executable -->
-  <!--
-  <node name="imagesift"
-        pkg="imagesift" type="imagesift">
-    <remap from="image" to="image_publisher/output" />
-    <remap from="camera_info" to="image_publisher/output/camera_info" />
-  </node>
-  -->
-  <!-- Use imagesift as nodelet -->
+  <arg name="gui" default="true" />
+
+  <node name="static_virtual_camera"
+        pkg="jsk_recognition_utils" type="static_virtual_camera.py" />
+
   <node name="nodelet_manager"
         pkg="nodelet" type="nodelet"
         args="manager" />
   <node name="imagesift"
         pkg="nodelet" type="nodelet"
         args="load imagesift/ImageSift nodelet_manager">
-    <remap from="image" to="image_publisher/output" />
-    <remap from="camera_info" to="image_publisher/output/camera_info" />
+    <remap from="image" to="static_virtual_camera/image_color" />
+    <remap from="camera_info" to="static_virtual_camera/camera_info" />
   </node>
 
-  <!-- visualization -->
-  <node name="image_view"
-        pkg="image_view" type="image_view">
-    <remap from="image" to="image_publisher/output" />
-  </node>
-  <node name="feature0d_to_image"
-        pkg="posedetection_msgs" type="feature0d_to_image">
-    <remap from="image" to="image_publisher/output" />
-  </node>
-  <node name="imagefeature0d_view"
-        pkg="image_view" type="image_view">
-    <remap from="image" to="feature0d_to_image/output" />
-  </node>
+  <group if="$(arg gui)">
+    <node name="image_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="static_virtual_camera/image_color" />
+    </node>
+    <node name="feature0d_to_image"
+          pkg="posedetection_msgs" type="feature0d_to_image">
+      <remap from="image" to="static_virtual_camera/image_color" />
+    </node>
+    <node name="imagefeature0d_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="feature0d_to_image/output" />
+    </node>
+  </group>
 </launch>

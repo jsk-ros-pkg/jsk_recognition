@@ -39,7 +39,7 @@
 #include <sensor_msgs/image_encodings.h>
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
-#include "jsk_perception/image_utils.h"
+#include <jsk_recognition_utils/cv_utils.h>
 
 namespace jsk_perception
 {
@@ -87,11 +87,11 @@ namespace jsk_perception
   {
     vital_checker_->poke();
     cv::Mat image;
-    if (isBGRA(image_msg->encoding)) {
+    if (jsk_recognition_utils::isBGRA(image_msg->encoding)) {
       cv::Mat tmp_image = cv_bridge::toCvShare(image_msg, image_msg->encoding)->image;
       cv::cvtColor(tmp_image, image, cv::COLOR_BGRA2BGR);
     }
-    else if (isRGBA(image_msg->encoding)) {
+    else if (jsk_recognition_utils::isRGBA(image_msg->encoding)) {
       cv::Mat tmp_image = cv_bridge::toCvShare(image_msg, image_msg->encoding)->image;
       cv::cvtColor(tmp_image, image, cv::COLOR_RGBA2BGR);
     }
@@ -107,7 +107,7 @@ namespace jsk_perception
     }
     
     if (clip_) {
-      cv::Rect region = boundingRectOfMaskImage(mask);
+      cv::Rect region = jsk_recognition_utils::boundingRectOfMaskImage(mask);
       mask = mask(region);
       image = image(region);
     }
@@ -125,7 +125,7 @@ namespace jsk_perception
       if (sensor_msgs::image_encodings::isMono(image_msg->encoding)) {
         cv::cvtColor(masked_image, output_image, CV_GRAY2BGRA);
       }
-      else if (isRGB(image_msg->encoding)) {
+      else if (jsk_recognition_utils::isRGB(image_msg->encoding)) {
         cv::cvtColor(masked_image, output_image, CV_RGB2BGRA);
       }
       else {  // BGR, BGRA or RGBA
@@ -147,10 +147,10 @@ namespace jsk_perception
             output_image).toImageMsg());
     }
     else {
-      if (isBGRA(image_msg->encoding)) {
+      if (jsk_recognition_utils::isBGRA(image_msg->encoding)) {
         cv::cvtColor(masked_image, output_image, cv::COLOR_BGR2BGRA);
       }
-      else if (isRGBA(image_msg->encoding)) {
+      else if (jsk_recognition_utils::isRGBA(image_msg->encoding)) {
         cv::cvtColor(masked_image, output_image, cv::COLOR_BGR2RGBA);
       }
       else {  // BGR, RGB or GRAY

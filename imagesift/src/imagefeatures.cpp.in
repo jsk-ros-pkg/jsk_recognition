@@ -59,7 +59,7 @@
 #include <vector>
 #include <cv_bridge/cv_bridge.h>
 #include <string.h>
-#include <jsk_perception/image_utils.h>
+#include <jsk_recognition_utils/cv_utils.h>
 
 using namespace std;
 using namespace ros;
@@ -164,7 +164,7 @@ public:
         if (maskmsg_ptr) {
           cv_mask_ptr = cv_bridge::toCvCopy(*maskmsg_ptr, maskmsg_ptr->encoding);
           mask = cv_mask_ptr->image;
-          roi = jsk_perception::boundingRectOfMaskImage(mask);
+          roi = jsk_recognition_utils::boundingRectOfMaskImage(mask);
           roi_image = original_image;
         }
         else {

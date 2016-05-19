@@ -6,6 +6,8 @@ Extract BoF histogram in realtime.
 
 import gzip
 import cPickle as pickle
+from distutils.version import StrictVersion
+from pkg_resources import get_distribution
 
 import numpy as np
 from sklearn.preprocessing import normalize
@@ -33,6 +35,13 @@ class BoFHistogramExtractor(ConnectionBasedTransport):
             quit()
         with gzip.open(bof_data, 'rb') as f:
             self.bof = pickle.load(f)
+        if (StrictVersion(get_distribution('scikit-learn').version) >=
+                StrictVersion('0.17.0')):
+            if 'n_jobs' not in bof.nn.__dict__:
+                # In scikit-learn>=0.17.0,
+                # sklearn.neighbors.NearestNeighbors needs 'n_jobs' attribute.
+                # https://github.com/jsk-ros-pkg/jsk_recognition/issues/1669
+                bof.nn.n_jobs = 1
 
         self._pub = self.advertise('~output', VectorArray, queue_size=1)
         jsk_loginfo('Initialized BoF histogram extractor')

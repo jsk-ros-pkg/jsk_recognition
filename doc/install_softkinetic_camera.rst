@@ -41,7 +41,7 @@ Error: No space left on device
 If you have above error, you can try below::
 
   vim /etc/modprobe.d/blacklist.conf
-  # add 'blacklist snd_usb_audio' at the bottom
+  # add 'blacklist snd_usb_audio' at the bottom and then reboot
 
 **References**
 

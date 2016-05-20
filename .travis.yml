@@ -17,8 +17,6 @@ addons:
       - python-pip
 env:
   global:
-    - ROSWS=wstool
-    - BUILDER=catkin
     - ROS_PARALLEL_JOBS="-j8"
     - NOT_TEST_INSTALL=true
     - NO_SUDO=true

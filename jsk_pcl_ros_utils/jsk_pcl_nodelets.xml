@@ -173,4 +173,9 @@
     <description>
     </description>
   </class>
+  <class name="jsk_pcl_utils/PCDCapture" type="jsk_pcl_ros_utils::PCDCapture"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
 </library>

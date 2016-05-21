@@ -61,6 +61,12 @@ def main():
         url='https://drive.google.com/uc?id=0B9P1L--7Wd2vZzJuaFRIdDMtLWc',
         md5='eb33103e36f299b4433c63fcfc165cbd',
     )
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/vgg16_bn_apc2015_496000.chainermodel',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vQ2tCN1hoYV84eHM',
+        md5='4a48c2f39234e46937759f4cc43bb257',
+    )
 
 
 if __name__ == '__main__':

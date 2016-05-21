@@ -1,0 +1,13 @@
+<launch>
+  <arg name="INPUT_CLOUD" />
+  <node pkg="nodelet" type="nodelet"
+        name="sample_pcd_capture"
+        args="standalone jsk_pcl_utils/PCDCapture"
+        output="screen">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <rosparam>
+      filename: tmp.pcd
+      duration: 1
+    </rosparam>
+  </node>
+</launch>

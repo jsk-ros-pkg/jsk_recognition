@@ -66,6 +66,7 @@
   <run_depend>nodelet</run_depend>
   <run_depend>pcl_ros</run_depend>
   <run_depend>posedetection_msgs</run_depend>
+  <run_depend>python-chainer</run_depend>
   <run_depend>python-dlib</run_depend>
   <run_depend>python-gdown</run_depend>
   <run_depend>python-sklearn</run_depend>

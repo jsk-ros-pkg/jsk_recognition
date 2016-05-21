@@ -168,6 +168,11 @@
     <description>
     </description>
   </class>
+  <class name="jsk_pcl_utils/PointCloudToPCD" type="jsk_pcl_ros_utils::PointCloudToPCD"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
   <class name="jsk_pcl_utils/CloudOnPlane" type="jsk_pcl_ros_utils::CloudOnPlane"
          base_class_type="nodelet::Nodelet">
     <description>

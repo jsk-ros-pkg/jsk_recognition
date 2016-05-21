@@ -139,6 +139,7 @@ generate_dynamic_reconfigure_options(
 #   cfg/MovingLeastSquareSmoothing.cfg
 #   cfg/OctreeVoxelGrid.cfg
 #   cfg/OctreeChangePublisher.cfg
+    cfg/PointCloudToPCD.cfg
   )
 
 generate_messages(DEPENDENCIES
@@ -240,6 +241,8 @@ jsk_pcl_util_nodelet(src/pcd_reader_with_pose_nodelet.cpp
   "jsk_pcl_utils/PCDReaderWithPose" "pcd_reader_with_pose")
 jsk_pcl_util_nodelet(src/pointcloud_relative_from_pose_stamped_nodelet.cpp
   "jsk_pcl_utils/PointCloudRelativeFromPoseStamped" "pointcloud_relative_from_pose_stamped")
+jsk_pcl_util_nodelet(src/pointcloud_to_pcd_nodelet.cpp
+  "jsk_pcl_utils/PointCloudToPCD" "pointcloud_to_pcd")
 add_library(jsk_pcl_ros_utils SHARED ${jsk_pcl_util_nodelet_sources})
 add_dependencies(jsk_pcl_ros_utils ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 target_link_libraries(jsk_pcl_ros_utils

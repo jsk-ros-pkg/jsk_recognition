@@ -69,6 +69,7 @@
   <run_depend>python-chainer</run_depend>
   <run_depend>python-dlib</run_depend>
   <run_depend>python-gdown</run_depend>
+  <run_depend>python-h5py</run_depend>
   <run_depend>python-sklearn</run_depend>
   <run_depend>rosbag</run_depend>
   <run_depend>roscpp</run_depend>

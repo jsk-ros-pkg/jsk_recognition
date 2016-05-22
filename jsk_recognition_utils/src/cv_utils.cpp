@@ -35,6 +35,9 @@
 
 #include "jsk_recognition_utils/cv_utils.h"
 #include "jsk_recognition_utils/rgb_colors.h"
+#include <sensor_msgs/image_encodings.h>
+
+namespace enc = sensor_msgs::image_encodings;
 
 namespace jsk_recognition_utils
 {
@@ -156,6 +159,46 @@ namespace jsk_recognition_utils
         }
       }
     }
+  }
+
+  cv::Rect boundingRectOfMaskImage(const cv::Mat& image)
+  {
+    int min_x = image.cols;
+    int min_y = image.rows;
+    int max_x = 0;
+    int max_y = 0;
+    for (int j = 0; j < image.rows; j++) {
+      for (int i = 0; i < image.cols; i++) {
+        if (image.at<uchar>(j, i) != 0) {
+          min_x = std::min(min_x, i);
+          min_y = std::min(min_y, j);
+          max_x = std::max(max_x, i);
+          max_y = std::max(max_y, j);
+        }
+      }
+    }
+    return cv::Rect(min_x, min_y, std::max(max_x - min_x, 0), std::max(max_y - min_y, 0));
+  }
+
+  // Utility functions for inspecting an encoding string
+  bool isBGR(const std::string& encoding)
+  {
+    return encoding == enc::BGR8 || encoding == enc::BGR16;
+  }
+
+  bool isRGB(const std::string& encoding)
+  {
+    return encoding == enc::RGB8 || encoding == enc::RGB16;
+  }
+
+  bool isBGRA(const std::string& encoding)
+  {
+    return encoding == enc::BGRA8 || encoding == enc::BGRA16;
+  }
+
+  bool isRGBA(const std::string& encoding)
+  {
+    return encoding == enc::RGBA8 || encoding == enc::RGBA16;
   }
 
 }

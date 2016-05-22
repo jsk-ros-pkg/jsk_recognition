@@ -35,7 +35,7 @@
 
 
 #include "jsk_perception/kmeans.h"
-#include "jsk_perception/image_utils.h"
+#include <jsk_recognition_utils/cv_utils.h>
 #include <boost/assign.hpp>
 #include <jsk_topic_tools/log_utils.h>
 #include <sensor_msgs/image_encodings.h>

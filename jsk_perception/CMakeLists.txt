@@ -38,7 +38,6 @@ find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 
 find_package(OpenCV REQUIRED)
 message("OPENCV ${OpenCV_VERSION} FOUND")
-include_directories(${OpenCV_INCLUDE_DIRS})
 
 find_package(Eigen REQUIRED)
 include_directories(${Eigen_INCLUDE_DIRS})
@@ -115,7 +114,8 @@ execute_process(
   MK_DIR=${mk_PREFIX}/share/mk installed
   RESULT_VARIABLE _make_failed)
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels)
+include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels)
+
 link_directories(${catkin_LIBRARY_DIRS})
 add_executable(camshiftdemo src/camshiftdemo.cpp)
 add_executable(linemod src/linemod.cpp)
@@ -208,7 +208,6 @@ endif(robot_self_filter_FOUND)
 # compiling jsk_perception library for nodelet
 add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
   ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels/slic.cpp
-  src/image_utils.cpp
   src/histogram_of_oriented_gradients.cpp
   )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${robot_self_filter_LIBRARIES} yaml-cpp)
@@ -217,7 +216,7 @@ if(robot_self_filter_FOUND)
   target_link_libraries(${PROJECT_NAME} ${robot_self_filter_LIBRARIES})
 endif(robot_self_filter_FOUND)
 if(${OpenCV_VERSION} VERSION_GREATER "2.4.8")
-  include_directories(${OpenCV_INCLUDE_DIRS})
+  # This condition is to avoid changing current behavior
   target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES})
 endif()
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
@@ -284,7 +283,9 @@ install(DIRECTORY include/${PROJECT_NAME}/
 install(FILES jsk_perception_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 if(CATKIN_ENABLE_TESTING)
+  find_package(roslaunch REQUIRED)
   find_package(roslint REQUIRED)
+  find_package(rostest REQUIRED)
   # install test data by a script
   add_custom_target(install_test_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.py)
   if(TARGET tests)
@@ -293,29 +294,34 @@ if(CATKIN_ENABLE_TESTING)
   set(ROSLINT_CPP_OPTS "--filter=-whitespace/parens,-whitespace/braces")
   roslint_cpp()
   roslint_python()
-  find_package(rostest REQUIRED)
   if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
+    # roslaunch_add_file_check in hydro is too strict
+    macro(jsk_perception_add_rostest rostest_file)
+      add_rostest(${rostest_file})
+      roslaunch_add_file_check(${rostest_file})
+    endmacro()
     # FIXME: jsk_tools/test_topic_published.py does not work on hydro travis/jenkins
     # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
-    add_rostest(test/apply_mask_image.test)
-    add_rostest(test/colorize_labels.test)
-    add_rostest(test/colorize_float_image.test)
-    add_rostest(test/draw_rect_array.test)
-    add_rostest(test/image_cluster_indices_decomposer.test)
-    add_rostest(test/image_publisher.test)
-    add_rostest(test/image_to_label.test)
-    add_rostest(test/mask_image_to_label.test)
-    add_rostest(test/kmeans.test)
-    add_rostest(test/selective_search.test)
-    add_rostest(test/slic_super_pixels.test)
-    add_rostest(test/split_fore_background.test)
-    add_rostest(test/tile_image.test)
-    add_rostest(test/label_image_decomposer.test)
-    add_custom_target(install_trained_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/download_trained_data.sh)
-    if(${OpenCV_VERSION} VERSION_GREATER "2.9.9")
-      add_rostest(test/bing.test DEPENDENCIES install_trained_data)
+    jsk_perception_add_rostest(test/apply_mask_image.test)
+    jsk_perception_add_rostest(test/colorize_labels.test)
+    jsk_perception_add_rostest(test/colorize_float_image.test)
+    jsk_perception_add_rostest(test/draw_rect_array.test)
+    jsk_perception_add_rostest(test/image_cluster_indices_decomposer.test)
+    jsk_perception_add_rostest(test/image_publisher.test)
+    jsk_perception_add_rostest(test/image_to_label.test)
+    jsk_perception_add_rostest(test/mask_image_to_label.test)
+    jsk_perception_add_rostest(test/kmeans.test)
+    jsk_perception_add_rostest(test/selective_search.test)
+    jsk_perception_add_rostest(test/slic_super_pixels.test)
+    jsk_perception_add_rostest(test/split_fore_background.test)
+    jsk_perception_add_rostest(test/tile_image.test)
+    jsk_perception_add_rostest(test/label_image_decomposer.test)
+    add_custom_target(install_trained_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/download_trained_data.py)
+    if(TARGET bing)
+      jsk_perception_add_rostest(test/bing.test DEPENDENCIES install_trained_data)
     endif()
-    add_rostest(test/bof_object_recognition.test DEPENDENCIES install_trained_data)
+    # TODO(wkentaro): https://github.com/jsk-ros-pkg/jsk_recognition/pull/1673#issuecomment-219963052
+    # add_rostest(test/bof_object_recognition.test DEPENDENCIES install_trained_data)
   endif()
   add_rostest(test/sparse_image.test)
 endif()

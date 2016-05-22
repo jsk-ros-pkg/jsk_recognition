@@ -9,7 +9,7 @@ if(CCACHE_FOUND)
 endif(CCACHE_FOUND)
 
 find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs posedetection_msgs image_transport cv_bridge cmake_modules
-  jsk_perception nodelet jsk_topic_tools)
+  jsk_recognition_utils nodelet jsk_topic_tools)
 
 find_package(OpenCV)
 
@@ -81,3 +81,13 @@ install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
 install(FILES nodelet.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
+
+if(CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
+    # FIXME: jsk_tools/test_topic_published.py does not work on hydro travis/jenkins
+    # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
+    add_rostest(test/test_imagesift.test)
+  endif()
+endif()

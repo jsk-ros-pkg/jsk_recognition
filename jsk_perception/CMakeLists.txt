@@ -38,7 +38,6 @@ find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 
 find_package(OpenCV REQUIRED)
 message("OPENCV ${OpenCV_VERSION} FOUND")
-include_directories(${OpenCV_INCLUDE_DIRS})
 
 find_package(Eigen REQUIRED)
 include_directories(${Eigen_INCLUDE_DIRS})
@@ -115,7 +114,8 @@ execute_process(
   MK_DIR=${mk_PREFIX}/share/mk installed
   RESULT_VARIABLE _make_failed)
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels)
+include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels)
+
 link_directories(${catkin_LIBRARY_DIRS})
 add_executable(camshiftdemo src/camshiftdemo.cpp)
 add_executable(linemod src/linemod.cpp)
@@ -216,7 +216,7 @@ if(robot_self_filter_FOUND)
   target_link_libraries(${PROJECT_NAME} ${robot_self_filter_LIBRARIES})
 endif(robot_self_filter_FOUND)
 if(${OpenCV_VERSION} VERSION_GREATER "2.4.8")
-  include_directories(${OpenCV_INCLUDE_DIRS})
+  # This condition is to avoid changing current behavior
   target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES})
 endif()
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)

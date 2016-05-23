@@ -51,7 +51,7 @@ def main():
     # node_scripts/fast_rcnn.py
     download_data(
         pkg_name=PKG,
-        path='trained_data/vgg16.chainermodel',
+        path='trained_data/vgg16_fast_rcnn.chainermodel',
         url='https://drive.google.com/uc?id=0B9P1L--7Wd2vX015UzB4aC13cVk',
         md5='5ae12288962e96124cce212fd3f18cad',
     )

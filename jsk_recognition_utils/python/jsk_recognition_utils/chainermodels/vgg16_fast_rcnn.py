@@ -5,10 +5,10 @@ import chainer.links as L
 from roi_pooling_2d import roi_pooling_2d
 
 
-class VGG16(chainer.Chain):
+class VGG16FastRCNN(chainer.Chain):
 
     def __init__(self):
-        super(VGG16, self).__init__(
+        super(self.__class__, self).__init__(
             conv1_1=L.Convolution2D(3, 64, 3, stride=1, pad=1),
             conv1_2=L.Convolution2D(64, 64, 3, stride=1, pad=1),
 

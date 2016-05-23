@@ -12,7 +12,7 @@ import numpy as np
 import cv_bridge
 from jsk_recognition_msgs.msg import RectArray
 import jsk_recognition_utils
-from jsk_recognition_utils.chainermodels import VGG16
+from jsk_recognition_utils.chainermodels import VGG16FastRCNN
 from jsk_recognition_utils.chainermodels import VGG_CNN_M_1024
 from jsk_recognition_utils.nms import nms
 from jsk_topic_tools import ConnectionBasedTransport
@@ -162,8 +162,8 @@ def main():
         model = VGG_CNN_M_1024()
         chainermodel = osp.join(data_path, 'vgg_cnn_m_1024.chainermodel')
     elif model_name == 'vgg16':
-        model = VGG16()
-        chainermodel = osp.join(data_path, 'vgg16.chainermodel')
+        model = VGG16FastRCNN()
+        chainermodel = osp.join(data_path, 'vgg16_fast_rcnn.chainermodel')
     else:
         rospy.logerr('Unsupported model: {0}'.format(model_name))
         sys.exit(1)

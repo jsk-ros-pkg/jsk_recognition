@@ -35,6 +35,11 @@ catkin_package(
 
 catkin_python_setup()
 
+# Cythonize pyx files
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+include(UseCython)
+add_subdirectory(python/${PROJECT_NAME})
+
 find_package(OpenCV REQUIRED core imgproc)
 find_package(PkgConfig)
 pkg_check_modules(yaml_cpp yaml-cpp REQUIRED)

@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-from .feature import *
-from .mask import *
-from .visualize import *
+from jsk_recognition_utils.conversations import *  # NOQA
+from jsk_recognition_utils.feature import *  # NOQA
+from jsk_recognition_utils.mask import *  # NOQA
+from jsk_recognition_utils.visualize import *  # NOQA

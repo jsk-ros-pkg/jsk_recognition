@@ -48,6 +48,20 @@ def main():
             md5=md5,
         )
 
+    # node_scripts/fast_rcnn.py
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/vgg16.chainermodel',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vX015UzB4aC13cVk',
+        md5='5ae12288962e96124cce212fd3f18cad',
+    )
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/vgg_cnn_m_1024.chainermodel',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vZzJuaFRIdDMtLWc',
+        md5='eb33103e36f299b4433c63fcfc165cbd',
+    )
+
 
 if __name__ == '__main__':
     main()

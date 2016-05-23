@@ -7,10 +7,13 @@
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
   </node>
 
-  <node name="fast_rcnn_caffenet"
-        pkg="jsk_perception" type="fast_rcnn_caffenet.py">
+  <node name="fast_rcnn"
+        pkg="jsk_perception" type="fast_rcnn.py">
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <remap from="~input/rect_array" to="selective_search/output" />
+    <rosparam>
+      model: vgg_cnn_m_1024
+    </rosparam>
   </node>
 
 </launch>

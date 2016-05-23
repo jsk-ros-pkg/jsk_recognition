@@ -1,0 +1,22 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_perception)/sample/sample_bof_object_recognition.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <node name="draw_classification_result"
+        pkg="jsk_perception" type="draw_classification_result.py">
+    <remap from="~input" to="sklearn_classifier/output" />
+    <remap from="~input/image" to="raw_image/output" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="draw_classification_result/output" />
+    </node>
+  </group>
+
+</launch>

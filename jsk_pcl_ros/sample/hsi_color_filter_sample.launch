@@ -11,8 +11,8 @@
     <arg name="h_min" value="-50" /><!-- -128 -->
     <arg name="s_max" value="150" /><!-- 255 -->
     <arg name="s_min" value="50" /><!-- 0 -->
-    <arg name="v_max" value="150" /><!-- 255 -->
-    <arg name="v_min" value="50" /><!-- 0 -->
+    <arg name="i_max" value="150" /><!-- 255 -->
+    <arg name="i_min" value="50" /><!-- 0 -->
 
     <arg name="create_manager" value="true" />
     <arg name="manager" value="hsi_filter_manager" />

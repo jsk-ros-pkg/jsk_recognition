@@ -282,7 +282,7 @@ install(DIRECTORY include/${PROJECT_NAME}/
 
 install(FILES jsk_perception_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
-add_custom_target(install_trained_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/download_trained_data.py)
+add_custom_target(install_trained_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_trained_data.py)
 
 if(CATKIN_ENABLE_TESTING)
   find_package(roslaunch REQUIRED)

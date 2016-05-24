@@ -1,7 +1,8 @@
-/*
+// -*- mode: c++ -*-
+/*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2009, Willow Garage, Inc.
+ *  Copyright (c) 2016, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -12,9 +13,9 @@
  *     notice, this list of conditions and the following disclaimer.
  *   * Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
+ *     disclaimer in the documentation and/o2r other materials provided
  *     with the distribution.
- *   * Neither the name of Willow Garage, Inc. nor the names of its
+ *   * Neither the name of the JSK Lab nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -30,10 +31,7 @@
  *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
- *
- * $Id: pointcloud_to_pcd.cpp 33238 2010-03-11 00:46:58Z rusu $
- *
- */
+ *********************************************************************/
 
 #include "jsk_pcl_ros_utils/pointcloud_to_pcd.h"
 #include <sensor_msgs/PointCloud2.h>

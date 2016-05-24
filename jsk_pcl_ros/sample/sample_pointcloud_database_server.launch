@@ -1,0 +1,10 @@
+<launch>
+    <node name="pointcloud_database_server" pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/PointcloudDatabaseServer" >
+        <rosparam subst_value="true">
+            models: ["$(find jsk_pcl_ros)/test_data/drill.pcd",
+                     "$(find jsk_pcl_ros)/test_data/drill.pcd",
+            ]
+        </rosparam>
+    </node>
+</launch>

@@ -1,0 +1,32 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/object_detection_example_1.jpg
+      encoding: bgr8
+      publish_info: false
+    </rosparam>
+  </node>
+
+  <node name="selective_search"
+        pkg="jsk_perception" type="selective_search.py">
+    <remap from="~input" to="image_publisher/output" />
+  </node>
+
+  <node name="rect_array_to_image_marker"
+        pkg="jsk_perception" type="rect_array_to_image_marker.py">
+    <remap from="~input" to="selective_search/output" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view2"
+          pkg="image_view2" type="image_view2">
+      <remap from="image" to="image_publisher/output" />
+      <remap from="image_marker" to="rect_array_to_image_marker/output" />
+    </node>
+  </group>
+
+</launch>

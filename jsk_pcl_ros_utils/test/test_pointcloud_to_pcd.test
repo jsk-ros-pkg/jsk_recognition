@@ -1,0 +1,12 @@
+<launch>
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros_utils)/test_data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/vision.compressed.bag --clock --loop">
+  </node>
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_pointcloud_to_pcd.launch">
+      <arg name="INPUT" value="/kinect2_head/hd/points" />
+  </include>
+  <test test-name="pointcloud_to_pcd_test"
+        name="test_pointcloud_to_pcd"
+        pkg="jsk_pcl_ros_utils" type="test_pointcloud_to_pcd.py"/>
+</launch>

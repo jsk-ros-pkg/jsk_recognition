@@ -1,0 +1,13 @@
+<launch>
+  <arg name="INPUT" />
+  <node name="sample_pointcloud_to_pcd" type="nodelet" pkg="nodelet"
+        args="standalone jsk_pcl_utils/PointCloudToPCD" output="screen" >
+    <remap from="~input" to="$(arg INPUT)" />
+    <rosparam subst_value="true">
+      prefix: $(find jsk_pcl_ros_utils)/test_data/sample_pcd_
+      duration: 0.5
+      binary: true
+      compressed: true
+    </rosparam>
+  </node> 
+</launch>

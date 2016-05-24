@@ -271,3 +271,15 @@ install(TARGETS jsk_pcl_ros_utils
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 
 install(FILES jsk_pcl_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
+if (CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  add_custom_target(install_test_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.py)
+  if(TARGET tests)
+    add_dependencies(tests install_test_data)
+  endif()
+  if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
+    # because of unreleased topic_tools/transform on hydro
+    add_rostest(test/test_pointcloud_to_pcd.test DEPENDENCIES install_test_data)
+  endif()
+endif()

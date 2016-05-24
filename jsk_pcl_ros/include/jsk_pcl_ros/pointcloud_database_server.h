@@ -61,6 +61,7 @@ namespace jsk_pcl_ros
     const std::string file_name_;
     std::string ext_;
     pcl::PolygonMesh mesh_;
+    std::string stem_;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_;
   private:
   };

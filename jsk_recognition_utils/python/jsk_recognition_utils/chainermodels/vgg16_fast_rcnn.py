@@ -2,11 +2,13 @@ import chainer
 import chainer.functions as F
 import chainer.links as L
 
+from roi_pooling_2d import roi_pooling_2d
 
-class VGG16(chainer.Chain):
+
+class VGG16FastRCNN(chainer.Chain):
 
     def __init__(self):
-        super(VGG16, self).__init__(
+        super(self.__class__, self).__init__(
             conv1_1=L.Convolution2D(3, 64, 3, stride=1, pad=1),
             conv1_2=L.Convolution2D(64, 64, 3, stride=1, pad=1),
 
@@ -27,11 +29,12 @@ class VGG16(chainer.Chain):
 
             fc6=L.Linear(25088, 4096),
             fc7=L.Linear(4096, 4096),
-            fc8=L.Linear(4096, 1000)
+            cls_score=L.Linear(4096, 21),
+            bbox_pred=L.Linear(4096, 84)
         )
         self.train = False
 
-    def __call__(self, x, t=None):
+    def __call__(self, x, rois):
         h = F.relu(self.conv1_1(x))
         h = F.relu(self.conv1_2(h))
         h = F.max_pooling_2d(h, 2, stride=2)
@@ -53,17 +56,11 @@ class VGG16(chainer.Chain):
         h = F.relu(self.conv5_1(h))
         h = F.relu(self.conv5_2(h))
         h = F.relu(self.conv5_3(h))
-        h = F.max_pooling_2d(h, 2, stride=2)
+        h = roi_pooling_2d(h, rois, 7, 7, spatial_scale=0.0625)
 
         h = F.dropout(F.relu(self.fc6(h)), train=self.train, ratio=0.5)
         h = F.dropout(F.relu(self.fc7(h)), train=self.train, ratio=0.5)
-        h = self.fc8(h)
+        cls_score = F.softmax(self.cls_score(h))
+        bbox_pred = self.bbox_pred(h)
 
-        self.pred = F.softmax(h)
-        if t is None:
-            assert not self.train
-            return
-
-        self.loss = F.softmax_cross_entropy(h, t)
-        self.acc = F.accuracy(h, t)
-        return self.loss
+        return cls_score, bbox_pred

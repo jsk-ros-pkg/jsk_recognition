@@ -282,6 +282,8 @@ install(DIRECTORY include/${PROJECT_NAME}/
 
 install(FILES jsk_perception_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
+add_custom_target(install_trained_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/download_trained_data.py)
+
 if(CATKIN_ENABLE_TESTING)
   find_package(roslaunch REQUIRED)
   find_package(roslint REQUIRED)
@@ -316,7 +318,8 @@ if(CATKIN_ENABLE_TESTING)
     jsk_perception_add_rostest(test/split_fore_background.test)
     jsk_perception_add_rostest(test/tile_image.test)
     jsk_perception_add_rostest(test/label_image_decomposer.test)
-    add_custom_target(install_trained_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/download_trained_data.py)
+    # FIXME: Does not work on Travis/Jenkins
+    # jsk_perception_add_rostest(test/vgg16_object_recognition.test install_trained_data)
     if(TARGET bing)
       jsk_perception_add_rostest(test/bing.test DEPENDENCIES install_trained_data)
     endif()

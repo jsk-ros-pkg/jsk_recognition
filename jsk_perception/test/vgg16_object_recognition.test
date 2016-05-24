@@ -1,0 +1,18 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_vgg16_object_recognition.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_vgg16_object_recognition"
+        name="test_vgg16_object_recognition"
+        pkg="jsk_tools" type="test_topic_published.py">
+    <rosparam>
+      topic_0: /vgg16_object_recognition/output
+      timeout_0: 30
+      topic_1: /vgg16_object_recognition/debug/net_input
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

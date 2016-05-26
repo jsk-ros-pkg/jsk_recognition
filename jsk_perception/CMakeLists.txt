@@ -262,6 +262,9 @@ add_custom_target(eusmodel_template ALL DEPENDS
   ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng8.launch
   ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng2.launch)
 
+# download and install trained data
+add_custom_target(install_trained_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_trained_data.py)
+
 install(TARGETS camshiftdemo virtual_camera_mono point_pose_extractor white_balance_converter hough_lines rectangle_detector calc_flow color_histogram_sliding_matcher oriented_gradient oriented_gradient_node ${PROJECT_NAME}
   ${jsk_perception_nodelet_executables}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
@@ -281,8 +284,6 @@ install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
 install(FILES jsk_perception_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-
-add_custom_target(install_trained_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_trained_data.py)
 
 if(CATKIN_ENABLE_TESTING)
   find_package(roslaunch REQUIRED)
@@ -322,10 +323,10 @@ if(CATKIN_ENABLE_TESTING)
     # FIXME: Does not work on Travis/Jenkins
     # jsk_perception_add_rostest(test/vgg16_object_recognition.test install_trained_data)
     if(TARGET bing)
-      jsk_perception_add_rostest(test/bing.test DEPENDENCIES install_trained_data)
+      jsk_perception_add_rostest(test/bing.test)
     endif()
     # TODO(wkentaro): https://github.com/jsk-ros-pkg/jsk_recognition/pull/1673#issuecomment-219963052
-    # add_rostest(test/bof_object_recognition.test DEPENDENCIES install_trained_data)
+    # add_rostest(test/bof_object_recognition.test)
   endif()
   add_rostest(test/sparse_image.test)
 endif()

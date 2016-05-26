@@ -86,14 +86,16 @@ namespace jsk_pcl_ros
   void ColorBasedRegionGrowingSegmentation::segment(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    pcl::search::Search <pcl::PointXYZRGB>::Ptr tree = pcl::search::Search <pcl::PointXYZRGB>::Ptr (new pcl::search::KdTree<pcl::PointXYZRGB>);
+    pcl::search::Search <pcl::PointXYZRGB>::Ptr tree =
+      pcl::search::Search <pcl::PointXYZRGB>::Ptr (new pcl::search::KdTree<pcl::PointXYZRGB>);
     pcl::PointCloud <pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud <pcl::PointXYZRGB>);
     pcl::fromROSMsg(*msg, *cloud);
 
-    pcl::IndicesPtr indices (new std::vector <int>);
+    std::vector<int> indices;
+    pcl::removeNaNFromPointCloud(*cloud, *cloud, indices);
+
     pcl::RegionGrowingRGB<pcl::PointXYZRGB> reg;
     reg.setInputCloud (cloud);
-    reg.setIndices (indices);
     reg.setSearchMethod (tree);
     reg.setDistanceThreshold (distance_threshould_);
     reg.setPointColorThreshold (point_color_threshould_);

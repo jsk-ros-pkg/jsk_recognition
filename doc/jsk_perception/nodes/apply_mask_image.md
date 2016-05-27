@@ -36,3 +36,9 @@ Apply mask image to original image and visualize it. It's a utlity to visualize 
 * `~mask_black_to_transparent` (Bool, default: `false`)
 
   Change black region of mask image to transparent and publish RGBA8 image as `~output` if its' true.
+
+## Sample
+
+```bash
+roslaunch jsk_perception sample_apply_mask_image.launch
+```

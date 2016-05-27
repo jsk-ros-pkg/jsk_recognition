@@ -79,14 +79,14 @@ namespace jsk_perception
   void MaskImageGenerator::generate(const sensor_msgs::Image::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    int offset_x = std::min(offset_x_, (int)msg->width);
-    int offset_y = std::min(offset_y_, (int)msg->height);
-    int width = std::min(offset_x + width_, (int)msg->width);
-    int height = std::min(offset_y + height_, (int)msg->height);
+    int min_x = std::min(offset_x_, (int)msg->width);
+    int min_y = std::min(offset_y_, (int)msg->height);
+    int max_x = std::min(min_x + width_, (int)msg->width);
+    int max_y = std::min(min_y + height_, (int)msg->height);
     cv::Mat mask_image = cv::Mat::zeros(msg->height, msg->width, CV_8UC1);
     cv::rectangle(mask_image,
-                  cv::Point(offset_x, offset_y),
-                  cv::Point(offset_x + width, offset_y + height),
+                  cv::Point(min_x, min_y),
+                  cv::Point(max_x, max_y),
                   cv::Scalar(255), CV_FILLED);
     pub_.publish(cv_bridge::CvImage(msg->header,
                                     sensor_msgs::image_encodings::MONO8,

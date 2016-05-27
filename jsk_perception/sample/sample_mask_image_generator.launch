@@ -13,8 +13,8 @@
         pkg="jsk_perception" type="mask_image_generator">
     <remap from="~input" to="image_publisher/output" />
     <rosparam>
-      offset_x: 0
-      offset_y: 0
+      offset_x: 100
+      offset_y: 200
       width: 256
       height: 256
     </rosparam>

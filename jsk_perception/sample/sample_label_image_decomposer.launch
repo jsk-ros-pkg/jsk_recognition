@@ -1,0 +1,30 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_perception)/sample/sample_image_publisher.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <node name="label_image_decomposer"
+        pkg="jsk_perception" type="label_image_decomposer.py">
+    <remap from="~input" to="raw_image_bgr/image_color" />
+    <remap from="~input/label" to="label_image/label" />
+    <rosparam>
+      approximate_sync: true
+      queue_size: 100
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="label_image_decomposer/output" />
+    </node>
+    <node name="image_view1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="label_image_decomposer/output/label_viz" />
+    </node>
+  </group>
+
+</launch>

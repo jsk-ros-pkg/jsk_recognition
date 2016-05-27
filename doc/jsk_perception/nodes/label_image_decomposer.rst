@@ -73,3 +73,11 @@ Parameters
 
   How many seconds you allow about the difference of timestamp
   when you specify ``~approximate_sync``.
+
+
+Sample
+------
+
+.. code-block:: bash
+
+  roslaunch jsk_perception sample_label_image_decomposer.launch

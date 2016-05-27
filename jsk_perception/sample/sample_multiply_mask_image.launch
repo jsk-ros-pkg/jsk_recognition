@@ -1,0 +1,30 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_perception)/sample/sample_add_mask_image.launch">
+    <arg name="gui" default="false" />
+  </include>
+
+  <node name="multiply_mask_image"
+        pkg="jsk_perception" type="multiply_mask_image">
+    <remap from="~input/src1" to="mask_image_generator0/output" />
+    <remap from="~input/src2" to="mask_image_generator1/output" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="mask_image_generator0/output" />
+    </node>
+    <node name="image_view1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="mask_image_generator1/output" />
+    </node>
+    <node name="image_view2"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="multiply_mask_image/output" />
+    </node>
+  </group>
+
+</launch>

@@ -1,0 +1,48 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/kiva_pod_image_color.jpg
+      encoding: bgr8
+      publish_info: false
+    </rosparam>
+  </node>
+
+  <node name="mask_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/kiva_pod_mask.jpg
+      encoding: mono8
+      publish_info: false
+    </rosparam>
+  </node>
+
+  <node name="apply_mask_image"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_perception/ApplyMaskImage">
+    <remap from="~input" to="image_publisher/output" />
+    <remap from="~input/mask" to="mask_publisher/output" />
+    <rosparam>
+      approximate_sync: true
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="image_publisher/output" />
+    </node>
+    <node name="image_view1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="mask_publisher/output" />
+    </node>
+    <node name="image_view2"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="apply_mask_image/output" />
+    </node>
+  </group>
+
+</launch>

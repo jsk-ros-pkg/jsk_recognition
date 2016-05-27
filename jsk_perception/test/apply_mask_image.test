@@ -1,16 +1,8 @@
 <launch>
 
-  <include file="$(find jsk_perception)/sample/publish_fixed_images.launch" />
-
-  <node name="apply_mask_image"
-        pkg="nodelet" type="nodelet"
-        args="standalone jsk_perception/ApplyMaskImage">
-    <remap from="~input" to="raw_image_bgr/image_color" />
-    <remap from="~input/mask" to="mask_image/mask" />
-    <rosparam>
-      approximate_sync: true
-    </rosparam>
-  </node>
+  <include file="$(find jsk_perception)/sample/sample_apply_mask_image.launch">
+    <arg name="gui" value="false" />
+  </include>
 
   <test test-name="test_apply_mask_image"
         name="test_apply_mask_image"

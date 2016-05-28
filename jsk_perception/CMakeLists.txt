@@ -308,6 +308,7 @@ if(CATKIN_ENABLE_TESTING)
     # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
     jsk_perception_add_rostest(test/add_mask_image.test)
     jsk_perception_add_rostest(test/apply_mask_image.test)
+    jsk_perception_add_rostest(test/bounding_rect_mask_image.test)
     jsk_perception_add_rostest(test/colorize_labels.test)
     jsk_perception_add_rostest(test/colorize_float_image.test)
     jsk_perception_add_rostest(test/draw_rect_array.test)

@@ -305,6 +305,7 @@ if(CATKIN_ENABLE_TESTING)
     endmacro()
     # FIXME: jsk_tools/test_topic_published.py does not work on hydro travis/jenkins
     # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
+    jsk_perception_add_rostest(test/add_mask_image.test)
     jsk_perception_add_rostest(test/apply_mask_image.test)
     jsk_perception_add_rostest(test/colorize_labels.test)
     jsk_perception_add_rostest(test/colorize_float_image.test)

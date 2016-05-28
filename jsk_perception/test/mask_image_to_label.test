@@ -1,6 +1,8 @@
 <launch>
 
-  <include file="$(find jsk_perception)/sample/publish_fixed_images.launch" />
+  <include file="$(find jsk_perception)/sample/sample_image_publisher.launch">
+    <arg name="gui" value="false" />
+  </include>
 
   <node name="mask_image_to_label"
         pkg="jsk_perception" type="mask_image_to_label.py">

@@ -17,3 +17,9 @@ Publish image from loaded file.
 
 * `~encoding` (str default: `bgr8`)
 * `~frame_id` (str default: `camera`)
+
+## Sample
+
+```bash
+roslaunch jsk_perception sample_image_publisher.launch
+```

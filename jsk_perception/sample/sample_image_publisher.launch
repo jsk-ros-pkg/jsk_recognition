@@ -1,5 +1,8 @@
 <launch>
 
+  <arg name="gui" default="true" />
+
+
   <node name="raw_image_bgr"
         pkg="jsk_perception" type="image_publisher.py">
     <remap from="~output" to="~image_color" />
@@ -65,13 +68,39 @@
     </rosparam>
   </node>
 
-  <node name="colorize_labels"
-        pkg="jsk_perception" type="colorize_labels">
-    <remap from="~input" to="label_image/label" />
-    <remap from="~output" to="~image" />
-    <rosparam>
-      publish_info: true
-    </rosparam>
-  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="raw_image_bgr/image_color" />
+    </node>
+    <node name="image_view1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="raw_image_rgb/image_color" />
+    </node>
+    <node name="image_view2"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="mask_image/mask" />
+    </node>
+    <node name="image_view3"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="depth_image_16uc1/image_depth" />
+    </node>
+    <node name="image_view4"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="depth_image_32fc1/image_depth" />
+      <rosparam>
+        do_dynamic_scaling: true
+      </rosparam>
+    </node>
+    <node name="image_view5"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="label_image/label" />
+      <rosparam>
+        bg_label: 0
+      </rosparam>
+    </node>
+  </group>
+
 
 </launch>

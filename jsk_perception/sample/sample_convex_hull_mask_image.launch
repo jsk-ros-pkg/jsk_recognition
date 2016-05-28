@@ -1,0 +1,25 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <node name="mask_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/mask0000.jpg
+      encoding: mono8
+      publish_info: false
+    </rosparam>
+  </node>
+
+  <node name="convex_hull_mask_image"
+        pkg="jsk_perception" type="convex_hull_mask_image">
+    <remap from="~input" to="mask_publisher/output" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rqt_gui"
+          pkg="rqt_gui" type="rqt_gui"
+          args="--perspective-file $(find jsk_perception)/sample/config/sample_convex_hull_mask_image.perspective" />
+  </group>
+
+</launch>

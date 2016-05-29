@@ -1,5 +1,7 @@
 # image_publisher.py
 
+![](./images/image_publisher.png)
+
 Publish image from loaded file.
 
 ## Publishing Topics

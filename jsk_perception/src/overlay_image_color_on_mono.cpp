@@ -49,8 +49,19 @@ namespace jsk_perception
     DiagnosticNodelet::onInit();
     pnh_->param("approximate_sync", approximate_sync_, false);
     pnh_->param("queue_size", queue_size_, 100);
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (
+        &OverlayImageColorOnMono::configCallback, this, _1, _2);
+    srv_->setCallback (f);
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
     onInitPostProcess();
+  }
+
+  void OverlayImageColorOnMono::configCallback(Config &config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    color_alpha_ = config.color_alpha;
   }
 
   void OverlayImageColorOnMono::subscribe()
@@ -92,18 +103,19 @@ namespace jsk_perception
       return;
     }
 
+    boost::mutex::scoped_lock lock(mutex_);
+
     cv::Mat color_image = cv_bridge::toCvShare(color_imgmsg, color_imgmsg->encoding)->image;
     cv::Mat mono_image = cv_bridge::toCvShare(mono_imgmsg, sensor_msgs::image_encodings::MONO8)->image;
 
-    float alpha = 0.3;
     cv::Mat overlayed_image = cv::Mat::zeros(color_image.rows, color_image.cols, CV_8UC3);
     for (size_t j = 0; j < overlayed_image.rows; j++) {
       for (size_t i = 0; i < overlayed_image.cols; i++) {
         cv::Vec3b color = color_image.at<cv::Vec3b>(j, i);
         uchar mono = mono_image.at<uchar>(j, i);
-        overlayed_image.at<cv::Vec3b>(j, i) = cv::Vec3b(color[0] * alpha + mono * (1 - alpha),
-                                                        color[1] * alpha + mono * (1 - alpha),
-                                                        color[2] * alpha + mono * (1 - alpha));
+        overlayed_image.at<cv::Vec3b>(j, i) = cv::Vec3b(color[0] * color_alpha_ + mono * (1 - color_alpha_),
+                                                        color[1] * color_alpha_ + mono * (1 - color_alpha_),
+                                                        color[2] * color_alpha_ + mono * (1 - color_alpha_));
       }
     }
     pub_.publish(cv_bridge::CvImage(color_imgmsg->header,

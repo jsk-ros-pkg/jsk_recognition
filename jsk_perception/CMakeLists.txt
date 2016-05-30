@@ -91,6 +91,7 @@ generate_dynamic_reconfigure_options(
   cfg/GaussianBlur.cfg
   cfg/KMeans.cfg
   cfg/ImageTimeDiff.cfg
+  cfg/OverlayImageColorOnMono.cfg
   cfg/SelectiveSearch.cfg
 )
 

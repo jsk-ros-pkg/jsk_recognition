@@ -38,6 +38,8 @@
 #define JSK_PERCEPTION_APPLY_MASK_IMAGE_H_
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <dynamic_reconfigure/server.h>
+#include <jsk_perception/OverlayImageColorOnMonoConfig.h>
 #include <sensor_msgs/Image.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
@@ -49,6 +51,7 @@ namespace jsk_perception
   class OverlayImageColorOnMono: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
+    typedef OverlayImageColorOnMonoConfig Config;
     typedef message_filters::sync_policies::ApproximateTime<
       sensor_msgs::Image, sensor_msgs::Image > ApproximateSyncPolicy;
     typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image > SyncPolicy;
@@ -61,14 +64,19 @@ namespace jsk_perception
     virtual void overlay(
       const sensor_msgs::Image::ConstPtr& image_msg,
       const sensor_msgs::Image::ConstPtr& mask_msg);
+    virtual void configCallback(Config &config, uint32_t level);
 
-    bool approximate_sync_;
-    int queue_size_;
+    boost::mutex mutex_;
+    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
     boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> > async_;
     message_filters::Subscriber<sensor_msgs::Image> sub_color_;
     message_filters::Subscriber<sensor_msgs::Image> sub_mono_;
     ros::Publisher pub_;
+
+    bool approximate_sync_;
+    int queue_size_;
+    double color_alpha_;
 
   private:
 

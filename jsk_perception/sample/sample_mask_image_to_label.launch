@@ -1,0 +1,25 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_perception)/sample/sample_image_publisher.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <node name="mask_image_to_label"
+        pkg="jsk_perception" type="mask_image_to_label.py">
+    <remap from="~input" to="mask_image/mask" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="mask_image/mask" />
+    </node>
+    <node name="image_view1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="mask_image_to_label/output" />
+    </node>
+  </group>
+
+</launch>

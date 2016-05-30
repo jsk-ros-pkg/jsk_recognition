@@ -1,13 +1,8 @@
 <launch>
 
-  <include file="$(find jsk_perception)/sample/sample_image_publisher.launch">
+  <include file="$(find jsk_perception)/sample/sample_mask_image_to_label.launch">
     <arg name="gui" value="false" />
   </include>
-
-  <node name="mask_image_to_label"
-        pkg="jsk_perception" type="mask_image_to_label.py">
-    <remap from="~input" to="mask_image/mask" />
-  </node>
 
   <test test-name="test_mask_image_to_label"
         name="test_mask_image_to_label"

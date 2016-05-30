@@ -28,6 +28,6 @@ Publishing Topic
 Sample
 ------
 
-::
+.. code-block:: bash
 
-roslaunch jsk_perception publish_fixed_images.launch
+  roslaunch jsk_perception sample_mask_image_to_label.launch

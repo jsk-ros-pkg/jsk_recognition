@@ -1,0 +1,52 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/kiva_pod_image_color.jpg
+      encoding: bgr8
+      publish_info: false
+    </rosparam>
+  </node>
+
+  <node name="depth_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/kiva_pod_image_depth.jpg
+      encoding: 32FC1
+      publish_info: false
+    </rosparam>
+  </node>
+
+  <node name="colorize_float_image"
+        pkg="jsk_perception" type="colorize_float_image">
+    <remap from="~input" to="depth_publisher/output" />
+  </node>
+
+  <node name="overlay_image_color_on_mono"
+        pkg="jsk_perception" type="overlay_image_color_on_mono">
+    <remap from="~input/color" to="colorize_float_image/output" />
+    <remap from="~input/mono" to="image_publisher/output" />
+    <rosparam>
+      approximate_sync: true
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="colorize_float_image/output" />
+    </node>
+    <node name="image_view1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="image_publisher/output" />
+    </node>
+    <node name="image_view2"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="overlay_image_color_on_mono/output" />
+    </node>
+  </group>
+
+</launch>

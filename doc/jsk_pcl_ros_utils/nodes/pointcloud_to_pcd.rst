@@ -36,4 +36,4 @@ Parameters
 
 * ``duration`` (Double, default: ``1.0``)
 
-  Saving duration. You can chage saving frequency with this parameter.
+  Saving duration. You can change saving frequency with this parameter.

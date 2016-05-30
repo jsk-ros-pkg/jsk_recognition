@@ -1,6 +1,6 @@
 # SlidingWindowObjectDetectorTrainer
 ## What is this?
-Nodelet to train `jsk\_perception/SlidingWindowObjectDetector` using binary support vector machine. The object is assigned a label of +1 and -1 otherwise. The SVM used is from the OpenCV Library with default set to RBF Kernel and 10-Fold Cross Validations. 
+Nodelet to train `jsk_perception/SlidingWindowObjectDetector` using binary support vector machine. The object is assigned a label of +1 and -1 otherwise. The SVM used is from the OpenCV Library with default set to RBF Kernel and 10-Fold Cross Validations.
 
 Note that this nodelet produces two output files of ".xml" format to the working directory.
 * `1) Trained Classifier` - this file the trained object SVM. Dont edit this file.

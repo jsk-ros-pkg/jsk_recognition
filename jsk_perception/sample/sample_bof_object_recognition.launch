@@ -53,7 +53,7 @@
   <group if="$(arg gui)">
     <node name="rqt_gui"
           pkg="rqt_gui" type="rqt_gui"
-          args="--perspective-file $(find jsk_perception)/sample/config/apc2015_object_recognition_sample.perspective" />
+          args="--perspective-file $(find jsk_perception)/sample/config/sample_bof_object_recognition.perspective" />
   </group>
 
 </launch>

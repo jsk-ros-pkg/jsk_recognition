@@ -1,6 +1,8 @@
 <launch>
 
-  <include file="$(find jsk_perception)/sample/publish_fixed_images.launch" />
+  <include file="$(find jsk_perception)/sample/sample_image_publisher.launch">
+    <arg name="gui" value="false" />
+  </include>
 
   <node name="label_image_delayed"
         pkg="jsk_tools" type="delay_timestamp.py">

@@ -1,6 +1,8 @@
 <launch>
 
-  <include file="$(find jsk_perception)/sample/publish_fixed_images.launch" />
+  <include file="$(find jsk_perception)/sample/sample_image_publisher.launch">
+    <arg name="gui" value="false" />
+  </include>
 
   <node name="split_fore_background_0"
         pkg="jsk_perception" type="split_fore_background.py">

@@ -1,13 +1,20 @@
 <launch>
 
-  <include file="$(find jsk_perception)/sample/publish_fixed_images.launch" />
+  <include file="$(find jsk_perception)/sample/sample_image_publisher.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <node name="colorize_labels"
+        pkg="jsk_perception" type="colorize_labels">
+    <remap from="~input" to="label_image/label" />
+  </node>
 
   <test test-name="test_colorize_labels"
         name="test_colorize_labels"
         pkg="jsk_tools" type="test_topic_published.py"
         retry="3">
     <rosparam>
-      topic_0: /colorize_labels/image
+      topic_0: /colorize_labels/output
       timeout_0: 30
     </rosparam>
   </test>

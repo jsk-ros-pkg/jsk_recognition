@@ -21,7 +21,7 @@ PCL and ROS.
 
    Input pointcloud. This should be **organized** pointcloud.
 
-## Publishing topisc
+## Publishing Topics
 * `~output` (`jsk_recognition_msgs/ClusterPointIndices`):
 * `~output_polygon` (`jsk_recognition_msgs/PolygonArray`):
 * `~output_coefficients` (`jsk_recognition_msgs/ModelCoefficientsArray`)

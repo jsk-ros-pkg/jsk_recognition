@@ -11,6 +11,28 @@ This instruction supports below cameras:
 - DepthSense DS325
 
 
+Attention
+---------
+
+- Field of view of RGB Image and Depth Image is different, it is not as kinect2.
+
+=================== =============
+RGB Image           Depth Image
+=================== =============
+63.2°x 49.3°x 75.2° 74°x 58°x 87°
+=================== =============
+
+- Resolution of RGB Image and Depth Image is different, it is not as kinect2.
+
+========= ===========
+RGB Image Depth Image
+========= ===========
+VGA or HD QVGA
+========= ===========
+
+If you want more information, please read datasheet. (`DS325 DataSheet <http://www.softkinetic.com/Portals/0/Download/WEB_20120907_SK_DS325_Datasheet_V2.1.pdf>`_)
+
+
 Installation
 ------------
 

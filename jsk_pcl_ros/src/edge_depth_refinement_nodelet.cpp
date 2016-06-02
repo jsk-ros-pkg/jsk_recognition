@@ -134,7 +134,7 @@ namespace jsk_pcl_ros
         min_x_index = index;
       }
       if (y > max_y) {
-        max_y = max_y;
+        max_y = y;
         max_y_index = index;
       }
       if (y < min_y) {
@@ -143,13 +143,13 @@ namespace jsk_pcl_ros
       }
     }
 
-    if (max_x_index != max_x_index) {
+    if (min_x_index != max_x_index) {
       return boost::make_tuple(
-        max_x_index, min_x_index);
+        min_x_index, max_x_index);
     }
     else {
       return boost::make_tuple(
-        max_y_index, min_y_index);
+        min_y_index, max_y_index);
     }
   }
 

@@ -91,6 +91,7 @@ generate_dynamic_reconfigure_options(
   cfg/GaussianBlur.cfg
   cfg/KMeans.cfg
   cfg/ImageTimeDiff.cfg
+  cfg/OverlayImageColorOnMono.cfg
   cfg/SelectiveSearch.cfg
 )
 
@@ -155,6 +156,7 @@ jsk_perception_nodelet(src/contour_finder.cpp "jsk_perception/ContourFinder" "co
 jsk_perception_nodelet(src/snake_segmentation.cpp "jsk_perception/SnakeSegmentation" "snake_segmentation")
 jsk_perception_nodelet(src/colorize_labels.cpp "jsk_perception/ColorizeLabels" "colorize_labels")
 jsk_perception_nodelet(src/colorize_float_image.cpp "jsk_perception/ColorizeFloatImage" "colorize_float_image")
+jsk_perception_nodelet(src/overlay_image_color_on_mono.cpp "jsk_perception/OverlayImageColorOnMono" "overlay_image_color_on_mono")
 jsk_perception_nodelet(src/grid_label.cpp "jsk_perception/GridLabel" "grid_label")
 jsk_perception_nodelet(src/color_histogram_label_match.cpp "jsk_perception/ColorHistogramLabelMatch" "color_histogram_label_match")
 jsk_perception_nodelet(src/apply_mask_image.cpp "jsk_perception/ApplyMaskImage" "apply_mask_image")
@@ -320,6 +322,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_perception_add_rostest(test/kmeans.test)
     jsk_perception_add_rostest(test/rect_array_to_image_marker.test)
     jsk_perception_add_rostest(test/convex_hull_mask_image.test)
+    jsk_perception_add_rostest(test/overlay_image_color_on_mono.test)
     jsk_perception_add_rostest(test/selective_search.test)
     jsk_perception_add_rostest(test/slic_super_pixels.test)
     jsk_perception_add_rostest(test/split_fore_background.test)

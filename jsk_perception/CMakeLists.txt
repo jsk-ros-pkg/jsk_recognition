@@ -30,6 +30,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   mk
   nodelet
+  opencv_apps
   pcl_ros
   posedetection_msgs
   roscpp
@@ -101,13 +102,10 @@ generate_dynamic_reconfigure_options(
   cfg/SLICSuperPixels.cfg
   cfg/SnakeSegmentation.cfg
   cfg/camshiftdemo.cfg
-  cfg/EdgeDetector.cfg
-  cfg/HoughLines.cfg
   cfg/matchtemplate.cfg
   cfg/point_pose_extractor.cfg
   cfg/RectangleDetector.cfg
   cfg/ColorHistogram.cfg
-  cfg/HoughCircles.cfg
   cfg/ColorHistogramSlidingMatcher.cfg
   cfg/BackgroundSubstraction.cfg
   cfg/GrabCut.cfg

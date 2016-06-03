@@ -39,7 +39,20 @@ pointcloud.
 
 * Open another Terminal and run `rosrun jsk_pcl_ros depth_error_calibration.py --model quadratic-uv-quadratic-abs` and move the chessboard slowly while watching to the image window. The edges of the image should be covered and the range(due to your application) should also be covered as more as possible.
 
-* Open new Terminal and run `rosrun image_view image_view image:=/depth_error_linear_regression/frequency_image`. You can observe which point the chessboard passes on the window. 
+* Open new Terminal and run `rosrun image_view image_view image:=/depth_error_logistic_regression/frequency_image`. You can observe which point the chessboard passes on the window. If it never apeears, setting `approximate_sync` in `jsk_pcl_ros/launch/depth_error.launch` to true might help you. (Please see the example below.)
+
+```
+  <node pkg="jsk_pcl_ros" type="depth_image_error"
+        name="depth_image_error"
+        output="screen">
+    <remap from="~image" to="$(arg DEPTH_IMAGE)" />
+    <remap from="~point" to="/checkerdetector/corner_point" />
+    <remap from="~camera_info" to="$(arg CAMERA_INFO_TOPIC)" />
+    <rosparam> 
+      approximate_sync: true
+    </rosparam>
+  </node>
+```
 ![](images/frequency_image.png)
 
 * Checking the window output and the Rviz output when you find the calibrated pointcloud overlaps the Pose vector. `Ctrl+c` in this Terminal and enter `y` to save the calibration file. Edit `openni2_remote.launch` file and find the param `depth_calibration_file`, add the path of your calibration file.

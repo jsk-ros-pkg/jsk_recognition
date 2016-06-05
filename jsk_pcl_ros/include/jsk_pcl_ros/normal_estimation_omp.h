@@ -75,6 +75,7 @@ namespace jsk_pcl_ros
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     int k_;
     double search_radius_;
+    int num_of_threads_;
     
   private:
     

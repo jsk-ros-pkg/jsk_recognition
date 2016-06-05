@@ -117,7 +117,26 @@ namespace jsk_perception
       }
     }
  #else
-    JSK_ROS_FATAL("yaml 0.5 is not supported yet");
+    // yaml-cpp is greater than 0.5.0
+    YAML::Node doc;
+
+    doc = YAML::LoadFile(file);
+    if ( doc["bins"] ) {
+      const YAML::Node& bins_yaml = doc["bins"];
+      for (size_t i = 0; i < bins_yaml.size(); i++) {
+        const YAML::Node& bin_yaml       = bins_yaml[i];
+        const YAML::Node& min_value_yaml = bin_yaml["min_value"];
+        const YAML::Node& max_value_yaml = bin_yaml["max_value"];
+        const YAML::Node& count_yaml     = bin_yaml["count"];
+        jsk_recognition_msgs::HistogramWithRangeBin bin;
+        bin.min_value = min_value_yaml.as<double> ();
+        bin.max_value = max_value_yaml.as<double> ();
+        bin.count     = count_yaml.as<int> ();
+        read_msg.bins.push_back(bin);
+      }
+    } else {
+      JSK_ROS_ERROR_STREAM("bins: keyword is not found in file(" << file << ")");
+    }
  #endif
     reference_ = boost::make_shared<jsk_recognition_msgs::HistogramWithRange>(read_msg);
   }

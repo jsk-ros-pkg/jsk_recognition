@@ -51,6 +51,7 @@ namespace jsk_perception
     DiagnosticNodelet::onInit();
     tf_listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
     pnh_->param("max_queue_size", max_queue_size_, 10);
+    pnh_->param("synchronizer_queue_size", sync_queue_size_, 100);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
@@ -66,7 +67,7 @@ namespace jsk_perception
     sub_info_ = pnh_->subscribe("input/info", 1, &PolygonArrayColorHistogram::infoCallback, this);
     sub_polygon_.subscribe(*pnh_, "input", max_queue_size_);
     sub_image_.subscribe(*pnh_, "input/image", max_queue_size_);
-    async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(100);
+    async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(sync_queue_size_);
     async_->connectInput(sub_image_, sub_polygon_);
     async_->registerCallback(
       boost::bind(&PolygonArrayColorHistogram::compute, this, _1, _2));

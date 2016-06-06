@@ -4,17 +4,13 @@
     <arg name="gui" value="false" />
   </include>
 
-  <test test-name="test_bof_object_recognition"
-        name="test_bof_object_recognition"
+  <test test-name="test_bof_histogram_extractor"
+        name="test_bof_histogram_extractor"
         pkg="jsk_tools" type="test_topic_published.py"
         retry="3">
     <rosparam>
-      topic_0: /imagesift/output
+      topic_0: /bof_histogram_extractor/output
       timeout_0: 30
-      topic_1: /bof_histogram_extractor/output
-      timeout_1: 30
-      topic_2: /sklearn_classifier/output
-      timeout_2: 30
     </rosparam>
   </test>
 

@@ -131,7 +131,21 @@ add_library(oriented_gradient src/oriented_gradient.cpp)
 add_executable(oriented_gradient_node src/oriented_gradient_node.cpp)
 add_executable(sliding_window_object_detector_trainer_node  src/sliding_window_object_detector_trainer_node.cpp)
 
+set(jsk_perception_nodes_without_test "")
+
+file(GLOB jsk_perception_node_scripts ${PROJECT_SOURCE_DIR}/node_scripts/*)
+foreach(_node_script ${jsk_perception_node_scripts})
+  get_filename_component(_node_name ${_node_script} NAME_WE)
+  get_filename_component(_basename ${_node_script} NAME)
+  if(NOT EXISTS ${PROJECT_SOURCE_DIR}/test/${_node_name}.test)
+    list(APPEND jsk_perception_nodes_without_test node_scripts/${_basename})
+  endif()
+endforeach()
+
 macro(jsk_perception_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
+  if(NOT EXISTS ${PROJECT_SOURCE_DIR}/test/${_single_nodelet_exec_name}.test)
+    list(APPEND jsk_perception_nodes_without_test ${_nodelet_cpp})
+  endif()
   jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
     jsk_perception_nodelet_sources jsk_perception_nodelet_executables)
 endmacro()
@@ -288,6 +302,8 @@ install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
 install(FILES jsk_perception_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
+message(AUTHOR_WARNING "Node/Nodelets without rostest: ${jsk_perception_nodes_without_test}")
 
 if(CATKIN_ENABLE_TESTING)
   find_package(roslaunch REQUIRED)

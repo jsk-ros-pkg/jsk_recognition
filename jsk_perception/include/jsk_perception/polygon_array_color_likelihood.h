@@ -86,6 +86,7 @@ namespace jsk_perception
     jsk_recognition_msgs::HistogramWithRange::ConstPtr reference_;
     bool approximate_sync_;
     int max_queue_size_;
+    int sync_queue_size_;
     int coefficient_method_;
     bool reference_from_file_;
   private:

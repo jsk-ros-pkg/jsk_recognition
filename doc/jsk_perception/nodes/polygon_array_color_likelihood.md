@@ -25,7 +25,11 @@ Compute polygon likelihood based on distance of histograms.
 
 * `~max_queue_size` (default: `10`)
 
-  Max queue size
+  Queue size of subscriber
+
+* `~synchronizer_queue_size` (default: `100`)
+
+  Queue size of message filter
 
 * `~reference_file`
 

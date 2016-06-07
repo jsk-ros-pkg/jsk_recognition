@@ -45,6 +45,7 @@ namespace jsk_perception
     DiagnosticNodelet::onInit();
     pnh_->param("approximate_sync", approximate_sync_, false);
     pnh_->param("max_queue_size", max_queue_size_, 10);
+    pnh_->param("synchronizer_queue_size", sync_queue_size_, 100);
     std::string reference_file;
     pnh_->param("reference_file", reference_file, std::string(""));
     reference_from_file_ = !reference_file.empty();
@@ -69,13 +70,13 @@ namespace jsk_perception
     sub_polygon_.subscribe(*pnh_, "input/polygons", max_queue_size_);
     sub_histogram_.subscribe(*pnh_, "input/histograms", max_queue_size_);
     if (approximate_sync_) {
-      async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(100);
+      async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(sync_queue_size_);
       async_->connectInput(sub_polygon_, sub_histogram_);
       async_->registerCallback(
         boost::bind(&PolygonArrayColorLikelihood::likelihood, this, _1, _2));
     }
     else {
-      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(sync_queue_size_);
       sync_->connectInput(sub_polygon_, sub_histogram_);
       sync_->registerCallback(
         boost::bind(&PolygonArrayColorLikelihood::likelihood, this, _1, _2));

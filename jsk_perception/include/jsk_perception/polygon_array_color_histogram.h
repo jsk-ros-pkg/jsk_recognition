@@ -83,6 +83,7 @@ namespace jsk_perception
     boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> > async_;
     tf::TransformListener* tf_listener_;
     int max_queue_size_;
+    int sync_queue_size_;
     int bin_size_;
     int pixel_min_value_, pixel_max_value_;
     int debug_line_width_;

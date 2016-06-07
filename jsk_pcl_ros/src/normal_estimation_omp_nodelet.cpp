@@ -44,6 +44,8 @@ namespace jsk_pcl_ros
   {
     pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
     DiagnosticNodelet::onInit();
+    pnh_->param("number_of_threads", num_of_threads_, 0);
+    JSK_NODELET_DEBUG_STREAM("num_of_threads: " << num_of_threads_);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&NormalEstimationOMP::configCallback, this, _1, _2);
@@ -86,7 +88,7 @@ namespace jsk_pcl_ros
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr
         cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
       pcl::fromROSMsg(*cloud_msg, *cloud);
-      pcl::NormalEstimationOMP<pcl::PointXYZRGB, pcl::Normal> impl;
+      pcl::NormalEstimationOMP<pcl::PointXYZRGB, pcl::Normal> impl(num_of_threads_);
       impl.setInputCloud(cloud);
       pcl::search::KdTree<pcl::PointXYZRGB>::Ptr
         tree (new pcl::search::KdTree<pcl::PointXYZRGB> ());

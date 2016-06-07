@@ -175,7 +175,7 @@ class SolidityRagMerge(ConnectionBasedTransport):
             img = gray2rgb(img)
         mask = bridge.imgmsg_to_cv2(maskmsg, desired_encoding='mono8')
         mask = mask.reshape(mask.shape[:2])
-        img = gray2rgb(mask)
+        mask = gray2rgb(mask)
         # compute label
         roi = closed_mask_roi(mask)
         roi_labels = masked_slic(img=img[roi], mask=mask[roi],

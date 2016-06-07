@@ -1,0 +1,4 @@
+- git:
+    uri: https://github.com/ros-perception/opencv_apps.git
+    local-name: ros-perception/opencv_apps
+    version: indigo

@@ -35,3 +35,11 @@ Compute color histogram of the region which is specified by 3-D Polygon.
 * `~debug_line_width` (default: `2`)
 
   Line width of debug image.
+
+* `~max_queue_size` (default: `10`)
+
+  Queue size of subscriber
+
+* `~synchronizer_queue_size` (default: `100`)
+
+  Queue size of message filter

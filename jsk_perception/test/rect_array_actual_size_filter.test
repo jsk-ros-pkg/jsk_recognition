@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_rect_array_actual_size_filter.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_rect_array_actual_size_filter"
+        name="test_rect_array_actual_size_filter"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="360" retry="3">
+    <rosparam>
+      topic_0: /rect_array_actual_size_filter/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

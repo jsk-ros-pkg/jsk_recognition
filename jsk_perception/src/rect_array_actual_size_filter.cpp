@@ -99,8 +99,8 @@ namespace jsk_perception
       for (int i = -kernel_size_; i <= kernel_size_; i++) {
         const int x = center_x + i;
         const int y = center_y + j;
-        if (img.cols < x && x > 0 &&
-            img.rows < y && x > 0) {
+        if (0 < x && x < img.cols &&
+            0 < y && y < img.rows ) {
           d += img.at<float>(y, x);
           ++valid;
         }
@@ -143,8 +143,8 @@ namespace jsk_perception
         cv::Point3d c_3d = c_ray * (distance / c_ray.z);
         const double width = std::abs(a_3d.x - c_3d.x);
         const double height = std::abs(a_3d.y - c_3d.y);
-        if (min_x_ < width && max_x_ > width &&
-            min_y_ < height && max_y_ > height) {
+        if (min_x_ * depth.cols < width && width < max_x_ * depth.cols  &&
+            min_y_ * depth.rows < height && height < max_y_ * depth.rows) {
           result_msg.rects.push_back(rect);
         }
       }

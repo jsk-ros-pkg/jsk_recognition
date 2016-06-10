@@ -125,10 +125,10 @@ macro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
     jsk_pcl_nodelet_sources jsk_pcl_nodelet_executables)
 endmacro(jsk_pcl_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
 
-macro(jsk_pcl_util_nodelet_deprecated _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
-  jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
-    jsk_pcl_util_nodelet_deprecated_sources jsk_pcl_util_nodelet_deprecated_executables)
-endmacro(jsk_pcl_util_nodelet_deprecated _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
+macro(jsk_pcl_nodelet_upstream _upstream _nodelet_class _single_nodelet_exec_name)
+  message("DEPRECATION WARNING: nodelet '${_nodelet_class}' is moved to upstream package '${_upstream}'.")
+  jsk_nodelet(dummy.cpp ${_nodelet_class} ${_single_nodelet_exec_name} jsk_pcl_nodelet_dummy_sources jsk_pcl_nodelet_executables)
+endmacro(jsk_pcl_nodelet_upstream _upstream _nodelet_class _single_nodelet_exec_name)
 
 if ($ENV{TRAVIS_JOB_ID})
   add_definitions("-O0")
@@ -139,8 +139,7 @@ endif ($ENV{TRAVIS_JOB_ID})
 # pcl_ros::Filter based class is not working...
 # https://github.com/ros-perception/perception_pcl/issues/9
 jsk_pcl_nodelet(src/pointcloud_screenpoint_nodelet.cpp "jsk_pcl/PointcloudScreenpoint" "pointcloud_screenpoint")
-jsk_pcl_util_nodelet_deprecated(src/normal_flip_to_frame_nodelet.cpp "jsk_pcl/NormalFlipToFrame"
-  "normal_flip_to_frame")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/NormalFlipToFrame" "normal_flip_to_frame")
 if(OPENMP_FOUND)
   jsk_pcl_nodelet(src/particle_filter_tracking_nodelet.cpp "jsk_pcl/ParticleFilterTracking" "particle_filter_tracking")
 endif()
@@ -149,7 +148,7 @@ jsk_pcl_nodelet(src/voxel_grid_downsample_decoder_nodelet.cpp "jsk_pcl/VoxelGrid
 jsk_pcl_nodelet(src/snapit_nodelet.cpp "jsk_pcl/Snapit" "snapit")
 jsk_pcl_nodelet(src/keypoints_publisher_nodelet.cpp "jsk_pcl/KeypointsPublisher" "keypoints_publisher")
 jsk_pcl_nodelet(src/hinted_plane_detector_nodelet.cpp "jsk_pcl/HintedPlaneDetector" "hinted_plane_detector")
-jsk_pcl_util_nodelet_deprecated(src/centroid_publisher_nodelet.cpp "jsk_pcl/CentroidPublisher" "centroid_publisher")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/CentroidPublisher" "centroid_publisher")
 jsk_pcl_nodelet(src/moving_least_square_smoothing_nodelet.cpp "jsk_pcl/MovingLeastSquareSmoothing" "moving_least_square_smoothing")
 jsk_pcl_nodelet(src/fisheye_sphere_publisher_nodelet.cpp "jsk_pcl/FisheyeSpherePublisher" "fisheye_sphere_publisher")
 jsk_pcl_nodelet(src/plane_supported_cuboid_estimator_nodelet.cpp
@@ -162,12 +161,9 @@ jsk_pcl_nodelet(src/image_rotate_nodelet.cpp
   "jsk_pcl/ImageRotateNodelet" "image_rotate")
 jsk_pcl_nodelet(src/octree_change_publisher_nodelet.cpp
   "jsk_pcl/OctreeChangePublisher" "octree_change_publisher")
-jsk_pcl_util_nodelet_deprecated(src/tf_transform_cloud_nodelet.cpp
-  "jsk_pcl/TfTransformCloud" "tf_transform_cloud")
-jsk_pcl_util_nodelet_deprecated(src/tf_transform_bounding_box_nodelet.cpp
-  "jsk_pcl/TfTransformBoundingBox" "tf_transform_bounding_box")
-jsk_pcl_util_nodelet_deprecated(src/tf_transform_bounding_box_array_nodelet.cpp
-  "jsk_pcl/TfTransformBoundingBoxArray" "tf_transform_bounding_box_array")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/TfTransformCloud" "tf_transform_cloud")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/TfTransformBoundingBox" "tf_transform_bounding_box")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/TfTransformBoundingBoxArray" "tf_transform_bounding_box_array")
 jsk_pcl_nodelet(src/color_filter_nodelet.cpp
   "jsk_pcl/RGBColorFilter" "rgb_color_filter")
 jsk_pcl_nodelet(src/color_filter_nodelet.cpp
@@ -180,8 +176,7 @@ jsk_pcl_nodelet(src/cluster_point_indices_decomposer_z_axis_nodelet.cpp
   "jsk_pcl/ClusterPointIndicesDecomposerZAxis" "cluster_point_indices_decomposer_z_axis")
 jsk_pcl_nodelet(src/resize_points_publisher_nodelet.cpp
   "jsk_pcl/ResizePointsPublisher" "resize_points_publisher")
-jsk_pcl_util_nodelet_deprecated(src/normal_concatenater_nodelet.cpp
-  "jsk_pcl/NormalConcatenater" "normal_concatenater")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/NormalConcatenater" "normal_concatenater")
 jsk_pcl_nodelet(src/normal_estimation_integral_image_nodelet.cpp
   "jsk_pcl/NormalEstimationIntegralImage" "normal_estimation_integral_image")
 jsk_pcl_nodelet(src/region_growing_segmentation_nodelet.cpp
@@ -193,36 +188,21 @@ jsk_pcl_nodelet(src/multi_plane_extraction_nodelet.cpp
   "jsk_pcl/MultiPlaneExtraction" "multi_plane_extraction")
 jsk_pcl_nodelet(src/selected_cluster_publisher_nodelet.cpp
   "jsk_pcl/SelectedClusterPublisher" "selected_cluster_publisher")
-jsk_pcl_util_nodelet_deprecated(src/polygon_array_distance_likelihood_nodelet.cpp
-  "jsk_pcl/PolygonArrayDistanceLikelihood" "polygon_array_distance_likelihood")
-jsk_pcl_util_nodelet_deprecated(src/polygon_array_area_likelihood_nodelet.cpp
-  "jsk_pcl/PolygonArrayAreaLikelihood" "polygon_array_area_likelihood")
-jsk_pcl_util_nodelet_deprecated(src/polygon_array_angle_likelihood_nodelet.cpp
-  "jsk_pcl/PolygonArrayAngleLikelihood" "polygon_array_angle_likelihood")
-jsk_pcl_util_nodelet_deprecated(src/polygon_array_foot_angle_likelihood_nodelet.cpp
-  "jsk_pcl/PolygonArrayFootAngleLikelihood" "polygon_array_foot_angle_likelihood")
-jsk_pcl_util_nodelet_deprecated(src/pose_with_covariance_stamped_to_gaussian_pointcloud_nodelet.cpp
-  "jsk_pcl/PoseWithCovarianceStampedToGaussianPointCloud" "pose_with_covariance_stamped_to_gaussian_pointcloud")
-jsk_pcl_util_nodelet_deprecated(src/spherical_pointcloud_simulator_nodelet.cpp
-  "jsk_pcl/SphericalPointCloudSimulator" "spherical_pointcloud_simulator")
-jsk_pcl_util_nodelet_deprecated(src/polygon_flipper_nodelet.cpp
-  "jsk_pcl/PolygonFlipper" "polygon_flipper")
-jsk_pcl_util_nodelet_deprecated(src/polygon_points_sampler_nodelet.cpp
-  "jsk_pcl/PolygonPointsSampler" "polygon_points_sampler")
-jsk_pcl_util_nodelet_deprecated(src/polygon_magnifier_nodelet.cpp
-  "jsk_pcl/PolygonMagnifier" "polygon_magnifier")
-jsk_pcl_util_nodelet_deprecated(src/planar_pointcloud_simulator_nodelet.cpp
-  "jsk_pcl/PlanarPointCloudSimulator" "planar_pointcloud_simulator")
-jsk_pcl_util_nodelet_deprecated(src/plane_rejector_nodelet.cpp
-  "jsk_pcl/PlaneRejector" "plane_rejector")
-jsk_pcl_util_nodelet_deprecated(src/pointcloud_to_cluster_point_indices_nodelet.cpp
-  "jsk_pcl/PointCloudToClusterPointIndices" "pointcloud_to_cluster_point_indices")
-jsk_pcl_util_nodelet_deprecated(src/static_polygon_array_publisher_nodelet.cpp
-  "jsk_pcl/StaticPolygonArrayPublisher" "static_polygon_array_publisher")
-jsk_pcl_util_nodelet_deprecated(src/polygon_array_transformer_nodelet.cpp
-  "jsk_pcl/PolygonArrayTransformer" "polygon_array_transformer")
-jsk_pcl_util_nodelet_deprecated(src/pointcloud_to_stl_nodelet.cpp
-  "jsk_pcl/PointCloudToSTL" "pointcloud_to_stl")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PolygonArrayDistanceLikelihood" "polygon_array_distance_likelihood")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PolygonArrayAreaLikelihood" "polygon_array_area_likelihood")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PolygonArrayAngleLikelihood" "polygon_array_angle_likelihood")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PolygonArrayFootAngleLikelihood" "polygon_array_foot_angle_likelihood")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PoseWithCovarianceStampedToGaussianPointCloud" "pose_with_covariance_stamped_to_gaussian_pointcloud")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/SphericalPointCloudSimulator" "spherical_pointcloud_simulator")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PolygonFlipper" "polygon_flipper")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PolygonPointsSampler" "polygon_points_sampler")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PolygonMagnifier" "polygon_magnifier")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PlanarPointCloudSimulator" "planar_pointcloud_simulator")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PlaneRejector" "plane_rejector")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PointCloudToClusterPointIndices" "pointcloud_to_cluster_point_indices")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/StaticPolygonArrayPublisher" "static_polygon_array_publisher")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PolygonArrayTransformer" "polygon_array_transformer")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PointCloudToSTL" "pointcloud_to_stl")
 
 if(ml_classifiers_FOUND)
   jsk_pcl_nodelet(src/colorize_segmented_RF_nodelet.cpp
@@ -234,25 +214,20 @@ jsk_pcl_nodelet(src/environment_plane_modeling_nodelet.cpp
   "jsk_pcl/EnvironmentPlaneModeling" "environment_plane_modeling")
 jsk_pcl_nodelet(src/color_histogram_matcher_nodelet.cpp
   "jsk_pcl/ColorHistogramMatcher" "color_histogram_matcher")
-jsk_pcl_util_nodelet_deprecated(src/polygon_appender_nodelet.cpp
-  "jsk_pcl/PolygonAppender" "polygon_appender")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PolygonAppender" "polygon_appender")
 
 jsk_pcl_nodelet(src/grid_sampler_nodelet.cpp
   "jsk_pcl/GridSampler" "grid_sampler")
 jsk_pcl_nodelet(src/handle_estimator_nodelet.cpp
   "jsk_pcl/HandleEstimator" "handle_estimator")
-jsk_pcl_util_nodelet_deprecated(src/delay_pointcloud_nodelet.cpp
-  "jsk_pcl/DelayPointCloud" "delay_pointcloud")
-jsk_pcl_util_nodelet_deprecated(src/depth_image_error_nodelet.cpp
-  "jsk_pcl/DepthImageError" "depth_image_error")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/DelayPointCloud" "delay_pointcloud")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/DepthImageError" "depth_image_error")
 # jsk_pcl_nodelet(src/organize_pointcloud_nodelet.cpp
 #   "jsk_pcl/OrganizePointCloud" "organize_pointcloud")
 jsk_pcl_nodelet(src/depth_image_creator_nodelet.cpp
   "jsk_pcl/DepthImageCreator" "depth_image_creator")
-jsk_pcl_util_nodelet_deprecated(src/polygon_array_wrapper_nodelet.cpp
-  "jsk_pcl/PolygonArrayWrapper" "polygon_array_wrapper")
-jsk_pcl_util_nodelet_deprecated(src/polygon_array_unwrapper_nodelet.cpp
-  "jsk_pcl/PolygonArrayUnwrapper" "polygon_array_unwrapper")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PolygonArrayWrapper" "polygon_array_wrapper")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PolygonArrayUnwrapper" "polygon_array_unwrapper")
 jsk_pcl_nodelet(src/border_estimator_nodelet.cpp
   "jsk_pcl/BorderEstimator" "border_estimator")
 jsk_pcl_nodelet(src/region_growing_multiple_plane_segmentation_nodelet.cpp
@@ -270,24 +245,20 @@ jsk_pcl_nodelet(src/parallel_edge_finder_nodelet.cpp
   "jsk_pcl/ParallelEdgeFinder" "parallel_edge_finder")
 jsk_pcl_nodelet(src/edgebased_cube_finder_nodelet.cpp
   "jsk_pcl/EdgebasedCubeFinder" "edgebased_cube_finder")
-jsk_pcl_util_nodelet_deprecated(src/colorize_distance_from_plane_nodelet.cpp
-  "jsk_pcl/ColorizeDistanceFromPlane" "colorize_distance_from_plane")
-jsk_pcl_util_nodelet_deprecated(src/colorize_height_2d_mapping_nodelet.cpp
-  "jsk_pcl/ColorizeHeight2DMapping" "colorize_height_2d_mapping")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/ColorizeDistanceFromPlane" "colorize_distance_from_plane")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/ColorizeHeight2DMapping" "colorize_height_2d_mapping")
 jsk_pcl_nodelet(src/multi_plane_sac_segmentation_nodelet.cpp
   "jsk_pcl/MultiPlaneSACSegmentation" "multi_plane_sac_segmentation")
 jsk_pcl_nodelet(src/bounding_box_filter_nodelet.cpp
   "jsk_pcl/BoundingBoxFilter" "bounding_box_filter")
 jsk_pcl_nodelet(src/organized_pass_through_nodelet.cpp
   "jsk_pcl/OrganizedPassThrough" "organized_pass_through")
-jsk_pcl_util_nodelet_deprecated(src/plane_reasoner_nodelet.cpp
-  "jsk_pcl/PlaneReasoner" "plane_reasoner")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PlaneReasoner" "plane_reasoner")
 jsk_pcl_nodelet(src/joint_state_static_filter_nodelet.cpp
   "jsk_pcl/JointStateStaticFilter" "joint_state_static_filter")
 jsk_pcl_nodelet(src/icp_registration_nodelet.cpp
   "jsk_pcl/ICPRegistration" "icp_registration")
-jsk_pcl_util_nodelet_deprecated(src/transform_pointcloud_in_bounding_box_nodelet.cpp
-  "jsk_pcl/TransformPointcloudInBoundingBox" "transform_pointcloud_in_bounding_box")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/TransformPointcloudInBoundingBox" "transform_pointcloud_in_bounding_box")
 jsk_pcl_nodelet(src/pointcloud_database_server_nodelet.cpp
   "jsk_pcl/PointcloudDatabaseServer" "pointcloud_database_server")
 jsk_pcl_nodelet(src/bilateral_filter_nodelet.cpp
@@ -308,14 +279,11 @@ jsk_pcl_nodelet(src/boundingbox_occlusion_rejector_nodelet.cpp
   "jsk_pcl/BoundingBoxOcclusionRejector" "boundingbox_occlusion_rejector")
 jsk_pcl_nodelet(src/roi_clipper_nodelet.cpp
   "jsk_pcl/ROIClipper" "roi_clipper")
-jsk_pcl_util_nodelet_deprecated(src/point_indices_to_mask_image_nodelet.cpp
-  "jsk_pcl/PointIndicesToMaskImage" "point_indices_to_mask_image")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PointIndicesToMaskImage" "point_indices_to_mask_image")
 jsk_pcl_nodelet(src/extract_indices_nodelet.cpp
   "jsk_pcl/ExtractIndices" "extract_indices")
-jsk_pcl_util_nodelet_deprecated(src/mask_image_to_depth_considered_mask_image_nodelet.cpp
-  "jsk_pcl/MaskImageToDepthConsideredMaskImage" "mask_image_to_depth_considered_mask_image")
-jsk_pcl_util_nodelet_deprecated(src/mask_image_to_point_indices_nodelet.cpp
-  "jsk_pcl/MaskImageToPointIndices" "mask_image_to_point_indices")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/MaskImageToDepthConsideredMaskImage" "mask_image_to_depth_considered_mask_image")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/MaskImageToPointIndices" "mask_image_to_point_indices")
 jsk_pcl_nodelet(src/organized_pointcloud_to_point_indices_nodelet.cpp
   "jsk_pcl/OrganizedPointCloudToPointIndices" "organized_pointcloud_to_point_indices")
 jsk_pcl_nodelet(src/hinted_handle_estimator_nodelet.cpp
@@ -332,8 +300,7 @@ jsk_pcl_nodelet(src/incremental_model_registration_nodelet.cpp
   "jsk_pcl/IncrementalModelRegistration" "incremental_model_registration")
 jsk_pcl_nodelet(src/supervoxel_segmentation_nodelet.cpp
   "jsk_pcl/SupervoxelSegmentation" "supervoxel_segmentation")
-jsk_pcl_util_nodelet_deprecated(src/plane_concatenator_nodelet.cpp
-  "jsk_pcl/PlaneConcatenator" "plane_concatenator")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PlaneConcatenator" "plane_concatenator")
 jsk_pcl_nodelet(src/add_color_from_image_nodelet.cpp
   "jsk_pcl/AddColorFromImage" "add_color_from_image")
 jsk_pcl_nodelet(src/torus_finder_nodelet.cpp "jsk_pcl/TorusFinder" "torus_finder")
@@ -341,8 +308,7 @@ jsk_pcl_nodelet(src/mask_image_filter_nodelet.cpp
   "jsk_pcl/MaskImageFilter" "mask_image_filter")
 jsk_pcl_nodelet(src/mask_image_cluster_filter_nodelet.cpp
   "jsk_pcl/MaskImageClusterFilter" "mask_image_cluster_filter")
-jsk_pcl_util_nodelet_deprecated(src/add_point_indices_nodelet.cpp
-  "jsk_pcl/AddPointIndices" "add_point_indices")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/AddPointIndices" "add_point_indices")
 jsk_pcl_nodelet(src/find_object_on_plane_nodelet.cpp "jsk_pcl/FindObjectOnPlane" "find_object_on_plane")
 jsk_pcl_nodelet(src/hinted_stick_finder_nodelet.cpp
   "jsk_pcl/HintedStickFinder" "hinted_stick_finder")
@@ -373,8 +339,7 @@ if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
     "jsk_pcl/Kinfu" "kinfu")
   include_directories(/usr/local/cuda/include)
 endif (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
-jsk_pcl_util_nodelet_deprecated(src/pcd_reader_with_pose_nodelet.cpp
-  "jsk_pcl/PCDReaderWithPose" "pcd_reader_with_pose")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PCDReaderWithPose" "pcd_reader_with_pose")
 jsk_pcl_nodelet(src/octree_voxel_grid_nodelet.cpp
   "jsk_pcl/OctreeVoxelGrid" "octree_voxel_grid")
 # robot_self_filter is released on version greater than indigo
@@ -456,7 +421,6 @@ install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 install(TARGETS jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit
   ${jsk_pcl_nodelet_executables}
-  ${jsk_pcl_util_nodelet_deprecated_executables}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})

@@ -99,8 +99,8 @@ namespace jsk_perception
       for (int i = -kernel_size_; i <= kernel_size_; i++) {
         const int x = center_x + i;
         const int y = center_y + j;
-        if (0 < x && x < img.cols &&
-            0 < y && y < img.rows ) {
+        if (0 <= x && x <= img.cols &&
+            0 <= y && y <= img.rows) {
           d += img.at<float>(y, x);
           ++valid;
         }
@@ -135,16 +135,16 @@ namespace jsk_perception
       const cv::Point A(rect.x, rect.y);
       const cv::Point C(rect.x + rect.width, rect.y + rect.height);
       //const double distance = average_depth.at<double>(center_y, center_x);
-      const double distance = averageDistance(center_x, center_y, depth);
-      cv::Point3d a_ray = camera_model.projectPixelTo3dRay(A);
-      cv::Point3d c_ray = camera_model.projectPixelTo3dRay(C);
+      const double distance = averageDistance(center_x, center_y, depth);  // z [m]
+      cv::Point3d a_ray = camera_model.projectPixelTo3dRay(A);  // (x, y, z) [depth_value]
+      cv::Point3d c_ray = camera_model.projectPixelTo3dRay(C);  // (x, y, z) [depth_value]
       if (a_ray.z != 0.0 && c_ray.z != 0.0) {
-        cv::Point3d a_3d = a_ray * (distance / a_ray.z);
-        cv::Point3d c_3d = c_ray * (distance / c_ray.z);
+        cv::Point3d a_3d = a_ray * (distance / a_ray.z);  // m = depth_value * (m / depth_value)
+        cv::Point3d c_3d = c_ray * (distance / c_ray.z);  // m = depth_value * (m / depth_value)
         const double width = std::abs(a_3d.x - c_3d.x);
         const double height = std::abs(a_3d.y - c_3d.y);
-        if (min_x_ * depth.cols < width && width < max_x_ * depth.cols  &&
-            min_y_ * depth.rows < height && height < max_y_ * depth.rows) {
+        if (min_x_ <= width && width <= max_x_ &&
+            min_y_ <= height && height <= max_y_) {
           result_msg.rects.push_back(rect);
         }
       }

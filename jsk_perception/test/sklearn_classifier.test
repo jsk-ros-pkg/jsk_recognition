@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_bof_object_recognition.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_sklearn_classifier"
+        name="test_sklearn_classifier"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /sklearn_classifier/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

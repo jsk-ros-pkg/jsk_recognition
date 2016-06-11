@@ -56,7 +56,7 @@ namespace jsk_pcl_ros
     DiagnosticNodelet::onInit();
     initialized_ = false;
     tf_listener_ = TfListenerSingleton::getInstance();
-    pnh_->param("parent_frame_id", parent_frame_id_, std::string("map"));
+    pnh_->param("parent_frame_id", parent_frame_id_, std::string(""));
     pnh_->param("child_frame_id", child_frame_id_, std::string("odom"));
     pnh_->param("kinfu_origin_frame_id", kinfu_origin_frame_id_, std::string("kinfu_origin"));
     pcl::gpu::setDevice(0);
@@ -166,14 +166,17 @@ namespace jsk_pcl_ros
                                       ros::Duration(0.1));
         Eigen::Affine3f odom_camera;
         tf::transformTFToEigen(trans, odom_camera);
-        Eigen::Affine3f map = initial_camera_pose_ * K * odom_camera.inverse();
-        tf::Transform map_odom_transform;
-        tf::transformEigenToTF(map, map_odom_transform);
-        tf_broadcaster_.sendTransform(tf::StampedTransform(
-                                                           map_odom_transform,
-                                                           depth_image->header.stamp,
-                                                           parent_frame_id_,
-                                                           child_frame_id_));
+        if (std::string("")!=parent_frame_id_) // if parent_frame_id is set, child_frame_id must be the top of the tf tree.
+        {
+          Eigen::Affine3f map = initial_camera_pose_ * K * odom_camera.inverse();
+          tf::Transform map_odom_transform;
+          tf::transformEigenToTF(map, map_odom_transform);
+          tf_broadcaster_.sendTransform(tf::StampedTransform(
+                                                             map_odom_transform,
+                                                             depth_image->header.stamp,
+                                                             parent_frame_id_,
+                                                             child_frame_id_));
+        }
         tf::Transform kinfu_origin;
         Eigen::Affine3f inverse_camera_pose = camera_pose.inverse();
         tf::transformEigenToTF(inverse_camera_pose, kinfu_origin);

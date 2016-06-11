@@ -53,8 +53,10 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
         use_mask = rospy.get_param('~use_mask', False)
         if use_mask:
             queue_size = rospy.get_param('~queue_size', 10)
-            sub_img = message_filters.Subscriber('~input', Image)
-            sub_mask = message_filters.Subscriber('~input/mask', Image)
+            sub_img = message_filters.Subscriber(
+                '~input', Image, queue_size=1, buff_size=2**24)
+            sub_mask = message_filters.Subscriber(
+                '~input/mask', Image, queue_size=1, buff_size=2**24)
             self.subs = [sub_img, sub_mask]
             if rospy.get_param('~approximate_sync', False):
                 slop = rospy.get_param('~slop', 0.1)
@@ -65,7 +67,10 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
                     fs=self.subs, queue_size=queue_size)
             sync.registerCallback(self._cb_with_mask)
         else:
-            sub_img = rospy.Subscriber('~input', Image, self._cb)
+            # larger buff_size is necessary for taking time callback
+            # http://stackoverflow.com/questions/26415699/ros-subscriber-not-up-to-date/29160379#29160379  # NOQA
+            sub_img = rospy.Subscriber(
+                '~input', Image, self._cb, queue_size=1, buff_size=2**24)
             self.subs = [sub_img]
 
     def unsubscribe(self):

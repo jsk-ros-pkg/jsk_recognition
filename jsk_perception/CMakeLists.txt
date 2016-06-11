@@ -348,6 +348,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_perception_add_rostest(test/tile_image.test)
     jsk_perception_add_rostest(test/label_image_decomposer.test)
     # FIXME: Does not work on Travis/Jenkins
+    # jsk_perception_add_rostest(test/fcn_object_segmentation.test)
     # jsk_perception_add_rostest(test/vgg16_object_recognition.test install_trained_data)
     if(TARGET bing)
       jsk_perception_add_rostest(test/bing.test)

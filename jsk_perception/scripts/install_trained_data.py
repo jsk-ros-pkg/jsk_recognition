@@ -68,6 +68,14 @@ def main():
         md5='4a48c2f39234e46937759f4cc43bb257',
     )
 
+    # node_scripts/fcn_object_segmentation.py
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/fcn8s_from_caffe.chainermodel',
+        url = 'https://drive.google.com/uc?id=0B9P1L--7Wd2vTXU0QzUwSkVwOFk',
+        md5 = 'a1083db5a47643b112af69bfa59954f9',
+    )
+
 
 if __name__ == '__main__':
     main()

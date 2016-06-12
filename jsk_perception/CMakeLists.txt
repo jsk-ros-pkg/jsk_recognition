@@ -279,6 +279,8 @@ add_custom_target(eusmodel_template ALL DEPENDS
   ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng8.launch
   ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng2.launch)
 
+# download and install sample data
+add_custom_target(install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
 # download and install trained data
 add_custom_target(install_trained_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_trained_data.py)
 

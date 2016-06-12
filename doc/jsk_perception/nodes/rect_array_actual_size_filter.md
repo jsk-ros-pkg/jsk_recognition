@@ -33,4 +33,10 @@ Sample is `selective_search_depth_image_filter.launch`.
 * `~min_y`
 * `~max_y`
 
-  Minimum and maximum size of x and y axis.
+  Minimum and maximum size of x (width) and y (height) axis in meter unit.
+
+## Sample
+
+```bash
+roslaunch jsk_perception sample_rect_array_actual_size_filter.launch
+```

@@ -18,14 +18,14 @@ env:
     - USE_JENKINS=true
   matrix:
     - ROS_DISTRO=hydro  USE_DEB=false CATKIN_TOOLS_BUILD_OPTIONS="-iv --summarize --no-status --no-color"
-    - ROS_DISTRO=indigo USE_DEB=true
-    - ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_released_testing.bash' ROS_REPOSITORY_PATH="http://packages.ros.org/ros/ubuntu"
-    - ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_opencv3.bash'
-    - ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_pcl1.8.bash'
+    - ROS_DISTRO=indigo USE_DEB=true NUMBER_OF_LOGS=12
+    - ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_released_testing.bash' ROS_REPOSITORY_PATH="http://packages.ros.org/ros/ubuntu" NUMBER_OF_LOGS=12
+    - ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_opencv3.bash' NUMBER_OF_LOGS=12
+    - ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_pcl1.8.bash' NUMBER_OF_LOGS=12
     - ROS_DISTRO=jade   USE_DEB=false
 matrix:
   allow_failures:
-    - env: ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_opencv3.bash'
+    - env: ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_opencv3.bash' NUMBER_OF_LOGS=12
 script:
   - source .travis/travis.sh
   - (cd doc && source setup.sh && make html)

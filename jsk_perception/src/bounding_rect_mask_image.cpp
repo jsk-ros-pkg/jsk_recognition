@@ -73,6 +73,11 @@ namespace jsk_perception
     cv::vector<cv::vector<cv::Point> > contours;
     cv::findContours(mask, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 
+    if (contours.size() == 0) {
+      NODELET_ERROR_THROTTLE(30, "[%s] Skipping because no contour is found", __PRETTY_FUNCTION__);
+      return;
+    }
+
     // Find max area to create mask later
     boost::tuple<int, double> max_area;
     for (size_t i = 0; i < contours.size(); i++) {

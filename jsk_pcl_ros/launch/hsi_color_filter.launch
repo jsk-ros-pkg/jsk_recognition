@@ -35,6 +35,7 @@
       <remap from="~output" to="$(arg OUTPUT)" />
       <rosparam>
         use_indices: false
+        keep_organized: true
       </rosparam>
       <param name="h_limit_max" value="$(arg h_max)" />
       <param name="h_limit_min" value="$(arg h_min)" />

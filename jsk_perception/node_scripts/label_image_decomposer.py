@@ -4,7 +4,6 @@
 import numpy as np
 from skimage.color import gray2rgb
 from skimage.color import label2rgb
-from skimage.segmentation import mark_boundaries
 
 import cv_bridge
 from jsk_recognition_utils import bounding_rect_of_mask
@@ -82,7 +81,6 @@ class LabelImageDecomposer(ConnectionBasedTransport):
             img = (img - min_value) / (max_value - min_value) * 255
             img = gray2rgb(img)
         label_viz_img = label2rgb(label_img, img, bg_label=0)
-        label_viz_img = mark_boundaries(label_viz_img, label_img, (1, 0, 0))
         label_viz_img = (label_viz_img * 255).astype(np.uint8)
         label_viz_msg = bridge.cv2_to_imgmsg(label_viz_img, encoding='rgb8')
         label_viz_msg.header = img_msg.header

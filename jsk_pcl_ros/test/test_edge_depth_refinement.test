@@ -1,0 +1,15 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_edge_depth_refinement.launch"/>
+
+  <test test-name="test_edge_depth_refinement"
+        name="test_edge_depth_refinement"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="360" retry="3">
+    <rosparam>
+      topic_0: /edge_depth_refinement/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

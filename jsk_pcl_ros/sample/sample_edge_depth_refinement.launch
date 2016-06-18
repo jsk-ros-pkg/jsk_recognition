@@ -1,0 +1,29 @@
+<launch>
+
+  <param name="/use_sim_time" value="true"/>
+  <rosparam command="load"
+            file="$(find jsk_pcl_ros)/test_data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/rosparam.yaml" />
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/test_data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/vision.compressed.bag --clock --loop">
+  </node>
+
+  <arg name="INPUT_CLOUD" value="/kinect2_head/hd/points" />
+
+  <node name="edge_depth_refinement_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager" />
+
+  <node name="edge_detector"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/OrganizedEdgeDetector edge_depth_refinement_manager">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+  </node>
+  <node name="edge_depth_refinement"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/EdgeDepthRefinement edge_depth_refinement_manager">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <remap from="~input_indices" to="/edge_detector/output_straight_edges_indices" />
+  </node>
+
+</launch>

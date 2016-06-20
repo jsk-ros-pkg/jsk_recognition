@@ -1,0 +1,22 @@
+<launch>
+  <arg name="INPUT_CLOUD" value="/kinect2_head/hd/points" />
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_convex_connected_voxels.launch">
+    <arg name="INPUT_CLOUD" value="$(arg INPUT_CLOUD)" />
+  </include>
+
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/test_data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/vision.compressed.bag --clock --loop">
+  </node>
+
+  <test test-name="test_convex_connected_voxels"
+      name="test_convex_connected_voxels"
+      pkg="jsk_tools" type="test_topic_published.py">
+    <rosparam>
+      topic_0: /sample_convex_connected_voxels/output/indices
+      timeout_0: 100
+    </rosparam>
+  </test>
+
+</launch>

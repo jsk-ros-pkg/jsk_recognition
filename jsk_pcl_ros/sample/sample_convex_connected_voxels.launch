@@ -1,0 +1,30 @@
+<launch>
+  <arg name="INPUT_CLOUD" />
+  <node name="sample_supervoxel_segmentation"
+      type="nodelet" pkg="nodelet"
+      args="standalone jsk_pcl/SupervoxelSegmentation">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <rosparam>
+      color_importance: 0.2
+      spatial_importance: 0.4
+      normal_importance: 1.0
+      voxel_resolution: 0.01
+      seed_resolution: 0.1
+    </rosparam>
+  </node>
+  <node name="sample_convex_connected_voxels"
+      type="nodelet" pkg="nodelet"
+      args="standalone jsk_pcl/ConvexConnectedVoxels">
+    <remap from="~input/indices" to="sample_supervoxel_segmentation/output/indices" />
+    <remap from="~input/cloud" to="sample_supervoxel_segmentation/output/cloud" />
+  </node>
+  <node name="sample_cpi_decomposer"
+      type="nodelet" pkg="nodelet"
+      args="standalone jsk_pcl/ClusterPointIndicesDecomposer">
+    <remap from="~input" to="sample_supervoxel_segmentation/output/cloud" />
+    <remap from="~target" to="sample_convex_connected_voxels/output/indices"/>
+    <rosparam>
+      queue_size: 1000
+    </rosparam>
+  </node>
+</launch>

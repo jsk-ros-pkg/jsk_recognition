@@ -4,8 +4,8 @@
 Merges the voxels initially segmented using SuperVoxel Segmentation into high level object representations by merging the voxels based on convexity measurements.
 
 ## Subscribing Topics
-* `~input` (`jsk_recognition_msgs/ClusterPointIndices`)
-* `~input` (`sensor_msgs/PointCloud2`)
+* `~input/indices` (`jsk_recognition_msgs/ClusterPointIndices`)
+* `~input/cloud` (`sensor_msgs/PointCloud2`)
 
   Input is set of voxel indices and point cloud from the supervoxel_segmentation nodelet
 

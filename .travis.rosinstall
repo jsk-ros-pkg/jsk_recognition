@@ -1,7 +1,7 @@
 - git:
     uri: https://github.com/jsk-ros-pkg/jsk_common.git
     local-name: jsk-ros-pkg/jsk_common
-    version: master
+    version: 2.0.16
 # - git:
 #     uri: https://github.com/jsk-ros-pkg/jsk_roseus.git
 #     local-name: jsk-ros-pkg/jsk_roseus

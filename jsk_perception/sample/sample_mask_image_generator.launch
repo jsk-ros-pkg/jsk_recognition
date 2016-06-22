@@ -5,7 +5,7 @@
   <node name="image_publisher"
         pkg="jsk_perception" type="image_publisher.py">
     <rosparam subst_value="true">
-      file_name: $(find jsk_perception)/sample/laugh_out_loud_joke_book.jpg
+      file_name: $(find jsk_perception)/sample/image/laugh_out_loud_joke_book.jpg
     </rosparam>
   </node>
 
@@ -13,10 +13,10 @@
         pkg="jsk_perception" type="mask_image_generator">
     <remap from="~input" to="image_publisher/output" />
     <rosparam>
-      offset_x: 100
-      offset_y: 200
-      width: 256
-      height: 256
+      offset_x: 50
+      offset_y: 100
+      width: 128
+      height: 128
     </rosparam>
   </node>
 

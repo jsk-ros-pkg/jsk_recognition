@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
+from threading import Lock
 
 import cv2
 import numpy as np
@@ -12,6 +13,7 @@ import rospy
 
 from jsk_perception.cfg import ImagePublisherConfig
 from jsk_topic_tools import jsk_logerr
+from jsk_topic_tools import jsk_loginfo
 from jsk_topic_tools import jsk_logwarn
 from sensor_msgs.msg import CameraInfo
 from sensor_msgs.msg import Image
@@ -20,31 +22,54 @@ from sensor_msgs.msg import Image
 class ImagePublisher(object):
 
     def __init__(self):
-        dynamic_reconfigure.server.Server(
-            ImagePublisherConfig, self._cb_dyn_reconfig)
+        self.lock = Lock()
+        self.imgmsg = None
         self.encoding = rospy.get_param('~encoding', 'bgr8')
         self.frame_id = rospy.get_param('~frame_id', 'camera')
+        dynamic_reconfigure.server.Server(
+            ImagePublisherConfig, self._cb_dyn_reconfig)
         self.pub = rospy.Publisher('~output', Image, queue_size=1)
         self.publish_info = rospy.get_param('~publish_info', True)
         if self.publish_info:
             self.pub_info = rospy.Publisher(
                 '~output/camera_info', CameraInfo, queue_size=1)
+        rate = rospy.get_param('~rate', 1.)
+        rospy.Timer(rospy.Duration(1. / rate), self.publish)
 
     def _cb_dyn_reconfig(self, config, level):
-        self.file_name = config['file_name']
-        config['file_name'] = os.path.abspath(self.file_name)
+        file_name = config['file_name']
+        config['file_name'] = os.path.abspath(file_name)
+        img_bgr = cv2.imread(file_name)
+        if img_bgr is None:
+            jsk_logwarn('Could not read image file: {}'.format(file_name))
+            with self.lock:
+                self.imgmsg = None
+        else:
+            jsk_loginfo('Read the image file: {}'.format(file_name))
+            with self.lock:
+                self.imgmsg = self.cv2_to_imgmsg(img_bgr, self.encoding)
         return config
 
-    def publish(self):
-        now = rospy.Time.now()
-        bridge = cv_bridge.CvBridge()
-        img_bgr = cv2.imread(self.file_name)
-        if img_bgr is None:
-            jsk_logwarn('cannot read the image at {}'
-                        .format(self.file_name))
+    def publish(self, event):
+        if self.imgmsg is None:
             return
+        now = rospy.Time.now()
+        # setup ros message and publish
+        with self.lock:
+            self.imgmsg.header.stamp = now
+            self.imgmsg.header.frame_id = self.frame_id
+        self.pub.publish(self.imgmsg)
+        if self.publish_info:
+            info = CameraInfo()
+            info.header.stamp = now
+            info.header.frame_id = self.frame_id
+            info.width = self.imgmsg.width
+            info.height = self.imgmsg.height
+            self.pub_info.publish(info)
+
+    def cv2_to_imgmsg(self, img_bgr, encoding):
+        bridge = cv_bridge.CvBridge()
         # resolve encoding
-        encoding = rospy.get_param('~encoding', 'bgr8')
         if getCvType(encoding) == 0:
             # mono8
             img = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
@@ -69,24 +94,10 @@ class ImagePublisher(object):
         else:
             jsk_logerr('unsupported encoding: {0}'.format(encoding))
             return
-        # setup ros message and publish
-        imgmsg = bridge.cv2_to_imgmsg(img, encoding=encoding)
-        imgmsg.header.stamp = now
-        imgmsg.header.frame_id = self.frame_id
-        self.pub.publish(imgmsg)
-        if self.publish_info:
-            info = CameraInfo()
-            info.header.stamp = now
-            info.header.frame_id = self.frame_id
-            info.width = imgmsg.width
-            info.height = imgmsg.height
-            self.pub_info.publish(info)
+        return bridge.cv2_to_imgmsg(img, encoding=encoding)
 
 
 if __name__ == '__main__':
     rospy.init_node('image_publisher')
-    rate = rospy.Rate(rospy.get_param('rate', 1))
-    img_pub = ImagePublisher()
-    while not rospy.is_shutdown():
-        img_pub.publish()
-        rate.sleep()
+    ImagePublisher()
+    rospy.spin()

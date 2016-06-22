@@ -4,12 +4,12 @@
 
   <node name="raw_image"
         pkg="jsk_perception" type="image_publisher.py">
-    <param name="~file_name" value="$(find jsk_perception)/sample/laugh_out_loud_joke_book.jpg" />
+    <param name="~file_name" value="$(find jsk_perception)/sample/image/laugh_out_loud_joke_book.jpg" />
   </node>
 
   <node name="mask_image"
         pkg="jsk_perception" type="image_publisher.py">
-    <param name="~file_name" value="$(find jsk_perception)/sample/laugh_out_loud_joke_book_mask.jpg" />
+    <param name="~file_name" value="$(find jsk_perception)/sample/image/laugh_out_loud_joke_book_mask.jpg" />
   </node>
 
   <node name="label_image"

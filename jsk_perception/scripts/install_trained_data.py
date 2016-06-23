@@ -1,11 +1,26 @@
 #!/usr/bin/env python
 
+import argparse
+import multiprocessing
 import os.path as osp
 
-from jsk_data import download_data
+import jsk_data
+
+
+def download_data(*args, **kwargs):
+    p = multiprocessing.Process(
+            target=jsk_data.download_data,
+            args=args,
+            kwargs=kwargs)
+    p.start()
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-v', '--verbose', dest='quiet', action='store_false')
+    args = parser.parse_args()
+    quiet = args.quiet
+
     PKG = 'jsk_perception'
 
     download_data(
@@ -13,6 +28,7 @@ def main():
         path='trained_data/drill_svm.xml',
         url='https://drive.google.com/uc?id=0B5hRAGKTOm_KWW11R0FTX0xjTDg',
         md5='762d0da4bcbf50e0e92939372988901a',
+        quiet=quiet,
     )
 
     download_data(
@@ -20,12 +36,14 @@ def main():
         path='trained_data/apc2015_sample_bof.pkl.gz',
         url='https://drive.google.com/uc?id=0B9P1L--7Wd2vemVRaDBOWDVpb28',
         md5='97eb737f71a33bfc23ec573f1d351bd8',
+        quiet=quiet,
     )
     download_data(
         pkg_name=PKG,
         path='trained_data/apc2015_sample_clf.pkl.gz',
         url='https://drive.google.com/uc?id=0B9P1L--7Wd2veFY5ZFNqbzAzNmc',
         md5='25e396358e9d7bfd1bd08334953fc287',
+        quiet=quiet,
     )
 
     files = [
@@ -46,6 +64,7 @@ def main():
             path=osp.join('trained_data/ObjectnessTrainedModel/', fname),
             url=osp.join(dirname, fname),
             md5=md5,
+            quiet=quiet,
         )
 
     # node_scripts/fast_rcnn.py
@@ -54,18 +73,21 @@ def main():
         path='trained_data/vgg16_fast_rcnn.chainermodel',
         url='https://drive.google.com/uc?id=0B9P1L--7Wd2vX015UzB4aC13cVk',
         md5='5ae12288962e96124cce212fd3f18cad',
+        quiet=quiet,
     )
     download_data(
         pkg_name=PKG,
         path='trained_data/vgg_cnn_m_1024.chainermodel',
         url='https://drive.google.com/uc?id=0B9P1L--7Wd2vZzJuaFRIdDMtLWc',
         md5='eb33103e36f299b4433c63fcfc165cbd',
+        quiet=quiet,
     )
     download_data(
         pkg_name=PKG,
         path='trained_data/vgg16_bn_apc2015_496000.chainermodel',
         url='https://drive.google.com/uc?id=0B9P1L--7Wd2vQ2tCN1hoYV84eHM',
         md5='4a48c2f39234e46937759f4cc43bb257',
+        quiet=quiet,
     )
 
 

@@ -1,0 +1,50 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <param name="/use_sim_time" value="true" />
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/test_data/2016-06-24-17-43-57_tabletop.bag --clock --loop">
+  </node>
+
+  <node name="cluster_point_indices_decomposer"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ClusterPointIndicesDecomposer">
+    <remap from="~input" to="/plane_extraction_left_hand_camera/output" />
+    <remap from="~target" to="/euclid_clustering_left_table/output" />
+  </node>
+
+  <node name="cluster_point_indices_decomposer_align_boxes_with_plane"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ClusterPointIndicesDecomposer">
+    <remap from="~input" to="/plane_extraction_left_hand_camera/output" />
+    <remap from="~target" to="/euclid_clustering_left_table/output" />
+    <remap from="~align_planes" to="/multi_plane_estimate_left_hand_camera/output_refined_polygon" />
+    <remap from="~align_planes_coefficients" to="/multi_plane_estimate_left_hand_camera/output_refined_coefficients" />
+    <rosparam>
+      align_boxes: true
+      align_boxes_with_plane: true
+    </rosparam>
+  </node>
+
+  <node name="cluster_point_indices_decomposer_align_boxes_with_frame"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ClusterPointIndicesDecomposer" output="screen">
+    <remap from="~input" to="/plane_extraction_left_hand_camera/output" />
+    <remap from="~target" to="/euclid_clustering_left_table/output" />
+    <rosparam>
+      align_boxes: true
+      align_boxes_with_plane: false
+      target_frame_id: base
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+      pkg="rviz" type="rviz"
+      args="-d $(find jsk_pcl_ros)/sample/rviz/cluster_point_indices_decomposer.rviz">
+    </node>
+  </group>
+
+</launch>

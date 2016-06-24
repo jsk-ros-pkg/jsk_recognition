@@ -1,0 +1,21 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_cluster_point_indices_decomposer.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_cluster_point_indices_decomposer"
+        name="test_cluster_point_indices_decomposer"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /cluster_point_indices_decomposer/boxes
+      timeout_0: 30
+      topic_1: /cluster_point_indices_decomposer_align_boxes_with_plane/boxes
+      timeout_1: 30
+      topic_2: /cluster_point_indices_decomposer_align_boxes_with_frame/boxes
+      timeout_2: 30
+    </rosparam>
+  </test>
+
+</launch>

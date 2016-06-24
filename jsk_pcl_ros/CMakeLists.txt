@@ -417,6 +417,9 @@ catkin_package(
     LIBRARIES jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit
 )
 
+# download and install sample data
+add_custom_target(install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
+
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 install(TARGETS jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit
@@ -445,6 +448,7 @@ if (CATKIN_ENABLE_TESTING)
   if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
     # because of unreleased topic_tools/transform on hydro
     add_rostest(test/test_attention_clipper.test DEPENDENCIES install_test_data)
+    add_rostest(test/test_cluster_point_indices_decomposer.test)
     add_rostest(test/test_euclidean_segmentation.test DEPENDENCIES install_test_data)
     add_rostest(test/test_pointcloud_database_server.test DEPENDENCIES install_test_data)
   endif()

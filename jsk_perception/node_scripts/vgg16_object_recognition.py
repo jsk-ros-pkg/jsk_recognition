@@ -14,6 +14,7 @@ import cv_bridge
 from jsk_topic_tools import ConnectionBasedTransport
 from jsk_recognition_utils.chainermodels import VGG16BatchNormalization
 from jsk_recognition_msgs.msg import ClassificationResult
+import message_filters
 import rospy
 from sensor_msgs.msg import Image
 
@@ -44,14 +45,33 @@ class VGG16ObjectRecognition(ConnectionBasedTransport):
             '~debug/net_input', Image, queue_size=1)
 
     def subscribe(self):
-        self.sub = rospy.Subscriber('~input', Image, self._recognize)
+        if rospy.get_param('~use_mask', False):
+            sub = message_filters.Subscriber('~input', Image)
+            sub_mask = message_filters.Subscriber('~input/mask', Image)
+            self.subs = [sub, sub_mask]
+            queue_size = rospy.get_param('~queue_size', 10)
+            if rospy.get_param('~approximate_sync', False):
+                slop = rospy.get_param('~slop', 0.1)
+                sync = message_filters.ApproximateTimeSynchronizer(
+                    self.subs, queue_size=queue_size, slop=slop)
+            else:
+                sync = message_filters.TimeSynchronizer(
+                    self.subs, queue_size=queue_size)
+            sync.registerCallback(self._recognize)
+        else:
+            sub = rospy.Subscriber('~input', Image, self._recognize, callback_args=None)
+            self.subs = [sub]
 
     def unsubscribe(self):
-        self.sub.unregister()
+        for sub in self.subs:
+            sub.unregister()
 
-    def _recognize(self, imgmsg):
+    def _recognize(self, imgmsg, mask_msg=None):
         bridge = cv_bridge.CvBridge()
         bgr = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='bgr8')
+        if mask_msg is not None:
+            mask = bridge.imgmsg_to_cv2(mask_msg)
+            bgr[mask == 0] = self.mean_bgr
         bgr = skimage.transform.resize(bgr, (224, 224), preserve_range=True)
         input_msg = bridge.cv2_to_imgmsg(bgr.astype(np.uint8), encoding='bgr8')
         input_msg.header = imgmsg.header

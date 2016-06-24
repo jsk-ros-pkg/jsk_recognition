@@ -417,6 +417,9 @@ catkin_package(
     LIBRARIES jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit
 )
 
+# download and install sample data
+add_custom_target(install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
+
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 install(TARGETS jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit

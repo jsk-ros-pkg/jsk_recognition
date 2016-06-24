@@ -448,6 +448,7 @@ if (CATKIN_ENABLE_TESTING)
   if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
     # because of unreleased topic_tools/transform on hydro
     add_rostest(test/test_attention_clipper.test DEPENDENCIES install_test_data)
+    add_rostest(test/test_cluster_point_indices_decomposer.test)
     add_rostest(test/test_euclidean_segmentation.test DEPENDENCIES install_test_data)
     add_rostest(test/test_pointcloud_database_server.test DEPENDENCIES install_test_data)
   endif()

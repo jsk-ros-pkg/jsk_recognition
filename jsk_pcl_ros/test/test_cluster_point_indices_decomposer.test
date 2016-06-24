@@ -9,10 +9,12 @@
         pkg="jsk_tools" type="test_topic_published.py"
         retry="3">
     <rosparam>
-      topic_0: /cluster_point_indices_decomposer_align_boxes_with_plane/boxes
+      topic_0: /cluster_point_indices_decomposer/boxes
       timeout_0: 30
-      topic_1: /cluster_point_indices_decomposer_not_align_boxes_with_plane/boxes
+      topic_1: /cluster_point_indices_decomposer_align_boxes_with_plane/boxes
       timeout_1: 30
+      topic_2: /cluster_point_indices_decomposer_align_boxes_with_frame/boxes
+      timeout_2: 30
     </rosparam>
   </test>
 

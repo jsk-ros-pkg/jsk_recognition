@@ -8,6 +8,13 @@
         args="$(find jsk_pcl_ros)/test_data/2016-06-24-17-43-57_tabletop.bag --clock --loop">
   </node>
 
+  <node name="cluster_point_indices_decomposer"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ClusterPointIndicesDecomposer">
+    <remap from="~input" to="/plane_extraction_left_hand_camera/output" />
+    <remap from="~target" to="/euclid_clustering_left_table/output" />
+  </node>
+
   <node name="cluster_point_indices_decomposer_align_boxes_with_plane"
         pkg="nodelet" type="nodelet"
         args="standalone jsk_pcl/ClusterPointIndicesDecomposer">
@@ -21,13 +28,15 @@
     </rosparam>
   </node>
 
-  <node name="cluster_point_indices_decomposer_not_align_boxes_with_plane"
+  <node name="cluster_point_indices_decomposer_align_boxes_with_frame"
         pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/ClusterPointIndicesDecomposer">
+        args="standalone jsk_pcl/ClusterPointIndicesDecomposer" output="screen">
     <remap from="~input" to="/plane_extraction_left_hand_camera/output" />
     <remap from="~target" to="/euclid_clustering_left_table/output" />
     <rosparam>
-      align_boxes: false
+      align_boxes: true
+      align_boxes_with_plane: false
+      target_frame_id: base
     </rosparam>
   </node>
 

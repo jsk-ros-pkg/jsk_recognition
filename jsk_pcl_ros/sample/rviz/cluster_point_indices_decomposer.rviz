@@ -7,6 +7,7 @@ Panels:
         - /Global Options1
         - /BoxesWithoutAlignment1
         - /BoxesWithAlignment1
+        - /BoxesWithAlignment2
       Splitter Ratio: 0.331288
     Tree Height: 848
   - Class: rviz/Selection
@@ -94,7 +95,7 @@ Visualization Manager:
     - Class: jsk_rviz_plugin/BoundingBoxArray
       Enabled: true
       Name: BoxesWithoutAlignment
-      Topic: /cluster_point_indices_decomposer_not_align_boxes_with_plane/boxes
+      Topic: /cluster_point_indices_decomposer/boxes
       Unreliable: false
       Value: true
       alpha: 0.8
@@ -111,6 +112,18 @@ Visualization Manager:
       Value: true
       alpha: 0.8
       color: 255; 0; 0
+      coloring: Flat color
+      line width: 0.005
+      only edge: true
+      show coords: false
+    - Class: jsk_rviz_plugin/BoundingBoxArray
+      Enabled: true
+      Name: BoxesWithAlignment
+      Topic: /cluster_point_indices_decomposer_align_boxes_with_frame/boxes
+      Unreliable: false
+      Value: true
+      alpha: 0.8
+      color: 85; 0; 255
       coloring: Flat color
       line width: 0.005
       only edge: true
@@ -139,22 +152,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.94173
+      Distance: 1.58488
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 1.64658
-        Y: -0.310027
-        Z: -0.255986
+        X: 2.06738
+        Y: 0.244749
+        Z: -0.461079
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.1148
+      Pitch: 0.3548
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 1.80996
+      Yaw: 2.38997
     Saved: ~
 Window Geometry:
   Displays:

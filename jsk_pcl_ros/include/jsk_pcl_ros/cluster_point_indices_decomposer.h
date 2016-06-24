@@ -42,6 +42,7 @@
 #include "jsk_recognition_msgs/ClusterPointIndices.h"
 #include "jsk_recognition_msgs/PolygonArray.h"
 #include "jsk_recognition_msgs/ModelCoefficientsArray.h"
+#include "jsk_recognition_utils/tf_listener_singleton.h"
 
 #include "sensor_msgs/PointCloud2.h"
 #include <dynamic_reconfigure/server.h>
@@ -107,6 +108,14 @@ namespace jsk_pcl_ros
      const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients,
      jsk_recognition_msgs::BoundingBox& bounding_box);
 
+    virtual bool transformPointCloudToAlignWithPlane(
+      const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud_transformed,
+      const Eigen::Vector4f center,
+      const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
+      const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients,
+      Eigen::Matrix4f& m4,
+      Eigen::Quaternionf& q);
     
     virtual int findNearestPlane(const Eigen::Vector4f& center,
                                  const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
@@ -149,6 +158,9 @@ namespace jsk_pcl_ros
     bool publish_clouds_;
     bool publish_tf_;
     bool align_boxes_;
+    bool align_boxes_with_plane_;
+    std::string target_frame_id_;
+    tf::TransformListener* tf_listener_;
     bool use_pca_;
     int max_size_;
     int min_size_;

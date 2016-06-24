@@ -80,6 +80,17 @@ namespace jsk_pcl_ros
       JSK_ROS_WARN("~output%%02d are not published before subscribed, you should subscribe ~debug_output in debuging.");
     }
     pnh_->param("align_boxes", align_boxes_, false);
+    if (align_boxes_) {
+      pnh_->param("align_boxes_with_plane", align_boxes_with_plane_, true);
+    }
+    if (align_boxes_ && !align_boxes_with_plane_) {
+      tf_listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
+      if (!pnh_->getParam("target_frame_id", target_frame_id_)) {
+        JSK_ROS_FATAL("~target_frame_id is not specified");
+        return;
+      }
+      JSK_ROS_INFO("Aligning bboxes with '%s' using tf transform.", target_frame_id_.c_str());
+    }
     pnh_->param("use_pca", use_pca_, false);
     pnh_->param("force_to_flip_z_axis", force_to_flip_z_axis_, true);
     // dynamic_reconfigure
@@ -109,7 +120,7 @@ namespace jsk_pcl_ros
   {
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_target_.subscribe(*pnh_, "target", 1);
-    if (align_boxes_) {
+    if (align_boxes_ && align_boxes_with_plane_) {
       sync_align_ = boost::make_shared<message_filters::Synchronizer<SyncAlignPolicy> >(queue_size_);
       sub_polygons_.subscribe(*pnh_, "align_planes", 1);
       sub_coefficients_.subscribe(*pnh_, "align_planes_coefficients", 1);
@@ -132,7 +143,7 @@ namespace jsk_pcl_ros
   {
     sub_input_.unsubscribe();
     sub_target_.unsubscribe();
-    if (align_boxes_) {
+    if (align_boxes_ && align_boxes_with_plane_) {
       sub_polygons_.unsubscribe();
       sub_coefficients_.unsubscribe();
     }
@@ -200,6 +211,96 @@ namespace jsk_pcl_ros
     return nearest_index;
   }
 
+  bool ClusterPointIndicesDecomposer::transformPointCloudToAlignWithPlane(
+    const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud_transformed,
+    const Eigen::Vector4f center,
+    const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
+    const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients,
+    Eigen::Matrix4f& m4,
+    Eigen::Quaternionf& q)
+  {
+    int nearest_plane_index = findNearestPlane(center, planes, coefficients);
+    if (nearest_plane_index == -1) {
+      segmented_cloud_transformed = segmented_cloud;
+      JSK_NODELET_ERROR("no planes to align boxes are given");
+    }
+    else {
+      Eigen::Vector3f normal, z_axis;
+      if (force_to_flip_z_axis_) {
+        normal[0] = - coefficients->coefficients[nearest_plane_index].values[0];
+        normal[1] = - coefficients->coefficients[nearest_plane_index].values[1];
+        normal[2] = - coefficients->coefficients[nearest_plane_index].values[2];
+      }
+      else {
+        normal[0] = coefficients->coefficients[nearest_plane_index].values[0];
+        normal[1] = coefficients->coefficients[nearest_plane_index].values[1];
+        normal[2] = coefficients->coefficients[nearest_plane_index].values[2];
+      }
+      normal = normal.normalized();
+      Eigen::Quaternionf rot;
+      rot.setFromTwoVectors(Eigen::Vector3f::UnitZ(), normal);
+      Eigen::AngleAxisf rotation_angle_axis(rot);
+      Eigen::Vector3f rotation_axis = rotation_angle_axis.axis();
+      double theta = rotation_angle_axis.angle();
+      if (isnan(theta) ||
+          isnan(rotation_axis[0]) ||
+          isnan(rotation_axis[1]) ||
+          isnan(rotation_axis[2])) {
+        segmented_cloud_transformed = segmented_cloud;
+        JSK_NODELET_ERROR("cannot compute angle to align the point cloud: [%f, %f, %f], [%f, %f, %f]",
+                      z_axis[0], z_axis[1], z_axis[2],
+                      normal[0], normal[1], normal[2]);
+      }
+      else {
+        Eigen::Matrix3f m = Eigen::Matrix3f::Identity() * rot;
+        if (use_pca_) {
+          // first project points to the plane
+          pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud
+            (new pcl::PointCloud<pcl::PointXYZRGB>);
+          pcl::ProjectInliers<pcl::PointXYZRGB> proj;
+          proj.setModelType (pcl::SACMODEL_PLANE);
+          pcl::ModelCoefficients::Ptr
+            plane_coefficients (new pcl::ModelCoefficients);
+          plane_coefficients->values
+            = coefficients->coefficients[nearest_plane_index].values;
+          proj.setModelCoefficients(plane_coefficients);
+          proj.setInputCloud(segmented_cloud);
+          proj.filter(*projected_cloud);
+          if (projected_cloud->points.size() >= 3) {
+            pcl::PCA<pcl::PointXYZRGB> pca;
+            pca.setInputCloud(projected_cloud);
+            Eigen::Matrix3f eigen = pca.getEigenVectors();
+            m.col(0) = eigen.col(0);
+            m.col(1) = eigen.col(1);
+            // flip axis to satisfy right-handed system
+            if (m.col(0).cross(m.col(1)).dot(m.col(2)) < 0) {
+              m.col(0) = - m.col(0);
+            }
+            if (m.col(0).dot(Eigen::Vector3f::UnitX()) < 0) {
+              // rotate around z
+              m = m * Eigen::AngleAxisf(M_PI, Eigen::Vector3f::UnitZ());
+            }
+          }
+          else {
+            JSK_NODELET_ERROR("Too small indices for PCA computation");
+            return false;
+          }
+        }
+        // m4 <- m
+        for (size_t row = 0; row < 3; row++) {
+          for (size_t column = 0; column < 3; column++) {
+            m4(row, column) = m(row, column);
+          }
+        }
+        q = m;
+        Eigen::Matrix4f inv_m = m4.inverse();
+        pcl::transformPointCloud(*segmented_cloud, *segmented_cloud_transformed, inv_m);
+      }
+    }
+    return true;
+  }
+
   bool ClusterPointIndicesDecomposer::computeBoundingBox
   (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
    const std_msgs::Header header,
@@ -208,90 +309,39 @@ namespace jsk_pcl_ros
    const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients,
    jsk_recognition_msgs::BoundingBox& bounding_box)
   {
+    bounding_box.header = header;
+
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr
       segmented_cloud_transformed (new pcl::PointCloud<pcl::PointXYZRGB>);
     // align boxes if possible
     Eigen::Matrix4f m4 = Eigen::Matrix4f::Identity();
     Eigen::Quaternionf q = Eigen::Quaternionf::Identity();
     if (align_boxes_) {
-      int nearest_plane_index = findNearestPlane(center, planes, coefficients);
-      if (nearest_plane_index == -1) {
-        segmented_cloud_transformed = segmented_cloud;
-        JSK_NODELET_ERROR("no planes to align boxes are given");
+      if (align_boxes_with_plane_) {
+        bool success = transformPointCloudToAlignWithPlane(segmented_cloud, segmented_cloud_transformed,
+                                                           center, planes, coefficients, m4, q);
+        if (!success) {
+          return false;
+        }
       }
       else {
-        Eigen::Vector3f normal, z_axis;
-        if (force_to_flip_z_axis_) {
-          normal[0] = - coefficients->coefficients[nearest_plane_index].values[0];
-          normal[1] = - coefficients->coefficients[nearest_plane_index].values[1];
-          normal[2] = - coefficients->coefficients[nearest_plane_index].values[2];
+        tf::StampedTransform tf_transform;
+        try {
+          tf_transform = jsk_recognition_utils::lookupTransformWithDuration(
+            /*listener=*/tf_listener_,
+            /*to_frame=*/header.frame_id,                // box origin
+            /*from_frame=*/target_frame_id_,  // sensor origin
+            /*time=*/header.stamp,
+            /*duration=*/ros::Duration(1.0));
         }
-        else {
-          normal[0] = coefficients->coefficients[nearest_plane_index].values[0];
-          normal[1] = coefficients->coefficients[nearest_plane_index].values[1];
-          normal[2] = coefficients->coefficients[nearest_plane_index].values[2];
+        catch (tf2::TransformException &e) {
+          JSK_NODELET_ERROR("Transform error: %s", e.what());
+          return false;
         }
-        normal = normal.normalized();
-        Eigen::Quaternionf rot;
-        rot.setFromTwoVectors(Eigen::Vector3f::UnitZ(), normal);
-        Eigen::AngleAxisf rotation_angle_axis(rot);
-        Eigen::Vector3f rotation_axis = rotation_angle_axis.axis();
-        double theta = rotation_angle_axis.angle();
-        if (isnan(theta) ||
-            isnan(rotation_axis[0]) ||
-            isnan(rotation_axis[1]) ||
-            isnan(rotation_axis[2])) {
-          segmented_cloud_transformed = segmented_cloud;
-          JSK_NODELET_ERROR("cannot compute angle to align the point cloud: [%f, %f, %f], [%f, %f, %f]",
-                        z_axis[0], z_axis[1], z_axis[2],
-                        normal[0], normal[1], normal[2]);
-        }
-        else {
-          Eigen::Matrix3f m = Eigen::Matrix3f::Identity() * rot;
-          if (use_pca_) {
-            // first project points to the plane
-            pcl::PointCloud<pcl::PointXYZRGB>::Ptr projected_cloud
-              (new pcl::PointCloud<pcl::PointXYZRGB>);
-            pcl::ProjectInliers<pcl::PointXYZRGB> proj;
-            proj.setModelType (pcl::SACMODEL_PLANE);
-            pcl::ModelCoefficients::Ptr
-              plane_coefficients (new pcl::ModelCoefficients);
-            plane_coefficients->values
-              = coefficients->coefficients[nearest_plane_index].values;
-            proj.setModelCoefficients(plane_coefficients);
-            proj.setInputCloud(segmented_cloud);
-            proj.filter(*projected_cloud);
-            if (projected_cloud->points.size() >= 3) {
-              pcl::PCA<pcl::PointXYZRGB> pca;
-              pca.setInputCloud(projected_cloud);
-              Eigen::Matrix3f eigen = pca.getEigenVectors();
-              m.col(0) = eigen.col(0);
-              m.col(1) = eigen.col(1);
-              // flip axis to satisfy right-handed system
-              if (m.col(0).cross(m.col(1)).dot(m.col(2)) < 0) {
-                m.col(0) = - m.col(0);
-              }
-              if (m.col(0).dot(Eigen::Vector3f::UnitX()) < 0) {
-                // rotate around z
-                m = m * Eigen::AngleAxisf(M_PI, Eigen::Vector3f::UnitZ());
-              }
-            }
-            else {
-              JSK_NODELET_ERROR("Too small indices for PCA computation");
-              return false;
-            }
-          }
-            
-          // m4 <- m
-          for (size_t row = 0; row < 3; row++) {
-            for (size_t column = 0; column < 3; column++) {
-              m4(row, column) = m(row, column);
-            }
-          }
-          q = m;
-          Eigen::Matrix4f inv_m = m4.inverse();
-          pcl::transformPointCloud(*segmented_cloud, *segmented_cloud_transformed, inv_m);
-        }
+        Eigen::Affine3f transform;
+        tf::transformTFToEigen(tf_transform, transform);
+        pcl::transformPointCloud(*segmented_cloud, *segmented_cloud_transformed, transform);
+        bounding_box.header.frame_id = target_frame_id_;
       }
     }
     else {
@@ -309,7 +359,6 @@ namespace jsk_pcl_ros
     Eigen::Vector4f center2((maxpt[0] + minpt[0]) / 2.0, (maxpt[1] + minpt[1]) / 2.0, (maxpt[2] + minpt[2]) / 2.0, 1.0);
     Eigen::Vector4f center_transformed = m4 * center2;
       
-    bounding_box.header = header;
     
     bounding_box.pose.position.x = center_transformed[0];
     bounding_box.pose.position.y = center_transformed[1];

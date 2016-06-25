@@ -54,6 +54,22 @@ Parameters
 
   Saved h5 file for trained model.
 
+* ``use_mask`` (Bool, Default: ``False``)
+
+  If true, topic ``~input/mask`` is enabled.
+
+* ``~approximate_sync`` (Bool, Default: ``False``)
+
+  Use approximate synchronization policy.
+
+* ``~queue_size`` (Int, Default: ``10``)
+
+  Queue size for synchronization.
+
+* ``~slop`` (Float, Default: ``0.1``)
+
+  Slop for approximate sync.
+
 
 Example
 -------

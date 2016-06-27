@@ -40,20 +40,20 @@ namespace jsk_pcl_ros
     void ConvexConnectedVoxels::onInit()
     {
        DiagnosticNodelet::onInit();
-       this->pub_indices_ = advertise<
+       pub_indices_ = advertise<
           jsk_recognition_msgs::ClusterPointIndices>(
-             *pnh_, "/convex_connected_voxels/output/indices", 1);
+             *pnh_, "output/indices", 1);
        onInitPostProcess();
    }
 
     void ConvexConnectedVoxels::subscribe()
     {
-       this->sub_indices_ = pnh_->subscribe(
-          "/supervoxel_segmentation/output/indices",
-          sizeof(char), &ConvexConnectedVoxels::indices_cb, this);
-       this->sub_cloud_ = pnh_->subscribe(
-          "/supervoxel_segmentation/output/cloud",
-          sizeof(char), &ConvexConnectedVoxels::cloud_cb, this);
+       sub_indices_ = pnh_->subscribe(
+          "input/indices", 10,
+          &ConvexConnectedVoxels::indices_cb, this);
+       sub_cloud_ = pnh_->subscribe(
+          "input/cloud", 10,
+          &ConvexConnectedVoxels::cloud_cb, this);
     }
    
     void ConvexConnectedVoxels::unsubscribe()

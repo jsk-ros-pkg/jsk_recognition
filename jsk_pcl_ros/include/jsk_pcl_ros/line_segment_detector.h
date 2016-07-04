@@ -89,6 +89,11 @@ namespace jsk_pcl_ros
     LineSegmentDetector(): DiagnosticNodelet("LineSegmentDetector")
     {
     }
+    ~LineSegmentDetector()
+    {
+      sync_.reset();
+      srv_.reset();
+    }
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
       jsk_recognition_msgs::ClusterPointIndices> SyncPolicy;

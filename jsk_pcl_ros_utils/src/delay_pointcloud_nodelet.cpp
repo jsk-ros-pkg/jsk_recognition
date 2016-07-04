@@ -61,7 +61,9 @@ namespace jsk_pcl_ros_utils
   void DelayPointCloud::delay(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     ros::Duration(delay_time_).sleep();
-    pub_.publish(msg);
+    sensor_msgs::PointCloud2 out_cloud_msg = *msg;
+    out_cloud_msg.header.stamp = ros::Time::now();
+    pub_.publish(out_cloud_msg);
   }
 
   void DelayPointCloud::subscribe()

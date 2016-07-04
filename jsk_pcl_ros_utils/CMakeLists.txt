@@ -82,6 +82,7 @@ ENDIF()
 generate_dynamic_reconfigure_options(
   #   cfg/VoxelGridLargeScale.cfg
   cfg/CloudOnPlane.cfg
+  cfg/DelayPointCloud.cfg
   cfg/PolygonArrayAreaLikelihood.cfg
 #   cfg/PlaneSupportedCuboidEstimator.cfg
 #   cfg/InteractiveCuboidLikelihood.cfg

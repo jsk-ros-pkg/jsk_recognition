@@ -41,13 +41,13 @@ namespace jsk_pcl_ros_utils
   void DelayPointCloud::onInit()
   {
     ConnectionBasedNodelet::onInit();
-    pnh_->param("sleep_time", sleep_time_, 1.0);
+    pnh_->param("delay_time", delay_time_, 1.0);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
   }
 
   void DelayPointCloud::delay(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
-    ros::Duration(sleep_time_).sleep();
+    ros::Duration(delay_time_).sleep();
     pub_.publish(msg);
   }
 

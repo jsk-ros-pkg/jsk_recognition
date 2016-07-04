@@ -53,7 +53,7 @@ namespace jsk_pcl_ros_utils
     virtual void delay(const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void subscribe();
     virtual void unsubscribe();
-    double sleep_time_;
+    double delay_time_;
     ros::Subscriber sub_;
     ros::Publisher pub_;
   private:

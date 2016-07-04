@@ -96,9 +96,11 @@ namespace jsk_pcl_ros
     //     points_->points[points_->points.size() - 1].getVector3fMap()));
   }
   
-  void LineSegment::addMarkerLine(
+
+  bool LineSegment::addMarkerLine(
     visualization_msgs::Marker& marker,
-    const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
+    const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
+    const double minimum_line_length)
   {
     // lookup minimum and max index
     int min_index = INT_MAX;
@@ -117,8 +119,14 @@ namespace jsk_pcl_ros
       cloud->points[min_index], a);
     jsk_recognition_utils::pointFromXYZToXYZ<pcl::PointXYZ, geometry_msgs::Point>(
       cloud->points[max_index], b);
+    if (std::sqrt((a.x - b.x) * (a.x - b.x) +
+                  (a.y - b.y) * (a.y - b.y) +
+                  (a.z - b.z) * (a.z - b.z)) < minimum_line_length) {
+      return false;
+    }
     marker.points.push_back(a);
     marker.points.push_back(b);
+    return true;
   }
   
   void LineSegmentDetector::onInit()
@@ -188,9 +196,10 @@ namespace jsk_pcl_ros
     marker.color.a = 1.0;
     marker.color.r = 1.0;
     for (size_t i = 0; i < segments.size(); i++) {
+      if (segments[i]->addMarkerLine(marker, cloud, min_length_) == false)
+        continue;
       indices.push_back(segments[i]->getIndices());
       coefficients.push_back(segments[i]->getCoefficients());
-      segments[i]->addMarkerLine(marker, cloud);
       std_msgs::ColorRGBA color = jsk_topic_tools::colorCategory20(i);
       color.a = 1.0;
       marker.colors.push_back(color);

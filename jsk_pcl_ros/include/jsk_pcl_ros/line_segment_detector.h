@@ -63,9 +63,10 @@ namespace jsk_pcl_ros
     LineSegment(pcl::PointIndices::Ptr indices,
                 pcl::ModelCoefficients::Ptr coefficients);
     virtual ~LineSegment();
-    virtual void addMarkerLine(
+    virtual bool addMarkerLine(
       visualization_msgs::Marker& marker,
-      const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+      const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
+      double minimum_line_length);
     //virtual Segment::Ptr toSegment();
     virtual jsk_recognition_utils::Line::Ptr toSegment();
     pcl::PointIndices::Ptr getIndices() { return indices_; }

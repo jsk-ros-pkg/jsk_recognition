@@ -41,8 +41,21 @@ namespace jsk_pcl_ros_utils
   void DelayPointCloud::onInit()
   {
     ConnectionBasedNodelet::onInit();
+
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+        boost::bind (&DelayPointCloud::configCallback, this, _1, _2);
+    srv_->setCallback (f);
+
     pnh_->param("delay_time", delay_time_, 1.0);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+  }
+
+  void DelayPointCloud::configCallback(Config &config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+
+    delay_time_ = config.delay_time;
   }
 
   void DelayPointCloud::delay(const sensor_msgs::PointCloud2::ConstPtr& msg)

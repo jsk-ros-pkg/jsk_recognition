@@ -12,6 +12,7 @@ import skimage.transform
 
 import cv_bridge
 from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools.log_utils import logerr_throttle
 from jsk_recognition_utils.chainermodels import VGG16BatchNormalization
 from jsk_recognition_msgs.msg import ClassificationResult
 import message_filters
@@ -77,6 +78,13 @@ class VGG16ObjectRecognition(ConnectionBasedTransport):
         bgr = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='bgr8')
         if mask_msg is not None:
             mask = bridge.imgmsg_to_cv2(mask_msg)
+            if mask.shape != bgr.shape[:2]:
+                logerr_throttle(10,
+                                'Size of input image and mask is different')
+                return
+            elif mask.size == 0:
+                logerr_throttle(10, 'Size of input mask is 0')
+                return
             bgr[mask == 0] = self.mean_bgr
         bgr = skimage.transform.resize(bgr, (224, 224), preserve_range=True)
         input_msg = bridge.cv2_to_imgmsg(bgr.astype(np.uint8), encoding='bgr8')

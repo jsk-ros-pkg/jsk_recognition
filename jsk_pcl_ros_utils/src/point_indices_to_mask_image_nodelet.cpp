@@ -34,6 +34,7 @@
  *********************************************************************/
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros_utils/point_indices_to_mask_image.h"
+#include <jsk_topic_tools/log_utils.h>
 #include <sensor_msgs/image_encodings.h>
 #include <cv_bridge/cv_bridge.h>
 
@@ -44,42 +45,54 @@ namespace jsk_pcl_ros_utils
     DiagnosticNodelet::onInit();
     pnh_->param("approximate_sync", approximate_sync_, false);
     pnh_->param("queue_size", queue_size_, 100);
+    pnh_->param("static_image_size", static_image_size_, false);
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
   }
 
   void PointIndicesToMaskImage::subscribe()
   {
-    sub_input_.subscribe(*pnh_, "input", 1);
-    sub_image_.subscribe(*pnh_, "input/image", 1);
-    if (approximate_sync_) {
-      async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
-      async_->connectInput(sub_input_, sub_image_);
-      async_->registerCallback(boost::bind(&PointIndicesToMaskImage::mask, this, _1, _2));
+    if (static_image_size_) {
+      pnh_->getParam("width", width_);
+      pnh_->getParam("height", height_);
+      sub_input_static_ = pnh_->subscribe("input", 1, &PointIndicesToMaskImage::mask, this);
     }
     else {
-      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
-      sync_->connectInput(sub_input_, sub_image_);
-      sync_->registerCallback(boost::bind(&PointIndicesToMaskImage::mask,
-                                          this, _1, _2));
+      sub_input_.subscribe(*pnh_, "input", 1);
+      sub_image_.subscribe(*pnh_, "input/image", 1);
+      if (approximate_sync_) {
+        async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
+        async_->connectInput(sub_input_, sub_image_);
+        async_->registerCallback(boost::bind(&PointIndicesToMaskImage::mask, this, _1, _2));
+      }
+      else {
+        sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
+        sync_->connectInput(sub_input_, sub_image_);
+        sync_->registerCallback(boost::bind(&PointIndicesToMaskImage::mask,
+                                            this, _1, _2));
+      }
     }
   }
   
   void PointIndicesToMaskImage::unsubscribe()
   {
     sub_input_.unsubscribe();
-    sub_image_.unsubscribe();
+    if (!static_image_size_) {
+      sub_image_.unsubscribe();
+    }
   }
 
-  void PointIndicesToMaskImage::mask(
+  void PointIndicesToMaskImage::convertAndPublish(
     const PCLIndicesMsg::ConstPtr& indices_msg,
-    const sensor_msgs::Image::ConstPtr& image_msg)
+    const int width,
+    const int height)
   {
-    vital_checker_->poke();
-    int width = image_msg->width;
-    int height = image_msg->height;
     cv::Mat mask_image = cv::Mat::zeros(height, width, CV_8UC1);
     for (size_t i = 0; i < indices_msg->indices.size(); i++) {
       int index = indices_msg->indices[i];
+      if (height * width <= index || index <= 0) {
+        JSK_ROS_ERROR("Input index is out of expected mask size.");
+        return;
+      }
       int width_index = index % width;
       int height_index = index / width;
       mask_image.at<uchar>(height_index, width_index) = 255;
@@ -89,7 +102,22 @@ namespace jsk_pcl_ros_utils
                                    mask_image);
     pub_.publish(mask_bridge.toImageMsg());
   }
-  
+
+  void PointIndicesToMaskImage::mask(
+    const PCLIndicesMsg::ConstPtr& indices_msg)
+  {
+    vital_checker_->poke();
+    convertAndPublish(indices_msg, width_, height_);
+  }
+
+  void PointIndicesToMaskImage::mask(
+    const PCLIndicesMsg::ConstPtr& indices_msg,
+    const sensor_msgs::Image::ConstPtr& image_msg)
+  {
+    vital_checker_->poke();
+    convertAndPublish(indices_msg, image_msg->width, image_msg->height);
+  }
+
   void PointIndicesToMaskImage::updateDiagnostic(
     diagnostic_updater::DiagnosticStatusWrapper &stat)
   {

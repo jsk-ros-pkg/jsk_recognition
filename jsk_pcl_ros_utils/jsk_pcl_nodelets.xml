@@ -33,6 +33,11 @@
          base_class_type="nodelet::Nodelet">
     Generate mask image out of point indices
   </class>
+  <class name="jsk_pcl_utils/PointIndicesToClusterPointIndices"
+         type="jsk_pcl_ros_utils::PointIndicesToClusterPointIndices"
+         base_class_type="nodelet::Nodelet">
+    Convert point indices to cluster of point indices
+  </class>
   <class name="jsk_pcl_utils/DepthImageError" type="jsk_pcl_ros_utils::DepthImageError"
          base_class_type="nodelet::Nodelet">
     <description>compute error of depth image</description>

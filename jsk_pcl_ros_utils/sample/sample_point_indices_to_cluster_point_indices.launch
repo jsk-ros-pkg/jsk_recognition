@@ -1,0 +1,36 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <param name="/use_sim_time" value="true" />
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros_utils)/test_data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/vision.compressed.bag --clock --loop">
+  </node>
+
+  <arg name="INPUT_CLOUD" value="/kinect2_head/hd/points" />
+
+  <node name="organized_pointcloud_to_point_indices"
+        pkg="jsk_pcl_ros" type="organized_pointcloud_to_point_indices">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+  </node>
+
+  <node name="point_indices_to_cluster_point_indices"
+        pkg="jsk_pcl_ros_utils" type="point_indices_to_cluster_point_indices">
+    <remap from="~input" to="organized_pointcloud_to_point_indices/output" />
+  </node>
+
+  <node name="cluster_point_indices_decomposer"
+        pkg="jsk_pcl_ros" type="cluster_point_indices_decomposer">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <remap from="~target" to="point_indices_to_cluster_point_indices/output" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="$(find jsk_pcl_ros_utils)/sample/rvizconfig/sample_point_indices_to_cluster_point_indices.rviz">
+    </node>
+  </group>
+
+</launch>

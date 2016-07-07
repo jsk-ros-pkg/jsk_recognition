@@ -12,6 +12,7 @@ import skimage.transform
 
 import cv_bridge
 from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools.log_utils import logerr_throttle
 from jsk_recognition_utils.chainermodels import VGG16BatchNormalization
 from jsk_recognition_msgs.msg import ClassificationResult
 import message_filters
@@ -46,8 +47,12 @@ class VGG16ObjectRecognition(ConnectionBasedTransport):
 
     def subscribe(self):
         if rospy.get_param('~use_mask', False):
-            sub = message_filters.Subscriber('~input', Image)
-            sub_mask = message_filters.Subscriber('~input/mask', Image)
+            # larger buff_size is necessary for taking time callback
+            # http://stackoverflow.com/questions/26415699/ros-subscriber-not-up-to-date/29160379#29160379  # NOQA
+            sub = message_filters.Subscriber(
+                '~input', Image, queue_size=1, buff_size=2**24)
+            sub_mask = message_filters.Subscriber(
+                '~input/mask', Image, queue_size=1, buff_size=2**24)
             self.subs = [sub, sub_mask]
             queue_size = rospy.get_param('~queue_size', 10)
             if rospy.get_param('~approximate_sync', False):
@@ -59,7 +64,9 @@ class VGG16ObjectRecognition(ConnectionBasedTransport):
                     self.subs, queue_size=queue_size)
             sync.registerCallback(self._recognize)
         else:
-            sub = rospy.Subscriber('~input', Image, self._recognize, callback_args=None)
+            sub = rospy.Subscriber(
+                '~input', Image, self._recognize, callback_args=None,
+                queue_size=1, buff_size=2**24)
             self.subs = [sub]
 
     def unsubscribe(self):
@@ -71,6 +78,13 @@ class VGG16ObjectRecognition(ConnectionBasedTransport):
         bgr = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='bgr8')
         if mask_msg is not None:
             mask = bridge.imgmsg_to_cv2(mask_msg)
+            if mask.shape != bgr.shape[:2]:
+                logerr_throttle(10,
+                                'Size of input image and mask is different')
+                return
+            elif mask.size == 0:
+                logerr_throttle(10, 'Size of input mask is 0')
+                return
             bgr[mask == 0] = self.mean_bgr
         bgr = skimage.transform.resize(bgr, (224, 224), preserve_range=True)
         input_msg = bridge.cv2_to_imgmsg(bgr.astype(np.uint8), encoding='bgr8')

@@ -43,6 +43,9 @@
 #include "jsk_pcl_ros_utils/DelayPointCloudConfig.h"
 #include <dynamic_reconfigure/server.h>
 
+#include <message_filters/subscriber.h>
+#include <message_filters/time_sequencer.h>
+
 namespace jsk_pcl_ros_utils
 {
 
@@ -61,8 +64,10 @@ namespace jsk_pcl_ros_utils
 
     boost::mutex mutex_;
     double delay_time_;
-    ros::Subscriber sub_;
+    int queue_size_;
     ros::Publisher pub_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_;
+    boost::shared_ptr<message_filters::TimeSequencer<sensor_msgs::PointCloud2> > time_sequencer_;
 
     ////////////////////////////////////////////////////////
     // dynamic reconfigure

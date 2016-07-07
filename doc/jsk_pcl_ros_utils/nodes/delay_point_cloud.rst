@@ -24,3 +24,5 @@ Parameters
 ----------
 
 - ``~delay_time`` (``Double``, default: ``1.0``)
+
+- ``~queue_size`` (``Int``, int: ``1``)

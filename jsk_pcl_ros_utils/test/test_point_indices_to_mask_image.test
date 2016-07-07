@@ -1,0 +1,29 @@
+<launch>
+
+  <test test-name="test_point_indices_to_mask_image"
+        name="test_point_indices_to_mask_image"
+        pkg="jsk_pcl_ros_utils" type="test_point_indices_to_mask_image.py">
+    <remap from="~input/mask1" to="point_indices_to_mask_image/output" />
+    <remap from="~input/mask2" to="point_indices_to_mask_image_static/output" />
+  </test>
+
+  <node name="point_indices_to_mask_image"
+        pkg="jsk_pcl_ros_utils" type="point_indices_to_mask_image">
+    <remap from="~input" to="test_point_indices_to_mask_image/output/indices" />
+    <remap from="~input/image" to="test_point_indices_to_mask_image/output/image" />
+    <rosparam>
+      static_image_size: false
+    </rosparam>
+  </node>
+
+  <node name="point_indices_to_mask_image_static"
+        pkg="jsk_pcl_ros_utils" type="point_indices_to_mask_image">
+    <remap from="~input" to="test_point_indices_to_mask_image/output/indices" />
+    <rosparam>
+      static_image_size: true
+      width: 30
+      height: 30
+    </rosparam>
+  </node>
+
+</launch>

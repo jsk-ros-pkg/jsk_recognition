@@ -67,6 +67,12 @@ namespace jsk_pcl_ros_utils
     virtual void unsubscribe();
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
+    virtual void convertAndPublish(
+      const PCLIndicesMsg::ConstPtr& indices_msg,
+      const int width,
+      const int height);
+    virtual void mask(
+      const PCLIndicesMsg::ConstPtr& indices_msg);
     virtual void mask(
       const PCLIndicesMsg::ConstPtr& indices_msg,
       const sensor_msgs::Image::ConstPtr& image_msg);
@@ -76,9 +82,13 @@ namespace jsk_pcl_ros_utils
     ////////////////////////////////////////////////////////
     bool approximate_sync_;
     int queue_size_;
+    bool static_image_size_;
+    int width_;
+    int height_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> >async_; 
-   message_filters::Subscriber<PCLIndicesMsg> sub_input_;
+    ros::Subscriber sub_input_static_;
+    message_filters::Subscriber<PCLIndicesMsg> sub_input_;
     message_filters::Subscriber<sensor_msgs::Image> sub_image_;
     ros::Publisher pub_;
   private:

@@ -13,7 +13,7 @@ of organized pointcloud and original `sensor_msgs/Image`.
 * `~input/image` (`sensor_msgs/Image`)
 
    In order to know width and height of the original image, jsk\_pcl/PointIndicesToMaskImage requires
-   input image.
+   input image. (**Note** If parameter `~static_image_size` is `True`, this topic is not subscribed.)
 
 ## Publishing Topic
 
@@ -33,3 +33,14 @@ of organized pointcloud and original `sensor_msgs/Image`.
 
   How many messages you allow about the subscriber to keep in the queue.
   This should be big when there is much difference about delay between two topics.
+
+* `~static_image_size` (Bool, default: `false`)
+
+  If this parameter is true, the topic `~input/image` is not used and paramter
+  `~height` and `~width` is used to generate mask image.
+
+**Optional**
+
+* `~height`, `~width` (Int)
+
+  Size of mask image which will be generated.

@@ -1,0 +1,17 @@
+<launch>
+
+  <test test-name="test_point_indices_to_cluster_point_indices"
+        name="test_point_indices_to_cluster_point_indices"
+        pkg="jsk_pcl_ros_utils" type="test_point_indices_to_cluster_point_indices.py"
+        time-limit="360" retry="3">
+    <remap from="~input" to="point_indices_to_cluster_point_indices/output" />
+  </test>
+
+  <arg name="INPUT_INDICES" value="test_point_indices_to_cluster_point_indices/output" />
+
+  <node name="point_indices_to_cluster_point_indices"
+        pkg="jsk_pcl_ros_utils" type="point_indices_to_cluster_point_indices">
+    <remap from="~input" to="$(arg INPUT_INDICES)" />
+  </node>
+
+</launch>

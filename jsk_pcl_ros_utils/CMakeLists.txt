@@ -225,6 +225,8 @@ jsk_pcl_util_nodelet(src/plane_reasoner_nodelet.cpp
   "jsk_pcl_utils/PlaneReasoner" "plane_reasoner")
 jsk_pcl_util_nodelet(src/transform_pointcloud_in_bounding_box_nodelet.cpp
   "jsk_pcl_utils/TransformPointcloudInBoundingBox" "transform_pointcloud_in_bounding_box")
+jsk_pcl_util_nodelet(src/point_indices_to_cluster_point_indices_nodelet.cpp
+  "jsk_pcl_utils/PointIndicesToClusterPointIndices" "point_indices_to_cluster_point_indices")
 jsk_pcl_util_nodelet(src/point_indices_to_mask_image_nodelet.cpp
   "jsk_pcl_utils/PointIndicesToMaskImage" "point_indices_to_mask_image")
 jsk_pcl_util_nodelet(src/mask_image_to_depth_considered_mask_image_nodelet.cpp

@@ -47,8 +47,9 @@ namespace jsk_pcl_ros_utils
         boost::bind (&DelayPointCloud::configCallback, this, _1, _2);
     srv_->setCallback (f);
 
-    pnh_->param("delay_time", delay_time_, 1.0);
-    pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    pnh_->param("delay_time", delay_time_, 0.1);
+    pnh_->param("queue_size", queue_size_, 1000);
+    pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", queue_size_);
   }
 
   void DelayPointCloud::configCallback(Config &config, uint32_t level)
@@ -56,11 +57,11 @@ namespace jsk_pcl_ros_utils
     boost::mutex::scoped_lock lock(mutex_);
 
     delay_time_ = config.delay_time;
+    DelayPointCloud::subscribe();
   }
 
   void DelayPointCloud::delay(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
-    ros::Duration(delay_time_).sleep();
     sensor_msgs::PointCloud2 out_cloud_msg = *msg;
     out_cloud_msg.header.stamp = ros::Time::now();
     pub_.publish(out_cloud_msg);
@@ -68,11 +69,14 @@ namespace jsk_pcl_ros_utils
 
   void DelayPointCloud::subscribe()
   {
-    sub_ = pnh_->subscribe("input", 1, &DelayPointCloud::delay, this);
+    sub_.subscribe(*pnh_, "input", 1);
+    time_sequencer_ = boost::make_shared<message_filters::TimeSequencer<sensor_msgs::PointCloud2> >(ros::Duration(delay_time_), ros::Duration(0.01), queue_size_);
+    time_sequencer_->connectInput(sub_);
+    time_sequencer_->registerCallback(boost::bind(&DelayPointCloud::delay, this, _1));
   }
   void DelayPointCloud::unsubscribe()
   {
-    sub_.shutdown();
+    sub_.unsubscribe();
   }
 }
 

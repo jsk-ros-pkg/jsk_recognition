@@ -35,6 +35,10 @@
          type="jsk_perception::BoundingRectMaskImage"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_perception/BoundingObjectMaskImage"
+         type="jsk_perception::BoundingObjectMaskImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/RectToMaskImage"
          type="jsk_perception::RectToMaskImage"
          base_class_type="nodelet::Nodelet">

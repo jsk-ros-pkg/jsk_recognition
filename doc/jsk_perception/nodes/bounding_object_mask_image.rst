@@ -1,5 +1,5 @@
 BoundingObjectMaskImage
-=====================
+=======================
 
 What is this?
 -------------

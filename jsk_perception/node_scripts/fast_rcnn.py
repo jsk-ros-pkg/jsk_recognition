@@ -71,6 +71,8 @@ class FastRCNN(ConnectionBasedTransport):
         im_orig = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='bgr8')
         im, im_scale = img_preprocessing(im_orig, self.pixel_means)
         rects_orig = jsk_recognition_utils.rects_msg_to_ndarray(rects_msg)
+        if len(rects_orig) == 0:
+            return
         rects = rects_orig * im_scale
         scores, bbox_pred = self._im_detect(im, rects)
         out_im = self._draw_result(

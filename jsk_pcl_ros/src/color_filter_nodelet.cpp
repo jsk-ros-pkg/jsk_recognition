@@ -241,10 +241,14 @@ namespace jsk_pcl_ros
   {
     ConnectionBasedNodelet::onInit();
 
-    filter_instance_ = pcl::ConditionalRemoval<pcl::PointXYZRGB>(true);
     updateCondition();
+    bool keep_organized;
+    pnh_->param("keep_organized", keep_organized, false);
     pnh_->param("use_indices", use_indices_, false);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+
+    filter_instance_ = pcl::ConditionalRemoval<pcl::PointXYZRGB>(true);
+    filter_instance_.setKeepOrganized(keep_organized);
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =

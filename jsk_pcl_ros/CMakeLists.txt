@@ -447,6 +447,7 @@ if (CATKIN_ENABLE_TESTING)
   target_link_libraries(test_extract_indices ${catkin_LIBRARIES} ${GTEST_LIBRARIES})
   if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
     # because of unreleased topic_tools/transform on hydro
+    add_rostest(test/test_hsi_color_filter.test DEPENDENCIES install_test_data)
     add_rostest(test/test_attention_clipper.test DEPENDENCIES install_test_data)
     add_rostest(test/test_cluster_point_indices_decomposer.test)
     add_rostest(test/test_euclidean_segmentation.test DEPENDENCIES install_test_data)

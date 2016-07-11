@@ -1,0 +1,77 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <param name="/use_sim_time" value="true" />
+  <rosparam command="load"
+            file="$(find jsk_pcl_ros)/test_data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/rosparam.yaml" />
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/test_data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/vision.compressed.bag --clock --loop">
+  </node>
+
+  <arg name="INPUT_CLOUD" value="/kinect2_head/hd/points" />
+
+  <!--Extracting blue objects -->
+  <arg name="h_max" default="-62" />
+  <arg name="h_min" default="-128" />
+  <arg name="s_max" default="111" />
+  <arg name="s_min" default="61" />
+  <arg name="i_max" default="163" />
+  <arg name="i_min" default="0" />
+
+  <node name="hsi_filter_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="hsi_color_filter"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/HSIColorFilter hsi_filter_manager">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <rosparam>
+      use_indices: false
+      keep_organized: true
+    </rosparam>
+    <param name="h_limit_max" value="$(arg h_max)" />
+    <param name="h_limit_min" value="$(arg h_min)" />
+    <param name="s_limit_max" value="$(arg s_max)" />
+    <param name="s_limit_min" value="$(arg s_min)" />
+    <param name="i_limit_max" value="$(arg i_max)" />
+    <param name="i_limit_min" value="$(arg i_min)" />
+  </node>
+
+  <node name="euclidean_clustering"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/EuclideanClustering hsi_filter_manager"
+        output="screen">
+    <remap from="~input" to="hsi_color_filter/output" />
+    <rosparam>
+      tolerance: 0.02
+      min_size: 100
+    </rosparam>
+  </node>
+
+  <node name="cluster_decomposer"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis hsi_filter_manager"
+        output="screen" clear_params="true">
+    <remap from="~input" to="hsi_color_filter/output" />
+    <remap from="~target" to="euclidean_clustering/output" />
+    <remap from="~debug_output" to="debug_output" />
+    <remap from="~boxes" to="boxes" />
+    <rosparam>
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="/cluster_decomposer/mask" />
+    </node>
+    <node name="image_view1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="/cluster_decomposer/label" />
+    </node>
+  </group>
+
+</launch>

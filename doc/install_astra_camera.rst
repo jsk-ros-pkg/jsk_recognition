@@ -10,19 +10,23 @@ Install SDK && Try Sample
 .. code-block:: bash
 
   cd ~/Downloads
-  wget "https://www.dropbox.com/sh/p2uowlt3swdrfno/AACfEbv7ejIU-4FHy4Fyi0ZWa?dl=1" -O Tools_SDK_OpenNI.zip
+  # this can be broken
+  # wget "https://www.dropbox.com/sh/p2uowlt3swdrfno/AACfEbv7ejIU-4FHy4Fyi0ZWa?dl=1" -O Tools_SDK_OpenNI.zip
+  sudo pip install gdown
+  gdown "https://drive.google.com/uc?id=0B9P1L--7Wd2vSktrZXFYMEZOWXM" -O Tools_SDK_OpenNI.zip
 
   mkdir ~/Downloads/Tools_SDK_OpenNI
   cd ~/Downloads/Tools_SDK_OpenNI
 
   unzip ~/Downloads/Tools_SDK_OpenNI.zip
 
-  tar zxvf OpenNI-2\ -Linux-x64-Orbbec3D.tgz
+  cd 2-Linux
+  tar zxvf OpenNI-Linux-x64-2.2-0118.tgz
   cd OpenNI-Linux-x64-2.2
 
   sudo ./install.sh
 
-  cd ~/Downloads/Tools_SDK_OpenNI/OpenNI-Linux-x64-2.2/Samples/Bin
+  cd ~/Downloads/Tools_SDK_OpenNI/2-Linux/OpenNI-Linux-x64-2.2/Samples/Bin
   ./SimpleViewer  # This should open a viewer for depth image
 
 
@@ -33,7 +37,7 @@ Use Astra camera with ``openni2_camera`` ROS package
 
   sudo apt-get install ros-indigo-openni2-camera ros-indigo-openni2-launch
 
-  cd ~/Downloads/Tools_SDK_OpenNI/OpenNI-Linux-x64-2.2/Samples/Bin
+  cd ~/Downloads/Tools_SDK_OpenNI/2-Linux/OpenNI-Linux-x64-2.2/Samples/Bin
 
   sudo cp libOpenNI2.so /usr/lib/libOpenNI2.so
   sudo cp OpenNI2/Drivers/* /usr/lib/OpenNI2/Drivers/

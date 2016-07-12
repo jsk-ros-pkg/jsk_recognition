@@ -9,6 +9,7 @@
 #include <cv_bridge/cv_bridge.h>
 
 #include <vector>
+#include <boost/assign.hpp>
 
 #include <geometry_msgs/Polygon.h>
 #include <geometry_msgs/PolygonStamped.h>
@@ -19,6 +20,7 @@ class VirtualCameraMono
   image_transport::ImageTransport it_,it_priv_;
   image_transport::CameraSubscriber sub_;
   image_transport::CameraPublisher pub_;
+  int subscriber_count_;
   tf::TransformListener tf_listener_;
   image_geometry::PinholeCameraModel cam_model_;
   tf::TransformBroadcaster tf_broadcaster_;
@@ -28,11 +30,11 @@ class VirtualCameraMono
   geometry_msgs::PolygonStamped poly_; // target polygon to transform image
 
 public:
-  VirtualCameraMono() : private_nh_("~"), it_(nh_), it_priv_(private_nh_)
+  VirtualCameraMono() : private_nh_("~"), it_(nh_), it_priv_(private_nh_), subscriber_count_(0)
   {
-    std::string image_topic = nh_.resolveName("image");
-    sub_ = it_.subscribeCamera(image_topic, 1, &VirtualCameraMono::imageCb, this);
-    pub_ = it_priv_.advertiseCamera("image", 1);
+    image_transport::SubscriberStatusCallback connect_cb = boost::bind(&VirtualCameraMono::connectCb, this, _1);
+    image_transport::SubscriberStatusCallback disconnect_cb = boost::bind(&VirtualCameraMono::disconnectCb, this, _1);
+    pub_ = it_priv_.advertiseCamera("image", 1, connect_cb, disconnect_cb);
 
     // init parameters : TODO replace ros::param
     trans_.frame_id_ = "/elevator_inside_panel";
@@ -53,13 +55,41 @@ public:
 
   }
 
+  void connectCb(const image_transport::SingleSubscriberPublisher&)
+  {
+    if (subscriber_count_ == 0){
+      subscribe();
+    }
+    subscriber_count_++;
+    JSK_ROS_DEBUG("connected new node. current subscriber: %d", subscriber_count_);
+  }
+
+  void disconnectCb(const image_transport::SingleSubscriberPublisher&)
+  {
+    subscriber_count_--;
+    if (subscriber_count_ == 0) {
+      unsubscribe();
+    }
+    JSK_ROS_DEBUG("disconnected node. current subscriber: %d", subscriber_count_);
+  }
+
+  void subscribe()
+  {
+    JSK_ROS_INFO("Subscribing to image topic");
+    sub_ = it_.subscribeCamera("image", 1, &VirtualCameraMono::imageCb, this);
+    ros::V_string names = boost::assign::list_of("image");
+    jsk_topic_tools::warnNoRemap(names);
+  }
+
+  void unsubscribe()
+  {
+    JSK_ROS_INFO("Unsubscibing from image topic");
+    sub_.shutdown();
+  }
+
   void imageCb(const sensor_msgs::ImageConstPtr& image_msg,
                const sensor_msgs::CameraInfoConstPtr& info_msg)
   {
-    // if nobody listens this topic, do not publish
-    if(pub_.getNumSubscribers() == 0)
-      return;
-
     cv_bridge::CvImagePtr cv_ptr;
     cv::Mat image;
     try {
@@ -77,12 +107,12 @@ public:
     tf_broadcaster_.sendTransform(trans_);
 
     //
-    JSK_ROS_INFO("transform image.");
+    JSK_ROS_DEBUG("transform image.");
     //IplImage *outimage = cvCloneImage(image); // need to release
     cv::Mat outimage = image.clone();
     if (TransformImage(image, outimage, trans_, poly_, cam_model_)) {
       //
-      JSK_ROS_INFO("publish image and transform.");
+      JSK_ROS_DEBUG("publish image and transform.");
       sensor_msgs::CameraInfo virtual_info = *info_msg;
       //sensor_msgs::Image::Ptr img_msg = bridge_.cvToImgMsg(outimage, "bgr8");
       cv_ptr->image = outimage;
@@ -123,8 +153,8 @@ public:
 	geometry_msgs::PointStamped point, cpoint, vpoint;
 	point.point.x = pit->x, point.point.y = pit->y, point.point.z = pit->z;
 	point.header = poly.header;
-	tf_listener_.transformPoint(cam_model_.tfFrame() ,point, cpoint);
-	tf_listener_.transformPoint(trans.frame_id_ ,point, vpoint);
+	tf_listener_.transformPoint(cam_model_.tfFrame(), point, cpoint);
+	tf_listener_.transformPoint(trans.frame_id_, point, vpoint);
 
 	tf::Vector3 vpt_vec = trans.inverse() * tf::Vector3(vpoint.point.x, vpoint.point.y, vpoint.point.z);
 
@@ -159,7 +189,7 @@ public:
       cv::warpPerspective (src, dest, map_matrix, dest.size(), cv::INTER_LINEAR);
       //cvReleaseImage(&rectified);
     } catch ( std::runtime_error e ) {
-      // JSK_ROS_ERROR("%s",e.what());
+      ROS_INFO_THROTTLE(10, "[virtual_camera_mono] failed to transform image: %s", e.what());
       return false;
     }
     return true;

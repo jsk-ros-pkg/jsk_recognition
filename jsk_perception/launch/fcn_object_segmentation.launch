@@ -1,0 +1,48 @@
+<launch>
+
+  <arg name="INPUT_IMAGE" />
+  <arg name="GPU" default="0" />
+
+  <node name="fcn_object_segmentation"
+        pkg="jsk_perception" type="fcn_object_segmentation.py"
+        output="screen">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <rosparam subst_value="true">
+      gpu: $(arg GPU)
+      model_name: fcn8s
+      model_h5: $(find jsk_perception)/trained_data/fcn8s_from_caffe.chainermodel
+      target_names:
+        - background
+        - aeroplane
+        - bicycle
+        - bird
+        - boat
+        - bottle
+        - bus
+        - car
+        - cat
+        - chair
+        - cow
+        - diningtable
+        - dog
+        - horse
+        - motorbike
+        - person
+        - potted plant
+        - sheep
+        - sofa
+        - train
+        - tv/monitor
+    </rosparam>
+  </node>
+
+  <node name="label_image_decomposer"
+        pkg="jsk_perception" type="label_image_decomposer.py">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/label" to="fcn_object_segmentation/output" />
+    <rosparam>
+      queue_size: 100
+    </rosparam>
+  </node>
+
+</launch>

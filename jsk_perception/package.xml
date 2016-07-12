@@ -68,6 +68,7 @@
   <run_depend>posedetection_msgs</run_depend>
   <run_depend>python-chainer</run_depend>
   <run_depend>python-dlib</run_depend>
+  <run_depend>python-fcn-pip</run_depend>
   <run_depend>python-gdown</run_depend>
   <run_depend>python-h5py</run_depend>
   <run_depend>python-sklearn</run_depend>

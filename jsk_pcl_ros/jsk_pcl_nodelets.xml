@@ -461,6 +461,13 @@
       Resize PointCloud
     </description>
   </class>
+  <class name="jsk_pcl/RearrangeBoundingBox"
+         type="jsk_pcl_ros::RearrangeBoundingBox"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Rearrange and Rescale BoundingBoxArray
+    </description>
+  </class>
 
   <class name="jsk_pcl/PointcloudScreenpoint" type="jsk_pcl_ros::PointcloudScreenpoint"
          base_class_type="nodelet::Nodelet">

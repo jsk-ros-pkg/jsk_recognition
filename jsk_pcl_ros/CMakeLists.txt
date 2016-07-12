@@ -101,6 +101,7 @@ generate_dynamic_reconfigure_options(
   cfg/MultiPlaneSACSegmentation.cfg
   cfg/BoundingBoxFilter.cfg
   cfg/ResizePointsPublisher.cfg
+  cfg/RearrangeBoundingBox.cfg
   cfg/LINEMODDetector.cfg
   cfg/SupervoxelSegmentation.cfg
   cfg/FeatureRegistration.cfg
@@ -176,6 +177,8 @@ jsk_pcl_nodelet(src/cluster_point_indices_decomposer_z_axis_nodelet.cpp
   "jsk_pcl/ClusterPointIndicesDecomposerZAxis" "cluster_point_indices_decomposer_z_axis")
 jsk_pcl_nodelet(src/resize_points_publisher_nodelet.cpp
   "jsk_pcl/ResizePointsPublisher" "resize_points_publisher")
+jsk_pcl_nodelet(src/rearrange_bounding_box_nodelet.cpp
+  "jsk_pcl/RearrangeBoundingBox" "rearrange_bounding_box")
 jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/NormalConcatenater" "normal_concatenater")
 jsk_pcl_nodelet(src/normal_estimation_integral_image_nodelet.cpp
   "jsk_pcl/NormalEstimationIntegralImage" "normal_estimation_integral_image")

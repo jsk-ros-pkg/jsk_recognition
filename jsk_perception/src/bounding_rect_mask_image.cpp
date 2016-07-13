@@ -40,6 +40,11 @@
 #include <sensor_msgs/image_encodings.h>
 #include <cv_bridge/cv_bridge.h>
 
+namespace cv
+{
+  using std::vector;
+}
+
 namespace jsk_perception
 {
   void BoundingRectMaskImage::onInit()

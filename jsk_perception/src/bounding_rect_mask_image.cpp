@@ -40,11 +40,6 @@
 #include <sensor_msgs/image_encodings.h>
 #include <cv_bridge/cv_bridge.h>
 
-namespace cv
-{
-  using std::vector;
-}
-
 namespace jsk_perception
 {
   void BoundingRectMaskImage::onInit()
@@ -75,7 +70,7 @@ namespace jsk_perception
     cv::Mat mask = cv_ptr->image;
 
     // Find contour
-    cv::vector<cv::vector<cv::Point> > contours;
+    std::vector<std::vector<cv::Point> > contours;
     cv::findContours(mask, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 
     if (contours.size() == 0) {
@@ -93,7 +88,7 @@ namespace jsk_perception
     }
 
     // Find bounding rect
-    cv::vector<cv::Point> max_area_contour = contours[max_area.get<0>()];
+    std::vector<cv::Point> max_area_contour = contours[max_area.get<0>()];
     cv::Rect rect = cv::boundingRect(cv::Mat(max_area_contour));
 
     // Draw bounding rect mask

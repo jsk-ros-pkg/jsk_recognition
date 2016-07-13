@@ -42,11 +42,6 @@
 #include <sensor_msgs/image_encodings.h>
 #include <cv_bridge/cv_bridge.h>
 
-namespace cv
-{
-  using std::vector;
-}
-
 namespace jsk_perception
 {
   void ConvexHullMaskImage::onInit()
@@ -76,11 +71,11 @@ namespace jsk_perception
       mask_msg, sensor_msgs::image_encodings::MONO8);
     cv::Mat mask = cv_ptr->image;
 
-    cv::vector<cv::vector<cv::Point> > contours;
+    std::vector<std::vector<cv::Point> > contours;
     cv::findContours(mask, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 
     boost::tuple<int, double> max_area;
-    cv::vector<cv::vector<cv::Point> >hull(contours.size());
+    std::vector<std::vector<cv::Point> >hull(contours.size());
     // Find the convex hull object for each contour
     for (size_t i = 0; i < contours.size(); i++) {
       // Find max area to create mask later

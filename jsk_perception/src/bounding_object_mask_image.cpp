@@ -70,7 +70,7 @@ namespace jsk_perception
     cv::Mat mask = cv_ptr->image;
 
     // Find contour
-    cv::vector<cv::vector<cv::Point> > contours;
+    std::vector<std::vector<cv::Point> > contours;
     cv::findContours(mask, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 
     if (contours.size() == 0) {

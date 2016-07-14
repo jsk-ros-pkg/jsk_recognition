@@ -23,9 +23,6 @@ env:
     - ROS_DISTRO=indigo USE_DEB=false BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_opencv3.bash' NUMBER_OF_LOGS=12
     - ROS_DISTRO=indigo USE_DEB=false BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_pcl1.8.bash' NUMBER_OF_LOGS=12
     - ROS_DISTRO=jade   USE_DEB=false
-matrix:
-  allow_failures:
-    - env: ROS_DISTRO=indigo USE_DEB=false BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_opencv3.bash' NUMBER_OF_LOGS=12
 script:
   - source .travis/travis.sh
   - (cd doc && source setup.sh && make html)

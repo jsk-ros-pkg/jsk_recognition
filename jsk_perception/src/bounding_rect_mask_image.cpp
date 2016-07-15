@@ -70,7 +70,7 @@ namespace jsk_perception
     cv::Mat mask = cv_ptr->image;
 
     // Find contour
-    cv::vector<cv::vector<cv::Point> > contours;
+    std::vector<std::vector<cv::Point> > contours;
     cv::findContours(mask, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 
     if (contours.size() == 0) {
@@ -88,7 +88,7 @@ namespace jsk_perception
     }
 
     // Find bounding rect
-    cv::vector<cv::Point> max_area_contour = contours[max_area.get<0>()];
+    std::vector<cv::Point> max_area_contour = contours[max_area.get<0>()];
     cv::Rect rect = cv::boundingRect(cv::Mat(max_area_contour));
 
     // Draw bounding rect mask

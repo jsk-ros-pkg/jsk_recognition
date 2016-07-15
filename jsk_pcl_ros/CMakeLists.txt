@@ -287,8 +287,7 @@ jsk_pcl_nodelet(src/extract_indices_nodelet.cpp
   "jsk_pcl/ExtractIndices" "extract_indices")
 jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/MaskImageToDepthConsideredMaskImage" "mask_image_to_depth_considered_mask_image")
 jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/MaskImageToPointIndices" "mask_image_to_point_indices")
-jsk_pcl_nodelet(src/organized_pointcloud_to_point_indices_nodelet.cpp
-  "jsk_pcl/OrganizedPointCloudToPointIndices" "organized_pointcloud_to_point_indices")
+jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/OrganizedPointCloudToPointIndices" "organized_pointcloud_to_point_indices")
 jsk_pcl_nodelet(src/hinted_handle_estimator_nodelet.cpp
   "jsk_pcl/HintedHandleEstimator" "hinted_handle_estimator")
 jsk_pcl_nodelet(src/capture_stereo_synchronizer_nodelet.cpp
@@ -456,5 +455,6 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/test_euclidean_segmentation.test DEPENDENCIES install_test_data)
     add_rostest(test/test_pointcloud_database_server.test DEPENDENCIES install_test_data)
     add_rostest(test/test_convex_connected_voxels.test DEPENDENCIES install_test_data)
+    add_rostest(test/test_organized_pointcloud_to_point_indices.test DEPENDENCIES install_test_data)
   endif()
 endif()

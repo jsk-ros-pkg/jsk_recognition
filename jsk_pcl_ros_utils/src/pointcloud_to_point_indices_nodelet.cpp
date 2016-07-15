@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, JSK Lab
+ *  Copyright (c) 2016, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,62 +33,58 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 #define BOOST_PARAMETER_MAX_ARITY 7
-#include "jsk_pcl_ros/organized_pointcloud_to_point_indices.h"
-#include "jsk_recognition_utils/pcl_conversion_util.h"
+#include "jsk_pcl_ros_utils/pointcloud_to_point_indices.h"
+#include <jsk_recognition_utils/pcl_conversion_util.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 
-namespace jsk_pcl_ros
+namespace jsk_pcl_ros_utils
 {
-  void OrganizedPointCloudToPointIndices::onInit()
+  void PointCloudToPointIndices::onInit()
   {
     DiagnosticNodelet::onInit();
     pub_ = advertise<PCLIndicesMsg>(*pnh_, "output", 1);
     onInitPostProcess();
   }
 
-  void OrganizedPointCloudToPointIndices::subscribe()
+  void PointCloudToPointIndices::subscribe()
   {
-    sub_ = pnh_->subscribe("input", 1,
-                           &OrganizedPointCloudToPointIndices::indices,
-                           this);
+    sub_ = pnh_->subscribe("input", 1, &PointCloudToPointIndices::convert, this);
   }
 
-  void OrganizedPointCloudToPointIndices::unsubscribe()
+  void PointCloudToPointIndices::unsubscribe()
   {
     sub_.shutdown();
   }
 
-  void OrganizedPointCloudToPointIndices::updateDiagnostic(
-    diagnostic_updater::DiagnosticStatusWrapper &stat)
+  void PointCloudToPointIndices::updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
-    if (vital_checker_->isAlive()) {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                   "OrganizedPointCloudToPointIndices running");
+    if (vital_checker_->isAlive())
+    {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "PointCloudToPointIndices running");
     }
-    else {
-      jsk_topic_tools::addDiagnosticErrorSummary(
-        "OrganizedPointCloudToPointIndices", vital_checker_, stat);
+    else
+    {
+      jsk_topic_tools::addDiagnosticErrorSummary("PointCloudToPointIndices", vital_checker_, stat);
     }
   }
 
-  void OrganizedPointCloudToPointIndices::indices(
-    const sensor_msgs::PointCloud2::ConstPtr& point_msg)
+  void PointCloudToPointIndices::convert(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
     pcl::PointCloud<pcl::PointXYZ>::Ptr pc(new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::fromROSMsg(*point_msg, *pc);
-    if(pc->isOrganized()){
-      PCLIndicesMsg indices_msg;
-      indices_msg.header = point_msg->header;
-      for (size_t i = 0; i < pc->points.size(); i++)
-        if (!isnan(pc->points[i].x) && !isnan(pc->points[i].y) && !isnan(pc->points[i].z))
-          indices_msg.indices.push_back(i);
-      pub_.publish(indices_msg);
-    }else{
-      JSK_ROS_ERROR("Input Pointcloud is not organized");
+    pcl::fromROSMsg(*cloud_msg, *pc);
+    PCLIndicesMsg indices_msg;
+    for (size_t i = 0; i < pc->points.size(); i++)
+    {
+      if (!isnan(pc->points[i].x) && !isnan(pc->points[i].y) && !isnan(pc->points[i].z))
+      {
+        indices_msg.indices.push_back(i);
+      }
     }
+    indices_msg.header = cloud_msg->header;
+    pub_.publish(indices_msg);
   }
 }
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::OrganizedPointCloudToPointIndices, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(jsk_pcl_ros_utils::PointCloudToPointIndices, nodelet::Nodelet);

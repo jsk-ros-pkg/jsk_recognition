@@ -1,0 +1,23 @@
+<launch>
+
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/test_data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/vision.compressed.bag --clock --loop">
+  </node>
+
+  <node name="organized_pointcloud_to_point_indices"
+        pkg="jsk_pcl_ros" type="organized_pointcloud_to_point_indices">
+    <remap from="~input" to="/kinect2_head/hd/points" />
+  </node>
+
+  <test test-name="test_organized_pointcloud_to_point_indices"
+        name="test_organized_pointcloud_to_point_indices"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="360" retry="3">
+    <rosparam>
+      topic_0: /organized_pointcloud_to_point_indices/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

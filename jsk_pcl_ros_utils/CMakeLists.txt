@@ -209,6 +209,8 @@ jsk_pcl_util_nodelet(src/polygon_array_transformer_nodelet.cpp
   "jsk_pcl_utils/PolygonArrayTransformer" "polygon_array_transformer")
 jsk_pcl_util_nodelet(src/pointcloud_to_stl_nodelet.cpp
   "jsk_pcl_utils/PointCloudToSTL" "pointcloud_to_stl")
+jsk_pcl_util_nodelet(src/pointcloud_to_point_indices_nodelet.cpp
+  "jsk_pcl_utils/PointCloudToPointIndices" "pointcloud_to_point_indices")
 jsk_pcl_util_nodelet(src/polygon_appender_nodelet.cpp
   "jsk_pcl_utils/PolygonAppender" "polygon_appender")
 jsk_pcl_util_nodelet(src/delay_pointcloud_nodelet.cpp
@@ -285,5 +287,6 @@ if (CATKIN_ENABLE_TESTING)
   if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
     # because of unreleased topic_tools/transform on hydro
     add_rostest(test/test_pointcloud_to_pcd.test DEPENDENCIES install_test_data)
+    add_rostest(test/test_pointcloud_to_point_indices.test DEPENDENCIES install_test_data)
   endif()
 endif()

@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, JSK Lab
+ *  Copyright (c) 2016, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -34,19 +34,18 @@
  *********************************************************************/
 
 
-#ifndef JSK_PCL_ROS_ORGANIZED_POINTCLOUD_TO_POINT_INDICES_H_
-#define JSK_PCL_ROS_ORGANIZED_POINTCLOUD_TO_POINT_INDICES_H_
+#ifndef JSK_PCL_ROS_UTILS_POINTCLOUD_TO_POINT_INDICES_H_
+#define JSK_PCL_ROS_UTILS_POINTCLOUD_TO_POINT_INDICES_H_
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/PointCloud2.h>
-#include "jsk_recognition_utils/pcl_conversion_util.h"
 
-namespace jsk_pcl_ros
+namespace jsk_pcl_ros_utils
 {
-  class OrganizedPointCloudToPointIndices: public jsk_topic_tools::DiagnosticNodelet
+  class PointCloudToPointIndices: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    OrganizedPointCloudToPointIndices(): DiagnosticNodelet("OrganizedPointCloudToPointIndices") { }
+    PointCloudToPointIndices(): DiagnosticNodelet("PointCloudToPointIndices") { }
   protected:
     ////////////////////////////////////////////////////////
     // methods
@@ -54,10 +53,8 @@ namespace jsk_pcl_ros
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
-    virtual void indices(
-      const sensor_msgs::PointCloud2::ConstPtr& point_msg);
+    virtual void updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat);
+    virtual void convert(const sensor_msgs::PointCloud2::ConstPtr& point_msg);
 
     ////////////////////////////////////////////////////////
     // ROS variables
@@ -65,8 +62,7 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_;
     ros::Publisher pub_;
   private:
-
   };
-}
+}  // namespace jsk_pcl_ros_utils
 
-#endif
+#endif  // JSK_PCL_ROS_UTILS_POINTCLOUD_TO_POINT_INDICES_H_

@@ -1,0 +1,22 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros_utils)/test_data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/vision.compressed.bag --clock --loop">
+  </node>
+
+  <node name="pointcloud_to_mask_image"
+        pkg="jsk_pcl_ros_utils" type="pointcloud_to_mask_image">
+    <remap from="~input" to="/kinect2_head/hd/points" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="pointcloud_to_mask_image/output" />
+    </node>
+  </group>
+
+</launch>

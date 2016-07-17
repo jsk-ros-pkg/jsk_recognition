@@ -11,20 +11,26 @@ namespace jsk_pcl_ros
   {
     ConnectionBasedNodelet::onInit();
 
+    // param
+    pnh_->param("approximate_sync", approximate_sync_, false);
+
+    // dynamic reconfigure
+    srv_ = boost::make_shared<dynamic_reconfigure::Server<Config> >(*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind(&InnerBoundingBoxFilter::configCallback, this, _1, _2);
+    srv_->setCallback(f);
+
     // diagnostics setup
     diagnostic_updater_.reset(
       new jsk_recognition_utils::TimeredDiagnosticUpdater(*pnh_, ros::Duration(1.0)));
     diagnostic_updater_->setHardwareID(getName());
     diagnostic_updater_->add(
       getName() + "::InnerBoundingBoxFilter",
-      boost::bind(
-        &InnerBoundingBoxFilter::updateDiagnostic,
-        this,
-        _1));
+      boost::bind(&InnerBoundingBoxFilter::updateDiagnostic, this, _1));
     double vital_rate;
     pnh_->param("vital_rate", vital_rate, 1.0);
     vital_checker_.reset(
-      new jsk_topic_tools::VitalChecker(1 / vital_rate));
+      new jsk_topic_tools::VitalChecker(1.0 / vital_rate));
     diagnostic_updater_->start();
 
     // publisher
@@ -33,12 +39,9 @@ namespace jsk_pcl_ros
     onInitPostProcess();
   }
 
-  void InnerBoundingBoxFilter::updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {}
-
   void InnerBoundingBoxFilter::subscribe()
   {
+    processed_msg_num_ = 0;
     sub_pc_.subscribe(*pnh_, "input_cloud", 1);
     sub_bbox_.subscribe(*pnh_, "input_box", 1);
     if (approximate_sync_) {
@@ -79,7 +82,7 @@ namespace jsk_pcl_ros
 
     for (int i = 0; i < bbox_msg->boxes.size(); ++i)
     {
-      BoundingBox b(bbox_msg->boxes[i]);
+      BoundingBox b(bbox_msg->boxes[i], padding_rate_);
       for (int j = 0; j < point_size; ++j)
       {
         if (b.innerPoint(cloud_xyz.points[i]))
@@ -88,7 +91,27 @@ namespace jsk_pcl_ros
     }
     cluster_indices.cluster_indices.push_back(indices);
     pub_indices_.publish(cluster_indices);
+    ++processed_msg_num_;
   }
+
+  void InnerBoundingBoxFilter::configCallback(Config &config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    JSK_NODELET_DEBUG_STREAM("padding_rate is changed " << padding_rate_ << " -> " << config.padding_rate);
+    padding_rate_ = config.padding_rate;
+  }
+
+  void InnerBoundingBoxFilter::updateDiagnostic(
+      diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    if (vital_checker_->isAlive()) {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
+                   "InnerBoundingBoxFilter running");
+      stat.add("Number of processed messages", processed_msg_num_);
+      jsk_recognition_utils::addDiagnosticBooleanStat("Approximate Sync", approximate_sync_, stat);
+    }
+  }
+
 }
 
 #include <pluginlib/class_list_macros.h>

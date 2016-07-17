@@ -41,6 +41,7 @@
 #define INNER_BOUNDING_BOX_FILTER_H__
 
 #include <boost/thread.hpp>
+#include <dynamic_reconfigure/server.h>
 #include <Eigen/Dense>
 #include <jsk_recognition_utils/pcl_util.h>
 #include <jsk_topic_tools/connection_based_nodelet.h>
@@ -51,6 +52,7 @@
 #include <pcl_ros/pcl_nodelet.h>
 
 #include <sensor_msgs/PointCloud2.h>
+#include <jsk_pcl_ros/InnerBoundingBoxFilterConfig.h>
 #include <jsk_recognition_msgs/BoundingBoxArray.h>
 #include <jsk_recognition_msgs/ClusterPointIndices.h>
 
@@ -59,6 +61,7 @@ namespace jsk_pcl_ros
   class InnerBoundingBoxFilter: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
+    typedef jsk_pcl_ros::InnerBoundingBoxFilterConfig Config;
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
       jsk_recognition_msgs::BoundingBoxArray> SyncPolicy;
@@ -74,7 +77,9 @@ namespace jsk_pcl_ros
       diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void subscribe();
     virtual void unsubscribe();
+    virtual void configCallback(Config &config, uint32_t level);
 
+    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_pc_;
     message_filters::Subscriber<jsk_recognition_msgs::BoundingBoxArray> sub_bbox_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
@@ -85,13 +90,14 @@ namespace jsk_pcl_ros
     jsk_recognition_utils::TimeredDiagnosticUpdater::Ptr diagnostic_updater_;
     jsk_topic_tools::VitalChecker::Ptr vital_checker_;
     bool approximate_sync_;
+    int processed_msg_num_;
     double padding_rate_;
 
   private:
 
 
     struct BoundingBox {
-      BoundingBox(const jsk_recognition_msgs::BoundingBox &bbox) {
+      BoundingBox(const jsk_recognition_msgs::BoundingBox &bbox, double padding) {
           Eigen::Translation3d ctrans
             = Eigen::Translation3d(bbox.pose.position.x,
                                    bbox.pose.position.y,
@@ -101,81 +107,59 @@ namespace jsk_pcl_ros
                                  bbox.pose.orientation.y,
                                  bbox.pose.orientation.z,
                                  bbox.pose.orientation.w);
+          double x = bbox.dimensions.x / 2.0 * padding;
+          double y = bbox.dimensions.y / 2.0 * padding;
+          double z = bbox.dimensions.z / 2.0 * padding;
           Eigen::Affine3d transform = ctrans * cquat;
-          Eigen::Vector3d vddd;
-          vddd << -bbox.dimensions.x / 2.0,
-            -bbox.dimensions.y / 2.0,
-            -bbox.dimensions.z / 2.0;
+          Eigen::Vector3d vddd(-x,-y,-z);
           vddd = transform * vddd;
-          Eigen::Vector3d vddu;
-          vddu << -bbox.dimensions.x / 2.0,
-            -bbox.dimensions.y / 2.0,
-            +bbox.dimensions.z / 2.0;
+          Eigen::Vector3d vddu(-x,-y,+z);
           vddu = transform * vddu;
-          Eigen::Vector3d vdud;
-          vdud << -bbox.dimensions.x / 2.0,
-            +bbox.dimensions.y / 2.0,
-            -bbox.dimensions.z / 2.0;
+          Eigen::Vector3d vdud(-x,+y,-z);
           vdud = transform * vdud;
-          Eigen::Vector3d vudd;
-          vudd << +bbox.dimensions.x / 2.0,
-            -bbox.dimensions.y / 2.0,
-            -bbox.dimensions.z / 2.0;
+          Eigen::Vector3d vudd(+x,-y,-z);
           vudd = transform * vudd;
-          Eigen::Vector3d vuud;
-          vuud << +bbox.dimensions.x / 2.0,
-            +bbox.dimensions.y / 2.0,
-            -bbox.dimensions.z / 2.0;
+          Eigen::Vector3d vuud(+x,+y,-z);
           vuud = transform * vuud;
-          Eigen::Vector3d vudu;
-          vudu << +bbox.dimensions.x / 2.0,
-            -bbox.dimensions.y / 2.0,
-            +bbox.dimensions.z / 2.0;
+          Eigen::Vector3d vudu(+x,-y,+z);
           vudu = transform * vudu;
-          Eigen::Vector3d vduu;
-          vduu << -bbox.dimensions.x / 2.0,
-            +bbox.dimensions.y / 2.0,
-            +bbox.dimensions.z / 2.0;
+          Eigen::Vector3d vduu(-x,+y,+z);
           vduu = transform * vduu;
-          Eigen::Vector3d vuuu;
-          vuuu << +bbox.dimensions.x / 2.0,
-            +bbox.dimensions.y / 2.0,
-            +bbox.dimensions.z / 2.0;
+          Eigen::Vector3d vuuu(+x,+y,+z);
           vuuu = transform * vuuu;
 
-          Eigen::Matrix3d mzd = Eigen::Matrix3d::Zero();
+          Eigen::Matrix3d mzd;
           mzd.col(0) = vddd;
           mzd.col(1) = vudd;
           mzd.col(2) = vdud;
           matrices.push_back(mzd);
-          Eigen::Matrix3d mxd = Eigen::Matrix3d::Zero();
+          Eigen::Matrix3d mxd;
           mxd.col(0) = vddd;
           mxd.col(1) = vdud;
           mxd.col(2) = vddu;
           matrices.push_back(mxd);
-          Eigen::Matrix3d myd = Eigen::Matrix3d::Zero();
+          Eigen::Matrix3d myd;
           myd.col(0) = vddd;
           myd.col(1) = vddu;
           myd.col(2) = vudd;
           matrices.push_back(myd);
-          Eigen::Matrix3d mzu = Eigen::Matrix3d::Zero();
+          Eigen::Matrix3d mzu;
           mzu.col(0) = vuuu;
           mzu.col(1) = vudu;
           mzu.col(2) = vduu;
           matrices.push_back(mzu);
-          Eigen::Matrix3d mxu = Eigen::Matrix3d::Zero();
+          Eigen::Matrix3d mxu;
           mxu.col(0) = vuuu;
           mxu.col(1) = vuud;
           mxu.col(2) = vudu;
           matrices.push_back(mxu);
-          Eigen::Matrix3d myu = Eigen::Matrix3d::Zero();
+          Eigen::Matrix3d myu;
           myu.col(0) = vuuu;
           myu.col(1) = vduu;
           myu.col(2) = vuud;
           matrices.push_back(myu);
       }
       bool innerPoint(const pcl::PointXYZ &p) {
-//      bool innerPoint(const Eigen::Vector4d &p) {
           Eigen::Vector3d v(p.x, p.y, p.z);
           bool inner = true;
           for (int i = 0; i < matrices.size(); ++i)

@@ -201,6 +201,8 @@ jsk_pcl_util_nodelet(src/plane_rejector_nodelet.cpp
   "jsk_pcl_utils/PlaneRejector" "plane_rejector")
 jsk_pcl_util_nodelet(src/pointcloud_to_cluster_point_indices_nodelet.cpp
   "jsk_pcl_utils/PointCloudToClusterPointIndices" "pointcloud_to_cluster_point_indices")
+jsk_pcl_util_nodelet(src/pointcloud_to_mask_image_nodelet.cpp
+  "jsk_pcl_utils/PointCloudToMaskImage" "pointcloud_to_mask_image")
 jsk_pcl_util_nodelet(src/static_polygon_array_publisher_nodelet.cpp
   "jsk_pcl_utils/StaticPolygonArrayPublisher" "static_polygon_array_publisher")
 jsk_pcl_util_nodelet(src/polygon_array_transformer_nodelet.cpp

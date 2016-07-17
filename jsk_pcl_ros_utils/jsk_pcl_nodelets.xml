@@ -168,6 +168,12 @@
     <description>
     </description>
   </class>
+  <class name="jsk_pcl_utils/PointCloudToMaskImage" type="jsk_pcl_ros_utils::PointCloudToMaskImage"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Convert point cloud to mask image with skipping nan region of xyz.
+    </description>
+  </class>
   <class name="jsk_pcl_utils/PointCloudRelativeFromPoseStamped" type="jsk_pcl_ros_utils::PointCloudRelativeFromPoseStamped"
          base_class_type="nodelet::Nodelet">
     <description>

@@ -329,6 +329,12 @@
       of the bounding boxes.
     </description>
   </class>
+  <class name="jsk_pcl/InnerBoundingBoxFilter" type="jsk_pcl_ros::InnerBoundingBoxFilter"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      filter PointCloud2 with boundingboxes.
+    </description>
+  </class>
   <class name="jsk_pcl/MultiPlaneSACSegmentation" type="jsk_pcl_ros::MultiPlaneSACSegmentation"
          base_class_type="nodelet::Nodelet">
     <description>

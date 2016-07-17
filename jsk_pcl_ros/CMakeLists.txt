@@ -100,6 +100,7 @@ generate_dynamic_reconfigure_options(
   cfg/EdgebasedCubeFinder.cfg
   cfg/MultiPlaneSACSegmentation.cfg
   cfg/BoundingBoxFilter.cfg
+  cfg/InnerBoundingBoxFilter.cfg
   cfg/ResizePointsPublisher.cfg
   cfg/RearrangeBoundingBox.cfg
   cfg/LINEMODDetector.cfg
@@ -254,6 +255,8 @@ jsk_pcl_nodelet(src/multi_plane_sac_segmentation_nodelet.cpp
   "jsk_pcl/MultiPlaneSACSegmentation" "multi_plane_sac_segmentation")
 jsk_pcl_nodelet(src/bounding_box_filter_nodelet.cpp
   "jsk_pcl/BoundingBoxFilter" "bounding_box_filter")
+jsk_pcl_nodelet(src/inner_bounding_box_filter_nodelet.cpp
+  "jsk_pcl/InnerBoundingBoxFilter" "inner_bounding_box_filter")
 jsk_pcl_nodelet(src/organized_pass_through_nodelet.cpp
   "jsk_pcl/OrganizedPassThrough" "organized_pass_through")
 jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PlaneReasoner" "plane_reasoner")

@@ -1,0 +1,55 @@
+<launch>
+  <arg name="input" default="/camera/depth_registered/points" />
+  <arg name="manager" default="inner_bounding_box_filter_nodelet_manager" />
+  <arg name="machine" default="localhost" />
+  <arg name="bounding_box_topic" default="bounding_box_array" />
+  <arg name="approximate_sync" default="true" />
+  <arg name="padding_rate" default="1.0" />
+  <arg name="publish_tf" default="true" />
+
+  <arg name="launch_manager" default="true" />
+  <arg name="launch_openni" default="true" />
+  <arg name="launch_decomposer" default="true" />
+
+  <machine name="localhost" address="localhost" />
+
+  <!-- openni driver -->
+  <include file="$(find openni_launch)/launch/openni.launch"
+           if="$(arg launch_openni)">
+    <arg name="depth_registration" value="true" />
+  </include>
+
+  <node name="$(arg manager)" pkg="nodelet" type="nodelet" args="manager"
+        machine="$(arg machine)" if="$(arg launch_manager)"
+        output="screen" />
+
+  <node name="input_relay" pkg="nodelet" type="nodelet"
+        args="load jsk_topic_tools/Relay $(arg manager)"
+        machine="$(arg machine)">
+    <remap from="~input" to="$(arg input)" />
+  </node>
+
+  <node name="inner_bounding_box_filter" pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/InnerBoundingBoxFilter $(arg manager)"
+        output="screen">
+    <rosparam subst_value="true">
+      approximate_sync: $(arg approximate_sync)
+      padding_rate: $(arg padding_rate)
+    </rosparam>
+    <remap from="~input_cloud" to="input_relay/output" />
+    <remap from="~input_box" to="$(arg bounding_box_topic)" />
+  </node>
+
+  <node name="segmentation_decomposer" pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg manager)"
+        output="screen"
+        if="$(arg launch_decomposer)"
+        machine="$(arg machine)">
+    <remap from="~input" to="/inner_bounding_box_filter/output" />
+    <remap from="~target" to="input_relay/output" />
+    <rosparam subst_value="true">
+      publish_clouds: true
+      publish_tf: $(arg publish_tf)
+    </rosparam>
+  </node>
+</launch>

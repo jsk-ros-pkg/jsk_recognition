@@ -159,6 +159,10 @@
     <description>
     </description>
   </class>
+  <class name="jsk_pcl/OrganizedPointCloudToPointIndices"
+         type="jsk_pcl_ros_utils::PointCloudToPointIndices"
+         base_class_type="nodelet::Nodelet">
+  </class>
 </library>
 <library path="libjsk_pcl_ros">
   <class name="jsk_pcl/InteractiveCuboidLikelihood"
@@ -211,10 +215,6 @@
   </class>
   <class name="jsk_pcl/SupervoxelSegmentation"
          type="jsk_pcl_ros::SupervoxelSegmentation"
-         base_class_type="nodelet::Nodelet">
-  </class>
-  <class name="jsk_pcl/OrganizedPointCloudToPointIndices"
-         type="jsk_pcl_ros::OrganizedPointCloudToPointIndices"
          base_class_type="nodelet::Nodelet">
   </class>
   <class name="jsk_pcl/IncrementalModelRegistration"

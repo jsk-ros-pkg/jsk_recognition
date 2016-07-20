@@ -19,6 +19,10 @@
          type="jsk_perception::ROIToMaskImage"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_perception/LabelToMaskImage"
+         type="jsk_perception::LabelToMaskImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/ROIToRect"
          type="jsk_perception::ROIToRect"
          base_class_type="nodelet::Nodelet">

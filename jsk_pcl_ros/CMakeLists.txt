@@ -73,6 +73,7 @@ generate_dynamic_reconfigure_options(
   cfg/BorderEstimator.cfg
   cfg/HintedStickFinder.cfg
   cfg/HintedPlaneDetector.cfg
+  cfg/PeopleDetection.cfg
   cfg/TorusFinder.cfg
   cfg/NormalDirectionFilter.cfg
   cfg/RegionGrowingMultiplePlaneSegmentation.cfg
@@ -320,6 +321,8 @@ jsk_pcl_nodelet(src/uniform_sampling_nodelet.cpp
   "jsk_pcl/UniformSampling" "uniform_sampling")
 jsk_pcl_nodelet(src/pointcloud_localization_nodelet.cpp
   "jsk_pcl/PointCloudLocalization" "pointcloud_localization")
+jsk_pcl_nodelet(src/people_detection_nodelet.cpp
+  "jsk_pcl/PeopleDetection" "people_detection")
 jsk_pcl_nodelet(src/geometric_consistency_grouping_nodelet.cpp
   "jsk_pcl/GeometricConsistencyGrouping" "geometric_consistency_grouping")
 jsk_pcl_nodelet(src/convex_connected_voxels_nodelet.cpp

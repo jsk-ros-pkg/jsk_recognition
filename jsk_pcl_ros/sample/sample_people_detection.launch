@@ -1,0 +1,99 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <param name="/use_sim_time" value="true" />
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/test_data/2016-07-06-12-16-43-person-in-point-cloud/vision.compressed.bag --clock --loop">
+  </node>
+
+  <arg name="INPUT_CLOUD" value="/camera_remote/depth_registered/points" />
+  <arg name="FILTERED_CLOUD" value="/zaxis_filter/output" />
+  <arg name="INPUT_IMAGE" value="/camera_remote/rgb/image_rect_color" />
+
+  <arg name="INPUT_CAMERA_INFO" value="/camera_remote/rgb/camera_info" />
+
+  <arg name="MANAGER" value="people_detection_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="zaxis_filter"
+        pkg="nodelet" type="nodelet"
+        args="load pcl/PassThrough $(arg MANAGER)">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <rosparam>
+      keep_organized: true
+      filter_field_name: z
+      filter_limit_min: -0.5
+      filter_limit_max: 3.0
+    </rosparam>
+  </node>
+
+  <node name="footstep_polygon_publisher"
+        pkg="nodelet" type="nodelet"
+        clear_params="true"
+        args="load jsk_pcl/StaticPolygonArrayPublisher /$(arg MANAGER)">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <rosparam>
+      use_message: true
+      frame_ids: [ground]
+      polygon_array: [[[10.0, -10.0, -0.05],[-10.0, -10.0, -0.05],[-10.0, 10.0, -0.05], [10.0, 10.0, -0.05]]]
+    </rosparam>
+  </node>
+
+  <node name="polygon_array_transformer"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/PolygonArrayTransformer $(arg MANAGER)"
+        clear_params="true">
+    <remap from="~input_polygons" to="/footstep_polygon_publisher/output_polygons" />
+    <remap from="~input_coefficients" to="/footstep_polygon_publisher/output_coefficients" />
+    <rosparam>
+      frame_id: camera_rgb_optical_frame
+    </rosparam>
+  </node>
+
+  <node name="people_detection"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/PeopleDetection people_detection_manager">
+    <remap from="~input" to="$(arg FILTERED_CLOUD)" />
+    <remap from="~input/info" to="$(arg INPUT_CAMERA_INFO)" />
+    <remap from="~input/coefficients" to="/polygon_array_transformer/output_coefficients" />
+    <param name="filename" value="$(find jsk_pcl_ros)/config/trainedLinearSVMForPeopleDetectionWithHOG.yaml" />
+    <rosparam>
+      people_height_threshold: 1.5
+      min_confidence: -3.0
+    </rosparam>
+  </node>
+
+  <node name="extract_people"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/AttentionClipper $(arg MANAGER)">
+    <remap from="~input" to="$(arg INPUT_CAMERA_INFO)" />
+    <remap from="~input/points" to="$(arg INPUT_CLOUD)" />
+    <remap from="~input/box_array" to="/people_detection/boxes" />
+    <rosparam>
+      use_multiple_attention: true
+    </rosparam>
+  </node>
+
+  <node name="roi_clipper"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ROIClipper $(arg MANAGER)">
+    <remap from="~input/image" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/camera_info" to="/extract_people/output" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="/extract_people/output/mask" />
+    </node>
+    <node name="image_view1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="/roi_clipper/output" />
+    </node>
+  </group>
+
+</launch>

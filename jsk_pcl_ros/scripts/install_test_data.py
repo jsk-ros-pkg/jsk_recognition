@@ -24,5 +24,16 @@ def main():
         extract=False,
     )
 
+    download_data(
+        pkg_name=PKG,
+        path='test_data/2016-07-06-12-16-43-person-in-point-cloud.tgz',
+        url='https://drive.google.com/uc?id=0B_NiLAzvehC9cHhnOFd0YUN2N1U',
+        md5='c59067adc429fb9f1cf180d350a2da43',
+        extract=True,
+        compressed_bags=[
+            'test_data/2016-07-06-12-16-43-person-in-point-cloud/vision.compressed.bag',
+        ],
+    )
+
 if __name__ == '__main__':
     main()

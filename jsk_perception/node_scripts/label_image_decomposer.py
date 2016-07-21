@@ -13,6 +13,8 @@ from jsk_recognition_utils.color import labelcolormap
 from jsk_topic_tools import ConnectionBasedTransport
 from jsk_topic_tools import jsk_loginfo
 from jsk_topic_tools import warn_no_remap
+import matplotlib
+matplotlib.use('Agg')  # NOQA
 import matplotlib.pyplot as plt
 import message_filters
 import rospy

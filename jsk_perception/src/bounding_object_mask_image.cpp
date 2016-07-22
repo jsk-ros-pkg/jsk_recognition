@@ -73,22 +73,19 @@ namespace jsk_perception
     std::vector<std::vector<cv::Point> > contours;
     cv::findContours(mask, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 
-    if (contours.size() == 0) {
-      NODELET_ERROR_THROTTLE(30, "[%s] Skipping because no contour is found", __PRETTY_FUNCTION__);
-      return;
-    }
-
-    // Find max area to create mask later
-    boost::tuple<int, double> max_area;
-    for (size_t i = 0; i < contours.size(); i++) {
-      double area = cv::contourArea(contours[i]);
-      if (area > max_area.get<1>()) {
-        max_area = boost::make_tuple<int, double>(i, area);
-      }
-    }
-
     cv::Mat object_mask = cv::Mat::zeros(mask_msg->height, mask_msg->width, CV_8UC1);
-    cv::drawContours(object_mask, contours, max_area.get<0>(), cv::Scalar(255), CV_FILLED);
+
+    if (contours.size() != 0) {
+      // Find max area to create mask later
+      boost::tuple<int, double> max_area;
+      for (size_t i = 0; i < contours.size(); i++) {
+        double area = cv::contourArea(contours[i]);
+        if (area > max_area.get<1>()) {
+          max_area = boost::make_tuple<int, double>(i, area);
+        }
+      }
+      cv::drawContours(object_mask, contours, max_area.get<0>(), cv::Scalar(255), CV_FILLED);
+    }
 
     pub_.publish(cv_bridge::CvImage(
                     mask_msg->header,

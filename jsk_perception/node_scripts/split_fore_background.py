@@ -35,13 +35,17 @@ class SplitForeBackground(ConnectionBasedTransport):
         # split fg/bg and get each mask
         bridge = cv_bridge.CvBridge()
         depth = bridge.imgmsg_to_cv2(depth_msg)
+        nan_mask = None
         if depth_msg.encoding == '32FC1':
             # convert float to int (handle 32FC1 as 16UC1)
-            depth = depth.copy()
-            depth[np.isnan(depth)] = 0
+            nan_mask = np.isnan(depth)
+            depth[nan_mask] = 0
             depth *= 255
             depth = depth.astype(np.uint8)
         fg_mask, bg_mask = split_fore_background(depth)
+        if nan_mask is not None:
+            fg_mask[nan_mask] = 0
+            bg_mask[nan_mask] = 0
         # fg_mask
         fg_mask = (fg_mask * 255).astype(np.uint8)
         fg_mask_msg = bridge.cv2_to_imgmsg(fg_mask, encoding='mono8')

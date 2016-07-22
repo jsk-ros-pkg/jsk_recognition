@@ -1,0 +1,51 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/lena.jpg
+      encoding: bgr8
+      publish_info: false
+    </rosparam>
+  </node>
+
+  <!-- create label -->
+  <node name="grid_label"
+        pkg="jsk_perception" type="grid_label">
+    <remap from="~input" to="image_publisher/output" />
+    <rosparam>
+      label_size: 128
+    </rosparam>
+  </node>
+
+  <node name="label_to_mask_image"
+        pkg="jsk_perception" type="label_to_mask_image">
+    <remap from="~input" to="grid_label/output" />
+    <rosparam>
+      label_value: 1
+    </rosparam>
+  </node>
+
+  <node name="label_image_decomposer"
+        pkg="jsk_perception" type="label_image_decomposer.py">
+    <remap from="~input" to="image_publisher/output" />
+    <remap from="~input/label" to="grid_label/output" />
+    <rosparam>
+      queue_size: 30
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="label_image_decomposer/output/label_viz" />
+    </node>
+    <node name="image_view1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="label_to_mask_image/output" />
+    </node>
+  </group>
+
+</launch>

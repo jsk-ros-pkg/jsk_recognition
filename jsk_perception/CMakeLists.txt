@@ -92,6 +92,7 @@ generate_dynamic_reconfigure_options(
   cfg/ImageTimeDiff.cfg
   cfg/OverlayImageColorOnMono.cfg
   cfg/SelectiveSearch.cfg
+  cfg/LabelToMaskImage.cfg
 )
 
 add_service_files(FILES EuclideanSegment.srv  SetTemplate.srv  WhiteBalancePoints.srv  WhiteBalance.srv NonMaximumSuppression.srv)
@@ -185,6 +186,7 @@ jsk_perception_nodelet(src/morphological_operator.cpp "jsk_perception/Closing" "
 jsk_perception_nodelet(src/morphological_operator.cpp "jsk_perception/MorphologicalGradient" "morphological_gradient")
 jsk_perception_nodelet(src/morphological_operator.cpp "jsk_perception/TopHat" "top_hat")
 jsk_perception_nodelet(src/morphological_operator.cpp "jsk_perception/BlackHat" "black_hat")
+jsk_perception_nodelet(src/label_to_mask_image.cpp "jsk_perception/LabelToMaskImage" "label_to_mask_image")
 jsk_perception_nodelet(src/rect_to_mask_image.cpp "jsk_perception/RectToMaskImage" "rect_to_mask_image")
 jsk_perception_nodelet(src/mask_image_to_roi.cpp "jsk_perception/MaskImageToROI" "mask_image_to_roi")
 jsk_perception_nodelet(src/mask_image_to_rect.cpp "jsk_perception/MaskImageToRect" "mask_image_to_rect")
@@ -340,6 +342,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_perception_add_rostest(test/image_to_label.test)
     jsk_perception_add_rostest(test/mask_image_to_label.test)
     jsk_perception_add_rostest(test/kmeans.test)
+    jsk_perception_add_rostest(test/label_to_mask_image.test)
     jsk_perception_add_rostest(test/rect_array_to_image_marker.test)
     jsk_perception_add_rostest(test/convex_hull_mask_image.test)
     jsk_perception_add_rostest(test/overlay_image_color_on_mono.test)

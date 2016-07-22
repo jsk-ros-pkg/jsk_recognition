@@ -46,7 +46,7 @@ namespace jsk_pcl_ros_utils
 class LabelToClusterPointIndices: public jsk_topic_tools::DiagnosticNodelet
 {
 public:
-  LabelToClusterPointIndices(): DiagnosticNodelet("MaskImageToPointIndices") { }
+  LabelToClusterPointIndices(): DiagnosticNodelet("LabelToClusterPointIndices") { }
 protected:
   ////////////////////////////////////////////////////////
   // methods

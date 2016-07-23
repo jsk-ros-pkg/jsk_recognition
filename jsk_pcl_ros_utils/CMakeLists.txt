@@ -292,6 +292,7 @@ if (CATKIN_ENABLE_TESTING)
   endif()
   # Naming Rule: filename of rostest should be {EXECUTABLE_NAME}.test
   add_rostest(test/point_indices_to_cluster_point_indices.test)
+  add_rostest(test/cluster_point_indices_to_point_indices.test)
   if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
     # unexpected error
     add_rostest(test/point_indices_to_mask_image.test)

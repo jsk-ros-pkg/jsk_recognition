@@ -87,6 +87,7 @@ generate_dynamic_reconfigure_options(
   cfg/Fisheye.cfg
   cfg/SlidingWindowObjectDetector.cfg
   cfg/ImagePublisher.cfg
+  cfg/ExtractImageChannel.cfg
   cfg/GaussianBlur.cfg
   cfg/KMeans.cfg
   cfg/ImageTimeDiff.cfg

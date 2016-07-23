@@ -177,6 +177,12 @@
       Convert point cloud to mask image with skipping nan region of xyz.
     </description>
   </class>
+  <class name="jsk_pcl_utils/ClusterPointIndicesToPointIndices" type="jsk_pcl_ros_utils::ClusterPointIndicesToPointIndices"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Convert cluster indices to point indices for specified index value with ROS param.
+    </description>
+  </class>
   <class name="jsk_pcl_utils/PointCloudToPointIndices" type="jsk_pcl_ros_utils::PointCloudToPointIndices"
          base_class_type="nodelet::Nodelet">
     <description>

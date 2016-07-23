@@ -4,13 +4,18 @@
 import numpy as np
 from skimage.color import gray2rgb
 from skimage.color import label2rgb
+from skimage.util import img_as_ubyte
 
 import cv_bridge
 from jsk_recognition_utils import bounding_rect_of_mask
 from jsk_recognition_utils import get_tile_image
+from jsk_recognition_utils.color import labelcolormap
 from jsk_topic_tools import ConnectionBasedTransport
 from jsk_topic_tools import jsk_loginfo
 from jsk_topic_tools import warn_no_remap
+import matplotlib
+matplotlib.use('Agg')  # NOQA
+import matplotlib.pyplot as plt
 import message_filters
 import rospy
 from sensor_msgs.msg import Image
@@ -23,6 +28,7 @@ class LabelImageDecomposer(ConnectionBasedTransport):
         self.pub_img = self.advertise('~output', Image, queue_size=5)
         self.pub_label_viz = self.advertise('~output/label_viz', Image,
                                             queue_size=5)
+        self._label_names = rospy.get_param('~label_names', [])
         # publish masks of fg/bg by decomposing each label
         self._publish_mask = rospy.get_param('~publish_mask', False)
         if self._publish_mask:
@@ -80,11 +86,54 @@ class LabelImageDecomposer(ConnectionBasedTransport):
             min_value, max_value = img.min(), img.max()
             img = (img - min_value) / (max_value - min_value) * 255
             img = gray2rgb(img)
-        label_viz_img = label2rgb(label_img, img, bg_label=0)
-        label_viz_img = (label_viz_img * 255).astype(np.uint8)
-        label_viz_msg = bridge.cv2_to_imgmsg(label_viz_img, encoding='rgb8')
+
+        unique_labels = np.unique(label_img)
+        if self._label_names:
+            n_label = len(self._label_names)
+        else:
+            n_label = len(unique_labels)
+        cmap = labelcolormap(N=n_label)
+        label_img = label_img.copy()
+        label_viz = label2rgb(label_img, img, colors=cmap[1:], bg_label=0)
+        label_viz = img_as_ubyte(label_viz)
+
+        if self._label_names:
+            # plot label titles on image using matplotlib
+            import StringIO
+            import PIL.Image
+            from scipy.misc import fromimage
+            plt.subplots_adjust(left=0, right=1, top=1, bottom=0,
+                                wspace=0, hspace=0)
+            plt.margins(0, 0)
+            plt.gca().xaxis.set_major_locator(plt.NullLocator())
+            plt.gca().yaxis.set_major_locator(plt.NullLocator())
+            plt.axis('off')
+            # plot image
+            plt.imshow(label_viz)
+            # plot legend
+            plt_handlers = []
+            plt_titles = []
+            for label_value in unique_labels:
+                if (label_img == label_value).sum() < 0.01 * label_img.size:
+                    # Skip label which has small region
+                    continue
+                fc = cmap[label_value]
+                p = plt.Rectangle((0, 0), 1, 1, fc=fc)
+                plt_handlers.append(p)
+                plt_titles.append(self._label_names[label_value])
+            plt.legend(plt_handlers, plt_titles, loc='lower right',
+                       framealpha=0.5)
+            # convert plotted figure to np.ndarray
+            f = StringIO.StringIO()
+            plt.savefig(f, bbox_inches='tight', pad_inches=0)
+            result_img_pil = PIL.Image.open(f)
+            result_img = fromimage(result_img_pil, mode='RGB')
+            label_viz = result_img
+
+        label_viz_msg = bridge.cv2_to_imgmsg(label_viz, encoding='rgb8')
         label_viz_msg.header = img_msg.header
         self.pub_label_viz.publish(label_viz_msg)
+
         # publish mask
         if self._publish_mask:
             bg_mask = (label_img == 0)

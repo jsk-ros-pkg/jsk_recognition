@@ -34,6 +34,8 @@ Publishing Topic
 
   Applied label to raw image to visualize.
   It computes the average pixel value of each label and draw with edge line.
+  If parameter ``~label_names`` is specified,
+  the label names are also drawn as a legend.
 
 **Optional Topics**
 
@@ -73,6 +75,11 @@ Parameters
 
   How many seconds you allow about the difference of timestamp
   when you specify ``~approximate_sync``.
+
+* ``~label_names`` (List of String, default: ``[]``)
+
+  The name of labels, and if this parameter is specified, the ``~output/label_viz``
+  image is drawn with label name legend.
 
 
 Sample

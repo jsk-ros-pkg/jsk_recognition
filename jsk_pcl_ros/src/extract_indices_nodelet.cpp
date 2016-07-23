@@ -99,6 +99,10 @@ namespace jsk_pcl_ros
     extract.filter(output);
 
     sensor_msgs::PointCloud2 out_cloud_msg;
+    if (indices->indices.empty()) {
+      out_cloud_msg.height = cloud_msg->height;
+      out_cloud_msg.width = cloud_msg->width;
+    }
     pcl_conversions::moveFromPCL(output, out_cloud_msg);
 
     out_cloud_msg.header = cloud_msg->header;

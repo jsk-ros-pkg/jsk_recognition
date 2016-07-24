@@ -1,4 +1,7 @@
 <library path="libjsk_pcl_ros_utils">
+  <class name="jsk_pcl_utils/BoundingBoxArrayToBoundingBox" type="jsk_pcl_ros_utils::BoundingBoxArrayToBoundingBox"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_pcl_utils/PCDReaderWithPose" type="jsk_pcl_ros_utils::PCDReaderWithPose"
          base_class_type="nodelet::Nodelet">
     <description>

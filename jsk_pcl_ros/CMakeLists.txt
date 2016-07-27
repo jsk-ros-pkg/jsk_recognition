@@ -73,6 +73,7 @@ generate_dynamic_reconfigure_options(
   cfg/BorderEstimator.cfg
   cfg/HintedStickFinder.cfg
   cfg/HintedPlaneDetector.cfg
+  cfg/PeopleDetection.cfg
   cfg/TorusFinder.cfg
   cfg/NormalDirectionFilter.cfg
   cfg/RegionGrowingMultiplePlaneSegmentation.cfg
@@ -320,6 +321,8 @@ jsk_pcl_nodelet(src/uniform_sampling_nodelet.cpp
   "jsk_pcl/UniformSampling" "uniform_sampling")
 jsk_pcl_nodelet(src/pointcloud_localization_nodelet.cpp
   "jsk_pcl/PointCloudLocalization" "pointcloud_localization")
+jsk_pcl_nodelet(src/people_detection_nodelet.cpp
+  "jsk_pcl/PeopleDetection" "people_detection")
 jsk_pcl_nodelet(src/geometric_consistency_grouping_nodelet.cpp
   "jsk_pcl/GeometricConsistencyGrouping" "geometric_consistency_grouping")
 jsk_pcl_nodelet(src/convex_connected_voxels_nodelet.cpp
@@ -453,6 +456,7 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/test_attention_clipper.test DEPENDENCIES install_test_data)
     add_rostest(test/test_cluster_point_indices_decomposer.test)
     add_rostest(test/test_euclidean_segmentation.test DEPENDENCIES install_test_data)
+    add_rostest(test/test_people_detection.test DEPENDENCIES install_test_data)
     add_rostest(test/test_pointcloud_database_server.test DEPENDENCIES install_test_data)
     add_rostest(test/test_convex_connected_voxels.test DEPENDENCIES install_test_data)
     add_rostest(test/test_organized_pointcloud_to_point_indices.test DEPENDENCIES install_test_data)

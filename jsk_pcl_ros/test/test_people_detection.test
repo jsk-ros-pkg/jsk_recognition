@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_people_detection.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_people_detection"
+        name="test_people_detection"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="360" retry="3">
+    <rosparam>
+      topic_0: /people_detection/boxes
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

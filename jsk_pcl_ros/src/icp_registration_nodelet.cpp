@@ -434,6 +434,12 @@ namespace jsk_pcl_ros
     Eigen::Affine3d best_transform_result;
     Eigen::Affine3f best_offset_result;
     jsk_recognition_msgs::ICPResult result;
+    if (cloud->empty()) {
+      result.header = header;
+      result.score = min_score;
+      result.name = "nan";
+      return result;
+    }
     for (size_t i = 0; i < reference_cloud_list_.size(); i++) {
       Eigen::Affine3f offset_result;
       pcl::PointCloud<PointT>::Ptr transformed_cloud(new pcl::PointCloud<PointT>);

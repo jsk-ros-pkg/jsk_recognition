@@ -7,6 +7,9 @@ Register two pointclouds based on icp like registration technique.
 * `~input` (`sensor_msgs/PointCloud`)
 
   Target pointcloud.
+* `~input/camera_info` (`sensor_msgs/CameraInfo`)
+
+  Camera info.
 * `~input_reference` (`sensor_msgs/PointCloud`)
 
   Reference pointcloud. frame_id of this pointlcoud is ignored.

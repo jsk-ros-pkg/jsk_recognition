@@ -63,9 +63,10 @@ namespace jsk_pcl_ros
     LineSegment(pcl::PointIndices::Ptr indices,
                 pcl::ModelCoefficients::Ptr coefficients);
     virtual ~LineSegment();
-    virtual void addMarkerLine(
+    virtual bool addMarkerLine(
       visualization_msgs::Marker& marker,
-      const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
+      const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud,
+      double minimum_line_length);
     //virtual Segment::Ptr toSegment();
     virtual jsk_recognition_utils::Line::Ptr toSegment();
     pcl::PointIndices::Ptr getIndices() { return indices_; }
@@ -87,6 +88,11 @@ namespace jsk_pcl_ros
   public:
     LineSegmentDetector(): DiagnosticNodelet("LineSegmentDetector")
     {
+    }
+    ~LineSegmentDetector()
+    {
+      sync_.reset();
+      srv_.reset();
     }
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,

@@ -1,0 +1,15 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_line_segment_detector.launch" />
+
+  <test test-name="test_line_segment_detector"
+        name="test_line_segment_detector"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="360" retry="3">
+    <rosparam>
+      topic_0: /line_segment_detector/debug/line_marker
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

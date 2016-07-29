@@ -1,0 +1,60 @@
+<launch>
+
+  <param name="/use_sim_time" value="true" />
+  <rosparam command="load"
+            file="$(find jsk_pcl_ros)/test_data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/rosparam.yaml" />
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/test_data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/vision.compressed.bag --clock --loop">
+  </node>
+
+  <arg name="INPUT_CLOUD" value="/kinect2_head/hd/points" />
+  <arg name="FILTERED_CLOUD" value="/voxelgrid/output" />
+
+  <node name="line_segment_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager" output="screen" />
+
+  <node name="voxelgrid"
+        pkg="nodelet" type="nodelet"
+        args="load pcl/VoxelGrid line_segment_manager"
+        output="screen">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <rosparam>
+      filter_field_name: z
+      filter_limit_min: 0.0
+      filter_limit_max: 5.0
+      leaf_size: 0.02
+    </rosparam>
+  </node>
+
+  <node name="euclidean_clustering"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/EuclideanClustering line_segment_manager"
+        output="screen">
+    <remap from="~input" to="$(arg FILTERED_CLOUD)" />
+  </node>
+
+  <node name="euclidean_clustering_decomposer"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis line_segment_manager"
+        output="screen">
+    <remap from="~input" to="$(arg FILTERED_CLOUD)" />
+    <remap from="~target" to="/euclidean_clustering/output" />
+  </node>
+
+  <node name="line_segment_detector"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/LineSegmentDetector"
+        output="screen">
+    <remap from="~input" to="$(arg FILTERED_CLOUD)" />
+    <remap from="~input_indices" to="/euclidean_clustering/output" />
+    <rosparam>
+      outlier_threshold: 0.04
+      max_iteration: 1000
+      min_indices: 150
+      min_length: 0.3
+    </rosparam>
+  </node>
+
+</launch>

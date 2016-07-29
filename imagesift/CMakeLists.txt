@@ -17,7 +17,7 @@ catkin_package(
     CATKIN_DEPENDS roscpp sensor_msgs posedetection_msgs image_transport cv_bridge
     LIBRARIES ${PROJECT_NAME}
     INCLUDE_DIRS include
-    DEPENDS OpenCV libsiftfast
+    DEPENDS OpenCV
 )
 
 catkin_python_setup()

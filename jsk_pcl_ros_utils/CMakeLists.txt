@@ -291,5 +291,7 @@ if (CATKIN_ENABLE_TESTING)
     # because of unreleased topic_tools/transform on hydro
     add_rostest(test/test_pointcloud_to_pcd.test DEPENDENCIES install_test_data)
     add_rostest(test/test_pointcloud_to_point_indices.test DEPENDENCIES install_test_data)
+    # because of unreleased jsk_tools/test_topic_published.py on hydro
+    add_rostest(test/bounding_box_array_to_bounding_box.test)
   endif()
 endif()

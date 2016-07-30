@@ -80,7 +80,7 @@ add_library(jsk_recognition_utils SHARED
   src/time_util.cpp
   )
 
-add_rostest_gtest(test_tf_listener_singleton test/test_tf_listener_singleton.test src/tests/test_tf_listener_singleton.cpp)
+add_rostest_gtest(test_tf_listener_singleton test/tf_listener_singleton.test src/tests/test_tf_listener_singleton.cpp)
 target_link_libraries(test_tf_listener_singleton ${PROJECT_NAME} ${catkin_LIBRARIES})
 
 catkin_add_gtest(test_cv_utils src/tests/test_cv_utils.cpp)

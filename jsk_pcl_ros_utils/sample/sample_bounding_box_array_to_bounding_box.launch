@@ -1,0 +1,24 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_recognition_utils)/sample/sample_bounding_box_array_publisher.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <node name="bounding_box_array_to_bounding_box"
+        pkg="jsk_pcl_ros_utils" type="bounding_box_array_to_bounding_box">
+    <remap from="~input" to="bounding_box_array_publisher/output" />
+    <rosparam>
+      index: 5
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="$(anon rviz)"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_bounding_box_array_to_bounding_box.rviz">
+    </node>
+  </group>
+
+</launch>

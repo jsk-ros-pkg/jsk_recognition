@@ -94,7 +94,11 @@ if (CATKIN_ENABLE_TESTING)
   target_link_libraries(test_cv_utils ${PROJECT_NAME} ${OpenCV_LIBRARIES})
   catkin_add_gtest(test_rgb_colors src/tests/test_rgb_colors.cpp)
   target_link_libraries(test_rgb_colors ${PROJECT_NAME} ${OpenCV_LIBRARIES})
-  add_rostest(test/bounding_box_array_publisher.test)
+  if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
+    # FIXME: jsk_tools/test_topic_published.py does not work on hydro travis/jenkins
+    # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
+    add_rostest(test/bounding_box_array_publisher.test)
+  endif()
 endif()
 
 install(TARGETS jsk_recognition_utils

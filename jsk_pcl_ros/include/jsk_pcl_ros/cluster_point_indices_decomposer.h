@@ -100,12 +100,12 @@ namespace jsk_pcl_ros
      size_t i,
      pcl::PointCloud<pcl::PointXYZRGB>& debug_output);
     
-    virtual bool computeBoundingBox
+    virtual bool computeCenterAndBoundingBox
     (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
      const std_msgs::Header header,
-     const Eigen::Vector4f center,
      const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
      const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients,
+     geometry_msgs::Pose& center_pose_msg,
      jsk_recognition_msgs::BoundingBox& bounding_box);
 
     virtual bool transformPointCloudToAlignWithPlane(

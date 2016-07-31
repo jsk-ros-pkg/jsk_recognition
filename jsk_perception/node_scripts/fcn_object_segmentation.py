@@ -19,12 +19,20 @@ import rospy
 from sensor_msgs.msg import Image
 
 
+def softmax(w, t=1.0):
+    e = np.exp(w)
+    dist = e / np.sum(e, axis=0)
+    return dist
+
+
 class FCNObjectSegmentation(ConnectionBasedTransport):
 
     def __init__(self):
         super(self.__class__, self).__init__()
         self._load_model()
         self.pub = self.advertise('~output', Image, queue_size=1)
+        self.pub_proba = self.advertise(
+            '~output/proba_image', Image, queue_size=1)
 
     def _load_model(self):
         self.gpu = rospy.get_param('~gpu', -1)  # -1 is cpu mode
@@ -81,19 +89,27 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
         br = cv_bridge.CvBridge()
         img = br.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
         mask = br.imgmsg_to_cv2(mask_msg, desired_encoding='mono8')
-        label = self.segment(img)
+        label, proba_img = self.segment(img)
         label[mask == 0] = 0
+        proba_img[:, :, 0][mask != 0] = 1
+        proba_img[:, :, 1:][mask != 0] = 0
         label_msg = br.cv2_to_imgmsg(label.astype(np.int32), '32SC1')
         label_msg.header = img_msg.header
         self.pub.publish(label_msg)
+        proba_msg = br.cv2_to_imgmsg(proba_img.astype(np.float32))
+        proba_msg.header = img_msg.header
+        self.pub_proba.publish(proba_msg)
 
     def _cb(self, img_msg):
         br = cv_bridge.CvBridge()
         img = br.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
-        label = self.segment(img)
+        label, proba_img = self.segment(img)
         label_msg = br.cv2_to_imgmsg(label.astype(np.int32), '32SC1')
         label_msg.header = img_msg.header
         self.pub.publish(label_msg)
+        proba_msg = br.cv2_to_imgmsg(proba_img.astype(np.float32))
+        proba_msg.header = img_msg.header
+        self.pub_proba.publish(proba_msg)
 
     def segment(self, bgr):
         blob = (bgr - self.mean_bgr).transpose((2, 0, 1))
@@ -104,9 +120,10 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
         self.model.train = False
         self.model(x)
         pred = self.model.score
-        pred_datum = cuda.to_cpu(pred.data)[0]
-        label = np.argmax(pred_datum, axis=0)
-        return label
+        score = cuda.to_cpu(pred.data)[0]
+        proba_img = softmax(score).transpose((1, 2, 0))
+        label = np.argmax(score, axis=0)
+        return label, proba_img
 
 
 if __name__ == '__main__':

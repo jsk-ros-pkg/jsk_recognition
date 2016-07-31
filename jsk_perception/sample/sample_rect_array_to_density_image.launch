@@ -1,0 +1,30 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_perception)/sample/sample_selective_search.launch">
+    <arg name="gui" value="$(arg gui)" />
+  </include>
+
+  <node name="rect_array_to_density_image"
+        pkg="jsk_perception" type="rect_array_to_density_image">
+    <remap from="~input/image" to="image_publisher/output" />
+    <remap from="~input/rect_array" to="selective_search/output" />
+  </node>
+
+  <node name="colorize_float_image"
+        pkg="jsk_perception" type="colorize_float_image">
+    <remap from="~input" to="rect_array_to_density_image/output" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="$(anon image_view)"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="rect_array_to_density_image/output" />
+      <rosparam>
+        do_dynamic_scaling: true
+      </rosparam>
+    </node>
+  </group>
+
+</launch>

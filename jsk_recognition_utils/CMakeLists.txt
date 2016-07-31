@@ -12,10 +12,12 @@ endif(CCACHE_FOUND)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  dynamic_reconfigure
   jsk_recognition_msgs
   pcl_ros
   pcl_msgs
   eigen_conversions
+  message_generation
   rostest
   tf_conversions
   tf
@@ -27,13 +29,17 @@ find_package(catkin REQUIRED COMPONENTS
   visualization_msgs
 )
 
+catkin_python_setup()
+
+generate_dynamic_reconfigure_options(
+  cfg/PoseArrayToPose.cfg
+)
+
 catkin_package(
  INCLUDE_DIRS include
  LIBRARIES jsk_recognition_utils
- CATKIN_DEPENDS jsk_recognition_msgs pcl_ros visualization_msgs
+ CATKIN_DEPENDS jsk_recognition_msgs pcl_ros visualization_msgs message_runtime
 )
-
-catkin_python_setup()
 
 # Cythonize pyx files
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)

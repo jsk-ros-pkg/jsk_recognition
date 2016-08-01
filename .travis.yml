@@ -1,28 +1,119 @@
-sudo: false
-language:
-  - cpp
-  - python
-python:
-  - "2.7"
-compiler:
-  - gcc
+language: generic
+
 notifications:
   email:
     on_success: always
     on_failure: always
   slack: jsk-robotics:Av7tc8wj3IWkLYvlTzHE7x2g
+
+matrix:
+  include:
+    # hydro
+    - os: linux
+      dist: precise
+      sudo: required
+      env:
+        - ROS_DISTRO=hydro
+        - BUILD_PKGS='jsk_pcl_ros_utils jsk_pcl_ros'
+        - USE_DEB=false
+        - CATKIN_TOOLS_BUILD_OPTIONS='-iv --summarize --no-status --no-color'
+    - os: linux
+      dist: precise
+      sudo: required
+      env:
+        - ROS_DISTRO=hydro
+        - BUILD_PKGS='checkerboard_detector imagesift jsk_perception jsk_recognition_utils resized_image_transport'
+        - USE_DEB=false
+        - CATKIN_TOOLS_BUILD_OPTIONS='-iv --summarize --no-status --no-color'
+    # indigo
+    - os: linux
+      dist: trusty
+      sudo: required
+      env:
+        - ROS_DISTRO=indigo
+        - BUILD_PKGS='jsk_pcl_ros_utils jsk_pcl_ros'
+        - USE_DEB=true
+        - CATKIN_TOOLS_BUILD_OPTIONS='--summarize --no-color'
+    - os: linux
+      dist: trusty
+      sudo: required
+      env:
+        - ROS_DISTRO=indigo
+        - BUILD_PKGS='checkerboard_detector imagesift jsk_perception jsk_recognition_utils resized_image_transport'
+        - USE_DEB=true
+        - CATKIN_TOOLS_BUILD_OPTIONS='--summarize --no-color'
+    # indigo + opencv3
+    - os: linux
+      dist: trusty
+      sudo: required
+      env:
+        - ROS_DISTRO=indigo
+        - BUILD_PKGS='checkerboard_detector imagesift jsk_perception jsk_recognition_utils resized_image_transport'
+        - USE_DEB=true
+        - CATKIN_TOOLS_BUILD_OPTIONS='--summarize --no-color'
+        - BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_opencv3.bash'
+    # indigo released
+    - os: linux
+      dist: trusty
+      sudo: required
+      env:
+        - ROS_DISTRO=indigo
+        - BUILD_PKGS='jsk_pcl_ros_utils jsk_pcl_ros'
+        - USE_DEB=true
+        - CATKIN_TOOLS_BUILD_OPTIONS='--summarize --no-color'
+        - BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_released_testing.bash'
+        - ROS_REPOSITORY_PATH='http://packages.ros.org/ros/ubuntu'
+    - os: linux
+      dist: trusty
+      sudo: required
+      env:
+        - ROS_DISTRO=indigo
+        - BUILD_PKGS='checkerboard_detector imagesift jsk_perception jsk_recognition_utils resized_image_transport'
+        - USE_DEB=true
+        - CATKIN_TOOLS_BUILD_OPTIONS='--summarize --no-color'
+        - BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_released_testing.bash'
+        - ROS_REPOSITORY_PATH='http://packages.ros.org/ros/ubuntu'
+    # indigo + pcl1.8
+    - os: linux
+      dist: trusty
+      sudo: required
+      env:
+        - ROS_DISTRO=indigo
+        - BUILD_PKGS='jsk_pcl_ros_utils jsk_pcl_ros'
+        - USE_DEB=true
+        - CATKIN_TOOLS_BUILD_OPTIONS='--summarize --no-color'
+        - BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_pcl1.8.bash'
+    # jade
+    - os: linux
+      dist: trusty
+      sudo: required
+      env:
+        - ROS_DISTRO=jade
+        - BUILD_PKGS='jsk_pcl_ros_utils jsk_pcl_ros'
+        - USE_DEB=true
+        - CATKIN_TOOLS_BUILD_OPTIONS='--summarize --no-color'
+    - os: linux
+      dist: trusty
+      sudo: required
+      env:
+        - ROS_DISTRO=jade
+        - BUILD_PKGS='checkerboard_detector imagesift jsk_perception jsk_recognition_utils resized_image_transport'
+        - USE_DEB=true
+        - CATKIN_TOOLS_BUILD_OPTIONS='--summarize --no-color'
+
+cache:
+  directories:
+    - $HOME/.ccache
+    - $HOME/.cache/pip
+    - $HOME/.ros/test_data
+
 env:
   global:
-    - ROS_PARALLEL_JOBS="-j8"
+    - ROS_PARALLEL_JOBS="-j4"
     - NOT_TEST_INSTALL=true
-    - USE_JENKINS=true
-  matrix:
-    - ROS_DISTRO=hydro  USE_DEB=false CATKIN_TOOLS_BUILD_OPTIONS="-iv --summarize --no-status --no-color"
-    - ROS_DISTRO=indigo USE_DEB=true
-    - ROS_DISTRO=indigo USE_DEB=false BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_released_testing.bash' ROS_REPOSITORY_PATH="http://packages.ros.org/ros/ubuntu"
-    - ROS_DISTRO=indigo USE_DEB=false BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_opencv3.bash' BUILD_PKGS='checkerboard_detector imagesift jsk_perception jsk_recognition_utils resized_image_transport'
-    - ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_pcl1.8.bash' BUILD_PKGS='jsk_pcl_ros_utils jsk_pcl_ros'
-    - ROS_DISTRO=jade   USE_DEB=false
+    - USE_JENKINS=false
+    - USE_TRAVIS=true
+
 script:
   - source .travis/travis.sh
   - (cd $TRAVIS_BUILD_DIR/doc && source setup.sh && make html)

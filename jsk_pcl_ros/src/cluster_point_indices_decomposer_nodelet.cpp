@@ -301,16 +301,17 @@ namespace jsk_pcl_ros
     return true;
   }
 
-  bool ClusterPointIndicesDecomposer::computeBoundingBox
+  bool ClusterPointIndicesDecomposer::computeCenterAndBoundingBox
   (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud,
    const std_msgs::Header header,
-   const Eigen::Vector4f center,
    const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
    const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients,
+   geometry_msgs::Pose& center_pose_msg,
    jsk_recognition_msgs::BoundingBox& bounding_box)
   {
     bounding_box.header = header;
 
+    Eigen::Vector4f center;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr
       segmented_cloud_transformed (new pcl::PointCloud<pcl::PointXYZRGB>);
     // align boxes if possible
@@ -318,6 +319,7 @@ namespace jsk_pcl_ros
     Eigen::Quaternionf q = Eigen::Quaternionf::Identity();
     if (align_boxes_) {
       if (align_boxes_with_plane_) {
+        pcl::compute3DCentroid(*segmented_cloud, center);
         bool success = transformPointCloudToAlignWithPlane(segmented_cloud, segmented_cloud_transformed,
                                                            center, planes, coefficients, m4, q);
         if (!success) {
@@ -341,6 +343,7 @@ namespace jsk_pcl_ros
         Eigen::Affine3f transform;
         tf::transformTFToEigen(tf_transform, transform);
         pcl::transformPointCloud(*segmented_cloud, *segmented_cloud_transformed, transform);
+        pcl::compute3DCentroid(*segmented_cloud_transformed, center);
         bounding_box.header.frame_id = target_frame_id_;
       }
     }
@@ -359,7 +362,16 @@ namespace jsk_pcl_ros
     Eigen::Vector4f center2((maxpt[0] + minpt[0]) / 2.0, (maxpt[1] + minpt[1]) / 2.0, (maxpt[2] + minpt[2]) / 2.0, 1.0);
     Eigen::Vector4f center_transformed = m4 * center2;
       
+    // set centroid pose msg
+    center_pose_msg.position.x = center[0];
+    center_pose_msg.position.y = center[1];
+    center_pose_msg.position.z = center[2];
+    center_pose_msg.orientation.x = 0;
+    center_pose_msg.orientation.y = 0;
+    center_pose_msg.orientation.z = 0;
+    center_pose_msg.orientation.w = 1;
     
+    // set bounding_box msg
     bounding_box.pose.position.x = center_transformed[0];
     bounding_box.pose.position.y = center_transformed[1];
     bounding_box.pose.position.z = center_transformed[2];
@@ -476,27 +488,6 @@ namespace jsk_pcl_ros
         out_cloud->header = input->header;
         publishers_[i].publish(out_cloud);
       }
-      // publish tf
-      Eigen::Vector4f center;
-      pcl::compute3DCentroid(*segmented_cloud, center);
-      if (publish_tf_) {
-        tf::Transform transform;
-        transform.setOrigin(tf::Vector3(center[0], center[1], center[2]));
-        transform.setRotation(tf::createIdentityQuaternion());
-        br_->sendTransform(tf::StampedTransform(transform, input->header.stamp,
-                                                input->header.frame_id,
-                                                tf_prefix_ + (boost::format("output%02u") % (i)).str()));
-      }
-      // centroid pose
-      geometry_msgs::Pose pose_msg;
-      pose_msg.position.x = center[0];
-      pose_msg.position.y = center[1];
-      pose_msg.position.z = center[2];
-      pose_msg.orientation.x = 0;
-      pose_msg.orientation.y = 0;
-      pose_msg.orientation.z = 0;
-      pose_msg.orientation.w = 1;
-      center_pose_array.poses.push_back(pose_msg);
       // label
       if (is_sensed_with_camera) {
         // create mask & label image from cluster indices
@@ -512,14 +503,37 @@ namespace jsk_pcl_ros
       }
       // adding the pointcloud into debug_output
       addToDebugPointCloud(segmented_cloud, i, debug_output);
-      
+
+      // compute centoid and bounding box
+      geometry_msgs::Pose pose_msg;
       jsk_recognition_msgs::BoundingBox bounding_box;
-      bool successp = computeBoundingBox(
-        segmented_cloud, input->header, center, planes, coefficients, bounding_box);
+      bool successp = computeCenterAndBoundingBox(
+        segmented_cloud, input->header, planes, coefficients, pose_msg, bounding_box);
       if (!successp) {
         return;
       }
+      center_pose_array.poses.push_back(pose_msg);
       bounding_box_array.boxes.push_back(bounding_box);
+      if (publish_tf_) {
+        tf::Transform transform;
+        transform.setOrigin(tf::Vector3(pose_msg.position.x, pose_msg.position.y, pose_msg.position.z));
+        transform.setRotation(tf::createIdentityQuaternion());
+        std::string target_frame;
+        if (align_boxes_ && !align_boxes_with_plane_) {
+          target_frame = target_frame_id_;
+        }
+        else {
+          target_frame = input->header.frame_id;
+        }
+        br_->sendTransform(tf::StampedTransform(transform, input->header.stamp, target_frame,
+                                                tf_prefix_ + (boost::format("output%02u") % (i)).str()));
+      }
+    }
+
+    // Both bounding box and centroid are computed with transformed point cloud for the target frame.
+    if (align_boxes_ && !align_boxes_with_plane_) {
+      bounding_box_array.header.frame_id = target_frame_id_;
+      center_pose_array.header.frame_id = target_frame_id_;
     }
 
     if (is_sensed_with_camera) {

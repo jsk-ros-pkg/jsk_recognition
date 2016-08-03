@@ -25,4 +25,4 @@ env:
     - ROS_DISTRO=jade   USE_DEB=false
 script:
   - source .travis/travis.sh
-  - (cd doc && source setup.sh && make html)
+  - (cd $TRAVIS_BUILD_DIR/doc && source setup.sh && make html)

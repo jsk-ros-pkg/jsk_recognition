@@ -242,13 +242,19 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     std::vector<std::set<int> > duplication_set_list;
     std::set<int> duplicated_indices;
-    for (size_t i = 0; i < all_inliers.size() - 1; i++) {
-      std::vector<int> duplication_list = duplication_map[i];
+    for (size_t i = 0; i < all_inliers.size(); i++) {
+      std::vector<int> duplication_list;
+      if (i < all_inliers.size() - 1) {
+        duplication_list = duplication_map[i];
+      }
       if (duplicated_indices.find(i) == duplicated_indices.end()) {
-        if (duplication_list.size() == 0) {
-          // nothing to do...
+        if (i == all_inliers.size() - 1 || duplication_list.size() == 0) { // no duplication found
+          std::set<int> no_duplication_set;
+          no_duplication_set.insert(i);
+          duplication_set_list.push_back(no_duplication_set);
+          jsk_recognition_utils::addSet<int>(duplicated_indices, no_duplication_set);
         }
-        else {
+        else { // some duplication found
           std::set<int> new_duplication_set;
           jsk_recognition_utils::buildGroupFromGraphMap(duplication_map,
                                  i,

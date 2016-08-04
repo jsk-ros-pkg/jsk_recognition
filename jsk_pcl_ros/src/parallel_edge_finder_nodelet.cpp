@@ -46,8 +46,8 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // publishers
     ////////////////////////////////////////////////////////
-    pub_ = pnh_->advertise<jsk_recognition_msgs::ParallelEdgeArray>("output_edges_groups", 1);
-    pub_clusters_ = pnh_->advertise<jsk_recognition_msgs::ClusterPointIndices>("output_clusters", 1);
+    pub_ = advertise<jsk_recognition_msgs::ParallelEdgeArray>(*pnh_, "output_edges_groups", 1);
+    pub_clusters_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output_clusters", 1);
 
     ////////////////////////////////////////////////////////
     // dynamic reconfigure

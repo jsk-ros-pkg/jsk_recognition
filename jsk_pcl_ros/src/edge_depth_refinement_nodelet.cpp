@@ -199,8 +199,6 @@ namespace jsk_pcl_ros
       JSK_NODELET_ERROR("no edges are specified");
       return;
     }
-    std::vector<pcl::PointIndices::Ptr> nonduplicated_inliers;
-    std::vector<pcl::ModelCoefficients::Ptr> cnonduplicated_oefficients;
 
     // buildup Lines and Segments
     std::vector<jsk_recognition_utils::Line::Ptr> lines;

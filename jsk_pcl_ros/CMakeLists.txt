@@ -115,6 +115,29 @@ generate_dynamic_reconfigure_options(
   cfg/PointcloudDatabaseServer.cfg
   )
 
+generate_messages(DEPENDENCIES
+  ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_footstep_msgs)
+
+catkin_package(
+  DEPENDS PCL
+  #
+  CATKIN_DEPENDS
+  pcl_ros
+  message_runtime
+  ${PCL_MSGS}
+  sensor_msgs
+  stereo_msgs
+  jsk_recognition_msgs
+  jsk_recognition_utils
+  #
+  INCLUDE_DIRS include
+  #
+  LIBRARIES
+  jsk_pcl_ros
+  jsk_pcl_ros_base
+  jsk_pcl_ros_moveit
+)
+
 find_package(OpenCV REQUIRED core imgproc)
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
@@ -409,18 +432,8 @@ target_link_libraries(range_sensor_error_visualization jsk_pcl_ros)
 add_executable(depth_camera_error_visualization tool/depth_camera_error_visualization.cpp)
 target_link_libraries(depth_camera_error_visualization jsk_pcl_ros)
 
-generate_messages(DEPENDENCIES
-  ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_footstep_msgs)
-
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 message("flags: ${CMAKE_CXX_FLAGS}")
-
-catkin_package(
-    DEPENDS pcl
-    CATKIN_DEPENDS pcl_ros message_runtime ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_recognition_utils
-    INCLUDE_DIRS include
-    LIBRARIES jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit
-)
 
 # download and install sample data
 add_custom_target(install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)

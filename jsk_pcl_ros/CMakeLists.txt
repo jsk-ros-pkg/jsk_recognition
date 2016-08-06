@@ -49,22 +49,57 @@ IF(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
   add_definitions("-DUSE_OLD_YAML")
 ENDIF()
 
-add_service_files(FILES SwitchTopic.srv
-  UpdateOffset.srv
-  SnapFootstep.srv
-  SetDepthCalibrationParameter.srv
-  TransformScreenpoint.srv
+macro(add_deprecated_service_files)
+  cmake_parse_arguments(ARG "" "UPSTREAM" "FILES" ${ARGN})
+  if(ARG_UNPARSED_ARGUMENTS)
+    message(FATAL_ERROR "add_deprecated_service_files() called with unused arguments: ${ARG_UNPARSED_ARGUMENTS}")
+  endif()
+
+  if(${PROJECT_NAME}_GENERATE_MESSAGES)
+    message(FATAL_ERROR "generate_messages() must be called after add_deprecated_service_files()")
+  endif()
+
+  if(EXISTS ${${ARG_UPSTREAM}_SOURCE_PREFIX}/srv)
+    set(_srv_prefix ${${ARG_UPSTREAM}_SOURCE_PREFIX})
+  else()
+    set(_srv_prefix ${${ARG_UPSTREAM}_PREFIX}/share/${ARG_UPSTREAM})
+  endif()
+
+  set(FILES_W_PATH "")
+  foreach(file ${ARG_FILES})
+    list(APPEND FILES_W_PATH ${_srv_prefix}/srv/${file})
+    list(APPEND ${PROJECT_NAME}_SERVICE_FILES ${_srv_prefix}/srv/${file})
+    assert_file_exists(${_srv_prefix}/srv/${file} "service file not found")
+  endforeach()
+
+  install(FILES ${FILES_W_PATH} DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/srv)
+  foreach(file ${ARG_FILES})
+    list(APPEND ${PROJECT_NAME}_INSTALLED_SERVICE_FILES "srv/${file}")
+  endforeach()
+endmacro()
+
+# Service files which are moved to the upstream package 'jsk_recognition_msgs'
+add_deprecated_service_files(
+  UPSTREAM jsk_recognition_msgs
+  FILES
+  CallPolygon.srv
+  CallSnapIt.srv
   CheckCircle.srv
-  RobotPickupReleasePoint.srv
-  TowerPickUp.srv
-  EuclideanSegment.srv
-  TowerRobotMoveCommand.srv
-  CallSnapIt.srv CallPolygon.srv
+  CheckCollision.srv
   EnvironmentLock.srv
-  PolygonOnEnvironment.srv
-  ICPAlignWithBox.srv
+  EuclideanSegment.srv
   ICPAlign.srv
-  CheckCollision.srv)
+  ICPAlignWithBox.srv
+  PolygonOnEnvironment.srv
+  RobotPickupReleasePoint.srv
+  SetDepthCalibrationParameter.srv
+  SnapFootstep.srv
+  SwitchTopic.srv
+  TowerPickUp.srv
+  TowerRobotMoveCommand.srv
+  TransformScreenpoint.srv
+  UpdateOffset.srv
+)
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(

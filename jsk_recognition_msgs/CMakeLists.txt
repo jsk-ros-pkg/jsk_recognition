@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(jsk_recognition_msgs)
 find_package(catkin REQUIRED
-  std_msgs sensor_msgs geometry_msgs message_generation pcl_msgs)
+  std_msgs sensor_msgs geometry_msgs message_generation pcl_msgs jsk_footstep_msgs)
 add_message_files(
   FILES
   BoundingBoxArray.msg
@@ -60,15 +60,32 @@ add_message_files(
   )
 
 add_service_files(FILES
+  CallPolygon.srv
+  CallSnapIt.srv
+  CheckCircle.srv
+  CheckCollision.srv
+  EnvironmentLock.srv
+  EuclideanSegment.srv
+  ICPAlign.srv
+  ICPAlignWithBox.srv
+  PolygonOnEnvironment.srv
+  RobotPickupReleasePoint.srv
+  SetDepthCalibrationParameter.srv
   SetPointCloud2.srv
-  )
+  SnapFootstep.srv
+  SwitchTopic.srv
+  TowerPickUp.srv
+  TowerRobotMoveCommand.srv
+  TransformScreenpoint.srv
+  UpdateOffset.srv
+)
 
 generate_messages(
   DEPENDENCIES
-  std_msgs sensor_msgs geometry_msgs pcl_msgs
+  std_msgs sensor_msgs geometry_msgs pcl_msgs jsk_footstep_msgs
 )
 catkin_package(
-  CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs pcl_msgs
+  CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs pcl_msgs jsk_footstep_msgs
 )
 
 install(DIRECTORY scripts

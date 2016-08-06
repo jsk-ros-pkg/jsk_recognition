@@ -127,6 +127,12 @@
             name="relay_camera_info"
             args="/camera/depth/camera_info /camera_remote/depth/camera_info" />
     </group>
+    <group ns="depth_registered">
+      <node pkg="topic_tools"
+            type="relay"
+            name="relay_camera_info"
+            args="/camera/depth_registered/camera_info /camera_remote/depth_registered/camera_info" />
+    </group>
     <!--                       -->
     <!-- downsample pointcloud -->
     <!--                       -->

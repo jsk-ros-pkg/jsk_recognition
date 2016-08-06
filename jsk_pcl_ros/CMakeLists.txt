@@ -475,6 +475,10 @@ install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 install(TARGETS jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit
   ${jsk_pcl_nodelet_executables}
+  bench_ransac_plane_estimation
+  depth_camera_error_visualization
+  range_sensor_error_visualization
+  sample_cube_nearest_point
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})

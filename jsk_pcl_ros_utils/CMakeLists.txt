@@ -287,6 +287,7 @@ if (CATKIN_ENABLE_TESTING)
   if(TARGET tests)
     add_dependencies(tests install_test_data)
   endif()
+  # Naming Rule: filename of rostest should be {EXECUTABLE_NAME}.test
   add_rostest(test/point_indices_to_cluster_point_indices.test)
   if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
     # unexpected error

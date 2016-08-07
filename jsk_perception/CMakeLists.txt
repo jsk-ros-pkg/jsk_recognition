@@ -130,7 +130,14 @@ generate_messages(
 )
 
 catkin_package(
-  CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs message_runtime jsk_recognition_msgs jsk_recognition_utils
+  CATKIN_DEPENDS
+  geometry_msgs
+  jsk_recognition_msgs
+  jsk_recognition_utils
+  message_runtime
+  posedetection_msgs
+  sensor_msgs
+  std_msgs
   DEPENDS
   INCLUDE_DIRS include
   LIBRARIES jsk_perception oriented_gradient

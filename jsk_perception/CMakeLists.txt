@@ -87,6 +87,7 @@ generate_dynamic_reconfigure_options(
   cfg/Fisheye.cfg
   cfg/SlidingWindowObjectDetector.cfg
   cfg/ImagePublisher.cfg
+  cfg/ExtractImageChannel.cfg
   cfg/GaussianBlur.cfg
   cfg/KMeans.cfg
   cfg/ImageTimeDiff.cfg
@@ -338,6 +339,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_perception_add_rostest(test/colorize_labels.test)
     jsk_perception_add_rostest(test/colorize_float_image.test)
     jsk_perception_add_rostest(test/draw_rect_array.test)
+    jsk_perception_add_rostest(test/extract_image_channel.test)
     jsk_perception_add_rostest(test/image_cluster_indices_decomposer.test)
     jsk_perception_add_rostest(test/image_publisher.test)
     jsk_perception_add_rostest(test/image_to_label.test)

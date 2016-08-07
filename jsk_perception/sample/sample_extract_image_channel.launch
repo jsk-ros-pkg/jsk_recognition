@@ -1,0 +1,43 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/lena.jpg
+      encoding: rgb8
+      publish_info: false
+    </rosparam>
+  </node>
+
+  <node name="extract_image_channel_r"
+        pkg="jsk_perception" type="extract_image_channel.py">
+    <remap from="~input" to="image_publisher/output" />
+    <rosparam>
+      channel: 0
+    </rosparam>
+  </node>
+  <node name="extract_image_channel_g"
+        pkg="jsk_perception" type="extract_image_channel.py">
+    <remap from="~input" to="image_publisher/output" />
+    <rosparam>
+      channel: 1
+    </rosparam>
+  </node>
+  <node name="extract_image_channel_b"
+        pkg="jsk_perception" type="extract_image_channel.py">
+    <remap from="~input" to="image_publisher/output" />
+    <rosparam>
+      channel: 2
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rqt_gui"
+          pkg="rqt_gui" type="rqt_gui"
+          args="--perspective-file $(find jsk_perception)/sample/config/sample_extract_image_channel.perspective">
+    </node>
+  </group>
+
+</launch>

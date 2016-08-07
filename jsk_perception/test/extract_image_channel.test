@@ -1,0 +1,21 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_extract_image_channel.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_extract_image_channel"
+        name="test_extract_image_channel"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /extract_image_channel_r/output
+      timeout_0: 10
+      topic_1: /extract_image_channel_g/output
+      timeout_1: 10
+      topic_2: /extract_image_channel_b/output
+      timeout_2: 10
+    </rosparam>
+  </test>
+
+</launch>

@@ -140,21 +140,9 @@ catkin_package(
 # Build
 # ------------------------------------------------------------------------------------
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${Eigen_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels)
+# Build nodelet executables
 
-link_directories(${catkin_LIBRARY_DIRS})
-add_executable(camshiftdemo src/camshiftdemo.cpp)
-add_executable(linemod src/linemod.cpp)
-add_executable(virtual_camera_mono src/virtual_camera_mono.cpp)
-add_executable(point_pose_extractor src/point_pose_extractor.cpp)
-add_executable(white_balance_converter src/white_balance_converter.cpp)
-add_executable(hough_lines src/hough_lines.cpp)
-add_executable(rectangle_detector src/rectangle_detector.cpp)
-add_executable(calc_flow src/calc_flow.cpp)
-add_executable(color_histogram_sliding_matcher src/color_histogram_sliding_matcher.cpp)
-add_library(oriented_gradient src/oriented_gradient.cpp)
-add_executable(oriented_gradient_node src/oriented_gradient_node.cpp)
-add_executable(sliding_window_object_detector_trainer_node  src/sliding_window_object_detector_trainer_node.cpp)
+include_directories(include ${catkin_INCLUDE_DIRS} ${Eigen_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels)
 
 file(GLOB jsk_perception_node_scripts ${PROJECT_SOURCE_DIR}/node_scripts/*)
 foreach(_node_script ${jsk_perception_node_scripts})
@@ -265,29 +253,32 @@ if(${OpenCV_VERSION} VERSION_GREATER "2.4.8")
 endif()
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 
+# Build node executables
 
-target_link_libraries(camshiftdemo             ${catkin_LIBRARIES})
-target_link_libraries(linemod                  ${catkin_LIBRARIES})
-target_link_libraries(virtual_camera_mono      ${catkin_LIBRARIES})
-target_link_libraries(point_pose_extractor     ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-target_link_libraries(edge_detector            ${catkin_LIBRARIES})
-target_link_libraries(white_balance_converter  ${catkin_LIBRARIES})
-target_link_libraries(hough_lines              ${catkin_LIBRARIES})
-target_link_libraries(rectangle_detector       ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-target_link_libraries(calc_flow                ${catkin_LIBRARIES})
-target_link_libraries(color_histogram_sliding_matcher  ${catkin_LIBRARIES})
-target_link_libraries(oriented_gradient_node   ${catkin_LIBRARIES} ${Boost_LIBRARIES} oriented_gradient)
-target_link_libraries(oriented_gradient   ${catkin_LIBRARIES} ${Boost_LIBRARIES} oriented_gradient)
-target_link_libraries(sliding_window_object_detector_trainer_node ${PROJECT_NAME} ${catkin_LIBRARIES})
+macro(_add_node _node_cpp _node_exec_name)
+  cmake_parse_arguments(ARG "" "" "DEPENDS;LIBRARIES" ${ARGN})
+  add_executable(${_node_exec_name} ${_node_cpp})
+  target_link_libraries(${_node_exec_name} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${ARG_LIBRARIES})
+  add_dependencies(${_node_exec_name} ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp ${ARG_DEPENDS})
+  list(APPEND ${PROJECT_NAME}_node_executables ${_node_exec_name})
+endmacro()
 
-add_dependencies(camshiftdemo             ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
-add_dependencies(virtual_camera_mono      ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
-add_dependencies(point_pose_extractor     ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp libsiftfast)
-add_dependencies(white_balance_converter  ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
-add_dependencies(hough_lines              ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
-add_dependencies(rectangle_detector       ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
-add_dependencies(color_histogram_sliding_matcher       ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
+add_library(oriented_gradient src/oriented_gradient.cpp)
+target_link_libraries(oriented_gradient ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
+_add_node(src/camshiftdemo.cpp camshiftdemo)
+_add_node(src/linemod.cpp linemod)
+_add_node(src/virtual_camera_mono.cpp virtual_camera_mono)
+_add_node(src/point_pose_extractor.cpp point_pose_extractor DEPENDS libsiftfast)
+_add_node(src/white_balance_converter.cpp white_balance_converter)
+_add_node(src/hough_lines.cpp hough_lines)
+_add_node(src/rectangle_detector.cpp rectangle_detector)
+_add_node(src/calc_flow.cpp calc_flow)
+_add_node(src/color_histogram_sliding_matcher.cpp color_histogram_sliding_matcher)
+_add_node(src/oriented_gradient_node.cpp oriented_gradient_node
+          DEPENDS oriented_gradient LIBRARIES oriented_gradient)
+_add_node(src/sliding_window_object_detector_trainer_node.cpp sliding_window_object_detector_trainer_node
+          DEPENDS ${PROJECT_NAME} LIBRARIES ${PROJECT_NAME})
 
 add_custom_command(
  OUTPUT ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng8.launch
@@ -310,8 +301,14 @@ add_custom_target(eusmodel_template ALL DEPENDS
 # Install
 # ------------------------------------------------------------------------------------
 
-install(TARGETS camshiftdemo virtual_camera_mono point_pose_extractor white_balance_converter hough_lines rectangle_detector calc_flow color_histogram_sliding_matcher oriented_gradient oriented_gradient_node ${PROJECT_NAME}
-  ${jsk_perception_nodelet_executables}
+install(TARGETS
+  # Libraries
+  ${PROJECT_NAME}
+  oriented_gradient
+  # Node executables
+  ${${PROJECT_NAME}_node_executables}
+  # Nodelet executables
+  ${${PROJECT_NAME}_nodelet_executables}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

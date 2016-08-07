@@ -33,6 +33,7 @@ catkin_python_setup()
 
 generate_dynamic_reconfigure_options(
   cfg/PoseArrayToPose.cfg
+  cfg/PolygonArrayToPolygon.cfg
 )
 
 catkin_package(

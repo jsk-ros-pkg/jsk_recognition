@@ -146,7 +146,7 @@ catkin_package(
   std_msgs
   DEPENDS
   INCLUDE_DIRS include
-  LIBRARIES jsk_perception oriented_gradient
+  LIBRARIES ${PROJECT_NAME} oriented_gradient
 )
 
 # ------------------------------------------------------------------------------------
@@ -157,12 +157,12 @@ catkin_package(
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${Eigen_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels)
 
-file(GLOB jsk_perception_node_scripts ${PROJECT_SOURCE_DIR}/node_scripts/*)
-foreach(_node_script ${jsk_perception_node_scripts})
+file(GLOB ${PROJECT_NAME}_node_scripts ${PROJECT_SOURCE_DIR}/node_scripts/*)
+foreach(_node_script ${${PROJECT_NAME}_node_scripts})
   get_filename_component(_node_name ${_node_script} NAME_WE)
   get_filename_component(_basename ${_node_script} NAME)
   if(NOT EXISTS ${PROJECT_SOURCE_DIR}/test/${_node_name}.test)
-    list(APPEND jsk_perception_nodes_without_test node_scripts/${_basename})
+    list(APPEND ${PROJECT_NAME}_nodes_without_test node_scripts/${_basename})
   endif()
 endforeach()
 
@@ -171,7 +171,7 @@ macro(_add_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
     list(APPEND ${PROJECT_NAME}_nodes_without_test ${_nodelet_cpp})
   endif()
   jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
-    jsk_perception_nodelet_sources jsk_perception_nodelet_executables)
+    ${PROJECT_NAME}_nodelet_sources ${PROJECT_NAME}_nodelet_executables)
 endmacro()
 _add_nodelet(src/bounding_box_to_rect.cpp "jsk_perception/BoundingBoxToRect" "bounding_box_to_rect")
 _add_nodelet(src/rect_array_actual_size_filter.cpp "jsk_perception/RectArrayActualSizeFilter" "rect_array_actual_size_filter")
@@ -247,11 +247,11 @@ endif()
 
 if(robot_self_filter_FOUND)
   message(AUTHOR_WARNING "robot_self_filter is found.")
-  jsk_perception_nodelet(src/robot_to_mask_image.cpp "jsk_perception/RobotToMaskImage" "robot_to_mask_image")
-endif(robot_self_filter_FOUND)
+  _add_nodelet(src/robot_to_mask_image.cpp "jsk_perception/RobotToMaskImage" "robot_to_mask_image")
+endif()
 
 # compiling jsk_perception library for nodelet
-add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
+add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_nodelet_sources}
   ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels/slic.cpp
   src/histogram_of_oriented_gradients.cpp
   )
@@ -338,7 +338,7 @@ install(DIRECTORY sample launch euslisp
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
-install(FILES jsk_perception_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+install(FILES ${PROJECT_NAME}_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 # ------------------------------------------------------------------------------------
 # Test

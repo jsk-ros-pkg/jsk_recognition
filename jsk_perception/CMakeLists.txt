@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(jsk_perception)
 
+# ------------------------------------------------------------------------------------
+# Initialization
+#  1. Resolve dependencies with find_package
+#  2. Set build flags
+# ------------------------------------------------------------------------------------
+
 # Use ccache if installed to make it fast to generate object files
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
@@ -58,6 +64,27 @@ add_definitions("-g -O2")
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
 endif()
+
+# ------------------------------------------------------------------------------------
+# Download
+# ------------------------------------------------------------------------------------
+
+# download and install sample data
+add_custom_target(install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
+# download and install trained data
+add_custom_target(install_trained_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_trained_data.py)
+
+execute_process(
+  COMMAND cmake -E chdir ${CMAKE_CURRENT_BINARY_DIR}
+  make -f ${PROJECT_SOURCE_DIR}/Makefile.slic
+  INSTALL_DIR=${CATKIN_DEVEL_PREFIX}
+  MK_DIR=${mk_PREFIX}/share/mk installed
+  RESULT_VARIABLE _make_failed)
+
+# ------------------------------------------------------------------------------------
+# Catkin setup
+# ------------------------------------------------------------------------------------
+
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
   cfg/RectArrayActualSizeFilter.cfg
@@ -109,12 +136,9 @@ catkin_package(
   LIBRARIES jsk_perception oriented_gradient
 )
 
-execute_process(
-  COMMAND cmake -E chdir ${CMAKE_CURRENT_BINARY_DIR}
-  make -f ${PROJECT_SOURCE_DIR}/Makefile.slic
-  INSTALL_DIR=${CATKIN_DEVEL_PREFIX}
-  MK_DIR=${mk_PREFIX}/share/mk installed
-  RESULT_VARIABLE _make_failed)
+# ------------------------------------------------------------------------------------
+# Build
+# ------------------------------------------------------------------------------------
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${Eigen_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels)
 
@@ -131,8 +155,6 @@ add_executable(color_histogram_sliding_matcher src/color_histogram_sliding_match
 add_library(oriented_gradient src/oriented_gradient.cpp)
 add_executable(oriented_gradient_node src/oriented_gradient_node.cpp)
 add_executable(sliding_window_object_detector_trainer_node  src/sliding_window_object_detector_trainer_node.cpp)
-
-set(jsk_perception_nodes_without_test "")
 
 file(GLOB jsk_perception_node_scripts ${PROJECT_SOURCE_DIR}/node_scripts/*)
 foreach(_node_script ${jsk_perception_node_scripts})
@@ -284,10 +306,9 @@ add_custom_target(eusmodel_template ALL DEPENDS
   ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng8.launch
   ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng2.launch)
 
-# download and install sample data
-add_custom_target(install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
-# download and install trained data
-add_custom_target(install_trained_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_trained_data.py)
+# ------------------------------------------------------------------------------------
+# Install
+# ------------------------------------------------------------------------------------
 
 install(TARGETS camshiftdemo virtual_camera_mono point_pose_extractor white_balance_converter hough_lines rectangle_detector calc_flow color_histogram_sliding_matcher oriented_gradient oriented_gradient_node ${PROJECT_NAME}
   ${jsk_perception_nodelet_executables}
@@ -309,7 +330,10 @@ install(DIRECTORY include/${PROJECT_NAME}/
 
 install(FILES jsk_perception_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
-message(AUTHOR_WARNING "Node/Nodelets without rostest: ${jsk_perception_nodes_without_test}")
+# ------------------------------------------------------------------------------------
+# Test
+# ------------------------------------------------------------------------------------
+message(AUTHOR_WARNING "Node/Nodelets without rostest: ${${PROJECT_NAME}_nodes_without_test}")
 
 if(CATKIN_ENABLE_TESTING)
   find_package(roslaunch REQUIRED)

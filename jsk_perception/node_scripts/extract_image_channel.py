@@ -57,13 +57,13 @@ class ExtractImageChannel(ConnectionBasedTransport):
             return
         bridge = CvBridgeArbitraryChannels()
         img = bridge.imgmsg_to_cv2(imgmsg)
+        if img.ndim == 2:
+            img = img[:, :, np.newaxis]
         if not (self.channel < img.shape[2]):
             logwarn_throttle(10,
                 'Invalid channel {} is specified for image with {} channels'
                 .format(self.channel, img.shape[2]))
             return
-        if img.ndim == 2:
-            img = img[:, :, np.newaxis]
         out_img = np.zeros(img.shape[:2], dtype=img.dtype)
         out_img = img[:, :, self.channel]
         out_imgmsg = bridge.cv2_to_imgmsg(out_img)

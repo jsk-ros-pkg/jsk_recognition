@@ -123,7 +123,13 @@ generate_dynamic_reconfigure_options(
   cfg/LabelToMaskImage.cfg
 )
 
-add_service_files(FILES EuclideanSegment.srv  SetTemplate.srv  WhiteBalancePoints.srv  WhiteBalance.srv NonMaximumSuppression.srv)
+add_service_files(FILES
+  EuclideanSegment.srv
+  NonMaximumSuppression.srv
+  SetTemplate.srv
+  WhiteBalancePoints.srv
+  WhiteBalance.srv
+)
 
 generate_messages(
   DEPENDENCIES std_msgs sensor_msgs geometry_msgs jsk_recognition_msgs

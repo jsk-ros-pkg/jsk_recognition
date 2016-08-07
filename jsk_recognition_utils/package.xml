@@ -41,6 +41,7 @@
   <run_depend>visualization_msgs</run_depend>
   <run_depend>yaml-cpp</run_depend>
   <run_depend>message_runtime</run_depend>
+  <test_depend>jsk_tools</test_depend>
   <export>
   </export>
 </package>

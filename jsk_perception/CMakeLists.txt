@@ -12,7 +12,7 @@ find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
-endif(CCACHE_FOUND)
+endif()
 
 find_package(catkin REQUIRED COMPONENTS
   angles
@@ -48,10 +48,10 @@ message("OPENCV ${OpenCV_VERSION} FOUND")
 find_package(Eigen REQUIRED)
 
 pkg_check_modules(yaml_cpp yaml-cpp REQUIRED)
-IF(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
+if(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
 ## indigo yaml-cpp : 0.5.0 /  hydro yaml-cpp : 0.3.0
   add_definitions("-DUSE_OLD_YAML")
-ENDIF()
+endif()
 
 find_package(OpenMP)
 if(OPENMP_FOUND)
@@ -253,8 +253,8 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${robot_self_filter_LI
 if(robot_self_filter_FOUND)
   include_directories(${robot_self_filter_INCLUDE_DIRS})
   target_link_libraries(${PROJECT_NAME} ${robot_self_filter_LIBRARIES})
-endif(robot_self_filter_FOUND)
-if(${OpenCV_VERSION} VERSION_GREATER "2.4.8")
+endif()
+if("${OpenCV_VERSION}" VERSION_GREATER "2.4.8")
   # This condition is to avoid changing current behavior
   target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES})
 endif()

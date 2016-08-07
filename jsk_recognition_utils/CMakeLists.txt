@@ -33,6 +33,7 @@ catkin_python_setup()
 
 generate_dynamic_reconfigure_options(
   cfg/PoseArrayToPose.cfg
+  cfg/PolygonArrayToPolygon.cfg
 )
 
 catkin_package(
@@ -86,13 +87,20 @@ add_library(jsk_recognition_utils SHARED
   src/time_util.cpp
   )
 
-add_rostest_gtest(test_tf_listener_singleton test/tf_listener_singleton.test src/tests/test_tf_listener_singleton.cpp)
-target_link_libraries(test_tf_listener_singleton ${PROJECT_NAME} ${catkin_LIBRARIES})
-
-catkin_add_gtest(test_cv_utils src/tests/test_cv_utils.cpp)
-target_link_libraries(test_cv_utils ${PROJECT_NAME} ${OpenCV_LIBRARIES})
-catkin_add_gtest(test_rgb_colors src/tests/test_rgb_colors.cpp)
-target_link_libraries(test_rgb_colors ${PROJECT_NAME} ${OpenCV_LIBRARIES})
+if (CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  add_rostest_gtest(test_tf_listener_singleton test/tf_listener_singleton.test src/tests/test_tf_listener_singleton.cpp)
+  target_link_libraries(test_tf_listener_singleton ${PROJECT_NAME} ${catkin_LIBRARIES})
+  catkin_add_gtest(test_cv_utils src/tests/test_cv_utils.cpp)
+  target_link_libraries(test_cv_utils ${PROJECT_NAME} ${OpenCV_LIBRARIES})
+  catkin_add_gtest(test_rgb_colors src/tests/test_rgb_colors.cpp)
+  target_link_libraries(test_rgb_colors ${PROJECT_NAME} ${OpenCV_LIBRARIES})
+  if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
+    # FIXME: jsk_tools/test_topic_published.py does not work on hydro travis/jenkins
+    # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
+    add_rostest(test/bounding_box_array_publisher.test)
+  endif()
+endif()
 
 install(TARGETS jsk_recognition_utils
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

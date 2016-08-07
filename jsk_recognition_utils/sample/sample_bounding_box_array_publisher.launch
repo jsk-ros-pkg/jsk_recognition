@@ -1,0 +1,63 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <node name="static_tf_publisher_map_to_shelf"
+        pkg="tf" type="static_transform_publisher"
+        args="0 0 1 0 0 0 map shelf_base 100">
+  </node>
+
+  <node name="bounding_box_array_publisher"
+        pkg="jsk_recognition_utils" type="bounding_box_array_publisher.py">
+    <rosparam>
+      frame_id: shelf_base
+      positions:
+        - [-0.22, 0.280, 0.361]
+        - [-0.22, 0, 0.361]
+        - [-0.22, -0.280, 0.361]
+        - [-0.22, 0.280, 0.116]
+        - [-0.22, 0, 0.116]
+        - [-0.22, -0.280, 0.116]
+        - [-0.22, 0.280, -0.116]
+        - [-0.22, 0, -0.116]
+        - [-0.22, -0.280, -0.116]
+        - [-0.22, 0.280, -0.361]
+        - [-0.22, 0, -0.361]
+        - [-0.22, -0.280, -0.361]
+      rotations:
+        - [0,0,0]
+        - [0,0,0]
+        - [0,0,0]
+        - [0,0,0]
+        - [0,0,0]
+        - [0,0,0]
+        - [0,0,0]
+        - [0,0,0]
+        - [0,0,0]
+        - [0,0,0]
+        - [0,0,0]
+        - [0,0,0]
+      dimensions:
+        - [0.37, 0.248, 0.218]
+        - [0.37, 0.306, 0.218]
+        - [0.37, 0.248, 0.218]
+        - [0.37, 0.248, 0.192]
+        - [0.37, 0.306, 0.192]
+        - [0.37, 0.248, 0.192]
+        - [0.37, 0.248, 0.192]
+        - [0.37, 0.306, 0.192]
+        - [0.37, 0.248, 0.192]
+        - [0.37, 0.248, 0.218]
+        - [0.37, 0.306, 0.218]
+        - [0.37, 0.248, 0.218]
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_recognition_utils)/sample/config/sample_bounding_box_array_publisher.rviz">
+    </node>
+  </group>
+
+</launch>

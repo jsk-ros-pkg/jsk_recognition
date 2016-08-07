@@ -81,6 +81,7 @@ ENDIF()
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
   #   cfg/VoxelGridLargeScale.cfg
+  cfg/BoundingBoxArrayToBoundingBox.cfg
   cfg/CloudOnPlane.cfg
   cfg/PolygonArrayAreaLikelihood.cfg
 #   cfg/PlaneSupportedCuboidEstimator.cfg
@@ -164,6 +165,8 @@ else ($ENV{TRAVIS_JOB_ID})
   add_definitions("-O2 -g")
 endif ($ENV{TRAVIS_JOB_ID})
 
+jsk_pcl_util_nodelet(src/bounding_box_array_to_bounding_box_nodelet.cpp "jsk_pcl_utils/BoundingBoxArrayToBoundingBox"
+  "bounding_box_array_to_bounding_box")
 jsk_pcl_util_nodelet(src/normal_flip_to_frame_nodelet.cpp "jsk_pcl_utils/NormalFlipToFrame"
   "normal_flip_to_frame")
 jsk_pcl_util_nodelet(src/centroid_publisher_nodelet.cpp "jsk_pcl_utils/CentroidPublisher" "centroid_publisher")
@@ -288,5 +291,7 @@ if (CATKIN_ENABLE_TESTING)
     # because of unreleased topic_tools/transform on hydro
     add_rostest(test/test_pointcloud_to_pcd.test DEPENDENCIES install_test_data)
     add_rostest(test/test_pointcloud_to_point_indices.test DEPENDENCIES install_test_data)
+    # because of unreleased jsk_tools/test_topic_published.py on hydro
+    add_rostest(test/bounding_box_array_to_bounding_box.test)
   endif()
 endif()

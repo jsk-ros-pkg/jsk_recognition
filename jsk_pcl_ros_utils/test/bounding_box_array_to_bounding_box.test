@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_bounding_box_array_to_bounding_box.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_bounding_box_array_to_bounding_box"
+        name="test_bounding_box_array_to_bounding_box"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="360" retry="3">
+    <rosparam>
+      topic_0: /bounding_box_array_to_bounding_box/output
+      timeout_0: 10
+    </rosparam>
+  </test>
+
+</launch>

@@ -98,6 +98,9 @@ namespace jsk_perception
                                       sensor_msgs::image_encodings::MONO8,
                                       mask_image).toImageMsg());
     }
+    else {
+      JSK_NODELET_WARN("no camera info is available");
+    }
   }
 
 }

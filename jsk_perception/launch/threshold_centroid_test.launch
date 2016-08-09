@@ -1,0 +1,27 @@
+<launch>
+  <arg name="INPUT_IMAGE" default="/camera/rgb/image_raw"/>
+  <arg name="INPUT_CAMERA_INFO" default="/camera/rgb/camera_info"/>
+  <node pkg="nodelet" type="nodelet" name="threshold_centroid_manager"
+        args="manager" />
+  <node pkg="nodelet" type="nodelet"
+        name="hsv_decomposer"
+        args="load jsk_perception/HSVDecomposer threshold_centroid_manager">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        name="threshold_binarizer"
+        args="load jsk_perception/ThresholdBinarizer threshold_centroid_manager">
+    <remap from="~input" to="/hsv_decomposer/output/hue"/>
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        name="centroid_publisher"
+        args="load jsk_perception/CentroidPublisher threshold_centroid_manager">
+    <remap from="~input" to="/threshold_binarizer/output"/>
+  </node>
+  <node pkg="nodelet" type="nodelet"
+        name="project_image_point"
+        args="load jsk_perception/ProjectImagePoint threshold_centroid_manager">
+    <remap from="~input" to="/centroid_publisher/centroid" />
+    <remap from="~input/camera_info" to="/camera/rgb/camera_info" />
+  </node>
+</launch>

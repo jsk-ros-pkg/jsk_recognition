@@ -157,6 +157,16 @@
     <description>
     </description>
   </class>
+  <class name="jsk_perception/ThresholdBinarizer" type="jsk_perception::ThresholdBinarizer"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
+  <class name="jsk_perception/CentroidPublisher" type="jsk_perception::CentroidPublisher"
+         base_class_type="nodelet::Nodelet">
+    <description>
+    </description>
+  </class>
   <class name="jsk_perception/LabDecomposer" type="jsk_perception::LabDecomposer"
          base_class_type="nodelet::Nodelet">
   </class>

@@ -1,0 +1,29 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_color_histogram.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_color_histogram"
+        name="test_color_histogram"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /color_histogram/input_image
+      timeout_0: 30
+      topic_1: /color_histogram/red_histogram
+      timeout_1: 30
+      topic_2: /color_histogram/green_histogram
+      timeout_2: 30
+      topic_3: /color_histogram/blue_histogram
+      timeout_3: 30
+      topic_4: /color_histogram/hue_histogram
+      timeout_4: 30
+      topic_5: /color_histogram/saturation_histogram
+      timeout_5: 30
+      topic_6: /color_histogram/intensity_histogram
+      timeout_6: 30
+    </rosparam>
+  </test>
+
+</launch>

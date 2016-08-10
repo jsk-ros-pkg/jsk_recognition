@@ -1,0 +1,48 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <remap from="~output" to="~output/image" />
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/lena.jpg
+      encoding: bgr8
+      publish_info: false
+    </rosparam>
+  </node>
+
+  <node name="color_histogram"
+        pkg="jsk_perception" type="color_histogram">
+    <remap from="image" to="image_publisher/output/image" />
+  </node>
+
+  <node name="image_view2"
+        pkg="image_view2" type="image_view2">
+    <remap from="image" to="image_publisher/output/image" />
+    <rosparam subst_value="true">
+      use_window: $(arg gui)
+    </rosparam>
+  </node>
+  <node name="publish_mouse_event"
+        pkg="image_view2" type="publish_mouse_event.py">
+    <remap from="~plus_rect_event" to="image_publisher/output/image/event" />
+    <rosparam>
+      image_width: 256
+      image_height: 256
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rqt_histogram_red"
+          pkg="jsk_rqt_plugins" type="rqt_histogram_plot"
+          args="/color_histogram/red_histogram/histogram">
+    </node>
+    <node name="rqt_histogram_hue"
+          pkg="jsk_rqt_plugins" type="rqt_histogram_plot"
+          args="/color_histogram/hue_histogram/histogram">
+    </node>
+  </group>
+
+
+</launch>

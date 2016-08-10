@@ -1,0 +1,21 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_smoothing_filter.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_smoothing_filter"
+        name="test_smoothing_filter"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /bilateral_filter/output
+      timeout_0: 30
+      topic_1: /gaussian_filter/output
+      timeout_1: 30
+      topic_2: /median_filter/output
+      timeout_2: 30
+    </rosparam>
+  </test>
+
+</launch>

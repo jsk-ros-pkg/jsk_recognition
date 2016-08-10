@@ -240,6 +240,18 @@
       Nodelet to compute saliency map
     </description>
   </class>
+  <class name="jsk_perception/BilateralFilter"
+         type="jsk_perception::BilateralFilter"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/GaussianFilter"
+         type="jsk_perception::GaussianFilter"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/MedianFilter"
+         type="jsk_perception::MedianFilter"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/GaussianBlur"
          type="jsk_perception::GaussianBlur"
          base_class_type="nodelet::Nodelet">

@@ -287,11 +287,16 @@ if (CATKIN_ENABLE_TESTING)
   if(TARGET tests)
     add_dependencies(tests install_test_data)
   endif()
+  # Naming Rule: filename of rostest should be {EXECUTABLE_NAME}.test
+  add_rostest(test/point_indices_to_cluster_point_indices.test)
   if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
+    # unexpected error
+    add_rostest(test/point_indices_to_mask_image.test)
     # because of unreleased topic_tools/transform on hydro
-    add_rostest(test/test_pointcloud_to_pcd.test DEPENDENCIES install_test_data)
-    add_rostest(test/test_pointcloud_to_point_indices.test DEPENDENCIES install_test_data)
+    add_rostest(test/pointcloud_to_pcd.test DEPENDENCIES install_test_data)
+    add_rostest(test/pointcloud_to_point_indices.test DEPENDENCIES install_test_data)
     # because of unreleased jsk_tools/test_topic_published.py on hydro
     add_rostest(test/bounding_box_array_to_bounding_box.test)
+    add_rostest(test/pointcloud_to_mask_image.test install_test_data)
   endif()
 endif()

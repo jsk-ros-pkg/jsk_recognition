@@ -60,6 +60,7 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 endif()
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
+  cfg/AddImage.cfg
   cfg/RectArrayActualSizeFilter.cfg
   cfg/PolygonArrayColorLikelihood.cfg
   cfg/PolygonArrayColorHistogram.cfg
@@ -179,6 +180,7 @@ jsk_perception_nodelet(src/apply_mask_image.cpp "jsk_perception/ApplyMaskImage" 
 jsk_perception_nodelet(src/unapply_mask_image.cpp "jsk_perception/UnapplyMaskImage" "unapply_mask_image")
 jsk_perception_nodelet(src/single_channel_histogram.cpp "jsk_perception/SingleChannelHistogram" "single_channel_histogram")
 jsk_perception_nodelet(src/blob_detector.cpp "jsk_perception/BlobDetector" "blob_detector")
+jsk_perception_nodelet(src/add_image.cpp "jsk_perception/AddImage" "add_image")
 jsk_perception_nodelet(src/add_mask_image.cpp "jsk_perception/AddMaskImage" "add_mask_image")
 jsk_perception_nodelet(src/multiply_mask_image.cpp "jsk_perception/MultiplyMaskImage" "multiply_mask_image")
 jsk_perception_nodelet(src/morphological_operator.cpp "jsk_perception/ErodeMaskImage" "erode_mask_image")

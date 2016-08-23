@@ -349,6 +349,7 @@ namespace jsk_pcl_ros
     }
     else {
       segmented_cloud_transformed = segmented_cloud;
+      pcl::compute3DCentroid(*segmented_cloud_transformed, center);
     }
       
     // create a bounding box

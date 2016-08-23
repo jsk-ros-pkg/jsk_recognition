@@ -203,8 +203,10 @@ jsk_pcl_util_nodelet(src/planar_pointcloud_simulator_nodelet.cpp
   "jsk_pcl_utils/PlanarPointCloudSimulator" "planar_pointcloud_simulator")
 jsk_pcl_util_nodelet(src/plane_rejector_nodelet.cpp
   "jsk_pcl_utils/PlaneRejector" "plane_rejector")
-jsk_pcl_util_nodelet(src/cluster_point_indices_to_point_indices_nodelet.cpp
-  "jsk_pcl_utils/ClusterPointIndicesToPointIndices" "cluster_point_indices_to_point_indices")
+if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
+  jsk_pcl_util_nodelet(src/cluster_point_indices_to_point_indices_nodelet.cpp
+    "jsk_pcl_utils/ClusterPointIndicesToPointIndices" "cluster_point_indices_to_point_indices")
+endif()
 jsk_pcl_util_nodelet(src/pointcloud_to_cluster_point_indices_nodelet.cpp
   "jsk_pcl_utils/PointCloudToClusterPointIndices" "pointcloud_to_cluster_point_indices")
 jsk_pcl_util_nodelet(src/pointcloud_to_mask_image_nodelet.cpp
@@ -292,8 +294,9 @@ if (CATKIN_ENABLE_TESTING)
   endif()
   # Naming Rule: filename of rostest should be {EXECUTABLE_NAME}.test
   add_rostest(test/point_indices_to_cluster_point_indices.test)
-  add_rostest(test/cluster_point_indices_to_point_indices.test)
   if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
+    # not build on hydro
+    add_rostest(test/cluster_point_indices_to_point_indices.test)
     # unexpected error
     add_rostest(test/point_indices_to_mask_image.test)
     # because of unreleased topic_tools/transform on hydro

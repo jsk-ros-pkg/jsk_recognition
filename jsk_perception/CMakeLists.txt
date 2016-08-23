@@ -356,6 +356,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_perception_add_rostest(test/slic_super_pixels.test)
     jsk_perception_add_rostest(test/sklearn_classifier.test)
     jsk_perception_add_rostest(test/split_fore_background.test)
+    jsk_perception_add_rostest(test/threshold_image.test)
     jsk_perception_add_rostest(test/tile_image.test)
     jsk_perception_add_rostest(test/label_image_decomposer.test)
     # FIXME: Does not work on Travis/Jenkins

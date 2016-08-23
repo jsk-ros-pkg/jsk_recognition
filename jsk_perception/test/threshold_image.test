@@ -1,0 +1,25 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_threshold_image.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_threshold_image"
+        name="test_threshold_image"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /binary_threshold_image/output
+      timeout_0: 30
+      topic_1: /binary_inverted_threshold_image/output
+      timeout_0: 30
+      topic_2: /threshold_truncated_image/output
+      timeout_0: 30
+      topic_3: /threshold_to_zero_image/output
+      timeout_0: 30
+      topic_4: /threshold_to_zero_inverted_image/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

@@ -64,6 +64,7 @@ generate_dynamic_reconfigure_options(
   cfg/PolygonArrayColorLikelihood.cfg
   cfg/PolygonArrayColorHistogram.cfg
   cfg/TabletopColorDifferenceLikelihood.cfg
+  cfg/ThresholdImage.cfg
   cfg/ProjectImagePoint.cfg
   cfg/MaskImageGenerator.cfg
   cfg/MorphologicalMaskImageOperator.cfg
@@ -209,6 +210,7 @@ if(${OpenCV_VERSION} VERSION_GREATER "2.9.9")  # >= 3.0.0
   jsk_perception_nodelet(src/bing.cpp "jsk_perception/Bing" "bing")
 endif()
 jsk_perception_nodelet(src/tabletop_color_difference_likelihood.cpp "jsk_perception/TabletopColorDifferenceLikelihood" "tabletop_color_difference_likelihood")
+jsk_perception_nodelet(src/threshold_image.cpp "jsk_perception/ThresholdImage" "threshold_image")
 if(OPENMP_FOUND)
   jsk_perception_nodelet(src/saliency_map_generator_node.cpp "jsk_perception/SaliencyMapGenerator" "saliency_map_generator")
   jsk_perception_nodelet(src/skeletonization_nodelet.cpp "jsk_perception/Skeletonization" "skeletonization")

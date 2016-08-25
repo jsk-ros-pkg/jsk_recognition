@@ -438,7 +438,10 @@ install(DIRECTORY scripts/
 )
 
 install(FILES jsk_pcl_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-install(DIRECTORY launch
+install(DIRECTORY
+  config
+  launch
+  sample
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 if (CATKIN_ENABLE_TESTING)

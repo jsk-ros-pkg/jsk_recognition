@@ -159,7 +159,7 @@ namespace jsk_pcl_ros
       }
     }
     publishHeightmap(new_heightmap, msg->header);
-    prev_from_center_to_fixed_ = from_center_to_fixed;
+    // prev_from_center_to_fixed_ = from_center_to_fixed;
   }
 
   void HeightmapTimeAccumulation::prevPointCloud(
@@ -167,7 +167,12 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     pcl::fromROSMsg(*msg, prev_cloud_);
-    // TODO: should check timestamp
+    // get transform at subscribed timestamp
+    tf::StampedTransform tf_transform;
+    tf_->lookupTransform(fixed_frame_id_, center_frame_id_,
+                         msg->header.stamp,
+                         tf_transform);
+    tf::transformTFToEigen(tf_transform, prev_from_center_to_fixed_);
   }
 
   void HeightmapTimeAccumulation::configCallback(

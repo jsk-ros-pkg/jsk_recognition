@@ -88,6 +88,9 @@ generate_dynamic_reconfigure_options(
   cfg/SlidingWindowObjectDetector.cfg
   cfg/ImagePublisher.cfg
   cfg/ExtractImageChannel.cfg
+  cfg/BilateralFilter.cfg
+  cfg/GaussianFilter.cfg
+  cfg/MedianFilter.cfg
   cfg/GaussianBlur.cfg
   cfg/KMeans.cfg
   cfg/ImageTimeDiff.cfg
@@ -203,6 +206,9 @@ jsk_perception_nodelet(src/convex_hull_mask_image.cpp "jsk_perception/ConvexHull
 jsk_perception_nodelet(src/mask_image_generator.cpp "jsk_perception/MaskImageGenerator" "mask_image_generator")
 jsk_perception_nodelet(src/project_image_point.cpp "jsk_perception/ProjectImagePoint" "project_image_point")
 jsk_perception_nodelet(src/sliding_window_object_detector.cpp "jsk_perception/SlidingWindowObjectDetector" "sliding_window_object_detector")
+jsk_perception_nodelet(src/smoothing_filter_nodelet.cpp "jsk_perception/BilateralFilter" "bilateral_filter")
+jsk_perception_nodelet(src/smoothing_filter_nodelet.cpp "jsk_perception/GaussianFilter" "gaussian_filter")
+jsk_perception_nodelet(src/smoothing_filter_nodelet.cpp "jsk_perception/MedianFilter" "median_filter")
 jsk_perception_nodelet(src/gaussian_blur.cpp "jsk_perception/GaussianBlur" "gaussian_blur")
 jsk_perception_nodelet(src/kmeans.cpp "jsk_perception/KMeans" "kmeans")
 if(${OpenCV_VERSION} VERSION_GREATER "2.9.9")  # >= 3.0.0
@@ -352,6 +358,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_perception_add_rostest(test/overlay_image_color_on_mono.test)
     jsk_perception_add_rostest(test/selective_search.test)
     jsk_perception_add_rostest(test/slic_super_pixels.test)
+    jsk_perception_add_rostest(test/smoothing_filter.test)
     jsk_perception_add_rostest(test/sklearn_classifier.test)
     jsk_perception_add_rostest(test/split_fore_background.test)
     jsk_perception_add_rostest(test/tile_image.test)

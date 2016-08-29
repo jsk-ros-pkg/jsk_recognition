@@ -1,0 +1,100 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <arg name="MANAGER" default="threshold_image_manager" />
+  <arg name="INPUT_IMAGE" value="/image_publisher/output" />
+
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet"
+        args="manager"
+        output="screen"
+        />
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/lena.jpg
+      encoding: bgr8
+      publish_info: false
+    </rosparam>
+  </node>
+
+  <node name="binary_threshold_image"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/ThresholdImage $(arg MANAGER)">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <rosparam>
+      threshold_type: 0
+      apply_otsu: true
+    </rosparam>
+  </node>
+
+  <node name="binary_inverted_threshold_image"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/ThresholdImage $(arg MANAGER)">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <rosparam>
+      threshold_type: 1
+      apply_otsu: true
+    </rosparam>
+  </node>
+
+  <node name="threshold_truncated_image"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/ThresholdImage $(arg MANAGER)">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <rosparam>
+      threshold_type: 2
+      apply_otsu: true
+    </rosparam>
+  </node>
+
+  <node name="threshold_to_zero_image"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/ThresholdImage $(arg MANAGER)">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <rosparam>
+      threshold_type: 3
+      apply_otsu: true
+    </rosparam>
+  </node>
+
+  <node name="threshold_to_zero_inverted_image"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/ThresholdImage $(arg MANAGER)">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <rosparam>
+      threshold_type: 4
+      apply_otsu: true
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view_0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="/image_publisher/output" />
+    </node>
+    <node name="image_view_1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="/binary_threshold_image/output" />
+    </node>
+    <node name="image_view_2"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="/binary_inverted_threshold_image/output" />
+    </node>
+    <node name="image_view_3"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="/threshold_truncated_image/output" />
+    </node>
+    <node name="image_view_4"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="/threshold_to_zero_image/output" />
+    </node>
+    <node name="image_view_5"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="/threshold_to_zero_inverted_image/output" />
+    </node>
+  </group>
+
+</launch>

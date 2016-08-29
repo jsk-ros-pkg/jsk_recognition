@@ -71,6 +71,10 @@
          type="jsk_perception::TabletopColorDifferenceLikelihood"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_perception/ThresholdImage"
+         type="jsk_perception::ThresholdImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/ErodeMaskImage"
          type="jsk_perception::Erode"
          base_class_type="nodelet::Nodelet">

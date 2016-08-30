@@ -109,6 +109,11 @@ catkin_package(
   LIBRARIES jsk_perception oriented_gradient
 )
 
+if(NOT EXISTS slic/slic.cpp)
+  message(WARNING "slic/slic.cpp is not exists, download this")
+  execute_process(COMMAND git submodule init slic   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+  execute_process(COMMAND git submodule update slic WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
 include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} slic)
 
 link_directories(${catkin_LIBRARY_DIRS})

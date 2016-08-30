@@ -4,7 +4,7 @@
 
   <node name="image_publisher"
         pkg="jsk_perception" type="image_publisher.py">
-    <param name="file_name" value="$(find jsk_perception)/sample/image/mask0001.jpg" />
+    <param name="file_name" value="$(find jsk_perception)/sample/image/sample_blob_detector_mask.jpg" />
     <rosparam>
       publish_info: false
       encoding: mono8

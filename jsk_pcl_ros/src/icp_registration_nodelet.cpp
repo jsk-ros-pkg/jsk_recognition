@@ -435,6 +435,19 @@ namespace jsk_pcl_ros
     Eigen::Affine3f best_offset_result;
     jsk_recognition_msgs::ICPResult result;
     if (cloud->empty()) {
+      sensor_msgs::PointCloud2 empty_cloud;
+      empty_cloud.header = header;
+      pub_result_cloud_.publish(empty_cloud);
+
+      pcl::PointCloud<PointT> empty_pcl_cloud;
+      publishDebugCloud(pub_debug_source_cloud_, empty_pcl_cloud);
+      publishDebugCloud(pub_debug_target_cloud_, empty_pcl_cloud);
+      publishDebugCloud(pub_debug_result_cloud_, empty_pcl_cloud);
+
+      geometry_msgs::PoseStamped empty_pose;
+      empty_pose.header = header;
+      pub_result_pose_.publish(empty_pose);
+
       result.header = header;
       result.score = min_score;
       result.name = "nan";

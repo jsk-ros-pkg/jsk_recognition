@@ -1,0 +1,61 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <arg name="INPUT_IMAGE" value="/image_publisher/output" />
+  <arg name="MANAGER" value="hsi_filter_manager" />
+
+  <!--Extracting blue objects -->
+  <arg name="h_max" default="255" />
+  <arg name="h_min" default="0" />
+  <arg name="s_max" default="255" />
+  <arg name="s_min" default="150" />
+  <arg name="i_max" default="255" />
+  <arg name="i_min" default="50" />
+
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/laugh_out_loud_joke_book.jpg
+    </rosparam>
+  </node>
+
+  <node name="hsi_color_filter"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/HSIColorFilter $(arg MANAGER)">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <param name="h_limit_max" value="$(arg h_max)" />
+    <param name="h_limit_min" value="$(arg h_min)" />
+    <param name="s_limit_max" value="$(arg s_max)" />
+    <param name="s_limit_min" value="$(arg s_min)" />
+    <param name="i_limit_max" value="$(arg i_max)" />
+    <param name="i_limit_min" value="$(arg i_min)" />
+  </node>
+
+  <node name="apply_mask_image"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/ApplyMaskImage $(arg MANAGER)">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/mask" to="/hsi_color_filter/output" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="$(arg INPUT_IMAGE)" />
+    </node>
+    <node name="image_view1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="/hsi_color_filter/output" />
+    </node>
+    <node name="image_view2"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="/apply_mask_image/output" />
+    </node>
+  </group>
+
+</launch>

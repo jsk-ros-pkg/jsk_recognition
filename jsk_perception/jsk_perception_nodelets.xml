@@ -3,6 +3,20 @@
          type="jsk_perception::BoundingBoxToRect"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_perception/RGBColorFilter"
+         type="jsk_perception::RGBColorFilter"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      filter using RGB color scale
+    </description>
+  </class>
+  <class name="jsk_perception/HSIColorFilter"
+         type="jsk_perception::HSIColorFilter"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      filter using HSI color scale
+    </description>
+  </class>
   <class name="jsk_perception/RectArrayActualSizeFilter"
          type="jsk_perception::RectArrayActualSizeFilter"
          base_class_type="nodelet::Nodelet">

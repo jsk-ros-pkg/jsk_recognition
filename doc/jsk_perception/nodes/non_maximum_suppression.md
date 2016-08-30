@@ -8,4 +8,4 @@ non_maximum_suppression in image processing (object detection)
 
 ## response
 * `bounding box` 
-* 'bounding box count`
+* `bounding box count`

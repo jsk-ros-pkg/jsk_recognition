@@ -1,0 +1,40 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <param name="file_name" value="$(find jsk_perception)/sample/image/sample_blob_detector_mask.jpg" />
+    <rosparam>
+      publish_info: false
+      encoding: mono8
+    </rosparam>
+  </node>
+
+  <node name="blob_detector"
+        pkg="jsk_perception" type="blob_detector">
+    <remap from="~input" to="image_publisher/output" />
+  </node>
+
+  <node name="label_image_decomposer"
+        pkg="jsk_perception" type="label_image_decomposer.py">
+    <remap from="~input" to="image_publisher/output" />
+    <remap from="~input/label" to="blob_detector/output" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="image_publisher/output" />
+    </node>
+    <node name="image_view1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="label_image_decomposer/output/label_viz" />
+    </node>
+    <node name="image_view2"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="blob_detector/output" />
+    </node>
+  </group>
+
+</launch>

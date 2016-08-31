@@ -1,0 +1,73 @@
+<launch>
+
+  <param name="/use_sim_time" value="true" />
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/test_data/2016-07-06-12-16-43-person-in-point-cloud/vision.compressed.bag --clock --loop">
+  </node>
+
+  <arg name="INPUT_CLOUD" value="/camera_remote/depth_registered/points" />
+  <arg name="FILTERED_CLOUD" value="/voxelgrid/output" />
+  <arg name="EMPTY_CLOUD" value="/empty_filter/output" />
+  <arg name="INPUT_IMAGE" value="/camera_remote/rgb/image_rect_color" />
+  <arg name="INPUT_CAMERA_INFO" value="/camera_remote/rgb/camera_info" />
+  <arg name="MODEL_FILE" value="$(find jsk_pcl_ros)/test_data/drill.pcd" />
+
+  <arg name="voxel_grid_filter_limit_min" default="0.0"/>
+  <arg name="voxel_grid_filter_limit_max" default="3.0"/>
+  <arg name="voxel_grid_filter_field_name" default="z"/>
+  <arg name="voxel_grid_leaf_size" default="0.04"/>
+
+  <arg name="MANAGER" value="people_detection_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="model_publisher"
+        pkg="pcl_ros" type="pcd_to_pointcloud"
+        args="$(arg MODEL_FILE) 0.1"
+        output="screen"
+        >
+    <remap from="cloud_pcd" to="reference_cloud" />
+    <rosparam>
+      _frame_id: /camera_link
+    </rosparam>
+  </node>
+
+  <node name="voxelgrid"
+        pkg="nodelet" type="nodelet"
+        args="load pcl/VoxelGrid $(arg MANAGER)"
+        output="screen" clear_params="true">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <param name="filter_limit_min" value="$(arg voxel_grid_filter_limit_min)" />
+    <param name="filter_limit_max" value="$(arg voxel_grid_filter_limit_max)" />
+    <param name="filter_limit_field_name" value="$(arg voxel_grid_filter_field_name)" />
+    <param name="leaf_size" value="$(arg voxel_grid_leaf_size)" />
+  </node>
+
+  <node name="empty_filter"
+        pkg="nodelet" type="nodelet"
+        args="load pcl/PassThrough $(arg MANAGER)"
+        output="screen" clear_params="true">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <param name="filter_limit_min" value="0.0" />
+    <param name="filter_limit_max" value="0.0" />
+  </node>
+
+  <node name="icp_registration"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ICPRegistration /$(arg MANAGER)"
+        output="screen">
+    <remap from="~input" to="$(arg FILTERED_CLOUD)" />
+    <remap from="~input_reference" to="/reference_cloud" />
+  </node>
+
+  <node name="empty_cloud_icp_registration"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ICPRegistration /$(arg MANAGER)"
+        output="screen">
+    <remap from="~input" to="$(arg EMPTY_CLOUD)" />
+    <remap from="~input_reference" to="/reference_cloud" />
+  </node>
+
+</launch>

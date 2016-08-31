@@ -456,6 +456,7 @@ if (CATKIN_ENABLE_TESTING)
   if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
     # because of unreleased topic_tools/transform on hydro
     add_rostest(test/test_hsi_color_filter.test DEPENDENCIES install_test_data)
+    add_rostest(test/test_icp_registration.test DEPENDENCIES install_test_data)
     add_rostest(test/test_attention_clipper.test DEPENDENCIES install_test_data)
     add_rostest(test/test_cluster_point_indices_decomposer.test)
     add_rostest(test/test_edge_depth_refinement.test DEPENDENCIES install_test_data)

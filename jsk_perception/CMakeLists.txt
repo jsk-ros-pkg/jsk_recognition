@@ -357,12 +357,13 @@ if(CATKIN_ENABLE_TESTING)
   set(ROSLINT_CPP_OPTS "--filter=-whitespace/parens,-whitespace/braces")
   roslint_cpp()
   roslint_python()
+  # declare rostest
+  macro(jsk_add_rostest rostest_file)
+    add_rostest(${rostest_file})
+    roslaunch_add_file_check(${rostest_file})
+  endmacro()
   if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
     # roslaunch_add_file_check in hydro is too strict
-    macro(jsk_add_rostest rostest_file)
-      add_rostest(${rostest_file})
-      roslaunch_add_file_check(${rostest_file})
-    endmacro()
     # FIXME: jsk_tools/test_topic_published.py does not work on hydro travis/jenkins
     # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
     jsk_add_rostest(test/add_mask_image.test)

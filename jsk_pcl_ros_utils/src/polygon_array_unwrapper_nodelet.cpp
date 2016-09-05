@@ -33,7 +33,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros_utils/polygon_array_unwrapper.h"
+#include <algorithm>
+#include <jsk_pcl_ros_utils/polygon_array_unwrapper.h>
 
 namespace jsk_pcl_ros_utils
 {
@@ -46,6 +47,10 @@ namespace jsk_pcl_ros_utils
       = advertise<pcl_msgs::ModelCoefficients>(
         *pnh_,
         "output_coefficients", 1);
+    srv_ = boost::make_shared<dynamic_reconfigure::Server<Config> >(*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind(&PolygonArrayUnwrapper::configCallback, this, _1, _2);
+    srv_->setCallback(f);
   }
 
   void PolygonArrayUnwrapper::subscribe()
@@ -64,19 +69,37 @@ namespace jsk_pcl_ros_utils
     sub_polygon_.unsubscribe();
     sub_coefficients_.unsubscribe();
   }
-  
+
+  void PolygonArrayUnwrapper::configCallback(Config& config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    use_likelihood_ = config.use_likelihood;
+    plane_index_ = (size_t)config.plane_index;
+  }
+
   void PolygonArrayUnwrapper::unwrap(
     const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons,
     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients)
   {
+    boost::mutex::scoped_lock lock(mutex_);
     if (polygons->polygons.size() > 0) {
-      geometry_msgs::PolygonStamped polygon_msg = polygons->polygons[0];
-      pcl_msgs::ModelCoefficients coefficients_msg = coefficients->coefficients[0];
+      size_t selected_index = plane_index_;
+      if (selected_index >= polygons->polygons.size()) {
+        NODELET_ERROR_THROTTLE(1.0, "plane_index exceeds polygons size");
+        selected_index = polygons->polygons.size() - 1;
+      }
+      if (use_likelihood_) {
+        // index of maximum likelihood
+        selected_index = std::distance(
+          polygons->likelihood.begin(),
+          std::max_element(polygons->likelihood.begin(), polygons->likelihood.end()));
+      }
+      geometry_msgs::PolygonStamped polygon_msg = polygons->polygons[selected_index];
+      pcl_msgs::ModelCoefficients coefficients_msg = coefficients->coefficients[selected_index];
       pub_polygon_.publish(polygon_msg);
       pub_coefficients_.publish(coefficients_msg);
     }
   }
-  
 }
 
 #include <pluginlib/class_list_macros.h>

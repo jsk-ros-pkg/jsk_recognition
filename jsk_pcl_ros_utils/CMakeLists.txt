@@ -142,6 +142,7 @@ generate_dynamic_reconfigure_options(
 #   cfg/OctreeVoxelGrid.cfg
 #   cfg/OctreeChangePublisher.cfg
     cfg/PointCloudToPCD.cfg
+    cfg/PolygonArrayUnwrapper.cfg
   )
 
 generate_messages(DEPENDENCIES

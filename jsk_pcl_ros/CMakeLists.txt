@@ -7,21 +7,47 @@ project(jsk_pcl_ros)
 set(PCL_MSGS pcl_msgs) ## hydro and later
 
 find_package(catkin REQUIRED COMPONENTS
-  jsk_recognition_utils jsk_pcl_ros_utils
-  dynamic_reconfigure pcl_ros nodelet message_generation genmsg
-  ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs
-  eigen_conversions tf_conversions tf2_ros tf
-  image_transport nodelet cv_bridge
-  jsk_topic_tools
+  cv_bridge
+  diagnostic_msgs
+  diagnostic_updater
+  dynamic_reconfigure
+  eigen_conversions
+  genmsg
+  geometry_msgs
   image_geometry
-  jsk_footstep_msgs
+  image_transport
+  image_view2
   interactive_markers
-  laser_assembler
-  octomap_server
-  octomap_ros
-  octomap_msgs
-  kdl_parser
+  jsk_data
+  jsk_footstep_msgs
+  jsk_pcl_ros_utils
+  jsk_recognition_msgs
+  jsk_recognition_utils
+  jsk_topic_tools
   kdl_conversions
+  kdl_parser
+  laser_assembler
+  message_generation
+  ml_classifiers
+  moveit_core
+  nav_msgs
+  nodelet
+  octomap_msgs
+  octomap_ros
+  octomap_server
+  pcl_conversions
+  ${PCL_MSGS}
+  pcl_ros nodelet
+  rosboost_cfg
+  roscpp_tutorials
+  sensor_msgs
+  std_msgs
+  std_srvs
+  stereo_msgs
+  tf
+  tf2_ros
+  tf_conversions
+  visualization_msgs
   )
 find_package(PkgConfig)
 pkg_check_modules(ml_classifieres ml_classifiers QUIET)
@@ -114,6 +140,36 @@ generate_dynamic_reconfigure_options(
   cfg/Kinfu.cfg
   cfg/PointcloudDatabaseServer.cfg
   )
+
+generate_messages(DEPENDENCIES
+  ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_footstep_msgs)
+
+catkin_package(
+  DEPENDS PCL
+  #
+  CATKIN_DEPENDS
+  diagnostic_msgs
+  geometry_msgs
+  pcl_ros
+  message_runtime
+  nav_msgs
+  octomap_msgs
+  ${PCL_MSGS}
+  sensor_msgs
+  std_msgs
+  stereo_msgs
+  jsk_footstep_msgs
+  jsk_recognition_msgs
+  jsk_recognition_utils
+  visualization_msgs
+  #
+  INCLUDE_DIRS include
+  #
+  LIBRARIES
+  jsk_pcl_ros
+  jsk_pcl_ros_base
+  jsk_pcl_ros_moveit
+)
 
 find_package(OpenCV REQUIRED core imgproc)
 
@@ -409,18 +465,8 @@ target_link_libraries(range_sensor_error_visualization jsk_pcl_ros)
 add_executable(depth_camera_error_visualization tool/depth_camera_error_visualization.cpp)
 target_link_libraries(depth_camera_error_visualization jsk_pcl_ros)
 
-generate_messages(DEPENDENCIES
-  ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_footstep_msgs)
-
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 message("flags: ${CMAKE_CXX_FLAGS}")
-
-catkin_package(
-    DEPENDS pcl
-    CATKIN_DEPENDS pcl_ros message_runtime ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_recognition_utils
-    INCLUDE_DIRS include
-    LIBRARIES jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit
-)
 
 # download and install sample data
 add_custom_target(install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
@@ -429,6 +475,10 @@ install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 install(TARGETS jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit
   ${jsk_pcl_nodelet_executables}
+  bench_ransac_plane_estimation
+  depth_camera_error_visualization
+  range_sensor_error_visualization
+  sample_cube_nearest_point
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})

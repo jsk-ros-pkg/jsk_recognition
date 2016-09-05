@@ -306,5 +306,6 @@ if (CATKIN_ENABLE_TESTING)
     # because of unreleased jsk_tools/test_topic_published.py on hydro
     add_rostest(test/bounding_box_array_to_bounding_box.test)
     add_rostest(test/pointcloud_to_mask_image.test install_test_data)
+    add_rostest(test/polygon_array_unwrapper.test)
   endif()
 endif()

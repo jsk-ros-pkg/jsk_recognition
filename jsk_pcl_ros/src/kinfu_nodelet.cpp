@@ -223,6 +223,12 @@ namespace jsk_pcl_ros
     mesh_ptr = convertToMesh(triangles_device);
     // cout << "Saving mesh to to 'mesh.ply'... " << flush;
     pcl::io::savePLYFile("mesh.ply", *mesh_ptr);
+
+    triangles_device = marching_cubes_->run(kinfu_->volume(), triangles_buffer_device_, true);
+    mesh_ptr = convertToMesh(triangles_device);
+    // cout << "Saving mesh to to 'mesh.ply'... " << flush;
+    pcl::io::savePLYFile("mesh_estimated.ply", *mesh_ptr);
+
     return true;
   }
   boost::shared_ptr<pcl::PolygonMesh> Kinfu::convertToMesh(const pcl::gpu::DeviceArray<pcl::PointXYZ>& triangles)

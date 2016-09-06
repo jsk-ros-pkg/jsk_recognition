@@ -1,0 +1,8 @@
+<launch>
+  <node name="polygon_array_unwrapper"
+        pkg="jsk_pcl_ros_utils" type="polygon_array_unwrapper"
+        output="screen" />
+
+  <test test-name="polygon_array_unwrapper_test"
+        pkg="jsk_pcl_ros_utils" type="test_polygon_array_unwrapper.py" />
+</launch>

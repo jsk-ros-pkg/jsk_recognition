@@ -2,26 +2,34 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(jsk_pcl_ros)
 
-# Load catkin and all dependencies required for this package
-# TODO: remove all from COMPONENTS that are not catkin packages.
-set(PCL_MSGS pcl_msgs) ## hydro and later
-
 find_package(catkin REQUIRED COMPONENTS
-  jsk_recognition_utils jsk_pcl_ros_utils
-  dynamic_reconfigure pcl_ros nodelet message_generation genmsg
-  ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs
-  eigen_conversions tf_conversions tf2_ros tf
-  image_transport nodelet cv_bridge
-  jsk_topic_tools
+  cv_bridge
+  dynamic_reconfigure
+  eigen_conversions
+  genmsg
+  geometry_msgs
   image_geometry
-  jsk_footstep_msgs
+  image_transport
   interactive_markers
-  laser_assembler
-  octomap_server
-  octomap_ros
-  octomap_msgs
-  kdl_parser
+  jsk_footstep_msgs
+  jsk_pcl_ros_utils
+  jsk_recognition_msgs
+  jsk_recognition_utils
+  jsk_topic_tools
   kdl_conversions
+  kdl_parser
+  laser_assembler
+  message_generation
+  nodelet
+  octomap_msgs
+  octomap_ros
+  octomap_server
+  pcl_msgs
+  pcl_ros
+  sensor_msgs
+  tf
+  tf2_ros
+  tf_conversions
   )
 find_package(PkgConfig)
 pkg_check_modules(ml_classifieres ml_classifiers QUIET)
@@ -429,6 +437,10 @@ install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 install(TARGETS jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit
   ${jsk_pcl_nodelet_executables}
+  bench_ransac_plane_estimation
+  depth_camera_error_visualization
+  range_sensor_error_visualization
+  sample_cube_nearest_point
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})

@@ -40,6 +40,12 @@
 #include <sensor_msgs/PointCloud.h>
 #include "jsk_topic_tools/connection_based_nodelet.h"
 
+#include "jsk_pcl_ros_utils/DelayPointCloudConfig.h"
+#include <dynamic_reconfigure/server.h>
+
+#include <message_filters/subscriber.h>
+#include <message_filters/time_sequencer.h>
+
 namespace jsk_pcl_ros_utils
 {
 
@@ -47,15 +53,28 @@ namespace jsk_pcl_ros_utils
   {
     
   public:
-    
+
+    typedef jsk_pcl_ros_utils::DelayPointCloudConfig Config;
+
   protected:
     virtual void onInit();
     virtual void delay(const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void subscribe();
     virtual void unsubscribe();
-    double sleep_time_;
-    ros::Subscriber sub_;
+
+    boost::mutex mutex_;
+    double delay_time_;
+    int queue_size_;
     ros::Publisher pub_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_;
+    boost::shared_ptr<message_filters::TimeSequencer<sensor_msgs::PointCloud2> > time_sequencer_;
+
+    ////////////////////////////////////////////////////////
+    // dynamic reconfigure
+    ////////////////////////////////////////////////////////
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    void configCallback (Config &config, uint32_t level);
+
   private:
 
   };

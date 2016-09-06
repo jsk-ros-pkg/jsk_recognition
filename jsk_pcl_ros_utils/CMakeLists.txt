@@ -84,6 +84,7 @@ generate_dynamic_reconfigure_options(
   cfg/BoundingBoxArrayToBoundingBox.cfg
   cfg/CloudOnPlane.cfg
   cfg/ClusterPointIndicesToPointIndices.cfg
+  cfg/DelayPointCloud.cfg
   cfg/PolygonArrayAreaLikelihood.cfg
 #   cfg/PlaneSupportedCuboidEstimator.cfg
 #   cfg/InteractiveCuboidLikelihood.cfg

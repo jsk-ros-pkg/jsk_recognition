@@ -101,13 +101,10 @@ generate_dynamic_reconfigure_options(
   cfg/SLICSuperPixels.cfg
   cfg/SnakeSegmentation.cfg
   cfg/camshiftdemo.cfg
-  cfg/EdgeDetector.cfg
-  cfg/HoughLines.cfg
   cfg/matchtemplate.cfg
   cfg/point_pose_extractor.cfg
   cfg/RectangleDetector.cfg
   cfg/ColorHistogram.cfg
-  cfg/HoughCircles.cfg
   cfg/ColorHistogramSlidingMatcher.cfg
   cfg/BackgroundSubstraction.cfg
   cfg/GrabCut.cfg
@@ -178,12 +175,10 @@ jsk_add_nodelet(src/rect_array_actual_size_filter.cpp "jsk_perception/RectArrayA
 jsk_add_nodelet(src/rect_array_to_density_image.cpp "jsk_perception/RectArrayToDensityImage" "rect_array_to_density_image")
 jsk_add_nodelet(src/polygon_array_color_likelihood.cpp "jsk_perception/PolygonArrayColorLikelihood" "polygon_array_color_likelihood")
 jsk_add_nodelet(src/polygon_array_color_histogram.cpp "jsk_perception/PolygonArrayColorHistogram" "polygon_array_color_histogram")
-jsk_add_nodelet(src/edge_detector.cpp "jsk_perception/EdgeDetector" "edge_detector")
 jsk_add_nodelet(src/sparse_image_encoder.cpp "jsk_perception/SparseImageEncoder" "sparse_image_encoder")
 jsk_add_nodelet(src/sparse_image_decoder.cpp "jsk_perception/SparseImageDecoder" "sparse_image_decoder")
 jsk_add_nodelet(src/color_histogram.cpp "jsk_perception/ColorHistogram" "color_histogram")
 jsk_add_nodelet(src/background_substraction_nodelet.cpp "jsk_perception/BackgroundSubstraction" "background_substraction")
-jsk_add_nodelet(src/hough_circles.cpp "jsk_perception/HoughCircleDetector" "hough_circles")
 jsk_add_nodelet(src/fisheye_to_panorama.cpp "jsk_perception/FisheyeToPanorama" "fisheye_to_panorama")
 jsk_add_nodelet(src/grabcut_nodelet.cpp "jsk_perception/GrabCut" "grabcut")
 jsk_add_nodelet(src/slic_superpixels.cpp "jsk_perception/SLICSuperPixels" "slic_super_pixels")
@@ -284,7 +279,6 @@ jsk_add_node(src/linemod.cpp linemod)
 jsk_add_node(src/virtual_camera_mono.cpp virtual_camera_mono)
 jsk_add_node(src/point_pose_extractor.cpp point_pose_extractor DEPENDS libsiftfast)
 jsk_add_node(src/white_balance_converter.cpp white_balance_converter)
-jsk_add_node(src/hough_lines.cpp hough_lines)
 jsk_add_node(src/rectangle_detector.cpp rectangle_detector)
 jsk_add_node(src/calc_flow.cpp calc_flow)
 jsk_add_node(src/color_histogram_sliding_matcher.cpp color_histogram_sliding_matcher)

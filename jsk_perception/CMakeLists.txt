@@ -30,6 +30,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   mk
   nodelet
+  opencv_apps
   pcl_ros
   posedetection_msgs
   roscpp

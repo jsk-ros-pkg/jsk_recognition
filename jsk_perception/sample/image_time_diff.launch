@@ -1,0 +1,24 @@
+<launch>
+  <node pkg="uvc_camera" type="uvc_camera_node" name="uvc_camera_node" />
+  <group ns="/" >
+    <node pkg="jsk_perception" type="hsv_decomposer" name="hsv_decomposer" output="screen">
+      <remap from="~input" to="image_raw" />
+    </node>
+    <node pkg="jsk_perception" type="image_time_diff.py" name="image_time_diff" output="screen" >
+      <remap from="~input/hue" to="/hsv_decomposer/output/hue" />
+      <remap from="~input/saturation" to="/hsv_decomposer/output/saturation" />
+    </node>
+    <node pkg="image_view" type="image_view" name="hue_view" >
+      <remap from="image" to="hsv_decomposer/output/hue" />
+      <param name="filename_format" value="hue%04i.jpg" />
+    </node>
+    <node pkg="image_view" type="image_view" name="satuation_view" >
+      <remap from="image" to="hsv_decomposer/output/saturation" />
+      <param name="filename_format" value="saturation%04i.jpg" />
+    </node>
+    <node pkg="image_view" type="image_view" name="diff_view" >
+      <remap from="image" to="image_time_diff/output/diff_image" />
+      <param name="filename_format" value="diff%04i.jpg" />
+    </node>
+  </group>
+</launch>

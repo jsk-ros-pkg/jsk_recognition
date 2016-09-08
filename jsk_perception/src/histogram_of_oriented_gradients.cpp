@@ -118,22 +118,6 @@ cv::Mat HOGFeatureDescriptor::computeHOG(
     return featureMD;
 }
 
-cv::Mat HOGFeatureDescriptor::orientationistogram(
-    const cv::Mat &src, const int &min_val, const int &max_val, bool normed) {
-    cv::Mat result;
-    int histSize = max_val - min_val;
-    float range[] = { static_cast<float>(min_val),
-                      static_cast<float>(max_val+1)};
-    const float* histRange = {range};
-    cv::calcHist(
-       &src, 1, 0, cv::Mat(), result, 1, &histSize, &histRange, true, false);
-    if (normed) {
-       cv::normalize(result, result, 0, 1, cv::NORM_MINMAX, -1, cv::Mat());
-    }
-    return result;
-}
-
-
 template<typename T>
 T HOGFeatureDescriptor::computeHOGHistogramDistances(
     const cv::Mat &patch, std::vector<cv::Mat> &imageHOG,

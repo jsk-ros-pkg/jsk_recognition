@@ -27,8 +27,6 @@ class HOGFeatureDescriptor {
        const cv::Mat &, cv::Mat &);
     virtual cv::Mat blockGradient(
        const int, const int, cv::Mat &);
-    virtual cv::Mat orientationistogram(
-       const cv::Mat&, const int &, const int &, bool = false);
     virtual void getHOG(
        const cv::Mat &, cv::Mat &, cv::Mat &);
     template<typename T>

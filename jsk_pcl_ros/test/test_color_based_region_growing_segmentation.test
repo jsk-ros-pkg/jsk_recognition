@@ -22,14 +22,15 @@
 
   <test test-name="test_color_based_region_growing_segmentation"
         name="test_color_based_region_growing_segmentation"
-        pkg="jsk_tools" type="test_topic_published.py" >
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="500">
     <rosparam>
       topic_0: /camera_remote/depth_registered/points
       timeout_0: 60
       topic_1: /cluster_point_indices_decomposer/boxes
-      timeout_1: 60
+      timeout_1: 180
       topic_2: /cluster_point_indices_decomposer/debug_output
-      timeout_2: 60
+      timeout_2: 320
     </rosparam>
   </test>
 

@@ -29,6 +29,8 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
 
     def __init__(self):
         super(self.__class__, self).__init__()
+        self.bg_label = rospy.get_param('~bg_label', 0)
+        self.proba_threshold = rospy.get_param('~proba_threshold', 0.0)
         self._load_model()
         self.pub = self.advertise('~output', Image, queue_size=1)
         self.pub_proba = self.advertise(
@@ -122,7 +124,10 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
         pred = self.model.score
         score = cuda.to_cpu(pred.data)[0]
         proba_img = softmax(score).transpose((1, 2, 0))
+        max_proba_img = np.max(proba_img, axis=-1)
         label = np.argmax(score, axis=0)
+        # uncertain because the probability is low
+        label[max_proba_img < self.proba_threshold] = self.bg_label
         return label, proba_img
 
 

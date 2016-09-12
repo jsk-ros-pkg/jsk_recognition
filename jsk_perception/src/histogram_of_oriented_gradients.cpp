@@ -42,8 +42,8 @@ void HOGFeatureDescriptor::imageGradient(
     cv::Mat Imag;
     cv::Mat Iang;
     cv::cartToPolar(xsobel, ysobel, Imag, Iang, true);
-    cv::add(Iang, cv::Scalar(180), Iang, Iang < 0);
-    cv::add(Iang, cv::Scalar(-180), Iang, Iang >= 180);
+    cv::add(Iang, cv::Scalar(ANGLE), Iang, Iang < 0);
+    cv::add(Iang, cv::Scalar(-ANGLE), Iang, Iang >= ANGLE);
     cv::Mat orientation_histogram;
     for (int j = 0; j < image.rows; j += CELL) {
         for (int i = 0; i < image.cols; i += CELL) {

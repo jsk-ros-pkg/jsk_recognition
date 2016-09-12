@@ -146,13 +146,18 @@ catkin_package(
   LIBRARIES ${PROJECT_NAME} oriented_gradient
 )
 
+
 # ------------------------------------------------------------------------------------
 # Build
 # ------------------------------------------------------------------------------------
+if(NOT EXISTS slic/slic.cpp)
+  message(WARNING "slic/slic.cpp is not exists, download this")
+  execute_process(COMMAND git submodule init slic   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+  execute_process(COMMAND git submodule update slic WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
 
 # Build nodelet executables
-
-include_directories(include ${catkin_INCLUDE_DIRS} ${Eigen_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels)
+include_directories(include ${catkin_INCLUDE_DIRS} ${Eigen_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} slic)
 
 file(GLOB ${PROJECT_NAME}_node_scripts ${PROJECT_SOURCE_DIR}/node_scripts/*)
 foreach(_node_script ${${PROJECT_NAME}_node_scripts})
@@ -246,8 +251,8 @@ if(robot_self_filter_FOUND)
 endif()
 
 # compiling jsk_perception library for nodelet
-add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_nodelet_sources}
-  ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels/slic.cpp
+add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
+  slic/slic.cpp
   src/histogram_of_oriented_gradients.cpp
   )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${robot_self_filter_LIBRARIES} yaml-cpp)

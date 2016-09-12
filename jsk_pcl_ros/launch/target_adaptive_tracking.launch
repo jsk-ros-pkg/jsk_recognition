@@ -1,0 +1,50 @@
+<launch>
+  <arg name="input_cloud" default="/camera/depth_registered/points" />
+  <arg name="model_cloud" default="/object_model/output/cloud" />
+  <arg name="background_cloud" default="/object_model/output/bkgd_cloud" />
+  <arg name="tracker_pose" default="/particle_filter_tracker/track_result_pose" />
+  <arg name="init_obj_pose" default="/object_model/output/pose" />
+  
+  <include file="$(find multilayer_object_tracking)/launch/object_model_annotation.launch" />
+  <!--<include file="$(find bounding_box_estimation)/launch/bounding_box_estimation.launch" />-->
+  <!-- <include file="$(find jsk_pcl_ros)/sample/tracking_sample.launch" /> -->
+  
+  <!-- <node pkg="jsk_pcl_ros" type="target_adaptive_tracking"  -->
+  <!-- 	name="target_adaptive_tracking" output="screen" respawn="false"> -->
+  <!--   <remap from="~input_cloud" to="/camera/depth_registered/points" /> -->
+  <!--   <!-\- <remap from="input_cloud" to="/pcl_filter_utils/output/cloud" /> -\-> -->
+  <!--   <remap from="~input_obj_cloud" to="/object_model/output/cloud" /> -->
+  <!--   <remap from="~input_bkgd_cloud" to="/object_model/output/bkgd_cloud" /> -->
+  <!--   <remap from="~input_pose" to="/particle_filter_tracker/track_result_pose" /> -->
+  <!--   <remap from="~input_obj_pose" to="/object_model/output/pose" /> -->
+  <!-- </node> -->
+
+    <node pkg="jsk_pcl_ros" type="target_adaptive_tracking"
+  	name="target_adaptive_tracking" output="screen" respawn="false">
+    <remap from="~input_cloud" to="$(arg input_cloud)" />
+    <remap from="~input_obj_cloud" to="$(arg model_cloud)" />
+    <remap from="~input_bkgd_cloud" to="$(arg background_cloud)" />
+    <remap from="~input_pose" to="$(arg tracker_pose)" />
+    <remap from="~input_obj_pose" to="$(arg init_obj_pose)" />
+  </node>
+
+  <include file="$(find jsk_pcl_ros)/launch/tracking.launch">
+    <arg name="input_point" default="/camera/depth_registered/points" />
+    <arg name="voxel_grid_filter_limit_min" value="0.0"/>
+    <arg name="voxel_grid_filter_limit_max" value="5.0"/>
+    <arg name="voxel_grid_filter_field_name" value="true"/>
+    <arg name="voxel_grid_leaf_size" value="0.01"/>
+  </include>
+  
+  <node pkg="rviz" type="rviz" name="particle_filter_rviz"
+	args=" -d $(find jsk_pcl_ros)/sample/rviz/tracking.rviz"/>
+  
+  <node pkg="jsk_pcl_ros" type="cluster_point_indices_decomposer" 
+	name="supervoxel_segmentation_decomposer" output="screen">
+    <remap from="~input" to="/target_adaptive_tracking/supervoxel/cloud" />
+    <remap from="~target" to="/target_adaptive_tracking/supervoxel/indices" />
+  </node>
+  <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_reconfigure"/>
+  <node pkg="rviz" type="rviz" name="target_adaptive_tracking_rviz"
+	args=" -d $(find jsk_pcl_ros)/sample/rviz/target_adaptive_tracking.rviz"/>
+</launch>

@@ -631,8 +631,15 @@
   <class name="jsk_pcl/CollisionDetector"
          type="jsk_pcl_ros::CollisionDetector"
          base_class_type="nodelet::Nodelet">
+
+  <class name="jsk_pcl/TargetAdaptiveTracking" type="jsk_pcl_ros::TargetAdaptiveTracking"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Nodelet to track object and update the appearance model online
+    </description>
   </class>
 </library>
+
 <library path="libjsk_pcl_ros_moveit">
   <class name="jsk_pcl/PointCloudMoveitFilter"
          type="jsk_pcl_ros::PointCloudMoveitFilter"

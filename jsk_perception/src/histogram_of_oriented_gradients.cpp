@@ -1,8 +1,14 @@
 
 #include <jsk_perception/histogram_of_oriented_gradients.h>
 
-HOGFeatureDescriptor::HOGFeatureDescriptor() {
-   
+HOGFeatureDescriptor::HOGFeatureDescriptor(
+    const int cell_size, const int block_per_cell,
+    const int n_bins, const float angle) :
+  CELL(cell_size),
+  BLOCK(block_per_cell),
+  ANGLE(angle),
+  N_BINS(n_bins) {
+  this->BINS_ANGLE = this->ANGLE / this->N_BINS;
 }
 
 void HOGFeatureDescriptor::bilinearBinVoting(
@@ -31,13 +37,13 @@ void HOGFeatureDescriptor::imageGradient(
     const cv::Mat &image, cv::Mat &hog_bins) {
     cv::Mat xsobel;
     cv::Mat ysobel;
-    cv::Sobel(image, xsobel, CV_32F, 1, 0, 3);
-    cv::Sobel(image, ysobel, CV_32F, 0, 1, 3);
+    cv::Sobel(image, xsobel, CV_32F, 1, 0, 7);
+    cv::Sobel(image, ysobel, CV_32F, 0, 1, 7);
     cv::Mat Imag;
     cv::Mat Iang;
     cv::cartToPolar(xsobel, ysobel, Imag, Iang, true);
-    cv::add(Iang, cv::Scalar(180), Iang, Iang < 0);
-    cv::add(Iang, cv::Scalar(-180), Iang, Iang >= 180);
+    cv::add(Iang, cv::Scalar(ANGLE), Iang, Iang < 0);
+    cv::add(Iang, cv::Scalar(-ANGLE), Iang, Iang >= ANGLE);
     cv::Mat orientation_histogram;
     for (int j = 0; j < image.rows; j += CELL) {
         for (int i = 0; i < image.cols; i += CELL) {
@@ -111,22 +117,6 @@ cv::Mat HOGFeatureDescriptor::computeHOG(
     featureMD = featureMD.reshape(1, 1);
     return featureMD;
 }
-
-cv::Mat HOGFeatureDescriptor::orientationistogram(
-    const cv::Mat &src, const int &min_val, const int &max_val, bool normed) {
-    cv::Mat result;
-    int histSize = max_val - min_val;
-    float range[] = { static_cast<float>(min_val),
-                      static_cast<float>(max_val+1)};
-    const float* histRange = {range};
-    cv::calcHist(
-       &src, 1, 0, cv::Mat(), result, 1, &histSize, &histRange, true, false);
-    if (normed) {
-       cv::normalize(result, result, 0, 1, cv::NORM_MINMAX, -1, cv::Mat());
-    }
-    return result;
-}
-
 
 template<typename T>
 T HOGFeatureDescriptor::computeHOGHistogramDistances(

@@ -37,8 +37,8 @@ void HOGFeatureDescriptor::imageGradient(
     const cv::Mat &image, cv::Mat &hog_bins) {
     cv::Mat xsobel;
     cv::Mat ysobel;
-    cv::Sobel(image, xsobel, CV_32F, 1, 0, 3);
-    cv::Sobel(image, ysobel, CV_32F, 0, 1, 3);
+    cv::Sobel(image, xsobel, CV_32F, 1, 0, 7);
+    cv::Sobel(image, ysobel, CV_32F, 0, 1, 7);
     cv::Mat Imag;
     cv::Mat Iang;
     cv::cartToPolar(xsobel, ysobel, Imag, Iang, true);

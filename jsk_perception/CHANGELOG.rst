@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.22 (2016-09-13)
+-------------------
 * Basically, if the angle is less than 0, just add 180. Likewise if the angle is greater than 180, just subtract by 180. https://github.com/jsk-ros-pkg/jsk_recognition/pull/1593/files#r77976906
 * Sobel operator with higher kernel can give better response https://github.com/jsk-ros-pkg/jsk_recognition/pull/1593#discussion_r77976333
 * [jsk_perception] slic as submodule

@@ -47,11 +47,30 @@ namespace jsk_perception
   void ConsensusTracking::onInit()
   {
     DiagnosticNodelet::onInit();
-    // pnh_->param("use_panorama", use_panorama_, false);
-    // pnh_->param("simple_panorama", simple_panorama_, false);
+    int topleft_x;
+    int topleft_y;
+    int bottomright_x;
+    int bottomright_y;
+    pnh_->param("show_window", show_window_, false);
+    pnh_->param("topleft_x", topleft_x, 100);
+    pnh_->param("topleft_y", topleft_y, 100);
+    pnh_->param("bottomright_x", bottomright_x, 200);
+    pnh_->param("bottomright_y", bottomright_y, 200);
     pub_image_ = advertise<sensor_msgs::Image>(
       *pnh_, "output", 1);
 
+    first_initialize_ = true;
+    
+    init_top_left_ = cv::Point2f(topleft_x, topleft_y);
+    init_bottom_right_ = cv::Point2f(bottomright_x, bottomright_y);
+    sub_rect_ = pnh_->subscribe("set_rect", 1, &CMTNodelet::reset_rect, this);
+  }
+
+  void CMTNodelet::reset_rect(jsk_recognition_msgs::Rect rc)
+  {
+    init_top_left_ = cv::Point2f(rc.x - rc.width/2, rc.y - rc.height/2);
+    init_bottom_right_ = cv::Point2f(rc.x + rc.width/2, rc.y + rc.height/2);
+    
     first_initialize_ = true;
   }
 
@@ -73,22 +92,20 @@ namespace jsk_perception
     cv::Mat im_gray;
     cv::cvtColor(input_msg, im_gray, CV_RGB2GRAY);
     if(first_initialize_){
-      cv::Point2f initTopLeft(150,80);
-      cv::Point2f initBottomDown(300,200);
-
-      cmt.initialise(im_gray, initTopLeft, initBottomDown);
+      cmt.initialise(im_gray, init_top_left_, init_bottom_right_);
       first_initialize_ = false;
     }
     cmt.processFrame(im_gray);
 
     for(int i = 0; i<cmt.trackedKeypoints.size(); i++)
-      cv::circle(input_msg, cmt.trackedKeypoints[i].first.pt, 3, cv::Scalar(255,255,255));
-    cv::line(input_msg, cmt.topLeft, cmt.topRight, cv::Scalar(255,255,255));
-    cv::line(input_msg, cmt.topRight, cmt.bottomRight, cv::Scalar(255,255,255));
-    cv::line(input_msg, cmt.bottomRight, cmt.bottomLeft, cv::Scalar(255,255,255));
-    cv::line(input_msg, cmt.bottomLeft, cmt.topLeft, cv::Scalar(255,255,255));
+      cv::circle(input_msg, cmt.trackedKeypoints[i].first.pt, 3, cv::Scalar(255,0,0));
+    cv::line(input_msg, cmt.topLeft, cmt.topRight, cv::Scalar(0,30,255));
+    cv::line(input_msg, cmt.topRight, cmt.bottomRight, cv::Scalar(0,30,255));
+    cv::line(input_msg, cmt.bottomRight, cmt.bottomLeft, cv::Scalar(0,30,255));
+    cv::line(input_msg, cmt.bottomLeft, cmt.topLeft, cv::Scalar(0,30,255));
     
-    imshow("frame", input_msg);
+    if(show_window_)
+      imshow("frame", input_msg);
     cv::waitKey(1);
     pub_image_.publish(cv_bridge::CvImage(image_msg->header,
                                           image_msg->encoding,

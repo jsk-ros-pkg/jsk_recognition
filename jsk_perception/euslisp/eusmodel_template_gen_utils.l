@@ -36,6 +36,8 @@
 	(setq template (ros::resolve-ros-path
 			(format nil "package://~A/template/~A.~A" *pkgname* (send path :name) (send path :type))))
 	(when (or (not (probe-file template)) (file-newer imgfile template))
+          (if (null (probe-file (send (pathname template) :directory-string)))
+              (unix::mkdir (send (pathname template) :directory-string)))
 	  (unix::system (format nil "cp -f ~a ~a" imgfile template)))
 	(list template width height trans)
 	))))

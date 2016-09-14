@@ -74,13 +74,6 @@ add_custom_target(install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/
 # download and install trained data
 add_custom_target(install_trained_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_trained_data.py)
 
-execute_process(
-  COMMAND cmake -E chdir ${CMAKE_CURRENT_BINARY_DIR}
-  make -f ${PROJECT_SOURCE_DIR}/Makefile.slic
-  INSTALL_DIR=${CATKIN_DEVEL_PREFIX}
-  MK_DIR=${mk_PREFIX}/share/mk installed
-  RESULT_VARIABLE _make_failed)
-
 # ------------------------------------------------------------------------------------
 # Catkin setup
 # ------------------------------------------------------------------------------------
@@ -150,7 +143,7 @@ catkin_package(
 # ------------------------------------------------------------------------------------
 # Build
 # ------------------------------------------------------------------------------------
-if(NOT EXISTS slic/slic.cpp)
+if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/slic/slic.cpp)
   message(WARNING "slic/slic.cpp is not exists, download this")
   execute_process(COMMAND git submodule init slic   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
   execute_process(COMMAND git submodule update slic WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})

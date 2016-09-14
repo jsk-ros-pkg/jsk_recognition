@@ -2,6 +2,12 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* euslisp/eusmodel_template_gen_utils.l: create directory if tepmlate path is not found
+* CMakeLists.txt : Makefile.slic is no longer used
+* Contributors: Kei Okada
+
 0.3.22 (2016-09-13)
 -------------------
 * Basically, if the angle is less than 0, just add 180. Likewise if the angle is greater than 180, just subtract by 180. https://github.com/jsk-ros-pkg/jsk_recognition/pull/1593/files#r77976906

@@ -2,6 +2,9 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.3.22 (2016-09-13)
 -------------------
 * remove imagesift/CATKIN_IGNORE which is wrongly commited on #1628

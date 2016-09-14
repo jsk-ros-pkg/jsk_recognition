@@ -2,6 +2,9 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.3.22 (2016-09-13)
 -------------------
 * [jsk_pcl_ros_utils/delay_point_cloud] Modified using message_filter for delay message

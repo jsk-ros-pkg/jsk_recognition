@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.23 (2016-09-14)
+-------------------
 * euslisp/eusmodel_template_gen_utils.l: create directory if tepmlate path is not found
 * CMakeLists.txt : Makefile.slic is no longer used
 * Contributors: Kei Okada

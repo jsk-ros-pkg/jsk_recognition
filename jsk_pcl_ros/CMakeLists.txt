@@ -122,7 +122,7 @@ generate_dynamic_reconfigure_options(
   cfg/ExtractTopPolygonLikelihood.cfg
   cfg/Kinfu.cfg
   cfg/PointcloudDatabaseServer.cfg
-  cfg/TargetAdaptiveTrackingConfig.cfg
+  cfg/TargetAdaptiveTracking.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)

@@ -29,6 +29,7 @@
   <build_depend>image_geometry</build_depend>
   <build_depend>image_transport</build_depend>
   <build_depend>image_view2</build_depend>
+  <build_depend>jsk_data</build_depend>
   <build_depend>jsk_recognition_msgs</build_depend>
   <build_depend>jsk_recognition_utils</build_depend>
   <build_depend>jsk_topic_tools</build_depend>

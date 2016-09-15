@@ -2,6 +2,11 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix TargetAdaptiveTrackingConfig file name (this breaks make install)
+* Contributors: Kei Okada
+
 0.3.24 (2016-09-15)
 -------------------
 

@@ -103,6 +103,7 @@ namespace jsk_pcl_ros_utils
     
     bool use_tf2_;
     bool use_inliers_;
+    bool allow_flip_;    
     std::string processing_frame_id_;
     // axis
     Eigen::Vector3d reference_axis_;

@@ -453,10 +453,14 @@ namespace jsk_pcl_ros
       // skip indices with points size
       if (min_size_ > 0 &&
           indices_input->cluster_indices[i].indices.size() < min_size_) {
+        vindices.reset (new std::vector<int> ());
+        converted_indices.push_back(vindices);
         continue;
       }
       if (max_size_ > 0 &&
           indices_input->cluster_indices[i].indices.size() > max_size_) {
+        vindices.reset (new std::vector<int> ());
+        converted_indices.push_back(vindices);
         continue;
       }
       vindices.reset (new std::vector<int> (indices_input->cluster_indices[i].indices));

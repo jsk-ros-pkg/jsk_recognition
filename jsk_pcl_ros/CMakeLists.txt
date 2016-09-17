@@ -462,6 +462,7 @@ install(DIRECTORY
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 if (CATKIN_ENABLE_TESTING)
+  find_package(roslaunch REQUIRED)
   find_package(rostest REQUIRED)
   # install test data by a script
   add_custom_target(install_test_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.py)
@@ -485,4 +486,8 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/test_organized_pointcloud_to_point_indices.test DEPENDENCIES install_test_data)
     add_rostest(test/test_color_based_region_growing_segmentation.test DEPENDENCIES install_test_data)
   endif()
+  roslaunch_add_file_check(launch/openni_local.launch)
+  roslaunch_add_file_check(launch/openni2_local.launch)
+  roslaunch_add_file_check(launch/openni_remote.launch)
+  roslaunch_add_file_check(launch/openni2_remote.launch)
 endif()

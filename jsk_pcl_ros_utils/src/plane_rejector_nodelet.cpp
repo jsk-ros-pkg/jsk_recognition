@@ -63,6 +63,7 @@ namespace jsk_pcl_ros_utils
       return;
     }
     pnh_->param("use_inliers", use_inliers_, false);
+    pnh_->param("allow_flip", allow_flip_, false);
 
     std::vector<double> reference_axis;
     if (!jsk_topic_tools::readVectorParameter(
@@ -214,6 +215,10 @@ namespace jsk_pcl_ros_utils
         Eigen::Vector3d eigen_transformed_plane_axis;
         tf::vectorMsgToEigen(transformed_plane_axis.vector,
                              eigen_transformed_plane_axis);
+        if (allow_flip_ && eigen_transformed_plane_axis.normalized().dot(reference_axis_) < 0) {
+          // flip normal vector to make its direction same as reference axis
+          eigen_transformed_plane_axis = -eigen_transformed_plane_axis;
+        }
         double ang = std::abs(acos(eigen_transformed_plane_axis.normalized().dot(reference_axis_)) - angle_);
         if (ang < angle_thr_) {
           ++passed_plane_counter;

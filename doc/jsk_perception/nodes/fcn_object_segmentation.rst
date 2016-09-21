@@ -57,6 +57,15 @@ Parameters
 
   Saved h5 file for trained model.
 
+* ``~bg_label`` (Int, default: ``0``)
+
+  Label value for background. This is used with rosparam ``~proba_threshold``
+
+* ``~proba_threshold`` (Float, default: ``0.0``)
+
+  Threshold for labeling pixels as uncertain, and the uncertain region
+  will be labeled as background with rosparam ``~bg_label``.
+
 
 **Optional**
 

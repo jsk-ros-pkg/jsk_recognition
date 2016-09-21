@@ -102,6 +102,10 @@
   <build_depend>interactive_markers</build_depend>
   <run_depend>interactive_markers</run_depend>
   <run_depend>jsk_recognition_utils</run_depend>
+  <run_depend>openni_launch</run_depend>
+  <run_depend>openni2_launch</run_depend>
+  <run_depend>topic_tools</run_depend>
+  <run_depend>resized_image_transport</run_depend>
   <run_depend>robot_self_filter</run_depend>
   <run_depend>kdl_parser</run_depend>
   <run_depend>kdl_conversions</run_depend>
@@ -113,6 +117,7 @@
   <run_depend>jsk_pcl_ros_utils</run_depend>
   <run_depend>jsk_data</run_depend>
   <test_depend>jsk_tools</test_depend>
+  <test_depend>roslaunch</test_depend>
   <test_depend>rostest</test_depend>
   <export>
     <nodelet plugin="${prefix}/jsk_pcl_nodelets.xml"/>

@@ -1,7 +1,6 @@
 <launch>
   <arg name="BASE_FRAME_ID" default="odom" />
   <arg name="RUN_SELF_FILTER" default="false"/>
-  <arg name="SELF_FILTER_PARAM" default="$(find jsk_pr2_startup)/jsk_pr2_sensors/tilt_self_filter.yaml" />
   <arg name="JOINT_STATIC_FILTER" default="false" />
   <arg name="FILTER_JOINT_PARAM" value="$(find jsk_pcl_ros)/config/pr2_sensor_joint.yaml" />
   <arg name="INPUT" default="/camera/depth_registered/points" />
@@ -33,6 +32,7 @@
 
   
   <group if="$(arg RUN_SELF_FILTER)">
+    <arg name="SELF_FILTER_PARAM" default="$(find jsk_pr2_startup)/jsk_pr2_sensors/tilt_self_filter.yaml" />
     <node pkg="pr2_navigation_self_filter"
           type="self_filter" clear_params="true"
           name="openni_cloud_self_filter" respawn="true" output="screen">

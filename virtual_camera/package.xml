@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<package>
+  <name>virtual_camera</name>
+  <version>0.3.25</version>
+  <description>A virtual ROS driver for RGB-D cameras.</description>
+  <maintainer email="www.kentaro.wada@gmail.com">Kentaro Wada</maintainer>
+  <license>BSD</license>
+  <url type="website">https://github.com/jsk-ros-pkg/jsk_recognition</url>
+  <author email="www.kentaro.wada@gmail.com">Kentaro Wada</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- alphabetical order -->
+  <build_depend>boost</build_depend>
+  <build_depend>camera_info_manager</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>libopencv-dev</build_depend>
+  <build_depend>libpcl-all-dev</build_depend>
+  <build_depend>nodelet</build_depend>
+  <build_depend>pcl_conversions</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <!-- alphabetical order -->
+
+  <!-- alphabetical order -->
+  <run_depend>boost</run_depend>
+  <run_depend>camera_info_manager</run_depend>
+  <run_depend>cv_bridge</run_depend>
+  <run_depend>libopencv-dev</run_depend>
+  <run_depend>libpcl-all-dev</run_depend>
+  <run_depend>nodelet</run_depend>
+  <run_depend>pcl_conversions</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <!-- alphabetical order -->
+
+  <!-- alphabetical order -->
+  <test_depend>rostest</test_depend>
+  <!-- alphabetical order -->
+
+  <export>
+    <nodelet plugin="${prefix}/nodelets.xml"/>
+  </export>
+</package>

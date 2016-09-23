@@ -1,0 +1,57 @@
+<launch>
+
+  <include file="$(find virtual_camera)/sample/sample_driver.launch" />
+
+  <test test-name="test_driver_rgb_info"
+        name="test_driver"
+        pkg="rostest" type="hztest"
+        retry="3">
+    <rosparam>
+      topic: /camera/rgb/camera_info
+      hz: 30.0
+      hzerror: 1.0
+      test_duration: 3.0
+      wait_time: 10.0
+    </rosparam>
+  </test>
+
+  <test test-name="test_driver_rgb_image"
+        name="test_driver"
+        pkg="rostest" type="hztest"
+        retry="3">
+    <rosparam>
+      topic: /camera/rgb/image_rect_color
+      hz: 30.0
+      hzerror: 1.0
+      test_duration: 3.0
+      wait_time: 10.0
+    </rosparam>
+  </test>
+
+  <test test-name="test_driver_depth_info"
+        name="test_driver"
+        pkg="rostest" type="hztest"
+        retry="3">
+    <rosparam>
+      topic: /camera/depth_registered/camera_info
+      hz: 30.0
+      hzerror: 1.0
+      test_duration: 3.0
+      wait_time: 10.0
+    </rosparam>
+  </test>
+
+  <test test-name="test_driver_depth_points"
+        name="test_driver"
+        pkg="rostest" type="hztest"
+        retry="3">
+    <rosparam>
+      topic: /camera/depth_registered/points
+      hz: 30.0
+      hzerror: 1.0
+      test_duration: 3.0
+      wait_time: 10.0
+    </rosparam>
+  </test>
+
+</launch>

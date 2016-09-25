@@ -17,18 +17,33 @@ class BoundingBoxArrayPublisher(object):
         self.seq = 0
 
         self.frame_id = rospy.get_param('~frame_id')
-        self.positions = rospy.get_param('~positions')
-        self.rotations = rospy.get_param('~rotations')
-        self.dimensions = rospy.get_param('~dimensions')
-        self.n_boxes = len(self.positions)
-        if len(self.rotations) != self.n_boxes:
-            rospy.logfatal('Number of ~rotations is expected as {}, but {}'
-                           .format(self.n_boxes, len(self.rotations)))
-            sys.exit(1)
-        if len(self.dimensions) != self.n_boxes:
-            rospy.logfatal('Number of ~dimensions is expected as {}, but {}'
-                           .format(self.n_boxes, len(self.dimensions)))
-            sys.exit(1)
+        if (rospy.has_param('~positions') or
+                rospy.has_param('~rotations') or
+                rospy.has_param('~dimensions')):
+            # Deprecated bounding box pose/dimension specification
+            rospy.logwarn("DEPRECATION WARNING: Rosparam '~positions', "
+                          "'~rotations' and '~dimensions' are being "
+                          "deprecated. Please use '~boxes' instead.")
+            positions = rospy.get_param('~positions')
+            rotations = rospy.get_param('~rotations')
+            dimensions = rospy.get_param('~dimensions')
+            if len(rotations) != len(positions):
+                rospy.logfatal('Number of ~rotations is expected as {}, but {}'
+                            .format(len(positions), len(rotations)))
+                sys.exit(1)
+            if len(dimensions) != len(positions):
+                rospy.logfatal('Number of ~dimensions is expected as {}, but {}'
+                            .format(len(positions), len(dimensions)))
+                sys.exit(1)
+            self.boxes = []
+            for pos, rot, dim in zip(positions, rotations, dimensions):
+                self.boxes.append({
+                    'position': pos,
+                    'rotation': rot,
+                    'dimension': dim,
+                })
+        else:
+            self.boxes = rospy.get_param('~boxes')
         self.pub = rospy.Publisher('~output', BoundingBoxArray, queue_size=1)
 
         rate = rospy.get_param('~rate', 1)
@@ -39,11 +54,11 @@ class BoundingBoxArrayPublisher(object):
         bbox_array_msg.header.seq = self.seq
         bbox_array_msg.header.frame_id = self.frame_id
         bbox_array_msg.header.stamp = event.current_real
-        for i_box in xrange(self.n_boxes):
-            pos = self.positions[i_box]
-            rot = self.rotations[i_box]
+        for box in self.boxes:
+            pos = box['position']
+            rot = box.get('rotation', [0, 0, 0])
             qua = quaternion_from_euler(*rot)
-            dim = self.dimensions[i_box]
+            dim = box['dimension']
 
             bbox_msg = BoundingBox()
             bbox_msg.header.seq = self.seq

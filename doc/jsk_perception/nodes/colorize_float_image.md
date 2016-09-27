@@ -12,6 +12,6 @@ Colorize float image with heatmap gradation.
 
   RGB8 image with heatmap gradation.
 ## Parameters
-* `~use_channel` (int, default: -1)
+* `~channel` (int, default: 0)
 
   Choose channel to colorize. If value is default, first channel is selected.

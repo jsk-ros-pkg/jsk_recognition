@@ -57,7 +57,7 @@ namespace jsk_perception
     ros::Publisher pub_;
     ros::Subscriber sub_;
   private:
-    
+    int use_channel_;
   };
 
 }

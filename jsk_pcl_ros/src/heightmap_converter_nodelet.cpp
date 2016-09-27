@@ -72,8 +72,9 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();
     /* float image */
-    cv::Mat height_map = cv::Mat(resolution_y_, resolution_x_, CV_32FC1);
+    cv::Mat height_map = cv::Mat(resolution_y_, resolution_x_, CV_32FC2);
     height_map = cv::Scalar::all(- FLT_MAX);
+
     pcl::PointCloud<pcl::PointXYZ> cloud;
     pcl::fromROSMsg(*msg, cloud);
     float max_height = - FLT_MAX;
@@ -89,14 +90,16 @@ namespace jsk_pcl_ros
         /* Store min/max value for colorization */
         max_height = std::max(max_height, p.z);
         min_height = std::min(min_height, p.z);
-        if (height_map.at<float>(index.y, index.x) < p.z) {
-          height_map.at<float>(index.y, index.x) = p.z;
+        // accept maximum points
+        if (height_map.at<cv::Vec2f>(index.y, index.x)[0] < p.z) {
+          height_map.at<cv::Vec2f>(index.y, index.x)[0] = p.z;
+          height_map.at<cv::Vec2f>(index.y, index.x)[1] = 0;
         }
       }
     }
     // Convert to sensor_msgs/Image
     cv_bridge::CvImage height_map_image(msg->header,
-                                        sensor_msgs::image_encodings::TYPE_32FC1,
+                                        sensor_msgs::image_encodings::TYPE_32FC2,
                                         height_map);
     pub_.publish(height_map_image.toImageMsg());
   }

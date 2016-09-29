@@ -36,8 +36,19 @@ RealSense-ROS Installation
 
   ./scripts/install_dependencies-4.4.sh
   ./scripts/patch-uvcvideo-4.4.sh v4.4-wily
+  # this script sometimes causes error below with Ubuntu 14.04
+  #
+  # cp: will not overwrite just-created ‘./.config’ with ‘/usr/src/linux-headers-4.4.4-040404-generic/.config’
+  #
+  # If you got this error, see https://github.com/IntelRealSense/librealsense/issues/146
+  # or see https://github.com/IntelRealSense/librealsense/issues/70
+  #
+  # my solution is https://gist.github.com/knorth55/8e76494a694a287a8cf00b54c38e29ad
 
   sudo modprobe uvcvideo
+  # if you get error below, patch script is not successful.
+  #
+  # modprobe: ERROR: could not insert 'uvcvideo'
 
 Build
 -----

@@ -10,11 +10,11 @@
         retry="3">
     <rosparam>
       topic_0: /label_image_decomposer/output
-      timeout_0: 30
+      timeout_0: 90
       topic_1: /label_image_decomposer/output/label_viz
-      timeout_1: 30
+      timeout_1: 90
       topic_2: /label_image_decomposer_with_names/output/label_viz
-      timeout_2: 30
+      timeout_2: 90
     </rosparam>
   </test>
 

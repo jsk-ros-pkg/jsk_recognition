@@ -28,9 +28,9 @@
       topic_0: /camera_remote/depth_registered/points
       timeout_0: 60
       topic_1: /cluster_point_indices_decomposer/boxes
-      timeout_1: 180
+      timeout_1: 500
       topic_2: /cluster_point_indices_decomposer/debug_output
-      timeout_2: 320
+      timeout_2: 500
     </rosparam>
   </test>
 

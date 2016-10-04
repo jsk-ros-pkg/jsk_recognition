@@ -7,14 +7,15 @@
   <test test-name="test_label_image_decomposer"
         name="test_label_image_decomposer"
         pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="300"
         retry="3">
     <rosparam>
       topic_0: /label_image_decomposer/output
-      timeout_0: 30
+      timeout_0: 120
       topic_1: /label_image_decomposer/output/label_viz
-      timeout_1: 30
+      timeout_1: 120
       topic_2: /label_image_decomposer_with_names/output/label_viz
-      timeout_2: 30
+      timeout_2: 120
     </rosparam>
   </test>
 

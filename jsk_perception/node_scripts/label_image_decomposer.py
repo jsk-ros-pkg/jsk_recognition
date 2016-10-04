@@ -126,9 +126,11 @@ class LabelImageDecomposer(ConnectionBasedTransport):
             # convert plotted figure to np.ndarray
             f = StringIO.StringIO()
             plt.savefig(f, bbox_inches='tight', pad_inches=0)
+            f.flush()
             result_img_pil = PIL.Image.open(f)
             result_img = fromimage(result_img_pil, mode='RGB')
             label_viz = result_img
+            f.close()
 
         label_viz_msg = bridge.cv2_to_imgmsg(label_viz, encoding='rgb8')
         label_viz_msg.header = img_msg.header

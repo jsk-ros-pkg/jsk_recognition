@@ -96,7 +96,7 @@ public:
     vector< string > vstrtypes; // type names for every grid point
     map<string,int> maptypes;
     ros::Time lasttime;
-    boost::mutex mutexcalib;
+    boost::mutex mutex;
     ros::NodeHandle _node;
     int dimx, dimy;
     bool use_P;
@@ -262,7 +262,7 @@ public:
     // Camera info callback
     void caminfo_cb(const sensor_msgs::CameraInfoConstPtr &msg)
     {
-        boost::mutex::scoped_lock lock(this->mutexcalib);
+        boost::mutex::scoped_lock lock(this->mutex);
 
         this->_camInfoMsg = *msg;
 
@@ -311,7 +311,7 @@ public:
     void image_cb2(const sensor_msgs::ImageConstPtr &msg)
     {
         ROS_WARN("The topic Image has been deprecated.  Please change your launch file to use image instead.");
-        boost::mutex::scoped_lock lock(this->mutexcalib);
+        boost::mutex::scoped_lock lock(this->mutex);
         ++message_throttle_counter_;
         if (message_throttle_counter_ % message_throttle_ == 0) {
             message_throttle_counter_ = 0;
@@ -332,7 +332,7 @@ public:
     // Image data callback
     void image_cb(const sensor_msgs::ImageConstPtr &msg)
     {
-        boost::mutex::scoped_lock lock(this->mutexcalib);
+        boost::mutex::scoped_lock lock(this->mutex);
         ++message_throttle_counter_;
         if (message_throttle_counter_ % message_throttle_ == 0) {
             message_throttle_counter_ = 0;
@@ -379,7 +379,7 @@ public:
     
     void connectCb( )
     {
-      boost::mutex::scoped_lock lock(this->mutexcalib);
+      boost::mutex::scoped_lock lock(this->mutex);
       if (_pubDetection.getNumSubscribers() == 0 && _pubCornerPoint.getNumSubscribers() == 0 &&
           _pubPoseStamped.getNumSubscribers() == 0 && _pubPolygonArray.getNumSubscribers() == 0)
         {
@@ -682,7 +682,7 @@ public:
     // Dynamic Reconfigure
     void configCallback(Config &config, uint32_t level)
     {
-        boost::mutex::scoped_lock lock(this->mutexcalib);
+        boost::mutex::scoped_lock lock(this->mutex);
         adaptive_thresh_flag = config.adaptive_thresh;
         normalize_image_flag = config.normalize_image;
         filter_quads_flag = config.filter_quads;

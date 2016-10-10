@@ -1,3 +1,4 @@
+<!-- vim: set ft=xml: -->
 <launch>
   <node name="rosbag_play"
         pkg="rosbag" type="play"

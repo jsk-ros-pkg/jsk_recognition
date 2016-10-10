@@ -1,3 +1,4 @@
+<!-- vim: set ft=xml: -->
 <launch>
 
   <include file="$(find jsk_pcl_ros)/sample/sample_icp_registration.launch">

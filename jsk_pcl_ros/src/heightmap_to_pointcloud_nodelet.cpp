@@ -85,19 +85,21 @@ namespace jsk_pcl_ros
       JSK_NODELET_ERROR("no ~input/config is yet available");
       return;
     }
-    cv::Mat float_image = cv_bridge::toCvShare(msg, sensor_msgs::image_encodings::TYPE_32FC1)->image;
-    pcl::PointCloud<pcl::PointXYZ> cloud;
+    cv::Mat float_image = cv_bridge::toCvShare(msg, sensor_msgs::image_encodings::TYPE_32FC2)->image;
+    pcl::PointCloud<pcl::PointXYZI> cloud;
     cloud.points.reserve(float_image.rows * float_image.cols);
     double dx = (max_x_ - min_x_) / float_image.cols;
     double dy = (max_y_ - min_y_) / float_image.rows;
     for (size_t j = 0; j < float_image.rows; j++) {
       for (size_t i = 0; i < float_image.cols; i++) {
-        float v = float_image.at<float>(j, i);
-        pcl::PointXYZ p;
+        float v = float_image.at<cv::Vec2f>(j, i)[0];
+        float fint = float_image.at<cv::Vec2f>(j, i)[1];
+        pcl::PointXYZI p;
         if (v != -FLT_MAX) {
           p.y = j * dy + min_y_ + dy / 2.0;
           p.x = i * dx + min_x_ + dx / 2.0;
           p.z = v;
+          p.intensity = (int)fint;
           cloud.points.push_back(p);
         }
       }

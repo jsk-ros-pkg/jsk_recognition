@@ -25,6 +25,6 @@ Accumulate heightmap in time series and construct a new heightmap.
   Config topic.
 
 ## Advertising Service
-* `~seset` (`std_srvs/Empty`)
+* `~reset` (`std_srvs/Empty`)
 
   Reset heightmap cache.

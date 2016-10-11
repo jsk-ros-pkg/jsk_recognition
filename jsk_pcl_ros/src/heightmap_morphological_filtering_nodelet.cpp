@@ -94,13 +94,14 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();
     cv::Mat input = cv_bridge::toCvShare(
-      msg, sensor_msgs::image_encodings::TYPE_32FC1)->image;
+      msg, sensor_msgs::image_encodings::TYPE_32FC2)->image;
+
     cv::Mat filtered_image;
     if (smooth_method_ == "average") {
       filtered_image = input.clone();
       for (size_t j = 0; j < input.rows; j++) {
         for (size_t i = 0; i < input.cols; i++) {
-          float v = input.at<float>(j, i);
+          float v = input.at<cv::Vec2f>(j, i)[0];
           if (isnan(v) || v == -FLT_MAX) { // Need to filter
             Accumulator acc;
             for (int jj = - mask_size_; jj <= mask_size_; jj++) {
@@ -110,7 +111,7 @@ namespace jsk_pcl_ros
                   int target_i = i + ii;
                   if (target_i >= 0 && target_i < input.cols) {
                     if (std::abs(jj) + std::abs(ii) <= mask_size_) {
-                      float vv = input.at<float>(target_j, target_i);
+                      float vv = input.at<cv::Vec2f>(target_j, target_i)[0];
                       if (!isnan(vv) && vv != -FLT_MAX) {
                         acc(vv);
                       }
@@ -123,7 +124,8 @@ namespace jsk_pcl_ros
               float newv = boost::accumulators::mean(acc);
               float variance = boost::accumulators::variance(acc);
               if (variance < max_variance_) {
-                filtered_image.at<float>(j, i) = newv;
+                filtered_image.at<cv::Vec2f>(j, i)[0] = newv;
+                filtered_image.at<cv::Vec2f>(j, i)[1] = variance;
               }
             }
           }
@@ -136,7 +138,7 @@ namespace jsk_pcl_ros
     
     pub_.publish(cv_bridge::CvImage(
                    msg->header,
-                   sensor_msgs::image_encodings::TYPE_32FC1,
+                   sensor_msgs::image_encodings::TYPE_32FC2,
                    filtered_image).toImageMsg());
   }
 }

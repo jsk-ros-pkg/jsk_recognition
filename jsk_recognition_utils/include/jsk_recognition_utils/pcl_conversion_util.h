@@ -197,6 +197,12 @@ namespace jsk_recognition_utils
     return !isnan(p.x) && !isnan(p.y) && !isnan(p.z);
   }
 
+  template <class PointT>
+  inline bool isValidPoint(const PointT& p)
+  {
+    return !isnan(p.x) && !isnan(p.y) && !isnan(p.z);
+  }
+
 }
 // extend pcl_conversions package's toPCL and fromPCL functions
 namespace pcl_conversions

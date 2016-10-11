@@ -44,6 +44,7 @@ namespace jsk_perception
   {
     DiagnosticNodelet::onInit();
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+    pnh_->param("channel", channel_, 0);
     onInitPostProcess();
   }
 
@@ -61,8 +62,22 @@ namespace jsk_perception
 
   void ColorizeFloatImage::colorize(const sensor_msgs::Image::ConstPtr& msg)
   {
-    cv::Mat float_image = cv_bridge::toCvShare(msg, sensor_msgs::image_encodings::TYPE_32FC1)->image;
+    int numchannels = sensor_msgs::image_encodings::numChannels(msg->encoding);
+    if (numchannels < channel_) {
+      ROS_ERROR("Image Channel(%s) %d is less than parameter channel (%d)",
+                msg->encoding.c_str(),
+                sensor_msgs::image_encodings::numChannels(msg->encoding),
+                channel_);
+    }
+    cv::Mat float_image = cv_bridge::toCvShare(msg)->image;
     cv::Mat color_image = cv::Mat(float_image.rows, float_image.cols, CV_8UC3);
+
+    if (channel_ != 0 || numchannels > 1) {
+      std::vector<cv::Mat> planes;
+      cv::split(float_image, planes);
+      float_image = planes[channel_];
+    }
+
     float min_value = FLT_MAX;
     float max_value = - FLT_MAX;
     for (size_t j = 0; j < float_image.rows; j++) {

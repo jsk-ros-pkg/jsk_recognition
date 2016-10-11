@@ -51,6 +51,7 @@
 
 namespace jsk_pcl_ros
 {
+  typedef pcl::PointXYZI PointType;
   class HeightmapTimeAccumulation:
     public jsk_topic_tools::ConnectionBasedNodelet
   {
@@ -65,7 +66,7 @@ namespace jsk_pcl_ros
       const sensor_msgs::Image::ConstPtr& new_heightmap);
     virtual void publishHeightmap(
       const cv::Mat& heightmap, const std_msgs::Header& header);
-    virtual cv::Point toIndex(const pcl::PointXYZ& p, const cv::Mat& map);
+    virtual cv::Point toIndex(const PointType& p, const cv::Mat& map);
     virtual bool isValidIndex(const cv::Point& index, const cv::Mat& map);
     virtual bool isValidCell(const cv::Point& index, const cv::Mat& map);
     virtual void configCallback(
@@ -88,7 +89,7 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<sensor_msgs::Image> sub_heightmap_;
     ros::Subscriber sub_previous_pointcloud_;
     ros::Subscriber sub_config_;
-    pcl::PointCloud<pcl::PointXYZ> prev_cloud_;
+    pcl::PointCloud<PointType> prev_cloud_;
     jsk_recognition_msgs::HeightmapConfig::ConstPtr config_;
     double min_x_;
     double min_y_;

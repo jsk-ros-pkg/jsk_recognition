@@ -1,0 +1,28 @@
+<launch>
+
+  <group ns="camera">
+    <node name="rgb"
+          pkg="nodelet" type="nodelet"
+          args="standalone virtual_camera/driver">
+      <remap from="~image_raw" to="~image_rect_color" />
+      <rosparam subst_value="true">
+        camera_info_url: file://$(find virtual_camera)/sample/data/lab_rgb.yaml
+        camera_info_rate: 30
+        image_file: $(find virtual_camera)/sample/data/lab_rgb.jpg
+        image_rate: 30
+      </rosparam>
+    </node>
+
+    <node name="depth_registered"
+          pkg="nodelet" type="nodelet"
+          args="standalone virtual_camera/driver">
+      <rosparam subst_value="true">
+        camera_info_url: file://$(find virtual_camera)/sample/data/lab_depth_registered.yaml
+        camera_info_rate: 30
+        pcd_file: $(find virtual_camera)/sample/data/lab_depth_registered.pcd
+        pcd_rate: 30
+      </rosparam>
+    </node>
+  </group>
+
+</launch>

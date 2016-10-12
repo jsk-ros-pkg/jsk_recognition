@@ -1,0 +1,11 @@
+<library path="lib/libvirtual_camera">
+
+  <class name="virtual_camera/driver"
+         type="virtual_camera::VirtualCameraDriver"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Virtual camera driver nodelet.
+    </description>
+  </class>
+
+</library>

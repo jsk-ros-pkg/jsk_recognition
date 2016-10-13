@@ -28,19 +28,9 @@ sudo -H pip install -q rosinstall_generator
 
 rosinstall_generator --tar --rosdistro $ROS_DISTRO \
   pcl_ros \
-  octomap_msgs \
-  octomap_ros \
   octomap_server \
-  kdl_parser \
-  kdl_conversions \
 >> /tmp/$$.rosinstall
 
 cd ~/ros/ws_$REPOSITORY_NAME/src
 wstool merge /tmp/$$.rosinstall
-wstool up -j4 \
-  geometry/kdl_conversions \
-  octomap_mapping/octomap_server \
-  octomap_msgs \
-  octomap_ros \
-  perception_pcl/pcl_ros \
-  robot_model/kdl_parser
+wstool up -j4

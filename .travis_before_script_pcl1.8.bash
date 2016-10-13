@@ -28,7 +28,6 @@ sudo -H pip install -q rosinstall_generator
 
 rosinstall_generator --tar --rosdistro $ROS_DISTRO \
   pcl_ros \
-  octomap_msgs \
   octomap_ros \
   octomap_server \
 >> /tmp/$$.rosinstall

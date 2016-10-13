@@ -61,6 +61,7 @@ add_message_files(
 
 add_service_files(FILES
   SetPointCloud2.srv
+  SetLabels.srv
   )
 
 generate_messages(

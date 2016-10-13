@@ -1,0 +1,2 @@
+*.launch linguist-language=XML
+*.test linguist-language=XML

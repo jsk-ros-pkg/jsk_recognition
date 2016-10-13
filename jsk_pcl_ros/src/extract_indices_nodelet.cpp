@@ -37,7 +37,11 @@
 #include "jsk_pcl_ros/extract_indices.h"
 #include "jsk_recognition_utils/pcl_conversion_util.h"
 
+#if PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 8
+#include <pcl/filters/extract_indices.h>
+#else
 #include "jsk_pcl_ros/pcl/extract_indices_patch.h"
+#endif
 #include <pcl_conversions/pcl_conversions.h>
 #include <sensor_msgs/PointCloud2.h>
 
@@ -99,10 +103,12 @@ namespace jsk_pcl_ros
     extract.filter(output);
 
     sensor_msgs::PointCloud2 out_cloud_msg;
+#if PCL_MAJOR_VERSION <= 1 && PCL_MINOR_VERSION < 8
     if (indices_msg->indices.empty() || cloud_msg->data.empty()) {
       out_cloud_msg.height = cloud_msg->height;
       out_cloud_msg.width = cloud_msg->width;
     }
+#endif
     pcl_conversions::moveFromPCL(output, out_cloud_msg);
 
     out_cloud_msg.header = cloud_msg->header;

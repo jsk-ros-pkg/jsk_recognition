@@ -52,6 +52,9 @@ if(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
   add_definitions("-DUSE_OLD_YAML")
 endif()
 
+include(FindPkgConfig)
+pkg_check_modules(libcmt REQUIRED libcmt)
+
 find_package(OpenMP)
 if(OPENMP_FOUND)
   message("OPENMP FOUND")
@@ -76,8 +79,6 @@ add_custom_target(install_trained_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts
 # ------------------------------------------------------------------------------------
 # Catkin setup
 # ------------------------------------------------------------------------------------
-include(FindPkgConfig)
-pkg_check_modules(libcmt REQUIRED libcmt)
 
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(

@@ -37,6 +37,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#include <opencv2/opencv.hpp>
+
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
@@ -48,46 +50,26 @@ namespace jsk_perception
   void ConsensusTracking::onInit()
   {
     DiagnosticNodelet::onInit();
-    int topleft_x;
-    int topleft_y;
-    int bottomright_x;
-    int bottomright_y;
-    pnh_->param("topleft_x", topleft_x, 100);
-    pnh_->param("topleft_y", topleft_y, 100);
-    pnh_->param("bottomright_x", bottomright_x, 200);
-    pnh_->param("bottomright_y", bottomright_y, 200);
-    pub_image_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
-    pub_mask_image_ = advertise<sensor_msgs::Image>(*pnh_, "mask_output", 1);
 
-    first_initialize_ = true;
+    pnh_->param("queue_size", queue_size_, 100);
 
-    init_top_left_ = cv::Point2f(topleft_x, topleft_y);
-    init_bottom_right_ = cv::Point2f(bottomright_x, bottomright_y);
-    sub_rect_ = pnh_->subscribe("set_rect", 1, &ConsensusTracking::reset_rect, this);
-    sub_rect_poly_ = pnh_->subscribe("set_poly", 1, &ConsensusTracking::reset_rect_with_poly, this);
+    pub_mask_image_ = advertise<sensor_msgs::Image>(*pnh_, "output/mask", 1);
+    pub_debug_image_ = advertise<sensor_msgs::Image>(*pnh_, "debug/image", 1);
+
+    // subscribers to set initial tracking window.
+    sub_image_to_init_.subscribe(*pnh_, "input", 1);
+    sub_polygon_to_init_.subscribe(*pnh_, "input/polygon", 1);
+    sync_ = boost::make_shared<message_filters::Synchronizer<ExactSyncPolicy> >(queue_size_);
+    sync_->connectInput(sub_image_to_init_, sub_polygon_to_init_);
+    sync_->registerCallback(boost::bind(&ConsensusTracking::setInitialWindow, this, _1, _2));
 
     onInitPostProcess();
   }
 
-  void ConsensusTracking::reset_rect(jsk_recognition_msgs::Rect rc)
-  {
-    init_top_left_ = cv::Point2f(rc.x - rc.width/2, rc.y - rc.height/2);
-    init_bottom_right_ = cv::Point2f(rc.x + rc.width/2, rc.y + rc.height/2);
-
-    first_initialize_ = true;
-  }
-
-  void ConsensusTracking::reset_rect_with_poly(geometry_msgs::PolygonStamped poly)
-  {
-    init_top_left_ = cv::Point2f(poly.polygon.points[0].x, poly.polygon.points[0].y);
-    init_bottom_right_ = cv::Point2f(poly.polygon.points[1].x, poly.polygon.points[1].y);
-
-    first_initialize_ = true;
-  }
-
   void ConsensusTracking::subscribe()
   {
-    sub_image_ = pnh_->subscribe("input", 1, &ConsensusTracking::tracking, this);
+    // subscribers to process the tracking
+    sub_image_ = pnh_->subscribe("input", 1, &ConsensusTracking::getTrackingResult, this);
   }
 
   void ConsensusTracking::unsubscribe()
@@ -95,50 +77,68 @@ namespace jsk_perception
     sub_image_.shutdown();
   }
 
-  void ConsensusTracking::tracking(const sensor_msgs::Image::ConstPtr& image_msg)
+  void ConsensusTracking::setInitialWindow(const sensor_msgs::Image::ConstPtr& image_msg,
+                                           const geometry_msgs::PolygonStamped::ConstPtr& poly_msg)
   {
-    cv::Mat input_msg = cv_bridge::toCvCopy(image_msg, sensor_msgs::image_encodings::BGR8)->image;
+    boost::mutex::scoped_lock lock(mutex_);
 
-    cv::Mat im_gray;
-    cv::cvtColor(input_msg, im_gray, CV_RGB2GRAY);
-    if (first_initialize_)
-    {
-      cmt.initialise(im_gray, init_top_left_, init_bottom_right_);
-      first_initialize_ = false;
-    }
-    cmt.processFrame(im_gray);
+    cv::Mat image = cv_bridge::toCvCopy(image_msg, sensor_msgs::image_encodings::BGR8)->image;
 
+    // Convert color image to gray to track.
+    cv::Mat gray;
+    cv::cvtColor(image, gray, CV_BGR2GRAY);
+
+    // Set initial rectangle vertices
+    cv::Point2f initial_top_left = cv::Point2f(poly_msg->polygon.points[0].x, poly_msg->polygon.points[0].y);
+    cv::Point2f initial_bottom_right = cv::Point2f(poly_msg->polygon.points[1].x, poly_msg->polygon.points[1].y);
+
+    cmt.initialise(gray, initial_top_left, initial_bottom_right);
+  }
+
+  void ConsensusTracking::getTrackingResult(const sensor_msgs::Image::ConstPtr& image_msg)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+
+    cv::Mat image = cv_bridge::toCvCopy(image_msg, sensor_msgs::image_encodings::BGR8)->image;
+
+    // Convert color image to gray and track it.
+    cv::Mat gray;
+    cv::cvtColor(image, gray, CV_BGR2GRAY);
+    cmt.processFrame(gray);
+
+    // Draw rectangle for debug view.
     for (int i=0; i < cmt.trackedKeypoints.size(); i++)
     {
-      cv::circle(input_msg, cmt.trackedKeypoints[i].first.pt, 3, cv::Scalar(255, 0, 0));
+      cv::circle(image, cmt.trackedKeypoints[i].first.pt, 3, cv::Scalar(255, 0, 0));
     }
-    cv::line(input_msg, cmt.topLeft, cmt.topRight, cv::Scalar(0, 30, 255));
-    cv::line(input_msg, cmt.topRight, cmt.bottomRight, cv::Scalar(0, 30, 255));
-    cv::line(input_msg, cmt.bottomRight, cmt.bottomLeft, cv::Scalar(0, 30, 255));
-    cv::line(input_msg, cmt.bottomLeft, cmt.topLeft, cv::Scalar(0, 30, 255));
+    cv::line(image, cmt.topLeft, cmt.topRight, cv::Scalar(0, 30, 255));
+    cv::line(image, cmt.topRight, cmt.bottomRight, cv::Scalar(0, 30, 255));
+    cv::line(image, cmt.bottomRight, cmt.bottomLeft, cv::Scalar(0, 30, 255));
+    cv::line(image, cmt.bottomLeft, cmt.topLeft, cv::Scalar(0, 30, 255));
 
+    // Generate object mask.
     cv::Point diff = cmt.topLeft - cmt.bottomLeft;
-    cv::Point center2 = cmt.topLeft+cmt.bottomRight;
+    cv::Point center2 = cmt.topLeft + cmt.bottomRight;
     cv::Point2f center = cv::Point2f(center2.x / 2, center2.y / 2);
-    cv::Size2f size = cv::Size2f(cv::norm(cmt.topLeft-cmt.topRight), cv::norm(cmt.topLeft-cmt.bottomLeft));
-    cv::RotatedRect rRect = cv::RotatedRect(center, size, asin(diff.x/cv::norm(diff))* 180 / M_PI);
-
+    cv::Size2f size = cv::Size2f(cv::norm(cmt.topLeft - cmt.topRight), cv::norm(cmt.topLeft - cmt.bottomLeft));
+    cv::RotatedRect rRect = cv::RotatedRect(center, size, asin(diff.x / cv::norm(diff)) * 180 / M_PI);
     cv::Point2f vertices2f[4];
-    cv::Point vertices[4];
     rRect.points(vertices2f);
+    cv::Point vertices[4];
     for (int i = 0; i < 4; ++i)
     {
       vertices[i] = vertices2f[i];
     }
-    cv::Mat mask_image = cv::Mat::zeros(input_msg.size().height, input_msg.size().width, CV_8UC1);
-    cv::fillConvexPoly(mask_image, vertices, 4, cv::Scalar(255));
+    cv::Mat mask = cv::Mat::zeros(image.rows, image.cols, CV_8UC1);
+    cv::fillConvexPoly(mask, vertices, 4, cv::Scalar(255));
 
-    pub_image_.publish(cv_bridge::CvImage(image_msg->header,
-                                          image_msg->encoding,
-                                          input_msg).toImageMsg());
+    // Publish all.
     pub_mask_image_.publish(cv_bridge::CvImage(image_msg->header,
                                                sensor_msgs::image_encodings::MONO8,
-                                               mask_image).toImageMsg());
+                                               mask).toImageMsg());
+    pub_debug_image_.publish(cv_bridge::CvImage(image_msg->header,
+                                                image_msg->encoding,
+                                                image).toImageMsg());
   }
 }  // namespace jsk_perception
 

@@ -37,41 +37,42 @@
 #define JSK_PERCEPTION_CONSENSUS_TRACKING_H_
 
 #include <geometry_msgs/PolygonStamped.h>
-#include <jsk_perception/FisheyeConfig.h>
-#include <jsk_recognition_msgs/Rect.h>
-#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <libcmt/CMT.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/exact_time.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/Image.h>
-#include <sensor_msgs/CameraInfo.h>
-
-#include <opencv2/opencv.hpp>
 
 namespace jsk_perception
 {
   class ConsensusTracking : public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    ConsensusTracking(): DiagnosticNodelet("ConsensusTracking") {}
+    ConsensusTracking() : DiagnosticNodelet("ConsensusTracking") {}
+    typedef message_filters::sync_policies::ExactTime<
+      sensor_msgs::Image,
+      geometry_msgs::PolygonStamped> ExactSyncPolicy;
   protected:
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    inline double interpolate(double rate, double first, double second) { return (1.0 - rate) * first + rate * second; }
-    virtual void tracking(const sensor_msgs::Image::ConstPtr& image_msg);
-    void reset_rect(jsk_recognition_msgs::Rect rc);
-    void reset_rect_with_poly(geometry_msgs::PolygonStamped poly);
+    virtual void getTrackingResult(const sensor_msgs::Image::ConstPtr& image_msg);
+    void setInitialWindow(const sensor_msgs::Image::ConstPtr& img_msg,
+                          const geometry_msgs::PolygonStamped::ConstPtr& poly_msg);
+
+    ros::Publisher pub_mask_image_;
+    ros::Publisher pub_debug_image_;
 
     ros::Subscriber sub_image_;
-    ros::Subscriber sub_rect_;
-    ros::Subscriber sub_rect_poly_;
-    ros::Publisher pub_image_;
-    ros::Publisher pub_mask_image_;
-    bool first_initialize_;
-
-    cv::Point2f init_top_left_;
-    cv::Point2f init_bottom_right_;
+    boost::shared_ptr<message_filters::Synchronizer<ExactSyncPolicy> > sync_;
+    message_filters::Subscriber<sensor_msgs::Image> sub_image_to_init_;
+    message_filters::Subscriber<geometry_msgs::PolygonStamped> sub_polygon_to_init_;
 
     CMT cmt;
+
+    boost::mutex mutex_;
+    int queue_size_;
   private:
   };
 }  // namespace jsk_perception

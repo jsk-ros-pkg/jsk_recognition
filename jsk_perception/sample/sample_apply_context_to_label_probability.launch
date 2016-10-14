@@ -1,0 +1,43 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_perception)/sample/sample_fcn_object_segmentation.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <arg name="INPUT_IMAGE" value="image_publisher/output" />
+  <arg name="INPUT_LABEL_PROBABILITY" value="fcn_object_segmentation/output/proba_image" />
+
+  <node name="apply_context_to_label_probability"
+        pkg="jsk_perception" type="apply_context_to_label_probability">
+    <remap from="~input" to="$(arg INPUT_LABEL_PROBABILITY)" />
+    <rosparam>
+      candidates:
+        - 0   # background
+        - 15  # person
+    </rosparam>
+  </node>
+
+  <node name="label_image_decomposer_with_context"
+        pkg="jsk_perception" type="label_image_decomposer.py">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/label" to="apply_context_to_label_probability/output/label" />
+    <rosparam>
+      queue_size: 100
+    </rosparam>
+    <remap from="~label_names" to="fcn_object_segmentation/target_names" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="label_image_decomposer_with_context/output/label_viz" />
+    </node>
+    <node name="image_view1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="label_image_decomposer/output/label_viz" />
+    </node>
+  </group>
+
+</launch>

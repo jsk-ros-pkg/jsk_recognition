@@ -17,6 +17,7 @@ The code is open source, and `available on github`_.
    tips
    install_astra_camera
    install_softkinetic_camera
+   install_realsense_camera
 
 
 .. toctree::

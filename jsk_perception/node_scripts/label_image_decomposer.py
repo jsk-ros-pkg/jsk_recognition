@@ -101,7 +101,6 @@ class LabelImageDecomposer(ConnectionBasedTransport):
             # plot label titles on image using matplotlib
             import StringIO
             import PIL.Image
-            from scipy.misc import fromimage
             plt.subplots_adjust(left=0, right=1, top=1, bottom=0,
                                 wspace=0, hspace=0)
             plt.margins(0, 0)
@@ -126,9 +125,7 @@ class LabelImageDecomposer(ConnectionBasedTransport):
             # convert plotted figure to np.ndarray
             f = StringIO.StringIO()
             plt.savefig(f, bbox_inches='tight', pad_inches=0)
-            result_img_pil = PIL.Image.open(f)
-            result_img = fromimage(result_img_pil, mode='RGB')
-            label_viz = result_img
+            label_viz = np.array(PIL.Image.open(f))[:, :, :3]  # RGBA -> RGB
 
         label_viz_msg = bridge.cv2_to_imgmsg(label_viz, encoding='rgb8')
         label_viz_msg.header = img_msg.header

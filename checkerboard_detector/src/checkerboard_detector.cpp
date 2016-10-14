@@ -50,6 +50,8 @@
 #include "eigen_conversions/eigen_msg.h"
 #include <sys/timeb.h>    // ftime(), struct timeb
 #include <sys/time.h>
+#include <dynamic_reconfigure/server.h>
+#include <checkerboard_detector/CheckerboardDetectorConfig.h>
 
 using namespace std;
 using namespace ros;
@@ -94,11 +96,18 @@ public:
     vector< string > vstrtypes; // type names for every grid point
     map<string,int> maptypes;
     ros::Time lasttime;
-    boost::mutex mutexcalib;
+    boost::mutex mutex;
     ros::NodeHandle _node;
     int dimx, dimy;
     bool use_P;
     double fRectSize[2];
+
+    typedef checkerboard_detector::CheckerboardDetectorConfig Config;
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv;
+    bool adaptive_thresh_flag;
+    bool filter_quads_flag;
+    bool normalize_image_flag;
+    bool fast_check_flag;
 
     //////////////////////////////////////////////////////////////////////////////
     // Constructor
@@ -112,6 +121,11 @@ public:
         _node.param("message_throttle", message_throttle_, 1);
         char str[32];
         int index = 0;
+
+        srv = boost::make_shared <dynamic_reconfigure::Server<Config> > (_node);
+        typename dynamic_reconfigure::Server<Config>::CallbackType f =
+            boost::bind (&CheckerboardDetector::configCallback, this, _1, _2);
+        srv->setCallback (f);
 
         while(1) {
             string type;
@@ -248,7 +262,7 @@ public:
     // Camera info callback
     void caminfo_cb(const sensor_msgs::CameraInfoConstPtr &msg)
     {
-        boost::mutex::scoped_lock lock(this->mutexcalib);
+        boost::mutex::scoped_lock lock(this->mutex);
 
         this->_camInfoMsg = *msg;
 
@@ -297,7 +311,7 @@ public:
     void image_cb2(const sensor_msgs::ImageConstPtr &msg)
     {
         ROS_WARN("The topic Image has been deprecated.  Please change your launch file to use image instead.");
-        boost::mutex::scoped_lock lock(this->mutexcalib);
+        boost::mutex::scoped_lock lock(this->mutex);
         ++message_throttle_counter_;
         if (message_throttle_counter_ % message_throttle_ == 0) {
             message_throttle_counter_ = 0;
@@ -318,7 +332,7 @@ public:
     // Image data callback
     void image_cb(const sensor_msgs::ImageConstPtr &msg)
     {
-        boost::mutex::scoped_lock lock(this->mutexcalib);
+        boost::mutex::scoped_lock lock(this->mutex);
         ++message_throttle_counter_;
         if (message_throttle_counter_ % message_throttle_ == 0) {
             message_throttle_counter_ = 0;
@@ -365,7 +379,7 @@ public:
     
     void connectCb( )
     {
-      boost::mutex::scoped_lock lock(this->mutexcalib);
+      boost::mutex::scoped_lock lock(this->mutex);
       if (_pubDetection.getNumSubscribers() == 0 && _pubCornerPoint.getNumSubscribers() == 0 &&
           _pubPoseStamped.getNumSubscribers() == 0 && _pubPolygonArray.getNumSubscribers() == 0)
         {
@@ -460,7 +474,12 @@ public:
                 bool allfound = false;
                 if (cb.board_type == "chess") {
                     allfound = cv::findChessboardCorners(
-                        capture, cb.griddims, cb.corners);
+                        capture, cb.griddims, cb.corners,
+                        (adaptive_thresh_flag ? CV_CALIB_CB_ADAPTIVE_THRESH : 0) |
+                        (normalize_image_flag ? CV_CALIB_CB_NORMALIZE_IMAGE : 0) |
+                        (filter_quads_flag ? CV_CALIB_CB_FILTER_QUADS : 0) |
+                        (fast_check_flag ? CV_CALIB_CB_FAST_CHECK : 0)
+                        );
                 }
                 else if (cb.board_type == "circle" ||
                          cb.board_type == "circles") {
@@ -657,6 +676,17 @@ public:
         pose.orientation.z = tglobal.rot.w;
         pose.orientation.w = tglobal.rot.x;
         return pose;
+    }
+
+    //////////////////////////////////////////////////////////////////////////////
+    // Dynamic Reconfigure
+    void configCallback(Config &config, uint32_t level)
+    {
+        boost::mutex::scoped_lock lock(this->mutex);
+        adaptive_thresh_flag = config.adaptive_thresh;
+        normalize_image_flag = config.normalize_image;
+        filter_quads_flag = config.filter_quads;
+        fast_check_flag = config.fast_check;
     }
 };
 

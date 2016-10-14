@@ -43,6 +43,7 @@
     <rosparam>
       queue_size: 100
     </rosparam>
+    <remap from="~label_names" to="fcn_object_segmentation/target_names" />
   </node>
 
 </launch>

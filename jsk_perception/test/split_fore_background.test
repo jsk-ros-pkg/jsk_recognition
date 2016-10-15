@@ -12,12 +12,13 @@
   <!-- test output message come -->
   <test test-name="test_split_fore_background"
         name="test_split_fore_background"
-        pkg="jsk_tools" type="test_topic_published.py">
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
     <rosparam>
       topic_0: /split_fore_background/output/fg_mask
-      timeout_0: 10
+      timeout_0: 30
       topic_1: /split_fore_background/output/bg_mask
-      timeout_1: 10
+      timeout_1: 30
     </rosparam>
   </test>
 

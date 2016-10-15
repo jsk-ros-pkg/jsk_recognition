@@ -107,8 +107,7 @@ namespace jsk_perception
       return;
     }
 
-    // We don't care if input image encoding is RGB or BGR.
-    cv::Mat image = cv_bridge::toCvCopy(image_msg, image_msg->encoding)->image;
+    cv::Mat image = cv_bridge::toCvCopy(image_msg, sensor_msgs::image_encodings::BGR8)->image;
 
     // Convert color image to gray and track it.
     cv::Mat gray;
@@ -146,7 +145,7 @@ namespace jsk_perception
                                                sensor_msgs::image_encodings::MONO8,
                                                mask).toImageMsg());
     pub_debug_image_.publish(cv_bridge::CvImage(image_msg->header,
-                                                image_msg->encoding,
+                                                sensor_msgs::image_encodings::BGR8,
                                                 image).toImageMsg());
   }
 }  // namespace jsk_perception

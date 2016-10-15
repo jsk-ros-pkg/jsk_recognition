@@ -49,7 +49,9 @@ namespace jsk_perception
   class ConsensusTracking : public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    ConsensusTracking() : DiagnosticNodelet("ConsensusTracking") {}
+    ConsensusTracking() :
+      DiagnosticNodelet("ConsensusTracking"),
+      window_initialized_(false) {}
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::Image,
       geometry_msgs::PolygonStamped> ExactSyncPolicy;
@@ -72,6 +74,7 @@ namespace jsk_perception
     CMT cmt;
 
     boost::mutex mutex_;
+    bool window_initialized_;
     int queue_size_;
   private:
   };

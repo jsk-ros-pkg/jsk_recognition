@@ -93,13 +93,22 @@ namespace jsk_perception
     cv::Point2f initial_bottom_right = cv::Point2f(poly_msg->polygon.points[1].x, poly_msg->polygon.points[1].y);
 
     cmt.initialise(gray, initial_top_left, initial_bottom_right);
+    window_initialized_ = true;
+    ROS_INFO("A window is initialized. top_left: (%d, %d), bottom_right: (%d, %d)",
+             initial_top_left.x, initial_top_left.y, initial_bottom_right.x, initial_bottom_right.y);
   }
 
   void ConsensusTracking::getTrackingResult(const sensor_msgs::Image::ConstPtr& image_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
 
-    cv::Mat image = cv_bridge::toCvCopy(image_msg, sensor_msgs::image_encodings::BGR8)->image;
+    if (!window_initialized_)
+    {
+      return;
+    }
+
+    // We don't care if input image encoding is RGB or BGR.
+    cv::Mat image = cv_bridge::toCvCopy(image_msg, image_msg->encoding)->image;
 
     // Convert color image to gray and track it.
     cv::Mat gray;

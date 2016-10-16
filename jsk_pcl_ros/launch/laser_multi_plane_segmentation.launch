@@ -27,7 +27,7 @@
     <arg name="INPUT" value="laser_transform_input/output" />
     <arg name="BASE_FRAME_ID" value="$(arg BASE_FRAME_ID)" />
     <arg name="RUN_SELF_FILTER" value="$(arg RUN_SELF_FILTER)"/>
-    <arg name="SELF_FILTER_PARAM" value="$(arg SELF_FILTER_PARAM)" />
+    <arg if="$(arg RUN_SELF_FILTER)" name="SELF_FILTER_PARAM" value="$(arg SELF_FILTER_PARAM)" />
     <arg name="JOINT_STATIC_FILTER" value="$(arg JOINT_STATIC_FILTER)" />
     <arg name="ICP_REGISTRATION" value="$(arg ICP_REGISTRATION)" />
     <arg name="PUBLISH_BOX_TF" value="$(arg PUBLISH_BOX_TF)" />

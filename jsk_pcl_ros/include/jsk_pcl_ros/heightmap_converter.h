@@ -45,6 +45,8 @@
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <jsk_recognition_msgs/HeightmapConfig.h>
+#include <tf/transform_listener.h>
+#include <tf/transform_broadcaster.h>
 
 namespace jsk_pcl_ros
 {
@@ -87,6 +89,13 @@ namespace jsk_pcl_ros
     int resolution_x_;
     int resolution_y_;
     int max_queue_size_;
+    std::string fixed_frame_id_;
+    std::string center_frame_id_;
+    std::string projected_center_frame_id_;
+    bool use_projected_center_;
+
+    tf::TransformListener* tf_;
+    tf::TransformBroadcaster tf_broadcaster_;
   };
 }
 

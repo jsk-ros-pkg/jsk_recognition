@@ -47,6 +47,7 @@
   <build_depend>tf</build_depend>
   <build_depend>robot_self_filter</build_depend>
   <build_depend>yaml-cpp</build_depend>
+  <build_depend>libcmt</build_depend>
 
   <run_depend>angles</run_depend>
   <run_depend>cv_bridge</run_depend>
@@ -70,6 +71,7 @@
   <run_depend>opencv_apps</run_depend>
   <run_depend>pcl_ros</run_depend>
   <run_depend>posedetection_msgs</run_depend>
+
   <run_depend>python-chainer</run_depend>
   <run_depend>python-dlib</run_depend>
   <run_depend>python-fcn-pip</run_depend>
@@ -88,7 +90,8 @@
   <run_depend>robot_self_filter</run_depend>
   <run_depend>yaml-cpp</run_depend>
   <run_depend>jsk_data</run_depend>
-
+  <run_depend>libcmt</run_depend>
+  
   <test_depend>jsk_tools</test_depend>
   <test_depend>roslaunch</test_depend>
   <test_depend>roslint</test_depend>

@@ -17,7 +17,7 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <!-- sort in alphabetical order -->
+  <!-- ALPHABETICAL ORDER -->
   <build_depend>angles</build_depend>
   <build_depend>cmake_modules</build_depend>
   <build_depend>cv_bridge</build_depend>
@@ -47,7 +47,9 @@
   <build_depend>tf</build_depend>
   <build_depend>robot_self_filter</build_depend>
   <build_depend>yaml-cpp</build_depend>
+  <!-- ALPHABETICAL ORDER -->
 
+  <!-- ALPHABETICAL ORDER -->
   <run_depend>angles</run_depend>
   <run_depend>cv_bridge</run_depend>
   <run_depend>driver_base</run_depend>
@@ -59,6 +61,7 @@
   <run_depend>image_view</run_depend>
   <run_depend>image_view2</run_depend>
   <run_depend>imagesift</run_depend>
+  <run_depend>jsk_data</run_depend>
   <run_depend>jsk_recognition_msgs</run_depend>
   <run_depend>jsk_recognition_utils</run_depend>
   <run_depend>jsk_rqt_plugins</run_depend>
@@ -87,12 +90,14 @@
   <run_depend>tf</run_depend>
   <run_depend>robot_self_filter</run_depend>
   <run_depend>yaml-cpp</run_depend>
-  <run_depend>jsk_data</run_depend>
+  <!-- ALPHABETICAL ORDER -->
 
+  <!-- ALPHABETICAL ORDER -->
   <test_depend>jsk_tools</test_depend>
   <test_depend>roslaunch</test_depend>
   <test_depend>roslint</test_depend>
   <test_depend>rostest</test_depend>
+  <!-- ALPHABETICAL ORDER -->
 
   <export>
     <nodelet plugin="${prefix}/jsk_perception_nodelets.xml"/>

@@ -154,7 +154,7 @@ bool jsk_pcl_ros::PointcloudScreenpoint::extract_point (pcl::PointCloud< pcl::Po
 
   x = reqx < 0.0 ? ceil(reqx - 0.5) : floor(reqx + 0.5);
   y = reqy < 0.0 ? ceil(reqy - 0.5) : floor(reqy + 0.5);
-  JSK_ROS_WARN("Request : %d %d", x, y);
+  JSK_ROS_INFO("Request : %d %d", x, y);
 
   if (checkpoint (in_pts, x, y, resx, resy, resz)) {
     return true;

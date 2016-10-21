@@ -1,4 +1,4 @@
-# UnpplyMaskImage
+# UnapplyMaskImage
 ![](images/apply_unapply_mask_image.png)
 
 Unapply mask image to the size of original image.

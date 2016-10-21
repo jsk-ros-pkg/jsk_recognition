@@ -48,4 +48,4 @@ Parameter
 - ``filter_field`` (``Int``, default: ``0``)
 
   - ``0``: Filter based on x field.
-  - ``1``: Filter based on x field.
+  - ``1``: Filter based on y field.

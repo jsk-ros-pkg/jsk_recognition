@@ -2,6 +2,98 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.25 (2016-09-16)
+-------------------
+* fix TargetAdaptiveTrackingConfig file name (this breaks make install)
+* Contributors: Kei Okada
+
+0.3.24 (2016-09-15)
+-------------------
+
+0.3.23 (2016-09-14)
+-------------------
+
+0.3.22 (2016-09-13)
+-------------------
+* added cfg and launch files
+* nodelet for tracking and updating object changes
+* increase time-limit
+* ColorBasedRegionGrowingSegmentation.cfg remove groovy code
+* add test_color_based_region_growing_segmentation.test
+* remove passthrough and fix type of kdtree
+* fix description of BSD license and remove passthroughfilter
+* add cfg of color_based_region_growing
+* add dynamic reconfigure of color_based_region_growing
+* Revert "Remove dependency on jsk_perception for separated build"
+* Merge pull request #1820 from wkentaro/dep-pcl-perception
+  Remove dependency on jsk_perception for separated build
+* Missing installation of executables
+* Fix missing dependency declaration of jsk_pcl_ros
+* Fix order of components in find_package of jsk_pcl_ros
+* Remove dependency on jsk_perception for separated build
+* [jsk_pcl_ros/icp_registration] Fix error in case of input point cloud… (#1795)
+  * [jsk_pcl_ros/icp_registration] Fix error in case of input point cloud size is 0
+  * [jsk_pcl_ros/icp_registration] Publish empty topics
+  * [jsk_pcl_ros/icp_registration] Add test
+* Add missing build_depend on jsk_data (#1852)
+  This is necessary to run install script on CMakeLists.txt.
+* [jsk_pcl_ros] Preserve transform at subscribed timestamp for prev pointcloud in heightmap time accumulation (#1850)
+* Install missing dirs for jsk_pcl_ros (#1847)
+  The missing dirs are: config, launch, sample.
+* Fix missing computation of point cloud center without box alignment (#1844)
+* Fix missing dependency on jsk_data
+* [jsk_pcl_ros/launch/openni2_remote.launch] relay camera_info for depth_registered.
+* [jsk_pcl_ros/src/edge_depth_refinement_nodelet.cpp] fix duplication check. treat edges which have no duplication correctly.
+* [jsk_pcl_ros/src/edge_depth_refinement_nodelet.cpp] remove unused local variable.
+* [jsk_pcl_ros/src/parallel_edge_finder_nodelet.cpp] use advertise function defined in ConnectionBasedNodelet class.
+* Compute point cloud centroid after transformed
+* Extract indices correctly with empty cloud
+* [jsk_pcl_ros/EdgeDepthRefinement] Add rostest for edge_depth_refinement
+* [jsk_pcl_ros] Fixed mistake of condition in edge_depth_refinment
+* [jsk_pcl_ros/line_segment_detector] Add test code
+* [jsk_pcl_ros/line_segment_detector] Fixed avoiding boost::lock_error
+* [jsk_pcl_ros/line_segment_detector] Modified line_segment_detector limitating length
+* Publish correct size cloud even with empty indices for ExtractIndices
+* [jsk_pcl_ros/people_tracking] Add test
+* [jsk_pcl_ros/people_tracking] Add traindata
+* [jsk_pcl_ros/people_tracking] Add people tracking nodelet
+* Convert point cloud to point indices
+* [jsk_pcl_ros] Add rearranged_bounding_box
+* [jsk_pcl_ros/hsi_color_filter] Add gui program
+* [jsk_pcl_ros] Add test for hsi_color_filter
+* [jsk_pcl_ros/hsi_color_filter] Add option keep_organized: ture
+* [jsk_pcl_ros] Add option keep_organized for color_filter
+* Merge pull request #1758 from knorth55/fix-convex
+  fix ConvexConnectedVoxels subscribers and publisher
+* Align bounding boxes with target frame in ClusterPointIndicesDecomposer
+* Add test for ClusterPointIndicesDecomposer
+* Add sample for ClusterPointIndicesDecomposer
+* [jsk_pcl_ros] add test for ConvexConnectedVoxels
+* [jsk_pcl_ros] fix ConvexConnectedVoxels subscribers and publisher
+* allow parent frame not set
+* Refactor deprecated node compilation moved to jsk_pcl_ros_utils
+  This is from same motivation as https://github.com/jsk-ros-pkg/jsk_recognition/pull/1726.
+* [Normal Estimation OMP] add parameter for setting number of threads
+* [jsk_pcl_ros] Fixed initialization of pnh in organized_edge_detector
+* [jsk_pcl_ros] add test and sample launch for pointcloud database server
+* fix parameter name in hsi_color_filter_sample.launch
+* [jsk_pcl_ros] Use jsk_data download_data func for test_data
+* [jsk_pcl_ros] fix and improve for frame_id
+* [jsk_pcl_ros] add stl file load func to PointcloudDatabaseServer
+* Stable ros version check by STRGREATER
+* [jsk_pcl_ros] add dynamic_reconfigure in pointcloud_database_server (#1632)
+* [jsk_pcl_ros] Support pcl 1.8 in 'jsk_pcl_ros' (#1609)
+  * Support pcl 1.8 in 'jsk_pcl_ros'
+  * Test building with PCL 1.8
+  Modified:
+  - .travis.yml
+  Added:
+  - .travis_before_script_pcl1.8.bash
+* Build particle_filter_tracking only with OpenMP (#1607)
+* Stop passing -z flag to ld with clang (#1606)
+* Add boost namespace as boost::tie (#1608)
+* Contributors: Iori Kumagai, Kei Okada, Kentaro Wada, Masaki Murooka, Satoshi Otsubo, Shingo Kitagawa, Yohei Kakiuchi, Yu Ohara, Hitoshi Kamada, Krishneel Chaudhary, Iori Yanokura, Yusuke Oshiro
+
 0.3.21 (2016-04-15)
 -------------------
 * CMakeLists.txt: we do not have node_scripts/ (#1587)

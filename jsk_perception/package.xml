@@ -1,6 +1,6 @@
 <package>
   <name>jsk_perception</name>
-  <version>0.3.21</version>
+  <version>0.3.25</version>
 
   <description>
 
@@ -17,7 +17,7 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <!-- sort in alphabetical order -->
+  <!-- ALPHABETICAL ORDER -->
   <build_depend>angles</build_depend>
   <build_depend>cmake_modules</build_depend>
   <build_depend>cv_bridge</build_depend>
@@ -29,12 +29,14 @@
   <build_depend>image_geometry</build_depend>
   <build_depend>image_transport</build_depend>
   <build_depend>image_view2</build_depend>
+  <build_depend>jsk_data</build_depend>
   <build_depend>jsk_recognition_msgs</build_depend>
   <build_depend>jsk_recognition_utils</build_depend>
   <build_depend>jsk_topic_tools</build_depend>
   <build_depend>message_generation</build_depend>
   <build_depend>mk</build_depend>
   <build_depend>nodelet</build_depend>
+  <build_depend>opencv_apps</build_depend>
   <build_depend>pcl_ros</build_depend>
   <build_depend>posedetection_msgs</build_depend>
   <build_depend>roscpp</build_depend>
@@ -45,7 +47,9 @@
   <build_depend>tf</build_depend>
   <build_depend>robot_self_filter</build_depend>
   <build_depend>yaml-cpp</build_depend>
+  <!-- ALPHABETICAL ORDER -->
 
+  <!-- ALPHABETICAL ORDER -->
   <run_depend>angles</run_depend>
   <run_depend>cv_bridge</run_depend>
   <run_depend>driver_base</run_depend>
@@ -57,13 +61,16 @@
   <run_depend>image_view</run_depend>
   <run_depend>image_view2</run_depend>
   <run_depend>imagesift</run_depend>
+  <run_depend>jsk_data</run_depend>
   <run_depend>jsk_recognition_msgs</run_depend>
   <run_depend>jsk_recognition_utils</run_depend>
+  <run_depend>jsk_rqt_plugins</run_depend>
   <run_depend>jsk_topic_tools</run_depend>
   <run_depend>message_runtime</run_depend>
   <run_depend>mk</run_depend>
   <run_depend>ml_classifiers</run_depend>
   <run_depend>nodelet</run_depend>
+  <run_depend>opencv_apps</run_depend>
   <run_depend>pcl_ros</run_depend>
   <run_depend>posedetection_msgs</run_depend>
   <run_depend>python-chainer</run_depend>
@@ -83,12 +90,14 @@
   <run_depend>tf</run_depend>
   <run_depend>robot_self_filter</run_depend>
   <run_depend>yaml-cpp</run_depend>
-  <run_depend>jsk_data</run_depend>
+  <!-- ALPHABETICAL ORDER -->
 
+  <!-- ALPHABETICAL ORDER -->
   <test_depend>jsk_tools</test_depend>
   <test_depend>roslaunch</test_depend>
   <test_depend>roslint</test_depend>
   <test_depend>rostest</test_depend>
+  <!-- ALPHABETICAL ORDER -->
 
   <export>
     <nodelet plugin="${prefix}/jsk_perception_nodelets.xml"/>

@@ -83,6 +83,8 @@ generate_dynamic_reconfigure_options(
   #   cfg/VoxelGridLargeScale.cfg
   cfg/BoundingBoxArrayToBoundingBox.cfg
   cfg/CloudOnPlane.cfg
+  cfg/ClusterPointIndicesToPointIndices.cfg
+  cfg/DelayPointCloud.cfg
   cfg/PolygonArrayAreaLikelihood.cfg
 #   cfg/PlaneSupportedCuboidEstimator.cfg
 #   cfg/InteractiveCuboidLikelihood.cfg
@@ -141,6 +143,7 @@ generate_dynamic_reconfigure_options(
 #   cfg/OctreeVoxelGrid.cfg
 #   cfg/OctreeChangePublisher.cfg
     cfg/PointCloudToPCD.cfg
+    cfg/PolygonArrayUnwrapper.cfg
   )
 
 generate_messages(DEPENDENCIES
@@ -202,6 +205,10 @@ jsk_pcl_util_nodelet(src/planar_pointcloud_simulator_nodelet.cpp
   "jsk_pcl_utils/PlanarPointCloudSimulator" "planar_pointcloud_simulator")
 jsk_pcl_util_nodelet(src/plane_rejector_nodelet.cpp
   "jsk_pcl_utils/PlaneRejector" "plane_rejector")
+if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
+  jsk_pcl_util_nodelet(src/cluster_point_indices_to_point_indices_nodelet.cpp
+    "jsk_pcl_utils/ClusterPointIndicesToPointIndices" "cluster_point_indices_to_point_indices")
+endif()
 jsk_pcl_util_nodelet(src/pointcloud_to_cluster_point_indices_nodelet.cpp
   "jsk_pcl_utils/PointCloudToClusterPointIndices" "pointcloud_to_cluster_point_indices")
 jsk_pcl_util_nodelet(src/pointcloud_to_mask_image_nodelet.cpp
@@ -290,6 +297,8 @@ if (CATKIN_ENABLE_TESTING)
   # Naming Rule: filename of rostest should be {EXECUTABLE_NAME}.test
   add_rostest(test/point_indices_to_cluster_point_indices.test)
   if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
+    # not build on hydro
+    add_rostest(test/cluster_point_indices_to_point_indices.test)
     # unexpected error
     add_rostest(test/point_indices_to_mask_image.test)
     # because of unreleased topic_tools/transform on hydro
@@ -298,5 +307,6 @@ if (CATKIN_ENABLE_TESTING)
     # because of unreleased jsk_tools/test_topic_published.py on hydro
     add_rostest(test/bounding_box_array_to_bounding_box.test)
     add_rostest(test/pointcloud_to_mask_image.test install_test_data)
+    add_rostest(test/polygon_array_unwrapper.test)
   endif()
 endif()

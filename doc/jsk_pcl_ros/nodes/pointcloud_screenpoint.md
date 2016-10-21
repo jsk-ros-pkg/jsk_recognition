@@ -18,7 +18,7 @@ Use amplifiered pointclouds published by laser
 This is a nodelet to convert (u, v) coordinate on a image to 3-D point.
 It retrieves 3-D environment as pointcloud.
 
-[pointcloud_screenpoint_sample.launch](launch/pointcloud_screenpoint_sample.launch) is a sample launch file.
+[pointcloud_screenpoint_sample.launch](../../../jsk_pcl_ros/sample/pointcloud_screenpoint_sample.launch) is a sample launch file.
 
 ## Subscribing Topics
 * `~points` (`sensor_msgs/PointCloud2`):

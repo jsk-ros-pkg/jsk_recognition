@@ -2,6 +2,228 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.25 (2016-09-16)
+-------------------
+
+0.3.24 (2016-09-15)
+-------------------
+* CMakeLists.txt : jsk_data is required in build time, used in scripts/install_sample_data
+* Contributors: Kei Okada
+
+0.3.23 (2016-09-14)
+-------------------
+* euslisp/eusmodel_template_gen_utils.l: create directory if tepmlate path is not found
+* CMakeLists.txt : Makefile.slic is no longer used
+* Contributors: Kei Okada
+
+0.3.22 (2016-09-13)
+-------------------
+* Basically, if the angle is less than 0, just add 180. Likewise if the angle is greater than 180, just subtract by 180. https://github.com/jsk-ros-pkg/jsk_recognition/pull/1593/files#r77976906
+* Sobel operator with higher kernel can give better response https://github.com/jsk-ros-pkg/jsk_recognition/pull/1593#discussion_r77976333
+* [jsk_perception] slic as submodule
+* sparse_image_encoder.cpp: need to escape %
+* remove orientationistogram is not used
+* set defiend values to protected member variables
+* add doc for image_time_diff.py
+* [jsk_perception] Remain executable API for nodes which is moved to opencv_apps
+  Delete deprecated API's cfg and src files.
+* Declare jsk_add_rostest in all distros
+* Add jsk\_ prefix for local macros
+* Refactor: jsk_perception_add_rostest -> _add_rostest
+* Refactor: jsk_perception -> ${PROJECT_NAME}
+* Refactor: jsk_perception_nodelet -> _add_nodelet
+* Sort service files
+* Fix if block syntax
+  - Use endif()
+  - Use quote "" for VERSION_GREATER
+* Fix missing CATKIN_DEPENDS of posedetection_msgs
+* Fix node executables installation by introducing macro
+* Organize cmake setup order
+  1. Initialization
+  2. Download
+  3. Catkin setup
+  4. Build
+  5. Install
+  6. Test
+* Add sample/test for blob_detector (#1849)
+  * Add sample/test for blob_detector
+  * Rename mask image file for understandable name
+* Fix special character for double to print (#1836)
+  * Fix special character for double to print
+  * Add unit for percentage in sparse_image_encoder info printing
+* Add sample & test for color_histogram node
+* Fix image dimension robustness in ExtractImageChannel
+* [jsk_perception/src/polygon_to_mask_image.cpp] add warning message when no camera info is available.
+* Add test for extract_image_channel.py
+* Add sample for extract_image_channel.py
+* Extract image channel for channel value in rosparam
+* disable global set ssl verification  to fase
+* Add test for RectArrayToDensityImage
+* Add sample for RectArrayToDensityImage
+* Add sample for selective_search.py
+* Convert rect array to density image
+* Publish probability image in fcn_object_segmentation.py
+* Publish whole black mask if no contour is found
+* Use matplotlib.use('Agg') to make it work on server (without window)
+* Update sample/test for drawn label names in label_image_decomposer
+* Decompose labels with their names listed as legend
+* Test LabelToMaskImage
+* Add sample for LabelToMaskImage
+* Node to convert label to mask image
+* Use std::vector instead of cv::vector for OpenCV3
+* Get bounding object mask image from noisy mask image
+* replace cv::vector to std::vector
+* enable to use cv::vector in opencv-3.x
+* Merge pull request #1740 from wkentaro/fcn
+  Fully Convolutional Networks for Object Segmentation
+* [jsk_perception/src/virtual_camera_mono.cpp] process only when subscribed
+* [jsk_perception/fast_rcnn] Modified avoiding size of rects is 0 case
+* Catch error which unexpected size of mask
+* Use larger buff_size to process input message with queue_size=1
+* Use mask image to enhance the object recognition result
+* Use timer and load img file when reconfigured in image_publisher
+* Add python-fcn-pip in package.xml
+* Add fcn_object_segmentation.launch
+* Large size buff_size is required for taking time callback
+* Test fcn_object_segmentation.py
+* Sample for fcn_object_segmentation.py
+* Fully Convolutional Networks for Object Segmentation
+* Use small sized image for stable testing
+* Make test for sklearn_classifier stable
+* Make test for label_image_decomposer stable
+* Add sample for slic_super_pixels
+* Download trained_data in multiprocess
+* Stop drawing boundary on label_image_decomposer
+  - Not so pretty
+  - Maybe Takes time
+* Skip when no contours in BoundingRectMaskImage
+* Test RectArrayActualSizeFilter
+* Add sample for RectArrayActualSizeFilter
+* Fix RectArrayActualSizeFilter in terms of size filtering
+* Merge pull request #1731 from wkentaro/warn-no-test
+  Warnings for without test node/nodelets
+* Merge pull request #1732 from wkentaro/test-with-bof
+  Add test for bof_histogram_extractor.py and sklearn_classifier.py
+* jsk_perception/CMakeList.sxt: eigen_INCLUDE_DIRS must be located after catkin_INCLUDE_DIRS
+* [jsk_perception] fix bug in solidity_rag_merge
+* [polygon_array_color_histogram, polygon_array_color_likelihood] add queue size for message filter
+* Warnings for without test node/nodelets
+* Add test for bof_histogram_extractor.py and sklearn_classifier.py
+* [polygon_array_color_likelihood] add code for reading yaml with latest yaml-cpp
+* [jsk_pcl_ros] Fix mistake of rect_array_actual_size_filter
+* Add sample for label_image_decomposer and use it in testing
+* Add test, sample, and documentation for OverlayImageColorOnMono
+* Add dynamic reconfigure for OverlayImageColorOnMono
+* Implement OverlayImageColorOnMono
+* Merge pull request #1697 from wkentaro/rectify-mask-image
+  Implement ConvexHullMaskImage
+* Add sample for mask_image_to_label.py
+* Rename publish_fixed_images.launch -> sample_image_publisher.launch
+* Use natural name of rqt_gui perspective for bof_object_recognition sample
+* Add sample & test for BoundingRectMaskImage
+* Implement BoundingRectMaskImage
+* Add sample & test for ConvexHullMaskImage
+* Implement ConvexHullMaskImage
+* Add sample & test for BoundingRectMaskImage
+* Implement BoundingRectMaskImage
+* Add sample & test for MultiplyMaskImage
+* Add sample & test for AddMaskImage
+* Fix wrong mask size generated by MaskImageGenerator
+  Fix #1701
+* Add sample & test for MaskImageGenerator
+* Add sample for apply_mask_image
+* Install trained_data all time with dependency on ALL
+* Merge pull request #1658 from wkentaro/color_pyx
+  [jsk_recognition_utils] Add label color utility function
+* Add test for 'rect_array_to_image_marker.py'
+* Use labelcolormap in 'rect_array_to_image_marker.py'
+* Use labelcolormap in 'draw_rect_array.py'
+* Rename download_trained_data -> install_trained_data.py
+  To follow install_test_data.py.
+* Comment out test for vgg16_object_recognition does not work in Jenkins
+* Install h5py via rosdep and apt
+* Install vgg16 trained model
+* Recognize object with VGG16 net
+* Rename vgg16 -> vgg16_fast_rcnn
+* Fix typo in bof_histogram_extractor.py
+* Implement drawing node of classification result
+* Rename fast_rcnn_caffenet -> fast_rcnn
+* Remove dependency on rbgirshick/fast-rcnn
+* CMakeLists.txt:  on Hydro  contains /opt/ros/hydro/include so we need to add after catkin_INCLUDE_DIRS
+* Merge pull request #1627 from wkentaro/use-jsk_data
+  [jsk_perception] Use jsk_data download_data function for test_data
+* Merge pull request #1628 from wkentaro/download-jsk_data-trained-data
+  [jsk_perception] Download trained_data with jsk_data function
+* Use jsk_data download_data function for test_data
+* Download trained_data with jsk_data function
+* Add roslaunch_add_file_check with add_rostest
+* Comment out bof_object_recognition.test because of no resolved imagesift depends
+* Support latest sklearn in BoF feature extraction
+* Make jsk_perception depend on imagesift for BoF
+* Migrate completely jsk_perception/image_utils.h to jsk_recognition_utils/cv_utils.h
+* Stable ros version check by STRGREATER
+* Deprecated create_feature0d_dataset.[py,launch]
+  Please use create_sift_dataset.py.
+* Make it stable image_cluster_indices_decomposer.test
+* Make selective_search.test be stable
+* Make slic_super_pixels.test be stable
+* Make colorize_float_image.test be stable
+* Make colorize_labels test stable
+* Make apply_mask_image.test be stable
+* Make bof_object_recognition.test stable
+* Make kmeans.test be stable
+* Make bing.test be stable
+* Make jsk_perception depend on image_view2 for ImageMaker2 message
+* Fix opencv version condition for bing.test (#1638)
+* [jsk_perception] Test tile_image.py (#1635)
+  * Follow name convention sample_tile_image.launch
+  * Test tile_image.py
+* Test colorize_float_image (#1636)
+* Test mask_image_to_label.py (#1634)
+* [jsk_perception] Add test for BoF object recognition sample (#1626)
+  * Refactor: BoF object recognition sample filname
+  * Add test for BoF object recognition sample
+* Test apply mask image (#1615)
+  Modified:
+  - jsk_perception/CMakeLists.txt
+  Added:
+  - jsk_perception/test/apply_mask_image.test
+* Add rqt_gui perspective file for BoF sample (#1622)
+* Test colorize labels (#1614)
+  Modified:
+  - jsk_perception/CMakeLists.txt
+  Added:
+  - jsk_perception/test/colorize_labels.test
+* Condition to find OpenCV 3 (> 2.9.9) (#1603)
+* Test KMeans (#1612)
+  Modified:
+  - jsk_perception/CMakeLists.txt
+  Added:
+  - jsk_perception/test/kmeans.test
+* Compile some nodes only when OpenMP found (#1604)
+* Stop passing -z flag to ld with clang (#1602)
+* [jsk_perception] Find OpenMP as an optional module (#1600)
+  * Find OpenMP as an optional module
+  * Fix indent of cmake
+* Refactoring: Rename test file for consistency (#1611)
+* [jsk_perception] Test image_publisher.py (#1613)
+  * Refactoring: remap ~output/camera_info to ~camera_info
+  This is a natural output topic design especially for image_pipeline package.
+  * Test image_publisher.py
+  Added:
+  - jsk_perception/test/image_publisher.test
+* [jsk_perception] BING: Binarized Normed Gradients for Objectness Estimation at 300fps (#1598)
+  * Add trained_data/
+  * Add bing
+  * Download trained_data for bing
+  * Documentation about bing
+  * Add test and sample for bing
+  * Download trained_data for bing automatically
+* Add trained_data/ (#1597)
+* clf save directory fixed (#1539)
+* [jsk_perception/image_cluster_indices_decomposer] fix typo (#1592)
+* Contributors: Kei Okada, Kentaro Wada, Kim Heecheol, Masaki Murooka, Ryohei Ueda, Shingo Kitagawa, Shintaro Hori, Yohei Kakiuchi, Yuki Furuta, Iori Yanokura, Hiroto Mizohana
+
 0.3.21 (2016-04-15)
 -------------------
 

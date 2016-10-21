@@ -2,7 +2,8 @@
 
   <test test-name="test_point_indices_to_mask_image"
         name="test_point_indices_to_mask_image"
-        pkg="jsk_pcl_ros_utils" type="test_point_indices_to_mask_image.py">
+        pkg="jsk_pcl_ros_utils" type="test_point_indices_to_mask_image.py"
+        retry="3">
     <remap from="~input/mask1" to="point_indices_to_mask_image/output" />
     <remap from="~input/mask2" to="point_indices_to_mask_image_static/output" />
   </test>

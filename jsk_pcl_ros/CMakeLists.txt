@@ -2,26 +2,34 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(jsk_pcl_ros)
 
-# Load catkin and all dependencies required for this package
-# TODO: remove all from COMPONENTS that are not catkin packages.
-set(PCL_MSGS pcl_msgs) ## hydro and later
-
 find_package(catkin REQUIRED COMPONENTS
-  jsk_recognition_utils jsk_pcl_ros_utils
-  dynamic_reconfigure pcl_ros nodelet message_generation genmsg
-  ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs
-  eigen_conversions tf_conversions tf2_ros tf
-  image_transport nodelet cv_bridge
-  jsk_topic_tools
+  cv_bridge
+  dynamic_reconfigure
+  eigen_conversions
+  genmsg
+  geometry_msgs
   image_geometry
-  jsk_footstep_msgs
+  image_transport
   interactive_markers
-  laser_assembler
-  octomap_server
-  octomap_ros
-  octomap_msgs
-  kdl_parser
+  jsk_footstep_msgs
+  jsk_pcl_ros_utils
+  jsk_recognition_msgs
+  jsk_recognition_utils
+  jsk_topic_tools
   kdl_conversions
+  kdl_parser
+  laser_assembler
+  message_generation
+  nodelet
+  octomap_msgs
+  octomap_ros
+  octomap_server
+  pcl_msgs
+  pcl_ros
+  sensor_msgs
+  tf
+  tf2_ros
+  tf_conversions
   )
 find_package(PkgConfig)
 pkg_check_modules(ml_classifieres ml_classifiers QUIET)
@@ -88,6 +96,7 @@ generate_dynamic_reconfigure_options(
   cfg/RGBColorFilter.cfg
   cfg/ImageRotate.cfg
   cfg/RegionGrowingSegmentation.cfg
+  cfg/ColorBasedRegionGrowingSegmentation.cfg
   cfg/OrganizedMultiPlaneSegmentation.cfg
   cfg/MultiPlaneExtraction.cfg
   cfg/NormalEstimationIntegralImage.cfg
@@ -113,6 +122,7 @@ generate_dynamic_reconfigure_options(
   cfg/ExtractTopPolygonLikelihood.cfg
   cfg/Kinfu.cfg
   cfg/PointcloudDatabaseServer.cfg
+  cfg/TargetAdaptiveTracking.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -185,7 +195,8 @@ jsk_pcl_nodelet(src/normal_estimation_integral_image_nodelet.cpp
   "jsk_pcl/NormalEstimationIntegralImage" "normal_estimation_integral_image")
 jsk_pcl_nodelet(src/region_growing_segmentation_nodelet.cpp
   "jsk_pcl/RegionGrowingSegmentation" "region_growing_segmentation")
-
+jsk_pcl_nodelet(src/color_based_region_growing_segmentation_nodelet.cpp
+  "jsk_pcl/ColorBasedRegionGrowingSegmentation" "color_based_region_growing_segmentation")
 jsk_pcl_nodelet(src/organized_multi_plane_segmentation_nodelet.cpp
   "jsk_pcl/OrganizedMultiPlaneSegmentation" "organized_multi_plane_segmentation")
 jsk_pcl_nodelet(src/multi_plane_extraction_nodelet.cpp
@@ -345,6 +356,8 @@ if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
   include_directories(/usr/local/cuda/include)
 endif (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
 jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PCDReaderWithPose" "pcd_reader_with_pose")
+jsk_pcl_nodelet(src/target_adaptive_tracking_nodelet.cpp
+  "jsk_pcl/TargetAdaptiveTracking" "target_adaptive_tracking")
 jsk_pcl_nodelet(src/octree_voxel_grid_nodelet.cpp
   "jsk_pcl/OctreeVoxelGrid" "octree_voxel_grid")
 # robot_self_filter is released on version greater than indigo
@@ -429,6 +442,10 @@ install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 install(TARGETS jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit
   ${jsk_pcl_nodelet_executables}
+  bench_ransac_plane_estimation
+  depth_camera_error_visualization
+  range_sensor_error_visualization
+  sample_cube_nearest_point
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
@@ -438,10 +455,14 @@ install(DIRECTORY scripts/
 )
 
 install(FILES jsk_pcl_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-install(DIRECTORY launch
+install(DIRECTORY
+  config
+  launch
+  sample
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 if (CATKIN_ENABLE_TESTING)
+  find_package(roslaunch REQUIRED)
   find_package(rostest REQUIRED)
   # install test data by a script
   add_custom_target(install_test_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.py)
@@ -453,6 +474,7 @@ if (CATKIN_ENABLE_TESTING)
   if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
     # because of unreleased topic_tools/transform on hydro
     add_rostest(test/test_hsi_color_filter.test DEPENDENCIES install_test_data)
+    add_rostest(test/test_icp_registration.test DEPENDENCIES install_test_data)
     add_rostest(test/test_attention_clipper.test DEPENDENCIES install_test_data)
     add_rostest(test/test_cluster_point_indices_decomposer.test)
     add_rostest(test/test_edge_depth_refinement.test DEPENDENCIES install_test_data)
@@ -462,5 +484,10 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/test_pointcloud_database_server.test DEPENDENCIES install_test_data)
     add_rostest(test/test_convex_connected_voxels.test DEPENDENCIES install_test_data)
     add_rostest(test/test_organized_pointcloud_to_point_indices.test DEPENDENCIES install_test_data)
+    add_rostest(test/test_color_based_region_growing_segmentation.test DEPENDENCIES install_test_data)
   endif()
+  roslaunch_add_file_check(launch/openni_local.launch)
+  roslaunch_add_file_check(launch/openni2_local.launch)
+  roslaunch_add_file_check(launch/openni_remote.launch)
+  roslaunch_add_file_check(launch/openni2_remote.launch)
 endif()

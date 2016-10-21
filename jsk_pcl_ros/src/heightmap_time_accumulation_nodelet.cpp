@@ -95,12 +95,12 @@ namespace jsk_pcl_ros
   {
     pub_output_.publish(cv_bridge::CvImage(
                           header,
-                          sensor_msgs::image_encodings::TYPE_32FC1,
+                          sensor_msgs::image_encodings::TYPE_32FC2,
                           heightmap).toImageMsg());
   }
 
   cv::Point HeightmapTimeAccumulation::toIndex(
-    const pcl::PointXYZ& p, const cv::Mat& map)
+    const PointType& p, const cv::Mat& map)
   {
     if (p.x > max_x_ || p.x < min_x_ ||
         p.y > max_y_ || p.y < min_y_) {
@@ -122,7 +122,7 @@ namespace jsk_pcl_ros
 
   bool HeightmapTimeAccumulation::isValidCell(const cv::Point& index, const cv::Mat& map)
   {
-    float v = map.at<float>(index.y, index.x);
+    float v = map.at<cv::Vec2f>(index.y, index.x)[0];
     return !isnan(v) && v != -FLT_MAX;
   }
 
@@ -141,25 +141,34 @@ namespace jsk_pcl_ros
     Eigen::Affine3f from_center_to_fixed;
     tf::transformTFToEigen(tf_transform, from_center_to_fixed);
     cv::Mat new_heightmap = cv_bridge::toCvShare(
-      msg, sensor_msgs::image_encodings::TYPE_32FC1)->image;
+      msg, sensor_msgs::image_encodings::TYPE_32FC2)->image;
     // Transform prev_cloud_ to current frame
     Eigen::Affine3f from_prev_to_current
       = prev_from_center_to_fixed_.inverse() * from_center_to_fixed;
-    pcl::PointCloud<pcl::PointXYZ> transformed_pointcloud;
+    pcl::PointCloud<PointType > transformed_pointcloud;
     pcl::transformPointCloud(prev_cloud_, transformed_pointcloud, from_prev_to_current.inverse());
     for (size_t i = 0; i < transformed_pointcloud.points.size(); i++) {
-      pcl::PointXYZ p = transformed_pointcloud.points[i];
+      PointType p = transformed_pointcloud.points[i];
       if (isValidPoint(p)) {
         cv::Point index = toIndex(p, new_heightmap);
         if (isValidIndex(index, new_heightmap)) {
           if (!isValidCell(index, new_heightmap)) {
-            new_heightmap.at<float>(index.y, index.x) = p.z;
+            // There is not valid data in current heightmap,
+            new_heightmap.at<cv::Vec2f>(index.y, index.x)[0] = p.z;
+            new_heightmap.at<cv::Vec2f>(index.y, index.x)[1] = (float)(p.intensity);
+          } else {
+            // There is valid data in current heightmap,
+            if (new_heightmap.at<cv::Vec2f>(index.y, index.x)[1] > (float)(p.intensity)) {
+              // heightmap has worth quality than prev_pointcloud
+              new_heightmap.at<cv::Vec2f>(index.y, index.x)[0] = p.z;
+              new_heightmap.at<cv::Vec2f>(index.y, index.x)[1] = (float)(p.intensity);
+            }
           }
         }
       }
     }
     publishHeightmap(new_heightmap, msg->header);
-    prev_from_center_to_fixed_ = from_center_to_fixed;
+    // prev_from_center_to_fixed_ = from_center_to_fixed;
   }
 
   void HeightmapTimeAccumulation::prevPointCloud(
@@ -167,7 +176,12 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     pcl::fromROSMsg(*msg, prev_cloud_);
-    // TODO: should check timestamp
+    // get transform at subscribed timestamp
+    tf::StampedTransform tf_transform;
+    tf_->lookupTransform(fixed_frame_id_, center_frame_id_,
+                         msg->header.stamp,
+                         tf_transform);
+    tf::transformTFToEigen(tf_transform, prev_from_center_to_fixed_);
   }
 
   void HeightmapTimeAccumulation::configCallback(

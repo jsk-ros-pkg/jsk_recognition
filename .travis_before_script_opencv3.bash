@@ -15,11 +15,12 @@ rosinstall_generator --tar --rosdistro $ROS_DISTRO \
   cv_bridge \
   image_geometry \
   image_transport \
+  image_view2 \
+  jsk_data \
+  jsk_topic_tools \
+  opencv_apps \
 >> /tmp/$$.rosinstall
 
 cd ~/ros/ws_$REPOSITORY_NAME/src
 wstool merge /tmp/$$.rosinstall
-wstool up -j3 \
-  vision_opencv/cv_bridge \
-  vision_opencv/image_geometry \
-  image_common/image_transport
+wstool up -j4

@@ -13,11 +13,12 @@
 class HOGFeatureDescriptor {
 
     //  HOG Configuration Params
-#define N_BINS 9
-#define ANGLE 180.0
-#define BINS_ANGLE (ANGLE / N_BINS)
-#define CELL 8
-#define BLOCK 2
+ protected:
+    int N_BINS;
+    int ANGLE;
+    int BINS_ANGLE;
+    int CELL;
+    int BLOCK;
 
  private:
     virtual void bilinearBinVoting(
@@ -26,8 +27,6 @@ class HOGFeatureDescriptor {
        const cv::Mat &, cv::Mat &);
     virtual cv::Mat blockGradient(
        const int, const int, cv::Mat &);
-    virtual cv::Mat orientationistogram(
-       const cv::Mat&, const int &, const int &, bool = false);
     virtual void getHOG(
        const cv::Mat &, cv::Mat &, cv::Mat &);
     template<typename T>
@@ -36,7 +35,9 @@ class HOGFeatureDescriptor {
        const int = CV_COMP_BHATTACHARYYA);
    
  public:
-    HOGFeatureDescriptor();
+    HOGFeatureDescriptor(
+       const int = 8, const int = 2, const int = 9,
+       const float = 180.0f);
     virtual cv::Mat computeHOG(
        const cv::Mat &);
 };

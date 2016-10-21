@@ -2,6 +2,26 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.25 (2016-09-16)
+-------------------
+
+0.3.24 (2016-09-15)
+-------------------
+
+0.3.23 (2016-09-14)
+-------------------
+
+0.3.22 (2016-09-13)
+-------------------
+* remove imagesift/CATKIN_IGNORE which is wrongly commited on #1628
+* Compile jsk_data from source in released testing
+* Compile jsk_data from source in released testing
+* jsk_tools/test_topic_published.py won't work on hydro
+* Add test for imagesift
+* Make imagesift stop depending on jsk_perception
+* Install imagesift executable correctly (#1621)
+* Contributors: Kei Okada, Kentaro Wada
+
 0.3.21 (2016-04-15)
 -------------------
 

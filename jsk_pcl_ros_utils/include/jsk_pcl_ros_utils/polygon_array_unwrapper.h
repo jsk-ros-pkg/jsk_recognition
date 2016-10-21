@@ -41,16 +41,20 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 
+#include <dynamic_reconfigure/server.h>
 #include <geometry_msgs/PolygonStamped.h>
+#include <jsk_pcl_ros_utils/PolygonArrayUnwrapperConfig.h>
 #include <jsk_recognition_msgs/PolygonArray.h>
 #include <jsk_recognition_msgs/ModelCoefficientsArray.h>
 #include <jsk_topic_tools/connection_based_nodelet.h>
+
 
 namespace jsk_pcl_ros_utils
 {
   class PolygonArrayUnwrapper: public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
+    typedef PolygonArrayUnwrapperConfig Config;
     typedef message_filters::sync_policies::ExactTime<
     jsk_recognition_msgs::PolygonArray,
     jsk_recognition_msgs::ModelCoefficientsArray>
@@ -60,14 +64,19 @@ namespace jsk_pcl_ros_utils
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
+    virtual void configCallback(Config &config, uint32_t level);
     virtual void unwrap(
       const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon,
       const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients);
+    boost::mutex mutex_;
+    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygon_;
     message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
     ros::Publisher pub_polygon_;
     ros::Publisher pub_coefficients_;
+    bool use_likelihood_;
+    size_t plane_index_;
   private:
     
   };

@@ -2,6 +2,50 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.25 (2016-09-16)
+-------------------
+
+0.3.24 (2016-09-15)
+-------------------
+
+0.3.23 (2016-09-14)
+-------------------
+
+0.3.22 (2016-09-13)
+-------------------
+* [jsk_pcl_ros_utils/delay_point_cloud] Modified using message_filter for delay message
+* [jsk_pcl_ros_utils/delay_point_cloud] Modified delay_point's time stampe
+* [jsk_pcl_ros_utils/delay_point_cloud] Modified delay_time as dynamic parameter
+* [jsk_pcl_ros_utils/delay_point_cloud] Refactor sleep_time -> delay_time
+* [jsk_pcl_ros_utils] add test for polygon_array_unwrapper nodelet
+* [jsk_pcl_ros_utils] add ~use_likelihood to polygon_array_unwrapper
+* Retry at most three times point_indices_to_mask_image.test (#1848)
+  To fix error sometimes on Travis.
+* Convert cluster indices to point indices with index in rosparam (#1794)
+  * Convert cluster indices to point indices with dynamic reconfigure
+  * Test ClusterPointIndicesToPointIndices
+  * Doc for ClusterPointIndicesToPointIndices
+  * Not build cluster_point_indices_to_point_indices on hydro
+* Add description about naming rule
+* Fix test names in favor to {NODE_NAME}.test
+* Negative index is skipped in conversion
+* Add test for bounding_box_array_to_bounding_box
+* Add sample for bounding_box_array_to_bounding_box
+* Convert bounding box array to bounding box
+* Fix typo in label_to_cluster_point_indices.h
+* Convert point cloud to point indices
+* Convert point cloud to mask image in a node
+* Convert point indices to mask w/o sync if it's static
+* Convert point indices to cluster point indices
+  ex)
+  - Input Indices: [0, 10, 20]
+  - Output Cluster Indices: [[0, 10, 20]]
+* [jsk_pcl_ros_utils/PointCloudToPCD] add test and sample launch
+* [jsk_pcl_ros_utils/PointCloudToPCD] license modified to JSK
+* [jsk_pcl_ros_utils] modify PointCloudToPCD to nodelet and add dynamic_reconfigure
+* Stop passing -z flag to ld with clang (#1610)
+* Contributors: Kentaro Wada, Shingo Kitagawa, Yuki Furuta, Iori Yanokura
+
 0.3.21 (2016-04-15)
 -------------------
 

@@ -2,6 +2,36 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.25 (2016-09-16)
+-------------------
+
+0.3.24 (2016-09-15)
+-------------------
+
+0.3.23 (2016-09-14)
+-------------------
+
+0.3.22 (2016-09-13)
+-------------------
+* .travis.yml: add test to check if this works with release repository (#1595)
+  * .travis.yml: add test to check if this works with release repository
+  * update jsk_travis to 0.4.1
+  * resized_image_transport: fix to work with jsk_topic_tools < 2.0.10
+  * update jsk_travis 0.4.2
+* Add onInitPostProcess for image_resizer (#1590)
+  Modified:
+  - resized_image_transport/src/image_resizer_nodelet.cpp
+* [resized_image_transport] Add test for image_resizer (#1589)
+  * Fix deprecated error about advertiseCamera
+  Modified:
+  - resized_image_transport/src/image_processing_nodelet.cpp
+  * Test if image_resizer's output topic is published
+  Modified:
+  - resized_image_transport/CMakeLists.txt
+  Added:
+  - resized_image_transport/test/image_resizer.test
+* Contributors: Kei Okada, Kentaro Wada
+
 0.3.21 (2016-04-15)
 -------------------
 

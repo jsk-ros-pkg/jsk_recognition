@@ -311,6 +311,7 @@ namespace jsk_pcl_ros
   {
     bounding_box.header = header;
 
+    bool is_center_valid = false;
     Eigen::Vector4f center;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr
       segmented_cloud_transformed (new pcl::PointCloud<pcl::PointXYZRGB>);
@@ -319,7 +320,7 @@ namespace jsk_pcl_ros
     Eigen::Quaternionf q = Eigen::Quaternionf::Identity();
     if (align_boxes_) {
       if (align_boxes_with_plane_) {
-        pcl::compute3DCentroid(*segmented_cloud, center);
+        is_center_valid = pcl::compute3DCentroid(*segmented_cloud, center) != 0;
         bool success = transformPointCloudToAlignWithPlane(segmented_cloud, segmented_cloud_transformed,
                                                            center, planes, coefficients, m4, q);
         if (!success) {
@@ -343,12 +344,13 @@ namespace jsk_pcl_ros
         Eigen::Affine3f transform;
         tf::transformTFToEigen(tf_transform, transform);
         pcl::transformPointCloud(*segmented_cloud, *segmented_cloud_transformed, transform);
-        pcl::compute3DCentroid(*segmented_cloud_transformed, center);
+        is_center_valid = pcl::compute3DCentroid(*segmented_cloud_transformed, center) != 0;
         bounding_box.header.frame_id = target_frame_id_;
       }
     }
     else {
       segmented_cloud_transformed = segmented_cloud;
+      is_center_valid = pcl::compute3DCentroid(*segmented_cloud_transformed, center) != 0;
     }
       
     // create a bounding box
@@ -363,13 +365,19 @@ namespace jsk_pcl_ros
     Eigen::Vector4f center_transformed = m4 * center2;
       
     // set centroid pose msg
-    center_pose_msg.position.x = center[0];
-    center_pose_msg.position.y = center[1];
-    center_pose_msg.position.z = center[2];
-    center_pose_msg.orientation.x = 0;
-    center_pose_msg.orientation.y = 0;
-    center_pose_msg.orientation.z = 0;
-    center_pose_msg.orientation.w = 1;
+    if (is_center_valid) {
+      center_pose_msg.position.x = center[0];
+      center_pose_msg.position.y = center[1];
+      center_pose_msg.position.z = center[2];
+      center_pose_msg.orientation.x = 0;
+      center_pose_msg.orientation.y = 0;
+      center_pose_msg.orientation.z = 0;
+      center_pose_msg.orientation.w = 1;
+    }
+    else {
+      // set invalid pose for invalid center
+      center_pose_msg = geometry_msgs::Pose();
+    }
     
     // set bounding_box msg
     bounding_box.pose.position.x = center_transformed[0];
@@ -452,10 +460,14 @@ namespace jsk_pcl_ros
       // skip indices with points size
       if (min_size_ > 0 &&
           indices_input->cluster_indices[i].indices.size() < min_size_) {
+        vindices.reset (new std::vector<int> ());
+        converted_indices.push_back(vindices);
         continue;
       }
       if (max_size_ > 0 &&
           indices_input->cluster_indices[i].indices.size() > max_size_) {
+        vindices.reset (new std::vector<int> ());
+        converted_indices.push_back(vindices);
         continue;
       }
       vindices.reset (new std::vector<int> (indices_input->cluster_indices[i].indices));

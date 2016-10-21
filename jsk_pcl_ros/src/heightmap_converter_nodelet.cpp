@@ -38,6 +38,9 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <jsk_topic_tools/color_utils.h>
+#include "jsk_pcl_ros/tf_listener_singleton.h"
+#include <pcl/common/transforms.h>
+#include <tf_conversions/tf_eigen.h>
 
 namespace jsk_pcl_ros
 {
@@ -51,8 +54,16 @@ namespace jsk_pcl_ros
       boost::bind (&HeightmapConverter::configCallback, this, _1, _2);
     srv_->setCallback (f);
 
+    pnh_->param("fixed_frame_id", fixed_frame_id_, std::string("map"));
+    pnh_->param("center_frame_id", center_frame_id_, std::string("BODY"));
+    pnh_->param("projected_center_frame_id",
+                projected_center_frame_id_, std::string("BODY_on_map"));
+    pnh_->param("use_projected_center", use_projected_center_, false);
+
     pnh_->param("max_queue_size", max_queue_size_, 10);
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+
+    tf_ = TfListenerSingleton::getInstance();
 
     onInitPostProcess();
   }
@@ -71,15 +82,48 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();
+    std_msgs::Header msg_header(msg->header);
+    pcl::PointCloud<pcl::PointXYZ> transformed_cloud;
+    if (use_projected_center_) {
+      /* convert points */
+      tf::StampedTransform ros_fixed_to_center;
+      tf_->lookupTransform(fixed_frame_id_, center_frame_id_,
+                           msg->header.stamp, ros_fixed_to_center);
+      double roll, pitch, yaw;
+      tf::Vector3 pos = ros_fixed_to_center.getOrigin();
+      ros_fixed_to_center.getBasis().getRPY(roll, pitch, yaw);
+      Eigen::Affine3d fixed_to_center = (Eigen::Translation3d(pos[0], pos[1], 0) *
+                                         Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()));
+
+      tf::StampedTransform ros_msg_to_fixed;
+      tf_->lookupTransform(msg->header.frame_id, fixed_frame_id_,
+                           msg->header.stamp, ros_msg_to_fixed);
+      Eigen::Affine3d msg_to_fixed;
+      tf::transformTFToEigen(ros_msg_to_fixed, msg_to_fixed);
+
+      pcl::PointCloud<pcl::PointXYZ> from_msg_cloud;
+      pcl::fromROSMsg(*msg, from_msg_cloud);
+      pcl::transformPointCloud(from_msg_cloud, transformed_cloud, msg_to_fixed * fixed_to_center);
+
+      tf::StampedTransform tf_fixed_to_center;
+      transformEigenToTF(fixed_to_center, tf_fixed_to_center);
+      tf_fixed_to_center.frame_id_ = fixed_frame_id_;
+      tf_fixed_to_center.child_frame_id_ = projected_center_frame_id_;
+      tf_fixed_to_center.stamp_ = msg_header.stamp;
+      tf_broadcaster_.sendTransform(tf_fixed_to_center);
+
+      msg_header.frame_id = projected_center_frame_id_;
+    } else {
+      pcl::fromROSMsg(*msg, transformed_cloud);
+    }
     /* float image */
-    cv::Mat height_map = cv::Mat(resolution_y_, resolution_x_, CV_32FC1);
+    cv::Mat height_map = cv::Mat(resolution_y_, resolution_x_, CV_32FC2);
     height_map = cv::Scalar::all(- FLT_MAX);
-    pcl::PointCloud<pcl::PointXYZ> cloud;
-    pcl::fromROSMsg(*msg, cloud);
+
     float max_height = - FLT_MAX;
     float min_height = FLT_MAX;
-    for (size_t i = 0; i < cloud.points.size(); i++) {
-      pcl::PointXYZ p = cloud.points[i];
+    for (size_t i = 0; i < transformed_cloud.points.size(); i++) {
+      pcl::PointXYZ p = transformed_cloud.points[i];
       if (isnan(p.x) || isnan(p.y) || isnan(p.z)) {
         continue;
       }
@@ -89,14 +133,16 @@ namespace jsk_pcl_ros
         /* Store min/max value for colorization */
         max_height = std::max(max_height, p.z);
         min_height = std::min(min_height, p.z);
-        if (height_map.at<float>(index.y, index.x) < p.z) {
-          height_map.at<float>(index.y, index.x) = p.z;
+        // accept maximum points
+        if (height_map.at<cv::Vec2f>(index.y, index.x)[0] < p.z) {
+          height_map.at<cv::Vec2f>(index.y, index.x)[0] = p.z;
+          height_map.at<cv::Vec2f>(index.y, index.x)[1] = 0;
         }
       }
     }
     // Convert to sensor_msgs/Image
-    cv_bridge::CvImage height_map_image(msg->header,
-                                        sensor_msgs::image_encodings::TYPE_32FC1,
+    cv_bridge::CvImage height_map_image(msg_header,
+                                        sensor_msgs::image_encodings::TYPE_32FC2,
                                         height_map);
     pub_.publish(height_map_image.toImageMsg());
   }

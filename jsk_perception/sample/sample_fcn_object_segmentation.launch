@@ -1,6 +1,7 @@
 <launch>
 
   <arg name="gui" default="true" />
+  <arg name="GPU" default="0" />
 
   <node name="image_publisher"
         pkg="jsk_perception" type="image_publisher.py">
@@ -12,7 +13,7 @@
 
   <include file="$(find jsk_perception)/launch/fcn_object_segmentation.launch">
     <arg name="INPUT_IMAGE" value="image_publisher/output" />
-    <arg name="GPU" value="-1" />
+    <arg name="GPU" value="$(arg GPU)" />
   </include>
 
   <group if="$(arg gui)">

@@ -1,0 +1,38 @@
+<launch>
+
+  <!-- load log -->
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/test_data/2016-07-06-12-16-43-person-in-point-cloud/vision.compressed.bag --loop" >
+  </node>
+
+  <arg name="INPUT_CLOUD" value="/camera_remote/depth_registered/points" />
+
+  <node name="resize_points_publisher"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ResizePointsPublisher">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <remap from="~output" to="$(arg INPUT_CLOUD)/quarter" />
+    <rosparam>
+      step_x: 4
+      step_y: 4
+    </rosparam>
+  </node>
+
+  <node name="color_based_region_growing_segmentation_nodelet"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ColorBasedRegionGrowingSegmentation">
+    <remap from="~input" to="$(arg INPUT_CLOUD)/quarter" />
+  </node>
+
+  <test test-name="test_color_based_region_growing_segmentation"
+        name="test_color_based_region_growing_segmentation"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="30" retry="6">
+    <rosparam>
+      topic_0: /color_based_region_growing_segmentation_nodelet/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

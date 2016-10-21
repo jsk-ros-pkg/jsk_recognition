@@ -2,6 +2,49 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.25 (2016-09-16)
+-------------------
+
+0.3.24 (2016-09-15)
+-------------------
+
+0.3.23 (2016-09-14)
+-------------------
+
+0.3.22 (2016-09-13)
+-------------------
+* Merge pull request #1826 from mmurooka/polyarr-to-poly2
+  [jsk_recognition_utils/node_scripts] add polygon_array_to_polygon.py
+* [jsk_recognition_utils/node_scripts] add polygon_array_to_polygon.py
+* Skip rostest on hydro because of unreleased test tools
+* Add test for bounding_box_array_publisher.py
+* Add sample for bounding_box_array_publisher.py
+* Node to publish bounding box array
+* Skip rostest on hydro because of unreleased test tools
+* Add test for bounding_box_array_publisher.py
+* Add sample for bounding_box_array_publisher.py
+* Node to publish bounding box array
+* Merge pull request #1809 from wkentaro/feature/pose-array-to-pose
+  Convert PoseArray to PoseStamped with a specified index
+* Convert PoseArray to PoseStamped with a specified index
+* Rename test files in favor to {NODE_NAME}.test
+* Add util to convert image 16uc1 to 32fc1
+* Merge pull request #1694 from wkentaro/get-numpy-include-dirs
+  [jsk_recognition_utils] Set Numpy include directories in cmake to fix error on OS X
+* Set Numpy include directories in cmake to fix error on OS X
+* Remove color_gategoryXX (use labelcolormap)
+* Add label color utility function
+* Remove nms.py that is moved to nms.pyx
+* Recognize object with VGG16 net
+* Rename vgg16 -> vgg16_fast_rcnn
+* Cythonize Non-maximum Supression baseline
+* Remove dependency on rbgirshick/fast-rcnn
+* Support old scipy which does not have face()
+* Add static virtual camera
+* Copy jsk_perception/image_utils.h to jsk_recognition_utils/cv_utils.h
+* Stop passing -z flag to ld with Clang (#1601)
+* Contributors: Kei Okada, Kentaro Wada, Masaki Murooka
+
 0.3.21 (2016-04-15)
 -------------------
 

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <library path="libjsk_pcl_ros_utils">
   <class name="jsk_pcl/PCDReaderWithPose" type="jsk_pcl_ros_utils::PCDReaderWithPose"
          base_class_type="nodelet::Nodelet">
@@ -406,6 +407,11 @@
          base_class_type="nodelet::Nodelet">
     <description>segment pointcloud by region growing</description>
   </class>
+  <class name="jsk_pcl/ColorBasedRegionGrowingSegmentation" type="jsk_pcl_ros::ColorBasedRegionGrowingSegmentation"
+         base_class_type="nodelet::Nodelet">
+    <description>segment pointcloud by color-based region growing</description>
+  </class>
+
   <class name="jsk_pcl/ImageRotateNodelet" type="jsk_pcl_ros::ImageRotateNodelet"
          base_class_type="nodelet::Nodelet">
     <description>Nodelet to rotate sensor_msgs/Image</description>
@@ -625,8 +631,15 @@
   <class name="jsk_pcl/CollisionDetector"
          type="jsk_pcl_ros::CollisionDetector"
          base_class_type="nodelet::Nodelet">
+
+  <class name="jsk_pcl/TargetAdaptiveTracking" type="jsk_pcl_ros::TargetAdaptiveTracking"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Nodelet to track object and update the appearance model online
+    </description>
   </class>
 </library>
+
 <library path="libjsk_pcl_ros_moveit">
   <class name="jsk_pcl/PointCloudMoveitFilter"
          type="jsk_pcl_ros::PointCloudMoveitFilter"

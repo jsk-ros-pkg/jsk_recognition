@@ -12,13 +12,10 @@ This nodelet will republish bounding box which is transformed with the designate
   output bounding box.
 
 ## Parameters
-* `~target_frame_id` (string): The frame_id to transform pointcloud.
+* `~target_frame_id` (string): The frame_id to transform bounding box.
 * `~use_latest_tf` (Bool, default: `false`)
 
-  If this parameter is true, ignore timestamp of tf to transform pointcloud.
+  If this parameter is true, ignore timestamp of tf to transform bounding box.
 * `~tf_queue_size` (Int, default: `10`)
 
   Queue size of tf message filter to synchronize tf and `~input` topic.
-
-## Depth Camera Calibration(Kinect,Xtion,Primesense)
-![](images/depth_calibration.png)

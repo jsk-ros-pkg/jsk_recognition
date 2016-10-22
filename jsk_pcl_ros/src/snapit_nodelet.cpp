@@ -153,8 +153,8 @@ namespace jsk_pcl_ros
   }
 
   bool SnapIt::footstepAlignServiceCallback(
-    jsk_pcl_ros::SnapFootstep::Request& req,
-    jsk_pcl_ros::SnapFootstep::Response& res)
+    jsk_recognition_msgs::SnapFootstep::Request& req,
+    jsk_recognition_msgs::SnapFootstep::Response& res)
   {
     boost::mutex::scoped_lock lock(mutex_);
     jsk_footstep_msgs::FootstepArray input_footsteps = req.input;

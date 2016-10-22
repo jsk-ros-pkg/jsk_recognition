@@ -39,7 +39,7 @@
 #include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <pcl/common/transforms.h>
 #include <pcl/filters/extract_indices.h>
-#include <jsk_pcl_ros/ICPAlign.h>
+#include <jsk_recognition_msgs/ICPAlign.h>
 
 namespace jsk_pcl_ros
 {
@@ -177,7 +177,7 @@ namespace jsk_pcl_ros
     Eigen::Affine3f& output_transform)
   {
     ros::ServiceClient icp
-      = pnh_->serviceClient<jsk_pcl_ros::ICPAlign>("icp_service");
+      = pnh_->serviceClient<jsk_recognition_msgs::ICPAlign>("icp_service");
     sensor_msgs::PointCloud2 reference_ros, target_ros;
     pcl::toROSMsg(*reference, reference_ros);
     pcl::toROSMsg(*target, target_ros);

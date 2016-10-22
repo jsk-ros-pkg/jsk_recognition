@@ -4,7 +4,7 @@
 
 (ros::roseus-add-msgs "sensor_msgs")
 (ros::roseus-add-msgs "geometry_msgs")
-(ros::roseus-add-srvs "jsk_pcl_ros")
+(ros::roseus-add-srvs "jsk_recognition_msgs")
 (ros::roseus-add-msgs "jsk_rviz_plugins")
 
 (defun setup-robot
@@ -46,7 +46,7 @@
   ()
   (send *robot* :update-descendants)
   (let* ((tm (ros::time-now))
-         (req (instance jsk_pcl_ros::CheckCollisionRequest :init))
+         (req (instance jsk_recognition_msgs::CheckCollisionRequest :init))
          res)
     (send req :joint
           (instance sensor_msgs::JointState :init

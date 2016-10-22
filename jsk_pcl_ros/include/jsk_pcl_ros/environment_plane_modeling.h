@@ -48,8 +48,8 @@
 #include <jsk_recognition_msgs/ModelCoefficientsArray.h>
 #include <jsk_recognition_msgs/ClusterPointIndices.h>
 #include <sensor_msgs/PointCloud2.h>
-#include <jsk_pcl_ros/EnvironmentLock.h>
-#include <jsk_pcl_ros/PolygonOnEnvironment.h>
+#include <jsk_recognition_msgs/EnvironmentLock.h>
+#include <jsk_recognition_msgs/PolygonOnEnvironment.h>
 
 #include <jsk_recognition_utils/pcl_conversion_util.h>
 #include <jsk_pcl_ros/EnvironmentPlaneModelingConfig.h>

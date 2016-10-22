@@ -22,7 +22,7 @@
 ;;  /ray_target
 ;;    tf of 3D touched point, frame_id is copied from image.
 ;;
-(ros::load-ros-manifest "jsk_pcl_ros")
+(ros::load-ros-manifest "jsk_recognition_msgs")
 (ros::load-ros-manifest "image_view2")
 
 (defun ros::tf-translation->pos (trans)
@@ -72,7 +72,7 @@
 @param msg subscribed msg"
   (let* ((x (send msg :point :x))
 	 (y (send msg :point :y))
-	 (req (instance jsk_pcl_ros::TransformScreenpointRequest :init
+	 (req (instance jsk_recognition_msgs::TransformScreenpointRequest :init
 			:x x :y y))
          res)
     ;; call PointcloudScreenPointNodelet::screen_to_point

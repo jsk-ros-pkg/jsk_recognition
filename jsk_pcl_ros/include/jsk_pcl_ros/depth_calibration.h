@@ -38,7 +38,7 @@
 
 #include "pcl_ros/pcl_nodelet.h"
 #include "jsk_topic_tools/diagnostic_nodelet.h"
-#include "jsk_pcl_ros/SetDepthCalibrationParameter.h"
+#include "jsk_recognition_msgs/SetDepthCalibrationParameter.h"
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>

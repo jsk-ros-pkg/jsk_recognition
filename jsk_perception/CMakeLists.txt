@@ -233,7 +233,7 @@ if(OPENMP_FOUND)
   jsk_add_nodelet(src/saliency_map_generator_node.cpp "jsk_perception/SaliencyMapGenerator" "saliency_map_generator")
   jsk_add_nodelet(src/skeletonization_nodelet.cpp "jsk_perception/Skeletonization" "skeletonization")
 endif()
-if("$ENV{ROS_DISTRO}" STRGREATER "hydro") # >= indigo
+if("$ENV{ROS_DISTRO}" STRGREATER "hydro" AND EXISTS ${libcmt_INCLUDE_DIRS}/libcmt/CMT.h) # >= indigo and has header file
   jsk_add_nodelet(src/consensus_tracking.cpp "jsk_perception/ConsensusTracking" "consensus_tracking")
 endif()
 

@@ -233,7 +233,9 @@ if(OPENMP_FOUND)
   jsk_add_nodelet(src/saliency_map_generator_node.cpp "jsk_perception/SaliencyMapGenerator" "saliency_map_generator")
   jsk_add_nodelet(src/skeletonization_nodelet.cpp "jsk_perception/Skeletonization" "skeletonization")
 endif()
-jsk_add_nodelet(src/consensus_tracking.cpp "jsk_perception/ConsensusTracking" "consensus_tracking")
+if("$ENV{ROS_DISTRO}" STRGREATER "hydro") # >= indigo
+  jsk_add_nodelet(src/consensus_tracking.cpp "jsk_perception/ConsensusTracking" "consensus_tracking")
+endif()
 
 # robot_self_filter is released on version greater than indigo
 find_package(robot_self_filter QUIET)

@@ -133,6 +133,8 @@ namespace jsk_pcl_ros
   {
     DiagnosticNodelet::onInit();
 
+    pnh_->param("approximate_sync", approximate_sync_, false);
+
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&LineSegmentDetector::configCallback, this, _1, _2);
@@ -165,10 +167,18 @@ namespace jsk_pcl_ros
   {
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_indices_.subscribe(*pnh_, "input_indices", 1);
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-    sync_->connectInput(sub_input_, sub_indices_);
-    sync_->registerCallback(boost::bind(&LineSegmentDetector::segment,
-                                        this, _1, _2));
+    if (approximate_sync_) {
+      async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(100);
+      async_->connectInput(sub_input_, sub_indices_);
+      async_->registerCallback(boost::bind(&LineSegmentDetector::segment,
+                                           this, _1, _2));
+    }
+    else {
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+      sync_->connectInput(sub_input_, sub_indices_);
+      sync_->registerCallback(boost::bind(&LineSegmentDetector::segment,
+                                          this, _1, _2));
+    }
   }
 
   void LineSegmentDetector::unsubscribe()

@@ -41,6 +41,7 @@ add_dependencies(objectdetection_transform_echo posedetection_msgs_gencpp)
 add_dependencies(checkerboard_detector    jsk_recognition_msgs_gencpp)
 add_dependencies(checkerboard_calibration jsk_recognition_msgs_gencpp)
 add_dependencies(objectdetection_transform_echo jsk_recognition_msgs_gencpp)
+add_dependencies(checkerboard_detector ${PROJECT_NAME}_gencfg)
 
 install(TARGETS checkerboard_detector checkerboard_calibration
   objectdetection_transform_echo

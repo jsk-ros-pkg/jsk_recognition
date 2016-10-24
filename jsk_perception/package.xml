@@ -33,6 +33,7 @@
   <build_depend>jsk_recognition_msgs</build_depend>
   <build_depend>jsk_recognition_utils</build_depend>
   <build_depend>jsk_topic_tools</build_depend>
+  <build_depend>libcmt</build_depend>
   <build_depend>message_generation</build_depend>
   <build_depend>mk</build_depend>
   <build_depend>nodelet</build_depend>
@@ -66,6 +67,7 @@
   <run_depend>jsk_recognition_utils</run_depend>
   <run_depend>jsk_rqt_plugins</run_depend>
   <run_depend>jsk_topic_tools</run_depend>
+  <run_depend>libcmt</run_depend>
   <run_depend>message_runtime</run_depend>
   <run_depend>mk</run_depend>
   <run_depend>ml_classifiers</run_depend>

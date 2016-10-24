@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_consensus_tracking.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_consensus_tracking"
+        name="test_consensus_tracking"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /consensus_tracking/output/mask
+      timeout_0: 30
+      topic_0: /consensus_tracking/debug/image
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

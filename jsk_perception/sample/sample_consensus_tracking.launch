@@ -1,0 +1,27 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <param name="/use_sim_time" value="true" />
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_perception)/sample/data/2016-10-15-23-21-42_moving_bottle.bag --clock"
+        required="true">
+  </node>
+
+  <arg name="INPUT_IMAGE" value="/camera/rgb/image_rect_color" />
+
+  <node name="consensus_tracking"
+        pkg="jsk_perception" type="consensus_tracking">
+    <remap from="~input" to="$(arg INPUT_IMAGE)"/>
+    <remap from="~input/polygon" to="$(arg INPUT_IMAGE)/screenrectangle" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rqt_gui"
+          pkg="rqt_gui" type="rqt_gui"
+          args="--perspective-file $(find jsk_perception)/sample/config/sample_consensus_tracking.perspective">
+    </node>
+  </group>
+
+</launch>

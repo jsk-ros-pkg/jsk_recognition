@@ -49,3 +49,5 @@ Parameters
 - ``min_indices`` (``Int``, default: ``1000``)
 
 - ``min_length`` (``Double``, default: ``0.1``)
+
+- ``line_width`` (``Double``, default: ``0.01``)

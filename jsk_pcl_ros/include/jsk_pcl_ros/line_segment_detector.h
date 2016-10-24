@@ -139,6 +139,7 @@ namespace jsk_pcl_ros
     int max_iterations_;
     int min_indices_;
     double min_length_;
+    double line_width_;
   private:
     
   };

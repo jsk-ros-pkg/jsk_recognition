@@ -158,6 +158,7 @@ namespace jsk_pcl_ros
     max_iterations_ = config.max_iterations;
     min_indices_ = config.min_indices;
     min_length_ = config.min_length;
+    line_width_ = config.line_width;
   }
   
   void LineSegmentDetector::subscribe()
@@ -191,7 +192,7 @@ namespace jsk_pcl_ros
     visualization_msgs::Marker marker;
     marker.header = header;
     marker.pose.orientation.w = 1.0;
-    marker.scale.x = 0.01;
+    marker.scale.x = line_width_;
     marker.type = visualization_msgs::Marker::LINE_LIST;
     marker.color.a = 1.0;
     marker.color.r = 1.0;

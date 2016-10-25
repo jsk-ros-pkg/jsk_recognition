@@ -74,7 +74,7 @@ namespace jsk_pcl_ros_utils
     }
     
     if (!use_periodic_ && !use_message_ && !use_trigger_) {
-      JSK_NODELET_FATAL("~use_preiodic, ~use_trigger nor ~use_message is not true");
+      JSK_NODELET_FATAL("~use_periodic, ~use_trigger nor ~use_message is not true");
       return;
     }
     polygons_.header.frame_id = frame_ids_[0];

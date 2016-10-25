@@ -38,6 +38,8 @@ Publishing Topics
 Parameters
 -----------
 
+-  ``approximate_sync`` (``Bool``, default: ``false``)
+
 - ``~outlier_threshold`` (``Double``, default: ``0.005``)
 
   Outlier threshold to detect plane using RANSAC.
@@ -49,3 +51,5 @@ Parameters
 - ``min_indices`` (``Int``, default: ``1000``)
 
 - ``min_length`` (``Double``, default: ``0.1``)
+
+- ``line_width`` (``Double``, default: ``0.01``)

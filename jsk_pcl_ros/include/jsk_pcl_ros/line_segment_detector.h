@@ -41,6 +41,8 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/exact_time.h>
+#include <message_filters/sync_policies/approximate_time.h>
 
 #include <jsk_recognition_msgs/ClusterPointIndices.h>
 #include <jsk_recognition_msgs/ModelCoefficientsArray.h>
@@ -97,6 +99,9 @@ namespace jsk_pcl_ros
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
       jsk_recognition_msgs::ClusterPointIndices> SyncPolicy;
+    typedef message_filters::sync_policies::ApproximateTime<
+      sensor_msgs::PointCloud2,
+      jsk_recognition_msgs::ClusterPointIndices> ApproximateSyncPolicy;
     typedef pcl::PointXYZ PointT;
     typedef jsk_pcl_ros::LineSegmentDetectorConfig Config;
   protected:
@@ -126,7 +131,8 @@ namespace jsk_pcl_ros
     ros::Publisher pub_line_marker_;
     ros::Publisher pub_indices_;
     ros::Publisher pub_coefficients_;
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
+    boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> > async_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_input_;
     message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_indices_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
@@ -135,10 +141,12 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // parameters
     ////////////////////////////////////////////////////////
+    bool approximate_sync_;
     double outlier_threshold_;
     int max_iterations_;
     int min_indices_;
     double min_length_;
+    double line_width_;
   private:
     
   };

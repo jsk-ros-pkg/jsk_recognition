@@ -472,4 +472,8 @@
       Nodelet to track object and update the appearance model online
     </description>
   </class>
+  <class name="jsk_pcl/PPFRegistration"
+         type="jsk_pcl_ros::PPFRegistration"
+         base_class_type="nodelet::Nodelet">
+  </class>
 </library>

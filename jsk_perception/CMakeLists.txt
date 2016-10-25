@@ -24,12 +24,14 @@ find_package(catkin REQUIRED COMPONENTS
   image_geometry
   image_transport
   image_view2
+  jsk_data
   jsk_recognition_msgs
   jsk_recognition_utils
   jsk_topic_tools
   message_generation
   mk
   nodelet
+  opencv_apps
   pcl_ros
   posedetection_msgs
   roscpp
@@ -44,15 +46,14 @@ find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 find_package(OpenCV REQUIRED)
 message("OPENCV ${OpenCV_VERSION} FOUND")
 
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 pkg_check_modules(yaml_cpp yaml-cpp REQUIRED)
-if(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
+if("${yaml_cpp_VERSION}" VERSION_LESS "0.5.0")
 ## indigo yaml-cpp : 0.5.0 /  hydro yaml-cpp : 0.3.0
   add_definitions("-DUSE_OLD_YAML")
 endif()
 
-include(FindPkgConfig)
 pkg_check_modules(libcmt REQUIRED libcmt)
 
 find_package(OpenMP)
@@ -119,12 +120,16 @@ add_service_files(FILES
   EuclideanSegment.srv
   NonMaximumSuppression.srv
   SetTemplate.srv
-  WhiteBalancePoints.srv
   WhiteBalance.srv
+  WhiteBalancePoints.srv
 )
 
 generate_messages(
-  DEPENDENCIES std_msgs sensor_msgs geometry_msgs jsk_recognition_msgs
+  DEPENDENCIES
+  geometry_msgs
+  jsk_recognition_msgs
+  sensor_msgs
+  std_msgs
 )
 
 catkin_package(
@@ -145,7 +150,7 @@ catkin_package(
 # ------------------------------------------------------------------------------------
 # Build
 # ------------------------------------------------------------------------------------
-if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/slic/slic.cpp)
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/slic/slic.cpp")
   message(WARNING "slic/slic.cpp is not exists, download this")
   execute_process(COMMAND git submodule init slic   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
   execute_process(COMMAND git submodule update slic WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
@@ -233,7 +238,7 @@ if(OPENMP_FOUND)
   jsk_add_nodelet(src/saliency_map_generator_node.cpp "jsk_perception/SaliencyMapGenerator" "saliency_map_generator")
   jsk_add_nodelet(src/skeletonization_nodelet.cpp "jsk_perception/Skeletonization" "skeletonization")
 endif()
-if("$ENV{ROS_DISTRO}" STRGREATER "hydro" AND EXISTS ${libcmt_INCLUDE_DIRS}/libcmt/CMT.h) # >= indigo and has header file
+if("$ENV{ROS_DISTRO}" STRGREATER "hydro" AND EXISTS "${libcmt_INCLUDE_DIRS}/libcmt/CMT.h") # >= indigo and has header file
   jsk_add_nodelet(src/consensus_tracking.cpp "jsk_perception/ConsensusTracking" "consensus_tracking")
 endif()
 
@@ -314,14 +319,13 @@ add_custom_target(eusmodel_template ALL DEPENDS
 # Install
 # ------------------------------------------------------------------------------------
 
+list(APPEND ${PROJECT_NAME}_targets oriented_gradient)
+list(APPEND ${PROJECT_NAME}_targets ${PROJECT_NAME})
+list(APPEND ${PROJECT_NAME}_targets ${${PROJECT_NAME}_node_executables})
+list(APPEND ${PROJECT_NAME}_targets ${${PROJECT_NAME}_nodelet_executables})
+list(SORT ${PROJECT_NAME}_targets)
 install(TARGETS
-  # Libraries
-  ${PROJECT_NAME}
-  oriented_gradient
-  # Node executables
-  ${${PROJECT_NAME}_node_executables}
-  # Nodelet executables
-  ${${PROJECT_NAME}_nodelet_executables}
+  ${${PROJECT_NAME}_targets}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

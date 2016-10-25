@@ -1,0 +1,8 @@
+<library path="libjsk_pcl_ros_moveit">
+  <class name="jsk_pcl/PointCloudMoveitFilter"
+         type="jsk_pcl_ros::PointCloudMoveitFilter"
+         base_class_type="occupancy_map_monitor::OccupancyMapUpdater">
+    <description>
+    </description>
+  </class>
+</library>

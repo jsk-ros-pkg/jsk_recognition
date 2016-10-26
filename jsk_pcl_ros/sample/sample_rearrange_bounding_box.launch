@@ -1,0 +1,43 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <node name="static_tf_publisher_map_to_shelf"
+        pkg="tf" type="static_transform_publisher"
+        args="0 0 1 0 0 0 map box_base 100">
+  </node>
+
+  <node name="bounding_box_array_publisher"
+        pkg="jsk_recognition_utils" type="bounding_box_array_publisher.py">
+    <rosparam>
+      frame_id: box_base
+      boxes:
+        - position: [-0.0, 0.0, 0.0]
+          dimension: [1.0, 1.0, 1.0]
+    </rosparam>
+  </node>
+
+  <node name="rearrange_bounding_box"
+        pkg="jsk_pcl_ros" type="rearrange_bounding_box">
+    <remap from="~input" to="/bounding_box_array_publisher/output" />
+    <rosparam>
+      offset_x: 0.0
+      offset_y: 0.0
+      offset_z: 0.0
+      scale_x: 1.0
+      scale_y: 1.0
+      scale_z: 1.0
+      rotate_x: 1.5707963267948966
+      rotate_y: 1.5707963267948966
+      rotate_z: 1.5707963267948966
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/sample_rearrange_bounding_box.rviz">
+    </node>
+  </group>
+
+</launch>

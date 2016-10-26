@@ -40,6 +40,7 @@
 #include <jsk_recognition_msgs/BoundingBoxArray.h>
 
 #include <dynamic_reconfigure/server.h>
+#include <tf2/LinearMath/Quaternion.h>
 
 #include "jsk_pcl_ros/RearrangeBoundingBoxConfig.h"
 
@@ -81,6 +82,11 @@ namespace jsk_pcl_ros
     double offset_y_;
     double offset_z_;
 
+    double rotate_x_;
+    double rotate_y_;
+    double rotate_z_;
+
+    tf2::Quaternion q_;
   private:
   };
 }

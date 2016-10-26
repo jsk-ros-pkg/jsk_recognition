@@ -32,3 +32,9 @@ Parameters
 - ``~scale_y`` (``Double``, default: ``1.0``)
 
 - ``~scale_z`` (``Double``, default: ``1.0``)
+
+- ``~rotate_x`` (``Double``, default: ``0.0``)
+
+- ``~rotate_y`` (``Double``, default: ``0.0``)
+
+- ``~rotate_z`` (``Double``, default: ``0.0``)

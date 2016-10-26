@@ -61,7 +61,7 @@ public:
       subscribe();
     }
     subscriber_count_++;
-    JSK_ROS_DEBUG("connected new node. current subscriber: %d", subscriber_count_);
+    ROS_DEBUG("connected new node. current subscriber: %d", subscriber_count_);
   }
 
   void disconnectCb(const image_transport::SingleSubscriberPublisher&)
@@ -70,12 +70,12 @@ public:
     if (subscriber_count_ == 0) {
       unsubscribe();
     }
-    JSK_ROS_DEBUG("disconnected node. current subscriber: %d", subscriber_count_);
+    ROS_DEBUG("disconnected node. current subscriber: %d", subscriber_count_);
   }
 
   void subscribe()
   {
-    JSK_ROS_INFO("Subscribing to image topic");
+    ROS_INFO("Subscribing to image topic");
     sub_ = it_.subscribeCamera("image", 1, &VirtualCameraMono::imageCb, this);
     ros::V_string names = boost::assign::list_of("image");
     jsk_topic_tools::warnNoRemap(names);
@@ -83,7 +83,7 @@ public:
 
   void unsubscribe()
   {
-    JSK_ROS_INFO("Unsubscibing from image topic");
+    ROS_INFO("Unsubscibing from image topic");
     sub_.shutdown();
   }
 
@@ -97,7 +97,7 @@ public:
       image = cv_ptr->image;
     }
     catch (cv_bridge::Exception& ex) {
-      JSK_ROS_ERROR("[virtual_camera_mono] Failed to convert image");
+      ROS_ERROR("[virtual_camera_mono] Failed to convert image");
       return;
     }
 
@@ -107,12 +107,12 @@ public:
     tf_broadcaster_.sendTransform(trans_);
 
     //
-    JSK_ROS_DEBUG("transform image.");
+    ROS_DEBUG("transform image.");
     //IplImage *outimage = cvCloneImage(image); // need to release
     cv::Mat outimage = image.clone();
     if (TransformImage(image, outimage, trans_, poly_, cam_model_)) {
       //
-      JSK_ROS_DEBUG("publish image and transform.");
+      ROS_DEBUG("publish image and transform.");
       sensor_msgs::CameraInfo virtual_info = *info_msg;
       //sensor_msgs::Image::Ptr img_msg = bridge_.cvToImgMsg(outimage, "bgr8");
       cv_ptr->image = outimage;

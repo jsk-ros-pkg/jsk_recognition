@@ -64,7 +64,7 @@ namespace jsk_pcl_ros
     urdf::Model urdf_model;
     if (nh_->getParam("robot_description", content)) {
       if (!urdf_model.initString(content)) {
-        JSK_NODELET_ERROR("Unable to parse URDF description!");
+        NODELET_ERROR("Unable to parse URDF description!");
       }
     }
 
@@ -80,35 +80,35 @@ namespace jsk_pcl_ros
     std::string link_names;
 
     if (!pnh_->hasParam("self_see_links")) {
-      JSK_NODELET_WARN("No links specified for self filtering.");
+      NODELET_WARN("No links specified for self filtering.");
     } else {
       XmlRpc::XmlRpcValue ssl_vals;;
       pnh_->getParam("self_see_links", ssl_vals);
       if (ssl_vals.getType() != XmlRpc::XmlRpcValue::TypeArray) {
-        JSK_NODELET_WARN("Self see links need to be an array");
+        NODELET_WARN("Self see links need to be an array");
       } else {
         if (ssl_vals.size() == 0) {
-          JSK_NODELET_WARN("No values in self see links array");
+          NODELET_WARN("No values in self see links array");
         } else {
           for (int i = 0; i < ssl_vals.size(); i++) {
             robot_self_filter::LinkInfo li;
             if (ssl_vals[i].getType() != XmlRpc::XmlRpcValue::TypeStruct) {
-              JSK_NODELET_WARN("Self see links entry %d is not a structure.  Stopping processing of self see links",i);
+              NODELET_WARN("Self see links entry %d is not a structure.  Stopping processing of self see links",i);
               break;
             }
             if (!ssl_vals[i].hasMember("name")) {
-              JSK_NODELET_WARN("Self see links entry %d has no name.  Stopping processing of self see links",i);
+              NODELET_WARN("Self see links entry %d has no name.  Stopping processing of self see links",i);
               break;
             }
             li.name = std::string(ssl_vals[i]["name"]);
             if (!ssl_vals[i].hasMember("padding")) {
-              JSK_NODELET_DEBUG("Self see links entry %d has no padding.  Assuming default padding of %g",i,default_padding);
+              NODELET_DEBUG("Self see links entry %d has no padding.  Assuming default padding of %g",i,default_padding);
               li.padding = default_padding;
             } else {
               li.padding = ssl_vals[i]["padding"];
             }
             if (!ssl_vals[i].hasMember("scale")) {
-              JSK_NODELET_DEBUG("Self see links entry %d has no scale.  Assuming default scale of %g",i,default_scale);
+              NODELET_DEBUG("Self see links entry %d has no scale.  Assuming default scale of %g",i,default_scale);
               li.scale = default_scale;
             } else {
               li.scale = ssl_vals[i]["scale"];
@@ -124,7 +124,7 @@ namespace jsk_pcl_ros
   void CollisionDetector::pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    JSK_NODELET_DEBUG("update pointcloud.");
+    NODELET_DEBUG("update pointcloud.");
 
     pcl::fromROSMsg(*msg, cloud_);
     cloud_frame_id_ = msg->header.frame_id;
@@ -144,14 +144,14 @@ namespace jsk_pcl_ros
                                          const geometry_msgs::PoseStamped& pose)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    JSK_NODELET_DEBUG("checkCollision is called.");
+    NODELET_DEBUG("checkCollision is called.");
 
     // calculate the sensor transformation
     tf::StampedTransform sensor_to_world_tf;
     try {
       tf_listener_.lookupTransform(world_frame_id_, cloud_frame_id_, cloud_stamp_, sensor_to_world_tf);
     } catch (tf::TransformException& ex) {
-      JSK_NODELET_ERROR_STREAM( "Transform error of sensor data: " << ex.what() << ", quitting callback");
+      NODELET_ERROR_STREAM( "Transform error of sensor data: " << ex.what() << ", quitting callback");
       return false;
     }
 
@@ -175,9 +175,9 @@ namespace jsk_pcl_ros
     }
 
     if (contain_flag) {
-      JSK_NODELET_INFO("collision!");
+      NODELET_INFO("collision!");
     } else {
-      JSK_NODELET_INFO("no collision!");
+      NODELET_INFO("no collision!");
     }
     return contain_flag;
   }

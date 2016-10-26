@@ -21,7 +21,7 @@ namespace jsk_perception
 
    void SaliencyMapGenerator::unsubscribe()
    {
-      JSK_NODELET_DEBUG("Unsubscribing from ROS topic.");
+      NODELET_DEBUG("Unsubscribing from ROS topic.");
       this->sub_image_.shutdown();
    }
    

@@ -92,7 +92,7 @@ namespace jsk_perception
     const sensor_msgs::Image::ConstPtr& image_msg)
   {
 #if CV_MAJOR_VERSION >= 3
-    JSK_ROS_ERROR("cvSnakeImage is not supported in OpenCV3");
+    ROS_ERROR("cvSnakeImage is not supported in OpenCV3");
 #else
     vital_checker_->poke();
     boost::mutex::scoped_lock lock(mutex_);

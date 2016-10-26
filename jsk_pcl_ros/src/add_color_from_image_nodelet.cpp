@@ -76,7 +76,7 @@ namespace jsk_pcl_ros
   {
     if ((cloud_msg->header.frame_id != image_msg->header.frame_id) ||
         (cloud_msg->header.frame_id != info_msg->header.frame_id)) {
-      JSK_NODELET_FATAL("frame_id is not collect: [%s, %s, %s",
+      NODELET_FATAL("frame_id is not collect: [%s, %s, %s",
                     cloud_msg->header.frame_id.c_str(),
                     image_msg->header.frame_id.c_str(),
                     info_msg->header.frame_id.c_str());

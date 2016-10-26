@@ -149,7 +149,7 @@ namespace jsk_perception
         }
       }
       else {
-        JSK_NODELET_ERROR("rect has z=0 ray");
+        NODELET_ERROR("rect has z=0 ray");
         return;
       }
     }

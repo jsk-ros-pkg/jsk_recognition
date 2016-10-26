@@ -100,9 +100,9 @@ namespace jsk_perception
     }
     cv::Mat mask = cv_bridge::toCvShare(mask_msg, "mono8")->image;
     if (image.cols != mask.cols || image.rows != mask.rows) {
-      JSK_NODELET_ERROR("size of image and mask is different");
-      JSK_NODELET_ERROR("image: %dx%dx", image.cols, image.rows);
-      JSK_NODELET_ERROR("mask: %dx%dx", mask.cols, mask.rows);
+      NODELET_ERROR("size of image and mask is different");
+      NODELET_ERROR("image: %dx%dx", image.cols, image.rows);
+      NODELET_ERROR("mask: %dx%dx", mask.cols, mask.rows);
       return;
     }
     

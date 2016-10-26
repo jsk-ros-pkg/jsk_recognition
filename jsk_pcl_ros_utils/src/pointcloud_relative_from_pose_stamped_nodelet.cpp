@@ -69,7 +69,7 @@ namespace jsk_pcl_ros_utils
   {
     if (!jsk_recognition_utils::isSameFrameId(cloud_msg->header.frame_id,
                                              pose_msg->header.frame_id)) {
-      JSK_NODELET_ERROR("frame_id does not match. cloud: %s, pose: %s",
+      NODELET_ERROR("frame_id does not match. cloud: %s, pose: %s",
                         cloud_msg->header.frame_id.c_str(),
                         pose_msg->header.frame_id.c_str());
       return;

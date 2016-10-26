@@ -46,7 +46,7 @@ namespace jsk_pcl_ros_utils
   {
     DiagnosticNodelet::onInit();
     if (!pnh_->getParam("target_frame_id", target_frame_id_)) {
-      JSK_ROS_ERROR("You need to specify ~target_frame_id");
+      ROS_ERROR("You need to specify ~target_frame_id");
       return;
     }
     pnh_->param("tf_queue_size", tf_queue_size_, 10);
@@ -119,7 +119,7 @@ namespace jsk_pcl_ros_utils
     }
     catch (...)
     {
-      JSK_NODELET_ERROR("Unknown transform error");
+      NODELET_ERROR("Unknown transform error");
     }
     
   }

@@ -50,7 +50,7 @@ namespace jsk_pcl_ros_utils
     std::string file_name;
     pnh_->param("pcd_file", file_name, std::string(""));
     if (file_name == std::string("") || pcl::io::loadPCDFile (file_name, template_cloud_) == -1){
-      JSK_NODELET_FATAL("cannot read pcd file %s", file_name.c_str());
+      NODELET_FATAL("cannot read pcd file %s", file_name.c_str());
       return;
     }
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_,

@@ -94,7 +94,7 @@ namespace jsk_pcl_ros
       ne.setNormalEstimationMethod (ne.AVERAGE_DEPTH_CHANGE);
     }
     else {
-      JSK_NODELET_FATAL("unknown estimation method: %d", estimation_method_);
+      NODELET_FATAL("unknown estimation method: %d", estimation_method_);
       return;
     }
 

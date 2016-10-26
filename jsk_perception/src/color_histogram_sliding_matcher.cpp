@@ -138,7 +138,7 @@ public:
   }
   bool template_add(cv::Mat template_image){
     if(template_image.cols==0){
-      JSK_ROS_INFO("template_error size==0");
+      ROS_INFO("template_error size==0");
       return false;
     }
     cv::Mat template_hsv_image; 
@@ -165,7 +165,7 @@ public:
       }
     }
     template_vecs.push_back(template_vec);
-    JSK_ROS_INFO("template vec was set successfully");
+    ROS_INFO("template vec was set successfully");
     return true;
   }
   
@@ -173,7 +173,7 @@ public:
   {
     boost::mutex::scoped_lock lock(_mutex);
     if(template_vecs.size()==0){
-      JSK_ROS_INFO("template vec is empty");
+      ROS_INFO("template vec is empty");
       return;
     }
     cv_bridge::CvImagePtr cv_ptr;
@@ -181,13 +181,13 @@ public:
       cv_ptr = cv_bridge::toCvCopy(msg_ptr, "bgr8");
     }
     catch (cv_bridge::Exception& e){
-      JSK_ROS_ERROR("cv_bridge exception: %s", e.what());
+      ROS_ERROR("cv_bridge exception: %s", e.what());
       return;
     }
     cv::Mat image=cv_ptr->image.clone();
-    JSK_ROS_INFO("mat made");
+    ROS_INFO("mat made");
     if(hsv_integral.size()==0||(image.cols!=hsv_integral.size() && image.rows!=hsv_integral[0].size())){
-      JSK_ROS_INFO("before memory size was changed");
+      ROS_INFO("before memory size was changed");
       hsv_integral.resize(image.cols);
       for(int i=0; i<image.cols; ++i){
 	hsv_integral[i].resize(image.rows);
@@ -195,7 +195,7 @@ public:
 	  hsv_integral[i][j].resize(255);
 	}
       }
-      JSK_ROS_INFO("memory size was changed");
+      ROS_INFO("memory size was changed");
     }
     cv::Mat hsv_image;
     cv::cvtColor(image, hsv_image, CV_BGR2HSV);
@@ -246,7 +246,7 @@ public:
 	}
       }
     } 
-    JSK_ROS_INFO("integral histogram made");
+    ROS_INFO("integral histogram made");
     for(size_t template_index=0; template_index<template_vecs.size(); ++template_index){
       std::vector<unsigned int> template_vec = template_vecs[template_index];
       double max_coe = 0;
@@ -283,9 +283,9 @@ public:
 	  }
 	}
       }
-      JSK_ROS_INFO("max_coefficient:%f", max_coe);
+      ROS_INFO("max_coefficient:%f", max_coe);
       if(boxes.size() == 0 || max_coe < coefficient_thre_for_best_window){
-	JSK_ROS_INFO("no objects found");
+	ROS_INFO("no objects found");
 	if(show_result_){
 	  cv::imshow("result", image);
 	  cv::imshow("template", template_images[template_index]);

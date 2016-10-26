@@ -76,7 +76,7 @@ namespace jsk_pcl_ros_utils
 
     if (!pc->isOrganized())
     {
-      JSK_NODELET_FATAL("Input point cloud is not organized.");
+      NODELET_FATAL("Input point cloud is not organized.");
       return;
     }
 

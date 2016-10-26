@@ -52,22 +52,22 @@ namespace jsk_pcl_ros
     tmp_sum_num = 100;
     if (!pnh_->getParam("rs", tmp_radius))
       {
-        JSK_ROS_WARN("~rs is not specified, set 1");
+        ROS_WARN("~rs is not specified, set 1");
       }
 
     if (!pnh_->getParam("po", tmp_pass))
       {
-        JSK_ROS_WARN("~po is not specified, set 1");
+        ROS_WARN("~po is not specified, set 1");
       }
 
     if (!pnh_->getParam("po2", tmp_pass2))
       {
-        JSK_ROS_WARN("~po is not specified, set 1");
+        ROS_WARN("~po is not specified, set 1");
       }
 
     if (!pnh_->getParam("sum_num", tmp_sum_num))
       {
-        JSK_ROS_WARN("~sum_num is not specified, set 1");
+        ROS_WARN("~sum_num is not specified, set 1");
       }
 
     radius_search_ = tmp_radius;
@@ -110,7 +110,7 @@ namespace jsk_pcl_ros
     pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree2 (new pcl::search::KdTree<pcl::PointXYZRGB> ());
     pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr cloud_normals (new pcl::PointCloud<pcl::PointXYZRGBNormal>);
     ne.setInputCloud (cloud);
-    JSK_ROS_INFO("normal estimate");
+    ROS_INFO("normal estimate");
     ne.setSearchMethod (tree2);
     ne.setRadiusSearch (0.02);
     ne.compute (*cloud_normals);
@@ -126,7 +126,7 @@ namespace jsk_pcl_ros
     pcl::PointXYZRGBNormal max_pt,min_pt;
     pcl::getMinMax3D(*cloud_normals, min_pt, max_pt);
     for (int i = 0 ; i < 200; i++){
-      JSK_ROS_INFO("fpfh %d / 200", i);
+      ROS_INFO("fpfh %d / 200", i);
       double lucky = 0, lucky2 = 0;
       std::string axis("x"),other_axis("y");
       int rand_xy = rand()%2;
@@ -207,7 +207,7 @@ namespace jsk_pcl_ros
         if(client.call(srv))
           if (atoi(srv.response.classifications[0].c_str()) == 0)
             cloth = true;
-        JSK_ROS_INFO("response result : %s", srv.response.classifications[0].c_str());
+        ROS_INFO("response result : %s", srv.response.classifications[0].c_str());
       }else{
         continue;
       }

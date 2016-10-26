@@ -171,7 +171,7 @@ namespace jsk_pcl_ros
                                                coefficients->header.frame_id) ||
          !jsk_recognition_utils::isSameFrameId(input->header.frame_id,
                                                polygons->header.frame_id)) {
-        JSK_NODELET_ERROR("frame_id does not match. cloud: %s, indices: %s, coefficients: %s, polygons: %s",
+        NODELET_ERROR("frame_id does not match. cloud: %s, indices: %s, coefficients: %s, polygons: %s",
                           input->header.frame_id.c_str(),
                           indices->header.frame_id.c_str(),
                           coefficients->header.frame_id.c_str(),
@@ -184,7 +184,7 @@ namespace jsk_pcl_ros
                                                coefficients->header.frame_id) ||
          !jsk_recognition_utils::isSameFrameId(input->header.frame_id,
                                                polygons->header.frame_id)) {
-        JSK_NODELET_ERROR("frame_id does not match. cloud: %s, coefficients: %s, polygons: %s",
+        NODELET_ERROR("frame_id does not match. cloud: %s, coefficients: %s, polygons: %s",
                           input->header.frame_id.c_str(),
                           coefficients->header.frame_id.c_str(),
                           polygons->header.frame_id.c_str());
@@ -208,15 +208,15 @@ namespace jsk_pcl_ros
     }
     catch (tf2::ConnectivityException &e)
     {
-      JSK_NODELET_ERROR("Transform error: %s", e.what());
+      NODELET_ERROR("Transform error: %s", e.what());
     }
     catch (tf2::InvalidArgumentException &e)
     {
-      JSK_NODELET_ERROR("Transform error: %s", e.what());
+      NODELET_ERROR("Transform error: %s", e.what());
     }
     catch (...)
     {
-      JSK_NODELET_ERROR("Unknown transform error");
+      NODELET_ERROR("Unknown transform error");
     }
     // convert all to the pcl types
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
@@ -256,7 +256,7 @@ namespace jsk_pcl_ros
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr hull_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
       geometry_msgs::Polygon the_polygon = polygons->polygons[plane_i].polygon;
       if (the_polygon.points.size() <= 2) {
-        JSK_NODELET_WARN("too small polygon");
+        NODELET_WARN("too small polygon");
         continue;
       }
       // compute centroid first

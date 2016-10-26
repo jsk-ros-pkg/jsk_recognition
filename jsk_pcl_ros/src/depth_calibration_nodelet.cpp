@@ -78,17 +78,17 @@ namespace jsk_pcl_ros
   
   void DepthCalibration::printModel()
   {
-    JSK_NODELET_INFO("C2(u, v) = %fu^2 + %fu + %fv^2 + %fv + %f",
+    NODELET_INFO("C2(u, v) = %fu^2 + %fu + %fv^2 + %fv + %f",
              coefficients2_[0], coefficients2_[1], coefficients2_[2], coefficients2_[3], coefficients2_[4]);
-    JSK_NODELET_INFO("C1(u, v) = %fu^2 + %fu + %fv^2 + %fv + %f",
+    NODELET_INFO("C1(u, v) = %fu^2 + %fu + %fv^2 + %fv + %f",
              coefficients1_[0], coefficients1_[1], coefficients1_[2], coefficients1_[3], coefficients1_[4]);
-    JSK_NODELET_INFO("C0(u, v) = %fu^2 + %fu + %fv^2 + %fv + %f",
+    NODELET_INFO("C0(u, v) = %fu^2 + %fu + %fv^2 + %fv + %f",
              coefficients0_[0], coefficients0_[1], coefficients0_[2], coefficients0_[3], coefficients0_[4]);
     if (use_abs_) {
-      JSK_NODELET_INFO("use_abs: True");
+      NODELET_INFO("use_abs: True");
     }
     else {
-      JSK_NODELET_INFO("use_abs: False");
+      NODELET_INFO("use_abs: False");
     }
   }
 
@@ -132,7 +132,7 @@ namespace jsk_pcl_ros
     }
     catch (cv_bridge::Exception& e)
     {
-      JSK_NODELET_ERROR("cv_bridge exception: %s", e.what());
+      NODELET_ERROR("cv_bridge exception: %s", e.what());
       return;
     }
     cv::Mat image = cv_ptr->image;
@@ -148,7 +148,7 @@ namespace jsk_pcl_ros
         else {
           output_image.at<float>(v, u) = applyModel(z, u, v, cu, cv);
         }
-        //JSK_NODELET_INFO("z: %f", z);
+        //NODELET_INFO("z: %f", z);
       }
     }
     sensor_msgs::Image::Ptr ros_image = cv_bridge::CvImage(msg->header, "32FC1", output_image).toImageMsg();

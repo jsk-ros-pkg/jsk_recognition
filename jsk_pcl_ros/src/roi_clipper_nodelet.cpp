@@ -101,7 +101,7 @@ namespace jsk_pcl_ros
       cv::Mat image = cv_ptr->image;
       cv::Rect roi(camera_info_msg->roi.x_offset, camera_info_msg->roi.y_offset,
                    camera_info_msg->roi.width, camera_info_msg->roi.height);
-      //JSK_NODELET_INFO("roi::(%d, %d, %d, %d)", roi.x, roi.y, roi.width, roi.height);
+      //NODELET_INFO("roi::(%d, %d, %d, %d)", roi.x, roi.y, roi.width, roi.height);
       cv::Mat image_roi = image(roi);
       // cv::imshow("roi", image_roi);
       // cv::waitKey(3);
@@ -112,7 +112,7 @@ namespace jsk_pcl_ros
     }
     catch (cv_bridge::Exception& e)
     {
-      JSK_NODELET_ERROR("cv_bridge exception: %s", e.what());
+      NODELET_ERROR("cv_bridge exception: %s", e.what());
       return;
     }
   }

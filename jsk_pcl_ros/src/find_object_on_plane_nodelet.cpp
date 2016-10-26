@@ -144,7 +144,7 @@ namespace jsk_pcl_ros
       cv_bridge::CvImage(image_msg->header,
                          sensor_msgs::image_encodings::BGR8,
                          min_area_rect_image).toImageMsg());
-    JSK_NODELET_INFO("published");
+    NODELET_INFO("published");
   }
 
 
@@ -267,7 +267,7 @@ namespace jsk_pcl_ros
     std::vector<cv::Point3f>& search_points_3d,
     std::vector<cv::Point2f>& search_points_2d)
   {
-    JSK_NODELET_INFO("generateStartPoints");
+    NODELET_INFO("generateStartPoints");
     jsk_recognition_utils::Plane::Ptr plane
       (new jsk_recognition_utils::Plane(coefficients->values));
     cv::Point3d ray = model.projectPixelTo3dRay(point_2d);

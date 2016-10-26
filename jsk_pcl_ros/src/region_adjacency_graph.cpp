@@ -52,7 +52,7 @@ namespace jsk_pcl_ros
     {
        if (cloud_clusters.empty() || normal_clusters.empty() ||
            centroids->empty() || neigbor_indices.empty()) {
-          JSK_ROS_ERROR("ERROR: Cannot Generate RAG of empty data...");
+          ROS_ERROR("ERROR: Cannot Generate RAG of empty data...");
           return;
        }
        const int comparision_points_size = 100;
@@ -84,7 +84,7 @@ namespace jsk_pcl_ros
                       r_histogram);
                 }
              } else {
-                JSK_ROS_ERROR("Incorrect Measurement type");
+                ROS_ERROR("Incorrect Measurement type");
                 return;
              }
              for (int i = 0; i < neigbor_indices[j].size(); i++) {
@@ -156,7 +156,7 @@ namespace jsk_pcl_ros
              }
           }
        } else {
-          JSK_ROS_WARN("Elements not same size..");
+          ROS_WARN("Elements not same size..");
        }
     }
 
@@ -262,7 +262,7 @@ namespace jsk_pcl_ros
        const int _threshold)
     {
        if (num_vertices(this->graph_) == 0) {
-          JSK_ROS_ERROR("ERROR: Cannot Merge Empty RAG ...");
+          ROS_ERROR("ERROR: Cannot Merge Empty RAG ...");
           return;
        }
        IndexMap index_map = get(boost::vertex_index, this->graph_);

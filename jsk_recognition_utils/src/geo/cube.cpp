@@ -182,7 +182,7 @@ namespace jsk_recognition_utils
         intersects.push_back(p);
       }
     }
-    //JSK_ROS_INFO("%lu intersects", intersects.size());
+    //ROS_INFO("%lu intersects", intersects.size());
     // Compute convex hull
     pcl::ConvexHull<pcl::PointXYZ> chull;
     pcl::PointCloud<pcl::PointXYZ>::Ptr chull_input

@@ -99,7 +99,7 @@ namespace jsk_perception
       pub_.publish(camera_info);
     }
     else {
-      JSK_NODELET_ERROR("camera info is not yet available");
+      NODELET_ERROR("camera info is not yet available");
     }
   }
   

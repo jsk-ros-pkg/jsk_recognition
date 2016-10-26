@@ -197,10 +197,10 @@ namespace jsk_pcl_ros
     std_srvs::Empty::Response& res)
   {
     if (samples_.size() <= 1) {
-      JSK_ROS_ERROR("no enough samples");
+      ROS_ERROR("no enough samples");
       return false;
     }
-    JSK_ROS_INFO("Starting registration %lu samples", samples_.size());
+    ROS_INFO("Starting registration %lu samples", samples_.size());
     // setup initial
     CapturedSamplePointCloud::Ptr initial_sample = samples_[0];
     initial_sample->setRefinedPointCloud(

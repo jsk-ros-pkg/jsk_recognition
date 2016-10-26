@@ -56,7 +56,7 @@ namespace jsk_perception
 
     void Skeletonization::unsubscribe()
     {
-       JSK_NODELET_DEBUG("Unsubscribing from ROS topic.");
+       NODELET_DEBUG("Unsubscribing from ROS topic.");
        this->sub_.shutdown();
     }
 
@@ -69,7 +69,7 @@ namespace jsk_perception
           cv_ptr = cv_bridge::toCvCopy(
              image_msg, sensor_msgs::image_encodings::MONO8);
        } catch (cv_bridge::Exception& e) {
-          JSK_ROS_ERROR("cv_bridge exception: %s", e.what());
+          ROS_ERROR("cv_bridge exception: %s", e.what());
           return;
        }
        cv::Mat image = cv_ptr->image;
@@ -85,7 +85,7 @@ namespace jsk_perception
        cv::Mat &image)
     {
        if (image.empty()) {
-          JSK_ROS_ERROR("--CANNOT THIN EMPTY DATA...");
+          ROS_ERROR("--CANNOT THIN EMPTY DATA...");
           return;
        }
        if (image.type() == CV_8UC3) {
@@ -108,7 +108,7 @@ namespace jsk_perception
        cv::Mat& img, int iter)
     {
        if (img.empty()) {
-          JSK_ROS_ERROR("--CANNOT THIN EMPTY DATA...");
+          ROS_ERROR("--CANNOT THIN EMPTY DATA...");
           return;
        }
        cv::Mat marker = cv::Mat::zeros(img.size(), CV_32F);

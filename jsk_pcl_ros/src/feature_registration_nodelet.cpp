@@ -88,7 +88,7 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& feature_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    JSK_NODELET_DEBUG("update reference");
+    NODELET_DEBUG("update reference");
     reference_cloud_.reset(new pcl::PointCloud<pcl::PointNormal>);
     reference_feature_.reset(new pcl::PointCloud<pcl::FPFHSignature33>);
     pcl::fromROSMsg(*cloud_msg, *reference_cloud_);
@@ -112,7 +112,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (!reference_cloud_ || !reference_feature_) {
-      JSK_NODELET_ERROR("Not yet reference data is available");
+      NODELET_ERROR("Not yet reference data is available");
       return;
     }
 
@@ -166,7 +166,7 @@ namespace jsk_pcl_ros
     
     }
     else {
-      JSK_NODELET_WARN("failed to align pointcloud");
+      NODELET_WARN("failed to align pointcloud");
     }
 
   }

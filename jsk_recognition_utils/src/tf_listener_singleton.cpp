@@ -43,7 +43,7 @@ namespace jsk_recognition_utils
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (!instance_) {
-      JSK_ROS_INFO("instantiating tf::TransformListener");
+      ROS_INFO("instantiating tf::TransformListener");
       instance_ = new tf::TransformListener(ros::Duration(30.0));
     }
     return instance_;

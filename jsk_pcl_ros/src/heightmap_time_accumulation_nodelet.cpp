@@ -52,11 +52,11 @@ namespace jsk_pcl_ros
       getHeightmapConfigTopic(pnh_->resolveName("input")), 1,
       &HeightmapTimeAccumulation::configCallback, this);
     if (!pnh_->getParam("center_frame_id", center_frame_id_)) {
-      JSK_NODELET_FATAL("no ~center_frame_id is specified");
+      NODELET_FATAL("no ~center_frame_id is specified");
       return;
     }
     if (!pnh_->getParam("fixed_frame_id", fixed_frame_id_)) {
-      JSK_NODELET_FATAL("no ~fixed_frame_id is specified");
+      NODELET_FATAL("no ~fixed_frame_id is specified");
       return;
     }
     int tf_queue_size;
@@ -131,7 +131,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (!config_) {
-      JSK_NODELET_ERROR("no ~input/config is yet available");
+      NODELET_ERROR("no ~input/config is yet available");
       return;
     }
     tf::StampedTransform tf_transform;

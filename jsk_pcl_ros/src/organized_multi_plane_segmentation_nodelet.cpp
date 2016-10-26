@@ -199,7 +199,7 @@ namespace jsk_pcl_ros
     const std::vector<pcl::PointIndices>& boundary_indices,
     jsk_recognition_utils::IntegerGraphMap& connection_map)
   {
-    JSK_NODELET_DEBUG("size of model_coefficients: %lu", model_coefficients.size());
+    NODELET_DEBUG("size of model_coefficients: %lu", model_coefficients.size());
     if (model_coefficients.size() == 0) {
       return;                   // do nothing
     }
@@ -233,7 +233,7 @@ namespace jsk_pcl_ros
           b_normal = b_normal / b_normal.norm();
         }
         double theta = fabs(acos(a_normal.dot(b_normal)));
-        JSK_NODELET_DEBUG("%lu - %lu angle: %f", i, j, theta);
+        NODELET_DEBUG("%lu - %lu angle: %f", i, j, theta);
         if (theta > M_PI / 2.0) {
           theta = M_PI  - theta;
         }
@@ -263,7 +263,7 @@ namespace jsk_pcl_ros
             std::vector<float> k_sqr_distances;
             if (kdtree.radiusSearch(
                   p, connect_distance_threshold_, k_indices, k_sqr_distances, 1) > 0) {
-              JSK_NODELET_DEBUG("%lu - %lu connected", i, j);
+              NODELET_DEBUG("%lu - %lu connected", i, j);
               foundp = true;
               break;
             }
@@ -315,7 +315,7 @@ namespace jsk_pcl_ros
     std::vector<pcl::PointCloud<PointT> >& output_boundary_clouds)
   { 
     std::vector<std::set<int> > cloud_sets;
-    JSK_NODELET_DEBUG("connection_map:");
+    NODELET_DEBUG("connection_map:");
     for (jsk_recognition_utils::IntegerGraphMap::const_iterator it = connection_map.begin();
          it != connection_map.end();
          ++it) {
@@ -325,7 +325,7 @@ namespace jsk_pcl_ros
       for (size_t i = 0; i < it->second.size(); i++) {
         ss << i << ", ";
       }
-      JSK_NODELET_DEBUG("%s", ss.str().c_str());
+      NODELET_DEBUG("%s", ss.str().c_str());
     }
 
     jsk_recognition_utils::buildAllGroupsSetFromGraphMap(connection_map, cloud_sets);
@@ -338,7 +338,7 @@ namespace jsk_pcl_ros
       for (std::set<int>::iterator it = cloud_sets[i].begin();
            it != cloud_sets[i].end();
            ++it) {
-        JSK_NODELET_DEBUG("%lu includes %d", i, *it);
+        NODELET_DEBUG("%lu includes %d", i, *it);
         new_coefficients = model_coefficients[*it].values;
         pcl::PointIndices inlier = inlier_indices[*it];
         pcl::PointIndices boundary_inlier = boundary_indices[*it];
@@ -377,7 +377,7 @@ namespace jsk_pcl_ros
         output_boundary_clouds.push_back(chull_output);
       }
       else {
-        JSK_NODELET_ERROR("failed to build convex");
+        NODELET_ERROR("failed to build convex");
       }
     }
 
@@ -695,7 +695,7 @@ namespace jsk_pcl_ros
       ne.setNormalEstimationMethod (ne.AVERAGE_DEPTH_CHANGE);
     }
     else {
-      JSK_NODELET_FATAL("unknown estimation method, force to use COVARIANCE_MATRIX: %d",
+      NODELET_FATAL("unknown estimation method, force to use COVARIANCE_MATRIX: %d",
                     estimation_method_);
       ne.setNormalEstimationMethod (ne.COVARIANCE_MATRIX);
     }

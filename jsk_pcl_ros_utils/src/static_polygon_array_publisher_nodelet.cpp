@@ -51,18 +51,18 @@ namespace jsk_pcl_ros_utils
       = jsk_topic_tools::readVectorParameter(*pnh_, "frame_ids",
                                              frame_ids_);
     if (!frame_id_read_p) {
-      JSK_NODELET_FATAL("failed to read frame_ids from ~frame_ids");
+      NODELET_FATAL("failed to read frame_ids from ~frame_ids");
       return;
     }
     
     bool polygon_read_p = readPolygonArray("polygon_array");
     if (!polygon_read_p) {
-      JSK_NODELET_FATAL("failed to read polygons from ~polygon_array");
+      NODELET_FATAL("failed to read polygons from ~polygon_array");
       return;
     }
 
     if (frame_ids_.size() != polygons_.polygons.size()) {
-      JSK_NODELET_FATAL("the size of frame_ids(%lu) does not match the size of polygons(%lu)",
+      NODELET_FATAL("the size of frame_ids(%lu) does not match the size of polygons(%lu)",
                     frame_ids_.size(), polygons_.polygons.size());
       return;
     }
@@ -74,7 +74,7 @@ namespace jsk_pcl_ros_utils
     }
     
     if (!use_periodic_ && !use_message_ && !use_trigger_) {
-      JSK_NODELET_FATAL("~use_periodic, ~use_trigger nor ~use_message is not true");
+      NODELET_FATAL("~use_periodic, ~use_trigger nor ~use_message is not true");
       return;
     }
     polygons_.header.frame_id = frame_ids_[0];
@@ -186,7 +186,7 @@ namespace jsk_pcl_ros_utils
                 polygon.polygon.points.push_back(point);
               }
               else {
-                JSK_NODELET_FATAL("%s[%lu][%lu] is not array or the length is not 3",
+                NODELET_FATAL("%s[%lu][%lu] is not array or the length is not 3",
                               param_name.c_str(), toplevel_i, secondlevel_i);
                 return false;
               }
@@ -196,19 +196,19 @@ namespace jsk_pcl_ros_utils
             coefficients_.coefficients.push_back(polygonToModelCoefficients(polygon));
           }
           else {
-            JSK_NODELET_FATAL("%s[%lu] is not array or not enough points", param_name.c_str(), toplevel_i);
+            NODELET_FATAL("%s[%lu] is not array or not enough points", param_name.c_str(), toplevel_i);
             return false;
           }
         }
         return true;
       }
       else {
-        JSK_NODELET_FATAL("%s is not array", param_name.c_str());
+        NODELET_FATAL("%s is not array", param_name.c_str());
         return false;
       }
     }
     else {
-      JSK_NODELET_FATAL("no %s is available on parameter server", param_name.c_str());
+      NODELET_FATAL("no %s is available on parameter server", param_name.c_str());
       return false;
     }
     return true;

@@ -110,7 +110,7 @@ namespace jsk_pcl_ros
     }
     catch(tf::TransformException ex)
       {
-      JSK_ROS_ERROR("%s", ex.what());
+      ROS_ERROR("%s", ex.what());
       return;
     }
     pcl::PointXYZ searchPoint;
@@ -133,7 +133,7 @@ namespace jsk_pcl_ros
     pass.filter(*cloud);
 
     if(cloud->points.size() < 10){
-      JSK_ROS_INFO("points are too small");
+      ROS_INFO("points are too small");
       return;
     }
     if(1){ //estimate_normal
@@ -148,7 +148,7 @@ namespace jsk_pcl_ros
       
     }
     if(! (kd_tree->nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)){
-      JSK_ROS_INFO("kdtree failed");
+      ROS_INFO("kdtree failed");
       return;
     }
     float x = cloud->points[pointIdxNKNSearch[0]].x;
@@ -218,7 +218,7 @@ namespace jsk_pcl_ros
       for(size_t index=0; index<points_xyz->size(); index++){
         points_xyz->points[index].x = points_xyz->points[index].z = 0;
       }
-      if(points_xyz->points.size() == 0){JSK_ROS_INFO("points are empty");return;}
+      if(points_xyz->points.size() == 0){ROS_INFO("points are empty");return;}
       kdtree.setInputCloud(points_xyz);
       std::vector<int> pointIdxRadiusSearch;
       std::vector<float> pointRadiusSquaredDistance;

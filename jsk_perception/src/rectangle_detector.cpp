@@ -135,7 +135,7 @@ class RectangleDetector
 
                 if (approx.size() != 4)
                     {
-                        JSK_ROS_ERROR("The object is not quadrilateral!");
+                        ROS_ERROR("The object is not quadrilateral!");
                         return ;
                     }
 
@@ -182,7 +182,7 @@ class RectangleDetector
             }
         catch (cv::Exception &e)
             {
-                JSK_ROS_ERROR("Image processing error: %s %s %s %i", e.err.c_str(), e.func.c_str(), e.file.c_str(), e.line);
+                ROS_ERROR("Image processing error: %s %s %s %i", e.err.c_str(), e.func.c_str(), e.file.c_str(), e.line);
             }
     }
 

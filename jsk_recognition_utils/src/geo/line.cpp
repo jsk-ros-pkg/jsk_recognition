@@ -187,14 +187,14 @@ namespace jsk_recognition_utils
         min_alpha = alpha;
       }
     }
-    // JSK_ROS_INFO("min: %f", min_alpha);
-    // JSK_ROS_INFO("max: %f", max_alpha);
+    // ROS_INFO("min: %f", min_alpha);
+    // ROS_INFO("max: %f", max_alpha);
     return boost::make_tuple<Point, Point>(min_alpha_point, max_alpha_point);
   }
 
   void Line::print()
   {
-    JSK_ROS_INFO("d: [%f, %f, %f], p: [%f, %f, %f]", direction_[0], direction_[1], direction_[2],
+    ROS_INFO("d: [%f, %f, %f], p: [%f, %f, %f]", direction_[0], direction_[1], direction_[2],
              origin_[0], origin_[1], origin_[2]);
   }
 

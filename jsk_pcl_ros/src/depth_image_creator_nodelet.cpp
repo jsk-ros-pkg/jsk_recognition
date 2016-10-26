@@ -37,25 +37,25 @@
 #include <jsk_topic_tools/rosparam_utils.h>
 
 void jsk_pcl_ros::DepthImageCreator::onInit () {
-  JSK_NODELET_INFO("[%s::onInit]", getName().c_str());
+  NODELET_INFO("[%s::onInit]", getName().c_str());
   ConnectionBasedNodelet::onInit();
   tf_listener_ = TfListenerSingleton::getInstance();
   // scale_depth
   pnh_->param("scale_depth", scale_depth, 1.0);
-  JSK_ROS_INFO("scale_depth : %f", scale_depth);
+  ROS_INFO("scale_depth : %f", scale_depth);
 
   // use fixed transform
   pnh_->param("use_fixed_transform", use_fixed_transform, false);
-  JSK_ROS_INFO("use_fixed_transform : %d", use_fixed_transform);
+  ROS_INFO("use_fixed_transform : %d", use_fixed_transform);
 
   pnh_->param("use_service", use_service, false);
-  JSK_ROS_INFO("use_service : %d", use_service);
+  ROS_INFO("use_service : %d", use_service);
 
   pnh_->param("use_asynchronous", use_asynchronous, false);
-  JSK_ROS_INFO("use_asynchronous : %d", use_asynchronous);
+  ROS_INFO("use_asynchronous : %d", use_asynchronous);
 
   pnh_->param("use_approximate", use_approximate, false);
-  JSK_ROS_INFO("use_approximate : %d", use_approximate);
+  ROS_INFO("use_approximate : %d", use_approximate);
 
   pnh_->param("info_throttle", info_throttle_, 0);
   info_counter_ = 0;
@@ -136,18 +136,18 @@ bool jsk_pcl_ros::DepthImageCreator::service_cb (std_srvs::Empty::Request &req,
 
 void jsk_pcl_ros::DepthImageCreator::callback_sync(const sensor_msgs::CameraInfoConstPtr& info,
                                                    const sensor_msgs::PointCloud2ConstPtr& pcloud2) {
-  JSK_ROS_DEBUG("DepthImageCreator::callback_sync");
+  ROS_DEBUG("DepthImageCreator::callback_sync");
   publish_points(info, pcloud2);
 }
 
 void jsk_pcl_ros::DepthImageCreator::callback_cloud(const sensor_msgs::PointCloud2ConstPtr& pcloud2) {
-  JSK_ROS_DEBUG("DepthImageCreator::callback_cloud");
+  ROS_DEBUG("DepthImageCreator::callback_cloud");
   boost::mutex::scoped_lock lock(this->mutex_points);
   points_ptr_ = pcloud2;
 }
 
 void jsk_pcl_ros::DepthImageCreator::callback_info(const sensor_msgs::CameraInfoConstPtr& info) {
-  JSK_ROS_DEBUG("DepthImageCreator::callback_info");
+  ROS_DEBUG("DepthImageCreator::callback_info");
   boost::mutex::scoped_lock lock(this->mutex_points);
   if( info_counter_++ >= info_throttle_ ) {
     info_counter_ = 0;
@@ -159,7 +159,7 @@ void jsk_pcl_ros::DepthImageCreator::callback_info(const sensor_msgs::CameraInfo
 
 void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInfoConstPtr& info,
                                                     const sensor_msgs::PointCloud2ConstPtr& pcloud2) {
-  JSK_ROS_DEBUG("DepthImageCreator::publish_points");
+  ROS_DEBUG("DepthImageCreator::publish_points");
   if (!pcloud2)  return;
   bool proc_cloud = true, proc_image = true, proc_disp = true;
   if ( pub_cloud_.getNumSubscribers()==0 ) {
@@ -197,7 +197,7 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
                                       info->header.stamp, transform);
       }
       catch ( std::runtime_error e ) {
-        JSK_ROS_ERROR("%s",e.what());
+        ROS_ERROR("%s",e.what());
         return;
       }
     }
@@ -212,7 +212,7 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
       sensorPose = sensorPose * trans;
     }
 #if 0 // debug print
-    JSK_ROS_INFO("%f %f %f %f %f %f %f %f %f, %f %f %f",
+    ROS_INFO("%f %f %f %f %f %f %f %f %f, %f %f %f",
              sensorPose(0,0), sensorPose(0,1), sensorPose(0,2),
              sensorPose(1,0), sensorPose(1,1), sensorPose(1,2),
              sensorPose(2,0), sensorPose(2,1), sensorPose(2,2),

@@ -93,13 +93,13 @@ namespace jsk_pcl_ros_utils
             tmp_width = i-tmp_x_off + 1;
             tmp_height = j-tmp_y_off + 1;
           }}}}
-    JSK_NODELET_INFO("mask_image_to_depth_considered_mask_image_nodelet : tmp width:%d height:%d x_off:%d y_off:%d", tmp_width, tmp_height, tmp_x_off, tmp_y_off);
+    NODELET_INFO("mask_image_to_depth_considered_mask_image_nodelet : tmp width:%d height:%d x_off:%d y_off:%d", tmp_width, tmp_height, tmp_x_off, tmp_y_off);
     region_width_ratio_ = ((double) tmp_width) / maskwidth;
     region_height_ratio_ = ((double) tmp_height) / maskheight;
     region_x_off_ratio_ = ((double) tmp_x_off) / maskwidth;
     region_y_off_ratio_ = ((double) tmp_y_off) / maskheight;
     use_region_ratio_ = true;
-    JSK_NODELET_INFO("mask_image_to_depth_considered_mask_image_nodelet : next region width_ratio:%f height_ratio:%f x_off_ratio:%f y_off_ratio:%f", region_width_ratio_, region_height_ratio_, region_x_off_ratio_, region_y_off_ratio_);
+    NODELET_INFO("mask_image_to_depth_considered_mask_image_nodelet : next region width_ratio:%f height_ratio:%f x_off_ratio:%f y_off_ratio:%f", region_width_ratio_, region_height_ratio_, region_x_off_ratio_, region_y_off_ratio_);
   }
 
 
@@ -175,7 +175,7 @@ namespace jsk_pcl_ros_utils
           }
         }
         else {
-          JSK_ROS_INFO("directed region width:%d height:%d", region_width_, region_height_);
+          ROS_INFO("directed region width:%d height:%d", region_width_, region_height_);
           //set nan_point to all points first.
           for (size_t j = 0; j < mask.rows; j++) {
             for (size_t i = 0; i < mask.cols; i++) {
@@ -204,7 +204,7 @@ namespace jsk_pcl_ros_utils
           std::vector<int> near_indices;
           std::vector<float> near_distances;
           kdtree.nearestKSearch(zero, extract_num_, near_indices, near_distances);
-          JSK_ROS_INFO("directed num of extract points:%d   num of nearestKSearch points:%d", extract_num_, ((int) near_indices.size()));
+          ROS_INFO("directed num of extract points:%d   num of nearestKSearch points:%d", extract_num_, ((int) near_indices.size()));
           int ext_num=std::min(extract_num_, ((int) near_indices.size()));
           for (int idx = 0; idx < ext_num; idx++) {
             int x = near_indices.at(idx) % width;
@@ -223,7 +223,7 @@ namespace jsk_pcl_ros_utils
             int min_y = region_y_off_;
             int max_x = region_width_ + region_x_off_ -1;
             int max_y = region_height_ + region_y_off_ -1;
-            JSK_NODELET_INFO("minx:%d miny:%d maxx:%d maxy:%d", min_x, min_y, max_x, max_y);
+            NODELET_INFO("minx:%d miny:%d maxx:%d maxy:%d", min_x, min_y, max_x, max_y);
             cv::Rect region = cv::Rect(min_x, min_y, std::max(max_x - min_x, 0), std::max(max_y - min_y, 0));
             cv::Mat clipped_mask_image = mask_image(region);
             cv_bridge::CvImage clipped_mask_bridge(point_cloud2_msg->header,
@@ -253,7 +253,7 @@ namespace jsk_pcl_ros_utils
           }
         }
         else {
-          JSK_ROS_INFO("directed region width:%d height:%d", region_width_, region_height_);
+          ROS_INFO("directed region width:%d height:%d", region_width_, region_height_);
           int x_end = region_x_off_ + region_width_;
           int y_end = region_y_off_ + region_height_;
           for (size_t j = region_y_off_; j < y_end; j++) {
@@ -283,7 +283,7 @@ namespace jsk_pcl_ros_utils
           int max_y = region_height_ + region_y_off_ -1;
           cv::Rect region = cv::Rect(min_x, min_y, std::max(max_x - min_x, 0), std::max(max_y - min_y, 0));
           cv::Mat clipped_mask_image = tmp_mask (region);
-          JSK_NODELET_INFO("minx:%d miny:%d maxx:%d maxy:%d", min_x, min_y, max_x, max_y);
+          NODELET_INFO("minx:%d miny:%d maxx:%d maxy:%d", min_x, min_y, max_x, max_y);
           cv_bridge::CvImage clipped_mask_bridge(point_cloud2_msg->header,
                                                  sensor_msgs::image_encodings::MONO8,
                                                  clipped_mask_image);
@@ -292,7 +292,7 @@ namespace jsk_pcl_ros_utils
       }
     }
     else {
-      JSK_ROS_ERROR ("ERROR: Different width and height. Points[width:%d height:%d] Image[width:%d height:%d]", point_cloud2_msg->width, point_cloud2_msg->height, image_msg->width, image_msg->height);
+      ROS_ERROR ("ERROR: Different width and height. Points[width:%d height:%d] Image[width:%d height:%d]", point_cloud2_msg->width, point_cloud2_msg->height, image_msg->width, image_msg->height);
     }
   }
 

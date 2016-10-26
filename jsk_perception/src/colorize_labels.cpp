@@ -68,7 +68,7 @@ namespace jsk_perception
   {
     cv::Mat label_image = cv_bridge::toCvShare(
       label_image_msg, label_image_msg->encoding)->image;
-    JSK_ROS_DEBUG("%dx%d", label_image_msg->width, label_image_msg->height);
+    ROS_DEBUG("%dx%d", label_image_msg->width, label_image_msg->height);
     cv::Mat output_image;
     jsk_recognition_utils::labelToRGB(label_image, output_image);
     cv::cvtColor(output_image, output_image, CV_RGB2BGR);

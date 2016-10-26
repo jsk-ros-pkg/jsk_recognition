@@ -88,7 +88,7 @@ namespace jsk_perception
     vital_checker_->poke();
     boost::mutex::scoped_lock lock(mutex_);
     if (!camera_info_) {
-      JSK_NODELET_WARN(
+      NODELET_WARN(
         "[ProjectImagePoint::project] camera info is not yet available");
       return;
     }
@@ -104,7 +104,7 @@ namespace jsk_perception
     vector.vector.z = ray.z;
     pub_vector_.publish(vector);
     if (ray.z == 0.0) {
-      JSK_NODELET_ERROR("Z value of projected ray is 0");
+      NODELET_ERROR("Z value of projected ray is 0");
       return;
     }
     double alpha = z_ / ray.z;

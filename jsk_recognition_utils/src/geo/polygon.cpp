@@ -148,12 +148,12 @@ namespace jsk_recognition_utils
     Eigen::Vector3f OB = B - O;
     Eigen::Vector3f n = (OA.normalized()).cross(OB.normalized());
     if (n.norm() == 0) {
-      // JSK_ROS_ERROR("normal is 0");
-      // JSK_ROS_ERROR("O: [%f, %f, %f]", O[0], O[1], O[2]);
-      // JSK_ROS_ERROR("A: [%f, %f, %f]", A[0], A[1], A[2]);
-      // JSK_ROS_ERROR("B: [%f, %f, %f]", B[0], B[1], B[2]);
-      // JSK_ROS_ERROR("OA: [%f, %f, %f]", OA[0], OA[1], OA[2]);
-      // JSK_ROS_ERROR("OB: [%f, %f, %f]", OB[0], OB[1], OB[2]);
+      // ROS_ERROR("normal is 0");
+      // ROS_ERROR("O: [%f, %f, %f]", O[0], O[1], O[2]);
+      // ROS_ERROR("A: [%f, %f, %f]", A[0], A[1], A[2]);
+      // ROS_ERROR("B: [%f, %f, %f]", B[0], B[1], B[2]);
+      // ROS_ERROR("OA: [%f, %f, %f]", OA[0], OA[1], OA[2]);
+      // ROS_ERROR("OB: [%f, %f, %f]", OB[0], OB[1], OB[2]);
       //exit(1);
     }
     return n.normalized();
@@ -278,7 +278,7 @@ namespace jsk_recognition_utils
           rest_vertices.push_back(vertices_[i]);
         }
         else {
-          JSK_ROS_ERROR("removed: %lu", i);
+          ROS_ERROR("removed: %lu", i);
         }
       }
       i = nextIndex(i);
@@ -297,22 +297,22 @@ namespace jsk_recognition_utils
     Polygon::Ptr rest_candidate = candidate.get<1>();
     // first check direction
     Eigen::Vector3f the_direction = directionAtPoint(index);
-    //JSK_ROS_INFO("direction: [%f, %f, %f]", the_direction[0], the_direction[1], the_direction[2]);
+    //ROS_INFO("direction: [%f, %f, %f]", the_direction[0], the_direction[1], the_direction[2]);
     if (the_direction.norm() == 0.0) {
-      JSK_ROS_ERROR("malformed polygon");
+      ROS_ERROR("malformed polygon");
       exit(1);
     }
     if (direction.dot(the_direction) < 0) {
 #ifdef DEBUG_GEO_UTIL
-      JSK_ROS_INFO("triangle is not same direction");
-      JSK_ROS_INFO("direction: [%f, %f, %f]", direction[0], direction[1], direction[2]);
-      JSK_ROS_INFO("the_direction: [%f, %f, %f]",
+      ROS_INFO("triangle is not same direction");
+      ROS_INFO("direction: [%f, %f, %f]", direction[0], direction[1], direction[2]);
+      ROS_INFO("the_direction: [%f, %f, %f]",
                the_direction[0],
                the_direction[1],
                the_direction[2]);
       for (size_t i = 0; i < vertices_.size(); i++) {
         Eigen::Vector3f v = directionAtPoint(i);
-        JSK_ROS_INFO("the_direction[%lu]: [%f, %f, %f]",
+        ROS_INFO("the_direction[%lu]: [%f, %f, %f]",
                  i, v[0], v[1], v[2]);
       // other direction
       }
@@ -341,16 +341,16 @@ namespace jsk_recognition_utils
           Eigen::Vector3f Bcross = AB.normalized().cross(BP.normalized()).normalized();
           Eigen::Vector3f Ccross = BC.normalized().cross(CP.normalized()).normalized();
 #ifdef DEBUG_GEO_UTIL
-          JSK_ROS_INFO("P: [%f, %f, %f]", P[0], P[1], P[2]);
-          JSK_ROS_INFO("A: [%f, %f, %f]", A[0], A[1], A[2]);
-          JSK_ROS_INFO("B: [%f, %f, %f]", B[0], B[1], B[2]);
-          JSK_ROS_INFO("C: [%f, %f, %f]", C[0], C[1], C[2]);
-          JSK_ROS_INFO("Across: [%f, %f, %f]", Across[0], Across[1], Across[2]);
-          JSK_ROS_INFO("Bcross: [%f, %f, %f]", Bcross[0], Bcross[1], Bcross[2]);
-          JSK_ROS_INFO("Ccross: [%f, %f, %f]", Ccross[0], Ccross[1], Ccross[2]);
-          JSK_ROS_INFO("Across-Bcross: %f", Across.dot(Bcross));
-          JSK_ROS_INFO("Bcross-Ccross: %f", Bcross.dot(Ccross));
-          JSK_ROS_INFO("Ccross-Across: %f", Ccross.dot(Across));
+          ROS_INFO("P: [%f, %f, %f]", P[0], P[1], P[2]);
+          ROS_INFO("A: [%f, %f, %f]", A[0], A[1], A[2]);
+          ROS_INFO("B: [%f, %f, %f]", B[0], B[1], B[2]);
+          ROS_INFO("C: [%f, %f, %f]", C[0], C[1], C[2]);
+          ROS_INFO("Across: [%f, %f, %f]", Across[0], Across[1], Across[2]);
+          ROS_INFO("Bcross: [%f, %f, %f]", Bcross[0], Bcross[1], Bcross[2]);
+          ROS_INFO("Ccross: [%f, %f, %f]", Ccross[0], Ccross[1], Ccross[2]);
+          ROS_INFO("Across-Bcross: %f", Across.dot(Bcross));
+          ROS_INFO("Bcross-Ccross: %f", Bcross.dot(Ccross));
+          ROS_INFO("Ccross-Across: %f", Ccross.dot(Across));
 #endif
           if (((Across.dot(Bcross) > 0 &&
                 Bcross.dot(Ccross) > 0 &&
@@ -358,12 +358,12 @@ namespace jsk_recognition_utils
                (Across.dot(Bcross) < 0 &&
                 Bcross.dot(Ccross) < 0 &&
                 Ccross.dot(Across) < 0))) {
-            // JSK_ROS_ERROR("%lu -- %lu is inside", index, i);
+            // ROS_ERROR("%lu -- %lu is inside", index, i);
             return false;
           }
           // ConvexPolygon convex_triangle(triangle_candidate->vertices_);
           // if (convex_triangle.isInside(v)) {
-          //   //JSK_ROS_INFO("vertices is inside of the polygon");
+          //   //ROS_INFO("vertices is inside of the polygon");
           //   return false;
           // }
         }
@@ -452,7 +452,7 @@ namespace jsk_recognition_utils
 #ifdef DEBUG_GEO_UTIL
     for (size_t i = 0; i < getNumVertices(); i++) {
       Eigen::Vector3f n = directionAtPoint(i);
-      JSK_ROS_INFO("n[%lu] [%f, %f, %f]", i, n[0], n[1], n[2]);
+      ROS_INFO("n[%lu] [%f, %f, %f]", i, n[0], n[1], n[2]);
     }
 #endif
     Eigen::Vector3f n0 = directionAtPoint(0);
@@ -522,7 +522,7 @@ namespace jsk_recognition_utils
       return (vertices_[1] - vertices_[0]).cross(vertices_[2] - vertices_[0]).normalized();
     }
     else {
-      JSK_ROS_ERROR("the number of vertices is not enough");
+      ROS_ERROR("the number of vertices is not enough");
       return Eigen::Vector3f(0, 0, 0);
     }
   }

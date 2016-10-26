@@ -83,7 +83,7 @@ namespace jsk_pcl_ros_utils
     boost::mutex::scoped_lock lock(mutex_);
     // check header
     if (!jsk_recognition_utils::isSameFrameId(*cloud_msg, *polygon_msg)) {
-      JSK_NODELET_ERROR("frame_id does not match: cloud: %s, polygon: %s",
+      NODELET_ERROR("frame_id does not match: cloud: %s, polygon: %s",
                         cloud_msg->header.frame_id.c_str(), polygon_msg->header.frame_id.c_str());
       return;
     }

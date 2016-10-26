@@ -143,7 +143,7 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    JSK_NODELET_WARN("starting detection");
+    NODELET_WARN("starting detection");
     ros::Time start_time = ros::Time::now();
     image_geometry::PinholeCameraModel model;
     model.fromCameraInfo(camera_info_msg);
@@ -181,7 +181,7 @@ namespace jsk_pcl_ros
     }
     fittingCylinder(normals_cloud, normals, a, b);
     ros::Time end_time = ros::Time::now();
-    JSK_NODELET_WARN("detection time: %f", (end_time - start_time).toSec());
+    NODELET_WARN("detection time: %f", (end_time - start_time).toSec());
   }
 
   void HintedStickFinder::normalEstimate(
@@ -216,7 +216,7 @@ namespace jsk_pcl_ros
     cylinder_dir[2] = 0;
     cylinder_dir.normalize();
     double ang = acos(cylinder_dir.dot(hint_dir));
-    JSK_NODELET_INFO("angle: %f", ang);
+    NODELET_INFO("angle: %f", ang);
     return !(ang < eps_2d_angle_ || (M_PI - ang) < eps_2d_angle_);
   }
   
@@ -297,7 +297,7 @@ namespace jsk_pcl_ros
         return;
         }
       }
-      JSK_NODELET_WARN("failed to detect cylinder [%lu/%d]", i, cylinder_fitting_trial_);
+      NODELET_WARN("failed to detect cylinder [%lu/%d]", i, cylinder_fitting_trial_);
     }
   }
   

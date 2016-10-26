@@ -64,6 +64,7 @@ namespace jsk_perception
     scale_ = 0.5;
     upside_down_ = false;
     offset_degree_ = 180.0;
+    k_ = 300.0;
     onInitPostProcess();
   }
 
@@ -73,6 +74,7 @@ namespace jsk_perception
     scale_ = new_config.scale;
     upside_down_ = new_config.upside_down;
     offset_degree_ = new_config.offset_degree;
+    k_ = new_config.k;
   }
 
 
@@ -91,17 +93,16 @@ namespace jsk_perception
 
   void FisheyeToPanorama::rectify(const sensor_msgs::Image::ConstPtr& image_msg)
   {
-    cv::Mat distorted = cv_bridge::toCvCopy(image_msg, sensor_msgs::image_encodings::BGR8)->image;
+    cv::Mat distorted = cv_bridge::toCvCopy(image_msg, image_msg->encoding)->image;
     int l = distorted.rows / 2;
 
     if(use_panorama_){
       float min_degree = 30;
       float min_radian = min_degree * 3.14159265 /180.0;
       float tan_min_radian = tan(min_radian);
-      const float K = 341.656050955;// x = K * theta
       if(simple_panorama_){
-        cv::Mat undistorted(l, l*4, CV_8UC3);
-        cv::Mat undistorted_bilinear(l, l*4, CV_8UC3);
+        cv::Mat undistorted(l, l*4, distorted.depth());
+        cv::Mat undistorted_bilinear(l, l*4, distorted.depth());
         for(int i = 0; i < undistorted.rows; ++i){
           for(int j = 0; j < undistorted.cols; ++j){
 	
@@ -174,7 +175,7 @@ namespace jsk_perception
                                                                    image_msg->encoding,
                                                                    undistorted_bilinear).toImageMsg());
       }else{
-        cv::Mat undistorted(int(l * 1.0 / tan_min_radian*scale_), int(l *  2.0 * PI * scale_), CV_8UC3);
+        cv::Mat undistorted(int(l * 1.0 / tan_min_radian*scale_), int(l *  2.0 * PI * scale_), distorted.depth());
         int center_x = distorted.rows/2, center_y = distorted.cols/2;
 
 	int offset_jndex = offset_degree_ / 180.0 * PI * l * scale_;
@@ -184,8 +185,8 @@ namespace jsk_perception
             if(i)
               phi = atan(l * 1.0 /i*scale_) + 0.5;
             float theta = (j-int(undistorted.cols/2))/scale_ * 1.0/l;
-            int x = K * phi * cos(theta) + center_x;
-            int y = K * phi * sin(theta) + center_y;
+            int x = k_ * phi * cos(theta) + center_x;
+            int y = k_ * phi * sin(theta) + center_y;
             for(int c = 0; c < undistorted.channels(); ++c){
 	      int index = undistorted.rows - 1 - i;
 	      if( upside_down_ )
@@ -208,26 +209,26 @@ namespace jsk_perception
       float max_degree = max_degree_;
       float max_radian = max_degree * 3.14159265 /180.0;
       float tan_max_radian = tan(max_radian);
-      const float K = 341.656050955;
+      //const float k_ = 341.656050955;
       const float absolute_max_degree = 85;
       const float absolute_max_radian = absolute_max_degree * 3.14159265 /180.0;
-      float max_radius = max_radian * K;
-      cv::Mat undistorted(int(l * tan_max_radian * 2 * scale_), int(l * tan_max_radian * 2 * scale_), CV_8UC3);
+      float max_radius = max_radian * k_;
+      cv::Mat undistorted(int(l * tan_max_radian * 2 * scale_), int(l * tan_max_radian * 2 * scale_), distorted.depth());
       int center_x = distorted.rows/2, center_y = distorted.cols/2;
-      int un_center_x = undistorted.rows/(2 * scale_), un_center_y = undistorted.cols/(2*scale_);
+      int un_center_x = undistorted.rows/2, un_center_y = undistorted.cols/2;
 
       for(int i = 0; i < undistorted.rows; ++i){
         for(int j = 0; j < undistorted.cols; ++j){
-          int diff_x = i/scale_-un_center_x, diff_y = j/scale_-un_center_y;
+          int diff_x = (i - un_center_x) / scale_, diff_y = (j - un_center_y) /scale_;
           float radius = sqrt(pow(diff_x, 2) + pow(diff_y, 2));
           float radian = atan(radius/l);
           if( radian < absolute_max_radian ){
             float multi = 0, new_x = center_x, new_y = center_y;
             if(radius){
-              // float new_radius = radian * K; 
-              multi = radian * K / radius;
-              new_x += diff_x * multi;
-              new_y += diff_y * multi;
+              // float new_radius = radian * k_; 
+              multi = radian * k_ / radius;
+              new_x += (diff_x * multi);
+              new_y += (diff_y * multi);
             }
 
             for(int c = 0; c < undistorted.channels(); ++c){

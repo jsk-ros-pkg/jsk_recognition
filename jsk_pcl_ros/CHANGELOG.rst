@@ -2,6 +2,42 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Stop using deprecated jsk_topic_tools/log_utils.h (`#1933 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1933>`_)
+* fix unparsable jsk_pcl_nodelets.xml (`#1929 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1929>`_)
+  1. multiple <library> tags in one xml file can't be used.
+  2. separate pluginlib xml for each library files.
+  3. pluginlib xml should be splitted with package name
+  (nodelet, moveit_ros_perception).
+* [jsk_pcl_ros/rearrange_bounding_box] Add rotation reconfigure (`#1930 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1930>`_)
+* fix typo in jsk_pcl_nodelets.xml
+* [jsk_pcl_ros/line_segment_detector] Enabled async (`#1921 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1921>`_)
+* [jsk_pcl_ros/line_segment_detector] Add line width reconfigure (`#1921 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1921>`_)
+* [jsk_pcl_ros/src/pointcloud_screenpoint_nodelet.cpp] change output property from warn to info because this is not warning case. (`#1910 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1910>`_)
+* [jsk_pcl_ros/src/pointcloud_screenpoint_nodelet.cpp] add warning comment when out of image size. (`#1910 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1910>`_)
+* [jsk_pcl_ros/laser_multi~] remove bug related to change in organized~.launch  (`#1907 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1907>`_)
+* heightmap_converter: fix heightmap using fixed frame (`#1903 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1903>`_)
+  * [jsk_pcl_ros] add heightmap_converter.launch
+  * [jsk_pcl_ros, heightmap_converter] add code for publishing projected TF
+  * [jsk_pcl_ros, heightmap_to_pointcloud] add method for converting height map to organized pointcloud
+
+* Add condition to use PCL1.8 for ExtractIndices (`#1902 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1902>`_)
+* Stabilize test for ColorBasedRegionGrowingSegmentation (`#1897 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1897>`_)
+* Comment out unstable test on travis (`#1897 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1897>`_)
+  * test/test_color_based_region_growing_segmentation.test
+
+* [heightmap] change type of heightmap to image/32FC2 (`#1886 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1886>`_)
+* Set invalid centroid for empty extracted cloud with indices (`#1880 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1880>`_)
+* cluster_point_indices_decomposer_nodelet.cpp: Preserve index of cluster_indices even with max/min size (`#1879 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1879>`_)
+* Fix missing dependency declaration of jsk_pcl_ros (`#1878 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1878>`_)
+  * Add roslaunch_add_file_check for openni*.launch
+
+* fixed organized_multi_plane_segmentation.launch (`#1873 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1873>`_)
+  * Fixed launch file to load jsk_pr2_startup only when RUN_SELF_FILTER is true
+
+* Contributors: Kei Okada, Kentaro Wada, Masaki Murooka, Shingo Kitagawa, Yohei Kakiuchi, Yu Ohara, Masahiro Bando, Iori Yanokura
+
 0.3.25 (2016-09-16)
 -------------------
 * fix TargetAdaptiveTrackingConfig file name (this breaks make install)

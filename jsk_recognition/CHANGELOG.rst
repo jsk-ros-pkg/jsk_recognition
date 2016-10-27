@@ -2,6 +2,9 @@
 Changelog for package jsk_recognition
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.3.25 (2016-09-16)
 -------------------
 

@@ -2,6 +2,11 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Apply context to label probability (`#1901 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1901>`_)
+* Contributors: Kentaro Wada
+
 0.3.25 (2016-09-16)
 -------------------
 

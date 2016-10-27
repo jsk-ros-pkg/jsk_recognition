@@ -2,6 +2,16 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [checkerboard_detector/CMakeLists.txt] add dependency to cfg for checkerboard_detector executable. (`#1920 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1920>`_)
+* [checkerboard_detector] enable to select option for cv::findChessboardCorners from dynamic reconfigure (`#1893 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1893>`_)
+  * [checkerboard_detector] rename variable name: mutexcalib -> mutex.
+  * [checkerboard_detector] pass parameter from dynamic reconfigure to findChessboardCorners.
+  * [checkerboard_detector] add cfg file and add dependency to dynamic reconfigure.
+
+* Contributors: Masaki Murooka
+
 0.3.25 (2016-09-16)
 -------------------
 

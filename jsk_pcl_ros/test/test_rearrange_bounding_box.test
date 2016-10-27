@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_rearrange_bounding_box.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_rearrange_bounding_box"
+        name="test_rearrange_bounding_box"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="360" retry="3">
+    <rosparam>
+      topic_0: /rearrange_bounding_box/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

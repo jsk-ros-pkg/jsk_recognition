@@ -45,6 +45,10 @@ namespace jsk_pcl_ros
     pnh_->param("scale_x", scale_x_, 1.0);
     pnh_->param("scale_y", scale_y_, 1.0);
     pnh_->param("scale_z", scale_z_, 1.0);
+    pnh_->param("rotate_x", rotate_x_, 0.0);
+    pnh_->param("rotate_y", rotate_y_, 0.0);
+    pnh_->param("rotate_z", rotate_z_, 0.0);
+    q_ = tf2::Quaternion(rotate_y_, rotate_x_, rotate_z_);
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -63,6 +67,10 @@ namespace jsk_pcl_ros
     scale_x_ = config.scale_x;
     scale_y_ = config.scale_y;
     scale_z_ = config.scale_z;
+    rotate_x_ = config.rotate_x;
+    rotate_y_ = config.rotate_y;
+    rotate_z_ = config.rotate_z;
+    q_ = tf2::Quaternion(rotate_y_, rotate_x_, rotate_z_);
   }
 
   void RearrangeBoundingBox::subscribe() {
@@ -86,6 +94,10 @@ namespace jsk_pcl_ros
       bba.boxes[i].dimensions.x *= scale_x_;
       bba.boxes[i].dimensions.y *= scale_y_;
       bba.boxes[i].dimensions.z *= scale_z_;
+      bba.boxes[i].pose.orientation.x += q_.x();
+      bba.boxes[i].pose.orientation.y += q_.y();
+      bba.boxes[i].pose.orientation.z += q_.z();
+      bba.boxes[i].pose.orientation.w += q_.w();
     }
     pub_bouding_box_array_.publish(bba);
   }

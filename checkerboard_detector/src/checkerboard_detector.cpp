@@ -91,6 +91,7 @@ public:
     int message_throttle_counter_;
     string frame_id; // tf frame id
     bool invert_color;
+    bool rectify_flug1, rectify_flug2;
     int display, verbose, maxboard;
     vector<CHECKERBOARD> vcheckers; // grid points for every checkerboard
     vector< string > vstrtypes; // type names for every grid point
@@ -315,7 +316,7 @@ public:
         ++message_throttle_counter_;
         if (message_throttle_counter_ % message_throttle_ == 0) {
             message_throttle_counter_ = 0;
-            if( Detect(_objdetmsg,*msg,this->_camInfoMsg) ) {
+            if( Detect(_objdetmsg,*msg,this->_camInfoMsg, rectify_flug2) ) {
                 if (_objdetmsg.objects.size() > 0) {
                     geometry_msgs::PoseStamped pose;
                     pose.header = _objdetmsg.header;
@@ -336,7 +337,7 @@ public:
         ++message_throttle_counter_;
         if (message_throttle_counter_ % message_throttle_ == 0) {
             message_throttle_counter_ = 0;
-            if( Detect(_objdetmsg,*msg,this->_camInfoMsg) ) {
+            if( Detect(_objdetmsg,*msg,this->_camInfoMsg, rectify_flug1) ) {
                 if (_objdetmsg.objects.size() > 0) {
                     geometry_msgs::PoseStamped pose;
                     pose.header = _objdetmsg.header;
@@ -360,13 +361,16 @@ public:
     {
         if ( camInfoSubscriber == NULL )
             camInfoSubscriber = _node.subscribe("camera_info", 1, &CheckerboardDetector::caminfo_cb, this);
-        if ( imageSubscriber == NULL )
+        if ( imageSubscriber == NULL ) {
             imageSubscriber = _node.subscribe("image", 1, &CheckerboardDetector::image_cb, this);
+            rectify_flug1 = (imageSubscriber.getTopic().find("image_rect") != std::string::npos); // rectified image has 'image_rect' in topic name
+        }
         if ( camInfoSubscriber2 == NULL )
             camInfoSubscriber2 = _node.subscribe("CameraInfo", 1, &CheckerboardDetector::caminfo_cb2, this);
-        if ( imageSubscriber2 == NULL )
+        if ( imageSubscriber2 == NULL ) {
             imageSubscriber2 = _node.subscribe("Image",1, &CheckerboardDetector::image_cb2, this);
-
+            rectify_flug2 = (imageSubscriber2.getTopic().find("image_rect") != std::string::npos); // rectified image has 'image_rect' in topic name
+        }
     }
 
     void unsubscribe( )
@@ -393,13 +397,15 @@ public:
 
     bool Detect(posedetection_msgs::ObjectDetection& objdetmsg,
                 const sensor_msgs::Image& imagemsg,
-                const sensor_msgs::CameraInfo& camInfoMsg)
+                const sensor_msgs::CameraInfo& camInfoMsg,
+                bool rectify_flug = 0)
     {
         image_geometry::PinholeCameraModel model;
         sensor_msgs::CameraInfo cam_info(camInfoMsg);
-        if (cam_info.distortion_model.empty()) {
+        if (cam_info.distortion_model.empty() || rectify_flug) {
             cam_info.distortion_model = "plumb_bob";
             cam_info.D.resize(5, 0);
+            if (!cam_info.distortion_model.empty()/* && rectify_flug */) ROS_INFO("topic name includes rect, so it applies zero distortion model");
         }
         if (use_P) {
             for (size_t i = 0; i < cam_info.D.size(); i++) {

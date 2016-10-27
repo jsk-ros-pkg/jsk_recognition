@@ -99,6 +99,7 @@ public:
     int dimx, dimy;
     bool use_P;
     double fRectSize[2];
+    bool rectify_flug_;
 
     //////////////////////////////////////////////////////////////////////////////
     // Constructor
@@ -110,6 +111,7 @@ public:
         _node.param("invert_color", invert_color, false);
         _node.param("use_P", use_P, false);
         _node.param("message_throttle", message_throttle_, 1);
+        _node.param("rectify_image", rectify_flug_, true);
         char str[32];
         int index = 0;
 
@@ -383,7 +385,7 @@ public:
     {
         image_geometry::PinholeCameraModel model;
         sensor_msgs::CameraInfo cam_info(camInfoMsg);
-        if (cam_info.distortion_model.empty()) {
+        if (cam_info.distortion_model.empty() || !rectify_flug_) {
             cam_info.distortion_model = "plumb_bob";
             cam_info.D.resize(5, 0);
         }

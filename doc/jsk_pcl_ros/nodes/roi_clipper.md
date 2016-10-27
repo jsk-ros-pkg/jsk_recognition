@@ -4,7 +4,7 @@
 
 ![](images/roi_clipper_pointcloud.png)
 
-It retrives `sensor_msgs/Image` and `sensor_msgs/CameraInfo` and publish `sensor_msgs/Image` of ROI.
+It retrieves `sensor_msgs/Image` and `sensor_msgs/CameraInfo` and publish `sensor_msgs/Image` of ROI.
 It is similar to `image_proc/crop_decimate` but you can use `CameraInfo/roi` field to specify ROI.
 
 We expect to use jsk\_pcl/ROIClipper with jsk\_pcl/AttentionClipper to get ROI image.

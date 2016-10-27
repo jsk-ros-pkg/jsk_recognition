@@ -2,8 +2,8 @@
 ## What Is This
 ![](images/attention_clipper.png)
 
-It retrives `sensor_msgs/CameraInfo` and publish `sensor_msgs/CameraInfo` with ROI filled and
-retirieves `sensor_msgs/PointCloud2` and publish `pcl_msgs/PointIndices`.
+It retrieves `sensor_msgs/CameraInfo` and publish `sensor_msgs/CameraInfo` with ROI filled and
+retrieves `sensor_msgs/PointCloud2` and publish `pcl_msgs/PointIndices`.
 
 You can specify the pose and size of the interest bounding box and jsk\_pcl/AttentionClipper returns ROI
 to see the object.

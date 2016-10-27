@@ -52,9 +52,14 @@
       publish_tf: false
     </rosparam>
   </node>
-  <node pkg="jsk_pcl_ros" type="box_array_to_box.py"
-        name="box_array_to_box">
-    <remap from="bounding_box_array" to="/cluster_decomposer_one/boxes" />
+  <node name="box_array_to_box"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/BoundingBoxArrayToBoundingBox $(arg MANAGER)">
+    <remap from="~input" to="/cluster_decomposer_one/boxes" />
+    <remap from="~output" to="bounding_box" />
+    <rosparam>
+      index: 0
+    </rosparam>
   </node>
   <node pkg="jsk_pcl_ros" type="calculate_polygon_from_imu.py"
         name="calc_polygon">

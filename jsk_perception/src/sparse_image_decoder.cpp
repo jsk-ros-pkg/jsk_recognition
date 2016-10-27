@@ -46,7 +46,7 @@ class SparseImageDecoder: public nodelet::Nodelet
       if (length <= 0) {
         useData32 = true;
         length = msg->data32.size();
-        JSK_NODELET_DEBUG("use data32 array");
+        NODELET_DEBUG("use data32 array");
       }
       _img_ptr->data.resize(_img_ptr->width * _img_ptr->height);
       // decode sparse image -> image
@@ -68,19 +68,19 @@ class SparseImageDecoder: public nodelet::Nodelet
       _img_pub.publish(*_img_ptr);
     } // end of try
     catch (...) {
-      JSK_NODELET_ERROR("making sparse image error");
+      NODELET_ERROR("making sparse image error");
     }
   } // end of do_work function
 
   void subscribe() {
-    JSK_NODELET_DEBUG("Subscribing to image topic.");
+    NODELET_DEBUG("Subscribing to image topic.");
     _spr_img_sub = _nh.subscribe("sparse_image", 3, &SparseImageDecoder::imageCallback, this);
     ros::V_string names = boost::assign::list_of("sparse_image");
     jsk_topic_tools::warnNoRemap(names);
   }
 
   void unsubscribe() {
-    JSK_NODELET_DEBUG("Unsubscribing from image topic.");
+    NODELET_DEBUG("Unsubscribing from image topic.");
     _spr_img_sub.shutdown();
   }
 

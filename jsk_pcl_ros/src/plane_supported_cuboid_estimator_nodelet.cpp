@@ -223,7 +223,7 @@ namespace jsk_pcl_ros
       pub_candidate_cloud_.publish(ros_candidate_cloud);
       // check the number of candidate points
       if (candidate_cloud_->points.size() == 0) {
-        JSK_NODELET_ERROR("No candidate cloud");
+        NODELET_ERROR("No candidate cloud");
         return;
       }
       tree_.setInputCloud(candidate_cloud_);
@@ -265,7 +265,7 @@ namespace jsk_pcl_ros
     pub_particles_.publish(ros_particles);
     }
     catch (tf2::TransformException& e) {
-      JSK_ROS_ERROR("tf exception");
+      ROS_ERROR("tf exception");
     }
   }
   
@@ -275,7 +275,7 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     NODELET_INFO("cloudCallback");
     if (!latest_polygon_msg_ || !latest_coefficients_msg_) {
-      JSK_NODELET_WARN("Not yet polygon is available");
+      NODELET_WARN("Not yet polygon is available");
       return;
     }
 

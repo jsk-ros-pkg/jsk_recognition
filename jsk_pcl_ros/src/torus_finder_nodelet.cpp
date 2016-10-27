@@ -203,7 +203,7 @@ namespace jsk_pcl_ros
     pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
     pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
     seg.segment(*inliers, *coefficients);
-    JSK_NODELET_INFO("input points: %lu", cloud->points.size());
+    NODELET_INFO("input points: %lu", cloud->points.size());
     if (inliers->indices.size() > min_size_) {
       // check direction. Torus should direct to origin of pointcloud
       // always.
@@ -256,7 +256,7 @@ namespace jsk_pcl_ros
       torus_array_msg.header = cloud_msg->header;
       torus_array_msg.toruses.push_back(torus_msg);
       pub_torus_array_with_failure_.publish(torus_array_msg);
-      JSK_NODELET_INFO("failed to find torus");
+      NODELET_INFO("failed to find torus");
     }
   }
 }

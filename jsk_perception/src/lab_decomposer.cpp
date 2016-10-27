@@ -79,7 +79,7 @@ namespace jsk_perception
       cv::cvtColor(image, lab_image, CV_RGB2Lab);
     }
     else {
-      JSK_NODELET_ERROR("unsupported format to Lab: %s", image_msg->encoding.c_str());
+      NODELET_ERROR("unsupported format to Lab: %s", image_msg->encoding.c_str());
       return;
     }
     cv::split(lab_image, lab_planes);

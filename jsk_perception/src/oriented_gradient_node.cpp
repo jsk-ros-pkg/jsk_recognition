@@ -41,7 +41,7 @@ class OrientedGradientNode {
     try {
       cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
     } catch (cv_bridge::Exception& e) {
-      JSK_ROS_ERROR("cv_bridge exception: %s", e.what());
+      ROS_ERROR("cv_bridge exception: %s", e.what());
       return;
     }
 

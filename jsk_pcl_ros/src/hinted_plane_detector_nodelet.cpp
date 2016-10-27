@@ -141,10 +141,10 @@ namespace jsk_pcl_ros {
     
     if (detectHintPlane(hint_cloud, convex) && convex) {
       if (detectLargerPlane(input_cloud, convex)) {
-        JSK_NODELET_INFO("success to detect!");
+        NODELET_INFO("success to detect!");
       }
       else {
-        JSK_NODELET_ERROR("failed to detect larger plane");
+        NODELET_ERROR("failed to detect larger plane");
       }
     }
   }
@@ -226,7 +226,7 @@ namespace jsk_pcl_ros {
       if (cluster_indices.size() == 0) {
         return;
       }
-      JSK_NODELET_INFO("%lu clusters", cluster_indices.size());
+      NODELET_INFO("%lu clusters", cluster_indices.size());
       pcl::PointIndices::Ptr filtered_indices
         = getBestCluster(cloud, cluster_indices, hint_convex);
       output = *filtered_indices;
@@ -302,7 +302,7 @@ namespace jsk_pcl_ros {
                 hint_convex->getNormal(),
                 *plane_inliers, *plane_coefficients);
     if (plane_inliers->indices.size() < min_size_) { // good!
-      JSK_NODELET_ERROR("failed to detect by plane fitting filtering");
+      NODELET_ERROR("failed to detect by plane fitting filtering");
       return false;
     }
     // Check direction of plane_coefficients
@@ -319,7 +319,7 @@ namespace jsk_pcl_ros {
     euclideanFilter(input_cloud, plane_inliers, hint_convex,
                     *euclidean_filtered_indices);
     if (euclidean_filtered_indices->indices.size() < min_size_) {
-      JSK_NODELET_ERROR("failed to detect by euclidean filtering");
+      NODELET_ERROR("failed to detect by euclidean filtering");
       return false;
     }
     pcl::PointIndices::Ptr density_filtered_indices (new pcl::PointIndices);
@@ -327,7 +327,7 @@ namespace jsk_pcl_ros {
       input_cloud, euclidean_filtered_indices, *density_filtered_indices);
       
     if (density_filtered_indices->indices.size() < min_size_) {
-      JSK_NODELET_ERROR("failed to detect by density filtering");
+      NODELET_ERROR("failed to detect by density filtering");
       return false;
     }
     jsk_recognition_utils::ConvexPolygon::Ptr convex
@@ -392,7 +392,7 @@ namespace jsk_pcl_ros {
       return true;
     }
     else {
-      JSK_NODELET_ERROR("Failed to find hint plane");
+      NODELET_ERROR("Failed to find hint plane");
       return false;
     }
   }

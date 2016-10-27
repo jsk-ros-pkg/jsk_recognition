@@ -87,15 +87,15 @@ namespace jsk_pcl_ros_utils
     const std::vector<jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr>& coefficients_array)
   {
     if (arrays.size() == 0) {
-      JSK_NODELET_ERROR("there is not enough polygons");
+      NODELET_ERROR("there is not enough polygons");
       return;
     }
     if (coefficients_array.size() == 0) {
-      JSK_NODELET_ERROR("there is not enough coefficients");
+      NODELET_ERROR("there is not enough coefficients");
       return;
     }
     if (arrays.size() != coefficients_array.size()) {
-      JSK_NODELET_ERROR("polygons and coefficients are not the same length");
+      NODELET_ERROR("polygons and coefficients are not the same length");
       return;
     }
     jsk_recognition_msgs::PolygonArray new_array;

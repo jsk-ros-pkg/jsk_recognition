@@ -50,7 +50,7 @@ namespace jsk_perception
     pnh_->param("reference_file", reference_file, std::string(""));
     reference_from_file_ = !reference_file.empty();
     if (reference_from_file_) {
-      JSK_ROS_INFO("Reading reference from %s", reference_file.c_str());
+      ROS_INFO("Reading reference from %s", reference_file.c_str());
       readReference(reference_file);
     }
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
@@ -136,7 +136,7 @@ namespace jsk_perception
         read_msg.bins.push_back(bin);
       }
     } else {
-      JSK_ROS_ERROR_STREAM("bins: keyword is not found in file(" << file << ")");
+      ROS_ERROR_STREAM("bins: keyword is not found in file(" << file << ")");
     }
  #endif
     reference_ = boost::make_shared<jsk_recognition_msgs::HistogramWithRange>(read_msg);
@@ -185,7 +185,7 @@ namespace jsk_perception
     else if (coefficient_method_ == 4 || coefficient_method_ == 5) {
       cv::Mat ref_sig = cv::Mat::zeros(ref_hist.cols, 2, CV_32FC1);
       cv::Mat target_sig = cv::Mat::zeros(ref_hist.cols, 2, CV_32FC1);
-      //JSK_NODELET_INFO("ref_hist.cols = %d", ref_hist.cols);
+      //NODELET_INFO("ref_hist.cols = %d", ref_hist.cols);
       for (size_t i = 0; i < ref_hist.cols; i++) {
         ref_sig.at<float>(i, 0) = ref_hist.at<float>(0, i);
         target_sig.at<float>(i, 0) = target_hist.at<float>(0, i);
@@ -202,7 +202,7 @@ namespace jsk_perception
       }
     }
     else {
-      JSK_NODELET_ERROR("unknown coefficiet method: %d", coefficient_method_);
+      NODELET_ERROR("unknown coefficiet method: %d", coefficient_method_);
       return 0;
     }
   }
@@ -216,7 +216,7 @@ namespace jsk_perception
       return;
     }
     if (polygon_msg->polygons.size() != histogram_msg->histograms.size()) {
-      JSK_NODELET_ERROR("length of polygon and histogram are not same");
+      NODELET_ERROR("length of polygon and histogram are not same");
       return;
     }
     cv::MatND reference_histogram

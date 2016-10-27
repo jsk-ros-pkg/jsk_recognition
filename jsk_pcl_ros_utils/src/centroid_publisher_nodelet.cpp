@@ -88,7 +88,7 @@ namespace jsk_pcl_ros_utils
     if (publish_tf_) {
       if (!pnh_->getParam("frame", frame_))
       {
-        JSK_ROS_WARN("~frame is not specified, using %s", getName().c_str());
+        ROS_WARN("~frame is not specified, using %s", getName().c_str());
         frame_ = getName();
       }
       // do not use DiagnosticNodelet functionality when ~publish_tf is false

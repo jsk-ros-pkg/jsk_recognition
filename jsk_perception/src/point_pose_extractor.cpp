@@ -166,16 +166,16 @@ public:
     posedetection_msgs::Feature0DDetect srv;
 
     if ( _template_img.empty()) {
-      JSK_ROS_ERROR ("template picture is empty.");
+      ROS_ERROR ("template picture is empty.");
       return -1;
     }
-    JSK_ROS_INFO_STREAM("read template image and call " << client.getService() << " service");
+    ROS_INFO_STREAM("read template image and call " << client.getService() << " service");
     cv_bridge::CvImage cv_img;
     cv_img.image = cv::Mat(_template_img);
     cv_img.encoding = std::string("bgr8");
     srv.request.image = *(cv_img.toImageMsg());
     if (client.call(srv)) {
-      JSK_ROS_INFO_STREAM("get features with " << srv.response.features.scales.size() << " descriptoins");
+      ROS_INFO_STREAM("get features with " << srv.response.features.scales.size() << " descriptoins");
       features2keypoint (srv.response.features, _template_keypoints, _template_descriptors);
 
       // inverse affine translation
@@ -198,7 +198,7 @@ public:
       //      _template_img = dst;
       return 0;
     } else {
-      JSK_ROS_ERROR("Failed to call service Feature0DDetect");
+      ROS_ERROR("Failed to call service Feature0DDetect");
       return 1;
     }
   }
@@ -254,7 +254,7 @@ public:
     }
     if ( _template_keypoints.size()== 0 &&
          _template_descriptors.empty() ) {
-      JSK_ROS_ERROR ("Template image was not set.");
+      ROS_ERROR ("Template image was not set.");
       return false;
     }
     // stacked image
@@ -283,13 +283,13 @@ public:
       }
     }
     if ( queryIdxs.size() == 0 ) {
-      JSK_ROS_WARN_STREAM("could not found matched points with distanceratio(" <<_distanceratio_threshold << ")");
+      ROS_WARN_STREAM("could not found matched points with distanceratio(" <<_distanceratio_threshold << ")");
     } else {
       cv::KeyPoint::convert(_template_keypoints,pt1,queryIdxs);
       cv::KeyPoint::convert(sourceimg_keypoints,pt2,trainIdxs);
     }
 
-    JSK_ROS_INFO ("Found %d total matches among %d template keypoints", (int)pt2.size(), (int)_template_keypoints.size());
+    ROS_INFO ("Found %d total matches among %d template keypoints", (int)pt2.size(), (int)_template_keypoints.size());
 
     cv::Mat H;
     std::vector<uchar> mask((int)pt2.size());
@@ -345,15 +345,15 @@ public:
     }
 
     // draw correspondances
-    JSK_ROS_INFO("  _correspondances.size: %d", (int)_correspondances.size());
+    ROS_INFO("  _correspondances.size: %d", (int)_correspondances.size());
     for (int j = 0; j < (int)_correspondances.size(); j++){
       cv::circle(stack_img, cv::Point2f(_correspondances.at(j).x, _correspondances.at(j).y + _template_img.size().height),
                  8, CV_RGB(255,0,0), -1);
     }
 
-    JSK_ROS_INFO("    inlier_sum:%d   min_lier:%d", inlier_sum, min_inlier((int)pt2.size(), 4, 0.10, 0.01));
+    ROS_INFO("    inlier_sum:%d   min_lier:%d", inlier_sum, min_inlier((int)pt2.size(), 4, 0.10, 0.01));
     if ((cv::countNonZero( H ) == 0) || (inlier_sum < min_inlier((int)pt2.size(), 4, 0.10, 0.01))){
-      JSK_ROS_INFO("    inlier_sum < min_lier return-from estimate-od");
+      ROS_INFO("    inlier_sum < min_lier return-from estimate-od");
       if( _window_name != "" )
         cv::imshow(_window_name, stack_img);
       return false;
@@ -406,7 +406,7 @@ public:
 
     resulttf = checktf * _relativepose;
 
-    JSK_ROS_INFO( "      tx: (%0.2lf,%0.2lf,%0.2lf) rx: (%0.2lf,%0.2lf,%0.2lf)",
+    ROS_INFO( "      tx: (%0.2lf,%0.2lf,%0.2lf) rx: (%0.2lf,%0.2lf,%0.2lf)",
               resulttf.getOrigin().getX(),
               resulttf.getOrigin().getY(),
               resulttf.getOrigin().getZ(),
@@ -455,7 +455,7 @@ public:
       }
       if((max_x - min_x) < 30 || (max_y - min_y) < 30 ||
          src_img.rows < (max_x - min_x)/2 || src_img.cols < (max_y - min_y)/2){
-        JSK_ROS_INFO("        matched region is too big or small (2< && <30) width:%f height:%f return-from estimate-od", max_x - min_x, max_y - min_y);
+        ROS_INFO("        matched region is too big or small (2< && <30) width:%f height:%f return-from estimate-od", max_x - min_x, max_y - min_y);
         return false;
       }
     }
@@ -468,7 +468,7 @@ public:
       err_sum += err;
     }
     if (err_sum > err_thr){
-      JSK_ROS_INFO("          err_sum:%f > err_thr:%f return-from estimate-od", err_sum, err_thr);
+      ROS_INFO("          err_sum:%f > err_thr:%f return-from estimate-od", err_sum, err_thr);
       err_success = false;
     }
     // draw lines around the detected object
@@ -529,7 +529,7 @@ public:
       cv::putText (stack_img, text, cv::Point(x, y),
                    0, text_scale, CV_RGB(0, 255, 0),
                    2, 8, false);
-      JSK_ROS_INFO("      %s < %f (threshold)", text.c_str(), err_thr );
+      ROS_INFO("      %s < %f (threshold)", text.c_str(), err_thr );
     }
     // for debug window
     if( _window_name != "" )
@@ -661,18 +661,18 @@ public:
     switch (event){
     case CV_EVENT_LBUTTONUP: {
       cv::Point2d pt(x,y - (int)mt->_template_img.size().height);
-      JSK_ROS_INFO("add correspondence (%d, %d)", (int)pt.x, (int)pt.y);
+      ROS_INFO("add correspondence (%d, %d)", (int)pt.x, (int)pt.y);
       mt->_correspondances.push_back(pt);
       if ((int)mt->_correspondances.size() >= 4){
         make_template_from_mousecb(mt);
         mt->_correspondances.clear();
-        JSK_ROS_INFO("reset");
+        ROS_INFO("reset");
       }
       break;
     }
     case CV_EVENT_RBUTTONUP: {
       mt->_correspondances.clear();
-      JSK_ROS_INFO("reset");
+      ROS_INFO("reset");
       break;
     }
     }
@@ -725,7 +725,7 @@ public:
     cv::Mat template_img;
     template_img = cv::imread (template_filename, 1);
     if ( template_img.empty()) {
-      JSK_ROS_ERROR ("template picture <%s> cannot read. template picture is not found or uses unsuported format.", template_filename.c_str());
+      ROS_ERROR ("template picture <%s> cannot read. template picture is not found or uses unsuported format.", template_filename.c_str());
       return;
     }
 
@@ -901,7 +901,7 @@ public:
     features2keypoint (msg->features, sourceimg_keypoints, sourceimg_descriptors);
     pcam.fromCameraInfo(msg->info);
     if ( cv::countNonZero(pcam.intrinsicMatrix()) == 0 ) {
-      JSK_ROS_FATAL("intrinsic matrix is zero, your camera info looks invalid");
+      ROS_FATAL("intrinsic matrix is zero, your camera info looks invalid");
     }
     if ( !_initialized ) {
       // make template images from camera info
@@ -911,14 +911,14 @@ public:
     }
 
     if ( sourceimg_keypoints.size () < 2 ) {
-      JSK_ROS_INFO ("The number of keypoints in source image is less than 2");
+      ROS_INFO ("The number of keypoints in source image is less than 2");
     }
     else {
       // make KDTree
       cv::flann::Index *ft = new cv::flann::Index(sourceimg_descriptors, cv::flann::KDTreeIndexParams(1));
 
       // matching and detect object
-      JSK_ROS_INFO("_templates size: %d", (int)_templates.size());
+      ROS_INFO("_templates size: %d", (int)_templates.size());
       for (int i = 0; i < (int)_templates.size(); i++){
         posedetection_msgs::Object6DPose o6p;
 
@@ -963,7 +963,7 @@ public:
                 _sub.shutdown();
           static int i = 0;
           if ( i++ % 100 == 0 ) {
-              JSK_ROS_INFO("wait for subscriberes ... %s", _pub.getTopic().c_str());
+              ROS_INFO("wait for subscriberes ... %s", _pub.getTopic().c_str());
           }
         } else {
           if(!_sub)
@@ -978,19 +978,19 @@ public:
     std::cout << "id = " << config.template_id << std::endl;
     std::cout << "lvl = " << level << std::endl;
     if((int)_templates.size() <= config.template_id) {
-      JSK_ROS_WARN("template_id is invalid");
+      ROS_WARN("template_id is invalid");
       config.template_id = 0;
       if(_templates.size() != 0)
         config.frame_id = _templates[0]->_matching_frame;
     } else {
       Matching_Template* tmpl = _templates[config.template_id];
       if(config.frame_id == tmpl->_matching_frame) {
-        JSK_ROS_WARN("update params");
+        ROS_WARN("update params");
         tmpl->_reprojection_threshold = config.reprojection_threshold;
         tmpl->_distanceratio_threshold = config.distanceratio_threshold;
         _err_thr = config.error_threshold;
       } else {
-        JSK_ROS_WARN("get params");
+        ROS_WARN("get params");
         config.frame_id = tmpl->_matching_frame;
         config.reprojection_threshold = tmpl->_reprojection_threshold;
         config.distanceratio_threshold = tmpl->_distanceratio_threshold;

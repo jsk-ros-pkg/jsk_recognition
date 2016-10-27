@@ -99,7 +99,7 @@ namespace jsk_perception
                                       mask_image).toImageMsg());
     }
     else {
-      JSK_NODELET_WARN("no camera info is available");
+      NODELET_WARN("no camera info is available");
     }
   }
 

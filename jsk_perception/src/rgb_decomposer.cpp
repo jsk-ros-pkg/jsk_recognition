@@ -68,7 +68,7 @@ namespace jsk_perception
     const sensor_msgs::Image::ConstPtr& image_msg)
   {
     if ((image_msg->width == 0) && (image_msg->height == 0)) {
-        JSK_ROS_WARN("invalid image input");
+        ROS_WARN("invalid image input");
         return;
     }
     cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(

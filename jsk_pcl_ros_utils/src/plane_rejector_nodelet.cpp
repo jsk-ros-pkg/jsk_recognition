@@ -59,7 +59,7 @@ namespace jsk_pcl_ros_utils
         &PlaneRejector::updateDiagnosticsPlaneRejector,
         this, _1));
     if (!pnh_->getParam("processing_frame_id", processing_frame_id_)) {
-      JSK_NODELET_FATAL("You need to specify ~processing_frame_id");
+      NODELET_FATAL("You need to specify ~processing_frame_id");
       return;
     }
     pnh_->param("use_inliers", use_inliers_, false);
@@ -68,11 +68,11 @@ namespace jsk_pcl_ros_utils
     std::vector<double> reference_axis;
     if (!jsk_topic_tools::readVectorParameter(
           *pnh_, "reference_axis", reference_axis)) {
-      JSK_NODELET_FATAL("you need to specify ~reference_axis");
+      NODELET_FATAL("you need to specify ~reference_axis");
       return;
     }
     else if (reference_axis.size() != 3){
-      JSK_NODELET_FATAL("~reference_axis is not 3 length vector");
+      NODELET_FATAL("~reference_axis is not 3 length vector");
       return;
     }
     else {

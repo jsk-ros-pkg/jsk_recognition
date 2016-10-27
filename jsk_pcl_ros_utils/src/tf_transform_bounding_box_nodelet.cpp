@@ -44,7 +44,7 @@ namespace jsk_pcl_ros_utils
   {
     DiagnosticNodelet::onInit();
     if (!pnh_->getParam("target_frame_id", target_frame_id_)) {
-      JSK_ROS_FATAL("~target_frame_id is not specified");
+      ROS_FATAL("~target_frame_id is not specified");
       return;
     }
 
@@ -109,11 +109,11 @@ namespace jsk_pcl_ros_utils
     }
     catch (tf2::ConnectivityException &e)
     {
-      JSK_NODELET_ERROR("Transform error: %s", e.what());
+      NODELET_ERROR("Transform error: %s", e.what());
     }
     catch (tf2::InvalidArgumentException &e)
     {
-      JSK_NODELET_ERROR("Transform error: %s", e.what());
+      NODELET_ERROR("Transform error: %s", e.what());
     }
     catch (...)
     {

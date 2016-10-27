@@ -113,13 +113,13 @@ namespace jsk_perception
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (!info_) {
-      JSK_NODELET_WARN("No camera_info is available");
+      NODELET_WARN("No camera_info is available");
       return;
     }
     // check frame_id
     if (!jsk_recognition_utils::isSameFrameId(image_msg->header.frame_id,
                                               polygon_msg->header.frame_id)) {
-      JSK_NODELET_ERROR("frame_id does not match. image: %s, polygon: %s",
+      NODELET_ERROR("frame_id does not match. image: %s, polygon: %s",
                         image_msg->header.frame_id.c_str(),
                         polygon_msg->header.frame_id.c_str());
       return;
@@ -165,7 +165,7 @@ namespace jsk_perception
     }
     catch (...)
     {
-      JSK_NODELET_ERROR("Failed to resolve tf");
+      NODELET_ERROR("Failed to resolve tf");
     }
 
   }

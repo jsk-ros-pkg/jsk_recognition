@@ -175,7 +175,7 @@ public:
       }
     catch (cv_bridge::Exception error)
       {
-        JSK_ROS_ERROR("error");
+        ROS_ERROR("error");
       }
 
     frame.copyTo(image_);
@@ -236,7 +236,7 @@ public:
 	  pub_result_.publish(result_msg);
 
 	} catch (...) {
-	  JSK_ROS_WARN("illegal tracBox = x:%f y:%f width:%f height:%f angle:%f",
+	  ROS_WARN("illegal tracBox = x:%f y:%f width:%f height:%f angle:%f",
 		   trackBox_.center.x, trackBox_.center.y,
 		   trackBox_.size.width, trackBox_.size.height,
 		   trackBox_.angle);
@@ -353,7 +353,7 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "camshiftdemo");
   ros::NodeHandle n;
   if (n.resolveName("image") == "/image") {
-    JSK_ROS_WARN("%s: image has not been remapped! Typical command-line usage:\n"
+    ROS_WARN("%s: image has not been remapped! Typical command-line usage:\n"
              "\t$ ./%s image:=<image topic>", argv[0], argv[0]);
   }
 

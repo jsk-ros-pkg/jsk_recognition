@@ -196,7 +196,7 @@ namespace jsk_pcl_ros
     std::vector<pcl::ModelCoefficients::Ptr>& output_coefficients)
   {
     if (all_inliers.size() == 0) {
-      JSK_NODELET_ERROR("no edges are specified");
+      NODELET_ERROR("no edges are specified");
       return;
     }
 
@@ -282,7 +282,7 @@ namespace jsk_pcl_ros
     }
 
     // print result for debug
-    // JSK_NODELET_INFO("%lu duplication set", duplication_set_list.size());
+    // NODELET_INFO("%lu duplication set", duplication_set_list.size());
     // for (size_t i = 0; i < duplication_set_list.size(); i++) {
     //   std::stringstream ss;
     //   ss << "[";
@@ -292,7 +292,7 @@ namespace jsk_pcl_ros
     //   {
     //     ss << *it << ", ";
     //   }
-    //   JSK_NODELET_INFO("%s", ss.str().c_str());
+    //   NODELET_INFO("%s", ss.str().c_str());
     // }
     
     // for (size_t i = 0; i < all_inliers.size() - 1; i++) {
@@ -302,7 +302,7 @@ namespace jsk_pcl_ros
     //   for (size_t j = 0; j < similar_indices.size(); j++) {
     //     ss << similar_indices[j] << ", ";
     //   }
-    //   JSK_NODELET_INFO("%s", ss.str().c_str());
+    //   NODELET_INFO("%s", ss.str().c_str());
     // }
   }
   

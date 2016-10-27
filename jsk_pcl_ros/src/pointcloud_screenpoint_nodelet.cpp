@@ -133,12 +133,12 @@ void jsk_pcl_ros::PointcloudScreenpoint::onInit()
 bool jsk_pcl_ros::PointcloudScreenpoint::checkpoint (pcl::PointCloud< pcl::PointXYZ > &in_pts, int x, int y,
                                                      float &resx, float &resy, float &resz)  {
   if ((x < 0) || (y < 0) || (x >= in_pts.width) || (y >= in_pts.height)) {
-    JSK_ROS_WARN("Requested point is out of image size.  point: (%d, %d)  size: (%d, %d)", x, y, in_pts.width, in_pts.height);
+    ROS_WARN("Requested point is out of image size.  point: (%d, %d)  size: (%d, %d)", x, y, in_pts.width, in_pts.height);
     return false;
   }
   pcl::PointXYZ p = in_pts.points[in_pts.width * y + x];
   // search near points
-  JSK_ROS_INFO("Request: screenpoint (%d, %d) => (%f, %f, %f)", x, y, p.x, p.y, p.z);
+  ROS_INFO("Request: screenpoint (%d, %d) => (%f, %f, %f)", x, y, p.x, p.y, p.z);
   //return !(isnan (p.x) || ( (p.x == 0.0) && (p.y == 0.0) && (p.z == 0.0)));
 
   if ( !isnan (p.x) && ((p.x != 0.0) || (p.y != 0.0) || (p.z == 0.0)) ) {
@@ -154,7 +154,7 @@ bool jsk_pcl_ros::PointcloudScreenpoint::extract_point (pcl::PointCloud< pcl::Po
 
   x = reqx < 0.0 ? ceil(reqx - 0.5) : floor(reqx + 0.5);
   y = reqy < 0.0 ? ceil(reqy - 0.5) : floor(reqy + 0.5);
-  JSK_ROS_INFO("Request : %d %d", x, y);
+  ROS_INFO("Request : %d %d", x, y);
 
   if (checkpoint (in_pts, x, y, resx, resy, resz)) {
     return true;
@@ -189,10 +189,10 @@ bool jsk_pcl_ros::PointcloudScreenpoint::extract_point (pcl::PointCloud< pcl::Po
 bool jsk_pcl_ros::PointcloudScreenpoint::screenpoint_cb (jsk_pcl_ros::TransformScreenpoint::Request &req,
                                                          jsk_pcl_ros::TransformScreenpoint::Response &res)
 {
-  JSK_ROS_DEBUG("PointcloudScreenpoint::screenpoint_cb");
+  ROS_DEBUG("PointcloudScreenpoint::screenpoint_cb");
   boost::mutex::scoped_lock lock(this->mutex_callback_);
   if ( pts_.points.size() == 0 ) {
-    JSK_ROS_ERROR("no point cloud was received");
+    ROS_ERROR("no point cloud was received");
     return false;
   }
 
@@ -245,7 +245,7 @@ bool jsk_pcl_ros::PointcloudScreenpoint::screenpoint_cb (jsk_pcl_ros::TransformS
 }
 
 void jsk_pcl_ros::PointcloudScreenpoint::points_cb(const sensor_msgs::PointCloud2ConstPtr &msg) {
-  //JSK_ROS_DEBUG("PointcloudScreenpoint::points_cb");
+  //ROS_DEBUG("PointcloudScreenpoint::points_cb");
   //boost::mutex::scoped_lock lock(this->mutex_callback_);
   header_ = msg->header;
   pcl::fromROSMsg (*msg, pts_);
@@ -374,7 +374,7 @@ void jsk_pcl_ros::PointcloudScreenpoint::poly_cb(const geometry_msgs::PolygonSta
     float rx, ry, rz;
     bool ret = extract_point (pts_, p.x, p.y, rx, ry, rz);
     if (!ret) {
-      JSK_NODELET_ERROR("Failed to project point");
+      NODELET_ERROR("Failed to project point");
       return;
     }
     geometry_msgs::Point32 p_projected;

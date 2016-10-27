@@ -60,7 +60,7 @@ namespace jsk_perception
     rospack::ROSPack rp;
     rospack::Package *p = rp.get_pkg("jsk_perception");
     if (p == NULL) {
-      JSK_ROS_ERROR("Package path of 'jsk_perception' does not found");
+      ROS_ERROR("Package path of 'jsk_perception' does not found");
       exit(1);
     } else {
        training_path = p->path + std::string("/trained_data/ObjectnessTrainedModel");
@@ -74,12 +74,12 @@ namespace jsk_perception
     if (rp.find("jsk_perception", path) == true) {
       training_path = path + std::string("/trained_data/ObjectnessTrainedModel");
     } else {
-      JSK_ROS_ERROR("Package path of 'jsk_perception' does not found");
+      ROS_ERROR("Package path of 'jsk_perception' does not found");
       exit(1);
     }
 #endif
     if (!boost::filesystem::exists(training_path)) {
-      JSK_ROS_ERROR("Training data path '%s' does not exist", training_path.c_str());
+      ROS_ERROR("Training data path '%s' does not exist", training_path.c_str());
       exit(1);
     }
     // setup bing

@@ -121,7 +121,7 @@ namespace jsk_pcl_ros
     pcl_conversions::toPCL(*indices_msg, *indices);
     samples_.push_back(cloud);
     sample_indices_.push_back(indices);
-    JSK_NODELET_INFO("%lu samples", samples_.size());
+    NODELET_INFO("%lu samples", samples_.size());
   }
 
   void LINEMODTrainer::subscribeCloud(
@@ -132,7 +132,7 @@ namespace jsk_pcl_ros
       (new pcl::PointCloud<pcl::PointXYZRGBA>);
     pcl::fromROSMsg(*cloud_msg, *cloud);
     samples_before_sampling_.push_back(cloud);
-    JSK_NODELET_INFO("%lu samples", samples_.size());
+    NODELET_INFO("%lu samples", samples_.size());
   }
 
   void LINEMODTrainer::subscribeCameraInfo(
@@ -147,7 +147,7 @@ namespace jsk_pcl_ros
     std_srvs::Empty::Response& res)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    JSK_NODELET_INFO("clearing %lu samples", samples_.size());
+    NODELET_INFO("clearing %lu samples", samples_.size());
     samples_.clear();
     sample_indices_.clear();
     return true;
@@ -255,13 +255,13 @@ namespace jsk_pcl_ros
   
   void LINEMODTrainer::trainWithViewpointSampling()
   {
-    JSK_NODELET_INFO("Start LINEMOD training from %lu samples", samples_before_sampling_.size());
+    NODELET_INFO("Start LINEMOD training from %lu samples", samples_before_sampling_.size());
     if (!camera_info_) {
-      JSK_NODELET_FATAL("no camera info is available");
+      NODELET_FATAL("no camera info is available");
       return;
     }
     if (samples_before_sampling_.size() != 1) {
-      JSK_NODELET_FATAL("we expect only one training pointcloud, but it has %lu pointclouds",
+      NODELET_FATAL("we expect only one training pointcloud, but it has %lu pointclouds",
                     samples_before_sampling_.size());
       return;
     }
@@ -270,7 +270,7 @@ namespace jsk_pcl_ros
     model.fromCameraInfo(camera_info_);
     
     if (samples_before_sampling_.size() != 1) {
-      JSK_NODELET_FATAL("we expect only one sample data");
+      NODELET_FATAL("we expect only one sample data");
       return;
     }
     ViewpointSampler sampler(sample_viewpoint_angle_step_,
@@ -337,7 +337,7 @@ namespace jsk_pcl_ros
       {
         boost::mutex::scoped_lock lock(train_mutex);
         ++counter;
-        JSK_NODELET_INFO("training: %d/%lu", counter, sampler.sampleNum());
+        NODELET_INFO("training: %d/%lu", counter, sampler.sampleNum());
         linemod.createAndAddTemplate(modalities, masks, region);
         pose_in_order_of_training.push_back(transforms[j]);
       }
@@ -348,13 +348,13 @@ namespace jsk_pcl_ros
     // 3. pose yaml about the template
     std::ofstream linemod_file;
     const std::string linemod_file_name = output_file_ + ".linemod";
-    JSK_NODELET_INFO("writing to %s", linemod_file_name.c_str());
+    NODELET_INFO("writing to %s", linemod_file_name.c_str());
     linemod_file.open(linemod_file_name.c_str(),
                       std::ofstream::out | std::ofstream::binary);
     linemod.serialize(linemod_file);
     linemod_file.close();
     const std::string pcd_file_name = output_file_ + ".pcd";
-    JSK_NODELET_INFO("writing to %s", pcd_file_name.c_str());
+    NODELET_INFO("writing to %s", pcd_file_name.c_str());
     pcl::PCDWriter writer;
     writer.writeBinaryCompressed(pcd_file_name, *raw_cloud);
     // pose yaml
@@ -377,7 +377,7 @@ namespace jsk_pcl_ros
       }
     }
     pose_file.close();
-    JSK_NODELET_INFO("done");
+    NODELET_INFO("done");
   }
 
   void LINEMODTrainer::generateLINEMODTrainingData(
@@ -503,14 +503,14 @@ namespace jsk_pcl_ros
   
   void LINEMODTrainer::trainWithoutViewpointSampling()
   {
-    JSK_NODELET_INFO("Start LINEMOD training from %lu samples", samples_.size());
+    NODELET_INFO("Start LINEMOD training from %lu samples", samples_.size());
     boost::filesystem::path temp = boost::filesystem::unique_path();
     boost::filesystem::create_directory(temp);
     std::string tempstr = temp.native();
-    JSK_NODELET_INFO("mkdir %s", tempstr.c_str());
+    NODELET_INFO("mkdir %s", tempstr.c_str());
     std::vector<std::string> all_files;
     for (size_t i = 0; i < samples_.size(); i++) {
-      JSK_NODELET_INFO("Processing %lu-th data", i);
+      NODELET_INFO("Processing %lu-th data", i);
       pcl::PointIndices::Ptr mask = sample_indices_[i];
       pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud = samples_[i];
       //std::vector<std::string> files = trainOneData(cloud, mask, tempstr, i);
@@ -519,14 +519,14 @@ namespace jsk_pcl_ros
       // }
     }
     tar(tempstr, output_file_);
-    JSK_NODELET_INFO("done");
+    NODELET_INFO("done");
   }
 
   void LINEMODTrainer::tar(const std::string& directory, const std::string& output)
   {
     std::stringstream command_stream;
     command_stream << "tar --format=ustar -cf " << output << " " << directory << "/*";
-    JSK_NODELET_INFO("executing %s", command_stream.str().c_str());
+    NODELET_INFO("executing %s", command_stream.str().c_str());
     int ret = system(command_stream.str().c_str());
   }
   
@@ -572,7 +572,7 @@ namespace jsk_pcl_ros
         Eigen::Vector4f minpt, maxpt;
         pcl::getMinMax3D<pcl::PointXYZRGBA>(transformed_cloud, minpt, maxpt);
         jsk_recognition_msgs::BoundingBox bbox = jsk_recognition_utils::boundingBoxFromPointCloud(transformed_cloud);
-        //JSK_ROS_INFO("bounding box size: [%f, %f, %f]", bbox.dimensions.x, bbox.dimensions.y, bbox.dimensions.z);
+        //ROS_INFO("bounding box size: [%f, %f, %f]", bbox.dimensions.x, bbox.dimensions.y, bbox.dimensions.z);
         template_bboxes_.push_back(bbox);
       }
     }
@@ -667,7 +667,7 @@ namespace jsk_pcl_ros
   void LINEMODDetector::detect(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
-    JSK_NODELET_INFO("detect");
+    NODELET_INFO("detect");
     vital_checker_->poke();
     boost::mutex::scoped_lock lock(mutex_);
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr
@@ -684,7 +684,7 @@ namespace jsk_pcl_ros
     modalities.push_back(&surface_normal_mod_);
     linemod_.detectTemplatesSemiScaleInvariant(modalities, linemod_detections,
                                                0.6944444f, 1.44f, 1.2f);
-    JSK_NODELET_INFO("detected %lu result", linemod_detections.size());
+    NODELET_INFO("detected %lu result", linemod_detections.size());
     // lookup the best result
     if (linemod_detections.size() > 0) {
       double max_score = 0;

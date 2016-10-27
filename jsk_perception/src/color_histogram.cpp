@@ -264,7 +264,7 @@ namespace jsk_perception
     }
     catch (cv_bridge::Exception& e)
     {
-      JSK_NODELET_ERROR("cv_bridge exception: %s", e.what());
+      NODELET_ERROR("cv_bridge exception: %s", e.what());
       return;
     }
   }
@@ -294,7 +294,7 @@ namespace jsk_perception
     }
     catch (cv_bridge::Exception& e)
     {
-      JSK_NODELET_ERROR("cv_bridge exception: %s", e.what());
+      NODELET_ERROR("cv_bridge exception: %s", e.what());
       return;
     }
 

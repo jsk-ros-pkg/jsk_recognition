@@ -40,7 +40,7 @@ class SparseImageEncoder: public nodelet::Nodelet
       bool useData32 = false;
       if (std::max(msg->width, msg->height) > 256){
         useData32 = true;
-        JSK_NODELET_DEBUG("use data32 array");
+        NODELET_DEBUG("use data32 array");
       }
 
       _spr_img_ptr->header.stamp = msg->header.stamp;
@@ -65,14 +65,14 @@ class SparseImageEncoder: public nodelet::Nodelet
         int size = 0;
         if (useData32) size = _spr_img_ptr->data32.size();
         else size = _spr_img_ptr->data16.size();
-        JSK_NODELET_INFO("%d point encoded. encoded area per is %lf%%.", size, (100 * ((double) size)/(msg->height* msg->width)));
+        NODELET_INFO("%d point encoded. encoded area per is %lf%%.", size, (100 * ((double) size)/(msg->height* msg->width)));
       }
 
       // publish sparse image message
       _spr_img_pub.publish(*_spr_img_ptr);
     } // end of try
     catch (...) {
-      JSK_NODELET_ERROR("making sparse image error");
+      NODELET_ERROR("making sparse image error");
     }
 
     ros::Rate pubRate(_rate); // hz
@@ -80,14 +80,14 @@ class SparseImageEncoder: public nodelet::Nodelet
   } // end of do_work function
 
   void subscribe() {
-    JSK_NODELET_DEBUG("Subscribing to image topic.");
+    NODELET_DEBUG("Subscribing to image topic.");
     _img_sub = _it->subscribe("image", 3, &SparseImageEncoder::imageCallback, this);
     ros::V_string names = boost::assign::list_of("image");
     jsk_topic_tools::warnNoRemap(names);
   }
 
   void unsubscribe() {
-    JSK_NODELET_DEBUG("Unsubscribing from image topic.");
+    NODELET_DEBUG("Unsubscribing from image topic.");
     _img_sub.shutdown();
   }
 

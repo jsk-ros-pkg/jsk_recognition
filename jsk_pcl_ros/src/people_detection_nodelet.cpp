@@ -53,7 +53,7 @@ namespace jsk_pcl_ros {
     pnh_->param<std::string>("filename", trained_filename_, "");
 
     if (trained_filename_ == "") {
-      JSK_NODELET_FATAL("Please set svm file name");
+      NODELET_FATAL("Please set svm file name");
     }
 
     person_classifier_.loadSVMFromFile(trained_filename_);  // load trained SVM

@@ -119,13 +119,13 @@ namespace jsk_recognition_utils
   {
     bool result = cells_.find(pair) != cells_.end();
     // Verbosing for debug
-    // JSK_ROS_INFO("Checking index pair (%d, %d)", pair.get<0>(), pair.get<1>());
-    // JSK_ROS_INFO("Result: %d", result);
-    // JSK_ROS_INFO("cells are:");
+    // ROS_INFO("Checking index pair (%d, %d)", pair.get<0>(), pair.get<1>());
+    // ROS_INFO("Result: %d", result);
+    // ROS_INFO("cells are:");
     // for (IndexPairSet::iterator it = cells_.begin();
     //      it != cells_.end();
     //      ++it) {
-    //   JSK_ROS_INFO("  (%d, %d)", it->get<0>(), it->get<1>());
+    //   ROS_INFO("  (%d, %d)", it->get<0>(), it->get<1>());
     // }
     return result;
   }
@@ -190,8 +190,8 @@ namespace jsk_recognition_utils
       max_x = ::fmax(max_x, local_vertices[i][0]);
       max_y = ::fmax(max_y, local_vertices[i][1]);
     }
-    // JSK_ROS_INFO("x: [%f~%f]", min_x, max_x);
-    // JSK_ROS_INFO("y: [%f~%f]", min_y, max_y);
+    // ROS_INFO("x: [%f~%f]", min_x, max_x);
+    // ROS_INFO("y: [%f~%f]", min_y, max_y);
     // 3. compute candidates
     std::vector<Polygon::Ptr> triangles
       = intersect_polygon->decomposeToTriangles();
@@ -298,7 +298,7 @@ namespace jsk_recognition_utils
     jsk_recognition_msgs::SimpleOccupancyGrid ros_msg;
     std::vector<float> coeff;
     convex_->toCoefficients(coeff);
-    //JSK_ROS_INFO("coef: [%f, %f, %f, %f]", coeff[0], coeff[1], coeff[2], coeff[3]);
+    //ROS_INFO("coef: [%f, %f, %f, %f]", coeff[0], coeff[1], coeff[2], coeff[3]);
     ros_msg.coefficients[0] = coeff[0];
     ros_msg.coefficients[1] = coeff[1];
     ros_msg.coefficients[2] = coeff[2];
@@ -323,19 +323,19 @@ namespace jsk_recognition_utils
   {
     boost::mutex::scoped_lock lock(global_chull_mutex);
     Plane plane = Plane(rosmsg.coefficients).transform(offset);
-    // JSK_ROS_INFO("[GridPlane::fromROSMsg] c: [%f, %f, %f, %f]",
+    // ROS_INFO("[GridPlane::fromROSMsg] c: [%f, %f, %f, %f]",
     //          rosmsg.coefficients[0],
     //          rosmsg.coefficients[1],
     //          rosmsg.coefficients[2],
     //          rosmsg.coefficients[3]);
-    // JSK_ROS_INFO("[GridPlane::fromROSMsg] transformed c: [%f, %f, %f, %f]",
+    // ROS_INFO("[GridPlane::fromROSMsg] transformed c: [%f, %f, %f, %f]",
     //          plane.toCoefficients()[0],
     //          plane.toCoefficients()[1],
     //          plane.toCoefficients()[2],
     //          plane.toCoefficients()[3]);
     Eigen::Affine3f plane_coords = plane.coordinates();
     Eigen::Vector3f plane_origin(plane_coords.translation());
-    // JSK_ROS_INFO_EIGEN_VECTOR3("[GridPlane::fromROSMsg] plane_origin",
+    // ROS_INFO_EIGEN_VECTOR3("[GridPlane::fromROSMsg] plane_origin",
     //                        plane_origin);
     pcl::PointCloud<pcl::PointNormal>::Ptr
       vertices (new pcl::PointCloud<pcl::PointNormal>);
@@ -346,7 +346,7 @@ namespace jsk_recognition_utils
       p.x = global_p[0];
       p.y = global_p[1];
       p.z = global_p[2];
-      // JSK_ROS_INFO("[%f, %f, %f] => [%f, %f, %f]",
+      // ROS_INFO("[%f, %f, %f] => [%f, %f, %f]",
       //          local_p[0], local_p[1], local_p[2],
       //          global_p[0], global_p[1], global_p[2]);
       vertices->points.push_back(p);
@@ -363,7 +363,7 @@ namespace jsk_recognition_utils
     ConvexPolygon::Ptr convex(new ConvexPolygon(convex_vertices));
     // Check orientation
     if (!convex->isSameDirection(plane)) {
-      // JSK_ROS_INFO("[GridPlane::fromROSMsg] flip convex");
+      // ROS_INFO("[GridPlane::fromROSMsg] flip convex");
       //convex = boost::make_shared<ConvexPolygon>(convex->flipConvex());
       Vertices reversed_convex_vertices;
       std::reverse_copy(convex_vertices.begin(), convex_vertices.end(),
@@ -372,15 +372,15 @@ namespace jsk_recognition_utils
     }
     Eigen::Vector3f convex_origin(convex->coordinates().translation());
     Eigen::Vector3f convex_normal = convex->getNormal();
-    // JSK_ROS_INFO_EIGEN_VECTOR3("[GridPlane::fromROSMsg] convex_origin",
+    // ROS_INFO_EIGEN_VECTOR3("[GridPlane::fromROSMsg] convex_origin",
     //                        convex_origin);
-    // JSK_ROS_INFO_EIGEN_VECTOR3("[GridPlane::fromROSMsg] convex_normal",
+    // ROS_INFO_EIGEN_VECTOR3("[GridPlane::fromROSMsg] convex_normal",
     //                        convex_normal);
     GridPlane ret(convex, rosmsg.resolution);
-    //JSK_ROS_INFO("resolution: %f", ret.resolution_);
+    //ROS_INFO("resolution: %f", ret.resolution_);
     ret.fillCellsFromPointCloud(vertices, 1000.0);
-    // JSK_ROS_INFO("cell size: %lu", ret.cells_.size());
-    // JSK_ROS_INFO("original cell size: %lu", rosmsg.cells.size());
+    // ROS_INFO("cell size: %lu", ret.cells_.size());
+    // ROS_INFO("original cell size: %lu", rosmsg.cells.size());
     return ret;
   }
 

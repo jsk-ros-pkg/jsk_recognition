@@ -46,18 +46,18 @@ public:
     bool prevImg_update_required = false;
     if((flow.cols != (int)img->width) ||
        (flow.rows != (int)img->height)) {
-      JSK_ROS_INFO("make flow");
+      ROS_INFO("make flow");
       cv_ptr->image.copyTo(flow);
       prevImg_update_required = true;
     }
     if(prevImg_update_required) {
       cv_ptr->image.copyTo(prevImg);
       prevImg_update_required = false;
-      JSK_ROS_INFO("return");
+      ROS_INFO("return");
       return;
     }
     //
-    //JSK_ROS_INFO("subscribe image");
+    //ROS_INFO("subscribe image");
     //prevImg.
     //cv::Mat *nextImg = new cv::Mat(ipl_);
     cv::Mat nextImg(img->height, img->width, CV_8UC1);

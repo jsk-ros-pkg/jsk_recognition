@@ -135,12 +135,12 @@ namespace jsk_pcl_ros
     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg,
     const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg)
   {
-    JSK_NODELET_INFO("Input data --");
-    JSK_NODELET_INFO("  Number of points -- %d", cloud_msg->width * cloud_msg->height);
-    JSK_NODELET_INFO("  Number of full points -- %d", full_cloud_msg->width * full_cloud_msg->height);
-    JSK_NODELET_INFO("  Number of clusters: -- %lu", indices_msg->cluster_indices.size());
-    JSK_NODELET_INFO("  Frame Id: %s", cloud_msg->header.frame_id.c_str());
-    JSK_NODELET_INFO("  Complete Footprint: %s", complete_footprint_region_? "true": "false");
+    NODELET_INFO("Input data --");
+    NODELET_INFO("  Number of points -- %d", cloud_msg->width * cloud_msg->height);
+    NODELET_INFO("  Number of full points -- %d", full_cloud_msg->width * full_cloud_msg->height);
+    NODELET_INFO("  Number of clusters: -- %lu", indices_msg->cluster_indices.size());
+    NODELET_INFO("  Frame Id: %s", cloud_msg->header.frame_id.c_str());
+    NODELET_INFO("  Complete Footprint: %s", complete_footprint_region_? "true": "false");
   } 
 
   bool EnvironmentPlaneModeling::isValidFrameIds(
@@ -186,7 +186,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (latest_grid_maps_.size() == 0) {
-      JSK_NODELET_WARN("not yet grid maps are available");
+      NODELET_WARN("not yet grid maps are available");
       return;
     }
 
@@ -229,7 +229,7 @@ namespace jsk_pcl_ros
       pub_snapped_move_base_simple_goal_.publish(ros_coords);
     }
     else {
-      JSK_NODELET_ERROR("Failed to find corresponding grid");
+      NODELET_ERROR("Failed to find corresponding grid");
     }
   }
   
@@ -251,11 +251,11 @@ namespace jsk_pcl_ros
     try {
       // check frame_id
       if (!isValidFrameIds(cloud_msg, full_cloud_msg, polygon_msg, coefficients_msg, indices_msg)) {
-        JSK_NODELET_FATAL("frame_id is not correct");
+        NODELET_FATAL("frame_id is not correct");
         return;
       }
       if (complete_footprint_region_ && !latest_leg_bounding_box_) {
-        JSK_NODELET_ERROR("Bounding Box for Footprint is not yet ready");
+        NODELET_ERROR("Bounding Box for Footprint is not yet ready");
         return;
       }
       // first, print all the information about ~inputs
@@ -335,7 +335,7 @@ namespace jsk_pcl_ros
       latest_grid_maps_ = result_grid_planes;
     }
     catch (tf2::TransformException& e) {
-      JSK_NODELET_ERROR("Failed to lookup transformation: %s", e.what());
+      NODELET_ERROR("Failed to lookup transformation: %s", e.what());
     }
   }
 
@@ -373,7 +373,7 @@ namespace jsk_pcl_ros
             }
           }
           else {
-            JSK_NODELET_INFO("Foot print is already occupied");
+            NODELET_INFO("Foot print is already occupied");
             return -1;
           }
           // NB: else break?
@@ -439,11 +439,11 @@ namespace jsk_pcl_ros
         int grid_index = lookupGroundPlaneForFootprint(
           footprint_frame, header, grid_maps);
         if (grid_index != -1) {
-          JSK_NODELET_INFO("Found ground plane for %s: %d", footprint_frame.c_str(), grid_index);
+          NODELET_INFO("Found ground plane for %s: %d", footprint_frame.c_str(), grid_index);
           ground_plane_indices.insert(grid_index);
         }
         else {
-          JSK_NODELET_WARN("Cannnot find ground plane for %s: %d", footprint_frame.c_str(), grid_index);
+          NODELET_WARN("Cannnot find ground plane for %s: %d", footprint_frame.c_str(), grid_index);
         }
       }
       for (size_t i = 0; i < grid_maps.size(); i++) {
@@ -459,7 +459,7 @@ namespace jsk_pcl_ros
       return completed_grid_maps;
     }
     catch (tf2::TransformException& e) {
-      JSK_NODELET_FATAL("Failed to lookup transformation: %s", e.what());
+      NODELET_FATAL("Failed to lookup transformation: %s", e.what());
       return std::vector<GridPlane::Ptr>();
     }
   }
@@ -525,7 +525,7 @@ namespace jsk_pcl_ros
       size_t num = grid->fillCellsFromPointCloud(cloud, distance_threshold_,
                                                  normal_threshold_,
                                                  non_plane_indices);
-      JSK_NODELET_INFO("%lu plane contains %lu points",
+      NODELET_INFO("%lu plane contains %lu points",
                        i, num);
       ret[i] = grid;
     }

@@ -127,7 +127,7 @@ namespace jsk_pcl_ros
       ne.setNormalEstimationMethod (ne.AVERAGE_DEPTH_CHANGE);
     }
     else {
-      JSK_NODELET_FATAL("unknown estimation method: %d", estimation_method_);
+      NODELET_FATAL("unknown estimation method: %d", estimation_method_);
       return;
     }
 
@@ -313,7 +313,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (msg->height == 1) {
-      JSK_NODELET_ERROR("[OrganizedEdgeDetector] organized pointcloud is required");
+      NODELET_ERROR("[OrganizedEdgeDetector] organized pointcloud is required");
       return;
     }
     pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>);

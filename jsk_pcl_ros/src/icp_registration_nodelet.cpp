@@ -201,7 +201,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (reference_cloud_list_.size() == 0) {
-      JSK_NODELET_FATAL("no reference is specified");
+      NODELET_FATAL("no reference is specified");
       return false;
     }
     try
@@ -217,12 +217,12 @@ namespace jsk_pcl_ros
     }
     catch (tf2::ConnectivityException &e)
     {
-      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
       return false;
     }
     catch (tf2::InvalidArgumentException &e)
     {
-      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
       return false;
     }
     return true;
@@ -250,7 +250,7 @@ namespace jsk_pcl_ros
       }
       new_references.push_back(non_nan_reference_cloud);
       reference_cloud_list_ = new_references; // replace references
-      JSK_NODELET_INFO("reference points: %lu/%lu",
+      NODELET_INFO("reference points: %lu/%lu",
                    non_nan_reference_cloud->points.size(),
                    reference_cloud->points.size());
       Eigen::Affine3f offset = Eigen::Affine3f::Identity();
@@ -262,13 +262,13 @@ namespace jsk_pcl_ros
     }
     catch (tf2::ConnectivityException &e)
     {
-      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
       reference_cloud_list_ = tmp_reference_cloud_list;
       return false;
     }
     catch (tf2::InvalidArgumentException &e)
     {
-      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
       reference_cloud_list_ = tmp_reference_cloud_list;
       return false;
     }
@@ -283,11 +283,11 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (!done_init_) {
-      JSK_NODELET_WARN("not yet initialized");
+      NODELET_WARN("not yet initialized");
       return;
     }
     if (reference_cloud_list_.size() == 0) {
-      JSK_NODELET_FATAL("no reference is specified");
+      NODELET_FATAL("no reference is specified");
       jsk_recognition_msgs::ICPResult result;
       result.name = std::string("NONE");
       result.score = DBL_MAX;
@@ -310,11 +310,11 @@ namespace jsk_pcl_ros
     }
     catch (tf2::ConnectivityException &e)
     {
-      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
     catch (tf2::InvalidArgumentException &e)
     {
-      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
   }
 
@@ -324,11 +324,11 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (!done_init_) {
-      JSK_NODELET_WARN("not yet initialized");
+      NODELET_WARN("not yet initialized");
       return;
     }
     if (reference_cloud_list_.size() == 0) {
-      JSK_NODELET_FATAL("no reference is specified");
+      NODELET_FATAL("no reference is specified");
       jsk_recognition_msgs::ICPResult result;
       result.name = std::string("NONE");
       result.score = DBL_MAX;
@@ -341,7 +341,7 @@ namespace jsk_pcl_ros
     {
       if (!jsk_recognition_utils::isSameFrameId(msg->header.frame_id,
                                                 offset_msg->header.frame_id)) {
-        JSK_NODELET_ERROR("frame_id does not match. cloud: %s, pose: %s",
+        NODELET_ERROR("frame_id does not match. cloud: %s, pose: %s",
                           msg->header.frame_id.c_str(),
                           offset_msg->header.frame_id.c_str());
         return;
@@ -359,11 +359,11 @@ namespace jsk_pcl_ros
     }
     catch (tf2::ConnectivityException &e)
     {
-      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
     catch (tf2::InvalidArgumentException &e)
     {
-      JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+      NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     }
   }
 
@@ -372,11 +372,11 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (!done_init_) {
-      JSK_NODELET_WARN("not yet initialized");
+      NODELET_WARN("not yet initialized");
       return;
     }
     if (reference_cloud_list_.size() == 0) {
-      JSK_NODELET_FATAL("no reference is specified");
+      NODELET_FATAL("no reference is specified");
       return;
     }
     
@@ -401,7 +401,7 @@ namespace jsk_pcl_ros
     {
       boost::mutex::scoped_lock lock(mutex_);
       if (!done_init_) {
-        JSK_NODELET_WARN("not yet initialized");
+        NODELET_WARN("not yet initialized");
         return;
       }
       reference_cloud_list_.resize(0);
@@ -474,7 +474,7 @@ namespace jsk_pcl_ros
       }
     }
     
-    JSK_NODELET_INFO("best score is: %f", min_score);
+    NODELET_INFO("best score is: %f", min_score);
     if (pub_result_cloud_.getNumSubscribers() > 0) {
       sensor_msgs::PointCloud2 ros_final;
       pcl::toROSMsg(*best_transformed_cloud, ros_final);
@@ -535,12 +535,12 @@ namespace jsk_pcl_ros
   {
     pcl::NormalDistributionsTransform<PointT, PointT> ndt;
     if (reference->points.empty ()) {
-      JSK_NODELET_ERROR("Input Reference Cloud is empty!");
+      NODELET_ERROR("Input Reference Cloud is empty!");
       return DBL_MAX;
     }
     ndt.setInputSource(reference);
     if (cloud->points.empty ()) {
-      JSK_NODELET_ERROR("Input Target Cloud is empty!");
+      NODELET_ERROR("Input Target Cloud is empty!");
       return DBL_MAX;
     }
     ndt.setInputTarget(cloud);
@@ -580,13 +580,13 @@ namespace jsk_pcl_ros
     }
     if (correspondence_algorithm_ == 1) { // Projective
       if (!camera_info_msg_) {
-        JSK_NODELET_ERROR("no camera info is available yet");
+        NODELET_ERROR("no camera info is available yet");
         return DBL_MAX;
       }
       image_geometry::PinholeCameraModel model;
       bool model_success_p = model.fromCameraInfo(camera_info_msg_);
       if (!model_success_p) {
-        JSK_NODELET_ERROR("failed to create camera model");
+        NODELET_ERROR("failed to create camera model");
         return DBL_MAX;
       }
       pcl::registration::CorrespondenceEstimationOrganizedProjection<PointT, PointT, float>::Ptr
@@ -597,12 +597,12 @@ namespace jsk_pcl_ros
     }
     
     if (reference->points.empty ()) {
-      JSK_NODELET_ERROR("Input Reference Cloud is empty!");
+      NODELET_ERROR("Input Reference Cloud is empty!");
       return DBL_MAX;
     }
     icp.setInputSource(reference);
     if (cloud->points.empty ()) {
-      JSK_NODELET_ERROR("Input Target Cloud is empty!");
+      NODELET_ERROR("Input Target Cloud is empty!");
       return DBL_MAX;
     }
     icp.setInputTarget(cloud);
@@ -615,8 +615,8 @@ namespace jsk_pcl_ros
     pcl::PointCloud<PointT> final;
     icp.align(final);
     pcl::transformPointCloud(final, *output_cloud, offset);
-    // JSK_NODELET_INFO_STREAM("ICP converged: " << icp.hasConverged());
-    // JSK_NODELET_INFO_STREAM("ICP score: " << icp.getFitnessScore());
+    // NODELET_INFO_STREAM("ICP converged: " << icp.hasConverged());
+    // NODELET_INFO_STREAM("ICP score: " << icp.getFitnessScore());
     Eigen::Matrix4f transformation = icp.getFinalTransformation ();
     Eigen::Matrix4d transformation_d;
     jsk_recognition_utils::convertMatrix4<Eigen::Matrix4f, Eigen::Matrix4d>(
@@ -658,7 +658,7 @@ namespace jsk_pcl_ros
         = alignPointcloud(flipped_cloud, reference, flipped_offset,
                           flipped_transformed_cloud,
                           flipped_transform_result);
-      JSK_NODELET_INFO("flipped score: %f", flipped_score);
+      NODELET_INFO("flipped score: %f", flipped_score);
       if (flipped_score < score) {
         score = flipped_score;
         transformed_cloud = flipped_transformed_cloud;
@@ -677,7 +677,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (!done_init_) {
-      JSK_NODELET_WARN("not yet initialized");
+      NODELET_WARN("not yet initialized");
       return;
     }
     reference_cloud_list_.resize(0);
@@ -698,7 +698,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (!done_init_) {
-      JSK_NODELET_WARN("not yet initialized");
+      NODELET_WARN("not yet initialized");
       return;
     }
     reference_cloud_list_.resize(0);
@@ -714,14 +714,14 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (!done_init_) {
-      JSK_NODELET_WARN("not yet initialized");
+      NODELET_WARN("not yet initialized");
       return;
     }
     //reference_cloud_list_.resize(0); //not 0
     pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(*msg, *cloud);
     reference_cloud_list_.push_back(cloud);
-    JSK_ROS_INFO("reference_num: %zd", reference_cloud_list_.size()-1);
+    ROS_INFO("reference_num: %zd", reference_cloud_list_.size()-1);
   }  
 }
 

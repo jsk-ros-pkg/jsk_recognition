@@ -92,7 +92,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (!info_msg_) {
-      JSK_NODELET_WARN("camera info is not yet ready");
+      NODELET_WARN("camera info is not yet ready");
       return;
     }
     if (!initialized_) {
@@ -115,7 +115,7 @@ namespace jsk_pcl_ros
     if (kinfu_->icpIsLost()) {
       kinfu_->reset();
       initialized_ = false;
-      JSK_NODELET_FATAL("kinfu is reset");
+      NODELET_FATAL("kinfu is reset");
       return;
     }
     
@@ -132,7 +132,7 @@ namespace jsk_pcl_ros
         tf::transformTFToEigen(trans, initial_camera_pose_);
       }
       catch (...) {
-        JSK_NODELET_ERROR("Failed to lookup transform from %s to %s",
+        NODELET_ERROR("Failed to lookup transform from %s to %s",
                           child_frame_id_.c_str(),
                           info_msg_->header.frame_id.c_str());
         return;
@@ -206,7 +206,7 @@ namespace jsk_pcl_ros
         pub_cloud_.publish(ros_cloud);
       }
       catch (...) {
-        JSK_NODELET_ERROR("Failed to lookup transform from %s to %s",
+        NODELET_ERROR("Failed to lookup transform from %s to %s",
                           child_frame_id_.c_str(),
                           depth_image->header.frame_id.c_str());
         return;
@@ -254,7 +254,7 @@ namespace jsk_pcl_ros
     icp_dist_trans_ = config.icp_dist_trans;
     icp_dist_rot_ = config.icp_dist_rot;
     camera_movement_thre_ = config.camera_movement_thre;
-    JSK_NODELET_INFO("kinfu config has changed");
+    NODELET_INFO("kinfu config has changed");
     if (initialized_) {
       kinfu_->volume().setTsdfTruncDist (tsdf_trunc_dist_/*meters*/);
       kinfu_->setIcpCorespFilteringParams (icp_dist_trans_/*meters*/, sin ( pcl::deg2rad(icp_dist_rot_) ));

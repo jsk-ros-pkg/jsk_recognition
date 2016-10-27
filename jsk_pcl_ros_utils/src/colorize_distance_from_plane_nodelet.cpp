@@ -148,7 +148,7 @@ namespace jsk_pcl_ros_utils
         convexes.push_back(convex_ptr);
       }
       else {
-        JSK_NODELET_ERROR_STREAM(__PRETTY_FUNCTION__ << ":: there is no points in the polygon");
+        NODELET_ERROR_STREAM(__PRETTY_FUNCTION__ << ":: there is no points in the polygon");
       }
     }
 

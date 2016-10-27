@@ -87,7 +87,7 @@ namespace jsk_pcl_ros
     pub_points_ = pnh_->advertise<jsk_recognition_msgs::PointsArray>("output", 1);
     if (!jsk_topic_tools::readVectorParameter(*pnh_, "models", files_)
         || files_.size() == 0) {
-      JSK_NODELET_FATAL("no models is specified");
+      NODELET_FATAL("no models is specified");
       return;
     }
 

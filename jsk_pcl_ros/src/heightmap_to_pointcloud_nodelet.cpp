@@ -82,7 +82,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (!config_msg_) {
-      JSK_NODELET_ERROR("no ~input/config is yet available");
+      NODELET_ERROR("no ~input/config is yet available");
       return;
     }
 

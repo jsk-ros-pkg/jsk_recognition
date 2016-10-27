@@ -116,7 +116,7 @@ namespace jsk_perception
           input.rows == foreground.rows &&
           background.cols == foreground.cols &&
           background.rows == foreground.rows)) {
-      JSK_NODELET_WARN("size of image is not corretct");
+      NODELET_WARN("size of image is not corretct");
       return;
     }
     cv::Mat mask = cv::Mat::zeros(input.size(), CV_8UC1);

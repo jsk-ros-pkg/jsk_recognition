@@ -45,7 +45,7 @@ namespace jsk_pcl_ros
     pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
     DiagnosticNodelet::onInit();
     pnh_->param("number_of_threads", num_of_threads_, 0);
-    JSK_NODELET_DEBUG_STREAM("num_of_threads: " << num_of_threads_);
+    NODELET_DEBUG_STREAM("num_of_threads: " << num_of_threads_);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     typename dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&NormalEstimationOMP::configCallback, this, _1, _2);

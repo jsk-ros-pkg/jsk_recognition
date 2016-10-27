@@ -119,12 +119,12 @@ namespace jsk_pcl_ros
     int x0_index = x0 / width;
     int x1_index = x1 / width;
     if (x0_index != x1_index) {
-      JSK_NODELET_WARN("malformed rectangle");
+      NODELET_WARN("malformed rectangle");
       return;
     }
     else {
       int image_index = x0_index;
-      JSK_NODELET_INFO("image index: %d", image_index);
+      NODELET_INFO("image index: %d", image_index);
       SnapshotInformation::Ptr info = snapshot_buffer_[image_index];
       // local point
       int width_offset = width * image_index;
@@ -138,14 +138,14 @@ namespace jsk_pcl_ros
       Eigen::Vector3d ray(mid_3d.x, mid_3d.y, mid_3d.z); // ray is camera local
       ray = ray / ray.norm();
       Eigen::Vector3d ray_global = pose.rotation() * ray;
-      JSK_NODELET_INFO("ray: [%f, %f, %f]", ray_global[0], ray_global[1], ray_global[2]);
+      NODELET_INFO("ray: [%f, %f, %f]", ray_global[0], ray_global[1], ray_global[2]);
       
       Eigen::Vector3d z = pose.rotation() * Eigen::Vector3d::UnitZ();
-      JSK_NODELET_INFO("z: [%f, %f, %f]", z[0], z[1], z[2]);
+      NODELET_INFO("z: [%f, %f, %f]", z[0], z[1], z[2]);
       Eigen::Vector3d original_pos = pose.translation();
       Eigen::Quaterniond q;
       q.setFromTwoVectors(z, ray_global);
-      JSK_NODELET_INFO("q: [%f, %f, %f, %f]", q.x(), q.y(), q.z(), q.w());
+      NODELET_INFO("q: [%f, %f, %f, %f]", q.x(), q.y(), q.z(), q.w());
       Eigen::Affine3d output_pose = pose.rotate(q);
       output_pose.translation() = original_pos;
       geometry_msgs::PoseStamped ros_pose;
@@ -295,7 +295,7 @@ namespace jsk_pcl_ros
       if ((now - last_publish_time_).toSec() > 1.0 / rate_) {
         cv::Mat concatenated_image;
         std::vector<cv::Mat> images;
-        //JSK_ROS_INFO("%lu images", snapshot_buffer_.size());
+        //ROS_INFO("%lu images", snapshot_buffer_.size());
         for (size_t i = 0; i < snapshot_buffer_.size(); i++) {
           images.push_back(snapshot_buffer_[i]->image_);
         }
@@ -361,7 +361,7 @@ namespace jsk_pcl_ros
             if (store_pointcloud_) {
               // use pointcloud
               if (!latest_cloud_msg_) {
-                JSK_NODELET_ERROR("no pointcloud is available");
+                NODELET_ERROR("no pointcloud is available");
                 return false;
               }
               // transform pointcloud to fixed frame
@@ -377,7 +377,7 @@ namespace jsk_pcl_ros
                 info->cloud_ = transformed_cloud;
               }
               else {
-                JSK_NODELET_ERROR("failed to transform pointcloud");
+                NODELET_ERROR("failed to transform pointcloud");
                 return false;
               }
             }
@@ -385,7 +385,7 @@ namespace jsk_pcl_ros
             return true;
           }
           else {
-            JSK_NODELET_ERROR("failed to resolve tf from %s to %s",
+            NODELET_ERROR("failed to resolve tf from %s to %s",
                           fixed_frame_id_.c_str(),
                           latest_camera_info_msg_->header.frame_id.c_str());
             return false;
@@ -393,17 +393,17 @@ namespace jsk_pcl_ros
         }
         catch (tf2::ConnectivityException &e)
         {
-          JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+          NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
           return false;
         }
         catch (tf2::InvalidArgumentException &e)
         {
-          JSK_NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
+          NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
           return false;
         }
       }
       else {
-        JSK_NODELET_ERROR("not yet camera message is available");
+        NODELET_ERROR("not yet camera message is available");
         return false;
       }
     }
@@ -425,13 +425,13 @@ namespace jsk_pcl_ros
     // concatenate images
     boost::mutex::scoped_lock lock(mutex_);
     if (snapshot_buffer_.size() == 0) {
-      JSK_NODELET_ERROR("no image is stored");
+      NODELET_ERROR("no image is stored");
       return false;
     }
     else {
       cv::Mat concatenated_image;
       std::vector<cv::Mat> images;
-      JSK_ROS_INFO("%lu images", snapshot_buffer_.size());
+      ROS_INFO("%lu images", snapshot_buffer_.size());
       for (size_t i = 0; i < snapshot_buffer_.size(); i++) {
         images.push_back(snapshot_buffer_[i]->image_);
       }

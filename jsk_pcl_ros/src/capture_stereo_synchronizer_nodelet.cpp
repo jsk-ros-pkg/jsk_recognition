@@ -149,10 +149,10 @@ namespace jsk_pcl_ros
     const stereo_msgs::DisparityImage::ConstPtr& disparity)
   {
     if (checkNearPose(pose->pose)) {
-      JSK_ROS_DEBUG("too near");
+      ROS_DEBUG("too near");
     }
     else {
-      JSK_ROS_INFO("%d sample", counter_++);
+      ROS_INFO("%d sample", counter_++);
       poses_.push_back(pose->pose);
       pub_pose_.publish(pose);
       pub_mask_.publish(mask);

@@ -257,7 +257,7 @@ namespace jsk_pcl_ros
     change_cloud_near_threshold_ = config.change_cloud_near_thr;
     if (tracker_ || reversed_tracker_) 
     {
-      JSK_NODELET_INFO("update tracker parameter");
+      NODELET_INFO("update tracker parameter");
       tracker_set_step_noise_covariance(default_step_covariance_);
       tracker_set_iteration_num(iteration_num_);
       tracker_set_resample_likelihood_thr(resample_likelihood_thr_);
@@ -419,11 +419,11 @@ namespace jsk_pcl_ros
         initial_pose_ = Eigen::Affine3f(trans);
       }
       track_target_set_ = true;
-      JSK_NODELET_INFO("RESET TARGET MODEL");
+      NODELET_INFO("RESET TARGET MODEL");
     }
     else {
       track_target_set_ = false;
-      JSK_NODELET_ERROR("TARGET MODEL POINTS SIZE IS 0 !! Stop TRACKING");
+      NODELET_ERROR("TARGET MODEL POINTS SIZE IS 0 !! Stop TRACKING");
     }
   } 
   
@@ -441,7 +441,7 @@ namespace jsk_pcl_ros
       //frame_id_ = base_frame_id_;
     }
     catch(tf::TransformException ex) {
-      JSK_NODELET_ERROR("%s",ex.what());
+      NODELET_ERROR("%s",ex.what());
       tfTransformation = tf::Transform(tf::Quaternion(0, 0, 0, 1));
     }
     tfTransformation = tf::Transform(tfTransformationStamped.getBasis(),
@@ -486,7 +486,7 @@ namespace jsk_pcl_ros
       p.y = prev_result_.y;
       p.z = prev_result_.z;
       if (kdtree.radiusSearch(p, change_cloud_near_threshold_, k_indices, k_sqr_distances, 1) > 0) {
-        JSK_NODELET_INFO("change detection triggered!");
+        NODELET_INFO("change detection triggered!");
         // there is near pointcloud
         cloud_cb(*pc_msg);
         r.setIsEnabled(false);
@@ -564,9 +564,9 @@ namespace jsk_pcl_ros
       frame_id_ = marker.header.frame_id;
       reset_tracking_target_model(cloud);
     }else{
-      JSK_ROS_ERROR(" Marker Models type is not TRIANGLE ");
-      JSK_ROS_ERROR("   OR   ");
-      JSK_ROS_ERROR(" Marker Points is empty ");
+      ROS_ERROR(" Marker Models type is not TRIANGLE ");
+      ROS_ERROR("   OR   ");
+      ROS_ERROR(" Marker Points is empty ");
     }
   }
 
@@ -597,7 +597,7 @@ namespace jsk_pcl_ros
     const Eigen::Affine3f& trans)
   {
     Eigen::Vector3f pos = trans.translation();
-    JSK_NODELET_INFO("trans: [%f, %f, %f]", pos[0], pos[1], pos[2]);
+    NODELET_INFO("trans: [%f, %f, %f]", pos[0], pos[1], pos[2]);
     if (reversed_) {
       reversed_tracker_->setTrans(trans);
     }

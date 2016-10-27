@@ -90,7 +90,7 @@ namespace jsk_pcl_ros_utils
     for (size_t i = 0; i < indices_msg->indices.size(); i++) {
       int index = indices_msg->indices[i];
       if (height * width <= index || index <= 0) {
-        JSK_ROS_ERROR("Input index is out of expected mask size.");
+        ROS_ERROR("Input index is out of expected mask size.");
         return;
       }
       int width_index = index % width;

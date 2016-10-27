@@ -170,7 +170,7 @@ namespace jsk_perception
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (histogram_.empty()) {
-      JSK_NODELET_DEBUG("no reference histogram is available");
+      NODELET_DEBUG("no reference histogram is available");
       return;
     }
     
@@ -238,7 +238,7 @@ namespace jsk_perception
         }
       }
     }
-    JSK_NODELET_INFO("coef: %f - %f", min_coef, max_coef);
+    NODELET_INFO("coef: %f - %f", min_coef, max_coef);
     pub_debug_.publish(
       cv_bridge::CvImage(image_msg->header,
                          sensor_msgs::image_encodings::BGR8,
@@ -306,7 +306,7 @@ namespace jsk_perception
     else if (coefficient_method_ == 4 || coefficient_method_ == 5) {
       cv::Mat ref_sig = cv::Mat::zeros(ref_hist.cols, 2, CV_32FC1);
       cv::Mat target_sig = cv::Mat::zeros(ref_hist.cols, 2, CV_32FC1);
-      //JSK_NODELET_INFO("ref_hist.cols = %d", ref_hist.cols);
+      //NODELET_INFO("ref_hist.cols = %d", ref_hist.cols);
       for (size_t i = 0; i < ref_hist.cols; i++) {
         ref_sig.at<float>(i, 0) = ref_hist.at<float>(0, i);
         target_sig.at<float>(i, 0) = target_hist.at<float>(0, i);
@@ -323,7 +323,7 @@ namespace jsk_perception
       }
     }
     else {
-      JSK_NODELET_ERROR("unknown coefficiet method: %d", coefficient_method_);
+      NODELET_ERROR("unknown coefficiet method: %d", coefficient_method_);
       return 0;
     }
   }

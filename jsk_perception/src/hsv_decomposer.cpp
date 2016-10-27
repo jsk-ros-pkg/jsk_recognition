@@ -91,7 +91,7 @@ namespace jsk_perception
       cv::cvtColor(tmp_image, hsv_image, CV_BGR2HSV);
     }
     else {
-      JSK_NODELET_ERROR("unsupported format to HSV: %s", image_msg->encoding.c_str());
+      NODELET_ERROR("unsupported format to HSV: %s", image_msg->encoding.c_str());
       return;
     }
     cv::split(hsv_image, hsv_planes);

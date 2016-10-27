@@ -54,7 +54,7 @@ namespace jsk_pcl_ros
       pnh_->getParam("joint_name", joint_name_);
     }
     else {
-      JSK_NODELET_ERROR("no ~joint_state is specified");
+      NODELET_ERROR("no ~joint_state is specified");
       return;
     }
     pnh_->getParam("twist_frame_id", twist_frame_id_);
@@ -80,7 +80,7 @@ namespace jsk_pcl_ros
       laser_type_ = INFINITE_SPINDLE_HALF;
     }
     else {
-      JSK_NODELET_ERROR("unknown ~laser_type: %s", laser_type.c_str());
+      NODELET_ERROR("unknown ~laser_type: %s", laser_type.c_str());
       return;
     }
     pnh_->param("not_use_laser_assembler_service", not_use_laser_assembler_service_, false);
@@ -197,7 +197,7 @@ namespace jsk_pcl_ros
       output_cloud.row_step = data_num;
     }
     else {
-      JSK_NODELET_WARN("target_clouds size is 0");
+      NODELET_WARN("target_clouds size is 0");
     }
   }
   
@@ -251,7 +251,7 @@ namespace jsk_pcl_ros
               cloud_pub_.publish(output_cloud);
             }
             else {
-              JSK_NODELET_ERROR("Failed to call assemble cloud service");
+              NODELET_ERROR("Failed to call assemble cloud service");
             }
           }
           else {
@@ -282,7 +282,7 @@ namespace jsk_pcl_ros
           }
         }
         catch (...) {
-          JSK_NODELET_ERROR("Exception in calling assemble cloud service");
+          NODELET_ERROR("Exception in calling assemble cloud service");
         }
       }
     }

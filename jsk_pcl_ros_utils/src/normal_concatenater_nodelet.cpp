@@ -42,9 +42,9 @@ namespace jsk_pcl_ros_utils
                                        const sensor_msgs::PointCloud2::ConstPtr& normal)
   {
     if (xyz->width != normal->width || xyz->height != normal->height) {
-      JSK_NODELET_ERROR("~input and ~normal's width or height does not match");
-      JSK_NODELET_ERROR("xyz: width=%d, height=%d", xyz->width, xyz->height);
-      JSK_NODELET_ERROR("normal: width=%d, height=%d", normal->width, normal->height);
+      NODELET_ERROR("~input and ~normal's width or height does not match");
+      NODELET_ERROR("xyz: width=%d, height=%d", xyz->width, xyz->height);
+      NODELET_ERROR("normal: width=%d, height=%d", normal->width, normal->height);
       return;
     }
     pcl::PointCloud<pcl::PointXYZRGB> xyz_cloud;

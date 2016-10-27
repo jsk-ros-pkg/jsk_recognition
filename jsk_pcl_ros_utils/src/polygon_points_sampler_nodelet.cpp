@@ -71,18 +71,18 @@ namespace jsk_pcl_ros_utils
     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg)
   {
     if (polygon_msg->polygons.size() == 0) {
-      JSK_NODELET_DEBUG("empty polygons");
+      NODELET_DEBUG("empty polygons");
       return false;
     }
     if (coefficients_msg->coefficients.size() != polygon_msg->polygons.size()) {
-      JSK_NODELET_ERROR("The size of coefficients and polygons are not same");
+      NODELET_ERROR("The size of coefficients and polygons are not same");
       return false;
     }
 
     std::string frame_id = polygon_msg->header.frame_id;
     for (size_t i = 0; i < polygon_msg->polygons.size(); i++) {
       if (frame_id != polygon_msg->polygons[i].header.frame_id) {
-        JSK_NODELET_ERROR("Frame id of polygon is not same: %s, %s",
+        NODELET_ERROR("Frame id of polygon is not same: %s, %s",
                       frame_id.c_str(),
                       polygon_msg->polygons[i].header.frame_id.c_str());
         return false;
@@ -90,7 +90,7 @@ namespace jsk_pcl_ros_utils
     }
     for (size_t i = 0; i < coefficients_msg->coefficients.size(); i++) {
       if (frame_id != coefficients_msg->coefficients[i].header.frame_id) {
-        JSK_NODELET_ERROR("Frame id of coefficient is not same: %s, %s",
+        NODELET_ERROR("Frame id of coefficient is not same: %s, %s",
                       frame_id.c_str(),
                       coefficients_msg->coefficients[i].header.frame_id.c_str());
         return false;

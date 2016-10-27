@@ -130,11 +130,11 @@ namespace jsk_perception
     boost::mutex::scoped_lock lock(mutex_);
     // check camera info and polygon is available
     if (!latest_info_msg_) {
-      JSK_ROS_WARN("no camera info is available yet");
+      ROS_WARN("no camera info is available yet");
       return;
     }
     if (!latest_polygon_msg_) {
-      JSK_ROS_WARN("no polygon is available yet");
+      ROS_WARN("no polygon is available yet");
       return;
     }
 
@@ -229,7 +229,7 @@ namespace jsk_perception
     }
     catch (...)
     {
-      JSK_NODELET_ERROR("Failed to resolve tf");
+      NODELET_ERROR("Failed to resolve tf");
     }
   }
   

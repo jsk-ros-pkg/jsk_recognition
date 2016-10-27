@@ -45,7 +45,7 @@ namespace jsk_pcl_ros_utils
   {
     DiagnosticNodelet::onInit();
     if (!pnh_->getParam("sensor_frame", sensor_frame_)) {
-      JSK_NODELET_FATAL("no ~sensor_frame is specified");
+      NODELET_FATAL("no ~sensor_frame is specified");
       return;
     }
     tf_listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
@@ -80,7 +80,7 @@ namespace jsk_pcl_ros_utils
   {
     vital_checker_->poke();
     if (polygons_msg->polygons.size() != coefficients_msg->coefficients.size()) {
-      JSK_NODELET_ERROR("The size of polygons and coefficients are not same");
+      NODELET_ERROR("The size of polygons and coefficients are not same");
       return;
     }
     jsk_recognition_msgs::PolygonArray flipped_polygons;
@@ -154,7 +154,7 @@ namespace jsk_pcl_ros_utils
       pub_indices_.publish(flipped_indices);
     }
     catch (tf2::TransformException& e) {
-      JSK_NODELET_ERROR("Failed to lookup transformation: %s", e.what());
+      NODELET_ERROR("Failed to lookup transformation: %s", e.what());
     }
   }
 }

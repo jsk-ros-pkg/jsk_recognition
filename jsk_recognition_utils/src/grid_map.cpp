@@ -211,7 +211,7 @@ namespace jsk_recognition_utils
   {
     for (size_t i = 0; i < cloud->points.size(); i++) {
       registerPoint(cloud->points[i]);
-      //JSK_ROS_INFO("registered point: [%f, %f, %f]", cloud->points[i].x, cloud->points[i].y, cloud->points[i].z);
+      //ROS_INFO("registered point: [%f, %f, %f]", cloud->points[i].x, cloud->points[i].y, cloud->points[i].z);
     }
   }
   
@@ -362,10 +362,10 @@ namespace jsk_recognition_utils
     rot_mat.col(0) = Eigen::Vector3f(ex_[0], ex_[1], ex_[2]);
     rot_mat.col(1) = Eigen::Vector3f(ey_[0], ey_[1], ey_[2]);
     rot_mat.col(2) = Eigen::Vector3f(normal_[0], normal_[1], normal_[2]);
-    JSK_ROS_DEBUG("O: [%f, %f, %f]", O_[0], O_[1], O_[2]);
-    JSK_ROS_DEBUG("ex: [%f, %f, %f]", ex_[0], ex_[1], ex_[2]);
-    JSK_ROS_DEBUG("ey: [%f, %f, %f]", ey_[0], ey_[1], ey_[2]);
-    JSK_ROS_DEBUG("normal: [%f, %f, %f]", normal_[0], normal_[1], normal_[2]);
+    ROS_DEBUG("O: [%f, %f, %f]", O_[0], O_[1], O_[2]);
+    ROS_DEBUG("ex: [%f, %f, %f]", ex_[0], ex_[1], ex_[2]);
+    ROS_DEBUG("ey: [%f, %f, %f]", ey_[0], ey_[1], ey_[2]);
+    ROS_DEBUG("normal: [%f, %f, %f]", normal_[0], normal_[1], normal_[2]);
     output = Eigen::Translation3f(O_) * Eigen::Quaternionf(rot_mat);
   }
   
@@ -459,7 +459,7 @@ namespace jsk_recognition_utils
   {
     GridIndex::Ptr ret (new GridIndex());
     pointToIndex(p, ret);
-    //JSK_ROS_INFO("checking (%d, %d)", ret->x, ret->y);
+    //ROS_INFO("checking (%d, %d)", ret->x, ret->y);
     return getValue(ret);
   }
 

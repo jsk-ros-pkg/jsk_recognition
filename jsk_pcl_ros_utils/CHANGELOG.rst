@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.26 (2016-10-27)
+-------------------
 * Stop using deprecated jsk_topic_tools/log_utils.h (`#1933 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1933>`_)
 * [jsk_pcl_ros_utils/static_polygon_array_publisher] Fix typo (`#1916 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1916>`_)
 * [jsk_pcl_ros_utils/plane_rejector_nodelet.cpp] Add allow_flip option to plane rejector (`#1876 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1886>`_)

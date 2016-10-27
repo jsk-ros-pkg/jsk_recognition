@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.26 (2016-10-27)
+-------------------
 * Stop using deprecated jsk_topic_tools/log_utils.h (`#1933 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1933>`_)
 * Fix unparsable nodelet pluginlib xml file (`#1929 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1929>`_)
 

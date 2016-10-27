@@ -120,8 +120,9 @@
   <test_depend>roslaunch</test_depend>
   <test_depend>rostest</test_depend>
   <export>
-    <nodelet plugin="${prefix}/jsk_pcl_nodelets.xml"/>
+    <nodelet plugin="${prefix}/plugins/nodelet/libjsk_pcl_ros.xml"/>
+    <nodelet plugin="${prefix}/plugins/nodelet/libjsk_pcl_ros_utils.xml"/>
+    <moveit_ros_perception plugin="${prefix}/plugins/moveit_ros_perception/libjsk_pcl_ros_moveit.xml"/>
     <cpp lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ljsk_pcl_ros" cflags="-I${prefix}/include"/>
-    <moveit_ros_perception plugin="${prefix}/jsk_pcl_nodelets.xml"/>
   </export>
 </package>

@@ -1,0 +1,22 @@
+<library path="lib/libopencv_apps">
+
+  <class name="jsk_perception/EdgeDetector" type="edge_detection::EdgeDetectionNodelet"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Nodelet to detect edges
+    </description>
+  </class>
+  <class name="jsk_perception/HoughCircleDetector" type="hough_circles::HoughCirclesNodelet"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      nodelet to detect circles based on hough transformation
+    </description>
+  </class>
+  <class name="jsk_perception/HoughLineDetector" type="hough_lines::HoughLinesNodelet"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      nodelet to detect lines based on hough transformation
+    </description>
+  </class>
+
+</library>

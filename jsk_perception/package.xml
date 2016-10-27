@@ -102,6 +102,7 @@
   <!-- ALPHABETICAL ORDER -->
 
   <export>
-    <nodelet plugin="${prefix}/jsk_perception_nodelets.xml"/>
+    <nodelet plugin="${prefix}/plugins/nodelet/libjsk_perception.xml"/>
+    <nodelet plugin="${prefix}/plugins/nodelet/libopencv_apps.xml"/>
   </export>
 </package>

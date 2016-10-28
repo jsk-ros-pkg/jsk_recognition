@@ -65,6 +65,8 @@ namespace jsk_perception
     upside_down_ = false;
     offset_degree_ = 180.0;
     k_ = 300.0;
+    roll_ = 0;
+    pitch_ = 0;
     onInitPostProcess();
   }
 
@@ -75,6 +77,8 @@ namespace jsk_perception
     upside_down_ = new_config.upside_down;
     offset_degree_ = new_config.offset_degree;
     k_ = new_config.k;
+    roll_ = new_config.roll;
+    pitch_ = new_config.pitch;
   }
 
 
@@ -105,7 +109,7 @@ namespace jsk_perception
         cv::Mat undistorted_bilinear(l, l*4, distorted.depth());
         for(int i = 0; i < undistorted.rows; ++i){
           for(int j = 0; j < undistorted.cols; ++j){
-	
+
             double radius = l - i;
             double theta = 2.0 * PI * (double)(-j) / (double)(4.0 * l);
             double fTrueX = radius * cos(theta);
@@ -210,39 +214,56 @@ namespace jsk_perception
       float max_radian = max_degree * 3.14159265 /180.0;
       float tan_max_radian = tan(max_radian);
       //const float k_ = 341.656050955;
-      const float absolute_max_degree = 85;
+      const float absolute_max_degree = 110;
       const float absolute_max_radian = absolute_max_degree * 3.14159265 /180.0;
       float max_radius = max_radian * k_;
       cv::Mat undistorted(int(l * tan_max_radian * 2 * scale_), int(l * tan_max_radian * 2 * scale_), distorted.depth());
       int center_x = distorted.rows/2, center_y = distorted.cols/2;
       int un_center_x = undistorted.rows/2, un_center_y = undistorted.cols/2;
 
+      tf::Matrix3x3 basis;
+      basis.setRPY(roll_, pitch_, 0);
+
       for(int i = 0; i < undistorted.rows; ++i){
         for(int j = 0; j < undistorted.cols; ++j){
-          int diff_x = (i - un_center_x) / scale_, diff_y = (j - un_center_y) /scale_;
-          float radius = sqrt(pow(diff_x, 2) + pow(diff_y, 2));
-          float radian = atan(radius/l);
+          tf::Vector3 p = basis * tf::Vector3((i - un_center_x) / scale_, (j - un_center_y) /scale_, l);
+
+          float radius = sqrt(pow(p.x(), 2) + pow(p.y(), 2));
+          float radian = atan2(radius, p.z());
           if( radian < absolute_max_radian ){
             float multi = 0, new_x = center_x, new_y = center_y;
             if(radius){
               // float new_radius = radian * k_; 
               multi = radian * k_ / radius;
-              new_x += (diff_x * multi);
-              new_y += (diff_y * multi);
+              new_x += (p.x() * multi);
+              new_y += (p.y() * multi);
             }
 
-            for(int c = 0; c < undistorted.channels(); ++c){
+            for(int c = 0; c < undistorted.channels(); ++c)
               undistorted.data[  i * undistorted.step + j * undistorted.elemSize() + c ]
                 = distorted.data[ int(new_x) * distorted.step + int(new_y) * distorted.elemSize() + c];
-            }
           }
+          else
+            {
+              for(int c = 0; c < undistorted.channels(); ++c)
+                undistorted.data[  i * undistorted.step + j * undistorted.elemSize() + c ] = 255;
+            }
         }
       }
-      pub_undistorted_image_.publish(
-                                     cv_bridge::CvImage(
-                                                        image_msg->header,
+
+#if 0
+      pub_undistorted_image_.publish(cv_bridge::CvImage(image_msg->header,
                                                         image_msg->encoding,
                                                         undistorted).toImageMsg());
+#else
+      cv::Mat test;
+      std::cout << distorted.type() << std::endl;
+      cv::cvtColor(distorted, test, CV_GRAY2RGB);
+      //cv::circle(test, cv::Point(640, 512), 10, CV_RGB(255,0,0));
+      //pub_undistorted_image_.publish(cv_bridge::CvImage(image_msg->header, image_msg->encoding, test).toImageMsg());
+#endif
+
+
     }
   }
 }

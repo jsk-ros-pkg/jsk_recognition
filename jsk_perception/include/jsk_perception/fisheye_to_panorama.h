@@ -47,6 +47,7 @@
 #include <message_filters/pass_through.h>
 #include <dynamic_reconfigure/server.h>
 #include <jsk_perception/FisheyeConfig.h>
+#include <tf/transform_listener.h> /* for vector3 */
 
 #include <opencv2/opencv.hpp>
 
@@ -82,6 +83,7 @@ namespace jsk_perception
     bool upside_down_;
     double offset_degree_;
     float  k_;
+    float roll_,pitch_;
   private:
     
   };

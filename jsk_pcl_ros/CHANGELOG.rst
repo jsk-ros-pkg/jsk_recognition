@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.27 (2016-10-29)
+-------------------
 * [jsk_pcl_ros] add description to libjsk_pcl_ros_utils.xml (`#1934 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1934>`_)
 * Remove dependency on run_depend jsk_perception for separated build (`#1865 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1865>`_)
 * Remove jsk_pcl_ros/box_array_to_box.py (`#1833 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1833>`_)

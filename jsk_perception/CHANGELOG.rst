@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.27 (2016-10-29)
+-------------------
 * Fix rosdep installation for jsk_perception with pip (`#1883 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1883>`_ )
   * Fix pip installation with libleveldb-dev installation
 * Publish only masks by split_fore_background.py (`#1791 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1791>`_ )

@@ -2,6 +2,24 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix rosdep installation for jsk_perception with pip (`#1883 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1883>`_ )
+  * Fix pip installation with libleveldb-dev installation
+* Publish only masks by split_fore_background.py (`#1791 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1791>`_ )
+
+  * Stabilize split_fore_background.test
+  * Fix nan region as mask 0 region
+  * Remove synchronization in split_fore_background.py
+
+* Remove extract_images_sync that merged in image_view (`#1633 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1633>`_ )
+* Remove not used codes: image_saver_sync, publish_header (`#1651 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1651>`_ )
+
+   * they will be merged in image_view package.
+   * for https://github.com/jsk-ros-pkg/jsk_recognition/issues/1648#issuecomment-217344813
+
+* Contributors: Kei Okada, Kentaro Wada
+
 0.3.26 (2016-10-27)
 -------------------
 * Stop using deprecated jsk_topic_tools/log_utils.h (`#1933 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1933>`_)

@@ -2,6 +2,9 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.3.26 (2016-10-27)
 -------------------
 * [checkerboard_detector/CMakeLists.txt] add dependency to cfg for checkerboard_detector executable. (`#1920 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1920>`_)

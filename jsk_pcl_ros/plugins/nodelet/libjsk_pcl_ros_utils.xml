@@ -1,4 +1,9 @@
 <library path="libjsk_pcl_ros_utils">
+  <!-- DO NOT ADD NEW CLASS TO THIS FILE -->
+  <!-- This file should be used just backward compatibility -->
+  <!-- ref: https://github.com/jsk-ros-pkg/jsk_recognition/issues/1482 -->
+  <!-- ref: https://github.com/jsk-ros-pkg/jsk_recognition/pull/1499 -->
+
   <class name="jsk_pcl/PCDReaderWithPose" type="jsk_pcl_ros_utils::PCDReaderWithPose"
          base_class_type="nodelet::Nodelet">
     <description>

@@ -1,7 +1,18 @@
 <launch>
   <arg name="USE_ICP" default="true" />
+  <arg name="USE_SAMPLE_DATA" default="true" />
   <arg name="input" default="/camera/depth/points" />
   <arg name="sensor_frame" default="/camera_depth_optical_frame" />
+
+  <param name="/use_sim_time" value="true" if="$(arg USE_SAMPLE_DATA)"/>
+  <param name="/use_sim_time" value="false" unless="$(arg USE_SAMPLE_DATA)"/>
+  <node name="rosbag_play"  if="$(arg USE_SAMPLE_DATA)"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/test_data/2016-10-29-17-05-44_tabletop-coffee-cup/tabletop-coffee-cup.bag --clock --loop" />
+
+  <node name="optical_frame_tf_publisher" if="$(arg USE_SAMPLE_DATA)"
+        pkg="tf" type="static_transform_publisher"
+        args="0 0 0 -1.57 0 -1.57 map camera_depth_optical_frame 500" />
 
   <arg name="manager" value="ppf_manager" />
   <node name="$(arg manager)" pkg="nodelet" type="nodelet" args="manager" />

@@ -18,7 +18,6 @@ find_package(catkin REQUIRED COMPONENTS
   angles
   cmake_modules
   cv_bridge
-  driver_base
   dynamic_reconfigure
   geometry_msgs
   image_geometry

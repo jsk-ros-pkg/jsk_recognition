@@ -50,31 +50,30 @@ namespace jsk_perception
   void FisheyeToPanorama::onInit()
   {
     DiagnosticNodelet::onInit();
-    pnh_->param("use_panorama", use_panorama_, false);
-    pnh_->param("simple_panorama", simple_panorama_, false);
-    pub_undistorted_image_ = advertise<sensor_msgs::Image>(
-      *pnh_, "output", 1);
-    if(use_panorama_ && simple_panorama_)
-      pub_undistorted_bilinear_image_ = advertise<sensor_msgs::Image>(*pnh_, "output_bilinear", 1);
 
-
+    pnh_->param("debug",debug_, false);
+    pnh_->param("calib",calib_, false);
+    pnh_->param("k", k_, 300.0);
+    pnh_->param("absolute_max_degree",absolute_max_degree_, 110.0);
     pnh_->param("odom_topic_name", odom_topic_name_, std::string("odom"));
+
+    pub_undistorted_image_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+    if(debug_)
+      pub_undistorted_center_image_ = advertise<sensor_msgs::Image>(*pnh_, "debug", 1);
     sub_odom_ = pnh_->subscribe<nav_msgs::Odometry>(odom_topic_name_, 1, &FisheyeToPanorama::odomCallback,
                                                    this, ros::TransportHints().tcpNoDelay());
-
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&FisheyeToPanorama::configCallback, this, _1, _2);
     srv_->setCallback (f);
 
 
+    absolute_max_radian_ = absolute_max_degree_ * M_PI /180.0;
     scale_ = 0.5;
-    upside_down_ = false;
-    offset_degree_ = 180.0;
-    pnh_->param("k", k_, 300.0);
     roll_ = 0;
     pitch_ = 0;
     gimbal_ = false;
+
     onInitPostProcess();
   }
 
@@ -82,28 +81,33 @@ namespace jsk_perception
   {
     max_degree_ = new_config.degree;
     scale_ = new_config.scale;
-    upside_down_ = new_config.upside_down;
-    offset_degree_ = new_config.offset_degree;
-    //k_ = new_config.k;
     if(!gimbal_)
       {
         roll_ = new_config.roll;
         pitch_ = new_config.pitch;
       }
-    circle_x_ = new_config.circle_x;
-    circle_y_ = new_config.circle_y;
-    circle_r_ = new_config.circle_r;
+    if(calib_)
+      {
+        circle_x_ = new_config.circle_x;
+        circle_y_ = new_config.circle_y;
+        circle_r_ = new_config.circle_r;
+      }
   }
 
-void FisheyeToPanorama::odomCallback(const nav_msgs::OdometryConstPtr& odom_msg)
-{
+  void FisheyeToPanorama::odomCallback(const nav_msgs::OdometryConstPtr& odom_msg)
+  {
     gimbal_ = true;
     tf::Quaternion q(odom_msg->pose.pose.orientation.x, odom_msg->pose.pose.orientation.y,
-                   odom_msg->pose.pose.orientation.z, odom_msg->pose.pose.orientation.w);
+                     odom_msg->pose.pose.orientation.z, odom_msg->pose.pose.orientation.w);
     gimbal_orientation_.setRotation(q);
     double yaw = 0;
     gimbal_orientation_.getRPY(roll_, pitch_, yaw);
+    tf::Matrix3x3 basis1, basis2, basis;
+    basis1.setRPY(pitch_, 0 , 0);
+    basis2.setRPY(0, -roll_, 0);
+    basis = (basis1 * basis2).transpose();
 
+    setBasis(basis);
   }
 
 
@@ -122,183 +126,91 @@ void FisheyeToPanorama::odomCallback(const nav_msgs::OdometryConstPtr& odom_msg)
   void FisheyeToPanorama::rectify(const sensor_msgs::Image::ConstPtr& image_msg)
   {
     cv::Mat distorted = cv_bridge::toCvCopy(image_msg, image_msg->encoding)->image;
-    int l = distorted.rows / 2;
 
-    if(use_panorama_){
-      float min_degree = 30;
-      float min_radian = min_degree * 3.14159265 /180.0;
-      float tan_min_radian = tan(min_radian);
-      if(simple_panorama_){
-        cv::Mat undistorted(l, l*4, distorted.depth());
-        cv::Mat undistorted_bilinear(l, l*4, distorted.depth());
-        for(int i = 0; i < undistorted.rows; ++i){
-          for(int j = 0; j < undistorted.cols; ++j){
+    if(!calib_)
+      {
+        int l = distorted.rows / 2;
+        float max_degree = max_degree_;
+        float max_radian = max_degree * M_PI /180.0;
+        float tan_max_radian = tan(max_radian);
 
-            double radius = l - i;
-            double theta = 2.0 * PI * (double)(-j) / (double)(4.0 * l);
-            double fTrueX = radius * cos(theta);
-            double fTrueY = radius * sin(theta);
+        float max_radius = max_radian * k_;
 
-            int x = (int)round(fTrueX) + l;
-            int y = l - (int)round(fTrueY);
-            if (x >= 0 && x < (2 * l) && y >= 0 && y < (2 * l))
-              {
-                for(int c = 0; c < undistorted.channels(); ++c)
-                  undistorted.data[ i * undistorted.step + j * undistorted.elemSize() + c ]
-                    = distorted.data[x * distorted.step + y * distorted.elemSize() + c];
+        cv::Mat undistorted(int(l * tan_max_radian * 2 * scale_), int(l * tan_max_radian * 2 * scale_), distorted.depth());
+        cv::Mat center_undistorted(int(l * tan_max_radian * 2 * scale_), int(l * tan_max_radian * 2 * scale_), distorted.depth());
+
+        int center_x = distorted.cols/2, center_y = distorted.rows/2;
+        int un_center_x = undistorted.cols/2, un_center_y = undistorted.rows/2;
+
+        if(!gimbal_)  basis_.setRPY(roll_, pitch_, 0);
+        tf::Matrix3x3 basis = getBasis();
+
+        for(int i = 0; i < undistorted.cols; ++i){
+          for(int j = 0; j < undistorted.rows; ++j){
+
+            tf::Vector3 p = basis * tf::Vector3((i - un_center_x) / scale_, (j - un_center_y) /scale_, l);
+
+            float radius = sqrt(pow(p.x(), 2) + pow(p.y(), 2));
+            float radian = atan2(radius, p.z());
+            if( radian < absolute_max_radian_ ){
+              float multi = 0, new_x = center_x, new_y = center_y;
+              if(radius){
+                multi = radian * k_ / radius;
+                new_x += (p.x() * multi);
+                new_y += (p.y() * multi);
               }
 
-            fTrueX = fTrueX + (double)l;
-            fTrueY = (double)l - fTrueY;
-
-            int iFloorX = (int)floor(fTrueX);
-            int iFloorY = (int)floor(fTrueY);
-            int iCeilingX = (int)ceil(fTrueX);
-            int iCeilingY = (int)ceil(fTrueY);
-
-            if (iFloorX < 0 || iCeilingX < 0 ||
-                iFloorX >= (2 * l) || iCeilingX >= (2 * l) ||
-                iFloorY < 0 || iCeilingY < 0 ||
-                iFloorY >= (2 * l) || iCeilingY >= (2 * l)) continue;
-
-            double fDeltaX = fTrueX - (double)iFloorX;
-            double fDeltaY = fTrueY - (double)iFloorY;
-
-            cv::Mat clrTopLeft(1,1, CV_8UC3), clrTopRight(1,1, CV_8UC3), clrBottomLeft(1,1, CV_8UC3), clrBottomRight(1,1, CV_8UC3);
-            for(int c = 0; c < undistorted.channels(); ++c){
-              clrTopLeft.data[ c ] = distorted.data[iFloorX * distorted.step + iFloorY * distorted.elemSize() + c];
-              clrTopRight.data[ c ] = distorted.data[iCeilingX * distorted.step + iFloorY * distorted.elemSize() + c];
-              clrBottomLeft.data[ c ] = distorted.data[iFloorX * distorted.step + iCeilingY * distorted.elemSize() + c];
-              clrBottomRight.data[ c ] = distorted.data[iCeilingX * distorted.step + iCeilingY * distorted.elemSize() + c];
-            }
-
-            double fTop0 = interpolate(fDeltaX, clrTopLeft.data[0], clrTopRight.data[0]);
-            double fTop1 = interpolate(fDeltaX, clrTopLeft.data[1], clrTopRight.data[1]);
-            double fTop2 = interpolate(fDeltaX, clrTopLeft.data[2], clrTopRight.data[2]);
-            double fBottom0 = interpolate(fDeltaX, clrBottomLeft.data[0], clrBottomRight.data[0]);
-            double fBottom1 = interpolate(fDeltaX, clrBottomLeft.data[1], clrBottomRight.data[1]);
-            double fBottom2 = interpolate(fDeltaX, clrBottomLeft.data[2], clrBottomRight.data[2]);
-
-            int i0 = (int)round(interpolate(fDeltaY, fTop0, fBottom0));
-            int i1 = (int)round(interpolate(fDeltaY, fTop1, fBottom1));
-            int i2 = (int)round(interpolate(fDeltaY, fTop2, fBottom2));
-
-            i0 = std::min(255, std::max(i0, 0));
-            i1 = std::min(255, std::max(i1, 0));
-            i2 = std::min(255, std::max(i2, 0));
-
-            undistorted_bilinear.data[ i * undistorted_bilinear.step + j * undistorted_bilinear.elemSize() + 0] = i0;
-            undistorted_bilinear.data[ i * undistorted_bilinear.step + j * undistorted_bilinear.elemSize() + 1] = i1;
-            undistorted_bilinear.data[ i * undistorted_bilinear.step + j * undistorted_bilinear.elemSize() + 2] = i2;
-          }
-        }
-
-        pub_undistorted_image_.publish(
-                                       cv_bridge::CvImage(
-                                                          image_msg->header,
-                                                          image_msg->encoding,
-                                                          undistorted).toImageMsg());
-        pub_undistorted_bilinear_image_.publish(cv_bridge::CvImage(
-                                                                   image_msg->header,
-                                                                   image_msg->encoding,
-                                                                   undistorted_bilinear).toImageMsg());
-      }else{
-        cv::Mat undistorted(int(l * 1.0 / tan_min_radian*scale_), int(l *  2.0 * PI * scale_), distorted.depth());
-        int center_x = distorted.rows/2, center_y = distorted.cols/2;
-
-	int offset_jndex = offset_degree_ / 180.0 * PI * l * scale_;
-        for(int i = 0; i < undistorted.rows; ++i){
-          for(int j = 0; j < undistorted.cols; ++j){
-            float phi = PI / 2;
-            if(i)
-              phi = atan(l * 1.0 /i*scale_) + 0.5;
-            float theta = (j-int(undistorted.cols/2))/scale_ * 1.0/l;
-            int x = k_ * phi * cos(theta) + center_x;
-            int y = k_ * phi * sin(theta) + center_y;
-            for(int c = 0; c < undistorted.channels(); ++c){
-	      int index = undistorted.rows - 1 - i;
-	      if( upside_down_ )
-		index = i;
-	      int jndex = j + offset_jndex;
-	      if(jndex > undistorted.cols - 1)
-		jndex -= undistorted.cols - 1;
-              undistorted.data[ index  * undistorted.step + jndex * undistorted.elemSize() + c ]
-                = distorted.data[ x * distorted.step + y * distorted.elemSize() + c];
-            }
-          }
-        }
-        pub_undistorted_image_.publish(
-                                       cv_bridge::CvImage(
-                                                          image_msg->header,
-                                                          image_msg->encoding,
-                                                          undistorted).toImageMsg());
-      }
-    }else{
-      float max_degree = max_degree_;
-      float max_radian = max_degree * 3.14159265 /180.0;
-      float tan_max_radian = tan(max_radian);
-      //const float k_ = 341.656050955;
-      const float absolute_max_degree = 110;
-      const float absolute_max_radian = absolute_max_degree * 3.14159265 /180.0;
-      float max_radius = max_radian * k_;
-      //std::cout << distorted.channels() << std::endl;
-      cv::Mat undistorted(int(l * tan_max_radian * 2 * scale_), int(l * tan_max_radian * 2 * scale_), distorted.depth());
-      int center_x = distorted.rows/2, center_y = distorted.cols/2;
-      int un_center_x = undistorted.rows/2, un_center_y = undistorted.cols/2;
-
-
-      tf::Matrix3x3 basis;
-
-
-      if(gimbal_) 
-        {
-          tf::Matrix3x3 basis1, basis2;
-          //DJI has oppsite coord 
-          basis1.setRPY(0, -roll_, 0);
-          basis2.setRPY(pitch_, 0, 0);
-          basis =  basis1 * basis2;
-          ROS_INFO("pitch: %f, roll:%f", pitch_, roll_);
-        }
-      else  basis.setRPY(roll_, pitch_, 0);
-
-      for(int i = 0; i < undistorted.rows; ++i){
-        for(int j = 0; j < undistorted.cols; ++j){
-
-          tf::Vector3 p = basis * tf::Vector3((i - un_center_x) / scale_, (j - un_center_y) /scale_, l);
-
-          float radius = sqrt(pow(p.x(), 2) + pow(p.y(), 2));
-          float radian = atan2(radius, p.z());
-          if( radian < absolute_max_radian ){
-            float multi = 0, new_x = center_x, new_y = center_y;
-            if(radius){
-              multi = radian * k_ / radius;
-              new_x += (p.x() * multi);
-              new_y += (p.y() * multi);
-            }
-
-            for(int c = 0; c < undistorted.channels(); ++c)
-              undistorted.data[  i * undistorted.step + j * undistorted.elemSize() + c ]
-                = distorted.data[ int(new_x) * distorted.step + int(new_y) * distorted.elemSize() + c];
-          }
-          else
-            {
               for(int c = 0; c < undistorted.channels(); ++c)
-                undistorted.data[  i * undistorted.step + j * undistorted.elemSize() + c ] = 255;
+                undistorted.data[  j * undistorted.step + i * undistorted.elemSize() + c ]
+                  = distorted.data[ int(new_y) * distorted.step + int(new_x) * distorted.elemSize() + c];
             }
+            else
+              {
+                for(int c = 0; c < undistorted.channels(); ++c)
+                  undistorted.data[  j * undistorted.step + i * undistorted.elemSize() + c ] = 255;
+              }
+
+            if(debug_)
+              {
+                p = tf::Vector3((i - un_center_x) / scale_, (j - un_center_y) /scale_, l);
+
+                radius = sqrt(pow(p.x(), 2) + pow(p.y(), 2));
+                radian = atan2(radius, p.z());
+                if( radian < absolute_max_radian_ )
+                  {
+                    float multi = 0, new_x = center_x, new_y = center_y;
+                    if(radius){
+                      multi = radian * k_ / radius;
+                      new_x += (p.x() * multi);
+                      new_y += (p.y() * multi);
+                    }
+
+                    for(int c = 0; c < undistorted.channels(); ++c)
+                      center_undistorted.data[  j * undistorted.step + i * undistorted.elemSize() + c ]
+                        = distorted.data[ int(new_y) * distorted.step + int(new_x) * distorted.elemSize() + c];
+                  }
+                else
+                  {
+                    for(int c = 0; c < undistorted.channels(); ++c)
+                      undistorted.data[  j * undistorted.step + i * undistorted.elemSize() + c ] = 255;
+                  }
+              }
+          }
         }
+
+        pub_undistorted_image_.publish(cv_bridge::CvImage(image_msg->header,
+                                                          image_msg->encoding,
+                                                          undistorted).toImageMsg());
+        if(debug_)
+          pub_undistorted_center_image_.publish(cv_bridge::CvImage(image_msg->header,
+                                                                   image_msg->encoding,
+                                                                   center_undistorted).toImageMsg());
       }
-
-#if 1
-      pub_undistorted_image_.publish(cv_bridge::CvImage(image_msg->header,
-                                                        image_msg->encoding,
-                                                        undistorted).toImageMsg());
-#else
-      cv::circle(distorted, cv::Point(circle_x_, circle_y_), circle_r_, CV_RGB(255,255,255), 10);
-      pub_undistorted_image_.publish(cv_bridge::CvImage(image_msg->header, image_msg->encoding, distorted).toImageMsg());
-#endif
-
-
-    }
+    else
+      {
+        cv::circle(distorted, cv::Point(circle_x_, circle_y_), circle_r_, CV_RGB(255,255,255), 10);
+        pub_undistorted_image_.publish(cv_bridge::CvImage(image_msg->header, image_msg->encoding, distorted).toImageMsg());
+      }
   }
 }
 

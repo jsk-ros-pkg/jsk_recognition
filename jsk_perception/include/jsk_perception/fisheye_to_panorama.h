@@ -51,6 +51,11 @@
 #include <nav_msgs/Odometry.h>
 
 #include <opencv2/opencv.hpp>
+#include <boost/version.hpp>
+#include <boost/thread/mutex.hpp>
+#if BOOST_VERSION>105200
+ #include <boost/thread/lock_guard.hpp>
+#endif
 
 namespace jsk_perception
 {
@@ -78,21 +83,37 @@ void odomCallback(const nav_msgs::OdometryConstPtr& odom_msg);
     ros::Subscriber sub_image_;
     ros::Subscriber sub_odom_;
     ros::Publisher pub_undistorted_image_;
-    ros::Publisher pub_undistorted_bilinear_image_;
+    ros::Publisher pub_undistorted_center_image_;
     std::string odom_topic_name_;
-    bool use_panorama_;
-    bool simple_panorama_;
     float max_degree_;
     float scale_;
-    bool upside_down_;
     double offset_degree_;
     double  k_;
     double roll_,pitch_;
     float circle_x_, circle_y_, circle_r_;
     bool gimbal_;
-tf::Matrix3x3 gimbal_orientation_;
+    tf::Matrix3x3 gimbal_orientation_;
+    tf::Matrix3x3 basis_;
+
+    double absolute_max_degree_, absolute_max_radian_;
+
+    boost::mutex param_mutex_;
+
+    bool calib_;
+    bool debug_;
+
   private:
-    
+    void setBasis(tf::Matrix3x3 basis)
+    {
+      boost::lock_guard<boost::mutex> lock(param_mutex_);
+      basis_ = basis;
+    }
+
+    const tf::Matrix3x3 getBasis()
+    {
+      boost::lock_guard<boost::mutex> lock(param_mutex_);
+      return basis_;
+    }
   };
 }
 

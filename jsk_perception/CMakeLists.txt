@@ -115,6 +115,9 @@ generate_dynamic_reconfigure_options(
   cfg/LabelToMaskImage.cfg
 )
 
+message(WARNING "DEPRECATION WARNING: srv files in jsk_pcl_ros are deprecated."
+        " Please use those in jsk_recognition_msgs.")
+# TODO(wkentaro): Remove deprecated srv files.
 add_service_files(FILES
   EuclideanSegment.srv
   NonMaximumSuppression.srv

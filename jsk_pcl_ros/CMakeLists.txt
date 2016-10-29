@@ -49,6 +49,9 @@ IF(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
   add_definitions("-DUSE_OLD_YAML")
 ENDIF()
 
+message(WARNING "DEPRECATION WARNING: srv files in jsk_pcl_ros are deprecated."
+        " Please use those in jsk_recognition_msgs.")
+# TODO(wkentaro): Remove deprecated srv files.
 add_service_files(FILES SwitchTopic.srv
   UpdateOffset.srv
   SnapFootstep.srv

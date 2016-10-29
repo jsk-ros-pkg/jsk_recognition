@@ -48,6 +48,7 @@
 #include <dynamic_reconfigure/server.h>
 #include <jsk_perception/FisheyeConfig.h>
 #include <tf/transform_listener.h> /* for vector3 */
+#include <nav_msgs/Odometry.h>
 
 #include <opencv2/opencv.hpp>
 
@@ -66,6 +67,7 @@ namespace jsk_perception
   protected:
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     void configCallback(Config &new_config, uint32_t level);
+void odomCallback(const nav_msgs::OdometryConstPtr& odom_msg);
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
@@ -74,16 +76,21 @@ namespace jsk_perception
     
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
     ros::Subscriber sub_image_;
+    ros::Subscriber sub_odom_;
     ros::Publisher pub_undistorted_image_;
     ros::Publisher pub_undistorted_bilinear_image_;
+    std::string odom_topic_name_;
     bool use_panorama_;
     bool simple_panorama_;
     float max_degree_;
     float scale_;
     bool upside_down_;
     double offset_degree_;
-    float  k_;
-    float roll_,pitch_;
+    double  k_;
+    double roll_,pitch_;
+    float circle_x_, circle_y_, circle_r_;
+    bool gimbal_;
+tf::Matrix3x3 gimbal_orientation_;
   private:
     
   };

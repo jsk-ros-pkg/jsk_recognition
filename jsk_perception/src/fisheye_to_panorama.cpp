@@ -42,6 +42,7 @@
 #include <math.h> 
 #include <boost/assign.hpp>
 
+
 #define PI 3.141592
 
 namespace jsk_perception
@@ -56,17 +57,24 @@ namespace jsk_perception
     if(use_panorama_ && simple_panorama_)
       pub_undistorted_bilinear_image_ = advertise<sensor_msgs::Image>(*pnh_, "output_bilinear", 1);
 
+
+    pnh_->param("odom_topic_name", odom_topic_name_, std::string("odom"));
+    sub_odom_ = pnh_->subscribe<nav_msgs::Odometry>(odom_topic_name_, 1, &FisheyeToPanorama::odomCallback,
+                                                   this, ros::TransportHints().tcpNoDelay());
+
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&FisheyeToPanorama::configCallback, this, _1, _2);
     srv_->setCallback (f);
 
+
     scale_ = 0.5;
     upside_down_ = false;
     offset_degree_ = 180.0;
-    k_ = 300.0;
+    pnh_->param("k", k_, 300.0);
     roll_ = 0;
     pitch_ = 0;
+    gimbal_ = false;
     onInitPostProcess();
   }
 
@@ -76,9 +84,26 @@ namespace jsk_perception
     scale_ = new_config.scale;
     upside_down_ = new_config.upside_down;
     offset_degree_ = new_config.offset_degree;
-    k_ = new_config.k;
-    roll_ = new_config.roll;
-    pitch_ = new_config.pitch;
+    //k_ = new_config.k;
+    if(!gimbal_)
+      {
+        roll_ = new_config.roll;
+        pitch_ = new_config.pitch;
+      }
+    circle_x_ = new_config.circle_x;
+    circle_y_ = new_config.circle_y;
+    circle_r_ = new_config.circle_r;
+  }
+
+void FisheyeToPanorama::odomCallback(const nav_msgs::OdometryConstPtr& odom_msg)
+{
+    gimbal_ = true;
+    tf::Quaternion q(odom_msg->pose.pose.orientation.x, odom_msg->pose.pose.orientation.y,
+                   odom_msg->pose.pose.orientation.z, odom_msg->pose.pose.orientation.w);
+    gimbal_orientation_.setRotation(q);
+    double yaw = 0;
+    gimbal_orientation_.getRPY(roll_, pitch_, yaw);
+
   }
 
 
@@ -93,7 +118,6 @@ namespace jsk_perception
   {
     sub_image_.shutdown();
   }
-
 
   void FisheyeToPanorama::rectify(const sensor_msgs::Image::ConstPtr& image_msg)
   {
@@ -217,15 +241,29 @@ namespace jsk_perception
       const float absolute_max_degree = 110;
       const float absolute_max_radian = absolute_max_degree * 3.14159265 /180.0;
       float max_radius = max_radian * k_;
+      //std::cout << distorted.channels() << std::endl;
       cv::Mat undistorted(int(l * tan_max_radian * 2 * scale_), int(l * tan_max_radian * 2 * scale_), distorted.depth());
       int center_x = distorted.rows/2, center_y = distorted.cols/2;
       int un_center_x = undistorted.rows/2, un_center_y = undistorted.cols/2;
 
+
       tf::Matrix3x3 basis;
-      basis.setRPY(roll_, pitch_, 0);
+
+
+      if(gimbal_) 
+        {
+          tf::Matrix3x3 basis1, basis2;
+          //DJI has oppsite coord 
+          basis1.setRPY(0, -roll_, 0);
+          basis2.setRPY(pitch_, 0, 0);
+          basis =  basis1 * basis2;
+          ROS_INFO("pitch: %f, roll:%f", pitch_, roll_);
+        }
+      else  basis.setRPY(roll_, pitch_, 0);
 
       for(int i = 0; i < undistorted.rows; ++i){
         for(int j = 0; j < undistorted.cols; ++j){
+
           tf::Vector3 p = basis * tf::Vector3((i - un_center_x) / scale_, (j - un_center_y) /scale_, l);
 
           float radius = sqrt(pow(p.x(), 2) + pow(p.y(), 2));
@@ -233,7 +271,6 @@ namespace jsk_perception
           if( radian < absolute_max_radian ){
             float multi = 0, new_x = center_x, new_y = center_y;
             if(radius){
-              // float new_radius = radian * k_; 
               multi = radian * k_ / radius;
               new_x += (p.x() * multi);
               new_y += (p.y() * multi);
@@ -251,16 +288,13 @@ namespace jsk_perception
         }
       }
 
-#if 0
+#if 1
       pub_undistorted_image_.publish(cv_bridge::CvImage(image_msg->header,
                                                         image_msg->encoding,
                                                         undistorted).toImageMsg());
 #else
-      cv::Mat test;
-      std::cout << distorted.type() << std::endl;
-      cv::cvtColor(distorted, test, CV_GRAY2RGB);
-      //cv::circle(test, cv::Point(640, 512), 10, CV_RGB(255,0,0));
-      //pub_undistorted_image_.publish(cv_bridge::CvImage(image_msg->header, image_msg->encoding, test).toImageMsg());
+      cv::circle(distorted, cv::Point(circle_x_, circle_y_), circle_r_, CV_RGB(255,255,255), 10);
+      pub_undistorted_image_.publish(cv_bridge::CvImage(image_msg->header, image_msg->encoding, distorted).toImageMsg());
 #endif
 
 

@@ -457,11 +457,11 @@ install(DIRECTORY scripts/
         USE_SOURCE_PERMISSIONS
 )
 
-install(FILES jsk_pcl_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 install(DIRECTORY
   config
   launch
   sample
+  plugins
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 if (CATKIN_ENABLE_TESTING)

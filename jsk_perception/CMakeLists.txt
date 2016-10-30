@@ -334,14 +334,12 @@ install(DIRECTORY node_scripts/ scripts/
         USE_SOURCE_PERMISSIONS
 )
 
-install(DIRECTORY sample launch euslisp
+install(DIRECTORY sample launch euslisp plugins
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         USE_SOURCE_PERMISSIONS
 )
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
-
-install(FILES ${PROJECT_NAME}_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 # ------------------------------------------------------------------------------------
 # Test

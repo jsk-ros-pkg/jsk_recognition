@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.29 (2016-10-30)
+-------------------
 * CMakeLists.txt: install nodelet.xml: for get to care about install process in #1929
 * Contributors: Kei Okada
 

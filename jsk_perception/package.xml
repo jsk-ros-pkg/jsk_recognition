@@ -91,5 +91,6 @@
 
   <export>
     <nodelet plugin="${prefix}/jsk_perception_nodelets.xml"/>
+    <nodelet plugin="${prefix}/fisheye_gimbal_nodelets.xml"/>
   </export>
 </package>

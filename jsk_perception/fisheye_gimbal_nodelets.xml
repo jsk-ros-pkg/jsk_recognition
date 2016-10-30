@@ -1,0 +1,7 @@
+<library path="lib/libfisheye_gimbal">
+  <class name="jsk_perception/FisheyeGimbal" type="jsk_perception::FisheyeGimbal" base_class_type="nodelet::Nodelet">
+    <description>
+      Nodelet to achieve vision gimbal using fisheye.
+    </description>
+  </class>
+</library>

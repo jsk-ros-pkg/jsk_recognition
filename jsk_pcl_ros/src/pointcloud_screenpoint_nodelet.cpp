@@ -141,7 +141,7 @@ bool jsk_pcl_ros::PointcloudScreenpoint::checkpoint (pcl::PointCloud< pcl::Point
   ROS_INFO("Request: screenpoint (%d, %d) => (%f, %f, %f)", x, y, p.x, p.y, p.z);
   //return !(isnan (p.x) || ( (p.x == 0.0) && (p.y == 0.0) && (p.z == 0.0)));
 
-  if ( !isnan (p.x) && ((p.x != 0.0) || (p.y != 0.0) || (p.z == 0.0)) ) {
+  if ( !std::isnan (p.x) && ((p.x != 0.0) || (p.y != 0.0) || (p.z == 0.0)) ) {
     resx = p.x; resy = p.y; resz = p.z;
     return true;
   }

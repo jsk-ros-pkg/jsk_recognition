@@ -252,7 +252,7 @@ namespace jsk_pcl_ros
     for (size_t i = 0; i < cloud->points.size(); i++) {
       pcl::PointXYZRGB p = cloud->points[i];
       Eigen::Vector3f pf = p.getVector3fMap();
-      if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
+      if (!std::isnan(p.x) && !std::isnan(p.y) && !std::isnan(p.z)) {
         if (plane0->signedDistanceToPoint(pf) > 0 &&
             plane1->signedDistanceToPoint(pf) > 0 &&
             plane2->signedDistanceToPoint(pf) > 0 &&

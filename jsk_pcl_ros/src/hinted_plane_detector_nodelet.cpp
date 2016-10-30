@@ -247,7 +247,7 @@ namespace jsk_pcl_ros {
   {
     for (size_t i = 0; i < cloud->points.size(); i++) {
       pcl::PointNormal p = cloud->points[i];
-      if (!isnan(p.x) && !isnan(p.y) && !isnan(p.y)) {
+      if (!std::isnan(p.x) && !std::isnan(p.y) && !std::isnan(p.y)) {
         Eigen::Vector4f v = p.getVector4fMap();
         if (!enable_distance_filtering_ || hint_convex->distanceToPoint(v) < outlier_threashold_) {
           Eigen::Vector3f n(p.normal_x, p.normal_y, p.normal_z);

@@ -103,7 +103,7 @@ namespace jsk_pcl_ros
       p.y = cloud->points[i].y;
       p.z = cloud->points[i].z;
       //p.getVector3fMap() = cloud->points[i].getVector3fMap();
-      if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
+      if (!std::isnan(p.x) && !std::isnan(p.y) && !std::isnan(p.z)) {
       // compute RGB
         cv::Point2d uv = model.project3dToPixel(cv::Point3d(p.x, p.y, p.z));
         if (uv.x > 0 && uv.x < image_msg->width &&

@@ -92,6 +92,7 @@ generate_dynamic_reconfigure_options(
   cfg/ImageTimeDiff.cfg
   cfg/OverlayImageColorOnMono.cfg
   cfg/SelectiveSearch.cfg
+  cfg/TimeStamp.cfg
 )
 
 add_service_files(FILES EuclideanSegment.srv  SetTemplate.srv  WhiteBalancePoints.srv  WhiteBalance.srv NonMaximumSuppression.srv)
@@ -148,7 +149,7 @@ macro(jsk_perception_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_na
   jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
     jsk_perception_nodelet_sources jsk_perception_nodelet_executables)
 endmacro()
-jsk_perception_nodelet(src/bounding_box_to_rect.cpp "jsk_perception/BoundingBoxToRect" "bounding_box_to_rect")
+#jsk_perception_nodelet(src/bounding_box_to_rect.cpp "jsk_perception/BoundingBoxToRect" "bounding_box_to_rect")
 jsk_perception_nodelet(src/rect_array_actual_size_filter.cpp "jsk_perception/RectArrayActualSizeFilter" "rect_array_actual_size_filter")
 jsk_perception_nodelet(src/polygon_array_color_likelihood.cpp "jsk_perception/PolygonArrayColorLikelihood" "polygon_array_color_likelihood")
 jsk_perception_nodelet(src/polygon_array_color_histogram.cpp "jsk_perception/PolygonArrayColorHistogram" "polygon_array_color_histogram")
@@ -159,6 +160,9 @@ jsk_perception_nodelet(src/color_histogram.cpp "jsk_perception/ColorHistogram" "
 jsk_perception_nodelet(src/background_substraction_nodelet.cpp "jsk_perception/BackgroundSubstraction" "background_substraction")
 jsk_perception_nodelet(src/hough_circles.cpp "jsk_perception/HoughCircleDetector" "hough_circles")
 jsk_perception_nodelet(src/fisheye_to_panorama.cpp "jsk_perception/FisheyeToPanorama" "fisheye_to_panorama")
+#add_library(fisheye_gimbal src/fisheye_gimbal.cpp)
+#target_link_libraries(fisheye_gimbal ${catkin_LIBRARIES})
+
 jsk_perception_nodelet(src/grabcut_nodelet.cpp "jsk_perception/GrabCut" "grabcut")
 jsk_perception_nodelet(src/slic_superpixels.cpp "jsk_perception/SLICSuperPixels" "slic_super_pixels")
 jsk_perception_nodelet(src/rgb_decomposer.cpp "jsk_perception/RGBDecomposer" "rgb_decomposer")
@@ -188,13 +192,13 @@ jsk_perception_nodelet(src/morphological_operator.cpp "jsk_perception/BlackHat" 
 jsk_perception_nodelet(src/rect_to_mask_image.cpp "jsk_perception/RectToMaskImage" "rect_to_mask_image")
 jsk_perception_nodelet(src/mask_image_to_roi.cpp "jsk_perception/MaskImageToROI" "mask_image_to_roi")
 jsk_perception_nodelet(src/mask_image_to_rect.cpp "jsk_perception/MaskImageToRect" "mask_image_to_rect")
-jsk_perception_nodelet(src/bounding_rect_mask_image.cpp "jsk_perception/BoundingRectMaskImage" "bounding_rect_mask_image")
+#jsk_perception_nodelet(src/bounding_rect_mask_image.cpp "jsk_perception/BoundingRectMaskImage" "bounding_rect_mask_image")
 jsk_perception_nodelet(src/roi_to_rect.cpp "jsk_perception/ROIToRect" "roi_to_rect")
 jsk_perception_nodelet(src/roi_to_mask_image.cpp "jsk_perception/ROIToMaskImage" "roi_to_mask_image")
 jsk_perception_nodelet(src/polygon_to_mask_image.cpp "jsk_perception/PolygonToMaskImage" "polygon_to_mask_image")
 jsk_perception_nodelet(src/polygon_array_to_label_image.cpp "jsk_perception/PolygonArrayToLabelImage" "polygon_array_to_label_image")
 jsk_perception_nodelet(src/rect_to_roi.cpp "jsk_perception/RectToROI" "rect_to_roi")
-jsk_perception_nodelet(src/convex_hull_mask_image.cpp "jsk_perception/ConvexHullMaskImage" "convex_hull_mask_image")
+#jsk_perception_nodelet(src/convex_hull_mask_image.cpp "jsk_perception/ConvexHullMaskImage" "convex_hull_mask_image")
 jsk_perception_nodelet(src/mask_image_generator.cpp "jsk_perception/MaskImageGenerator" "mask_image_generator")
 jsk_perception_nodelet(src/project_image_point.cpp "jsk_perception/ProjectImagePoint" "project_image_point")
 jsk_perception_nodelet(src/sliding_window_object_detector.cpp "jsk_perception/SlidingWindowObjectDetector" "sliding_window_object_detector")
@@ -227,10 +231,10 @@ add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
   ${CMAKE_CURRENT_BINARY_DIR}/build/patched-SLIC-Superpixels/slic.cpp
   src/histogram_of_oriented_gradients.cpp
   )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${robot_self_filter_LIBRARIES} yaml-cpp)
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${robot_self_filter_LIBRARIES} yaml-cpp ${OpenCV_LIBS})
 if(robot_self_filter_FOUND)
   include_directories(${robot_self_filter_INCLUDE_DIRS})
-  target_link_libraries(${PROJECT_NAME} ${robot_self_filter_LIBRARIES})
+  target_link_libraries(${PROJECT_NAME} ${robot_self_filter_LIBRARIES} ${OpenCV_LIBS})
 endif(robot_self_filter_FOUND)
 if(${OpenCV_VERSION} VERSION_GREATER "2.4.8")
   # This condition is to avoid changing current behavior
@@ -239,19 +243,19 @@ endif()
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 
 
-target_link_libraries(camshiftdemo             ${catkin_LIBRARIES})
-target_link_libraries(linemod                  ${catkin_LIBRARIES})
-target_link_libraries(virtual_camera_mono      ${catkin_LIBRARIES})
-target_link_libraries(point_pose_extractor     ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-target_link_libraries(edge_detector            ${catkin_LIBRARIES})
-target_link_libraries(white_balance_converter  ${catkin_LIBRARIES})
-target_link_libraries(hough_lines              ${catkin_LIBRARIES})
-target_link_libraries(rectangle_detector       ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-target_link_libraries(calc_flow                ${catkin_LIBRARIES})
-target_link_libraries(color_histogram_sliding_matcher  ${catkin_LIBRARIES})
-target_link_libraries(oriented_gradient_node   ${catkin_LIBRARIES} ${Boost_LIBRARIES} oriented_gradient)
-target_link_libraries(oriented_gradient   ${catkin_LIBRARIES} ${Boost_LIBRARIES} oriented_gradient)
-target_link_libraries(sliding_window_object_detector_trainer_node ${PROJECT_NAME} ${catkin_LIBRARIES})
+target_link_libraries(camshiftdemo             ${catkin_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(linemod                  ${catkin_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(virtual_camera_mono      ${catkin_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(point_pose_extractor     ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(edge_detector            ${catkin_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(white_balance_converter  ${catkin_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(hough_lines              ${catkin_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(rectangle_detector       ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(calc_flow                ${catkin_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(color_histogram_sliding_matcher  ${catkin_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(oriented_gradient_node   ${catkin_LIBRARIES} ${Boost_LIBRARIES} oriented_gradient ${OpenCV_LIBS})
+target_link_libraries(oriented_gradient   ${catkin_LIBRARIES} ${Boost_LIBRARIES} oriented_gradient ${OpenCV_LIBS})
+target_link_libraries(sliding_window_object_detector_trainer_node ${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 add_dependencies(camshiftdemo             ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 add_dependencies(virtual_camera_mono      ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)

@@ -3,6 +3,7 @@
   <arg name="calib" default="false" />
   <arg name="debug" default="false" />
 
+  <!--
   <node type="nodelet" pkg="nodelet" name="fisheye_manager" args="manager" output="screen"/>
   <node type="nodelet" pkg="nodelet" name="fisheye_to_panorama"
         args="load jsk_perception/FisheyeToPanorama fisheye_manager" output="screen">
@@ -11,6 +12,11 @@
     <param name="odom_topic_name" value="/dji_sdk/odometry" />
     <param name="debug" value="$(arg debug)" />
     <param name="calib" value="$(arg calib)" />
+  </node>
+  -->
+
+  <node type="odom_timestamp_modification.py" pkg="jsk_perception" name="odom_time_stamp" output="screen" >
+    <param name="sub_topic_name" value="/dji_sdk/odometry" />
   </node>
 
   <node type="image_view" pkg="image_view" name="fisheye_image_view">

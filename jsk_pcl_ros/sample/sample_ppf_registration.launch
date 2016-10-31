@@ -1,0 +1,110 @@
+<launch>
+  <arg name="USE_ICP" default="true" />
+  <arg name="USE_SAMPLE_DATA" default="true" />
+  <arg name="input" default="/camera/depth/points" />
+  <arg name="sensor_frame" default="/camera_depth_optical_frame" />
+
+  <param name="/use_sim_time" value="true" if="$(arg USE_SAMPLE_DATA)"/>
+  <param name="/use_sim_time" value="false" unless="$(arg USE_SAMPLE_DATA)"/>
+  <node name="rosbag_play"  if="$(arg USE_SAMPLE_DATA)"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/test_data/2016-10-29-17-05-44_tabletop-coffee-cup/tabletop-coffee-cup.bag --clock --loop" />
+
+  <node name="optical_frame_tf_publisher" if="$(arg USE_SAMPLE_DATA)"
+        pkg="tf" type="static_transform_publisher"
+        args="0 0 0 -1.57 0 -1.57 map camera_depth_optical_frame 500" />
+
+  <arg name="manager" value="ppf_manager" />
+  <node name="$(arg manager)" pkg="nodelet" type="nodelet" args="manager" />
+
+  <!-- input cloud -->
+  <node name="multi_plane_estimate" pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg manager)"
+        output="screen">
+    <remap from="~input" to="$(arg input)" />
+    <rosparam>
+      max_curvature: 0.01
+      estimate_normal: true
+    </rosparam>
+  </node>
+  <node name="polygon_magnifier" pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PolygonMagnifier $(arg manager)"
+        output="screen">
+    <remap from="~input" to="multi_plane_estimate/output_refined_polygon" />
+  </node>
+  <node name="plane_extraction" pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/MultiPlaneExtraction $(arg manager)"
+        output="screen">
+    <remap from="~input" to="$(arg input)" />
+    <remap from="~indices" to="multi_plane_estimate/output_refined" />
+    <remap from="~input_polygons" to="multi_plane_estimate/output_refined_polygon" />
+    <remap from="~input_coefficients" to="multi_plane_estimate/output_refined_coefficients" />
+    <rosparam subst_value="true">
+      use_sensor_frame: true
+      sensor_frame: $(arg sensor_frame)
+      min_height: 0.03
+      use_async: true
+    </rosparam>
+  </node>
+  <!--
+   <node name="passthrough_z" pkg="nodelet" type="nodelet"
+      args="load pcl/PassThrough $(arg manager)">
+    <remap from="~input" to="plane_extraction" />
+    <rosparam>
+      filter_field_name: z
+      filter_limit_min: 0.5
+      filter_limit_max: 1.0
+      keep_organized: true
+    </rosparam>
+  </node>
+  -->
+  <node name ="subsample_input" pkg="nodelet" type="nodelet"
+      args="load pcl/VoxelGrid $(arg manager)" output="screen">
+      <remap from="~input" to="plane_extraction/output" />
+    <rosparam>
+      leaf_size: 0.008
+    </rosparam>
+  </node>
+
+  <!-- reference cloud -->
+  <node name="pointcloud_database_server" pkg="nodelet" type="nodelet"
+    args="load jsk_pcl/PointcloudDatabaseServer $(arg manager)" output="screen">
+    <rosparam subst_value="true">
+      models: ["$(find jsk_pcl_ros)/test_data/2016-10-26-02-09-51_coffee_cup.pcd",
+      ]
+      duration: 0.05
+      use_array: false
+    </rosparam>
+  </node>
+
+  <node name ="subsample_reference" pkg="nodelet" type="nodelet"
+      args="load pcl/VoxelGrid $(arg manager)" output="screen">
+    <remap from="~input" to="pointcloud_database_server/cloud" />
+    <rosparam>
+      leaf_size: 0.005
+    </rosparam>
+  </node>
+
+  <node name="ppf_registration" pkg="nodelet" type="nodelet"
+    args="load jsk_pcl/PPFRegistration $(arg manager)" output="screen">
+    <remap from="~input/cloud" to="subsample_input/output" />
+    <remap from="~input/reference_cloud" to="subsample_reference/output" />
+    <rosparam>
+      approximate_sync: true
+      queue_size: 1000
+      sampling_rate: 10
+      search_radius: 0.05
+      position_clustering_threshold: 0.2
+      rotation_clustering_threshold: 30
+      use_array: false
+    </rosparam>
+  </node>
+  <node name="icp_registration" if="$(arg USE_ICP)"
+      pkg="nodelet" type="nodelet"
+      args="load jsk_pcl/ICPRegistration /$(arg manager)"
+      output="screen">
+    <remap from="~input" to="subsample_input/output" />
+    <remap from="~input_reference" to="ppf_registration/output/cloud" />
+  </node>
+
+</launch>

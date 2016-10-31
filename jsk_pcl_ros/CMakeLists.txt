@@ -126,6 +126,7 @@ generate_dynamic_reconfigure_options(
   cfg/Kinfu.cfg
   cfg/PointcloudDatabaseServer.cfg
   cfg/TargetAdaptiveTracking.cfg
+  cfg/PPFRegistration.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -353,6 +354,8 @@ jsk_pcl_nodelet(src/heightmap_time_accumulation_nodelet.cpp
   "jsk_pcl/HeightmapTimeAccumulation" "heightmap_time_accumulation")
 jsk_pcl_nodelet(src/voxel_grid_large_scale_nodelet.cpp
   "jsk_pcl/VoxelGridLargeScale" "voxel_grid_large_scale")
+jsk_pcl_nodelet(src/ppf_registration_nodelet.cpp
+  "jsk_pcl/PPFRegistration" "ppf_registration")
 if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
   jsk_pcl_nodelet(src/kinfu_nodelet.cpp
     "jsk_pcl/Kinfu" "kinfu")

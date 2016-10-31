@@ -35,12 +35,10 @@ class timestamp_changer:
         if config.enable_flag == True:
             self.__time_diff = config.time_diff
             rospy.loginfo("change time diff to %f", self.__time_diff);
-            print self.__time_diff
         return config
 
     def __odom_callback(self, msg):
         t = msg.header.stamp.to_sec()
-        print self.__time_diff
         msg.header.stamp = rospy.Time.from_sec(t + self.__time_diff)
         self.__pub_odometry.publish(msg)
 

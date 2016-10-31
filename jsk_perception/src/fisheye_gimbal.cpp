@@ -104,6 +104,8 @@ namespace jsk_perception
 
   void FisheyeGimbal::rectifycallback(const sensor_msgs::Image::ConstPtr& image_msg, const nav_msgs::OdometryConstPtr& odom_msg)
   {
+    ROS_WARN("image_time: %f, odom_time: %f, diff: %f", image_msg->header.stamp.toSec(), odom_msg->header.stamp.toSec(), image_msg->header.stamp.toSec() -odom_msg->header.stamp.toSec());
+
     cv::Mat distorted = cv_bridge::toCvCopy(image_msg, image_msg->encoding)->image;
     gimbal_ = true;
     tf::Quaternion q(odom_msg->pose.pose.orientation.x, odom_msg->pose.pose.orientation.y,
@@ -111,6 +113,7 @@ namespace jsk_perception
     gimbal_orientation_.setRotation(q);
     double yaw = 0;
     gimbal_orientation_.getRPY(roll_, pitch_, yaw);
+    ROS_INFO("pitch: %f, roll: %f", pitch_, roll_);
     tf::Matrix3x3 basis1, basis2, basis;
     basis1.setRPY(pitch_, 0 , 0);
     basis2.setRPY(0, -roll_, 0);

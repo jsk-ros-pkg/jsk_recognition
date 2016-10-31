@@ -159,7 +159,7 @@ jsk_perception_nodelet(src/sparse_image_decoder.cpp "jsk_perception/SparseImageD
 jsk_perception_nodelet(src/color_histogram.cpp "jsk_perception/ColorHistogram" "color_histogram")
 jsk_perception_nodelet(src/background_substraction_nodelet.cpp "jsk_perception/BackgroundSubstraction" "background_substraction")
 jsk_perception_nodelet(src/hough_circles.cpp "jsk_perception/HoughCircleDetector" "hough_circles")
-jsk_perception_nodelet(src/fisheye_to_panorama.cpp "jsk_perception/FisheyeToPanorama" "fisheye_to_panorama")
+#jsk_perception_nodelet(src/fisheye_to_panorama.cpp "jsk_perception/FisheyeToPanorama" "fisheye_to_panorama")
 add_library(fisheye_gimbal src/fisheye_gimbal.cpp)
 target_link_libraries(fisheye_gimbal ${catkin_LIBRARIES})
 

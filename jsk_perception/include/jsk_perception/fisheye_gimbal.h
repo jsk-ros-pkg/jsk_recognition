@@ -37,26 +37,24 @@
 #ifndef JSK_PERCEPTION_FISHEYE_GIMBAL_H_
 #define JSK_PERCEPTION_FISHEYE_GIMBAL_H_
 
-#include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <ros/ros.h>
+#include <nodelet/nodelet.h>
 #include <sensor_msgs/Image.h>
+#include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/CameraInfo.h>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
-#include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
-#include <message_filters/pass_through.h>
 #include <dynamic_reconfigure/server.h>
-#include <jsk_perception/FisheyeConfig.h>
+#include <jsk_perception/FisheyeConfig.h> /* should change */
 #include <tf/transform_listener.h> /* for vector3 */
 #include <nav_msgs/Odometry.h>
+#include <cv_bridge/cv_bridge.h>
 
 #include <opencv2/opencv.hpp>
-#include <boost/version.hpp>
-#include <boost/thread/mutex.hpp>
-#if BOOST_VERSION>105200
- #include <boost/thread/lock_guard.hpp>
-#endif
+#include <math.h>
+
 
 namespace jsk_perception
 {
@@ -73,9 +71,12 @@ namespace jsk_perception
     virtual void onInit();
     void rectifycallback(const sensor_msgs::ImageConstPtr& image_msg, const nav_msgs::OdometryConstPtr& odom_msg);
 
+  private:
     boost::shared_ptr< message_filters::Synchronizer<SyncPolicy> > sync_;
     message_filters::Subscriber<sensor_msgs::Image> sub_image_;
     message_filters::Subscriber<nav_msgs::Odometry> sub_odom_;
+
+    ros::NodeHandle pnh_;
 
     ros::Publisher pub_undistorted_image_;
     ros::Publisher pub_undistorted_center_image_;
@@ -86,30 +87,16 @@ namespace jsk_perception
     double  k_;
     double roll_,pitch_;
     float circle_x_, circle_y_, circle_r_;
+    double  stamp_diff_thre_;
     bool gimbal_;
     tf::Matrix3x3 gimbal_orientation_;
     tf::Matrix3x3 basis_;
 
     double absolute_max_degree_, absolute_max_radian_;
 
-    boost::mutex param_mutex_;
-
     bool calib_;
     bool debug_;
 
-  private:
-    ros::NodeHandle pnh_;
-    void setBasis(tf::Matrix3x3 basis)
-    {
-      boost::lock_guard<boost::mutex> lock(param_mutex_);
-      basis_ = basis;
-    }
-
-    const tf::Matrix3x3 getBasis()
-    {
-      boost::lock_guard<boost::mutex> lock(param_mutex_);
-      return basis_;
-    }
   };
 }
 

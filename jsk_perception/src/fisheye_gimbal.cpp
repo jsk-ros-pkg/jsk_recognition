@@ -34,16 +34,6 @@
  *********************************************************************/
 
 #include "jsk_perception/fisheye_gimbal.h"
-#include <jsk_topic_tools/log_utils.h>
-#include <cv_bridge/cv_bridge.h>
-#include <sensor_msgs/Image.h>
-#include <sensor_msgs/image_encodings.h>
-#include <algorithm>
-#include <math.h> 
-#include <boost/assign.hpp>
-
-
-#define PI 3.141592
 
 namespace jsk_perception
 {
@@ -58,6 +48,7 @@ namespace jsk_perception
     pnh_.param("absolute_max_degree",absolute_max_degree_, 110.0);
     pnh_.param("odom_topic_name", odom_topic_name_, std::string("odom"));
     pnh_.param("image_topic_name", image_topic_name_, std::string("camera/image_raw"));
+    pnh_.param("stamp_diff_thre", stamp_diff_thre_, 0.01);
 
     /* ros pub and sub */
     pub_undistorted_image_ = pnh_.advertise<sensor_msgs::Image>("output", 1);
@@ -104,8 +95,6 @@ namespace jsk_perception
 
   void FisheyeGimbal::rectifycallback(const sensor_msgs::Image::ConstPtr& image_msg, const nav_msgs::OdometryConstPtr& odom_msg)
   {
-    ROS_WARN("image_time: %f, odom_time: %f, diff: %f", image_msg->header.stamp.toSec(), odom_msg->header.stamp.toSec(), image_msg->header.stamp.toSec() -odom_msg->header.stamp.toSec());
-
     cv::Mat distorted = cv_bridge::toCvCopy(image_msg, image_msg->encoding)->image;
     gimbal_ = true;
     tf::Quaternion q(odom_msg->pose.pose.orientation.x, odom_msg->pose.pose.orientation.y,
@@ -113,13 +102,19 @@ namespace jsk_perception
     gimbal_orientation_.setRotation(q);
     double yaw = 0;
     gimbal_orientation_.getRPY(roll_, pitch_, yaw);
-    ROS_INFO("pitch: %f, roll: %f", pitch_, roll_);
+
+    /* we exculude the set whcih time difference is biggre than 10ms */
+    if(fabs(image_msg->header.stamp.toSec() - odom_msg->header.stamp.toSec()) > stamp_diff_thre_)
+      {
+        ROS_WARN("pitch: %.3f, roll: %.3f, time_diff: %.4f", pitch_, roll_, image_msg->header.stamp.toSec() -odom_msg->header.stamp.toSec());
+        return;
+      }
+
+
     tf::Matrix3x3 basis1, basis2, basis;
     basis1.setRPY(pitch_, 0 , 0);
     basis2.setRPY(0, -roll_, 0);
     basis_ = (basis1 * basis2).transpose();
-
-    //setBasis(basis);
 
     if(!calib_)
       {
@@ -137,7 +132,6 @@ namespace jsk_perception
         int un_center_x = undistorted.cols/2, un_center_y = undistorted.rows/2;
 
         if(!gimbal_)  basis_.setRPY(roll_, pitch_, 0);
-        //tf::Matrix3x3 basis = getBasis();
 
         for(int i = 0; i < undistorted.cols; ++i){
           for(int j = 0; j < undistorted.rows; ++j){

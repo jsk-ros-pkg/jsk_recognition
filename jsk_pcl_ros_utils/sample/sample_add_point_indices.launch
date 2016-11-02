@@ -1,0 +1,104 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <param name="/use_sim_time" value="true" />
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros_utils)/sample/data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/vision.compressed.bag --clock --loop">
+  </node>
+
+  <arg name="INPUT_CLOUD" value="/kinect2_head/hd/points" />
+  <arg name="INPUT_IMAGE" value="/kinect2_head/hd/image_color" />
+
+  <arg name="MANAGER" value="add_point_indices_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet"
+        args="manager"
+        output="screen"/>
+
+  <node name="passthrough_filter_right"
+        pkg="nodelet" type="nodelet"
+        args="load pcl/PassThrough $(arg MANAGER)">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <rosparam>
+      keep_organized: true
+      filter_field_name: x
+      filter_limit_min: 0.0
+      filter_limit_max: 1.5
+    </rosparam>
+  </node>
+
+  <node name="passthrough_filter_left"
+        pkg="nodelet" type="nodelet"
+        args="load pcl/PassThrough $(arg MANAGER)">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <rosparam>
+      keep_organized: true
+      filter_field_name: x
+      filter_limit_min: -1.5
+      filter_limit_max: 0.0
+    </rosparam>
+  </node>
+
+  <node name="pointcloud_to_point_indices_right"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PointCloudToPointIndices $(arg MANAGER)">
+    <remap from="~input" to="/passthrough_filter_right/output" />
+  </node>
+
+  <node name="pointcloud_to_point_indices_left"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PointCloudToPointIndices $(arg MANAGER)">
+    <remap from="~input" to="/passthrough_filter_left/output" />
+  </node>
+
+  <node name="add_point_indices"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/AddPointIndices $(arg MANAGER)">
+    <remap from="~input/src1" to="/pointcloud_to_point_indices_right/output" />
+    <remap from="~input/src2" to="/pointcloud_to_point_indices_left/output" />
+    <rosparam>
+      approximate_sync: true
+    </rosparam>
+  </node>
+
+  <node name="point_indices_to_mask_image"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PointIndicesToMaskImage $(arg MANAGER)">
+    <remap from="~input" to="add_point_indices/output" />
+    <remap from="~input/image" to="$(arg INPUT_IMAGE)" />
+    <rosparam>
+      approximate_sync: true
+      static_image_size: false
+    </rosparam>
+  </node>
+
+  <node name="pointcloud_to_mask_image_right"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PointCloudToMaskImage $(arg MANAGER)">
+    <remap from="~input" to="/passthrough_filter_right/output" />
+  </node>
+
+  <node name="pointcloud_to_mask_image_left"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PointCloudToMaskImage $(arg MANAGER)">
+    <remap from="~input" to="/passthrough_filter_left/output" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="/pointcloud_to_mask_image_right/output" />
+    </node>
+    <node name="image_view1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="/pointcloud_to_mask_image_left/output" />
+    </node>
+    <node name="image_view2"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="/point_indices_to_mask_image/output" />
+    </node>
+  </group>
+
+</launch>

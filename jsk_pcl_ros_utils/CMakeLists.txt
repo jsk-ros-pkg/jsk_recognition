@@ -289,6 +289,7 @@ install(TARGETS jsk_pcl_ros_utils
 install(FILES jsk_pcl_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 if (CATKIN_ENABLE_TESTING)
+  find_package(roslaunch REQUIRED)
   find_package(rostest REQUIRED)
   add_custom_target(install_test_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.py)
   if(TARGET tests)
@@ -298,6 +299,7 @@ if (CATKIN_ENABLE_TESTING)
   add_rostest(test/point_indices_to_cluster_point_indices.test)
   if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
     # not build on hydro
+    add_rostest(test/add_point_indices.test)
     add_rostest(test/cluster_point_indices_to_point_indices.test)
     # unexpected error
     add_rostest(test/point_indices_to_mask_image.test)
@@ -309,4 +311,5 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/pointcloud_to_mask_image.test install_test_data)
     add_rostest(test/polygon_array_unwrapper.test)
   endif()
+  roslaunch_add_file_check(test/add_point_indices.test)
 endif()

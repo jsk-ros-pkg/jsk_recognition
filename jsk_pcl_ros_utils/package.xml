@@ -73,6 +73,7 @@
   <run_depend>std_msgs</run_depend>
   <run_depend>image_transport</run_depend>
   <run_depend>image_geometry</run_depend>
+  <run_depend>image_view</run_depend>
   <run_depend>image_view2</run_depend>
   <run_depend>message_runtime</run_depend>
   <run_depend>visualization_msgs</run_depend>
@@ -105,7 +106,10 @@
   <run_depend>octomap_server</run_depend>
   <run_depend>octomap_msgs</run_depend>
   <run_depend>octomap_ros</run_depend>
+  <run_depend>rosbag</run_depend>
   <test_depend>jsk_tools</test_depend>
+  <test_depend>roslaunch</test_depend>
+  <test_depend>rostest</test_depend>
   <export>
     <nodelet plugin="${prefix}/jsk_pcl_nodelets.xml"/>
     <cpp lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ljsk_pcl_ros" cflags="-I${prefix}/include"/>

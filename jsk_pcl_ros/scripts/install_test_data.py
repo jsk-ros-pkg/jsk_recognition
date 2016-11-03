@@ -26,14 +26,6 @@ def main():
 
     download_data(
         pkg_name=PKG,
-        path='test_data/2016-10-26-02-09-51_coffee_cup.pcd',
-        url='https://drive.google.com/uc?id=0B5DV6gwLHtyJVVQ2TFhVSTJqZ3M',
-        md5='27d1a39e6ea596c4e24f1347f53f2e7b',
-        extract=False,
-    )
-
-    download_data(
-        pkg_name=PKG,
         path='test_data/2016-07-06-12-16-43-person-in-point-cloud.tgz',
         url='https://drive.google.com/uc?id=0B_NiLAzvehC9cHhnOFd0YUN2N1U',
         md5='c59067adc429fb9f1cf180d350a2da43',

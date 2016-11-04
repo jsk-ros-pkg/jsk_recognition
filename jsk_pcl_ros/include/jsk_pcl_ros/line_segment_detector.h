@@ -37,6 +37,8 @@
 #ifndef JSK_PCL_ROS_LINE_SEGMENT_DETECTOR_H_
 #define JSK_PCL_ROS_LINE_SEGMENT_DETECTOR_H_
 
+#include <pcl/segmentation/sac_segmentation.h>
+
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -147,6 +149,11 @@ namespace jsk_pcl_ros
     int min_indices_;
     double min_length_;
     double line_width_;
+    int segmentation_method_;
+
+    pcl::SACSegmentation<PointT> seg_;
+    bool segmentation_update_;
+
   private:
     
   };

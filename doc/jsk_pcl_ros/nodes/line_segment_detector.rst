@@ -40,6 +40,13 @@ Parameters
 
 -  ``approximate_sync`` (``Bool``, default: ``false``)
 
+- ``method_type`` (Int, default: 0)
+
+  The type of sample consensus method to use.
+
+  - 0: RANSAC
+  - 1: LMEDS
+
 - ``~outlier_threshold`` (``Double``, default: ``0.005``)
 
   Outlier threshold to detect plane using RANSAC.

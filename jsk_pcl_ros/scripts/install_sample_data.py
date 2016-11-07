@@ -33,17 +33,6 @@ def main():
         extract=False,
     )
 
-    download_data(
-        pkg_name=PKG,
-        path='test_data/2016-10-29-17-05-44_tabletop-coffee-cup.tgz',
-        url='https://drive.google.com/uc?id=0B5DV6gwLHtyJczRRcUhURndQeDg',
-        md5='d58e894c853fc4485d08547b9fc2b64',
-        extract=True,
-        compressed_bags=[
-            'test_data/2016-10-29-17-05-44_tabletop-coffee-cup/tabletop-coffee-cup.bag',
-        ],
-    )
-
 
 if __name__ == '__main__':
     main()

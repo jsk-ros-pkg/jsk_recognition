@@ -78,6 +78,7 @@
   <run_depend>visualization_msgs</run_depend>
   <run_depend>boost</run_depend>
   <run_depend>rosboost_cfg</run_depend>
+  <run_depend>rviz</run_depend>
   <run_depend>cv_bridge</run_depend>
   <run_depend>ml_classifiers</run_depend>
   <run_depend>diagnostic_updater</run_depend>

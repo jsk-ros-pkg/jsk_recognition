@@ -4,7 +4,7 @@
 
   <node name="rosbag_play"
         pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros_utils)/test_data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/vision.compressed.bag --clock --loop">
+        args="$(find jsk_pcl_ros_utils)/sample/data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/vision.compressed.bag --clock --loop">
   </node>
 
   <node name="pointcloud_to_mask_image"

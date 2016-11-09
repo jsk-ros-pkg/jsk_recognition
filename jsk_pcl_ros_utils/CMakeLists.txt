@@ -296,11 +296,14 @@ install(TARGETS jsk_pcl_ros_utils
 install(FILES jsk_pcl_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 if (CATKIN_ENABLE_TESTING)
+  find_package(roslaunch REQUIRED)
   find_package(rostest REQUIRED)
   # Naming Rule: filename of rostest should be {EXECUTABLE_NAME}.test
   add_rostest(test/point_indices_to_cluster_point_indices.test)
   if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
     # not build on hydro
+    add_rostest(test/add_point_indices.test)
+    roslaunch_add_file_check(test/add_point_indices.test)
     add_rostest(test/cluster_point_indices_to_point_indices.test)
     # unexpected error
     add_rostest(test/point_indices_to_mask_image.test)

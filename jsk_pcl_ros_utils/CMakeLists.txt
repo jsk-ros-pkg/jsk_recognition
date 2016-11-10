@@ -260,6 +260,8 @@ jsk_pcl_util_nodelet(src/plane_concatenator_nodelet.cpp
   "jsk_pcl_utils/PlaneConcatenator" "plane_concatenator")
 jsk_pcl_util_nodelet(src/add_point_indices_nodelet.cpp
   "jsk_pcl_utils/AddPointIndices" "add_point_indices")
+jsk_pcl_util_nodelet(src/subtract_point_indices_nodelet.cpp
+  "jsk_pcl_utils/SubtractPointIndices" "subtract_point_indices")
 jsk_pcl_util_nodelet(src/pcd_reader_with_pose_nodelet.cpp
   "jsk_pcl_utils/PCDReaderWithPose" "pcd_reader_with_pose")
 jsk_pcl_util_nodelet(src/pointcloud_relative_from_pose_stamped_nodelet.cpp
@@ -314,5 +316,7 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/bounding_box_array_to_bounding_box.test)
     add_rostest(test/pointcloud_to_mask_image.test)
     add_rostest(test/polygon_array_unwrapper.test)
+    add_rostest(test/subtract_point_indices.test)
+    roslaunch_add_file_check(test/subtract_point_indices.test)
   endif()
 endif()

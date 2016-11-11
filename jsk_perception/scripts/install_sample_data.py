@@ -24,7 +24,7 @@ def main():
         md5='ad4e7d298c0d9985295d93e47c7b03e6',
         extract=False,
         compressed_bags=[
-            'sample/data/2016-10-15-23-21-42_sample_consensus_tracking.bag',
+            'sample/data/2016-10-15-23-21-42_moving_bottle.bag',
         ],
     )
 

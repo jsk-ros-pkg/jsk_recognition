@@ -35,6 +35,7 @@
 
 #include "jsk_perception/colorize_float_image.h"
 #include <boost/assign.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <jsk_topic_tools/log_utils.h>
 #include <sensor_msgs/image_encodings.h>
 
@@ -78,26 +79,19 @@ namespace jsk_perception
       float_image = planes[channel_];
     }
 
-    float min_value = FLT_MAX;
-    float max_value = - FLT_MAX;
+    double min_value;
+    double max_value;
+    cv::minMaxLoc(float_image, &min_value, &max_value);
+
     for (size_t j = 0; j < float_image.rows; j++) {
       for (size_t i = 0; i < float_image.cols; i++) {
         float v = float_image.at<float>(j, i);
-        if (v != - FLT_MAX) {
-          min_value = std::min(v, min_value);
-          max_value = std::max(v, max_value);
-        }
-      }
-    }
-    for (size_t j = 0; j < float_image.rows; j++) {
-      for (size_t i = 0; i < float_image.cols; i++) {
-        float v = float_image.at<float>(j, i);
-        if (v != - FLT_MAX) {
-          std_msgs::ColorRGBA c = jsk_topic_tools::heatColor((v - min_value) / (max_value - min_value));
-          color_image.at<cv::Vec3b>(j, i) = cv::Vec3b(c.r * 255, c.g * 255, c.b * 255);
+        if (std::isnan(v)) {
+          color_image.at<cv::Vec3b>(j, i) = cv::Vec3b(0, 0, 0);
         }
         else {
-          color_image.at<cv::Vec3b>(j, i) = cv::Vec3b(0, 0, 0);
+          std_msgs::ColorRGBA c = jsk_topic_tools::heatColor((v - min_value) / (max_value - min_value));
+          color_image.at<cv::Vec3b>(j, i) = cv::Vec3b(c.r * 255, c.g * 255, c.b * 255);
         }
       }
     }

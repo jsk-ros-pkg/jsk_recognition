@@ -8,12 +8,12 @@ def main():
 
     download_data(
         pkg_name=PKG,
-        path='sample/data/2016-06-10-23-01-28_in_lab.bag',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vbkluZzZrdU15TlE',
-        md5='1eed023d48a94bc18fecaa7e5b5cb345',
+        path='sample/data/2016-11-11-12-53-06_in_lab.bag',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vdE9IRERDLXRoUWs',
+        md5='5066157f7373a19829f4edba65068a89',
         extract=False,
         compressed_bags=[
-            'sample/data/2016-06-10-23-01-28_in_lab.bag',
+            'sample/data/2016-11-11-12-53-06_in_lab.bag',
         ],
     )
 

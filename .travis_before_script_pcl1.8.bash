@@ -27,6 +27,7 @@ sudo make -j2 install
 sudo -H pip install -q rosinstall_generator
 
 rosinstall_generator --tar --rosdistro $ROS_DISTRO \
+  pcl_conversions \
   pcl_ros \
   octomap_server \
 >> /tmp/$$.rosinstall

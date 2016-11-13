@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_mask_image_to_rect.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_mask_image_to_rect"
+        name="test_mask_image_to_rect"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /mask_image_to_rect/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

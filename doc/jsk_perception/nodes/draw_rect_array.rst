@@ -20,13 +20,17 @@ Subscribing Topic
 
   Object location proposals.
 
+* ``~input/polygon`` (``geometry_msgs/PolygonStamped``)
+
+  Input polygon.
+
 
 Publishing Topic
 ----------------
 
 * ``~output`` (``sensor_msgs/Image``)
 
-  Image on which rect_array is drawn.
+  Image on which rects are drawn.
 
 
 Parameters

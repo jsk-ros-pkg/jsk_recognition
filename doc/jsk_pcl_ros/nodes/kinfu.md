@@ -24,3 +24,15 @@ Publishes camera pose using pcl/KinfuLS
 * `~save_mesh` (`std_srvs/Empty`)
 
   Convert tsdf->mesh using marching cubes algorithm, saved as ~/.ros/mesh.ply
+
+* `~publish_tsdf` (`std_srvs/Empty`)
+
+  Publish tsdf volume as unknown, empty or occupied. The topics are below.
+  ! the occupied topic is too big(if resolution of kinfu is set as default), so may not be shown in rviz or others.
+
+* `~output/unknown` (`sensor_msgs/PointCloud2`)
+
+* `~output/empty` (`sensor_msgs/PointCloud2`)
+
+* `~output/occupied` (`sensor_msgs/PointCloud2`)
+

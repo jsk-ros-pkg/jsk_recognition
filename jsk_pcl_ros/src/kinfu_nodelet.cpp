@@ -71,7 +71,11 @@ namespace jsk_pcl_ros
     srv_->setCallback (f);
     pub_pose_ = pnh_->advertise<geometry_msgs::PoseStamped>("output", 1);
     pub_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>("output/cloud", 1);
+    pub_unknown_ = pnh_->advertise<sensor_msgs::PointCloud2>("output/unknown", 1);
+    pub_empty_ = pnh_->advertise<sensor_msgs::PointCloud2>("output/empty", 1);
+    pub_occupied_ = pnh_->advertise<sensor_msgs::PointCloud2>("output/occupied", 1);
     srv_save_mesh_ = pnh_->advertiseService("save_mesh", &Kinfu::saveMeshService, this);
+    srv_pub_tsdf_ = pnh_->advertiseService("publish_tsdf", &Kinfu::publishTsdfService, this);
     sub_depth_image_.subscribe(*pnh_, "input/depth", 1);
     sub_color_image_.subscribe(*pnh_, "input/color", 1);
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
@@ -212,6 +216,68 @@ namespace jsk_pcl_ros
         return;
       }
     }
+  }
+  bool Kinfu::publishTsdfService(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res)
+  {
+    std::vector<float> tsdf;
+    std::vector<short> weights;
+    /** \brief Downloads TSDF volume and according voxel weights from GPU memory*/
+    kinfu_->volume().downloadTsdfAndWeights(tsdf, weights);
+    /** \brief Returns volume resolution */
+    Eigen::Vector3i resolution = kinfu_->volume().getResolution();
+    /** \brief Returns volume voxel size in meters */
+    Eigen::Vector3f voxel_size = kinfu_->volume().getVoxelSize();
+    pcl::PointCloud<pcl::PointXYZ> unknown, empty, occupied;
+    for (size_t x =0; x < resolution[0]; x++)
+      {
+      for (size_t y =0; y < resolution[1]; y++)
+        {
+        for (size_t z =0; z < resolution[2]; z++)
+          {
+            unsigned int index =  x + resolution[1] * (y + resolution[2] * z);
+            short weight = weights[index];
+            short tsdf_val = tsdf[index];
+            pcl::PointXYZ point;
+            point.x = (x + 0.5f) * voxel_size[0];
+            point.y = (y + 0.5f) * voxel_size[1];
+            point.z = (z + 0.5f) * voxel_size[2];
+            if (weight == 0) {
+              unknown.points.push_back(point);
+              continue;
+            }
+            if (tsdf_val > 0.0f) {
+              empty.points.push_back(point);
+              continue;
+            }
+            occupied.points.push_back(point);
+          }
+        }
+      }
+    ros::Time now = ros::Time::now();
+    unknown.width = (int)unknown.points.size ();
+    unknown.height = 1;
+    sensor_msgs::PointCloud2 ros_unknown;
+    pcl::toROSMsg(unknown, ros_unknown);
+    ros_unknown.header.stamp = now;
+    ros_unknown.header.frame_id = kinfu_origin_frame_id_;
+
+    empty.width = (int)empty.points.size ();
+    empty.height = 1;
+    sensor_msgs::PointCloud2 ros_empty;
+    pcl::toROSMsg(empty, ros_empty);
+    ros_empty.header.stamp = now;
+    ros_empty.header.frame_id = kinfu_origin_frame_id_;
+
+    occupied.width = (int)occupied.points.size ();
+    occupied.height = 1;
+    sensor_msgs::PointCloud2 ros_occupied;
+    pcl::toROSMsg(occupied, ros_occupied);
+    ros_occupied.header.stamp = now;
+    ros_occupied.header.frame_id = kinfu_origin_frame_id_;
+    pub_unknown_.publish(ros_unknown);
+    pub_empty_.publish(ros_empty);
+    pub_occupied_.publish(ros_occupied);
+    return true;
   }
   bool Kinfu::saveMeshService(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res)
   {

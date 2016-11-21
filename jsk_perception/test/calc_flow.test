@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_calc_flow.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_calc_flow"
+        name="test_calc_flow"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3" time-limit="60">
+    <rosparam>
+      topic_0: /calc_flow/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

@@ -28,7 +28,9 @@ Publishes camera pose using pcl/KinfuLS
 * `~get_tsdf` (`jsk_recognition_msgs/GetTsdf`)
 
   Get tsdf volume, also publish as unknown, empty or occupied. The topics are below.
-  ! the occupied topic is too big(if resolution of kinfu is set as default), so may not be shown in rviz or others.
+  The occupied topic is too big(if resolution of kinfu is set as default), so may not be shown in rviz or others.
+  You can use nodelet for subscribing occupied data.
+  It takes much time to convert tsdf->cloud, so not always published.
 
 * `~output/unknown` (`sensor_msgs/PointCloud2`)
 

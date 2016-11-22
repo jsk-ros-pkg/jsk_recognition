@@ -75,7 +75,7 @@ namespace jsk_pcl_ros
     pub_empty_ = pnh_->advertise<sensor_msgs::PointCloud2>("output/empty", 1);
     pub_occupied_ = pnh_->advertise<sensor_msgs::PointCloud2>("output/occupied", 1);
     srv_save_mesh_ = pnh_->advertiseService("save_mesh", &Kinfu::saveMeshService, this);
-    srv_pub_tsdf_ = pnh_->advertiseService("publish_tsdf", &Kinfu::publishTsdfService, this);
+    srv_get_tsdf_ = pnh_->advertiseService("get_tsdf", &Kinfu::getTsdfService, this);
     sub_depth_image_.subscribe(*pnh_, "input/depth", 1);
     sub_color_image_.subscribe(*pnh_, "input/color", 1);
     sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
@@ -217,7 +217,7 @@ namespace jsk_pcl_ros
       }
     }
   }
-  bool Kinfu::publishTsdfService(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res)
+  bool Kinfu::getTsdfService(jsk_recognition_msgs::GetTsdf::Request& req, jsk_recognition_msgs::GetTsdf::Response& res)
   {
     std::vector<float> tsdf;
     std::vector<short> weights;
@@ -227,6 +227,23 @@ namespace jsk_pcl_ros
     Eigen::Vector3i resolution = kinfu_->volume().getResolution();
     /** \brief Returns volume voxel size in meters */
     Eigen::Vector3f voxel_size = kinfu_->volume().getVoxelSize();
+    size_t tsdf_size = tsdf.size();
+    res.tsdf.resize(tsdf_size);
+    res.weights.resize(tsdf_size);
+    for (size_t i = 0; i < tsdf_size; i++) {
+      res.tsdf[i] = tsdf[i];
+      res.weights[i] = weights[i];
+    }
+    res.resolution_x = resolution[0];
+    res.resolution_y = resolution[1];
+    res.resolution_z = resolution[2];
+    res.voxel_x = voxel_size[0];
+    res.voxel_y = voxel_size[1];
+    res.voxel_z = voxel_size[2];
+    if (pub_unknown_.getNumSubscribers() == 0 && pub_empty_.getNumSubscribers() == 0 && pub_occupied_.getNumSubscribers() == 0) {
+      return true;
+    }
+    // publish as cloud if subscribed
     pcl::PointCloud<pcl::PointXYZ> unknown, empty, occupied;
     for (size_t x =0; x < resolution[0]; x++)
       {

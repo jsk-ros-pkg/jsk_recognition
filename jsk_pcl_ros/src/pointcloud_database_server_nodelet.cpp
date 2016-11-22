@@ -95,6 +95,7 @@ namespace jsk_pcl_ros
     for (size_t i = 0; i< files_.size(); i++) {
       PointCloudData::Ptr data(new PointCloudData(files_[i]));
       point_clouds_.push_back(data);
+      array_msg_.cloud_list.push_back(point_clouds_[i]->getROSPointCloud(ros::Time::now()));
     }
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -107,8 +108,8 @@ namespace jsk_pcl_ros
   void PointcloudDatabaseServer::timerCallback(const ros::TimerEvent& event)
   {
     if (use_array_) {
-      for (size_t i = 0; i < point_clouds_.size(); i++) {
-        array_msg_.cloud_list.push_back(point_clouds_[i]->getROSPointCloud(event.current_real));
+      for (size_t i = 0; i< files_.size(); i++) {
+        array_msg_.cloud_list[i].header.stamp = event.current_real;
       }
       array_msg_.header.stamp = event.current_real;
       pub_points_array_.publish(array_msg_);

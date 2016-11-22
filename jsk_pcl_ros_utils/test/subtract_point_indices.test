@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_subtract_point_indices.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_subtract_point_indices"
+        name="test_subtract_point_indices"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="360" retry="3">
+    <rosparam>
+      topic_0: /subtract_point_indices/output
+      timeout_0: 10
+    </rosparam>
+  </test>
+
+</launch>

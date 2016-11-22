@@ -239,7 +239,10 @@ namespace jsk_pcl_ros
       extract_nonplane.setInputCloud(input_cloud);
       extract_nonplane.setIndices(all_indices);
       extract_nonplane.filter(*nonplane_cloud);
-      nonplane_pub_.publish(nonplane_cloud);
+      sensor_msgs::PointCloud2 ros_result;
+      pcl::toROSMsg(*nonplane_cloud, ros_result);
+      ros_result.header = input->header;
+      nonplane_pub_.publish(ros_result);
     }
     else {
       nonplane_cloud = input_cloud;

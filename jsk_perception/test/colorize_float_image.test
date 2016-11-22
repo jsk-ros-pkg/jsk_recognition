@@ -1,14 +1,8 @@
 <launch>
 
-  <include file="$(find jsk_perception)/sample/sample_image_publisher.launch">
+  <include file="$(find jsk_perception)/sample/sample_colorize_float_image.launch">
     <arg name="gui" value="false" />
   </include>
-
-  <node name="colorize_float_image"
-        pkg="nodelet" type="nodelet"
-        args="standalone jsk_perception/ColorizeLabels">
-    <remap from="~input" to="depth_image_32fc1/image_depth" />
-  </node>
 
   <test test-name="test_colorize_float_image"
         name="test_colorize_float_image"

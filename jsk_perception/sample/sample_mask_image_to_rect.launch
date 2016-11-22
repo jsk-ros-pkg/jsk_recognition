@@ -1,0 +1,45 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/laugh_out_loud_joke_book.jpg
+    </rosparam>
+  </node>
+
+  <node name="mask_image_generator"
+        pkg="jsk_perception" type="mask_image_generator">
+    <remap from="~input" to="image_publisher/output" />
+    <rosparam>
+      offset_x: 50
+      offset_y: 50
+      width: 128
+      height: 128
+    </rosparam>
+  </node>
+
+  <node name="mask_image_to_rect"
+        pkg="jsk_perception" type="mask_image_to_rect">
+    <remap from="~input" to="mask_image_generator/output" />
+  </node>
+
+  <node name="draw_rect_array"
+        pkg="jsk_perception" type="draw_rect_array.py">
+    <remap from="~input" to="image_publisher/output" />
+    <remap from="~input/polygon" to="mask_image_to_rect/output" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="mask_image_generator/output" />
+    </node>
+    <node name="image_view1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="draw_rect_array/output" />
+    </node>
+  </group>
+
+</launch>

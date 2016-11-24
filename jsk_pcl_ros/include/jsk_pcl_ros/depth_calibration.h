@@ -94,8 +94,8 @@ namespace jsk_pcl_ros
     }
     
     virtual bool setCalibrationParameter(
-      SetDepthCalibrationParameter::Request& req,
-      SetDepthCalibrationParameter::Response& res);
+      jsk_recognition_msgs::SetDepthCalibrationParameter::Request& req,
+      jsk_recognition_msgs::SetDepthCalibrationParameter::Response& res);
     message_filters::Subscriber<sensor_msgs::Image> sub_input_;
     message_filters::Subscriber<sensor_msgs::CameraInfo> sub_camera_info_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;

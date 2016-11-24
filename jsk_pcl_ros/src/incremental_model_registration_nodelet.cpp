@@ -184,7 +184,7 @@ namespace jsk_pcl_ros
     ros::Time now = ros::Time::now();
     reference_ros.header.stamp = target_ros.header.stamp = now;
     reference_ros.header.frame_id = target_ros.header.frame_id = "map";
-    ICPAlign srv;
+    jsk_recognition_msgs::ICPAlign srv;
     srv.request.reference_cloud = reference_ros;
     srv.request.target_cloud = target_ros;
     icp.call(srv);

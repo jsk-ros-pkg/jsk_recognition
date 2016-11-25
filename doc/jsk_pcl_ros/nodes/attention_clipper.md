@@ -11,7 +11,7 @@ to see the object.
 ## Subscribing Topic
 * `~input` (`sensor_msgs/CameraInfo`)
 
-  Original camera info.
+  Original camera info. (You don't need camera info when you only use pointcloud.)
 
 * `~input/points` (`sensor_msgs/PointCloud2`)
 

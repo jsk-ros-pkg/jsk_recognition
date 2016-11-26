@@ -1,0 +1,23 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <node name="pcd_to_pointcloud"
+        pkg="pcl_ros" type="pcd_to_pointcloud"
+        args="$(find jsk_pcl_ros_utils)/sample/data/bunny.pcd 10">
+    <remap from="cloud_pcd" to="~output" />
+  </node>
+
+  <node name="pointcloud_xyz_to_xyzrgb"
+        pkg="jsk_pcl_ros_utils" type="pointcloud_xyz_to_xyzrgb">
+    <remap from="~input" to="pcd_to_pointcloud/output" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_pointcloud_xyz_to_xyzrgb.rviz">
+    </node>
+  </group>
+
+</launch>

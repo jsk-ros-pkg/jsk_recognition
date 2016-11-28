@@ -43,6 +43,7 @@
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
 
 // pcl
 #include <pcl_ros/pcl_nodelet.h>
@@ -69,6 +70,7 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_input_;
     ros::Publisher pub_cloud_;
     ros::Publisher pub_marker_;
+    ros::Publisher pub_marker_array_;
     ros::Publisher pub_octree_resolution_;
 
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;

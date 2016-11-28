@@ -1,0 +1,23 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_octree_voxel_grid.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_octree_voxel_grid"
+        name="test_octree_voxel_grid"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /octree_voxel_grid/output
+      timeout_0: 30
+      topic_1: /octree_voxel_grid/output_marker
+      timeout_1: 30
+      topic_2: /octree_voxel_grid/output_marker_array
+      timeout_2: 30
+      topic_3: /octree_voxel_grid/output_resolution
+      timeout_3: 30
+    </rosparam>
+  </test>
+
+</launch>

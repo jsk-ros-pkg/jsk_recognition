@@ -1,0 +1,28 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <param name="/use_sim_time" value="true" />
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/test_data/2016-10-29-17-05-44_tabletop-coffee-cup/tabletop-coffee-cup.bag --clock --loop">
+  </node>
+
+  <arg name="INPUT_CLOUD" value="/camera/depth/points" />
+
+  <node name="octree_voxel_grid"
+        pkg="jsk_pcl_ros" type="octree_voxel_grid">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <rosparam>
+      resolution: 0.03
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/octree_voxel_grid.rviz">
+    </node>
+  </group>
+
+</launch>

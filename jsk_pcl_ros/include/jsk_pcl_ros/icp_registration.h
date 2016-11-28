@@ -41,8 +41,8 @@
 #include <dynamic_reconfigure/server.h>
 #include <jsk_pcl_ros/ICPRegistrationConfig.h>
 #include <jsk_recognition_msgs/BoundingBox.h>
-#include <jsk_pcl_ros/ICPAlignWithBox.h>
-#include <jsk_pcl_ros/ICPAlign.h>
+#include <jsk_recognition_msgs/ICPAlignWithBox.h>
+#include <jsk_recognition_msgs/ICPAlign.h>
 #include <jsk_recognition_msgs/ICPResult.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -87,11 +87,11 @@ namespace jsk_pcl_ros
       const sensor_msgs::PointCloud2::ConstPtr& msg,
       const geometry_msgs::PoseStamped::ConstPtr& pose_msg);
     virtual bool alignWithBoxService(
-      jsk_pcl_ros::ICPAlignWithBox::Request& req, 
-      jsk_pcl_ros::ICPAlignWithBox::Response& res);
+      jsk_recognition_msgs::ICPAlignWithBox::Request& req, 
+      jsk_recognition_msgs::ICPAlignWithBox::Response& res);
     virtual bool alignService(
-      jsk_pcl_ros::ICPAlign::Request& req, 
-      jsk_pcl_ros::ICPAlign::Response& res);
+      jsk_recognition_msgs::ICPAlign::Request& req, 
+      jsk_recognition_msgs::ICPAlign::Response& res);
     virtual void referenceCallback(
       const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual void referenceArrayCallback(

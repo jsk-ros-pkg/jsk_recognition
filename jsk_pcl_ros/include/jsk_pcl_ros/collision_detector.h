@@ -39,7 +39,7 @@
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/PointCloud2.h>
-#include <jsk_pcl_ros/CheckCollision.h>
+#include <jsk_recognition_msgs/CheckCollision.h>
 
 #include <pcl/point_types.h>
 #include <pcl_ros/transforms.h>
@@ -66,8 +66,8 @@ namespace jsk_pcl_ros
     virtual bool checkCollision(const sensor_msgs::JointState& joint,
                                 const geometry_msgs::PoseStamped& pose);
     virtual void pointcloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg);
-    virtual bool serviceCallback(jsk_pcl_ros::CheckCollision::Request &req,
-                                 jsk_pcl_ros::CheckCollision::Response &res);
+    virtual bool serviceCallback(jsk_recognition_msgs::CheckCollision::Request &req,
+                                 jsk_recognition_msgs::CheckCollision::Response &res);
     boost::mutex mutex_;
     ros::Subscriber sub_;
     ros::ServiceServer service_;

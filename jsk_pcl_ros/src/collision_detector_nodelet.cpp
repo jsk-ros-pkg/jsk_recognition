@@ -131,8 +131,8 @@ namespace jsk_pcl_ros
     cloud_stamp_ = msg->header.stamp;
   }
 
-  bool CollisionDetector::serviceCallback(jsk_pcl_ros::CheckCollision::Request &req,
-                                          jsk_pcl_ros::CheckCollision::Response &res)
+  bool CollisionDetector::serviceCallback(jsk_recognition_msgs::CheckCollision::Request &req,
+                                          jsk_recognition_msgs::CheckCollision::Response &res)
   {
     sensor_msgs::JointState joint = req.joint;
     geometry_msgs::PoseStamped pose = req.pose;

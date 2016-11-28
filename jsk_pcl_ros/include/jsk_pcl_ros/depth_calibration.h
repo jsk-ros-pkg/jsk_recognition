@@ -38,7 +38,7 @@
 
 #include "pcl_ros/pcl_nodelet.h"
 #include "jsk_topic_tools/diagnostic_nodelet.h"
-#include "jsk_pcl_ros/SetDepthCalibrationParameter.h"
+#include "jsk_recognition_msgs/SetDepthCalibrationParameter.h"
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
@@ -94,8 +94,8 @@ namespace jsk_pcl_ros
     }
     
     virtual bool setCalibrationParameter(
-      SetDepthCalibrationParameter::Request& req,
-      SetDepthCalibrationParameter::Response& res);
+      jsk_recognition_msgs::SetDepthCalibrationParameter::Request& req,
+      jsk_recognition_msgs::SetDepthCalibrationParameter::Response& res);
     message_filters::Subscriber<sensor_msgs::Image> sub_input_;
     message_filters::Subscriber<sensor_msgs::CameraInfo> sub_camera_info_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;

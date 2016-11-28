@@ -24,8 +24,8 @@ from std_msgs.msg import Int16
 from std_msgs.msg import String
 from std_msgs.msg import Header
 from jsk_pcl_ros.msg import Int32Stamped
-from jsk_pcl_ros.srv import *
-import jsk_pcl_ros.srv
+from jsk_recognition_msgs.srv import *
+import jsk_recognition_msgs.srv
 import tf
 from draw_3d_circle import Drawer3DCircle
 
@@ -58,12 +58,12 @@ class State:
         
 class TowerDetectViewerServer:
     # name of tower
-    TOWER_LOWEST = jsk_pcl_ros.srv.TowerRobotMoveCommandRequest.TOWER_LOWEST
-    TOWER_MIDDLE = jsk_pcl_ros.srv.TowerRobotMoveCommandRequest.TOWER_MIDDLE
-    TOWER_HIGHEST = jsk_pcl_ros.srv.TowerRobotMoveCommandRequest.TOWER_HIGHEST
-    PLATE_SMALL = jsk_pcl_ros.srv.TowerRobotMoveCommandRequest.PLATE_SMALL
-    PLATE_MIDDLE = jsk_pcl_ros.srv.TowerRobotMoveCommandRequest.PLATE_MIDDLE
-    PLATE_LARGE = jsk_pcl_ros.srv.TowerRobotMoveCommandRequest.PLATE_LARGE
+    TOWER_LOWEST = jsk_recognition_msgs.srv.TowerRobotMoveCommandRequest.TOWER_LOWEST
+    TOWER_MIDDLE = jsk_recognition_msgs.srv.TowerRobotMoveCommandRequest.TOWER_MIDDLE
+    TOWER_HIGHEST = jsk_recognition_msgs.srv.TowerRobotMoveCommandRequest.TOWER_HIGHEST
+    PLATE_SMALL = jsk_recognition_msgs.srv.TowerRobotMoveCommandRequest.PLATE_SMALL
+    PLATE_MIDDLE = jsk_recognition_msgs.srv.TowerRobotMoveCommandRequest.PLATE_MIDDLE
+    PLATE_LARGE = jsk_recognition_msgs.srv.TowerRobotMoveCommandRequest.PLATE_LARGE
     PLATE_HEIGHT_LOWEST = 0
     PLATE_HEIGHT_MIDDLE = 1
     PLATE_HEIGHT_HIGHEST = 2
@@ -195,10 +195,10 @@ class TowerDetectViewerServer:
                                                             self.resolveTowerName(to_tower), self.resolvePlateHeight(to_height)))
         from_target_position = self.tower_position[from_tower]
         to_target_position = self.tower_position[to_tower]
-        self.robot_command(jsk_pcl_ros.srv.TowerRobotMoveCommandRequest.ROBOT1,
+        self.robot_command(jsk_recognition_msgs.srv.TowerRobotMoveCommandRequest.ROBOT1,
                            plate,
                            from_tower, to_tower,
-                           jsk_pcl_ros.srv.TowerRobotMoveCommandRequest.OPTION_NONE)
+                           jsk_recognition_msgs.srv.TowerRobotMoveCommandRequest.OPTION_NONE)
         # self.robot_server1(Header(), from_target_position, 0)
         # self.robot_server1(Header(), to_target_position, 1)
     def runMain(self):

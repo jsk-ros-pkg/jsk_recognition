@@ -15,4 +15,11 @@
   <include file="$(find jsk_perception)/launch/darknet_yolo_object_segmentation.launch">
     <arg name="input_image" value="/image_raw" />
   </include>
+  <node name="result_rectangle_drawer" pkg="jsk_perception" type="draw_labeled_rect">
+    <remap from="~input" to="/image_raw" />
+    <remap from="~input/rect_array" to="darknet_yolo_object_detection/output" />
+  </node>
+  <node name="debug_view" pkg="image_view" type="image_view">
+    <remap from="image" to="result_rectangle_drawer/output" />
+  </node>
 </launch>

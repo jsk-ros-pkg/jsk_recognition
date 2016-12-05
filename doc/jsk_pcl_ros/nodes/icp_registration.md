@@ -11,7 +11,7 @@ Register two pointclouds based on icp like registration technique.
   Target pointcloud.
 * `~input/camera_info` (`sensor_msgs/CameraInfo`)
 
-  Camera info.
+  Camera info. Needed only when correspondence_algorithm == `Projective`
 * `~input_reference` (`sensor_msgs/PointCloud`)
 
   Reference pointcloud. frame_id of this pointlcoud is ignored.

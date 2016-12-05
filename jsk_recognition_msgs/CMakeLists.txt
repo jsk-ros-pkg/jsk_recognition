@@ -25,6 +25,9 @@ add_message_files(
   ICPResult.msg
   ImageDifferenceValue.msg
   Int32Stamped.msg
+  Label.msg
+  LabeledRect.msg
+  LabeledRectArray.msg
   LineArray.msg
   Line.msg
   ModelCoefficientsArray.msg

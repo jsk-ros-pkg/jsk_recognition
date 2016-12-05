@@ -1,0 +1,12 @@
+<launch>
+  <arg name="input_image" default="/camera/rgb/image_rect_color" />
+
+  <node name="darknet_yolo_object_detection"
+        pkg="jsk_perception" type="darknet_object_detection"
+        output="screen">
+    <param name="network_weight_path" value="$(find darknet)/weights/yolo.weights" />
+    <param name="network_config_path" value="$(find darknet)/cfg/yolo.cfg" />
+    <param name="label_path" value="$(find darknet)/data/coco.names" />
+    <remap from="~input" to="$(arg input_image)" />
+  </node>
+</launch>

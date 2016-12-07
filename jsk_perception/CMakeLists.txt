@@ -24,12 +24,14 @@ find_package(catkin REQUIRED COMPONENTS
   image_geometry
   image_transport
   image_view2
+  jsk_data
   jsk_recognition_msgs
   jsk_recognition_utils
   jsk_topic_tools
   message_generation
   mk
   nodelet
+  opencv_apps
   pcl_ros
   posedetection_msgs
   roscpp

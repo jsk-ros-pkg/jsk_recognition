@@ -84,7 +84,8 @@ namespace jsk_pcl_ros
   void PointcloudDatabaseServer::onInit()
   {
     PCLNodelet::onInit();
-    pub_points_ = pnh_->advertise<jsk_recognition_msgs::PointsArray>("output", 1);
+    pub_points_array_ = pnh_->advertise<jsk_recognition_msgs::PointsArray>("output", 1);
+    pub_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>("cloud", 1);
     if (!jsk_topic_tools::readVectorParameter(*pnh_, "models", files_)
         || files_.size() == 0) {
       NODELET_FATAL("no models is specified");
@@ -94,6 +95,7 @@ namespace jsk_pcl_ros
     for (size_t i = 0; i< files_.size(); i++) {
       PointCloudData::Ptr data(new PointCloudData(files_[i]));
       point_clouds_.push_back(data);
+      array_msg_.cloud_list.push_back(point_clouds_[i]->getROSPointCloud(ros::Time::now()));
     }
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -105,19 +107,24 @@ namespace jsk_pcl_ros
 
   void PointcloudDatabaseServer::timerCallback(const ros::TimerEvent& event)
   {
-    jsk_recognition_msgs::PointsArray ros_out;
-    ros_out.header.stamp = event.current_real;
-    for (size_t i = 0; i < point_clouds_.size(); i++) {
-      ros_out.cloud_list.push_back(point_clouds_[i]->getROSPointCloud(event.current_real));
-                                                                      
+    if (use_array_) {
+      for (size_t i = 0; i< files_.size(); i++) {
+        array_msg_.cloud_list[i].header.stamp = event.current_real;
+      }
+      array_msg_.header.stamp = event.current_real;
+      pub_points_array_.publish(array_msg_);
+   } else {
+      point_msg_ = point_clouds_[0]->getROSPointCloud(event.current_real);
+      point_msg_.header.stamp = event.current_real;
+      pub_cloud_.publish(point_msg_);
     }
-    pub_points_.publish(ros_out);
   }
 
   void PointcloudDatabaseServer::configCallback(Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mutex_);
     duration_ = config.duration;
+    use_array_ = config.use_array;
     if (timer_) {
       timer_.stop();
     }

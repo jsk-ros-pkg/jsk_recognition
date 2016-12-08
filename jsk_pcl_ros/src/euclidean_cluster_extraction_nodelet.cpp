@@ -147,8 +147,8 @@ namespace jsk_pcl_ros
 
 
   bool EuclideanClustering::serviceCallback(
-    jsk_pcl_ros::EuclideanSegment::Request &req,
-    jsk_pcl_ros::EuclideanSegment::Response &res)
+    jsk_recognition_msgs::EuclideanSegment::Request &req,
+    jsk_recognition_msgs::EuclideanSegment::Response &res)
   {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(req.input, *cloud);

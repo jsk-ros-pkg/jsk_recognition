@@ -93,8 +93,8 @@ namespace jsk_pcl_ros
   }
 
   bool DepthCalibration::setCalibrationParameter(
-    SetDepthCalibrationParameter::Request& req,
-    SetDepthCalibrationParameter::Response& res)
+    jsk_recognition_msgs::SetDepthCalibrationParameter::Request& req,
+    jsk_recognition_msgs::SetDepthCalibrationParameter::Response& res)
   {
     boost::mutex::scoped_lock lock(mutex_);
     coefficients2_ = req.parameter.coefficients2;

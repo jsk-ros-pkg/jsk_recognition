@@ -111,6 +111,11 @@ namespace jsk_pcl_ros
         marker_msg.colors[marker_msg.colors.size() - 1].a = marker_color_alpha_;
       }
       pub_marker_.publish(marker_msg);
+
+      // publish marker_array also for convenience
+      visualization_msgs::MarkerArray marker_array_msg;
+      marker_array_msg.markers.push_back(marker_msg);
+      pub_marker_array_.publish(marker_array_msg);
     }
   }
 
@@ -174,6 +179,7 @@ namespace jsk_pcl_ros
 
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     pub_marker_ = advertise<visualization_msgs::Marker>(*pnh_, "output_marker", 1);
+    pub_marker_array_ = advertise<visualization_msgs::MarkerArray>(*pnh_, "output_marker_array", 1);
     pub_octree_resolution_ = advertise<std_msgs::Float32>(*pnh_, "output_resolution", 1);
 
     onInitPostProcess();

@@ -50,7 +50,7 @@
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/PolygonStamped.h>
 
-#include "jsk_pcl_ros/TransformScreenpoint.h"
+#include "jsk_recognition_msgs/TransformScreenpoint.h"
 
 #include <boost/thread/mutex.hpp>
 
@@ -101,8 +101,8 @@ namespace jsk_pcl_ros
 #endif
 
     void onInit();
-    bool screenpoint_cb(jsk_pcl_ros::TransformScreenpoint::Request &req,
-                        jsk_pcl_ros::TransformScreenpoint::Response &res);
+    bool screenpoint_cb(jsk_recognition_msgs::TransformScreenpoint::Request &req,
+                        jsk_recognition_msgs::TransformScreenpoint::Response &res);
     void points_cb(const sensor_msgs::PointCloud2ConstPtr &msg);
 
     bool checkpoint (pcl::PointCloud< pcl::PointXYZ > &in_pts, int x, int y,

@@ -44,14 +44,14 @@
 #include <geometry_msgs/PolygonStamped.h>
 #include <geometry_msgs/PoseArray.h>
 #include <jsk_recognition_msgs/ModelCoefficientsArray.h>
-#include "jsk_pcl_ros/CallSnapIt.h"
+#include "jsk_recognition_msgs/CallSnapIt.h"
 #include <tf/transform_listener.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include "jsk_recognition_utils/geo_util.h"
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
-#include <jsk_pcl_ros/SnapFootstep.h>
+#include <jsk_recognition_msgs/SnapFootstep.h>
 #include "jsk_pcl_ros/tf_listener_singleton.h"
 namespace jsk_pcl_ros
 {
@@ -88,8 +88,8 @@ namespace jsk_pcl_ros
     virtual geometry_msgs::PoseStamped alignPose(
       Eigen::Affine3f& pose, jsk_recognition_utils::ConvexPolygon::Ptr convex);
     virtual bool footstepAlignServiceCallback(
-      jsk_pcl_ros::SnapFootstep::Request& req,
-      jsk_pcl_ros::SnapFootstep::Response& res);
+      jsk_recognition_msgs::SnapFootstep::Request& req,
+      jsk_recognition_msgs::SnapFootstep::Response& res);
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////

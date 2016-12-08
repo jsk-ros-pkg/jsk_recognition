@@ -333,14 +333,12 @@ install(DIRECTORY node_scripts/ scripts/
         USE_SOURCE_PERMISSIONS
 )
 
-install(DIRECTORY sample launch euslisp
+install(DIRECTORY sample launch euslisp plugins
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         USE_SOURCE_PERMISSIONS
 )
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
-
-install(FILES ${PROJECT_NAME}_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 # ------------------------------------------------------------------------------------
 # Test
@@ -370,10 +368,12 @@ if(CATKIN_ENABLE_TESTING)
     # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
     jsk_add_rostest(test/add_mask_image.test)
     jsk_add_rostest(test/apply_mask_image.test)
+    jsk_add_rostest(test/background_subtraction.test)
     jsk_add_rostest(test/blob_detector.test)
     jsk_add_rostest(test/bof_histogram_extractor.test)
     jsk_add_rostest(test/bounding_object_mask_image.test)
     jsk_add_rostest(test/bounding_rect_mask_image.test)
+    jsk_add_rostest(test/calc_flow.test)
     jsk_add_rostest(test/color_histogram.test)
     jsk_add_rostest(test/colorize_labels.test)
     jsk_add_rostest(test/colorize_float_image.test)

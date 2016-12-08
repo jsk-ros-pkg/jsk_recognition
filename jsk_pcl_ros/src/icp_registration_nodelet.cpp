@@ -196,8 +196,8 @@ namespace jsk_pcl_ros
   }
 
   bool ICPRegistration::alignWithBoxService(
-    jsk_pcl_ros::ICPAlignWithBox::Request& req, 
-    jsk_pcl_ros::ICPAlignWithBox::Response& res)
+    jsk_recognition_msgs::ICPAlignWithBox::Request& req, 
+    jsk_recognition_msgs::ICPAlignWithBox::Response& res)
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (reference_cloud_list_.size() == 0) {
@@ -229,8 +229,8 @@ namespace jsk_pcl_ros
   }
 
   bool ICPRegistration::alignService(
-    jsk_pcl_ros::ICPAlign::Request& req, 
-    jsk_pcl_ros::ICPAlign::Response& res)
+    jsk_recognition_msgs::ICPAlign::Request& req, 
+    jsk_recognition_msgs::ICPAlign::Response& res)
   {
     boost::mutex::scoped_lock lock(mutex_);
     std::vector<pcl::PointCloud<PointT>::Ptr> tmp_reference_cloud_list

@@ -19,3 +19,8 @@ Publishes camera pose using pcl/KinfuLS
 * `~output/cloud` (`sensor_msgs/PointCloud2`)
 
   Registered scene pointcloud
+
+## Advertising Services
+* `~save_mesh` (`std_srvs/Empty`)
+
+  Convert tsdf->mesh using marching cubes algorithm, saved as ~/.ros/mesh.ply

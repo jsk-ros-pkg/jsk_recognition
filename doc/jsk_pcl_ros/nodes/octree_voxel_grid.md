@@ -20,7 +20,9 @@ and other voxel filtered functions output the other position such as the centroi
 * `~output` (`sensor_msgs/PointCloud2`):
 
    Voxel grided clouds.
+
 * `~output_marker` (`visualization_msgs/Marker`):
+* `~output_marker_array` (`visualization_msgs/MarkerArray`):
 
    Voxel grided clouds.
 

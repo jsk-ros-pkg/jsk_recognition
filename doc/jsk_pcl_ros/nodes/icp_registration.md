@@ -1,5 +1,7 @@
 # ICPRegistration
 ![](../images/icp_registration.png)
+![sample_gif](./images/icp_registration.gif)
+![sample](./images/icp_registration.png)
 
 Register two pointclouds based on icp like registration technique.
 
@@ -9,7 +11,7 @@ Register two pointclouds based on icp like registration technique.
   Target pointcloud.
 * `~input/camera_info` (`sensor_msgs/CameraInfo`)
 
-  Camera info.
+  Camera info. Needed only when correspondence_algorithm == `Projective`
 * `~input_reference` (`sensor_msgs/PointCloud`)
 
   Reference pointcloud. frame_id of this pointlcoud is ignored.
@@ -77,3 +79,9 @@ Register two pointclouds based on icp like registration technique.
 * `~ndt_resolution` (default: `1.0`)
 * `~ndt_step_size` (default: `0.05`)
 * `~ndt_outlier_ratio` (default: `0.35`)
+
+## Sample Launch
+
+```
+roslaunch jsk_pcl_ros sample_icp_registration.launch
+```

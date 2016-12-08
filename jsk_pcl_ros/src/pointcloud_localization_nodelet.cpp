@@ -35,7 +35,7 @@
 
 #define BOOST_PARAMETER_MAX_ARITY 7
 #include "jsk_pcl_ros/pointcloud_localization.h"
-#include <jsk_pcl_ros/ICPAlign.h>
+#include <jsk_recognition_msgs/ICPAlign.h>
 #include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <pcl_ros/transforms.h>
 #include <pcl/filters/voxel_grid.h>
@@ -189,8 +189,8 @@ namespace jsk_pcl_ros
           else {
             // run ICP
             ros::ServiceClient client
-              = pnh_->serviceClient<jsk_pcl_ros::ICPAlign>("icp_align");
-            jsk_pcl_ros::ICPAlign icp_srv;
+              = pnh_->serviceClient<jsk_recognition_msgs::ICPAlign>("icp_align");
+            jsk_recognition_msgs::ICPAlign icp_srv;
 
             if (clip_unseen_pointcloud_) {
               // Before running ICP, remove pointcloud where we cannot see
@@ -316,8 +316,8 @@ namespace jsk_pcl_ros
   }
 
   bool PointCloudLocalization::updateOffsetCallback(
-    jsk_pcl_ros::UpdateOffset::Request& req,
-    jsk_pcl_ros::UpdateOffset::Response& res)
+    jsk_recognition_msgs::UpdateOffset::Request& req,
+    jsk_recognition_msgs::UpdateOffset::Response& res)
   {
     boost::mutex::scoped_lock lock(mutex_);
     geometry_msgs::TransformStamped next_pose = req.transformation;

@@ -12,6 +12,10 @@
          type="jsk_pcl_ros_utils::AddPointIndices"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_pcl_utils/SubtractPointIndices"
+         type="jsk_pcl_ros_utils::SubtractPointIndices"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_pcl_utils/MaskImageToPointIndices"
          type="jsk_pcl_ros_utils::MaskImageToPointIndices"
          base_class_type="nodelet::Nodelet">
@@ -160,6 +164,10 @@
   </class>
   <class name="jsk_pcl_utils/PlaneConcatenator"
          type="jsk_pcl_ros_utils::PlaneConcatenator"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl_utils/PointCloudXYZToXYZRGB"
+         type="jsk_pcl_ros_utils::PointCloudXYZToXYZRGB"
          base_class_type="nodelet::Nodelet">
   </class>
   <class name="jsk_pcl_utils/PointCloudToClusterPointIndices"

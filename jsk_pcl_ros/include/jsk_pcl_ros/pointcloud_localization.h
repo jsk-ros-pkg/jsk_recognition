@@ -45,7 +45,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-#include <jsk_pcl_ros/UpdateOffset.h>
+#include <jsk_recognition_msgs/UpdateOffset.h>
 
 namespace jsk_pcl_ros
 {
@@ -100,8 +100,8 @@ namespace jsk_pcl_ros
      * callback function for ~update_offset service
      */
     virtual bool updateOffsetCallback(
-      jsk_pcl_ros::UpdateOffset::Request& req,
-      jsk_pcl_ros::UpdateOffset::Response& res);
+      jsk_recognition_msgs::UpdateOffset::Request& req,
+      jsk_recognition_msgs::UpdateOffset::Response& res);
     
     virtual void applyDownsampling(
       pcl::PointCloud<pcl::PointNormal>::Ptr in_cloud,

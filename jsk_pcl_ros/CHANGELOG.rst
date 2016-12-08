@@ -2,6 +2,11 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.3.29 (2016-10-30)
+-------------------
+* CMakeLists.txt: install nodelet.xml: for get to care about install process in #1929
+* Contributors: Kei Okada
+
 0.3.28 (2016-10-29)
 -------------------
 * [Major Release] Copy jsk_pcl_ros/srv and  jsk_perception/srv files to jsk_recognition_msgs (`#1914 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1914>`_)

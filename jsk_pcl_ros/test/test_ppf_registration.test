@@ -1,0 +1,58 @@
+<launch>
+  <arg name="manager" value="ppf_manager" />
+  <node name="$(arg manager)" pkg="nodelet" type="nodelet" args="manager" />
+
+  <node name="pointcloud_database_server" pkg="nodelet" type="nodelet"
+    args="load jsk_pcl/PointcloudDatabaseServer $(arg manager)" output="screen">
+    <rosparam subst_value="true">
+      models: ["$(find jsk_pcl_ros)/test_data/2016-10-26-02-09-51_coffee_cup.pcd",
+      ]
+      duration: 0.05
+      use_array: false
+    </rosparam>
+  </node>
+
+  <node name ="subsample_input" pkg="nodelet" type="nodelet"
+      args="load pcl/VoxelGrid $(arg manager)" output="screen">
+    <remap from="~input" to="pointcloud_database_server/cloud" />
+    <rosparam>
+      leaf_size: 0.005
+    </rosparam>
+  </node>
+
+  <node name ="subsample_reference" pkg="nodelet" type="nodelet"
+      args="load pcl/VoxelGrid $(arg manager)" output="screen">
+    <remap from="~input" to="pointcloud_database_server/cloud" />
+    <rosparam>
+      leaf_size: 0.005
+    </rosparam>
+  </node>
+
+  <node name="ppf_registration" pkg="nodelet" type="nodelet"
+    args="load jsk_pcl/PPFRegistration $(arg manager)" output="screen">
+    <remap from="~input/cloud" to="subsample_input/output" />
+    <remap from="~input/reference_cloud" to="subsample_reference/output" />
+    <rosparam>
+      approximate_sync: true
+      queue_size: 1000
+      sampling_rate: 10
+      search_radius: 0.05
+      position_clustering_threshold: 0.2
+      rotation_clustering_threshold: 30
+      use_array: false
+    </rosparam>
+  </node>
+
+  <test test-name="test_ppf_registration"
+        name="test_ppf_registration"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /ppf_registration/output/cloud
+      timeout_0: 30
+      topic_1: /ppf_registration/output/pose_stamped
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

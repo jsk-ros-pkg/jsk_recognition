@@ -81,10 +81,15 @@ namespace jsk_pcl_ros
     // virtual void listPointcloud();
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
-    ros::Publisher pub_points_;
+    ros::Publisher pub_points_array_;
+    ros::Publisher pub_cloud_;
     ros::Timer timer_;
     std::vector<PointCloudData::Ptr> point_clouds_;
+    jsk_recognition_msgs::PointsArray array_msg_;
+    sensor_msgs::PointCloud2 point_msg_;
+
     double duration_;
+    bool use_array_;
 
   private:
   };

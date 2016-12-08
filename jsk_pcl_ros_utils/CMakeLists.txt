@@ -60,6 +60,13 @@ IF(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
   add_definitions("-DUSE_OLD_YAML")
 ENDIF()
 
+# ------------------------------------------------------------------------------------
+# Download
+# ------------------------------------------------------------------------------------
+
+# download and install sample data
+add_custom_target(install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
+
 # add_service_files(FILES SwitchTopic.srv
 #   UpdateOffset.srv
 #   SnapFootstep.srv
@@ -209,6 +216,8 @@ if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
   jsk_pcl_util_nodelet(src/cluster_point_indices_to_point_indices_nodelet.cpp
     "jsk_pcl_utils/ClusterPointIndicesToPointIndices" "cluster_point_indices_to_point_indices")
 endif()
+jsk_pcl_util_nodelet(src/pointcloud_xyz_to_xyzrgb_nodelet.cpp
+  "jsk_pcl_utils/PointCloudXYZToXYZRGB" "pointcloud_xyz_to_xyzrgb")
 jsk_pcl_util_nodelet(src/pointcloud_to_cluster_point_indices_nodelet.cpp
   "jsk_pcl_utils/PointCloudToClusterPointIndices" "pointcloud_to_cluster_point_indices")
 jsk_pcl_util_nodelet(src/pointcloud_to_mask_image_nodelet.cpp
@@ -253,6 +262,8 @@ jsk_pcl_util_nodelet(src/plane_concatenator_nodelet.cpp
   "jsk_pcl_utils/PlaneConcatenator" "plane_concatenator")
 jsk_pcl_util_nodelet(src/add_point_indices_nodelet.cpp
   "jsk_pcl_utils/AddPointIndices" "add_point_indices")
+jsk_pcl_util_nodelet(src/subtract_point_indices_nodelet.cpp
+  "jsk_pcl_utils/SubtractPointIndices" "subtract_point_indices")
 jsk_pcl_util_nodelet(src/pcd_reader_with_pose_nodelet.cpp
   "jsk_pcl_utils/PCDReaderWithPose" "pcd_reader_with_pose")
 jsk_pcl_util_nodelet(src/pointcloud_relative_from_pose_stamped_nodelet.cpp
@@ -289,24 +300,25 @@ install(TARGETS jsk_pcl_ros_utils
 install(FILES jsk_pcl_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 if (CATKIN_ENABLE_TESTING)
+  find_package(roslaunch REQUIRED)
   find_package(rostest REQUIRED)
-  add_custom_target(install_test_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.py)
-  if(TARGET tests)
-    add_dependencies(tests install_test_data)
-  endif()
   # Naming Rule: filename of rostest should be {EXECUTABLE_NAME}.test
   add_rostest(test/point_indices_to_cluster_point_indices.test)
   if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
     # not build on hydro
+    add_rostest(test/add_point_indices.test)
+    roslaunch_add_file_check(test/add_point_indices.test)
     add_rostest(test/cluster_point_indices_to_point_indices.test)
     # unexpected error
     add_rostest(test/point_indices_to_mask_image.test)
     # because of unreleased topic_tools/transform on hydro
-    add_rostest(test/pointcloud_to_pcd.test DEPENDENCIES install_test_data)
-    add_rostest(test/pointcloud_to_point_indices.test DEPENDENCIES install_test_data)
+    add_rostest(test/pointcloud_to_pcd.test)
+    add_rostest(test/pointcloud_to_point_indices.test)
     # because of unreleased jsk_tools/test_topic_published.py on hydro
     add_rostest(test/bounding_box_array_to_bounding_box.test)
-    add_rostest(test/pointcloud_to_mask_image.test install_test_data)
+    add_rostest(test/pointcloud_to_mask_image.test)
     add_rostest(test/polygon_array_unwrapper.test)
+    add_rostest(test/subtract_point_indices.test)
+    roslaunch_add_file_check(test/subtract_point_indices.test)
   endif()
 endif()

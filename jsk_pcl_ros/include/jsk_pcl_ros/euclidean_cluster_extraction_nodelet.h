@@ -54,7 +54,7 @@
 #include <pcl/common/centroid.h>
 
 #include "jsk_recognition_msgs/ClusterPointIndices.h"
-#include "jsk_pcl_ros/EuclideanSegment.h"
+#include "jsk_recognition_msgs/EuclideanSegment.h"
 #include "jsk_recognition_msgs/Int32Stamped.h"
 
 #include "jsk_pcl_ros/EuclideanClusteringConfig.h"
@@ -105,8 +105,8 @@ namespace jsk_pcl_ros
     
     virtual void onInit();
     virtual void extract(const sensor_msgs::PointCloud2ConstPtr &input);
-    bool serviceCallback(jsk_pcl_ros::EuclideanSegment::Request &req,
-                         jsk_pcl_ros::EuclideanSegment::Response &res);
+    bool serviceCallback(jsk_recognition_msgs::EuclideanSegment::Request &req,
+                         jsk_recognition_msgs::EuclideanSegment::Response &res);
     void updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual std::vector<pcl::PointIndices> pivotClusterIndices(
       std::vector<int>& pivot_table,

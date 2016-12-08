@@ -186,8 +186,8 @@ bool jsk_pcl_ros::PointcloudScreenpoint::extract_point (pcl::PointCloud< pcl::Po
   return false;
 }
 
-bool jsk_pcl_ros::PointcloudScreenpoint::screenpoint_cb (jsk_pcl_ros::TransformScreenpoint::Request &req,
-                                                         jsk_pcl_ros::TransformScreenpoint::Response &res)
+bool jsk_pcl_ros::PointcloudScreenpoint::screenpoint_cb (jsk_recognition_msgs::TransformScreenpoint::Request &req,
+                                                         jsk_recognition_msgs::TransformScreenpoint::Response &res)
 {
   ROS_DEBUG("PointcloudScreenpoint::screenpoint_cb");
   boost::mutex::scoped_lock lock(this->mutex_callback_);

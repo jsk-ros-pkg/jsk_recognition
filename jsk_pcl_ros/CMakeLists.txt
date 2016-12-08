@@ -19,7 +19,6 @@ find_package(catkin REQUIRED COMPONENTS
   kdl_conversions
   kdl_parser
   laser_assembler
-  message_generation
   nodelet
   octomap_msgs
   octomap_ros
@@ -48,26 +47,6 @@ IF(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
 ## indigo yaml-cpp : 0.5.0 /  hydro yaml-cpp : 0.3.0
   add_definitions("-DUSE_OLD_YAML")
 ENDIF()
-
-message(WARNING "DEPRECATION WARNING: srv files in jsk_pcl_ros are deprecated."
-        " Please use those in jsk_recognition_msgs.")
-# TODO(wkentaro): Remove deprecated srv files.
-add_service_files(FILES SwitchTopic.srv
-  UpdateOffset.srv
-  SnapFootstep.srv
-  SetDepthCalibrationParameter.srv
-  TransformScreenpoint.srv
-  CheckCircle.srv
-  RobotPickupReleasePoint.srv
-  TowerPickUp.srv
-  EuclideanSegment.srv
-  TowerRobotMoveCommand.srv
-  CallSnapIt.srv CallPolygon.srv
-  EnvironmentLock.srv
-  PolygonOnEnvironment.srv
-  ICPAlignWithBox.srv
-  ICPAlign.srv
-  CheckCollision.srv)
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
@@ -428,15 +407,12 @@ target_link_libraries(range_sensor_error_visualization jsk_pcl_ros)
 add_executable(depth_camera_error_visualization tool/depth_camera_error_visualization.cpp)
 target_link_libraries(depth_camera_error_visualization jsk_pcl_ros)
 
-generate_messages(DEPENDENCIES
-  ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_footstep_msgs)
-
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 message("flags: ${CMAKE_CXX_FLAGS}")
 
 catkin_package(
     DEPENDS pcl
-    CATKIN_DEPENDS pcl_ros message_runtime ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_recognition_utils
+    CATKIN_DEPENDS pcl_ros ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_recognition_utils
     INCLUDE_DIRS include
     LIBRARIES jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit
 )

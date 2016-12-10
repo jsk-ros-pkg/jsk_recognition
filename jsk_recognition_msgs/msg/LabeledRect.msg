@@ -1,0 +1,2 @@
+Rect rect
+Label label

@@ -243,10 +243,10 @@ namespace jsk_pcl_ros
       Eigen::AngleAxisf rotation_angle_axis(rot);
       Eigen::Vector3f rotation_axis = rotation_angle_axis.axis();
       double theta = rotation_angle_axis.angle();
-      if (isnan(theta) ||
-          isnan(rotation_axis[0]) ||
-          isnan(rotation_axis[1]) ||
-          isnan(rotation_axis[2])) {
+      if (std::isnan(theta) ||
+          std::isnan(rotation_axis[0]) ||
+          std::isnan(rotation_axis[1]) ||
+          std::isnan(rotation_axis[2])) {
         segmented_cloud_transformed = segmented_cloud;
         NODELET_ERROR("cannot compute angle to align the point cloud: [%f, %f, %f], [%f, %f, %f]",
                       z_axis[0], z_axis[1], z_axis[2],

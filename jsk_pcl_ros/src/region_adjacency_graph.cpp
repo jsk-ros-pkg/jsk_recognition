@@ -180,7 +180,7 @@ namespace jsk_pcl_ros
           if (convexC_ij > 0.0) {
              convex_++;
           }
-          if (convexC_ij <= 0.0 || isnan(convexC_ij)) {
+          if (convexC_ij <= 0.0 || std::isnan(convexC_ij)) {
              concave_++;
           }
           /*

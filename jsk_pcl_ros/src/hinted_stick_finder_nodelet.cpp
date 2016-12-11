@@ -309,7 +309,7 @@ namespace jsk_pcl_ros
     output_indices.indices.clear();
     for (size_t i = 0; i < cloud->points.size(); i++) {
       pcl::PointXYZ p = cloud->points[i];
-      if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
+      if (!std::isnan(p.x) && !std::isnan(p.y) && !std::isnan(p.z)) {
         if (polygon->isProjectableInside(p.getVector3fMap())) {
           if (polygon->distanceSmallerThan(p.getVector3fMap(), filter_distance_)) {
             output_indices.indices.push_back(i);

@@ -146,13 +146,13 @@ namespace jsk_pcl_ros
       pcl::concatenateFields(*cloud, *normal, *all_cloud);
       pcl::PointIndices::Ptr indices (new pcl::PointIndices);
       for (size_t i = 0; i < all_cloud->points.size(); i++) {
-        if (!isnan(all_cloud->points[i].x) &&
-            !isnan(all_cloud->points[i].y) &&
-            !isnan(all_cloud->points[i].z) &&
-            !isnan(all_cloud->points[i].normal_x) &&
-            !isnan(all_cloud->points[i].normal_y) &&
-            !isnan(all_cloud->points[i].normal_z) &&
-            !isnan(all_cloud->points[i].curvature)) {
+        if (!std::isnan(all_cloud->points[i].x) &&
+            !std::isnan(all_cloud->points[i].y) &&
+            !std::isnan(all_cloud->points[i].z) &&
+            !std::isnan(all_cloud->points[i].normal_x) &&
+            !std::isnan(all_cloud->points[i].normal_y) &&
+            !std::isnan(all_cloud->points[i].normal_z) &&
+            !std::isnan(all_cloud->points[i].curvature)) {
           if (all_cloud->points[i].curvature < max_curvature_) {
             indices->indices.push_back(i);
           }

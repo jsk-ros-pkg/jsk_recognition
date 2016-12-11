@@ -1138,7 +1138,7 @@ namespace jsk_pcl_ros
          // weight = static_cast<T>(1 - (c_normal.dot(n_normal)));
          return 0.0f;
       }
-      if (isnan(weight)) {
+      if (std::isnan(weight)) {
          return 0.0f;
       }
       T probability = std::exp(-1 * weight);
@@ -1365,8 +1365,8 @@ namespace jsk_pcl_ros
       this->current_pose_(1) = current_pose.y;
       this->current_pose_(2) = current_pose.z;
       this->current_pose_(3) = 0.0f;
-      if (!isnan(current_pose.x) && !isnan(current_pose.y) &&
-          !isnan(current_pose.z)) {
+      if (!std::isnan(current_pose.x) && !std::isnan(current_pose.y) &&
+          !std::isnan(current_pose.z)) {
          if (!this->motion_history_.empty()) {
             int last_index = static_cast<int>(
                this->motion_history_.size()) - 1;
@@ -1401,7 +1401,7 @@ namespace jsk_pcl_ros
       }
       Eigen::Vector4f centroid;
       pcl::compute3DCentroid<PointT, float>(*cloud, centroid);
-      if (!isnan(centroid(0)) && !isnan(centroid(1)) && !isnan(centroid(2))) {
+      if (!std::isnan(centroid(0)) && !std::isnan(centroid(1)) && !std::isnan(centroid(2))) {
          centre = centroid;
       }
    }
@@ -1418,9 +1418,9 @@ namespace jsk_pcl_ros
       float z = 0.0f;
       int icounter = 0;
       for (int i = 0; i < normal->size(); i++) {
-         if ((!isnan(normal->points[i].normal_x)) &&
-             (!isnan(normal->points[i].normal_y)) &&
-             (!isnan(normal->points[i].normal_z))) {
+         if ((!std::isnan(normal->points[i].normal_x)) &&
+             (!std::isnan(normal->points[i].normal_y)) &&
+             (!std::isnan(normal->points[i].normal_z))) {
             x += normal->points[i].normal_x;
             y += normal->points[i].normal_y;
             z += normal->points[i].normal_z;
@@ -1467,7 +1467,7 @@ namespace jsk_pcl_ros
 
    float TargetAdaptiveTracking::computeCoherency(
       const float dist, const float weight) {
-      if (isnan(dist)) {
+      if (std::isnan(dist)) {
          return 0.0f;
       }
       return static_cast<float>(1/(1 + (weight * std::pow(dist, 2))));

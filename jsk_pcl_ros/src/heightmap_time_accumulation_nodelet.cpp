@@ -123,7 +123,7 @@ namespace jsk_pcl_ros
   bool HeightmapTimeAccumulation::isValidCell(const cv::Point& index, const cv::Mat& map)
   {
     float v = map.at<cv::Vec2f>(index.y, index.x)[0];
-    return !isnan(v) && v != -FLT_MAX;
+    return !std::isnan(v) && v != -FLT_MAX;
   }
 
   void HeightmapTimeAccumulation::accumulate(

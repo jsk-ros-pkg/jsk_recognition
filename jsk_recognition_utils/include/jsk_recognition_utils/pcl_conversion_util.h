@@ -194,13 +194,13 @@ namespace jsk_recognition_utils
 
   inline bool isValidPoint(const pcl::PointXYZ& p)
   {
-    return !isnan(p.x) && !isnan(p.y) && !isnan(p.z);
+    return !std::isnan(p.x) && !std::isnan(p.y) && !std::isnan(p.z);
   }
 
   template <class PointT>
   inline bool isValidPoint(const PointT& p)
   {
-    return !isnan(p.x) && !isnan(p.y) && !isnan(p.z);
+    return !std::isnan(p.x) && !std::isnan(p.y) && !std::isnan(p.z);
   }
 
 }

@@ -102,7 +102,7 @@ namespace jsk_pcl_ros
       for (size_t j = 0; j < input.rows; j++) {
         for (size_t i = 0; i < input.cols; i++) {
           float v = input.at<cv::Vec2f>(j, i)[0];
-          if (isnan(v) || v == -FLT_MAX) { // Need to filter
+          if (std::isnan(v) || v == -FLT_MAX) { // Need to filter
             Accumulator acc;
             for (int jj = - mask_size_; jj <= mask_size_; jj++) {
               int target_j = j + jj;
@@ -112,7 +112,7 @@ namespace jsk_pcl_ros
                   if (target_i >= 0 && target_i < input.cols) {
                     if (std::abs(jj) + std::abs(ii) <= mask_size_) {
                       float vv = input.at<cv::Vec2f>(target_j, target_i)[0];
-                      if (!isnan(vv) && vv != -FLT_MAX) {
+                      if (!std::isnan(vv) && vv != -FLT_MAX) {
                         acc(vv);
                       }
                     }

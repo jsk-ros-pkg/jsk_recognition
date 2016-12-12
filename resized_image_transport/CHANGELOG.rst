@@ -2,6 +2,12 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge branch 'master' into fix_for_kinetic
+* remove depends to driver_base
+* Contributors: Kei Okada
+
 0.3.29 (2016-10-30)
 -------------------
 

@@ -2,6 +2,25 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix for kinetic build (`#1943 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1943>`_)
+* Add missing packages(jsk_data, opencv_apps) to find_package (`#1984 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1984>`_)
+* Add test & sample
+
+  * calc_flow   (`#1959 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1959>`_)
+  * background_subtraction   (`#1959 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1959>`_)
+  * mask_image_to_rect   (`#1961 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1961>`_)
+  * Add test & sample for grid_label  (`#1960 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1960>`_)
+  * Add sample for colorize_float_image (`#1956 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1956>`_)
+
+* Draw rects on image with PolygonStamped input (`#1961 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1961>`_)
+* sample/sample_rect_array_actual_size_filter.launch : Fix typo of sample data path (`#1955 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1955>`_)
+* colorize_float_image.cpp : Fill black color to nan region (`#1956 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1956>`_)
+* scripts/install_sample_data.py : Fix wrong filename in install_sample_data.py (`#1954 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1954>`_)
+* remove depends to driver_base (`#1943 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1943>`_)
+* Contributors: Kei Okada, Kentaro Wada
+
 0.3.29 (2016-10-30)
 -------------------
 * CMakeLists.txt: install nodelet.xml: for get to care about install process in #1929

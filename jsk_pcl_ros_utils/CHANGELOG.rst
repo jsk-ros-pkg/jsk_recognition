@@ -2,6 +2,16 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add PointCloudXYZToXYZRGB utility nodelet (`#1967 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1967>`_)
+ * Test for PointCloudXYZToXYZRGB
+ * Sample for PointCloudXYZToXYZRGB
+* [jsk_pcl_ros_utils] Add subtract_point_indices (`#1952 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1952>`_)
+* [jsk_pcl_ros_utils/add_point_indices] Add test  (`#1945 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1945>`_)
+* [jsk_pcl_ros_utils] Removed dependencies of install_test_data.py (`#1949 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1949>`_)
+* Contributors: Kentaro Wada, Iori Yanokura
+
 0.3.29 (2016-10-30)
 -------------------
 

@@ -2,6 +2,13 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix fo kinetic  (`#1943 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1943>`_)
+  * use std::isnan instead of isnan, knetic compiler requires this
+
+* Contributors: Kei Okada
+
 0.3.29 (2016-10-30)
 -------------------
 

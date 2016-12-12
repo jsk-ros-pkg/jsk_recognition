@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.0 (2016-12-12)
+------------------
 * Add PointCloudXYZToXYZRGB utility nodelet (`#1967 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1967>`_)
  * Test for PointCloudXYZToXYZRGB
  * Sample for PointCloudXYZToXYZRGB

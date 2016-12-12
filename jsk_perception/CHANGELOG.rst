@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.0 (2016-12-12)
+------------------
 * Fix for kinetic build (`#1943 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1943>`_)
 * Add missing packages(jsk_data, opencv_apps) to find_package (`#1984 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1984>`_)
 * Add test & sample

@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.1 (2016-12-13)
+------------------
 * package.xml : Fix dependency (jsk_data) of jsk_pcl_ros_utils
 * Contributors: Kentaro Wada
 

@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.1 (2016-12-13)
+------------------
 * jsk_perception/node_scripts/speak_when_label_found.py: Speak when target labels are found ( `#1923 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1923>`_)
 * Contributors: Kentaro Wada
 

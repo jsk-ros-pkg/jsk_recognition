@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_speak_when_label_found.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_speak_when_label_found"
+        name="test_speak_when_label_found"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /speak_when_label_found/output/string
+      timeout_0: 30
+      topic_0: /speak_when_label_found/output/slack_msg
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

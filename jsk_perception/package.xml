@@ -61,6 +61,7 @@
   <run_depend>image_view2</run_depend>
   <run_depend>imagesift</run_depend>
   <run_depend>jsk_data</run_depend>
+  <run_depend>jsk_gui_msgs</run_depend>
   <run_depend>jsk_recognition_msgs</run_depend>
   <run_depend>jsk_recognition_utils</run_depend>
   <run_depend>jsk_rqt_plugins</run_depend>
@@ -90,8 +91,10 @@
   <run_depend>roseus</run_depend>
   <run_depend>rospack</run_depend>
   <run_depend>rospy</run_depend>
+  <run_depend>rostopic</run_depend>
   <run_depend>rqt_gui</run_depend>
   <run_depend>sensor_msgs</run_depend>
+  <run_depend>sound_play</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>robot_self_filter</run_depend>

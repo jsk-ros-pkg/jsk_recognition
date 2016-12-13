@@ -2,6 +2,11 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* package.xml : Fix dependency (jsk_data) of jsk_pcl_ros_utils
+* Contributors: Kentaro Wada
+
 1.0.0 (2016-12-12)
 ------------------
 * Add PointCloudXYZToXYZRGB utility nodelet (`#1967 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1967>`_)

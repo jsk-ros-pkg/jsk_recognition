@@ -2,6 +2,11 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* jsk_perception/node_scripts/speak_when_label_found.py: Speak when target labels are found ( `#1923 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1923>`_)
+* Contributors: Kentaro Wada
+
 1.0.0 (2016-12-12)
 ------------------
 * Fix for kinetic build (`#1943 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1943>`_)

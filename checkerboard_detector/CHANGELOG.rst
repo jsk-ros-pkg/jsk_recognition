@@ -2,6 +2,9 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.0.0 (2016-12-12)
 ------------------
 * [checkerboard_detector] warn if error is big (`#1939 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1939>`_)

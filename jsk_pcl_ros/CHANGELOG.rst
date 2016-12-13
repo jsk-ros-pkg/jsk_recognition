@@ -2,6 +2,9 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.0.0 (2016-12-12)
 ------------------
 * **[MajorRelease]** remove message generation from jsk_pcl_ros (`#1983 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1983>`_)

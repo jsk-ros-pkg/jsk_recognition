@@ -84,7 +84,6 @@
   <run_depend>leveldb</run_depend>
   <run_depend>python-fcn-pip</run_depend>  <!-- pip -->
   <!-- }} install fcn -->
-  <run_depend>python-gdown</run_depend>  <!-- pip -->
   <run_depend>python-sklearn</run_depend>
   <run_depend>rosbag</run_depend>
   <run_depend>roscpp</run_depend>

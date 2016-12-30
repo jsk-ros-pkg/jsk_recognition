@@ -360,13 +360,18 @@ public:
     {
         if ( camInfoSubscriber == NULL )
             camInfoSubscriber = _node.subscribe("camera_info", 1, &CheckerboardDetector::caminfo_cb, this);
-        if ( imageSubscriber == NULL )
+        if ( imageSubscriber == NULL ) {
             imageSubscriber = _node.subscribe("image", 1, &CheckerboardDetector::image_cb, this);
+            if ( imageSubscriber.getTopic().find("image_rect") != std::string::npos )
+                ROS_WARN("topic name seems rectified, please use unrectified image"); // rectified image has 'image_rect' in topic name
+        }
         if ( camInfoSubscriber2 == NULL )
             camInfoSubscriber2 = _node.subscribe("CameraInfo", 1, &CheckerboardDetector::caminfo_cb2, this);
-        if ( imageSubscriber2 == NULL )
+        if ( imageSubscriber2 == NULL ) {
             imageSubscriber2 = _node.subscribe("Image",1, &CheckerboardDetector::image_cb2, this);
-
+            if ( imageSubscriber2.getTopic().find("image_rect") != std::string::npos )
+                ROS_WARN("topic name seems rectified, please use unrectified image"); // rectified image has 'image_rect' in topic name
+        }
     }
 
     void unsubscribe( )

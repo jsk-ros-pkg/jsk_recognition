@@ -13,6 +13,7 @@ import skimage.transform
 import cv_bridge
 from jsk_topic_tools import ConnectionBasedTransport
 from jsk_topic_tools.log_utils import logerr_throttle
+from jsk_recognition_utils.chainermodels import VGG16
 from jsk_recognition_utils.chainermodels import VGG16BatchNormalization
 from jsk_recognition_msgs.msg import ClassificationResult
 import message_filters

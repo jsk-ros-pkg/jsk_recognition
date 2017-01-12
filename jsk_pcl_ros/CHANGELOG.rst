@@ -2,6 +2,11 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros/install_sample] fix md5sum (`#1988 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1988>`_)
+* Contributors: Yu Ohara
+
 1.0.1 (2016-12-13)
 ------------------
 

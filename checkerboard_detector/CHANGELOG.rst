@@ -2,8 +2,8 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.2 (2017-01-12)
+------------------
 * warn if topic seems to be rectified (`#1937 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1937>`_)
 * Contributors: Yu Ohara
 

@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.2 (2017-01-12)
+------------------
 * fix typo in vgg16_object_recognition (`#1990 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1990>`_)
 * No longer required python-gdown dependency
   Because python-gdown-pip is installed via jsk_data (`#1989 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1989>`_)

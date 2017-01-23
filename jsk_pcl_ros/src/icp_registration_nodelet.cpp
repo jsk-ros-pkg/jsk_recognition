@@ -37,6 +37,8 @@
 #include <pcl/registration/icp.h>
 #include <pcl/registration/gicp.h>
 #include <pcl/registration/ndt.h>
+#include <pcl/registration/transformation_estimation_lm.h>
+#include <pcl/registration/warp_point_rigid_3d.h>
 #include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <eigen_conversions/eigen_msg.h>
 #include <pcl/common/transforms.h>
@@ -65,6 +67,7 @@ namespace jsk_pcl_ros
     pnh_->param("use_normal", use_normal_, false);
     pnh_->param("align_box", align_box_, false);
     pnh_->param("synchronize_reference", synchronize_reference_, false);
+    pnh_->param("transform_3dof", transform_3dof_, false);
     pnh_->param("use_offset_pose", use_offset_pose_, false);
     ////////////////////////////////////////////////////////
     // Publishers
@@ -606,6 +609,16 @@ namespace jsk_pcl_ros
       return DBL_MAX;
     }
     icp.setInputTarget(cloud);
+
+    if (transform_3dof_) {
+      boost::shared_ptr<pcl::registration::WarpPointRigid3D<PointT, PointT> > warp_func
+        (new pcl::registration::WarpPointRigid3D<PointT, PointT>);
+      boost::shared_ptr<pcl::registration::TransformationEstimationLM<PointT, PointT> > te
+        (new pcl::registration::TransformationEstimationLM<PointT, PointT>);
+      te->setWarpFunction(warp_func);
+      icp.setTransformationEstimation(te);
+    }
+
     icp.setMaxCorrespondenceDistance (correspondence_distance_);
     icp.setMaximumIterations (max_iteration_);
     icp.setTransformationEpsilon (transform_epsilon_);

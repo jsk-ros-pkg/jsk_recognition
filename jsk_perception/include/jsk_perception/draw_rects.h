@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2015, JSK Lab
+ *  Copyright (c) 2016, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,8 @@
  * Author: Yuki Furuta <furushchev@jsk.imi.i.u-tokyo.ac.jp>
  */
 
-#ifndef JSK_PERCEPTION_DRAW_LABELED_RECT_H__
-#define JSK_PERCEPTION_DRAW_LABELED_RECT_H__
+#ifndef JSK_PERCEPTION_DRAW_RECTS_H__
+#define JSK_PERCEPTION_DRAW_RECTS_H__
 
 #include <sstream>
 #include <boost/shared_ptr.hpp>
@@ -51,6 +51,7 @@
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
+#include <jsk_recognition_msgs/RectArray.h>
 #include <jsk_recognition_msgs/LabeledRectArray.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
@@ -58,13 +59,16 @@
 
 namespace jsk_perception
 {
-  class DrawLabeledRect : public jsk_topic_tools::ConnectionBasedNodelet
+  class DrawRects : public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
-    typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, jsk_recognition_msgs::LabeledRectArray> ApproximateSyncPolicyRects;
-    typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, jsk_recognition_msgs::LabeledRectArray> ExactSyncPolicyRects;
+    typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, jsk_recognition_msgs::RectArray> ApproximateSyncPolicyRects;
+    typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, jsk_recognition_msgs::RectArray> ExactSyncPolicyRects;
 
-    DrawLabeledRect(){}
+    typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, jsk_recognition_msgs::LabeledRectArray> ApproximateSyncPolicyLabeledRects;
+    typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, jsk_recognition_msgs::LabeledRectArray> ExactSyncPolicyLabeledRects;
+
+    DrawRects(){}
   protected:
     bool approximate_sync_;
     int queue_size_;
@@ -72,20 +76,30 @@ namespace jsk_perception
     int label_num_;
     ros::Publisher pub_image_;
     message_filters::Subscriber<sensor_msgs::Image> sub_image_;
-    message_filters::Subscriber<jsk_recognition_msgs::LabeledRectArray> sub_rects_;
+    message_filters::Subscriber<jsk_recognition_msgs::RectArray> sub_rects_;
+    message_filters::Subscriber<jsk_recognition_msgs::LabeledRectArray> sub_labeled_rects_;
     boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicyRects> > async_rects_;
     boost::shared_ptr<message_filters::Synchronizer<ExactSyncPolicyRects> > sync_rects_;
+    boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicyLabeledRects> > async_labeled_rects_;
+    boost::shared_ptr<message_filters::Synchronizer<ExactSyncPolicyLabeledRects> > sync_labeled_rects_;
 
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    void getColorString(const jsk_recognition_msgs::Label &label, cv::Scalar& color);
-    void draw(cv::Mat& mat, const jsk_recognition_msgs::LabeledRect &msg);
+    void getRandomColor(const int index, cv::Scalar &color);
+    void getLabelColor(const jsk_recognition_msgs::Label &label, cv::Scalar& color);
+    void drawRect(cv::Mat& mat,
+                  const jsk_recognition_msgs::Rect &msg, const cv::Scalar& color);
+    void drawLabel(cv::Mat& mat,
+                   const jsk_recognition_msgs::LabeledRect &msg, const cv::Scalar& color);
     void callbackRects(
       const sensor_msgs::Image::ConstPtr &img,
+      const jsk_recognition_msgs::RectArray::ConstPtr &rects);
+    void callbackLabeledRects(
+      const sensor_msgs::Image::ConstPtr &img,
       const jsk_recognition_msgs::LabeledRectArray::ConstPtr &rects);
-  }; // class DrawLabeledRect
+  }; // class DrawRects
 } // namespace jsk_perception
 
 
-#endif // JSK_PERCEPTION_DRAW_LABELED_RECT_H__
+#endif // JSK_PERCEPTION_DRAW_RECTS_H__

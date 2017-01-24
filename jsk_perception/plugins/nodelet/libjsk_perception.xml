@@ -261,8 +261,8 @@
          type="jsk_perception::DarknetObjectDetection"
          base_class_type="nodelet::Nodelet">
   </class>
-  <class name="jsk_perception/DrawLabeledRect"
-         type="jsk_perception::DrawLabeledRect"
+  <class name="jsk_perception/DrawRects"
+         type="jsk_perception::DrawRects"
          base_class_type="nodelet::Nodelet">
   </class>
 </library>

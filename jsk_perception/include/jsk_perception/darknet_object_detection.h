@@ -87,7 +87,7 @@ class AverageArray {
   bool valid;
   int n, e, c;
 public:
-  AverageArray(int n, int e) : n(n), e(e), c(0), valid(false) {
+  AverageArray(int n, int e) : valid(false), n(n), e(e), c(0) {
     arr = (float**)calloc(n, sizeof(float*));
     for (int i = 0; i < n; ++i) arr[i] = (float*)calloc(e, sizeof(float));
   }

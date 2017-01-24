@@ -265,6 +265,7 @@ add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
   )
 # add definitions for darknet to keep compatibility to darknet library
 add_darknet_definitions(${PROJECT_NAME})
+add_darknet_definitions(darknet_object_detection)
 
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${robot_self_filter_LIBRARIES} ${libcmt_LIBRARIES} yaml-cpp)
 if(robot_self_filter_FOUND)

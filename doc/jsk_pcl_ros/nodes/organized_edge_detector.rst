@@ -42,6 +42,13 @@ Publishing Topics
 
   Output point cloud.
 
+- ``~edge_image``
+- ``~hough_image``
+
+  Debug image.
+  Visualize the input and output image of ``cv::HoughLinesP``.
+.. image:: images/organized_edge_detector_hough_image.png
+
 
 Parameters
 ----------

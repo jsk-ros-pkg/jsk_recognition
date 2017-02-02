@@ -68,15 +68,6 @@ Visualization Manager:
       line width: 0.005
       only edge: true
       show coords: true
-    - Class: rviz/InteractiveMarkers
-      Enable Transparency: true
-      Enabled: true
-      Name: InteractiveMarkers
-      Show Axes: false
-      Show Descriptions: true
-      Show Visual Aids: false
-      Update Topic: /simple_marker/update
-      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -134,5 +125,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1200
-  X: 0
+  X: -10
   Y: 14

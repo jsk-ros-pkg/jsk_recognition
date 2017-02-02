@@ -51,7 +51,7 @@ Visualization Manager:
     - Class: jsk_rviz_plugin/BoundingBoxArray
       Enabled: true
       Name: BoundingBoxArray
-      Topic: /transformable_boxes/output/boxes
+      Topic: /bounding_box_array_publisher/output
       Unreliable: false
       Value: true
       alpha: 1
@@ -60,15 +60,6 @@ Visualization Manager:
       line width: 0.005
       only edge: true
       show coords: false
-    - Class: rviz/InteractiveMarkers
-      Enable Transparency: true
-      Enabled: true
-      Name: InteractiveMarkers
-      Show Axes: false
-      Show Descriptions: true
-      Show Visual Aids: false
-      Update Topic: /simple_marker/update
-      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -126,5 +117,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1200
-  X: 50
-  Y: 50
+  X: 40
+  Y: 40

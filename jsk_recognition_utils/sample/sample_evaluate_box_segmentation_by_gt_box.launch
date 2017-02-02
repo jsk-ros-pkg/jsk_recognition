@@ -2,20 +2,18 @@
 
   <arg name="gui" default="true" />
 
-  <node name="transformable_interactive_server"
-        pkg="jsk_interactive_marker" type="transformable_server_sample">
-    <rosparam subst_value="true">
-      display_interactive_manipulator: true
-      display_interactive_manipulator_only_selected: true
-    </rosparam>
-  </node>
-  <node name="transformable_boxes"
-        pkg="jsk_interactive_marker" type="transformable_boxes_client.py"
-        output="screen">
-    <remap from="~server" to="transformable_interactive_server" />
-    <rosparam subst_value="true">
-      config_file: $(find jsk_recognition_utils)/sample/config/sample_evaluate_box_segmentation_by_gt_box.yaml
-      config_auto_save: false  <!-- Use true to save config updated on rviz -->
+  <node name="bounding_box_array_publisher"
+        pkg="jsk_recognition_utils" type="bounding_box_array_publisher.py">
+    <rosparam>
+      rate: 10
+      frame_id: /map
+      boxes:
+        - dimension: [0.09, 0.13, 0.15]
+          orientation: [0.0, 0.0, 0.0, 1.0]
+          position: [1.3860276937484741, -0.3705306053161621, 0.5474169254302979]
+        - dimension: [0.15, 0.09, 0.13]
+          orientation: [0, 0, 0, 1]
+          position: [1.4170238971710205, -0.3371482789516449, 0.5605951547622681]
     </rosparam>
   </node>
   <group if="$(arg gui)">
@@ -27,14 +25,14 @@
 
   <node name="boxes_to_gt_box"
         pkg="jsk_pcl_ros_utils" type="bounding_box_array_to_bounding_box">
-    <remap from="~input" to="transformable_boxes/output/boxes" />
+    <remap from="~input" to="bounding_box_array_publisher/output" />
     <rosparam>
       index: 0
     </rosparam>
   </node>
   <node name="boxes_to_box"
         pkg="jsk_pcl_ros_utils" type="bounding_box_array_to_bounding_box">
-    <remap from="~input" to="transformable_boxes/output/boxes" />
+    <remap from="~input" to="bounding_box_array_publisher/output" />
     <rosparam>
       index: 1
     </rosparam>

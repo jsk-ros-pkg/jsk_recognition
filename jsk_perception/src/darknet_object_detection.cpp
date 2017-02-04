@@ -42,6 +42,19 @@ namespace enc = sensor_msgs::image_encodings;
 
 namespace jsk_perception {
 
+  void make_image_from_ros(const sensor_msgs::Image::ConstPtr &msg, image &img)
+  {
+    cv::Mat cv_img;
+    cv_bridge::toCvShare(msg, enc::RGB8)->image.convertTo(cv_img, CV_32FC3, 1 / 255.0);
+    const unsigned int channels = cv_img.channels();
+    const unsigned int size = cv_img.cols * cv_img.rows;
+    img = make_image(cv_img.cols, cv_img.rows, channels);
+    std::vector<cv::Mat> img_channels;
+    cv::split(cv_img, img_channels);
+    for (unsigned int c = 0; c < channels; ++c)
+      memcpy(img.data + size * c, img_channels[c].data, sizeof(float) * size);
+  }
+
   DarknetObjectDetection::~DarknetObjectDetection()
   {
     free_network(network_);
@@ -134,15 +147,14 @@ namespace jsk_perception {
   {
     layer layer = network_.layers[network_.n-1];
 
-    IplImage cv_img;
-
+    image dn_img;
     try {
-      cv_img = cv_bridge::toCvShare(msg, enc::RGB8)->image;
+      make_image_from_ros(msg, dn_img);
     } catch (cv_bridge::Exception &e) {
       ROS_ERROR("Failed to convert image to IplImage");
       return;
     }
-    image dn_img = ipl_to_image(&cv_img);
+
     image dn_resized = resize_image(dn_img, network_.w, network_.h);
     float *pred = network_predict(network_, (float*)dn_resized.data);
 

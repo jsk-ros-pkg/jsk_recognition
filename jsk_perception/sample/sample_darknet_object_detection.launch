@@ -18,6 +18,10 @@
   <node name="result_rectangle_drawer" pkg="jsk_perception" type="draw_rects">
     <remap from="~input" to="/image_raw" />
     <remap from="~input/labeled_rect_array" to="darknet_yolo_object_detection/output" />
+    <rosparam>
+      label_text_size: 1.4
+      label_text_boldness: 2
+    </rosparam>
   </node>
   <node name="debug_view" pkg="image_view" type="image_view">
     <remap from="image" to="result_rectangle_drawer/output" />

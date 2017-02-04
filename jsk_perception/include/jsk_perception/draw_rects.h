@@ -74,6 +74,8 @@ namespace jsk_perception
     int queue_size_;
     std::vector<std::string> labels_;
     int label_num_;
+    double label_text_size_;
+    int label_text_boldness_;
     ros::Publisher pub_image_;
     message_filters::Subscriber<sensor_msgs::Image> sub_image_;
     message_filters::Subscriber<jsk_recognition_msgs::RectArray> sub_rects_;

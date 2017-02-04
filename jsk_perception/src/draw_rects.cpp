@@ -47,6 +47,8 @@ namespace jsk_perception
 
     pnh_->param("approximate_sync", approximate_sync_, false);
     pnh_->param("queue_size", queue_size_, 100);
+    pnh_->param("label_text_size", label_text_size_, 1.4);
+    pnh_->param("label_text_boldness", label_text_boldness_, 2);
     pnh_->param("labels", labels_, std::vector<std::string>());
 
     label_num_ = labels_.size() ? labels_.size() : 1000;
@@ -124,27 +126,30 @@ namespace jsk_perception
   void DrawRects::drawLabel(cv::Mat& mat,
                             const jsk_recognition_msgs::LabeledRect &msg, const cv::Scalar &color)
   {
-    static const double font_size = 1.4;
-    static const int font_thickness = 4;
+    static const double label_margin = 0.2;
 
     if (msg.label.name.empty()) return;
 
     int font_color = 255;
     // http://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color
-    if (color[0] * 0.299 + color[1] * 0.587 + color[2] * 0.114 > 186)
+    if (color[0] * 0.299 + color[1] * 0.587 + color[2] * 0.114 > 170)
       font_color = 0;
 
     int baseline;
     cv::Size label_size = cv::getTextSize(msg.label.name, cv::FONT_HERSHEY_SIMPLEX,
-                                          font_size, font_thickness, &baseline);
+                                          label_text_size_, label_text_boldness_, &baseline);
+    const double label_rect_width  = label_size.width  * (1.0 + label_margin);
+    const double label_rect_height = label_size.height * (1.0 + label_margin);
     cv::rectangle(mat,
-                  cv::Rect(msg.rect.x, msg.rect.y-label_size.height-1,
-                           label_size.width+1, label_size.height+1),
+                  cv::Rect(msg.rect.x, msg.rect.y-label_rect_height,
+                           label_rect_width, label_rect_height),
                   color, -1, CV_AA);
-    cv::putText(mat, msg.label.name, cv::Point(msg.rect.x, msg.rect.y),
+    cv::putText(mat, msg.label.name, cv::Point(
+                  msg.rect.x + label_size.width  * label_margin / 2.0,
+                  msg.rect.y - label_size.height * label_margin / 2.0),
                 cv::FONT_HERSHEY_SIMPLEX,
-                font_size, cv::Scalar(font_color, font_color, font_color),
-                font_thickness, CV_AA);
+                label_text_size_, cv::Scalar(font_color, font_color, font_color),
+                label_text_boldness_, CV_AA);
   }
 
   void DrawRects::callbackRects(

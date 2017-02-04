@@ -94,7 +94,7 @@ namespace jsk_perception
 
     cmt.initialise(gray, initial_top_left, initial_bottom_right);
     window_initialized_ = true;
-    ROS_INFO("A window is initialized. top_left: (%d, %d), bottom_right: (%d, %d)",
+    ROS_INFO("A window is initialized. top_left: (%lf, %lf), bottom_right: (%lf, %lf)",
              initial_top_left.x, initial_top_left.y, initial_bottom_right.x, initial_bottom_right.y);
   }
 

@@ -109,6 +109,7 @@
   <run_depend>octomap_server</run_depend>
   <run_depend>octomap_msgs</run_depend>
   <run_depend>octomap_ros</run_depend>
+  <run_depend>openni2_launch</run_depend>
   <run_depend>rosbag</run_depend>
   <test_depend>jsk_tools</test_depend>
   <test_depend>roslaunch</test_depend>

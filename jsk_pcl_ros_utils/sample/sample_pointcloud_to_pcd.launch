@@ -1,12 +1,8 @@
 <launch>
 
-  <param name="/use_sim_time" value="true" />
-  <node name="rosbag_play"
-        pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros_utils)/sample/data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/vision.compressed.bag --clock --loop">
-  </node>
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml" />
 
-  <arg name="INPUT" value="/kinect2_head/hd/points" />
+  <arg name="INPUT" value="/right_hand_camera/depth_registered/points" />
 
   <node name="sample_pointcloud_to_pcd" type="nodelet" pkg="nodelet"
         args="standalone jsk_pcl_utils/PointCloudToPCD" output="screen" >

@@ -2,14 +2,9 @@
 
   <arg name="gui" default="true" />
 
-  <param name="/use_sim_time" value="true" />
-  <node name="rosbag_play"
-        pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros_utils)/sample/data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/vision.compressed.bag --clock --loop">
-  </node>
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml" />
 
-  <arg name="INPUT_CLOUD" value="/kinect2_head/hd/points" />
-  <arg name="INPUT_IMAGE" value="/kinect2_head/hd/image_color" />
+  <arg name="INPUT_CLOUD" value="/right_hand_camera/depth_registered/points" />
 
   <arg name="MANAGER" value="add_point_indices_manager" />
   <node name="$(arg MANAGER)"
@@ -24,8 +19,8 @@
     <rosparam>
       keep_organized: true
       filter_field_name: x
-      filter_limit_min: 0.0
-      filter_limit_max: 1.5
+      filter_limit_min: 0.05
+      filter_limit_max: 0.5
     </rosparam>
   </node>
 
@@ -36,8 +31,8 @@
     <rosparam>
       keep_organized: true
       filter_field_name: x
-      filter_limit_min: -1.5
-      filter_limit_max: 0.0
+      filter_limit_min: -0.5
+      filter_limit_max: -0.05
     </rosparam>
   </node>
 
@@ -59,7 +54,7 @@
     <remap from="~input/src1" to="/pointcloud_to_point_indices_right/output" />
     <remap from="~input/src2" to="/pointcloud_to_point_indices_left/output" />
     <rosparam>
-      approximate_sync: true
+      approximate_sync: false
     </rosparam>
   </node>
 
@@ -67,10 +62,10 @@
         pkg="nodelet" type="nodelet"
         args="load jsk_pcl_utils/PointIndicesToMaskImage $(arg MANAGER)">
     <remap from="~input" to="add_point_indices/output" />
-    <remap from="~input/image" to="$(arg INPUT_IMAGE)" />
     <rosparam>
-      approximate_sync: true
-      static_image_size: false
+      static_image_size: true
+      height: 480
+      width: 640
     </rosparam>
   </node>
 

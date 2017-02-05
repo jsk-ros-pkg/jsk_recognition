@@ -75,7 +75,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.01
       Style: Flat Squares
-      Topic: /kinect2_head/hd/points
+      Topic: /right_hand_camera/depth_registered/points
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -95,7 +95,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: head
+    Fixed Frame: right_hand
     Frame Rate: 30
   Name: root
   Tools:
@@ -116,22 +116,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.12565
+      Distance: 3.61742
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
+        X: -0.0656711
+        Y: -0.0154224
+        Z: 1.22099
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.245398
+      Pitch: 0.0503981
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.1104
+      Yaw: 6.09358
     Saved: ~
 Window Geometry:
   Displays:
@@ -149,5 +149,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1200
-  X: 55
-  Y: 50
+  X: 45
+  Y: 40

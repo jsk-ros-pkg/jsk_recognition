@@ -89,7 +89,7 @@ namespace jsk_pcl_ros_utils
     cv::Mat mask_image = cv::Mat::zeros(height, width, CV_8UC1);
     for (size_t i = 0; i < indices_msg->indices.size(); i++) {
       int index = indices_msg->indices[i];
-      if (height * width <= index || index <= 0) {
+      if (index >= height * width || index < 0) {
         ROS_ERROR("Input index is out of expected mask size.");
         return;
       }

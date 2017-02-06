@@ -4,7 +4,7 @@
 
   <node name="play"
         pkg="rosbag" type="play"
-        args="$(find jsk_recognition_utils)/sample/data/bunny_marker_array.bag --loop">
+        args="$(find jsk_pcl_ros_utils)/sample/data/bunny_marker_array.bag --loop">
   </node>
 
   <node name="bounding_box_array_publisher"
@@ -22,7 +22,7 @@
   <group if="$(arg gui)">
     <node name="rviz"
           pkg="rviz" type="rviz"
-          args="-d $(find jsk_recognition_utils)/sample/config/sample_evaluate_voxel_segmentation_by_gt_box.rviz">
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_evaluate_voxel_segmentation_by_gt_box.rviz">
     </node>
   </group>
 
@@ -35,7 +35,7 @@
   </node>
 
   <node name="evaluate_voxel_segmentation_by_gt_box"
-        pkg="jsk_recognition_utils" type="evaluate_voxel_segmentation_by_gt_box.py">
+        pkg="jsk_pcl_ros_utils" type="evaluate_voxel_segmentation_by_gt_box.py">
     <remap from="~input/box_gt" to="boxes_to_gt_box/output" />
     <remap from="~input/markers" to="/octree_voxel_grid/output_marker_array" />
   </node>

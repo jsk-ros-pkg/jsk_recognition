@@ -19,7 +19,7 @@
   <group if="$(arg gui)">
     <node name="rviz"
           pkg="rviz" type="rviz"
-          args="-d $(find jsk_recognition_utils)/sample/config/sample_evaluate_box_segmentation_by_gt_box.rviz">
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_evaluate_box_segmentation_by_gt_box.rviz">
     </node>
   </group>
 
@@ -39,7 +39,7 @@
   </node>
 
   <node name="evaluate_box_segmentation_by_gt_box"
-        pkg="jsk_recognition_utils" type="evaluate_box_segmentation_by_gt_box.py">
+        pkg="jsk_pcl_ros_utils" type="evaluate_box_segmentation_by_gt_box.py">
     <remap from="~input/box_gt" to="boxes_to_gt_box/output" />
     <remap from="~input/box" to="boxes_to_box/output" />
   </node>

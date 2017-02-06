@@ -99,8 +99,6 @@ if (CATKIN_ENABLE_TESTING)
     # FIXME: jsk_tools/test_topic_published.py does not work on hydro travis/jenkins
     # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
     add_rostest(test/bounding_box_array_publisher.test)
-    add_rostest(test/evaluate_box_segmentation_by_gt_box.test)
-    add_rostest(test/evaluate_voxel_segmentation_by_gt_box.test)
   endif()
 endif()
 

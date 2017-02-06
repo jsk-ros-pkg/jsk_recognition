@@ -1,12 +1,9 @@
 <launch>
 
   <!-- load log -->
-  <node name="rosbag_play"
-        pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros)/test_data/2016-07-06-12-16-43-person-in-point-cloud/vision.compressed.bag --loop" >
-  </node>
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml" />
 
-  <arg name="INPUT_CLOUD" value="/camera_remote/depth_registered/points" />
+  <arg name="INPUT_CLOUD" value="/right_hand_camera/depth_registered/points" />
 
   <node name="resize_points_publisher"
         pkg="nodelet" type="nodelet"

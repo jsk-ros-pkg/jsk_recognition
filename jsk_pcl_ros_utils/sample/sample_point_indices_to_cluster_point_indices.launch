@@ -2,22 +2,19 @@
 
   <arg name="gui" default="true" />
 
-  <param name="/use_sim_time" value="true" />
-  <node name="rosbag_play"
-        pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros_utils)/sample/data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/vision.compressed.bag --clock --loop">
-  </node>
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml" />
 
-  <arg name="INPUT_CLOUD" value="/kinect2_head/hd/points" />
+  <arg name="INPUT_CLOUD" value="/right_hand_camera/depth_registered/points" />
+  <arg name="INPUT_IMAGE" value="/right_hand_camera/rgb/image_rect_color" />
 
-  <node name="organized_pointcloud_to_point_indices"
-        pkg="jsk_pcl_ros" type="organized_pointcloud_to_point_indices">
+  <node name="pointcloud_to_point_indices"
+        pkg="jsk_pcl_ros_utils" type="pointcloud_to_point_indices">
     <remap from="~input" to="$(arg INPUT_CLOUD)" />
   </node>
 
   <node name="point_indices_to_cluster_point_indices"
         pkg="jsk_pcl_ros_utils" type="point_indices_to_cluster_point_indices">
-    <remap from="~input" to="organized_pointcloud_to_point_indices/output" />
+    <remap from="~input" to="pointcloud_to_point_indices/output" />
   </node>
 
   <node name="cluster_point_indices_decomposer"

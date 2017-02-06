@@ -1,14 +1,8 @@
 <launch>
 
-  <!-- load log -->
-  <rosparam command="load"
-            file="$(find jsk_pcl_ros)/test_data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/rosparam.yaml" />
-  <node name="rosbag_play"
-        pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros)/test_data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/vision.compressed.bag --clock --loop">
-  </node>
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml" />
 
-  <arg name="INPUT_CLOUD" value="/kinect2_head/hd/points" />
+  <arg name="INPUT_CLOUD" value="/right_hand_camera/depth_registered/points" />
 
   <node name="euclidean_clustering"
         pkg="nodelet" type="nodelet"
@@ -16,26 +10,16 @@
     <remap from="~input" to="$(arg INPUT_CLOUD)" />
   </node>
 
-  <node name="transform_0"
-        pkg="topic_tools" type="transform"
-        args="/euclidean_clustering/cluster_num /euclidean_clustering/cluster_num_assert std_msgs/Bool 'm.data > 20' --wait-for-start" />
-  <node name="transform_1"
-        pkg="topic_tools" type="transform"
-        args="/euclidean_clustering/output/cluster_indices /euclidean_clustering/output/cluster_indices_assert std_msgs/Bool 'len(m) > 20' --wait-for-start" />
-
-  <test test-name="test_euclidean_segmentation_cluster_num"
-        name="test_euclidean_segmentation_cluster_num"
-        time-limit="360"
-        pkg="jsk_tools" type="test_stdout.py">
-    <param name="~command" value="rostopic echo /euclidean_clustering/cluster_num_assert/data -n1" />
-    <param name="~stdout_line0" type="str" value="True" />
-  </test>
-  <test test-name="test_euclidean_segmentation_cluster_indices"
-        name="test_euclidean_segmentation_cluster_indices"
-        time-limit="360"
-        pkg="jsk_tools" type="test_stdout.py">
-    <param name="~command" value="rostopic echo /euclidean_clustering/output/cluster_indices_assert/data -n1" />
-    <param name="~stdout_line0" type="str" value="True" />
+  <test test-name="test_euclidean_segmentation"
+        name="test_euclidean_segmentation"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="360" retry="3">
+    <rosparam>
+      topic_0: /euclidean_clustering/cluster_num
+      timeout_0: 30
+      topic_1: /euclidean_clustering/output
+      timeout_1: 30
+    </rosparam>
   </test>
 
 </launch>

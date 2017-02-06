@@ -196,7 +196,7 @@ namespace jsk_pcl_ros
     std::vector<pcl::ModelCoefficients::Ptr>& output_coefficients)
   {
     if (all_inliers.size() == 0) {
-      NODELET_ERROR("no edges are specified");
+      NODELET_WARN("no edges are specified");
       return;
     }
 

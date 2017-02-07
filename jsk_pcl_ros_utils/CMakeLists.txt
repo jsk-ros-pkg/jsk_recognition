@@ -316,6 +316,8 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/pointcloud_to_point_indices.test)
     # because of unreleased jsk_tools/test_topic_published.py on hydro
     add_rostest(test/bounding_box_array_to_bounding_box.test)
+    add_rostest(test/evaluate_box_segmentation_by_gt_box.test)
+    add_rostest(test/evaluate_voxel_segmentation_by_gt_box.test)
     add_rostest(test/pointcloud_to_mask_image.test)
     add_rostest(test/polygon_array_unwrapper.test)
     add_rostest(test/subtract_point_indices.test)

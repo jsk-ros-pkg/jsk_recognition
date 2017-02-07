@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_evaluate_box_segmentation_by_gt_box.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_evaluate_box_segmentation_by_gt_box"
+        name="test_evaluate_box_segmentation_by_gt_box"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="360" retry="3">
+    <rosparam>
+      topic_0: /evaluate_box_segmentation_by_gt_box/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

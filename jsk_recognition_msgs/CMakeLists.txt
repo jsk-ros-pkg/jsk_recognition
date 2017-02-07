@@ -4,6 +4,7 @@ find_package(catkin REQUIRED
   std_msgs sensor_msgs geometry_msgs message_generation pcl_msgs jsk_footstep_msgs)
 add_message_files(
   FILES
+  Accuracy.msg
   BoundingBoxArray.msg
   BoundingBoxMovement.msg
   BoundingBox.msg

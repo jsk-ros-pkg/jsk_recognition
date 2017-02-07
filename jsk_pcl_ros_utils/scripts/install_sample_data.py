@@ -15,6 +15,13 @@ def main():
 
     download_data(
         pkg_name=PKG,
+        path='sample/data/bunny_marker_array.bag',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vdW1NMlhiRU9KZDQ',
+        md5='e7dc29d21bdd30c769396c361e4350fd',
+    )
+
+    download_data(
+        pkg_name=PKG,
         path='sample/data/bunny.pcd',
         url='https://raw.githubusercontent.com/PointCloudLibrary/pcl/pcl-1.8.0/test/bunny.pcd',
         md5='a4e58778ba12d3f26304127f6be82897',

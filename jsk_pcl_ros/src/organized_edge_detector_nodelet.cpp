@@ -54,6 +54,13 @@ namespace jsk_pcl_ros
     ConnectionBasedNodelet::onInit();
 
     ////////////////////////////////////////////////////////
+    // setup dynamic reconfigure
+    ////////////////////////////////////////////////////////
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (&OrganizedEdgeDetector::configCallback, this, _1, _2);
+    srv_->setCallback (f);
+    ////////////////////////////////////////////////////////
     // indices publishers
     ////////////////////////////////////////////////////////
     pub_nan_boundary_edges_indices_
@@ -93,13 +100,6 @@ namespace jsk_pcl_ros
     image_transport::ImageTransport it(*pnh_);
     pub_edge_image_ = it.advertise("edge_image", 1);
     pub_hough_image_ = it.advertise("hough_image", 1);
-    ////////////////////////////////////////////////////////
-    // setup dynamic reconfigure
-    ////////////////////////////////////////////////////////
-    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
-    dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&OrganizedEdgeDetector::configCallback, this, _1, _2);
-    srv_->setCallback (f);
     onInitPostProcess();
   }
   

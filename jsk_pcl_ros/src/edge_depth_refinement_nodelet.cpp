@@ -226,10 +226,12 @@ namespace jsk_pcl_ros
       for (size_t j = i + 1; j < all_inliers.size(); j++) {
         jsk_recognition_utils::Line::Ptr candidate_line = lines[j];
         jsk_recognition_utils::Segment::Ptr candidate_segment = segments[j];
-        
+        Eigen::Vector3f candidate_midpoint;
+        candidate_segment->midpoint(candidate_midpoint);
+
         double angle_diff = the_line->angle(*candidate_line);
         if (duplication_angle_threshold_ > angle_diff) {
-          double distance_diff = the_line->distance(*candidate_line);
+          double distance_diff = the_segment->distance(candidate_midpoint);
           if (duplication_distance_threshold_ > distance_diff) {
             duplication_map[i].push_back(j);
           }

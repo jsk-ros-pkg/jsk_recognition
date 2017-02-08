@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.3 (2017-02-08)
+------------------
 * [jsk_pcl_ros/edge_depth_refinement_nodelet] fix bug of calculating distance between edges.  (`#2009 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2009>`_ )
 * Re-enable tests in jsk_pcl_ros_utils (`#2008 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2008>`_ )
   * Re-enable all tests in jsk_pcl_ros

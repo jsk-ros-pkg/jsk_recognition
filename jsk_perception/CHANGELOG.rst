@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.3 (2017-02-08)
+------------------
 * Fix cpp format of consensus_tracking(`#1999 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1999>`_)
 * Contributors: Kentaro Wada
 

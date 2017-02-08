@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.3 (2017-02-08)
+------------------
 * Convert Voxel represented by MarkerArray to PointCloud (`#2012 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2012>`_ )
   * src/marker_array_voxel_to_pointcloud_nodelet.cpp
 * Use bunny_marker_array.bag longer and high resolution (`#2011 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2011>`_ )

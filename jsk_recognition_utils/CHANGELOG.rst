@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.3 (2017-02-08)
+------------------
 * [jsk_recognition_utils] add mipoint method to segment class. (`#2009 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2009>`_ )
   * src/edge_depth_refinement_nodelet.cpp
   * src/geo/segment.cpp

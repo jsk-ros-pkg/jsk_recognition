@@ -95,9 +95,9 @@ namespace jsk_recognition_utils
     return 0 <= r && r <= 1.0;
   }
 
-  void Segment::midpoint(Eigen::Vector3f& output) const
+  void Segment::midpoint(Eigen::Vector3f& midpoint) const
   {
-    output = (from_ + to_) * 0.5;
+    midpoint = (from_ + to_) * 0.5;
   }
 
   std::ostream& operator<<(std::ostream& os, const Segment& seg)

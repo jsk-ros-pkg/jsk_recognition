@@ -2,6 +2,18 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros/edge_depth_refinement_nodelet] fix bug of calculating distance between edges.  (`#2009 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2009>`_ )
+* Re-enable tests in jsk_pcl_ros_utils (`#2008 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2008>`_ )
+  * Re-enable all tests in jsk_pcl_ros
+  * Re-eanble tests in jsk_pcl_ros with new rosbag
+  * Fix test condition bug about test_edge_depth_refinement
+  * Comment out pcl tests
+* [jsk_pcl_ros/edge_based_pose_estimation] add configCallback before advertise and subscribe for avoiding initialization miss. (`#1996 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1996>`_ )
+* [jsk_pcl_ros/ organized_edge_detector_nodelet] set color with colorCategory20 in debug hough image. (`#1992 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1992>`_ )
+* Contributors: Kentaro Wada, Masaki Murooka
+
 1.0.2 (2017-01-12)
 ------------------
 * [jsk_pcl_ros/install_sample] fix md5sum (`#1988 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1988>`_)

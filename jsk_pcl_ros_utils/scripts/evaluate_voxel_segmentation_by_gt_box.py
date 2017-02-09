@@ -14,6 +14,8 @@ class EvaluateVoxelSegmentationByGTBox(ConnectionBasedTransport):
         super(EvaluateVoxelSegmentationByGTBox, self).__init__()
         self.box_gt = None
         self.marker_ns = rospy.get_param('~marker_ns', None)
+        if self.marker_ns is not None:
+            self.marker_ns = str(self.marker_ns)
         self.pub = self.advertise('~output', Accuracy, queue_size=1)
         self.sub_box_gt = rospy.Subscriber(
             '~input/box_gt', BoundingBox, self._cb_box_gt)

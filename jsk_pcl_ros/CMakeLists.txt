@@ -458,16 +458,11 @@ install(DIRECTORY
 if (CATKIN_ENABLE_TESTING)
   find_package(roslaunch REQUIRED)
   find_package(rostest REQUIRED)
-  # install test data by a script
-  add_custom_target(install_test_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.py)
-  if(TARGET tests)
-    add_dependencies(tests install_test_data)
-  endif()
   add_rostest_gtest(test_extract_indices test/test_extract_indices.test test/test_extract_indices.cpp)
   target_link_libraries(test_extract_indices ${catkin_LIBRARIES} ${GTEST_LIBRARIES})
   if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
     # because of unreleased topic_tools/transform on hydro
-    add_rostest(test/test_octree_voxel_grid.test DEPENDENCIES install_test_data)
+    add_rostest(test/test_octree_voxel_grid.test)
     add_rostest(test/test_hsi_color_filter.test)
     add_rostest(test/test_icp_registration.test)
     add_rostest(test/test_attention_clipper.test)

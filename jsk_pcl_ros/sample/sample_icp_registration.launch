@@ -5,7 +5,7 @@
 
   <node name="rosbag_play"  if="$(arg USE_SAMPLE_DATA)"
         pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros)/test_data/2016-10-29-17-05-44_tabletop-coffee-cup/tabletop-coffee-cup.bag --clock --loop" />
+        args="$(find jsk_pcl_ros)/sample/data/2016-10-29-17-05-44_tabletop-coffee-cup/tabletop-coffee-cup.bag --clock --loop" />
 
   <node name="optical_frame_tf_publisher" if="$(arg USE_SAMPLE_DATA)"
       pkg="tf" type="static_transform_publisher"
@@ -67,7 +67,7 @@
   <node name="pointcloud_database_server" pkg="nodelet" type="nodelet"
     args="load jsk_pcl/PointcloudDatabaseServer $(arg manager)" output="screen">
     <rosparam subst_value="true">
-      models: ["$(find jsk_pcl_ros)/test_data/2016-10-26-02-09-51_coffee_cup.pcd",
+      models: ["$(find jsk_pcl_ros)/sample/data/2016-10-26-02-09-51_coffee_cup.pcd",
       ]
       duration: 0.05
       use_array: false

@@ -5,7 +5,7 @@
   <arg name="INPUT_CLOUD" value="/right_hand_camera/depth_registered/points" />
   <arg name="FILTERED_CLOUD" value="/voxelgrid/output" />
   <arg name="EMPTY_CLOUD" value="/empty_filter/output" />
-  <arg name="MODEL_FILE" value="$(find jsk_pcl_ros)/test_data/drill.pcd" />
+  <arg name="MODEL_FILE" value="$(find jsk_pcl_ros)/sample/data/drill.pcd" />
 
   <arg name="voxel_grid_filter_limit_min" default="0.0"/>
   <arg name="voxel_grid_filter_limit_max" default="3.0"/>

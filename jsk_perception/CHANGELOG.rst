@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.4 (2017-02-09)
+------------------
 * package.xml: python-chainer -> python-chainer-pip (`#2014 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2014>`_)
 * Contributors: Kentaro Wada
 

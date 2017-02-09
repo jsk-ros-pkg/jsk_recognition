@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.4 (2017-02-09)
+------------------
 * scripts/evaluate_voxel_segmentation_by_gt_box.py: Cast to string to get correctly ns from rosparam (`#2016 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2016>`_ )
 * Contributors: Kentaro Wada
 

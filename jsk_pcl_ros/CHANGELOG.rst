@@ -2,6 +2,11 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* remove test_data and move to sample_data (`#2017 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2017>`_ )
+* Contributors: Shingo Kitagawa
+
 1.0.4 (2017-02-09)
 ------------------
 

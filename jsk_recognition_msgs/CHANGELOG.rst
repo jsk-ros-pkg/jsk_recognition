@@ -2,6 +2,9 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.0.3 (2017-02-08)
 ------------------
 * Compute box overlap and publish it (`#1993 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1993>`_ )

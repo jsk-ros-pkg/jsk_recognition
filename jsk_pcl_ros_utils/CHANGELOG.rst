@@ -2,6 +2,11 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* scripts/evaluate_voxel_segmentation_by_gt_box.py: Cast to string to get correctly ns from rosparam (`#2016 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2016>`_ )
+* Contributors: Kentaro Wada
+
 1.0.3 (2017-02-08)
 ------------------
 * Convert Voxel represented by MarkerArray to PointCloud (`#2012 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2012>`_ )

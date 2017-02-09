@@ -2,6 +2,11 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_recognition_utils] src/geo/segment.cpp: fix argument name of Segment::midpoint. (`#2013 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2013>`_ )
+* Contributors: Masaki Murooka
+
 1.0.3 (2017-02-08)
 ------------------
 * [jsk_recognition_utils] add mipoint method to segment class. (`#2009 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2009>`_ )

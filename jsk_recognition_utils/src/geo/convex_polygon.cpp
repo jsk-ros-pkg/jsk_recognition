@@ -40,6 +40,10 @@
 
 namespace jsk_recognition_utils
 {
+  ConvexPolygon::ConvexPolygon()
+  {
+  }
+
   ConvexPolygon::ConvexPolygon(const Vertices& vertices):
     Polygon(vertices)
   {

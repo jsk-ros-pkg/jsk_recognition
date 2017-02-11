@@ -52,6 +52,13 @@ namespace jsk_recognition_utils
   {
   public:
     typedef boost::shared_ptr<PolyLine> Ptr;
+
+    /**
+     * @brief
+     * Construct a polyline.
+     */
+    PolyLine();
+
     /**
      * @brief
      * Construct a polyline from points.

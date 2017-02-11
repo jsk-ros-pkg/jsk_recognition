@@ -54,6 +54,12 @@ namespace jsk_recognition_utils
 
     /**
      * @brief
+     * Construct a segment.
+     */
+    Segment();
+
+    /**
+     * @brief
      * Construct a line from a start point and a goal point.
      *
      * @param from

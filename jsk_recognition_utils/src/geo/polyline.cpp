@@ -40,6 +40,10 @@
 
 namespace jsk_recognition_utils
 {
+  PolyLine::PolyLine()
+  {
+  }
+
   PolyLine::PolyLine(const std::vector < Eigen::Vector3f > &points) : Line(points[points.size()-1] - points[0], points[0])
   {
     int n = points.size();

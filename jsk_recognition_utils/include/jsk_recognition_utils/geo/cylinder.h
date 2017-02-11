@@ -48,6 +48,7 @@ namespace jsk_recognition_utils
   {
   public:
     typedef boost::shared_ptr<Cylinder> Ptr;
+    Cylinder();
     Cylinder(Eigen::Vector3f point, Eigen::Vector3f direction, double radius);
 
     virtual void filterPointCloud(const pcl::PointCloud<pcl::PointXYZ>& cloud,

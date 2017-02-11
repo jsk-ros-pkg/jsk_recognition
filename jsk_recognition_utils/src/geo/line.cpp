@@ -40,6 +40,10 @@
 
 namespace jsk_recognition_utils
 {
+  Line::Line()
+  {
+  }
+
   Line::Line(const Eigen::Vector3f& direction, const Eigen::Vector3f& origin)
     : direction_ (direction.normalized()), origin_(origin)
   {

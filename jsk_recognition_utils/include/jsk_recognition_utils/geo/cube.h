@@ -46,6 +46,7 @@ namespace jsk_recognition_utils
   {
   public:
     typedef boost::shared_ptr<Cube> Ptr;
+    Cube();
     Cube(const Eigen::Vector3f& pos, const Eigen::Quaternionf& rot);
     Cube(const Eigen::Vector3f& pos, const Eigen::Quaternionf& rot,
          const std::vector<double>& dimensions);

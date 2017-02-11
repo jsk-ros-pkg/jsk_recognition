@@ -40,6 +40,10 @@
 
 namespace jsk_recognition_utils
 {
+  GridPlane::GridPlane()
+  {
+  }
+
   GridPlane::GridPlane(ConvexPolygon::Ptr plane, const double resolution):
     convex_(plane), resolution_(resolution)
   {

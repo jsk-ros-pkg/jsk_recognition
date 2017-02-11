@@ -41,6 +41,10 @@
 
 namespace jsk_recognition_utils
 {
+  Plane::Plane()
+  {
+  }
+
   Plane::Plane(const std::vector<float>& coefficients)
   {
     normal_ = Eigen::Vector3f(coefficients[0], coefficients[1], coefficients[2]);

@@ -48,6 +48,7 @@ namespace jsk_recognition_utils
   {
   public:
     typedef boost::shared_ptr<Plane> Ptr;
+    Plane();
     Plane(const std::vector<float>& coefficients);
     Plane(const boost::array<float, 4>& coefficients);
     Plane(Eigen::Vector3f normal, double d);

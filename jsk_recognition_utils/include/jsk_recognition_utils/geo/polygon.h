@@ -120,6 +120,20 @@ namespace jsk_recognition_utils
     
     /**
      * @brief
+     * Compute distance between point and this polygon.
+     */
+    double distance(const Eigen::Vector3f& point);
+
+    /**
+     * @brief
+     * Compute distance between point and this polygon.
+     * Nearest point on this polygon can be gotten.
+     */
+    double distance(const Eigen::Vector3f& point,
+                    Eigen::Vector3f& nearest_point);
+
+    /**
+     * @brief
      * Compute nearest point from p on this polygon.
      * 
      * This method first project p onth the polygon and

@@ -222,6 +222,20 @@ namespace jsk_recognition_utils
     return ret;
   }
   
+  double Polygon::distance(const Eigen::Vector3f& point)
+  {
+    Eigen::Vector3f nearest_point;
+    return Polygon::distance(point, nearest_point);
+  }
+
+  double Polygon::distance(const Eigen::Vector3f& point,
+                           Eigen::Vector3f& nearest_point)
+  {
+    double distance;
+    nearest_point = Polygon::nearestPoint(point, distance);
+    return distance;
+  }
+
   Eigen::Vector3f Polygon::nearestPoint(const Eigen::Vector3f& p,
                                         double& distance)
   {

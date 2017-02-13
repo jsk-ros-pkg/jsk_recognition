@@ -60,6 +60,8 @@ add_message_files(
   PlotDataArray.msg
   Edge.msg
   EdgeArray.msg
+  PoseLabeled.msg
+  PoseLabeledArray.msg
   )
 
 # TODO(wkentaro): Most of srv files are duplicated in jsk_pcl_ros,

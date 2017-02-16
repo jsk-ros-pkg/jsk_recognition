@@ -164,7 +164,6 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 endif()
 
 macro(jsk_pcl_util_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
-  message("util: ${_nodelet_cpp}")
   jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
     jsk_pcl_util_nodelet_sources jsk_pcl_util_nodelet_executables)
 endmacro(jsk_pcl_util_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)

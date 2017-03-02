@@ -89,7 +89,7 @@ namespace jsk_pcl_ros
     std::map<int, std::map<int, std::map<int, std::vector<size_t > > > > grid;
     for (size_t i = 0; i < pcl_cloud->points.size(); i++) {
       pcl::PointXYZRGB point = pcl_cloud->points[i];
-      if (isnan(point.x) || isnan(point.y) || isnan(point.z)) {
+      if (std::isnan(point.x) || std::isnan(point.y) || std::isnan(point.z)) {
         // skip nan
         continue;
       }

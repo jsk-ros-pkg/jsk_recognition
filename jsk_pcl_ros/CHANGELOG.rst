@@ -2,6 +2,72 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.0 (2017-02-09)
+------------------
+* remove test_data and move to sample_data (`#2017 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2017>`_ )
+* Contributors: Shingo Kitagawa
+
+1.0.4 (2017-02-09)
+------------------
+
+1.0.3 (2017-02-08)
+------------------
+* [jsk_pcl_ros/edge_depth_refinement_nodelet] fix bug of calculating distance between edges.  (`#2009 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2009>`_ )
+* Re-enable tests in jsk_pcl_ros_utils (`#2008 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2008>`_ )
+  * Re-enable all tests in jsk_pcl_ros
+  * Re-eanble tests in jsk_pcl_ros with new rosbag
+  * Fix test condition bug about test_edge_depth_refinement
+  * Comment out pcl tests
+* [jsk_pcl_ros/edge_based_pose_estimation] add configCallback before advertise and subscribe for avoiding initialization miss. (`#1996 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1996>`_ )
+* [jsk_pcl_ros/ organized_edge_detector_nodelet] set color with colorCategory20 in debug hough image. (`#1992 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1992>`_ )
+* Contributors: Kentaro Wada, Masaki Murooka
+
+1.0.2 (2017-01-12)
+------------------
+* [jsk_pcl_ros/install_sample] fix md5sum (`#1988 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1988>`_)
+* Contributors: Yu Ohara
+
+1.0.1 (2016-12-13)
+------------------
+
+1.0.0 (2016-12-12)
+------------------
+* **[MajorRelease]** remove message generation from jsk_pcl_ros (`#1983 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1983>`_)
+* **[MajorRelease]** Migrate srv files from jsk_pcl_ros to jsk_recognition_msgs (`#1917 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1917>`_)
+  see
+  - https://github.com/jsk-ros-pkg/jsk_recognition/pull/1827
+  - https://github.com/jsk-ros-pkg/jsk_recognition/pull/1914
+
+* fix_for_kinetic (`#1943 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1943>`_)
+
+  * use std::isnan instead of isnan, knetic compiler requires this
+  * CMakeFiles.txt : add c++11noption if possible, http://answers.ros.org/question/152276/is-there-a-way-to-enable-c11-support-for-catkin-packages/
+
+* [jsk_pcl/ICP] change max param of icp-cfg(debug) (`#1978 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1978>`_)
+* Publish marker_array by octree_voxel_grid (`#1972 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1972>`_)
+
+  * Test octree_voxel_grid
+  * Sample for octree_voxel_grid
+  * Publish marker_array by octree_voxel_grid
+
+* [jsk_pcl_ros/pointcloud_dataserver] remove adding unneeded cloud (`#1969 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1969>`_)
+* [jsk_pcl/multi_plane_extraction] fix stamp of cloud msg (`#1965 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1965>`_)
+* [jsk_pcl_ros] remove duplicated install data lines (`#1946 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1946>`_)
+
+  * remove duplicated install_test_data
+  * remove duplicated install_sample_data line
+
+* [jsk_pcl_ros] add PPF registration (`#1926 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1926>`_)
+
+  * add use_sample_data option in ppf_registration sample launch
+  * add tabletop coffee cup sample pointcloud data
+  * add test and sample for ppf registration in jsk_pcl_ros
+  * add ppf registraion nodelet in jsk_pcl_ros
+  * add use_array option in PointcloudDatabaseServer
+
+* modify icp sample to do coffee cup matching (`#1941 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1941>`_)
+* Contributors: Kei Okada, Kentaro Wada, Shingo Kitagawa, Yu Ohara
+
 0.3.29 (2016-10-30)
 -------------------
 * CMakeLists.txt: install nodelet.xml: for get to care about install process in #1929

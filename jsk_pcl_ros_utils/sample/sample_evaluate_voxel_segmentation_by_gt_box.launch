@@ -1,0 +1,44 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <param name="/use_sim_time" value="true" />
+  <node name="play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros_utils)/sample/data/bunny_marker_array.bag --clock --loop">
+  </node>
+
+  <node name="bounding_box_array_publisher"
+        pkg="jsk_recognition_utils" type="bounding_box_array_publisher.py">
+    <rosparam>
+      rate: 10
+      frame_id: /map
+      boxes:
+        - dimension: [0.15, 0.14, 0.11]
+          orientation: [0.0, 0.0, 0.0, 1.0]
+          position: [-0.025551795959472656, 0.11148339509963989, 0.01671653985977173]
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_evaluate_voxel_segmentation_by_gt_box.rviz">
+    </node>
+  </group>
+
+  <node name="boxes_to_gt_box"
+        pkg="jsk_pcl_ros_utils" type="bounding_box_array_to_bounding_box">
+    <remap from="~input" to="bounding_box_array_publisher/output" />
+    <rosparam>
+      index: 0
+    </rosparam>
+  </node>
+
+  <node name="evaluate_voxel_segmentation_by_gt_box"
+        pkg="jsk_pcl_ros_utils" type="evaluate_voxel_segmentation_by_gt_box.py">
+    <remap from="~input/box_gt" to="boxes_to_gt_box/output" />
+    <remap from="~input/markers" to="/octree_voxel_grid/output_marker_array" />
+  </node>
+
+</launch>

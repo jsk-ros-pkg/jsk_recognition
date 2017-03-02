@@ -2,6 +2,18 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(jsk_pcl_ros)
 
+# check c++11 / c++0x
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+if(COMPILER_SUPPORTS_CXX11)
+  set(CMAKE_CXX_FLAGS "-std=c++11")
+elseif(COMPILER_SUPPORTS_CXX0X)
+  set(CMAKE_CXX_FLAGS "-std=c++0x")
+else()
+  message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+endif()
+
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   dynamic_reconfigure
@@ -19,7 +31,6 @@ find_package(catkin REQUIRED COMPONENTS
   kdl_conversions
   kdl_parser
   laser_assembler
-  message_generation
   nodelet
   octomap_msgs
   octomap_ros
@@ -48,26 +59,6 @@ IF(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
 ## indigo yaml-cpp : 0.5.0 /  hydro yaml-cpp : 0.3.0
   add_definitions("-DUSE_OLD_YAML")
 ENDIF()
-
-message(WARNING "DEPRECATION WARNING: srv files in jsk_pcl_ros are deprecated."
-        " Please use those in jsk_recognition_msgs.")
-# TODO(wkentaro): Remove deprecated srv files.
-add_service_files(FILES SwitchTopic.srv
-  UpdateOffset.srv
-  SnapFootstep.srv
-  SetDepthCalibrationParameter.srv
-  TransformScreenpoint.srv
-  CheckCircle.srv
-  RobotPickupReleasePoint.srv
-  TowerPickUp.srv
-  EuclideanSegment.srv
-  TowerRobotMoveCommand.srv
-  CallSnapIt.srv CallPolygon.srv
-  EnvironmentLock.srv
-  PolygonOnEnvironment.srv
-  ICPAlignWithBox.srv
-  ICPAlign.srv
-  CheckCollision.srv)
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
@@ -428,15 +419,12 @@ target_link_libraries(range_sensor_error_visualization jsk_pcl_ros)
 add_executable(depth_camera_error_visualization tool/depth_camera_error_visualization.cpp)
 target_link_libraries(depth_camera_error_visualization jsk_pcl_ros)
 
-generate_messages(DEPENDENCIES
-  ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_footstep_msgs)
-
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 message("flags: ${CMAKE_CXX_FLAGS}")
 
 catkin_package(
     DEPENDS pcl
-    CATKIN_DEPENDS pcl_ros message_runtime ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_recognition_utils
+    CATKIN_DEPENDS pcl_ros ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_recognition_utils
     INCLUDE_DIRS include
     LIBRARIES jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit
 )
@@ -470,29 +458,28 @@ install(DIRECTORY
 if (CATKIN_ENABLE_TESTING)
   find_package(roslaunch REQUIRED)
   find_package(rostest REQUIRED)
-  # install test data by a script
-  add_custom_target(install_test_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.py)
-  if(TARGET tests)
-    add_dependencies(tests install_test_data)
-  endif()
   add_rostest_gtest(test_extract_indices test/test_extract_indices.test test/test_extract_indices.cpp)
   target_link_libraries(test_extract_indices ${catkin_LIBRARIES} ${GTEST_LIBRARIES})
   if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
     # because of unreleased topic_tools/transform on hydro
     add_rostest(test/test_octree_voxel_grid.test)
-    add_rostest(test/test_hsi_color_filter.test DEPENDENCIES install_test_data)
-    add_rostest(test/test_icp_registration.test DEPENDENCIES install_test_data)
-    add_rostest(test/test_attention_clipper.test DEPENDENCIES install_test_data)
+    add_rostest(test/test_hsi_color_filter.test)
+    add_rostest(test/test_icp_registration.test)
+    add_rostest(test/test_attention_clipper.test)
     add_rostest(test/test_cluster_point_indices_decomposer.test)
-    add_rostest(test/test_edge_depth_refinement.test DEPENDENCIES install_test_data)
-    add_rostest(test/test_euclidean_segmentation.test DEPENDENCIES install_test_data)
-    add_rostest(test/test_people_detection.test DEPENDENCIES install_test_data)
-    add_rostest(test/test_line_segment_detector.test DEPENDENCIES install_test_data)
-    add_rostest(test/test_pointcloud_database_server.test DEPENDENCIES install_test_data)
-    add_rostest(test/test_convex_connected_voxels.test DEPENDENCIES install_test_data)
-    add_rostest(test/test_organized_pointcloud_to_point_indices.test DEPENDENCIES install_test_data)
+    if(${PCL_VERSION} VERSION_GREATER "1.7.2")
+      # because of jsk_pcl/OrganizedEdgeDetector
+      add_rostest(test/test_edge_depth_refinement.test)
+    endif()
+    add_rostest(test/test_euclidean_segmentation.test)
+    # TODO(iory): https://github.com/jsk-ros-pkg/jsk_recognition/issues/2007
+    # add_rostest(test/test_people_detection.test DEPENDENCIES install_test_data)
+    add_rostest(test/test_line_segment_detector.test)
+    add_rostest(test/test_pointcloud_database_server.test)
+    add_rostest(test/test_convex_connected_voxels.test)
+    add_rostest(test/test_organized_pointcloud_to_point_indices.test)
     add_rostest(test/test_rearrange_bounding_box.test)
-    add_rostest(test/test_color_based_region_growing_segmentation.test DEPENDENCIES install_test_data)
+    add_rostest(test/test_color_based_region_growing_segmentation.test)
   endif()
   roslaunch_add_file_check(launch/openni_local.launch)
   roslaunch_add_file_check(launch/openni2_local.launch)

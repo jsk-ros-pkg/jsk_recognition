@@ -95,6 +95,11 @@ namespace jsk_recognition_utils
     return 0 <= r && r <= 1.0;
   }
 
+  void Segment::midpoint(Eigen::Vector3f& midpoint) const
+  {
+    midpoint = (from_ + to_) * 0.5;
+  }
+
   std::ostream& operator<<(std::ostream& os, const Segment& seg)
   {
     os << "[" << seg.from_[0] << ", " << seg.from_[1] << ", " << seg.from_[2] << "] -- "

@@ -8,13 +8,16 @@ def main():
 
     download_data(
         pkg_name=PKG,
-        path='sample/data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud.tgz',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vSE5XMmJQczl3NWc',
-        md5='4da6242d74950a171e6d4455be87932e',
-        extract=True,
-        compressed_bags=[
-            'sample/data/2015-11-04-19-37-29_baxter-kiva-object-in-hand-cloud/vision.compressed.bag',
-        ],
+        path='sample/data/2017-02-05-16-11-09_shelf_bin.bag',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vYWI2NnZrekEwSmc',
+        md5='44427634f57ac76111edabd7b1f4e140',
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/bunny_marker_array.bag',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vdW1NMlhiRU9KZDQ',
+        md5='e7dc29d21bdd30c769396c361e4350fd',
     )
 
     download_data(

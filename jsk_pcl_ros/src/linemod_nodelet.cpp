@@ -206,9 +206,9 @@ namespace jsk_pcl_ros
     cv::Mat colored_image = cv::Mat::zeros(
       range_image.height, range_image.width, CV_8UC3);
     for (size_t pi = 0; pi < range_image.points.size(); pi++) {
-      if (isnan(range_image.points[pi].x) ||
-          isnan(range_image.points[pi].y) ||
-          isnan(range_image.points[pi].z)) {
+      if (std::isnan(range_image.points[pi].x) ||
+          std::isnan(range_image.points[pi].y) ||
+          std::isnan(range_image.points[pi].z)) {
         // nan
         colored_cloud->points[pi] = nan_point;
       }
@@ -232,9 +232,9 @@ namespace jsk_pcl_ros
       }
     }
     for (size_t pi = 0; pi < range_image.points.size(); pi++) {
-      if (!isnan(range_image.points[pi].x) &&
-          !isnan(range_image.points[pi].y) &&
-          !isnan(range_image.points[pi].z)) {
+      if (!std::isnan(range_image.points[pi].x) &&
+          !std::isnan(range_image.points[pi].y) &&
+          !std::isnan(range_image.points[pi].z)) {
         // nan
         mask.indices.push_back(pi);
       }
@@ -404,7 +404,7 @@ namespace jsk_pcl_ros
       for (size_t i = 0; i < masked_cloud->width; ++i) {
         pcl::PointXYZRGBA p
           = masked_cloud->points[j * masked_cloud->width + i];
-        if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
+        if (!std::isnan(p.x) && !std::isnan(p.y) && !std::isnan(p.z)) {
           mask_map(i, j) = 1;
           min_x = std::min(min_x, i);
           max_x = std::max(max_x, i);
@@ -452,7 +452,7 @@ namespace jsk_pcl_ros
       for (size_t i = 0; i < masked_cloud->width; ++i) {
         pcl::PointXYZRGBA p
           = masked_cloud->points[j * masked_cloud->width + i];
-        if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
+        if (!std::isnan(p.x) && !std::isnan(p.y) && !std::isnan(p.z)) {
           mask_map(i, j) = 1;
           min_x = std::min(min_x, i);
           max_x = std::max(max_x, i);

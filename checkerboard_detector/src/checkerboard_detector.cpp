@@ -360,13 +360,18 @@ public:
     {
         if ( camInfoSubscriber == NULL )
             camInfoSubscriber = _node.subscribe("camera_info", 1, &CheckerboardDetector::caminfo_cb, this);
-        if ( imageSubscriber == NULL )
+        if ( imageSubscriber == NULL ) {
             imageSubscriber = _node.subscribe("image", 1, &CheckerboardDetector::image_cb, this);
+            if ( imageSubscriber.getTopic().find("image_rect") != std::string::npos )
+                ROS_WARN("topic name seems rectified, please use unrectified image"); // rectified image has 'image_rect' in topic name
+        }
         if ( camInfoSubscriber2 == NULL )
             camInfoSubscriber2 = _node.subscribe("CameraInfo", 1, &CheckerboardDetector::caminfo_cb2, this);
-        if ( imageSubscriber2 == NULL )
+        if ( imageSubscriber2 == NULL ) {
             imageSubscriber2 = _node.subscribe("Image",1, &CheckerboardDetector::image_cb2, this);
-
+            if ( imageSubscriber2.getTopic().find("image_rect") != std::string::npos )
+                ROS_WARN("topic name seems rectified, please use unrectified image"); // rectified image has 'image_rect' in topic name
+        }
     }
 
     void unsubscribe( )
@@ -541,7 +546,7 @@ public:
                                          cv::Size(size,size), cv::Size(-1,-1),
                                          cv::TermCriteria(CV_TERMCRIT_ITER, 50, 1e-2));
                     }
-                    objpose.pose = FindTransformation(cb.corners, cb.grid3d, cb.tlocaltrans, model);
+                    objpose.pose = FindTransformation(cb.corners, cb.grid3d, cb.tlocaltrans, model, size);
                 }
 
 #pragma omp critical
@@ -645,7 +650,8 @@ public:
     geometry_msgs::Pose FindTransformation(
         const vector<cv::Point2f> &imgpts, const vector<cv::Point3f> &objpts,
         const Transform& tlocal,
-        const image_geometry::PinholeCameraModel& model)
+        const image_geometry::PinholeCameraModel& model,
+        double cell_size = 1.0)
     {
         geometry_msgs::Pose pose;
         Transform tchecker;
@@ -665,6 +671,22 @@ public:
         if( fang >= 1e-6 ) {
             double fmult = sin(fang/2)/fang;
             tchecker.rot = Vector(cos(fang/2),fR3[0]*fmult, fR3[1]*fmult, fR3[2]*fmult);
+        }
+
+        // check if points are in truth position
+        cv::Mat projpoints(objpts.size(), 2, CV_32FC1);
+        projectPoints(objpts, R3_mat, T3_mat, model.intrinsicMatrix(), model.distortionCoeffs(), projpoints);
+        const cv::Point2f* projpoints_ptr = projpoints.ptr<cv::Point2f>();
+        float max_diff_norm = -10;
+        for ( size_t i = 0; i < objpts.size(); ++i){
+            float diff_norm = (float)norm(imgpts[i] - projpoints_ptr[i]);
+            if (diff_norm > max_diff_norm) {
+                max_diff_norm = diff_norm;
+            }
+        }
+        ROS_DEBUG("max error of cells: %d", max_diff_norm/cell_size);
+        if (max_diff_norm/cell_size > 0.02) { // 2%
+            ROS_WARN("Large error %f detected, please check (1): checker board is on plane, (2): you uses rectified image", max_diff_norm/cell_size);
         }
 
         Transform tglobal = tchecker*tlocal;

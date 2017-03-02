@@ -142,7 +142,7 @@ namespace jsk_pcl_ros
     for(int v = 0; v < image.rows; v++) {
       for(int u = 0; u < image.cols; u++) {
         float z = image.at<float>(v, u);
-        if (isnan(z)) {
+        if (std::isnan(z)) {
           output_image.at<float>(v, u) = z;
         }
         else {

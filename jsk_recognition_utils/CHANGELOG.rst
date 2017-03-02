@@ -2,6 +2,47 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.0 (2017-02-09)
+------------------
+
+1.0.4 (2017-02-09)
+------------------
+* [jsk_recognition_utils] src/geo/segment.cpp: fix argument name of Segment::midpoint. (`#2013 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2013>`_ )
+* Contributors: Masaki Murooka
+
+1.0.3 (2017-02-08)
+------------------
+* [jsk_recognition_utils] add mipoint method to segment class. (`#2009 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2009>`_ )
+  * src/edge_depth_refinement_nodelet.cpp
+  * src/geo/segment.cpp
+   include/jsk_recognition_utils/geo/segment.h
+* Evaluate voxel segmentation by IU (`#1993 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1993>`_ )
+  * Stop depending on jsk_interactive_marker
+  * node_scripts/evaluate_voxel_segmentation_by_gt_box.py
+  * Compute box overlap and publish it : intersect-over-union (overlap)  = volume_tp / (volume_fn + volume_fp + volume_tp)
+    * test/evaluate_box_segmentation_by_gt_box.test
+    * test/evaluate_voxel_segmentation_by_gt_box.test
+    * sample/sample_evaluate_box_segmentation_by_gt_box.launch
+    * sample/sample_evaluate_voxel_segmentation_by_gt_box.launch
+    * scripts/evaluate_box_segmentation_by_gt_box.py
+    * scripts/evaluate_voxel_segmentation_by_gt_box.py
+  * Move evaluation scripts of box segmentation from jsk_recognition_utils to to jsk_pcl_ros_utils
+
+* Contributors: Kentaro Wada, Masaki Murooka
+
+1.0.2 (2017-01-12)
+------------------
+
+1.0.1 (2016-12-13)
+------------------
+
+1.0.0 (2016-12-12)
+------------------
+* Fix fo kinetic  (`#1943 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1943>`_)
+  * use std::isnan instead of isnan, knetic compiler requires this
+
+* Contributors: Kei Okada
+
 0.3.29 (2016-10-30)
 -------------------
 

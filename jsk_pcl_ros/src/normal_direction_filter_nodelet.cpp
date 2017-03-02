@@ -107,9 +107,9 @@ namespace jsk_pcl_ros
   {
     for (size_t i = 0; i < normal_cloud->points.size(); i++) {
       Eigen::Vector3f normal = normal_cloud->points[i].getNormalVector3fMap().normalized();
-      if (!isnan(normal[0]) &&
-          !isnan(normal[1]) &&
-          !isnan(normal[2])) {
+      if (!std::isnan(normal[0]) &&
+          !std::isnan(normal[1]) &&
+          !std::isnan(normal[2])) {
         double dot = std::abs(normal.dot(direction));
         if (dot < -1.0) {
           dot = -1.0;

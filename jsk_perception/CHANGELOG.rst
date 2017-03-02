@@ -2,6 +2,55 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.0 (2017-02-09)
+------------------
+
+1.0.4 (2017-02-09)
+------------------
+* package.xml: python-chainer -> python-chainer-pip (`#2014 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2014>`_)
+* Contributors: Kentaro Wada
+
+1.0.3 (2017-02-08)
+------------------
+* Fix cpp format of consensus_tracking(`#1999 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1999>`_)
+* Contributors: Kentaro Wada
+
+1.0.2 (2017-01-12)
+------------------
+* fix typo in vgg16_object_recognition (`#1990 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1990>`_)
+* No longer required python-gdown dependency
+  Because python-gdown-pip is installed via jsk_data (`#1989 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1989>`_)
+* Disable bing test on Travis (`#1985 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1985>`_)
+  Currently the node `bing` seems not used/changed frequently
+  because it requires opencv3, and I have no time to analyze the
+  unstable test on Travis/Jenkins. That's why I'm disabling it.
+  For `#1962 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1962>`_
+* Contributors: Kei Okada, Kentaro Wada, Shingo Kitagawa
+
+1.0.1 (2016-12-13)
+------------------
+* jsk_perception/node_scripts/speak_when_label_found.py: Speak when target labels are found ( `#1923 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1923>`_)
+* Contributors: Kentaro Wada
+
+1.0.0 (2016-12-12)
+------------------
+* Fix for kinetic build (`#1943 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1943>`_)
+* Add missing packages(jsk_data, opencv_apps) to find_package (`#1984 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1984>`_)
+* Add test & sample
+
+  * calc_flow   (`#1959 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1959>`_)
+  * background_subtraction   (`#1959 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1959>`_)
+  * mask_image_to_rect   (`#1961 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1961>`_)
+  * Add test & sample for grid_label  (`#1960 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1960>`_)
+  * Add sample for colorize_float_image (`#1956 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1956>`_)
+
+* Draw rects on image with PolygonStamped input (`#1961 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1961>`_)
+* sample/sample_rect_array_actual_size_filter.launch : Fix typo of sample data path (`#1955 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1955>`_)
+* colorize_float_image.cpp : Fill black color to nan region (`#1956 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1956>`_)
+* scripts/install_sample_data.py : Fix wrong filename in install_sample_data.py (`#1954 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1954>`_)
+* remove depends to driver_base (`#1943 <https://github.com/jsk-ros-pkg/jsk_recognition/pull/1943>`_)
+* Contributors: Kei Okada, Kentaro Wada
+
 0.3.29 (2016-10-30)
 -------------------
 * CMakeLists.txt: install nodelet.xml: for get to care about install process in #1929

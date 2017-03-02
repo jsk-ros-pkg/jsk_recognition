@@ -41,6 +41,8 @@
 #include "jsk_recognition_utils/pcl_util.h"
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
+#include <std_msgs/ColorRGBA.h>
+#include <jsk_topic_tools/color_utils.h>
 
 #include <opencv2/opencv.hpp>
 #include <jsk_recognition_msgs/ClusterPointIndices.h>
@@ -51,6 +53,13 @@ namespace jsk_pcl_ros
   {
     ConnectionBasedNodelet::onInit();
 
+    ////////////////////////////////////////////////////////
+    // setup dynamic reconfigure
+    ////////////////////////////////////////////////////////
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (&OrganizedEdgeDetector::configCallback, this, _1, _2);
+    srv_->setCallback (f);
     ////////////////////////////////////////////////////////
     // indices publishers
     ////////////////////////////////////////////////////////
@@ -91,13 +100,6 @@ namespace jsk_pcl_ros
     image_transport::ImageTransport it(*pnh_);
     pub_edge_image_ = it.advertise("edge_image", 1);
     pub_hough_image_ = it.advertise("hough_image", 1);
-    ////////////////////////////////////////////////////////
-    // setup dynamic reconfigure
-    ////////////////////////////////////////////////////////
-    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
-    dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&OrganizedEdgeDetector::configCallback, this, _1, _2);
-    srv_->setCallback (f);
     onInitPostProcess();
   }
   
@@ -291,9 +293,11 @@ namespace jsk_pcl_ros
       cv::cvtColor(mat, color_dst, CV_GRAY2BGR );
       for( size_t i = 0; i < lines.size(); i++ )
       {
-        cv::line( color_dst,
-                  cv::Point(lines[i][0], lines[i][1]),
-                  cv::Point(lines[i][2], lines[i][3]), cv::Scalar(0,0,255), 3, 8);
+        std_msgs::ColorRGBA c = jsk_topic_tools::colorCategory20(i);
+        cv::line(color_dst,
+                 cv::Point(lines[i][0], lines[i][1]),
+                 cv::Point(lines[i][2], lines[i][3]),
+                 cv::Scalar((uint8_t)(c.b * 255), (uint8_t)(c.g * 255), (uint8_t)(c.r * 255)), 3, 8);
       }
       sensor_msgs::Image::Ptr ros_edge_image
         = cv_bridge::CvImage(header,

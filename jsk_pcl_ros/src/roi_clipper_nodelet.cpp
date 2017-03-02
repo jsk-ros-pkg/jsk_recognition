@@ -154,7 +154,7 @@ namespace jsk_pcl_ros
       for (size_t i = 0; i < cloud->points.size(); i++) {
         pcl::PointXYZRGB p = cloud->points[i];
         bool foundp = false;
-        if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
+        if (!std::isnan(p.x) && !std::isnan(p.y) && !std::isnan(p.z)) {
           cv::Point2d uv = model.project3dToPixel(cv::Point3d(p.x, p.y, p.z));
           if (uv.x >= 0 && uv.x <= region.width &&
               uv.y >= 0 && uv.y <= region.height) {

@@ -1,6 +1,6 @@
 <package>
   <name>jsk_pcl_ros</name>
-  <version>0.3.29</version>
+  <version>1.1.0</version>
   <description>jsk_pcl_ros</description>
   <maintainer email="youhei@jsk.t.u-tokyo.ac.jp">Youhei Kakiuchi</maintainer>
   <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
@@ -33,7 +33,6 @@
   <build_depend>image_transport</build_depend>
   <build_depend>image_geometry</build_depend>
   <build_depend>image_view2</build_depend>
-  <build_depend>message_generation</build_depend>
   <build_depend>visualization_msgs</build_depend>
   <build_depend>boost</build_depend>
   <build_depend>rosboost_cfg</build_depend>
@@ -77,7 +76,6 @@
   <run_depend>image_transport</run_depend>
   <run_depend>image_geometry</run_depend>
   <run_depend>image_view2</run_depend>
-  <run_depend>message_runtime</run_depend>
   <run_depend>visualization_msgs</run_depend>
   <run_depend>boost</run_depend>
   <run_depend>rosboost_cfg</run_depend>

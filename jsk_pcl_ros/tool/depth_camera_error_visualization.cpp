@@ -177,7 +177,7 @@ void dataCallback(
     pcl::PointXYZ p = cloud->points[i];
     // We expect organized pointcloud in input/point_cloud message.
     // So we need to check nan.
-    if (isnan(p.x) || isnan(p.y) || isnan(p.z)) {
+    if (std::isnan(p.x) || std::isnan(p.y) || std::isnan(p.z)) {
       continue;
     }
     stats[i]->addData(p.z);

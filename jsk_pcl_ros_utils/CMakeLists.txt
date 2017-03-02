@@ -164,7 +164,6 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 endif()
 
 macro(jsk_pcl_util_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
-  message("util: ${_nodelet_cpp}")
   jsk_nodelet(${_nodelet_cpp} ${_nodelet_class} ${_single_nodelet_exec_name}
     jsk_pcl_util_nodelet_sources jsk_pcl_util_nodelet_executables)
 endmacro(jsk_pcl_util_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
@@ -270,6 +269,8 @@ jsk_pcl_util_nodelet(src/pointcloud_relative_from_pose_stamped_nodelet.cpp
   "jsk_pcl_utils/PointCloudRelativeFromPoseStamped" "pointcloud_relative_from_pose_stamped")
 jsk_pcl_util_nodelet(src/pointcloud_to_pcd_nodelet.cpp
   "jsk_pcl_utils/PointCloudToPCD" "pointcloud_to_pcd")
+jsk_pcl_util_nodelet(src/marker_array_voxel_to_pointcloud_nodelet.cpp
+  "jsk_pcl_utils/MarkerArrayVoxelToPointCloud" "marker_array_voxel_to_pointcloud")
 add_library(jsk_pcl_ros_utils SHARED ${jsk_pcl_util_nodelet_sources})
 add_dependencies(jsk_pcl_ros_utils ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
 target_link_libraries(jsk_pcl_ros_utils
@@ -316,6 +317,8 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/pointcloud_to_point_indices.test)
     # because of unreleased jsk_tools/test_topic_published.py on hydro
     add_rostest(test/bounding_box_array_to_bounding_box.test)
+    add_rostest(test/evaluate_box_segmentation_by_gt_box.test)
+    add_rostest(test/evaluate_voxel_segmentation_by_gt_box.test)
     add_rostest(test/pointcloud_to_mask_image.test)
     add_rostest(test/polygon_array_unwrapper.test)
     add_rostest(test/subtract_point_indices.test)

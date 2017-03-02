@@ -1,6 +1,6 @@
 <package>
   <name>jsk_perception</name>
-  <version>0.3.29</version>
+  <version>1.1.0</version>
 
   <description>
 
@@ -21,7 +21,6 @@
   <build_depend>angles</build_depend>
   <build_depend>cmake_modules</build_depend>
   <build_depend>cv_bridge</build_depend>
-  <build_depend>driver_base</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>eigen</build_depend>
   <build_depend>geometry_msgs</build_depend>
@@ -53,7 +52,6 @@
   <!-- ALPHABETICAL ORDER -->
   <run_depend>angles</run_depend>
   <run_depend>cv_bridge</run_depend>
-  <run_depend>driver_base</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>eigen</run_depend>
   <run_depend>geometry_msgs</run_depend>
@@ -63,6 +61,7 @@
   <run_depend>image_view2</run_depend>
   <run_depend>imagesift</run_depend>
   <run_depend>jsk_data</run_depend>
+  <run_depend>jsk_gui_msgs</run_depend>
   <run_depend>jsk_recognition_msgs</run_depend>
   <run_depend>jsk_recognition_utils</run_depend>
   <run_depend>jsk_rqt_plugins</run_depend>
@@ -78,22 +77,23 @@
   <run_depend>posedetection_msgs</run_depend>
   <!-- install chainer {{ -->
   <run_depend>python-h5py</run_depend>
-  <run_depend>python-chainer</run_depend>  <!-- pip -->
+  <run_depend>python-chainer-pip</run_depend>
   <!-- }} install chainer -->
   <run_depend>python-dlib</run_depend>  <!-- pip -->
   <!-- install fcn {{ -->
   <run_depend>leveldb</run_depend>
   <run_depend>python-fcn-pip</run_depend>  <!-- pip -->
   <!-- }} install fcn -->
-  <run_depend>python-gdown</run_depend>  <!-- pip -->
   <run_depend>python-sklearn</run_depend>
   <run_depend>rosbag</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>roseus</run_depend>
   <run_depend>rospack</run_depend>
   <run_depend>rospy</run_depend>
+  <run_depend>rostopic</run_depend>
   <run_depend>rqt_gui</run_depend>
   <run_depend>sensor_msgs</run_depend>
+  <run_depend>sound_play</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>robot_self_filter</run_depend>

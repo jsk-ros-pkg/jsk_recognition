@@ -53,6 +53,7 @@ namespace jsk_recognition_utils
     virtual double distance(const Eigen::Vector3f& point) const;
     virtual double distance(const Eigen::Vector3f& point, Eigen::Vector3f& foot_point) const;
     virtual bool intersect(Plane& plane, Eigen::Vector3f& point) const;
+    virtual void midpoint(Eigen::Vector3f& midpoint) const;
     //virtual double distance(const Segment& other);
     friend std::ostream& operator<<(std::ostream& os, const Segment& seg);
   protected:

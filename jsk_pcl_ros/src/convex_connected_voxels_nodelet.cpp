@@ -159,7 +159,7 @@ namespace jsk_pcl_ros
              float ct_x = static_cast<float>(centroid[0]);
              float ct_y = static_cast<float>(centroid[1]);
              float ct_z = static_cast<float>(centroid[2]);
-             if (!isnan(ct_x) && !isnan(ct_y) && !isnan(ct_z)) {
+             if (!std::isnan(ct_x) && !std::isnan(ct_y) && !std::isnan(ct_z)) {
                 pcl::PointCloud<pcl::Normal>::Ptr s_normal(
                    new pcl::PointCloud<pcl::Normal>);
                 this->estimatePointCloudNormals(

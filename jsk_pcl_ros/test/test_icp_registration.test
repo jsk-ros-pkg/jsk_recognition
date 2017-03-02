@@ -1,17 +1,11 @@
 <launch>
 
-  <param name="/use_sim_time" value="true" />
-  <node name="rosbag_play"
-        pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros)/test_data/2016-07-06-12-16-43-person-in-point-cloud/vision.compressed.bag --clock --loop">
-  </node>
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml" />
 
-  <arg name="INPUT_CLOUD" value="/camera_remote/depth_registered/points" />
+  <arg name="INPUT_CLOUD" value="/right_hand_camera/depth_registered/points" />
   <arg name="FILTERED_CLOUD" value="/voxelgrid/output" />
   <arg name="EMPTY_CLOUD" value="/empty_filter/output" />
-  <arg name="INPUT_IMAGE" value="/camera_remote/rgb/image_rect_color" />
-  <arg name="INPUT_CAMERA_INFO" value="/camera_remote/rgb/camera_info" />
-  <arg name="MODEL_FILE" value="$(find jsk_pcl_ros)/test_data/drill.pcd" />
+  <arg name="MODEL_FILE" value="$(find jsk_pcl_ros)/sample/data/drill.pcd" />
 
   <arg name="voxel_grid_filter_limit_min" default="0.0"/>
   <arg name="voxel_grid_filter_limit_max" default="3.0"/>

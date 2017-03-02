@@ -124,7 +124,7 @@ namespace jsk_pcl_ros
     float min_height = FLT_MAX;
     for (size_t i = 0; i < transformed_cloud.points.size(); i++) {
       pcl::PointXYZ p = transformed_cloud.points[i];
-      if (isnan(p.x) || isnan(p.y) || isnan(p.z)) {
+      if (std::isnan(p.x) || std::isnan(p.y) || std::isnan(p.z)) {
         continue;
       }
       cv::Point index = toIndex(p);

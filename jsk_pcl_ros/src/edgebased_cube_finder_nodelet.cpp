@@ -332,7 +332,7 @@ namespace jsk_pcl_ros
     int num = 0;
     for (size_t i = 0; i < cloud->points.size(); i++) {
       PointT p = cloud->points[i];
-      if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
+      if (!std::isnan(p.x) && !std::isnan(p.y) && !std::isnan(p.z)) {
         Eigen::Vector3f ep = p.getVector3fMap();
         if (convex->distanceSmallerThan(ep, outlier_threshold_)) {
           num++;
@@ -531,7 +531,7 @@ namespace jsk_pcl_ros
     pcl::PointCloud<PointT>::Ptr ret (new pcl::PointCloud<PointT>);
     for (size_t i = 0; i < cloud->points.size(); i++) {
       PointT p = cloud->points[i];
-      if (!isnan(p.x) && !isnan(p.y) && !isnan(p.z)) {
+      if (!std::isnan(p.x) && !std::isnan(p.y) && !std::isnan(p.z)) {
         Eigen::Vector3f ep = p.getVector3fMap();
         Eigen::Vector3f foot;
         magnified_convex->projectOnPlane(ep, foot);

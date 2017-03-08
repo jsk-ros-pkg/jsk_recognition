@@ -65,7 +65,6 @@
   <run_depend>jsk_data</run_depend>
   <run_depend>jsk_recognition_msgs</run_depend>
   <run_depend>jsk_recognition_utils</run_depend>
-  <run_depend>jsk_rqt_plugins</run_depend>
   <run_depend>jsk_topic_tools</run_depend>
   <run_depend>libcmt</run_depend>
   <run_depend>message_runtime</run_depend>

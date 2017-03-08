@@ -34,13 +34,21 @@
   </node>
 
   <group if="$(arg gui)">
-    <node name="rqt_histogram_red"
-          pkg="jsk_rqt_plugins" type="rqt_histogram_plot"
-          args="/color_histogram/red_histogram/histogram">
+    <node name="plot_red_hist"
+          pkg="jsk_perception" type="plot_color_histogram.py">
+      <remap from="~input" to="/color_histogram/red_histogram" />
     </node>
-    <node name="rqt_histogram_hue"
-          pkg="jsk_rqt_plugins" type="rqt_histogram_plot"
-          args="/color_histogram/hue_histogram/histogram">
+    <node name="image_view_red_hist"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="plot_red_hist/output" />
+    </node>
+    <node name="plot_hue_hist"
+          pkg="jsk_perception" type="plot_color_histogram.py">
+      <remap from="~input" to="/color_histogram/hue_histogram" />
+    </node>
+    <node name="image_view_hue_hist"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="plot_hue_hist/output" />
     </node>
   </group>
 

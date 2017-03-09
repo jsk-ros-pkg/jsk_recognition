@@ -215,6 +215,8 @@ if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
   jsk_pcl_util_nodelet(src/cluster_point_indices_to_point_indices_nodelet.cpp
     "jsk_pcl_utils/ClusterPointIndicesToPointIndices" "cluster_point_indices_to_point_indices")
 endif()
+jsk_pcl_util_nodelet(src/pointcloud_xyzrgb_to_xyz_nodelet.cpp
+  "jsk_pcl_utils/PointCloudXYZRGBToXYZ" "pointcloud_xyzrgb_to_xyz")
 jsk_pcl_util_nodelet(src/pointcloud_xyz_to_xyzrgb_nodelet.cpp
   "jsk_pcl_utils/PointCloudXYZToXYZRGB" "pointcloud_xyz_to_xyzrgb")
 jsk_pcl_util_nodelet(src/pointcloud_to_cluster_point_indices_nodelet.cpp

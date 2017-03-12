@@ -48,6 +48,8 @@ namespace jsk_perception
     DiagnosticNodelet::onInit();
     pnh_->param("approximate_sync", approximate_sync_, false);
     pnh_->param("clip", clip_, true);
+    pnh_->param("negative", negative_, false);
+    pnh_->param("negative/before_clip", negative_before_clip_, true);
     pnh_->param("mask_black_to_transparent", mask_black_to_transparent_, false);
     pnh_->param("queue_size", queue_size_, 100);
     pub_image_ = advertise<sensor_msgs::Image>(
@@ -105,11 +107,19 @@ namespace jsk_perception
       NODELET_ERROR("mask: %dx%dx", mask.cols, mask.rows);
       return;
     }
-    
+
+    if (negative_ && negative_before_clip_) {
+      cv::bitwise_not(mask, mask);
+    }
+
     if (clip_) {
       cv::Rect region = jsk_recognition_utils::boundingRectOfMaskImage(mask);
       mask = mask(region);
       image = image(region);
+    }
+
+    if (negative_ && !negative_before_clip_) {
+      cv::bitwise_not(mask, mask);
     }
 
     pub_mask_.publish(cv_bridge::CvImage(

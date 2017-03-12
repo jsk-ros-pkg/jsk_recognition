@@ -24,9 +24,18 @@ Apply mask image to original image and visualize it. It's a utlity to visualize 
 
   Approximately synchronize inputs if it's true.
 
+* `~negative` (Bool, default: `false`)
+
+  Flip the max region of mask image or not.
+
 * `~clip` (Bool, default: `true`)
 
   Clip the max region of mask image or not.
+
+* `~negative/before_clip` (Bool, default: `true`)
+
+  This decides order of negative and clip.
+  If true, negative process is before clipping.
 
 * ``~queue_size`` (Int, default: ``100``)
 

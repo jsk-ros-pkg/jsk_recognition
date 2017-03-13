@@ -53,6 +53,7 @@ namespace jsk_recognition_utils
     typedef std::vector<Eigen::Vector3f,
                         Eigen::aligned_allocator<Eigen::Vector3f> > Vertices;
     // vertices should be CW
+    ConvexPolygon();
     ConvexPolygon(const Vertices& vertices);
     ConvexPolygon(const Vertices& vertices,
                   const std::vector<float>& coefficients);

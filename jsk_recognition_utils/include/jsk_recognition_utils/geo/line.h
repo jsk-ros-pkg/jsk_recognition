@@ -50,7 +50,13 @@ namespace jsk_recognition_utils
   {
   public:
     typedef boost::shared_ptr<Line> Ptr;
-    
+
+    /**
+     * @brief
+     * Construct a line.
+     */
+    Line();
+
     /**
      * @brief
      * Construct a line from direction vector and a point on the line.

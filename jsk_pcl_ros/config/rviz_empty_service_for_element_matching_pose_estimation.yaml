@@ -1,0 +1,16 @@
+rviz_service_call/buttons:
+  - icon: ""
+    service_name: /reset_object_pose_with_marker
+    text: reset with marker pose
+  - icon: ""
+    service_name: /reset_object_pose_with_saved
+    text: reset with saved pose
+  - icon: ""
+    service_name: /print_estimation_output
+    text: print estimated pose
+  - icon: ""
+    service_name: /enable_pose_correspondence
+    text: enable grasping
+  - icon: ""
+    service_name: /disable_pose_correspondence
+    text: disable grasping

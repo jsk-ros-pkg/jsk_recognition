@@ -1,0 +1,117 @@
+<launch>
+  <arg name="INPUT_RGB" default="/camera/rgb/image_rect_color" />
+  <arg name="INPUT_CLOUD" default="/camera/depth_registered/points" />
+  <arg name="INPUT_CAMERA_INFO" default="/camera/depth_registered/camera_info" />
+  <arg name="OBJECT_CLOUD" default="/object_cloud" />
+  <arg name="OBJECT_MASK" default="/mask/image" />
+
+  <arg name="object_shape" default="l-shaped-block2" />
+  <arg name="launch_openni" default="true" />
+  <arg name="launch_recognize_object" default="true" />
+
+  <!-- nodelet manager -->
+  <arg name="MANAGER" value="manager_colored_cube_pose_estimation" />
+  <node pkg="nodelet" type="nodelet" name="$(arg MANAGER)" args="manager" output="screen" />
+
+  <!-- launch openni2 for xtion -->
+  <group if="$(arg launch_openni)" >
+    <include file="$(find openni2_launch)/launch/openni2.launch" >
+      <arg name="depth_registration" value="true" />
+    </include>
+    <node pkg="dynamic_reconfigure" type="dynparam" name="openni_color_mode"
+          args="set /camera/driver color_mode 5">
+    </node>
+    <node pkg="dynamic_reconfigure" type="dynparam" name="openni_depth_mode"
+          args="set /camera/driver depth_mode 5">
+    </node>
+  </group>
+
+  <!-- recognize object -->
+  <group if="$(arg launch_recognize_object)" >
+    <include file="$(find jsk_pcl_ros)/sample/recognize_object_colored_cube.launch" >
+      <arg name="INPUT_RGB" default="$(arg INPUT_RGB)" />
+      <arg name="INPUT_CLOUD" value="$(arg INPUT_CLOUD)" />
+      <arg name="INPUT_CAMERA_INFO" default="$(arg INPUT_CAMERA_INFO)" />
+      <arg name="OBJECT_CLOUD" value="$(arg OBJECT_CLOUD)" />
+      <arg name="OBJECT_MASK" value="$(arg OBJECT_MASK)" />
+      <arg name="MANAGER" value="$(arg MANAGER)" />
+      <arg name="run_manager" value="false" />
+    </include>
+  </group>
+
+  <!-- recognize element -->
+  <include file="$(find jsk_pcl_ros)/sample/recognize_element_colored_cube.launch" >
+    <arg name="OBJECT_CLOUD" value="$(arg OBJECT_CLOUD)" />
+    <arg name="MANAGER" value="$(arg MANAGER)" />
+  </include>
+
+  <!-- publish dummy element -->
+  <node pkg="jsk_pcl_ros" type="dummy_element_publisher.py" name="dummy_element_publisher" >
+    <remap from="~input" to="$(arg OBJECT_CLOUD)" />
+    <rosparam>
+      publish_edge: false
+      publish_polygon: true
+      publish_pose: true
+    </rosparam>
+  </node>
+
+  <!-- element based pose estimation -->
+  <node pkg="nodelet" type="nodelet" name="element_matching_pose_estimation"
+        args="load jsk_pcl/ElementMatchingPoseEstimation $(arg MANAGER)" output="screen">
+    <remap from="~input" to="$(arg OBJECT_CLOUD)" />
+    <remap from="~edge_indices" to="/edge_depth_refinement/output" />
+    <remap from="~edges" to="/edge_depth_refinement/output_edges" />
+    <remap from="~polygon_indices" to="/dummy_element_publisher/output_polygon_indices" />
+    <remap from="~polygons" to="/dummy_element_publisher/output_polygons" />
+    <remap from="~poses" to="/dummy_element_publisher/output_poses" />
+    <rosparam>
+      max_queue_size: 1000
+      approximate_sync: false
+      debug_viewer: false
+      publish_tf: true
+      tf_rate: 10
+      max_edge_indices: 20
+      max_polygon_indices: 10
+      tolerance: 0.001
+      fixed_weight: 1.0
+    </rosparam>
+  </node>
+
+  <!-- compute correspondence -->
+  <node pkg="jsk_pcl_ros" type="element-correspondence-server-node.l" name="element_correspondence_server"
+        output="screen" >
+    <param name="object_shape" value="$(arg object_shape)" />
+    <param name="edge_distance_threshold" value="1000" />
+    <param name="polygon_distance_threshold" value="1000" />
+  </node>
+
+  <!-- publish marker -->
+  <node pkg="jsk_pcl_ros" type="publish-object-marker.l" name="publish_object_marker"
+        output="screen" >
+    <param name="object_shape" value="$(arg object_shape)" />
+  </node>
+
+  <!-- reset pose -->
+  <node pkg="jsk_pcl_ros" type="reset-pose-client.l" name="reset_pose_client"
+        output="screen" >
+  </node>
+
+  <!-- downsample because too heavy to visualize -->
+  <node pkg="nodelet" type="nodelet" name="resize_point_publisher"
+        args="load jsk_pcl/ResizePointsPublisher $(arg MANAGER)">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <param name="step_x" value="2" />
+    <param name="step_y" value="2" />
+  </node>
+
+  <!-- rviz -->
+  <node pkg="rviz" type="rviz" name="rviz_extract_edge"
+        args="-d $(find jsk_pcl_ros)/config/element_matching_pose_estimation.rviz" >
+    <rosparam command="load" file="$(find jsk_pcl_ros)/config/rviz_empty_service_for_element_matching_pose_estimation.yaml" />
+  </node>
+
+  <!-- tf for fixed frame -->
+  <node pkg="tf" type="static_transform_publisher" name="static_transform_for_view_center"
+        args="0 0 0.75 0.0 3.14 0.8 camera_depth_optical_frame view_center 20" />
+
+</launch>

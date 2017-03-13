@@ -1,0 +1,112 @@
+<launch>
+  <arg name="INPUT_RGB" default="/camera/rgb/image_rect_color" />
+  <arg name="INPUT_CLOUD" default="/camera_remote/depth_registered/points" />
+  <arg name="INPUT_CAMERA_INFO" default="/camera_remote/depth_registered/camera_info" />
+  <arg name="OBJECT_CLOUD" default="/object_cloud" />
+  <arg name="OBJECT_MASK" default="/mask/image" />
+  <arg name="MANAGER" default="manager_colored_cube_object_recognition" />
+
+  <arg name="run_manager" default="true" />
+
+  <!-- nodelet manager -->
+  <group if="$(arg run_manager)">
+    <node pkg="nodelet" type="nodelet" name="$(arg MANAGER)" args="manager" output="screen" />
+  </group>
+
+  <!-- resize image -->
+  <node pkg="nodelet" type="nodelet" name="resize_image"
+        args="load resized_image_transport/ImageResizer $(arg MANAGER)">
+    <param name="resize_scale_x" value="0.5" />
+    <param name="resize_scale_y" value="0.5" />
+    <remap from="~input/image" to="$(arg INPUT_RGB)" />
+  </node>
+
+  <!-- resize pointcloud -->
+  <node pkg="nodelet" type="nodelet" name="resize_pointcloud"
+        args="load jsk_pcl/ResizePointsPublisher $(arg MANAGER)">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <param name="~step_x" value="2" />
+    <param name="~step_y" value="2" />
+    <param name="~not_use_rgb" value="false" />
+  </node>
+
+  <!-- filter object with hsi threshold -->
+  <node pkg="nodelet" type="nodelet" name="hsi_color_filter"
+        args="load hsv_color_filter/hsv_color_filter $(arg MANAGER)">
+    <remap from="image" to="/resize_image/output/image" />
+    <param name="use_camera_info" value="false" />
+    <param name="debug_view" value="false" />
+    <param name="h_limit_max" value="255" />
+    <param name="h_limit_min" value="85" />
+    <param name="s_limit_max" value="255" />
+    <param name="s_limit_min" value="45" />
+    <param name="i_limit_max" value="255" />
+    <param name="i_limit_min" value="140" />
+    <!-- <param name="i_limit_min" value="40" /> -->
+  </node>
+
+  <!-- erode mask image -->
+  <node pkg="nodelet" type="nodelet" name="erode_mask_image"
+        args="load jsk_perception/ErodeMaskImage $(arg MANAGER)">
+    <remap from="~input" to="/hsi_color_filter/image" />
+    <param name="size" value="1" />
+    <param name="iterations" value="3" />
+  </node>
+
+  <!-- extract largest blob -->
+  <node pkg="nodelet" type="nodelet" name="blob_detector"
+        args="load jsk_perception/BlobDetector $(arg MANAGER)">
+    <remap from="~input" to="/erode_mask_image/output" />
+  </node>
+  <node pkg="nodelet" type="nodelet" name="label_to_mask_image"
+        args="load jsk_perception/LabelToMaskImage $(arg MANAGER)">
+    <remap from="~input" to="/blob_detector/output" />
+    <param name="label_value" value="1" />
+  </node>
+
+  <!-- dilate mask image -->
+  <node pkg="nodelet" type="nodelet" name="dilate_mask_image"
+        args="load jsk_perception/DilateMaskImage $(arg MANAGER)">
+    <remap from="~input" to="/label_to_mask_image/output" />
+    <remap from="~output" to="$(arg OBJECT_MASK)" />
+    <param name="size" value="20" />
+    <param name="iterations" value="1" />
+  </node>
+
+  <!-- convert image to indicies -->
+  <node pkg="nodelet" type="nodelet" name="image_to_indices"
+        args="load jsk_pcl_utils/MaskImageToPointIndices $(arg MANAGER)">
+    <remap from="~input" to="$(arg OBJECT_MASK)" />
+  </node>
+
+  <!-- extract pointcloud with indices  -->
+  <node pkg="nodelet" type="nodelet" name="mask_extract_indices"
+        args="load jsk_pcl/ExtractIndices $(arg MANAGER)">
+    <remap from="~input" to="/resize_pointcloud/output" />
+    <remap from="~indices" to="/image_to_indices/output" />
+    <remap from="~output" to="$(arg OBJECT_CLOUD)" />
+    <param name="~approximate_sync" value="true" />
+    <param name="~keep_organized" value="true" />
+  </node>
+
+  <!-- object interactive marker -->
+  <node pkg="jsk_interactive_marker" type="marker_6dof" name="object_marker"
+        output="screen" >
+    <rosparam>
+      frame_id: camera_rgb_optical_frame
+      object_type: cube
+      object_x: 0.001
+      object_y: 0.001
+      object_z: 0.001
+      object_r: 0.0
+      object_g: 0.0
+      object_b: 0.0
+      object_a: 0.0
+      interactive_marker_scale: 0.3
+      publish_tf: true
+      tf_frame: interactive_object_marker
+      publish_pose_periodically: true
+    </rosparam>
+  </node>
+
+</launch>

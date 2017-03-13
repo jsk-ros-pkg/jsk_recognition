@@ -357,6 +357,8 @@ jsk_pcl_nodelet(src/target_adaptive_tracking_nodelet.cpp
   "jsk_pcl/TargetAdaptiveTracking" "target_adaptive_tracking")
 jsk_pcl_nodelet(src/octree_voxel_grid_nodelet.cpp
   "jsk_pcl/OctreeVoxelGrid" "octree_voxel_grid")
+jsk_pcl_nodelet(src/element_matching_pose_estimation_nodelet.cpp
+  "jsk_pcl/ElementMatchingPoseEstimation" "element_matching_pose_estimation")
 # robot_self_filter is released on version greater than indigo
 find_package(robot_self_filter QUIET)
 if(NOT robot_self_filter_FOUND)

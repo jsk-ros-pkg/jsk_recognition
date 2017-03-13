@@ -90,6 +90,8 @@ add_service_files(FILES
   UpdateOffset.srv
   WhiteBalancePoints.srv
   WhiteBalance.srv
+  ElementCorrespondence.srv
+  ResetPose.srv
   )
 
 generate_messages(

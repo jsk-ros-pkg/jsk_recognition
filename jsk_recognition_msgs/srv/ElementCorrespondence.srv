@@ -1,0 +1,8 @@
+jsk_recognition_msgs/EdgeArray input_edges
+jsk_recognition_msgs/PolygonArray input_polygons
+jsk_recognition_msgs/PoseLabeledArray input_poses
+geometry_msgs/PoseStamped input_pose
+---
+jsk_recognition_msgs/EdgeArray corresponding_edges
+jsk_recognition_msgs/PolygonArray corresponding_polygons
+jsk_recognition_msgs/PoseLabeledArray corresponding_poses

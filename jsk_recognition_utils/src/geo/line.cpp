@@ -202,5 +202,4 @@ namespace jsk_recognition_utils
   {
     output = alpha * direction_ + origin_;
   }
-
 }

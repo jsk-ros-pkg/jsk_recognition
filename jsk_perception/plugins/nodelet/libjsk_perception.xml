@@ -111,6 +111,22 @@
          type="jsk_perception::ColorHistogramLabelMatch"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_perception/AddImages"
+         type="jsk_perception::AddImages"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/SubtractImages"
+         type="jsk_perception::SubtractImages"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/MultiplyImages"
+         type="jsk_perception::MultiplyImages"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/DivideImages"
+         type="jsk_perception::DivideImages"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/AddMaskImage" type="jsk_perception::AddMaskImage"
          base_class_type="nodelet::Nodelet">
   </class>

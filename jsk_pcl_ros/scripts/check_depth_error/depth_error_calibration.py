@@ -13,7 +13,7 @@ import argparse
 import csv
 import math
 import datetime
-from jsk_pcl_ros.srv import SetDepthCalibrationParameter
+from jsk_recognition_msgs.srv import SetDepthCalibrationParameter
 from jsk_recognition_msgs.msg import DepthCalibrationParameter
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError

@@ -70,6 +70,7 @@
 #include "jsk_recognition_utils/types.h"
 #include "jsk_recognition_utils/geo/line.h"
 #include "jsk_recognition_utils/geo/segment.h"
+#include "jsk_recognition_utils/geo/polyline.h"
 #include "jsk_recognition_utils/geo/plane.h"
 #include "jsk_recognition_utils/geo/polygon.h"
 #include "jsk_recognition_utils/geo/convex_polygon.h"

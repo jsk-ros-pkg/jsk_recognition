@@ -67,6 +67,8 @@ namespace jsk_perception
 
     bool approximate_sync_;
     bool clip_;
+    bool negative_;
+    bool negative_before_clip_;
     bool mask_black_to_transparent_;
     int queue_size_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;

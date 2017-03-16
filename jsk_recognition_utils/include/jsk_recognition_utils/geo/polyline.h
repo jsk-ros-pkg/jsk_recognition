@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2015, JSK Lab
+ *  Copyright (c) 2017, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,90 +33,89 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JSK_RECOGNITION_UTILS_GEO_SEGMENT_H_
-#define JSK_RECOGNITION_UTILS_GEO_SEGMENT_H_
+#ifndef JSK_RECOGNITION_UTILS_GEO_POLYLINE_H_
+#define JSK_RECOGNITION_UTILS_GEO_POLYLINE_H_
 
-#include <iostream>
-#include "jsk_recognition_utils/geo/line.h"
+#include <Eigen/Geometry>
+#include <boost/shared_ptr.hpp>
+#include "jsk_recognition_utils/types.h"
+#include "jsk_recognition_utils/geo/segment.h"
 #include "visualization_msgs/Marker.h"
 
 namespace jsk_recognition_utils
 {
-  class Plane;
   /**
    * @brief
-   * Class to represent 3-D straight line which has finite length.
+   * Class to represent 3-D polyline (not closed).
    */
-  class Segment: public Line
+  class PolyLine : public Line
   {
   public:
-    typedef boost::shared_ptr<Segment> Ptr;
-
+    typedef boost::shared_ptr<PolyLine> Ptr;
     /**
      * @brief
-     * Construct a line from a start point and a goal point.
+     * Construct a polyline from points.
+     * The polyline consists of lines which starts with p[i] and ends with p[i+1].
+     * @param points
+     */
+    PolyLine(const std::vector < Eigen::Vector3f > &points);
+
+    /**
+     * @ brief
+     * get the line positioned at index
      *
-     * @param from
-     * @param to
+     * @param index position of the line
      */
-    Segment(const Eigen::Vector3f& from, const Eigen::Vector3f to);
-
-    /**
-     * @brief
-     * get end of the line and assing it to output.
-     */
-    virtual void getEnd(Eigen::Vector3f& output) const;
-    virtual Eigen::Vector3f getEnd() const;
-
-    virtual void foot(const Eigen::Vector3f& point, Eigen::Vector3f& output) const;
-    virtual double dividingRatio(const Eigen::Vector3f& point) const;
-    virtual double distance(const Eigen::Vector3f& point) const;
-    virtual double distance(const Eigen::Vector3f& point, Eigen::Vector3f& foot_point) const;
-    virtual bool intersect(Plane& plane, Eigen::Vector3f& point) const;
-    virtual void midpoint(Eigen::Vector3f& midpoint) const;
-    //virtual double distance(const Segment& other);
-    friend std::ostream& operator<<(std::ostream& os, const Segment& seg);
+    virtual Segment::Ptr at(int index) const;
 
     /**
      * @brief
      * compute a distance to a point
-     * @param from
-     * @param foot_point
-     * @param distance_to_goal
+     */
+    virtual double distance(const Eigen::Vector3f& point,
+                            Eigen::Vector3f& foot_point) const;
+    virtual double distance(const Eigen::Vector3f& point) const;
+
+    /**
+     * @brief
+     * compute a distance to a point, get various information
      */
     virtual double distanceWithInfo(const Eigen::Vector3f& from,
                                     Eigen::Vector3f& foot_point,
-                                    double &distance_to_goal) const;
+                                    double& distance_to_goal,
+                                    int& foot_index,
+                                    double& foot_alpha) const;
 
     /**
      * @brief
-     * return flipped line (line of opposite direction)
+     * get normalized direction vector of the line.
+     *
+     * @param index position of the line which returns direction
      */
-    virtual Segment::Ptr flipSegment() const;
+    virtual void getDirection(int index, Eigen::Vector3f& output) const;
+    virtual Eigen::Vector3f getDirection(int index) const;
 
     /**
      * @brief
-     * return length of the line
+     * get total length of the polyline
      */
     virtual double length() const;
 
     /**
-     * @brief
-     * make marker message to display the finite line
+     * @ brief
+     * flip direction of the polyline.
+     */
+    virtual PolyLine::Ptr flipPolyLine() const;
+
+    /**
+     * @ brief
+     * make marker message to display the polyline
      */
     void toMarker(visualization_msgs::Marker& marker) const;
 
-    /**
-     * @brief
-     * is crossing with another line
-     */
-    virtual bool isCross (const Line &ln, double distance_threshold = 1e-5) const;
-    virtual bool isCross (const Segment &ln, double distance_threshold = 1e-5) const;
-
+    friend std::ostream& operator<<(std::ostream& os, const PolyLine& pl);
   protected:
-    Eigen::Vector3f to_;
-    double length_;
-  private:
+    std::vector< Segment::Ptr > segments;
   };
 }
 

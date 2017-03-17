@@ -47,7 +47,6 @@ namespace jsk_recognition_utils
   {
   public:
     typedef boost::shared_ptr<Segment> Ptr;
-    Segment();
     Segment(const Eigen::Vector3f& from, const Eigen::Vector3f to);
     virtual void foot(const Eigen::Vector3f& point, Eigen::Vector3f& output) const;
     virtual double dividingRatio(const Eigen::Vector3f& point) const;

@@ -11,6 +11,10 @@ namespace pcl
 {
   struct EIGEN_ALIGN16 PointElement
   {
+    PointElement ():
+      edge(Eigen::Vector3f(), Eigen::Vector3f()),
+      polygon(jsk_recognition_utils::Vertices (3))
+        {};
     PCL_ADD_POINT4D;
     PCL_ADD_NORMAL4D;
     jsk_recognition_utils::Segment edge;

@@ -312,6 +312,8 @@ jsk_pcl_nodelet(src/supervoxel_segmentation_nodelet.cpp
 jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PlaneConcatenator" "plane_concatenator")
 jsk_pcl_nodelet(src/add_color_from_image_nodelet.cpp
   "jsk_pcl/AddColorFromImage" "add_color_from_image")
+jsk_pcl_nodelet(src/add_color_from_image_to_organized_nodelet.cpp
+  "jsk_pcl/AddColorFromImageToOrganized" "add_color_from_image_to_organized")
 jsk_pcl_nodelet(src/torus_finder_nodelet.cpp "jsk_pcl/TorusFinder" "torus_finder")
 jsk_pcl_nodelet(src/mask_image_filter_nodelet.cpp
   "jsk_pcl/MaskImageFilter" "mask_image_filter")
@@ -462,6 +464,8 @@ if (CATKIN_ENABLE_TESTING)
   target_link_libraries(test_extract_indices ${catkin_LIBRARIES} ${GTEST_LIBRARIES})
   if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
     # because of unreleased topic_tools/transform on hydro
+    add_rostest(test/test_add_color_from_image.test)
+    add_rostest(test/test_add_color_from_image_to_organized.test)
     add_rostest(test/test_octree_voxel_grid.test)
     add_rostest(test/test_hsi_color_filter.test)
     add_rostest(test/test_icp_registration.test)

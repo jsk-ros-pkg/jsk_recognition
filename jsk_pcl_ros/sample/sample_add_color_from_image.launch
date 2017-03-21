@@ -1,0 +1,47 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <param name="/use_sim_time" value="true" />
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/sample/data/sample_add_color_from_image_20170319.bag --clock --loop">
+  </node>
+
+  <arg name="MANAGER" value="nodelet_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet" args="manager" />
+
+  <group ns="camera">
+    <node name="register"
+          pkg="nodelet" type="nodelet"
+          args="load depth_image_proc/register /$(arg MANAGER)">
+      <rosparam>
+        queue_size: 50
+      </rosparam>
+    </node>
+    <node name="point_cloud_xyzrgb"
+          pkg="nodelet" type="nodelet"
+          args="load depth_image_proc/point_cloud_xyzrgb /$(arg MANAGER)">
+      <rosparam>
+        queue_size: 50
+      </rosparam>
+    </node>
+  </group>
+
+  <node name="add_color_from_image"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/AddColorFromImage $(arg MANAGER)">
+    <remap from="~input" to="camera/depth_registered/points" />
+    <remap from="~input/image" to="colorize_label/output" />
+    <remap from="~input/camera_info" to="camera/depth_registered/camera_info" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+      pkg="rviz" type="rviz"
+      args="-d $(find jsk_pcl_ros)/sample/rviz/add_color_from_image.rviz">
+    </node>
+  </group>
+
+</launch>

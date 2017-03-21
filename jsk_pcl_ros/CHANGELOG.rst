@@ -2,6 +2,11 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.1 (2017-03-04)
+------------------
+* incldue flann before any opencv includes, fix `#2022 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2022>`_ (`#2023 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2023>`_ )
+* Contributors: Kei Okada
+
 1.1.0 (2017-02-09)
 ------------------
 * remove test_data and move to sample_data (`#2017 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2017>`_ )

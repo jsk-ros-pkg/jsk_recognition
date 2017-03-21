@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2015, JSK Lab
+ *  Copyright (c) 2017, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -34,53 +34,42 @@
  *********************************************************************/
 
 
-#ifndef JSK_PERCEPTION_APPLY_MASK_IMAGE_H_
-#define JSK_PERCEPTION_APPLY_MASK_IMAGE_H_
+#ifndef JSK_PCL_ROS_ADD_COLOR_FROM_IMAGE_TO_ORGANIZED_H_
+#define JSK_PCL_ROS_ADD_COLOR_FROM_IMAGE_TO_ORGANIZED_H_
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
-#include <sensor_msgs/Image.h>
+
 #include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
-namespace jsk_perception
+#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/CameraInfo.h>
+
+namespace jsk_pcl_ros
 {
-  class ApplyMaskImage: public jsk_topic_tools::DiagnosticNodelet
+  class AddColorFromImageToOrganized: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef message_filters::sync_policies::ApproximateTime<
-    sensor_msgs::Image,
-    sensor_msgs::Image > ApproximateSyncPolicy;
-    typedef message_filters::sync_policies::ExactTime<
-    sensor_msgs::Image,
-    sensor_msgs::Image > SyncPolicy;
-    ApplyMaskImage(): DiagnosticNodelet("ApplyMaskImage") {}
+      sensor_msgs::PointCloud2,
+      sensor_msgs::Image > SyncPolicy;
+    AddColorFromImageToOrganized(): DiagnosticNodelet("AddColorFromImageToOrganized") { }
   protected:
-
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual void apply(
-      const sensor_msgs::Image::ConstPtr& image_msg,
-      const sensor_msgs::Image::ConstPtr& mask_msg);
-
-    bool approximate_sync_;
-    bool clip_;
-    bool negative_;
-    bool negative_before_clip_;
-    bool mask_black_to_transparent_;
-    int queue_size_;
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
-    boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> > async_;
+    virtual void addColor(
+      const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
+      const sensor_msgs::Image::ConstPtr& image_msg);
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_cloud_;
     message_filters::Subscriber<sensor_msgs::Image> sub_image_;
-    message_filters::Subscriber<sensor_msgs::Image> sub_mask_;
-    ros::Publisher pub_image_;
-    ros::Publisher pub_mask_;
-    
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    ros::Publisher pub_;
   private:
-    
   };
-}
+}  // namespace jsk_pcl_ros
 
-#endif
+#endif  // JSK_PCL_ROS_ADD_COLOR_FROM_IMAGE_TO_ORGANIZED_H_

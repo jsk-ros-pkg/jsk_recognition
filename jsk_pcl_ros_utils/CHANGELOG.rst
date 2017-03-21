@@ -2,6 +2,11 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.1 (2017-03-04)
+------------------
+* Remove unnecessary cmake messages (`#2010 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2010>`_)
+* Contributors: Kentaro Wada
+
 1.1.0 (2017-02-09)
 ------------------
 

@@ -78,6 +78,7 @@ add_library(jsk_recognition_utils SHARED
   src/rgb_colors.cpp
   src/geo/line.cpp
   src/geo/segment.cpp
+  src/geo/polyline.cpp
   src/geo/plane.cpp
   src/geo/polygon.cpp
   src/geo/convex_polygon.cpp

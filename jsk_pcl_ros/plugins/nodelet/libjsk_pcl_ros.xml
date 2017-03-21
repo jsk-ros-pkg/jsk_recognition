@@ -43,6 +43,10 @@
          type="jsk_pcl_ros::TorusFinder"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_pcl/AddColorFromImageToOrganized"
+         type="jsk_pcl_ros::AddColorFromImageToOrganized"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_pcl/AddColorFromImage"
          type="jsk_pcl_ros::AddColorFromImage"
          base_class_type="nodelet::Nodelet">

@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_add_color_from_image.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_add_color_from_image"
+        name="test_add_color_from_image"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="30" retry="6">
+    <rosparam>
+      topic_0: /add_color_from_image/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

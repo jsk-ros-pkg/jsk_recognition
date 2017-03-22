@@ -1,8 +1,12 @@
 <launch>
-  <arg name="manager" default="/camera_nodelet_manager" />
+  <arg name="manager" default="camera_nodelet_manager" />
   <arg name="input_point" default="/camera/depth_registered/points" />
+  <arg name="create_manager" default="true" />
 
   <group ns="pcl_nodelet">
+     <node if="$(arg create_manager)"
+          pkg="nodelet" type="nodelet" name="$(arg manager)"
+          args="manager" output="screen"/>
      <node pkg="nodelet" type="nodelet"
           name="voxelgrid"
           args="load pcl/VoxelGrid $(arg manager)"

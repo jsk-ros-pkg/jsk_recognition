@@ -9,6 +9,7 @@
   <arg name="color_quater_scale" default="0.25" />
   <arg name="uv_scale" default="1.0"  />
   <arg name="depth_calibration_file" default="$(find jsk_pcl_ros)/config/default_depth_calibration_parameter.yaml" />
+  <arg name="republish" default="false" />
   <group>       <!--group only for remapping-->
     <remap from="/camera_remote_uncalibrated/depth/image_raw" 
            to="/camera/depth/image_raw"/>
@@ -54,11 +55,30 @@
     <remap from="/camera_remote_uncalibrated/depth/image_rect_raw"
            to="/camera/depth/image_rect_raw_calibrated"/>
     <remap from="/camera_remote/depth_registered/image_raw"
-           to="/camera/depth_registered/image_raw"/>
+           to="/camera/depth_registered/image_raw" unless="$(arg republish)" />
     <remap from="/camera_remote/rgb/image_raw"
-           to="/camera/rgb/image_raw"/>
+           to="/camera/rgb/image_raw" unless="$(arg republish)" />
     <remap from="/camera_remote/rgb/camera_info"
            to="/camera/rgb/camera_info"/>
+    <group if="$(arg republish)" >
+      <group ns="/camera/rgb">
+        <node name="republish_rgb_image_raw"
+              pkg="image_transport" type="republish"
+              args="compressed raw">
+          <remap from="in" to="image_raw" />
+          <remap from="out" to="/camera_remote/rgb/image_raw" />
+        </node>
+      </group>
+
+      <group ns="/camera/depth_registered">
+        <node name="republish_depth_registered_image_raw"
+              pkg="image_transport" type="republish"
+              args="compressedDepth raw">
+          <remap from="in" to="image_raw" />
+          <remap from="out" to="/camera_remote/depth_registered/image_raw" />
+        </node>
+      </group>
+    </group>
     <group ns="camera_remote">  <!--from depth_registered.launch.xml-->
       <arg name="respawn" value="false" />
       <arg     if="$(arg respawn)" name="bond" value="" />

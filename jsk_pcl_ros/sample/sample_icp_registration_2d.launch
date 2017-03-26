@@ -1,0 +1,123 @@
+<launch>
+  <arg name="manager" default="/camera/camera_nodelet_manager" />
+  <arg name="cloud_input" default="/camera/depth_registered/points" />
+  <arg name="cloud_reference" default="/reference_cloud" />
+  <arg name="sensor_frame_id" default="/camera_rgb_optical_frame" />
+
+  <node name="input_relay"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_topic_tools/Relay $(arg manager)">
+    <remap from="~input" to="$(arg cloud_input)" />
+  </node>
+
+  <node name="pass_through"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/OrganizedPassThrough $(arg manager)">
+    <remap from="~input" to="input_relay/output"/>
+    <rosparam>
+      min_index: 0
+      max_index: 640
+      remove_nan: true
+    </rosparam>
+  </node>
+
+  <node name="plane_estimator"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg manager)">
+    <remap from="~input" to="pass_through/output" />
+    <rosparam>
+      max_curvature: 0.01
+      estimate_normal: true
+      publish_normal: true
+      connect_plane_angle_threshold: 0.1
+    </rosparam>
+  </node>
+
+  <node name="area_filter"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PolygonArrayAreaLikelihood $(arg manager)">
+    <remap from="~input" to="plane_estimator/output_refined_polygon"/>
+    <rosparam>
+      area: 1.0
+    </rosparam>
+  </node>
+
+  <node name="table_extractor"
+        pkg="jsk_pcl_ros" type="extract_top_polygon_likelihood.py">
+    <remap from="~input" to="area_filter/output"/>
+    <remap from="~input/coefficients" to="plane_estimator/output_refined_coefficients" />
+    <rosparam subst_value="true">
+      min_likelihood: 0.2
+    </rosparam>
+  </node>
+
+  <node name="table_centroid_publisher"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/CentroidPublisher $(arg manager)">
+    <remap from="~input/polygons" to="table_extractor/output" />
+    <rosparam>
+      publish_tf: true
+      frame: table
+    </rosparam>
+  </node>
+
+  <node name="tabletop_object_extractor"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/MultiPlaneExtraction $(arg manager)">
+    <remap from="~input" to="input_relay/output"/>
+    <remap from="~input_polygons" to="table_extractor/output" />
+    <remap from="~input_coefficients" to="table_extractor/output/coefficients" />
+    <rosparam subst_value="true">
+      use_indices: false
+      use_sensor_frame: true
+      sensor_frame: $(arg sensor_frame_id)
+      min_height: 0.01
+      max_height: 0.20
+    </rosparam>
+  </node>
+
+  <node name="downsample_input"
+        pkg="nodelet" type="nodelet"
+        args="load pcl/VoxelGrid $(arg manager)">
+    <remap from="~input" to="tabletop_object_extractor/output"/>
+    <rosparam>
+      leaf_size: 0.008
+    </rosparam>
+  </node>
+
+  <node name="transform_input"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/TfTransformCloud $(arg manager)">
+    <remap from="~input" to="downsample_input/output" />
+    <rosparam>
+      target_frame_id: table00
+    </rosparam>
+  </node>
+
+  <!-- reference -->
+  <node name="downsample_reference"
+        pkg="nodelet" type="nodelet"
+        args="load pcl/VoxelGrid $(arg manager)">
+    <remap from="~input" to="$(arg cloud_reference)"/>
+    <rosparam>
+      leaf_size: 0.005
+    </rosparam>
+  </node>
+
+  <!-- icp -->
+  <node name="icp_registration"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ICPRegistration $(arg manager)">
+    <remap from="~input" to="transform_input/output"/>
+    <remap from="~input_reference" to="downsample_reference/output" />
+    <rosparam>
+      use_normal: true
+      transform_3dof: true
+    </rosparam>
+  </node>
+
+  <!-- for visualize icp debug clouds -->
+  <node name="base_link_publisher"
+        pkg="tf" type="static_transform_publisher"
+        args="0 0 0 0 0 0 camera_link base_link 10" />
+</launch>

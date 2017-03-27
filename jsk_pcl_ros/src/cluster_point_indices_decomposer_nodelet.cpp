@@ -294,6 +294,7 @@ namespace jsk_pcl_ros
           }
         }
         q = m;
+        q.normalize();
         Eigen::Matrix4f inv_m = m4.inverse();
         pcl::transformPointCloud(*segmented_cloud, *segmented_cloud_transformed, inv_m);
       }

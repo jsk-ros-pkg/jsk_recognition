@@ -57,6 +57,7 @@ namespace jsk_pcl_ros_utils
     }
     pub_ = advertise<sensor_msgs::PointCloud2>(
       *pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void SphericalPointCloudSimulator::subscribe()

@@ -52,6 +52,8 @@ namespace jsk_pcl_ros_utils
     pnh_->param("tf_queue_size", tf_queue_size_, 10);
     tf_listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
     pub_ = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "output", 1);
+
+    onInitPostProcess();
   }
 
   void PolygonArrayDistanceLikelihood::subscribe()

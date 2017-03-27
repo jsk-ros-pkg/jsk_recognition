@@ -103,6 +103,8 @@ namespace jsk_pcl_ros_utils
       pub_point_ = advertise<geometry_msgs::PointStamped>(
         *pnh_, "output/point", 1);
     }
+
+    onInitPostProcess();
   }
 }
 

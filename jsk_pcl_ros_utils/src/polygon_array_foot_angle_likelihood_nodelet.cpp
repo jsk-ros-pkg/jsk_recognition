@@ -62,6 +62,8 @@ namespace jsk_pcl_ros_utils
     axis_[2] = axis[2];
     tf_listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
     pub_ = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "output", 1);
+
+    onInitPostProcess();
   }
 
   void PolygonArrayFootAngleLikelihood::subscribe()

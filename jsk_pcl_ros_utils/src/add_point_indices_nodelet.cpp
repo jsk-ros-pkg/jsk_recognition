@@ -44,6 +44,7 @@ namespace jsk_pcl_ros_utils
     DiagnosticNodelet::onInit();
     pnh_->param("approximate_sync", approximate_sync_, false);
     pub_ = advertise<PCLIndicesMsg>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void AddPointIndices::subscribe()

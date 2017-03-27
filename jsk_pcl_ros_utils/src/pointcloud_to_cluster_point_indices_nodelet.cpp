@@ -41,6 +41,7 @@ namespace jsk_pcl_ros_utils
   {
     DiagnosticNodelet::onInit();
     pub_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void PointCloudToClusterPointIndices::subscribe()

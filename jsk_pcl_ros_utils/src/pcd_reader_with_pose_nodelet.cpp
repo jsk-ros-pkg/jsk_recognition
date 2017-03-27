@@ -53,8 +53,9 @@ namespace jsk_pcl_ros_utils
       NODELET_FATAL("cannot read pcd file %s", file_name.c_str());
       return;
     }
-    pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_,
-                                                       "output", 1);    
+    pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+
+    onInitPostProcess();
   }
   void PCDReaderWithPose::subscribe()
   {

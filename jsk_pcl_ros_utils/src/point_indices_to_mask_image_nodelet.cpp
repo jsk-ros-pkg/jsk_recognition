@@ -47,6 +47,7 @@ namespace jsk_pcl_ros_utils
     pnh_->param("queue_size", queue_size_, 100);
     pnh_->param("static_image_size", static_image_size_, false);
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void PointIndicesToMaskImage::subscribe()

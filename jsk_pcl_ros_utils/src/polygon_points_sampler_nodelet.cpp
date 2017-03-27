@@ -49,6 +49,8 @@ namespace jsk_pcl_ros_utils
 
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     pub_xyz_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_xyz", 1);
+
+    onInitPostProcess();
   }
 
   void PolygonPointsSampler::subscribe()

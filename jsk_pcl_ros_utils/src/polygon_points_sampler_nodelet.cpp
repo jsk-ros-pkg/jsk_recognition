@@ -104,6 +104,7 @@ namespace jsk_pcl_ros_utils
     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     // check frame_ids
     if (!isValidMessage(polygon_msg, coefficients_msg)) {
       return;

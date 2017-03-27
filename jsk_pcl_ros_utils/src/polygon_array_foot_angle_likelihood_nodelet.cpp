@@ -85,6 +85,7 @@ namespace jsk_pcl_ros_utils
     const jsk_recognition_msgs::PolygonArray::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     jsk_recognition_msgs::PolygonArray new_msg(*msg);
 
     try

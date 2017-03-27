@@ -96,6 +96,7 @@ namespace jsk_pcl_ros_utils
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZ>::Ptr
       cloud (new pcl::PointCloud<pcl::PointXYZ>);
     // 40fps 

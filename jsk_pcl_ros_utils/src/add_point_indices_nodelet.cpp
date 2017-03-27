@@ -76,6 +76,7 @@ namespace jsk_pcl_ros_utils
     const PCLIndicesMsg::ConstPtr& src1,
     const PCLIndicesMsg::ConstPtr& src2)
   {
+    vital_checker_->poke();
     pcl::PointIndices a, b;
     pcl_conversions::toPCL(*src1, a);
     pcl_conversions::toPCL(*src2, b);

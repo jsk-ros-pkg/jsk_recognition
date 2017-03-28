@@ -17,7 +17,6 @@ from sensor_msgs.msg import Image
 is_torch_available = True
 try:
     import torch
-    import torchfcn
 except ImportError:
     is_torch_available = False
 
@@ -73,6 +72,11 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
         self.model.train = False
 
     def _load_torch_model(self):
+        try:
+            import torchfcn
+        except ImportError as e:
+            rospy.logerr('Please install torchfcn by pip.')
+            raise ImportError(e)
         n_class = len(self.target_names)
         model_file = rospy.get_param('~model_file')
         model_name = rospy.get_param('~model_name')

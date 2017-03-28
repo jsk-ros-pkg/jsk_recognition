@@ -122,8 +122,6 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
         img = br.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
         mask = br.imgmsg_to_cv2(mask_msg, desired_encoding='mono8')
         label, proba_img = self.segment(img)
-        if label is None or proba_img is None:
-            return
         label[mask == 0] = 0
         proba_img[:, :, 0][mask != 0] = 1
         proba_img[:, :, 1:][mask != 0] = 0
@@ -138,8 +136,6 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
         br = cv_bridge.CvBridge()
         img = br.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
         label, proba_img = self.segment(img)
-        if label is None or proba_img is None:
-            return
         label_msg = br.cv2_to_imgmsg(label.astype(np.int32), '32SC1')
         label_msg.header = img_msg.header
         self.pub.publish(label_msg)
@@ -191,8 +187,6 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
         proba = proba.permute(0, 2, 3, 1).data.cpu().numpy()[0]
         max_proba = max_proba.data.cpu().numpy().squeeze((0, 1))
         label = label.data.cpu().numpy().squeeze((0, 1))
-        # uncertain because the probability is low
-        label[max_proba < self.proba_threshold] = self.bg_label
         return label, proba
 
 

@@ -78,6 +78,7 @@ namespace jsk_pcl_ros_utils
   void ClusterPointIndicesToPointIndices::convert(
     const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& cluster_indices_msg)
   {
+    vital_checker_->poke();
     PCLIndicesMsg indices_msg;
     indices_msg.header = cluster_indices_msg->header;
 

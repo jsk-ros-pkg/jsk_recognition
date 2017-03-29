@@ -55,6 +55,8 @@ namespace jsk_pcl_ros_utils
       *pnh_, "output/indices", 1);
     pub_coefficients_ = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(
       *pnh_, "output/coefficients", 1);
+
+    onInitPostProcess();
   }
 
   void PolygonFlipper::subscribe()

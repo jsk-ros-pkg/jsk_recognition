@@ -71,6 +71,8 @@ namespace jsk_pcl_ros_utils
       = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(*pnh_, "output/horizontal/coefficients", 1);
     pub_horizontal_polygons_
       = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "output/horizontal/polygons", 1);
+
+    onInitPostProcess();
   }
 
   void PlaneReasoner::subscribe()

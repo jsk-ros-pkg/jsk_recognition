@@ -44,6 +44,7 @@ namespace jsk_pcl_ros_utils
   {
     DiagnosticNodelet::onInit();
     pub_ = advertise<PCLIndicesMsg>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void MaskImageToPointIndices::subscribe()
@@ -74,6 +75,7 @@ namespace jsk_pcl_ros_utils
   void MaskImageToPointIndices::indices(
     const sensor_msgs::Image::ConstPtr& image_msg)
   {
+    vital_checker_->poke();
     cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(
       image_msg, sensor_msgs::image_encodings::MONO8);
     cv::Mat image = cv_ptr->image;

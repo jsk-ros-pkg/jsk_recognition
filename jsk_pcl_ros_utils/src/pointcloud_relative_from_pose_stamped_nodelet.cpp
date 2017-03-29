@@ -47,6 +47,7 @@ namespace jsk_pcl_ros_utils
   {
     DiagnosticNodelet::onInit();
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
   
   void PointCloudRelativeFromPoseStamped::subscribe()
@@ -67,6 +68,7 @@ namespace jsk_pcl_ros_utils
   void PointCloudRelativeFromPoseStamped::transform(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
                                                     const geometry_msgs::PoseStamped::ConstPtr& pose_msg)
   {
+    vital_checker_->poke();
     if (!jsk_recognition_utils::isSameFrameId(cloud_msg->header.frame_id,
                                              pose_msg->header.frame_id)) {
       NODELET_ERROR("frame_id does not match. cloud: %s, pose: %s",

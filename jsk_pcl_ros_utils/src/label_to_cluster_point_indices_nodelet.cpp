@@ -68,6 +68,7 @@ namespace jsk_pcl_ros_utils
   void LabelToClusterPointIndices::convert(
     const sensor_msgs::Image::ConstPtr& label_msg)
   {
+    vital_checker_->poke();
     cv_bridge::CvImagePtr label_img_ptr = cv_bridge::toCvCopy(
       label_msg, sensor_msgs::image_encodings::TYPE_32SC1);
     // collect indices for each labels

@@ -49,6 +49,7 @@ namespace jsk_pcl_ros_utils
 {
   void CentroidPublisher::extract(const sensor_msgs::PointCloud2ConstPtr& input)
   {
+    vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZ> cloud_xyz;
     pcl::fromROSMsg(*input, cloud_xyz);
     Eigen::Vector4f center;
@@ -151,6 +152,8 @@ namespace jsk_pcl_ros_utils
         *pnh_, "output/point", 1);
       pub_pose_array_ = advertise<geometry_msgs::PoseArray>(*pnh_, "output/pose_array", 1);
     }
+
+    onInitPostProcess();
   }
 }
 

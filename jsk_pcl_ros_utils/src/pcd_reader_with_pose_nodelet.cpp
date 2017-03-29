@@ -53,8 +53,9 @@ namespace jsk_pcl_ros_utils
       NODELET_FATAL("cannot read pcd file %s", file_name.c_str());
       return;
     }
-    pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_,
-                                                       "output", 1);    
+    pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+
+    onInitPostProcess();
   }
   void PCDReaderWithPose::subscribe()
   {
@@ -68,6 +69,7 @@ namespace jsk_pcl_ros_utils
   void PCDReaderWithPose::poseCallback(
     const geometry_msgs::PoseStamped::ConstPtr& pose_stamped)
   {
+    vital_checker_->poke();
     ros::Time now = ros::Time::now();
     Eigen::Affine3f pose_eigen;
     tf::poseMsgToEigen(pose_stamped->pose, pose_eigen);

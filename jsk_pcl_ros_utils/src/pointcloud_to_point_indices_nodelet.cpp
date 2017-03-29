@@ -71,6 +71,7 @@ namespace jsk_pcl_ros_utils
 
   void PointCloudToPointIndices::convert(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
+    vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZ>::Ptr pc(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*cloud_msg, *pc);
     PCLIndicesMsg indices_msg;

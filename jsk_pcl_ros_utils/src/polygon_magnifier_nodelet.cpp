@@ -48,6 +48,7 @@ namespace jsk_pcl_ros_utils
     srv_->setCallback (f);
 
     pub_ = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void PolygonMagnifier::subscribe()

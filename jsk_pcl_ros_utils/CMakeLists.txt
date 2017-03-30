@@ -67,94 +67,27 @@ ENDIF()
 # download and install sample data
 add_custom_target(install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
 
-# add_service_files(FILES SwitchTopic.srv
-#   UpdateOffset.srv
-#   SnapFootstep.srv
-#   SetDepthCalibrationParameter.srv
-#   TransformScreenpoint.srv
-#   CheckCircle.srv
-#   RobotPickupReleasePoint.srv
-#   TowerPickUp.srv
-#   EuclideanSegment.srv
-#   TowerRobotMoveCommand.srv
-#   SetPointCloud2.srv
-#   CallSnapIt.srv CallPolygon.srv
-#   EnvironmentLock.srv
-#   PolygonOnEnvironment.srv
-#   ICPAlignWithBox.srv
-#   ICPAlign.srv
-#   CheckCollision.srv)
-
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
-  #   cfg/VoxelGridLargeScale.cfg
   cfg/BoundingBoxArrayToBoundingBox.cfg
   cfg/CloudOnPlane.cfg
   cfg/ClusterPointIndicesToPointIndices.cfg
+  cfg/ColorizeDistanceFromPlane.cfg
   cfg/DelayPointCloud.cfg
+  cfg/MaskImageToDepthConsideredMaskImage.cfg
+  cfg/PlanarPointCloudSimulator.cfg
+  cfg/PlaneConcatenator.cfg
+  cfg/PlaneReasoner.cfg
+  cfg/PlaneRejector.cfg
+  cfg/PointCloudToPCD.cfg
   cfg/PolygonArrayAreaLikelihood.cfg
-#   cfg/PlaneSupportedCuboidEstimator.cfg
-#   cfg/InteractiveCuboidLikelihood.cfg
-#   cfg/ExtractParticlesTopNBase.cfg
-  cfg/PoseWithCovarianceStampedToGaussianPointCloud.cfg
-#   cfg/HeightmapMorphologicalFiltering.cfg
-#   cfg/HeightmapConverter.cfg
-#   cfg/HeightmapToPointCloud.cfg
-#   cfg/HeightmapTimeAccumulation.cfg
+  cfg/PolygonArrayUnwrapper.cfg
   cfg/PolygonMagnifier.cfg
   cfg/PolygonPointsSampler.cfg
-#   cfg/GeometricConsistencyGrouping.cfg
-#   cfg/UniformSampling.cfg
-  cfg/PlanarPointCloudSimulator.cfg
+  cfg/PoseWithCovarianceStampedToGaussianPointCloud.cfg
   cfg/SphericalPointCloudSimulator.cfg
-#   cfg/BorderEstimator.cfg
-#   cfg/HintedStickFinder.cfg
-#   cfg/HintedPlaneDetector.cfg
-#   cfg/TorusFinder.cfg
-  cfg/PlaneConcatenator.cfg
-#   cfg/NormalDirectionFilter.cfg
-#   cfg/RegionGrowingMultiplePlaneSegmentation.cfg
-#   cfg/LineSegmentCollector.cfg
-#   cfg/LineSegmentDetector.cfg
-#   cfg/ParticleFilterTracking.cfg
-#   cfg/BilateralFilter.cfg
-#   cfg/ICPRegistration.cfg
-  cfg/PlaneReasoner.cfg
-#   cfg/OrganizedPassThrough.cfg
-#   cfg/EuclideanClustering.cfg
-  cfg/ColorizeDistanceFromPlane.cfg
-#   cfg/HSIColorFilter.cfg
-#   cfg/RGBColorFilter.cfg
-#   cfg/ImageRotate.cfg
-#   cfg/RegionGrowingSegmentation.cfg
-#   cfg/OrganizedMultiPlaneSegmentation.cfg
-#   cfg/MultiPlaneExtraction.cfg
-#   cfg/NormalEstimationIntegralImage.cfg
-  cfg/PlaneRejector.cfg
-#   cfg/EnvironmentPlaneModeling.cfg
-#   cfg/ColorHistogramMatcher.cfg
-#   cfg/GridSampler.cfg
-#   cfg/OrganizedEdgeDetector.cfg
-#   cfg/EdgeDepthRefinement.cfg
-#   cfg/ParallelEdgeFinder.cfg
-#   cfg/EdgebasedCubeFinder.cfg
-#   cfg/MultiPlaneSACSegmentation.cfg
-#   cfg/BoundingBoxFilter.cfg
-  cfg/MaskImageToDepthConsideredMaskImage.cfg
-#   cfg/ResizePointsPublisher.cfg
-#   cfg/LINEMODDetector.cfg
-#   cfg/SupervoxelSegmentation.cfg
-#   cfg/FeatureRegistration.cfg
-#   cfg/FisheyeSphere.cfg
-#   cfg/MovingLeastSquareSmoothing.cfg
-#   cfg/OctreeVoxelGrid.cfg
-#   cfg/OctreeChangePublisher.cfg
-    cfg/PointCloudToPCD.cfg
-    cfg/PolygonArrayUnwrapper.cfg
-  )
+)
 
-generate_messages(DEPENDENCIES
-  ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_footstep_msgs)
 find_package(OpenCV REQUIRED core imgproc)
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
@@ -276,12 +209,7 @@ add_dependencies(jsk_pcl_ros_utils ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg
 target_link_libraries(jsk_pcl_ros_utils
   ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
 
-# bench/ directory
-# generate_messages(DEPENDENCIES
-#   ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_footstep_msgs)
-
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-message("flags: ${CMAKE_CXX_FLAGS}")
 
 catkin_package(
     DEPENDS pcl

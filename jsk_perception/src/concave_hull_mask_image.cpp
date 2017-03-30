@@ -35,12 +35,7 @@
 
 #include "jsk_perception/concave_hull_mask_image.h"
 #include <boost/assign.hpp>
-#include <boost/tuple/tuple.hpp>
-#include <jsk_topic_tools/log_utils.h>
-#include <jsk_recognition_utils/cv_utils.h>
-#include <opencv2/opencv.hpp>
-#include <sensor_msgs/image_encodings.h>
-#include <cv_bridge/cv_bridge.h>
+
 
 namespace jsk_perception
 {

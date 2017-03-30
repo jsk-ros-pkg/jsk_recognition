@@ -110,8 +110,8 @@ namespace jsk_perception
       std::vector<float> x_smooth;
       std::vector<float> y_smooth;
 
-      filter2D(x, x_smooth, CV_32FC1, G);
-      filter2D(y, y_smooth, CV_32FC1, G);
+      cv::filter2D(x, x_smooth, CV_32FC1, G);
+      cv::filter2D(y, y_smooth, CV_32FC1, G);
 
       for (size_t j = 0; j < n; j++) {
         smoothed_contours[i].push_back(cv::Point2f(x_smooth[j], y_smooth[j]));

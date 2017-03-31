@@ -249,16 +249,38 @@ namespace jsk_pcl_ros
       seg_.setOptimizeCoefficients (true);
       seg_.setModelType (pcl::SACMODEL_LINE);
       switch (segmentation_method_) {
-        case jsk_pcl_ros::LineSegmentDetector_RANSAC: {
+        case jsk_pcl_ros::LineSegmentDetector_SAC_RANSAC: {
           seg_.setMethodType(pcl::SAC_RANSAC);
           break;
         }
-        case jsk_pcl_ros::LineSegmentDetector_LMEDS: {
+        case jsk_pcl_ros::LineSegmentDetector_SAC_LMEDS: {
           seg_.setMethodType(pcl::SAC_LMEDS);
           break;
         }
+        case jsk_pcl_ros::LineSegmentDetector_SAC_MSAC: {
+          seg_.setMethodType(pcl::SAC_MSAC);
+          break;
+        }
+        case jsk_pcl_ros::LineSegmentDetector_SAC_RRANSAC: {
+          seg_.setMethodType(pcl::SAC_RRANSAC);
+          break;
+        }
+        case jsk_pcl_ros::LineSegmentDetector_SAC_RMSAC: {
+          seg_.setMethodType(pcl::SAC_RMSAC);
+          break;
+        }
+        case jsk_pcl_ros::LineSegmentDetector_SAC_MLESAC: {
+          seg_.setMethodType(pcl::SAC_MLESAC);
+          break;
+        }
+        case jsk_pcl_ros::LineSegmentDetector_SAC_PROSAC: {
+          seg_.setMethodType(pcl::SAC_PROSAC);
+          break;
+        }
+        default: {
+          NODELET_ERROR("No such index type of Method Type: %d", segmentation_method_);
+        }
       }
-      seg_.setMethodType (segmentation_method_);
       seg_.setDistanceThreshold (outlier_threshold_);
       seg_.setMaxIterations (max_iterations_);
       segmentation_update_ = false;

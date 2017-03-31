@@ -44,8 +44,13 @@ Parameters
 
   The type of sample consensus method to use.
 
-  - 0: RANSAC
-  - 1: LMEDS
+  - 0: SAC_RANSAC
+  - 1: SAC_LMEDS
+  - 2: SAC_MSAC
+  - 3: SAC_RRANSAC
+  - 4: SAC_RMSAC
+  - 5: SAC_MLESAC
+  - 6: SAC_PROSAC
 
 - ``~outlier_threshold`` (``Double``, default: ``0.005``)
 

@@ -32,7 +32,7 @@ Parameters
 
   Minimum area of concave.
 
-* ``max_area`` (Float, default: ``10000000``)
+* ``max_area`` (Float, default: ``Image's height * width``)
 
   Maximum area of concave.
 

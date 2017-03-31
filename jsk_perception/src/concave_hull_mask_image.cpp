@@ -82,15 +82,18 @@ namespace jsk_perception
     std::vector<cv::Vec4i> hierarchy;
     cv::findContours(mask, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 
+    int max_area = 0;
     if (max_area_ < 0) {
-      max_area_ = mask.cols * mask.rows;
+      max_area = mask.cols * mask.rows;
+    } else {
+      max_area = max_area_;
     }
 
     // Prune contours
     std::vector<std::vector<cv::Point> > pruned_contours;
     for (size_t i = 0; i < contours.size(); i++) {
       double area = cv::contourArea(contours[i]);
-      if (min_area_ <= area && area <= max_area_) {
+      if (min_area_ <= area && area <= max_area) {
         pruned_contours.push_back(contours[i]);
       }
     }

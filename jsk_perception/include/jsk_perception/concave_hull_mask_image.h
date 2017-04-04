@@ -37,8 +37,11 @@
 #ifndef JSK_PERCEPTION_CONCAVE_HULL_MASK_IMAGE_H_
 #define JSK_PERCEPTION_CONCAVE_HULL_MASK_IMAGE_H_
 
+#include <opencv2/opencv.hpp>
+
 #include <dynamic_reconfigure/server.h>
 #include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <jsk_perception/ConcaveHullMaskImageConfig.h>

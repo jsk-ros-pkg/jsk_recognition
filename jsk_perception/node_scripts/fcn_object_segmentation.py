@@ -52,7 +52,7 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
         else:
             raise RuntimeError('Unsupported backend: %s', self.backend)
 
-    def _load_model_chainer_backend(self):
+    def _load_chainer_model(self):
         model_name = rospy.get_param('~model_name')
         model_h5 = rospy.get_param('~model_h5')
         n_class = len(self.target_names)
@@ -162,7 +162,7 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
             x_data = cuda.to_gpu(x_data, device=self.gpu)
         x = chainer.Variable(x_data, volatile=True)
         self.model(x)
-        proba_img = chainer.functions.softmax(self.model.score)
+        proba_img = chainer.functions.softmax(self.model.score)[0]
         proba_img = chainer.functions.transpose(proba_img, (1, 2, 0))
         max_proba_img = chainer.functions.max(proba_img, axis=-1)
         label = chainer.functions.argmax(self.model.score, axis=1)

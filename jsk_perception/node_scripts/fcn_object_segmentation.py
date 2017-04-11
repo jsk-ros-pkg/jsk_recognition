@@ -23,9 +23,8 @@ except ImportError:
 
 def assert_torch_available():
     if not is_torch_available:
-        raise RuntimeError(
-            'PyTorch is unavailable. Please install it by:'
-            ' rosrun jsk_perception install_pytorch.sh')
+        url = 'http://download.pytorch.org/whl/cu80/torch-0.1.11.post4-cp27-none-linux_x86_64.whl'  # NOQA
+        raise RuntimeError('Please install pytorch: pip install %s' % url)
 
 
 class FCNObjectSegmentation(ConnectionBasedTransport):
@@ -75,8 +74,7 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
         try:
             import torchfcn
         except ImportError as e:
-            rospy.logerr('Please install torchfcn by pip.')
-            raise ImportError(e)
+            raise ImportError('Please install torchfcn: pip install torchfcn')
         n_class = len(self.target_names)
         model_file = rospy.get_param('~model_file')
         model_name = rospy.get_param('~model_name')

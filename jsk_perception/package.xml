@@ -85,6 +85,7 @@
   <run_depend>python-fcn-pip</run_depend>  <!-- pip -->
   <!-- }} install fcn -->
   <run_depend>python-sklearn</run_depend>
+  <run_depend>python-torch-cuda80-pip</run_depend>
   <run_depend>rosbag</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>roseus</run_depend>

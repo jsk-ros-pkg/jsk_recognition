@@ -81,7 +81,7 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
         if model_name == 'fcn32s':
             self.model = torchfcn.models.FCN32s(n_class=n_class)
         elif model_name == 'fcn32s_bilinear':
-            self.model = torchfcn.models.FCN32s(n_class=n_class, deconv=False)
+            self.model = torchfcn.models.FCN32s(n_class=n_class, nodeconv=True)
         else:
             raise ValueError('Unsupported ~model_name: {0}'.format(model_name))
         jsk_loginfo('Loading trained model: %s' % model_file)

@@ -253,8 +253,10 @@ namespace resized_image_transport
     boost::mutex::scoped_lock lock(mutex_);
     ros::Time now = ros::Time::now();
     ROS_DEBUG("image processing callback");
-    if ( !publish_once_ || (cp_.getNumSubscribers () == 0 && image_pub_.getNumSubscribers () == 0 )) {
-      ROS_DEBUG("number of subscribers is 0, ignoring image");
+    if (!publish_once_ ||
+        (!cp_.getTopic().empty() && cp_.getNumSubscribers () == 0) ||
+        (!image_pub_.getTopic().empty() && image_pub_.getNumSubscribers () == 0)) {
+      ROS_DEBUG("number of subscribers is 0, ignoring image"); 
       return;
     }
     if (use_messages_ && now - last_publish_time_ < period_) {

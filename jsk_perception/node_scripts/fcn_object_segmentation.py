@@ -47,6 +47,8 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
             self._load_chainer_model()
         elif self.backend == 'torch':
             assert_torch_available()
+            # we assume input data size won't change in dynamic
+            torch.backends.cudnn.benchmark = True
             self._load_torch_model()
         else:
             raise RuntimeError('Unsupported backend: %s', self.backend)
@@ -73,7 +75,7 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
     def _load_torch_model(self):
         try:
             import torchfcn
-        except ImportError as e:
+        except ImportError:
             raise ImportError('Please install torchfcn: pip install torchfcn')
         n_class = len(self.target_names)
         model_file = rospy.get_param('~model_file')
@@ -81,7 +83,7 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
         if model_name == 'fcn32s':
             self.model = torchfcn.models.FCN32s(n_class=n_class)
         elif model_name == 'fcn32s_bilinear':
-            self.model = torchfcn.models.FCN32s(n_class=n_class, deconv=False)
+            self.model = torchfcn.models.FCN32s(n_class=n_class, nodeconv=True)
         else:
             raise ValueError('Unsupported ~model_name: {0}'.format(model_name))
         jsk_loginfo('Loading trained model: %s' % model_file)
@@ -149,7 +151,6 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
         if self.backend == 'chainer':
             return self._segment_chainer_backend(bgr)
         elif self.backend == 'torch':
-            assert_torch_available()
             return self._segment_torch_backend(bgr)
         raise ValueError('Unsupported backend: {0}'.format(self.backend))
 
@@ -185,9 +186,7 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
         # uncertain because the probability is low
         label[max_proba < self.proba_threshold] = self.bg_label
         # gpu -> cpu
-        score = score.permute(0, 2, 3, 1).data.cpu().numpy()[0]
         proba = proba.permute(0, 2, 3, 1).data.cpu().numpy()[0]
-        max_proba = max_proba.data.cpu().numpy().squeeze((0, 1))
         label = label.data.cpu().numpy().squeeze((0, 1))
         return label, proba
 

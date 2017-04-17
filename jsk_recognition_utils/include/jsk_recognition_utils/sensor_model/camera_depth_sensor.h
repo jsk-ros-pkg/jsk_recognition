@@ -82,7 +82,7 @@ namespace jsk_recognition_utils
     virtual double expectedPointCloudNum(double distance, double area) const
     {
       double f = model_.fx();
-      return f*f / (distance*distance) * area;
+      return f*f / (width() * height()) / (distance*distance) * area;
     }
 
     /**

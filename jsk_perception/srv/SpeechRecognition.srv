@@ -1,0 +1,5 @@
+float32 duration   # recording duration
+bool quiet         # quiet recording
+string[] keywords  # keyword phrases
+---
+string sentence   # speech recognition result

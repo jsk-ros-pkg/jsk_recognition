@@ -81,6 +81,7 @@ generate_dynamic_reconfigure_options(
   cfg/PlaneRejector.cfg
   cfg/PointCloudToPCD.cfg
   cfg/PolygonArrayAreaLikelihood.cfg
+  cfg/PolygonArrayLikelihoodFilter.cfg
   cfg/PolygonArrayUnwrapper.cfg
   cfg/PolygonMagnifier.cfg
   cfg/PolygonPointsSampler.cfg
@@ -130,6 +131,8 @@ jsk_pcl_util_nodelet(src/polygon_array_angle_likelihood_nodelet.cpp
   "jsk_pcl_utils/PolygonArrayAngleLikelihood" "polygon_array_angle_likelihood")
 jsk_pcl_util_nodelet(src/polygon_array_foot_angle_likelihood_nodelet.cpp
   "jsk_pcl_utils/PolygonArrayFootAngleLikelihood" "polygon_array_foot_angle_likelihood")
+jsk_pcl_util_nodelet(src/polygon_array_likelihood_filter_nodelet.cpp
+  "jsk_pcl_utils/PolygonArrayLikelihoodFilter" "polygon_array_likelihood_filter")
 jsk_pcl_util_nodelet(src/pose_with_covariance_stamped_to_gaussian_pointcloud_nodelet.cpp
   "jsk_pcl_utils/PoseWithCovarianceStampedToGaussianPointCloud" "pose_with_covariance_stamped_to_gaussian_pointcloud")
 jsk_pcl_util_nodelet(src/spherical_pointcloud_simulator_nodelet.cpp

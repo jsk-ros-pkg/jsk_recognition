@@ -15,7 +15,7 @@
 (setq *marker-life* (ros::get-param "~marker_life" 300))
 (setq *base-frame-id* (ros::get-param "~base_frame_id" "/base_footprint"))
 (setq *calc-kalman* t)
-(setq *detect-flag* t)
+(setq *detect-flag* nil)
 (setq *tf-force* nil)
 (setq *target-obj* (make-cube 60 60 60))
 (send *target-obj* :reset-coords)
@@ -461,7 +461,7 @@
     (cond
      ((and ts (send *map-frame-objectdetection* :objects))
       (send cds :move-to ts :local)
-      (Let ((mf-obj-lst (send *map-frame-objectdetection* :objects))
+      (let ((mf-obj-lst (send *map-frame-objectdetection* :objects))
             (tp (send req :type)))
         (dolist (obj mf-obj-lst)
           (when (or (not (stringp tp))
@@ -481,15 +481,6 @@
     (ros::ros-info "reliability:~A type:~A" (send (send m :object_pose) :reliability) (send (send m :object_pose) :type))
     m))
 
-(defun detect-switch-cb (msg)
-  (ros::ros-debug "detect-switch data:~A" (send msg :data))
-  (setq *detect-flag* (send msg :data))
-  (when *detect-flag*
-    ;; reflesh
-    (setq *map-frame-objectdetection* (instance posedetection_msgs::ObjectDetection :init))
-    (send *map-frame-objectdetection* :header :frame_id *map-id*) ;; avoiding header error in rviz
-    ))
-
 (ros::advertise "object_detection_marker_array" visualization_msgs::MarkerArray 5)
 (ros::advertise "filtered" visualization_msgs::MarkerArray 5)
 (ros::advertise "outlier" visualization_msgs::MarkerArray 5)
@@ -498,16 +489,21 @@
 (ros::advertise "simplecov" geometry_msgs::PoseWithCovarianceStamped 1)
 (ros::advertise-service "targetobj" posedetection_msgs::TargetObj #'target-obj-cb)
 (ros::subscribe "input/image" sensor_msgs::Image #'attention-init)
-(ros::subscribe "input/switch" std_msgs::Bool #'detect-switch-cb)
 
 (ros::rate 10)
+(ros::set-param "~running" nil)
 (while t
   (ros::spin-once)
+  (setq *detect-flag* (ros::get-param "~running" nil))
   (cond
    (*detect-flag*
     (ros::subscribe "input/ObjectDetection"
                     posedetection_msgs::ObjectDetection
                     #'pub-cb *target-obj*))
    (t
-    (ros::unsubscribe detection-topic)))
+    (ros::unsubscribe "input/ObjectDetection")
+    ;; reflesh
+    (setq *map-frame-objectdetection* (instance posedetection_msgs::ObjectDetection :init))
+    (send *map-frame-objectdetection* :header :frame_id *map-id*) ;; avoiding header error in rviz
+    ))
   (ros::sleep))

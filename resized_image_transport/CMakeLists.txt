@@ -10,7 +10,7 @@ if(CCACHE_FOUND)
 endif(CCACHE_FOUND)
 
 find_package(catkin REQUIRED COMPONENTS cv_bridge sensor_msgs image_transport
-  std_srvs message_generation dynamic_reconfigure
+  std_srvs message_generation dynamic_reconfigure driver_base
   nodelet
   jsk_topic_tools)
 find_package(OpenCV REQUIRED)
@@ -24,8 +24,8 @@ generate_dynamic_reconfigure_options(
 catkin_package(
     DEPENDS # opencv2
     CATKIN_DEPENDS cv_bridge sensor_msgs image_transport std_srvs message_runtime
-    INCLUDE_DIRS include # TODO include
-    LIBRARIES # TODO
+    INCLUDE_DIRS include
+    LIBRARIES resized_image_transport
 )
 
 if("${jsk_topic_tools_VERSION}" VERSION_LESS 2.0.10) # https://github.com/jsk-ros-pkg/jsk_common/pull/1346 changed since >= 2.0.10
@@ -50,7 +50,7 @@ add_dependencies(resized_image_transport ${PROJECT_NAME}_gencfg)
 
 
 # Mark executables and/or libraries for installation
-install(TARGETS image_resizer resized_image_transport ${nodelet_executables}
+install(TARGETS resized_image_transport ${nodelet_executables}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

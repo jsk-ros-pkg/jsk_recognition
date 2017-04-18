@@ -15,12 +15,18 @@ Step by step
 
 For this purpose, you can use `image_publisher.py <../jsk_perception/nodes/image_publisher.html>`_.
 
+terminal 1:
+
 .. code:: bash
 
     $ roscore
 
+terminal 2:
+
+.. code:: bash
+
     $ rosrun jsk_perception image_publisher.py \
-      _file_name:=$(find jsk_perception)/sample/kiva_pod_image_color.jpg _rate:=30
+      _file_name:=$(rospack find jsk_perception)/sample/kiva_pod_image_color.jpg _rate:=30
 
 ``_file_name:=...`` and ``_rate:=...`` is remapping of **rosparam** and
 you can get the value with:

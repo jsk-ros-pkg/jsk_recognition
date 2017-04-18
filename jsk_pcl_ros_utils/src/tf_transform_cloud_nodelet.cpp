@@ -90,6 +90,8 @@ namespace jsk_pcl_ros_utils
     pnh_->param("tf_queue_size", tf_queue_size_, 10);
     tf_listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+
+    onInitPostProcess();
   }
 
   void TfTransformCloud::subscribe()

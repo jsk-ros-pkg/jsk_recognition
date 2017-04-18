@@ -57,6 +57,8 @@ namespace jsk_pcl_ros_utils
     region_height_ = 0;
     region_x_off_ = 0;
     region_y_off_ = 0;
+
+    onInitPostProcess();
   }
 
   void MaskImageToDepthConsideredMaskImage::configCallback(Config &config, uint32_t level){

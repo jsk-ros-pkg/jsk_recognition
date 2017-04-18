@@ -49,6 +49,8 @@ namespace jsk_pcl_ros_utils
 
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     pub_xyz_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output_xyz", 1);
+
+    onInitPostProcess();
   }
 
   void PolygonPointsSampler::subscribe()
@@ -104,6 +106,7 @@ namespace jsk_pcl_ros_utils
     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     // check frame_ids
     if (!isValidMessage(polygon_msg, coefficients_msg)) {
       return;

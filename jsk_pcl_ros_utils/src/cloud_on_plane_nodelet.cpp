@@ -51,6 +51,8 @@ namespace jsk_pcl_ros_utils
     srv_->setCallback (f);
 
     pub_ = advertise<jsk_recognition_msgs::BoolStamped>(*pnh_, "output", 1);
+
+    onInitPostProcess();
   }
 
   void CloudOnPlane::subscribe()
@@ -81,6 +83,7 @@ namespace jsk_pcl_ros_utils
                                const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     // check header
     if (!jsk_recognition_utils::isSameFrameId(*cloud_msg, *polygon_msg)) {
       NODELET_ERROR("frame_id does not match: cloud: %s, polygon: %s",

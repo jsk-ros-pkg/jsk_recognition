@@ -1,0 +1,17 @@
+<launch>
+
+  <node name="hsv_color_filter"
+        pkg="opencv_apps" type="hsv_color_filter">
+    <remap from="image" to="image_publisher/output" />
+    <rosparam>
+      use_camera_info: false
+      h_limit_max: 360
+      h_limit_min: 340
+      s_limit_max: 220
+      s_limit_min: 170
+      v_limit_max: 130
+      v_limit_min: 80
+    </rosparam>
+  </node>
+
+</launch>

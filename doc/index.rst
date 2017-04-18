@@ -13,8 +13,8 @@ The code is open source, and `available on github`_.
    :maxdepth: 1
    :caption: Contents
 
-   tutorials/index
    overview
+   tutorials/index
    tips
    install_astra_camera
    install_softkinetic_camera

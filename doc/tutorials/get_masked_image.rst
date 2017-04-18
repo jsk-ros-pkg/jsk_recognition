@@ -49,8 +49,17 @@ The advance from previous tutorials is it subscribes **2 topics**: color image a
 
 .. code-block:: bash
 
-  $ rosrun jsk_perception apply_mask_image _clip:=false \
+  $ rosrun jsk_perception apply_mask_image
+      _clip:=false _approximate_sync:=false _queue_size:=100 \
       \~input:=image_publisher/output \~input/mask:=hsv_color_filter/image
+
+``_clip:=false`` is for disabling cropping of the region.
+``_approximate_sync:=false`` and ``_queue_size:=...`` is for synchronization method of timestamp, that is needed if you subscribes
+multiple topics. In this case, the both topic has the exactly the same stamp and it can be synchronized without approximation.
+You can see the timestamp by below::
+
+  $ rostopic echo /image_publisher/image/header/stamp
+  $ rostopic echo /hsv_color_filter/image/header/stamp
 
 The result will be like below:
 

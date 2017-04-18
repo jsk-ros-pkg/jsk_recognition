@@ -33,10 +33,27 @@ Publishing Topic
    Resized camera info.
 
 
+Parameters
+----------
+
+- ``~resize_scale_x``, ``~resize_scale_y`` (``Double``, default: ``0.25``)
+
+   Resizing scale.
+
+-  ``~use_messages`` (``Bool``, default: ``true``)
+
+   If ``true``, topic publishing rate will be limited, and it causes some problems
+   on handling rostime: for example ``rosbag play --loop`` won't work with this option,
+   and the topic publication is stopped.
+
+- ``~msg_par_second`` (``Double``, default: ``15.0``)
+
+   Topic publishing rate if ``~use_messages`` is ``true``.
+
+
 Sample
 ------
 
 ::
 
-    $ roslaunch resized_image_transport image_resizer.test
-    $ rosrun image_view image_view image:=/image_resizer/output/image
+    $ roslaunch resized_image_transport sample_image_resizer.launch

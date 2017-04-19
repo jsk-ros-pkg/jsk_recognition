@@ -1,8 +1,7 @@
-// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2015, JSK Lab
+ *  Copyright (c) 2017, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -34,48 +33,56 @@
  *********************************************************************/
 
 
-#ifndef JSK_PERCEPTION_MULTIPLY_MASK_IMAGE_H_
-#define JSK_PERCEPTION_MULTIPLY_MASK_IMAGE_H_
+#ifndef JSK_PERCEPTION_FILTER_MASK_IMAGE_WITH_SIZE_H_
+#define JSK_PERCEPTION_FILTER_MASK_IMAGE_WITH_SIZE_H_
 
+#include <dynamic_reconfigure/server.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
-#include <sensor_msgs/Image.h>
-
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include <sensor_msgs/Image.h>
+
+#include "jsk_perception/FilterMaskImageWithSizeConfig.h"
 
 namespace jsk_perception
 {
-  class MultiplyMaskImage: public jsk_topic_tools::DiagnosticNodelet
+  class FilterMaskImageWithSize: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
+    FilterMaskImageWithSize(): DiagnosticNodelet("FilterMaskImageWithSize") {}
     typedef message_filters::sync_policies::ExactTime<
-    sensor_msgs::Image,
-    sensor_msgs::Image > SyncPolicy;
+      sensor_msgs::Image, sensor_msgs::Image > SyncPolicy;
     typedef message_filters::sync_policies::ApproximateTime<
-    sensor_msgs::Image,
-    sensor_msgs::Image > ApproxSyncPolicy;
-    
-    MultiplyMaskImage(): DiagnosticNodelet("MultiplyMaskImage") {}
+      sensor_msgs::Image, sensor_msgs::Image > ApproxSyncPolicy;
+    typedef jsk_perception::FilterMaskImageWithSizeConfig Config;
   protected:
     virtual void onInit();
+    virtual void configCallback(Config &config, uint32_t level);
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual void multiply(
-      const sensor_msgs::Image::ConstPtr& src1_msg,
-      const sensor_msgs::Image::ConstPtr& src2_msg);
+    virtual void filter(const sensor_msgs::Image::ConstPtr& input_msg,
+                        const sensor_msgs::Image::ConstPtr& reference_msg);
+
+    boost::mutex mutex_;
+
+    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
+    double min_size_;
+    double max_size_;
+    double min_relative_size_;
+    double max_relative_size_;
 
     bool approximate_sync_;
     int queue_size_;
-    ros::Publisher pub_;
-    message_filters::Subscriber<sensor_msgs::Image> sub_src1_;
-    message_filters::Subscriber<sensor_msgs::Image> sub_src2_;
+    message_filters::Subscriber<sensor_msgs::Image> sub_input_;
+    message_filters::Subscriber<sensor_msgs::Image> sub_reference_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
     boost::shared_ptr<message_filters::Synchronizer<ApproxSyncPolicy> > async_;
-  private:
-    
-  };
-}
 
-#endif
+    ros::Publisher pub_;
+  private:
+  };
+}  // namespace jsk_perception
+
+#endif  // JSK_PERCEPTION_FILTER_MASK_IMAGE_WITH_RELATIVE_SIZE_H_

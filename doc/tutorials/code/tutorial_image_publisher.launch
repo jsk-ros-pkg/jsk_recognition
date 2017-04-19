@@ -1,0 +1,24 @@
+<launch>
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <!--
+    <param name="file_name" value="$(find jsk_perception)/sample/kiva_pod_image_color.jpg" type="str" />
+    <param name="rate" value="30" type="int" />
+    Below also works.
+    See http://wiki.ros.org/roslaunch/XML/param and http://wiki.ros.org/roslaunch/XML/rosparam for detail.
+    -->
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/kiva_pod_image_color.jpg
+      rate: 30
+    </rosparam>
+  </node>
+  <node name="image_view"
+        pkg="image_view" type="image_view">
+    <!--
+    <remap from="image" to="/image_publisher/output" />
+    Below works because image_publisher and image_view is in the same namespace.
+    See http://wiki.ros.org/roslaunch/Tutorials/Roslaunch%20tips%20for%20larger%20projects for detail.
+    -->
+    <remap from="image" to="image_publisher/output" />
+  </node>
+</launch>

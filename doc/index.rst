@@ -14,6 +14,7 @@ The code is open source, and `available on github`_.
    :caption: Contents
 
    overview
+   tutorials/index
    tips
    install_astra_camera
    install_softkinetic_camera

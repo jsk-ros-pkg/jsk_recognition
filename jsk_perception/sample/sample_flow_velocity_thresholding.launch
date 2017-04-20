@@ -1,0 +1,59 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <param name="/use_sim_time" value="true" />
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_perception)/sample/data/2016-10-15-23-21-42_moving_bottle.bag --clock"
+        required="true">
+  </node>
+
+  <arg name="INPUT_IMAGE" value="/camera/rgb/image_rect_color" />
+
+  <node name="fback_flow"
+        pkg="opencv_apps" type="fback_flow">
+    <remap from="image" to="$(arg INPUT_IMAGE)" />
+    <rosparam>
+      use_camera_info: false
+    </rosparam>
+  </node>
+
+  <node name="flow_velocity_thresholding"
+        pkg="jsk_perception" type="flow_velocity_thresholding">
+    <remap from="~input/flows" to="fback_flow/flows" />
+    <rosparam>
+      approximate_sync: false
+      use_camera_info: false
+      image_height: 480
+      image_width: 640
+      window_size: 16
+      threshold: 5.0
+    </rosparam>
+  </node>
+
+  <node name="apply_mask_image"
+        pkg="jsk_perception" type="apply_mask_image">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/mask" to="flow_velocity_thresholding/output" />
+    <rosparam>
+      clip: false
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="fback_flow/image" />
+    </node>
+    <node name="image_view1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="flow_velocity_thresholding/output" />
+    </node>
+    <node name="image_view2"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="apply_mask_image/output" />
+    </node>
+  </group>
+
+</launch>

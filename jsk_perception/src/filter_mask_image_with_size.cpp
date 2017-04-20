@@ -108,13 +108,13 @@ namespace jsk_perception
     double size_input = cv::countNonZero(input > 127) / size_image;
     double size_reference = cv::countNonZero(reference > 127) / size_image;
     double size_relative = size_input / size_reference;
+    ROS_INFO("image relative: %lf <= %lf <= %lf, mask relative: %lf <= %lf <= %lf",
+             min_size_, size_input, max_size_,
+             min_relative_size_, size_relative, max_relative_size_);
     if (!std::isnan(size_relative) &&
         (min_size_ <= size_input) && (size_input <= max_size_) &&
         (min_relative_size_ <= size_relative) && (size_relative <= max_relative_size_))
     {
-      ROS_DEBUG("image relative: %lf <= %lf <= %lf, mask relative: %lf <= %lf <= %lf",
-                min_size_, size_input, max_size_,
-                min_relative_size_, size_relative, max_relative_size_);
       pub_.publish(input_msg);
     }
   }

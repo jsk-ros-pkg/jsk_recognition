@@ -41,6 +41,10 @@ Parameters
   How many messages you allow about the subscriber to keep in the queue.
   This should be big when there is much difference about delay between two topics.
 
+* ``~approximate_sync`` (Bool, default: ``False``)
+
+  Whether to use approximate for input topics.
+
 
 Sample
 ------

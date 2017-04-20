@@ -116,6 +116,7 @@
   <test_depend>jsk_tools</test_depend>
   <test_depend>roslaunch</test_depend>
   <test_depend>rostest</test_depend>
+  <test_depend>libxml2</test_depend>
   <export>
     <nodelet plugin="${prefix}/plugins/nodelet/libjsk_pcl_ros.xml"/>
     <nodelet plugin="${prefix}/plugins/nodelet/libjsk_pcl_ros_utils.xml"/>

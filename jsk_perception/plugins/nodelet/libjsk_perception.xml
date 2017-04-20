@@ -59,6 +59,10 @@
          type="jsk_perception::ConvexHullMaskImage"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_perception/ConcaveHullMaskImage"
+         type="jsk_perception::ConcaveHullMaskImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/PolygonToMaskImage"
          type="jsk_perception::PolygonToMaskImage"
          base_class_type="nodelet::Nodelet">

@@ -83,6 +83,7 @@ add_custom_target(install_trained_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts
 
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
+  cfg/ConcaveHullMaskImage.cfg
   cfg/RectArrayActualSizeFilter.cfg
   cfg/PolygonArrayColorLikelihood.cfg
   cfg/PolygonArrayColorHistogram.cfg
@@ -223,6 +224,7 @@ jsk_add_nodelet(src/roi_to_mask_image.cpp "jsk_perception/ROIToMaskImage" "roi_t
 jsk_add_nodelet(src/polygon_to_mask_image.cpp "jsk_perception/PolygonToMaskImage" "polygon_to_mask_image")
 jsk_add_nodelet(src/polygon_array_to_label_image.cpp "jsk_perception/PolygonArrayToLabelImage" "polygon_array_to_label_image")
 jsk_add_nodelet(src/rect_to_roi.cpp "jsk_perception/RectToROI" "rect_to_roi")
+jsk_add_nodelet(src/concave_hull_mask_image.cpp "jsk_perception/ConcaveHullMaskImage" "concave_hull_mask_image")
 jsk_add_nodelet(src/convex_hull_mask_image.cpp "jsk_perception/ConvexHullMaskImage" "convex_hull_mask_image")
 jsk_add_nodelet(src/mask_image_generator.cpp "jsk_perception/MaskImageGenerator" "mask_image_generator")
 jsk_add_nodelet(src/project_image_point.cpp "jsk_perception/ProjectImagePoint" "project_image_point")
@@ -388,6 +390,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/kmeans.test)
     jsk_add_rostest(test/label_to_mask_image.test)
     jsk_add_rostest(test/rect_array_to_image_marker.test)
+    jsk_add_rostest(test/concave_hull_mask_image.test)
     jsk_add_rostest(test/convex_hull_mask_image.test)
     jsk_add_rostest(test/overlay_image_color_on_mono.test)
     jsk_add_rostest(test/selective_search.test)

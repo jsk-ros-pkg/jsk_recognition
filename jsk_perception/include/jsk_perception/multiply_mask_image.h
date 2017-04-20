@@ -67,6 +67,7 @@ namespace jsk_perception
       const sensor_msgs::Image::ConstPtr& src2_msg);
 
     bool approximate_sync_;
+    int queue_size_;
     ros::Publisher pub_;
     message_filters::Subscriber<sensor_msgs::Image> sub_src1_;
     message_filters::Subscriber<sensor_msgs::Image> sub_src2_;

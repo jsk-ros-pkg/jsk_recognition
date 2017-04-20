@@ -1,3 +1,4 @@
+<!-- vim: set ft=xml: -->
 <launch>
 
   <include file="$(find jsk_perception)/sample/sample_blob_detector.launch">

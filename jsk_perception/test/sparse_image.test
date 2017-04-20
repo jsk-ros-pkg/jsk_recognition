@@ -1,3 +1,4 @@
+<!-- vim: set ft=xml: -->
 <launch>
   <node name="sparse_image_encoder"
         pkg="jsk_perception" type="sparse_image_encoder">

@@ -1,3 +1,4 @@
+<!-- vim: set ft=xml: -->
 <launch>
   <node name="polygon_array_unwrapper"
         pkg="jsk_pcl_ros_utils" type="polygon_array_unwrapper"

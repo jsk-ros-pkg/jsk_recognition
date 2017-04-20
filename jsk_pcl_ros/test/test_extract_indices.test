@@ -1,3 +1,4 @@
+<!-- vim: set ft=xml: -->
 <launch>
   
   <node name="even_extract_indices"

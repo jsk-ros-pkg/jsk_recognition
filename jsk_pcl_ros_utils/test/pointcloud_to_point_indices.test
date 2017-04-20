@@ -1,3 +1,4 @@
+<!-- vim: set ft=xml: -->
 <launch>
 
   <include file="$(find jsk_pcl_ros_utils)/sample/sample_pointcloud_to_point_indices.launch">

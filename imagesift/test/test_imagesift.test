@@ -1,3 +1,4 @@
+<!-- vim: set ft=xml: -->
 <launch>
 
   <include file="$(find imagesift)/sample/imagesift_sample.launch">

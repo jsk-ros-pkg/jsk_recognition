@@ -1,3 +1,4 @@
+<!-- vim: set ft=xml: -->
 <launch>
 
   <include file="$(find resized_image_transport)/launch/sample_image_resizer.launch">

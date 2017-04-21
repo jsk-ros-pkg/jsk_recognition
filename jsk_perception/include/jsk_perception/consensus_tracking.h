@@ -41,6 +41,7 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
+#include <message_filters/sync_policies/approximate_time.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/Image.h>
 
@@ -52,6 +53,9 @@ namespace jsk_perception
     ConsensusTracking() :
       DiagnosticNodelet("ConsensusTracking"),
       window_initialized_(false) {}
+    typedef message_filters::sync_policies::ApproximateTime<
+      sensor_msgs::Image,
+      geometry_msgs::PolygonStamped> ApproximateSyncPolicy;
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::Image,
       geometry_msgs::PolygonStamped> ExactSyncPolicy;
@@ -68,6 +72,7 @@ namespace jsk_perception
 
     ros::Subscriber sub_image_;
     boost::shared_ptr<message_filters::Synchronizer<ExactSyncPolicy> > sync_;
+    boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> > async_;
     message_filters::Subscriber<sensor_msgs::Image> sub_image_to_init_;
     message_filters::Subscriber<geometry_msgs::PolygonStamped> sub_polygon_to_init_;
 
@@ -75,6 +80,7 @@ namespace jsk_perception
 
     boost::mutex mutex_;
     bool window_initialized_;
+    bool approximate_sync_;
     int queue_size_;
   private:
   };

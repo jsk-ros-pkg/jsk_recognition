@@ -51,6 +51,7 @@ namespace jsk_perception
   {
     DiagnosticNodelet::onInit();
 
+    pnh_->param("approximate_sync", approximate_sync_, false);
     pnh_->param("queue_size", queue_size_, 100);
 
     pub_mask_image_ = advertise<sensor_msgs::Image>(*pnh_, "output/mask", 1);
@@ -59,9 +60,18 @@ namespace jsk_perception
     // subscribers to set initial tracking window.
     sub_image_to_init_.subscribe(*pnh_, "input", 1);
     sub_polygon_to_init_.subscribe(*pnh_, "input/polygon", 1);
-    sync_ = boost::make_shared<message_filters::Synchronizer<ExactSyncPolicy> >(queue_size_);
-    sync_->connectInput(sub_image_to_init_, sub_polygon_to_init_);
-    sync_->registerCallback(boost::bind(&ConsensusTracking::setInitialWindow, this, _1, _2));
+    if (approximate_sync_)
+    {
+      async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
+      async_->connectInput(sub_image_to_init_, sub_polygon_to_init_);
+      async_->registerCallback(boost::bind(&ConsensusTracking::setInitialWindow, this, _1, _2));
+    }
+    else
+    {
+      sync_ = boost::make_shared<message_filters::Synchronizer<ExactSyncPolicy> >(queue_size_);
+      sync_->connectInput(sub_image_to_init_, sub_polygon_to_init_);
+      sync_->registerCallback(boost::bind(&ConsensusTracking::setInitialWindow, this, _1, _2));
+    }
 
     onInitPostProcess();
   }

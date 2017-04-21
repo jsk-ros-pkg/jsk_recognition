@@ -62,6 +62,7 @@ namespace jsk_perception
     virtual void configCallback(Config &config, uint32_t level);
     virtual void subscribe();
     virtual void unsubscribe();
+    virtual void filter(const sensor_msgs::Image::ConstPtr& input_msg);
     virtual void filter(const sensor_msgs::Image::ConstPtr& input_msg,
                         const sensor_msgs::Image::ConstPtr& reference_msg);
 
@@ -75,6 +76,7 @@ namespace jsk_perception
 
     bool approximate_sync_;
     int queue_size_;
+    bool use_reference_;
     message_filters::Subscriber<sensor_msgs::Image> sub_input_;
     message_filters::Subscriber<sensor_msgs::Image> sub_reference_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;

@@ -22,12 +22,10 @@
   <node name="filter_mask_image_with_size"
         pkg="jsk_perception" type="filter_mask_image_with_size">
     <remap from="~input" to="convex_hull_mask_image/output" />
-    <remap from="~input/reference" to="convex_hull_mask_image/output" />
     <rosparam>
+      use_reference: false
       min_size: 0.1
       max_size: 0.3
-      min_relative_size: 0.0
-      max_relative_size: 1.0
     </rosparam>
   </node>
 

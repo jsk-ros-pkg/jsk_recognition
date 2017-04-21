@@ -46,6 +46,7 @@ namespace jsk_perception
     DiagnosticNodelet::onInit();
     pnh_->param("approximate_sync", approximate_sync_, false);
     pnh_->param("queue_size", queue_size_, 100);
+    pnh_->param("use_reference", use_reference_, false);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> >(*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind(&FilterMaskImageWithSize::configCallback, this, _1, _2);
@@ -60,34 +61,64 @@ namespace jsk_perception
     boost::mutex::scoped_lock lock(mutex_);
     min_size_ = config.min_size;
     max_size_ = config.max_size;
-    min_relative_size_ = config.min_relative_size;
-    max_relative_size_ = config.max_relative_size;
+    if (use_reference_)
+    {
+      min_relative_size_ = config.min_relative_size;
+      max_relative_size_ = config.max_relative_size;
+    }
+    else
+    {
+      if ((config.min_relative_size != 0) || (config.max_relative_size != 1))
+      {
+        ROS_WARN("Rosparam ~min_relative_size and ~max_relative_size is enabled only with ~use_reference is true,"
+                 " and will be overwritten by 0 and 1.");
+      }
+      min_relative_size_ = config.min_relative_size = 0;
+      max_relative_size_ = config.max_relative_size = 1;
+    }
   }
 
   void FilterMaskImageWithSize::subscribe()
   {
     sub_input_.subscribe(*pnh_, "input", 1);
-    sub_reference_.subscribe(*pnh_, "input/reference", 1);
-    if (approximate_sync_)
+    ros::V_string names = boost::assign::list_of("~input");
+    if (use_reference_)
     {
-      async_ = boost::make_shared<message_filters::Synchronizer<ApproxSyncPolicy> >(queue_size_);
-      async_->connectInput(sub_input_, sub_reference_);
-      async_->registerCallback(boost::bind(&FilterMaskImageWithSize::filter, this, _1, _2));
+      sub_reference_.subscribe(*pnh_, "input/reference", 1);
+      if (approximate_sync_)
+      {
+        async_ = boost::make_shared<message_filters::Synchronizer<ApproxSyncPolicy> >(queue_size_);
+        async_->connectInput(sub_input_, sub_reference_);
+        async_->registerCallback(boost::bind(&FilterMaskImageWithSize::filter, this, _1, _2));
+      }
+      else
+      {
+        sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
+        sync_->connectInput(sub_input_, sub_reference_);
+        sync_->registerCallback(boost::bind(&FilterMaskImageWithSize::filter, this, _1, _2));
+      }
+      names.push_back("~input/reference");
     }
     else
     {
-      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
-      sync_->connectInput(sub_input_, sub_reference_);
-      sync_->registerCallback(boost::bind(&FilterMaskImageWithSize::filter, this, _1, _2));
+      sub_input_.registerCallback(&FilterMaskImageWithSize::filter, this);
     }
-    ros::V_string names = boost::assign::list_of("~input")("~input/reference");
     jsk_topic_tools::warnNoRemap(names);
   }
 
   void FilterMaskImageWithSize::unsubscribe()
   {
     sub_input_.unsubscribe();
-    sub_reference_.unsubscribe();
+    if (use_reference_)
+    {
+      sub_reference_.unsubscribe();
+    }
+  }
+
+  void FilterMaskImageWithSize::filter(
+    const sensor_msgs::Image::ConstPtr& input_msg)
+  {
+    filter(input_msg, input_msg);
   }
 
   void FilterMaskImageWithSize::filter(

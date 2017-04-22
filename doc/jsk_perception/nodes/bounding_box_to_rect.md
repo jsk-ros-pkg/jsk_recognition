@@ -34,6 +34,6 @@ Convert `jsk_recognition_msgs/BoundingBoxArray` to `jsk_recognition_msgs/RectArr
 ![](images/bounding_box_to_rect_example.jpg)
 
 ```
-rosrun jsk_perception install_tes_data.py
+rosrun jsk_perception install_test_data.py
 roslaunch jsk_perception sample_bounding_box_to_rect.launch
 ```

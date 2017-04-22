@@ -50,7 +50,7 @@ namespace jsk_pcl_ros_utils
     pub_polygons_ = advertise<jsk_recognition_msgs::PolygonArray>(
       *pnh_, "output_polygons", 1);
 
-    pnh_->param<bool>(std::string("use_coefficients"), use_coefficients_, true);
+    pnh_->param<bool>("use_coefficients", use_coefficients_, true);
     if (use_coefficients_) {
       pub_coefficients_ = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(
         *pnh_, "output_coefficients", 1);
@@ -88,12 +88,12 @@ namespace jsk_pcl_ros_utils
   void PolygonArrayLikelihoodFilter::configCallback(Config& config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    min_likelihood_ = config.min_likelihood;
-    negate_ = config.negate;
+    threshold_ = config.threshold;
+    negative_ = config.negative;
     if (queue_size_ != config.queue_size) {
+      queue_size_ = config.queue_size;
       unsubscribe();
       subscribe();
-      queue_size_ = config.queue_size;
     }
   }
 
@@ -140,8 +140,8 @@ namespace jsk_pcl_ros_utils
     for (int i = 0; i < lookup_table.size(); ++i) {
       double likelihood = lookup_table[i].first;
       int idx = lookup_table[i].second;
-      if ((!negate_ && likelihood >= min_likelihood_) ||
-          (negate_ && likelihood < min_likelihood_)) {
+      if ((!negative_ && likelihood >= threshold_) ||
+          (negative_  && likelihood <  threshold_)) {
         ret_polygons.polygons.push_back(polygons->polygons[idx]);
         ret_polygons.likelihood.push_back(polygons->likelihood[idx]);
         if (use_labels) {

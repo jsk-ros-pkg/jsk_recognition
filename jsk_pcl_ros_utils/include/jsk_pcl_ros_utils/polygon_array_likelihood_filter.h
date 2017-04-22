@@ -77,9 +77,9 @@ namespace jsk_pcl_ros_utils
     ros::Subscriber sub_polygons_alone_;
     ros::Publisher pub_polygons_;
     ros::Publisher pub_coefficients_;
-    bool negate_;
+    bool negative_;
     bool use_coefficients_;
-    double min_likelihood_;
+    double threshold_;
     size_t queue_size_;
   private:
     

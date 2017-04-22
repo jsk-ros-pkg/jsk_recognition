@@ -38,10 +38,11 @@ Parameters
 
   If ``true``, polygons and coefficients are subscribed and published synchronously.
 
-* ``~min_likelihood`` (Double, default: ``0.5``)
+* ``~threshold`` (Double, default: ``0.5``)
 
   Threshold for filtering polygons.
+  See also description of ``~negative`` below for more detail.
 
-* ``~negate`` (Bool, default: ``false``)
+* ``~negative`` (Bool, default: ``false``)
 
-  If ``false``, published polygons whose likelihood is higher than ``~min_likelihood``, lower otherwise.
+  If ``false``, published polygons whose likelihood is higher than ``~threshold``, lower otherwise.

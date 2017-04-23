@@ -104,6 +104,7 @@ namespace jsk_pcl_ros
     double color_min_coefficient_;
     double color_max_coefficient_;
     int show_method_;
+    bool skip_compare_;
     // must be exclusive
     ComparePolicy policy_;
   private:

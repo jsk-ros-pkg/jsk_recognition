@@ -32,6 +32,10 @@ Finds objects similar to a selected object as reference based on bhattacharyya d
 
 ## Parameters
 
+- `skip_compare` (Bool, default: `False`)
+
+  If this value is `true`, only `~output_histogram` is published and skip comparison with reference.
+
 - `coefficient_threshold` (Double, default: `0.9`)
 
   Threshold for determining color histogram similarity

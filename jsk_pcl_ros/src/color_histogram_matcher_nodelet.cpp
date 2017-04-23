@@ -33,7 +33,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/color_histogram_matcher.h"
+#include <jsk_pcl_ros/color_histogram_matcher.h>
 #include <pluginlib/class_list_macros.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/point_types_conversion.h>
@@ -102,6 +102,8 @@ namespace jsk_pcl_ros
     color_min_coefficient_ = config.color_min_coefficient;
     color_max_coefficient_ = config.color_max_coefficient;
     show_method_ = config.show_method;
+    skip_compare_ = config.skip_compare;
+
     ComparePolicy new_histogram;
     if (config.histogram_method == 0) {
       new_histogram = USE_HUE;
@@ -132,7 +134,7 @@ namespace jsk_pcl_ros
       const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_indices)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    if (!reference_set_) {
+    if (!reference_set_ && !skip_compare_) {
       NODELET_WARN("reference histogram is not available yet");
       return;
     }
@@ -171,6 +173,7 @@ namespace jsk_pcl_ros
       histogram_array.histograms.push_back(ros_histogram);
     }
     all_histogram_pub_.publish(histogram_array);
+    if (skip_compare_) return;
 
     // compare histograms
     jsk_recognition_msgs::ClusterPointIndices result;

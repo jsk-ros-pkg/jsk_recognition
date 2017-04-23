@@ -39,7 +39,11 @@
 
 namespace jsk_recognition_utils
 {
-    Cube::Cube(const Eigen::Vector3f& pos, const Eigen::Quaternionf& rot):
+  Cube::Cube()
+  {
+  }
+
+  Cube::Cube(const Eigen::Vector3f& pos, const Eigen::Quaternionf& rot):
     pos_(pos), rot_(rot)
   {
     dimensions_.resize(3);

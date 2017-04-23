@@ -58,6 +58,10 @@ add_message_files(
   ContactSensor.msg
   ContactSensorArray.msg
   PlotDataArray.msg
+  Edge.msg
+  EdgeArray.msg
+  PoseLabeled.msg
+  PoseLabeledArray.msg
   )
 
 # TODO(wkentaro): Most of srv files are duplicated in jsk_pcl_ros,
@@ -86,6 +90,8 @@ add_service_files(FILES
   UpdateOffset.srv
   WhiteBalancePoints.srv
   WhiteBalance.srv
+  ElementCorrespondence.srv
+  ResetPose.srv
   )
 
 generate_messages(

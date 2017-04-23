@@ -1,0 +1,98 @@
+<launch>
+  <arg name="OBJECT_CLOUD" />
+  <arg name="MANAGER" default="element_detector" />
+
+  <!-- edge detector -->
+  <node pkg="nodelet" type="nodelet" name="edge_detector"
+        args="load jsk_pcl/OrganizedEdgeDetector $(arg MANAGER)">
+    <remap from="~input" to="$(arg OBJECT_CLOUD)" />
+    <rosparam>
+      <!-- normal estimation -->
+      max_depth_change_factor: 0.01
+      normal_smoothing_size: 20.0
+      <!-- edge detection option -->
+      use_nan_boundary: false
+      use_occluding: true
+      use_occluded: false
+      use_curbature: false
+      use_rbg: false
+      depth_discontinuation_threshold: 0.1
+      max_search_neighbors: 100
+      <!-- hogh transformation -->
+      rho: 2.0
+      theta: 5.0
+      straightline_threshold: 24
+      min_line_length: 20.0
+      max_line_gap: 10.0
+      <!-- publish -->
+      publish_debug_image: true
+      publish_normal: false
+    </rosparam>
+  </node>
+
+  <!-- throttle edge -->
+  <arg name="THROTTLE_EDGE" default="false" />
+  <arg name="EDGE_DETECTOR_INDICES" value="/edge_detector/output_straight_edges_indices" unless="$(arg THROTTLE_EDGE)" />
+  <arg name="EDGE_DETECTOR_INDICES" value="/edge_detector/output_straight_edges_indices_throttled" if="$(arg THROTTLE_EDGE)" />
+  <group if="$(arg THROTTLE_EDGE)">
+    <node pkg="topic_tools" type="throttle" name="edge_detector_throttle"
+          args="messages /edge_detector/output_straight_edges_indices 1.0 $(arg EDGE_DETECTOR_INDICES)" >
+    </node>
+  </group>
+
+  <!-- decompose edge detector -->
+  <node pkg="nodelet" type="nodelet" name="edge_detector_decomposer"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)">
+    <remap from="~input" to="$(arg OBJECT_CLOUD)" />
+    <remap from="~target" to="$(arg EDGE_DETECTOR_INDICES)" />
+    <rosparam>
+      approximate_sync: true
+      publish_tf: false
+      publish_clouds: false
+      align_boxes: false
+      align_boxes_with_plane: false
+    </rosparam>
+  </node>
+
+  <!-- edge refinement -->
+  <node pkg="nodelet" type="nodelet" name="edge_depth_refinement"
+        args="load jsk_pcl/EdgeDepthRefinement $(arg MANAGER)" output="screen">
+    <remap from="~input" to="$(arg OBJECT_CLOUD)" />
+    <remap from="~input_indices" to="$(arg EDGE_DETECTOR_INDICES)" />
+    <rosparam>
+      outlier_distance_threshold: 0.002
+      min_inliers: 10
+      duplication_angle_threshold: 0.3
+      duplication_distance_threshold: 0.08
+    </rosparam>
+  </node>
+
+  <!-- decompose edge refinement -->
+  <node pkg="nodelet" type="nodelet" name="edge_depth_refinement_decomposer"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)">
+    <remap from="~input" to="$(arg OBJECT_CLOUD)" />
+    <remap from="~target" to="/edge_depth_refinement/output" />
+    <rosparam>
+      approximate_sync: true
+      publish_tf: false
+      publish_clouds: false
+      align_boxes: false
+      align_boxes_with_plane: false
+    </rosparam>
+  </node>
+
+  <!-- decompose edge refinement -->
+  <node pkg="nodelet" type="nodelet" name="edge_depth_refinement_decomposer_outlier_removed"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)">
+    <remap from="~input" to="$(arg OBJECT_CLOUD)" />
+    <remap from="~target" to="/edge_depth_refinement/output_outlier_removed" />
+    <rosparam>
+      approximate_sync: true
+      publish_tf: false
+      publish_clouds: false
+      align_boxes: false
+      align_boxes_with_plane: false
+    </rosparam>
+  </node>
+
+</launch>

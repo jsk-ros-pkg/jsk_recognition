@@ -480,4 +480,11 @@
          type="jsk_pcl_ros::PPFRegistration"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_pcl/ElementMatchingPoseEstimation"
+         type="jsk_pcl_ros::ElementMatchingPoseEstimation"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Nodelet to estimate 6DoF pose from edge and face correspondence
+    </description>
+  </class>
 </library>

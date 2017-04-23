@@ -76,6 +76,7 @@ namespace jsk_recognition_utils
     typedef boost::shared_ptr<GridPlane> Ptr;
     typedef boost::tuple<int, int> IndexPair;
     typedef std::set<IndexPair> IndexPairSet;
+    GridPlane();
     GridPlane(ConvexPolygon::Ptr plane, const double resolution);
     virtual ~GridPlane();
     virtual GridPlane::Ptr clone(); // shallow copy

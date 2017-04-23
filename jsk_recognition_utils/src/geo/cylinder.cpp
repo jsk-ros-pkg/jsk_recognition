@@ -40,6 +40,10 @@
 
 namespace jsk_recognition_utils
 {
+  Cylinder::Cylinder()
+  {
+  }
+
   Cylinder::Cylinder(Eigen::Vector3f point, Eigen::Vector3f direction, double radius):
     point_(point), direction_(direction), radius_(radius)
   {

@@ -54,10 +54,14 @@ namespace jsk_pcl_ros
       *pnh_, "output", 1);
     pub_coefficients_ = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(
       *pnh_, "output_coefficients", 1);
+    pub_edges_ = advertise<jsk_recognition_msgs::SegmentArray>(
+      *pnh_, "output_edges", 1);
     pub_outlier_removed_indices_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(
       *pnh_, "output_outlier_removed", 1);
     pub_outlier_removed_coefficients_ = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(
       *pnh_, "output_outlier_removed_coefficients", 1);
+    pub_outlier_removed_edges_= advertise<jsk_recognition_msgs::SegmentArray>(
+      *pnh_, "output_outlier_removed_edges", 1);
     ////////////////////////////////////////////////////////
     // dynamic reconfigure
     ////////////////////////////////////////////////////////
@@ -351,17 +355,21 @@ namespace jsk_pcl_ros
   void EdgeDepthRefinement::publishIndices(
     ros::Publisher& pub,
     ros::Publisher& pub_coefficients,
+    ros::Publisher& pub_edges,
     const std::vector<pcl::PointIndices::Ptr> inliers,
     const std::vector<pcl::ModelCoefficients::Ptr> coefficients,
     const std_msgs::Header& header)
   {
     jsk_recognition_msgs::ClusterPointIndices output_ros_msg;
     jsk_recognition_msgs::ModelCoefficientsArray output_ros_coefficients_msg;
+    jsk_recognition_msgs::SegmentArray output_ros_edges_msg;
     output_ros_msg.header = header;
     output_ros_coefficients_msg.header = header;
+    output_ros_edges_msg.header = header;
     for (size_t i = 0; i < inliers.size(); i++) {
       PCLIndicesMsg output_indices_msg;
       PCLModelCoefficientMsg output_coefficients_msg;
+      jsk_recognition_msgs::Segment output_edge_msg;
       output_indices_msg.header = header;
       output_indices_msg.indices = inliers[i]->indices;
       output_ros_msg.cluster_indices.push_back(output_indices_msg);
@@ -369,9 +377,18 @@ namespace jsk_pcl_ros
       output_coefficients_msg.header = header;
       output_coefficients_msg.values = coefficients[i]->values;
       output_ros_coefficients_msg.coefficients.push_back(output_coefficients_msg);
+
+      output_edge_msg.start_point.x = coefficients[i]->values[0] - coefficients[i]->values[3];
+      output_edge_msg.start_point.y = coefficients[i]->values[1] - coefficients[i]->values[4];
+      output_edge_msg.start_point.z = coefficients[i]->values[2] - coefficients[i]->values[5];
+      output_edge_msg.end_point.x = coefficients[i]->values[0] + coefficients[i]->values[3];
+      output_edge_msg.end_point.y = coefficients[i]->values[1] + coefficients[i]->values[4];
+      output_edge_msg.end_point.z = coefficients[i]->values[2] + coefficients[i]->values[5];
+      output_ros_edges_msg.segments.push_back(output_edge_msg);
     }
     pub.publish(output_ros_msg);
     pub_coefficients.publish(output_ros_coefficients_msg);
+    pub_edges.publish(output_ros_edges_msg);
   }
 
   void EdgeDepthRefinement::configCallback (Config &config, uint32_t level)
@@ -402,10 +419,12 @@ namespace jsk_pcl_ros
                           non_duplicated_coefficients);
     publishIndices(pub_outlier_removed_indices_,
                    pub_outlier_removed_coefficients_,
+                   pub_outlier_removed_edges_,
                    inliers, coefficients,
                    input->header);
     publishIndices(pub_indices_,
                    pub_coefficients_,
+                   pub_edges_,
                    non_duplicated_inliers,
                    non_duplicated_coefficients,
                    input->header);

@@ -116,6 +116,7 @@ generate_dynamic_reconfigure_options(
   cfg/SelectiveSearch.cfg
   cfg/LabelToMaskImage.cfg
   cfg/FlowVelocityThresholding.cfg
+  cfg/FilterMaskImageWithSize.cfg
 )
 
 message(WARNING "DEPRECATION WARNING: srv files in jsk_pcl_ros are deprecated."
@@ -178,6 +179,7 @@ macro(jsk_add_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
     ${PROJECT_NAME}_nodelet_sources ${PROJECT_NAME}_nodelet_executables)
 endmacro()
 
+jsk_add_nodelet(src/filter_mask_image_with_size.cpp "jsk_perception/FilterMaskImageWithSize" "filter_mask_image_with_size")
 jsk_add_nodelet(src/flow_velocity_thresholding.cpp "jsk_perception/FlowVelocityThresholding" "flow_velocity_thresholding")
 jsk_add_nodelet(src/bounding_box_to_rect.cpp "jsk_perception/BoundingBoxToRect" "bounding_box_to_rect")
 jsk_add_nodelet(src/rect_array_actual_size_filter.cpp "jsk_perception/RectArrayActualSizeFilter" "rect_array_actual_size_filter")
@@ -386,6 +388,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/draw_rect_array.test)
     jsk_add_rostest(test/extract_image_channel.test)
     jsk_add_rostest(test/flow_velocity_thresholding.test)
+    jsk_add_rostest(test/filter_mask_image_with_size.test)
     jsk_add_rostest(test/image_cluster_indices_decomposer.test)
     jsk_add_rostest(test/image_publisher.test)
     jsk_add_rostest(test/image_to_label.test)

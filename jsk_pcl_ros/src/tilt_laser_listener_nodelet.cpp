@@ -60,10 +60,12 @@ namespace jsk_pcl_ros
     pnh_->getParam("twist_frame_id", twist_frame_id_);
     pnh_->param("overwrap_angle", overwrap_angle_, 0.0);
     std::string laser_type;
+    bool subscribe_joint = true;
     pnh_->param("clear_assembled_scans", clear_assembled_scans_, false);
     pnh_->param("skip_number", skip_number_, 1);
     pnh_->param("laser_type", laser_type, std::string("tilt_half_down"));
     pnh_->param("max_queue_size", max_queue_size_, 100);
+    pnh_->param("publish_rate", publish_rate_, 1.0);
     if (laser_type == "tilt_half_up") {
       laser_type_ = TILT_HALF_UP;
     }
@@ -78,6 +80,11 @@ namespace jsk_pcl_ros
     }
     else if (laser_type == "infinite_spindle_half") {
       laser_type_ = INFINITE_SPINDLE_HALF;
+    }
+    else if (laser_type == "periodic") {
+      laser_type_ = PERIODIC;
+      periodic_timer_ = pnh_->createTimer(ros::Duration(1/publish_rate_), &TiltLaserListener::timerCallback, this);
+      subscribe_joint = false;
     }
     else {
       NODELET_ERROR("unknown ~laser_type: %s", laser_type.c_str());
@@ -109,9 +116,19 @@ namespace jsk_pcl_ros
     pnh_->param("vital_rate", vital_rate, 1.0);
     cloud_vital_checker_.reset(
       new jsk_topic_tools::VitalChecker(1 / vital_rate));
-    sub_ = pnh_->subscribe("input", max_queue_size_, &TiltLaserListener::jointCallback, this);
+    if(subscribe_joint) {
+      sub_ = pnh_->subscribe("input", max_queue_size_, &TiltLaserListener::jointCallback, this);
+    }
 
     onInitPostProcess();
+  }
+
+  void TiltLaserListener::timerCallback(const ros::TimerEvent& e)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
+    publishTimeRange(e.current_real, e.last_real, e.current_real);
+    start_time_ = e.current_real; // not used??
   }
 
   void TiltLaserListener::subscribe()

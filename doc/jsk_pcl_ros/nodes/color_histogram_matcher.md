@@ -2,7 +2,7 @@
 
 ## What is this
 
-![](images/color_histogram_matcher.png)
+![](images/color_histogram_matcher_image.png)
 
 Finds objects similar to a selected object as reference based on bhattacharyya distance of color histogram. 
 

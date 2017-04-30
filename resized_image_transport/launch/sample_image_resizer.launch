@@ -3,13 +3,8 @@
   <arg name="gui" default="true" />
 
   <node name="virtual_camera"
-        pkg="jsk_perception" type="image_publisher.py">
-    <remap from="~output" to="~image" />
-    <remap from="~output/camera_info" to="~camera_info" />
-    <rosparam subst_value="true">
-      file_name: $(find jsk_perception)/sample/ros_groovy.jpg
-      rate: 30
-    </rosparam>
+        pkg="jsk_recognition_utils" type="static_virtual_camera.py">
+    <remap from="~image_color" to="~image" />
   </node>
 
   <node name="image_resizer_w_camera_info"

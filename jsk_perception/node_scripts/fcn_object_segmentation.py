@@ -167,7 +167,7 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
         label = chainer.functions.argmax(self.model.score, axis=1)
         # gpu -> cpu
         proba_img = cuda.to_cpu(proba_img.data)
-        max_proba_img = cuda.to_cpu(max_proba_img.data)[0]
+        max_proba_img = cuda.to_cpu(max_proba_img.data)
         label = cuda.to_cpu(label.data)[0]
         # uncertain because the probability is low
         label[max_proba_img < self.proba_threshold] = self.bg_label

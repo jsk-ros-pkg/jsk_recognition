@@ -61,6 +61,7 @@ add_message_files(
   Segment.msg
   SegmentStamped.msg
   SegmentArray.msg
+  TransformArray.msg
   )
 
 # TODO(wkentaro): Most of srv files are duplicated in jsk_pcl_ros,

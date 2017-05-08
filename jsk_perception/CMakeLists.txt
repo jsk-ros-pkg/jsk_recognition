@@ -409,6 +409,7 @@ if(CATKIN_ENABLE_TESTING)
     # FIXME: Does not work on Travis/Jenkins
     # jsk_add_rostest(test/fcn_object_segmentation.test)
     # jsk_add_rostest(test/vgg16_object_recognition.test install_trained_data)
+    # jsk_add_rostest(test/alex_object_recognition.test install_trained_data)
     # FIXME: Unstable on Travis/Jenkins
     # if(TARGET bing)
     #   jsk_add_rostest(test/bing.test)

@@ -161,12 +161,12 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
             x_data = cuda.to_gpu(x_data, device=self.gpu)
         x = chainer.Variable(x_data, volatile=True)
         self.model(x)
-        proba_img = chainer.functions.softmax(self.model.score)[0]
-        proba_img = chainer.functions.transpose(proba_img, (1, 2, 0))
+        proba_img = chainer.functions.softmax(self.model.score)
+        proba_img = chainer.functions.transpose(proba_img, (0, 2, 3, 1))
         max_proba_img = chainer.functions.max(proba_img, axis=-1)
         label = chainer.functions.argmax(self.model.score, axis=1)
-        # gpu -> cpu
-        proba_img = cuda.to_cpu(proba_img.data)
+        # squeeze batch axis, gpu -> cpu
+        proba_img = cuda.to_cpu(proba_img.data)[0]
         max_proba_img = cuda.to_cpu(max_proba_img.data)[0]
         label = cuda.to_cpu(label.data)[0]
         # uncertain because the probability is low

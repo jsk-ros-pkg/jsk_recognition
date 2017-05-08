@@ -72,19 +72,24 @@ namespace jsk_pcl_ros_utils
   {
     boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();
-    jsk_recognition_msgs::PolygonArray ret_polygon_array;
-    ret_polygon_array.header = msg->header;
+
+    jsk_recognition_msgs::PolygonArray ret_polygon_array = *msg;
+
     for (size_t i = 0; i < msg->polygons.size(); i++) {
-      geometry_msgs::PolygonStamped magnified_polygon;
-      magnified_polygon.header = msg->polygons[i].header;
-      jsk_recognition_utils::ConvexPolygon poly = jsk_recognition_utils::ConvexPolygon::fromROSMsg(msg->polygons[i].polygon);
-      jsk_recognition_utils::ConvexPolygon::Ptr magnified_poly = poly.magnifyByDistance(magnify_distance_);
-      magnified_polygon.polygon = magnified_poly->toROSMsg();
-      ret_polygon_array.polygons.push_back(magnified_polygon);
+      jsk_recognition_utils::ConvexPolygon poly =
+        jsk_recognition_utils::ConvexPolygon::fromROSMsg(msg->polygons[i].polygon);
+
+      jsk_recognition_utils::ConvexPolygon::Ptr magnified_poly
+        = poly.magnifyByDistance(magnify_distance_);
+
+      if (!magnified_poly->isConvex()) {
+        ROS_WARN("Magnified polygon %ld is not convex.", i);
+      }
+
+      ret_polygon_array.polygons[i].polygon = magnified_poly->toROSMsg();
     }
     pub_.publish(ret_polygon_array);
   }
-    
 }
 
 #include <pluginlib/class_list_macros.h>

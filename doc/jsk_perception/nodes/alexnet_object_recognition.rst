@@ -1,11 +1,11 @@
-alex_object_recognition.py
-==========================
+alexnet_object_recognition.py
+=============================
 
 
 What is this?
 -------------
 
-.. image:: ./images/alex_object_recognition.png
+.. image:: ./images/alexnet_object_recognition.png
 
 Recognize object with Alex net by resizing input image to 227 x 227.
 This node requires pretrained Chainer_ model.
@@ -76,4 +76,4 @@ Example
 
 .. code-block:: bash
 
-   roslaunch jsk_perception sample_alex_object_recognition.launch
+   roslaunch jsk_perception sample_alexnet_object_recognition.launch

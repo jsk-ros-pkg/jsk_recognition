@@ -21,7 +21,7 @@ import rospy
 from sensor_msgs.msg import Image
 
 
-class AlexObjectRecognition(ConnectionBasedTransport):
+class AlexNetObjectRecognition(ConnectionBasedTransport):
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -118,6 +118,6 @@ class AlexObjectRecognition(ConnectionBasedTransport):
 
 
 if __name__ == '__main__':
-    rospy.init_node('alex_object_recognition')
-    app = AlexObjectRecognition()
+    rospy.init_node('alexnet_object_recognition')
+    app = AlexNetObjectRecognition()
     rospy.spin()

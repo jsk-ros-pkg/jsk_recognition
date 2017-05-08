@@ -98,7 +98,7 @@ def main():
         md5 = 'a1083db5a47643b112af69bfa59954f9',
     )
 
-    # node_scripts/alex_object_recognition.py
+    # node_scripts/alexnet_object_recognition.py
     download_data(
         pkg_name=PKG,
         path='trained_data/bvlc_alexnet.chainermodel',

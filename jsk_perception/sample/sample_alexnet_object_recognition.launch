@@ -12,8 +12,8 @@
     </rosparam>
   </node>
 
-  <node name="alex_object_recognition"
-        pkg="jsk_perception" type="alex_object_recognition.py">
+  <node name="alexnet_object_recognition"
+        pkg="jsk_perception" type="alexnet_object_recognition.py">
     <remap from="~input" to="image_publisher/output" />
     <rosparam subst_value="true">
       gpu: $(arg gpu)
@@ -25,7 +25,7 @@
 
   <node name="draw_classification_result"
         pkg="jsk_perception" type="draw_classification_result.py">
-    <remap from="~input" to="alex_object_recognition/output" />
+    <remap from="~input" to="alexnet_object_recognition/output" />
     <remap from="~input/image" to="image_publisher/output" />
   </node>
 

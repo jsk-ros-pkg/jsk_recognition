@@ -6,26 +6,26 @@
   <node name="image_publisher"
         pkg="jsk_perception" type="image_publisher.py">
     <rosparam subst_value="true">
-      file_name: $(find jsk_perception)/sample/image/laugh_out_loud_joke_book.jpg
+      file_name: $(find jsk_perception)/sample/image/leopard.jpg
       publish_info: false
       encoding: bgr8
     </rosparam>
   </node>
 
-  <node name="vgg16_object_recognition"
-        pkg="jsk_perception" type="vgg16_object_recognition.py">
-    <remap from="~input" to="apply_mask_image/output" />
+  <node name="alex_object_recognition"
+        pkg="jsk_perception" type="alex_object_recognition.py">
+    <remap from="~input" to="image_publisher/output" />
     <rosparam subst_value="true">
       gpu: $(arg gpu)
-      model_name: vgg16_batch_normalization
-      model_file: $(find jsk_perception)/trained_data/vgg16_bn_apc2015_496000.chainermodel
+      model_name: alex
+      model_file: $(find jsk_perception)/trained_data/bvlc_alexnet.chainermodel
     </rosparam>
-    <remap from="~target_names" to="target_names" />
+    <rosparam command="load" file="$(find jsk_perception)/sample/imagenet_target_names.yaml" />
   </node>
 
   <node name="draw_classification_result"
         pkg="jsk_perception" type="draw_classification_result.py">
-    <remap from="~input" to="vgg16_object_recognition/output" />
+    <remap from="~input" to="alex_object_recognition/output" />
     <remap from="~input/image" to="image_publisher/output" />
   </node>
 

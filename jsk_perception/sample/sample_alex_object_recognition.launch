@@ -20,7 +20,7 @@
       model_name: alex
       model_file: $(find jsk_perception)/trained_data/bvlc_alexnet.chainermodel
     </rosparam>
-    <rosparam command="load" file="$(find jsk_perception)/sample/imagenet_target_names.yaml" />
+    <rosparam command="load" file="$(find jsk_perception)/sample/config/imagenet_target_names.yaml" />
   </node>
 
   <node name="draw_classification_result"

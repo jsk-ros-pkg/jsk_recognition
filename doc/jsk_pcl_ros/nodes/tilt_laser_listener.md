@@ -74,10 +74,16 @@ You can choose several types of tilt/spindle lasers such as tilt-laser of PR2, i
    5. `infinite_spindle_half`: Infinite spindle laser, but most of laser has over 180 degrees range of field.
    Therefore we don't need to rotate laser 360 degrees to scan 3-D space, just 180 degree rotation is required.
    In this mode, TiltLaserListener publishes time range a time range of 180 degree rotation.
+   6. `periodic`: TiltLaserListener periodically publishes.
 * `~overwrap_angle` (Double, default: `0.0`)
 
    overwrap angle offset when detecting time range.
    Only available in `infinite_spindle` and `infinite_spindle_half`.
+
+* `~publish_rate` (Double, default: `1.0`)
+
+   rate of publishing assembled cloud
+   Only available in `periodic`
 
 ## Troubleshooting
 * tilt_laser_listener don't publish `~output_cloud` when `~laser_type` is `infinite_spindle` or `infinite_spindle_half`

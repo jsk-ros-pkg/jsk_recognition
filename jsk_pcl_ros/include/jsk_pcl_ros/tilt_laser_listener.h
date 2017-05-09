@@ -65,7 +65,7 @@ namespace jsk_pcl_ros
   public:
     TiltLaserListener(): DiagnosticNodelet("TiltLaserListener") { };
     enum LaserType {
-      INFINITE_SPINDLE, INFINITE_SPINDLE_HALF, TILT, TILT_HALF_UP, TILT_HALF_DOWN
+      INFINITE_SPINDLE, INFINITE_SPINDLE_HALF, TILT, TILT_HALF_UP, TILT_HALF_DOWN, PERIODIC
     };
   protected:
     ////////////////////////////////////////////////////////
@@ -94,6 +94,7 @@ namespace jsk_pcl_ros
     virtual void getPointCloudFromLocalBuffer(
       const std::vector<sensor_msgs::PointCloud2::ConstPtr>& target_clouds,
       sensor_msgs::PointCloud2& output_cloud);
+    virtual void timerCallback(const ros::TimerEvent& e);
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
@@ -105,6 +106,7 @@ namespace jsk_pcl_ros
     ros::ServiceServer clear_cache_service_;
     ros::ServiceClient assemble_cloud_srv_;
     jsk_topic_tools::VitalChecker::Ptr cloud_vital_checker_;
+    ros::Timer periodic_timer_;
 
     ////////////////////////////////////////////////////////
     // parameters
@@ -126,6 +128,7 @@ namespace jsk_pcl_ros
     int skip_number_;
     int skip_counter_;
     int max_queue_size_;
+    double publish_rate_;
     std::string twist_frame_id_;
   private:
     

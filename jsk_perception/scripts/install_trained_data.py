@@ -98,6 +98,14 @@ def main():
         md5 = 'a1083db5a47643b112af69bfa59954f9',
     )
 
+    # node_scripts/alexnet_object_recognition.py
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/bvlc_alexnet.chainermodel',
+        url='https://drive.google.com/uc?id=0B5DV6gwLHtyJZkd1ZTRiNUdrUXM',
+        md5='2175620a2237bbd33e35bf38867d84b2',
+    )
+
 
 if __name__ == '__main__':
     main()

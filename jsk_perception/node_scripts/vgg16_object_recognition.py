@@ -23,10 +23,12 @@ from sensor_msgs.msg import Image
 
 class VGG16ObjectRecognition(ConnectionBasedTransport):
 
+    mean_bgr = np.array([104.00698793, 116.66876762, 122.67891434])
+
     def __init__(self):
         super(self.__class__, self).__init__()
+        self.insize = 224
         self.gpu = rospy.get_param('~gpu', -1)
-        self.mean_bgr = np.array([104.00698793, 116.66876762, 122.67891434])
         self.target_names = rospy.get_param('~target_names')
         self.model_name = rospy.get_param('~model_name')
         if self.model_name == 'vgg16':
@@ -87,7 +89,7 @@ class VGG16ObjectRecognition(ConnectionBasedTransport):
                 logerr_throttle(10, 'Size of input mask is 0')
                 return
             bgr[mask == 0] = self.mean_bgr
-        bgr = skimage.transform.resize(bgr, (224, 224), preserve_range=True)
+        bgr = skimage.transform.resize(bgr, (self.insize, self.insize), preserve_range=True)
         input_msg = bridge.cv2_to_imgmsg(bgr.astype(np.uint8), encoding='bgr8')
         input_msg.header = imgmsg.header
         self.pub_input.publish(input_msg)

@@ -6,8 +6,8 @@ from __future__ import print_function
 
 import chainer.serializers as S
 from jsk_recognition_msgs.msg import ClassificationResult
-from jsk_recognition_utils.chainermodels import Alex
-from jsk_recognition_utils.chainermodels import AlexBatchNormalization
+from jsk_recognition_utils.chainermodels import AlexNet
+from jsk_recognition_utils.chainermodels import AlexNetBatchNormalization
 import rospy
 from sensor_msgs.msg import Image
 from vgg16_object_recognition import VGG16ObjectRecognition
@@ -21,10 +21,10 @@ class AlexNetObjectRecognition(VGG16ObjectRecognition):
         self.gpu = rospy.get_param('~gpu', -1)
         self.target_names = rospy.get_param('~target_names')
         self.model_name = rospy.get_param('~model_name')
-        if self.model_name == 'alex':
-            self.model = Alex(n_class=len(self.target_names))
-        elif self.model_name == 'alex_batch_normalization':
-            self.model = AlexBatchNormalization(
+        if self.model_name == 'alexnet':
+            self.model = AlexNet(n_class=len(self.target_names))
+        elif self.model_name == 'alexnet_batch_normalization':
+            self.model = AlexNetBatchNormalization(
                 n_class=len(self.target_names))
         else:
             rospy.logerr('Unsupported ~model_name: {0}'

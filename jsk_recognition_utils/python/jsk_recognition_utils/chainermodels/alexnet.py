@@ -3,13 +3,12 @@ import chainer.functions as F
 import chainer.links as L
 
 
-class AlexBatchNormalization(chainer.Chain):
+class AlexNet(chainer.Chain):
+
     def __init__(self, n_class=1000):
-        super(AlexBatchNormalization, self).__init__(
+        super(AlexNet, self).__init__(
             conv1=L.Convolution2D(3,  96, 11, stride=4),
-            bn1=L.BatchNormalization(96),
             conv2=L.Convolution2D(96, 256,  5, pad=2),
-            bn2=L.BatchNormalization(256),
             conv3=L.Convolution2D(256, 384,  3, pad=1),
             conv4=L.Convolution2D(384, 384,  3, pad=1),
             conv5=L.Convolution2D(384, 256,  3, pad=1),
@@ -19,9 +18,9 @@ class AlexBatchNormalization(chainer.Chain):
         self.train = False
 
     def __call__(self, x, t=None):
-        h = self.bn1(self.conv1(x), test=not self.train)
+        h = F.local_response_normalization(self.conv1(x))
         h = F.max_pooling_2d(F.relu(h), 3, stride=2)
-        h = self.bn2(self.conv2(h), test=not self.train)
+        h = F.local_response_normalization(self.conv2(h))
         h = F.max_pooling_2d(F.relu(h), 3, stride=2)
         h = F.relu(self.conv3(h))
         h = F.relu(self.conv4(h))
@@ -30,7 +29,7 @@ class AlexBatchNormalization(chainer.Chain):
         h = F.dropout(F.relu(self.fc7(h)), train=self.train)
         h = self.fc8(h)
 
-        self.pred = F.softrmax(h)
+        self.pred = F.softmax(h)
         if t is None:
             assert not self.train
             return

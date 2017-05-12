@@ -17,7 +17,7 @@
     <remap from="~input" to="image_publisher/output" />
     <rosparam subst_value="true">
       gpu: $(arg gpu)
-      model_name: alex
+      model_name: alexnet
       model_file: $(find jsk_perception)/trained_data/bvlc_alexnet.chainermodel
     </rosparam>
     <rosparam command="load" file="$(find jsk_perception)/sample/config/imagenet_target_names.yaml" />

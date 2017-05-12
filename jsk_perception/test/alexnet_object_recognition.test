@@ -8,9 +8,9 @@
         name="test_alexnet_object_recognition"
         pkg="jsk_tools" type="test_topic_published.py">
     <rosparam>
-      topic_0: /alexnet_object_recognition/output
+      topic_0: /object_recognition/output
       timeout_0: 30
-      topic_1: /alexnet_object_recognition/debug/net_input
+      topic_1: /object_recognition/debug/net_input
       timeout_1: 30
     </rosparam>
   </test>

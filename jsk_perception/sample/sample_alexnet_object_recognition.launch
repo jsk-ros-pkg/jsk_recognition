@@ -3,37 +3,10 @@
   <arg name="gui" default="true" />
   <arg name="gpu" default="-1" />
 
-  <node name="image_publisher"
-        pkg="jsk_perception" type="image_publisher.py">
-    <rosparam subst_value="true">
-      file_name: $(find jsk_perception)/sample/image/leopard.jpg
-      publish_info: false
-      encoding: bgr8
-    </rosparam>
-  </node>
-
-  <node name="alexnet_object_recognition"
-        pkg="jsk_perception" type="alexnet_object_recognition.py">
-    <remap from="~input" to="image_publisher/output" />
-    <rosparam subst_value="true">
-      gpu: $(arg gpu)
-      model_name: alexnet
-      model_file: $(find jsk_perception)/trained_data/bvlc_alexnet.chainermodel
-    </rosparam>
-    <rosparam command="load" file="$(find jsk_perception)/sample/config/imagenet_target_names.yaml" />
-  </node>
-
-  <node name="draw_classification_result"
-        pkg="jsk_perception" type="draw_classification_result.py">
-    <remap from="~input" to="alexnet_object_recognition/output" />
-    <remap from="~input/image" to="image_publisher/output" />
-  </node>
-
-  <group if="$(arg gui)">
-    <node name="image_view0"
-          pkg="image_view" type="image_view">
-      <remap from="image" to="draw_classification_result/output" />
-    </node>
-  </group>
+  <include file="$(find jsk_perception)/sample/sample_imagenet_object_recognition.launch">
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="gpu" value="$(arg gpu)" />
+    <arg name="network" value="alexnet" />
+  </include>
 
 </launch>

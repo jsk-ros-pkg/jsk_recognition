@@ -98,6 +98,14 @@ def main():
         md5 = 'a1083db5a47643b112af69bfa59954f9',
     )
 
+    # node_scripts/vgg16_object_recognition.py
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/bvlc_vgg16.chainermodel',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vSlFjQlJFQjM5TEk',
+        md5='292e6472062392f5de02ef431bba4a48',
+    )
+
     # node_scripts/alexnet_object_recognition.py
     download_data(
         pkg_name=PKG,

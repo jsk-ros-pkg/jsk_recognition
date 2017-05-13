@@ -5,7 +5,7 @@ import chainer.links as L
 
 class VGG16(chainer.Chain):
 
-    def __init__(self):
+    def __init__(self, n_class):
         super(VGG16, self).__init__(
             conv1_1=L.Convolution2D(3, 64, 3, stride=1, pad=1),
             conv1_2=L.Convolution2D(64, 64, 3, stride=1, pad=1),
@@ -27,7 +27,7 @@ class VGG16(chainer.Chain):
 
             fc6=L.Linear(25088, 4096),
             fc7=L.Linear(4096, 4096),
-            fc8=L.Linear(4096, 1000)
+            fc8=L.Linear(4096, n_class)
         )
         self.train = False
 

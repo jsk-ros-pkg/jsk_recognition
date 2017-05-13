@@ -39,8 +39,8 @@ class VGG16ObjectRecognition(ConnectionBasedTransport):
         else:
             rospy.logerr('Unsupported ~model_name: {0}'
                          .format(self.model_name))
-        model_h5 = rospy.get_param('~model_h5')
-        S.load_hdf5(model_h5, self.model)
+        model_file = rospy.get_param('~model_file')
+        S.load_hdf5(model_file, self.model)
         if self.gpu != -1:
             self.model.to_gpu(self.gpu)
         self.pub = self.advertise('~output', ClassificationResult,

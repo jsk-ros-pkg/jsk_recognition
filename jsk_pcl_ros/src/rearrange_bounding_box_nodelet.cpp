@@ -48,7 +48,8 @@ namespace jsk_pcl_ros
     pnh_->param("rotate_x", rotate_x_, 0.0);
     pnh_->param("rotate_y", rotate_y_, 0.0);
     pnh_->param("rotate_z", rotate_z_, 0.0);
-    q_ = tf2::Quaternion(rotate_y_, rotate_x_, rotate_z_);
+    q_ = tf2::Quaternion();
+    q_.setEuler(rotate_y_, rotate_x_, rotate_z_);
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -70,7 +71,8 @@ namespace jsk_pcl_ros
     rotate_x_ = config.rotate_x;
     rotate_y_ = config.rotate_y;
     rotate_z_ = config.rotate_z;
-    q_ = tf2::Quaternion(rotate_y_, rotate_x_, rotate_z_);
+    q_ = tf2::Quaternion();
+    q_.setEuler(rotate_y_, rotate_x_, rotate_z_);
   }
 
   void RearrangeBoundingBox::subscribe() {

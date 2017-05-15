@@ -33,7 +33,6 @@ find_package(catkin REQUIRED COMPONENTS
   laser_assembler
   nodelet
   octomap_msgs
-  octomap_ros
   octomap_server
   pcl_msgs
   pcl_ros

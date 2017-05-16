@@ -366,10 +366,30 @@ if(NOT robot_self_filter_FOUND)
   pkg_check_modules(robot_self_filter robot_self_filter QUIET)
 endif()
 if(robot_self_filter_FOUND)
-  jsk_pcl_nodelet(src/collision_detector_nodelet.cpp
-    "jsk_pcl/CollisionDetector" "collision_detector")
-  jsk_pcl_nodelet(src/octomap_server_contact_nodelet.cpp
-    "jsk_pcl/OctomapServerContact" "octomap_server_contact")
+  # check robot_self_filter exports private variables
+  include(CheckCXXSourceCompiles)
+  set(CMAKE_REQUIRED_INCLUDES ${catkin_INCLUDE_DIRS})
+  set(CMAKE_REQUIRED_LIBRARIES ${catkin_LIBRARY_DIRS})
+  CHECK_CXX_SOURCE_COMPILES("
+  #include <robot_self_filter/self_mask.h>
+  class SelfMaskSubclass : public robot_self_filter::SelfMask<pcl::PointXYZ>
+  {
+     public:
+       void foo()
+       {
+         bodies_.size();
+       }
+  };
+  int main(void) { return 0; }"
+    ROBOT_SELF_FILTER_EXPORT_BODIES)
+  if (ROBOT_SELF_FILTER_EXPORT_BODIES)
+    jsk_pcl_nodelet(src/collision_detector_nodelet.cpp
+      "jsk_pcl/CollisionDetector" "collision_detector")
+    jsk_pcl_nodelet(src/octomap_server_contact_nodelet.cpp
+      "jsk_pcl/OctomapServerContact" "octomap_server_contact")
+  else()
+    message(AUTHOR_WARNING "robot_self_filter does not export private variables. see https://github.com/PR2/robot_self_filter/pull/5")
+  endif ()
 else(robot_self_filter_FOUND)
   message(AUTHOR_WARNING "robot_self_filter is NOT found. some nodelet depending on robot_self_filter will not be compiled.")
 endif(robot_self_filter_FOUND)

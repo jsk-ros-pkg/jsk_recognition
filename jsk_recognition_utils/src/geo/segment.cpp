@@ -39,6 +39,10 @@
 #include "jsk_recognition_utils/geo_util.h"
 namespace jsk_recognition_utils
 {
+  Segment::Segment()
+  {
+  }
+
   Segment::Segment(const Eigen::Vector3f& from, const Eigen::Vector3f to):
     Line(to - from, from), to_(to), length_((to - from).norm())
   {

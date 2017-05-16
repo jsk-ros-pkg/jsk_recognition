@@ -84,6 +84,10 @@ namespace jsk_recognition_utils
   }
   
   
+  Polygon::Polygon()
+  {
+  }
+
   Polygon::Polygon(const Vertices& vertices):
     Plane((vertices[1] - vertices[0]).cross(vertices[2] - vertices[0]).normalized(), vertices[0]),
     vertices_(vertices)

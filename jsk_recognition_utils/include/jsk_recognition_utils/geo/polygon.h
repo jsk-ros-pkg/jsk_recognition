@@ -57,6 +57,7 @@ namespace jsk_recognition_utils
   public:
     typedef boost::shared_ptr<Polygon> Ptr;
     typedef boost::tuple<Ptr, Ptr> PtrPair;
+    Polygon();
     Polygon(const Vertices& vertices);
     Polygon(const Vertices& vertices,
             const std::vector<float>& coefficients);

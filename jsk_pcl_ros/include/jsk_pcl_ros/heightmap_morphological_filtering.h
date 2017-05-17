@@ -83,6 +83,7 @@ namespace jsk_pcl_ros
     int bilateral_filter_size_;
     double bilateral_sigma_color_;
     double bilateral_sigma_space_;
+    bool use_bilateral_;
   };
 }
 

@@ -93,6 +93,7 @@ namespace jsk_pcl_ros
     std::string center_frame_id_;
     std::string projected_center_frame_id_;
     bool use_projected_center_;
+    double initial_probability_;
 
     tf::TransformListener* tf_;
     tf::TransformBroadcaster tf_broadcaster_;

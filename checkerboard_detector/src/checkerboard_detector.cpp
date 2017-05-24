@@ -91,7 +91,7 @@ public:
     int message_throttle_counter_;
     string frame_id; // tf frame id
     bool invert_color;
-    int display, verbose, maxboard;
+    int display, verbose, maxboard, queue_size, publish_queue_size;
     vector<CHECKERBOARD> vcheckers; // grid points for every checkerboard
     vector< string > vstrtypes; // type names for every grid point
     map<string,int> maptypes;
@@ -119,6 +119,9 @@ public:
         _node.param("invert_color", invert_color, false);
         _node.param("use_P", use_P, false);
         _node.param("message_throttle", message_throttle_, 1);
+        _node.param("queue_size", queue_size, 1);
+        _node.param("publish_queue_size", publish_queue_size, 1);
+
         char str[32];
         int index = 0;
 
@@ -228,21 +231,21 @@ public:
         if (!display) {
             ros::SubscriberStatusCallback connect_cb = boost::bind( &CheckerboardDetector::connectCb, this);
             _pubDetection =
-                _node.advertise<posedetection_msgs::ObjectDetection> ("ObjectDetection", 1,
+                _node.advertise<posedetection_msgs::ObjectDetection> ("ObjectDetection", publish_queue_size,
                                                                       connect_cb, connect_cb);
             _pubPoseStamped =
-                _node.advertise<geometry_msgs::PoseStamped> ("objectdetection_pose", 1,
+                _node.advertise<geometry_msgs::PoseStamped> ("objectdetection_pose", publish_queue_size,
                                                              connect_cb, connect_cb);
-            _pubCornerPoint = _node.advertise<geometry_msgs::PointStamped>("corner_point", 1, connect_cb, connect_cb);
-            _pubPolygonArray = _node.advertise<jsk_recognition_msgs::PolygonArray>("polygons", 1, connect_cb, connect_cb);
+            _pubCornerPoint = _node.advertise<geometry_msgs::PointStamped>("corner_point", publish_queue_size, connect_cb, connect_cb);
+            _pubPolygonArray = _node.advertise<jsk_recognition_msgs::PolygonArray>("polygons", publish_queue_size, connect_cb, connect_cb);
         }
         else {
             _pubDetection =
-                _node.advertise<posedetection_msgs::ObjectDetection> ("ObjectDetection", 1);
+                _node.advertise<posedetection_msgs::ObjectDetection> ("ObjectDetection", publish_queue_size);
             _pubPoseStamped =
-                _node.advertise<geometry_msgs::PoseStamped> ("objectdetection_pose", 1);
-            _pubCornerPoint = _node.advertise<geometry_msgs::PointStamped>("corner_point", 1);
-            _pubPolygonArray = _node.advertise<jsk_recognition_msgs::PolygonArray>("polygons", 1);
+                _node.advertise<geometry_msgs::PoseStamped> ("objectdetection_pose", publish_queue_size);
+            _pubCornerPoint = _node.advertise<geometry_msgs::PointStamped>("corner_point", publish_queue_size);
+            _pubPolygonArray = _node.advertise<jsk_recognition_msgs::PolygonArray>("polygons", publish_queue_size);
             subscribe();
         }
         //this->camInfoSubscriber = _node.subscribe("camera_info", 1, &CheckerboardDetector::caminfo_cb, this);
@@ -359,16 +362,18 @@ public:
     void subscribe( )
     {
         if ( camInfoSubscriber == NULL )
-            camInfoSubscriber = _node.subscribe("camera_info", 1, &CheckerboardDetector::caminfo_cb, this);
+            camInfoSubscriber = _node.subscribe("camera_info", queue_size,
+                                                &CheckerboardDetector::caminfo_cb, this);
         if ( imageSubscriber == NULL ) {
-            imageSubscriber = _node.subscribe("image", 1, &CheckerboardDetector::image_cb, this);
+            imageSubscriber = _node.subscribe("image", queue_size,
+                                              &CheckerboardDetector::image_cb, this);
             if ( imageSubscriber.getTopic().find("image_rect") != std::string::npos )
                 ROS_WARN("topic name seems rectified, please use unrectified image"); // rectified image has 'image_rect' in topic name
         }
         if ( camInfoSubscriber2 == NULL )
-            camInfoSubscriber2 = _node.subscribe("CameraInfo", 1, &CheckerboardDetector::caminfo_cb2, this);
+            camInfoSubscriber2 = _node.subscribe("CameraInfo", queue_size, &CheckerboardDetector::caminfo_cb2, this);
         if ( imageSubscriber2 == NULL ) {
-            imageSubscriber2 = _node.subscribe("Image",1, &CheckerboardDetector::image_cb2, this);
+            imageSubscriber2 = _node.subscribe("Image", queue_size, &CheckerboardDetector::image_cb2, this);
             if ( imageSubscriber2.getTopic().find("image_rect") != std::string::npos )
                 ROS_WARN("topic name seems rectified, please use unrectified image"); // rectified image has 'image_rect' in topic name
         }

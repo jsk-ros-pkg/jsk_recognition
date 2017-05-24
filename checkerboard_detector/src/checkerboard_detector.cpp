@@ -179,12 +179,12 @@ public:
             cb.board_type = board_type;
             cb.grid3d.resize(dimx*dimy);
             int j=0;
-            if (board_type == "chess" || board_type == "circle") {
+            if (board_type == "chess" || board_type == "circle" || board_type == "circles") {
               for(int y=0; y<dimy; ++y)
                 for(int x=0; x<dimx; ++x)
                   cb.grid3d[j++] = cv::Point3f(x*fRectSize[0], y*fRectSize[1], 0);
             }
-            else if (board_type == "acircle") {
+            else if (board_type == "acircle" || board_type == "acircles") {
               for(int ii=0; ii<dimy; ii++) {
                 for(int jj=0; jj<dimx; jj++) {
                   cb.grid3d[j++] = cv::Point3f((2*jj + ii % 2)*fRectSize[0],

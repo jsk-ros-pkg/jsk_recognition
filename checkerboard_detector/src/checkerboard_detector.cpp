@@ -101,13 +101,14 @@ public:
     int dimx, dimy;
     bool use_P;
     double fRectSize[2];
-
     typedef checkerboard_detector::CheckerboardDetectorConfig Config;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv;
     bool adaptive_thresh_flag;
     bool filter_quads_flag;
     bool normalize_image_flag;
     bool fast_check_flag;
+    double axis_size_;
+    int circle_size_;
 
     //////////////////////////////////////////////////////////////////////////////
     // Constructor
@@ -121,6 +122,8 @@ public:
         _node.param("message_throttle", message_throttle_, 1);
         _node.param("queue_size", queue_size, 1);
         _node.param("publish_queue_size", publish_queue_size, 1);
+        _node.param("axis_size", axis_size_, 0.05);
+        _node.param("circle_size", circle_size_, 6);
 
         char str[32];
         int index = 0;
@@ -592,13 +595,34 @@ public:
                 tglobal.rot = Vector(vobjects[i].pose.orientation.w,vobjects[i].pose.orientation.x,vobjects[i].pose.orientation.y, vobjects[i].pose.orientation.z);
                 Transform tlocal = tglobal * cb.tlocaltrans.inverse();
 
+                // draw all the points
+                int csize0 = std::max(circle_size_, 6);
+                int cwidth0 = std::max(circle_size_/3, 2);
+                int csize1 = std::max((2*circle_size_)/3, 4);
+                int csize2 = std::max(circle_size_/4, 2);
+                int cwidth1 = std::max(circle_size_/2, 4);
+                int cwidth2 = std::max(circle_size_/2, 3);
+
+                for(size_t i = 0; i < cb.grid3d.size(); ++i) {
+                    Vector grid3d_vec(cb.grid3d[i].x, cb.grid3d[i].y, cb.grid3d[i].z);
+                    Vector p = tlocal * grid3d_vec;
+                    dReal fx = p.x*camInfoMsg.P[0] + p.y*camInfoMsg.P[1] + p.z*camInfoMsg.P[2] + camInfoMsg.P[3];
+                    dReal fy = p.x*camInfoMsg.P[4] + p.y*camInfoMsg.P[5] + p.z*camInfoMsg.P[6] + camInfoMsg.P[7];
+                    dReal fz = p.x*camInfoMsg.P[8] + p.y*camInfoMsg.P[9] + p.z*camInfoMsg.P[10] + camInfoMsg.P[11];
+                    int x = (int)(fx/fz);
+                    int y = (int)(fy/fz);
+                    cv::circle(frame, cv::Point(x,y), csize0, cv::Scalar(0, 255, 0), cwidth0);
+                    cv::circle(frame, cv::Point(x,y), csize1, cv::Scalar(64*itype,128,128), cwidth1);
+                    cv::circle(frame, cv::Point(x,y), csize2, cv::Scalar(0,   0, 0), cwidth0);
+                }
+
                 cv::Point X[4];
 
                 Vector vaxes[4];
                 vaxes[0] = Vector(0,0,0);
-                vaxes[1] = Vector(0.05f,0,0);
-                vaxes[2] = Vector(0,0.05f,0);
-                vaxes[3] = Vector(0,0,0.05f);
+                vaxes[1] = Vector(axis_size_,0,0);
+                vaxes[2] = Vector(0,axis_size_,0);
+                vaxes[3] = Vector(0,0,axis_size_);
 
                 for(int i = 0; i < 4; ++i) {
                     Vector p = tglobal*vaxes[i];
@@ -609,29 +633,17 @@ public:
                     X[i].y = (int)(fy/fz);
                 }
 
+                cv::circle(frame, X[0], cwidth2, cv::Scalar(255,255,128), cwidth2);
+
                 // draw three lines
-                cv::Scalar col0(255,0,(64*itype)%256);
-                cv::Scalar col1(0,255,(64*itype)%256);
-                cv::Scalar col2((64*itype)%256,(64*itype)%256,255);
-                cv::line(frame, X[0], X[1], col0, 1);
-                cv::line(frame, X[0], X[2], col1, 1);
-                cv::line(frame, X[0], X[3], col2, 1);
+                cv::Scalar col0(255,0,(64*itype)%256); // B
+                cv::Scalar col1(0,255,(64*itype)%256); // G
+                cv::Scalar col2((64*itype)%256,(64*itype)%256,255); // R
+                int axis_width_ = floor(axis_size_ / 0.03);
+                cv::line(frame, X[0], X[3], col0, axis_width_);
+                cv::line(frame, X[0], X[2], col1, axis_width_);
+                cv::line(frame, X[0], X[1], col2, axis_width_);
 
-                // draw all the points
-                for(size_t i = 0; i < cb.grid3d.size(); ++i) {
-                    Vector grid3d_vec(cb.grid3d[i].x, cb.grid3d[i].y, cb.grid3d[i].z);
-                    Vector p = tlocal * grid3d_vec;
-                    dReal fx = p.x*camInfoMsg.P[0] + p.y*camInfoMsg.P[1] + p.z*camInfoMsg.P[2] + camInfoMsg.P[3];
-                    dReal fy = p.x*camInfoMsg.P[4] + p.y*camInfoMsg.P[5] + p.z*camInfoMsg.P[6] + camInfoMsg.P[7];
-                    dReal fz = p.x*camInfoMsg.P[8] + p.y*camInfoMsg.P[9] + p.z*camInfoMsg.P[10] + camInfoMsg.P[11];
-                    int x = (int)(fx/fz);
-                    int y = (int)(fy/fz);
-                    cv::circle(frame, cv::Point(x,y), 6, cv::Scalar(0,0,0), 2);
-                    cv::circle(frame, cv::Point(x,y), 2, cv::Scalar(0,0,0), 2);
-                    cv::circle(frame, cv::Point(x,y), 4, cv::Scalar(64*itype,128,128), 3);
-                }
-
-                cv::circle(frame, X[0], 3, cv::Scalar(255,255,128), 3);
                 // publish X[0]
                 geometry_msgs::PointStamped point_msg;
                 point_msg.header = imagemsg.header;
@@ -639,7 +651,6 @@ public:
                 point_msg.point.y = X[0].y;
                 point_msg.point.z = vobjects[vobjects.size() - 1].pose.position.z;
                 _pubCornerPoint.publish(point_msg);
-                
             }
 
             cv::imshow("Checkerboard Detector",frame);

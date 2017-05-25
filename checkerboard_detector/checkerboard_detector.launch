@@ -3,28 +3,33 @@
  <group ns="checkerdetector" clear_params="true">
     <param name="display" type="int" value="1"/>
     <!--param name="frame_id" type="string" value="stereo_link"/-->
+    <param name="board_type" value="chess" />
+    <!-- board0 -->
     <param name="rect0_size_x" type="double" value="0.35"/>
     <param name="rect0_size_y" type="double" value="0.35"/>
-    <!-- <param name="rect0_size_x" type="double" value="0.02"/> -->
-    <!-- <param name="rect0_size_y" type="double" value="0.02"/> -->
-    <!-- <param name="grid0_size_x" type="int" value="10"/> -->
-    <!-- <param name="grid0_size_y" type="int" value="12"/> -->
     <param name="grid0_size_x" type="int" value="4"/>
     <param name="grid0_size_y" type="int" value="6"/>
-    <param name="board_type" value="chess" />
-    
-    <!-- <param name="board_type" value="acircle" /> -->
-    <!-- <param name="invert_color" value="true" /> -->
-    <!-- <param name="grid0_size_x" type="int" value="4"/> -->
-    <!-- <param name="grid0_size_y" type="int" value="7"/> -->
-    
-    <param name="type0" type="string" value="data/ricebox.kinbody.xml"/>
-    <node pkg="checkerboard_detector" name="checkerboard_detector" type="checkerboard_detector" respawn="false" output="screen">
+    <param name="type0" type="string" value="4x6chessboard"/>
+
+    <!-- board1 -->
+    <param name="rect1_size_x" type="double" value="0.02"/>
+    <param name="rect1_size_y" type="double" value="0.02"/>
+    <param name="grid1_size_x" type="int" value="10"/>
+    <param name="grid1_size_y" type="int" value="12"/>
+    <param name="type1" type="string" value="10x12chessboard"/>
+
+    <param name="use_P"              value="true" /> <!-- if you use rectified image, use_P should be true -->
+    <param name="invert_color"       value="false" /> <!-- invert white and black -->
+    <param name="message_throttle"   value="1" />
+    <param name="queue_size"         value="1" />
+    <param name="publish_queue_size" value="1" />
+    <param name="axis_size"   value="0.05" /> <!-- set axis_size as [m] -->
+    <param name="circle_size" value="6" />    <!-- set circle_size as [pixel] -->
+
+    <node pkg="checkerboard_detector" name="checkerboard_detector"
+          type="checkerboard_detector" respawn="false" output="screen">
       <remap from="camera_info" to="/wide_stereo/left/camera_info"/>
       <remap from="image" to="/wide_stereo/left/image_rect"/>
-      <!-- <remap from="camera_info" to="/camera/rgb/camera_info"/> -->
-      <!-- <remap from="image" to="/camera/rgb/image_rect_color"/> -->
     </node>
   </group>
-
-</launch> 
+</launch>

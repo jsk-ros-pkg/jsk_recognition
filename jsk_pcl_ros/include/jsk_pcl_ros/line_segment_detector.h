@@ -139,6 +139,7 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_indices_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
+    boost::recursive_mutex config_mutex_;
 
     ////////////////////////////////////////////////////////
     // parameters
@@ -149,10 +150,8 @@ namespace jsk_pcl_ros
     int min_indices_;
     double min_length_;
     double line_width_;
-    int segmentation_method_;
 
     pcl::SACSegmentation<PointT> seg_;
-    bool segmentation_update_;
 
   private:
     

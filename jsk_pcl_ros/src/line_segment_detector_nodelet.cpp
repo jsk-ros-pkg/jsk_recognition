@@ -135,12 +135,10 @@ namespace jsk_pcl_ros
 
     pnh_->param("approximate_sync", approximate_sync_, false);
 
-    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (config_mutex_, *pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&LineSegmentDetector::configCallback, this, _1, _2);
     srv_->setCallback (f);
-
-    segmentation_update_ = true;
 
     ////////////////////////////////////////////////////////
     // setup publishers
@@ -163,8 +161,19 @@ namespace jsk_pcl_ros
     min_indices_ = config.min_indices;
     min_length_ = config.min_length;
     line_width_ = config.line_width;
-    segmentation_method_ = config.method_type;
-    segmentation_update_ = true;
+
+
+    // update segmentation parameters
+    seg_.setOptimizeCoefficients (true);
+    seg_.setModelType(pcl::SACMODEL_LINE);
+    int segmentation_method;
+    {
+      boost::lock_guard<boost::recursive_mutex> lock(config_mutex_);
+      segmentation_method = config.method_type;
+    }
+    seg_.setMethodType(segmentation_method);
+    seg_.setDistanceThreshold (outlier_threshold_);
+    seg_.setMaxIterations (max_iterations_);
   }
   
   void LineSegmentDetector::subscribe()
@@ -245,46 +254,6 @@ namespace jsk_pcl_ros
     pcl::PointIndices::Ptr rest_indices (new pcl::PointIndices);
     rest_indices->indices = indices->indices;
     // use RANSAC to segment lines
-    if(segmentation_update_) {
-      seg_.setOptimizeCoefficients (true);
-      seg_.setModelType (pcl::SACMODEL_LINE);
-      switch (segmentation_method_) {
-        case jsk_pcl_ros::LineSegmentDetector_SAC_RANSAC: {
-          seg_.setMethodType(pcl::SAC_RANSAC);
-          break;
-        }
-        case jsk_pcl_ros::LineSegmentDetector_SAC_LMEDS: {
-          seg_.setMethodType(pcl::SAC_LMEDS);
-          break;
-        }
-        case jsk_pcl_ros::LineSegmentDetector_SAC_MSAC: {
-          seg_.setMethodType(pcl::SAC_MSAC);
-          break;
-        }
-        case jsk_pcl_ros::LineSegmentDetector_SAC_RRANSAC: {
-          seg_.setMethodType(pcl::SAC_RRANSAC);
-          break;
-        }
-        case jsk_pcl_ros::LineSegmentDetector_SAC_RMSAC: {
-          seg_.setMethodType(pcl::SAC_RMSAC);
-          break;
-        }
-        case jsk_pcl_ros::LineSegmentDetector_SAC_MLESAC: {
-          seg_.setMethodType(pcl::SAC_MLESAC);
-          break;
-        }
-        case jsk_pcl_ros::LineSegmentDetector_SAC_PROSAC: {
-          seg_.setMethodType(pcl::SAC_PROSAC);
-          break;
-        }
-        default: {
-          NODELET_ERROR("No such index type of Method Type: %d", segmentation_method_);
-        }
-      }
-      seg_.setDistanceThreshold (outlier_threshold_);
-      seg_.setMaxIterations (max_iterations_);
-      segmentation_update_ = false;
-    }
     seg_.setInputCloud(cloud);
     while (true) {
       if (rest_indices->indices.size() > min_indices_) {

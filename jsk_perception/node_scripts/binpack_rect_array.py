@@ -4,8 +4,6 @@ import numpy as np
 
 import cv_bridge
 from jsk_recognition_utils.depth import split_fore_background
-from jsk_topic_tools import jsk_logwarn
-from jsk_topic_tools import jsk_logerr
 from jsk_topic_tools import ConnectionBasedTransport
 from jsk_recognition_msgs.msg import RectArray, Rect
 import message_filters

@@ -6,7 +6,6 @@ import numpy as np
 import cv_bridge
 from jsk_recognition_utils.depth import split_fore_background
 from jsk_topic_tools import ConnectionBasedTransport
-from jsk_topic_tools import jsk_logwarn
 import rospy
 from sensor_msgs.msg import Image
 
@@ -30,8 +29,8 @@ class SplitForeBackground(ConnectionBasedTransport):
         # validation
         supported_encodings = {'16UC1', '32FC1'}
         if depth_msg.encoding not in supported_encodings:
-            jsk_logwarn('Unsupported depth image encoding: {0}'
-                        .format(depth_msg.encoding))
+            rospy.logwarn('Unsupported depth image encoding: {0}'
+                          .format(depth_msg.encoding))
         # split fg/bg and get each mask
         bridge = cv_bridge.CvBridge()
         depth = bridge.imgmsg_to_cv2(depth_msg)

@@ -11,7 +11,6 @@ from jsk_recognition_utils import bounding_rect_of_mask
 from jsk_recognition_utils import get_tile_image
 from jsk_recognition_utils.color import labelcolormap
 from jsk_topic_tools import ConnectionBasedTransport
-from jsk_topic_tools import jsk_loginfo
 from jsk_topic_tools import warn_no_remap
 import matplotlib
 matplotlib.use('Agg')  # NOQA
@@ -38,7 +37,7 @@ class LabelImageDecomposer(ConnectionBasedTransport):
                                                     queue_size=5)
         # publish each region image. this can take time so optional.
         self._publish_tile = rospy.get_param('~publish_tile', False)
-        jsk_loginfo('~publish_tile: {}'.format(self._publish_tile))
+        rospy.loginfo('~publish_tile: {}'.format(self._publish_tile))
         if self._publish_tile:
             self.pub_tile = self.advertise('~output/tile', Image, queue_size=5)
 
@@ -48,11 +47,11 @@ class LabelImageDecomposer(ConnectionBasedTransport):
         warn_no_remap('~input', '~input/label')
         use_async = rospy.get_param('~approximate_sync', False)
         queue_size = rospy.get_param('~queue_size', 10)
-        jsk_loginfo('~approximate_sync: {}, queue_size: {}'
-                    .format(use_async, queue_size))
+        rospy.loginfo('~approximate_sync: {}, queue_size: {}'
+                      .format(use_async, queue_size))
         if use_async:
             slop = rospy.get_param('~slop', 0.1)
-            jsk_loginfo('~slop: {}'.format(slop))
+            rospy.loginfo('~slop: {}'.format(slop))
             async = message_filters.ApproximateTimeSynchronizer(
                 [self.sub_img, self.sub_label],
                 queue_size=queue_size, slop=slop)

@@ -18,7 +18,6 @@ from skimage.util import img_as_uint
 
 import cv_bridge
 from jsk_topic_tools import ConnectionBasedTransport
-from jsk_topic_tools import jsk_loginfo
 from jsk_topic_tools import warn_no_remap
 import message_filters
 import rospy
@@ -154,7 +153,7 @@ class SolidityRagMerge(ConnectionBasedTransport):
         self.sub = message_filters.Subscriber('~input', Image)
         self.sub_mask = message_filters.Subscriber('~input/mask', Image)
         self.use_async = rospy.get_param('~approximate_sync', False)
-        jsk_loginfo('~approximate_sync: {}'.format(self.use_async))
+        rospy.loginfo('~approximate_sync: {}'.format(self.use_async))
         if self.use_async:
             sync = message_filters.ApproximateTimeSynchronizer(
                 [self.sub, self.sub_mask], queue_size=1000, slop=0.1)

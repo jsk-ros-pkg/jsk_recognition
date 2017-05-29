@@ -7,7 +7,6 @@ import fcn
 
 import cv_bridge
 from jsk_topic_tools import ConnectionBasedTransport
-from jsk_topic_tools.log_utils import jsk_loginfo
 import message_filters
 import numpy as np
 import rospy
@@ -65,9 +64,9 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
             self.model = fcn.models.FCN8s(n_class=n_class)
         else:
             raise ValueError('Unsupported ~model_name: {}'.format(model_name))
-        jsk_loginfo('Loading trained model: {0}'.format(model_h5))
+        rospy.loginfo('Loading trained model: {0}'.format(model_h5))
         S.load_hdf5(model_h5, self.model)
-        jsk_loginfo('Finished loading trained model: {0}'.format(model_h5))
+        rospy.loginfo('Finished loading trained model: {0}'.format(model_h5))
         if self.gpu != -1:
             self.model.to_gpu(self.gpu)
         self.model.train = False
@@ -86,9 +85,9 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
             self.model = torchfcn.models.FCN32s(n_class=n_class, nodeconv=True)
         else:
             raise ValueError('Unsupported ~model_name: {0}'.format(model_name))
-        jsk_loginfo('Loading trained model: %s' % model_file)
+        rospy.loginfo('Loading trained model: %s' % model_file)
         self.model.load_state_dict(torch.load(model_file))
-        jsk_loginfo('Finished loading trained model: %s' % model_file)
+        rospy.loginfo('Finished loading trained model: %s' % model_file)
         if self.gpu >= 0:
             self.model = self.model.cuda(self.gpu)
         self.model.eval()

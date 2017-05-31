@@ -115,7 +115,7 @@ namespace jsk_pcl_ros
     pcl::concatenateFields (*cloud, *cloud_normals, *cloud_calculated);
 
     // DEBUG
-    JSK_NODELET_INFO_STREAM("cloud with normals size:" << cloud_calculated->points.size());
+    NODELET_INFO_STREAM("cloud with normals size:" << cloud_calculated->points.size());
     return cloud_calculated;
   }
 
@@ -173,7 +173,7 @@ namespace jsk_pcl_ros
     Eigen::Affine3f pose (mat);
     // DEBUG
     Eigen::IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
-    JSK_NODELET_INFO_STREAM( "Matrix:\n" << mat.format(CleanFmt));
+    NODELET_INFO_STREAM( "Matrix:\n" << mat.format(CleanFmt));
 
     // transform reference
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_output (new pcl::PointCloud<pcl::PointXYZ> ());
@@ -254,7 +254,7 @@ namespace jsk_pcl_ros
       Eigen::Affine3f pose (mat);
       // DEBUG
       Eigen::IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
-      JSK_NODELET_INFO_STREAM( "Matrix:\n" << mat.format(CleanFmt));
+      NODELET_INFO_STREAM( "Matrix:\n" << mat.format(CleanFmt));
 
       // transform reference
       pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_output (new pcl::PointCloud<pcl::PointXYZ> ());

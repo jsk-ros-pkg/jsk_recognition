@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import rospy 
-from jsk_topic_tools import jsk_logdebug, jsk_loginfo, ConnectionBasedTransport
+from jsk_topic_tools import ConnectionBasedTransport
 from jsk_recognition_msgs.msg import PolygonArray, ModelCoefficientsArray
 from pcl_msgs.msg import ModelCoefficients
 from geometry_msgs.msg import PolygonStamped

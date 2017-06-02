@@ -44,5 +44,5 @@ See rosparam `~input_topics`.
 ## Sample
 
 ```
-roslaunch jsk_pcl_ros sample_fuse_depth_image.launch
+roslaunch jsk_pcl_ros sample_fuse_images.launch
 ```

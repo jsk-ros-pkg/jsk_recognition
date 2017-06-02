@@ -19,6 +19,16 @@
         max_queue_size: 20
       </rosparam>
     </node>
+    <node name="depth_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="depth_image_creator/output" />
+      <rosparam>
+        gui: false
+        min_image_value: 0.5
+        max_image_value: 2.0
+        colormap: 2
+      </rosparam>
+    </node>
   </group>
 
   <group ns="right_hand_right_camera">
@@ -30,6 +40,16 @@
       <rosparam>
         use_approximate: true
         max_queue_size: 20
+      </rosparam>
+    </node>
+    <node name="depth_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="depth_image_creator/output" />
+      <rosparam>
+        gui: false
+        min_image_value: 0.5
+        max_image_value: 2.0
+        colormap: 2
       </rosparam>
     </node>
   </group>
@@ -58,6 +78,16 @@
       <rosparam>
         use_approximate: true
         max_queue_size: 20
+      </rosparam>
+    </node>
+    <node name="depth_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="depth_image_creator/output" />
+      <rosparam>
+        gui: false
+        min_image_value: 0.5
+        max_image_value: 2.0
+        colormap: 2
       </rosparam>
     </node>
   </group>
@@ -109,9 +139,36 @@
       </rosparam>
     </node>
     -->
+    <node name="depth_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="fuse_depth_images/output" />
+      <rosparam>
+        gui: false
+        min_image_value: 0.5
+        max_image_value: 2.0
+        colormap: 2
+      </rosparam>
+    </node>
   </group>
 
   <group if="$(arg gui)">
+    <node name="tile_image"
+          pkg="jsk_perception" type="tile_image.py">
+      <rosparam>
+        font_scale: 2.0
+        draw_topic_name: true
+        no_sync: true
+        input_topics:
+          - /right_hand_left_camera/depth_image_creator/output_image
+          - /right_hand_right_camera/depth_image_creator/output_image
+          - /right_hand_stereo/depth_image_creator/output_image
+          - /right_hand_camera/fuse_rgb_images/output
+          - /right_hand_left_camera/depth_view/output
+          - /right_hand_right_camera/depth_view/output
+          - /right_hand_stereo/depth_view/output
+          - /right_hand_camera/depth_view/output
+      </rosparam>
+    </node>
     <node name="rviz"
           pkg="rviz" type="rviz"
           args="-d $(find jsk_pcl_ros)/sample/rviz/fuse_depth_images.rviz">

@@ -1,0 +1,95 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_stereo.xml" />
+
+  <arg name="MANAGER" value="nodelet_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet" args="manager" />
+
+  <group ns="right_hand_right_camera">
+    <node name="depth_image_creator"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/DepthImageCreator /$(arg MANAGER)">
+      <remap from="~input" to="depth_registered/points" />
+      <remap from="~info" to="/right_hand_left_camera/rgb/camera_info" />
+      <rosparam>
+        use_approximate: true
+        max_queue_size: 20
+      </rosparam>
+    </node>
+  </group>
+
+  <!-- benchmark 1~2 Hz -->
+  <node name="point_cloud_concat"
+        pkg="nodelet" type="nodelet"
+        args="load pcl/PointCloudConcatenateDataSynchronizer $(arg MANAGER)">
+    <rosparam>
+      approximate_sync: true
+      queue_size: 20
+      output_frame: right_hand_left_camera_rgb_optical_frame
+      input_topics:
+        - /right_hand_left_camera/depth_registered/points
+        - /right_hand_right_camera/depth_registered/points
+        - /right_hand_stereo/points
+    </rosparam>
+  </node>
+
+  <group ns="right_hand_stereo">
+    <node name="depth_image_creator"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/DepthImageCreator /$(arg MANAGER)">
+      <remap from="~input" to="points" />
+      <remap from="~info" to="/right_hand_left_camera/rgb/camera_info" />
+      <rosparam>
+        use_approximate: true
+        max_queue_size: 20
+      </rosparam>
+    </node>
+  </group>
+
+  <group ns="right_hand_camera">
+    <node name="fuse_depth_images"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/FuseDepthImages /$(arg MANAGER)">
+      <rosparam>
+        approximate_sync: true
+        queue_size: 50
+        input_topics:
+          - /right_hand_left_camera/depth_registered/hw_registered/image_rect_raw
+          - /right_hand_right_camera/depth_image_creator/output
+          - /right_hand_stereo/depth_image_creator/output
+      </rosparam>
+    </node>
+    <node name="point_cloud_xyzrgb"
+          pkg="nodelet" type="nodelet"
+          args="standalone depth_image_proc/point_cloud_xyzrgb /$(arg MANAGER)">
+      <remap from="rgb/camera_info" to="/right_hand_left_camera/rgb/camera_info" />
+      <remap from="rgb/image_rect_color" to="/right_hand_left_camera/rgb/image_rect_color" />
+      <remap from="depth_registered/image_rect" to="fuse_depth_images/output" />
+      <rosparam>
+        queue_size: 20
+      </rosparam>
+    </node>
+    <!-- FIXME: This does not work!
+    <node name="point_cloud_xyz"
+          pkg="nodelet" type="nodelet"
+          args="standalone depth_image_proc/point_cloud_xyz /$(arg MANAGER)">
+      <remap from="image_rect" to="fuse_depth_images/output" />
+      <remap from="fuse_depth_images/camera_info" to="/right_hand_left_camera/rgb/camera_info" />
+      <rosparam>
+        queue_size: 100
+      </rosparam>
+    </node>
+    -->
+  </group>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/fuse_depth_images.rviz">
+    </node>
+  </group>
+
+</launch>

@@ -40,7 +40,7 @@
 
 #include <cv_bridge/cv_bridge.h>
 #include <pcl_conversions/pcl_conversions.h>
-#include "jsk_pcl_ros/fuse_depth_images.h"
+#include "jsk_pcl_ros/fuse_images.h"
 
 
 namespace jsk_pcl_ros

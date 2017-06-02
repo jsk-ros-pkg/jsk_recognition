@@ -2,7 +2,7 @@
 
 ![](images/fuse_depth_images.jpg)
 
-Do sensor fusions by multiple depth images.
+Do sensor fusions by multiple depth images ignoring nan region in each image.
 For transformation of depth from one to another, you can use `jsk_pcl/DepthImageCreator`.
 See `sample_fuse_depth_image.launch` for detail.
 
@@ -20,9 +20,26 @@ See rosparam `~input_topics`.
 
 ## Parameters
 
+**Required**
+
 * `~input_topics` (String array, required)
 
   Input depth image topics.
+
+
+**Optional**
+
+* `~approximate_sync` (Boolean, default: `False`):
+
+  Policy of synchronization, if `False` it synchornizes exactly, else approximately.
+
+* `~queue_size` (Int, default: `100`):
+
+  Queue size of topic msgs for synchronization.
+
+* `~averaging` (Bool, default: `true`)
+
+  Average image values while sensor fusion.
 
 ## Sample
 

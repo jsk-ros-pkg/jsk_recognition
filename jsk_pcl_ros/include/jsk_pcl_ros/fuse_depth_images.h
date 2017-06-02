@@ -47,10 +47,11 @@
 
 namespace jsk_pcl_ros
 {
-  class FuseDepthImages: public jsk_topic_tools::DiagnosticNodelet
+  class FuseImages: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    FuseDepthImages(): DiagnosticNodelet("FuseDepthImages") { }
+    FuseImages(const std::string& name, const std::string& encoding):
+      DiagnosticNodelet(name), encoding_(encoding) {}
   protected:
     virtual void onInit();
     virtual void subscribe();
@@ -62,6 +63,8 @@ namespace jsk_pcl_ros
 
     bool approximate_sync_;
     int queue_size_;
+    bool averaging_;
+    std::string encoding_;
 
     /** \brief Null passthrough filter, used for pushing empty elements in the
       * synchronizer */
@@ -96,8 +99,27 @@ namespace jsk_pcl_ros
                          const sensor_msgs::Image::ConstPtr &in3, const sensor_msgs::Image::ConstPtr &in4,
                          const sensor_msgs::Image::ConstPtr &in5, const sensor_msgs::Image::ConstPtr &in6,
                          const sensor_msgs::Image::ConstPtr &in7, const sensor_msgs::Image::ConstPtr &in8);
+
+    virtual cv::Mat fuseInputs(std::vector<cv::Mat> inputs) {};
   private:
   };
+
+  class FuseDepthImages: public FuseImages
+  {
+  public:
+    FuseDepthImages(): FuseImages("FuseDepthImages", sensor_msgs::image_encodings::TYPE_32FC1) {};
+  protected:
+    virtual cv::Mat fuseInputs(std::vector<cv::Mat> inputs);
+  };
+
+  class FuseRGBImages: public FuseImages
+  {
+  public:
+    FuseRGBImages(): FuseImages("FuseRGBImages", sensor_msgs::image_encodings::RGB8) {};
+  protected:
+    virtual cv::Mat fuseInputs(std::vector<cv::Mat> inputs);
+  };
+
 } // namespace jsk_pcl_ros
 
 #endif // JSK_PCL_ROS_FUSE_DEPTH_IMAGES_H_

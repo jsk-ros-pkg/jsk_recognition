@@ -3,6 +3,10 @@
          type="jsk_pcl_ros::FuseDepthImages"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_pcl/FuseRGBImages"
+         type="jsk_pcl_ros::FuseRGBImages"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_pcl/InteractiveCuboidLikelihood"
          type="jsk_pcl_ros::InteractiveCuboidLikelihood"
          base_class_type="nodelet::Nodelet">

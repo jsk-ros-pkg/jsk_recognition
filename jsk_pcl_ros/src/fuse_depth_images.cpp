@@ -45,17 +45,18 @@
 
 namespace jsk_pcl_ros
 {
-  void FuseDepthImages::onInit()
+  void FuseImages::onInit()
   {
     DiagnosticNodelet::onInit();
     pub_out_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
     onInitPostProcess();
   }
 
-  void FuseDepthImages::subscribe()
+  void FuseImages::subscribe()
   {
     pnh_->param("approximate_sync", approximate_sync_, true);
     pnh_->param("queue_size", queue_size_, 10);
+    pnh_->param("averaging", averaging_, true);  // TODO: -> dynparam
 
     XmlRpc::XmlRpcValue input_topics;
     if (!pnh_->getParam("input_topics", input_topics))
@@ -197,14 +198,14 @@ namespace jsk_pcl_ros
     }
   }
 
-  void FuseDepthImages::unsubscribe()
+  void FuseImages::unsubscribe()
   {
     for (size_t i = 0; i < filters_.size(); i++) {
       filters_[i]->unsubscribe();
     }
   }
 
-  bool FuseDepthImages::validateInput(
+  bool FuseImages::validateInput(
       const sensor_msgs::Image::ConstPtr& in,
       const int height_expected,
       const int width_expected,
@@ -220,11 +221,11 @@ namespace jsk_pcl_ros
       ROS_ERROR("Input depth images must have same size: height=%d, width=%d.", height_expected, width_expected);
       return false;
     }
-    inputs.push_back(cv_bridge::toCvShare(in, sensor_msgs::image_encodings::TYPE_32FC1)->image);
+    inputs.push_back(cv_bridge::toCvShare(in, encoding_)->image);
     return true;
   }
 
-  void FuseDepthImages::inputCb(
+  void FuseImages::inputCb(
     const sensor_msgs::Image::ConstPtr& in1, const sensor_msgs::Image::ConstPtr& in2,
     const sensor_msgs::Image::ConstPtr& in3, const sensor_msgs::Image::ConstPtr& in4,
     const sensor_msgs::Image::ConstPtr& in5, const sensor_msgs::Image::ConstPtr& in6,
@@ -233,8 +234,8 @@ namespace jsk_pcl_ros
     int height = in1->height;
     int width = in1->width;
     std::vector<cv::Mat> inputs;
-    inputs.push_back(cv_bridge::toCvShare(in1, sensor_msgs::image_encodings::TYPE_32FC1)->image);
-    inputs.push_back(cv_bridge::toCvShare(in2, sensor_msgs::image_encodings::TYPE_32FC1)->image);
+    inputs.push_back(cv_bridge::toCvShare(in1, encoding_)->image);
+    inputs.push_back(cv_bridge::toCvShare(in2, encoding_)->image);
     validateInput(in3, height, width, inputs);
     validateInput(in4, height, width, inputs);
     validateInput(in5, height, width, inputs);
@@ -242,11 +243,17 @@ namespace jsk_pcl_ros
     validateInput(in7, height, width, inputs);
     validateInput(in8, height, width, inputs);
 
-    cv::Mat out(in1->height, in1->width, CV_32FC1);
+    cv::Mat out = fuseInputs(inputs);
+    pub_out_.publish(cv_bridge::CvImage(in1->header, encoding_, out).toImageMsg());
+  }
+
+  cv::Mat FuseDepthImages::fuseInputs(const std::vector<cv::Mat> inputs)
+  {
+    cv::Mat out(inputs[0].rows, inputs[0].cols, cv_bridge::getCvType(encoding_));
     out.setTo(std::numeric_limits<float>::quiet_NaN());
-    for (size_t j = 0; j < height; j++)
+    for (size_t j = 0; j < inputs[0].rows; j++)
     {
-      for (size_t i = 0; i< width; i++)
+      for (size_t i = 0; i < inputs[0].cols; i++)
       {
         int n_fused = 0;
         float value_fused = 0;
@@ -265,11 +272,43 @@ namespace jsk_pcl_ros
         }
       }
     }
-    pub_out_.publish(cv_bridge::CvImage(in1->header,
-                                        sensor_msgs::image_encodings::TYPE_32FC1,
-                                        out).toImageMsg());
+    return out;
   }
+
+  cv::Mat FuseRGBImages::fuseInputs(const std::vector<cv::Mat> inputs)
+  {
+    cv::Mat out(inputs[0].rows, inputs[0].cols, cv_bridge::getCvType(encoding_));
+    out.setTo(cv::Scalar(0, 0, 0));
+    for (size_t j = 0; j < inputs[0].rows; j++)
+    {
+      for (size_t i = 0; i < inputs[0].cols; i++)
+      {
+        int n_fused = 0;
+        cv::Vec3b value_fused(0, 0, 0);
+        for (size_t k = 0; k < inputs.size(); k++)
+        {
+          cv::Vec3b value = inputs[k].at<cv::Vec3b>(j, i);
+          if (value[0] != 0 || value[1] != 0 || value[2] != 0)
+          {
+            if (!averaging_ && n_fused > 0)
+            {
+              continue;
+            }
+            value_fused += value;
+            n_fused += 1;
+          }
+        }
+        if (n_fused > 0)
+        {
+          out.at<cv::Vec3b>(j, i) = value_fused / n_fused;
+        }
+      }
+    }
+    return out;
+  }
+
 } // namespace jsk_pcl_ros
 
 #include <pluginlib/class_list_macros.h>
 PLUGINLIB_EXPORT_CLASS(jsk_pcl_ros::FuseDepthImages, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(jsk_pcl_ros::FuseRGBImages, nodelet::Nodelet);

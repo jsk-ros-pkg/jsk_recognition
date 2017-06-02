@@ -1,4 +1,5 @@
 # DepthImageCreator
+
 ## What is this
 Create *organized* pointcloud from non-organized pointcloud.
 
@@ -14,6 +15,9 @@ Create *organized* pointcloud from non-organized pointcloud.
 * `~output` (`sensor_msgs/Image`):
 
    Publish organized pointcloud as depth image.
+* `~output_image` (`sensor_msgs/Image`):
+
+   Publish image colorized according to the input cloud.
 * `~output_cloud` (`sensor_msgs/PointCloud2`)
 
    organized pointcloud.
@@ -44,3 +48,9 @@ Create *organized* pointcloud from non-organized pointcloud.
 * `~max_queue_size` (integer, default: `3`):
 
    Queue length of topics.
+
+## Sample
+
+```bash
+roslaunch jsk_pcl_ros sample_depth_image_creator.launch
+```

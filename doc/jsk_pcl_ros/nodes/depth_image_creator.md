@@ -1,5 +1,7 @@
 # DepthImageCreator
 
+![](images/depth_image_creator.jpg)
+
 ## What is this
 Create *organized* pointcloud from non-organized pointcloud.
 

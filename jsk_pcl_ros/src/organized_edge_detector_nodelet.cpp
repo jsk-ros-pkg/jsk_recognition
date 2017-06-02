@@ -51,6 +51,8 @@ namespace jsk_pcl_ros
 {
   void OrganizedEdgeDetector::onInit()
   {
+    boost::mutex::scoped_lock lock(mutex_);
+
     ConnectionBasedNodelet::onInit();
 
     ////////////////////////////////////////////////////////

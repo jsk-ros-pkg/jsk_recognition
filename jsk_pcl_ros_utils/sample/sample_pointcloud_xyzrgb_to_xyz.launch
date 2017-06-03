@@ -1,0 +1,22 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml" />
+
+  <arg name="INPUT_CLOUD" value="/right_hand_camera/depth_registered/points" />
+  <arg name="INPUT_IMAGE" value="/right_hand_camera/rgb/image_rect_color" />
+
+  <node name="pointcloud_xyzrgb_to_xyz"
+        pkg="jsk_pcl_ros_utils" type="pointcloud_xyzrgb_to_xyz">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_pointcloud_xyzrgb_to_xyz.rviz">
+    </node>
+  </group>
+
+</launch>

@@ -44,6 +44,7 @@
 #include <message_filters/sync_policies/approximate_time.h>
 #include <message_filters/time_synchronizer.h>
 #include <sensor_msgs/Image.h>
+#include <sensor_msgs/image_encodings.h>
 
 namespace jsk_pcl_ros
 {

@@ -4,6 +4,7 @@
 
 ## What is this
 Create *organized* pointcloud from non-organized pointcloud.
+Currently it supports `pcl::PointXYZ` and `pcl::PointXYZRGB` as the input.
 
 ## Subscribing Topics
 * `~input` (`sensor_msgs/PointCloud2`):

@@ -34,8 +34,10 @@
  *********************************************************************/
 
 #include <cv_bridge/cv_bridge.h>
-#include <sensor_msgs/image_encodings.h>
+#include <jsk_recognition_utils/pcl_ros_util.h>
 #include <jsk_topic_tools/rosparam_utils.h>
+#include <sensor_msgs/image_encodings.h>
+#include <sensor_msgs/point_cloud2_iterator.h>
 
 #include "jsk_pcl_ros/depth_image_creator.h"
 
@@ -163,8 +165,17 @@ void jsk_pcl_ros::DepthImageCreator::callback_info(const sensor_msgs::CameraInfo
 
 void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInfoConstPtr& info,
                                                     const sensor_msgs::PointCloud2ConstPtr& pcloud2) {
+  sensor_msgs::PointCloud2Ptr pcloud2_ptr(new sensor_msgs::PointCloud2(*pcloud2));
+  if (!jsk_recognition_utils::hasField("rgb", *pcloud2_ptr)) {
+    sensor_msgs::PointCloud2Modifier pc_mod(*pcloud2_ptr);
+    pc_mod.setPointCloud2Fields(4, "x", 1, sensor_msgs::PointField::FLOAT32,
+                                   "y", 1, sensor_msgs::PointField::FLOAT32,
+                                   "z", 1, sensor_msgs::PointField::FLOAT32,
+                                   "rgb", 1, sensor_msgs::PointField::FLOAT32);
+  }
+
   ROS_DEBUG("DepthImageCreator::publish_points");
-  if (!pcloud2)  return;
+  if (!pcloud2_ptr)  return;
   bool proc_cloud = true, proc_depth = true, proc_image = true, proc_disp = true;
   if ( pub_cloud_.getNumSubscribers()==0 ) {
     proc_cloud = false;
@@ -195,11 +206,11 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
       transform = fixed_transform;
     } else {
       try {
-        tf_listener_->waitForTransform(pcloud2->header.frame_id,
+        tf_listener_->waitForTransform(pcloud2_ptr->header.frame_id,
                                        info->header.frame_id,
                                        info->header.stamp,
                                        ros::Duration(0.001));
-        tf_listener_->lookupTransform(pcloud2->header.frame_id,
+        tf_listener_->lookupTransform(pcloud2_ptr->header.frame_id,
                                       info->header.frame_id,
                                       info->header.stamp, transform);
       }
@@ -232,7 +243,7 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
   {
     // code here is dirty, some bag is in RangeImagePlanar
     PointCloud tpc;
-    pcl::fromROSMsg(*pcloud2, tpc);
+    pcl::fromROSMsg(*pcloud2_ptr, tpc);
 
     Eigen::Affine3f inv;
 #if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
@@ -348,6 +359,7 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
       pub_disp_image_.publish(boost::make_shared<stereo_msgs::DisparityImage> (disp));
     }
   }
-}
+}  // namespace jsk_pcl_ros
 
+#include <pluginlib/class_list_macros.h>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::DepthImageCreator, nodelet::Nodelet);

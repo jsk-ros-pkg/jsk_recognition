@@ -263,6 +263,10 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
     int image_y;
     rangeImageP.getImagePoint(pt.x, pt.y, pt.z, image_x, image_y);
 
+    if (!rangeImageP.isInImage(image_x, image_y)) {
+      continue;
+    }
+
     pcl::PointWithRange pt_with_range = rangeImageP.getPoint(image_x, image_y);
     depth_mat.at<float>(image_y, image_x) = pt_with_range.z;
 

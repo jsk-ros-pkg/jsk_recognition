@@ -71,9 +71,12 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
             self.model = fcn.models.FCN8s(n_class=n_class)
         else:
             raise ValueError('Unsupported ~model_name: {}'.format(model_name))
-        jsk_loginfo('Loading trained model: {0}'.format(model_file))
-        S.load_hdf5(model_file, self.model)
-        jsk_loginfo('Finished loading trained model: {0}'.format(model_file))
+        rospy.loginfo('Loading trained model: {0}'.format(model_file))
+        if model_file.endswith('.npz'):
+            S.load_npz(model_file, self.model)
+        else:
+            S.load_hdf5(model_file, self.model)
+        rospy.loginfo('Finished loading trained model: {0}'.format(model_file))
         if self.gpu != -1:
             self.model.to_gpu(self.gpu)
         if LooseVersion(chainer.__version__) < LooseVersion('2.0.0'):

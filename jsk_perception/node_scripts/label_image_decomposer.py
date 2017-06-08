@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from distutils.version import LooseVersion
+
 import numpy as np
+import skimage
 from skimage.color import gray2rgb
 from skimage.color import label2rgb
 from skimage.util import img_as_ubyte
@@ -92,8 +95,12 @@ class LabelImageDecomposer(ConnectionBasedTransport):
         else:
             n_label = len(unique_labels)
         cmap = labelcolormap(N=n_label)
+        if LooseVersion(skimage.__version__) < '0.13.0':
+            colors = cmap[1:]
+        else:
+            colors = cmap[unique_labels[unique_labels != 0]]
         label_img = label_img.copy()
-        label_viz = label2rgb(label_img, img, colors=cmap[1:], bg_label=0)
+        label_viz = label2rgb(label_img, img, colors=colors, bg_label=0)
         label_viz = img_as_ubyte(label_viz)
 
         if self._label_names:

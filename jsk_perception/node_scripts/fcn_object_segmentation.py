@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from distutils.version import LooseVersion
+
 import chainer
 from chainer import cuda
 import chainer.serializers as S
@@ -69,7 +71,8 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
         rospy.loginfo('Finished loading trained model: {0}'.format(model_h5))
         if self.gpu != -1:
             self.model.to_gpu(self.gpu)
-        self.model.train = False
+        if LooseVersion(chainer.__version__) < LooseVersion('2.0.0'):
+            self.model.train = False
 
     def _load_torch_model(self):
         try:
@@ -158,8 +161,14 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
         x_data = np.array([blob], dtype=np.float32)
         if self.gpu != -1:
             x_data = cuda.to_gpu(x_data, device=self.gpu)
-        x = chainer.Variable(x_data, volatile=True)
-        self.model(x)
+        if LooseVersion(chainer.__version__) < LooseVersion('2.0.0'):
+            x = chainer.Variable(x_data, volatile=True)
+            self.model(x)
+        else:
+            with chainer.using_config('train', False), \
+                 chainer.no_backprop_mode():
+                x = chainer.Variable(x_data)
+                self.model(x)
         proba_img = chainer.functions.softmax(self.model.score)
         proba_img = chainer.functions.transpose(proba_img, (0, 2, 3, 1))
         max_proba_img = chainer.functions.max(proba_img, axis=-1)

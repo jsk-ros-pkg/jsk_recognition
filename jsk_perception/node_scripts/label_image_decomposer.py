@@ -93,7 +93,7 @@ class LabelImageDecomposer(ConnectionBasedTransport):
         if self._label_names:
             n_label = len(self._label_names)
         else:
-            n_label = len(unique_labels)
+            n_label = max(unique_labels) + 1
         cmap = labelcolormap(N=n_label)
         if LooseVersion(skimage.__version__) < '0.13.0':
             colors = cmap[1:]

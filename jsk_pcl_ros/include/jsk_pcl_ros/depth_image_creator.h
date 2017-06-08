@@ -90,6 +90,8 @@ namespace jsk_pcl_ros
     int info_throttle_;
     int info_counter_;
     int max_queue_size_;
+    int max_pub_queue_size_;
+    int max_sub_queue_size_;
     tf::StampedTransform fixed_transform;
     tf::TransformListener* tf_listener_;
     double scale_depth;

@@ -63,6 +63,10 @@ void jsk_pcl_ros::DepthImageCreator::onInit () {
   pnh_->param("info_throttle", info_throttle_, 0);
   info_counter_ = 0;
   pnh_->param("max_queue_size", max_queue_size_, 3);
+  // maybe below queue_size can always be 1,
+  // but we set max_queue_size_ for backward compatibility.
+  pnh_->param("max_pub_queue_size", max_pub_queue_size_, max_queue_size_);
+  pnh_->param("max_sub_queue_size", max_sub_queue_size_, max_queue_size_);
   // set transformation
   std::vector<double> trans_pos(3, 0);
   std::vector<double> trans_quat(4, 0); trans_quat[3] = 1.0;
@@ -77,10 +81,10 @@ void jsk_pcl_ros::DepthImageCreator::onInit () {
   fixed_transform.setOrigin(btp);
   fixed_transform.setRotation(btq);
 
-  pub_depth_ = advertise<sensor_msgs::Image> (*pnh_, "output", 1);
-  pub_image_ = advertise<sensor_msgs::Image> (*pnh_, "output_image", 1);
-  pub_cloud_ = advertise<PointCloud>(*pnh_, "output_cloud", 1);
-  pub_disp_image_ = advertise<stereo_msgs::DisparityImage> (*pnh_, "output_disp", 1);
+  pub_depth_ = advertise<sensor_msgs::Image> (*pnh_, "output", max_pub_queue_size_);
+  pub_image_ = advertise<sensor_msgs::Image> (*pnh_, "output_image", max_pub_queue_size_);
+  pub_cloud_ = advertise<PointCloud>(*pnh_, "output_cloud", max_pub_queue_size_);
+  pub_disp_image_ = advertise<stereo_msgs::DisparityImage> (*pnh_, "output_disp", max_pub_queue_size_);
   
   if (use_service) {
     service_ = pnh_->advertiseService("set_point_cloud",
@@ -92,11 +96,13 @@ void jsk_pcl_ros::DepthImageCreator::onInit () {
 void jsk_pcl_ros::DepthImageCreator::subscribe() {
   if (!use_service) {
     if (use_asynchronous) {
-      sub_as_info_ = pnh_->subscribe<sensor_msgs::CameraInfo> ("info", 1, &DepthImageCreator::callback_info, this);
-      sub_as_cloud_ = pnh_->subscribe<sensor_msgs::PointCloud2> ("input", 1, &DepthImageCreator::callback_cloud, this);
+      sub_as_info_ = pnh_->subscribe<sensor_msgs::CameraInfo> ("info", max_sub_queue_size_,
+                                                               &DepthImageCreator::callback_info, this);
+      sub_as_cloud_ = pnh_->subscribe<sensor_msgs::PointCloud2> ("input", max_sub_queue_size_,
+                                                                 &DepthImageCreator::callback_cloud, this);
     } else {
-      sub_info_.subscribe(*pnh_, "info", 1);
-      sub_cloud_.subscribe(*pnh_, "input", 1);
+      sub_info_.subscribe(*pnh_, "info", max_sub_queue_size_);
+      sub_cloud_.subscribe(*pnh_, "input", max_sub_queue_size_);
 
       if (use_approximate) {
         sync_inputs_a_ = boost::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<sensor_msgs::CameraInfo, sensor_msgs::PointCloud2> > > (max_queue_size_);
@@ -110,7 +116,8 @@ void jsk_pcl_ros::DepthImageCreator::subscribe() {
     }
   } else {
     // not continuous
-    sub_as_info_ = pnh_->subscribe<sensor_msgs::CameraInfo> ("info", 1, &DepthImageCreator::callback_info, this);
+    sub_as_info_ = pnh_->subscribe<sensor_msgs::CameraInfo> ("info", max_sub_queue_size_,
+                                                             &DepthImageCreator::callback_info, this);
    
   }
 }

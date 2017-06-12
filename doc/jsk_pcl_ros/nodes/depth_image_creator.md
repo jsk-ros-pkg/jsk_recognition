@@ -50,7 +50,18 @@ Currently it supports `pcl::PointXYZ` and `pcl::PointXYZRGB` as the input.
    The number of `~info` messages to skip to generate depth image.
 * `~max_queue_size` (integer, default: `3`):
 
-   Queue length of topics.
+   Queue length for synchronization of topics.
+
+* `~max_pub_queue_size` (integer, default: `~max_queue_size_`):
+
+   Queue length of topic publishers.
+   Default is value set for `max_queue_size_`.
+
+* `~max_pub_queue_size` (integer, default: `~max_queue_size_`):
+
+   Queue length of topic subscribers.
+   Default is value set for `max_queue_size_`.
+
 
 ## Sample
 

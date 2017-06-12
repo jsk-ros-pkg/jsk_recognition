@@ -56,7 +56,12 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
 
     def _load_chainer_model(self):
         model_name = rospy.get_param('~model_name')
-        model_h5 = rospy.get_param('~model_h5')
+        if rospy.has_param('~model_h5'):
+            rospy.logwarn('Rosparam ~model_h5 is deprecated,'
+                          ' and please use ~model_file instead.')
+            model_file = rospy.get_param('~model_h5')
+        else:
+            model_file = rospy.get_param('~model_file')
         n_class = len(self.target_names)
         if model_name == 'fcn32s':
             self.model = fcn.models.FCN32s(n_class=n_class)
@@ -66,9 +71,12 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
             self.model = fcn.models.FCN8s(n_class=n_class)
         else:
             raise ValueError('Unsupported ~model_name: {}'.format(model_name))
-        rospy.loginfo('Loading trained model: {0}'.format(model_h5))
-        S.load_hdf5(model_h5, self.model)
-        rospy.loginfo('Finished loading trained model: {0}'.format(model_h5))
+        rospy.loginfo('Loading trained model: {0}'.format(model_file))
+        if model_file.endswith('.npz'):
+            S.load_npz(model_file, self.model)
+        else:
+            S.load_hdf5(model_file, self.model)
+        rospy.loginfo('Finished loading trained model: {0}'.format(model_file))
         if self.gpu != -1:
             self.model.to_gpu(self.gpu)
         if LooseVersion(chainer.__version__) < LooseVersion('2.0.0'):

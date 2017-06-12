@@ -10,7 +10,7 @@
     <rosparam subst_value="true">
       gpu: $(arg GPU)
       model_name: fcn8s
-      model_h5: $(find jsk_perception)/trained_data/fcn8s_from_caffe.chainermodel
+      model_file: $(find jsk_perception)/trained_data/fcn8s_voc.npz
       target_names:
         - background
         - aeroplane

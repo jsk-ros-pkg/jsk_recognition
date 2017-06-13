@@ -1,24 +1,74 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
+import cv2
+import matplotlib
+matplotlib.use('Agg')  # NOQA
+import matplotlib.cm
 import numpy as np
-from skimage.color import gray2rgb
-from skimage.color import label2rgb
-from skimage.util import img_as_ubyte
+import scipy.ndimage
 
 import cv_bridge
 from jsk_recognition_utils import bounding_rect_of_mask
 from jsk_recognition_utils import get_tile_image
 from jsk_recognition_utils.color import labelcolormap
 from jsk_topic_tools import ConnectionBasedTransport
-from jsk_topic_tools import jsk_loginfo
 from jsk_topic_tools import warn_no_remap
-import matplotlib
-matplotlib.use('Agg')  # NOQA
-import matplotlib.pyplot as plt
 import message_filters
 import rospy
 from sensor_msgs.msg import Image
+
+
+def get_text_color(color):
+    if color[0] * 0.299 + color[1] * 0.587 + color[2] * 0.114 > 170:
+        return (0, 0, 0)
+    return (255, 255, 255)
+
+
+def label2rgb(lbl, img=None, label_names=None, alpha=0.3):
+    if label_names is None:
+        n_labels = lbl.max() + 1  # +1 for bg_label 0
+    else:
+        n_labels = len(label_names)
+    cmap = labelcolormap(n_labels)
+    cmap = (cmap * 255).astype(np.uint8)
+
+    lbl_viz = cmap[lbl]
+
+    if img is not None:
+        img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        img_gray = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2RGB)
+        lbl_viz = alpha * lbl_viz + (1 - alpha) * img_gray
+        lbl_viz = lbl_viz.astype(np.uint8)
+
+    if label_names is None:
+        return lbl_viz
+
+    np.random.seed(1234)
+    labels = np.unique(lbl)
+    labels = labels[labels != 0]
+    for label in labels:
+        mask = lbl == label
+        mask = (mask * 255).astype(np.uint8)
+        y, x = scipy.ndimage.center_of_mass(mask)
+        y, x = map(int, [y, x])
+
+        if lbl[y, x] != label:
+            Y, X = np.where(mask)
+            point_index = np.random.randint(0, len(Y))
+            y, x = Y[point_index], X[point_index]
+
+        text = label_names[label]
+        font_face = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = 0.7
+        thickness = 2
+        text_size, baseline = cv2.getTextSize(
+            text, font_face, font_scale, thickness)
+
+        color = get_text_color(lbl_viz[y, x])
+        cv2.putText(lbl_viz, text,
+                    (x - text_size[0] // 2, y),
+                    font_face, font_scale, color, thickness)
+    return lbl_viz
 
 
 class LabelImageDecomposer(ConnectionBasedTransport):
@@ -28,17 +78,17 @@ class LabelImageDecomposer(ConnectionBasedTransport):
         self.pub_img = self.advertise('~output', Image, queue_size=5)
         self.pub_label_viz = self.advertise('~output/label_viz', Image,
                                             queue_size=5)
-        self._label_names = rospy.get_param('~label_names', [])
+        self._label_names = rospy.get_param('~label_names', None)
         # publish masks of fg/bg by decomposing each label
         self._publish_mask = rospy.get_param('~publish_mask', False)
         if self._publish_mask:
             self.pub_fg_mask = self.advertise('~output/fg_mask', Image,
                                               queue_size=5)
             self.pub_bg_mask = self.advertise('~output/bg_mask', Image,
-                                                    queue_size=5)
+                                              queue_size=5)
         # publish each region image. this can take time so optional.
         self._publish_tile = rospy.get_param('~publish_tile', False)
-        jsk_loginfo('~publish_tile: {}'.format(self._publish_tile))
+        rospy.loginfo('~publish_tile: {}'.format(self._publish_tile))
         if self._publish_tile:
             self.pub_tile = self.advertise('~output/tile', Image, queue_size=5)
 
@@ -48,11 +98,11 @@ class LabelImageDecomposer(ConnectionBasedTransport):
         warn_no_remap('~input', '~input/label')
         use_async = rospy.get_param('~approximate_sync', False)
         queue_size = rospy.get_param('~queue_size', 10)
-        jsk_loginfo('~approximate_sync: {}, queue_size: {}'
-                    .format(use_async, queue_size))
+        rospy.loginfo('~approximate_sync: {}, queue_size: {}'
+                      .format(use_async, queue_size))
         if use_async:
             slop = rospy.get_param('~slop', 0.1)
-            jsk_loginfo('~slop: {}'.format(slop))
+            rospy.loginfo('~slop: {}'.format(slop))
             async = message_filters.ApproximateTimeSynchronizer(
                 [self.sub_img, self.sub_label],
                 queue_size=queue_size, slop=slop)
@@ -85,48 +135,10 @@ class LabelImageDecomposer(ConnectionBasedTransport):
             # do dynamic scaling to make it look nicely
             min_value, max_value = img.min(), img.max()
             img = (img - min_value) / (max_value - min_value) * 255
-            img = gray2rgb(img)
+            img = img.astype(np.uint8)
+            img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
 
-        unique_labels = np.unique(label_img)
-        if self._label_names:
-            n_label = len(self._label_names)
-        else:
-            n_label = len(unique_labels)
-        cmap = labelcolormap(N=n_label)
-        label_img = label_img.copy()
-        label_viz = label2rgb(label_img, img, colors=cmap[1:], bg_label=0)
-        label_viz = img_as_ubyte(label_viz)
-
-        if self._label_names:
-            # plot label titles on image using matplotlib
-            import StringIO
-            import PIL.Image
-            plt.subplots_adjust(left=0, right=1, top=1, bottom=0,
-                                wspace=0, hspace=0)
-            plt.margins(0, 0)
-            plt.gca().xaxis.set_major_locator(plt.NullLocator())
-            plt.gca().yaxis.set_major_locator(plt.NullLocator())
-            plt.axis('off')
-            # plot image
-            plt.imshow(label_viz)
-            # plot legend
-            plt_handlers = []
-            plt_titles = []
-            for label_value in unique_labels:
-                if (label_img == label_value).sum() < 0.01 * label_img.size:
-                    # Skip label which has small region
-                    continue
-                fc = cmap[label_value]
-                p = plt.Rectangle((0, 0), 1, 1, fc=fc)
-                plt_handlers.append(p)
-                plt_titles.append(self._label_names[label_value])
-            plt.legend(plt_handlers, plt_titles, loc='lower right',
-                       framealpha=0.5)
-            # convert plotted figure to np.ndarray
-            f = StringIO.StringIO()
-            plt.savefig(f, bbox_inches='tight', pad_inches=0)
-            label_viz = np.array(PIL.Image.open(f))[:, :, :3]  # RGBA -> RGB
-
+        label_viz = label2rgb(label_img, img, label_names=self._label_names)
         label_viz_msg = bridge.cv2_to_imgmsg(label_viz, encoding='rgb8')
         label_viz_msg.header = img_msg.header
         self.pub_label_viz.publish(label_viz_msg)

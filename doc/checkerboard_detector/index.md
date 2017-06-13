@@ -43,6 +43,27 @@ Parameters
 * `grid%d_size_y`
 
   The number of grids in x and y axis.
+* `use_P` (default: `false`)
+
+  By default, use camera matrix (K) and unrectified image (image_raw).
+  If you use rectified image (image_rect), use_P should be true.
+* `invert_color` (default: `false`)
+
+  Invert white and black before searching cross points or circles.
+* `message_throttle`   (default: `1`)
+
+  Finding checker boards every `message_throttle` images
+* `queue_size`         (default: `1`)
+* `publish_queue_size` (default: `1`)
+
+  Size of queue of subscriber is `queue_size`, publisher is `publish_queue_size`.
+* `axis_size`   (default: `0.05`)
+* `circle_size` (default: `6`)
+
+  For setting displayed marker size.
+  Set circle_size as [pixel].
+  Set axis_size as [m].
+
 
 Trouble Shooting
 ----------------

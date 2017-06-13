@@ -91,11 +91,28 @@ def main():
     )
 
     # node_scripts/fcn_object_segmentation.py
+    # ref: https://github.com/wkentaro/fcn#training
     download_data(
         pkg_name=PKG,
-        path='trained_data/fcn8s_from_caffe.chainermodel',
-        url = 'https://drive.google.com/uc?id=0B9P1L--7Wd2vTXU0QzUwSkVwOFk',
-        md5 = 'a1083db5a47643b112af69bfa59954f9',
+        path='trained_data/fcn8s_voc.npz',
+        url = 'https://drive.google.com/uc?id=0B9P1L--7Wd2vWG5MeUEwWmxudU0',
+        md5 = '75128c0e175767fc82a7d4f1e21f4009',
+    )
+
+    # node_scripts/vgg16_object_recognition.py
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/bvlc_vgg16.chainermodel',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vSlFjQlJFQjM5TEk',
+        md5='292e6472062392f5de02ef431bba4a48',
+    )
+
+    # node_scripts/alexnet_object_recognition.py
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/bvlc_alexnet.chainermodel',
+        url='https://drive.google.com/uc?id=0B5DV6gwLHtyJZkd1ZTRiNUdrUXM',
+        md5='2175620a2237bbd33e35bf38867d84b2',
     )
 
 

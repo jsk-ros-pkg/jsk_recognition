@@ -25,6 +25,7 @@ class TileImages(ConnectionBasedTransport):
         self.draw_topic_name = rospy.get_param('~draw_topic_name', False)
         self.approximate_sync = rospy.get_param('~approximate_sync', True)
         self.no_sync = rospy.get_param('~no_sync', False)
+        self.font_scale = rospy.get_param('~font_scale', 4)
         if (not self.no_sync and
             StrictVersion(pkg_resources.get_distribution('message_filters').version) < StrictVersion('1.11.4') and
             self.approximate_sync):
@@ -66,7 +67,7 @@ class TileImages(ConnectionBasedTransport):
                 bridge = cv_bridge.CvBridge()
                 self.input_imgs[target_topic] = bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
                 if self.draw_topic_name:
-                    cv2.putText(self.input_imgs[target_topic], target_topic, (0, 50), cv2.FONT_HERSHEY_PLAIN, 4, (0, 255, 0), 4)
+                    cv2.putText(self.input_imgs[target_topic], target_topic, (0, 50), cv2.FONT_HERSHEY_PLAIN, self.font_scale, (0, 255, 0), 4)
         return callback
     def _append_images(self, imgs):
         if self.cache_img is None:
@@ -83,7 +84,7 @@ class TileImages(ConnectionBasedTransport):
         for msg, topic in zip(msgs, self.input_topics):
             img = bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
             if self.draw_topic_name:
-                cv2.putText(img, topic, (0, 50), cv2.FONT_HERSHEY_PLAIN, 4, (0, 255, 0), 4)
+                cv2.putText(img, topic, (0, 50), cv2.FONT_HERSHEY_PLAIN, self.font_scale, (0, 255, 0), 4)
             imgs.append(img)
         self._append_images(imgs)
 

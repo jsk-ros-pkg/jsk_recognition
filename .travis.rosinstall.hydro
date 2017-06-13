@@ -6,6 +6,10 @@
     uri: https://github.com/ros-perception/opencv_apps.git
     local-name: ros-perception/opencv_apps
     version: 1.11.14
+- tar:
+    uri: https://github.com/ros-gbp/common_msgs-release/archive/release/indigo/sensor_msgs/1.11.9-0.tar.gz
+    local-name: common_msgs/sensor_msgs
+    version: common_msgs-release-release-indigo-sensor_msgs-1.11.9-0
 # - git:
 #     uri: https://github.com/jsk-ros-pkg/jsk_roseus.git
 #     local-name: jsk-ros-pkg/jsk_roseus

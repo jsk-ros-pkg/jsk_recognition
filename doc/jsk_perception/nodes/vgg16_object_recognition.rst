@@ -50,9 +50,9 @@ Parameters
   Currently ``vgg16`` or ``vgg16_batch_normalization`` is only supported.
   See models in ``$(rospack find jsk_recognition_utils)/python/jsk_recognition_utils/chainermodels``.
 
-* ``~model_h5`` (String, Required)
+* ``~model_file`` (String, Required)
 
-  Saved h5 file for trained model.
+  Trained model file.
 
 * ``use_mask`` (Bool, Default: ``False``)
 

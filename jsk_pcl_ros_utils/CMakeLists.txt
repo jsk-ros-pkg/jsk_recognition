@@ -153,6 +153,8 @@ if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
 endif()
 jsk_pcl_util_nodelet(src/pointcloud_xyz_to_xyzrgb_nodelet.cpp
   "jsk_pcl_utils/PointCloudXYZToXYZRGB" "pointcloud_xyz_to_xyzrgb")
+jsk_pcl_util_nodelet(src/pointcloud_xyzrgb_to_xyz_nodelet.cpp
+  "jsk_pcl_utils/PointCloudXYZRGBToXYZ" "pointcloud_xyzrgb_to_xyz")
 jsk_pcl_util_nodelet(src/pointcloud_to_cluster_point_indices_nodelet.cpp
   "jsk_pcl_utils/PointCloudToClusterPointIndices" "pointcloud_to_cluster_point_indices")
 jsk_pcl_util_nodelet(src/pointcloud_to_mask_image_nodelet.cpp
@@ -252,6 +254,7 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/evaluate_voxel_segmentation_by_gt_box.test)
     add_rostest(test/pointcloud_to_mask_image.test)
     add_rostest(test/polygon_array_unwrapper.test)
+    add_rostest(test/polygon_magnifier.test)
     add_rostest(test/subtract_point_indices.test)
     roslaunch_add_file_check(test/subtract_point_indices.test)
   endif()

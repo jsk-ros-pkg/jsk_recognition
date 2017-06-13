@@ -4,7 +4,7 @@
 Convert HistogramWithRangeArray to HistogramWithRange
 """
 
-from jsk_topic_tools import jsk_logdebug, jsk_loginfo, ConnectionBasedTransport
+from jsk_topic_tools import ConnectionBasedTransport
 from jsk_recognition_msgs.msg import HistogramWithRange, HistogramWithRangeArray
 
 import rospy

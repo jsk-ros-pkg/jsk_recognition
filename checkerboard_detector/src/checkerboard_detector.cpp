@@ -91,7 +91,7 @@ public:
     int message_throttle_counter_;
     string frame_id; // tf frame id
     bool invert_color;
-    int display, verbose, maxboard;
+    int display, verbose, maxboard, queue_size, publish_queue_size;
     vector<CHECKERBOARD> vcheckers; // grid points for every checkerboard
     vector< string > vstrtypes; // type names for every grid point
     map<string,int> maptypes;
@@ -101,13 +101,14 @@ public:
     int dimx, dimy;
     bool use_P;
     double fRectSize[2];
-
     typedef checkerboard_detector::CheckerboardDetectorConfig Config;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv;
     bool adaptive_thresh_flag;
     bool filter_quads_flag;
     bool normalize_image_flag;
     bool fast_check_flag;
+    double axis_size_;
+    int circle_size_;
 
     //////////////////////////////////////////////////////////////////////////////
     // Constructor
@@ -119,6 +120,11 @@ public:
         _node.param("invert_color", invert_color, false);
         _node.param("use_P", use_P, false);
         _node.param("message_throttle", message_throttle_, 1);
+        _node.param("queue_size", queue_size, 1);
+        _node.param("publish_queue_size", publish_queue_size, 1);
+        _node.param("axis_size", axis_size_, 0.05);
+        _node.param("circle_size", circle_size_, 6);
+
         char str[32];
         int index = 0;
 
@@ -179,12 +185,12 @@ public:
             cb.board_type = board_type;
             cb.grid3d.resize(dimx*dimy);
             int j=0;
-            if (board_type == "chess" || board_type == "circle") {
+            if (board_type == "chess" || board_type == "circle" || board_type == "circles") {
               for(int y=0; y<dimy; ++y)
                 for(int x=0; x<dimx; ++x)
                   cb.grid3d[j++] = cv::Point3f(x*fRectSize[0], y*fRectSize[1], 0);
             }
-            else if (board_type == "acircle") {
+            else if (board_type == "acircle" || board_type == "acircles") {
               for(int ii=0; ii<dimy; ii++) {
                 for(int jj=0; jj<dimx; jj++) {
                   cb.grid3d[j++] = cv::Point3f((2*jj + ii % 2)*fRectSize[0],
@@ -228,21 +234,21 @@ public:
         if (!display) {
             ros::SubscriberStatusCallback connect_cb = boost::bind( &CheckerboardDetector::connectCb, this);
             _pubDetection =
-                _node.advertise<posedetection_msgs::ObjectDetection> ("ObjectDetection", 1,
+                _node.advertise<posedetection_msgs::ObjectDetection> ("ObjectDetection", publish_queue_size,
                                                                       connect_cb, connect_cb);
             _pubPoseStamped =
-                _node.advertise<geometry_msgs::PoseStamped> ("objectdetection_pose", 1,
+                _node.advertise<geometry_msgs::PoseStamped> ("objectdetection_pose", publish_queue_size,
                                                              connect_cb, connect_cb);
-            _pubCornerPoint = _node.advertise<geometry_msgs::PointStamped>("corner_point", 1, connect_cb, connect_cb);
-            _pubPolygonArray = _node.advertise<jsk_recognition_msgs::PolygonArray>("polygons", 1, connect_cb, connect_cb);
+            _pubCornerPoint = _node.advertise<geometry_msgs::PointStamped>("corner_point", publish_queue_size, connect_cb, connect_cb);
+            _pubPolygonArray = _node.advertise<jsk_recognition_msgs::PolygonArray>("polygons", publish_queue_size, connect_cb, connect_cb);
         }
         else {
             _pubDetection =
-                _node.advertise<posedetection_msgs::ObjectDetection> ("ObjectDetection", 1);
+                _node.advertise<posedetection_msgs::ObjectDetection> ("ObjectDetection", publish_queue_size);
             _pubPoseStamped =
-                _node.advertise<geometry_msgs::PoseStamped> ("objectdetection_pose", 1);
-            _pubCornerPoint = _node.advertise<geometry_msgs::PointStamped>("corner_point", 1);
-            _pubPolygonArray = _node.advertise<jsk_recognition_msgs::PolygonArray>("polygons", 1);
+                _node.advertise<geometry_msgs::PoseStamped> ("objectdetection_pose", publish_queue_size);
+            _pubCornerPoint = _node.advertise<geometry_msgs::PointStamped>("corner_point", publish_queue_size);
+            _pubPolygonArray = _node.advertise<jsk_recognition_msgs::PolygonArray>("polygons", publish_queue_size);
             subscribe();
         }
         //this->camInfoSubscriber = _node.subscribe("camera_info", 1, &CheckerboardDetector::caminfo_cb, this);
@@ -359,16 +365,18 @@ public:
     void subscribe( )
     {
         if ( camInfoSubscriber == NULL )
-            camInfoSubscriber = _node.subscribe("camera_info", 1, &CheckerboardDetector::caminfo_cb, this);
+            camInfoSubscriber = _node.subscribe("camera_info", queue_size,
+                                                &CheckerboardDetector::caminfo_cb, this);
         if ( imageSubscriber == NULL ) {
-            imageSubscriber = _node.subscribe("image", 1, &CheckerboardDetector::image_cb, this);
+            imageSubscriber = _node.subscribe("image", queue_size,
+                                              &CheckerboardDetector::image_cb, this);
             if ( imageSubscriber.getTopic().find("image_rect") != std::string::npos )
                 ROS_WARN("topic name seems rectified, please use unrectified image"); // rectified image has 'image_rect' in topic name
         }
         if ( camInfoSubscriber2 == NULL )
-            camInfoSubscriber2 = _node.subscribe("CameraInfo", 1, &CheckerboardDetector::caminfo_cb2, this);
+            camInfoSubscriber2 = _node.subscribe("CameraInfo", queue_size, &CheckerboardDetector::caminfo_cb2, this);
         if ( imageSubscriber2 == NULL ) {
-            imageSubscriber2 = _node.subscribe("Image",1, &CheckerboardDetector::image_cb2, this);
+            imageSubscriber2 = _node.subscribe("Image", queue_size, &CheckerboardDetector::image_cb2, this);
             if ( imageSubscriber2.getTopic().find("image_rect") != std::string::npos )
                 ROS_WARN("topic name seems rectified, please use unrectified image"); // rectified image has 'image_rect' in topic name
         }
@@ -587,13 +595,34 @@ public:
                 tglobal.rot = Vector(vobjects[i].pose.orientation.w,vobjects[i].pose.orientation.x,vobjects[i].pose.orientation.y, vobjects[i].pose.orientation.z);
                 Transform tlocal = tglobal * cb.tlocaltrans.inverse();
 
+                // draw all the points
+                int csize0 = std::max(circle_size_, 6);
+                int cwidth0 = std::max(circle_size_/3, 2);
+                int csize1 = std::max((2*circle_size_)/3, 4);
+                int csize2 = std::max(circle_size_/4, 2);
+                int cwidth1 = std::max(circle_size_/2, 4);
+                int cwidth2 = std::max(circle_size_/2, 3);
+
+                for(size_t i = 0; i < cb.grid3d.size(); ++i) {
+                    Vector grid3d_vec(cb.grid3d[i].x, cb.grid3d[i].y, cb.grid3d[i].z);
+                    Vector p = tlocal * grid3d_vec;
+                    dReal fx = p.x*camInfoMsg.P[0] + p.y*camInfoMsg.P[1] + p.z*camInfoMsg.P[2] + camInfoMsg.P[3];
+                    dReal fy = p.x*camInfoMsg.P[4] + p.y*camInfoMsg.P[5] + p.z*camInfoMsg.P[6] + camInfoMsg.P[7];
+                    dReal fz = p.x*camInfoMsg.P[8] + p.y*camInfoMsg.P[9] + p.z*camInfoMsg.P[10] + camInfoMsg.P[11];
+                    int x = (int)(fx/fz);
+                    int y = (int)(fy/fz);
+                    cv::circle(frame, cv::Point(x,y), csize0, cv::Scalar(0, 255, 0), cwidth0);
+                    cv::circle(frame, cv::Point(x,y), csize1, cv::Scalar(64*itype,128,128), cwidth1);
+                    cv::circle(frame, cv::Point(x,y), csize2, cv::Scalar(0,   0, 0), cwidth0);
+                }
+
                 cv::Point X[4];
 
                 Vector vaxes[4];
                 vaxes[0] = Vector(0,0,0);
-                vaxes[1] = Vector(0.05f,0,0);
-                vaxes[2] = Vector(0,0.05f,0);
-                vaxes[3] = Vector(0,0,0.05f);
+                vaxes[1] = Vector(axis_size_,0,0);
+                vaxes[2] = Vector(0,axis_size_,0);
+                vaxes[3] = Vector(0,0,axis_size_);
 
                 for(int i = 0; i < 4; ++i) {
                     Vector p = tglobal*vaxes[i];
@@ -604,29 +633,17 @@ public:
                     X[i].y = (int)(fy/fz);
                 }
 
+                cv::circle(frame, X[0], cwidth2, cv::Scalar(255,255,128), cwidth2);
+
                 // draw three lines
-                cv::Scalar col0(255,0,(64*itype)%256);
-                cv::Scalar col1(0,255,(64*itype)%256);
-                cv::Scalar col2((64*itype)%256,(64*itype)%256,255);
-                cv::line(frame, X[0], X[1], col0, 1);
-                cv::line(frame, X[0], X[2], col1, 1);
-                cv::line(frame, X[0], X[3], col2, 1);
+                cv::Scalar col0(255,0,(64*itype)%256); // B
+                cv::Scalar col1(0,255,(64*itype)%256); // G
+                cv::Scalar col2((64*itype)%256,(64*itype)%256,255); // R
+                int axis_width_ = floor(axis_size_ / 0.03);
+                cv::line(frame, X[0], X[3], col0, axis_width_);
+                cv::line(frame, X[0], X[2], col1, axis_width_);
+                cv::line(frame, X[0], X[1], col2, axis_width_);
 
-                // draw all the points
-                for(size_t i = 0; i < cb.grid3d.size(); ++i) {
-                    Vector grid3d_vec(cb.grid3d[i].x, cb.grid3d[i].y, cb.grid3d[i].z);
-                    Vector p = tlocal * grid3d_vec;
-                    dReal fx = p.x*camInfoMsg.P[0] + p.y*camInfoMsg.P[1] + p.z*camInfoMsg.P[2] + camInfoMsg.P[3];
-                    dReal fy = p.x*camInfoMsg.P[4] + p.y*camInfoMsg.P[5] + p.z*camInfoMsg.P[6] + camInfoMsg.P[7];
-                    dReal fz = p.x*camInfoMsg.P[8] + p.y*camInfoMsg.P[9] + p.z*camInfoMsg.P[10] + camInfoMsg.P[11];
-                    int x = (int)(fx/fz);
-                    int y = (int)(fy/fz);
-                    cv::circle(frame, cv::Point(x,y), 6, cv::Scalar(0,0,0), 2);
-                    cv::circle(frame, cv::Point(x,y), 2, cv::Scalar(0,0,0), 2);
-                    cv::circle(frame, cv::Point(x,y), 4, cv::Scalar(64*itype,128,128), 3);
-                }
-
-                cv::circle(frame, X[0], 3, cv::Scalar(255,255,128), 3);
                 // publish X[0]
                 geometry_msgs::PointStamped point_msg;
                 point_msg.header = imagemsg.header;
@@ -634,7 +651,6 @@ public:
                 point_msg.point.y = X[0].y;
                 point_msg.point.z = vobjects[vobjects.size() - 1].pose.position.z;
                 _pubCornerPoint.publish(point_msg);
-                
             }
 
             cv::imshow("Checkerboard Detector",frame);

@@ -1,0 +1,68 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_perception)/sample/sample_flow_velocity_thresholding.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <node name="erode_mask_image"
+        pkg="jsk_perception" type="erode_mask_image">
+    <remap from="~input" to="flow_velocity_thresholding/output" />
+    <rosparam>
+      size: 5
+      iterations: 3
+    </rosparam>
+  </node>
+  <node name="convex_hull_mask_image"
+        pkg="jsk_perception" type="convex_hull_mask_image">
+    <remap from="~input" to="erode_mask_image/output" />
+  </node>
+
+  <node name="filter_mask_image_with_size"
+        pkg="jsk_perception" type="filter_mask_image_with_size">
+    <remap from="~input" to="convex_hull_mask_image/output" />
+    <rosparam>
+      use_reference: false
+      min_size: 0.1
+      max_size: 0.3
+    </rosparam>
+  </node>
+
+  <node name="apply_mask_image_before_filtering"
+        pkg="jsk_perception" type="apply_mask_image">
+    <remap from="~input" to="/camera/rgb/image_rect_color" />
+    <remap from="~input/mask" to="convex_hull_mask_image/output" />
+    <rosparam>
+      approximate_sync: false
+      queue_size: 10
+      clip: false
+    </rosparam>
+  </node>
+  <node name="apply_mask_image_filtered"
+        pkg="jsk_perception" type="apply_mask_image">
+    <remap from="~input" to="/camera/rgb/image_rect_color" />
+    <remap from="~input/mask" to="filter_mask_image_with_size/output" />
+    <rosparam>
+      approximate_sync: false
+      queue_size: 10
+      clip: false
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="fback_flow/image" />
+    </node>
+    <node name="image_view1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="apply_mask_image_before_filtering/output" />
+    </node>
+    <node name="image_view2"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="apply_mask_image_filtered/output" />
+    </node>
+  </group>
+
+</launch>

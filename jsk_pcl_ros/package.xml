@@ -54,7 +54,6 @@
   <build_depend>octomap</build_depend>
   <build_depend>octomap_server</build_depend>
   <build_depend>octomap_msgs</build_depend>
-  <build_depend>octomap_ros</build_depend>
   <build_depend>jsk_pcl_ros_utils</build_depend>
   <build_depend>jsk_data</build_depend>
 
@@ -110,10 +109,9 @@
   <run_depend>nav_msgs</run_depend>
   <run_depend>octomap</run_depend>
   <run_depend>octomap_server</run_depend>
-  <run_depend>octomap_msgs</run_depend>
-  <run_depend>octomap_ros</run_depend>
   <run_depend>jsk_pcl_ros_utils</run_depend>
   <run_depend>jsk_data</run_depend>
+  <run_depend>stereo_image_proc</run_depend>
   <test_depend>jsk_tools</test_depend>
   <test_depend>roslaunch</test_depend>
   <test_depend>rostest</test_depend>

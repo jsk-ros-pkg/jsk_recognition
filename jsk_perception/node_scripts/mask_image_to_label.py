@@ -4,7 +4,6 @@
 import numpy as np
 
 from jsk_topic_tools import ConnectionBasedTransport
-from jsk_topic_tools import jsk_logdebug
 import rospy
 from sensor_msgs.msg import Image
 import cv_bridge
@@ -25,7 +24,7 @@ class MaskImageToLabel(ConnectionBasedTransport):
         bridge = cv_bridge.CvBridge()
         mask = bridge.imgmsg_to_cv2(msg, desired_encoding='mono8')
         if mask.size == 0:
-            jsk_logdebug('Skipping empty image')
+            rospy.logdebug('Skipping empty image')
             return
         label = np.zeros(mask.shape, dtype=np.int32)
         label[mask == 0] = 0

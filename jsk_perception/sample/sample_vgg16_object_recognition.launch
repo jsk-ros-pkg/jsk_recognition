@@ -65,7 +65,7 @@
     <rosparam subst_value="true">
       gpu: $(arg gpu)
       model_name: vgg16_batch_normalization
-      model_h5: $(find jsk_perception)/trained_data/vgg16_bn_apc2015_496000.chainermodel
+      model_file: $(find jsk_perception)/trained_data/vgg16_bn_apc2015_496000.chainermodel
     </rosparam>
     <remap from="~target_names" to="target_names" />
   </node>
@@ -79,7 +79,7 @@
       approximate_sync: true
       gpu: $(arg gpu)
       model_name: vgg16_batch_normalization
-      model_h5: $(find jsk_perception)/trained_data/vgg16_bn_apc2015_496000.chainermodel
+      model_file: $(find jsk_perception)/trained_data/vgg16_bn_apc2015_496000.chainermodel
     </rosparam>
     <remap from="~target_names" to="target_names" />
   </node>

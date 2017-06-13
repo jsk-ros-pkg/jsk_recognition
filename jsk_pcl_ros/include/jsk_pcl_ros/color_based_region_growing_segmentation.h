@@ -57,9 +57,9 @@ namespace jsk_pcl_ros
   protected:
     ros::Publisher pub_;
     ros::Subscriber sub_;
-    int distance_threshould_;
-    int point_color_threshould_;
-    int region_color_threshould_;
+    int distance_threshold_;
+    int point_color_threshold_;
+    int region_color_threshold_;
     int min_cluster_size_;
     typedef jsk_pcl_ros::ColorBasedRegionGrowingSegmentationConfig Config;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;

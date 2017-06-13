@@ -41,6 +41,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <jsk_recognition_msgs/ClusterPointIndices.h>
 #include <jsk_recognition_msgs/ModelCoefficientsArray.h>
+#include <jsk_recognition_msgs/SegmentArray.h>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -104,6 +105,7 @@ namespace jsk_pcl_ros
     virtual void publishIndices(
       ros::Publisher& pub,
       ros::Publisher& pub_coefficients,
+      ros::Publisher& pub_edges,
       const std::vector<pcl::PointIndices::Ptr> inliers,
       const std::vector<pcl::ModelCoefficients::Ptr> coefficients,
       const std_msgs::Header& header);
@@ -132,6 +134,7 @@ namespace jsk_pcl_ros
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     ros::Publisher pub_indices_, pub_outlier_removed_indices_;
     ros::Publisher pub_coefficients_, pub_outlier_removed_coefficients_;
+    ros::Publisher pub_edges_, pub_outlier_removed_edges_;
     boost::mutex mutex_;
     ////////////////////////////////////////////////////////
     // outlier removal

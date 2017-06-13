@@ -1,4 +1,8 @@
 <library path="lib/libjsk_perception">
+  <class name="jsk_perception/FilterMaskImageWithSize"
+         type="jsk_perception::FilterMaskImageWithSize"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/FlowVelocityThresholding"
          type="jsk_perception::FlowVelocityThresholding"
          base_class_type="nodelet::Nodelet">

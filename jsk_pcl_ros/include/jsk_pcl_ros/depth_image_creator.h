@@ -72,6 +72,7 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_cloud_;
     ros::Subscriber sub_as_info_;
     ros::Subscriber sub_as_cloud_;
+    ros::Publisher pub_depth_;
     ros::Publisher pub_image_;
     ros::Publisher pub_cloud_;
     ros::Publisher pub_disp_image_;
@@ -89,10 +90,12 @@ namespace jsk_pcl_ros
     int info_throttle_;
     int info_counter_;
     int max_queue_size_;
+    int max_pub_queue_size_;
+    int max_sub_queue_size_;
     tf::StampedTransform fixed_transform;
     tf::TransformListener* tf_listener_;
     double scale_depth;
-    typedef pcl::PointXYZ Point;
+    typedef pcl::PointXYZRGB Point;
     typedef pcl::PointCloud< Point > PointCloud;
 
     void onInit();

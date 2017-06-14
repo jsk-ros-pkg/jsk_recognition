@@ -1,0 +1,14 @@
+<launch>
+  <include file="$(find jsk_recognition_utils)/sample/sample_polygon_array_publisher.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <node name="polygon_array_likelihood_filter"
+        pkg="jsk_pcl_ros_utils" type="polygon_array_likelihood_filter">
+    <remap from="~input_polygons" to="/polygon_array_publisher/output" />
+    <rosparam>
+      use_coefficients: false
+      threshold: 0.8
+    </rosparam>
+  </node>
+</launch>

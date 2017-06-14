@@ -1,0 +1,5 @@
+<launch>
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_polygon_array_likelihood_filter.launch"/>
+  <test test-name="test_polygon_array_likelihood_filter"
+        pkg="jsk_pcl_ros_utils" type="test_polygon_array_likelihood_filter.py" />
+</launch>

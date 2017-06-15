@@ -64,7 +64,9 @@ namespace jsk_pcl_ros_utils
   void PolygonMagnifier::configCallback(Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    use_scale_factor_ = config.use_scale_factor;
     magnify_distance_ = config.magnify_distance;
+    magnify_scale_factor_ = config.magnify_scale_factor;
   }
 
   void PolygonMagnifier::magnify(
@@ -79,8 +81,9 @@ namespace jsk_pcl_ros_utils
       jsk_recognition_utils::ConvexPolygon poly =
         jsk_recognition_utils::ConvexPolygon::fromROSMsg(msg->polygons[i].polygon);
 
-      jsk_recognition_utils::ConvexPolygon::Ptr magnified_poly
-        = poly.magnifyByDistance(magnify_distance_);
+      jsk_recognition_utils::ConvexPolygon::Ptr magnified_poly;
+      if (use_scale_factor_) magnified_poly = poly.magnify(magnify_scale_factor_);
+      else                   magnified_poly = poly.magnifyByDistance(magnify_distance_);
 
       if (!magnified_poly->isConvex()) {
         ROS_WARN("Magnified polygon %ld is not convex.", i);

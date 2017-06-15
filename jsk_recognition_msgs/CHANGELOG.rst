@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.2 (2017-06-16)
+------------------
 * [jsk_recognition_msgs] add segment messages. (`#2047 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2047>`_ )
 * Generate README by script (`#2064 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2064>`_ )
 * Contributors: Kentaro Wada, Masaki Murooka

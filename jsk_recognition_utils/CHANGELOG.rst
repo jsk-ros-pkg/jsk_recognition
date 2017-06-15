@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.2 (2017-06-16)
+------------------
 * [jsk_percption][jsk_recogniton_utils] add imagenet_object_recognition
 launch and its sample (`#2085 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2085>`_ )
   * add n_class in VGG16

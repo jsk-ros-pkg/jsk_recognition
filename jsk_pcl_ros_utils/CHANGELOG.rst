@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.2 (2017-06-16)
+------------------
 * [jsk_pcl_ros_utils] add PolygonArrayLikelihoodFilter (`#2054 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2054>`_ )
   * [jsk_pcl_ros_utils] add sample / test for polygon_array_likelihood_filter
   * [jsk_pcl_ros_utils][polygon_array_likelihood_filter] fix

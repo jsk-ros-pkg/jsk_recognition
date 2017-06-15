@@ -2,8 +2,8 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.2 (2017-06-16)
+------------------
 * Remove dependency of resized_image_transport on jsk_perception (`#2075 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2075>`_ )
 * Generate README by script (`#2064 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2064>`_ )
 * Improve documentation and example of image_resizer (`#2056 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2056>`_ )

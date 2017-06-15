@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.2 (2017-06-16)
+------------------
 * Use 1 queue size for pub/sub not synchronization (`#2103 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2103>`_ )
   * Use 1 queue size for pub/sub not synchronization
   * Keep backward compatibility by using max_queue_size\_

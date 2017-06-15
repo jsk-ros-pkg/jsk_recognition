@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.2 (2017-06-16)
+------------------
 * label_image_decomposer.py: Faster and better visualization of segmentation (`#2109 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2109>`_ )
 * fcn_object_segmentation.{launch,py} : Support .npz in chainermodel (https://github.com/jsk-ros-pkg/jsk_recognition/commit/19d7a2ac09bab2b470a8b06e0ed98d072b4958d4)
 * fcn_object_segmentation.{launch,py} : Show deprecated warning for ~model_h5 in fcn_object_segmentation https://github.com/jsk-ros-pkg/jsk_recognition/commit/8d9be278a4ce019f4e026883a30785be874c6a16

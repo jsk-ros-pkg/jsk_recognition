@@ -2,6 +2,59 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use 1 queue size for pub/sub not synchronization (`#2103 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2103>`_ )
+  * Use 1 queue size for pub/sub not synchronization
+  * Keep backward compatibility by using max_queue_size\_
+* Support PointXYZ in DepthImageCreator (`#2105 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2105>`_)
+  * Support PointXYZ in DepthImageCreator
+  * Add stereo_image_proc as run_depend
+* Check if in image to create depth from laser scans (`#2106 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2106>`_)
+* Triple sensor fusion with stereo rgbd cameras  (`#2104 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2104>`_)
+  * Fix missing inclusion of image_encodings.h
+  * Install sample data for fuse_images
+  * Rename: sample_fuse_depth_images.launch -> sample_fuse_images.launch
+  * Improve visualization in sample_fuse_depth_image
+  * Rename: fuse_depth_images.cpp -> fuse_images.cpp
+  * Fuse RGB images from multiple cameras
+  * Add sample for FuseDepthImages
+  * Fuse depth images for multiple sensor fusion
+  * Add test for depth_image_creator
+  * Create rgb image in depth_image_creator
+* Fix typo in ColorBasedRegionGrowingSegmentation (`#2098 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2098>`_)
+* Stop using deprecated logging func in jsk_topic_tools (`#2097 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2097>`_)
+  * Stop using deprecated JSK_NODELET_INFO_STREAM
+  * Stop using deprecated jsk_logxxx
+* [jsk_pcl_ros/line_segment_detector] Add consensus method of segmentation (`#1997 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1947>`_)
+  * [jsk_pcl_ros/lsd] Refactored code
+  * [jsk_pcl_ros/line_segment_detector] Mofied method type of consensus method
+  * [jsk_pcl_ros/line_segment_detector] Add consensus method of segmentation
+* Cleanup octomap dependencies of jsk_pcl_ros (`#2090 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2090>`_)
+* Fix deprecation warning on RearrangeBoundingBox (`#2088 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2088>`_)
+  ```
+  WARNING: '/home/wkentaro/Projects/label_octomap/src/jsk-ros-pkg/jsk_recognition/jsk_pcl_ros/sample/data/sample_add_color_from_image_20170319.bag' exists
+  /home/wkentaro/Projects/label_octomap/src/jsk-ros-pkg/jsk_recognition/jsk_pcl_ros/src/rearrange_bounding_box_nodelet.cpp: In member function ‘virtual void jsk_pcl_ros::RearrangeBoundingBox::onInit()’:
+  /home/wkentaro/Projects/label_octomap/src/jsk-ros-pkg/jsk_recognition/jsk_pcl_ros/src/rearrange_bounding_box_nodelet.cpp:51:57: warning: ‘tf2::Quaternion::Quaternion(const tf2Scalar&, const tf2Scalar&, const tf2Scalar&)’ is deprecated (declared at /opt/ros/indigo/include/tf2/LinearMath/Quaternion.h:50) [-Wdeprecated-declarations]
+  q\_ = tf2::Quaternion(rotate_y\_, rotate_x\_, rotate_z\_);
+  ^
+  /home/wkentaro/Projects/label_octomap/src/jsk-ros-pkg/jsk_recognition/jsk_pcl_ros/src/rearrange_bounding_box_nodelet.cpp: In member function ‘void jsk_pcl_ros::RearrangeBoundingBox::configCallback(jsk_pcl_ros::RearrangeBoundingBox::Config&, uint32_t)’:
+  /home/wkentaro/Projects/label_octomap/src/jsk-ros-pkg/jsk_recognition/jsk_pcl_ros/src/rearrange_bounding_box_nodelet.cpp:73:57: warning: ‘tf2::Quaternion::Quaternion(const tf2Scalar&, const tf2Scalar&, const tf2Scalar&)’ is deprecated (declared at /opt/ros/indigo/include/tf2/LinearMath/Quaternion.h:50) [-Wdeprecated-declarations]
+  q\_ = tf2::Quaternion(rotate_y\_, rotate_x\_, rotate_z\_);
+  ```
+* [tilt_laser_listener] add periodic publish mode (`#2082 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2082>`_)
+* [jsk_pcl_ros] publish edge as segment message in edge_depth_refinement_nodelet. (`#2047 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2047>`_)
+* enlarge euclidean clustering max cluster size (`#2066 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2066>`_)
+* Generate README by script (`#2064 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2064>`_)
+* [jsk_pcl_ros][cluster_point_indices_decomposer] normailize bounding box pose orientation quaternion (`#2044 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2044>`_)
+* [jsk_pcl_ros] Modified openni2_remote for republish compressed image (`#2036 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2036>`_)
+* Nodelet to add color from image to organized pointcloud (`#2035 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2035>`_)
+  * Add test, sample and doc for add_color_from_image(_to_organized)
+  * Nodelet to add color from image to organized pointcloud
+* forget to convert form jsk_pcl_ros to jsk_recognition_msgs (`#2021 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2021>`_)
+* [jsk_pcl_ros/launch/euclidean_segmentation.launch] add create manager node  (`#2020 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2020>`_)
+* Contributors: Guilherme Affonso, Kanae Kochigami, Kei Okada, Kentaro Wada, Masaki Murooka, Yohei Kakiuchi, Yuki Furuta, Iory Yanokura, Hiroto Mizohana
+
 1.1.1 (2017-03-04)
 ------------------
 * incldue flann before any opencv includes, fix `#2022 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2022>`_ (`#2023 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2023>`_ )

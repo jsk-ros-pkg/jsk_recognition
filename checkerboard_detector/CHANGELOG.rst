@@ -2,6 +2,15 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [checkerboard_detector] update launch and document
+* [checkerboard_detector] add parameters, axis_size and circle_size
+* [checkerboard_detector] add queue_size and publish_queue_size
+* [checkerboard_detector] fix board_type
+* Generate README by script
+* Contributors: Kentaro Wada, YoheiKakiuchi
+
 1.1.1 (2017-03-04)
 ------------------
 

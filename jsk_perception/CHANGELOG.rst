@@ -2,6 +2,110 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* label_image_decomposer.py: Faster and better visualization of segmentation (`#2109 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2109>`_ )
+* fcn_object_segmentation.{launch,py} : Support .npz in chainermodel (https://github.com/jsk-ros-pkg/jsk_recognition/commit/19d7a2ac09bab2b470a8b06e0ed98d072b4958d4)
+* fcn_object_segmentation.{launch,py} : Show deprecated warning for ~model_h5 in fcn_object_segmentation https://github.com/jsk-ros-pkg/jsk_recognition/commit/8d9be278a4ce019f4e026883a30785be874c6a16
+* Support chainer v2 in fcn_object_segmentation.py  (`#2107 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2107>`_ )
+* tile_image.py : Improve visualization in sample_fuse_depth_image https://github.com/jsk-ros-pkg/jsk_recognition/commit/6caa4c6f5039cb49cf0d07f43a6954a287b8ed35
+* Stop using deprecated logging func in jsk_topic_tools (`#2097 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2097>`_ )
+  * Stop using deprecated jsk_logxxx
+* Refactor cmake to find robot_self_filter (`#2089 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2089>`_ )
+* [jsk_percption][jsk_recogniton_utils] add imagenet_object_recognition launch and its sample (`#2085 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2085>`_ )
+  * add sample_imagenet_object_recognition launch
+  * use imagenet launch in alexnet sample launch
+  * add imagenet_object_recognition.launch
+  * move imagenet_target_names in config
+  * install bvlc_vgg16 chainermodel
+  * format API in vgg16: model_h5 -> model_file
+  * format Alex -> AlexNet
+* [jsk_perception] add AlexNet object recognition node (`#2083 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2083>`_ )
+ * inherit VGG16ObjectRecognition in AlexNet
+  * rename alex to alexnet
+  * mv imagenet_target_names.yaml in sample/config
+  * add test for alex_object_recognition
+  * add sample for alex_object_recognition
+  * add alex_object_recognition node
+* jsk_perception/test/bof_histogram_extractor.test: increase time-limit for test_bof_histogram_extractor (`#2079 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2079>`_)
+* fix typo in fcn_object_segmentation (`#2076 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2076>`_)
+  * Improve the location of squeezing batch axis https://github.com/jsk-ros-pkg/jsk_recognition/commit/ddf46101d2d02e7bd18261542a2bacb456bf6e11
+* Remove unexpectedly introduced torch rosdep key (`#2074 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2074>`_)
+* FilterMaskImageWithSize: Filter mask image with its size  (`#2062 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2062>`_)
+  * Add flag of ~use_reference to minimize overhead of synchronizing
+    - modified:   ../doc/jsk_perception/nodes/filter_mask_image_with_size.md
+    - modified:   include/jsk_perception/filter_mask_image_with_size.h
+    - modified:   sample/sample_filter_mask_image_with_size.launch
+    - modified:   src/filter_mask_image_with_size.cpp
+  * filter_mask_image_with_size.cpp: Improve rosinfo https://github.com/jsk-ros-pkg/jsk_recognition/commit/5b5455c46f8397d6aa7e1c3d3501e87bf39326ca
+  * Add sample, test & doc for FilterMaskImageWithSize https://github.com/jsk-ros-pkg/jsk_recognition/commit/14931792da009ef9468bc1ec3d6419005aca9335
+    -	new file:   doc/jsk_perception/nodes/filter_mask_image_with_size.md
+    -	new file:   doc/jsk_perception/nodes/images/filter_mask_image_with_size.gif
+    -	modified:   jsk_perception/CMakeLists.txt
+    -	new file:   jsk_perception/sample/sample_filter_mask_image_with_size.launch
+    -	new file:   jsk_perception/test/filter_mask_image_with_size.test
+  * Filter mask image with its size
+    Modified:
+    - jsk_perception/CMakeLists.txt
+    - jsk_perception/include/jsk_perception/multiply_mask_image.h
+    - jsk_perception/plugins/nodelet/libjsk_perception.xml
+    Added:
+    - jsk_perception/cfg/FilterMaskImageWithSize.cfg
+    - jsk_perception/include/jsk_perception/filter_mask_image_with_size.h
+    - jsk_perception/src/filter_mask_image_with_size.cpp
+* Add ~approximate_sync param to ConsensusTracking  (`#2067 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2067>`_)
+  Modified:
+  - doc/jsk_perception/nodes/consensus_tracking.rst
+  - jsk_perception/include/jsk_perception/consensus_tracking.h
+  - jsk_perception/src/consensus_tracking.cpp
+* FlowVelocityThresholding: Thresholding with velocity of optical flow (`#2060 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2060>`_ )
+  * Add sample/test for FlowVelocityThresholding
+    -	new file:   jsk_perception/nodes/flow_velocity_thresholding.md
+    -	new file:   jsk_perception/nodes/images/flow_velocity_thresholding.gif
+    -	modified:   ../jsk_perception/CMakeLists.txt
+    -	new file:   ../jsk_perception/sample/sample_flow_velocity_thresholding.launch
+    -	new file:   ../jsk_perception/test/flow_velocity_thresholding.test
+  * Thresholding with velocity of optical flow
+    -	modified:   CMakeLists.txt
+    -	new file:   cfg/FlowVelocityThresholding.cfg
+    -	new file:   include/jsk_perception/flow_velocity_thresholding.h
+    -	modified:   plugins/nodelet/libjsk_perception.xml
+    -	new file:   src/flow_velocity_thresholding.cpp
+* Generate README by script (`#2064 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2064>`_ )
+* fix typo in fcn_object_segmentation.py (`#2063 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2063>`_ )
+* Add ~queue_size param to MultiplyMaskImage (`#2061 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2061>`_ )
+  Modified:
+  - doc/jsk_perception/nodes/multiply_mask_image.md
+  - jsk_perception/src/multiply_mask_image.cpp
+* Enhance fcn_object_segmentation.py with PyTorch backend (`#2051 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2051>`_ )
+  * Optimization for faster processing
+    - modified: jsk_perception/node_scripts/fcn_object_segmentation.py
+  * Fix api of fcn_object_segmentation.py with PyTorch
+    - modified: jsk_perception/node_scripts/fcn_object_segmentation.py
+  * Raise error for unavailable torch & torchfcn
+  * Remove install_pytorch.sh
+  * Revert "Install packages to devel space"
+    This reverts commit 40e068fc6788087c3a11f914269e93a4538be72e.
+  * Fix method
+  * Install packages to devel space
+    - new file:   install_pytorch.py
+    - deleted:    install_pytorch.sh
+  * Install PyTorch for CUDA8.0 with rosdep
+  * Add instruction of installing torchfcn
+  * Remove not needed lines
+* [jsk_perception] Add concave_hull_mask_image (`#2045 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2045>`_ )
+  * [jsk_perception/concave_hull_mask_image] Fixed header
+  * [jsk_perception/concave_hull_mask_image] Fixed consistency of cfg files
+  * [jsk_perception/concave_hull_mask_image] Fixed max area size
+  * [jsk_perception/concave_hull_mask_image] Fixed cfg for limit of contour area size for inf
+  * [jsk_perception/concave_hull_mask_image] Fixed namespace of filter2D
+  * [jsk_perception/concave_hull_mask_image] Fixed include header lists
+  * [jsk_perception/concave_hull_mask_image] Fixed year
+
+* [jsk_perception/apply_mask_image] Add negative option (`#2025 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2025>`_ )
+* [jsk_perception][detection_interface.l] fix: changing object name  affects unexpected side effect (`#1974 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1974>`_ )
+* Contributors: Kei Okada, Kentaro Wada, Shingo Kitagawa, Yuki Furuta, Iory Yanokura
+
 1.1.1 (2017-03-04)
 ------------------
 

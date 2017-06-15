@@ -2,6 +2,28 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_percption][jsk_recogniton_utils] add imagenet_object_recognition
+launch and its sample (`#2085 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2085>`_ )
+  * add n_class in VGG16
+  * format Alex -> AlexNet
+* [jsk_perception] add AlexNet object recognition node #2083 (`#2083 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2083>`_ )
+  * add alex_object_recognition node
+* Remove README.md to generate doc of jsk_recognition_utils (`#2078 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2078>`_ )
+    Modified:
+    - doc/jsk_recognition_utils/index.rst
+    Added:
+    - jsk_recognition_utils/sample/sample_static_virtual_camera.launch
+* [jsk_pcl_ros_utils][polygon_magnifier] allow negative distance to magnify (`#2053 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2053>`_ )
+  [jsk_pcl_ros_utils][polygon_magnifier] update docs
+  [jsk_recognition_utils] add polygon_array_publisher.py / sample_polygon_array_publisher.launch
+  [jsk_pcl_ros_utils] add sample / test for polygon_magnifier
+* Generate README by script (`#2064 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2064>`_ )
+* [jsk_recognition_utils/geo/Polygon] add distance method. (`#2031 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2031>`_ )
+* [jsk_recognition_utils] add PolyLine to polyline.{h,cpp} and add code to segment.{h, cpp} (`#2026 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2026>`_ )
+* Contributors: Kentaro Wada, Masaki Murooka, Shingo Kitagawa, Yohei Kakiuchi, Yuki Furuta
+
 1.1.1 (2017-03-04)
 ------------------
 

@@ -2,6 +2,35 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros_utils] add PolygonArrayLikelihoodFilter (`#2054 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2054>`_ )
+  * [jsk_pcl_ros_utils] add sample / test for polygon_array_likelihood_filter
+  * [jsk_pcl_ros_utils][polygon_array_likelihood_filter] fix
+  * [jsk_pcl_ros_utils] add polygon_array_likelihood_filter
+    [jsk_pcl_ros_utils] add docs for polygon_array_likelihood_filter
+* Add PointCloudXYZRGBToXYZ: (add for testing) (https://github.com/jsk-ros-pkg/jsk_recognition/commit/86b64a27d00d218b68e3d598220cd0c6fadbeaec)
+* [jsk_pcl_ros_utils][polygon_magnifier] Support scale factor to  magnify polygon (`#2072 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2072>`_ )
+  * [jsk_pcl_ros_utils][polygon_magnifier] support scale factor to magnify
+* Fix website url for jsk_pcl_ros_utils (`#2071 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2071>`_ )
+  - modified:   README.md
+  - modified:   jsk_pcl_ros_utils/package.xml
+* [jsk_pcl_ros_utils][polygon_magnifier] allow negative distance to magnify (`#2053 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2053>`_ )
+  [jsk_pcl_ros_utils][polygon_magnifier] update docs
+  [jsk_recognition_utils] add polygon_array_publisher.py / sample_polygon_array_publisher.launch
+  [jsk_pcl_ros_utils] add sample / test for polygon_magnifier
+* Generate README by script (`#2064 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2064>`_)
+* [jsk_pcl_ros_utils][plane_rejector] add onInitPostProcess (`#2049 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2049>`_)
+* [jsk_pcl_ros_utils][CMakeLists.txt] Suppress warning on build (`#2040 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2040>`_)
+  * [jsk_pcl_ros_utils][CMakeLists.txt] remove comment out lines
+  * [jsk_pcl_ros_utils][CMakeLists.txt] remove debug line
+  * [jsk_pcl_ros_utils][CMakeLists.txt] comment out generate_messages
+* [jsk_pcl_ros_utils] ensure super class functionality works (`#2043 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2043>`_ )
+  * [jsk_pcl_ros_utils] ensure call onInitPostProcess() on DiagnosticNodelet
+  * [jsk_pcl_ros_utils] ensure poke on callback in DiagnosticNodelet
+* [jsk_pcl_ros_utils][centroid_publisher_nodelet] support polygon array (`#2038 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2038>`_ )
+* Contributors: Kei Okada, Kentaro Wada, Yuki Furuta
+
 1.1.1 (2017-03-04)
 ------------------
 * Remove unnecessary cmake messages (`#2010 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2010>`_)

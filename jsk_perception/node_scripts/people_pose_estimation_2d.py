@@ -19,7 +19,8 @@ import cv_bridge
 import message_filters
 import rospy
 from jsk_topic_tools import ConnectionBasedTransport
-from geometry_msgs.msg import Point32
+from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Point
 from jsk_recognition_msgs.msg import PeoplePose
 from jsk_recognition_msgs.msg import PeoplePoseArray
 from sensor_msgs.msg import CameraInfo
@@ -170,9 +171,9 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
                 x = (joint_pos['x'] - cx) * z / fx
                 y = (joint_pos['y'] - cy) * z / fy
                 pose_msg.limb_names.append(joint_pos['limb'])
-                pose_msg.points.append(Point32(x=x,
-                                               y=y,
-                                               z=z))
+                pose_msg.poses.append(Pose(position=Point(x=x,
+                                                          y=y,
+                                                          z=z)))
             people_pose_msg.poses.append(pose_msg)
 
         self.pose_pub.publish(people_pose_msg)
@@ -193,9 +194,9 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
             pose_msg = PeoplePose()
             for joint_pos in person_joint_positions:
                 pose_msg.limb_names.append(joint_pos['limb'])
-                pose_msg.points.append(Point32(x=joint_pos['x'],
-                                               y=joint_pos['y'],
-                                               z=0))
+                pose_msg.poses.append(Pose(position=Point(x=joint_pos['x'],
+                                                          y=joint_pos['y'],
+                                                          z=0)))
                 people_pose_msg.poses.append(pose_msg)
 
         self.pose_pub.publish(people_pose_msg)

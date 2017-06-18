@@ -4,9 +4,9 @@ Convert rectangle (`geometry_msgs/Polygon`) into mask image (`sensor_msgs/Image`
 We expect it will be used with image_view2.
 
 ## Subscribing Topic
-* `~input` (`geometry_msgs/Polygon`)
+* `~input` (`geometry_msgs/PolygonStamped`)
 
-  Polygon to represent rectangle region of image.
+  PolygonStamped to represent rectangle region of image.
 * `~input/camera_info` (`sensor_msgs/CameraInfo`)
 
   Original camera info.

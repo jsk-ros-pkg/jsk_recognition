@@ -152,7 +152,6 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         pose_estimated_msg = br.cv2_to_imgmsg(
             pose_estimated_img.astype(np.uint8), encoding='bgr8')
         pose_estimated_msg.header = img_msg.header
-        pose_estimated_msg.encoding = "bgr8"
 
         people_pose_msg = PeoplePoseArray()
         people_pose_msg.header = img_msg.header
@@ -186,7 +185,6 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         pose_estimated_msg = br.cv2_to_imgmsg(
             pose_estimated_img.astype(np.uint8), encoding='bgr8')
         pose_estimated_msg.header = img_msg.header
-        pose_estimated_msg.encoding = "bgr8"
 
         people_pose_msg = PeoplePoseArray()
         people_pose_msg.header = img_msg.header

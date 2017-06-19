@@ -164,12 +164,15 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         for person_joint_positions in people_joint_positions:
             pose_msg = PeoplePose()
             for joint_pos in person_joint_positions:
+                if joint_pos['score'] < 0:
+                    continue
                 z = float(depth_img[int(joint_pos['y'])][int(joint_pos['x'])])
                 if np.isnan(z):
                     continue
                 x = (joint_pos['x'] - cx) * z / fx
                 y = (joint_pos['y'] - cy) * z / fy
                 pose_msg.limb_names.append(joint_pos['limb'])
+                pose_msg.scores.append(joint_pos['score'])
                 pose_msg.poses.append(Pose(position=Point(x=x,
                                                           y=y,
                                                           z=z)))
@@ -191,7 +194,10 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         for person_joint_positions in people_joint_positions:
             pose_msg = PeoplePose()
             for joint_pos in person_joint_positions:
+                if joint_pos['score'] < 0:
+                    continue
                 pose_msg.limb_names.append(joint_pos['limb'])
+                pose_msg.scores.append(joint_pos['score'])
                 pose_msg.poses.append(Pose(position=Point(x=joint_pos['x'],
                                                           y=joint_pos['y'],
                                                           z=0)))
@@ -467,11 +473,16 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
             for i, limb_name in enumerate(self.index2limbname):
                 cand_idx = int(joint_cand_idx[i])
                 if cand_idx == -1 or cand_idx >= candidate.shape[0]:
+                    person_joint_positions.append(dict(limb=limb_name,
+                                                       x=0,
+                                                       y=0,
+                                                       score=-1))
                     continue
                 X, Y = candidate[cand_idx, :2]
                 person_joint_positions.append(dict(limb=limb_name,
                                                    x=X,
-                                                   y=Y,))
+                                                   y=Y,
+                                                   score=candidate[cand_idx, 2]))
             people_joint_positions.append(person_joint_positions)
 
         return people_joint_positions

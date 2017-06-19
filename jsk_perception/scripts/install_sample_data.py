@@ -34,9 +34,6 @@ def main():
         url='https://drive.google.com/uc?id=0B_NiLAzvehC9TTNPSGc0OUlIUDg',
         md5='7f997176ea2ef2f16aa297de68e09d8d',
         extract=False,
-        compressed_bags=[
-            'sample/data/2017-06-16-12-00-00_people_images_in_lab.bag',
-        ],
     )
 
 

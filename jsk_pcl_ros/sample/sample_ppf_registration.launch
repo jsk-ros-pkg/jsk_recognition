@@ -8,14 +8,22 @@
   <param name="/use_sim_time" value="false" unless="$(arg USE_SAMPLE_DATA)"/>
   <node name="rosbag_play"  if="$(arg USE_SAMPLE_DATA)"
         pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros)/sample/data/2016-10-29-17-05-44_tabletop-coffee-cup/tabletop-coffee-cup.bag --clock --loop" />
+        args="$(find jsk_pcl_ros)/sample/data/2017-06-19-19-34-18_tabletop_coffeecup.bag --clock --loop" />
+
+  <arg name="manager" value="ppf_manager" />
+  <node name="$(arg manager)" pkg="nodelet" type="nodelet" args="manager" />
+
+  <node if="$(arg USE_SAMPLE_DATA)"
+        pkg="nodelet" type="nodelet" name="depth_to_points"
+        args="load depth_image_proc/point_cloud_xyz $(arg manager)">
+    <remap from="camera_info" to="/camera/depth/camera_info" />
+    <remap from="image_rect" to="/camera/depth/image_rect_raw"/>
+    <remap from="points" to="/camera/depth/points" />
+  </node>
 
   <node name="optical_frame_tf_publisher" if="$(arg USE_SAMPLE_DATA)"
         pkg="tf" type="static_transform_publisher"
         args="0 0 0 -1.57 0 -1.57 map camera_depth_optical_frame 500" />
-
-  <arg name="manager" value="ppf_manager" />
-  <node name="$(arg manager)" pkg="nodelet" type="nodelet" args="manager" />
 
   <!-- input cloud -->
   <node name="multi_plane_estimate" pkg="nodelet" type="nodelet"

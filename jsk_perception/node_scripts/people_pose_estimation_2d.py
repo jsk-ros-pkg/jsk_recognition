@@ -101,6 +101,8 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         self._load_model()
         self.pub = self.advertise('~output', Image, queue_size=1)
         self.pose_pub = self.advertise('~pose', PeoplePoseArray, queue_size=1)
+        if self.with_depth is True:
+            self.pose_2d_pub = self.advertise('~pose_2d', PeoplePoseArray, queue_size=1)
 
     def _load_model(self):
         if self.backend == 'chainer':
@@ -155,6 +157,9 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
 
         people_pose_msg = PeoplePoseArray()
         people_pose_msg.header = img_msg.header
+        people_pose_2d_msg = self._create_2d_people_pose_array_msgs(
+            people_joint_positions,
+            img_msg.header)
 
         # calculate xyz-position
         fx = camera_info_msg.K[0]
@@ -178,6 +183,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
                                                           z=z)))
             people_pose_msg.poses.append(pose_msg)
 
+        self.pose_2d_pub.publish(people_pose_2d_msg)
         self.pose_pub.publish(people_pose_msg)
         self.pub.publish(pose_estimated_msg)
 
@@ -189,8 +195,15 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
             pose_estimated_img.astype(np.uint8), encoding='bgr8')
         pose_estimated_msg.header = img_msg.header
 
-        people_pose_msg = PeoplePoseArray()
-        people_pose_msg.header = img_msg.header
+        people_pose_msg = self._create_2d_people_pose_array_msg(
+            people_joint_positions,
+            img_msg.header)
+
+        self.pose_pub.publish(people_pose_msg)
+        self.pub.publish(pose_estimated_msg)
+
+    def _create_2d_people_pose_array_msgs(self, people_joint_positions, header):
+        people_pose_msg = PeoplePoseArray(header=header)
         for person_joint_positions in people_joint_positions:
             pose_msg = PeoplePose()
             for joint_pos in person_joint_positions:
@@ -202,9 +215,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
                                                           y=joint_pos['y'],
                                                           z=0)))
                 people_pose_msg.poses.append(pose_msg)
-
-        self.pose_pub.publish(people_pose_msg)
-        self.pub.publish(pose_estimated_msg)
+        return people_pose_msg
 
     def pose_estimate(self, bgr):
         if self.backend == 'chainer':

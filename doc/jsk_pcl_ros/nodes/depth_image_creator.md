@@ -57,7 +57,7 @@ Currently it supports `pcl::PointXYZ` and `pcl::PointXYZRGB` as the input.
    Queue length of topic publishers.
    Default is value set for `max_queue_size_`.
 
-* `~max_pub_queue_size` (integer, default: `~max_queue_size_`):
+* `~max_sub_queue_size` (integer, default: `~max_queue_size_`):
 
    Queue length of topic subscribers.
    Default is value set for `max_queue_size_`.

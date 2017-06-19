@@ -12,6 +12,8 @@
     <rosparam>
       use_approximate: true
       max_queue_size: 3
+      max_pub_queue_size: 1
+      max_sub_queue_size: 1
     </rosparam>
   </node>
 
@@ -29,6 +31,8 @@
       <rosparam>
         use_approximate: true
         max_queue_size: 3
+        max_pub_queue_size: 1
+        max_sub_queue_size: 1
       </rosparam>
     </node>
   </group>

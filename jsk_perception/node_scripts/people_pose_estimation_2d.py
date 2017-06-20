@@ -302,7 +302,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         candBs = cands[:, 1]
         nAs = np.array([len(candA) for candA in candAs])
         nBs = np.array([len(candB) for candB in candBs])
-        target_indices = np.nonzero(xp.logical_and(nAs != 0, nBs != 0))[0]
+        target_indices = np.nonzero(np.logical_and(nAs != 0, nBs != 0))[0]
         if len(target_indices) == 0:
             return bgr_img, []
 

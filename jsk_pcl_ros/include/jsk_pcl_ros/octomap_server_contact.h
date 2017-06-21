@@ -39,6 +39,7 @@
 #include <ros/ros.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 
+#define NDEBUG
 #include <octomap_server/OctomapServer.h>
 #include <jsk_pcl_ros/OcTreeContact.h>
 #include <jsk_recognition_msgs/ContactSensorArray.h>

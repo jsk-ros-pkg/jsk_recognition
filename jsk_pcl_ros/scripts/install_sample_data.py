@@ -32,13 +32,10 @@ def main():
 
     download_data(
         pkg_name=PKG,
-        path='sample/data/2016-10-29-17-05-44_tabletop-coffee-cup.tgz',
-        url='https://drive.google.com/uc?id=0B5DV6gwLHtyJczRRcUhURndQeDg',
+        path='sample/data/2017-06-19-19-34-18_tabletop_coffeecup.tgz',
+        url='https://drive.google.com/uc?id=0B5DV6gwLHtyJRTJ0eGdVYk43bEU',
         md5='d58e894c853fc4485d08547b9fc2b640',
         extract=True,
-        compressed_bags=[
-            'sample/data/2016-10-29-17-05-44_tabletop-coffee-cup/tabletop-coffee-cup.bag',
-        ],
     )
 
     download_data(

@@ -1,8 +1,7 @@
-// -*- mode: c++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, JSK Lab
+ *  Copyright (c) 2017, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,236 +32,188 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/kinfu.h"
-#include <geometry_msgs/PoseStamped.h>
-#include "jsk_recognition_utils/pcl_conversion_util.h"
-#include <pcl/common/transforms.h>
+#define BOOST_PARAMETER_MAX_ARITY 7
+
+#include <boost/thread/thread.hpp>
 #include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/fill_image.h>
+#include <sensor_msgs/image_encodings.h>
+
+#include "jsk_pcl_ros/kinfu.h"
+
+namespace enc = sensor_msgs::image_encodings;
 
 namespace jsk_pcl_ros
 {
+  void Kinfu::onInit()
+  {
+    ConnectionBasedNodelet::onInit();
+
+    pnh_->param("device", device_, 0);
+    pnh_->param("queue_size", queue_size_, 10);
+    pnh_->param("auto_reset", auto_reset_, false);
+
+    is_kinfu_initialized_ = false;
+
+    pub_rendered_image_ = advertise<sensor_msgs::Image>(*pnh_, "output/rendered_image", 1);
+    pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+
+    srv_reset_ = pnh_->advertiseService("reset", &Kinfu::resetCallback, this);
+
+    onInitPostProcess();
+  }
+
+  void Kinfu::initKinfu(const int height, const int width)
+  {
+    pcl::gpu::setDevice(device_);
+    pcl::gpu::printShortCudaDeviceInfo(device_);
+
+    float shift_distance = 10.0f * pcl::device::kinfuLS::DISTANCE_THRESHOLD;
+    int snapshot_rate = pcl::device::kinfuLS::SNAPSHOT_RATE;
+    Eigen::Vector3f volume_size = Eigen::Vector3f::Constant(pcl::device::kinfuLS::VOLUME_SIZE);  // 3mm
+
+    kinfu_ = new pcl::gpu::kinfuLS::KinfuTracker(volume_size, shift_distance, height, width);
+
+    Eigen::Matrix3f R = Eigen::Matrix3f::Identity();   // * AngleAxisf( pcl::deg2rad(-30.f), Eigen::Vector3f::UnitX());
+    Eigen::Vector3f t = volume_size * 0.5f - Eigen::Vector3f(0, 0, volume_size(2) / 2 * 1.2f);
+
+    Eigen::Affine3f pose = Eigen::Translation3f(t) * Eigen::AngleAxisf(R);
+
+    kinfu_->setInitialCameraPose(pose);
+    kinfu_->volume().setTsdfTruncDist(0.030f/*meters*/);
+    kinfu_->setIcpCorespFilteringParams(0.1f/*meters*/, sin(pcl::deg2rad(20.0f)));
+    //kinfu_->setDepthTruncationForICP(3.f/*meters*/);
+    kinfu_->setCameraMovementThreshold(0.001f);
+  }
+
   void Kinfu::subscribe()
   {
-
+    sub_camera_info_.subscribe(*pnh_, "input/camera_info", 1);
+    sub_depth_.subscribe(*pnh_, "input/depth", 1);
+    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
+    sync_->connectInput(sub_camera_info_, sub_depth_);
+    sync_->registerCallback(boost::bind(&Kinfu::update, this, _1, _2));
   }
 
   void Kinfu::unsubscribe()
   {
-
+    sub_camera_info_.unsubscribe();
+    sub_depth_.unsubscribe();
   }
 
-  void Kinfu::onInit()
-  {
-    DiagnosticNodelet::onInit();
-    initialized_ = false;
-    tf_listener_ = TfListenerSingleton::getInstance();
-    pnh_->param("parent_frame_id", parent_frame_id_, std::string(""));
-    pnh_->param("child_frame_id", child_frame_id_, std::string("odom"));
-    pnh_->param("kinfu_origin_frame_id", kinfu_origin_frame_id_, std::string("kinfu_origin"));
-    pcl::gpu::setDevice(0);
-    pcl::gpu::printShortCudaDeviceInfo(0);
-    volume_size_ = pcl::device::kinfuLS::VOLUME_SIZE;
-    shift_distance_ = pcl::device::kinfuLS::DISTANCE_THRESHOLD;
-    snapshot_rate_ = pcl::device::kinfuLS::SNAPSHOT_RATE;
-    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
-    dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind(
-        &Kinfu::configCallback, this, _1, _2);
-    srv_->setCallback (f);
-    pub_pose_ = pnh_->advertise<geometry_msgs::PoseStamped>("output", 1);
-    pub_cloud_ = pnh_->advertise<sensor_msgs::PointCloud2>("output/cloud", 1);
-    srv_save_mesh_ = pnh_->advertiseService("save_mesh", &Kinfu::saveMeshService, this);
-    sub_depth_image_.subscribe(*pnh_, "input/depth", 1);
-    sub_color_image_.subscribe(*pnh_, "input/color", 1);
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-    sync_->connectInput(sub_depth_image_, sub_color_image_);
-    sync_->registerCallback(boost::bind(&Kinfu::callback, this, _1, _2));
-    sub_info_ = pnh_->subscribe("input/info", 1, &Kinfu::infoCallback, this);
-    onInitPostProcess();
-  }
-
-  void Kinfu::infoCallback(const sensor_msgs::CameraInfo::ConstPtr& info_msg)
+  void Kinfu::update(const sensor_msgs::CameraInfo::ConstPtr& caminfo_msg,
+                     const sensor_msgs::Image::ConstPtr& depth_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
-    info_msg_ = info_msg;
-  }
 
-  void Kinfu::callback(const sensor_msgs::Image::ConstPtr& depth_image,
-                       const sensor_msgs::Image::ConstPtr& rgb_image)
-  {
-    boost::mutex::scoped_lock lock(mutex_);
-    if (!info_msg_) {
-      NODELET_WARN("camera info is not yet ready");
+    if ((depth_msg->height != caminfo_msg->height) || (depth_msg->width != caminfo_msg->width))
+    {
+      ROS_ERROR("Image size of input depth and camera info must be same. Depth: (%d, %d), Camera Info: (%d, %d)",
+                depth_msg->height, depth_msg->width, caminfo_msg->height, caminfo_msg->width);
       return;
     }
-    if (!initialized_) {
-      Eigen::Vector3f volume_size = Eigen::Vector3f::Constant (volume_size_);
-      
-      // Setup kinfu
-      kinfu_ = new pcl::gpu::kinfuLS::KinfuTracker(volume_size, 
-                                                   shift_distance_,
-                                                   info_msg_->height,
-                                                   info_msg_->width);
-      kinfu_->setInitialCameraPose(Eigen::Affine3f::Identity());
-      kinfu_->volume().setTsdfTruncDist (tsdf_trunc_dist_/*meters*/);
-      kinfu_->setIcpCorespFilteringParams (icp_dist_trans_/*meters*/, sin ( pcl::deg2rad(icp_dist_rot_) ));
-      kinfu_->setCameraMovementThreshold(camera_movement_thre_);
 
-      kinfu_->setDepthIntrinsics (info_msg_->K[0], info_msg_->K[4], info_msg_->K[2], info_msg_->K[5]);
-      initialized_ = true;
-      initial_camera_pose_acquired_ = false;
+    if (!is_kinfu_initialized_)
+    {
+      initKinfu(caminfo_msg->height, caminfo_msg->width);
+      is_kinfu_initialized_ = true;
     }
-    if (kinfu_->icpIsLost()) {
-      kinfu_->reset();
-      initialized_ = false;
-      NODELET_FATAL("kinfu is reset");
+
+    // run kinfu
+    {
+      pcl::gpu::kinfuLS::KinfuTracker::DepthMap depth_device;
+
+      cv::Mat depth;
+      if (depth_msg->encoding == enc::TYPE_32FC1)
+      {
+        cv::Mat depth_32fc1 = cv_bridge::toCvShare(depth_msg, enc::TYPE_32FC1)->image;
+        depth_32fc1 *= 1000.;
+        depth_32fc1.convertTo(depth, CV_16UC1);
+      }
+      else if (depth_msg->encoding == enc::TYPE_16UC1)
+      {
+        depth = cv_bridge::toCvShare(depth_msg, enc::TYPE_16UC1)->image;
+      }
+      else
+      {
+        NODELET_FATAL("Unsupported depth image encoding: %s", depth_msg->encoding.c_str());
+        return;
+      }
+      depth_device.upload(&(depth.data[0]), depth.cols * 2, depth.rows, depth.cols);
+
+      kinfu_->setDepthIntrinsics(/*fx=*/caminfo_msg->K[0], /*fy=*/caminfo_msg->K[4],
+                                 /*cx=*/caminfo_msg->K[2], /*cy=*/caminfo_msg->K[5]);
+      (*kinfu_)(depth_device);
+    }
+
+    if (kinfu_->icpIsLost())
+    {
+      NODELET_FATAL_THROTTLE(10, "Tracking by ICP in kinect fusion is lost. auto_reset: %d", auto_reset_);
+      if (auto_reset_)
+      {
+        kinfu_->reset();
+        is_kinfu_initialized_ = false;
+      }
       return;
     }
-    
-    if (!initial_camera_pose_acquired_) {
-      // First we need to check odometry is available or not
-      try {
-        // odom -> camera
-        tf::StampedTransform trans = 
-          lookupTransformWithDuration(tf_listener_,
-                                      info_msg_->header.frame_id,
-                                      child_frame_id_,
-                                      depth_image->header.stamp,
-                                      ros::Duration(1.0));
-        tf::transformTFToEigen(trans, initial_camera_pose_);
-      }
-      catch (...) {
-        NODELET_ERROR("Failed to lookup transform from %s to %s",
-                          child_frame_id_.c_str(),
-                          info_msg_->header.frame_id.c_str());
-        return;
-      }
+
+    // publish kinfu origin
+    {
+      Eigen::Affine3f camera_to_kinfu_origin = kinfu_->getCameraPose().inverse();
+      tf::Transform tf_kinfu_origin;
+      tf::transformEigenToTF(camera_to_kinfu_origin, tf_kinfu_origin);
+      tf_kinfu_origin.setRotation(tf_kinfu_origin.getRotation().normalized());  // for long-term use
+      tf_broadcaster_.sendTransform(
+        tf::StampedTransform(tf_kinfu_origin, caminfo_msg->header.stamp,
+                             caminfo_msg->header.frame_id, "kinfu_origin"));
     }
 
-    cv::Mat depth_m_image = cv_bridge::toCvShare(depth_image, "32FC1")->image;
-    cv::Mat depth_mm_image = depth_m_image * 1000.0;
-    cv::Mat depth_mm_sc_image;
-    depth_mm_image.convertTo(depth_mm_sc_image, CV_16UC1);
-    depth_device_.upload(&(depth_mm_sc_image.data[0]), depth_image->width * 2, depth_image->height, depth_image->width);
-    //colors_device_.upload(&(rgb_image->data[0]), rgb_image->step, rgb_image->height, rgb_image->width);
+    // publish rendered image
+    {
+      pcl::gpu::kinfuLS::KinfuTracker::View view_device;
+      std::vector<pcl::gpu::kinfuLS::PixelRGB> view_host_;
+      kinfu_->getImage(view_device);
 
-    //(*kinfu_)(depth_device_, colors_device_);
-    (*kinfu_)(depth_device_);
-    Eigen::Affine3f camera_pose = kinfu_->getCameraPose();
-    if (!initial_camera_pose_acquired_) {
-      initial_kinfu_pose_ = camera_pose;
-      initial_camera_pose_acquired_ = true;
+      int cols;
+      view_device.download(view_host_, cols);
+
+      sensor_msgs::Image rendered_image_msg;
+      sensor_msgs::fillImage(rendered_image_msg,
+                             sensor_msgs::image_encodings::RGB8,
+                             view_device.rows(),
+                             view_device.cols(),
+                             view_device.cols() * 3,
+                             reinterpret_cast<unsigned char*>(&view_host_[0]));
+      pub_rendered_image_.publish(rendered_image_msg);
     }
-    else {
-      Eigen::Affine3f K = initial_kinfu_pose_.inverse() * camera_pose;
-      // TODO: we should use tf message filter
-      try {
-        // odom -> camera
-        tf::StampedTransform trans = 
-          lookupTransformWithDuration(tf_listener_,
-                                      depth_image->header.frame_id,
-                                      child_frame_id_,
-                                      depth_image->header.stamp,
-                                      ros::Duration(0.1));
-        Eigen::Affine3f odom_camera;
-        tf::transformTFToEigen(trans, odom_camera);
-        if (std::string("")!=parent_frame_id_) // if parent_frame_id is set, child_frame_id must be the top of the tf tree.
-        {
-          Eigen::Affine3f map = initial_camera_pose_ * K * odom_camera.inverse();
-          tf::Transform map_odom_transform;
-          tf::transformEigenToTF(map, map_odom_transform);
-          tf_broadcaster_.sendTransform(tf::StampedTransform(
-                                                             map_odom_transform,
-                                                             depth_image->header.stamp,
-                                                             parent_frame_id_,
-                                                             child_frame_id_));
-        }
-        tf::Transform kinfu_origin;
-        Eigen::Affine3f inverse_camera_pose = camera_pose.inverse();
-        tf::transformEigenToTF(inverse_camera_pose, kinfu_origin);
-        tf_broadcaster_.sendTransform(tf::StampedTransform(
-                                                           kinfu_origin,
-                                                           depth_image->header.stamp,
-                                                           depth_image->header.frame_id,
-                                                           kinfu_origin_frame_id_));
-        Eigen::Affine3f camera_diff = K.inverse();
-        geometry_msgs::PoseStamped ros_camera_diff;
-        tf::poseEigenToMsg(camera_diff, ros_camera_diff.pose);
-        ros_camera_diff.header = depth_image->header;
-        pub_pose_.publish(ros_camera_diff);
 
-        // scene cloud.
-        pcl::gpu::DeviceArray<pcl::PointXYZ> extracted = kinfu_->volume().fetchCloud(cloud_buffer_device_);             
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-        pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-        extracted.download (cloud->points);
-        cloud->width = (int)cloud->points.size ();
-        cloud->height = 1;
-        //pcl::transformPointCloud(*cloud, *transformed_cloud, camera_pose.inverse());
-        sensor_msgs::PointCloud2 ros_cloud;
-        pcl::toROSMsg(*cloud, ros_cloud);
-        ros_cloud.header.stamp = depth_image->header.stamp;
-        ros_cloud.header.frame_id = kinfu_origin_frame_id_;
-        pub_cloud_.publish(ros_cloud);
-      }
-      catch (...) {
-        NODELET_ERROR("Failed to lookup transform from %s to %s",
-                          child_frame_id_.c_str(),
-                          depth_image->header.frame_id.c_str());
-        return;
-      }
+    // publish cloud
+    {
+      pcl::gpu::DeviceArray<pcl::PointXYZ> cloud_buffer_device_;
+
+      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
+      pcl::gpu::DeviceArray<pcl::PointXYZ> extracted = kinfu_->volume().fetchCloud(cloud_buffer_device_);
+      extracted.download(cloud->points);
+      cloud->width = static_cast<int>(cloud->points.size());
+      cloud->height = 1;
+
+      sensor_msgs::PointCloud2 output_cloud_msg;
+      pcl::toROSMsg(*cloud, output_cloud_msg);
+      output_cloud_msg.header.stamp = depth_msg->header.stamp;
+      output_cloud_msg.header.frame_id = "kinfu_origin";
+      pub_cloud_.publish(output_cloud_msg);
     }
   }
-  bool Kinfu::saveMeshService(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res)
+
+  bool Kinfu::resetCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res)
   {
-    pcl::gpu::DeviceArray<pcl::PointXYZ> triangles_buffer_device_;
-    if (!marching_cubes_)
-      marching_cubes_ = pcl::gpu::kinfuLS::MarchingCubes::Ptr( new pcl::gpu::kinfuLS::MarchingCubes() );
-    pcl::gpu::DeviceArray<pcl::PointXYZ> triangles_device = marching_cubes_->run(kinfu_->volume(), triangles_buffer_device_);
-    boost::shared_ptr<pcl::PolygonMesh> mesh_ptr( new pcl::PolygonMesh() ); 
-    mesh_ptr = convertToMesh(triangles_device);
-    // cout << "Saving mesh to to 'mesh.ply'... " << flush;
-    pcl::io::savePLYFile("mesh.ply", *mesh_ptr);
+    NODELET_INFO("Resetting kinect fusion was requested, so resetting.");
+    kinfu_->reset();
+    is_kinfu_initialized_ = false;
     return true;
   }
-  boost::shared_ptr<pcl::PolygonMesh> Kinfu::convertToMesh(const pcl::gpu::DeviceArray<pcl::PointXYZ>& triangles)
-  {
-    if (triangles.empty())
-      return boost::shared_ptr<pcl::PolygonMesh>();
 
-    pcl::PointCloud<pcl::PointXYZ> cloud;
-    cloud.width  = (int)triangles.size();
-    cloud.height = 1;
-    triangles.download(cloud.points);
-    boost::shared_ptr<pcl::PolygonMesh> mesh_ptr( new pcl::PolygonMesh() );
-    pcl::toPCLPointCloud2(cloud, mesh_ptr->cloud);
-    mesh_ptr->polygons.resize (triangles.size() / 3);
-    for (size_t i = 0; i < mesh_ptr->polygons.size (); ++i)
-      {
-        pcl::Vertices v;
-        v.vertices.push_back(i*3+0);
-        v.vertices.push_back(i*3+2);
-        v.vertices.push_back(i*3+1);
-        mesh_ptr->polygons[i] = v;
-      }
-    return mesh_ptr;
-  }
-  void Kinfu::configCallback(Config &config, uint32_t level)
-  {
-    boost::mutex::scoped_lock lock(mutex_);
-    tsdf_trunc_dist_ = config.tsdf_trunc_dist;
-    icp_dist_trans_ = config.icp_dist_trans;
-    icp_dist_rot_ = config.icp_dist_rot;
-    camera_movement_thre_ = config.camera_movement_thre;
-    NODELET_INFO("kinfu config has changed");
-    if (initialized_) {
-      kinfu_->volume().setTsdfTruncDist (tsdf_trunc_dist_/*meters*/);
-      kinfu_->setIcpCorespFilteringParams (icp_dist_trans_/*meters*/, sin ( pcl::deg2rad(icp_dist_rot_) ));
-      kinfu_->setCameraMovementThreshold(camera_movement_thre_);
-    }
-  }
-}
+}  // namespace jsk_pcl_ros
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::Kinfu,
-                        nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(jsk_pcl_ros::Kinfu, nodelet::Nodelet);

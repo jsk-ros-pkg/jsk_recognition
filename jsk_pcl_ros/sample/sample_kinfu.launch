@@ -1,0 +1,37 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_room73b2_table.xml" />
+
+  <arg name="INPUT_CAMERA_INFO" default="/camera/depth_registered/camera_info" />
+  <arg name="INPUT_DEPTH" default="/camera/depth_registered/hw_registered/image_rect_raw" />
+  <arg name="INPUT_CLOUD" default="/camera/depth_registered/points" />
+
+  <node name="rosconsole_overlay_text"
+        pkg="jsk_rviz_plugins" type="rosconsole_overlay_text.py">
+    <rosparam>
+      nodes:
+        - /kinfu
+    </rosparam>
+  </node>
+  <node name="rviz"
+        pkg="rviz" type="rviz"
+        args="-d $(find jsk_pcl_ros)/sample/rviz/kinfu.rviz">
+  </node>
+
+  <node name="kinfu"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/Kinfu">
+    <remap from="~input/camera_info" to="$(arg INPUT_CAMERA_INFO)" />
+    <remap from="~input/depth" to="$(arg INPUT_DEPTH)" />
+  </node>
+
+  <node name="octree_voxel_grid"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/OctreeVoxelGrid">
+    <remap from="~input" to="kinfu/output" />
+    <rosparam>
+      resolution: 0.01
+    </rosparam>
+  </node>
+
+</launch>

@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2017, JSK Lab
+ *  Copyright (c) 2017, Kentaro Wada and JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/o2r other materials provided
  *     with the distribution.
- *   * Neither the name of the JSK Lab nor the names of its
+ *   * Neither the name of Kentaro Wada and JSK Lab nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -35,9 +35,12 @@
 #define BOOST_PARAMETER_MAX_ARITY 7
 
 #include <boost/thread/thread.hpp>
+#include <boost/filesystem.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/fill_image.h>
 #include <sensor_msgs/image_encodings.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/io/obj_io.h>
 
 #include "jsk_pcl_ros/kinfu.h"
 
@@ -80,6 +83,13 @@ namespace jsk_pcl_ros
     pnh_->param("device", device_, 0);
     pnh_->param("auto_reset", auto_reset_, false);
     pnh_->param("integrate_color", integrate_color_, false);
+
+    pnh_->param<std::string>("save_dir", save_dir_, ".");
+    boost::filesystem::path save_dir(save_dir_);
+    if (boost::filesystem::create_directories(save_dir))
+    {
+      NODELET_INFO("Created save_dir: %s", save_dir_.c_str());
+    }
 
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     pub_generated_depth_ = advertise<sensor_msgs::Image>(*pnh_, "output/generated_depth", 1);
@@ -228,6 +238,7 @@ namespace jsk_pcl_ros
       {
         (*kinfu_)(depth_device);
       }
+      frame_idx_++;
     }
 
     if (kinfu_->icpIsLost())
@@ -237,8 +248,39 @@ namespace jsk_pcl_ros
       {
         kinfu_->reset();
         is_kinfu_initialized_ = false;
+        frame_idx_ = 0;
+        cameras_.clear();
       }
       return;
+    }
+
+    // save texture
+    if (integrate_color_ && (frame_idx_ % pcl::device::kinfuLS::SNAPSHOT_RATE == 1))
+    {
+      if (frame_idx_ == 1)
+      {
+        cv::imwrite(save_dir_ + "/occluded.jpg",
+                    cv::Mat::zeros(caminfo_msg->height, caminfo_msg->width, CV_8UC3));
+      }
+
+      cv::Mat image = cv_bridge::toCvShare(color_msg, color_msg->encoding)->image;
+      if (color_msg->encoding == enc::RGB8)
+      {
+        cv::cvtColor(image, image, cv::COLOR_RGB2BGR);
+      }
+      std::stringstream ss;
+      ss << save_dir_ << "/" << ros::Time::now().toNSec() << ".jpg";
+      std::string filename = ss.str();
+      cv::imwrite(filename, image);
+      NODELET_INFO("Saved texture snapshot: %s", filename.c_str());
+
+      pcl::TextureMapping<pcl::PointXYZ>::Camera camera;
+      camera.pose = kinfu_->getCameraPose();
+      camera.focal_length = caminfo_msg->K[0];  // must be equal to caminfo_msg->K[4]
+      camera.height = caminfo_msg->height;
+      camera.width = caminfo_msg->width;
+      camera.texture_file = filename;
+      cameras_.push_back(camera);
     }
 
     // publish kinfu origin
@@ -362,38 +404,135 @@ namespace jsk_pcl_ros
     pcl::gpu::DeviceArray<pcl::PointXYZ> triangles_buffer_device;
     pcl::gpu::DeviceArray<pcl::PointXYZ> triangles_device =
       marching_cubes_->run(kinfu_->volume(), triangles_buffer_device);
-    boost::shared_ptr<pcl::PolygonMesh> mesh_ptr(new pcl::PolygonMesh());
-    mesh_ptr = convertToMesh(triangles_device);
+    pcl::PolygonMesh polygon_mesh = convertToPolygonMesh(triangles_device);
 
-    NODELET_INFO("Saving mesh to: %s.", "mesh.ply");
-    pcl::io::savePLYFile("mesh.ply", *mesh_ptr);
+    std::string out_file = save_dir_ + "/mesh.obj";
+    if (integrate_color_)
+    {
+      pcl::TextureMesh texture_mesh = convertToTextureMesh(polygon_mesh);
+      pcl::io::saveOBJFile(out_file, texture_mesh, 5);
+    }
+    else
+    {
+      pcl::io::saveOBJFile(out_file, polygon_mesh);
+    }
+    NODELET_INFO("Saved mesh file: %s", out_file.c_str());
     return true;
   }
 
-  boost::shared_ptr<pcl::PolygonMesh>
-  Kinfu::convertToMesh(const pcl::gpu::DeviceArray<pcl::PointXYZ>& triangles)
+  pcl::TextureMesh
+  Kinfu::convertToTextureMesh(const pcl::PolygonMesh triangles)
+  {
+    // copy cameras
+    pcl::texture_mapping::CameraVector cameras;
+    {
+      boost::mutex::scoped_lock lock(mutex_);
+      for (size_t i = 0; i < cameras_.size(); i++)
+      {
+        cameras.push_back(cameras_[i]);
+      }
+    }
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::fromPCLPointCloud2(triangles.cloud, *cloud);
+
+    // Create the texturemesh object that will contain our UV-mapped mesh
+    pcl::TextureMesh mesh;
+    mesh.cloud = triangles.cloud;
+    std::vector< pcl::Vertices> polygon_1;
+
+    // push faces into the texturemesh object
+    polygon_1.resize (triangles.polygons.size ());
+    for(size_t i =0; i < triangles.polygons.size (); ++i)
+    {
+      polygon_1[i] = triangles.polygons[i];
+    }
+    mesh.tex_polygons.push_back(polygon_1);
+    NODELET_INFO("Input mesh contains %lu faces, %lu vertices and %lu textures.",
+                 mesh.tex_polygons[0].size(), cloud->points.size(), cameras.size());
+
+    // Create materials for each texture (and one extra for occluded faces)
+    mesh.tex_materials.resize(cameras.size () + 1);
+    for(int i = 0 ; i <= cameras.size() ; ++i)
+    {
+      pcl::TexMaterial mesh_material;
+      mesh_material.tex_Ka.r = 0.2f;
+      mesh_material.tex_Ka.g = 0.2f;
+      mesh_material.tex_Ka.b = 0.2f;
+
+      mesh_material.tex_Kd.r = 0.8f;
+      mesh_material.tex_Kd.g = 0.8f;
+      mesh_material.tex_Kd.b = 0.8f;
+
+      mesh_material.tex_Ks.r = 1.0f;
+      mesh_material.tex_Ks.g = 1.0f;
+      mesh_material.tex_Ks.b = 1.0f;
+
+      mesh_material.tex_d = 1.0f;
+      mesh_material.tex_Ns = 75.0f;
+      mesh_material.tex_illum = 2;
+
+      std::stringstream tex_name;
+      tex_name << "material_" << i;
+      tex_name >> mesh_material.tex_name;
+
+      if (i < cameras.size ())
+      {
+        mesh_material.tex_file = cameras[i].texture_file;
+      }
+      else
+      {
+        mesh_material.tex_file = save_dir_ + "/occluded.jpg";
+      }
+
+      mesh.tex_materials[i] = mesh_material;
+    }
+
+    // sort faces
+    pcl::TextureMapping<pcl::PointXYZ> tm;  // TextureMapping object that will perform the sort
+    tm.textureMeshwithMultipleCameras(mesh, cameras);
+
+    // compute normals for the mesh
+    pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> n;
+    pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
+    tree->setInputCloud(cloud);
+    n.setInputCloud(cloud);
+    n.setSearchMethod(tree);
+    n.setKSearch(20);
+    n.compute(*normals);
+    pcl::PointCloud<pcl::PointNormal>::Ptr cloud_with_normals(new pcl::PointCloud<pcl::PointNormal>);
+    pcl::concatenateFields(*cloud, *normals, *cloud_with_normals);
+    pcl::toPCLPointCloud2(*cloud_with_normals, mesh.cloud);
+
+    return mesh;
+  }
+
+  pcl::PolygonMesh
+  Kinfu::convertToPolygonMesh(const pcl::gpu::DeviceArray<pcl::PointXYZ>& triangles)
   {
     if (triangles.empty())
     {
-      return boost::shared_ptr<pcl::PolygonMesh>();
+      return pcl::PolygonMesh();
     }
 
     pcl::PointCloud<pcl::PointXYZ> cloud;
     cloud.width = static_cast<int>(triangles.size());
     cloud.height = 1;
     triangles.download(cloud.points);
-    boost::shared_ptr<pcl::PolygonMesh> mesh_ptr(new pcl::PolygonMesh());
-    pcl::toPCLPointCloud2(cloud, mesh_ptr->cloud);
-    mesh_ptr->polygons.resize(triangles.size() / 3);
-    for (size_t i = 0; i < mesh_ptr->polygons.size(); ++i)
+
+    pcl::PolygonMesh mesh;
+    pcl::toPCLPointCloud2(cloud, mesh.cloud);
+    mesh.polygons.resize(triangles.size() / 3);
+    for (size_t i = 0; i < mesh.polygons.size(); ++i)
     {
       pcl::Vertices v;
       v.vertices.push_back(i*3+0);
       v.vertices.push_back(i*3+2);
       v.vertices.push_back(i*3+1);
-      mesh_ptr->polygons[i] = v;
+      mesh.polygons[i] = v;
     }
-    return mesh_ptr;
+    return mesh;
   }
 }  // namespace jsk_pcl_ros
 

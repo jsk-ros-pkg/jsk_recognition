@@ -198,7 +198,7 @@ Visualization Manager:
       line width: 2
       text size: 12
       top: 0
-      width: 500
+      width: 800
     - Class: rviz/Image
       Enabled: true
       Image Topic: /camera/rgb/image_rect_color

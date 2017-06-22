@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2017, JSK Lab
+ *  Copyright (c) 2017, Kentaro Wada and JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/o2r other materials provided
  *     with the distribution.
- *   * Neither the name of the JSK Lab nor the names of its
+ *   * Neither the name of Kentaro Wada and JSK Lab nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -40,6 +40,7 @@
 #include <pcl/gpu/kinfu_large_scale/marching_cubes.h>
 #include <pcl/gpu/kinfu_large_scale/raycaster.h>
 #include <pcl/gpu/containers/initialization.h>
+#include <pcl/surface/texture_mapping.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/common/angles.h>
@@ -69,7 +70,6 @@ namespace pcl
   }
 }
 
-
 namespace jsk_pcl_ros
 {
   class Kinfu: public jsk_topic_tools::ConnectionBasedNodelet
@@ -80,7 +80,7 @@ namespace jsk_pcl_ros
     typedef message_filters::sync_policies::ApproximateTime<
       sensor_msgs::CameraInfo, sensor_msgs::Image, sensor_msgs::Image> SyncPolicyWithColor;
 
-    Kinfu(): ConnectionBasedNodelet(), is_kinfu_initialized_(false) {}
+    Kinfu(): ConnectionBasedNodelet(), is_kinfu_initialized_(false), frame_idx_(0) {}
     ~Kinfu() {}
   protected:
     virtual void onInit();
@@ -95,18 +95,22 @@ namespace jsk_pcl_ros
                 const sensor_msgs::Image::ConstPtr& rgb_msg);
     bool resetCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
 
-    boost::shared_ptr<pcl::PolygonMesh> convertToMesh(const pcl::gpu::DeviceArray<pcl::PointXYZ>& triangles);
+    pcl::PolygonMesh convertToPolygonMesh(const pcl::gpu::DeviceArray<pcl::PointXYZ>& triangles);
+    pcl::TextureMesh convertToTextureMesh(const pcl::PolygonMesh triangles);
     bool saveMeshCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
 
     pcl::gpu::kinfuLS::KinfuTracker* kinfu_;
     pcl::gpu::kinfuLS::MarchingCubes::Ptr marching_cubes_;
     pcl::gpu::kinfuLS::KinfuTracker::View colors_device_;
     pcl::gpu::kinfuLS::RayCaster::Ptr raycaster_;
+    pcl::texture_mapping::CameraVector cameras_;
 
+    int frame_idx_;
     int device_;
     bool auto_reset_;
     bool integrate_color_;
     bool is_kinfu_initialized_;
+    std::string save_dir_;
 
     boost::mutex mutex_;
 

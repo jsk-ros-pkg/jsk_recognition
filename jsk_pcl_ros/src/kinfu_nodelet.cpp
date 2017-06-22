@@ -266,7 +266,7 @@ namespace jsk_pcl_ros
 
       sensor_msgs::Image rendered_image_msg;
       sensor_msgs::fillImage(rendered_image_msg,
-                             sensor_msgs::image_encodings::RGB8,
+                             enc::RGB8,
                              view_device.rows(),
                              view_device.cols(),
                              view_device.cols() * 3,

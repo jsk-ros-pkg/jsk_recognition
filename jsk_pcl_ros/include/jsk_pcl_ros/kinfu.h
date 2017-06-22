@@ -45,6 +45,7 @@
 
 #include <message_filters/subscriber.h>
 #include <message_filters/sync_policies/exact_time.h>
+#include <message_filters/sync_policies/approximate_time.h>
 #include <jsk_topic_tools/connection_based_nodelet.h>
 #include <jsk_recognition_utils/pcl_conversion_util.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -62,16 +63,23 @@ namespace jsk_pcl_ros
   {
   public:
     typedef message_filters::sync_policies::ExactTime<
-      sensor_msgs::CameraInfo,
-      sensor_msgs::Image > SyncPolicy;
+      sensor_msgs::CameraInfo, sensor_msgs::Image> SyncPolicy;
+    typedef message_filters::sync_policies::ApproximateTime<
+      sensor_msgs::CameraInfo, sensor_msgs::Image, sensor_msgs::Image> SyncPolicyWithColor;
 
+    Kinfu(): ConnectionBasedNodelet(), is_kinfu_initialized_(false) {}
+    ~Kinfu() {}
   protected:
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
 
     void initKinfu(const int height, const int width);
-    void update(const sensor_msgs::CameraInfo::ConstPtr& caminfo_msg, const sensor_msgs::Image::ConstPtr& depth_msg);
+    void update(const sensor_msgs::CameraInfo::ConstPtr& caminfo_msg,
+                const sensor_msgs::Image::ConstPtr& depth_msg);
+    void update(const sensor_msgs::CameraInfo::ConstPtr& caminfo_msg,
+                const sensor_msgs::Image::ConstPtr& depth_msg,
+                const sensor_msgs::Image::ConstPtr& rgb_msg);
     bool resetCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
 
     boost::shared_ptr<pcl::PolygonMesh> convertToMesh(const pcl::gpu::DeviceArray<pcl::PointXYZ>& triangles);
@@ -81,15 +89,17 @@ namespace jsk_pcl_ros
     pcl::gpu::kinfuLS::MarchingCubes::Ptr marching_cubes_;
 
     int device_;
-    int queue_size_;
     bool auto_reset_;
+    bool integrate_color_;
     bool is_kinfu_initialized_;
 
     boost::mutex mutex_;
 
     message_filters::Subscriber<sensor_msgs::CameraInfo> sub_camera_info_;
     message_filters::Subscriber<sensor_msgs::Image> sub_depth_;
+    message_filters::Subscriber<sensor_msgs::Image> sub_color_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicyWithColor> > sync_with_color_;
 
     ros::Publisher pub_rendered_image_;
     ros::Publisher pub_cloud_;

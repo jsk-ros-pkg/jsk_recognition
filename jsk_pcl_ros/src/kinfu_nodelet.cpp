@@ -52,10 +52,8 @@ namespace jsk_pcl_ros
     always_subscribe_ = true;  // for mapping
 
     pnh_->param("device", device_, 0);
-    pnh_->param("queue_size", queue_size_, 10);
     pnh_->param("auto_reset", auto_reset_, false);
-
-    is_kinfu_initialized_ = false;
+    pnh_->param("integrate_color", integrate_color_, false);
 
     pub_rendered_image_ = advertise<sensor_msgs::Image>(*pnh_, "output/rendered_image", 1);
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
@@ -100,22 +98,42 @@ namespace jsk_pcl_ros
   void
   Kinfu::subscribe()
   {
+    int queue_size;
+    pnh_->param("queue_size", queue_size, 10);
+
     sub_camera_info_.subscribe(*pnh_, "input/camera_info", 1);
     sub_depth_.subscribe(*pnh_, "input/depth", 1);
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
-    sync_->connectInput(sub_camera_info_, sub_depth_);
-    sync_->registerCallback(boost::bind(&Kinfu::update, this, _1, _2));
+    if (integrate_color_)
+    {
+      sub_color_.subscribe(*pnh_, "input/color", 1);
+      sync_with_color_.reset(new message_filters::Synchronizer<SyncPolicyWithColor>(queue_size));
+      sync_with_color_->connectInput(sub_camera_info_, sub_depth_, sub_color_);
+      sync_with_color_->registerCallback(boost::bind(&Kinfu::update, this, _1, _2, _3));
+    }
+    else
+    {
+      sync_.reset(new message_filters::Synchronizer<SyncPolicy>(queue_size));
+      sync_->connectInput(sub_camera_info_, sub_depth_);
+      sync_->registerCallback(boost::bind(&Kinfu::update, this, _1, _2));
+    }
   }
 
   void
   Kinfu::unsubscribe()
   {
-    sub_camera_info_.unsubscribe();
-    sub_depth_.unsubscribe();
   }
 
   void
-  Kinfu::update(const sensor_msgs::CameraInfo::ConstPtr& caminfo_msg, const sensor_msgs::Image::ConstPtr& depth_msg)
+  Kinfu::update(const sensor_msgs::CameraInfo::ConstPtr& caminfo_msg,
+                const sensor_msgs::Image::ConstPtr& depth_msg)
+  {
+    update(caminfo_msg, depth_msg, sensor_msgs::ImageConstPtr());
+  }
+
+  void
+  Kinfu::update(const sensor_msgs::CameraInfo::ConstPtr& caminfo_msg,
+                const sensor_msgs::Image::ConstPtr& depth_msg,
+                const sensor_msgs::Image::ConstPtr& color_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
 
@@ -123,6 +141,12 @@ namespace jsk_pcl_ros
     {
       ROS_ERROR("Image size of input depth and camera info must be same. Depth: (%d, %d), Camera Info: (%d, %d)",
                 depth_msg->height, depth_msg->width, caminfo_msg->height, caminfo_msg->width);
+      return;
+    }
+    if (integrate_color_ && ((color_msg->height != caminfo_msg->height) || (color_msg->width != color_msg->width)))
+    {
+      ROS_ERROR("Image size of input color image and camera info must be same. Color: (%d, %d), Camera Info: (%d, %d)",
+                color_msg->height, color_msg->width, caminfo_msg->height, caminfo_msg->width);
       return;
     }
 
@@ -134,8 +158,10 @@ namespace jsk_pcl_ros
 
     // run kinfu
     {
-      pcl::gpu::kinfuLS::KinfuTracker::DepthMap depth_device;
+      kinfu_->setDepthIntrinsics(/*fx=*/caminfo_msg->K[0], /*fy=*/caminfo_msg->K[4],
+                                 /*cx=*/caminfo_msg->K[2], /*cy=*/caminfo_msg->K[5]);
 
+      // depth: 32fc1 -> 16uc1
       cv::Mat depth;
       if (depth_msg->encoding == enc::TYPE_32FC1)
       {
@@ -152,11 +178,23 @@ namespace jsk_pcl_ros
         NODELET_FATAL("Unsupported depth image encoding: %s", depth_msg->encoding.c_str());
         return;
       }
+
+      // depth: cpu -> gpu
+      pcl::gpu::kinfuLS::KinfuTracker::DepthMap depth_device;
       depth_device.upload(&(depth.data[0]), depth.cols * 2, depth.rows, depth.cols);
 
-      kinfu_->setDepthIntrinsics(/*fx=*/caminfo_msg->K[0], /*fy=*/caminfo_msg->K[4],
-                                 /*cx=*/caminfo_msg->K[2], /*cy=*/caminfo_msg->K[5]);
-      (*kinfu_)(depth_device);
+      if (integrate_color_)
+      {
+        // color: cpu -> gpu
+        pcl::gpu::kinfuLS::KinfuTracker::View colors_device;
+        colors_device.upload(&(color_msg->data[0]), color_msg->step, color_msg->height, color_msg->width);
+
+        (*kinfu_)(depth_device, colors_device);
+      }
+      else
+      {
+        (*kinfu_)(depth_device);
+      }
     }
 
     if (kinfu_->icpIsLost())

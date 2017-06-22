@@ -240,6 +240,7 @@ namespace jsk_pcl_ros
                              view_device.cols(),
                              view_device.cols() * 3,
                              reinterpret_cast<unsigned char*>(&view_host[0]));
+      rendered_image_msg.header = caminfo_msg->header;
       pub_rendered_image_.publish(rendered_image_msg);
     }
 

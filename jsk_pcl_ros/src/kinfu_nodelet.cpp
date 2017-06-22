@@ -55,8 +55,9 @@ namespace jsk_pcl_ros
     pnh_->param("auto_reset", auto_reset_, false);
     pnh_->param("integrate_color", integrate_color_, false);
 
-    pub_rendered_image_ = advertise<sensor_msgs::Image>(*pnh_, "output/rendered_image", 1);
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    pub_generated_depth_ = advertise<sensor_msgs::Image>(*pnh_, "output/generated_depth", 1);
+    pub_rendered_image_ = advertise<sensor_msgs::Image>(*pnh_, "output/rendered_image", 1);
 
     srv_reset_ = pnh_->advertiseService("reset", &Kinfu::resetCallback, this);
     srv_save_mesh_ = pnh_->advertiseService("save_mesh", &Kinfu::saveMeshCallback, this);
@@ -217,6 +218,36 @@ namespace jsk_pcl_ros
       tf_broadcaster_.sendTransform(
         tf::StampedTransform(tf_kinfu_origin, caminfo_msg->header.stamp,
                              caminfo_msg->header.frame_id, "kinfu_origin"));
+    }
+
+    // publish generated depth image
+    {
+      pcl::gpu::kinfuLS::KinfuTracker::DepthMap generated_depth;
+      Eigen::Affine3f camera_pose = kinfu_->getCameraPose();
+      if (!raycaster_)
+      {
+        raycaster_ = pcl::gpu::kinfuLS::RayCaster::Ptr(
+          new pcl::gpu::kinfuLS::RayCaster(
+            /*height=*/kinfu_->rows(), /*width=*/kinfu_->cols(),
+            /*fx=*/caminfo_msg->K[0], /*fy=*/caminfo_msg->K[4],
+            /*cx=*/caminfo_msg->K[2], /*cy=*/caminfo_msg->K[5]));
+      }
+      raycaster_->run(kinfu_->volume(), camera_pose, kinfu_->getCyclicalBufferStructure());
+      raycaster_->generateDepthImage(generated_depth);
+
+      int cols;
+      std::vector<unsigned short> data;
+      generated_depth.download(data, cols);
+
+      sensor_msgs::Image generated_depth_msg;
+      sensor_msgs::fillImage(generated_depth_msg,
+                             enc::TYPE_16UC1,
+                             generated_depth.rows(),
+                             generated_depth.cols(),
+                             generated_depth.cols() * 2,
+                             reinterpret_cast<unsigned short*>(&data[0]));
+      generated_depth_msg.header = caminfo_msg->header;
+      pub_generated_depth_.publish(generated_depth_msg);
     }
 
     // publish rendered image

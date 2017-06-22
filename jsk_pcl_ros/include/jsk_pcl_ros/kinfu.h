@@ -38,6 +38,7 @@
 #include <pcl/console/parse.h>
 #include <pcl/gpu/kinfu_large_scale/kinfu.h>
 #include <pcl/gpu/kinfu_large_scale/marching_cubes.h>
+#include <pcl/gpu/kinfu_large_scale/raycaster.h>
 #include <pcl/gpu/containers/initialization.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -100,6 +101,7 @@ namespace jsk_pcl_ros
     pcl::gpu::kinfuLS::KinfuTracker* kinfu_;
     pcl::gpu::kinfuLS::MarchingCubes::Ptr marching_cubes_;
     pcl::gpu::kinfuLS::KinfuTracker::View colors_device_;
+    pcl::gpu::kinfuLS::RayCaster::Ptr raycaster_;
 
     int device_;
     bool auto_reset_;
@@ -114,9 +116,11 @@ namespace jsk_pcl_ros
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicyWithColor> > sync_with_color_;
 
-    ros::Publisher pub_rendered_image_;
     ros::Publisher pub_cloud_;
     ros::Publisher pub_camera_pose_;
+    ros::Publisher pub_generated_depth_;
+    ros::Publisher pub_rendered_image_;
+
     tf::TransformBroadcaster tf_broadcaster_;
 
     ros::ServiceServer srv_reset_;

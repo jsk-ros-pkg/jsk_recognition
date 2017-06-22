@@ -37,6 +37,7 @@
 
 #include <pcl/console/parse.h>
 #include <pcl/gpu/kinfu_large_scale/kinfu.h>
+#include <pcl/gpu/kinfu_large_scale/marching_cubes.h>
 #include <pcl/gpu/containers/initialization.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -68,12 +69,16 @@ namespace jsk_pcl_ros
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual void initKinfu(const int height, const int width);
-    virtual void update(const sensor_msgs::CameraInfo::ConstPtr& caminfo_msg,
-                        const sensor_msgs::Image::ConstPtr& depth_msg);
-    virtual bool resetCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
+
+    void initKinfu(const int height, const int width);
+    void update(const sensor_msgs::CameraInfo::ConstPtr& caminfo_msg, const sensor_msgs::Image::ConstPtr& depth_msg);
+    bool resetCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
+
+    boost::shared_ptr<pcl::PolygonMesh> convertToMesh(const pcl::gpu::DeviceArray<pcl::PointXYZ>& triangles);
+    bool saveMeshCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
 
     pcl::gpu::kinfuLS::KinfuTracker* kinfu_;
+    pcl::gpu::kinfuLS::MarchingCubes::Ptr marching_cubes_;
 
     int device_;
     int queue_size_;
@@ -92,6 +97,7 @@ namespace jsk_pcl_ros
     tf::TransformBroadcaster tf_broadcaster_;
 
     ros::ServiceServer srv_reset_;
+    ros::ServiceServer srv_save_mesh_;
 
   private:
   };

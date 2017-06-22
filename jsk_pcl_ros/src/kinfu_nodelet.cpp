@@ -45,9 +45,11 @@ namespace enc = sensor_msgs::image_encodings;
 
 namespace jsk_pcl_ros
 {
-  void Kinfu::onInit()
+  void
+  Kinfu::onInit()
   {
     ConnectionBasedNodelet::onInit();
+    always_subscribe_ = true;  // for mapping
 
     pnh_->param("device", device_, 0);
     pnh_->param("queue_size", queue_size_, 10);
@@ -59,11 +61,13 @@ namespace jsk_pcl_ros
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
 
     srv_reset_ = pnh_->advertiseService("reset", &Kinfu::resetCallback, this);
+    srv_save_mesh_ = pnh_->advertiseService("save_mesh", &Kinfu::saveMeshCallback, this);
 
     onInitPostProcess();
   }
 
-  void Kinfu::initKinfu(const int height, const int width)
+  void
+  Kinfu::initKinfu(const int height, const int width)
   {
     pcl::gpu::setDevice(device_);
     pcl::gpu::printShortCudaDeviceInfo(device_);
@@ -86,7 +90,8 @@ namespace jsk_pcl_ros
     kinfu_->setCameraMovementThreshold(0.001f);
   }
 
-  void Kinfu::subscribe()
+  void
+  Kinfu::subscribe()
   {
     sub_camera_info_.subscribe(*pnh_, "input/camera_info", 1);
     sub_depth_.subscribe(*pnh_, "input/depth", 1);
@@ -95,14 +100,15 @@ namespace jsk_pcl_ros
     sync_->registerCallback(boost::bind(&Kinfu::update, this, _1, _2));
   }
 
-  void Kinfu::unsubscribe()
+  void
+  Kinfu::unsubscribe()
   {
     sub_camera_info_.unsubscribe();
     sub_depth_.unsubscribe();
   }
 
-  void Kinfu::update(const sensor_msgs::CameraInfo::ConstPtr& caminfo_msg,
-                     const sensor_msgs::Image::ConstPtr& depth_msg)
+  void
+  Kinfu::update(const sensor_msgs::CameraInfo::ConstPtr& caminfo_msg, const sensor_msgs::Image::ConstPtr& depth_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
 
@@ -205,7 +211,8 @@ namespace jsk_pcl_ros
     }
   }
 
-  bool Kinfu::resetCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res)
+  bool
+  Kinfu::resetCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res)
   {
     NODELET_INFO("Resetting kinect fusion was requested, so resetting.");
     kinfu_->reset();
@@ -213,6 +220,50 @@ namespace jsk_pcl_ros
     return true;
   }
 
+  bool
+  Kinfu::saveMeshCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res)
+  {
+    if (!marching_cubes_)
+    {
+      marching_cubes_ = pcl::gpu::kinfuLS::MarchingCubes::Ptr(new pcl::gpu::kinfuLS::MarchingCubes());
+    }
+
+    pcl::gpu::DeviceArray<pcl::PointXYZ> triangles_buffer_device;
+    pcl::gpu::DeviceArray<pcl::PointXYZ> triangles_device =
+      marching_cubes_->run(kinfu_->volume(), triangles_buffer_device);
+    boost::shared_ptr<pcl::PolygonMesh> mesh_ptr(new pcl::PolygonMesh());
+    mesh_ptr = convertToMesh(triangles_device);
+
+    NODELET_INFO("Saving mesh to: %s.", "mesh.ply");
+    pcl::io::savePLYFile("mesh.ply", *mesh_ptr);
+    return true;
+  }
+
+  boost::shared_ptr<pcl::PolygonMesh>
+  Kinfu::convertToMesh(const pcl::gpu::DeviceArray<pcl::PointXYZ>& triangles)
+  {
+    if (triangles.empty())
+    {
+      return boost::shared_ptr<pcl::PolygonMesh>();
+    }
+
+    pcl::PointCloud<pcl::PointXYZ> cloud;
+    cloud.width = static_cast<int>(triangles.size());
+    cloud.height = 1;
+    triangles.download(cloud.points);
+    boost::shared_ptr<pcl::PolygonMesh> mesh_ptr(new pcl::PolygonMesh());
+    pcl::toPCLPointCloud2(cloud, mesh_ptr->cloud);
+    mesh_ptr->polygons.resize(triangles.size() / 3);
+    for (size_t i = 0; i < mesh_ptr->polygons.size(); ++i)
+    {
+      pcl::Vertices v;
+      v.vertices.push_back(i*3+0);
+      v.vertices.push_back(i*3+2);
+      v.vertices.push_back(i*3+1);
+      mesh_ptr->polygons[i] = v;
+    }
+    return mesh_ptr;
+  }
 }  // namespace jsk_pcl_ros
 
 #include <pluginlib/class_list_macros.h>

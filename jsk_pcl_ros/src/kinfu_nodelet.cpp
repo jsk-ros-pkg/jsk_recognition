@@ -72,21 +72,28 @@ namespace jsk_pcl_ros
     pcl::gpu::setDevice(device_);
     pcl::gpu::printShortCudaDeviceInfo(device_);
 
-    float shift_distance = 10.0f * pcl::device::kinfuLS::DISTANCE_THRESHOLD;
-    int snapshot_rate = pcl::device::kinfuLS::SNAPSHOT_RATE;
-    Eigen::Vector3f volume_size = Eigen::Vector3f::Constant(pcl::device::kinfuLS::VOLUME_SIZE);  // 3mm
+    /* below are copied from pcl/gpu/kinfu_large_scale/src/kinfuLS_app.cpp */
+
+    float vsz = pcl::device::kinfuLS::VOLUME_SIZE;
+    float shift_distance = pcl::device::kinfuLS::DISTANCE_THRESHOLD;
+    Eigen::Vector3f volume_size = Eigen::Vector3f::Constant(vsz/*meters*/);
+    if (shift_distance > 2.5 * vsz)
+    {
+      NODELET_WARN("WARNING Shifting distance (%.2f) is very large compared to the volume size (%.2f).",
+                   shift_distance, vsz);
+    }
 
     kinfu_ = new pcl::gpu::kinfuLS::KinfuTracker(volume_size, shift_distance, height, width);
 
-    Eigen::Matrix3f R = Eigen::Matrix3f::Identity();   // * AngleAxisf( pcl::deg2rad(-30.f), Eigen::Vector3f::UnitX());
+    Eigen::Matrix3f R = Eigen::Matrix3f::Identity();
     Eigen::Vector3f t = volume_size * 0.5f - Eigen::Vector3f(0, 0, volume_size(2) / 2 * 1.2f);
 
     Eigen::Affine3f pose = Eigen::Translation3f(t) * Eigen::AngleAxisf(R);
 
     kinfu_->setInitialCameraPose(pose);
     kinfu_->volume().setTsdfTruncDist(0.030f/*meters*/);
-    kinfu_->setIcpCorespFilteringParams(0.1f/*meters*/, sin(pcl::deg2rad(20.0f)));
-    //kinfu_->setDepthTruncationForICP(3.f/*meters*/);
+    kinfu_->setIcpCorespFilteringParams(0.1f/*meters*/, sin(pcl::deg2rad(20.f)));
+    //kinfu_->setDepthTruncationForICP(3.0f/*meters*/);
     kinfu_->setCameraMovementThreshold(0.001f);
   }
 
@@ -177,11 +184,11 @@ namespace jsk_pcl_ros
     // publish rendered image
     {
       pcl::gpu::kinfuLS::KinfuTracker::View view_device;
-      std::vector<pcl::gpu::kinfuLS::PixelRGB> view_host_;
+      std::vector<pcl::gpu::kinfuLS::PixelRGB> view_host;
       kinfu_->getImage(view_device);
 
       int cols;
-      view_device.download(view_host_, cols);
+      view_device.download(view_host, cols);
 
       sensor_msgs::Image rendered_image_msg;
       sensor_msgs::fillImage(rendered_image_msg,
@@ -189,16 +196,16 @@ namespace jsk_pcl_ros
                              view_device.rows(),
                              view_device.cols(),
                              view_device.cols() * 3,
-                             reinterpret_cast<unsigned char*>(&view_host_[0]));
+                             reinterpret_cast<unsigned char*>(&view_host[0]));
       pub_rendered_image_.publish(rendered_image_msg);
     }
 
     // publish cloud
     {
-      pcl::gpu::DeviceArray<pcl::PointXYZ> cloud_buffer_device_;
+      pcl::gpu::DeviceArray<pcl::PointXYZ> cloud_buffer_device;
 
       pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
-      pcl::gpu::DeviceArray<pcl::PointXYZ> extracted = kinfu_->volume().fetchCloud(cloud_buffer_device_);
+      pcl::gpu::DeviceArray<pcl::PointXYZ> extracted = kinfu_->volume().fetchCloud(cloud_buffer_device);
       extracted.download(cloud->points);
       cloud->width = static_cast<int>(cloud->points.size());
       cloud->height = 1;

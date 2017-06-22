@@ -1,6 +1,10 @@
 <launch>
 
-  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_room73b2_table.xml" />
+  <arg name="rosbag" default="true" />
+
+  <group if="$(arg rosbag)">
+    <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_room73b2_table.xml" />
+  </group>
 
   <arg name="INPUT_CAMERA_INFO" default="/camera/depth_registered/camera_info" />
   <arg name="INPUT_DEPTH" default="/camera/depth_registered/hw_registered/image_rect_raw" />

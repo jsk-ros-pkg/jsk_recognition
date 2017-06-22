@@ -43,6 +43,32 @@
 
 namespace enc = sensor_msgs::image_encodings;
 
+// TODO(wkentaro): Move to upstream.
+namespace pcl
+{
+  void
+  concatenateFields(PointCloud<PointXYZ>& cloud_xyz, PointCloud<RGB>& cloud_rgb, PointCloud<PointXYZRGB>& cloud)
+  {
+    if (cloud_xyz.points.size() != cloud_rgb.points.size())
+    {
+      std::cout << "Clouds being concatenated must have same size." << std::endl;
+      return;
+    }
+    cloud.points.resize(cloud_xyz.points.size());
+    for (size_t i = 0; i < cloud_xyz.points.size(); i++)
+    {
+      cloud.points[i].x = cloud_xyz.points[i].x;
+      cloud.points[i].y = cloud_xyz.points[i].y;
+      cloud.points[i].z = cloud_xyz.points[i].z;
+      cloud.points[i].r = cloud_rgb.points[i].r;
+      cloud.points[i].g = cloud_rgb.points[i].g;
+      cloud.points[i].b = cloud_rgb.points[i].b;
+    }
+    cloud.width = cloud_xyz.width;
+    cloud.height = cloud_xyz.height;
+  }
+}
+
 namespace jsk_pcl_ros
 {
   void
@@ -94,6 +120,12 @@ namespace jsk_pcl_ros
     kinfu_->setIcpCorespFilteringParams(0.1f/*meters*/, sin(pcl::deg2rad(20.f)));
     //kinfu_->setDepthTruncationForICP(3.0f/*meters*/);
     kinfu_->setCameraMovementThreshold(0.001f);
+
+    if (integrate_color_)
+    {
+      const int max_color_integration_weight = 2;
+      kinfu_->initColorIntegration(max_color_integration_weight);
+    }
   }
 
   void
@@ -278,16 +310,33 @@ namespace jsk_pcl_ros
     // publish cloud
     {
       pcl::gpu::DeviceArray<pcl::PointXYZ> cloud_buffer_device;
-
-      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
       pcl::gpu::DeviceArray<pcl::PointXYZ> extracted = kinfu_->volume().fetchCloud(cloud_buffer_device);
-      extracted.download(cloud->points);
-      cloud->width = static_cast<int>(cloud->points.size());
-      cloud->height = 1;
+
+      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz(new pcl::PointCloud<pcl::PointXYZ>());
+      extracted.download(cloud_xyz->points);
+      cloud_xyz->width = static_cast<int>(cloud_xyz->points.size());
+      cloud_xyz->height = 1;
 
       sensor_msgs::PointCloud2 output_cloud_msg;
-      pcl::toROSMsg(*cloud, output_cloud_msg);
-      output_cloud_msg.header.stamp = depth_msg->header.stamp;
+      if (integrate_color_)
+      {
+        pcl::gpu::DeviceArray<pcl::RGB> point_colors_device;
+        kinfu_->colorVolume().fetchColors(extracted, point_colors_device);
+
+        pcl::PointCloud<pcl::RGB>::Ptr cloud_rgb(new pcl::PointCloud<pcl::RGB>());
+        point_colors_device.download(cloud_rgb->points);
+        cloud_rgb->width = static_cast<int>(cloud_rgb->points.size());
+        cloud_rgb->height = 1;
+
+        pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
+        cloud->points.resize(cloud_xyz->width);
+        pcl::concatenateFields(*cloud_xyz, *cloud_rgb, *cloud);
+        pcl::toROSMsg(*cloud, output_cloud_msg);
+      }
+      else
+      {
+        pcl::toROSMsg(*cloud_xyz, output_cloud_msg);
+      }
       output_cloud_msg.header.frame_id = "kinfu_origin";
       pub_cloud_.publish(output_cloud_msg);
     }

@@ -27,7 +27,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: Input
+    SyncSource: KinfuOutput
 Visualization Manager:
   Class: ""
   Displays:
@@ -61,7 +61,7 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: RGB8
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 4096
@@ -78,7 +78,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
+      Value: false
     - Class: jsk_rviz_plugin/CameraInfo
       Enabled: true
       Image Topic: ""
@@ -104,37 +104,7 @@ Visualization Manager:
       Channel Name: intensity
       Class: rviz/PointCloud2
       Color: 255; 255; 255
-      Color Transformer: Intensity
-      Decay Time: 0
-      Enabled: false
-      Invert Rainbow: false
-      Max Color: 255; 255; 255
-      Max Intensity: 4096
-      Min Color: 0; 0; 0
-      Min Intensity: 0
-      Name: KinfuOutput
-      Position Transformer: XYZ
-      Queue Size: 10
-      Selectable: true
-      Size (Pixels): 3
-      Size (m): 0.01
-      Style: Flat Squares
-      Topic: /kinfu/output
-      Unreliable: false
-      Use Fixed Frame: true
-      Use rainbow: true
-      Value: false
-    - Alpha: 1
-      Autocompute Intensity Bounds: true
-      Autocompute Value Bounds:
-        Max Value: 10
-        Min Value: -10
-        Value: true
-      Axis: Z
-      Channel Name: intensity
-      Class: rviz/PointCloud2
-      Color: 255; 255; 255
-      Color Transformer: Intensity
+      Color Transformer: RGB8
       Decay Time: 0
       Enabled: true
       Invert Rainbow: false
@@ -146,10 +116,10 @@ Visualization Manager:
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
-      Size (Pixels): 1
+      Size (Pixels): 3
       Size (m): 0.01
       Style: Points
-      Topic: /octree_voxel_grid/output
+      Topic: /kinfu/output
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -201,8 +171,14 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        kinfu_origin:
-          {}
+        camera_link:
+          camera_depth_frame:
+            camera_depth_optical_frame:
+              {}
+          camera_rgb_frame:
+            camera_rgb_optical_frame:
+              kinfu_origin:
+                {}
       Update Interval: 0
       Value: true
     - Background Alpha: 0.8

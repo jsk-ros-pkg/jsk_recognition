@@ -34,13 +34,4 @@
     </rosparam>
   </node>
 
-  <node name="octree_voxel_grid"
-        pkg="nodelet" type="nodelet"
-        args="standalone jsk_pcl/OctreeVoxelGrid">
-    <remap from="~input" to="kinfu/output" />
-    <rosparam>
-      resolution: 0.01
-    </rosparam>
-  </node>
-
 </launch>

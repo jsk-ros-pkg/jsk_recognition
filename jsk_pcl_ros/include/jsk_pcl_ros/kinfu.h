@@ -56,6 +56,18 @@
 #include <jsk_pcl_ros/tf_listener_singleton.h>
 #include <tf/transform_broadcaster.h>
 
+// defined in pcl/gpu/kinfu_large_scale/src/kinfu.cpp
+namespace pcl
+{
+  namespace gpu
+  {
+    namespace kinfuLS
+    {
+      void paint3DView (const KinfuTracker::View& rgb24, KinfuTracker::View& view, float colors_weight = 0.5f);
+    }
+  }
+}
+
 
 namespace jsk_pcl_ros
 {
@@ -87,6 +99,7 @@ namespace jsk_pcl_ros
 
     pcl::gpu::kinfuLS::KinfuTracker* kinfu_;
     pcl::gpu::kinfuLS::MarchingCubes::Ptr marching_cubes_;
+    pcl::gpu::kinfuLS::KinfuTracker::View colors_device_;
 
     int device_;
     bool auto_reset_;

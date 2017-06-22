@@ -183,13 +183,13 @@ namespace jsk_pcl_ros
       pcl::gpu::kinfuLS::KinfuTracker::DepthMap depth_device;
       depth_device.upload(&(depth.data[0]), depth.cols * 2, depth.rows, depth.cols);
 
+
       if (integrate_color_)
       {
         // color: cpu -> gpu
-        pcl::gpu::kinfuLS::KinfuTracker::View colors_device;
-        colors_device.upload(&(color_msg->data[0]), color_msg->step, color_msg->height, color_msg->width);
+        colors_device_.upload(&(color_msg->data[0]), color_msg->step, color_msg->height, color_msg->width);
 
-        (*kinfu_)(depth_device, colors_device);
+        (*kinfu_)(depth_device, colors_device_);
       }
       else
       {
@@ -224,6 +224,11 @@ namespace jsk_pcl_ros
       pcl::gpu::kinfuLS::KinfuTracker::View view_device;
       std::vector<pcl::gpu::kinfuLS::PixelRGB> view_host;
       kinfu_->getImage(view_device);
+
+      if (integrate_color_)
+      {
+        pcl::gpu::kinfuLS::paint3DView(colors_device_, view_device);
+      }
 
       int cols;
       view_device.download(view_host, cols);

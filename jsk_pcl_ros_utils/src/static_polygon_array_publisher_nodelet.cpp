@@ -94,6 +94,7 @@ namespace jsk_pcl_ros_utils
       subscribe();
       timer_ = pnh_->createTimer(ros::Duration(1.0 / periodic_rate_), &StaticPolygonArrayPublisher::timerCallback, this);
     }
+    onInitPostProcess();
   }
 
   void StaticPolygonArrayPublisher::subscribe()

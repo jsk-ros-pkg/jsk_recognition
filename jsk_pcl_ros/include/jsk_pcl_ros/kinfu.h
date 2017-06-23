@@ -87,7 +87,7 @@ namespace jsk_pcl_ros
     virtual void subscribe();
     virtual void unsubscribe();
 
-    void initKinfu(const int height, const int width);
+    void initKinfu(const sensor_msgs::CameraInfo::ConstPtr& caminfo_msg);
     void update(const sensor_msgs::CameraInfo::ConstPtr& caminfo_msg,
                 const sensor_msgs::Image::ConstPtr& depth_msg);
     void update(const sensor_msgs::CameraInfo::ConstPtr& caminfo_msg,
@@ -108,7 +108,7 @@ namespace jsk_pcl_ros
     int device_;
     bool auto_reset_;
     bool integrate_color_;
-    std::string fixed_frame_id_;
+    bool slam_;
 
     int frame_idx_;
     bool is_kinfu_initialized_;
@@ -117,6 +117,7 @@ namespace jsk_pcl_ros
     boost::mutex mutex_;
 
     boost::shared_ptr<tf::TransformListener> tf_listener_;
+    Eigen::Affine3f odom_init_to_kinfu_origin_;
 
     message_filters::Subscriber<sensor_msgs::CameraInfo> sub_camera_info_;
     message_filters::Subscriber<sensor_msgs::Image> sub_depth_;

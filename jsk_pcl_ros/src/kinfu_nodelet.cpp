@@ -83,7 +83,7 @@ namespace jsk_pcl_ros
     pnh_->param("device", device_, 0);
     pnh_->param("auto_reset", auto_reset_, true);
     pnh_->param("integrate_color", integrate_color_, false);
-    pnh_->param<std::string>("fixed_frame_id", fixed_frame_id_, "");
+    pnh_->param("slam", slam_, true);
 
     pnh_->param<std::string>("save_dir", save_dir_, ".");
     boost::filesystem::path save_dir(save_dir_);
@@ -92,7 +92,7 @@ namespace jsk_pcl_ros
       NODELET_INFO("Created save_dir: %s", save_dir_.c_str());
     }
 
-    if (!fixed_frame_id_.empty())
+    if (slam_)
     {
       tf_listener_.reset(new tf::TransformListener());
     }
@@ -109,7 +109,7 @@ namespace jsk_pcl_ros
   }
 
   void
-  Kinfu::initKinfu(const int height, const int width)
+  Kinfu::initKinfu(const sensor_msgs::CameraInfo::ConstPtr& caminfo_msg)
   {
     pcl::gpu::setDevice(device_);
     pcl::gpu::printShortCudaDeviceInfo(device_);
@@ -125,7 +125,7 @@ namespace jsk_pcl_ros
                    shift_distance, vsz);
     }
 
-    kinfu_ = new pcl::gpu::kinfuLS::KinfuTracker(volume_size, shift_distance, height, width);
+    kinfu_ = new pcl::gpu::kinfuLS::KinfuTracker(volume_size, shift_distance, caminfo_msg->height, caminfo_msg->width);
 
     Eigen::Matrix3f R = Eigen::Matrix3f::Identity();
     Eigen::Vector3f t = volume_size * 0.5f - Eigen::Vector3f(0, 0, volume_size(2) / 2 * 1.2f);
@@ -185,8 +185,6 @@ namespace jsk_pcl_ros
                 const sensor_msgs::Image::ConstPtr& depth_msg,
                 const sensor_msgs::Image::ConstPtr& color_msg)
   {
-    boost::mutex::scoped_lock lock(mutex_);
-
     if ((depth_msg->height != caminfo_msg->height) || (depth_msg->width != caminfo_msg->width))
     {
       ROS_ERROR("Image size of input depth and camera info must be same. Depth: (%d, %d), Camera Info: (%d, %d)",
@@ -202,7 +200,7 @@ namespace jsk_pcl_ros
 
     if (!is_kinfu_initialized_)
     {
-      initKinfu(caminfo_msg->height, caminfo_msg->width);
+      initKinfu(caminfo_msg);
       is_kinfu_initialized_ = true;
     }
 
@@ -253,6 +251,7 @@ namespace jsk_pcl_ros
       NODELET_FATAL_THROTTLE(10, "Tracking by ICP in kinect fusion is lost. auto_reset: %d", auto_reset_);
       if (auto_reset_)
       {
+        boost::mutex::scoped_lock lock(mutex_);
         kinfu_->reset();
         is_kinfu_initialized_ = false;
         frame_idx_ = 0;
@@ -264,6 +263,8 @@ namespace jsk_pcl_ros
     // save texture
     if (integrate_color_ && (frame_idx_ % pcl::device::kinfuLS::SNAPSHOT_RATE == 1))
     {
+      boost::mutex::scoped_lock lock(mutex_);
+
       if (frame_idx_ == 1)
       {
         cv::imwrite(save_dir_ + "/occluded.jpg",
@@ -290,7 +291,7 @@ namespace jsk_pcl_ros
       cameras_.push_back(camera);
     }
 
-    // publish kinfu origin
+    // publish kinfu origin and slam
     {
       Eigen::Affine3f camera_pose = kinfu_->getCameraPose();
       geometry_msgs::PoseStamped camera_pose_msg;
@@ -299,42 +300,37 @@ namespace jsk_pcl_ros
       camera_pose_msg.header.frame_id = "kinfu_origin";
       pub_camera_pose_.publish(camera_pose_msg);
 
-      if (fixed_frame_id_.empty())
-      {
-        Eigen::Affine3f camera_to_kinfu_origin = camera_pose.inverse();
-        tf::Transform tf_camera_to_kinfu_origin;
-        tf::transformEigenToTF(camera_to_kinfu_origin, tf_camera_to_kinfu_origin);
-        tf_camera_to_kinfu_origin.setRotation(tf_camera_to_kinfu_origin.getRotation().normalized());
-        tf_broadcaster_.sendTransform(
-          tf::StampedTransform(tf_camera_to_kinfu_origin, caminfo_msg->header.stamp,
-                               caminfo_msg->header.frame_id, "kinfu_origin"));
-      }
-      else
+      Eigen::Affine3f camera_to_kinfu_origin = camera_pose.inverse();
+      tf::Transform tf_camera_to_kinfu_origin;
+      tf::transformEigenToTF(camera_to_kinfu_origin, tf_camera_to_kinfu_origin);
+      tf_camera_to_kinfu_origin.setRotation(tf_camera_to_kinfu_origin.getRotation().normalized());
+      tf_broadcaster_.sendTransform(
+        tf::StampedTransform(tf_camera_to_kinfu_origin, caminfo_msg->header.stamp,
+                             caminfo_msg->header.frame_id, "kinfu_origin"));
+
+      if (slam_)
       {
         // use kinfu as slam: change fixed_frame to child frame of kinfu_origin
         try
         {
-          // tf: fixed_frame -> camera (ex. camera is fixed to robot)
-          tf_listener_->waitForTransform(fixed_frame_id_,
-                                        caminfo_msg->header.frame_id,
-                                        caminfo_msg->header.stamp,
-                                        ros::Duration(1));
-          tf::StampedTransform tf_fixed_frame_to_camera;
-          tf_listener_->lookupTransform(fixed_frame_id_,
-                                        caminfo_msg->header.frame_id,
-                                        caminfo_msg->header.stamp,
-                                        tf_fixed_frame_to_camera);
-          Eigen::Affine3f fixed_frame_to_camera;
-          tf::transformTFToEigen(tf_fixed_frame_to_camera, fixed_frame_to_camera);
+          tf::StampedTransform tf_odom_to_camera;
+          tf_listener_->lookupTransform("odom_init", caminfo_msg->header.frame_id, ros::Time(0), tf_odom_to_camera);
+          Eigen::Affine3f odom_to_camera;
+          tf::transformTFToEigen(tf_odom_to_camera, odom_to_camera);
 
-          // tf: (kinfu_origin -> fixed_frame) = (kinfu_origin -> camera -> fixed_frame)
-          Eigen::Affine3f kinfu_origin_to_fixed_frame = fixed_frame_to_camera.inverse() * camera_pose.inverse();
-          tf::StampedTransform tf_kinfu_origin_to_fixed_frame;
-          tf::transformEigenToTF(kinfu_origin_to_fixed_frame, tf_kinfu_origin_to_fixed_frame);
-          tf_kinfu_origin_to_fixed_frame.setRotation(tf_kinfu_origin_to_fixed_frame.getRotation().normalized());
+          Eigen::AngleAxisf rotate90_x = Eigen::AngleAxisf(1.57, Eigen::Vector3f::UnitX());
+          if (frame_idx_ == 1)
+          {
+            odom_init_to_kinfu_origin_ = odom_to_camera * camera_to_kinfu_origin * rotate90_x;
+          }
+
+          Eigen::Affine3f map_to_odom;
+          map_to_odom = odom_init_to_kinfu_origin_ * (odom_to_camera * camera_to_kinfu_origin).inverse() * rotate90_x;
+          tf::StampedTransform tf_map_to_odom;
+          tf::transformEigenToTF(map_to_odom, tf_map_to_odom);
+          tf_map_to_odom.setRotation(tf_map_to_odom.getRotation().normalized());
           tf_broadcaster_.sendTransform(
-            tf::StampedTransform(tf_kinfu_origin_to_fixed_frame, caminfo_msg->header.stamp,
-                                 "kinfu_origin", fixed_frame_id_));
+            tf::StampedTransform(tf_map_to_odom, caminfo_msg->header.stamp, "map", "odom_init"));
         }
         catch (tf::TransformException e)
         {

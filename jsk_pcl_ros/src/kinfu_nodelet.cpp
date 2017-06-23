@@ -84,6 +84,7 @@ namespace jsk_pcl_ros
     pnh_->param("auto_reset", auto_reset_, true);
     pnh_->param("integrate_color", integrate_color_, false);
     pnh_->param("slam", slam_, false);
+    pnh_->param<std::string>("fixed_frame_id", fixed_frame_id_, "odom_init");
 
     pnh_->param<std::string>("save_dir", save_dir_, ".");
     boost::filesystem::path save_dir(save_dir_);
@@ -310,11 +311,12 @@ namespace jsk_pcl_ros
 
       if (slam_)
       {
-        // use kinfu as slam: change fixed_frame to child frame of kinfu_origin
+        // use kinfu as slam, and publishes tf: map -> fixed_frame_id_ (usually odom_init)
         try
         {
           tf::StampedTransform tf_odom_to_camera;
-          tf_listener_->lookupTransform("odom_init", caminfo_msg->header.frame_id, ros::Time(0), tf_odom_to_camera);
+          tf_listener_->lookupTransform(
+            fixed_frame_id_, caminfo_msg->header.frame_id, ros::Time(0), tf_odom_to_camera);
           Eigen::Affine3f odom_to_camera;
           tf::transformTFToEigen(tf_odom_to_camera, odom_to_camera);
 
@@ -331,7 +333,7 @@ namespace jsk_pcl_ros
           tf::transformEigenToTF(map_to_odom, tf_map_to_odom);
           tf_map_to_odom.setRotation(tf_map_to_odom.getRotation().normalized());
           tf_broadcaster_.sendTransform(
-            tf::StampedTransform(tf_map_to_odom, caminfo_msg->header.stamp, "map", "odom_init"));
+            tf::StampedTransform(tf_map_to_odom, caminfo_msg->header.stamp, "map", fixed_frame_id_));
         }
         catch (tf::TransformException e)
         {

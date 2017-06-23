@@ -110,6 +110,7 @@ namespace jsk_pcl_ros
     bool auto_reset_;
     bool integrate_color_;
     bool slam_;
+    std::string fixed_frame_id_;
 
     int frame_idx_;
     bool is_kinfu_initialized_;

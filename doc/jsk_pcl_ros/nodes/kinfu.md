@@ -67,8 +67,11 @@ Use kinfu (kinect fusion) for model generation and SLAM.
 
 * `~slam` (Boolean, default: `false`)
 
-  Flag to publishing tf `map` relative to `odom_init`.
+  Flag to publishing tf `map` relative to `~fixed_frame_id`.
 
+* `~fixed_frame_id` (String, default: `odom_init`)
+
+  Used when `~slam` is `true`.
 
 ## Sample
 

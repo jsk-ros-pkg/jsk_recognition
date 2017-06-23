@@ -5,10 +5,16 @@
 
 import math
 import pickle
+from distutils.version import LooseVersion
 
 import chainer
 import chainer.functions as F
-import chainer.links.caffe
+if LooseVersion(chainer.__version__) < LooseVersion("2.0"):
+    import chainer.functions.caffe
+    chainer_v1 = True
+else:
+    import chainer.links.caffe
+    chainer_v1 = False
 from chainer import cuda
 import cv2
 import matplotlib
@@ -283,7 +289,11 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         all_peaks[:, 1] = peaks[:, 0]
         all_peaks[:, 2] = heatmap_avg[peaks.T.tolist()]
         peaks_order = peaks[..., 2]
-        all_peaks = all_peaks[xp.argsort(peaks_order)]
+        if chainer_v1:
+            peaks_order = chainer.cuda.to_cpu(peaks_order)
+            all_peaks = all_peaks[np.argsort(peaks_order)]
+        else:
+            all_peaks = all_peaks[xp.argsort(peaks_order)]
         all_peaks[:, 3] = xp.arange(peak_counter, dtype=np.float32)
         if self.gpu != -1:
             all_peaks = chainer.cuda.to_cpu(all_peaks)

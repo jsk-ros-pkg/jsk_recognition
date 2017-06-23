@@ -120,8 +120,8 @@ namespace jsk_pcl_ros
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicyWithColor> > sync_with_color_;
 
-    ros::Publisher pub_cloud_;
     ros::Publisher pub_camera_pose_;
+    ros::Publisher pub_cloud_;
     ros::Publisher pub_generated_depth_;
     ros::Publisher pub_rendered_image_;
 

@@ -96,7 +96,8 @@ namespace jsk_pcl_ros
     bool resetCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
 
     pcl::PolygonMesh convertToPolygonMesh(const pcl::gpu::DeviceArray<pcl::PointXYZ>& triangles);
-    pcl::TextureMesh convertToTextureMesh(const pcl::PolygonMesh triangles);
+    pcl::TextureMesh convertToTextureMesh(const pcl::PolygonMesh triangles,
+                                          const pcl::texture_mapping::CameraVector cameras);
     bool saveMeshCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
 
     pcl::gpu::kinfuLS::KinfuTracker* kinfu_;

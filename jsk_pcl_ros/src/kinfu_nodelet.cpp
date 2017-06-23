@@ -455,7 +455,7 @@ namespace jsk_pcl_ros
     std::string out_file = save_dir_ + "/mesh.obj";
     if (integrate_color_)
     {
-      pcl::TextureMesh texture_mesh = convertToTextureMesh(polygon_mesh);
+      pcl::TextureMesh texture_mesh = convertToTextureMesh(polygon_mesh, cameras_);
       pcl::io::saveOBJFile(out_file, texture_mesh, 5);
     }
     else
@@ -467,18 +467,8 @@ namespace jsk_pcl_ros
   }
 
   pcl::TextureMesh
-  Kinfu::convertToTextureMesh(const pcl::PolygonMesh triangles)
+  Kinfu::convertToTextureMesh(const pcl::PolygonMesh triangles, const pcl::texture_mapping::CameraVector cameras)
   {
-    // copy cameras
-    pcl::texture_mapping::CameraVector cameras;
-    {
-      boost::mutex::scoped_lock lock(mutex_);
-      for (size_t i = 0; i < cameras_.size(); i++)
-      {
-        cameras.push_back(cameras_[i]);
-      }
-    }
-
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromPCLPointCloud2(triangles.cloud, *cloud);
 

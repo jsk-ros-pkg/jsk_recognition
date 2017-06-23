@@ -113,7 +113,6 @@ generate_dynamic_reconfigure_options(
   cfg/OctreeVoxelGrid.cfg
   cfg/OctreeChangePublisher.cfg
   cfg/ExtractTopPolygonLikelihood.cfg
-  cfg/Kinfu.cfg
   cfg/PointcloudDatabaseServer.cfg
   cfg/TargetAdaptiveTracking.cfg
   cfg/PPFRegistration.cfg

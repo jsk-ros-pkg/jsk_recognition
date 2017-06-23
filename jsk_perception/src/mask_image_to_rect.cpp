@@ -76,19 +76,20 @@ namespace jsk_perception
         }
       }
     }
-    cv::Rect mask_rect = cv::boundingRect(indices);
     geometry_msgs::PolygonStamped rect;
     rect.header = mask_msg->header;
-    geometry_msgs::Point32 min_pt, max_pt;
-    min_pt.x = mask_rect.x;
-    min_pt.y = mask_rect.y;
-    max_pt.x = mask_rect.x + mask_rect.width;
-    max_pt.y = mask_rect.y + mask_rect.height;
-    rect.polygon.points.push_back(min_pt);
-    rect.polygon.points.push_back(max_pt);
+    if (indices.size() > 0){
+      cv::Rect mask_rect = cv::boundingRect(indices);
+      geometry_msgs::Point32 min_pt, max_pt;
+      min_pt.x = mask_rect.x;
+      min_pt.y = mask_rect.y;
+      max_pt.x = mask_rect.x + mask_rect.width;
+      max_pt.y = mask_rect.y + mask_rect.height;
+      rect.polygon.points.push_back(min_pt);
+      rect.polygon.points.push_back(max_pt);
+    }
     pub_.publish(rect);
   }
-  
 }
 
 #include <pluginlib/class_list_macros.h>

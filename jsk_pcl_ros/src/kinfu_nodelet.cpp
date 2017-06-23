@@ -327,7 +327,7 @@ namespace jsk_pcl_ros
           Eigen::Affine3f fixed_frame_to_camera;
           tf::transformTFToEigen(tf_fixed_frame_to_camera, fixed_frame_to_camera);
 
-          // tf: kinfu_origin -> fixed_frame = kinfu_origin -> camera -> fixed_frame
+          // tf: (kinfu_origin -> fixed_frame) = (kinfu_origin -> camera -> fixed_frame)
           Eigen::Affine3f kinfu_origin_to_fixed_frame = fixed_frame_to_camera.inverse() * camera_pose.inverse();
           tf::StampedTransform tf_kinfu_origin_to_fixed_frame;
           tf::transformEigenToTF(kinfu_origin_to_fixed_frame, tf_kinfu_origin_to_fixed_frame);

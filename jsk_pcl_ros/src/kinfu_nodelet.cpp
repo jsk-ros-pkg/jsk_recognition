@@ -83,12 +83,18 @@ namespace jsk_pcl_ros
     pnh_->param("device", device_, 0);
     pnh_->param("auto_reset", auto_reset_, true);
     pnh_->param("integrate_color", integrate_color_, false);
+    pnh_->param<std::string>("fixed_frame_id", fixed_frame_id_, "");
 
     pnh_->param<std::string>("save_dir", save_dir_, ".");
     boost::filesystem::path save_dir(save_dir_);
     if (boost::filesystem::create_directories(save_dir))
     {
       NODELET_INFO("Created save_dir: %s", save_dir_.c_str());
+    }
+
+    if (!fixed_frame_id_.empty())
+    {
+      tf_listener_.reset(new tf::TransformListener());
     }
 
     pub_camera_pose_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output", 1);
@@ -293,13 +299,48 @@ namespace jsk_pcl_ros
       camera_pose_msg.header.frame_id = "kinfu_origin";
       pub_camera_pose_.publish(camera_pose_msg);
 
-      Eigen::Affine3f camera_to_kinfu_origin = camera_pose.inverse();
-      tf::Transform tf_kinfu_origin;
-      tf::transformEigenToTF(camera_to_kinfu_origin, tf_kinfu_origin);
-      tf_kinfu_origin.setRotation(tf_kinfu_origin.getRotation().normalized());  // for long-term use
-      tf_broadcaster_.sendTransform(
-        tf::StampedTransform(tf_kinfu_origin, caminfo_msg->header.stamp,
-                             caminfo_msg->header.frame_id, "kinfu_origin"));
+      if (fixed_frame_id_.empty())
+      {
+        Eigen::Affine3f camera_to_kinfu_origin = camera_pose.inverse();
+        tf::Transform tf_camera_to_kinfu_origin;
+        tf::transformEigenToTF(camera_to_kinfu_origin, tf_camera_to_kinfu_origin);
+        tf_camera_to_kinfu_origin.setRotation(tf_camera_to_kinfu_origin.getRotation().normalized());
+        tf_broadcaster_.sendTransform(
+          tf::StampedTransform(tf_camera_to_kinfu_origin, caminfo_msg->header.stamp,
+                               caminfo_msg->header.frame_id, "kinfu_origin"));
+      }
+      else
+      {
+        // use kinfu as slam: change fixed_frame to child frame of kinfu_origin
+        try
+        {
+          // tf: fixed_frame -> camera (ex. camera is fixed to robot)
+          tf_listener_->waitForTransform(fixed_frame_id_,
+                                        caminfo_msg->header.frame_id,
+                                        caminfo_msg->header.stamp,
+                                        ros::Duration(1));
+          tf::StampedTransform tf_fixed_frame_to_camera;
+          tf_listener_->lookupTransform(fixed_frame_id_,
+                                        caminfo_msg->header.frame_id,
+                                        caminfo_msg->header.stamp,
+                                        tf_fixed_frame_to_camera);
+          Eigen::Affine3f fixed_frame_to_camera;
+          tf::transformTFToEigen(tf_fixed_frame_to_camera, fixed_frame_to_camera);
+
+          // tf: kinfu_origin -> fixed_frame = kinfu_origin -> camera -> fixed_frame
+          Eigen::Affine3f kinfu_origin_to_fixed_frame = fixed_frame_to_camera.inverse() * camera_pose.inverse();
+          tf::StampedTransform tf_kinfu_origin_to_fixed_frame;
+          tf::transformEigenToTF(kinfu_origin_to_fixed_frame, tf_kinfu_origin_to_fixed_frame);
+          tf_kinfu_origin_to_fixed_frame.setRotation(tf_kinfu_origin_to_fixed_frame.getRotation().normalized());
+          tf_broadcaster_.sendTransform(
+            tf::StampedTransform(tf_kinfu_origin_to_fixed_frame, caminfo_msg->header.stamp,
+                                 "kinfu_origin", fixed_frame_id_));
+        }
+        catch (tf::TransformException e)
+        {
+          NODELET_FATAL("%s", e.what());
+        }
+      }
     }
 
     // publish generated depth image

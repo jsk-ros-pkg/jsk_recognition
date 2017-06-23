@@ -105,14 +105,18 @@ namespace jsk_pcl_ros
     pcl::gpu::kinfuLS::RayCaster::Ptr raycaster_;
     pcl::texture_mapping::CameraVector cameras_;
 
-    int frame_idx_;
     int device_;
     bool auto_reset_;
     bool integrate_color_;
+    std::string fixed_frame_id_;
+
+    int frame_idx_;
     bool is_kinfu_initialized_;
     std::string save_dir_;
 
     boost::mutex mutex_;
+
+    boost::shared_ptr<tf::TransformListener> tf_listener_;
 
     message_filters::Subscriber<sensor_msgs::CameraInfo> sub_camera_info_;
     message_filters::Subscriber<sensor_msgs::Image> sub_depth_;

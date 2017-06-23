@@ -3,6 +3,7 @@
   <arg name="gui" default="true" />
   <arg name="rosbag" default="true" />
   <arg name="integrate_color" default="true" />
+  <arg name="fixed_frame_id" default="" />
 
   <group if="$(arg rosbag)">
     <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_room73b2_table.xml" />
@@ -32,7 +33,8 @@
         output="screen">
     <remap from="~input/camera_info" to="$(arg INPUT_CAMERA_INFO)" />
     <remap from="~input/depth" to="$(arg INPUT_DEPTH)" />
-    <remap from="~input/color" to="$(arg INPUT_COLOR)" />
+    <remap from="~input/color" to="$(arg INPUT_COLOR)" if="$(arg integrate_color)" />
+    <param name="fixed_frame_id" value="$(arg fixed_frame_id)" />
     <rosparam subst_value="true">
       auto_reset: false
       integrate_color: $(arg integrate_color)

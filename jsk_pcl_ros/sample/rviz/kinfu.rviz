@@ -158,7 +158,7 @@ Visualization Manager:
         camera_depth_optical_frame:
           Value: false
         camera_link:
-          Value: false
+          Value: true
         camera_rgb_frame:
           Value: false
         camera_rgb_optical_frame:

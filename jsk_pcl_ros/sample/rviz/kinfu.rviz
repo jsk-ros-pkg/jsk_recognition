@@ -119,7 +119,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.01
       Style: Points
-      Topic: /kinfu/output
+      Topic: /kinfu/output/cloud
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true

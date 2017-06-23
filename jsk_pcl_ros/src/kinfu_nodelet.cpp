@@ -91,7 +91,7 @@ namespace jsk_pcl_ros
       NODELET_INFO("Created save_dir: %s", save_dir_.c_str());
     }
 
-    pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output/cloud", 1);
     pub_generated_depth_ = advertise<sensor_msgs::Image>(*pnh_, "output/generated_depth", 1);
     pub_rendered_image_ = advertise<sensor_msgs::Image>(*pnh_, "output/rendered_image", 1);
 

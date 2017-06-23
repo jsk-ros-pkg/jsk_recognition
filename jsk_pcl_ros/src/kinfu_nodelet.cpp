@@ -81,7 +81,7 @@ namespace jsk_pcl_ros
     always_subscribe_ = true;  // for mapping
 
     pnh_->param("device", device_, 0);
-    pnh_->param("auto_reset", auto_reset_, false);
+    pnh_->param("auto_reset", auto_reset_, true);
     pnh_->param("integrate_color", integrate_color_, false);
 
     pnh_->param<std::string>("save_dir", save_dir_, ".");

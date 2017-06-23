@@ -34,6 +34,7 @@
     <remap from="~input/depth" to="$(arg INPUT_DEPTH)" />
     <remap from="~input/color" to="$(arg INPUT_COLOR)" />
     <rosparam subst_value="true">
+      auto_reset: false
       integrate_color: $(arg integrate_color)
       save_dir: $(optenv HOME)/.ros/jsk_pcl_ros/sample_kinfu
     </rosparam>

@@ -40,69 +40,15 @@
     </rosparam>
   </node>
 
-  <node name="apply_mask_image"
-        pkg="nodelet" type="nodelet"
-        args="standalone jsk_perception/ApplyMaskImage" >
-    <remap from="~input" to="$(arg INPUT_IMAGE)" />
-    <remap from="~input/mask" to="people_mask_publisher/output" />
-    <rosparam>
-      clip: false
-    </rosparam>
-  </node>
-
-  <include file="$(find opencv_apps)/launch/hsv_color_filter.launch" >
-    <arg name="image" value="apply_mask_image/output" />
-    <arg name="debug_view" value="false" />
-    <arg name="h_limit_max" value="24" />
-    <arg name="h_limit_min" value="2" />
-    <arg name="s_limit_max" value="256" />
-    <arg name="s_limit_min" value="0" />
-    <arg name="v_limit_max" value="255" />
-    <arg name="v_limit_min" value="0" />
-  </include>
-
-  <node name="erode_mask_image"
-        pkg="jsk_perception" type="erode_mask_image" >
-    <remap from="~input" to="hsv_color_filter/image" />
-  </node>
-
-  <node name="dilate_mask_image"
-        pkg="jsk_perception" type="dilate_mask_image" >
-    <remap from="~input" to="erode_mask_image/output" />
-  </node>
-
-  <node name="mask_image_to_point_indices"
-	pkg="nodelet" type="nodelet"
-        args="load jsk_pcl_utils/MaskImageToPointIndices $(arg MANAGER)"
-        output="screen" clear_params="true" >
-    <remap from="~input" to="dilate_mask_image/output" />
-  </node>
-
-  <node name="extract_indices"
-	pkg="nodelet" type="nodelet"
-        args="load pcl/ExtractIndices $(arg MANAGER)"
-        output="screen" clear_params="true">
-    <remap from="~input" to="$(arg INPUT_CLOUD)" />
-    <remap from="~indices" to="mask_image_to_point_indices/output" />
-    <rosparam>
-      approximate_sync: true
-    </rosparam>
-  </node>
-  
-  <node name="centroid_publisher"
-	pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/CentroidPublisher $(arg MANAGER)"
-        output="screen" clear_params="true">
-    <remap from="~input" to="extract_indices/output" />
-    <rosparam>
-      publish_tf: true
-    </rosparam>
-  </node>
-
   <group if="$(arg gui)" >
-    <node name="rviz"
-          pkg="rviz" type="rviz"
-	  args="-d $(find jsk_perception)/sample/rviz/people_pose_estimation_2d.rviz" />
+    <node name="image_view0"
+          pkg="image_view" type="image_view" >
+      <remap from="image" to="people_pose_estimation2d/output" />
+    </node>
+    <node name="image_view1"
+          pkg="image_view" type="image_view" >
+      <remap from="image" to="people_mask_publisher/output" />
+    </node>
   </group>
 
 </launch>

@@ -83,7 +83,7 @@ namespace jsk_pcl_ros
     pnh_->param("device", device_, 0);
     pnh_->param("auto_reset", auto_reset_, true);
     pnh_->param("integrate_color", integrate_color_, false);
-    pnh_->param("slam", slam_, true);
+    pnh_->param("slam", slam_, false);
 
     pnh_->param<std::string>("save_dir", save_dir_, ".");
     boost::filesystem::path save_dir(save_dir_);

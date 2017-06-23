@@ -91,6 +91,7 @@ namespace jsk_pcl_ros
       NODELET_INFO("Created save_dir: %s", save_dir_.c_str());
     }
 
+    pub_camera_pose_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output", 1);
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output/cloud", 1);
     pub_generated_depth_ = advertise<sensor_msgs::Image>(*pnh_, "output/generated_depth", 1);
     pub_rendered_image_ = advertise<sensor_msgs::Image>(*pnh_, "output/rendered_image", 1);
@@ -285,7 +286,14 @@ namespace jsk_pcl_ros
 
     // publish kinfu origin
     {
-      Eigen::Affine3f camera_to_kinfu_origin = kinfu_->getCameraPose().inverse();
+      Eigen::Affine3f camera_pose = kinfu_->getCameraPose();
+      geometry_msgs::PoseStamped camera_pose_msg;
+      tf::poseEigenToMsg(camera_pose, camera_pose_msg.pose);
+      camera_pose_msg.header.stamp = caminfo_msg->header.stamp;
+      camera_pose_msg.header.frame_id = "kinfu_origin";
+      pub_camera_pose_.publish(camera_pose_msg);
+
+      Eigen::Affine3f camera_to_kinfu_origin = camera_pose.inverse();
       tf::Transform tf_kinfu_origin;
       tf::transformEigenToTF(camera_to_kinfu_origin, tf_kinfu_origin);
       tf_kinfu_origin.setRotation(tf_kinfu_origin.getRotation().normalized());  // for long-term use

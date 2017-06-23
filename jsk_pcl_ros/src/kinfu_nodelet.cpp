@@ -325,6 +325,7 @@ namespace jsk_pcl_ros
           }
 
           Eigen::Affine3f map_to_odom;
+          // map_to_odom * odom_to_camera * camera_to_kinfu_origin == odom_init_to_kinfu_origin_
           map_to_odom = odom_init_to_kinfu_origin_ * (odom_to_camera * camera_to_kinfu_origin).inverse() * rotate90_x;
           tf::StampedTransform tf_map_to_odom;
           tf::transformEigenToTF(map_to_odom, tf_map_to_odom);

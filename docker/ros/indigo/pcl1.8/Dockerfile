@@ -16,8 +16,8 @@ RUN cd ~/pcl-pcl-1.8.0rc2 && \
     mkdir build && \
     cd build && \
     cmake .. -DCMAKE_BUILD_TYPE=Release && \
-    make -j && \
-    make install -j
+    make -j2 && \
+    make install
 
 RUN mkdir -p ~/ros/ws_jsk_recognition/src && \
     cd ~/ros/ws_jsk_recognition/src && \

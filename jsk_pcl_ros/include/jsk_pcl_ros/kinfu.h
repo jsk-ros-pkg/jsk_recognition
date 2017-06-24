@@ -80,7 +80,7 @@ namespace jsk_pcl_ros
     typedef message_filters::sync_policies::ApproximateTime<
       sensor_msgs::CameraInfo, sensor_msgs::Image, sensor_msgs::Image> SyncPolicyWithColor;
 
-    Kinfu(): ConnectionBasedNodelet(), is_kinfu_initialized_(false), frame_idx_(0) {}
+    Kinfu(): ConnectionBasedNodelet(), frame_idx_(0) {}
     ~Kinfu() {}
   protected:
     virtual void onInit();
@@ -100,7 +100,7 @@ namespace jsk_pcl_ros
                                           const pcl::texture_mapping::CameraVector cameras);
     bool saveMeshCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
 
-    pcl::gpu::kinfuLS::KinfuTracker* kinfu_;
+    boost::shared_ptr<pcl::gpu::kinfuLS::KinfuTracker> kinfu_;
     pcl::gpu::kinfuLS::MarchingCubes::Ptr marching_cubes_;
     pcl::gpu::kinfuLS::KinfuTracker::View colors_device_;
     pcl::gpu::kinfuLS::RayCaster::Ptr raycaster_;
@@ -113,7 +113,6 @@ namespace jsk_pcl_ros
     std::string fixed_frame_id_;
 
     int frame_idx_;
-    bool is_kinfu_initialized_;
     std::string save_dir_;
 
     boost::mutex mutex_;

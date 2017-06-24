@@ -130,7 +130,8 @@ namespace jsk_pcl_ros
                    shift_distance, vsz);
     }
 
-    kinfu_ = new pcl::gpu::kinfuLS::KinfuTracker(volume_size, shift_distance, caminfo_msg->height, caminfo_msg->width);
+    kinfu_.reset(new pcl::gpu::kinfuLS::KinfuTracker(
+      volume_size, shift_distance, caminfo_msg->height, caminfo_msg->width));
 
     Eigen::Matrix3f R = Eigen::Matrix3f::Identity();
     Eigen::Vector3f t = volume_size * 0.5f - Eigen::Vector3f(0, 0, volume_size(2) / 2 * 1.2f);
@@ -203,10 +204,9 @@ namespace jsk_pcl_ros
       return;
     }
 
-    if (!is_kinfu_initialized_)
+    if (!kinfu_)
     {
       initKinfu(caminfo_msg);
-      is_kinfu_initialized_ = true;
     }
 
     // run kinfu
@@ -259,8 +259,7 @@ namespace jsk_pcl_ros
       if (auto_reset_)
       {
         boost::mutex::scoped_lock lock(mutex_);
-        kinfu_->reset();
-        is_kinfu_initialized_ = false;
+        kinfu_.reset();
         frame_idx_ = 0;
         cameras_.clear();
       }
@@ -446,8 +445,7 @@ namespace jsk_pcl_ros
   Kinfu::resetCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res)
   {
     NODELET_INFO("Resetting kinect fusion was requested, so resetting.");
-    kinfu_->reset();
-    is_kinfu_initialized_ = false;
+    kinfu_.reset();
     return true;
   }
 

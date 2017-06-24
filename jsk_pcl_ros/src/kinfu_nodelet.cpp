@@ -446,6 +446,7 @@ namespace jsk_pcl_ros
   {
     NODELET_INFO("Resetting kinect fusion was requested, so resetting.");
     kinfu_.reset();
+    cameras_.clear();
     return true;
   }
 

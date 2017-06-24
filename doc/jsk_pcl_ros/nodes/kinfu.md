@@ -28,15 +28,15 @@ Use kinfu (kinect fusion) for model generation and SLAM.
 
 * `~output/cloud` (`sensor_msgs/PointCloud2`)
 
-  Registered scene pointcloud
+  Generated point cloud of kinfu model.
+
+* `~output/depth` (`sensor_msgs/Image`)
+
+  Generated depth of kinfu model in current camera view.
 
 * `~output/rendered_image` (`sensor_msgs/Image`)
 
   Rendered image of kinfu model in current camera view.
-
-* `~output/generated_depth` (`sensor_msgs/Image`)
-
-  Generated depth of kinfu model in current camera view.
 
 * `~output/status` (`jsk_recognition_msgs/TrackerStatus`)
 

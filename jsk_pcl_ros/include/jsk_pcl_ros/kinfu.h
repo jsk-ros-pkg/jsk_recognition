@@ -129,7 +129,7 @@ namespace jsk_pcl_ros
 
     ros::Publisher pub_camera_pose_;
     ros::Publisher pub_cloud_;
-    ros::Publisher pub_generated_depth_;
+    ros::Publisher pub_depth_;
     ros::Publisher pub_rendered_image_;
     ros::Publisher pub_status_;
 

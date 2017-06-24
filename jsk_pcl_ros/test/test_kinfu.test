@@ -17,6 +17,8 @@
       timeout_2: 30
       topic_3: /kinfu/output/rendered_image
       timeout_3: 30
+      topic_4: /kinfu/output/status
+      timeout_4: 30
     </rosparam>
   </test>
 

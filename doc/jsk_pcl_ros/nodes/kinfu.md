@@ -38,6 +38,10 @@ Use kinfu (kinect fusion) for model generation and SLAM.
 
   Generated depth of kinfu model in current camera view.
 
+* `~output/status` (`jsk_recognition_msgs/TrackerStatus`)
+
+  Status of icp tracking. Succeeding or lost.
+
 
 ## Advertising Services
 
@@ -72,6 +76,7 @@ Use kinfu (kinect fusion) for model generation and SLAM.
 * `~fixed_frame_id` (String, default: `odom_init`)
 
   Used when `~slam` is `true`.
+
 
 ## Sample
 

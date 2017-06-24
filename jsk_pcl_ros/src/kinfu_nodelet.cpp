@@ -36,11 +36,14 @@
 
 #include <boost/thread/thread.hpp>
 #include <boost/filesystem.hpp>
-#include <cv_bridge/cv_bridge.h>
-#include <sensor_msgs/fill_image.h>
-#include <sensor_msgs/image_encodings.h>
+
 #include <pcl/features/normal_3d.h>
 #include <pcl/io/obj_io.h>
+
+#include <cv_bridge/cv_bridge.h>
+#include <jsk_recognition_msgs/TrackerStatus.h>
+#include <sensor_msgs/fill_image.h>
+#include <sensor_msgs/image_encodings.h>
 
 #include "jsk_pcl_ros/kinfu.h"
 
@@ -102,6 +105,7 @@ namespace jsk_pcl_ros
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output/cloud", 1);
     pub_generated_depth_ = advertise<sensor_msgs::Image>(*pnh_, "output/generated_depth", 1);
     pub_rendered_image_ = advertise<sensor_msgs::Image>(*pnh_, "output/rendered_image", 1);
+    pub_status_ = advertise<jsk_recognition_msgs::TrackerStatus>(*pnh_, "output/status", 1);
 
     srv_reset_ = pnh_->advertiseService("reset", &Kinfu::resetCallback, this);
     srv_save_mesh_ = pnh_->advertiseService("save_mesh", &Kinfu::saveMeshCallback, this);
@@ -247,6 +251,8 @@ namespace jsk_pcl_ros
       frame_idx_++;
     }
 
+    jsk_recognition_msgs::TrackerStatus status;
+    status.header = caminfo_msg->header;
     if (kinfu_->icpIsLost())
     {
       NODELET_FATAL_THROTTLE(10, "Tracking by ICP in kinect fusion is lost. auto_reset: %d", auto_reset_);
@@ -258,8 +264,12 @@ namespace jsk_pcl_ros
         frame_idx_ = 0;
         cameras_.clear();
       }
+      status.is_tracking = false;
+      pub_status_.publish(status);
       return;
     }
+    status.is_tracking = true;
+    pub_status_.publish(status);
 
     // save texture
     if (integrate_color_ && (frame_idx_ % pcl::device::kinfuLS::SNAPSHOT_RATE == 1))

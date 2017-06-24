@@ -115,6 +115,14 @@ def main():
         md5='2175620a2237bbd33e35bf38867d84b2',
     )
 
+    # node_scripts/people_pose_estimation_2d.py
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/pose_estimation_2d_chainermodel.pkl',
+        url='https://drive.google.com/uc?id=0B_NiLAzvehC9R2stRmQyM3ZiVjQ',
+        md5='587933c2c0adf335ebed0486c183541f',
+    )
+
 
 if __name__ == '__main__':
     main()

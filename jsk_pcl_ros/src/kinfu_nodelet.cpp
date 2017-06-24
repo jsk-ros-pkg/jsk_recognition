@@ -303,11 +303,16 @@ namespace jsk_pcl_ros
     // publish kinfu origin and slam
     {
       Eigen::Affine3f camera_pose = kinfu_->getCameraPose();
-      geometry_msgs::PoseStamped camera_pose_msg;
-      tf::poseEigenToMsg(camera_pose, camera_pose_msg.pose);
-      camera_pose_msg.header.stamp = caminfo_msg->header.stamp;
-      camera_pose_msg.header.frame_id = "kinfu_origin";
-      pub_camera_pose_.publish(camera_pose_msg);
+
+      // publish camera pose
+      if (pub_camera_pose_.getNumSubscribers() > 0)
+      {
+        geometry_msgs::PoseStamped camera_pose_msg;
+        tf::poseEigenToMsg(camera_pose, camera_pose_msg.pose);
+        camera_pose_msg.header.stamp = caminfo_msg->header.stamp;
+        camera_pose_msg.header.frame_id = "kinfu_origin";
+        pub_camera_pose_.publish(camera_pose_msg);
+      }
 
       Eigen::Affine3f camera_to_kinfu_origin = camera_pose.inverse();
       tf::Transform tf_camera_to_kinfu_origin;
@@ -351,6 +356,7 @@ namespace jsk_pcl_ros
     }
 
     // publish depth image
+    if (pub_depth_.getNumSubscribers() > 0)
     {
       pcl::gpu::kinfuLS::KinfuTracker::DepthMap depth_gpu;
       Eigen::Affine3f camera_pose = kinfu_->getCameraPose();
@@ -381,6 +387,7 @@ namespace jsk_pcl_ros
     }
 
     // publish rendered image
+    if (pub_rendered_image_.getNumSubscribers() > 0)
     {
       pcl::gpu::kinfuLS::KinfuTracker::View view_device;
       std::vector<pcl::gpu::kinfuLS::PixelRGB> view_host;
@@ -406,6 +413,7 @@ namespace jsk_pcl_ros
     }
 
     // publish cloud
+    if (pub_cloud_.getNumSubscribers() > 0)
     {
       pcl::gpu::DeviceArray<pcl::PointXYZ> cloud_buffer_device;
       pcl::gpu::DeviceArray<pcl::PointXYZ> extracted = kinfu_->volume().fetchCloud(cloud_buffer_device);

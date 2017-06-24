@@ -191,6 +191,8 @@ namespace jsk_pcl_ros
                 const sensor_msgs::Image::ConstPtr& depth_msg,
                 const sensor_msgs::Image::ConstPtr& color_msg)
   {
+    boost::mutex::scoped_lock lock(mutex_);
+
     if ((depth_msg->height != caminfo_msg->height) || (depth_msg->width != caminfo_msg->width))
     {
       ROS_ERROR("Image size of input depth and camera info must be same. Depth: (%d, %d), Camera Info: (%d, %d)",
@@ -258,7 +260,6 @@ namespace jsk_pcl_ros
       NODELET_FATAL_THROTTLE(10, "Tracking by ICP in kinect fusion is lost. auto_reset: %d", auto_reset_);
       if (auto_reset_)
       {
-        boost::mutex::scoped_lock lock(mutex_);
         kinfu_.reset();
         frame_idx_ = 0;
         cameras_.clear();
@@ -273,8 +274,6 @@ namespace jsk_pcl_ros
     // save texture
     if (integrate_color_ && (frame_idx_ % pcl::device::kinfuLS::SNAPSHOT_RATE == 1))
     {
-      boost::mutex::scoped_lock lock(mutex_);
-
       if (frame_idx_ == 1)
       {
         cv::imwrite(save_dir_ + "/occluded.jpg",
@@ -444,9 +443,10 @@ namespace jsk_pcl_ros
   bool
   Kinfu::resetCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res)
   {
-    NODELET_INFO("Resetting kinect fusion was requested, so resetting.");
+    boost::mutex::scoped_lock lock(mutex_);
     kinfu_.reset();
     cameras_.clear();
+    NODELET_INFO("Reset kinect fusion by request.");
     return true;
   }
 

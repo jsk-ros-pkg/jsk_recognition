@@ -333,15 +333,14 @@ namespace jsk_pcl_ros
           Eigen::Affine3f odom_to_camera;
           tf::transformTFToEigen(tf_odom_to_camera, odom_to_camera);
 
-          Eigen::AngleAxisf rotate90_x = Eigen::AngleAxisf(1.57, Eigen::Vector3f::UnitX());
           if (frame_idx_ == 1)
           {
-            odom_init_to_kinfu_origin_ = odom_to_camera * camera_to_kinfu_origin * rotate90_x;
+            odom_init_to_kinfu_origin_ = odom_to_camera * camera_to_kinfu_origin;
           }
 
           Eigen::Affine3f map_to_odom;
           // map_to_odom * odom_to_camera * camera_to_kinfu_origin == odom_init_to_kinfu_origin_
-          map_to_odom = odom_init_to_kinfu_origin_ * (odom_to_camera * camera_to_kinfu_origin).inverse() * rotate90_x;
+          map_to_odom = odom_init_to_kinfu_origin_ * (odom_to_camera * camera_to_kinfu_origin).inverse();
           tf::StampedTransform tf_map_to_odom;
           tf::transformEigenToTF(map_to_odom, tf_map_to_odom);
           tf_map_to_odom.setRotation(tf_map_to_odom.getRotation().normalized());

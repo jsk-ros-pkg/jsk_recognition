@@ -41,7 +41,7 @@
 #include <pcl/io/obj_io.h>
 
 #include <cv_bridge/cv_bridge.h>
-#include <jsk_recognition_msgs/TrackerStatus.h>
+#include <jsk_recognition_msgs/TrackingStatus.h>
 #include <sensor_msgs/fill_image.h>
 #include <sensor_msgs/image_encodings.h>
 
@@ -105,7 +105,7 @@ namespace jsk_pcl_ros
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output/cloud", 1);
     pub_depth_ = advertise<sensor_msgs::Image>(*pnh_, "output/depth", 1);
     pub_rendered_image_ = advertise<sensor_msgs::Image>(*pnh_, "output/rendered_image", 1);
-    pub_status_ = advertise<jsk_recognition_msgs::TrackerStatus>(*pnh_, "output/status", 1);
+    pub_status_ = advertise<jsk_recognition_msgs::TrackingStatus>(*pnh_, "output/status", 1);
 
     srv_reset_ = pnh_->advertiseService("reset", &Kinfu::resetCallback, this);
     srv_save_mesh_ = pnh_->advertiseService("save_mesh", &Kinfu::saveMeshCallback, this);
@@ -253,7 +253,7 @@ namespace jsk_pcl_ros
       frame_idx_++;
     }
 
-    jsk_recognition_msgs::TrackerStatus status;
+    jsk_recognition_msgs::TrackingStatus status;
     status.header = caminfo_msg->header;
     if (kinfu_->icpIsLost())
     {
@@ -264,11 +264,11 @@ namespace jsk_pcl_ros
         frame_idx_ = 0;
         cameras_.clear();
       }
-      status.is_tracking = false;
+      status.is_lost = true;
       pub_status_.publish(status);
       return;
     }
-    status.is_tracking = true;
+    status.is_lost = false;
     pub_status_.publish(status);
 
     // save texture

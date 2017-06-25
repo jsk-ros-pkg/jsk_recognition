@@ -93,6 +93,13 @@ rosservice call /kinfu/save_mesh  # saves mesh model below
 
 ## With SLAM
 
+```bash
+gdown https://drive.google.com/uc?id=0B9P1L--7Wd2vMDA4NW9YSEpoczQ -O $(rospack find jsk_pcl_ros)/sample/data/hrp2_apc_2016-07-27-22-08-02.bag
+export ROBOT=HRP2JSKNTS
+# you need to resolve dependencies on private projects here to see robot model on rviz.
+roslaunch jsk_pcl_ros sample_kinfu_hrp2_apc.launch
+```
+
 <div class="text-center">
-  <iframe src="https://drive.google.com/file/d/0B9P1L--7Wd2vVlMwNjJNeGVIV0E/preview?autoplay=1" width="640" height="350" frameborder="0"></iframe>
+  <iframe src="https://drive.google.com/file/d/0B9P1L--7Wd2vWjJWbU9rQlE4bUE/preview?autoplay=1" width="640" height="350" frameborder="0"></iframe>
 </div>

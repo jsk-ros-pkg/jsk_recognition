@@ -472,6 +472,7 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/test_icp_registration.test)
     add_rostest(test/test_attention_clipper.test)
     add_rostest(test/test_cluster_point_indices_decomposer.test)
+    add_rostest(test/test_cluster_point_indices_decomposer_sort_by.test)
     add_rostest(test/test_depth_image_creator.test)
     if(${PCL_VERSION} VERSION_GREATER "1.7.2")
       # because of jsk_pcl/OrganizedEdgeDetector

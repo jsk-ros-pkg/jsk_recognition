@@ -3,22 +3,25 @@
 ######################################################
 # Install PCL 1.8
 ######################################################
-cd /tmp
 
-version="1.8.0rc2"
-url="https://github.com/PointCloudLibrary/pcl/archive/pcl-${version}.tar.gz"
-fname=pcl-${version}.tar.gz
+if [ ! -e /usr/local/include/pcl-1.8/pcl/pcl_base.h ]; then
+  cd /tmp
 
-wget $url -O $fname
-tar zxf $fname
+  version="1.8.0rc2"
+  url="https://github.com/PointCloudLibrary/pcl/archive/pcl-${version}.tar.gz"
+  fname=pcl-${version}.tar.gz
 
-cd pcl-pcl-${version}
-mkdir build
-cd build
+  wget $url -O $fname
+  tar zxf $fname
 
-cmake -DCMAKE_BUILD_TYPE=Release ..
-make -j2
-sudo make -j2 install
+  cd pcl-pcl-${version}
+  mkdir build
+  cd build
+
+  cmake -DCMAKE_BUILD_TYPE=Release ..
+  make -j2
+  sudo make -j2 install
+fi
 
 
 ######################################################

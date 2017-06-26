@@ -157,29 +157,45 @@ namespace jsk_pcl_ros
   }
 
   void ClusterPointIndicesDecomposer::sortIndicesOrder(
-    pcl::PointCloud<pcl::PointXYZ>::Ptr input,
-    std::vector<pcl::IndicesPtr> indices_array,
+    const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+    const std::vector<pcl::IndicesPtr> indices_array,
     std::vector<pcl::IndicesPtr> &output_array)
   {
-    if (sort_by_ == "input_indices")
+    std::string sort_by = sort_by_;
+    bool reverse = false;
+    if (sort_by.compare(0, 1, "-") == 0)
+    {
+      reverse = true;
+      sort_by = sort_by.substr(1, sort_by.size() - 1);
+    }
+    if (sort_by == "input_indices")
     {
       sortIndicesOrderByIndices(input, indices_array, output_array);
     }
-    else if (sort_by_ == "z_axis")
+    else if (sort_by == "z_axis")
     {
       sortIndicesOrderByZAxis(input, indices_array, output_array);
+    }
+    else if (sort_by == "cloud_size")
+    {
+      sortIndicesOrderByCloudSize(input, indices_array, output_array);
     }
     else
     {
       NODELET_WARN_ONCE("Unsupported ~sort_by param is specified '%s', "
                         "so using the default: 'input_indices'", sort_by_.c_str());
       sortIndicesOrderByIndices(input, indices_array, output_array);
+      return;
+    }
+    if (reverse)
+    {
+      std::reverse(output_array.begin(), output_array.end());
     }
   }
 
   void ClusterPointIndicesDecomposer::sortIndicesOrderByIndices(
-    pcl::PointCloud<pcl::PointXYZ>::Ptr input,
-    std::vector<pcl::IndicesPtr> indices_array,
+    const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+    const std::vector<pcl::IndicesPtr> indices_array,
     std::vector<pcl::IndicesPtr> &output_array)
   {
     output_array.resize(indices_array.size());
@@ -190,8 +206,8 @@ namespace jsk_pcl_ros
   }
 
   void ClusterPointIndicesDecomposer::sortIndicesOrderByZAxis(
-    pcl::PointCloud<pcl::PointXYZ>::Ptr input,
-    std::vector<pcl::IndicesPtr> indices_array,
+    const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+    const std::vector<pcl::IndicesPtr> indices_array,
     std::vector<pcl::IndicesPtr> &output_array)
   {
     output_array.resize(indices_array.size());
@@ -202,9 +218,13 @@ namespace jsk_pcl_ros
     {
       Eigen::Vector4f center;
       ex.setIndices(indices_array[i]);
-      pcl::PointCloud<pcl::PointXYZ>::Ptr tmp(new pcl::PointCloud<pcl::PointXYZ>);
-      ex.filter(*tmp);
-      pcl::compute3DCentroid(*tmp, center);
+      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+      ex.filter(*cloud);
+      //
+      std::vector<int> nan_indices;
+      pcl::removeNaNFromPointCloud(*cloud, *cloud, nan_indices);
+      //
+      pcl::compute3DCentroid(*cloud, center);
       z_values.push_back(center[2]); // only focus on z value
     }
 
@@ -224,6 +244,47 @@ namespace jsk_pcl_ros
       // ROS_INFO("%lu => %lu", i, minimum_index);
       output_array[i] = indices_array[minimum_index];
       z_values[minimum_index] = DBL_MAX;
+    }
+  }
+
+  void ClusterPointIndicesDecomposer::sortIndicesOrderByCloudSize(
+    const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+    const std::vector<pcl::IndicesPtr> indices_array,
+    std::vector<pcl::IndicesPtr> &output_array)
+  {
+    output_array.resize(indices_array.size());
+    std::vector<double> cloud_sizes;
+    pcl::ExtractIndices<pcl::PointXYZ> ex;
+    ex.setInputCloud(input);
+    for (size_t i = 0; i < indices_array.size(); i++)
+    {
+      Eigen::Vector4f center;
+      ex.setIndices(indices_array[i]);
+      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+      ex.filter(*cloud);
+      //
+      std::vector<int> nan_indices;
+      pcl::removeNaNFromPointCloud(*cloud, *cloud, nan_indices);
+      //
+      double cloud_size = static_cast<double>(cloud->points.size());
+      cloud_sizes.push_back(cloud_size);
+    }
+
+    // sort clouds
+    for (size_t i = 0; i < indices_array.size(); i++)
+    {
+      size_t minimum_index = 0;
+      double minimum_value = DBL_MAX;
+      for (size_t j = 0; j < indices_array.size(); j++)
+      {
+        if (cloud_sizes[j] < minimum_value)
+        {
+          minimum_value = cloud_sizes[j];
+          minimum_index = j;
+        }
+      }
+      output_array[i] = indices_array[minimum_index];
+      cloud_sizes[minimum_index] = DBL_MAX;
     }
   }
 

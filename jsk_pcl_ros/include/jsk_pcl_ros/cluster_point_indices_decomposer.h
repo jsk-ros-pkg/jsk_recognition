@@ -88,15 +88,18 @@ namespace jsk_pcl_ros
                          const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients);
     virtual void extract(const sensor_msgs::PointCloud2ConstPtr &point,
                          const jsk_recognition_msgs::ClusterPointIndicesConstPtr &indices);
-    virtual void sortIndicesOrder(pcl::PointCloud<pcl::PointXYZ>::Ptr input,
-                                  std::vector<pcl::IndicesPtr> indices_array,
+    virtual void sortIndicesOrder(const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+                                  const std::vector<pcl::IndicesPtr> indices_array,
                                   std::vector<pcl::IndicesPtr> &output_array);
-    void sortIndicesOrderByIndices(pcl::PointCloud<pcl::PointXYZ>::Ptr input,
-                                   std::vector<pcl::IndicesPtr> indices_array,
+    void sortIndicesOrderByIndices(const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+                                   const std::vector<pcl::IndicesPtr> indices_array,
                                    std::vector<pcl::IndicesPtr> &output_array);
-    void sortIndicesOrderByZAxis(pcl::PointCloud<pcl::PointXYZ>::Ptr input,
-                                 std::vector<pcl::IndicesPtr> indices_array,
+    void sortIndicesOrderByZAxis(const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+                                 const std::vector<pcl::IndicesPtr> indices_array,
                                  std::vector<pcl::IndicesPtr> &output_array);
+    void sortIndicesOrderByCloudSize(const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+                                     const std::vector<pcl::IndicesPtr> indices_array,
+                                     std::vector<pcl::IndicesPtr> &output_array);
   protected:
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;

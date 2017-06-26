@@ -42,6 +42,8 @@
 
 #include <cv_bridge/cv_bridge.h>
 #include <jsk_recognition_msgs/TrackingStatus.h>
+#include <jsk_recognition_msgs/SaveMesh.h>
+#include <jsk_recognition_utils/pcl_ros_util.h>
 #include <sensor_msgs/fill_image.h>
 #include <sensor_msgs/image_encodings.h>
 
@@ -88,15 +90,13 @@ namespace jsk_pcl_ros
     pnh_->param("integrate_color", integrate_color_, false);
     pnh_->param("slam", slam_, false);
     pnh_->param<std::string>("fixed_frame_id", fixed_frame_id_, "odom_init");
+    pnh_->param("n_textures", n_textures_, -1);
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> >(*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f = boost::bind(&Kinfu::configCallback, this, _1, _2);
     srv_->setCallback(f);
 
-    if (slam_)
-    {
-      tf_listener_.reset(new tf::TransformListener());
-    }
+    tf_listener_.reset(new tf::TransformListener());
 
     pub_camera_pose_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output", 1);
     pub_cloud_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output/cloud", 1);
@@ -106,6 +106,8 @@ namespace jsk_pcl_ros
 
     srv_reset_ = pnh_->advertiseService("reset", &Kinfu::resetCallback, this);
     srv_save_mesh_ = pnh_->advertiseService("save_mesh", &Kinfu::saveMeshCallback, this);
+    srv_save_mesh_with_context_ = pnh_->advertiseService(
+      "save_mesh_with_context", &Kinfu::saveMeshWithContextCallback, this);
 
     onInitPostProcess();
   }
@@ -467,17 +469,29 @@ namespace jsk_pcl_ros
   }
 
   bool
+  Kinfu::saveMeshWithContextCallback(
+    jsk_recognition_msgs::SaveMesh::Request& req, jsk_recognition_msgs::SaveMesh::Response& res)
+  {
+    pcl::PolygonMesh polygon_mesh = createPolygonMesh(req.box);
+
+    std::string out_file = save_dir_ + "/mesh.obj";
+    if (integrate_color_)
+    {
+      pcl::TextureMesh texture_mesh = convertToTextureMesh(polygon_mesh, cameras_);
+      pcl::io::saveOBJFile(out_file, texture_mesh, 5);
+    }
+    else
+    {
+      pcl::io::saveOBJFile(out_file, polygon_mesh);
+    }
+    NODELET_INFO("Saved mesh file: %s", out_file.c_str());
+    return true;
+  }
+
+  bool
   Kinfu::saveMeshCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res)
   {
-    if (!marching_cubes_)
-    {
-      marching_cubes_ = pcl::gpu::kinfuLS::MarchingCubes::Ptr(new pcl::gpu::kinfuLS::MarchingCubes());
-    }
-
-    pcl::gpu::DeviceArray<pcl::PointXYZ> triangles_buffer_device;
-    pcl::gpu::DeviceArray<pcl::PointXYZ> triangles_device =
-      marching_cubes_->run(kinfu_->volume(), triangles_buffer_device);
-    pcl::PolygonMesh polygon_mesh = convertToPolygonMesh(triangles_device);
+    pcl::PolygonMesh polygon_mesh = createPolygonMesh();
 
     std::string out_file = save_dir_ + "/mesh.obj";
     if (integrate_color_)
@@ -572,21 +586,31 @@ namespace jsk_pcl_ros
   }
 
   pcl::PolygonMesh
-  Kinfu::convertToPolygonMesh(const pcl::gpu::DeviceArray<pcl::PointXYZ>& triangles)
+  Kinfu::createPolygonMesh()
   {
-    if (triangles.empty())
+    // create triangles
+    if (!marching_cubes_)
+    {
+      marching_cubes_ = pcl::gpu::kinfuLS::MarchingCubes::Ptr(new pcl::gpu::kinfuLS::MarchingCubes());
+    }
+    pcl::gpu::DeviceArray<pcl::PointXYZ> triangles_buffer_device;
+    pcl::gpu::DeviceArray<pcl::PointXYZ> triangles_device =
+      marching_cubes_->run(kinfu_->volume(), triangles_buffer_device);
+
+    if (triangles_device.empty())
     {
       return pcl::PolygonMesh();
     }
 
-    pcl::PointCloud<pcl::PointXYZ> cloud;
-    cloud.width = static_cast<int>(triangles.size());
-    cloud.height = 1;
-    triangles.download(cloud.points);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    cloud->width = static_cast<int>(triangles_device.size());
+    cloud->height = 1;
+    cloud->header.frame_id = "kinfu_origin";
+    triangles_device.download(cloud->points);
 
     pcl::PolygonMesh mesh;
-    pcl::toPCLPointCloud2(cloud, mesh.cloud);
-    mesh.polygons.resize(triangles.size() / 3);
+    pcl::toPCLPointCloud2(*cloud, mesh.cloud);
+    mesh.polygons.resize(triangles_device.size() / 3);
     for (size_t i = 0; i < mesh.polygons.size(); ++i)
     {
       pcl::Vertices v;
@@ -595,6 +619,74 @@ namespace jsk_pcl_ros
       v.vertices.push_back(i*3+1);
       mesh.polygons[i] = v;
     }
+    return mesh;
+  }
+
+  pcl::PolygonMesh
+  Kinfu::createPolygonMesh(const jsk_recognition_msgs::BoundingBox& box_msg)
+  {
+    // create triangles
+    if (!marching_cubes_)
+    {
+      marching_cubes_ = pcl::gpu::kinfuLS::MarchingCubes::Ptr(new pcl::gpu::kinfuLS::MarchingCubes());
+    }
+    pcl::gpu::DeviceArray<pcl::PointXYZ> triangles_buffer_device;
+    pcl::gpu::DeviceArray<pcl::PointXYZ> triangles_device =
+      marching_cubes_->run(kinfu_->volume(), triangles_buffer_device);
+
+    if (triangles_device.empty())
+    {
+      return pcl::PolygonMesh();
+    }
+
+    // get original polygon mesh
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
+    cloud->width = static_cast<int>(triangles_device.size());
+    cloud->height = 1;
+    cloud->header.frame_id = "kinfu_origin";
+    triangles_device.download(cloud->points);
+
+    // get tf
+    Eigen::Affine3f kinfu_origin_to_box = Eigen::Affine3f::Identity();
+    if (box_msg.header.frame_id != "kinfu_origin")
+    {
+      tf::StampedTransform tf_kinfu_origin_to_box;
+      tf_listener_->lookupTransform("kinfu_origin", box_msg.header.frame_id, ros::Time(0), tf_kinfu_origin_to_box);
+      tf::transformTFToEigen(tf_kinfu_origin_to_box, kinfu_origin_to_box);
+    }
+
+    // transform bounding box to kinfu frame
+    jsk_recognition_msgs::BoundingBox transformed_box_msg;
+    transformed_box_msg.dimensions = box_msg.dimensions;
+    Eigen::Affine3f box_pose;
+    tf::poseMsgToEigen(box_msg.pose, box_pose);
+    box_pose = kinfu_origin_to_box * box_pose;
+    tf::poseEigenToMsg(box_pose, transformed_box_msg.pose);
+    transformed_box_msg.header.frame_id = "kinfu_origin";
+
+    // crop cloud
+    std::vector<int> indices;
+    jsk_recognition_utils::cropPointCloud<pcl::PointXYZ>(cloud, transformed_box_msg, &indices);
+
+    // generate filtered polygon mesh
+    pcl::PolygonMesh mesh;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_in_box(new pcl::PointCloud<pcl::PointXYZ>());
+    cloud_in_box->width = static_cast<int>(indices.size());
+    cloud_in_box->height = 1;
+    cloud_in_box->points.resize(indices.size());
+    for (size_t i = 0; i < indices.size(); i++)
+    {
+      cloud_in_box->points[i] = cloud->points[indices[i]];
+      if (indices[i] % 3 == 0 && (indices[i] + 1) == indices[i  + 1] && (indices[i] + 2) == indices[i + 2])
+      {
+        pcl::Vertices v;
+        v.vertices.push_back(i + 0);
+        v.vertices.push_back(i + 2);
+        v.vertices.push_back(i + 1);
+        mesh.polygons.push_back(v);
+      }
+    }
+    pcl::toPCLPointCloud2(*cloud_in_box, mesh.cloud);
     return mesh;
   }
 }  // namespace jsk_pcl_ros

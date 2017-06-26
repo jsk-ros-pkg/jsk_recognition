@@ -46,6 +46,7 @@ namespace jsk_pcl_ros_utils
   void LabelToClusterPointIndices::onInit()
   {
     DiagnosticNodelet::onInit();
+    pnh_->param("bg_label", bg_label_, 0);
     pub_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output", 1);
     pub_bg_ = advertise<pcl_msgs::PointIndices>(*pnh_, "output/bg_indices", 1);
     onInitPostProcess();
@@ -83,7 +84,6 @@ namespace jsk_pcl_ros_utils
       }
     }
     // convert 'map for label to indices' to 'cluster point indices'
-    int bg_label = 0;
     int cluster_counter = 0;
     jsk_recognition_msgs::ClusterPointIndices cluster_indices_msg;
     pcl_msgs::PointIndices bg_indices_msg;
@@ -91,7 +91,7 @@ namespace jsk_pcl_ros_utils
     for (std::map<int, pcl_msgs::PointIndices>::iterator it = label_to_indices.begin();
          it != label_to_indices.end(); it++)
     {
-      if (it->first == bg_label) {
+      if (it->first == bg_label_) {
         bg_indices_msg.indices = it->second.indices;
         cluster_counter++;
         continue;

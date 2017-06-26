@@ -73,7 +73,9 @@ class LabelToLargestMaskImage: public LabelToMaskImage
 public:
   LabelToLargestMaskImage(): LabelToMaskImage("LabelToLargestMaskImage") { }
 protected:
+  virtual void onInit();
   virtual int selectTargetLabel(const cv::Mat& label);
+  std::vector<int> ignored_labels_;
 };
 
 }  // namespace jsk_perception

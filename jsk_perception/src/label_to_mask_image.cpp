@@ -34,6 +34,7 @@
  *********************************************************************/
 #include "jsk_perception/label_to_mask_image.h"
 #include <jsk_topic_tools/log_utils.h>
+#include <jsk_topic_tools/rosparam_utils.h>
 #include <sensor_msgs/Image.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
@@ -110,6 +111,14 @@ namespace jsk_perception
           mask_image).toImageMsg());
   }
 
+  void LabelToLargestMaskImage::onInit()
+  {
+    DiagnosticNodelet::onInit();
+    jsk_topic_tools::readVectorParameter(*pnh_, "ignored_labels", ignored_labels_);
+    pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
+    onInitPostProcess();
+  }
+
   int LabelToLargestMaskImage::selectTargetLabel(
     const cv::Mat& label)
   {
@@ -131,6 +140,10 @@ namespace jsk_perception
     int max_label_count = -1;
     for (std::map<int, int>::iterator it = label_count.begin(); it != label_count.end(); it++)
     {
+      if (std::find(ignored_labels_.begin(), ignored_labels_.end(), it->first) != ignored_labels_.end())
+      {
+        continue;
+      }
       if (it->second > max_label_count)
       {
         max_label_value = it->first;

@@ -41,6 +41,7 @@
 #include <dynamic_reconfigure/server.h>
 #include <jsk_perception/LabelToMaskImageConfig.h>
 #include <sensor_msgs/Image.h>
+#include <opencv2/opencv.hpp>
 
 namespace jsk_perception
 {
@@ -49,13 +50,14 @@ class LabelToMaskImage: public jsk_topic_tools::DiagnosticNodelet
 {
 public:
   typedef jsk_perception::LabelToMaskImageConfig Config;
-  LabelToMaskImage(): DiagnosticNodelet("LabelToMaskImage") { }
+  LabelToMaskImage(std::string name="LabelToMaskImage"): DiagnosticNodelet(name) { }
 protected:
   virtual void onInit();
   virtual void subscribe();
   virtual void unsubscribe();
   virtual void convert(const sensor_msgs::Image::ConstPtr& label_msg);
   virtual void configCallback(Config &config, uint32_t level);
+  virtual int selectTargetLabel(const cv::Mat& label);
 
   boost::mutex mutex_;
 
@@ -64,6 +66,16 @@ protected:
   boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
   int label_value_;
 private:
+};
+
+class LabelToLargestMaskImage: public LabelToMaskImage
+{
+public:
+  LabelToLargestMaskImage(): LabelToMaskImage("LabelToLargestMaskImage") { }
+protected:
+  virtual void onInit();
+  virtual int selectTargetLabel(const cv::Mat& label);
+  std::vector<int> ignored_labels_;
 };
 
 }  // namespace jsk_perception

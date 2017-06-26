@@ -91,6 +91,7 @@ add_service_files(FILES
   UpdateOffset.srv
   WhiteBalancePoints.srv
   WhiteBalance.srv
+  GetTsdf.srv
   )
 
 generate_messages(

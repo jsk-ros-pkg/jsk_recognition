@@ -1,0 +1,9 @@
+---
+float64[] tsdf
+uint16[] weights
+uint8 resolution_x
+uint8 resolution_y
+uint8 resolution_z
+float64 voxel_x
+float64 voxel_y
+float64 voxel_z

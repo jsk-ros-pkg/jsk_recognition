@@ -39,6 +39,7 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <std_srvs/Empty.h>
+#include <jsk_recognition_msgs/GetTsdf.h>
 #include <dynamic_reconfigure/server.h>
 #include <jsk_pcl_ros/KinfuConfig.h>
 #include <pcl/gpu/kinfu_large_scale/kinfu.h>
@@ -97,6 +98,7 @@ namespace jsk_pcl_ros
     virtual void callback(const sensor_msgs::Image::ConstPtr& depth_image,
                           const sensor_msgs::Image::ConstPtr& rgb_image);
     virtual void infoCallback(const sensor_msgs::CameraInfo::ConstPtr& info_msg);
+    virtual bool getTsdfService(jsk_recognition_msgs::GetTsdf::Request& req, jsk_recognition_msgs::GetTsdf::Response& res);
     virtual bool saveMeshService(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
     virtual void configCallback (Config &config, uint32_t level);
     virtual boost::shared_ptr<pcl::PolygonMesh> convertToMesh(const pcl::gpu::DeviceArray<pcl::PointXYZ>& triangles);
@@ -111,7 +113,11 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_info_;
     ros::Publisher pub_pose_;
     ros::Publisher pub_cloud_;
+    ros::Publisher pub_unknown_;
+    ros::Publisher pub_empty_;
+    ros::Publisher pub_occupied_;
     ros::ServiceServer srv_save_mesh_;
+    ros::ServiceServer srv_get_tsdf_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     message_filters::Subscriber<sensor_msgs::Image> sub_depth_image_;
     message_filters::Subscriber<sensor_msgs::Image> sub_color_image_;

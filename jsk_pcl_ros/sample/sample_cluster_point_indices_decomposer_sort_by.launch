@@ -1,0 +1,80 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_arc2017_4objects.xml" />
+
+  <node name="attention_clipper"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/AttentionClipper">
+    <remap from="~input/points" to="/camera/depth_registered/points" />
+    <rosparam>
+      initial_pos: [0.5, -0.05, 0]
+      dimension_x: 0.3
+      dimension_y: 0.3
+      dimension_z: 0.3
+      frame_id: camera_link
+    </rosparam>
+  </node>
+  <node name="extract_indices"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ExtractIndices">
+    <remap from="~input" to="/camera/depth_registered/points" />
+    <remap from="~indices" to="attention_clipper/output/point_indices" />
+    <rosparam>
+      keep_organized: true
+    </rosparam>
+  </node>
+
+  <node name="label_to_cluster_indices"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/LabelToClusterPointIndices">
+    <remap from="~input" to="apply_context_to_label_proba/output/label" />
+  </node>
+
+  <node name="cluster_point_indices_decomposer"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ClusterPointIndicesDecomposer">
+    <remap from="~input" to="extract_indices/output" />
+    <remap from="~target" to="label_to_cluster_indices/output" />
+    <rosparam>
+      approximate_sync: true
+      queue_size: 100
+    </rosparam>
+  </node>
+  <node name="bboxes_to_bbox"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/BoundingBoxArrayToBoundingBox">
+    <remap from="~input" to="cluster_point_indices_decomposer/boxes" />
+    <rosparam>
+      index: 10  # label 11
+    </rosparam>
+  </node>
+
+  <node name="cluster_point_indices_decomposer_z_axis"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ClusterPointIndicesDecomposerZAxis">
+    <remap from="~input" to="extract_indices/output" />
+    <remap from="~target" to="label_to_cluster_indices/output" />
+    <rosparam>
+      approximate_sync: true
+      queue_size: 100
+    </rosparam>
+  </node>
+  <node name="bboxes_to_bbox_z_axis"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/BoundingBoxArrayToBoundingBox">
+    <remap from="~input" to="cluster_point_indices_decomposer_z_axis/boxes" />
+    <rosparam>
+      index: 0
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+      pkg="rviz" type="rviz"
+      args="-d $(find jsk_pcl_ros)/sample/rviz/cluster_point_indices_decomposer_sort_by.rviz">
+    </node>
+  </group>
+
+</launch>

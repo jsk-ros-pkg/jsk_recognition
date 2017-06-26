@@ -91,6 +91,12 @@ namespace jsk_pcl_ros
     virtual void sortIndicesOrder(pcl::PointCloud<pcl::PointXYZ>::Ptr input,
                                   std::vector<pcl::IndicesPtr> indices_array,
                                   std::vector<pcl::IndicesPtr> &output_array);
+    void sortIndicesOrderByIndices(pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+                                   std::vector<pcl::IndicesPtr> indices_array,
+                                   std::vector<pcl::IndicesPtr> &output_array);
+    void sortIndicesOrderByZAxis(pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+                                 std::vector<pcl::IndicesPtr> indices_array,
+                                 std::vector<pcl::IndicesPtr> &output_array);
   protected:
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
@@ -164,11 +170,18 @@ namespace jsk_pcl_ros
     bool use_pca_;
     int max_size_;
     int min_size_;
+    std::string sort_by_;
 
     jsk_recognition_utils::Counter cluster_counter_;
     
   };
 
-}
+  class ClusterPointIndicesDecomposerZAxis: public ClusterPointIndicesDecomposer
+  {
+  public:
+    virtual void onInit();
+  };
 
-#endif
+}  // namespace jsk_pcl_ros
+
+#endif  // JSK_PCL_ROS_CLUSTER_POINT_INDICES_DECOMPOSER_H_

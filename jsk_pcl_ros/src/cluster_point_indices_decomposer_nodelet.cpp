@@ -57,6 +57,12 @@
 
 namespace jsk_pcl_ros
 {
+  void ClusterPointIndicesDecomposerZAxis::onInit()
+  {
+    ClusterPointIndicesDecomposer::onInit();
+    sort_by_ = "z_axis";
+  }
+
   void ClusterPointIndicesDecomposer::onInit()
   {
     DiagnosticNodelet::onInit();
@@ -93,6 +99,7 @@ namespace jsk_pcl_ros
     }
     pnh_->param("use_pca", use_pca_, false);
     pnh_->param("force_to_flip_z_axis", force_to_flip_z_axis_, true);
+    pnh_->param<std::string>("sort_by", sort_by_, "input_indices");
     // dynamic_reconfigure
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> >(*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -148,16 +155,75 @@ namespace jsk_pcl_ros
       sub_coefficients_.unsubscribe();
     }
   }
-  
-  void ClusterPointIndicesDecomposer::sortIndicesOrder
-  (pcl::PointCloud<pcl::PointXYZ>::Ptr input,
-   std::vector<pcl::IndicesPtr> indices_array,
-   std::vector<pcl::IndicesPtr> &output_array)
+
+  void ClusterPointIndicesDecomposer::sortIndicesOrder(
+    pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+    std::vector<pcl::IndicesPtr> indices_array,
+    std::vector<pcl::IndicesPtr> &output_array)
+  {
+    if (sort_by_ == "input_indices")
+    {
+      sortIndicesOrderByIndices(input, indices_array, output_array);
+    }
+    else if (sort_by_ == "z_axis")
+    {
+      sortIndicesOrderByZAxis(input, indices_array, output_array);
+    }
+    else
+    {
+      NODELET_WARN_ONCE("Unsupported ~sort_by param is specified '%s', "
+                        "so using the default: 'input_indices'", sort_by_.c_str());
+      sortIndicesOrderByIndices(input, indices_array, output_array);
+    }
+  }
+
+  void ClusterPointIndicesDecomposer::sortIndicesOrderByIndices(
+    pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+    std::vector<pcl::IndicesPtr> indices_array,
+    std::vector<pcl::IndicesPtr> &output_array)
   {
     output_array.resize(indices_array.size());
     for (size_t i = 0; i < indices_array.size(); i++)
     {
       output_array[i] = indices_array[i];
+    }
+  }
+
+  void ClusterPointIndicesDecomposer::sortIndicesOrderByZAxis(
+    pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+    std::vector<pcl::IndicesPtr> indices_array,
+    std::vector<pcl::IndicesPtr> &output_array)
+  {
+    output_array.resize(indices_array.size());
+    std::vector<double> z_values;
+    pcl::ExtractIndices<pcl::PointXYZ> ex;
+    ex.setInputCloud(input);
+    for (size_t i = 0; i < indices_array.size(); i++)
+    {
+      Eigen::Vector4f center;
+      ex.setIndices(indices_array[i]);
+      pcl::PointCloud<pcl::PointXYZ>::Ptr tmp(new pcl::PointCloud<pcl::PointXYZ>);
+      ex.filter(*tmp);
+      pcl::compute3DCentroid(*tmp, center);
+      z_values.push_back(center[2]); // only focus on z value
+    }
+
+    // sort centroids
+    for (size_t i = 0; i < indices_array.size(); i++)
+    {
+      size_t minimum_index = 0;
+      double minimum_value = DBL_MAX;
+      for (size_t j = 0; j < indices_array.size(); j++)
+      {
+        if (z_values[j] < minimum_value)
+        {
+          minimum_value = z_values[j];
+          minimum_index = j;
+        }
+      }
+      // ROS_INFO("%lu => %lu", i, minimum_index);
+      output_array[i] = indices_array[minimum_index];
+      z_values[minimum_index] = DBL_MAX;
     }
   }
 
@@ -593,9 +659,9 @@ namespace jsk_pcl_ros
         }
     }
   }
-  
-}
 
-PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::ClusterPointIndicesDecomposer,
-                        nodelet::Nodelet);
+}  // namespace jsk_pcl_ros
 
+PLUGINLIB_EXPORT_CLASS(jsk_pcl_ros::ClusterPointIndicesDecomposer, nodelet::Nodelet);
+// TODO: deprecate below export. because sorting by z_axis is achieved in parent class with sort_by_ = "z_axis"
+PLUGINLIB_EXPORT_CLASS(jsk_pcl_ros::ClusterPointIndicesDecomposerZAxis, nodelet::Nodelet);

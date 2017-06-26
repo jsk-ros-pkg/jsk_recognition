@@ -1,3 +1,7 @@
 [submodule "jsk_perception/slic"]
 	path = jsk_perception/slic
 	url = https://github.com/garaemon/SLIC-Superpixels.git
+[submodule ".travis"]
+	path = .travis
+	url = https://github.com/wkentaro/jsk_travis.git
+	branch = docker_image_jenkins

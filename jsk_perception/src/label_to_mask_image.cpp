@@ -76,11 +76,20 @@ namespace jsk_perception
     sub_.shutdown();
   }
 
+  int LabelToMaskImage::selectTargetLabel(
+    const cv::Mat& label)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    return label_value_;
+  }
+
   void LabelToMaskImage::convert(
     const sensor_msgs::Image::ConstPtr& label_msg)
   {
     cv_bridge::CvImagePtr label_img_ptr = cv_bridge::toCvCopy(
       label_msg, sensor_msgs::image_encodings::TYPE_32SC1);
+
+    int label_value = selectTargetLabel(label_img_ptr->image);
 
     cv::Mat mask_image = cv::Mat::zeros(label_msg->height,
                                         label_msg->width,
@@ -90,7 +99,7 @@ namespace jsk_perception
       for (size_t i = 0; i < label_img_ptr->image.cols; i++)
       {
         int label = label_img_ptr->image.at<int>(j, i);
-        if (label == label_value_) {
+        if (label == label_value) {
           mask_image.at<uchar>(j, i) = 255;
         }
       }
@@ -101,7 +110,38 @@ namespace jsk_perception
           mask_image).toImageMsg());
   }
 
+  int LabelToLargestMaskImage::selectTargetLabel(
+    const cv::Mat& label)
+  {
+    std::map<int, int> label_count;
+    for (size_t j = 0; j < label.rows; j++)
+    {
+      for (size_t i = 0; i < label.rows; i++)
+      {
+        int label_value = label.at<int>(j, i);
+        if (label_count.count(label_value) == 0)
+        {
+          label_count[label_value] = 0;
+        }
+        label_count[label_value]++;
+      }
+    }
+
+    int max_label_value = -1;
+    int max_label_count = -1;
+    for (std::map<int, int>::iterator it = label_count.begin(); it != label_count.end(); it++)
+    {
+      if (it->second > max_label_count)
+      {
+        max_label_value = it->first;
+        max_label_count = it->second;
+      }
+    }
+    return max_label_value;
+  }
+
 }  // namespace jsk_perception
 
 #include <pluginlib/class_list_macros.h>
 PLUGINLIB_EXPORT_CLASS(jsk_perception::LabelToMaskImage, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(jsk_perception::LabelToLargestMaskImage, nodelet::Nodelet);

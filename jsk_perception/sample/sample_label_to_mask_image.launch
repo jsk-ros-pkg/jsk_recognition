@@ -28,6 +28,11 @@
     </rosparam>
   </node>
 
+  <node name="label_to_largest_mask_image"
+        pkg="jsk_perception" type="label_to_largest_mask_image">
+    <remap from="~input" to="grid_label/output" />
+  </node>
+
   <node name="label_image_decomposer"
         pkg="jsk_perception" type="label_image_decomposer.py">
     <remap from="~input" to="image_publisher/output" />

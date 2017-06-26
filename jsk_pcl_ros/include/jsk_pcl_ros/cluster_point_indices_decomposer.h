@@ -90,16 +90,16 @@ namespace jsk_pcl_ros
                          const jsk_recognition_msgs::ClusterPointIndicesConstPtr &indices);
     virtual void sortIndicesOrder(const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
                                   const std::vector<pcl::IndicesPtr> indices_array,
-                                  std::vector<pcl::IndicesPtr> &output_array);
+                                  std::vector<size_t>* argsort);
     void sortIndicesOrderByIndices(const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
                                    const std::vector<pcl::IndicesPtr> indices_array,
-                                   std::vector<pcl::IndicesPtr> &output_array);
+                                   std::vector<size_t>* argsort);
     void sortIndicesOrderByZAxis(const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
                                  const std::vector<pcl::IndicesPtr> indices_array,
-                                 std::vector<pcl::IndicesPtr> &output_array);
+                                 std::vector<size_t>* argsort);
     void sortIndicesOrderByCloudSize(const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
                                      const std::vector<pcl::IndicesPtr> indices_array,
-                                     std::vector<pcl::IndicesPtr> &output_array);
+                                     std::vector<size_t>* argsort);
   protected:
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;

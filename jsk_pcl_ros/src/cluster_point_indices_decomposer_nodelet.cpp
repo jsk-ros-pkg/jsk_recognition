@@ -159,7 +159,7 @@ namespace jsk_pcl_ros
   void ClusterPointIndicesDecomposer::sortIndicesOrder(
     const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
     const std::vector<pcl::IndicesPtr> indices_array,
-    std::vector<pcl::IndicesPtr> &output_array)
+    std::vector<size_t>* argsort)
   {
     std::string sort_by = sort_by_;
     bool reverse = false;
@@ -170,47 +170,46 @@ namespace jsk_pcl_ros
     }
     if (sort_by == "input_indices")
     {
-      sortIndicesOrderByIndices(input, indices_array, output_array);
+      sortIndicesOrderByIndices(input, indices_array, argsort);
     }
     else if (sort_by == "z_axis")
     {
-      sortIndicesOrderByZAxis(input, indices_array, output_array);
+      sortIndicesOrderByZAxis(input, indices_array, argsort);
     }
     else if (sort_by == "cloud_size")
     {
-      sortIndicesOrderByCloudSize(input, indices_array, output_array);
+      sortIndicesOrderByCloudSize(input, indices_array, argsort);
     }
     else
     {
       NODELET_WARN_ONCE("Unsupported ~sort_by param is specified '%s', "
                         "so using the default: 'input_indices'", sort_by_.c_str());
-      sortIndicesOrderByIndices(input, indices_array, output_array);
+      sortIndicesOrderByIndices(input, indices_array, argsort);
       return;
     }
     if (reverse)
     {
-      std::reverse(output_array.begin(), output_array.end());
+      std::reverse((*argsort).begin(), (*argsort).end());
     }
   }
 
   void ClusterPointIndicesDecomposer::sortIndicesOrderByIndices(
     const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
     const std::vector<pcl::IndicesPtr> indices_array,
-    std::vector<pcl::IndicesPtr> &output_array)
+    std::vector<size_t>* argsort)
   {
-    output_array.resize(indices_array.size());
+    (*argsort).resize(indices_array.size());
     for (size_t i = 0; i < indices_array.size(); i++)
     {
-      output_array[i] = indices_array[i];
+      (*argsort)[i] = i;
     }
   }
 
   void ClusterPointIndicesDecomposer::sortIndicesOrderByZAxis(
     const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
     const std::vector<pcl::IndicesPtr> indices_array,
-    std::vector<pcl::IndicesPtr> &output_array)
+    std::vector<size_t>* argsort)
   {
-    output_array.resize(indices_array.size());
     std::vector<double> z_values;
     pcl::ExtractIndices<pcl::PointXYZ> ex;
     ex.setInputCloud(input);
@@ -229,6 +228,7 @@ namespace jsk_pcl_ros
     }
 
     // sort centroids
+    (*argsort).resize(indices_array.size());
     for (size_t i = 0; i < indices_array.size(); i++)
     {
       size_t minimum_index = 0;
@@ -241,8 +241,7 @@ namespace jsk_pcl_ros
           minimum_index = j;
         }
       }
-      // ROS_INFO("%lu => %lu", i, minimum_index);
-      output_array[i] = indices_array[minimum_index];
+      (*argsort)[i] = minimum_index;
       z_values[minimum_index] = DBL_MAX;
     }
   }
@@ -250,9 +249,8 @@ namespace jsk_pcl_ros
   void ClusterPointIndicesDecomposer::sortIndicesOrderByCloudSize(
     const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
     const std::vector<pcl::IndicesPtr> indices_array,
-    std::vector<pcl::IndicesPtr> &output_array)
+    std::vector<size_t>* argsort)
   {
-    output_array.resize(indices_array.size());
     std::vector<double> cloud_sizes;
     pcl::ExtractIndices<pcl::PointXYZ> ex;
     ex.setInputCloud(input);
@@ -271,6 +269,7 @@ namespace jsk_pcl_ros
     }
 
     // sort clouds
+    (*argsort).resize(indices_array.size());
     for (size_t i = 0; i < indices_array.size(); i++)
     {
       size_t minimum_index = 0;
@@ -283,7 +282,7 @@ namespace jsk_pcl_ros
           minimum_index = j;
         }
       }
-      output_array[i] = indices_array[minimum_index];
+      (*argsort)[i] = minimum_index;
       cloud_sizes[minimum_index] = DBL_MAX;
     }
   }
@@ -580,7 +579,6 @@ namespace jsk_pcl_ros
     cluster_counter_.add(indices_input->cluster_indices.size());
     
     std::vector<pcl::IndicesPtr> converted_indices;
-    std::vector<pcl::IndicesPtr> sorted_indices;
     
     for (size_t i = 0; i < indices_input->cluster_indices.size(); i++)
     {
@@ -601,8 +599,9 @@ namespace jsk_pcl_ros
       vindices.reset (new std::vector<int> (indices_input->cluster_indices[i].indices));
       converted_indices.push_back(vindices);
     }
-    
-    sortIndicesOrder(cloud_xyz, converted_indices, sorted_indices);
+
+    std::vector<size_t> argsort;
+    sortIndicesOrder(cloud_xyz, converted_indices, &argsort);
     extract.setInputCloud(cloud);
 
     // point cloud from camera not laser
@@ -615,12 +614,12 @@ namespace jsk_pcl_ros
     bounding_box_array.header = input->header;
     geometry_msgs::PoseArray center_pose_array;
     center_pose_array.header = input->header;
-    for (size_t i = 0; i < sorted_indices.size(); i++)
+    for (size_t i = 0; i < argsort.size(); i++)
     {
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
       
       pcl::PointIndices::Ptr segmented_indices (new pcl::PointIndices);
-      extract.setIndices(sorted_indices[i]);
+      extract.setIndices(converted_indices[argsort[i]]);
       extract.filter(*segmented_cloud);
       if (publish_clouds_) {
         sensor_msgs::PointCloud2::Ptr out_cloud(new sensor_msgs::PointCloud2);
@@ -631,8 +630,8 @@ namespace jsk_pcl_ros
       // label
       if (is_sensed_with_camera) {
         // create mask & label image from cluster indices
-        for (size_t j = 0; j < sorted_indices[i]->size(); j++) {
-          int index = sorted_indices[i]->data()[j];
+        for (size_t j = 0; j < converted_indices[argsort[i]]->size(); j++) {
+          int index = converted_indices[argsort[i]]->data()[j];
           int width_index = index % input->width;
           int height_index = index / input->width;
           mask.at<uchar>(height_index, width_index) = 255;
@@ -647,6 +646,7 @@ namespace jsk_pcl_ros
       // compute centoid and bounding box
       geometry_msgs::Pose pose_msg;
       jsk_recognition_msgs::BoundingBox bounding_box;
+      bounding_box.label = static_cast<int>(argsort[i]);
       bool successp = computeCenterAndBoundingBox(
         segmented_cloud, input->header, planes, coefficients, pose_msg, bounding_box);
       if (!successp) {

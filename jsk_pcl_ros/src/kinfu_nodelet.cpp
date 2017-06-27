@@ -89,12 +89,9 @@ namespace jsk_pcl_ros
     pnh_->param("slam", slam_, false);
     pnh_->param<std::string>("fixed_frame_id", fixed_frame_id_, "odom_init");
 
-    pnh_->param<std::string>("save_dir", save_dir_, ".");
-    boost::filesystem::path save_dir(save_dir_);
-    if (boost::filesystem::create_directories(save_dir))
-    {
-      NODELET_INFO("Created save_dir: %s", save_dir_.c_str());
-    }
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> >(*pnh_);
+    dynamic_reconfigure::Server<Config>::CallbackType f = boost::bind(&Kinfu::configCallback, this, _1, _2);
+    srv_->setCallback(f);
 
     if (slam_)
     {
@@ -111,6 +108,18 @@ namespace jsk_pcl_ros
     srv_save_mesh_ = pnh_->advertiseService("save_mesh", &Kinfu::saveMeshCallback, this);
 
     onInitPostProcess();
+  }
+
+  void
+  Kinfu::configCallback(Config& config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    save_dir_ = config.save_dir;
+    boost::filesystem::path save_dir(save_dir_);
+    if (boost::filesystem::create_directories(save_dir))
+    {
+      NODELET_INFO("Created save_dir: %s", save_dir_.c_str());
+    }
   }
 
   void

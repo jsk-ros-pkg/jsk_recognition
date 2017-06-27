@@ -77,6 +77,10 @@ Use kinfu (kinect fusion) for model generation and SLAM.
 
   Used when `~slam` is `true`.
 
+* `~save_dir` (String, default: `.`)
+
+  Save directory for mesh and texture images.
+
 
 ## Sample
 

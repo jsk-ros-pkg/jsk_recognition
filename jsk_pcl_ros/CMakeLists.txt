@@ -116,6 +116,7 @@ generate_dynamic_reconfigure_options(
   cfg/PointcloudDatabaseServer.cfg
   cfg/TargetAdaptiveTracking.cfg
   cfg/PPFRegistration.cfg
+  cfg/Kinfu.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)

@@ -45,6 +45,7 @@
 #include <pcl/point_types.h>
 #include <pcl/common/angles.h>
 
+#include <dynamic_reconfigure/server.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
@@ -57,6 +58,8 @@
 #include <jsk_rviz_plugins/OverlayText.h>
 #include <jsk_pcl_ros/tf_listener_singleton.h>
 #include <tf/transform_broadcaster.h>
+
+#include "jsk_pcl_ros/KinfuConfig.h"
 
 // defined in pcl/gpu/kinfu_large_scale/src/kinfu.cpp
 namespace pcl
@@ -79,6 +82,7 @@ namespace jsk_pcl_ros
       sensor_msgs::CameraInfo, sensor_msgs::Image> SyncPolicy;
     typedef message_filters::sync_policies::ApproximateTime<
       sensor_msgs::CameraInfo, sensor_msgs::Image, sensor_msgs::Image> SyncPolicyWithColor;
+    typedef jsk_pcl_ros::KinfuConfig Config;
 
     Kinfu(): ConnectionBasedNodelet(), frame_idx_(0) {}
     ~Kinfu() {}
@@ -94,6 +98,9 @@ namespace jsk_pcl_ros
                 const sensor_msgs::Image::ConstPtr& depth_msg,
                 const sensor_msgs::Image::ConstPtr& rgb_msg);
     bool resetCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
+
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    virtual void configCallback(Config &config, uint32_t level);
 
     pcl::PolygonMesh convertToPolygonMesh(const pcl::gpu::DeviceArray<pcl::PointXYZ>& triangles);
     pcl::TextureMesh convertToTextureMesh(const pcl::PolygonMesh triangles,

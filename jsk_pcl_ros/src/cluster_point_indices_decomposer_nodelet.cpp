@@ -464,6 +464,11 @@ namespace jsk_pcl_ros
     double xwidth = maxpt[0] - minpt[0];
     double ywidth = maxpt[1] - minpt[1];
     double zwidth = maxpt[2] - minpt[2];
+    if (!pcl_isfinite(xwidth) || !pcl_isfinite(ywidth) || !pcl_isfinite(zwidth))
+    {
+      // all points in cloud are nan or its size is 0
+      xwidth = ywidth = zwidth = 0;
+    }
     
     Eigen::Vector4f center2((maxpt[0] + minpt[0]) / 2.0, (maxpt[1] + minpt[1]) / 2.0, (maxpt[2] + minpt[2]) / 2.0, 1.0);
     Eigen::Vector4f center_transformed = m4 * center2;

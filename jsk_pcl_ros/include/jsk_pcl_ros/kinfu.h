@@ -103,7 +103,8 @@ namespace jsk_pcl_ros
     virtual void configCallback(Config &config, uint32_t level);
 
     pcl::PolygonMesh createPolygonMesh();
-    pcl::PolygonMesh createPolygonMesh(const jsk_recognition_msgs::BoundingBox& box_msg);
+    pcl::PolygonMesh createPolygonMesh(const jsk_recognition_msgs::BoundingBox& box_msg,
+                                       const std::string& ground_frame_id);
     pcl::TextureMesh convertToTextureMesh(const pcl::PolygonMesh triangles,
                                           const pcl::texture_mapping::CameraVector cameras);
     bool saveMeshCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);

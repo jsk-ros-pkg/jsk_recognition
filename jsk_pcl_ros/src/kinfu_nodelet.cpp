@@ -472,12 +472,21 @@ namespace jsk_pcl_ros
   Kinfu::saveMeshWithContextCallback(
     jsk_recognition_msgs::SaveMesh::Request& req, jsk_recognition_msgs::SaveMesh::Response& res)
   {
-    pcl::PolygonMesh polygon_mesh = createPolygonMesh(req.box);
+    pcl::PolygonMesh polygon_mesh = createPolygonMesh(req.box, req.ground_frame_id);
 
     std::string out_file = save_dir_ + "/mesh.obj";
     if (integrate_color_)
     {
-      pcl::TextureMesh texture_mesh = convertToTextureMesh(polygon_mesh, cameras_);
+      pcl::texture_mapping::CameraVector cameras;
+      for (size_t i = (cameras_.size() - 1); i >= 0; i--)
+      {
+        cameras.push_back(cameras_[i]);
+        if (cameras.size() == n_textures_)
+        {
+          break;
+        }
+      }
+      pcl::TextureMesh texture_mesh = convertToTextureMesh(polygon_mesh, cameras);
       pcl::io::saveOBJFile(out_file, texture_mesh, 5);
     }
     else
@@ -623,7 +632,7 @@ namespace jsk_pcl_ros
   }
 
   pcl::PolygonMesh
-  Kinfu::createPolygonMesh(const jsk_recognition_msgs::BoundingBox& box_msg)
+  Kinfu::createPolygonMesh(const jsk_recognition_msgs::BoundingBox& box_msg, const std::string& ground_frame_id)
   {
     // create triangles
     if (!marching_cubes_)
@@ -686,6 +695,41 @@ namespace jsk_pcl_ros
         mesh.polygons.push_back(v);
       }
     }
+
+    // fill face occluded by putting object on plane (ex. tabletop)
+    if (!ground_frame_id.empty())
+    {
+      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_ground_frame(new pcl::PointCloud<pcl::PointXYZ>());
+      tf::StampedTransform tf_transform;
+      tf_listener_->lookupTransform(ground_frame_id, "kinfu_origin", ros::Time(0), tf_transform);
+      Eigen::Affine3f transform;
+      tf::transformTFToEigen(tf_transform, transform);
+      pcl::transformPointCloud(*cloud_in_box, *cloud_ground_frame, transform);
+
+      pcl::PointXYZ min_pt, max_pt;
+      pcl::getMinMax3D(*cloud_ground_frame, min_pt, max_pt);
+
+      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_occluded(new pcl::PointCloud<pcl::PointXYZ>());
+      for (size_t i = 0; i < cloud_ground_frame->points.size(); i++)
+      {
+        pcl::PointXYZ pt_visible = cloud_ground_frame->points[i];
+        pcl::PointXYZ pt_occluded(pt_visible.x, pt_visible.y, min_pt.z);
+        cloud_occluded->points.push_back(pt_occluded);
+        if (i >= 3)
+        {
+          pcl::Vertices v;
+          v.vertices.push_back(cloud_in_box->width + i - 2);
+          v.vertices.push_back(cloud_in_box->width + i - 1);
+          v.vertices.push_back(cloud_in_box->width + i - 0);
+          mesh.polygons.push_back(v);
+        }
+      }
+      cloud_occluded->width = cloud_occluded->points.size();
+      cloud_occluded->height = 1;
+      pcl::transformPointCloud(*cloud_occluded, *cloud_occluded, transform.inverse());
+      *cloud_in_box = *cloud_in_box + *cloud_occluded;
+    }
+
     pcl::toPCLPointCloud2(*cloud_in_box, mesh.cloud);
     return mesh;
   }

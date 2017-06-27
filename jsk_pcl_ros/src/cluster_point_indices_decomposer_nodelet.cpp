@@ -229,21 +229,9 @@ namespace jsk_pcl_ros
 
     // sort centroids
     (*argsort).resize(indices_array.size());
-    for (size_t i = 0; i < indices_array.size(); i++)
-    {
-      size_t minimum_index = 0;
-      double minimum_value = DBL_MAX;
-      for (size_t j = 0; j < indices_array.size(); j++)
-      {
-        if (z_values[j] < minimum_value)
-        {
-          minimum_value = z_values[j];
-          minimum_index = j;
-        }
-      }
-      (*argsort)[i] = minimum_index;
-      z_values[minimum_index] = DBL_MAX;
-    }
+    std::iota(argsort->begin(), argsort->end(), 0);
+    std::sort(argsort->begin(), argsort->end(),
+              [&z_values](size_t i1, size_t i2) {return z_values[i1] < z_values[i2];});
   }
 
   void ClusterPointIndicesDecomposer::sortIndicesOrderByCloudSize(
@@ -270,21 +258,9 @@ namespace jsk_pcl_ros
 
     // sort clouds
     (*argsort).resize(indices_array.size());
-    for (size_t i = 0; i < indices_array.size(); i++)
-    {
-      size_t minimum_index = 0;
-      double minimum_value = DBL_MAX;
-      for (size_t j = 0; j < indices_array.size(); j++)
-      {
-        if (cloud_sizes[j] < minimum_value)
-        {
-          minimum_value = cloud_sizes[j];
-          minimum_index = j;
-        }
-      }
-      (*argsort)[i] = minimum_index;
-      cloud_sizes[minimum_index] = DBL_MAX;
-    }
+    std::iota(argsort->begin(), argsort->end(), 0);
+    std::sort(argsort->begin(), argsort->end(),
+              [&cloud_sizes](size_t i1, size_t i2) {return cloud_sizes[i1] < cloud_sizes[i2];});
   }
 
   void ClusterPointIndicesDecomposer::updateDiagnostic(

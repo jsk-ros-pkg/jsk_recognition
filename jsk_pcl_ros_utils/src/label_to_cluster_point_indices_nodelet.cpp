@@ -74,36 +74,43 @@ namespace jsk_pcl_ros_utils
       label_msg, sensor_msgs::image_encodings::TYPE_32SC1);
     // collect indices for each labels
     std::map<int, pcl_msgs::PointIndices> label_to_indices;
+    int max_label = 0;
     for (size_t j = 0; j < label_img_ptr->image.rows; j++)
     {
       for (size_t i = 0; i < label_img_ptr->image.cols; i++)
       {
         int label = label_img_ptr->image.at<int>(j, i);
+        if (label > max_label) {
+           max_label = label;
+        }
         label_to_indices[label].header = label_msg->header;
         label_to_indices[label].indices.push_back(j * label_img_ptr->image.cols + i);
       }
     }
     // convert 'map for label to indices' to 'cluster point indices'
-    int cluster_counter = 0;
     jsk_recognition_msgs::ClusterPointIndices cluster_indices_msg;
     pcl_msgs::PointIndices bg_indices_msg;
     cluster_indices_msg.header = bg_indices_msg.header = label_msg->header;
-    for (std::map<int, pcl_msgs::PointIndices>::iterator it = label_to_indices.begin();
-         it != label_to_indices.end(); it++)
+    for (size_t i=0; i <= max_label; i++)
     {
-      if (it->first == bg_label_) {
-        bg_indices_msg.indices = it->second.indices;
-        cluster_counter++;
-        continue;
+      if (i == bg_label_) {
+        if (label_to_indices.count(i) == 0) {
+          pcl_msgs::PointIndices indices_msg;
+          indices_msg.header = label_msg->header;
+          bg_indices_msg = indices_msg;
+        }
+        else {
+          bg_indices_msg = label_to_indices[i];
+        }
       }
-      while (it->first != cluster_counter) {
+      else if (label_to_indices.count(i) == 0) {
         pcl_msgs::PointIndices indices_msg;
         indices_msg.header = label_msg->header;
         cluster_indices_msg.cluster_indices.push_back(indices_msg);
-        cluster_counter++;
       }
-      cluster_indices_msg.cluster_indices.push_back(it->second);
-      cluster_counter++;
+      else {
+        cluster_indices_msg.cluster_indices.push_back(label_to_indices[i]);
+      }
     }
     pub_bg_.publish(bg_indices_msg);
     pub_.publish(cluster_indices_msg);

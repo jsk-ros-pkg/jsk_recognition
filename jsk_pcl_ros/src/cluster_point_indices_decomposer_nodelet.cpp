@@ -228,6 +228,7 @@ namespace jsk_pcl_ros
     }
 
     // sort centroids
+    // https://stackoverflow.com/a/12399290
     (*argsort).resize(indices_array.size());
     std::iota(argsort->begin(), argsort->end(), 0);
     std::sort(argsort->begin(), argsort->end(),

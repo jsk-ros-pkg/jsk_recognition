@@ -74,6 +74,13 @@ def main():
 
     download_data(
         pkg_name=PKG,
+        path='sample/data/room73b2_table.bag',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vdXdfMWNSUU9IVEU',
+        md5='a38fee55c926152f3d65023d60322eb0',
+    )
+
+    download_data(
+        pkg_name=PKG,
         path='sample/data/sample_add_color_from_image_20170319.bag',
         url='https://drive.google.com/uc?id=0B9P1L--7Wd2vN284RHBXT1duUWM',
         md5='d432e7eec587708849ac85fdb3c6247f',

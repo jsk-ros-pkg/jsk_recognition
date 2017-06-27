@@ -1,0 +1,37 @@
+<launch>
+
+  <arg name="gui" default="true" />
+  <arg name="integrate_color" default="true" />
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_kinfu.launch">
+    <arg name="gui" value="false" />
+    <arg name="rosbag" value="false" />
+    <arg name="INPUT_CAMERA_INFO" default="/camera_remote/depth_registered/camera_info" />
+    <arg name="INPUT_DEPTH" default="/camera_remote/depth_registered/hw_registered/image_rect_raw" />
+    <arg name="INPUT_COLOR" default="/camera_remote/rgb_half/image_rect_color" />
+  </include>
+  <param name="kinfu/slam" value="true" />
+
+  <include file="$(find jsk_data)/launch/hrp2_play.launch">
+    <arg name="bagfile_names" value="$(find jsk_pcl_ros)/sample/data/hrp2_apc_2016-07-27-22-08-02.bag" />
+    <arg name="launch_openni" value="true" />
+    <arg name="launch_multisense" value="false" />
+    <arg name="rosbag_option" value="--clock --loop" />
+    <arg name="use_xterm" value="true" />
+  </include>
+
+  <group if="$(arg gui)">
+    <node name="rosconsole_overlay_text"
+          pkg="jsk_rviz_plugins" type="rosconsole_overlay_text.py">
+      <rosparam>
+        nodes:
+          - /kinfu
+      </rosparam>
+    </node>
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/kinfu_hrp2_apc.rviz">
+    </node>
+  </group>
+
+</launch>

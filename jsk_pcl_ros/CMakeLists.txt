@@ -113,7 +113,6 @@ generate_dynamic_reconfigure_options(
   cfg/OctreeVoxelGrid.cfg
   cfg/OctreeChangePublisher.cfg
   cfg/ExtractTopPolygonLikelihood.cfg
-  cfg/Kinfu.cfg
   cfg/PointcloudDatabaseServer.cfg
   cfg/TargetAdaptiveTracking.cfg
   cfg/PPFRegistration.cfg
@@ -480,6 +479,9 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/test_euclidean_segmentation.test)
     # TODO(iory): https://github.com/jsk-ros-pkg/jsk_recognition/issues/2007
     # add_rostest(test/test_people_detection.test DEPENDENCIES install_test_data)
+    if(PCL_GPU_KINFU_LARGE_SCALE_FOUND)
+      add_rostest(test/test_kinfu.test)
+    endif()
     add_rostest(test/test_line_segment_detector.test)
     add_rostest(test/test_pointcloud_database_server.test)
     add_rostest(test/test_convex_connected_voxels.test)

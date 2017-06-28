@@ -179,7 +179,7 @@ jsk_pcl_nodelet(src/euclidean_cluster_extraction_nodelet.cpp
   "jsk_pcl/EuclideanClustering" "euclidean_clustering")
 jsk_pcl_nodelet(src/cluster_point_indices_decomposer_nodelet.cpp
   "jsk_pcl/ClusterPointIndicesDecomposer" "cluster_point_indices_decomposer")
-jsk_pcl_nodelet(src/cluster_point_indices_decomposer_z_axis_nodelet.cpp
+jsk_pcl_nodelet(src/cluster_point_indices_decomposer_nodelet.cpp
   "jsk_pcl/ClusterPointIndicesDecomposerZAxis" "cluster_point_indices_decomposer_z_axis")
 jsk_pcl_nodelet(src/resize_points_publisher_nodelet.cpp
   "jsk_pcl/ResizePointsPublisher" "resize_points_publisher")
@@ -471,6 +471,7 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/test_icp_registration.test)
     add_rostest(test/test_attention_clipper.test)
     add_rostest(test/test_cluster_point_indices_decomposer.test)
+    add_rostest(test/test_cluster_point_indices_decomposer_sort_by.test)
     add_rostest(test/test_depth_image_creator.test)
     if(${PCL_VERSION} VERSION_GREATER "1.7.2")
       # because of jsk_pcl/OrganizedEdgeDetector

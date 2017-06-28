@@ -584,7 +584,6 @@ namespace jsk_pcl_ros
         ss << "textures/" << i << ".jpg";
         std::string texture_file = ss.str();
         cv::imwrite(save_dir_ + "/" + texture_file, textures[i]);
-        NODELET_FATAL("%s %s", texture_file.c_str(), (save_dir_ + "/" + texture_file).c_str());
         cameras[i].texture_file = texture_file;
         mesh_material.tex_file = texture_file;
       }

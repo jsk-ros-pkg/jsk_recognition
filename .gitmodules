@@ -3,5 +3,5 @@
 	url = https://github.com/garaemon/SLIC-Superpixels.git
 [submodule ".travis"]
 	path = .travis
-	url = https://github.com/wkentaro/jsk_travis.git
-	branch = docker_image_jenkins
+	url = https://github.com/jsk-ros-pkg/jsk_travis.git
+	branch = eb9e9ea48e7f5992724a933967ee66be37ab03fb

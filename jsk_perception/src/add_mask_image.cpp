@@ -66,7 +66,7 @@ namespace jsk_perception
       sync_->registerCallback(boost::bind(&AddMaskImage::add, this, _1, _2));
     }
     ros::V_string names = boost::assign::list_of("~input/src1")("~input/src2");
-    jsk_topic_tools::warnNoRemap(names);
+    warnNoRemap(names);
   }
 
   void AddMaskImage::unsubscribe()

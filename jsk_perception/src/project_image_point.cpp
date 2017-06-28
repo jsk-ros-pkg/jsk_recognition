@@ -60,7 +60,7 @@ namespace jsk_perception
                                        &ProjectImagePoint::cameraInfoCallback,
                                        this);
     ros::V_string names = boost::assign::list_of("~input")("~input/camera_info");
-    jsk_topic_tools::warnNoRemap(names);
+    warnNoRemap(names);
   }
 
   void ProjectImagePoint::unsubscribe()

@@ -57,7 +57,7 @@ namespace jsk_perception
     sub_ = pnh_->subscribe("input", 1,
                            &PolygonToMaskImage::convert, this);
     ros::V_string names = boost::assign::list_of("~input")("~input/camera_info");
-    jsk_topic_tools::warnNoRemap(names);
+    warnNoRemap(names);
   }
 
   void PolygonToMaskImage::unsubscribe()

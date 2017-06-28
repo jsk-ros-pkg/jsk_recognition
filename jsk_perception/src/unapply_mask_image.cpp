@@ -67,7 +67,7 @@ namespace jsk_perception
       sync_->registerCallback(boost::bind(&UnapplyMaskImage::apply, this, _1, _2));
     }
     ros::V_string names = boost::assign::list_of("~input")("~input/mask");
-    jsk_topic_tools::warnNoRemap(names);
+    warnNoRemap(names);
   }
 
   void UnapplyMaskImage::unsubscribe()

@@ -61,7 +61,7 @@ namespace jsk_perception
     image_sub_ = it_->subscribe("", 1, &SLICSuperPixels::imageCallback, this);
 
     ros::V_string names = boost::assign::list_of("image");
-    jsk_topic_tools::warnNoRemap(names);
+    warnNoRemap(names);
   }
   
   void SLICSuperPixels::imageCallback(const sensor_msgs::Image::ConstPtr& image)

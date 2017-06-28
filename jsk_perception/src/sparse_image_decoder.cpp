@@ -76,7 +76,7 @@ class SparseImageDecoder: public nodelet::Nodelet
     NODELET_DEBUG("Subscribing to image topic.");
     _spr_img_sub = _nh.subscribe("sparse_image", 3, &SparseImageDecoder::imageCallback, this);
     ros::V_string names = boost::assign::list_of("sparse_image");
-    jsk_topic_tools::warnNoRemap(names);
+    warnNoRemap(names);
   }
 
   void unsubscribe() {

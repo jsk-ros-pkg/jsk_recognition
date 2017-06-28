@@ -75,7 +75,7 @@ namespace jsk_perception
                              this);
       names.push_back("~input");
     }
-    jsk_topic_tools::warnNoRemap(names);
+    warnNoRemap(names);
   }
 
   void SingleChannelHistogram::unsubscribe()

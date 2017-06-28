@@ -67,7 +67,7 @@ namespace jsk_perception
         "input", 1, &GridLabel::imageCallback, this);
     }
     ros::V_string names = boost::assign::list_of("~input");
-    jsk_topic_tools::warnNoRemap(names);
+    warnNoRemap(names);
   }
 
   void GridLabel::unsubscribe()

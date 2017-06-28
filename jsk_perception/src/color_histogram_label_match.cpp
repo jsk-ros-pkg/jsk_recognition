@@ -84,7 +84,7 @@ namespace jsk_perception
     sub_histogram_ = pnh_->subscribe(
       "input/histogram", 1, &ColorHistogramLabelMatch::histogramCallback, this);
     names.push_back("~input/histogram");
-    jsk_topic_tools::warnNoRemap(names);
+    warnNoRemap(names);
   }
 
   void ColorHistogramLabelMatch::unsubscribe()

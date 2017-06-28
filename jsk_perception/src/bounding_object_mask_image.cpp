@@ -53,7 +53,7 @@ namespace jsk_perception
   {
     sub_ = pnh_->subscribe("input", 1, &BoundingObjectMaskImage::convert, this);
     ros::V_string names = boost::assign::list_of("~input");
-    jsk_topic_tools::warnNoRemap(names);
+    warnNoRemap(names);
   }
 
   void BoundingObjectMaskImage::unsubscribe()

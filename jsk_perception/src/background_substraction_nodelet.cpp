@@ -90,7 +90,7 @@ namespace jsk_perception
     it_.reset(new image_transport::ImageTransport(*pnh_));
     sub_ = it_->subscribe("image", 1, &BackgroundSubstraction::substract, this);
     ros::V_string names = boost::assign::list_of("image");
-    jsk_topic_tools::warnNoRemap(names);
+    warnNoRemap(names);
   }
 
   void BackgroundSubstraction::unsubscribe()

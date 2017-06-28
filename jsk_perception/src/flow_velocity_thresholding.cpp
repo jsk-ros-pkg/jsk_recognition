@@ -98,7 +98,7 @@ namespace jsk_perception
         ROS_FATAL("Rosparam ~image_height and ~image_width must be set if ~use_camera_info=false");
       }
     }
-    jsk_topic_tools::warnNoRemap(names);
+    warnNoRemap(names);
   }
 
   void FlowVelocityThresholding::unsubscribe()

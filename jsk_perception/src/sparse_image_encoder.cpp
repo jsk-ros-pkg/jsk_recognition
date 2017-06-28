@@ -83,7 +83,7 @@ class SparseImageEncoder: public nodelet::Nodelet
     NODELET_DEBUG("Subscribing to image topic.");
     _img_sub = _it->subscribe("image", 3, &SparseImageEncoder::imageCallback, this);
     ros::V_string names = boost::assign::list_of("image");
-    jsk_topic_tools::warnNoRemap(names);
+    warnNoRemap(names);
   }
 
   void unsubscribe() {

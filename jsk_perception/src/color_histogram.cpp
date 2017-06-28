@@ -105,7 +105,7 @@ namespace jsk_perception
         boost::bind(
           &ColorHistogram::extractMask, this, _1, _2));
     }
-    jsk_topic_tools::warnNoRemap(names);
+    warnNoRemap(names);
   }
 
   void ColorHistogram::unsubscribe()

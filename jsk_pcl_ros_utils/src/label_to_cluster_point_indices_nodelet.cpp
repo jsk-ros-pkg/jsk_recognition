@@ -57,7 +57,7 @@ namespace jsk_pcl_ros_utils
                            &LabelToClusterPointIndices::convert,
                            this);
     ros::V_string names = boost::assign::list_of("~input");
-    jsk_topic_tools::warnNoRemap(names);
+    warnNoRemap(names);
   }
 
   void LabelToClusterPointIndices::unsubscribe()

@@ -78,7 +78,7 @@ public:
     ROS_INFO("Subscribing to image topic");
     sub_ = it_.subscribeCamera("image", 1, &VirtualCameraMono::imageCb, this);
     ros::V_string names = boost::assign::list_of("image");
-    jsk_topic_tools::warnNoRemap(names);
+    warnNoRemap(names);
   }
 
   void unsubscribe()

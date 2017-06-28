@@ -103,7 +103,7 @@ namespace jsk_perception
     {
       sub_input_.registerCallback(&FilterMaskImageWithSize::filter, this);
     }
-    jsk_topic_tools::warnNoRemap(names);
+    warnNoRemap(names);
   }
 
   void FilterMaskImageWithSize::unsubscribe()

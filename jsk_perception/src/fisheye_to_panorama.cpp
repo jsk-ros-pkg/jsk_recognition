@@ -80,7 +80,7 @@ namespace jsk_perception
   {
     sub_image_ = pnh_->subscribe("input", 1, &FisheyeToPanorama::rectify, this);
     ros::V_string names = boost::assign::list_of("~input");
-    jsk_topic_tools::warnNoRemap(names);
+    warnNoRemap(names);
   }
 
   void FisheyeToPanorama::unsubscribe()

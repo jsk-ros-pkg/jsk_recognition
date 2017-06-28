@@ -54,7 +54,7 @@ namespace jsk_perception
     sub_info_ = pnh_->subscribe("input/camera_info", 1,
                                 &RectToMaskImage::infoCallback, this);
     ros::V_string names = boost::assign::list_of("~input")("~input/camera_info");
-    jsk_topic_tools::warnNoRemap(names);
+    warnNoRemap(names);
   }
 
   void RectToMaskImage::unsubscribe()

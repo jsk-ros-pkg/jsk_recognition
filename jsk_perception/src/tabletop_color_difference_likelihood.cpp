@@ -75,7 +75,7 @@ namespace jsk_perception
                                     &TabletopColorDifferenceLikelihood::polygonCallback, this);
     sub_image_.subscribe(*pnh_, "input", 1);
     ros::V_string names = boost::assign::list_of("~input")("~input/camera_info")("~input/polygons");
-    jsk_topic_tools::warnNoRemap(names);
+    warnNoRemap(names);
   }
 
   void TabletopColorDifferenceLikelihood::unsubscribe()

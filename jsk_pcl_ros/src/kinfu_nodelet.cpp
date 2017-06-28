@@ -117,11 +117,6 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     save_dir_ = config.save_dir;
-    boost::filesystem::path dir(integrate_color_ ? save_dir_ + "/textures" : save_dir_);
-    if (boost::filesystem::create_directories(dir))
-    {
-      NODELET_INFO("Created save_dir: %s", save_dir_.c_str());
-    }
   }
 
   void
@@ -464,6 +459,12 @@ namespace jsk_pcl_ros
   {
     pcl::PolygonMesh polygon_mesh = createPolygonMesh(req.box, req.ground_frame_id);
 
+    boost::filesystem::path dir(integrate_color_ ? save_dir_ + "/textures" : save_dir_);
+    if (boost::filesystem::create_directories(dir))
+    {
+      NODELET_INFO("Created save_dir: %s", save_dir_.c_str());
+    }
+
     std::string out_file = save_dir_ + "/mesh.obj";
     if (integrate_color_)
     {
@@ -495,6 +496,12 @@ namespace jsk_pcl_ros
   Kinfu::saveMeshCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res)
   {
     pcl::PolygonMesh polygon_mesh = createPolygonMesh();
+
+    boost::filesystem::path dir(integrate_color_ ? save_dir_ + "/textures" : save_dir_);
+    if (boost::filesystem::create_directories(dir))
+    {
+      NODELET_INFO("Created save_dir: %s", save_dir_.c_str());
+    }
 
     std::string out_file = save_dir_ + "/mesh.obj";
     if (integrate_color_)

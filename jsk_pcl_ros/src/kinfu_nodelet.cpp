@@ -538,7 +538,7 @@ namespace jsk_pcl_ros
 
     // push faces into the texturemesh object
     polygon_1.resize (triangles.polygons.size ());
-    for(int i =0; i < triangles.polygons.size (); ++i)
+    for(size_t i =0; i < triangles.polygons.size (); ++i)
     {
       polygon_1[i] = triangles.polygons[i];
     }

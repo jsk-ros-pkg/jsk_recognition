@@ -90,6 +90,7 @@ Use kinfu (kinect fusion) for model generation and SLAM.
 ```bash
 roslaunch jsk_pcl_ros sample_kinfu.launch
 rosservice call /kinfu/save_mesh  # saves mesh model below
+rosservice call /save_mesh_server/request  # saves mesh with context (bbox)
 ```
 
 ![](images/kinfu_mesh.jpg)

@@ -81,6 +81,13 @@ Use kinfu (kinect fusion) for model generation and SLAM.
 
   Save directory for mesh and texture images.
 
+* `~n_textures` (Int, default: `-1`)
+
+  The number of textures to be used to create texture mesh with below logics:
+    - `-1`: all textures are used and texture mesh is saved
+    - `0`: no textures are used and polygon mesh is saved
+    - `>0`: `n_textures_` textures are used and texture mesh is saved
+
 
 ## Sample
 

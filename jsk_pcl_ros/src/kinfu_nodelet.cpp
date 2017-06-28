@@ -466,22 +466,19 @@ namespace jsk_pcl_ros
     }
 
     std::string out_file = save_dir_ + "/mesh.obj";
-    if (integrate_color_)
+    if (integrate_color_ && n_textures_ != 0)
     {
-      assert(textures_.size() == cameras_.size());
-      std::vector<cv::Mat> textures;
-      pcl::texture_mapping::CameraVector cameras;
-      for (int i = (cameras_.size() - 1); i >= 0; i--)
+      pcl::TextureMesh texture_mesh;
+      if (n_textures_ > 0)
       {
-        boost::mutex::scoped_lock lock(mutex_);
-        textures.push_back(textures_[i]);
-        cameras.push_back(cameras_[i]);
-        if (cameras.size() == n_textures_)
-        {
-          break;
-        }
+        std::vector<cv::Mat> textures(textures_.end() - n_textures_, textures_.end());
+        pcl::texture_mapping::CameraVector cameras(cameras_.end() - n_textures_, cameras_.end());
+        texture_mesh = convertToTextureMesh(polygon_mesh, textures, cameras);
       }
-      pcl::TextureMesh texture_mesh = convertToTextureMesh(polygon_mesh, textures, cameras);
+      else
+      {
+        texture_mesh = convertToTextureMesh(polygon_mesh, textures_, cameras_);
+      }
       pcl::io::saveOBJFile(out_file, texture_mesh, 5);
     }
     else
@@ -504,22 +501,19 @@ namespace jsk_pcl_ros
     }
 
     std::string out_file = save_dir_ + "/mesh.obj";
-    if (integrate_color_)
+    if (integrate_color_ && n_textures_ != 0)
     {
-      boost::mutex::scoped_lock lock(mutex_);
-      assert(textures_.size() == cameras_.size());
-      std::vector<cv::Mat> textures;
-      pcl::texture_mapping::CameraVector cameras;
-      for (int i = (cameras_.size() - 1); i >= 0; i--)
+      pcl::TextureMesh texture_mesh;
+      if (n_textures_ > 0)
       {
-        textures.push_back(textures_[i]);
-        cameras.push_back(cameras_[i]);
-        if (cameras.size() == n_textures_)
-        {
-          break;
-        }
+        std::vector<cv::Mat> textures(textures_.end() - n_textures_, textures_.end());
+        pcl::texture_mapping::CameraVector cameras(cameras_.end() - n_textures_, cameras_.end());
+        texture_mesh = convertToTextureMesh(polygon_mesh, textures, cameras);
       }
-      pcl::TextureMesh texture_mesh = convertToTextureMesh(polygon_mesh, textures, cameras);
+      else
+      {
+        texture_mesh = convertToTextureMesh(polygon_mesh, textures_, cameras_);
+      }
       pcl::io::saveOBJFile(out_file, texture_mesh, 5);
     }
     else

@@ -583,9 +583,10 @@ namespace jsk_pcl_ros
       }
       else
       {
-        cv::imwrite(save_dir_ + "/textures/occluded.jpg",
+        std::string texture_file = "textures/occluded.jpg";
+        cv::imwrite(save_dir_ + "/" + texture_file,
                     cv::Mat::zeros(textures[0].rows, textures[0].cols, CV_8UC1));
-        mesh_material.tex_file = "textures/occluded.jpg";
+        mesh_material.tex_file = texture_file;
       }
 
       mesh.tex_materials[i] = mesh_material;

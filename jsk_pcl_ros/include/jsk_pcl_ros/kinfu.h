@@ -105,8 +105,9 @@ namespace jsk_pcl_ros
     pcl::PolygonMesh createPolygonMesh();
     pcl::PolygonMesh createPolygonMesh(const jsk_recognition_msgs::BoundingBox& box_msg,
                                        const std::string& ground_frame_id);
-    pcl::TextureMesh convertToTextureMesh(const pcl::PolygonMesh triangles,
-                                          const pcl::texture_mapping::CameraVector cameras);
+    pcl::TextureMesh convertToTextureMesh(const pcl::PolygonMesh& triangles,
+                                          const std::vector<cv::Mat> textures,
+                                          pcl::texture_mapping::CameraVector cameras);
     bool saveMeshCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
     bool saveMeshWithContextCallback(
       jsk_recognition_msgs::SaveMesh::Request& req, jsk_recognition_msgs::SaveMesh::Response& res);
@@ -115,6 +116,7 @@ namespace jsk_pcl_ros
     pcl::gpu::kinfuLS::MarchingCubes::Ptr marching_cubes_;
     pcl::gpu::kinfuLS::KinfuTracker::View colors_device_;
     pcl::gpu::kinfuLS::RayCaster::Ptr raycaster_;
+    std::vector<cv::Mat> textures_;
     pcl::texture_mapping::CameraVector cameras_;
 
     int device_;

@@ -117,8 +117,8 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     save_dir_ = config.save_dir;
-    boost::filesystem::path save_dir(save_dir_);
-    if (boost::filesystem::create_directories(save_dir))
+    boost::filesystem::path dir(integrate_color_ ? save_dir_ + "/textures" : save_dir_);
+    if (boost::filesystem::create_directories(dir))
     {
       NODELET_INFO("Created save_dir: %s", save_dir_.c_str());
     }
@@ -285,29 +285,18 @@ namespace jsk_pcl_ros
     // save texture
     if (integrate_color_ && (frame_idx_ % pcl::device::kinfuLS::SNAPSHOT_RATE == 1))
     {
-      if (frame_idx_ == 1)
-      {
-        cv::imwrite(save_dir_ + "/occluded.jpg",
-                    cv::Mat::zeros(caminfo_msg->height, caminfo_msg->width, CV_8UC3));
-      }
-
-      cv::Mat image = cv_bridge::toCvShare(color_msg, color_msg->encoding)->image;
+      cv::Mat texture = cv_bridge::toCvCopy(color_msg, color_msg->encoding)->image;
       if (color_msg->encoding == enc::RGB8)
       {
-        cv::cvtColor(image, image, cv::COLOR_RGB2BGR);
+        cv::cvtColor(texture, texture, cv::COLOR_RGB2BGR);
       }
-      std::stringstream ss;
-      ss << save_dir_ << "/" << ros::Time::now().toNSec() << ".jpg";
-      std::string filename = ss.str();
-      cv::imwrite(filename, image);
-      NODELET_INFO("Saved texture snapshot: %s", filename.c_str());
+      textures_.push_back(texture);
 
       pcl::TextureMapping<pcl::PointXYZ>::Camera camera;
       camera.pose = kinfu_->getCameraPose();
       camera.focal_length = caminfo_msg->K[0];  // must be equal to caminfo_msg->K[4]
       camera.height = caminfo_msg->height;
       camera.width = caminfo_msg->width;
-      camera.texture_file = filename;
       cameras_.push_back(camera);
     }
 
@@ -463,6 +452,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     kinfu_.reset();
+    textures_.clear();
     cameras_.clear();
     NODELET_INFO("Reset kinect fusion by request.");
     return true;
@@ -477,16 +467,20 @@ namespace jsk_pcl_ros
     std::string out_file = save_dir_ + "/mesh.obj";
     if (integrate_color_)
     {
+      assert(textures_.size() == cameras_.size());
+      std::vector<cv::Mat> textures;
       pcl::texture_mapping::CameraVector cameras;
-      for (size_t i = (cameras_.size() - 1); i >= 0; i--)
+      for (int i = (cameras_.size() - 1); i >= 0; i--)
       {
+        boost::mutex::scoped_lock lock(mutex_);
+        textures.push_back(textures_[i]);
         cameras.push_back(cameras_[i]);
         if (cameras.size() == n_textures_)
         {
           break;
         }
       }
-      pcl::TextureMesh texture_mesh = convertToTextureMesh(polygon_mesh, cameras);
+      pcl::TextureMesh texture_mesh = convertToTextureMesh(polygon_mesh, textures, cameras);
       pcl::io::saveOBJFile(out_file, texture_mesh, 5);
     }
     else
@@ -505,7 +499,20 @@ namespace jsk_pcl_ros
     std::string out_file = save_dir_ + "/mesh.obj";
     if (integrate_color_)
     {
-      pcl::TextureMesh texture_mesh = convertToTextureMesh(polygon_mesh, cameras_);
+      boost::mutex::scoped_lock lock(mutex_);
+      assert(textures_.size() == cameras_.size());
+      std::vector<cv::Mat> textures;
+      pcl::texture_mapping::CameraVector cameras;
+      for (int i = (cameras_.size() - 1); i >= 0; i--)
+      {
+        textures.push_back(textures_[i]);
+        cameras.push_back(cameras_[i]);
+        if (cameras.size() == n_textures_)
+        {
+          break;
+        }
+      }
+      pcl::TextureMesh texture_mesh = convertToTextureMesh(polygon_mesh, textures, cameras);
       pcl::io::saveOBJFile(out_file, texture_mesh, 5);
     }
     else
@@ -517,7 +524,9 @@ namespace jsk_pcl_ros
   }
 
   pcl::TextureMesh
-  Kinfu::convertToTextureMesh(const pcl::PolygonMesh triangles, const pcl::texture_mapping::CameraVector cameras)
+  Kinfu::convertToTextureMesh(const pcl::PolygonMesh& triangles,
+                              const std::vector<cv::Mat> textures,
+                              pcl::texture_mapping::CameraVector cameras)
   {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromPCLPointCloud2(triangles.cloud, *cloud);
@@ -529,7 +538,7 @@ namespace jsk_pcl_ros
 
     // push faces into the texturemesh object
     polygon_1.resize (triangles.polygons.size ());
-    for(size_t i =0; i < triangles.polygons.size (); ++i)
+    for(int i =0; i < triangles.polygons.size (); ++i)
     {
       polygon_1[i] = triangles.polygons[i];
     }
@@ -564,11 +573,19 @@ namespace jsk_pcl_ros
 
       if (i < cameras.size ())
       {
-        mesh_material.tex_file = cameras[i].texture_file;
+        std::stringstream ss;
+        ss << "textures/" << i << ".jpg";
+        std::string texture_file = ss.str();
+        cv::imwrite(save_dir_ + "/" + texture_file, textures[i]);
+        NODELET_FATAL("%s %s", texture_file.c_str(), (save_dir_ + "/" + texture_file).c_str());
+        cameras[i].texture_file = texture_file;
+        mesh_material.tex_file = texture_file;
       }
       else
       {
-        mesh_material.tex_file = save_dir_ + "/occluded.jpg";
+        cv::imwrite(save_dir_ + "/textures/occluded.jpg",
+                    cv::Mat::zeros(textures[0].rows, textures[0].cols, CV_8UC1));
+        mesh_material.tex_file = "textures/occluded.jpg";
       }
 
       mesh.tex_materials[i] = mesh_material;

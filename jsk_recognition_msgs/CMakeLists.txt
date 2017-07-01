@@ -52,6 +52,7 @@ add_message_files(
   TorusArray.msg
   Torus.msg
   TrackerStatus.msg
+  TrackingStatus.msg
   BoolStamped.msg
   VectorArray.msg
   WeightedPoseArray.msg

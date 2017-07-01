@@ -1,0 +1,25 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_kinfu.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_kinfu"
+        name="test_kinfu"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="30" retry="6">
+    <rosparam>
+      topic_0: /kinfu/output
+      timeout_0: 30
+      topic_1: /kinfu/output/cloud
+      timeout_1: 30
+      topic_2: /kinfu/output/depth
+      timeout_2: 30
+      topic_3: /kinfu/output/rendered_image
+      timeout_3: 30
+      topic_4: /kinfu/output/status
+      timeout_4: 30
+    </rosparam>
+  </test>
+
+</launch>

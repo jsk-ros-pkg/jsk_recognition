@@ -113,7 +113,6 @@ generate_dynamic_reconfigure_options(
   cfg/OctreeVoxelGrid.cfg
   cfg/OctreeChangePublisher.cfg
   cfg/ExtractTopPolygonLikelihood.cfg
-  cfg/Kinfu.cfg
   cfg/PointcloudDatabaseServer.cfg
   cfg/TargetAdaptiveTracking.cfg
   cfg/PPFRegistration.cfg
@@ -180,7 +179,7 @@ jsk_pcl_nodelet(src/euclidean_cluster_extraction_nodelet.cpp
   "jsk_pcl/EuclideanClustering" "euclidean_clustering")
 jsk_pcl_nodelet(src/cluster_point_indices_decomposer_nodelet.cpp
   "jsk_pcl/ClusterPointIndicesDecomposer" "cluster_point_indices_decomposer")
-jsk_pcl_nodelet(src/cluster_point_indices_decomposer_z_axis_nodelet.cpp
+jsk_pcl_nodelet(src/cluster_point_indices_decomposer_nodelet.cpp
   "jsk_pcl/ClusterPointIndicesDecomposerZAxis" "cluster_point_indices_decomposer_z_axis")
 jsk_pcl_nodelet(src/resize_points_publisher_nodelet.cpp
   "jsk_pcl/ResizePointsPublisher" "resize_points_publisher")
@@ -472,6 +471,7 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/test_icp_registration.test)
     add_rostest(test/test_attention_clipper.test)
     add_rostest(test/test_cluster_point_indices_decomposer.test)
+    add_rostest(test/test_cluster_point_indices_decomposer_sort_by.test)
     add_rostest(test/test_depth_image_creator.test)
     if(${PCL_VERSION} VERSION_GREATER "1.7.2")
       # because of jsk_pcl/OrganizedEdgeDetector
@@ -480,6 +480,9 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/test_euclidean_segmentation.test)
     # TODO(iory): https://github.com/jsk-ros-pkg/jsk_recognition/issues/2007
     # add_rostest(test/test_people_detection.test DEPENDENCIES install_test_data)
+    if(PCL_GPU_KINFU_LARGE_SCALE_FOUND)
+      add_rostest(test/test_kinfu.test)
+    endif()
     add_rostest(test/test_line_segment_detector.test)
     add_rostest(test/test_pointcloud_database_server.test)
     add_rostest(test/test_convex_connected_voxels.test)

@@ -223,6 +223,18 @@ Visualization Manager:
       Transport Hint: raw
       Unreliable: false
       Value: true
+    - Class: jsk_rviz_plugin/BoundingBox
+      Enabled: true
+      Name: BoundingBox
+      Topic: /bbox_array_to_bbox/output
+      Unreliable: false
+      Value: true
+      alpha: 0.8
+      color: 25; 255; 0
+      coloring: Flat color
+      line width: 0.005
+      only edge: true
+      show coords: false
   Enabled: true
   Global Options:
     Background Color: 74; 74; 74

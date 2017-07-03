@@ -45,6 +45,7 @@
 #include <pcl/point_types.h>
 #include <pcl/common/angles.h>
 
+#include <dynamic_reconfigure/server.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
@@ -57,6 +58,8 @@
 #include <jsk_rviz_plugins/OverlayText.h>
 #include <jsk_pcl_ros/tf_listener_singleton.h>
 #include <tf/transform_broadcaster.h>
+
+#include "jsk_pcl_ros/KinfuConfig.h"
 
 // defined in pcl/gpu/kinfu_large_scale/src/kinfu.cpp
 namespace pcl
@@ -79,6 +82,7 @@ namespace jsk_pcl_ros
       sensor_msgs::CameraInfo, sensor_msgs::Image> SyncPolicy;
     typedef message_filters::sync_policies::ApproximateTime<
       sensor_msgs::CameraInfo, sensor_msgs::Image, sensor_msgs::Image> SyncPolicyWithColor;
+    typedef jsk_pcl_ros::KinfuConfig Config;
 
     Kinfu(): ConnectionBasedNodelet(), frame_idx_(0) {}
     ~Kinfu() {}
@@ -95,15 +99,24 @@ namespace jsk_pcl_ros
                 const sensor_msgs::Image::ConstPtr& rgb_msg);
     bool resetCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
 
-    pcl::PolygonMesh convertToPolygonMesh(const pcl::gpu::DeviceArray<pcl::PointXYZ>& triangles);
-    pcl::TextureMesh convertToTextureMesh(const pcl::PolygonMesh triangles,
-                                          const pcl::texture_mapping::CameraVector cameras);
+    boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
+    virtual void configCallback(Config &config, uint32_t level);
+
+    pcl::PolygonMesh createPolygonMesh();
+    pcl::PolygonMesh createPolygonMesh(const jsk_recognition_msgs::BoundingBox& box_msg,
+                                       const std::string& ground_frame_id);
+    pcl::TextureMesh convertToTextureMesh(const pcl::PolygonMesh& triangles,
+                                          const std::vector<cv::Mat> textures,
+                                          pcl::texture_mapping::CameraVector cameras);
     bool saveMeshCallback(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
+    bool saveMeshWithContextCallback(
+      jsk_recognition_msgs::SaveMesh::Request& req, jsk_recognition_msgs::SaveMesh::Response& res);
 
     boost::shared_ptr<pcl::gpu::kinfuLS::KinfuTracker> kinfu_;
     pcl::gpu::kinfuLS::MarchingCubes::Ptr marching_cubes_;
     pcl::gpu::kinfuLS::KinfuTracker::View colors_device_;
     pcl::gpu::kinfuLS::RayCaster::Ptr raycaster_;
+    std::vector<cv::Mat> textures_;
     pcl::texture_mapping::CameraVector cameras_;
 
     int device_;
@@ -111,6 +124,7 @@ namespace jsk_pcl_ros
     bool integrate_color_;
     bool slam_;
     std::string fixed_frame_id_;
+    int n_textures_;
 
     int frame_idx_;
     std::string save_dir_;
@@ -136,6 +150,7 @@ namespace jsk_pcl_ros
 
     ros::ServiceServer srv_reset_;
     ros::ServiceServer srv_save_mesh_;
+    ros::ServiceServer srv_save_mesh_with_context_;
 
   private:
   };

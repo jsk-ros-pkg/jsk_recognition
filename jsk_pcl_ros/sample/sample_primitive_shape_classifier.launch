@@ -1,0 +1,96 @@
+<launch>
+  <arg name="cloud_input" default="/camera/depth_registered/points" />
+  <arg name="manager" default="primitive_shape_classifier_nodelet_manager" />
+  <arg name="vital_rate" default="0.1" />
+  <arg name="sensor_frame_id" default="/camera_rgb_optical_frame" />
+
+  <node name="$(arg manager)"
+        pkg="nodelet" type="nodelet" args="manager" output="screen" />
+
+  <group ns="primitive_shape_classifier">
+    <node name="input_relay" pkg="nodelet" type="nodelet"
+          args="load jsk_topic_tools/Relay /$(arg manager)">
+      <remap from="~input" to="$(arg cloud_input)" />
+    </node>
+    <node name="bilateral_filter" pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/BilateralFilter /$(arg manager)">
+      <remap from="~input" to="input_relay/output" />
+      <rosparam subst_value="true">
+        sigma_s: 1.0
+        sigma_r: 0.1
+        vital_rate: $(arg vital_rate)
+      </rosparam>
+    </node>
+    <node name="organized_multi_plane_segmentation" pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/OrganizedMultiPlaneSegmentation /$(arg manager)">
+      <remap from="~input" to="bilateral_filter/output" />
+      <rosparam subst_value="true">
+        max_curvature: 0.01
+        estimate_normal: true
+        publish_normal: true
+        vital_rate: $(arg vital_rate)
+      </rosparam>
+    </node>
+    <node name="plane_concatenator" pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/PlaneConcatenator /$(arg manager)">
+      <remap from="~input" to="bilateral_filter/output" />
+      <remap from="~input/indices" to="organized_multi_plane_segmentation/output_refined" />
+      <remap from="~input/polygons" to="organized_multi_plane_segmentation/output_refined_polygon" />
+      <remap from="~input/coefficients" to="organized_multi_plane_segmentation/output_refined_coefficients" />
+      <rosparam subst_value="true">
+        connect_distance_threshold: 0.2
+        min_area: 0.4
+        vital_rate: $(arg vital_rate)
+      </rosparam>
+    </node>
+    <node name="multi_plane_extraction" pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/MultiPlaneExtraction /$(arg manager)">
+      <remap from="~input" to="bilateral_filter/output" />
+      <remap from="~indices" to="plane_concatenator/output/indices" />
+      <remap from="~input_polygons" to="plane_concatenator/output/polygons" />
+      <remap from="~input_coefficients" to="plane_concatenator/output/coefficients" />
+      <rosparam subst_value="true">
+        use_sensor_frame: true
+        sensor_frame: $(arg sensor_frame_id)
+        min_height: 0.03
+        vital_rate: $(arg vital_rate)
+      </rosparam>
+    </node>
+    <node name="euclidean_clustering" pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/EuclideanClustering /$(arg manager)">
+      <remap from="~input" to="multi_plane_extraction/output" />
+      <rosparam subst_value="true">
+        tolerance: 0.02
+        min_size: 100
+        vital_rate: $(arg vital_rate)
+      </rosparam>
+    </node>
+    <node name="euclidean_segmentation_decomposer" pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/ClusterPointIndicesDecomposer /$(arg manager)">
+      <remap from="~input" to="multi_plane_extraction/output" />
+      <remap from="~target" to="euclidean_clustering/output" />
+      <remap from="~align_planes" to="plane_concatenator/output/polygons" />
+      <remap from="~align_planes_coefficients" to="plane_concatenator/output/coefficients" />
+      <rosparam subst_value="true">
+        align_boxes: true
+        align_boxes_with_plane: true
+        use_pca: true
+        publish_clouds: false
+        publish_tf: false
+        vital_rate: $(arg vital_rate)
+      </rosparam>
+    </node>
+
+    <node name="primitive_shape_classifier" pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/PrimitiveShapeClassifier /$(arg manager)">
+      <remap from="~input" to="bilateral_filter/output" />
+      <remap from="~input/normal" to="organized_multi_plane_segmentation/output_normal" />
+      <remap from="~input/indices" to="euclidean_clustering/output" />
+      <remap from="~input/polygons" to="plane_concatenator/output/polygons" />
+      <rosparam subst_value="true">
+        vital_rate: $(arg vital_rate)
+      </rosparam>
+    </node>
+  </group>
+
+</launch>

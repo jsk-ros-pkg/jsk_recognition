@@ -1,4 +1,4 @@
-#GrabCut
+# GrabCut
 Input a original image an seed to foreground/background to obtain foreground and background image
 ![](image/grabCut.png)
 

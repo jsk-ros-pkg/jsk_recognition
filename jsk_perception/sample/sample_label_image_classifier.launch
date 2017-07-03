@@ -1,0 +1,63 @@
+<launch>
+
+  <arg name="gui" default="true" />
+  <arg name="GPU" default="0" />
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      publish_info: false
+      file_name: $(find jsk_perception)/sample/object_detection_example_1.jpg
+    </rosparam>
+  </node>
+
+  <include file="$(find jsk_perception)/launch/fcn_object_segmentation.launch">
+    <arg name="INPUT_IMAGE" value="image_publisher/output" />
+    <arg name="GPU" value="$(arg GPU)" />
+  </include>
+
+  <node name="label_image_classifier"
+      pkg="jsk_perception" type="label_image_classifier.py">
+    <remap from="~input" to="fcn_object_segmentation/output" />
+    <rosparam>
+      ignore_labels:
+        - 0
+      target_names:
+        - background
+        - aeroplane
+        - bicycle
+        - bird
+        - boat
+        - bottle
+        - bus
+        - car
+        - cat
+        - chair
+        - cow
+        - diningtable
+        - dog
+        - horse
+        - motorbike
+        - person
+        - potted plant
+        - sheep
+        - sofa
+        - train
+        - tv/monitor
+    </rosparam>
+  </node>
+
+  <node name="draw_classification_result"
+        pkg="jsk_perception" type="draw_classification_result.py">
+    <remap from="~input" to="label_image_classifier/output" />
+    <remap from="~input/image" to="image_publisher/output" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="draw_classification_result/output" />
+    </node>
+  </group>
+
+</launch>

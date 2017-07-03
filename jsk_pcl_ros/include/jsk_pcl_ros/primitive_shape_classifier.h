@@ -51,6 +51,7 @@
 #include <jsk_recognition_msgs/ClassificationResult.h>
 #include <jsk_recognition_msgs/PolygonArray.h>
 #include <jsk_recognition_utils/geo_util.h>
+#include <jsk_recognition_utils/pcl_ros_util.h>
 #include <jsk_pcl_ros/PrimitiveShapeClassifierConfig.h>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
@@ -81,12 +82,12 @@ namespace jsk_pcl_ros
             const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& ros_indices,
             const jsk_recognition_msgs::PolygonArray::ConstPtr& ros_polygons);
 
-    virtual void
+    virtual bool
     estimate(const pcl::PointCloud<PointT>::Ptr& cloud,
              const pcl::PointCloud<pcl::Normal>::Ptr& normal,
              const pcl::ModelCoefficients::Ptr& plane,
-             pcl::PointIndices::Ptr& boundary_indices, /* for debug */
-             pcl::PointCloud<PointT>::Ptr& projected_cloud, /* for debug */
+             pcl::PointIndices::Ptr& boundary_indices,
+             pcl::PointCloud<PointT>::Ptr& projected_cloud,
              float& circle_likelihood,
              float& box_likelihood);
 
@@ -95,10 +96,12 @@ namespace jsk_pcl_ros
                     const std::vector<jsk_recognition_utils::Polygon::Ptr>& polygons,
                     pcl::ModelCoefficients::Ptr& coeff);
 
-/*
-    virtual void computeNormal(const pcl::PointCloud<PointT>::Ptr& input,
-                               pcl::PointCloud<pcl::Normal>::Ptr& output);
-*/
+    virtual bool
+    checkFrameId(const sensor_msgs::PointCloud2::ConstPtr& ros_cloud,
+                 const sensor_msgs::PointCloud2::ConstPtr& ros_normal,
+                 const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& ros_indices,
+                 const jsk_recognition_msgs::PolygonArray::ConstPtr& ros_polygons);
+
     // properties
     boost::mutex mutex_;
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
@@ -113,6 +116,10 @@ namespace jsk_pcl_ros
 
     // parameters
     int queue_size_;
+    int min_points_num_;
+    int sac_max_iterations_;
+    double sac_distance_threshold_;
+    double sac_radius_limit_min_, sac_radius_limit_max_;
   };
 }
 

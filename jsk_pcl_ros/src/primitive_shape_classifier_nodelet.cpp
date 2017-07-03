@@ -92,6 +92,16 @@ namespace jsk_pcl_ros
   void PrimitiveShapeClassifier::configCallback(Config& config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    min_points_num_ = config.min_points_num;
+    sac_max_iterations_ = config.sac_max_iterations;
+    sac_distance_threshold_ = config.sac_distance_threshold;
+    if (config.sac_radius_limit_min < config.sac_radius_limit_max) {
+      sac_radius_limit_min_ = config.sac_radius_limit_min;
+      sac_radius_limit_max_ = config.sac_radius_limit_max;
+    } else {
+      config.sac_radius_limit_min = sac_radius_limit_min_;
+      config.sac_radius_limit_max = sac_radius_limit_max_;
+    }
     if (queue_size_ = config.queue_size) {
       queue_size_ = config.queue_size;
       if (isSubscribed()) {
@@ -100,64 +110,33 @@ namespace jsk_pcl_ros
       }
     }
   }
-/*
-  void PrimitiveShapeClassifier::process(const sensor_msgs::PointCloud2::ConstPtr& ros_cloud,
+
+  bool
+  PrimitiveShapeClassifier::checkFrameId(const sensor_msgs::PointCloud2::ConstPtr& ros_cloud,
                                          const sensor_msgs::PointCloud2::ConstPtr& ros_normal,
-                                         const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices,
-                                         const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons)
+                                         const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& ros_indices,
+                                         const jsk_recognition_msgs::PolygonArray::ConstPtr& ros_polygons)
   {
-    boost::mutex::scoped_lock lock(mutex_);
-
-    pcl::PointCloud<PointT>::Ptr input(new pcl::PointCloud<PointT>);
-    pcl::fromROSMsg(*ros_cloud, *input);
-
-    pcl::PointCloud<pcl::Normal>::Ptr normal(new pcl::PointCloud<pcl::Normal>);
-    pcl::fromROSMsg(*ros_normal, *normal);
-
-    pcl::ExtractIndices<PointT> ext_input;
-    ext_input.setInputCloud(input);
-    pcl::ExtractIndices<pcl::Normal> ext_normal;
-    ext_normal.setInputCloud(normal);
-
-    pcl::ProjectInliers<PointT> proj;
-
-    for (size_t i = 0; i < indices->cluster_indices.size(); ++i)
-    {
-      pcl::IndicesPtr cluster_indices(new std::vector<int>(indices->cluster_indices[i].indices));
-
-      pcl::PointCloud<PointT>::Ptr cluster_cloud(new pcl::PointCloud<PointT>);
-      ext_input.setIndices(cluster_indices);
-      ext_input.filter(cluster_cloud);
-
-      pcl::PointCloud<pcl::Normal>::Ptr cluster_normal(new pcl::PointCloud<pcl::Normal>);
-      ext_normal.setIndices(cluster_indices);
-      ext_normal.filter(cluster_normal);
-
-      pcl::BoundaryEstimation<PointT, pcl::Normal, pcl::Boundary> b;
-      b.setInputCloud(cluster_cloud);
-      b.setInputNormals(cluster_normal);
-      b.setSearchMethod(typename pcl::search::KdTree<PointT>::Ptr(new pcl::search::KdTree<PointT>));
-      b.setAngleThreshold(DEG2RAD(70));
-      b.setRadiusSearch(0.03);
-
-      pcl::PointCloud<pcl::Boundary>::Ptr boundaries(new pcl::PointCloud<pcl::Boundary>);
-      b.compute(boundaries);
-
-      pcl::PointCloud<PointT>::Ptr boundary_cloud(new pcl::PointCloud<PointT>);
-      for (size_t j = 0; j < boundaries->points.size(); ++k)
-      {
-        if ((int)boundaries->points[k].boundary_point)
-          boundary_cloud->points.push_back(cluster_cloud->points[k]);
-      }
-      boundary_cloud->width  = boundary_cloud->points.size();
-      boundary_cloud->height = 1;
-
-      proj.setModelType(pcl::SACMODEL_PLANE);
-      proj.setInputCloud(boundary_cloud);
-
+    std::string cloud_topic = ros::names::resolve(sub_cloud_.getTopic());
+    std::string normal_topic = ros::names::resolve(sub_normal_.getTopic());
+    std::string indices_topic = ros::names::resolve(sub_indices_.getTopic());
+    std::string polygons_topic = ros::names::resolve(sub_polygons_.getTopic());
+    if (!jsk_recognition_utils::isSameFrameId(ros_cloud->header, ros_normal->header)) {
+      NODELET_ERROR_STREAM(cloud_topic << " and " << normal_topic << " must have same frame_id");
+      return false;
     }
+    if (!jsk_recognition_utils::isSameFrameId(ros_cloud->header, ros_indices->header)) {
+      NODELET_ERROR_STREAM(cloud_topic << " and " << indices_topic << " must have same frame_id");
+      return false;
+    }
+    if (!jsk_recognition_utils::isSameFrameId(ros_cloud->header, ros_polygons->header)) {
+      NODELET_ERROR_STREAM(cloud_topic << " and " << polygons_topic << " must have same frame_id");
+      return false;
+    }
+    NODELET_DEBUG_STREAM("Frame id is ok: " << ros_cloud->header.frame_id);
+    return true;
   }
-*/
+
   void
   PrimitiveShapeClassifier::process(const sensor_msgs::PointCloud2::ConstPtr& ros_cloud,
                                     const sensor_msgs::PointCloud2::ConstPtr& ros_normal,
@@ -165,6 +144,8 @@ namespace jsk_pcl_ros
                                     const jsk_recognition_msgs::PolygonArray::ConstPtr& ros_polygons)
   {
     boost::mutex::scoped_lock lock(mutex_);
+
+    if (!checkFrameId(ros_cloud, ros_normal, ros_indices, ros_polygons)) return;
 
     pcl::PointCloud<PointT>::Ptr input(new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(*ros_cloud, *input);
@@ -178,16 +159,24 @@ namespace jsk_pcl_ros
     ext_normal.setInputCloud(normal);
 
     std::vector<jsk_recognition_utils::Polygon::Ptr> polygons
-      = jsk_recognition_utils::Polygon::fromROSMsg(*ros_polygons, Eigen::Affine3f());
+      = jsk_recognition_utils::Polygon::fromROSMsg(*ros_polygons);
 
-    // for visualization
+    jsk_recognition_msgs::ClassificationResult result;
+    result.header = ros_cloud->header;
+    result.classifier = "primitive_shape_classifier";
+    result.target_names.push_back("box");
+    result.target_names.push_back("circle");
+    result.target_names.push_back("other");
+
     pcl::PointCloud<PointT>::Ptr projected_cloud(new pcl::PointCloud<PointT>);
-    std::vector<pcl::PointIndices::Ptr> boundary_indices(ros_indices->cluster_indices.size());
+    std::vector<pcl::PointIndices::Ptr> boundary_indices;
 
+    NODELET_DEBUG_STREAM("Cluster num: " << ros_indices->cluster_indices.size());
     for (size_t i = 0; i < ros_indices->cluster_indices.size(); ++i)
     {
       pcl::PointIndices::Ptr indices(new pcl::PointIndices);
       indices->indices = ros_indices->cluster_indices[i].indices;
+      NODELET_DEBUG_STREAM("Estimating cluster #" << i << " (" << indices->indices.size() << " points)");
 
       pcl::PointCloud<PointT>::Ptr cluster_cloud(new pcl::PointCloud<PointT>);
       ext_input.setIndices(indices);
@@ -210,9 +199,25 @@ namespace jsk_pcl_ros
       estimate(cluster_cloud, cluster_normal, support_plane,
                b, pc,
                circle_likelihood, box_likelihood);
-
-      boundary_indices.push_back(b);
+      boundary_indices.push_back(std::move(b));
       *projected_cloud += *pc;
+
+      if (box_likelihood > 0.60) {
+        // box
+        result.labels.push_back(0);
+        result.label_names.push_back("box");
+        result.label_proba.push_back(box_likelihood);
+      } else if (circle_likelihood > 0.3) {
+        // circle
+        result.labels.push_back(1);
+        result.label_names.push_back("circle");
+        result.label_proba.push_back(circle_likelihood);
+      } else {
+        // other
+        result.labels.push_back(3);
+        result.label_names.push_back("other");
+        result.label_proba.push_back(0.0);
+      }
     }
 
     // publish results
@@ -231,15 +236,15 @@ namespace jsk_pcl_ros
     }
     pub_boundary_indices_.publish(ros_boundary_indices);
 
-    // TODO: publish class
+    pub_class_.publish(result);
   }
 
-  void
+  bool
   PrimitiveShapeClassifier::estimate(const pcl::PointCloud<PointT>::Ptr& cloud,
                                      const pcl::PointCloud<pcl::Normal>::Ptr& normal,
                                      const pcl::ModelCoefficients::Ptr& plane,
-                                     pcl::PointIndices::Ptr& boundary_indices, /* for debug */
-                                     pcl::PointCloud<PointT>::Ptr& projected_cloud, /* for debug */
+                                     pcl::PointIndices::Ptr& boundary_indices,
+                                     pcl::PointCloud<PointT>::Ptr& projected_cloud,
                                      float& circle_likelihood,
                                      float& box_likelihood)
   {
@@ -265,7 +270,11 @@ namespace jsk_pcl_ros
     ext.setIndices(boundary_indices);
     ext.filter(*boundary_cloud);
 
-    // project to plane
+    // thresholding with min points num
+    if (boundary_indices->indices.size() < min_points_num_)
+      return false;
+
+    // project to supporting plane
     pcl::ProjectInliers<PointT> proj;
     proj.setModelType(pcl::SACMODEL_PLANE);
     proj.setInputCloud(boundary_cloud);
@@ -283,30 +292,32 @@ namespace jsk_pcl_ros
 
     seg.setOptimizeCoefficients(true);
     seg.setMethodType(pcl::SAC_RANSAC);
-    seg.setMaxIterations(500);
+    seg.setMaxIterations(sac_max_iterations_);
     seg.setModelType(pcl::SACMODEL_CIRCLE3D);
-    seg.setDistanceThreshold(0.005);
-    seg.setRadiusLimits(0.025, 0.13);
+    seg.setDistanceThreshold(sac_distance_threshold_);
+    seg.setRadiusLimits(sac_radius_limit_min_, sac_radius_limit_max_);
     seg.segment(*circle_inliers, *circle_coeffs);
 
     seg.setOptimizeCoefficients(true);
     seg.setMethodType(pcl::SAC_RANSAC);
-    seg.setMaxIterations(500);
+    seg.setMaxIterations(sac_max_iterations_);
     seg.setModelType(pcl::SACMODEL_LINE);
-    seg.setDistanceThreshold(0.005);
+    seg.setDistanceThreshold(sac_distance_threshold_);
     seg.segment(*line_inliers, *line_coeffs);
 
     // compute likelihood
     circle_likelihood =
-      1.0 * circle_inliers->indices.size() / projected_cloud->points.size();
+      1.0f * circle_inliers->indices.size() / projected_cloud->points.size();
     box_likelihood =
-      1.0 * line_inliers->indices.size() / projected_cloud->points.size();
+      1.0f * line_inliers->indices.size() / projected_cloud->points.size();
 
-    NODELET_INFO_STREAM("Projected cloud has " << projected_cloud->points.size() << " points");
-    NODELET_INFO_STREAM(circle_inliers->indices.size() << " circle inliers found");
-    NODELET_INFO_STREAM("confidence: " << circle_likelihood);
-    NODELET_INFO_STREAM(line_inliers->indices.size() << " line inliers found");
-    NODELET_INFO_STREAM("confidence: " << box_likelihood);
+    NODELET_DEBUG_STREAM("Projected cloud has " << projected_cloud->points.size() << " points");
+    NODELET_DEBUG_STREAM(circle_inliers->indices.size() << " circle inliers found");
+    NODELET_DEBUG_STREAM("circle confidence: " << circle_likelihood);
+    NODELET_DEBUG_STREAM(line_inliers->indices.size() << " line inliers found");
+    NODELET_DEBUG_STREAM("box confidence: " << box_likelihood);
+
+    return true;
   }
 
   bool
@@ -329,42 +340,6 @@ namespace jsk_pcl_ros
     }
     return false;
   }
-/*
-  void PrimitiveShapeClassifier::computeNormal(const pcl::PointCloud<PointT>::Ptr& input,
-                                               pcl::PointCloud<pcl::Normal>::Ptr& output)
-  {
-    pcl::IntegralImageNormalEstimation<PointT, pcl::Normal> n;
-    switch (normal_estimation_method_) {
-    case 0:
-      n.setNormalEstimationMethod(n.AVERAGE_3D_GRADIENT);
-      break;
-    case 1:
-      n.setNormalEstimationMethod(n.COVARIANCE_MATRIX);
-      break;
-    case 2:
-      n.setNormalEstimationMethod(n.AVERAGE_DEPTH_CHANGE);
-      break;
-    default:
-      n.setNormalEstimationMethod(n.COVARIANCE_MATRIX);
-      break;
-    }
-
-    switch (normal_border_policy_) {
-    case 0:
-      n.setBorderPolicy(pcl::IntegralImageNormalEstimation<PointT, pcl::Normal>::BORDER_POLICY_IGNORE);
-      break;
-    default:
-      n.setBorderPolicy(pcl::IntegralImageNormalEstimation<PointT, pcl::Normal>::BORDER_POLICY_MIRROR);
-      break;
-    }
-
-    n.setMaxDepthChangeFactor(max_depth_change_factor_);
-    n.setNormalSmoothingSize(normal_smoothing_size_);
-    n.setDepthDependentSmoothing(depth_dependent_smoothing_);
-    n.setInputCloud(input);
-    n.compute(output);
-  }
-*/
 }
 
 #include <pluginlib/class_list_macros.h>

@@ -1,0 +1,29 @@
+<launch>
+  <arg name="launch_camera" default="true" />
+  <node name="uvc_camera" pkg="uvc_camera" type="uvc_camera_node"
+        if="$(arg launch_camera)"/>
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py"
+        unless="$(arg launch_camera)">
+    <rosparam subst_value="true">
+      file_name: $(find darknet)/data/dog.jpg
+      publish_info: false
+      encoding: bgr8
+    </rosparam>
+    <remap from="~output" to="/image_raw" />
+  </node>
+  <include file="$(find jsk_perception)/launch/darknet_yolo_object_segmentation.launch">
+    <arg name="input_image" value="/image_raw" />
+  </include>
+  <node name="result_rectangle_drawer" pkg="jsk_perception" type="draw_rects">
+    <remap from="~input" to="/image_raw" />
+    <remap from="~input/labeled_rect_array" to="darknet_yolo_object_detection/output" />
+    <rosparam>
+      label_text_size: 1.4
+      label_text_boldness: 2
+    </rosparam>
+  </node>
+  <node name="debug_view" pkg="image_view" type="image_view">
+    <remap from="image" to="result_rectangle_drawer/output" />
+  </node>
+</launch>

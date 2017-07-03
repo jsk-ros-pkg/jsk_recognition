@@ -18,6 +18,8 @@ find_package(catkin REQUIRED COMPONENTS
   angles
   cmake_modules
   cv_bridge
+  darknet
+  driver_base
   dynamic_reconfigure
   geometry_msgs
   image_geometry
@@ -246,6 +248,8 @@ jsk_add_nodelet(src/project_image_point.cpp "jsk_perception/ProjectImagePoint" "
 jsk_add_nodelet(src/sliding_window_object_detector.cpp "jsk_perception/SlidingWindowObjectDetector" "sliding_window_object_detector")
 jsk_add_nodelet(src/gaussian_blur.cpp "jsk_perception/GaussianBlur" "gaussian_blur")
 jsk_add_nodelet(src/kmeans.cpp "jsk_perception/KMeans" "kmeans")
+jsk_add_nodelet(src/darknet_object_detection "jsk_perception/DarknetObjectDetection" "darknet_object_detection")
+jsk_add_nodelet(src/draw_rects "jsk_perception/DrawRects" "draw_rects")
 if("${OpenCV_VERSION}" VERSION_GREATER "2.9.9")  # >= 3.0.0
   jsk_add_nodelet(src/bing.cpp "jsk_perception/Bing" "bing")
 endif()
@@ -267,6 +271,9 @@ add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
   slic/slic.cpp
   src/histogram_of_oriented_gradients.cpp
   )
+# add definitions for darknet to keep compatibility to darknet library
+add_darknet_definitions(${PROJECT_NAME})
+add_darknet_definitions(darknet_object_detection)
 
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${libcmt_LIBRARIES} yaml-cpp)
 if(robot_self_filter_FOUND)

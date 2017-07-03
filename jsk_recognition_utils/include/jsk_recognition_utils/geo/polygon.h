@@ -184,7 +184,7 @@ namespace jsk_recognition_utils
      * It requires offset transformation in the 2nd argument.
      */
     static std::vector<Polygon::Ptr> fromROSMsg(const jsk_recognition_msgs::PolygonArray& msg,
-                                                const Eigen::Affine3f& offset);
+                                                const Eigen::Affine3f& offset = Eigen::Affine3f::Identity());
     
     /**
      * @brief

@@ -116,6 +116,7 @@ generate_dynamic_reconfigure_options(
   cfg/PointcloudDatabaseServer.cfg
   cfg/TargetAdaptiveTracking.cfg
   cfg/PPFRegistration.cfg
+  cfg/PrimitiveShapeClassifier.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -349,6 +350,8 @@ jsk_pcl_nodelet(src/voxel_grid_large_scale_nodelet.cpp
   "jsk_pcl/VoxelGridLargeScale" "voxel_grid_large_scale")
 jsk_pcl_nodelet(src/ppf_registration_nodelet.cpp
   "jsk_pcl/PPFRegistration" "ppf_registration")
+jsk_pcl_nodelet(src/primitive_shape_classifier_nodelet.cpp
+  "jsk_pcl/PrimitiveShapeClassifier" "primitive_shape_classifier")
 if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
   jsk_pcl_nodelet(src/kinfu_nodelet.cpp
     "jsk_pcl/Kinfu" "kinfu")

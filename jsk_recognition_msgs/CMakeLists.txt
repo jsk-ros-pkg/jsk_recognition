@@ -80,6 +80,7 @@ add_service_files(FILES
   NonMaximumSuppression.srv
   PolygonOnEnvironment.srv
   RobotPickupReleasePoint.srv
+  SaveMesh.srv
   SetDepthCalibrationParameter.srv
   SetLabels.srv
   SetPointCloud2.srv

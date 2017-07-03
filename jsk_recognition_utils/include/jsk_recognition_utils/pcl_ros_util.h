@@ -40,13 +40,18 @@
 
 #ifndef JSK_RECOGNITION_UTILS_PCL_ROS_UTIL_H_
 #define JSK_RECOGNITION_UTILS_PCL_ROS_UTIL_H_
+
 #include <ros/ros.h>
 
 #include <std_msgs/Header.h>
 #include <pcl_msgs/PointIndices.h>
 
+#include <jsk_recognition_msgs/BoundingBox.h>
 #include <pcl/PointIndices.h>
+#include <pcl/filters/crop_box.h>
 #include <sensor_msgs/PointCloud2.h>
+
+#include "jsk_recognition_utils/pcl_conversion_util.h"
 
 namespace jsk_recognition_utils
 {
@@ -87,6 +92,48 @@ namespace jsk_recognition_utils
    */
   bool hasField(const std::string& field_name, const sensor_msgs::PointCloud2& msg);
 
-}
+  /**
+   * @brief
+   * Crop point cloud with jsk_recognition_msgs/BoundingBox.
+   */
+  template<typename PointT>
+  void
+  cropPointCloud(const typename pcl::PointCloud<PointT>::Ptr& cloud,
+                 const jsk_recognition_msgs::BoundingBox& bbox_msg,
+                 std::vector<int>* indices,
+                 bool extract_removed_indices=false)
+  {
+    if (cloud->header.frame_id != bbox_msg.header.frame_id)
+    {
+      fprintf(stderr, "Frame id of input cloud and bounding box must be same. Cloud: %s, BoundingBox: %s.",
+              cloud->header.frame_id.c_str(), bbox_msg.header.frame_id.c_str());
+      return;
+    }
+    pcl::CropBox<PointT> crop_box(/*extract_removed_indices=*/extract_removed_indices);
 
-#endif
+    crop_box.setInputCloud(cloud);
+
+    Eigen::Affine3f box_pose;
+    tf::poseMsgToEigen(bbox_msg.pose, box_pose);
+    crop_box.setTranslation(box_pose.translation());
+    float roll, pitch, yaw;
+    pcl::getEulerAngles(box_pose, roll, pitch, yaw);
+    crop_box.setRotation(Eigen::Vector3f(roll, pitch, yaw));
+
+    Eigen::Vector4f max_point(bbox_msg.dimensions.x / 2,
+                              bbox_msg.dimensions.y / 2,
+                              bbox_msg.dimensions.z / 2,
+                              0);
+    Eigen::Vector4f min_point(-bbox_msg.dimensions.x / 2,
+                              -bbox_msg.dimensions.y / 2,
+                              -bbox_msg.dimensions.z / 2,
+                              0);
+    crop_box.setMax(max_point);
+    crop_box.setMin(min_point);
+
+    crop_box.filter(*indices);
+  }
+
+}  // namespace jsk_recognition_utils
+
+#endif  // JSK_RECOGNITION_UTILS_PCL_ROS_UTIL_H_

@@ -77,6 +77,17 @@ Use kinfu (kinect fusion) for model generation and SLAM.
 
   Used when `~slam` is `true`.
 
+* `~save_dir` (String, default: `.`)
+
+  Save directory for mesh and texture images.
+
+* `~n_textures` (Int, default: `-1`)
+
+  The number of textures to be used to create texture mesh with below logics:
+    - `-1`: all textures are used and texture mesh is saved
+    - `0`: no textures are used and polygon mesh is saved
+    - `>0`: `n_textures_` textures are used and texture mesh is saved
+
 
 ## Sample
 
@@ -86,6 +97,7 @@ Use kinfu (kinect fusion) for model generation and SLAM.
 ```bash
 roslaunch jsk_pcl_ros sample_kinfu.launch
 rosservice call /kinfu/save_mesh  # saves mesh model below
+rosservice call /save_mesh_server/request  # saves mesh with context (bbox)
 ```
 
 ![](images/kinfu_mesh.jpg)

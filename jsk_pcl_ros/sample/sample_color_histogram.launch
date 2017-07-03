@@ -1,0 +1,48 @@
+<launch>
+  <arg name="input_cloud" default="/camera/depth_registered/points" />
+
+  <arg name="manager" default="color_histogram_manager" />
+
+  <node name="$(arg manager)"
+        pkg="nodelet" type="nodelet" args="manager" />
+
+  <group ns="color_histogram">
+    <node name="input_relay"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_topic_tools/Relay /$(arg manager)">
+      <remap from="~input" to="$(arg input_cloud)" />
+    </node>
+
+    <node name="point_cloud_to_cluster_point_indices"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl_utils/PointCloudToClusterPointIndices /$(arg manager)">
+      <remap from="~input" to="input_relay/output" />
+    </node>
+
+    <node name="color_histogram"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/ColorHistogram /$(arg manager)">
+      <remap from="~input" to="input_relay/output"/>
+      <remap from="~input/indices" to="point_cloud_to_cluster_point_indices/output" />
+      <rosparam>
+        bin_size: 20
+        histogram_policy: 0
+      </rosparam>
+    </node>
+
+    <node name="color_histogram_visualizer"
+          pkg="jsk_pcl_ros" type="color_histogram_visualizer.py" output="screen">
+      <remap from="~input/array" to="color_histogram/output"/>
+      <rosparam>
+        histogram_policy: 0
+        histogram_index: 0
+        histogram_scale: 1.0
+      </rosparam>
+    </node>
+
+    <node name="image_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="color_histogram_visualizer/output" />
+    </node>
+  </group>
+</launch>

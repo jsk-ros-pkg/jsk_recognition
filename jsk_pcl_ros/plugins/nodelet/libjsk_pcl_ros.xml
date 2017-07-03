@@ -228,6 +228,24 @@
          base_class_type="nodelet::Nodelet">
     <description>modeling the environment</description>
   </class>
+  <class name="jsk_pcl/ColorHistogram" type="jsk_pcl_ros::ColorHistogram"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Compute histogram for each point indices
+    </description>
+  </class>
+  <class name="jsk_pcl/ColorHistogramClassifier" type="jsk_pcl_ros::ColorHistogramClassifier"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Classify point indices using color histogram
+    </description>
+  </class>
+  <class name="jsk_pcl/ColorHistogramFilter" type="jsk_pcl_ros::ColorHistogramFilter"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Filter point indices using color histogram
+    </description>
+  </class>
   <class name="jsk_pcl/ColorHistogramMatcher" type="jsk_pcl_ros::ColorHistogramMatcher"
          base_class_type="nodelet::Nodelet">
     <description>find object based on h-s-v histogram</description>

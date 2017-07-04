@@ -7,15 +7,17 @@ import rospy
 
 class ProbabilityImageClassifier(LabelImageClassifier):
 
+    classifier_name = 'probability_image_classifier'
+
     def __init__(self):
         super(ProbabilityImageClassifier, self).__init__()
 
     def _classify(self, proba_img):
-        class_proba = proba_img.sum(axis=(0, 1)).astype(np.float32)
-        class_proba[self.ignore_labels] = 0
-        label = np.argmax(class_proba)
-        label_proba = class_proba.max() / class_proba.sum()
-        return label, label_proba
+        proba = proba_img.sum(axis=(0, 1)).astype(np.float32)
+        proba[self.ignore_labels] = 0
+        label = np.argmax(proba)
+        proba = proba / proba.sum()
+        return label, proba
 
 
 if __name__ == '__main__':

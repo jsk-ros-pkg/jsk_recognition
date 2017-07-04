@@ -1,2 +1,2 @@
-int32 label
+int32 id
 string name

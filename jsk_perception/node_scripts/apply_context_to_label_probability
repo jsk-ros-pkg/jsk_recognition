@@ -49,7 +49,7 @@ class ApplyContextToLabelProbability(ConnectionBasedTransport):
 
     def _update_candidates_with_topic(self, candidates_msg):
         candidates = candidates_msg.labels
-        self.candidates = [x.label for x in candidates]
+        self.candidates = [x.id for x in candidates]
         rospy.set_param('~candidates', self.candidates)
 
     def _apply(self, imgmsg):

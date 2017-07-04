@@ -93,6 +93,7 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     min_points_num_ = config.min_points_num;
+
     sac_max_iterations_ = config.sac_max_iterations;
     sac_distance_threshold_ = config.sac_distance_threshold;
     if (config.sac_radius_limit_min < config.sac_radius_limit_max) {
@@ -102,6 +103,10 @@ namespace jsk_pcl_ros
       config.sac_radius_limit_min = sac_radius_limit_min_;
       config.sac_radius_limit_max = sac_radius_limit_max_;
     }
+
+    box_threshold_ = config.box_threshold;
+    circle_threshold_ = config.circle_threshold;
+
     if (queue_size_ = config.queue_size) {
       queue_size_ = config.queue_size;
       if (isSubscribed()) {
@@ -202,12 +207,12 @@ namespace jsk_pcl_ros
       boundary_indices.push_back(std::move(b));
       *projected_cloud += *pc;
 
-      if (box_likelihood > 0.60) {
+      if (box_likelihood > box_threshold_) {
         // box
         result.labels.push_back(0);
         result.label_names.push_back("box");
         result.label_proba.push_back(box_likelihood);
-      } else if (circle_likelihood > 0.3) {
+      } else if (circle_likelihood > circle_threshold_) {
         // circle
         result.labels.push_back(1);
         result.label_names.push_back("circle");

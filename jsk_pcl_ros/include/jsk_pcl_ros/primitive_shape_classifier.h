@@ -120,6 +120,7 @@ namespace jsk_pcl_ros
     int sac_max_iterations_;
     double sac_distance_threshold_;
     double sac_radius_limit_min_, sac_radius_limit_max_;
+    double box_threshold_, circle_threshold_;
   };
 }
 

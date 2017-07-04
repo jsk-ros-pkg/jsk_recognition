@@ -1,16 +1,28 @@
 <launch>
-
-  <include file="$(find jsk_perception)/sample/sample_fcn_object_segmentation.launch">
-    <arg name="gui" value="false" />
-  </include>
+  <group ns="no_mask">
+    <include file="$(find jsk_perception)/sample/sample_fcn_object_segmentation.launch">
+      <arg name="gui" value="false" />
+      <arg name="gpu" value="-1" />
+      <arg name="use_mask" value="false" />
+    </include>
+  </group>
+  <group ns="use_mask">
+    <include file="$(find jsk_perception)/sample/sample_fcn_object_segmentation.launch">
+      <arg name="gui" value="false" />
+      <arg name="gpu" value="-1" />
+      <arg name="use_mask" value="true" />
+    </include>
+  </group>
 
   <test test-name="test_fcn_object_segmentation"
         name="test_fcn_object_segmentation"
         pkg="jsk_tools" type="test_topic_published.py"
         retry="3">
     <rosparam>
-      topic_0: /fcn_object_segmentation/output
+      topic_0: /no_mask/fcn_object_segmentation/output
       timeout_0: 60
+      topic_1: /use_mask/fcn_object_segmentation/output
+      timeout_1: 60
     </rosparam>
   </test>
 

@@ -43,7 +43,7 @@
   <group if="$(arg gui)" >
     <node name="image_view0"
           pkg="image_view" type="image_view" >
-      <remap from="image" to="people_pose_estimation2d/output" />
+      <remap from="image" to="people_pose_estimation_2d/output" />
     </node>
     <node name="image_view1"
           pkg="image_view" type="image_view" >

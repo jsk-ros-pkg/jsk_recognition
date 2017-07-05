@@ -30,6 +30,8 @@ add_message_files(
   LineArray.msg
   Line.msg
   ModelCoefficientsArray.msg
+  Object.msg
+  ObjectArray.msg
   ParallelEdgeArray.msg
   ParallelEdge.msg
   PlotData.msg

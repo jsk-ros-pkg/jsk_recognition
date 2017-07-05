@@ -201,7 +201,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
             pose_estimated_img.astype(np.uint8), encoding='bgr8')
         pose_estimated_msg.header = img_msg.header
 
-        people_pose_msg = self._create_2d_people_pose_array_msg(
+        people_pose_msg = self._create_2d_people_pose_array_msgs(
             people_joint_positions,
             img_msg.header)
 

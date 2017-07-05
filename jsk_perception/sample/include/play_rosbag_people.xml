@@ -14,6 +14,14 @@
       <remap from="in" to="image_raw" />
       <remap from="out" to="image_raw" />
     </node>
+    <node name="rgb_rectify"
+	  pkg="nodelet" type="nodelet"
+          args="standalone image_proc/rectify"
+          respawn="true" >
+      <remap from="image_mono"  to="image_raw" />
+      <remap from="image_rect"  to="image_rect_color" />
+      <param name="interpolation" value="0" />
+    </node>
   </group>
   <group ns="/camera/depth_registered">
     <node name="republish"
@@ -21,6 +29,14 @@
           args="compressedDepth raw">
       <remap from="in" to="image_raw" />
       <remap from="out" to="image_raw" />
+    </node>
+    <node name="depth_registered_rectify_depth"
+	  pkg="nodelet" type="nodelet"
+          args="standalone image_proc/rectify"
+          respawn="true" >
+      <remap from="image_mono"  to="image_raw" />
+      <remap from="image_rect"  to="hw_registered/image_rect_raw" />
+      <param name="interpolation" value="0" />
     </node>
   </group>
 

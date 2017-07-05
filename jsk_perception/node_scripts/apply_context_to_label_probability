@@ -3,11 +3,11 @@
 import numpy as np
 
 import cv_bridge
-import dynamic_reconfigure.server
 from jsk_topic_tools import ConnectionBasedTransport
 import rospy
 from sensor_msgs.msg import Image
 
+from jsk_recognition_msgs.msg import LabelArray
 from jsk_recognition_msgs.srv import SetLabels
 from jsk_recognition_msgs.srv import SetLabelsResponse
 
@@ -16,30 +16,43 @@ class ApplyContextToLabelProbability(ConnectionBasedTransport):
 
     def __init__(self):
         super(self.__class__, self).__init__()
+        self.use_topic = rospy.get_param('~use_topic', False)
+
         # list of label values
         self.candidates = rospy.get_param('~candidates', [])
-        if not all(isinstance(lbl, int) and lbl >= 0
-                   for lbl in self.candidates):
-            rospy.logfatal("Elements of '~candidates' must be "
-                           "integer and >=0.")
-            quit(1)
-        rospy.Service(
-            '~update_candidates', SetLabels, self.update_candidates_cb)
+        if not self.use_topic:
+            if not all(isinstance(lbl, int) and lbl >= 0
+                       for lbl in self.candidates):
+                rospy.logfatal("Elements of '~candidates' must be "
+                               "integer and >=0.")
+                quit(1)
+        rospy.Service('~update_candidates', SetLabels, self._update_candidates)
         self.pub_proba = self.advertise('~output', Image, queue_size=1)
         self.pub_label = self.advertise('~output/label', Image, queue_size=1)
 
-    def update_candidates_cb(self, req):
+    def subscribe(self):
+        self._sub_img = rospy.Subscriber('~input', Image, self._apply)
+        if self.use_topic:
+            self._sub_candidates = rospy.Subscriber(
+                '~input/candidates', LabelArray,
+                self._update_candidates_with_topic)
+
+    def unsubscribe(self):
+        self._sub_img.unregister()
+        if self.use_topic:
+            self._sub_candidates.unregister()
+
+    def _update_candidates(self, req):
         self.candidates = req.labels
         rospy.set_param('~candidates', self.candidates)
         return SetLabelsResponse(success=True)
 
-    def subscribe(self):
-        self.sub = rospy.Subscriber('~input', Image, self.apply)
+    def _update_candidates_with_topic(self, candidates_msg):
+        candidates = candidates_msg.labels
+        self.candidates = [x.id for x in candidates]
+        rospy.set_param('~candidates', self.candidates)
 
-    def unsubscribe(self):
-        self.sub.unregister()
-
-    def apply(self, imgmsg):
+    def _apply(self, imgmsg):
         bridge = cv_bridge.CvBridge()
 
         proba_img = bridge.imgmsg_to_cv2(imgmsg).copy()  # copy to change it
@@ -49,9 +62,9 @@ class ApplyContextToLabelProbability(ConnectionBasedTransport):
 
         if self.candidates:
             n_labels = proba_img.shape[2]
-            if self.candidates and max(self.candidates) >= n_labels:
+            if max(self.candidates) >= n_labels:
                 rospy.logerr("The max label value in '~candidates' exceeds "
-                            "the number of input labels.")
+                             "the number of input labels.")
                 return
 
             for lbl in range(n_labels):

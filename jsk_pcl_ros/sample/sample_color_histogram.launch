@@ -1,7 +1,7 @@
 <launch>
   <arg name="input_cloud" default="/camera/depth_registered/points" />
   <arg name="sensor_frame_id" default="camera_rgb_optical_frame" />
-  <arg name="area_size" default="0.4" />
+  <arg name="area_size" default="0.6" />
   <arg name="vital_rate" default="0.1" />
 
   <arg name="manager" default="color_histogram_manager" />
@@ -10,15 +10,19 @@
         pkg="nodelet" type="nodelet" args="manager" />
 
   <group ns="color_histogram">
-    <node name="input_relay"
+    <node name="bilateral_filter"
           pkg="nodelet" type="nodelet"
-          args="load jsk_topic_tools/Relay /$(arg manager)">
+          args="load jsk_pcl/BilateralFilter /$(arg manager)">
       <remap from="~input" to="$(arg input_cloud)" />
+      <rosparam>
+        sigma_s: 1.0
+        sigma_r: 0.1
+      </rosparam>
     </node>
 
     <node name="organized_multi_plane_segmentation" pkg="nodelet" type="nodelet"
         args="load jsk_pcl/OrganizedMultiPlaneSegmentation /$(arg manager)">
-      <remap from="~input" to="input_relay/output" />
+      <remap from="~input" to="bilateral_filter/output" />
       <rosparam subst_value="true">
         max_curvature: 0.01
         estimate_normal: true
@@ -28,12 +32,14 @@
 
     <node name="plane_concatenator" pkg="nodelet" type="nodelet"
           args="load jsk_pcl/PlaneConcatenator /$(arg manager)">
-      <remap from="~input" to="input_relay/output" />
+      <remap from="~input" to="bilateral_filter/output" />
       <remap from="~input/indices" to="organized_multi_plane_segmentation/output_refined" />
       <remap from="~input/polygons" to="organized_multi_plane_segmentation/output_refined_polygon" />
       <remap from="~input/coefficients" to="organized_multi_plane_segmentation/output_refined_coefficients" />
       <rosparam subst_value="true">
         connect_distance_threshold: 0.2
+        min_area: 0.1
+        max_area: $(arg area_size)
         vital_rate: $(arg vital_rate)
       </rosparam>
     </node>
@@ -52,21 +58,21 @@
       <remap from="~input_polygons" to="polygon_array_area_likelihood/output" />
       <remap from="~input_coefficients" to="plane_concatenator/output/coefficients" />
       <rosparam subst_value="true">
-        threshold: 0.8
+        threshold: 0.9
         vital_rate: $(arg vital_rate)
       </rosparam>
     </node>
 
     <node name="multi_plane_extraction" pkg="nodelet" type="nodelet"
           args="load jsk_pcl/MultiPlaneExtraction /$(arg manager)">
-      <remap from="~input" to="input_relay/output" />
+      <remap from="~input" to="bilateral_filter/output" />
       <remap from="~indices" to="plane_concatenator/output/indices" />
       <remap from="~input_polygons" to="polygon_array_likelihood_filter/output_polygons" />
       <remap from="~input_coefficients" to="polygon_array_likelihood_filter/output_coefficients" />
       <rosparam subst_value="true">
         use_sensor_frame: true
         sensor_frame: $(arg sensor_frame_id)
-        min_height: 0.03
+        min_height: 0.01
         vital_rate: $(arg vital_rate)
       </rosparam>
     </node>
@@ -75,7 +81,7 @@
           args="load jsk_pcl/EuclideanClustering /$(arg manager)">
       <remap from="~input" to="multi_plane_extraction/output" />
       <rosparam subst_value="true">
-        tolerance: 0.02
+        tolerance: 0.05
         min_size: 100
         vital_rate: $(arg vital_rate)
       </rosparam>
@@ -100,10 +106,10 @@
     <node name="color_histogram"
           pkg="nodelet" type="nodelet"
           args="load jsk_pcl/ColorHistogram /$(arg manager)">
-      <remap from="~input" to="input_relay/output"/>
+      <remap from="~input" to="bilateral_filter/output"/>
       <remap from="~input/indices" to="euclidean_clustering/output" />
       <rosparam>
-        bin_size: 12
+        bin_size: 10
         histogram_policy: 0
       </rosparam>
     </node>

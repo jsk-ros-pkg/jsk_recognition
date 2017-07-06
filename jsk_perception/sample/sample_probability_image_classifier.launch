@@ -19,31 +19,10 @@
   <node name="probability_image_classifier"
       pkg="jsk_perception" type="probability_image_classifier.py">
     <remap from="~input" to="fcn_object_segmentation/output/proba_image" />
+    <rosparam command="load" file="$(find jsk_perception)/config/voc_target_names.yaml" />
     <rosparam>
       ignore_labels:
         - 0
-      target_names:
-        - background
-        - aeroplane
-        - bicycle
-        - bird
-        - boat
-        - bottle
-        - bus
-        - car
-        - cat
-        - chair
-        - cow
-        - diningtable
-        - dog
-        - horse
-        - motorbike
-        - person
-        - potted plant
-        - sheep
-        - sofa
-        - train
-        - tv/monitor
     </rosparam>
   </node>
 

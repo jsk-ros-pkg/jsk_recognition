@@ -10,32 +10,11 @@
         output="screen">
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <remap from="~input/mask" to="$(arg INPUT_MASK)" />
+    <rosparam command="load" file="$(find jsk_perception)/config/voc_target_names.yaml" />
     <rosparam subst_value="true">
       gpu: $(arg GPU)
       model_name: fcn8s
       model_file: $(find jsk_perception)/trained_data/fcn8s_voc.npz
-      target_names:
-        - background
-        - aeroplane
-        - bicycle
-        - bird
-        - boat
-        - bottle
-        - bus
-        - car
-        - cat
-        - chair
-        - cow
-        - diningtable
-        - dog
-        - horse
-        - motorbike
-        - person
-        - potted plant
-        - sheep
-        - sofa
-        - train
-        - tv/monitor
       use_mask: $(arg USE_MASK)
     </rosparam>
   </node>

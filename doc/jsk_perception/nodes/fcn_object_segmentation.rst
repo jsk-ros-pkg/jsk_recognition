@@ -89,8 +89,19 @@ Parameters
 Sample
 ------
 
+**Sample**
+
 .. code-block:: bash
 
   roslaunch jsk_perception sample_fcn_object_segmentation.launch
 
 .. image:: images/sample_fcn_object_segmentation.png
+
+**Sample with mask image**
+
+.. code-block:: bash
+
+  roslaunch jsk_perception sample_fcn_object_segmentation.launch use_mask:=true
+
+.. image:: images/sample_fcn_object_segmentation_with_mask.png
+

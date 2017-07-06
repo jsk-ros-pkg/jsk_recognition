@@ -1,12 +1,15 @@
 <launch>
 
   <arg name="INPUT_IMAGE" />
+  <arg name="INPUT_MASK" />
   <arg name="GPU" default="0" />
+  <arg name="USE_MASK" default="false" />
 
   <node name="fcn_object_segmentation"
         pkg="jsk_perception" type="fcn_object_segmentation.py"
         output="screen">
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/mask" to="$(arg INPUT_MASK)" />
     <rosparam subst_value="true">
       gpu: $(arg GPU)
       model_name: fcn8s
@@ -33,6 +36,7 @@
         - sofa
         - train
         - tv/monitor
+      use_mask: $(arg USE_MASK)
     </rosparam>
   </node>
 

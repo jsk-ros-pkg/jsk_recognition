@@ -135,10 +135,12 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
         br = cv_bridge.CvBridge()
         img = br.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
         mask = br.imgmsg_to_cv2(mask_msg, desired_encoding='mono8')
+        if mask.ndim > 2:
+            mask = np.squeeze(mask, axis=2)
         label, proba_img = self.segment(img)
         label[mask == 0] = 0
-        proba_img[:, :, 0][mask != 0] = 1
-        proba_img[:, :, 1:][mask != 0] = 0
+        proba_img[:, :, 0][mask == 0] = 1
+        proba_img[:, :, 1:][mask == 0] = 0
         label_msg = br.cv2_to_imgmsg(label.astype(np.int32), '32SC1')
         label_msg.header = img_msg.header
         self.pub.publish(label_msg)

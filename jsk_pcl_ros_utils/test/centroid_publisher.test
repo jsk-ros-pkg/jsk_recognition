@@ -7,16 +7,16 @@
   <test test-name="test_centroid_publisher"
         name="test_centroid_publisher"
         pkg="jsk_tools" type="test_topic_published.py"
-        time-limit="20" retry="3">
+        time-limit="25" retry="3">
     <rosparam>
       topic_0: /centroid_publisher/output/point
-      timeout_0: 10
+      timeout_0: 20
       topic_1: /centroid_publisher/output/pose
-      timeout_1: 10
+      timeout_1: 20
       topic_2: /centroid_publisher_nan_input/output/point
-      timeout_2: 10
+      timeout_2: 20
       topic_3: /centroid_publisher_nan_input/output/pose
-      timeout_3: 10
+      timeout_3: 20
     </rosparam>
   </test>
 

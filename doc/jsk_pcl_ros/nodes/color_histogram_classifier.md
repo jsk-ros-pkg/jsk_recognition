@@ -1,7 +1,7 @@
 ColorHistogramClassifier
 ==============
 
-![detect_cans](https://user-images.githubusercontent.com/1901008/26961630-2ff9326c-4d1b-11e7-9a6e-2e149ae4ffca.png)
+![color_hist_rviz](https://user-images.githubusercontent.com/1901008/27892667-fc4ddd9c-623b-11e7-9b7a-9349f3711790.png)
 
 Classify point indices using color histogram by comparing with reference histogram array
 
@@ -21,13 +21,9 @@ Reference histograms are loaded from rosparam on start.
 
 ## Publishing Topics
 
-* `~output` (`jsk_recognition_msgs/ColorHistogramArray`)
+* `~output` (`jsk_recognition_msgs/ClassificationResult`)
 
-    Filtered color histogram array
-
-* `~output/indices` (`jsk_recognition_msgs/ClusterPointIndices`)
-
-    Filtered cluster point indices
+    Class from color histogram array
 
 ## Parameters
 
@@ -115,3 +111,5 @@ Reference histograms are loaded from rosparam on start.
 5. Run and get result
 
     You will be able to get classification result as `jsk_recognition_msgs/ClassificationResult`.
+
+See `jsk_pcl_ros/sample/sample_color_histogram.launch` for detail.

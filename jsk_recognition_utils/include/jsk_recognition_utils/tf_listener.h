@@ -7,9 +7,12 @@
 #define TF_LISTENER_H__
 
 #include <boost/shared_ptr.hpp>
+#include <geometry_msgs/TransformStamped.h>
 #include <ros/ros.h>
-#include <tf/transform_listener.h>
+#include <tf/transform_datatypes.h>
+#include <tf2_ros/buffer.h>
 #include <tf2_ros/buffer_client.h>
+#include <tf2_ros/transform_listener.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 
@@ -19,54 +22,60 @@ namespace jsk_recognition_utils
   {
   public:
     typedef boost::shared_ptr<TfListener> Ptr;
-    TfListener(const bool use_tf2,
-               const double check_frequency = 10.0,
-               const ros::Duration timeout_padding = ros::Duration(2.0),
-               const ros::Duration timeout_waiting = ros::Duration(0.0));
+    TfListener(const ros::NodeHandle& nh);
 
-    bool waitForTransform(const std::string& target_frame,
-                          const std::string& source_frame,
-                          const ros::Time& time,
-                          const ros::Duration& timeout) const;
+    // TF2 Style API
+    virtual bool
+    canTransform(const std::string&   target_frame,
+                 const std::string&   source_frame,
+                 const ros::Time&     target_time,
+                 const ros::Duration& timeout,
+                 std::string*         errstr = NULL) const;
 
-    void lookupTransform(const std::string& target_frame,
-                         const std::string& source_frame,
-                         const ros::Time& time,
-                         tf::StampedTransform& transform) const;
+    virtual geometry_msgs::TransformStamped
+    lookupTransform(const std::string&   target_frame,
+                    const std::string&   source_frame,
+                    const ros::Time&     time,
+                    const ros::Duration& timeout) const;
 
     template<class T>
     T& transform(const T& in, T& out,
-                 const std::string& target_frame,
-                 const ros::Duration& timeout=ros::Duration(0.0)) const
+                 const std::string&   target_frame,
+                 const ros::Duration& timeout = ros::Duration(0.0),
+                 std::string*         errstr  = NULL) const
     {
-      if (use_tf2_) {
-        return tf2_buffer_client_->transform(in, out, target_frame, timeout);
-      } else {
-        transform_tf1(in, out, target_frame, timeout);
-        return out;
-      }
+      if (use_buffer_client_)
+        return buffer_client_->transform(in, out, target_frame, timeout);
+      else
+        return buffer_->transform(in, out, target_frame, timeout);
     }
 
+    // Backport for TF1 style API
+    virtual bool
+    waitForTransform(const std::string& target_frame,
+                     const std::string& source_frame,
+                     const ros::Time& time,
+                     const ros::Duration& timeout,
+                     const ros::Duration& polling_sleep_duration = ros::Duration(0.01),
+                     std::string* error_msg = NULL) const;
+
+    virtual bool
+    canTransform(const std::string& target_frame,
+                 const std::string& source_frame,
+                 const ros::Time& time,
+                 std::string* error_msg = NULL) const;
+
+    virtual void
+    lookupTransform(const std::string& target_frame,
+                    const std::string& source_frame,
+                    const ros::Time& time,
+                    tf::StampedTransform& transform) const;
+
   protected:
-    bool use_tf2_;
-    tf::TransformListener* tf_listener_;
-    boost::shared_ptr<tf2_ros::BufferClient> tf2_buffer_client_;
-  private:
-    void transform_tf1(const geometry_msgs::Vector3Stamped& in,
-                       geometry_msgs::Vector3Stamped& out,
-                       const std::string& target_frame) const;
-    void transform_tf1(const geometry_msgs::PointStamped& in,
-                       geometry_msgs::PointStamped& out,
-                       const std::string& target_frame) const;
-    void transform_tf1(const geometry_msgs::PoseStamped& in,
-                       geometry_msgs::PoseStamped& out,
-                       const std::string& target_frame) const;
-    void transform_tf1(const geometry_msgs::QuaternionStamped& in,
-                       geometry_msgs::QuaternionStamped& out,
-                       const std::string& target_frame) const;
-    void transform_tf1(const geometry_msgs::TransformStamped& in,
-                       geometry_msgs::TransformStamped& out,
-                       const std::string& target_frame) const;
+    bool use_buffer_client_;
+    boost::shared_ptr<tf2_ros::Buffer> buffer_;
+    boost::shared_ptr<tf2_ros::TransformListener> listener_;
+    boost::shared_ptr<tf2_ros::BufferClient> buffer_client_;
   };
 }
 

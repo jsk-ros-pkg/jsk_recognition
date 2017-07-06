@@ -8,94 +8,121 @@
 
 namespace jsk_recognition_utils
 {
-  TfListener::TfListener(const bool use_tf2,
-                         const double check_frequency,
-                         const ros::Duration timeout_padding,
-                         const ros::Duration timeout_waiting) :
-    use_tf2_(use_tf2)
+  TfListener::TfListener(const ros::NodeHandle& nh)
   {
-    if (use_tf2_) {
-      tf2_buffer_client_.reset(new tf2_ros::BufferClient("/tf2_buffer_server", check_frequency, timeout_padding));
-      if (!tf2_buffer_client_->waitForServer(timeout_waiting)) {
-        ROS_ERROR_STREAM("Timed out to wait /tf2_buffer_server. TF1 is used instead of TF2");
-        tf2_buffer_client_.reset();
-        use_tf2_ = false;
+    nh.param("tf_use_buffer_client", use_buffer_client_, false);
+
+    // for buffer
+    int cache_time;
+    nh.param("tf_cache_time", cache_time, 10); // = tf2::BufferCore::DEFAULT_CACHE_TIME
+
+    // for buffer client
+    std::string buffer_server_ns;
+    double check_frequency, timeout_padding, wait_server_timeout;
+    nh.param("tf_buffer_server_ns", buffer_server_ns, std::string("/tf2_buffer_server"));
+    nh.param("tf_check_frequency", check_frequency, 10.0);
+    nh.param("tf_timeout_padding", timeout_padding, 2.0);
+    nh.param("tf_wait_server_timeout", wait_server_timeout, 10.0);
+
+    if (use_buffer_client_) {
+      buffer_client_.reset(new tf2_ros::BufferClient(buffer_server_ns, check_frequency,
+                                                     ros::Duration(timeout_padding)));
+      if (!buffer_client_->waitForServer(ros::Duration(wait_server_timeout))) {
+        ROS_ERROR_STREAM("Waiting " << buffer_server_ns << " timed out");
+        ROS_WARN_STREAM("Falling back to use tf2_ros::TransformListener");
+        buffer_client_.reset();
+        use_buffer_client_ = false;
       }
     }
-    if (!use_tf2_) {
-      tf_listener_ = TfListenerSingleton::getInstance();
+    if (!use_buffer_client_) {
+      buffer_.reset(new tf2_ros::Buffer(ros::Duration(cache_time)));
+      listener_.reset(new tf2_ros::TransformListener(*buffer_));
     }
   }
 
-  bool TfListener::waitForTransform(const std::string& target_frame,
-                                    const std::string& source_frame,
-                                    const ros::Time& time,
-                                    const ros::Duration& timeout) const
+  bool
+  TfListener::canTransform(const std::string&   target_frame,
+                           const std::string&   source_frame,
+                           const ros::Time&     target_time,
+                           const ros::Duration& timeout,
+                           std::string*         errstr) const
   {
-    if (use_tf2_) {
-      std::string errstr;
-      bool ok = tf2_buffer_client_->canTransform(target_frame, source_frame,
-                                                 time, timeout,
-                                                 &errstr);
-      if (!ok) ROS_ERROR_STREAM(errstr);
-      return ok;
-    } else {
-      return tf_listener_->waitForTransform(target_frame, source_frame,
-                                            time, timeout);
-    }
+    if (use_buffer_client_)
+      return buffer_client_->canTransform(target_frame, source_frame,
+                                          target_time, timeout, errstr);
+    else
+      return buffer_->canTransform(target_frame, source_frame,
+                                   target_time, timeout, errstr);
   }
 
-  void TfListener::lookupTransform(const std::string& target_frame,
-                                   const std::string& source_frame,
-                                   const ros::Time& time,
-                                   tf::StampedTransform& transform) const
+  geometry_msgs::TransformStamped
+  TfListener::lookupTransform(const std::string&   target_frame,
+                              const std::string&   source_frame,
+                              const ros::Time&     time,
+                              const ros::Duration& timeout) const
   {
-    if (use_tf2_) {
+    if (use_buffer_client_)
+      return buffer_client_->lookupTransform(target_frame, source_frame,
+                                             time, timeout);
+    else
+      return buffer_->lookupTransform(target_frame, source_frame,
+                                      time, timeout);
+  }
+
+  bool
+  TfListener::waitForTransform(const std::string& target_frame,
+                               const std::string& source_frame,
+                               const ros::Time& time,
+                               const ros::Duration& timeout,
+                               const ros::Duration& polling_sleep_duration,
+                               std::string* error_msg) const
+  {
+    ros::Time start = ros::Time::now();
+    bool ok = false;
+    while (ros::Time::now() - start < timeout)
+    {
+      if (use_buffer_client_)
+        ok = buffer_client_->canTransform(target_frame, source_frame,
+                                          time, polling_sleep_duration,
+                                          error_msg);
+      else
+        ok = buffer_->canTransform(target_frame, source_frame,
+                                   time, polling_sleep_duration,
+                                   error_msg);
+      if (ok) return true;
+    }
+    return false;
+  }
+
+  bool
+  TfListener::canTransform(const std::string& target_frame,
+                           const std::string& source_frame,
+                           const ros::Time&   time,
+                           std::string*       error_msg) const
+  {
+    if (use_buffer_client_)
+      return buffer_client_->canTransform(target_frame, source_frame,
+                                          time, ros::Duration(0.001),
+                                          error_msg);
+    else
+      return buffer_->canTransform(target_frame, source_frame,
+                                   time, error_msg);
+  }
+
+  void
+  TfListener::lookupTransform(const std::string&    target_frame,
+                              const std::string&    source_frame,
+                              const ros::Time&      time,
+                              tf::StampedTransform& transform) const
+  {
+    if (use_buffer_client_) {
       geometry_msgs::TransformStamped ts
-        = tf2_buffer_client_->lookupTransform(target_frame, source_frame, time);
+        = buffer_client_->lookupTransform(target_frame, source_frame, time);
       tf::transformStampedMsgToTF(ts, transform);
     } else {
-      tf_listener_->lookupTransform(target_frame, source_frame,
-                                    time, transform);
+      geometry_msgs::TransformStamped ts
+        = buffer_->lookupTransform(target_frame, source_frame, time);
+      tf::transformStampedMsgToTF(ts, transform);
     }
-  }
-
-  void TfListener::transform_tf1(const geometry_msgs::Vector3Stamped& in,
-                                 geometry_msgs::Vector3Stamped& out,
-                                 const std::string& target_frame) const
-  {
-    tf_listener_->transformVector(target_frame, in, out);
-  }
-
-  void TfListener::transform_tf1(const geometry_msgs::PointStamped& in,
-                                 geometry_msgs::PointStamped& out,
-                                 const std::string& target_frame) const
-  {
-    tf_listener_->transformPoint(target_frame, in, out);
-  }
-
-  void TfListener::transform_tf1(const geometry_msgs::PoseStamped& in,
-                                 geometry_msgs::PoseStamped& out,
-                                 const std::string& target_frame) const
-  {
-    tf_listener_->transformPose(target_frame, in, out);
-  }
-
-  void TfListener::transform_tf1(const geometry_msgs::QuaternionStamped& in,
-                                 geometry_msgs::QuaternionStamped& out,
-                                 const std::string& target_frame) const
-  {
-    tf_listener_->transformQuaternion(target_frame, in, out);
-  }
-
-  void TfListener::transform_tf1(const geometry_msgs::TransformStamped& in,
-                                 geometry_msgs::TransformStamped& out,
-                                 const std::string& target_frame) const
-  {
-    tf::StampedTransform tin, tout;
-    tf::transformStampedMsgToTF(in, tin);
-    tf_listener_->lookupTransform(target_frame, in.header.frame_id,
-                                  in.header.stamp, tout);
-    tf::transformStampedTFToMsg(tout, out);
   }
 }

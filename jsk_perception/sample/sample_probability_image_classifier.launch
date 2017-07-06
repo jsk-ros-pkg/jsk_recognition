@@ -1,19 +1,13 @@
 <launch>
 
   <arg name="gui" default="true" />
-  <arg name="GPU" default="0" />
+  <arg name="gpu" default="0" />
+  <arg name="use_mask" default="false" />
 
-  <node name="image_publisher"
-        pkg="jsk_perception" type="image_publisher.py">
-    <rosparam subst_value="true">
-      publish_info: false
-      file_name: $(find jsk_perception)/sample/object_detection_example_1.jpg
-    </rosparam>
-  </node>
-
-  <include file="$(find jsk_perception)/launch/fcn_object_segmentation.launch">
-    <arg name="INPUT_IMAGE" value="image_publisher/output" />
-    <arg name="GPU" value="$(arg GPU)" />
+  <include file="$(find jsk_perception)/sample/sample_fcn_object_segmentation.launch">
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="gpu" value="$(arg gpu)" />
+    <arg name="use_mask" value="$(arg use_mask)" />
   </include>
 
   <node name="probability_image_classifier"
@@ -33,7 +27,7 @@
   </node>
 
   <group if="$(arg gui)">
-    <node name="image_view"
+    <node name="image_view_1"
           pkg="image_view" type="image_view">
       <remap from="image" to="draw_classification_result/output" />
     </node>

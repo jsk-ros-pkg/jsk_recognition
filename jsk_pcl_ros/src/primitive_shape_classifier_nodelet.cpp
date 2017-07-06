@@ -207,16 +207,16 @@ namespace jsk_pcl_ros
       boundary_indices.push_back(std::move(b));
       *projected_cloud += *pc;
 
-      if (box_likelihood > box_threshold_) {
-        // box
-        result.labels.push_back(0);
-        result.label_names.push_back("box");
-        result.label_proba.push_back(box_likelihood);
-      } else if (circle_likelihood > circle_threshold_) {
+      if (circle_likelihood > circle_threshold_) {
         // circle
         result.labels.push_back(1);
         result.label_names.push_back("circle");
         result.label_proba.push_back(circle_likelihood);
+      } else if (box_likelihood > box_threshold_) {
+        // box
+        result.labels.push_back(0);
+        result.label_names.push_back("box");
+        result.label_proba.push_back(box_likelihood);
       } else {
         // other
         result.labels.push_back(3);

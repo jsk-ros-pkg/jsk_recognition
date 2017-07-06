@@ -105,7 +105,7 @@ namespace jsk_pcl_ros_utils
         }
       }
       else if (label_to_indices.count(i) == 0 ||
-              std::find(ignore_labels_.begin(), ignore_labels_.end(), i) != ignore_labels_.end()) {
+               std::find(ignore_labels_.begin(), ignore_labels_.end(), i) != ignore_labels_.end()) {
         indices_msg.header = label_msg->header;
         cluster_indices_msg.cluster_indices.push_back(indices_msg);
       }

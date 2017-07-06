@@ -45,3 +45,6 @@ Compute color histogram for each cluster point indices.
     - 2: `HUE_AND_SATURATION`
         - Use both hue and saturation as 2-d matrix
 
+## How to visualize
+
+See [ColorHistogramVisualizer](color_histogram_visualizer.md)

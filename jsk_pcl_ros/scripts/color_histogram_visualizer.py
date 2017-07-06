@@ -92,7 +92,7 @@ class ColorHistogramVisualizer(ConnectionBasedTransport):
 
     def plot_hist_hue(self, hist):
         gs = gridspec.GridSpec(1, 2, width_ratios=[4, 1])
-        plt.subplot(gs[0])
+        plt.subplot(gs[0], axisbg='silver')
         bin_size = len(hist) - 2
         bin_step = 360.0 / bin_size
         x = np.arange(360.0, step=bin_step)
@@ -103,8 +103,9 @@ class ColorHistogramVisualizer(ConnectionBasedTransport):
         plt.xlim(0, 360.0)
         plt.ylim(ymin=0.0, ymax=1.0)
         ymin, ymax = plt.ylim()
-        plt.subplot(gs[1])
-        bars = plt.bar(range(2), hist[-2:], width=1.0, label=["white", "black"])
+        plt.subplot(gs[1], axisbg='silver')
+        bars = plt.bar(range(2), hist[-2:], label=["white", "black"],
+                       width=1.0, linewidth=2.0)
         bars[0].set_facecolor((1.0, 1.0, 1.0, 1.0))
         bars[1].set_facecolor((0.0, 0.0, 0.0, 1.0))
         plt.ylim(ymin, ymax)

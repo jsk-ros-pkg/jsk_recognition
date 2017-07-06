@@ -1,6 +1,8 @@
 PrimitiveShapeClassifier
 =========================
 
+![primitive_shape_classifier](https://user-images.githubusercontent.com/1901008/27854434-ca088eee-61a1-11e7-9a98-0864013a8f63.png)
+
 Classify shape for each cluster point indices on planes.
 
 ## Subscribing Topics

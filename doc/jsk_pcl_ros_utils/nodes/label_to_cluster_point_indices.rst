@@ -38,3 +38,8 @@ Parameters
 * ``~bg_label`` (``Int``, default: ``0``)
 
   Label value for which background point indices is published.
+
+* ``~ignore_labels`` (List of ``Int``, default ``[]``)
+
+  List of ignored labels.
+  Indices of ignored labels are replaced by empty ones.

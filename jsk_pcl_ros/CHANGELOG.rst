@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.3 (2017-07-07)
+------------------
 * Filter invalid centroid in centroid_publisher (`#2150 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2150>`_)
   * Add sample and test for CentroidPublisher
 

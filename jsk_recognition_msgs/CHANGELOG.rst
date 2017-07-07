@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.3 (2017-07-07)
+------------------
 * [jsk_perception] apply candidates node supports topic update (`#2143 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2143>`_)
   * update Label msg API
   * add Label and LabelArray msg

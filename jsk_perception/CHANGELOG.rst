@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.3 (2017-07-07)
+------------------
 * [jsk_perception] add FCN-based classifiers (`#2142 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2142>`_)
   * make FCN-based classifiers pass test
   * mask_image_generator run only when use_mask=true

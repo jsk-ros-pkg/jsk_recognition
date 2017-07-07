@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.3 (2017-07-07)
+------------------
 * [jsk_pcl_ros_utils] Add nodelet for computing & comparing color  histogram (`#2101 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2101>`_ )
   * jsk_recognition_utils/include/jsk_recognition_utils/pcl/color_histogram.h: add color_histogram_classifier and visualizer
 * Generate Kinfu texture model with attention (BoundingBox) and Groundframe to fix occluded surface  (`#2135 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2135>`_ )

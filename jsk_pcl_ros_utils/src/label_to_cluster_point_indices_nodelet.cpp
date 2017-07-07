@@ -47,6 +47,7 @@ namespace jsk_pcl_ros_utils
   {
     DiagnosticNodelet::onInit();
     pnh_->param("bg_label", bg_label_, 0);
+    pnh_->param("ignore_labels", ignore_labels_, std::vector<int>());
     pub_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output", 1);
     pub_bg_ = advertise<pcl_msgs::PointIndices>(*pnh_, "output/bg_indices", 1);
     onInitPostProcess();
@@ -93,9 +94,9 @@ namespace jsk_pcl_ros_utils
     cluster_indices_msg.header = bg_indices_msg.header = label_msg->header;
     for (size_t i=0; i <= max_label; i++)
     {
+      pcl_msgs::PointIndices indices_msg;
       if (i == bg_label_) {
         if (label_to_indices.count(i) == 0) {
-          pcl_msgs::PointIndices indices_msg;
           indices_msg.header = label_msg->header;
           bg_indices_msg = indices_msg;
         }
@@ -103,8 +104,8 @@ namespace jsk_pcl_ros_utils
           bg_indices_msg = label_to_indices[i];
         }
       }
-      else if (label_to_indices.count(i) == 0) {
-        pcl_msgs::PointIndices indices_msg;
+      else if (label_to_indices.count(i) == 0 ||
+               std::find(ignore_labels_.begin(), ignore_labels_.end(), i) != ignore_labels_.end()) {
         indices_msg.header = label_msg->header;
         cluster_indices_msg.cluster_indices.push_back(indices_msg);
       }

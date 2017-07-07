@@ -13,7 +13,7 @@
   </node>
 
   <node name="mask_image_generator"
-        pkg="jsk_perception" type="mask_image_generator">
+        pkg="jsk_perception" type="mask_image_generator" if="$(arg use_mask)">
     <remap from="~input" to="image_publisher/output" />
     <rosparam>
       offset_x: 110

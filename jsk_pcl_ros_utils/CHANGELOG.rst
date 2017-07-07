@@ -2,6 +2,25 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Filter invalid centroid in centroid_publisher (`#2150 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2150>`_)
+  * Looser timeout for centroid_publisher.test
+  * Add sample and test for CentroidPublisher
+  * Filter invalid centroid in centroid_publisher
+
+* Capability of specifying background label for LabelToClusterPointIndices (`#2134 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2134>`_)
+  * fix bug in label_to_cluster_point_indices_nodelet
+  * Capability of specifying background label for LabelToClusterPointIndices
+
+* add ignore_labels in label_to_cluster_point_indices (`#2151 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2151>`_)
+  * Fix style of code of LabelToClusterPointIndices
+
+* [jsk_pcl_ros_utils/src] add onInitPostProcess forStaticPolygonArrayPublisher, PolygonArrayTransformer (`#2126 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2126>`_)
+  * [jsk_pcl_ros_utils] add onInitPostProcess to static_polygon_array_publisher_nodelet.cpp, polygon_array_transformer_nodelet.cpp
+
+* Contributors: Kanae Kochigami, Kentaro Wada, Shingo Kitagawa
+
 1.1.2 (2017-06-16)
 ------------------
 * [jsk_pcl_ros_utils] add PolygonArrayLikelihoodFilter (`#2054 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2054>`_ )

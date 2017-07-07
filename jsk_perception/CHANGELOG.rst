@@ -2,6 +2,56 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_perception] add FCN-based classifiers (`#2142 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2142>`_)
+  * make FCN-based classifiers pass test
+  * mask_image_generator run only when use_mask=true
+  * add voc_target_names yaml
+  * FCN-based classifiers publish full result
+  * add sample and test of fcn-based classifiers
+  * add probability_image_classifier node
+  * add label_image_classifier node
+
+* [jsk_perception] squeeze mask to image dim=2 in fcn segmentation (`#2144 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2144>`_)
+  * check mask ndim before squeeze
+  * add use_mask sample and test for FCN segmentation
+  * fix typo in fcn segmentation
+  * squeeze mask to image dim=2 in fcn segmentation
+
+* [jsk_perception/polygon_to_mask] add error message of frame_id (`#2125 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2125>`_)
+  * [jsk_perception/polygon_to_mask_image] add error message when frame_id is not correct.
+
+* [jsk_perception] apply candidates node supports topic update (`#2143 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2143>`_)
+  * node_scripts/apply_context_to_label_probability: update Label msg API
+  * node_scripts/apply_context_to_label_probability: apply candiates support topic update
+
+* [jsk_perception] PeoplePoseEstimation2D (`#2115 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2115>`_)
+  * [jsk_perception][people_pose_estimation_2d.py] keep compatibility chainer v1
+  * [jsk_perception/people_pose_estimation_2d] Fixed missed numpy/cupy type
+  * [jsk_perception/people_pose_estimation_2d] Changed sample bag file
+  * [jsk_perception/people_pose_estimation_2d] Add people_mask_publisher
+  * [jsk_perception/people_pose_estimation_2d] Publishe 2d image pose
+  * [jsk_recogntion_msgs/PoseArray] Add score
+  * [jsk_perception/people_pose_estimation_2d] Fixed install sample bag
+  * [jsk_perception/people_pose_estimation_2d] Delete duplicated code
+  * [jsk_perception/people_pose_estimation_2d] Modified type of PeoplePose.msg
+  * [jsk_perception/people_pose_estimation_2d] Fiexed publish img encodings
+  * [jsk_perception/people_pose_estimation_2d] Add test
+
+* [jsk_perception/people_pose] Fixed typo and publish rect images. (`#2146 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2146>`_ )
+  * [jsk_perception/people_pose] Refactor. Delete unnecessary code
+  * [jsk_perception/people_pose] Bug fix. Publish rectified image
+  * [jsk_perception/people_pose] Fix typo
+  * [jsk_perception/people_pose] Delete pcl dependencies
+
+* [jsk_perception/draw_rect_array.py] check polygon_msg list size (`#2114 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2114>`_ )
+* [jsk_perception/mask_image_to_rect.cpp] check indices size before execute boundingRect (`#2113 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2113>`_ )
+  * [jsk_perception] check indices size before execute boundingRect
+  * jsk_perception/src/mask_image_to_rect.cpp: publish topic even if list is empty
+
+* Contributors: Yuki Furuta, Kanae Kochigami, Masaki Murooka, Shingo Kitagawa, Iori Yanokura
+
 1.1.2 (2017-06-16)
 ------------------
 * label_image_decomposer.py: Faster and better visualization of segmentation (`#2109 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2109>`_ )

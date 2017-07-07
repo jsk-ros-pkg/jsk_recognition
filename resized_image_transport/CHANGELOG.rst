@@ -2,6 +2,9 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.1.2 (2017-06-16)
 ------------------
 * Remove dependency of resized_image_transport on jsk_perception (`#2075 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2075>`_ )

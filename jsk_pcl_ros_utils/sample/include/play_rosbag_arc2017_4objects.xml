@@ -4,7 +4,7 @@
 
   <node name="rosbag_play"
         pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros)/sample/data/arc2017_4objects.bag --clock --loop">
+        args="$(find jsk_pcl_ros_utils)/sample/data/arc2017_4objects.bag --clock --loop">
   </node>
 
   <group ns="/camera/rgb">

@@ -2,7 +2,7 @@
 
   <arg name="gui" default="true" />
 
-  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_arc2017_4objects.xml" />
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_arc2017_4objects.xml" />
 
   <arg name="MANAGER" value="nodelet_manager" />
   <node name="$(arg MANAGER)"

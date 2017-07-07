@@ -53,8 +53,8 @@ namespace jsk_pcl_ros_utils
     pcl::PointCloud<pcl::PointXYZ> cloud_xyz;
     pcl::fromROSMsg(*input, cloud_xyz);
     Eigen::Vector4f center;
-    pcl::compute3DCentroid(cloud_xyz, center);
-    if (publish_tf_) {
+    bool is_valid = pcl::compute3DCentroid(cloud_xyz, center);
+    if (publish_tf_ && is_valid) {
       tf::Transform transform;
       transform.setOrigin(tf::Vector3(center[0], center[1], center[2]));
       transform.setRotation(tf::createIdentityQuaternion());

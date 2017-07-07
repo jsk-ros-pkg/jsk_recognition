@@ -1,6 +1,8 @@
 # CentroidPublisher
 ## What Is This
 
+![](images/centroid_publisher.jpg)
+
 This nodelet will subscribe the sensor\_msgs::PointCloud2 or jsk\_recognition\_msgs/PolygonArray and calculate its centroid.
 This also boardcasts coodinates of cloud or each polygons as `tf` whose parent is cloud headers frame\_id and whose child is the new centroid frame_id.
 
@@ -31,13 +33,14 @@ This also boardcasts coodinates of cloud or each polygons as `tf` whose parent i
 
    A frame_id for centroid tf.
    For polygon array, suffix numbers are appended. (e.g. `frame00`)
+
 * `~publish_tf` (Boolean, default: `False`)
   Set this parameter to `True` in order to publish tf frame.
+  The invalid centroid is filtered and tf is not published in that case.
   Note that if this option is `True`, input topics are always subscribed.
 
 ## Sample
-Plug the depth sensor which can be launched by openni.launch and run the below command.
 
 ```
-roslaunch jsk_pcl_ros centroid_publisher.launch
+roslaunch jsk_pcl_ros_utils sample_centroid_publisher.launch
 ```

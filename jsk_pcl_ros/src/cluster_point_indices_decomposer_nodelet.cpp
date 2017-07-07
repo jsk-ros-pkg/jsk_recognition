@@ -432,6 +432,7 @@ namespace jsk_pcl_ros
         }
       }
       else {
+        // transform point cloud to target frame
         tf::StampedTransform tf_transform;
         try {
           tf_transform = jsk_recognition_utils::lookupTransformWithDuration(
@@ -447,9 +448,50 @@ namespace jsk_pcl_ros
         }
         Eigen::Affine3f transform;
         tf::transformTFToEigen(tf_transform, transform);
-        pcl::transformPointCloud(*segmented_cloud, *segmented_cloud_transformed, transform);
-        is_center_valid = pcl::compute3DCentroid(*segmented_cloud_transformed, center) != 0;
-        bounding_box.header.frame_id = target_frame_id_;
+        pcl::transformPointCloud(*segmented_cloud, *segmented_cloud, transform);
+
+        is_center_valid = pcl::compute3DCentroid(*segmented_cloud, center) != 0;
+
+        // compute planes from target frame
+        pcl::PointXYZRGB min_pt, max_pt;
+        pcl::getMinMax3D(*segmented_cloud, min_pt, max_pt);
+        //
+        pcl_msgs::ModelCoefficients coef_by_frame;
+        coef_by_frame.values.push_back(0);
+        coef_by_frame.values.push_back(0);
+        coef_by_frame.values.push_back(1);
+        coef_by_frame.values.push_back(- min_pt.z);
+        jsk_recognition_msgs::ModelCoefficientsArray::Ptr coefficients_by_frame(
+          new jsk_recognition_msgs::ModelCoefficientsArray);
+        coefficients_by_frame->header.frame_id = target_frame_id_;
+        coefficients_by_frame->coefficients.push_back(coef_by_frame);
+        //
+        geometry_msgs::PolygonStamped plane_by_frame;
+        plane_by_frame.header.frame_id = target_frame_id_;
+        geometry_msgs::Point32 point;
+        point.z = min_pt.z;
+        point.x = min_pt.x;
+        point.y = min_pt.y;
+        plane_by_frame.polygon.points.push_back(point);
+        point.x = max_pt.x;
+        point.y = min_pt.y;
+        plane_by_frame.polygon.points.push_back(point);
+        point.x = max_pt.x;
+        point.y = max_pt.y;
+        plane_by_frame.polygon.points.push_back(point);
+        point.x = min_pt.x;
+        point.y = max_pt.y;
+        plane_by_frame.polygon.points.push_back(point);
+        jsk_recognition_msgs::PolygonArray::Ptr planes_by_frame(
+          new jsk_recognition_msgs::PolygonArray);
+        planes_by_frame->header.frame_id = target_frame_id_;
+        planes_by_frame->polygons.push_back(plane_by_frame);
+        //
+        bool success = transformPointCloudToAlignWithPlane(segmented_cloud, segmented_cloud_transformed,
+                                                           center, planes_by_frame, coefficients_by_frame, m4, q);
+        if (!success) {
+          return false;
+        }
       }
     }
     else {
@@ -634,19 +676,20 @@ namespace jsk_pcl_ros
       if (!successp) {
         return;
       }
+      std::string target_frame;
+      if (align_boxes_ && !align_boxes_with_plane_) {
+        target_frame = target_frame_id_;
+      }
+      else {
+        target_frame = input->header.frame_id;
+      }
       center_pose_array.poses.push_back(pose_msg);
+      bounding_box.header.frame_id = target_frame;
       bounding_box_array.boxes.push_back(bounding_box);
       if (publish_tf_) {
         tf::Transform transform;
         transform.setOrigin(tf::Vector3(pose_msg.position.x, pose_msg.position.y, pose_msg.position.z));
         transform.setRotation(tf::createIdentityQuaternion());
-        std::string target_frame;
-        if (align_boxes_ && !align_boxes_with_plane_) {
-          target_frame = target_frame_id_;
-        }
-        else {
-          target_frame = input->header.frame_id;
-        }
         br_->sendTransform(tf::StampedTransform(transform, input->header.stamp, target_frame,
                                                 tf_prefix_ + (boost::format("output%02u") % (i)).str()));
       }

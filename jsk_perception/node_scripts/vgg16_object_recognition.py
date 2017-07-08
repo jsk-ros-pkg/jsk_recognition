@@ -4,18 +4,21 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+
+import chainer
 from chainer import cuda
-from chainer import Variable
 import chainer.serializers as S
+from chainer import Variable
+from distutils.version import LooseVersion
 import numpy as np
 import skimage.transform
 
 import cv_bridge
-from jsk_topic_tools import ConnectionBasedTransport
-from jsk_topic_tools.log_utils import logerr_throttle
+from jsk_recognition_msgs.msg import ClassificationResult
 from jsk_recognition_utils.chainermodels import VGG16
 from jsk_recognition_utils.chainermodels import VGG16BatchNormalization
-from jsk_recognition_msgs.msg import ClassificationResult
+from jsk_topic_tools import ConnectionBasedTransport
+from jsk_topic_tools.log_utils import logerr_throttle
 import message_filters
 import rospy
 from sensor_msgs.msg import Image
@@ -89,7 +92,8 @@ class VGG16ObjectRecognition(ConnectionBasedTransport):
                 logerr_throttle(10, 'Size of input mask is 0')
                 return
             bgr[mask == 0] = self.mean_bgr
-        bgr = skimage.transform.resize(bgr, (self.insize, self.insize), preserve_range=True)
+        bgr = skimage.transform.resize(
+            bgr, (self.insize, self.insize), preserve_range=True)
         input_msg = bridge.cv2_to_imgmsg(bgr.astype(np.uint8), encoding='bgr8')
         input_msg.header = imgmsg.header
         self.pub_input.publish(input_msg)
@@ -98,10 +102,15 @@ class VGG16ObjectRecognition(ConnectionBasedTransport):
         x_data = np.array([blob], dtype=np.float32)
         if self.gpu != -1:
             x_data = cuda.to_gpu(x_data, device=self.gpu)
-        x = Variable(x_data, volatile=True)
-
-        self.model.train = False
-        self.model(x)
+        if LooseVersion(chainer.__version__) < LooseVersion('2.0.0'):
+            x = Variable(x_data, volatile=True)
+            self.model.train = False
+            self.model(x)
+        else:
+            with chainer.using_config('train', False), \
+                    chainer.no_backprop_mode():
+                x = Variable(x_data)
+                self.model(x)
 
         proba = cuda.to_cpu(self.model.pred.data)[0]
         label = np.argmax(proba)

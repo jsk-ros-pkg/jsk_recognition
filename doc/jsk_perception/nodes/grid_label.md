@@ -20,3 +20,9 @@ Generate labels of grid.
 * `~use_camera_info` (Boolean, default: `false`)
 
   if this parameter is true, it uses `sensor_msgs/CameraInfo` for `~input`.
+
+## Sample
+
+```bash
+roslaunch jsk_perception sample_grid_label.launch
+```

@@ -48,3 +48,9 @@ Compute color histogram for each cluster point indices.
 ## How to visualize
 
 See [ColorHistogramVisualizer](color_histogram_visualizer.md)
+
+## Sample
+
+```bash
+roslaunch jsk_pcl_ros sample_color_histogram.launch
+```

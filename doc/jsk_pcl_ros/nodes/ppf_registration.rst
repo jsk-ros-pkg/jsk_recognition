@@ -102,5 +102,9 @@ Parameters
 
   Rotation clustering threshold for registration
 
+Sample
+------
 
+.. code-block:: bash
 
+  roslaunch jsk_pcl_ros sample_ppf_registration.launch

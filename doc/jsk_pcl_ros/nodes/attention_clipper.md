@@ -78,3 +78,9 @@ to see the object.
 * `~negative` (Boolean, default: `False`)
 
   Publish points which are not inside of attention regions if this parameter is true.
+
+## Sample
+
+```bash
+roslaunch jsk_pcl_ros sample_attention_clipper.launch
+```

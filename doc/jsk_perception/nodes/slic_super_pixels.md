@@ -31,3 +31,9 @@ Output of this node is an image and each value means label index.
 * `~weight` (Integer, default: `4`)
 
   Weight of metrics between color and pixel distance.
+
+## Sample
+
+```bash
+roslaunch jsk_perception sample_slic_super_pixel.launch
+```

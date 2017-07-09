@@ -38,3 +38,10 @@ Parameters
 - ``~rotate_y`` (``Double``, default: ``0.0``)
 
 - ``~rotate_z`` (``Double``, default: ``0.0``)
+
+Sample
+------
+
+.. code-block:: bash
+
+  roslaunch jsk_pcl_ros sample_rearrange_bounding_box.launch

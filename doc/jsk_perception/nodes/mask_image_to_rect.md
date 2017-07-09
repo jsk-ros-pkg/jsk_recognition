@@ -11,3 +11,8 @@ Convert a mask image into geometry_msgs::PolygonStamped.
 
   PolygonStamped message which only contains two points. Minimum point and Maximum point to represent bounding box in image.
 
+## Sample
+
+```bash
+roslaunch jsk_perception sample_mask_image_to_rect.launch
+```

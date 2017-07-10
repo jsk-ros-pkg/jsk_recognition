@@ -59,6 +59,8 @@ add_message_files(
   TrackingStatus.msg
   BoolStamped.msg
   VectorArray.msg
+  Weight.msg
+  WeightStamped.msg
   WeightedPoseArray.msg
   ContactSensor.msg
   ContactSensorArray.msg

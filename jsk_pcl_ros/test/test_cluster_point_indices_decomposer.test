@@ -15,6 +15,8 @@
       timeout_1: 30
       topic_2: /cluster_point_indices_decomposer_align_boxes_with_frame/boxes
       timeout_2: 30
+      topic_3: /cluster_point_indices_decomposer_sorted/boxes
+      timeout_3: 30
     </rosparam>
   </test>
 

@@ -151,6 +151,9 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
             sub.unregister()
 
     def _cb_with_depth(self, img_msg, depth_msg, camera_info_msg):
+        depth_scale_factor = 1.0
+        if depth_msg.encoding == '16UC1':
+            depth_scale_factor = 1. / 1000
         br = cv_bridge.CvBridge()
         img = br.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
         depth_img = br.imgmsg_to_cv2(depth_msg, 'passthrough')
@@ -177,7 +180,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
             for joint_pos in person_joint_positions:
                 if joint_pos['score'] < 0:
                     continue
-                z = float(depth_img[int(joint_pos['y'])][int(joint_pos['x'])])
+                z = float(depth_img[int(joint_pos['y'])][int(joint_pos['x'])]) * depth_scale_factor
                 if np.isnan(z):
                     continue
                 x = (joint_pos['x'] - cx) * z / fx

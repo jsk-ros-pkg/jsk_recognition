@@ -218,7 +218,14 @@ namespace jsk_pcl_ros
     }
     if (in->height != height_expected || in->width != width_expected)
     {
-      ROS_ERROR("Input depth images must have same size: height=%d, width=%d.", height_expected, width_expected);
+      NODELET_ERROR_THROTTLE(10, "Input images must have same size: height=%d, width=%d.",
+                             height_expected, width_expected);
+      return false;
+    }
+    if (in->encoding != encoding_)
+    {
+      NODELET_ERROR_THROTTLE(10, "Input images must have same encoding. Expected: %s, Actual: %s",
+                             encoding_.c_str(), in->encoding.c_str());
       return false;
     }
     inputs.push_back(cv_bridge::toCvShare(in, encoding_)->image);
@@ -234,8 +241,8 @@ namespace jsk_pcl_ros
     int height = in1->height;
     int width = in1->width;
     std::vector<cv::Mat> inputs;
-    inputs.push_back(cv_bridge::toCvShare(in1, encoding_)->image);
-    inputs.push_back(cv_bridge::toCvShare(in2, encoding_)->image);
+    validateInput(in1, height, width, inputs);
+    validateInput(in2, height, width, inputs);
     validateInput(in3, height, width, inputs);
     validateInput(in4, height, width, inputs);
     validateInput(in5, height, width, inputs);

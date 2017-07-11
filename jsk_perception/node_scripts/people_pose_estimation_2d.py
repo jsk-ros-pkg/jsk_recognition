@@ -149,7 +149,11 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         br = cv_bridge.CvBridge()
         img = br.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
         depth_img = br.imgmsg_to_cv2(depth_msg, 'passthrough')
-        depth_img = np.array(depth_img, dtype=np.float32)
+        if depth_msg.encoding == '16UC1':
+            depth_img = np.asarray(depth_img, dtype=np.float32)
+            depth_img /= 1000  # convert metric: mm -> m
+        elif depth_msg.encoding != '32FC1':
+            rospy.logerr('Unsupported depth encoding: %s' % depth_msg.encoding)
 
         pose_estimated_img, people_joint_positions = self.pose_estimate(img)
         pose_estimated_msg = br.cv2_to_imgmsg(

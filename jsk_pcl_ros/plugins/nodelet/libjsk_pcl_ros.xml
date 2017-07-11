@@ -506,4 +506,8 @@
          type="jsk_pcl_ros::PPFRegistration"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_pcl/PrimitiveShapeClassifier"
+         type="jsk_pcl_ros::PrimitiveShapeClassifier"
+         base_class_type="nodelet::Nodelet">
+  </class>
 </library>

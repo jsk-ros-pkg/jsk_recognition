@@ -21,6 +21,7 @@ import rospy
 from jsk_topic_tools import ConnectionBasedTransport
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import Point
+from geometry_msgs.msg import Quaternion
 from jsk_recognition_msgs.msg import PeoplePose
 from jsk_recognition_msgs.msg import PeoplePoseArray
 from sensor_msgs.msg import CameraInfo
@@ -178,9 +179,8 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
                 y = (joint_pos['y'] - cy) * z / fy
                 pose_msg.limb_names.append(joint_pos['limb'])
                 pose_msg.scores.append(joint_pos['score'])
-                pose_msg.poses.append(Pose(position=Point(x=x,
-                                                          y=y,
-                                                          z=z)))
+                pose_msg.poses.append(Pose(position=Point(x=x, y=y, z=z),
+                                           orientation=Quaternion(w=1)))
             people_pose_msg.poses.append(pose_msg)
 
         self.pose_2d_pub.publish(people_pose_2d_msg)

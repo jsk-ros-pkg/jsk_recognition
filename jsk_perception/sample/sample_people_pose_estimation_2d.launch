@@ -29,19 +29,21 @@
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <remap from="~input/pose" to="people_pose_estimation_2d/pose_2d" />
     <rosparam>
+      queue_size: 50
       person_indices: 0
       limb_part: RHand
     </rosparam>
   </node>
 
+  <node name="people_poses_to_poses"
+        pkg="jsk_recognition_msgs" type="people_pose_array_to_pose_array.py">
+    <remap from="~input" to="people_pose_estimation_2d/pose" />
+  </node>
+
   <group if="$(arg gui)" >
-    <node name="image_view0"
-          pkg="image_view" type="image_view" >
-      <remap from="image" to="people_pose_estimation_2d/output" />
-    </node>
-    <node name="image_view1"
-          pkg="image_view" type="image_view" >
-      <remap from="image" to="people_mask_publisher/output" />
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_perception)/sample/config/people_pose_estimation_2d.rviz">
     </node>
   </group>
 

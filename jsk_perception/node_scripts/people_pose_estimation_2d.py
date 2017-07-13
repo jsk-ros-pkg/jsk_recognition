@@ -9,12 +9,6 @@ from distutils.version import LooseVersion
 
 import chainer
 import chainer.functions as F
-if LooseVersion(chainer.__version__) < LooseVersion("2.0"):
-    import chainer.functions.caffe
-    chainer_v1 = True
-else:
-    import chainer.links.caffe
-    chainer_v1 = False
 from chainer import cuda
 import cv2
 import matplotlib
@@ -27,6 +21,7 @@ import rospy
 from jsk_topic_tools import ConnectionBasedTransport
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import Point
+from geometry_msgs.msg import Quaternion
 from jsk_recognition_msgs.msg import PeoplePose
 from jsk_recognition_msgs.msg import PeoplePoseArray
 from sensor_msgs.msg import CameraInfo
@@ -154,7 +149,11 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         br = cv_bridge.CvBridge()
         img = br.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
         depth_img = br.imgmsg_to_cv2(depth_msg, 'passthrough')
-        depth_img = np.array(depth_img, dtype=np.float32)
+        if depth_msg.encoding == '16UC1':
+            depth_img = np.asarray(depth_img, dtype=np.float32)
+            depth_img /= 1000  # convert metric: mm -> m
+        elif depth_msg.encoding != '32FC1':
+            rospy.logerr('Unsupported depth encoding: %s' % depth_msg.encoding)
 
         pose_estimated_img, people_joint_positions = self.pose_estimate(img)
         pose_estimated_msg = br.cv2_to_imgmsg(
@@ -184,9 +183,8 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
                 y = (joint_pos['y'] - cy) * z / fy
                 pose_msg.limb_names.append(joint_pos['limb'])
                 pose_msg.scores.append(joint_pos['score'])
-                pose_msg.poses.append(Pose(position=Point(x=x,
-                                                          y=y,
-                                                          z=z)))
+                pose_msg.poses.append(Pose(position=Point(x=x, y=y, z=z),
+                                           orientation=Quaternion(w=1)))
             people_pose_msg.poses.append(pose_msg)
 
         self.pose_2d_pub.publish(people_pose_2d_msg)
@@ -289,11 +287,12 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         all_peaks[:, 1] = peaks[:, 0]
         all_peaks[:, 2] = heatmap_avg[peaks.T.tolist()]
         peaks_order = peaks[..., 2]
-        if chainer_v1:
+        try:
+            all_peaks = all_peaks[xp.argsort(peaks_order)]
+        except AttributeError:
+            # cupy.argsort is not available at cupy==1.0.1
             peaks_order = chainer.cuda.to_cpu(peaks_order)
             all_peaks = all_peaks[np.argsort(peaks_order)]
-        else:
-            all_peaks = all_peaks[xp.argsort(peaks_order)]
         all_peaks[:, 3] = xp.arange(peak_counter, dtype=np.float32)
         if self.gpu != -1:
             all_peaks = chainer.cuda.to_cpu(all_peaks)

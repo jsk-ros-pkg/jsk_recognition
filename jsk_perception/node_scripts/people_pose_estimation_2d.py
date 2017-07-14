@@ -5,7 +5,6 @@
 
 import math
 import pickle
-from distutils.version import LooseVersion
 
 import chainer
 import chainer.functions as F
@@ -96,14 +95,17 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         self.pad_value = rospy.get_param('~pad_value', 128)
         self.thre1 = rospy.get_param('~thre1', 0.1)
         self.thre2 = rospy.get_param('~thre2', 0.05)
-        self.visualize = rospy.get_param('~visualize', True)
         self.gpu = rospy.get_param('~gpu', -1)  # -1 is cpu mode
         self.with_depth = rospy.get_param('~with_depth', False)
         self._load_model()
-        self.pub = self.advertise('~output', Image, queue_size=1)
+        self.image_pub = self.advertise('~output', Image, queue_size=1)
         self.pose_pub = self.advertise('~pose', PeoplePoseArray, queue_size=1)
         if self.with_depth is True:
             self.pose_2d_pub = self.advertise('~pose_2d', PeoplePoseArray, queue_size=1)
+
+    @property
+    def visualize(self):
+        return self.image_pub.get_num_connections() > 0
 
     def _load_model(self):
         if self.backend == 'chainer':
@@ -189,7 +191,8 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
 
         self.pose_2d_pub.publish(people_pose_2d_msg)
         self.pose_pub.publish(people_pose_msg)
-        self.pub.publish(pose_estimated_msg)
+        if self.visualize:
+            self.image_pub.publish(pose_estimated_msg)
 
     def _cb(self, img_msg):
         br = cv_bridge.CvBridge()
@@ -204,7 +207,8 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
             img_msg.header)
 
         self.pose_pub.publish(people_pose_msg)
-        self.pub.publish(pose_estimated_msg)
+        if self.visualize:
+            self.image_pub.publish(pose_estimated_msg)
 
     def _create_2d_people_pose_array_msgs(self, people_joint_positions, header):
         people_pose_msg = PeoplePoseArray(header=header)

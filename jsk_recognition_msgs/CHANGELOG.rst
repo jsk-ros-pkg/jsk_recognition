@@ -2,6 +2,9 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.0 (2017-07-15)
 ------------------
 * [ADD NEW MESSAGE] Add Object.msg, ObjectArray.msg to represent object property (`#2148 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2148>`_)

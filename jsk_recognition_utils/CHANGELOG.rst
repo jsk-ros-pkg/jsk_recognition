@@ -2,6 +2,9 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.0 (2017-07-15)
 ------------------
 * jsk_pcl_ros: Add Primitive shape classifier nodelet (`#2141 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2141>`_)

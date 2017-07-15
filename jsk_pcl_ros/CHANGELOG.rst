@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.0 (2017-07-15)
+------------------
 * Check encoding of input topics in FuseImages (`#2158 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2158>`_)
   
 * jsk_pcl_ros: Add Primitive shape classifier nodelet (`#2141 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2141>`_)

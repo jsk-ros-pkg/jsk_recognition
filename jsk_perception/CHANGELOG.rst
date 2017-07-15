@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.0 (2017-07-15)
+------------------
 * [jsk_perception][people_pose_estimation_2d] publish image only when subscribed (`#2164 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2164>`_)
 
 * Enhance PeoplePoseEstimation2D (`#2162 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2162>`_)

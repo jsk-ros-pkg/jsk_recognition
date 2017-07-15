@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.0 (2017-07-15)
+------------------
 * jsk_pcl_ros: Add Primitive shape classifier nodelet (`#2141 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2141>`_)
    * jsk_recognition_utils/include/jsk_recognition_utils/geo/polygon.h
    * [jsk_recognition_utils][polygon][fromROSMsg] use identity matrix for default transformation

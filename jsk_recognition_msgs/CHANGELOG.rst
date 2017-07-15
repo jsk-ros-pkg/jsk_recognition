@@ -2,6 +2,16 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [ADD NEW MESSAGE] Add Object.msg, ObjectArray.msg to represent object property (`#2148 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2148>`_)
+  * Message to represent object property (Object.msg/ObjectArray.msg)
+
+* Enhance PeoplePoseEstimation2D (`#2162 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2162>`_
+  * scripts/people_pose_array_to_pose_array.py: Visualize people 3D pose on rviz in sample
+
+* Contributors: Kentaro Wada, Yuki Furuta
+
 1.1.3 (2017-07-07)
 ------------------
 * [jsk_perception] apply candidates node supports topic update (`#2143 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2143>`_)

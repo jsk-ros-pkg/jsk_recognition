@@ -2,6 +2,19 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* jsk_pcl_ros: Add Primitive shape classifier nodelet (`#2141 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2141>`_)
+   * jsk_recognition_utils/include/jsk_recognition_utils/geo/polygon.h
+   * [jsk_recognition_utils][polygon][fromROSMsg] use identity matrix for default transformation
+
+* jsk_recognition_utils/setup.py: Find packages automatically in jsk_recognition_utils (`#2156 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2156>`_)
+* [jsk_recognition_utils] install chainermodels dir in setup.py (`#2154 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2154>`_)
+ * [jsk_perception][jsk_recognition_utils] support chainer-v2 in alexnet and vgg16 (`#2153 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2153>`_)
+  * alexnet and vgg16 support chainer-v2
+
+* Contributors: Kentaro Wada, Shingo Kitagawa, Yuki Furuta
+
 1.1.3 (2017-07-07)
 ------------------
 * [jsk_pcl_ros_utils] Add nodelet for computing & comparing color  histogram (`#2101 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2101>`_ )

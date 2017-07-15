@@ -2,6 +2,26 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_perception][people_pose_estimation_2d] publish image only when subscribed (`#2164 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2164>`_)
+
+* Enhance PeoplePoseEstimation2D (`#2162 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2162>`_)
+  * Fix run_depend on rviz
+  * Install different pre-trained model according to the version of chainer
+  * Support 16UC1 depth image in PeoplePoseEstimation2D
+  * Visualize people 3D pose on rviz in sample
+  * Add orientation to people 3d pose
+  * Create point cloud in play_rosbag_people.xml
+  * Fix AttributeError of argsort in cupy == 1.0.1
+
+* [jsk_perception][jsk_recognition_utils] support chainer-v2 in alexnet and vgg16 (`#2153 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2153>`_)
+  * enable alexnet and vgg test
+  * fix syntax in vgg16_object_recognition
+  * alexnet and vgg16 support chainer-v2
+
+* Contributors: Kentaro Wada, Shingo Kitagawa, Yuki Furuta
+
 1.1.3 (2017-07-07)
 ------------------
 * [jsk_perception] add FCN-based classifiers (`#2142 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2142>`_)

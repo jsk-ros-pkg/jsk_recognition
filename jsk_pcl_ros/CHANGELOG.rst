@@ -2,6 +2,19 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Check encoding of input topics in FuseImages (`#2158 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2158>`_)
+  
+* jsk_pcl_ros: Add Primitive shape classifier nodelet (`#2141 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2141>`_)
+  * [jsk_pcl_ros] add test for primitive_shape_classifier
+  * [jsk_pcl_ros][primitive_shape_classifier] classify with circle likelihood first
+  * [jsk_pcl_ros][primitive_shape_classifier] parameterize classification threshold
+  * [jsk_pcl_ros] add primitive shape classifier (cont)
+  * [jsk_pcl_ros] add primitive shape classifier
+
+* Contributors: Kentaro Wada, Yuki Furuta
+
 1.1.3 (2017-07-07)
 ------------------
 * Filter invalid centroid in centroid_publisher (`#2150 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2150>`_)

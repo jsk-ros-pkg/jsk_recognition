@@ -4,8 +4,12 @@ import argparse
 from distutils.version import LooseVersion
 import multiprocessing
 import os.path as osp
+import sys
 
-import chainer
+try:
+    import chainer
+except:
+    print('### Failed to import chainer')
 
 import jsk_data
 
@@ -120,7 +124,7 @@ def main():
 
     # node_scripts/people_pose_estimation_2d.py
     path = 'trained_data/pose_estimation_2d_chainermodel.pkl'
-    if LooseVersion(chainer.__version__) >= LooseVersion('2.0.0'):
+    if not 'chainer' in sys.modules or LooseVersion(chainer.__version__) >= LooseVersion('2.0.0'):
         # created on chainer v2.0.0
         download_data(
             pkg_name=PKG,

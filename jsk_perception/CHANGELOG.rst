@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.1 (2017-07-15)
+------------------
 * If chainer is not installed, use v2 (`#2167 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2167>`_)
   * chainer can not install in ros build firm
 

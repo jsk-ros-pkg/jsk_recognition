@@ -16,6 +16,7 @@ import rospy
 from sensor_msgs.msg import Image
 from skimage.color import rgb_colors
 from skimage.color.colorlabel import DEFAULT_COLORS
+from jsk_recognition_utils.color import labelcolormap
 
 
 class DrawClassificationResult(ConnectionBasedTransport):
@@ -23,6 +24,7 @@ class DrawClassificationResult(ConnectionBasedTransport):
     def __init__(self):
         super(self.__class__, self).__init__()
         self.pub = self.advertise('~output', Image, queue_size=1)
+        self.cmap = labelcolormap(255)
 
     def subscribe(self):
         self.sub = message_filters.Subscriber('~input', ClassificationResult)
@@ -43,9 +45,7 @@ class DrawClassificationResult(ConnectionBasedTransport):
         n_results = len(cls_msg.labels)
         for i in xrange(n_results):
             label = cls_msg.labels[i]
-            color_name = DEFAULT_COLORS[label % len(DEFAULT_COLORS)]
-            color = getattr(rgb_colors, color_name)
-            color = np.array(color) * 255
+            color = self.cmap[label % len(self.cmap)] * 255
             legend_size = int(rgb.shape[0] * 0.1)
             rgb[:legend_size, :] = (np.array(color) * 255).astype(np.uint8)
 

@@ -17,9 +17,20 @@
     <rosparam subst_value="true">
       images_path: $(find jsk_perception)/sample/in_hand_recognition_database_images.npy
       labels_path: $(find jsk_perception)/sample/in_hand_recognition_database_labels.npy
+      publish_retrieved_image: 1
       gpu: -1
     </rosparam>
   </node>
 
-</launch>
+  <group if="$(arg gui)">
+    <node name="image_view0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="image_publisher/output" />
+    </node>
+    <node name="image_view1"
+          pkg="image_view" type="image_view">
+          <remap from="image" to="in_hand_recognition/retrieved_image" />
+    </node>
+  </group>
 
+</launch>

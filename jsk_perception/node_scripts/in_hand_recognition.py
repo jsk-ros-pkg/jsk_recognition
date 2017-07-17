@@ -330,6 +330,9 @@ class InHandRecognitionNode(ConnectionBasedTransport):
         gpu = rospy.get_param('~gpu', -1)
         imgs_path = rospy.get_param('~images_path')
         labels_path = rospy.get_param('~labels_path')
+        self.publish_retrieved_image = rospy.get_param(
+            '~publish_retrieved_image', default=False)
+        print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", self.publish_retrieved_image
 
         base_model = ResNet50(pretrained_model='imagenet')
         self.model = RetrievalPredictor(base_model, k=3)
@@ -343,9 +346,14 @@ class InHandRecognitionNode(ConnectionBasedTransport):
             shuffle=False, repeat=False)
         self.model.load_db(it)
 
-        self.pub =self.advertise(
+        self.pub_classification = self.advertise(
             '~classification', ClassificationResult, queue_size=10)
+        self.pub_retrieved_image = self.advertise(
+            '~retrieved_image', Image, queue_size=10)
         self.bridge = CvBridge()
+
+        if self.publish_retrieved_image:
+            self.imgs = imgs
 
     def subscribe(self):
         self.sub = rospy.Subscriber('~input', Image, self.callback)
@@ -364,13 +372,21 @@ class InHandRecognitionNode(ConnectionBasedTransport):
         probs = np.linspace(1, 0, len(pred_labels) + 1)[:-1]
 
         # Publish results
-        msg = ClassificationResult(
+        classification_msg = ClassificationResult(
             labels=pred_labels,
             label_proba=probs,
             classifier='in_hand_recognition'
         )
-        msg.header.stamp = rospy.Time.now()
-        self.pub.publish(msg)
+        classification_msg.header.stamp = rospy.Time.now()
+        self.pub_classification.publish(classification_msg)
+
+        if self.publish_retrieved_image:
+            retrieved_img = self.imgs[pred_indices[0]]
+            retrieved_img = retrieved_img.astype(
+                np.uint8).transpose(1, 2, 0)
+            img_msg = self.bridge.cv2_to_imgmsg(retrieved_img, encoding="rgb8")
+            img_msg.header.stamp = classification_msg.header.stamp
+            self.pub_retrieved_image.publish(img_msg)
 
 
 if __name__ == '__main__':

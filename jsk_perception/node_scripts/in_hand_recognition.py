@@ -355,9 +355,8 @@ class InHandRecognitionNode(ConnectionBasedTransport):
 
     def callback(self, img_msg):
         # Subscribe results
-        img = self.bridge.imgmsg_to_cv2(img_msg)
-        # TODO: Make sure that this image is RGB
-        img = img.transpose(2, 0, 1)
+        img = self.bridge.imgmsg_to_cv2(img_msg, desired_encoding="rgb8")
+        img = img.transpose(2, 0, 1).astype(np.float32)
 
         # Predictions
         pred_indices = self.model.predict([img])[0]  # (K,)

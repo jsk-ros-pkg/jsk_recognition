@@ -332,7 +332,6 @@ class InHandRecognitionNode(ConnectionBasedTransport):
         labels_path = rospy.get_param('~labels_path')
         self.publish_retrieved_image = rospy.get_param(
             '~publish_retrieved_image', default=False)
-        print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", self.publish_retrieved_image
 
         base_model = ResNet50(pretrained_model='imagenet')
         self.model = RetrievalPredictor(base_model, k=3)

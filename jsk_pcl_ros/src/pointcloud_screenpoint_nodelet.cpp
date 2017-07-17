@@ -193,7 +193,7 @@ bool jsk_pcl_ros::PointcloudScreenpoint::screenpoint_cb (jsk_recognition_msgs::T
   boost::mutex::scoped_lock lock(this->mutex_callback_);
   if ( pts_.points.size() == 0 ) {
     ROS_ERROR("no point cloud was received");
-    return false;
+    return true;
   }
 
   res.header = header_;
@@ -204,7 +204,7 @@ bool jsk_pcl_ros::PointcloudScreenpoint::screenpoint_cb (jsk_recognition_msgs::T
   res.point.x = rx; res.point.y = ry; res.point.z = rz;
 
   if (!ret) {
-    return false;
+    return true;
   }
 
   // search normal

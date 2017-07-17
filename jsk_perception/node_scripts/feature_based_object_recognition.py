@@ -79,10 +79,10 @@ class FeatureBasedObjectRecognition(ConnectionBasedTransport):
     def callback(self, imgmsg, mask_msg):
         bridge = cv_bridge.CvBridge()
         img = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='bgr8')
-        mask = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='mono8')
+        mask = bridge.imgmsg_to_cv2(mask_msg, desired_encoding='mono8')
         if mask.ndim == 3:
             mask = np.squeeze(mask, axis=2)
-        mask = mask > 127  # uint8 -> bool
+        mask = mask >= 127  # uint8 -> bool
 
         img = img.astype(np.float64)
         img[mask] -= self.mean[mask]
@@ -101,8 +101,6 @@ class FeatureBasedObjectRecognition(ConnectionBasedTransport):
         X_query = feat
 
         y_pred_proba = self.knn.predict_proba(X_query)
-        y_pred_proba = y_pred_proba.reshape(-1, 1, y_pred_proba.shape[1])
-        y_pred_proba = y_pred_proba.mean(axis=1)
         y_pred = np.argmax(y_pred_proba, axis=1)
 
         classes = self.knn.classes_

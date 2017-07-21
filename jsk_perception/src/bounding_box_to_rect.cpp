@@ -56,33 +56,56 @@ namespace jsk_perception
 
   void BoundingBoxToRect::subscribe()
   {
+    // camera_info + bounding box array
     sub_info_.subscribe(*pnh_, "input/info", 1);
-    sub_box_.subscribe(*pnh_, "input", 1);
+    sub_boxes_.subscribe(*pnh_, "input", 1);
     if (approximate_sync_) {
       async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_); 
-      async_->connectInput(sub_info_, sub_box_);
+      async_->connectInput(sub_info_, sub_boxes_);
       async_->registerCallback(boost::bind(&BoundingBoxToRect::inputCallback, this, _1, _2));
     } else {
       sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
-      sync_->connectInput(sub_info_, sub_box_);
+      sync_->connectInput(sub_info_, sub_boxes_);
       sync_->registerCallback(boost::bind(&BoundingBoxToRect::inputCallback, this, _1, _2));
+    }
+    // camera_info + bounding box
+    sub_box_.subscribe(*pnh_, "input/box", 1);
+    if (approximate_sync_) {
+      async_box_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicyBox> >(queue_size_);
+      async_box_->connectInput(sub_info_, sub_box_);
+      async_box_->registerCallback(boost::bind(&BoundingBoxToRect::inputBoxCallback, this, _1, _2));
+    } else {
+      sync_box_ = boost::make_shared<message_filters::Synchronizer<SyncPolicyBox> >(queue_size_);
+      sync_box_->connectInput(sub_info_, sub_box_);
+      sync_box_->registerCallback(boost::bind(&BoundingBoxToRect::inputBoxCallback, this, _1, _2));
     }
   }
 
   void BoundingBoxToRect::unsubscribe()
   {
     sub_info_.unsubscribe();
+    sub_boxes_.unsubscribe();
     sub_box_.unsubscribe();
     frame_id_ = "";
   }
 
+  void BoundingBoxToRect::inputBoxCallback(const sensor_msgs::CameraInfo::ConstPtr& info_msg,
+                                           const jsk_recognition_msgs::BoundingBox::ConstPtr& box_msg)
+  {
+    jsk_recognition_msgs::BoundingBoxArray::Ptr boxes_msg(
+      new jsk_recognition_msgs::BoundingBoxArray());
+    boxes_msg->header = box_msg->header;
+    boxes_msg->boxes.push_back(*box_msg);
+    inputCallback(info_msg, boxes_msg);
+  }
+
   void BoundingBoxToRect::inputCallback(const sensor_msgs::CameraInfo::ConstPtr& info_msg,
-                                        const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& box_msg)
+                                        const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& boxes_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
     if (frame_id_.empty()) {
       // setup tf message filters
-      frame_id_ = box_msg->header.frame_id;
+      frame_id_ = boxes_msg->header.frame_id;
       tf_filter_.reset(new tf::MessageFilter<jsk_recognition_msgs::BoundingBoxArrayWithCameraInfo>(
                          sub_box_with_info_,
                          *tf_listener_,
@@ -91,8 +114,8 @@ namespace jsk_perception
       tf_filter_->registerCallback(boost::bind(&BoundingBoxToRect::internalCallback, this, _1));
     }
     jsk_recognition_msgs::BoundingBoxArrayWithCameraInfo internal_msg;
-    internal_msg.header = box_msg->header;
-    internal_msg.boxes = *box_msg;
+    internal_msg.header = boxes_msg->header;
+    internal_msg.boxes = *boxes_msg;
     internal_msg.camera_info = *info_msg;
     pub_internal_.publish(internal_msg);
   }

@@ -51,7 +51,7 @@ Parameters
   If no candidates are provided,
   this node does nothing and just transports the input msg.
 
-* ``~candidates`` (List of String, default: ``[]``)
+* ``~candidates_fixed`` (List of String, default: ``[]``)
 
   Candidates that never changed by services or topics.
 

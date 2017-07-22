@@ -40,11 +40,8 @@ class LabelImageClassifier(ConnectionBasedTransport):
         self.pub.publish(msg)
 
     def _classify(self, label_img):
-        label_img = label_img.flatten()
-        counts = np.bincount(label_img)
-        if len(counts) < len(self.target_names):
-            counts = np.hstack(
-                (counts, np.zeros(len(self.target_names) - len(counts))))
+        counts = np.bincount(label_img.flatten(),
+                             minlength=len(self.target_names))
         counts[self.ignore_labels] = 0
         label = np.argmax(counts)
         proba = counts.astype(np.float32) / counts.sum()

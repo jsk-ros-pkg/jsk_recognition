@@ -17,6 +17,7 @@ class ApplyContextToLabelProbability(ConnectionBasedTransport):
     def __init__(self):
         super(self.__class__, self).__init__()
         self.use_topic = rospy.get_param('~use_topic', False)
+        self.bg_label = rospy.get_param('~bg_label', None)
 
         # list of label values
         self.candidates = rospy.get_param('~candidates', [])
@@ -67,8 +68,12 @@ class ApplyContextToLabelProbability(ConnectionBasedTransport):
                              "the number of input labels.")
                 return
 
+            candidates = self.candidates[:]
+            if self.bg_label is not None:
+                candidates.append(self.bg_label)
+
             for lbl in range(n_labels):
-                if lbl not in self.candidates:
+                if lbl not in candidates:
                     proba_img[:, :, lbl] = 0.
 
         # do dynamic scaling for the probability image

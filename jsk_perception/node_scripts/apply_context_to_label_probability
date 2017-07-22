@@ -24,8 +24,6 @@ class ApplyContextToLabelProbability(ConnectionBasedTransport):
 
     def __init__(self):
         super(self.__class__, self).__init__()
-        self.use_topic = rospy.get_param('~use_topic', False)
-
         # list of label values
         self.candidates = get_param_uint_list('~candidates', [])
 
@@ -38,15 +36,12 @@ class ApplyContextToLabelProbability(ConnectionBasedTransport):
 
     def subscribe(self):
         self._sub_img = rospy.Subscriber('~input', Image, self._apply)
-        if self.use_topic:
-            self._sub_candidates = rospy.Subscriber(
-                '~input/candidates', LabelArray,
-                self._update_candidates_with_topic)
+        self._sub_candidates = rospy.Subscriber(
+            '~input/candidates', LabelArray, self._update_candidates_with_topic)
 
     def unsubscribe(self):
         self._sub_img.unregister()
-        if self.use_topic:
-            self._sub_candidates.unregister()
+        self._sub_candidates.unregister()
 
     def _update_candidates(self, req):
         self.candidates = req.labels

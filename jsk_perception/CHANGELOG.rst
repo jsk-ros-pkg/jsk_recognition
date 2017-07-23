@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.2 (2017-07-23)
+------------------
 * add bg_label in apply_context_to_label_probability (`#2175 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2175>`_)
   * Remove no need ~use_topic flag
   * Refactor to handle fixed candidates in ApplyContextToLabelProbability

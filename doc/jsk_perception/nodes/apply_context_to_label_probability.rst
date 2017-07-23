@@ -19,8 +19,7 @@ Subscribing Topic
 
 * ``~input/candidates`` (``jsk_recognition_msgs/LabelArray``)
 
-  Array of candidates label.
-  This topic is only subscribed when parameter ``~use_topic`` is ``True``.
+  Array of candidates label to update ``~candidates``.
 
 
 Publishing Topic
@@ -52,9 +51,9 @@ Parameters
   If no candidates are provided,
   this node does nothing and just transports the input msg.
 
-* ``~use_topic`` (Bool, default: ``False``)
+* ``~candidates_fixed`` (List of String, default: ``[]``)
 
-  Update candidates by ``~input/candidates`` subscription
+  Candidates that never changed by services or topics.
 
 Sample
 ------

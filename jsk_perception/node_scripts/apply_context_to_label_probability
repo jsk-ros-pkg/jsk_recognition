@@ -12,35 +12,36 @@ from jsk_recognition_msgs.srv import SetLabels
 from jsk_recognition_msgs.srv import SetLabelsResponse
 
 
+def get_param_uint_list(name, default=None):
+    param = rospy.get_param(name, default)
+    if not (isinstance(param, list) and
+            all(isinstance(el, int) and el >= 0 for el in param)):
+        raise ValueError("Elements of '%s' must be integer and >=0." % param)
+    return param
+
+
 class ApplyContextToLabelProbability(ConnectionBasedTransport):
 
     def __init__(self):
         super(self.__class__, self).__init__()
-        self.use_topic = rospy.get_param('~use_topic', False)
-
         # list of label values
-        self.candidates = rospy.get_param('~candidates', [])
-        if not self.use_topic:
-            if not all(isinstance(lbl, int) and lbl >= 0
-                       for lbl in self.candidates):
-                rospy.logfatal("Elements of '~candidates' must be "
-                               "integer and >=0.")
-                quit(1)
+        self.candidates = get_param_uint_list('~candidates', [])
+
+        # candidates which are never updated
+        self.candidates_fixed = get_param_uint_list('~candidates_fixed', [])
+
         rospy.Service('~update_candidates', SetLabels, self._update_candidates)
         self.pub_proba = self.advertise('~output', Image, queue_size=1)
         self.pub_label = self.advertise('~output/label', Image, queue_size=1)
 
     def subscribe(self):
         self._sub_img = rospy.Subscriber('~input', Image, self._apply)
-        if self.use_topic:
-            self._sub_candidates = rospy.Subscriber(
-                '~input/candidates', LabelArray,
-                self._update_candidates_with_topic)
+        self._sub_candidates = rospy.Subscriber(
+            '~input/candidates', LabelArray, self._update_candidates_with_topic)
 
     def unsubscribe(self):
         self._sub_img.unregister()
-        if self.use_topic:
-            self._sub_candidates.unregister()
+        self._sub_candidates.unregister()
 
     def _update_candidates(self, req):
         self.candidates = req.labels
@@ -60,15 +61,19 @@ class ApplyContextToLabelProbability(ConnectionBasedTransport):
             rospy.logerr('Image shape must be (height, width, channels).')
             return
 
-        if self.candidates:
+        # current candidates
+        candidates = self.candidates + self.candidates_fixed
+        candidates = set(candidates)
+
+        if candidates:
             n_labels = proba_img.shape[2]
-            if max(self.candidates) >= n_labels:
+            if max(candidates) >= n_labels:
                 rospy.logerr("The max label value in '~candidates' exceeds "
                              "the number of input labels.")
                 return
 
             for lbl in range(n_labels):
-                if lbl not in self.candidates:
+                if lbl not in candidates:
                     proba_img[:, :, lbl] = 0.
 
         # do dynamic scaling for the probability image

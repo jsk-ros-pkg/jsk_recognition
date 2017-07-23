@@ -2,6 +2,19 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* add bg_label in apply_context_to_label_probability (`#2175 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2175>`_)
+  * Remove no need ~use_topic flag
+  * Refactor to handle fixed candidates in ApplyContextToLabelProbability
+  * add bg_label in apply_context_to_label_probability
+
+* fix bug in label_image_classifier (`#2174 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2174>`_)
+  * Update label_image_classifier.py
+  * fix bug in label_image_classifier
+
+* Contributors: Kentaro Wada, Shingo Kitagawa
+
 1.2.1 (2017-07-15)
 ------------------
 * If chainer is not installed, use v2 (`#2167 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2167>`_)

@@ -222,7 +222,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
                 pose_msg.poses.append(Pose(position=Point(x=joint_pos['x'],
                                                           y=joint_pos['y'],
                                                           z=0)))
-                people_pose_msg.poses.append(pose_msg)
+            people_pose_msg.poses.append(pose_msg)
         return people_pose_msg
 
     def pose_estimate(self, bgr):

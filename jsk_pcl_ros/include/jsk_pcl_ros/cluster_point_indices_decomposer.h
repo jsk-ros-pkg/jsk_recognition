@@ -157,7 +157,7 @@ namespace jsk_pcl_ros
     boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> >async_;
     boost::shared_ptr<message_filters::Synchronizer<SyncAlignPolicy> >sync_align_;
     std::vector<ros::Publisher> publishers_;
-    ros::Publisher pc_pub_, box_pub_, mask_pub_, label_pub_, centers_pub_, negative_indices_pub_;
+    ros::Publisher pc_pub_, box_pub_, mask_pub_, label_pub_, centers_pub_, negative_indices_pub_, indices_pub_;
     boost::shared_ptr<tf::TransformBroadcaster> br_;
     std::string tf_prefix_;
     

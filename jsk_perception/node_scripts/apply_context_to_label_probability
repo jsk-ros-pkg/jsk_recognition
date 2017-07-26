@@ -68,9 +68,9 @@ class ApplyContextToLabelProbability(ConnectionBasedTransport):
 
             n_labels = proba_img.shape[2]
             if max(candidates) >= n_labels:
-                rospy.logerr("The max label value in '~candidates' exceeds "
-                             "the number of input labels.")
-                return
+                rospy.logwarn_throttle(
+                    10, "The max label value in '~candidates' exceeds "
+                        "the number of input labels.")
 
             for lbl in range(n_labels):
                 if lbl not in candidates:

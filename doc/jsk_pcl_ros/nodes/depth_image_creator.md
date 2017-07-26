@@ -1,6 +1,10 @@
 # DepthImageCreator
+
+![](images/depth_image_creator.jpg)
+
 ## What is this
 Create *organized* pointcloud from non-organized pointcloud.
+Currently it supports `pcl::PointXYZ` and `pcl::PointXYZRGB` as the input.
 
 ## Subscribing Topics
 * `~input` (`sensor_msgs/PointCloud2`):
@@ -14,6 +18,9 @@ Create *organized* pointcloud from non-organized pointcloud.
 * `~output` (`sensor_msgs/Image`):
 
    Publish organized pointcloud as depth image.
+* `~output_image` (`sensor_msgs/Image`):
+
+   Publish image colorized according to the input cloud.
 * `~output_cloud` (`sensor_msgs/PointCloud2`)
 
    organized pointcloud.
@@ -43,4 +50,21 @@ Create *organized* pointcloud from non-organized pointcloud.
    The number of `~info` messages to skip to generate depth image.
 * `~max_queue_size` (integer, default: `3`):
 
-   Queue length of topics.
+   Queue length for synchronization of topics.
+
+* `~max_pub_queue_size` (integer, default: `~max_queue_size_`):
+
+   Queue length of topic publishers.
+   Default is value set for `max_queue_size_`.
+
+* `~max_sub_queue_size` (integer, default: `~max_queue_size_`):
+
+   Queue length of topic subscribers.
+   Default is value set for `max_queue_size_`.
+
+
+## Sample
+
+```bash
+roslaunch jsk_pcl_ros sample_depth_image_creator.launch
+```

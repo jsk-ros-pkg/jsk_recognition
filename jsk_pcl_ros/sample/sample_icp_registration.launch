@@ -5,7 +5,7 @@
 
   <node name="rosbag_play"  if="$(arg USE_SAMPLE_DATA)"
         pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros)/sample/data/2016-10-29-17-05-44_tabletop-coffee-cup/tabletop-coffee-cup.bag --clock --loop" />
+        args="$(find jsk_pcl_ros)/sample/data/2017-06-19-19-34-18_tabletop_coffeecup.bag --clock --loop" />
 
   <node name="optical_frame_tf_publisher" if="$(arg USE_SAMPLE_DATA)"
       pkg="tf" type="static_transform_publisher"
@@ -15,7 +15,15 @@
   <node name="$(arg manager)" pkg="nodelet" type="nodelet" args="manager" />
 
   <!-- input cloud -->
-  <node name="multi_plane_estimate" pkg="nodelet" type="nodelet"
+  <node if="$(arg USE_SAMPLE_DATA)"
+        pkg="nodelet" type="nodelet" name="depth_to_points"
+        args="load depth_image_proc/point_cloud_xyz $(arg manager)">
+    <remap from="camera_info" to="/camera/depth/camera_info" />
+    <remap from="image_rect" to="/camera/depth/image_rect_raw"/>
+    <remap from="points" to="/camera/depth/points" />
+  </node>
+
+   <node name="multi_plane_estimate" pkg="nodelet" type="nodelet"
         args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg manager)"
         output="screen">
     <remap from="~input" to="$(arg input)" />

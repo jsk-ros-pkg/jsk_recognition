@@ -250,7 +250,7 @@ namespace jsk_pcl_ros
   }
 
   void OctomapServerContact::insertContactSensorCallback(const jsk_recognition_msgs::ContactSensorArray::ConstPtr& msg) {
-    ROS_WARN_STREAM("insert contact sensor");
+    NODELET_INFO("insert contact sensor");
     std::vector<jsk_recognition_msgs::ContactSensor> datas = msg->datas;
     insertContactSensor(datas);
 

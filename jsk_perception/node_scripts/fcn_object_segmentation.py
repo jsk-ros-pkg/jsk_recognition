@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from distutils.version import LooseVersion
+
 import chainer
 from chainer import cuda
 import chainer.serializers as S
@@ -7,7 +9,6 @@ import fcn
 
 import cv_bridge
 from jsk_topic_tools import ConnectionBasedTransport
-from jsk_topic_tools.log_utils import jsk_loginfo
 import message_filters
 import numpy as np
 import rospy
@@ -55,7 +56,12 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
 
     def _load_chainer_model(self):
         model_name = rospy.get_param('~model_name')
-        model_h5 = rospy.get_param('~model_h5')
+        if rospy.has_param('~model_h5'):
+            rospy.logwarn('Rosparam ~model_h5 is deprecated,'
+                          ' and please use ~model_file instead.')
+            model_file = rospy.get_param('~model_h5')
+        else:
+            model_file = rospy.get_param('~model_file')
         n_class = len(self.target_names)
         if model_name == 'fcn32s':
             self.model = fcn.models.FCN32s(n_class=n_class)
@@ -65,12 +71,16 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
             self.model = fcn.models.FCN8s(n_class=n_class)
         else:
             raise ValueError('Unsupported ~model_name: {}'.format(model_name))
-        jsk_loginfo('Loading trained model: {0}'.format(model_h5))
-        S.load_hdf5(model_h5, self.model)
-        jsk_loginfo('Finished loading trained model: {0}'.format(model_h5))
+        rospy.loginfo('Loading trained model: {0}'.format(model_file))
+        if model_file.endswith('.npz'):
+            S.load_npz(model_file, self.model)
+        else:
+            S.load_hdf5(model_file, self.model)
+        rospy.loginfo('Finished loading trained model: {0}'.format(model_file))
         if self.gpu != -1:
             self.model.to_gpu(self.gpu)
-        self.model.train = False
+        if LooseVersion(chainer.__version__) < LooseVersion('2.0.0'):
+            self.model.train = False
 
     def _load_torch_model(self):
         try:
@@ -86,9 +96,9 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
             self.model = torchfcn.models.FCN32s(n_class=n_class, nodeconv=True)
         else:
             raise ValueError('Unsupported ~model_name: {0}'.format(model_name))
-        jsk_loginfo('Loading trained model: %s' % model_file)
+        rospy.loginfo('Loading trained model: %s' % model_file)
         self.model.load_state_dict(torch.load(model_file))
-        jsk_loginfo('Finished loading trained model: %s' % model_file)
+        rospy.loginfo('Finished loading trained model: %s' % model_file)
         if self.gpu >= 0:
             self.model = self.model.cuda(self.gpu)
         self.model.eval()
@@ -125,10 +135,12 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
         br = cv_bridge.CvBridge()
         img = br.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
         mask = br.imgmsg_to_cv2(mask_msg, desired_encoding='mono8')
+        if mask.ndim > 2:
+            mask = np.squeeze(mask, axis=2)
         label, proba_img = self.segment(img)
         label[mask == 0] = 0
-        proba_img[:, :, 0][mask != 0] = 1
-        proba_img[:, :, 1:][mask != 0] = 0
+        proba_img[:, :, 0][mask == 0] = 1
+        proba_img[:, :, 1:][mask == 0] = 0
         label_msg = br.cv2_to_imgmsg(label.astype(np.int32), '32SC1')
         label_msg.header = img_msg.header
         self.pub.publish(label_msg)
@@ -159,8 +171,14 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
         x_data = np.array([blob], dtype=np.float32)
         if self.gpu != -1:
             x_data = cuda.to_gpu(x_data, device=self.gpu)
-        x = chainer.Variable(x_data, volatile=True)
-        self.model(x)
+        if LooseVersion(chainer.__version__) < LooseVersion('2.0.0'):
+            x = chainer.Variable(x_data, volatile=True)
+            self.model(x)
+        else:
+            with chainer.using_config('train', False), \
+                 chainer.no_backprop_mode():
+                x = chainer.Variable(x_data)
+                self.model(x)
         proba_img = chainer.functions.softmax(self.model.score)
         proba_img = chainer.functions.transpose(proba_img, (0, 2, 3, 1))
         max_proba_img = chainer.functions.max(proba_img, axis=-1)

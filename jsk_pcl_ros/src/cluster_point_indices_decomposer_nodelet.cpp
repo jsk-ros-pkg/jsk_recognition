@@ -57,6 +57,12 @@
 
 namespace jsk_pcl_ros
 {
+  void ClusterPointIndicesDecomposerZAxis::onInit()
+  {
+    ClusterPointIndicesDecomposer::onInit();
+    sort_by_ = "z_axis";
+  }
+
   void ClusterPointIndicesDecomposer::onInit()
   {
     DiagnosticNodelet::onInit();
@@ -93,6 +99,7 @@ namespace jsk_pcl_ros
     }
     pnh_->param("use_pca", use_pca_, false);
     pnh_->param("force_to_flip_z_axis", force_to_flip_z_axis_, true);
+    pnh_->param<std::string>("sort_by", sort_by_, "input_indices");
     // dynamic_reconfigure
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> >(*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
@@ -148,17 +155,113 @@ namespace jsk_pcl_ros
       sub_coefficients_.unsubscribe();
     }
   }
-  
-  void ClusterPointIndicesDecomposer::sortIndicesOrder
-  (pcl::PointCloud<pcl::PointXYZ>::Ptr input,
-   std::vector<pcl::IndicesPtr> indices_array,
-   std::vector<pcl::IndicesPtr> &output_array)
+
+  void ClusterPointIndicesDecomposer::sortIndicesOrder(
+    const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+    const std::vector<pcl::IndicesPtr> indices_array,
+    std::vector<size_t>* argsort)
   {
-    output_array.resize(indices_array.size());
+    std::string sort_by = sort_by_;
+    bool reverse = false;
+    if (sort_by.compare(0, 1, "-") == 0)
+    {
+      reverse = true;
+      sort_by = sort_by.substr(1, sort_by.size() - 1);
+    }
+    if (sort_by == "input_indices")
+    {
+      sortIndicesOrderByIndices(input, indices_array, argsort);
+    }
+    else if (sort_by == "z_axis")
+    {
+      sortIndicesOrderByZAxis(input, indices_array, argsort);
+    }
+    else if (sort_by == "cloud_size")
+    {
+      sortIndicesOrderByCloudSize(input, indices_array, argsort);
+    }
+    else
+    {
+      NODELET_WARN_ONCE("Unsupported ~sort_by param is specified '%s', "
+                        "so using the default: 'input_indices'", sort_by_.c_str());
+      sortIndicesOrderByIndices(input, indices_array, argsort);
+      return;
+    }
+    if (reverse)
+    {
+      std::reverse((*argsort).begin(), (*argsort).end());
+    }
+  }
+
+  void ClusterPointIndicesDecomposer::sortIndicesOrderByIndices(
+    const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+    const std::vector<pcl::IndicesPtr> indices_array,
+    std::vector<size_t>* argsort)
+  {
+    (*argsort).resize(indices_array.size());
     for (size_t i = 0; i < indices_array.size(); i++)
     {
-      output_array[i] = indices_array[i];
+      (*argsort)[i] = i;
     }
+  }
+
+  void ClusterPointIndicesDecomposer::sortIndicesOrderByZAxis(
+    const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+    const std::vector<pcl::IndicesPtr> indices_array,
+    std::vector<size_t>* argsort)
+  {
+    std::vector<double> z_values;
+    pcl::ExtractIndices<pcl::PointXYZ> ex;
+    ex.setInputCloud(input);
+    for (size_t i = 0; i < indices_array.size(); i++)
+    {
+      Eigen::Vector4f center;
+      ex.setIndices(indices_array[i]);
+      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+      ex.filter(*cloud);
+      //
+      std::vector<int> nan_indices;
+      pcl::removeNaNFromPointCloud(*cloud, *cloud, nan_indices);
+      //
+      pcl::compute3DCentroid(*cloud, center);
+      z_values.push_back(center[2]); // only focus on z value
+    }
+
+    // sort centroids
+    // https://stackoverflow.com/a/12399290
+    (*argsort).resize(indices_array.size());
+    std::iota(argsort->begin(), argsort->end(), 0);
+    std::sort(argsort->begin(), argsort->end(),
+              [&z_values](size_t i1, size_t i2) {return z_values[i1] < z_values[i2];});
+  }
+
+  void ClusterPointIndicesDecomposer::sortIndicesOrderByCloudSize(
+    const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+    const std::vector<pcl::IndicesPtr> indices_array,
+    std::vector<size_t>* argsort)
+  {
+    std::vector<double> cloud_sizes;
+    pcl::ExtractIndices<pcl::PointXYZ> ex;
+    ex.setInputCloud(input);
+    for (size_t i = 0; i < indices_array.size(); i++)
+    {
+      Eigen::Vector4f center;
+      ex.setIndices(indices_array[i]);
+      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+      ex.filter(*cloud);
+      //
+      std::vector<int> nan_indices;
+      pcl::removeNaNFromPointCloud(*cloud, *cloud, nan_indices);
+      //
+      double cloud_size = static_cast<double>(cloud->points.size());
+      cloud_sizes.push_back(cloud_size);
+    }
+
+    // sort clouds
+    (*argsort).resize(indices_array.size());
+    std::iota(argsort->begin(), argsort->end(), 0);
+    std::sort(argsort->begin(), argsort->end(),
+              [&cloud_sizes](size_t i1, size_t i2) {return cloud_sizes[i1] < cloud_sizes[i2];});
   }
 
   void ClusterPointIndicesDecomposer::updateDiagnostic(
@@ -329,6 +432,7 @@ namespace jsk_pcl_ros
         }
       }
       else {
+        // transform point cloud to target frame
         tf::StampedTransform tf_transform;
         try {
           tf_transform = jsk_recognition_utils::lookupTransformWithDuration(
@@ -344,9 +448,50 @@ namespace jsk_pcl_ros
         }
         Eigen::Affine3f transform;
         tf::transformTFToEigen(tf_transform, transform);
-        pcl::transformPointCloud(*segmented_cloud, *segmented_cloud_transformed, transform);
-        is_center_valid = pcl::compute3DCentroid(*segmented_cloud_transformed, center) != 0;
-        bounding_box.header.frame_id = target_frame_id_;
+        pcl::transformPointCloud(*segmented_cloud, *segmented_cloud, transform);
+
+        is_center_valid = pcl::compute3DCentroid(*segmented_cloud, center) != 0;
+
+        // compute planes from target frame
+        pcl::PointXYZRGB min_pt, max_pt;
+        pcl::getMinMax3D(*segmented_cloud, min_pt, max_pt);
+        //
+        pcl_msgs::ModelCoefficients coef_by_frame;
+        coef_by_frame.values.push_back(0);
+        coef_by_frame.values.push_back(0);
+        coef_by_frame.values.push_back(1);
+        coef_by_frame.values.push_back(- min_pt.z);
+        jsk_recognition_msgs::ModelCoefficientsArray::Ptr coefficients_by_frame(
+          new jsk_recognition_msgs::ModelCoefficientsArray);
+        coefficients_by_frame->header.frame_id = target_frame_id_;
+        coefficients_by_frame->coefficients.push_back(coef_by_frame);
+        //
+        geometry_msgs::PolygonStamped plane_by_frame;
+        plane_by_frame.header.frame_id = target_frame_id_;
+        geometry_msgs::Point32 point;
+        point.z = min_pt.z;
+        point.x = min_pt.x;
+        point.y = min_pt.y;
+        plane_by_frame.polygon.points.push_back(point);
+        point.x = max_pt.x;
+        point.y = min_pt.y;
+        plane_by_frame.polygon.points.push_back(point);
+        point.x = max_pt.x;
+        point.y = max_pt.y;
+        plane_by_frame.polygon.points.push_back(point);
+        point.x = min_pt.x;
+        point.y = max_pt.y;
+        plane_by_frame.polygon.points.push_back(point);
+        jsk_recognition_msgs::PolygonArray::Ptr planes_by_frame(
+          new jsk_recognition_msgs::PolygonArray);
+        planes_by_frame->header.frame_id = target_frame_id_;
+        planes_by_frame->polygons.push_back(plane_by_frame);
+        //
+        bool success = transformPointCloudToAlignWithPlane(segmented_cloud, segmented_cloud_transformed,
+                                                           center, planes_by_frame, coefficients_by_frame, m4, q);
+        if (!success) {
+          return false;
+        }
       }
     }
     else {
@@ -361,6 +506,11 @@ namespace jsk_pcl_ros
     double xwidth = maxpt[0] - minpt[0];
     double ywidth = maxpt[1] - minpt[1];
     double zwidth = maxpt[2] - minpt[2];
+    if (!pcl_isfinite(xwidth) || !pcl_isfinite(ywidth) || !pcl_isfinite(zwidth))
+    {
+      // all points in cloud are nan or its size is 0
+      xwidth = ywidth = zwidth = 0;
+    }
     
     Eigen::Vector4f center2((maxpt[0] + minpt[0]) / 2.0, (maxpt[1] + minpt[1]) / 2.0, (maxpt[2] + minpt[2]) / 2.0, 1.0);
     Eigen::Vector4f center_transformed = m4 * center2;
@@ -453,7 +603,6 @@ namespace jsk_pcl_ros
     cluster_counter_.add(indices_input->cluster_indices.size());
     
     std::vector<pcl::IndicesPtr> converted_indices;
-    std::vector<pcl::IndicesPtr> sorted_indices;
     
     for (size_t i = 0; i < indices_input->cluster_indices.size(); i++)
     {
@@ -474,8 +623,9 @@ namespace jsk_pcl_ros
       vindices.reset (new std::vector<int> (indices_input->cluster_indices[i].indices));
       converted_indices.push_back(vindices);
     }
-    
-    sortIndicesOrder(cloud_xyz, converted_indices, sorted_indices);
+
+    std::vector<size_t> argsort;
+    sortIndicesOrder(cloud_xyz, converted_indices, &argsort);
     extract.setInputCloud(cloud);
 
     // point cloud from camera not laser
@@ -488,12 +638,12 @@ namespace jsk_pcl_ros
     bounding_box_array.header = input->header;
     geometry_msgs::PoseArray center_pose_array;
     center_pose_array.header = input->header;
-    for (size_t i = 0; i < sorted_indices.size(); i++)
+    for (size_t i = 0; i < argsort.size(); i++)
     {
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
       
       pcl::PointIndices::Ptr segmented_indices (new pcl::PointIndices);
-      extract.setIndices(sorted_indices[i]);
+      extract.setIndices(converted_indices[argsort[i]]);
       extract.filter(*segmented_cloud);
       if (publish_clouds_) {
         sensor_msgs::PointCloud2::Ptr out_cloud(new sensor_msgs::PointCloud2);
@@ -504,8 +654,8 @@ namespace jsk_pcl_ros
       // label
       if (is_sensed_with_camera) {
         // create mask & label image from cluster indices
-        for (size_t j = 0; j < sorted_indices[i]->size(); j++) {
-          int index = sorted_indices[i]->data()[j];
+        for (size_t j = 0; j < converted_indices[argsort[i]]->size(); j++) {
+          int index = converted_indices[argsort[i]]->data()[j];
           int width_index = index % input->width;
           int height_index = index / input->width;
           mask.at<uchar>(height_index, width_index) = 255;
@@ -520,24 +670,26 @@ namespace jsk_pcl_ros
       // compute centoid and bounding box
       geometry_msgs::Pose pose_msg;
       jsk_recognition_msgs::BoundingBox bounding_box;
+      bounding_box.label = static_cast<int>(argsort[i]);
       bool successp = computeCenterAndBoundingBox(
         segmented_cloud, input->header, planes, coefficients, pose_msg, bounding_box);
       if (!successp) {
         return;
       }
+      std::string target_frame;
+      if (align_boxes_ && !align_boxes_with_plane_) {
+        target_frame = target_frame_id_;
+      }
+      else {
+        target_frame = input->header.frame_id;
+      }
       center_pose_array.poses.push_back(pose_msg);
+      bounding_box.header.frame_id = target_frame;
       bounding_box_array.boxes.push_back(bounding_box);
       if (publish_tf_) {
         tf::Transform transform;
         transform.setOrigin(tf::Vector3(pose_msg.position.x, pose_msg.position.y, pose_msg.position.z));
         transform.setRotation(tf::createIdentityQuaternion());
-        std::string target_frame;
-        if (align_boxes_ && !align_boxes_with_plane_) {
-          target_frame = target_frame_id_;
-        }
-        else {
-          target_frame = input->header.frame_id;
-        }
         br_->sendTransform(tf::StampedTransform(transform, input->header.stamp, target_frame,
                                                 tf_prefix_ + (boost::format("output%02u") % (i)).str()));
       }
@@ -593,9 +745,9 @@ namespace jsk_pcl_ros
         }
     }
   }
-  
-}
 
-PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::ClusterPointIndicesDecomposer,
-                        nodelet::Nodelet);
+}  // namespace jsk_pcl_ros
 
+PLUGINLIB_EXPORT_CLASS(jsk_pcl_ros::ClusterPointIndicesDecomposer, nodelet::Nodelet);
+// TODO: deprecate below export. because sorting by z_axis is achieved in parent class with sort_by_ = "z_axis"
+PLUGINLIB_EXPORT_CLASS(jsk_pcl_ros::ClusterPointIndicesDecomposerZAxis, nodelet::Nodelet);

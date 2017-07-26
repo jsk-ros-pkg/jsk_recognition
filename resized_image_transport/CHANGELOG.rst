@@ -2,6 +2,34 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.2 (2017-07-23)
+------------------
+* current source code needs jsk_topic_tools >= 2.2.4 (`#2173 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2173>`_)
+* Contributors: Kei Okada
+
+1.2.1 (2017-07-15)
+------------------
+
+1.2.0 (2017-07-15)
+------------------
+
+1.1.3 (2017-07-07)
+------------------
+
+1.1.2 (2017-06-16)
+------------------
+* Remove dependency of resized_image_transport on jsk_perception (`#2075 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2075>`_ )
+* Generate README by script (`#2064 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2064>`_ )
+* Improve documentation and example of image_resizer (`#2056 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2056>`_ )
+  * Add description about rosparam in doc
+    - modified:   doc/resized_image_transport/nodes/image_resizer.rst
+    - new file:   resized_image_transport/doc
+  * Add sample for image_resizer
+    - deleted:    resized_image_transport/launch/example.launch
+    - new file:   resized_image_transport/launch/sample_image_resizer.launch
+    - modified:   resized_image_transport/test/image_resizer.test
+* Contributors: Kentaro Wada
+
 1.1.1 (2017-03-04)
 ------------------
 

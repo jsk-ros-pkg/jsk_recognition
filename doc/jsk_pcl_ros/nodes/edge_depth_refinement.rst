@@ -40,3 +40,10 @@ Parameters
 - ``~duplication_angle_threshold`` (``Double``, default: ``0.1``)
 
 - ``~duplication_distance_threshold`` (``Double``, default: ``0.01``)
+
+Sample
+------
+
+.. code-block:: bash
+
+  roslaunch jsk_pcl_ros sample_edge_depth_refinement.launch

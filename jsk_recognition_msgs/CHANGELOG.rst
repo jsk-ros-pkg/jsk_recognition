@@ -2,6 +2,43 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.2 (2017-07-23)
+------------------
+
+1.2.1 (2017-07-15)
+------------------
+
+1.2.0 (2017-07-15)
+------------------
+* [ADD NEW MESSAGE] Add Object.msg, ObjectArray.msg to represent object property (`#2148 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2148>`_)
+  * Message to represent object property (Object.msg/ObjectArray.msg)
+
+* Enhance PeoplePoseEstimation2D (`#2162 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2162>`_
+  * scripts/people_pose_array_to_pose_array.py: Visualize people 3D pose on rviz in sample
+
+* Contributors: Kentaro Wada, Yuki Furuta
+
+1.1.3 (2017-07-07)
+------------------
+* [jsk_perception] apply candidates node supports topic update (`#2143 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2143>`_)
+  * update Label msg API
+  * add Label and LabelArray msg
+* Rewrite KinfuNodelet with some enhancements and new features (`#2129 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2129>`_)
+  * Save kinfu mesh model with bbox and ground frame id
+  * Create polygon mesh with bbox request in kinfu
+  * Create jsk_recognition_msgs/TrackingStatus.msg and use it in  Kinfue
+* [jsk_perception] PeoplePoseEstimation2D (`#2115 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2115>`_)
+  * [jsk_recogntion_msgs/PoseArray] Add score
+  * [jsk_perception/people_pose_estimation_2d] Modified type of PeoplePose.msg
+  * [jsk_recognition_msgs] Add people_pose msgs
+* Contributors: Kei Okada, Kentaro Wada, Shingo Kitagawa, Iori Yanokura
+
+1.1.2 (2017-06-16)
+------------------
+* [jsk_recognition_msgs] add segment messages. (`#2047 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2047>`_ )
+* Generate README by script (`#2064 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2064>`_ )
+* Contributors: Kentaro Wada, Masaki Murooka
+
 1.1.1 (2017-03-04)
 ------------------
 

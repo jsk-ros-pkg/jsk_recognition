@@ -10,6 +10,7 @@ Convert polygon into mask image.
 * `~input/camera_info` (`sensor_msgs/CameraInfo`)
 
   Input camera info to project 3-D polygon.
+  frame_id of `~input` and `~input/camera_info` should be same.
 
 ## Publishing Topic
 * `~output` (`sensor_msgs/Image`)

@@ -8,3 +8,9 @@ Convert `jsk_recognition_msgs/RectArray` to `image_view2/ImageMarker`.
 
 ## Publishing Topics
 * `~output` (`image_view2/ImageMarker`)
+
+## Sample
+
+```bash
+roslaunch jsk_perception sample_rect_array_actual_size_filter.launch
+```

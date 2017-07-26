@@ -1,7 +1,8 @@
 <launch>
 
   <arg name="gui" default="true" />
-  <arg name="GPU" default="0" />
+  <arg name="gpu" default="0" />
+  <arg name="use_mask" default="false" />
 
   <node name="image_publisher"
         pkg="jsk_perception" type="image_publisher.py">
@@ -11,9 +12,22 @@
     </rosparam>
   </node>
 
+  <node name="mask_image_generator"
+        pkg="jsk_perception" type="mask_image_generator" if="$(arg use_mask)">
+    <remap from="~input" to="image_publisher/output" />
+    <rosparam>
+      offset_x: 110
+      offset_y: 25
+      width: 280
+      height: 420
+    </rosparam>
+  </node>
+
   <include file="$(find jsk_perception)/launch/fcn_object_segmentation.launch">
     <arg name="INPUT_IMAGE" value="image_publisher/output" />
-    <arg name="GPU" value="$(arg GPU)" />
+    <arg name="INPUT_MASK" value="mask_image_generator/output" />
+    <arg name="USE_MASK" value="$(arg use_mask)" />
+    <arg name="GPU" value="$(arg gpu)" />
   </include>
 
   <group if="$(arg gui)">

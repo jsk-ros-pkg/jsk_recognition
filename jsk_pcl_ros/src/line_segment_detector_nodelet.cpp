@@ -135,11 +135,11 @@ namespace jsk_pcl_ros
 
     pnh_->param("approximate_sync", approximate_sync_, false);
 
-    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (config_mutex_, *pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&LineSegmentDetector::configCallback, this, _1, _2);
     srv_->setCallback (f);
-    
+
     ////////////////////////////////////////////////////////
     // setup publishers
     ////////////////////////////////////////////////////////
@@ -161,6 +161,19 @@ namespace jsk_pcl_ros
     min_indices_ = config.min_indices;
     min_length_ = config.min_length;
     line_width_ = config.line_width;
+
+
+    // update segmentation parameters
+    seg_.setOptimizeCoefficients (true);
+    seg_.setModelType(pcl::SACMODEL_LINE);
+    int segmentation_method;
+    {
+      boost::lock_guard<boost::recursive_mutex> lock(config_mutex_);
+      segmentation_method = config.method_type;
+    }
+    seg_.setMethodType(segmentation_method);
+    seg_.setDistanceThreshold (outlier_threshold_);
+    seg_.setMaxIterations (max_iterations_);
   }
   
   void LineSegmentDetector::subscribe()
@@ -241,21 +254,15 @@ namespace jsk_pcl_ros
     pcl::PointIndices::Ptr rest_indices (new pcl::PointIndices);
     rest_indices->indices = indices->indices;
     // use RANSAC to segment lines
-    pcl::SACSegmentation<PointT> seg;
-    seg.setOptimizeCoefficients (true);
-    seg.setModelType (pcl::SACMODEL_LINE);
-    seg.setMethodType (pcl::SAC_RANSAC);
-    seg.setDistanceThreshold (outlier_threshold_);
-    seg.setMaxIterations (max_iterations_);
-    seg.setInputCloud(cloud);
+    seg_.setInputCloud(cloud);
     while (true) {
       if (rest_indices->indices.size() > min_indices_) {
         pcl::PointIndices::Ptr
           result_indices (new pcl::PointIndices);
         pcl::ModelCoefficients::Ptr
           result_coefficients (new pcl::ModelCoefficients);
-        seg.setIndices(rest_indices);
-        seg.segment(*result_indices, *result_coefficients);
+        seg_.setIndices(rest_indices);
+        seg_.segment(*result_indices, *result_coefficients);
         if (result_indices->indices.size() > min_indices_) {
           line_indices.push_back(result_indices);
           line_coefficients.push_back(result_coefficients);

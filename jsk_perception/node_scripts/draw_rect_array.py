@@ -57,14 +57,15 @@ class DrawRectArray(ConnectionBasedTransport):
 
     def _draw_polygon(self, imgmsg, polygon_msg):
         rect_msg = Rect()
-        x1 = polygon_msg.polygon.points[0].x
-        y1 = polygon_msg.polygon.points[0].y
-        x2 = polygon_msg.polygon.points[1].x
-        y2 = polygon_msg.polygon.points[1].y
-        rect_msg.x = int(x1)
-        rect_msg.y = int(y1)
-        rect_msg.width = int(x2 - x1)
-        rect_msg.height = int(y2 - y1)
+        if len(polygon_msg.polygon.points) == 2:
+            x1 = polygon_msg.polygon.points[0].x
+            y1 = polygon_msg.polygon.points[0].y
+            x2 = polygon_msg.polygon.points[1].x
+            y2 = polygon_msg.polygon.points[1].y
+            rect_msg.x = int(x1)
+            rect_msg.y = int(y1)
+            rect_msg.width = int(x2 - x1)
+            rect_msg.height = int(y2 - y1)
         rects = [rect_msg]
         rects_msg = RectArray(header=polygon_msg.header, rects=rects)
         self._draw(imgmsg, rects_msg)

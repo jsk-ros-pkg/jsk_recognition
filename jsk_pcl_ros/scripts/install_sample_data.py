@@ -1,9 +1,25 @@
 #!/usr/bin/env python
 
-from jsk_data import download_data
+import argparse
+import multiprocessing
+
+import jsk_data
+
+
+def download_data(*args, **kwargs):
+    p = multiprocessing.Process(
+            target=jsk_data.download_data,
+            args=args,
+            kwargs=kwargs)
+    p.start()
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-v', '--verbose', dest='quiet', action='store_false')
+    args = parser.parse_args()
+    quiet = args.quiet
+
     PKG = 'jsk_pcl_ros'
 
     download_data(
@@ -16,13 +32,10 @@ def main():
 
     download_data(
         pkg_name=PKG,
-        path='sample/data/2016-10-29-17-05-44_tabletop-coffee-cup.tgz',
-        url='https://drive.google.com/uc?id=0B5DV6gwLHtyJczRRcUhURndQeDg',
+        path='sample/data/2017-06-19-19-34-18_tabletop_coffeecup.tgz',
+        url='https://drive.google.com/uc?id=0B5DV6gwLHtyJRTJ0eGdVYk43bEU',
         md5='d58e894c853fc4485d08547b9fc2b640',
         extract=True,
-        compressed_bags=[
-            'sample/data/2016-10-29-17-05-44_tabletop-coffee-cup/tabletop-coffee-cup.bag',
-        ],
     )
 
     download_data(
@@ -50,6 +63,20 @@ def main():
         compressed_bags=[
             'sample/data/2016-07-06-12-16-43-person-in-point-cloud/vision.compressed.bag',
         ],
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/stereo_arc2017_objects.bag',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2va1ZvWHJRT3Y5dkk',
+        md5='4d8f51d0827f66afe5b91473aeaf9c97',
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/room73b2_table.bag',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vdXdfMWNSUU9IVEU',
+        md5='a38fee55c926152f3d65023d60322eb0',
     )
 
     download_data(

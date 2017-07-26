@@ -16,8 +16,6 @@ from jsk_recognition_utils.chainermodels import VGG16FastRCNN
 from jsk_recognition_utils.chainermodels import VGG_CNN_M_1024
 from jsk_recognition_utils.nms import nms
 from jsk_topic_tools import ConnectionBasedTransport
-from jsk_topic_tools.log_utils import jsk_logfatal
-from jsk_topic_tools.log_utils import jsk_loginfo
 import message_filters
 import rospkg
 import rospy
@@ -152,7 +150,7 @@ def main():
 
     # FIXME: In CPU mode, there is no detections.
     if not cuda.available:
-        jsk_logfatal('CUDA environment is required.')
+        rospy.logfatal('CUDA environment is required.')
         sys.exit(1)
     use_gpu = True
 
@@ -169,11 +167,11 @@ def main():
     else:
         rospy.logerr('Unsupported model: {0}'.format(model_name))
         sys.exit(1)
-    jsk_loginfo('Loading chainermodel')
+    rospy.loginfo('Loading chainermodel')
     S.load_hdf5(chainermodel, model)
     if use_gpu:
         model.to_gpu()
-    jsk_loginfo('Finished loading chainermodel')
+    rospy.loginfo('Finished loading chainermodel')
 
     # assumptions
     target_names = [

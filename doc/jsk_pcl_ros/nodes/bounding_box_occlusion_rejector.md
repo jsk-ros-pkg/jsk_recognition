@@ -28,3 +28,9 @@ $ roslaunch sample_boundingbox_occlusion_rejector.launch
 * `~input/candidate_boxes` (`jsk_recognition_msgs/BoundingBoxArray`)
 
   BoundingBox array of candidate poses.
+
+## Sample
+
+```bash
+roslaunch jsk_pcl_ros sample_boundingbox_occlusion_rejector.launch
+```

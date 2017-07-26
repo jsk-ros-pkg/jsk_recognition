@@ -1,38 +1,21 @@
 <launch>
 
   <arg name="INPUT_IMAGE" />
+  <arg name="INPUT_MASK" />
   <arg name="GPU" default="0" />
+  <arg name="USE_MASK" default="false" />
 
   <node name="fcn_object_segmentation"
         pkg="jsk_perception" type="fcn_object_segmentation.py"
         output="screen">
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/mask" to="$(arg INPUT_MASK)" />
+    <rosparam command="load" file="$(find jsk_perception)/config/voc_target_names.yaml" />
     <rosparam subst_value="true">
       gpu: $(arg GPU)
       model_name: fcn8s
-      model_h5: $(find jsk_perception)/trained_data/fcn8s_from_caffe.chainermodel
-      target_names:
-        - background
-        - aeroplane
-        - bicycle
-        - bird
-        - boat
-        - bottle
-        - bus
-        - car
-        - cat
-        - chair
-        - cow
-        - diningtable
-        - dog
-        - horse
-        - motorbike
-        - person
-        - potted plant
-        - sheep
-        - sofa
-        - train
-        - tv/monitor
+      model_file: $(find jsk_perception)/trained_data/fcn8s_voc.npz
+      use_mask: $(arg USE_MASK)
     </rosparam>
   </node>
 

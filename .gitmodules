@@ -1,6 +1,7 @@
-[submodule ".travis"]
-	path = .travis
-	url = git://github.com/jsk-ros-pkg/jsk_travis
 [submodule "jsk_perception/slic"]
 	path = jsk_perception/slic
 	url = https://github.com/garaemon/SLIC-Superpixels.git
+[submodule ".travis"]
+	path = .travis
+	url = https://github.com/jsk-ros-pkg/jsk_travis.git
+	branch = 0.4.26

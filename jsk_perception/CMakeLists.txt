@@ -56,6 +56,14 @@ endif()
 include(FindPkgConfig)
 pkg_check_modules(libcmt REQUIRED libcmt)
 
+# robot_self_filter is released on version greater than indigo
+find_package(robot_self_filter QUIET)
+if(NOT robot_self_filter_FOUND)
+  # check existence of robot_self_filter package because robot_self_filter is not installed by apt on version less than indigo
+  find_package(PkgConfig)
+  pkg_check_modules(robot_self_filter robot_self_filter QUIET)
+endif()
+
 find_package(OpenMP)
 if(OPENMP_FOUND)
   message("OPENMP FOUND")
@@ -160,6 +168,9 @@ endif()
 
 # Build nodelet executables
 include_directories(include ${catkin_INCLUDE_DIRS} ${Eigen_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} slic ${libcmt_INCLUDE_DIRS})
+if(robot_self_filter_FOUND)
+  include_directories(${robot_self_filter_INCLUDE_DIRS})
+endif()
 link_directories(${libcmt_LIBRARY_DIRS})
 
 file(GLOB ${PROJECT_NAME}_node_scripts ${PROJECT_SOURCE_DIR}/node_scripts/*)
@@ -247,16 +258,7 @@ if("$ENV{ROS_DISTRO}" STRGREATER "hydro") # >= indigo
   jsk_add_nodelet(src/consensus_tracking.cpp "jsk_perception/ConsensusTracking" "consensus_tracking")
 endif()
 
-# robot_self_filter is released on version greater than indigo
-find_package(robot_self_filter QUIET)
-if(NOT robot_self_filter_FOUND)
-  # check existence of robot_self_filter package because robot_self_filter is not installed by apt on version less than indigo
-  find_package(PkgConfig)
-  pkg_check_modules(robot_self_filter robot_self_filter QUIET)
-endif()
-
 if(robot_self_filter_FOUND)
-  message(AUTHOR_WARNING "robot_self_filter is found.")
   jsk_add_nodelet(src/robot_to_mask_image.cpp "jsk_perception/RobotToMaskImage" "robot_to_mask_image")
 endif()
 
@@ -266,9 +268,8 @@ add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
   src/histogram_of_oriented_gradients.cpp
   )
 
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${robot_self_filter_LIBRARIES} ${libcmt_LIBRARIES} yaml-cpp)
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${libcmt_LIBRARIES} yaml-cpp)
 if(robot_self_filter_FOUND)
-  include_directories(${robot_self_filter_INCLUDE_DIRS})
   target_link_libraries(${PROJECT_NAME} ${robot_self_filter_LIBRARIES})
 endif()
 if("${OpenCV_VERSION}" VERSION_GREATER "2.4.8")
@@ -406,10 +407,12 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/split_fore_background.test)
     jsk_add_rostest(test/tile_image.test)
     jsk_add_rostest(test/label_image_decomposer.test)
-    # FIXME: Does not work on Travis/Jenkins
-    # jsk_add_rostest(test/fcn_object_segmentation.test)
-    # jsk_add_rostest(test/vgg16_object_recognition.test install_trained_data)
-    # jsk_add_rostest(test/alexnet_object_recognition.test install_trained_data)
+    jsk_add_rostest(test/people_pose_estimation_2d.test)
+    jsk_add_rostest(test/fcn_object_segmentation.test)
+    jsk_add_rostest(test/label_image_classifier.test)
+    jsk_add_rostest(test/probability_image_classifier.test)
+    jsk_add_rostest(test/vgg16_object_recognition.test)
+    jsk_add_rostest(test/alexnet_object_recognition.test)
     # FIXME: Unstable on Travis/Jenkins
     # if(TARGET bing)
     #   jsk_add_rostest(test/bing.test)

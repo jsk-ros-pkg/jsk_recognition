@@ -9,7 +9,9 @@
   </node>
 
   <node name="slic_super_pixels"
-        pkg="jsk_perception" type="slic_super_pixels" />
+        pkg="jsk_perception" type="slic_super_pixels" >
+    <param name="publish_debug_images" value="$(arg gui)" />
+  </node>
 
   <group if="$(arg gui)">
     <node name="image_view0"

@@ -28,3 +28,20 @@ Accumulate heightmap in time series and construct a new heightmap.
 * `~reset` (`std_srvs/Empty`)
 
   Reset heightmap cache.
+
+## Parameters
+* `~use_offset` (default: `false`)
+
+  use averaging height offset to fit input and prev_pointcloud
+* `~use_bilateral` (Bool, default: `false`)
+
+  use bilateral filtering after accumulation
+* `~bilateral_filter_size` (Integer, default: `5`)
+
+  Kernel size of bilateral filtering.
+* `~bilateral_sigma_color` (Double, default: `0.04`)
+
+  filter sigma of color space.
+* `~bilateral_sigma_space` (Double, default: `5`)
+
+  filter sigma of coordinate space.

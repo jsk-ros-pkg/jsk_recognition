@@ -48,9 +48,13 @@ namespace jsk_pcl_ros
     ConnectionBasedNodelet::onInit();
     pub_config_ = pnh_->advertise<jsk_recognition_msgs::HeightmapConfig>(
       "output/config", 1, true);
+    srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
+    typename dynamic_reconfigure::Server<Config>::CallbackType f =
+      boost::bind (&HeightmapTimeAccumulation::configCallback, this, _1, _2);
+    srv_->setCallback (f);
     sub_config_ = pnh_->subscribe(
       getHeightmapConfigTopic(pnh_->resolveName("input")), 1,
-      &HeightmapTimeAccumulation::configCallback, this);
+      &HeightmapTimeAccumulation::configTopicCallback, this);
     if (!pnh_->getParam("center_frame_id", center_frame_id_)) {
       NODELET_FATAL("no ~center_frame_id is specified");
       return;
@@ -147,6 +151,16 @@ namespace jsk_pcl_ros
       = prev_from_center_to_fixed_.inverse() * from_center_to_fixed;
     pcl::PointCloud<PointType > transformed_pointcloud;
     pcl::transformPointCloud(prev_cloud_, transformed_pointcloud, from_prev_to_current.inverse());
+
+    mergedAccmulation(transformed_pointcloud, new_heightmap);
+
+    publishHeightmap(new_heightmap, msg->header);
+    // prev_from_center_to_fixed_ = from_center_to_fixed;
+  }
+
+  void HeightmapTimeAccumulation::overwriteAccmulation(
+    pcl::PointCloud<PointType > &transformed_pointcloud, cv::Mat &new_heightmap)
+  {
     for (size_t i = 0; i < transformed_pointcloud.points.size(); i++) {
       PointType p = transformed_pointcloud.points[i];
       if (isValidPoint(p)) {
@@ -158,7 +172,7 @@ namespace jsk_pcl_ros
             new_heightmap.at<cv::Vec2f>(index.y, index.x)[1] = (float)(p.intensity);
           } else {
             // There is valid data in current heightmap,
-            if (new_heightmap.at<cv::Vec2f>(index.y, index.x)[1] > (float)(p.intensity)) {
+            if (new_heightmap.at<cv::Vec2f>(index.y, index.x)[1] < (float)(p.intensity)) {
               // heightmap has worth quality than prev_pointcloud
               new_heightmap.at<cv::Vec2f>(index.y, index.x)[0] = p.z;
               new_heightmap.at<cv::Vec2f>(index.y, index.x)[1] = (float)(p.intensity);
@@ -167,14 +181,104 @@ namespace jsk_pcl_ros
         }
       }
     }
-    publishHeightmap(new_heightmap, msg->header);
-    // prev_from_center_to_fixed_ = from_center_to_fixed;
+  }
+
+  void HeightmapTimeAccumulation::mergedAccmulation(
+    pcl::PointCloud<PointType > &transformed_pointcloud, cv::Mat &new_heightmap)
+  {
+    float offset_new_z = 0.0;
+    float offset_org_z = 0.0;
+    if (use_offset_) { // calc offset
+      double diff_z = 0.0;
+      long cntr = 0;
+      for (size_t i = 0; i < transformed_pointcloud.points.size(); i++) {
+        PointType p = transformed_pointcloud.points[i];
+        if (isValidPoint(p)) {
+          cv::Point index = toIndex(p, new_heightmap);
+          if (isValidIndex(index, new_heightmap)) {
+            if (isValidCell(index, new_heightmap)) {
+              float new_z = new_heightmap.at<cv::Vec2f>(index.y, index.x)[0];
+              float new_q = new_heightmap.at<cv::Vec2f>(index.y, index.x)[1];
+              float org_z = p.z;
+              float org_q = p.intensity;
+              float tmp_diff = (new_z - org_z);
+              if (std::fabs(tmp_diff) < 0.04) {
+                diff_z += tmp_diff;
+                cntr++;
+              }
+            }
+          }
+        }
+      }
+      if(cntr > 0) {
+        diff_z /= cntr;
+        offset_new_z = - diff_z/2.0;
+        offset_org_z =   diff_z/2.0;
+      }
+      // add offset to new heightmap
+      for(int yy = 0; yy < new_heightmap.rows; yy++) {
+        for(int xx = 0; xx < new_heightmap.cols; xx++) {
+          new_heightmap.at<cv::Vec2f>(yy, xx)[0] += offset_new_z;
+        }
+      }
+    }
+
+    //averaging strategy
+    for (size_t i = 0; i < transformed_pointcloud.points.size(); i++) {
+      PointType p = transformed_pointcloud.points[i];
+      if (isValidPoint(p)) {
+        cv::Point index = toIndex(p, new_heightmap);
+        if (isValidIndex(index, new_heightmap)) {
+          p.z += offset_org_z;
+          if (!isValidCell(index, new_heightmap)) {
+            // There is not valid data in current heightmap,
+            new_heightmap.at<cv::Vec2f>(index.y, index.x)[0] = p.z;
+            new_heightmap.at<cv::Vec2f>(index.y, index.x)[1] = (float)(p.intensity);
+          } else {
+            // There is valid data in current heightmap,
+            float new_z = new_heightmap.at<cv::Vec2f>(index.y, index.x)[0];
+            float new_q = new_heightmap.at<cv::Vec2f>(index.y, index.x)[1];
+            float org_z = p.z;
+            float org_q = p.intensity;
+            new_z = (new_z * new_q + org_z * org_q)/(new_q + org_q);
+            new_q = (new_q + org_q)/1.6; // ?? new quality
+            if(new_q > 1.0) new_q = 1.0;
+            new_heightmap.at<cv::Vec2f>(index.y, index.x)[0] = new_z;
+            new_heightmap.at<cv::Vec2f>(index.y, index.x)[1] = new_q;
+          }
+        }
+      }
+    }
+
+    if (use_bilateral_) {
+      std::vector<cv::Mat> fimages;
+      cv::split(new_heightmap, fimages);
+      cv::Mat res_image;
+      // filter
+      cv::bilateralFilter(fimages[0], res_image, bilateral_filter_size_, bilateral_sigma_color_, bilateral_sigma_space_);
+      {
+        for (size_t j = 0; j < res_image.rows; j++) {
+          for (size_t i = 0; i < res_image.cols; i++) {
+            float ov = fimages[0].at<float>(j, i);
+            if (ov == -FLT_MAX) {
+              res_image.at<float>(j, i) = -FLT_MAX;
+            }
+          }
+        }
+      }
+      // reconstruct images
+      std::vector<cv::Mat> ret_images;
+      ret_images.push_back(res_image);
+      ret_images.push_back(fimages[1]);
+      cv::merge(ret_images, new_heightmap);
+    }
   }
 
   void HeightmapTimeAccumulation::prevPointCloud(
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+
     pcl::fromROSMsg(*msg, prev_cloud_);
     // get transform at subscribed timestamp
     tf::StampedTransform tf_transform;
@@ -184,7 +288,7 @@ namespace jsk_pcl_ros
     tf::transformTFToEigen(tf_transform, prev_from_center_to_fixed_);
   }
 
-  void HeightmapTimeAccumulation::configCallback(
+  void HeightmapTimeAccumulation::configTopicCallback(
     const jsk_recognition_msgs::HeightmapConfig::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
@@ -203,6 +307,20 @@ namespace jsk_pcl_ros
     prev_from_center_to_fixed_ = Eigen::Affine3f::Identity();
     prev_cloud_.points.clear();
     return true;
+  }
+
+  void HeightmapTimeAccumulation::configCallback(Config& config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    //min_x_ = config.min_x;
+    //max_x_ = config.max_x;
+    //min_y_ = config.min_y;
+    //max_y_ = config.max_y;
+    use_offset_    = config.use_offset;
+    use_bilateral_ = config.use_bilateral;
+    bilateral_filter_size_ = config.bilateral_filter_size;
+    bilateral_sigma_color_ = config.bilateral_sigma_color;
+    bilateral_sigma_space_ = config.bilateral_sigma_space;
   }
 }
 

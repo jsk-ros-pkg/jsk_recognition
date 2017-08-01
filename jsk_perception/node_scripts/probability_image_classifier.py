@@ -13,7 +13,7 @@ class ProbabilityImageClassifier(LabelImageClassifier):
         super(ProbabilityImageClassifier, self).__init__()
 
     def _classify(self, proba_img):
-        proba = proba_img.sum(axis=(0, 1)).astype(np.float32)
+        proba = np.nansum(proba_img, axis=(0, 1)).astype(np.float32)
         proba[self.ignore_labels] = 0
         label = np.argmax(proba)
         proba = proba / proba.sum()

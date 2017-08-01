@@ -61,11 +61,11 @@ class ApplyContextToLabelProbability(ConnectionBasedTransport):
             rospy.logerr('Image shape must be (height, width, channels).')
             return
 
-        # current candidates
-        candidates = self.candidates + self.candidates_fixed
-        candidates = set(candidates)
+        if self.candidates:
+            # current candidates
+            candidates = self.candidates + self.candidates_fixed
+            candidates = set(candidates)
 
-        if candidates:
             n_labels = proba_img.shape[2]
             if max(candidates) >= n_labels:
                 rospy.logerr("The max label value in '~candidates' exceeds "

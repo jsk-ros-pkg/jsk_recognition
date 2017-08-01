@@ -89,6 +89,16 @@ def main():
         ],
     )
 
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/sample_door_handle_detector.bag',
+        url='https://drive.google.com/uc?id=0B4ysRIwB7GryMGxCTUI0MHhqWFk',
+        md5='f702e012730db7aaf01b9868280d8bca',
+        compressed_bags=[
+            'sample/data/sample_door_handle_detector.bag',
+        ],
+    )
+
 
 if __name__ == '__main__':
     main()

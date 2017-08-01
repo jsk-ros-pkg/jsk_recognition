@@ -1,4 +1,7 @@
 <launch>
+  <arg name="play_rosbag" default="true" />
+  <arg name="gui" default="true" />
+
   <arg name="cloud_input" default="/camera_remote/depth_registered/points" />
   <arg name="base_frame_id" default="ground" />
   <arg name="min_likelihood" default="0.3" />
@@ -7,6 +10,17 @@
   <arg name="handle_min_cluster_size" default="15" />
   <arg name="vital_rate" default="0.2" />
   <arg name="respawn" default="true" />
+
+  <group if="$(arg play_rosbag)">
+    <param name="/use_sim_time" value="true" />
+    <node name="rosbag_play" pkg="rosbag" type="play"
+          args="$(find jsk_pcl_ros)/sample/data/sample_door_handle_detector.bag
+                --clock -l -r0.1" />
+  </group>
+
+  <node if="$(arg gui)"
+        name="rviz" pkg="rviz" type="rviz"
+        args="-d $(find jsk_pcl_ros)/sample/rviz/door_handle_detector.rviz" />
 
   <group ns="door_detector">
     <node name="manager"

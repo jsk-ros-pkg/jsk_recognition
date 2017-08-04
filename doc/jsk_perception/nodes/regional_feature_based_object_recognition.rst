@@ -9,6 +9,8 @@ Classify object image from input image and mask
 using regional feature outputted by ResNet.
 
 .. image:: images/regional_feature_based_object_recognition.gif
+   :width: 80%
+
 .. image:: images/regional_feature_based_object_recognition_objects.jpg
    :width: 80%
 

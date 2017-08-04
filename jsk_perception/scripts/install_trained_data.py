@@ -141,6 +141,20 @@ def main():
             md5='4d41e1ac80185849384a67a329746115',
         )
 
+    # node_scripts/feature_based_object_recognition.py
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/resnet_lsvrc2012_mean.npy',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vTDV3ZzUyTlBFZE0',
+        md5='00431426c4fab22985885da0e2ff31b8',
+    )
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/resnet152_from_caffe.npz',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vQVBodlFsMnpGbkU',
+        md5='77fe66a229a2444688a21e3b63fa0661',
+    )
+
 
 if __name__ == '__main__':
     main()

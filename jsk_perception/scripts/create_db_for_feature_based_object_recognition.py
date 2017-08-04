@@ -33,7 +33,7 @@ def get_templates(template_dir):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('template_dir', help='Template dir')
-    parser.add_argument('--db-file', default='db.npz')
+    parser.add_argument('db_file', help='DB file which will be created')
     parser.add_argument('-g', '--gpu', type=int, default=0)
     args = parser.parse_args()
 
@@ -50,7 +50,7 @@ def main():
 
     mean = np.load(mean_file)
 
-    model = ResNetFeature()
+    model = ResNet152Feature()
     chainer.serializers.load_npz(pretrained_model, model)
     if gpu >= 0:
         chainer.cuda.get_device_from_id(gpu).use()

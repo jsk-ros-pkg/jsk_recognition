@@ -44,6 +44,10 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 
   Point indices which are not included in input indices.
 
+* `~cluster_indices` (`jsk_recognition_msgs/ClusterPointIndices`)
+
+  Sorted cluster point indices.
+
 **Optional Topics**
 
 * `~output%02d` (`sensor_msgs/PointCloud2`):

@@ -20,8 +20,6 @@
     <remap from="~input/mask" to="publish_apc2016_object_imgs_and_masks/output/mask" />
     <rosparam subst_value="true">
       gpu: $(arg GPU)
-      pretrained_model: $(find jsk_perception)/trained_data/resnet152_from_caffe.npz
-      mean_file: $(find jsk_perception)/trained_data/resnet_lsvrc2012_mean.npy
       db_file: $(find jsk_perception)/sample/data/resnet_features_apc2016.npz
     </rosparam>
   </node>

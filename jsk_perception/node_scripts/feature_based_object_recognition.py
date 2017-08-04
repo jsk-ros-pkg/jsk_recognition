@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import os.path as osp
+
 import chainer
 from chainer import cuda
 import numpy as np
@@ -15,19 +17,24 @@ import rospy
 from sensor_msgs.msg import Image
 
 
+import rospkg
+PKG_PATH = rospkg.RosPack().get_path('jsk_perception')
+
+
 class FeatureBasedObjectRecognition(ConnectionBasedTransport):
 
     def __init__(self):
         super(FeatureBasedObjectRecognition, self).__init__()
         # parameters
-        pretrained_model = rospy.get_param('~pretrained_model')
-        mean_file = rospy.get_param('~mean_file')
+        db_file = rospy.get_param('~db_file')
         self.gpu = rospy.get_param('~gpu', 0)
         # setup chainer
         chainer.global_config.train = False
         chainer.global_config.enable_backprop = False
         # model
-        rospy.loginfo('Loading pretrained model')
+        pretrained_model = osp.join(
+            PKG_PATH, 'trained_data/resnet152_from_caffe.npz')
+        rospy.loginfo('Loading pretrained model: %s' % pretrained_model)
         # TODO(wkentaro): Support Resnet50/101
         self.model = ResNet152Feature()
         chainer.serializers.load_npz(pretrained_model, self.model)
@@ -36,11 +43,12 @@ class FeatureBasedObjectRecognition(ConnectionBasedTransport):
             self.model.to_gpu()
         rospy.loginfo('Finished loading pretrained model')
         # mean
+        mean_file = osp.join(
+            PKG_PATH, 'trained_data/resnet_lsvrc2012_mean.npy')
         self.mean = np.load(mean_file)
         assert self.mean.shape == (224, 224, 3)  # BGR order
         # knn
         rospy.loginfo('Fitting KNN from db')
-        db_file = rospy.get_param('~db_file')
         db = np.load(db_file)
         X, y, self.target_names = db['X'], db['y'], db['target_names']
         self.knn = KNeighborsClassifier(n_neighbors=10)

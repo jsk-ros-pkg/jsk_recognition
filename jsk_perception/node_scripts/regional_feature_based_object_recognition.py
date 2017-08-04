@@ -21,10 +21,10 @@ import rospkg
 PKG_PATH = rospkg.RosPack().get_path('jsk_perception')
 
 
-class FeatureBasedObjectRecognition(ConnectionBasedTransport):
+class RegionalFeatureBasedObjectRecognition(ConnectionBasedTransport):
 
     def __init__(self):
-        super(FeatureBasedObjectRecognition, self).__init__()
+        super(RegionalFeatureBasedObjectRecognition, self).__init__()
         # parameters
         db_file = rospy.get_param('~db_file')
         self.gpu = rospy.get_param('~gpu', 0)
@@ -113,6 +113,6 @@ class FeatureBasedObjectRecognition(ConnectionBasedTransport):
 
 
 if __name__ == '__main__':
-    rospy.init_node('feature_based_object_recognition')
-    app = FeatureBasedObjectRecognition()
+    rospy.init_node('regional_feature_based_object_recognition')
+    app = RegionalFeatureBasedObjectRecognition()
     rospy.spin()

@@ -8,13 +8,13 @@
   <!--
     The db_file is created by below command:
 
-      rosrun jsk_perception create_db_for_feature_based_object_recognition.py \
+      rosrun jsk_perception create_db_for_regional_feature_based_object_recognition.py \
         $(rospack find jsk_perception)/sample/data/apc2016_object_imgs_and_masks_templates \
         $(rospack find jsk_perception)/sample/data/resnet_features_apc2016.npz
   -->
 
-  <node name="feature_based_object_recognition"
-        pkg="jsk_perception" type="feature_based_object_recognition.py"
+  <node name="regional_feature_based_object_recognition"
+        pkg="jsk_perception" type="regional_feature_based_object_recognition.py"
         output="screen">
     <remap from="~input" to="publish_apc2016_object_imgs_and_masks/output/image" />
     <remap from="~input/mask" to="publish_apc2016_object_imgs_and_masks/output/mask" />
@@ -27,7 +27,7 @@
   <node name="draw_classification_result"
         pkg="jsk_perception" type="draw_classification_result.py">
     <remap from="~input/image" to="publish_apc2016_object_imgs_and_masks/output/image" />
-    <remap from="~input" to="feature_based_object_recognition/output" />
+    <remap from="~input" to="regional_feature_based_object_recognition/output" />
     <rosparam>
       approximate_sync: true
     </rosparam>

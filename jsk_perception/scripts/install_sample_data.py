@@ -36,7 +36,7 @@ def main():
         extract=True,
     )
 
-    # sample/sample_feature_based_object_recognition.launch
+    # sample/sample_regional_feature_based_object_recognition.launch
     download_data(
         pkg_name=PKG,
         path='sample/data/apc2016_object_imgs_and_masks.bag',

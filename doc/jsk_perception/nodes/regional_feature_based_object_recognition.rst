@@ -1,5 +1,5 @@
-feature_based_object_recognition.py
-===================================
+regional_feature_based_object_recognition.py
+============================================
 
 
 What is this?
@@ -8,8 +8,8 @@ What is this?
 Classify object image from input image and mask
 using regional feature outputted by ResNet.
 
-.. image:: images/feature_based_object_recognition.gif
-.. image:: images/feature_based_object_recognition_objects.jpg
+.. image:: images/regional_feature_based_object_recognition.gif
+.. image:: images/regional_feature_based_object_recognition_objects.jpg
    :width: 80%
 
 
@@ -52,8 +52,8 @@ The sample classifies 39 objects which is used Amazon Picking Challenge 2016.
 
 .. code-block:: bash
 
-   roslaunch jsk_perception sample_feature_based_object_recognition.launch  # CPU mode
-   roslaunch jsk_perception sample_feature_based_object_recognition.launch GPU:=0  # GPU mode
+   roslaunch jsk_perception sample_regional_feature_based_object_recognition.launch  # CPU mode
+   roslaunch jsk_perception sample_regional_feature_based_object_recognition.launch GPU:=0  # GPU mode
 
 
 How to create db_file?
@@ -65,6 +65,6 @@ but you can try to create it again in your environment.
 
 .. code-block:: bash
 
-   rosrun jsk_perception create_db_for_feature_based_object_recognition.py \
+   rosrun jsk_perception create_db_for_regional_feature_based_object_recognition.py \
      $(rospack find jsk_perception)/sample/data/apc2016_object_imgs_and_masks_templates \
      $(rospack find jsk_perception)/sample/data/resnet_features_apc2016.npz

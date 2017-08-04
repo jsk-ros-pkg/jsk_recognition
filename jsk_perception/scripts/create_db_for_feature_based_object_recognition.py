@@ -14,10 +14,8 @@ from sklearn.neighbors import KNeighborsClassifier
 import tqdm
 import yaml
 
-import sys
-here = osp.dirname(osp.abspath(__file__))  # NOQA
-sys.path.insert(0, osp.join(here, '../node_scripts'))  # NOQA
-from feature_based_object_recognition import ResNetFeature
+# TODO(wkentaro): Support Resnet50/101
+from jsk_recognition_utils.chainermodels import ResNet152Feature
 
 
 def get_templates(template_dir):

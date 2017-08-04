@@ -118,3 +118,16 @@ class ResNet152(chainer.Chain):
         self.loss = F.softmax_cross_entropy(h, t)
         self.accuracy = F.accuracy(h, t)
         return self.loss
+
+
+class ResNet152Feature(ResNet152):
+
+    def __call__(self, x):
+        h = self.bn1(self.conv1(x))
+        h = F.max_pooling_2d(F.relu(h), 3, stride=2)
+        h = self.res2(h)
+        h = self.res3(h)
+        h = self.res4(h)
+        h = self.res5(h)
+        h = F.average_pooling_2d(h, 7, stride=1)
+        return h

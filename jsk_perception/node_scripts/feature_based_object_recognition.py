@@ -8,24 +8,11 @@ from sklearn.neighbors import KNeighborsClassifier
 import cv_bridge
 from jsk_recognition_msgs.msg import ClassificationResult
 from jsk_recognition_utils.chainermodels import ResNet152
+from jsk_recognition_utils.chainermodels import ResNet152Feature
 from jsk_topic_tools import ConnectionBasedTransport
 import message_filters
 import rospy
 from sensor_msgs.msg import Image
-
-
-class ResNetFeature(ResNet152):
-
-    def __call__(self, x):
-        import chainer.functions as F
-        h = self.bn1(self.conv1(x))
-        h = F.max_pooling_2d(F.relu(h), 3, stride=2)
-        h = self.res2(h)
-        h = self.res3(h)
-        h = self.res4(h)
-        h = self.res5(h)
-        h = F.average_pooling_2d(h, 7, stride=1)
-        return h
 
 
 class FeatureBasedObjectRecognition(ConnectionBasedTransport):
@@ -41,7 +28,8 @@ class FeatureBasedObjectRecognition(ConnectionBasedTransport):
         chainer.global_config.enable_backprop = False
         # model
         rospy.loginfo('Loading pretrained model')
-        self.model = ResNetFeature()
+        # TODO(wkentaro): Support Resnet50/101
+        self.model = ResNet152Feature()
         chainer.serializers.load_npz(pretrained_model, self.model)
         if self.gpu >= 0:
             chainer.cuda.get_device_from_id(self.gpu).use()

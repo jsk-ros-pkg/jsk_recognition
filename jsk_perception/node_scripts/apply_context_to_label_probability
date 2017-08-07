@@ -44,7 +44,7 @@ class ApplyContextToLabelProbability(ConnectionBasedTransport):
         self._sub_candidates.unregister()
 
     def _update_candidates(self, req):
-        self.candidates = req.labels
+        self.candidates = list(req.labels)
         rospy.set_param('~candidates', self.candidates)
         return SetLabelsResponse(success=True)
 

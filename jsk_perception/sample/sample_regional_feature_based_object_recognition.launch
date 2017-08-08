@@ -1,0 +1,53 @@
+<launch>
+
+  <arg name="gui" default="true" />
+  <arg name="GPU" default="-1" />
+
+  <include file="$(find jsk_perception)/sample/include/play_rosbag_apc2016_object_imgs_and_masks.xml" />
+
+  <!--
+    The db_file is created by below command:
+
+      rosrun jsk_perception create_db_for_regional_feature_based_object_recognition.py \
+        $(rospack find jsk_perception)/sample/data/apc2016_object_imgs_and_masks_templates \
+        $(rospack find jsk_perception)/sample/data/resnet_features_apc2016.npz
+  -->
+
+  <node name="regional_feature_based_object_recognition"
+        pkg="jsk_perception" type="regional_feature_based_object_recognition.py"
+        output="screen">
+    <remap from="~input" to="publish_apc2016_object_imgs_and_masks/output/image" />
+    <remap from="~input/mask" to="publish_apc2016_object_imgs_and_masks/output/mask" />
+    <rosparam subst_value="true">
+      gpu: $(arg GPU)
+      db_file: $(find jsk_perception)/sample/data/resnet_features_apc2016.npz
+    </rosparam>
+  </node>
+
+  <node name="draw_classification_result"
+        pkg="jsk_perception" type="draw_classification_result.py">
+    <remap from="~input/image" to="publish_apc2016_object_imgs_and_masks/output/image" />
+    <remap from="~input" to="regional_feature_based_object_recognition/output" />
+    <rosparam>
+      approximate_sync: true
+    </rosparam>
+  </node>
+  <node name="tile_images"
+        pkg="jsk_perception" type="tile_image.py">
+    <rosparam>
+      no_sync: true
+      input_topics:
+        - publish_apc2016_object_imgs_and_masks/output/image
+        - publish_apc2016_object_imgs_and_masks/output/mask
+        - draw_classification_result/output
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="tile_images/output" />
+    </node>
+  </group>
+
+</launch>

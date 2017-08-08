@@ -36,7 +36,7 @@ class TileImages(ConnectionBasedTransport):
     def subscribe(self):
         self.sub_img_list = []
         if self.no_sync:
-            self.input_imgs = dict((topic, None) for topic in self.input_topics)
+            self.input_imgs = {}
             self.sub_img_list = [rospy.Subscriber(topic, Image, self.simple_callback(topic), queue_size=1) for topic in self.input_topics]
             rospy.Timer(rospy.Duration(0.1), self.timer_callback)
         else:
@@ -56,11 +56,9 @@ class TileImages(ConnectionBasedTransport):
             sub.sub.unregister()
     def timer_callback(self, event):
         with self.lock:
-            if None not in self.input_imgs.values():
-                imgs = []
-                for topic in self.input_topics:
-                    imgs.append(self.input_imgs[topic])
-                self._append_images(imgs)
+            imgs = [self.input_imgs[topic] for topic in self.input_topics
+                    if topic in self.input_imgs]
+            self._append_images(imgs)
     def simple_callback(self, target_topic):
         def callback(msg):
             with self.lock:
@@ -70,11 +68,18 @@ class TileImages(ConnectionBasedTransport):
                     cv2.putText(self.input_imgs[target_topic], target_topic, (0, 50), cv2.FONT_HERSHEY_PLAIN, self.font_scale, (0, 255, 0), 4)
         return callback
     def _append_images(self, imgs):
+        if not imgs:
+            return
         if self.cache_img is None:
             out_bgr = jsk_recognition_utils.get_tile_image(imgs)
             self.cache_img = out_bgr
         else:
-            out_bgr = jsk_recognition_utils.get_tile_image(imgs, tile_shape=None, result_img=self.cache_img)
+            try:
+                out_bgr = jsk_recognition_utils.get_tile_image(
+                    imgs, tile_shape=None, result_img=self.cache_img)
+            except ValueError:  # cache miss
+                out_bgr = jsk_recognition_utils.get_tile_image(imgs)
+                self.cache_img = out_bgr
         bridge = cv_bridge.CvBridge()
         imgmsg = bridge.cv2_to_imgmsg(out_bgr, encoding='bgr8')
         self.pub_img.publish(imgmsg)

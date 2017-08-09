@@ -64,9 +64,9 @@ class WeightCanditatesRefiner(object):
         candidates = self.candidates
 
         assert len(weight_msgs) == len(self.prev_weight_values)
+        if any(not msg.weight.stable for msg in weight_msgs):
+            return  # unstable
         weight_values = [w.weight.value for w in weight_msgs]
-        if any(w < 0 for w in weight_values):
-            return  # unstable, scale over, or something
         self.prev_weight_values = weight_values
 
         weight_sum = sum(weight_values)
@@ -74,9 +74,11 @@ class WeightCanditatesRefiner(object):
         sum_msg = WeightStamped()
         sum_msg.header = weight_msgs[0].header
         sum_msg.weight.value = weight_sum
+        sum_msg.weight.stable = True
         sum_at_reset_msg = WeightStamped()
         sum_at_reset_msg.header = weight_msgs[0].header
         sum_at_reset_msg.weight.value = self.weight_sum_at_reset
+        sum_at_reset_msg.weight.stable = True
 
         pick_msg = LabelArray()
         place_msg = LabelArray()

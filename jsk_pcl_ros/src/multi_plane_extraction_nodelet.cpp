@@ -41,6 +41,7 @@
 #include <jsk_topic_tools/log_utils.h>
 #include <pcl/filters/project_inliers.h>
 #include <set>
+#include <sstream>
 
 namespace jsk_pcl_ros
 {
@@ -60,11 +61,23 @@ namespace jsk_pcl_ros
     if (!pnh_->getParam("max_queue_size", maximum_queue_size_)) {
       maximum_queue_size_ = 100;
     }
+
+    pnh_->param("use_coefficients", use_coefficients_, false);
     pnh_->param("use_sensor_frame", use_sensor_frame_, false);
     if (use_sensor_frame_) {
       pnh_->param("sensor_frame", sensor_frame_, std::string("head_root"));
       tf_listener_ = TfListenerSingleton::getInstance();
+      if (use_coefficients_) {
+        NODELET_WARN("'~use_sensor_frame' and '~use_coefficients' cannot be enabled at the same time."
+                     " disabled '~use_coefficients'");
+        use_coefficients_ = false;
+      }
+    } else if (!use_coefficients_) {
+      NODELET_WARN("'~use_coefficients' and '~use_sensor_frame' are both disabled."
+                   " Normal axes of planes are estimated with PCA"
+                   " and they may be flipped unintentionally.");
     }
+
     ////////////////////////////////////////////////////////
     // Dynamic Reconfigure
     ////////////////////////////////////////////////////////
@@ -81,35 +94,55 @@ namespace jsk_pcl_ros
     // Subscribe
     ////////////////////////////////////////////////////////
 
-    
     sub_input_.subscribe(*pnh_, "input", 1);
-    
     sub_polygons_.subscribe(*pnh_, "input_polygons", 1);
-    sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
+
+    if (use_coefficients_) {
+      sub_coefficients_.subscribe(*pnh_, "input_coefficients", 1);
+    } else {
+      sub_polygons_.registerCallback(
+        boost::bind(&MultiPlaneExtraction::fillEmptyCoefficients, this, _1));
+    }
+
+    if (use_indices_) {
+      sub_indices_.subscribe(*pnh_, "indices", 1);
+    } else {
+      sub_polygons_.registerCallback(
+        boost::bind(&MultiPlaneExtraction::fillEmptyIndices, this, _1));
+    }
+
     if (use_async_) {
+      async_ = boost::make_shared<message_filters::Synchronizer<ASyncPolicy> >(maximum_queue_size_);
       if (use_indices_) {
-        sub_indices_.subscribe(*pnh_, "indices", 1);
-        async_ = boost::make_shared<message_filters::Synchronizer<ASyncPolicy> >(maximum_queue_size_);
-        async_->connectInput(sub_input_, sub_indices_, sub_coefficients_, sub_polygons_);
-        async_->registerCallback(boost::bind(&MultiPlaneExtraction::extract, this, _1, _2, _3, _4));
+        if (use_coefficients_) {
+          async_->connectInput(sub_input_, sub_indices_, sub_coefficients_, sub_polygons_);
+        } else {
+          async_->connectInput(sub_input_, sub_indices_, null_coefficients_, sub_polygons_);
+        }
+      } else {
+        if (use_coefficients_) {
+          async_->connectInput(sub_input_, null_indices_, sub_coefficients_, sub_polygons_);
+        } else {
+          async_->connectInput(sub_input_, null_indices_, null_coefficients_, sub_polygons_);
+        }
       }
-      else {
-        async_wo_indices_ = boost::make_shared<message_filters::Synchronizer<ASyncWithoutIndicesPolicy> >(maximum_queue_size_);
-        async_wo_indices_->connectInput(sub_input_, sub_coefficients_, sub_polygons_);
-        async_wo_indices_->registerCallback(boost::bind(&MultiPlaneExtraction::extract, this, _1, _2, _3));
-      }    }
-    else {
+      async_->registerCallback(boost::bind(&MultiPlaneExtraction::extract, this, _1, _2, _3, _4));
+    } else {
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(maximum_queue_size_);
       if (use_indices_) {
-        sub_indices_.subscribe(*pnh_, "indices", 1);
-        sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(maximum_queue_size_);
-        sync_->connectInput(sub_input_, sub_indices_, sub_coefficients_, sub_polygons_);
-        sync_->registerCallback(boost::bind(&MultiPlaneExtraction::extract, this, _1, _2, _3, _4));
+        if (use_coefficients_) {
+          sync_->connectInput(sub_input_, sub_indices_, sub_coefficients_, sub_polygons_);
+        } else {
+          sync_->connectInput(sub_input_, sub_indices_, null_coefficients_, sub_polygons_);
+        }
+      } else {
+        if (use_coefficients_) {
+          sync_->connectInput(sub_input_, null_indices_, sub_coefficients_, sub_polygons_);
+        } else {
+          sync_->connectInput(sub_input_, null_indices_, null_coefficients_, sub_polygons_);
+        }
       }
-      else {
-        sync_wo_indices_ = boost::make_shared<message_filters::Synchronizer<SyncWithoutIndicesPolicy> >(maximum_queue_size_);
-        sync_wo_indices_->connectInput(sub_input_, sub_coefficients_, sub_polygons_);
-        sync_wo_indices_->registerCallback(boost::bind(&MultiPlaneExtraction::extract, this, _1, _2, _3));
-      }
+      sync_->registerCallback(boost::bind(&MultiPlaneExtraction::extract, this, _1, _2, _3, _4));
     }
   }
 
@@ -120,7 +153,9 @@ namespace jsk_pcl_ros
       sub_indices_.unsubscribe();
     }
     sub_polygons_.unsubscribe();
-    sub_coefficients_.unsubscribe();
+    if (use_coefficients_) {
+      sub_coefficients_.unsubscribe();
+    }
   }
 
   void MultiPlaneExtraction::configCallback(Config& config, uint32_t level)
@@ -148,12 +183,24 @@ namespace jsk_pcl_ros
     }
   }
 
-  void MultiPlaneExtraction::extract(const sensor_msgs::PointCloud2::ConstPtr& input,
-                                     const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
-                                     const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons)
+  void MultiPlaneExtraction::fillEmptyIndices(
+    const jsk_recognition_msgs::PolygonArray::ConstPtr &polygons)
   {
-    extract(input, jsk_recognition_msgs::ClusterPointIndices::ConstPtr(),
-            coefficients, polygons);
+    jsk_recognition_msgs::ClusterPointIndices indices;
+    indices.header = polygons->header;
+    indices.cluster_indices.resize(polygons->polygons.size());
+    null_indices_.add(
+      boost::make_shared<jsk_recognition_msgs::ClusterPointIndices>(indices));
+  }
+
+  void MultiPlaneExtraction::fillEmptyCoefficients(
+    const jsk_recognition_msgs::PolygonArray::ConstPtr &polygons)
+  {
+    jsk_recognition_msgs::ModelCoefficientsArray coeffs;
+    coeffs.header = polygons->header;
+    coeffs.coefficients.resize(polygons->polygons.size());
+    null_coefficients_.add(
+      boost::make_shared<jsk_recognition_msgs::ModelCoefficientsArray>(coeffs));
   }
   
   void MultiPlaneExtraction::extract(const sensor_msgs::PointCloud2::ConstPtr& input,
@@ -164,37 +211,29 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();
     // check header
-    if (use_indices_) {
-      if(!jsk_recognition_utils::isSameFrameId(input->header.frame_id,
-                                               indices->header.frame_id) ||
-         !jsk_recognition_utils::isSameFrameId(input->header.frame_id,
-                                               coefficients->header.frame_id) ||
-         !jsk_recognition_utils::isSameFrameId(input->header.frame_id,
-                                               polygons->header.frame_id)) {
-        NODELET_ERROR("frame_id does not match. cloud: %s, indices: %s, coefficients: %s, polygons: %s",
-                          input->header.frame_id.c_str(),
-                          indices->header.frame_id.c_str(),
-                          coefficients->header.frame_id.c_str(),
-                          polygons->header.frame_id.c_str());
-        return;
+    if(!jsk_recognition_utils::isSameFrameId(input->header.frame_id,
+                                             indices->header.frame_id) ||
+       !jsk_recognition_utils::isSameFrameId(input->header.frame_id,
+                                             coefficients->header.frame_id) ||
+       !jsk_recognition_utils::isSameFrameId(input->header.frame_id,
+                                             polygons->header.frame_id)) {
+      std::ostringstream oss;
+      oss << "frame id does not match. cloud: " << input->header.frame_id
+          << ", polygons: " << polygons->header.frame_id;
+      if (use_indices_) {
+        oss << ", indices: " << indices->header.frame_id;
       }
-    }
-    else {
-      if(!jsk_recognition_utils::isSameFrameId(input->header.frame_id,
-                                               coefficients->header.frame_id) ||
-         !jsk_recognition_utils::isSameFrameId(input->header.frame_id,
-                                               polygons->header.frame_id)) {
-        NODELET_ERROR("frame_id does not match. cloud: %s, coefficients: %s, polygons: %s",
-                          input->header.frame_id.c_str(),
-                          coefficients->header.frame_id.c_str(),
-                          polygons->header.frame_id.c_str());
-        return;
+      if (use_coefficients_) {
+        oss << ", coefficients: " << coefficients->header.frame_id;
       }
+      NODELET_ERROR_STREAM(oss.str());
+      return;
     }
-  
+
+    // set viewpoint to determine normal axes of the planes
     Eigen::Vector3f viewpoint;
-    try {
-      if (use_sensor_frame_) {
+    if (use_sensor_frame_) {
+      try {
         tf::StampedTransform transform
           = lookupTransformWithDuration(tf_listener_,
                                         input->header.frame_id,
@@ -205,19 +244,20 @@ namespace jsk_pcl_ros
         tf::transformTFToEigen(transform, sensor_pose);
         viewpoint = Eigen::Vector3f(sensor_pose.translation());
       }
+      catch (tf2::ConnectivityException &e)
+      {
+        NODELET_ERROR("Transform error: %s", e.what());
+      }
+      catch (tf2::InvalidArgumentException &e)
+      {
+        NODELET_ERROR("Transform error: %s", e.what());
+      }
+      catch (...)
+      {
+        NODELET_ERROR("Unknown transform error");
+      }
     }
-    catch (tf2::ConnectivityException &e)
-    {
-      NODELET_ERROR("Transform error: %s", e.what());
-    }
-    catch (tf2::InvalidArgumentException &e)
-    {
-      NODELET_ERROR("Transform error: %s", e.what());
-    }
-    catch (...)
-    {
-      NODELET_ERROR("Unknown transform error");
-    }
+
     // convert all to the pcl types
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr nonplane_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
@@ -251,9 +291,13 @@ namespace jsk_pcl_ros
     // inside of the polygon
     
     std::set<int> result_set;
-    plane_counter_.add(coefficients->coefficients.size());
-    for (size_t plane_i = 0; plane_i < coefficients->coefficients.size(); plane_i++) {
-
+    plane_counter_.add(polygons->polygons.size());
+    for (size_t plane_i = 0; plane_i < polygons->polygons.size(); plane_i++) {
+      if (use_coefficients_) {
+        // set viewpoint from coefficients
+        for (size_t vec_i = 0; vec_i < 3; ++vec_i)
+          viewpoint[vec_i] = coefficients->coefficients[plane_i].values[vec_i];
+      }
       pcl::ExtractPolygonalPrismData<pcl::PointXYZRGB> prism_extract;
       prism_extract.setViewPoint(viewpoint[0], viewpoint[1], viewpoint[2]);
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr hull_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());

@@ -68,6 +68,8 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     virtual void onInit();
     virtual void filter(
+      const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& box_array_msg);
+    virtual void filterWithIndices(
       const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& box_array_msg,
       const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg);
     virtual void configCallback(Config &config, uint32_t level);
@@ -75,6 +77,10 @@ namespace jsk_pcl_ros
       diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void subscribe();
     virtual void unsubscribe();
+    void filterBoundingBoxes(
+      const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& box_array_msg,
+      std::vector<size_t>& keep);
+
     ////////////////////////////////////////////////////////
     // ROS varariables
     ////////////////////////////////////////////////////////
@@ -108,6 +114,7 @@ namespace jsk_pcl_ros
     double z_dimension_min_;
     double z_dimension_max_;
     
+    bool with_indices_;
     
   private:
     

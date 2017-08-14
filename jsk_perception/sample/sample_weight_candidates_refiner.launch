@@ -1,0 +1,37 @@
+<launch>
+
+  <param name="/use_sim_time" value="true" />
+  <node name="rosbag_play"
+    pkg="rosbag" type="play"
+    args="$(find jsk_perception)/sample/data/2017-08-14-12-45-18_scales.bag --clock --loop" />
+
+  <node name="candidates_pub" pkg="rostopic" type="rostopic"
+    args="pub -l /weight_candidates_refiner/input/candidates jsk_recognition_msgs/LabelArray
+    '{header: auto,
+    labels:
+    [{id: 8, name: 'composition_book'},
+    {id: 13, name: 'fiskars_scissors'},
+    {id: 33, name: 'speed_stick'}]}'" />
+
+  <node name="reset_service" pkg="rosservice" type="rosservice"
+    args="call /weight_candidates_refiner/reset '{}' --wait" />
+
+  <node name="weight_candidates_refiner"
+        pkg="jsk_perception" type="weight_candidates_refiner.py">
+    <rosparam>
+      approximate_sync: true
+      queue_size: 10
+      input_topics:
+        - /scale0/output
+        - /scale1/output
+        - /scale2/output
+        - /scale3/output
+      error: 10.0
+      object_weights:
+        composition_book: 305
+        fiskars_scissors: 24
+        speed_stick: 273
+    </rosparam>
+  </node>
+
+</launch>

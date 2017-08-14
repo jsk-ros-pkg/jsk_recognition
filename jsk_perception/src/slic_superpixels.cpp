@@ -100,6 +100,9 @@ namespace jsk_perception
     slic.create_connectivity(lab_image);
 
     if (debug_image_) {
+      // creating debug image may occur seg fault.
+      // So, publish_debug_images was added, in order to create debug image explicitly
+      // See https://github.com/jsk-ros-pkg/jsk_recognition/pull/2181
       slic.colour_with_cluster_means(mean_color_image);
       slic.display_center_grid(center_grid_image, cv::Scalar(0, 0, 255));
       slic.display_contours(out_image, cv::Vec3b(0,0,255));

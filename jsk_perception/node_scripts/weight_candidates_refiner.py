@@ -28,7 +28,7 @@ class WeightCanditatesRefiner(object):
             '~output/candidates/picked', LabelArray, queue_size=1)
         self.placed_pub = rospy.Publisher(
             '~output/candidates/placed', LabelArray, queue_size=1)
-        self.init_srv = rospy.Service('~reset', Trigger, self._reset)
+        self.can_reset = False
         self.subscribe()
 
     def subscribe(self):
@@ -58,28 +58,38 @@ class WeightCanditatesRefiner(object):
             self.candidates[label_msg.name] = label_msg.id
 
     def _scale_cb(self, *weight_msgs):
-        if not self.candidates:
-            rospy.logwarn_throttle(10, 'No candidates, so skipping')
-            return
-        candidates = self.candidates
-
         assert len(weight_msgs) == len(self.prev_weight_values)
-        if any(not msg.weight.stable for msg in weight_msgs):
-            return  # unstable
-        weight_values = [w.weight.value for w in weight_msgs]
-        self.prev_weight_values = weight_values
 
+        # Publish debug info
+        weight_values = [w.weight.value for w in weight_msgs]
         weight_sum = sum(weight_values)
-        weight_diff = weight_sum - self.weight_sum_at_reset
         sum_msg = WeightStamped()
         sum_msg.header = weight_msgs[0].header
         sum_msg.weight.value = weight_sum
-        sum_msg.weight.stable = True
+        sum_msg.weight.stable = all(msg.weight.stable for msg in weight_msgs)
         sum_at_reset_msg = WeightStamped()
         sum_at_reset_msg.header = weight_msgs[0].header
         sum_at_reset_msg.weight.value = self.weight_sum_at_reset
         sum_at_reset_msg.weight.stable = True
+        self.weight_sum_at_reset_pub.publish(sum_at_reset_msg)
+        self.weight_sum_pub.publish(sum_msg)
 
+        if not sum_msg.weight.stable:
+            return  # unstable
+
+        # Store stable weight and enable resetting
+        self.prev_weight_values = weight_values
+        if not self.can_reset:
+            self.reset_srv = rospy.Service('~reset', Trigger, self._reset)
+            self.can_reset = True
+
+        if not self.candidates:
+            rospy.logwarn_throttle(10, 'No candidates, so skip refining')
+            return
+        candidates = self.candidates
+
+        # Output candidates
+        weight_diff = weight_sum - self.weight_sum_at_reset
         pick_msg = LabelArray()
         place_msg = LabelArray()
         pick_msg.header = weight_msgs[0].header
@@ -100,9 +110,6 @@ class WeightCanditatesRefiner(object):
                 label.id = obj_id
                 label.name = obj_name
                 pick_msg.labels.append(label)
-
-        self.weight_sum_at_reset_pub.publish(sum_at_reset_msg)
-        self.weight_sum_pub.publish(sum_msg)
         self.picked_pub.publish(pick_msg)
         self.placed_pub.publish(place_msg)
 

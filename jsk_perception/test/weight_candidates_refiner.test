@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_weight_candidates_refiner.launch" />
+
+  <test test-name="test_weight_candidates_refiner"
+        name="test_weight_candidates_refiner"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /weight_candidates_refiner/output/candidates/picked
+      timeout_0: 30
+      topic_1: /weight_candidates_refiner/output/candidates/placed
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

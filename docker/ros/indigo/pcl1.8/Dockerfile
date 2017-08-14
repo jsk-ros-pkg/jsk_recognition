@@ -1,4 +1,5 @@
-FROM ros:indigo-ros-core
+# FROM ros:indigo-ros-core
+FROM ros-ubuntu:14.04  # built on jenkins.jsk.imi.i.u-tokyo.ac.jp
 
 RUN apt-get update && apt-get install -y \
     wget \

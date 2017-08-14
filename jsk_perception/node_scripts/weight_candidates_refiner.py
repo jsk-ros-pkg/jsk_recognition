@@ -13,8 +13,10 @@ from std_srvs.srv import TriggerResponse
 class WeightCanditatesRefiner(object):
 
     def __init__(self):
+        # {object_name: object_id}
         self.candidates = {}
         self.input_topics = rospy.get_param('~input_topics')
+        # {object_name: weight}
         self.object_weights = rospy.get_param('~object_weights')
         self.error = rospy.get_param('~error', 1.0)
 
@@ -95,7 +97,7 @@ class WeightCanditatesRefiner(object):
         weight_diff = weight_sum - self.weight_sum_at_reset
         diff_lower = weight_diff - self.error
         diff_upper = weight_diff + self.error
-        weight_min = min(self.object_weights[x] for x in self.object_weights)
+        weight_min = min(self.object_weights[x] for x in candidates.keys())
         changed_msg = BoolStamped()
         changed_msg.header = weight_msgs[0].header
         if -weight_min < diff_lower and diff_upper < weight_min:

@@ -69,3 +69,10 @@ Parameters
 * ``~slop`` (Float, Default: ``0.1``)
 
   Slop size of message_filters
+
+
+Sample
+------
+::
+
+    roslaunch jsk_perception sample_weight_candidates_refiner.launch

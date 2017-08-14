@@ -11,6 +11,8 @@
       timeout_0: 30
       topic_1: /weight_candidates_refiner/output/candidates/placed
       timeout_1: 30
+      topic_2: /weight_candidates_refiner/output/changed_from_reset
+      timeout_2: 30
     </rosparam>
   </test>
 

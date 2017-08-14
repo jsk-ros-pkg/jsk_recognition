@@ -12,26 +12,30 @@ Return label array of refined object candidates.
 Subscribing Topic
 -----------------
 
-* ``~input/candidates`` (``jsk_recognitiom_msgs/LabelArray``)
+* ``~input/candidates`` (``jsk_recognition_msgs/LabelArray``)
 
   Input candidates
 
 Publishing Topic
 ----------------
 
-* ``output/candidates/picked`` (``jsk_recognitiom_msgs/LabelArray``)
+* ``output/candidates/picked`` (``jsk_recognition_msgs/LabelArray``)
 
   Output candidates of picked object
 
-* ``output/candidates/placed`` (``jsk_recognitiom_msgs/LabelArray``)
+* ``output/candidates/placed`` (``jsk_recognition_msgs/LabelArray``)
 
   Output candidates of placed object
 
-* ``debug/weight_sum`` (``jsk_recognitiom_msgs/WeightStamped``)
+* ``output/changed_from_reset`` (``jsk_recognition_msgs/BoolStamped``)
+
+  Output whether weight sum is changed from the sum at reset
+
+* ``debug/weight_sum`` (``jsk_recognition_msgs/WeightStamped``)
 
   Output weight sum calculated from scale input
 
-* ``debug/weight_sum_at_reset`` (``jsk_recognitiom_msgs/WeightStamped``)
+* ``debug/weight_sum_at_reset`` (``jsk_recognition_msgs/WeightStamped``)
 
   Output weight sum at reset calculated from scale input
 

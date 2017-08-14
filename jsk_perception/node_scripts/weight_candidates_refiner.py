@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from jsk_recognition_msgs.msg import BoolStamped
 from jsk_recognition_msgs.msg import Label
 from jsk_recognition_msgs.msg import LabelArray
 from jsk_recognition_msgs.msg import WeightStamped
@@ -24,6 +25,8 @@ class WeightCanditatesRefiner(object):
             '~debug/weight_sum', WeightStamped, queue_size=1)
         self.weight_sum_at_reset_pub = rospy.Publisher(
             '~debug/weight_sum_at_reset', WeightStamped, queue_size=1)
+        self.changed_pub = rospy.Publisher(
+            '~output/changed_from_reset', BoolStamped, queue_size=1)
         self.picked_pub = rospy.Publisher(
             '~output/candidates/picked', LabelArray, queue_size=1)
         self.placed_pub = rospy.Publisher(
@@ -88,14 +91,24 @@ class WeightCanditatesRefiner(object):
             return
         candidates = self.candidates
 
-        # Output candidates
+        # Judge if scale value is changed
         weight_diff = weight_sum - self.weight_sum_at_reset
+        diff_lower = weight_diff - self.error
+        diff_upper = weight_diff + self.error
+        weight_min = min(self.object_weights[x] for x in self.object_weights)
+        changed_msg = BoolStamped()
+        changed_msg.header = weight_msgs[0].header
+        if -weight_min < diff_lower and diff_upper < weight_min:
+            changed_msg.data = False
+        else:
+            changed_msg.data = True
+        self.changed_pub.publish(changed_msg)
+
+        # Output candidates
         pick_msg = LabelArray()
         place_msg = LabelArray()
         pick_msg.header = weight_msgs[0].header
         place_msg.header = weight_msgs[0].header
-        diff_lower = weight_diff - self.error
-        diff_upper = weight_diff + self.error
         for obj_name, w in self.object_weights.items():
             if obj_name not in candidates:
                 continue

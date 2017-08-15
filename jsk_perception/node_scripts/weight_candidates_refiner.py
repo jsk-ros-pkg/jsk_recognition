@@ -100,7 +100,8 @@ class WeightCanditatesRefiner(object):
         weight_min = min(self.object_weights[x] for x in candidates.keys())
         changed_msg = BoolStamped()
         changed_msg.header = weight_msgs[0].header
-        if -weight_min < diff_lower and diff_upper < weight_min:
+        if -weight_min < diff_lower and diff_upper < weight_min \
+                and diff_lower < 0 and 0 < diff_upper:
             changed_msg.data = False
         else:
             changed_msg.data = True

@@ -17,13 +17,13 @@ Output of this node is an image and each value means label index.
   Output image. The encoding of image is `CV_32SC1` and each element value means label index.
 * `~debug` (`sensor_msgs/Image`)
 
-  Debug image, each border of cluster drawn by red contour.
+  Debug image, each border of cluster drawn by red contour. (optional, publish if ~publish_debug_images is true)
 * `~debug/mean_color` (`sensor_msgs/Image`)
 
-  Debug image, each cluster is drawn by mean color of the cluster.
+  Debug image, each cluster is drawn by mean color of the cluster. (optional, publish if ~publish_debug_images is true)
 * `~debug/center_grid` (`sensor_msgs/Image`)
 
-  Debug image, Center of each cluster is plotted by red dot.
+  Debug image, Center of each cluster is plotted by red dot. (optional, publish if ~publish_debug_images is true)
 ## Parameters
 * `~number_of_super_pixels` (Integer, default: `100`)
 
@@ -31,6 +31,9 @@ Output of this node is an image and each value means label index.
 * `~weight` (Integer, default: `4`)
 
   Weight of metrics between color and pixel distance.
+* `~publish_debug_images` (Bool, default: `false`)
+
+  Publish debug images (~debug, ~debug/mean_color, ~debug/centr_grid)
 
 ## Sample
 

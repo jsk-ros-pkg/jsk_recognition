@@ -37,4 +37,5 @@ RUN cd ~/ros/ws_jsk_recognition/src && \
 RUN cd ~/ros/ws_jsk_recognition && \
     apt-get install -y python-catkin-tools && \
     . /opt/ros/indigo/setup.sh && \
-    catkin build
+    catkin build && \
+    catkin clean -y

@@ -97,7 +97,8 @@ class WeightCanditatesRefiner(object):
         weight_diff = weight_sum - self.weight_sum_at_reset
         diff_lower = weight_diff - self.error
         diff_upper = weight_diff + self.error
-        weight_min = min(self.object_weights[x] for x in candidates.keys())
+        weight_min = min(self.object_weights.get(x, float('inf'))
+                         for x in candidates.keys())
         changed_msg = BoolStamped()
         changed_msg.header = weight_msgs[0].header
         if -weight_min < diff_lower and diff_upper < weight_min \

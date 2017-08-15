@@ -9,7 +9,8 @@
     args="pub -l /weight_candidates_refiner/input/candidates jsk_recognition_msgs/LabelArray
     '{header: auto,
     labels:
-    [{id: 8, name: 'composition_book'},
+    [{id: 0, name: '__background__'},
+    {id: 8, name: 'composition_book'},
     {id: 13, name: 'fiskars_scissors'},
     {id: 33, name: 'speed_stick'}]}'" />
 

@@ -3,7 +3,7 @@
   <param name="/use_sim_time" value="true" />
   <node name="rosbag_play"
     pkg="rosbag" type="play"
-    args="$(find jsk_perception)/sample/data/2017-08-14-12-45-18_scales.bag --clock --loop" />
+    args="$(find jsk_perception)/sample/data/2017-08-19-13-05-41_scales.bag --clock --loop" />
 
   <node name="candidates_pub" pkg="rostopic" type="rostopic"
     args="pub -l /weight_candidates_refiner/input/candidates jsk_recognition_msgs/LabelArray

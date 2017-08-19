@@ -59,12 +59,12 @@ def main():
 
     download_data(
         pkg_name=PKG,
-        path='sample/data/2017-08-14-12-45-18_scales.bag',
-        url='https://drive.google.com/uc?id=0BxxBA3J-CunGY2doeE5MMGFkSlE',
-        md5='e7d7c9cb223ea0664f763b53fc5ac1f5',
+        path='sample/data/2017-08-19-13-05-41_scales.bag',
+        url='https://drive.google.com/uc?id=0BxxBA3J-CunGV3QyS3hGeFp0dTg',
+        md5='ee9e170aeda0f4280a6e30dd3dc42d9d',
         extract=False,
         compressed_bags=[
-            'sample/data/2017-08-14-12-45-18_scales.bag',
+            'sample/data/2017-08-19-13-05-41_scales.bag',
         ],
     )
 

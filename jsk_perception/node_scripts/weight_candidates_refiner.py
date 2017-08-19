@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
+from and_scale_ros.msg import WeightStamped
 from jsk_recognition_msgs.msg import BoolStamped
 from jsk_recognition_msgs.msg import Label
 from jsk_recognition_msgs.msg import LabelArray
-from jsk_recognition_msgs.msg import WeightStamped
 import message_filters
 import rospy
 from std_srvs.srv import Trigger

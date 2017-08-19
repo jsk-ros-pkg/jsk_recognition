@@ -31,11 +31,11 @@ Publishing Topic
 
   Output whether weight sum is changed from the sum at reset
 
-* ``debug/weight_sum`` (``jsk_recognition_msgs/WeightStamped``)
+* ``debug/weight_sum`` (``and_scale_ros/WeightStamped``)
 
   Output weight sum calculated from scale input
 
-* ``debug/weight_sum_at_reset`` (``jsk_recognition_msgs/WeightStamped``)
+* ``debug/weight_sum_at_reset`` (``and_scale_ros/WeightStamped``)
 
   Output weight sum at reset calculated from scale input
 

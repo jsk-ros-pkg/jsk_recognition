@@ -1,4 +1,5 @@
-FROM ros:indigo-ros-core
+# FROM ros:indigo-ros-core
+FROM ros-ubuntu:14.04  # built on jenkins.jsk.imi.i.u-tokyo.ac.jp
 
 RUN apt-get update && apt-get install -y \
     wget \
@@ -36,4 +37,5 @@ RUN cd ~/ros/ws_jsk_recognition/src && \
 RUN cd ~/ros/ws_jsk_recognition && \
     apt-get install -y python-catkin-tools && \
     . /opt/ros/indigo/setup.sh && \
-    catkin build
+    catkin build && \
+    catkin clean -y

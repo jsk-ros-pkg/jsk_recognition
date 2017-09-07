@@ -58,6 +58,8 @@ namespace imagesift
         _srvDetect = nh_->advertiseService("Feature0DDetect", &SiftNode::detectCb, this);
         lasttime = ros::WallTime::now();
         _bInfoInitialized = false;
+
+        onInitPostProcess();
     }
 
     void SiftNode::subscribe()
@@ -201,6 +203,7 @@ namespace imagesift
     void SiftNode::imageCb(const sensor_msgs::ImageConstPtr& msg_ptr,
                            const sensor_msgs::ImageConstPtr& mask_ptr)
     {
+        vital_checker_->poke();
         if(_pubFeatures.getNumSubscribers()==0 && _pubSift.getNumSubscribers()==0) {
             ROS_DEBUG("number of subscribers is 0, ignoring image");
             return;

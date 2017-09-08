@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
   rostest
   tf_conversions
   tf
+  tf2_geometry_msgs
   tf2_ros
   image_geometry
   sensor_msgs
@@ -71,6 +72,7 @@ add_library(jsk_recognition_utils SHARED
   src/pcl_ros_util.cpp
   src/pcl_conversion_util.cpp
   src/pcl_util.cpp
+  src/tf_listener.cpp
   src/tf_listener_singleton.cpp
   src/pcl/ear_clipping_patched.cpp
   src/sensor_model_utils.cpp

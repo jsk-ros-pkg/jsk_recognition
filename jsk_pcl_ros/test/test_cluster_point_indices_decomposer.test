@@ -15,6 +15,14 @@
       timeout_1: 30
       topic_2: /cluster_point_indices_decomposer_align_boxes_with_frame/boxes
       timeout_2: 30
+      topic_3: /cluster_point_indices_decomposer/mask
+      timeout_3: 30
+      topic_4: /cluster_point_indices_decomposer/label
+      timeout_4: 30
+      topic_5: /cluster_point_indices_decomposer/cluster_indices
+      timeout_5: 30
+      topic_6: /cluster_point_indices_decomposer/centroid_pose_array
+      timeout_6: 30
     </rosparam>
   </test>
 

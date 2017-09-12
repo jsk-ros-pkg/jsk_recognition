@@ -112,6 +112,7 @@ namespace jsk_pcl_ros
     mask_pub_ = advertise<sensor_msgs::Image>(*pnh_, "mask", 1);
     label_pub_ = advertise<sensor_msgs::Image>(*pnh_, "label", 1);
     centers_pub_ = advertise<geometry_msgs::PoseArray>(*pnh_, "centroid_pose_array", 1);
+    indices_pub_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "cluster_indices", 1);
 
     onInitPostProcess();
   }
@@ -635,13 +636,20 @@ namespace jsk_pcl_ros
     cv::Mat label = cv::Mat::zeros(input->height, input->width, CV_32SC1);
     pcl::PointCloud<pcl::PointXYZRGB> debug_output;
     jsk_recognition_msgs::BoundingBoxArray bounding_box_array;
+    jsk_recognition_msgs::ClusterPointIndices out_cluster_indices;
     bounding_box_array.header = input->header;
     geometry_msgs::PoseArray center_pose_array;
     center_pose_array.header = input->header;
+    out_cluster_indices.header = input->header;
     for (size_t i = 0; i < argsort.size(); i++)
     {
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
       
+      pcl_msgs::PointIndices out_indices_msg;
+      out_indices_msg.header = input->header;
+      out_indices_msg.indices = *(converted_indices[argsort[i]]);
+      out_cluster_indices.cluster_indices.push_back(out_indices_msg);
+
       pcl::PointIndices::Ptr segmented_indices (new pcl::PointIndices);
       extract.setIndices(converted_indices[argsort[i]]);
       extract.filter(*segmented_cloud);
@@ -721,6 +729,7 @@ namespace jsk_pcl_ros
     pc_pub_.publish(debug_ros_output);
     centers_pub_.publish(center_pose_array);
     box_pub_.publish(bounding_box_array);
+    indices_pub_.publish(out_cluster_indices);
   }
   
   void ClusterPointIndicesDecomposer::extract

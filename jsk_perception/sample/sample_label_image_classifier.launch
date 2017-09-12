@@ -2,7 +2,7 @@
 
   <arg name="gui" default="true" />
   <arg name="gpu" default="0" />
-  <arg name="use_mask" default="false" />
+  <arg name="use_mask" default="true" />
 
   <include file="$(find jsk_perception)/sample/sample_fcn_object_segmentation.launch">
     <arg name="gui" value="$(arg gui)" />
@@ -23,7 +23,8 @@
   <node name="draw_classification_result"
         pkg="jsk_perception" type="draw_classification_result.py">
     <remap from="~input" to="label_image_classifier/output" />
-    <remap from="~input/image" to="image_publisher/output" />
+    <remap from="~input/image" to="apply_mask_image/output" if="$(arg use_mask)" />
+    <remap from="~input/image" to="image_publisher/output" unless="$(arg use_mask)" />
   </node>
 
   <group if="$(arg gui)">

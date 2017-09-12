@@ -101,7 +101,8 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     compare_policy_ = jsk_recognition_utils::ComparePolicy(config.compare_policy);
     detection_threshold_ = config.detection_threshold;
-    if (queue_size_ = config.queue_size) {
+
+    if (queue_size_ != config.queue_size) {
       queue_size_ = config.queue_size;
       if (isSubscribed()) {
         unsubscribe();

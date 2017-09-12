@@ -38,6 +38,7 @@
 #include <ros/ros.h>
 #include <ros/names.h>
 #include <pcl_ros/pcl_nodelet.h>
+#include <message_filters/pass_through.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
@@ -65,19 +66,11 @@ namespace jsk_pcl_ros
     jsk_recognition_msgs::ClusterPointIndices,
     jsk_recognition_msgs::ModelCoefficientsArray,
     jsk_recognition_msgs::PolygonArray> SyncPolicy;
-    typedef message_filters::sync_policies::ExactTime<
-      sensor_msgs::PointCloud2,
-      jsk_recognition_msgs::ModelCoefficientsArray,
-      jsk_recognition_msgs::PolygonArray> SyncWithoutIndicesPolicy;
     typedef message_filters::sync_policies::ApproximateTime<
       sensor_msgs::PointCloud2,
       jsk_recognition_msgs::ClusterPointIndices,
       jsk_recognition_msgs::ModelCoefficientsArray,
       jsk_recognition_msgs::PolygonArray> ASyncPolicy;
-    typedef message_filters::sync_policies::ApproximateTime<
-      sensor_msgs::PointCloud2,
-      jsk_recognition_msgs::ModelCoefficientsArray,
-      jsk_recognition_msgs::PolygonArray> ASyncWithoutIndicesPolicy;
     typedef jsk_pcl_ros::MultiPlaneExtractionConfig Config;
 
     MultiPlaneExtraction(): DiagnosticNodelet("MultiPlaneExtraction") { }
@@ -87,14 +80,15 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     virtual void onInit();
     
+    virtual void fillEmptyIndices(
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons);
+    virtual void fillEmptyCoefficients(
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons);
+
     virtual void extract(const sensor_msgs::PointCloud2::ConstPtr& input,
                          const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices,
                          const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
                          const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons);
-    virtual void extract(
-      const sensor_msgs::PointCloud2::ConstPtr& input,
-      const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients,
-      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons);
     
     virtual void configCallback (Config &config, uint32_t level);
 
@@ -114,10 +108,11 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
     message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygons_;
     message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_indices_;
+    message_filters::PassThrough<jsk_recognition_msgs::ClusterPointIndices> null_indices_;
+    message_filters::PassThrough<jsk_recognition_msgs::ModelCoefficientsArray> null_coefficients_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
-    boost::shared_ptr<message_filters::Synchronizer<SyncWithoutIndicesPolicy> > sync_wo_indices_;
     boost::shared_ptr<message_filters::Synchronizer<ASyncPolicy> > async_;
-    boost::shared_ptr<message_filters::Synchronizer<ASyncWithoutIndicesPolicy> > async_wo_indices_;
+
 
     ////////////////////////////////////////////////////////
     // Diagnostics Variables
@@ -136,6 +131,7 @@ namespace jsk_pcl_ros
     double maginify_;
     bool use_sensor_frame_;
     std::string sensor_frame_;
+    bool use_coefficients_;
   private:
     
     

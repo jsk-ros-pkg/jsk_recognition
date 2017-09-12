@@ -71,10 +71,13 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // Publishers
     ////////////////////////////////////////////////////////
+    pnh_->param("with_indices", with_indices_, true);
     filtered_box_pub_
       = advertise<jsk_recognition_msgs::BoundingBoxArray>(*pnh_, "output_box", 1);
-    filtered_indices_pub_
-      = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output_indices", 1);
+    if (with_indices_) {
+      filtered_indices_pub_
+        = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output_indices", 1);
+    }
 
     onInitPostProcess();
   }
@@ -82,19 +85,100 @@ namespace jsk_pcl_ros
   void BoundingBoxFilter::subscribe()
   {
     sub_box_.subscribe(*pnh_, "input_box", 1);
-    sub_indices_.subscribe(*pnh_, "input_indices", 1);
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-    sync_->connectInput(sub_box_, sub_indices_);
-    sync_->registerCallback(boost::bind(&BoundingBoxFilter::filter, this, _1, _2));
+    if (with_indices_) {
+      sub_indices_.subscribe(*pnh_, "input_indices", 1);
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+      sync_->connectInput(sub_box_, sub_indices_);
+      sync_->registerCallback(boost::bind(&BoundingBoxFilter::filterWithIndices, this, _1, _2));
+    } else {
+      sub_box_.registerCallback(boost::bind(&BoundingBoxFilter::filter, this, _1));
+    }
   }
 
   void BoundingBoxFilter::unsubscribe()
   {
     sub_box_.unsubscribe();
-    sub_indices_.unsubscribe();
+    if (with_indices_) {
+      sub_indices_.unsubscribe();
+    }
   }
 
-  void BoundingBoxFilter::filter(
+  void BoundingBoxFilter::filterBoundingBoxes(
+    const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& box_array_msg,
+    std::vector<size_t>& keep)
+  {
+    for (size_t i = 0; i < box_array_msg->boxes.size(); i++) {
+      jsk_recognition_msgs::BoundingBox box = box_array_msg->boxes[i];
+      if (!filter_limit_negative_) {
+        if (use_x_dimension_) {
+          if (box.dimensions.x < x_dimension_min_ ||
+              box.dimensions.x > x_dimension_max_) {
+            continue;
+          }
+        }
+        if (use_y_dimension_) {
+          if (box.dimensions.y < y_dimension_min_ ||
+              box.dimensions.y > y_dimension_max_) {
+            continue;
+          }
+        }
+        if (use_z_dimension_) {
+          if (box.dimensions.z < z_dimension_min_ ||
+              box.dimensions.z > z_dimension_max_) {
+            continue;
+          }
+        }
+      }
+      else {
+        if (use_x_dimension_) {
+          if (box.dimensions.x > x_dimension_min_ &&
+              box.dimensions.x < x_dimension_max_) {
+            continue;
+          }
+        }
+        if (use_y_dimension_) {
+          if (box.dimensions.y > y_dimension_min_ &&
+              box.dimensions.y < y_dimension_max_) {
+            continue;
+          }
+        }
+        if (use_z_dimension_) {
+          if (box.dimensions.z > z_dimension_min_ &&
+              box.dimensions.z < z_dimension_max_) {
+            continue;
+          }
+        }
+      }
+      keep.push_back(i);
+    }
+  }
+
+  void BoundingBoxFilter::filter(const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& box_array_msg)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+
+    jsk_recognition_msgs::BoundingBoxArray filtered_box_array;
+    filtered_box_array.header = box_array_msg->header;
+
+    std::vector<size_t> keep;  // index of bounding box which will be kept
+    filterBoundingBoxes(box_array_msg, keep);
+    for (size_t j = 0; j < keep.size(); j++)
+    {
+      size_t i = keep[j];
+      filtered_box_array.boxes.push_back(box_array_msg->boxes[i]);
+    }
+
+    // publish
+    filtered_box_pub_.publish(filtered_box_array);
+
+    // for diagnostic
+    size_t pass_count = keep.size();
+    size_t remove_count = box_array_msg->boxes.size() - pass_count;
+    remove_counter_.add(remove_count);
+    pass_counter_.add(pass_count);
+  }
+
+  void BoundingBoxFilter::filterWithIndices(
     const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& box_array_msg,
     const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg)
   {
@@ -111,63 +195,23 @@ namespace jsk_pcl_ros
     jsk_recognition_msgs::ClusterPointIndices filtered_indices;
     filtered_box_array.header = box_array_msg->header;
     filtered_indices.header = indices_msg->header;
-    int remove_count = 0;
-    int pass_count = 0;
-    for (size_t i = 0; i < box_array_msg->boxes.size(); i++) {
-      jsk_recognition_msgs::BoundingBox box = box_array_msg->boxes[i];
-      bool filterp = false;
-      if (!filter_limit_negative_) {
-        if (use_x_dimension_) {
-          if (box.dimensions.x < x_dimension_min_ ||
-              box.dimensions.x > x_dimension_max_) {
-            filterp = true;
-          }
-        }
-        if (use_y_dimension_) {
-          if (box.dimensions.y < y_dimension_min_ ||
-              box.dimensions.y > y_dimension_max_) {
-            filterp = true;
-          }
-        }
-        if (use_z_dimension_) {
-          if (box.dimensions.z < z_dimension_min_ ||
-              box.dimensions.z > z_dimension_max_) {
-            filterp = true;
-          }
-        }
-      }
-      else {
-        if (use_x_dimension_) {
-          if (box.dimensions.x > x_dimension_min_ &&
-              box.dimensions.x < x_dimension_max_) {
-            filterp = true;
-          }
-        }
-        if (use_y_dimension_) {
-          if (box.dimensions.y > y_dimension_min_ &&
-              box.dimensions.y < y_dimension_max_) {
-            filterp = true;
-          }
-        }
-        if (use_z_dimension_) {
-          if (box.dimensions.z > z_dimension_min_ &&
-              box.dimensions.z < z_dimension_max_) {
-            filterp = true;
-          }
-        }
-      }
-      if (!filterp) {
-        filtered_box_array.boxes.push_back(box);
-        filtered_indices.cluster_indices.push_back(
-          indices_msg->cluster_indices[i]);
-        ++pass_count;
-      }
-      else {
-        ++remove_count;
-      }
+
+    std::vector<size_t> keep;  // index of bounding box which will be kept
+    filterBoundingBoxes(box_array_msg, keep);
+    for (size_t j = 0; j < keep.size(); j++)
+    {
+      size_t i = keep[j];
+      filtered_box_array.boxes.push_back(box_array_msg->boxes[i]);
+      filtered_indices.cluster_indices.push_back(indices_msg->cluster_indices[i]);
     }
+
+    // publish
     filtered_box_pub_.publish(filtered_box_array);
     filtered_indices_pub_.publish(filtered_indices);
+
+    // for diagnostic
+    size_t pass_count = keep.size();
+    size_t remove_count = box_array_msg->boxes.size() - pass_count;
     remove_counter_.add(remove_count);
     pass_counter_.add(pass_count);
   }

@@ -119,11 +119,13 @@ namespace jsk_perception
 
     resolution_factor_ = config.resolution_factor;
     interpolation_method_ = config.interpolation_method;
-
+#if ROS_VERSION_MINIMUM(1, 11, 4)
+    // indigo or later
     if (need_resubscribe && isSubscribed()) {
       unsubscribe();
       subscribe();
     }
+#endif
   }
 
   void DrawRects::fillEmptyClasses(

@@ -125,6 +125,7 @@ generate_dynamic_reconfigure_options(
   cfg/LabelToMaskImage.cfg
   cfg/FlowVelocityThresholding.cfg
   cfg/FilterMaskImageWithSize.cfg
+  cfg/FastRCNN.cfg
 )
 
 message(WARNING "DEPRECATION WARNING: srv files in jsk_pcl_ros are deprecated."

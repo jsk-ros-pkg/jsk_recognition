@@ -45,7 +45,7 @@ namespace jsk_perception
   void MaskImageToRect::onInit()
   {
     DiagnosticNodelet::onInit();
-    pub_ = advertise<geometry_msgs::PolygonStamped>(*pnh_, "output", 1);
+    pub_ = advertise<jsk_recognition_msgs::RectArray>(*pnh_, "output", 1);
     onInitPostProcess();
   }
 
@@ -76,19 +76,18 @@ namespace jsk_perception
         }
       }
     }
-    geometry_msgs::PolygonStamped rect;
-    rect.header = mask_msg->header;
+    jsk_recognition_msgs::RectArray rects;
+    rects.header = mask_msg->header;
     if (indices.size() > 0){
       cv::Rect mask_rect = cv::boundingRect(indices);
-      geometry_msgs::Point32 min_pt, max_pt;
-      min_pt.x = mask_rect.x;
-      min_pt.y = mask_rect.y;
-      max_pt.x = mask_rect.x + mask_rect.width;
-      max_pt.y = mask_rect.y + mask_rect.height;
-      rect.polygon.points.push_back(min_pt);
-      rect.polygon.points.push_back(max_pt);
+      jsk_recognition_msgs::Rect rect;
+      rect.x = mask_rect.x;
+      rect.y = mask_rect.y;
+      rect.width = mask_rect.width;
+      rect.height = mask_rect.height;
+      rects.rects.push_back(rect);
     }
-    pub_.publish(rect);
+    pub_.publish(rects);
   }
 }
 

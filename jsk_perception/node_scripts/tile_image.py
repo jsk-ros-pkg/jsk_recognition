@@ -21,6 +21,11 @@ class TileImages(ConnectionBasedTransport):
         if not self.input_topics:
             rospy.logerr('need to specify input_topics')
             sys.exit(1)
+        self._shape = rospy.get_param('~shape', None)
+        if self._shape and \
+                (self._shape[0] * self._shape[1]) < len(self.input_topics):
+            rospy.logerr('Tile size must be larger than # of input topics')
+            sys.exit(1)
         self.cache_img = None
         self.draw_topic_name = rospy.get_param('~draw_topic_name', False)
         self.approximate_sync = rospy.get_param('~approximate_sync', True)
@@ -70,15 +75,19 @@ class TileImages(ConnectionBasedTransport):
     def _append_images(self, imgs):
         if not imgs:
             return
+        # convert tile shape: (Y, X) -> (X, Y)
+        shape_xy = self._shape[::-1] if self._shape else self._shape
         if self.cache_img is None:
-            out_bgr = jsk_recognition_utils.get_tile_image(imgs)
+            out_bgr = jsk_recognition_utils.get_tile_image(
+                imgs, tile_shape=shape_xy)
             self.cache_img = out_bgr
         else:
             try:
                 out_bgr = jsk_recognition_utils.get_tile_image(
-                    imgs, tile_shape=None, result_img=self.cache_img)
+                    imgs, tile_shape=shape_xy, result_img=self.cache_img)
             except ValueError:  # cache miss
-                out_bgr = jsk_recognition_utils.get_tile_image(imgs)
+                out_bgr = jsk_recognition_utils.get_tile_image(
+                    imgs, tile_shape=shape_xy)
                 self.cache_img = out_bgr
         bridge = cv_bridge.CvBridge()
         imgmsg = bridge.cv2_to_imgmsg(out_bgr, encoding='bgr8')

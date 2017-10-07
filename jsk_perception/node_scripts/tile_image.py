@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import collections
 import sys
 import cv2
 import cv_bridge
@@ -22,10 +23,14 @@ class TileImages(ConnectionBasedTransport):
             rospy.logerr('need to specify input_topics')
             sys.exit(1)
         self._shape = rospy.get_param('~shape', None)
-        if self._shape and \
-                (self._shape[0] * self._shape[1]) < len(self.input_topics):
-            rospy.logerr('Tile size must be larger than # of input topics')
-            sys.exit(1)
+        if self._shape:
+            if not (isinstance(self._shape, collections.Sequence) and
+                    len(self._shape) == 2):
+                rospy.logerr('~shape must be a list of 2 float values.')
+                sys.exit(1)
+            if (self._shape[0] * self._shape[1]) < len(self.input_topics):
+                rospy.logerr('Tile size must be larger than # of input topics')
+                sys.exit(1)
         self.cache_img = None
         self.draw_topic_name = rospy.get_param('~draw_topic_name', False)
         self.approximate_sync = rospy.get_param('~approximate_sync', True)

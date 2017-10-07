@@ -13,9 +13,19 @@
     <arg name="INPUT_IMAGE" value="image_publisher/output" />
   </include>
 
+  <node name="draw_rects" pkg="jsk_perception" type="draw_rects"
+        output="screen">
+    <remap from="~input" to="image_publisher/output" />
+    <remap from="~input/rects" to="fast_rcnn/output/rect_array" />
+    <remap from="~input/class" to="fast_rcnn/output/class" />
+    <rosparam>
+      use_classification_result: true
+    </rosparam>
+  </node>
+
   <node name="image_view"
         pkg="image_view" type="image_view">
-    <remap from="image" to="fast_rcnn/output" />
+    <remap from="image" to="draw_rects/output" />
   </node>
 
 </launch>

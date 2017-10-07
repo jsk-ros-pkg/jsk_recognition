@@ -125,6 +125,8 @@ generate_dynamic_reconfigure_options(
   cfg/LabelToMaskImage.cfg
   cfg/FlowVelocityThresholding.cfg
   cfg/FilterMaskImageWithSize.cfg
+  cfg/FastRCNN.cfg
+  cfg/DrawRects.cfg
 )
 
 message(WARNING "DEPRECATION WARNING: srv files in jsk_pcl_ros are deprecated."
@@ -246,6 +248,7 @@ jsk_add_nodelet(src/project_image_point.cpp "jsk_perception/ProjectImagePoint" "
 jsk_add_nodelet(src/sliding_window_object_detector.cpp "jsk_perception/SlidingWindowObjectDetector" "sliding_window_object_detector")
 jsk_add_nodelet(src/gaussian_blur.cpp "jsk_perception/GaussianBlur" "gaussian_blur")
 jsk_add_nodelet(src/kmeans.cpp "jsk_perception/KMeans" "kmeans")
+jsk_add_nodelet(src/draw_rects.cpp "jsk_perception/DrawRects" "draw_rects")
 if("${OpenCV_VERSION}" VERSION_GREATER "2.9.9")  # >= 3.0.0
   jsk_add_nodelet(src/bing.cpp "jsk_perception/Bing" "bing")
 endif()
@@ -389,7 +392,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/colorize_labels.test)
     jsk_add_rostest(test/concave_hull_mask_image.test)
     jsk_add_rostest(test/convex_hull_mask_image.test)
-    jsk_add_rostest(test/draw_rect_array.test)
+    jsk_add_rostest(test/draw_rects.test)
     jsk_add_rostest(test/extract_image_channel.test)
     jsk_add_rostest(test/fcn_object_segmentation.test)
     add_rostest(test/fcn_object_segmentation.test ARGS use_mask:=true)

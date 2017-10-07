@@ -44,6 +44,20 @@
     </rosparam>
   </node>
 
+  <node name="label_image_decomposer_only_label"
+        pkg="jsk_perception" type="label_image_decomposer.py">
+    <remap from="~input/label" to="grid_label/output" />
+    <rosparam>
+      only_label: true
+      label_names:
+        - background
+        - upper_left
+        - upper_right
+        - lower_left
+        - lower_right
+    </rosparam>
+  </node>
+
   <group if="$(arg gui)">
     <node name="image_view0"
           pkg="image_view" type="image_view">
@@ -56,6 +70,10 @@
     <node name="image_view2"
           pkg="image_view" type="image_view">
       <remap from="image" to="label_image_decomposer_with_names/output/label_viz" />
+    </node>
+    <node name="image_view3"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="label_image_decomposer_only_label/output/label_viz" />
     </node>
   </group>
 

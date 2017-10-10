@@ -52,6 +52,8 @@ Parameters
 * ``shape`` (type: ``FloatArray``, default: ``None``)
 
   Tile shape like ``[2, 4]`` in [Y, X] order.
+  If ``None``, shape is automatically decided to be square
+  as much as possible.
 
 
 CLI

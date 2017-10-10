@@ -81,7 +81,8 @@ class TileImages(ConnectionBasedTransport):
         if not imgs:
             return
         # convert tile shape: (Y, X) -> (X, Y)
-        shape_xy = self._shape[::-1] if self._shape else self._shape
+        # if None, shape is automatically decided to be square AMAP.
+        shape_xy = self._shape[::-1] if self._shape else None
         if self.cache_img is None:
             out_bgr = jsk_recognition_utils.get_tile_image(
                 imgs, tile_shape=shape_xy)

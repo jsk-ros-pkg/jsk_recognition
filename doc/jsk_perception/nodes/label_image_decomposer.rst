@@ -81,6 +81,11 @@ Parameters
   The name of labels, and if this parameter is specified, the ``~output/label_viz``
   image is drawn with label name legend.
 
+* ``~only_label`` (Bool, default: ``False``)
+
+  If ``True``, ``~input`` is not subscribed and ``~input/label`` is only used
+  to visualize the input label.
+
 
 Sample
 ------

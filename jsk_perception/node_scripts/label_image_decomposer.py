@@ -10,6 +10,7 @@ import numpy as np
 import scipy.ndimage
 
 import cv_bridge
+import dynamic_reconfigure.server
 from jsk_recognition_utils import bounding_rect_of_mask
 from jsk_recognition_utils import get_tile_image
 from jsk_recognition_utils.color import labelcolormap
@@ -18,6 +19,8 @@ from jsk_topic_tools import warn_no_remap
 import message_filters
 import rospy
 from sensor_msgs.msg import Image
+
+from jsk_perception.cfg import LabelImageDecomposerConfig
 
 
 def get_text_color(color):
@@ -77,14 +80,14 @@ class LabelImageDecomposer(ConnectionBasedTransport):
 
     def __init__(self):
         super(LabelImageDecomposer, self).__init__()
+
+        self._srv_dynparam = dynamic_reconfigure.server.Server(
+            LabelImageDecomposerConfig, self._config_callback)
+
         self.pub_img = self.advertise('~output', Image, queue_size=5)
         self.pub_label_viz = self.advertise('~output/label_viz', Image,
                                             queue_size=5)
         self._only_label = rospy.get_param('~only_label', False)
-        self._alpha = rospy.get_param('~alpha', 0.3)  # not used if only_label
-        if not (0 <= self._alpha <= 1):
-            rospy.logerr('~alpha must be satisfy 0 <= ~alpha <= 1.')
-            sys.exit(1)
         self._label_names = rospy.get_param('~label_names', None)
         # publish masks of fg/bg by decomposing each label
         self._publish_mask = rospy.get_param('~publish_mask', False)
@@ -102,6 +105,10 @@ class LabelImageDecomposer(ConnectionBasedTransport):
             self._publish_tile = False
         if self._publish_tile:
             self.pub_tile = self.advertise('~output/tile', Image, queue_size=5)
+
+    def _config_callback(self, config, level):
+        self._alpha = config.alpha
+        return config
 
     def subscribe(self):
         self.sub_label = message_filters.Subscriber('~input/label', Image)

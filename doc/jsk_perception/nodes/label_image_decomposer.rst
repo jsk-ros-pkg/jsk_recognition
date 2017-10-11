@@ -89,7 +89,7 @@ Parameters
 * ``~alpha`` (Float, default: ``0.3``)
 
   Ratio of label color when overlaying label image on input rgb image:
-  label_color * alpha + rgb * (1 - alpha).
+  label_color * alpha + rgb2gray(rgb) * (1 - alpha).
   Note that this parameter is not used if ``~only_label`` is ``True``.
 
 

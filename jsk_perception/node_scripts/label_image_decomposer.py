@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import sys
+
 import cv2
 import matplotlib
 matplotlib.use('Agg')  # NOQA
@@ -79,6 +81,10 @@ class LabelImageDecomposer(ConnectionBasedTransport):
         self.pub_label_viz = self.advertise('~output/label_viz', Image,
                                             queue_size=5)
         self._only_label = rospy.get_param('~only_label', False)
+        self._alpha = rospy.get_param('~alpha', 0.3)  # not used if only_label
+        if not (0 <= self._alpha <= 1):
+            rospy.logerr('~alpha must be satisfy 0 <= ~alpha <= 1.')
+            sys.exit(1)
         self._label_names = rospy.get_param('~label_names', None)
         # publish masks of fg/bg by decomposing each label
         self._publish_mask = rospy.get_param('~publish_mask', False)
@@ -149,7 +155,8 @@ class LabelImageDecomposer(ConnectionBasedTransport):
         else:
             img = None
 
-        label_viz = label2rgb(label_img, img, label_names=self._label_names)
+        label_viz = label2rgb(label_img, img, label_names=self._label_names,
+                              alpha=self._alpha)
         label_viz_msg = bridge.cv2_to_imgmsg(label_viz, encoding='rgb8')
         label_viz_msg.header = label_msg.header
         self.pub_label_viz.publish(label_viz_msg)

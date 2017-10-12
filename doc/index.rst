@@ -19,6 +19,7 @@ The code is open source, and `available on github`_.
    install_astra_camera
    install_softkinetic_camera
    install_realsense_camera
+   install_xtion2
 
 
 .. toctree::

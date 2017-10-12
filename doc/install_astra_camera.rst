@@ -79,13 +79,13 @@ Then, edit ``/usr/lib/pkgconfig/libopenni2.pc`` to be like below::
 .. code-block:: bash
 
   cd ~/ros/indigo/src
-  wstool set ros-drivers/openni2_camera https://github.com/ros-drivers/openni2_camera.git --git -vindigo-devel -y -u
+  wstool set ros-drivers/openni2_camera https://github.com/ros-drivers/openni2_camera.git --git -v indigo-devel -y -u
 
   cd ros-drivers/openni2_camera
-  source /opt/ros/indigo/setup.zsh
+  source /opt/ros/indigo/setup.bash
   catkin bt
 
-  source ~/ros/indigo/setup.zsh
+  source ~/ros/indigo/devel/setup.bash
   roslaunch openni2_launch openni2.launch
 
 

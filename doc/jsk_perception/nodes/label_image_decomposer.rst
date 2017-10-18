@@ -81,6 +81,17 @@ Parameters
   The name of labels, and if this parameter is specified, the ``~output/label_viz``
   image is drawn with label name legend.
 
+* ``~only_label`` (Bool, default: ``False``)
+
+  If ``True``, ``~input`` is not subscribed and ``~input/label`` is only used
+  to visualize the input label.
+
+* ``~alpha`` (Float, default: ``0.3``)
+
+  Ratio of label color when overlaying label image on input rgb image:
+  label_color * alpha + rgb2gray(rgb) * (1 - alpha).
+  Note that this parameter is not used if ``~only_label`` is ``True``.
+
 
 Sample
 ------

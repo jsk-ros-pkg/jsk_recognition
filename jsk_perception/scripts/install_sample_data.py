@@ -57,6 +57,17 @@ def main():
         md5='ff7f6a90090d152e2c43bf5057d4e853',
     )
 
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/2017-08-19-13-05-41_scales.bag',
+        url='https://drive.google.com/uc?id=0BxxBA3J-CunGV3QyS3hGeFp0dTg',
+        md5='ee9e170aeda0f4280a6e30dd3dc42d9d',
+        extract=False,
+        compressed_bags=[
+            'sample/data/2017-08-19-13-05-41_scales.bag',
+        ],
+    )
+
 
 if __name__ == '__main__':
     main()

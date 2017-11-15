@@ -91,7 +91,9 @@ class ImageTimeDiff(object):
                                 / filtered_diff_img.size
                                 / 255. )
         pub_diff.publish(diff_msg)
-        pub_diff_img.publish(bridge.cv2_to_imgmsg(diff_img, encoding='mono8'))
+        diff_img_msg = bridge.cv2_to_imgmsg(diff_img, encoding='mono8')
+        diff_img_msg.header = diff_msg.header
+        pub_diff_img.publish(diff_img_msg)
 
     def spin(self):
         rate = rospy.Rate(rospy.get_param('rate', 10))

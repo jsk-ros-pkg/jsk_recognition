@@ -430,6 +430,11 @@ namespace jsk_pcl_ros
       std::string name = msg->name[i];
       if (name == joint_name_) {
         vital_checker_->poke();
+        if(msg->position.size() <= i) {
+          ROS_WARN("size of position (%d) is smaller than joint(%s) position(%d)",
+                   msg->position.size(), name.c_str(), i);
+          return;
+        }
         if (laser_type_ == TILT_HALF_UP) {
           processTiltHalfUp(msg->header.stamp, msg->position[i]);
         }
@@ -440,12 +445,22 @@ namespace jsk_pcl_ros
           processTilt(msg->header.stamp, msg->position[i]);
         }
         else if (laser_type_ == INFINITE_SPINDLE) {
+          if(msg->velocity.size() <= i) {
+            ROS_WARN("size of velocity (%d) is smaller than joint(%s) position(%d)",
+                     msg->velocity.size(), name.c_str(), i);
+            return;
+          }
           processInfiniteSpindle(msg->header.stamp,
                                  msg->position[i],
                                  msg->velocity[i],
                                  msg->position[i]);
         }
         else if (laser_type_ == INFINITE_SPINDLE_HALF) {
+          if(msg->velocity.size() <= i) {
+            ROS_WARN("size of velocity (%d) is smaller than joint(%s) position(%d)",
+                     msg->velocity.size(), name.c_str(), i);
+            return;
+          }
           processInfiniteSpindle(msg->header.stamp,
                                  fmod(msg->position[i], M_PI),
                                  msg->velocity[i],

@@ -1,28 +1,95 @@
-sudo: false
 language: c++
-python:
-  - "2.7"
-compiler:
-  - gcc
+
+cache:
+  directories:
+    - $HOME/.ccache
+    - $HOME/.cache/pip
+
 notifications:
   email:
     on_success: always
     on_failure: always
   slack: jsk-robotics:Av7tc8wj3IWkLYvlTzHE7x2g
+
 env:
   global:
-    - ROS_PARALLEL_JOBS="-j8"
-    - CATKIN_PARALLEL_TEST_JOBS="-p1 -j1"
+    - CATKIN_PARALLEL_TEST_JOBS='-p1 -j1'
     - NOT_TEST_INSTALL=true
-    - USE_JENKINS=true
-  matrix:
-    - ROS_DISTRO=indigo USE_DEB=true
-    - ROS_DISTRO=indigo USE_DEB=true CATKIN_TOOLS_CONFIG_OPTIONS="--install" TEST_PKGS='jsk_recognition_msgs' # to skip test
-    - ROS_DISTRO=indigo USE_DEB=true ROS_REPOSITORY_PATH="http://packages.ros.org/ros/ubuntu"
-    - ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_opencv3.bash' BUILD_PKGS='checkerboard_detector imagesift jsk_perception jsk_recognition_utils resized_image_transport'
-    - ROS_DISTRO=indigo USE_DEB=true BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_pcl1.8.bash' BUILD_PKGS='jsk_pcl_ros_utils jsk_pcl_ros' DOCKER_IMAGE_JENKINS='ros-indigo-pcl1.8'
-    - ROS_DISTRO=jade   USE_DEB=false
-    - ROS_DISTRO=kinetic   USE_DEB=false TEST_PKGS='jsk_recognition_msgs'
+
+matrix:
+  include:
+    # indigo
+    - sudo: false
+      env:
+        - ROS_DISTRO=indigo
+        - USE_DEB=true
+        - USE_JENKINS=true
+        - ROS_PARALLEL_JOBS='-j8'
+    # indigo + install + no test
+    - sudo: true
+      env:
+        - ROS_DISTRO=indigo
+        - USE_DEB=true
+        - CATKIN_TOOLS_CONFIG_OPTIONS='--install'
+        - TEST_PKGS='jsk_recognition_msgs' # to skip test
+        - USE_JENKINS=true
+        - ROS_PARALLEL_JOBS='-j8'
+      services:
+        - docker
+    # indigo + deb
+    - sudo: true
+      env:
+        - ROS_DISTRO=indigo
+        - USE_DEB=true
+        - ROS_REPOSITORY_PATH='http://packages.ros.org/ros/ubuntu'
+        - USE_JENKINS=true
+        - ROS_PARALLEL_JOBS='-j8'
+    # indigo + opencv3
+    - sudo: true
+      env:
+        - ROS_DISTRO=indigo
+        - USE_DEB=true
+        - BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_opencv3.bash'
+        - BUILD_PKGS='checkerboard_detector imagesift jsk_perception jsk_recognition_utils resized_image_transport'
+        - USE_JENKINS=false
+        - USE_DOCKER=true
+        - ROS_PARALLEL_JOBS='-j4'
+      services:
+        - docker
+    # indigo + pcl1.8
+    - sudo: true
+      env:
+        - ROS_DISTRO=indigo
+        - USE_DEB=true
+        - BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_pcl1.8.bash'
+        - BUILD_PKGS='jsk_pcl_ros_utils jsk_pcl_ros'
+        - DOCKER_IMAGE_JENKINS='ros-indigo-pcl1.8'
+        - USE_JENKINS=false
+        - USE_DOCKER=true
+        - ROS_PARALLEL_JOBS='-j4'
+      services:
+        - docker
+    # jade
+    - sudo: true
+      env:
+        - ROS_DISTRO=jade
+        - USE_DEB=false
+        - USE_JENKINS=true
+        - ROS_PARALLEL_JOBS='-j8'
+      services:
+        - docker
+    # kinetic + no test
+    - sudo: true
+      env:
+        - ROS_DISTRO=kinetic
+        - USE_DEB=false
+        - TEST_PKGS='jsk_recognition_msgs'  # to skip test
+        - USE_JENKINS=false
+        - USE_DOCKER=true
+        - ROS_PARALLEL_JOBS='-j4'
+      services:
+        - docker
+
 script:
   - source .travis/travis.sh
   - (cd $TRAVIS_BUILD_DIR/doc && source setup.sh && make html)

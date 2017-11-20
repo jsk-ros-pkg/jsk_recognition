@@ -226,20 +226,24 @@ namespace jsk_pcl_ros
     }
 
     // publish results
-    sensor_msgs::PointCloud2 ros_projected_cloud;
-    pcl::toROSMsg(*projected_cloud, ros_projected_cloud);
-    ros_projected_cloud.header = ros_cloud->header;
-    pub_projected_cloud_.publish(ros_projected_cloud);
-
-    jsk_recognition_msgs::ClusterPointIndices ros_boundary_indices;
-    ros_boundary_indices.header = ros_cloud->header;
-    for (size_t i = 0; i < boundary_indices.size(); ++i)
-    {
-      pcl_msgs::PointIndices ri;
-      pcl_conversions::moveFromPCL(*boundary_indices[i], ri);
-      ros_boundary_indices.cluster_indices.push_back(ri);
+    if (pub_projected_cloud_.getNumSubscribers() > 0) {
+      sensor_msgs::PointCloud2 ros_projected_cloud;
+      pcl::toROSMsg(*projected_cloud, ros_projected_cloud);
+      ros_projected_cloud.header = ros_cloud->header;
+      pub_projected_cloud_.publish(ros_projected_cloud);
     }
-    pub_boundary_indices_.publish(ros_boundary_indices);
+
+    if (pub_boundary_indices_.getNumSubscribers() > 0) {
+      jsk_recognition_msgs::ClusterPointIndices ros_boundary_indices;
+      ros_boundary_indices.header = ros_cloud->header;
+      for (size_t i = 0; i < boundary_indices.size(); ++i)
+      {
+        pcl_msgs::PointIndices ri;
+        pcl_conversions::moveFromPCL(*boundary_indices[i], ri);
+        ros_boundary_indices.cluster_indices.push_back(ri);
+      }
+      pub_boundary_indices_.publish(ros_boundary_indices);
+    }
 
     pub_class_.publish(result);
   }

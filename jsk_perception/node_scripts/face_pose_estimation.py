@@ -8,6 +8,8 @@ import os
 import traceback
 
 import chainer
+from chainer.dataset import download
+from chainer.serializers import load_npz
 import chainer.functions as F
 import chainer.links as L
 
@@ -61,12 +63,16 @@ class HyperFaceModel(chainer.Chain):
 
         # download pretrained weights
         if pretrained_model == 'auto':
-            print("Loading pretrained model. (This may take some minutes.)")
-            from chainer.dataset import download
-            from chainer.serializers import load_npz
+            rospy.loginfo("Loading pretrained model. (This may take some minutes.)")
             url = 'https://jsk-ros-pkg.s3.amazonaws.com/chainer/hyperface_model_epoch_190.npz'
             load_npz(download.cached_download(url), self)
-            print("Model loaded.")
+            rospy.loginfo("Model loaded")
+        elif pretrained_model:
+            rospy.loginfo("Loading pretrained model: %s" % pretrained_model)
+            load_npz(pretrained_model)
+            rospy.loginfo("Model loaded")
+        else:
+            rospy.logwarn("No pretrained model is loaded.")
 
     def __call__(self, x):
         c1 = F.relu(self.conv1(x))
@@ -111,12 +117,10 @@ class HyperFaceModel(chainer.Chain):
 
 
 class HyperFacePredictor(object):
-    def __init__(self, model=None, gpu=-1):
-
+    def __init__(self, model, gpu=-1):
+        assert isinstance(model, HyperFaceModel)
         self.gpu = gpu
 
-        if model is None:
-            model = HyperFaceModel(pretrained_model='auto')
         model.train = False
         model.report = False
         model.backward = False
@@ -180,7 +184,9 @@ class FacePoseEstimator(ConnectionBasedTransport):
         self.cv_bridge = cv_bridge.CvBridge()
 
         gpu = rospy.get_param("~gpu", -1)  # -1 == cpu only
-        self.predictor = HyperFacePredictor(gpu=gpu)
+
+        model = HyperFaceModel(pretrained_model=rospy.get_param("~model_path", None))
+        self.predictor = HyperFacePredictor(model=model, gpu=gpu)
         rospy.loginfo("hyperface predictor initialized ({})".format(
             "GPU: %d" % gpu if gpu >= 0 else "CPU mode"))
 
@@ -274,8 +280,12 @@ class FacePoseEstimator(ConnectionBasedTransport):
             face_origins.append(face_origin)
             faces.append(face)
 
+        if not faces:
+            rospy.logdebug("No face found")
+            return
+
         try:
-            results = self.predictor([face])
+            results = self.predictor(faces)
         except OverflowError:
             rospy.logfatal(traceback.format_exc())
             rospy.signal_shutdown("shutdown")

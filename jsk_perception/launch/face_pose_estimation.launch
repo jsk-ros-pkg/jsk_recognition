@@ -1,7 +1,12 @@
 <launch>
-  <arg name="gui" default="true" />
-  <arg name="GPU" default="-1" />
-  <arg name="launch_openni" default="true" />
+  <arg name="test_mode" default="false" />
+  <arg name="gui" default="true" unless="$(arg test_mode)" />
+  <arg name="gui" default="false"    if="$(arg test_mode)" />
+  <arg name="GPU" default="0" unless="$(arg test_mode)"  />
+  <arg name="GPU" default="-1"    if="$(arg test_mode)" />
+  <arg name="model_path" default="auto" />
+  <arg name="launch_openni" default="true" unless="$(arg test_mode)"/>
+  <arg name="launch_openni" default="true"     if="$(arg test_mode)"/>
   <arg name="CAMERA_NS" default="camera" />
   <arg name="INPUT_IMAGE" default="/$(arg CAMERA_NS)/rgb/image_rect_color" />
   <arg name="INPUT_DEPTH_IMAGE" default="/$(arg CAMERA_NS)/depth_registered/image" />
@@ -37,6 +42,7 @@
     <rosparam subst_value="true">
       gpu: $(arg GPU)
     </rosparam>
+    <param name="model_path" value="$(arg model_path)" unless="$(arg test_mode)" />
   </node>
 
   <node name="draw_rects"

@@ -1,7 +1,6 @@
 <launch>
   <include file="$(find jsk_perception)/sample/sample_ssd_object_detector.launch">
-    <arg name="gui" value="false" />
-    <arg name="gpu" value="-1" />
+    <arg name="test_mode" value="true" />
   </include>
 
   <test test-name="test_ssd_object_detector"

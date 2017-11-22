@@ -1,7 +1,10 @@
 <launch>
+  <arg name="test_mode" default="false" />
 
-  <arg name="gui" default="true" />
-  <arg name="gpu" default="0" />
+  <arg name="gui" default="true" unless="$(arg test_mode)" />
+  <arg name="gui" default="false" if="$(arg test_mode)" />
+  <arg name="gpu" default="0" unless="$(arg test_mode)"/>
+  <arg name="gpu" default="-1" if="$(arg test_mode)" />
 
   <node name="image_publisher"
         pkg="jsk_perception" type="image_publisher.py">
@@ -18,6 +21,7 @@
     <rosparam subst_value="true">
       gpu: $(arg gpu)
     </rosparam>
+    <param name="model_path" value="voc0712" unless="$(arg test_mode)" />
   </node>
 
   <node name="image_view" pkg="image_view" type="image_view"

@@ -20,7 +20,6 @@ from sensor_msgs.msg import Image
 from jsk_recognition_msgs.msg import Rect, RectArray
 from jsk_recognition_msgs.msg import ClassificationResult
 
-from chainercv.datasets import voc_detection_label_names
 from chainercv.links import SSD300
 from chainercv.visualizations import vis_bbox
 
@@ -39,7 +38,7 @@ class SSDObjectDetector(ConnectionBasedTransport):
         rospy.loginfo("Loaded %d labels" % len(self.label_names))
 
         # model_path: name of pretrained model or path to model file
-        model_path = rospy.get_param("~model_path", "voc0712")
+        model_path = rospy.get_param("~model_path", None)
 
         self.model = SSD300(
             n_fg_class=len(self.label_names),
@@ -73,7 +72,12 @@ class SSDObjectDetector(ConnectionBasedTransport):
     def load_label_names(self):
         label_names = rospy.get_param("~label_names", tuple())
         if not label_names:
-            label_names = voc_detection_label_names
+            try:
+                from chainercv.datasets import voc_detection_label_names
+                label_names = voc_detection_label_names
+            except:
+                from chainercv.datasets import voc_bbox_label_names
+                label_names = voc_bbox_label_names
         elif isinstance(label_names, str):
             with open(label_names, "r") as f:
                 label_names = tuple(yaml.load(f))

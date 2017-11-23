@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.3 (2017-11-23)
+------------------
 * jsk_perception: add face_pose_estimation (`#2207 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2207>`_)
 * jsk_perception: people_pose_estimation_2d.py: add option not to synchronize camera info
 

@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.3 (2017-11-23)
+------------------
 * Regional feature based object recognition using ResNet (`#2172 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2172>`_)
 * Convert bounding box to mask (`#2176 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2176>`_)
   * Add RectArrayToPolygonArray

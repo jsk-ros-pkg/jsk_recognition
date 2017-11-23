@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.3 (2017-11-23)
+------------------
 * [tilt_laser_listener] add size check of position and velocity (`#2218 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2218>`_)
 * jsk_pcl_ros: primitive_shape_classifier: don't process debug message if not subscribed (`#2220 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2220>`_)
 * find moveit_ros_perception package at the top of cmake (`#2210 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2210>`_)

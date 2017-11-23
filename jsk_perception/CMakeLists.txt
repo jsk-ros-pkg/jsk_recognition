@@ -128,6 +128,7 @@ generate_dynamic_reconfigure_options(
   cfg/FastRCNN.cfg
   cfg/DrawRects.cfg
   cfg/LabelImageDecomposer.cfg
+  cfg/SSDObjectDetector.cfg
 )
 
 message(WARNING "DEPRECATION WARNING: srv files in jsk_pcl_ros are deprecated."
@@ -420,6 +421,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/split_fore_background.test)
     jsk_add_rostest(test/tile_image.test)
     jsk_add_rostest(test/vgg16_object_recognition.test)
+    jsk_add_rostest(test/ssd_object_detector.test)
     # FIXME: Unstable on Travis/Jenkins
     # if(TARGET bing)
     #   jsk_add_rostest(test/bing.test)

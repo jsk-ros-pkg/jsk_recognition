@@ -151,6 +151,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
             if sync_cam_info:
                 sync.registerCallback(self._cb_with_depth_info)
             else:
+                self.camera_info_msg = None
                 sync.registerCallback(self._cb_with_depth)
         else:
             sub_img = rospy.Subscriber(

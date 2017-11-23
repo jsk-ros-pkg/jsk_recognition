@@ -127,6 +127,7 @@ generate_dynamic_reconfigure_options(
   cfg/FilterMaskImageWithSize.cfg
   cfg/FastRCNN.cfg
   cfg/DrawRects.cfg
+  cfg/FacePoseEstimation.cfg
   cfg/LabelImageDecomposer.cfg
   cfg/SSDObjectDetector.cfg
 )
@@ -397,6 +398,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/convex_hull_mask_image.test)
     jsk_add_rostest(test/draw_rects.test)
     jsk_add_rostest(test/extract_image_channel.test)
+    jsk_add_rostest(test/face_pose_estimation.test)
     jsk_add_rostest(test/fcn_object_segmentation.test)
     add_rostest(test/fcn_object_segmentation.test ARGS use_mask:=true)
     jsk_add_rostest(test/filter_mask_image_with_size.test)

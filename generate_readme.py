@@ -24,7 +24,8 @@ def get_package_table():
     rows = []
     for pkg in packages:
         from bs4 import BeautifulSoup
-        soup = BeautifulSoup(open(osp.join(pkg, 'package.xml')).read())
+        with open(osp.join(pkg, 'package.xml')) as f:
+            soup = BeautifulSoup(f.read(), 'lxml')
         website_url = soup.find('url', type='website')
         if website_url:
             doc_url = '[![](https://img.shields.io/badge/docs-here-brightgreen.svg)](%s)' % website_url.text

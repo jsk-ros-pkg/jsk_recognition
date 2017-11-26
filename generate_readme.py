@@ -1,28 +1,74 @@
 #!/usr/bin/env python
 
 import datetime
+import glob
+import math
 import os.path as osp
 import subprocess
 import sys
 
+import cv2
 import tabulate
+
+import jsk_recognition_utils
+
+
+here = osp.dirname(osp.realpath(__file__))
+
+
+PACKAGES = [
+    'jsk_recognition_msgs',
+    'jsk_perception',
+    'jsk_pcl_ros',
+    'jsk_pcl_ros_utils',
+    'resized_image_transport',
+    'jsk_recognition_utils',
+    'checkerboard_detector',
+    'imagesift',
+]
+
+
+def get_gallery():
+    content = []
+    for pkg in PACKAGES:
+        # TODO(wkentaro): Scrape pacakge.xml only once by creating a class.
+        from bs4 import BeautifulSoup
+        with open(osp.join(pkg, 'package.xml')) as f:
+            soup = BeautifulSoup(f.read(), 'lxml')
+        website_url = soup.find('url', type='website')
+
+        imgs = []
+        for ext in ['*.png', '*.jpg']:
+            pattern = osp.join(here, 'doc', pkg, 'nodes/images', ext)
+            for fname in glob.glob(pattern):
+                img = cv2.imread(fname)
+                scale = math.sqrt(1. * 200 * 200 / img.shape[0] / img.shape[1])
+                img = cv2.resize(img, None, None, fx=scale, fy=scale)
+                imgs.append(img)
+                if len(imgs) >= 15:
+                    break
+        if not imgs:
+            continue
+
+        cols = 5
+        rows = max(len(imgs) // cols, 1)
+        tiled = jsk_recognition_utils.get_tile_image(
+            imgs, tile_shape=(cols, rows), margin_color=[255, 255, 255])
+        fname = osp.join(here, '.readme/gallery_%s.jpg' % pkg)
+        cv2.imwrite(fname, tiled)
+        content.append('### [%s](%s)' % (pkg, website_url.text))
+        content.append('')
+        content.append('[![](%s)](%s)' % (osp.relpath(fname, here),
+                                          website_url.text))
+        content.append('')
+    return '\n'.join(content)
 
 
 def get_package_table():
-    packages = [
-        'jsk_recognition_msgs',
-        'jsk_perception',
-        'jsk_pcl_ros',
-        'jsk_pcl_ros_utils',
-        'resized_image_transport',
-        'jsk_recognition_utils',
-        'checkerboard_detector',
-        'imagesift',
-    ]
-
     headers = ['Package', 'Description', 'Documentation', 'Code']
     rows = []
-    for pkg in packages:
+    for pkg in PACKAGES:
+        # TODO(wkentaro): Scrape pacakge.xml only once by creating a class.
         from bs4 import BeautifulSoup
         with open(osp.join(pkg, 'package.xml')) as f:
             soup = BeautifulSoup(f.read(), 'lxml')
@@ -68,16 +114,22 @@ jsk\_recognition
 jsk_recognition is a stack for the perception packages which are used in JSK lab.
 
 
-Deb build status
-----------------
-
-{DEB_STATUS_TABLE}
-
-
 ROS packages
 ------------
 
 {PACKAGES_TABLE}
+
+
+Gallery
+-------
+
+{GALLERY}
+
+
+Deb build status
+----------------
+
+{DEB_STATUS_TABLE}
 
 
 Deprecated packages
@@ -95,6 +147,7 @@ def main():
             SCRIPT=osp.realpath(__file__),
             TIMESTAMP=datetime.datetime.now().isoformat(),
             DEB_STATUS_TABLE=get_deb_status_table(),
+            GALLERY=get_gallery(),
             PACKAGES_TABLE=get_package_table(),
         )
     )

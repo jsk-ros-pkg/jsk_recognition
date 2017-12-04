@@ -1,30 +1,34 @@
 <launch>
-  <!-- pointcloud_screenpoint for PR2 -->
-  <machine name="c1" address="pr1012" ros-root="$(env ROS_ROOT)"
-  	   ros-package-path="$(env ROS_PACKAGE_PATH)">
-    <env name="PATH" value="$(env PATH)"/>
-  </machine>
-  <arg name="cloud_machine" default="c1"
+
+  <machine name="localhost" address="localhost" />
+
+  <arg name="cloud_machine" default="localhost"
        doc="point cloud processor machine" />
   <arg name="display_machine" default="localhost"
        doc="display client machine" />
+  <arg name="base_frame" default="camera_link" />
   <arg name="image" default="/camera/rgb"
        doc="image namespace" />
-  <arg name="points" default="/camera/rgb/points"
+  <arg name="points" default="/camera/depth_registered/points"
        doc="point cloud" />
+
   <!-- launch/pointcloud_screenpoint.launch -->
   <include file="$(find jsk_pcl_ros)/launch/pointcloud_screenpoint.launch">
     <arg name="cloud_machine" default="$(arg cloud_machine)"/>
     <arg name="display_machine" default="$(arg display_machine)"/>
     <arg name="image" default="$(arg image)"/>
     <arg name="points" default="$(arg points)"/>
+    <arg name="USE_DEPTH_CREATER" value="false" />
   </include>
 
   <!-- publish markers, broadcast TF -->
   <node name="display_point" pkg="jsk_pcl_ros" machine="localhost"
         type="pointcloud_screenpoint.l" output="screen">
-    <param name="~sensor_topic" value="$(arg image)/image_rect_color"/>
-    <param name="~ray_srv" value="/pointcloud_screenpoint_nodelet/screen_to_point"/>
+    <rosparam subst_value="true">
+      base_frame: $(arg base_frame)
+      sensor_topic: $(arg image)/image_rect_color
+      ray_srv: /pointcloud_screenpoint_nodelet/screen_to_point
+    </rosparam>
   </node>
 
   <!-- If PATH is different, you can directly call roseus like below -->

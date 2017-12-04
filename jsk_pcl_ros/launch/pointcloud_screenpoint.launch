@@ -73,37 +73,10 @@
     <param name="qeueu_size" value="30" />
   </node>
 
-  <group unless="$(arg USE_VIEW)" >
   <node name="pointcloud_screenpoint_nodelet" pkg="nodelet" type="nodelet"
         args="load jsk_pcl/PointcloudScreenpoint screenpoint_manager"
         output="screen" clear_params="true" respawn="true"
         machine="$(arg cloud_machine)">
-    <remap from="~points" to="$(arg inpoints)" />
-    <rosparam>
-      queue_size: 4
-      crop_size: 10
-      search_size: 16
-      use_rect: false
-      use_point_array: true
-      use_point: true
-      publish_point: true
-    </rosparam>
-    <param name="use_sync" value="$(arg USE_SYNC)" />
-    <param name="publish_points" value="$(arg PUBLISH_POINTS)" />
-  </node>
-  </group>
-
-  <group if="$(arg USE_VIEW)" >
-  <node name="screenpoint_view" ns="$(arg image)"
-        pkg="image_view2" type="image_view2" output="screen" respawn="true"
-        machine="$(arg display_machine)" >
-    <remap from="image" to="$(arg image_type)" />
-    <param name="autosize" value="true" />
-  </node>
-  <node name="pointcloud_screenpoint_nodelet" pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/PointcloudScreenpoint screenpoint_manager"
-        output="screen" clear_params="true" respawn="true"
-        machine="$(arg cloud_machine)" >
     <remap from="~points" to="$(arg inpoints)" />
     <remap from="~point" to="$(arg image)/$(arg image_type)/screenpoint" />
     <remap from="~rect" to="$(arg image)/$(arg image_type)/screenrectangle" />
@@ -120,6 +93,14 @@
     <param name="use_sync" value="$(arg USE_SYNC)" />
     <param name="publish_points" value="$(arg PUBLISH_POINTS)" />
   </node>
+
+  <group if="$(arg USE_VIEW)" >
+    <node name="screenpoint_view" ns="$(arg image)"
+          pkg="image_view2" type="image_view2" output="screen" respawn="true"
+          machine="$(arg display_machine)" >
+      <remap from="image" to="$(arg image_type)" />
+      <param name="autosize" value="true" />
+    </node>
   </group>
 
   <sphinxdoc><![CDATA[

@@ -10,6 +10,8 @@
        doc="image namespace" />
   <arg name="points" default="/camera/depth/points"
        doc="point cloud" />
+  <arg name="USE_VIEW" default="true"
+       doc="if true, launch image_view2 on $(arg display_machine)" />
   <arg name="PUBLISH_BASE_FOOTPRINT" default="false" doc="publish tf from base_footprint to camera" />
   <arg name="publish_base_footprint_camera_frame" default="camera_link" doc="frame used for publish tf from base_footprint to camera" />
   <!-- launch/pointcloud_screenpoint.launch -->
@@ -20,6 +22,7 @@
     <arg name="points" default="$(arg points)"/>
     <arg name="USE_DEPTH_CREATER" default="false"/>
     <arg name="USE_REGISTERED_DEPTH" default="true"/>
+    <arg name="USE_VIEW" default="$(arg USE_VIEW)"/>
   </include>
 
   <!-- publish markers, broadcast TF -->
@@ -36,13 +39,6 @@
     <param name="sensor_topic" value="$(arg image)/image_rect_color"/>
     <param name="ray_srv" value="/pointcloud_screenpoint_nodelet/screen_to_point"/>
     </node>-->
-
-  <!-- image viewer -->
-  <node name="image_view2" pkg="image_view2"
-  	type="image_view2" machine="$(arg display_machine)">
-    <remap from="image" to="$(arg image)/image_rect_color" />
-    <remap from="camera_info" to="$(arg image)/camera_info" />
-  </node>
 
   <!-- Visualize on rviz -->
   <!-- <node name="$(anon rviz)" type="rviz" output="screen"

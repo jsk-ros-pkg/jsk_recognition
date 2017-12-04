@@ -6,6 +6,7 @@
     <arg name="image" default="/right_hand_camera/rgb" />
     <arg name="points" default="/right_hand_camera/depth_registered/points" />
     <arg name="PUBLISH_BASE_FOOTPRINT" default="true" />
+    <arg name="USE_VIEW" default="false" />
     <arg name="publish_base_footprint_camera_frame" default="right_hand" />
   </include>
 

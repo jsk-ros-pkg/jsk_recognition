@@ -11,8 +11,13 @@
        doc="point cloud" />
   <arg name="USE_VIEW" default="true"
        doc="if true, launch image_view2 on $(arg display_machine)" />
-  <arg name="PUBLISH_BASE_FOOTPRINT" default="false" doc="publish tf from base_footprint to camera" />
-  <arg name="publish_base_footprint_camera_frame" default="camera_link" doc="frame used for publish tf from base_footprint to camera" />
+  <arg name="USE_RVIZ" default="false"
+       doc="if true, launch rviz on $(arg display_machine)" />
+  <arg name="PUBLISH_BASE_FOOTPRINT" default="false"
+       doc="publish tf from base_footprint to camera" />
+  <arg name="publish_base_footprint_camera_frame" default="camera_link"
+       doc="frame used for publish tf from base_footprint to camera" />
+
   <!-- launch/pointcloud_screenpoint.launch -->
   <include file="$(find jsk_pcl_ros)/launch/pointcloud_screenpoint.launch">
     <arg name="cloud_machine" default="$(arg cloud_machine)"/>
@@ -42,15 +47,14 @@
     <param name="ray_srv" value="/pointcloud_screenpoint_nodelet/screen_to_point"/>
     </node>-->
 
-  <!-- Visualize on rviz -->
-  <!-- <node name="$(anon rviz)" type="rviz" output="screen"
-       respawn="true" pkg="rviz" machine="$(arg display_machine)"
-       args="-d $(find jsk_pcl_ros)/launch/pointcloud_screenpoint.vcg"/> -->
+  <node name="$(anon rviz)" type="rviz" output="screen" if="$(arg USE_RVIZ)"
+        respawn="true" pkg="rviz" machine="$(arg display_machine)"
+        args="-d $(find jsk_pcl_ros)/launch/pointcloud_screenpoint.rviz"/>
 
   <!-- publish base_footprint since 'base_footprint' is hardcoded within euslisp/pointcloud_screenpoint.l -->
   <node name="optical_frame_tf_publisher" if="$(arg PUBLISH_BASE_FOOTPRINT)"
         pkg="tf" type="static_transform_publisher"
-        args="0 0 1 0 0 0 base_footprint $(arg publish_base_footprint_camera_frame) 500" />
+        args="0 0 1 -1.57 1.57 -1.57 base_footprint $(arg publish_base_footprint_camera_frame) 500" />
 
   <sphinxdoc><![CDATA[
 

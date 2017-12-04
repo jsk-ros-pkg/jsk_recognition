@@ -466,6 +466,7 @@ install(DIRECTORY scripts/
 
 install(DIRECTORY
   config
+  euslisp
   launch
   sample
   plugins

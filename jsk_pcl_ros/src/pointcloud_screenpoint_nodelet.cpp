@@ -64,13 +64,16 @@ void jsk_pcl_ros::PointcloudScreenpoint::onInit()
 
   if (publish_point_) {
     pub_point_ = pnh_->advertise< geometry_msgs::PointStamped > ("output_point", 1);
+    ROS_INFO("Publish output as geometry_msgs::PointStamped to '%s'", pub_point_.getTopic().c_str());
   }
 
   if (publish_points_) {
     pub_points_ = pnh_->advertise< sensor_msgs::PointCloud2 > ("output", 1);
+    ROS_INFO("Publish output as sensor_msgs::PointCloud2 to '%s'", pub_points_.getTopic().c_str());
   }
 
   pub_polygon_ = pnh_->advertise<geometry_msgs::PolygonStamped>("output_polygon", 1);
+  ROS_INFO("Publish output as geometry_msgs::PolygonStamped to '%s'", pub_polygon_.getTopic().c_str());
 
 #if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
   normals_tree_ = boost::make_shared< pcl::search::KdTree<pcl::PointXYZ> > ();
@@ -81,9 +84,11 @@ void jsk_pcl_ros::PointcloudScreenpoint::onInit()
   n3d_.setSearchMethod (normals_tree_);
 
   points_sub_.subscribe (*pnh_, "points", queue_size_);
+  ROS_INFO("Subscribe '%s' of sensor_msgs::PointCloud2", points_sub_.getTopic().c_str());
 
   if (use_rect_) {
     rect_sub_.subscribe   (*pnh_, "rect", queue_size_);
+    ROS_INFO("Subscribe '%s' of geometry_msgs::PolygonStamped", rect_sub_.getTopic().c_str());
     if (use_sync_) {
       sync_a_rect_ = boost::make_shared < message_filters::Synchronizer< PolygonApproxSyncPolicy > > (queue_size_);
       sync_a_rect_->connectInput (points_sub_, rect_sub_);
@@ -95,6 +100,7 @@ void jsk_pcl_ros::PointcloudScreenpoint::onInit()
   
   if (use_poly_) {
     poly_sub_.subscribe   (*pnh_, "poly", queue_size_);
+    ROS_INFO("Subscribe '%s' of geometry_msgs::PolygonStamped", poly_sub_.getTopic().c_str());
     if (use_sync_) {
       sync_a_poly_ = boost::make_shared < message_filters::Synchronizer< PolygonApproxSyncPolicy > > (queue_size_);
       sync_a_poly_->connectInput (points_sub_, rect_sub_);
@@ -106,6 +112,7 @@ void jsk_pcl_ros::PointcloudScreenpoint::onInit()
 
   if (use_point_) {
     point_sub_.subscribe  (*pnh_, "point", queue_size_);
+    ROS_INFO("Subscribe '%s' of geometry_msgs::PointStamped", point_sub_.getTopic().c_str());
     if (use_sync_) {
       sync_a_point_ = boost::make_shared < message_filters::Synchronizer< PointApproxSyncPolicy > > (queue_size_);
       sync_a_point_->connectInput (points_sub_, point_sub_);
@@ -117,6 +124,7 @@ void jsk_pcl_ros::PointcloudScreenpoint::onInit()
 
   if (use_point_array_) {
     point_array_sub_.subscribe(*pnh_, "point_array", queue_size_);
+    ROS_INFO("Subscribe '%s' of sensor_msgs::PointCloud2", point_array_sub_.getTopic().c_str());
     if (use_sync_) {
       sync_a_point_array_ = boost::make_shared < message_filters::Synchronizer< PointCloudApproxSyncPolicy > > (queue_size_);
       sync_a_point_array_->connectInput (points_sub_, point_array_sub_);
@@ -245,7 +253,7 @@ bool jsk_pcl_ros::PointcloudScreenpoint::screenpoint_cb (jsk_recognition_msgs::T
 }
 
 void jsk_pcl_ros::PointcloudScreenpoint::points_cb(const sensor_msgs::PointCloud2ConstPtr &msg) {
-  //ROS_DEBUG("PointcloudScreenpoint::points_cb");
+  ROS_DEBUG("PointcloudScreenpoint::points_cb, width=%d, height=%d, fields=%d", msg->width, msg->height, msg->fields.size());
   //boost::mutex::scoped_lock lock(this->mutex_callback_);
   header_ = msg->header;
   pcl::fromROSMsg (*msg, pts_);

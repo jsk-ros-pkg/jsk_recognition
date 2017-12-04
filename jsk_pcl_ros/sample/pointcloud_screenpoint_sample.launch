@@ -42,13 +42,6 @@
     <param name="ray_srv" value="/pointcloud_screenpoint_nodelet/screen_to_point"/>
     </node>-->
 
-  <!-- image viewer -->
-  <node name="image_view2" pkg="image_view2"
-  	type="image_view2" machine="$(arg display_machine)">
-    <remap from="image" to="$(arg image)/image_rect_color" />
-    <remap from="camera_info" to="$(arg image)/camera_info" />
-  </node>
-
   <!-- Visualize on rviz -->
   <!-- <node name="$(anon rviz)" type="rviz" output="screen"
        respawn="true" pkg="rviz" machine="$(arg display_machine)"

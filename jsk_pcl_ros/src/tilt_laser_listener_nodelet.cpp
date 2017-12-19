@@ -92,6 +92,10 @@ namespace jsk_pcl_ros
     }
     pnh_->param("not_use_laser_assembler_service", not_use_laser_assembler_service_, false);
     pnh_->param("use_laser_assembler", use_laser_assembler_, false);
+    double vital_rate;
+    pnh_->param("vital_rate", vital_rate, 1.0);
+    cloud_vital_checker_.reset(
+      new jsk_topic_tools::VitalChecker(1 / vital_rate));
     if (use_laser_assembler_) {
       if (not_use_laser_assembler_service_) {
         sub_cloud_
@@ -112,10 +116,6 @@ namespace jsk_pcl_ros
       "clear_cache", &TiltLaserListener::clearCacheCallback,
       this);
     trigger_pub_ = advertise<jsk_recognition_msgs::TimeRange>(*pnh_, "output", 1);
-    double vital_rate;
-    pnh_->param("vital_rate", vital_rate, 1.0);
-    cloud_vital_checker_.reset(
-      new jsk_topic_tools::VitalChecker(1 / vital_rate));
     if(subscribe_joint) {
       sub_ = pnh_->subscribe("input", max_queue_size_, &TiltLaserListener::jointCallback, this);
     }

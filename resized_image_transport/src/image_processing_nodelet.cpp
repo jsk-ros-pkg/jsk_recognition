@@ -159,6 +159,12 @@ namespace resized_image_transport
   void ImageProcessing::updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    
+    if (!image_vital_ || !info_vital_) {
+      // initialization is not finished
+      return;
+    }
+    
     // common
     stat.add("use_camera_info", use_camera_info_);
     stat.add("use_snapshot", use_snapshot_);

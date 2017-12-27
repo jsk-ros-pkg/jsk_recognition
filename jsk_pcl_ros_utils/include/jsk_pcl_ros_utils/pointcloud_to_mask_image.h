@@ -37,14 +37,21 @@
 #ifndef JSK_PCL_ROS_UTILS_POINTCLOUD_TO_MASK_IMAGE_H_
 #define JSK_PCL_ROS_UTILS_POINTCLOUD_TO_MASK_IMAGE_H_
 
+#include <boost/shared_ptr.hpp>
+
+#include <dynamic_reconfigure/server.h>
 #include <jsk_topic_tools/diagnostic_nodelet.h>
+#include <sensor_msgs/Image.h>
 #include <sensor_msgs/PointCloud2.h>
+
+#include <jsk_pcl_ros_utils/PointCloudToMaskImageConfig.h>
 
 namespace jsk_pcl_ros_utils
 {
   class PointCloudToMaskImage: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
+    typedef PointCloudToMaskImageConfig Config;
     PointCloudToMaskImage(): DiagnosticNodelet("PointCloudToMaskImage") { }
   protected:
     ////////////////////////////////////////////////////////
@@ -54,12 +61,18 @@ namespace jsk_pcl_ros_utils
     virtual void subscribe();
     virtual void unsubscribe();
     virtual void updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat);
+    virtual void configCallback(Config &config, uint32_t level);
+    virtual void convert(const sensor_msgs::Image::ConstPtr& image_msg);
     virtual void convert(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
 
     ////////////////////////////////////////////////////////
     // ROS variables
     ////////////////////////////////////////////////////////
-    ros::Subscriber sub_;
+    float z_near_, z_far_;
+    boost::mutex mutex_;
+    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
+    ros::Subscriber sub_cloud_;
+    ros::Subscriber sub_image_;
     ros::Publisher pub_;
   private:
 

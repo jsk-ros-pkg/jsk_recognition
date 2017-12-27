@@ -79,6 +79,7 @@ generate_dynamic_reconfigure_options(
   cfg/PlaneConcatenator.cfg
   cfg/PlaneReasoner.cfg
   cfg/PlaneRejector.cfg
+  cfg/PointCloudToMaskImage.cfg
   cfg/PointCloudToPCD.cfg
   cfg/PolygonArrayAreaLikelihood.cfg
   cfg/PolygonArrayLikelihoodFilter.cfg

@@ -78,9 +78,13 @@ Parameters
 
   Trained model file.
 
-* ``with_depth`` (Bool, Default: ``False``)
+* ``~with_depth`` (Bool, Default: ``False``)
 
   If true, subscribe ``~input/depth`` and ``~input/info``.
+
+* ``~sync_camera_info`` (Bool, Default: ``False``)
+
+  Synchronize ``~input/info`` if enabled, otherwise the last received camera info message is used.
 
 * ``~approximate_sync`` (Bool, Default: ``True``)
 

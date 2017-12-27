@@ -32,6 +32,7 @@ find_package(catkin REQUIRED COMPONENTS
   kdl_parser
   laser_assembler
   nodelet
+  moveit_ros_perception
   octomap_msgs
   octomap_server
   pcl_msgs
@@ -415,8 +416,6 @@ add_dependencies(jsk_pcl_ros_moveit ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencf
 
 target_link_libraries(jsk_pcl_ros_base
   ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
-# moveit_ros_perception is excluded from catkin COMPONENTS because of collision about octomap dependency
-find_package(moveit_ros_perception)
 target_link_libraries(jsk_pcl_ros_moveit
   ${catkin_LIBRARIES} ${moveit_ros_perception_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
 

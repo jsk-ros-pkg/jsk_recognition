@@ -125,6 +125,11 @@ generate_dynamic_reconfigure_options(
   cfg/LabelToMaskImage.cfg
   cfg/FlowVelocityThresholding.cfg
   cfg/FilterMaskImageWithSize.cfg
+  cfg/FastRCNN.cfg
+  cfg/DrawRects.cfg
+  cfg/FacePoseEstimation.cfg
+  cfg/LabelImageDecomposer.cfg
+  cfg/SSDObjectDetector.cfg
 )
 
 message(WARNING "DEPRECATION WARNING: srv files in jsk_pcl_ros are deprecated."
@@ -246,6 +251,7 @@ jsk_add_nodelet(src/project_image_point.cpp "jsk_perception/ProjectImagePoint" "
 jsk_add_nodelet(src/sliding_window_object_detector.cpp "jsk_perception/SlidingWindowObjectDetector" "sliding_window_object_detector")
 jsk_add_nodelet(src/gaussian_blur.cpp "jsk_perception/GaussianBlur" "gaussian_blur")
 jsk_add_nodelet(src/kmeans.cpp "jsk_perception/KMeans" "kmeans")
+jsk_add_nodelet(src/draw_rects.cpp "jsk_perception/DrawRects" "draw_rects")
 if("${OpenCV_VERSION}" VERSION_GREATER "2.9.9")  # >= 3.0.0
   jsk_add_nodelet(src/bing.cpp "jsk_perception/Bing" "bing")
 endif()
@@ -342,7 +348,7 @@ install(DIRECTORY node_scripts/ scripts/
         USE_SOURCE_PERMISSIONS
 )
 
-install(DIRECTORY sample launch euslisp plugins
+install(DIRECTORY sample launch euslisp plugins template
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         USE_SOURCE_PERMISSIONS
 )
@@ -384,13 +390,15 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/bounding_object_mask_image.test)
     jsk_add_rostest(test/bounding_rect_mask_image.test)
     jsk_add_rostest(test/calc_flow.test)
-    jsk_add_rostest(test/color_histogram.test)
+    # FIXME: Not work on Travis. (https://github.com/jsk-ros-pkg/jsk_recognition/pull/2217)
+    # jsk_add_rostest(test/color_histogram.test)
     jsk_add_rostest(test/colorize_float_image.test)
     jsk_add_rostest(test/colorize_labels.test)
     jsk_add_rostest(test/concave_hull_mask_image.test)
     jsk_add_rostest(test/convex_hull_mask_image.test)
-    jsk_add_rostest(test/draw_rect_array.test)
+    jsk_add_rostest(test/draw_rects.test)
     jsk_add_rostest(test/extract_image_channel.test)
+    jsk_add_rostest(test/face_pose_estimation.test)
     jsk_add_rostest(test/fcn_object_segmentation.test)
     add_rostest(test/fcn_object_segmentation.test ARGS use_mask:=true)
     jsk_add_rostest(test/filter_mask_image_with_size.test)
@@ -415,6 +423,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/split_fore_background.test)
     jsk_add_rostest(test/tile_image.test)
     jsk_add_rostest(test/vgg16_object_recognition.test)
+    jsk_add_rostest(test/ssd_object_detector.test)
     # FIXME: Unstable on Travis/Jenkins
     # if(TARGET bing)
     #   jsk_add_rostest(test/bing.test)

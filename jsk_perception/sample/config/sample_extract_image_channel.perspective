@@ -37,7 +37,7 @@
                 }, 
                 "mouse_pub_topic": {
                   "type": "repr", 
-                  "repr": "u'/draw_rect_array_filtered/output_mouse_left'"
+                  "repr": "u'/draw_rects_filtered/output_mouse_left'"
                 }, 
                 "zoom1": {
                   "type": "repr", 

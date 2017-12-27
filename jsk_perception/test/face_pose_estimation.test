@@ -1,0 +1,20 @@
+<launch>
+  <include file="$(find jsk_perception)/sample/sample_face_pose_estimation.launch">
+    <arg name="test_mode" value="true" />
+  </include>
+
+  <test test-name="test_face_pose_estimation"
+        name="test_face_pose_estimation"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /face_pose_estimation/output/rects
+      timeout_0: 60
+      topic_1: /face_pose_estimation/output/pose
+      timeout_1: 60
+      topic_2: /face_pose_estimation/output/gender
+      timeout_2: 60
+    </rosparam>
+  </test>
+
+</launch>

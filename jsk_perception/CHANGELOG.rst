@@ -2,6 +2,64 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.3 (2017-11-23)
+------------------
+* jsk_perception: add face_pose_estimation (`#2207 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2207>`_)
+* jsk_perception: people_pose_estimation_2d.py: add option not to synchronize camera info
+
+* jsk_perception: use 'find' in generated eusmodel launch file (`#2215 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2215>`_)
+* add timestamp for diff_image (`#2216 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2216>`_)
+* jsk_percetion: add ssd object detector (`#2204 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2204>`_ from furushchev/ssd)
+* Drop hydro from CI on Travis (`#2217 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2217>`_)
+  * Remove color_histogram test that won't work on Travis
+
+* Capability of specifying shape for tiling images (`#2208 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2208>`_)
+  * Refactor tile_image.py about self._shape
+  * Validate ~shape param of tile_image.py
+    - modified:   tile_image.py
+  * Capability of specifying shape for tiling images
+
+* Add ~alpha param to label_image_decomposer to tune the overlay (`#2211 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2211>`_)
+  * Make ~alpha param of label_image_decomposer to dynparam
+  * Add ~alpha param to label_image_decomposer to tune the overlay
+  * Add option to visualize label image without sync by ~only_label option
+
+* jsk_perception: people_pose_estimation_2d.py: unsynchronize camera info (`#2206 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2206>`_)
+* Add node for visualization of (labeled) rectangle region on 2D image (`#2205 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2205>`_)
+  * jsk_perception: draw_rects: disable resubscribing on hydro
+  * jsk_perception: use jsk_recognition_msgs::Rect for rect instead of geometry_msgs::PolygonStamped
+  * jsk_perception: add nodelet for drawing rects on image
+  * jsk_perception: use classification result for FastRCNN
+
+* Split test of fcn_object_segmentation to avoid MemoryError Because loading 2 FCN8s model is too heavy on PCs with small memories. (`#2200 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2200>`_)
+* [jsk_perception, slic_super_pixels] add parameter, publish_debug_images (`#2181 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2181>`_)
+* Regional feature based object recognition using ResNet (`#2172 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2172>`_)
+  * Rename to regional_feature_based_object_recognition
+  * Remove params pretrained_model and mean_file
+  * Sort add_rostest
+  * Add test for feature_based_object_recognition
+  * Download files and make the sample work
+  * Add ResNetFeature
+  * Fix bug in feature_based_object_recognition
+  * Add feature based object recognition node
+  * Large color variation in draw_classification_result
+  * Display image even though some topics have not come yet
+  * Fix nan values in ProbabilityImageClassifier
+
+* node_scripts/apply_context_to_label_probability: make sure candidates is list  because it can be tuple, which cause error (`#2185 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2185>`_)
+* Fix ignore_labels out of range for the input label/proba image (`#2184 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2184>`_)
+  * Update sample of label/probability_image_classifier
+* Fixes on probabilistic image classifier (`#2177 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2177>`_)
+  * If no candidates, candidates_fixed should be ignored
+* src/bounding_box_to_rect.cpp: Convert bounding box to mask (`#2176 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2176>`_)
+  * Add sample_rect_to_mask_image.launch
+  * support BoundingBox as input topic type as well as BoundingBoxArray
+
+* jsk_perception: fix indent in creating people pose (`#2179 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2179>`_)
+
+
+* Contributors: Yuki Furuta, Kei Okada, Kentaro Wada, Naoki Hiraoka, Shingo Kitagawa, Yohei Kakiuchi, Yuto Uchimi
+
 1.2.2 (2017-07-23)
 ------------------
 * add bg_label in apply_context_to_label_probability (`#2175 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2175>`_)

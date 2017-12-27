@@ -269,4 +269,8 @@
          type="jsk_perception::ConsensusTracking"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_perception/DrawRects"
+         type="jsk_perception::DrawRects"
+         base_class_type="nodelet::Nodelet">
+  </class>
 </library>

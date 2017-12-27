@@ -25,10 +25,10 @@
     <remap from="~input" to="mask_image_generator/output" />
   </node>
 
-  <node name="draw_rect_array"
-        pkg="jsk_perception" type="draw_rect_array.py">
+  <node name="draw_rects"
+        pkg="jsk_perception" type="draw_rects">
     <remap from="~input" to="image_publisher/output" />
-    <remap from="~input/polygon" to="mask_image_to_rect/output" />
+    <remap from="~input/rects" to="mask_image_to_rect/output" />
   </node>
 
   <group if="$(arg gui)">
@@ -38,7 +38,7 @@
     </node>
     <node name="image_view1"
           pkg="image_view" type="image_view">
-      <remap from="image" to="draw_rect_array/output" />
+      <remap from="image" to="draw_rects/output" />
     </node>
   </group>
 

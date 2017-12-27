@@ -37,7 +37,7 @@
                 }, 
                 "mouse_pub_topic": {
                   "type": "repr", 
-                  "repr": "u'/draw_rect_array_filtered/output_mouse_left'"
+                  "repr": "u'/draw_rects_filtered/output_mouse_left'"
                 }, 
                 "zoom1": {
                   "type": "repr", 
@@ -49,7 +49,7 @@
                 }, 
                 "topic": {
                   "type": "repr", 
-                  "repr": "u'/draw_rect_array_filtered/output'"
+                  "repr": "u'/draw_rects_filtered/output'"
                 }, 
                 "publish_click_location": {
                   "type": "repr", 
@@ -190,7 +190,7 @@
                 }, 
                 "mouse_pub_topic": {
                   "type": "repr", 
-                  "repr": "u'/draw_rect_array/output_mouse_left'"
+                  "repr": "u'/draw_rects/output_mouse_left'"
                 }, 
                 "zoom1": {
                   "type": "repr", 
@@ -202,7 +202,7 @@
                 }, 
                 "topic": {
                   "type": "repr", 
-                  "repr": "u'/draw_rect_array/output'"
+                  "repr": "u'/draw_rects/output'"
                 }, 
                 "publish_click_location": {
                   "type": "repr", 

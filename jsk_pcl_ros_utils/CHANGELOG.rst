@@ -2,6 +2,11 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.3 (2017-11-23)
+------------------
+*  [jsk_pcl_ros_utils] polygon_flipper: add option '~use_indices' (`#2189 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2189>`_)
+* Contributors: Yuki Furuta
+
 1.2.2 (2017-07-23)
 ------------------
 

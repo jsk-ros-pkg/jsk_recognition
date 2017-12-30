@@ -38,23 +38,35 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 
+namespace enc = sensor_msgs::image_encodings;
+
 namespace jsk_pcl_ros_utils
 {
   void PointCloudToMaskImage::onInit()
   {
     DiagnosticNodelet::onInit();
+
+    srv_ = boost::make_shared<dynamic_reconfigure::Server<Config> >(*pnh_);
+    typename dynamic_reconfigure::Server<Config>::CallbackType f =
+        boost::bind(&PointCloudToMaskImage::configCallback, this, _1, _2);
+    srv_->setCallback(f);
+
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
     onInitPostProcess();
   }
 
   void PointCloudToMaskImage::subscribe()
   {
-    sub_ = pnh_->subscribe("input", 1, &PointCloudToMaskImage::convert, this);
+    sub_cloud_ = pnh_->subscribe<sensor_msgs::PointCloud2>(
+        "input", 1, &PointCloudToMaskImage::convert, this);
+    sub_image_ = pnh_->subscribe<sensor_msgs::Image>(
+        "input/depth", 1, &PointCloudToMaskImage::convert, this);
   }
 
   void PointCloudToMaskImage::unsubscribe()
   {
-    sub_.shutdown();
+    sub_cloud_.shutdown();
+    sub_image_.shutdown();
   }
 
   void PointCloudToMaskImage::updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat)
@@ -69,8 +81,19 @@ namespace jsk_pcl_ros_utils
     }
   }
 
+  void PointCloudToMaskImage::configCallback(Config &config, uint32_t level)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    z_near_ = std::min(config.z_near, config.z_far);
+    z_far_ = std::max(config.z_near, config.z_far);
+    config.z_near = z_near_;
+    config.z_far = z_far_;
+  }
+
   void PointCloudToMaskImage::convert(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
+    boost::mutex::scoped_lock lock(mutex_);
+
     vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZ>::Ptr pc(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*cloud_msg, *pc);
@@ -88,6 +111,10 @@ namespace jsk_pcl_ros_utils
       {
         continue;
       }
+      if (pc->points[index].z < z_near_ || pc->points[index].z > z_far_)
+      {
+        continue;
+      }
       int width_index = index % cloud_msg->width;
       int height_index = index / cloud_msg->width;
       mask_image.at<uchar>(height_index, width_index) = 255;
@@ -96,6 +123,58 @@ namespace jsk_pcl_ros_utils
                                    sensor_msgs::image_encodings::MONO8,
                                    mask_image);
     pub_.publish(mask_bridge.toImageMsg());
+  }
+
+  void PointCloudToMaskImage::convert(const sensor_msgs::Image::ConstPtr& image_msg)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
+
+    cv_bridge::CvImage::Ptr depth_img;
+    try {
+      depth_img = cv_bridge::toCvCopy(image_msg);
+    } catch (cv_bridge::Exception &e) {
+      NODELET_ERROR_STREAM("Failed to convert image: " << e.what());
+      return;
+    }
+
+    cv_bridge::CvImage::Ptr mask_img(new cv_bridge::CvImage);
+    mask_img->header = depth_img->header;
+    mask_img->encoding = "mono8";
+    mask_img->image = cv::Mat(depth_img->image.rows, depth_img->image.cols, CV_8UC1);
+
+    cv::MatIterator_<uint8_t>
+      mask_it  = mask_img->image.begin<uint8_t>(),
+      mask_end = mask_img->image.end<uint8_t>();
+
+    if (depth_img->encoding == enc::TYPE_32FC1) {
+      cv::MatConstIterator_<float>
+        depth_it = depth_img->image.begin<float>(),
+        depth_end = depth_img->image.end<float>();
+
+      for (; (depth_it != depth_end) && (mask_it != mask_end); ++depth_it, ++mask_it)
+      {
+        if (z_near_ < *depth_it && *depth_it < z_far_) *mask_it = -1;
+        else *mask_it = 0;
+      }
+    } else if (depth_img->encoding == enc::TYPE_16UC1) {
+      uint16_t z_near16 = (uint16_t) (z_near_ * 1000.0), z_far16 = (uint16_t) (z_far_ * 1000.0); // mm
+      cv::MatConstIterator_<uint16_t>
+        depth_it = depth_img->image.begin<uint16_t>(),
+        depth_end = depth_img->image.end<uint16_t>();
+
+      for (; (depth_it != depth_end) && (mask_it != mask_end); ++depth_it, ++mask_it)
+      {
+        if (z_near16 < *depth_it && *depth_it < z_far16) *mask_it = -1;
+        else *mask_it = 0;
+      }
+
+    } else {
+      NODELET_ERROR_STREAM("Invalid encoding:" << depth_img->encoding);
+      return;
+    }
+
+    pub_.publish(mask_img->toImageMsg());
   }
 }
 

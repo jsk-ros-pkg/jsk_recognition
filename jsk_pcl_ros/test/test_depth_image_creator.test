@@ -7,7 +7,7 @@
   <test test-name="test_depth_image_creator"
         name="test_depth_image_creator"
         pkg="jsk_tools" type="test_topic_published.py"
-        time-limit="30" retry="6">
+        time-limit="120" retry="6">
     <rosparam>
       topic_0: /depth_image_creator/output
       timeout_0: 30

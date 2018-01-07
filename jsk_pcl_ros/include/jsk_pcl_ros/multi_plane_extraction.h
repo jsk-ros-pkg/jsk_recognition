@@ -128,7 +128,7 @@ namespace jsk_pcl_ros
     int maximum_queue_size_;
     double min_height_, max_height_;
     bool use_indices_;
-    double maginify_;
+    double magnify_;
     bool use_sensor_frame_;
     std::string sensor_frame_;
     bool use_coefficients_;

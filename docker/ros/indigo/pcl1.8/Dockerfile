@@ -37,3 +37,7 @@ RUN cd ~/ros/ws_jsk_recognition && \
     apt-get install -y python-catkin-tools && \
     . /opt/ros/indigo/setup.sh && \
     catkin build
+
+RUN apt-get update && apt-get install -y python-setuptools
+RUN easy_install 'pip==6.0.7'
+RUN pip install -U dlib

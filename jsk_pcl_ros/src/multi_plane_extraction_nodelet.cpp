@@ -163,8 +163,19 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock lock(mutex_);
     min_height_ = config.min_height;
     max_height_ = config.max_height;
-    maginify_ = config.maginify;
     keep_organized_ = config.keep_organized;
+
+    if (magnify_ != config.magnify)
+    {
+      magnify_ = config.magnify;
+      config.maginify = magnify_;
+    }
+    else if (magnify_ != config.maginify)
+    {
+      ROS_WARN_STREAM_ONCE("parameter 'maginify' is deprecated! Use 'magnify' instead!");
+      magnify_ = config.maginify;
+      config.magnify = magnify_;
+    }
   }
 
   void MultiPlaneExtraction::updateDiagnostic(
@@ -321,7 +332,7 @@ namespace jsk_pcl_ros
         jsk_recognition_utils::pointFromXYZToXYZ<geometry_msgs::Point32, pcl::PointXYZRGB>(
           the_polygon.points[i], p);
         Eigen::Vector3f dir = (p.getVector3fMap() - centroid).normalized();
-        p.getVector3fMap() = dir * maginify_ + p.getVector3fMap();
+        p.getVector3fMap() = dir * magnify_ + p.getVector3fMap();
         hull_cloud->points.push_back(p);
       }
       

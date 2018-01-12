@@ -2,6 +2,11 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add image gallery to README (`#2225 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2225>`_)
+* Contributors: Kentaro Wada
+
 1.2.3 (2017-11-23)
 ------------------
 * Regional feature based object recognition using ResNet (`#2172 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2172>`_)

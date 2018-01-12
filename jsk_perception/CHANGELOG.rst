@@ -2,6 +2,11 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* jsk_perception: install template dir (`#2222 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2222>`_)
+* Contributors: Yuki Furuta
+
 1.2.3 (2017-11-23)
 ------------------
 * jsk_perception: add face_pose_estimation (`#2207 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2207>`_)

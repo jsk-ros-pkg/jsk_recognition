@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.4 (2018-01-12)
+------------------
 * jsk_perception: install template dir (`#2222 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2222>`_)
 * Contributors: Yuki Furuta
 

@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.4 (2018-01-12)
+------------------
 * jsk_pcl_ros/multi_plane_extraction: fix typo 'maginify' (`#2237 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2237>`_)
   * test_depth_image_creator.test: increase time limit (`#2236 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2236>`_)
 * Fix uninitialized pointer error in some recognition nodelets (`#2234 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2234>`_)

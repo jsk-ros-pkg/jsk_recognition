@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.4 (2018-01-12)
+------------------
 * Add image gallery to README (`#2225 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2225>`_)
 * Contributors: Kentaro Wada
 

@@ -89,6 +89,24 @@ def main():
         ],
     )
 
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/pr2_sink.bag.tgz',
+        url='https://drive.google.com/uc?id=19VujodKsX7EJJwHetqFGCRYz0JBtZQ6h',
+        md5='9bdc1500610a1a97480cae6fcf261811',
+        extract=True,
+        compressed_bags=[
+            'sample/data/pr2_sink.bag',
+        ],
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/kettle.pcd',
+        url='https://drive.google.com/uc?id=1y1XrmRJcB6YX1dmMHoVJaF-9J05jQ4dV',
+        md5='effa435f493b563b77b015d63f4d70c8',
+        extract=False,
+    )
 
 if __name__ == '__main__':
     main()

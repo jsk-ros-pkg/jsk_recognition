@@ -88,9 +88,18 @@ namespace jsk_pcl_ros
                          const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients);
     virtual void extract(const sensor_msgs::PointCloud2ConstPtr &point,
                          const jsk_recognition_msgs::ClusterPointIndicesConstPtr &indices);
-    virtual void sortIndicesOrder(pcl::PointCloud<pcl::PointXYZ>::Ptr input,
-                                  std::vector<pcl::IndicesPtr> indices_array,
-                                  std::vector<pcl::IndicesPtr> &output_array);
+    virtual void sortIndicesOrder(const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+                                  const std::vector<pcl::IndicesPtr> indices_array,
+                                  std::vector<size_t>* argsort);
+    void sortIndicesOrderByIndices(const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+                                   const std::vector<pcl::IndicesPtr> indices_array,
+                                   std::vector<size_t>* argsort);
+    void sortIndicesOrderByZAxis(const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+                                 const std::vector<pcl::IndicesPtr> indices_array,
+                                 std::vector<size_t>* argsort);
+    void sortIndicesOrderByCloudSize(const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+                                     const std::vector<pcl::IndicesPtr> indices_array,
+                                     std::vector<size_t>* argsort);
   protected:
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
@@ -148,7 +157,7 @@ namespace jsk_pcl_ros
     boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> >async_;
     boost::shared_ptr<message_filters::Synchronizer<SyncAlignPolicy> >sync_align_;
     std::vector<ros::Publisher> publishers_;
-    ros::Publisher pc_pub_, box_pub_, mask_pub_, label_pub_, centers_pub_, negative_indices_pub_;
+    ros::Publisher pc_pub_, box_pub_, mask_pub_, label_pub_, centers_pub_, negative_indices_pub_, indices_pub_;
     boost::shared_ptr<tf::TransformBroadcaster> br_;
     std::string tf_prefix_;
     
@@ -164,11 +173,18 @@ namespace jsk_pcl_ros
     bool use_pca_;
     int max_size_;
     int min_size_;
+    std::string sort_by_;
 
     jsk_recognition_utils::Counter cluster_counter_;
     
   };
 
-}
+  class ClusterPointIndicesDecomposerZAxis: public ClusterPointIndicesDecomposer
+  {
+  public:
+    virtual void onInit();
+  };
 
-#endif
+}  // namespace jsk_pcl_ros
+
+#endif  // JSK_PCL_ROS_CLUSTER_POINT_INDICES_DECOMPOSER_H_

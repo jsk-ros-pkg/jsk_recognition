@@ -12,9 +12,6 @@ import dynamic_reconfigure.server
 import rospy
 
 from jsk_perception.cfg import ImagePublisherConfig
-from jsk_topic_tools import jsk_logerr
-from jsk_topic_tools import jsk_loginfo
-from jsk_topic_tools import jsk_logwarn
 from sensor_msgs.msg import CameraInfo
 from sensor_msgs.msg import Image
 
@@ -41,11 +38,11 @@ class ImagePublisher(object):
         config['file_name'] = os.path.abspath(file_name)
         img_bgr = cv2.imread(file_name)
         if img_bgr is None:
-            jsk_logwarn('Could not read image file: {}'.format(file_name))
+            rospy.logwarn('Could not read image file: {}'.format(file_name))
             with self.lock:
                 self.imgmsg = None
         else:
-            jsk_loginfo('Read the image file: {}'.format(file_name))
+            rospy.loginfo('Read the image file: {}'.format(file_name))
             with self.lock:
                 self.imgmsg = self.cv2_to_imgmsg(img_bgr, self.encoding)
         return config
@@ -92,7 +89,7 @@ class ImagePublisher(object):
             else:
                 img = img_bgr
         else:
-            jsk_logerr('unsupported encoding: {0}'.format(encoding))
+            rospy.logerr('unsupported encoding: {0}'.format(encoding))
             return
         return bridge.cv2_to_imgmsg(img, encoding=encoding)
 

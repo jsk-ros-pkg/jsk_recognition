@@ -50,6 +50,7 @@ namespace jsk_pcl_ros_utils
       boost::bind (&PolygonArrayAreaLikelihood::configCallback, this, _1, _2);
     srv_->setCallback (f);
     pub_ = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void PolygonArrayAreaLikelihood::subscribe()
@@ -67,6 +68,7 @@ namespace jsk_pcl_ros_utils
     const jsk_recognition_msgs::PolygonArray::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     jsk_recognition_msgs::PolygonArray new_msg(*msg);
 
     double min_area = DBL_MAX;

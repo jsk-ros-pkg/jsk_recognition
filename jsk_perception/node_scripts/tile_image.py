@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import collections
 import sys
 import cv2
 import cv_bridge
@@ -21,10 +22,20 @@ class TileImages(ConnectionBasedTransport):
         if not self.input_topics:
             rospy.logerr('need to specify input_topics')
             sys.exit(1)
+        self._shape = rospy.get_param('~shape', None)
+        if self._shape:
+            if not (isinstance(self._shape, collections.Sequence) and
+                    len(self._shape) == 2):
+                rospy.logerr('~shape must be a list of 2 float values.')
+                sys.exit(1)
+            if (self._shape[0] * self._shape[1]) < len(self.input_topics):
+                rospy.logerr('Tile size must be larger than # of input topics')
+                sys.exit(1)
         self.cache_img = None
         self.draw_topic_name = rospy.get_param('~draw_topic_name', False)
         self.approximate_sync = rospy.get_param('~approximate_sync', True)
         self.no_sync = rospy.get_param('~no_sync', False)
+        self.font_scale = rospy.get_param('~font_scale', 4)
         if (not self.no_sync and
             StrictVersion(pkg_resources.get_distribution('message_filters').version) < StrictVersion('1.11.4') and
             self.approximate_sync):
@@ -35,7 +46,7 @@ class TileImages(ConnectionBasedTransport):
     def subscribe(self):
         self.sub_img_list = []
         if self.no_sync:
-            self.input_imgs = dict((topic, None) for topic in self.input_topics)
+            self.input_imgs = {}
             self.sub_img_list = [rospy.Subscriber(topic, Image, self.simple_callback(topic), queue_size=1) for topic in self.input_topics]
             rospy.Timer(rospy.Duration(0.1), self.timer_callback)
         else:
@@ -55,25 +66,35 @@ class TileImages(ConnectionBasedTransport):
             sub.sub.unregister()
     def timer_callback(self, event):
         with self.lock:
-            if None not in self.input_imgs.values():
-                imgs = []
-                for topic in self.input_topics:
-                    imgs.append(self.input_imgs[topic])
-                self._append_images(imgs)
+            imgs = [self.input_imgs[topic] for topic in self.input_topics
+                    if topic in self.input_imgs]
+            self._append_images(imgs)
     def simple_callback(self, target_topic):
         def callback(msg):
             with self.lock:
                 bridge = cv_bridge.CvBridge()
                 self.input_imgs[target_topic] = bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
                 if self.draw_topic_name:
-                    cv2.putText(self.input_imgs[target_topic], target_topic, (0, 50), cv2.FONT_HERSHEY_PLAIN, 4, (0, 255, 0), 4)
+                    cv2.putText(self.input_imgs[target_topic], target_topic, (0, 50), cv2.FONT_HERSHEY_PLAIN, self.font_scale, (0, 255, 0), 4)
         return callback
     def _append_images(self, imgs):
+        if not imgs:
+            return
+        # convert tile shape: (Y, X) -> (X, Y)
+        # if None, shape is automatically decided to be square AMAP.
+        shape_xy = self._shape[::-1] if self._shape else None
         if self.cache_img is None:
-            out_bgr = jsk_recognition_utils.get_tile_image(imgs)
+            out_bgr = jsk_recognition_utils.get_tile_image(
+                imgs, tile_shape=shape_xy)
             self.cache_img = out_bgr
         else:
-            out_bgr = jsk_recognition_utils.get_tile_image(imgs, tile_shape=None, result_img=self.cache_img)
+            try:
+                out_bgr = jsk_recognition_utils.get_tile_image(
+                    imgs, tile_shape=shape_xy, result_img=self.cache_img)
+            except ValueError:  # cache miss
+                out_bgr = jsk_recognition_utils.get_tile_image(
+                    imgs, tile_shape=shape_xy)
+                self.cache_img = out_bgr
         bridge = cv_bridge.CvBridge()
         imgmsg = bridge.cv2_to_imgmsg(out_bgr, encoding='bgr8')
         self.pub_img.publish(imgmsg)
@@ -83,7 +104,7 @@ class TileImages(ConnectionBasedTransport):
         for msg, topic in zip(msgs, self.input_topics):
             img = bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
             if self.draw_topic_name:
-                cv2.putText(img, topic, (0, 50), cv2.FONT_HERSHEY_PLAIN, 4, (0, 255, 0), 4)
+                cv2.putText(img, topic, (0, 50), cv2.FONT_HERSHEY_PLAIN, self.font_scale, (0, 255, 0), 4)
             imgs.append(img)
         self._append_images(imgs)
 

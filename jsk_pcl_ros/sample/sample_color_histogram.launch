@@ -1,0 +1,166 @@
+<launch>
+  <arg name="use_rviz" default="true" />
+  <arg name="input_cloud" default="/camera/depth_registered/points" />
+  <arg name="sensor_frame_id" default="camera_rgb_optical_frame" />
+  <arg name="plane_size" default="0.6" />
+  <arg name="vital_rate" default="0.1" />
+
+  <arg name="manager" default="color_histogram_manager" />
+
+  <node name="$(arg manager)"
+        pkg="nodelet" type="nodelet" args="manager" />
+
+  <group ns="color_histogram">
+    <node name="bilateral_filter"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/BilateralFilter /$(arg manager)">
+      <remap from="~input" to="$(arg input_cloud)" />
+      <rosparam>
+        sigma_s: 1.0
+        sigma_r: 0.1
+      </rosparam>
+    </node>
+
+    <node name="organized_multi_plane_segmentation" pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/OrganizedMultiPlaneSegmentation /$(arg manager)">
+      <remap from="~input" to="bilateral_filter/output" />
+      <rosparam subst_value="true">
+        max_curvature: 0.01
+        estimate_normal: true
+        vital_rate: $(arg vital_rate)
+      </rosparam>
+    </node>
+
+    <node name="plane_concatenator" pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/PlaneConcatenator /$(arg manager)">
+      <remap from="~input" to="bilateral_filter/output" />
+      <remap from="~input/indices" to="organized_multi_plane_segmentation/output_refined" />
+      <remap from="~input/polygons" to="organized_multi_plane_segmentation/output_refined_polygon" />
+      <remap from="~input/coefficients" to="organized_multi_plane_segmentation/output_refined_coefficients" />
+      <rosparam subst_value="true">
+        connect_distance_threshold: 0.2
+        min_area: 0.1
+        max_area: $(arg plane_size)
+        vital_rate: $(arg vital_rate)
+      </rosparam>
+    </node>
+
+    <node name="polygon_array_area_likelihood" pkg="nodelet" type="nodelet"
+          args="load jsk_pcl_utils/PolygonArrayAreaLikelihood /$(arg manager)">
+      <remap from="~input" to="plane_concatenator/output/polygons" />
+      <rosparam subst_value="true">
+        area: $(arg plane_size)
+        vital_rate: $(arg vital_rate)
+      </rosparam>
+    </node>
+
+    <node name="polygon_array_likelihood_filter" pkg="nodelet" type="nodelet"
+          args="load jsk_pcl_utils/PolygonArrayLikelihoodFilter /$(arg manager)">
+      <remap from="~input_polygons" to="polygon_array_area_likelihood/output" />
+      <remap from="~input_coefficients" to="plane_concatenator/output/coefficients" />
+      <rosparam subst_value="true">
+        threshold: 0.9
+        vital_rate: $(arg vital_rate)
+      </rosparam>
+    </node>
+
+    <node name="multi_plane_extraction" pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/MultiPlaneExtraction /$(arg manager)">
+      <remap from="~input" to="bilateral_filter/output" />
+      <remap from="~indices" to="plane_concatenator/output/indices" />
+      <remap from="~input_polygons" to="polygon_array_likelihood_filter/output_polygons" />
+      <remap from="~input_coefficients" to="polygon_array_likelihood_filter/output_coefficients" />
+      <rosparam subst_value="true">
+        use_sensor_frame: true
+        sensor_frame: $(arg sensor_frame_id)
+        min_height: 0.01
+        vital_rate: $(arg vital_rate)
+      </rosparam>
+    </node>
+
+    <node name="euclidean_clustering" pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/EuclideanClustering /$(arg manager)">
+      <remap from="~input" to="multi_plane_extraction/output" />
+      <rosparam subst_value="true">
+        tolerance: 0.05
+        min_size: 100
+        vital_rate: $(arg vital_rate)
+      </rosparam>
+    </node>
+
+    <node name="euclidean_segmentation_decomposer" pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/ClusterPointIndicesDecomposer /$(arg manager)">
+      <remap from="~input" to="multi_plane_extraction/output" />
+      <remap from="~target" to="euclidean_clustering/output" />
+      <remap from="~align_planes" to="polygon_array_likelihood_filter/output_polygons" />
+      <remap from="~align_planes_coefficients" to="polygon_array_likelihood_filter/output_coefficients" />
+      <rosparam subst_value="true">
+        align_boxes: true
+        align_boxes_with_plane: true
+        use_pca: true
+        publish_clouds: false
+        publish_tf: false
+        vital_rate: $(arg vital_rate)
+      </rosparam>
+    </node>
+
+    <node name="color_histogram"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/ColorHistogram /$(arg manager)">
+      <remap from="~input" to="bilateral_filter/output"/>
+      <remap from="~input/indices" to="euclidean_clustering/output" />
+      <rosparam>
+        bin_size: 10
+        histogram_policy: 0
+        white_threshold: 0.3
+        black_threshold: 0.2
+      </rosparam>
+    </node>
+
+    <node name="color_histogram_visualizer"
+          pkg="jsk_pcl_ros" type="color_histogram_visualizer.py" output="screen">
+      <remap from="~input/array" to="color_histogram/output"/>
+      <rosparam>
+        histogram_policy: 0
+        histogram_index: 0
+        histogram_scale: 1.0
+      </rosparam>
+    </node>
+
+    <node name="color_histogram_classifier"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/ColorHistogramClassifier /$(arg manager)">
+      <remap from="~input/array" to="color_histogram/output" />
+      <rosparam>
+        label_names:
+          - red
+          - green
+          - blue
+          - white
+          - black
+        histograms:
+          red:   [0.4, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.4, 0.2, 0.0]
+          blue:  [0.0, 0.0, 0.0, 0.0, 0.0, 0.2, 0.4, 0.1, 0.0, 0.0, 0.3, 0.0]
+          green: [0.0, 0.0, 0.1, 0.4, 0.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.3, 0.0]
+          white: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+          black: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+      </rosparam>
+    </node>
+
+    <node name="color_class_visualizer"
+          pkg="jsk_rviz_plugins" type="classification_result_visualizer.py">
+      <remap from="~input/boxes" to="euclidean_segmentation_decomposer/boxes"/>
+      <remap from="~input/classes" to="color_histogram_classifier/output" />
+      <rosparam>
+        text_offset_x: 0.0
+        text_offset_y: -0.1
+        text_offset_z: 0.0
+        text_size: 0.07
+      </rosparam>
+    </node>
+  </group>
+
+  <node name="rviz" pkg="rviz" type="rviz"
+        if="$(arg use_rviz)"
+        args="-d $(find jsk_pcl_ros)/sample/rviz/color_histogram.rviz" />
+</launch>

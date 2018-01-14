@@ -51,6 +51,7 @@ namespace jsk_pcl_ros_utils
     }
     pnh_->param("strict_tf", strict_tf_, false);
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void NormalFlipToFrame::subscribe()

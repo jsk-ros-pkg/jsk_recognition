@@ -56,6 +56,14 @@ endif()
 include(FindPkgConfig)
 pkg_check_modules(libcmt REQUIRED libcmt)
 
+# robot_self_filter is released on version greater than indigo
+find_package(robot_self_filter QUIET)
+if(NOT robot_self_filter_FOUND)
+  # check existence of robot_self_filter package because robot_self_filter is not installed by apt on version less than indigo
+  find_package(PkgConfig)
+  pkg_check_modules(robot_self_filter robot_self_filter QUIET)
+endif()
+
 find_package(OpenMP)
 if(OPENMP_FOUND)
   message("OPENMP FOUND")
@@ -83,6 +91,7 @@ add_custom_target(install_trained_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts
 
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(
+  cfg/ConcaveHullMaskImage.cfg
   cfg/RectArrayActualSizeFilter.cfg
   cfg/PolygonArrayColorLikelihood.cfg
   cfg/PolygonArrayColorHistogram.cfg
@@ -114,6 +123,13 @@ generate_dynamic_reconfigure_options(
   cfg/OverlayImageColorOnMono.cfg
   cfg/SelectiveSearch.cfg
   cfg/LabelToMaskImage.cfg
+  cfg/FlowVelocityThresholding.cfg
+  cfg/FilterMaskImageWithSize.cfg
+  cfg/FastRCNN.cfg
+  cfg/DrawRects.cfg
+  cfg/FacePoseEstimation.cfg
+  cfg/LabelImageDecomposer.cfg
+  cfg/SSDObjectDetector.cfg
 )
 
 message(WARNING "DEPRECATION WARNING: srv files in jsk_pcl_ros are deprecated."
@@ -157,6 +173,9 @@ endif()
 
 # Build nodelet executables
 include_directories(include ${catkin_INCLUDE_DIRS} ${Eigen_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} slic ${libcmt_INCLUDE_DIRS})
+if(robot_self_filter_FOUND)
+  include_directories(${robot_self_filter_INCLUDE_DIRS})
+endif()
 link_directories(${libcmt_LIBRARY_DIRS})
 
 file(GLOB ${PROJECT_NAME}_node_scripts ${PROJECT_SOURCE_DIR}/node_scripts/*)
@@ -176,6 +195,8 @@ macro(jsk_add_nodelet _nodelet_cpp _nodelet_class _single_nodelet_exec_name)
     ${PROJECT_NAME}_nodelet_sources ${PROJECT_NAME}_nodelet_executables)
 endmacro()
 
+jsk_add_nodelet(src/filter_mask_image_with_size.cpp "jsk_perception/FilterMaskImageWithSize" "filter_mask_image_with_size")
+jsk_add_nodelet(src/flow_velocity_thresholding.cpp "jsk_perception/FlowVelocityThresholding" "flow_velocity_thresholding")
 jsk_add_nodelet(src/bounding_box_to_rect.cpp "jsk_perception/BoundingBoxToRect" "bounding_box_to_rect")
 jsk_add_nodelet(src/rect_array_actual_size_filter.cpp "jsk_perception/RectArrayActualSizeFilter" "rect_array_actual_size_filter")
 jsk_add_nodelet(src/rect_array_to_density_image.cpp "jsk_perception/RectArrayToDensityImage" "rect_array_to_density_image")
@@ -223,12 +244,14 @@ jsk_add_nodelet(src/roi_to_mask_image.cpp "jsk_perception/ROIToMaskImage" "roi_t
 jsk_add_nodelet(src/polygon_to_mask_image.cpp "jsk_perception/PolygonToMaskImage" "polygon_to_mask_image")
 jsk_add_nodelet(src/polygon_array_to_label_image.cpp "jsk_perception/PolygonArrayToLabelImage" "polygon_array_to_label_image")
 jsk_add_nodelet(src/rect_to_roi.cpp "jsk_perception/RectToROI" "rect_to_roi")
+jsk_add_nodelet(src/concave_hull_mask_image.cpp "jsk_perception/ConcaveHullMaskImage" "concave_hull_mask_image")
 jsk_add_nodelet(src/convex_hull_mask_image.cpp "jsk_perception/ConvexHullMaskImage" "convex_hull_mask_image")
 jsk_add_nodelet(src/mask_image_generator.cpp "jsk_perception/MaskImageGenerator" "mask_image_generator")
 jsk_add_nodelet(src/project_image_point.cpp "jsk_perception/ProjectImagePoint" "project_image_point")
 jsk_add_nodelet(src/sliding_window_object_detector.cpp "jsk_perception/SlidingWindowObjectDetector" "sliding_window_object_detector")
 jsk_add_nodelet(src/gaussian_blur.cpp "jsk_perception/GaussianBlur" "gaussian_blur")
 jsk_add_nodelet(src/kmeans.cpp "jsk_perception/KMeans" "kmeans")
+jsk_add_nodelet(src/draw_rects.cpp "jsk_perception/DrawRects" "draw_rects")
 if("${OpenCV_VERSION}" VERSION_GREATER "2.9.9")  # >= 3.0.0
   jsk_add_nodelet(src/bing.cpp "jsk_perception/Bing" "bing")
 endif()
@@ -241,16 +264,7 @@ if("$ENV{ROS_DISTRO}" STRGREATER "hydro") # >= indigo
   jsk_add_nodelet(src/consensus_tracking.cpp "jsk_perception/ConsensusTracking" "consensus_tracking")
 endif()
 
-# robot_self_filter is released on version greater than indigo
-find_package(robot_self_filter QUIET)
-if(NOT robot_self_filter_FOUND)
-  # check existence of robot_self_filter package because robot_self_filter is not installed by apt on version less than indigo
-  find_package(PkgConfig)
-  pkg_check_modules(robot_self_filter robot_self_filter QUIET)
-endif()
-
 if(robot_self_filter_FOUND)
-  message(AUTHOR_WARNING "robot_self_filter is found.")
   jsk_add_nodelet(src/robot_to_mask_image.cpp "jsk_perception/RobotToMaskImage" "robot_to_mask_image")
 endif()
 
@@ -260,9 +274,8 @@ add_library(${PROJECT_NAME} SHARED ${jsk_perception_nodelet_sources}
   src/histogram_of_oriented_gradients.cpp
   )
 
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${robot_self_filter_LIBRARIES} ${libcmt_LIBRARIES} yaml-cpp)
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${libcmt_LIBRARIES} yaml-cpp)
 if(robot_self_filter_FOUND)
-  include_directories(${robot_self_filter_INCLUDE_DIRS})
   target_link_libraries(${PROJECT_NAME} ${robot_self_filter_LIBRARIES})
 endif()
 if("${OpenCV_VERSION}" VERSION_GREATER "2.4.8")
@@ -335,7 +348,7 @@ install(DIRECTORY node_scripts/ scripts/
         USE_SOURCE_PERMISSIONS
 )
 
-install(DIRECTORY sample launch euslisp plugins
+install(DIRECTORY sample launch euslisp plugins template
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         USE_SOURCE_PERMISSIONS
 )
@@ -369,6 +382,7 @@ if(CATKIN_ENABLE_TESTING)
     # FIXME: jsk_tools/test_topic_published.py does not work on hydro travis/jenkins
     # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
     jsk_add_rostest(test/add_mask_image.test)
+    jsk_add_rostest(test/alexnet_object_recognition.test)
     jsk_add_rostest(test/apply_mask_image.test)
     jsk_add_rostest(test/background_subtraction.test)
     jsk_add_rostest(test/blob_detector.test)
@@ -376,30 +390,40 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/bounding_object_mask_image.test)
     jsk_add_rostest(test/bounding_rect_mask_image.test)
     jsk_add_rostest(test/calc_flow.test)
-    jsk_add_rostest(test/color_histogram.test)
-    jsk_add_rostest(test/colorize_labels.test)
+    # FIXME: Not work on Travis. (https://github.com/jsk-ros-pkg/jsk_recognition/pull/2217)
+    # jsk_add_rostest(test/color_histogram.test)
     jsk_add_rostest(test/colorize_float_image.test)
-    jsk_add_rostest(test/draw_rect_array.test)
+    jsk_add_rostest(test/colorize_labels.test)
+    jsk_add_rostest(test/concave_hull_mask_image.test)
+    jsk_add_rostest(test/convex_hull_mask_image.test)
+    jsk_add_rostest(test/draw_rects.test)
     jsk_add_rostest(test/extract_image_channel.test)
+    jsk_add_rostest(test/face_pose_estimation.test)
+    jsk_add_rostest(test/fcn_object_segmentation.test)
+    add_rostest(test/fcn_object_segmentation.test ARGS use_mask:=true)
+    jsk_add_rostest(test/filter_mask_image_with_size.test)
+    jsk_add_rostest(test/flow_velocity_thresholding.test)
     jsk_add_rostest(test/image_cluster_indices_decomposer.test)
     jsk_add_rostest(test/image_publisher.test)
     jsk_add_rostest(test/image_to_label.test)
-    jsk_add_rostest(test/mask_image_to_label.test)
     jsk_add_rostest(test/kmeans.test)
+    jsk_add_rostest(test/label_image_classifier.test)
+    jsk_add_rostest(test/label_image_decomposer.test)
     jsk_add_rostest(test/label_to_mask_image.test)
-    jsk_add_rostest(test/rect_array_to_image_marker.test)
-    jsk_add_rostest(test/convex_hull_mask_image.test)
+    jsk_add_rostest(test/mask_image_to_label.test)
     jsk_add_rostest(test/overlay_image_color_on_mono.test)
+    jsk_add_rostest(test/people_pose_estimation_2d.test)
+    jsk_add_rostest(test/probability_image_classifier.test)
+    jsk_add_rostest(test/rect_array_to_image_marker.test)
+    jsk_add_rostest(test/regional_feature_based_object_recognition.test)
     jsk_add_rostest(test/selective_search.test)
-    jsk_add_rostest(test/slic_super_pixels.test)
     jsk_add_rostest(test/sklearn_classifier.test)
+    jsk_add_rostest(test/slic_super_pixels.test)
     jsk_add_rostest(test/speak_when_label_found.test)
     jsk_add_rostest(test/split_fore_background.test)
     jsk_add_rostest(test/tile_image.test)
-    jsk_add_rostest(test/label_image_decomposer.test)
-    # FIXME: Does not work on Travis/Jenkins
-    # jsk_add_rostest(test/fcn_object_segmentation.test)
-    # jsk_add_rostest(test/vgg16_object_recognition.test install_trained_data)
+    jsk_add_rostest(test/vgg16_object_recognition.test)
+    jsk_add_rostest(test/ssd_object_detector.test)
     # FIXME: Unstable on Travis/Jenkins
     # if(TARGET bing)
     #   jsk_add_rostest(test/bing.test)

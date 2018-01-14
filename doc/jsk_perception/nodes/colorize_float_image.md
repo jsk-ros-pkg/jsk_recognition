@@ -15,3 +15,9 @@ Colorize float image with heatmap gradation.
 * `~channel` (int, default: 0)
 
   Choose channel to colorize. If value is default, first channel is selected.
+
+## Sample
+
+```bash
+roslaunch jsk_perception sample_color_float_image.launch
+```

@@ -52,7 +52,7 @@ namespace jsk_pcl_ros_utils
     polygons_pub_ = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "output_polygons", 1);
     coefficients_pub_ = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(
       *pnh_, "output_coefficients", 1);
-    
+    onInitPostProcess();
   }
 
   void PolygonArrayTransformer::subscribe()

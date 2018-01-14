@@ -2,6 +2,263 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.4 (2018-01-12)
+------------------
+* jsk_perception: install template dir (`#2222 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2222>`_)
+* Contributors: Yuki Furuta
+
+1.2.3 (2017-11-23)
+------------------
+* jsk_perception: add face_pose_estimation (`#2207 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2207>`_)
+* jsk_perception: people_pose_estimation_2d.py: add option not to synchronize camera info
+
+* jsk_perception: use 'find' in generated eusmodel launch file (`#2215 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2215>`_)
+* add timestamp for diff_image (`#2216 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2216>`_)
+* jsk_percetion: add ssd object detector (`#2204 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2204>`_ from furushchev/ssd)
+* Drop hydro from CI on Travis (`#2217 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2217>`_)
+  * Remove color_histogram test that won't work on Travis
+
+* Capability of specifying shape for tiling images (`#2208 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2208>`_)
+  * Refactor tile_image.py about self._shape
+  * Validate ~shape param of tile_image.py
+    - modified:   tile_image.py
+  * Capability of specifying shape for tiling images
+
+* Add ~alpha param to label_image_decomposer to tune the overlay (`#2211 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2211>`_)
+  * Make ~alpha param of label_image_decomposer to dynparam
+  * Add ~alpha param to label_image_decomposer to tune the overlay
+  * Add option to visualize label image without sync by ~only_label option
+
+* jsk_perception: people_pose_estimation_2d.py: unsynchronize camera info (`#2206 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2206>`_)
+* Add node for visualization of (labeled) rectangle region on 2D image (`#2205 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2205>`_)
+  * jsk_perception: draw_rects: disable resubscribing on hydro
+  * jsk_perception: use jsk_recognition_msgs::Rect for rect instead of geometry_msgs::PolygonStamped
+  * jsk_perception: add nodelet for drawing rects on image
+  * jsk_perception: use classification result for FastRCNN
+
+* Split test of fcn_object_segmentation to avoid MemoryError Because loading 2 FCN8s model is too heavy on PCs with small memories. (`#2200 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2200>`_)
+* [jsk_perception, slic_super_pixels] add parameter, publish_debug_images (`#2181 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2181>`_)
+* Regional feature based object recognition using ResNet (`#2172 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2172>`_)
+  * Rename to regional_feature_based_object_recognition
+  * Remove params pretrained_model and mean_file
+  * Sort add_rostest
+  * Add test for feature_based_object_recognition
+  * Download files and make the sample work
+  * Add ResNetFeature
+  * Fix bug in feature_based_object_recognition
+  * Add feature based object recognition node
+  * Large color variation in draw_classification_result
+  * Display image even though some topics have not come yet
+  * Fix nan values in ProbabilityImageClassifier
+
+* node_scripts/apply_context_to_label_probability: make sure candidates is list  because it can be tuple, which cause error (`#2185 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2185>`_)
+* Fix ignore_labels out of range for the input label/proba image (`#2184 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2184>`_)
+  * Update sample of label/probability_image_classifier
+* Fixes on probabilistic image classifier (`#2177 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2177>`_)
+  * If no candidates, candidates_fixed should be ignored
+* src/bounding_box_to_rect.cpp: Convert bounding box to mask (`#2176 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2176>`_)
+  * Add sample_rect_to_mask_image.launch
+  * support BoundingBox as input topic type as well as BoundingBoxArray
+
+* jsk_perception: fix indent in creating people pose (`#2179 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2179>`_)
+
+
+* Contributors: Yuki Furuta, Kei Okada, Kentaro Wada, Naoki Hiraoka, Shingo Kitagawa, Yohei Kakiuchi, Yuto Uchimi
+
+1.2.2 (2017-07-23)
+------------------
+* add bg_label in apply_context_to_label_probability (`#2175 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2175>`_)
+  * Remove no need ~use_topic flag
+  * Refactor to handle fixed candidates in ApplyContextToLabelProbability
+  * add bg_label in apply_context_to_label_probability
+
+* fix bug in label_image_classifier (`#2174 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2174>`_)
+  * Update label_image_classifier.py
+  * fix bug in label_image_classifier
+
+* Contributors: Kentaro Wada, Shingo Kitagawa
+
+1.2.1 (2017-07-15)
+------------------
+* If chainer is not installed, use v2 (`#2167 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2167>`_)
+  * chainer can not install in ros build firm
+
+* Contributors: Kei Okada
+
+1.2.0 (2017-07-15)
+------------------
+* [jsk_perception][people_pose_estimation_2d] publish image only when subscribed (`#2164 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2164>`_)
+
+* Enhance PeoplePoseEstimation2D (`#2162 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2162>`_)
+  * Fix run_depend on rviz
+  * Install different pre-trained model according to the version of chainer
+  * Support 16UC1 depth image in PeoplePoseEstimation2D
+  * Visualize people 3D pose on rviz in sample
+  * Add orientation to people 3d pose
+  * Create point cloud in play_rosbag_people.xml
+  * Fix AttributeError of argsort in cupy == 1.0.1
+
+* [jsk_perception][jsk_recognition_utils] support chainer-v2 in alexnet and vgg16 (`#2153 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2153>`_)
+  * enable alexnet and vgg test
+  * fix syntax in vgg16_object_recognition
+  * alexnet and vgg16 support chainer-v2
+
+* Contributors: Kentaro Wada, Shingo Kitagawa, Yuki Furuta
+
+1.1.3 (2017-07-07)
+------------------
+* [jsk_perception] add FCN-based classifiers (`#2142 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2142>`_)
+  * make FCN-based classifiers pass test
+  * mask_image_generator run only when use_mask=true
+  * add voc_target_names yaml
+  * FCN-based classifiers publish full result
+  * add sample and test of fcn-based classifiers
+  * add probability_image_classifier node
+  * add label_image_classifier node
+
+* [jsk_perception] squeeze mask to image dim=2 in fcn segmentation (`#2144 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2144>`_)
+  * check mask ndim before squeeze
+  * add use_mask sample and test for FCN segmentation
+  * fix typo in fcn segmentation
+  * squeeze mask to image dim=2 in fcn segmentation
+
+* [jsk_perception/polygon_to_mask] add error message of frame_id (`#2125 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2125>`_)
+  * [jsk_perception/polygon_to_mask_image] add error message when frame_id is not correct.
+
+* [jsk_perception] apply candidates node supports topic update (`#2143 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2143>`_)
+  * node_scripts/apply_context_to_label_probability: update Label msg API
+  * node_scripts/apply_context_to_label_probability: apply candiates support topic update
+
+* [jsk_perception] PeoplePoseEstimation2D (`#2115 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2115>`_)
+  * [jsk_perception][people_pose_estimation_2d.py] keep compatibility chainer v1
+  * [jsk_perception/people_pose_estimation_2d] Fixed missed numpy/cupy type
+  * [jsk_perception/people_pose_estimation_2d] Changed sample bag file
+  * [jsk_perception/people_pose_estimation_2d] Add people_mask_publisher
+  * [jsk_perception/people_pose_estimation_2d] Publishe 2d image pose
+  * [jsk_recogntion_msgs/PoseArray] Add score
+  * [jsk_perception/people_pose_estimation_2d] Fixed install sample bag
+  * [jsk_perception/people_pose_estimation_2d] Delete duplicated code
+  * [jsk_perception/people_pose_estimation_2d] Modified type of PeoplePose.msg
+  * [jsk_perception/people_pose_estimation_2d] Fiexed publish img encodings
+  * [jsk_perception/people_pose_estimation_2d] Add test
+
+* [jsk_perception/people_pose] Fixed typo and publish rect images. (`#2146 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2146>`_ )
+  * [jsk_perception/people_pose] Refactor. Delete unnecessary code
+  * [jsk_perception/people_pose] Bug fix. Publish rectified image
+  * [jsk_perception/people_pose] Fix typo
+  * [jsk_perception/people_pose] Delete pcl dependencies
+
+* [jsk_perception/draw_rect_array.py] check polygon_msg list size (`#2114 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2114>`_ )
+* [jsk_perception/mask_image_to_rect.cpp] check indices size before execute boundingRect (`#2113 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2113>`_ )
+  * [jsk_perception] check indices size before execute boundingRect
+  * jsk_perception/src/mask_image_to_rect.cpp: publish topic even if list is empty
+
+* Contributors: Yuki Furuta, Kanae Kochigami, Masaki Murooka, Shingo Kitagawa, Iori Yanokura
+
+1.1.2 (2017-06-16)
+------------------
+* label_image_decomposer.py: Faster and better visualization of segmentation (`#2109 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2109>`_ )
+* fcn_object_segmentation.{launch,py} : Support .npz in chainermodel (https://github.com/jsk-ros-pkg/jsk_recognition/commit/19d7a2ac09bab2b470a8b06e0ed98d072b4958d4)
+* fcn_object_segmentation.{launch,py} : Show deprecated warning for ~model_h5 in fcn_object_segmentation https://github.com/jsk-ros-pkg/jsk_recognition/commit/8d9be278a4ce019f4e026883a30785be874c6a16
+* Support chainer v2 in fcn_object_segmentation.py  (`#2107 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2107>`_ )
+* tile_image.py : Improve visualization in sample_fuse_depth_image https://github.com/jsk-ros-pkg/jsk_recognition/commit/6caa4c6f5039cb49cf0d07f43a6954a287b8ed35
+* Stop using deprecated logging func in jsk_topic_tools (`#2097 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2097>`_ )
+  * Stop using deprecated jsk_logxxx
+* Refactor cmake to find robot_self_filter (`#2089 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2089>`_ )
+* [jsk_percption][jsk_recogniton_utils] add imagenet_object_recognition launch and its sample (`#2085 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2085>`_ )
+  * add sample_imagenet_object_recognition launch
+  * use imagenet launch in alexnet sample launch
+  * add imagenet_object_recognition.launch
+  * move imagenet_target_names in config
+  * install bvlc_vgg16 chainermodel
+  * format API in vgg16: model_h5 -> model_file
+  * format Alex -> AlexNet
+* [jsk_perception] add AlexNet object recognition node (`#2083 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2083>`_ )
+ * inherit VGG16ObjectRecognition in AlexNet
+  * rename alex to alexnet
+  * mv imagenet_target_names.yaml in sample/config
+  * add test for alex_object_recognition
+  * add sample for alex_object_recognition
+  * add alex_object_recognition node
+* jsk_perception/test/bof_histogram_extractor.test: increase time-limit for test_bof_histogram_extractor (`#2079 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2079>`_)
+* fix typo in fcn_object_segmentation (`#2076 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2076>`_)
+  * Improve the location of squeezing batch axis https://github.com/jsk-ros-pkg/jsk_recognition/commit/ddf46101d2d02e7bd18261542a2bacb456bf6e11
+* Remove unexpectedly introduced torch rosdep key (`#2074 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2074>`_)
+* FilterMaskImageWithSize: Filter mask image with its size  (`#2062 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2062>`_)
+  * Add flag of ~use_reference to minimize overhead of synchronizing
+    - modified:   ../doc/jsk_perception/nodes/filter_mask_image_with_size.md
+    - modified:   include/jsk_perception/filter_mask_image_with_size.h
+    - modified:   sample/sample_filter_mask_image_with_size.launch
+    - modified:   src/filter_mask_image_with_size.cpp
+  * filter_mask_image_with_size.cpp: Improve rosinfo https://github.com/jsk-ros-pkg/jsk_recognition/commit/5b5455c46f8397d6aa7e1c3d3501e87bf39326ca
+  * Add sample, test & doc for FilterMaskImageWithSize https://github.com/jsk-ros-pkg/jsk_recognition/commit/14931792da009ef9468bc1ec3d6419005aca9335
+    -	new file:   doc/jsk_perception/nodes/filter_mask_image_with_size.md
+    -	new file:   doc/jsk_perception/nodes/images/filter_mask_image_with_size.gif
+    -	modified:   jsk_perception/CMakeLists.txt
+    -	new file:   jsk_perception/sample/sample_filter_mask_image_with_size.launch
+    -	new file:   jsk_perception/test/filter_mask_image_with_size.test
+  * Filter mask image with its size
+    Modified:
+    - jsk_perception/CMakeLists.txt
+    - jsk_perception/include/jsk_perception/multiply_mask_image.h
+    - jsk_perception/plugins/nodelet/libjsk_perception.xml
+    Added:
+    - jsk_perception/cfg/FilterMaskImageWithSize.cfg
+    - jsk_perception/include/jsk_perception/filter_mask_image_with_size.h
+    - jsk_perception/src/filter_mask_image_with_size.cpp
+* Add ~approximate_sync param to ConsensusTracking  (`#2067 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2067>`_)
+  Modified:
+  - doc/jsk_perception/nodes/consensus_tracking.rst
+  - jsk_perception/include/jsk_perception/consensus_tracking.h
+  - jsk_perception/src/consensus_tracking.cpp
+* FlowVelocityThresholding: Thresholding with velocity of optical flow (`#2060 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2060>`_ )
+  * Add sample/test for FlowVelocityThresholding
+    -	new file:   jsk_perception/nodes/flow_velocity_thresholding.md
+    -	new file:   jsk_perception/nodes/images/flow_velocity_thresholding.gif
+    -	modified:   ../jsk_perception/CMakeLists.txt
+    -	new file:   ../jsk_perception/sample/sample_flow_velocity_thresholding.launch
+    -	new file:   ../jsk_perception/test/flow_velocity_thresholding.test
+  * Thresholding with velocity of optical flow
+    -	modified:   CMakeLists.txt
+    -	new file:   cfg/FlowVelocityThresholding.cfg
+    -	new file:   include/jsk_perception/flow_velocity_thresholding.h
+    -	modified:   plugins/nodelet/libjsk_perception.xml
+    -	new file:   src/flow_velocity_thresholding.cpp
+* Generate README by script (`#2064 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2064>`_ )
+* fix typo in fcn_object_segmentation.py (`#2063 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2063>`_ )
+* Add ~queue_size param to MultiplyMaskImage (`#2061 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2061>`_ )
+  Modified:
+  - doc/jsk_perception/nodes/multiply_mask_image.md
+  - jsk_perception/src/multiply_mask_image.cpp
+* Enhance fcn_object_segmentation.py with PyTorch backend (`#2051 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2051>`_ )
+  * Optimization for faster processing
+    - modified: jsk_perception/node_scripts/fcn_object_segmentation.py
+  * Fix api of fcn_object_segmentation.py with PyTorch
+    - modified: jsk_perception/node_scripts/fcn_object_segmentation.py
+  * Raise error for unavailable torch & torchfcn
+  * Remove install_pytorch.sh
+  * Revert "Install packages to devel space"
+    This reverts commit 40e068fc6788087c3a11f914269e93a4538be72e.
+  * Fix method
+  * Install packages to devel space
+    - new file:   install_pytorch.py
+    - deleted:    install_pytorch.sh
+  * Install PyTorch for CUDA8.0 with rosdep
+  * Add instruction of installing torchfcn
+  * Remove not needed lines
+* [jsk_perception] Add concave_hull_mask_image (`#2045 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2045>`_ )
+  * [jsk_perception/concave_hull_mask_image] Fixed header
+  * [jsk_perception/concave_hull_mask_image] Fixed consistency of cfg files
+  * [jsk_perception/concave_hull_mask_image] Fixed max area size
+  * [jsk_perception/concave_hull_mask_image] Fixed cfg for limit of contour area size for inf
+  * [jsk_perception/concave_hull_mask_image] Fixed namespace of filter2D
+  * [jsk_perception/concave_hull_mask_image] Fixed include header lists
+  * [jsk_perception/concave_hull_mask_image] Fixed year
+
+* [jsk_perception/apply_mask_image] Add negative option (`#2025 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2025>`_ )
+* [jsk_perception][detection_interface.l] fix: changing object name  affects unexpected side effect (`#1974 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1974>`_ )
+* Contributors: Kei Okada, Kentaro Wada, Shingo Kitagawa, Yuki Furuta, Iory Yanokura
+
 1.1.1 (2017-03-04)
 ------------------
 

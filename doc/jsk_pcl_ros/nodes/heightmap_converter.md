@@ -30,3 +30,7 @@ Convert a pointcloud(`sensor_msgs/PointCloud2`) into heightmap representation (`
 * `~max_y` (Double, default: `2.0`)
 
   Minimum and maximum value of heightmap dimension.
+
+* `~initial_probability` (Double, default: `1.0`)
+
+  Initial value to be set to Channel1 of heightmap image

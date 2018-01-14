@@ -39,10 +39,10 @@
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
-#include <pcl/filters/crop_box.h>
 #include <pcl_ros/transforms.h>
 #include "jsk_recognition_utils/pcl_conversion_util.h"
 #include <jsk_topic_tools/rosparam_utils.h>
+#include "jsk_recognition_utils/pcl_ros_util.h"
 #include "jsk_recognition_utils/pcl_util.h"
 #include <algorithm>
 #include <set>
@@ -405,33 +405,19 @@ namespace jsk_pcl_ros
         pcl::PointCloud<pcl::PointXYZ>::Ptr
           cloud(new pcl::PointCloud<pcl::PointXYZ>);
         pcl::fromROSMsg(*msg, *cloud);
-        pcl::CropBox<pcl::PointXYZ> crop_box(false);
-        pcl::PointIndices::Ptr indices (new pcl::PointIndices);
-        NODELET_DEBUG("max_points: [%f, %f, %f]", dimensions_[i][0]/2,
-                      dimensions_[i][1]/2,
-                      dimensions_[i][2]/2);
-        NODELET_DEBUG("min_points: [%f, %f, %f]",
-                      -dimensions_[i][0]/2,
-                      -dimensions_[i][1]/2,
-                      -dimensions_[i][2]/2);
-        Eigen::Vector4f max_points(dimensions_[i][0]/2,
-                                   dimensions_[i][1]/2,
-                                   dimensions_[i][2]/2,
-                                   0);
-        Eigen::Vector4f min_points(-dimensions_[i][0]/2,
-                                   -dimensions_[i][1]/2,
-                                   -dimensions_[i][2]/2,
-                                   0);
-        float roll, pitch, yaw;
+
         Eigen::Affine3f transformed_box_pose = transform * pose_list_[i];
         transformed_pose_list_.push_back(transformed_box_pose);
-        pcl::getEulerAngles(transformed_box_pose, roll, pitch, yaw);
-        crop_box.setInputCloud(cloud);
-        crop_box.setMax(max_points);
-        crop_box.setMin(min_points);
-        crop_box.setTranslation(transformed_box_pose.translation());
-        crop_box.setRotation(Eigen::Vector3f(roll, pitch, yaw));
-        crop_box.filter(indices->indices);
+
+        pcl::PointIndices::Ptr indices (new pcl::PointIndices);
+        jsk_recognition_msgs::BoundingBox bbox_msg;
+        bbox_msg.header.frame_id = cloud->header.frame_id;
+        tf::poseEigenToMsg(transformed_box_pose, bbox_msg.pose);
+        bbox_msg.dimensions.x = dimensions_[i][0];
+        bbox_msg.dimensions.y = dimensions_[i][1];
+        bbox_msg.dimensions.z = dimensions_[i][2];
+        jsk_recognition_utils::cropPointCloud<pcl::PointXYZ>(cloud, bbox_msg, &(indices->indices));
+
         // indices->indices may include NaN and inf points
         // https://github.com/jsk-ros-pkg/jsk_recognition/issues/888
         pcl::PointIndices non_nan_indices;

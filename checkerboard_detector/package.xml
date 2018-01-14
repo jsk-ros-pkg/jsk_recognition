@@ -1,6 +1,6 @@
 <package>
   <name>checkerboard_detector</name>
-  <version>1.1.1</version>
+  <version>1.2.4</version>
   <description>Uses opencv to find checkboards and compute their 6D poses with respect to the image. Requires the image to be calibrated.<br />
     Parameters:<br />
     <ul>
@@ -13,6 +13,10 @@
     There can be more than one grid%d declared, the numbers should grow consecutively starting at 0.</description>
 
   <license>BSD</license>
+
+  <url type="repository">http://github.com/jsk-ros-pkg/jsk_recognition</url>
+  <url type="bugtracker">http://github.com/jsk-ros-pkg/jsk_recognition/issues</url>
+  <url type="website">http://jsk-docs.readthedocs.io/en/latest/jsk_recognition/doc/checkerboard_detector</url>
 
   <author>Rosen Diankov (rdiankov@cs.cmu.edu)</author>
   <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>

@@ -25,9 +25,13 @@ add_message_files(
   ICPResult.msg
   ImageDifferenceValue.msg
   Int32Stamped.msg
+  Label.msg
+  LabelArray.msg
   LineArray.msg
   Line.msg
   ModelCoefficientsArray.msg
+  Object.msg
+  ObjectArray.msg
   ParallelEdgeArray.msg
   ParallelEdge.msg
   PlotData.msg
@@ -52,12 +56,18 @@ add_message_files(
   TorusArray.msg
   Torus.msg
   TrackerStatus.msg
+  TrackingStatus.msg
   BoolStamped.msg
   VectorArray.msg
   WeightedPoseArray.msg
   ContactSensor.msg
   ContactSensorArray.msg
   PlotDataArray.msg
+  Segment.msg
+  SegmentStamped.msg
+  SegmentArray.msg
+  PeoplePose.msg
+  PeoplePoseArray.msg
   )
 
 # TODO(wkentaro): Most of srv files are duplicated in jsk_pcl_ros,
@@ -74,6 +84,7 @@ add_service_files(FILES
   NonMaximumSuppression.srv
   PolygonOnEnvironment.srv
   RobotPickupReleasePoint.srv
+  SaveMesh.srv
   SetDepthCalibrationParameter.srv
   SetLabels.srv
   SetPointCloud2.srv

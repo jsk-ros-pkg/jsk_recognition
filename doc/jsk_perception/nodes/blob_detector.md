@@ -18,3 +18,9 @@ The implementation is based on [Imura's implementation](http://oshiro.bpe.es.osa
 * `~min_size` (Integer, default: `10`)
 
   Minimum size of blob
+
+## Sample
+
+```bash
+roslaunch jsk_perception sample_blob_detector.launch
+```

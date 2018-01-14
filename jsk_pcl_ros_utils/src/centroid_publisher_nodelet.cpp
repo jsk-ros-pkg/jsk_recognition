@@ -33,23 +33,28 @@
  *********************************************************************/
 
 #define BOOST_PARAMETER_MAX_ARITY 7
-#include "jsk_pcl_ros_utils/centroid_publisher.h"
+#include <jsk_pcl_ros_utils/centroid_publisher.h>
 
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/PointStamped.h>
 
-#include <pcl/common/centroid.h>
-#include "jsk_recognition_utils/pcl_conversion_util.h"
+#include <algorithm>
+#include <iomanip>
+#include <sstream>
+#include <jsk_recognition_utils/geo_util.h>
+#include <jsk_recognition_utils/pcl_conversion_util.h>
 
 namespace jsk_pcl_ros_utils
 {
   void CentroidPublisher::extract(const sensor_msgs::PointCloud2ConstPtr& input)
   {
+    vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZ> cloud_xyz;
     pcl::fromROSMsg(*input, cloud_xyz);
     Eigen::Vector4f center;
-    pcl::compute3DCentroid(cloud_xyz, center);
-    if (publish_tf_) {
+    bool is_valid = pcl::compute3DCentroid(cloud_xyz, center);
+    if (publish_tf_ && is_valid) {
       tf::Transform transform;
       transform.setOrigin(tf::Vector3(center[0], center[1], center[2]));
       transform.setRotation(tf::createIdentityQuaternion());
@@ -71,14 +76,57 @@ namespace jsk_pcl_ros_utils
     pub_point_.publish(point);
   }
 
+  void CentroidPublisher::extractPolygons(const jsk_recognition_msgs::PolygonArray::ConstPtr& input)
+  {
+    vital_checker_->poke();
+
+    int size = std::min(100, (int)input->polygons.size());
+
+    geometry_msgs::PoseArray pose_array;
+    pose_array.header = input->header;
+    pose_array.poses.resize(size);
+
+    for (size_t i = 0; i < size; ++i) {
+      jsk_recognition_utils::Polygon::Ptr polygon
+        = jsk_recognition_utils::Polygon::fromROSMsgPtr(input->polygons[i].polygon);
+      Eigen::Vector3f c = polygon->centroid(), n = polygon->getNormal();
+      Eigen::Vector3f ez;
+      ez << 0.0f, 0.0f, 1.0f;
+      Eigen::Quaternionf q;
+      q.setFromTwoVectors(ez, n);
+
+      if (publish_tf_) {
+        std::stringstream ss;
+        ss << frame_ << std::setfill('0') << std::setw(2) << std::right << i;
+        tf::Transform transform;
+        transform.setOrigin(tf::Vector3(c.x(), c.y(), c.z()));
+        transform.setRotation(tf::Quaternion(q.x(), q.y(), q.z(), q.w()));
+        br_.sendTransform(tf::StampedTransform(transform, input->header.stamp,
+                                               input->header.frame_id, ss.str()));
+      }
+
+      pose_array.poses[i].position.x = c.x();
+      pose_array.poses[i].position.y = c.y();
+      pose_array.poses[i].position.z = c.z();
+      pose_array.poses[i].orientation.x = q.x();
+      pose_array.poses[i].orientation.y = q.y();
+      pose_array.poses[i].orientation.z = q.z();
+      pose_array.poses[i].orientation.w = q.w();
+    }
+
+    pub_pose_array_.publish(pose_array);
+  }
+
   void CentroidPublisher::subscribe()
   {
-    sub_input_ = pnh_->subscribe("input", 1, &CentroidPublisher::extract, this);
+    sub_cloud_ = pnh_->subscribe("input", 1, &CentroidPublisher::extract, this);
+    sub_polygons_ = pnh_->subscribe("input/polygons", 1, &CentroidPublisher::extractPolygons, this);
   }
 
   void CentroidPublisher::unsubscribe()
   {
-    sub_input_.shutdown();
+    sub_cloud_.shutdown();
+    sub_polygons_.shutdown();
   }
   
   void CentroidPublisher::onInit(void)
@@ -95,13 +143,17 @@ namespace jsk_pcl_ros_utils
       pub_pose_ = pnh_->advertise<geometry_msgs::PoseStamped>("output/pose", 1);
       pub_point_ = pnh_->advertise<geometry_msgs::PointStamped>(
         "output/point", 1);
+      pub_pose_array_ = pnh_->advertise<geometry_msgs::PoseArray>("output/pose_array", 1);
       subscribe();
     }
     else {
       pub_pose_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output/pose", 1);
       pub_point_ = advertise<geometry_msgs::PointStamped>(
         *pnh_, "output/point", 1);
+      pub_pose_array_ = advertise<geometry_msgs::PoseArray>(*pnh_, "output/pose_array", 1);
     }
+
+    onInitPostProcess();
   }
 }
 

@@ -1,8 +1,15 @@
 #!/usr/bin/env python
 
 import argparse
+from distutils.version import LooseVersion
 import multiprocessing
 import os.path as osp
+import sys
+
+try:
+    import chainer
+except:
+    print('### Failed to import chainer')
 
 import jsk_data
 
@@ -91,11 +98,61 @@ def main():
     )
 
     # node_scripts/fcn_object_segmentation.py
+    # ref: https://github.com/wkentaro/fcn#training
     download_data(
         pkg_name=PKG,
-        path='trained_data/fcn8s_from_caffe.chainermodel',
-        url = 'https://drive.google.com/uc?id=0B9P1L--7Wd2vTXU0QzUwSkVwOFk',
-        md5 = 'a1083db5a47643b112af69bfa59954f9',
+        path='trained_data/fcn8s_voc.npz',
+        url = 'https://drive.google.com/uc?id=0B9P1L--7Wd2vWG5MeUEwWmxudU0',
+        md5 = '75128c0e175767fc82a7d4f1e21f4009',
+    )
+
+    # node_scripts/vgg16_object_recognition.py
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/bvlc_vgg16.chainermodel',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vSlFjQlJFQjM5TEk',
+        md5='292e6472062392f5de02ef431bba4a48',
+    )
+
+    # node_scripts/alexnet_object_recognition.py
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/bvlc_alexnet.chainermodel',
+        url='https://drive.google.com/uc?id=0B5DV6gwLHtyJZkd1ZTRiNUdrUXM',
+        md5='2175620a2237bbd33e35bf38867d84b2',
+    )
+
+    # node_scripts/people_pose_estimation_2d.py
+    path = 'trained_data/pose_estimation_2d_chainermodel.pkl'
+    if not 'chainer' in sys.modules or LooseVersion(chainer.__version__) >= LooseVersion('2.0.0'):
+        # created on chainer v2.0.0
+        download_data(
+            pkg_name=PKG,
+            path=path,
+            url='https://drive.google.com/uc?id=0B_NiLAzvehC9R2stRmQyM3ZiVjQ',
+            md5='587933c2c0adf335ebed0486c183541f',
+        )
+    else:
+        # created on chainer v1.24.0
+        download_data(
+            pkg_name=PKG,
+            path=path,
+            url='https://drive.google.com/uc?id=0B4ysRIwB7GryNnhidGN3VVJkNVE',
+            md5='4d41e1ac80185849384a67a329746115',
+        )
+
+    # node_scripts/feature_based_object_recognition.py
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/resnet_lsvrc2012_mean.npy',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vTDV3ZzUyTlBFZE0',
+        md5='00431426c4fab22985885da0e2ff31b8',
+    )
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/resnet152_from_caffe.npz',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vQVBodlFsMnpGbkU',
+        md5='77fe66a229a2444688a21e3b63fa0661',
     )
 
 

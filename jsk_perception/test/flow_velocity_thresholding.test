@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_flow_velocity_thresholding.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_flow_velocity_thresholding"
+        name="test_flow_velocity_thresholding"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /flow_velocity_thresholding/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

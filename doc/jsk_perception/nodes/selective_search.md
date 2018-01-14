@@ -15,3 +15,9 @@ Segmentation result is published as `jsk_recognition_msgs/RectArray`
 * `~debug` (`sensor_msgs/Image`)
 
   Debug image
+
+## Sample
+
+```bash
+roslaunch jsk_perception sample_selective_search.launch
+```

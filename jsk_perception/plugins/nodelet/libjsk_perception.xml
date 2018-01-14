@@ -1,4 +1,12 @@
 <library path="lib/libjsk_perception">
+  <class name="jsk_perception/FilterMaskImageWithSize"
+         type="jsk_perception::FilterMaskImageWithSize"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/FlowVelocityThresholding"
+         type="jsk_perception::FlowVelocityThresholding"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/BoundingBoxToRect"
          type="jsk_perception::BoundingBoxToRect"
          base_class_type="nodelet::Nodelet">
@@ -57,6 +65,10 @@
   </class>
   <class name="jsk_perception/ConvexHullMaskImage"
          type="jsk_perception::ConvexHullMaskImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/ConcaveHullMaskImage"
+         type="jsk_perception::ConcaveHullMaskImage"
          base_class_type="nodelet::Nodelet">
   </class>
   <class name="jsk_perception/PolygonToMaskImage"
@@ -255,6 +267,10 @@
   </class>
   <class name="jsk_perception/ConsensusTracking"
          type="jsk_perception::ConsensusTracking"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_perception/DrawRects"
+         type="jsk_perception::DrawRects"
          base_class_type="nodelet::Nodelet">
   </class>
 </library>

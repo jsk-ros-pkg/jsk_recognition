@@ -99,7 +99,7 @@ namespace jsk_pcl_ros_utils
       boost::bind(&PlaneRejector::updateDiagnostics,
                   this,
                   _1));
-    
+    onInitPostProcess();
   }
 
   void PlaneRejector::subscribe()

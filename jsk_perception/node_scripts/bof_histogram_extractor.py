@@ -15,7 +15,7 @@ from sklearn.preprocessing import normalize
 import cv_bridge
 from jsk_recognition_msgs.msg import VectorArray
 from jsk_recognition_utils import decompose_descriptors_with_label
-from jsk_topic_tools import jsk_logdebug, jsk_loginfo, ConnectionBasedTransport
+from jsk_topic_tools import ConnectionBasedTransport
 import message_filters
 from posedetection_msgs.msg import Feature0D
 from sensor_msgs.msg import Image
@@ -29,7 +29,7 @@ class BoFHistogramExtractor(ConnectionBasedTransport):
         self.queue_size = rospy.get_param('~queue_size', 10)
 
         # load bag of features
-        jsk_loginfo('Loading BoF data')
+        rospy.loginfo('Loading BoF data')
         bof_data = rospy.get_param('~bof_data', None)
         if bof_data is None:
             quit()
@@ -44,7 +44,7 @@ class BoFHistogramExtractor(ConnectionBasedTransport):
                 self.bof.nn.n_jobs = 1
 
         self._pub = self.advertise('~output', VectorArray, queue_size=1)
-        jsk_loginfo('Initialized BoF histogram extractor')
+        rospy.loginfo('Initialized BoF histogram extractor')
 
     def subscribe(self):
         self._sub_feature = message_filters.Subscriber('~input', Feature0D)
@@ -58,7 +58,7 @@ class BoFHistogramExtractor(ConnectionBasedTransport):
             sync = message_filters.TimeSynchronizer(
                 [self._sub_feature, self._sub_label],
                 queue_size=self.queue_size)
-        jsk_logdebug('~approximate_sync: {}'.format(use_async))
+        rospy.logdebug('~approximate_sync: {}'.format(use_async))
         sync.registerCallback(self._apply)
 
     def unsubscribe(self):
@@ -73,7 +73,7 @@ class BoFHistogramExtractor(ConnectionBasedTransport):
         pos = np.array(feature_msg.positions)
         pos = pos.reshape((-1, 2))
         if label.sum() == 0:
-            jsk_logdebug('Skip image with only background label')
+            rospy.logdebug('Skip image with only background label')
             return
         decomposed = decompose_descriptors_with_label(
             descriptors=desc, positions=pos, label_img=label,

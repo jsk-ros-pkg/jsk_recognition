@@ -1,0 +1,16 @@
+<launch>
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_polygon_magnifier.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_polygon_magnifier"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="360" retry="2">
+    <rosparam>
+      topic_0: /polygon_magnifier_positive/output
+      timeout_0: 10
+      topic_1: /polygon_magnifier_negative/output
+      timeout_1: 10
+    </rosparam>
+  </test>
+</launch>

@@ -1,19 +1,18 @@
 <package>
   <name>jsk_perception</name>
-  <version>1.1.1</version>
+  <version>1.2.4</version>
 
-  <description>
-
-     jsk_perception
-
-  </description>
+  <description>ROS nodes and nodelets for 2-D image perception.</description>
   <author>Manabu Saito</author>
   <author email="ueda@jsk.t.u-tokyo.ac.jp">Ryohei Ueda</author>
   <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
   <maintainer email="ueda@jsk.t.u-tokyo.ac.jp">Ryohei Ueda</maintainer>
 
   <license>BSD</license>
-  <url>http://ros.org/wiki/jsk_perception</url>
+
+  <url type="repository">http://github.com/jsk-ros-pkg/jsk_recognition</url>
+  <url type="bugtracker">http://github.com/jsk-ros-pkg/jsk_recognition/issues</url>
+  <url type="website">http://jsk-docs.readthedocs.io/en/latest/jsk_recognition/doc/jsk_perception</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
@@ -78,6 +77,7 @@
   <!-- install chainer {{ -->
   <run_depend>python-h5py</run_depend>
   <run_depend>python-chainer-pip</run_depend>
+  <run_depend>python-chainercv-pip</run_depend>
   <!-- }} install chainer -->
   <run_depend>python-dlib</run_depend>  <!-- pip -->
   <!-- install fcn {{ -->
@@ -85,6 +85,7 @@
   <run_depend>python-fcn-pip</run_depend>  <!-- pip -->
   <!-- }} install fcn -->
   <run_depend>python-sklearn</run_depend>
+  <run_depend>python-yaml</run_depend>
   <run_depend>rosbag</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>roseus</run_depend>
@@ -92,6 +93,7 @@
   <run_depend>rospy</run_depend>
   <run_depend>rostopic</run_depend>
   <run_depend>rqt_gui</run_depend>
+  <run_depend>rviz</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>sound_play</run_depend>
   <run_depend>std_msgs</run_depend>

@@ -33,8 +33,13 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "jsk_pcl_ros/depth_image_creator.h"
+#include <cv_bridge/cv_bridge.h>
+#include <jsk_recognition_utils/pcl_ros_util.h>
 #include <jsk_topic_tools/rosparam_utils.h>
+#include <sensor_msgs/image_encodings.h>
+#include <sensor_msgs/point_cloud2_iterator.h>
+
+#include "jsk_pcl_ros/depth_image_creator.h"
 
 void jsk_pcl_ros::DepthImageCreator::onInit () {
   NODELET_INFO("[%s::onInit]", getName().c_str());
@@ -60,6 +65,10 @@ void jsk_pcl_ros::DepthImageCreator::onInit () {
   pnh_->param("info_throttle", info_throttle_, 0);
   info_counter_ = 0;
   pnh_->param("max_queue_size", max_queue_size_, 3);
+  // maybe below queue_size can always be 1,
+  // but we set max_queue_size_ for backward compatibility.
+  pnh_->param("max_pub_queue_size", max_pub_queue_size_, max_queue_size_);
+  pnh_->param("max_sub_queue_size", max_sub_queue_size_, max_queue_size_);
   // set transformation
   std::vector<double> trans_pos(3, 0);
   std::vector<double> trans_quat(4, 0); trans_quat[3] = 1.0;
@@ -74,9 +83,11 @@ void jsk_pcl_ros::DepthImageCreator::onInit () {
   fixed_transform.setOrigin(btp);
   fixed_transform.setRotation(btq);
 
-  pub_image_ = advertise<sensor_msgs::Image> (*pnh_, "output", max_queue_size_);
-  pub_cloud_ = advertise<PointCloud>(*pnh_, "output_cloud", max_queue_size_);
-  pub_disp_image_ = advertise<stereo_msgs::DisparityImage> (*pnh_, "output_disp", max_queue_size_);
+  pub_depth_ = advertise<sensor_msgs::Image> (*pnh_, "output", max_pub_queue_size_);
+  pub_image_ = advertise<sensor_msgs::Image> (*pnh_, "output_image", max_pub_queue_size_);
+  pub_cloud_ = advertise<PointCloud>(*pnh_, "output_cloud", max_pub_queue_size_);
+  pub_disp_image_ = advertise<stereo_msgs::DisparityImage> (*pnh_, "output_disp", max_pub_queue_size_);
+  
   if (use_service) {
     service_ = pnh_->advertiseService("set_point_cloud",
                                       &DepthImageCreator::service_cb, this);
@@ -87,13 +98,13 @@ void jsk_pcl_ros::DepthImageCreator::onInit () {
 void jsk_pcl_ros::DepthImageCreator::subscribe() {
   if (!use_service) {
     if (use_asynchronous) {
-      sub_as_info_ = pnh_->subscribe<sensor_msgs::CameraInfo> ("info", max_queue_size_,
+      sub_as_info_ = pnh_->subscribe<sensor_msgs::CameraInfo> ("info", max_sub_queue_size_,
                                                                &DepthImageCreator::callback_info, this);
-      sub_as_cloud_ = pnh_->subscribe<sensor_msgs::PointCloud2> ("input", max_queue_size_,
+      sub_as_cloud_ = pnh_->subscribe<sensor_msgs::PointCloud2> ("input", max_sub_queue_size_,
                                                                  &DepthImageCreator::callback_cloud, this);
     } else {
-      sub_info_.subscribe(*pnh_, "info", max_queue_size_);
-      sub_cloud_.subscribe(*pnh_, "input", max_queue_size_);
+      sub_info_.subscribe(*pnh_, "info", max_sub_queue_size_);
+      sub_cloud_.subscribe(*pnh_, "input", max_sub_queue_size_);
 
       if (use_approximate) {
         sync_inputs_a_ = boost::make_shared <message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<sensor_msgs::CameraInfo, sensor_msgs::PointCloud2> > > (max_queue_size_);
@@ -107,7 +118,7 @@ void jsk_pcl_ros::DepthImageCreator::subscribe() {
     }
   } else {
     // not continuous
-    sub_as_info_ = pnh_->subscribe<sensor_msgs::CameraInfo> ("info", max_queue_size_,
+    sub_as_info_ = pnh_->subscribe<sensor_msgs::CameraInfo> ("info", max_sub_queue_size_,
                                                              &DepthImageCreator::callback_info, this);
    
   }
@@ -159,11 +170,23 @@ void jsk_pcl_ros::DepthImageCreator::callback_info(const sensor_msgs::CameraInfo
 
 void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInfoConstPtr& info,
                                                     const sensor_msgs::PointCloud2ConstPtr& pcloud2) {
+  sensor_msgs::PointCloud2Ptr pcloud2_ptr(new sensor_msgs::PointCloud2(*pcloud2));
+  if (!jsk_recognition_utils::hasField("rgb", *pcloud2_ptr)) {
+    sensor_msgs::PointCloud2Modifier pc_mod(*pcloud2_ptr);
+    pc_mod.setPointCloud2Fields(4, "x", 1, sensor_msgs::PointField::FLOAT32,
+                                   "y", 1, sensor_msgs::PointField::FLOAT32,
+                                   "z", 1, sensor_msgs::PointField::FLOAT32,
+                                   "rgb", 1, sensor_msgs::PointField::FLOAT32);
+  }
+
   ROS_DEBUG("DepthImageCreator::publish_points");
-  if (!pcloud2)  return;
-  bool proc_cloud = true, proc_image = true, proc_disp = true;
+  if (!pcloud2_ptr)  return;
+  bool proc_cloud = true, proc_depth = true, proc_image = true, proc_disp = true;
   if ( pub_cloud_.getNumSubscribers()==0 ) {
     proc_cloud = false;
+  }
+  if ( pub_depth_.getNumSubscribers()==0 ) {
+    proc_depth = false;
   }
   if ( pub_image_.getNumSubscribers()==0 ) {
     proc_image = false;
@@ -171,7 +194,7 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
   if ( pub_disp_image_.getNumSubscribers()==0 ) {
     proc_disp = false;
   }
-  if( !proc_cloud && !proc_image && !proc_disp) return;
+  if( !proc_cloud && !proc_depth && !proc_image && !proc_disp) return;
 
   int width = info->width;
   int height = info->height;
@@ -188,11 +211,11 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
       transform = fixed_transform;
     } else {
       try {
-        tf_listener_->waitForTransform(pcloud2->header.frame_id,
+        tf_listener_->waitForTransform(pcloud2_ptr->header.frame_id,
                                        info->header.frame_id,
                                        info->header.stamp,
                                        ros::Duration(0.001));
-        tf_listener_->lookupTransform(pcloud2->header.frame_id,
+        tf_listener_->lookupTransform(pcloud2_ptr->header.frame_id,
                                       info->header.frame_id,
                                       info->header.stamp, transform);
       }
@@ -225,7 +248,7 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
   {
     // code here is dirty, some bag is in RangeImagePlanar
     PointCloud tpc;
-    pcl::fromROSMsg(*pcloud2, tpc);
+    pcl::fromROSMsg(*pcloud2_ptr, tpc);
 
     Eigen::Affine3f inv;
 #if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
@@ -245,37 +268,50 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
                                                    dummytrans); //sensorPose);
   }
 
-  cv::Mat mat(rangeImageP.height, rangeImageP.width, CV_32FC1);
-  float *tmpf = (float *)mat.ptr();
-  for(unsigned int i = 0; i < rangeImageP.height*rangeImageP.width; i++) {
-    tmpf[i] = rangeImageP.points[i].z;
+  // Create color and depth image from point cloud
+  cv::Mat color_mat = cv::Mat::zeros(rangeImageP.height, rangeImageP.width, CV_8UC3);
+  cv::Mat depth_mat(rangeImageP.height, rangeImageP.width, CV_32FC1);
+  depth_mat.setTo(std::numeric_limits<float>::quiet_NaN());
+  for (size_t i=0; i<pointCloud.size(); i++) {
+    Point pt = pointCloud[i];
+
+    int image_x;
+    int image_y;
+    rangeImageP.getImagePoint(pt.x, pt.y, pt.z, image_x, image_y);
+
+    if (!rangeImageP.isInImage(image_x, image_y)) {
+      continue;
+    }
+
+    pcl::PointWithRange pt_with_range = rangeImageP.getPoint(image_x, image_y);
+    depth_mat.at<float>(image_y, image_x) = pt_with_range.z;
+
+    if (!std::isnan(pt.x) && !std::isnan(pt.y) && !std::isnan(pt.z)) {
+      color_mat.at<cv::Vec3b>(image_y, image_x) = cv::Vec3b(pt.r, pt.g, pt.b);
+    }
   }
 
-  if(scale_depth != 1.0) {
-    cv::Mat tmpmat(info->height, info->width, CV_32FC1);
-    cv::resize(mat, tmpmat, cv::Size(info->width, info->height)); // LINEAR
-    //cv::resize(mat, tmpmat, cv::Size(info->width, info->height), 0.0, 0.0, cv::INTER_NEAREST);
-    mat = tmpmat;
+  if (scale_depth != 1.0) {
+    // LINEAR
+    cv::resize(color_mat, color_mat, cv::Size(info->width, info->height));
+    cv::resize(depth_mat, depth_mat, cv::Size(info->width, info->height));
   }
 
   if (proc_image) {
-    sensor_msgs::Image pubimg;
-    pubimg.header = info->header;
-    pubimg.width = info->width;
-    pubimg.height = info->height;
-    pubimg.encoding = "32FC1";
-    pubimg.step = sizeof(float)*info->width;
-    pubimg.data.resize(sizeof(float)*info->width*info->height);
-
-    // publish image
-    memcpy(&(pubimg.data[0]), mat.ptr(), sizeof(float)*info->height*info->width);
-    pub_image_.publish(boost::make_shared<sensor_msgs::Image>(pubimg));
+    pub_image_.publish(cv_bridge::CvImage(info->header,
+                                          sensor_msgs::image_encodings::RGB8,
+                                          color_mat).toImageMsg());
+  }
+  if (proc_depth) {
+    pub_depth_.publish(cv_bridge::CvImage(info->header,
+                                          sensor_msgs::image_encodings::TYPE_32FC1,
+                                          depth_mat).toImageMsg());
   }
 
   if(proc_cloud || proc_disp) {
     // publish point cloud
     pcl::RangeImagePlanar rangeImagePP;
-    rangeImagePP.setDepthImage ((float *)mat.ptr(),
+    rangeImagePP.setDepthImage ((float *)depth_mat.ptr(),
                                 width, height,
                                 cx, cy, fx, fy);
 #if PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION >= 7
@@ -283,9 +319,24 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
 #else
     rangeImagePP.header = info->header;
 #endif
-    if(proc_cloud) {
-      pub_cloud_.publish(boost::make_shared<pcl::PointCloud<pcl::PointWithRange > >
-                         ( (pcl::PointCloud<pcl::PointWithRange>)rangeImagePP) );
+    if (proc_cloud) {
+      PointCloud cloud_out;
+      cloud_out.header = rangeImagePP.header;
+      cloud_out.resize(rangeImagePP.points.size());
+      for (int y = 0; y < (int)rangeImagePP.height; y++ ) {
+        for (int x = 0; x < (int)rangeImagePP.width; x++ ) {
+          pcl::PointWithRange pt_from = rangeImagePP.points[rangeImagePP.width * y + x];
+          cv::Vec3b rgb = color_mat.at<cv::Vec3b>(y, x);
+          Point pt_to = cloud_out[rangeImagePP.width * y + x];
+          pt_to.x = pt_from.x;
+          pt_to.y = pt_from.y;
+          pt_to.z = pt_from.z;
+          pt_to.r = rgb[0];
+          pt_to.g = rgb[1];
+          pt_to.b = rgb[2];
+        }
+      }
+      pub_cloud_.publish(boost::make_shared<PointCloud>(cloud_out));
     }
 
     if(proc_disp) {
@@ -317,6 +368,7 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
       pub_disp_image_.publish(boost::make_shared<stereo_msgs::DisparityImage> (disp));
     }
   }
-}
+}  // namespace jsk_pcl_ros
 
+#include <pluginlib/class_list_macros.h>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::DepthImageCreator, nodelet::Nodelet);

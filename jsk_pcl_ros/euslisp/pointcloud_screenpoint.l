@@ -113,7 +113,7 @@
 		     (normalize-vector cv)))
    ;; camera coordinates from base_footprint
 	 (cam-cds (send *tfl* :lookup-transform
-			"base_footprint" frame (ros::time 0)))
+                    *base-frame* frame (ros::time 0)))
    base-cds)  ;; (let*)
     (cond ((null frame)
 	   (ros::ros-warn "detected service fail")
@@ -151,6 +151,8 @@
   (setq *sensor_topic* (ros::get-param "~sensor_topic"))
   ;; service of PointcloudScreenpointNodelet
   (setq *ray_srv* (ros::get-param "~ray_srv"))
+  ;; set base frame
+  (setq *base-frame* (ros::get-param "~base_frame" "base_footprint"))
   ;; to store previous coords
   (setq *cds* (make-coords))
 

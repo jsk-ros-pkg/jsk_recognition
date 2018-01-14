@@ -27,6 +27,13 @@ def main():
         md5='a4e58778ba12d3f26304127f6be82897',
     )
 
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/arc2017_4objects.bag',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vakpvU0wtMFNCTkk',
+        md5='2c3af4482cd2e0ee95b58848ae48afaf',
+    )
+
 
 if __name__ == '__main__':
     main()

@@ -13,3 +13,9 @@ Merges the voxels initially segmented using SuperVoxel Segmentation into high le
 * `~output/indices` (`jsk_recognition_msgs/ClusterPointIndices`)
 
   Output is set of merged voxel indices
+
+## Sample
+
+```bash
+roslaunch jsk_pcl_ros sample_convex_connected_voxels.launch
+```

@@ -81,43 +81,45 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();
-    pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
-    pcl::fromROSMsg(*cloud_msg, *cloud);
-    pcl::SupervoxelClustering<PointT> super(voxel_resolution_,
-                                            seed_resolution_,
-                                            use_transform_);
-    super.setInputCloud(cloud);
-    super.setColorImportance(color_importance_);
-    super.setSpatialImportance(spatial_importance_);
-    super.setNormalImportance(normal_importance_);
-    std::map<uint32_t, pcl::Supervoxel<PointT>::Ptr > supervoxel_clusters;
-    super.extract(supervoxel_clusters);
-    pcl::PointCloud<PointT>::Ptr output (new pcl::PointCloud<PointT>);
-    std::vector<pcl::PointIndices> all_indices;
-    for (std::map<uint32_t, pcl::Supervoxel<PointT>::Ptr >::iterator
-           it = supervoxel_clusters.begin();
-         it != supervoxel_clusters.end();
-         ++it) {
-      pcl::Supervoxel<PointT>::Ptr super_voxel = it->second;
-      pcl::PointCloud<PointT>::Ptr super_voxel_cloud = super_voxel->voxels_;
-      pcl::PointIndices indices;
-      // add indices...
-      for (size_t i = 0; i < super_voxel_cloud->size(); i++) {
-        indices.indices.push_back(i + output->points.size());
+    if (cloud_msg->data.size() > 0) {
+      pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
+      pcl::fromROSMsg(*cloud_msg, *cloud);
+      pcl::SupervoxelClustering<PointT> super(voxel_resolution_,
+                                              seed_resolution_,
+                                              use_transform_);
+      super.setInputCloud(cloud);
+      super.setColorImportance(color_importance_);
+      super.setSpatialImportance(spatial_importance_);
+      super.setNormalImportance(normal_importance_);
+      std::map<uint32_t, pcl::Supervoxel<PointT>::Ptr > supervoxel_clusters;
+      super.extract(supervoxel_clusters);
+      pcl::PointCloud<PointT>::Ptr output (new pcl::PointCloud<PointT>);
+      std::vector<pcl::PointIndices> all_indices;
+      for (std::map<uint32_t, pcl::Supervoxel<PointT>::Ptr >::iterator
+             it = supervoxel_clusters.begin();
+           it != supervoxel_clusters.end();
+           ++it) {
+        pcl::Supervoxel<PointT>::Ptr super_voxel = it->second;
+        pcl::PointCloud<PointT>::Ptr super_voxel_cloud = super_voxel->voxels_;
+        pcl::PointIndices indices;
+        // add indices...
+        for (size_t i = 0; i < super_voxel_cloud->size(); i++) {
+          indices.indices.push_back(i + output->points.size());
+        }
+        all_indices.push_back(indices);
+        *output = *output + *super_voxel_cloud; // append
       }
-      all_indices.push_back(indices);
-      *output = *output + *super_voxel_cloud; // append
+      sensor_msgs::PointCloud2 ros_cloud;
+      pcl::toROSMsg(*output, ros_cloud);
+      ros_cloud.header = cloud_msg->header;
+      jsk_recognition_msgs::ClusterPointIndices ros_indices;
+      ros_indices.cluster_indices = pcl_conversions::convertToROSPointIndices(
+        all_indices,
+        cloud_msg->header);
+      ros_indices.header = cloud_msg->header;
+      pub_cloud_.publish(ros_cloud);
+      pub_indices_.publish(ros_indices);
     }
-    sensor_msgs::PointCloud2 ros_cloud;
-    pcl::toROSMsg(*output, ros_cloud);
-    ros_cloud.header = cloud_msg->header;
-    jsk_recognition_msgs::ClusterPointIndices ros_indices;
-    ros_indices.cluster_indices = pcl_conversions::convertToROSPointIndices(
-      all_indices,
-      cloud_msg->header);
-    ros_indices.header = cloud_msg->header;
-    pub_cloud_.publish(ros_cloud);
-    pub_indices_.publish(ros_indices);
   }
 
   void SupervoxelSegmentation::configCallback (Config &config, uint32_t level)

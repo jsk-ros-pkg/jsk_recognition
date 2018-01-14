@@ -117,7 +117,8 @@
                              (marker-life 30) (speak-name)
                              (detection-topic *detection-topic*)
                              ((:target-object target-obj) (make-cube 60 60 60)))
-  (let ((tgt-cds (send target-obj :copy-worldcoords)))
+  (let ((tgt-cds (send target-obj :copy-worldcoords))
+        (tgt-name (send target-obj :name)))
     (send target-obj :reset-coords)
     (setf (get target-obj :type) atype)
     (when speak-name
@@ -189,6 +190,7 @@
                       (speak-jp (format nil "I have found ~a." (send target-obj :speak-name))))
                      (t (speak-jp (format nil "~aが見つかりました。" (send target-obj :speak-name)))))
                   (speak-jp (format nil "~a が みつかりました" (send target-obj :speak-name)))))
+              (send target-obj :name tgt-name)
               (return-from check-detection target-obj))
               (t
                (ros::ros-info (format nil "no - obj-type(~a)" (send target-obj :name)))
@@ -214,6 +216,7 @@
           (send target-obj :reset-coords)
           (send target-obj :transform tgt-cds)
           (send *ri* :ros-wait 0.0) ;; attention-check ...
+          (send target-obj :name tgt-name)
           (return-from check-detection nil))
         (send *ri* :ros-wait 0.05 :spin-self t
               :func-before-throw #'(lambda (sl) (stop-detection-interface-subscribe detection-topic))) ;; attention-check ...

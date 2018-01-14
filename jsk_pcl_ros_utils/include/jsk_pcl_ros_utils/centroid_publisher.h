@@ -37,6 +37,7 @@
 #define JSK_PCL_ROS_UTILS_CENTROID_PUBLISHER_H_
 
 // ros
+#include <jsk_recognition_msgs/PolygonArray.h>
 #include <ros/ros.h>
 #include <ros/names.h>
 #include <sensor_msgs/PointCloud2.h>
@@ -61,12 +62,15 @@ namespace jsk_pcl_ros_utils
     virtual void subscribe();
     virtual void unsubscribe();
     virtual void extract(const sensor_msgs::PointCloud2ConstPtr &input);
+    virtual void extractPolygons(const jsk_recognition_msgs::PolygonArray::ConstPtr &input);
     
-    ros::Subscriber sub_input_;
+    ros::Subscriber sub_cloud_;
+    ros::Subscriber sub_polygons_;
     tf::TransformBroadcaster br_;
     std::string frame_;
     bool publish_tf_;
     ros::Publisher pub_pose_;
+    ros::Publisher pub_pose_array_;
     ros::Publisher pub_point_;
   private:
   };

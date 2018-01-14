@@ -30,15 +30,15 @@
     </rosparam>
   </node>
 
-  <node name="draw_rect_array"
-        pkg="jsk_perception" type="draw_rect_array.py">
+  <node name="draw_rects"
+        pkg="jsk_perception" type="draw_rects">
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
-    <remap from="~input/rect_array" to="selective_search/output" />
+    <remap from="~input/rects" to="selective_search/output" />
   </node>
-  <node name="draw_rect_array_filtered"
-        pkg="jsk_perception" type="draw_rect_array.py">
+  <node name="draw_rects_filtered"
+        pkg="jsk_perception" type="draw_rects">
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
-    <remap from="~input/rect_array" to="rect_array_actual_size_filter/output" />
+    <remap from="~input/rects" to="rect_array_actual_size_filter/output" />
   </node>
   <node name="binpack_rect_array"
         pkg="jsk_perception" type="binpack_rect_array.py">

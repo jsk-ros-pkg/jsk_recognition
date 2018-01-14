@@ -1,0 +1,12 @@
+<launch>
+  <arg name="test_mode" default="false" />
+  <arg name="launch_openni" default="false" />
+  <arg name="INPUT_IMAGE" default="/camera/rgb/image_rect_color" />
+  <arg name="INPUT_DEPTH_IMAGE" default="/camera/depth_registered/hw_registered/image_rect_raw" />
+  <arg name="INPUT_CAMERA_INFO" default="/camera/rgb/camera_info" />
+
+  <include file="$(find jsk_perception)/sample/include/play_rosbag_people.xml" />
+
+  <include file="$(find jsk_perception)/launch/face_pose_estimation.launch"
+           pass_all_args="true"/>
+</launch>

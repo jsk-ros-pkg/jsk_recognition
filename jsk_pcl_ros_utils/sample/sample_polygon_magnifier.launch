@@ -1,0 +1,37 @@
+<launch>
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_recognition_utils)/sample/sample_polygon_array_publisher.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <node name="polygon_magnifier_positive"
+        pkg="jsk_pcl_ros_utils" type="polygon_magnifier">
+    <remap from="~input" to="polygon_array_publisher/output" />
+    <rosparam>
+      magnify_distance: 1.0
+    </rosparam>
+  </node>
+
+  <node name="polygon_magnifier_negative"
+        pkg="jsk_pcl_ros_utils" type="polygon_magnifier">
+    <remap from="~input" to="polygon_array_publisher/output" />
+    <rosparam>
+      magnify_distance: -1.0
+    </rosparam>
+  </node>
+
+
+  <node name="polygon_magnifier_scale"
+        pkg="jsk_pcl_ros_utils" type="polygon_magnifier">
+    <remap from="~input" to="polygon_array_publisher/output" />
+    <rosparam>
+      use_scale_factor: true
+      magnify_scale_factor: 0.3
+    </rosparam>
+  </node>
+
+  <node if="$(arg gui)"
+        name="rviz" pkg="rviz" type="rviz"
+        args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_polygon_magnifier.rviz" />
+</launch>

@@ -1,17 +1,28 @@
 <launch>
 
   <arg name="gui" default="true" />
+  <arg name="USE_SAMPLE_DATA" default="true" />
 
   <param name="/use_sim_time" value="true" />
-  <node name="rosbag_play"
+  <node name="rosbag_play"  if="$(arg USE_SAMPLE_DATA)"
         pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros)/sample/data/2016-10-29-17-05-44_tabletop-coffee-cup/tabletop-coffee-cup.bag --clock --loop">
-  </node>
+        args="$(find jsk_pcl_ros)/sample/data/2017-06-19-19-34-18_tabletop_coffeecup.bag --clock --loop" />
 
   <arg name="INPUT_CLOUD" value="/camera/depth/points" />
 
-  <node name="octree_voxel_grid"
-        pkg="jsk_pcl_ros" type="octree_voxel_grid">
+  <arg name="manager" value="octree_voxel_manager" />
+  <node name="$(arg manager)" pkg="nodelet" type="nodelet" args="manager" />
+
+  <node if="$(arg USE_SAMPLE_DATA)"
+        pkg="nodelet" type="nodelet" name="depth_to_points"
+        args="load depth_image_proc/point_cloud_xyz $(arg manager)">
+    <remap from="camera_info" to="/camera/depth/camera_info" />
+    <remap from="image_rect" to="/camera/depth/image_rect_raw"/>
+    <remap from="points" to="/camera/depth/points" />
+  </node>
+
+  <node name="octree_voxel_grid" pkg="nodelet"
+        type="nodelet" args="load jsk_pcl/OctreeVoxelGrid $(arg manager)">
     <remap from="~input" to="$(arg INPUT_CLOUD)" />
     <rosparam>
       resolution: 0.03

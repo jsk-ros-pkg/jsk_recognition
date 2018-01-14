@@ -1,0 +1,38 @@
+<launch>
+
+  <node name="apply_mask_image"
+        pkg="jsk_perception" type="apply_mask_image">
+    <remap from="~input" to="image_publisher/output" />
+    <remap from="~input/mask" to="hsv_color_filter/image" />
+    <rosparam>
+      clip: false
+    </rosparam>
+  </node>
+
+  <node name="image_view_apply_mask"
+        pkg="image_view" type="image_view">
+    <remap from="image" to="apply_mask_image/output" />
+  </node>
+
+  <!-- !!! ADVACED !!!! -->
+
+  <node name="bounding_object_mask_image"
+        pkg="jsk_perception" type="bounding_object_mask_image">
+    <remap from="~input" to="hsv_color_filter/image" />
+  </node>
+
+  <node name="apply_mask_image_better"
+        pkg="jsk_perception" type="apply_mask_image">
+    <remap from="~input" to="image_publisher/output" />
+    <remap from="~input/mask" to="bounding_object_mask_image/output" />
+    <rosparam>
+      clip: false
+    </rosparam>
+  </node>
+
+  <node name="image_view_apply_mask_better"
+        pkg="image_view" type="image_view">
+    <remap from="image" to="apply_mask_image_better/output" />
+  </node>
+
+</launch>

@@ -2,12 +2,11 @@
   <node pkg="jsk_pcl_ros" type="kinfu" name="kinfu" output="screen">
     <remap from="~input/depth" to="/multisense/depth" />
     <remap from="~input/color" to="/multisense/left/image_rect_color" />
-    <remap from="~input/info" to="/multisense/left/camera_info" />
+    <remap from="~input/camera_info" to="/multisense/left/camera_info" />
     <rosparam>
-      tsdf_trunc_dist: 0.03
-      icp_dist_trans: 0.1
-      icp_dist_rot: 20
-      camera_movement_thre: 0.001
+      auto_reset: true
+      slam: true
+      integrate_color: true
     </rosparam>
   </node>
 </launch>

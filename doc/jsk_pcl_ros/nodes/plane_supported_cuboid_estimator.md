@@ -100,3 +100,9 @@ to confirm likelihood function behaves as expected.
   Enable `~init_global_orientation_yaw_mean` and `~init_global_orientation_yaw_variance`
   to decide intial particle states.
   
+
+## Sample
+
+```bash
+roslaunch jsk_pcl_ros sample_plane_supported_cuboid_estimator.launch
+```

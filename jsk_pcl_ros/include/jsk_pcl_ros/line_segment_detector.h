@@ -37,6 +37,8 @@
 #ifndef JSK_PCL_ROS_LINE_SEGMENT_DETECTOR_H_
 #define JSK_PCL_ROS_LINE_SEGMENT_DETECTOR_H_
 
+#include <pcl/segmentation/sac_segmentation.h>
+
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
@@ -137,6 +139,7 @@ namespace jsk_pcl_ros
     message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_indices_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
+    boost::recursive_mutex config_mutex_;
 
     ////////////////////////////////////////////////////////
     // parameters
@@ -147,6 +150,9 @@ namespace jsk_pcl_ros
     int min_indices_;
     double min_length_;
     double line_width_;
+
+    pcl::SACSegmentation<PointT> seg_;
+
   private:
     
   };

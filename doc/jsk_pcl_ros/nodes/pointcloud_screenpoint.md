@@ -30,7 +30,7 @@ It retrieves 3-D environment as pointcloud.
    Only x and y fileds are used and the header frame_id is ignored.
    If `~use_sync` parameter is set `True`, `~points` and `~point` are synchronized.
 
-* `~polygon` (`geometry_msgs/PolygonStamped`):
+* `~rect` (`geometry_msgs/PolygonStamped`):
 
    Input rectangular region on image local coordinates and this topic is enabled only if `~use_rect` parameter is set `True`.
    Only x and y fields are used and the header frame_id is ignored.
@@ -55,11 +55,11 @@ It retrieves 3-D environment as pointcloud.
 * `~output` (`sensor_msgs/PointCloud`):
 
    The topic to be used to publish series of points as a result of screenpoint.
-* `~output_poly` (`geometry_msgs/PolygonStamped`)
+* `~output_polygon` (`geometry_msgs/PolygonStamped`):
 
-   Projected points of `~poly`.
+   Projected points of `~rect` or `~poly`.
 ## Advertising Servicies
-* `~screen_to_point` (`jsk_pcl_ros::TransformScreenpoint`)
+* `~screen_to_point` (`jsk_pcl_ros::TransformScreenpoint`):
 
    ROS Service interface to convert (u, v) image coordinate into 3-D point.
 

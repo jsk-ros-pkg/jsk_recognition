@@ -1,9 +1,15 @@
 <launch>
+  <arg name="INPUT" default="/multisense/left/image_rect_color" />
+  <arg name="DEBUG" default="false" />
+
   <node pkg="image_view" type="image_view" name="original_view">
-    <remap from="image" to="/multisense/left/image_rect_color" />
+    <remap from="image" to="$(arg INPUT)" />
   </node>
-  <node pkg="jsk_perception" type="slic_super_pixels" name="slic_super_pixels">
-    <remap from="image" to="/multisense/left/image_rect_color" />
+  <node pkg="jsk_perception" type="slic_super_pixels" name="slic_super_pixels" >
+    <remap from="image" to="$(arg INPUT)" />
+    <param name="publish_debug_images" value="$(arg DEBUG)" />
+    <param name="number_of_super_pixels" value="800" />
+    <param name="weight" value="40" />
   </node>
   <node pkg="jsk_perception" type="colorize_labels" name="colorize_labels"
         output="screen">
@@ -12,7 +18,7 @@
   <node pkg="image_view" type="image_view" name="label_view">
     <remap from="image" to="colorize_labels/output" />
   </node>
-  <node pkg="image_view" type="image_view" name="debug_view">
+  <node pkg="image_view" type="image_view" name="debug_view" if="$(arg DEBUG)" >
     <remap from="image" to="slic_super_pixels/debug" />
   </node>
 </launch>

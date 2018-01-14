@@ -36,9 +36,25 @@ Parameters
       </rosparam>
     </node>
 
-* ``no_sync`` (type: ``Bool``, optional)
+* ``no_sync`` (type: ``Bool``, default: ``False``)
 
   set ``no_sync`` parameter true if you do not want to synchronize timestamps of ``input_topics``
+
+
+* ``draw_topic_name`` (type: ``Bool``, default: ``False``)
+
+  Draw topic name on each image.
+
+* ``font_scale`` (type: ``Float``, default: ``4``)
+
+  Font size to draw topic names.
+
+* ``shape`` (type: ``FloatArray``, default: ``None``)
+
+  Tile shape like ``[2, 4]`` in [Y, X] order.
+  If ``None``, shape is automatically decided to be square
+  as much as possible.
+
 
 CLI
 ---

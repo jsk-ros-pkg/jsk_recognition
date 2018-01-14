@@ -79,6 +79,11 @@ namespace jsk_perception
     boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();
     if (camera_info_) {
+      if (polygon_msg->header.frame_id != camera_info_->header.frame_id) {
+        NODELET_ERROR("frame_id of polygon (%s) and camera (%s) are not same.",
+                      polygon_msg->header.frame_id.c_str(), camera_info_->header.frame_id.c_str());
+      }
+
       image_geometry::PinholeCameraModel model;
       model.fromCameraInfo(camera_info_);
       cv::Mat mask_image = cv::Mat::zeros(camera_info_->height,

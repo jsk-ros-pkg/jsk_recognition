@@ -64,7 +64,9 @@ namespace jsk_pcl_ros_utils
     ros::Publisher pub_;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
+    bool use_scale_factor_;
     double magnify_distance_;
+    double magnify_scale_factor_;
   private:
     
   };

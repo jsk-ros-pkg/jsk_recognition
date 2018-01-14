@@ -62,6 +62,8 @@ namespace jsk_pcl_ros_utils
     axis_[2] = axis[2];
     tf_listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
     pub_ = advertise<jsk_recognition_msgs::PolygonArray>(*pnh_, "output", 1);
+
+    onInitPostProcess();
   }
 
   void PolygonArrayFootAngleLikelihood::subscribe()
@@ -85,6 +87,7 @@ namespace jsk_pcl_ros_utils
     const jsk_recognition_msgs::PolygonArray::ConstPtr& msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
     jsk_recognition_msgs::PolygonArray new_msg(*msg);
 
     try

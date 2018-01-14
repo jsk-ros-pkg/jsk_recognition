@@ -1,0 +1,37 @@
+<launch>
+  <node name="simulate"
+        pkg="jsk_pcl_ros" type="simulate_primitive_shape_on_plane.py" />
+
+  <node name="tf_pub" pkg="tf" type="static_transform_publisher"
+        args="0 0 0 0 0 0 root camera_rgb_optical_frame 10" />
+
+  <node name="euclidean_clustering" pkg="jsk_pcl_ros" type="euclidean_clustering">
+    <remap from="~input" to="simulate/output/cloud" />
+  </node>
+
+  <node name="normal_estimation" pkg="jsk_pcl_ros" type="normal_estimation_omp">
+    <remap from="~input" to="simulate/output/cloud" />
+  </node>
+
+  <node name="primtive_shape_classifier" pkg="jsk_pcl_ros" type="primitive_shape_classifier">
+    <remap from="~input" to="simulate/output/cloud" />
+    <remap from="~input/normal" to="normal_estimation/output" />
+    <remap from="~input/indices" to="euclidean_clustering/output" />
+    <remap from="~input/polygons" to="simulate/output/plane" />
+    <rosparam>
+      box_threshold: 0.3
+      circle_threshold: 0.5
+    </rosparam>
+  </node>
+
+  <test test-name="test_primitive_shape_classifier" pkg="rostest" type="hztest"
+        time-limit="20">
+    <rosparam>
+      topic: /primtive_shape_classifier/output
+      hz: 10
+      hzerror: 10
+      test_duration: 5.0
+      wait_time: 10.0
+    </rosparam>
+  </test>
+</launch>

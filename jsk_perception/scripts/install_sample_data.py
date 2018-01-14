@@ -28,6 +28,35 @@ def main():
         ],
     )
 
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/2017-06-20-12-00-00_people_images_in_lab.bag.tgz',
+        url='https://drive.google.com/uc?id=0B_NiLAzvehC9Yzl4YzB1WnlFcXM',
+        md5='0a397a2ff14c07954cc0b9178e33600d',
+        extract=True,
+    )
+
+    # sample/sample_regional_feature_based_object_recognition.launch
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/apc2016_object_imgs_and_masks.bag',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2veVJ4N21tVlB3MGs',
+        md5='fc03e326e0b46f6ecdf9287ddc5f0f68',
+    )
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/apc2016_object_imgs_and_masks_templates.tgz',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vX0NqcXNGYXEzUlE',
+        md5='df30d3bf32fda521f4c888c83a394fe5',
+        extract=True,
+    )
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/resnet_features_apc2016.npz',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vM3hhOTBGNjA1eTQ',
+        md5='ff7f6a90090d152e2c43bf5057d4e853',
+    )
+
 
 if __name__ == '__main__':
     main()

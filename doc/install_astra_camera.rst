@@ -3,6 +3,25 @@ Install Astra camera
 
 - Homepage: https://orbbec3d.com/
 
+Spec
+----
+
++------------------+------------------+------------------+------------------+------------------+------------------+
+| Spec/Device      | Astra            | Astra Mini       | Astra S          | Astra Mini S     | Astra Pro        |
++==================+==================+==================+==================+==================+==================+
+| Optimized Range  | 0.6 - 5.0m       | 0.6 - 5.0m       | 0.4 - 2.0m       | 0.35 - 1.0m      | 0.6 - 5.0m       |
++------------------+------------------+------------------+------------------+------------------+------------------+
+| RGB Image Size   | | HD   (10FPS)   | | HD   (10FPS)   | | HD   (10FPS)   | | HD   (10FPS)   | | HD   (30FPS)   |
+|                  | | VGA  (30FPS)   | | VGA  (30FPS)   | | VGA  (30FPS)   | | VGA  (30FPS)   | | VGA  (30FPS)   |
+|                  | | QVGA (30FPS)   | | QVGA (30FPS)   | | QVGA (30FPS)   | | QVGA (30FPS)   | | QVGA (30FPS)   |
++------------------+------------------+------------------+------------------+------------------+------------------+
+| Depth Image Size | | VGA  (30FPS)   | | VGA  (30FPS)   | | VGA  (30FPS)   | | VGA  (30FPS)   | | VGA  (30FPS)   |
+|                  | | QVGA (30FPS)   | | QVGA (30FPS)   | | QVGA (30FPS)   | | QVGA (30FPS)   | | QVGA (30FPS)   |
++------------------+------------------+------------------+------------------+------------------+------------------+
+| Field of View    | | 60°   horiz    |                  | | 60°   horiz    |                  | | 60°   horiz    |
+|                  | | 49.5° vert     |                  | | 49.5° vert     |                  | | 49.5° vert     |
+|                  | | 73°   diagonal |                  | | 73°   diagonal |                  | | 73°   diagonal |
++------------------+------------------+------------------+------------------+------------------+------------------+
 
 Install SDK && Try Sample
 -------------------------
@@ -60,13 +79,13 @@ Then, edit ``/usr/lib/pkgconfig/libopenni2.pc`` to be like below::
 .. code-block:: bash
 
   cd ~/ros/indigo/src
-  wstool set ros-drivers/openni2_camera https://github.com/ros-drivers/openni2_camera.git --git -vindigo-devel -y -u
+  wstool set ros-drivers/openni2_camera https://github.com/ros-drivers/openni2_camera.git --git -v indigo-devel -y -u
 
   cd ros-drivers/openni2_camera
-  source /opt/ros/indigo/setup.zsh
+  source /opt/ros/indigo/setup.bash
   catkin bt
 
-  source ~/ros/indigo/setup.zsh
+  source ~/ros/indigo/devel/setup.bash
   roslaunch openni2_launch openni2.launch
 
 
@@ -75,16 +94,16 @@ Topics per Devices
 
 Below are tested with ``roslaunch openni2_launch openni2.launch``.
 
-+------------------------------------+-------+---------+-----------+
-| Topics/Device                      | Astra | Astra S | Astra Pro |
-+====================================+=======+=========+===========+
-| /camera/rgb/image_raw              | o     | o       | ?         |
-+------------------------------------+-------+---------+-----------+
-| /camera/depth/image_raw            | o     | o       | ?         |
-+------------------------------------+-------+---------+-----------+
-| /camera/depth/points               | o     | o       | ?         |
-+------------------------------------+-------+---------+-----------+
-| /camera/depth_registered/image_raw | o     | o       | ?         |
-+------------------------------------+-------+---------+-----------+
-| /camera/depth_registered/points    | x     | o       | ?         |
-+------------------------------------+-------+---------+-----------+
++------------------------------------+-------+---------+-----------+--------------+
+| Topics/Device                      | Astra | Astra S | Astra Pro | Astra Mini S |
++====================================+=======+=========+===========+==============+
+| /camera/rgb/image_raw              | o     | o       | ?         | o            |
++------------------------------------+-------+---------+-----------+--------------+
+| /camera/depth/image_raw            | o     | o       | ?         | o            |
++------------------------------------+-------+---------+-----------+--------------+
+| /camera/depth/points               | o     | o       | ?         | o            |
++------------------------------------+-------+---------+-----------+--------------+
+| /camera/depth_registered/image_raw | o     | o       | ?         | o            |
++------------------------------------+-------+---------+-----------+--------------+
+| /camera/depth_registered/points    | x     | o       | ?         | o            |
++------------------------------------+-------+---------+-----------+--------------+

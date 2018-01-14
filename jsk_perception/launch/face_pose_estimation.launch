@@ -1,0 +1,66 @@
+<launch>
+  <arg name="test_mode" default="false" />
+  <arg name="gui" default="true" unless="$(arg test_mode)" />
+  <arg name="gui" default="false"    if="$(arg test_mode)" />
+  <arg name="GPU" default="0" unless="$(arg test_mode)"  />
+  <arg name="GPU" default="-1"    if="$(arg test_mode)" />
+  <arg name="model_path" default="auto" />
+  <arg name="launch_openni" default="true" unless="$(arg test_mode)"/>
+  <arg name="launch_openni" default="true"     if="$(arg test_mode)"/>
+  <arg name="CAMERA_NS" default="camera" />
+  <arg name="INPUT_IMAGE" default="/$(arg CAMERA_NS)/rgb/image_rect_color" />
+  <arg name="INPUT_DEPTH_IMAGE" default="/$(arg CAMERA_NS)/depth_registered/image" />
+  <arg name="INPUT_CAMERA_INFO" default="/$(arg CAMERA_NS)/rgb/camera_info" />
+
+  <include file="$(find openni2_launch)/launch/openni2.launch"
+           if="$(arg launch_openni)">
+    <arg name="depth_registration" value="true" />
+    <arg name="sw_registered_processing" value="false" />
+    <arg name="hw_registered_processing" value="true" />
+  </include>
+
+  <node name="people_pose_estimation_2d"
+        pkg="jsk_perception" type="people_pose_estimation_2d.py">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/info" to="$(arg INPUT_CAMERA_INFO)" />
+    <remap from="~input/depth" to="$(arg INPUT_DEPTH_IMAGE)" />
+    <rosparam subst_value="true">
+      gpu: $(arg GPU)
+      model_file: $(find jsk_perception)/trained_data/pose_estimation_2d_chainermodel.pkl
+      with_depth: true
+      scales: [0.38]
+      stride: 8
+    </rosparam>
+  </node>
+
+  <node name="face_pose_estimation"
+        pkg="jsk_perception" type="face_pose_estimation.py"
+        output="screen">
+    <remap from="~input" to="$(arg INPUT_IMAGE)"/>
+    <remap from="~input/pose_2d" to="people_pose_estimation_2d/pose_2d" />
+    <remap from="~input/pose" to="people_pose_estimation_2d/pose" />
+    <rosparam subst_value="true">
+      gpu: $(arg GPU)
+    </rosparam>
+    <param name="model_path" value="$(arg model_path)" unless="$(arg test_mode)" />
+  </node>
+
+  <node name="draw_rects"
+        pkg="jsk_perception" type="draw_rects">
+    <remap from="~input" to="$(arg INPUT_IMAGE)"/>
+    <remap from="~input/rects" to="face_pose_estimation/output/rects" />
+    <remap from="~input/class" to="face_pose_estimation/output/gender" />
+    <rosparam>
+      use_classification_result: true
+    </rosparam>
+  </node>
+
+  <node name="people_poses_to_poses"
+        pkg="jsk_recognition_msgs" type="people_pose_array_to_pose_array.py">
+    <remap from="~input" to="people_pose_estimation_2d/pose" />
+  </node>
+
+  <node name="rviz" pkg="rviz" type="rviz"
+        args="-d $(find jsk_perception)/sample/config/sample_face_pose_estimation.rviz"
+        if="$(arg gui)"/>
+</launch>

@@ -87,8 +87,14 @@ namespace jsk_pcl_ros
     if (use_projected_center_) {
       /* convert points */
       tf::StampedTransform ros_fixed_to_center;
-      tf_->lookupTransform(fixed_frame_id_, center_frame_id_,
-                           msg->header.stamp, ros_fixed_to_center);
+      try {
+        tf_->lookupTransform(fixed_frame_id_, center_frame_id_,
+                             msg->header.stamp, ros_fixed_to_center);
+      }
+      catch (tf2::TransformException &e) {
+        NODELET_ERROR("Transform error: %s", e.what());
+        return;
+      }
       double roll, pitch, yaw;
       tf::Vector3 pos = ros_fixed_to_center.getOrigin();
       ros_fixed_to_center.getBasis().getRPY(roll, pitch, yaw);
@@ -128,7 +134,7 @@ namespace jsk_pcl_ros
         continue;
       }
       cv::Point index = toIndex(p);
-      if (index.x >= 0 && index.x < resolution_x_ && 
+      if (index.x >= 0 && index.x < resolution_x_ &&
           index.y >= 0 && index.y < resolution_y_) {
         /* Store min/max value for colorization */
         max_height = std::max(max_height, p.z);
@@ -136,7 +142,7 @@ namespace jsk_pcl_ros
         // accept maximum points
         if (height_map.at<cv::Vec2f>(index.y, index.x)[0] < p.z) {
           height_map.at<cv::Vec2f>(index.y, index.x)[0] = p.z;
-          height_map.at<cv::Vec2f>(index.y, index.x)[1] = 0;
+          height_map.at<cv::Vec2f>(index.y, index.x)[1] = initial_probability_;
         }
       }
     }
@@ -156,6 +162,7 @@ namespace jsk_pcl_ros
     max_y_ = config.max_y;
     resolution_x_ = config.resolution_x;
     resolution_y_ = config.resolution_y;
+    initial_probability_ = config.initial_probability;
     jsk_recognition_msgs::HeightmapConfig heightmap_config;
     heightmap_config.min_x = min_x_;
     heightmap_config.min_y = min_y_;

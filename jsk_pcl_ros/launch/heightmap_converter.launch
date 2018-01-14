@@ -56,24 +56,32 @@
   <!-- parameters -->
   <rosparam param="current_heightmap" subst_value="true">
     min_x: -3.0
-    max_x:  5.0
-    min_y: -4.0
-    max_y:  4.0
-    resolution_x: 800 ## 0.01 m/pixel
-    resolution_y: 800 ## 0.01 m/pixel
+    max_x: 13.0
+    min_y: -8.0
+    max_y:  8.0
+    resolution_x: 1600 ## 0.01 m/pixel
+    resolution_y: 1600 ## 0.01 m/pixel
     fixed_frame_id:  $(arg STATIC_FRAME)
     center_frame_id: $(arg ROBOT_FRAME)
     projected_center_frame_id: $(arg PROJECTED_FRAME)
     use_projected_center: $(arg USE_PROJECTED_FRAME)
   </rosparam>
-  <rosparam param="filtering_current_heightmap" subst_value="true">
-    mask_size: 4 ## cover within 0.08m
-    max_variance: 0.14
-    smooth_meshod: average
+  <rosparam param="filtered_current_heightmap" subst_value="true">
+    mask_size: 3 ## cover within 0.06m
+    max_variance: 0.0002 ### (* 0.014 0.014)
+    smooth_method: average_distance
+    use_bilateral: true
+    bilateral_filter_size: 4
+    bilateral_sigma_color: 0.028
+    bilateral_sigma_space: 3
   </rosparam>
   <rosparam param="accumulated_heightmap" subst_value="true">
     center_frame_id: $(arg CENTER_FRAME)
     fixed_frame_id:  $(arg STATIC_FRAME)
+    use_bilateral: false
+    bilateral_filter_size: 4
+    bilateral_sigma_color: 0.028
+    bilateral_sigma_space: 3
   </rosparam>
   <rosparam param="accumulated_heightmap_pointcloud_static" subst_value="true">
     target_frame_id: $(arg STATIC_FRAME)

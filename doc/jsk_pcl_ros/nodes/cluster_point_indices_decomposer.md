@@ -44,6 +44,10 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 
   Point indices which are not included in input indices.
 
+* `~cluster_indices` (`jsk_recognition_msgs/ClusterPointIndices`)
+
+  Sorted cluster point indices.
+
 **Optional Topics**
 
 * `~output%02d` (`sensor_msgs/PointCloud2`):
@@ -92,3 +96,17 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 * `~max_size`, `~min_size` (Int, default: `-1`, `-1`)
 
    If positive value, ignores cluster which points size is external from (`clusterPointsSize` < `~min_size` or `clusterPointsSize` > `~max_size`).
+
+* `~sort_by` (String, default `input_indices`)
+
+  Sort output indices. Currently below options are supported:]
+    - `input_indices`: same order as the input cluster indices
+    - `z_axis`: sort by z axis of cloud
+    - `cloud_size`: sort by size of cloud
+
+## Sample
+
+```bash
+roslaunch jsk_pcl_ros sample_cluster_point_indices_decomposer.launch
+roslaunch jsk_pcl_ros sample_cluster_point_indices_decomposer_sort_by.launch
+```

@@ -67,94 +67,29 @@ ENDIF()
 # download and install sample data
 add_custom_target(install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
 
-# add_service_files(FILES SwitchTopic.srv
-#   UpdateOffset.srv
-#   SnapFootstep.srv
-#   SetDepthCalibrationParameter.srv
-#   TransformScreenpoint.srv
-#   CheckCircle.srv
-#   RobotPickupReleasePoint.srv
-#   TowerPickUp.srv
-#   EuclideanSegment.srv
-#   TowerRobotMoveCommand.srv
-#   SetPointCloud2.srv
-#   CallSnapIt.srv CallPolygon.srv
-#   EnvironmentLock.srv
-#   PolygonOnEnvironment.srv
-#   ICPAlignWithBox.srv
-#   ICPAlign.srv
-#   CheckCollision.srv)
-
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
-  #   cfg/VoxelGridLargeScale.cfg
   cfg/BoundingBoxArrayToBoundingBox.cfg
   cfg/CloudOnPlane.cfg
   cfg/ClusterPointIndicesToPointIndices.cfg
+  cfg/ColorizeDistanceFromPlane.cfg
   cfg/DelayPointCloud.cfg
+  cfg/MaskImageToDepthConsideredMaskImage.cfg
+  cfg/PlanarPointCloudSimulator.cfg
+  cfg/PlaneConcatenator.cfg
+  cfg/PlaneReasoner.cfg
+  cfg/PlaneRejector.cfg
+  cfg/PointCloudToMaskImage.cfg
+  cfg/PointCloudToPCD.cfg
   cfg/PolygonArrayAreaLikelihood.cfg
-#   cfg/PlaneSupportedCuboidEstimator.cfg
-#   cfg/InteractiveCuboidLikelihood.cfg
-#   cfg/ExtractParticlesTopNBase.cfg
-  cfg/PoseWithCovarianceStampedToGaussianPointCloud.cfg
-#   cfg/HeightmapMorphologicalFiltering.cfg
-#   cfg/HeightmapConverter.cfg
-#   cfg/HeightmapToPointCloud.cfg
-#   cfg/HeightmapTimeAccumulation.cfg
+  cfg/PolygonArrayLikelihoodFilter.cfg
+  cfg/PolygonArrayUnwrapper.cfg
   cfg/PolygonMagnifier.cfg
   cfg/PolygonPointsSampler.cfg
-#   cfg/GeometricConsistencyGrouping.cfg
-#   cfg/UniformSampling.cfg
-  cfg/PlanarPointCloudSimulator.cfg
+  cfg/PoseWithCovarianceStampedToGaussianPointCloud.cfg
   cfg/SphericalPointCloudSimulator.cfg
-#   cfg/BorderEstimator.cfg
-#   cfg/HintedStickFinder.cfg
-#   cfg/HintedPlaneDetector.cfg
-#   cfg/TorusFinder.cfg
-  cfg/PlaneConcatenator.cfg
-#   cfg/NormalDirectionFilter.cfg
-#   cfg/RegionGrowingMultiplePlaneSegmentation.cfg
-#   cfg/LineSegmentCollector.cfg
-#   cfg/LineSegmentDetector.cfg
-#   cfg/ParticleFilterTracking.cfg
-#   cfg/BilateralFilter.cfg
-#   cfg/ICPRegistration.cfg
-  cfg/PlaneReasoner.cfg
-#   cfg/OrganizedPassThrough.cfg
-#   cfg/EuclideanClustering.cfg
-  cfg/ColorizeDistanceFromPlane.cfg
-#   cfg/HSIColorFilter.cfg
-#   cfg/RGBColorFilter.cfg
-#   cfg/ImageRotate.cfg
-#   cfg/RegionGrowingSegmentation.cfg
-#   cfg/OrganizedMultiPlaneSegmentation.cfg
-#   cfg/MultiPlaneExtraction.cfg
-#   cfg/NormalEstimationIntegralImage.cfg
-  cfg/PlaneRejector.cfg
-#   cfg/EnvironmentPlaneModeling.cfg
-#   cfg/ColorHistogramMatcher.cfg
-#   cfg/GridSampler.cfg
-#   cfg/OrganizedEdgeDetector.cfg
-#   cfg/EdgeDepthRefinement.cfg
-#   cfg/ParallelEdgeFinder.cfg
-#   cfg/EdgebasedCubeFinder.cfg
-#   cfg/MultiPlaneSACSegmentation.cfg
-#   cfg/BoundingBoxFilter.cfg
-  cfg/MaskImageToDepthConsideredMaskImage.cfg
-#   cfg/ResizePointsPublisher.cfg
-#   cfg/LINEMODDetector.cfg
-#   cfg/SupervoxelSegmentation.cfg
-#   cfg/FeatureRegistration.cfg
-#   cfg/FisheyeSphere.cfg
-#   cfg/MovingLeastSquareSmoothing.cfg
-#   cfg/OctreeVoxelGrid.cfg
-#   cfg/OctreeChangePublisher.cfg
-    cfg/PointCloudToPCD.cfg
-    cfg/PolygonArrayUnwrapper.cfg
-  )
+)
 
-generate_messages(DEPENDENCIES
-  ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_footstep_msgs)
 find_package(OpenCV REQUIRED core imgproc)
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
@@ -197,6 +132,8 @@ jsk_pcl_util_nodelet(src/polygon_array_angle_likelihood_nodelet.cpp
   "jsk_pcl_utils/PolygonArrayAngleLikelihood" "polygon_array_angle_likelihood")
 jsk_pcl_util_nodelet(src/polygon_array_foot_angle_likelihood_nodelet.cpp
   "jsk_pcl_utils/PolygonArrayFootAngleLikelihood" "polygon_array_foot_angle_likelihood")
+jsk_pcl_util_nodelet(src/polygon_array_likelihood_filter_nodelet.cpp
+  "jsk_pcl_utils/PolygonArrayLikelihoodFilter" "polygon_array_likelihood_filter")
 jsk_pcl_util_nodelet(src/pose_with_covariance_stamped_to_gaussian_pointcloud_nodelet.cpp
   "jsk_pcl_utils/PoseWithCovarianceStampedToGaussianPointCloud" "pose_with_covariance_stamped_to_gaussian_pointcloud")
 jsk_pcl_util_nodelet(src/spherical_pointcloud_simulator_nodelet.cpp
@@ -217,6 +154,8 @@ if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
 endif()
 jsk_pcl_util_nodelet(src/pointcloud_xyz_to_xyzrgb_nodelet.cpp
   "jsk_pcl_utils/PointCloudXYZToXYZRGB" "pointcloud_xyz_to_xyzrgb")
+jsk_pcl_util_nodelet(src/pointcloud_xyzrgb_to_xyz_nodelet.cpp
+  "jsk_pcl_utils/PointCloudXYZRGBToXYZ" "pointcloud_xyzrgb_to_xyz")
 jsk_pcl_util_nodelet(src/pointcloud_to_cluster_point_indices_nodelet.cpp
   "jsk_pcl_utils/PointCloudToClusterPointIndices" "pointcloud_to_cluster_point_indices")
 jsk_pcl_util_nodelet(src/pointcloud_to_mask_image_nodelet.cpp
@@ -276,12 +215,7 @@ add_dependencies(jsk_pcl_ros_utils ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg
 target_link_libraries(jsk_pcl_ros_utils
   ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
 
-# bench/ directory
-# generate_messages(DEPENDENCIES
-#   ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_footstep_msgs)
-
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-message("flags: ${CMAKE_CXX_FLAGS}")
 
 catkin_package(
     DEPENDS pcl
@@ -321,7 +255,10 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/evaluate_voxel_segmentation_by_gt_box.test)
     add_rostest(test/pointcloud_to_mask_image.test)
     add_rostest(test/polygon_array_unwrapper.test)
+    add_rostest(test/polygon_array_likelihood_filter.test)
+    add_rostest(test/polygon_magnifier.test)
     add_rostest(test/subtract_point_indices.test)
+    add_rostest(test/centroid_publisher.test)
     roslaunch_add_file_check(test/subtract_point_indices.test)
   endif()
 endif()

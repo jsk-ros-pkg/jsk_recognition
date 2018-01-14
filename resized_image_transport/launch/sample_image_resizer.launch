@@ -1,0 +1,51 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <node name="virtual_camera"
+        pkg="jsk_recognition_utils" type="static_virtual_camera.py">
+    <remap from="~image_color" to="~image" />
+  </node>
+
+  <node name="image_resizer_w_camera_info"
+        pkg="resized_image_transport" type="image_resizer">
+    <remap from="~input/image" to="virtual_camera/image" />
+    <rosparam>
+      resize_scale_x: 0.5
+      resize_scale_y: 0.5
+      use_camera_info: true
+      use_camera_subscriber: false
+      use_messages: false
+      interpolation: LINEAR
+    </rosparam>
+  </node>
+
+  <node name="image_resizer_wo_camera_info"
+        pkg="resized_image_transport" type="image_resizer">
+    <remap from="~input/image" to="virtual_camera/image" />
+    <rosparam>
+      resize_scale_x: 2.0
+      resize_scale_y: 2.0
+      use_camera_info: false
+      use_camera_subscriber: false
+      use_messages: false
+      interpolation: NEAREST
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="virtual_camera/image" />
+    </node>
+    <node name="image_view1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="image_resizer_w_camera_info/output/image" />
+    </node>
+    <node name="image_view2"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="image_resizer_wo_camera_info/output/image" />
+    </node>
+  </group>
+
+</launch>

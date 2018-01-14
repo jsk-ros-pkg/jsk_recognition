@@ -41,6 +41,7 @@ namespace jsk_pcl_ros_utils
   {
     DiagnosticNodelet::onInit();
     pub_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output", 1);
+    onInitPostProcess();
   }
 
   void PointCloudToClusterPointIndices::subscribe()
@@ -57,6 +58,7 @@ namespace jsk_pcl_ros_utils
   void PointCloudToClusterPointIndices::convert(
     const sensor_msgs::PointCloud2::ConstPtr& msg)
   {
+    vital_checker_->poke();
     int point_num = msg->width * msg->height;
     pcl_msgs::PointIndices indices;
     jsk_recognition_msgs::ClusterPointIndices cluster_indices;

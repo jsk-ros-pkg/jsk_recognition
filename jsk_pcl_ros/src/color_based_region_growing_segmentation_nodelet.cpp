@@ -69,14 +69,14 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
 
-    if (distance_threshould_ != config.distance_threshould) {
-      distance_threshould_ = config.distance_threshould;
+    if (distance_threshold_ != config.distance_threshold) {
+      distance_threshold_ = config.distance_threshold;
     }
-    if (point_color_threshould_ != config.point_color_threshould) {
-      point_color_threshould_ = config.point_color_threshould;
+    if (point_color_threshold_ != config.point_color_threshold) {
+      point_color_threshold_ = config.point_color_threshold;
     }
-    if (region_color_threshould_ != config.region_color_threshould) {
-      region_color_threshould_ = config.region_color_threshould;
+    if (region_color_threshold_ != config.region_color_threshold) {
+      region_color_threshold_ = config.region_color_threshold;
     }
     if (min_cluster_size_ != config.min_cluster_size) {
       min_cluster_size_ = config.min_cluster_size;
@@ -97,9 +97,9 @@ namespace jsk_pcl_ros
     pcl::RegionGrowingRGB<pcl::PointXYZRGB> reg;
     reg.setInputCloud (cloud);
     reg.setSearchMethod (tree);
-    reg.setDistanceThreshold (distance_threshould_);
-    reg.setPointColorThreshold (point_color_threshould_);
-    reg.setRegionColorThreshold (region_color_threshould_);
+    reg.setDistanceThreshold (distance_threshold_);
+    reg.setPointColorThreshold (point_color_threshold_);
+    reg.setRegionColorThreshold (region_color_threshold_);
     reg.setMinClusterSize (min_cluster_size_);
 
     std::vector <pcl::PointIndices> clusters;

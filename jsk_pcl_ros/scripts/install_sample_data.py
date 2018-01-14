@@ -103,8 +103,8 @@ def main():
     download_data(
         pkg_name=PKG,
         path='sample/data/kettle.pcd',
-        url='https://drive.google.com/uc?id=1y1XrmRJcB6YX1dmMHoVJaF-9J05jQ4dV',
-        md5='effa435f493b563b77b015d63f4d70c8',
+        url='https://drive.google.com/uc?id=1MpQ3MK3D5VTlmj--r9dFPrfyLPQU7LO0',
+        md5='87579bdbb5f87a058697ace16887e37f',
         extract=False,
     )
 

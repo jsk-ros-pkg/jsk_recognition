@@ -19,6 +19,7 @@ Publish image from loaded file.
 
 * `~encoding` (str default: `bgr8`)
 * `~frame_id` (str default: `camera`)
+* `~rate` (Float default: `1.0`)
 
 ## Sample
 

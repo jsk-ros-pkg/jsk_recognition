@@ -466,6 +466,7 @@ install(DIRECTORY scripts/
 
 install(DIRECTORY
   config
+  euslisp
   launch
   sample
   plugins
@@ -499,6 +500,7 @@ if (CATKIN_ENABLE_TESTING)
     endif()
     add_rostest(test/test_line_segment_detector.test)
     add_rostest(test/test_pointcloud_database_server.test)
+    add_rostest(test/test_pointcloud_screenpoint.test)
     add_rostest(test/test_convex_connected_voxels.test)
     add_rostest(test/test_organized_pointcloud_to_point_indices.test)
     add_rostest(test/test_rearrange_bounding_box.test)

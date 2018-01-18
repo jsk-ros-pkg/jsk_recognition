@@ -3,13 +3,13 @@
        doc="point cloud processor machine" />
   <arg name="display_machine" default="localhost"
        doc="display machine for visualization" />
-  <arg name="image" default="/openni/rgb"
+  <arg name="image" default="/camera/rgb"
        doc="image namespace" />
   <arg name="image_type" default="image_rect_color"
        doc="image topic name" />
   <arg name="camera_info" default="$(arg image)/camera_info"
        doc="camera_info topic name" />
-  <arg name="points" default="/openni/depth_registered/points"
+  <arg name="points" default="/camera/depth_registered/points"
        doc="point cloud topic name" />
   <arg name="LAUNCH_OPENNI" default="false"
        doc="if true, launch openni.launch" />
@@ -34,7 +34,7 @@
   <!-- for openni.launch -->
   <include if="$(arg LAUNCH_OPENNI)"
            file="$(find openni_launch)/launch/openni.launch" >
-    <arg name="camera" value="openni" />
+    <arg name="camera" value="camera" />
   </include>
 
   <!-- nodelet manager -->
@@ -60,6 +60,7 @@
       use_approximate: true
     </rosparam>
   </node>
+
   <!-- for organized points -->
   <node if="$(arg USE_REGISTERED_DEPTH)"
         name="depth_image_proc_nodelet" pkg="nodelet" type="nodelet"
@@ -72,37 +73,10 @@
     <param name="qeueu_size" value="30" />
   </node>
 
-  <group unless="$(arg USE_VIEW)" >
   <node name="pointcloud_screenpoint_nodelet" pkg="nodelet" type="nodelet"
         args="load jsk_pcl/PointcloudScreenpoint screenpoint_manager"
         output="screen" clear_params="true" respawn="true"
         machine="$(arg cloud_machine)">
-    <remap from="~points" to="$(arg inpoints)" />
-    <rosparam>
-      queue_size: 4
-      crop_size: 10
-      search_size: 16
-      use_rect: false
-      use_point_array: true
-      use_point: true
-      publish_point: true
-    </rosparam>
-    <param name="use_sync" value="$(arg USE_SYNC)" />
-    <param name="publish_points" value="$(arg PUBLISH_POINTS)" />
-  </node>
-  </group>
-
-  <group if="$(arg USE_VIEW)" >
-  <node name="screenpoint_view" ns="$(arg image)"
-        pkg="image_view2" type="image_view2" output="screen" respawn="true"
-        machine="$(arg display_machine)" >
-    <remap from="image" to="$(arg image_type)" />
-    <param name="autosize" value="true" />
-  </node>
-  <node name="pointcloud_screenpoint_nodelet" pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/PointcloudScreenpoint screenpoint_manager"
-        output="screen" clear_params="true" respawn="true"
-        machine="$(arg cloud_machine)" >
     <remap from="~points" to="$(arg inpoints)" />
     <remap from="~point" to="$(arg image)/$(arg image_type)/screenpoint" />
     <remap from="~rect" to="$(arg image)/$(arg image_type)/screenrectangle" />
@@ -119,6 +93,14 @@
     <param name="use_sync" value="$(arg USE_SYNC)" />
     <param name="publish_points" value="$(arg PUBLISH_POINTS)" />
   </node>
+
+  <group if="$(arg USE_VIEW)" >
+    <node name="screenpoint_view" ns="$(arg image)"
+          pkg="image_view2" type="image_view2" output="screen" respawn="true"
+          machine="$(arg display_machine)" >
+      <remap from="image" to="$(arg image_type)" />
+      <param name="autosize" value="true" />
+    </node>
   </group>
 
   <sphinxdoc><![CDATA[

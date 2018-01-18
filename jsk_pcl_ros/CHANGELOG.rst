@@ -2,6 +2,26 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.4 (2018-01-12)
+------------------
+* jsk_pcl_ros/multi_plane_extraction: fix typo 'maginify' (`#2237 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2237>`_)
+  * test_depth_image_creator.test: increase time limit (`#2236 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2236>`_)
+* Fix uninitialized pointer error in some recognition nodelets (`#2234 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2234>`_)
+  * [tilt_laser_listener] Initialize cloud_vital_checker\_ before subscribe input/cloud because cloud_vital_checker\_ is referred in cloudCallback
+* add test/test_pointcloud_screenpoint.test, enable to run run pointcloud_screenpoint sample launch in indigo (`#2233 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2233>`_)
+  * update pointcloud_screenpoint.rviz
+  * sample/pointcloud_screenpoint_sample.launch: enable to use rviz
+  * merge jsk_pcl/PointcloudScreenpoint for both with or without USE_VIEW
+  * update test_pointcloud_screenpoint, use base_frame, instead of PUBLISH_BASE_FOOTPRINT
+  * pointcloud_screenpoint_nodelet.cpp: add more ROS_INFO messages when start up
+  * remove image_view2 from pointcloud_screenpoint_sample.launch, because pointcloud_screenpoint.launch is already start image_view2
+  * use common camera prefix for openni
+  * run pointcloud_screenpoint sample in localhost not pr2, fix for indigo/kinetic setup for openni, machine env-loader, etc...
+* add base_frame param in pointcloud_screenpoint.l
+  * add test/test_pointcloud_screenpoint.test
+* install euslisp/ directory (`#2232 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2232>`_)
+* Contributors: Yuki Furuta, Iori Kumagai, Kei Okada, Shingo Kitagawa
+
 1.2.3 (2017-11-23)
 ------------------
 * [tilt_laser_listener] add size check of position and velocity (`#2218 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2218>`_)

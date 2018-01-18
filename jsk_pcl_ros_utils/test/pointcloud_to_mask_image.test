@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /pointcloud_to_mask_image/output
       timeout_0: 30
+      topic_1: /depth_to_mask_image/output
+      timeout_1: 30
     </rosparam>
   </test>
 

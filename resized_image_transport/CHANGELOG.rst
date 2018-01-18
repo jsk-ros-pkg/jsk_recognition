@@ -2,6 +2,12 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.4 (2018-01-12)
+------------------
+* Fix uninitialized pointer error in some recognition nodelets (`#2234 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2234>`_)
+  * [image_processing] Check validity of vital checker in updateDiagnostic because this callback might be called before initPublishersAndSubscribers is finished
+* Contributors: Iori Kumagai
+
 1.2.3 (2017-11-23)
 ------------------
 

@@ -2,6 +2,13 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.4 (2018-01-12)
+------------------
+* jsk_pcl_ros_utils: pointcloud_to_mask_image:  add depth image for input (`#2229 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2229>`_)
+    jsk_pcl_ros_utils: add depth image for input to pointcloud_to_mask_image
+    jsk_pcl_ros_utils: update doc for pointcloud_to_mask_image
+* Contributors: Yuki Furuta
+
 1.2.3 (2017-11-23)
 ------------------
 *  [jsk_pcl_ros_utils] polygon_flipper: add option '~use_indices' (`#2189 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2189>`_)

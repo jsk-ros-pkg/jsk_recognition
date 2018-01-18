@@ -2,20 +2,26 @@
 
   <arg name="gui" default="true" />
 
-  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml" />
+  <arg name="INPUT_CLOUD" default="/right_hand_camera/depth_registered/points" />
+  <arg name="INPUT_DEPTH" default="/right_hand_camera/depth_registered/hw_registered/image_rect" />
 
-  <arg name="INPUT_CLOUD" value="/right_hand_camera/depth_registered/points" />
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml" />
 
   <node name="pointcloud_to_mask_image"
         pkg="jsk_pcl_ros_utils" type="pointcloud_to_mask_image">
     <remap from="~input" to="$(arg INPUT_CLOUD)" />
   </node>
 
-  <group if="$(arg gui)">
-    <node name="image_view"
-          pkg="image_view" type="image_view">
-      <remap from="image" to="pointcloud_to_mask_image/output" />
-    </node>
-  </group>
+  <node name="depth_to_mask_image"
+        pkg="jsk_pcl_ros_utils" type="pointcloud_to_mask_image">
+    <remap from="~input/depth" to="$(arg INPUT_DEPTH)" />
+    <rosparam>
+      z_near: 0.5
+      z_far: 0.7
+    </rosparam>
+  </node>
 
+  <node if="$(arg gui)"
+        name="rqt_gui" pkg="rqt_gui" type="rqt_gui"
+        args="--perspective-file $(find jsk_pcl_ros_utils)/sample/config/sample_pointcloud_to_mask_image.perspective" />
 </launch>

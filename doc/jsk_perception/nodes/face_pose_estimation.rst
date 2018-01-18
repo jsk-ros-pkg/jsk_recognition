@@ -1,4 +1,4 @@
-people_pose_estimation_2d.py
+face_pose_estimation.py
 ============================
 
 

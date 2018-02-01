@@ -20,6 +20,7 @@ The code is open source, and `available on github`_.
    install_softkinetic_camera
    install_realsense_camera
    install_xtion2
+   install_ensenso
 
 
 .. toctree::

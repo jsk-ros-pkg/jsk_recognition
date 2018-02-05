@@ -91,6 +91,24 @@ def main():
 
     download_data(
         pkg_name=PKG,
+        path='sample/data/pr2_sink.bag.tgz',
+        url='https://drive.google.com/uc?id=19VujodKsX7EJJwHetqFGCRYz0JBtZQ6h',
+        md5='9bdc1500610a1a97480cae6fcf261811',
+        extract=True,
+        compressed_bags=[
+            'sample/data/pr2_sink.bag',
+        ],
+    )
+
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/kettle.pcd',
+        url='https://drive.google.com/uc?id=1MpQ3MK3D5VTlmj--r9dFPrfyLPQU7LO0',
+        md5='87579bdbb5f87a058697ace16887e37f',
+        extract=False,
+    )
+
+    download_data(
         path='sample/data/sample_door_handle_detector.bag',
         url='https://drive.google.com/uc?id=0B4ysRIwB7GryMGxCTUI0MHhqWFk',
         md5='f702e012730db7aaf01b9868280d8bca',

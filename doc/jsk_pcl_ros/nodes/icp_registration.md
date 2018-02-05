@@ -57,6 +57,13 @@ Register two pointclouds based on icp like registration technique.
   Use normal information in registration.
   In order to use this feature, reference and target pointcloud should have
   valid normal fields.
+* `~transform_3dof` (default: `false`)
+
+  Add constraint to transform estimation on 3D (1D rotation + 2D translation) from header frame of input cloud.
+  See `TfTransformCloud` to change header frame of point cloud.
+
+  ![icp_2d](./images/icp_registration_2d.gif)
+
 * `~align_box` (default: `false`)
 * `~synchronize_reference` (default: `false`)
 

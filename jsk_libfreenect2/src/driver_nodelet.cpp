@@ -237,5 +237,5 @@ namespace jsk_libfreenect2
 
 #include <pluginlib/class_list_macros.h>
 typedef jsk_libfreenect2::Driver Driver;
-PLUGINLIB_DECLARE_CLASS (jsk_libfreenect2, Driver, Driver, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(Driver, nodelet::Nodelet);
 

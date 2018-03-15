@@ -1,6 +1,7 @@
 <launch>
 
   <arg name="INPUT_IMAGE" />
+  <arg name="MODEL" />
 
   <node name="selective_search"
         pkg="jsk_perception" type="selective_search.py">
@@ -11,8 +12,8 @@
         pkg="jsk_perception" type="fast_rcnn.py">
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <remap from="~input/rect_array" to="selective_search/output" />
-    <rosparam>
-      model: vgg_cnn_m_1024
+    <rosparam subst_value="true">
+      model: $(arg MODEL)
     </rosparam>
   </node>
 

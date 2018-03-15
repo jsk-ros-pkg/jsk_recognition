@@ -4,8 +4,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import textwrap
-
 import cv2
 import cv_bridge
 from distutils.version import LooseVersion
@@ -15,8 +13,6 @@ import message_filters
 import numpy as np
 import rospy
 from sensor_msgs.msg import Image
-from skimage.color import rgb_colors
-from skimage.color.colorlabel import DEFAULT_COLORS
 from jsk_recognition_utils.color import labelcolormap
 
 
@@ -39,7 +35,6 @@ class DrawClassificationResult(ConnectionBasedTransport):
         self.sub_img.unregister()
 
     def _draw(self, cls_msg, imgmsg):
-        n_class = len(cls_msg.target_names)
         bridge = cv_bridge.CvBridge()
         rgb = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='rgb8')
 

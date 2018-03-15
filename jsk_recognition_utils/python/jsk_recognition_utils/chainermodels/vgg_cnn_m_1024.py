@@ -3,6 +3,7 @@ from chainer import cuda
 import chainer.functions as F
 import chainer.links as L
 from chainer import Variable
+from distutils.version import LooseVersion
 
 from roi_pooling_2d import roi_pooling_2d
 
@@ -24,7 +25,7 @@ class VGG_CNN_M_1024(chainer.Chain):
         self.n_class = n_class
         self.bg_label = bg_label
 
-    def __call__(self, x, rois, t=None, train=False):
+    def __call__(self, x, rois, t=None):
         h = self.conv1(x)
         h = F.relu(h)
         h = F.local_response_normalization(h, n=5, k=2, alpha=5e-4, beta=.75)
@@ -48,27 +49,25 @@ class VGG_CNN_M_1024(chainer.Chain):
 
         h = self.fc6(h)
         h = F.relu(h)
-        h = F.dropout(h, train=train, ratio=.5)
+        h = F.dropout(h, ratio=.5)
 
         h = self.fc7(h)
         h = F.relu(h)
-        h = F.dropout(h, train=train, ratio=.5)
+        h = F.dropout(h, ratio=.5)
 
         h_cls_score = self.cls_score(h)
         cls_score = F.softmax(h_cls_score)
         bbox_pred = self.bbox_pred(h)
 
         if t is None:
-            assert train is False
+            assert not chainer.config.train
             return cls_score, bbox_pred
 
-        assert train
         t_cls, t_bbox = t
         self.cls_loss = F.softmax_cross_entropy(h_cls_score, t_cls)
         self.bbox_loss = F.smooth_l1_loss(bbox_pred, t_bbox)
 
         xp = cuda.get_array_module(x.data)
         lambda_ = (0.5 * (t_cls.data != self.bg_label)).astype(xp.float32)
-        lambda_ = Variable(lambda_, volatile=not train)
         L = self.cls_loss + F.sum(lambda_ * self.bbox_loss)
         return L

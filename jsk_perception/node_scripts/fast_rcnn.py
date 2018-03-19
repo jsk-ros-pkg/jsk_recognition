@@ -3,10 +3,12 @@
 import os.path as osp
 import sys
 
+import chainer
 from chainer import cuda
 import chainer.serializers as S
 from chainer import Variable
 import cv2
+from distutils.version import LooseVersion
 import numpy as np
 
 import cv_bridge
@@ -145,9 +147,16 @@ class FastRCNN(ConnectionBasedTransport):
         # batch_indices is always 0 when batch size is 1
         batch_indices = xp.zeros((len(rects), 1), dtype=np.float32)
         rects = xp.hstack((batch_indices, rects))
-        x = Variable(x_data, volatile=True)
-        rects_val = Variable(rects, volatile=True)
-        self.model.train = False
+        if LooseVersion(chainer.__version__).version[0] < 2:
+            x = Variable(x_data, volatile=True)
+            rects_val = Variable(rects, volatile=True)
+            self.model.train = False
+        else:
+            with chainer.using_config('train', False), \
+                 chainer.no_backprop_mode():
+                x = Variable(x_data)
+                rects_val = Variable(rects)
+
         cls_score, bbox_pred = self.model(x, rects_val)
         scores = cuda.to_cpu(cls_score.data)
         bbox_pred = cuda.to_cpu(bbox_pred.data)

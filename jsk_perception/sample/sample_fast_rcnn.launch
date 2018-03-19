@@ -1,4 +1,5 @@
 <launch>
+  <arg name="model" default="vgg_cnn_m_1024" />
 
   <node name="image_publisher"
         pkg="jsk_perception" type="image_publisher.py">
@@ -11,6 +12,7 @@
 
   <include file="$(find jsk_perception)/launch/fast_rcnn.launch">
     <arg name="INPUT_IMAGE" value="image_publisher/output" />
+    <arg name="MODEL" value="$(arg model)" />
   </include>
 
   <node name="draw_rects" pkg="jsk_perception" type="draw_rects"

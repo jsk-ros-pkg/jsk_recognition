@@ -40,7 +40,11 @@ def label2rgb(lbl, img=None, label_names=None, alpha=0.3):
     lbl_viz = cmap[lbl]
 
     if img is not None:
-        img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        if img.ndim == 3:
+            img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        else:
+            assert img.ndim == 2
+            img_gray = img
         img_gray = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2RGB)
         lbl_viz = alpha * lbl_viz + (1 - alpha) * img_gray
         lbl_viz = lbl_viz.astype(np.uint8)

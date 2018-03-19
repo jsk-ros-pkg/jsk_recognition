@@ -19,6 +19,22 @@ import rospy
 from sensor_msgs.msg import Image
 
 
+def colorize_depth(depth, min_value=None, max_value=None):
+    min_value = np.nanmin(depth) if min_value is None else min_value
+    max_value = np.nanmax(depth) if max_value is None else max_value
+    if np.isinf(min_value) or np.isinf(max_value):
+        rospy.logwarn('Min or max value for depth colorization is inf.')
+
+    colorized = depth.copy()
+    nan_mask = np.isnan(colorized)
+    colorized[nan_mask] = 0
+    colorized = 1. * (colorized - min_value) / (max_value - min_value)
+    colorized = matplotlib.cm.jet(colorized)[:, :, :3]
+    colorized = (colorized * 255).astype(np.uint8)
+    colorized[nan_mask] = (0, 0, 0)
+    return colorized
+
+
 class FCNDepthPrediction(ConnectionBasedTransport):
 
     def __init__(self):
@@ -82,27 +98,12 @@ class FCNDepthPrediction(ConnectionBasedTransport):
         for sub in self.subs:
             sub.unregister()
 
-    def colorize_depth(self, depth, min_value=None, max_value=None):
-        min_value = np.nanmin(depth) if min_value is None else min_value
-        max_value = np.nanmax(depth) if max_value is None else max_value
-        if np.isinf(min_value) or np.isinf(max_value):
-            rospy.logwarn('Min or max value for depth colorization is inf.')
-
-        colorized = depth.copy()
-        nan_mask = np.isnan(colorized)
-        colorized[nan_mask] = 0
-        colorized = 1. * (colorized - min_value) / (max_value - min_value)
-        colorized = matplotlib.cm.jet(colorized)[:, :, :3]
-        colorized = (colorized * 255).astype(np.uint8)
-        colorized[nan_mask] = (0, 0, 0)
-        return colorized
-
     def transform_depth(self, depth):
         if depth.dtype == np.uint16:
             depth = depth.astype(np.float32) * 0.001
         min_value = self.model.min_depth
         max_value = self.model.max_depth
-        depth_viz_rgb = self.colorize_depth(
+        depth_viz_rgb = colorize_depth(
             depth,
             min_value=min_value, max_value=max_value
         )
@@ -120,7 +121,7 @@ class FCNDepthPrediction(ConnectionBasedTransport):
         depth_viz_bgr = self.transform_depth(depth_img)
 
         label_pred, proba_img, depth_pred = \
-            self.depth_predict(bgr_img, depth_viz_bgr)
+            self.predict_depth(bgr_img, depth_viz_bgr)
         depth_pred_raw = depth_pred.copy()
         depth_pred[label_pred == 0] = depth_img[label_pred == 0]
 
@@ -137,12 +138,12 @@ class FCNDepthPrediction(ConnectionBasedTransport):
         depth_raw_msg.header = img_msg.header
         self.pub_depth_raw.publish(depth_raw_msg)
 
-    def depth_predict(self, bgr, depth_bgr=None):
+    def predict_depth(self, bgr, depth_bgr=None):
         if self.backend == 'chainer':
-            return self._depth_predict_chainer_backend(bgr, depth_bgr)
+            return self._predict_depth_chainer_backend(bgr, depth_bgr)
         raise ValueError('Unsupported backend: {0}'.format(self.backend))
 
-    def _depth_predict_chainer_backend(self, bgr, depth_bgr=None):
+    def _predict_depth_chainer_backend(self, bgr, depth_bgr=None):
         bgr_data = np.array([bgr], dtype=np.float32)
         depth_bgr_data = np.array([depth_bgr], dtype=np.float32)
         if self.gpu != -1:

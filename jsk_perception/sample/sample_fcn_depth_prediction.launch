@@ -1,0 +1,84 @@
+<launch>
+
+  <arg name="gpu" default="0" />
+  <arg name="gui" default="true" />
+
+  <node name="image_publisher_rgb"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      publish_info: false
+      encoding: rgb8
+      file_name: $(find jsk_perception)/sample/depth_prediction_rgb.jpg
+    </rosparam>
+  </node>
+
+  <node name="image_publisher_depth"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      publish_info: false
+      encoding: 32FC1
+      file_name: $(find jsk_perception)/sample/depth_prediction_depth.jpg
+    </rosparam>
+  </node>
+
+  <rosparam command="load" file="$(find jsk_perception)/config/refrigerator_target_names.yaml"
+            ns="label_names" />
+
+  <node name="fcn_depth_prediction"
+        pkg="jsk_perception" type="fcn_depth_prediction.py"
+        output="screen">
+    <remap from="~input" to="image_publisher_rgb/output" />
+    <remap from="~input/depth" to="image_publisher_depth/output" />
+    <remap from="~target_names" to="label_names" />
+    <rosparam subst_value="true">
+      gpu: $(arg gpu)
+      model_name: fcn8s_depth_prediction
+      model_file: $(find jsk_perception)/trained_data/fcn8s_depth_prediction_refrigerator.npz
+      approximate_sync: true
+    </rosparam>
+  </node>
+
+  <node name="label_image_decomposer"
+        pkg="jsk_perception" type="label_image_decomposer.py">
+    <remap from="~input" to="image_publisher_rgb/output" />
+    <remap from="~input/label" to="fcn_depth_prediction/output/label" />
+    <remap from="~label_names" to="label_names" />
+    <rosparam>
+      queue_size: 100
+      approximate_sync: true
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view_rgb"
+          pkg="image_view" type="image_view" >
+      <remap from="image" to="image_publisher_rgb/output" />
+    </node>
+
+    <node name="image_view_depth_input"
+          pkg="image_view" type="image_view" >
+      <remap from="image" to="image_publisher_depth/output" />
+      <rosparam>
+        min_image_value: 0.5
+        max_image_value: 1.2
+        colormap: 2
+      </rosparam>
+    </node>
+
+    <node name="image_view_label"
+          pkg="image_view" type="image_view" >
+      <remap from="image" to="label_image_decomposer/output/label_viz" />
+    </node>
+
+    <node name="image_view_depth_output"
+          pkg="image_view" type="image_view" >
+      <remap from="image" to="fcn_depth_prediction/output" />
+      <rosparam>
+        min_image_value: 0.5
+        max_image_value: 1.2
+        colormap: 2
+      </rosparam>
+    </node>
+  </group>
+
+</launch>

@@ -45,7 +45,7 @@ Parameters
 
   Draw topic name on each image.
 
-* ``font_scale`` (type: ``Float``, default: ``4``)
+* ``font_scale`` (type: ``Float``, default: ``0.8``)
 
   Font size to draw topic names.
 

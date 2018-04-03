@@ -26,11 +26,11 @@ def draw_text_box(img, text, font_scale=0.8, thickness=2,
         # pt: (x, y)
         pt1 = (0, 0)
         pt2 = (size[0], size[1] + baseline)
-        pt3 = (1, 1 + size[1])
+        pt3 = (0, size[1])
     elif loc == 'rba':  # right + bottom + above
         pt1 = (W - size[0], H - size[1] - baseline)
         pt2 = (W, H)
-        pt3 = (-1 + W - size[0], -1 + H - baseline)
+        pt3 = (W - size[0], H - baseline)
     else:
         raise ValueError
     if color is not None:

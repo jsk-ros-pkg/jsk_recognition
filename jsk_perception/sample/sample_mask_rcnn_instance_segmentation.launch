@@ -1,0 +1,77 @@
+<launch>
+
+  <arg name="gui" default="true" />
+  <arg name="gpu" default="0" />
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py"
+        clear_params="true">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/object_detection_example_1.jpg
+      fps: 30
+    </rosparam>
+  </node>
+  <arg name="INPUT_IMAGE" value="image_publisher/output" />
+
+  <node name="mask_rcnn_instance_segmentation"
+        pkg="jsk_perception" type="mask_rcnn_instance_segmentation.py"
+        clear_params="true">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <rosparam subst_value="true">
+      gpu: $(arg gpu)
+      pretrained_model: $(find jsk_perception)/trained_data/mask_rcnn_resnet50_voc_20180403.npz
+      fg_class_names:
+        - aeroplane
+        - bicycle
+        - bird
+        - boat
+        - bottle
+        - bus
+        - car
+        - cat
+        - chair
+        - cow
+        - diningtable
+        - dog
+        - horse
+        - motorbike
+        - person
+        - pottedplant
+        - sheep
+        - sofa
+        - train
+        - tvmonitor
+    </rosparam>
+  </node>
+
+  <node name="image_cluster_indices_decomposer"
+        pkg="jsk_perception" type="image_cluster_indices_decomposer.py"
+        clear_params="true">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/cluster_indices"
+           to="mask_rcnn_instance_segmentation/output/cluster_indices" />
+  </node>
+
+  <node name="tile_image"
+        pkg="jsk_perception" type="tile_image.py"
+        clear_params="true">
+    <rosparam subst_value="true">
+      input_topics:
+        - $(arg INPUT_IMAGE)
+        - mask_rcnn_instance_segmentation/output/viz
+        - image_cluster_indices_decomposer/output
+      draw_topic_name: true
+      font_scale: 0.8
+      font_thickness: 2
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view"
+          pkg="image_view" type="image_view"
+          clear_params="true">
+      <remap from="image" to="tile_image/output" />
+    </node>
+  </group>
+
+</launch>

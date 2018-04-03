@@ -163,6 +163,14 @@ def main():
         md5='a585e4d41ed67d5052417ade6fb2d608',
     )
 
+    # node_scripts/mask_rcnn_instance_segmentation.py
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/mask_rcnn_resnet50_voc_20180403',
+        url='https://drive.google.com/uc?id=1Ui_SXZzF388fLZ-WM1rponFziCCJcm3n',
+        md5='16a196fab8789f7c72a71241a85f59f7',
+    )
+
 
 if __name__ == '__main__':
     main()

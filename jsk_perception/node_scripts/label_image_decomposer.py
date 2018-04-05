@@ -29,15 +29,19 @@ def get_text_color(color):
     return (255, 255, 255)
 
 
-def label2rgb(lbl, img=None, label_names=None, alpha=0.3):
+def label2rgb(lbl, img=None, label_names=None, alpha=0.3, bg_label=0):
     if label_names is None:
         n_labels = lbl.max() + 1  # +1 for bg_label 0
     else:
         n_labels = len(label_names)
-    cmap = labelcolormap(n_labels)
+    cmap = labelcolormap(256)
     cmap = (cmap * 255).astype(np.uint8)
+    bg_color, cmap = cmap[0], cmap[1:]  # bg_color is 0
 
-    lbl_viz = cmap[lbl]
+    lbl_viz = np.zeros((lbl.shape[0], lbl.shape[1], 3), dtype=np.uint8)
+    fg_mask = lbl != bg_label
+    lbl_viz[fg_mask] = cmap[lbl[fg_mask] % 256]
+    lbl_viz[~fg_mask] = bg_color
 
     if img is not None:
         if img.ndim == 3:
@@ -91,6 +95,7 @@ class LabelImageDecomposer(ConnectionBasedTransport):
         self.pub_img = self.advertise('~output', Image, queue_size=5)
         self.pub_label_viz = self.advertise('~output/label_viz', Image,
                                             queue_size=5)
+        self._bg_label = rospy.get_param('~bg_label', 0)  # ignored label
         self._only_label = rospy.get_param('~only_label', False)
         self._label_names = rospy.get_param('~label_names', None)
         # publish masks of fg/bg by decomposing each label
@@ -152,7 +157,7 @@ class LabelImageDecomposer(ConnectionBasedTransport):
             img = bridge.imgmsg_to_cv2(img_msg)
             # publish only valid label region
             applied = img.copy()
-            applied[label_img == 0] = 0
+            applied[label_img == self._bg_label] = 0
             applied_msg = bridge.cv2_to_imgmsg(applied, encoding=img_msg.encoding)
             applied_msg.header = img_msg.header
             self.pub_img.publish(applied_msg)
@@ -167,7 +172,7 @@ class LabelImageDecomposer(ConnectionBasedTransport):
             img = None
 
         label_viz = label2rgb(label_img, img, label_names=self._label_names,
-                              alpha=self._alpha)
+                              alpha=self._alpha, bg_label=self._bg_label)
         label_viz_msg = bridge.cv2_to_imgmsg(label_viz, encoding='rgb8')
         label_viz_msg.header = label_msg.header
         self.pub_label_viz.publish(label_viz_msg)

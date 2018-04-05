@@ -71,6 +71,10 @@ Parameters
   How many messages you allow about the subscriber to keep in the queue.
   This should be big when there is much difference about delay between two topics.
 
+* ``~bg_label`` (Int, default: ``0``)
+
+  Background label which is not colorized.
+
 * ``~slop`` (Float, default: ``0.1``)
 
   How many seconds you allow about the difference of timestamp

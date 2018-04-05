@@ -37,10 +37,14 @@ Apply mask image to original image and visualize it. It's a utlity to visualize 
   This decides order of negative and clip.
   If true, negative process is before clipping.
 
-* ``~queue_size`` (Int, default: ``100``)
+* `~queue_size` (Int, default: `100`)
 
   How many messages you allow about the subscriber to keep in the queue.
   This should be big when there is much difference about delay between two topics.
+
+* `~cval` (Int, default: `0`)
+
+  Used to fill image before masking with input image and mask.
 
 * `~mask_black_to_transparent` (Bool, default: `false`)
 

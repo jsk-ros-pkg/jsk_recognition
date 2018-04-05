@@ -22,6 +22,7 @@
         output="screen">
     <rosparam>
       input_topics: [img1/output, img2/output, img3/output, img4/output]
+      draw_topic_name: true
     </rosparam>
   </node>
 

@@ -56,6 +56,10 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
             '~output/cluster_indices', ClusterPointIndices, queue_size=1)
         self.pub_labels = self.advertise(
             '~output/labels', LabelArray, queue_size=1)
+        self.pub_lbl_cls = self.advertise(
+            '~output/label_cls', Image, queue_size=1)
+        self.pub_lbl_ins = self.advertise(
+            '~output/label_ins', Image, queue_size=1)
         self.pub_viz = self.advertise(
             '~output/viz', Image, queue_size=1)
 
@@ -79,14 +83,25 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
 
         msg_indices = ClusterPointIndices(header=imgmsg.header)
         msg_labels = LabelArray(header=imgmsg.header)
-        for mask, label in zip(masks, labels):
+        # -1: label for background
+        lbl_cls = - np.ones(img.shape[:2], dtype=np.int32)
+        lbl_ins = - np.ones(img.shape[:2], dtype=np.int32)
+        for ins_id, (mask, label) in enumerate(zip(masks, labels)):
             indices = np.where(mask.flatten())[0]
             indices_msg = PointIndices(header=imgmsg.header, indices=indices)
             msg_indices.cluster_indices.append(indices_msg)
             class_name = self.fg_class_names[label]
             msg_labels.labels.append(Label(id=label, name=class_name))
+            lbl_cls[mask] = label
+            lbl_ins[mask] = ins_id  # instance_id
         self.pub_indices.publish(msg_indices)
         self.pub_labels.publish(msg_labels)
+
+        msg_lbl_cls = bridge.cv2_to_imgmsg(lbl_cls)
+        msg_lbl_ins = bridge.cv2_to_imgmsg(lbl_ins)
+        msg_lbl_cls.header = msg_lbl_ins.header = imgmsg.header
+        self.pub_lbl_cls.publish(msg_lbl_cls)
+        self.pub_lbl_ins.publish(msg_lbl_ins)
 
         if self.pub_viz.get_num_connections() > 0:
             n_fg_class = len(self.fg_class_names)

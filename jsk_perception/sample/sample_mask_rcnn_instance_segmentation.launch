@@ -44,12 +44,42 @@
     </rosparam>
   </node>
 
+  <!-- use cluster_indices and labels -->
   <node name="image_cluster_indices_decomposer"
         pkg="jsk_perception" type="image_cluster_indices_decomposer.py"
         clear_params="true">
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <remap from="~input/cluster_indices"
            to="mask_rcnn_instance_segmentation/output/cluster_indices" />
+  </node>
+
+  <!-- use lbl_cls and lbl_ins -->
+  <node name="label_cls_to_mask"
+        pkg="jsk_perception" type="label_to_mask_image"
+        clear_params="true">
+    <remap from="~input" to="mask_rcnn_instance_segmentation/output/label_cls" />
+    <rosparam subst_value="true">
+      label_value: 14
+    </rosparam>
+  </node>
+  <node name="apply_mask_image"
+        pkg="jsk_perception" type="apply_mask_image"
+        clear_params="true">
+    <remap from="~input" to="mask_rcnn_instance_segmentation/output/label_ins" />
+    <remap from="~input/mask" to="label_cls_to_mask/output" />
+    <rosparam subst_value="true">
+      clip: false
+      cval: -1
+    </rosparam>
+  </node>
+  <node name="label_image_decomposer"
+        pkg="jsk_perception" type="label_image_decomposer.py"
+        clear_params="true">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/label" to="apply_mask_image/output" />
+    <rosparam subst_value="true">
+      bg_label: -1
+    </rosparam>
   </node>
 
   <node name="tile_image"
@@ -60,6 +90,7 @@
         - $(arg INPUT_IMAGE)
         - mask_rcnn_instance_segmentation/output/viz
         - image_cluster_indices_decomposer/output
+        - label_image_decomposer/output/label_viz
       draw_topic_name: true
       font_scale: 0.8
       font_thickness: 2

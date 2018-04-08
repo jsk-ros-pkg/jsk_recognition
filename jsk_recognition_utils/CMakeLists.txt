@@ -59,8 +59,9 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 endif()
 include_directories(
   include ${catkin_INCLUDE_DIRS}
-)
-link_libraries(${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES}  yaml-cpp)
+  )
+# libpcl_visualization is missing from pcl_ros_LIBRARIES (see https://github.com/jsk-ros-pkg/jsk_recognition/issues/2259#issuecomment-379529111)
+link_libraries(${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} pcl_visualization ${OpenCV_LIBRARIES}  yaml-cpp)
 
 add_library(jsk_recognition_utils SHARED
   src/grid_index.cpp

@@ -2,6 +2,14 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix build of jsk_recognition_utils (on Kinetic) (`#2262 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2262>`_ )
+  * Close https://github.com/jsk-ros-pkg/jsk_recognition/issues/2259
+* [jsk_perception/fast_rcnn.py] fast_rcnn node to follow chainer-v2 version (`#2249 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2249>`_)
+  * modify fast_rcnn model to follow chainer-v2 version
+* Contributors: Yuki Furuta, Kentaro Wada, Shingo Kitagawa
+
 1.2.4 (2018-01-12)
 ------------------
 * Add image gallery to README (`#2225 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2225>`_)

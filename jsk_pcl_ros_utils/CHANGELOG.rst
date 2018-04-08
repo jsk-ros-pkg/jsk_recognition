@@ -2,6 +2,9 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.4 (2018-01-12)
 ------------------
 * jsk_pcl_ros_utils: pointcloud_to_mask_image:  add depth image for input (`#2229 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2229>`_)

@@ -2,6 +2,39 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add MaskRCNNInstanceSegmentation node (`#2257 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2257>`_)
+  * MaskRCNN node publishes label imgs that have class and instance id
+  * Add ~bg_label to label_image_decomposer which is not colorized
+  * Add ~cval param to apply_mask_image
+  * Add MaskRCNNInstanceSegmentation node
+
+* Improve topic name visualization in tile_image.py (`#2256 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2256>`_)
+  * Comment out draw_classification_result test
+  * Improve visualization in tile_image.py
+    - Use FONT_HERSHEY_SIMPLEX.
+    - Adjust font_scale according to the new font.
+
+* [jsk_perception/draw_classification_result.py] use LINE_AA for opencv3 in kinetic (`#2247 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2247>`_)
+  * enable draw_classification_result test
+  * remove unused variables and imports
+  * use LINE_AA for opencv3 in kinetic
+
+* Add fcn_depth_prediction node (`#2244 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2244>`_)
+  * [jsk_perception] Fix function name in fcn_depth_prediction.py
+  * [jsk_perception] Add sample of fcn_depth_prediction
+  * [jsk_perception] Add trained data for fcn_depth_prediction to install_trained_data
+  * [jsk_perception] Add fcn_depth_prediction node
+* [jsk_perception/fast_rcnn.py] fast_rcnn node to follow chainer-v2 version (`#2249 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2249>`_)
+  * add MODEL arg for fast rcnn launch
+  * check chainer version for volatile variable
+
+* [jsk_perception/label_image_decomposer.py] check img.ndim for gray scale image (`#2248 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2248>`_)
+  * check img.ndim for gray scale image
+
+* Contributors: Yuki Furuta, Kei Okada, Kentaro Wada, Shingo Kitagawa, Yuto Uchimi
+
 1.2.4 (2018-01-12)
 ------------------
 * jsk_perception: install template dir (`#2222 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2222>`_)

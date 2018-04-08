@@ -2,6 +2,9 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.4 (2018-01-12)
 ------------------
 * Fix uninitialized pointer error in some recognition nodelets (`#2234 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2234>`_)

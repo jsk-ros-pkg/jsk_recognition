@@ -2,6 +2,25 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix build of jsk_pcl_ros (on Kinetic) (`#2262 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2262>`_)
+* [jsk_pcl_ros/color_histogram_visualizer.py] use facecolor instead of axisbg (`#2250 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2250>`_)
+  * use facecolor instead of axisbg
+    axisbg is removed from matplotlib 2.2.0
+
+* [jsk_pcl_ros] ICP Registration on 2D plane (`#1991 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1991>`_)
+  * [jsk_pcl_ros] add sample launch file for icp_registration 2d
+  * [jsk_pcl_ros][icp_registration_nodelet.cpp] add option for 2d transform estimation
+
+* jsk_pcl_ros: add sample door detector (`#2182 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2182>`_)
+  * jsk_pcl_ros: fix param for door_detector sample launch
+  * jsk_pcl_ros: add sample launch files for icp registration 2d
+  * jsk_pcl_ros: add sample data for pr2 sink scenario
+  * jsk_pcl_ros: add rviz config / rosbag for sample_door_handle_detector
+  * jsk_pcl_ros: add sample door detector
+* Contributors: Kentaro Wada, Shingo Kitagawa, Yuki Furuta
+
 1.2.4 (2018-01-12)
 ------------------
 * jsk_pcl_ros/multi_plane_extraction: fix typo 'maginify' (`#2237 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2237>`_)

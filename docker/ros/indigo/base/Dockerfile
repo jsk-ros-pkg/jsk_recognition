@@ -1,10 +1,13 @@
 FROM ros:indigo-ros-core
 
 RUN apt-get update && apt-get install -y \
+    ccache \
     git \
     python-setuptools \
     python-rosdep \
     python-wstool
+
+RUN ccache -M 10G
 
 RUN easy_install -U pip && \
     pip install -U pip setuptools
@@ -24,5 +27,7 @@ RUN cd ~/ros/ws_jsk_recognition/src && \
 RUN cd ~/ros/ws_jsk_recognition && \
     apt-get install -y python-catkin-tools && \
     . /opt/ros/indigo/setup.sh && \
+    export PATH=/usr/lib/ccache:$PATH && \
     catkin build && \
-    catkin clean -y
+    cd && \
+    rm -rf ros/ws_jsk_recognition

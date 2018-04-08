@@ -1,3 +1,4 @@
+
 # http://ros.org/doc/groovy/api/catkin/html/user_guide/supposed.html
 cmake_minimum_required(VERSION 2.8.3)
 project(jsk_pcl_ros)
@@ -128,7 +129,7 @@ generate_dynamic_reconfigure_options(
 find_package(OpenCV REQUIRED core imgproc)
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
-link_directories(${catkin_LIBRARY_DIRS})
+link_directories(${catkin_LIBRARY_DIRS} pcl_tracking pcl_people)
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
 endif()

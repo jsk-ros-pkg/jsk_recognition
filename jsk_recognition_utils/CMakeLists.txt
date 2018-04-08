@@ -48,6 +48,7 @@ include(UseCython)
 add_subdirectory(python/${PROJECT_NAME})
 
 find_package(OpenCV REQUIRED core imgproc)
+find_package(PCL REQUIRED)
 find_package(PkgConfig)
 pkg_check_modules(yaml_cpp yaml-cpp REQUIRED)
 IF(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
@@ -60,7 +61,7 @@ endif()
 include_directories(
   include ${catkin_INCLUDE_DIRS}
 )
-link_libraries(${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES}  yaml-cpp)
+link_libraries(${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARIES} yaml-cpp)
 
 add_library(jsk_recognition_utils SHARED
   src/grid_index.cpp

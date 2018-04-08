@@ -3,6 +3,7 @@ FROM ros:indigo-ros-core
 RUN apt-get update && apt-get install -y \
     ccache \
     git \
+    wget \
     python-setuptools \
     python-rosdep \
     python-wstool
@@ -22,7 +23,7 @@ RUN mkdir -p ~/ros/ws_jsk_recognition/src && \
 
 RUN cd ~/ros/ws_jsk_recognition/src && \
     rosdep update && \
-    rosdep install --from-path . -y -i -r
+    wget http://raw.github.com/jsk-ros-pkg/jsk_travis/master/rosdep-install.sh -O - | bash
 
 RUN cd ~/ros/ws_jsk_recognition && \
     apt-get install -y python-catkin-tools && \

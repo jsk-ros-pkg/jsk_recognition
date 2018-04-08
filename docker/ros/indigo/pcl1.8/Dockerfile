@@ -1,7 +1,6 @@
 FROM ros-indigo-base-jsk-recognition
 
 RUN apt-get update && apt-get install -y \
-    wget \
     libboost-all-dev \
     libeigen3-dev \
     libflann-dev \
@@ -33,7 +32,7 @@ RUN mkdir -p ~/ros/ws_jsk_recognition/src && \
 
 RUN cd ~/ros/ws_jsk_recognition/src && \
     rosdep update && \
-    rosdep install --from-path . -y -i -r
+    wget http://raw.github.com/jsk-ros-pkg/jsk_travis/master/rosdep-install.sh -O - | bash
 
 RUN cd ~/ros/ws_jsk_recognition && \
     . /opt/ros/indigo/setup.sh && \

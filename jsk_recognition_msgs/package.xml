@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>jsk_recognition_msgs</name>
-  <version>1.2.4</version>
+  <version>1.2.5</version>
   <description>ROS messages for jsk_pcl_ros and jsk_perception.</description>
 
   <url type="repository">http://github.com/jsk-ros-pkg/jsk_recognition</url>

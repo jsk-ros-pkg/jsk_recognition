@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>jsk_recognition_utils</name>
-  <version>1.2.4</version>
+  <version>1.2.5</version>
   <description>C++ library about sensor model, geometrical modeling and perception. </description>
   <maintainer email="ueda@jsk.t.u-tokyo.ac.jp">Ryohei Ueda</maintainer>
 

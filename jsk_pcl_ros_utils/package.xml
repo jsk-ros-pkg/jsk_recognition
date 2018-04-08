@@ -1,6 +1,6 @@
 <package>
   <name>jsk_pcl_ros_utils</name>
-  <version>1.2.4</version>
+  <version>1.2.5</version>
   <description>ROS utility nodelets for pointcloud perception.</description>
   <maintainer email="ueda@jsk.t.u-tokyo.ac.jp">Ryohei Ueda</maintainer>
 

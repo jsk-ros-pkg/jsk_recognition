@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.5 (2018-04-09)
+------------------
 * Add MaskRCNNInstanceSegmentation node (`#2257 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2257>`_)
   * MaskRCNN node publishes label imgs that have class and instance id
   * Add ~bg_label to label_image_decomposer which is not colorized

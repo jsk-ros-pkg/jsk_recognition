@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.5 (2018-04-09)
+------------------
 * Fix build of jsk_pcl_ros (on Kinetic) (`#2262 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2262>`_)
 * [jsk_pcl_ros/color_histogram_visualizer.py] use facecolor instead of axisbg (`#2250 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2250>`_)
   * use facecolor instead of axisbg

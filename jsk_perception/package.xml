@@ -1,6 +1,6 @@
 <package>
   <name>jsk_perception</name>
-  <version>1.2.4</version>
+  <version>1.2.5</version>
 
   <description>ROS nodes and nodelets for 2-D image perception.</description>
   <author>Manabu Saito</author>

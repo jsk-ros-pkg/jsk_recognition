@@ -33,7 +33,7 @@ RUN mkdir -p ~/ros/ws_jsk_recognition/src && \
 
 RUN cd ~/ros/ws_jsk_recognition/src && \
     rosdep update && \
-    rosdep install --from-path . -y -i
+    rosdep install --from-path . -y -i -r
 
 RUN cd ~/ros/ws_jsk_recognition && \
     apt-get install -y python-catkin-tools && \

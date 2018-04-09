@@ -36,7 +36,6 @@ RUN cd ~/ros/ws_jsk_recognition/src && \
 
 RUN cd ~/ros/ws_jsk_recognition && \
     . /opt/ros/indigo/setup.sh && \
-    export PATH=/usr/lib/ccache:$PATH && \
     catkin build -c && \
     cd && \
     rm -rf ros/ws_jsk_recognition

@@ -1,6 +1,7 @@
 <launch>
 
   <arg name="gui" default="true" />
+  <arg name="test" default="true" />
 
   <node name="static_tf_publisher_map_to_shelf"
         pkg="tf" type="static_transform_publisher"
@@ -44,6 +45,18 @@
           pkg="rviz" type="rviz"
           args="-d $(find jsk_recognition_utils)/sample/config/sample_bounding_box_array_publisher.rviz">
     </node>
+  </group>
+
+  <group if="$(arg test)">
+    <test test-name="test_bounding_box_array_publisher"
+          name="test_bounding_box_array_publisher"
+          pkg="jsk_tools" type="test_topic_published.py"
+          time-limit="360" retry="3">
+      <rosparam>
+        topic_0: /bounding_box_array_publisher/output
+        timeout_0: 10
+      </rosparam>
+    </test>
   </group>
 
 </launch>

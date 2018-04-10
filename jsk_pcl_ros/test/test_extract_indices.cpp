@@ -170,7 +170,7 @@ TEST_F(ExtractIndicesTest, testEvenOrganizedIndices)
   EXPECT_EQ(even_organized_cloud_->points.size(), original_cloud_->points.size());
   size_t non_nan_count = 0;
   for (size_t i = 0; i < even_organized_cloud_->points.size(); i++) {
-    if (!isnan(even_organized_cloud_->points[i].x)) {
+    if (!std::isnan(even_organized_cloud_->points[i].x)) {
       EXPECT_FLOAT_EQ(even_organized_cloud_->points[i].x, i);
       non_nan_count++;
     }
@@ -183,7 +183,7 @@ TEST_F(ExtractIndicesTest, testOddOrganizedIndices)
   EXPECT_EQ(odd_organized_cloud_->points.size(), original_cloud_->points.size());
   size_t non_nan_count = 0;
   for (size_t i = 0; i < odd_organized_cloud_->points.size(); i++) {
-    if (!isnan(odd_organized_cloud_->points[i].x)) {
+    if (!std::isnan(odd_organized_cloud_->points[i].x)) {
       EXPECT_FLOAT_EQ(odd_organized_cloud_->points[i].x, i);
       non_nan_count++;
     }

@@ -410,9 +410,9 @@ if (robot_self_filter_FOUND)
   target_link_libraries(jsk_pcl_ros ${robot_self_filter_LIBRARIES})
 endif (robot_self_filter_FOUND)
 
-add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
-add_dependencies(jsk_pcl_ros_base ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
-add_dependencies(jsk_pcl_ros_moveit ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
+add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencfg)
+add_dependencies(jsk_pcl_ros_base ${PROJECT_NAME}_gencfg)
+add_dependencies(jsk_pcl_ros_moveit ${PROJECT_NAME}_gencfg)
 
 target_link_libraries(jsk_pcl_ros_base
   ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
@@ -439,7 +439,7 @@ get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTO
 message("flags: ${CMAKE_CXX_FLAGS}")
 
 catkin_package(
-    DEPENDS pcl
+    DEPENDS PCL
     CATKIN_DEPENDS pcl_ros ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_recognition_utils
     INCLUDE_DIRS include
     LIBRARIES jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit

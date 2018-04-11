@@ -211,14 +211,14 @@ jsk_pcl_util_nodelet(src/pointcloud_to_pcd_nodelet.cpp
 jsk_pcl_util_nodelet(src/marker_array_voxel_to_pointcloud_nodelet.cpp
   "jsk_pcl_utils/MarkerArrayVoxelToPointCloud" "marker_array_voxel_to_pointcloud")
 add_library(jsk_pcl_ros_utils SHARED ${jsk_pcl_util_nodelet_sources})
-add_dependencies(jsk_pcl_ros_utils ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
+add_dependencies(jsk_pcl_ros_utils ${PROJECT_NAME}_gencfg)
 target_link_libraries(jsk_pcl_ros_utils
   ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
 
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 
 catkin_package(
-    DEPENDS pcl
+    DEPENDS PCL
     CATKIN_DEPENDS pcl_ros message_runtime ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_recognition_utils
     INCLUDE_DIRS include
     LIBRARIES jsk_pcl_ros_utils

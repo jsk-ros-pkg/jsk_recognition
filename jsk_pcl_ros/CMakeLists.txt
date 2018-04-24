@@ -123,6 +123,7 @@ generate_dynamic_reconfigure_options(
   cfg/PPFRegistration.cfg
   cfg/PrimitiveShapeClassifier.cfg
   cfg/Kinfu.cfg
+  cfg/PointcloudScreenpoint.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)

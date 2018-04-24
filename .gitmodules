@@ -3,5 +3,5 @@
 	url = https://github.com/garaemon/SLIC-Superpixels.git
 [submodule ".travis"]
 	path = .travis
-	url = https://github.com/jsk-ros-pkg/jsk_travis.git
-	branch = 0.4.26
+	url = https://github.com/furushchev/jsk_travis.git
+	branch = hoge

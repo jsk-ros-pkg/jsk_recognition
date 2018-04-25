@@ -5,9 +5,12 @@
   <arg name="GPU" default="0" />
   <arg name="USE_MASK" default="false" />
 
+  <arg name="required" default="false" />
+
   <node name="fcn_object_segmentation"
         pkg="jsk_perception" type="fcn_object_segmentation.py"
-        output="screen">
+        output="screen"
+        required="$(arg required)">
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <remap from="~input/mask" to="$(arg INPUT_MASK)" />
     <rosparam command="load" file="$(find jsk_perception)/config/voc_target_names.yaml" />
@@ -20,7 +23,8 @@
   </node>
 
   <node name="label_image_decomposer"
-        pkg="jsk_perception" type="label_image_decomposer.py">
+        pkg="jsk_perception" type="label_image_decomposer.py"
+        required="$(arg required)">
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <remap from="~input/label" to="fcn_object_segmentation/output" />
     <rosparam>

@@ -17,29 +17,29 @@ endif()
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   dynamic_reconfigure
-  eigen_conversions
-  genmsg
-  geometry_msgs
+  # eigen_conversions
+  # genmsg
+  # geometry_msgs
   image_geometry
-  image_transport
+  # image_transport
   interactive_markers
-  jsk_footstep_msgs
+  # jsk_footstep_msgs
   jsk_pcl_ros_utils
-  jsk_recognition_msgs
+  # jsk_recognition_msgs
   jsk_recognition_utils
   jsk_topic_tools
-  kdl_conversions
-  kdl_parser
+  # kdl_conversions
+  # kdl_parser
   laser_assembler
-  nodelet
+  # nodelet
   moveit_ros_perception
-  octomap_msgs
+  # octomap_msgs
   octomap_server
   pcl_msgs
   pcl_ros
-  sensor_msgs
+  # sensor_msgs
   tf
-  tf2_ros
+  # tf2_ros
   tf_conversions
   )
 find_package(PkgConfig)
@@ -440,7 +440,7 @@ message("flags: ${CMAKE_CXX_FLAGS}")
 
 catkin_package(
     DEPENDS PCL
-    CATKIN_DEPENDS pcl_ros ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_recognition_utils
+    CATKIN_DEPENDS pcl_ros ${PCL_MSGS} jsk_recognition_utils
     INCLUDE_DIRS include
     LIBRARIES jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit
 )

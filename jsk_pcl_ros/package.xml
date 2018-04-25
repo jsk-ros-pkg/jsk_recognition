@@ -16,47 +16,24 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <!-- <build_depend>pcl</build_depend> -->
-  <build_depend>pcl_ros</build_depend>
-  <build_depend>pcl_msgs</build_depend>
   <build_depend>cv_bridge</build_depend>
-  <build_depend>tf</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>geometry_msgs</build_depend>
-  <build_depend>stereo_msgs</build_depend>
-  <build_depend>nodelet</build_depend>
-  <build_depend>eigen_conversions</build_depend>
-  <build_depend>tf_conversions</build_depend>
-  <build_depend>tf2_ros</build_depend>
-  <build_depend>pcl_conversions</build_depend>
-  <build_depend>dynamic_reconfigure</build_depend>
-  <build_depend>std_srvs</build_depend>
-  <build_depend>std_msgs</build_depend>
-  <build_depend>image_transport</build_depend>
   <build_depend>image_geometry</build_depend>
-  <build_depend>image_view2</build_depend>
-  <build_depend>visualization_msgs</build_depend>
-  <build_depend>boost</build_depend>
-  <build_depend>rosboost_cfg</build_depend>
-  <build_depend>cv_bridge</build_depend>
-  <build_depend>ml_classifiers</build_depend>
-  <build_depend>diagnostic_updater</build_depend>
-  <build_depend>diagnostic_msgs</build_depend>
-  <build_depend>jsk_topic_tools</build_depend>
-  <build_depend>roscpp_tutorials</build_depend>
-  <build_depend>jsk_footstep_msgs</build_depend>
+  <build_depend>interactive_markers</build_depend>
+  <build_depend>jsk_data</build_depend>
+  <build_depend>jsk_pcl_ros_utils</build_depend>
   <build_depend>jsk_recognition_utils</build_depend>
-  <build_depend>robot_self_filter</build_depend>
   <run_depend>roscpp_tutorials</run_depend>
   <run_depend>jsk_topic_tools</run_depend>
-  <build_depend>kdl_parser</build_depend>
-  <build_depend>kdl_conversions</build_depend>
-  <build_depend>nav_msgs</build_depend>
-  <build_depend>octomap</build_depend>
+  <build_depend>jsk_topic_tools</build_depend>
+  <build_depend>laser_assembler</build_depend>
+  <build_depend>moveit_ros_perception</build_depend>
   <build_depend>octomap_server</build_depend>
-  <build_depend>octomap_msgs</build_depend>
-  <build_depend>jsk_pcl_ros_utils</build_depend>
-  <build_depend>jsk_data</build_depend>
+  <build_depend>pcl_msgs</build_depend>
+  <build_depend>pcl_ros</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>tf_conversions</build_depend>
+  <build_depend>yaml-cpp</build_depend>
+
 
   <!-- <run_depend>pcl</run_depend> -->
   <run_depend>eigen_conversions</run_depend>
@@ -84,17 +61,14 @@
   <run_depend>ml_classifiers</run_depend>
   <run_depend>diagnostic_updater</run_depend>
   <run_depend>diagnostic_msgs</run_depend>
-  <build_depend>python-sklearn</build_depend>
   <run_depend>python-sklearn</run_depend>
   <build_depend>laser_assembler</build_depend>
   <run_depend>laser_assembler</run_depend>
   <build_depend>moveit_ros_perception</build_depend>
   <run_depend>moveit_ros_perception</run_depend>
-  <build_depend>moveit_core</build_depend>
   <run_depend>moveit_core</run_depend>
   <build_depend>yaml-cpp</build_depend>
   <run_depend>yaml-cpp</run_depend>
-  <build_depend>jsk_recognition_msgs</build_depend>
   <run_depend>jsk_recognition_msgs</run_depend>
   <run_depend>jsk_footstep_msgs</run_depend>
   <build_depend>interactive_markers</build_depend>

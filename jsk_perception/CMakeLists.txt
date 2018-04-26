@@ -45,15 +45,22 @@ find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 find_package(OpenCV REQUIRED)
 message("OPENCV ${OpenCV_VERSION} FOUND")
 
-find_package(Eigen REQUIRED)
+find_package(Eigen3)
+if(EIGEN3_FOUND)
+  set(EIGEN3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
+else()
+  # Fallback to cmake_modules
+  find_package(Eigen REQUIRED)
+  set(EIGEN3_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS})
+endif()
 
+include(FindPkgConfig)
 pkg_check_modules(yaml_cpp yaml-cpp REQUIRED)
 if(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
 ## indigo yaml-cpp : 0.5.0 /  hydro yaml-cpp : 0.3.0
   add_definitions("-DUSE_OLD_YAML")
 endif()
 
-include(FindPkgConfig)
 pkg_check_modules(libcmt REQUIRED libcmt)
 
 # robot_self_filter is released on version greater than indigo
@@ -157,7 +164,7 @@ catkin_package(
   sensor_msgs
   std_msgs
   DEPENDS
-  INCLUDE_DIRS include
+  INCLUDE_DIRS include ${EIGEN3_INCLUDE_DIRS}
   LIBRARIES ${PROJECT_NAME} oriented_gradient
 )
 
@@ -172,7 +179,7 @@ if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/slic/slic.cpp)
 endif()
 
 # Build nodelet executables
-include_directories(include ${catkin_INCLUDE_DIRS} ${Eigen_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} slic ${libcmt_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} slic ${libcmt_INCLUDE_DIRS})
 if(robot_self_filter_FOUND)
   include_directories(${robot_self_filter_INCLUDE_DIRS})
 endif()
@@ -300,7 +307,7 @@ target_link_libraries(oriented_gradient ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 jsk_add_node(src/camshiftdemo.cpp camshiftdemo)
 jsk_add_node(src/linemod.cpp linemod)
 jsk_add_node(src/virtual_camera_mono.cpp virtual_camera_mono)
-jsk_add_node(src/point_pose_extractor.cpp point_pose_extractor DEPENDS libsiftfast)
+jsk_add_node(src/point_pose_extractor.cpp point_pose_extractor)
 jsk_add_node(src/white_balance_converter.cpp white_balance_converter)
 jsk_add_node(src/rectangle_detector.cpp rectangle_detector)
 jsk_add_node(src/calc_flow.cpp calc_flow)

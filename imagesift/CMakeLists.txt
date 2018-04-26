@@ -17,7 +17,7 @@ catkin_package(
     CATKIN_DEPENDS roscpp sensor_msgs posedetection_msgs image_transport cv_bridge
     LIBRARIES ${PROJECT_NAME}
     INCLUDE_DIRS include
-    DEPENDS OpenCV libsiftfast
+    DEPENDS OpenCV
 )
 
 catkin_python_setup()
@@ -42,7 +42,6 @@ macro(jsk_feature detector extractor exec_name)
   if($ENV{ROS_DISTRO} STREQUAL "groovy" OR $ENV{ROS_DISTRO} STREQUAL "hydro")
     set_target_properties(${exec_name} PROPERTIES COMPILE_FLAGS "-DOPENCV_NON_FREE")
   endif()
-  add_dependencies(${exec_name} posedetection_msgs_generate_messages_cpp libsiftfast)
 endmacro(jsk_feature detector extractor exec_name)
 
 message(STATUS "OpenCV_VERSION: ${OpenCV_VERSION}")
@@ -68,7 +67,6 @@ add_library(${PROJECT_NAME} SHARED ${nodelet_sources})
 add_definitions("-O2 -g")
 include_directories(include ${catkin_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBS})
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg)
 
 
 install(TARGETS ${PROJECT_NAME} ${jsk_exec}

@@ -16,7 +16,7 @@ Install CUDA
 
 - Download deb file from https://developer.nvidia.com/cuda-downloads::
 
-    # If you'd like to use CUDA8.0 on aUbuntu 14.04.
+    # If you'd like to use CUDA8.0 on Ubuntu 14.04.
     wget https://developer.nvidia.com/compute/cuda/8.0/Prod2/local_installers/cuda-repo-ubuntu1404-8-0-local-ga2_8.0.61-1_amd64-deb
     mv cuda-repo-ubuntu1404-8-0-local-ga2_8.0.61-1_amd64-deb cuda-repo-ubuntu1404-8-0-local-ga2_8.0.61-1_amd64.deb
     sudo dpkg -i cuda-repo-ubuntu1404-8-0-local-ga2_8.0.61-1_amd64.deb

@@ -1,6 +1,7 @@
 # screen point
 float32 x
 float32 y
+bool no_update
 ---
 # position in actual world
 std_msgs/Header header

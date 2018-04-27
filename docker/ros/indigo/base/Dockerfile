@@ -11,9 +11,12 @@ RUN apt-get update && apt-get install -y \
 RUN ccache -M 10G
 ENV PATH /usr/lib/ccache:$PATH
 
-# pip==7.1.2 is necessary to reinstall python modules by rosdep
-# https://github.com/pypa/pip/issues/3384
-RUN easy_install pip==7.1.2
+# Install pip
+# pip>=10 no longer uninstalls distutils packages (ex. packages installed via apt),
+# and fails to install packages via pip if they are already installed via apt.
+# See https://github.com/pypa/pip/issues/4805 for detail.
+RUN curl https://bootstrap.pypa.io/get-pip.py | python - \
+    pip install 'pip<10'
 
 RUN mkdir -p ~/ros/ws_jsk_recognition/src && \
     cd ~/ros/ws_jsk_recognition/src && \

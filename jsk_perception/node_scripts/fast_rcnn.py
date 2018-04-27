@@ -151,13 +151,14 @@ class FastRCNN(ConnectionBasedTransport):
             x = Variable(x_data, volatile=True)
             rects_val = Variable(rects, volatile=True)
             self.model.train = False
+            cls_score, bbox_pred = self.model(x, rects_val)
         else:
             with chainer.using_config('train', False), \
                  chainer.no_backprop_mode():
                 x = Variable(x_data)
                 rects_val = Variable(rects)
+                cls_score, bbox_pred = self.model(x, rects_val)
 
-        cls_score, bbox_pred = self.model(x, rects_val)
         scores = cuda.to_cpu(cls_score.data)
         bbox_pred = cuda.to_cpu(bbox_pred.data)
         return scores, bbox_pred

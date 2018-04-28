@@ -31,10 +31,10 @@
     <test test-name="test_add_bounding_box_array"
           name="test_add_bounding_box_array"
           pkg="jsk_tools" type="test_topic_published.py"
-          time-limit="360" retry="3">
+          time-limit="40" retry="3">
       <rosparam>
         topic_0: /add_bounding_box_array/output
-        timeout_0: 10
+        timeout_0: 30
       </rosparam>
     </test>
   </group>

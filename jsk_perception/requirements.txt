@@ -1,5 +1,6 @@
-chainer
-chainercv
+# FIXME: people_pose_estimation_2d.py does not work chainer>=4.0.0
+chainer<4
+chainercv<0.9
 fcn
 dlib
 h5py

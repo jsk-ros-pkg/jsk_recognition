@@ -1,0 +1,5 @@
+chainer
+chainercv
+fcn
+dlib
+h5py

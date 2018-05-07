@@ -2,8 +2,6 @@ import chainer
 import chainer.functions as F
 import chainer.links as L
 
-from roi_pooling_2d import roi_pooling_2d
-
 
 class VGG16FastRCNN(chainer.Chain):
 
@@ -55,7 +53,7 @@ class VGG16FastRCNN(chainer.Chain):
         h = F.relu(self.conv5_1(h))
         h = F.relu(self.conv5_2(h))
         h = F.relu(self.conv5_3(h))
-        h = roi_pooling_2d(h, rois, 7, 7, spatial_scale=0.0625)
+        h = F.roi_pooling_2d(h, rois, 7, 7, spatial_scale=0.0625)
 
         h = F.dropout(F.relu(self.fc6(h)), ratio=0.5)
         h = F.dropout(F.relu(self.fc7(h)), ratio=0.5)

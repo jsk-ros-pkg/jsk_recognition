@@ -5,8 +5,6 @@ import chainer.links as L
 from chainer import Variable
 from distutils.version import LooseVersion
 
-from roi_pooling_2d import roi_pooling_2d
-
 
 class VGG_CNN_M_1024(chainer.Chain):
 
@@ -45,7 +43,7 @@ class VGG_CNN_M_1024(chainer.Chain):
         h = self.conv5(h)
         h = F.relu(h)
 
-        h = roi_pooling_2d(h, rois, 6, 6, spatial_scale=0.0625)
+        h = F.roi_pooling_2d(h, rois, 6, 6, spatial_scale=0.0625)
 
         h = self.fc6(h)
         h = F.relu(h)

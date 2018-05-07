@@ -107,7 +107,7 @@ namespace jsk_pcl_ros
     box_threshold_ = config.box_threshold;
     circle_threshold_ = config.circle_threshold;
 
-    if (queue_size_ = config.queue_size) {
+    if (queue_size_ != config.queue_size) {
       queue_size_ = config.queue_size;
       if (isSubscribed()) {
         unsubscribe();

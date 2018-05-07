@@ -66,7 +66,7 @@ namespace jsk_pcl_ros
     compare_policy_ = jsk_recognition_utils::ComparePolicy(config.compare_policy);
     distance_threshold_ = config.distance_threshold;
     flip_threshold_ = config.flip_threshold;
-    if (queue_size_ = config.queue_size) {
+    if (queue_size_ != config.queue_size) {
       queue_size_ = config.queue_size;
       if (isSubscribed()) {
         unsubscribe();

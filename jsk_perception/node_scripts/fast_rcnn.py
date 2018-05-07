@@ -178,7 +178,8 @@ def main():
     if not cuda.available:
         rospy.logfatal('CUDA environment is required.')
         sys.exit(1)
-    use_gpu = True
+    gpu = rospy.get_param('~gpu', -1)
+    use_gpu = True if gpu >= 0 else False
 
     # setup model
     PKG = 'jsk_perception'
@@ -196,7 +197,7 @@ def main():
     rospy.loginfo('Loading chainermodel')
     S.load_hdf5(chainermodel, model)
     if use_gpu:
-        model.to_gpu()
+        model.to_gpu(gpu)
     rospy.loginfo('Finished loading chainermodel')
 
     # assumptions

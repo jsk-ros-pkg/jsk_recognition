@@ -174,10 +174,6 @@ def main():
         rospy.logerr('Unspecified rosparam: {0}'.format(e))
         sys.exit(1)
 
-    # FIXME: In CPU mode, there is no detections.
-    if not cuda.available:
-        rospy.logfatal('CUDA environment is required.')
-        sys.exit(1)
     gpu = rospy.get_param('~gpu', -1)
     use_gpu = True if gpu >= 0 else False
 

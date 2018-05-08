@@ -2,6 +2,7 @@
 
   <arg name="INPUT_IMAGE" />
   <arg name="MODEL" />
+  <arg name="GPU" default="0" />
 
   <node name="selective_search"
         pkg="jsk_perception" type="selective_search.py">
@@ -14,6 +15,7 @@
     <remap from="~input/rect_array" to="selective_search/output" />
     <rosparam subst_value="true">
       model: $(arg MODEL)
+      gpu: $(arg GPU)
     </rosparam>
   </node>
 

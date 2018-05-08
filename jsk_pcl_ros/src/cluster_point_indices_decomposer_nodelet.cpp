@@ -88,6 +88,8 @@ namespace jsk_pcl_ros
     pnh_->param("align_boxes", align_boxes_, false);
     if (align_boxes_) {
       pnh_->param("align_boxes_with_plane", align_boxes_with_plane_, true);
+    } else if (pnh_->hasParam("align_boxes_with_plane")) {
+      NODELET_WARN("Rosparam ~align_boxes_with_plane is used only with ~align_boxes:=true, so ignoring it.");
     }
     if (align_boxes_ && !align_boxes_with_plane_) {
       tf_listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
@@ -96,6 +98,8 @@ namespace jsk_pcl_ros
         return;
       }
       ROS_INFO("Aligning bboxes with '%s' using tf transform.", target_frame_id_.c_str());
+    } else if (pnh_->hasParam("target_frame_id")) {
+      NODELET_WARN("Rosparam ~target_frame_id is used only with ~align_boxes:=true and ~align_boxes_with_plane:=true, so ignoring it.");
     }
     pnh_->param("use_pca", use_pca_, false);
     pnh_->param("force_to_flip_z_axis", force_to_flip_z_axis_, true);

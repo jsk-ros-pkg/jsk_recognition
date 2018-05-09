@@ -21,6 +21,7 @@ The code is open source, and `available on github`_.
    install_realsense_camera
    install_xtion2
    install_ensenso
+   install_chainer_gpu
 
 
 .. toctree::

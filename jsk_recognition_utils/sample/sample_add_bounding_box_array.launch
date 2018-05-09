@@ -21,6 +21,7 @@
         clear_params="true">
     <rosparam subst_value="true">
       approximate_sync: true
+      slop: 0.9  # input topics are slow (~1Hz)
       topics:
         - bboxes_a/bounding_box_array_publisher/output
         - bboxes_b/bounding_box_array_publisher/output

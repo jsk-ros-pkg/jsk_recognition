@@ -73,7 +73,7 @@ namespace jsk_pcl_ros
     if (!pnh_->getParam("tf_prefix", tf_prefix_))
     {
       if (publish_tf_) {
-        ROS_WARN("~tf_prefix is not specified, using %s", getName().c_str());
+        NODELET_WARN("~tf_prefix is not specified, using %s", getName().c_str());
       }
       tf_prefix_ = getName();
     }
@@ -83,19 +83,23 @@ namespace jsk_pcl_ros
     pnh_->param("queue_size", queue_size_, 100);
     pnh_->param("publish_clouds", publish_clouds_, false);
     if (publish_clouds_) {
-      ROS_WARN("~output%%02d are not published before subscribed, you should subscribe ~debug_output in debuging.");
+      NODELET_WARN("~output%%02d are not published before subscribed, you should subscribe ~debug_output in debuging.");
     }
     pnh_->param("align_boxes", align_boxes_, false);
     if (align_boxes_) {
       pnh_->param("align_boxes_with_plane", align_boxes_with_plane_, true);
+    } else if (pnh_->hasParam("align_boxes_with_plane")) {
+      NODELET_WARN("Rosparam ~align_boxes_with_plane is used only with ~align_boxes:=true, so ignoring it.");
     }
     if (align_boxes_ && !align_boxes_with_plane_) {
       tf_listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
       if (!pnh_->getParam("target_frame_id", target_frame_id_)) {
-        ROS_FATAL("~target_frame_id is not specified");
+        NODELET_FATAL("~target_frame_id is not specified");
         return;
       }
-      ROS_INFO("Aligning bboxes with '%s' using tf transform.", target_frame_id_.c_str());
+      NODELET_INFO("Aligning bboxes with '%s' using tf transform.", target_frame_id_.c_str());
+    } else if (pnh_->hasParam("target_frame_id")) {
+      NODELET_WARN("Rosparam ~target_frame_id is used only with ~align_boxes:=true and ~align_boxes_with_plane:=true, so ignoring it.");
     }
     pnh_->param("use_pca", use_pca_, false);
     pnh_->param("force_to_flip_z_axis", force_to_flip_z_axis_, true);
@@ -748,7 +752,7 @@ namespace jsk_pcl_ros
         for (size_t i = publishers_.size(); i < num; i++)
         {
             std::string topic_name = (boost::format("output%02u") % (i)).str();
-            ROS_INFO("advertising %s", topic_name.c_str());
+            NODELET_INFO("advertising %s", topic_name.c_str());
             ros::Publisher publisher = pnh_->advertise<sensor_msgs::PointCloud2>(topic_name, 1);
             publishers_.push_back(publisher);
         }

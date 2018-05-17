@@ -166,9 +166,9 @@ def main():
     # node_scripts/mask_rcnn_instance_segmentation.py
     download_data(
         pkg_name=PKG,
-        path='trained_data/mask_rcnn_resnet50_voc_20180403.npz',
-        url='https://drive.google.com/uc?id=1Ui_SXZzF388fLZ-WM1rponFziCCJcm3n',
-        md5='16a196fab8789f7c72a71241a85f59f7',
+        path='trained_data/mask_rcnn_resnet50_voc_20180516.npz',
+        url='https://drive.google.com/uc?id=1uv_jK-CAIJUXsRNmccFEISSKW4vXqI46',
+        md5='47a507934b6bc20f0d9274825b734942',
     )
 
 

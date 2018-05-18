@@ -124,22 +124,13 @@ def main():
 
     # node_scripts/people_pose_estimation_2d.py
     path = 'trained_data/pose_estimation_2d_chainermodel.pkl'
-    if not 'chainer' in sys.modules or LooseVersion(chainer.__version__) >= LooseVersion('2.0.0'):
-        # created on chainer v2.0.0
+    if not 'chainer' in sys.modules:
         download_data(
             pkg_name=PKG,
             path=path,
-            url='https://drive.google.com/uc?id=0B_NiLAzvehC9R2stRmQyM3ZiVjQ',
-            md5='587933c2c0adf335ebed0486c183541f',
-        )
-    else:
-        # created on chainer v1.24.0
-        download_data(
-            pkg_name=PKG,
-            path=path,
-            url='https://drive.google.com/uc?id=0B4ysRIwB7GryNnhidGN3VVJkNVE',
-            md5='4d41e1ac80185849384a67a329746115',
-        )
+            url='https://drive.google.com/uc?id=0B6J8T1kmKcLj1RZmgVaNxlVH3m1Bz',
+            md5='c0683094aa42eab1b9424e05112190c5',
+    )
 
     # node_scripts/feature_based_object_recognition.py
     download_data(

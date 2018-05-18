@@ -129,7 +129,7 @@ def main():
             pkg_name=PKG,
             path=path,
             url='https://drive.google.com/'
-            'uc?id=0B6J8T1kmKcLj1RZmgVaNxlVH3m1Bz',
+            'uc?id=1la-B-I1Dh00BRkJuNC3TAXju6p3ccmmb',
             md5='c0683094aa42eab1b9424e05112190c5',
         )
 

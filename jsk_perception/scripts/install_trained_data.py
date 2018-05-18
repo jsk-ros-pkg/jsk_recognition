@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
 import argparse
-from distutils.version import LooseVersion
 import multiprocessing
 import os.path as osp
-import sys
 
 try:
-    import chainer
+    import chainer  # NOQA
+    _chainer_available = True
 except:
     print('### Failed to import chainer')
+    _chainer_available = False
 
 import jsk_data
 
@@ -124,13 +124,14 @@ def main():
 
     # node_scripts/people_pose_estimation_2d.py
     path = 'trained_data/pose_estimation_2d_chainermodel.pkl'
-    if not 'chainer' in sys.modules:
+    if _chainer_available:
         download_data(
             pkg_name=PKG,
             path=path,
-            url='https://drive.google.com/uc?id=0B6J8T1kmKcLj1RZmgVaNxlVH3m1Bz',
+            url='https://drive.google.com/'
+            'uc?id=0B6J8T1kmKcLj1RZmgVaNxlVH3m1Bz',
             md5='c0683094aa42eab1b9424e05112190c5',
-    )
+        )
 
     # node_scripts/feature_based_object_recognition.py
     download_data(

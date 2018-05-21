@@ -19,7 +19,7 @@
     <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <rosparam subst_value="true">
       gpu: $(arg gpu)
-      pretrained_model: $(find jsk_perception)/trained_data/mask_rcnn_resnet50_voc_20180403.npz
+      pretrained_model: $(find jsk_perception)/trained_data/mask_rcnn_resnet50_voc_20180516.npz
       fg_class_names:
         - aeroplane
         - bicycle

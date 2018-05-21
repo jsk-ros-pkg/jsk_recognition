@@ -40,6 +40,10 @@ Parameters
 
   GPU id.
 
+* ``~score_thresh`` (Float, default: ``0.7``)
+
+  Score threshold of detections.
+
 * ``~fg_class_names`` (List of String, required)
 
   Foreground class names that is used to identify number of class.

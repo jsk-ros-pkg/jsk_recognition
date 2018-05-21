@@ -49,6 +49,7 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
             n_fg_class=n_fg_class,
             pretrained_model=pretrained_model,
         )
+        self.model.score_thresh = rospy.get_param('~score_thresh', 0.7)
         if self.gpu >= 0:
             self.model.to_gpu()
 

@@ -355,7 +355,7 @@ install(DIRECTORY node_scripts/ scripts/
         USE_SOURCE_PERMISSIONS
 )
 
-install(DIRECTORY sample launch euslisp plugins template
+install(DIRECTORY config euslisp launch sample plugins template
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         USE_SOURCE_PERMISSIONS
 )

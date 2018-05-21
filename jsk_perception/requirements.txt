@@ -1,0 +1,6 @@
+# FIXME: people_pose_estimation_2d.py does not work chainer>=4.0.0
+chainer==3.5.0    # chainer<4  # '<' does not work on catkin_virtualenv
+chainercv==0.8.0  # chainercv<0.9
+fcn
+dlib
+h5py

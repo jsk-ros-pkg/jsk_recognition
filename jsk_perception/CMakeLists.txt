@@ -16,6 +16,7 @@ endif()
 
 find_package(catkin REQUIRED COMPONENTS
   angles
+  catkin_virtualenv
   cmake_modules
   cv_bridge
   dynamic_reconfigure
@@ -167,6 +168,8 @@ catkin_package(
   INCLUDE_DIRS include ${EIGEN3_INCLUDE_DIRS}
   LIBRARIES ${PROJECT_NAME} oriented_gradient
 )
+
+catkin_generate_virtualenv()
 
 
 # ------------------------------------------------------------------------------------
@@ -338,6 +341,13 @@ add_custom_target(eusmodel_template ALL DEPENDS
 # Install
 # ------------------------------------------------------------------------------------
 
+# catkin_virtualenv overwrites catkin_install_python, so all python executables
+# must be installed via catkin_install_python.
+catkin_install_python(PROGRAMS ${${PROJECT_NAME}_node_scripts}
+                      DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+install(FILES requirements.txt
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
 install(TARGETS
   # Libraries
   ${PROJECT_NAME}
@@ -350,7 +360,7 @@ install(TARGETS
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-install(DIRECTORY node_scripts/ scripts/
+install(DIRECTORY scripts/
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         USE_SOURCE_PERMISSIONS
 )

@@ -18,6 +18,7 @@
 
   <!-- ALPHABETICAL ORDER -->
   <build_depend>angles</build_depend>
+  <build_depend>catkin_virtualenv</build_depend>
   <build_depend>cmake_modules</build_depend>
   <build_depend>cv_bridge</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
@@ -74,16 +75,6 @@
   <run_depend>openni2_launch</run_depend>
   <run_depend>pcl_ros</run_depend>
   <run_depend>posedetection_msgs</run_depend>
-  <!-- install chainer {{ -->
-  <run_depend>python-h5py</run_depend>
-  <run_depend>python-chainer-pip</run_depend>
-  <run_depend>python-chainercv-pip</run_depend>
-  <!-- }} install chainer -->
-  <run_depend>python-dlib</run_depend>  <!-- pip -->
-  <!-- install fcn {{ -->
-  <run_depend>leveldb</run_depend>
-  <run_depend>python-fcn-pip</run_depend>  <!-- pip -->
-  <!-- }} install fcn -->
   <run_depend>python-sklearn</run_depend>
   <run_depend>python-yaml</run_depend>
   <run_depend>rosbag</run_depend>
@@ -112,5 +103,6 @@
   <export>
     <nodelet plugin="${prefix}/plugins/nodelet/libjsk_perception.xml"/>
     <nodelet plugin="${prefix}/plugins/nodelet/libopencv_apps.xml"/>
+    <pip_requirements>requirements.txt</pip_requirements>
   </export>
 </package>

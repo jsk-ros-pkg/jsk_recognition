@@ -4,7 +4,6 @@
 #    See: https://arxiv.org/abs/1611.08050
 
 import math
-import pickle
 
 import chainer
 import chainer.functions as F
@@ -25,6 +24,8 @@ from jsk_recognition_msgs.msg import PeoplePose
 from jsk_recognition_msgs.msg import PeoplePoseArray
 from sensor_msgs.msg import CameraInfo
 from sensor_msgs.msg import Image
+
+from openpose.net import OpenPoseNet
 
 
 def padRightDownCorner(img, stride, padValue):
@@ -116,10 +117,11 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
 
     def _load_chainer_model(self):
         model_file = rospy.get_param('~model_file')
-        self.func = pickle.load(open(model_file, 'rb'))
+        self.net = OpenPoseNet()
+        chainer.serializers.load_npz(model_file, self.net)
         rospy.loginfo('Finished loading trained model: {0}'.format(model_file))
         if self.gpu != -1:
-            self.func.to_gpu(self.gpu)
+            self.net.to_gpu(self.gpu)
 
     def subscribe(self):
         if self.with_depth:
@@ -277,21 +279,24 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
             if self.gpu != -1:
                 x = chainer.cuda.to_gpu(x)
             x = chainer.Variable(x)
-            y = self.func(inputs={'image': x},
-                          outputs=['Mconv7_stage6_L2', 'Mconv7_stage6_L1'])
+            pafs, heatmaps = self.net(x)
+            paf = pafs[-1]
+            heatmap = heatmaps[-1]
 
             # extract outputs, resize, and remove padding
-            y0 = F.resize_images(
-                y[0], (y[0].data.shape[2] * self.stride, y[0].data.shape[3] * self.stride))
-            heatmap = y0[:, :, :padded_img.shape[0] -
-                         pad[2], :padded_img.shape[1] - pad[3]]
+            heatmap = F.resize_images(
+                heatmap, (heatmap.data.shape[2] * self.stride,
+                          heatmap.data.shape[3] * self.stride))
+            heatmap = heatmap[:, :, :padded_img.shape[0] -
+                              pad[2], :padded_img.shape[1] - pad[3]]
             heatmap = F.resize_images(
                 heatmap, (bgr_img.shape[0], bgr_img.shape[1]))
             heatmap = xp.transpose(xp.squeeze(heatmap.data), (1, 2, 0))
-            y1 = F.resize_images(
-                y[1], (y[1].data.shape[2] * self.stride, y[1].data.shape[3] * self.stride))
-            paf = y1[:, :, :padded_img.shape[0] -
-                     pad[2], :padded_img.shape[1] - pad[3]]
+            paf = F.resize_images(
+                paf, (paf.data.shape[2] * self.stride,
+                      paf.data.shape[3] * self.stride))
+            paf = paf[:, :, :padded_img.shape[0] -
+                      pad[2], :padded_img.shape[1] - pad[3]]
             paf = F.resize_images(paf, (bgr_img.shape[0], bgr_img.shape[1]))
             paf = xp.transpose(xp.squeeze(paf.data), (1, 2, 0))
 

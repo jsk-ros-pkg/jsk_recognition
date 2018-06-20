@@ -23,7 +23,7 @@
   <build_depend>jsk_data</build_depend>
   <build_depend>jsk_pcl_ros_utils</build_depend>
   <build_depend>jsk_recognition_utils</build_depend>
-  <build_depend>jsk_topic_tools</build_depend>
+  <build_depend version_gte="2.2.7">jsk_topic_tools</build_depend>
   <build_depend>laser_assembler</build_depend>
   <build_depend>moveit_ros_perception</build_depend>
   <build_depend>octomap_server</build_depend>
@@ -50,7 +50,7 @@
   <run_depend>jsk_pcl_ros_utils</run_depend>
   <run_depend>jsk_recognition_msgs</run_depend>
   <run_depend>jsk_recognition_utils</run_depend>
-  <run_depend>jsk_topic_tools</run_depend>
+  <run_depend version_gte="2.2.7">jsk_topic_tools</run_depend>
   <run_depend>kdl_conversions</run_depend>
   <run_depend>kdl_parser</run_depend>
   <run_depend>laser_assembler</run_depend>

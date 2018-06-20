@@ -297,19 +297,6 @@ namespace jsk_pcl_ros_utils
       ROS_ERROR ("ERROR: Different width and height. Points[width:%d height:%d] Image[width:%d height:%d]", point_cloud2_msg->width, point_cloud2_msg->height, image_msg->width, image_msg->height);
     }
   }
-
-  void MaskImageToDepthConsideredMaskImage::updateDiagnostic(
-    diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-    if (vital_checker_->isAlive()) {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                   "MaskImageToDepthConsideredMaskImage running");
-    }
-    else {
-      jsk_topic_tools::addDiagnosticErrorSummary(
-        "MaskImageToDepthConsideredMaskImage", vital_checker_, stat);
-    }
-  }
 }
 
 #include <pluginlib/class_list_macros.h>

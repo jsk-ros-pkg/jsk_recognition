@@ -57,18 +57,6 @@ namespace jsk_pcl_ros_utils
     sub_.shutdown();
   }
 
-  void PointCloudToPointIndices::updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-    if (vital_checker_->isAlive())
-    {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "PointCloudToPointIndices running");
-    }
-    else
-    {
-      jsk_topic_tools::addDiagnosticErrorSummary("PointCloudToPointIndices", vital_checker_, stat);
-    }
-  }
-
   void PointCloudToPointIndices::convert(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {
     vital_checker_->poke();

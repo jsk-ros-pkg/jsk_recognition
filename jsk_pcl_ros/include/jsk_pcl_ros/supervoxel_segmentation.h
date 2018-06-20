@@ -58,8 +58,6 @@ namespace jsk_pcl_ros
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void segment(
       const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
     virtual void configCallback (Config &config, uint32_t level);

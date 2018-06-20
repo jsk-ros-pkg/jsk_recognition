@@ -443,19 +443,6 @@ namespace jsk_pcl_ros
       return true;
     }
   }
-
-  void IntermittentImageAnnotator::updateDiagnostic(
-    diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-    if (vital_checker_->isAlive()) {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                   "IntermittentImageAnnotator running");
-    }
-    else {
-      jsk_topic_tools::addDiagnosticErrorSummary(
-        "IntermittentImageAnnotator", vital_checker_, stat);
-    }
-  }
 }
 
 #include <pluginlib/class_list_macros.h>

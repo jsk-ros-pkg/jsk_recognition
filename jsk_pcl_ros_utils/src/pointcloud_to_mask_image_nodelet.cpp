@@ -69,18 +69,6 @@ namespace jsk_pcl_ros_utils
     sub_image_.shutdown();
   }
 
-  void PointCloudToMaskImage::updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-    if (vital_checker_->isAlive())
-    {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "PointCloudToMaskImage running");
-    }
-    else
-    {
-      jsk_topic_tools::addDiagnosticErrorSummary("PointCloudToMaskImage", vital_checker_, stat);
-    }
-  }
-
   void PointCloudToMaskImage::configCallback(Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mutex_);

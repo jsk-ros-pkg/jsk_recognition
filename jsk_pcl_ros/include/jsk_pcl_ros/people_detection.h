@@ -70,8 +70,6 @@ namespace jsk_pcl_ros {
       const sensor_msgs::CameraInfo::ConstPtr& info_msg);
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper& stat);
     virtual void detect(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
 
     ////////////////////////////////////////////////////////

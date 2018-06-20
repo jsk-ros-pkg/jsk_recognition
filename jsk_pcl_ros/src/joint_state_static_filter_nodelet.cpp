@@ -173,13 +173,13 @@ namespace jsk_pcl_ros
                      name_ + " running");
       }
       else {
-        jsk_recognition_utils::addDiagnosticErrorSummary(
-          name_, joint_vital_, stat);
+        jsk_topic_tools::addDiagnosticErrorSummary(
+          name_, joint_vital_, stat, diagnostic_error_level_);
       }
     }
     else {
-      jsk_recognition_utils::addDiagnosticErrorSummary(
-        name_, vital_checker_, stat);
+      jsk_topic_tools::addDiagnosticErrorSummary(
+        name_, vital_checker_, stat, diagnostic_error_level_);
     }
 
   }

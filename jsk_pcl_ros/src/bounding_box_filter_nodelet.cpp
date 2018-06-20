@@ -51,24 +51,6 @@ namespace jsk_pcl_ros
     srv_->setCallback (f);
 
     ////////////////////////////////////////////////////////
-    // Diagnostics
-    ////////////////////////////////////////////////////////
-    diagnostic_updater_.reset(
-      new jsk_recognition_utils::TimeredDiagnosticUpdater(*pnh_, ros::Duration(1.0)));
-    diagnostic_updater_->setHardwareID(getName());
-    diagnostic_updater_->add(
-      getName() + "::BoundingBoxFilter",
-      boost::bind(
-        &BoundingBoxFilter::updateDiagnostic,
-        this,
-        _1));
-    double vital_rate;
-    pnh_->param("vital_rate", vital_rate, 1.0);
-    vital_checker_.reset(
-      new jsk_topic_tools::VitalChecker(1 / vital_rate));
-    diagnostic_updater_->start();
-
-    ////////////////////////////////////////////////////////
     // Publishers
     ////////////////////////////////////////////////////////
     pnh_->param("with_indices", with_indices_, true);
@@ -239,22 +221,19 @@ namespace jsk_pcl_ros
                    "BoundingBoxArray running");
       stat.add("Number of filtered box (Avg.)", remove_counter_.mean());
       stat.add("Number of passed box (Avg.)", pass_counter_.mean());
-      jsk_recognition_utils::addDiagnosticBooleanStat("Use x dimension", use_x_dimension_, stat);
+      jsk_topic_tools::addDiagnosticBooleanStat("Use x dimension", use_x_dimension_, stat);
       stat.add("minimum x dimension", x_dimension_min_);
       stat.add("maximum x dimension", x_dimension_max_);
-      jsk_recognition_utils::addDiagnosticBooleanStat("Use y dimension", use_y_dimension_, stat);
+      jsk_topic_tools::addDiagnosticBooleanStat("Use y dimension", use_y_dimension_, stat);
       stat.add("minimum y dimension", y_dimension_min_);
       stat.add("maximum y dimension", y_dimension_max_);
-      jsk_recognition_utils::addDiagnosticBooleanStat("Use z dimension", use_z_dimension_, stat);
+      jsk_topic_tools::addDiagnosticBooleanStat("Use z dimension", use_z_dimension_, stat);
       stat.add("minimum z dimension", z_dimension_min_);
       stat.add("maximum z dimension", z_dimension_max_);
-      jsk_recognition_utils::addDiagnosticBooleanStat("Filter limit negative",
+      jsk_topic_tools::addDiagnosticBooleanStat("Filter limit negative",
                                filter_limit_negative_, stat);
     }
-    else {
-      jsk_recognition_utils::addDiagnosticErrorSummary(
-        "BoundingBoxArray", vital_checker_, stat);
-    }
+    DiagnosticNodelet::updateDiagnostic(stat);
   }
   
 }

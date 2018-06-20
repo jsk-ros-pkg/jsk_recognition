@@ -108,19 +108,6 @@ namespace jsk_pcl_ros_utils
     vertical_angular_threshold_ = config.vertical_angular_threshold;
   }
 
-  void PlaneReasoner::updateDiagnostic(
-    diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-    if (vital_checker_->isAlive()) {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                   name_ + " running");
-    }
-    else {
-      jsk_topic_tools::addDiagnosticErrorSummary(
-        name_, vital_checker_, stat);
-    }
-  }
-
   void PlaneReasoner::reason(
       const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
       const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& inliers_msg,

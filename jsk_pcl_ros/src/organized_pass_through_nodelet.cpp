@@ -158,10 +158,7 @@ namespace jsk_pcl_ros
                                                 filter_limit_negative_,
                                                 stat);
     }
-    else {
-      jsk_recognition_utils::addDiagnosticErrorSummary(
-        "ClusterPointIndicesDecomposer", vital_checker_, stat);
-    }
+    DiagnosticNodelet::updateDiagnostic(stat);
   }
 }
 

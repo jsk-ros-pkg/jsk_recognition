@@ -162,8 +162,6 @@ namespace jsk_pcl_ros
       virtual void onInit();
       virtual void subscribe();
       virtual void unsubscribe();
-      virtual void updateDiagnostic(
-          diagnostic_updater::DiagnosticStatusWrapper &);
       
    public:
       TargetAdaptiveTracking();

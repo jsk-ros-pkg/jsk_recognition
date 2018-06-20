@@ -58,26 +58,23 @@
 #include "jsk_recognition_msgs/Int32Stamped.h"
 
 #include "jsk_pcl_ros/EuclideanClusteringConfig.h"
-#include <diagnostic_updater/diagnostic_updater.h>
-#include <diagnostic_updater/publisher.h>
 #include <Eigen/StdVector>
 #include "jsk_recognition_utils/pcl_util.h"
 #include "jsk_recognition_utils/pcl_conversion_util.h"
-#include <jsk_topic_tools/vital_checker.h>
 #include <jsk_topic_tools/time_accumulator.h>
 
-#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 
 namespace jsk_pcl_ros
 {
-  class EuclideanClustering : public jsk_topic_tools::ConnectionBasedNodelet
+  class EuclideanClustering : public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef jsk_pcl_ros::EuclideanClusteringConfig Config;
     typedef std::vector<Eigen::Vector4f,
                         Eigen::aligned_allocator<Eigen::Vector4f> >
     Vector4fVector;
-    
+    EuclideanClustering() : DiagnosticNodelet("EuclideanClustering") {}
   protected:
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     boost::mutex mutex_;
@@ -94,8 +91,6 @@ namespace jsk_pcl_ros
     int minsize_;
     int maxsize_;
     
-    jsk_recognition_utils::TimeredDiagnosticUpdater::Ptr diagnostic_updater_;
-    jsk_topic_tools::VitalChecker::Ptr vital_checker_;
     jsk_topic_tools::TimeAccumulator segmentation_acc_;
     jsk_topic_tools::TimeAccumulator kdtree_acc_;
     jsk_recognition_utils::Counter cluster_counter_;
@@ -107,7 +102,7 @@ namespace jsk_pcl_ros
     virtual void extract(const sensor_msgs::PointCloud2ConstPtr &input);
     bool serviceCallback(jsk_recognition_msgs::EuclideanSegment::Request &req,
                          jsk_recognition_msgs::EuclideanSegment::Response &res);
-    void updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat);
+    virtual void updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual std::vector<pcl::PointIndices> pivotClusterIndices(
       std::vector<int>& pivot_table,
       std::vector<pcl::PointIndices>& cluster_indices);

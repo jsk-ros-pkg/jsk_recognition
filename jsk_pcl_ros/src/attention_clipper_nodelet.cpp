@@ -516,20 +516,6 @@ namespace jsk_pcl_ros
       NODELET_ERROR("[%s] Transform error: %s", __PRETTY_FUNCTION__, e.what());
     } 
   }
-
-  void AttentionClipper::updateDiagnostic(
-    diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-    if (vital_checker_->isAlive()) {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                   "AttentionClipper running");
-    }
-    else {
-      jsk_topic_tools::addDiagnosticErrorSummary(
-        "AttentionClipper", vital_checker_, stat);
-    }
-  }
-
 }
 
 #include <pluginlib/class_list_macros.h>

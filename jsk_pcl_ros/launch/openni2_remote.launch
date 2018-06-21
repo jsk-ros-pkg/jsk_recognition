@@ -2,6 +2,7 @@
   <arg name="camera" default="camera_remote" />
   <arg name="local_camera" default="camera" />
   <arg name="rgb" default="rgb" />
+  <arg name="depth" default="depth" />
   <arg name="rgb_camera_info_url"   default="" />
   <arg name="depth_camera_info_url" default="" />
   <arg name="rgb_frame_id"   default="/$(arg local_camera)_rgb_optical_frame" />
@@ -14,12 +15,12 @@
   <arg name="depth_calibration_file" default="$(find jsk_pcl_ros)/config/default_depth_calibration_parameter.yaml" />
   <arg name="republish" default="false" />
   <group>       <!--group only for remapping-->
-    <remap from="/$(arg camera)_uncalibrated/depth/image_raw"
-           to="/$(arg local_camera)/depth/image_raw"/>
-    <remap from="/$(arg camera)_uncalibrated/depth/camera_info"
-           to="/$(arg local_camera)/depth/camera_info"/>
-    <remap from="/$(arg camera)_uncalibrated/depth/image_rect_raw"
-           to="/$(arg local_camera)/depth/image_rect_raw_calibrated"/>
+    <remap from="/$(arg camera)_uncalibrated/$(arg depth)/image_raw"
+           to="/$(arg local_camera)/$(arg depth)/image_raw"/>
+    <remap from="/$(arg camera)_uncalibrated/$(arg depth)/camera_info"
+           to="/$(arg local_camera)/$(arg depth)/camera_info"/>
+    <remap from="/$(arg camera)_uncalibrated/$(arg depth)/image_rect_raw"
+           to="/$(arg local_camera)/$(arg depth)/image_rect_raw_calibrated"/>
     <remap from="/$(arg camera)_uncalibrated/depth_registered/image_raw"
            to="/$(arg local_camera)/depth_registered/image_raw"/>
     <remap from="/$(arg camera)_uncalibrated/$(arg rgb)/image_raw"
@@ -52,12 +53,12 @@
          /$(arg camera)/depth_registered/hw_registered/image_rect_raw_calibrated  ->
          /$(arg camera)/depth_registered/points
     -->
-    <remap from="/$(arg camera)/depth/image_raw"
-           to="/$(arg local_camera)/depth/image_raw"/>
-    <remap from="/$(arg camera)/depth/camera_info"
-           to="/$(arg local_camera)/depth/camera_info"/>
-    <remap from="/$(arg camera)_uncalibrated/depth/image_rect_raw"
-           to="/$(arg local_camera)/depth/image_rect_raw_calibrated"/>
+    <remap from="/$(arg camera)/$(arg depth)/image_raw"
+           to="/$(arg local_camera)/$(arg depth)/image_raw"/>
+    <remap from="/$(arg camera)/$(arg depth)/camera_info"
+           to="/$(arg local_camera)/$(arg depth)/camera_info"/>
+    <remap from="/$(arg camera)_uncalibrated/$(arg depth)/image_rect_raw"
+           to="/$(arg local_camera)/$(arg depth)/image_rect_raw_calibrated"/>
     <remap from="/$(arg camera)/depth_registered/image_raw"
            to="/$(arg local_camera)/depth_registered/image_raw" unless="$(arg republish)" />
     <remap from="/$(arg camera)/$(arg rgb)/image_raw"
@@ -145,11 +146,11 @@
             name="relay_camera_info"
             args="/$(arg local_camera)/$(arg rgb)/camera_info /$(arg camera)/$(arg rgb)/camera_info" />
     </group>
-    <group ns="depth">
+    <group ns="$(arg depth)">
       <node pkg="topic_tools"
             type="relay"
             name="relay_camera_info"
-            args="/$(arg local_camera)/depth/camera_info /$(arg camera)/depth/camera_info" />
+            args="/$(arg local_camera)/$(arg depth)/camera_info /$(arg camera)/$(arg depth)/camera_info" />
     </group>
     <group ns="depth_registered">
       <node pkg="topic_tools"
@@ -171,9 +172,9 @@
     </node>
     <node pkg="nodelet"
           type="nodelet"
-          name="depth_half"
+          name="$(arg depth)_half"
           args="load jsk_pcl/ResizePointsPublisher $(arg camera)_nodelet_manager">
-      <remap from="~input" to="depth/points" />
+      <remap from="~input" to="$(arg depth)/points" />
       <remap from="~output" to="~points" />
       <param name="not_use_rgb" value="true" />
       <param name="step_x" value="$(arg half_step)" />
@@ -190,9 +191,9 @@
     </node>
     <node pkg="nodelet"
           type="nodelet"
-          name="depth_quater"
+          name="$(arg depth)_quater"
           args="load jsk_pcl/ResizePointsPublisher $(arg camera)_nodelet_manager">
-      <remap from="~input" to="depth/points" />
+      <remap from="~input" to="$(arg depth)/points" />
       <remap from="~output" to="~points" />
       <param name="not_use_rgb" value="true" />
       <param name="step_x" value="$(arg quater_step)" />

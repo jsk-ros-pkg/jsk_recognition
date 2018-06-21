@@ -4,7 +4,7 @@
   <arg name="rgb" default="rgb" />
   <arg name="rgb_camera_info_url"   default="" />
   <arg name="depth_camera_info_url" default="" />
-  <arg name="rgb_frame_id"   default="/$(arg local_camera)_$(arg rgb)_optical_frame" />
+  <arg name="rgb_frame_id"   default="/$(arg local_camera)_rgb_optical_frame" />
   <arg name="depth_frame_id" default="/$(arg local_camera)_depth_optical_frame" />
   <arg name="half_step" default="2" />
   <arg name="quater_step" default="4" />

@@ -109,7 +109,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
             self.pose_2d_pub = self.advertise('~pose_2d', PeoplePoseArray, queue_size=1)
 
     def check_wh(self):
-        if self.width is None != self.height is None:
+        if (self.width is None) != (self.height is None):
             rospy.logwarn('width and height should be specified, but '
                           'specified only {}'
                           .format('height' if self.height else 'width'))

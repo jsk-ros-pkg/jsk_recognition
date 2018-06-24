@@ -69,7 +69,7 @@ class HyperFaceModel(chainer.Chain):
             rospy.loginfo("Model loaded")
         elif pretrained_model:
             rospy.loginfo("Loading pretrained model: %s" % pretrained_model)
-            load_npz(pretrained_model)
+            load_npz(pretrained_model, self)
             rospy.loginfo("Model loaded")
         else:
             rospy.logwarn("No pretrained model is loaded.")

@@ -329,10 +329,12 @@ class FacePoseEstimator(ConnectionBasedTransport):
         for r in results:
             pose = r["face_origin"]
             ori = r["pose"]
-            quat = T.quaternion_from_euler(ori[2], ori[1], -ori[0])
+            mat = T.euler_matrix(-ori[0], -ori[1], -ori[2])
+            rotmat = mat[:3, :3]
+            quat = T.quaternion_from_matrix(mat)
             quat = T.quaternion_multiply(
-                quat,
-                T.quaternion_from_euler(np.pi/2., np.pi/2., 0))
+                [0.5, 0.5, -0.5, 0.5], quat)
+
             pose.orientation.x = quat[0]
             pose.orientation.y = quat[1]
             pose.orientation.z = quat[2]

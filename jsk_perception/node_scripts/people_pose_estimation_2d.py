@@ -98,6 +98,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         self.thre2 = rospy.get_param('~thre2', 0.05)
         self.width = rospy.get_param('~width', None)
         self.height = rospy.get_param('~height', None)
+        self.check_wh()
         self.gpu = rospy.get_param('~gpu', -1)  # -1 is cpu mode
         self.with_depth = rospy.get_param('~with_depth', False)
         self._load_model()
@@ -106,6 +107,12 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         self.sub_info = None
         if self.with_depth is True:
             self.pose_2d_pub = self.advertise('~pose_2d', PeoplePoseArray, queue_size=1)
+
+    def check_wh(self):
+        if self.width is None != self.height is None:
+            rospy.logwarn('width and height should be specified, but '
+                          'specified only {}'
+                          .format('height' if self.height else 'width'))
 
     @property
     def visualize(self):

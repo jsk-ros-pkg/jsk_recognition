@@ -1,9 +1,12 @@
 <launch>
   <arg name="camera" default="camera_remote" />
+  <arg name="local_camera" default="camera" />
+  <arg name="rgb" default="rgb" />
+  <arg name="depth" default="depth" />
   <arg name="rgb_camera_info_url"   default="" />
   <arg name="depth_camera_info_url" default="" />
-  <arg name="rgb_frame_id"   default="/camera_rgb_optical_frame" />
-  <arg name="depth_frame_id" default="/camera_depth_optical_frame" />
+  <arg name="rgb_frame_id"   default="/$(arg local_camera)_rgb_optical_frame" />
+  <arg name="depth_frame_id" default="/$(arg local_camera)_depth_optical_frame" />
   <arg name="half_step" default="2" />
   <arg name="quater_step" default="4" />
   <arg name="color_half_scale" default="0.5" />
@@ -12,21 +15,22 @@
   <arg name="depth_calibration_file" default="$(find jsk_pcl_ros)/config/default_depth_calibration_parameter.yaml" />
   <arg name="republish" default="false" />
   <group>       <!--group only for remapping-->
-    <remap from="/$(arg camera)_uncalibrated/depth/image_raw" 
-           to="/camera/depth/image_raw"/>
-    <remap from="/$(arg camera)_uncalibrated/depth/camera_info" 
-           to="/camera/depth/camera_info"/>
-    <remap from="/$(arg camera)_uncalibrated/depth/image_rect_raw"
-           to="/camera/depth/image_rect_raw_calibrated"/>
+    <remap from="/$(arg camera)_uncalibrated/$(arg depth)/image_raw"
+           to="/$(arg local_camera)/$(arg depth)/image_raw"/>
+    <remap from="/$(arg camera)_uncalibrated/$(arg depth)/camera_info"
+           to="/$(arg local_camera)/$(arg depth)/camera_info"/>
+    <remap from="/$(arg camera)_uncalibrated/$(arg depth)/image_rect_raw"
+           to="/$(arg local_camera)/$(arg depth)/image_rect_raw_calibrated"/>
     <remap from="/$(arg camera)_uncalibrated/depth_registered/image_raw"
-           to="/camera/depth_registered/image_raw"/>
-    <remap from="/$(arg camera)_uncalibrated/rgb/image_raw"
-           to="/camera/rgb/image_raw"/>
-    <remap from="/$(arg camera)_uncalibrated/rgb/camera_info"
-           to="/camera/rgb/camera_info"/>
+           to="/$(arg local_camera)/depth_registered/image_raw"/>
+    <remap from="/$(arg camera)_uncalibrated/$(arg rgb)/image_raw"
+           to="/$(arg local_camera)/$(arg rgb)/image_raw"/>
+    <remap from="/$(arg camera)_uncalibrated/$(arg rgb)/camera_info"
+           to="/$(arg local_camera)/$(arg rgb)/camera_info"/>
     <include file="$(find openni2_launch)/launch/openni2.launch">
       <arg name="publish_tf" value="false" />
       <arg name="camera" value="$(arg camera)_uncalibrated" />
+      <arg name="rgb" value="$(arg rgb)" />
       <arg name="depth_registration" value="true" />
       <arg name="load_driver" value="false" />
       <arg name="rgb_processing" value="true" />
@@ -49,29 +53,29 @@
          /$(arg camera)/depth_registered/hw_registered/image_rect_raw_calibrated  ->
          /$(arg camera)/depth_registered/points
     -->
-    <remap from="/$(arg camera)/depth/image_raw" 
-           to="/camera/depth/image_raw"/>
-    <remap from="/$(arg camera)/depth/camera_info" 
-           to="/camera/depth/camera_info"/>
-    <remap from="/$(arg camera)_uncalibrated/depth/image_rect_raw"
-           to="/camera/depth/image_rect_raw_calibrated"/>
+    <remap from="/$(arg camera)/$(arg depth)/image_raw"
+           to="/$(arg local_camera)/$(arg depth)/image_raw"/>
+    <remap from="/$(arg camera)/$(arg depth)/camera_info"
+           to="/$(arg local_camera)/$(arg depth)/camera_info"/>
+    <remap from="/$(arg camera)_uncalibrated/$(arg depth)/image_rect_raw"
+           to="/$(arg local_camera)/$(arg depth)/image_rect_raw_calibrated"/>
     <remap from="/$(arg camera)/depth_registered/image_raw"
-           to="/camera/depth_registered/image_raw" unless="$(arg republish)" />
-    <remap from="/$(arg camera)/rgb/image_raw"
-           to="/camera/rgb/image_raw" unless="$(arg republish)" />
-    <remap from="/$(arg camera)/rgb/camera_info"
-           to="/camera/rgb/camera_info"/>
+           to="/$(arg local_camera)/depth_registered/image_raw" unless="$(arg republish)" />
+    <remap from="/$(arg camera)/$(arg rgb)/image_raw"
+           to="/$(arg local_camera)/$(arg rgb)/image_raw" unless="$(arg republish)" />
+    <remap from="/$(arg camera)/$(arg rgb)/camera_info"
+           to="/$(arg local_camera)/$(arg rgb)/camera_info"/>
     <group if="$(arg republish)" >
-      <group ns="/camera/rgb">
+      <group ns="/$(arg local_camera)/$(arg rgb)">
         <node name="republish_rgb_image_raw"
               pkg="image_transport" type="republish"
               args="compressed raw">
           <remap from="in" to="image_raw" />
-          <remap from="out" to="/$(arg camera)/rgb/image_raw" />
+          <remap from="out" to="/$(arg camera)/$(arg rgb)/image_raw" />
         </node>
       </group>
 
-      <group ns="/camera/depth_registered">
+      <group ns="/$(arg local_camera)/depth_registered">
         <node name="republish_depth_registered_image_raw"
               pkg="image_transport" type="republish"
               args="compressedDepth raw">
@@ -85,7 +89,6 @@
       <arg     if="$(arg respawn)" name="bond" value="" />
       <arg unless="$(arg respawn)" name="bond" value="--no-bond" />
       <arg name="depth_registered" value="depth_registered" />
-      <arg name="rgb" value="rgb" />
       <arg name="manager" value="$(arg camera)_nodelet_manager" />
       <node pkg="nodelet" type="nodelet" name="depth_registered_rectify_depth"
             args="load image_proc/rectify $(arg manager) $(arg bond)"
@@ -113,7 +116,7 @@
           output="screen">
         <param name="uv_scale" value="$(arg uv_scale)" />
         <remap from="~input" to="/$(arg camera)/depth_registered/hw_registered/image_rect_raw" />
-        <remap from="~camera_info" to="/camera/depth_registered/camera_info" />
+        <remap from="~camera_info" to="/$(arg camera)/depth_registered/camera_info" />
         <remap from="~output" to="/$(arg camera)/depth_registered/hw_registered/image_rect_raw_calibrated" />
         <rosparam command="load" file="$(arg depth_calibration_file)" />
       </node>
@@ -122,6 +125,7 @@
     <include file="$(find openni2_launch)/launch/openni2.launch">
       <arg name="publish_tf" value="false" />
       <arg name="camera" value="$(arg camera)" />
+      <arg name="rgb" value="$(arg rgb)" />
       <arg name="depth_registration" value="true" />
       <arg name="load_driver" value="false" />
       <arg name="rgb_processing" value="true" />
@@ -131,28 +135,28 @@
       <arg name="depth_camera_info_url" value="$(arg depth_camera_info_url)" />
     </include>
   </group>
-  
+
   <group ns="$(arg camera)">
     <!--                      -->
     <!-- camera_info relaying -->
     <!--                      -->
-    <group ns="rgb">
+    <group ns="$(arg rgb)">
       <node pkg="topic_tools"
             type="relay"
             name="relay_camera_info"
-            args="/camera/rgb/camera_info /$(arg camera)/rgb/camera_info" />
+            args="/$(arg local_camera)/$(arg rgb)/camera_info /$(arg camera)/$(arg rgb)/camera_info" />
     </group>
-    <group ns="depth">
+    <group ns="$(arg depth)">
       <node pkg="topic_tools"
             type="relay"
             name="relay_camera_info"
-            args="/camera/depth/camera_info /$(arg camera)/depth/camera_info" />
+            args="/$(arg local_camera)/$(arg depth)/camera_info /$(arg camera)/$(arg depth)/camera_info" />
     </group>
     <group ns="depth_registered">
       <node pkg="topic_tools"
             type="relay"
             name="relay_camera_info"
-            args="/camera/depth_registered/camera_info /$(arg camera)/depth_registered/camera_info" />
+            args="/$(arg local_camera)/depth_registered/camera_info /$(arg camera)/depth_registered/camera_info" />
     </group>
     <!--                       -->
     <!-- downsample pointcloud -->
@@ -168,9 +172,9 @@
     </node>
     <node pkg="nodelet"
           type="nodelet"
-          name="depth_half"
+          name="$(arg depth)_half"
           args="load jsk_pcl/ResizePointsPublisher $(arg camera)_nodelet_manager">
-      <remap from="~input" to="depth/points" />
+      <remap from="~input" to="$(arg depth)/points" />
       <remap from="~output" to="~points" />
       <param name="not_use_rgb" value="true" />
       <param name="step_x" value="$(arg half_step)" />
@@ -187,9 +191,9 @@
     </node>
     <node pkg="nodelet"
           type="nodelet"
-          name="depth_quater"
+          name="$(arg depth)_quater"
           args="load jsk_pcl/ResizePointsPublisher $(arg camera)_nodelet_manager">
-      <remap from="~input" to="depth/points" />
+      <remap from="~input" to="$(arg depth)/points" />
       <remap from="~output" to="~points" />
       <param name="not_use_rgb" value="true" />
       <param name="step_x" value="$(arg quater_step)" />
@@ -200,16 +204,16 @@
     <!--            -->
     <node pkg="nodelet"
           type="nodelet"
-          name="rgb_half"
+          name="$(arg rgb)_half"
           args="load resized_image_transport/ImageResizer $(arg camera)_nodelet_manager">
       <param name="resize_scale_x" value="$(arg color_half_scale)" />
       <param name="resize_scale_y" value="$(arg color_half_scale)" />
-      <remap from="~input/image" to="rgb/image_rect_color" />
+      <remap from="~input/image" to="$(arg rgb)/image_rect_color" />
       <remap from="~output/image" to="~image_rect_color" />
     </node>
     <node pkg="nodelet"
           type="nodelet"
-          name="rgb_quater"
+          name="$(arg rgb)_quater"
           args="load resized_image_transport/ImageResizer $(arg camera)_nodelet_manager">
       <param name="resize_scale_x" value="$(arg color_quater_scale)" />
       <param name="resize_scale_y" value="$(arg color_quater_scale)" />

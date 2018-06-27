@@ -36,6 +36,18 @@ def _get(var):
     return var
 
 
+def _project_plane_yz(vec):
+    x = vec.dot(np.array([0, 1, 0], dtype=np.float32))
+    y = vec.dot(np.array([0, 0, 1], dtype=np.float32))
+    return np.array([x, -y], dtype=np.float32)  # y flip
+
+
+def _draw_line(img, pt1, pt2, color, thickness=2):
+    pt1 = (int(pt1[0]), int(pt1[1]))
+    pt2 = (int(pt2[0]), int(pt2[1]))
+    return cv2.line(img, pt1, pt2, color, int(thickness))
+
+
 class HyperFaceModel(chainer.Chain):
 
     def __init__(self, pretrained_model='auto'):
@@ -69,7 +81,7 @@ class HyperFaceModel(chainer.Chain):
             rospy.loginfo("Model loaded")
         elif pretrained_model:
             rospy.loginfo("Loading pretrained model: %s" % pretrained_model)
-            load_npz(pretrained_model)
+            load_npz(pretrained_model, self)
             rospy.loginfo("Model loaded")
         else:
             rospy.logwarn("No pretrained model is loaded.")
@@ -199,6 +211,11 @@ class FacePoseEstimator(ConnectionBasedTransport):
         self.pub_pose = self.advertise("~output/pose", PoseArray, queue_size=1)
         self.pub_gender = self.advertise("~output/gender", ClassificationResult, queue_size=1)
         self.pub_rect = self.advertise("~output/rects", RectArray, queue_size=1)
+        self.pub_debug_image = self.advertise("~output/debug", Image, queue_size=1)
+
+    @property
+    def visualize(self):
+        return self.pub_debug_image.get_num_connections() > 0
 
     def config_callback(self, config, level):
         need_resubscribe = (
@@ -250,6 +267,7 @@ class FacePoseEstimator(ConnectionBasedTransport):
         faces = []
         rects = []
         face_origins = []
+        face_2d_origins = []
         for p2d, p3d in zip(pose2d.poses, pose3d.poses):
             try:
                 score = p2d.scores[p2d.limb_names.index("Nose")]
@@ -265,6 +283,7 @@ class FacePoseEstimator(ConnectionBasedTransport):
                             width=int(width_half*2),
                             height=int(width_half*2))
                 face_origin = p3d.poses[p3d.limb_names.index("Nose")]
+                face_2d_origin = nose
             except ValueError:
                 continue
 
@@ -278,6 +297,7 @@ class FacePoseEstimator(ConnectionBasedTransport):
                 continue
             rects.append(rect)
             face_origins.append(face_origin)
+            face_2d_origins.append(face_2d_origin)
             faces.append(face)
 
         if not faces:
@@ -297,12 +317,13 @@ class FacePoseEstimator(ConnectionBasedTransport):
         for i in range(len(results)):
             results[i].update({
                 "face_origin": face_origins[i],
+                "face_2d_origin": face_2d_origins[i],
                 "rect": rects[i],
             })
 
         self.publish_face_rects(header, results)
         self.publish_gender(header, results)
-        self.publish_pose(header, results)
+        self.publish_pose(header, results, img)
 
     def publish_face_rects(self, header, results):
         rects = RectArray(
@@ -324,21 +345,45 @@ class FacePoseEstimator(ConnectionBasedTransport):
         )
         self.pub_gender.publish(msg)
 
-    def publish_pose(self, header, results):
+    def publish_pose(self, header, results, img):
         msg = PoseArray(header=header)
         for r in results:
             pose = r["face_origin"]
+            pose_2d = r['face_2d_origin']
             ori = r["pose"]
-            quat = T.quaternion_from_euler(ori[2], ori[1], -ori[0])
+            mat = T.euler_matrix(-ori[0], -ori[1], -ori[2])
+            rotmat = mat[:3, :3]
+            quat = T.quaternion_from_matrix(mat)
             quat = T.quaternion_multiply(
-                quat,
-                T.quaternion_from_euler(np.pi/2., np.pi/2., 0))
+                [0.5, 0.5, -0.5, 0.5], quat)
+
             pose.orientation.x = quat[0]
             pose.orientation.y = quat[1]
             pose.orientation.z = quat[2]
             pose.orientation.w = quat[3]
             msg.poses.append(pose)
+
+            if self.visualize:
+                zvec = np.array([0, 0, 1], np.float32)
+                yvec = np.array([0, 1, 0], np.float32)
+                xvec = np.array([1, 0, 0], np.float32)
+                zvec = _project_plane_yz(rotmat.dot(zvec)) * 50.0
+                yvec = _project_plane_yz(rotmat.dot(yvec)) * 50.0
+                xvec = _project_plane_yz(rotmat.dot(xvec)) * 50.0
+
+                face_2d_center = np.array([pose_2d.position.x, pose_2d.position.y])
+                img = _draw_line(img, face_2d_center,
+                                 face_2d_center + zvec, (255, 0, 0), 3)
+                img = _draw_line(img, face_2d_center,
+                                 face_2d_center + yvec, (0, 255, 0), 3)
+                img = _draw_line(img, face_2d_center,
+                                 face_2d_center + xvec, (0, 0, 255), 3)
+
         self.pub_pose.publish(msg)
+        if self.visualize:
+            img_msg = self.cv_bridge.cv2_to_imgmsg(img, "bgr8")
+            img_msg.header = header
+            self.pub_debug_image.publish(img_msg)
 
 
 if __name__ == '__main__':

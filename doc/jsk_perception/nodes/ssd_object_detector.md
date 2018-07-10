@@ -47,6 +47,10 @@ You can see camera image with results in `image_view`
 
         Index of gpu used for prediction. Set `-1` for using CPU.
 
+    - `~model` (`String`, default: `ssd300`)
+
+        Name of model structure.`ssd300` and `ssd512` are supported.
+
     - `~model_path` (`String`, default: `voc0712`)
 
         Name of pretrained model or path to trained model file.

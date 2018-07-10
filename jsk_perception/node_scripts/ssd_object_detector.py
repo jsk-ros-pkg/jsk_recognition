@@ -21,6 +21,7 @@ from jsk_recognition_msgs.msg import Rect, RectArray
 from jsk_recognition_msgs.msg import ClassificationResult
 
 from chainercv.links import SSD300
+from chainercv.links import SSD512
 from chainercv.visualizations import vis_bbox
 
 
@@ -39,8 +40,14 @@ class SSDObjectDetector(ConnectionBasedTransport):
 
         # model_path: name of pretrained model or path to model file
         model_path = rospy.get_param("~model_path", None)
-
-        self.model = SSD300(
+        model_name = rospy.get_param('~model', 'ssd300')
+        if model_name == 'ssd300':
+            model_class = SSD300
+        elif model_name == 'ssd512':
+            model_class = SSD512
+        else:
+            rospy.logerr('Unsupported ~model: {}'.format(model_name))
+        self.model = model_class(
             n_fg_class=len(self.label_names),
             pretrained_model=model_path)
         if self.gpu >= 0:

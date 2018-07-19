@@ -98,20 +98,6 @@ namespace jsk_perception
     sub_.shutdown();
   }
 
-  void BackgroundSubstraction::updateDiagnostic(
-    diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-    if (vital_checker_->isAlive()) {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                   "BackgroundSubstraction running");
-    }
-    else {
-      jsk_topic_tools::addDiagnosticErrorSummary(
-        "BackgroundSubstraction", vital_checker_, stat);
-    }
-
-  }
-  
   void BackgroundSubstraction::substract(
     const sensor_msgs::Image::ConstPtr& image_msg)
   {

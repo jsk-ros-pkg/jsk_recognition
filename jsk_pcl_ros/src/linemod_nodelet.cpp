@@ -594,6 +594,8 @@ namespace jsk_pcl_ros
     pub_pose_ = advertise<geometry_msgs::PoseStamped>(*pnh_, "output/pose", 1);
     pub_original_template_cloud_ = advertise<sensor_msgs::PointCloud2>(
       *pnh_, "output/template", 1);
+
+    onInitPostProcess();
   }
 
   void LINEMODDetector::subscribe()
@@ -620,19 +622,6 @@ namespace jsk_pcl_ros
     linemod_in.open(linemod_file.c_str(), std::ifstream::in);
     linemod_.deserialize(linemod_in);
     linemod_in.close();
-  }
-
-  void LINEMODDetector::updateDiagnostic(
-    diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-    if (vital_checker_->isAlive()) {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                   "LINEMODDetector running");
-    }
-    else {
-      jsk_topic_tools::addDiagnosticErrorSummary(
-        "LINEMODDetector", vital_checker_, stat);
-    }
   }
 
   void LINEMODDetector::computeCenterOfTemplate(

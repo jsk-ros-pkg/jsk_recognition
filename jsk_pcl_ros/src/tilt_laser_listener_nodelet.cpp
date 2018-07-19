@@ -153,7 +153,7 @@ namespace jsk_pcl_ros
                        getName() + " running");
         }
         else {
-          stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,
+          stat.summary(diagnostic_error_level_,
                        "~input/cloud is not activate");
         }
         stat.add("scan queue", cloud_buffer_.size());
@@ -166,7 +166,7 @@ namespace jsk_pcl_ros
     }
     else {
       jsk_topic_tools::addDiagnosticErrorSummary(
-        name_, vital_checker_, stat);
+        name_, vital_checker_, stat, diagnostic_error_level_);
     }
   }
 

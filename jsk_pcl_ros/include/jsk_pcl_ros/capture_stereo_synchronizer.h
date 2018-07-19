@@ -75,8 +75,6 @@ namespace jsk_pcl_ros
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void republish(
       const geometry_msgs::PoseStamped::ConstPtr& pose, // pose of checker board
       const sensor_msgs::Image::ConstPtr& mask,         // mask image

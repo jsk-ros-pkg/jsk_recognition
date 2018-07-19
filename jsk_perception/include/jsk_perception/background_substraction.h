@@ -63,8 +63,6 @@ namespace jsk_perception
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void substract(
       const sensor_msgs::Image::ConstPtr& image_msg);
     virtual void configCallback (Config &config, uint32_t level);

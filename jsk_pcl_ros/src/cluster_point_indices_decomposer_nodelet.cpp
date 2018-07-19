@@ -286,10 +286,7 @@ namespace jsk_pcl_ros
       stat.add("tf_prefix", tf_prefix_);
       stat.add("Clusters (Ave.)", cluster_counter_.mean());
     }
-    else {
-      jsk_topic_tools::addDiagnosticErrorSummary(
-        "ClusterPointIndicesDecomposer", vital_checker_, stat);
-    }
+    DiagnosticNodelet::updateDiagnostic(stat);
   }
   
   int ClusterPointIndicesDecomposer::findNearestPlane(

@@ -59,19 +59,6 @@ namespace jsk_pcl_ros_utils
     sub_.shutdown();
   }
 
-  void MaskImageToPointIndices::updateDiagnostic(
-    diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-    if (vital_checker_->isAlive()) {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                   "MaskImageToPointIndices running");
-    }
-    else {
-      jsk_topic_tools::addDiagnosticErrorSummary(
-        "MaskImageToPointIndices", vital_checker_, stat);
-    }
-  }
-  
   void MaskImageToPointIndices::indices(
     const sensor_msgs::Image::ConstPtr& image_msg)
   {

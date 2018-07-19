@@ -65,8 +65,6 @@ namespace jsk_pcl_ros_utils
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void convertAndPublish(
       const PCLIndicesMsg::ConstPtr& indices_msg,
       const int width,

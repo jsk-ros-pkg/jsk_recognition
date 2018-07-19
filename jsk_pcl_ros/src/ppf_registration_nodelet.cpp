@@ -274,19 +274,6 @@ namespace jsk_pcl_ros
     pub_pose_array_.publish(pose_array_msg);
     pub_points_array_.publish(points_array_msg);
   }
-
-  void PPFRegistration::updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-    if (vital_checker_->isAlive()) {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                   "PPFRegistration running");
-    }
-    else {
-      jsk_topic_tools::addDiagnosticErrorSummary(
-        "PPFRegistration", vital_checker_, stat);
-    }
-  }
 }
 
 #include <pluginlib/class_list_macros.h>

@@ -63,19 +63,6 @@ namespace jsk_pcl_ros
     sub_.shutdown();
   }
 
-  void SupervoxelSegmentation::updateDiagnostic(
-    diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-    if (vital_checker_->isAlive()) {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                   "SupervoxelSegmentation running");
-    }
-    else {
-      jsk_topic_tools::addDiagnosticErrorSummary(
-        "SupervoxelSegmentation", vital_checker_, stat);
-    }
-  }
-
   void SupervoxelSegmentation::segment(
     const sensor_msgs::PointCloud2::ConstPtr& cloud_msg)
   {

@@ -188,10 +188,7 @@ namespace jsk_pcl_ros
       stat.add("Maximum Height", max_height_);
       stat.add("Number of Planes", plane_counter_.mean());
     }
-    else {
-      jsk_topic_tools::addDiagnosticErrorSummary(
-        "MultiPlaneExtraction", vital_checker_, stat);
-    }
+    DiagnosticNodelet::updateDiagnostic(stat);
   }
 
   void MultiPlaneExtraction::fillEmptyIndices(

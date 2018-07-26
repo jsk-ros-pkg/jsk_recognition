@@ -44,14 +44,9 @@ catkin_package(
 )
 
 catkin_generate_virtualenv(
-  # Select an alternative major version of the python interpreter - it must be installed on the system.
-  PYTHON_VERSION_MAJOR 2  # Default 2
-
-  # Choose not to use underlying system packages. This excludes any python packages installed by apt or system-pip from the environment.
-  USE_SYSTEM_PACKAGES TRUE  # Default TRUE
-
-  # Disable including pip requirements from catkin dependencies of this package.
-  ISOLATE_REQUIREMENTS FALSE  # Default FALSE
+  PYTHON_VERSION_MAJOR 2
+  USE_SYSTEM_PACKAGES TRUE
+  ISOLATE_REQUIREMENTS FALSE
 )
 
 # Cythonize pyx files

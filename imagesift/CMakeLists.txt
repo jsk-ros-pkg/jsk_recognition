@@ -57,10 +57,8 @@ jsk_feature("BRISK" "BRISK" "imagebrisk")
 
 jsk_nodelet(src/imagesift.cpp
   "imagesift/ImageSift"
-  "imagesift_exec"
+  "imagesift"
   nodelet_sources nodelet_executables)
-set_target_properties("imagesift_exec" PROPERTIES OUTPUT_NAME "imagesift")
-list(APPEND jsk_exec "imagesift_exec")
 
 add_library(${PROJECT_NAME} SHARED ${nodelet_sources})
 

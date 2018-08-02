@@ -60,14 +60,15 @@ jsk_nodelet(src/imagesift.cpp
   "imagesift"
   nodelet_sources nodelet_executables)
 
-add_library(${PROJECT_NAME} SHARED ${nodelet_sources})
+add_library(lib_${PROJECT_NAME} SHARED ${nodelet_sources})
+set_target_properties(lib_${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
 
 add_definitions("-O2 -g")
 include_directories(include ${catkin_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(lib_${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 
-install(TARGETS ${PROJECT_NAME} ${jsk_exec}
+install(TARGETS lib_${PROJECT_NAME} ${jsk_exec} ${nodelet_executables}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

@@ -50,7 +50,7 @@ add_dependencies(resized_image_transport ${PROJECT_NAME}_gencfg)
 
 
 # Mark executables and/or libraries for installation
-install(TARGETS image_resizer resized_image_transport ${nodelet_executables}
+install(TARGETS ${nodelet_executables}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

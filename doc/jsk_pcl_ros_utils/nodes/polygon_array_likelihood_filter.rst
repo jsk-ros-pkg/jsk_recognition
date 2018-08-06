@@ -22,7 +22,7 @@ Subscribing Topics
 Publishing Topics
 -----------------
 
-* ``~output_polygon`` (``jsk_recognition_msgs/PolygonArray``)
+* ``~output_polygons`` (``jsk_recognition_msgs/PolygonArray``)
 
   Filtered polygon array. (Polygons are sorted by their likelihood.)
 

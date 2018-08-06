@@ -2,12 +2,12 @@
 
 ## What is this?
 
-Convert `geometry_msgs/PolygonArray` to `geometry_msgs/PolygonStamped`.
+Convert `jsk_recognition_msgs/PolygonArray` to `geometry_msgs/PolygonStamped`.
 
 
 ## Subscribing Topic
 
-* `~input` (`geometry_msgs/PolygonArray`)
+* `~input` (`jsk_recognition_msgs/PolygonArray`)
 
   Input polygon array.
 

@@ -9,7 +9,7 @@ What is this?
 
 Detect edges from organized point cloud.
 
-.. note:: This node requires PCL >= 1.7.2.
+.. note:: This node requires PCL > 1.7.2.
 
 
 Subscribing Topics

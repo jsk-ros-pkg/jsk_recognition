@@ -141,6 +141,15 @@ def main():
             'uc?id=1la-B-I1Dh00BRkJuNC3TAXju6p3ccmmb',
             md5='c0683094aa42eab1b9424e05112190c5',
         )
+    path = 'trained_data/pose_estimation_2d_hand.chainermodel'
+    if _chainer_available:
+        download_data(
+            pkg_name=PKG,
+            path=path,
+            url='https://drive.google.com/'
+            'uc?id=1cpLVVS63Q2T7EgPMcA5u6iwcMWSvUycM',
+            md5='d7d2413e5be2f71d1fcf38db6c86fd49',
+        )
 
     path = 'trained_data/hand_ssd300_chainermodel.npz'
     if _chainer_available:

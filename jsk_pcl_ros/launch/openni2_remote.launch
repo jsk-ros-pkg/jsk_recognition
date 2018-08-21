@@ -14,7 +14,7 @@
   <arg name="uv_scale" default="1.0"  />
   <arg name="depth_calibration_file" default="$(find jsk_pcl_ros)/config/default_depth_calibration_parameter.yaml" />
   <arg name="republish" default="false" />
-  <arg name="use_warn" default="true" />
+  <arg name="use_warn" default="false" />
   <group>       <!--group only for remapping-->
     <remap from="/$(arg camera)_uncalibrated/$(arg depth)/image_raw"
            to="/$(arg local_camera)/$(arg depth)/image_raw"/>

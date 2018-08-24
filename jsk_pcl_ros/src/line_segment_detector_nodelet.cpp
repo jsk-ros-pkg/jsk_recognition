@@ -200,11 +200,6 @@ namespace jsk_pcl_ros
     sub_indices_.unsubscribe();
   }
 
-  void LineSegmentDetector::updateDiagnostic(
-    diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-  }
-
   void LineSegmentDetector::publishResult(
     const std_msgs::Header& header,
     const pcl::PointCloud<PointT>::Ptr& cloud,

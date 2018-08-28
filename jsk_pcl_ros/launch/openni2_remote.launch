@@ -14,6 +14,7 @@
   <arg name="uv_scale" default="1.0"  />
   <arg name="depth_calibration_file" default="$(find jsk_pcl_ros)/config/default_depth_calibration_parameter.yaml" />
   <arg name="republish" default="false" />
+  <arg name="use_warn" default="false" />
   <group>       <!--group only for remapping-->
     <remap from="/$(arg camera)_uncalibrated/$(arg depth)/image_raw"
            to="/$(arg local_camera)/$(arg depth)/image_raw"/>
@@ -114,6 +115,7 @@
           respawn="$(arg respawn)"
           clear_params="true"
           output="screen">
+        <param name="use_warn" value="$(arg use_warn)" />
         <param name="uv_scale" value="$(arg uv_scale)" />
         <remap from="~input" to="/$(arg camera)/depth_registered/hw_registered/image_rect_raw" />
         <remap from="~camera_info" to="/$(arg camera)/depth_registered/camera_info" />
@@ -206,6 +208,7 @@
           type="nodelet"
           name="$(arg rgb)_half"
           args="load resized_image_transport/ImageResizer $(arg camera)_nodelet_manager">
+      <param name="use_warn" value="$(arg use_warn)" />
       <param name="resize_scale_x" value="$(arg color_half_scale)" />
       <param name="resize_scale_y" value="$(arg color_half_scale)" />
       <remap from="~input/image" to="$(arg rgb)/image_rect_color" />
@@ -215,6 +218,7 @@
           type="nodelet"
           name="$(arg rgb)_quater"
           args="load resized_image_transport/ImageResizer $(arg camera)_nodelet_manager">
+      <param name="use_warn" value="$(arg use_warn)" />
       <param name="resize_scale_x" value="$(arg color_quater_scale)" />
       <param name="resize_scale_y" value="$(arg color_quater_scale)" />
       <remap from="~input/image" to="rgb/image_rect_color" />

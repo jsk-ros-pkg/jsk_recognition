@@ -68,8 +68,6 @@ namespace jsk_pcl_ros
     virtual void subscribe();
     virtual void unsubscribe();
     virtual void printModel();
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual inline double applyModel(double z, int u, int v, double cu, double cv) {
       double z2 = z * z;
       double uu, vv;

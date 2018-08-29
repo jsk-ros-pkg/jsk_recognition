@@ -119,12 +119,17 @@ class PointIt(ConnectionBasedTransport):
         refer: https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/output.md
         """
         frame_id = remove_slash(ppl_msg.header.frame_id)
-        objects = self.objects
-        for bbox in objects:
+        in_objects = self.objects
+        objects = []
+        for bbox in in_objects:
             if remove_slash(bbox.header.frame_id) != frame_id:
                 ps = PoseStamped(header=bbox.header, pose=bbox.pose)
-                ps = self.tfl.transform(ps, frame_id)
-                bbox.header, bbox.pose = ps.header, ps.pose
+                try:
+                    ps = self.tfl.transform(ps, frame_id)
+                    bbox.header, bbox.pose = ps.header, ps.pose
+                    objects.append(bbox)
+                except tf2_ros.TransformException:
+                    continue
 
         out_bboxes = []
         out_markers = []

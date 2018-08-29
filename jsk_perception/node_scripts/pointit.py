@@ -50,6 +50,7 @@ class PointIt(ConnectionBasedTransport):
 
         # parameters
         self.dist_threshold = rospy.get_param("~dist_threshold", 0.1)
+        self.min_norm_threshold = rospy.get_param("~min_norm_threshold", 0.2)
 
         # tf listener
         use_tf2_buffer_client = rospy.get_param("~use_tf2_buffer_client", True)
@@ -117,7 +118,6 @@ class PointIt(ConnectionBasedTransport):
 
         refer: https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/output.md
         """
-        rospy.loginfo("on_people")
         frame_id = remove_slash(ppl_msg.header.frame_id)
         objects = self.objects
         for bbox in objects:
@@ -134,7 +134,6 @@ class PointIt(ConnectionBasedTransport):
             rfinger = find_pose(["RHand5", "RHand6", "RHand7", "RHand8"], pose)
             if rwrist is not None and rfinger is not None:
                 rclosest, rdist = self.get_closest_bbox((rwrist, rfinger), objects)
-                rospy.loginfo("rdist: %s" % rdist)
                 if rdist is not None and rdist < self.dist_threshold:
                     out_bboxes.append(rclosest)
                 rmarker = self.get_marker((rwrist, rfinger), frame_id)
@@ -145,7 +144,6 @@ class PointIt(ConnectionBasedTransport):
             lfinger = find_pose(["LHand5", "LHand6", "LHand7", "LHand8"], pose)
             if lwrist is not None and lfinger is not None:
                 lclosest, ldist = self.get_closest_bbox((lwrist, lfinger), objects)
-                rospy.loginfo("ldist: %s" % ldist)
                 if ldist is not None and ldist < self.dist_threshold:
                     out_bboxes.append(lclosest)
                 lmarker = self.get_marker((lwrist, lfinger), frame_id)
@@ -162,11 +160,14 @@ class PointIt(ConnectionBasedTransport):
         if out_markers:
             self.pub_marker.publish(MarkerArray(markers=out_markers))
 
-    def get_marker(self, line_seg, frame_id, scale=300.0):
+    def get_marker(self, line_seg, frame_id, scale=0.3):
         p0, p1 = line_seg
-        v = [p1.position.x - p0.position.x,
-             p1.position.y - p0.position.y,
-             p1.position.z - p0.position.z]
+        v = np.asarray([p1.position.x - p0.position.x,
+                        p1.position.y - p0.position.y,
+                        p1.position.z - p0.position.z])
+        vnorm = np.linalg.norm(v)
+        if vnorm > 0.0:
+            v /= np.linalg.norm(v)
         p2 = copy.deepcopy(p0)
         p2.position.x += scale * v[0]
         p2.position.y += scale * v[1]
@@ -190,12 +191,26 @@ class PointIt(ConnectionBasedTransport):
         p0 = np.asarray([pose0.position.x, pose0.position.y, pose0.position.z])
         p1 = np.asarray([pose1.position.x, pose1.position.y, pose1.position.z])
         min_d, closest = None, None
+
+        n01 = np.linalg.norm(p1 - p0)
+        if n01 == 0.0:
+            return closest, min_d
+
         for bbox in bboxes:
             pos = bbox.pose.position
             p = np.asarray([pos.x, pos.y, pos.z])
+
+            # check if the order is p0 -> p1 -> p
+            n = np.linalg.norm(p - p0)
+            ip = np.inner(p1 - p0, p - p0) / (n01 * n)
+            rospy.logdebug("ip: %s, dn: %s" % (ip, n - n01))
+            if ip < 0.0 or n - n01 < self.min_norm_threshold:
+                continue
+
             d = np.linalg.norm(np.cross(p1 - p0, p0 - p)) / np.linalg.norm(p1 - p0)
             if min_d is None or min_d > d:
                 min_d, closest = d, bbox
+
         return closest, min_d
 
 

@@ -1,6 +1,9 @@
 # DetectGraspablePosesPcabase
 ## What Is This
+
 ![](images/detect_graspable_poses_pcabase.png)
+
+![](images/detect_graspable_poses_pcabase.gif)
 
 Detect_graspable_poses_pcabase.py is a program which publishes pose array where a robot can grasp, using point cloud of a target object and PCA algorithm. In the above image, the grasp poses are visualized with the axies. Please transform input cloud to a flame which direction is the same as the robot (e.g. /BODY) before using this program.
 

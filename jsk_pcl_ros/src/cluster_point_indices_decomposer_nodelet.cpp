@@ -566,6 +566,9 @@ namespace jsk_pcl_ros
     const sensor_msgs::PointCloud2ConstPtr &input,
     const jsk_recognition_msgs::ClusterPointIndicesConstPtr &indices_input)
   {
+    if (negative_indices_pub_.getNumSubscribers() <= 0) {
+      return;
+    }
     std::vector<int> all_indices;
 
     boost::copy(

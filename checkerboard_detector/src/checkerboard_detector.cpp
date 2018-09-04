@@ -51,6 +51,7 @@
 #include <sys/timeb.h>    // ftime(), struct timeb
 #include <sys/time.h>
 #include <dynamic_reconfigure/server.h>
+#include <tf/transform_broadcaster.h>
 #include <checkerboard_detector/CheckerboardDetectorConfig.h>
 
 using namespace std;
@@ -90,6 +91,7 @@ public:
     int message_throttle_;
     int message_throttle_counter_;
     string frame_id; // tf frame id
+    string child_frame_id_;
     bool invert_color;
     int display, verbose, maxboard, queue_size, publish_queue_size;
     vector<CHECKERBOARD> vcheckers; // grid points for every checkerboard
@@ -101,6 +103,9 @@ public:
     int dimx, dimy;
     bool use_P;
     double fRectSize[2];
+    tf::TransformBroadcaster br_;
+    bool publish_tf_;
+
     typedef checkerboard_detector::CheckerboardDetectorConfig Config;
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv;
     bool adaptive_thresh_flag;
@@ -124,7 +129,7 @@ public:
         _node.param("publish_queue_size", publish_queue_size, 1);
         _node.param("axis_size", axis_size_, 0.05);
         _node.param("circle_size", circle_size_, 6);
-
+        _node.param("publish_tf", publish_tf_, false);
         char str[32];
         int index = 0;
 
@@ -219,6 +224,7 @@ public:
         }
 
         _node.param("frame_id", frame_id,string(""));
+        _node.param("child_frame_id", child_frame_id_, string(""));
 
         if( maptypes.size() == 0 ) {
             ROS_ERROR("no checkerboards to detect");
@@ -348,6 +354,18 @@ public:
                     pose.header = _objdetmsg.header;
                     pose.pose = _objdetmsg.objects[0].pose;
                     _pubPoseStamped.publish(pose);
+                    if (publish_tf_) {
+                        tf::Transform transform;
+                        transform.setOrigin(tf::Vector3(pose.pose.position.x,
+                                                        pose.pose.position.y,
+                                                        pose.pose.position.z));
+                        transform.setRotation(tf::Quaternion(pose.pose.orientation.x,
+                                                             pose.pose.orientation.y,
+                                                             pose.pose.orientation.z,
+                                                             pose.pose.orientation.w));
+                        br_.sendTransform(tf::StampedTransform(transform, ros::Time::now(),
+                                                               frame_id, child_frame_id_));
+                    }
                 }
                 _pubDetection.publish(_objdetmsg);
                 publishPolygonArray(_objdetmsg);

@@ -45,6 +45,10 @@ namespace jsk_perception
   void TemplateMatchDetector::onInit()
   {
     DiagnosticNodelet::onInit();
+
+    pnh_->param("approximate_sync", approximate_sync_, false);
+    pnh_->param("queue_size", queue_size_, 100);
+
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&TemplateMatchDetector::configCallback, this, _1, _2);
@@ -75,9 +79,15 @@ namespace jsk_perception
   {
     sub_image_.subscribe(*pnh_, "input", 1);
     sub_info_.subscribe(*pnh_, "input/info", 1);
-    async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(100);
-    async_->connectInput(sub_image_, sub_info_);
-    async_->registerCallback(boost::bind(&TemplateMatchDetector::apply, this, _1, _2));
+    if (approximate_sync_) {
+      async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
+      async_->connectInput(sub_image_, sub_info_);
+      async_->registerCallback(boost::bind(&TemplateMatchDetector::apply, this, _1, _2));
+    } else {
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
+      sync_->connectInput(sub_image_, sub_info_);
+      sync_->registerCallback(boost::bind(&TemplateMatchDetector::apply, this, _1, _2));
+    }
 
     ros::V_string names = boost::assign::list_of("~input")("~input/info");
     jsk_topic_tools::warnNoRemap(names);

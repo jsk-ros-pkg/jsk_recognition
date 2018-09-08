@@ -103,11 +103,14 @@ namespace jsk_perception
     ros::Publisher rects_pub_;
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> > async_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
 
     std::string template_name_;
     bool screen_debug_, specify_target_, flip_template_, use_cuda;
     double min_scale, max_scale, matching_thre, stored_thre;
     int resize_num, target_num, position_op, max_detect_num, sort_op;
+    int queue_size_;
+    bool approximate_sync_;
     cv::Mat tmpl_img;
 
 #ifdef USE_CUDA

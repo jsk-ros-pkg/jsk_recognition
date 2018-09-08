@@ -11,6 +11,8 @@
     <rosparam>
       topic_0: /template_match_detector/output/viz
       timeout_0: 10
+      topic_1: /template_match_detector/output/rects
+      timeout_1: 10
     </rosparam>
   </test>
 

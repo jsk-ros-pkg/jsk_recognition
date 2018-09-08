@@ -50,6 +50,7 @@
 #include <jsk_perception/TemplateMatchDetectorConfig.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/core.hpp>
+#include <opencv2/dnn.hpp>
 
 #ifdef USE_CUDA
 #include <opencv2/cudaarithm.hpp>
@@ -88,10 +89,7 @@ namespace jsk_perception
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual bool is_overlaped(cv::Rect rect1, cv::Rect rect2);
-    virtual void rectangleIntegration(std::vector<cv::Rect> rects,
-                                      std::vector<double> score,
-                                      std::vector<cv::Rect>& result);
+    virtual void sortRects(std::vector<cv::Rect> rects);
     virtual void configCallback(Config &config, uint32_t level);
     virtual void apply(const sensor_msgs::Image::ConstPtr& image_msg,
                        const sensor_msgs::CameraInfo::ConstPtr& info_msg);

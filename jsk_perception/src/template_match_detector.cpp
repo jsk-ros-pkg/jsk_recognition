@@ -98,94 +98,20 @@ namespace jsk_perception
     sub_info_.unsubscribe();
   }
 
-  bool TemplateMatchDetector::is_overlaped(
-   cv::Rect rect1,
-   cv::Rect rect2)
+  void TemplateMatchDetector::sortRects(
+    std::vector<cv::Rect> rects)
   {
-    if((double)(rect1 & rect2).area() / rect1.area() > config_.rects_overlaped_threshold ||
-       (double)(rect1 & rect2).area() / rect2.area() > config_.rects_overlaped_threshold)
-      return true;
-    else
-      return false;
-  }
-
-  void TemplateMatchDetector::rectangleIntegration(
-   std::vector<cv::Rect> rects,
-   std::vector<double> score,
-   std::vector<cv::Rect>& result)
-  {
-    if (rects.size() == 0) {
-      return;
-    }
-    int i, j, k;
-
-    //clustering
-    std::vector<std::vector<cv::Rect> > rects_cluster;
-    std::vector<std::vector<double> > score_cluster;
-    std::vector<cv::Rect> tmp_rects;
-    std::vector<double> tmp_scores;
-    tmp_rects.push_back(rects.at(0));
-    rects_cluster.push_back(tmp_rects);
-    rects_cluster.at(0).reserve(rects.size());
-    tmp_scores.push_back(score.at(0));
-    score_cluster.push_back(tmp_scores);
-    score_cluster.at(0).reserve(rects.size());
-    for(i = 1; i < rects.size(); i++){
-      for(j = 0; j < rects_cluster.size(); j++){
-        for(k = 0; k < rects_cluster.at(j).size(); k++){
-          if(is_overlaped(rects.at(i), rects_cluster.at(j).at(k))){
-            rects_cluster.at(j).push_back(rects.at(i));
-            score_cluster.at(j).push_back(score.at(i));
-            break;
-          }
-        }
-        if(k < rects_cluster.at(j).size())
-          break;
-      }
-      if(j == rects_cluster.size() &&
-         k == rects_cluster.at(rects_cluster.size() - 1).size())
-        {
-          tmp_rects.clear();
-          tmp_rects.push_back(rects.at(i));
-          rects_cluster.push_back(tmp_rects);
-          rects_cluster.at(rects_cluster.size() - 1).reserve(rects.size());
-
-          tmp_scores.clear();
-          tmp_scores.push_back(score.at(i));
-          score_cluster.push_back(tmp_scores);
-          score_cluster.at(rects_cluster.size() - 1).reserve(rects.size());
-        }
-    }
-
-    //integrate and sort result
-    result.resize(rects_cluster.size());
-    for(i = 0; i < result.size(); i++){
-      cv::Rect tmp_rect(0.0, 0.0, 0.0, 0.0);
-      double score_total = 0.0;
-      for(j = 0; j < rects_cluster.at(i).size(); j++){
-        tmp_rect += score_cluster.at(i).at(j) * rects_cluster.at(i).at(j).tl();
-        tmp_rect += cv::Size(score_cluster.at(i).at(j) * rects_cluster.at(i).at(j).width,
-                             score_cluster.at(i).at(j) * rects_cluster.at(i).at(j).height);
-        score_total += score_cluster.at(i).at(j);
-      }
-      tmp_rect.x /= score_total;
-      tmp_rect.y /= score_total;
-      tmp_rect.width /= score_total;
-      tmp_rect.height /= score_total;
-      result.at(i) = tmp_rect;
-    }
     switch(config_.sort_direction){
     case jsk_perception::TemplateMatchDetector_NoOperation:
       break;
     case jsk_perception::TemplateMatchDetector_Horizontal:
-      std::sort(result.begin(), result.end(), rect_horizontal<cv::Rect>);
+      std::sort(rects.begin(), rects.end(), rect_horizontal<cv::Rect>);
       break;
     case jsk_perception::TemplateMatchDetector_Vertical:
-      std::sort(result.begin(), result.end(), rect_vertical<cv::Rect>);
+      std::sort(rects.begin(), rects.end(), rect_vertical<cv::Rect>);
       break;
     }
   }
-
 
   void TemplateMatchDetector::configCallback(
     Config &config, uint32_t level)
@@ -235,7 +161,7 @@ namespace jsk_perception
     cv::Mat result_img = search_img.clone();
     cv::cvtColor(result_img, result_img, CV_GRAY2BGR);
     std::vector<cv::Rect> rects;
-    std::vector<double> score;
+    std::vector<float> scores;
 
 #ifdef USE_CUDA
     if(use_cuda){
@@ -279,12 +205,12 @@ namespace jsk_perception
           for (j = 0; j < score_img.cols; j++) {
             if (score_img.at<float>(i, j) > 0.0) {
               rects.push_back(cv::Rect(cv::Point(j, i), cv::Size(cuda_resized_template.cols, cuda_resized_template.rows)));
-              score.push_back(score_img.at<float>(i, j));
+              scores.push_back(score_img.at<float>(i, j));
             }
             if(check_flipped_image_){
               if (flip_score_img.at<float>(i, j) > 0.0) {
                 rects.push_back(cv::Rect(cv::Point(j, i), cv::Size(cuda_flip_resized_template.cols, cuda_flip_resized_template.rows)));
-                score.push_back(flip_score_img.at<float>(i, j));
+                scores.push_back(flip_score_img.at<float>(i, j));
               }
             }
           }
@@ -321,7 +247,7 @@ namespace jsk_perception
             for (j = 0; j < score_img.cols; j++) {
               if (score_img.at<float>(i, j) > 0.0) {
                 rects.push_back(cv::Rect(cv::Point(j, i), cv::Size(resized_template.cols, resized_template.rows)));
-                score.push_back(score_img.at<float>(i, j));
+                scores.push_back(score_img.at<float>(i, j));
               }
             }
           }
@@ -359,7 +285,7 @@ namespace jsk_perception
           for (j = 0; j < score_img.cols; j++) {
             if (score_img.at<float>(i, j) > 0.0) {
               rects.push_back(cv::Rect(cv::Point(j, i), cv::Size(resized_template.cols, resized_template.rows)));
-              score.push_back(score_img.at<float>(i, j));
+              scores.push_back(score_img.at<float>(i, j));
             }
           }
         }
@@ -368,8 +294,13 @@ namespace jsk_perception
     search_img.release();
 #endif
     // integrate neighborhood rectangles
-    std::vector<cv::Rect> result_rects;
-    TemplateMatchDetector::rectangleIntegration(rects, score, result_rects);
+    std::vector<int> result_indices;
+    cv::dnn::NMSBoxes(rects, scores, matching_threshold, config_.nms_threshold, result_indices);
+    std::vector<cv::Rect> result_rects(result_indices.size());
+    for (i = 0; i < result_indices.size(); ++i) {
+      result_rects[i] = rects[result_indices[i]];
+    }
+    sortRects(result_rects);
 
     //update matching threshold
     if(update_matching_threshold_) {
@@ -384,7 +315,10 @@ namespace jsk_perception
     if (img_pub_.getNumSubscribers() > 0) {
       //draw rectangles on image
       for (i = 0;i < result_rects.size(); i++) {
-        cv::rectangle(result_img, result_rects.at(i).tl(), result_rects.at(i).br(), cv::Scalar(0, 0, 255), 2, 8, 0);
+        cv::rectangle(result_img,
+                      result_rects.at(i).tl(),
+                      result_rects.at(i).br(),
+                      cv::Scalar(0, 0, 255), 2, 8, 0);
       }
       img_pub_.publish(cv_bridge::CvImage(image_msg->header,
                                           sensor_msgs::image_encodings::BGR8,
@@ -404,7 +338,6 @@ namespace jsk_perception
       }
 
       rects_msg.header = image_msg->header;
-      rects_msg.rects.resize(result_rects.size());
       rects_pub_.publish(rects_msg);
     }
   }

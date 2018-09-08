@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_template_matching_detector.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_template_matching_detector"
+        name="test_template_matching_detector"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /template_match_detector/output/viz
+      timeout_0: 10
+    </rosparam>
+  </test>
+
+</launch>

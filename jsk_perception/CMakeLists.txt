@@ -435,6 +435,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/tile_image.test)
     jsk_add_rostest(test/vgg16_object_recognition.test)
     jsk_add_rostest(test/ssd_object_detector.test)
+    jsk_add_rostest(test/template_matching_detector.test)
     # FIXME: Unstable on Travis/Jenkins
     # if(TARGET bing)
     #   jsk_add_rostest(test/bing.test)

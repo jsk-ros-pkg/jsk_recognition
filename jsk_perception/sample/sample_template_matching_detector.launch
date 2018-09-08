@@ -19,14 +19,13 @@
     <remap from="~input" to="$(arg input)" />
     <remap from="~input/info" to="$(arg input_info)"/>
     <rosparam subst_value="true">
-      template_name: "$(arg template)"
-      specify_target: false
+      template_filename: "$(arg template)"
       min_scale: 0.5
       max_scale: 1.4
-      resize_num: 10
-      matching_thre: 0.6
-      screen_debug: false
-      flip_template: false
+      target_num: 1
+      resize_template_num: 10
+      matching_threshold: 0.4
+      update_matching_threshold: true
     </rosparam>
   </node>
 

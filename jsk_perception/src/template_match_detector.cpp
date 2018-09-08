@@ -55,7 +55,7 @@ namespace jsk_perception
     srv_->setCallback (f);
 
     img_pub_ = advertise<sensor_msgs::Image>(*pnh_, "output/viz", 1);
-    rects_pub_ = advertise<jsk_recognition_msgs::RectArray>(*pnh_, "output/rect", 1);
+    rects_pub_ = advertise<jsk_recognition_msgs::RectArray>(*pnh_, "output/rects", 1);
 
     stored_thre = 0.0;
 #ifdef USE_CUDA

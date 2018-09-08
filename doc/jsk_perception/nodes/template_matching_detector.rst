@@ -36,7 +36,7 @@ Publishing Topic
 Parameters
 ----------
 
-* ``~template_name`` (String, default: ``template.png``)
+* ``~template_filename`` (String, default: ``template.png``)
 
   Template image's file name
 
@@ -48,37 +48,37 @@ Parameters
 
   Max scale of template
 
-* ``~resize_num`` (Int, default: ``20``)
+* ``~resize_template_num`` (Int, default: ``20``)
 
   the number of resizing template
 
-* ``~matching_thre``, (Float, default: ``0.7``)
+* ``~matching_threshold``, (Float, default: ``0.7``)
 
   Threshold of matching result
+
+* ``~nms_threshold``, (Int, default: ``0.5``)
+
+  Threshold of nms
 
 * ``~target_num``, (Int, default: ``6``)
 
   The number of target
 
-* ``~max_detect_num``, (Int, default: ``15000``)
+* ``~sort_direction``, (Int, default: ``0``)
 
-  If detected rectangle number is over max_detect_num, skip calculation.
+  Option of sorting target. 0: NoOperation, 1: sort by Vertical 2: sort by horizontal
 
-* ``~sort_op``, (Int, default: ``1``)
+* ``~check_flipped_image``, (Bool, default: ``True``)
 
-  Option of sorting target. 0:horizontal, 1:vertical
+  If ``True``, template matching using original template image and use flipped template image
 
-* ``~screen_debug``, (Bool, default: ``True``)
+* ``~update_matching_threshold``, (Bool, default: ``False``)
 
-  Toggle of screen_debug
+  If ``True``, update matching threshold
 
-* ``~specify_target``, (Bool, default: ``True``)
+* ``~update_step_of_threshold``, (Float, default: ``0.05``)
 
-  Specify the number of target
-
-* ``~flip_template``, (Bool, default: ``True``)
-
-  If ``True`` Using flipped template
+  Update step of matching threshold
 
 
 Sample

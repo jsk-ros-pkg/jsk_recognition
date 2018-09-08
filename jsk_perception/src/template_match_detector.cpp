@@ -209,7 +209,7 @@ namespace jsk_perception
         std::cout << "template : " << template_name_ << std::endl;
         tmpl_img = cv::imread(template_name_, 0);
         if(tmpl_img.empty()){
-          ROS_WARN("Cannot read template image!");
+          ROS_ERROR("Cannot read template image!");
         }
       }
     if(config.matching_thre != stored_thre)

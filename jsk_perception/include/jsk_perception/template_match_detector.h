@@ -90,6 +90,7 @@ namespace jsk_perception
 
     std::string template_filename_;
     bool update_matching_threshold_, check_flipped_image_, use_cuda;
+    static bool need_config_update_;
     double min_scale, max_scale, matching_threshold;
     int resize_template_num, target_num;
     int queue_size_;

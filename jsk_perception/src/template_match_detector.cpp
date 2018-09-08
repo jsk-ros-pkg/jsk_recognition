@@ -112,8 +112,9 @@ namespace jsk_perception
     target_num = config.target_num;
     update_matching_threshold_ = config.update_matching_threshold;
     check_flipped_image_ = config.check_flipped_image;
-    if (update_matching_threshold_) {
+    if (need_config_update_) {
       config.matching_threshold = matching_threshold;
+      need_config_update_ = false;
     } else {
       matching_threshold = config_.matching_threshold;
     }
@@ -292,9 +293,11 @@ namespace jsk_perception
     if(update_matching_threshold_) {
       if (result_rects.size() > target_num) {
         matching_threshold = std::min(matching_threshold + config_.update_step_of_threshold, 1.0);
+        need_config_update_ = true;
       }
       else if (result_rects.size() < target_num) {
         matching_threshold = std::max(matching_threshold - config_.update_step_of_threshold, 0.0);
+        need_config_update_ = true;
       }
     }
 
@@ -327,7 +330,7 @@ namespace jsk_perception
       rects_pub_.publish(rects_msg);
     }
   }
-
+bool TemplateMatchDetector::need_config_update_ = false;
 }
 
 #include <pluginlib/class_list_macros.h>

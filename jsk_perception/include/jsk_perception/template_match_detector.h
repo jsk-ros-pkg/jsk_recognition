@@ -96,6 +96,7 @@ namespace jsk_perception
     virtual void apply(const sensor_msgs::Image::ConstPtr& image_msg,
                        const sensor_msgs::CameraInfo::ConstPtr& info_msg);
 
+    Config config_;
     boost::mutex mutex_;
     message_filters::Subscriber<sensor_msgs::Image> sub_image_;
     message_filters::Subscriber<sensor_msgs::CameraInfo> sub_info_;
@@ -105,16 +106,16 @@ namespace jsk_perception
     boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> > async_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
 
-    std::string template_name_;
-    bool debug_, specify_target_, flip_template_, use_cuda;
-    double min_scale, max_scale, matching_threshold, stored_thre;
-    int resize_num, target_num, position_op, max_detect_num, sort_op;
+    std::string template_filename_;
+    bool update_matching_threshold_, check_flipped_image_, use_cuda;
+    double min_scale, max_scale, matching_threshold;
+    int resize_template_num, target_num;
     int queue_size_;
     bool approximate_sync_;
-    cv::Mat tmpl_img;
+    cv::Mat template_image;
 
 #ifdef USE_CUDA
-    cv::cuda::GpuMat cuda_tmpl_img;
+    cv::cuda::GpuMat cuda_template_image;
 #endif
 
   private:

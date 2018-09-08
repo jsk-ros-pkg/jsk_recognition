@@ -57,7 +57,6 @@ namespace jsk_perception
     img_pub_ = advertise<sensor_msgs::Image>(*pnh_, "output/viz", 1);
     rects_pub_ = advertise<jsk_recognition_msgs::RectArray>(*pnh_, "output/rects", 1);
 
-    stored_thre = 0.0;
 #ifdef USE_CUDA
     if(cv::cuda::getCudaEnabledDeviceCount() > 0){
       use_cuda = true;
@@ -103,10 +102,8 @@ namespace jsk_perception
    cv::Rect rect1,
    cv::Rect rect2)
   {
-    double overlap_thre = 0.5;
-    if(
-       (double)(rect1 & rect2).area() / rect1.area() > overlap_thre ||
-       (double)(rect1 & rect2).area() / rect2.area() > overlap_thre)
+    if((double)(rect1 & rect2).area() / rect1.area() > config_.rects_overlaped_threshold ||
+       (double)(rect1 & rect2).area() / rect2.area() > config_.rects_overlaped_threshold)
       return true;
     else
       return false;
@@ -117,10 +114,12 @@ namespace jsk_perception
    std::vector<double> score,
    std::vector<cv::Rect>& result)
   {
+    if (rects.size() == 0) {
+      return;
+    }
     int i, j, k;
 
     //clustering
-    int found_cluster = 0;
     std::vector<std::vector<cv::Rect> > rects_cluster;
     std::vector<std::vector<double> > score_cluster;
     std::vector<cv::Rect> tmp_rects;
@@ -175,15 +174,14 @@ namespace jsk_perception
       tmp_rect.height /= score_total;
       result.at(i) = tmp_rect;
     }
-    switch(sort_op){
-    case 0:
+    switch(config_.sort_direction){
+    case jsk_perception::TemplateMatchDetector_NoOperation:
+      break;
+    case jsk_perception::TemplateMatchDetector_Horizontal:
       std::sort(result.begin(), result.end(), rect_horizontal<cv::Rect>);
       break;
-    case 1:
+    case jsk_perception::TemplateMatchDetector_Vertical:
       std::sort(result.begin(), result.end(), rect_vertical<cv::Rect>);
-      break;
-    default :
-      std::cout << "sort_option error!! sort_op should be 0 or 1." << std::endl;
       break;
     }
   }
@@ -194,29 +192,25 @@ namespace jsk_perception
   {
     boost::mutex::scoped_lock lock(mutex_);
 
+    config_ = config;
     min_scale = config.min_scale;
     max_scale = config.max_scale;
-    resize_num = config.resize_num;
+    resize_template_num = config.resize_template_num;
     target_num = config.target_num;
-    max_detect_num = config.max_detect_num;
-    sort_op = config.sort_op;
-    debug_ = config.debug;
-    specify_target_ = config.specify_target;
-    flip_template_ = config.flip_template;
-    if(config.template_name != template_name_)
-      {
-        template_name_ = config.template_name;
-        std::cout << "template : " << template_name_ << std::endl;
-        tmpl_img = cv::imread(template_name_, 0);
-        if(tmpl_img.empty()){
-          ROS_ERROR("Cannot read template image!");
-        }
+    update_matching_threshold_ = config.update_matching_threshold;
+    check_flipped_image_ = config.check_flipped_image;
+    if (update_matching_threshold_) {
+      config.matching_threshold = matching_threshold;
+    } else {
+      matching_threshold = config_.matching_threshold;
+    }
+    if (config.template_filename != template_filename_) {
+      template_filename_ = config.template_filename;
+      template_image = cv::imread(template_filename_, 0);
+      if (template_image.empty()) {
+        ROS_ERROR("Cannot read template image!");
       }
-    if(config.matching_threshold != stored_thre)
-      {
-        stored_thre = config.matching_threshold;
-        matching_threshold = stored_thre;
-      }
+    }
   }
 
 
@@ -226,13 +220,12 @@ namespace jsk_perception
   {
     boost::mutex::scoped_lock lock(mutex_);
     int i, j, k, l;
-    double thre_update_step = 0.05;
 
     if ((image_msg->width == 0) && (image_msg->height == 0)) {
-        ROS_WARN("invalid image input");
-        return;
+      ROS_WARN("invalid image input");
+      return;
     }
-    if(tmpl_img.empty()){
+    if(template_image.empty()){
       return;
     }
 
@@ -247,10 +240,10 @@ namespace jsk_perception
 #ifdef USE_CUDA
     if(use_cuda){
       cv::cuda::GpuMat cuda_search_img(search_img);
-      cv::cuda::GpuMat cuda_resized_tmpl;
+      cv::cuda::GpuMat cuda_resized_template;
       cv::cuda::GpuMat cuda_score_img;
-      cv::cuda::GpuMat cuda_flipped_tmpl;
-      cv::cuda::GpuMat cuda_flip_resized_tmpl;
+      cv::cuda::GpuMat cuda_flipped_template;
+      cv::cuda::GpuMat cuda_flip_resized_template;
       cv::cuda::GpuMat cuda_flip_score_img;
       cv::Mat score_img;
       cv::Mat flip_score_img;
@@ -258,63 +251,52 @@ namespace jsk_perception
       stream[0].waitForCompletion(); // normal template
       stream[1].waitForCompletion(); // flipped template
 
-      cuda_tmpl_img.upload(tmpl_img, stream[0]);
-      if(flip_template_)
-        cv::cuda::flip(cuda_tmpl_img, cuda_flipped_tmpl, 1, stream[0]);
+      cuda_template_image.upload(template_image, stream[0]);
+      if(check_flipped_image_)
+        cv::cuda::flip(cuda_template_image, cuda_flipped_template, 1, stream[0]);
 
       //template matching
-      for(k = 0; k <= resize_num; k++){
-        double scale = min_scale + (max_scale - min_scale) * (double)k / resize_num;
-        if(debug_) std::cout << "scale : " << scale;
-        cv::cuda::resize(cuda_tmpl_img, cuda_resized_tmpl, cv::Size(), scale, scale, CV_INTER_LINEAR, stream[0]);
-        if(flip_template_)
-          cv::cuda::resize(cuda_flipped_tmpl, cuda_flip_resized_tmpl, cv::Size(), scale, scale, CV_INTER_LINEAR, stream[1]);
-        if(cuda_search_img.size().width <= cuda_resized_tmpl.size().width ||
-           cuda_search_img.size().height <= cuda_resized_tmpl.size().height){
+      for(k = 0; k <= resize_template_num; k++){
+        double scale = min_scale + (max_scale - min_scale) * (double)k / resize_template_num;
+        cv::cuda::resize(cuda_template_image, cuda_resized_template, cv::Size(), scale, scale, CV_INTER_LINEAR, stream[0]);
+        if(check_flipped_image_)
+          cv::cuda::resize(cuda_flipped_template, cuda_flip_resized_template, cv::Size(), scale, scale, CV_INTER_LINEAR, stream[1]);
+        if(cuda_search_img.size().width <= cuda_resized_template.size().width ||
+           cuda_search_img.size().height <= cuda_resized_template.size().height){
           break;
         }
         cv::Ptr<cv::cuda::TemplateMatching> alg = cv::cuda::createTemplateMatching(cuda_search_img.type(), CV_TM_CCOEFF_NORMED);
-        alg->match(cuda_search_img, cuda_resized_tmpl, cuda_score_img, stream[0]);
+        alg->match(cuda_search_img, cuda_resized_template, cuda_score_img, stream[0]);
         cv::cuda::threshold(cuda_score_img, cuda_score_img, matching_threshold, 1.0, CV_THRESH_TOZERO, stream[0]);
         cuda_score_img.download(score_img, stream[0]);
-        if(flip_template_){
+        if(check_flipped_image_){
           cv::Ptr<cv::cuda::TemplateMatching> alg_flip = cv::cuda::createTemplateMatching(cuda_search_img.type(), CV_TM_CCOEFF_NORMED);
-          alg_flip->match(cuda_search_img, cuda_flip_resized_tmpl, cuda_flip_score_img, stream[1]);
+          alg_flip->match(cuda_search_img, cuda_flip_resized_template, cuda_flip_score_img, stream[1]);
           cv::cuda::threshold(cuda_flip_score_img, cuda_flip_score_img, matching_threshold, 1.0, CV_THRESH_TOZERO, stream[1]);
           cuda_flip_score_img.download(flip_score_img, stream[1]);
         }
-        int debug_count = 0;
         for (i = 0; i < score_img.rows; i++) {
           for (j = 0; j < score_img.cols; j++) {
             if (score_img.at<float>(i, j) > 0.0) {
-              debug_count++;
-              rects.push_back(cv::Rect(cv::Point(j, i), cv::Size(cuda_resized_tmpl.cols, cuda_resized_tmpl.rows)));
+              rects.push_back(cv::Rect(cv::Point(j, i), cv::Size(cuda_resized_template.cols, cuda_resized_template.rows)));
               score.push_back(score_img.at<float>(i, j));
-              if(debug_)
-                cv::rectangle(result_img, cv::Point(j, i),
-                              cv::Point(j + cuda_resized_tmpl.cols, i + cuda_resized_tmpl.rows), cv::Scalar(0, 0, 0));
             }
-            if(flip_template_){
+            if(check_flipped_image_){
               if (flip_score_img.at<float>(i, j) > 0.0) {
-                debug_count++;
-                rects.push_back(cv::Rect(cv::Point(j, i), cv::Size(cuda_flip_resized_tmpl.cols, cuda_flip_resized_tmpl.rows)));
+                rects.push_back(cv::Rect(cv::Point(j, i), cv::Size(cuda_flip_resized_template.cols, cuda_flip_resized_template.rows)));
                 score.push_back(flip_score_img.at<float>(i, j));
-                if(debug_)
-                  cv::rectangle(result_img, cv::Point(j, i),
-                                cv::Point(j + cuda_flip_resized_tmpl.cols, i + cuda_flip_resized_tmpl.rows), cv::Scalar(0, 0, 0));
               }
             }
           }
         }
-        if(debug_) std::cout << "  match :" << debug_count << std::endl;
       }
       search_img.release();
     } else {
       cv::Mat score_img;
-      cv::Mat resized_tmpl;
+      cv::Mat resized_template;
       int matching_try_num;
 
-      if(flip_template_){
+      if(check_flipped_image_){
         matching_try_num = 2;
       } else {
         matching_try_num = 1;
@@ -322,43 +304,37 @@ namespace jsk_perception
 
       //template matching
       for(l = 0; l < matching_try_num; l++){
-        for(k = 0; k <= resize_num; k++){
-          double scale = min_scale + (max_scale - min_scale) * (double)k / resize_num;
-          if(debug_) std::cout << "scale : " << scale;
-          cv::resize(tmpl_img, resized_tmpl, cv::Size(), scale, scale);
+        for(k = 0; k <= resize_template_num; k++){
+          double scale = min_scale + (max_scale - min_scale) * (double)k / resize_template_num;
+          cv::resize(template_image, resized_template, cv::Size(), scale, scale);
           if(l == 1){
-            cv::flip(resized_tmpl, resized_tmpl, 1);
+            cv::flip(resized_template, resized_template, 1);
           }
-          if(search_img.size().width <= resized_tmpl.size().width ||
-             search_img.size().height <= resized_tmpl.size().height){
+          if(search_img.size().width <= resized_template.size().width ||
+             search_img.size().height <= resized_template.size().height){
             break;
           }
-          cv::matchTemplate(search_img, resized_tmpl, score_img, CV_TM_CCOEFF_NORMED);
+          cv::matchTemplate(search_img, resized_template, score_img, CV_TM_CCOEFF_NORMED);
 
           cv::threshold(score_img, score_img, matching_threshold, 1.0, CV_THRESH_TOZERO);
-          int debug_count = 0;
           for (i = 0; i < score_img.rows; i++) {
             for (j = 0; j < score_img.cols; j++) {
               if (score_img.at<float>(i, j) > 0.0) {
-                debug_count++;
-                rects.push_back(cv::Rect(cv::Point(j, i), cv::Size(resized_tmpl.cols, resized_tmpl.rows)));
+                rects.push_back(cv::Rect(cv::Point(j, i), cv::Size(resized_template.cols, resized_template.rows)));
                 score.push_back(score_img.at<float>(i, j));
-                if(debug_)
-                  cv::rectangle(result_img, cv::Point(j, i), cv::Point(j + resized_tmpl.cols, i + resized_tmpl.rows), cv::Scalar(0, 0, 0));
               }
             }
           }
-          if(debug_) std::cout << "  match :" << debug_count << std::endl;
         }
       }
       search_img.release();
     }
 #else
     cv::Mat score_img;
-    cv::Mat resized_tmpl;
+    cv::Mat resized_template;
     int matching_try_num;
 
-    if(flip_template_){
+    if(check_flipped_image_){
       matching_try_num = 2;
     } else {
       matching_try_num = 1;
@@ -366,96 +342,44 @@ namespace jsk_perception
 
     //template matching
     for(l = 0; l < matching_try_num; l++){
-      for(k = 0; k <= resize_num; k++){
-        double scale = min_scale + (max_scale - min_scale) * (double)k / resize_num;
-        if(debug_) std::cout << "scale : " << scale;
-        cv::resize(tmpl_img, resized_tmpl, cv::Size(), scale, scale);
+      for(k = 0; k <= resize_template_num; k++){
+        double scale = min_scale + (max_scale - min_scale) * (double)k / resize_template_num;
+        cv::resize(template_image, resized_template, cv::Size(), scale, scale);
         if(l == 1){
-          cv::flip(resized_tmpl, resized_tmpl, 1);
+          cv::flip(resized_template, resized_template, 1);
         }
-        if(search_img.size().width <= resized_tmpl.size().width ||
-           search_img.size().height <= resized_tmpl.size().height){
+        if(search_img.size().width <= resized_template.size().width ||
+           search_img.size().height <= resized_template.size().height){
           break;
         }
-        cv::matchTemplate(search_img, resized_tmpl, score_img, CV_TM_CCOEFF_NORMED);
+        cv::matchTemplate(search_img, resized_template, score_img, CV_TM_CCOEFF_NORMED);
 
         cv::threshold(score_img, score_img, matching_threshold, 1.0, CV_THRESH_TOZERO);
-        int debug_count = 0;
         for (i = 0; i < score_img.rows; i++) {
           for (j = 0; j < score_img.cols; j++) {
             if (score_img.at<float>(i, j) > 0.0) {
-              debug_count++;
-              rects.push_back(cv::Rect(cv::Point(j, i), cv::Size(resized_tmpl.cols, resized_tmpl.rows)));
+              rects.push_back(cv::Rect(cv::Point(j, i), cv::Size(resized_template.cols, resized_template.rows)));
               score.push_back(score_img.at<float>(i, j));
-              if(debug_)
-                cv::rectangle(result_img, cv::Point(j, i), cv::Point(j + resized_tmpl.cols, i + resized_tmpl.rows), cv::Scalar(0, 0, 0));
             }
           }
         }
-        if(debug_) std::cout << "  match :" << debug_count << std::endl;
       }
     }
     search_img.release();
 #endif
-
-    if(rects.size() == 0){
-      if(specify_target_){
-        std::cout << "no match!" << std::endl << "Decreasing threshold before : " << matching_threshold;
-        matching_threshold = std::max(matching_threshold - thre_update_step, 0.0);
-        std::cout << "  after : " << matching_threshold << std::endl;
-        return;
-      } else {
-        if(debug_)
-          std::cout << std::endl << std::endl;
-        jsk_recognition_msgs::RectArray rects_msg;
-        rects_msg.header = image_msg->header;
-        rects_pub_.publish(rects_msg);
-        img_pub_.publish(cv_bridge::CvImage(
-                                            image_msg->header,
-                                            sensor_msgs::image_encodings::BGR8,
-                                            result_img).toImageMsg());
-        return;
-      }
-    }
-
-    if(rects.size() > max_detect_num){
-      std::cout << "detected rectangles num is over maxdetected num. detected num : " << rects.size() << "  max num : "
-                << max_detect_num << std::endl;
-      if(specify_target_){
-        std::cout << "Increasing threshold before : " << matching_threshold;
-        matching_threshold = std::min(matching_threshold + thre_update_step, 1.0);
-        std::cout << "  after : " << matching_threshold << std::endl;
-        return;
-      } else {
-        // todo clear rects
-        return;
-      }
-    }
-
     // integrate neighborhood rectangles
     std::vector<cv::Rect> result_rects;
     TemplateMatchDetector::rectangleIntegration(rects, score, result_rects);
-    if(debug_)
-      std::cout << "integrated_rect num : " << result_rects.size() << std::endl;
 
     //update matching threshold
-    if(specify_target_ &&
-       result_rects.size() != target_num){
-      if(result_rects.size() > target_num){
-        std::cout << "Too many rectangles detected. detected num : " << result_rects.size() << "  target num : "
-                  << target_num << std::endl << "Increasing threshold before : " << matching_threshold;
-        matching_threshold = std::min(matching_threshold + thre_update_step, 1.0);
-        std::cout << "  after : " << matching_threshold << std::endl;
+    if(update_matching_threshold_) {
+      if (result_rects.size() > target_num) {
+        matching_threshold = std::min(matching_threshold + config_.update_step_of_threshold, 1.0);
       }
-      else {
-        std::cout << "Too few rectangles detected. detected num : " << result_rects.size() << "  target num : "
-                  << target_num << std::endl << "Decreasing threshold before : " << matching_threshold;
-        matching_threshold = std::max(matching_threshold - thre_update_step, 0.0);
-        std::cout << "  after : " << matching_threshold << std::endl;
+      else if (result_rects.size() < target_num) {
+        matching_threshold = std::max(matching_threshold - config_.update_step_of_threshold, 0.0);
       }
-      return;
     }
-    if(debug_) std::cout << std::endl;
 
     if (img_pub_.getNumSubscribers() > 0) {
       //draw rectangles on image

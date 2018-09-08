@@ -36,6 +36,10 @@ Publishing Topic
 Parameters
 ----------
 
+* ``~queue_size`` (Int, default: ``100``)
+
+  Size of queue
+
 * ``~template_filename`` (String, default: ``template.png``)
 
   Template image's file name

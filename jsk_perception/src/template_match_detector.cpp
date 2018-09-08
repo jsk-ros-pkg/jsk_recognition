@@ -200,7 +200,7 @@ namespace jsk_perception
     target_num = config.target_num;
     max_detect_num = config.max_detect_num;
     sort_op = config.sort_op;
-    screen_debug_ = config.screen_debug;
+    debug_ = config.debug;
     specify_target_ = config.specify_target;
     flip_template_ = config.flip_template;
     if(config.template_name != template_name_)
@@ -265,7 +265,7 @@ namespace jsk_perception
       //template matching
       for(k = 0; k <= resize_num; k++){
         double scale = min_scale + (max_scale - min_scale) * (double)k / resize_num;
-        if(screen_debug_) std::cout << "scale : " << scale;
+        if(debug_) std::cout << "scale : " << scale;
         cv::cuda::resize(cuda_tmpl_img, cuda_resized_tmpl, cv::Size(), scale, scale, CV_INTER_LINEAR, stream[0]);
         if(flip_template_)
           cv::cuda::resize(cuda_flipped_tmpl, cuda_flip_resized_tmpl, cv::Size(), scale, scale, CV_INTER_LINEAR, stream[1]);
@@ -290,7 +290,7 @@ namespace jsk_perception
               debug_count++;
               rects.push_back(cv::Rect(cv::Point(j, i), cv::Size(cuda_resized_tmpl.cols, cuda_resized_tmpl.rows)));
               score.push_back(score_img.at<float>(i, j));
-              if(screen_debug_)
+              if(debug_)
                 cv::rectangle(result_img, cv::Point(j, i),
                               cv::Point(j + cuda_resized_tmpl.cols, i + cuda_resized_tmpl.rows), cv::Scalar(0, 0, 0));
             }
@@ -299,14 +299,14 @@ namespace jsk_perception
                 debug_count++;
                 rects.push_back(cv::Rect(cv::Point(j, i), cv::Size(cuda_flip_resized_tmpl.cols, cuda_flip_resized_tmpl.rows)));
                 score.push_back(flip_score_img.at<float>(i, j));
-                if(screen_debug_)
+                if(debug_)
                   cv::rectangle(result_img, cv::Point(j, i),
                                 cv::Point(j + cuda_flip_resized_tmpl.cols, i + cuda_flip_resized_tmpl.rows), cv::Scalar(0, 0, 0));
               }
             }
           }
         }
-        if(screen_debug_) std::cout << "  match :" << debug_count << std::endl;
+        if(debug_) std::cout << "  match :" << debug_count << std::endl;
       }
       search_img.release();
     } else {
@@ -324,7 +324,7 @@ namespace jsk_perception
       for(l = 0; l < matching_try_num; l++){
         for(k = 0; k <= resize_num; k++){
           double scale = min_scale + (max_scale - min_scale) * (double)k / resize_num;
-          if(screen_debug_) std::cout << "scale : " << scale;
+          if(debug_) std::cout << "scale : " << scale;
           cv::resize(tmpl_img, resized_tmpl, cv::Size(), scale, scale);
           if(l == 1){
             cv::flip(resized_tmpl, resized_tmpl, 1);
@@ -343,12 +343,12 @@ namespace jsk_perception
                 debug_count++;
                 rects.push_back(cv::Rect(cv::Point(j, i), cv::Size(resized_tmpl.cols, resized_tmpl.rows)));
                 score.push_back(score_img.at<float>(i, j));
-                if(screen_debug_)
+                if(debug_)
                   cv::rectangle(result_img, cv::Point(j, i), cv::Point(j + resized_tmpl.cols, i + resized_tmpl.rows), cv::Scalar(0, 0, 0));
               }
             }
           }
-          if(screen_debug_) std::cout << "  match :" << debug_count << std::endl;
+          if(debug_) std::cout << "  match :" << debug_count << std::endl;
         }
       }
       search_img.release();
@@ -368,7 +368,7 @@ namespace jsk_perception
     for(l = 0; l < matching_try_num; l++){
       for(k = 0; k <= resize_num; k++){
         double scale = min_scale + (max_scale - min_scale) * (double)k / resize_num;
-        if(screen_debug_) std::cout << "scale : " << scale;
+        if(debug_) std::cout << "scale : " << scale;
         cv::resize(tmpl_img, resized_tmpl, cv::Size(), scale, scale);
         if(l == 1){
           cv::flip(resized_tmpl, resized_tmpl, 1);
@@ -387,12 +387,12 @@ namespace jsk_perception
               debug_count++;
               rects.push_back(cv::Rect(cv::Point(j, i), cv::Size(resized_tmpl.cols, resized_tmpl.rows)));
               score.push_back(score_img.at<float>(i, j));
-              if(screen_debug_)
+              if(debug_)
                 cv::rectangle(result_img, cv::Point(j, i), cv::Point(j + resized_tmpl.cols, i + resized_tmpl.rows), cv::Scalar(0, 0, 0));
             }
           }
         }
-        if(screen_debug_) std::cout << "  match :" << debug_count << std::endl;
+        if(debug_) std::cout << "  match :" << debug_count << std::endl;
       }
     }
     search_img.release();
@@ -405,7 +405,7 @@ namespace jsk_perception
         std::cout << "  after : " << matching_thre << std::endl;
         return;
       } else {
-        if(screen_debug_)
+        if(debug_)
           std::cout << std::endl << std::endl;
         jsk_recognition_msgs::RectArray rects_msg;
         rects_msg.header = image_msg->header;
@@ -435,7 +435,7 @@ namespace jsk_perception
     // integrate neighborhood rectangles
     std::vector<cv::Rect> result_rects;
     TemplateMatchDetector::rectangleIntegration(rects, score, result_rects);
-    if(screen_debug_)
+    if(debug_)
       std::cout << "integrated_rect num : " << result_rects.size() << std::endl;
 
     //update matching threshold
@@ -455,7 +455,7 @@ namespace jsk_perception
       }
       return;
     }
-    if(screen_debug_) std::cout << std::endl;
+    if(debug_) std::cout << std::endl;
 
     //draw rectangles on image
     for (i = 0;i < result_rects.size(); i++) {

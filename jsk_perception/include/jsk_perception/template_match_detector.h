@@ -40,7 +40,8 @@
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
-#include <opencv_apps/Point2DArrayStamped.h>
+#include <jsk_recognition_msgs/Rect.h>
+#include <jsk_recognition_msgs/RectArray.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
@@ -99,7 +100,7 @@ namespace jsk_perception
     message_filters::Subscriber<sensor_msgs::Image> sub_image_;
     message_filters::Subscriber<sensor_msgs::CameraInfo> sub_info_;
     ros::Publisher img_pub_;
-    ros::Publisher pos_pub_;
+    ros::Publisher rects_pub_;
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> > async_;
 

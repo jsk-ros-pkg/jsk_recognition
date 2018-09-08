@@ -50,8 +50,8 @@ namespace jsk_perception
       boost::bind (&TemplateMatchDetector::configCallback, this, _1, _2);
     srv_->setCallback (f);
 
-    img_pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
-    pos_pub_ = advertise<opencv_apps::Point2DArrayStamped>(*pnh_, "output/position", 1);
+    img_pub_ = advertise<sensor_msgs::Image>(*pnh_, "output/viz", 1);
+    rects_pub_ = advertise<jsk_recognition_msgs::RectArray>(*pnh_, "output/rect", 1);
 
     stored_thre = 0.0;
 #ifdef USE_CUDA
@@ -397,9 +397,9 @@ namespace jsk_perception
       } else {
         if(screen_debug_)
           std::cout << std::endl << std::endl;
-        opencv_apps::Point2DArrayStamped pos_msg;
-        pos_msg.header = image_msg->header;
-        pos_pub_.publish(pos_msg);
+        jsk_recognition_msgs::RectArray rects_msg;
+        rects_msg.header = image_msg->header;
+        rects_pub_.publish(rects_msg);
         img_pub_.publish(cv_bridge::CvImage(
                                             image_msg->header,
                                             sensor_msgs::image_encodings::BGR8,
@@ -452,22 +452,20 @@ namespace jsk_perception
       cv::rectangle(result_img, result_rects.at(i).tl(), result_rects.at(i).br(), cv::Scalar(0, 0, 255), 2, 8, 0);
     }
 
-    //calculate wrench positions
-    std::vector<opencv_apps::Point2D> positions(result_rects.size());
-    //bottom
+    jsk_recognition_msgs::RectArray rects_msg;
+    rects_msg.rects.resize(result_rects.size());
     for(i = 0; i < result_rects.size(); i++){
-      opencv_apps::Point2D pos;
-      pos.x = result_rects.at(i).x + result_rects.at(i).width / 2.0 + info_msg->roi.x_offset;
-      pos.y = result_rects.at(i).y + result_rects.at(i).height / 2.0 + info_msg->roi.y_offset;
-      positions.at(i) = pos;
+      jsk_recognition_msgs::Rect rect;
+      rect.x = result_rects[i].x;
+      rect.y = result_rects[i].y;
+      rect.width = result_rects[i].width;
+      rect.height = result_rects[i].height;
+      rects_msg.rects[i] = rect;
     }
-    //todo->top
 
-    opencv_apps::Point2DArrayStamped pos_msg;
-    pos_msg.header = image_msg->header;
-    pos_msg.points.resize(result_rects.size());
-    pos_msg.points = positions;
-    pos_pub_.publish(pos_msg);
+    rects_msg.header = image_msg->header;
+    rects_msg.rects.resize(result_rects.size());
+    rects_pub_.publish(rects_msg);
     img_pub_.publish(cv_bridge::CvImage(
                      image_msg->header,
                      sensor_msgs::image_encodings::BGR8,

@@ -39,13 +39,8 @@
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/Image.h>
-#include <sensor_msgs/CameraInfo.h>
 #include <jsk_recognition_msgs/Rect.h>
 #include <jsk_recognition_msgs/RectArray.h>
-#include <message_filters/subscriber.h>
-#include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/exact_time.h>
-#include <message_filters/sync_policies/approximate_time.h>
 #include <dynamic_reconfigure/server.h>
 #include <jsk_perception/TemplateMatchDetectorConfig.h>
 #include <opencv2/opencv.hpp>
@@ -77,13 +72,6 @@ namespace jsk_perception
   {
   public:
     typedef jsk_perception::TemplateMatchDetectorConfig Config;
-    typedef message_filters::sync_policies::ApproximateTime<
-      sensor_msgs::Image,
-      sensor_msgs::CameraInfo > ApproximateSyncPolicy;
-    typedef message_filters::sync_policies::ExactTime<
-      sensor_msgs::Image,
-      sensor_msgs::CameraInfo > SyncPolicy;
-
     TemplateMatchDetector(): DiagnosticNodelet("TemplateMatchDetector") {}
   protected:
     virtual void onInit();
@@ -91,25 +79,20 @@ namespace jsk_perception
     virtual void unsubscribe();
     virtual void sortRects(std::vector<cv::Rect> rects);
     virtual void configCallback(Config &config, uint32_t level);
-    virtual void apply(const sensor_msgs::Image::ConstPtr& image_msg,
-                       const sensor_msgs::CameraInfo::ConstPtr& info_msg);
+    virtual void apply(const sensor_msgs::Image::ConstPtr& image_msg);
 
     Config config_;
     boost::mutex mutex_;
-    message_filters::Subscriber<sensor_msgs::Image> sub_image_;
-    message_filters::Subscriber<sensor_msgs::CameraInfo> sub_info_;
+    ros::Subscriber sub_;
     ros::Publisher img_pub_;
     ros::Publisher rects_pub_;
     boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
-    boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> > async_;
-    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
 
     std::string template_filename_;
     bool update_matching_threshold_, check_flipped_image_, use_cuda;
     double min_scale, max_scale, matching_threshold;
     int resize_template_num, target_num;
     int queue_size_;
-    bool approximate_sync_;
     cv::Mat template_image;
 
 #ifdef USE_CUDA

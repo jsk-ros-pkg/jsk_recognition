@@ -46,7 +46,6 @@ namespace jsk_perception
   {
     DiagnosticNodelet::onInit();
 
-    pnh_->param("approximate_sync", approximate_sync_, false);
     pnh_->param("queue_size", queue_size_, 100);
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
@@ -76,26 +75,14 @@ namespace jsk_perception
 
   void TemplateMatchDetector::subscribe()
   {
-    sub_image_.subscribe(*pnh_, "input", 1);
-    sub_info_.subscribe(*pnh_, "input/info", 1);
-    if (approximate_sync_) {
-      async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
-      async_->connectInput(sub_image_, sub_info_);
-      async_->registerCallback(boost::bind(&TemplateMatchDetector::apply, this, _1, _2));
-    } else {
-      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
-      sync_->connectInput(sub_image_, sub_info_);
-      sync_->registerCallback(boost::bind(&TemplateMatchDetector::apply, this, _1, _2));
-    }
-
-    ros::V_string names = boost::assign::list_of("~input")("~input/info");
+    sub_ = pnh_->subscribe("input", queue_size_, &TemplateMatchDetector::apply, this);
+    ros::V_string names = boost::assign::list_of("~input");
     jsk_topic_tools::warnNoRemap(names);
   }
 
   void TemplateMatchDetector::unsubscribe()
   {
-    sub_image_.unsubscribe();
-    sub_info_.unsubscribe();
+    sub_.shutdown();
   }
 
   void TemplateMatchDetector::sortRects(
@@ -141,8 +128,7 @@ namespace jsk_perception
 
 
   void TemplateMatchDetector::apply(
-    const sensor_msgs::Image::ConstPtr& image_msg,
-    const sensor_msgs::CameraInfo::ConstPtr& info_msg)
+    const sensor_msgs::Image::ConstPtr& image_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
     int i, j, k, l;

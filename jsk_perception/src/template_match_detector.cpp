@@ -212,10 +212,10 @@ namespace jsk_perception
           ROS_ERROR("Cannot read template image!");
         }
       }
-    if(config.matching_thre != stored_thre)
+    if(config.matching_threshold != stored_thre)
       {
-        stored_thre = config.matching_thre;
-        matching_thre = stored_thre;
+        stored_thre = config.matching_threshold;
+        matching_threshold = stored_thre;
       }
   }
 
@@ -275,12 +275,12 @@ namespace jsk_perception
         }
         cv::Ptr<cv::cuda::TemplateMatching> alg = cv::cuda::createTemplateMatching(cuda_search_img.type(), CV_TM_CCOEFF_NORMED);
         alg->match(cuda_search_img, cuda_resized_tmpl, cuda_score_img, stream[0]);
-        cv::cuda::threshold(cuda_score_img, cuda_score_img, matching_thre, 1.0, CV_THRESH_TOZERO, stream[0]);
+        cv::cuda::threshold(cuda_score_img, cuda_score_img, matching_threshold, 1.0, CV_THRESH_TOZERO, stream[0]);
         cuda_score_img.download(score_img, stream[0]);
         if(flip_template_){
           cv::Ptr<cv::cuda::TemplateMatching> alg_flip = cv::cuda::createTemplateMatching(cuda_search_img.type(), CV_TM_CCOEFF_NORMED);
           alg_flip->match(cuda_search_img, cuda_flip_resized_tmpl, cuda_flip_score_img, stream[1]);
-          cv::cuda::threshold(cuda_flip_score_img, cuda_flip_score_img, matching_thre, 1.0, CV_THRESH_TOZERO, stream[1]);
+          cv::cuda::threshold(cuda_flip_score_img, cuda_flip_score_img, matching_threshold, 1.0, CV_THRESH_TOZERO, stream[1]);
           cuda_flip_score_img.download(flip_score_img, stream[1]);
         }
         int debug_count = 0;
@@ -335,7 +335,7 @@ namespace jsk_perception
           }
           cv::matchTemplate(search_img, resized_tmpl, score_img, CV_TM_CCOEFF_NORMED);
 
-          cv::threshold(score_img, score_img, matching_thre, 1.0, CV_THRESH_TOZERO);
+          cv::threshold(score_img, score_img, matching_threshold, 1.0, CV_THRESH_TOZERO);
           int debug_count = 0;
           for (i = 0; i < score_img.rows; i++) {
             for (j = 0; j < score_img.cols; j++) {
@@ -379,7 +379,7 @@ namespace jsk_perception
         }
         cv::matchTemplate(search_img, resized_tmpl, score_img, CV_TM_CCOEFF_NORMED);
 
-        cv::threshold(score_img, score_img, matching_thre, 1.0, CV_THRESH_TOZERO);
+        cv::threshold(score_img, score_img, matching_threshold, 1.0, CV_THRESH_TOZERO);
         int debug_count = 0;
         for (i = 0; i < score_img.rows; i++) {
           for (j = 0; j < score_img.cols; j++) {
@@ -400,9 +400,9 @@ namespace jsk_perception
 
     if(rects.size() == 0){
       if(specify_target_){
-        std::cout << "no match!" << std::endl << "Decreasing threshold before : " << matching_thre;
-        matching_thre = std::max(matching_thre - thre_update_step, 0.0);
-        std::cout << "  after : " << matching_thre << std::endl;
+        std::cout << "no match!" << std::endl << "Decreasing threshold before : " << matching_threshold;
+        matching_threshold = std::max(matching_threshold - thre_update_step, 0.0);
+        std::cout << "  after : " << matching_threshold << std::endl;
         return;
       } else {
         if(debug_)
@@ -422,9 +422,9 @@ namespace jsk_perception
       std::cout << "detected rectangles num is over maxdetected num. detected num : " << rects.size() << "  max num : "
                 << max_detect_num << std::endl;
       if(specify_target_){
-        std::cout << "Increasing threshold before : " << matching_thre;
-        matching_thre = std::min(matching_thre + thre_update_step, 1.0);
-        std::cout << "  after : " << matching_thre << std::endl;
+        std::cout << "Increasing threshold before : " << matching_threshold;
+        matching_threshold = std::min(matching_threshold + thre_update_step, 1.0);
+        std::cout << "  after : " << matching_threshold << std::endl;
         return;
       } else {
         // todo clear rects
@@ -443,15 +443,15 @@ namespace jsk_perception
        result_rects.size() != target_num){
       if(result_rects.size() > target_num){
         std::cout << "Too many rectangles detected. detected num : " << result_rects.size() << "  target num : "
-                  << target_num << std::endl << "Increasing threshold before : " << matching_thre;
-        matching_thre = std::min(matching_thre + thre_update_step, 1.0);
-        std::cout << "  after : " << matching_thre << std::endl;
+                  << target_num << std::endl << "Increasing threshold before : " << matching_threshold;
+        matching_threshold = std::min(matching_threshold + thre_update_step, 1.0);
+        std::cout << "  after : " << matching_threshold << std::endl;
       }
       else {
         std::cout << "Too few rectangles detected. detected num : " << result_rects.size() << "  target num : "
-                  << target_num << std::endl << "Decreasing threshold before : " << matching_thre;
-        matching_thre = std::max(matching_thre - thre_update_step, 0.0);
-        std::cout << "  after : " << matching_thre << std::endl;
+                  << target_num << std::endl << "Decreasing threshold before : " << matching_threshold;
+        matching_threshold = std::max(matching_threshold - thre_update_step, 0.0);
+        std::cout << "  after : " << matching_threshold << std::endl;
       }
       return;
     }

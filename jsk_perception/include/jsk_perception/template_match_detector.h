@@ -107,7 +107,7 @@ namespace jsk_perception
 
     std::string template_name_;
     bool debug_, specify_target_, flip_template_, use_cuda;
-    double min_scale, max_scale, matching_thre, stored_thre;
+    double min_scale, max_scale, matching_threshold, stored_thre;
     int resize_num, target_num, position_op, max_detect_num, sort_op;
     int queue_size_;
     bool approximate_sync_;

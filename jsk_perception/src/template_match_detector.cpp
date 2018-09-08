@@ -457,29 +457,32 @@ namespace jsk_perception
     }
     if(debug_) std::cout << std::endl;
 
-    //draw rectangles on image
-    for (i = 0;i < result_rects.size(); i++) {
-      cv::rectangle(result_img, result_rects.at(i).tl(), result_rects.at(i).br(), cv::Scalar(0, 0, 255), 2, 8, 0);
+    if (img_pub_.getNumSubscribers() > 0) {
+      //draw rectangles on image
+      for (i = 0;i < result_rects.size(); i++) {
+        cv::rectangle(result_img, result_rects.at(i).tl(), result_rects.at(i).br(), cv::Scalar(0, 0, 255), 2, 8, 0);
+      }
+      img_pub_.publish(cv_bridge::CvImage(image_msg->header,
+                                          sensor_msgs::image_encodings::BGR8,
+                                          result_img).toImageMsg());
     }
 
-    jsk_recognition_msgs::RectArray rects_msg;
-    rects_msg.rects.resize(result_rects.size());
-    for(i = 0; i < result_rects.size(); i++){
-      jsk_recognition_msgs::Rect rect;
-      rect.x = result_rects[i].x;
-      rect.y = result_rects[i].y;
-      rect.width = result_rects[i].width;
-      rect.height = result_rects[i].height;
-      rects_msg.rects[i] = rect;
-    }
+    if (rects_pub_.getNumSubscribers() > 0) {
+      jsk_recognition_msgs::RectArray rects_msg;
+      rects_msg.rects.resize(result_rects.size());
+      for(i = 0; i < result_rects.size(); i++){
+          jsk_recognition_msgs::Rect rect;
+          rect.x = result_rects[i].x;
+          rect.y = result_rects[i].y;
+          rect.width = result_rects[i].width;
+          rect.height = result_rects[i].height;
+          rects_msg.rects[i] = rect;
+      }
 
-    rects_msg.header = image_msg->header;
-    rects_msg.rects.resize(result_rects.size());
-    rects_pub_.publish(rects_msg);
-    img_pub_.publish(cv_bridge::CvImage(
-                     image_msg->header,
-                     sensor_msgs::image_encodings::BGR8,
-                     result_img).toImageMsg());
+      rects_msg.header = image_msg->header;
+      rects_msg.rects.resize(result_rects.size());
+      rects_pub_.publish(rects_msg);
+    }
   }
 
 }

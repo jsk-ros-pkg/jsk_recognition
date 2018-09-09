@@ -1,0 +1,39 @@
+<launch>
+
+  <arg name="gui" default="true" />
+  <arg name="template" default="$(find jsk_perception)/sample/image/chair.png" />
+  <arg name="input" default="/camera/rgb/image_raw" />
+  <arg name="input_info" default="/camera/rgb/camera_info" />
+
+  <param name="/use_sim_time" value="true" />
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_perception)/sample/data/2016-11-11-12-53-06_in_lab.bag --clock --loop" />
+
+  <!-- template matching -->
+  <node name="template_matching_detector"
+        pkg="jsk_perception" type="template_matching_detector"
+        args="standalone jsk_perception/TemplateMatchingDetector"
+        output="screen"
+        respawn="true" >
+    <remap from="~input" to="$(arg input)" />
+    <remap from="~input/info" to="$(arg input_info)"/>
+    <rosparam subst_value="true">
+      template_filename: "$(arg template)"
+      min_scale: 0.5
+      max_scale: 1.4
+      target_num: 1
+      resize_template_num: 10
+      matching_threshold: 0.4
+      update_matching_threshold: true
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)" >
+    <node name="image_view00"
+          pkg="image_view" type="image_view" >
+      <remap from="image" to="/template_matching_detector/output/viz" />
+    </node>
+  </group>
+
+</launch>

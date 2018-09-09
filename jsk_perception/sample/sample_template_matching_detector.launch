@@ -11,9 +11,9 @@
         args="$(find jsk_perception)/sample/data/2016-11-11-12-53-06_in_lab.bag --clock --loop" />
 
   <!-- template matching -->
-  <node name="template_match_detector"
-        pkg="jsk_perception" type="template_match_detector"
-        args="standalone jsk_perception/TemplateMatchDetector"
+  <node name="template_matching_detector"
+        pkg="jsk_perception" type="template_matching_detector"
+        args="standalone jsk_perception/TemplateMatchingDetector"
         output="screen"
         respawn="true" >
     <remap from="~input" to="$(arg input)" />
@@ -32,7 +32,7 @@
   <group if="$(arg gui)" >
     <node name="image_view00"
           pkg="image_view" type="image_view" >
-      <remap from="image" to="/template_match_detector/output/viz" />
+      <remap from="image" to="/template_matching_detector/output/viz" />
     </node>
   </group>
 

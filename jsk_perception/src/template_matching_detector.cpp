@@ -34,7 +34,7 @@
  *********************************************************************/
 
 
-#include "jsk_perception/template_match_detector.h"
+#include "jsk_perception/template_matching_detector.h"
 #include <boost/assign.hpp>
 #include <jsk_topic_tools/log_utils.h>
 #include <sensor_msgs/image_encodings.h>
@@ -42,7 +42,7 @@
 
 namespace jsk_perception
 {
-  void TemplateMatchDetector::onInit()
+  void TemplateMatchingDetector::onInit()
   {
     DiagnosticNodelet::onInit();
 
@@ -50,7 +50,7 @@ namespace jsk_perception
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
-      boost::bind (&TemplateMatchDetector::configCallback, this, _1, _2);
+      boost::bind (&TemplateMatchingDetector::configCallback, this, _1, _2);
     srv_->setCallback (f);
 
     img_pub_ = advertise<sensor_msgs::Image>(*pnh_, "output/viz", 1);
@@ -73,34 +73,34 @@ namespace jsk_perception
     onInitPostProcess();
   }
 
-  void TemplateMatchDetector::subscribe()
+  void TemplateMatchingDetector::subscribe()
   {
-    sub_ = pnh_->subscribe("input", queue_size_, &TemplateMatchDetector::apply, this);
+    sub_ = pnh_->subscribe("input", queue_size_, &TemplateMatchingDetector::apply, this);
     ros::V_string names = boost::assign::list_of("~input");
     jsk_topic_tools::warnNoRemap(names);
   }
 
-  void TemplateMatchDetector::unsubscribe()
+  void TemplateMatchingDetector::unsubscribe()
   {
     sub_.shutdown();
   }
 
-  void TemplateMatchDetector::sortRects(
+  void TemplateMatchingDetector::sortRects(
     std::vector<cv::Rect> rects)
   {
     switch(config_.sort_direction){
-    case jsk_perception::TemplateMatchDetector_NoOperation:
+    case jsk_perception::TemplateMatchingDetector_NoOperation:
       break;
-    case jsk_perception::TemplateMatchDetector_Horizontal:
+    case jsk_perception::TemplateMatchingDetector_Horizontal:
       std::sort(rects.begin(), rects.end(), rect_horizontal<cv::Rect>);
       break;
-    case jsk_perception::TemplateMatchDetector_Vertical:
+    case jsk_perception::TemplateMatchingDetector_Vertical:
       std::sort(rects.begin(), rects.end(), rect_vertical<cv::Rect>);
       break;
     }
   }
 
-  void TemplateMatchDetector::configCallback(
+  void TemplateMatchingDetector::configCallback(
     Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mutex_);
@@ -128,7 +128,7 @@ namespace jsk_perception
   }
 
 
-  void TemplateMatchDetector::apply(
+  void TemplateMatchingDetector::apply(
     const sensor_msgs::Image::ConstPtr& image_msg)
   {
     boost::mutex::scoped_lock lock(mutex_);
@@ -330,8 +330,8 @@ namespace jsk_perception
       rects_pub_.publish(rects_msg);
     }
   }
-bool TemplateMatchDetector::need_config_update_ = false;
+bool TemplateMatchingDetector::need_config_update_ = false;
 }
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS (jsk_perception::TemplateMatchDetector, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS (jsk_perception::TemplateMatchingDetector, nodelet::Nodelet);

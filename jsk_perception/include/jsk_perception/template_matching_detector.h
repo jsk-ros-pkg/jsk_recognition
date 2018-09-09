@@ -34,15 +34,15 @@
  *********************************************************************/
 
 
-#ifndef JSK_PERCEPTION_TEMPLATE_MATCH_DETECTOR_H_
-#define JSK_PERCEPTION_TEMPLATE_MATCH_DETECTOR_H_
+#ifndef JSK_PERCEPTION_TEMPLATE_MATCHING_DETECTOR_H_
+#define JSK_PERCEPTION_TEMPLATE_MATCHING_DETECTOR_H_
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/Image.h>
 #include <jsk_recognition_msgs/Rect.h>
 #include <jsk_recognition_msgs/RectArray.h>
 #include <dynamic_reconfigure/server.h>
-#include <jsk_perception/TemplateMatchDetectorConfig.h>
+#include <jsk_perception/TemplateMatchingDetectorConfig.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/dnn.hpp>
@@ -68,11 +68,11 @@ namespace jsk_perception
     return left.y + left.height / 2.0 < right.y + right.height / 2.0;
   }
 
-  class TemplateMatchDetector: public jsk_topic_tools::DiagnosticNodelet
+  class TemplateMatchingDetector: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    typedef jsk_perception::TemplateMatchDetectorConfig Config;
-    TemplateMatchDetector(): DiagnosticNodelet("TemplateMatchDetector") {}
+    typedef jsk_perception::TemplateMatchingDetectorConfig Config;
+    TemplateMatchingDetector(): DiagnosticNodelet("TemplateMatchingDetector") {}
   protected:
     virtual void onInit();
     virtual void subscribe();

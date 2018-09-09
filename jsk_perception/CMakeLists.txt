@@ -137,7 +137,7 @@ generate_dynamic_reconfigure_options(
   cfg/FacePoseEstimation.cfg
   cfg/LabelImageDecomposer.cfg
   cfg/SSDObjectDetector.cfg
-  cfg/TemplateMatchDetector.cfg
+  cfg/TemplateMatchingDetector.cfg
 )
 
 message(WARNING "DEPRECATION WARNING: srv files in jsk_pcl_ros are deprecated."
@@ -437,7 +437,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/tile_image.test)
     jsk_add_rostest(test/vgg16_object_recognition.test)
     jsk_add_rostest(test/ssd_object_detector.test)
-    if(TARGET template_match_detector)
+    if(TARGET template_matching_detector)
       jsk_add_rostest(test/template_matching_detector.test)
     endif()
     # FIXME: Unstable on Travis/Jenkins

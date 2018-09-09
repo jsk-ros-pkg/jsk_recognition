@@ -44,7 +44,7 @@
 #include <dynamic_reconfigure/server.h>
 #include <jsk_perception/TemplateMatchDetectorConfig.h>
 #include <opencv2/opencv.hpp>
-#include <opencv2/core.hpp>
+#include <opencv2/core/core.hpp>
 #include <opencv2/dnn.hpp>
 
 #ifdef USE_CUDA

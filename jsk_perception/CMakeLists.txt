@@ -260,7 +260,9 @@ jsk_add_nodelet(src/sliding_window_object_detector.cpp "jsk_perception/SlidingWi
 jsk_add_nodelet(src/gaussian_blur.cpp "jsk_perception/GaussianBlur" "gaussian_blur")
 jsk_add_nodelet(src/kmeans.cpp "jsk_perception/KMeans" "kmeans")
 jsk_add_nodelet(src/draw_rects.cpp "jsk_perception/DrawRects" "draw_rects")
-jsk_add_nodelet(src/template_match_detector.cpp "jsk_perception/TemplateMatchDetector" "template_match_detector")
+if("${OpenCV_VERSION}" VERSION_GREATER "3.3.0")  # >= 3.3.1
+  jsk_add_nodelet(src/template_matching_detector.cpp "jsk_perception/TemplateMatchingDetector" "template_matching_detector")
+endif()
 if("${OpenCV_VERSION}" VERSION_GREATER "2.9.9")  # >= 3.0.0
   jsk_add_nodelet(src/bing.cpp "jsk_perception/Bing" "bing")
 endif()
@@ -435,7 +437,9 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/tile_image.test)
     jsk_add_rostest(test/vgg16_object_recognition.test)
     jsk_add_rostest(test/ssd_object_detector.test)
-    jsk_add_rostest(test/template_matching_detector.test)
+    if(TARGET template_match_detector)
+      jsk_add_rostest(test/template_matching_detector.test)
+    endif()
     # FIXME: Unstable on Travis/Jenkins
     # if(TARGET bing)
     #   jsk_add_rostest(test/bing.test)

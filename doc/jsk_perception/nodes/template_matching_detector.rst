@@ -62,7 +62,7 @@ Parameters
 
 * ``~nms_threshold``, (Int, default: ``0.5``)
 
-  Threshold of nms
+  Threshold of non maximum suppression for overlapped rects
 
 * ``~target_num``, (Int, default: ``6``)
 

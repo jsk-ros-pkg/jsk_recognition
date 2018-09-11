@@ -87,6 +87,8 @@ namespace jsk_pcl_ros
      double m_occupancyMinY;
      double m_occupancyMaxY;
 
+     bool m_useVertex;
+
      boost::shared_ptr<robot_self_filter::SelfMaskNamedLink> m_selfMask;
 
      octomap::OcTreeContact* m_octreeContact;

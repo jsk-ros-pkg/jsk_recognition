@@ -52,7 +52,8 @@ namespace jsk_pcl_ros
     m_occupancyMinX(-std::numeric_limits<double>::max()),
     m_occupancyMaxX(std::numeric_limits<double>::max()),
     m_occupancyMinY(-std::numeric_limits<double>::max()),
-    m_occupancyMaxY(std::numeric_limits<double>::max())
+    m_occupancyMaxY(std::numeric_limits<double>::max()),
+    m_useVertex(true)
   {
     delete m_octree;
     m_octree = NULL;
@@ -74,6 +75,8 @@ namespace jsk_pcl_ros
     privateNh.param("occupancy_max_x", m_occupancyMaxX,m_occupancyMaxX);
     privateNh.param("occupancy_min_y", m_occupancyMinY,m_occupancyMinY);
     privateNh.param("occupancy_max_y", m_occupancyMaxY,m_occupancyMaxY);
+
+    privateNh.param("use_vertex", m_useVertex,m_useVertex);
 
     double r, g, b, a;
     privateNh.param("color_unknown/r", r, 0.5);
@@ -308,85 +311,156 @@ namespace jsk_pcl_ros
     m_selfMask->assumeFrame(tmpHeader);
 
     // loop for grids of octomap
-    std::vector< std::vector<bool> > containFlag(datas.size(), std::vector<bool>(8));
-    point3d p = pmin;
-    for (unsigned int x = 0; x < steps[0]; ++x) {
-      p.x() += resolution;
-      for (unsigned int y = 0; y < steps[1]; ++y) {
-        p.y() += resolution;
-        for (unsigned int z = 0; z < steps[2]; ++z) {
-          // std::cout << "querying p=" << p << std::endl;
-          p.z() += resolution;
-          // loop for vertices of each gird
-          point3d vertexOffset(-resolution/2.0, -resolution/2.0, -resolution/2.0);
-          point3d vertex;
-          for (int i = 0; i < 2; i++) {
-            if (i == 1) { vertexOffset.z() += resolution; }
-            for (int j = 0; j < 2; j++) {
-              if (j == 1) { vertexOffset.y() += resolution; }
-              for (int k = 0; k < 2; k++) {
-                if (k == 1) { vertexOffset.x() += resolution; }
-                vertex = p + vertexOffset;
-                // std::cout << "vertex = " << vertex << std::endl;
-                // loop for each body link
-                for (int l=0; l<datas.size(); l++) {
-                  if (m_selfMask->getMaskContainmentforNamedLink(vertex(0), vertex(1), vertex(2), datas[l].link_name) == robot_self_filter::INSIDE) {
-                    // std::cout << "inside vertex = " << vertex << std::endl;
-                    containFlag[l][i+j*2+k*4] = true;
-                  }
-                  else {
-                    containFlag[l][i+j*2+k*4] = false;
+    if (m_useVertex) {
+      std::vector< std::vector<bool> > containFlag(datas.size(), std::vector<bool>(8));
+      point3d p = pmin;
+      for (unsigned int x = 0; x < steps[0]; ++x) {
+        p.x() += resolution;
+        for (unsigned int y = 0; y < steps[1]; ++y) {
+          p.y() += resolution;
+          for (unsigned int z = 0; z < steps[2]; ++z) {
+            // std::cout << "querying p=" << p << std::endl;
+            p.z() += resolution;
+            // loop for vertices of each gird
+            point3d vertexOffset(-resolution/2.0, -resolution/2.0, -resolution/2.0);
+            point3d vertex;
+            for (int i = 0; i < 2; i++) {
+              if (i == 1) { vertexOffset.z() += resolution; }
+              for (int j = 0; j < 2; j++) {
+                if (j == 1) { vertexOffset.y() += resolution; }
+                for (int k = 0; k < 2; k++) {
+                  if (k == 1) { vertexOffset.x() += resolution; }
+                  vertex = p + vertexOffset;
+                  // std::cout << "vertex = " << vertex << std::endl;
+                  // loop for each body link
+                  for (int l=0; l<datas.size(); l++) {
+                    if (m_selfMask->getMaskContainmentforNamedLink(vertex(0), vertex(1), vertex(2), datas[l].link_name) == robot_self_filter::INSIDE) {
+                      // std::cout << "inside vertex = " << vertex << std::endl;
+                      containFlag[l][i+j*2+k*4] = true;
+                    }
+                    else {
+                      containFlag[l][i+j*2+k*4] = false;
+                    }
                   }
                 }
+                vertexOffset.x() -= resolution;
               }
-              vertexOffset.x() -= resolution;
+              vertexOffset.y() -= resolution;
             }
-            vertexOffset.y() -= resolution;
-          }
 
-          // update probability of grid
-          std::vector<bool> containFlagLinkSum(8, false);
-          std::vector<bool> containFlagVerticesSum(datas.size(), false);
-          std::vector<bool> containFlagVerticesProd(datas.size(), true);
-          bool insideFlag = false;
-          bool surfaceFlag = false;
-          for (int l = 0; l < datas.size(); l++) {
-            for (int i = 0; i < 8; i++) {
-              if (containFlag[l][i]) {
-                containFlagLinkSum[i] = true;
+            // update probability of grid
+            std::vector<bool> containFlagLinkSum(8, false);
+            std::vector<bool> containFlagVerticesSum(datas.size(), false);
+            std::vector<bool> containFlagVerticesProd(datas.size(), true);
+            bool insideFlag = false;
+            bool surfaceFlag = false;
+            for (int l = 0; l < datas.size(); l++) {
+              for (int i = 0; i < 8; i++) {
+                if (containFlag[l][i]) {
+                  containFlagLinkSum[i] = true;
+                  containFlagVerticesSum[l] = true;
+                }
+                else {
+                  containFlagVerticesProd[l] = false;
+                }
+              }
+            }
+            insideFlag = (std::find(containFlagLinkSum.begin(), containFlagLinkSum.end(), false) == containFlagLinkSum.end()); // when all elements is true
+            for (int l = 0; l < datas.size(); l++) {
+              if (containFlagVerticesSum[l] && !(containFlagVerticesProd[l]) ) {
+                if (datas[l].contact) {
+                  surfaceFlag = true;
+                }
+              }
+            }
+            if (insideFlag) { // inside
+              octomap::OcTreeKey pKey;
+              if (m_octreeContact->coordToKeyChecked(p, pKey)) {
+                m_octreeContact->updateNode(pKey, m_octreeContact->getProbMissContactSensorLog());
+                // std::cout << "find inside grid and find key. p = " << vertex << std::endl;
+              }
+            }
+            else if (surfaceFlag) { // surface
+              octomap::OcTreeKey pKey;
+              if (m_octreeContact->coordToKeyChecked(p, pKey)) {
+                m_octreeContact->updateNode(pKey, m_octreeContact->getProbHitContactSensorLog());
+                // std::cout << "find surface grid and find key. p = " << vertex << std::endl;
+              }
+            }
+          }
+          p.z() = pmin.z();
+        }
+        p.y() = pmin.y();
+      }
+    }
+    else {
+      std::vector<bool> containFlag(datas.size());
+      point3d p = pmin;
+      for (unsigned int x = 0; x < steps[0]; ++x) {
+        p.x() += resolution;
+        for (unsigned int y = 0; y < steps[1]; ++y) {
+          p.y() += resolution;
+          for (unsigned int z = 0; z < steps[2]; ++z) {
+            // std::cout << "querying p=" << p << std::endl;
+            p.z() += resolution;
+            // loop for vertices of each gird
+            point3d vertexOffset(-resolution/2.0, -resolution/2.0, -resolution/2.0);
+            point3d vertex;
+            vertex = p + vertexOffset;
+            // std::cout << "vertex = " << vertex << std::endl;
+            // loop for each body link
+            for (int l=0; l<datas.size(); l++) {
+              if (m_selfMask->getMaskContainmentforNamedLink(vertex(0), vertex(1), vertex(2), datas[l].link_name) == robot_self_filter::INSIDE) {
+                // std::cout << "inside vertex = " << vertex << std::endl;
+                containFlag[l] = true;
+              }
+              else {
+                containFlag[l] = false;
+              }
+            }
+
+            // update probability of grid
+            bool containFlagLinkSum = false;
+            std::vector<bool> containFlagVerticesSum(datas.size(), false);
+            std::vector<bool> containFlagVerticesProd(datas.size(), true);
+            bool insideFlag = false;
+            bool surfaceFlag = false;
+            for (int l = 0; l < datas.size(); l++) {
+              if (containFlag[l]) {
+                containFlagLinkSum = true;
                 containFlagVerticesSum[l] = true;
               }
               else {
                 containFlagVerticesProd[l] = false;
               }
             }
-          }
-          insideFlag = (std::find(containFlagLinkSum.begin(), containFlagLinkSum.end(), false) == containFlagLinkSum.end()); // when all elements is true
-          for (int l = 0; l < datas.size(); l++) {
-            if (containFlagVerticesSum[l] && !(containFlagVerticesProd[l]) ) {
-              if (datas[l].contact) {
-                surfaceFlag = true;
+            insideFlag = containFlagLinkSum; // when all elements is true
+            for (int l = 0; l < datas.size(); l++) {
+              if (containFlagVerticesSum[l] && !(containFlagVerticesProd[l]) ) {
+                if (datas[l].contact) {
+                  surfaceFlag = true;
+                }
+              }
+            }
+            if (insideFlag) { // inside
+              octomap::OcTreeKey pKey;
+              if (m_octreeContact->coordToKeyChecked(p, pKey)) {
+                m_octreeContact->updateNode(pKey, m_octreeContact->getProbMissContactSensorLog());
+                // std::cout << "find inside grid and find key. p = " << vertex << std::endl;
+              }
+            }
+            else if (surfaceFlag) { // surface
+              octomap::OcTreeKey pKey;
+              if (m_octreeContact->coordToKeyChecked(p, pKey)) {
+                m_octreeContact->updateNode(pKey, m_octreeContact->getProbHitContactSensorLog());
+                // std::cout << "find surface grid and find key. p = " << vertex << std::endl;
               }
             }
           }
-          if (insideFlag) { // inside
-            octomap::OcTreeKey pKey;
-            if (m_octreeContact->coordToKeyChecked(p, pKey)) {
-              m_octreeContact->updateNode(pKey, m_octreeContact->getProbMissContactSensorLog());
-              // std::cout << "find inside grid and find key. p = " << vertex << std::endl;
-            }
-          }
-          else if (surfaceFlag) { // surface
-            octomap::OcTreeKey pKey;
-            if (m_octreeContact->coordToKeyChecked(p, pKey)) {
-              m_octreeContact->updateNode(pKey, m_octreeContact->getProbHitContactSensorLog());
-              // std::cout << "find surface grid and find key. p = " << vertex << std::endl;
-            }
-          }
+          p.z() = pmin.z();
         }
-        p.z() = pmin.z();
+        p.y() = pmin.y();
       }
-      p.y() = pmin.y();
     }
     m_octreeContact->updateInnerOccupancy();
   }

@@ -73,6 +73,7 @@ namespace jsk_pcl_ros
 
      std_msgs::ColorRGBA m_colorUnknown;
 
+     bool m_publishUnknownSpace;
      double m_offsetVisualizeUnknown;
 
      double m_occupancyMinX;

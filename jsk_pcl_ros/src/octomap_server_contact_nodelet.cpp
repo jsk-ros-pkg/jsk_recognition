@@ -46,6 +46,7 @@ namespace jsk_pcl_ros
   : OctomapServer(privateNh),
     DiagnosticNodelet("OctomapServerContact"),
     m_octreeContact(NULL),
+    m_publishUnknownSpace(false),
     m_offsetVisualizeUnknown(0),
     m_occupancyMinX(-std::numeric_limits<double>::max()),
     m_occupancyMaxX(std::numeric_limits<double>::max()),
@@ -63,6 +64,7 @@ namespace jsk_pcl_ros
 
     m_useHeightMap = false;
 
+    privateNh.param("publish_unknown_space", m_publishUnknownSpace, m_publishUnknownSpace);
     privateNh.param("offset_vis_unknown", m_offsetVisualizeUnknown,m_offsetVisualizeUnknown);
 
     privateNh.param("occupancy_min_x", m_occupancyMinX,m_occupancyMinX);
@@ -267,6 +269,7 @@ namespace jsk_pcl_ros
     }
 
     bool publishFreeMarkerArray = m_publishFreeSpace && (m_latchedTopics || m_fmarkerPub.getNumSubscribers() > 0);
+    bool publishUnknownMarkerArray = m_publishUnknownSpace && (m_latchedTopics || m_umarkerPub.getNumSubscribers() > 0);
     bool publishMarkerArray = (m_latchedTopics || m_markerPub.getNumSubscribers() > 0);
     bool publishPointCloud = (m_latchedTopics || m_pointCloudPub.getNumSubscribers() > 0);
     bool publishBinaryMap = (m_latchedTopics || m_binaryMapPub.getNumSubscribers() > 0);
@@ -438,62 +441,64 @@ namespace jsk_pcl_ros
     }
 
     // publish unknown grid as marker
-    visualization_msgs::MarkerArray unknownNodesVis;
-    unknownNodesVis.markers.resize(1);
+    if (publishUnknownMarkerArray) {
+      visualization_msgs::MarkerArray unknownNodesVis;
+      unknownNodesVis.markers.resize(1);
 
-    point3d_list unknownLeaves;
-    double offset = m_offsetVisualizeUnknown;
-    point3d pMin(m_occupancyMinX + offset, m_occupancyMinY + offset, m_occupancyMinZ + offset);
-    point3d pMax(m_occupancyMaxX - offset, m_occupancyMaxY - offset, m_occupancyMaxZ - offset);
+      point3d_list unknownLeaves;
+      double offset = m_offsetVisualizeUnknown;
+      point3d pMin(m_occupancyMinX + offset, m_occupancyMinY + offset, m_occupancyMinZ + offset);
+      point3d pMax(m_occupancyMaxX - offset, m_occupancyMaxY - offset, m_occupancyMaxZ - offset);
 
-    m_octreeContact->getUnknownLeafCenters(unknownLeaves, pMin, pMax);
-    pcl::PointCloud<pcl::PointXYZ> unknownCloud;
+      m_octreeContact->getUnknownLeafCenters(unknownLeaves, pMin, pMax);
+      pcl::PointCloud<pcl::PointXYZ> unknownCloud;
 
-    for (point3d_list::iterator it = unknownLeaves.begin(); it != unknownLeaves.end(); it++) {
-      float x = (*it).x();
-      float y = (*it).y();
-      float z = (*it).z();
-      unknownCloud.push_back(pcl::PointXYZ(x, y, z));
+      for (point3d_list::iterator it = unknownLeaves.begin(); it != unknownLeaves.end(); it++) {
+        float x = (*it).x();
+        float y = (*it).y();
+        float z = (*it).z();
+        unknownCloud.push_back(pcl::PointXYZ(x, y, z));
 
-      geometry_msgs::Point cubeCenter;
-      cubeCenter.x = x;
-      cubeCenter.y = y;
-      cubeCenter.z = z;
-      if (m_useHeightMap) {
-        double minX, minY, minZ, maxX, maxY, maxZ;
-        m_octreeContact->getMetricMin(minX, minY, minZ);
-        m_octreeContact->getMetricMax(maxX, maxY, maxZ);
-        double h = (1.0 - std::min(std::max((cubeCenter.z-minZ)/ (maxZ - minZ), 0.0), 1.0)) *m_colorFactor;
-        unknownNodesVis.markers[0].colors.push_back(heightMapColor(h));
+        geometry_msgs::Point cubeCenter;
+        cubeCenter.x = x;
+        cubeCenter.y = y;
+        cubeCenter.z = z;
+        if (m_useHeightMap) {
+          double minX, minY, minZ, maxX, maxY, maxZ;
+          m_octreeContact->getMetricMin(minX, minY, minZ);
+          m_octreeContact->getMetricMax(maxX, maxY, maxZ);
+          double h = (1.0 - std::min(std::max((cubeCenter.z-minZ)/ (maxZ - minZ), 0.0), 1.0)) *m_colorFactor;
+          unknownNodesVis.markers[0].colors.push_back(heightMapColor(h));
+        }
+        unknownNodesVis.markers[0].points.push_back(cubeCenter);
       }
-      unknownNodesVis.markers[0].points.push_back(cubeCenter);
-    }
 
-    double size = m_octreeContact->getNodeSize(m_maxTreeDepth);
-    unknownNodesVis.markers[0].header.frame_id = m_worldFrameId;
-    unknownNodesVis.markers[0].header.stamp = rostime;
-    unknownNodesVis.markers[0].ns = m_worldFrameId;
-    unknownNodesVis.markers[0].id = 0;
-    unknownNodesVis.markers[0].type = visualization_msgs::Marker::CUBE_LIST;
-    unknownNodesVis.markers[0].scale.x = size;
-    unknownNodesVis.markers[0].scale.y = size;
-    unknownNodesVis.markers[0].scale.z = size;
-    unknownNodesVis.markers[0].color = m_colorUnknown;
+      double size = m_octreeContact->getNodeSize(m_maxTreeDepth);
+      unknownNodesVis.markers[0].header.frame_id = m_worldFrameId;
+      unknownNodesVis.markers[0].header.stamp = rostime;
+      unknownNodesVis.markers[0].ns = m_worldFrameId;
+      unknownNodesVis.markers[0].id = 0;
+      unknownNodesVis.markers[0].type = visualization_msgs::Marker::CUBE_LIST;
+      unknownNodesVis.markers[0].scale.x = size;
+      unknownNodesVis.markers[0].scale.y = size;
+      unknownNodesVis.markers[0].scale.z = size;
+      unknownNodesVis.markers[0].color = m_colorUnknown;
 
-    if (unknownNodesVis.markers[0].points.size() > 0) {
-      unknownNodesVis.markers[0].action = visualization_msgs::Marker::ADD;
-    }
-    else {
-      unknownNodesVis.markers[0].action = visualization_msgs::Marker::DELETE;
-    }
-    m_umarkerPub.publish(unknownNodesVis);
+      if (unknownNodesVis.markers[0].points.size() > 0) {
+        unknownNodesVis.markers[0].action = visualization_msgs::Marker::ADD;
+      }
+      else {
+        unknownNodesVis.markers[0].action = visualization_msgs::Marker::DELETE;
+      }
+      m_umarkerPub.publish(unknownNodesVis);
 
-    // publish unknown grid as pointcloud
-    sensor_msgs::PointCloud2 unknownRosCloud;
-    pcl::toROSMsg (unknownCloud, unknownRosCloud);
-    unknownRosCloud.header.frame_id = m_worldFrameId;
-    unknownRosCloud.header.stamp = rostime;
-    m_unknownPointCloudPub.publish(unknownRosCloud);
+      // publish unknown grid as pointcloud
+      sensor_msgs::PointCloud2 unknownRosCloud;
+      pcl::toROSMsg (unknownCloud, unknownRosCloud);
+      unknownRosCloud.header.frame_id = m_worldFrameId;
+      unknownRosCloud.header.stamp = rostime;
+      m_unknownPointCloudPub.publish(unknownRosCloud);
+    }
 
     // finish pointcloud:
     if (publishPointCloud) {

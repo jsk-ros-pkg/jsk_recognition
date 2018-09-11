@@ -56,6 +56,8 @@ namespace jsk_pcl_ros
      OctomapServerContact(const ros::NodeHandle& privateNh = ros::NodeHandle("~"));
      virtual ~OctomapServerContact();
 
+     virtual void insertProximityCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud);
+     virtual void insertScanProximity(const tf::Point& sensorOriginTf, const PCLPointCloud& pc);
      virtual void initContactSensor(const ros::NodeHandle& privateNh);
      virtual void insertContactSensor(const std::vector<jsk_recognition_msgs::ContactSensor>& datas);
      virtual void insertContactSensorCallback(const jsk_recognition_msgs::ContactSensorArray::ConstPtr& msg);
@@ -67,6 +69,8 @@ namespace jsk_pcl_ros
    protected:
      virtual void onInit();
      ros::Publisher m_unknownPointCloudPub, m_umarkerPub;
+     message_filters::Subscriber<sensor_msgs::PointCloud2>* m_pointProximitySub;
+     tf::MessageFilter<sensor_msgs::PointCloud2>* m_tfPointProximitySub;
      message_filters::Subscriber<jsk_recognition_msgs::ContactSensorArray> m_contactSensorSub;
      boost::shared_ptr<tf::MessageFilter<jsk_recognition_msgs::ContactSensorArray> > m_tfContactSensorSub;
      ros::ServiceServer m_octomapBinaryService, m_octomapFullService, m_clearBBXService, m_resetService;
@@ -75,6 +79,8 @@ namespace jsk_pcl_ros
 
      bool m_publishUnknownSpace;
      double m_offsetVisualizeUnknown;
+
+     double m_maxRangeProximity;
 
      double m_occupancyMinX;
      double m_occupancyMaxX;

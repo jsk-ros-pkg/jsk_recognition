@@ -48,6 +48,7 @@ namespace jsk_pcl_ros
     m_octreeContact(NULL),
     m_publishUnknownSpace(false),
     m_offsetVisualizeUnknown(0),
+    m_maxRangeProximity(0.05),
     m_occupancyMinX(-std::numeric_limits<double>::max()),
     m_occupancyMaxX(std::numeric_limits<double>::max()),
     m_occupancyMinY(-std::numeric_limits<double>::max()),
@@ -65,7 +66,9 @@ namespace jsk_pcl_ros
     m_useHeightMap = false;
 
     privateNh.param("publish_unknown_space", m_publishUnknownSpace, m_publishUnknownSpace);
-    privateNh.param("offset_vis_unknown", m_offsetVisualizeUnknown,m_offsetVisualizeUnknown);
+    privateNh.param("offset_vis_unknown", m_offsetVisualizeUnknown, m_offsetVisualizeUnknown);
+
+    privateNh.param("sensor_model/max_range_proximity", m_maxRangeProximity, m_maxRangeProximity);
 
     privateNh.param("occupancy_min_x", m_occupancyMinX,m_occupancyMinX);
     privateNh.param("occupancy_max_x", m_occupancyMaxX,m_occupancyMaxX);
@@ -84,6 +87,10 @@ namespace jsk_pcl_ros
 
     m_unknownPointCloudPub = m_nh.advertise<sensor_msgs::PointCloud2>("octomap_unknown_point_cloud_centers", 1, m_latchedTopics);
     m_umarkerPub = m_nh.advertise<visualization_msgs::MarkerArray>("unknown_cells_vis_array", 1, m_latchedTopics);
+
+    m_pointProximitySub = new message_filters::Subscriber<sensor_msgs::PointCloud2> (m_nh, "proximity_in", 5);
+    m_tfPointProximitySub = new tf::MessageFilter<sensor_msgs::PointCloud2> (*m_pointProximitySub, m_tfListener, m_worldFrameId, 5);
+    m_tfPointProximitySub->registerCallback(boost::bind(&OctomapServerContact::insertProximityCallback, this, _1));
 
     m_contactSensorSub.subscribe(m_nh, "contact_sensors_in", 2);
     m_tfContactSensorSub.reset(new tf::MessageFilter<jsk_recognition_msgs::ContactSensorArray> (
@@ -147,6 +154,139 @@ namespace jsk_pcl_ros
       }
     }
     m_selfMask = boost::shared_ptr<robot_self_filter::SelfMaskNamedLink>(new robot_self_filter::SelfMaskNamedLink(m_tfListener, links));
+  }
+
+  void OctomapServerContact::insertProximityCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud) {
+    // ROS_INFO("insertProximityCallback is called");
+
+    ros::WallTime startTime = ros::WallTime::now();
+
+    //
+    // ground filtering in base frame
+    //
+    PCLPointCloud pc; // input cloud for filtering and ground-detection
+    pcl::fromROSMsg(*cloud, pc);
+
+    tf::StampedTransform sensorToWorldTf;
+    try {
+      m_tfListener.lookupTransform(m_worldFrameId, cloud->header.frame_id, cloud->header.stamp, sensorToWorldTf);
+    } catch(tf::TransformException& ex){
+      ROS_ERROR_STREAM( "Transform error of sensor data: " << ex.what() << ", quitting callback");
+      return;
+    }
+
+    Eigen::Matrix4f sensorToWorld;
+    pcl_ros::transformAsMatrix(sensorToWorldTf, sensorToWorld);
+
+    // directly transform to map frame:
+    pcl::transformPointCloud(pc, pc, sensorToWorld);
+
+    pc.header = pc.header;
+
+    insertScanProximity(sensorToWorldTf.getOrigin(), pc);
+
+    double total_elapsed = (ros::WallTime::now() - startTime).toSec();
+    ROS_DEBUG("Pointcloud insertion in OctomapServer done (%zu pts, %f sec)", pc.size(), total_elapsed);
+
+    publishAll(cloud->header.stamp);
+  }
+
+  void OctomapServerContact::insertScanProximity(const tf::Point& sensorOriginTf, const PCLPointCloud& pc) {
+    point3d sensorOrigin = pointTfToOctomap(sensorOriginTf);
+
+    if (!m_octree->coordToKeyChecked(sensorOrigin, m_updateBBXMin)
+        || !m_octree->coordToKeyChecked(sensorOrigin, m_updateBBXMax))
+      {
+        ROS_ERROR_STREAM("Could not generate Key for origin "<<sensorOrigin);
+      }
+
+#ifdef COLOR_OCTOMAP_SERVER
+    unsigned char* colors = new unsigned char[3];
+#endif
+
+    // instead of direct scan insertion, compute update to filter ground:
+    KeySet free_cells, occupied_cells;
+
+    // all other points: free on ray, occupied on endpoint:
+    for (PCLPointCloud::const_iterator it = pc.begin(); it != pc.end(); ++it) {
+      point3d point(it->x, it->y, it->z);
+      // maxrange check
+      if ((m_maxRangeProximity < 0.0) || ((point - sensorOrigin).norm() <= m_maxRangeProximity) ) {
+
+        // free cells
+        if (m_octree->computeRayKeys(sensorOrigin, point, m_keyRay)){
+          free_cells.insert(m_keyRay.begin(), m_keyRay.end());
+        }
+        // occupied endpoint
+        OcTreeKey key;
+        if (m_octree->coordToKeyChecked(point, key)){
+          occupied_cells.insert(key);
+
+          updateMinKey(key, m_updateBBXMin);
+          updateMaxKey(key, m_updateBBXMax);
+
+#ifdef COLOR_OCTOMAP_SERVER // NB: Only read and interpret color if it's an occupied node
+          const int rgb = *reinterpret_cast<const int*>(&(it->rgb)); // TODO: there are other ways to encode color than this one
+          colors[0] = ((rgb >> 16) & 0xff);
+          colors[1] = ((rgb >> 8) & 0xff);
+          colors[2] = (rgb & 0xff);
+          m_octree->averageNodeColor(it->x, it->y, it->z, colors[0], colors[1], colors[2]);
+#endif
+        }
+      } else {// ray longer than maxrange:;
+        point3d new_end = sensorOrigin + (point - sensorOrigin).normalized() * m_maxRangeProximity;
+        if (m_octree->computeRayKeys(sensorOrigin, new_end, m_keyRay)){
+          free_cells.insert(m_keyRay.begin(), m_keyRay.end());
+
+          octomap::OcTreeKey endKey;
+          if (m_octree->coordToKeyChecked(new_end, endKey)){
+            updateMinKey(endKey, m_updateBBXMin);
+            updateMaxKey(endKey, m_updateBBXMax);
+          } else{
+            ROS_ERROR_STREAM("Could not generate Key for endpoint "<<new_end);
+          }
+        }
+      }
+    }
+
+    // mark free cells only if not seen occupied in this cloud
+    for(KeySet::iterator it = free_cells.begin(), end=free_cells.end(); it!= end; ++it){
+      if (occupied_cells.find(*it) == occupied_cells.end()){
+        m_octree->updateNode(*it, false);
+      }
+    }
+
+    // now mark all occupied cells:
+    for (KeySet::iterator it = occupied_cells.begin(), end=occupied_cells.end(); it!= end; it++) {
+      m_octree->updateNode(*it, true);
+    }
+
+    // TODO: eval lazy+updateInner vs. proper insertion
+    // non-lazy by default (updateInnerOccupancy() too slow for large maps)
+    //m_octree->updateInnerOccupancy();
+    octomap::point3d minPt, maxPt;
+    ROS_DEBUG_STREAM("Bounding box keys (before): " << m_updateBBXMin[0] << " " <<m_updateBBXMin[1] << " " << m_updateBBXMin[2] << " / " <<m_updateBBXMax[0] << " "<<m_updateBBXMax[1] << " "<< m_updateBBXMax[2]);
+
+    // TODO: snap max / min keys to larger voxels by m_maxTreeDepth
+    //   if (m_maxTreeDepth < 16)
+    //   {
+    //      OcTreeKey tmpMin = getIndexKey(m_updateBBXMin, m_maxTreeDepth); // this should give us the first key at depth m_maxTreeDepth that is smaller or equal to m_updateBBXMin (i.e. lower left in 2D grid coordinates)
+    //      OcTreeKey tmpMax = getIndexKey(m_updateBBXMax, m_maxTreeDepth); // see above, now add something to find upper right
+    //      tmpMax[0]+= m_octree->getNodeSize( m_maxTreeDepth ) - 1;
+    //      tmpMax[1]+= m_octree->getNodeSize( m_maxTreeDepth ) - 1;
+    //      tmpMax[2]+= m_octree->getNodeSize( m_maxTreeDepth ) - 1;
+    //      m_updateBBXMin = tmpMin;
+    //      m_updateBBXMax = tmpMax;
+    //   }
+
+    // TODO: we could also limit the bbx to be within the map bounds here (see publishing check)
+    minPt = m_octree->keyToCoord(m_updateBBXMin);
+    maxPt = m_octree->keyToCoord(m_updateBBXMax);
+    ROS_DEBUG_STREAM("Updated area bounding box: "<< minPt << " - "<<maxPt);
+    ROS_DEBUG_STREAM("Bounding box keys (after): " << m_updateBBXMin[0] << " " <<m_updateBBXMin[1] << " " << m_updateBBXMin[2] << " / " <<m_updateBBXMax[0] << " "<<m_updateBBXMax[1] << " "<< m_updateBBXMax[2]);
+
+    if (m_compressMap)
+      m_octree->prune();
   }
 
   void OctomapServerContact::insertContactSensor(const std::vector<jsk_recognition_msgs::ContactSensor> &datas) {

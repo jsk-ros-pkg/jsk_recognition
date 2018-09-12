@@ -315,15 +315,18 @@ namespace jsk_pcl_ros
       m_selfMask->assumeFrame(tmpHeader);
     }
 
-    point3d pmin( m_occupancyMinX, m_occupancyMinY, m_occupancyMinZ);
-    point3d pmax( m_occupancyMaxX, m_occupancyMaxY, m_occupancyMaxZ);
+    // clamp min and max points  cf. https://github.com/OctoMap/octomap/issues/146
+    point3d pmin_raw( m_occupancyMinX, m_occupancyMinY, m_occupancyMinZ );
+    point3d pmax_raw( m_occupancyMaxX, m_occupancyMaxY, m_occupancyMaxZ );
+    point3d pmin = m_octree->keyToCoord(m_octree->coordToKey(pmin_raw));
+    point3d pmax = m_octree->keyToCoord(m_octree->coordToKey(pmax_raw));
     float diff[3];
     unsigned int steps[3];
     double resolution = m_octreeContact->getResolution();
     for (int i = 0; i < 3; ++i) {
       diff[i] = pmax(i) - pmin(i);
       steps[i] = floor(diff[i] / resolution);
-      //      std::cout << "bbx " << i << " size: " << diff[i] << " " << steps[i] << " steps\n";
+      // std::cout << "bbx " << i << " size: " << diff[i] << " " << steps[i] << " steps\n";
     }
 
     // loop for grids of octomap

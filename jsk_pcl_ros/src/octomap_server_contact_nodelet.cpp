@@ -402,6 +402,7 @@ namespace jsk_pcl_ros
     }
     else {
       point3d vertexOffset(-resolution/2.0, -resolution/2.0, -resolution/2.0);
+#pragma omp parallel for
       for (unsigned int cnt = 0; cnt < steps[0] * steps[1] * steps[2]; ++cnt) {
         // get grid center
         point3d p;
@@ -414,21 +415,17 @@ namespace jsk_pcl_ros
           p.y() = pmin(1) + resolution * id[1];
           p.z() = pmin(2) + resolution * id[2];
         }
-
-        // loop for vertices of each gird
         point3d vertex;
         vertex = p + vertexOffset;
-        // std::cout << "vertex = " << vertex << std::endl;
         // loop for each body link
         for (int l=0; l<datas.size(); l++) {
           if (m_selfMask->getMaskContainmentforNamedLink(vertex(0), vertex(1), vertex(2), datas[l].link_name) == robot_self_filter::INSIDE) {
-            // std::cout << "inside vertex = " << vertex << std::endl;
             octomap::OcTreeKey pKey;
             if (m_octreeContact->coordToKeyChecked(p, pKey)) {
+#pragma omp critical
               m_octreeContact->updateNode(pKey, m_octreeContact->getProbMissContactSensorLog());
-              // std::cout << "find inside grid and find key. p = " << vertex << std::endl;
-              break;
             }
+            break;
           }
         }
       }

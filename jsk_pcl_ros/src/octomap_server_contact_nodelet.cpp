@@ -413,36 +413,36 @@ namespace jsk_pcl_ros
       }
     }
     else {
-      std::vector<bool> containFlag(datas.size());
-      point3d p = pmin;
-      for (unsigned int x = 0; x < steps[0]; ++x) {
-        p.x() += resolution;
-        for (unsigned int y = 0; y < steps[1]; ++y) {
-          p.y() += resolution;
-          for (unsigned int z = 0; z < steps[2]; ++z) {
-            // std::cout << "querying p=" << p << std::endl;
-            p.z() += resolution;
-            // loop for vertices of each gird
-            point3d vertexOffset(-resolution/2.0, -resolution/2.0, -resolution/2.0);
-            point3d vertex;
-            vertex = p + vertexOffset;
-            // std::cout << "vertex = " << vertex << std::endl;
-            // loop for each body link
-            for (int l=0; l<datas.size(); l++) {
-              if (m_selfMask->getMaskContainmentforNamedLink(vertex(0), vertex(1), vertex(2), datas[l].link_name) == robot_self_filter::INSIDE) {
-                // std::cout << "inside vertex = " << vertex << std::endl;
-                octomap::OcTreeKey pKey;
-                if (m_octreeContact->coordToKeyChecked(p, pKey)) {
-                  m_octreeContact->updateNode(pKey, m_octreeContact->getProbMissContactSensorLog());
-                  // std::cout << "find inside grid and find key. p = " << vertex << std::endl;
-                  break;
-                }
-              }
+      point3d vertexOffset(-resolution/2.0, -resolution/2.0, -resolution/2.0);
+      for (unsigned int cnt = 0; cnt < steps[0] * steps[1] * steps[2]; ++cnt) {
+        // get grid center
+        point3d p;
+        {
+          unsigned int id[3];
+          id[0] = cnt / (steps[1] * steps[2]);
+          id[1] = (cnt % (steps[1] * steps[2])) / steps[2];
+          id[2] = (cnt % (steps[1] * steps[2])) % steps[2];
+          p.x() = pmin(0) + resolution * id[0];
+          p.y() = pmin(1) + resolution * id[1];
+          p.z() = pmin(2) + resolution * id[2];
+        }
+
+        // loop for vertices of each gird
+        point3d vertex;
+        vertex = p + vertexOffset;
+        // std::cout << "vertex = " << vertex << std::endl;
+        // loop for each body link
+        for (int l=0; l<datas.size(); l++) {
+          if (m_selfMask->getMaskContainmentforNamedLink(vertex(0), vertex(1), vertex(2), datas[l].link_name) == robot_self_filter::INSIDE) {
+            // std::cout << "inside vertex = " << vertex << std::endl;
+            octomap::OcTreeKey pKey;
+            if (m_octreeContact->coordToKeyChecked(p, pKey)) {
+              m_octreeContact->updateNode(pKey, m_octreeContact->getProbMissContactSensorLog());
+              // std::cout << "find inside grid and find key. p = " << vertex << std::endl;
+              break;
             }
           }
-          p.z() = pmin.z();
         }
-        p.y() = pmin.y();
       }
     }
     m_octreeContact->updateInnerOccupancy();

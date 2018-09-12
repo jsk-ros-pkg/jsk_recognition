@@ -53,7 +53,7 @@ namespace jsk_pcl_ros
     m_occupancyMaxX(std::numeric_limits<double>::max()),
     m_occupancyMinY(-std::numeric_limits<double>::max()),
     m_occupancyMaxY(std::numeric_limits<double>::max()),
-    m_useVertex(true)
+    m_useContactSurface(true)
   {
     delete m_octree;
     m_octree = NULL;
@@ -76,7 +76,7 @@ namespace jsk_pcl_ros
     privateNh.param("occupancy_min_y", m_occupancyMinY,m_occupancyMinY);
     privateNh.param("occupancy_max_y", m_occupancyMaxY,m_occupancyMaxY);
 
-    privateNh.param("use_vertex", m_useVertex,m_useVertex);
+    privateNh.param("use_contact_surface", m_useContactSurface,m_useContactSurface);
 
     double r, g, b, a;
     privateNh.param("color_unknown/r", r, 0.5);
@@ -318,7 +318,7 @@ namespace jsk_pcl_ros
     }
 
     // loop for grids of octomap
-    if (m_useVertex) {
+    if (m_useContactSurface) {
       std::vector< std::vector<bool> > containFlag(datas.size(), std::vector<bool>(8));
       point3d p = pmin;
       for (unsigned int x = 0; x < steps[0]; ++x) {
@@ -419,48 +419,12 @@ namespace jsk_pcl_ros
             for (int l=0; l<datas.size(); l++) {
               if (m_selfMask->getMaskContainmentforNamedLink(vertex(0), vertex(1), vertex(2), datas[l].link_name) == robot_self_filter::INSIDE) {
                 // std::cout << "inside vertex = " << vertex << std::endl;
-                containFlag[l] = true;
-              }
-              else {
-                containFlag[l] = false;
-              }
-            }
-
-            // update probability of grid
-            bool containFlagLinkSum = false;
-            std::vector<bool> containFlagVerticesSum(datas.size(), false);
-            std::vector<bool> containFlagVerticesProd(datas.size(), true);
-            bool insideFlag = false;
-            bool surfaceFlag = false;
-            for (int l = 0; l < datas.size(); l++) {
-              if (containFlag[l]) {
-                containFlagLinkSum = true;
-                containFlagVerticesSum[l] = true;
-              }
-              else {
-                containFlagVerticesProd[l] = false;
-              }
-            }
-            insideFlag = containFlagLinkSum; // when all elements is true
-            for (int l = 0; l < datas.size(); l++) {
-              if (containFlagVerticesSum[l] && !(containFlagVerticesProd[l]) ) {
-                if (datas[l].contact) {
-                  surfaceFlag = true;
+                octomap::OcTreeKey pKey;
+                if (m_octreeContact->coordToKeyChecked(p, pKey)) {
+                  m_octreeContact->updateNode(pKey, m_octreeContact->getProbMissContactSensorLog());
+                  // std::cout << "find inside grid and find key. p = " << vertex << std::endl;
+                  break;
                 }
-              }
-            }
-            if (insideFlag) { // inside
-              octomap::OcTreeKey pKey;
-              if (m_octreeContact->coordToKeyChecked(p, pKey)) {
-                m_octreeContact->updateNode(pKey, m_octreeContact->getProbMissContactSensorLog());
-                // std::cout << "find inside grid and find key. p = " << vertex << std::endl;
-              }
-            }
-            else if (surfaceFlag) { // surface
-              octomap::OcTreeKey pKey;
-              if (m_octreeContact->coordToKeyChecked(p, pKey)) {
-                m_octreeContact->updateNode(pKey, m_octreeContact->getProbHitContactSensorLog());
-                // std::cout << "find surface grid and find key. p = " << vertex << std::endl;
               }
             }
           }

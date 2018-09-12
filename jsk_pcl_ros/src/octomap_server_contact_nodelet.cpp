@@ -312,7 +312,10 @@ namespace jsk_pcl_ros
       std_msgs::Header tmpHeader;
       tmpHeader.frame_id = m_worldFrameId;
       tmpHeader.stamp = msg->header.stamp;
-      m_selfMask->assumeFrame(tmpHeader);
+      if(!m_selfMask->assumeFrame(tmpHeader)) {
+        ROS_ERROR_STREAM("failed tf transformation in insertContactSensor");
+        return;
+      }
     }
 
     // clamp min and max points  cf. https://github.com/OctoMap/octomap/issues/146

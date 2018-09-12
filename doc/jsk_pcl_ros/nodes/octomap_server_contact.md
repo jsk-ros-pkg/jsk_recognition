@@ -1,5 +1,8 @@
 # OctomapServerContact
 ![](images/octomap_server_contact.png)
+
+![](images/octomap_server_contact_pr2.png)
+
 ## What Is This
 Occupancy grid map in which the contact sensor model is available.
 OctomapServerContact class is derived from OctomapServer class[1].
@@ -115,6 +118,12 @@ You can pass the output of vision and contact sensors.
 
 
 ## Sample
+### Simulation
+``
+roslaunch jsk_pcl_ros sample_octomap_server_contact_pr2.launch
+``
+
+### Real
 Plug the depth sensor which can be launched by openni.launch and run the below command.
 
 ``

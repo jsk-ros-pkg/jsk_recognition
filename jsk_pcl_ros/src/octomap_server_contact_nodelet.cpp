@@ -292,10 +292,16 @@ namespace jsk_pcl_ros
       m_octree->prune();
   }
 
-  void OctomapServerContact::insertContactSensor(const std::vector<jsk_recognition_msgs::ContactSensor> &datas) {
-    std_msgs::Header tmpHeader;
-    tmpHeader.frame_id = m_worldFrameId;
-    tmpHeader.stamp = ros::Time::now();
+  void OctomapServerContact::insertContactSensor(const jsk_recognition_msgs::ContactSensorArray::ConstPtr& msg) {
+    std::vector<jsk_recognition_msgs::ContactSensor> datas = msg->datas;
+
+    // setup tf transformation between octomap and each link
+    {
+      std_msgs::Header tmpHeader;
+      tmpHeader.frame_id = m_worldFrameId;
+      tmpHeader.stamp = msg->header.stamp;
+      m_selfMask->assumeFrame(tmpHeader);
+    }
 
     point3d pmin( m_occupancyMinX, m_occupancyMinY, m_occupancyMinZ);
     point3d pmax( m_occupancyMaxX, m_occupancyMaxY, m_occupancyMaxZ);
@@ -307,8 +313,6 @@ namespace jsk_pcl_ros
       steps[i] = floor(diff[i] / resolution);
       //      std::cout << "bbx " << i << " size: " << diff[i] << " " << steps[i] << " steps\n";
     }
-
-    m_selfMask->assumeFrame(tmpHeader);
 
     // loop for grids of octomap
     if (m_useVertex) {
@@ -467,8 +471,7 @@ namespace jsk_pcl_ros
 
   void OctomapServerContact::insertContactSensorCallback(const jsk_recognition_msgs::ContactSensorArray::ConstPtr& msg) {
     NODELET_INFO("insert contact sensor");
-    std::vector<jsk_recognition_msgs::ContactSensor> datas = msg->datas;
-    insertContactSensor(datas);
+    insertContactSensor(msg);
 
     publishAll(msg->header.stamp);
   }

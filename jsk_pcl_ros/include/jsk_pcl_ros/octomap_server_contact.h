@@ -59,7 +59,7 @@ namespace jsk_pcl_ros
      virtual void insertProximityCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud);
      virtual void insertScanProximity(const tf::Point& sensorOriginTf, const PCLPointCloud& pc);
      virtual void initContactSensor(const ros::NodeHandle& privateNh);
-     virtual void insertContactSensor(const std::vector<jsk_recognition_msgs::ContactSensor>& datas);
+     virtual void insertContactSensor(const jsk_recognition_msgs::ContactSensorArray::ConstPtr& msg);
      virtual void insertContactSensorCallback(const jsk_recognition_msgs::ContactSensorArray::ConstPtr& msg);
 
      virtual void publishAll(const ros::Time& rostime);

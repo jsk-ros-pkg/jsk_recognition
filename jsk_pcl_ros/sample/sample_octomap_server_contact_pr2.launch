@@ -17,6 +17,7 @@
     <rosparam>
       resolution: 0.005
       frame_id: octomap_world
+      latch: false
       publish_free_space: true
       publish_unknown_space: true
       <!-- maximum range to integrate (speedup!) -->
@@ -42,7 +43,7 @@
       occupancy_min_z: -0.2
       occupancy_max_z: 0.2
       <!-- contact sensor -->
-      use_vertex: false
+      use_contact_surface: false
       min_sensor_dist: 0.2
       self_see_default_padding: 0.0
       self_see_default_scale: 1.0

@@ -91,7 +91,7 @@ namespace jsk_pcl_ros
      double m_occupancyMinY;
      double m_occupancyMaxY;
 
-     bool m_useVertex;
+     bool m_useContactSurface;
 
      boost::shared_ptr<robot_self_filter::SelfMaskNamedLink> m_selfMask;
 

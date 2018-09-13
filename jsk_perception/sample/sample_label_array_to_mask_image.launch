@@ -55,6 +55,8 @@
     <remap from="~input" to="label_extract_indices/output" />
     <remap from="~target" to="point_indices_to_cluster_point_indices/output" />
     <rosparam>
+      align_boxes: true
+      target_frame_id: base_link
       approximate_sync: true
       queue_size: 50
       sort_by: -z_axis

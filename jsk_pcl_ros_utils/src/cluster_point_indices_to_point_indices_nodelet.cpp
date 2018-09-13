@@ -84,8 +84,11 @@ namespace jsk_pcl_ros_utils
 
     int cluster_size = cluster_indices_msg->cluster_indices.size();
     if (index_ < 0) {
-      // skipped silently
-      return;
+      for(int i = 0;i < cluster_size; ++i) {
+        indices_msg.indices.insert(indices_msg.indices.end(),
+                                   cluster_indices_msg->cluster_indices[i].indices.begin(),
+                                   cluster_indices_msg->cluster_indices[i].indices.end());
+      }
     } else if (index_ < cluster_size) {
       indices_msg.indices = cluster_indices_msg->cluster_indices[index_].indices;
     } else {

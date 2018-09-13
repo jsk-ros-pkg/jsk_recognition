@@ -1,50 +1,78 @@
 <launch>
 
   <arg name="gui" default="true" />
-
-  <node name="image_publisher"
-        pkg="jsk_perception" type="image_publisher.py">
-    <rosparam subst_value="true">
-      file_name: $(find jsk_perception)/sample/image/lena.jpg
-      encoding: bgr8
-      publish_info: false
-    </rosparam>
-  </node>
-
-  <!-- create label -->
-  <node name="grid_label"
-        pkg="jsk_perception" type="grid_label">
-    <remap from="~input" to="image_publisher/output" />
-    <rosparam>
-      label_size: 128
-    </rosparam>
-  </node>
+  <arg name="input_image" default="/zed/rgb/image_rect_color" />
+  <arg name="input_cloud" default="/pc_transformer/output" />
+  <arg name="input_label" default="mask_rcnn_instance_segmentation/output/label_cls" />
 
   <node name="label_array_to_mask_image"
         pkg="jsk_perception" type="label_array_to_mask_image">
-    <remap from="~input" to="grid_label/output" />
+    <remap from="~input" to="$(arg input_label)" />
     <rosparam>
-      label_values: [1, 2, 3]
+      label_values: [0, 1, 4, 5, 6, 7, 9, 10, 11, 15, 17, 18]
     </rosparam>
   </node>
 
   <node name="label_image_decomposer"
         pkg="jsk_perception" type="label_image_decomposer.py">
-    <remap from="~input" to="image_publisher/output" />
-    <remap from="~input/label" to="grid_label/output" />
+    <remap from="~input" to="$(arg input_image)" />
+    <remap from="~input/label" to="$(arg input_label)" />
     <rosparam>
       queue_size: 30
+    </rosparam>
+  </node>
+
+  <node name="apply_mask_image"
+        pkg="jsk_perception" type="apply_mask_image"
+        clear_params="true" >
+    <remap from="~input" to="$(arg input_image)" />
+    <remap from="~input/mask" to="label_array_to_mask_image/output" />
+    <rosparam subst_value="true">
+      clip: false
+    </rosparam>
+  </node>
+
+  <node name="mask_image_to_point_indices"
+        pkg="jsk_pcl_ros_utils" type="mask_image_to_point_indices" >
+    <remap from="~input" to="label_array_to_mask_image/output" />
+  </node>
+
+  <node name="label_extract_indices"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ExtractIndices" >
+    <remap from="~input" to="$(arg input_cloud)" />
+    <remap from="~indices" to="mask_image_to_point_indices/output" />
+  </node>
+
+  <node name="point_indices_to_cluster_point_indices"
+        pkg="jsk_pcl_ros_utils" type="point_indices_to_cluster_point_indices">
+    <remap from="~input" to="mask_image_to_point_indices/output" />
+  </node>
+
+  <node name="label_cluster_point_indices_decomposer"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ClusterPointIndicesDecomposer" >
+    <remap from="~input" to="label_extract_indices/output" />
+    <remap from="~target" to="point_indices_to_cluster_point_indices/output" />
+    <rosparam>
+      approximate_sync: true
+      queue_size: 50
+      sort_by: -z_axis
     </rosparam>
   </node>
 
   <group if="$(arg gui)">
     <node name="image_view0"
           pkg="image_view" type="image_view">
-      <remap from="image" to="label_image_decomposer/output/label_viz" />
+      <remap from="image" to="$(arg input_image)" />
     </node>
     <node name="image_view1"
           pkg="image_view" type="image_view">
       <remap from="image" to="label_array_to_mask_image/output" />
+    </node>
+    <node name="image_view2"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="apply_mask_image/output" />
     </node>
   </group>
 

@@ -266,6 +266,7 @@ jsk_add_nodelet(src/morphological_operator.cpp "jsk_perception/MorphologicalGrad
 jsk_add_nodelet(src/morphological_operator.cpp "jsk_perception/TopHat" "top_hat")
 jsk_add_nodelet(src/morphological_operator.cpp "jsk_perception/BlackHat" "black_hat")
 jsk_add_nodelet(src/label_to_mask_image.cpp "jsk_perception/LabelToMaskImage" "label_to_mask_image")
+jsk_add_nodelet(src/label_array_to_mask_image.cpp "jsk_perception/LabelArrayToMaskImage" "label_array_to_mask_image")
 jsk_add_nodelet(src/rect_to_mask_image.cpp "jsk_perception/RectToMaskImage" "rect_to_mask_image")
 jsk_add_nodelet(src/mask_image_to_roi.cpp "jsk_perception/MaskImageToROI" "mask_image_to_roi")
 jsk_add_nodelet(src/mask_image_to_rect.cpp "jsk_perception/MaskImageToRect" "mask_image_to_rect")

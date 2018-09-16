@@ -142,6 +142,16 @@ def main():
             md5='c0683094aa42eab1b9424e05112190c5',
         )
 
+    path = 'trained_data/hand_ssd300_chainermodel.npz'
+    if _chainer_available:
+        download_data(
+            pkg_name=PKG,
+            path=path,
+            url='https://drive.google.com/'
+            'uc?id=1rJ_ZYY-AjKqvlJGLF6RJ_I_vuaOp3lXg',
+            md5='ba1226f8dd816514e610a746278be02e',
+        )
+
     # node_scripts/feature_based_object_recognition.py
     download_data(
         pkg_name=PKG,

@@ -127,6 +127,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         self.hand_gaussian_sigma = rospy.get_param('~hand/gaussian_sigma', 2.5)
         self.hand_thre1 = rospy.get_param('~hand/thre1', 20)
         self.hand_thre2 = rospy.get_param('~hand/thre2', 0.1)
+        self.hand_width_offset = rospy.get_param('~hand/width_offset', 0)
         # model loading
         self._load_model()
         # topic advertise
@@ -670,7 +671,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         # https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/29ea7e24dce4abae30faecf769855823ad7bb637/src/openpose/hand/handDetector.cpp
         for joint_positions in people_joint_positions:
             # crop hand image for each person
-            width = self._get_hand_roi_width(joint_positions)
+            width = self._get_hand_roi_width(joint_positions) + self.hand_width_offset
             hand_joint_positions = []
             if width > self.hand_thre1:
                 rwrist = find_joint('RWrist', joint_positions)

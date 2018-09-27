@@ -46,7 +46,7 @@ class DetectGraspablePosesPcabase(ConnectionBasedTransport):
         elif self.direction == 'x':
             points_surface = points[:, [1, 2]] # choose y, z
         else:
-            rospy.logwarn("direction should x or z")
+            rospy.logwarn("direction should be x or z")
 
         pca = PCA(n_components=2)
         pca.fit(points_surface)
@@ -71,7 +71,6 @@ class DetectGraspablePosesPcabase(ConnectionBasedTransport):
         discrete_xy_list = np.array(discrete_xy_list)
         discrete_xy_list = discrete_xy_list[np.where(discrete_xy_list[:, 2] < self.hand_size)]
         discrete_xy_list = discrete_xy_list[np.argsort(np.absolute(discrete_xy_list[:, 0]))]
-
         grasp_xy_list = pca.inverse_transform(discrete_xy_list[:, [0, 1]])
 
         search_range_m = interval_m
@@ -92,7 +91,7 @@ class DetectGraspablePosesPcabase(ConnectionBasedTransport):
                                                (points[:, 2] < grasp_xy[1] + search_range_m))]
                 points_depth = points_depth[:, 0]
             else:
-                rospy.logwarn("direction should x or z")
+                rospy.logwarn("direction should be x or z")
             if len(points_depth) > 0:
                 grasp_position = np.append(grasp_xy, np.mean(points_depth))
             else:
@@ -114,13 +113,13 @@ class DetectGraspablePosesPcabase(ConnectionBasedTransport):
             trans_matrix[2, 2] = 0
 
         elif self.direction == 'x':
-            trans_matrix[1, 1] = pca.components_[0, 0]
-            trans_matrix[2, 1] = pca.components_[0, 1]
-            trans_matrix[1, 2] = pca.components_[0, 1]
-            trans_matrix[2, 2] = -1 * pca.components_[0, 0]
+            trans_matrix[1, 1] = pca.components_[0, 1]
+            trans_matrix[2, 1] = pca.components_[0, 0]
+            trans_matrix[1, 2] = -1 * pca.components_[0, 1]
+            trans_matrix[2, 2] = pca.components_[0, 0]
 
         else:
-            rospy.logwarn("direction should x or z")
+            rospy.logwarn("direction should be x or z")
 
         quaternion = tf.transformations.quaternion_from_matrix(trans_matrix)
 

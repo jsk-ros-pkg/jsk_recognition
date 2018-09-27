@@ -113,11 +113,17 @@ class DetectGraspablePosesPcabase(ConnectionBasedTransport):
             trans_matrix[2, 2] = 0
 
         elif self.direction == 'x':
-            trans_matrix[1, 1] = pca.components_[0, 1]
-            trans_matrix[2, 1] = pca.components_[0, 0]
-            trans_matrix[1, 2] = -1 * pca.components_[0, 1]
-            trans_matrix[2, 2] = pca.components_[0, 0]
-
+            # this if else is set so that z value of grasp poses' y axies become positive.
+            if pca.components_[0, 0] > 0:
+                trans_matrix[1, 1] = pca.components_[0, 0]
+                trans_matrix[2, 1] = pca.components_[0, 1]
+                trans_matrix[1, 2] = -1 * pca.components_[0, 1]
+                trans_matrix[2, 2] = pca.components_[0, 0]
+            else:
+                trans_matrix[1, 1] = -1 * pca.components_[0, 0]
+                trans_matrix[2, 1] = -1 * pca.components_[0, 1]
+                trans_matrix[1, 2] = pca.components_[0, 1]
+                trans_matrix[2, 2] = -1 * pca.components_[0, 0]
         else:
             rospy.logwarn("direction should be x or z")
 

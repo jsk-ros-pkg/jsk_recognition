@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
-
 import numpy as np
-import matplotlib.pyplot as plt
 
 import rospy
 import sensor_msgs.point_cloud2 as pc2
@@ -28,7 +25,7 @@ class DetectGraspablePosesPcabase(ConnectionBasedTransport):
         self.hand_size = rospy.get_param('~hand_size', 0.13) # maximum hand width
         self.interval_m = rospy.get_param('~interval_m', '0.04') # interval of possible grasp
 
-        self.pub_targetPoses = self.advertise("~output/can_grasp_poses", PoseArray, queue_size=1)
+        self.pub_target_poses = self.advertise("~output/can_grasp_poses", PoseArray, queue_size=1)
 
         rospy.spin()
 
@@ -45,107 +42,107 @@ class DetectGraspablePosesPcabase(ConnectionBasedTransport):
         interval_m = self.interval_m
 
         if self.direction == 'z':
-            points_surface = points[:,[0,1]] # choose x, y
+            points_surface = points[:, [0, 1]] # choose x, y
         elif self.direction == 'x':
-            points_surface = points[:,[1,2]] # choose y, z
+            points_surface = points[:, [1, 2]] # choose y, z
         else:
             rospy.logwarn("direction should x or z")
 
         pca = PCA(n_components=2)
         pca.fit(points_surface)
-        newPoints = pca.transform(points_surface)
-        newPoints = newPoints[np.argsort(newPoints[:,0])]
+        new_points = pca.transform(points_surface)
+        new_points = new_points[np.argsort(new_points[:, 0])]
 
-        minX = newPoints[0,0]
-        maxX = newPoints[-1,0]
+        min_x = new_points[0, 0]
+        max_x = new_points[-1, 0]
 
-        discreteXYList = []
+        discrete_xy_list = []
 
-        while minX <= maxX:
-            candidate = newPoints[np.where(newPoints[:,0] < (minX + interval_m))]
-            newPoints = newPoints[np.where(newPoints[:,0] >= (minX + interval_m))]
+        while min_x <= max_x:
+            candidate = new_points[np.where(new_points[:, 0] < (min_x + interval_m))]
+            new_points = new_points[np.where(new_points[:, 0] >= (min_x + interval_m))]
             if len(candidate) > 0:
-                meanX = np.mean(candidate, axis=0)[0]
-                meanY = np.mean(candidate, axis=0)[1]
-                rangeY = np.max(candidate[:,1]) - np.min(candidate[:,1])
-                discreteXYList.append([meanX, meanY, rangeY])
-            minX += interval_m
+                mean_x = np.mean(candidate, axis=0)[0]
+                mean_y = np.mean(candidate, axis=0)[1]
+                range_y = np.max(candidate[:, 1]) - np.min(candidate[:, 1])
+                discrete_xy_list.append([mean_x, mean_y, range_y])
+            min_x += interval_m
 
-        discreteXYList = np.array(discreteXYList)
-        discreteXYList = discreteXYList[np.where(discreteXYList[:,2] < self.hand_size)]
-        discreteXYList = discreteXYList[np.argsort(np.absolute(discreteXYList[:,0]))]
+        discrete_xy_list = np.array(discrete_xy_list)
+        discrete_xy_list = discrete_xy_list[np.where(discrete_xy_list[:, 2] < self.hand_size)]
+        discrete_xy_list = discrete_xy_list[np.argsort(np.absolute(discrete_xy_list[:, 0]))]
 
-        graspXYList = pca.inverse_transform(discreteXYList[:,[0,1]])
+        grasp_xy_list = pca.inverse_transform(discrete_xy_list[:, [0, 1]])
 
-        searchRange_m = interval_m
+        search_range_m = interval_m
 
-        graspPositionList = []
+        grasp_position_list = []
 
-        for graspXY in graspXYList:
+        for grasp_xy in grasp_xy_list:
             if self.direction == 'z':
-                points_depth = points[np.where((points[:,0] > graspXY[0] - searchRange_m) &
-                                               (points[:,0] < graspXY[0] + searchRange_m) &
-                                               (points[:,1] > graspXY[1] - searchRange_m) &
-                                               (points[:,1] < graspXY[1] + searchRange_m))]
-                points_depth = points_depth[:,2]
+                points_depth = points[np.where((points[:, 0] > grasp_xy[0] - search_range_m) &
+                                               (points[:, 0] < grasp_xy[0] + search_range_m) &
+                                               (points[:, 1] > grasp_xy[1] - search_range_m) &
+                                               (points[:, 1] < grasp_xy[1] + search_range_m))]
+                points_depth = points_depth[:, 2]
             elif self.direction == 'x':
-                points_depth = points[np.where((points[:,1] > graspXY[0] - searchRange_m) &
-                                               (points[:,1] < graspXY[0] + searchRange_m) &
-                                               (points[:,2] > graspXY[1] - searchRange_m) &
-                                               (points[:,2] < graspXY[1] + searchRange_m))]
-                points_depth = points_depth[:,0]
+                points_depth = points[np.where((points[:, 1] > grasp_xy[0] - search_range_m) &
+                                               (points[:, 1] < grasp_xy[0] + search_range_m) &
+                                               (points[:, 2] > grasp_xy[1] - search_range_m) &
+                                               (points[:, 2] < grasp_xy[1] + search_range_m))]
+                points_depth = points_depth[:, 0]
             else:
                 rospy.logwarn("direction should x or z")
             if len(points_depth) > 0:
-                graspPosition = np.append(graspXY, np.mean(points_depth))
+                grasp_position = np.append(grasp_xy, np.mean(points_depth))
             else:
                 rospy.logwarn("it happens that something wrong")
-            graspPositionList.append(list(graspPosition))
+            grasp_position_list.append(list(grasp_position))
 
-        pubMsg = PoseArray()
-        pubMsg.header = point_cloud.header
+        pub_msg = PoseArray()
+        pub_msg.header = point_cloud.header
 
-        transMatrix = tf.transformations.identity_matrix()
+        trans_matrix = tf.transformations.identity_matrix()
         if self.direction == 'z':
-            transMatrix[0,0] = 0
-            transMatrix[1,0] = 0
-            transMatrix[2,0] = -1
-            transMatrix[0,1] = -1 * pca.components_[0,1]
-            transMatrix[1,1] = pca.components_[0,0]
-            transMatrix[0,2] = pca.components_[0,0]
-            transMatrix[1,2] = pca.components_[0,1]
-            transMatrix[2,2] = 0
+            trans_matrix[0, 0] = 0
+            trans_matrix[1, 0] = 0
+            trans_matrix[2, 0] = -1
+            trans_matrix[0, 1] = -1 * pca.components_[0, 1]
+            trans_matrix[1, 1] = pca.components_[0, 0]
+            trans_matrix[0, 2] = pca.components_[0, 0]
+            trans_matrix[1, 2] = pca.components_[0, 1]
+            trans_matrix[2, 2] = 0
 
         elif self.direction == 'x':
-            transMatrix[1,1] = pca.components_[0,0]
-            transMatrix[2,1] = pca.components_[0,1]
-            transMatrix[1,2] = pca.components_[0,1]
-            transMatrix[2,2] = -1 * pca.components_[0,0]
+            trans_matrix[1, 1] = pca.components_[0, 0]
+            trans_matrix[2, 1] = pca.components_[0, 1]
+            trans_matrix[1, 2] = pca.components_[0, 1]
+            trans_matrix[2, 2] = -1 * pca.components_[0, 0]
 
         else:
             rospy.logwarn("direction should x or z")
 
-        quaternion = tf.transformations.quaternion_from_matrix(transMatrix)
+        quaternion = tf.transformations.quaternion_from_matrix(trans_matrix)
 
-        for graspPosition in graspPositionList:
+        for grasp_position in grasp_position_list:
             pose = Pose()
             if self.direction == 'z':
-                pose.position.x = graspPosition[0]
-                pose.position.y = graspPosition[1]
-                pose.position.z = graspPosition[2]
+                pose.position.x = grasp_position[0]
+                pose.position.y = grasp_position[1]
+                pose.position.z = grasp_position[2]
             elif self.direction == 'x':
-                pose.position.x = graspPosition[2]
-                pose.position.y = graspPosition[0]
-                pose.position.z = graspPosition[1]
+                pose.position.x = grasp_position[2]
+                pose.position.y = grasp_position[0]
+                pose.position.z = grasp_position[1]
             else:
                 rospy.logwarn("direction should x or z")
             pose.orientation.x = quaternion[0]
             pose.orientation.y = quaternion[1]
             pose.orientation.z = quaternion[2]
             pose.orientation.w = quaternion[3]
-            pubMsg.poses.append(pose)
+            pub_msg.poses.append(pose)
 
-        self.pub_targetPoses.publish(pubMsg)
+        self.pub_target_poses.publish(pub_msg)
 
 def main():
     try:

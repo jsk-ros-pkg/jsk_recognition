@@ -144,8 +144,13 @@ namespace jsk_pcl_ros
     if (tf_ && !monitor_->getMapFrame().empty())
     {
       point_cloud_filter_
+#if ROS_VERSION_MINIMUM(1,14,0) // melodic
+        = new tf2_ros::MessageFilter<sensor_msgs::PointCloud2>(
+          *point_cloud_subscriber_, *tf_, monitor_->getMapFrame(), 5, nullptr);
+#else
         = new tf::MessageFilter<sensor_msgs::PointCloud2>(
           *point_cloud_subscriber_, *tf_, monitor_->getMapFrame(), 5);
+#endif
       if (use_color_) {
         point_cloud_filter_->registerCallback(
           boost::bind(

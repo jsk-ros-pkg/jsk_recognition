@@ -247,7 +247,7 @@ if (CATKIN_ENABLE_TESTING)
     # unexpected error
     add_rostest(test/point_indices_to_mask_image.test)
     # because of unreleased topic_tools/transform on hydro
-    # add_rostest(test/pointcloud_to_pcd.test)
+    add_rostest(test/pointcloud_to_pcd.test)
     add_rostest(test/pointcloud_to_point_indices.test)
     # because of unreleased jsk_tools/test_topic_published.py on hydro
     add_rostest(test/bounding_box_array_to_bounding_box.test)

@@ -24,7 +24,7 @@ endif()
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   dynamic_reconfigure
-  # eigen_conversions
+  eigen_conversions
   # genmsg
   # geometry_msgs
   image_geometry

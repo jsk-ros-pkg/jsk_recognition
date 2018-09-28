@@ -38,7 +38,7 @@
         pkg="jsk_perception" type="bof_histogram_extractor.py">
     <remap from="~input" to="imagesift/output" />
     <remap from="~input/label" to="label_image/output" />
-    <param name="~bof_data" value="$(find jsk_perception)/trained_data/apc2015_sample_bof.pkl.gz" />
+    <param name="~bof_data" value="$(find jsk_perception)/trained_data/apc2015_sample_bof_sklearn==0.20.0.pkl.gz" />
     <rosparam>
       approximate_sync: true
     </rosparam>

@@ -45,6 +45,15 @@ def main():
         md5='97eb737f71a33bfc23ec573f1d351bd8',
         quiet=quiet,
     )
+
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/apc2015_sample_bof_sklearn==0.20.0.pkl.gz',
+        url='https://drive.google.com/uc?id=1VRwQxbjtSI4I1cjIqUFaemiUTHE4wlDj',
+        md5='001dbd0767369daff0cafb8fc7b39e92',
+        quiet=quiet,
+    )
+
     download_data(
         pkg_name=PKG,
         path='trained_data/apc2015_sample_clf.pkl.gz',

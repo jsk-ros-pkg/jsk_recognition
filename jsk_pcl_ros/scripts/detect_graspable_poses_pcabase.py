@@ -15,8 +15,6 @@ class DetectGraspablePosesPcabase(ConnectionBasedTransport):
 
     def __init__(self):
 
-        rospy.init_node('detect_graspable_poses_pcabase')
-
         rospy.logwarn("This node is experiential one.")
 
         super(DetectGraspablePosesPcabase, self).__init__()
@@ -26,8 +24,6 @@ class DetectGraspablePosesPcabase(ConnectionBasedTransport):
         self.interval_m = rospy.get_param('~interval_m', '0.04') # interval of possible grasp
 
         self.pub_target_poses = self.advertise("~output/can_grasp_poses", PoseArray, queue_size=1)
-
-        rospy.spin()
 
     def subscribe(self):
         rospy.Subscriber('~input', PointCloud2, self.callback)
@@ -156,4 +152,6 @@ def main():
         pass
 
 if __name__ == '__main__':
+    rospy.init_node('detect_graspable_poses_pcabase')
     main()
+    rospy.spin()

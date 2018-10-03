@@ -50,36 +50,19 @@
     </rosparam>
   </node>
 
-  <test test-name="test_color_histogram_filter" pkg="rostest" type="hztest"
-        time-limit="10">
+  <test test-name="test_color_histogram"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="30" retry="3" >
     <rosparam>
-      topic: color_histogram_filter/output
-      hz: 15
-      hzerror: 14
-      test_duration: 5.0
-      wait_time: 5.0
+      topic_0: color_histogram/output
+      timeout_0: 30
+      topic_1: color_histogram_filter/output
+      timeout_1: 30
+      topic_2: color_histogram_classifier/output
+      timeout_2: 30
+      topic_3: color_histogram_visualizer/output
+      timeout_3: 30
     </rosparam>
   </test>
 
-  <test test-name="test_color_histogram_classifier" pkg="rostest" type="hztest"
-        time-limit="10">
-    <rosparam>
-      topic: color_histogram_classifier/output
-      hz: 15
-      hzerror: 14
-      test_duration: 5.0
-      wait_time: 5.0
-    </rosparam>
-  </test>
-
-  <test test-name="test_color_histogram_visualizer" pkg="rostest" type="hztest"
-        time-limit="10">
-    <rosparam>
-      topic: color_histogram_visualizer/output
-      hz: 15
-      hzerror: 14
-      test_duration: 5.0
-      wait_time: 5.0
-    </rosparam>
-  </test>
 </launch>

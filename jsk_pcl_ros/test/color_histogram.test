@@ -1,15 +1,7 @@
 <launch>
   <arg name="cloud_input" default="/right_hand_camera/depth_registered/points" />
 
-  <node name="rosbag_play"
-        pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros_utils)/sample/data/2017-02-05-16-11-09_shelf_bin.bag --clock --loop">
-  </node>
-  <include file="$(find openni2_launch)/launch/openni2.launch">
-    <arg name="camera" value="right_hand_camera"/>
-    <arg name="load_driver" value="false"/>
-    <arg name="depth_registration" value="true"/>
-  </include>
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml" />
 
   <node name="indices"
         pkg="jsk_pcl_ros_utils" type="pointcloud_to_cluster_point_indices">

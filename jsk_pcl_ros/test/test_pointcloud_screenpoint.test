@@ -15,14 +15,13 @@
   <node pkg="rostopic" type="rostopic" name="publish_pointcloud_screenpoint_point"
         args="pub -r 10 /right_hand_camera/rgb/image_rect_color/screenpoint geometry_msgs/PointStamped '{header: {frame_id: 'right_hand_camera_rgb_optical_frame'}, point: {x: 100, y: 100}}'" />
 
-  <test test-name="test_pointcloud_screenpoint" pkg="rostest" type="hztest"
-        time-limit="30" retry="3" >
+  <test test-name="test_pointcloud_screenpoint_published"
+        name="test_people_detection"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="360" retry="3">
     <rosparam>
-      topic: /pointcloud_screenpoint_nodelet/output_point
-      hz: 10
-      hzerror: 9
-      test_duration: 5.0
-      wait_time: 5.0
+      topic_0: /pointcloud_screenpoint_nodelet/output_point
+      timeout_0: 30
     </rosparam>
   </test>
 

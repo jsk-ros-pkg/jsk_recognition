@@ -21,6 +21,13 @@ Publish image from loaded file.
 * `~frame_id` (str default: `camera`)
 * `~rate` (Float default: `1.0`)
 
+* `~fovx` (Float default: `None`)
+* `~fovy` (Float default: `None`)
+
+  If `publish_info` is `True` and `fovx` and `fovy` are specified,
+  calculate camera intrinsic parameter and publish it as a values of
+  `~output/camera_info`.
+
 ## Sample
 
 ```bash

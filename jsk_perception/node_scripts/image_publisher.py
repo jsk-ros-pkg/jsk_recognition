@@ -23,6 +23,8 @@ class ImagePublisher(object):
         self.imgmsg = None
         self.encoding = rospy.get_param('~encoding', 'bgr8')
         self.frame_id = rospy.get_param('~frame_id', 'camera')
+        self.fovx = rospy.get_param('~fovx', None)
+        self.fovy = rospy.get_param('~fovy', None)
         dynamic_reconfigure.server.Server(
             ImagePublisherConfig, self._cb_dyn_reconfig)
         self.pub = rospy.Publisher('~output', Image, queue_size=1)
@@ -62,6 +64,20 @@ class ImagePublisher(object):
             info.header.frame_id = self.frame_id
             info.width = self.imgmsg.width
             info.height = self.imgmsg.height
+            if self.fovx is not None and self.fovy is not None:
+                fx = self.imgmsg.width / 2.0 / \
+                    np.tan(np.deg2rad(self.fovx / 2.0))
+                fy = self.imgmsg.height / 2.0 / \
+                    np.tan(np.deg2rad(self.fovy / 2.0))
+                cx = self.imgmsg.width / 2.0
+                cy = self.imgmsg.height / 2.0
+                info.K = np.array([fx, 0, cx,
+                                   0, fy, cy,
+                                   0, 0, 1.0])
+                info.P = np.array([fx, 0, cx, 0,
+                                   0, fy, cy, 0,
+                                   0, 0, 1, 0])
+                info.R = [1, 0, 0, 0, 1, 0, 0, 0, 1]
             self.pub_info.publish(info)
 
     def cv2_to_imgmsg(self, img_bgr, encoding):

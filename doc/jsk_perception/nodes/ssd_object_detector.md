@@ -172,6 +172,18 @@ You can see camera image with results in `image_view`
 
     A generated weight file can be used as model file for `ssd_object_detector.py` by setting `~model_path` parameter as path to the weight file.
 
+## Pretrained Models
+
+### Hand Detection
+
+You can use pretrained hand detection models.
+
+``` bash
+roslaunch jsk_perception sample_ssd_hand_detector.launch gpu:=0
+```
+
+![](images/ssd_hand_detection.gif)
+
 ## Reference
 
 - [Wei Liu, et al. "SSD: Single shot multibox detector" ECCV 2016](https://arxiv.org/abs/1512.02325)

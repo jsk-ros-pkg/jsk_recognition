@@ -24,7 +24,7 @@ Publish image from loaded file.
 * `~fovx` (Float default: `None`)
 * `~fovy` (Float default: `None`)
 
-  If `~publish_info` is `True` and `~fovx` and `~fovy` are specified,
+  If `~publish_info` is `True` and `~fovx`[degree] and `~fovy`[degree] are specified,
   calculate camera intrinsic parameter and publish it as a values of
   `~output/camera_info`.
 

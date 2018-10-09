@@ -13,7 +13,7 @@ Publish image from loaded file.
 * `~file_name` (str default: `image.png`)
 
   full path to the file to be loaded
-* `publish_info` (bool default: `True`)
+* `~publish_info` (bool default: `True`)
 
   publish `~output/camera_info` if true
 

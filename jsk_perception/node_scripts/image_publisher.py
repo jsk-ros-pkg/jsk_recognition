@@ -25,6 +25,10 @@ class ImagePublisher(object):
         self.frame_id = rospy.get_param('~frame_id', 'camera')
         self.fovx = rospy.get_param('~fovx', None)
         self.fovy = rospy.get_param('~fovy', None)
+        if (self.fovx is None) != (self.fovy is None):
+            rospy.logwarn('fovx and fovy should be specified, but '
+                          'specified only {}'
+                          .format('fovx' if self.fovx else 'fovy'))
         dynamic_reconfigure.server.Server(
             ImagePublisherConfig, self._cb_dyn_reconfig)
         self.pub = rospy.Publisher('~output', Image, queue_size=1)

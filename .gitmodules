@@ -5,3 +5,6 @@
 	path = .travis
 	url = https://github.com/jsk-ros-pkg/jsk_travis.git
 	branch = 0.4.26
+[submodule "jsk_perception/node_scripts/deep_sort/deep_sort"]
+	path = jsk_perception/node_scripts/deep_sort/deep_sort
+	url = https://github.com/nwojke/deep_sort.git

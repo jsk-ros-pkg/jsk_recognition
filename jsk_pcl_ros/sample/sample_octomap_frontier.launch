@@ -1,0 +1,44 @@
+<launch>
+  <!-- Reconstruct pointcloud from robot on this computer -->
+  <arg name="camera_remote" default="camera_remote"/>
+  <include file="$(find jsk_pcl_ros)/launch/openni2_remote.launch">
+    <arg name="camera" value="$(arg camera_remote)" />
+    <arg name="local_camera" value="head_camera" />
+    <arg name="rgb_camera_info_url" value="/head_camera/rgb/camera_info" />
+    <arg name="depth_camera_info_url" value="/head_camera/depth/camera_info" />
+    <arg name="republish" value="true" />
+  </include>
+
+  <!-- octomap -->
+  <node pkg="jsk_pcl_ros" type="octomap_server_contact" name="octomap_server_contact"
+        output="screen" >
+    <param name="resolution" value="0.01" />
+    <!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
+    <param name="frame_id" type="string" value="base_link" />
+    <!-- maximum range to integrate (speedup!) -->
+    <param name="sensor_model/max_range" value="5.0" />
+    <param name="publish_free_space" value="true"/>
+    <param name="publish_unknown_space" value="true"/>
+    <param name="publish_frontier_space" value="true"/>
+    <param name="latch" value="false"/>
+    <!-- data source to integrate (PointCloud2) -->
+    <remap from="/cloud_in" to="/$(arg camera_remote)/depth_registered/points" />
+    <!-- <remap from="/proximity_in" to="proximity_pointcloud/all" /> -->
+    <remap from="/contact_sensors_in" to="contact_sensors_in" />
+    <!-- octomap region -->
+    <param name="occupancy_min_x" value="-0.3" />
+    <param name="occupancy_max_x" value="0.2" />
+    <param name="occupancy_min_y" value="-1.1" />
+    <param name="occupancy_max_y" value="-0.6" />
+    <param name="occupancy_min_z" value="0.3" />
+    <param name="occupancy_max_z" value="0.9" />
+    <rosparam command="load" file="$(find octomap_server)/config/fetch_contact_sensor_config.yaml" />
+  </node>
+
+  <!-- set octomap free where pointcloud is inside of the robot -->
+  <node pkg="octomap_server" type="publish_fetch_contact_sensor.py" name="publish_fetch_contact_sensor" output="screen" />
+
+  <!-- rviz -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find jsk_pcl_ros)/sample/rviz/sample_octomap_frontier.rviz"/>
+
+</launch>

@@ -145,13 +145,7 @@ class DetectGraspablePosesPcabase(ConnectionBasedTransport):
 
         self.pub_target_poses.publish(pub_msg)
 
-def main():
-    try:
-        DetectGraspablePosesPcabase()
-    except rospy.ROSInterruptException:
-        pass
-
 if __name__ == '__main__':
     rospy.init_node('detect_graspable_poses_pcabase')
-    main()
+    DetectGraspablePosesPcabase()
     rospy.spin()

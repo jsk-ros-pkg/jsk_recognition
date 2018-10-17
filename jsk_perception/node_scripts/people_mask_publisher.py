@@ -45,6 +45,8 @@ class PeopleMaskPublisher(ConnectionBasedTransport):
             '~arms_score_threshold', 0.25)
         self.hand_ratio = rospy.get_param('~hand_ratio', 0.33)
         self.hand_width_ratio = rospy.get_param('~hand_width_ratio', 0.8)
+        self.face_ratio = rospy.get_param('~face_ratio', 0.6)
+        self.face_width_margin_ratio = rospy.get_param('~face_width_margin_ratio', 1.3)
 
         self.pub = self.advertise('~output', Image, queue_size=1)
         self.debug_pub = self.advertise('~debug/output', Image, queue_size=1)
@@ -83,9 +85,13 @@ class PeopleMaskPublisher(ConnectionBasedTransport):
         mask_img = np.zeros((img.shape[0], img.shape[1]), dtype=np.bool)
         arm = [limb_prefix for limb_prefix in ['R', 'L']
                if limb_prefix + 'Hand' in self.limb_part]
+        nose = 'Nose' in self.limb_part
         if arm:
             arm_mask_img, debug_img = self._create_hand_mask(people_pose, img, arm)
             mask_img = np.bitwise_or(mask_img, arm_mask_img)
+        if nose:
+            nose_mask_img, debug_img = self._create_nose_mask(people_pose, img)
+            mask_img = np.bitwise_or(mask_img, nose_mask_img)
 
         mask_msg = br.cv2_to_imgmsg(np.uint8(mask_img * 255.0), encoding='mono8')
         mask_msg.header = img_msg.header
@@ -144,6 +150,56 @@ class PeopleMaskPublisher(ConnectionBasedTransport):
                 mask_img[y:y + height, x:x + width] = True
                 cv2.rectangle(img, (x, y), (x + width, y + height),
                               color, rectangle_thickness)
+        return mask_img, img
+
+    def _create_nose_mask(self, people_pose, img):
+        rectangle_thickness = 5
+        color = (0, 255, 0)
+
+        mask_img = np.zeros((img.shape[0], img.shape[1]), dtype=np.bool)
+        for person_pose in people_pose:
+            limb_poses = []
+            nose_pose = None
+            neck_pose = None
+            target_limb_names = ['Nose', 'Neck', 'REye', 'LEye', 'REar', 'LEar']
+            for limb_name in target_limb_names:
+                try:
+                    limb_index = person_pose.limb_names.index(limb_name)
+                    limb_pose = person_pose.poses[limb_index]
+                    limb_poses.append(limb_pose)
+                    if limb_name == 'Nose':
+                        nose_pose = limb_pose
+                    elif limb_name == 'Neck':
+                        neck_pose = limb_pose
+                except ValueError:
+                    continue
+
+            if nose_pose == None or neck_pose == None:
+                continue
+
+            positions_x = [pose.position.x for pose in limb_poses]
+            x_max = max(positions_x)
+            x_min = min(positions_x)
+            width = (x_max - x_min) * self.face_width_margin_ratio
+            x = (x_max + x_min) / 2.0 - width / 2.0
+
+            positions_y = [pose.position.y for pose in limb_poses]
+            y_min = min(positions_y)
+            height = self.face_ratio * \
+                     abs(nose_pose.position.y - neck_pose.position.y) * 2.0
+            y_min = min(y_min, nose_pose.position.y - height / 2.0)
+            y_max = nose_pose.position.y + height / 2.0
+            y = y_min
+            height = y_max - y_min
+
+            x = int(x)
+            y = int(y)
+            width = int(width)
+            height = int(height)
+
+            mask_img[y:y + height, x:x + width] = True
+            cv2.rectangle(img, (x, y), (x + width, y + height),
+                          color, rectangle_thickness)
         return mask_img, img
 
 if __name__ == '__main__':

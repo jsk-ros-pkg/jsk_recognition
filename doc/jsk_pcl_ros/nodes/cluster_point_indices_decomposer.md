@@ -91,7 +91,7 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 
    Run PCA algorithm on each cluster to estimate x and y direction.
 
-* `~force_to_flip_z_axis` (Boolean, default: `False`)
+* `~force_to_flip_z_axis` (Boolean, default: `True`)
 
    Flip z axis direction if this value is true.
 

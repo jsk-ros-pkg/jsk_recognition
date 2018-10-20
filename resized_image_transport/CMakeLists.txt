@@ -42,7 +42,7 @@ jsk_nodelet(src/log_polar_nodelet.cpp
   nodelet_sources nodelet_executables)
 add_library(resized_image_transport SHARED ${nodelet_sources}
   src/image_processing_nodelet.cpp)
-  
+
 add_definitions("-O2 -g")
 include_directories(include ${catkin_INCLUDE_DIRS})
 target_link_libraries(resized_image_transport ${catkin_LIBRARIES} ${OpenCV_LIBS})
@@ -54,15 +54,16 @@ install(TARGETS ${nodelet_executables}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-  )
+)
 
-install(DIRECTORY include/${PROJECT_NAME}/ 
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
 
-install(DIRECTORY launch/
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-        PATTERN ".svn" EXCLUDE
-        )
+install(DIRECTORY launch test
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  PATTERN ".svn" EXCLUDE
+)
 install(FILES nodelet.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 # check ros distro >= indigo

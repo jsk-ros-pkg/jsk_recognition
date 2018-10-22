@@ -283,7 +283,7 @@ public:
       }
     }
     if ( queryIdxs.size() == 0 ) {
-      ROS_WARN_STREAM("could not found matched points with distanceratio(" <<_distanceratio_threshold << ")");
+      ROS_WARN_STREAM("could not find matched points with distanceratio(" <<_distanceratio_threshold << ")");
     } else {
       cv::KeyPoint::convert(_template_keypoints,pt1,queryIdxs);
       cv::KeyPoint::convert(sourceimg_keypoints,pt2,trainIdxs);

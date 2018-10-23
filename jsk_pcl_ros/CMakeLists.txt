@@ -465,13 +465,7 @@ install(DIRECTORY scripts/
   USE_SOURCE_PERMISSIONS
 )
 
-install(DIRECTORY
-  config
-  euslisp
-  launch
-  plugins
-  sample
-  test
+install(DIRECTORY config euslisp launch plugins sample test
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   USE_SOURCE_PERMISSIONS
 )

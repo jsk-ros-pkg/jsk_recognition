@@ -12,6 +12,7 @@ endif(CCACHE_FOUND)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  catkin_virtualenv
   dynamic_reconfigure
   jsk_recognition_msgs
   pcl_ros
@@ -40,6 +41,12 @@ catkin_package(
  INCLUDE_DIRS include
  LIBRARIES jsk_recognition_utils
  CATKIN_DEPENDS jsk_recognition_msgs pcl_ros visualization_msgs message_runtime
+)
+
+catkin_generate_virtualenv(
+  PYTHON_VERSION_MAJOR 2
+  USE_SYSTEM_PACKAGES TRUE
+  ISOLATE_REQUIREMENTS FALSE
 )
 
 # Cythonize pyx files
@@ -113,7 +120,10 @@ install(TARGETS jsk_recognition_utils
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
-install(DIRECTORY node_scripts/
-        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-        USE_SOURCE_PERMISSIONS
-)
+file(GLOB NODE_SCRIPTS_FILES node_scripts/*)
+catkin_install_python(
+  PROGRAMS ${NODE_SCRIPTS_FILES}
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+install(FILES requirements.txt
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

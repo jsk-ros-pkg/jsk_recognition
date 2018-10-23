@@ -1,0 +1,2 @@
+chainer>=2.0.0
+scikit-image>=0.12.1

@@ -57,5 +57,5 @@ install(PROGRAMS src/objectdetection_tf_publisher.py
 file(GLOB _launch *.launch)
 file(GLOB _pdf *.pdf)
 install(FILES ${_launch} ${_pdf}
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-        )
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)

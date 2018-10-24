@@ -224,8 +224,15 @@ catkin_package(
     LIBRARIES jsk_pcl_ros_utils
 )
 
+# Install header files directly into ${CATKIN_PACKAGE_INCLUDE_DESTINATION}, and
+# executable programs directly into ${CATKIN_PACKAGE_BIN_DESTINATION}.
+# However, other directories like 'launch' or 'sample' must be installed
+# recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+# Be careful that 'launch' and 'launch/' are different: the former is directory
+# and the latter is each content.
 install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
 install(TARGETS jsk_pcl_ros_utils
   ${jsk_pcl_util_nodelet_executables}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

@@ -67,7 +67,12 @@ add_definitions("-O2 -g")
 include_directories(include ${catkin_INCLUDE_DIRS})
 target_link_libraries(lib_${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
-
+# Install header files directly into ${CATKIN_PACKAGE_INCLUDE_DESTINATION}, and
+# executable programs directly into ${CATKIN_PACKAGE_BIN_DESTINATION}.
+# However, other directories like 'launch' or 'sample' must be installed
+# recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+# Be careful that 'launch' and 'launch/' are different: the former is directory
+# and the latter is each content.
 install(TARGETS lib_${PROJECT_NAME} ${jsk_exec} ${nodelet_executables}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
@@ -75,7 +80,8 @@ install(TARGETS lib_${PROJECT_NAME} ${jsk_exec} ${nodelet_executables}
 )
 
 install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
 
 install(FILES nodelet.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}

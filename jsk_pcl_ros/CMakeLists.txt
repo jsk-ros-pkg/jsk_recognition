@@ -449,8 +449,15 @@ catkin_package(
 # download and install sample data
 add_custom_target(${PROJECT_NAME}_install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
 
+# Install header files directly into ${CATKIN_PACKAGE_INCLUDE_DESTINATION}, and
+# executable programs directly into ${CATKIN_PACKAGE_BIN_DESTINATION}.
+# However, other directories like 'launch' or 'sample' must be installed
+# recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+# Be careful that 'launch' and 'launch/' are different: the former is directory
+# and the latter is each content.
 install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
 install(TARGETS jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit
   ${jsk_pcl_nodelet_executables}
   bench_ransac_plane_estimation

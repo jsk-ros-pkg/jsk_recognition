@@ -48,6 +48,12 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 target_link_libraries(resized_image_transport ${catkin_LIBRARIES} ${OpenCV_LIBS})
 add_dependencies(resized_image_transport ${PROJECT_NAME}_gencfg)
 
+# Install header files directly into ${CATKIN_PACKAGE_INCLUDE_DESTINATION}, and
+# executable programs directly into ${CATKIN_PACKAGE_BIN_DESTINATION}.
+# However, other directories like 'launch' or 'sample' must be installed
+# recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+# Be careful that 'launch' and 'launch/' are different: the former is directory
+# and the latter is each content.
 
 # Mark executables and/or libraries for installation
 install(TARGETS ${nodelet_executables}

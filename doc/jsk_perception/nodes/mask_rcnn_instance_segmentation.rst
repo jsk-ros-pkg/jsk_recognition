@@ -32,6 +32,13 @@ Publishing Topic
 
   Visualized image of recognition result.
 
+* ``~output/class`` (``jsk_recognition_msgs/ClassificationResult``)
+
+  Class information of detected objects
+
+* ``~output/rects`` (``jsk_recognition_msgs/RectArray``)
+
+  Rectangles of detected objects
 
 Parameters
 ----------
@@ -53,6 +60,9 @@ Parameters
 
   Pretrained model path.
 
+* ``~classifier_name`` (String, default: ``rospy.get_name()``)
+
+  Name of this classifier
 
 Sample
 ------

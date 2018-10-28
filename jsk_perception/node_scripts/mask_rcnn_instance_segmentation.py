@@ -20,6 +20,9 @@ import cv_bridge
 from jsk_recognition_msgs.msg import ClusterPointIndices
 from jsk_recognition_msgs.msg import Label
 from jsk_recognition_msgs.msg import LabelArray
+from jsk_recognition_msgs.msg import Rect
+from jsk_recognition_msgs.msg import RectArray
+from jsk_recognition_msgs.msg import ClassificationResult
 from jsk_topic_tools import ConnectionBasedTransport
 from pcl_msgs.msg import PointIndices
 import rospy
@@ -42,6 +45,8 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
 
         self.fg_class_names = rospy.get_param('~fg_class_names')
         pretrained_model = rospy.get_param('~pretrained_model')
+        self.classifier_name = rospy.get_param(
+            "~classifier_name", rospy.get_name())
 
         n_fg_class = len(self.fg_class_names)
         self.model = chainer_mask_rcnn.models.MaskRCNNResNet(
@@ -63,6 +68,12 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
             '~output/label_ins', Image, queue_size=1)
         self.pub_viz = self.advertise(
             '~output/viz', Image, queue_size=1)
+        self.pub_rects = self.advertise(
+            "~output/rects", RectArray,
+            queue_size=1)
+        self.pub_class = self.advertise(
+            "~output/class", ClassificationResult,
+            queue_size=1)
 
     def subscribe(self):
         self.sub = rospy.Subscriber('~input', Image, self.callback,
@@ -103,6 +114,24 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
         msg_lbl_cls.header = msg_lbl_ins.header = imgmsg.header
         self.pub_lbl_cls.publish(msg_lbl_cls)
         self.pub_lbl_ins.publish(msg_lbl_ins)
+
+        cls_msg = ClassificationResult(
+            header=imgmsg.header,
+            classifier=self.classifier_name,
+            target_names=self.fg_class_names,
+            labels=labels,
+            label_names=[self.fg_class_names[l] for l in labels],
+            label_proba=scores,
+        )
+
+        rects_msg = RectArray(header=imgmsg.header)
+        for bbox in bboxes:
+            rect = Rect(x=bbox[1], y=bbox[0],
+                        width=bbox[3] - bbox[1],
+                        height=bbox[2] - bbox[0])
+            rects_msg.rects.append(rect)
+        self.pub_rects.publish(rects_msg)
+        self.pub_class.publish(cls_msg)
 
         if self.pub_viz.get_num_connections() > 0:
             n_fg_class = len(self.fg_class_names)

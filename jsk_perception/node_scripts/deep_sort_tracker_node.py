@@ -8,6 +8,8 @@ from cv_bridge import CvBridge
 import message_filters
 from jsk_recognition_msgs.msg import RectArray
 from jsk_recognition_msgs.msg import ClassificationResult
+from jsk_recognition_msgs.msg import Label
+from jsk_recognition_msgs.msg import LabelArray
 
 from deep_sort.deep_sort_tracker import DeepSortTracker
 
@@ -30,6 +32,8 @@ class DeepSortTrackerNode(object):
         self.image_pub = rospy.Publisher(
             '~output/vis',
             Image, queue_size=1)
+        self.pub_labels = rospy.Publisher(
+            '~output/labels', LabelArray, queue_size=1)
 
         self.subscribe()
 
@@ -70,6 +74,14 @@ class DeepSortTrackerNode(object):
 
         if len(rects) > 0:
             tracker.track(frame, rects, scores)
+
+        if self.pub_labels.get_num_connections() > 0:
+            msg_labels = LabelArray(header=img_msg.header)
+            for object_id, target_object in tracker.tracking_objects.items():
+                if target_object['out_of_frame']:
+                    continue
+                msg_labels.labels.append(Label(id=object_id))
+            self.pub_labels.publish(msg_labels)
 
         if self.image_pub.get_num_connections() > 0:
             frame = tracker.visualize(frame, rects)

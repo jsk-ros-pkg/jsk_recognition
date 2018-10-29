@@ -30,7 +30,7 @@ class DeepSortTrackerNode(object):
         self.tracker = DeepSortTracker(gpu=self.gpu,
                                        pretrained_model=pretrained_model)
         self.image_pub = rospy.Publisher(
-            '~output/vis',
+            '~output/viz',
             Image, queue_size=1)
         self.pub_labels = rospy.Publisher(
             '~output/labels', LabelArray, queue_size=1)

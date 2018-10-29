@@ -40,6 +40,6 @@
 
   <node name="image_view" pkg="image_view" type="image_view"
         if="$(arg gui)">
-    <remap from="image" to="deep_sort_tracker/output/vis" />
+    <remap from="image" to="deep_sort_tracker/output/viz" />
   </node>
 </launch>

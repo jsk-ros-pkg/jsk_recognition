@@ -34,6 +34,7 @@
     <remap from="~input/class" to="ssd_object_detector/output/class" />
     <rosparam subst_value="true">
       gpu: $(arg gpu)
+      pretrained_model: $(find jsk_perception)/trained_data/deepsort_chainermodel.npz
     </rosparam>
   </node>
 

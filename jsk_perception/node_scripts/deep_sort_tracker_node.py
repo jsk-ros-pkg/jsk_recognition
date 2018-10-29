@@ -20,6 +20,7 @@ class DeepSortTrackerNode(object):
         super(DeepSortTrackerNode, self).__init__()
         self.bridge = CvBridge()
 
+        self.target_labels = rospy.get_param('~target_labels', None)
         self.gpu = rospy.get_param('~gpu', 0)
         if self.gpu >= 0:
             chainer.cuda.get_device_from_id(self.gpu).use()
@@ -65,6 +66,9 @@ class DeepSortTrackerNode(object):
         scores = []
         rects = []
         for i, r in enumerate(rects_msg.rects):
+            if self.target_labels is not None and \
+               class_msg.label_names[i] not in self.target_labels:
+                continue
             rects.append((int(r.x), int(r.y),
                           int(r.width),
                           int(r.height)))

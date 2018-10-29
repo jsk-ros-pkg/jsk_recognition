@@ -1,0 +1,88 @@
+#!/usr/bin/env python
+
+import numpy as np
+import rospy
+import chainer
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
+import message_filters
+from jsk_recognition_msgs.msg import RectArray
+from jsk_recognition_msgs.msg import ClassificationResult
+
+from deep_sort.deep_sort_tracker import DeepSortTracker
+
+
+class DeepSortTrackerNode(object):
+
+    def __init__(self):
+        super(DeepSortTrackerNode, self).__init__()
+        self.bridge = CvBridge()
+
+        self.gpu = rospy.get_param('~gpu', 0)
+        if self.gpu >= 0:
+            chainer.cuda.get_device_from_id(self.gpu).use()
+        chainer.global_config.train = False
+        chainer.global_config.enable_backprop = False
+
+        pretrained_model = rospy.get_param('~pretrained_model')
+        self.tracker = DeepSortTracker(gpu=self.gpu,
+                                       pretrained_model=pretrained_model)
+        self.image_pub = rospy.Publisher(
+            '~output/vis',
+            Image, queue_size=1)
+
+        self.subscribe()
+
+    def subscribe(self):
+        queue_size = rospy.get_param('~queue_size', 100)
+        sub_img = message_filters.Subscriber(
+            '~input', Image, queue_size=1)
+        sub_rects = message_filters.Subscriber(
+            '~input/rects', RectArray, queue_size=1)
+        sub_class = message_filters.Subscriber(
+            '~input/class', ClassificationResult, queue_size=1)
+        self.subs = [sub_img, sub_rects, sub_class]
+        if rospy.get_param('~approximate_sync', False):
+            slop = rospy.get_param('~slop', 0.1)
+            sync = message_filters.ApproximateTimeSynchronizer(
+                fs=self.subs, queue_size=queue_size, slop=slop)
+        else:
+            sync = message_filters.TimeSynchronizer(
+                fs=self.subs, queue_size=queue_size)
+        sync.registerCallback(self.callback)
+
+    def callback(self, img_msg, rects_msg, class_msg):
+        bridge = self.bridge
+        tracker = self.tracker
+
+        frame = bridge.imgmsg_to_cv2(
+            img_msg, desired_encoding='bgr8')
+
+        scores = []
+        rects = []
+        for i, r in enumerate(rects_msg.rects):
+            rects.append((int(r.x), int(r.y),
+                          int(r.width),
+                          int(r.height)))
+            scores.append(class_msg.label_proba[i])
+        rects = np.array(rects, 'f')
+        scores = np.array(scores, 'f')
+
+        if len(rects) > 0:
+            tracker.track(frame, rects, scores)
+
+        if self.image_pub.get_num_connections() > 0:
+            frame = tracker.visualize(frame, rects)
+            msg = bridge.cv2_to_imgmsg(frame, "bgr8")
+            msg.header = img_msg.header
+            self.image_pub.publish(msg)
+
+
+def main():
+    rospy.init_node('deep_sort_tracker_node')
+    dstn = DeepSortTrackerNode()  # NOQA
+    rospy.spin()
+
+
+if __name__ == '__main__':
+    main()

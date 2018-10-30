@@ -110,23 +110,24 @@ def preprocess_image(img, key_points=None, img_size=224):
     return crop_img, proc_param
 
 
-mean = np.array([[0.90365213, -0.00383353,  0.03301106,  3.14986515, -0.01883755,
-                  0.16895422, -0.15615709, -0.0058559,  0.07191881, -0.18924442,
-                  -0.04396844, -0.05114707,  0.24385466,  0.00881136,  0.02384637,
-                  0.2066803, -0.10190887, -0.03373535,  0.27340922,  0.00637481,
-                  0.07408072, -0.03409823, -0.00971786,  0.03841642,  0.0191336,
-                  0.10812955, -0.06782207, -0.08026548, -0.18373352,  0.16556455,
-                  0.03735897, -0.02497507,  0.02688527, -0.18802814,  0.17772846,
-                  0.13135587,  0.01438429,  0.15891947, -0.2279436, -0.07497088,
-                  0.05169746,  0.08784129,  0.02147929,  0.02320284, -0.42375749,
-                  -0.04963749,  0.08627309,  0.47963148,  0.26528436, -0.1028522,
-                  -0.02501041,  0.05762934, -0.26270828, -0.8297376,  0.13903582,
-                  0.30412629,  0.79824799,  0.12842464, -0.64139324,  0.16469972,
-                  -0.08669609,  0.55955994, -0.16742738, -0.03153928, -0.02245264,
-                  -0.02357809,  0.02061746,  0.02320515,  0.00869796, -0.1655257,
-                  -0.07094092, -0.1663706, -0.10953037,  0.11675739,  0.20495811,
-                  0.10592803,  0.14583197, -0.31755996,  0.13645983,  0.28833047,
-                  0.06303538,  0.48629287,  0.23359743, -0.02812484,  0.23948504]], 'f')
+mean = np.array([[
+    0.90365213, -0.00383353,  0.03301106,  3.14986515, -0.01883755,
+    0.16895422, -0.15615709, -0.0058559,  0.07191881, -0.18924442,
+    -0.04396844, -0.05114707,  0.24385466,  0.00881136,  0.02384637,
+    0.2066803, -0.10190887, -0.03373535,  0.27340922,  0.00637481,
+    0.07408072, -0.03409823, -0.00971786,  0.03841642,  0.0191336,
+    0.10812955, -0.06782207, -0.08026548, -0.18373352,  0.16556455,
+    0.03735897, -0.02497507,  0.02688527, -0.18802814,  0.17772846,
+    0.13135587,  0.01438429,  0.15891947, -0.2279436, -0.07497088,
+    0.05169746,  0.08784129,  0.02147929,  0.02320284, -0.42375749,
+    -0.04963749,  0.08627309,  0.47963148,  0.26528436, -0.1028522,
+    -0.02501041,  0.05762934, -0.26270828, -0.8297376,  0.13903582,
+    0.30412629,  0.79824799,  0.12842464, -0.64139324,  0.16469972,
+    -0.08669609,  0.55955994, -0.16742738, -0.03153928, -0.02245264,
+    -0.02357809,  0.02061746,  0.02320515,  0.00869796, -0.1655257,
+    -0.07094092, -0.1663706, -0.10953037,  0.11675739,  0.20495811,
+    0.10592803,  0.14583197, -0.31755996,  0.13645983,  0.28833047,
+    0.06303538,  0.48629287,  0.23359743, -0.02812484,  0.23948504]], 'f')
 
 
 class HumanMeshRecovery(ConnectionBasedTransport):
@@ -143,7 +144,8 @@ class HumanMeshRecovery(ConnectionBasedTransport):
         self._load_model()
 
         self.br = cv_bridge.CvBridge()
-        self.pose_pub = self.advertise('~output/pose', PeoplePoseArray, queue_size=1)
+        self.pose_pub = self.advertise(
+            '~output/pose', PeoplePoseArray, queue_size=1)
 
     def _load_model(self):
         smpl_model_file = rospy.get_param('~smpl_model_file')
@@ -160,6 +162,8 @@ class HumanMeshRecovery(ConnectionBasedTransport):
             self.smpl.to_gpu()
             self.encoder_fc3_model.to_gpu()
             self.resnet_v2.to_gpu()
+        chainer.global_config.train = False
+        chainer.global_config.enable_backprop = False
 
     def subscribe(self):
         if self.with_people_pose:
@@ -167,7 +171,8 @@ class HumanMeshRecovery(ConnectionBasedTransport):
             sub_img = message_filters.Subscriber(
                 '~input', Image, queue_size=queue_size, buff_size=2**24)
             sub_pose = message_filters.Subscriber(
-                '~input/pose', PeoplePoseArray, queue_size=queue_size, buff_size=2**24)
+                '~input/pose', PeoplePoseArray,
+                queue_size=queue_size, buff_size=2**24)
             self.subs = [sub_img, sub_pose]
 
             if rospy.get_param('~approximate_sync', False):
@@ -243,26 +248,23 @@ class HumanMeshRecovery(ConnectionBasedTransport):
     def pose_estimate(self, imgs):
         batch_size = imgs.shape[0]
         imgs = Variable(self.resnet_v2.xp.array(imgs, 'f'))
-        with chainer.using_config('train', False), \
-                chainer.using_config('enable_backprop', False):
-            img_feat = self.resnet_v2(imgs).reshape(batch_size, -1)
+        img_feat = self.resnet_v2(imgs).reshape(batch_size, -1)
 
-        theta_prev = F.tile(Variable(self.encoder_fc3_model.xp.array(mean, 'f')),
-                            (batch_size, 1))
+        theta_prev = F.tile(
+            Variable(self.encoder_fc3_model.xp.array(mean, 'f')),
+            (batch_size, 1))
         num_cam = 3
         num_theta = 72
         for i in range(self.num_stage):
             state = F.concat([img_feat, theta_prev], axis=1)
-            with chainer.using_config('train', False), chainer.using_config('enable_backprop', False):
-                delta_theta = self.encoder_fc3_model(state)
+            delta_theta = self.encoder_fc3_model(state)
             theta_here = theta_prev + delta_theta
             # cam = N x 3, pose N x self.num_theta, shape: N x 10
             cams = theta_here[:, :num_cam]
             poses = theta_here[:, num_cam:(num_cam + num_theta)]
             shapes = theta_here[:, (num_cam + num_theta):]
 
-            with chainer.using_config('train', False), chainer.using_config('enable_backprop', False):
-                verts, Js, Rs, A = self.smpl(shapes, poses)
+            verts, Js, Rs, A = self.smpl(shapes, poses)
             # Project to 2D!
             # pred_kp = batch_orth_proj_idrot(
             #     Js, cams, name='proj_2d_stage%d' % i)

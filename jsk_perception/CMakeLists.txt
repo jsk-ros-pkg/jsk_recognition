@@ -356,12 +356,8 @@ install(TARGETS
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-install(DIRECTORY node_scripts/ scripts/
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-  USE_SOURCE_PERMISSIONS
-)
 
-install(DIRECTORY config euslisp launch plugins sample template test
+install(DIRECTORY config euslisp launch node_scripts plugins sample scripts template test
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   USE_SOURCE_PERMISSIONS
 )

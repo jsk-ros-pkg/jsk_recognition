@@ -113,10 +113,7 @@ catkin_package(
 # recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
 # Be careful that 'launch' and 'launch/' are different: the former is directory
 # and the latter is each content.
-install(DIRECTORY scripts/
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
-install(DIRECTORY sample
+install(DIRECTORY sample scripts
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  USE_SOURCE_PERMISSIONS
 )

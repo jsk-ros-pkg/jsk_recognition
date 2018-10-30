@@ -48,9 +48,13 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 target_link_libraries(resized_image_transport ${catkin_LIBRARIES} ${OpenCV_LIBS})
 add_dependencies(resized_image_transport ${PROJECT_NAME}_gencfg)
 
-# Install header files directly into ${CATKIN_PACKAGE_INCLUDE_DESTINATION}, and
-# executable programs directly into ${CATKIN_PACKAGE_BIN_DESTINATION}.
-# However, other directories like 'launch' or 'sample' must be installed
+# From https://github.com/jsk-ros-pkg/jsk_recognition/pull/2345
+# Install header files directly into ${CATKIN_PACKAGE_INCLUDE_DESTINATION}.
+# If the package has setup.py and modules under src/${PROJECT_NAME}/,
+# install python executables directly into ${CATKIN_PACKAGE_BIN_DESTINATION}.
+# However, if it doesn't have setup.py, directories including python executables
+# should be installed recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+# Also, other directories like 'launch' or 'sample' must be installed
 # recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
 # Be careful that 'launch' and 'launch/' are different: the former is directory
 # and the latter is each content.

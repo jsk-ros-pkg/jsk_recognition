@@ -67,7 +67,16 @@ add_definitions("-O2 -g")
 include_directories(include ${catkin_INCLUDE_DIRS})
 target_link_libraries(lib_${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
-
+# From https://github.com/jsk-ros-pkg/jsk_recognition/pull/2345
+# Install header files directly into ${CATKIN_PACKAGE_INCLUDE_DESTINATION}.
+# If the package has setup.py and modules under src/${PROJECT_NAME}/,
+# install python executables directly into ${CATKIN_PACKAGE_BIN_DESTINATION}.
+# However, if it doesn't have setup.py, directories including python executables
+# should be installed recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+# Also, other directories like 'launch' or 'sample' must be installed
+# recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+# Be careful that 'launch' and 'launch/' are different: the former is directory
+# and the latter is each content.
 install(TARGETS lib_${PROJECT_NAME} ${jsk_exec} ${nodelet_executables}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
@@ -75,10 +84,15 @@ install(TARGETS lib_${PROJECT_NAME} ${jsk_exec} ${nodelet_executables}
 )
 
 install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
 
-install(FILES nodelet.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-
+install(FILES nodelet.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+install(DIRECTORY sample test
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
 
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)

@@ -449,8 +449,19 @@ catkin_package(
 # download and install sample data
 add_custom_target(${PROJECT_NAME}_install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
 
+# From https://github.com/jsk-ros-pkg/jsk_recognition/pull/2345
+# Install header files directly into ${CATKIN_PACKAGE_INCLUDE_DESTINATION}.
+# If the package has setup.py and modules under src/${PROJECT_NAME}/,
+# install python executables directly into ${CATKIN_PACKAGE_BIN_DESTINATION}.
+# However, if it doesn't have setup.py, directories including python executables
+# should be installed recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+# Also, other directories like 'launch' or 'sample' must be installed
+# recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+# Be careful that 'launch' and 'launch/' are different: the former is directory
+# and the latter is each content.
 install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
 install(TARGETS jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit
   ${jsk_pcl_nodelet_executables}
   bench_ransac_plane_estimation
@@ -459,19 +470,13 @@ install(TARGETS jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit
   sample_cube_nearest_point
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
-install(DIRECTORY scripts/
-        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-        USE_SOURCE_PERMISSIONS
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
-install(DIRECTORY
-  config
-  euslisp
-  launch
-  sample
-  plugins
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+install(DIRECTORY config euslisp launch plugins sample scripts test
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  USE_SOURCE_PERMISSIONS
+)
 
 if (CATKIN_ENABLE_TESTING)
   find_package(roslaunch REQUIRED)

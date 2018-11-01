@@ -65,10 +65,14 @@ namespace jsk_pcl_ros
     
     virtual void filter(const sensor_msgs::PointCloud2::ConstPtr& msg);
 
-    virtual pcl::PointIndices::Ptr filterIndices(const sensor_msgs::PointCloud2::ConstPtr& msg);
+    virtual pcl::PointIndices::Ptr filterIndices(const pcl::PointCloud<PointT>::Ptr& pc);
     
     virtual void updateDiagnostic(
       diagnostic_updater::DiagnosticStatusWrapper &stat);
+
+    bool isPointNaN(const PointT& p) {
+      return (!pcl_isfinite(p.x) || !pcl_isfinite(p.y) || !pcl_isfinite(p.z));
+    }
 
     ////////////////////////////////////////////////////////
     // ROS variables
@@ -96,6 +100,7 @@ namespace jsk_pcl_ros
     int max_index_;
     bool filter_limit_negative_;
     bool keep_organized_;
+    bool remove_nan_;
   private:
     
   };

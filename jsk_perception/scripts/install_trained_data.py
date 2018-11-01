@@ -132,27 +132,23 @@ def main():
     )
 
     # node_scripts/people_pose_estimation_2d.py
-    path = 'trained_data/pose_estimation_2d_chainermodel.pkl'
     if _chainer_available:
         download_data(
             pkg_name=PKG,
-            path=path,
+            path='trained_data/pose_estimation_2d_chainermodel.pkl',
             url='https://drive.google.com/'
             'uc?id=1la-B-I1Dh00BRkJuNC3TAXju6p3ccmmb',
             md5='c0683094aa42eab1b9424e05112190c5',
         )
 
-    path = 'trained_data/hand_ssd300_chainermodel.npz'
-    if _chainer_available:
         download_data(
             pkg_name=PKG,
-            path=path,
+            path='trained_data/hand_ssd300_chainermodel.npz',
             url='https://drive.google.com/'
             'uc?id=1rJ_ZYY-AjKqvlJGLF6RJ_I_vuaOp3lXg',
             md5='ba1226f8dd816514e610a746278be02e',
         )
-    # node_scripts/human_mesh_recovery.py
-    if _chainer_available:
+     # node_scripts/human_mesh_recovery.py
         download_data(
             pkg_name=PKG,
             path='trained_data/hmr_smpl.npz',

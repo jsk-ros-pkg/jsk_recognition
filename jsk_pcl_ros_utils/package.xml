@@ -74,6 +74,8 @@
   <run_depend>std_srvs</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>image_transport</run_depend>
+  <run_depend>compressed_image_transport</run_depend>
+  <run_depend>compressed_depth_image_transport</run_depend>
   <run_depend>image_geometry</run_depend>
   <run_depend>image_view</run_depend>
   <run_depend>image_view2</run_depend>

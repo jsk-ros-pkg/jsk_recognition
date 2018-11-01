@@ -1,0 +1,32 @@
+<launch>
+
+  <arg name="test_mode" default="false" />
+
+  <arg name="gui" default="true" unless="$(arg test_mode)" />
+  <arg name="gui" default="false" if="$(arg test_mode)" />
+  <arg name="gpu" default="0" unless="$(arg test_mode)"/>
+  <arg name="gpu" default="-1" if="$(arg test_mode)" />
+  <arg name="input_image" default="/camera/rgb/image_rect_color" />
+
+  <include file="$(find jsk_perception)/sample/include/play_rosbag_people.xml" />
+
+  <node name="ssd_object_detector"
+        pkg="jsk_perception" type="ssd_object_detector.py"
+        output="screen" >
+    <remap from="~input" to="$(arg input_image)" />
+    <rosparam subst_value="true">
+      gpu: $(arg gpu)
+      label_names: [hands]
+    </rosparam>
+    <param name="model_path"
+           value="$(find jsk_perception)/trained_data/hand_ssd300_chainermodel.npz"
+           unless="$(arg test_mode)" />
+  </node>
+
+  <node name="image_view"
+        pkg="image_view" type="image_view"
+        if="$(arg gui)">
+    <remap from="image" to="ssd_object_detector/output/image" />
+  </node>
+
+</launch>

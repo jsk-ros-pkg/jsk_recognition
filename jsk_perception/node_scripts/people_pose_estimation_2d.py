@@ -96,6 +96,9 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         self.pad_value = rospy.get_param('~pad_value', 128)
         self.thre1 = rospy.get_param('~thre1', 0.1)
         self.thre2 = rospy.get_param('~thre2', 0.05)
+        self.width = rospy.get_param('~width', None)
+        self.height = rospy.get_param('~height', None)
+        self.check_wh()
         self.gpu = rospy.get_param('~gpu', -1)  # -1 is cpu mode
         self.with_depth = rospy.get_param('~with_depth', False)
         self._load_model()
@@ -104,6 +107,12 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         self.sub_info = None
         if self.with_depth is True:
             self.pose_2d_pub = self.advertise('~pose_2d', PeoplePoseArray, queue_size=1)
+
+    def check_wh(self):
+        if (self.width is None) != (self.height is None):
+            rospy.logwarn('width and height should be specified, but '
+                          'specified only {}'
+                          .format('height' if self.height else 'width'))
 
     @property
     def visualize(self):
@@ -263,6 +272,10 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
 
     def _pose_estimate_chainer_backend(self, bgr_img):
         xp = cuda.cupy if self.gpu != -1 else np
+
+        org_h, org_w, _ = bgr_img.shape
+        if not (self.width is None or self.height is None):
+            bgr_img = cv2.resize(bgr_img, (self.width, self.height))
 
         heatmap_avg = xp.zeros((bgr_img.shape[0], bgr_img.shape[1], 19),
                                dtype=np.float32)
@@ -490,6 +503,8 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
                 bgr_img, joint_cands_indices, all_peaks, candidate)
         else:
             result_img = bgr_img
+        if not (self.width is None or self.height is None):
+            result_img = cv2.resize(result_img, (org_w, org_h))
 
         return result_img, self._extract_joint_position(joint_cands_indices, candidate)
 

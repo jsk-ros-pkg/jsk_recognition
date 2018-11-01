@@ -45,6 +45,15 @@ def main():
         md5='97eb737f71a33bfc23ec573f1d351bd8',
         quiet=quiet,
     )
+
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/apc2015_sample_bof_sklearn==0.20.0.pkl.gz',
+        url='https://drive.google.com/uc?id=1VRwQxbjtSI4I1cjIqUFaemiUTHE4wlDj',
+        md5='001dbd0767369daff0cafb8fc7b39e92',
+        quiet=quiet,
+    )
+
     download_data(
         pkg_name=PKG,
         path='trained_data/apc2015_sample_clf.pkl.gz',
@@ -131,6 +140,16 @@ def main():
             url='https://drive.google.com/'
             'uc?id=1la-B-I1Dh00BRkJuNC3TAXju6p3ccmmb',
             md5='c0683094aa42eab1b9424e05112190c5',
+        )
+
+    path = 'trained_data/hand_ssd300_chainermodel.npz'
+    if _chainer_available:
+        download_data(
+            pkg_name=PKG,
+            path=path,
+            url='https://drive.google.com/'
+            'uc?id=1rJ_ZYY-AjKqvlJGLF6RJ_I_vuaOp3lXg',
+            md5='ba1226f8dd816514e610a746278be02e',
         )
 
     # node_scripts/feature_based_object_recognition.py

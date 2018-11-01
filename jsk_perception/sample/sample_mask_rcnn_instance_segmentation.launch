@@ -8,7 +8,7 @@
         clear_params="true">
     <rosparam subst_value="true">
       file_name: $(find jsk_perception)/sample/object_detection_example_1.jpg
-      fps: 30
+      rate: 30
     </rosparam>
   </node>
   <arg name="INPUT_IMAGE" value="image_publisher/output" />

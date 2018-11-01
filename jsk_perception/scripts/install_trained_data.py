@@ -164,6 +164,7 @@ def main():
             url='https://drive.google.com/'
             'uc?id=19nGjVyIaXMhILS32J4whQgApY_qKYURj',
             md5='33d80575b507b66c975f350f2f24ee91',
+        )
 
     path = 'trained_data/hand_ssd300_chainermodel.npz'
     if _chainer_available:

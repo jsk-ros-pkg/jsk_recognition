@@ -181,6 +181,8 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
                 with chainer.cuda.get_device_from_id(self.hand_net._device_id):
                     k = chainer.cuda.to_gpu(k)
                 self.hand_gaussian_kernel = k
+            chainer.global_config.train = False
+            chainer.global_config.enable_backprop = False
 
 
     def subscribe(self):

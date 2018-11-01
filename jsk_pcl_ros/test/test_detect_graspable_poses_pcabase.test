@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_detect_graspable_poses_pcabase.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_detect_graspable_poses_pcabase"
+        name="test_detect_graspable_poses_pcabase"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="360" retry="3">
+    <rosparam>
+      topic_0: /detect_graspable_poses_pcabase/output/can_grasp_poses
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

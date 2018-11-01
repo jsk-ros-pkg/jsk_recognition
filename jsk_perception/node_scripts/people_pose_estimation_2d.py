@@ -355,8 +355,9 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
                 img, self.stride, self.pad_value)
             x = np.transpose(np.float32(
                 padded_img[:, :, :, np.newaxis]), (3, 2, 0, 1)) / 256 - 0.5
-            with chainer.cuda.get_device_from_id(device_id):
-                x = chainer.cuda.to_gpu(x)
+            if self.gpu >= 0:
+                with chainer.cuda.get_device_from_id(device_id):
+                    x = chainer.cuda.to_gpu(x)
             x = chainer.Variable(x)
             pafs, heatmaps = self.pose_net(x)
             paf = pafs[-1]
@@ -444,8 +445,9 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
 
         vec = np.vstack(target_candidates_B)[
             :, :2] - np.vstack(target_candidates_A)[:, :2]
-        with chainer.cuda.get_device_from_id(device_id):
-            vec = chainer.cuda.to_gpu(vec)
+        if self.gpu >= 0:
+            with chainer.cuda.get_device_from_id(device_id):
+                vec = chainer.cuda.to_gpu(vec)
         norm = xp.sqrt(xp.sum(vec ** 2, axis=1)) + eps
         vec = vec / norm[:, None]
         start_end = zip(np.round(np.mgrid[np.vstack(target_candidates_A)[:, 1].reshape(-1, 1):np.vstack(target_candidates_B)[:, 1].reshape(-1, 1):(mid_num * 1j)]).astype(np.int32),
@@ -728,8 +730,9 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         x = x.transpose(0, 3, 1, 2)
         x = x / 256 - 0.5
 
-        with chainer.cuda.get_device_from_id(device_id):
-            x = chainer.cuda.to_gpu(x)
+        if self.gpu >= 0:
+            with chainer.cuda.get_device_from_id(device_id):
+                x = chainer.cuda.to_gpu(x)
         x = chainer.Variable(x)
 
         heatmaps = self.hand_net(x)

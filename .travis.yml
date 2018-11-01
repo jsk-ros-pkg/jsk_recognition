@@ -23,6 +23,7 @@ env:
     - ROS_DISTRO=indigo BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_opencv3.bash' BUILD_PKGS='checkerboard_detector imagesift jsk_perception jsk_recognition_utils resized_image_transport'
     - ROS_DISTRO=indigo BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_pcl1.8.bash' BUILD_PKGS='jsk_pcl_ros_utils jsk_pcl_ros' DOCKER_IMAGE_JENKINS='ros-indigo-pcl1.8'
     - ROS_DISTRO=kinetic
+    - ROS_DISTRO=melodic
 script:
   - source .travis/travis.sh
   - (cd $TRAVIS_BUILD_DIR/doc && source setup.sh && make html)

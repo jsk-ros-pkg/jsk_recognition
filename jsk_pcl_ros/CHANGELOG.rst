@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.6 (2018-11-02)
+------------------
 * [octomap_server_contact] add callback function to insert proximity sensor pointcloud (`#2328 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2328>`_)
   * [octomap_server_contact] add rosparam to select using vertex in insertContactSensor()
   * [octomap_server_contact] add callback function to insert proximity sensor pointcloud

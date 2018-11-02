@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.6 (2018-11-02)
+------------------
 * Add hand pose detection (`#2324 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2324>`_)
   * [jsk_perception/people_pose_estimation.py] Fixed for cpu inference
   * [jsk_perception/people_pose_estimation.py] Diable train and enable_backprop

@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.6 (2018-11-02)
+------------------
 * [jsk_pcl_ros_utils/cluster_point_indices_to_point_indices] Concatenate all indices in case of index==-1 (`#2330 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2330>`_)
 * [jsk_pcl_ros_utils/package.xml] Add dependencies for compressed_image/depth_image_transport to run sample launch files (`#2341 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2341>`_)
 * Install 'sample', 'scripts', 'test' into SHARE_DESTINATION (`#2345 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2345>`_)

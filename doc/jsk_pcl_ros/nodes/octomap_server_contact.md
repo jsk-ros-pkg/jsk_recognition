@@ -16,6 +16,10 @@ You can pass the output of vision and contact sensors.
 
    input pointcloud.
 
+* `proximity_in` (`sensor_msgs/PointCloud2`)
+
+   input pointcloud from proximity sensors.
+
 ## Advertising Services
 * `octomap_binary` (`octomap_msgs/GetOctomap`)
 
@@ -74,6 +78,9 @@ You can pass the output of vision and contact sensors.
 * `~color_unknown/[r/g/b/a]` (float)
 
     Color for visualizing unknown cells.
+* `~color_frontier/[r/g/b/a]` (float)
+
+     Color for visualizing frontier cells.
 * `~sensor_model/max_range` (float, default: `-1 (unlimited)`)
 
     Same with original OctomapServer.
@@ -119,4 +126,8 @@ Plug the depth sensor which can be launched by openni.launch and run the below c
 
 ``
 roslaunch jsk_pcl_ros octomap_server_contact.launch
+``
+If you want to see how frontier grids works, run the below command.
+``
+roslaunch jsk_pcl_ros sample_octomap_contact.launch
 ``

@@ -45,7 +45,7 @@
     <param name="publish_frontier_space" value="true" />
     <param name="latch" value="false" />
     <!-- data source to integrate (PointCloud2) -->
-    <remap from="/cloud_in" to="/head_camera/depth_registered/points" />
+    <remap from="cloud_in" to="/head_camera/depth_registered/points" />
     <!-- octomap region -->
     <param name="occupancy_min_x" value="0.8" />
     <param name="occupancy_max_x" value="1.3" />

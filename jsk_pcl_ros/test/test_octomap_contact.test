@@ -9,12 +9,22 @@
         pkg="jsk_tools" type="test_topic_published.py"
         time-limit="30" retry="3">
     <rosparam>
-      topic_0: /unknown_cells_vis_array
+      topic_0: /occupied_cells_vis_array
       timeout_0: 30
-      topic_1: /frontier_cells_vis_array
+      topic_1: /free_cells_vis_array
       timeout_1: 30
-      topic_2: /occupied_cells_vis_array
+      topic_2: /unknown_cells_vis_array
       timeout_2: 30
+      topic_3: /frontier_cells_vis_array
+      timeout_3: 30
+      topic_4: /octomap_unknown_point_cloud_centers
+      timeout_4: 30
+      topic_5: /octomap_frontier_point_cloud_centers
+      timeout_5: 30
+      topic_6: /octomap_full
+      timeout_6: 30
+      topic_7: /octomap_binary
+      timeout_7: 30
     </rosparam>
   </test>
 

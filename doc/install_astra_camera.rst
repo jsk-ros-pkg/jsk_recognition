@@ -78,7 +78,7 @@ Then, edit ``/usr/lib/pkgconfig/libopenni2.pc`` to be like below::
 
 .. code-block:: bash
 
-  cd ~/CATKIN_WS/src
+  cd <your catkin workspace>/src
   # if you do not initialize wstools
   # wstool init .
   wstool set ros-drivers/openni2_camera https://github.com/ros-drivers/openni2_camera.git --git -v indigo-devel -y -u
@@ -87,7 +87,7 @@ Then, edit ``/usr/lib/pkgconfig/libopenni2.pc`` to be like below::
   source /opt/ros/$ROS_DISTRO/setup.bash
   catkin bt
 
-  source ~/CATKIN_WS/devel/setup.bash
+  source <your catkin workspace>/devel/setup.bash
   roslaunch openni2_launch openni2.launch
 
 

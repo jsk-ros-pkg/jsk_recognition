@@ -2,6 +2,12 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.6 (2018-11-02)
+------------------
+* Fix Cmake indent (`#2345 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2345>`_)
+* Fix warnings: gencpp -> generate_messsage_cpp (`#2296 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2296>`_)
+* Contributors: Kentaro Wada, Yuto Uchimi
+
 1.2.5 (2018-04-09)
 ------------------
 

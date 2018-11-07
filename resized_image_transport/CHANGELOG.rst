@@ -2,6 +2,15 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.6 (2018-11-02)
+------------------
+* Call USE_SOURCE_PERMISSIONS before PATTERN(`#2345 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2345>`_)
+* [resized_image_transport] Changed diagnostic error level (`#2312 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2312>`_)
+  * add version_gte for jsk_topic_tools
+
+* fix for jsk-ros-pkg/jsk_common/pull/1586 (`#2311 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2311>`_)
+* Contributors: Yuki Furuta, Yuto Uchimi, Iori Yanokura
+
 1.2.5 (2018-04-09)
 ------------------
 

@@ -2,6 +2,95 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.6 (2018-11-02)
+------------------
+* [octomap_server_contact] add callback function to insert proximity sensor pointcloud (`#2328 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2328>`_)
+  * [octomap_server_contact] add rosparam to select using vertex in insertContactSensor()
+  * [octomap_server_contact] add callback function to insert proximity sensor pointcloud
+  * [octomap_server_contact] add rosparam to select publishing unknown marker array
+  
+* kinfu.h depends on jsk_rviz_plugins (`#2310 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2310>`_)
+* Add detect_graspable_poses_pcabase.py and its sample (`#2297 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2297>`_)
+  * delete unnecessary try except block    
+  * move rospy.init_node and rospy.spin into the block of if __name_\_ == '__main_\_'
+  * if else is set so that z value of grasp poses' y axies become positive.
+  * delete unncessary import, change variables to snake case, put spaces
+  * modify axis so that a robot can grasp object more naturally
+  * fix a problem that this program does not provide correct axies when x option is selected
+  * add test for detect_graspable_poses_pcabase
+  * files needed to run sample of detect_graspable_poses_pcabase
+  * detect_graspable_poses_pca_base.py produce graspable poses using input point cloud data, hand width, and grasp direction.
+
+* [jsk_pcl_ros/multi_plane_extraction] Initialize viewpoint by zeros to avoid flip of surface normal direction (`#2343 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2343>`_)
+* [jsk_pcl_ros][organized_pass_through] add remove_nan (`#2039 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2039>`_)
+* Install 'scripts' into SHARE_DESTINATION (`#2345 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2345>`_)
+* [jsk_pcl_ros/package.xml] Add checkerborad_detecotr's dependency (`#2319 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2319>`_)
+* [jsk_pcl_ros/cluster_point_indices_decomposer] Modified publishNegativeIndices to make it fast (`#2326 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2326>`_)
+  * [jsk_pcl_ros/cluster_point_indice_decomposer] Monitor num of subscriber and if equal less than 0, return.
+  * [jsk_pcl_ros/cluster_point_indice_decomposer] Make publishNegativeIndices fast by fixing algorithm
+
+* [jsk_perception] Retrain bof data for sklearn==0.2.0 version and modified jsk_pcl_ros/utils's test for kinetic travis (`#2337 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2337>`_)
+  * [jsk_pcl_ros/test_pointcloud_screenpoint.test] Check a topic published by using jsk_tools/test_topic_published.py
+  * [jsk_pcl_ros/color_histogram.test] Check topics published by using jsk_tools/test_topic_published.py
+  * [jsk_pcl_ros/color_histogram.test] Refactored rosbag play by using common file
+
+* [jsk_pcl_ros] Delete subclass's updateDiagnostic method (`#2323 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2323>`_)
+  * [jsk_pcl_ros] Add diagnostics update
+
+* [jsk_pcl_ros/openni2_remote.launch] Add use_warn option (`#2322 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2322>`_)
+  * [jsk_pcl_ros/openni2_remote.launch] Add use_warn option
+  * [jsk_pcl_ros/openni2_remote.launch] Modified use_warn false
+  * [jsk_pcl_ros/openni2_remote.launch] Add use_warn option
+
+* Fix typos (`#2313 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2313>`_)
+  * Fix typo in cfg of OrganizedMultiPlaneSegmentation
+
+* [jsk_pcl_ros/package.xml] Delete duplication of cv_bridge (`#2318 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2318>`_)
+  * [jsk_pcl_ros/package.xml] Add checkerborad_detecotr's dependency
+  * [jsk_pcl_ros/package.xml] Delete duplication of cv_bridge
+
+* fix for jsk-ros-pkg/jsk_common/pull/1586 (`#2311 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2311>`_)
+  * to avoid add_custom_target cannot create target install_sample_data because  another target with the same name already exists errors
+
+* Use diagnostic nodelet for EuclideanClustering and other nodelets (`#2301 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2301>`_)
+
+* [jsk_pcl_ros/openni2_remote.launch] Modified namespace (`#2302 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2302>`_)
+  * [jsk_pcl_ros/openni2_remote] Add depth args
+  * [jsk_pcl_ros/openni2_remote] Fixed rgb_frame_id because this not changed
+  * [jsk_pcl_ros/openni2_remote] Modified rgb namespace
+  * [jsk_pcl_ros/openni2_remote] Changed that you can change the camera source
+
+* [jsk_pcl_ros] Modified openni2_remote.launch to change camera namespace (`#2299 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2299>`_)
+  * [jsk_pcl_ros] Modified openni2_remote.launch to change camera namespace
+
+* Fix warnings about <pcl/ros/conversions.h> and printf format (`#2291 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2291>`_)
+  * Fix printf format in tilt_laser_listener_nodelet
+  * Fix warnings about <pcl/ros/conversions.h>
+
+* Describe the hierachy of rosparams of ClusterPointIndicesDecomposer (`#2285 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2285>`_)
+  * cluster_point_indices_decomposer: ROS_XXX -> NODELET_XXX
+  * Show warning for unused rosparams
+
+* jsk_pcl_ros: primitive_shape_classifier: fix typo (`#2283 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2283>`_)
+  * jsk_pcl_ros: color_histogram_filter: fix typo
+  * jsk_pcl_ros: primitive_shape_classifier: fix typo
+
+* jsk_pcl_ros: support lazy mode for pointcloud_screenpoint nodelet (`#2277 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2277>`_)
+  * jsk_pcl_ros: support lazy mode for pointcloud_screenpoint nodelet
+
+* fix travia and reduce dependency for jsk_pcl_ros (`#2276 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2276>`_)
+  * sort run/build depends
+  * remove unnesessary depends as reported on https://github.com/jsk-ros-pkg/jsk_3rdparty/issues/140, building jsk_pcl_ros on ros buildfarm takes too much time.  This PR cleans dependencies.
+  * add wkentaro to maintainer
+
+* Fix warnings for jsk_pcl_ros package (`#2266 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2266>`_)
+* Fix missing pkg_name in install_sample_data.py (`#2267 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2267>`_)
+* [jsk_pcl_ros/test_extract_indices.cpp] use std::isnan in test_extract_indices (`#2251 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2251>`_)
+  * use std::isnan in test_extract_indices
+  * [jsk_pcl_ros][organized_pass_through] add remove_nan
+
+* Contributors: Kei Okada, Kentaro Wada, Naoya Yamaguchi, Riku Shigematsu, Shingo Kitagawa, Shun Hasegawa, Yuki Furuta, Yuto Uchimi, Iori Yanokura
+
 1.2.5 (2018-04-09)
 ------------------
 * Fix build of jsk_pcl_ros (on Kinetic) (`#2262 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2262>`_)

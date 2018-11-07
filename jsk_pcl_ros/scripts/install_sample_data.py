@@ -30,7 +30,7 @@ def main():
     download_data(
         path='sample/data/2017-06-19-19-34-18_tabletop_coffeecup.tgz',
         url='https://drive.google.com/uc?id=0B5DV6gwLHtyJRTJ0eGdVYk43bEU',
-        md5='d58e894c853fc4485d08547b9fc2b640',
+        md5='58002c60761d192322413f799368ae88',
         extract=True,
     )
 

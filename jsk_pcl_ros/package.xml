@@ -1,6 +1,6 @@
 <package>
   <name>jsk_pcl_ros</name>
-  <version>1.2.5</version>
+  <version>1.2.6</version>
   <description>ROS nodelets for pointcloud perception.</description>
   <maintainer email="youhei@jsk.t.u-tokyo.ac.jp">Youhei Kakiuchi</maintainer>
   <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
@@ -23,6 +23,7 @@
   <build_depend>jsk_data</build_depend>
   <build_depend>jsk_pcl_ros_utils</build_depend>
   <build_depend>jsk_recognition_utils</build_depend>
+  <build_depend>jsk_rviz_plugins</build_depend>
   <build_depend version_gte="2.2.7">jsk_topic_tools</build_depend>
   <build_depend>laser_assembler</build_depend>
   <build_depend>moveit_ros_perception</build_depend>
@@ -48,6 +49,7 @@
   <run_depend>jsk_data</run_depend>
   <run_depend>jsk_footstep_msgs</run_depend>
   <run_depend>jsk_pcl_ros_utils</run_depend>
+  <run_depend>jsk_rviz_plugins</run_depend>
   <run_depend>jsk_recognition_msgs</run_depend>
   <run_depend>jsk_recognition_utils</run_depend>
   <run_depend version_gte="2.2.7">jsk_topic_tools</run_depend>

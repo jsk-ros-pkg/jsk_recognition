@@ -2,6 +2,26 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.6 (2018-11-02)
+------------------
+* Install 'sample' and 'test'into SHARE_DESTINATION (`#2345 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2345>`_)
+* Use diagnostic nodelet for EuclideanClustering and other nodelets (`#2301 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2301>`_)
+  * jsk_pcl_ros: euclidean_clustering: use dianogistc nodelet
+    Use DiagnosticNodelet::updateDiagnostic preferrably
+* Describe the hierachy of rosparams of ClusterPointIndicesDecomposer (`#2285 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2285>`_)
+  * Fix test of add_bounding_box_array The input topics are slow (~1Hz), so slop should be larger (it was 0.1 before).
+
+* Fix for AssertionError in fast_rcnn.py (`#2281 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2281>`_)
+  * Use roi_pooling_2d defined in chainer for fast_rcnn on CPU mode
+
+* Re-enable tests which use chainer inside them (`#2280 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2280>`_)
+  * Looser timeout for test of add_bounding_box_array
+* Node to concatenate BoundingBoxArray (`#2264 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2264>`_)
+  * Doc for add_bounding_box_array.py
+  * Node to concatenate BoundingBoxArray
+  * Move <test> section to the sample launch files
+* Contributors: Yuki Furuta, Kei Okada, Kentaro Wada
+
 1.2.5 (2018-04-09)
 ------------------
 * Fix build of jsk_recognition_utils (on Kinetic) (`#2262 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2262>`_ )

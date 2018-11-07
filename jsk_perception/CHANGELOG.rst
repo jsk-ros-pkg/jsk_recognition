@@ -2,6 +2,95 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.6 (2018-11-02)
+------------------
+* Add hand pose detection (`#2324 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2324>`_)
+  * [jsk_perception/people_pose_estimation.py] Fixed for cpu inference
+  * [jsk_perception/people_pose_estimation.py] Diable train and enable_backprop
+  * [jsk_perception/people_pose_estimation_2d] Add hand width offset
+  * pointit: add handle exception on tf2
+  * pointit: add min threshold
+  * jsk_perception: add pointit
+  * people_pose_estimation_2d: support hand detection
+
+* [jsk_perception] Add human mesh recovery(estimate people 3d pose from 2d image) (`#2332 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2332>`_)
+  * clean up jsk_perception/scripts/install_trained_data.py around if _chainer_available
+  * [jsk_perception/human_mesh_recovery] Refactor
+  * [jsk_perception/human_mesh_recovery] Add test
+  * [jsk_perception/human_mesh_recovery] Add sample
+  * [jsk_perception/human_mesh_recovery] Add install model file code
+  * [jsk_perception/human_mesh_recovery] Add node
+
+* [jsk_perception/openpose] Add resize image (`#2300 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2300>`_)
+  * [jsk_perception/openpose] Fixed logic
+  * [jsk_perception/openpose] Add warning
+  * [jsk_perception/openpose] Add resize image
+
+* [jsk_perception/ssd_object_detector] Add hand pretrained model (`#2333 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2333>`_)
+
+* Fix install destination (`#2345 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2345>`_)
+  * Install 'node_scripts', 'scripts', 'test' into SHARE_DESTINATION
+
+* [jsk_perception/sample_mask_rcnn] Fixed typo. fps -> rate (`#2353 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2353>`_)
+
+* [jsk_perception/mask_rcnn_instance_segmentation.py] Publish rects and class (`#2350 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2350>`_)
+
+* [jsk_perception/point_pose_extractor.cpp] Correct grammer. 'could not found' -> 'could not find' (`#2349 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2349>`_)
+* [jsk_perception/image_publisher.py] Add fov parameter for publishing valid camera info parameters (`#2340 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2340>`_)
+  * [jsk_perception/image_publisher.py] Add warning when not specified fovx and fovy at the same time
+  * [jsk_perception/sample_image_publisher.launch] Add fov parameter for kinectv2
+  * [jsk_perception/image_publisher.py] Add fov parameter for camera info
+
+* [jsk_perception/sample_bof_object_recognition.launch] Fixed path of trained bof data(`#2337 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2337>`_)
+  * [jsk_perception/install_trained_data.py] Add trained bof data for sklearn==0.20.0
+
+* fix for jsk-ros-pkg/jsk_common/pull/1586 (`#2311 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2311>`_)
+  * to avoid add_custom_target cannot create target install_sample_data because another target with the same name already exists errors
+  
+* Use diagnostic nodelet for EuclideanClustering and other nodelets (`#2301 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2301>`_)
+  * jsk_pcl_ros: euclidean_clustering: use dianogistc nodelet
+    Use DiagnosticNodelet::updateDiagnostic preferrably
+  
+* support SSD512 for ssd_object_detector (`#2305 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2305>`_)
+  * move ssd_train_dataset to scripts
+
+* [jsk_perception/face_pose_estimation] Fixed orientation of face pose (`#2304 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2304>`_)
+  * [jsk_perception/face] Modified rviz
+  * [jsk_perception/face] Add debug image of face pose
+  * [jsk_perception/face] Fixed orientation of publish pose
+  * [jsk_perception/face] Fixed pretrained model loader
+
+* Enable Openpose Node for chainer 4.0.0 (`#2295 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2295>`_)
+  * [jsk_perception/scripts] Modified url
+  * [jsk_perception/scripts] Modified format
+  * [jsk_perception/scripts] Modified openpose's weight
+  * [jsk_perception] Modified openpose
+
+* [jsk_perception] install config dir (`#2294 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2294>`_)
+* Update chainer_mask_rcnn to 0.3.0 (`#2293 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2293>`_
+* Fix for AssertionError in fast_rcnn.py (`#2281 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2281>`_)
+  * Ignore whether cuda is available or not in fast_rcnn.py
+  * Allow ~gpu as rosparam in fast_rcnn
+  * Fix for AssertionError in fast_rcnn.py
+
+* Re-enable tests which use chainer inside them (`#2280 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2280>`_)
+  * Re-enable all tests which use chainer
+  * Re-enable tests which use chainer inside them
+
+* Set required=true for samples to fast finish in testsMerge pull request (`#2274 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2274>`_)
+* Refactor cmake of jsk_perception (`#2275 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2275>`_)
+  * Apply Eigen -> Eigen3 migration (Eigen also works)  http://wiki.ros.org/jade/Migration
+  * Remove no need libsiftfast dependency
+
+* fix travia and reduce dependency for jsk_pcl_ros (`#2276 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2276>`_)
+  * skip test for `#2272 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2272>`_
+  * Set required=true for samples to fast finish in tests
+    Sometimes the test fails because of unexpected errors.
+    In that case, it is better that the test quickly finish with errors.
+  * skip more tests
+
+* Contributors: Yuki Furuta, Kei Okada, Kentaro Wada, Riku Shigematsu, Shingo Kitagawa, Yuto Uchimi, Iori Yanokura
+
 1.2.5 (2018-04-09)
 ------------------
 * Add MaskRCNNInstanceSegmentation node (`#2257 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2257>`_)

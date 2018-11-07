@@ -2,6 +2,19 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.6 (2018-11-02)
+------------------
+* Install 'sample' and 'test' dir into CATKIN_PACKAGE_SHARE_DESTINATION (`#2345 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2345>`_)
+* fix for jsk-ros-pkg/jsk_common/pull/1586 (`#2311 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2311>`_)
+  * use lib\_ instaed of  for add_library to avoid conflict
+  * add version_gte for jsk_topic_tools
+  * imagesift: fix for jsk-ros-pkg/jsk_common/pull/1586
+* Refactor CMakeLists.txt and package.xml of jsk_perception (`#2279 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2279>`_)
+* Contributors: Fuki Furuta, Kei Okada, Kentaro Wada
+
+1.2.5 (2018-04-09)
+------------------
+
 1.2.4 (2018-01-12)
 ------------------
 

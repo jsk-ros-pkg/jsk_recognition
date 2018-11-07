@@ -188,10 +188,7 @@ namespace jsk_pcl_ros
       stat.add("Maximum Height", max_height_);
       stat.add("Number of Planes", plane_counter_.mean());
     }
-    else {
-      jsk_topic_tools::addDiagnosticErrorSummary(
-        "MultiPlaneExtraction", vital_checker_, stat);
-    }
+    DiagnosticNodelet::updateDiagnostic(stat);
   }
 
   void MultiPlaneExtraction::fillEmptyIndices(
@@ -242,7 +239,7 @@ namespace jsk_pcl_ros
     }
 
     // set viewpoint to determine normal axes of the planes
-    Eigen::Vector3f viewpoint;
+    Eigen::Vector3f viewpoint = Eigen::Vector3f::Zero();
     if (use_sensor_frame_) {
       try {
         tf::StampedTransform transform

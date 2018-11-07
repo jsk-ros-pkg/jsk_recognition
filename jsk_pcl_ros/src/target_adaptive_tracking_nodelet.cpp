@@ -61,6 +61,8 @@ namespace jsk_pcl_ros
 
       this->pub_prob_ = advertise<sensor_msgs::PointCloud2>(
          *pnh_, "/target_adaptive_tracking/output/probability_map", 1);
+
+      onInitPostProcess();
    }
 
    void TargetAdaptiveTracking::subscribe()
@@ -92,18 +94,6 @@ namespace jsk_pcl_ros
       this->sub_obj_cloud_.unsubscribe();
       this->sub_obj_pose_.unsubscribe();
    }
-
-   void TargetAdaptiveTracking::updateDiagnostic(
-       diagnostic_updater::DiagnosticStatusWrapper &stat)
-   {
-       if (vital_checker_->isAlive()) {
-          stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                       "TargetAdaptiveTracking running");
-       } else {
-          jsk_topic_tools::addDiagnosticErrorSummary(
-             "TargetAdaptiveTracking", vital_checker_, stat);
-       }
-    }
 
    void TargetAdaptiveTracking::objInitCallback(
       const sensor_msgs::PointCloud2::ConstPtr &cloud_msg,

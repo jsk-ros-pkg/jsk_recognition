@@ -65,7 +65,7 @@ ENDIF()
 # ------------------------------------------------------------------------------------
 
 # download and install sample data
-add_custom_target(install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
+add_custom_target(${PROJECT_NAME}_install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py --pkg-path ${PROJECT_SOURCE_DIR})
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
@@ -211,21 +211,32 @@ jsk_pcl_util_nodelet(src/pointcloud_to_pcd_nodelet.cpp
 jsk_pcl_util_nodelet(src/marker_array_voxel_to_pointcloud_nodelet.cpp
   "jsk_pcl_utils/MarkerArrayVoxelToPointCloud" "marker_array_voxel_to_pointcloud")
 add_library(jsk_pcl_ros_utils SHARED ${jsk_pcl_util_nodelet_sources})
-add_dependencies(jsk_pcl_ros_utils ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
+add_dependencies(jsk_pcl_ros_utils ${PROJECT_NAME}_gencfg)
 target_link_libraries(jsk_pcl_ros_utils
   ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
 
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 
 catkin_package(
-    DEPENDS pcl
+    DEPENDS PCL
     CATKIN_DEPENDS pcl_ros message_runtime ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_recognition_utils
     INCLUDE_DIRS include
     LIBRARIES jsk_pcl_ros_utils
 )
 
+# From https://github.com/jsk-ros-pkg/jsk_recognition/pull/2345
+# Install header files directly into ${CATKIN_PACKAGE_INCLUDE_DESTINATION}.
+# If the package has setup.py and modules under src/${PROJECT_NAME}/,
+# install python executables directly into ${CATKIN_PACKAGE_BIN_DESTINATION}.
+# However, if it doesn't have setup.py, directories including python executables
+# should be installed recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+# Also, other directories like 'launch' or 'sample' must be installed
+# recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+# Be careful that 'launch' and 'launch/' are different: the former is directory
+# and the latter is each content.
 install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
 install(TARGETS jsk_pcl_ros_utils
   ${jsk_pcl_util_nodelet_executables}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -233,6 +244,10 @@ install(TARGETS jsk_pcl_ros_utils
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 
 install(FILES jsk_pcl_nodelets.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+install(DIRECTORY sample scripts test
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  USE_SOURCE_PERMISSIONS
+)
 
 if (CATKIN_ENABLE_TESTING)
   find_package(roslaunch REQUIRED)
@@ -247,7 +262,8 @@ if (CATKIN_ENABLE_TESTING)
     # unexpected error
     add_rostest(test/point_indices_to_mask_image.test)
     # because of unreleased topic_tools/transform on hydro
-    add_rostest(test/pointcloud_to_pcd.test)
+    # TODO(iory): Fix this. (https://github.com/jsk-ros-pkg/jsk_recognition/issues/2339)
+    # add_rostest(test/pointcloud_to_pcd.test)
     add_rostest(test/pointcloud_to_point_indices.test)
     # because of unreleased jsk_tools/test_topic_published.py on hydro
     add_rostest(test/bounding_box_array_to_bounding_box.test)

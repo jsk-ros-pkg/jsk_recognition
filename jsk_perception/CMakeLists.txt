@@ -45,15 +45,22 @@ find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 find_package(OpenCV REQUIRED)
 message("OPENCV ${OpenCV_VERSION} FOUND")
 
-find_package(Eigen REQUIRED)
+find_package(Eigen3)
+if(EIGEN3_FOUND)
+  set(EIGEN3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
+else()
+  # Fallback to cmake_modules
+  find_package(Eigen REQUIRED)
+  set(EIGEN3_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS})
+endif()
 
+include(FindPkgConfig)
 pkg_check_modules(yaml_cpp yaml-cpp REQUIRED)
 if(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
 ## indigo yaml-cpp : 0.5.0 /  hydro yaml-cpp : 0.3.0
   add_definitions("-DUSE_OLD_YAML")
 endif()
 
-include(FindPkgConfig)
 pkg_check_modules(libcmt REQUIRED libcmt)
 
 # robot_self_filter is released on version greater than indigo
@@ -81,9 +88,9 @@ endif()
 # ------------------------------------------------------------------------------------
 
 # download and install sample data
-add_custom_target(install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
+add_custom_target(${PROJECT_NAME}_install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
 # download and install trained data
-add_custom_target(install_trained_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_trained_data.py)
+add_custom_target(${PROJECT_NAME}_install_trained_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_trained_data.py)
 
 # ------------------------------------------------------------------------------------
 # Catkin setup
@@ -157,7 +164,7 @@ catkin_package(
   sensor_msgs
   std_msgs
   DEPENDS
-  INCLUDE_DIRS include
+  INCLUDE_DIRS include ${EIGEN3_INCLUDE_DIRS}
   LIBRARIES ${PROJECT_NAME} oriented_gradient
 )
 
@@ -172,7 +179,7 @@ if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/slic/slic.cpp)
 endif()
 
 # Build nodelet executables
-include_directories(include ${catkin_INCLUDE_DIRS} ${Eigen_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} slic ${libcmt_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} slic ${libcmt_INCLUDE_DIRS})
 if(robot_self_filter_FOUND)
   include_directories(${robot_self_filter_INCLUDE_DIRS})
 endif()
@@ -300,7 +307,7 @@ target_link_libraries(oriented_gradient ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 jsk_add_node(src/camshiftdemo.cpp camshiftdemo)
 jsk_add_node(src/linemod.cpp linemod)
 jsk_add_node(src/virtual_camera_mono.cpp virtual_camera_mono)
-jsk_add_node(src/point_pose_extractor.cpp point_pose_extractor DEPENDS libsiftfast)
+jsk_add_node(src/point_pose_extractor.cpp point_pose_extractor)
 jsk_add_node(src/white_balance_converter.cpp white_balance_converter)
 jsk_add_node(src/rectangle_detector.cpp rectangle_detector)
 jsk_add_node(src/calc_flow.cpp calc_flow)
@@ -331,6 +338,16 @@ add_custom_target(eusmodel_template ALL DEPENDS
 # Install
 # ------------------------------------------------------------------------------------
 
+# From https://github.com/jsk-ros-pkg/jsk_recognition/pull/2345
+# Install header files directly into ${CATKIN_PACKAGE_INCLUDE_DESTINATION}.
+# If the package has setup.py and modules under src/${PROJECT_NAME}/,
+# install python executables directly into ${CATKIN_PACKAGE_BIN_DESTINATION}.
+# However, if it doesn't have setup.py, directories including python executables
+# should be installed recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+# Also, other directories like 'launch' or 'sample' must be installed
+# recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+# Be careful that 'launch' and 'launch/' are different: the former is directory
+# and the latter is each content.
 install(TARGETS
   # Libraries
   ${PROJECT_NAME}
@@ -343,17 +360,14 @@ install(TARGETS
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-install(DIRECTORY node_scripts/ scripts/
-        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-        USE_SOURCE_PERMISSIONS
-)
 
-install(DIRECTORY sample launch euslisp plugins template
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-        USE_SOURCE_PERMISSIONS
+install(DIRECTORY config euslisp launch node_scripts plugins sample scripts template test
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  USE_SOURCE_PERMISSIONS
 )
 install(DIRECTORY include/${PROJECT_NAME}/
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
 
 # ------------------------------------------------------------------------------------
 # Test
@@ -365,9 +379,9 @@ if(CATKIN_ENABLE_TESTING)
   find_package(roslint REQUIRED)
   find_package(rostest REQUIRED)
   # install test data by a script
-  add_custom_target(install_test_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.py)
+  add_custom_target(${PROJECT_NAME}_install_test_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.py)
   if(TARGET tests)
-    add_dependencies(tests install_test_data)
+    add_dependencies(tests ${PROJECT_NAME}_install_test_data)
   endif()
   set(ROSLINT_CPP_OPTS "--filter=-whitespace/parens,-whitespace/braces")
   roslint_cpp()
@@ -397,6 +411,8 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/concave_hull_mask_image.test)
     jsk_add_rostest(test/convex_hull_mask_image.test)
     jsk_add_rostest(test/draw_rects.test)
+    # TODO(wkentaro): Fix this. (https://github.com/jsk-ros-pkg/jsk_recognition/issues/2258)
+    # jsk_add_rostest(test/draw_classification_result.test)
     jsk_add_rostest(test/extract_image_channel.test)
     jsk_add_rostest(test/face_pose_estimation.test)
     jsk_add_rostest(test/fcn_object_segmentation.test)
@@ -413,6 +429,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/mask_image_to_label.test)
     jsk_add_rostest(test/overlay_image_color_on_mono.test)
     jsk_add_rostest(test/people_pose_estimation_2d.test)
+    jsk_add_rostest(test/human_mesh_recovery.test)
     jsk_add_rostest(test/probability_image_classifier.test)
     jsk_add_rostest(test/rect_array_to_image_marker.test)
     jsk_add_rostest(test/regional_feature_based_object_recognition.test)

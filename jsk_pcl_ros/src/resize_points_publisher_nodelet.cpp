@@ -3,7 +3,7 @@
 
 #include <pcl/pcl_base.h>
 #include <pcl/point_types.h>
-#include <pcl/ros/conversions.h>
+#include <pcl/conversions.h>
 #include <pcl/filters/extract_indices.h>
 
 #include <pcl_ros/pcl_nodelet.h>

@@ -1,6 +1,6 @@
 <package>
   <name>imagesift</name>
-  <version>1.2.4</version>
+  <version>1.2.6</version>
   <description>
     For every image, computes its sift features and send a new message with the image, its intrinsic parameters, and the features.
     Parameters include:
@@ -22,6 +22,7 @@
   <build_depend>posedetection_msgs</build_depend>
   <build_depend>image_transport</build_depend>
   <build_depend>jsk_recognition_utils</build_depend>
+  <build_depend version_gte="2.2.8">jsk_topic_tools</build_depend>
   <build_depend>cv_bridge</build_depend>
   <build_depend>libsiftfast</build_depend>
   <build_depend>nodelet</build_depend>
@@ -34,6 +35,9 @@
   <run_depend>cv_bridge</run_depend>
   <run_depend>libsiftfast</run_depend>
   <run_depend>nodelet</run_depend>
+  <run_depend version_gte="2.2.8">jsk_topic_tools</run_depend>
+
+  <test_depend>rostest</test_depend>
 
   <export>
     <nodelet plugin="${prefix}/nodelet.xml"/>

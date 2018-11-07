@@ -48,6 +48,7 @@ include(UseCython)
 add_subdirectory(python/${PROJECT_NAME})
 
 find_package(OpenCV REQUIRED core imgproc)
+find_package(PCL REQUIRED)
 find_package(PkgConfig)
 pkg_check_modules(yaml_cpp yaml-cpp REQUIRED)
 IF(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
@@ -60,7 +61,7 @@ endif()
 include_directories(
   include ${catkin_INCLUDE_DIRS}
 )
-link_libraries(${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES}  yaml-cpp)
+link_libraries(${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARIES} yaml-cpp)
 
 add_library(jsk_recognition_utils SHARED
   src/grid_index.cpp
@@ -99,19 +100,31 @@ if (CATKIN_ENABLE_TESTING)
   if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
     # FIXME: jsk_tools/test_topic_published.py does not work on hydro travis/jenkins
     # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
-    add_rostest(test/bounding_box_array_publisher.test)
+    add_rostest(sample/sample_add_bounding_box_array.launch ARGS gui:=false)
+    add_rostest(sample/sample_bounding_box_array_publisher.launch ARGS gui:=false)
   endif()
 endif()
 
+# From https://github.com/jsk-ros-pkg/jsk_recognition/pull/2345
+# Install header files directly into ${CATKIN_PACKAGE_INCLUDE_DESTINATION}.
+# If the package has setup.py and modules under src/${PROJECT_NAME}/,
+# install python executables directly into ${CATKIN_PACKAGE_BIN_DESTINATION}.
+# However, if it doesn't have setup.py, directories including python executables
+# should be installed recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+# Also, other directories like 'launch' or 'sample' must be installed
+# recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+# Be careful that 'launch' and 'launch/' are different: the former is directory
+# and the latter is each content.
 install(TARGETS jsk_recognition_utils
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 
 install(DIRECTORY include/${PROJECT_NAME}/
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
 
-install(DIRECTORY node_scripts/
-        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-        USE_SOURCE_PERMISSIONS
+install(DIRECTORY node_scripts sample test
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  USE_SOURCE_PERMISSIONS
 )

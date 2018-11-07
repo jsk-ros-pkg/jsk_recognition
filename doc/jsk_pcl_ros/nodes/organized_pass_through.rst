@@ -37,9 +37,13 @@ Parameter
 
   Maximum index that are included.
 
--  ``keep_organized`` (Boolean, default: ``true``)
+- ``keep_organized`` (``Boolean``, default: ``true``)
 
   Set keep_organized when extract indices.
+
+- ``remove_nan`` (``Boolean``, default: ``false``)
+
+  Remove points with x, y, or z equal to NaN.
 
 - ``filter_limit_negative`` (``Boolean``, default: ``false``)
 

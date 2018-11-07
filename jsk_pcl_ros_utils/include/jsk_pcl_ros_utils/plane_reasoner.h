@@ -95,9 +95,6 @@ namespace jsk_pcl_ros_utils
 
     virtual void configCallback (Config &config, uint32_t level);
 
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
-    
     virtual std::vector<PlaneInfoContainer>
     packInfo(std::vector<pcl::PointIndices::Ptr>& inliers,
              std::vector<pcl::ModelCoefficients::Ptr>& coefficients,

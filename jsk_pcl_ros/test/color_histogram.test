@@ -1,15 +1,7 @@
 <launch>
   <arg name="cloud_input" default="/right_hand_camera/depth_registered/points" />
 
-  <node name="rosbag_play"
-        pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros_utils)/sample/data/2017-02-05-16-11-09_shelf_bin.bag --clock --loop">
-  </node>
-  <include file="$(find openni2_launch)/launch/openni2.launch">
-    <arg name="camera" value="right_hand_camera"/>
-    <arg name="load_driver" value="false"/>
-    <arg name="depth_registration" value="true"/>
-  </include>
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml" />
 
   <node name="indices"
         pkg="jsk_pcl_ros_utils" type="pointcloud_to_cluster_point_indices">
@@ -58,36 +50,19 @@
     </rosparam>
   </node>
 
-  <test test-name="test_color_histogram_filter" pkg="rostest" type="hztest"
-        time-limit="10">
+  <test test-name="test_color_histogram"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="30" retry="3" >
     <rosparam>
-      topic: color_histogram_filter/output
-      hz: 15
-      hzerror: 14
-      test_duration: 5.0
-      wait_time: 5.0
+      topic_0: color_histogram/output
+      timeout_0: 30
+      topic_1: color_histogram_filter/output
+      timeout_1: 30
+      topic_2: color_histogram_classifier/output
+      timeout_2: 30
+      topic_3: color_histogram_visualizer/output
+      timeout_3: 30
     </rosparam>
   </test>
 
-  <test test-name="test_color_histogram_classifier" pkg="rostest" type="hztest"
-        time-limit="10">
-    <rosparam>
-      topic: color_histogram_classifier/output
-      hz: 15
-      hzerror: 14
-      test_duration: 5.0
-      wait_time: 5.0
-    </rosparam>
-  </test>
-
-  <test test-name="test_color_histogram_visualizer" pkg="rostest" type="hztest"
-        time-limit="10">
-    <rosparam>
-      topic: color_histogram_visualizer/output
-      hz: 15
-      hzerror: 14
-      test_duration: 5.0
-      wait_time: 5.0
-    </rosparam>
-  </test>
 </launch>

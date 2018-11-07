@@ -4,7 +4,6 @@
 #    See: https://arxiv.org/abs/1611.08050
 
 import math
-import pickle
 
 import chainer
 import chainer.functions as F
@@ -12,6 +11,7 @@ from chainer import cuda
 import cv2
 import matplotlib
 import numpy as np
+from scipy.ndimage.filters import gaussian_filter
 import pylab as plt  # NOQA
 
 import cv_bridge
@@ -25,6 +25,16 @@ from jsk_recognition_msgs.msg import PeoplePose
 from jsk_recognition_msgs.msg import PeoplePoseArray
 from sensor_msgs.msg import CameraInfo
 from sensor_msgs.msg import Image
+
+from openpose import PoseNet, HandNet
+
+
+def find_joint(limb, jts):
+    jt = [jt for jt in jts if jt['limb'] == limb]
+    if jt:
+        return jt[0]
+    else:
+        return None
 
 
 def padRightDownCorner(img, stride, padValue):
@@ -51,16 +61,29 @@ def padRightDownCorner(img, stride, padValue):
 
 
 class PeoplePoseEstimation2D(ConnectionBasedTransport):
+    # Note: the order of this sequences is important
     # find connection in the specified sequence,
     # center 29 is in the position 15
-    limb_sequence = [[2, 3], [2, 6], [3, 4], [4, 5], [6, 7], [7, 8], [2, 9],
-                     [9, 10], [10, 11], [2, 12], [12, 13], [13, 14], [2, 1],
-                     [1, 15], [15, 17], [1, 16], [16, 18], [3, 17], [6, 18]]
+    limb_sequence = [[ 2,  1], [ 1, 16], [ 1, 15], [ 6, 18], [ 3, 17],
+                     [ 2,  3], [ 2,  6], [ 3,  4], [ 4,  5], [ 6,  7],
+                     [ 7,  8], [ 2,  9], [ 9, 10], [10, 11], [ 2, 12],
+                     [12, 13], [13, 14], [15, 17], [16, 18]]
     # the middle joints heatmap correpondence
-    map_idx = [[31, 32], [39, 40], [33, 34], [35, 36], [41, 42], [43, 44],
-               [19, 20], [21, 22], [23, 24], [25, 26], [27, 28], [29, 30],
-               [47, 48], [49, 50], [53, 54], [51, 52], [55, 56], [37, 38],
-               [45, 46]]
+    map_idx = [[47, 48], [49, 50], [51, 52], [37, 38], [45, 46],
+               [31, 32], [39, 40], [33, 34], [35, 36], [41, 42],
+               [43, 44], [19, 20], [21, 22], [23, 24], [25, 26],
+               [27, 28], [29, 30], [53, 54], [55, 56]]
+    # length ratio from connections
+    limb_length_hand_ratio = [ 0.6,  0.2,  0.2, 0.85, 0.85,
+                               0.6,  0.6, 0.93, 0.65, 0.95,
+                              0.65,  2.2,  1.7,  1.7,  2.2,
+                               1.7,  1.7, 0.25, 0.25]
+    # hand joint connection sequence
+    hand_sequence = [[0, 1],   [1, 2],   [2, 3],   [3, 4],
+                     [0, 5],   [5, 6],   [6, 7],   [7, 8],
+                     [0, 9],   [9, 10],  [10, 11], [11, 12],
+                     [0, 13],  [13, 14], [14, 15], [15, 16],
+                     [0, 17],  [17, 18], [18, 19], [19, 20],]
 
     index2limbname = ["Nose",
                       "Neck",
@@ -82,10 +105,8 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
                       "LEar",
                       "Bkg"]
 
-    colors = [[255, 0, 0], [255, 85, 0], [255, 170, 0], [255, 255, 0], [170, 255, 0], [85, 255, 0], [0, 255, 0],
-              [0, 255, 85], [0, 255, 170], [0, 255, 255], [
-                  0, 170, 255], [0, 85, 255], [0, 0, 255], [85, 0, 255],
-              [170, 0, 255], [255, 0, 255], [255, 0, 170], [255, 0, 85]]
+    index2handname = ["RHand{}".format(i) for i in range(21)] +\
+                     ["LHand{}".format(i) for i in range(21)]
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -95,14 +116,32 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         self.pad_value = rospy.get_param('~pad_value', 128)
         self.thre1 = rospy.get_param('~thre1', 0.1)
         self.thre2 = rospy.get_param('~thre2', 0.05)
+        self.width = rospy.get_param('~width', None)
+        self.height = rospy.get_param('~height', None)
+        self.check_wh()
         self.gpu = rospy.get_param('~gpu', -1)  # -1 is cpu mode
         self.with_depth = rospy.get_param('~with_depth', False)
+        # hand detection
+        self.use_hand = rospy.get_param('~hand/enable', False)
+        self.hand_gaussian_ksize = rospy.get_param('~hand/gaussian_ksize', 17)
+        self.hand_gaussian_sigma = rospy.get_param('~hand/gaussian_sigma', 2.5)
+        self.hand_thre1 = rospy.get_param('~hand/thre1', 20)
+        self.hand_thre2 = rospy.get_param('~hand/thre2', 0.1)
+        self.hand_width_offset = rospy.get_param('~hand/width_offset', 0)
+        # model loading
         self._load_model()
+        # topic advertise
         self.image_pub = self.advertise('~output', Image, queue_size=1)
         self.pose_pub = self.advertise('~pose', PeoplePoseArray, queue_size=1)
         self.sub_info = None
         if self.with_depth is True:
             self.pose_2d_pub = self.advertise('~pose_2d', PeoplePoseArray, queue_size=1)
+
+    def check_wh(self):
+        if (self.width is None) != (self.height is None):
+            rospy.logwarn('width and height should be specified, but '
+                          'specified only {}'
+                          .format('height' if self.height else 'width'))
 
     @property
     def visualize(self):
@@ -116,10 +155,35 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
 
     def _load_chainer_model(self):
         model_file = rospy.get_param('~model_file')
-        self.func = pickle.load(open(model_file, 'rb'))
+        self.pose_net = PoseNet(pretrained_model=model_file)
         rospy.loginfo('Finished loading trained model: {0}'.format(model_file))
-        if self.gpu != -1:
-            self.func.to_gpu(self.gpu)
+        # hand net
+        if self.use_hand:
+            model_file = rospy.get_param('~hand/model_file')
+            self.hand_net = HandNet(pretrained_model=model_file)
+            rospy.loginfo('Finished loading trained hand model: {}'.format(model_file))
+        #
+        if self.gpu >= 0:
+            self.pose_net.to_gpu(self.gpu)
+            if self.use_hand:
+                self.hand_net.to_gpu(self.gpu)
+                # create gaussian kernel
+                ksize = self.hand_gaussian_ksize
+                sigma = self.hand_gaussian_sigma
+                c = ksize // 2
+                k = np.zeros((1, 1, ksize, ksize), dtype=np.float32)
+                for y in range(ksize):
+                    dy = abs(y - c)
+                    for x in range(ksize):
+                        dx = abs(x - c)
+                        e = np.exp(- (dx ** 2 + dy ** 2) / (2 * sigma ** 2))
+                        k[0][0][y][x] = 1 / (sigma ** 2 * 2 * np.pi) * e
+                with chainer.cuda.get_device_from_id(self.hand_net._device_id):
+                    k = chainer.cuda.to_gpu(k)
+                self.hand_gaussian_kernel = k
+            chainer.global_config.train = False
+            chainer.global_config.enable_backprop = False
+
 
     def subscribe(self):
         if self.with_depth:
@@ -186,10 +250,10 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         elif depth_msg.encoding != '32FC1':
             rospy.logerr('Unsupported depth encoding: %s' % depth_msg.encoding)
 
-        pose_estimated_img, people_joint_positions = self.pose_estimate(img)
-        pose_estimated_msg = br.cv2_to_imgmsg(
-            pose_estimated_img.astype(np.uint8), encoding='bgr8')
-        pose_estimated_msg.header = img_msg.header
+        people_joint_positions, all_peaks = self.pose_estimate(img)
+        if self.use_hand:
+            people_joint_positions = self.hand_estimate(
+                img, people_joint_positions)
 
         people_pose_msg = PeoplePoseArray()
         people_pose_msg.header = img_msg.header
@@ -207,7 +271,11 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
             for joint_pos in person_joint_positions:
                 if joint_pos['score'] < 0:
                     continue
-                z = float(depth_img[int(joint_pos['y'])][int(joint_pos['x'])])
+                if 0 <= joint_pos['y'] < depth_img.shape[0] and\
+                   0 <= joint_pos['x'] < depth_img.shape[1]:
+                    z = float(depth_img[int(joint_pos['y'])][int(joint_pos['x'])])
+                else:
+                    continue
                 if np.isnan(z):
                     continue
                 x = (joint_pos['x'] - cx) * z / fx
@@ -220,24 +288,32 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
 
         self.pose_2d_pub.publish(people_pose_2d_msg)
         self.pose_pub.publish(people_pose_msg)
+
         if self.visualize:
-            self.image_pub.publish(pose_estimated_msg)
+            vis_img = self._draw_joints(img, people_joint_positions, all_peaks)
+            vis_msg = br.cv2_to_imgmsg(vis_img, encoding='bgr8')
+            vis_msg.header.stamp = img_msg.header.stamp
+            self.image_pub.publish(vis_msg)
 
     def _cb(self, img_msg):
         br = cv_bridge.CvBridge()
         img = br.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
-        pose_estimated_img, people_joint_positions = self.pose_estimate(img)
-        pose_estimated_msg = br.cv2_to_imgmsg(
-            pose_estimated_img.astype(np.uint8), encoding='bgr8')
-        pose_estimated_msg.header = img_msg.header
+        people_joint_positions, all_peaks = self.pose_estimate(img)
+        if self.use_hand:
+            people_joint_positions = self.hand_estimate(
+                img, people_joint_positions)
 
         people_pose_msg = self._create_2d_people_pose_array_msgs(
             people_joint_positions,
             img_msg.header)
 
         self.pose_pub.publish(people_pose_msg)
+
         if self.visualize:
-            self.image_pub.publish(pose_estimated_msg)
+            vis_img = self._draw_joints(img, people_joint_positions, all_peaks)
+            vis_msg = br.cv2_to_imgmsg(vis_img, encoding='bgr8')
+            vis_msg.header.stamp = img_msg.header.stamp
+            self.image_pub.publish(vis_msg)
 
     def _create_2d_people_pose_array_msgs(self, people_joint_positions, header):
         people_pose_msg = PeoplePoseArray(header=header)
@@ -260,7 +336,12 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         raise ValueError('Unsupported backend: {0}'.format(self.backend))
 
     def _pose_estimate_chainer_backend(self, bgr_img):
-        xp = cuda.cupy if self.gpu != -1 else np
+        xp = self.pose_net.xp
+        device_id = self.pose_net._device_id
+
+        org_h, org_w, _ = bgr_img.shape
+        if not (self.width is None or self.height is None):
+            bgr_img = cv2.resize(bgr_img, (self.width, self.height))
 
         heatmap_avg = xp.zeros((bgr_img.shape[0], bgr_img.shape[1], 19),
                                dtype=np.float32)
@@ -274,24 +355,28 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
                 img, self.stride, self.pad_value)
             x = np.transpose(np.float32(
                 padded_img[:, :, :, np.newaxis]), (3, 2, 0, 1)) / 256 - 0.5
-            if self.gpu != -1:
-                x = chainer.cuda.to_gpu(x)
+            if self.gpu >= 0:
+                with chainer.cuda.get_device_from_id(device_id):
+                    x = chainer.cuda.to_gpu(x)
             x = chainer.Variable(x)
-            y = self.func(inputs={'image': x},
-                          outputs=['Mconv7_stage6_L2', 'Mconv7_stage6_L1'])
+            pafs, heatmaps = self.pose_net(x)
+            paf = pafs[-1]
+            heatmap = heatmaps[-1]
 
             # extract outputs, resize, and remove padding
-            y0 = F.resize_images(
-                y[0], (y[0].data.shape[2] * self.stride, y[0].data.shape[3] * self.stride))
-            heatmap = y0[:, :, :padded_img.shape[0] -
-                         pad[2], :padded_img.shape[1] - pad[3]]
+            heatmap = F.resize_images(
+                heatmap, (heatmap.data.shape[2] * self.stride,
+                          heatmap.data.shape[3] * self.stride))
+            heatmap = heatmap[:, :, :padded_img.shape[0] -
+                              pad[2], :padded_img.shape[1] - pad[3]]
             heatmap = F.resize_images(
                 heatmap, (bgr_img.shape[0], bgr_img.shape[1]))
             heatmap = xp.transpose(xp.squeeze(heatmap.data), (1, 2, 0))
-            y1 = F.resize_images(
-                y[1], (y[1].data.shape[2] * self.stride, y[1].data.shape[3] * self.stride))
-            paf = y1[:, :, :padded_img.shape[0] -
-                     pad[2], :padded_img.shape[1] - pad[3]]
+            paf = F.resize_images(
+                paf, (paf.data.shape[2] * self.stride,
+                      paf.data.shape[3] * self.stride))
+            paf = paf[:, :, :padded_img.shape[0] -
+                      pad[2], :padded_img.shape[1] - pad[3]]
             paf = F.resize_images(paf, (bgr_img.shape[0], bgr_img.shape[1]))
             paf = xp.transpose(xp.squeeze(paf.data), (1, 2, 0))
 
@@ -346,7 +431,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         nBs = np.array([len(candB) for candB in candBs])
         target_indices = np.nonzero(np.logical_and(nAs != 0, nBs != 0))[0]
         if len(target_indices) == 0:
-            return bgr_img, []
+            return [], []
 
         all_candidates_A = [np.repeat(np.array(tmp_candA, dtype=np.float32), nB, axis=0)
                             for tmp_candA, nB in zip(candAs, nBs)]
@@ -360,8 +445,9 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
 
         vec = np.vstack(target_candidates_B)[
             :, :2] - np.vstack(target_candidates_A)[:, :2]
-        if self.gpu != -1:
-            vec = chainer.cuda.to_gpu(vec)
+        if self.gpu >= 0:
+            with chainer.cuda.get_device_from_id(device_id):
+                vec = chainer.cuda.to_gpu(vec)
         norm = xp.sqrt(xp.sum(vec ** 2, axis=1)) + eps
         vec = vec / norm[:, None]
         start_end = zip(np.round(np.mgrid[np.vstack(target_candidates_A)[:, 1].reshape(-1, 1):np.vstack(target_candidates_B)[:, 1].reshape(-1, 1):(mid_num * 1j)]).astype(np.int32),
@@ -384,7 +470,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         indices_bins = np.concatenate(
             [np.zeros(1), indices_bins]).astype(np.int32)
         target_candidate_indices = xp.nonzero(criterion)[0]
-        if self.gpu != -1:
+        if self.gpu >= 0:
             target_candidate_indices = chainer.cuda.to_cpu(
                 target_candidate_indices)
             score_with_dist_prior = chainer.cuda.to_cpu(score_with_dist_prior)
@@ -480,44 +566,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
                 deleteIdx.append(i)
         joint_cands_indices = np.delete(joint_cands_indices, deleteIdx, axis=0)
 
-        if self.visualize:
-            result_img = self._visualize(
-                bgr_img, joint_cands_indices, all_peaks, candidate)
-        else:
-            result_img = bgr_img
-
-        return result_img, self._extract_joint_position(joint_cands_indices, candidate)
-
-    def _visualize(self, img, joint_cands_indices, all_peaks, candidate):
-
-        cmap = matplotlib.cm.get_cmap('hsv')
-        for i in range(len(self.index2limbname)-1):
-            rgba = np.array(cmap(1 - i / 18. - 1. / 36))
-            rgba[0:3] *= 255
-            for j in range(len(all_peaks[i])):
-                cv2.circle(img, (int(all_peaks[i][j][0]), int(
-                    all_peaks[i][j][1])), 4, self.colors[i], thickness=-1)
-
-        stickwidth = 4
-        for i in range(len(self.index2limbname) - 2):
-            for joint_cand_indices in joint_cands_indices:
-                index = joint_cand_indices[np.array(self.limb_sequence[i],
-                                                    dtype=np.int32) - 1]
-                if -1 in index:
-                    continue
-                cur_img = img.copy()
-                Y = candidate[index.astype(int), 0]
-                X = candidate[index.astype(int), 1]
-                mX = np.mean(X)
-                mY = np.mean(Y)
-                length = ((X[0] - X[1]) ** 2 + (Y[0] - Y[1]) ** 2) ** 0.5
-                angle = math.degrees(math.atan2(X[0] - X[1], Y[0] - Y[1]))
-                polygon = cv2.ellipse2Poly((int(mY), int(mX)), (int(
-                    length / 2), stickwidth), int(angle), 0, 360, 1)
-                cv2.fillConvexPoly(cur_img, polygon, self.colors[i])
-                img = cv2.addWeighted(img, 0.4, cur_img, 0.6, 0)
-
-        return img
+        return self._extract_joint_position(joint_cands_indices, candidate), all_peaks
 
     def _extract_joint_position(self, joint_cands_indices, candidate):
         people_joint_positions = []
@@ -539,6 +588,218 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
             people_joint_positions.append(person_joint_positions)
 
         return people_joint_positions
+
+    def _draw_joints(self, img, people_joint_positions, all_peaks):
+        if all_peaks:
+            # keypoints
+            cmap = matplotlib.cm.get_cmap('hsv')
+            n = len(self.index2limbname)-1
+            for i in range(len(self.index2limbname)-1):
+                rgba = np.array(cmap(1. * i / n))
+                color = rgba[:3] * 255
+                for j in range(len(all_peaks[i])):
+                    cv2.circle(img, (int(all_peaks[i][j][0]), int(
+                        all_peaks[i][j][1])), 4, color, thickness=-1)
+
+        # connections
+        stickwidth = 4
+        for joint_positions in people_joint_positions:
+            n = len(self.limb_sequence)
+            for i, conn in enumerate(self.limb_sequence):
+                rgba = np.array(cmap(1. * i / n))
+                color = rgba[:3] * 255
+                j1, j2 = joint_positions[conn[0]-1], joint_positions[conn[1]-1]
+                if j1['score'] < 0 or j2['score'] < 0:
+                    continue
+                cx, cy = int((j1['x'] + j2['x']) / 2.), int((j1['y'] + j2['y']) / 2.)
+                dx, dy = j1['x'] - j2['x'], j1['y'] - j2['y']
+                length = np.linalg.norm([dx, dy])
+                angle = int(np.degrees(np.arctan2(dy, dx)))
+                polygon = cv2.ellipse2Poly((cx, cy), (int(length / 2.), stickwidth),
+                                           angle, 0, 360, 1)
+                top, left = np.min(polygon[:,1]), np.min(polygon[:,0])
+                bottom, right = np.max(polygon[:,1]), np.max(polygon[:,0])
+                roi = img[top:bottom,left:right]
+                roi2 = roi.copy()
+                cv2.fillConvexPoly(roi2, polygon - np.array([left, top]), color)
+                cv2.addWeighted(roi, 0.4, roi2, 0.6, 0.0, dst=roi)
+
+        # for hand
+        if self.use_hand:
+            offset = len(self.limb_sequence)
+            for joint_positions in people_joint_positions:
+                n = len(joint_positions[offset:])
+                for i, jt in enumerate(joint_positions[offset:]):
+                    if jt['score'] < 0.0:
+                        continue
+                    rgba = np.array(cmap(1. * i / n))
+                    color = rgba[:3] * 255
+                    cv2.circle(img, (int(jt['x']), int(jt['y'])),
+                               2, color, thickness=-1)
+
+            for joint_positions in people_joint_positions:
+                offset = len(self.limb_sequence)
+                n = len(self.hand_sequence)
+                for _ in range(2):
+                    # for both hands
+                    for i, conn in enumerate(self.hand_sequence):
+                        rgba = np.array(cmap(1. * i / n))
+                        color = rgba[:3] * 255
+                        j1 = joint_positions[offset + conn[0]]
+                        j2 = joint_positions[offset + conn[1]]
+                        if j1['score'] < 0 or j2['score'] < 0:
+                            continue
+                        cx, cy = int((j1['x'] + j2['x']) / 2.), int((j1['y'] + j2['y']) / 2.)
+                        dx, dy = j1['x'] - j2['x'], j1['y'] - j2['y']
+                        length = np.linalg.norm([dx, dy])
+                        angle = int(np.degrees(np.arctan2(dy, dx)))
+                        polygon = cv2.ellipse2Poly((cx, cy), (int(length / 2.), stickwidth),
+                                                   angle, 0, 360, 1)
+                        top, left = np.min(polygon[:,1]), np.min(polygon[:,0])
+                        bottom, right = np.max(polygon[:,1]), np.max(polygon[:,0])
+                        roi = img[top:bottom,left:right]
+                        roi2 = roi.copy()
+                        cv2.fillConvexPoly(roi2, polygon - np.array([left, top]), color)
+                        cv2.addWeighted(roi, 0.4, roi2, 0.6, 0.0, dst=roi)
+                    #
+                    offset += len(self.index2handname) / 2
+
+        return img
+
+    def hand_estimate(self, bgr, people_joint_positions):
+        if self.backend == 'chainer':
+            return self._hand_estimate_chainer_backend(bgr, people_joint_positions)
+        raise ValueError('Unsupported backend: {0}'.format(self.backend))
+
+    def _hand_estimate_chainer_backend(self, bgr, people_joint_positions):
+        # https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/29ea7e24dce4abae30faecf769855823ad7bb637/src/openpose/hand/handDetector.cpp
+        for joint_positions in people_joint_positions:
+            # crop hand image for each person
+            width = self._get_hand_roi_width(joint_positions) + self.hand_width_offset
+            hand_joint_positions = []
+            if width > self.hand_thre1:
+                rwrist = find_joint('RWrist', joint_positions)
+                if rwrist['score'] > self.hand_thre2:
+                    cx, cy = rwrist['x'], rwrist['y']
+                    relbow = find_joint('RElbow', joint_positions)
+                    if relbow['score'] > 0:
+                        cx += 0.3 * (cx - relbow['x'])
+                        cy += 0.3 * (cy - relbow['y'])
+                    hand_bgr = self._crop_square_image(bgr, cx, cy, width)
+                    hand_joints = self._hand_estimate_chainer_backend_each(
+                        hand_bgr, cx, cy, False)
+                    hand_joint_positions.extend(hand_joints)
+                    if self.visualize:
+                        cv2.circle(bgr, (int(cx), int(cy)), int(width/2.),
+                                   (255, 0, 0), thickness=1)
+
+                lwrist = find_joint('LWrist', joint_positions)
+                if lwrist['score'] > self.hand_thre2:
+                    cx, cy = lwrist['x'], lwrist['y']
+                    lelbow = find_joint('LElbow', joint_positions)
+                    if lelbow['score'] > 0:
+                        cx += 0.3 * (cx - lelbow['x'])
+                        cy += 0.3 * (cy - lelbow['y'])
+                    hand_bgr = self._crop_square_image(bgr, cx, cy, width)
+                    hand_joints = self._hand_estimate_chainer_backend_each(
+                        hand_bgr, cx, cy, True)
+                    hand_joint_positions.extend(hand_joints)
+                    if self.visualize:
+                        cv2.circle(bgr, (int(cx), int(cy)), int(width/2.),
+                                   (255, 0, 0), thickness=1)
+
+            for limb in self.index2handname:
+                jt = find_joint(limb, hand_joint_positions)
+                if jt is not None:
+                    joint_positions.append(jt)
+                else:
+                    joint_positions.append({
+                        'x': 0, 'y': 0, 'score': -1, 'limb': limb})
+
+        return people_joint_positions
+
+    def _hand_estimate_chainer_backend_each(self, hand_bgr, cx, cy, left_hand):
+        xp = self.hand_net.xp
+        device_id = self.hand_net._device_id
+
+        if left_hand:
+            hand_bgr = cv2.flip(hand_bgr, 1)  # 1 = vertical
+
+        resized = cv2.resize(hand_bgr, (368, 368), interpolation=cv2.INTER_CUBIC)
+        x = np.array(resized[np.newaxis], dtype=np.float32)
+        x = x.transpose(0, 3, 1, 2)
+        x = x / 256 - 0.5
+
+        if self.gpu >= 0:
+            with chainer.cuda.get_device_from_id(device_id):
+                x = chainer.cuda.to_gpu(x)
+        x = chainer.Variable(x)
+
+        heatmaps = self.hand_net(x)
+        heatmaps = F.resize_images(heatmaps[-1], hand_bgr.shape[:2])[0]
+        if self.gpu >= 0:
+            heatmaps.to_cpu()
+        heatmaps = heatmaps.array
+
+        if left_hand:
+            heatmaps = heatmaps.transpose(1, 2, 0)
+            heatmaps = cv2.flip(heatmaps, 1)
+            heatmaps = heatmaps.transpose(2, 0, 1)
+
+        # get peak on heatmap
+        hmaps = []
+        if xp == np:
+            # cpu
+            for i in range(heatmaps.shape[0] - 1):
+                heatmap = gaussian_filter(heatmaps[i], sigma=self.hand_gaussian_sigma)
+                hmaps.append(heatmap)
+        else:
+            with chainer.cuda.get_device_from_id(device_id):
+                heatmaps = chainer.cuda.to_gpu(heatmaps)
+            heatmaps = F.convolution_2d(
+                heatmaps[:, xp.newaxis], self.hand_gaussian_kernel,
+                stride=1, pad=int(self.hand_gaussian_ksize / 2))
+            heatmaps = chainer.cuda.to_cpu(xp.squeeze(heatmaps.array))
+            for heatmap in heatmaps[:-1]:
+                hmaps.append(heatmap)
+        keypoints = []
+        idx_offset = 0
+        if left_hand:
+            idx_offset += len(hmaps)
+        for i, heatmap in enumerate(hmaps):
+            conf = heatmap.max()
+            cds = np.array(np.where(heatmap==conf)).flatten().tolist()
+            py = cy + cds[0] - hand_bgr.shape[0] / 2
+            px = cx + cds[1] - hand_bgr.shape[1] / 2
+            keypoints.append({'x': px, 'y': py, 'score': conf,
+                              'limb': self.index2handname[idx_offset+i]})
+        return keypoints
+
+    def _crop_square_image(self, img, cx, cy, width):
+        cx, cy, width = int(cx), int(cy), int(width)
+        left, right = cx - int(width / 2), cx + int(width / 2)
+        top, bottom = cy - int(width / 2), cy + int(width / 2)
+        imh, imw, imc = img.shape
+        cropped = img[max(0, top):min(imh, bottom), max(0, left):min(imw, right)]
+        ch, cw = cropped.shape[:2]
+        bx, by = max(0, -left), max(0, -top)
+        padded = np.zeros((bottom - top, right - left, imc), dtype=np.uint8)
+        padded[by:by+ch,bx:bx+cw] = cropped
+        return padded
+
+    def _get_hand_roi_width(self, joint_positions):
+        lengths = []
+        for conn, ratio in zip(self.limb_sequence, self.limb_length_hand_ratio):
+            j1, j2 = joint_positions[conn[0]-1], joint_positions[conn[1]-1]
+            length = 0
+            if j1['score'] > 0 and j2['score'] > 0:
+                dx, dy = j1['x'] - j2['x'], j1['y'] - j2['y']
+                length = np.linalg.norm([dx, dy])
+            lengths.append(length / ratio)
+        if np.sum(lengths[:5]) > 0:
+            lengths = lengths[:5]
+        rospy.logdebug('length: %s' % lengths)
+        return np.sum(lengths) / len(np.nonzero(lengths)[0])
 
 
 if __name__ == '__main__':

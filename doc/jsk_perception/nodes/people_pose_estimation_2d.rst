@@ -7,7 +7,9 @@ What is this?
 
 .. image:: ./images/people_pose_estimation_2d.png
 
-Estimate people pose in 2d.
+.. image:: ./images/hand_pose_estimation_2d.png
+
+Estimate people pose and hand pose in 2d.
 Please refer to `https://arxiv.org/abs/1611.08050`
 
 
@@ -69,6 +71,30 @@ Parameters
 * ``~thre2`` (Float, Default: ``0.05``)
 
   Threshold of score.
+
+* ``~hand/enable`` (Bool, Default: ``False``)
+
+  If ``True``, estimate hand pose.
+
+* ``~hand/gaussian_ksize`` (Int, Default: ``17``)
+
+  Size of gaussian kernel.
+
+* ``~hand/gaussian_sigma`` (Float, Default: ``2.5``)
+
+  Value of gaussian sigma.
+
+* ``~hand/thre1`` (Float, Default: ``20``)
+
+  Threshold of width of hand area.
+
+* ``~hand/thre2`` (Float, Default: ``0.1``)
+
+  Threshold of hand score.
+
+* ``~hand/width_offset`` (Int, Default: ``0``)
+
+  Offset of hand area's width.
 
 * ``~visualize`` (Bool, Default: ``True``)
 

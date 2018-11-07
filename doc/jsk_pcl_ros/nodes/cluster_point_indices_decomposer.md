@@ -76,7 +76,9 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
    Toggle `~output%02d` topics.
 
 * `~align_boxes` (Boolean, default: `False`):
-* `~align_boxes_with_plane` (Boolean, default: `True`):
+
+  * `~align_boxes_with_plane` (Boolean, default: `True`):
+    * Is enabled only if `~align_boxes` is `True`.
 
   * If `~align_boxes` is `True` and `~align_boxes_with_plane` is `True`:
     * Topics `~align_planes` and `~align_planes_coefficients` are enabled.
@@ -89,7 +91,7 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 
    Run PCA algorithm on each cluster to estimate x and y direction.
 
-* `~force_to_flip_z_axis` (Boolean, default: `False`)
+* `~force_to_flip_z_axis` (Boolean, default: `True`)
 
    Flip z axis direction if this value is true.
 

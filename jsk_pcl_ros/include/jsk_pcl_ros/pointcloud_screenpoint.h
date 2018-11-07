@@ -34,105 +34,130 @@
  *********************************************************************/
 // Haseru Chen, Kei Okada, Yohei Kakiuchi
 
-#include <pcl_ros/pcl_nodelet.h>
-#include <pcl_ros/point_cloud.h>
-
-#include <pcl/features/normal_3d.h>
-#include <pcl/kdtree/kdtree_flann.h>
-
-#include <pluginlib/class_list_macros.h>
-
-#include <message_filters/subscriber.h>
-#include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/exact_time.h>
-#include <message_filters/sync_policies/approximate_time.h>
-
+#include <boost/thread/mutex.hpp>
+#include <dynamic_reconfigure/server.h>
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/PolygonStamped.h>
+#include <jsk_pcl_ros/PointcloudScreenpointConfig.h>
+#include <jsk_recognition_msgs/TransformScreenpoint.h>
+#include <jsk_topic_tools/connection_based_nodelet.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/sync_policies/approximate_time.h>
+#include <message_filters/sync_policies/exact_time.h>
+#include <message_filters/synchronizer.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/kdtree/kdtree_flann.h>
+#include <sensor_msgs/PointCloud2.h>
 
-#include "jsk_recognition_msgs/TransformScreenpoint.h"
-
-#include <boost/thread/mutex.hpp>
-
-// F/K/A <ray ocnverter>
+namespace mf = message_filters;
 
 namespace jsk_pcl_ros
 {
-  class PointcloudScreenpoint : public pcl_ros::PCLNodelet
+  class PointcloudScreenpoint : public jsk_topic_tools::ConnectionBasedNodelet
   {
-    typedef message_filters::sync_policies::ApproximateTime<
+   protected:
+    typedef PointcloudScreenpointConfig Config;
+
+    // approximate sync policies
+    typedef mf::sync_policies::ApproximateTime<
       sensor_msgs::PointCloud2,
       geometry_msgs::PolygonStamped > PolygonApproxSyncPolicy;
 
-    typedef message_filters::sync_policies::ApproximateTime<
+    typedef mf::sync_policies::ApproximateTime<
       sensor_msgs::PointCloud2,
       geometry_msgs::PointStamped > PointApproxSyncPolicy;
-    typedef message_filters::sync_policies::ApproximateTime<
+
+    typedef mf::sync_policies::ApproximateTime<
       sensor_msgs::PointCloud2,
       sensor_msgs::PointCloud2 > PointCloudApproxSyncPolicy;
 
+    // exact sync policies
+    typedef mf::sync_policies::ExactTime<
+      sensor_msgs::PointCloud2,
+      geometry_msgs::PolygonStamped > PolygonExactSyncPolicy;
 
-  private:
-    message_filters::Subscriber < sensor_msgs::PointCloud2 > points_sub_;
-    message_filters::Subscriber < geometry_msgs::PolygonStamped > rect_sub_;
-    message_filters::Subscriber < geometry_msgs::PointStamped > point_sub_;
-    message_filters::Subscriber < sensor_msgs::PointCloud2 > point_array_sub_;
-    message_filters::Subscriber < geometry_msgs::PolygonStamped > poly_sub_;
+    typedef mf::sync_policies::ExactTime<
+      sensor_msgs::PointCloud2,
+      geometry_msgs::PointStamped > PointExactSyncPolicy;
 
-    boost::shared_ptr < message_filters::Synchronizer < PolygonApproxSyncPolicy > > sync_a_rect_;
-    boost::shared_ptr < message_filters::Synchronizer < PointApproxSyncPolicy > > sync_a_point_;
-    boost::shared_ptr < message_filters::Synchronizer < PointCloudApproxSyncPolicy > > sync_a_point_array_;
-    boost::shared_ptr < message_filters::Synchronizer < PolygonApproxSyncPolicy > > sync_a_poly_;
+    typedef mf::sync_policies::ExactTime<
+      sensor_msgs::PointCloud2,
+      sensor_msgs::PointCloud2 > PointCloudExactSyncPolicy;
 
+    virtual void onInit();
+    virtual void subscribe();
+    virtual void unsubscribe();
+    virtual void configCallback(Config &config, uint32_t level);
+
+    // service callback functions
+    bool screenpoint_cb(jsk_recognition_msgs::TransformScreenpoint::Request &req,
+                        jsk_recognition_msgs::TransformScreenpoint::Response &res);
+
+    // message callback functions
+    void points_cb (const sensor_msgs::PointCloud2::ConstPtr &msg);
+    void point_cb (const geometry_msgs::PointStamped::ConstPtr &pt_ptr);
+    void point_array_cb (const sensor_msgs::PointCloud2::ConstPtr &pt_arr_ptr);
+    void rect_cb (const geometry_msgs::PolygonStamped::ConstPtr &array_ptr);
+    void poly_cb (const geometry_msgs::PolygonStamped::ConstPtr &array_ptr);
+
+    // synchronized message callback functions
+    void sync_point_cb (const sensor_msgs::PointCloud2::ConstPtr &points_ptr,
+                        const geometry_msgs::PointStamped::ConstPtr &pt_ptr);
+    void sync_point_array_cb (const sensor_msgs::PointCloud2::ConstPtr &points_ptr,
+                              const sensor_msgs::PointCloud2::ConstPtr &pt_arr_ptr);
+    void sync_rect_cb (const sensor_msgs::PointCloud2ConstPtr &points_ptr,
+                       const geometry_msgs::PolygonStamped::ConstPtr &array_ptr);
+    void sync_poly_cb (const sensor_msgs::PointCloud2::ConstPtr &points_ptr,
+                       const geometry_msgs::PolygonStamped::ConstPtr &array_ptr);
+
+    // internal functions
+    bool checkpoint (const pcl::PointCloud< pcl::PointXYZ > &in_pts,
+                     int x, int y,
+                     float &resx, float &resy, float &resz);
+    bool extract_point (const pcl::PointCloud< pcl::PointXYZ > &in_pts,
+                        int reqx, int reqy,
+                        float &resx, float &resy, float &resz);
+    void extract_rect (const pcl::PointCloud< pcl::PointXYZ > &in_pts,
+                       int st_x, int st_y,
+                       int ed_x, int ed_y,
+                       sensor_msgs::PointCloud2 &out_pts);
+
+    // ros
+    boost::mutex mutex_;
+    boost::shared_ptr<dynamic_reconfigure::Server<Config> > dyn_srv_;
     ros::Publisher pub_points_;
     ros::Publisher pub_point_;
     ros::Publisher pub_polygon_;
     ros::ServiceServer srv_;
-    pcl::PointCloud<pcl::PointXYZ> pts_;
-    std_msgs::Header header_;
+    mf::Subscriber < sensor_msgs::PointCloud2 > points_sub_;
+    mf::Subscriber < geometry_msgs::PolygonStamped > rect_sub_;
+    mf::Subscriber < geometry_msgs::PointStamped > point_sub_;
+    mf::Subscriber < sensor_msgs::PointCloud2 > point_array_sub_;
+    mf::Subscriber < geometry_msgs::PolygonStamped > poly_sub_;
+    boost::shared_ptr < mf::Synchronizer < PolygonApproxSyncPolicy > > async_rect_;
+    boost::shared_ptr < mf::Synchronizer < PointApproxSyncPolicy > > async_point_;
+    boost::shared_ptr < mf::Synchronizer < PointCloudApproxSyncPolicy > > async_point_array_;
+    boost::shared_ptr < mf::Synchronizer < PolygonApproxSyncPolicy > > async_poly_;
 
-    bool use_rect_, use_point_, use_sync_, use_point_array_, use_poly_;
-    
+    boost::shared_ptr < mf::Synchronizer < PolygonExactSyncPolicy > > sync_rect_;
+    boost::shared_ptr < mf::Synchronizer < PointExactSyncPolicy > > sync_point_;
+    boost::shared_ptr < mf::Synchronizer < PointCloudExactSyncPolicy > > sync_point_array_;
+    boost::shared_ptr < mf::Synchronizer < PolygonExactSyncPolicy > > sync_poly_;
+
+    // pcl
     pcl::NormalEstimation< pcl::PointXYZ, pcl::Normal > n3d_;
-#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
     pcl::search::KdTree< pcl::PointXYZ >::Ptr normals_tree_;
-#else
-    pcl::KdTree< pcl::PointXYZ >::Ptr normals_tree_;
-#endif
 
-    void onInit();
-    bool screenpoint_cb(jsk_recognition_msgs::TransformScreenpoint::Request &req,
-                        jsk_recognition_msgs::TransformScreenpoint::Response &res);
-    void points_cb(const sensor_msgs::PointCloud2ConstPtr &msg);
-
-    bool checkpoint (pcl::PointCloud< pcl::PointXYZ > &in_pts, int x, int y,
-                     float &resx, float &resy, float &resz);
-    bool extract_point (pcl::PointCloud< pcl::PointXYZ > &in_pts, int reqx, int reqy,
-                        float &resx, float &resy, float &resz);
-    void extract_rect (const sensor_msgs::PointCloud2ConstPtr& points_ptr,
-                       int st_x, int st_y, int ed_x, int ed_y);
-    void point_cb (const geometry_msgs::PointStampedConstPtr& pt_ptr);
-    void callback_point (const sensor_msgs::PointCloud2ConstPtr& points_ptr,
-                         const geometry_msgs::PointStampedConstPtr& pt_ptr);
-    void point_array_cb (const sensor_msgs::PointCloud2ConstPtr& pt_arr_ptr);
-    void callback_point_array (const sensor_msgs::PointCloud2ConstPtr& points_ptr,
-                               const sensor_msgs::PointCloud2ConstPtr& pt_arr_ptr);
-    
-    void rect_cb (const geometry_msgs::PolygonStampedConstPtr& array_ptr);
-    void callback_rect(const sensor_msgs::PointCloud2ConstPtr& points_ptr,
-                       const geometry_msgs::PolygonStampedConstPtr& array_ptr);
-    void poly_cb(const geometry_msgs::PolygonStampedConstPtr& array_ptr);
-    void callback_poly(const sensor_msgs::PointCloud2ConstPtr& points_ptr,
-                       const geometry_msgs::PolygonStampedConstPtr& array_ptr);
-    boost::mutex mutex_callback_;
-
-    int k_;
+    // parameters
+    bool synchronization_, approximate_sync_;
     int queue_size_;
+    int search_size_;
     int crop_size_;
-    bool publish_point_;
-    bool publish_points_;
+    double timeout_;
 
-  public:
+    std_msgs::Header latest_cloud_header_;
+    pcl::PointCloud<pcl::PointXYZ> latest_cloud_;
+
   };
 }
 

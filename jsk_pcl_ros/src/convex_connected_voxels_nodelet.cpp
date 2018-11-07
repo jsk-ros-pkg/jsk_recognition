@@ -62,18 +62,6 @@ namespace jsk_pcl_ros
        sub_indices_.shutdown();
     }
 
-    void ConvexConnectedVoxels::updateDiagnostic(
-       diagnostic_updater::DiagnosticStatusWrapper &stat)
-    {
-       if (vital_checker_->isAlive()) {
-          stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                       "ConvexConnectedVoxels running");
-       } else {
-          jsk_topic_tools::addDiagnosticErrorSummary(
-             "ConvexConnectedVoxels", vital_checker_, stat);
-       }
-    }
-   
     void ConvexConnectedVoxels::cloud_cb(
        const sensor_msgs::PointCloud2::ConstPtr &cloud_msg)
     {

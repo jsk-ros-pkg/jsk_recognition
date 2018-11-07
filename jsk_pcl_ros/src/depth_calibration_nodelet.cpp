@@ -155,11 +155,6 @@ namespace jsk_pcl_ros
     pub_.publish(ros_image);
   }
 
-  void DepthCalibration::updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-  }
-
 }
 #include <pluginlib/class_list_macros.h>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::DepthCalibration,

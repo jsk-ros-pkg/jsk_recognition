@@ -17,7 +17,7 @@ catkin_package(
     CATKIN_DEPENDS roscpp sensor_msgs posedetection_msgs image_transport cv_bridge
     LIBRARIES ${PROJECT_NAME}
     INCLUDE_DIRS include
-    DEPENDS OpenCV libsiftfast
+    DEPENDS OpenCV
 )
 
 catkin_python_setup()
@@ -42,7 +42,6 @@ macro(jsk_feature detector extractor exec_name)
   if($ENV{ROS_DISTRO} STREQUAL "groovy" OR $ENV{ROS_DISTRO} STREQUAL "hydro")
     set_target_properties(${exec_name} PROPERTIES COMPILE_FLAGS "-DOPENCV_NON_FREE")
   endif()
-  add_dependencies(${exec_name} posedetection_msgs_generate_messages_cpp libsiftfast)
 endmacro(jsk_feature detector extractor exec_name)
 
 message(STATUS "OpenCV_VERSION: ${OpenCV_VERSION}")
@@ -58,30 +57,42 @@ jsk_feature("BRISK" "BRISK" "imagebrisk")
 
 jsk_nodelet(src/imagesift.cpp
   "imagesift/ImageSift"
-  "imagesift_exec"
+  "imagesift"
   nodelet_sources nodelet_executables)
-set_target_properties("imagesift_exec" PROPERTIES OUTPUT_NAME "imagesift")
-list(APPEND jsk_exec "imagesift_exec")
 
-add_library(${PROJECT_NAME} SHARED ${nodelet_sources})
+add_library(lib_${PROJECT_NAME} SHARED ${nodelet_sources})
+set_target_properties(lib_${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
 
 add_definitions("-O2 -g")
 include_directories(include ${catkin_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBS})
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg)
+target_link_libraries(lib_${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
-
-install(TARGETS ${PROJECT_NAME} ${jsk_exec}
+# From https://github.com/jsk-ros-pkg/jsk_recognition/pull/2345
+# Install header files directly into ${CATKIN_PACKAGE_INCLUDE_DESTINATION}.
+# If the package has setup.py and modules under src/${PROJECT_NAME}/,
+# install python executables directly into ${CATKIN_PACKAGE_BIN_DESTINATION}.
+# However, if it doesn't have setup.py, directories including python executables
+# should be installed recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+# Also, other directories like 'launch' or 'sample' must be installed
+# recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+# Be careful that 'launch' and 'launch/' are different: the former is directory
+# and the latter is each content.
+install(TARGETS lib_${PROJECT_NAME} ${jsk_exec} ${nodelet_executables}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
 
-install(FILES nodelet.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-
+install(FILES nodelet.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+install(DIRECTORY sample test
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
 
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)

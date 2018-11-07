@@ -55,6 +55,7 @@
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
 #include <jsk_topic_tools/connection_based_nodelet.h>
+#include <jsk_topic_tools/diagnostic_utils.h>
 
 namespace jsk_pcl_ros
 {

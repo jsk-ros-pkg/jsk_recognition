@@ -194,12 +194,6 @@ namespace jsk_pcl_ros
     sub_coefficients_.unsubscribe();
     sub_trigger_.shutdown();
   }
-  
-  void LineSegmentCollector::updateDiagnostic(
-    diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-
-  }
 
   void LineSegmentCollector::cleanupBuffers(
       const ros::Time& stamp)

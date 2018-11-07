@@ -5,7 +5,8 @@
   <arg name="use_mask" default="false" />
 
   <node name="image_publisher"
-        pkg="jsk_perception" type="image_publisher.py">
+        pkg="jsk_perception" type="image_publisher.py"
+        required="true">
     <rosparam subst_value="true">
       publish_info: false
       file_name: $(find jsk_perception)/sample/object_detection_example_1.jpg
@@ -14,7 +15,8 @@
 
   <group if="$(arg use_mask)">
     <node name="mask_image_generator"
-          pkg="jsk_perception" type="mask_image_generator">
+          pkg="jsk_perception" type="mask_image_generator"
+          required="true">
       <remap from="~input" to="image_publisher/output" />
       <rosparam>
         offset_x: 170
@@ -24,7 +26,8 @@
       </rosparam>
     </node>
     <node name="apply_mask_image"
-          pkg="jsk_perception" type="apply_mask_image">
+          pkg="jsk_perception" type="apply_mask_image"
+          required="true">
       <remap from="~input" to="image_publisher/output" />
       <remap from="~input/mask" to="mask_image_generator/output" />
       <rosparam>
@@ -38,6 +41,7 @@
     <arg name="INPUT_MASK" value="mask_image_generator/output" />
     <arg name="USE_MASK" value="$(arg use_mask)" />
     <arg name="GPU" value="$(arg gpu)" />
+    <arg name="required" value="true" />
   </include>
 
   <group if="$(arg gui)">

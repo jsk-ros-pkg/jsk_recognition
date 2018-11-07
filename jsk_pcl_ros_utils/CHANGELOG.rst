@@ -2,6 +2,46 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.6 (2018-11-02)
+------------------
+* [jsk_pcl_ros_utils/cluster_point_indices_to_point_indices] Concatenate all indices in case of index==-1 (`#2330 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2330>`_)
+* [jsk_pcl_ros_utils/package.xml] Add dependencies for compressed_image/depth_image_transport to run sample launch files (`#2341 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2341>`_)
+* Install 'sample', 'scripts', 'test' into SHARE_DESTINATION (`#2345 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2345>`_)
+* [jsk_perception] Retrain bof data for sklearn==0.2.0 version and modified jsk_pcl_ros/utils's test for kinetic travis (`#2337 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2337>`_)
+  * [jsk_pcl_ros_utils] Ignore test for pointcloud_to_pcd.test
+
+* Add --pkg-path option to install_sample_data.py not to use rospack (`#2314 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2314>`_)
+  * Close https://github.com/jsk-ros-pkg/jsk_recognition/pull/2303
+
+* fix for jsk-ros-pkg/jsk_common/pull/1586 (`#2311 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2311>`_)
+  * to avoid add_custom_target cannot create target install_sample_data because another target with the same name already exists errors
+
+* Use diagnostic nodelet for EuclideanClustering and other nodelets (`#2301 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2301>`_)
+  * jsk_pcl_ros: euclidean_clustering: use dianogistc nodelet
+    Use DiagnosticNodelet::updateDiagnostic preferrably
+
+* Fix warnings for jsk_pcl_ros_utils (`#2265 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2265>`_)
+  * Fix warnings for jsk_pcl_ros_utils
+    ```
+  CMake Warning at /opt/ros/kinetic/share/catkin/cmake/catkin_package.cmake:166 (message):
+  catkin_package() DEPENDS on 'pcl' but neither 'pcl_INCLUDE_DIRS' nor
+  'pcl_LIBRARIES' is defined.
+  Call Stack (most recent call first):
+  /opt/ros/kinetic/share/catkin/cmake/catkin_package.cmake:102 (_catkin_package)
+  CMakeLists.txt:220 (catkin_package)
+  CMake Warning (dev) at CMakeLists.txt:214 (add_dependencies):
+  Policy CMP0046 is not set: Error on non-existent dependency in
+  add_dependencies.  Run "cmake --help-policy CMP0046" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+  The dependency target "jsk_pcl_ros_utils_gencpp" of target
+  "jsk_pcl_ros_utils" does not exist.
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+    ```
+* Contributors: Yuki Furuta, Kei Okada, Kentaro Wada, Yuto Uchimi, Iori Yanokura
+
+1.2.5 (2018-04-09)
+------------------
+
 1.2.4 (2018-01-12)
 ------------------
 * jsk_pcl_ros_utils: pointcloud_to_mask_image:  add depth image for input (`#2229 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2229>`_)

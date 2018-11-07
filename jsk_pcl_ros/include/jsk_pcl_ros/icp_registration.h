@@ -168,7 +168,12 @@ namespace jsk_pcl_ros
     boost::shared_ptr<message_filters::Synchronizer<OffsetSyncPolicy> >sync_offset_;
     boost::shared_ptr<message_filters::Synchronizer<ReferenceSyncPolicy> > sync_reference_;
     tf::TransformListener* tf_listener_;
-    
+
+    /**
+     * @brief
+     * set via ~transform_3dof parameter. default is false.
+     */
+    bool transform_3dof_;
     /**
      * @brief
      * set via ~use_offset_pose parameter. default is false.

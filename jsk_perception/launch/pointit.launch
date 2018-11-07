@@ -1,0 +1,47 @@
+<launch>
+  <arg name="gpu" default="0"/>
+  <arg name="camera_ns" default="kinect_head_external"/>
+  <arg name="input_rgb" default="$(arg camera_ns)/rgb/image_rect_color"/>
+  <arg name="input_camera_info" default="$(arg camera_ns)/rgb/camera_info"/>
+  <arg name="input_depth" default="$(arg camera_ns)/depth_registered/image_rect"/>
+  <arg name="input_cloud" default="$(arg camera_ns)/depth_registered/points"/>
+  <arg name="sensor_frame" default="head_mount_kinect_rgb_optical_frame"/>
+
+  <node name="people_pose_estimation_2d"
+        pkg="jsk_perception" type="people_pose_estimation_2d.py"
+        output="screen">
+    <remap from="~input" to="$(arg input_rgb)" />
+    <remap from="~input/info" to="$(arg input_camera_info)" />
+    <remap from="~input/depth" to="$(arg input_depth)" />
+    <rosparam subst_value="true">
+      gpu: $(arg gpu)
+      model_file: $(find jsk_perception)/trained_data/pose_estimation_2d_chainermodel.pkl
+      hand:
+        enable: true
+        model_file: $(find jsk_perception)/trained_data/pose_estimation_2d_hand.chainermodel
+      with_depth: true
+      scales: [0.38]
+      stride: 8
+    </rosparam>
+  </node>
+  
+  <include file="$(find jsk_pcl_ros)/sample/tabletop_object_detector.launch">
+    <arg name="input" value="$(arg input_cloud)"/>
+    <arg name="sensor_frame" value="$(arg sensor_frame)"/>
+    <arg name="launch_manager" value="true"/>
+    <arg name="launch_tracking" value="false"/>
+    <arg name="launch_openni" value="false"/>
+    <arg name="launch_rviz" value="false"/>
+    <arg name="publish_tf" value="false"/>
+  </include>
+
+  <node name="pointit" pkg="jsk_perception" type="pointit.py"
+        output="screen">
+    <remap from="~input" to="people_pose_estimation_2d/pose"/>
+    <remap from="~input/boxes" to="segmentation_decomposer/boxes"/>
+    <rosparam>
+      use_tf2_buffer_client: true
+    </rosparam>
+  </node>
+
+</launch>

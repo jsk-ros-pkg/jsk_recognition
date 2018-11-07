@@ -91,23 +91,28 @@ namespace jsk_pcl_ros
     max_index_ = config.max_index;
     filter_limit_negative_ = config.filter_limit_negative;
     keep_organized_ = config.keep_organized;
+    remove_nan_ = config.remove_nan;
   }
 
-  pcl::PointIndices::Ptr OrganizedPassThrough::filterIndices(const sensor_msgs::PointCloud2::ConstPtr& msg)
+  pcl::PointIndices::Ptr OrganizedPassThrough::filterIndices(const pcl::PointCloud<PointT>::Ptr& pc)
   {
     pcl::PointIndices::Ptr indices (new pcl::PointIndices);
 
     if (filter_field_ == FIELD_X) {
-      for (size_t j = 0; j < msg->height; j++) {
-        for (size_t i = min_index_; i < max_index_ && i < msg->width; i++) {
-          indices->indices.push_back(i + j * msg->width);
+      for (size_t j = 0; j < pc->height; j++) {
+        for (size_t i = min_index_; i < max_index_ && i < pc->width; i++) {
+          size_t idx = i + j * pc->width;
+          if (!remove_nan_ || (remove_nan_ && !isPointNaN(pc->points[idx])))
+            indices->indices.push_back(idx);
         }
       }
     }
     else if (filter_field_ == FIELD_Y) {
-      for (size_t i = 0; i < msg->width; i++) {
-        for (size_t j = min_index_; j < max_index_ && j < msg->height; j++) {
-          indices->indices.push_back(i + j * msg->width);
+      for (size_t i = 0; i < pc->width; i++) {
+        for (size_t j = min_index_; j < max_index_ && j < pc->height; j++) {
+          size_t idx = i + j * pc->width;
+          if (!remove_nan_ || (remove_nan_ && !isPointNaN(pc->points[idx])))
+            indices->indices.push_back(idx);
         }
       }
     }
@@ -120,7 +125,7 @@ namespace jsk_pcl_ros
     vital_checker_->poke();
     pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
     pcl::fromROSMsg(*msg, *cloud);
-    pcl::PointIndices::Ptr indices = filterIndices(msg);
+    pcl::PointIndices::Ptr indices = filterIndices(cloud);
     filtered_points_counter_.add(indices->indices.size());
     pcl::ExtractIndices<PointT> ex;
     ex.setInputCloud(cloud);
@@ -154,14 +159,14 @@ namespace jsk_pcl_ros
       jsk_topic_tools::addDiagnosticBooleanStat("keep organized",
                                                 keep_organized_,
                                                 stat);
+      jsk_topic_tools::addDiagnosticBooleanStat("remove_nan",
+                                                remove_nan_,
+                                                stat);
       jsk_topic_tools::addDiagnosticBooleanStat("filter_limit_negative",
                                                 filter_limit_negative_,
                                                 stat);
     }
-    else {
-      jsk_recognition_utils::addDiagnosticErrorSummary(
-        "ClusterPointIndicesDecomposer", vital_checker_, stat);
-    }
+    DiagnosticNodelet::updateDiagnostic(stat);
   }
 }
 

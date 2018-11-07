@@ -86,8 +86,6 @@ namespace jsk_perception
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void convertHistogramToMsg(
       const cv::Mat& hist,
       int size,

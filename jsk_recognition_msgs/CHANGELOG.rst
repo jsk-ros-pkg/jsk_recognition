@@ -2,6 +2,17 @@
 Changelog for package jsk_recognition_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.6 (2018-11-02)
+------------------
+* Install sample and test  into SHARE_DESTINATION (`#2345 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2345>`_)
+* jsk_pcl_ros: support lazy mode for pointcloud_screenpoint nodelet (`#2277 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2277>`_)p
+  * add 'bool no_update' to TransformScreenpoint.srv
+
+* Contributors: Yuki Furuta, Yuto Uchimi
+
+1.2.5 (2018-04-09)
+------------------
+
 1.2.4 (2018-01-12)
 ------------------
 

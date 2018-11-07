@@ -3,10 +3,12 @@
 import os.path as osp
 import sys
 
+import chainer
 from chainer import cuda
 import chainer.serializers as S
 from chainer import Variable
 import cv2
+from distutils.version import LooseVersion
 import numpy as np
 
 import cv_bridge
@@ -145,10 +147,18 @@ class FastRCNN(ConnectionBasedTransport):
         # batch_indices is always 0 when batch size is 1
         batch_indices = xp.zeros((len(rects), 1), dtype=np.float32)
         rects = xp.hstack((batch_indices, rects))
-        x = Variable(x_data, volatile=True)
-        rects_val = Variable(rects, volatile=True)
-        self.model.train = False
-        cls_score, bbox_pred = self.model(x, rects_val)
+        if LooseVersion(chainer.__version__).version[0] < 2:
+            x = Variable(x_data, volatile=True)
+            rects_val = Variable(rects, volatile=True)
+            self.model.train = False
+            cls_score, bbox_pred = self.model(x, rects_val)
+        else:
+            with chainer.using_config('train', False), \
+                 chainer.no_backprop_mode():
+                x = Variable(x_data)
+                rects_val = Variable(rects)
+                cls_score, bbox_pred = self.model(x, rects_val)
+
         scores = cuda.to_cpu(cls_score.data)
         bbox_pred = cuda.to_cpu(bbox_pred.data)
         return scores, bbox_pred
@@ -164,11 +174,8 @@ def main():
         rospy.logerr('Unspecified rosparam: {0}'.format(e))
         sys.exit(1)
 
-    # FIXME: In CPU mode, there is no detections.
-    if not cuda.available:
-        rospy.logfatal('CUDA environment is required.')
-        sys.exit(1)
-    use_gpu = True
+    gpu = rospy.get_param('~gpu', -1)
+    use_gpu = True if gpu >= 0 else False
 
     # setup model
     PKG = 'jsk_perception'
@@ -186,7 +193,7 @@ def main():
     rospy.loginfo('Loading chainermodel')
     S.load_hdf5(chainermodel, model)
     if use_gpu:
-        model.to_gpu()
+        model.to_gpu(gpu)
     rospy.loginfo('Finished loading chainermodel')
 
     # assumptions

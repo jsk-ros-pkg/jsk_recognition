@@ -153,7 +153,7 @@ namespace jsk_pcl_ros
                        getName() + " running");
         }
         else {
-          stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,
+          stat.summary(diagnostic_error_level_,
                        "~input/cloud is not activate");
         }
         stat.add("scan queue", cloud_buffer_.size());
@@ -166,7 +166,7 @@ namespace jsk_pcl_ros
     }
     else {
       jsk_topic_tools::addDiagnosticErrorSummary(
-        name_, vital_checker_, stat);
+        name_, vital_checker_, stat, diagnostic_error_level_);
     }
   }
 
@@ -431,7 +431,7 @@ namespace jsk_pcl_ros
       if (name == joint_name_) {
         vital_checker_->poke();
         if(msg->position.size() <= i) {
-          ROS_WARN("size of position (%d) is smaller than joint(%s) position(%d)",
+          ROS_WARN("size of position (%zu) is smaller than joint(%s) position(%zu)",
                    msg->position.size(), name.c_str(), i);
           return;
         }
@@ -446,7 +446,7 @@ namespace jsk_pcl_ros
         }
         else if (laser_type_ == INFINITE_SPINDLE) {
           if(msg->velocity.size() <= i) {
-            ROS_WARN("size of velocity (%d) is smaller than joint(%s) position(%d)",
+            ROS_WARN("size of velocity (%zu) is smaller than joint(%s) position(%zu)",
                      msg->velocity.size(), name.c_str(), i);
             return;
           }
@@ -457,7 +457,7 @@ namespace jsk_pcl_ros
         }
         else if (laser_type_ == INFINITE_SPINDLE_HALF) {
           if(msg->velocity.size() <= i) {
-            ROS_WARN("size of velocity (%d) is smaller than joint(%s) position(%d)",
+            ROS_WARN("size of velocity (%zu) is smaller than joint(%s) position(%zu)",
                      msg->velocity.size(), name.c_str(), i);
             return;
           }

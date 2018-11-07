@@ -47,6 +47,10 @@ You can see camera image with results in `image_view`
 
         Index of gpu used for prediction. Set `-1` for using CPU.
 
+    - `~model` (`String`, default: `ssd300`)
+
+        Name of model structure.`ssd300` and `ssd512` are supported.
+
     - `~model_path` (`String`, default: `voc0712`)
 
         Name of pretrained model or path to trained model file.
@@ -167,6 +171,18 @@ You can see camera image with results in `image_view`
     You can monitor loss and stop training at anytime and resume with option `--resume`.
 
     A generated weight file can be used as model file for `ssd_object_detector.py` by setting `~model_path` parameter as path to the weight file.
+
+## Pretrained Models
+
+### Hand Detection
+
+You can use pretrained hand detection models.
+
+``` bash
+roslaunch jsk_perception sample_ssd_hand_detector.launch gpu:=0
+```
+
+![](images/ssd_hand_detection.gif)
 
 ## Reference
 

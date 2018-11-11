@@ -12,6 +12,8 @@ What is this?
 Estimate people pose and hand pose in 2d.
 Please refer to `https://arxiv.org/abs/1611.08050`
 
+In order to use this feature, you need to install `chainer`.
+To install chainer with GPU support, please refer to https://jsk-recognition.readthedocs.io/en/latest/install_chainer_gpu.html::
 
 Subscribing Topic
 -----------------

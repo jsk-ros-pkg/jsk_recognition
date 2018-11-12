@@ -161,6 +161,7 @@ roslaunch jsk_pcl_ros octomap_server_contact.launch
 ``
 
 If you want to see how frontier grids works, run the below command.
+
 ``
 roslaunch jsk_pcl_ros sample_octomap_contact.launch
 ``

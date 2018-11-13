@@ -156,14 +156,14 @@ class SSDObjectDetector(ConnectionBasedTransport):
             tprev = tcur
 
         if self.visualize:
-            self.publish_bbox_image(img, bboxes, labels, scores)
+            self.publish_bbox_image(img, bboxes, labels, scores, msg.header)
 
         if self.profiling:
             tcur = time.time()
             rospy.loginfo("%s: elapsed %f msec" % ("callback end", (tcur-tprev)*1000))
             tprev = tcur
 
-    def publish_bbox_image(self, img, bbox, label, score):
+    def publish_bbox_image(self, img, bbox, label, score, header):
         vis_bbox(img, bbox, label, score,
                  label_names=self.label_names)
         fig = plt.gcf()
@@ -178,6 +178,7 @@ class SSDObjectDetector(ConnectionBasedTransport):
         except Exception as e:
             rospy.logerr("Failed to convert bbox image: %s" % str(e))
             return
+        msg.header = header
         self.pub_image.publish(msg)
 
 

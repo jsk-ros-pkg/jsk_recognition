@@ -1,0 +1,61 @@
+<launch>
+  <arg name="rviz" default="true" />
+
+  <!-- publish pointcloud -->
+  <param name="/use_sim_time" value="true" />
+  <node name="publish_pointcloud"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/sample/data/octomap_contact.bag --clock --loop" />
+
+  <!-- Reconstruct pointcloud on this computer -->
+  <!-- RGB -->
+  <group ns="/head_camera/rgb">
+    <node name="republish_rgb" pkg="image_transport" type="republish" args="compressed raw">
+      <remap from="in" to="image_raw" />
+      <remap from="out" to="image_raw" />
+    </node>
+  </group>
+  <!-- Depth -->
+  <group ns="/head_camera/depth_registered">
+    <node name="republish_depth_registered" pkg="image_transport" type="republish" args="compressedDepth raw">
+      <remap from="in" to="image_raw" />
+      <remap from="out" to="image_raw" />
+    </node>
+  </group>
+  <!-- publish pointcloud -->
+  <include file="$(find openni2_launch)/launch/openni2.launch">
+    <!-- <arg name="depth" value="depth_registered"/> -->
+    <arg name="load_driver" value="false" />
+    <arg name="camera" value="head_camera" />
+    <arg name="depth_registration" value="true" />
+    <arg name="rgb_frame_id" value="head_camera_rgb_optical_frame" />
+    <arg name="depth_frame_id" value="head_camera_depth_optical_frame" />
+  </include>
+
+  <!-- octomap -->
+  <node pkg="jsk_pcl_ros" type="octomap_server_contact" name="octomap_server_contact"
+        output="screen" >
+    <param name="resolution" value="0.01" />
+    <!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
+    <param name="frame_id" type="string" value="base_link" />
+    <!-- maximum range to integrate (speedup!) -->
+    <param name="sensor_model/max_range" value="5.0" />
+    <param name="publish_free_space" value="true" />
+    <param name="publish_unknown_space" value="true" />
+    <param name="publish_frontier_space" value="true" />
+    <param name="latch" value="false" />
+    <!-- data source to integrate (PointCloud2) -->
+    <remap from="cloud_in" to="/head_camera/depth_registered/points" />
+    <!-- octomap region -->
+    <param name="occupancy_min_x" value="0.8" />
+    <param name="occupancy_max_x" value="1.3" />
+    <param name="occupancy_min_y" value="-0.5" />
+    <param name="occupancy_max_y" value="0.5" />
+    <param name="occupancy_min_z" value="0.5" />
+    <param name="occupancy_max_z" value="1.0" />
+  </node>
+
+  <!-- rviz -->
+  <node if="$(arg rviz)" name="rviz" pkg="rviz" type="rviz" args="-d $(find jsk_pcl_ros)/sample/rviz/sample_octomap_contact.rviz" />
+
+</launch>

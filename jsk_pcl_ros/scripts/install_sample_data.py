@@ -105,6 +105,16 @@ def main():
         ],
     )
 
+    download_data(
+        path='sample/data/octomap_contact.bag.tgz',
+        url='https://drive.google.com/uc?id=1r7Hj4ujB8Ml5QHg7_Q6kd3rbtL6kzTbh',
+        md5='a6f4d560830c93e0710fef0e7518a099',
+        extract=True,
+        compressed_bags=[
+            'sample/data/octomap_contact.bag',
+        ],
+    )
+
 
 if __name__ == '__main__':
     main()

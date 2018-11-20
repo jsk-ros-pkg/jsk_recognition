@@ -88,3 +88,14 @@ You can try to run samples to check if the installation succeeded::
     roslaunch jsk_perception sample_fcn_object_segmentation.launch gpu:=0
     roslaunch jsk_perception sample_people_pose_estimation_2d.launch GPU:=0
     roslaunch jsk_perception sample_regional_feature_based_object_recognition.launch GPU:=0
+
+Trouble Shooting
+----------------
+
+- After installing CUDA and rebooting, ``nvidia-smi`` returns ``command not found``
+
+If your PC uses dual boot, please check BIOS setting and secure boot is disabled.
+
+- When installing jsk_perception, ``rosdep install --from-paths --ignore-src -y -r src`` fails due to pip version:
+
+Please make sure you have pip >= 9.0.1. If not, please try ``sudo python -m pip install pip==9.0.1``, for example. Please do not execute ``pip install -U pip``. (2018.11.20)

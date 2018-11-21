@@ -686,8 +686,10 @@ namespace jsk_pcl_ros
       jsk_recognition_msgs::BoundingBox bounding_box;
       bounding_box.label = static_cast<int>(argsort[i]);
 
-      std::vector<int> nan_indices;
-      pcl::removeNaNFromPointCloud(*segmented_cloud, *segmented_cloud, nan_indices);
+      if (!segmented_cloud->is_dense) {
+        std::vector<int> nan_indices;
+        pcl::removeNaNFromPointCloud(*segmented_cloud, *segmented_cloud, nan_indices);
+      }
 
       bool successp = computeCenterAndBoundingBox(
         segmented_cloud, input->header, planes, coefficients, pose_msg, bounding_box);

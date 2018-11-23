@@ -44,7 +44,7 @@ class TrainFCN(object):
         parser.add_argument('--gpu', type=int, default=0)
         parser.add_argument('--batch_size', type=int, default=1)
         parser.add_argument('--max_epoch', type=int, default=100)
-        parser.add_argument('--lr', type=float, default=0.01)
+        parser.add_argument('--lr', type=float, default=1e-10)
         parser.add_argument('--weight_decay', type=float, default=0.0001)
         parser.add_argument('--out_dir', type=str, default=None)
         parser.add_argument('--progressbar_update_interval', type=float,

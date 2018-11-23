@@ -4,7 +4,10 @@ from __future__ import print_function
 
 import argparse
 import datetime
+import os
 import os.path as osp
+
+os.environ['MPLBACKEND'] = 'Agg'  # NOQA
 
 import chainer
 from chainer import cuda
@@ -53,11 +56,11 @@ class TrainFCN(object):
         parser.add_argument('--print_interval_type', type=str,
                             default='iteration',
                             choices=['epoch', 'iteration'])
-        parser.add_argument('--log_interval', type=float, default=100)
+        parser.add_argument('--log_interval', type=float, default=10)
         parser.add_argument('--log_interval_type', type=str,
                             default='iteration',
                             choices=['epoch', 'iteration'])
-        parser.add_argument('--plot_interval', type=float, default=0.1)
+        parser.add_argument('--plot_interval', type=float, default=5)
         parser.add_argument('--plot_interval_type', type=str,
                             default='epoch',
                             choices=['epoch', 'iteration'])
@@ -200,7 +203,7 @@ class TrainFCN(object):
         self.trainer.extend(
             extensions.dump_graph(
                 root_name='main/loss',
-                out_name='graph.dot'))
+                out_name='network_architecture.dot'))
 
         # Logging
         self.trainer.extend(
@@ -214,7 +217,7 @@ class TrainFCN(object):
                 log_name='log.json',
                 trigger=(self.log_interval, self.log_interval_type)))
         self.trainer.extend(
-            chainer.training.extensions.PrintReport([
+            extensions.PrintReport([
                 'iteration',
                 'epoch',
                 'elapsed_time',
@@ -225,12 +228,15 @@ class TrainFCN(object):
 
         # Plot
         self.trainer.extend(
-            extensions.PlotReport(
-                ['validation/main/loss'],
+            extensions.PlotReport([
+                'main/loss',
+                'validation/main/loss',
+            ],
                 file_name='loss_plot.png',
+                x_key=self.plot_interval_type,
                 trigger=(self.plot_interval, self.plot_interval_type),
             ),
-            trigger=(self.eval_interval, self.eval_interval_type))
+            trigger=(self.plot_interval, self.plot_interval_type))
 
         # Dump params
         params = dict()

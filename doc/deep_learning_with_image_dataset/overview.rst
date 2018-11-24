@@ -9,8 +9,6 @@ This page shows the overview of how to start deep learning with your own image d
 
 Collect available images from Web or take pictures by yourself.
 
-If you would like to create a dataset whose directory structure is VOC-like, all of the images should be placed directly in one directory.
-
 
 2. Annotate images
 ------------------
@@ -32,7 +30,7 @@ There are some training scripts in jsk_perception package.
 
    .. toctree::
       :maxdepth: 1
-      :caption: Training for Semantic Segmentation
+      :caption: Training for semantic segmentation
 
       ../jsk_perception/training_scripts/train_fcn
 
@@ -44,6 +42,6 @@ Now you can use your trained network to infer things as a ROS node.
 
    .. toctree::
       :maxdepth: 1
-      :caption: Nodes for Semantic Segmentation
+      :caption: Nodes for semantic segmentation
 
       ../jsk_perception/nodes/fcn_object_segmentation

@@ -11,7 +11,7 @@ Any size of image can be applied to this network as long as your GPU has enough 
 
 `SemanticSegmentationDataset` (imported from `jsk_recognition_utils.datasets`)
 
-This class assumes the following directory structure for each of train and test.
+This class assumes the following directory structure for each split.
 
 ```
 path_to_awesome_dataset/

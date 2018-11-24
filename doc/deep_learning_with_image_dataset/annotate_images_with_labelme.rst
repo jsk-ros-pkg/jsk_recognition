@@ -17,12 +17,20 @@ For more information, please see https://github.com/wkentaro/labelme
 How to use labelme
 ------------------
 
+Split your data
+^^^^^^^^^^^^^^^
+
+We recommend you to make ``train``, ``val`` and ``test`` directory, and split your image files into them.
+
+
 Prepare label list
 ^^^^^^^^^^^^^^^^^^
 
 List up all labels and save them into a file (e.g. labels.txt).
 
-Note that "background" label must be described as "_background_", and all labels must not have "-".
+Note that "ignore" label must be described as ``__ignore__`` and "background" label as ``_background_``, and they must be placed in the first and second line respectively in labels.txt.
+
+All labels must not have "-", because it is used to distinct instances.
 
 
 Do annotation
@@ -40,7 +48,7 @@ Do annotation
 
 3. Choose the class of the object from "Label List".
 
-   If you would like to create dataset for instance segmentation, please remember to name the polygon "<class name>-<instance id>".
+   If you would like to create dataset for instance segmentation, please remember to name the polygon ``<class name>-<instance id>``.
 
 .. image:: images/annotate_images_with_labelme_2.png
 
@@ -51,3 +59,41 @@ Do annotation
 5. When you have finished annotating all objects listed in "Label List" in the image, click "Save" to save .json file.
 
 .. image:: images/annotate_images_with_labelme_4.png
+
+
+Create dataset
+^^^^^^^^^^^^^^
+
+After annotation, you can create dataset from raw images, labels and JSON files.
+
+- For semantic segmentation, see https://github.com/wkentaro/labelme/tree/master/examples/semantic_segmentation
+
+- For instance segmentation, see https://github.com/wkentaro/labelme/tree/master/examples/instance_segmentation
+
+
+Store dataset
+^^^^^^^^^^^^^
+
+At last, place your dataset where you want.
+
+For example, ``$HOME/.ros/data/jsk_perception/learning_datasets/awesome_dataset``. ::
+
+  awesome_dataset
+  |-- test
+  |   |-- JPEGImages
+  |   |-- SegmentationClass
+  |   |-- SegmentationClassPNG
+  |   |-- SegmentationClassVisualization
+  |   |-- SegmentationObject
+  |   |-- SegmentationObjectPNG
+  |   |-- SegmentationObjectVisualization
+  |   `-- class_names.txt
+  `-- train
+      |-- JPEGImages
+      |-- SegmentationClass
+      |-- SegmentationClassPNG
+      |-- SegmentationClassVisualization
+      |-- SegmentationObject
+      |-- SegmentationObjectPNG
+      |-- SegmentationObjectVisualization
+      `-- class_names.txt

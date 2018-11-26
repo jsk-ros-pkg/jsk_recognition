@@ -22,6 +22,7 @@ The code is open source, and `available on github`_.
    install_xtion2
    install_ensenso
    install_chainer_gpu
+   deep_learning_with_image_dataset/overview
 
 
 .. toctree::

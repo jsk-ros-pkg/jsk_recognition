@@ -10,11 +10,12 @@ Requirements
 - Nvidia GPU (ex. K80, TitanX, GTX 1080Ti).
 - Ubuntu (ex. 14.04, 16.04).
 
+  You can check whether your PC has a GPU by ``lspci | grep -i nvidia``.
 
 Install CUDA
 ------------
 
-- Download deb file from https://developer.nvidia.com/cuda-downloads::
+- Download deb file from https://developer.nvidia.com/cuda-downloads?target_os=Linux::
 
     # If you'd like to use CUDA8.0 on Ubuntu 14.04.
     wget https://developer.nvidia.com/compute/cuda/8.0/Prod2/local_installers/cuda-repo-ubuntu1404-8-0-local-ga2_8.0.61-1_amd64-deb
@@ -23,16 +24,27 @@ Install CUDA
     sudo apt-get update
     sudo apt-get install cuda
 
+    # If you'd like to use CUDA9.2 on Ubuntu 16.04.
+    # Choose the green buttons on the web page like x86_64 -> Ubuntu -> version -> deb (network).
+    # Excute 1-3 and then, change step 4 as follows:
+    sudo apt install cuda-9-2
+
+- After rebooting, you can see the memory usage of your GPU by ``nvidia-smi``
 
 Install CUDNN
 -------------
 
-- Download tgz file from https://developer.nvidia.com/cudnn::
+- You need to login at https://developer.nvidia.com/cudnn
+- Go to cuDNN Download and choose version
+- Download deb files of cuDNN Runtime Library and cuDNN Developer Library
 
-    tar zxvf cudnn-XXX.tgz  # it creates cuda/
-    sudo cp cuda/include/* /usr/local/cuda/include/
-    sudo cp cuda/lib64/* /usr/local/cuda/lib64/
+::
 
+   # If you'd like to install cuDNN for CUDA9.2 on Ubuntu 16.04
+   # Download cuDNN v7.3.1 Runtime Library for Ubuntu16.04 (Deb)
+   sudo dpkg -i libcudnn7_7.3.1.20-1+cuda9.2_amd64.deb
+   # Download cuDNN v7.3.1 Developer Library for Ubuntu16.04 (Deb)
+   sudo dpkg -i libcudnn7-dev_7.3.1.20-1+cuda9.2_amd64.deb
 
 Install Chainer
 ---------------
@@ -76,3 +88,14 @@ You can try to run samples to check if the installation succeeded::
     roslaunch jsk_perception sample_fcn_object_segmentation.launch gpu:=0
     roslaunch jsk_perception sample_people_pose_estimation_2d.launch GPU:=0
     roslaunch jsk_perception sample_regional_feature_based_object_recognition.launch GPU:=0
+
+Trouble Shooting
+----------------
+
+- After installing CUDA and rebooting, ``nvidia-smi`` returns ``command not found``
+
+If your PC uses dual boot, please check BIOS setting and secure boot is disabled.
+
+- When installing jsk_perception, ``rosdep install --from-paths --ignore-src -y -r src`` fails due to pip version:
+
+Please make sure you have pip >= 9.0.1. If not, please try ``sudo python -m pip install pip==9.0.1``, for example. Please do not execute ``pip install -U pip``. (2018.11.20)

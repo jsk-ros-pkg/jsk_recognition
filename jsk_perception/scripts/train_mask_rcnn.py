@@ -274,7 +274,7 @@ class TrainMaskRCNN(object):
         self.trainer.extend(
             extensions.PlotReport(
                 ['validation/main/map'],
-                file_name='accuracy.png',
+                file_name='accuracy_plot.png',
                 x_key=self.plot_interval_type,
                 trigger=(self.plot_interval, self.plot_interval_type)),
             trigger=(self.eval_interval, self.eval_interval_type))

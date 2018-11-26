@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
-
 import argparse
 import datetime
 import os
@@ -40,8 +38,8 @@ class TrainFCN(object):
 
         # Model
         parser.add_argument(
-            '--model_name', type=str, default='FCN32s',
-            choices=['FCN32s', 'FCN16s', 'FCN8s', 'FCN8sAtOnce'])
+            '--model_name', type=str, default='fcn32s',
+            choices=['fcn32s', 'fcn16s', 'fcn8s', 'fcn8s_atonce'])
 
         # Training parameters
         parser.add_argument('--gpu', type=int, default=0)
@@ -142,30 +140,33 @@ class TrainFCN(object):
 
     def load_model(self):
         n_class = len(self.train_dataset.class_names)
-        if self.model_name == 'FCN32s':
+        if self.model_name == 'fcn32s':
             self.model = fcn.models.FCN32s(n_class=n_class)
             vgg = fcn.models.VGG16()
             vgg_path = vgg.download()
             S.load_npz(vgg_path, vgg)
             self.model.init_from_vgg16(vgg)
-        elif self.model_name == 'FCN16s':
+        elif self.model_name == 'fcn16s':
             self.model = fcn.models.FCN16s(n_class=n_class)
             fcn32s = fcn.models.FCN32s()
             fcn32s_path = fcn32s.download()
             S.load_npz(fcn32s_path, fcn32s)
             self.model.init_from_fcn32s(fcn32s_path, fcn32s)
-        elif self.model_name == 'FCN8s':
+        elif self.model_name == 'fcn8s':
             self.model = fcn.models.FCN8s(n_class=n_class)
             fcn16s = fcn.models.FCN16s()
             fcn16s_path = fcn16s.download()
             S.load_npz(fcn16s_path, fcn16s)
             self.model.init_from_fcn16s(fcn16s_path, fcn16s)
-        else:
+        elif self.model_name == 'fcn8s_atonce':
             self.model = fcn.models.FCN8sAtOnce(n_class=n_class)
             vgg = fcn.models.VGG16()
             vgg_path = vgg.download()
             S.load_npz(vgg_path, vgg)
             self.model.init_from_vgg16(vgg)
+        else:
+            raise ValueError(
+                'Unsupported model_name: {}'.format(self.model_name))
 
         if self.gpu >= 0:
             cuda.get_device_from_id(self.gpu).use()
@@ -234,8 +235,7 @@ class TrainFCN(object):
             ],
                 file_name='loss_plot.png',
                 x_key=self.plot_interval_type,
-                trigger=(self.plot_interval, self.plot_interval_type),
-            ),
+                trigger=(self.plot_interval, self.plot_interval_type)),
             trigger=(self.plot_interval, self.plot_interval_type))
 
         # Dump params
@@ -253,6 +253,18 @@ class TrainFCN(object):
         params['weight_decay'] = self.weight_decay
         self.trainer.extend(
             fcn.extensions.ParamsReport(params, file_name='params.yaml'))
+
+        # Dump param for fcn_object_segmentation.py
+        model_name = dict()
+        model_name['model_name'] = self.model_name
+        self.trainer.extend(
+            fcn.extensions.ParamsReport(
+                model_name, file_name='model_name.yaml'))
+        target_names = dict()
+        target_names['target_names'] = self.train_dataset.class_names
+        self.trainer.extend(
+            fcn.extensions.ParamsReport(
+                target_names, file_name='target_names.yaml'))
 
 
 if __name__ == '__main__':

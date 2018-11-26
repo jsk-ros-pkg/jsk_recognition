@@ -34,9 +34,9 @@ path_to_awesome_dataset/
 
   Directory name which contains dataset for training and validation respectively.
 
-- `--model_name` (`string`, default: `FCN32s`)
+- `--model_name` (`string`, default: `fcn32s`)
 
-  Model name. Currently, `FCN32s`, `FCN16s`, `FCN8s` and `FCN8sAtOnce` are supported.
+  Model name. Currently, `fcn32s`, `fcn16s`, `fcn8s` and `fcn8s_atonce` are supported.
 
 - `--gpu` (`int`, default: `0`)
 
@@ -109,9 +109,11 @@ All these files will be automatically generated under `<out_dir>`.
 
 - `log.json`
 - `loss_plot.png`
+- `model_name.yaml`
 - `model_snapshot.npz`
 - `network_architecture.dot`
 - `params.yaml`
+- `target_names.yaml`
 
 
 Usage

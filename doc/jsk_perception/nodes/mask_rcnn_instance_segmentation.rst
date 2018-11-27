@@ -28,6 +28,14 @@ Publishing Topic
 
   Class labels of each instance.
 
+* ``~output/label_cls`` (``sensor_msgs/Image``)
+
+  Label image color-coded by class.
+
+* ``~output/label_ins`` (``sensor_msgs/Image``)
+
+  Label image color-coded by instance.
+
 * ``~output/viz`` (``sensor_msgs/Image``)
 
   Visualized image of recognition result.

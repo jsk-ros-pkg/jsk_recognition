@@ -30,6 +30,10 @@ to see the object.
   This camera info is same with `~input` except for roi field.
   (only when `~input` is published.)
 
+* `~output/box_array` (`jsk_recognition_msgs/BoundingBoxArray`)
+
+  Array of bounding boxes representing the interest regions.
+
 * `~output/mask` (`sensor_msgs/Image`)
 
   Mask image to mask the regions of specified interest.
@@ -38,6 +42,10 @@ to see the object.
 * `~output/point_indices` (`pcl_msgs/PointIndices`)
 
   Indices of `~input/points` which are inside of interest regions.
+
+* `~output/cluster_point_indices` (`jsk_recognition_msgs/ClusterPointIndices`)
+
+  Cluster point indices of `~input/points` which are inside of interest regions.
 
 ## Parameter
 * `~use_multiple_attention` (Boolean, default: `False`)

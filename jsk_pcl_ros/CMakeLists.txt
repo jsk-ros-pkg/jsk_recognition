@@ -480,6 +480,7 @@ install(DIRECTORY config euslisp launch plugins sample scripts test
 )
 
 if (CATKIN_ENABLE_TESTING)
+  find_package(jsk_perception REQUIRED)
   find_package(roslaunch REQUIRED)
   find_package(rostest REQUIRED)
   add_rostest_gtest(test_extract_indices test/test_extract_indices.test test/test_extract_indices.cpp)

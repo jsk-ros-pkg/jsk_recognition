@@ -421,6 +421,7 @@ namespace jsk_pcl_ros
     Eigen::Vector4f center;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr
       segmented_cloud_transformed (new pcl::PointCloud<pcl::PointXYZRGB>);
+    segmented_cloud_transformed->is_dense = segmented_cloud->is_dense;
     // align boxes if possible
     Eigen::Matrix4f m4 = Eigen::Matrix4f::Identity();
     Eigen::Quaternionf q = Eigen::Quaternionf::Identity();
@@ -648,6 +649,7 @@ namespace jsk_pcl_ros
     for (size_t i = 0; i < argsort.size(); i++)
     {
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr segmented_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+      segmented_cloud->is_dense = cloud->is_dense;
       
       pcl_msgs::PointIndices out_indices_msg;
       out_indices_msg.header = input->header;
@@ -683,6 +685,12 @@ namespace jsk_pcl_ros
       geometry_msgs::Pose pose_msg;
       jsk_recognition_msgs::BoundingBox bounding_box;
       bounding_box.label = static_cast<int>(argsort[i]);
+
+      if (!segmented_cloud->is_dense) {
+        std::vector<int> nan_indices;
+        pcl::removeNaNFromPointCloud(*segmented_cloud, *segmented_cloud, nan_indices);
+      }
+
       bool successp = computeCenterAndBoundingBox(
         segmented_cloud, input->header, planes, coefficients, pose_msg, bounding_box);
       if (!successp) {

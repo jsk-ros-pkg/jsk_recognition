@@ -34,6 +34,11 @@ Publishing Topic
 
   Label image each object in param ``~target_names`` is segmented.
 
+* ``~output/proba_image`` (``sensor_msgs/Image``)
+
+  Probability image of each object.
+  The encoding is ``32FCX``, where X is the length of ``~target_names``.
+
 
 Parameters
 ----------
@@ -55,7 +60,7 @@ Parameters
 
 * ``~model_name`` (String, Required)
 
-  Currently ``fcn8s``, ``fcn16s`` or ``fcn32s`` is only supported.
+  Currently ``fcn8s``, ``fcn8s_atonce``, ``fcn16s`` or ``fcn32s`` is only supported.
   See models in https://github.com/wkentaro/fcn/tree/master/fcn/models.
 
 * ``~model_file`` (String, Required)

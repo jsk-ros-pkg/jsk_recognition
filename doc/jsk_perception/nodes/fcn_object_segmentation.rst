@@ -60,7 +60,7 @@ Parameters
 
 * ``~model_name`` (String, Required)
 
-  Currently ``fcn8s``, ``fcn8s_atonce``, ``fcn16s`` or ``fcn32s`` is only supported.
+  Currently ``fcn8s``, ``fcn8s_at_once``, ``fcn16s`` or ``fcn32s`` is only supported.
   See models in https://github.com/wkentaro/fcn/tree/master/fcn/models.
 
 * ``~model_file`` (String, Required)

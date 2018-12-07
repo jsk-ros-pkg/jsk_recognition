@@ -132,4 +132,4 @@ Example
 
 .. code-block:: bash
 
-   roslaunch jsk_perception sample_people_pose_estimation_2d.launch GPU:=0
+   roslaunch jsk_perception sample_people_pose_estimation_2d.launch gpu:=0

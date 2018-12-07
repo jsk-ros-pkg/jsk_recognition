@@ -54,7 +54,7 @@ Use Astra camera with ``openni2_camera`` ROS package
 
 .. code-block:: bash
 
-  sudo apt-get install ros-indigo-openni2-camera ros-indigo-openni2-launch
+  sudo apt-get install ros-$ROS_DISTRO-openni2-camera ros-$ROS_DISTRO-openni2-launch
 
   cd ~/Downloads/Tools_SDK_OpenNI/2-Linux/OpenNI-Linux-x64-2.2/Samples/Bin
 
@@ -78,14 +78,16 @@ Then, edit ``/usr/lib/pkgconfig/libopenni2.pc`` to be like below::
 
 .. code-block:: bash
 
-  cd ~/ros/indigo/src
+  cd <your catkin workspace>/src
+  # if you do not initialize wstools
+  # wstool init .
   wstool set ros-drivers/openni2_camera https://github.com/ros-drivers/openni2_camera.git --git -v indigo-devel -y -u
 
   cd ros-drivers/openni2_camera
-  source /opt/ros/indigo/setup.bash
+  source /opt/ros/$ROS_DISTRO/setup.bash
   catkin bt
 
-  source ~/ros/indigo/devel/setup.bash
+  source <your catkin workspace>/devel/setup.bash
   roslaunch openni2_launch openni2.launch
 
 

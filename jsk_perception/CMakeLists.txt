@@ -178,6 +178,12 @@ if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/slic/slic.cpp)
   execute_process(COMMAND git submodule update slic WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
+if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/node_scripts/deep_sort/deep_sort/README.md)
+  message(WARNING "node_scripts/deep_sort/deep_sort is not exists, download this")
+  execute_process(COMMAND git submodule init deep_sort   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/node_scripts/deep_sort)
+  execute_process(COMMAND git submodule update deep_sort WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/node_scripts/deep_sort)
+endif()
+
 # Build nodelet executables
 include_directories(include ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} slic ${libcmt_INCLUDE_DIRS})
 if(robot_self_filter_FOUND)

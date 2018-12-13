@@ -13,7 +13,3 @@ application_util = imp.load_package(
 
 deep_sort_app = imp.load_source(
     'deep_sort_app', osp.join(abs_path, 'deep_sort/deep_sort_app.py'))
-
-generate_detections = imp.load_source(
-    'generate_detections', osp.join(
-        abs_path, 'deep_sort/tools/generate_detections.py'))

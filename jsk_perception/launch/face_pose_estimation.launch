@@ -1,6 +1,6 @@
 <launch>
   <arg name="gui" default="true" />
-  <arg name="GPU" default="-1" />
+  <arg name="gpu" default="-1" />
   <arg name="launch_openni" default="true" />
   <arg name="model_path" default="auto" />
   <arg name="CAMERA_NS" default="camera" />
@@ -21,7 +21,7 @@
     <remap from="~input/info" to="$(arg INPUT_CAMERA_INFO)" />
     <remap from="~input/depth" to="$(arg INPUT_DEPTH_IMAGE)" />
     <rosparam subst_value="true">
-      gpu: $(arg GPU)
+      gpu: $(arg gpu)
       model_file: $(find jsk_perception)/trained_data/pose_estimation_2d_chainermodel.pkl
       with_depth: true
       scales: [0.38]
@@ -36,7 +36,7 @@
     <remap from="~input/pose_2d" to="people_pose_estimation_2d/pose_2d" />
     <remap from="~input/pose" to="people_pose_estimation_2d/pose" />
     <rosparam subst_value="true">
-      gpu: $(arg GPU)
+      gpu: $(arg gpu)
       model_path: $(arg model_path)
     </rosparam>
   </node>

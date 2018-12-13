@@ -85,6 +85,7 @@
   <run_depend>visualization_msgs</run_depend>
   <run_depend>yaml-cpp</run_depend>
 
+  <test_depend>jsk_perception</test_depend>
   <test_depend>jsk_tools</test_depend>
   <test_depend>roslaunch</test_depend>
   <test_depend>rostest</test_depend>

@@ -48,14 +48,23 @@ Parameters
 
   Target names for classification.
 
+* ``~backend`` (String, Default: ``chainer``)
+
+  Neural network framework.
+  Currently ``chainer`` and ``torch`` are supported.
+
 * ``~model_name`` (String, Required)
 
   Currently ``fcn8s``, ``fcn16s`` or ``fcn32s`` is only supported.
   See models in https://github.com/wkentaro/fcn/tree/master/fcn/models.
 
-* ``~model_h5`` (String, Required)
+* ``~model_file`` (String, Required)
 
-  Saved h5 file for trained model.
+  Saved npz or h5 file for trained model.
+
+* ``~use_mask`` (Bool, default: ``False``)
+
+  If True, ``~input/mask`` is subscribed and ignore black region in the mask image.
 
 * ``~bg_label`` (Int, default: ``0``)
 

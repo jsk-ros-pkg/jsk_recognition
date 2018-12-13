@@ -87,6 +87,8 @@ endif()
 # Download
 # ------------------------------------------------------------------------------------
 
+# download and install learning datasets
+add_custom_target(${PROJECT_NAME}_install_learning_datasets ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_learning_datasets.py)
 # download and install sample data
 add_custom_target(${PROJECT_NAME}_install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
 # download and install trained data

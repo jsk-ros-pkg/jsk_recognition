@@ -85,7 +85,6 @@
   <run_depend>python-fcn-pip</run_depend>  <!-- pip -->
   <!-- }} install fcn -->
   <run_depend>python-sklearn</run_depend>
-  <run_depend>python-tensorflow-pip</run_depend>
   <run_depend>python-yaml</run_depend>
   <run_depend>rosbag</run_depend>
   <run_depend>roscpp</run_depend>

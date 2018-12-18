@@ -65,10 +65,10 @@ class BlockA(chainer.Chain):
             return x + h
 
 
-class DeepSortFeature(chainer.Chain):
+class DeepSortFeatureExtractor(chainer.Chain):
 
     def __init__(self):
-        super(DeepSortFeature, self).__init__()
+        super(DeepSortFeatureExtractor, self).__init__()
 
         with self.init_scope():
             self.conv1_1 = L.Convolution2D(

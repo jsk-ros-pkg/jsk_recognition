@@ -2,7 +2,8 @@ import cv2
 import numpy as np
 import chainer
 
-from deep_sort_net import DeepSortFeature
+from jsk_recognition_utils.chainermodels.deep_sort_net\
+    import DeepSortFeatureExtractor
 
 from vis_bboxes import vis_bboxes
 import deep_sort
@@ -92,7 +93,7 @@ class DeepSortTracker(object):
 
         # feature extractor
         self.gpu = gpu
-        self.extractor = DeepSortFeature()
+        self.extractor = DeepSortFeatureExtractor()
         if pretrained_model is not None:
             chainer.serializers.load_npz(
                 pretrained_model, self.extractor)

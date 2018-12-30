@@ -1,6 +1,6 @@
 #!/usr/bin/env runeus
 
-(ros::load-ros-manifest "jsk_pcl_ros")
+(ros::load-ros-manifest "jsk_recognition_msgs")
 
 (defvar *topic-name* "/cluster_decomposer/boxes")
 (defvar *bounding-box-list* nil)
@@ -22,7 +22,7 @@
     (send *irtviewer* :viewer :viewsurface :flush)
     ))
 
-(ros::subscribe *topic-name* jsk_pcl_ros::BoundingBoxArray #'bounding-box-array-cb 1)
+(ros::subscribe *topic-name* jsk_recognition_msgs::BoundingBoxArray #'bounding-box-array-cb 1)
 
 (unless (boundp '*irtviewer*) (make-irtviewer))
 

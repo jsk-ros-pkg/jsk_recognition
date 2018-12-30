@@ -11,16 +11,16 @@
   (setq *bounding-box-list* (send msg :boxes))
   (when *bounding-box-list*
     (send *irtviewer* :draw-objects :flush nil)
-    (mapcar #'(lambda (b)
-                (let* ((dims (ros::tf-point->pos (send b :dimensions)))
-                       (bx (make-cube (elt dims 0) (elt dims 1) (elt dims 2))))
-                  (send bx :newcoords (ros::tf-pose->coords (send b :pose)))
-                  (send bx :worldcoords)
-                  (send bx :draw-on :flush nil :color #f(1 0 0))
-                  bx))
-            *bounding-box-list*)
+    (dolist (cube (mapcar #'bounding-box->cube *bounding-box-list*))
+      (send cube :draw-on :flush nil :color #f(1 0 0)))
     (send *irtviewer* :viewer :viewsurface :flush)
     ))
+
+(defun bounding-box->cube (b)
+  (let* ((dims (ros::tf-point->pos (send b :dimensions)))
+         (cube (make-cube (elt dims 0) (elt dims 1) (elt dims 2))))
+    (send cube :newcoords (ros::tf-pose->coords (send b :pose)))
+    cube))
 
 (ros::subscribe *topic-name* jsk_recognition_msgs::BoundingBoxArray #'bounding-box-array-cb 1)
 

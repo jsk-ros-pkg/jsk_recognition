@@ -8,10 +8,10 @@ except:
 
 import rospy
 import numpy as np
-from sklearn.cross_validation import cross_val_score
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.externals import joblib
+
 
 class RandomForestServer:
     def __init__(self, clf):

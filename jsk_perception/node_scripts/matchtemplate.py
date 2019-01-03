@@ -2,11 +2,11 @@
 
 import roslib; roslib.load_manifest('jsk_perception')
 import rospy
-import numpy
+import numpy as np
 import thread
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import *
-from jsk_perception.msg import *
+from jsk_recognition_msgs.msg import Rect
 import cv
 from cv_bridge import CvBridge, CvBridgeError
 
@@ -22,15 +22,15 @@ from jsk_perception.cfg import matchtemplateConfig as ConfigType
 #   match method: 6type
 
 # publish topic:
-#   ~/current_template    [sensor_msgs/Image]
-#   ~/result              [geometry_msgs/TransformStamped]
-#   ~/debug_image         [sensor_msgs/Image]
+#   current_template    [sensor_msgs/Image]
+#   result              [geometry_msgs/TransformStamped]
+#   debug_image         [sensor_msgs/Image]
 
 # subscribe topic:
-#   ~/reference           [sensor_msgs/Image]
-#   ~/search              [sensor_msgs/Image]
-#   ~/set_reference_point [geometry_msgs/PointStamped]
-#   ~/set_search_rect     [jsk_perception/Rect]
+#   reference           [sensor_msgs/Image]
+#   search              [sensor_msgs/Image]
+#   set_reference_point [geometry_msgs/PointStamped]
+#   set_search_rect     [jsk_recognition_msgs/Rect]
 
 # return (1st-val,1st-loc,2nd-val,2nd-loc)
 def _MinMaxLock2nd(arr,ex_size,is_min):
@@ -66,9 +66,11 @@ class MepConverter:
         self.clock = [rospy.Time.now()]
 
         # publisher
-        self.reference_pub = rospy.Publisher("current_template",Image)
-        self.result_pub = rospy.Publisher("result",TransformStamped)
-        self.debug_pub = rospy.Publisher("debug_image",Image)
+        self.reference_pub = rospy.Publisher(
+            "current_template", Image, queue_size=1)
+        self.result_pub = rospy.Publisher(
+            "result", TransformStamped, queue_size=1)
+        self.debug_pub = rospy.Publisher("debug_image", Image, queue_size=1)
 
         # subscriber
         self.reference_image_sub = rospy.Subscriber(rospy.resolve_name("reference"),
@@ -146,7 +148,13 @@ class MepConverter:
     def set_reference (self, rect):
         if self.reference_image_msg == None: return
         try:
-            cv_image = cv.GetImage(self.bridge.imgmsg_to_cv(self.reference_image_msg, "bgr8"))
+            # imgmsg -> cv2 -> cv
+            cv2_image = self.bridge.imgmsg_to_cv2(
+                self.reference_image_msg, "bgr8")
+            cv_image = cv.CreateImageHeader(
+                (cv2_image.shape[1], cv2_image.shape[0]), cv.IPL_DEPTH_8U, 3)
+            cv.SetData(cv_image, cv2_image.tostring(),
+                       cv2_image.dtype.itemsize * 3 * cv2_image.shape[1])
             self.set_template('',ref_image=cv_image, ref_rect=rect)
         except CvBridgeError, e:
             print e
@@ -214,7 +222,14 @@ class MepConverter:
     def ser_image_callback (self, msg):
         # initialize debug image
         if self.show_debug_image:
-            debug_image = cv.CloneImage(cv.GetImage(self.bridge.imgmsg_to_cv(msg, "bgr8")))
+            # imgmsg -> cv2 -> cv
+            debug_img_cv2 = self.bridge.imgmsg_to_cv2(msg, "bgr8")
+            debug_image = cv.CreateImageHeader(
+                (debug_img_cv2.shape[1], debug_img_cv2.shape[0]),
+                cv.IPL_DEPTH_8U, 3)
+            cv.SetData(
+                debug_image, debug_img_cv2.tostring(),
+                debug_img_cv2.dtype.itemsize * 3 * debug_img_cv2.shape[1])
 
         self.lockobj.acquire()
 
@@ -238,12 +253,26 @@ class MepConverter:
             result = TransformStamped(header=msg.header)
 
             try:
-                if color_space in ['mono8','bgr8']:
-                    search_image = cv.GetImage(self.bridge.imgmsg_to_cv(msg, color_space))
+                if color_space == 'mono8':
+                    # imgmsg -> cv2 -> cv
+                    ser_img_cv2 = self.bridge.imgmsg_to_cv2(msg, 'mono8')
+                    search_image = cv.CreateImageHeader(
+                        (ser_img_cv2.shape[1], ser_img_cv2.shape[0]),
+                        cv.IPL_DEPTH_8U, 1)
+                    cv.SetData(
+                        search_image, ser_img_cv2.tostring(),
+                        ser_img_cv2.dtype.itemsize * 1 * ser_img_cv2.shape[1])
                 else:
-                    cv_image = cv.GetImage(self.bridge.imgmsg_to_cv(msg, 'bgr8'))
-                    search_image = cv.CreateImage(cv.GetSize(cv_image),cv_image.depth,cv_image.nChannels)
-                    cv.CvtColor(cv_image,search_image,cv.CV_BGR2HSV)
+                    # imgmsg -> cv2 -> cv
+                    ser_img_cv2 = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
+                    search_image = cv.CreateImageHeader(
+                        (ser_img_cv2.shape[1], ser_img_cv2.shape[0]),
+                        cv.IPL_DEPTH_8U, 3)
+                    cv.SetData(
+                        search_image, ser_img_cv2.tostring(),
+                        ser_img_cv2.dtype.itemsize * 3 * ser_img_cv2.shape[1])
+                    if color_space != 'bgr8':
+                        cv.CvtColor(ser_img_cv2, search_image, cv.CV_BGR2HSV)
 
                 image_size = cv.GetSize(search_image)
                 reference_size = cv.GetSize(reference_image)
@@ -276,13 +305,19 @@ class MepConverter:
                 result.transform.rotation.w = 1 # not rotate, temporary
                 self.result_pub.publish(result)
 
-                self.reference_pub.publish(self.bridge.cv_to_imgmsg(reference_image, "passthrough"))
+                # cv -> cv2 -> imgmsg
+                ref_img = np.asarray(cv.GetMat(reference_image))
+                if ref_img.ndim == 2 and ref_img.dtype == np.uint8:
+                    ref_msg = self.bridge.cv2_to_imgmsg(ref_img, "mono8")
+                else:
+                    ref_msg = self.bridge.cv2_to_imgmsg(ref_img, "bgr8")
+                self.reference_pub.publish(ref_msg)
 
                 # self feedback
                 if self.auto_search_area:
                     val_x = result_pt[0]-search_rect[2]/2
                     val_y = result_pt[1]-search_rect[3]/2
-                    ser_scale = max(2,5+numpy.log(status[0])) # ???
+                    ser_scale = max(2,5+np.log(status[0])) # ???
                     new_ser_rect = (
                         min(max(val_x,0),image_size[0]-search_rect[2]),
                         min(max(val_y,0),image_size[1]-search_rect[3]),
@@ -326,7 +361,10 @@ class MepConverter:
                 cv.PutText(debug_image, '%.1f fps'%fps, (msg.width-150,40),font,cv.CV_RGB(255,0,0))
                 self.clock = self.clock[-30:]
             # publish debug image
-            self.debug_pub.publish(self.bridge.cv_to_imgmsg(debug_image, "bgr8"))
+            # cv -> cv2 -> imgmsg
+            debug_img = np.asarray(cv.GetMat(debug_image))
+            debug_msg = self.bridge.cv2_to_imgmsg(debug_img, "bgr8")
+            self.debug_pub.publish(debug_msg)
 
         return
 

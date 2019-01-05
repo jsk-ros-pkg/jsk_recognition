@@ -59,7 +59,7 @@ Parameters
 
 * ``~match_method`` (Int, default: ``1``)
 
-  Choose from ``CV_TM_SQDIFF (0)``, ``CV_TM_SQDIFF_NORMED (1)``, ``CV_TM_CCORR (2)``, ``CV_TM_CCORR_NORMED (3)``, ``CV_TM_CCOEFF (4)`` and ``CV_TM_CCOEFF_NORMED (5)``.
+  Choose from ``TM_SQDIFF (0)``, ``TM_SQDIFF_NORMED (1)``, ``TM_CCORR (2)``, ``TM_CCORR_NORMED (3)``, ``TM_CCOEFF (4)`` and ``TM_CCOEFF_NORMED (5)``.
 
 * ``~template_color_space`` (String, default: ``mono8``)
 

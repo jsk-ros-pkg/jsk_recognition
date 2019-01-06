@@ -416,6 +416,9 @@ namespace jsk_pcl_ros
    jsk_recognition_msgs::BoundingBox& bounding_box)
   {
     bounding_box.header = header;
+    if (segmented_cloud->points.size() == 0) {
+      return true;
+    }
 
     bool is_center_valid = false;
     Eigen::Vector4f center;
@@ -713,7 +716,7 @@ namespace jsk_pcl_ros
         br_->sendTransform(tf::StampedTransform(transform, input->header.stamp, target_frame,
                                                 tf_prefix_ + (boost::format("output%02u") % (i)).str()));
       }
-    }
+    } // for each indices
 
     // Both bounding box and centroid are computed with transformed point cloud for the target frame.
     if (align_boxes_ && !align_boxes_with_plane_) {

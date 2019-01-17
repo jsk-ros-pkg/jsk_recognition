@@ -39,7 +39,7 @@ class TrainFCN(object):
         # Model
         parser.add_argument(
             '--model_name', type=str, default='fcn32s',
-            choices=['fcn32s', 'fcn16s', 'fcn8s', 'fcn8s_atonce'])
+            choices=['fcn32s', 'fcn16s', 'fcn8s', 'fcn8s_at_once'])
 
         # Training parameters
         parser.add_argument('--gpu', type=int, default=0)
@@ -158,7 +158,7 @@ class TrainFCN(object):
             fcn16s_path = fcn16s.download()
             S.load_npz(fcn16s_path, fcn16s)
             self.model.init_from_fcn16s(fcn16s_path, fcn16s)
-        elif self.model_name == 'fcn8s_atonce':
+        elif self.model_name == 'fcn8s_at_once':
             self.model = fcn.models.FCN8sAtOnce(n_class=n_class)
             vgg = fcn.models.VGG16()
             vgg_path = vgg.download()

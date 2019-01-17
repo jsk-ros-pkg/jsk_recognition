@@ -69,6 +69,8 @@ class FCNObjectSegmentation(ConnectionBasedTransport):
             self.model = fcn.models.FCN16s(n_class=n_class)
         elif model_name == 'fcn8s':
             self.model = fcn.models.FCN8s(n_class=n_class)
+        elif model_name == 'fcn8s_at_once':
+            self.model = fcn.models.FCN8sAtOnce(n_class=n_class)
         else:
             raise ValueError('Unsupported ~model_name: {}'.format(model_name))
         rospy.loginfo('Loading trained model: {0}'.format(model_file))

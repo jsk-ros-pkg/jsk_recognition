@@ -36,7 +36,7 @@ path_to_awesome_dataset/
 
 - `--model_name` (`string`, default: `fcn32s`)
 
-  Model name. Currently, `fcn32s`, `fcn16s`, `fcn8s` and `fcn8s_atonce` are supported.
+  Model name. Currently, `fcn32s`, `fcn16s`, `fcn8s` and `fcn8s_at_once` are supported.
 
 - `--gpu` (`int`, default: `0`)
 

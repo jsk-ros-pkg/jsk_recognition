@@ -77,7 +77,11 @@ namespace jsk_pcl_ros
   protected:
     virtual void stopHelper();
     virtual bool getShapeTransform(ShapeHandle h,
+#if ROS_VERSION_MINIMUM(1,14,0) // melodic
+                                   Eigen::Isometry3d &transform) const;
+#else
                                    Eigen::Affine3d &transform) const;
+#endif
     template <typename PointT>
     void cloudMsgCallback(
       const sensor_msgs::PointCloud2::ConstPtr &cloud_msg)

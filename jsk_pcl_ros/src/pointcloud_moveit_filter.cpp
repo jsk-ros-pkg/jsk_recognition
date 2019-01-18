@@ -103,7 +103,11 @@ namespace jsk_pcl_ros
     return true;
   }
 
+#if ROS_VERSION_MINIMUM(1,14,0) // melodic
+  bool PointCloudMoveitFilter::getShapeTransform(ShapeHandle h, Eigen::Isometry3d &transform) const
+#else
   bool PointCloudMoveitFilter::getShapeTransform(ShapeHandle h, Eigen::Affine3d &transform) const
+#endif
   {
     ShapeTransformCache::const_iterator it = transform_cache_.find(h);
     if (it == transform_cache_.end())

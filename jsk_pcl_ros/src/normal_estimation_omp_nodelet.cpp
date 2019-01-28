@@ -112,6 +112,7 @@ namespace jsk_pcl_ros
         p.x = cloud->points[i].x;
         p.y = cloud->points[i].y;
         p.z = cloud->points[i].z;
+        p.rgb = cloud->points[i].rgb;
         p.normal_x = normal_cloud->points[i].normal_x;
         p.normal_y = normal_cloud->points[i].normal_y;
         p.normal_z = normal_cloud->points[i].normal_z;

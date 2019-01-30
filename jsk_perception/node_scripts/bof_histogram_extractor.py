@@ -51,9 +51,10 @@ class BoFHistogramExtractor(ConnectionBasedTransport):
         self._sub_label = message_filters.Subscriber('~input/label', Image)
         use_async = rospy.get_param('~approximate_sync', False)
         if use_async:
+            slop = rospy.get_param('~slop', 0.1)
             sync = message_filters.ApproximateTimeSynchronizer(
                 [self._sub_feature, self._sub_label],
-                queue_size=self.queue_size, slop=0.1)
+                queue_size=self.queue_size, slop=slop)
         else:
             sync = message_filters.TimeSynchronizer(
                 [self._sub_feature, self._sub_label],

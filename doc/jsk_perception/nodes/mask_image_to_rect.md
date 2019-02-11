@@ -1,5 +1,7 @@
 # MaskImageToRect
-Convert a mask image into geometry_msgs::PolygonStamped.
+![](images/mask_image_to_rect.png)
+
+Convert a mask image into jsk_recognition_msgs/RectArray.
 
 ## Subscribing Topic
 * `~input` (`sensor_msgs/Image`)
@@ -7,9 +9,10 @@ Convert a mask image into geometry_msgs::PolygonStamped.
   Input mask image.
 
 ## Publishing Topic
-* `~output` (`geometry_msgs/PolygonStamped`)
+* `~output` (`jsk_recognition_msgs/RectArray`)
 
-  PolygonStamped message which only contains two points. Minimum point and Maximum point to represent bounding box in image.
+  Array of rectangle which contains only one rectangle.
+  It is bounding rectangle of input mask.
 
 ## Sample
 

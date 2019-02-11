@@ -181,6 +181,17 @@ def main():
             md5='ba1226f8dd816514e610a746278be02e',
          )
 
+    # node_scripts/deep_sort_tracker_node.py
+    path = 'trained_data/deepsort_chainermodel.npz'
+    if _chainer_available:
+        download_data(
+            pkg_name=PKG,
+            path=path,
+            url='https://drive.google.com/'
+            'uc?id=1td1CQzH0RefCJN9iCiYpsHGh5ZiN8E48',
+            md5='51c69c182b3bb04a728d256e93a3be36',
+        )
+
     # node_scripts/feature_based_object_recognition.py
     download_data(
         pkg_name=PKG,

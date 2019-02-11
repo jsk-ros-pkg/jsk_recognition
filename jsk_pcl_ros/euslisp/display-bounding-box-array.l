@@ -1,9 +1,9 @@
 #!/usr/bin/env runeus
 
-(ros::load-ros-manifest "jsk_pcl_ros")
-
 (defvar *topic-name* "/cluster_decomposer/boxes")
 (defvar *bounding-box-list* nil)
+
+(load "package://jsk_pcl_ros/euslisp/bounding-box-to-cube.l")
 
 (ros::roseus "boundingboxarray_subscriber")
 
@@ -11,18 +11,12 @@
   (setq *bounding-box-list* (send msg :boxes))
   (when *bounding-box-list*
     (send *irtviewer* :draw-objects :flush nil)
-    (mapcar #'(lambda (b)
-                (let* ((dims (ros::tf-point->pos (send b :dimensions)))
-                       (bx (make-cube (elt dims 0) (elt dims 1) (elt dims 2))))
-                  (send bx :newcoords (ros::tf-pose->coords (send b :pose)))
-                  (send bx :worldcoords)
-                  (send bx :draw-on :flush nil :color #f(1 0 0))
-                  bx))
-            *bounding-box-list*)
+    (dolist (cube (mapcar #'bounding-box->cube *bounding-box-list*))
+      (send cube :draw-on :flush nil :color #f(1 0 0)))
     (send *irtviewer* :viewer :viewsurface :flush)
     ))
 
-(ros::subscribe *topic-name* jsk_pcl_ros::BoundingBoxArray #'bounding-box-array-cb 1)
+(ros::subscribe *topic-name* jsk_recognition_msgs::BoundingBoxArray #'bounding-box-array-cb 1)
 
 (unless (boundp '*irtviewer*) (make-irtviewer))
 

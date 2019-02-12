@@ -54,7 +54,7 @@ namespace jsk_pcl_ros
     m_occupancyMaxX(std::numeric_limits<double>::max()),
     m_occupancyMinY(-std::numeric_limits<double>::max()),
     m_occupancyMaxY(std::numeric_limits<double>::max()),
-    m_useVertex(true)
+    m_useContactSurface(true)
   {
     delete m_octree;
     m_octree = NULL;
@@ -77,7 +77,7 @@ namespace jsk_pcl_ros
     privateNh.param("occupancy_min_y", m_occupancyMinY,m_occupancyMinY);
     privateNh.param("occupancy_max_y", m_occupancyMaxY,m_occupancyMaxY);
 
-    privateNh.param("use_vertex", m_useVertex,m_useVertex);
+    privateNh.param("use_contact_surface", m_useContactSurface,m_useContactSurface);
 
     double r, g, b, a;
     privateNh.param("color_unknown/r", r, 0.5);
@@ -304,26 +304,36 @@ namespace jsk_pcl_ros
       m_octree->prune();
   }
 
-  void OctomapServerContact::insertContactSensor(const std::vector<jsk_recognition_msgs::ContactSensor> &datas) {
-    std_msgs::Header tmpHeader;
-    tmpHeader.frame_id = m_worldFrameId;
-    tmpHeader.stamp = ros::Time::now();
+  void OctomapServerContact::insertContactSensor(const jsk_recognition_msgs::ContactSensorArray::ConstPtr& msg) {
+    std::vector<jsk_recognition_msgs::ContactSensor> datas = msg->datas;
 
-    point3d pmin( m_occupancyMinX, m_occupancyMinY, m_occupancyMinZ);
-    point3d pmax( m_occupancyMaxX, m_occupancyMaxY, m_occupancyMaxZ);
+    // setup tf transformation between octomap and each link
+    {
+      std_msgs::Header tmpHeader;
+      tmpHeader.frame_id = m_worldFrameId;
+      tmpHeader.stamp = msg->header.stamp;
+      if(!m_selfMask->assumeFrame(tmpHeader)) {
+        ROS_ERROR_STREAM("failed tf transformation in insertContactSensor");
+        return;
+      }
+    }
+
+    // clamp min and max points  cf. https://github.com/OctoMap/octomap/issues/146
+    point3d pmin_raw( m_occupancyMinX, m_occupancyMinY, m_occupancyMinZ );
+    point3d pmax_raw( m_occupancyMaxX, m_occupancyMaxY, m_occupancyMaxZ );
+    point3d pmin = m_octree->keyToCoord(m_octree->coordToKey(pmin_raw));
+    point3d pmax = m_octree->keyToCoord(m_octree->coordToKey(pmax_raw));
     float diff[3];
     unsigned int steps[3];
     double resolution = m_octreeContact->getResolution();
     for (int i = 0; i < 3; ++i) {
       diff[i] = pmax(i) - pmin(i);
       steps[i] = floor(diff[i] / resolution);
-      //      std::cout << "bbx " << i << " size: " << diff[i] << " " << steps[i] << " steps\n";
+      // std::cout << "bbx " << i << " size: " << diff[i] << " " << steps[i] << " steps\n";
     }
 
-    m_selfMask->assumeFrame(tmpHeader);
-
     // loop for grids of octomap
-    if (m_useVertex) {
+    if (m_useContactSurface) {
       std::vector< std::vector<bool> > containFlag(datas.size(), std::vector<bool>(8));
       point3d p = pmin;
       for (unsigned int x = 0; x < steps[0]; ++x) {
@@ -406,72 +416,33 @@ namespace jsk_pcl_ros
       }
     }
     else {
-      std::vector<bool> containFlag(datas.size());
-      point3d p = pmin;
-      for (unsigned int x = 0; x < steps[0]; ++x) {
-        p.x() += resolution;
-        for (unsigned int y = 0; y < steps[1]; ++y) {
-          p.y() += resolution;
-          for (unsigned int z = 0; z < steps[2]; ++z) {
-            // std::cout << "querying p=" << p << std::endl;
-            p.z() += resolution;
-            // loop for vertices of each gird
-            point3d vertexOffset(-resolution/2.0, -resolution/2.0, -resolution/2.0);
-            point3d vertex;
-            vertex = p + vertexOffset;
-            // std::cout << "vertex = " << vertex << std::endl;
-            // loop for each body link
-            for (int l=0; l<datas.size(); l++) {
-              if (m_selfMask->getMaskContainmentforNamedLink(vertex(0), vertex(1), vertex(2), datas[l].link_name) == robot_self_filter::INSIDE) {
-                // std::cout << "inside vertex = " << vertex << std::endl;
-                containFlag[l] = true;
-              }
-              else {
-                containFlag[l] = false;
-              }
-            }
-
-            // update probability of grid
-            bool containFlagLinkSum = false;
-            std::vector<bool> containFlagVerticesSum(datas.size(), false);
-            std::vector<bool> containFlagVerticesProd(datas.size(), true);
-            bool insideFlag = false;
-            bool surfaceFlag = false;
-            for (int l = 0; l < datas.size(); l++) {
-              if (containFlag[l]) {
-                containFlagLinkSum = true;
-                containFlagVerticesSum[l] = true;
-              }
-              else {
-                containFlagVerticesProd[l] = false;
-              }
-            }
-            insideFlag = containFlagLinkSum; // when all elements is true
-            for (int l = 0; l < datas.size(); l++) {
-              if (containFlagVerticesSum[l] && !(containFlagVerticesProd[l]) ) {
-                if (datas[l].contact) {
-                  surfaceFlag = true;
-                }
-              }
-            }
-            if (insideFlag) { // inside
-              octomap::OcTreeKey pKey;
-              if (m_octreeContact->coordToKeyChecked(p, pKey)) {
-                m_octreeContact->updateNode(pKey, m_octreeContact->getProbMissContactSensorLog());
-                // std::cout << "find inside grid and find key. p = " << vertex << std::endl;
-              }
-            }
-            else if (surfaceFlag) { // surface
-              octomap::OcTreeKey pKey;
-              if (m_octreeContact->coordToKeyChecked(p, pKey)) {
-                m_octreeContact->updateNode(pKey, m_octreeContact->getProbHitContactSensorLog());
-                // std::cout << "find surface grid and find key. p = " << vertex << std::endl;
-              }
-            }
-          }
-          p.z() = pmin.z();
+      point3d vertexOffset(-resolution/2.0, -resolution/2.0, -resolution/2.0);
+#pragma omp parallel for
+      for (unsigned int cnt = 0; cnt < steps[0] * steps[1] * steps[2]; ++cnt) {
+        // get grid center
+        point3d p;
+        {
+          unsigned int id[3];
+          id[0] = cnt / (steps[1] * steps[2]);
+          id[1] = (cnt % (steps[1] * steps[2])) / steps[2];
+          id[2] = (cnt % (steps[1] * steps[2])) % steps[2];
+          p.x() = pmin(0) + resolution * id[0];
+          p.y() = pmin(1) + resolution * id[1];
+          p.z() = pmin(2) + resolution * id[2];
         }
-        p.y() = pmin.y();
+        point3d vertex;
+        vertex = p + vertexOffset;
+        // loop for each body link
+        for (int l=0; l<datas.size(); l++) {
+          if (m_selfMask->getMaskContainmentforNamedLink(vertex(0), vertex(1), vertex(2), datas[l].link_name) == robot_self_filter::INSIDE) {
+            octomap::OcTreeKey pKey;
+            if (m_octreeContact->coordToKeyChecked(p, pKey)) {
+#pragma omp critical
+              m_octreeContact->updateNode(pKey, m_octreeContact->getProbMissContactSensorLog());
+            }
+            break;
+          }
+        }
       }
     }
     m_octreeContact->updateInnerOccupancy();
@@ -479,8 +450,7 @@ namespace jsk_pcl_ros
 
   void OctomapServerContact::insertContactSensorCallback(const jsk_recognition_msgs::ContactSensorArray::ConstPtr& msg) {
     NODELET_INFO("insert contact sensor");
-    std::vector<jsk_recognition_msgs::ContactSensor> datas = msg->datas;
-    insertContactSensor(datas);
+    insertContactSensor(msg);
 
     publishAll(msg->header.stamp);
   }

@@ -34,7 +34,6 @@ find_package(catkin REQUIRED COMPONENTS
   jsk_pcl_ros_utils
   # jsk_recognition_msgs
   jsk_recognition_utils
-  jsk_rviz_plugins # kinfu.h uses jsk_rviz_plugins/OverlayText.h
   jsk_topic_tools
   # kdl_conversions
   # kdl_parser

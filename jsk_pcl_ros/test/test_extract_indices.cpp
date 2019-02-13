@@ -68,7 +68,18 @@ protected:
     ros::Time start_time = ros::Time::now();
     while (!isReady()) {
       publishData();
+#if ROS_VERSION_MINIMUM(1,14,0) // melodic
+      /*
+        on melodic, it hugs after first test.
+        not sure why and if we move SetUp code to class function, then it will raise
+           terminate called after throwing an instance of 'boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >'
+           what():  boost: mutex lock failed in pthread_mutex_lock: Invalid argument
+        error on exit.
+        related ? -> https://github.com/ros/ros_comm/issues/838
+       */
+#else
       ros::spinOnce();
+#endif
       ros::Duration(0.5).sleep();
     }
     ros::Time end_time = ros::Time::now();
@@ -96,6 +107,8 @@ protected:
   virtual bool isReady()
   {
     boost::mutex::scoped_lock lock(mutex_);
+    ROS_INFO("even_cloud_ %d, odd_cloud_ %d, even_organized_cloud_ %d, odd_organized_cloud_ %d",
+             !!even_cloud_, !!odd_cloud_, !!even_organized_cloud_, !!odd_organized_cloud_);
     return (even_cloud_ && odd_cloud_ && even_organized_cloud_ && odd_organized_cloud_);
   }
 
@@ -195,6 +208,10 @@ TEST_F(ExtractIndicesTest, testOddOrganizedIndices)
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "test_extract_indices");
+#if ROS_VERSION_MINIMUM(1,14,0) // melodic
+  ros::AsyncSpinner spinner(1);
+  spinner.start();
+#endif
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

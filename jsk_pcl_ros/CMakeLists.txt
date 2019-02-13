@@ -34,7 +34,7 @@ find_package(catkin REQUIRED COMPONENTS
   jsk_pcl_ros_utils
   # jsk_recognition_msgs
   jsk_recognition_utils
-  jsk_rviz_plugins # kinfu.h uses jsk_rviz_plugins/OverlayText.h
+  # jsk_rviz_plugins # kinfu.h uses jsk_rviz_plugins/OverlayText.h, but jsk_recognition should not depends on jsk_visualization
   jsk_topic_tools
   # kdl_conversions
   # kdl_parser
@@ -374,7 +374,11 @@ jsk_pcl_nodelet(src/voxel_grid_large_scale_nodelet.cpp
   "jsk_pcl/VoxelGridLargeScale" "voxel_grid_large_scale")
 jsk_pcl_nodelet(src/ppf_registration_nodelet.cpp
   "jsk_pcl/PPFRegistration" "ppf_registration")
-if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
+
+# kinfu.h uses jsk_rviz_plugins/OverlayText.h, but jsk_recognition should not depends on jsk_visualization
+find_package(jsk_rviz_plugins QUIET)
+if (PCL_GPU_KINFU_LARGE_SCALE_FOUND AND jsk_rviz_plugins_FOUND)
+  include_directories(${jsk_rviz_plugins_INCLUDE_DIRS})
   jsk_pcl_nodelet(src/kinfu_nodelet.cpp
     "jsk_pcl/Kinfu" "kinfu")
   include_directories(/usr/local/cuda/include)

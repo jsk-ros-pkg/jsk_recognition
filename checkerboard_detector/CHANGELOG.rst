@@ -2,6 +2,9 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.6 (2018-11-02)
 ------------------
 * Fix Cmake indent (`#2345 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2345>`_)

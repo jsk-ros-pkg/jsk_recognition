@@ -2,6 +2,11 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros, jsk_pcl_ros_utils] Use ccache if installed to make it fast to generate object file (`#2342 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2342>`_ )
+* Contributors: Iori Yanokura
+
 1.2.6 (2018-11-02)
 ------------------
 * [jsk_pcl_ros_utils/cluster_point_indices_to_point_indices] Concatenate all indices in case of index==-1 (`#2330 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2330>`_)

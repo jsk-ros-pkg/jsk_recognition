@@ -2,6 +2,76 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_perception/ssd_object_detector.py] Add header for publishing result image (`#2367 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2367>`_ )
+* [jsk_perception] Add deep_sort_tracker_node.py (`#2351 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2351>`_ )
+
+  * [jsk_perception/deep_sort_net.py] Fixed deep_sort_net import
+  * [jsk_perception/test/deep_sort_tracker.test] Disable gpu in test
+  * [jsk_perception/sample_deep_sort_tracker.launch] Refactor
+  * [jsk_perception/deep_sort_tracker_node.py] Modified import file not to depend on tensorflow
+  * Revert "[jsk_perception/deep_sort_tracker] Add dependencies of tensorflow"
+    This reverts commit 7dac944cfc9292d81b8bdb90d89e8100eda2bf3a.
+  * [jsk_perception/deep_sort_tracker] Add dependencies of tensorflow
+  * [jsk_perception/deep_sort_tracker] Install git submodule directory to node_scripts/deep_sort/deep_sort
+  * [jsk_perception/deep_sort_tracker_node.py] Add target_labels param to specify input labels/recst
+  * [jsk_perception/deep_sort_tracker_node.py] Add test
+  * [jsk_perception/deep_sort_tracker_node.py] Renamed publish image topic vis -> viz
+  * [jsk_perception/deep_sort_tracker_node.py] Publish labelarray
+  * [jsk_perception/sample/deep_sort_tracker] Add pretrained model load
+  * [jsk_perception/deep_sort_tracker_noder.py] Add node
+  * [jsk_perception/deep_sort_tracker_node.py] Add sample
+  * [jsk_perception/install_trained_data.py] Add deepsort trained model
+  * [jsk_perception] Add deep_sort by gitsubmodule
+
+* [doc] [jsk_perception] Add documentation (`#2385 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2385>`_ )
+
+  * Rewrite matchtemplate.py with cv2
+  * Add test for matchtemplate.py
+  * Enable random_forest_server.test only in indigo.
+  * Add sample for matchtemplate.py
+  * Fix conversion for latest cv_bridge: imgmsg <-> cv2 <-> cv
+  * Add test for fisheye_ray.py
+  * Add sample for fisheye_ray.py
+  * Fix for undefined global variable in fisheye_ray.py
+  * Add test for random_forest_server
+  * Publish ~output/debug_image in random_forest_client_sample.py
+  * Fix for executing RandomForestClassifier
+  * Remove unused sklearn module which causes ImportError in sklearn>=0.20
+  * Add ~slop param to bof_histogram_extractor
+  * Show viewer if gui:=true in sample_background_subtraction
+  * Remove unused remapping in sparse_image.test
+  * Fix sparse_image_encoder/decoder sample
+
+* [jsk_perception] Support fcn8s_atonce model in fcn_object_segmentation.py (`#2375 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2375>`_ )
+
+  * Fix typo: fcn8s_atonce -> fcn8s_at_once
+  * Support fcn8s_atonce model in fcn_object_segmentation.py
+
+* [jsk_perception] fix load path for kalmanlib.l (`#2377 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2377>`_ )
+* [doc] [jsk_perception] [jsk_recognition_utils] Add guide to image recognition with deep learning (`#2365 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2365>`_)
+
+  * Add doc for image annotation
+  * Add annotate_images_with_labelme to index
+  * Add dataset class for semantic segmentation
+  * Add install_learning_datasets script
+  * Download datasets during catkin build
+  * Add .gitignore in learning_datasets/
+  * Add train_fcn script
+  * Set default learning_rate to valid value
+  * Enable plotting from remote host as well
+  * Add doc for training FCN
+  * Add doc for starting deep learning with image dataset
+  * Add how to create dataset, where to store it in documentation
+  * Dump param for fcn_object_segmentation.py
+  * Add InstanceSegmentationDataset
+  * Add train script for Mask-RCNN
+  * Fix model_name and outputs in train_fcn.md
+  * Add doc for training Mask-RCNN
+
+* Contributors: Kei Okada, Yuki Furuta, Yuto Uchimi, Iori Yanokura
+
 1.2.6 (2018-11-02)
 ------------------
 * Add hand pose detection (`#2324 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2324>`_)

@@ -2,6 +2,9 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.6 (2018-11-02)
 ------------------
 * Install 'sample' and 'test' dir into CATKIN_PACKAGE_SHARE_DESTINATION (`#2345 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2345>`_)

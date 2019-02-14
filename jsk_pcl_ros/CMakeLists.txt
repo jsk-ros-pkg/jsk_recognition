@@ -51,7 +51,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf_conversions
   )
 find_package(PkgConfig)
-pkg_check_modules(ml_classifieres ml_classifiers QUIET)
+pkg_check_modules(ml_classifiers ml_classifiers QUIET)
 # only run in hydro
 find_package(PCL REQUIRED)
 find_package(OpenMP)
@@ -232,7 +232,7 @@ jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PointCloudToSTL" "pointcloud
 
 if(ml_classifiers_FOUND)
   jsk_pcl_nodelet(src/colorize_segmented_RF_nodelet.cpp
-    "jsk_pcl/ColorizeRandomForest" "colorize_random_forest_result")
+    "jsk_pcl/ColorizeRandomForest" "colorize_random_forest")
   jsk_pcl_nodelet(src/colorize_random_points_RF_nodelet.cpp
     "jsk_pcl/ColorizeMapRandomForest" "colorize_random_foreset_result2")
 endif(ml_classifiers_FOUND)

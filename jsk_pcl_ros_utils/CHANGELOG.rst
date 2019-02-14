@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.7 (2019-02-14)
+------------------
 * [jsk_pcl_ros, jsk_pcl_ros_utils] Use ccache if installed to make it fast to generate object file (`#2342 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2342>`_ )
 * Contributors: Iori Yanokura
 

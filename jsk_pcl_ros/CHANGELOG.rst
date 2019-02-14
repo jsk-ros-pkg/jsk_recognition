@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.7 (2019-02-14)
+------------------
 * add melodic test (`#2355 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2355>`_ )
 
   * fix for melodic, use ros::AsyncSpinner

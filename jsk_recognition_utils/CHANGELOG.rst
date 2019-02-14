@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.7 (2019-02-14)
+------------------
 * [jsk_perception] Add deep_sort_tracker_node.py (`#2351 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2351>`_ )
   * [jsk_recognition_utils/deep_sort_net.py] Renamed network name DeepSortFeature -> DeepSortFeatureExtractor
   * [jsk_perception/deep_sort/deep_sort_net.py] Moved to jsk_recognition_utils's chainermodels

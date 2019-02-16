@@ -60,7 +60,7 @@ namespace jsk_pcl_ros
       }
     if (!pnh_->getParam("po2", tmp_pass2))
       {
-        NODELET_WARN("~po is not specified, so set to 0.06");
+        NODELET_WARN("~po2 is not specified, so set to 0.06");
       }
     if (!pnh_->getParam("sum_num", sum_num_))
       {

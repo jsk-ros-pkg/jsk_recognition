@@ -234,7 +234,7 @@ if(ml_classifiers_FOUND)
   jsk_pcl_nodelet(src/colorize_segmented_RF_nodelet.cpp
     "jsk_pcl/ColorizeRandomForest" "colorize_random_forest")
   jsk_pcl_nodelet(src/colorize_random_points_RF_nodelet.cpp
-    "jsk_pcl/ColorizeMapRandomForest" "colorize_random_foreset_result2")
+    "jsk_pcl/ColorizeMapRandomForest" "colorize_map_random_forest")
 endif(ml_classifiers_FOUND)
 jsk_pcl_nodelet(src/environment_plane_modeling_nodelet.cpp
   "jsk_pcl/EnvironmentPlaneModeling" "environment_plane_modeling")

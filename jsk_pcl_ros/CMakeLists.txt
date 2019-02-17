@@ -500,6 +500,7 @@ if (CATKIN_ENABLE_TESTING)
     if(ml_classifiers_FOUND)
       # Wait for upstream: ml_classifiers is not yet released in jade, kinetic, ...
       # (https://github.com/jsk-ros-pkg/jsk_recognition/pull/2385#issuecomment-451349430)
+      add_rostest(test/test_colorize_map_random_forest.test)
       add_rostest(test/test_colorize_random_forest.test)
     endif()
     add_rostest(test/test_octree_voxel_grid.test)

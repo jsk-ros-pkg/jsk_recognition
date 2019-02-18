@@ -1,0 +1,25 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_handle_estimator.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_handle_estimator"
+        name="test_handle_estimator"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="30" retry="6">
+    <rosparam>
+      topic_0: /handle_estimator/output
+      timeout_0: 30
+      topic_1: /handle_estimator/output_preapproach
+      timeout_1: 30
+      topic_2: /handle_estimator/output_best
+      timeout_2: 30
+      topic_3: /handle_estimator/output_selected
+      timeout_3: 30
+      topic_4: /handle_estimator/output_selected_preapproach
+      timeout_4: 30
+    </rosparam>
+  </test>
+
+</launch>

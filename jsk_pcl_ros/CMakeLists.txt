@@ -517,6 +517,7 @@ if (CATKIN_ENABLE_TESTING)
       # because of jsk_pcl/OrganizedEdgeDetector
       add_rostest(test/test_edge_depth_refinement.test)
     endif()
+    add_rostest(test/test_environment_plane_modeling.test)
     add_rostest(test/test_euclidean_segmentation.test)
     # TODO(iory): https://github.com/jsk-ros-pkg/jsk_recognition/issues/2007
     # add_rostest(test/test_people_detection.test DEPENDENCIES install_test_data)

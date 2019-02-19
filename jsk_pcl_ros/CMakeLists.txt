@@ -520,6 +520,7 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/test_euclidean_segmentation.test)
     # TODO(iory): https://github.com/jsk-ros-pkg/jsk_recognition/issues/2007
     # add_rostest(test/test_people_detection.test DEPENDENCIES install_test_data)
+    add_rostest(test/test_joint_state_static_filter.test)
     if(PCL_GPU_KINFU_LARGE_SCALE_FOUND)
       add_rostest(test/test_kinfu.test)
     endif()

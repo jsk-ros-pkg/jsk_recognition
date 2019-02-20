@@ -1,0 +1,44 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <node name="static_polygon_array_publisher"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/StaticPolygonArrayPublisher">
+    <rosparam>
+      use_periodic: true
+      periodic_rate: 30.0
+      frame_ids:
+        - map
+        - map
+        - map
+      polygon_array:
+        - [[3, 0, 0], [0, 3, 0], [0, 1, 2], [1, 0, 2]]
+        - [[-1, -1, 1], [4, 3, 0], [3, 4, 0]]
+        - [[3, -1, 1], [3, -3, 1], [0, -2, 1]]
+    </rosparam>
+  </node>
+
+  <node name="dynparam_setter"
+        pkg="dynamic_reconfigure" type="dynparam"
+        args="set plane_rejector angle_thr 0.15707963268"/>
+
+  <node name="plane_rejector"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/PlaneRejector">
+    <remap from="~input_polygons" to="static_polygon_array_publisher/output_polygons"/>
+    <remap from="~input_coefficients" to="static_polygon_array_publisher/output_coefficients"/>
+    <rosparam>
+      processing_frame_id: map
+      reference_axis: [0, 0, 1]
+      allow_flip: true
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_plane_rejector.rviz"/>
+  </group>
+
+</launch>

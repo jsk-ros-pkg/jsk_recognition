@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_normal_concatenater.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_normal_concatenater"
+        name="test_normal_concatenater"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="30" retry="3">
+    <rosparam>
+      topic_0: /normal_concatenater/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

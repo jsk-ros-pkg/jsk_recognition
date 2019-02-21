@@ -38,7 +38,16 @@ macro(jsk_feature detector extractor exec_name)
   set(EXEC_NAME ${exec_name})
   configure_file(src/imagefeatures.cpp.in src/${exec_name}.cpp) #${CMAKE_CURRENT_BINARY_DIR}/
   add_executable(${exec_name} src/${exec_name}.cpp)
-  set_target_properties(${exec_name} PROPERTIES COMPILE_FLAGS "-msse2 -O3" LINK_FLAGS "-msse2 -O3")
+  # https://stackoverflow.com/questions/28939652/how-to-detect-sse-sse2-avx-avx2-avx-512-avx-128-fma-kcvi-availability-at-compile
+  execute_process(
+    COMMAND gcc -dM -E -
+    COMMAND grep SSE
+    INPUT_FILE /dev/null
+    RESULT_VARIABLE GCC_SUPPORT_SSE)
+  message(STATUS "Check GCC supports SSE ${GCC_SUPPORT_SSE}")
+  if(NOT ${GCC_SUPPORT_SSE})
+    set_target_properties(${exec_name} PROPERTIES COMPILE_FLAGS "-msse2 -O3" LINK_FLAGS "-msse2 -O3")
+  endif()
   if($ENV{ROS_DISTRO} STREQUAL "groovy" OR $ENV{ROS_DISTRO} STREQUAL "hydro")
     set_target_properties(${exec_name} PROPERTIES COMPILE_FLAGS "-DOPENCV_NON_FREE")
   endif()

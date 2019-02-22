@@ -519,6 +519,7 @@ if (CATKIN_ENABLE_TESTING)
     endif()
     add_rostest(test/test_environment_plane_modeling.test)
     add_rostest(test/test_euclidean_segmentation.test)
+    add_rostest(test/test_find_object_on_plane.test)
     # TODO(iory): https://github.com/jsk-ros-pkg/jsk_recognition/issues/2007
     # add_rostest(test/test_people_detection.test DEPENDENCIES install_test_data)
     add_rostest(test/test_joint_state_static_filter.test)

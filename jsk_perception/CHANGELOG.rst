@@ -2,6 +2,9 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.7 (2019-02-14)
 ------------------
 * [jsk_perception/ssd_object_detector.py] Add header for publishing result image (`#2367 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2367>`_ )

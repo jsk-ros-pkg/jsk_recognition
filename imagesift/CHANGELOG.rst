@@ -2,6 +2,11 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix arm build regressions, closes `#2396 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2396>`_ (`#2397 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2397>`_ )
+* Contributors: Kei Okada
+
 1.2.7 (2019-02-14)
 ------------------
 

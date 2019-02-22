@@ -2,6 +2,9 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.7 (2019-02-14)
 ------------------
 * [resized_image_transport] install resized_image_transport (`#2390 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2390>`_ )

@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.9 (2019-02-23)
+------------------
 * add QT_LIBRARIES Qt5::Widgets to fix 'cannot find -lQt5::Widgets' error on debian stretch (`#2398 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2398>`_ )
 * Contributors: Kei Okada
 

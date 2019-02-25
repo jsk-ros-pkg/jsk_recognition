@@ -517,6 +517,7 @@ if (CATKIN_ENABLE_TESTING)
       # because of jsk_pcl/OrganizedEdgeDetector
       add_rostest(test/test_edge_depth_refinement.test)
     endif()
+    add_rostest(test/test_edgebased_cube_finder.test)
     add_rostest(test/test_environment_plane_modeling.test)
     add_rostest(test/test_euclidean_segmentation.test)
     add_rostest(test/test_find_object_on_plane.test)

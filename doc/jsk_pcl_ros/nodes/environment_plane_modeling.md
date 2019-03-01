@@ -36,11 +36,13 @@ These 5 topics described above must be synchronized.
 
 * `~input/leg_bounding_box` (`jsk_recognition_msgs/BoundingBox`)
 
-  Sorry, editing now...
+  Optional input bounding box.
+
+  Used only when `~complete_footprint_region` is true.
 
 * `/move_base_simple/goal` (`geometry_msgs/PoseStamped`)
 
-  Sorry, editing now...
+  Optional input pose which a user wants robot to move to.
 
 
 ## Publishing Topic
@@ -79,18 +81,22 @@ These 5 topics described above must be synchronized.
 
 * `/footstep_simple/goal` (`geometry_msgs/PoseStamped`)
 
-  Sorry, editing now...
+  Output pose of suitable grid.
+
+  Only published when `/move_base_simple/goal` is subscribed.
 
 
 ## Parameter
 
 * `~complete_footprint_region` (Bool, default: `False`)
 
-  Sorry, editing now...
+  Set to true if you want to complete grid map by `~input/leg_bounding_box`.
 
 * `~footprint_frames` (List of String, default: `[]`)
 
-  Sorry, editing now...
+  Frame ID used for looking up ground plane for footprint.
+
+  Used only when `~complete_footprint_region` is true.
 
 ## Sample
 

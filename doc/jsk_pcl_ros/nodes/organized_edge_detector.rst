@@ -47,7 +47,7 @@ Publishing Topics
 
   Debug image.
   Visualize the input and output image of ``cv::HoughLinesP``.
-.. image:: images/organized_edge_detector_hough_image.png
+  .. image:: images/organized_edge_detector_hough_image.png
 
 
 Parameters

@@ -266,13 +266,9 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/add_point_indices.test)
     roslaunch_add_file_check(test/add_point_indices.test)
     add_rostest(test/cluster_point_indices_to_point_indices.test)
-    # unexpected error
     add_rostest(test/point_indices_to_mask_image.test)
-    # because of unreleased topic_tools/transform on hydro
-    # TODO(iory): Fix this. (https://github.com/jsk-ros-pkg/jsk_recognition/issues/2339)
-    # add_rostest(test/pointcloud_to_pcd.test)
+    add_rostest(test/pointcloud_to_pcd.test)
     add_rostest(test/pointcloud_to_point_indices.test)
-    # because of unreleased jsk_tools/test_topic_published.py on hydro
     add_rostest(test/bounding_box_array_to_bounding_box.test)
     add_rostest(test/evaluate_box_segmentation_by_gt_box.test)
     add_rostest(test/evaluate_voxel_segmentation_by_gt_box.test)

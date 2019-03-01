@@ -6,6 +6,7 @@ What is this?
 
 
 .. image:: ./images/solidity_rag_merge.png
+
 (red region in top image is segmented using euclidean clustering, yellow, purple and red region is segmented by solidity_rag_merge.)
 
 Segment image region which has high solidity, using `RAG <http://scikit-image.org/docs/dev/auto_examples/plot_rag.html>`_.

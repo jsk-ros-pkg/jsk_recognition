@@ -46,6 +46,7 @@ class PeopleMaskPublisher(ConnectionBasedTransport):
         self.hand_ratio = rospy.get_param('~hand_ratio', 0.33)
         self.hand_width_ratio = rospy.get_param('~hand_width_ratio', 0.8)
         self.face_ratio = rospy.get_param('~face_ratio', 0.6)
+        self.face_shoulder_ratio = rospy.get_param('~face_shoulder_ratio', 0.5)
         self.face_width_margin_ratio = rospy.get_param('~face_width_margin_ratio', 1.3)
 
         self.pub = self.advertise('~output', Image, queue_size=1)
@@ -158,10 +159,18 @@ class PeopleMaskPublisher(ConnectionBasedTransport):
 
         mask_img = np.zeros((img.shape[0], img.shape[1]), dtype=np.bool)
         for person_pose in people_pose:
+            x_max = -10000
+            x_min = 10000
+
             limb_poses = []
             nose_pose = None
             neck_pose = None
-            target_limb_names = ['Nose', 'Neck', 'REye', 'LEye', 'REar', 'LEar']
+            target_limb_names = ['Nose',
+                                 'Neck',
+                                 'REye',
+                                 'LEye',
+                                 'REar',
+                                 'LEar']
             for limb_name in target_limb_names:
                 try:
                     limb_index = person_pose.limb_names.index(limb_name)
@@ -174,12 +183,30 @@ class PeopleMaskPublisher(ConnectionBasedTransport):
                 except ValueError:
                     continue
 
+            shoulder_limb_poses = []
+            shoulder_limb_names = ['RShoulder',
+                                   'LShoulder']
+            for limb_name in shoulder_limb_names:
+                try:
+                    shoulder_limb_index = person_pose.limb_names.index(limb_name)
+                    shoulder_limb_pose = person_pose.poses[shoulder_limb_index]
+                    shoulder_limb_poses.append(shoulder_limb_pose)
+                except ValueError:
+                    continue
+            if len(shoulder_limb_poses) == 2:
+                positions_x = [pose.position.x for pose in shoulder_limb_poses]
+                x_mid = sum(positions_x) / len(positions_x)
+                x_max = max(positions_x) * self.face_shoulder_ratio + \
+                        x_mid * (1.0 - self.face_shoulder_ratio)
+                x_min = min(positions_x) * self.face_shoulder_ratio + \
+                        x_mid * (1.0 - self.face_shoulder_ratio)
+
             if nose_pose == None or neck_pose == None:
                 continue
 
             positions_x = [pose.position.x for pose in limb_poses]
-            x_max = max(positions_x)
-            x_min = min(positions_x)
+            x_max = max(max(positions_x), x_max)
+            x_min = min(min(positions_x), x_min)
             width = (x_max - x_min) * self.face_width_margin_ratio
             x = (x_max + x_min) / 2.0 - width / 2.0
 

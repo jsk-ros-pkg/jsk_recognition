@@ -43,6 +43,8 @@ Parameters
 
   Which limb part to create mask of.
 
+  ``RHand``, ``LHand``, ``Nose`` and ``all`` is allowed.
+
 * ``~arms_score_threshold`` (Float, Default: ``0.25``)
 
   Threshold of arm score.

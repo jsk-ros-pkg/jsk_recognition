@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
+import os
 import sys
+import yaml
 
 import chainer
 import numpy as np
@@ -17,6 +19,8 @@ except ImportError:
     sys.exit(1)
 
 import cv_bridge
+from dynamic_reconfigure.server import Server
+from jsk_perception.cfg import MaskRCNNInstanceSegmentationConfig as Config
 from jsk_recognition_msgs.msg import ClusterPointIndices
 from jsk_recognition_msgs.msg import Label
 from jsk_recognition_msgs.msg import LabelArray
@@ -43,20 +47,34 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
         chainer.global_config.train = False
         chainer.global_config.enable_backprop = False
 
-        self.fg_class_names = rospy.get_param('~fg_class_names')
+        fg_class_names = rospy.get_param('~fg_class_names')
+        if isinstance(fg_class_names, str) and os.path.exists(fg_class_names):
+            rospy.loginfo('Loading class names from file: {}'.format(fg_class_names))
+            with open(fg_class_names, 'r') as f:
+                fg_class_names = yaml.load(f)
+        self.fg_class_names = fg_class_names
+
         pretrained_model = rospy.get_param('~pretrained_model')
         self.classifier_name = rospy.get_param(
             "~classifier_name", rospy.get_name())
 
         n_fg_class = len(self.fg_class_names)
-        self.model = chainer_mask_rcnn.models.MaskRCNNResNet(
-            n_layers=50,
-            n_fg_class=n_fg_class,
-            pretrained_model=pretrained_model,
-        )
-        self.model.score_thresh = rospy.get_param('~score_thresh', 0.7)
+        rospy.loginfo('Loading model for {} classes'.format(n_fg_class))
+        network_params = {
+            'n_layers': 50,
+            'n_fg_class': n_fg_class,
+            'pretrained_model': pretrained_model,
+        }
+        for key in ['anchor_scales', 'min_size', 'max_size']:
+            if rospy.has_param('~' + key):
+                network_params[key] = rospy.get_param('~' + key)
+        rospy.loginfo('Loading model with params: {}'.format(str(network_params)))
+        self.model = chainer_mask_rcnn.models.MaskRCNNResNet(**network_params)
+
         if self.gpu >= 0:
             self.model.to_gpu()
+
+        self.srv = Server(Config, self.config_callback)
 
         self.pub_indices = self.advertise(
             '~output/cluster_indices', ClusterPointIndices, queue_size=1)
@@ -81,6 +99,10 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
 
     def unsubscribe(self):
         self.sub.unregister()
+
+    def config_callback(self, config, level):
+        self.model.score_thresh = config.score_thresh
+        return config
 
     def callback(self, imgmsg):
         bridge = cv_bridge.CvBridge()

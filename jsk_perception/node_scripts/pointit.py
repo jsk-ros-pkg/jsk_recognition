@@ -49,8 +49,13 @@ class PointIt(ConnectionBasedTransport):
         self.objects = []
 
         # parameters
-        self.dist_threshold = rospy.get_param("~dist_threshold", 0.1)
+        self.min_dist_threshold = rospy.get_param("~min_dist_threshold", 0.0)
+        self.max_dist_threshold = rospy.get_param("~max_dist_threshold", 5.0)
         self.min_norm_threshold = rospy.get_param("~min_norm_threshold", 0.2)
+        self.use_arm = rospy.get_param("~use_arm", ["rarm", "larm"])
+
+        if "rarm" not in self.use_arm or "larm" not in self.use_arm:
+            rospy.logfatal("~use_arm must contain at least 'rarm' or 'larm'.")
 
         # tf listener
         use_tf2_buffer_client = rospy.get_param("~use_tf2_buffer_client", True)
@@ -135,25 +140,29 @@ class PointIt(ConnectionBasedTransport):
         out_markers = []
         for i, pose in enumerate(ppl_msg.poses):
             # for each person
-            rwrist = find_pose("RWrist", pose)
-            rfinger = find_pose(["RHand5", "RHand6", "RHand7", "RHand8"], pose)
-            if rwrist is not None and rfinger is not None:
-                rclosest, rdist = self.get_closest_bbox((rwrist, rfinger), objects)
-                if rdist is not None and rdist < self.dist_threshold:
-                    out_bboxes.append(rclosest)
-                rmarker = self.get_marker((rwrist, rfinger), frame_id)
-                rmarker.id = 2 * i
-                out_markers.append(rmarker)
+            if "rarm" in self.use_arm:
+                rwrist = find_pose("RWrist", pose)
+                rfinger = find_pose(["RHand5", "RHand6", "RHand7", "RHand8"], pose)
+                if rwrist is not None and rfinger is not None:
+                    rclosest, rdist = self.get_closest_bbox((rwrist, rfinger), objects)
+                    if rdist is not None and\
+                       self.min_dist_threshold <= rdist <= self.max_dist_threshold:
+                        out_bboxes.append(rclosest)
+                    rmarker = self.get_marker((rwrist, rfinger), frame_id)
+                    rmarker.id = 2 * i
+                    out_markers.append(rmarker)
 
-            lwrist = find_pose("LWrist", pose)
-            lfinger = find_pose(["LHand5", "LHand6", "LHand7", "LHand8"], pose)
-            if lwrist is not None and lfinger is not None:
-                lclosest, ldist = self.get_closest_bbox((lwrist, lfinger), objects)
-                if ldist is not None and ldist < self.dist_threshold:
-                    out_bboxes.append(lclosest)
-                lmarker = self.get_marker((lwrist, lfinger), frame_id)
-                lmarker.id = 2 * i + 1
-                out_markers.append(lmarker)
+            if "larm" in self.use_arm:
+                lwrist = find_pose("LWrist", pose)
+                lfinger = find_pose(["LHand5", "LHand6", "LHand7", "LHand8"], pose)
+                if lwrist is not None and lfinger is not None:
+                    lclosest, ldist = self.get_closest_bbox((lwrist, lfinger), objects)
+                    if ldist is not None and\
+                       self.min_dist_threshold <= ldist <= self.max_dist_threshold:
+                        out_bboxes.append(lclosest)
+                    lmarker = self.get_marker((lwrist, lfinger), frame_id)
+                    lmarker.id = 2 * i + 1
+                    out_markers.append(lmarker)
 
         # publish
         if out_bboxes:

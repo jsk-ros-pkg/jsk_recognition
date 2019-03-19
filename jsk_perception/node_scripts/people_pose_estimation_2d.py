@@ -178,12 +178,10 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
                         dx = abs(x - c)
                         e = np.exp(- (dx ** 2 + dy ** 2) / (2 * sigma ** 2))
                         k[0][0][y][x] = 1 / (sigma ** 2 * 2 * np.pi) * e
-                with chainer.cuda.get_device_from_id(self.hand_net._device_id):
-                    k = chainer.cuda.to_gpu(k)
+                k = chainer.cuda.to_gpu(k, device=self.gpu)
                 self.hand_gaussian_kernel = k
-            chainer.global_config.train = False
-            chainer.global_config.enable_backprop = False
-
+        chainer.global_config.train = False
+        chainer.global_config.enable_backprop = False
 
     def subscribe(self):
         if self.with_depth:
@@ -336,8 +334,9 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         raise ValueError('Unsupported backend: {0}'.format(self.backend))
 
     def _pose_estimate_chainer_backend(self, bgr_img):
+        if self.gpu >= 0:
+            chainer.cuda.get_device_from_id(self.gpu).use()
         xp = self.pose_net.xp
-        device_id = self.pose_net._device_id
 
         org_h, org_w, _ = bgr_img.shape
         if not (self.width is None or self.height is None):
@@ -356,8 +355,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
             x = np.transpose(np.float32(
                 padded_img[:, :, :, np.newaxis]), (3, 2, 0, 1)) / 256 - 0.5
             if self.gpu >= 0:
-                with chainer.cuda.get_device_from_id(device_id):
-                    x = chainer.cuda.to_gpu(x)
+                x = chainer.cuda.to_gpu(x)
             x = chainer.Variable(x)
             pafs, heatmaps = self.pose_net(x)
             paf = pafs[-1]
@@ -412,7 +410,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
             peaks_order = chainer.cuda.to_cpu(peaks_order)
             all_peaks = all_peaks[np.argsort(peaks_order)]
         all_peaks[:, 3] = xp.arange(peak_counter, dtype=np.float32)
-        if self.gpu != -1:
+        if self.gpu >= 0:
             all_peaks = chainer.cuda.to_cpu(all_peaks)
             peaks_order = chainer.cuda.to_cpu(peaks_order)
         all_peaks = np.split(all_peaks, np.cumsum(
@@ -446,8 +444,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         vec = np.vstack(target_candidates_B)[
             :, :2] - np.vstack(target_candidates_A)[:, :2]
         if self.gpu >= 0:
-            with chainer.cuda.get_device_from_id(device_id):
-                vec = chainer.cuda.to_gpu(vec)
+            vec = chainer.cuda.to_gpu(vec)
         norm = xp.sqrt(xp.sum(vec ** 2, axis=1)) + eps
         vec = vec / norm[:, None]
         start_end = zip(np.round(np.mgrid[np.vstack(target_candidates_A)[:, 1].reshape(-1, 1):np.vstack(target_candidates_B)[:, 1].reshape(-1, 1):(mid_num * 1j)]).astype(np.int32),
@@ -672,6 +669,8 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         raise ValueError('Unsupported backend: {0}'.format(self.backend))
 
     def _hand_estimate_chainer_backend(self, bgr, people_joint_positions):
+        if self.gpu >= 0:
+            chainer.cuda.get_device_from_id(self.gpu).use()
         # https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/29ea7e24dce4abae30faecf769855823ad7bb637/src/openpose/hand/handDetector.cpp
         for joint_positions in people_joint_positions:
             # crop hand image for each person
@@ -720,7 +719,6 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
 
     def _hand_estimate_chainer_backend_each(self, hand_bgr, cx, cy, left_hand):
         xp = self.hand_net.xp
-        device_id = self.hand_net._device_id
 
         if left_hand:
             hand_bgr = cv2.flip(hand_bgr, 1)  # 1 = vertical
@@ -731,8 +729,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         x = x / 256 - 0.5
 
         if self.gpu >= 0:
-            with chainer.cuda.get_device_from_id(device_id):
-                x = chainer.cuda.to_gpu(x)
+            x = chainer.cuda.to_gpu(x)
         x = chainer.Variable(x)
 
         heatmaps = self.hand_net(x)
@@ -754,8 +751,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
                 heatmap = gaussian_filter(heatmaps[i], sigma=self.hand_gaussian_sigma)
                 hmaps.append(heatmap)
         else:
-            with chainer.cuda.get_device_from_id(device_id):
-                heatmaps = chainer.cuda.to_gpu(heatmaps)
+            heatmaps = chainer.cuda.to_gpu(heatmaps)
             heatmaps = F.convolution_2d(
                 heatmaps[:, xp.newaxis], self.hand_gaussian_kernel,
                 stride=1, pad=int(self.hand_gaussian_ksize / 2))

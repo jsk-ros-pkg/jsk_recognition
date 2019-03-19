@@ -38,8 +38,6 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
         super(MaskRCNNInstanceSegmentation, self).__init__()
         # gpu
         self.gpu = rospy.get_param('~gpu', 0)
-        if self.gpu >= 0:
-            chainer.cuda.get_device_from_id(self.gpu).use()
         chainer.global_config.train = False
         chainer.global_config.enable_backprop = False
 
@@ -56,7 +54,7 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
         )
         self.model.score_thresh = rospy.get_param('~score_thresh', 0.7)
         if self.gpu >= 0:
-            self.model.to_gpu()
+            self.model.to_gpu(self.gpu)
 
         self.pub_indices = self.advertise(
             '~output/cluster_indices', ClusterPointIndices, queue_size=1)
@@ -87,7 +85,10 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
         img = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='rgb8')
         img_chw = img.transpose(2, 0, 1)  # C, H, W
 
+        if self.gpu >= 0:
+            chainer.cuda.get_device_from_id(self.gpu).use()
         bboxes, masks, labels, scores = self.model.predict([img_chw])
+
         bboxes = bboxes[0]
         masks = masks[0]
         labels = labels[0]

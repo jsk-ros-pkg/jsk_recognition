@@ -1,0 +1,21 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_multi_plane_sac_segmentation.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_multi_plane_sac_segmentation"
+        name="test_multi_plane_sac_segmentation"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="60" retry="6">
+    <rosparam>
+      topic_0: /multi_plane_sac_segmentation/output_indices
+      timeout_0: 60
+      topic_1: /multi_plane_sac_segmentation/output_coefficients
+      timeout_1: 60
+      topic_2: /multi_plane_sac_segmentation/output_polygons
+      timeout_2: 60
+    </rosparam>
+  </test>
+
+</launch>

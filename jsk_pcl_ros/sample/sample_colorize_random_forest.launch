@@ -1,0 +1,33 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml" />
+
+  <node name="random_forest_server"
+        pkg="jsk_perception" type="random_forest_server.py">
+    <remap from="predict" to="random_forest_classify_server"/>
+    <param name="random_forest_train_file" value="$(find jsk_pcl_ros)/sample/random_forest_33_features_random_x_data.txt" />
+    <param name="random_forest_train_class_file" value="$(find jsk_pcl_ros)/sample/random_forest_random_y_data.txt" />
+  </node>
+
+  <node name="colorize_random_forest"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ColorizeRandomForest"
+        clear_params="true">
+    <remap from="~input" to="/kinect_head/depth_registered/points" />
+    <remap from="~classify_server" to="random_forest_classify_server"/>
+    <rosparam>
+      rs: 0.03
+      po: 0.02
+      po2: 0.2
+      sum_num: 500
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args=" -d $(find jsk_pcl_ros)/sample/rviz/colorize_random_forest.rviz"/>
+  </group>
+
+</launch>

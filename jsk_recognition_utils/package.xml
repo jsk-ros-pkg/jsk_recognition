@@ -21,6 +21,7 @@
   <build_depend>jsk_topic_tools</build_depend>
   <build_depend>pcl_msgs</build_depend>
   <build_depend>pcl_ros</build_depend>
+  <build_depend>qtbase5-dev</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>tf2_ros</build_depend>

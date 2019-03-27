@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.10 (2019-03-27)
+-------------------
 * Fix error on setting device number other than 0 on multiple gpu env. (`#2412 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2412>`_)
 
   * face_pose_estimation: support multi gpu env

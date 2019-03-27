@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.10 (2019-03-27)
+-------------------
 * Add qtbase5-dev as a package.xml dependency for jsk_recognition_utils. (`#2417 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2417>`_)
   Needed since CMakeLists.txt tries to depend on it.
   Signed-off-by: Chris Lalancette <clalancette@openrobotics.org>

@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.10 (2019-03-27)
+-------------------
 * use (MOVEIT_VERSION_MAJOR == 0 and MOVEIT_VERSION_MINOR < 6), since moveit is upgraded to 1.0 (`#2416 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2416>`_)
 * [doc] [jsk_pcl_ros_utils] [jsk_pcl_ros] Add documentation (`#2393 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2393>`_)
 

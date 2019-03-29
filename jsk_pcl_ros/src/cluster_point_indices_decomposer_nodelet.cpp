@@ -417,6 +417,7 @@ namespace jsk_pcl_ros
   {
     bounding_box.header = header;
     if (segmented_cloud->points.size() == 0) {
+      NODELET_WARN("segmented cloud size is zero");
       return true;
     }
 

@@ -2,6 +2,48 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.10 (2019-03-27)
+-------------------
+* use (MOVEIT_VERSION_MAJOR == 0 and MOVEIT_VERSION_MINOR < 6), since moveit is upgraded to 1.0 (`#2416 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2416>`_)
+* [doc] [jsk_pcl_ros_utils] [jsk_pcl_ros] Add documentation (`#2393 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2393>`_)
+
+  * Add test for InteractiveCuboidLikelihood
+  * Add dependency on jsk_interactive_marker to jsk_pcl_ros
+  * Remove unused nodes in sample_plane_supported_cuboid_estimator.launch
+  * Set queue_size explicitly for publisher in sample_simulate_tabletop_cloud.py
+  * Add test for EdgebasedCubeFinder
+  * Add sample for EdgebasedCubeFinder
+  * Add test for FindObjectOnPlane
+  * Add sample for FindObjectOnPlane
+  * Add test for EnvironmentPlaneModeling
+  * Add sample for EnvironmentPlaneModeling
+  * Add test for JointStateStaticFilter
+  * Add sample for JointStateStaticFilter
+  * Install additional rosbag file for move & stop joints
+  * Add test for MultiPlaneSACSegmentation
+  * Add sample for MultiPlaneSACSegmentation
+  * Fix for assertion error (ptr != 0) when subscribing only ~input
+  * Add test for HandleEstimator
+  * Add sample for HandleEstimator
+  * Add test for VoxelGridDownsampleManager/Decoder
+  * Add sample for VoxelGridDownsampleManager/Decoder
+  * Add test for ColorizeMapRandomForest
+  * Add sample for ColorizeMapRandomForest
+  * Fix executable name for ColorizeMapRandomForest
+  * Fix names in ColorizeMapRandomForest
+  * Run test for ColorizeRandomForest only when ml_classifiers is found
+  * Add doc for ColorizeRandomForest
+  * Add test for ColorizeRandomForest
+  * Add sample for ColorizeRandomForest
+  * Fix typo in CMakeLists.txt in order to build ColorizeRandomForest
+  * Fix names in ColorizeRandomForest
+  * Add test for SelectedClusterPublisher
+  * Add sample for SelectedClusterPublisher
+  * Add test for BilateralFilter
+  * Add sample for BilateralFilter
+
+* Contributors: Kei Okada, Yuto Uchimi
+
 1.2.9 (2019-02-23)
 ------------------
 

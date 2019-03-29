@@ -1,0 +1,48 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml" />
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="euclidean_clustering"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/EuclideanClustering /sample_manager">
+    <remap from="~input" to="/right_hand_camera/depth_registered/points"/>
+    <rosparam>
+      min_size: 100
+      max_size: 50000
+    </rosparam>
+  </node>
+
+  <node name="cluster_indices_decomposer"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer /sample_manager">
+    <remap from="~input" to="/right_hand_camera/depth_registered/points"/>
+    <remap from="~target" to="/euclidean_clustering/output"/>
+  </node>
+
+  <node name="index_publisher"
+        pkg="jsk_pcl_ros" type="sample_int_publisher_from_cluster_indices.py">
+    <remap from="~input" to="/euclidean_clustering/output"/>
+  </node>
+
+  <node name="selected_cluster_publisher"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/SelectedClusterPublisher /sample_manager">
+    <remap from="~input" to="/right_hand_camera/depth_registered/points"/>
+    <remap from="~indices" to="/euclidean_clustering/output"/>
+    <remap from="~selected_index" to="/index_publisher/output"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+      pkg="rviz" type="rviz"
+      args="-d $(find jsk_pcl_ros)/sample/rviz/selected_cluster_publisher.rviz">
+    </node>
+  </group>
+
+</launch>

@@ -1,0 +1,71 @@
+<launch>
+
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="voxel_grid"
+        pkg="nodelet" type="nodelet"
+        args="load pcl/VoxelGrid /sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <rosparam>
+      filter_field_name: z
+      filter_limit_min: 0.0
+      filter_limit_max: 5.0
+      leaf_size: 0.02
+    </rosparam>
+  </node>
+
+  <node name="euclidean_clustering"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/EuclideanClustering /sample_manager">
+    <remap from="~input" to="voxel_grid/output"/>
+    <rosparam>
+      tolerance: 0.02
+      max_size: 300000
+      min_size: 300
+    </rosparam>
+  </node>
+
+  <node name="line_segment_detector"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/LineSegmentDetector /sample_manager">
+    <remap from="~input" to="voxel_grid/output"/>
+    <remap from="~input_indices" to="euclidean_clustering/output"/>
+    <rosparam>
+      outlier_threshold: 0.05
+      max_iteration: 1000
+      min_indices: 300
+      min_length: 0.5
+    </rosparam>
+  </node>
+
+  <node name="parallel_edge_finder"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ParallelEdgeFinder /sample_manager">
+    <remap from="~input_indices" to="line_segment_detector/output/inliers"/>
+    <remap from="~input_coefficients" to="line_segment_detector/output/coefficients"/>
+    <rosparam>
+      angular_threshold: 0.1
+    </rosparam>
+  </node>
+
+  <node name="edgebased_cube_finder"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/EdgebasedCubeFinder /sample_manager">
+    <remap from="~input" to="voxel_grid/output"/>
+    <remap from="~input_edges" to="parallel_edge_finder/output_edges_groups"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/edgebased_cube_finder.rviz">
+    </node>
+  </group>
+
+</launch>

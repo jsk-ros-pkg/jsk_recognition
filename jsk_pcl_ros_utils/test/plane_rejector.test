@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_plane_rejector.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_plane_rejector"
+        name="test_plane_rejector"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="30" retry="3">
+    <rosparam>
+      topic_0: /plane_rejector/output_polygons
+      timeout_0: 30
+      topic_1: /plane_rejector/output_coefficients
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

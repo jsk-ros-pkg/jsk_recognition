@@ -2,6 +2,24 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.10 (2019-03-27)
+-------------------
+* Fix error on setting device number other than 0 on multiple gpu env. (`#2412 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2412>`_)
+
+  * face_pose_estimation: support multi gpu env
+    mask_rcnn_instance_segmentation.py: support multi gpu env
+    people_pose_estimation_2d.py: support multi gpu env
+    ssd_object_detector.py: support multi gpu env
+
+* Re-enable draw_classification_result.test (`#2401 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2401>`_)
+
+  * Re-enable draw_classification_result.test
+  * Increase slop for bof_histogram_extractor
+
+* Re-enable color_histogram.test( `#2400 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2400>`_)
+
+* Contributors: Yuki Furuta, Yuto Uchimi
+
 1.2.9 (2019-02-23)
 ------------------
 

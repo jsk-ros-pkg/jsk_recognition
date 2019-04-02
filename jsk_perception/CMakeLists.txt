@@ -450,10 +450,9 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/tile_image.test)
     jsk_add_rostest(test/vgg16_object_recognition.test)
     jsk_add_rostest(test/ssd_object_detector.test)
-    # FIXME: Unstable on Travis/Jenkins
-    # if(TARGET bing)
-    #   jsk_add_rostest(test/bing.test)
-    # endif()
+    if(TARGET bing)
+      jsk_add_rostest(test/bing.test)
+    endif()
     if("$ENV{ROS_DISTRO}" STRLESS "jade")
       # Wait for upstream: ml_classifiers is not yet released in jade, kinetic, ...
       # (https://github.com/jsk-ros-pkg/jsk_recognition/pull/2385#issuecomment-451349430)

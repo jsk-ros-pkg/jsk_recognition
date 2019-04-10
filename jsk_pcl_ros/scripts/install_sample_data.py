@@ -84,9 +84,6 @@ def main():
         url='https://drive.google.com/uc?id=19VujodKsX7EJJwHetqFGCRYz0JBtZQ6h',
         md5='9bdc1500610a1a97480cae6fcf261811',
         extract=True,
-        compressed_bags=[
-            'sample/data/pr2_sink.bag',
-        ],
     )
 
     download_data(
@@ -110,9 +107,6 @@ def main():
         url='https://drive.google.com/uc?id=1r7Hj4ujB8Ml5QHg7_Q6kd3rbtL6kzTbh',
         md5='a6f4d560830c93e0710fef0e7518a099',
         extract=True,
-        compressed_bags=[
-            'sample/data/octomap_contact.bag',
-        ],
     )
 
     download_data(

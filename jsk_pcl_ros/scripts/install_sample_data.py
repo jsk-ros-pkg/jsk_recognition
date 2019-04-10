@@ -56,6 +56,7 @@ def main():
         compressed_bags=[
             'sample/data/2016-07-06-12-16-43-person-in-point-cloud/vision.compressed.bag',  # NOQA
         ],
+        force=True,
     )
 
     download_data(
@@ -77,6 +78,7 @@ def main():
         compressed_bags=[
             'sample/data/sample_add_color_from_image_20170319.bag',
         ],
+        force=False,
     )
 
     download_data(
@@ -100,6 +102,7 @@ def main():
         compressed_bags=[
             'sample/data/sample_door_handle_detector.bag',
         ],
+        force=False,
     )
 
     download_data(

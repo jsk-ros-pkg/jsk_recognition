@@ -15,6 +15,7 @@ def main():
         compressed_bags=[
             'sample/data/2016-11-11-12-53-06_in_lab.bag',
         ],
+        force=False,
     )
 
     download_data(
@@ -26,6 +27,7 @@ def main():
         compressed_bags=[
             'sample/data/2016-10-15-23-21-42_moving_bottle.bag',
         ],
+        force=False,
     )
 
     download_data(

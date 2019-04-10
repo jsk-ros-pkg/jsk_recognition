@@ -13,6 +13,7 @@ def main():
         md5='9516566c66391835f85ac9cc44cbfc4b',
         extract=True,
         compressed_bags=['test_data/2016-04-05-17-19-43_draw_bbox/vision.bag'],
+        force=True,
     )
 
     download_data(
@@ -24,6 +25,7 @@ def main():
         compressed_bags=[
             'test_data/2016-04-06-08-16-08_img_cpi_decomposer/vision.bag',
         ],
+        force=True,
     )
 
 

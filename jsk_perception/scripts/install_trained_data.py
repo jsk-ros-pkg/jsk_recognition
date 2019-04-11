@@ -222,6 +222,21 @@ def main():
         md5='47a507934b6bc20f0d9274825b734942',
     )
 
+    # node_scripts/mask_rcnn_instance_segmentation.py 73B2 kitchen
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/mask_rcnn_resnet50_73B2_kitchen_20181129.npz',
+        url='https://drive.google.com/uc?id=1-rejgt6BvnBByY37zYKPMimGGJ2ySwgo',
+        md5='34b51590e61a9bed88062994507bc487',
+    )
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/'
+        'mask_rcnn_resnet50_73B2_kitchen_20181129_classnames.yaml',
+        url='https://drive.google.com/uc?id=1f9E2b1uJrk3eLbJmEDSSPl6TQKgKvZLW',
+        md5='077bc3a6aedd46226c47106afdeec279',
+    )
+
 
 if __name__ == '__main__':
     main()

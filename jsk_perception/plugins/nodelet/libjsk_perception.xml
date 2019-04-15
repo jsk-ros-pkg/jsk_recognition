@@ -126,6 +126,9 @@
   <class name="jsk_perception/AddMaskImage" type="jsk_perception::AddMaskImage"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_perception/SubtractMaskImage" type="jsk_perception::SubtractMaskImage"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_perception/MultiplyMaskImage"
          type="jsk_perception::MultiplyMaskImage"
          base_class_type="nodelet::Nodelet">

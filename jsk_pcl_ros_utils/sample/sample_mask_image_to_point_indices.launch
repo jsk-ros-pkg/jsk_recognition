@@ -1,0 +1,104 @@
+<launch>
+
+  <arg name="gui" default="true"/>
+
+  <node name="mask_image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/kiva_pod_mask.jpg
+      encoding: mono8
+      publish_info: false
+    </rosparam>
+  </node>
+  <node name="color_image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/circles.jpg
+      encoding: bgr8
+      publish_info: false
+    </rosparam>
+  </node>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <!-- mask -> point indices -> mask -->
+  <node name="mask_image_to_point_indices0"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/MaskImageToPointIndices sample_manager">
+    <remap from="~input" to="mask_image_publisher/output"/>
+    <rosparam>
+      use_multi_channels: false
+    </rosparam>
+  </node>
+  <node name="point_indices_to_mask_image0"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PointIndicesToMaskImage sample_manager">
+    <remap from="~input" to="mask_image_to_point_indices0/output"/>
+    <remap from="~input/image" to="mask_image_publisher/output"/>
+  </node>
+
+  <!-- multi-channel mask -> point indices -> mask -->
+  <node name="mask_image_to_point_indices1"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/MaskImageToPointIndices sample_manager">
+    <remap from="~input" to="color_image_publisher/output"/>
+    <rosparam>
+      use_multi_channels: true
+      target_channel: 0
+    </rosparam>
+  </node>
+  <node name="point_indices_to_mask_image1"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PointIndicesToMaskImage sample_manager">
+    <remap from="~input" to="mask_image_to_point_indices1/output"/>
+    <remap from="~input/image" to="color_image_publisher/output"/>
+  </node>
+
+  <!-- multi-channel mask -> cluster point indices -> point indices -> mask -->
+  <node name="mask_image_to_point_indices2"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/MaskImageToPointIndices sample_manager">
+    <remap from="~input" to="color_image_publisher/output"/>
+    <rosparam>
+      use_multi_channels: true
+      target_channel: -1
+    </rosparam>
+  </node>
+  <node name="cluster_point_indices_to_point_indices2"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/ClusterPointIndicesToPointIndices sample_manager">
+    <remap from="~input" to="mask_image_to_point_indices2/output/all_indices"/>
+  </node>
+  <node name="point_indices_to_mask_image2"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PointIndicesToMaskImage sample_manager">
+    <remap from="~input" to="cluster_point_indices_to_point_indices2/output"/>
+    <remap from="~input/image" to="color_image_publisher/output"/>
+  </node>
+
+  <node name="tile_image"
+        pkg="jsk_perception" type="tile_image.py">
+    <rosparam>
+      input_topics:
+        <!-- Input images -->
+        - /mask_image_publisher/output
+        - /color_image_publisher/output
+        - /color_image_publisher/output
+        <!-- Output images -->
+        - /point_indices_to_mask_image0/output
+        - /point_indices_to_mask_image1/output
+        - /point_indices_to_mask_image2/output
+      no_sync: true
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="tile_image/output"/>
+    </node>
+  </group>
+
+</launch>

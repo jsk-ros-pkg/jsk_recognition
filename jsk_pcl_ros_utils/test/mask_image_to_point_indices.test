@@ -1,0 +1,21 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_mask_image_to_point_indices.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_mask_image_to_point_indices"
+        name="test_mask_image_to_point_indices"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /mask_image_to_point_indices0/output
+      timeout_0: 30
+      topic_1: /mask_image_to_point_indices1/output
+      timeout_1: 30
+      topic_2: /mask_image_to_point_indices2/output/all_indices
+      timeout_2: 30
+    </rosparam>
+  </test>
+
+</launch>

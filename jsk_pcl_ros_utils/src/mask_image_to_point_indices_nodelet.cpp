@@ -47,7 +47,7 @@ namespace jsk_pcl_ros_utils
     pnh_->param("target_channel", target_channel_, -1);
 
     if (use_multi_channels_ && target_channel_ < 0) {
-      pub_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output", 1);
+      pub_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output/all_indices", 1);
     } else {
       pub_ = advertise<PCLIndicesMsg>(*pnh_, "output", 1);
     }

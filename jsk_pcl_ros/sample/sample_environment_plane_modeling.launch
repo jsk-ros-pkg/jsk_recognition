@@ -1,0 +1,44 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml" />
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="multi_plane_segmentation"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/OrganizedMultiPlaneSegmentation /sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <rosparam>
+      publish_normal: true
+      border_policy_ignore: false
+    </rosparam>
+  </node>
+
+  <node name="normal_concatenater"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/NormalConcatenater /sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <remap from="~normal" to="multi_plane_segmentation/output_normal"/>
+  </node>
+
+  <node name="environment_plane_modeling"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/EnvironmentPlaneModeling /sample_manager">
+    <remap from="~input" to="normal_concatenater/output"/>
+    <remap from="~input/full_cloud" to="normal_concatenater/output"/>
+    <remap from="~input/indices" to="multi_plane_segmentation/output_refined"/>
+    <remap from="~input/polygons" to="multi_plane_segmentation/output_refined_polygon"/>
+    <remap from="~input/coefficients" to="multi_plane_segmentation/output_refined_coefficients"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/environment_plane_modeling.rviz"/>
+  </group>
+
+</launch>

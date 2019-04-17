@@ -383,7 +383,9 @@ namespace jsk_pcl_ros
     pcl::PointCloud<PointT>::Ptr input (new pcl::PointCloud<PointT>);
     pcl::PointCloud<pcl::Normal>::Ptr normal (new pcl::PointCloud<pcl::Normal>);
     pcl::fromROSMsg(*msg, *input);
-    pcl::fromROSMsg(*msg_normal, *normal);
+    if (use_normal_) {
+      pcl::fromROSMsg(*msg_normal, *normal);
+    }
     std::vector<pcl::PointIndices::Ptr> inliers;
     std::vector<pcl::ModelCoefficients::Ptr> coefficients;
     std::vector<jsk_recognition_utils::ConvexPolygon::Ptr> convexes;

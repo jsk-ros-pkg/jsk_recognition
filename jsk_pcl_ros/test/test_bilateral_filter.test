@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_bilateral_filter.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_bilateral_filter"
+        name="test_bilateral_filter"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="30" retry="6">
+    <rosparam>
+      topic_0: /bilateral_filter/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

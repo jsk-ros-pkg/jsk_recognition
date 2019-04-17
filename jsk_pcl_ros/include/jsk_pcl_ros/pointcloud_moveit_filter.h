@@ -143,7 +143,7 @@ namespace jsk_pcl_ros
           return;
         }
         /* mask out points on the robot */
-#if (MOVEIT_VERSION_MINOR < 6)
+#if (MOVEIT_VERSION_MAJOR == 0 and MOVEIT_VERSION_MINOR < 6)
         shape_mask_->maskContainment(xyz_cloud, sensor_origin_eigen, 0.0,
                                      max_range_, mask_);
 #else   // from moveit 0.6 (indigo), PCL dependency is removed

@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_static_polygon_array_publisher.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_static_polygon_array_publisher"
+        name="test_static_polygon_array_publisher"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="30" retry="3">
+    <rosparam>
+      topic_0: /static_polygon_array_publisher/output_polygons
+      timeout_0: 30
+      topic_1: /static_polygon_array_publisher/output_coefficients
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

@@ -17,11 +17,11 @@ env:
     - USE_JENKINS=true
     - USE_DEB=true
   matrix:
-    - ROS_DISTRO=indigo
-    - ROS_DISTRO=indigo CATKIN_TOOLS_CONFIG_OPTIONS="--install" TEST_PKGS='jsk_recognition_msgs' # to skip test
-    - ROS_DISTRO=indigo ROS_REPOSITORY_PATH="http://packages.ros.org/ros/ubuntu"
-    - ROS_DISTRO=indigo BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_opencv3.bash' BUILD_PKGS='checkerboard_detector imagesift jsk_perception jsk_recognition_utils resized_image_transport'
-    - ROS_DISTRO=indigo BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_pcl1.8.bash' BUILD_PKGS='jsk_pcl_ros_utils jsk_pcl_ros' DOCKER_IMAGE_JENKINS='ros-indigo-pcl1.8'
+    - ROS_DISTRO=indigo DOCKER_IMAGE_JENKINS='ros-indigo-base-jsk-recognition'
+    - ROS_DISTRO=indigo DOCKER_IMAGE_JENKINS='ros-indigo-base-jsk-recognition' CATKIN_TOOLS_CONFIG_OPTIONS="--install" TEST_PKGS='jsk_recognition_msgs' # to skip test
+    - ROS_DISTRO=indigo DOCKER_IMAGE_JENKINS='ros-indigo-base-jsk-recognition' ROS_REPOSITORY_PATH="http://packages.ros.org/ros/ubuntu"
+    - ROS_DISTRO=indigo DOCKER_IMAGE_JENKINS='ros-indigo-base-jsk-recognition' BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_opencv3.bash' BUILD_PKGS='checkerboard_detector imagesift jsk_perception jsk_recognition_utils resized_image_transport'
+    - ROS_DISTRO=indigo DOCKER_IMAGE_JENKINS='ros-indigo-pcl1.8-jsk-recognition' BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_pcl1.8.bash' BUILD_PKGS='jsk_pcl_ros_utils jsk_pcl_ros' DOCKER_IMAGE_JENKINS='ros-indigo-pcl1.8'
     - ROS_DISTRO=kinetic
     - ROS_DISTRO=melodic
 script:

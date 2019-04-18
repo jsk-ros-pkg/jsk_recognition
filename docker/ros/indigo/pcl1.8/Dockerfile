@@ -1,7 +1,6 @@
-FROM ros:indigo-ros-core
+FROM ros-indigo-base-jsk-recognition
 
 RUN apt-get update && apt-get install -y \
-    wget \
     libboost-all-dev \
     libeigen3-dev \
     libflann-dev \
@@ -21,23 +20,22 @@ RUN cd ~/pcl-pcl-1.8.0rc2 && \
 
 RUN mkdir -p ~/ros/ws_jsk_recognition/src && \
     cd ~/ros/ws_jsk_recognition/src && \
-    apt-get install -y python-rosinstall-generator python-wstool && \
+    apt-get install -y python-rosinstall-generator && \
+    wstool init; \
     rosinstall_generator --tar --rosdistro indigo \
         pcl_conversions \
         pcl_ros \
         octomap_server \
-        > .rosinstall && \
+        > $$.rosinstall && \
+    wstool merge -y $$.rosinstall && \
     wstool up -j -1
 
 RUN cd ~/ros/ws_jsk_recognition/src && \
     rosdep update && \
-    rosdep install --from-path . -y -i
+    wget http://raw.github.com/jsk-ros-pkg/jsk_travis/master/rosdep-install.sh -O - | bash
 
 RUN cd ~/ros/ws_jsk_recognition && \
-    apt-get install -y python-catkin-tools && \
     . /opt/ros/indigo/setup.sh && \
-    catkin build
-
-RUN apt-get update && apt-get install -y python-setuptools
-RUN easy_install 'pip==6.0.7'
-RUN pip install -U dlib
+    catkin build -c && \
+    cd && \
+    rm -rf ros/ws_jsk_recognition

@@ -20,6 +20,7 @@ from sensor_msgs.msg import Image
 from jsk_recognition_msgs.msg import Rect, RectArray
 from jsk_recognition_msgs.msg import ClassificationResult
 
+import chainer
 from chainercv.links import SSD300
 from chainercv.links import SSD512
 from chainercv.visualizations import vis_bbox
@@ -51,7 +52,8 @@ class SSDObjectDetector(ConnectionBasedTransport):
             n_fg_class=len(self.label_names),
             pretrained_model=model_path)
         if self.gpu >= 0:
-            self.model.to_gpu(self.gpu)
+            chainer.cuda.get_device_from_id(self.gpu).use()
+            self.model.to_gpu()
         rospy.loginfo("Loaded model: %s" % model_path)
 
         # dynamic reconfigure
@@ -113,6 +115,8 @@ class SSDObjectDetector(ConnectionBasedTransport):
             rospy.loginfo("%s: elapsed %f msec" % ("convert", (tcur-tprev)*1000))
             tprev = tcur
 
+        if self.gpu >= 0:
+            chainer.cuda.get_device_from_id(self.gpu).use()
         bboxes, labels, scores = self.model.predict([img])
         bboxes, labels, scores = bboxes[0], labels[0], scores[0]
 

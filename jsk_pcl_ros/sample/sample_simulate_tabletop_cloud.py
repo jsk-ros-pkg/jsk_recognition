@@ -146,10 +146,13 @@ def candidateBoxes(header, model_index):
 
 if __name__ == "__main__":
     rospy.init_node("sample_simulate_tabletop_cloud")
-    pub = rospy.Publisher("~output", PointCloud2)
-    pub_polygon = rospy.Publisher("~output/polygon", PolygonArray)
-    pub_coef = rospy.Publisher("~output/coef", ModelCoefficientsArray)
-    pub_boxes = rospy.Publisher("~output/candidate_boxes", BoundingBoxArray)
+    pub = rospy.Publisher("~output", PointCloud2, queue_size=1)
+    pub_polygon = rospy.Publisher(
+        "~output/polygon", PolygonArray, queue_size=1)
+    pub_coef = rospy.Publisher(
+        "~output/coef", ModelCoefficientsArray, queue_size=1)
+    pub_boxes = rospy.Publisher(
+        "~output/candidate_boxes", BoundingBoxArray, queue_size=1)
     r = rospy.Rate(10)
     counter = 0
     model_index = 4

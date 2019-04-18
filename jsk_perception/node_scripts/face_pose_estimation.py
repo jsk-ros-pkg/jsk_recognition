@@ -137,10 +137,8 @@ class HyperFacePredictor(object):
         model.report = False
         model.backward = False
 
-        if gpu >= 0:
-            chainer.cuda.check_cuda_available()
-            chainer.cuda.get_device(gpu).use()
-            model.to_gpu()
+        if self.gpu >= 0:
+            model.to_gpu(self.gpu)
 
         self.model = model
 
@@ -158,11 +156,8 @@ class HyperFacePredictor(object):
 
         return img
 
-    def __call__(self, imgs):
-        if self.gpu >= 0:
-            xp = chainer.cuda.cupy
-        else:
-            xp = np
+    def forward(self, imgs):
+        xp = self.model.xp
         imgs = xp.asarray([self.preprocess(img) for img in imgs])
 
         # forwarding
@@ -187,6 +182,11 @@ class HyperFacePredictor(object):
                 "gender": gender[i]
             })
         return result
+
+    def __call__(self, imgs):
+        if self.gpu >= 0:
+            chainer.cuda.get_device_from_id(self.gpu).use()
+        return self.forward(imgs)
 
 
 class FacePoseEstimator(ConnectionBasedTransport):

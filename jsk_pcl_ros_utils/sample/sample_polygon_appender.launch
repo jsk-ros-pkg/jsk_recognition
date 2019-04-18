@@ -1,0 +1,50 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml"/>
+
+  <node name="static_polygon_array_publisher0"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/StaticPolygonArrayPublisher">
+    <remap from="~input" to="/right_hand_camera/depth_registered/points"/>
+    <rosparam>
+      use_message: true
+      frame_ids:
+        - right_hand_camera_rgb_optical_frame
+        - right_hand_camera_rgb_optical_frame
+      polygon_array:
+        - [[3, 0, 0], [0, 3, 0], [0, 1, 2], [1, 0, 2]]
+        - [[-1, -1, 1], [4, 3, 0], [3, 4, 0]]
+    </rosparam>
+  </node>
+
+  <node name="static_polygon_array_publisher1"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/StaticPolygonArrayPublisher">
+    <remap from="~input" to="/right_hand_camera/depth_registered/points"/>
+    <rosparam>
+      use_message: true
+      frame_ids:
+        - right_hand_camera_rgb_optical_frame
+      polygon_array:
+        - [[-1, 2, 0], [-1, 2, 2], [-1, 4, 2], [-1, 4, 0]]
+    </rosparam>
+  </node>
+
+  <node name="polygon_appender"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/PolygonAppender">
+    <remap from="~input0" to="static_polygon_array_publisher0/output_polygons"/>
+    <remap from="~input1" to="static_polygon_array_publisher1/output_polygons"/>
+    <remap from="~input_coefficients0" to="static_polygon_array_publisher0/output_coefficients"/>
+    <remap from="~input_coefficients1" to="static_polygon_array_publisher1/output_coefficients"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_polygon_appender.rviz"/>
+  </group>
+
+</launch>

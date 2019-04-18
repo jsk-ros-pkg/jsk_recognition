@@ -2,6 +2,26 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.10 (2019-03-27)
+-------------------
+* Re-enable pointcloud_to_pcd.test `#2402 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2402>`_)
+* [doc] [jsk_pcl_ros_utils] [jsk_pcl_ros] Add documentation (`#2393 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2393>`_)
+
+  * Add test for TransformPointcloudInBoundingBox
+  * Add sample for TransformPointcloudInBoundingBox
+  * Add test for PlaneReasoner
+  * Add sample for PlaneReasoner
+  * Add test for PlaneRejcetor
+  * Add sample for PlaneRejcetor
+  * Add test for PolygonAppender
+  * Add sample for PolygonAppender
+  * Add test for StaticPolygonArrayPublisher
+  * Add sample for StaticPolygonArrayPublisher
+  * Add test for NormalConcatenater
+  * Add sample for NormalConcatenater
+
+* Contributors: Yuto Uchimi
+
 1.2.9 (2019-02-23)
 ------------------
 

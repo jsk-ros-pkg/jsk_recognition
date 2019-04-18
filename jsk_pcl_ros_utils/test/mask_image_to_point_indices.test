@@ -13,8 +13,10 @@
       timeout_0: 30
       topic_1: /mask_image_to_point_indices1/output
       timeout_1: 30
-      topic_2: /mask_image_to_point_indices2/output/all_indices
-      timeout_2: 30
+      <!-- Unstable on travis/jenkins -->
+      <!-- (https://github.com/jsk-ros-pkg/jsk_recognition/pull/2409) -->
+      <!-- topic_2: /mask_image_to_point_indices2/output/all_indices -->
+      <!-- timeout_2: 30 -->
     </rosparam>
   </test>
 

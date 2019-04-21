@@ -233,8 +233,8 @@ def main():
         pkg_name=PKG,
         path='trained_data/'
         'mask_rcnn_resnet50_73B2_kitchen_20181129_classnames.yaml',
-        url='https://drive.google.com/uc?id=1f9E2b1uJrk3eLbJmEDSSPl6TQKgKvZLW',
-        md5='077bc3a6aedd46226c47106afdeec279',
+        url='https://drive.google.com/uc?id=1AFCctyrrY2PXCpemJXeFHN1wUAFaoFxq',
+        md5='463b951ce7ef4469b551fe6f567a9e57',
     )
 
 

@@ -91,8 +91,8 @@ namespace jsk_pcl_ros_utils
         pub_.publish(cluster_msg);
       } else {
         if (target_channel_ > image.channels() - 1) {
-          ROS_ERROR("target_channel_ is %d, but image has %d channels",
-                    target_channel_, image.channels());
+          NODELET_ERROR("target_channel_ is %d, but image has %d channels",
+                        target_channel_, image.channels());
           return;
         }
         PCLIndicesMsg indices_msg;

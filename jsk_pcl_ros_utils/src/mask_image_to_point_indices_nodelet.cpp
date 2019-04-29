@@ -82,7 +82,7 @@ namespace jsk_pcl_ros_utils
           indices_msg.header = image_msg->header;
           for (size_t j = 0; j < image.rows; j++) {
             for (size_t i = 0; i < image.cols; i++) {
-              if (image.at<int>(j, i, c) > 0) {
+              if (image.data[j * image.step + i * image.elemSize() + c] > 0) {
                 indices_msg.indices.push_back(j * image.cols + i);
               }
             }
@@ -99,7 +99,7 @@ namespace jsk_pcl_ros_utils
         indices_msg.header = image_msg->header;
         for (size_t j = 0; j < image.rows; j++) {
           for (size_t i = 0; i < image.cols; i++) {
-            if (image.at<uchar>(j, i, target_channel_) > 0) {
+            if (image.data[j * image.step + i * image.elemSize() + target_channel_] > 0) {
               indices_msg.indices.push_back(j * image.cols + i);
             }
           }

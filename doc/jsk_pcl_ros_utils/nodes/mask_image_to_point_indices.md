@@ -1,4 +1,7 @@
 # MaskImageToPointIndices
+
+![](images/mask_image_to_point_indices.png)
+
 A nodelet to convert mask image (`sensor_msgs/Image`) to point indices
 (`pcl_msgs/PointIndices` or `jsk_recognition_msgs/ClusterPointIndices`) for
 organized pointcloud.

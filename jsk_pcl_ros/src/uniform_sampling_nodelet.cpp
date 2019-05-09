@@ -37,7 +37,7 @@
 #include "jsk_pcl_ros/uniform_sampling.h"
 #if ( PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION == 7)
 #include <pcl/keypoints/uniform_sampling.h>
-#elif ( PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION == 8)
+#elif ( PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION >= 8)
 #include <pcl/filters/uniform_sampling.h>
 #endif
 
@@ -86,7 +86,7 @@ namespace jsk_pcl_ros
 #if ( PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION == 7)
     pcl::PointCloud<int> indices;
     uniform_sampling.compute(indices);
-#elif ( PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION == 8)
+#elif ( PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION >= 8)
     pcl::PointCloud<pcl::PointXYZ> output;
     uniform_sampling.filter(output);
     pcl::PointIndicesPtr indices_ptr;
@@ -97,7 +97,7 @@ namespace jsk_pcl_ros
     for (size_t i = 0; i < indices.points.size(); i++) {
       ros_indices.indices.push_back(indices.points[i]);
     }
-#elif ( PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION == 8)
+#elif ( PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION >= 8)
     for (size_t i = 0; i < indices.size(); i++) {
       ros_indices.indices.push_back(indices[i]);
     }

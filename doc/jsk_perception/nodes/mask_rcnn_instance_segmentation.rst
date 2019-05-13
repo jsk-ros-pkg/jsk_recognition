@@ -78,7 +78,7 @@ Parameters
 
 * ``~min_size`` (Int, default: ``600``)
 
-  Min size parameter of the input imagefor Mask RCNN.
+  Min size parameter of the input image for Mask RCNN.
 
 * ``~max_size`` (Int, default: ``1000``)
 

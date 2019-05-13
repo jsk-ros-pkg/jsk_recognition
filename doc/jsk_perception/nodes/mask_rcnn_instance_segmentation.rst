@@ -72,9 +72,9 @@ Parameters
 
   Name of this classifier
 
-* ``~anchor_size`` (List, default: ``[4, 8, 16, 32]``)
+* ``~anchor_scales`` (List, default: ``[4, 8, 16, 32]``)
 
-  Anchor size parameter for Mask RCNN.
+  Anchor scales parameter for Mask RCNN.
 
 * ``~min_size`` (Int, default: ``600``)
 

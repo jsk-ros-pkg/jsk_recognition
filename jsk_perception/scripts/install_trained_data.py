@@ -221,6 +221,12 @@ def main():
         url='https://drive.google.com/uc?id=1uv_jK-CAIJUXsRNmccFEISSKW4vXqI46',
         md5='47a507934b6bc20f0d9274825b734942',
     )
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/mask_rcnn_resnet50_coco_20180730.npz',
+        url='https://drive.google.com/uc?id=1XC-Mx4HX0YBIy0Fbp59EjJFOF7a3XK0R',
+        md5='410b2aa065ebe6ca3607c98f3337ae49',
+    )
 
 
 if __name__ == '__main__':

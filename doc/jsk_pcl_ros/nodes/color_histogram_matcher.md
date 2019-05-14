@@ -17,6 +17,9 @@ Finds objects similar to a selected object as reference based on bhattacharyya d
 - `~input_reference_cloud` (`sensor_msgs::PointCloud2`):
 
   Input target point cloud as reference.
+- `~input_reference` (`jsk_recognition_msgs::ColorHistogram`):
+
+  Input reference color histogram.
 
 ## Publishing Topic
 

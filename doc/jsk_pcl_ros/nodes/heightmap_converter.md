@@ -1,5 +1,5 @@
 # HeightmapConverter
-![](images/heightmap_converter.png)
+![](../../jsk_perception/nodes/images/heightmap_converter.png)
 
 Convert a pointcloud(`sensor_msgs/PointCloud2`) into heightmap representation (`sensor_msgs/Image`).
 

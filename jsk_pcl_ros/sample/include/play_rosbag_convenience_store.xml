@@ -1,0 +1,36 @@
+<launch>
+  <param name="/use_sim_time" value="false" />
+
+  <arg name="filename" default="$(find jsk_pcl_ros)/sample/data/convenience_store.bag" />
+  <arg name="camera_name" default="openni_camera" />
+  <arg name="namespace" default="remote"/>
+
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(arg filename) --clock --loop" />
+
+  <node name="rgb_image_republish"
+        pkg="image_transport" type="republish"
+        output="screen" args="compressed raw">
+    <remap from="in" to="/$(arg camera_name)/rgb/image_raw" />
+    <remap from="out" to="/$(arg namespace)/$(arg camera_name)/rgb/image_rect_color" />
+  </node>
+
+  <node name="depth_image_republish"
+        pkg="image_transport" type="republish"
+        output="screen" args="compressedDepth raw">
+    <remap from="in" to="/$(arg camera_name)/depth_registered/image_raw" />
+    <remap from="out" to="/$(arg namespace)/$(arg camera_name)/depth_registered/image_rect" />
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="points_xyzrgb_hw_registered"
+        args="standalone depth_image_proc/point_cloud_xyzrgb">
+    <remap from="rgb/image_rect_color"        to="/$(arg namespace)/$(arg camera_name)/rgb/image_rect_color"/>
+    <remap from="rgb/camera_info"             to="/$(arg camera_name)/rgb/camera_info"/>
+    <remap from="depth_registered/image_rect" to="/$(arg namespace)/$(arg camera_name)/depth_registered/image_rect"/>
+    <remap from="depth_registered/points"     to="/$(arg namespace)/$(arg camera_name)/point_cloud/cloud_registered/remote"/>
+    <rosparam>
+      queue_size: 100
+    </rosparam>
+  </node>
+</launch>

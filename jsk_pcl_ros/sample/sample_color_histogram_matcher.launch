@@ -1,0 +1,44 @@
+<launch>
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_convenience_store.xml" />
+
+  <node name="color_histogram_publisher"
+        pkg="jsk_pcl_ros" type="color_histogram_publisher.py"
+        output="screen">
+    <rosparam>
+      frame_id: base_link
+      histogram: [
+      0.006934032775461674, 0.03804347664117813, 0.242316335439682, 0.15161170065402985,
+      0.039917539805173874, 0.0052473763935267925, 0.003935532178729773, 0.0007496252073906362,
+      0.0014992504147812724, 0.0013118440983816981, 0.0, 0.0007496252073906362, 0.0016866566147655249,
+      0.0026236881967633963, 0.0003748126036953181, 0.0005622188909910619, 0.0003748126036953181,
+      0.0003748126036953181, 0.0005622188909910619, 0.0011244377819821239, 0.0026236881967633963,
+      0.005622189026325941, 0.005059970077127218, 0.00468515744432807, 0.005059970077127218,
+      0.0067466264590620995, 0.007683658041059971, 0.007308845408260822, 0.015554722398519516,
+      0.0200524739921093, 0.017616191878914833, 0.024362819269299507, 0.028110943734645844,
+      0.021551724523305893, 0.026986505836248398, 0.03279610350728035, 0.03373313322663307,
+      0.0393553227186203, 0.044790104031562805, 0.15029984712600708
+      ]
+    </rosparam>
+  </node>
+
+  <node name="color_histogram_matcher"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ColorHistogramMatcher"
+        output="screen">
+    <remap from="~input" to="/remote/openni_camera/point_cloud/cloud_registered/remote" />
+    <remap from="~input_indices" to="/instance_cluster_point_indices_decomposer/cluster_indices" />
+    <remap from="~input_reference" to="/color_histogram_publisher/output" />
+    <rosparam>
+      bin_size: 20
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args=" -d $(find jsk_pcl_ros)/sample/rviz/color_histogram_matcher.rviz"/>
+  </group>
+
+</launch>

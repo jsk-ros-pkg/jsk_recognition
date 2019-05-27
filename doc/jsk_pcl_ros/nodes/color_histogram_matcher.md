@@ -23,13 +23,13 @@ Finds objects similar to a selected object as reference based on bhattacharyya d
 
 ## Publishing Topic
 
-- `~output` (`jsk_pcl_ros::ClusterPointIndices`):
+- `~output` (`jsk_recognition_msgs::ClusterPointIndices`):
 
   Output Indices of satisfying color histogram similarity.
-- `~output_reference` (`jsk_pcl_ros::ColorHistogram`):
+- `~output_reference` (`jsk_recognition_msgs::ColorHistogram`):
 
   Output of histogram from input referenced point cloud.
-- `~output_histograms` (`jsk_pcl_ros::ColorHistogramArray`):
+- `~output_histograms` (`jsk_recognition_msgs::ColorHistogramArray`):
 
   Output of all histograms from clustered input point cloud.
 - `~coefficient_points` (`sensor_msgs/PointCloud2`):

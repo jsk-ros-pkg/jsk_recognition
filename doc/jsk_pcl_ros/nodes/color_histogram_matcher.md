@@ -32,6 +32,12 @@ Finds objects similar to a selected object as reference based on bhattacharyya d
 - `~output_histograms` (`jsk_pcl_ros::ColorHistogramArray`):
 
   Output of all histograms from clustered input point cloud.
+- `~coefficient_points` (`sensor_msgs/PointCloud2`):
+
+  Output of heat map point cloud.
+- `~best_match` (`geometry_msgs/PoseStamped`):
+
+  Output of best match indices points pose.
 
 ## Parameters
 

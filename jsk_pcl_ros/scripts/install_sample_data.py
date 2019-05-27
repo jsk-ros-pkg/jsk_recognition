@@ -121,6 +121,11 @@ def main():
         md5='6e3dfda0ac4f23b7849f135ec9041e92',
     )
 
+    download_data(
+        path='sample/data/convenience_store.bag',
+        url='https://drive.google.com/uc?id=1M_oTql9Rd_jcc5NGMGp5ZvGW2V9WfGpw',
+        md5='a8b8ed7783d7838d78abef22f2ce9b9a',
+    )
 
 if __name__ == '__main__':
     main()

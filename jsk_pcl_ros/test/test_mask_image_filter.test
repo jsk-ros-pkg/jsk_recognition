@@ -9,8 +9,6 @@
     <rosparam>
       topic_0: /mask_image_filter/output
       timeout_0: 30
-      topic_1: /extract_indices/output
-      timeout_1: 30
     </rosparam>
   </test>
 </launch>

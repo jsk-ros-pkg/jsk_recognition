@@ -22,8 +22,8 @@ add_message_files(
   HistogramWithRangeBin.msg
   HistogramWithRange.msg
   HistogramWithRangeArray.msg
-  HumanSkelton.msg
-  HumanSkeltonArray.msg
+  HumanSkeleton.msg
+  HumanSkeletonArray.msg
   ICPResult.msg
   ImageDifferenceValue.msg
   Int32Stamped.msg

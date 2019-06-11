@@ -28,8 +28,16 @@ i.e.
 import chainer
 from chainercv.datasets.coco.coco_utils \
     import coco_instance_segmentation_label_names
-from chainercv.links import MaskRCNNFPNResNet101
-from chainercv.links import MaskRCNNFPNResNet50
+try:
+    from chainercv.links import MaskRCNNFPNResNet101
+    from chainercv.links import MaskRCNNFPNResNet50
+except ImportError:
+    print('''If you want to use chainercv mask_rcnn, please upgrade chainercv
+
+    sudo pip install chainercv>=0.13.0
+
+''', file=sys.stdout)
+
 from chainercv.utils import mask_to_bbox
 import numpy as np
 

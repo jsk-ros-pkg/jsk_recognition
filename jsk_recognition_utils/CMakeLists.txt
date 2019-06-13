@@ -106,6 +106,7 @@ if (CATKIN_ENABLE_TESTING)
     # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
     add_rostest(sample/sample_add_bounding_box_array.launch ARGS gui:=false)
     add_rostest(sample/sample_bounding_box_array_publisher.launch ARGS gui:=false)
+    add_rostest(test/polygon_array_publisher.test)
   endif()
 endif()
 

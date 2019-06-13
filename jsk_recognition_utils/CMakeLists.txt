@@ -109,6 +109,7 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/polygon_array_publisher.test)
     add_rostest(test/polygon_array_to_polygon.test)
     add_rostest(test/pose_array_to_pose.test)
+    add_rostest(test/static_virtual_camera.test)
   endif()
 endif()
 

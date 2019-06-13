@@ -1,0 +1,22 @@
+<launch>
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_recognition_utils)/sample/sample_polygon_array_publisher.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="polygon_array_to_polygon"
+        pkg="jsk_recognition_utils" type="polygon_array_to_polygon.py"
+        output="screen">
+    <remap from="~input" to="polygon_array_publisher/output"/>
+    <rosparam>
+      index: 1
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_recognition_utils)/sample/config/sample_polygon_array_to_polygon.rviz"/>
+  </group>
+</launch>

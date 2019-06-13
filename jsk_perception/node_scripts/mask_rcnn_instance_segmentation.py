@@ -40,6 +40,7 @@ except ImportError:
 
 from chainercv.utils import mask_to_bbox
 import numpy as np
+import yaml
 
 try:
     import chainer_mask_rcnn
@@ -62,6 +63,7 @@ from jsk_recognition_msgs.msg import RectArray
 from jsk_recognition_msgs.msg import ClassificationResult
 from jsk_topic_tools import ConnectionBasedTransport
 from pcl_msgs.msg import PointIndices
+import rospkg
 import rospy
 from sensor_msgs.msg import Image
 
@@ -89,8 +91,30 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
         self.classifier_name = rospy.get_param(
             "~classifier_name", rospy.get_name())
         self.model_name = rospy.get_param('~model_name', 'mask_rcnn_resnet50')
+        rospack = rospkg.RosPack()
 
         if self.model_name == 'mask_rcnn_resnet50':
+            if pretrained_model == 'coco':
+                pretrained_model = os.path.join(
+                    rospack.get_path('jsk_perception'),
+                    'trained_data/mask_rcnn_resnet50_coco_20180730.npz')
+                if self.fg_class_names is None:
+                    yaml_path = os.path.join(
+                        rospack.get_path('jsk_perception'),
+                        'sample/config/coco_class_names.yaml')
+                    with open(yaml_path) as yaml_f:
+                        self.fg_class_names = yaml.load(yaml_f)
+            elif pretrained_model == 'voc':
+                pretrained_model = os.path.join(
+                    rospack.get_path('jsk_perception'),
+                    'trained_data/mask_rcnn_resnet50_voc_20180516.npz')
+                if self.fg_class_names is None:
+                    yaml_path = os.path.join(
+                        rospack.get_path('jsk_perception'),
+                        'sample/config/voc_class_names.yaml')
+                    with open(yaml_path) as yaml_f:
+                        self.fg_class_names = yaml.load(yaml_f)
+
             self.model = chainer_mask_rcnn.models.MaskRCNNResNet(
                 n_layers=50,
                 n_fg_class=len(self.fg_class_names),

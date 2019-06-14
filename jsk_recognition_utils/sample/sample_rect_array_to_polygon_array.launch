@@ -1,0 +1,28 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="static_tf_publisher"
+        pkg="tf" type="static_transform_publisher"
+        args="0 0 0 0 0 0 map camera_rgb_optical_frame 10"/>
+
+  <node name="rect_array_publisher"
+        pkg="rostopic" type="rostopic"
+        output="screen"
+        args="pub -r 1 -s /rect_array_publisher/output jsk_recognition_msgs/RectArray
+              '{header: {stamp: now, frame_id: camera_rgb_optical_frame},
+                rects: [{x: 50, y: 50, width: 200, height: 80},
+                        {x: 70, y: 100, width: 30, height: 120},
+                        {x: 140, y: 150, width: 90, height: 70}]}'"/>
+
+  <node name="rect_array_to_polygon_array"
+        pkg="jsk_recognition_utils" type="rect_array_to_polygon_array.py"
+        output="screen">
+    <remap from="~input" to="rect_array_publisher/output"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_recognition_utils)/sample/config/sample_rect_array_to_polygon_array.rviz"/>
+  </group>
+</launch>

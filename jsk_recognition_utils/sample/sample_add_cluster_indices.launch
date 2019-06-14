@@ -1,0 +1,31 @@
+<launch>
+  <node name="cluster_indices_publisher0"
+        pkg="rostopic" type="rostopic"
+        output="screen"
+        args="pub -r 1 -s /cluster_indices_publisher0/output
+              jsk_recognition_msgs/ClusterPointIndices
+              '{header: {stamp: now, frame_id: map},
+                cluster_indices: [{indices: [0, 1, 2]},
+                                  {indices: [3, 4, 5]}]}'"/>
+
+  <node name="cluster_indices_publisher1"
+        pkg="rostopic" type="rostopic"
+        output="screen"
+        args="pub -r 1 -s /cluster_indices_publisher1/output
+              jsk_recognition_msgs/ClusterPointIndices
+              '{header: {stamp: now, frame_id: map},
+                cluster_indices: [{indices: [7, 8, 9]},
+                                  {indices: [4, 5, 6]}]}'"/>
+
+  <node name="add_cluster_indices"
+        pkg="jsk_recognition_utils" type="add_cluster_indices.py"
+        output="screen">
+    <rosparam>
+      topics:
+        - /cluster_indices_publisher0/output
+        - /cluster_indices_publisher1/output
+      approximate_sync: true
+      slop: 1.0
+    </rosparam>
+  </node>
+</launch>

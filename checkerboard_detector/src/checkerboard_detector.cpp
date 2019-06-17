@@ -86,6 +86,7 @@ public:
     ros::Publisher _pubPoseStamped;
     ros::Publisher _pubCornerPoint;
     ros::Publisher _pubPolygonArray;
+    ros::Publisher _pubDebugImage;
     ros::ServiceServer _srvDetect;
     int message_throttle_;
     int message_throttle_counter_;
@@ -241,6 +242,8 @@ public:
                                                              connect_cb, connect_cb);
             _pubCornerPoint = _node.advertise<geometry_msgs::PointStamped>("corner_point", publish_queue_size, connect_cb, connect_cb);
             _pubPolygonArray = _node.advertise<jsk_recognition_msgs::PolygonArray>("polygons", publish_queue_size, connect_cb, connect_cb);
+            _pubDebugImage =
+                _node.advertise<sensor_msgs::Image>("debug_image", publish_queue_size, connect_cb, connect_cb);
         }
         else {
             _pubDetection =
@@ -249,6 +252,7 @@ public:
                 _node.advertise<geometry_msgs::PoseStamped> ("objectdetection_pose", publish_queue_size);
             _pubCornerPoint = _node.advertise<geometry_msgs::PointStamped>("corner_point", publish_queue_size);
             _pubPolygonArray = _node.advertise<jsk_recognition_msgs::PolygonArray>("polygons", publish_queue_size);
+            _pubDebugImage = _node.advertise<sensor_msgs::Image>("debug_image", publish_queue_size);
             subscribe();
         }
         //this->camInfoSubscriber = _node.subscribe("camera_info", 1, &CheckerboardDetector::caminfo_cb, this);
@@ -394,7 +398,8 @@ public:
     {
       boost::mutex::scoped_lock lock(this->mutex);
       if (_pubDetection.getNumSubscribers() == 0 && _pubCornerPoint.getNumSubscribers() == 0 &&
-          _pubPoseStamped.getNumSubscribers() == 0 && _pubPolygonArray.getNumSubscribers() == 0)
+          _pubPoseStamped.getNumSubscribers() == 0 && _pubPolygonArray.getNumSubscribers() == 0 &&
+          _pubDebugImage.getNumSubscribers() == 0)
         {
             unsubscribe();
         }
@@ -652,6 +657,10 @@ public:
                 point_msg.point.z = vobjects[vobjects.size() - 1].pose.position.z;
                 _pubCornerPoint.publish(point_msg);
             }
+
+            // publish debug image
+            _pubDebugImage.publish(
+              cv_bridge::CvImage(imagemsg.header, sensor_msgs::image_encodings::RGB8, frame).toImageMsg());
 
             cv::imshow("Checkerboard Detector",frame);
             cv::waitKey(1);

@@ -50,7 +50,10 @@
   <run_depend>tf</run_depend>
   <build_depend>tf2</build_depend>
   <run_depend>tf2</run_depend>
-  <export>
 
+  <test_depend>jsk_tools</test_depend>
+  <test_depend>rostest</test_depend>
+
+  <export>
   </export>
 </package>

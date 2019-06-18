@@ -33,6 +33,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#include <string>
+
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
@@ -43,6 +45,8 @@
 #include <tf2/exceptions.h>
 
 tf::TransformListener* g_listener_;
+ros::Publisher pub_pose_;
+std::string frame_id_;
 
 void getTransformation(const geometry_msgs::Pose& pose1,
                        const geometry_msgs::Pose& pose2,
@@ -84,6 +88,19 @@ void callback(const posedetection_msgs::ObjectDetection::ConstPtr& detection1,
         Eigen::Vector3d pos_transformed;
         Eigen::Quaterniond rot_transformed;
         getTransformation(pose1, pose2_transformed, pos_transformed, rot_transformed);
+
+        geometry_msgs::PoseStamped pose_out;
+        pose_out.header.stamp = detection2->header.stamp;
+        pose_out.header.frame_id = frame_id_;
+        pose_out.pose.position.x = pos_transformed[0];
+        pose_out.pose.position.y = pos_transformed[1];
+        pose_out.pose.position.z = pos_transformed[2];
+        pose_out.pose.orientation.x = rot_transformed.x();
+        pose_out.pose.orientation.y = rot_transformed.y();
+        pose_out.pose.orientation.z = rot_transformed.z();
+        pose_out.pose.orientation.w = rot_transformed.w();
+        pub_pose_.publish(pose_out);
+
         ROS_INFO("with tf resolving::");
         ROS_INFO("  pos: [%f %f %f]", pos_transformed[0], pos_transformed[1], pos_transformed[2]);
         ROS_INFO("  rot: [%f %f %f %f]", rot_transformed.x(), rot_transformed.y(), rot_transformed.z(), rot_transformed.w());
@@ -110,13 +127,18 @@ int main(int argc, char** argv)
   typedef message_filters::sync_policies::ApproximateTime<
     posedetection_msgs::ObjectDetection, posedetection_msgs::ObjectDetection>
     SyncPolicy;
-  
+
   ros::NodeHandle nh;
+
+  nh.param<std::string>("frame_id", frame_id_, "");
+
+  pub_pose_ = nh.advertise<geometry_msgs::PoseStamped>("pose", 1);
+
   message_filters::Subscriber<posedetection_msgs::ObjectDetection>
     detection1_sub(nh, "detection1", 1);
   message_filters::Subscriber<posedetection_msgs::ObjectDetection>
     detection2_sub(nh, "detection2", 1);
-  
+
   message_filters::Synchronizer<SyncPolicy> sync(
     SyncPolicy(1000),
     detection1_sub, detection2_sub);

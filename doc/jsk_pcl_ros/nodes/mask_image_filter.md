@@ -19,3 +19,7 @@ Extract indices of pointcloud which is masked by mask image. The pointcloud is n
 
   Indices of the points masked by `~input/mask`.
 
+## Publishing Topic
+* `~negative` (Bool, default: `false`)
+
+  Flip the max region of mask image or not.

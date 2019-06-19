@@ -120,6 +120,14 @@ All these files will be automatically generated under `<out_dir>`.
 - `params.yaml`
 
 
+Sample
+-----
+
+mask rcnn object instance segmentation result using 73b2 kitchen model.
+
+[![](.readme/gallery_73b2_kitchen_mask_rcnn.jpg)](https://jsk-recognition.readthedocs.io/en/latest/jsk_perception/training_scripts/73b2_kitchen_mask_rcnn_result.html)
+
+
 Usage
 -----
 

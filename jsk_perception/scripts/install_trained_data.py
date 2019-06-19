@@ -225,16 +225,16 @@ def main():
     # node_scripts/mask_rcnn_instance_segmentation.py 73B2 kitchen
     download_data(
         pkg_name=PKG,
-        path='trained_data/mask_rcnn_resnet50_73B2_kitchen_20181129.npz',
-        url='https://drive.google.com/uc?id=1-rejgt6BvnBByY37zYKPMimGGJ2ySwgo',
-        md5='34b51590e61a9bed88062994507bc487',
+        path='trained_data/mask_rcnn_resnet50_73B2_kitchen_20190619.npz',
+        url='https://drive.google.com/uc?id=1ZK-6qGKb87MpXVo4aW8LEyx0OI3uBitt',
+        md5='ccefb23d17f057b25b16815fd88edb8f',
     )
     download_data(
         pkg_name=PKG,
         path='trained_data/'
-        'mask_rcnn_resnet50_73B2_kitchen_20181129_classnames.yaml',
-        url='https://drive.google.com/uc?id=1AFCctyrrY2PXCpemJXeFHN1wUAFaoFxq',
-        md5='463b951ce7ef4469b551fe6f567a9e57',
+        'mask_rcnn_resnet50_73B2_kitchen_20190619_classnames.yaml',
+        url='https://drive.google.com/uc?id=1BTnVD0vHcwFIqAKchIuDZ8LZmaNr4qr0',
+        md5='183631f938aef7786a1bcfd6343946bc',
     )
 
 

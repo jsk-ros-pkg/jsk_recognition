@@ -125,4 +125,5 @@ install(DIRECTORY sample scripts
 if (CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   add_rostest(test/object_array_publisher.test)
+  add_rostest(test/people_pose_array_to_pose_array.test)
 endif()

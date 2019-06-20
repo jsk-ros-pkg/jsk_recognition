@@ -1,0 +1,17 @@
+<launch>
+  <include file="$(find jsk_recognition_msgs)/sample/sample_people_pose_array_to_pose_array.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_people_pose_array_to_pose_array"
+        name="test_people_pose_array_to_pose_array"
+        pkg="rostest" type="hztest"
+        time-limit="10" retry="3">
+    <rosparam>
+      topic: /people_pose_array_to_pose_array/output
+      hz: 10.0
+      hzerror: 1.0
+      test_duration: 5.0
+    </rosparam>
+  </test>
+</launch>

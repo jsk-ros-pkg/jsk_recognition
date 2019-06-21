@@ -444,6 +444,8 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/label_image_decomposer.test)
     jsk_add_rostest(test/label_to_mask_image.test)
     jsk_add_rostest(test/mask_image_to_label.test)
+    # mask_rcnn_instance_segmentation.test requires GPU.
+    # jsk_add_rostest(test/mask_rcnn_instance_segmentation.test)
     jsk_add_rostest(test/matchtemplate.test)
     jsk_add_rostest(test/overlay_image_color_on_mono.test)
     jsk_add_rostest(test/people_pose_estimation_2d.test)

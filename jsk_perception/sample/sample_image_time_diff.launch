@@ -1,0 +1,41 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_perception)/sample/include/play_rosbag_people.xml"/>
+
+  <node name="start_trigger_publisher"
+        pkg="rostopic" type="rostopic"
+        args="pub -r 1 /start_trigger_publisher/output std_msgs/Header '{}'"/>
+
+  <node name="hsv_decomposer"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_perception/HSVDecomposer">
+      <remap from="~input" to="camera/rgb/image_rect_color"/>
+  </node>
+
+  <node name="image_time_diff"
+        pkg="jsk_perception" type="image_time_diff.py">
+    <remap from="~input/hue" to="hsv_decomposer/output/hue"/>
+    <remap from="~input/saturation" to="hsv_decomposer/output/saturation"/>
+    <remap from="~start" to="start_trigger_publisher/output"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="tile_image"
+          pkg="jsk_perception" type="tile_image.py">
+      <rosparam>
+        input_topics:
+          - /hsv_decomposer/output/hue
+          - /hsv_decomposer/output/saturation
+          - /camera/rgb/image_rect_color
+          - /image_time_diff/output/diff_image
+        draw_topic_name: true
+      </rosparam>
+    </node>
+
+    <node name="image_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="tile_image/output"/>
+    </node>
+  </group>
+</launch>

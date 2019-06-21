@@ -99,7 +99,10 @@ class ImageTimeDiff(object):
         rate = rospy.Rate(rospy.get_param('rate', 10))
         while not rospy.is_shutdown():
             self.spin_once()
-            rate.sleep()
+            try:
+                rate.sleep()
+            except rospy.ROSTimeMovedBackwardsException:
+                pass
 
 
 if __name__ == '__main__':

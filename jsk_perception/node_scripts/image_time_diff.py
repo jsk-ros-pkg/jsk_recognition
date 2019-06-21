@@ -65,7 +65,7 @@ class ImageTimeDiff(object):
         self.pub_stored = (hue, saturation, pub_diff, pub_diff_img)
 
     def _cb_stop(self, header):
-        while header.stamp > self.imgmsg.header.stamp:
+        while header.stamp > self.input[0].header.stamp:
             rospy.sleep(0.1)
         self.pub_stored = None
 

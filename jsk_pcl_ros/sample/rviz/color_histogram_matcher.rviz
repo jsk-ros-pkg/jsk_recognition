@@ -167,18 +167,18 @@ Visualization Manager:
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.0262356717
-        Y: 0.044948779
-        Z: 0.995900989
+        X: -0.025
+        Y: 0.045
+        Z: 1.0
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.0500000007
       Invert Z Axis: true
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 1.56979632
+      Pitch: 1.57
       Target Frame: openni_camera_rgb_optical_frame
       Value: Orbit (rviz)
-      Yaw: 4.69539881
+      Yaw: -1.57
     Saved: ~
 Window Geometry:
   Displays:

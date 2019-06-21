@@ -123,8 +123,8 @@ def main():
 
     download_data(
         path='sample/data/convenience_store.bag',
-        url='https://drive.google.com/uc?id=1M_oTql9Rd_jcc5NGMGp5ZvGW2V9WfGpw',
-        md5='a8b8ed7783d7838d78abef22f2ce9b9a',
+        url='https://drive.google.com/uc?id=1OyhDsoPffgX0pHiF4XfXI3wM5FK3USKY',
+        md5='d7bc0f2e9b126c013c18964d4a1fa1be',
     )
 
 if __name__ == '__main__':

@@ -16,6 +16,7 @@ env:
     - NOT_TEST_INSTALL=true
     - USE_JENKINS=true
     - USE_DEB=true
+    - ROSDEP_ADDITIONAL_OPTIONS='-n -r -v --ignore-src' # run rosdep without -q
   matrix:
     - ROS_DISTRO=indigo
     - ROS_DISTRO=indigo CATKIN_TOOLS_CONFIG_OPTIONS="--install" TEST_PKGS='jsk_recognition_msgs' # to skip test

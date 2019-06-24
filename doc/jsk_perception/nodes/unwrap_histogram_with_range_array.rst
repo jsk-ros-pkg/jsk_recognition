@@ -1,6 +1,8 @@
 unwrap_histogram_with_range_array.py
 ====================================
 
+.. image:: ./images/unwrap_histogram_with_range_array.png
+
 What is this?
 -------------
 
@@ -21,3 +23,11 @@ Publishing Topic
 * ``~output`` (``jsk_recognition_msgs/HistogramWithRange``)
 
   Histogram
+
+
+Sample
+------
+
+.. code-block:: bash
+
+  roslaunch jsk_perception sample_unwrap_histogram_with_range_array.launch

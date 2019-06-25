@@ -72,9 +72,31 @@ Parameters
 
   Name of this classifier
 
+* ``~anchor_scales`` (List, default: ``[4, 8, 16, 32]``)
+
+  Anchor scales parameter for Mask RCNN.
+
+* ``~min_size`` (Int, default: ``600``)
+
+  Min size parameter of the input image for Mask RCNN.
+
+* ``~max_size`` (Int, default: ``1000``)
+
+  Max size parameter of the input image for Mask RCNN.
+
 Sample
 ------
 
 .. code-block:: bash
 
-  roslaunch jsk_perception sample_mask_rcnn_instance_segmentation.launch gpu:=0
+  roslaunch jsk_perception sample_mask_rcnn_instance_segmentation.launch gpu:=0 COCO:=true  # COCO dataset (~80 classes)
+  roslaunch jsk_perception sample_mask_rcnn_instance_segmentation.launch gpu:=0 COCO:=false  # VOC dataset (~20 classes)
+
+Launch
+------
+
+.. code-block:: bash
+
+   roslaunch jsk_perception mask_rcnn_instance_segmentation.launch gpu:=0 COCO:=true INPUT_IMAGE:=/camera/color/image_raw
+
+.. image:: ./images/mask_rcnn_instance_segmentation_launch.gif

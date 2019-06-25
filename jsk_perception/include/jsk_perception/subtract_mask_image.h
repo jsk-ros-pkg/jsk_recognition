@@ -1,8 +1,8 @@
-// -*- mode: c++ -*-
+// -*- mode: C++ -*-
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, JSK Lab
+ *  Copyright (c) 2017, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,41 +32,52 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
+/*
+ * subtract_mask_image.h
+ * Author: Yuki Furuta <furushchev@jsk.imi.i.u-tokyo.ac.jp>
+ */
 
 
-#ifndef JSK_PCL_ROS_UTILS_MASK_IMAGE_TO_POINT_INDICES_H_
-#define JSK_PCL_ROS_UTILS_MASK_IMAGE_TO_POINT_INDICES_H_
+#ifndef JSK_PERCEPTION_SUBTRACT_MASK_IMAGE_H__
+#define JSK_PERCEPTION_SUBTRACT_MASK_IMAGE_H__
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/Image.h>
-#include <jsk_recognition_msgs/ClusterPointIndices.h>
-#include "jsk_recognition_utils/pcl_conversion_util.h"
 
-namespace jsk_pcl_ros_utils
+#include <message_filters/subscriber.h>
+#include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/exact_time.h>
+#include <message_filters/sync_policies/approximate_time.h>
+
+namespace jsk_perception
 {
-  class MaskImageToPointIndices: public jsk_topic_tools::DiagnosticNodelet
+  class SubtractMaskImage: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
-    MaskImageToPointIndices(): DiagnosticNodelet("MaskImageToPointIndices") { }
+    typedef message_filters::sync_policies::ExactTime<
+    sensor_msgs::Image,
+    sensor_msgs::Image > SyncPolicy;
+    typedef message_filters::sync_policies::ApproximateTime<
+    sensor_msgs::Image,
+    sensor_msgs::Image > ApproxSyncPolicy;
+    
+    SubtractMaskImage(): DiagnosticNodelet("SubtractMaskImage") {}
   protected:
-    ////////////////////////////////////////////////////////
-    // methods
-    ////////////////////////////////////////////////////////
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual void indices(
-      const sensor_msgs::Image::ConstPtr& image_msg);
-  
-    ////////////////////////////////////////////////////////
-    // ROS variables
-    ////////////////////////////////////////////////////////
-    ros::Subscriber sub_;
+    virtual void subtract(
+      const sensor_msgs::Image::ConstPtr& src1_msg,
+      const sensor_msgs::Image::ConstPtr& src2_msg);
+
+    bool approximate_sync_;
+    int queue_size_;
     ros::Publisher pub_;
-  private:
-    bool use_multi_channels_;
-    int target_channel_;
+    message_filters::Subscriber<sensor_msgs::Image> sub_src1_;
+    message_filters::Subscriber<sensor_msgs::Image> sub_src2_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
+    boost::shared_ptr<message_filters::Synchronizer<ApproxSyncPolicy> > async_;
   };
 }
 
-#endif
+#endif // SUBTRACT_MASK_IMAGE_H__

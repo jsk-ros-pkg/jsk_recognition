@@ -447,6 +447,7 @@ if(CATKIN_ENABLE_TESTING)
     # mask_rcnn_instance_segmentation.test requires GPU.
     # jsk_add_rostest(test/mask_rcnn_instance_segmentation.test)
     jsk_add_rostest(test/matchtemplate.test)
+    jsk_add_rostest(test/morphological_operator.test)
     jsk_add_rostest(test/non_maximum_suppression.test)
     jsk_add_rostest(test/overlay_image_color_on_mono.test)
     jsk_add_rostest(test/people_pose_estimation_2d.test)

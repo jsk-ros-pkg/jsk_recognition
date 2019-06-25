@@ -1,0 +1,21 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_ycc_decomposer.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_ycc_decomposer"
+        name="test_ycc_decomposer"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /ycc_decomposer/output/y
+      timeout_0: 30
+      topic_1: /ycc_decomposer/output/cr
+      timeout_1: 30
+      topic_2: /ycc_decomposer/output/cb
+      timeout_2: 30
+    </rosparam>
+  </test>
+
+</launch>

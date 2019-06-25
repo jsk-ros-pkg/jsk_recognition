@@ -43,7 +43,14 @@ namespace jsk_pcl_ros_utils
   void MaskImageToPointIndices::onInit()
   {
     DiagnosticNodelet::onInit();
-    pub_ = advertise<PCLIndicesMsg>(*pnh_, "output", 1);
+    pnh_->param("use_multi_channels", use_multi_channels_, false);
+    pnh_->param("target_channel", target_channel_, -1);
+
+    if (use_multi_channels_ && target_channel_ < 0) {
+      pub_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output/all_indices", 1);
+    } else {
+      pub_ = advertise<PCLIndicesMsg>(*pnh_, "output", 1);
+    }
     onInitPostProcess();
   }
 
@@ -63,19 +70,57 @@ namespace jsk_pcl_ros_utils
     const sensor_msgs::Image::ConstPtr& image_msg)
   {
     vital_checker_->poke();
-    cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(
-      image_msg, sensor_msgs::image_encodings::MONO8);
-    cv::Mat image = cv_ptr->image;
-    PCLIndicesMsg indices_msg;
-    indices_msg.header = image_msg->header;
-    for (size_t j = 0; j < image.rows; j++) {
-      for (size_t i = 0; i < image.cols; i++) {
-        if (image.at<uchar>(j, i) == 255) {
-          indices_msg.indices.push_back(j * image.cols + i);
+    if (use_multi_channels_) {
+      cv_bridge::CvImageConstPtr cv_ptr = cv_bridge::toCvShare(image_msg);
+      cv::Mat image = cv_ptr->image;
+      if (target_channel_ < 0) {
+        jsk_recognition_msgs::ClusterPointIndices cluster_msg;
+        cluster_msg.header = image_msg->header;
+        cluster_msg.cluster_indices.resize(image.channels());
+        for (size_t c = 0; c < image.channels(); ++c) {
+          PCLIndicesMsg &indices_msg = cluster_msg.cluster_indices[c];
+          indices_msg.header = image_msg->header;
+          for (size_t j = 0; j < image.rows; j++) {
+            for (size_t i = 0; i < image.cols; i++) {
+              if (image.data[j * image.step + i * image.elemSize() + c] > 127) {
+                indices_msg.indices.push_back(j * image.cols + i);
+              }
+            }
+          }
+        }
+        pub_.publish(cluster_msg);
+      } else {
+        if (target_channel_ > image.channels() - 1) {
+          NODELET_ERROR("target_channel_ is %d, but image has %d channels",
+                        target_channel_, image.channels());
+          return;
+        }
+        PCLIndicesMsg indices_msg;
+        indices_msg.header = image_msg->header;
+        for (size_t j = 0; j < image.rows; j++) {
+          for (size_t i = 0; i < image.cols; i++) {
+            if (image.data[j * image.step + i * image.elemSize() + target_channel_] > 127) {
+              indices_msg.indices.push_back(j * image.cols + i);
+            }
+          }
+        }
+        pub_.publish(indices_msg);
+      }
+    } else {
+      cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(
+        image_msg, sensor_msgs::image_encodings::TYPE_8UC1);
+      cv::Mat image = cv_ptr->image;
+      PCLIndicesMsg indices_msg;
+      indices_msg.header = image_msg->header;
+      for (size_t j = 0; j < image.rows; j++) {
+        for (size_t i = 0; i < image.cols; i++) {
+          if (image.at<uchar>(j, i) > 127) {
+            indices_msg.indices.push_back(j * image.cols + i);
+          }
         }
       }
+      pub_.publish(indices_msg);
     }
-    pub_.publish(indices_msg);
   }
 }
 

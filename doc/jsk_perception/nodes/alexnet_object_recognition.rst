@@ -8,10 +8,8 @@ What is this?
 .. image:: ./images/alexnet_object_recognition.png
 
 Recognize object with Alex net by resizing input image to 227 x 227.
-This node requires pretrained Chainer_ model.
-For training Alex net, please refer to `chainer imagenet example <https://github.com/pfnet/chainer/tree/master/examples/imagenet>`_
-
-.. _Chainer:: https://github.com/pfnet/chainer
+This node requires pretrained `chainer <https://github.com/chainer/chainer>`_ model.
+For training Alex net, please refer to `chainer imagenet example <https://github.com/chainer/chainer/tree/master/examples/imagenet>`_
 
 
 Subscribing Topic
@@ -20,6 +18,7 @@ Subscribing Topic
 * ``~input`` (``sensor_msgs/Image``)
 
   Input image.
+
 
 
 Publishing Topic

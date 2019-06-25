@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_gaussian_blur.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_gaussian_blur"
+        name="test_gaussian_blur"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /gaussian_blur/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

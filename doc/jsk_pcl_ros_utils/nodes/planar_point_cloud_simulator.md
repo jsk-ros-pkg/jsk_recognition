@@ -1,5 +1,5 @@
 # PlanarPointCloudSimulator
-![](images/planar_pointcloud_simulator.h)
+![](images/planar_pointcloud_simulator.png)
 
 Simulate a pointcloud which is acquired by cameras such as stereo camera and kinect.
 Sensor model is pinhole camera model.

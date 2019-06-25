@@ -47,4 +47,4 @@ synchronizing timestamp and republish them into `~output` namespace.
   are republished only if input messages are synchronized.
 
 ## Sample
-Please check [capture_multisense_training_data.launch](launch/capture_multisense_training_data.launch).
+Please check [capture_multisense.launch](https://github.com/jsk-ros-pkg/jsk_recognition/blob/master/jsk_pcl_ros/launch/capture/capture_multisense.launch).

@@ -36,6 +36,8 @@ def find_pose(limb, msg):
 def remove_slash(frame_id):
     if frame_id.startswith("/"):
         return frame_id[1:]
+    else:
+        return frame_id
 
 
 class PointIt(ConnectionBasedTransport):

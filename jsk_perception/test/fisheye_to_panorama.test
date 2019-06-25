@@ -1,0 +1,21 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_fisheye_to_panorama.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_fisheye_to_panorama"
+        name="test_fisheye_to_panorama"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /fisheye_to_panorama_rectify/output
+      timeout_0: 30
+      topic_1: /fisheye_to_panorama/output
+      timeout_1: 30
+      topic_2: /fisheye_to_panorama/output_bilinear
+      timeout_2: 30
+    </rosparam>
+  </test>
+
+</launch>

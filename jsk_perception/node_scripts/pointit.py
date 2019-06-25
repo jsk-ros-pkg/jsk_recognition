@@ -63,6 +63,7 @@ class PointIt(ConnectionBasedTransport):
                 use_tf2_buffer_client = False
         if not use_tf2_buffer_client:
             self.tfl = tf2_ros.Buffer()
+            self.tf_listener = tf2_ros.TransformListener(self.tfl)
 
         # advertise
         self.pub_bbox = self.advertise("~output", BoundingBoxArray, queue_size=1)

@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # Author: Yuki Furuta <furushchev@jsk.imi.i.u-tokyo.ac.jp>
 
-import copy
 from jsk_topic_tools import ConnectionBasedTransport
 import message_filters as MF
 import numpy as np
@@ -10,7 +9,6 @@ import rospy
 import tf2_ros
 import tf2_geometry_msgs
 
-from geometry_msgs.msg import Point
 from geometry_msgs.msg import PoseStamped
 from jsk_recognition_msgs.msg import BoundingBoxArray
 from jsk_recognition_msgs.msg import ClassificationResult

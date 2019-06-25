@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_plane_supported_cuboid_estimator.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_interactive_cuboid_likelihood"
+        name="test_interactive_cuboid_likelihood"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="30" retry="3">
+    <rosparam>
+      topic_0: /interactive_cuboid_likelihood/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

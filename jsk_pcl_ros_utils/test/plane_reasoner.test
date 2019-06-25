@@ -1,0 +1,27 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_plane_reasoner.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_plane_reasoner"
+        name="test_plane_reasoner"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="30" retry="3">
+    <rosparam>
+      topic_0: /plane_reasoner/output/vertical/inliers
+      timeout_0: 30
+      topic_1: /plane_reasoner/output/vertical/coefficients
+      timeout_1: 30
+      topic_2: /plane_reasoner/output/vertical/polygons
+      timeout_2: 30
+      topic_3: /plane_reasoner/output/horizontal/inliers
+      timeout_3: 30
+      topic_4: /plane_reasoner/output/horizontal/coefficients
+      timeout_4: 30
+      topic_5: /plane_reasoner/output/horizontal/polygons
+      timeout_5: 30
+    </rosparam>
+  </test>
+
+</launch>

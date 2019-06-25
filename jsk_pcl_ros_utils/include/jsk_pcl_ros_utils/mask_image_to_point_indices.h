@@ -39,6 +39,7 @@
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/Image.h>
+#include <jsk_recognition_msgs/ClusterPointIndices.h>
 #include "jsk_recognition_utils/pcl_conversion_util.h"
 
 namespace jsk_pcl_ros_utils
@@ -63,7 +64,8 @@ namespace jsk_pcl_ros_utils
     ros::Subscriber sub_;
     ros::Publisher pub_;
   private:
-  
+    bool use_multi_channels_;
+    int target_channel_;
   };
 }
 

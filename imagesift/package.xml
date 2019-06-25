@@ -1,6 +1,6 @@
 <package>
   <name>imagesift</name>
-  <version>1.2.9</version>
+  <version>1.2.10</version>
   <description>
     For every image, computes its sift features and send a new message with the image, its intrinsic parameters, and the features.
     Parameters include:

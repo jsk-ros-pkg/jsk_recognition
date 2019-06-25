@@ -1,0 +1,26 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <node name="static_polygon_array_publisher"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/StaticPolygonArrayPublisher">
+    <rosparam>
+      use_periodic: true
+      periodic_rate: 30.0
+      frame_ids:
+        - map
+        - map
+      polygon_array:
+        - [[3, 0, 0], [0, 3, 0], [0, 1, 2], [1, 0, 2]]
+        - [[-1, -1, 1], [4, 3, 0], [3, 4, 0]]
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_static_polygon_array_publisher.rviz"/>
+  </group>
+
+</launch>

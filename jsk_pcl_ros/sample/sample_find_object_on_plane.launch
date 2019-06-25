@@ -1,0 +1,82 @@
+<launch>
+
+  <arg name="gui" default="true"/>
+
+  <param name="/use_sim_time" value="true"/>
+
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/sample/data/pr2_look_around_in_room_73b2.bag --clock --loop"/>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <group ns="/kinect_head">
+    <node name="republish_rgb"
+          pkg="image_transport" type="republish"
+          args="compressed raw">
+      <remap from="in" to="rgb/image_rect_color"/>
+      <remap from="out" to="rgb/image_rect_color"/>
+    </node>
+    <node name="republish_depth"
+          pkg="image_transport" type="republish"
+          args="compressedDepth raw">
+      <remap from="in" to="depth_registered/hw_registered/image_rect"/>
+      <remap from="out" to="depth_registered/hw_registered/image_rect"/>
+    </node>
+    <node name="point_cloud_xyzrgb"
+          pkg="nodelet" type="nodelet"
+          args="load depth_image_proc/point_cloud_xyzrgb /sample_manager">
+      <remap from="rgb/camera_info" to="rgb/camera_info"/>
+      <remap from="rgb/image_rect_color" to="rgb/image_rect_color"/>
+      <remap from="depth_registered/image_rect" to="depth_registered/hw_registered/image_rect"/>
+    </node>
+  </group>
+
+  <node name="multi_plane_segmentation"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/OrganizedMultiPlaneSegmentation /sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+  </node>
+
+  <node name="polygon_array_to_polygon"
+        pkg="jsk_recognition_utils" type="polygon_array_to_polygon.py">
+    <remap from="~input" to="multi_plane_segmentation/output_refined_polygon"/>
+    <rosparam>
+      index: 0
+    </rosparam>
+  </node>
+
+  <node name="polygon_to_mask_image"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/PolygonToMaskImage /sample_manager">
+    <remap from="~input" to="polygon_array_to_polygon/output"/>
+    <remap from="~input/camera_info" to="/kinect_head/rgb/camera_info"/>
+  </node>
+
+  <node name="polygon_array_unwrapper"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PolygonArrayUnwrapper /sample_manager">
+    <remap from="~input_polygons" to="multi_plane_segmentation/output_refined_polygon"/>
+    <remap from="~input_coefficients" to="multi_plane_segmentation/output_refined_coefficients"/>
+    <rosparam>
+      use_likelihood: true
+    </rosparam>
+  </node>
+
+  <node name="find_object_on_plane"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/FindObjectOnPlane /sample_manager">
+    <remap from="~input" to="polygon_to_mask_image/output"/>
+    <remap from="~input/camera_info" to="/kinect_head/rgb/camera_info"/>
+    <remap from="~input/coefficients" to="polygon_array_unwrapper/output_coefficients"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/find_object_on_plane.rviz"/>
+  </group>
+
+</launch>

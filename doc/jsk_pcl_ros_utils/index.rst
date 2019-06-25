@@ -10,13 +10,6 @@ This package provides some programs as nodelet.
 .. toctree::
    :glob:
    :maxdepth: 1
-
-   ./*
-
-
-.. toctree::
-   :glob:
-   :maxdepth: 1
    :caption: nodes and nodelets
 
    ./nodes/*

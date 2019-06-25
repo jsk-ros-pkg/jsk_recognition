@@ -168,18 +168,8 @@ class PointIt(ConnectionBasedTransport):
         if out_markers:
             self.pub_marker.publish(MarkerArray(markers=out_markers))
 
-    def get_marker(self, line_seg, frame_id, scale=0.3):
+    def get_marker(self, line_seg, frame_id):
         p0, p1 = line_seg
-        v = np.asarray([p1.position.x - p0.position.x,
-                        p1.position.y - p0.position.y,
-                        p1.position.z - p0.position.z])
-        vnorm = np.linalg.norm(v)
-        if vnorm > 0.0:
-            v /= np.linalg.norm(v)
-        p2 = copy.deepcopy(p0)
-        p2.position.x += scale * v[0]
-        p2.position.y += scale * v[1]
-        p2.position.z += scale * v[2]
         m = Marker()
         m.header.stamp = rospy.Time.now()
         m.header.frame_id = frame_id

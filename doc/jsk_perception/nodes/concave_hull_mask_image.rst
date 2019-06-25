@@ -1,5 +1,5 @@
 ConcaveHullMaskImage
-===================
+====================
 
 What is this?
 -------------

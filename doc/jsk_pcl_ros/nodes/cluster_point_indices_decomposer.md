@@ -30,7 +30,7 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 * `~label` (`sensor_msgs/Image`):
 
    Label image for each cluster point indices.
-   You can visualize it with [jsk\_perception/ColorizeLabels](../jsk_perception/nodes/colorize_labels.md)
+   You can visualize it with [jsk_perception/ColorizeLabels](../../jsk_perception/nodes/colorize_labels.md)
 
 * `~mask` (`sensor_msgs/Image`):
 

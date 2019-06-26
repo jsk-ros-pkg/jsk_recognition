@@ -52,6 +52,6 @@ Finds objects similar to a selected object as reference based on bhattacharyya d
 ## Sample
 
 ``` 
-roslaunch jsk_pcl_ros organized_multi_plane_segmentation.launch COLOR_HISTOGRAM:=true 
+roslaunch jsk_pcl_ros sample_color_histogram_matcher.launch
 ```
 Please refer to ``` SelectedClusterPublisher ``` on how to select a referenced object. 

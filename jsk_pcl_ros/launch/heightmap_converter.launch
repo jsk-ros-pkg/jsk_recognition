@@ -83,6 +83,9 @@
     bilateral_sigma_color: 0.028
     bilateral_sigma_space: 3
   </rosparam>
+  <rosparam param="accumulated_heightmap_pointcloud" subst_value="true">
+    keep_organized: false
+  </rosparam>
   <rosparam param="accumulated_heightmap_pointcloud_static" subst_value="true">
     target_frame_id: $(arg STATIC_FRAME)
   </rosparam>

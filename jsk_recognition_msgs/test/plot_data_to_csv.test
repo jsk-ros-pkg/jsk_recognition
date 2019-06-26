@@ -11,6 +11,7 @@
         time-limit="10">
     <rosparam subst_value="true">
       csv_path: $(arg csv_path)
+      timeout: 5.0
     </rosparam>
   </test>
 </launch>

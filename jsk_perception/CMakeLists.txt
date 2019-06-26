@@ -428,7 +428,9 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/draw_classification_result.test)
     jsk_add_rostest(test/extract_image_channel.test)
     jsk_add_rostest(test/face_pose_estimation.test)
-    jsk_add_rostest(test/fast_rcnn.test)
+    # fast_rcnn.test is unstable.
+    # So disabled in https://github.com/jsk-ros-pkg/jsk_recognition/pull/2440
+    # jsk_add_rostest(test/fast_rcnn.test)
     # fcn_depth_prediction.test is unstable.
     # See https://github.com/jsk-ros-pkg/jsk_recognition/pull/2244
     # jsk_add_rostest(test/fcn_depth_prediction.test)

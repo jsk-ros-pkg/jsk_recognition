@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_project_image_point.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_project_image_point"
+        name="test_project_image_point"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /project_image_point/output
+      timeout_0: 30
+      topic_1: /project_image_point/output/ray
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

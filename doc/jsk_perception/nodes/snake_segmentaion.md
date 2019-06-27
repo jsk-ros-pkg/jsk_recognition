@@ -31,3 +31,10 @@ Snake segmentation based on cvSnakeImage.
 * `~epsilon` (double, default: `0.1`)
 
   epsilon value of convergence
+
+
+## Sample
+
+```bash
+roslaunch jsk_perception sample_snake_segmentation.launch
+```

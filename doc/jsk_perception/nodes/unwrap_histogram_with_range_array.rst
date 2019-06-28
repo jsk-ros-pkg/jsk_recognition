@@ -6,7 +6,7 @@ unwrap_histogram_with_range_array.py
 What is this?
 -------------
 
-Unwrap a HistogramWithRangeArray message and publish its first element.
+Unwrap a HistogramWithRangeArray message and publish its element.
 
 
 Subscribing Topic
@@ -23,6 +23,14 @@ Publishing Topic
 * ``~output`` (``jsk_recognition_msgs/HistogramWithRange``)
 
   Histogram
+
+
+Parameters
+----------
+
+* ``~index`` (Int, default: ``0``)
+
+  Histogram index to be extracted from ``~input``.
 
 
 Sample

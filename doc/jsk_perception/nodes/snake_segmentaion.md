@@ -3,6 +3,8 @@
 
 Snake segmentation based on cvSnakeImage.
 
+This feature is not supported in OpenCV >= 3.
+
 ## Subscribing Topics
 * `~input` (`sensor_msgs/Image`)
 

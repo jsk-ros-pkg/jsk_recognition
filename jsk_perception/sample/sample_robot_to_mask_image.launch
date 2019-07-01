@@ -1,0 +1,24 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_perception)/sample/sample_image_publisher.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <!-- Note:                                                        -->
+  <!--     This sample does not contain required parameters such as -->
+  <!--     robot_description, so output mask image will be black.   -->
+  <!--     Currently, this sample is only for testing.              -->
+  <node name="robot_to_mask_image"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_perception/RobotToMaskImage">
+    <remap from="~input/camera_info" to="raw_image_rgb/camera_info"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="robot_to_mask_image/output"/>
+    </node>
+  </group>
+</launch>

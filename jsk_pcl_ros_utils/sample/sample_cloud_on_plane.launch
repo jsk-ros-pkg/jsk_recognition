@@ -1,0 +1,47 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="pcd_to_pointcloud"
+        pkg="pcl_ros" type="pcd_to_pointcloud"
+        args="$(find jsk_pcl_ros_utils)/sample/data/bunny.pcd 0.1">
+    <remap from="cloud_pcd" to="~output"/>
+    <rosparam>
+      frame_id: map
+    </rosparam>
+  </node>
+
+  <node name="polygon_array_publisher"
+        pkg="jsk_recognition_utils" type="polygon_array_publisher.py">
+    <rosparam>
+      frame_id: map
+      polygons:
+      - points:
+        - [-0.5, -0.5, 0.0]
+        - [0.5, -0.5, 0.0]
+        - [0.5,  0.5, 0.0]
+        - [-0.5,  0.5, 0.0]
+    </rosparam>
+  </node>
+
+  <node name="cloud_on_plane"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/CloudOnPlane">
+    <remap from="~input" to="pcd_to_pointcloud/output"/>
+    <remap from="~input/polygon" to="polygon_array_publisher/output"/>
+    <rosparam>
+      approximate_sync: true
+      distance_thr: 0.3
+    </rosparam>
+  </node>
+
+  <node name="cloud_on_plane_info"
+        pkg="jsk_pcl_ros_utils" type="cloud_on_plane_info.py">
+    <remap from="~input" to="cloud_on_plane/output"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_cloud_on_plane.rviz"/>
+  </group>
+</launch>

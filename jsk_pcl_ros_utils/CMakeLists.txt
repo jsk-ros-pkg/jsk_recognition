@@ -265,6 +265,7 @@ if (CATKIN_ENABLE_TESTING)
     # not build on hydro
     add_rostest(test/add_point_indices.test)
     roslaunch_add_file_check(test/add_point_indices.test)
+    add_rostest(test/cloud_on_plane.test)
     add_rostest(test/cluster_point_indices_to_point_indices.test)
     add_rostest(test/point_indices_to_mask_image.test)
     add_rostest(test/pointcloud_to_pcd.test)

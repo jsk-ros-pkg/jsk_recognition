@@ -40,6 +40,14 @@ def main():
 
     download_data(
         pkg_name=PKG,
+        path='trained_data/svm_apc2016_objects.xml',
+        url='https://drive.google.com/uc?id=10JHFDfdxtAQxxtE1-GmTzkNTc8QBGq3x',
+        md5='1493f55104e7723512eaa67885c5a958',
+        quiet=quiet,
+    )
+
+    download_data(
+        pkg_name=PKG,
         path='trained_data/apc2015_sample_bof.pkl.gz',
         url='https://drive.google.com/uc?id=0B9P1L--7Wd2vemVRaDBOWDVpb28',
         md5='97eb737f71a33bfc23ec573f1d351bd8',

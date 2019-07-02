@@ -4,9 +4,9 @@ import rospy
 from sensor_msgs.msg import CameraInfo, PointCloud2
 
 if __name__ == "__main__":
-    rospy.init_node("laser_camera_fov_sample")
-    pub_info = rospy.Publisher("~info", CameraInfo)
-    pub_cloud = rospy.Publisher("~cloud", PointCloud2)
+    rospy.init_node("sample_camera_info_and_pointcloud_publisher")
+    pub_info = rospy.Publisher("~info", CameraInfo, queue_size=1)
+    pub_cloud = rospy.Publisher("~cloud", PointCloud2, queue_size=1)
     rate = rospy.Rate(1)
     while not rospy.is_shutdown():
         info = CameraInfo()

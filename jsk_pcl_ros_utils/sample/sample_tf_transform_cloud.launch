@@ -1,0 +1,31 @@
+<launch>
+  <arg name="gui" default="true" />
+
+  <node name="pcd_to_pointcloud"
+        pkg="pcl_ros" type="pcd_to_pointcloud"
+        args="$(find jsk_pcl_ros_utils)/sample/data/bunny.pcd 0.1">
+    <remap from="cloud_pcd" to="~output" />
+    <rosparam>
+      frame_id: bunny
+    </rosparam>
+  </node>
+
+  <node name="static_tf_publisher"
+        pkg="tf" type="static_transform_publisher"
+        args="0 0 1 0 0 0 /map /bunny 10"/>
+
+  <node name="tf_transform_cloud"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/TfTransformCloud">
+    <remap from="~input" to="pcd_to_pointcloud/output"/>
+    <rosparam>
+      target_frame_id: map
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_tf_transform_cloud.rviz"/>
+  </group>
+</launch>

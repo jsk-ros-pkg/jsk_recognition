@@ -1,0 +1,38 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_perception)/sample/sample_grid_label.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="label_to_cluster_point_indices"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/LabelToClusterPointIndices">
+    <remap from="~input" to="grid_label/output"/>
+    <rosparam>
+      bg_label: 0
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_cluster_indices_decomposer"
+          pkg="jsk_perception" type="image_cluster_indices_decomposer.py">
+      <remap from="~input" to="image_publisher/output"/>
+      <remap from="~input/cluster_indices" to="label_to_cluster_point_indices/output"/>
+    </node>
+
+    <node name="tile_image"
+          pkg="jsk_perception" type="tile_image.py">
+      <rosparam>
+        input_topics:
+          - /image_publisher/output
+          - /image_cluster_indices_decomposer/output
+      </rosparam>
+    </node>
+
+    <node name="image_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="tile_image/output"/>
+    </node>
+  </group>
+</launch>

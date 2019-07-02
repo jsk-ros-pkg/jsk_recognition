@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_label_to_cluster_point_indices.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_label_to_cluster_point_indices"
+        name="test_label_to_cluster_point_indices"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /label_to_cluster_point_indices/output
+      timeout_0: 30
+      topic_1: /label_to_cluster_point_indices/output/bg_indices
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

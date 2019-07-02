@@ -43,3 +43,11 @@ Parameters
 
   List of ignored labels.
   Indices of ignored labels are replaced by empty ones.
+
+
+Sample
+------
+
+.. code-block:: bash
+
+  roslaunch jsk_pcl_ros_utils sample_label_to_cluster_point_indices.launch

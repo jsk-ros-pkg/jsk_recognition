@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_planar_pointcloud_simulator.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_planar_pointcloud_simulator"
+        name="test_planar_pointcloud_simulator"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /planar_pointcloud_simulator/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

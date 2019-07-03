@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_colorize_distance_from_plane.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_colorize_distance_from_plane"
+        name="test_colorize_distance_from_plane"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /colorize_distance_from_plane/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

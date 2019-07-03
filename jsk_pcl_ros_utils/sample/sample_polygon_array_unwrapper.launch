@@ -1,0 +1,42 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="static_polygon_array_publisher"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/StaticPolygonArrayPublisher sample_manager">
+    <rosparam>
+      use_periodic: true
+      periodic_rate: 1.0
+      frame_ids:
+        - map
+        - map
+        - map
+        - map
+      polygon_array:
+        - [[-2.0, 2.0, 2.0], [-2.0, 0.0, 2.0], [0.0, 0.0, 2.0], [0.0, 2.0, 2.0]]
+        - [[2.0, 2.0, 2.0], [2.0, 0.0, 2.0], [0.0, 0.0, 2.0], [0.0, 2.0, 2.0]]
+        - [[-2.0, -2.0, 2.0], [-2.0, 0.0, 2.0], [0.0, 0.0, 2.0], [0.0, -2.0, 2.0]]
+        - [[2.0, -2.0, 2.0], [2.0, 0.0, 2.0], [0.0, 0.0, 2.0], [0.0, -2.0, 2.0]]
+    </rosparam>
+  </node>
+
+  <node name="polygon_array_unwrapper"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PolygonArrayUnwrapper sample_manager">
+    <remap from="~input_polygons" to="static_polygon_array_publisher/output_polygons"/>
+    <remap from="~input_coefficients" to="static_polygon_array_publisher/output_coefficients"/>
+    <rosparam>
+      plane_index: 1
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_polygon_array_unwrapper.rviz"/>
+  </group>
+</launch>

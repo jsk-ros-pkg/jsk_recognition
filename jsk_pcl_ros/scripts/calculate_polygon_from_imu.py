@@ -32,7 +32,7 @@ def imu_cb(imu):
         PStamped.polygon.points.append(Point32(x*dx[0]+y*dy[0],x*dx[1]+y*dy[1],x*dx[2]+y*dy[2]))
 
     PStamped.header = imu.header
-    PArrayPub.publish(PolygonArray(imu.header, [PStamped]))
+    PArrayPub.publish(PolygonArray(header=imu.header, polygons=[PStamped]))
     normal_array = np.array([ax, ay, az, 0])
     normal_array = normal_array / np.linalg.norm(x)
     MStamped = ModelCoefficients(imu.header, normal_array)
@@ -40,7 +40,8 @@ def imu_cb(imu):
     
 if __name__ == "__main__":
     rospy.init_node('calc_imu_plane', anonymous=True)
-    PArrayPub = rospy.Publisher('polygon_array', PolygonArray)
-    MArrayPub = rospy.Publisher('model_coefficients_array', ModelCoefficientsArray)
+    PArrayPub = rospy.Publisher('polygon_array', PolygonArray, queue_size=1)
+    MArrayPub = rospy.Publisher(
+        'model_coefficients_array', ModelCoefficientsArray, queue_size=1)
     rospy.Subscriber("imu_data", Imu, imu_cb)
     rospy.spin()

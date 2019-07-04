@@ -21,9 +21,9 @@ from std_msgs.msg import Header
 def imu_cb(imu):
     ax, ay, az = imu.linear_acceleration.x, imu.linear_acceleration.y, imu.linear_acceleration.z 
     # rospy.loginfo("%f %f %f" % (ax, ay, az))
-    if az > 0.1:
+    if np.abs(az) > 0.1:
         dx, dy = [-az, 0, ax], [0, -az, ay]
-    elif ay > 0.1:
+    elif np.abs(ay) > 0.1:
         dx, dy = [-ay, ax, 0], [0, az, -ay]
     else:
         dx, dy = [ay, -ax, 0], [az, 0, -az]

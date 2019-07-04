@@ -93,7 +93,7 @@ def get_package_table():
 
 
 def get_deb_status_table():
-    cmd = 'rosrun jsk_tools generate_deb_status_table.py jsk_recognition -f i -t k'
+    cmd = 'rosrun jsk_tools generate_deb_status_table.py jsk_recognition'
     return subprocess.check_output(cmd, shell=True).strip()
 
 

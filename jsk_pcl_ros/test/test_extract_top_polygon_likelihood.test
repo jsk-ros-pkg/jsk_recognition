@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_extract_top_polygon_likelihood.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_extract_top_polygon_likelihood"
+        name="test_extract_top_polygon_likelihood"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /extract_top_polygon_likelihood/output
+      timeout_0: 30
+      topic_1: /extract_top_polygon_likelihood/output/coefficients
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

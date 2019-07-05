@@ -526,6 +526,7 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/test_edgebased_cube_finder.test)
     add_rostest(test/test_environment_plane_modeling.test)
     add_rostest(test/test_euclidean_segmentation.test)
+    add_rostest(test/test_extract_top_polygon_likelihood.test)
     add_rostest(test/test_find_object_on_plane.test)
     # TODO(iory): https://github.com/jsk-ros-pkg/jsk_recognition/issues/2007
     # add_rostest(test/test_people_detection.test DEPENDENCIES install_test_data)

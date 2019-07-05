@@ -1,0 +1,52 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="border_estimator"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/BorderEstimator sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <remap from="~input_camera_info" to="/kinect_head/rgb/camera_info"/>
+  </node>
+
+  <node name="extract_indices_border"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ExtractIndices sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <remap from="~indices" to="border_estimator/output_border_indices"/>
+    <rosparam>
+      keep_organized: true
+    </rosparam>
+  </node>
+
+  <node name="extract_indices_veil"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ExtractIndices sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <remap from="~indices" to="border_estimator/output_veil_indices"/>
+    <rosparam>
+      keep_organized: true
+    </rosparam>
+  </node>
+
+  <node name="extract_indices_shadow"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ExtractIndices sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <remap from="~indices" to="border_estimator/output_shadow_indices"/>
+    <rosparam>
+      keep_organized: true
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/border_estimator.rviz"/>
+  </group>
+</launch>

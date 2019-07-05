@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_plane_time_ensync_for_recognition.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_plane_time_ensync_for_recognition"
+        name="test_plane_time_ensync_for_recognition"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /plane_time_ensync_for_recognition/output/ensynced_planes
+      timeout_0: 30
+      topic_1: /plane_time_ensync_for_recognition/output/ensynced_planes_coefficients
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

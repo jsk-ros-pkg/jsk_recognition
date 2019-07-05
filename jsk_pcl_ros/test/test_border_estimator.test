@@ -1,0 +1,25 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_border_estimator.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_border_estimator"
+        name="test_border_estimator"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /border_estimator/output_cloud
+      timeout_0: 30
+      topic_1: /border_estimator/output_border_indices
+      timeout_1: 30
+      topic_2: /border_estimator/output_veil_indices
+      timeout_2: 30
+      topic_3: /border_estimator/output_shadow_indices
+      timeout_3: 30
+      topic_4: /border_estimator/output_range_image
+      timeout_4: 30
+    </rosparam>
+  </test>
+
+</launch>

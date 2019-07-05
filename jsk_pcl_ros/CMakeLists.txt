@@ -501,6 +501,7 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/test_add_color_from_image.test)
     add_rostest(test/test_add_color_from_image_to_organized.test)
     add_rostest(test/test_bilateral_filter.test)
+    add_rostest(test/test_border_estimator.test)
     add_rostest(test/test_calculate_polygon_from_imu.test)
     if(ml_classifiers_FOUND)
       # Wait for upstream: ml_classifiers is not yet released in jade, kinetic, ...

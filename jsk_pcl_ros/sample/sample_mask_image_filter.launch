@@ -1,45 +1,31 @@
 <launch>
-  <arg name="gui" default="true"/>
+  <arg name="gui" default="true" />
+  <arg name="camera" value="/right_hand_camera" />
 
-  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml" />
 
-  <node name="sample_manager"
-        pkg="nodelet" type="nodelet"
-        args="manager"/>
-
-  <node name="mask_image_generator"
-        pkg="nodelet" type="nodelet"
-        args="load jsk_perception/MaskImageGenerator sample_manager">
-    <remap from="~input" to="/kinect_head/rgb/image_rect_color"/>
-    <rosparam>
-      offset_x: 130
-      offset_y: 140
-      width: 100
-      height: 110
-    </rosparam>
+  <node name="pointcloud_to_mask_image" pkg="jsk_pcl_ros_utils" type="pointcloud_to_mask_image">
+    <param name="~z_near" value="0" />
+    <param name="~z_far" value="1" />
+    <remap from="~input" to="$(arg camera)/depth_registered/points" />
+    <remap from="~input/depth" to="$(arg camera)/depth/image_rect" />
   </node>
 
-  <node name="mask_image_filter"
-        pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/MaskImageFilter sample_manager">
-    <remap from="~input" to="/kinect_head/depth_registered/points"/>
-    <remap from="~input/mask" to="mask_image_generator/output"/>
-    <remap from="~input/camera_info" to="/kinect_head/rgb/camera_info"/>
-  </node>
+  <node name="mask_image_filter" pkg="jsk_pcl_ros" type="mask_image_filter">
+    <param name="~negative" value="false" />
+    <remap from="~input" to="$(arg camera)/depth_registered/points" />
+    <remap from="~input/mask" to="/pointcloud_to_mask_image/output" />
+    <remap from="~input/camera_info" to="$(arg camera)/depth_registered/camera_info" />
+    </node>
 
-  <node name="extract_indices"
-        pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/ExtractIndices sample_manager">
-    <remap from="~input" to="/kinect_head/depth_registered/points"/>
-    <remap from="~indices" to="mask_image_filter/output"/>
-    <rosparam>
-      keep_organized: true
-    </rosparam>
+  <node name="extract_indices" pkg="jsk_pcl_ros" type="extract_indices">
+    <remap from="~input" to="$(arg camera)/depth_registered/points" />
+    <remap from="~indices" to="/mask_image_filter/output" />
   </node>
 
   <group if="$(arg gui)">
-    <node name="rviz"
-          pkg="rviz" type="rviz"
-          args="-d $(find jsk_pcl_ros)/sample/rviz/mask_image_filter.rviz"/>
+    <node name="rviz" pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/sample_mask_image_filter.rviz">
+    </node>
   </group>
 </launch>

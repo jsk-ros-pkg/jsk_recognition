@@ -89,7 +89,14 @@ namespace jsk_pcl_ros
     cv::Mat float_image = cv_bridge::toCvShare(msg, sensor_msgs::image_encodings::TYPE_32FC2)->image;
     pcl::PointCloud<HeightMapPointType > cloud;
 
-    convertHeightMapToPCL(float_image, cloud, max_x_, min_x_, max_y_, min_y_);
+    bool keep_organized;
+    pnh_->param("keep_organized", keep_organized, false);
+    if (keep_organized) {
+      convertHeightMapToPCLOrganize(float_image, cloud, max_x_, min_x_, max_y_, min_y_);
+    }
+    else {
+      convertHeightMapToPCL(float_image, cloud, max_x_, min_x_, max_y_, min_y_);
+    }
 
     sensor_msgs::PointCloud2 ros_cloud;
     pcl::toROSMsg(cloud, ros_cloud);
@@ -100,4 +107,3 @@ namespace jsk_pcl_ros
 
 #include <pluginlib/class_list_macros.h>
 PLUGINLIB_EXPORT_CLASS (jsk_pcl_ros::HeightmapToPointCloud, nodelet::Nodelet);
-

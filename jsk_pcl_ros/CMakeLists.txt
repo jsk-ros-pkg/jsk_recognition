@@ -531,6 +531,7 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/test_euclidean_segmentation.test)
     add_rostest(test/test_extract_top_polygon_likelihood.test)
     add_rostest(test/test_find_object_on_plane.test)
+    add_rostest(test/test_fisheye_sphere_publisher.test)
     # TODO(iory): https://github.com/jsk-ros-pkg/jsk_recognition/issues/2007
     # add_rostest(test/test_people_detection.test DEPENDENCIES install_test_data)
     add_rostest(test/test_interactive_cuboid_likelihood.test)

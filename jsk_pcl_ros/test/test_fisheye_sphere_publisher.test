@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_fisheye_sphere_publisher.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_fisheye_sphere_publisher"
+        name="test_fisheye_sphere_publisher"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /fisheye_sphere_publisher/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

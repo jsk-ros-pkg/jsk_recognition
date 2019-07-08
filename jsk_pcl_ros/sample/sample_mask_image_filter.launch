@@ -1,0 +1,45 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="mask_image_generator"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/MaskImageGenerator sample_manager">
+    <remap from="~input" to="/kinect_head/rgb/image_rect_color"/>
+    <rosparam>
+      offset_x: 130
+      offset_y: 140
+      width: 100
+      height: 110
+    </rosparam>
+  </node>
+
+  <node name="mask_image_filter"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/MaskImageFilter sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <remap from="~input/mask" to="mask_image_generator/output"/>
+    <remap from="~input/camera_info" to="/kinect_head/rgb/camera_info"/>
+  </node>
+
+  <node name="extract_indices"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ExtractIndices sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <remap from="~indices" to="mask_image_filter/output"/>
+    <rosparam>
+      keep_organized: true
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/mask_image_filter.rviz"/>
+  </group>
+</launch>

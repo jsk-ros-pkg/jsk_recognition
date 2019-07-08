@@ -1,0 +1,31 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="supervoxel_segmentation"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/SupervoxelSegmentation sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <rosparam>
+      seed_resolution: 0.5
+    </rosparam>
+  </node>
+
+  <node name="cluster_point_indices_decomposer"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer sample_manager">
+    <remap from="~input" to="supervoxel_segmentation/output/cloud"/>
+    <remap from="~target" to="supervoxel_segmentation/output/indices"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/supervoxel_segmentation.rviz"/>
+  </group>
+</launch>

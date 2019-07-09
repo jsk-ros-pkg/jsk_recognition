@@ -139,6 +139,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         self.sub_info = None
         if self.with_depth is True:
             self.pose_2d_pub = self.advertise('~pose_2d', PeoplePoseArray, queue_size=1)
+            # visualization rviz plugin: https://github.com/jsk-ros-pkg/jsk_visualization/pull/740
             self.skeleton_pub = self.advertise(
                 '~skeleton', HumanSkeletonArray, queue_size=1)
 

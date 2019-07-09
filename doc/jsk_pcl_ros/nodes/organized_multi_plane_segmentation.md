@@ -41,6 +41,8 @@ PCL and ROS.
 
    The pointcloud of normal of `~input` pointcloud.
 
+   Point type is `pcl::Normal`.
+
 ## Parameters
 * `~estimate_normal` (Boolean, default: `True`):
 
@@ -90,3 +92,9 @@ PCL and ROS.
 * `~max_refined_area_threshold` (Double, default: `10000`)
 
    Minimum and maximum area threshold for each convex polygon.
+
+## Sample
+
+```bash
+roslaunch jsk_pcl_ros sample_organized_multi_plane_segmentation.launch
+```

@@ -39,11 +39,6 @@
 
 #include <ros/ros.h>
 #include <tf/tf.h>
-#if (ROS_VERSION_MINIMUM(1,14,0) || MOVEIT_VERSION_MAJOR >= 1) // melodic or MoveIt 1.0
-#include <tf2_ros/message_filter.h>
-#else
-#include <tf/message_filter.h>
-#endif
 #include <message_filters/subscriber.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <moveit/version.h>
@@ -55,6 +50,12 @@
 #include <pcl/point_cloud.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/filters/extract_indices.h>
+
+#if (ROS_VERSION_MINIMUM(1,14,0) || MOVEIT_VERSION_MAJOR >= 1) // melodic or MoveIt 1.0
+#include <tf2_ros/message_filter.h>
+#else
+#include <tf/message_filter.h>
+#endif
 
 namespace jsk_pcl_ros
 {

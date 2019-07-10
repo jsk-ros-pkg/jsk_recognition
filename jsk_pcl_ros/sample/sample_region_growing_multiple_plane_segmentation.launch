@@ -1,0 +1,37 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="normal_estimation_omp"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/NormalEstimationOMP sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <rosparam>
+      k_search: 10
+    </rosparam>
+  </node>
+
+  <node name="region_growing_multiple_plane_segmentation"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/RegionGrowingMultiplePlaneSegmentation sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <remap from="~input_normal" to="normal_estimation_omp/output"/>
+    <rosparam>
+      angular_threshold: 0.05
+      distance_threshold: 0.01
+      max_curvature: 0.001
+      min_size: 2000
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/region_growing_multiple_plane_segmentation.rviz"/>
+  </group>
+</launch>

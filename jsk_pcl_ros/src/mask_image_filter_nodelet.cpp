@@ -45,6 +45,7 @@ namespace jsk_pcl_ros
   void MaskImageFilter::onInit()
   {
     DiagnosticNodelet::onInit();
+    pnh_->param("negative", negative_, false);
     pub_ = advertise<PCLIndicesMsg>(
       *pnh_, "output", 1);
     DiagnosticNodelet::onInitPostProcess();
@@ -80,6 +81,10 @@ namespace jsk_pcl_ros
     cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(
       mask_msg, sensor_msgs::image_encodings::MONO8);
     mask_image_ = cv_ptr->image;
+
+    if (negative_) {
+      cv::bitwise_not(mask_image_, mask_image_);
+    }
   }
 
   void MaskImageFilter::filter(

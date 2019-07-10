@@ -470,6 +470,8 @@ public:
     if (err_sum > err_thr){
       ROS_INFO("          err_sum:%f > err_thr:%f return-from estimate-od", err_sum, err_thr);
       err_success = false;
+    } else {
+      o6p->reliability = 1.0 - (err_sum / err_thr);
     }
     // draw lines around the detected object
     for (int j = 0; j < corners2d_mat_trans.cols; j++){
@@ -860,8 +862,10 @@ public:
                               (_viewer ? type : ""), _autosize);
       _templates.push_back(tmplt);
       if( _viewer )
+      {
         cv::namedWindow(type, _autosize ? CV_WINDOW_AUTOSIZE : 0);
-      cvSetMouseCallback (type.c_str(), &cvmousecb, static_cast<void *>(_templates.back()));
+        cvSetMouseCallback (type.c_str(), &cvmousecb, static_cast<void *>(_templates.back()));
+      }
     }
     return true;
   }

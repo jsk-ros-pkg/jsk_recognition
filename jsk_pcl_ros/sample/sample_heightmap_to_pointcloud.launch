@@ -1,0 +1,28 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_heightmap_morphological_filtering.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="heightmap_to_pointcloud"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/HeightmapToPointCloud sample_manager">
+    <remap from="~input" to="heightmap_morphological_filtering/output"/>
+    <rosparam>
+      keep_organized: true
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="colorize_float_image"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_perception/ColorizeFloatImage sample_manager">
+      <remap from="~input" to="heightmap_morphological_filtering/output"/>
+    </node>
+
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/heightmap_to_pointcloud.rviz"/>
+  </group>
+</launch>

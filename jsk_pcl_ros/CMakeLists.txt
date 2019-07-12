@@ -536,6 +536,7 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/test_fuse_depth_images.test)
     add_rostest(test/test_fuse_rgb_images.test)
     add_rostest(test/test_grid_sampler.test)
+    add_rostest(test/test_heightmap_converter.test)
     # TODO(iory): https://github.com/jsk-ros-pkg/jsk_recognition/issues/2007
     # add_rostest(test/test_people_detection.test DEPENDENCIES install_test_data)
     add_rostest(test/test_interactive_cuboid_likelihood.test)

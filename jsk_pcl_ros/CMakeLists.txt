@@ -538,6 +538,7 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/test_grid_sampler.test)
     add_rostest(test/test_heightmap_converter.test)
     add_rostest(test/test_heightmap_morphological_filtering.test)
+    add_rostest(test/test_heightmap_time_accumulation.test)
     add_rostest(test/test_heightmap_to_pointcloud.test)
     # TODO(iory): https://github.com/jsk-ros-pkg/jsk_recognition/issues/2007
     # add_rostest(test/test_people_detection.test DEPENDENCIES install_test_data)

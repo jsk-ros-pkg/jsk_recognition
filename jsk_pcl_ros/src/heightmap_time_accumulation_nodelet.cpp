@@ -139,9 +139,15 @@ namespace jsk_pcl_ros
       return;
     }
     tf::StampedTransform tf_transform;
-    tf_->lookupTransform(fixed_frame_id_, center_frame_id_,
-                         msg->header.stamp,
-                         tf_transform);
+    try {
+      tf_->lookupTransform(fixed_frame_id_, center_frame_id_,
+                           msg->header.stamp,
+                           tf_transform);
+    }
+    catch (tf2::TransformException &e) {
+        NODELET_ERROR("Transform error: %s", e.what());
+        return;
+    }
     Eigen::Affine3f from_center_to_fixed;
     tf::transformTFToEigen(tf_transform, from_center_to_fixed);
     cv::Mat new_heightmap = cv_bridge::toCvShare(
@@ -282,9 +288,15 @@ namespace jsk_pcl_ros
     pcl::fromROSMsg(*msg, prev_cloud_);
     // get transform at subscribed timestamp
     tf::StampedTransform tf_transform;
-    tf_->lookupTransform(fixed_frame_id_, center_frame_id_,
-                         msg->header.stamp,
-                         tf_transform);
+    try {
+      tf_->lookupTransform(fixed_frame_id_, center_frame_id_,
+                           msg->header.stamp,
+                           tf_transform);
+    }
+    catch (tf2::TransformException &e) {
+      NODELET_ERROR("Transform error: %s", e.what());
+      return;
+    }
     tf::transformTFToEigen(tf_transform, prev_from_center_to_fixed_);
   }
 

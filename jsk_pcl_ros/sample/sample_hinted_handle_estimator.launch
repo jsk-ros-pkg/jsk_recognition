@@ -1,0 +1,28 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+
+  <node name="sample_point_publisher_from_pointcloud"
+        pkg="jsk_pcl_ros" type="sample_point_publisher_from_pointcloud.py">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <rosparam>
+      x: -0.3
+      y: -0.2
+      z: 0.98
+    </rosparam>
+  </node>
+
+  <node name="hinted_handle_estimator"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/HintedHandleEstimator">
+    <remap from="~cloud" to="/kinect_head/depth_registered/points"/>
+    <remap from="~point" to="sample_point_publisher_from_pointcloud/output"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/hinted_handle_estimator.rviz"/>
+  </group>
+</launch>

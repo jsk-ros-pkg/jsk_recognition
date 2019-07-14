@@ -540,6 +540,7 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/test_heightmap_morphological_filtering.test)
     add_rostest(test/test_heightmap_time_accumulation.test)
     add_rostest(test/test_heightmap_to_pointcloud.test)
+    add_rostest(test/test_hinted_handle_estimator.test)
     add_rostest(test/test_hinted_plane_detector.test)
     # TODO(iory): https://github.com/jsk-ros-pkg/jsk_recognition/issues/2007
     # add_rostest(test/test_people_detection.test DEPENDENCIES install_test_data)

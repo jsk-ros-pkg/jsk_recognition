@@ -1,0 +1,41 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_plane_supported_cuboid_estimator.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_plane_supported_cuboid_estimator"
+        name="test_plane_supported_cuboid_estimator"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /plane_supported_cuboid_estimator/output/result
+      timeout_0: 30
+      topic_1: /plane_supported_cuboid_estimator/output/result_pose
+      timeout_1: 30
+      topic_2: /plane_supported_cuboid_estimator/output/candidate_cloud
+      timeout_2: 30
+      topic_3: /plane_supported_cuboid_estimator/output/particles
+      timeout_3: 30
+      topic_4: /plane_supported_cuboid_estimator/output/histogram/global/x
+      timeout_4: 30
+      topic_5: /plane_supported_cuboid_estimator/output/histogram/global/y
+      timeout_5: 30
+      topic_6: /plane_supported_cuboid_estimator/output/histogram/global/z
+      timeout_6: 30
+      topic_7: /plane_supported_cuboid_estimator/output/histogram/global/roll
+      timeout_7: 30
+      topic_8: /plane_supported_cuboid_estimator/output/histogram/global/pitch
+      timeout_8: 30
+      topic_9: /plane_supported_cuboid_estimator/output/histogram/global/yaw
+      timeout_9: 30
+      topic_10: /plane_supported_cuboid_estimator/output/histogram/dx
+      timeout_10: 30
+      topic_11: /plane_supported_cuboid_estimator/output/histogram/dy
+      timeout_11: 30
+      topic_12: /plane_supported_cuboid_estimator/output/histogram/dz
+      timeout_12: 30
+    </rosparam>
+  </test>
+
+</launch>

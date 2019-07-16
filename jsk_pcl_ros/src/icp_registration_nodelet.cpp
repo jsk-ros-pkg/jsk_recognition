@@ -192,6 +192,7 @@ namespace jsk_pcl_ros
     rotation_epsilon_ = config.rotation_epsilon;
     ransac_iterations_ = config.ransac_iterations;
     ransac_outlier_threshold_ = config.ransac_outlier_threshold;
+    correspondence_randomness_ = config.correspondence_randomness;
     maximum_optimizer_iterations_ = config.maximum_optimizer_iterations;
     ndt_resolution_ = config.ndt_resolution;
     ndt_step_size_ = config.ndt_step_size;

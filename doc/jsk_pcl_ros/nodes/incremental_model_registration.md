@@ -23,7 +23,24 @@ Build a full-model from sequential captured data.
 * `~output/registered` (`sensor_msgs/PointCloud2`)
 
   Pointcloud refined by ICP.
-## Using Services
-* `~icp_service` (`jsk_pcl_ros/ICPAlign`)
+
+## Internally Using Services
+* `~icp_service` (`jsk_recognition_msgs/ICPAlign`)
 
   ICP service interface to refine model.
+
+## Advertising Services
+* `~start_registration` (`std_srvs/Empty`)
+
+  Trigger to start registration.
+
+## Parameters
+* `~frame_id` (String, default: `multisense/left_camera_optical_frame`)
+
+  Frame ID used for output topics.
+
+## Sample
+
+```bash
+roslaunch jsk_pcl_ros sample_incremental_model_registration.launch
+```

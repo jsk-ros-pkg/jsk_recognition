@@ -1,0 +1,52 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_perception)/sample/include/play_rosbag_pr2_self_see.xml"/>
+
+  <node name="collision_detector"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/CollisionDetector"
+        output="screen">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <rosparam>
+      world_frame_id: base_footprint
+      root_link_id: base_footprint
+      self_see_default_padding: 0.0
+      self_see_default_scale: 1.0
+      self_see_links:
+        <!-- - name: base_footprint -->
+        <!-- - name: torso_lift_link -->
+        <!-- - name: l_shoulder_pan_link -->
+        <!-- - name: l_shoulder_lift_link -->
+        <!-- - name: l_upper_arm_roll_link -->
+        <!-- - name: l_elbow_flex_link -->
+        <!-- - name: l_forearm_roll_link -->
+        - name: l_wrist_flex_link
+        - name: l_wrist_roll_link
+        <!-- - name: r_shoulder_pan_link -->
+        <!-- - name: r_shoulder_lift_link -->
+        <!-- - name: r_upper_arm_roll_link -->
+        <!-- - name: r_elbow_flex_link -->
+        <!-- - name: r_forearm_roll_link -->
+        - name: r_wrist_flex_link
+        - name: r_wrist_roll_link
+        <!-- - name: head_pan_link -->
+        <!-- - name: head_tilt_link -->
+    </rosparam>
+  </node>
+
+  <node name="sample_collision_detector_client"
+        pkg="jsk_pcl_ros" type="sample_collision_detector_client.py">
+    <remap from="~joint_states" to="/joint_states"/>
+    <remap from="~check_collision" to="collision_detector/check_collision"/>
+    <rosparam>
+      request_rate: 1.0
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/collision_detector.rviz"/>
+  </group>
+</launch>

@@ -1,0 +1,21 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_snapit.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_snapit"
+        name="test_snapit"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /snapit/output/plane_aligned
+      timeout_0: 30
+      topic_1: /snapit/output/convex_aligned
+      timeout_1: 30
+      topic_2: /snapit/output/convex_aligned_pose_array
+      timeout_2: 30
+    </rosparam>
+  </test>
+
+</launch>

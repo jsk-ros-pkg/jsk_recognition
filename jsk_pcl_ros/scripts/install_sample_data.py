@@ -127,5 +127,13 @@ def main():
         md5='d7bc0f2e9b126c013c18964d4a1fa1be',
     )
 
+    download_data(
+        path='sample/data/torus.pcd',
+        url='https://blog.innovotion.co.jp/wp-content/uploads/2018/08/torus.pcd',  # NOQA
+        md5='17ae9636f42403a20bf1b936c03bb35c',
+        extract=False,
+    )
+
+
 if __name__ == '__main__':
     main()

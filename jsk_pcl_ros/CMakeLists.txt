@@ -504,6 +504,7 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/test_border_estimator.test)
     add_rostest(test/test_boundingbox_occlusion_rejector.test)
     add_rostest(test/test_calculate_polygon_from_imu.test)
+    add_rostest(test/test_collision_detector.test)
     if(ml_classifiers_FOUND)
       # Wait for upstream: ml_classifiers is not yet released in jade, kinetic, ...
       # (https://github.com/jsk-ros-pkg/jsk_recognition/pull/2385#issuecomment-451349430)

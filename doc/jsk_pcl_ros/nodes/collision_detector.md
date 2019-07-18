@@ -5,15 +5,19 @@
 Collision check between robot model and point cloud.
 
 This node has service interface.
-You can requeste collision check by service.
+You can request collision check by service.
 
 ## Subscribing Topics
 * `~input` (`sensor_msgs/PointCloud2`):
 
    input pointcloud.
 
+## Publishing Topics
+
+None.
+
 ## Advertising Services
-* `~check_collision` (`jsk_pcl_ros/CheckCollision`):
+* `~check_collision` (`jsk_recognition_msgs/CheckCollision`):
 
    Service interface to check collision.
    `joint` is the joint state of robot.
@@ -37,17 +41,17 @@ bool result
 * `~root_link_id` (String, default: `BODY`)
 
   The name of robot root link.
-* `~self_see_default_padding` (Double, default: `0.001`)
+* `~self_see_default_padding` (Double, default: `0.01`)
 
-  Same as the parameter in pr2_navigation_self_filter.
+  Same as the parameter in [self_filter](http://wiki.ros.org/self_see_filter).
   Padding of robot link in collision check.
 * `~self_see_default_scale` (Double, default: `1.0`)
 
-  Same as the parameter in pr2_navigation_self_filter.
+  Same as the parameter in [self_filter](http://wiki.ros.org/self_see_filter).
   Scale of robot link in collision check.
 * `~self_see_links` (Array of link configuration, required)
 
-  Same as the parameter in pr2_navigation_self_filter.
+  Same as the parameter in [self_filter](http://wiki.ros.org/self_see_filter).
   Configuration of links for collision check.
   Link configuratin consists of name (required), padding (optional), and scale (optional).
 * `~publish_tf` (Boolean, default: `False`)
@@ -56,8 +60,7 @@ bool result
    This is useful to display robot model in Rviz.
 
 ## Sample
-Plug the depth sensor which can be launched by openni.launch and run the below command.
 
 ```
-roslaunch jsk_pcl_ros collision_detector.launch
+roslaunch jsk_pcl_ros sample_collision_detector.launch
 ```

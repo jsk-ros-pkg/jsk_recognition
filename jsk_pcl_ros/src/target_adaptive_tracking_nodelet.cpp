@@ -22,13 +22,12 @@ namespace jsk_pcl_ros
    void TargetAdaptiveTracking::onInit()
    {
       DiagnosticNodelet::onInit();
-      srv_ = boost::shared_ptr<dynamic_reconfigure::Server<Config> >(
-         new dynamic_reconfigure::Server<Config>);
 
       pnh_->param("use_tf", use_tf_, false);
       pnh_->param("parent_frame_id", parent_frame_id_, std::string("/track_result"));
       pnh_->param("child_frame_id", child_frame_id_, std::string("/camera_rgb_optical_frame"));
 
+      srv_ = boost::make_shared<dynamic_reconfigure::Server<Config> >(*pnh_);
       dynamic_reconfigure::Server<Config>::CallbackType f =
        boost::bind(&TargetAdaptiveTracking::configCallback, this, _1, _2);
       srv_->setCallback(f);

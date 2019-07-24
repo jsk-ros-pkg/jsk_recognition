@@ -165,7 +165,9 @@ void jsk_pcl_ros::DepthImageCreator::callback_info(const sensor_msgs::CameraInfo
   } else {
     return;
   }
-  publish_points(info, points_ptr_);
+  if (points_ptr_) {
+    publish_points(info, points_ptr_);
+  }
 }
 
 void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInfoConstPtr& info,

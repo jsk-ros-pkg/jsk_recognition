@@ -122,6 +122,10 @@ namespace jsk_pcl_ros
       NODELET_WARN("malformed rectangle");
       return;
     }
+    if (snapshot_buffer_.size() == 0) {
+      NODELET_WARN("Size of snapshot buffer is 0.");
+      return;
+    }
     else {
       int image_index = x0_index;
       NODELET_INFO("image index: %d", image_index);

@@ -76,6 +76,7 @@ namespace jsk_pcl_ros
                 0.4);
     pnh_->param("sample_viewpoint_radius_max", sample_viewpoint_radius_max_,
                 0.8);
+    pnh_->param("n_points", n_points_, 150);
     if (!sample_viewpoint_) {
       sub_input_.subscribe(*pnh_, "input", 1);
       sub_indices_.subscribe(*pnh_, "input/indices", 1);
@@ -279,7 +280,7 @@ namespace jsk_pcl_ros
                                sample_viewpoint_radius_step_,
                                sample_viewpoint_radius_min_,
                                sample_viewpoint_radius_max_,
-                               150);
+                               n_points_);
     std::vector<Eigen::Affine3f> transforms;
     transforms.resize(sampler.sampleNum());
     for (size_t i = 0; i < sampler.sampleNum(); i++) {

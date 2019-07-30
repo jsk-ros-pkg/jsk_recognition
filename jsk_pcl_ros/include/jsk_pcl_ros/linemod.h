@@ -181,6 +181,7 @@ namespace jsk_pcl_ros
     double sample_viewpoint_radius_min_;
     double sample_viewpoint_angle_max_;
     double sample_viewpoint_radius_max_;
+    int n_points_;
   private:
     
   };

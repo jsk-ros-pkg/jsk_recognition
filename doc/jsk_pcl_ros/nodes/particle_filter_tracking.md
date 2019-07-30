@@ -213,7 +213,15 @@ This nodelet tracks the target pointcloud.
 roslaunch jsk_pcl_ros sample_particle_filter_tracking.launch
 ```
 
-... or you can try service API to renew reference pointcloud instead of topic API.
+... or you can visualize tracking status by using
+[tracking_info.py](tracking_info.md) and [tracker_status_info.py](tracker_status_info.md)
+
+```bash
+roslaunch jsk_pcl_ros sample_particle_filter_tracking_change_detection.launch
+```
+
+... or you can try service API [renew_tracking.py](renew_tracking.md)
+to renew reference pointcloud instead of topic API.
 
 ```bash
 roslaunch jsk_pcl_ros sample_particle_filter_tracking_service_renew.launch

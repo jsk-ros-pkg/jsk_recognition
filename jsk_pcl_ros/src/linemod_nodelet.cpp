@@ -361,6 +361,7 @@ namespace jsk_pcl_ros
     // pose yaml
     std::ofstream pose_file;
     const std::string pose_file_name = output_file_ + "_poses.yaml";
+    NODELET_INFO("writing to %s", pose_file_name.c_str());
     pose_file.open(pose_file_name.c_str(), std::ofstream::out);
     pose_file << "template_poses: [" << std::endl;
     for (size_t i = 0; i < pose_in_order_of_training.size(); i++) {
@@ -560,27 +561,13 @@ namespace jsk_pcl_ros
     pose_fin.open(pose_yaml.c_str(), std::ifstream::in);
     YAML::Parser parser(pose_fin);
     while (parser.GetNextDocument(doc)) {
-      const YAML::Node& template_pose_yaml = doc["template_poses"];
-      for (size_t i = 0; i < template_pose_yaml.size(); i++) {
-        const YAML::Node& pose = template_pose_yaml[i];
-        Eigen::Affine3f trans = jsk_recognition_utils::affineFromYAMLNode(pose);
-        template_poses_.push_back(trans);
-        // set template_bboxes
-        pcl::PointCloud<pcl::PointXYZRGBA> transformed_cloud;
-        pcl::transformPointCloud<pcl::PointXYZRGBA>(
-          *template_cloud_, transformed_cloud, trans);
-        // compute size of bounding box
-        Eigen::Vector4f minpt, maxpt;
-        pcl::getMinMax3D<pcl::PointXYZRGBA>(transformed_cloud, minpt, maxpt);
-        jsk_recognition_msgs::BoundingBox bbox = jsk_recognition_utils::boundingBoxFromPointCloud(transformed_cloud);
-        //ROS_INFO("bounding box size: [%f, %f, %f]", bbox.dimensions.x, bbox.dimensions.y, bbox.dimensions.z);
-        template_bboxes_.push_back(bbox);
-      }
+      setTemplate(doc);
     }
     pose_fin.close();
 #else
-     // yaml-cpp is greater than 0.5.0
-     doc = YAML::LoadFile(pose_yaml);
+    // yaml-cpp is greater than 0.5.0
+    doc = YAML::LoadFile(pose_yaml);
+    setTemplate(doc);
 #endif
 
     
@@ -608,7 +595,26 @@ namespace jsk_pcl_ros
   {
     sub_cloud_.shutdown();
   }
-  
+
+  void LINEMODDetector::setTemplate(YAML::Node doc)
+  {
+    const YAML::Node& template_pose_yaml = doc["template_poses"];
+    for (size_t i = 0; i < template_pose_yaml.size(); i++) {
+      const YAML::Node& pose = template_pose_yaml[i];
+      Eigen::Affine3f trans = jsk_recognition_utils::affineFromYAMLNode(pose);
+      template_poses_.push_back(trans);
+      // set template_bboxes
+      pcl::PointCloud<pcl::PointXYZRGBA> transformed_cloud;
+      pcl::transformPointCloud<pcl::PointXYZRGBA>(*template_cloud_, transformed_cloud, trans);
+      // compute size of bounding box
+      Eigen::Vector4f minpt, maxpt;
+      pcl::getMinMax3D<pcl::PointXYZRGBA>(transformed_cloud, minpt, maxpt);
+      jsk_recognition_msgs::BoundingBox bbox = jsk_recognition_utils::boundingBoxFromPointCloud(transformed_cloud);
+      //ROS_INFO("bounding box size: [%f, %f, %f]", bbox.dimensions.x, bbox.dimensions.y, bbox.dimensions.z);
+      template_bboxes_.push_back(bbox);
+    }
+  }
+
   void LINEMODDetector::configCallback(Config &config, uint32_t level)
   {
     boost::mutex::scoped_lock lock(mutex_);

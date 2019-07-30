@@ -212,3 +212,9 @@ This nodelet tracks the target pointcloud.
 ```bash
 roslaunch jsk_pcl_ros sample_particle_filter_tracking.launch
 ```
+
+... or you can try service API to renew reference pointcloud instead of topic API.
+
+```bash
+roslaunch jsk_pcl_ros sample_particle_filter_tracking_service_renew.launch
+```

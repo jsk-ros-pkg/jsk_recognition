@@ -701,7 +701,7 @@ namespace jsk_pcl_ros
       computeCenterOfTemplate(
         cloud, linemod_template, linemod_detection, center);
       // publish mask image here
-      cv::Mat detect_mask = cv::Mat::zeros(cloud->width, cloud->height, CV_8UC1);
+      cv::Mat detect_mask = cv::Mat::zeros(cloud->height, cloud->width, CV_8UC1);
       int scaled_template_width
         = linemod_template.region.width * linemod_detection.scale;
       int scaled_template_height

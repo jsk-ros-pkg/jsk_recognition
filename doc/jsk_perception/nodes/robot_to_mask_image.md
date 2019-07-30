@@ -20,7 +20,7 @@ Convert robot model into mask image.
 
   Distance is in z-axis direction of the camera coordinates.
 
-*`robot_description` (String, required)
+* `robot_description` (String, required)
 
   robot_description of the mask-generated robot.
 
@@ -42,23 +42,6 @@ Convert robot model into mask image.
 
 ## Samples
 
-### Simple cube
-Launch gazebo and kinect simulation.
-```
-roslaunch hrpsys_gazebo_tutorials gazebo_kinect_cube_interactive.launch
-```
-Run the mask generation node.
-```
-roslaunch jsk_perception robot_to_mask_image.launch
-```
-
-### HRP2
-Launch gazebo and robot simulation.
-```
-roslaunch hrpsys_gazebo_tutorials gazebo_hrp2jsk_no_controllers.launch
-rtmlaunch hrpsys_gazebo_tutorials hrp2jsk_hrpsys_bringup.launch
-```
-Run the mask generation node.
-```
-roslaunch jsk_perception robot_to_mask_image_hrp2.launch
+```bash
+roslaunch jsk_perception sample_robot_to_mask_image.launch
 ```

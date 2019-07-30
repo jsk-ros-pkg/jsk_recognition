@@ -253,6 +253,44 @@ Visualization Manager:
       top: 500
       update interval: 0.04
       width: 200
+    - Align Bottom: false
+      Background Alpha: 0.8
+      Background Color: 0; 0; 0
+      Class: jsk_rviz_plugin/OverlayText
+      Enabled: true
+      Foreground Alpha: 0.8
+      Foreground Color: 25; 255; 240
+      Name: TrackingRMSEInfo
+      Overtake Color Properties: true
+      Overtake Position Properties: true
+      Topic: /tracking_info/text
+      Value: true
+      font: DejaVu Sans Mono
+      height: 100
+      left: 300
+      line width: 2
+      text size: 12
+      top: 50
+      width: 300
+    - Align Bottom: false
+      Background Alpha: 0.8
+      Background Color: 0; 0; 0
+      Class: jsk_rviz_plugin/OverlayText
+      Enabled: true
+      Foreground Alpha: 0.8
+      Foreground Color: 25; 255; 240
+      Name: TrackerStatusInfo
+      Overtake Color Properties: true
+      Overtake Position Properties: true
+      Topic: /tracker_status_info/text
+      Value: true
+      font: DejaVu Sans Mono
+      height: 100
+      left: 300
+      line width: 2
+      text size: 12
+      top: 200
+      width: 300
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48

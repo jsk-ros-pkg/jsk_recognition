@@ -23,5 +23,6 @@ def clicked_point_cb(msg):
 rospy.init_node('clicked_bbox')
 listener = tf.TransformListener()
 point_sub = rospy.Subscriber('clicked_point', PointStamped, clicked_point_cb)
-bbox_pub = rospy.Publisher('bbox_with_clicked_point', BoundingBoxArray)
+bbox_pub = rospy.Publisher(
+    'bbox_with_clicked_point', BoundingBoxArray, queue_size=1)
 rospy.spin()

@@ -52,7 +52,6 @@ def pose_diff_cb(pose_stamped):
     if (not teacher_pose_stamped):
         rospy.loginfo("teacher is empty")
         return
-    # DummyArrayPub.publish(PointsArray()) # register empty clouds to stop recognition
     try:
         teacher_pose_stamped.header.stamp = rospy.Time(0)
         teacher_pose_stamped_recog_frame = listener.transformPose(pose_stamped.header.frame_id, teacher_pose_stamped)
@@ -82,10 +81,10 @@ def renew_cb(req):
     return srv.EmptyResponse()
 if __name__ == "__main__":
     rospy.init_node("in_hand_recognition_manager")
-    InputPosePub = rospy.Publisher("~output/recognition", PoseStamped)
-    OutputPosePub = rospy.Publisher("~output", PoseStamped)
+    InputPosePub = rospy.Publisher(
+        "~output/recognition", PoseStamped, queue_size=1)
+    OutputPosePub = rospy.Publisher("~output", PoseStamped, queue_size=1)
     listener = tf.TransformListener()
-    DummyArrayPub = rospy.Publisher("~dummy_array", PointsArray)
     rospy.Subscriber("~input", PoseStamped, pose_teacher_cb)
     rospy.Subscriber("~input/result", PoseStamped, pose_diff_cb)
     rospy.Service("~renew", srv.Empty, renew_cb)

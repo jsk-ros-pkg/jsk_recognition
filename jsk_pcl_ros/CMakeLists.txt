@@ -552,6 +552,7 @@ if (CATKIN_ENABLE_TESTING)
     add_rostest(test/test_hinted_stick_finder.test)
     # TODO(iory): https://github.com/jsk-ros-pkg/jsk_recognition/issues/2007
     # add_rostest(test/test_people_detection.test DEPENDENCIES install_test_data)
+    add_rostest(test/test_in_hand_recognition_manager.test)
     add_rostest(test/test_incremental_model_registration.test)
     add_rostest(test/test_interactive_cuboid_likelihood.test)
     add_rostest(test/test_intermittent_image_annotator.test)

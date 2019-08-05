@@ -1,0 +1,42 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml"/>
+
+  <node name="sample_point_publisher"
+        pkg="rostopic" type="rostopic"
+        args="pub -r 1 -s /sample_point_publisher/output/screenpoint geometry_msgs/PointStamped
+              '{header: {stamp: now, frame_id: right_hand_camera_rgb_optical_frame},
+                point: {x: 100, y: 100, z: 0}}'"/>
+
+  <node name="pointcloud_screenpoint"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/PointcloudScreenpoint">
+    <remap from="~points" to="/right_hand_camera/depth_registered/points"/>
+    <remap from="~point" to="sample_point_publisher/output/screenpoint"/>
+    <rosparam>
+      queue_size: 100
+      use_point: true
+      publish_points: true
+      publish_point: true
+    </rosparam>
+  </node>
+
+  <node name="pointcloud_screenpoint_client"
+        pkg="jsk_pcl_ros" type="pointcloud_screenpoint.l">
+    <remap from="ray_marker_array" to="~output/ray_marker_array"/>
+    <remap from="image_marker" to="~output/image_marker"/>
+    <remap from="ray_coords" to="~output/ray_coords"/>
+    <rosparam>
+      sensor_topic: sample_point_publisher/output
+      ray_srv: pointcloud_screenpoint/screen_to_point
+      base_frame: right_hand_camera_rgb_optical_frame
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/pointcloud_screenpoint.rviz"/>
+  </group>
+</launch>

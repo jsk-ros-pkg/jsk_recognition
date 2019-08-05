@@ -50,7 +50,7 @@ def pose_diff_cb(pose_stamped):
     global teacher_pose_stamped, renew_flag
     # add diff and pub
     if (not teacher_pose_stamped):
-        rospy.info ("teacher is empty")
+        rospy.loginfo("teacher is empty")
         return
     # DummyArrayPub.publish(PointsArray()) # register empty clouds to stop recognition
     try:

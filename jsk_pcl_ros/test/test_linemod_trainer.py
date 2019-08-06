@@ -14,6 +14,7 @@ class TestLINEMODTrainer(unittest.TestCase):
         pcd_path = osp.expanduser(rospy.get_param('~pcd_path'))
         yaml_path = osp.expanduser(rospy.get_param('~yaml_path'))
         timeout = rospy.Duration(rospy.get_param('timeout', 30.0))
+        rospy.sleep(2.0)  # Wait a moment until /clock is published.
         start = rospy.Time.now()
         while (rospy.Time.now() - start < timeout and
                (not osp.exists(linemod_path) or

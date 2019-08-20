@@ -326,7 +326,9 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
     if (proc_cloud) {
       PointCloud cloud_out;
       cloud_out.header = rangeImagePP.header;
-      cloud_out.resize(rangeImagePP.points.size());
+      cloud_out.width = rangeImagePP.width;
+      cloud_out.height = rangeImagePP.height;
+      cloud_out.resize(cloud_out.width * cloud_out.height);
       for (int y = 0; y < (int)rangeImagePP.height; y++ ) {
         for (int x = 0; x < (int)rangeImagePP.width; x++ ) {
           pcl::PointWithRange pt_from = rangeImagePP.points[rangeImagePP.width * y + x];

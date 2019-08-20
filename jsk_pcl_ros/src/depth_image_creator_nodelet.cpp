@@ -329,6 +329,7 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
       cloud_out.width = rangeImagePP.width;
       cloud_out.height = rangeImagePP.height;
       cloud_out.resize(cloud_out.width * cloud_out.height);
+      cloud_out.is_dense = true;
       for (int y = 0; y < (int)rangeImagePP.height; y++ ) {
         for (int x = 0; x < (int)rangeImagePP.width; x++ ) {
           pcl::PointWithRange pt_from = rangeImagePP.points[rangeImagePP.width * y + x];
@@ -341,6 +342,9 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
           pt_to.g = rgb[1];
           pt_to.b = rgb[2];
           cloud_out.points[rangeImagePP.width * y + x] = pt_to;
+          if (std::isnan(pt_to.x) || std::isnan(pt_to.y) || std::isnan(pt_to.z)) {
+            cloud_out.is_dense = false;
+          }
         }
       }
       pub_cloud_.publish(boost::make_shared<PointCloud>(cloud_out));

@@ -174,7 +174,7 @@ namespace jsk_pcl_ros
     tf::StampedTransform transform
       = lookupTransformWithDuration(tf_, sensor_frame_, msg->header.frame_id,
                                     ros::Time(0.0),
-                                    ros::Duration(0.0));
+                                    ros::Duration(1.0));
     tf::vectorTFToEigen(transform.getOrigin(), viewpoint_);
 
     if (!tracker_) {
@@ -291,7 +291,7 @@ namespace jsk_pcl_ros
       tf::StampedTransform transform
         = lookupTransformWithDuration(tf_, sensor_frame_, msg->header.frame_id,
                                       ros::Time(0.0),
-                                      ros::Duration(0.0));
+                                      ros::Duration(1.0));
       tf::vectorTFToEigen(transform.getOrigin(), viewpoint_);
       
       ParticleCloud::Ptr particles = initParticles();

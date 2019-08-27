@@ -65,7 +65,7 @@ pcl::EarClippingPatched::performProcessing (PolygonMesh& output)
 void
 pcl::EarClippingPatched::triangulate (const Vertices& vertices, PolygonMesh& output)
 {
-  const int n_vertices = static_cast<const int> (vertices.vertices.size ());
+  const size_t n_vertices = vertices.vertices.size ();
 
   if (n_vertices < 3)
     return;
@@ -75,76 +75,55 @@ pcl::EarClippingPatched::triangulate (const Vertices& vertices, PolygonMesh& out
     return;
   }
 
-  std::vector<uint32_t> remaining_vertices (n_vertices);
-  if (area (vertices.vertices) > 0) // clockwise?
-    remaining_vertices = vertices.vertices;
-  else
-    for (int v = 0; v < n_vertices; v++)
+  std::vector<uint32_t> remaining_vertices = vertices.vertices;
+  size_t count = triangulate(remaining_vertices, output);
+
+  // if the input vertices order is anti-clockwise, it always left a
+  // convex polygon and start infinite loops, which means will left more
+  // than 3 points.
+  if(remaining_vertices.size() < 3)return;
+
+  output.polygons.erase(output.polygons.end(), output.polygons.end() + count);
+  remaining_vertices.resize(n_vertices);
+  for (size_t v = 0; v < n_vertices; v++)
       remaining_vertices[v] = vertices.vertices[n_vertices - 1 - v];
+  triangulate(remaining_vertices, output);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+size_t
+pcl::EarClippingPatched::triangulate (std::vector<uint32_t>& vertices, PolygonMesh& output)
+{
+  // triangles count
+  size_t count = 0;
 
   // Avoid closed loops.
-  if (remaining_vertices.front () == remaining_vertices.back ())
-    remaining_vertices.erase (remaining_vertices.end () - 1);
+  if (vertices.front () == vertices.back ())
+    vertices.erase (vertices.end () - 1);
 
   // null_iterations avoids infinite loops if the polygon is not simple.
-  for (int u = static_cast<int> (remaining_vertices.size ()) - 1, null_iterations = 0;
-      remaining_vertices.size () > 2 && null_iterations < static_cast<int >(remaining_vertices.size () * 2);
-      ++null_iterations, u = (u+1) % static_cast<int> (remaining_vertices.size ()))
+  for (int u = static_cast<int> (vertices.size ()) - 1, null_iterations = 0;
+      vertices.size () > 2 && null_iterations < static_cast<int >(vertices.size () * 2);
+      ++null_iterations, u = (u+1) % static_cast<int> (vertices.size ()))
   {
-    int v = (u + 1) % static_cast<int> (remaining_vertices.size ());
-    int w = (u + 2) % static_cast<int> (remaining_vertices.size ());
+    int v = (u + 1) % static_cast<int> (vertices.size ());
+    int w = (u + 2) % static_cast<int> (vertices.size ());
 
-    if (isEar (u, v, w, remaining_vertices))
+    if (vertices.size() == 3 || isEar (u, v, w, vertices))
     {
       Vertices triangle;
       triangle.vertices.resize (3);
-      triangle.vertices[0] = remaining_vertices[u];
-      triangle.vertices[1] = remaining_vertices[v];
-      triangle.vertices[2] = remaining_vertices[w];
+      triangle.vertices[0] = vertices[u];
+      triangle.vertices[1] = vertices[v];
+      triangle.vertices[2] = vertices[w];
       output.polygons.push_back (triangle);
-      remaining_vertices.erase (remaining_vertices.begin () + v);
+      vertices.erase (vertices.begin () + v);
       null_iterations = 0;
+      count++;
     }
   }
+  return count;
 }
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-float
-pcl::EarClippingPatched::area (const std::vector<uint32_t>& vertices)
-{
-    //if the polygon is projected onto the xy-plane, the area of the polygon is determined
-    //by the trapeze formula of Gauss. However this fails, if the projection is one 'line'.
-    //Therefore the following implementation determines the area of the flat polygon in 3D-space
-    //using Stoke's law: http://code.activestate.com/recipes/578276-3d-polygon-area/
-
-    int n = static_cast<int> (vertices.size ());
-    float area = 0.0f;
-    Eigen::Vector3f prev_p, cur_p;
-    Eigen::Vector3f total (0,0,0);
-    Eigen::Vector3f unit_normal;
-
-    if (n > 3)
-    {
-        for (int prev = n - 1, cur = 0; cur < n; prev = cur++)
-        {
-            prev_p = points_->points[vertices[prev]].getVector3fMap();
-            cur_p = points_->points[vertices[cur]].getVector3fMap();
-
-            total += prev_p.cross( cur_p );
-        }
-
-        //unit_normal is unit normal vector of plane defined by the first three points
-        prev_p = points_->points[vertices[1]].getVector3fMap() - points_->points[vertices[0]].getVector3fMap();
-        cur_p = points_->points[vertices[2]].getVector3fMap() - points_->points[vertices[0]].getVector3fMap();
-        unit_normal = (prev_p.cross(cur_p)).normalized();
-
-        area = total.dot( unit_normal );
-    }
-
-    return area * 0.5f; 
-}
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 bool
@@ -156,12 +135,13 @@ pcl::EarClippingPatched::isEar (int u, int v, int w, const std::vector<uint32_t>
   p_w = points_->points[vertices[w]].getVector3fMap();
 
   const float eps = 1e-15f;
-  Eigen::Vector3f p_uv, p_uw;
-  p_uv = p_v - p_u;
-  p_uw = p_w - p_u;
+  Eigen::Vector3f p_vu, p_vw;
+  p_vu = p_u - p_v;
+  p_vw = p_w - p_v;
 
-  // Avoid flat triangles.
-  if ((p_uv.cross(p_uw)).norm() < eps)
+  // Avoid flat triangles and concave vertex
+  Eigen::Vector3f cross = p_vu.cross(p_vw);
+  if ((cross[2] > 0) || (cross.norm() < eps))
     return (false);
 
   Eigen::Vector3f p;

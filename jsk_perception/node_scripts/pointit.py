@@ -58,7 +58,7 @@ class PointIt(ConnectionBasedTransport):
         self.min_norm_threshold = rospy.get_param("~min_norm_threshold", 0.2)
         self.use_arm = rospy.get_param("~use_arm", ["rarm", "larm"])
 
-        if "rarm" not in self.use_arm or "larm" not in self.use_arm:
+        if "rarm" not in self.use_arm and "larm" not in self.use_arm:
             rospy.logfatal("~use_arm must contain at least 'rarm' or 'larm'.")
 
         # tf listener

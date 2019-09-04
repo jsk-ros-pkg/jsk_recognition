@@ -17,6 +17,9 @@
         output="screen">
     <remap from="/camera_remote/depth_calibration/set_calibration_parameter"
            to="depth_calibration/set_calibration_parameter"/>
+    <rosparam>
+      dump_result_into_yaml: false
+    </rosparam>
   </node>
 
   <group if="$(arg gui)">

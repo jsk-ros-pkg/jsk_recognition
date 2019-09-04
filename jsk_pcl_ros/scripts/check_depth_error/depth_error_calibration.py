@@ -420,7 +420,9 @@ def main():
             with open(csv_filename, "w") as f:
                 for x, y, u, v, cu, cv in zip(raw_xs, ys, us, vs, c_us, c_vs):
                     f.write("%f,%f,%d,%d,%f,%f\n" % (x, y, u, v, cu, cv))
-        if query_yes_no("Dump result into yaml file?"):
+        dump = rospy.get_param("~dump_result_into_yaml", "query")
+        if dump is True or \
+           (dump == "query" and query_yes_no("Dump result into yaml file?")):
             yaml_filename = "calibration_parameter_%s.yaml" % datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
             print "writing to %s" % yaml_filename
             c = classifier.coef_

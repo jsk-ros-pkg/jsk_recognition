@@ -444,3 +444,4 @@ use_abs: %s
 if __name__ == "__main__":
     rospy.init_node("depth_error_logistic_regression")
     main()
+    rospy.spin()

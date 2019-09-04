@@ -42,8 +42,6 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
         super(MaskRCNNInstanceSegmentation, self).__init__()
         # gpu
         self.gpu = rospy.get_param('~gpu', 0)
-        if self.gpu >= 0:
-            chainer.cuda.get_device_from_id(self.gpu).use()
         chainer.global_config.train = False
         chainer.global_config.enable_backprop = False
 
@@ -59,20 +57,16 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
             "~classifier_name", rospy.get_name())
 
         n_fg_class = len(self.fg_class_names)
-        rospy.loginfo('Loading model for {} classes'.format(n_fg_class))
-        network_params = {
-            'n_layers': 50,
-            'n_fg_class': n_fg_class,
-            'pretrained_model': pretrained_model,
-        }
-        for key in ['anchor_scales', 'min_size', 'max_size']:
-            if rospy.has_param('~' + key):
-                network_params[key] = rospy.get_param('~' + key)
-        rospy.loginfo('Loading model with params: {}'.format(str(network_params)))
-        self.model = chainer_mask_rcnn.models.MaskRCNNResNet(**network_params)
-
+        self.model = chainer_mask_rcnn.models.MaskRCNNResNet(
+            n_layers=50,
+            n_fg_class=n_fg_class,
+            pretrained_model=pretrained_model,
+            anchor_scales=rospy.get_param('~anchor_scales', [4, 8, 16, 32]),
+            min_size=rospy.get_param('~min_size', 600),
+            max_size=rospy.get_param('~max_size', 1000),
+        )
         if self.gpu >= 0:
-            self.model.to_gpu()
+            self.model.to_gpu(self.gpu)
 
         self.srv = Server(Config, self.config_callback)
 
@@ -109,7 +103,10 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
         img = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='rgb8')
         img_chw = img.transpose(2, 0, 1)  # C, H, W
 
+        if self.gpu >= 0:
+            chainer.cuda.get_device_from_id(self.gpu).use()
         bboxes, masks, labels, scores = self.model.predict([img_chw])
+
         bboxes = bboxes[0]
         masks = masks[0]
         labels = labels[0]

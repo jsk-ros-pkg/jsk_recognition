@@ -115,6 +115,17 @@ def main():
         ],
     )
 
+    download_data(
+        path='sample/data/pr2_look_around_in_room_73b2.bag',
+        url='https://drive.google.com/uc?id=1X6S6CU6rC_c_KGlVZfvoTwsAhGS5jG27',
+        md5='6e3dfda0ac4f23b7849f135ec9041e92',
+    )
+
+    download_data(
+        path='sample/data/convenience_store.bag',
+        url='https://drive.google.com/uc?id=1OyhDsoPffgX0pHiF4XfXI3wM5FK3USKY',
+        md5='d7bc0f2e9b126c013c18964d4a1fa1be',
+    )
 
 if __name__ == '__main__':
     main()

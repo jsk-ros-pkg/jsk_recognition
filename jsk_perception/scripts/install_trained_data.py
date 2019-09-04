@@ -221,6 +221,27 @@ def main():
         url='https://drive.google.com/uc?id=1uv_jK-CAIJUXsRNmccFEISSKW4vXqI46',
         md5='47a507934b6bc20f0d9274825b734942',
     )
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/mask_rcnn_resnet50_coco_20180730.npz',
+        url='https://drive.google.com/uc?id=1XC-Mx4HX0YBIy0Fbp59EjJFOF7a3XK0R',
+        md5='410b2aa065ebe6ca3607c98f3337ae49',
+    )
+
+    # node_scripts/mask_rcnn_instance_segmentation.py 73B2 kitchen
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/mask_rcnn_resnet50_73B2_kitchen_20190619.npz',
+        url='https://drive.google.com/uc?id=1ZK-6qGKb87MpXVo4aW8LEyx0OI3uBitt',
+        md5='ccefb23d17f057b25b16815fd88edb8f',
+    )
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/'
+        'mask_rcnn_resnet50_73B2_kitchen_20190619_classnames.yaml',
+        url='https://drive.google.com/uc?id=1BTnVD0vHcwFIqAKchIuDZ8LZmaNr4qr0',
+        md5='183631f938aef7786a1bcfd6343946bc',
+    )
 
 
 if __name__ == '__main__':

@@ -62,6 +62,8 @@ void jsk_pcl_ros::DepthImageCreator::onInit () {
   pnh_->param("use_approximate", use_approximate, false);
   ROS_INFO("use_approximate : %d", use_approximate);
 
+  pnh_->param("fill_value", fill_value, std::numeric_limits<float>::quiet_NaN());
+
   pnh_->param("info_throttle", info_throttle_, 0);
   info_counter_ = 0;
   pnh_->param("max_queue_size", max_queue_size_, 3);
@@ -165,7 +167,9 @@ void jsk_pcl_ros::DepthImageCreator::callback_info(const sensor_msgs::CameraInfo
   } else {
     return;
   }
-  publish_points(info, points_ptr_);
+  if (points_ptr_) {
+    publish_points(info, points_ptr_);
+  }
 }
 
 void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInfoConstPtr& info,
@@ -271,7 +275,7 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
   // Create color and depth image from point cloud
   cv::Mat color_mat = cv::Mat::zeros(rangeImageP.height, rangeImageP.width, CV_8UC3);
   cv::Mat depth_mat(rangeImageP.height, rangeImageP.width, CV_32FC1);
-  depth_mat.setTo(std::numeric_limits<float>::quiet_NaN());
+  depth_mat.setTo(fill_value);
   for (size_t i=0; i<pointCloud.size(); i++) {
     Point pt = pointCloud[i];
 

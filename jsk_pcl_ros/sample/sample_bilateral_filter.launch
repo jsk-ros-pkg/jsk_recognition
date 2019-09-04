@@ -1,0 +1,20 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml" />
+
+  <node name="bilateral_filter"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/BilateralFilter">
+    <remap from="~input" to="/kinect_head/depth_registered/points" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/bilateral_filter.rviz">
+    </node>
+  </group>
+
+</launch>

@@ -62,6 +62,10 @@ Currently it supports `pcl::PointXYZ` and `pcl::PointXYZRGB` as the input.
    Queue length of topic subscribers.
    Default is value set for `max_queue_size_`.
 
+* `~fill_value` (float, default: `nan`):
+
+   Initial value of depth image. The pixels where there is no corresponding point
+   are filled by this value.
 
 ## Sample
 

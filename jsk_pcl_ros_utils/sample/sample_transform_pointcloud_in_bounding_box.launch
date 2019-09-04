@@ -1,0 +1,39 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <node name="pcd_to_pointcloud"
+        pkg="pcl_ros" type="pcd_to_pointcloud"
+        args="$(find jsk_pcl_ros_utils)/sample/data/bunny.pcd 0.1">
+    <remap from="cloud_pcd" to="~output" />
+    <rosparam>
+      frame_id: rabbit
+    </rosparam>
+  </node>
+
+  <node name="sample_bounding_box_publisher_from_pointcloud"
+        pkg="jsk_pcl_ros_utils" type="sample_bounding_box_publisher_from_pointcloud.py">
+    <remap from="~input" to="pcd_to_pointcloud/output"/>
+    <rosparam>
+      frame_id: box
+    </rosparam>
+  </node>
+
+  <node name="static_tf_publisher"
+        pkg="tf" type="static_transform_publisher"
+        args="0.4 -0.1 0 0.52 0 0 rabbit box 10"/>
+
+  <node name="transform_pointcloud_in_bounding_box"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/TransformPointcloudInBoundingBox">
+    <remap from="~input" to="pcd_to_pointcloud/output"/>
+    <remap from="~input_box" to="sample_bounding_box_publisher_from_pointcloud/output"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_transform_pointcloud_in_bounding_box.rviz"/>
+  </group>
+
+</launch>

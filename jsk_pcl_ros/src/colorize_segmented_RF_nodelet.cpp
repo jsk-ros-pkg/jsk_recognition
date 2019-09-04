@@ -43,8 +43,8 @@ namespace jsk_pcl_ros
     PCLNodelet::onInit();
     sub_input_ = pnh_->subscribe("input", 1, &ColorizeRandomForest::extract, this);
 
-    pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("cloth_result", 1);
-    pub2_ = pnh_->advertise<sensor_msgs::PointCloud2>("noncloth_result", 1);
+    pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("output/zero", 1);
+    pub2_ = pnh_->advertise<sensor_msgs::PointCloud2>("output/nonzero", 1);
 
     srand(time(NULL));
 
@@ -52,19 +52,19 @@ namespace jsk_pcl_ros
     sum_num_ = 100;
     if (!pnh_->getParam("rs", tmp_radius))
       {
-        ROS_WARN("~rs is not specified, set 1");
+        NODELET_WARN("~rs is not specified, so set to 0.03");
       }
     if (!pnh_->getParam("po", tmp_pass))
       {
-        ROS_WARN("~po is not specified, set 1");
+        NODELET_WARN("~po is not specified, so set to 0.03");
       }
     if (!pnh_->getParam("po2", tmp_pass2))
       {
-        ROS_WARN("~po is not specified, set 1");
+        NODELET_WARN("~po2 is not specified, so set to 0.06");
       }
     if (!pnh_->getParam("sum_num", sum_num_))
       {
-        ROS_WARN("~sum_num is not specified, set 1");
+        NODELET_WARN("~sum_num is not specified, so set to 100");
       }
 
     radius_search_ = tmp_radius;
@@ -103,7 +103,7 @@ namespace jsk_pcl_ros
     int cluster_num = 0;
     for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); ++it)
       {
-        ROS_INFO("Calculate time %d / %ld", cluster_num  , cluster_indices.size());
+        NODELET_DEBUG("Calculate time %d / %ld", cluster_num  , cluster_indices.size());
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_cluster (new pcl::PointCloud<pcl::PointXYZRGB>);
         for (std::vector<int>::const_iterator pit = it->indices.begin (); pit != it->indices.end (); pit++)
           cloud_cluster->points.push_back (cloud->points[*pit]);
@@ -204,7 +204,7 @@ namespace jsk_pcl_ros
             break;
 
           call_counter++;
-          ros::ServiceClient client = pnh_->serviceClient<ml_classifiers::ClassifyData>("/predict");
+          ros::ServiceClient client = pnh_->serviceClient<ml_classifiers::ClassifyData>("classify_server");
           ml_classifiers::ClassifyData srv;
           ml_classifiers::ClassDataPoint class_data_point;
           class_data_point.point = result;
@@ -212,14 +212,14 @@ namespace jsk_pcl_ros
           if(client.call(srv))
             if (atoi(srv.response.classifications[0].c_str()) == 0)
               result_counter += 1;
-          ROS_INFO("response result : %s", srv.response.classifications[0].c_str());
+          NODELET_DEBUG("response result : %s", srv.response.classifications[0].c_str());
         }
 
         if(result_counter >= call_counter / 2){
-          ROS_INFO("Cloth %d / %d", result_counter, call_counter);
+          NODELET_DEBUG("Result == 0 because counter is %d / %d", result_counter, call_counter);
         }
         else{
-          ROS_INFO("Not Cloth %d / %d", result_counter, call_counter);
+          NODELET_DEBUG("Result != 0 because counter is %d / %d", result_counter, call_counter);
         }
 
         for (int i = 0; i < cloud_cluster->points.size(); i++){

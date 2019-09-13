@@ -248,7 +248,16 @@ namespace jsk_pcl_ros
       if (integrate_color_)
       {
         // color: cpu -> gpu
-        colors_device_.upload(&(color_msg->data[0]), color_msg->step, color_msg->height, color_msg->width);
+        if (color_msg->encoding == enc::BGR8)
+        {
+          cv_bridge::CvImagePtr tmp_image_ptr_ = cv_bridge::toCvCopy(color_msg, enc::RGB8);
+          colors_device_.upload(&(tmp_image_ptr_->toImageMsg()->data[0]),
+                                color_msg->step, color_msg->height, color_msg->width);
+        }
+        else
+        {
+          colors_device_.upload(&(color_msg->data[0]), color_msg->step, color_msg->height, color_msg->width);
+        }
 
         (*kinfu_)(depth_device, colors_device_);
       }

@@ -125,6 +125,7 @@ namespace jsk_pcl_ros
     bool slam_;
     std::string fixed_frame_id_;
     int n_textures_;
+    float volume_size_;
 
     int frame_idx_;
     std::string save_dir_;

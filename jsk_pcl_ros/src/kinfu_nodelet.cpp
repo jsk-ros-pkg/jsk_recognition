@@ -91,6 +91,7 @@ namespace jsk_pcl_ros
     pnh_->param("slam", slam_, false);
     pnh_->param<std::string>("fixed_frame_id", fixed_frame_id_, "odom_init");
     pnh_->param("n_textures", n_textures_, -1);
+    pnh_->param("volume_size", volume_size_, pcl::device::kinfuLS::VOLUME_SIZE);
 
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> >(*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f = boost::bind(&Kinfu::configCallback, this, _1, _2);
@@ -127,20 +128,19 @@ namespace jsk_pcl_ros
 
     /* below are copied from pcl/gpu/kinfu_large_scale/src/kinfuLS_app.cpp */
 
-    float vsz = pcl::device::kinfuLS::VOLUME_SIZE;
     float shift_distance = pcl::device::kinfuLS::DISTANCE_THRESHOLD;
-    Eigen::Vector3f volume_size = Eigen::Vector3f::Constant(vsz/*meters*/);
-    if (shift_distance > 2.5 * vsz)
+    Eigen::Vector3f volume_size_vector = Eigen::Vector3f::Constant(volume_size_/*meters*/);
+    if (shift_distance > 2.5 * volume_size_)
     {
       NODELET_WARN("WARNING Shifting distance (%.2f) is very large compared to the volume size (%.2f).",
-                   shift_distance, vsz);
+                   shift_distance, volume_size_);
     }
 
     kinfu_.reset(new pcl::gpu::kinfuLS::KinfuTracker(
-      volume_size, shift_distance, caminfo_msg->height, caminfo_msg->width));
+      volume_size_vector, shift_distance, caminfo_msg->height, caminfo_msg->width));
 
     Eigen::Matrix3f R = Eigen::Matrix3f::Identity();
-    Eigen::Vector3f t = volume_size * 0.5f - Eigen::Vector3f(0, 0, volume_size(2) / 2 * 1.2f);
+    Eigen::Vector3f t = volume_size_vector * 0.5f - Eigen::Vector3f(0, 0, volume_size_vector(2) / 2 * 1.2f);
 
     Eigen::Affine3f pose = Eigen::Translation3f(t) * Eigen::AngleAxisf(R);
 

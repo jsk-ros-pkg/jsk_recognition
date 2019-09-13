@@ -1,0 +1,25 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_color_histogram_matcher.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_color_histogram_matcher"
+        name="test_color_histogram_matcher"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="30" retry="5">
+    <rosparam>
+      topic_0: /color_histogram_matcher/output
+      timeout_0: 30
+      topic_1: /color_histogram_matcher/output_histograms
+      timeout_1: 30
+      topic_2: /color_histogram_matcher/output_reference
+      timeout_2: 30
+      topic_3: /color_histogram_matcher/coefficient_points
+      timeout_3: 30
+      topic_4: /color_histogram_matcher/best_match
+      timeout_4: 30
+    </rosparam>
+  </test>
+
+</launch>

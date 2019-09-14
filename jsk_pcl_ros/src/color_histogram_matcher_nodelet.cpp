@@ -269,6 +269,8 @@ namespace jsk_pcl_ros
     if (best_index != -1) {
       pcl::PointCloud<pcl::PointXYZHSV>::Ptr best_cloud
         = segmented_clouds[best_index];
+
+      best_cloud->is_dense = false;
       Eigen::Vector4f center;
       pcl::compute3DCentroid(*best_cloud, center);
       geometry_msgs::PoseStamped best_pose;

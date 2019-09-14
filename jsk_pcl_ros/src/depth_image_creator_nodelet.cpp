@@ -62,6 +62,9 @@ void jsk_pcl_ros::DepthImageCreator::onInit () {
   pnh_->param("use_approximate", use_approximate, false);
   ROS_INFO("use_approximate : %d", use_approximate);
 
+  pnh_->param("fill_value", fill_value, std::numeric_limits<float>::quiet_NaN());
+  pnh_->param("organize_cloud", organize_cloud_, false);
+
   pnh_->param("info_throttle", info_throttle_, 0);
   info_counter_ = 0;
   pnh_->param("max_queue_size", max_queue_size_, 3);
@@ -165,7 +168,9 @@ void jsk_pcl_ros::DepthImageCreator::callback_info(const sensor_msgs::CameraInfo
   } else {
     return;
   }
-  publish_points(info, points_ptr_);
+  if (points_ptr_) {
+    publish_points(info, points_ptr_);
+  }
 }
 
 void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInfoConstPtr& info,
@@ -271,7 +276,7 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
   // Create color and depth image from point cloud
   cv::Mat color_mat = cv::Mat::zeros(rangeImageP.height, rangeImageP.width, CV_8UC3);
   cv::Mat depth_mat(rangeImageP.height, rangeImageP.width, CV_32FC1);
-  depth_mat.setTo(std::numeric_limits<float>::quiet_NaN());
+  depth_mat.setTo(fill_value);
   for (size_t i=0; i<pointCloud.size(); i++) {
     Point pt = pointCloud[i];
 
@@ -322,18 +327,30 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
     if (proc_cloud) {
       PointCloud cloud_out;
       cloud_out.header = rangeImagePP.header;
-      cloud_out.resize(rangeImagePP.points.size());
+      if (organize_cloud_) {
+        cloud_out.width = rangeImagePP.width;
+        cloud_out.height = rangeImagePP.height;
+      } else {
+        cloud_out.width = rangeImagePP.width * rangeImagePP.height;
+        cloud_out.height = 1;
+      }
+      cloud_out.resize(cloud_out.width * cloud_out.height);
+      cloud_out.is_dense = true;
       for (int y = 0; y < (int)rangeImagePP.height; y++ ) {
         for (int x = 0; x < (int)rangeImagePP.width; x++ ) {
           pcl::PointWithRange pt_from = rangeImagePP.points[rangeImagePP.width * y + x];
           cv::Vec3b rgb = color_mat.at<cv::Vec3b>(y, x);
-          Point pt_to = cloud_out[rangeImagePP.width * y + x];
+          Point pt_to;
           pt_to.x = pt_from.x;
           pt_to.y = pt_from.y;
           pt_to.z = pt_from.z;
           pt_to.r = rgb[0];
           pt_to.g = rgb[1];
           pt_to.b = rgb[2];
+          cloud_out.points[rangeImagePP.width * y + x] = pt_to;
+          if (std::isnan(pt_to.x) || std::isnan(pt_to.y) || std::isnan(pt_to.z)) {
+            cloud_out.is_dense = false;
+          }
         }
       }
       pub_cloud_.publish(boost::make_shared<PointCloud>(cloud_out));

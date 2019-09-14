@@ -139,6 +139,7 @@ generate_dynamic_reconfigure_options(
   cfg/FacePoseEstimation.cfg
   cfg/LabelImageDecomposer.cfg
   cfg/SSDObjectDetector.cfg
+  cfg/MaskRCNNInstanceSegmentation.cfg
 )
 
 message(WARNING "DEPRECATION WARNING: srv files in jsk_pcl_ros are deprecated."

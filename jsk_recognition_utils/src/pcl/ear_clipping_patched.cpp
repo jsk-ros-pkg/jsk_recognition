@@ -139,13 +139,13 @@ pcl::EarClippingPatched::isEar (int u, int v, int w, const std::vector<uint32_t>
   p_vu = p_u - p_v;
   p_vw = p_w - p_v;
 
-  // Avoid flat triangles and concave vertex
+  // 1: Avoid flat triangles and concave vertex
   Eigen::Vector3f cross = p_vu.cross(p_vw);
   if ((cross[2] > 0) || (cross.norm() < eps))
     return (false);
 
   Eigen::Vector3f p;
-  // Check if any other vertex is inside the triangle.
+  // 2: Check if any other vertex is inside the triangle.
   for (int k = 0; k < static_cast<int> (vertices.size ()); k++)
   {
     if ((k == u) || (k == v) || (k == w))
@@ -155,6 +155,25 @@ pcl::EarClippingPatched::isEar (int u, int v, int w, const std::vector<uint32_t>
     if (isInsideTriangle (p_u, p_v, p_w, p))
       return (false);
   }
+
+  // 3: Check if the line segment uw lies completely inside the polygon.
+  // Here we suppose simple polygon (all edges do not intersect by themselves),
+  // so we only check if the middle point of line segment uw is inside the polygon.
+  Eigen::Vector3f p_i0, p_i1;
+  Eigen::Vector3f p_mid_uw = (p_u + p_w) / 2.0;
+  // HACK: avoid double-counting intersection at polygon vertices
+  Eigen::Vector3f p_inf = p_mid_uw + (p_v - p_mid_uw) * 1e15f + p_vu * 1e10f;
+  int intersect_count = 0;
+  for (int i = 0; i < static_cast<int>(vertices.size()); i++)
+  {
+    p_i0 = points_->points[vertices[i]].getVector3fMap();
+    p_i1 = points_->points[vertices[(i + 1) % static_cast<int>(vertices.size())]].getVector3fMap();
+    if (intersect(p_mid_uw, p_inf, p_i0, p_i1))
+      intersect_count++;
+  }
+  if (intersect_count % 2 == 0)
+    return (false);
+
   return (true);
 }
 
@@ -187,3 +206,20 @@ pcl::EarClippingPatched::isInsideTriangle (const Eigen::Vector3f& u,
   return (a >= 0) && (b >= 0) && (a + b < 1);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+bool
+pcl::EarClippingPatched::intersect (const Eigen::Vector3f& p0,
+                                    const Eigen::Vector3f& p1,
+                                    const Eigen::Vector3f& p2,
+                                    const Eigen::Vector3f& p3)
+{
+  // See http://mathworld.wolfram.com/Line-LineIntersection.html
+  Eigen::Vector3f a = p1 - p0;
+  Eigen::Vector3f b = p3 - p2;
+  Eigen::Vector3f c = p2 - p0;
+
+  float s = (c.cross(b)).dot(a.cross(b)) / ((a.cross(b)).norm() * (a.cross(b)).norm());
+  float t = (c.cross(a)).dot(a.cross(b)) / ((a.cross(b)).norm() * (a.cross(b)).norm());
+
+  return ((s >= 0 && s <= 1) && (t >= 0 && t <= 1));
+}

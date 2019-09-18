@@ -120,6 +120,17 @@ namespace pcl
         return p1[0]*p2[1] - p1[1]*p2[0];
       }
 
+      /** \brief Check if two line segments intersect by themselves.
+        * \param[in] p0 an end of the first line segment
+        * \param[in] p1 the other end of the first line segment
+        * \param[in] p2 an end of the second line segment
+        * \param[in] p3 the other end of the second line segment
+        */
+      bool
+      intersect (const Eigen::Vector3f& p0,
+                 const Eigen::Vector3f& p1,
+                 const Eigen::Vector3f& p2,
+                 const Eigen::Vector3f& p3);
   };
 
 }

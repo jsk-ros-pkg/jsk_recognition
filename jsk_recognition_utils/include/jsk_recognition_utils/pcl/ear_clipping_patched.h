@@ -87,7 +87,7 @@ namespace pcl
         * \param[out] output the resultant polygonal mesh
         */
       size_t
-      triangulate (std::vector<uint32_t>& vertices, PolygonMesh& output);
+      triangulateClockwiseVertices (std::vector<uint32_t>& vertices, PolygonMesh& output);
 
       /** \brief Check if the triangle (u,v,w) is an ear. 
         * \param[in] u the first triangle vertex 

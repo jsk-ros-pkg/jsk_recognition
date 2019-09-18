@@ -76,7 +76,7 @@ pcl::EarClippingPatched::triangulate (const Vertices& vertices, PolygonMesh& out
   }
 
   std::vector<uint32_t> remaining_vertices = vertices.vertices;
-  size_t count = triangulate(remaining_vertices, output);
+  size_t count = triangulateClockwiseVertices(remaining_vertices, output);
 
   // if the input vertices order is anti-clockwise, it always left a
   // convex polygon and start infinite loops, which means will left more
@@ -87,12 +87,12 @@ pcl::EarClippingPatched::triangulate (const Vertices& vertices, PolygonMesh& out
   remaining_vertices.resize(n_vertices);
   for (size_t v = 0; v < n_vertices; v++)
       remaining_vertices[v] = vertices.vertices[n_vertices - 1 - v];
-  triangulate(remaining_vertices, output);
+  triangulateClockwiseVertices(remaining_vertices, output);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 size_t
-pcl::EarClippingPatched::triangulate (std::vector<uint32_t>& vertices, PolygonMesh& output)
+pcl::EarClippingPatched::triangulateClockwiseVertices (std::vector<uint32_t>& vertices, PolygonMesh& output)
 {
   // triangles count
   size_t count = 0;

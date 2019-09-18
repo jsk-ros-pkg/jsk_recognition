@@ -54,7 +54,11 @@ Select object bounding box by human pointing his/her finger toward one of them.
 
   This parameter is enabled only when `~approximate_sync` is True.
 
-* `~dist_threshold` (Float, default: `0.1`)
+* `~min_dist_threshold` (Float, default: `0.0`)
+
+  Minimum allowed distance from left/right hand to the nearest object.
+
+* `~max_dist_threshold` (Float, default: `0.1`)
 
   Maximum allowed distance from left/right hand to the nearest object.
 

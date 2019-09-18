@@ -81,7 +81,7 @@ pcl::EarClippingPatched::triangulate (const Vertices& vertices, PolygonMesh& out
   // if the input vertices order is anti-clockwise, it always left a
   // convex polygon and start infinite loops, which means will left more
   // than 3 points.
-  if(remaining_vertices.size() < 3)return;
+  if (remaining_vertices.size() < 3) return;
 
   output.polygons.erase(output.polygons.end(), output.polygons.end() + count);
   remaining_vertices.resize(n_vertices);

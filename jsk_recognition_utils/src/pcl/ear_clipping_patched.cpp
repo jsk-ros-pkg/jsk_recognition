@@ -218,8 +218,14 @@ pcl::EarClippingPatched::intersect (const Eigen::Vector3f& p0,
   Eigen::Vector3f b = p3 - p2;
   Eigen::Vector3f c = p2 - p0;
 
+  // Parallel line segments do not intersect each other.
+  if (a.cross(b).norm() == 0)
+    return (false);
+
+  // Compute intersection of two lines.
   float s = (c.cross(b)).dot(a.cross(b)) / ((a.cross(b)).norm() * (a.cross(b)).norm());
   float t = (c.cross(a)).dot(a.cross(b)) / ((a.cross(b)).norm() * (a.cross(b)).norm());
 
+  // Check if the intersection is inside the line segments.
   return ((s >= 0 && s <= 1) && (t >= 0 && t <= 1));
 }

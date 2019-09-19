@@ -169,7 +169,7 @@
     <remap from="~input/boxes" to="bounding_box_array_publisher/output"/>
     <rosparam>
       use_classification_result: false
-      dist_threshold: 1.0
+      max_dist_threshold: 1.0
       min_norm_threshold: 0.0
       use_tf2_buffer_client: false
     </rosparam>

@@ -53,8 +53,11 @@ class PointIt(ConnectionBasedTransport):
             rospy.logwarn("Parameter ~dist_threshold is deprecated. "
                           "Use ~max_dist_threshold instead.")
             self.max_dist_threshold = rospy.get_param("~dist_threshold")
+        else:
+            self.max_dist_threshold = rospy.get_param(
+                "~max_dist_threshold", 0.1)
+
         self.min_dist_threshold = rospy.get_param("~min_dist_threshold", 0.0)
-        self.max_dist_threshold = rospy.get_param("~max_dist_threshold", 0.1)
         self.min_norm_threshold = rospy.get_param("~min_norm_threshold", 0.2)
         self.use_arm = rospy.get_param("~use_arm", ["rarm", "larm"])
 

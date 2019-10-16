@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_polygon_array_color_likelihood.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_polygon_array_color_likelihood"
+        name="test_polygon_array_color_likelihood"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /polygon_array_color_likelihood/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

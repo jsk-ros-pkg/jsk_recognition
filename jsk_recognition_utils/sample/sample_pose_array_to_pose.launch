@@ -1,0 +1,27 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="pose_array_publisher"
+        pkg="rostopic" type="rostopic"
+        output="screen"
+        args="pub -r 1 -s /pose_array_publisher/output geometry_msgs/PoseArray
+              '{header: {stamp: now, frame_id: map},
+                poses: [{position: {x: 1.0}, orientation: {w: 1.0}},
+                        {position: {y: 1.0}, orientation: {w: 1.0}},
+                        {position: {x: -2.0}, orientation: {w: 1.0}}]}'"/>
+
+  <node name="pose_array_to_pose"
+        pkg="jsk_recognition_utils" type="pose_array_to_pose.py"
+        output="screen">
+    <remap from="~input" to="pose_array_publisher/output"/>
+    <rosparam>
+      index: 0
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_recognition_utils)/sample/config/sample_pose_array_to_pose.rviz"/>
+  </group>
+</launch>

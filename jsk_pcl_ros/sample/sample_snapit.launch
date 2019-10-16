@@ -1,0 +1,54 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="static_polygon_array_publisher"
+        pkg="jsk_pcl_ros_utils" type="static_polygon_array_publisher">
+    <rosparam>
+      use_periodic: true
+      frame_ids:
+        - map
+        - map
+      polygon_array:
+        - [[-1, -2, 3],
+           [-1, 2, 3],
+           [3, 2, 1],
+           [3, -2, 1]]
+        - [[1, -2, 3],
+           [1, 2, 3],
+           [-3, 2, 1],
+           [-3, -2, 1]]
+    </rosparam>
+  </node>
+
+  <node name="polygon_array_to_polygon"
+        pkg="jsk_recognition_utils" type="polygon_array_to_polygon.py">
+    <remap from="~input" to="static_polygon_array_publisher/output_polygons"/>
+    <rosparam>
+      index: 0
+    </rosparam>
+  </node>
+
+  <node name="sample_snapit_pose_publisher"
+        pkg="jsk_pcl_ros" type="sample_snapit_pose_publisher.py">
+    <rosparam>
+      frame_id: map
+      rate: 30.0
+    </rosparam>
+  </node>
+
+  <node name="snapit"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/Snapit">
+    <remap from="~input/polygons" to="static_polygon_array_publisher/output_polygons"/>
+    <remap from="~input/polygon_coefficients" to="static_polygon_array_publisher/output_coefficients"/>
+    <remap from="~input/plane_align" to="sample_snapit_pose_publisher/output"/>
+    <remap from="~input/convex_align" to="sample_snapit_pose_publisher/output"/>
+    <remap from="~input/convex_align_polygon" to="polygon_array_to_polygon/output"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/snapit.rviz"/>
+  </group>
+</launch>

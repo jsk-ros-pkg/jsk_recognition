@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_heightmap_morphological_filtering.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_heightmap_morphlogical_filtering"
+        name="test_heightmap_morphlogical_filtering"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /heightmap_morphological_filtering/output
+      timeout_0: 30
+      topic_1: /heightmap_morphological_filtering/output/config
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

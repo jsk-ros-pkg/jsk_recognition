@@ -1,0 +1,61 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="static_tf_publisher"
+        pkg="tf" type="static_transform_publisher"
+        args="5.302 6.703 1.678 -0.761 -0.246 0.180 0.573 /map /head_mount_kinect_rgb_optical_frame 10"/>
+
+  <!-- People pose was estimated by jsk_perception/people_pose_estimation_2d.py -->
+  <node name="people_pose_array_publisher"
+        pkg="rostopic" type="rostopic"
+        args="pub -r 10 -s /people_pose_array_publisher/output jsk_recognition_msgs/PeoplePoseArray
+              &quot;{header: {stamp: now, frame_id: head_mount_kinect_rgb_optical_frame},
+              poses: [{'limb_names': ['Nose', 'Neck', 'RShoulder', 'RElbow', 'RWrist', 'LShoulder',
+                                      'LElbow', 'LWrist', 'RHip', 'RKnee', 'RAnkle', 'LHip',
+                                      'LKnee', 'LAnkle', 'LEye', 'RHand0', 'LHand0'],
+                       'poses': [{'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                                  'position': {'x': -0.124811669985, 'y': -0.593282869657, 'z': 1.79523634911}},
+                                 {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                                  'position': {'x': -0.138310696398, 'y': -0.396490663006, 'z': 1.93634974957}},
+                                 {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                                  'position': {'x': -0.309251438095, 'y': -0.407908338592, 'z': 1.9921104908}},
+                                 {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                                  'position': {'x': -0.328125459807, 'y': -0.161079771178, 'z': 2.08807110786}},
+                                 {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                                  'position': {'x': -0.425897373472, 'y': 0.105954956327, 'z': 2.18142557144}},
+                                 {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                                  'position': {'x': 0.0199490049907, 'y': -0.389912370273, 'z': 1.90422320366}},
+                                 {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                                  'position': {'x': 0.101717784745, 'y': -0.159293889318, 'z': 2.01516366005}},
+                                 {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                                  'position': {'x': 0.110697697912, 'y': 0.0990453086581, 'z': 2.03916811943}},
+                                 {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                                  'position': {'x': -0.228559831892, 'y': 0.181675763811, 'z': 2.05117797852}},
+                                 {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                                  'position': {'x': -0.254219249317, 'y': 0.580141363825, 'z': 2.28145480156}},
+                                 {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                                  'position': {'x': -0.17209650789, 'y': 0.915553421974, 'z': 2.40935111046}},
+                                 {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                                  'position': {'x': -0.0512256983348, 'y': 0.172649575869, 'z': 1.9921104908}},
+                                 {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                                  'position': {'x': 0.0307579857962, 'y': 0.547492147173, 'z': 2.15305900574}},
+                                 {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                                  'position': {'x': 0.0371898585274, 'y': 0.885993688447, 'z': 2.29702067375}},
+                                 {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                                  'position': {'x': -0.124811669985, 'y': -0.600121865273, 'z': 1.79523634911}},
+                                 {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                                  'position': {'x': -0.41902718703, 'y': 0.100318824087, 'z': 2.16738200188}},
+                                 {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                                  'position': {'x': 0.109786859422, 'y': 0.115647367932, 'z': 2.05117797852}}]}]}&quot;"/>
+
+  <node name="people_pose_array_to_pose_array"
+        pkg="jsk_recognition_msgs" type="people_pose_array_to_pose_array.py">
+    <remap from="~input" to="people_pose_array_publisher/output"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_recognition_msgs)/sample/config/sample_people_pose_array_to_pose_array.rviz"/>
+  </group>
+</launch>

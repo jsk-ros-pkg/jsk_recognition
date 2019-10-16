@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_marker_appender.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_marker_appender"
+        name="test_marker_appender"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /marker_appender/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

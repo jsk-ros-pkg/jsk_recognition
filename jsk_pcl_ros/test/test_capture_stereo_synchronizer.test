@@ -1,0 +1,31 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_capture_stereo_synchronizer.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_capture_stereo_synchronizer"
+        name="test_capture_stereo_synchronizer"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /capture_stereo_synchronizer/output/pose
+      timeout_0: 30
+      topic_1: /capture_stereo_synchronizer/output/mask
+      timeout_1: 30
+      topic_2: /capture_stereo_synchronizer/output/mask_indices
+      timeout_2: 30
+      topic_3: /capture_stereo_synchronizer/output/left_image
+      timeout_3: 30
+      topic_4: /capture_stereo_synchronizer/output/left_camera_info
+      timeout_4: 30
+      topic_5: /capture_stereo_synchronizer/output/right_camera_info
+      timeout_5: 30
+      topic_6: /capture_stereo_synchronizer/output/disparity
+      timeout_6: 30
+      topic_7: /capture_stereo_synchronizer/output/count
+      timeout_7: 30
+    </rosparam>
+  </test>
+
+</launch>

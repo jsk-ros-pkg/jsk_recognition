@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find checkerboard_detector)/sample/sample_objectdetection_transform_echo.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_objectdetection_transform_echo"
+        name="test_objectdetection_transform_echo"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="60">
+    <rosparam>
+      topic_0: /objectdetection_transform_echo/output
+      timeout_0: 60
+    </rosparam>
+  </test>
+
+</launch>

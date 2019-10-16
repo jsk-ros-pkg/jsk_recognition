@@ -71,8 +71,8 @@
     <rosparam>
       topic_0: /icp_registration/output
       timeout_0: 30
-      topic1: /icp_registration/debug/flipped
-      timeout_1: 30
+      <!-- topic1: /icp_registration/debug/flipped -->
+      <!-- timeout_1: 30 -->
       topic2: /icp_registration/debug/result
       timeout_2: 30
       topic3: /icp_registration/debug/source
@@ -81,8 +81,6 @@
       timeout_4: 30
       topic_5: /icp_registration/icp_result
       timeout_5: 30
-      topic_6: /icp_registration/output
-      timeout_6: 30
       topic_7: /icp_registration/output/average_time
       timeout_7: 30
       topic_8: /icp_registration/output/latest_time
@@ -91,8 +89,8 @@
       timeout_9: 30
       topic_10: /empty_cloud_icp_registration/output
       timeout_10: 30
-      topic11: /empty_cloud_icp_registration/debug/flipped
-      timeout_11: 30
+      <!-- topic11: /empty_cloud_icp_registration/debug/flipped -->
+      <!-- timeout_11: 30 -->
       topic12: /empty_cloud_icp_registration/debug/result
       timeout_13: 30
       topic14: /empty_cloud_icp_registration/debug/source
@@ -101,8 +99,6 @@
       timeout_15: 30
       topic_16: /empty_cloud_icp_registration/icp_result
       timeout_16: 30
-      topic_17: /empty_cloud_icp_registration/output
-      timeout_17: 30
       topic_18: /empty_cloud_icp_registration/output/average_time
       timeout_18: 30
       topic_19: /empty_cloud_icp_registration/output/latest_time

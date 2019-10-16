@@ -59,3 +59,19 @@ file(GLOB _pdf *.pdf)
 install(FILES ${_launch} ${_pdf}
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
+
+install(DIRECTORY sample test
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  USE_SOURCE_PERMISSIONS
+)
+
+if(CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  if("$ENV{ROS_DISTRO}" STRGREATER "hydro")
+    # FIXME: jsk_tools/test_topic_published.py does not work on hydro travis/jenkins
+    # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
+    add_rostest(test/checkerboard_detector.test)
+    add_rostest(test/objectdetection_tf_publisher.test)
+    add_rostest(test/objectdetection_transform_echo.test)
+  endif()
+endif()

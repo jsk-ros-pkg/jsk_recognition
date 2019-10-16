@@ -1,0 +1,102 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+
+  <node name="static_tf_publisher"
+        pkg="tf" type="static_transform_publisher"
+        args="1.0 -0.3 0.8 -1.57 0 0 /base_link /kettle 1"/>
+
+  <node name="pcd_to_pointcloud"
+        pkg="pcl_ros" type="pcd_to_pointcloud"
+        args="$(find jsk_pcl_ros)/sample/data/kettle.pcd 1.0">
+    <remap from="cloud_pcd" to="~output"/>
+    <rosparam>
+      frame_id: kettle
+    </rosparam>
+  </node>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"
+        output="screen"/>
+
+  <!-- Reference -->
+  <node name="normal_estimation_omp_reference"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/NormalEstimationOMP sample_manager">
+    <remap from="~input" to="pcd_to_pointcloud/output"/>
+    <rosparam>
+      k_search: 20
+    </rosparam>
+  </node>
+
+  <node name="fpfh_estimation_omp_reference"
+        pkg="nodelet" type="nodelet"
+        args="load pcl/FPFHEstimationOMP sample_manager">
+    <remap from="~input" to="normal_estimation_omp_reference/output_with_xyz"/>
+    <remap from="~normals" to="normal_estimation_omp_reference/output_with_xyz"/>
+    <remap from="~surface" to="normal_estimation_omp_reference/output_with_xyz"/>
+    <rosparam>
+      use_surface: true
+      k_search: 20
+      spatial_locator: 0
+    </rosparam>
+  </node>
+
+  <!-- Target -->
+  <node name="organized_pass_through"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/OrganizedPassThrough sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <rosparam>
+      filter_field: 0
+      min_index: 0
+      max_index: 640
+      keep_organized: false
+      remove_nan: true
+    </rosparam>
+  </node>
+
+  <node name="normal_estimation_omp_target"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/NormalEstimationOMP sample_manager">
+    <remap from="~input" to="organized_pass_through/output"/>
+    <rosparam>
+      k_search: 20
+    </rosparam>
+  </node>
+
+  <node name="fpfh_estimation_omp_target"
+        pkg="nodelet" type="nodelet"
+        args="load pcl/FPFHEstimationOMP sample_manager">
+    <remap from="~input" to="normal_estimation_omp_target/output_with_xyz"/>
+    <remap from="~normals" to="normal_estimation_omp_target/output_with_xyz"/>
+    <remap from="~surface" to="normal_estimation_omp_target/output_with_xyz"/>
+    <rosparam>
+      use_surface: true
+      k_search: 20
+      spatial_locator: 0
+    </rosparam>
+  </node>
+
+  <node name="feature_registration"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/FeatureRegistration sample_manager">
+    <remap from="~input" to="normal_estimation_omp_target/output_with_xyz"/>
+    <remap from="~input/feature" to="fpfh_estimation_omp_target/output"/>
+    <remap from="~input/reference/cloud" to="normal_estimation_omp_reference/output_with_xyz"/>
+    <remap from="~input/reference/feature" to="fpfh_estimation_omp_reference/output"/>
+    <rosparam>
+      correspondence_randomness: 10
+      similarity_threshold: 0.7
+      max_correspondence_distance: 1.0
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/feature_registration.rviz"/>
+  </group>
+</launch>

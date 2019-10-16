@@ -34,9 +34,13 @@ Subscribing Topic
 Publishing Topic
 ----------------
 
-* ``~output`` (``sensor_msgs/Image``)
+* ``~output/class`` (``jsk_recognition_msgs/ClassificationResult``)
 
-  Image with bounding boxes, scores and labels for objects listed **Object Labels**.
+  Detected object class labels and probabilities.
+
+* ``~output/rect_array`` (``jsk_recognition_msgs/RectArray``)
+
+  Rects of detected objects.
 
 
 Parameters
@@ -47,6 +51,15 @@ Parameters
   Network model name. (``vgg_cnn_m_1024`` or ``vgg16``)
   ``vgg_cnn_m_1024`` is small network and requires ~2GB GPU memory.
   ``vgg16`` is large network and requires ~5GB GPU memory.
+
+* ``~gpu`` (Int, default: ``-1``)
+
+  GPU ID.
+  Negative value means CPU mode.
+
+* ``~classifier_name`` (String, default: ``rospy.get_name()``)
+
+  Classifier name written to ``classifier`` field of ``~output/class``.
 
 * ``~approximate_sync`` (Bool, default: ``False``)
 

@@ -1,0 +1,21 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_boundingbox_occlusion_rejector.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_boundingbox_occlusion_rejector"
+        name="test_boundingbox_occlusion_rejector"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /boundingbox_occlusion_rejector/output
+      timeout_0: 30
+      topic_1: /boundingbox_occlusion_rejector/output/target_image
+      timeout_1: 30
+      topic_2: /boundingbox_occlusion_rejector/output/candidate_image
+      timeout_2: 30
+    </rosparam>
+  </test>
+
+</launch>

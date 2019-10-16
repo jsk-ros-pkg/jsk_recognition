@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_collision_detector.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_collision_detector"
+        name="test_collision_detector"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /sample_collision_detector_client/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

@@ -1,0 +1,19 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_line_segment_detector.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="marker_appender"
+        pkg="jsk_pcl_ros" type="marker_appender.py">
+    <remap from="marker" to="line_segment_detector/debug/line_marker"/>
+    <remap from="marker_array" to="~output"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/marker_appender.rviz"/>
+  </group>
+</launch>

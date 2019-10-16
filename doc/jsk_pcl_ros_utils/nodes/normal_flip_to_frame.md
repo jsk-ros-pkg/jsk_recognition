@@ -1,4 +1,7 @@
 # NormalFlipToFrame
+
+![](images/normal_flip_to_frame.png)
+
 Flip normal direction towards specified frame.
 
 ## Subscribing Topics
@@ -14,7 +17,14 @@ Flip normal direction towards specified frame.
 ## Parameters
 * `~frame_id` (String, **required**)
 
-  Frame ID which to be oriented by normal vectors.
+  Frame ID which is to be oriented by normal vectors.
+
 * `~strict_tf` (Bool, default: `false`)
 
   Do not take into account timestamp if this parameter is false.
+
+## Sample
+
+```bash
+roslaunch jsk_pcl_ros_utils sample_normal_flip_to_frame.launch
+```

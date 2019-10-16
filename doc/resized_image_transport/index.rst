@@ -1,7 +1,7 @@
 resized_image_transport
 =======================
 
-ROS nodes to compute local features of 2-D images. It supports SIFT, SURF, STAR, BRISK.
+ROS nodes for resizing images.
 
 
 .. toctree::

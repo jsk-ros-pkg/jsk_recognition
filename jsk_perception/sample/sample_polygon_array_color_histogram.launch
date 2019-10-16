@@ -1,0 +1,91 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_perception)/sample/sample_image_publisher.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="static_tf_publisher_map_to_camera"
+        pkg="tf" type="static_transform_publisher"
+        args="-0.580 -1.485 1.289 -0.753 0.291 -0.217 0.548 /map /camera 10"/>
+
+  <node name="polygon_array_publisher"
+        pkg="jsk_recognition_utils" type="polygon_array_publisher.py"
+        output="screen">
+    <rosparam>
+      frame_id: camera
+      polygons:
+      - points:
+        - [1.5, -1.0, 2.0]
+        - [-1.0, -1.0, 4.0]
+        - [0.5,  1.0, 3.0]
+      - points:
+        - [1.5, -1.0, 4.0]
+        - [-1.0, -0.5, 3.0]
+        - [-2.5, 1.5, 1.0]
+        - [0.0,  1.0, 2.0]
+      - points:
+        - [0.0, -1.0, 2.0]
+        - [-2.0, -1.0, 4.0]
+        - [-0.6, 0.2, 1.0]
+    </rosparam>
+  </node>
+
+  <node name="polygon_array_color_histogram"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_perception/PolygonArrayColorHistogram">
+    <remap from="~input" to="polygon_array_publisher/output"/>
+    <remap from="~input/image" to="raw_image_rgb/image_color"/>
+    <remap from="~input/info" to="raw_image_rgb/camera_info"/>
+    <rosparam>
+      debug_line_width: 5
+      pixel_min_value: 0
+      pixel_max_value: 180
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="unwrap_histogram_with_range_array0"
+          pkg="jsk_perception" type="unwrap_histogram_with_range_array.py">
+      <remap from="~input" to="polygon_array_color_histogram/output"/>
+      <rosparam>
+        index: 0
+      </rosparam>
+    </node>
+
+    <node name="histogram_plot_polygon0"
+          pkg="jsk_rqt_plugins" type="rqt_histogram_plot"
+          args="/unwrap_histogram_with_range_array0/output">
+    </node>
+
+    <node name="unwrap_histogram_with_range_array1"
+          pkg="jsk_perception" type="unwrap_histogram_with_range_array.py">
+      <remap from="~input" to="polygon_array_color_histogram/output"/>
+      <rosparam>
+        index: 1
+      </rosparam>
+    </node>
+
+    <node name="histogram_plot_polygon1"
+          pkg="jsk_rqt_plugins" type="rqt_histogram_plot"
+          args="/unwrap_histogram_with_range_array1/output">
+    </node>
+
+    <node name="unwrap_histogram_with_range_array2"
+          pkg="jsk_perception" type="unwrap_histogram_with_range_array.py">
+      <remap from="~input" to="polygon_array_color_histogram/output"/>
+      <rosparam>
+        index: 2
+      </rosparam>
+    </node>
+
+    <node name="histogram_plot_polygon2"
+          pkg="jsk_rqt_plugins" type="rqt_histogram_plot"
+          args="/unwrap_histogram_with_range_array2/output">
+    </node>
+
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_perception)/sample/config/sample_polygon_array_color_histogram.rviz"/>
+  </group>
+</launch>

@@ -1,0 +1,23 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_solidity_rag_merge.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_solidity_rag_merge"
+        name="test_solidity_rag_merge"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /solidity_rag_merge/output
+      timeout_0: 30
+      topic_1: /solidity_rag_merge/debug/slic
+      timeout_1: 30
+      topic_2: /solidity_rag_merge/debug/rag
+      timeout_2: 30
+      topic_3: /solidity_rag_merge/debug/label_viz
+      timeout_3: 30
+    </rosparam>
+  </test>
+
+</launch>

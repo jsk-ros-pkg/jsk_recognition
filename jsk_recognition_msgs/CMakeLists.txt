@@ -121,3 +121,11 @@ install(DIRECTORY sample scripts
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   USE_SOURCE_PERMISSIONS
 )
+
+if (CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  add_rostest(test/object_array_publisher.test)
+  add_rostest(test/people_pose_array_to_pose_array.test)
+  add_rostest(test/plot_data_to_csv.test)
+  add_rostest(test/save_mesh_server.test)
+endif()

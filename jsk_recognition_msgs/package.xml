@@ -23,6 +23,7 @@
   <run_depend>message_generation</run_depend>
   <build_depend>jsk_footstep_msgs</build_depend>
   <run_depend>jsk_footstep_msgs</run_depend>
+  <test_depend>rostest</test_depend>
   <export>
   </export>
 </package>

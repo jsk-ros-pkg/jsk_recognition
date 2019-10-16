@@ -1,0 +1,31 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="pose_with_covariance_stamped_publisher"
+        pkg="rostopic" type="rostopic"
+        args="pub -r 1 -s /pose_with_covariance_stamped_publisher/output
+              geometry_msgs/PoseWithCovarianceStamped
+              '{header: {stamp: now, frame_id: map},
+                pose: {pose: {orientation: {z: 1.0}},
+                       covariance: [0.050, 0.005, 0.0, 0.0, 0.0, 0.0,
+                                    0.005, 0.037, 0.0, 0.0, 0.0, 0.0,
+                                    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                    0.0, 0.0, 0.0, 0.0, 0.0, 0.022]}}'"/>
+
+  <node name="pose_with_covariance_stamped_to_gaussian_pointcloud"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/PoseWithCovarianceStampedToGaussianPointCloud">
+    <remap from="~input" to="pose_with_covariance_stamped_publisher/output"/>
+    <rosparam>
+      cut_plane: xy
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_pose_with_covariance_stamped_to_gaussian_pointcloud.rviz"/>
+  </group>
+</launch>

@@ -6,13 +6,15 @@ Extract indices of pointcloud which is masked by mask image. The pointcloud is n
 ## Subscribing Topic
 * `~input` (`sensor_msgs/PointCloud2`)
 
-  Input point cloud.
+  Input point cloud to be filtered.
+
 * `~input/mask` (`sensor_msgs/Image`)
 
   Mask image.
+
 * `~input/camera_info` (`sensor_msgs/CameraInfo`)
 
-  Camera parameters of the image.
+  Camera parameters of the mask image.
 
 ## Publishing Topic
 * `~output` (`pcl_msgs/PointIndices`)
@@ -23,3 +25,9 @@ Extract indices of pointcloud which is masked by mask image. The pointcloud is n
 * `~negative` (Bool, default: `false`)
 
   Flip the max region of mask image or not.
+
+## Sample
+
+```bash
+roslaunch jsk_pcl_ros sample_mask_image_filter.launch
+```

@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_saliency_map_generator.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_saliency_map_generator"
+        name="test_saliency_map_generator"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /saliency_map_generator/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

@@ -1,0 +1,29 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_perception)/sample/sample_image_publisher.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="point_stamped_publisher"
+        pkg="rostopic" type="rostopic"
+        args="pub -r 1 -s /point_stamped_publisher/output geometry_msgs/PointStamped
+              '{header: {stamp: now},
+                point: {x: 800, y: 600}}'"/>
+
+  <node name="project_image_point"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_perception/ProjectImagePoint">
+    <remap from="~input" to="point_stamped_publisher/output"/>
+    <remap from="~input/camera_info" to="raw_image_rgb/camera_info"/>
+    <rosparam>
+      z: 2.0
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_perception)/sample/config/sample_project_image_point.rviz"/>
+  </group>
+</launch>

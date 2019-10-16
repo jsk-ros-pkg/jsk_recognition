@@ -1,0 +1,35 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_target_adaptive_tracking.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_target_adaptive_tracking"
+        name="test_target_adaptive_tracking"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /target_adaptive_tracking/selected_pointcloud
+      timeout_0: 30
+      topic_1: /target_adaptive_tracking/output/object_pose
+      timeout_1: 30
+      topic_2: /target_adaptive_tracking/output/cloud
+      timeout_2: 30
+      topic_3: /target_adaptive_tracking/output/normal
+      timeout_3: 30
+      topic_4: /target_adaptive_tracking/output/inliers
+      timeout_4: 30
+      topic_5: /target_adaptive_tracking/output/centroids
+      timeout_5: 30
+      topic_6: /target_adaptive_tracking/output/probability_map
+      timeout_6: 30
+      topic_7: /target_adaptive_tracking/supervoxel/cloud
+      timeout_7: 30
+      topic_8: /target_adaptive_tracking/supervoxel/indices
+      timeout_8: 30
+      topic_9: /target_adaptive_tracking/supervoxel/tdp_indices
+      timeout_9: 30
+    </rosparam>
+  </test>
+
+</launch>

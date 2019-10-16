@@ -1,0 +1,91 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/lena.jpg
+      encoding: rgb8
+      publish_info: true
+      frame_id: map
+      fovx: 90.0
+      fovy: 90.0
+    </rosparam>
+  </node>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="grid_label"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/GridLabel sample_manager">
+    <remap from="~input" to="image_publisher/output" />
+    <rosparam>
+      label_size: 128
+    </rosparam>
+  </node>
+
+  <node name="label_to_cluster_point_indices"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/LabelToClusterPointIndices sample_manager">
+    <remap from="~input" to="grid_label/output"/>
+  </node>
+
+  <node name="planar_pointcloud_simulator"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PlanarPointCloudSimulator sample_manager">
+    <remap from="~input" to="image_publisher/output/camera_info"/>
+    <rosparam>
+      distance: 2.0
+    </rosparam>
+  </node>
+
+  <node name="pointcloud_xyz_to_xyzrgb"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PointCloudXYZToXYZRGB sample_manager">
+    <remap from="~input" to="planar_pointcloud_simulator/output"/>
+  </node>
+
+  <node name="static_polygon_array_publisher"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/StaticPolygonArrayPublisher sample_manager">
+    <remap from="~input" to="pointcloud_xyz_to_xyzrgb/output"/>
+    <rosparam>
+      use_message: true
+      frame_ids:
+        - map
+        - map
+        - map
+        - map
+      polygon_array:
+        - [[-2.0, 2.0, 2.0], [-2.0, 0.0, 2.0], [0.0, 0.0, 2.0], [0.0, 2.0, 2.0]]
+        - [[2.0, 2.0, 2.0], [2.0, 0.0, 2.0], [0.0, 0.0, 2.0], [0.0, 2.0, 2.0]]
+        - [[-2.0, -2.0, 2.0], [-2.0, 0.0, 2.0], [0.0, 0.0, 2.0], [0.0, -2.0, 2.0]]
+        - [[2.0, -2.0, 2.0], [2.0, 0.0, 2.0], [0.0, 0.0, 2.0], [0.0, -2.0, 2.0]]
+    </rosparam>
+  </node>
+
+  <node name="plane_concatenator"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PlaneConcatenator sample_manager">
+    <remap from="~input" to="pointcloud_xyz_to_xyzrgb/output"/>
+    <remap from="~input/indices" to="label_to_cluster_point_indices/output"/>
+    <remap from="~input/polygons" to="static_polygon_array_publisher/output_polygons"/>
+    <remap from="~input/coefficients" to="static_polygon_array_publisher/output_coefficients"/>
+    <rosparam>
+      connect_angular_threshold: 0.1
+      connect_distance_threshold: 0.1
+      connect_perpendicular_distance_threshold: 0.1
+      min_size: 100
+      min_area: 0.1
+      max_area: 100.0
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_plane_concatenator.rviz"/>
+  </group>
+</launch>

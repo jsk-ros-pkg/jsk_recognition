@@ -1,0 +1,20 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_apply_context_to_label_probability.launch">
+    <arg name="gui" value="false" />
+    <arg name="gpu" value="-1" />
+  </include>
+
+  <test test-name="test_apply_context_to_label_probability"
+        name="test_apply_context_to_label_probability"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /apply_context_to_label_probability/output
+      timeout_0: 60
+      topic_1: /apply_context_to_label_probability/output/label
+      timeout_1: 60
+    </rosparam>
+  </test>
+
+</launch>

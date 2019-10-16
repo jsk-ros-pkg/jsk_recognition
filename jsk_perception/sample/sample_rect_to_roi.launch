@@ -1,0 +1,45 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="rect_array_publisher"
+        pkg="rostopic" type="rostopic"
+        args="pub -r 1 -s /rect_array_publisher/output jsk_recognition_msgs/RectArray
+              '{header: {stamp: now, frame_id: camera},
+                rects: [{x: 200, y: 200, width: 300, height: 200}]}'"/>
+
+  <node name="rect_array_to_polygon_array"
+        pkg="jsk_recognition_utils" type="rect_array_to_polygon_array.py">
+    <remap from="~input" to="rect_array_publisher/output"/>
+  </node>
+
+  <node name="polygon_array_to_polygon"
+        pkg="jsk_recognition_utils" type="polygon_array_to_polygon.py">
+    <remap from="~input" to="rect_array_to_polygon_array/output"/>
+    <rosparam>
+      index: 0
+    </rosparam>
+  </node>
+
+  <node name="camera_info_publisher"
+        pkg="rostopic" type="rostopic"
+        args="pub -r 30 -s /camera/rgb/camera_info sensor_msgs/CameraInfo
+              '{header: {stamp: now, frame_id: camera},
+                height: 480,
+                width: 640,
+                K: [525.0, 0.0, 319.5, 0.0, 525.0, 239.5, 0.0, 0.0, 1.0],
+                R: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0],
+                P: [525.0, 0.0, 319.5, 0.0, 0.0, 525.0, 239.5, 0.0, 0.0, 0.0, 1.0, 0.0]}'"/>
+
+  <node name="polygon_rect_to_roi"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_perception/RectToROI">
+    <remap from="~input" to="polygon_array_to_polygon/output"/>
+    <remap from="~input/camera_info" to="camera/rgb/camera_info"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_perception)/sample/config/sample_rect_to_roi.rviz"/>
+  </group>
+</launch>

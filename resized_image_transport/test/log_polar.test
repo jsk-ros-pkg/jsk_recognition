@@ -1,0 +1,22 @@
+<launch>
+
+  <include file="$(find resized_image_transport)/launch/sample_log_polar.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_log_polar"
+        name="test_log_polar"
+        pkg="jsk_tools" type="test_topic_published.py">
+    <rosparam>
+      topic_0: /log_polar/output/camera_info
+      timeout_0: 10
+      topic_1: /log_polar/output/image
+      timeout_1: 10
+      topic_2: /log_polar/output/width_scale
+      timeout_2: 10
+      topic_3: /log_polar/output/height_scale
+      timeout_3: 10
+    </rosparam>
+  </test>
+
+</launch>

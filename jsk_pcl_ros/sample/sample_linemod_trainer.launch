@@ -1,0 +1,111 @@
+<launch>
+  <arg name="gui" default="true"/>
+  <arg name="output_path" default="$(env HOME)/.ros/jsk_pcl_ros_sample_linemod_template"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <!-- Filter by red color -->
+  <node name="hsi_color_filter"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/HSIColorFilter sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <rosparam>
+      use_indices: false
+      h_limit_max: 20
+      h_limit_min: -20
+      s_limit_max: 255
+      s_limit_min: 120
+      i_limit_max: 150
+      i_limit_min: 50
+    </rosparam>
+  </node>
+
+  <!-- Filter by cluster size -->
+  <node name="euclidean_clustering"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/EuclideanClustering sample_manager">
+    <remap from="~input" to="hsi_color_filter/output"/>
+    <rosparam>
+      torelance: 0.01
+      max_size: 10000
+      min_size: 300
+    </rosparam>
+  </node>
+
+  <node name="cluster_point_indices_decomposer"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer sample_manager">
+    <remap from="~input" to="hsi_color_filter/output"/>
+    <remap from="~target" to="euclidean_clustering/output"/>
+    <rosparam>
+      sort_by: -cloud_size
+    </rosparam>
+  </node>
+
+  <node name="cluster_point_indices_to_point_indices"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/ClusterPointIndicesToPointIndices sample_manager">
+    <remap from="~input" to="cluster_point_indices_decomposer/cluster_indices"/>
+    <rosparam>
+      index: 0
+    </rosparam>
+  </node>
+
+  <node name="extract_indices"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ExtractIndices sample_manager">
+    <remap from="~input" to="hsi_color_filter/output"/>
+    <remap from="~indices" to="cluster_point_indices_to_point_indices/output"/>
+    <rosparam>
+      keep_organized: true
+    </rosparam>
+  </node>
+
+  <!-- Train LINEMOD -->
+  <node name="linemod_trainer"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/LINEMODTrainer"
+        output="screen">
+    <remap from="~input" to="extract_indices/output"/>
+    <remap from="~input/info" to="/kinect_head/rgb/camera_info"/>
+    <rosparam subst_value="true">
+      output_file: $(arg output_path)
+      sample_viewpoint: true
+      sample_viewpoint_angle_step: 40.0
+      sample_viewpoint_angle_min: -80.0
+      sample_viewpoint_angle_max: 80.0
+      sample_viewpoint_radius_step: 0.1
+      sample_viewpoint_radius_min: 0.9
+      sample_viewpoint_radius_max: 1.1
+      n_points: 10
+    </rosparam>
+  </node>
+
+  <node name="sample_empty_service_caller"
+        pkg="jsk_pcl_ros" type="sample_empty_service_caller.py">
+    <remap from="~service" to="linemod_trainer/start_training"/>
+    <rosparam>
+      rate: 1.0
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rosconsole_overlay_text"
+          pkg="jsk_rviz_plugins" type="rosconsole_overlay_text.py">
+      <rosparam>
+        nodes:
+          - /linemod_trainer
+        line_buffer_length: 100
+        reverse_lines: false
+      </rosparam>
+    </node>
+
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/linemod_trainer.rviz"/>
+  </group>
+</launch>

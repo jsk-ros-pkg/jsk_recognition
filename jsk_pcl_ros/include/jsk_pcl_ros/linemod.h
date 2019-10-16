@@ -59,6 +59,7 @@
 #include <jsk_recognition_msgs/BoundingBox.h>
 #include <jsk_recognition_msgs/BoundingBoxArray.h>
 #include <pcl_ros/pcl_nodelet.h>
+#include <yaml-cpp/yaml.h>
 
 namespace jsk_pcl_ros
 {
@@ -74,6 +75,7 @@ namespace jsk_pcl_ros
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
+    virtual void setTemplate(YAML::Node doc);
     virtual void detect(
       const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
     virtual void configCallback(
@@ -181,6 +183,7 @@ namespace jsk_pcl_ros
     double sample_viewpoint_radius_min_;
     double sample_viewpoint_angle_max_;
     double sample_viewpoint_radius_max_;
+    int n_points_;
   private:
     
   };

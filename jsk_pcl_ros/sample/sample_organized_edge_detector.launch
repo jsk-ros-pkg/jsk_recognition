@@ -1,0 +1,33 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml"/>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="organized_edge_detector"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/OrganizedEdgeDetector sample_manager">
+    <remap from="~input" to="/right_hand_camera/depth_registered/points"/>
+    <rosparam>
+      publish_normal: true
+      use_nan_boundary: true
+      use_rgb: true
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="normal_concatenater"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl_utils/NormalConcatenater sample_manager">
+      <remap from="~input" to="/right_hand_camera/depth_registered/points"/>
+      <remap from="~normal" to="organized_edge_detector/output_normal"/>
+    </node>
+
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/organized_edge_detector.rviz"/>
+  </group>
+</launch>

@@ -12,8 +12,7 @@
   <arg name="input_image" value="image_publisher/output" />
 
   <node name="ssd_object_detector"
-        pkg="jsk_perception" type="ssd_object_detector.py"
-        output="screen">
+        pkg="jsk_perception" type="ssd_object_detector.py">
     <remap from="~input" to="$(arg input_image)" />
     <rosparam subst_value="true">
       gpu: $(arg gpu)

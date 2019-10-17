@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_depth_error_calibration.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_depth_error_calibration"
+        name="test_depth_error_calibration"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /depth_error_calibration/frequency_image
+      timeout_0: 30
+      topic_1: /depth_error_calibration/error_plot_image
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

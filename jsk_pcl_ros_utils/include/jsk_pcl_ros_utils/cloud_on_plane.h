@@ -61,7 +61,10 @@ namespace jsk_pcl_ros_utils
     typedef message_filters::sync_policies::ExactTime<
       sensor_msgs::PointCloud2,
       jsk_recognition_msgs::PolygonArray > SyncPolicy;
-    
+    typedef message_filters::sync_policies::ApproximateTime<
+      sensor_msgs::PointCloud2,
+      jsk_recognition_msgs::PolygonArray> ApproximateSyncPolicy;
+
     CloudOnPlane(): DiagnosticNodelet("CloudOnPlane") {}
   protected:
     virtual void onInit();
@@ -78,6 +81,8 @@ namespace jsk_pcl_ros_utils
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_cloud_;
     message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygon_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
+    boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> > async_;
+    bool approximate_sync_;
     double distance_thr_;
     int buf_size_;
     jsk_recognition_utils::SeriesedBoolean::Ptr buffer_;

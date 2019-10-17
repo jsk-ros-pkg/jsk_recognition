@@ -1,0 +1,28 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="histogram_with_range_array_publisher"
+        pkg="rostopic" type="rostopic"
+        args="pub -r 1 -s /histogram_with_range_array_publisher/output
+              jsk_recognition_msgs/HistogramWithRangeArray
+              '{header: {stamp: now},
+                histograms: [{header: {stamp: now},
+                              bins: [{min_value: 0.0, max_value: 1.0, count: 1},
+                                     {min_value: 1.0, max_value: 2.0, count: 2},
+                                     {min_value: 2.0, max_value: 3.0, count: 4},
+                                     {min_value: 3.0, max_value: 4.0, count: 2},
+                                     {min_value: 4.0, max_value: 5.0, count: 1}]},
+                             {header: {stamp: now},
+                              bins: [{min_value: 0.0, max_value: 1.0, count: 2}]}]}'"/>
+
+  <node name="unwrap_histogram_with_range_array"
+        pkg="jsk_perception" type="unwrap_histogram_with_range_array.py">
+    <remap from="~input" to="histogram_with_range_array_publisher/output"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rqt_histogram_plot"
+          pkg="jsk_rqt_plugins" type="rqt_histogram_plot"
+          args="/unwrap_histogram_with_range_array/output"/>
+  </group>
+</launch>

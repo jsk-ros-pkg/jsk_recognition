@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<opencv_storage>
+<TrainerInfo>
+  <trainer_type>cv::SVM</trainer_type>
+  <trainer_path>/home/user/.ros/jsk_perception_sample_sliding_window_object_detector_classifier.xml</trainer_path></TrainerInfo>
+<FeatureInfo>
+  <HOG>1</HOG>
+  <COLOR_HISTOGRAM>1</COLOR_HISTOGRAM></FeatureInfo>
+<SlidingWindowInfo>
+  <swindow_x>32</swindow_x>
+  <swindow_y>32</swindow_y></SlidingWindowInfo>
+<TrainingDatasetDirectoryInfo>
+  <object_dataset_filename>apc2016_object_imgs_and_masks.bag</object_dataset_filename>
+  <nonobject_dataset_filename>apc2016_object_imgs_and_masks.bag</nonobject_dataset_filename>
+  <dataset_path>/home/user/catkin_ws/src/jsk-ros-pkg/jsk_recognition/jsk_perception/sample/data/</dataset_path></TrainingDatasetDirectoryInfo>
+</opencv_storage>

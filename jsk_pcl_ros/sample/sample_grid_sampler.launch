@@ -1,0 +1,32 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="grid_sampler"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/GridSampler sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <rosparam>
+      grid_size: 0.1
+      min_indices: 700
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="cluster_point_indices_decomposer"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/ClusterPointIndicesDecomposer sample_manager">
+      <remap from="~input" to="/kinect_head/depth_registered/points"/>
+      <remap from="~target" to="grid_sampler/output"/>
+    </node>
+
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/grid_sampler.rviz"/>
+  </group>
+</launch>

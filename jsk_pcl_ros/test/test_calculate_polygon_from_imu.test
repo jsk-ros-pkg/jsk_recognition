@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_calculate_polygon_from_imu.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_calculate_polygon_from_imu"
+        name="test_calculate_polygon_from_imu"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /calculate_polygon_from_imu/output/polygon_array
+      timeout_0: 30
+      topic_1: /calculate_polygon_from_imu/output/model_coefficients_array
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

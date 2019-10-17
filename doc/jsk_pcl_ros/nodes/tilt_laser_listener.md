@@ -11,7 +11,8 @@ You can choose several types of tilt/spindle lasers such as tilt-laser of PR2, i
    Joint angles of laser actuator.
 * `~input/cloud`(`sensor_msgs/PointCloud2`):
 
-   Input scan pointcloud, it only used if ~not_use_laser_assembler_service and ~use_laser_assembler is true.
+   Input scan pointcloud.
+   It only used if `~not_use_laser_assembler_service` and `~use_laser_assembler` are true.
 
 ## Publishing Topics
 * `~output` (`jsk_recognition_msgs/TimeRange`):
@@ -22,14 +23,17 @@ You can choose several types of tilt/spindle lasers such as tilt-laser of PR2, i
    Assembled pointcloud according to time range
    of `~output`. this require `~assemble_scans2`
    service of [laser_assembler](http://wiki.ros.org/laser_assembler).
+
+   This topic is published only when `~use_laser_assembler` is true.
+
 * `~output_velocity` (`geometry_msgs/TwistStamped`)
 
-   Velocity of rotating laser. it is only published when `~twist_frame_id` is provided.
+   Velocity of rotating laser. It is only published when `~twist_frame_id` is provided.
 
-## Using Services
+## Internally Using Services
 * `~assemble_scans2` (`laser_assembler/AssembleScans2`):
 
-   A service to build 3-D pointcloud from scan pointcloud.
+   A service to build 3-D pointcloud from laser scan.
    It should be remapped to `assemble_scans2` service of
    [laser_assembler](http://wiki.ros.org/laser_assembler).
 
@@ -41,22 +45,22 @@ You can choose several types of tilt/spindle lasers such as tilt-laser of PR2, i
 ## Parameters
 * `~max_queue_size` (Integer, default: `100`):
 
-  Queu size of subscription.
+   Queue size of subscription.
 * `~clear_assembled_scans` (Bool, default: `false`)
 
    Do not use assembled scans twice.
 * `~skip_number` (Integer, default: `1`):
 
    Skip publishing and calling laser assembler per `~skip_number`.
-* `~twist_frame_id`
+* `~twist_frame_id` (String)
 
-  Frame id used in twist velocity.
+   Frame id used in `~output_velocity`.
 * `~use_laser_assembler` (Boolean, default: `False`):
 
    Enable `~output_cloud` and `~assemble_scans2`.
 * `~not_use_laser_assembler_service` (Boolean, default: `False`)
 
-   When it is true, do not use laser_assembler service but assemble scan pointcloud locally.
+   When it is true, do not use `~assemble_scans2` service but assemble scan pointcloud locally.
 * `~joint_name` (String, **required**):
 
    Joint name of actuator to rotate laser.
@@ -77,15 +81,26 @@ You can choose several types of tilt/spindle lasers such as tilt-laser of PR2, i
    6. `periodic`: TiltLaserListener periodically publishes.
 * `~overwrap_angle` (Double, default: `0.0`)
 
-   overwrap angle offset when detecting time range.
-   Only available in `infinite_spindle` and `infinite_spindle_half`.
+   overwrap angle offset in radians when detecting time range.
+   Only available when `~laser_type` is `infinite_spindle` or `infinite_spindle_half`.
 
 * `~publish_rate` (Double, default: `1.0`)
 
-   rate of publishing assembled cloud
-   Only available in `periodic`
+   rate of publishing assembled cloud [Hz].
+   Only available when `~laser_type` is `periodic`.
+
+* `~vital_rate` (Double, default: `1.0`)
+
+   Rate of publishing diagnostics [Hz].
 
 ## Troubleshooting
-* tilt_laser_listener don't publish `~output_cloud` when `~laser_type` is `infinite_spindle` or `infinite_spindle_half`
+* Q: `TiltLaserListener` doesn't publish `~output_cloud`
+     when `~laser_type` is `infinite_spindle` or `infinite_spindle_half`.
 
-  A: tilt_laser_listener doesn't publish ~output_cloud when ~laser_type is infinite_spindle or infinite_spindle_half if velocity field of ~input is not valid.
+  A: Maybe velocity field of `~input` is not valid.
+
+## Sample
+
+```bash
+roslaunch jsk_pcl_ros sample_tilt_laser_listener.launch
+```

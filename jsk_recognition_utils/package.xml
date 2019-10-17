@@ -33,6 +33,7 @@
   <run_depend>eigen_conversions</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>image_geometry</run_depend>
+  <run_depend>image_view</run_depend>
   <run_depend>jsk_recognition_msgs</run_depend>
   <run_depend>jsk_topic_tools</run_depend>
   <run_depend>pcl_msgs</run_depend>

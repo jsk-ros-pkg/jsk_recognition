@@ -1,5 +1,7 @@
 # PolygonFlipper
 
+![](images/polygon_flipper.png)
+
 Flip `jsk_recognition_msgs/PolygonArray` to specified sensor_frame.
 
 ## Subscribing Topic
@@ -9,6 +11,8 @@ Flip `jsk_recognition_msgs/PolygonArray` to specified sensor_frame.
 
   Input polygons.
   If `~use_indices` is disabled, `~input/indices` is not used.
+
+
 ## Publishing Topic
 * `~output/polygons` (`jsk_recognition_msgs/PolygonArray`)
 * `~output/coefficients` (`jsk_recognition_msgs/ModelCoefficientsArray`)
@@ -16,6 +20,8 @@ Flip `jsk_recognition_msgs/PolygonArray` to specified sensor_frame.
 
   Output flipped polygons which look at the origin of sensor_frame.
   If `~use_indices` is disabled, `~output/indices` is not published.
+
+
 ## Parameter
 * `~sensor_frame` (`String`, Required):
 
@@ -28,3 +34,10 @@ Flip `jsk_recognition_msgs/PolygonArray` to specified sensor_frame.
 * `~use_indices` (`Bool`, default: `true`):
 
    Use indices if this parameter is enabled.
+
+
+## Sample
+
+```bash
+roslaunch jsk_pcl_ros_utils sample_polygon_flipper.launch
+```

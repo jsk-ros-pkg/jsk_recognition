@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_resize_points_publisher.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_resize_points_publisher"
+        name="test_resize_points_publisher"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /resize_points_publisher/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

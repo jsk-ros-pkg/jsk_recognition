@@ -1,0 +1,37 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_line_segment_detector.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="parallel_edge_finder"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ParallelEdgeFinder line_segment_manager">
+    <remap from="~input_indices" to="line_segment_detector/output/inliers"/>
+    <remap from="~input_coefficients" to="line_segment_detector/output/coefficients"/>
+    <rosparam>
+      angular_threshold: 0.1
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="cluster_point_indices_decomposer_line_segments"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/ClusterPointIndicesDecomposer line_segment_manager">
+      <remap from="~input" to="voxelgrid/output"/>
+      <remap from="~target" to="line_segment_detector/output/inliers"/>
+    </node>
+
+    <node name="cluster_point_indices_decomposer_parallel_edge"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/ClusterPointIndicesDecomposer line_segment_manager">
+      <remap from="~input" to="voxelgrid/output"/>
+      <remap from="~target" to="parallel_edge_finder/output_clusters"/>
+    </node>
+
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/parallel_edge_finder.rviz"/>
+  </group>
+</launch>

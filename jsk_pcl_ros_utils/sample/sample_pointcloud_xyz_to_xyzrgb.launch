@@ -4,7 +4,7 @@
 
   <node name="pcd_to_pointcloud"
         pkg="pcl_ros" type="pcd_to_pointcloud"
-        args="$(find jsk_pcl_ros_utils)/sample/data/bunny.pcd 10">
+        args="$(find jsk_pcl_ros_utils)/sample/data/bunny.pcd 0.1">
     <remap from="cloud_pcd" to="~output" />
   </node>
 

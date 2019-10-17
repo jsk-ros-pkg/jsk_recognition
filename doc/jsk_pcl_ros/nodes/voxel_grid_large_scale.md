@@ -1,5 +1,7 @@
 # VoxelGridLargeScale
 
+![](images/voxel_grid_large_scale.png)
+
 VoxelGrid downsampler which can handle small leaf_size.
 Only supports `pcl::PointXYZ`.
 
@@ -14,6 +16,12 @@ Only supports `pcl::PointXYZ`.
   Output downsampled cloud
 
 ## Parameters
-* `~leaf_size` (default: `0.01`)
+* `~leaf_size` (Float, default: `0.01`)
 
   Size of voxel grid.
+
+## Sample
+
+```bash
+roslaunch jsk_pcl_ros sample_voxel_grid_large_scale.launch
+```

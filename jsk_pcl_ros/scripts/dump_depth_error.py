@@ -34,8 +34,9 @@ def callback(msg):
 
 if __name__ == "__main__":
     rospy.init_node("plot_depth_error")
-    pub = rospy.Publisher("~scatter", PlotData)
-    f = open("output.csv", "w")
+    csv_path = rospy.get_param("~csv_path", "output.csv")
+    pub = rospy.Publisher("~scatter", PlotData, queue_size=1)
+    f = open(csv_path, "w")
     writer = csv.writer(f)
     sub = rospy.Subscriber("/depth_image_error/output", DepthErrorResult, callback)
     rospy.spin()

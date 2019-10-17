@@ -37,8 +37,11 @@ namespace jsk_perception
       std::string dataset_path_;
 
       std::string object_dataset_filename_;
+      std::string object_dataset_topic_;
       std::string nonobject_dataset_filename_;
+      std::string nonobject_dataset_topic_;
       std::string trained_classifier_name_;
+      std::string manifest_filename_;
 
       boost::shared_ptr<rosbag::Bag> rosbag_;
 #if CV_MAJOR_VERSION >= 3 // http://answers.opencv.org/question/46770/cvknearest-missing-in-300-cvmlknearest-abstract/

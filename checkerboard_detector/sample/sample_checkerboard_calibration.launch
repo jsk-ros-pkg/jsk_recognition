@@ -1,0 +1,28 @@
+<launch>
+  <node name="image_publisher"
+        pkg="image_publisher" type="image_publisher"
+        args="$(find checkerboard_detector)/sample/images/real_world_checkerboard_grid_7x6_size_0.108_unrectified.jpg">
+    <remap from="~image_raw" to="~output/image_raw"/>
+    <remap from="~camera_info" to="~output/camera_info"/>
+    <rosparam subst_value="true">
+      frame_id: head_mount_kinect_rgb_optical_frame
+      publish_rate: 10
+      camera_info_url: file:///$(find checkerboard_detector)/sample/config/kinect_rgb_camera_info.yaml
+    </rosparam>
+  </node>
+
+  <group ns="checkerboard_calibration">
+    <rosparam>
+      grid_size_x: 7
+      grid_size_y: 6
+      rect_size_x: 0.108
+      rect_size_y: 0.108
+    </rosparam>
+
+    <node name="checkerboard_calibration"
+          pkg="checkerboard_detector" type="checkerboard_calibration"
+          output="screen">
+      <remap from="image" to="/image_publisher/output/image_raw"/>
+    </node>
+  </group>
+</launch>

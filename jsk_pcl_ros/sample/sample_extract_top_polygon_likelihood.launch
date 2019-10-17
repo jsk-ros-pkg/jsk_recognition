@@ -1,0 +1,34 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_plane_time_ensync_for_recognition.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="extract_top_polygon_likelihood"
+        pkg="jsk_pcl_ros" type="extract_top_polygon_likelihood.py">
+    <remap from="~input" to="plane_time_ensync_for_recognition/output/ensynced_planes"/>
+    <remap from="~input/coefficients" to="plane_time_ensync_for_recognition/output/ensynced_planes_coefficients"/>
+    <rosparam>
+      min_likelihood: 0.5
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="likelihood0_to_float"
+          pkg="topic_tools" type="transform"
+          args="/polygon_array_publisher/output /likelihood0_to_float/output std_msgs/Float32
+                'm.likelihood[0]'
+                --wait-for-start"/>
+
+    <node name="likelihood1_to_float"
+          pkg="topic_tools" type="transform"
+          args="/polygon_array_publisher/output /likelihood1_to_float/output std_msgs/Float32
+                'm.likelihood[1]'
+                --wait-for-start"/>
+
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/extract_top_polygon_likelihood.rviz"/>
+  </group>
+</launch>

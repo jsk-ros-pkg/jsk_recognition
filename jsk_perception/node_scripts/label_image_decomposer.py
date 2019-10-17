@@ -133,12 +133,12 @@ class LabelImageDecomposer(ConnectionBasedTransport):
         if use_async:
             slop = rospy.get_param('~slop', 0.1)
             rospy.loginfo('~slop: {}'.format(slop))
-            async = message_filters.ApproximateTimeSynchronizer(
+            sync = message_filters.ApproximateTimeSynchronizer(
                 [self.sub_label, self.sub_img],
                 queue_size=queue_size, slop=slop)
-            async.registerCallback(self._apply)
+            sync.registerCallback(self._apply)
             if self._publish_tile:
-                async.registerCallback(self._apply_tile)
+                sync.registerCallback(self._apply_tile)
         else:
             sync = message_filters.TimeSynchronizer(
                 [self.sub_label, self.sub_img], queue_size=queue_size)

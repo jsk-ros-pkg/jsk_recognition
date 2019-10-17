@@ -1,0 +1,95 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_perception)/sample/sample_polygon_array_color_histogram.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="unwrap_histogram_with_range_array_reference"
+        pkg="jsk_perception" type="unwrap_histogram_with_range_array.py">
+    <remap from="~input" to="polygon_array_color_histogram/output"/>
+    <rosparam>
+      index: 0
+    </rosparam>
+  </node>
+
+  <node name="polygon_array_color_likelihood"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_perception/PolygonArrayColorLikelihood">
+    <remap from="~input/polygons" to="polygon_array_publisher/output"/>
+    <remap from="~input/histograms" to="polygon_array_color_histogram/output"/>
+    <remap from="~input/reference" to="unwrap_histogram_with_range_array_reference/output"/>
+  </node>
+
+  <node name="extract_likelihood0"
+        pkg="topic_tools" type="transform"
+        args="/polygon_array_color_likelihood/output/likelihood
+              /extract_likelihood0/output std_msgs/Float32 'm[0]'
+              --wait-for-start"/>
+
+  <node name="extract_likelihood1"
+        pkg="topic_tools" type="transform"
+        args="/polygon_array_color_likelihood/output/likelihood
+              /extract_likelihood1/output std_msgs/Float32 'm[1]'
+              --wait-for-start"/>
+
+  <node name="extract_likelihood2"
+        pkg="topic_tools" type="transform"
+        args="/polygon_array_color_likelihood/output/likelihood
+              /extract_likelihood2/output std_msgs/Float32 'm[2]'
+              --wait-for-start"/>
+
+  <group if="$(arg gui)">
+    <!-- Visualize reference histogram -->
+    <node name="histogram_plot_reference"
+          pkg="jsk_rqt_plugins" type="rqt_histogram_plot"
+          args="/unwrap_histogram_with_range_array_reference/output">
+    </node>
+
+    <!-- Visualize histogram[0] -->
+    <node name="unwrap_histogram_with_range_array_polygon0"
+          pkg="jsk_perception" type="unwrap_histogram_with_range_array.py">
+      <remap from="~input" to="polygon_array_color_histogram/output"/>
+      <rosparam>
+        index: 0
+      </rosparam>
+    </node>
+
+    <node name="histogram_plot_polygon0"
+          pkg="jsk_rqt_plugins" type="rqt_histogram_plot"
+          args="/unwrap_histogram_with_range_array_polygon0/output">
+    </node>
+
+    <!-- Visualize histogram[1] -->
+    <node name="unwrap_histogram_with_range_array_polygon1"
+          pkg="jsk_perception" type="unwrap_histogram_with_range_array.py">
+      <remap from="~input" to="polygon_array_color_histogram/output"/>
+      <rosparam>
+        index: 1
+      </rosparam>
+    </node>
+
+    <node name="histogram_plot_polygon1"
+          pkg="jsk_rqt_plugins" type="rqt_histogram_plot"
+          args="/unwrap_histogram_with_range_array_polygon1/output">
+    </node>
+
+    <!-- Visualize histogram[2] -->
+    <node name="unwrap_histogram_with_range_array_polygon2"
+          pkg="jsk_perception" type="unwrap_histogram_with_range_array.py">
+      <remap from="~input" to="polygon_array_color_histogram/output"/>
+      <rosparam>
+        index: 2
+      </rosparam>
+    </node>
+
+    <node name="histogram_plot_polygon2"
+          pkg="jsk_rqt_plugins" type="rqt_histogram_plot"
+          args="/unwrap_histogram_with_range_array_polygon2/output">
+    </node>
+
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_perception)/sample/config/sample_polygon_array_color_likelihood.rviz"/>
+  </group>
+</launch>

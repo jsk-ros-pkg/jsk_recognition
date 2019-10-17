@@ -78,9 +78,9 @@ class TileImages(ConnectionBasedTransport):
                 sub_img = message_filters.Subscriber(input_topic, Image)
                 self.sub_img_list.append(sub_img)
             if self.approximate_sync:
-                async = message_filters.ApproximateTimeSynchronizer(
+                sync = message_filters.ApproximateTimeSynchronizer(
                     self.sub_img_list, queue_size=10, slop=1)
-                async.registerCallback(self._apply)
+                sync.registerCallback(self._apply)
             else:
                 sync = message_filters.TimeSynchronizer(
                     self.sub_img_list, queue_size=10)

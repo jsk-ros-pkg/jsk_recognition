@@ -1,0 +1,25 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_intermittent_image_annotator.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_intermittent_image_annotator"
+        name="test_intermittent_image_annotator"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /intermittent_image_annotator/output
+      timeout_0: 30
+      topic_1: /intermittent_image_annotator/output/direction
+      timeout_1: 30
+      topic_2: /intermittent_image_annotator/output/roi
+      timeout_2: 30
+      topic_3: /intermittent_image_annotator/output/cloud
+      timeout_3: 30
+      topic_4: /intermittent_image_annotator/output/marker
+      timeout_4: 30
+    </rosparam>
+  </test>
+
+</launch>

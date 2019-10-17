@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_robot_to_mask_image.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_robot_to_mask_image"
+        name="test_polygon_robot_to_mask_image"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /robot_to_mask_image/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

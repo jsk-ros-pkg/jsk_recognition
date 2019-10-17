@@ -10,7 +10,7 @@
     <remap from="~input" to="$(arg camera)/depth_registered/points" />
     <remap from="~input/depth" to="$(arg camera)/depth/image_rect" />
   </node>
-  
+
   <node name="mask_image_filter" pkg="jsk_pcl_ros" type="mask_image_filter">
     <param name="~negative" value="false" />
     <remap from="~input" to="$(arg camera)/depth_registered/points" />

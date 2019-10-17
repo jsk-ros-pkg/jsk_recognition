@@ -1,0 +1,23 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_grabcut.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_grabcut"
+        name="test_grabcut"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /grabcut/output/foreground
+      timeout_0: 30
+      topic_1: /grabcut/output/background
+      timeout_1: 30
+      topic_2: /grabcut/output/foreground_mask
+      timeout_2: 30
+      topic_3: /grabcut/output/background_mask
+      timeout_3: 30
+    </rosparam>
+  </test>
+
+</launch>

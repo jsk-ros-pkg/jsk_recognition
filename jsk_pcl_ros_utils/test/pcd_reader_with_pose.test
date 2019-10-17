@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_pcd_reader_with_pose.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_pcd_reader_with_pose"
+        name="test_pcd_reader_with_pose"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /pcd_reader_with_pose/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

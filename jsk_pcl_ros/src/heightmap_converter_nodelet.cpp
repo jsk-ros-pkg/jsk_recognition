@@ -102,14 +102,20 @@ namespace jsk_pcl_ros
                                          Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()));
 
       tf::StampedTransform ros_msg_to_fixed;
-      tf_->lookupTransform(msg->header.frame_id, fixed_frame_id_,
-                           msg->header.stamp, ros_msg_to_fixed);
+      try {
+        tf_->lookupTransform(msg->header.frame_id, fixed_frame_id_,
+                             msg->header.stamp, ros_msg_to_fixed);
+      }
+      catch (tf2::TransformException &e) {
+        NODELET_ERROR("Transform error: %s", e.what());
+        return;
+      }
       Eigen::Affine3d msg_to_fixed;
       tf::transformTFToEigen(ros_msg_to_fixed, msg_to_fixed);
 
       pcl::PointCloud<pcl::PointXYZ> from_msg_cloud;
       pcl::fromROSMsg(*msg, from_msg_cloud);
-      pcl::transformPointCloud(from_msg_cloud, transformed_cloud, msg_to_fixed * fixed_to_center);
+      pcl::transformPointCloud(from_msg_cloud, transformed_cloud, (msg_to_fixed * fixed_to_center).inverse());
 
       tf::StampedTransform tf_fixed_to_center;
       transformEigenToTF(fixed_to_center, tf_fixed_to_center);

@@ -1,0 +1,24 @@
+<launch>
+  <arg name="gui" default="true" />
+
+  <node name="pose_publisher"
+        pkg="rostopic" type="rostopic"
+        args="pub -r 1 -s /pose_publisher/output geometry_msgs/PoseStamped
+              '{header: {stamp: now, frame_id: map},
+                pose: {position: {z: 1.0}, orientation: {w: 1.0}}}'"/>
+
+  <node name="pcd_reader_with_pose"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/PCDReaderWithPose">
+    <remap from="~input" to="pose_publisher/output"/>
+    <rosparam subst_value="true">
+      pcd_file: $(find jsk_pcl_ros_utils)/sample/data/bunny.pcd
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_pcd_reader_with_pose.rviz"/>
+  </group>
+</launch>

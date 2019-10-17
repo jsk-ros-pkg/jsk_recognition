@@ -88,6 +88,10 @@ Use kinfu (kinect fusion) for model generation and SLAM.
     - `0`: no textures are used and polygon mesh is saved
     - `>0`: `n_textures_` textures are used and texture mesh is saved
 
+* `~volume_size` (Float, default: `3.0`)
+
+  TSDF Volume size for Kinect Fusion.
+
 
 ## Sample
 

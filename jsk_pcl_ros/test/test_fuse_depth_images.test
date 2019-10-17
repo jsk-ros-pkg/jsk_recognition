@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_fuse_images.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_fuse_depth_images"
+        name="test_fuse_depth_images"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /right_hand_camera/fuse_depth_images/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

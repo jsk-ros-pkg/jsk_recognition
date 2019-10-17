@@ -1,0 +1,21 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_perception)/sample/include/play_rosbag_people.xml"/>
+
+  <node name="delay_pointcloud"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/DelayPointCloud">
+    <remap from="~input" to="camera/depth_registered/points"/>
+    <rosparam>
+      delay_time: 1.0
+      queue_size: 100
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_delay_pointcloud.rviz"/>
+  </group>
+</launch>

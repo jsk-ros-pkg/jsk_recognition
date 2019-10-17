@@ -1,0 +1,17 @@
+<launch>
+  <include file="$(find jsk_recognition_msgs)/sample/sample_object_array_publisher.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_object_array_publisher"
+        name="test_object_array_publisher"
+        pkg="rostest" type="hztest"
+        time-limit="10" retry="3">
+    <rosparam>
+      topic: /object_array_publisher/output
+      hz: 1.0
+      hzerror: 0.5
+      test_duration: 5.0
+    </rosparam>
+  </test>
+</launch>

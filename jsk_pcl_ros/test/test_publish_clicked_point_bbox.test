@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_publish_clicked_point_bbox.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_publish_clicked_point_bbox"
+        name="test_publish_clicked_point_bbox"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /publish_clicked_point_bbox/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_recognition_utils)/sample/sample_rect_array_to_polygon_array.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_rect_array_to_polygon_array"
+        name="test_rect_array_to_polygon_array"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="60" retry="3">
+    <rosparam>
+      topic_0: /rect_array_to_polygon_array/output
+      timeout_0: 60
+    </rosparam>
+  </test>
+
+</launch>

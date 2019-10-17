@@ -1,0 +1,21 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_multi_plane_extraction.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_multi_plane_extraction"
+        name="test_multi_plane_extraction"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /multi_plane_extraction/output
+      timeout_0: 30
+      topic_1: /multi_plane_extraction/output_nonplane_cloud
+      timeout_1: 30
+      topic_2: /multi_plane_extraction/output/indices
+      timeout_2: 30
+    </rosparam>
+  </test>
+
+</launch>

@@ -1,0 +1,52 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <arg name="PARENT_FRAME" default="/map"/>
+  <arg name="CAMERA_FRAME" default="/head_mount_kinect_rgb_optical_frame"/>
+  <arg name="TRANSFORM" default="5.526 6.230 1.627 0.747 0.387 -0.246 -0.482"/>
+
+  <node name="static_tf_publisher"
+        pkg="tf" type="static_transform_publisher"
+        args="$(arg TRANSFORM) $(arg PARENT_FRAME) $(arg CAMERA_FRAME) 10"/>
+
+  <node name="image_publisher"
+        pkg="image_publisher" type="image_publisher"
+        args="$(find checkerboard_detector)/sample/images/real_world_checkerboard_grid_7x6_size_0.108_unrectified.jpg">
+    <remap from="~image_raw" to="~output/image_raw"/>
+    <remap from="~camera_info" to="~output/camera_info"/>
+    <rosparam subst_value="true">
+      frame_id: $(arg CAMERA_FRAME)
+      publish_rate: 10
+      camera_info_url: file:///$(find checkerboard_detector)/sample/config/kinect_rgb_camera_info.yaml
+    </rosparam>
+  </node>
+
+  <rosparam>
+    display: 0
+    board_type: chess
+    grid0_size_x: 7
+    grid0_size_y: 6
+    rect0_size_x: 0.108
+    rect0_size_y: 0.108
+    queue_size: 10
+  </rosparam>
+
+  <node name="checkerboard_detector"
+        pkg="checkerboard_detector" type="checkerboard_detector">
+    <!-- input -->
+    <remap from="image" to="image_publisher/output/image_raw"/>
+    <remap from="camera_info" to="image_publisher/output/camera_info"/>
+    <!-- output -->
+    <remap from="ObjectDetection" to="~output/ObjectDetection"/>
+    <remap from="objectdetection_pose" to="~output/objectdetection_pose"/>
+    <remap from="corner_point" to="~output/corner_point"/>
+    <remap from="polygons" to="~output/polygons"/>
+    <remap from="debug_image" to="~output/debug_image"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find checkerboard_detector)/sample/config/sample_checkerboard_detector.rviz"/>
+  </group>
+</launch>

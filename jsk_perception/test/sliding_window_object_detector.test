@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_sliding_window_object_detector.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_sliding_window_object_detector"
+        name="test_sliding_window_object_detector"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /sliding_window_object_detector/output/image
+      timeout_0: 30
+      topic_1: /sliding_window_object_detector/output/rects
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

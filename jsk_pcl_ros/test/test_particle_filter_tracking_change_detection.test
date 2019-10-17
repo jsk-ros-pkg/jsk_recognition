@@ -1,0 +1,43 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_particle_filter_tracking.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_particle_filter_tracking"
+        name="test_particle_filter_tracking"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /particle_filter_tracking/track_result
+      timeout_0: 30
+      topic_1: /particle_filter_tracking/track_result_pose
+      timeout_1: 30
+      topic_2: /particle_filter_tracking/particle
+      timeout_2: 30
+      topic_3: /particle_filter_tracking/output/latest_time
+      timeout_3: 30
+      topic_4: /particle_filter_tracking/output/average_time
+      timeout_4: 30
+      topic_5: /particle_filter_tracking/output/rms_angle_error
+      timeout_5: 30
+      topic_6: /particle_filter_tracking/output/rms_distance_error
+      timeout_6: 30
+      topic_7: /particle_filter_tracking/output/velocity
+      timeout_7: 30
+      topic_8: /particle_filter_tracking/output/velocity_norm
+      timeout_8: 30
+      topic_9: /particle_filter_tracking/output/no_move
+      timeout_9: 30
+      topic_10: /particle_filter_tracking/output/no_move_raw
+      timeout_10: 30
+      topic_11: /particle_filter_tracking/output/tracker_status
+      timeout_11: 30
+      topic_12: /tracking_info/text
+      timeout_12: 30
+      topic_13: /tracker_status_info/text
+      timeout_13: 30
+    </rosparam>
+  </test>
+
+</launch>

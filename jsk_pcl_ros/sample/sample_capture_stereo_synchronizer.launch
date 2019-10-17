@@ -1,0 +1,70 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_stereo.xml"/>
+
+  <node name="dummy_pose_publisher"
+        pkg="rostopic" type="rostopic"
+        args="pub -r 30 -s /dummy_pose_publisher/output geometry_msgs/PoseStamped
+              '{header: {stamp: now, frame_id: base},
+                pose: {position: {x: 1.0}, orientation: {w: 1.0}}}'"/>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="mask_image_generator"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/MaskImageGenerator sample_manager">
+    <remap from="~input" to="/right_hand_left_camera/rgb/image_raw"/>
+    <rosparam>
+      offset_x: 150
+      offset_y: 100
+      width: 100
+      height: 100
+    </rosparam>
+  </node>
+
+  <node name="mask_image_to_point_indices"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/MaskImageToPointIndices sample_manager">
+    <remap from="~input" to="mask_image_generator/output"/>
+  </node>
+
+  <!-- Force some topics to synchronize here. -->
+  <node name="topic_ensync"
+        pkg="jsk_pcl_ros" type="sample_topic_ensync_for_capture_stereo_synchronizer.py">
+    <remap from="~input/pose" to="dummy_pose_publisher/output"/>
+    <remap from="~input/mask" to="mask_image_generator/output"/>
+    <remap from="~input/mask_indices" to="mask_image_to_point_indices/output"/>
+    <remap from="~input/left_image" to="/right_hand_left_camera/rgb/image_raw"/>
+    <remap from="~input/left_camera_info" to="/right_hand_left_camera/rgb/camera_info"/>
+    <remap from="~input/right_camera_info" to="/right_hand_right_camera/rgb/camera_info"/>
+    <remap from="~input/disparity" to="right_hand_stereo/disparity"/>
+    <rosparam>
+      rate: 30
+    </rosparam>
+  </node>
+
+  <node name="capture_stereo_synchronizer"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/CaptureStereoSynchronizer sample_manager">
+    <remap from="~input/pose" to="topic_ensync/output/pose"/>
+    <remap from="~input/mask" to="topic_ensync/output/mask"/>
+    <remap from="~input/mask_indices" to="topic_ensync/output/mask_indices"/>
+    <remap from="~input/left_image" to="topic_ensync/output/left_image"/>
+    <remap from="~input/left_camera_info" to="topic_ensync/output/left_camera_info"/>
+    <remap from="~input/right_camera_info" to="topic_ensync/output/right_camera_info"/>
+    <remap from="~input/disparity" to="topic_ensync/output/disparity"/>
+    <rosparam>
+      rotational_bin_size: 0.0
+      positional_bin_size: 0.0
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/capture_stereo_synchronizer.rviz"/>
+  </group>
+</launch>

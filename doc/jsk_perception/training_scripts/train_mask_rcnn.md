@@ -126,3 +126,28 @@ Usage
 ```
 rosrun jsk_perception train_mask_rcnn.py [ARGS]
 ```
+
+
+Sample Output
+-----
+
+There are some pre-trained mask rcnn model on jsk_perception.\
+Getting trained data by build `jsk_perception` or run script [install_trained_data](https://github.com/jsk-ros-pkg/jsk_recognition/blob/master/jsk_perception/scripts/install_trained_data.py)
+
+`73b2 kitchen model` is some of the typical example of pre-trained mask rcnn model on jsk_perception.\
+The results of mask rcnn using `73b2 kitchen model` are as follows.
+
+Click the below image to see more mask rcnn results.
+[![](../../../.readme/gallery_73b2_kitchen_mask_rcnn.jpg)](https://jsk-recognition.readthedocs.io/en/latest/jsk_perception/training_scripts/73b2_kitchen_mask_rcnn_result.html)
+
+
+Sample usage with pre-trained model
+-----
+You can use `73b2 kitchen model` with jsk_perception node.
+```
+roslaunch jsk_perception sample_mask_rcnn_73b2_kitchen.launch
+```
+The result is displayed on the screen as a `/mask_rcnn_73b2_kitchen/output/viz` topic like below image.
+
+[![](result_images/mask_rcnn_73b2_kitchen_sample_result.png)](https://jsk-recognition.readthedocs.io/en/latest/jsk_perception/training_scripts/73b2_kitchen_mask_rcnn_result.html)
+

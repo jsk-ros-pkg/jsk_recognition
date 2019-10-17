@@ -23,7 +23,10 @@ Currently it supports `pcl::PointXYZ` and `pcl::PointXYZRGB` as the input.
    Publish image colorized according to the input cloud.
 * `~output_cloud` (`sensor_msgs/PointCloud2`)
 
-   organized pointcloud.
+   Output pointcloud.
+
+   See `~organize_cloud` parameter.
+
 * `~output_disp` (`sensor_msgs/DisparityImage`)
 
    Publish organized pointcloud as disparity image.
@@ -62,6 +65,14 @@ Currently it supports `pcl::PointXYZ` and `pcl::PointXYZRGB` as the input.
    Queue length of topic subscribers.
    Default is value set for `max_queue_size_`.
 
+* `~fill_value` (float, default: `nan`):
+
+   Initial value of depth image. The pixels where there is no corresponding point
+   are filled by this value.
+
+* `~organize_cloud` (Boolean, default: `False`)
+
+   Whether to organize `~output_cloud` or not.
 
 ## Sample
 

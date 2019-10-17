@@ -1,5 +1,5 @@
 # MultiPlaneExtraction
-![MultiPlaneExtraction](images/multi_plane_extraction.png)
+![](images/multi_plane_extraction.png)
 
 Extract the points above the planes between `~min_height` and `~max_height`.
 
@@ -12,8 +12,11 @@ Extract the points above the planes between `~min_height` and `~max_height`.
 * `~input_coefficients` (`jsk_recognition_msgs/ModelCoefficientsArray`):
 
    The input planes.
-   If `~use_indices` parameter is false, `~indices` is be used.
-   If `~use_coefficients` parameter is false, `~coefficients` is not used. (Instead `~use_sensor_frame` should be enabled in order to determine normal direction of planes.)
+
+   If `~use_indices` parameter is false, `~indices` is used.
+
+   If `~use_coefficients` parameter is false, `~coefficients` is not used.
+   (Instead `~use_sensor_frame` should be enabled in order to determine normal direction of planes.)
 
 ## Publishing Topics
 * `~output` (`sensor_msgs/PointCloud2`):
@@ -27,7 +30,7 @@ Extract the points above the planes between `~min_height` and `~max_height`.
   PointIndices of points which are between `~min_height` and `~max_height`.
 
 ## Parameters
-* `~keep_organized` (Bool, default: `false`)
+* `~keep_organized` (Bool, default: `True`)
 
    Keep organized point cloud or not.
 
@@ -68,10 +71,19 @@ Extract the points above the planes between `~min_height` and `~max_height`.
 
   Normal directions of each planes are computed as followings:
 
-  |                         | use_sensor_frame: false            | use_sensor_frame: true                 |
-  |-------------------------|------------------------------------|----------------------------------------|
-  | use_coefficients: false | PCL computes z-axis internally (it occurs flipping. warning shows up)   | Determine z-axis direction to TF frame |
-  | use_coefficients: true  | Determine z-axis from coefficients topic | N/A (This condition is invalid. ~use_coefficients is disabled in this case. Also warning shows up)                 |
-  
-  Both `~use_sensor_frame` and `~use_coefficients` is disabled by default, which means the normal directions are computed individually on every callback and can be flipped on the continuous time domain.
+  |                             | __use_sensor_frame: false__        | __use_sensor_frame: true__             |
+  |-----------------------------|------------------------------------|----------------------------------------|
+  | __use_coefficients: false__ | PCL computes z-axis internally (it occurs flipping. warning shows up)   | Determine z-axis direction to TF frame |
+  | __use_coefficients: true__  | Determine z-axis from coefficients topic | N/A (This condition is invalid. `~use_coefficients` is disabled in this case. Also warning shows up) |
+
+  Both `~use_sensor_frame` and `~use_coefficients` is disabled by default,
+  which means the normal directions are computed individually on every callback
+  and can be flipped on the continuous time domain.
+
   Generally it's better to set either `~use_sensor_frame` or `~use_coefficients` as `true` for stable detection.
+
+## Sample
+
+```bash
+roslaunch jsk_pcl_ros sample_multi_plane_extraction.launch
+```

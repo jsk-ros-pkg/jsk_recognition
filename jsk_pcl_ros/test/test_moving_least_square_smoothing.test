@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_moving_least_square_smoothing.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_moving_least_square_smoothing"
+        name="test_moving_least_square_smoothing"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /moving_least_square_smoothing/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

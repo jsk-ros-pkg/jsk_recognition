@@ -1,0 +1,24 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="spherical_pointcloud_simulator"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/SphericalPointCloudSimulator">
+    <rosparam>
+      rate: 1.0
+      frame_id: origin
+      r: 3.0
+      min_phi: 0.1
+      max_phi: 3.0
+      scan_range: 4.71
+      scan_num: 300
+      fps: 40.0
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_spherical_pointcloud_simulator.rviz"/>
+  </group>
+</launch>

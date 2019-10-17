@@ -1,0 +1,31 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_particle_filter_tracking.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="target_adaptive_tracking"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/TargetAdaptiveTracking sample_manager">
+    <!-- For initializing -->
+    <remap from="~input_obj_cloud" to="voxel_grid_reference/output"/>
+    <remap from="~input_bkgd_cloud" to="voxel_grid_target/output"/>
+    <remap from="~input_obj_pose" to="particle_filter_tracking/track_result_pose"/>
+    <!-- For tracking -->
+    <remap from="~input_cloud" to="particle_filter_tracking/track_result"/>
+    <remap from="~input_pose" to="particle_filter_tracking/track_result_pose"/>
+    <!-- Output -->
+    <remap from="/selected_pointcloud" to="~selected_pointcloud"/>
+    <rosparam>
+      update_filter_template: true
+      child_frame_id: camera_depth_optical_frame
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/target_adaptive_tracking.rviz"/>
+  </group>
+</launch>

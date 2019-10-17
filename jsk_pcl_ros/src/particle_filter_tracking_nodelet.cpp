@@ -51,7 +51,8 @@ namespace jsk_pcl_ros
   
   void ParticleFilterTracking::onInit(void)
   {
-    pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
+    // Suppress huge amount of error message.
+    pcl::console::setVerbosityLevel(pcl::console::VERBOSITY_LEVEL::L_ALWAYS);
     // not implemented yet
     ConnectionBasedNodelet::onInit();
     

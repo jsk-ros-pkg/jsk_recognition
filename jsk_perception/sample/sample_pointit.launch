@@ -1,0 +1,183 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="static_tf_publisher"
+        pkg="tf" type="static_transform_publisher"
+        args="-0.071 -0.012 1.541 -0.411 0.683 -0.519 0.307
+              /base_footprint /head_mount_kinect_rgb_optical_frame 10"/>
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/human_pointing_at_laptop.jpg
+      frame_id: head_mount_kinect_rgb_optical_frame
+      fovx: 62.0
+      fovy: 48.6
+    </rosparam>
+  </node>
+
+  <!-- Note: Boxes below are recorded mainly by using          -->
+  <!--       jsk_perception/mask_rcnn_instance_segmentation.py -->
+  <!--       and jsk_pcl/ClusterPointIndicesDecomposer         -->
+  <node name="bounding_box_array_publisher"
+        pkg="jsk_recognition_utils" type="bounding_box_array_publisher.py">
+    <rosparam>
+      frame_id: base_footprint
+      boxes:
+        - position: [5.04022121429, -0.416285872459, 0.780527234077]
+          dimension: [6.90143013, 2.29380679131, 1.67340159416]
+        - position: [1.29157757759, -1.51638650894, 0.369486153126]
+          dimension: [1.45630073547, 0.576508939266, 0.814463734627]
+        - position: [2.68149781227, -2.11086440086, 0.661145567894]
+          dimension: [1.08191037178, 0.545619189739, 0.512296438217]
+        - position: [2.49405550957, -0.760844230652, 0.414580613375]
+          dimension: [2.28678607941, 0.443403691053, 0.840670883656]
+        - position: [2.42722415924, -1.98393440247, 0.412786275148]
+          dimension: [3.26594591141, 1.42334866524, 0.847765266895]
+        - position: [2.33323812485, -1.26017129421, 0.581514835358]
+          dimension: [2.08685541153, 0.498961925507, 0.536869704723]
+    </rosparam>
+  </node>
+
+  <!-- Note: Human Pose below are recorded by using      -->
+  <!--       jsk_perception/people_pose_estimation_2d.py -->
+  <node name="people_pose_array_publisher"
+        pkg="rostopic" type="rostopic"
+        args="pub -r 1 -s /people_pose_array_publisher/output
+              jsk_recognition_msgs/PeoplePoseArray
+              &quot;
+              {'header': {'frame_id': 'head_mount_kinect_rgb_optical_frame', 'stamp': now},
+               'poses': [{
+                 'limb_names': [
+                   'Nose', 'Neck', 'RShoulder', 'RElbow', 'RWrist', 'LShoulder',
+                   'LElbow','LWrist', 'RHip', 'RKnee', 'RAnkle', 'LHip', 'LKnee',
+                   'LAnkle', 'RHand0', 'RHand1', 'RHand2', 'RHand3', 'RHand4',
+                   'RHand5', 'RHand6', 'RHand7', 'RHand8', 'RHand9', 'RHand10',
+                   'RHand11', 'RHand12', 'RHand13', 'RHand14', 'RHand15',
+                   'RHand16', 'RHand17', 'RHand18', 'RHand19', 'RHand20',
+                   'LHand0', 'LHand1', 'LHand2', 'LHand3', 'LHand4', 'LHand5',
+                   'LHand6', 'LHand9', 'LHand10', 'LHand13', 'LHand14',
+                   'LHand17', 'LHand18', 'LHand19', 'LHand20'
+                 ],
+                 'poses': [
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.189994009124, 'y': -0.493649531972, 'z': 1.71500003338}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.392671825813, 'y': -0.478412722187, 'z': 1.67300009727}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.500197698492, 'y': -0.451048872933, 'z': 1.56700003147}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.805528799393, 'y': -0.378597282068, 'z': 1.56000006199}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.742877813841, 'y': -0.140557345643, 'z': 1.69800007343}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.283767701842, 'y': -0.447278707503, 'z': 1.84300005436}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.212150749733, 'y': -0.22697211893, 'z': 1.91500008106}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.0539159775298, 'y': 0.00385859192723, 'z': 2.05100011826}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.647164486753, 'y': 0.00341271860209, 'z': 1.8140001297}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.682848066227, 'y': 0.401188192498, 'z': 1.90400004387}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.735567979156, 'y': 0.771718385447, 'z': 2.05100011826}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.451819036955, 'y': 0.00362154524995, 'z': 1.92500007153}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.487260458382, 'y': 0.355411889569, 'z': 2.07600021362}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.518242326888, 'y': 0.739404813229, 'z': 2.20800018311}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.738933153018, 'y': -0.141006038952, 'z': 1.72300004959}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.713523533607, 'y': -0.145001031875, 'z': 1.73200011253}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.685012299848, 'y': -0.137333698995, 'z': 1.75900006294}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.665328858598, 'y': -0.125366608873, 'z': 1.77700006962}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.645308933064, 'y': -0.111994170594, 'z': 1.77700006962}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.668598688519, 'y': -0.128057844398, 'z': 1.76800012589}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.638635624552, 'y': -0.118680389733, 'z': 1.77700006962}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.611942390506, 'y': -0.111994170594, 'z': 1.77700006962}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.597918305097, 'y': -0.10299768812, 'z': 1.79500007629}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.671800876514, 'y': -0.110859732924, 'z': 1.75900006294}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.635401136954, 'y': -0.0914698888557, 'z': 1.76800012589}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.615279044762, 'y': -0.0819061844639, 'z': 1.77700006962}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.594920404889, 'y': -0.068880852546, 'z': 1.78600013256}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.681507426662, 'y': -0.0971232619831, 'z': 1.75000011921}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.65863942305, 'y': -0.0715128221963, 'z': 1.76800012589}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.638635624552, 'y': -0.0585044174742, 'z': 1.77700006962}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.625102387099, 'y': -0.0487206030204, 'z': 1.78600013256}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.697616851518, 'y': -0.0835222396708, 'z': 1.74100005627}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.692022092644, 'y': -0.0618475270442, 'z': 1.77700006962}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.685550074728, 'y': -0.0489661140244, 'z': 1.79500007629}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.678825341043, 'y': -0.0390299120845, 'z': 1.80400013924}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.0394906257545, 'y': -0.0180877837517, 'z': 2.00300002098}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.0363717838027, 'y': 0.0122752508918, 'z': 2.03900003433}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.0210573485173, 'y': 0.0544714258324, 'z': 2.03900003433}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.00577671187819, 'y': 0.0818021488573, 'z': 2.05100011826}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': -0.00192557062606, 'y': 0.0972365165663, 'z': 2.05100011826}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': 0.0211812768867, 'y': 0.0509334134395, 'z': 2.05100011826}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': 0.0414227691603, 'y': 0.0758910325328, 'z': 2.10100007057}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': 0.0211812768867, 'y': 0.0509334134395, 'z': 2.05100011826}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': 0.0411664643269, 'y': 0.0793496548489, 'z': 2.08800005913}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': 0.0173301356346, 'y': 0.0470748215122, 'z': 2.05100011826}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': 0.03313371117, 'y': 0.0710823779138, 'z': 2.07600021362}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': 0.00962785313032, 'y': 0.0470748215122, 'z': 2.05100011826}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': 0.025178878939, 'y': 0.0667560887533, 'z': 2.06300020218}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': 0.0175413765018, 'y': 0.0749880030738, 'z': 2.07600021362}},
+                   {'orientation': {'w': 1.0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+                    'position': {'x': 0.00974520916765, 'y': 0.0788936282339, 'z': 2.07600021362}}
+                   ]}]}
+                   &quot;"/>
+
+  <node name="pointit"
+        pkg="jsk_perception" type="pointit.py">
+    <remap from="~input" to="people_pose_array_publisher/output"/>
+    <remap from="~input/boxes" to="bounding_box_array_publisher/output"/>
+    <rosparam>
+      use_classification_result: false
+      max_dist_threshold: 1.0
+      min_norm_threshold: 0.0
+      use_tf2_buffer_client: false
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_perception)/sample/config/sample_pointit.rviz"/>
+  </group>
+</launch>

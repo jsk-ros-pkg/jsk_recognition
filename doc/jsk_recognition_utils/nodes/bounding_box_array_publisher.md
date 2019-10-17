@@ -33,6 +33,7 @@ Parameters
     - position: [-0.22, 0.280, 0.361] # required
       rotation: [0, 0, 1.57] # optional
       dimension: [0.37, 0.248, 0.218] # required
+      label: 0 # optional
     - position: [-0.22, 0, 0.361]
       dimension: [0.37, 0.306, 0.218]
 </rosparam>

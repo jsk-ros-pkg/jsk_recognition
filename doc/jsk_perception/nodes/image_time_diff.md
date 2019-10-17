@@ -27,24 +27,20 @@ Image is stored when start msgs is subscribed.
 * `~output/diff_image` (`sensor_msgs/Image`)
 
 ## Parameters
-* `saturation_threshold` (int, default: `0`)
+* `rate` (Float, default: `10`)
 
-  Threshold of saturation to get diff of hue
+  Comparing rate [Hz].
+
+* `~saturation_threshold` (int, default: `0`)
+
+  Threshold of saturation to get diff of hue.
+
+  This parameter can be changed by `dynamic_reconfigure`.
 
 
 Sample
 ------
 
 ```
-roslaunch jsk_perception image_time_diff.launch
+roslaunch jsk_perception sample_image_time_diff.launch
 ```
-
-and run
-
-```
-rostopic pub -1 /image_time_diff/start std_msgs/Header '{stamp: now}'
-```
-
-
-to start generating diff image
-

@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_mask_image_cluster_filter.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_mask_image_cluster_filter"
+        name="test_mask_image_cluster_filter"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /mask_image_cluster_filter/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

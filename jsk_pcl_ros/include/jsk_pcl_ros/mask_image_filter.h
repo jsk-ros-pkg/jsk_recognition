@@ -60,6 +60,7 @@ namespace jsk_pcl_ros
     virtual void infoCalback(
       const sensor_msgs::CameraInfo::ConstPtr& info_ms);
 
+    bool negative_;
     boost::mutex mutex_;
     ros::Publisher pub_;
     ros::Subscriber sub_cloud_;

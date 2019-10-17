@@ -1,0 +1,32 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_plane_supported_cuboid_estimator.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="extract_cuboid_particles_top_n"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ExtractCuboidParticlesTopN sample_manager">
+    <remap from="~input" to="plane_supported_cuboid_estimator/output/particles"/>
+    <rosparam>
+      top_n_ratio: 0.2
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="extract_indices"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/ExtractIndices sample_manager">
+      <remap from="~input" to="plane_supported_cuboid_estimator/output/particles"/>
+      <remap from="~indices" to="extract_cuboid_particles_top_n/output"/>
+      <rosparam>
+        keep_organized: true
+      </rosparam>
+    </node>
+
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/extract_cuboid_particles_top_n.rviz"/>
+  </group>
+</launch>

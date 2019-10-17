@@ -15,7 +15,7 @@ Subscribing Topics
 
 - ``~input`` (``sensor_msgs/PointCloud2``)
 
-  Input point cloud. (``PointXYZRGB``)
+  Input point cloud. (point type is ``pcl::PointXYZRGB``)
 
 
 Publishing Topics
@@ -23,7 +23,11 @@ Publishing Topics
 
 - ``~output`` (``sensor_msgs/PointCloud2``)
 
-  Output normals.
+  Output normals. (point type is ``pcl::Normal``)
+
+- ``~output_with_xyz`` (``sensor_msgs/PointCloud2``)
+
+  Output point cloud with normal field. (point type is ``pcl::PointXYZRGBNormal``)
 
 
 Parameters
@@ -52,3 +56,13 @@ Parameters
 - ``border_policy_ignore`` (Boolean, default: true)
 
   Ignore border policy.
+
+Parameters above can be changed by ``dynamic_reconfigure``.
+
+
+Sample
+------
+
+.. code-block:: bash
+
+  roslaunch jsk_pcl_ros sample_normal_estimation_integral_image.launch

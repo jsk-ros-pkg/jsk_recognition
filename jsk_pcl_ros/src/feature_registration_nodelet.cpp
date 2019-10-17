@@ -104,6 +104,7 @@ namespace jsk_pcl_ros
     similarity_threshold_ = config.similarity_threshold;
     max_correspondence_distance_ = config.max_correspondence_distance;
     inlier_fraction_ = config.inlier_fraction;
+    transformation_epsilon_ = config.transformation_epsilon;
   }
   
   void FeatureRegistration::estimate(
@@ -141,6 +142,8 @@ namespace jsk_pcl_ros
     align.setSimilarityThreshold(similarity_threshold_); // Polygonal edge length similarity threshold
     align.setMaxCorrespondenceDistance(max_correspondence_distance_); // Inlier threshold
     align.setInlierFraction(inlier_fraction_); // Required inlier fraction for accepting a pose hypothesis
+    // Maximum allowable difference between two consecutive transformations
+    align.setTransformationEpsilon(transformation_epsilon_);
     align.align (*object_aligned);
   
     if (align.hasConverged ())

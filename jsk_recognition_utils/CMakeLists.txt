@@ -106,6 +106,13 @@ if (CATKIN_ENABLE_TESTING)
     # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
     add_rostest(sample/sample_add_bounding_box_array.launch ARGS gui:=false)
     add_rostest(sample/sample_bounding_box_array_publisher.launch ARGS gui:=false)
+    add_rostest(test/add_cluster_indices.test)
+    add_rostest(test/image_16uc1_to_32fc1.test)
+    add_rostest(test/polygon_array_publisher.test)
+    add_rostest(test/polygon_array_to_polygon.test)
+    add_rostest(test/pose_array_to_pose.test)
+    add_rostest(test/rect_array_to_polygon_array.test)
+    add_rostest(test/static_virtual_camera.test)
   endif()
 endif()
 

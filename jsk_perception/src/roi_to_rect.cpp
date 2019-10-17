@@ -65,13 +65,19 @@ namespace jsk_perception
     vital_checker_->poke();
     geometry_msgs::PolygonStamped rect;
     rect.header = roi_msg->header;
-    geometry_msgs::Point32 min_pt, max_pt;
-    min_pt.x = roi_msg->roi.x_offset;
-    min_pt.y = roi_msg->roi.y_offset;
-    max_pt.x = roi_msg->roi.x_offset + roi_msg->roi.width;
-    max_pt.y = roi_msg->roi.y_offset + roi_msg->roi.height;
-    rect.polygon.points.push_back(min_pt);
-    rect.polygon.points.push_back(max_pt);
+    geometry_msgs::Point32 top_left_pt, top_right_pt, bottom_left_pt, bottom_right_pt;
+    top_left_pt.x = roi_msg->roi.x_offset;
+    top_left_pt.y = roi_msg->roi.y_offset;
+    top_right_pt.x = roi_msg->roi.x_offset + roi_msg->roi.width;
+    top_right_pt.y = roi_msg->roi.y_offset;
+    bottom_left_pt.x = roi_msg->roi.x_offset;
+    bottom_left_pt.y = roi_msg->roi.y_offset + roi_msg->roi.height;
+    bottom_right_pt.x = roi_msg->roi.x_offset + roi_msg->roi.width;
+    bottom_right_pt.y = roi_msg->roi.y_offset + roi_msg->roi.height;
+    rect.polygon.points.push_back(top_left_pt);
+    rect.polygon.points.push_back(bottom_left_pt);
+    rect.polygon.points.push_back(bottom_right_pt);
+    rect.polygon.points.push_back(top_right_pt);
     pub_.publish(rect);
   }
 }

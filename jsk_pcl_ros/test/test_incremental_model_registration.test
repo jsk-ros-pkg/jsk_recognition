@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_incremental_model_registration.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_incremental_model_registration"
+        name="test_incremental_model_registration"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /incremental_model_registration/output/non_registered
+      timeout_0: 30
+      topic_1: /incremental_model_registration/output/registered
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

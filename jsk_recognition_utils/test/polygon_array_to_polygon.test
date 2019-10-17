@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_recognition_utils)/sample/sample_polygon_array_to_polygon.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_polygon_array_to_polygon"
+        name="test_polygon_array_to_polygon"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="60" retry="3">
+    <rosparam>
+      topic_0: /polygon_array_to_polygon/output
+      timeout_0: 60
+    </rosparam>
+  </test>
+
+</launch>

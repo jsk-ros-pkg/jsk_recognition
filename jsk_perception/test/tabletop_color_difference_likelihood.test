@@ -1,0 +1,21 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_tabletop_color_difference_likelihood.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_tabletop_color_difference_likelihood"
+        name="test_tabletop_color_difference_likelihood"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /tabletop_color_difference_likelihood/output
+      timeout_0: 30
+      topic_1: /tabletop_color_difference_likelihood/debug/histogram_image
+      timeout_1: 30
+      topic_2: /tabletop_color_difference_likelihood/debug/polygon_image
+      timeout_2: 30
+    </rosparam>
+  </test>
+
+</launch>

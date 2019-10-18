@@ -44,7 +44,6 @@ namespace jsk_pcl_ros_utils
   void MaskImageToDepthConsideredMaskImage::onInit()
   {
     DiagnosticNodelet::onInit();
-    pnh_->param("approximate_sync", approximate_sync_, false);
     pub_ = advertise<sensor_msgs::Image>(*pnh_, "output", 1);
     applypub_ = advertise<sensor_msgs::Image>(*pnh_, "applyoutput", 1);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
@@ -66,6 +65,16 @@ namespace jsk_pcl_ros_utils
     extract_num_ = config.extract_num;
     use_mask_region_ = config.use_mask_region;
     in_the_order_of_depth_ = config.in_the_order_of_depth;
+
+    if (approximate_sync_ != config.approximate_sync ||
+        queue_size_ != config.queue_size) {
+      approximate_sync_ = config.approximate_sync;
+      queue_size_ = config.queue_size;
+      if (isSubscribed()) {
+        unsubscribe();
+        subscribe();
+      }
+    }
   }
 
 
@@ -110,15 +119,15 @@ namespace jsk_pcl_ros_utils
     sub_input_.subscribe(*pnh_, "input", 1);
     sub_image_.subscribe(*pnh_, "input/image", 1);
     if (approximate_sync_) {
-      async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(100);
+      async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
       async_->connectInput(sub_input_, sub_image_);
       async_->registerCallback(boost::bind(&MaskImageToDepthConsideredMaskImage::extractmask, this, _1, _2));
     }
     else {
-      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
       sync_->connectInput(sub_input_, sub_image_);
       sync_->registerCallback(boost::bind(&MaskImageToDepthConsideredMaskImage::extractmask,
-					  this, _1, _2));
+                                          this, _1, _2));
     }
   }
   
@@ -177,7 +186,7 @@ namespace jsk_pcl_ros_utils
           }
         }
         else {
-          ROS_INFO("directed region width:%d height:%d", region_width_, region_height_);
+          NODELET_DEBUG("directed region width:%d height:%d", region_width_, region_height_);
           //set nan_point to all points first.
           for (size_t j = 0; j < mask.rows; j++) {
             for (size_t i = 0; i < mask.cols; i++) {
@@ -203,10 +212,10 @@ namespace jsk_pcl_ros_utils
           pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
           kdtree.setInputCloud(edge_cloud);
           pcl::PointXYZ zero;
-          std::vector<int> near_indices;
-          std::vector<float> near_distances;
+          std::vector<int> near_indices(extract_num_);
+          std::vector<float> near_distances(extract_num_);
           kdtree.nearestKSearch(zero, extract_num_, near_indices, near_distances);
-          ROS_INFO("directed num of extract points:%d   num of nearestKSearch points:%d", extract_num_, ((int) near_indices.size()));
+          NODELET_DEBUG("directed num of extract points:%d   num of nearestKSearch points:%d", extract_num_, ((int) near_indices.size()));
           int ext_num=std::min(extract_num_, ((int) near_indices.size()));
           for (int idx = 0; idx < ext_num; idx++) {
             int x = near_indices.at(idx) % width;
@@ -225,7 +234,7 @@ namespace jsk_pcl_ros_utils
             int min_y = region_y_off_;
             int max_x = region_width_ + region_x_off_ -1;
             int max_y = region_height_ + region_y_off_ -1;
-            NODELET_INFO("minx:%d miny:%d maxx:%d maxy:%d", min_x, min_y, max_x, max_y);
+            NODELET_DEBUG("minx:%d miny:%d maxx:%d maxy:%d", min_x, min_y, max_x, max_y);
             cv::Rect region = cv::Rect(min_x, min_y, std::max(max_x - min_x, 0), std::max(max_y - min_y, 0));
             cv::Mat clipped_mask_image = mask_image(region);
             cv_bridge::CvImage clipped_mask_bridge(point_cloud2_msg->header,

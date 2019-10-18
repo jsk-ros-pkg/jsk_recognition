@@ -138,6 +138,7 @@ Deprecated packages
 * [cr\_capture](https://github.com/jsk-ros-pkg/jsk_recognition/tree/master/cr_capture)
 * [orbit\_pantilt](https://github.com/jsk-ros-pkg/jsk_recognition/tree/master/orbit_pantilt)
 * [posedetectiondb](https://github.com/jsk-ros-pkg/jsk_recognition/tree/master/posedetectiondb)
+* [jsk\_libfreenect2](https://github.com/jsk-ros-pkg/jsk_recognition/tree/master/jsk_libfreenect2)
 '''
 
 

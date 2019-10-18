@@ -109,7 +109,7 @@ jsk\_recognition
 
 [![GitHub version](https://badge.fury.io/gh/jsk-ros-pkg%2Fjsk_recognition.svg)](https://badge.fury.io/gh/jsk-ros-pkg%2Fjsk_recognition)
 [![Build Status](https://travis-ci.org/jsk-ros-pkg/jsk_recognition.svg)](https://travis-ci.org/jsk-ros-pkg/jsk_recognition)
-[![Read the Docs](https://readthedocs.org/projects/jsk-docs/badge/?version=latest)](http://jsk-docs.readthedocs.org/en/latest/jsk_recognition/doc/index.html)
+[![Read the Docs](https://readthedocs.org/projects/jsk-recognition/badge/?version=latest)](https://jsk-docs.readthedocs.io/projects/jsk_recognition/en/latest/)
 
 jsk_recognition is a stack for the perception packages which are used in JSK lab.
 

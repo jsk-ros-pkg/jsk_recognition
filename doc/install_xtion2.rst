@@ -29,10 +29,7 @@ Install SDK && Try Sample
 
   # Download SDK.zip from https://www.asus.com/3D-Sensor/Xtion-2/HelpDesk_Download/
   cd ~/Downloads
-  unzip SDK.zip
-  cd SDK/Linux
-
-  tar zxvf ASUS-Linux-x64-OpenNI2.2.tar.gz
+  tar xf ASUS-Linux-x64-OpenNI2.2.tar.gz
   cd ASUS-Linux-x64-OpenNI2.2/
 
   sudo apt-get install ros-indigo-openni2-launch ros-indigo-openni2-camera libopenni2-dev

@@ -1,5 +1,5 @@
 Install Structure core Camera
-====================
+=============================
 
 - Homepage: https://structure.io/structure-core
 

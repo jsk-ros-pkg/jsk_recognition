@@ -32,7 +32,7 @@ Install SDK && Try Sample
   tar xf ASUS-Linux-x64-OpenNI2.2.tar.gz
   cd ASUS-Linux-x64-OpenNI2.2/
 
-  sudo apt-get install ros-indigo-openni2-launch ros-indigo-openni2-camera libopenni2-dev
+  sudo apt-get install ros-kinetic-openni2-launch ros-kinetic-openni2-camera libopenni2-dev
   sudo ./install.sh
   # you need to copy libSenDuck.so by manual
   sudo cp ASUS/Xtion2/lib/libSenDuck.so /usr/lib/OpenNI2/Drivers/
@@ -46,11 +46,11 @@ Use Xtion2 camera with ``openni2_camera`` ROS package
 
 .. code-block:: bash
 
-  cd ~/ros/indigo/src
+  cd ~/ros/kinetic/src
   wstool set ros-drivers/openni2_camera https://github.com/ros-drivers/openni2_camera.git --git -v 0.2.8 -y -u
 
-  source /opt/ros/indigo/setup.bash
+  source /opt/ros/kinetic/setup.bash
   catkin b
 
-  source ~/ros/indigo/devel/setup.bash
+  source ~/ros/kinetic/devel/setup.bash
   roslaunch openni2_launch openni2.launch

@@ -7,10 +7,10 @@ Install SDK && Try Sample
 -------------------------
 
 - Join the Developer Program and Download SDK (Cross-Platform)
-  + https://developer.structure.io/sdk
+- https://developer.structure.io/sdk
 
 .. code-block:: bash
-  
+
   # Download SDK to ~/Downloads
   cd ~/Downloads
   unzip StructureSDK-CrossPlatform-0.7.2.zip

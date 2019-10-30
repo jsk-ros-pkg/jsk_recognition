@@ -126,6 +126,7 @@ namespace jsk_pcl_ros
     boost::mutex::scoped_lock(mutex_);
     max_size_ = config.max_size;
     min_size_ = config.min_size;
+    use_pca_ = config.use_pca;
   }
 
   void ClusterPointIndicesDecomposer::subscribe()

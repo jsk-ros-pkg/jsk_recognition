@@ -552,10 +552,10 @@ namespace jsk_pcl_ros
       center_pose_msg.position.x = center[0];
       center_pose_msg.position.y = center[1];
       center_pose_msg.position.z = center[2];
-      center_pose_msg.orientation.x = 0;
-      center_pose_msg.orientation.y = 0;
-      center_pose_msg.orientation.z = 0;
-      center_pose_msg.orientation.w = 1;
+      center_pose_msg.orientation.x = q.x();
+      center_pose_msg.orientation.y = q.y();
+      center_pose_msg.orientation.z = q.z();
+      center_pose_msg.orientation.w = q.w();
     }
     else {
       // set invalid pose for invalid center

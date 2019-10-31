@@ -519,14 +519,16 @@ namespace jsk_pcl_ros
           m4.block<3, 3>(0, 0) = eigen_vectors_pca;
           q = eigen_vectors_pca;
           q.normalize();
+          is_center_valid = pcl::compute3DCentroid(*segmented_cloud_transformed, center) != 0;
+          center = m4 * center;
         } else {
           NODELET_ERROR("Too small indices for PCA computation");
           segmented_cloud_transformed = segmented_cloud;
         }
       } else {
         segmented_cloud_transformed = segmented_cloud;
+        is_center_valid = pcl::compute3DCentroid(*segmented_cloud_transformed, center) != 0;
       }
-      is_center_valid = pcl::compute3DCentroid(*segmented_cloud_transformed, center) != 0;
     }
       
     // create a bounding box

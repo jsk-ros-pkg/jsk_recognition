@@ -502,7 +502,30 @@ namespace jsk_pcl_ros
       }
     }
     else {
-      segmented_cloud_transformed = segmented_cloud;
+      if (use_pca_) {
+        if (segmented_cloud->points.size() >= 3) {
+          Eigen::Vector4f pca_centroid;
+          pcl::compute3DCentroid(*segmented_cloud, pca_centroid);
+          Eigen::Matrix3f covariance;
+          pcl::computeCovarianceMatrixNormalized(*segmented_cloud, pca_centroid, covariance);
+          Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eigen_solver(covariance, Eigen::ComputeEigenvectors);
+          Eigen::Matrix3f eigen_vectors_pca = eigen_solver.eigenvectors();
+          /// This line is necessary for proper orientation in some cases. The numbers come out the same without it, but
+          eigen_vectors_pca.col(2) = eigen_vectors_pca.col(0).cross(eigen_vectors_pca.col(1));
+          // Transform the original cloud to the origin where the principal components correspond to the axes.
+          Eigen::Matrix4f projection_transform(Eigen::Matrix4f::Identity());
+          projection_transform.block<3,3>(0,0) = eigen_vectors_pca.transpose();
+          pcl::transformPointCloud(*segmented_cloud, *segmented_cloud_transformed, projection_transform);
+          m4.block<3, 3>(0, 0) = eigen_vectors_pca;
+          q = eigen_vectors_pca;
+          q.normalize();
+        } else {
+          NODELET_ERROR("Too small indices for PCA computation");
+          segmented_cloud_transformed = segmented_cloud;
+        }
+      } else {
+        segmented_cloud_transformed = segmented_cloud;
+      }
       is_center_valid = pcl::compute3DCentroid(*segmented_cloud_transformed, center) != 0;
     }
       

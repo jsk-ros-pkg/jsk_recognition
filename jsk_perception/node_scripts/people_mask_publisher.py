@@ -224,7 +224,8 @@ class PeopleMaskPublisher(ConnectionBasedTransport):
             width = int(width)
             height = int(height)
 
-            mask_img[y:y + height, x:x + width] = True
+            mask_img[max(y, 0):max(min(y + height, img.shape[0]), 0),
+                     max(x, 0):max(min(x + width, img.shape[1]), 0)] = True
             cv2.rectangle(img, (x, y), (x + width, y + height),
                           color, rectangle_thickness)
         return mask_img, img

@@ -510,7 +510,8 @@ namespace jsk_pcl_ros
           pcl::computeCovarianceMatrixNormalized(*segmented_cloud, pca_centroid, covariance);
           Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eigen_solver(covariance, Eigen::ComputeEigenvectors);
           Eigen::Matrix3f eigen_vectors_pca = eigen_solver.eigenvectors();
-          /// This line is necessary for proper orientation in some cases. The numbers come out the same without it, but
+          // This line is necessary for proper orientation in some cases. The numbers come out the same without it, but
+          // the signs are different and the box doesn't get correctly oriented in some cases.
           eigen_vectors_pca.col(2) = eigen_vectors_pca.col(0).cross(eigen_vectors_pca.col(1));
           // Transform the original cloud to the origin where the principal components correspond to the axes.
           Eigen::Matrix4f projection_transform(Eigen::Matrix4f::Identity());

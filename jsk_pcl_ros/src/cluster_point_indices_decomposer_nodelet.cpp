@@ -513,6 +513,12 @@ namespace jsk_pcl_ros
           // This line is necessary for proper orientation in some cases. The numbers come out the same without it, but
           // the signs are different and the box doesn't get correctly oriented in some cases.
           eigen_vectors_pca.col(2) = eigen_vectors_pca.col(0).cross(eigen_vectors_pca.col(1));
+          // Rotate with respect to y-axis to make x-axis the first principal component
+          eigen_vectors_pca = eigen_vectors_pca * Eigen::AngleAxisf(M_PI / 2.0, Eigen::Vector3f::UnitY());
+          // Rotate around x
+          if (eigen_vectors_pca.col(2).dot(Eigen::Vector3f::UnitZ()) < 0) {
+            eigen_vectors_pca = eigen_vectors_pca * Eigen::AngleAxisf(M_PI, Eigen::Vector3f::UnitX());
+          }
           // Transform the original cloud to the origin where the principal components correspond to the axes.
           Eigen::Matrix4f projection_transform(Eigen::Matrix4f::Identity());
           projection_transform.block<3,3>(0,0) = eigen_vectors_pca.transpose();

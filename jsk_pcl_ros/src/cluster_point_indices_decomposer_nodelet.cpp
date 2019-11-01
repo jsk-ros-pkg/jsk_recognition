@@ -101,7 +101,6 @@ namespace jsk_pcl_ros
     } else if (pnh_->hasParam("target_frame_id")) {
       NODELET_WARN("Rosparam ~target_frame_id is used only with ~align_boxes:=true and ~align_boxes_with_plane:=true, so ignoring it.");
     }
-    pnh_->param("use_pca", use_pca_, false);
     pnh_->param("force_to_flip_z_axis", force_to_flip_z_axis_, true);
     pnh_->param<std::string>("sort_by", sort_by_, "input_indices");
     // dynamic_reconfigure

@@ -801,7 +801,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         left, right = cx - int(width / 2), cx + int(width / 2)
         top, bottom = cy - int(width / 2), cy + int(width / 2)
         imh, imw, imc = img.shape
-        cropped = img[max(0, top):min(imh, bottom), max(0, left):min(imw, right)]
+        cropped = img[max(0, top):max(min(imh, bottom), 0), max(0, left):max(min(imw, right), 0)]
         ch, cw = cropped.shape[:2]
         bx, by = max(0, -left), max(0, -top)
         padded = np.zeros((bottom - top, right - left, imc), dtype=np.uint8)

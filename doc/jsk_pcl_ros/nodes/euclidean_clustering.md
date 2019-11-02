@@ -12,7 +12,12 @@ tries to track the segment.
 ## Subscribing Topics
 * `~input` (`sensor_msgs/PointCloud2`):
 
-   input pointcloud.
+   input pointcloud. If `multi` is `talse`, this input is only enough.
+
+
+* `~input/indices` (`jsk_recognition_msgs/ClusterPointIndices`):
+
+   input indices. If `multi` is `true`, synchronized `~input` and `~input/indices` are used.
 
 ## Publishing Topics
 * `~output` (`jsk_recognition_msgs/ClusterPointIndices`):
@@ -47,6 +52,29 @@ sensor_msgs/PointCloud2[] output
 * `~min_size` (Integer, default: `20`)
 
    The minimum number of the points of one cluster.
+
+* `~multi` (Boolean, default: `false`)
+
+   Flag of multi euclidean clustering. If `~multi` is `true`, synchronized `~input` and `~input/indices` are used.
+
+* `~approximate_sync` (Boolean, default: `False`):
+
+   Policy of synchronization, if `false` it synchornizes exactly, else approximately.
+   This value is only valid in case of `~multi` is `true`.
+
+* `~queue_size` (Int, default: `1`):
+
+   Queue size of topic msgs.
+
+* `~downsample_enable` (Boolean, default: `false`)
+
+   Flag of VoxelGrid downsampling. If `~downsample_enable` is `true`, `~input` is downsampled.
+
+* `~leaf_size` (Double, default: `0.01`)
+
+   Leaf size of voxel grid downsampling.
+   This value is only valid in case of `~downsample_enable` is `true`.
+
 
 ## Sample
 Plug the depth sensor which can be launched by openni.launch and run the below command.

@@ -42,6 +42,16 @@ def main():
     )
 
     download_data(
+        path='sample/data/2019-11-03-hsr-multi-objects-in-shelf.bag',
+        url='https://drive.google.com/uc?id=1RvpUWnPJogYw_n7IRfmt6ONpUD1ZETus',
+        md5='e913a5e7426addff615cc41664d22f73',
+        extract=False,
+        compressed_bags=[
+            'sample/data/2019-11-03-hsr-multi-objects-in-shelf.bag',  # NOQA
+        ],
+    )
+
+    download_data(
         path='sample/data/drill.pcd',
         url='http://www.jsk.t.u-tokyo.ac.jp/~ueda/dataset/2015/02/drill.pcd',
         md5='b6ea8f7bd97fd1e88fb6af2f6cd42ac5',

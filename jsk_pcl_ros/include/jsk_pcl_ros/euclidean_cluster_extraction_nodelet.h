@@ -51,6 +51,7 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/segmentation/extract_clusters.h>
 #include <pcl/filters/extract_indices.h>
+#include <pcl/filters/voxel_grid.h>
 #include <pcl/common/centroid.h>
 
 #include "jsk_recognition_msgs/ClusterPointIndices.h"
@@ -70,6 +71,14 @@ namespace jsk_pcl_ros
   class EuclideanClustering : public jsk_topic_tools::DiagnosticNodelet
   {
   public:
+    typedef message_filters::sync_policies::ExactTime<
+      jsk_recognition_msgs::ClusterPointIndices,
+      sensor_msgs::PointCloud2> SyncPolicy;
+
+    typedef message_filters::sync_policies::ApproximateTime<
+      jsk_recognition_msgs::ClusterPointIndices,
+      sensor_msgs::PointCloud2> ApproximateSyncPolicy;
+
     typedef jsk_pcl_ros::EuclideanClusteringConfig Config;
     typedef std::vector<Eigen::Vector4f,
                         Eigen::aligned_allocator<Eigen::Vector4f> >
@@ -84,22 +93,42 @@ namespace jsk_pcl_ros
     ros::Subscriber sub_input_;
     ros::Publisher cluster_num_pub_;
 
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
+    boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> > async_;
+
+    message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_cluster_indices_;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> sub_point_cloud_;
+
     ros::ServiceServer service_;
 
     double tolerance;
     double label_tracking_tolerance;
     int minsize_;
     int maxsize_;
+    bool downsample_;
+    double leaf_size_;
+    bool multi_;
+    bool approximate_sync_;
+    int queue_size_;
+
+    std::vector<std::vector<int> > downsample_to_original_indices_;
+    std::vector<int> original_to_downsample_indices_;
     
     jsk_topic_tools::TimeAccumulator segmentation_acc_;
     jsk_topic_tools::TimeAccumulator kdtree_acc_;
     jsk_recognition_utils::Counter cluster_counter_;
-    
+
     // the list of COGs of each cluster
     Vector4fVector cogs_;
     
     virtual void onInit();
     virtual void extract(const sensor_msgs::PointCloud2ConstPtr &input);
+    virtual void multi_extract(const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& cluster_indices,
+                               const sensor_msgs::PointCloud2::ConstPtr& input);
+    virtual void clusteringClusterIndices(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
+                                          std::vector<pcl::PointIndices::Ptr> &cluster_indices,
+                                          std::vector<pcl::PointIndices> &clustered_indices,
+                                          bool keep_whole_cluster);
     bool serviceCallback(jsk_recognition_msgs::EuclideanSegment::Request &req,
                          jsk_recognition_msgs::EuclideanSegment::Response &res);
     virtual void updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat);
@@ -122,6 +151,8 @@ namespace jsk_pcl_ros
     computeCentroidsOfClusters(Vector4fVector& ret,
                                pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
                                std::vector<pcl::PointIndices> cluster_indices);
+    virtual void removeDuplicatedIndices(pcl::PointIndices::Ptr indices);
+
 
     virtual void subscribe();
     virtual void unsubscribe();

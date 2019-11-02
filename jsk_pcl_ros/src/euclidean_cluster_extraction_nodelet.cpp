@@ -42,109 +42,269 @@ using namespace pcl;
 namespace jsk_pcl_ros
 {
 
+  void EuclideanClustering::clusteringClusterIndices(
+    pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
+    std::vector<pcl::PointIndices::Ptr> &cluster_indices,
+    std::vector<pcl::PointIndices> &clustered_indices,
+    bool keep_whole_cluster) {
+
+    boost::mutex::scoped_lock lock(mutex_);
+
+    clustered_indices.clear();
+
+    pcl::VoxelGrid<pcl::PointXYZ> voxel;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr voxel_cloud(
+      new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr preprocessed_cloud;
+    if (downsample_) {
+      voxel.setLeafSize(leaf_size_, leaf_size_, leaf_size_);
+      voxel.setSaveLeafLayout(true);
+      voxel.setInputCloud(cloud);
+      voxel.filter(*voxel_cloud);
+      preprocessed_cloud = voxel_cloud;
+      downsample_to_original_indices_.resize(cloud->points.size());
+      original_to_downsample_indices_.resize(cloud->points.size());
+      std::fill(original_to_downsample_indices_.begin(),
+                original_to_downsample_indices_.end(),
+                -1);
+      std::fill(downsample_to_original_indices_.begin(),
+                downsample_to_original_indices_.end(),
+                std::vector<int>());
+      for (size_t i = 0; i < cloud->points.size(); ++i) {
+        pcl::PointXYZ p = cloud->points[i];
+        if (std::isnan(p.x) || std::isnan(p.y) || std::isnan(p.z)) {
+          continue;
+        }
+        int index = voxel.getCentroidIndex(p);
+        if (index == -1) {
+          continue;
+        }
+        original_to_downsample_indices_[i] = index;
+        downsample_to_original_indices_[index].push_back(i);
+      }
+    } else {
+      preprocessed_cloud = cloud;
+    }
+
+    if (preprocessed_cloud->points.size() == 0) {
+      return;
+    }
+
+    for(pcl::PointIndices::Ptr point_indices : cluster_indices){
+      pcl::PointIndices::Ptr nonnan_indices (new pcl::PointIndices);
+      for(int original_index : point_indices->indices) {
+        int index;
+        if (downsample_) {
+          index = original_to_downsample_indices_[original_index];
+        } else {
+          index = original_index;
+        }
+        if (index == -1) {
+          continue;
+        }
+
+        pcl::PointXYZ p = preprocessed_cloud->points[index];
+        if (!std::isnan(p.x) && !std::isnan(p.y) && !std::isnan(p.z)) {
+          nonnan_indices->indices.push_back(index);
+        }
+      }
+      removeDuplicatedIndices(nonnan_indices);
+
+      pcl::PointIndices result_point_indices;
+      if (nonnan_indices->indices.size() > 0) {
+        // Create the filtering object
+        pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+        {
+          pcl::ExtractIndices<pcl::PointXYZ> extract;
+          extract.setInputCloud(preprocessed_cloud);
+          extract.setIndices (nonnan_indices);
+          extract.setNegative(false);
+          extract.filter (*filtered_cloud);
+        }
+
+        EuclideanClusterExtraction<pcl::PointXYZ> impl;
+        if (filtered_cloud->points.size() > 0) {
+          jsk_topic_tools::ScopedTimer timer = kdtree_acc_.scopedTimer();
+#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
+          pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
+          tree = boost::make_shared< pcl::search::KdTree<pcl::PointXYZ> > ();
+#else
+          pcl::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::KdTreeFLANN<pcl::PointXYZ>);
+          tree = boost::make_shared<pcl::KdTreeFLANN<pcl::PointXYZ> > ();
+#endif
+          tree->setInputCloud(filtered_cloud);
+          impl.setClusterTolerance(tolerance);
+          impl.setMinClusterSize(minsize_);
+          impl.setMaxClusterSize(maxsize_);
+          impl.setSearchMethod(tree);
+          impl.setInputCloud(filtered_cloud);
+        }
+
+        std::vector<pcl::PointIndices> output_indices;
+        {
+          jsk_topic_tools::ScopedTimer timer = segmentation_acc_.scopedTimer();
+          impl.extract(output_indices);
+          if (downsample_) {
+            for (size_t i = 0; i < output_indices.size(); ++i) {
+              pcl::PointIndices::Ptr tmp_indices(new pcl::PointIndices);
+              for (size_t j = 0; j < output_indices.at(i).indices.size(); ++j) {
+                tmp_indices->indices.insert(
+                  tmp_indices->indices.end(),
+                  downsample_to_original_indices_[nonnan_indices->indices[output_indices.at(i).indices[j]]].begin(),
+                  downsample_to_original_indices_[nonnan_indices->indices[output_indices.at(i).indices[j]]].end());
+              }
+              removeDuplicatedIndices(tmp_indices);
+              output_indices[i] = *tmp_indices;
+            }
+          } else {
+            for (size_t i = 0; i < output_indices.size(); ++i) {
+              pcl::PointIndices tmp_indices;
+              tmp_indices.indices.resize( output_indices.at(i).indices.size());
+              for (size_t j = 0; j < output_indices.at(i).indices.size(); ++j) {
+                tmp_indices.indices[j] = nonnan_indices->indices[output_indices.at(i).indices[j]];
+              }
+              output_indices[i] = tmp_indices;
+            }
+          }
+        }
+        std::vector<int> result_indices;
+        std::vector<int> examine_indices;
+        if (keep_whole_cluster) {
+          for (size_t i_e = 0; i_e < output_indices.size(); ++i_e) {
+            examine_indices.push_back(i_e);
+          }
+        } else {
+          // take maximum size of cluster
+          int size = 0;
+          int index = 0;
+          for(size_t i=0; i < output_indices.size(); i++){
+            if(output_indices[i].indices.size() > size){
+              size = output_indices[i].indices.size();
+              index = i;
+            }
+          }
+          examine_indices.push_back(index);
+        }
+
+        for (int index : examine_indices) {
+          result_point_indices.indices = output_indices.at(index).indices;
+          clustered_indices.push_back(result_point_indices);
+        }
+      } else {
+        clustered_indices.push_back(result_point_indices);
+      }
+    }
+  }
+
   void EuclideanClustering::extract(
     const sensor_msgs::PointCloud2ConstPtr &input)
   {
-    boost::mutex::scoped_lock lock(mutex_);
     vital_checker_->poke();
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud
       (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*input, *cloud);
-    
-    std::vector<pcl::PointIndices> cluster_indices;
-    // list up indices which are not NaN to use
-    // organized pointcloud
-    pcl::PointIndices::Ptr nonnan_indices (new pcl::PointIndices);
-    for (size_t i = 0; i < cloud->points.size(); i++) {
-      pcl::PointXYZ p = cloud->points[i];
-      if (!std::isnan(p.x) && !std::isnan(p.y) && !std::isnan(p.z)) {
-        nonnan_indices->indices.push_back(i);
-      }
-    }
 
-    if (nonnan_indices->indices.size() == 0) {
-      // if input points is 0, publish empty data as result
-      jsk_recognition_msgs::ClusterPointIndices result;
-      result.header = input->header;
-      result_pub_.publish(result);
-      // do nothing and return it
-      jsk_recognition_msgs::Int32Stamped::Ptr cluster_num_msg (new jsk_recognition_msgs::Int32Stamped);
-      cluster_num_msg->header = input->header;
-      cluster_num_msg->data = 0;
-      cluster_num_pub_.publish(cluster_num_msg);
-      return;
+    pcl::PointIndices::Ptr whole_indices(new pcl::PointIndices);
+    whole_indices->indices.resize(input->height * input->width);
+    for (size_t i = 0; i < input->height * input->width; ++i) {
+      whole_indices->indices[i] = i;
     }
-    
-    EuclideanClusterExtraction<pcl::PointXYZ> impl;
-    {
-      jsk_topic_tools::ScopedTimer timer = kdtree_acc_.scopedTimer();
-#if ( PCL_MAJOR_VERSION >= 1 && PCL_MINOR_VERSION >= 5 )
-      pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
-      tree = boost::make_shared< pcl::search::KdTree<pcl::PointXYZ> > ();
-#else
-      pcl::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::KdTreeFLANN<pcl::PointXYZ>);
-      tree = boost::make_shared<pcl::KdTreeFLANN<pcl::PointXYZ> > ();
-#endif
-      tree->setInputCloud (cloud);
-      impl.setClusterTolerance (tolerance);
-      impl.setMinClusterSize (minsize_);
-      impl.setMaxClusterSize (maxsize_);
-      impl.setSearchMethod (tree);
-      impl.setIndices(nonnan_indices);
-      impl.setInputCloud (cloud);
-    }
-    
-    {
-      jsk_topic_tools::ScopedTimer timer = segmentation_acc_.scopedTimer();
-      impl.extract (cluster_indices);
-    }
-    
+    std::vector<pcl::PointIndices::Ptr> cluster_indices{whole_indices};
+    std::vector<pcl::PointIndices> clustered_indices;
+    clusteringClusterIndices(cloud,
+                             cluster_indices,
+                             clustered_indices,
+                             true);
+
     // Publish result indices
     jsk_recognition_msgs::ClusterPointIndices result;
-    result.cluster_indices.resize(cluster_indices.size());
-    cluster_counter_.add(cluster_indices.size());
+    result.cluster_indices.resize(clustered_indices.size());
+    cluster_counter_.add(clustered_indices.size());
     result.header = input->header;
-    if (cogs_.size() != 0 && cogs_.size() == cluster_indices.size()) {
+    if (cogs_.size() != 0 && cogs_.size() == clustered_indices.size()) {
       // tracking the labels
       //ROS_INFO("computing distance matrix");
       // compute distance matrix
       // D[i][j] --> distance between the i-th previous cluster
       //             and the current j-th cluster
       Vector4fVector new_cogs;
-      computeCentroidsOfClusters(new_cogs, cloud, cluster_indices);
+      computeCentroidsOfClusters(new_cogs, cloud, clustered_indices);
       double D[cogs_.size() * new_cogs.size()];
       computeDistanceMatrix(D, cogs_, new_cogs);
       std::vector<int> pivot_table = buildLabelTrackingPivotTable(D, cogs_, new_cogs, label_tracking_tolerance);
       if (pivot_table.size() != 0) {
-        cluster_indices = pivotClusterIndices(pivot_table, cluster_indices);
+        clustered_indices = pivotClusterIndices(pivot_table, clustered_indices);
       }
     }
     Vector4fVector tmp_cogs;
-    computeCentroidsOfClusters(tmp_cogs, cloud, cluster_indices); // NB: not efficient
+    computeCentroidsOfClusters(tmp_cogs, cloud, clustered_indices); // NB: not efficient
     cogs_ = tmp_cogs;
       
-    for (size_t i = 0; i < cluster_indices.size(); i++) {
+    for (size_t i = 0; i < clustered_indices.size(); i++) {
 #if ROS_VERSION_MINIMUM(1, 10, 0)
       // hydro and later
       result.cluster_indices[i].header
-        = pcl_conversions::fromPCL(cluster_indices[i].header);
+        = pcl_conversions::fromPCL(clustered_indices[i].header);
 #else
       // groovy
-      result.cluster_indices[i].header = cluster_indices[i].header;
+      result.cluster_indices[i].header = clustered_indices[i].header;
 #endif
-      result.cluster_indices[i].indices = cluster_indices[i].indices;
+      result.cluster_indices[i].indices = clustered_indices[i].indices;
     }
 
     result_pub_.publish(result);
     
     jsk_recognition_msgs::Int32Stamped::Ptr cluster_num_msg (new jsk_recognition_msgs::Int32Stamped);
     cluster_num_msg->header = input->header;
-    cluster_num_msg->data = cluster_indices.size();
+    cluster_num_msg->data = clustered_indices.size();
     cluster_num_pub_.publish(cluster_num_msg);
 
     diagnostic_updater_->update();
   }
 
+  void EuclideanClustering::multi_extract(
+    const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& input_cluster_indices,
+    const sensor_msgs::PointCloud2::ConstPtr& input) {
+    vital_checker_->poke();
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud
+      (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::fromROSMsg(*input, *cloud);
+
+    std::vector<pcl::PointIndices::Ptr> cluster_indices =
+      pcl_conversions::convertToPCLPointIndices(input_cluster_indices->cluster_indices);
+    std::vector<pcl::PointIndices> clustered_indices;
+    clusteringClusterIndices(cloud,
+                             cluster_indices,
+                             clustered_indices,
+                             false);
+
+    // Publish result indices
+    jsk_recognition_msgs::ClusterPointIndices result;
+    result.cluster_indices.resize(clustered_indices.size());
+    cluster_counter_.add(clustered_indices.size());
+    result.header = input->header;
+
+    for (size_t i = 0; i < clustered_indices.size(); i++) {
+#if ROS_VERSION_MINIMUM(1, 10, 0)
+      // hydro and later
+      result.cluster_indices[i].header
+        = pcl_conversions::fromPCL(clustered_indices[i].header);
+#else
+      // groovy
+      result.cluster_indices[i].header = clustered_indices[i].header;
+#endif
+      result.cluster_indices[i].indices = clustered_indices[i].indices;
+    }
+
+    result_pub_.publish(result);
+
+    jsk_recognition_msgs::Int32Stamped::Ptr cluster_num_msg (new jsk_recognition_msgs::Int32Stamped);
+    cluster_num_msg->header = input->header;
+    cluster_num_msg->data = clustered_indices.size();
+    cluster_num_pub_.publish(cluster_num_msg);
+
+    diagnostic_updater_->update();
+  }
 
   bool EuclideanClustering::serviceCallback(
     jsk_recognition_msgs::EuclideanSegment::Request &req,
@@ -204,6 +364,10 @@ namespace jsk_pcl_ros
   {
     DiagnosticNodelet::onInit();
 
+    pnh_->param("multi", multi_, false);
+    pnh_->param("approximate_sync_", approximate_sync_, false);
+    pnh_->param("queue_size", queue_size_, 1);
+
     ////////////////////////////////////////////////////////
     // dynamic reconfigure
     ////////////////////////////////////////////////////////
@@ -228,12 +392,31 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // Subscription
     ////////////////////////////////////////////////////////
-    sub_input_ = pnh_->subscribe("input", 1, &EuclideanClustering::extract, this);
+    if (multi_) {
+      sub_cluster_indices_.subscribe(*pnh_, "input/indices", 1);
+      sub_point_cloud_.subscribe(*pnh_, "input", 1);
+      if (approximate_sync_) {
+        async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
+        async_->connectInput(sub_cluster_indices_, sub_point_cloud_);
+        async_->registerCallback(boost::bind(&EuclideanClustering::multi_extract, this, _1, _2));
+      } else {
+        sync_  = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
+        sync_->connectInput(sub_cluster_indices_, sub_point_cloud_);
+        sync_->registerCallback(boost::bind(&EuclideanClustering::multi_extract, this, _1, _2));
+      }
+    } else {
+      sub_input_ = pnh_->subscribe("input", 1, &EuclideanClustering::extract, this);
+    }
   }
 
   void EuclideanClustering::unsubscribe()
   {
-    sub_input_.shutdown();
+    if (multi_) {
+      sub_cluster_indices_.unsubscribe();
+      sub_point_cloud_.unsubscribe();
+    } else {
+      sub_input_.shutdown();
+    }
   }
   
   void EuclideanClustering::updateDiagnostic(
@@ -253,6 +436,11 @@ namespace jsk_pcl_ros
       stat.add("Min Size of the cluster", minsize_);
       stat.add("Cluster tolerance", tolerance);
       stat.add("Tracking tolerance", label_tracking_tolerance);
+      stat.add("MultiEuclideanClustering", multi_);
+      stat.add("Downsample enable", downsample_);
+      if (downsample_) {
+        stat.add("Leaf size", leaf_size_);
+      }
     }
     DiagnosticNodelet::updateDiagnostic(stat);
   }
@@ -264,6 +452,10 @@ namespace jsk_pcl_ros
     label_tracking_tolerance = config.label_tracking_tolerance;
     maxsize_ = config.max_size;
     minsize_ = config.min_size;
+
+    // downsample group
+    downsample_ = config.downsample_enable;
+    leaf_size_ = config.leaf_size;
   }
 
   std::vector<pcl::PointIndices> EuclideanClustering::pivotClusterIndices(
@@ -336,6 +528,15 @@ namespace jsk_pcl_ros
         D[i * old_cogs.size() + j] = distance;
       }
     }
+  }
+
+  void EuclideanClustering::removeDuplicatedIndices(
+    pcl::PointIndices::Ptr indices)
+  {
+    std::sort(indices->indices.begin(), indices->indices.end());
+    indices->indices.erase(
+      std::unique(indices->indices.begin(), indices->indices.end()),
+      indices->indices.end());
   }
 
   void EuclideanClustering::computeCentroidsOfClusters(

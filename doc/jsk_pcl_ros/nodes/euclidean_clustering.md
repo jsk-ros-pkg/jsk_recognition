@@ -62,9 +62,9 @@ sensor_msgs/PointCloud2[] output
    Policy of synchronization, if `false` it synchornizes exactly, else approximately.
    This value is only valid in case of `~multi` is `true`.
 
-* `~queue_size` (Int, default: `1`):
+* `~queue_size` (Int, default: `20`):
 
-   Queue size of topic msgs.
+   Queue size of topic msgs for synchronization.
 
 * `~downsample_enable` (Boolean, default: `false`)
 

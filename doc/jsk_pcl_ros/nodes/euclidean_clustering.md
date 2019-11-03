@@ -15,9 +15,9 @@ tries to track the segment.
    input pointcloud. If `multi` is `talse`, this input is only enough.
 
 
-* `~input/indices` (`jsk_recognition_msgs/ClusterPointIndices`):
+* `~input/cluster_indices` (`jsk_recognition_msgs/ClusterPointIndices`):
 
-   input indices. If `multi` is `true`, synchronized `~input` and `~input/indices` are used.
+   input indices. If `multi` is `true`, synchronized `~input` and `~input/cluster_indices` are used.
 
 ## Publishing Topics
 * `~output` (`jsk_recognition_msgs/ClusterPointIndices`):
@@ -55,7 +55,7 @@ sensor_msgs/PointCloud2[] output
 
 * `~multi` (Boolean, default: `false`)
 
-   Flag of multi euclidean clustering. If `~multi` is `true`, synchronized `~input` and `~input/indices` are used.
+   Flag of multi euclidean clustering. If `~multi` is `true`, synchronized `~input` and `~input/cluster_indices` are used.
 
 * `~approximate_sync` (Boolean, default: `False`):
 

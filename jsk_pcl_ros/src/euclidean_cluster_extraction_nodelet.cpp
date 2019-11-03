@@ -393,7 +393,7 @@ namespace jsk_pcl_ros
     // Subscription
     ////////////////////////////////////////////////////////
     if (multi_) {
-      sub_cluster_indices_.subscribe(*pnh_, "input/indices", 1);
+      sub_cluster_indices_.subscribe(*pnh_, "input/cluster_indices", 1);
       sub_point_cloud_.subscribe(*pnh_, "input", 1);
       if (approximate_sync_) {
         async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);

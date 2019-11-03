@@ -11,7 +11,7 @@
         pkg="nodelet" type="nodelet"
         args="standalone jsk_pcl/EuclideanClustering"
         output="screen">
-    <remap from="~input/indices" to="$(arg input_indices)" />
+    <remap from="~input/cluster_indices" to="$(arg input_indices)" />
     <remap from="~input" to="$(arg input_cloud)" />
     <rosparam subst_value="true">
       cluster_tolerance: 0.02

@@ -45,8 +45,7 @@ namespace jsk_pcl_ros
   void EuclideanClustering::clusteringClusterIndices(
     pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
     std::vector<pcl::PointIndices::Ptr> &cluster_indices,
-    std::vector<pcl::PointIndices> &clustered_indices,
-    bool keep_whole_cluster) {
+    std::vector<pcl::PointIndices> &clustered_indices) {
 
     boost::mutex::scoped_lock lock(mutex_);
 
@@ -169,23 +168,27 @@ namespace jsk_pcl_ros
         }
         std::vector<int> result_indices;
         std::vector<int> examine_indices;
-        if (keep_whole_cluster) {
-          for (size_t i_e = 0; i_e < output_indices.size(); ++i_e) {
-            examine_indices.push_back(i_e);
-          }
-        } else {
-          // take maximum size of cluster
-          int size = 0;
-          int index = 0;
-          for(size_t i=0; i < output_indices.size(); i++){
-            if(output_indices[i].indices.size() > size){
-              size = output_indices[i].indices.size();
-              index = i;
+        switch (cluster_filter_type_) {
+          case jsk_pcl_ros::EuclideanClustering_All:  {
+            for (size_t i_e = 0; i_e < output_indices.size(); ++i_e) {
+              examine_indices.push_back(i_e);
             }
+            break;
           }
-          examine_indices.push_back(index);
+          case jsk_pcl_ros::EuclideanClustering_MaxSize: {
+            // take maximum size of cluster
+            int size = 0;
+            int index = 0;
+            for(size_t i=0; i < output_indices.size(); i++){
+              if(output_indices[i].indices.size() > size){
+                size = output_indices[i].indices.size();
+                index = i;
+              }
+            }
+            examine_indices.push_back(index);
+            break;
+          }
         }
-
         for (int index : examine_indices) {
           result_point_indices.indices = output_indices.at(index).indices;
           clustered_indices.push_back(result_point_indices);
@@ -213,8 +216,7 @@ namespace jsk_pcl_ros
     std::vector<pcl::PointIndices> clustered_indices;
     clusteringClusterIndices(cloud,
                              cluster_indices,
-                             clustered_indices,
-                             true);
+                             clustered_indices);
 
     // Publish result indices
     jsk_recognition_msgs::ClusterPointIndices result;
@@ -275,8 +277,7 @@ namespace jsk_pcl_ros
     std::vector<pcl::PointIndices> clustered_indices;
     clusteringClusterIndices(cloud,
                              cluster_indices,
-                             clustered_indices,
-                             false);
+                             clustered_indices);
 
     // Publish result indices
     jsk_recognition_msgs::ClusterPointIndices result;
@@ -452,7 +453,7 @@ namespace jsk_pcl_ros
     label_tracking_tolerance = config.label_tracking_tolerance;
     maxsize_ = config.max_size;
     minsize_ = config.min_size;
-
+    cluster_filter_type_ = config.cluster_filter;
     // downsample group
     downsample_ = config.downsample_enable;
     leaf_size_ = config.leaf_size;

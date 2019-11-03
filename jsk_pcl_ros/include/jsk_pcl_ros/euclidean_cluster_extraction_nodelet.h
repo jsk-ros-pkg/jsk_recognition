@@ -110,6 +110,7 @@ namespace jsk_pcl_ros
     bool multi_;
     bool approximate_sync_;
     int queue_size_;
+    int cluster_filter_type_;
 
     std::vector<std::vector<int> > downsample_to_original_indices_;
     std::vector<int> original_to_downsample_indices_;
@@ -127,8 +128,7 @@ namespace jsk_pcl_ros
                                const sensor_msgs::PointCloud2::ConstPtr& input);
     virtual void clusteringClusterIndices(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
                                           std::vector<pcl::PointIndices::Ptr> &cluster_indices,
-                                          std::vector<pcl::PointIndices> &clustered_indices,
-                                          bool keep_whole_cluster);
+                                          std::vector<pcl::PointIndices> &clustered_indices);
     bool serviceCallback(jsk_recognition_msgs::EuclideanSegment::Request &req,
                          jsk_recognition_msgs::EuclideanSegment::Response &res);
     virtual void updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat);

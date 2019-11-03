@@ -22,6 +22,7 @@
       multi: true
       downsample_enable: true
       queue_size: 100
+      cluster_filter: 1  <!-- take max size of clustering in each cluster -->
     </rosparam>
   </node>
 

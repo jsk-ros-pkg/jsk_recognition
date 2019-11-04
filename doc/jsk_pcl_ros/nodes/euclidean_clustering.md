@@ -75,6 +75,10 @@ sensor_msgs/PointCloud2[] output
    Leaf size of voxel grid downsampling.
    This value is only valid in case of `~downsample_enable` is `true`.
 
+* `~cluster_filter` (Int, default: `0`)
+
+   Specify cluster filtering methods. 0: Passthrough all cluster. 1: Take max size of cluster.
+
 
 ## Sample
 Plug the depth sensor which can be launched by openni.launch and run the below command.

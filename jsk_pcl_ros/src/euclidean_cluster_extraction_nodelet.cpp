@@ -42,6 +42,40 @@ using namespace pcl;
 namespace jsk_pcl_ros
 {
 
+  void EuclideanClustering::downsample_cloud(
+    const pcl::PointCloud<pcl::PointXYZ>::Ptr& original_cloud,
+    pcl::PointCloud<pcl::PointXYZ>::Ptr& sampled_cloud,
+    std::vector<std::vector<int> >& sampled_to_original_indices,
+    std::vector<int>& original_to_sampled_indices,
+    double leaf_size)
+  {
+    pcl::VoxelGrid<pcl::PointXYZ> voxel;
+    voxel.setLeafSize(leaf_size, leaf_size, leaf_size);
+    voxel.setSaveLeafLayout(true);
+    voxel.setInputCloud(original_cloud);
+    voxel.filter(*sampled_cloud);
+    sampled_to_original_indices.resize(original_cloud->points.size());
+    original_to_sampled_indices.resize(original_cloud->points.size());
+    std::fill(original_to_sampled_indices.begin(),
+              original_to_sampled_indices.end(),
+              -1);
+    std::fill(sampled_to_original_indices.begin(),
+              sampled_to_original_indices.end(),
+              std::vector<int>());
+    for (size_t i = 0; i < original_cloud->points.size(); ++i) {
+      pcl::PointXYZ p = original_cloud->points[i];
+      if (std::isnan(p.x) || std::isnan(p.y) || std::isnan(p.z)) {
+        continue;
+      }
+      int index = voxel.getCentroidIndex(p);
+      if (index == -1) {
+        continue;
+      }
+      original_to_sampled_indices[i] = index;
+      sampled_to_original_indices[index].push_back(i);
+    }
+  }
+
   void EuclideanClustering::clusteringClusterIndices(
     pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
     std::vector<pcl::PointIndices::Ptr> &cluster_indices,
@@ -51,36 +85,16 @@ namespace jsk_pcl_ros
 
     clustered_indices.clear();
 
-    pcl::VoxelGrid<pcl::PointXYZ> voxel;
-    pcl::PointCloud<pcl::PointXYZ>::Ptr voxel_cloud(
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr preprocessed_cloud(
       new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr preprocessed_cloud;
     if (downsample_) {
-      voxel.setLeafSize(leaf_size_, leaf_size_, leaf_size_);
-      voxel.setSaveLeafLayout(true);
-      voxel.setInputCloud(cloud);
-      voxel.filter(*voxel_cloud);
-      preprocessed_cloud = voxel_cloud;
-      downsample_to_original_indices_.resize(cloud->points.size());
-      original_to_downsample_indices_.resize(cloud->points.size());
-      std::fill(original_to_downsample_indices_.begin(),
-                original_to_downsample_indices_.end(),
-                -1);
-      std::fill(downsample_to_original_indices_.begin(),
-                downsample_to_original_indices_.end(),
-                std::vector<int>());
-      for (size_t i = 0; i < cloud->points.size(); ++i) {
-        pcl::PointXYZ p = cloud->points[i];
-        if (std::isnan(p.x) || std::isnan(p.y) || std::isnan(p.z)) {
-          continue;
-        }
-        int index = voxel.getCentroidIndex(p);
-        if (index == -1) {
-          continue;
-        }
-        original_to_downsample_indices_[i] = index;
-        downsample_to_original_indices_[index].push_back(i);
-      }
+      downsample_cloud(cloud,
+                       preprocessed_cloud,
+                       downsample_to_original_indices_,
+                       original_to_downsample_indices_,
+                       leaf_size_);
+
     } else {
       preprocessed_cloud = cloud;
     }

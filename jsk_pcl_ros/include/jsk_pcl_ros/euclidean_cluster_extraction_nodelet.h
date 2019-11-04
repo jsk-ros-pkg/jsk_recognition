@@ -146,13 +146,19 @@ namespace jsk_pcl_ros
       double* D,
       Vector4fVector& old_cogs,
       Vector4fVector& new_cogs);
-      
+
     virtual void
     computeCentroidsOfClusters(Vector4fVector& ret,
                                pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
                                std::vector<pcl::PointIndices> cluster_indices);
     virtual void removeDuplicatedIndices(pcl::PointIndices::Ptr indices);
 
+    void downsample_cloud(
+      const pcl::PointCloud<pcl::PointXYZ>::Ptr& original_cloud,
+      pcl::PointCloud<pcl::PointXYZ>::Ptr& sampled_cloud,
+      std::vector<std::vector<int> >& sampled_to_original_indices,
+      std::vector<int>& original_to_sampled_indices,
+      double leaf_size);
 
     virtual void subscribe();
     virtual void unsubscribe();

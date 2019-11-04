@@ -2,8 +2,8 @@
 
   <arg name="gui" default="true"/>
   <arg name="downsample" default="true" />
-  <arg name="input_cloud" default="/head_rgbd_sensor_remote/depth_registered/points" />
-  <arg name="input_indices" default="/mask_rcnn_instance_segmentation/output/cluster_indices" />
+  <arg name="INPUT_CLOUD" default="/head_rgbd_sensor_remote/depth_registered/points" />
+  <arg name="INPUT_INDICES" default="/mask_rcnn_instance_segmentation/output/cluster_indices" />
 
   <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_hsr_multiobjects_in_shelf.xml" />
 
@@ -11,8 +11,8 @@
         pkg="nodelet" type="nodelet"
         args="standalone jsk_pcl/EuclideanClustering"
         output="screen">
-    <remap from="~input/cluster_indices" to="$(arg input_indices)" />
-    <remap from="~input" to="$(arg input_cloud)" />
+    <remap from="~input/cluster_indices" to="$(arg INPUT_INDICES)" />
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
     <rosparam subst_value="true">
       cluster_tolerance: 0.02
       min_size: 0
@@ -28,7 +28,7 @@
   <node name="multi_euclidean_cluster_point_indices_decomposer"
         pkg="nodelet" type="nodelet"
         args="standalone jsk_pcl/ClusterPointIndicesDecomposer">
-    <remap from="~input" to="$(arg input_cloud)" />
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
     <remap from="~target" to="/multi_euclidean_clustering/output" />
     <rosparam>
       align_boxes: false
@@ -41,8 +41,8 @@
   <node name="cluster_point_indices_decomposer"
         pkg="nodelet" type="nodelet"
         args="standalone jsk_pcl/ClusterPointIndicesDecomposer">
-    <remap from="~input" to="$(arg input_cloud)" />
-    <remap from="~target" to="$(arg input_indices)" />
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <remap from="~target" to="$(arg INPUT_INDICES)" />
     <rosparam>
       align_boxes: false
       use_pca: true

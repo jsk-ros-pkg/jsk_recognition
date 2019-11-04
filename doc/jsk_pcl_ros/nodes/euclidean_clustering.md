@@ -55,7 +55,9 @@ sensor_msgs/PointCloud2[] output
 
 * `~multi` (Boolean, default: `false`)
 
-   Flag of multi euclidean clustering. If `~multi` is `true`, synchronized `~input` and `~input/cluster_indices` are used.
+   Flag of applying euclidean clustering for each pointcloud's indices(`~input/cluster_indices`'s cluster_indices).
+
+   If `~multi` is `true`, synchronized `~input` and `~input/cluster_indices` are used.
 
 * `~approximate_sync` (Boolean, default: `False`):
 
@@ -77,7 +79,12 @@ sensor_msgs/PointCloud2[] output
 
 * `~cluster_filter` (Int, default: `0`)
 
-   Specify cluster filtering methods. 0: Passthrough all cluster. 1: Take max size of cluster.
+   Specify cluster filtering methods.
+
+   0: Passthrough the all clustering result for each cluster.
+
+   1: Take a cluster which has the maximum size of those for each cluster.
+      The length of `~output`'s cluster_indices, `~cluster_num`, is length of `~input/cluster_indices`'s cluster_indices.
 
 
 ## Sample

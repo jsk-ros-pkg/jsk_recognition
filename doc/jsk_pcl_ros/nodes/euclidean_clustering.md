@@ -12,7 +12,7 @@ tries to track the segment.
 ## Subscribing Topics
 * `~input` (`sensor_msgs/PointCloud2`):
 
-   input pointcloud. If `multi` is `talse`, this input is only enough.
+   input pointcloud. If `multi` is `false`, this input is only enough.
 
 
 * `~input/cluster_indices` (`jsk_recognition_msgs/ClusterPointIndices`):

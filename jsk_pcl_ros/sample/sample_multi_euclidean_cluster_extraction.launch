@@ -16,11 +16,10 @@
     <rosparam subst_value="true">
       cluster_tolerance: 0.02
       min_size: 0
-      max_size: 2500000
-      approximate_sync_: true
+      max_size: 307200
+      approximate_sync: true
       downsample_enable: $(arg downsample)
       multi: true
-      downsample_enable: true
       queue_size: 100
       cluster_filter: 1  <!-- take max size of clustering in each cluster -->
     </rosparam>
@@ -54,8 +53,8 @@
 
   <group if="$(arg gui)">
     <node name="rviz"
-      pkg="rviz" type="rviz"
-      args="-d $(find jsk_pcl_ros)/sample/rviz/multi_euclidean_clustering.rviz">
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/multi_euclidean_clustering.rviz">
     </node>
   </group>
 

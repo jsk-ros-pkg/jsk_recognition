@@ -12,12 +12,12 @@ tries to track the segment.
 ## Subscribing Topics
 * `~input` (`sensor_msgs/PointCloud2`):
 
-   input pointcloud. If `multi` is `false`, this input is only enough.
+   input pointcloud. If `~multi` is `false`, this input is only enough.
 
 
 * `~input/cluster_indices` (`jsk_recognition_msgs/ClusterPointIndices`):
 
-   input indices. If `multi` is `true`, synchronized `~input` and `~input/cluster_indices` are used.
+   input indices. If `~multi` is `true`, synchronized `~input` and `~input/cluster_indices` are used.
 
 ## Publishing Topics
 * `~output` (`jsk_recognition_msgs/ClusterPointIndices`):
@@ -59,7 +59,7 @@ sensor_msgs/PointCloud2[] output
 
 * `~approximate_sync` (Boolean, default: `False`):
 
-   Policy of synchronization, if `false` it synchornizes exactly, else approximately.
+   Policy of synchronization, if `false` it synchronizes exactly, else approximately.
    This value is only valid in case of `~multi` is `true`.
 
 * `~queue_size` (Int, default: `20`):

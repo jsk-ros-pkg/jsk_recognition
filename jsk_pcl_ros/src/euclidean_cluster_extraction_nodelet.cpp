@@ -380,7 +380,7 @@ namespace jsk_pcl_ros
     DiagnosticNodelet::onInit();
 
     pnh_->param("multi", multi_, false);
-    pnh_->param("approximate_sync_", approximate_sync_, false);
+    pnh_->param("approximate_sync", approximate_sync_, false);
     pnh_->param("queue_size", queue_size_, 20);
 
     ////////////////////////////////////////////////////////

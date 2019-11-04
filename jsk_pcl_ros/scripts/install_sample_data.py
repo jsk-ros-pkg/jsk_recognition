@@ -44,7 +44,7 @@ def main():
     download_data(
         path='sample/data/2019-11-03-hsr-multi-objects-in-shelf.bag',
         url='https://drive.google.com/uc?id=1RvpUWnPJogYw_n7IRfmt6ONpUD1ZETus',
-        md5='e913a5e7426addff615cc41664d22f73',
+        md5='f719f3dfed7d9cece1557f340f088683',
         extract=False,
         compressed_bags=[
             'sample/data/2019-11-03-hsr-multi-objects-in-shelf.bag',  # NOQA

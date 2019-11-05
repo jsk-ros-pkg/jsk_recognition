@@ -62,8 +62,8 @@ namespace jsk_pcl_ros_utils
 
   void ClusterPointIndicesLabelFilter::subscribe()
   {
-    sub_indices_.subscribe(*pnh_, "input_indices", 1);
-    sub_labels_.subscribe(*pnh_, "input_labels", 1);
+    sub_indices_.subscribe(*pnh_, "input/indices", 1);
+    sub_labels_.subscribe(*pnh_, "input/labels", 1);
     if (approximate_sync_) {
       async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(queue_size_);
       async_->connectInput(sub_indices_, sub_labels_);

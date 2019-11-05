@@ -19,6 +19,8 @@ from jsk_perception.cfg import SSDObjectDetectorConfig as Config
 from sensor_msgs.msg import Image
 from jsk_recognition_msgs.msg import Rect, RectArray
 from jsk_recognition_msgs.msg import ClassificationResult
+from jsk_recognition_msgs.msg import ClusterPointIndices
+from pcl_msgs.msg import PointIndices
 
 import chainer
 from chainercv.links import SSD300
@@ -60,6 +62,8 @@ class SSDObjectDetector(ConnectionBasedTransport):
         self.srv = Server(Config, self.config_callback)
 
         # advertise
+        self.pub_indices = self.advertise("~output/cluster_indices", ClusterPointIndices,
+                                        queue_size=1)
         self.pub_rects = self.advertise("~output/rect", RectArray,
                                         queue_size=1)
         self.pub_class = self.advertise("~output/class", ClassificationResult,
@@ -119,6 +123,16 @@ class SSDObjectDetector(ConnectionBasedTransport):
             chainer.cuda.get_device_from_id(self.gpu).use()
         bboxes, labels, scores = self.model.predict([img])
         bboxes, labels, scores = bboxes[0], labels[0], scores[0]
+
+        msg_indices = ClusterPointIndices(header=msg.header)
+        for bbox in bboxes:
+            H = img.shape[1]
+            W = img.shape[2]
+            bbox = bbox.astype(np.int32)
+            indices = np.arange(H * W).reshape(H, W)[bbox[0]:bbox[2],bbox[1]:bbox[3]].reshape(-1)
+            indices_msg = PointIndices(header=msg.header, indices=indices)
+            msg_indices.cluster_indices.append(indices_msg)
+        self.pub_indices.publish(msg_indices)
 
         if self.profiling:
             tcur = time.time()

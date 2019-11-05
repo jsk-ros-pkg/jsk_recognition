@@ -5,7 +5,7 @@
 
   <node name="rosbag_play"
         pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros)/sample/data/2019-11-03-hsr-multi-objects-in-shelf.bag --clock --loop" >
+        args="$(find jsk_pcl_ros_utils)/sample/data/2019-11-03-hsr-multi-objects-in-shelf.bag --clock --loop" >
   </node>
 
   <group ns="$(arg camera)">

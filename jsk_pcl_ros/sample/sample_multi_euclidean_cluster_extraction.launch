@@ -5,7 +5,7 @@
   <arg name="INPUT_CLOUD" default="/head_rgbd_sensor_remote/depth_registered/points" />
   <arg name="INPUT_INDICES" default="/mask_rcnn_instance_segmentation/output/cluster_indices" />
 
-  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_hsr_multiobjects_in_shelf.xml" />
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_hsr_multiobjects_in_shelf.xml" />
 
   <node name="multi_euclidean_clustering"
         pkg="nodelet" type="nodelet"

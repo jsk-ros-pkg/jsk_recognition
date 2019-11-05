@@ -40,6 +40,13 @@ Parameters
 
   set ``no_sync`` parameter true if you do not want to synchronize timestamps of ``input_topics``
 
+* ``queue_size`` (type: ``Int``, default: ``10``)
+
+  The queue size for ``message_filters.TimeSynchronizer`` or ``message_filters.ApproximateTimeSynchronizer``.
+
+* ``slop`` (type: ``Float``, default: ``1.0``)
+
+  The slop time in second for ``message_filters.ApproximateTimeSynchronizer``.
 
 * ``draw_topic_name`` (type: ``Bool``, default: ``False``)
 

@@ -78,7 +78,7 @@
   <!-- install chainer {{ -->
   <run_depend>python-h5py</run_depend>
   <run_depend version_lt="7.0.0">python-chainer-pip</run_depend>
-  <run_depend>python-chainercv-pip</run_depend>
+  <run_depend version_gte="0.13.0">python-chainercv-pip</run_depend>
   <!-- }} install chainer -->
   <run_depend>python-dlib</run_depend>  <!-- pip -->
   <!-- install fcn {{ -->

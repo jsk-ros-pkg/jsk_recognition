@@ -14,7 +14,7 @@
     <remap from="~input/cluster_indices" to="$(arg INPUT_INDICES)" />
     <remap from="~input" to="$(arg INPUT_CLOUD)" />
     <rosparam subst_value="true">
-      cluster_tolerance: 0.02
+      tolerance: 0.02
       min_size: 0
       max_size: 307200
       approximate_sync: true

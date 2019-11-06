@@ -1,7 +1,7 @@
 # ClusterPointIndicesLabelFilter
 ## What Is This
 
-![](images/cluster_point_indices_label_filter.jpg)
+![](images/cluster_point_indices_label_filter.png)
 
 This nodelet selects and republishes the ClusterPointIndices which belong to a certain label present in a LabelArray topic.
 
@@ -28,3 +28,10 @@ This nodelet selects and republishes the ClusterPointIndices which belong to a c
 
 * `~queue_size` (Int, default: `100`)
    Queue size of topic msgs for synchronization.
+
+
+## Sample
+
+```bash
+roslaunch jsk_pcl_ros_utils sample_cluster_point_indices_label_filter.launch
+```

@@ -1,0 +1,45 @@
+<launch>
+  <arg name="gui" default="true"/>
+  <arg name="label_value" default="7" />
+  <arg name="INPUT_IMAGE" default="/head_rgbd_sensor_remote/rgb/image_rect_color" />
+  <arg name="INPUT_INDICES" default="/mask_rcnn_instance_segmentation/output/cluster_indices" />
+  <arg name="INPUT_LABELS" default="/mask_rcnn_instance_segmentation/output/labels" />
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_hsr_multiobjects_in_shelf.xml" />
+
+  <node name="cluster_point_indices_label_filter"
+	pkg="jsk_pcl_ros_utils" type="cluster_point_indices_label_filter">
+    <remap from="~input/indices" to="$(arg INPUT_INDICES)"/>
+    <remap from="~input/labels" to="$(arg INPUT_LABELS)"/>
+    <remap from="~output" to="mask_rcnn_instance_segmentation/output/filtered_cluster_indices"/>
+    <rosparam subst_value="true">
+      label_value: $(arg label_value)
+    </rosparam>
+  </node>
+
+  <node name="image_cluster_indices_decomposer"
+        pkg="jsk_perception" type="image_cluster_indices_decomposer.py">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/cluster_indices" to="mask_rcnn_instance_segmentation/output/filtered_cluster_indices"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="tile_image" pkg="jsk_perception" type="tile_image.py"
+          clear_params="true">
+      <rosparam>
+      input_topics:
+        - mask_rcnn_instance_segmentation/output/viz
+        - image_cluster_indices_decomposer/output
+      draw_topic_name: true
+      font_scale: 0.8
+      font_thickness: 2
+      </rosparam>
+    </node>
+
+    <node name="image_view_clust" pkg="image_view" type="image_view"
+          clear_params="true">
+      <remap from="image" to="tile_image/output"/>
+    </node>
+  </group>
+
+</launch>

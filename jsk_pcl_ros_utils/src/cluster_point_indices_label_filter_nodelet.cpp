@@ -42,6 +42,7 @@ namespace jsk_pcl_ros_utils
   {
     DiagnosticNodelet::onInit();
     pnh_->param("approximate_sync", approximate_sync_, false);
+    pnh_->param("queue_size", queue_size_, 100);
 
     // dynamic_reconfigure
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
@@ -57,7 +58,6 @@ namespace jsk_pcl_ros_utils
   {
     boost::mutex::scoped_lock lock(mutex_);
     label_value_ = config.label_value;
-    queue_size_ = config.queue_size;
   }
 
   void ClusterPointIndicesLabelFilter::subscribe()

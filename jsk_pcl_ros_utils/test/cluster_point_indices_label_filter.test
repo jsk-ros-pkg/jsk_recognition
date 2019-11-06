@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_cluster_point_indices_label_filter.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_cluster_point_indices_label_filter"
+        name="test_cluster_point_indices_label_filter"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /mask_rcnn_instance_segmentation/output/filtered_cluster_indices
+      timeout_0: 60
+    </rosparam>
+  </test>
+
+</launch>

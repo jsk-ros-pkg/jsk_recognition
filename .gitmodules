@@ -3,8 +3,7 @@
 	url = https://github.com/garaemon/SLIC-Superpixels.git
 [submodule ".travis"]
 	path = .travis
-	url = https://github.com/jsk-ros-pkg/jsk_travis.git
-	branch = 0.4.26
+	url = https://github.com/pazeshun/jsk_travis.git
 [submodule "jsk_perception/node_scripts/deep_sort/deep_sort"]
 	path = jsk_perception/node_scripts/deep_sort/deep_sort
 	url = https://github.com/nwojke/deep_sort.git

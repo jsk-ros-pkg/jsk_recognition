@@ -72,10 +72,10 @@ rosrun jsk_perception train_ssd.py [ARGS]
 
 ## Sample Output
 
-There are some pre-trained mask rcnn model on jsk_perception.\
+There are some pre-trained SSD model on jsk_perception.\
 Getting trained data by build `jsk_perception` or run script [install_trained_data](https://github.com/jsk-ros-pkg/jsk_recognition/blob/master/jsk_perception/scripts/install_trained_data.py)
 
-`73b2 kitchen model` is some of the typical example of pre-trained mask rcnn model on jsk_perception.\
-The results of mask rcnn using `73b2 kitchen model` are as follows.
+`73b2 kitchen model` is some of the typical example of pre-trained SSD model on jsk_perception.\
+The results of SSD using `73b2 kitchen model` are as follows.
 
 ![](./result_images/ssd_73b2_kitchen_sample_result.png)

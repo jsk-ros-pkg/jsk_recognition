@@ -66,6 +66,6 @@ Now you can use your trained network to infer things as a ROS node.
 
    .. toctree::
       :maxdepth: 1
-      :caption: Nodes for instance segmentation
+      :caption: Nodes for object detection
 
       ../jsk_perception/nodes/ssd_object_detector

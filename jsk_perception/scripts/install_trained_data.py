@@ -250,6 +250,13 @@ def main():
         url='https://drive.google.com/uc?id=1BTnVD0vHcwFIqAKchIuDZ8LZmaNr4qr0',
         md5='183631f938aef7786a1bcfd6343946bc',
     )
+    # node_scripts/ssd_object_detector 73B2 kitchen
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/ssd512_73B2_kitchen_20191114.npz',
+        url='https://drive.google.com/uc?id=1nE7vWbjjrGRtpvtnUxzil4f2DsqTXjA8',
+        md5='650049ece249acae688547df316a3e26',
+    )
 
 
 if __name__ == '__main__':

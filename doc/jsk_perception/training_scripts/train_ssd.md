@@ -70,10 +70,17 @@ All these files will be automatically generated under `<out_dir>`.
 rosrun jsk_perception train_ssd.py [ARGS]
 ```
 
-## Sample Output
+## Sample usage with pre-trained model
 
 There are some pre-trained SSD model on jsk_perception.\
 Getting trained data by build `jsk_perception` or run script [install_trained_data](https://github.com/jsk-ros-pkg/jsk_recognition/blob/master/jsk_perception/scripts/install_trained_data.py)
+
+You can use `73b2 kitchen model` with jsk_perception node.
+```
+roslaunch jsk_perception sample_ssd_object_detector_73b2_kitchen.launch
+```
+
+## Sample Output
 
 `73b2 kitchen model` is some of the typical example of pre-trained SSD model on jsk_perception.\
 The results of SSD using `73b2 kitchen model` are as follows.

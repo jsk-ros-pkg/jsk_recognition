@@ -26,6 +26,9 @@ from chainercv.links import SSD512
 from chainercv.visualizations import vis_bbox
 
 
+chainer.config.cv_resize_backend = 'cv2'
+
+
 class SSDObjectDetector(ConnectionBasedTransport):
 
     def __init__(self):

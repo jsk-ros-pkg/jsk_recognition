@@ -117,18 +117,18 @@ def main():
 
     parser = argparse.ArgumentParser()
     # Dataset directory
-    parser.add_argument('--train_dataset_dir', type=str,
+    parser.add_argument('--train-dataset-dir', type=str,
                         default=osp.join(jsk_perception_datasets_path,
                                          'kitchen_dataset', 'train'))
-    parser.add_argument('--val_dataset_dir', type=str,
+    parser.add_argument('--val-dataset-dir', type=str,
                         default=osp.join(jsk_perception_datasets_path,
                                          'kitchen_dataset', 'test'))
     parser.add_argument(
-        '--model', choices=('ssd300', 'ssd512'), default='ssd512')
+        '--model-name', choices=('ssd300', 'ssd512'), default='ssd512')
     parser.add_argument('--gpu', type=int, default=0)
     parser.add_argument('--batch-size', type=int, default=8)
     parser.add_argument('--max-epoch', type=int, default=100)
-    parser.add_argument('--out_dir', type=str, default=None)
+    parser.add_argument('--out-dir', type=str, default=None)
     args = parser.parse_args()
 
     train_dataset = DetectionDataset(args.train_dataset_dir)

@@ -63,7 +63,7 @@ class SSDObjectDetector(ConnectionBasedTransport):
 
         # advertise
         self.pub_indices = self.advertise("~output/cluster_indices", ClusterPointIndices,
-                                          queue_size=1)
+                                           queue_size=1)
         self.pub_rects = self.advertise("~output/rect", RectArray,
                                         queue_size=1)
         self.pub_class = self.advertise("~output/class", ClassificationResult,

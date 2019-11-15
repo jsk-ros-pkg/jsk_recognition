@@ -30,6 +30,7 @@ import rospkg
 # https://docs.chainer.org/en/stable/tips.html#my-training-process-gets-stuck-when-using-multiprocessiterator
 import cv2
 cv2.setNumThreads(0)
+chainer.config.cv_resize_backend = 'cv2'
 
 
 class MultiboxTrainChain(chainer.Chain):

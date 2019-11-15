@@ -128,8 +128,12 @@ class SSDObjectDetector(ConnectionBasedTransport):
         for bbox in bboxes:
             H = img.shape[1]
             W = img.shape[2]
-            bbox = bbox.astype(np.int32)
-            indices = np.arange(H * W).reshape(H, W)[bbox[0]:bbox[2],bbox[1]:bbox[3]].reshape(-1)
+            ymin = max(0, int(np.floor(bbox[0])))
+            xmin = max(0, int(np.floor(bbox[1])))
+            ymax = min(H, int(np.ceil(bbox[2])))
+            xmax = min(W, int(np.ceil(bbox[3])))
+            indices = [range(W*y+xmin, W*y+xmax) for y in range(ymin, ymax)]
+            indices = np.array(indices, dtype=np.int32).flatten()
             indices_msg = PointIndices(header=msg.header, indices=indices)
             msg_indices.cluster_indices.append(indices_msg)
         self.pub_indices.publish(msg_indices)

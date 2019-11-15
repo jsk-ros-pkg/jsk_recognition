@@ -74,7 +74,7 @@ class SSDObjectDetector(ConnectionBasedTransport):
     def subscribe(self):
         self.sub_image = rospy.Subscriber("~input", Image, self.image_cb,
                                           queue_size=1, buff_size=2**26)
-s
+        
     def unsubscribe(self):
         self.sub_image.unregister()
 

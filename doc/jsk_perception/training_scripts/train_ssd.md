@@ -6,7 +6,7 @@ SSD is a neural network model used for object detection.
 
 ## Available Dataset Class
 
-`ObjectDetectionDataset` (imported from `jsk_recognition_utils.datasets`)
+`DetectionDataset` (imported from `jsk_recognition_utils.datasets`)
 
 This class assumes the following directory structure for each split.
 
@@ -30,12 +30,12 @@ path_to_awesome_dataset/
 
 ## Arguments
 
-- `--train_dataset_dir` (`string`, default: `$(rospack find jsk_perception)/learning_datasets/kitchen_dataset/train`)
-- `--val_dataset_dir` (`string`, default: `$(rospack find jsk_perception)/learning_datasets/kitchen_dataset/test`)
+- `--train-dataset-dir` (`string`, default: `$(rospack find jsk_perception)/learning_datasets/kitchen_dataset/train`)
+- `--val-dataset-dir` (`string`, default: `$(rospack find jsk_perception)/learning_datasets/kitchen_dataset/test`)
 
   Directory name which contains dataset for training and validation respectively.
 
-- `--model_name` (`string`, default: `ssd512`)
+- `--model-name` (`string`, default: `ssd512`)
 
   Model name. Currently, `ssd300` and `ssd512` are supported.
 
@@ -53,7 +53,7 @@ path_to_awesome_dataset/
 
   Stop trigger for training.
 
-- `--out_dir` (`string`, default: `${ROS_HOME}/learning_logs/<timestamp>`)
+- `--out-dir` (`string`, default: `${ROS_HOME}/learning_logs/<timestamp>`)
 
   Output directory name.
 

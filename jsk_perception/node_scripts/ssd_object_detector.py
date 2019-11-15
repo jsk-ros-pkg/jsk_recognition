@@ -63,7 +63,7 @@ class SSDObjectDetector(ConnectionBasedTransport):
 
         # advertise
         self.pub_indices = self.advertise("~output/cluster_indices", ClusterPointIndices,
-                                        queue_size=1)
+                                          queue_size=1)
         self.pub_rects = self.advertise("~output/rect", RectArray,
                                         queue_size=1)
         self.pub_class = self.advertise("~output/class", ClassificationResult,
@@ -74,7 +74,7 @@ class SSDObjectDetector(ConnectionBasedTransport):
     def subscribe(self):
         self.sub_image = rospy.Subscriber("~input", Image, self.image_cb,
                                           queue_size=1, buff_size=2**26)
-
+s
     def unsubscribe(self):
         self.sub_image.unregister()
 
@@ -124,10 +124,10 @@ class SSDObjectDetector(ConnectionBasedTransport):
         bboxes, labels, scores = self.model.predict([img])
         bboxes, labels, scores = bboxes[0], labels[0], scores[0]
 
-        msg_indices = ClusterPointIndices(header=msg.header)
+        cluster_indices_msg = ClusterPointIndices(header=msg.header)
+        H = img.shape[1]
+        W = img.shape[2]
         for bbox in bboxes:
-            H = img.shape[1]
-            W = img.shape[2]
             ymin = max(0, int(np.floor(bbox[0])))
             xmin = max(0, int(np.floor(bbox[1])))
             ymax = min(H, int(np.ceil(bbox[2])))
@@ -135,8 +135,8 @@ class SSDObjectDetector(ConnectionBasedTransport):
             indices = [range(W*y+xmin, W*y+xmax) for y in range(ymin, ymax)]
             indices = np.array(indices, dtype=np.int32).flatten()
             indices_msg = PointIndices(header=msg.header, indices=indices)
-            msg_indices.cluster_indices.append(indices_msg)
-        self.pub_indices.publish(msg_indices)
+            cluster_indices_msg.cluster_indices.append(indices_msg)
+        self.pub_indices.publish(cluster_indices_msg)
 
         if self.profiling:
             tcur = time.time()

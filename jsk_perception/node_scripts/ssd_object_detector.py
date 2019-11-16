@@ -63,7 +63,7 @@ class SSDObjectDetector(ConnectionBasedTransport):
 
         # advertise
         self.pub_indices = self.advertise("~output/cluster_indices", ClusterPointIndices,
-                                           queue_size=1)
+                                          queue_size=1)
         self.pub_rects = self.advertise("~output/rect", RectArray,
                                         queue_size=1)
         self.pub_class = self.advertise("~output/class", ClassificationResult,
@@ -74,7 +74,7 @@ class SSDObjectDetector(ConnectionBasedTransport):
     def subscribe(self):
         self.sub_image = rospy.Subscriber("~input", Image, self.image_cb,
                                           queue_size=1, buff_size=2**26)
-        
+
     def unsubscribe(self):
         self.sub_image.unregister()
 

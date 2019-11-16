@@ -27,6 +27,8 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 
    Array of oriented bounding box for each segmented cluster.
 
+   If `~align_boxes` and `~align_boxes_with_plane` are `True`, each box(`jsk_recognition_msgs/BoundingBox`)'s label indicates nearest plane index.
+
 * `~label` (`sensor_msgs/Image`):
 
    Label image for each cluster point indices.

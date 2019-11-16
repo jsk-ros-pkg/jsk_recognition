@@ -124,7 +124,8 @@ namespace jsk_pcl_ros
       const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
       const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients,
       Eigen::Matrix4f& m4,
-      Eigen::Quaternionf& q);
+      Eigen::Quaternionf& q,
+      int& nearest_plane_index);
     
     virtual int findNearestPlane(const Eigen::Vector4f& center,
                                  const jsk_recognition_msgs::PolygonArrayConstPtr& planes,

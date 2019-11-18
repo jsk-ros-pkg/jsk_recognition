@@ -126,6 +126,7 @@ namespace jsk_pcl_ros
     max_size_ = config.max_size;
     min_size_ = config.min_size;
     use_pca_ = config.use_pca;
+    fill_bba_label_with_nearest_plane_index_ = config.fill_bba_label_with_nearest_plane_index;
   }
 
   void ClusterPointIndicesDecomposer::subscribe()
@@ -552,7 +553,11 @@ namespace jsk_pcl_ros
     bounding_box.dimensions.x = xwidth;
     bounding_box.dimensions.y = ywidth;
     bounding_box.dimensions.z = zwidth;
-    bounding_box.label = nearest_plane_index;
+    if (align_boxes_ &&
+        align_boxes_with_plane_ &&
+        fill_bba_label_with_nearest_plane_index_) {
+      bounding_box.label = nearest_plane_index;
+    }
     return true;
   }
 

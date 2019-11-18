@@ -172,6 +172,7 @@ namespace jsk_pcl_ros
     std::string target_frame_id_;
     tf::TransformListener* tf_listener_;
     bool use_pca_;
+    bool fill_bba_label_with_nearest_plane_index_;
     int max_size_;
     int min_size_;
     std::string sort_by_;

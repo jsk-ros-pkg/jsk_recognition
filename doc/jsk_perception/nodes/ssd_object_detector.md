@@ -23,6 +23,10 @@ You can see camera image with results in `image_view`
 
         Output image with bounding boxes
 
+    - `~output/labels` (`jsk_recognition_msgs/LabelArray`)
+
+        Class labels of each instance
+
     - `~output/class` (`jsk_recognition_msgs/ClassificationResult`)
 
         Class information of detected objects

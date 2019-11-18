@@ -135,11 +135,11 @@ def main():
     train_dataset = DetectionDataset(args.train_dataset_dir)
     fg_label_names = train_dataset.fg_class_names
 
-    if args.model == 'ssd300':
+    if args.model_name == 'ssd300':
         model = SSD300(
             n_fg_class=len(fg_label_names),
             pretrained_model='imagenet')
-    elif args.model == 'ssd512':
+    elif args.model_name == 'ssd512':
         model = SSD512(
             n_fg_class=len(fg_label_names),
             pretrained_model='imagenet')

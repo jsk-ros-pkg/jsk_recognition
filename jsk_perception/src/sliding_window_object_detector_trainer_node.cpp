@@ -14,10 +14,13 @@ namespace jsk_perception
 #endif
       nh_.getParam("dataset_path", this->dataset_path_);
       nh_.getParam("object_dataset_filename", this->object_dataset_filename_);
+      nh_.param<std::string>("object_dataset_topic", this->object_dataset_topic_, "/dataset/roi");
       nh_.getParam("nonobject_dataset_filename", this->nonobject_dataset_filename_);
+      nh_.param<std::string>("nonobject_dataset_topic", this->nonobject_dataset_topic_, "/dataset/background/roi");
       nh_.getParam("classifier_name", this->trained_classifier_name_);
       nh_.getParam("swindow_x", this->swindow_x_);
       nh_.getParam("swindow_y", this->swindow_y_);
+      nh_.param<std::string>("manifest_filename", this->manifest_filename_, "sliding_window_trainer_manifest.xml");
 
       ROS_INFO("--Training Classifier");
       std::string pfilename = dataset_path_ + this->object_dataset_filename_;
@@ -26,9 +29,8 @@ namespace jsk_perception
       ROS_INFO("--Trained Successfully..");
 
       /*write the training manifest*/
-      std::string mainfest_filename = "sliding_window_trainer_manifest.xml";
-      cv::FileStorage fs = cv::FileStorage(
-         mainfest_filename, cv::FileStorage::WRITE);
+      std::string manifest_filename = this->manifest_filename_;
+      cv::FileStorage fs(manifest_filename, cv::FileStorage::WRITE);
       this->writeTrainingManifestToDirectory(fs);
       fs.release();
 
@@ -41,11 +43,11 @@ namespace jsk_perception
    {
       cv::Mat featureMD;
       cv::Mat labelMD;
-      std::string topic_name = "/dataset/roi";
+      std::string topic_name = this->object_dataset_topic_;
       this->readDataset(pfilename, topic_name, featureMD, labelMD, true, 1);
       ROS_INFO("Info: Total Object Sample: %d", featureMD.rows);
       
-      topic_name = "/dataset/background/roi";
+      topic_name = this->nonobject_dataset_topic_;
       this->readDataset(nfilename, topic_name, featureMD, labelMD, true, -1);
       ROS_INFO("Info: Total Training Features: %d", featureMD.rows);
     

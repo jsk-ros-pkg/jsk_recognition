@@ -1,0 +1,37 @@
+<launch>
+
+  <arg name="gui" default="true" />
+  <arg name="gpu" default="0" />
+  <arg name="use_mask" default="true" />
+
+  <include file="$(find jsk_perception)/sample/sample_fcn_object_segmentation.launch">
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="gpu" value="$(arg gpu)" />
+    <arg name="use_mask" value="$(arg use_mask)" />
+  </include>
+
+  <node name="label_image_classifier"
+      pkg="jsk_perception" type="label_image_classifier.py">
+    <remap from="~input" to="fcn_object_segmentation/output" />
+    <rosparam command="load" file="$(find jsk_perception)/config/voc_target_names.yaml" />
+    <rosparam>
+      ignore_labels:
+        - 0
+    </rosparam>
+  </node>
+
+  <node name="draw_classification_result"
+        pkg="jsk_perception" type="draw_classification_result.py">
+    <remap from="~input" to="label_image_classifier/output" />
+    <remap from="~input/image" to="apply_mask_image/output" if="$(arg use_mask)" />
+    <remap from="~input/image" to="image_publisher/output" unless="$(arg use_mask)" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view_1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="draw_classification_result/output" />
+    </node>
+  </group>
+
+</launch>

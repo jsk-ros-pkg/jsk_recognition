@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_recognition_utils)/sample/sample_image_16uc1_to_32fc1.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_image_16uc1_to_32fc1"
+        name="test_image_16uc1_to_32fc1"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /image_16uc1_to_32fc1/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

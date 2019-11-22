@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_unwrap_histogram_with_range_array.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_unwrap_histogram_with_range_array"
+        name="test_unwrap_histogram_with_range_array"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /unwrap_histogram_with_range_array/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

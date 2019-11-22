@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_grid_sampler.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_grid_sampler"
+        name="test_grid_sampler"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /grid_sampler/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

@@ -95,6 +95,10 @@
          type="jsk_pcl_ros_utils::PolygonArrayFootAngleLikelihood"
          base_class_type="nodelet::Nodelet">
   </class>
+  <class name="jsk_pcl_utils/PolygonArrayLikelihoodFilter"
+         type="jsk_pcl_ros_utils::PolygonArrayLikelihoodFilter"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_pcl_utils/PoseWithCovarianceStampedToGaussianPointCloud" 
          type="jsk_pcl_ros_utils::PoseWithCovarianceStampedToGaussianPointCloud"
          base_class_type="nodelet::Nodelet">
@@ -168,6 +172,10 @@
   </class>
   <class name="jsk_pcl_utils/PointCloudXYZToXYZRGB"
          type="jsk_pcl_ros_utils::PointCloudXYZToXYZRGB"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl_utils/PointCloudXYZRGBToXYZ"
+         type="jsk_pcl_ros_utils::PointCloudXYZRGBToXYZ"
          base_class_type="nodelet::Nodelet">
   </class>
   <class name="jsk_pcl_utils/PointCloudToClusterPointIndices"

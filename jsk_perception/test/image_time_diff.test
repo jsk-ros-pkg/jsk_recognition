@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_image_time_diff.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_image_time_diff"
+        name="test_image_time_diff"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /image_time_diff/output/diff
+      timeout_0: 30
+      topic_1: /image_time_diff/output/diff_image
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

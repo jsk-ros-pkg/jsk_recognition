@@ -1,4 +1,5 @@
 <launch>
+  <arg name="gui" default="true"/>
 
   <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml" />
 
@@ -46,9 +47,14 @@
     <rosparam>
       outlier_threshold: 0.04
       max_iteration: 1000
-      min_indices: 150
-      min_length: 0.3
+      min_indices: 30
+      min_length: 0.2
     </rosparam>
   </node>
 
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/line_segment_detector.rviz"/>
+  </group>
 </launch>

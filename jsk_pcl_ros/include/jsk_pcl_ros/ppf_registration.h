@@ -81,8 +81,6 @@ namespace jsk_pcl_ros
     virtual void unsubscribe();
     virtual pcl::PointCloud<pcl::PointNormal>::Ptr calculateNormals (pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
     virtual void configCallback(Config &config, uint32_t level);
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void ArrayRegistration(
             const sensor_msgs::PointCloud2::ConstPtr& input_cloud,
             const jsk_recognition_msgs::PointsArray::ConstPtr& input_reference_points_array);

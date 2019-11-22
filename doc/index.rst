@@ -19,6 +19,11 @@ The code is open source, and `available on github`_.
    install_astra_camera
    install_softkinetic_camera
    install_realsense_camera
+   install_xtion2
+   install_ensenso
+   install_structure_core
+   install_chainer_gpu
+   deep_learning_with_image_dataset/overview
 
 
 .. toctree::
@@ -30,5 +35,6 @@ The code is open source, and `available on github`_.
    jsk_perception/index
    jsk_pcl_ros/index
    jsk_pcl_ros_utils/index
+   jsk_recognition_msgs/index
    jsk_recognition_utils/index
    resized_image_transport/index

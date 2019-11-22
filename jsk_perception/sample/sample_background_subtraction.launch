@@ -17,4 +17,15 @@
     <remap from="~image" to="/camera/rgb/image_rect_color" />
   </node>
 
+  <group if="$(arg gui)">
+    <node name="image_view_rgb"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="/camera/rgb/image_rect_color"/>
+    </node>
+    <node name="image_view_fg"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="background_subtraction/output"/>
+    </node>
+  </group>
+
 </launch>

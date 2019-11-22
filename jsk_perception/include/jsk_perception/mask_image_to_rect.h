@@ -40,7 +40,7 @@
 #include <jsk_topic_tools/diagnostic_nodelet.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/Image.h>
-#include <geometry_msgs/PolygonStamped.h>
+#include <jsk_recognition_msgs/RectArray.h>
 
 namespace jsk_perception
 {

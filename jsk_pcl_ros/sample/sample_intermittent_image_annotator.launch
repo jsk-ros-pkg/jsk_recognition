@@ -1,0 +1,87 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <param name="/use_sim_time" value="true"/>
+
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/sample/data/pr2_look_around_in_room_73b2.bag --clock --loop"/>
+
+  <node name="polygon_array_publisher"
+        pkg="jsk_recognition_utils" type="polygon_array_publisher.py">
+    <rosparam>
+      frame_id: base_link
+      polygons:
+      - points:
+        - [100, 100, 0]
+        - [100, 300, 0]
+        - [300, 300, 0]
+        - [300, 100, 0]
+    </rosparam>
+  </node>
+
+  <node name="polygon_array_to_polygon"
+        pkg="jsk_recognition_utils" type="polygon_array_to_polygon.py">
+    <remap from="~input" to="polygon_array_publisher/output"/>
+    <rosparam>
+      index: 0
+    </rosparam>
+  </node>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <group ns="/kinect_head">
+    <node name="republish_rgb"
+          pkg="image_transport" type="republish"
+          args="compressed raw">
+      <remap from="in" to="rgb/image_rect_color"/>
+      <remap from="out" to="rgb/image_rect_color"/>
+    </node>
+    <node name="republish_depth"
+          pkg="image_transport" type="republish"
+          args="compressedDepth raw">
+      <remap from="in" to="depth_registered/hw_registered/image_rect"/>
+      <remap from="out" to="depth_registered/hw_registered/image_rect"/>
+    </node>
+    <node name="point_cloud_xyzrgb"
+          pkg="nodelet" type="nodelet"
+          args="load depth_image_proc/point_cloud_xyzrgb /sample_manager">
+      <remap from="rgb/camera_info" to="rgb/camera_info"/>
+      <remap from="rgb/image_rect_color" to="rgb/image_rect_color"/>
+      <remap from="depth_registered/image_rect" to="depth_registered/hw_registered/image_rect"/>
+    </node>
+  </group>
+
+  <node name="intermittent_image_annotator"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/IntermittentImageAnnotator sample_manager">
+    <remap from="~input/image" to="/kinect_head/rgb/image_rect_color"/>
+    <remap from="~input/camera_info" to="/kinect_head/rgb/camera_info"/>
+    <remap from="~input/cloud" to="/kinect_head/depth_registered/points"/>
+    <remap from="~output/screenrectangle" to="polygon_array_to_polygon/output"/>
+    <rosparam>
+      fixed_frame_id: base_link
+      max_image_buffer: 5
+      rate: 4.0
+      store_pointcloud: true
+      keep_organized: true
+    </rosparam>
+  </node>
+
+  <node name="sample_empty_service_caller"
+        pkg="jsk_pcl_ros" type="sample_empty_service_caller.py">
+    <remap from="~service" to="intermittent_image_annotator/shutter"/>
+    <rosparam>
+      rate: 4.0
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/intermittent_image_annotator.rviz"/>
+  </group>
+
+</launch>

@@ -1,0 +1,27 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_kalman_filtered_objectdetection_marker.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_kalman_filtered_objectdetection_marker"
+        name="test_kalman_filtered_objectdetection_marker"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /kalman_filtered_objectdetection_marker/output/object_detection_marker_array
+      timeout_0: 30
+      topic_1: /kalman_filtered_objectdetection_marker/output/filtered
+      timeout_1: 30
+      <!-- topic_2: /kalman_filtered_objectdetection_marker/output/outlier -->
+      <!-- timeout_2: 30 -->
+      topic_3: /kalman_filtered_objectdetection_marker/output/attention_clipper/input/pose
+      timeout_3: 30
+      topic_4: /kalman_filtered_objectdetection_marker/output/posewithcovstamped
+      timeout_4: 30
+      topic_5: /kalman_filtered_objectdetection_marker/output/simplecov
+      timeout_5: 30
+    </rosparam>
+  </test>
+
+</launch>

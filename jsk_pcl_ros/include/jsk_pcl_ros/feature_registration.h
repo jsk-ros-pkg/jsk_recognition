@@ -103,6 +103,7 @@ namespace jsk_pcl_ros
     double similarity_threshold_;
     double max_correspondence_distance_;
     double inlier_fraction_;
+    double transformation_epsilon_;
   private:
     
   };

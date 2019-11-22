@@ -1,0 +1,61 @@
+<launch>
+
+  <arg name="gui" default="true"/>
+
+  <param name="/use_sim_time" value="true"/>
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/sample/data/2016-06-24-17-43-57_tabletop.bag --clock --loop"/>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="cluster_indices_decomposer"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer /sample_manager">
+    <remap from="~input" to="/plane_extraction_left_hand_camera/output"/>
+    <remap from="~target" to="/euclid_clustering_left_table/output"/>
+    <rosparam>
+      align_boxes: true
+      align_boxes_with_plane: false
+      target_frame_id: left_hand_camera_depth_optical_frame
+      use_pca: true
+    </rosparam>
+  </node>
+
+  <node name="bbox_array_to_bbox"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/BoundingBoxArrayToBoundingBox /sample_manager">
+    <remap from="~input" to="cluster_indices_decomposer/boxes"/>
+    <rosparam>
+      index: 0
+    </rosparam>
+  </node>
+
+  <node name="sample_int_publisher_from_pose_array"
+        pkg="jsk_pcl_ros" type="sample_int_publisher_from_pose_array.py">
+    <remap from="~input" to="handle_estimator/output"/>
+  </node>
+
+  <node name="handle_estimator"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/HandleEstimator /sample_manager">
+    <remap from="~input" to="/plane_extraction_left_hand_camera/output"/>
+    <remap from="~input_box" to="bbox_array_to_bbox/output"/>
+    <remap from="~selected_index" to="sample_int_publisher_from_pose_array/output"/>
+    <rosparam>
+      gripper_size: 0.08
+      approach_offset: 0.1
+      angle_divide_num: 6
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/handle_estimator.rviz">
+    </node>
+  </group>
+
+</launch>

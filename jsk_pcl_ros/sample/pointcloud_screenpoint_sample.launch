@@ -1,30 +1,42 @@
 <launch>
-  <!-- pointcloud_screenpoint for PR2 -->
-  <machine name="c1" address="pr1012" ros-root="$(env ROS_ROOT)"
-  	   ros-package-path="$(env ROS_PACKAGE_PATH)">
-    <env name="PATH" value="$(env PATH)"/>
-  </machine>
-  <arg name="cloud_machine" default="c1"
+  <machine name="localhost" address="localhost" />
+  <arg name="cloud_machine" default="localhost"
        doc="point cloud processor machine" />
   <arg name="display_machine" default="localhost"
        doc="display client machine" />
+  <arg name="base_frame" default="camera_link" />
   <arg name="image" default="/camera/rgb"
        doc="image namespace" />
-  <arg name="points" default="/camera/rgb/points"
+  <arg name="points" default="/camera/depth/points"
        doc="point cloud" />
+  <arg name="USE_VIEW" default="true"
+       doc="if true, launch image_view2 on $(arg display_machine)" />
+  <arg name="USE_RVIZ" default="false"
+       doc="if true, launch rviz on $(arg display_machine)" />
+  <arg name="PUBLISH_BASE_FOOTPRINT" default="false"
+       doc="publish tf from base_footprint to camera" />
+  <arg name="publish_base_footprint_camera_frame" default="camera_link"
+       doc="frame used for publish tf from base_footprint to camera" />
+
   <!-- launch/pointcloud_screenpoint.launch -->
   <include file="$(find jsk_pcl_ros)/launch/pointcloud_screenpoint.launch">
     <arg name="cloud_machine" default="$(arg cloud_machine)"/>
     <arg name="display_machine" default="$(arg display_machine)"/>
     <arg name="image" default="$(arg image)"/>
     <arg name="points" default="$(arg points)"/>
+    <arg name="USE_DEPTH_CREATER" default="false" />
+    <arg name="USE_REGISTERED_DEPTH" default="true"/>
+    <arg name="USE_VIEW" default="$(arg USE_VIEW)"/>
   </include>
 
   <!-- publish markers, broadcast TF -->
   <node name="display_point" pkg="jsk_pcl_ros" machine="localhost"
         type="pointcloud_screenpoint.l" output="screen">
-    <param name="~sensor_topic" value="$(arg image)/image_rect_color"/>
-    <param name="~ray_srv" value="/pointcloud_screenpoint_nodelet/screen_to_point"/>
+    <rosparam subst_value="true">
+      base_frame: $(arg base_frame)
+      sensor_topic: $(arg image)/image_rect_color
+      ray_srv: /pointcloud_screenpoint_nodelet/screen_to_point
+    </rosparam>
   </node>
 
   <!-- If PATH is different, you can directly call roseus like below -->
@@ -35,17 +47,14 @@
     <param name="ray_srv" value="/pointcloud_screenpoint_nodelet/screen_to_point"/>
     </node>-->
 
-  <!-- image viewer -->
-  <node name="image_view2" pkg="image_view2"
-  	type="image_view2" machine="$(arg display_machine)">
-    <remap from="image" to="$(arg image)/image_rect_color" />
-    <remap from="camera_info" to="$(arg image)/camera_info" />
-  </node>
+  <node name="$(anon rviz)" type="rviz" output="screen" if="$(arg USE_RVIZ)"
+        respawn="true" pkg="rviz" machine="$(arg display_machine)"
+        args="-d $(find jsk_pcl_ros)/launch/pointcloud_screenpoint.rviz"/>
 
-  <!-- Visualize on rviz -->
-  <!-- <node name="$(anon rviz)" type="rviz" output="screen"
-       respawn="true" pkg="rviz" machine="$(arg display_machine)"
-       args="-d $(find jsk_pcl_ros)/launch/pointcloud_screenpoint.vcg"/> -->
+  <!-- publish base_footprint since 'base_footprint' is hardcoded within euslisp/pointcloud_screenpoint.l -->
+  <node name="optical_frame_tf_publisher" if="$(arg PUBLISH_BASE_FOOTPRINT)"
+        pkg="tf" type="static_transform_publisher"
+        args="0 0 1 -1.57 1.57 -1.57 base_footprint $(arg publish_base_footprint_camera_frame) 500" />
 
   <sphinxdoc><![CDATA[
 

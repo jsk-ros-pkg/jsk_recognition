@@ -48,24 +48,34 @@ namespace jsk_pcl_ros_utils
       NODELET_FATAL("no ~sensor_frame is specified");
       return;
     }
+
+    pnh_->param<int>("queue_size", queue_size_, 100);
+    pnh_->param<bool>("use_indices", use_indices_, true);
+
     tf_listener_ = jsk_recognition_utils::TfListenerSingleton::getInstance();
     pub_polygons_ = advertise<jsk_recognition_msgs::PolygonArray>(
       *pnh_, "output/polygons", 1);
-    pub_indices_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(
-      *pnh_, "output/indices", 1);
     pub_coefficients_ = advertise<jsk_recognition_msgs::ModelCoefficientsArray>(
       *pnh_, "output/coefficients", 1);
+    if (use_indices_)
+      pub_indices_ = advertise<jsk_recognition_msgs::ClusterPointIndices>(
+        *pnh_, "output/indices", 1);
 
     onInitPostProcess();
   }
 
   void PolygonFlipper::subscribe()
   {
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(queue_size_);
     sub_polygons_.subscribe(*pnh_, "input/polygons", 1);
-    sub_indices_.subscribe(*pnh_, "input/indices", 1);
     sub_coefficients_.subscribe(*pnh_, "input/coefficients", 1);
-    sync_->connectInput(sub_polygons_, sub_indices_, sub_coefficients_);
+    if (use_indices_) {
+      sub_indices_.subscribe(*pnh_, "input/indices", 1);
+      sync_->connectInput(sub_polygons_, sub_indices_, sub_coefficients_);
+    } else {
+      sub_polygons_.registerCallback(boost::bind(&PolygonFlipper::fillEmptyIndices, this, _1));
+      sync_->connectInput(sub_polygons_, sub_indices_null_, sub_coefficients_);
+    }
     sync_->registerCallback(boost::bind(&PolygonFlipper::flip, this, _1, _2, _3));
   }
 
@@ -73,6 +83,18 @@ namespace jsk_pcl_ros_utils
   {
     sub_polygons_.unsubscribe();
     sub_coefficients_.unsubscribe();
+    if (use_indices_)
+      sub_indices_.unsubscribe();
+  }
+
+  void PolygonFlipper::fillEmptyIndices(
+    const jsk_recognition_msgs::PolygonArray::ConstPtr& polygons_msg)
+  {
+    jsk_recognition_msgs::ClusterPointIndices indices;
+    indices.header.stamp = polygons_msg->header.stamp;
+    indices.cluster_indices.resize(polygons_msg->polygons.size());
+    sub_indices_null_.add(
+      boost::make_shared<jsk_recognition_msgs::ClusterPointIndices>(indices));
   }
 
   void PolygonFlipper::flip(
@@ -85,10 +107,10 @@ namespace jsk_pcl_ros_utils
       NODELET_ERROR("The size of polygons and coefficients are not same");
       return;
     }
-    jsk_recognition_msgs::PolygonArray flipped_polygons;
+    jsk_recognition_msgs::PolygonArray flipped_polygons = *polygons_msg;
     jsk_recognition_msgs::ModelCoefficientsArray flipped_coefficients;
     jsk_recognition_msgs::ClusterPointIndices flipped_indices;
-    flipped_polygons.header = polygons_msg->header;
+    flipped_polygons.polygons.clear();
     flipped_coefficients.header = coefficients_msg->header;
     flipped_indices.header = indices_msg->header;
     try {
@@ -153,7 +175,8 @@ namespace jsk_pcl_ros_utils
       }
       pub_polygons_.publish(flipped_polygons);
       pub_coefficients_.publish(flipped_coefficients);
-      pub_indices_.publish(flipped_indices);
+      if (use_indices_)
+        pub_indices_.publish(flipped_indices);
     }
     catch (tf2::TransformException& e) {
       NODELET_ERROR("Failed to lookup transformation: %s", e.what());

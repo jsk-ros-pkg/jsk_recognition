@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_human_mesh_recovery.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_human_mesh_recovery"
+        name="test_human_mesh_recovery"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3" >
+    <rosparam>
+      topic_0: /human_mesh_recovery/output/pose
+      timeout_0: 60
+    </rosparam>
+  </test>
+
+</launch>

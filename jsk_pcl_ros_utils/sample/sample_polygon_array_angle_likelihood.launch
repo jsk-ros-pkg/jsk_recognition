@@ -1,0 +1,71 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_recognition_utils)/sample/sample_polygon_array_publisher.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="polygon_array_angle_likelihood"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/PolygonArrayAngleLikelihood">
+    <remap from="~input" to="polygon_array_publisher/output"/>
+    <rosparam>
+      target_frame_id: map
+      axis: [0, 0, 1]
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="input_likelihood0_to_float"
+          pkg="topic_tools" type="transform"
+          args="/polygon_array_publisher/output /input_likelihood0_to_float std_msgs/Float32
+                'm.likelihood[0]'
+                --wait-for-start"/>
+
+    <node name="input_likelihood1_to_float"
+          pkg="topic_tools" type="transform"
+          args="/polygon_array_publisher/output /input_likelihood1_to_float std_msgs/Float32
+                'm.likelihood[1]'
+                --wait-for-start"/>
+
+    <node name="input_likelihood2_to_float"
+          pkg="topic_tools" type="transform"
+          args="/polygon_array_publisher/output /input_likelihood2_to_float std_msgs/Float32
+                'm.likelihood[2]'
+                --wait-for-start"/>
+
+    <node name="input_likelihood3_to_float"
+          pkg="topic_tools" type="transform"
+          args="/polygon_array_publisher/output /input_likelihood3_to_float std_msgs/Float32
+                'm.likelihood[3]'
+                --wait-for-start"/>
+
+    <node name="output_likelihood0_to_float"
+          pkg="topic_tools" type="transform"
+          args="/polygon_array_angle_likelihood/output /output_likelihood0_to_float std_msgs/Float32
+                'm.likelihood[0]'
+                --wait-for-start"/>
+
+    <node name="output_likelihood1_to_float"
+          pkg="topic_tools" type="transform"
+          args="/polygon_array_angle_likelihood/output /output_likelihood1_to_float std_msgs/Float32
+                'm.likelihood[1]'
+                --wait-for-start"/>
+
+    <node name="output_likelihood2_to_float"
+          pkg="topic_tools" type="transform"
+          args="/polygon_array_angle_likelihood/output /output_likelihood2_to_float std_msgs/Float32
+                'm.likelihood[2]'
+                --wait-for-start"/>
+
+    <node name="output_likelihood3_to_float"
+          pkg="topic_tools" type="transform"
+          args="/polygon_array_angle_likelihood/output /output_likelihood3_to_float std_msgs/Float32
+                'm.likelihood[3]'
+                --wait-for-start"/>
+
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_polygon_array_angle_likelihood.rviz"/>
+  </group>
+</launch>

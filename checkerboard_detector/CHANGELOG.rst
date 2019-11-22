@@ -2,6 +2,54 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.10 (2019-03-27)
+-------------------
+
+1.2.9 (2019-02-23)
+------------------
+
+1.2.8 (2019-02-22)
+------------------
+
+1.2.7 (2019-02-14)
+------------------
+
+1.2.6 (2018-11-02)
+------------------
+* Fix Cmake indent (`#2345 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2345>`_)
+* Fix warnings: gencpp -> generate_messsage_cpp (`#2296 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2296>`_)
+* Contributors: Kentaro Wada, Yuto Uchimi
+
+1.2.5 (2018-04-09)
+------------------
+
+1.2.4 (2018-01-12)
+------------------
+
+1.2.3 (2017-11-23)
+------------------
+
+1.2.2 (2017-07-23)
+------------------
+
+1.2.1 (2017-07-15)
+------------------
+
+1.2.0 (2017-07-15)
+------------------
+
+1.1.3 (2017-07-07)
+------------------
+
+1.1.2 (2017-06-16)
+------------------
+* [checkerboard_detector] update launch and document
+* [checkerboard_detector] add parameters, axis_size and circle_size
+* [checkerboard_detector] add queue_size and publish_queue_size
+* [checkerboard_detector] fix board_type
+* Generate README by script
+* Contributors: Kentaro Wada, YoheiKakiuchi
+
 1.1.1 (2017-03-04)
 ------------------
 

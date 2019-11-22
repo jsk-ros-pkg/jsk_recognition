@@ -52,12 +52,16 @@ namespace jsk_perception
       boost::bind (
         &SLICSuperPixels::configCallback, this, _1, _2);
     srv_->setCallback (f);
-    
+
+    pnh_.param("publish_debug_images", debug_image_, false);
+
     it_.reset(new image_transport::ImageTransport(nh_));
     pub_ = pnh_.advertise<sensor_msgs::Image>("output", 1);
-    pub_debug_ = pnh_.advertise<sensor_msgs::Image>("debug", 1);
-    pub_debug_mean_color_ = pnh_.advertise<sensor_msgs::Image>("debug/mean_color", 1);
-    pub_debug_center_grid_ = pnh_.advertise<sensor_msgs::Image>("debug/center_grid", 1);
+    if (debug_image_) {
+      pub_debug_ = pnh_.advertise<sensor_msgs::Image>("debug", 1);
+      pub_debug_mean_color_ = pnh_.advertise<sensor_msgs::Image>("debug/mean_color", 1);
+      pub_debug_center_grid_ = pnh_.advertise<sensor_msgs::Image>("debug/center_grid", 1);
+    }
     image_sub_ = it_->subscribe("", 1, &SLICSuperPixels::imageCallback, this);
 
     ros::V_string names = boost::assign::list_of("image");
@@ -83,30 +87,39 @@ namespace jsk_perception
     //cv::Mat bgr_image = cv_ptr->image;
     cv::Mat lab_image, out_image, mean_color_image, center_grid_image;
     // slic
-    bgr_image.copyTo(out_image);
-    bgr_image.copyTo(mean_color_image);
-    bgr_image.copyTo(center_grid_image);
+    if (debug_image_) {
+      bgr_image.copyTo(out_image);
+      bgr_image.copyTo(mean_color_image);
+      bgr_image.copyTo(center_grid_image);
+    }
     cv::cvtColor(bgr_image, lab_image, CV_BGR2Lab);
     int w = image->width, h = image->height;
     double step = sqrt((w * h) / (double) number_of_super_pixels_);
     Slic slic;
     slic.generate_superpixels(lab_image, step, weight_);
     slic.create_connectivity(lab_image);
-    slic.colour_with_cluster_means(mean_color_image);
-    slic.display_center_grid(center_grid_image, cv::Scalar(0, 0, 255));
-    slic.display_contours(out_image, cv::Vec3b(0,0,255));
-    pub_debug_.publish(cv_bridge::CvImage(
-                         image->header,
-                         sensor_msgs::image_encodings::BGR8,
-                         out_image).toImageMsg());
-    pub_debug_mean_color_.publish(cv_bridge::CvImage(
-                                    image->header,
-                                    sensor_msgs::image_encodings::BGR8,
-                                    mean_color_image).toImageMsg());
-    pub_debug_center_grid_.publish(cv_bridge::CvImage(
-                                     image->header,
-                                     sensor_msgs::image_encodings::BGR8,
-                                     center_grid_image).toImageMsg());
+
+    if (debug_image_) {
+      // creating debug image may occur seg fault.
+      // So, publish_debug_images was added, in order to create debug image explicitly
+      // See https://github.com/jsk-ros-pkg/jsk_recognition/pull/2181
+      slic.colour_with_cluster_means(mean_color_image);
+      slic.display_center_grid(center_grid_image, cv::Scalar(0, 0, 255));
+      slic.display_contours(out_image, cv::Vec3b(0,0,255));
+
+      pub_debug_.publish(cv_bridge::CvImage(
+                                            image->header,
+                                            sensor_msgs::image_encodings::BGR8,
+                                            out_image).toImageMsg());
+      pub_debug_mean_color_.publish(cv_bridge::CvImage(
+                                                       image->header,
+                                                       sensor_msgs::image_encodings::BGR8,
+                                                       mean_color_image).toImageMsg());
+      pub_debug_center_grid_.publish(cv_bridge::CvImage(
+                                                        image->header,
+                                                        sensor_msgs::image_encodings::BGR8,
+                                                        center_grid_image).toImageMsg());
+    }
     // publish clusters
     cv::Mat clusters;
     cv::transpose(slic.clusters, clusters);

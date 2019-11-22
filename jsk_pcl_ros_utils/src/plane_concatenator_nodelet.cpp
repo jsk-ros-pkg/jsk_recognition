@@ -268,20 +268,6 @@ namespace jsk_pcl_ros_utils
     min_area_ = config.min_area;
     max_area_ = config.max_area;
   }
-
-  void PlaneConcatenator::updateDiagnostic(
-    diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-    if (vital_checker_->isAlive()) {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                   "PlaneConcatenator running");
-    }
-    else {
-      jsk_topic_tools::addDiagnosticErrorSummary(
-        "PlaneConcatenator", vital_checker_, stat);
-    }
-  }
-
 }
 
 #include <pluginlib/class_list_macros.h>

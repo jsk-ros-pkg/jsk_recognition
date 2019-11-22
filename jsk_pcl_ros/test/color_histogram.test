@@ -1,0 +1,68 @@
+<launch>
+  <arg name="cloud_input" default="/right_hand_camera/depth_registered/points" />
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml" />
+
+  <node name="indices"
+        pkg="jsk_pcl_ros_utils" type="pointcloud_to_cluster_point_indices">
+    <remap from="~input" to="$(arg cloud_input)"/>
+  </node>
+
+  <node name="color_histogram"
+        pkg="jsk_pcl_ros" type="color_histogram" output="screen">
+    <remap from="~input" to="$(arg cloud_input)"/>
+    <remap from="~input/indices" to="indices/output" />
+    <rosparam>
+      bin_size: 10
+      histogram_policy: 0
+    </rosparam>
+  </node>
+
+  <node name="color_histogram_filter"
+        pkg="jsk_pcl_ros" type="color_histogram_filter" output="screen">
+    <remap from="~input" to="color_histogram/output" />
+    <remap from="~input/indices" to="indices/output" />
+    <rosparam>
+      bin_size: 10
+      distance_threshold: 0.9999
+      flip_threshold: true
+      reference_histogram: [0.1366894543170929, 0.018193358555436134, 0.019957682117819786, 0.010312500409781933, 0.02364908903837204, 0.13187174499034882, 0.13228841125965118, 0.05075846239924431, 0.021832682192325592, 0.0352376289665699, 0.18575845658779144, 0.2334505170583725]
+    </rosparam>
+  </node>
+
+  <node name="color_histogram_classifier"
+        pkg="jsk_pcl_ros" type="color_histogram_classifier" output="screen">
+    <remap from="~input/array" to="color_histogram/output" />
+    <rosparam>
+      label_names:
+        - test
+      histograms:
+        test: [0.1366894543170929, 0.018193358555436134, 0.019957682117819786, 0.010312500409781933, 0.02364908903837204, 0.13187174499034882, 0.13228841125965118, 0.05075846239924431, 0.021832682192325592, 0.0352376289665699, 0.18575845658779144, 0.2334505170583725]
+    </rosparam>
+  </node>
+
+  <node name="color_histogram_visualizer"
+        pkg="jsk_pcl_ros" type="color_histogram_visualizer.py">
+    <remap from="~input/array" to="color_histogram/output"/>
+    <rosparam>
+      histogram_index: 0
+      histogram_policy: 0
+    </rosparam>
+  </node>
+
+  <test test-name="test_color_histogram"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="30" retry="3" >
+    <rosparam>
+      topic_0: color_histogram/output
+      timeout_0: 30
+      topic_1: color_histogram_filter/output
+      timeout_1: 30
+      topic_2: color_histogram_classifier/output
+      timeout_2: 30
+      topic_3: color_histogram_visualizer/output
+      timeout_3: 30
+    </rosparam>
+  </test>
+
+</launch>

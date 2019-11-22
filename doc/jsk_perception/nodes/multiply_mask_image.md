@@ -21,3 +21,9 @@ Multiply (bitwise) two mask image into one mask image.
 
   How many messages you allow about the subscriber to keep in the queue.
   This should be big when there is much difference about delay between two topics.
+
+## Sample
+
+```bash
+roslaunch jsk_perception sample_multiply_mask_image.launch
+```

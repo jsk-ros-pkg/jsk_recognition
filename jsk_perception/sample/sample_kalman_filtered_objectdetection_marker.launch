@@ -1,0 +1,26 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find checkerboard_detector)/sample/sample_checkerboard_detector.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="kalman_filtered_objectdetection_marker"
+        pkg="jsk_perception" type="kalman-filtered-objectdetection-marker.l">
+    <!-- input -->
+    <remap from="input/ObjectDetection" to="checkerboard_detector/output/ObjectDetection"/>
+    <!-- output -->
+    <remap from="object_detection_marker_array" to="~output/object_detection_marker_array"/>
+    <remap from="filtered" to="~output/filtered"/>
+    <remap from="outlier" to="~output/outlier"/>
+    <remap from="attention_clipper/input/pose" to="~output/attention_clipper/input/pose"/>
+    <remap from="posewithcovstamped" to="~output/posewithcovstamped"/>
+    <remap from="simplecov" to="~output/simplecov"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_perception)/sample/config/sample_kalman_filtered_objectdetection_marker.rviz"/>
+  </group>
+</launch>

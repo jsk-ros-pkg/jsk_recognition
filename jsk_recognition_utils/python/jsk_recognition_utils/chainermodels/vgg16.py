@@ -5,7 +5,7 @@ import chainer.links as L
 
 class VGG16(chainer.Chain):
 
-    def __init__(self):
+    def __init__(self, n_class):
         super(VGG16, self).__init__(
             conv1_1=L.Convolution2D(3, 64, 3, stride=1, pad=1),
             conv1_2=L.Convolution2D(64, 64, 3, stride=1, pad=1),
@@ -27,9 +27,8 @@ class VGG16(chainer.Chain):
 
             fc6=L.Linear(25088, 4096),
             fc7=L.Linear(4096, 4096),
-            fc8=L.Linear(4096, 1000)
+            fc8=L.Linear(4096, n_class)
         )
-        self.train = False
 
     def __call__(self, x, t=None):
         h = F.relu(self.conv1_1(x))
@@ -55,13 +54,13 @@ class VGG16(chainer.Chain):
         h = F.relu(self.conv5_3(h))
         h = F.max_pooling_2d(h, 2, stride=2)
 
-        h = F.dropout(F.relu(self.fc6(h)), train=self.train, ratio=0.5)
-        h = F.dropout(F.relu(self.fc7(h)), train=self.train, ratio=0.5)
+        h = F.dropout(F.relu(self.fc6(h)), ratio=0.5)
+        h = F.dropout(F.relu(self.fc7(h)), ratio=0.5)
         h = self.fc8(h)
 
         self.pred = F.softmax(h)
         if t is None:
-            assert not self.train
+            assert not chainer.config.train
             return
 
         self.loss = F.softmax_cross_entropy(h, t)

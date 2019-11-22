@@ -1,0 +1,24 @@
+<launch>
+  <include file="$(find jsk_pcl_ros)/sample/sample_pointcloud_screenpoint.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_pointcloud_screenpoint_published"
+        name="test_people_detection"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="360" retry="3">
+    <rosparam>
+      topic_0: /pointcloud_screenpoint/output
+      timeout_0: 30
+      topic_1: /pointcloud_screenpoint/output_point
+      timeout_1: 30
+      topic_2: /pointcloud_screenpoint_client/output/image_marker
+      timeout_2: 30
+      topic_3: /pointcloud_screenpoint_client/output/ray_coords
+      timeout_3: 30
+      topic_4: /pointcloud_screenpoint_client/output/ray_marker_array
+      timeout_4: 30
+    </rosparam>
+  </test>
+
+</launch>

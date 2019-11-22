@@ -1,9 +1,11 @@
 <launch>
 
   <arg name="gui" default="true" />
+  <arg name="gpu" default="0"/>
 
   <include file="$(find jsk_perception)/sample/sample_fcn_object_segmentation.launch">
     <arg name="gui" value="false" />
+    <arg name="gpu" value="$(arg gpu)"/>
   </include>
 
   <arg name="INPUT_IMAGE" value="image_publisher/output" />

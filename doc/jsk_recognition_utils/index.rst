@@ -10,12 +10,6 @@ jsk_recognition_utils a C++ library for sensor model, geometrical modeling and p
 .. toctree::
    :glob:
    :maxdepth: 1
-
-   ./*
-
-.. toctree::
-   :glob:
-   :maxdepth: 1
    :caption: nodes and nodelets
 
    ./nodes/*

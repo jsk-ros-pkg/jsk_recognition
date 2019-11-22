@@ -7,10 +7,10 @@
   <test test-name="test_bof_histogram_extractor"
         name="test_bof_histogram_extractor"
         pkg="jsk_tools" type="test_topic_published.py"
-        time-limit="30" retry="6">
+        time-limit="60" retry="6">
     <rosparam>
       topic_0: /bof_histogram_extractor/output
-      timeout_0: 30
+      timeout_0: 60
     </rosparam>
   </test>
 

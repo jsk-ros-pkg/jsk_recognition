@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_organized_pass_through.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_organzed_pass_through"
+        name="test_organzed_pass_through"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /organized_pass_through/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

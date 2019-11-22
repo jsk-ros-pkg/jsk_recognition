@@ -17,6 +17,10 @@ Subscribing Topic
 
   Label probability image.
 
+* ``~input/candidates`` (``jsk_recognition_msgs/LabelArray``)
+
+  Array of candidates label to update ``~candidates``.
+
 
 Publishing Topic
 ----------------
@@ -47,6 +51,9 @@ Parameters
   If no candidates are provided,
   this node does nothing and just transports the input msg.
 
+* ``~candidates_fixed`` (List of String, default: ``[]``)
+
+  Candidates that never changed by services or topics.
 
 Sample
 ------

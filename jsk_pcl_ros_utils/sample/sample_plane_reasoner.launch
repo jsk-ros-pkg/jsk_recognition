@@ -1,0 +1,54 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml"/>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="static_polygon_array_publisher"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/StaticPolygonArrayPublisher /sample_manager">
+    <remap from="~input" to="/right_hand_camera/depth_registered/points"/>
+    <rosparam>
+      use_message: true
+      frame_ids:
+        - right_hand_camera_rgb_optical_frame
+        - right_hand_camera_rgb_optical_frame
+        - right_hand_camera_rgb_optical_frame
+        - right_hand_camera_rgb_optical_frame
+      polygon_array:
+        - [[3, 0, 0], [0, 3, 0], [0, 1, 2], [1, 0, 2]]
+        - [[-1, -1, 1], [4, 3, 0], [3, 4, 0]]
+        - [[-1, 2, 0], [-1, 2, 2], [-1, 4, 2], [-1, 4, 0]]
+        - [[1, 2, -1], [3, 2, -1], [3, 1, -1]]
+    </rosparam>
+  </node>
+
+  <node name="sample_cluster_indices_publisher_from_polygons"
+        pkg="jsk_pcl_ros_utils" type="sample_cluster_indices_publisher_from_polygons.py">
+    <remap from="~input" to="static_polygon_array_publisher/output_polygons"/>
+  </node>
+
+  <node name="dynparam_setter"
+        pkg="dynamic_reconfigure" type="dynparam"
+        args="set plane_reasoner global_frame_id right_hand_camera_rgb_optical_frame"/>
+
+  <node name="plane_reasoner"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PlaneReasoner /sample_manager">
+    <remap from="~input" to="/right_hand_camera/depth_registered/points"/>
+    <remap from="~input_inliers" to="sample_cluster_indices_publisher_from_polygons/output"/>
+    <remap from="~input_coefficients" to="static_polygon_array_publisher/output_coefficients"/>
+    <remap from="~input_polygons" to="static_polygon_array_publisher/output_polygons"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_plane_reasoner.rviz"/>
+  </group>
+
+</launch>

@@ -1,0 +1,38 @@
+<launch>
+  <arg name="gui" default="true"/>
+  <arg name="csv_path" default="$(env HOME)/.ros/jsk_pcl_ros_sample_dump_depth_error.csv"/>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_depth_image_error.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="dump_depth_error"
+        pkg="jsk_pcl_ros" type="dump_depth_error.py">
+    <remap from="/depth_image_error/output" to="depth_image_error/output"/>
+    <rosparam subst_value="true">
+      csv_path: $(arg csv_path)
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="extract_true_depth"
+          pkg="topic_tools" type="transform"
+          args="/depth_image_error/output /extract_true_depth/output std_msgs/Float32
+                'm.true_depth'
+                --wait-for-start"/>
+
+    <node name="extract_observed_depth"
+          pkg="topic_tools" type="transform"
+          args="/depth_image_error/output /extract_observed_depth/output std_msgs/Float32
+                'm.observed_depth'
+                --wait-for-start"/>
+
+    <node name="rqt_2d_plot"
+          pkg="jsk_rqt_plugins" type="rqt_2d_plot"
+          args="/dump_depth_error/scatter"/>
+
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/dump_depth_error.rviz"/>
+  </group>
+</launch>

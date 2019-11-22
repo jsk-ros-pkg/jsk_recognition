@@ -8,24 +8,22 @@ from geometry_msgs.msg import Vector3, PoseStamped, PointStamped
 import math
 import tf
 import numpy as np
-rospy.init_node("click_to_pose")
 
-latest_camera_info=None
-pub = rospy.Publisher("~output", PoseStamped, queue_size=1)
-pub_p = rospy.Publisher("~output_point", PointStamped, queue_size=1)
 
 def camera_info_cb(msg):
     global latest_camera_info
     latest_camera_info = msg;
 
+
 def image_cb(msg):
     global latest_image
     latest_image = msg;
 
+
 def cloud_cb(msg):
     global latest_camera_info, latest_image, frame_id
     # if latest_camera_info:
-    if latest_image:
+    if latest_image is not None:
     #     r = math.sqrt((msg.point.x - latest_camera_info.width/2)*(msg.point.x - latest_camera_info.width/2)+ (msg.point.y - latest_camera_info.height/2.0) * (msg.point.y - latest_camera_info.height/2.0))
         r = math.sqrt((msg.point.x - latest_image.width/2)*(msg.point.x - latest_image.width/2)+ (msg.point.y - latest_image.height/2.0) * (msg.point.y - latest_image.height/2.0))
         phi=r/341.0
@@ -63,6 +61,10 @@ def cloud_cb(msg):
         pub_p.publish(point)
 
 if __name__ == "__main__":
+    rospy.init_node("click_to_pose")
+    latest_image = None
+    pub = rospy.Publisher("~output", PoseStamped, queue_size=1)
+    pub_p = rospy.Publisher("~output_point", PointStamped, queue_size=1)
     frame_id = rospy.get_param("~frame_id", "fisheye")
     rospy.Subscriber("clicked_point", PointStamped, cloud_cb)
     rospy.Subscriber("camera_info", CameraInfo, camera_info_cb)

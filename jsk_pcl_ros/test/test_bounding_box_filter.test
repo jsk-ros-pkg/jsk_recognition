@@ -1,0 +1,21 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_bounding_box_filter.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_bounding_box_filter"
+        name="test_bounding_box_filter"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="30" retry="6">
+    <rosparam>
+      topic_0: /bounding_box_filter/output_box
+      timeout_0: 30
+      topic_1: /bounding_box_filter/output_indices
+      timeout_1: 30
+      topic_2: /bounding_box_filter_without_indices/output_box
+      timeout_2: 30
+    </rosparam>
+  </test>
+
+</launch>

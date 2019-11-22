@@ -39,6 +39,8 @@
 
 #include <jsk_topic_tools/connection_based_nodelet.h>
 #include <jsk_recognition_msgs/HeightmapConfig.h>
+#include <jsk_pcl_ros/HeightmapTimeAccumulationConfig.h>
+#include <dynamic_reconfigure/server.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/Image.h>
 #include <opencv2/opencv.hpp>
@@ -49,14 +51,29 @@
 #include "jsk_pcl_ros/heightmap_utils.h"
 #include <std_srvs/Empty.h>
 
+// accumulate
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/variance.hpp>
+#include <boost/accumulators/statistics/count.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+
 namespace jsk_pcl_ros
 {
   typedef pcl::PointXYZI PointType;
+
   class HeightmapTimeAccumulation:
     public jsk_topic_tools::ConnectionBasedNodelet
   {
   public:
     typedef boost::shared_ptr<HeightmapTimeAccumulation> Ptr;
+    typedef HeightmapTimeAccumulationConfig Config;
+    typedef boost::accumulators::accumulator_set<
+      float,
+      boost::accumulators::stats<
+        boost::accumulators::tag::variance,
+        boost::accumulators::tag::count,
+        boost::accumulators::tag::mean> >  Accumulator;
     HeightmapTimeAccumulation(): ConnectionBasedNodelet() {}
   protected:
     virtual void onInit();
@@ -69,14 +86,20 @@ namespace jsk_pcl_ros
     virtual cv::Point toIndex(const PointType& p, const cv::Mat& map);
     virtual bool isValidIndex(const cv::Point& index, const cv::Mat& map);
     virtual bool isValidCell(const cv::Point& index, const cv::Mat& map);
-    virtual void configCallback(
+    virtual void configTopicCallback(
       const jsk_recognition_msgs::HeightmapConfig::ConstPtr& config);
     virtual void prevPointCloud(
       const sensor_msgs::PointCloud2::ConstPtr& msg);
     virtual bool resetCallback(std_srvs::Empty::Request& req,
                                std_srvs::Empty::Response& res);
+    virtual void overwriteAccmulation(pcl::PointCloud<PointType > &transformed_pointcloud,
+                                      cv::Mat &new_heightmap);
+    virtual void mergedAccmulation(pcl::PointCloud<PointType > &transformed_pointcloud,
+                                   cv::Mat &new_heightmap);
+    virtual void configCallback(Config& config, uint32_t level);
 
     boost::mutex mutex_;
+    boost::shared_ptr<dynamic_reconfigure::Server<Config> > srv_;
     tf::TransformListener* tf_;
     Eigen::Affine3f prev_from_center_to_fixed_;
     std::string center_frame_id_;
@@ -96,6 +119,11 @@ namespace jsk_pcl_ros
     double max_x_;
     double max_y_;
     int tf_queue_size_;
+    bool use_offset_;
+    int bilateral_filter_size_;
+    double bilateral_sigma_color_;
+    double bilateral_sigma_space_;
+    bool use_bilateral_;
   private:
   };
 }

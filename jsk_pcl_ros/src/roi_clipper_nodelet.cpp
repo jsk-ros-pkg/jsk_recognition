@@ -179,20 +179,6 @@ namespace jsk_pcl_ros
       pub_cloud_indices_.publish(indices);
     }
   }
-  
-  void ROIClipper::updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-    if (vital_checker_->isAlive()) {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                   "ROIClipper running");
-    }
-    else {
-      jsk_topic_tools::addDiagnosticErrorSummary(
-        "ROIClipper", vital_checker_, stat);
-    }
-
-  }
 }
 
 #include <pluginlib/class_list_macros.h>

@@ -1,6 +1,7 @@
 from jsk_recognition_utils import chainermodels
 from jsk_recognition_utils import color
 from jsk_recognition_utils import conversations
+from jsk_recognition_utils import datasets
 from jsk_recognition_utils import feature
 from jsk_recognition_utils import mask
 from jsk_recognition_utils import visualize

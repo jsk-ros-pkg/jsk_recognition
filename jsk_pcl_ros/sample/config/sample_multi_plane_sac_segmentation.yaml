@@ -1,0 +1,29 @@
+!!python/object/new:dynamic_reconfigure.encoding.Config
+dictitems:
+  eps_angle: 0.01
+  groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+    dictitems:
+      eps_angle: 0.01
+      groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+        state: []
+      id: 0
+      max_iterations: 200
+      min_inliers: 5000
+      min_points: 1000
+      min_trial: 3
+      name: Default
+      normal_distance_weight: 0.1
+      outlier_threshold: 0.01
+      parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
+        state: []
+      parent: 0
+      state: true
+      type: ''
+    state: []
+  max_iterations: 200
+  min_inliers: 5000
+  min_points: 1000
+  min_trial: 3
+  normal_distance_weight: 0.1
+  outlier_threshold: 0.01
+state: []

@@ -186,17 +186,6 @@ namespace jsk_pcl_ros {
     people_detector_.setIntrinsics(
       rgb_intrinsics_matrix);  // set RGB camera intrinsic parameters
   }
-
-  void PeopleDetection::updateDiagnostic(
-    diagnostic_updater::DiagnosticStatusWrapper& stat) {
-    if (vital_checker_->isAlive()) {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                   "PeopleDetection running");
-    } else {
-      jsk_topic_tools::addDiagnosticErrorSummary("PeopleDetection",
-                                                 vital_checker_, stat);
-    }
-  }
 }
 
 #include <pluginlib/class_list_macros.h>

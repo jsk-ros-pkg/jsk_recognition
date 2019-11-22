@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_heightmap_converter.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_heightmap_converter"
+        name="test_heightmap_converter"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /heightmap_converter/output
+      timeout_0: 30
+      topic_1: /heightmap_converter/output/config
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

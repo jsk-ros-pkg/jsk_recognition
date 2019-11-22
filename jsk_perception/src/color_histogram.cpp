@@ -120,19 +120,6 @@ namespace jsk_perception
     }
   }
 
-  void ColorHistogram::updateDiagnostic(
-    diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-    if (vital_checker_->isAlive()) {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                   "ColorHistogram running");
-    }
-    else {
-      jsk_topic_tools::addDiagnosticErrorSummary(
-        "ColorHistogram", vital_checker_, stat);
-    }
-  }
-
   void ColorHistogram::convertHistogramToMsg(const cv::Mat& hist,
                                              int size,
                                              jsk_recognition_msgs::ColorHistogram& msg)

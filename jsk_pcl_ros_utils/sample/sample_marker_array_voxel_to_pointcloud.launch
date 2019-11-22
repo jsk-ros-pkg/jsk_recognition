@@ -1,0 +1,21 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <param name="/use_sim_time" value="true"/>
+
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros_utils)/sample/data/bunny_marker_array.bag --clock --loop"/>
+
+  <node name="marker_array_voxel_to_pointcloud"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/MarkerArrayVoxelToPointCloud">
+    <remap from="~input" to="/octree_voxel_grid/output_marker_array"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_marker_arrray_voxel_to_pointcloud.rviz"/>
+  </group>
+</launch>

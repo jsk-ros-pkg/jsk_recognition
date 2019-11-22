@@ -1,0 +1,30 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_mask_rcnn_instance_segmentation.launch">
+    <arg name="gui" value="false"/>
+    <arg name="gpu" value="-1"/>
+  </include>
+
+  <test test-name="test_mask_rcnn_instance_segmentation"
+        name="test_mask_rcnn_instance_segmentation"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /mask_rcnn_instance_segmentation/output/class
+      timeout_0: 60
+      topic_1: /mask_rcnn_instance_segmentation/output/cluster_indices
+      timeout_1: 60
+      topic_2: /mask_rcnn_instance_segmentation/output/label_cls
+      timeout_2: 60
+      topic_3: /mask_rcnn_instance_segmentation/output/label_ins
+      timeout_3: 60
+      topic_4: /mask_rcnn_instance_segmentation/output/labels
+      timeout_4: 60
+      topic_5: /mask_rcnn_instance_segmentation/output/rects
+      timeout_5: 60
+      topic_6: /mask_rcnn_instance_segmentation/output/viz
+      timeout_6: 60
+    </rosparam>
+  </test>
+
+</launch>

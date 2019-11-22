@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_draw_rects.launch">
+    <env name="DISPLAY" value="" />  <!-- disable image_view -->
+  </include>
+
+  <test test-name="test_draw_rects"
+        name="test_draw_rects"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="360">
+    <rosparam>
+      topic_0: /draw_rects/output
+      timeout_0: 10
+    </rosparam>
+  </test>
+
+</launch>

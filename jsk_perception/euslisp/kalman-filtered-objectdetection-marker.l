@@ -1,6 +1,6 @@
 #!/usr/bin/env roseus
 
-(load "package://euslisp/jskeus/irteus/kalmanlib.l")
+(load "irteus/kalmanlib.l")
 (ros::load-ros-manifest "roseus")
 (ros::load-ros-manifest "posedetection_msgs")
 (ros::roseus "marker-publish")

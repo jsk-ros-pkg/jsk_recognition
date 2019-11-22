@@ -1,0 +1,20 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_deep_sort_tracker.launch">
+    <arg name="gui" value="false" />
+    <arg name="gpu" value="-1" />
+  </include>
+
+  <test test-name="test_deep_sort_tracker"
+        name="test_deep_sort_tracker"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /deep_sort_tracker/output/viz
+      timeout_0: 60
+      topic_1: /deep_sort_tracker/output/labels
+      timeout_1: 60
+    </rosparam>
+  </test>
+
+</launch>

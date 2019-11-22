@@ -1,0 +1,21 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_roi_clipper.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_roi_clipper"
+        name="test_roi_clipper"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /roi_clipper/output
+      timeout_0: 30
+      topic_1: /roi_clipper/output/cloud
+      timeout_1: 30
+      topic_2: /roi_clipper/output/cloud_indices
+      timeout_2: 30
+    </rosparam>
+  </test>
+
+</launch>

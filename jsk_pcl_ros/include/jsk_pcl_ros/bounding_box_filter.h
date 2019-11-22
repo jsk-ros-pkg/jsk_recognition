@@ -48,11 +48,11 @@
 #include <jsk_recognition_msgs/ClusterPointIndices.h>
 #include <jsk_recognition_msgs/ModelCoefficientsArray.h>
 #include <jsk_pcl_ros/BoundingBoxFilterConfig.h>
-#include "jsk_topic_tools/connection_based_nodelet.h"
+#include <jsk_topic_tools/diagnostic_nodelet.h>
 
 namespace jsk_pcl_ros
 {
-  class BoundingBoxFilter: public jsk_topic_tools::ConnectionBasedNodelet
+  class BoundingBoxFilter: public jsk_topic_tools::DiagnosticNodelet
   {
   public:
     typedef jsk_pcl_ros::BoundingBoxFilterConfig Config;
@@ -62,12 +62,16 @@ namespace jsk_pcl_ros
       jsk_recognition_msgs::ClusterPointIndices
       > SyncPolicy;
 
+    BoundingBoxFilter() : DiagnosticNodelet("BoundingBoxFilter") {}
+
   protected:
     ////////////////////////////////////////////////////////
     // methods
     ////////////////////////////////////////////////////////
     virtual void onInit();
     virtual void filter(
+      const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& box_array_msg);
+    virtual void filterWithIndices(
       const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& box_array_msg,
       const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg);
     virtual void configCallback(Config &config, uint32_t level);
@@ -75,6 +79,10 @@ namespace jsk_pcl_ros
       diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void subscribe();
     virtual void unsubscribe();
+    void filterBoundingBoxes(
+      const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& box_array_msg,
+      std::vector<size_t>& keep);
+
     ////////////////////////////////////////////////////////
     // ROS varariables
     ////////////////////////////////////////////////////////
@@ -89,8 +97,6 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     // Diagnostics Variables
     ////////////////////////////////////////////////////////
-    jsk_recognition_utils::TimeredDiagnosticUpdater::Ptr diagnostic_updater_;
-    jsk_topic_tools::VitalChecker::Ptr vital_checker_;
     jsk_recognition_utils::Counter remove_counter_;
     jsk_recognition_utils::Counter pass_counter_;
     
@@ -108,6 +114,7 @@ namespace jsk_pcl_ros
     double z_dimension_min_;
     double z_dimension_max_;
     
+    bool with_indices_;
     
   private:
     

@@ -1,6 +1,7 @@
 <launch>
 
   <arg name="gui" default="true" />
+  <arg name="use_pca" default="true" />
 
   <param name="/use_sim_time" value="true" />
   <node name="rosbag_play"
@@ -22,9 +23,10 @@
     <remap from="~target" to="/euclid_clustering_left_table/output" />
     <remap from="~align_planes" to="/multi_plane_estimate_left_hand_camera/output_refined_polygon" />
     <remap from="~align_planes_coefficients" to="/multi_plane_estimate_left_hand_camera/output_refined_coefficients" />
-    <rosparam>
+    <rosparam subst_value="true">
       align_boxes: true
       align_boxes_with_plane: true
+      use_pca: $(arg use_pca)
     </rosparam>
   </node>
 
@@ -33,10 +35,11 @@
         args="standalone jsk_pcl/ClusterPointIndicesDecomposer" output="screen">
     <remap from="~input" to="/plane_extraction_left_hand_camera/output" />
     <remap from="~target" to="/euclid_clustering_left_table/output" />
-    <rosparam>
+    <rosparam subst_value="true">
       align_boxes: true
       align_boxes_with_plane: false
       target_frame_id: base
+      use_pca: $(arg use_pca)
     </rosparam>
   </node>
 

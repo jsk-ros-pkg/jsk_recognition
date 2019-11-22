@@ -1,13 +1,15 @@
 # polygon_array_to_polygon.py
 
+![](images/polygon_array_to_polygon.png)
+
 ## What is this?
 
-Convert `geometry_msgs/PolygonArray` to `geometry_msgs/PolygonStamped`.
+Convert `jsk_recognition_msgs/PolygonArray` to `geometry_msgs/PolygonStamped`.
 
 
 ## Subscribing Topic
 
-* `~input` (`geometry_msgs/PolygonArray`)
+* `~input` (`jsk_recognition_msgs/PolygonArray`)
 
   Input polygon array.
 
@@ -23,3 +25,10 @@ Convert `geometry_msgs/PolygonArray` to `geometry_msgs/PolygonStamped`.
 
   Index value where polygon is extracted from polygon array.
   Please note that negative index is skipped.
+
+
+## Sample
+
+```bash
+roslaunch jsk_recognition_utils sample_polygon_array_to_polygon.launch
+```

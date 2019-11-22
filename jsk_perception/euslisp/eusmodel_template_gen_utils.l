@@ -15,7 +15,7 @@
 (defun get-template-info (obj aface)
   (let ((teximg (send aface :get :gl-textureimage))
 	(texcoh (send aface :get :gl-texturecoords))
-	imgpath template)
+	imgpath template template-include)
     (when (and teximg texcoh)
       (let* ((texco (send texcoh :list))
 	     (imgfile (if teximg (send teximg :name)))
@@ -35,11 +35,13 @@
 		    ))
 	(setq template (ros::resolve-ros-path
 			(format nil "package://~A/template/~A.~A" *pkgname* (send path :name) (send path :type))))
+  (setq template-include
+        (format nil "$(find ~A)/template/~A.~A" *pkgname* (send path :name) (send path :type)))
 	(when (or (not (probe-file template)) (file-newer imgfile template))
           (if (null (probe-file (send (pathname template) :directory-string)))
               (unix::mkdir (send (pathname template) :directory-string)))
 	  (unix::system (format nil "cp -f ~a ~a" imgfile template)))
-	(list template width height trans)
+	(list template-include width height trans)
 	))))
 
 (defun gen-detection-nodes (obj)
@@ -75,11 +77,13 @@
    (launch-f launch-file-name :direction :output)
    (format launch-f "<launch>")
    (dolist (obj objects)
-     (let (obj-launch xmllist xmltext nodes)
+     (let (obj-launch obj-include xmllist xmltext nodes)
        (setq obj-launch
 	     (format nil "~A/template/_~x_~A.xml" (ros::resolve-ros-path (format nil "package://~A" *pkgname*))
 		     (system::address obj)
 		     (send obj :name)))
+       (setq obj-include
+             (format nil "$(find ~A)/template/_~x_~A.xml" *pkgname* (system::address obj) (send obj :name)))
        (setq nodes (gen-detection-nodes obj))
        (send-all nodes :namespace ns)
        (setq xmllist (append (list "launch" nil)
@@ -88,7 +92,7 @@
 				      :newline "~%" :attrfmt " ~A=\"~A\""))
        (with-open-file (f obj-launch :direction :output)
 		       (format f xmltext))
-       (format launch-f "<include file=\"~A\"/>~%" obj-launch)
+       (format launch-f "<include file=\"~A\"/>~%" obj-include)
      ))
    (format launch-f "</launch>")
    ))

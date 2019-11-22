@@ -1,0 +1,42 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="heightmap_converter"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/HeightmapConverter sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <rosparam>
+      use_projected_center: true
+      fixed_frame_id: map
+      center_frame_id: base_link
+      projected_center_frame_id: heightmap_center
+      resolution_x: 800
+      resolution_y: 800
+      min_x: -2.0
+      max_x: 2.0
+      min_y: -2.0
+      max_y: 2.0
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="colorize_float_image"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_perception/ColorizeFloatImage sample_manager">
+      <remap from="~input" to="heightmap_converter/output"/>
+      <rosparam>
+        channel: 0
+      </rosparam>
+    </node>
+
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/heightmap_converter.rviz"/>
+  </group>
+</launch>

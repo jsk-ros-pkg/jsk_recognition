@@ -1,7 +1,11 @@
 <launch>
 
+  <arg name="use_mask" default="false" />
+
   <include file="$(find jsk_perception)/sample/sample_fcn_object_segmentation.launch">
     <arg name="gui" value="false" />
+    <arg name="gpu" value="-1" />
+    <arg name="use_mask" value="$(arg use_mask)" />
   </include>
 
   <test test-name="test_fcn_object_segmentation"

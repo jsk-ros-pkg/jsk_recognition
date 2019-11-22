@@ -8,10 +8,10 @@ except:
 
 import rospy
 import numpy as np
-from sklearn.cross_validation import cross_val_score
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.externals import joblib
+
 
 class RandomForestServer:
     def __init__(self, clf):
@@ -24,7 +24,9 @@ class RandomForestServer:
             rospy.logerr("Lenght of datas are different")
             exit()
         rospy.loginfo("InitWithData please wait..")
-        clf = RandomForestClassifier(n_estimators=250, max_features=2, max_depth=29, min_samples_split=1, random_state=0)
+        clf = RandomForestClassifier(
+            n_estimators=250, max_features=2, max_depth=29,
+            min_samples_split=2, random_state=0)
         clf.fit(data_x, data_y)
         return cls(clf)
 
@@ -39,7 +41,9 @@ class RandomForestServer:
         ret = []
         for data in req.data:
             print data
-            ret.append(" ".join([str(predict_data) for predict_data in self.clf.predict(data.point)]))
+            ret.append(" ".join([
+                str(predict_data)
+                for predict_data in self.clf.predict([data.point])]))
             rospy.loginfo("req : " + str(data.point) +  "-> answer : " + str(ret))
         return ClassifyDataResponse(ret)
 

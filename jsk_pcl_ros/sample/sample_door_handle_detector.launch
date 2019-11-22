@@ -1,0 +1,278 @@
+<launch>
+  <arg name="play_rosbag" default="true" />
+  <arg name="gui" default="true" />
+
+  <arg name="cloud_input" default="/camera_remote/depth_registered/points" />
+  <arg name="base_frame_id" default="ground" />
+  <arg name="sensor_frame_id" default="camera_rgb_optical_frame"/>
+  <arg name="min_likelihood" default="0.3" />
+  <arg name="door_min_height" default="0.3" />
+  <arg name="door_max_height" default="2.0" />
+  <arg name="handle_min_cluster_size" default="15" />
+  <arg name="vital_rate" default="0.2" />
+  <arg name="respawn" default="true" />
+
+  <group if="$(arg play_rosbag)">
+    <param name="/use_sim_time" value="true" />
+    <node name="rosbag_play" pkg="rosbag" type="play"
+          args="$(find jsk_pcl_ros)/sample/data/sample_door_handle_detector.bag
+                --clock -l -r0.1" />
+  </group>
+
+  <node if="$(arg gui)"
+        name="rviz" pkg="rviz" type="rviz"
+        args="-d $(find jsk_pcl_ros)/sample/rviz/door_handle_detector.rviz" />
+
+  <group ns="door_detector">
+    <node name="manager"
+          pkg="jsk_topic_tools" type="standalone_complexed_nodelet"
+          output="screen" respawn="$(arg respawn)">
+      <rosparam subst_value="true">
+        nodelets:
+        - name: input_relay
+          type: jsk_topic_tools/Relay
+          remappings:
+          - from: ~input
+            to: $(arg cloud_input)
+        - name: pass_through
+          type: pcl/PassThrough
+          remappings:
+          - from: ~input
+            to: input_relay/output
+        - name: plane_segmentation
+          type: jsk_pcl/OrganizedMultiPlaneSegmentation
+          remappings:
+          - from: ~input
+            to: pass_through/output
+        - name: plane_segmentation_decomposer
+          type: jsk_pcl/ClusterPointIndicesDecomposer
+          remappings:
+          - from: ~input
+            to: pass_through/output
+          - from: ~target
+            to: plane_segmentation/output_refined
+          - from: ~align_planes
+            to: plane_segmentation/output_refined_polygon
+          - from: ~align_planes_coefficients
+            to: plane_segmentation/output_refined_coefficients
+        - name: plane_reasoner
+          type: jsk_pcl_utils/PlaneReasoner
+          remappings:
+          - from: ~input
+            to: pass_through/output
+          - from: ~input_inliers
+            to: plane_segmentation/output_refined
+          - from: ~input_polygons
+            to: plane_segmentation/output_refined_polygon
+          - from: ~input_coefficients
+            to: plane_segmentation/output_refined_coefficients
+        - name: plane_reasoner_decomposer
+          type: jsk_pcl/ClusterPointIndicesDecomposer
+          remappings:
+          - from: ~input
+            to: pass_through/output
+          - from: ~target
+            to: plane_reasoner/output/vertical/inliers
+          - from: ~align_planes
+            to: plane_reasoner/output/vertical/polygons
+          - from: ~align_planes_coefficients
+            to: plane_reasoner/output/vertical/coefficients
+        - name: plane_concatenator
+          type: jsk_pcl_utils/PlaneConcatenator
+          remappings:
+          - from: ~input
+            to: pass_through/output
+          - from: ~input/indices
+            to: plane_reasoner/output/vertical/inliers
+          - from: ~input/polygons
+            to: plane_reasoner/output/vertical/polygons
+          - from: ~input/coefficients
+            to: plane_reasoner/output/vertical/coefficients
+        - name: plane_concatenator_decomposer
+          type: jsk_pcl/ClusterPointIndicesDecomposer
+          remappings:
+          - from: ~input
+            to: pass_through/output
+          - from: ~target
+            to: plane_concatenator/output/inliers
+          - from: ~align_planes
+            to: plane_concatenator/output/polygons
+          - from: ~align_planes_coefficients
+            to: plane_concatenator/output/coefficients
+        - name: polygon_area_likelihood_filter
+          type: jsk_pcl_utils/PolygonArrayAreaLikelihood
+          remappings:
+          - from: ~input
+            to: plane_concatenator/output/polygons
+        - name: polygon_magnifier
+          type: jsk_pcl_utils/PolygonMagnifier
+          remappings:
+          - from: ~input
+            to: polygon_area_likelihood_filter/output
+        - name: plane_extraction
+          type: jsk_pcl/MultiPlaneExtraction
+          remappings:
+          - from: ~input
+            to: pass_through/output
+          - from: ~input_polygons
+            to: extract_top_polygon/output
+          - from: ~input_coefficients
+            to: extract_top_polygon/output/coefficients
+        - name: downsample
+          type: pcl/VoxelGrid
+          remappings:
+          - from: ~input
+            to: plane_extraction/output
+        - name: euclidean_clustering
+          type: jsk_pcl/EuclideanClustering
+          remappings:
+          - from: ~input
+            to: downsample/output
+        - name: euclidean_clustering_decomposer
+          type: jsk_pcl/ClusterPointIndicesDecomposerZAxis
+          remappings:
+          - from: ~input
+            to: downsample/output
+          - from: ~target
+            to: euclidean_clustering/output
+          - from: ~align_planes
+            to: extract_top_polygon/output
+          - from: ~align_planes_coefficients
+            to: extract_top_polygon/output/coefficients
+        - name: door_handle_unwrapper
+          type: jsk_pcl_utils/BoundingBoxArrayToBoundingBox
+          remappings:
+          - from: ~input
+            to: euclidean_clustering_decomposer/boxes
+          - from: ~output
+            to: door_handle_box
+      </rosparam>
+    </node>
+
+    <rosparam subst_value="true"
+              ns="pass_through">
+      filter_limit_min: $(arg door_min_height)
+      filter_limit_max: $(arg door_max_height)
+      filter_field_name: z
+      keep_organized: true
+      input_frame: $(arg base_frame_id)
+    </rosparam>
+
+    <rosparam subst_value="true"
+              ns="plane_segmentation">
+      max_curvature: 0.01
+      estimate_normal: true
+      publish_normal: true
+      connect_plane_angle_threshold: 0.1
+      vital_rate: $(arg vital_rate)
+    </rosparam>
+
+    <rosparam subst_value="true"
+              ns="plane_segmentation_decomposer">
+      queue_size: 100
+      align_boxes: true
+      align_boxes_with_plane: true
+      use_pca: true
+      vital_rate: $(arg vital_rate)
+    </rosparam>
+
+    <rosparam subst_value="true"
+              ns="plane_reasoner">
+      global_frame_id: $(arg base_frame_id)
+      horizontal_angular_threshold: 0.2
+      vertical_angular_threshold: 0.1
+      vital_rate: $(arg vital_rate)
+    </rosparam>
+
+    <rosparam subst_value="true"
+              ns="plane_reasoner_decomposer">
+      queue_size: 100
+      align_boxes: true
+      align_boxes_with_plane: true
+      use_pca: true
+      vital_rate: $(arg vital_rate)
+    </rosparam>
+
+    <rosparam subst_value="true"
+              ns="plane_concatenator">
+      queue_size: 100
+      connect_distance_threshold: 0.2
+      min_area: 0.3
+      vital_rate: $(arg vital_rate)
+    </rosparam>
+
+    <rosparam subst_value="true"
+              ns="plane_concatenator_decomposer">
+      queue_size: 100
+      align_boxes: true
+      align_boxes_with_plane: true
+      use_pca: true
+      vital_rate: $(arg vital_rate)
+    </rosparam>
+
+    <rosparam subst_value="true"
+              ns="polygon_array_likelihood_filter">
+      area: 1.0
+      vital_rate: $(arg vital_rate)
+    </rosparam>
+
+    <rosparam subst_value="true"
+              ns="polygon_magnifier">
+      use_scale_factor: true
+      magnify_scale_factor: 0.9
+      vital_rate: $(arg vital_rate)
+    </rosparam>
+
+    <rosparam subst_value="true"
+              ns="plane_extraction">
+      use_indices: false
+      min_height: 0.05
+      max_height: 0.1
+      max_queue_size: 300
+      use_sensor_frame: true
+      sensor_frame: $(arg sensor_frame_id)
+      vital_rate: $(arg vital_rate)
+    </rosparam>
+
+    <rosparam subst_value="true"
+              ns="downsample">
+      leaf_size: 0.01
+      filter_limit_min: 0.0
+      filter_limit_max: 1.5
+      keep_organized: true
+      vital_rate: $(arg vital_rate)
+    </rosparam>
+
+    <rosparam subst_value="true"
+              ns="euclidean_clustering">
+      tolerance: 0.05
+      min_size: $(arg handle_min_cluster_size)
+      vital_rate: $(arg vital_rate)
+    </rosparam>
+
+    <rosparam subst_value="true"
+              ns="euclidean_clustering_decomposer">
+      queue_size: 100
+      align_boxes: true
+      align_boxes_with_plane: true
+      force_to_flip_z_axis: true
+      use_pca: true
+      vital_rate: $(arg vital_rate)
+    </rosparam>
+
+    <rosparam subst_value="true"
+              ns="door_handle_unwrapper">
+      index: 0
+      vital_rate: $(arg vital_rate)
+    </rosparam>
+
+    <node name="extract_top_polygon"
+          pkg="jsk_pcl_ros" type="extract_top_polygon_likelihood.py">
+      <remap from="~input" to="polygon_magnifier/output"/>
+      <remap from="~input/coefficients" to="plane_concatenator/output/coefficients" />
+      <rosparam subst_value="true">
+        min_likelihood: $(arg min_likelihood)
+      </rosparam>
+    </node>
+  </group>
+</launch>

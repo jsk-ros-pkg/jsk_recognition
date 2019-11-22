@@ -1,0 +1,22 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_bounding_box_array_to_bounding_box.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="tf_transform_bounding_box"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/TfTransformBoundingBox">
+    <remap from="~input" to="bounding_box_array_to_bounding_box/output"/>
+    <rosparam>
+      target_frame_id: map
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_tf_transform_bounding_box.rviz"/>
+  </group>
+</launch>

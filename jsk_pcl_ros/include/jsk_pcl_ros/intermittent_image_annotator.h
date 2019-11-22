@@ -84,8 +84,6 @@ namespace jsk_pcl_ros
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void waitForNextImage();
     virtual void cameraCallback(
       const sensor_msgs::Image::ConstPtr& image_msg,

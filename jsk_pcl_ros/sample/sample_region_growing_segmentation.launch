@@ -1,0 +1,49 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_normal_estimation_omp.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="pass_through"
+        pkg="nodelet" type="nodelet"
+        args="load pcl/PassThrough sample_manager">
+    <remap from="~input" to="normal_estimation_omp/output_with_xyz"/>
+    <rosparam>
+      filter_field_name: z
+      filter_limit_min: 0.0
+      filter_limit_max: 10.0
+      keep_organized: false  # remove NaN here
+    </rosparam>
+  </node>
+
+  <node name="region_growing_segmentation"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/RegionGrowingSegmentation sample_manager">
+    <remap from="~input" to="pass_through/output"/>
+    <rosparam>
+      max_size: 50000
+      min_size: 100
+      number_of_neighbors: 50
+      smoothness_threshold: 0.1
+      curvature_threshold: 0.2
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="cluster_point_indices_decomposer"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/ClusterPointIndicesDecomposer sample_manager">
+      <remap from="~input" to="pass_through/output"/>
+      <remap from="~target" to="region_growing_segmentation/output"/>
+    </node>
+
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/region_growing_segmentation.rviz"/>
+  </group>
+</launch>

@@ -1,0 +1,376 @@
+Panels:
+  - Class: rviz/Displays
+    Help Height: 78
+    Name: Displays
+    Property Tree Widget:
+      Expanded:
+        - /TF1/Frames1
+      Splitter Ratio: 0.5
+    Tree Height: 631
+  - Class: rviz/Selection
+    Name: Selection
+  - Class: rviz/Tool Properties
+    Expanded:
+      - /2D Pose Estimate1
+      - /2D Nav Goal1
+      - /Publish Point1
+    Name: Tool Properties
+    Splitter Ratio: 0.588679
+  - Class: rviz/Views
+    Expanded:
+      - /Current View1
+    Name: Views
+    Splitter Ratio: 0.5
+  - Class: rviz/Time
+    Experimental: false
+    Name: Time
+    SyncMode: 0
+    SyncSource: CameraCloudIn
+  - Class: jsk_rviz_plugin/PublishTopic
+    Name: PublishTopic
+    Topic: /set_init_proximities
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Alpha: 0.5
+      Cell Size: 1
+      Class: rviz/Grid
+      Color: 160; 160; 164
+      Enabled: true
+      Line Style:
+        Line Width: 0.03
+        Value: Lines
+      Name: Grid
+      Normal Cell Count: 0
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 10
+      Reference Frame: <Fixed Frame>
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /occupied_cells_vis_array
+      Name: OccupiedCells
+      Namespaces:
+        base_link: true
+      Queue Size: 100
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 0
+      Enabled: false
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: OccupiedCenterPointCloud
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.003
+      Style: Spheres
+      Topic: /octomap_point_cloud_centers
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: false
+    - Class: rviz/MarkerArray
+      Enabled: false
+      Marker Topic: /free_cells_vis_array
+      Name: FreeCells
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: false
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /unknown_cells_vis_array
+      Name: UnknownCells
+      Namespaces:
+        base_link: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /frontier_cells_vis_array
+      Name: FrontierCells
+      Namespaces:
+        base_link: true
+      Queue Size: 100
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: CameraCloudIn
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.001
+      Style: Flat Squares
+      Topic: /head_camera/depth_registered/points
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Class: rviz/Image
+      Enabled: true
+      Image Topic: /head_camera/rgb/image_rect_color
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: CameraImage
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: true
+    - Class: jsk_rviz_plugin/CameraInfo
+      Enabled: true
+      Image Topic: ""
+      Name: CameraInfo
+      Topic: /head_camera/rgb/camera_info
+      Unreliable: false
+      Value: true
+      alpha: 0.5
+      color: 85; 255; 255
+      edge color: 125; 125; 125
+      far clip: 0.1
+      not show side polygons: true
+      show edges: true
+      show polygons: true
+      use image: false
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        base_link:
+          Value: true
+        bellows_link:
+          Value: false
+        bellows_link2:
+          Value: false
+        elbow_flex_link:
+          Value: false
+        eng2:
+          Value: false
+        eng2/1f:
+          Value: false
+        eng2/2f:
+          Value: false
+        eng2/3f:
+          Value: false
+        eng2/7f:
+          Value: false
+        eng2/7f/73B2:
+          Value: false
+        eng2/8f:
+          Value: false
+        estop_link:
+          Value: false
+        forearm_roll_link:
+          Value: false
+        gripper_link:
+          Value: false
+        head_camera_depth_frame:
+          Value: false
+        head_camera_depth_optical_frame:
+          Value: false
+        head_camera_link:
+          Value: false
+        head_camera_rgb_frame:
+          Value: false
+        head_camera_rgb_optical_frame:
+          Value: true
+        head_pan_link:
+          Value: false
+        head_tilt_link:
+          Value: false
+        l_gripper_finger_link:
+          Value: false
+        l_wheel_link:
+          Value: false
+        laser_link:
+          Value: false
+        map:
+          Value: false
+        odom:
+          Value: false
+        r_gripper_finger_link:
+          Value: false
+        r_wheel_link:
+          Value: false
+        respeaker_base:
+          Value: false
+        shoulder_lift_link:
+          Value: false
+        shoulder_pan_link:
+          Value: false
+        torso_fixed_link:
+          Value: false
+        torso_lift_link:
+          Value: false
+        upperarm_roll_link:
+          Value: false
+        world:
+          Value: false
+        wrist_flex_link:
+          Value: false
+        wrist_roll_link:
+          Value: false
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: false
+      Tree:
+        base_link:
+          estop_link:
+            {}
+          l_wheel_link:
+            {}
+          laser_link:
+            {}
+          r_wheel_link:
+            {}
+          torso_fixed_link:
+            {}
+          torso_lift_link:
+            bellows_link:
+              {}
+            bellows_link2:
+              {}
+            head_pan_link:
+              head_tilt_link:
+                head_camera_link:
+                  head_camera_depth_frame:
+                    head_camera_depth_optical_frame:
+                      {}
+                  head_camera_rgb_frame:
+                    head_camera_rgb_optical_frame:
+                      {}
+              respeaker_base:
+                {}
+            shoulder_pan_link:
+              shoulder_lift_link:
+                upperarm_roll_link:
+                  elbow_flex_link:
+                    forearm_roll_link:
+                      wrist_flex_link:
+                        wrist_roll_link:
+                          gripper_link:
+                            l_gripper_finger_link:
+                              {}
+                            r_gripper_finger_link:
+                              {}
+        world:
+          eng2:
+            eng2/1f:
+              {}
+            eng2/2f:
+              {}
+            eng2/3f:
+              {}
+            eng2/7f:
+              eng2/7f/73B2:
+                {}
+              map:
+                odom:
+                  {}
+            eng2/8f:
+              {}
+      Update Interval: 0
+      Value: true
+  Enabled: true
+  Global Options:
+    Background Color: 48; 48; 48
+    Fixed Frame: base_link
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz/Interact
+      Hide Inactive Objects: true
+    - Class: rviz/MoveCamera
+    - Class: rviz/Select
+    - Class: rviz/FocusCamera
+    - Class: rviz/Measure
+    - Class: rviz/SetInitialPose
+      Topic: /initialpose
+    - Class: rviz/SetGoal
+      Topic: /move_base_simple/goal
+    - Class: rviz/PublishPoint
+      Single click: true
+      Topic: /clicked_point
+  Value: true
+  Views:
+    Current:
+      Class: rviz/Orbit
+      Distance: 2.81453
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.06
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
+      Focal Point:
+        X: 0.393706
+        Y: -0.375752
+        Z: 0.845183
+      Name: Current View
+      Near Clip Distance: 0.01
+      Pitch: 0.549798
+      Target Frame: <Fixed Frame>
+      Value: Orbit (rviz)
+      Yaw: 2.41814
+    Saved: ~
+Window Geometry:
+  CameraImage:
+    collapsed: false
+  Displays:
+    collapsed: false
+  Height: 1056
+  Hide Left Dock: false
+  Hide Right Dock: true
+  PublishTopic:
+    collapsed: false
+  QMainWindow State: 000000ff00000000fd00000004000000000000025e000003dafc020000000dfb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006400fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afc0000002800000306000000dd00fffffffa000000010100000002fb0000000a0049006d0061006700650000000000ffffffff0000000000000000fb000000100044006900730070006c0061007900730100000000000002f60000016a00fffffffc00000370000000920000000000fffffffaffffffff0100000002fb00000018005000750062006c0069007300680054006f0070006900630000000000ffffffff0000008700fffffffb0000000800540069006d00650000000000000002f6000002f600fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000a0049006d006100670065010000025e000001a40000000000000000fb0000000a0049006d0061006700650100000243000001bf0000000000000000fb0000000a0049006d0061006700650100000228000001da0000000000000000fb0000001600430061006d0065007200610049006d0061006700650100000334000000ce0000001600ffffff000000010000010f0000037afc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0056006900650077007300000000280000037a000000b000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000073f0000003efc0100000001fb0000000800540069006d00650100000000000004500000000000000000000004db000003da00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Selection:
+    collapsed: false
+  Time:
+    collapsed: false
+  Tool Properties:
+    collapsed: false
+  Views:
+    collapsed: true
+  Width: 1855
+  X: 65
+  Y: 24

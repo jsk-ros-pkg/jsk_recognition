@@ -62,8 +62,6 @@ namespace jsk_pcl_ros
                       const sensor_msgs::CameraInfo::ConstPtr& camera_info_msg);
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void imageCallback(
       const sensor_msgs::Image::ConstPtr& image_msg);
     virtual void infoCallback(

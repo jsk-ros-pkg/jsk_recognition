@@ -159,6 +159,12 @@ namespace resized_image_transport
   void ImageProcessing::updateDiagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
     boost::mutex::scoped_lock lock(mutex_);
+    
+    if (!image_vital_ || !info_vital_) {
+      // initialization is not finished
+      return;
+    }
+    
     // common
     stat.add("use_camera_info", use_camera_info_);
     stat.add("use_snapshot", use_snapshot_);
@@ -166,13 +172,13 @@ namespace resized_image_transport
     stat.add("output image", pnh_->resolveName("output/image"));
     // summary
     if (!image_vital_->isAlive()) {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,
+      stat.summary(diagnostic_error_level_,
                    "no image input. Is " + pnh_->resolveName("input/image") + " active?");
     }
     else {
       if (use_camera_info_) {
         if (!info_vital_->isAlive()) {
-          stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,
+          stat.summary(diagnostic_error_level_,
                        "no info input. Is " + camera_info_sub_.getTopic() + " active?");
         }
         else {

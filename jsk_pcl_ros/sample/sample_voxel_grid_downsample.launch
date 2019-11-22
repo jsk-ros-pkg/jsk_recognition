@@ -1,0 +1,35 @@
+<launch>
+
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="voxel_grid_downsample_manager"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/VoxelGridDownsampleManager /sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <rosparam>
+      base_frame: base_link
+      max_points: 100
+      rate: 30.0
+    </rosparam>
+  </node>
+
+  <node name="voxel_grid_downsample_decoder"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/VoxelGridDownsampleDecoder /sample_manager">
+    <remap from="~input" to="voxel_grid_downsample_manager/output_encoded"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/voxel_grid_downsample.rviz">
+    </node>
+  </group>
+
+</launch>

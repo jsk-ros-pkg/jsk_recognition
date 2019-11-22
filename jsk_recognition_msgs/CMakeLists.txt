@@ -22,12 +22,18 @@ add_message_files(
   HistogramWithRangeBin.msg
   HistogramWithRange.msg
   HistogramWithRangeArray.msg
+  HumanSkeleton.msg
+  HumanSkeletonArray.msg
   ICPResult.msg
   ImageDifferenceValue.msg
   Int32Stamped.msg
+  Label.msg
+  LabelArray.msg
   LineArray.msg
   Line.msg
   ModelCoefficientsArray.msg
+  Object.msg
+  ObjectArray.msg
   ParallelEdgeArray.msg
   ParallelEdge.msg
   PlotData.msg
@@ -52,6 +58,7 @@ add_message_files(
   TorusArray.msg
   Torus.msg
   TrackerStatus.msg
+  TrackingStatus.msg
   BoolStamped.msg
   VectorArray.msg
   WeightedPoseArray.msg
@@ -61,6 +68,8 @@ add_message_files(
   Segment.msg
   SegmentStamped.msg
   SegmentArray.msg
+  PeoplePose.msg
+  PeoplePoseArray.msg
   TransformArray.msg
   )
 
@@ -78,6 +87,7 @@ add_service_files(FILES
   NonMaximumSuppression.srv
   PolygonOnEnvironment.srv
   RobotPickupReleasePoint.srv
+  SaveMesh.srv
   SetDepthCalibrationParameter.srv
   SetLabels.srv
   SetPointCloud2.srv
@@ -100,5 +110,25 @@ catkin_package(
   CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs pcl_msgs jsk_footstep_msgs
 )
 
-install(DIRECTORY scripts
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+# From https://github.com/jsk-ros-pkg/jsk_recognition/pull/2345
+# Install header files directly into ${CATKIN_PACKAGE_INCLUDE_DESTINATION}.
+# If the package has setup.py and modules under src/${PROJECT_NAME}/,
+# install python executables directly into ${CATKIN_PACKAGE_BIN_DESTINATION}.
+# However, if it doesn't have setup.py, directories including python executables
+# should be installed recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+# Also, other directories like 'launch' or 'sample' must be installed
+# recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+# Be careful that 'launch' and 'launch/' are different: the former is directory
+# and the latter is each content.
+install(DIRECTORY sample scripts
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  USE_SOURCE_PERMISSIONS
+)
+
+if (CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  add_rostest(test/object_array_publisher.test)
+  add_rostest(test/people_pose_array_to_pose_array.test)
+  add_rostest(test/plot_data_to_csv.test)
+  add_rostest(test/save_mesh_server.test)
+endif()

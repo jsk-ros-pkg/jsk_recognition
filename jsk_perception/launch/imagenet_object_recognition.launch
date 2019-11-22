@@ -1,0 +1,18 @@
+<launch>
+
+  <arg name="INPUT_IMAGE" />
+  <arg name="gpu" default="0" />
+  <arg name="network"/>
+
+  <node name="object_recognition"
+        pkg="jsk_perception" type="$(arg network)_object_recognition.py">
+    <remap from="~input" to="image_publisher/output" />
+    <rosparam subst_value="true">
+      gpu: $(arg gpu)
+      model_name: $(arg network)
+      model_file: $(find jsk_perception)/trained_data/bvlc_$(arg network).chainermodel
+    </rosparam>
+    <rosparam command="load" file="$(find jsk_perception)/config/imagenet_target_names.yaml" />
+  </node>
+
+</launch>

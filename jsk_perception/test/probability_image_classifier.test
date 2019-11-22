@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_probability_image_classifier.launch">
+    <arg name="gpu" default="-1" />
+    <arg name="gui" value="false" />
+    <arg name="use_mask" value="false" />
+  </include>
+
+  <test test-name="test_probability_image_classifier"
+        name="test_probability_image_classifier"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /probability_image_classifier/output
+      timeout_0: 60
+    </rosparam>
+  </test>
+
+</launch>

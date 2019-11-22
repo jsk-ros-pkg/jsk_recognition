@@ -26,7 +26,7 @@ Publishing Topic
 Parameters
 ----------
 
-* ``~index`` (Int, default: `-1`)
+* ``~index`` (Int, default: ``-1``)
 
   Index value where point indices is extracted from cluster indices.
-  Please note that negative index is skipped, and empty indices is published.
+  If ``~index`` is ``-1``, concatenated cluster indices is published.

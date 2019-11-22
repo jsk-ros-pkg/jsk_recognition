@@ -47,3 +47,10 @@ Parameters
 - ``~box_width`` (``Double``, default: ``0.5``)
 
 - ``~box_depth`` (``Double``, default: ``0.5``)
+
+Sample
+------
+
+.. code-block:: bash
+
+  roslaunch jsk_pcl_ros sample_people_detection.launch

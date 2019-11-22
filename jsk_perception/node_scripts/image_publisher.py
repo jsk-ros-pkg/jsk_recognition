@@ -12,9 +12,6 @@ import dynamic_reconfigure.server
 import rospy
 
 from jsk_perception.cfg import ImagePublisherConfig
-from jsk_topic_tools import jsk_logerr
-from jsk_topic_tools import jsk_loginfo
-from jsk_topic_tools import jsk_logwarn
 from sensor_msgs.msg import CameraInfo
 from sensor_msgs.msg import Image
 
@@ -26,6 +23,12 @@ class ImagePublisher(object):
         self.imgmsg = None
         self.encoding = rospy.get_param('~encoding', 'bgr8')
         self.frame_id = rospy.get_param('~frame_id', 'camera')
+        self.fovx = rospy.get_param('~fovx', None)
+        self.fovy = rospy.get_param('~fovy', None)
+        if (self.fovx is None) != (self.fovy is None):
+            rospy.logwarn('fovx and fovy should be specified, but '
+                          'specified only {}'
+                          .format('fovx' if self.fovx else 'fovy'))
         dynamic_reconfigure.server.Server(
             ImagePublisherConfig, self._cb_dyn_reconfig)
         self.pub = rospy.Publisher('~output', Image, queue_size=1)
@@ -41,11 +44,11 @@ class ImagePublisher(object):
         config['file_name'] = os.path.abspath(file_name)
         img_bgr = cv2.imread(file_name)
         if img_bgr is None:
-            jsk_logwarn('Could not read image file: {}'.format(file_name))
+            rospy.logwarn('Could not read image file: {}'.format(file_name))
             with self.lock:
                 self.imgmsg = None
         else:
-            jsk_loginfo('Read the image file: {}'.format(file_name))
+            rospy.loginfo('Read the image file: {}'.format(file_name))
             with self.lock:
                 self.imgmsg = self.cv2_to_imgmsg(img_bgr, self.encoding)
         return config
@@ -65,6 +68,20 @@ class ImagePublisher(object):
             info.header.frame_id = self.frame_id
             info.width = self.imgmsg.width
             info.height = self.imgmsg.height
+            if self.fovx is not None and self.fovy is not None:
+                fx = self.imgmsg.width / 2.0 / \
+                    np.tan(np.deg2rad(self.fovx / 2.0))
+                fy = self.imgmsg.height / 2.0 / \
+                    np.tan(np.deg2rad(self.fovy / 2.0))
+                cx = self.imgmsg.width / 2.0
+                cy = self.imgmsg.height / 2.0
+                info.K = np.array([fx, 0, cx,
+                                   0, fy, cy,
+                                   0, 0, 1.0])
+                info.P = np.array([fx, 0, cx, 0,
+                                   0, fy, cy, 0,
+                                   0, 0, 1, 0])
+                info.R = [1, 0, 0, 0, 1, 0, 0, 0, 1]
             self.pub_info.publish(info)
 
     def cv2_to_imgmsg(self, img_bgr, encoding):
@@ -92,7 +109,7 @@ class ImagePublisher(object):
             else:
                 img = img_bgr
         else:
-            jsk_logerr('unsupported encoding: {0}'.format(encoding))
+            rospy.logerr('unsupported encoding: {0}'.format(encoding))
             return
         return bridge.cv2_to_imgmsg(img, encoding=encoding)
 

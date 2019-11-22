@@ -1,5 +1,5 @@
 # PlanarPointCloudSimulator
-![](images/planar_pointcloud_simulator.h)
+![](images/planar_pointcloud_simulator.png)
 
 Simulate a pointcloud which is acquired by cameras such as stereo camera and kinect.
 Sensor model is pinhole camera model.
@@ -12,7 +12,7 @@ Sensor model is pinhole camera model.
 ## Publishing Topics
 * `~output` (`sensor_msgs/PointCloud2`)
 
-  Simulated pointcloud.
+  Simulated planar pointcloud.
 
 ## Parameters
 * `~distance` (Double, default: `1.0`)
@@ -22,5 +22,5 @@ Sensor model is pinhole camera model.
 ## Sample
 
 ```
-roslaunch jsk_pcl_ros laser_camera_fov_sample.launch
+roslaunch jsk_pcl_ros_utils sample_planar_pointcloud_simulator.launch
 ```

@@ -30,7 +30,7 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 * `~label` (`sensor_msgs/Image`):
 
    Label image for each cluster point indices.
-   You can visualize it with [jsk\_perception/ColorizeLabels](../jsk_perception/nodes/colorize_labels.md)
+   You can visualize it with [jsk_perception/ColorizeLabels](../../jsk_perception/nodes/colorize_labels.md)
 
 * `~mask` (`sensor_msgs/Image`):
 
@@ -43,6 +43,10 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 * `~negative_indices` (`pcl_msgs/PointIndices`)
 
   Point indices which are not included in input indices.
+
+* `~cluster_indices` (`jsk_recognition_msgs/ClusterPointIndices`)
+
+  Sorted cluster point indices.
 
 **Optional Topics**
 
@@ -72,7 +76,9 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
    Toggle `~output%02d` topics.
 
 * `~align_boxes` (Boolean, default: `False`):
-* `~align_boxes_with_plane` (Boolean, default: `True`):
+
+  * `~align_boxes_with_plane` (Boolean, default: `True`):
+    * Is enabled only if `~align_boxes` is `True`.
 
   * If `~align_boxes` is `True` and `~align_boxes_with_plane` is `True`:
     * Topics `~align_planes` and `~align_planes_coefficients` are enabled.
@@ -85,10 +91,24 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 
    Run PCA algorithm on each cluster to estimate x and y direction.
 
-* `~force_to_flip_z_axis` (Boolean, default: `False`)
+* `~force_to_flip_z_axis` (Boolean, default: `True`)
 
    Flip z axis direction if this value is true.
 
 * `~max_size`, `~min_size` (Int, default: `-1`, `-1`)
 
    If positive value, ignores cluster which points size is external from (`clusterPointsSize` < `~min_size` or `clusterPointsSize` > `~max_size`).
+
+* `~sort_by` (String, default `input_indices`)
+
+  Sort output indices. Currently below options are supported:]
+    - `input_indices`: same order as the input cluster indices
+    - `z_axis`: sort by z axis of cloud
+    - `cloud_size`: sort by size of cloud
+
+## Sample
+
+```bash
+roslaunch jsk_pcl_ros sample_cluster_point_indices_decomposer.launch
+roslaunch jsk_pcl_ros sample_cluster_point_indices_decomposer_sort_by.launch
+```

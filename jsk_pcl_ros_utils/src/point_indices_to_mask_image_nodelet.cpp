@@ -118,19 +118,6 @@ namespace jsk_pcl_ros_utils
     vital_checker_->poke();
     convertAndPublish(indices_msg, image_msg->width, image_msg->height);
   }
-
-  void PointIndicesToMaskImage::updateDiagnostic(
-    diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-    if (vital_checker_->isAlive()) {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                   "PointIndicesToMaskImage running");
-    }
-    else {
-      jsk_topic_tools::addDiagnosticErrorSummary(
-        "PointIndicesToMaskImage", vital_checker_, stat);
-    }
-  }
 }
 
 #include <pluginlib/class_list_macros.h>

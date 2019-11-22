@@ -36,9 +36,15 @@
 #include "jsk_pcl_ros/color_histogram_matcher.h"
 #include <pluginlib/class_list_macros.h>
 #include <pcl/filters/extract_indices.h>
-#include <pcl/point_types_conversion.h>
 #include <pcl/common/centroid.h>
 #include <geometry_msgs/PoseStamped.h>
+
+#include <pcl/pcl_config.h>
+#if PCL_VERSION_COMPARE (<, 1, 7, 2)
+#include <jsk_pcl_ros/pcl/point_types_conversion.h>
+#else
+#include <pcl/point_types_conversion.h>
+#endif
 
 namespace jsk_pcl_ros
 {
@@ -263,6 +269,8 @@ namespace jsk_pcl_ros
     if (best_index != -1) {
       pcl::PointCloud<pcl::PointXYZHSV>::Ptr best_cloud
         = segmented_clouds[best_index];
+
+      best_cloud->is_dense = false;
       Eigen::Vector4f center;
       pcl::compute3DCentroid(*best_cloud, center);
       geometry_msgs::PoseStamped best_pose;

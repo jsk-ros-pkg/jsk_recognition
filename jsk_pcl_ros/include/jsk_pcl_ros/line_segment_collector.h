@@ -128,8 +128,6 @@ namespace jsk_pcl_ros
       const jsk_recognition_msgs::ModelCoefficientsArray::ConstPtr& coefficients_msg);
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void triggerCallback(
       const jsk_recognition_msgs::TimeRange::ConstPtr& trigger);
     virtual void cleanupBuffers(

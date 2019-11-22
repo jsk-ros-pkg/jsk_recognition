@@ -67,7 +67,7 @@ namespace jsk_pcl_ros
           p.y = j * dy + min_y_ + dy / 2.0;
           p.x = i * dx + min_x_ + dx / 2.0;
           p.z = v;
-          p.intensity = (int)fint;
+          p.intensity = fint;
           cloud.points.push_back(p); // normal
         }
       }
@@ -95,7 +95,7 @@ namespace jsk_pcl_ros
           p.y = j * dy + min_y_ + dy / 2.0;
           p.x = i * dx + min_x_ + dx / 2.0;
           p.z = v;
-          p.intensity = (int)fint;
+          p.intensity = fint;
         }
         cloud.points[(j * width) + i] = p; // organized
       }

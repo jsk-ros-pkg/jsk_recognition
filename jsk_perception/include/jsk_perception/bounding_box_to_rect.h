@@ -61,6 +61,12 @@ namespace jsk_perception
     typedef message_filters::sync_policies::ApproximateTime<
       sensor_msgs::CameraInfo,
       jsk_recognition_msgs::BoundingBoxArray > ApproximateSyncPolicy;
+    typedef message_filters::sync_policies::ExactTime<
+      sensor_msgs::CameraInfo,
+      jsk_recognition_msgs::BoundingBox > SyncPolicyBox;
+    typedef message_filters::sync_policies::ApproximateTime<
+      sensor_msgs::CameraInfo,
+      jsk_recognition_msgs::BoundingBox > ApproximateSyncPolicyBox;
 
     BoundingBoxToRect(): DiagnosticNodelet("BoundingBoxToRect") {}
   protected:
@@ -68,17 +74,22 @@ namespace jsk_perception
     virtual void subscribe();
     virtual void unsubscribe();
     virtual void inputCallback(const sensor_msgs::CameraInfo::ConstPtr& info_msg,
-                               const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& box_msg);
+                               const jsk_recognition_msgs::BoundingBoxArray::ConstPtr& boxes_msg);
+    virtual void inputBoxCallback(const sensor_msgs::CameraInfo::ConstPtr& info_msg,
+                                  const jsk_recognition_msgs::BoundingBox::ConstPtr& box_msg);
 
     virtual void internalCallback(const jsk_recognition_msgs::BoundingBoxArrayWithCameraInfo::ConstPtr& msg);
 
     boost::mutex mutex_;
     std::string frame_id_;
     message_filters::Subscriber<sensor_msgs::CameraInfo> sub_info_;
-    message_filters::Subscriber<jsk_recognition_msgs::BoundingBoxArray> sub_box_;
+    message_filters::Subscriber<jsk_recognition_msgs::BoundingBox> sub_box_;
+    message_filters::Subscriber<jsk_recognition_msgs::BoundingBoxArray> sub_boxes_;
     message_filters::Subscriber<jsk_recognition_msgs::BoundingBoxArrayWithCameraInfo> sub_box_with_info_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
     boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> > async_;
+    boost::shared_ptr<message_filters::Synchronizer<SyncPolicyBox> > sync_box_;
+    boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicyBox> > async_box_;
     tf::TransformListener* tf_listener_;
     bool approximate_sync_;
     int tf_queue_size_;

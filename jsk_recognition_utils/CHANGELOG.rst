@@ -2,6 +2,142 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.10 (2019-03-27)
+-------------------
+* Add qtbase5-dev as a package.xml dependency for jsk_recognition_utils. (`#2417 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2417>`_)
+  Needed since CMakeLists.txt tries to depend on it.
+  Signed-off-by: Chris Lalancette <clalancette@openrobotics.org>
+* Contributors: Chris Lalancette
+
+1.2.9 (2019-02-23)
+------------------
+* add QT_LIBRARIES Qt5::Widgets to fix 'cannot find -lQt5::Widgets' error on debian stretch (`#2398 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2398>`_ )
+* Contributors: Kei Okada
+
+1.2.8 (2019-02-22)
+------------------
+
+1.2.7 (2019-02-14)
+------------------
+* [jsk_perception] Add deep_sort_tracker_node.py (`#2351 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2351>`_ )
+  * [jsk_recognition_utils/deep_sort_net.py] Renamed network name DeepSortFeature -> DeepSortFeatureExtractor
+  * [jsk_perception/deep_sort/deep_sort_net.py] Moved to jsk_recognition_utils's chainermodels
+
+* [jsk_recognition_utils] Resolve dependency for chainer (`#2306 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2306>`_ )
+* Support passing Numpy_INCLUDE_DIRS externally (`#2389 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2389>`_ )
+
+* [doc] [jsk_perception] [jsk_recognition_utils] Add guide to image recognition with deep learning (`#2365 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2365>`_)
+
+  * Add doc for image annotation
+  * Add annotate_images_with_labelme to index
+  * Add dataset class for semantic segmentation
+  * Add install_learning_datasets script
+  * Download datasets during catkin build
+  * Add .gitignore in learning_datasets/
+  * Add train_fcn script
+  * Set default learning_rate to valid value
+  * Enable plotting from remote host as well
+  * Add doc for training FCN
+  * Add doc for starting deep learning with image dataset
+  * Add how to create dataset, where to store it in documentation
+  * Dump param for fcn_object_segmentation.py
+  * Add InstanceSegmentationDataset
+  * Add train script for Mask-RCNN
+  * Fix model_name and outputs in train_fcn.md
+  * Add doc for training Mask-RCNN
+
+* Contributors: Esteve Fernandez, Yuto Uchimi, Iori Yanokura
+
+1.2.6 (2018-11-02)
+------------------
+* Install 'sample' and 'test'into SHARE_DESTINATION (`#2345 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2345>`_)
+* Use diagnostic nodelet for EuclideanClustering and other nodelets (`#2301 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2301>`_)
+  * jsk_pcl_ros: euclidean_clustering: use dianogistc nodelet
+    Use DiagnosticNodelet::updateDiagnostic preferrably
+* Describe the hierachy of rosparams of ClusterPointIndicesDecomposer (`#2285 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2285>`_)
+  * Fix test of add_bounding_box_array The input topics are slow (~1Hz), so slop should be larger (it was 0.1 before).
+
+* Fix for AssertionError in fast_rcnn.py (`#2281 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2281>`_)
+  * Use roi_pooling_2d defined in chainer for fast_rcnn on CPU mode
+
+* Re-enable tests which use chainer inside them (`#2280 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2280>`_)
+  * Looser timeout for test of add_bounding_box_array
+* Node to concatenate BoundingBoxArray (`#2264 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2264>`_)
+  * Doc for add_bounding_box_array.py
+  * Node to concatenate BoundingBoxArray
+  * Move <test> section to the sample launch files
+* Contributors: Yuki Furuta, Kei Okada, Kentaro Wada
+
+1.2.5 (2018-04-09)
+------------------
+* Fix build of jsk_recognition_utils (on Kinetic) (`#2262 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2262>`_ )
+  * Close https://github.com/jsk-ros-pkg/jsk_recognition/issues/2259
+* [jsk_perception/fast_rcnn.py] fast_rcnn node to follow chainer-v2 version (`#2249 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2249>`_)
+  * modify fast_rcnn model to follow chainer-v2 version
+* Contributors: Yuki Furuta, Kentaro Wada, Shingo Kitagawa
+
+1.2.4 (2018-01-12)
+------------------
+* Add image gallery to README (`#2225 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2225>`_)
+* Contributors: Kentaro Wada
+
+1.2.3 (2017-11-23)
+------------------
+* Regional feature based object recognition using ResNet (`#2172 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2172>`_)
+* Convert bounding box to mask (`#2176 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2176>`_)
+  * Add RectArrayToPolygonArray
+* Contributors: Kentaro Wada
+
+1.2.2 (2017-07-23)
+------------------
+
+1.2.1 (2017-07-15)
+------------------
+
+1.2.0 (2017-07-15)
+------------------
+* jsk_pcl_ros: Add Primitive shape classifier nodelet (`#2141 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2141>`_)
+   * jsk_recognition_utils/include/jsk_recognition_utils/geo/polygon.h
+   * [jsk_recognition_utils][polygon][fromROSMsg] use identity matrix for default transformation
+
+* jsk_recognition_utils/setup.py: Find packages automatically in jsk_recognition_utils (`#2156 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2156>`_)
+* [jsk_recognition_utils] install chainermodels dir in setup.py (`#2154 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2154>`_)
+ * [jsk_perception][jsk_recognition_utils] support chainer-v2 in alexnet and vgg16 (`#2153 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2153>`_)
+  * alexnet and vgg16 support chainer-v2
+
+* Contributors: Kentaro Wada, Shingo Kitagawa, Yuki Furuta
+
+1.1.3 (2017-07-07)
+------------------
+* [jsk_pcl_ros_utils] Add nodelet for computing & comparing color  histogram (`#2101 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2101>`_ )
+  * jsk_recognition_utils/include/jsk_recognition_utils/pcl/color_histogram.h: add color_histogram_classifier and visualizer
+* Generate Kinfu texture model with attention (BoundingBox) and Groundframe to fix occluded surface  (`#2135 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2135>`_ )
+  * Create function to crop point cloud by bounding box `#2118 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2118>`_ )
+* install node_scripts in jsk_recognition_utils
+* Contributors: Kentaro Wada, Shingo Kitagawa, Yuki Furuta
+
+1.1.2 (2017-06-16)
+------------------
+* [jsk_percption][jsk_recogniton_utils] add imagenet_object_recognition
+launch and its sample (`#2085 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2085>`_ )
+  * add n_class in VGG16
+  * format Alex -> AlexNet
+* [jsk_perception] add AlexNet object recognition node #2083 (`#2083 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2083>`_ )
+  * add alex_object_recognition node
+* Remove README.md to generate doc of jsk_recognition_utils (`#2078 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2078>`_ )
+    Modified:
+    - doc/jsk_recognition_utils/index.rst
+    Added:
+    - jsk_recognition_utils/sample/sample_static_virtual_camera.launch
+* [jsk_pcl_ros_utils][polygon_magnifier] allow negative distance to magnify (`#2053 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2053>`_ )
+  [jsk_pcl_ros_utils][polygon_magnifier] update docs
+  [jsk_recognition_utils] add polygon_array_publisher.py / sample_polygon_array_publisher.launch
+  [jsk_pcl_ros_utils] add sample / test for polygon_magnifier
+* Generate README by script (`#2064 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2064>`_ )
+* [jsk_recognition_utils/geo/Polygon] add distance method. (`#2031 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2031>`_ )
+* [jsk_recognition_utils] add PolyLine to polyline.{h,cpp} and add code to segment.{h, cpp} (`#2026 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2026>`_ )
+* Contributors: Kentaro Wada, Masaki Murooka, Shingo Kitagawa, Yohei Kakiuchi, Yuki Furuta
+
 1.1.1 (2017-03-04)
 ------------------
 

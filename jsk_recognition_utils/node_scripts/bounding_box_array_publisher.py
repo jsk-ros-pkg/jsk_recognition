@@ -59,6 +59,7 @@ class BoundingBoxArrayPublisher(object):
             rot = box.get('rotation', [0, 0, 0])
             qua = quaternion_from_euler(*rot)
             dim = box['dimension']
+            label = box.get('label', 0)
 
             bbox_msg = BoundingBox()
             bbox_msg.header.seq = self.seq
@@ -67,6 +68,7 @@ class BoundingBoxArrayPublisher(object):
             bbox_msg.pose.position = Point(*pos)
             bbox_msg.pose.orientation = Quaternion(*qua)
             bbox_msg.dimensions = Vector3(*dim)
+            bbox_msg.label = label
 
             bbox_array_msg.boxes.append(bbox_msg)
 

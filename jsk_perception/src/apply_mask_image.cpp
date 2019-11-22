@@ -52,6 +52,7 @@ namespace jsk_perception
     pnh_->param("negative/before_clip", negative_before_clip_, true);
     pnh_->param("mask_black_to_transparent", mask_black_to_transparent_, false);
     pnh_->param("queue_size", queue_size_, 100);
+    pnh_->param("cval", cval_, 0);
     pub_image_ = advertise<sensor_msgs::Image>(
       *pnh_, "output", 1);
     pub_mask_ = advertise<sensor_msgs::Image>(
@@ -127,7 +128,8 @@ namespace jsk_perception
                         "mono8",
                         mask).toImageMsg());
 
-    cv::Mat masked_image;
+    cv::Mat masked_image = image.clone();  // should have the same dtype
+    masked_image.setTo(cval_);
     image.copyTo(masked_image, mask);
 
     cv::Mat output_image;

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import cv2
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')  # NOQA
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from jsk_recognition_msgs.msg import DepthErrorResult
@@ -205,6 +207,7 @@ def callback(msg):
     if math.isnan(x) or math.isnan(y):
         return
     processData(x, y, u, v, msg.center_u, msg.center_v)
+    updatePlot()
 
 def uvCoefString(c, absolute=False):
     if absolute:
@@ -290,7 +293,7 @@ def applyModel(x, u, v, cu, cv, clssifier):
                 (c[10] * u2 + c[11] * u + c[12] * v2 + c[13] * v + i))
                 
         
-def updatePlot(num):
+def updatePlot():
     global xs, ax, width, height
     if rospy.is_shutdown():
         plt.close()
@@ -326,6 +329,15 @@ def updatePlot(num):
             bridge = CvBridge()
             img = generateFrequencyMap()
             pub_image.publish(bridge.cv2_to_imgmsg(img, "bgr8"))
+            # publish error plot
+            fig = plt.gcf()
+            fig.canvas.draw()
+            w, h = fig.canvas.get_width_height()
+            plot_img = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8)
+            fig.clf()
+            plot_img.shape = (h, w, 3)
+            plt.close()
+            pub_error_plot.publish(bridge.cv2_to_imgmsg(plot_img, "bgr8"))
         except Exception, e:
             rospy.logerr(e.message)
 
@@ -350,8 +362,9 @@ def generateFrequencyMap():
         
 def main():
     global ax, xs, ys, classifier, u_min, u_max, v_min, v_max, model, set_param
-    global width, height, pub_image
-    pub_image = rospy.Publisher("~frequency_image", Image)
+    global width, height, pub_image, pub_error_plot
+    pub_image = rospy.Publisher("~frequency_image", Image, queue_size=1)
+    pub_error_plot = rospy.Publisher("~error_plot_image", Image, queue_size=1)
     set_param = rospy.ServiceProxy("/camera_remote/depth_calibration/set_calibration_parameter", 
                                    SetDepthCalibrationParameter)
     # parse argument
@@ -378,7 +391,6 @@ def main():
         #plt.ion()
     fig = plt.figure()
     ax = plt.axes([.12, .12, .8, .8])
-    anim = animation.FuncAnimation(fig, updatePlot)
     classifier = linear_model.LinearRegression()
     u_min = rospy.get_param("~u_min", 0)
     u_max = rospy.get_param("~u_max", 4096)
@@ -408,7 +420,9 @@ def main():
             with open(csv_filename, "w") as f:
                 for x, y, u, v, cu, cv in zip(raw_xs, ys, us, vs, c_us, c_vs):
                     f.write("%f,%f,%d,%d,%f,%f\n" % (x, y, u, v, cu, cv))
-        if query_yes_no("Dump result into yaml file?"):
+        dump = rospy.get_param("~dump_result_into_yaml", "query")
+        if dump is True or \
+           (dump == "query" and query_yes_no("Dump result into yaml file?")):
             yaml_filename = "calibration_parameter_%s.yaml" % datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
             print "writing to %s" % yaml_filename
             c = classifier.coef_
@@ -432,3 +446,4 @@ use_abs: %s
 if __name__ == "__main__":
     rospy.init_node("depth_error_logistic_regression")
     main()
+    rospy.spin()

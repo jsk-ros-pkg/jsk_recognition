@@ -1,6 +1,6 @@
-#!/usr/bin/env runeus
+#!/usr/bin/env roseus
 
-(setq ros::*compile-message* t) ;; switch for using compiled messages
+;; (setq ros::*compile-message* t) ;; switch for using compiled messages
 (ros::load-ros-manifest "jsk_pcl_ros")
 
 (defvar *topic-name* "/openni/depth_registered/points_throttle")

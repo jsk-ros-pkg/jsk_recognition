@@ -2,10 +2,17 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(jsk_pcl_ros)
 
+# Use ccache if installed to make it fast to generate object files
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+endif()
+
 # check c++11 / c++0x
 include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
+check_cxx_compiler_flag("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 if(COMPILER_SUPPORTS_CXX11)
   set(CMAKE_CXX_FLAGS "-std=c++11")
 elseif(COMPILER_SUPPORTS_CXX0X)
@@ -18,32 +25,33 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   dynamic_reconfigure
   eigen_conversions
-  genmsg
-  geometry_msgs
+  # genmsg
+  # geometry_msgs
   image_geometry
-  image_transport
+  # image_transport
   interactive_markers
-  jsk_footstep_msgs
+  # jsk_footstep_msgs
   jsk_pcl_ros_utils
-  jsk_recognition_msgs
+  # jsk_recognition_msgs
   jsk_recognition_utils
+  # jsk_rviz_plugins # kinfu.h uses jsk_rviz_plugins/OverlayText.h, but jsk_recognition should not depends on jsk_visualization
   jsk_topic_tools
-  kdl_conversions
-  kdl_parser
+  # kdl_conversions
+  # kdl_parser
   laser_assembler
-  nodelet
-  octomap_msgs
-  octomap_ros
+  # nodelet
+  moveit_ros_perception
+  # octomap_msgs
   octomap_server
   pcl_msgs
   pcl_ros
-  sensor_msgs
+  # sensor_msgs
   tf
-  tf2_ros
+  # tf2_ros
   tf_conversions
   )
 find_package(PkgConfig)
-pkg_check_modules(ml_classifieres ml_classifiers QUIET)
+pkg_check_modules(ml_classifiers ml_classifiers QUIET)
 # only run in hydro
 find_package(PCL REQUIRED)
 find_package(OpenMP)
@@ -55,10 +63,10 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}
 find_package(PCL QUIET COMPONENTS gpu_kinfu_large_scale)
 
 pkg_check_modules(yaml_cpp yaml-cpp REQUIRED)
-IF(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
+if(${yaml_cpp_VERSION} VERSION_LESS "0.5.0")
 ## indigo yaml-cpp : 0.5.0 /  hydro yaml-cpp : 0.3.0
   add_definitions("-DUSE_OLD_YAML")
-ENDIF()
+endif()
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
@@ -95,7 +103,11 @@ generate_dynamic_reconfigure_options(
   cfg/MultiPlaneExtraction.cfg
   cfg/NormalEstimationIntegralImage.cfg
   cfg/EnvironmentPlaneModeling.cfg
+  cfg/ColorHistogram.cfg
+  cfg/ColorHistogramClassifier.cfg
+  cfg/ColorHistogramFilter.cfg
   cfg/ColorHistogramMatcher.cfg
+  cfg/ColorHistogramVisualizer.cfg
   cfg/ClusterPointIndicesDecomposer.cfg
   cfg/GridSampler.cfg
   cfg/OrganizedEdgeDetector.cfg
@@ -114,10 +126,12 @@ generate_dynamic_reconfigure_options(
   cfg/OctreeVoxelGrid.cfg
   cfg/OctreeChangePublisher.cfg
   cfg/ExtractTopPolygonLikelihood.cfg
-  cfg/Kinfu.cfg
   cfg/PointcloudDatabaseServer.cfg
   cfg/TargetAdaptiveTracking.cfg
   cfg/PPFRegistration.cfg
+  cfg/PrimitiveShapeClassifier.cfg
+  cfg/Kinfu.cfg
+  cfg/PointcloudScreenpoint.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -150,6 +164,8 @@ jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/NormalFlipToFrame" "normal_f
 if(OPENMP_FOUND)
   jsk_pcl_nodelet(src/particle_filter_tracking_nodelet.cpp "jsk_pcl/ParticleFilterTracking" "particle_filter_tracking")
 endif()
+jsk_pcl_nodelet(src/fuse_images.cpp "jsk_pcl/FuseRGBImages" "fuse_rgb_images")
+jsk_pcl_nodelet(src/fuse_images.cpp "jsk_pcl/FuseDepthImages" "fuse_depth_images")
 jsk_pcl_nodelet(src/voxel_grid_downsample_manager_nodelet.cpp "jsk_pcl/VoxelGridDownsampleManager" "voxel_grid_downsample_manager")
 jsk_pcl_nodelet(src/voxel_grid_downsample_decoder_nodelet.cpp "jsk_pcl/VoxelGridDownsampleDecoder" "voxel_grid_downsample_decoder")
 jsk_pcl_nodelet(src/snapit_nodelet.cpp "jsk_pcl/Snapit" "snapit")
@@ -179,7 +195,7 @@ jsk_pcl_nodelet(src/euclidean_cluster_extraction_nodelet.cpp
   "jsk_pcl/EuclideanClustering" "euclidean_clustering")
 jsk_pcl_nodelet(src/cluster_point_indices_decomposer_nodelet.cpp
   "jsk_pcl/ClusterPointIndicesDecomposer" "cluster_point_indices_decomposer")
-jsk_pcl_nodelet(src/cluster_point_indices_decomposer_z_axis_nodelet.cpp
+jsk_pcl_nodelet(src/cluster_point_indices_decomposer_nodelet.cpp
   "jsk_pcl/ClusterPointIndicesDecomposerZAxis" "cluster_point_indices_decomposer_z_axis")
 jsk_pcl_nodelet(src/resize_points_publisher_nodelet.cpp
   "jsk_pcl/ResizePointsPublisher" "resize_points_publisher")
@@ -216,12 +232,21 @@ jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PointCloudToSTL" "pointcloud
 
 if(ml_classifiers_FOUND)
   jsk_pcl_nodelet(src/colorize_segmented_RF_nodelet.cpp
-    "jsk_pcl/ColorizeRandomForest" "colorize_random_forest_result")
+    "jsk_pcl/ColorizeRandomForest" "colorize_random_forest")
   jsk_pcl_nodelet(src/colorize_random_points_RF_nodelet.cpp
-    "jsk_pcl/ColorizeMapRandomForest" "colorize_random_foreset_result2")
+    "jsk_pcl/ColorizeMapRandomForest" "colorize_map_random_forest")
 endif(ml_classifiers_FOUND)
 jsk_pcl_nodelet(src/environment_plane_modeling_nodelet.cpp
   "jsk_pcl/EnvironmentPlaneModeling" "environment_plane_modeling")
+if(jsk_topic_tools_VERSION VERSION_LESS 2.2.4)
+  message(WARNING "Building some nodelets are skipped if jsk_topic_tools < 2.2.4")
+else()
+  jsk_pcl_nodelet(src/color_histogram_nodelet.cpp "jsk_pcl/ColorHistogram" "color_histogram")
+  jsk_pcl_nodelet(src/color_histogram_classifier_nodelet.cpp "jsk_pcl/ColorHistogramClassifier" "color_histogram_classifier")
+  jsk_pcl_nodelet(src/color_histogram_filter_nodelet.cpp "jsk_pcl/ColorHistogramFilter" "color_histogram_filter")
+  jsk_pcl_nodelet(src/primitive_shape_classifier_nodelet.cpp
+    "jsk_pcl/PrimitiveShapeClassifier" "primitive_shape_classifier")
+endif()
 jsk_pcl_nodelet(src/color_histogram_matcher_nodelet.cpp
   "jsk_pcl/ColorHistogramMatcher" "color_histogram_matcher")
 jsk_pcl_nodelet_upstream(jsk_pcl_ros_utils "jsk_pcl/PolygonAppender" "polygon_appender")
@@ -244,10 +269,10 @@ jsk_pcl_nodelet(src/region_growing_multiple_plane_segmentation_nodelet.cpp
   "jsk_pcl/RegionGrowingMultiplePlaneSegmentation"
   "region_growing_multiple_plane_segmentation")
 
-IF(${PCL_VERSION} VERSION_GREATER "1.7.2")
+if(${PCL_VERSION} VERSION_GREATER "1.7.2")
   jsk_pcl_nodelet(src/organized_edge_detector_nodelet.cpp
     "jsk_pcl/OrganizedEdgeDetector" "organized_edge_detector")
-ENDIF(${PCL_VERSION} VERSION_GREATER "1.7.2")
+endif(${PCL_VERSION} VERSION_GREATER "1.7.2")
 
 jsk_pcl_nodelet(src/edge_depth_refinement_nodelet.cpp
   "jsk_pcl/EdgeDepthRefinement" "edge_depth_refinement")
@@ -349,7 +374,11 @@ jsk_pcl_nodelet(src/voxel_grid_large_scale_nodelet.cpp
   "jsk_pcl/VoxelGridLargeScale" "voxel_grid_large_scale")
 jsk_pcl_nodelet(src/ppf_registration_nodelet.cpp
   "jsk_pcl/PPFRegistration" "ppf_registration")
-if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
+
+# kinfu.h uses jsk_rviz_plugins/OverlayText.h, but jsk_recognition should not depends on jsk_visualization
+find_package(jsk_rviz_plugins QUIET)
+if (PCL_GPU_KINFU_LARGE_SCALE_FOUND AND jsk_rviz_plugins_FOUND)
+  include_directories(${jsk_rviz_plugins_INCLUDE_DIRS})
   jsk_pcl_nodelet(src/kinfu_nodelet.cpp
     "jsk_pcl/Kinfu" "kinfu")
   include_directories(/usr/local/cuda/include)
@@ -382,11 +411,11 @@ add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
 if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
   target_link_libraries(jsk_pcl_ros
     ${PCL_GPU_KINFU_LARGE_SCALE_LIBRARY} ${PCL_GPU_CONTAINERS_LIBRARY}
-    ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp
+    ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp
     jsk_pcl_ros_base)
 else (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
   target_link_libraries(jsk_pcl_ros
-    ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp
+    ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp
     jsk_pcl_ros_base)
 endif (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
 if (robot_self_filter_FOUND)
@@ -394,16 +423,14 @@ if (robot_self_filter_FOUND)
   target_link_libraries(jsk_pcl_ros ${robot_self_filter_LIBRARIES})
 endif (robot_self_filter_FOUND)
 
-add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
-add_dependencies(jsk_pcl_ros_base ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
-add_dependencies(jsk_pcl_ros_moveit ${PROJECT_NAME}_gencpp ${PROJECT_NAME}_gencfg)
+add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencfg)
+add_dependencies(jsk_pcl_ros_base ${PROJECT_NAME}_gencfg)
+add_dependencies(jsk_pcl_ros_moveit ${PROJECT_NAME}_gencfg)
 
 target_link_libraries(jsk_pcl_ros_base
-  ${catkin_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
-# moveit_ros_perception is excluded from catkin COMPONENTS because of collision about octomap dependency
-find_package(moveit_ros_perception)
+  ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
 target_link_libraries(jsk_pcl_ros_moveit
-  ${catkin_LIBRARIES} ${moveit_ros_perception_LIBRARIES} ${pcl_ros_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
+  ${catkin_LIBRARIES} ${moveit_ros_perception_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
 
 
 # bench/ directory
@@ -425,17 +452,30 @@ get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTO
 message("flags: ${CMAKE_CXX_FLAGS}")
 
 catkin_package(
-    DEPENDS pcl
-    CATKIN_DEPENDS pcl_ros ${PCL_MSGS} sensor_msgs geometry_msgs jsk_recognition_msgs jsk_recognition_utils
+    DEPENDS PCL
+    CATKIN_DEPENDS pcl_ros ${PCL_MSGS} jsk_recognition_utils
     INCLUDE_DIRS include
     LIBRARIES jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit
 )
 
 # download and install sample data
-add_custom_target(install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
+add_custom_target(${PROJECT_NAME}_install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
+# download and install trained data
+add_custom_target(${PROJECT_NAME}_install_trained_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_trained_data.py)
 
+# From https://github.com/jsk-ros-pkg/jsk_recognition/pull/2345
+# Install header files directly into ${CATKIN_PACKAGE_INCLUDE_DESTINATION}.
+# If the package has setup.py and modules under src/${PROJECT_NAME}/,
+# install python executables directly into ${CATKIN_PACKAGE_BIN_DESTINATION}.
+# However, if it doesn't have setup.py, directories including python executables
+# should be installed recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+# Also, other directories like 'launch' or 'sample' must be installed
+# recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+# Be careful that 'launch' and 'launch/' are different: the former is directory
+# and the latter is each content.
 install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
 install(TARGETS jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit
   ${jsk_pcl_nodelet_executables}
   bench_ransac_plane_estimation
@@ -444,20 +484,16 @@ install(TARGETS jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit
   sample_cube_nearest_point
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
-install(DIRECTORY scripts/
-        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-        USE_SOURCE_PERMISSIONS
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
-install(DIRECTORY
-  config
-  launch
-  sample
-  plugins
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+install(DIRECTORY config euslisp launch plugins sample scripts test
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  USE_SOURCE_PERMISSIONS
+)
 
 if (CATKIN_ENABLE_TESTING)
+  find_package(jsk_perception REQUIRED)
   find_package(roslaunch REQUIRED)
   find_package(rostest REQUIRED)
   add_rostest_gtest(test_extract_indices test/test_extract_indices.test test/test_extract_indices.cpp)
@@ -466,24 +502,116 @@ if (CATKIN_ENABLE_TESTING)
     # because of unreleased topic_tools/transform on hydro
     add_rostest(test/test_add_color_from_image.test)
     add_rostest(test/test_add_color_from_image_to_organized.test)
+    add_rostest(test/test_bilateral_filter.test)
+    add_rostest(test/test_border_estimator.test)
+    add_rostest(test/test_boundingbox_occlusion_rejector.test)
+    add_rostest(test/test_calculate_polygon_from_imu.test)
+    add_rostest(test/test_capture_stereo_synchronizer.test)
+    add_rostest(test/test_collision_detector.test)
+    if(ml_classifiers_FOUND)
+      # Wait for upstream: ml_classifiers is not yet released in jade, kinetic, ...
+      # (https://github.com/jsk-ros-pkg/jsk_recognition/pull/2385#issuecomment-451349430)
+      add_rostest(test/test_colorize_map_random_forest.test)
+      add_rostest(test/test_colorize_random_forest.test)
+    endif()
+    add_rostest(test/test_depth_calibration.test)
+    add_rostest(test/test_depth_error_calibration.test)
+    add_rostest(test/test_display_bounding_box_array.test)
+    add_rostest(test/test_dump_depth_error.test)
     add_rostest(test/test_octree_voxel_grid.test)
+    add_rostest(test/test_octomap_contact.test)
+    add_rostest(test/test_handle_estimator.test)
     add_rostest(test/test_hsi_color_filter.test)
     add_rostest(test/test_icp_registration.test)
     add_rostest(test/test_attention_clipper.test)
     add_rostest(test/test_cluster_point_indices_decomposer.test)
+    add_rostest(test/test_cluster_point_indices_decomposer_bbox.test)
+    add_rostest(test/test_cluster_point_indices_decomposer_sort_by.test)
+    add_rostest(test/test_depth_image_creator.test)
     if(${PCL_VERSION} VERSION_GREATER "1.7.2")
       # because of jsk_pcl/OrganizedEdgeDetector
       add_rostest(test/test_edge_depth_refinement.test)
     endif()
+    add_rostest(test/test_edgebased_cube_finder.test)
+    add_rostest(test/test_environment_plane_modeling.test)
     add_rostest(test/test_euclidean_segmentation.test)
+    add_rostest(test/test_extract_cuboid_particles_top_n.test)
+    add_rostest(test/test_extract_top_polygon_likelihood.test)
+    add_rostest(test/test_feature_registration.test)
+    add_rostest(test/test_find_object_on_plane.test)
+    add_rostest(test/test_fisheye_sphere_publisher.test)
+    add_rostest(test/test_fuse_depth_images.test)
+    add_rostest(test/test_fuse_rgb_images.test)
+    add_rostest(test/test_grid_sampler.test)
+    add_rostest(test/test_heightmap_converter.test)
+    add_rostest(test/test_heightmap_morphological_filtering.test)
+    add_rostest(test/test_heightmap_time_accumulation.test)
+    add_rostest(test/test_heightmap_to_pointcloud.test)
+    add_rostest(test/test_hinted_handle_estimator.test)
+    add_rostest(test/test_hinted_plane_detector.test)
+    add_rostest(test/test_hinted_stick_finder.test)
     # TODO(iory): https://github.com/jsk-ros-pkg/jsk_recognition/issues/2007
     # add_rostest(test/test_people_detection.test DEPENDENCIES install_test_data)
+    add_rostest(test/test_in_hand_recognition_manager.test)
+    add_rostest(test/test_incremental_model_registration.test)
+    add_rostest(test/test_interactive_cuboid_likelihood.test)
+    add_rostest(test/test_intermittent_image_annotator.test)
+    add_rostest(test/test_joint_state_static_filter.test)
+    add_rostest(test/test_keypoints_publisher.test)
+    if(PCL_GPU_KINFU_LARGE_SCALE_FOUND)
+      add_rostest(test/test_kinfu.test)
+    endif()
+    add_rostest(test/test_line_segment_collector.test)
     add_rostest(test/test_line_segment_detector.test)
+    add_rostest(test/test_linemod_detector.test)
+    add_rostest(test/test_linemod_trainer.test)
+    add_rostest(test/test_marker_appender.test)
+    add_rostest(test/test_mask_image_cluster_filter.test)
+    add_rostest(test/test_mask_image_filter.test)
+    add_rostest(test/test_moving_least_square_smoothing.test)
+    add_rostest(test/test_multi_plane_extraction.test)
+    add_rostest(test/test_multi_plane_sac_segmentation.test)
+    add_rostest(test/test_normal_direction_filter.test)
+    add_rostest(test/test_normal_estimation_integral_image.test)
+    add_rostest(test/test_normal_estimation_omp.test)
+    add_rostest(test/test_octree_change_publisher.test)
+    if(${PCL_VERSION} VERSION_GREATER "1.7.2")
+      add_rostest(test/test_organized_edge_detector.test)
+    endif()
+    add_rostest(test/test_organized_multi_plane_segmentation.test)
+    add_rostest(test/test_organized_pass_through.test)
+    add_rostest(test/test_parallel_edge_finder.test)
+    add_rostest(test/test_particle_filter_tracking.test)
+    add_rostest(test/test_particle_filter_tracking_change_detection.test)
+    add_rostest(test/test_particle_filter_tracking_service_renew.test)
+    add_rostest(test/test_plane_supported_cuboid_estimator.test)
+    add_rostest(test/test_plane_time_ensync_for_recognition.test)
     add_rostest(test/test_pointcloud_database_server.test)
+    add_rostest(test/test_pointcloud_localization.test)
+    add_rostest(test/test_pointcloud_screenpoint.test)
+    add_rostest(test/test_publish_clicked_point_bbox.test)
     add_rostest(test/test_convex_connected_voxels.test)
     add_rostest(test/test_organized_pointcloud_to_point_indices.test)
     add_rostest(test/test_rearrange_bounding_box.test)
+    add_rostest(test/test_region_growing_multiple_plane_segmentation.test)
+    add_rostest(test/test_region_growing_segmentation.test)
+    add_rostest(test/test_resize_points_publisher.test)
+    add_rostest(test/test_rgb_color_filter.test)
+    add_rostest(test/test_roi_clipper.test)
+    add_rostest(test/test_selected_cluster_publisher.test)
+    add_rostest(test/test_snapit.test)
+    add_rostest(test/test_supervoxel_segmentation.test)
+    add_rostest(test/test_target_adaptive_tracking.test)
+    add_rostest(test/test_tilt_laser_listener.test)
+    add_rostest(test/test_torus_finder.test)
     add_rostest(test/test_color_based_region_growing_segmentation.test)
+    add_rostest(test/test_detect_graspable_poses_pcabase.test)
+    if(jsk_topic_tools_VERSION VERSION_GREATER 2.2.4)
+      add_rostest(test/color_histogram.test)
+      add_rostest(test/primitive_shape_classifier.test)
+    endif()
+    add_rostest(test/test_voxel_grid_downsample.test)
+    add_rostest(test/test_voxel_grid_large_scale.test)
   endif()
   roslaunch_add_file_check(launch/openni_local.launch)
   roslaunch_add_file_check(launch/openni2_local.launch)

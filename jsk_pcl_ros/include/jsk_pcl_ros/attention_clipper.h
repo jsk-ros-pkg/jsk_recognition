@@ -69,8 +69,6 @@ namespace jsk_pcl_ros
     virtual jsk_recognition_utils::Vertices cubeVertices(Eigen::Vector3f& dimension);
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void computeROI(
       const sensor_msgs::CameraInfo::ConstPtr& msg,
       std::vector<cv::Point2d>& points,

@@ -65,7 +65,7 @@ class ImageTimeDiff(object):
         self.pub_stored = (hue, saturation, pub_diff, pub_diff_img)
 
     def _cb_stop(self, header):
-        while header.stamp > self.imgmsg.header.stamp:
+        while header.stamp > self.input[0].header.stamp:
             rospy.sleep(0.1)
         self.pub_stored = None
 
@@ -91,13 +91,18 @@ class ImageTimeDiff(object):
                                 / filtered_diff_img.size
                                 / 255. )
         pub_diff.publish(diff_msg)
-        pub_diff_img.publish(bridge.cv2_to_imgmsg(diff_img, encoding='mono8'))
+        diff_img_msg = bridge.cv2_to_imgmsg(diff_img, encoding='mono8')
+        diff_img_msg.header = diff_msg.header
+        pub_diff_img.publish(diff_img_msg)
 
     def spin(self):
         rate = rospy.Rate(rospy.get_param('rate', 10))
         while not rospy.is_shutdown():
             self.spin_once()
-            rate.sleep()
+            try:
+                rate.sleep()
+            except rospy.ROSTimeMovedBackwardsException:
+                pass
 
 
 if __name__ == '__main__':

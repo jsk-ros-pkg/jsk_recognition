@@ -1,0 +1,8 @@
+<launch>
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+
+  <node name="store_pointcloud"
+        pkg="jsk_pcl_ros" type="store-pointcloud.l">
+    <remap from="/openni/depth_registered/points_throttle" to="/kinect_head/depth_registered/points"/>
+  </node>
+</launch>

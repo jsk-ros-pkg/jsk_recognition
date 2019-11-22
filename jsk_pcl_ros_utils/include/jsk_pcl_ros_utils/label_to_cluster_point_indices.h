@@ -62,6 +62,9 @@ protected:
   ros::Subscriber sub_;
   ros::Publisher pub_;
   ros::Publisher pub_bg_;
+
+  int bg_label_;
+  std::vector<int> ignore_labels_;
 private:
 };
 

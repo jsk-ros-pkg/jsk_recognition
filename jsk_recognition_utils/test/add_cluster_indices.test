@@ -1,0 +1,13 @@
+<launch>
+  <include file="$(find jsk_recognition_utils)/sample/sample_add_cluster_indices.launch"/>
+
+  <test test-name="test_add_cluster_indices"
+        name="test_add_cluster_indices"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="60" retry="3">
+    <rosparam>
+      topic_0: /add_cluster_indices/output
+      timeout_0: 60
+    </rosparam>
+  </test>
+</launch>

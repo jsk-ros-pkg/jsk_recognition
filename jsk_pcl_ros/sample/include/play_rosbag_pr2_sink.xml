@@ -1,0 +1,46 @@
+<launch>
+  <arg name="LOAD_URDF" default="false"/>
+
+  <param name="/use_sim_time" value="true"/>
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find pr2_description)/robots/pr2.urdf.xacro'"
+         if="$(arg LOAD_URDF)"/>
+
+  <node name="rosbag_play" pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/sample/data/pr2_sink.bag --clock --loop"/>
+
+  <group ns="kinect_head">
+    <group ns="rgb">
+      <node name="republish"
+            pkg="image_transport" type="republish"
+            args="compressed raw">
+        <remap from="in" to="image_raw"/>
+        <remap from="out" to="image_raw"/>
+      </node>
+    </group>
+
+    <group ns="depth_registered">
+      <node name="republish"
+            pkg="image_transport" type="republish"
+            args="compressedDepth raw">
+        <remap from="in" to="image_raw"/>
+        <remap from="out" to="image_raw"/>
+      </node>
+    </group>
+  </group>
+
+  <group ns="prosilica">
+    <node name="republish"
+          pkg="image_transport" type="republish"
+          args="compressed raw">
+      <remap from="in" to="image_raw"/>
+      <remap from="out" to="image_raw"/>
+    </node>
+  </group>
+
+  <include file="$(find openni_launch)/launch/openni.launch">
+    <arg name="camera" value="kinect_head"/>
+    <arg name="load_driver" value="false"/>
+    <arg name="depth_registration" value="true"/>
+    <arg name="publish_tf" value="false"/>
+  </include>
+</launch>

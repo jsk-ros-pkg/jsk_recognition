@@ -2,6 +2,7 @@
 
   <include file="$(find jsk_perception)/sample/sample_vgg16_object_recognition.launch">
     <arg name="gui" value="false" />
+    <arg name="gpu" value="-1" />
   </include>
 
   <test test-name="test_vgg16_object_recognition"

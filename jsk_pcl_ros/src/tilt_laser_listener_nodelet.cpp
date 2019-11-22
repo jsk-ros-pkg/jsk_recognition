@@ -60,10 +60,12 @@ namespace jsk_pcl_ros
     pnh_->getParam("twist_frame_id", twist_frame_id_);
     pnh_->param("overwrap_angle", overwrap_angle_, 0.0);
     std::string laser_type;
+    bool subscribe_joint = true;
     pnh_->param("clear_assembled_scans", clear_assembled_scans_, false);
     pnh_->param("skip_number", skip_number_, 1);
     pnh_->param("laser_type", laser_type, std::string("tilt_half_down"));
     pnh_->param("max_queue_size", max_queue_size_, 100);
+    pnh_->param("publish_rate", publish_rate_, 1.0);
     if (laser_type == "tilt_half_up") {
       laser_type_ = TILT_HALF_UP;
     }
@@ -79,12 +81,21 @@ namespace jsk_pcl_ros
     else if (laser_type == "infinite_spindle_half") {
       laser_type_ = INFINITE_SPINDLE_HALF;
     }
+    else if (laser_type == "periodic") {
+      laser_type_ = PERIODIC;
+      periodic_timer_ = pnh_->createTimer(ros::Duration(1/publish_rate_), &TiltLaserListener::timerCallback, this);
+      subscribe_joint = false;
+    }
     else {
       NODELET_ERROR("unknown ~laser_type: %s", laser_type.c_str());
       return;
     }
     pnh_->param("not_use_laser_assembler_service", not_use_laser_assembler_service_, false);
     pnh_->param("use_laser_assembler", use_laser_assembler_, false);
+    double vital_rate;
+    pnh_->param("vital_rate", vital_rate, 1.0);
+    cloud_vital_checker_.reset(
+      new jsk_topic_tools::VitalChecker(1 / vital_rate));
     if (use_laser_assembler_) {
       if (not_use_laser_assembler_service_) {
         sub_cloud_
@@ -105,13 +116,19 @@ namespace jsk_pcl_ros
       "clear_cache", &TiltLaserListener::clearCacheCallback,
       this);
     trigger_pub_ = advertise<jsk_recognition_msgs::TimeRange>(*pnh_, "output", 1);
-    double vital_rate;
-    pnh_->param("vital_rate", vital_rate, 1.0);
-    cloud_vital_checker_.reset(
-      new jsk_topic_tools::VitalChecker(1 / vital_rate));
-    sub_ = pnh_->subscribe("input", max_queue_size_, &TiltLaserListener::jointCallback, this);
+    if(subscribe_joint) {
+      sub_ = pnh_->subscribe("input", max_queue_size_, &TiltLaserListener::jointCallback, this);
+    }
 
     onInitPostProcess();
+  }
+
+  void TiltLaserListener::timerCallback(const ros::TimerEvent& e)
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    vital_checker_->poke();
+    publishTimeRange(e.current_real, e.last_real, e.current_real);
+    start_time_ = e.current_real; // not used??
   }
 
   void TiltLaserListener::subscribe()
@@ -136,7 +153,7 @@ namespace jsk_pcl_ros
                        getName() + " running");
         }
         else {
-          stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,
+          stat.summary(diagnostic_error_level_,
                        "~input/cloud is not activate");
         }
         stat.add("scan queue", cloud_buffer_.size());
@@ -149,7 +166,7 @@ namespace jsk_pcl_ros
     }
     else {
       jsk_topic_tools::addDiagnosticErrorSummary(
-        name_, vital_checker_, stat);
+        name_, vital_checker_, stat, diagnostic_error_level_);
     }
   }
 
@@ -413,6 +430,11 @@ namespace jsk_pcl_ros
       std::string name = msg->name[i];
       if (name == joint_name_) {
         vital_checker_->poke();
+        if(msg->position.size() <= i) {
+          ROS_WARN("size of position (%zu) is smaller than joint(%s) position(%zu)",
+                   msg->position.size(), name.c_str(), i);
+          return;
+        }
         if (laser_type_ == TILT_HALF_UP) {
           processTiltHalfUp(msg->header.stamp, msg->position[i]);
         }
@@ -423,12 +445,22 @@ namespace jsk_pcl_ros
           processTilt(msg->header.stamp, msg->position[i]);
         }
         else if (laser_type_ == INFINITE_SPINDLE) {
+          if(msg->velocity.size() <= i) {
+            ROS_WARN("size of velocity (%zu) is smaller than joint(%s) position(%zu)",
+                     msg->velocity.size(), name.c_str(), i);
+            return;
+          }
           processInfiniteSpindle(msg->header.stamp,
                                  msg->position[i],
                                  msg->velocity[i],
                                  msg->position[i]);
         }
         else if (laser_type_ == INFINITE_SPINDLE_HALF) {
+          if(msg->velocity.size() <= i) {
+            ROS_WARN("size of velocity (%zu) is smaller than joint(%s) position(%zu)",
+                     msg->velocity.size(), name.c_str(), i);
+            return;
+          }
           processInfiniteSpindle(msg->header.stamp,
                                  fmod(msg->position[i], M_PI),
                                  msg->velocity[i],

@@ -20,3 +20,9 @@ Pack `jsk_recognition_msgs/RectArray` to one image by solving 2-D binpack proble
 * `~approximate_sync` (default: `false`)
 
   Synchronize `~input` and `~input/rect_array` with approximate time sync.
+
+## Sample
+
+```bash
+roslaunch jsk_perception sample_binpack_rect_array.launch
+```

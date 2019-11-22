@@ -1,0 +1,44 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_cluster_point_indices_decomposer_sort_by.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <node name="bounding_box_filter"
+        pkg="jsk_pcl_ros" type="bounding_box_filter">
+    <remap from="~input_box" to="cluster_point_indices_decomposer_cloud_size/boxes" />
+    <remap from="~input_indices" to="cluster_point_indices_decomposer_cloud_size/cluster_indices" />
+    <rosparam>
+      use_x_dimension: true
+      use_y_dimension: true
+      x_dimension_min: 0.2
+      x_dimension_max: 100
+      y_dimension_min: 0.28
+      y_dimension_max: 100
+    </rosparam>
+  </node>
+
+  <node name="bounding_box_filter_without_indices"
+        pkg="jsk_pcl_ros" type="bounding_box_filter">
+    <remap from="~input_box" to="cluster_point_indices_decomposer_cloud_size/boxes" />
+    <rosparam>
+      with_indices: false
+      use_x_dimension: true
+      use_y_dimension: true
+      x_dimension_min: 0.2
+      x_dimension_max: 100
+      y_dimension_min: 0.28
+      y_dimension_max: 100
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/bounding_box_filter.rviz">
+    </node>
+  </group>
+
+</launch>

@@ -1,0 +1,39 @@
+#
+# Wavefront material file
+#
+newmtl material_0
+Ka 0.2 0.2 0.2
+Kd 0.8 0.8 0.8
+Ks 1 1 1
+d 1
+Ns 75
+illum 2
+map_Kd textures/0.jpg
+###
+newmtl material_1
+Ka 0.2 0.2 0.2
+Kd 0.8 0.8 0.8
+Ks 1 1 1
+d 1
+Ns 75
+illum 2
+map_Kd textures/1.jpg
+###
+newmtl material_2
+Ka 0.2 0.2 0.2
+Kd 0.8 0.8 0.8
+Ks 1 1 1
+d 1
+Ns 75
+illum 2
+map_Kd textures/2.jpg
+###
+newmtl material_3
+Ka 0.2 0.2 0.2
+Kd 0.8 0.8 0.8
+Ks 1 1 1
+d 1
+Ns 75
+illum 2
+map_Kd textures/occluded.jpg
+###

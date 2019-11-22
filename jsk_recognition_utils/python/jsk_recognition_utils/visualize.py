@@ -9,7 +9,7 @@ import numpy as np
 import PIL
 
 
-def centerize(src, dst_shape):
+def centerize(src, dst_shape, margin_color=None):
     """Centerize image for specified image size
 
     @param src: image to centerize
@@ -18,6 +18,8 @@ def centerize(src, dst_shape):
     if src.shape[:2] == dst_shape[:2]:
         return src
     centerized = np.zeros(dst_shape, dtype=src.dtype)
+    if margin_color is not None:
+        centerized[:, :] = margin_color
     pad_vertical, pad_horizontal = 0, 0
     h, w = src.shape[:2]
     dst_h, dst_w = dst_shape[:2]
@@ -29,7 +31,7 @@ def centerize(src, dst_shape):
                pad_horizontal:pad_horizontal+w] = src
     return centerized
 
-def _tile_images(imgs, tile_shape, concatenated_image):
+def _tile_images(imgs, tile_shape, concatenated_image, margin_color=None):
     """Concatenate images whose sizes are same.
 
     @param imgs: image list which should be concatenated
@@ -42,6 +44,8 @@ def _tile_images(imgs, tile_shape, concatenated_image):
     if concatenated_image is None:
         concatenated_image = np.zeros((one_height * y_num, one_width * x_num, 3),
                                       dtype=np.uint8)
+        if margin_color is not None:
+            concatenated_image[:, :] = margin_color
     for y in range(y_num):
         for x in range(x_num):
             i = x + y * x_num
@@ -52,7 +56,7 @@ def _tile_images(imgs, tile_shape, concatenated_image):
     return concatenated_image
 
 
-def get_tile_image(imgs, tile_shape=None, result_img=None):
+def get_tile_image(imgs, tile_shape=None, result_img=None, margin_color=None):
     """Concatenate images whose sizes are different.
 
     @param imgs: image list which should be concatenated
@@ -82,9 +86,11 @@ def get_tile_image(imgs, tile_shape=None, result_img=None):
         scale = min([h_scale, w_scale])
         h, w = int(scale * h), int(scale * w)
         img = cv2.resize(img, (w, h))
-        img = centerize(img, (max_height, max_width, 3))
+        img = centerize(img, (max_height, max_width, 3),
+                        margin_color=margin_color)
         imgs[i] = img
-    return _tile_images(imgs, tile_shape, result_img)
+    return _tile_images(imgs, tile_shape, result_img,
+                        margin_color=margin_color)
 
 
 def colorize_cluster_indices(image, cluster_indices, alpha=0.3, image_alpha=1):

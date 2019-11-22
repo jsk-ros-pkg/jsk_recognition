@@ -201,44 +201,6 @@ namespace jsk_recognition_utils
     }
   }
 
-  void addDiagnosticInformation(
-    const std::string& string_prefix,
-    jsk_topic_tools::TimeAccumulator& accumulator,
-    diagnostic_updater::DiagnosticStatusWrapper& stat)
-  {
-    stat.add(string_prefix + " (Avg.)", accumulator.mean());
-    if (accumulator.mean() != 0.0) {
-      stat.add(string_prefix + " (Avg., fps)", 1.0 / accumulator.mean());
-    }
-    stat.add(string_prefix + " (Max)", accumulator.max());
-    stat.add(string_prefix + " (Min)", accumulator.min());
-    stat.add(string_prefix + " (Var.)", accumulator.variance());
-  }
-
-  void addDiagnosticErrorSummary(
-    const std::string& string_prefix,
-    jsk_topic_tools::VitalChecker::Ptr vital_checker,
-    diagnostic_updater::DiagnosticStatusWrapper& stat)
-  {
-    stat.summary(
-      diagnostic_msgs::DiagnosticStatus::ERROR,
-      (boost::format("%s not running for %f sec")
-       % string_prefix % vital_checker->deadSec()).str());
-  }
-  
-  void addDiagnosticBooleanStat(
-    const std::string& string_prefix,
-    const bool value,
-    diagnostic_updater::DiagnosticStatusWrapper& stat)
-  {
-    if (value) {
-      stat.add(string_prefix, "True");
-    }
-    else {
-      stat.add(string_prefix, "False");
-    }
-  }
-
   SeriesedBoolean::SeriesedBoolean(const int buf_len):
     buf_(buf_len), buf_len_(buf_len)
   {
@@ -279,54 +241,5 @@ namespace jsk_recognition_utils
   {
     buf_.clear();
   }
-
-  TimeredDiagnosticUpdater::TimeredDiagnosticUpdater(
-    ros::NodeHandle& nh,
-    const ros::Duration& timer_duration):
-    diagnostic_updater_(new diagnostic_updater::Updater)
-  {
-    timer_ = nh.createTimer(
-      timer_duration, boost::bind(
-        &TimeredDiagnosticUpdater::timerCallback,
-        this,
-        _1));
-    timer_.stop();
-  }
-  
-  void TimeredDiagnosticUpdater::start()
-  {
-    timer_.start();
-  }
-
-  TimeredDiagnosticUpdater::~TimeredDiagnosticUpdater()
-  {
-  }
-
-  void TimeredDiagnosticUpdater::setHardwareID(const std::string& name)
-  {
-    diagnostic_updater_->setHardwareID(name);
-  }
-  
-  void TimeredDiagnosticUpdater::add(const std::string& name,
-                                     diagnostic_updater::TaskFunction f)
-  {
-    diagnostic_updater_->add(name, f);
-  }
-  
-  // void TimeredDiagnosticUpdater::add(diagnostic_updater::DiagnosticTask task)
-  // {
-  //   diagnostic_updater_->add(task);
-  // }
-
-  void TimeredDiagnosticUpdater::update()
-  {
-    diagnostic_updater_->update();
-  }
-  
-  void TimeredDiagnosticUpdater::timerCallback(const ros::TimerEvent& event)
-  {
-    update();
-  }
-  
 }
 

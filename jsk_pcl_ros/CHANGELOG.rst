@@ -2,6 +2,413 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.10 (2019-03-27)
+-------------------
+* use (MOVEIT_VERSION_MAJOR == 0 and MOVEIT_VERSION_MINOR < 6), since moveit is upgraded to 1.0 (`#2416 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2416>`_)
+* [doc] [jsk_pcl_ros_utils] [jsk_pcl_ros] Add documentation (`#2393 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2393>`_)
+
+  * Add test for InteractiveCuboidLikelihood
+  * Add dependency on jsk_interactive_marker to jsk_pcl_ros
+  * Remove unused nodes in sample_plane_supported_cuboid_estimator.launch
+  * Set queue_size explicitly for publisher in sample_simulate_tabletop_cloud.py
+  * Add test for EdgebasedCubeFinder
+  * Add sample for EdgebasedCubeFinder
+  * Add test for FindObjectOnPlane
+  * Add sample for FindObjectOnPlane
+  * Add test for EnvironmentPlaneModeling
+  * Add sample for EnvironmentPlaneModeling
+  * Add test for JointStateStaticFilter
+  * Add sample for JointStateStaticFilter
+  * Install additional rosbag file for move & stop joints
+  * Add test for MultiPlaneSACSegmentation
+  * Add sample for MultiPlaneSACSegmentation
+  * Fix for assertion error (ptr != 0) when subscribing only ~input
+  * Add test for HandleEstimator
+  * Add sample for HandleEstimator
+  * Add test for VoxelGridDownsampleManager/Decoder
+  * Add sample for VoxelGridDownsampleManager/Decoder
+  * Add test for ColorizeMapRandomForest
+  * Add sample for ColorizeMapRandomForest
+  * Fix executable name for ColorizeMapRandomForest
+  * Fix names in ColorizeMapRandomForest
+  * Run test for ColorizeRandomForest only when ml_classifiers is found
+  * Add doc for ColorizeRandomForest
+  * Add test for ColorizeRandomForest
+  * Add sample for ColorizeRandomForest
+  * Fix typo in CMakeLists.txt in order to build ColorizeRandomForest
+  * Fix names in ColorizeRandomForest
+  * Add test for SelectedClusterPublisher
+  * Add sample for SelectedClusterPublisher
+  * Add test for BilateralFilter
+  * Add sample for BilateralFilter
+
+* Contributors: Kei Okada, Yuto Uchimi
+
+1.2.9 (2019-02-23)
+------------------
+
+1.2.8 (2019-02-22)
+------------------
+
+1.2.7 (2019-02-14)
+------------------
+* add melodic test (`#2355 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2355>`_ )
+
+  * fix for melodic, use ros::AsyncSpinner
+  * revert Reverts `#2310 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2310>`_, kinfu.h uses jsk_rviz_plugins/OverlayText.h, but jsk_recognition should not depends on jsk_visualization, jsk_visualization depends on jsk_recognition
+  * moveit API change: Affine3d -> Isometry3d
+  * replace tf::MessageFilter by tf2_ros::MessageFilter
+
+* OctomapServerContact sample with PR2(`#2392 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2392>`_ )
+
+  * [jsk_pcl_ros/octomap_server_contact] check wheter tf transformation succeeds.
+  * [jsk_pcl_ros/octomap_server_contact] refactor euslisp node for publishing sensor data.
+  * [jsk_pcl_ros/octomap_server_contact] use openmp for scan grids.
+  * [jsk_pcl_ros/octomap_server_contact] write with one loop for scanning grid.
+  * [jsk_pcl_ros/octomap_server_contact] remove unnecessary lines in the case that vertex is not used (= contact surface is not used). change parameter name: use_vetex -> use_contact_surface.
+  * [jsk_pcl_ros/octomap_server_contact] clamp min and max points for scanning all leaf.
+  * [jsk_pcl_ros/octomap_server_contact] pass timestamp of subscribed message for tf transformation correctly.
+  * [jsk_pcl_ros] add launch, scripts, and configs for sample of octomap_server_contact with PR2.
+
+* Add method to convert jsk_recognition_msgs/BoundingBox to cube in euslisp (`#2384 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2384>`_ )
+
+  * add function to convert jsk_recognition_msgs/BoundingBox to cube in euslisp
+  * divide single roseus file into node file and library file
+  * correct message type
+
+* normal_estimation_omp_nodelet.cpp: add line to preserve rgb data of pointcloud (`#2388 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2388>`_ )
+* [jsk_pcl_ros, jsk_pcl_ros_utils] Use ccache if installed to make it fast to generate object file (`#2342 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2342>`_ )
+
+  * [jsk_pcl_ros] Use ccache if installed to make it fast to generate object file
+
+* Fix cluster point indices decomposer to make bounding box from cloud including nan (`#2369 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2369>`_ )
+
+  * remove nan only when is_dense is False
+  * take over is_dense from input cloud and remove nan for bounding box computation
+  * [jsk_pcl_ros] Add test_depend to jsk_perception
+  *  Add bbox test for cpi decomposer.
+
+* [octomap_server_contact] Publish frontier grid (`#2344 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2344>`_ )
+
+  * add test topics which is passed to test_topic_published.py
+  * modify name space in remap
+  * add test for octomap_contact
+  * install bag file for octomap server contact
+  * update sample rviz config for octomap frontier
+  * add sample launch file for octomap frontier grid
+  * publish frontier grid in octomap_server_contact
+
+* Correct md5 of install rosbag file (`#2361 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2361>`_ )
+
+* Contributors: Christian Rauch, Kei Okada, Masaki Murooka, Naoya Yamaguchi, Shingo Kitagawa, Shun Hasegawa, Iory Yanokura, Hideaki Ito, Weiqi Yang
+
+1.2.6 (2018-11-02)
+------------------
+* [octomap_server_contact] add callback function to insert proximity sensor pointcloud (`#2328 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2328>`_)
+  * [octomap_server_contact] add rosparam to select using vertex in insertContactSensor()
+  * [octomap_server_contact] add callback function to insert proximity sensor pointcloud
+  * [octomap_server_contact] add rosparam to select publishing unknown marker array
+  
+* kinfu.h depends on jsk_rviz_plugins (`#2310 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2310>`_)
+* Add detect_graspable_poses_pcabase.py and its sample (`#2297 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2297>`_)
+  * delete unnecessary try except block    
+  * move rospy.init_node and rospy.spin into the block of if __name_\_ == '__main_\_'
+  * if else is set so that z value of grasp poses' y axies become positive.
+  * delete unncessary import, change variables to snake case, put spaces
+  * modify axis so that a robot can grasp object more naturally
+  * fix a problem that this program does not provide correct axies when x option is selected
+  * add test for detect_graspable_poses_pcabase
+  * files needed to run sample of detect_graspable_poses_pcabase
+  * detect_graspable_poses_pca_base.py produce graspable poses using input point cloud data, hand width, and grasp direction.
+
+* [jsk_pcl_ros/multi_plane_extraction] Initialize viewpoint by zeros to avoid flip of surface normal direction (`#2343 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2343>`_)
+* [jsk_pcl_ros][organized_pass_through] add remove_nan (`#2039 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2039>`_)
+* Install 'scripts' into SHARE_DESTINATION (`#2345 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2345>`_)
+* [jsk_pcl_ros/package.xml] Add checkerborad_detecotr's dependency (`#2319 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2319>`_)
+* [jsk_pcl_ros/cluster_point_indices_decomposer] Modified publishNegativeIndices to make it fast (`#2326 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2326>`_)
+  * [jsk_pcl_ros/cluster_point_indice_decomposer] Monitor num of subscriber and if equal less than 0, return.
+  * [jsk_pcl_ros/cluster_point_indice_decomposer] Make publishNegativeIndices fast by fixing algorithm
+
+* [jsk_perception] Retrain bof data for sklearn==0.2.0 version and modified jsk_pcl_ros/utils's test for kinetic travis (`#2337 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2337>`_)
+  * [jsk_pcl_ros/test_pointcloud_screenpoint.test] Check a topic published by using jsk_tools/test_topic_published.py
+  * [jsk_pcl_ros/color_histogram.test] Check topics published by using jsk_tools/test_topic_published.py
+  * [jsk_pcl_ros/color_histogram.test] Refactored rosbag play by using common file
+
+* [jsk_pcl_ros] Delete subclass's updateDiagnostic method (`#2323 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2323>`_)
+  * [jsk_pcl_ros] Add diagnostics update
+
+* [jsk_pcl_ros/openni2_remote.launch] Add use_warn option (`#2322 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2322>`_)
+  * [jsk_pcl_ros/openni2_remote.launch] Add use_warn option
+  * [jsk_pcl_ros/openni2_remote.launch] Modified use_warn false
+  * [jsk_pcl_ros/openni2_remote.launch] Add use_warn option
+
+* Fix typos (`#2313 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2313>`_)
+  * Fix typo in cfg of OrganizedMultiPlaneSegmentation
+
+* [jsk_pcl_ros/package.xml] Delete duplication of cv_bridge (`#2318 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2318>`_)
+  * [jsk_pcl_ros/package.xml] Add checkerborad_detecotr's dependency
+  * [jsk_pcl_ros/package.xml] Delete duplication of cv_bridge
+
+* fix for jsk-ros-pkg/jsk_common/pull/1586 (`#2311 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2311>`_)
+  * to avoid add_custom_target cannot create target install_sample_data because  another target with the same name already exists errors
+
+* Use diagnostic nodelet for EuclideanClustering and other nodelets (`#2301 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2301>`_)
+
+* [jsk_pcl_ros/openni2_remote.launch] Modified namespace (`#2302 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2302>`_)
+  * [jsk_pcl_ros/openni2_remote] Add depth args
+  * [jsk_pcl_ros/openni2_remote] Fixed rgb_frame_id because this not changed
+  * [jsk_pcl_ros/openni2_remote] Modified rgb namespace
+  * [jsk_pcl_ros/openni2_remote] Changed that you can change the camera source
+
+* [jsk_pcl_ros] Modified openni2_remote.launch to change camera namespace (`#2299 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2299>`_)
+  * [jsk_pcl_ros] Modified openni2_remote.launch to change camera namespace
+
+* Fix warnings about <pcl/ros/conversions.h> and printf format (`#2291 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2291>`_)
+  * Fix printf format in tilt_laser_listener_nodelet
+  * Fix warnings about <pcl/ros/conversions.h>
+
+* Describe the hierachy of rosparams of ClusterPointIndicesDecomposer (`#2285 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2285>`_)
+  * cluster_point_indices_decomposer: ROS_XXX -> NODELET_XXX
+  * Show warning for unused rosparams
+
+* jsk_pcl_ros: primitive_shape_classifier: fix typo (`#2283 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2283>`_)
+  * jsk_pcl_ros: color_histogram_filter: fix typo
+  * jsk_pcl_ros: primitive_shape_classifier: fix typo
+
+* jsk_pcl_ros: support lazy mode for pointcloud_screenpoint nodelet (`#2277 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2277>`_)
+  * jsk_pcl_ros: support lazy mode for pointcloud_screenpoint nodelet
+
+* fix travia and reduce dependency for jsk_pcl_ros (`#2276 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2276>`_)
+  * sort run/build depends
+  * remove unnesessary depends as reported on https://github.com/jsk-ros-pkg/jsk_3rdparty/issues/140, building jsk_pcl_ros on ros buildfarm takes too much time.  This PR cleans dependencies.
+  * add wkentaro to maintainer
+
+* Fix warnings for jsk_pcl_ros package (`#2266 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2266>`_)
+* Fix missing pkg_name in install_sample_data.py (`#2267 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2267>`_)
+* [jsk_pcl_ros/test_extract_indices.cpp] use std::isnan in test_extract_indices (`#2251 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2251>`_)
+  * use std::isnan in test_extract_indices
+  * [jsk_pcl_ros][organized_pass_through] add remove_nan
+
+* Contributors: Kei Okada, Kentaro Wada, Naoya Yamaguchi, Riku Shigematsu, Shingo Kitagawa, Shun Hasegawa, Yuki Furuta, Yuto Uchimi, Iori Yanokura
+
+1.2.5 (2018-04-09)
+------------------
+* Fix build of jsk_pcl_ros (on Kinetic) (`#2262 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2262>`_)
+* [jsk_pcl_ros/color_histogram_visualizer.py] use facecolor instead of axisbg (`#2250 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2250>`_)
+  * use facecolor instead of axisbg
+    axisbg is removed from matplotlib 2.2.0
+
+* [jsk_pcl_ros] ICP Registration on 2D plane (`#1991 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1991>`_)
+  * [jsk_pcl_ros] add sample launch file for icp_registration 2d
+  * [jsk_pcl_ros][icp_registration_nodelet.cpp] add option for 2d transform estimation
+
+* jsk_pcl_ros: add sample door detector (`#2182 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2182>`_)
+  * jsk_pcl_ros: fix param for door_detector sample launch
+  * jsk_pcl_ros: add sample launch files for icp registration 2d
+  * jsk_pcl_ros: add sample data for pr2 sink scenario
+  * jsk_pcl_ros: add rviz config / rosbag for sample_door_handle_detector
+  * jsk_pcl_ros: add sample door detector
+* Contributors: Kentaro Wada, Shingo Kitagawa, Yuki Furuta
+
+1.2.4 (2018-01-12)
+------------------
+* jsk_pcl_ros/multi_plane_extraction: fix typo 'maginify' (`#2237 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2237>`_)
+  * test_depth_image_creator.test: increase time limit (`#2236 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2236>`_)
+* Fix uninitialized pointer error in some recognition nodelets (`#2234 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2234>`_)
+  * [tilt_laser_listener] Initialize cloud_vital_checker\_ before subscribe input/cloud because cloud_vital_checker\_ is referred in cloudCallback
+* add test/test_pointcloud_screenpoint.test, enable to run run pointcloud_screenpoint sample launch in indigo (`#2233 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2233>`_)
+  * update pointcloud_screenpoint.rviz
+  * sample/pointcloud_screenpoint_sample.launch: enable to use rviz
+  * merge jsk_pcl/PointcloudScreenpoint for both with or without USE_VIEW
+  * update test_pointcloud_screenpoint, use base_frame, instead of PUBLISH_BASE_FOOTPRINT
+  * pointcloud_screenpoint_nodelet.cpp: add more ROS_INFO messages when start up
+  * remove image_view2 from pointcloud_screenpoint_sample.launch, because pointcloud_screenpoint.launch is already start image_view2
+  * use common camera prefix for openni
+  * run pointcloud_screenpoint sample in localhost not pr2, fix for indigo/kinetic setup for openni, machine env-loader, etc...
+* add base_frame param in pointcloud_screenpoint.l
+  * add test/test_pointcloud_screenpoint.test
+* install euslisp/ directory (`#2232 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2232>`_)
+* Contributors: Yuki Furuta, Iori Kumagai, Kei Okada, Shingo Kitagawa
+
+1.2.3 (2017-11-23)
+------------------
+* [tilt_laser_listener] add size check of position and velocity (`#2218 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2218>`_)
+* jsk_pcl_ros: primitive_shape_classifier: don't process debug message if not subscribed (`#2220 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2220>`_)
+* find moveit_ros_perception package at the top of cmake (`#2210 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2210>`_)
+* bounding_box_filter_nodelet.cpp: Support filtering bounding boxes without indices (`#2192 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2192>`_)
+* jsk_pcl_ros: color_histogram_classifier: fix typo (`#2190 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2190>`_)
+* jsk_pcl_ros: multi_plane_extraction: add option use_coefficients (`#2191 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2191>`_)
+* Publish sorted cluster point indices in ClusterPointIndicesDecomposer (`#2183 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2183>`_)
+* enhance heightmap much smoother (`#2180 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2180>`_)
+  * [jsk_pcl_ros, heightmap] update heightmap_converter.launch
+  * [jsk_pcl_ros, heightmap_converter, heightmap_morphological_filtering, heightmap_time_accumulation] update for using averaging accumulation and bilateral filter
+
+* Contributors: Yuki Furuta, Kei Okada, Kentaro Wada, Shingo Kitagawa, Yohei Kakiuchi
+
+1.2.2 (2017-07-23)
+------------------
+
+1.2.1 (2017-07-15)
+------------------
+
+1.2.0 (2017-07-15)
+------------------
+* Check encoding of input topics in FuseImages (`#2158 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2158>`_)
+  
+* jsk_pcl_ros: Add Primitive shape classifier nodelet (`#2141 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2141>`_)
+  * [jsk_pcl_ros] add test for primitive_shape_classifier
+  * [jsk_pcl_ros][primitive_shape_classifier] classify with circle likelihood first
+  * [jsk_pcl_ros][primitive_shape_classifier] parameterize classification threshold
+  * [jsk_pcl_ros] add primitive shape classifier (cont)
+  * [jsk_pcl_ros] add primitive shape classifier
+
+* Contributors: Kentaro Wada, Yuki Furuta
+
+1.1.3 (2017-07-07)
+------------------
+* Filter invalid centroid in centroid_publisher (`#2150 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2150>`_)
+  * Add sample and test for CentroidPublisher
+
+* Support PCA even without input planes but with only ground frame (`#2149 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2149>`_)
+
+* Add nodelet for computing & comparing color histogram (`#2101 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2101>`_)
+  * [jsk_pcl_ros] add color_histogram_classifier and visualizer
+
+* Generate Kinfu texture model with attention (BoundingBox) and Ground frame to fix occluded surface (`#2135 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2135>`_)
+  * Refactor slicing of textures\_ and cameras\_
+  * Use save_mesh_server.py in example
+  * Remove no need print debug
+  * Create save_dir when necessary
+  * Refactoring texture_file for occluded.jpg
+  * Fix to use size_t for indexing
+  * Set texture file with relative path to mesh file
+  * Save kinfu mesh model with bbox and ground frame id
+  * Create polygon mesh with bbox request in kinfu
+  * Create function to crop point cloud by bounding box
+  * Add dynamic_reconfigure for kinfu to change save_dir in dynamic
+
+* Various sort options for cluster point indices decomposer (`#2133 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2133>`_)
+  * Check bounding box's size to make it valid
+  * Add ref for std::sort with lambda function
+  * use std::sort in ClusterPointIndicesDecomposer
+  * Use argsort to add label to bounding box correctly
+    The box label is the index of input indices.
+    Index\_{output_indices} = argsort(Index\_{input_indices})
+  * Add test for ClusterPointIndicesDecomposer with sort_by option
+  * Add capability to sort indices with cloud size
+  * Refactor ClusterPointIndicesDecomposer with ~sort_by param
+
+* [jsk_pcl_ros] use smaller rosbag data for ppf registration (`#2123 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2123>`_)
+  * use nodelet in sample octree voxel grid
+  * use smaller rosbag data for ppf registration
+
+* [jsk_pcl_ros/OctomapServerContact] Supress octomap debug message (`#2122 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2122>`_)
+  * [jsk_pcl_ros/src/octomap_server_contact_nodelet.cpp] fix log output function.
+  * [jsk_pcl_ros/src/octomap_server_contact_nodelet.cpp] add NDEBUG definition for octomap log.
+
+* src/supervoxel_segmentation_nodelet.cpp: check size of PointCloud data size (`#2120 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2120>`_)
+
+* Following change of `#2103 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2103>`_ (`#2111 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2111>`_)
+  * Use max_pub_queue_size, max_sub_queue_size
+
+* Rewrite KinfuNodelet with some enhancements and new features (`#2129 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2129>`_)
+  * Create jsk_recognition_msgs/TrackingStatus.msg and use it in Kinfu
+  * Add sample of kinfu for hrp2_apc
+  * Remove no longer required rotate90_x
+  * Check number of subscribers for each topic to publish
+  * Hanle mutex correctly for kinfu\_ and cameras\_
+  * Reset cameras\_ when kinfu is reset
+  * Use boost shared_ptr to avoid resource leak by kinfu instance
+  * Improve topic name: generated_depth -> depth
+  * Publish kinfu tracking status
+  * Parameterize odom_init (fixed_frame_id)
+  * Remove no need scoped lock
+  * Add hint comment for slam by kinfu
+  * Remove unused Kinfu.cfg
+  * Disable slam in default
+  * Support kinfu as slam and publish tf map -> odom_init
+  * Improve comment
+  * Support kinfu as slam with making fixed frame as child
+  * Fix kinfu.launch ~input/info -> ~input/camera_info
+  * Preserve default behavior of auto_reset=true
+  * Test kinfu output topics
+  * Preserve kinfu ~output (camera pose)
+  * Preserve previous kinfu ~output/cloud
+  * Support texture mesh generated using kinfu
+  * Support colorized cloud output by kinfu
+  * Refactoring: use enc::
+  * Support publishing depth image generated by kinfu
+  * Fix missing header for rendered image msg
+  * Support colorized rendered image
+  * Support color integration
+  * Refactoring seeing kinfuLS_app.cpp
+  * Save mesh model with service request
+  * Rewrite KinfuNodelet with some enhancements
+    - Stable tracking
+    - Publish rendered image
+
+* [docs][color_histogram_classifier] add tutorials `#2147 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2147>`_
+  * [jsk_pcl_ros][color_histogram] update docs / rviz config
+  * [jsk_pcl_ros][sample_color_histogram.launch] update launch file
+  * [jsk_pcl_ros][color_histogram_visualizer] change bg color to gray
+
+* Various sort options for cluster point indices decomposer (`#2133 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2133>`_)
+
+* Contributors: Kei Okada, Kentaro Wada, Masaki Murooka, Shingo Kitagawa, Yuki Furuta
+
+1.1.2 (2017-06-16)
+------------------
+* Use 1 queue size for pub/sub not synchronization (`#2103 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2103>`_ )
+  * Use 1 queue size for pub/sub not synchronization
+  * Keep backward compatibility by using max_queue_size\_
+* Support PointXYZ in DepthImageCreator (`#2105 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2105>`_)
+  * Support PointXYZ in DepthImageCreator
+  * Add stereo_image_proc as run_depend
+* Check if in image to create depth from laser scans (`#2106 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2106>`_)
+* Triple sensor fusion with stereo rgbd cameras  (`#2104 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2104>`_)
+  * Fix missing inclusion of image_encodings.h
+  * Install sample data for fuse_images
+  * Rename: sample_fuse_depth_images.launch -> sample_fuse_images.launch
+  * Improve visualization in sample_fuse_depth_image
+  * Rename: fuse_depth_images.cpp -> fuse_images.cpp
+  * Fuse RGB images from multiple cameras
+  * Add sample for FuseDepthImages
+  * Fuse depth images for multiple sensor fusion
+  * Add test for depth_image_creator
+  * Create rgb image in depth_image_creator
+* Fix typo in ColorBasedRegionGrowingSegmentation (`#2098 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2098>`_)
+* Stop using deprecated logging func in jsk_topic_tools (`#2097 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2097>`_)
+  * Stop using deprecated JSK_NODELET_INFO_STREAM
+  * Stop using deprecated jsk_logxxx
+* [jsk_pcl_ros/line_segment_detector] Add consensus method of segmentation (`#1997 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/1947>`_)
+  * [jsk_pcl_ros/lsd] Refactored code
+  * [jsk_pcl_ros/line_segment_detector] Mofied method type of consensus method
+  * [jsk_pcl_ros/line_segment_detector] Add consensus method of segmentation
+* Cleanup octomap dependencies of jsk_pcl_ros (`#2090 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2090>`_)
+* Fix deprecation warning on RearrangeBoundingBox (`#2088 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2088>`_)
+  ```
+  WARNING: '/home/wkentaro/Projects/label_octomap/src/jsk-ros-pkg/jsk_recognition/jsk_pcl_ros/sample/data/sample_add_color_from_image_20170319.bag' exists
+  /home/wkentaro/Projects/label_octomap/src/jsk-ros-pkg/jsk_recognition/jsk_pcl_ros/src/rearrange_bounding_box_nodelet.cpp: In member function 'virtual void jsk_pcl_ros::RearrangeBoundingBox::onInit()':
+  /home/wkentaro/Projects/label_octomap/src/jsk-ros-pkg/jsk_recognition/jsk_pcl_ros/src/rearrange_bounding_box_nodelet.cpp:51:57: warning: 'tf2::Quaternion::Quaternion(const tf2Scalar&, const tf2Scalar&, const tf2Scalar&)' is deprecated (declared at /opt/ros/indigo/include/tf2/LinearMath/Quaternion.h:50) [-Wdeprecated-declarations]
+  q\_ = tf2::Quaternion(rotate_y\_, rotate_x\_, rotate_z\_);
+  ^
+  /home/wkentaro/Projects/label_octomap/src/jsk-ros-pkg/jsk_recognition/jsk_pcl_ros/src/rearrange_bounding_box_nodelet.cpp: In member function 'void jsk_pcl_ros::RearrangeBoundingBox::configCallback(jsk_pcl_ros::RearrangeBoundingBox::Config&, uint32_t)':
+  /home/wkentaro/Projects/label_octomap/src/jsk-ros-pkg/jsk_recognition/jsk_pcl_ros/src/rearrange_bounding_box_nodelet.cpp:73:57: warning: 'tf2::Quaternion::Quaternion(const tf2Scalar&, const tf2Scalar&, const tf2Scalar&)' is deprecated (declared at /opt/ros/indigo/include/tf2/LinearMath/Quaternion.h:50) [-Wdeprecated-declarations]
+  q\_ = tf2::Quaternion(rotate_y\_, rotate_x\_, rotate_z\_);
+  ```
+* [tilt_laser_listener] add periodic publish mode (`#2082 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2082>`_)
+* [jsk_pcl_ros] publish edge as segment message in edge_depth_refinement_nodelet. (`#2047 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2047>`_)
+* enlarge euclidean clustering max cluster size (`#2066 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2066>`_)
+* Generate README by script (`#2064 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2064>`_)
+* [jsk_pcl_ros][cluster_point_indices_decomposer] normailize bounding box pose orientation quaternion (`#2044 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2044>`_)
+* [jsk_pcl_ros] Modified openni2_remote for republish compressed image (`#2036 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2036>`_)
+* Nodelet to add color from image to organized pointcloud (`#2035 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2035>`_)
+  * Add test, sample and doc for add_color_from_image(_to_organized)
+  * Nodelet to add color from image to organized pointcloud
+* forget to convert form jsk_pcl_ros to jsk_recognition_msgs (`#2021 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2021>`_)
+* [jsk_pcl_ros/launch/euclidean_segmentation.launch] add create manager node  (`#2020 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2020>`_)
+* Contributors: Guilherme Affonso, Kanae Kochigami, Kei Okada, Kentaro Wada, Masaki Murooka, Yohei Kakiuchi, Yuki Furuta, Iory Yanokura, Hiroto Mizohana
+
 1.1.1 (2017-03-04)
 ------------------
 * incldue flann before any opencv includes, fix `#2022 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2022>`_ (`#2023 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2023>`_ )
@@ -164,7 +571,7 @@ Changelog for package jsk_pcl_ros
 * Fix missing dependency declaration of jsk_pcl_ros
 * Fix order of components in find_package of jsk_pcl_ros
 * Remove dependency on jsk_perception for separated build
-* [jsk_pcl_ros/icp_registration] Fix error in case of input point cloud… (#1795)
+* [jsk_pcl_ros/icp_registration] Fix error in case of input point cloud... (#1795)
   * [jsk_pcl_ros/icp_registration] Fix error in case of input point cloud size is 0
   * [jsk_pcl_ros/icp_registration] Publish empty topics
   * [jsk_pcl_ros/icp_registration] Add test

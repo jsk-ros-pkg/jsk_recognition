@@ -104,6 +104,18 @@ Visualization Manager:
       normal length: 0.1
       only border: true
       show normal: true
+    - Alpha: 1
+      Class: jsk_rviz_plugin/PolygonArray
+      Color: 85; 85; 255
+      Enabled: true
+      Name: Scale
+      Topic: /polygon_magnifier_scale/output
+      Unreliable: false
+      Value: true
+      coloring: Flat color
+      normal length: 0.1
+      only border: true
+      show normal: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -162,4 +174,4 @@ Window Geometry:
     collapsed: false
   Width: 2200
   X: 71
-  Y: 42
+  Y: 24

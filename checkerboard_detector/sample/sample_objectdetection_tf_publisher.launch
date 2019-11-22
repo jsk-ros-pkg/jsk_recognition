@@ -1,0 +1,21 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find checkerboard_detector)/sample/sample_checkerboard_detector.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="objectdetection_tf_publisher"
+        pkg="checkerboard_detector" type="objectdetection_tf_publisher.py">
+    <remap from="ObjectDetection" to="checkerboard_detector/output/ObjectDetection"/>
+    <rosparam>
+      use_simple_tf: true
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find checkerboard_detector)/sample/config/sample_objectdetection_tf_publisher.rviz"/>
+  </group>
+</launch>

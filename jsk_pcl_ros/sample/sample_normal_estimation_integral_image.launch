@@ -1,0 +1,20 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml"/>
+
+  <node name="normal_estimation_integral_image"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/NormalEstimationIntegralImage">
+    <remap from="~input" to="/right_hand_camera/depth_registered/points"/>
+    <rosparam>
+      max_depth_change_factor: 0.001
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/normal_estimation_integral_image.rviz"/>
+  </group>
+</launch>

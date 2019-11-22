@@ -1,0 +1,58 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="polygon_array_publisher"
+        pkg="jsk_recognition_utils" type="polygon_array_publisher.py">
+    <rosparam>
+      frame_id: map
+      polygons:
+        - points:
+            - [1.0, -1.0, 0.0]
+            - [2.0, -1.0, 0.0]
+            - [2.0,  1.0, 0.0]
+            - [1.0,  1.0, 0.0]
+          label: 1
+          likelihood: 0.8
+        - points:
+            - [-1.0, 1.0, 2.0]
+            - [-1.0, 1.0, 0.0]
+            - [ 0.0, 1.0, 0.0]
+            - [ 0.0, 1.0, 2.0]
+          label: 2
+          likelihood: 0.6
+    </rosparam>
+  </node>
+
+  <node name="model_coefficients_array_publisher"
+        pkg="rostopic" type="rostopic"
+        args="pub -r 1 -s /model_coefficients_array_publisher/output
+              jsk_recognition_msgs/ModelCoefficientsArray
+              '{header: {stamp: now, frame_id: map},
+                coefficients: [
+                    {header: {stamp: now, frame_id: map}, values: [0, 0, 1, 1]},
+                    {header: {stamp: now, frame_id: map}, values: [0, 0, 1, 1]}
+                ]}'"/>
+
+  <node name="pcd_to_pointcloud"
+        pkg="pcl_ros" type="pcd_to_pointcloud"
+        args="$(find jsk_pcl_ros_utils)/sample/data/bunny.pcd 0.1">
+    <remap from="cloud_pcd" to="~output"/>
+  </node>
+
+  <node name="plane_time_ensync_for_recognition"
+        pkg="jsk_pcl_ros" type="plane_time_ensync_for_recognition.py">
+    <!-- input -->
+    <remap from="timer" to="pcd_to_pointcloud/output"/>
+    <remap from="planes" to="polygon_array_publisher/output"/>
+    <remap from="planes_coefficients" to="model_coefficients_array_publisher/output"/>
+    <!-- output -->
+    <remap from="ensynced_planes" to="~output/ensynced_planes"/>
+    <remap from="ensynced_planes_coefficients" to="~output/ensynced_planes_coefficients"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/plane_time_ensync_for_recognition.rviz"/>
+  </group>
+</launch>

@@ -1,0 +1,31 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_environment_plane_modeling.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_environment_plane_modeling"
+        name="test_environment_plane_modeling"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="30" retry="3">
+    <rosparam>
+      topic_0: /environment_plane_modeling/output
+      timeout_0: 30
+      topic_1: /environment_plane_modeling/output/non_plane_indices
+      timeout_1: 30
+      topic_2: /environment_plane_modeling/debug/magnified_polygons
+      timeout_2: 30
+      topic_3: /environment_plane_modeling/debug/convex_cloud
+      timeout_3: 30
+      topic_4: /environment_plane_modeling/debug/raw_grid_map
+      timeout_4: 30
+      topic_5: /environment_plane_modeling/debug/noeroded_grid_map
+      timeout_5: 30
+      topic_6: /environment_plane_modeling/debug/plane_poses
+      timeout_6: 30
+      topic_7: /environment_plane_modeling/debug/magnified_plane_poses
+      timeout_7: 30
+    </rosparam>
+  </test>
+
+</launch>

@@ -1,0 +1,19 @@
+<launch>
+  <include file="$(find jsk_perception)/sample/sample_ssd_object_detector.launch">
+    <arg name="test_mode" value="true" />
+  </include>
+
+  <test test-name="test_ssd_object_detector"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /ssd_object_detector/output/image
+      timeout_0: 120
+      topic_1: /ssd_object_detector/output/class
+      timeout_1: 120
+      topic_2: /ssd_object_detector/output/rect
+      timeout_2: 120
+    </rosparam>
+  </test>
+
+</launch>

@@ -1,0 +1,41 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="multi_plane_sac_segmentation"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/MultiPlaneSACSegmentation /sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <rosparam>
+      use_normal: false
+      use_clusters: false
+      use_imu_parallel: false
+      use_imu_perpendicular: false
+    </rosparam>
+  </node>
+
+  <node name="dynparam_loader"
+        pkg="dynamic_reconfigure" type="dynparam"
+        args="load /multi_plane_sac_segmentation $(find jsk_pcl_ros)/sample/config/sample_multi_plane_sac_segmentation.yaml"/>
+
+  <node name="cluster_indices_decomposer"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer /sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <remap from="~target" to="multi_plane_sac_segmentation/output_indices"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/multi_plane_sac_segmentation.rviz">
+    </node>
+  </group>
+
+</launch>

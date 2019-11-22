@@ -1,0 +1,95 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <param name="/use_sim_time" value="true"/>
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find pr2_description)/robots/pr2.urdf.xacro'"/>
+
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/sample/data/pr2_look_around_in_room_73b2.bag --clock --loop"/>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <group ns="/kinect_head">
+    <node name="republish_rgb"
+          pkg="image_transport" type="republish"
+          args="compressed raw">
+      <remap from="in" to="rgb/image_rect_color"/>
+      <remap from="out" to="rgb/image_rect_color"/>
+    </node>
+    <node name="republish_depth"
+          pkg="image_transport" type="republish"
+          args="compressedDepth raw">
+      <remap from="in" to="depth_registered/hw_registered/image_rect"/>
+      <remap from="out" to="depth_registered/hw_registered/image_rect"/>
+    </node>
+    <node name="point_cloud_xyzrgb"
+          pkg="nodelet" type="nodelet"
+          args="load depth_image_proc/point_cloud_xyzrgb /sample_manager">
+      <remap from="rgb/camera_info" to="rgb/camera_info"/>
+      <remap from="rgb/image_rect_color" to="rgb/image_rect_color"/>
+      <remap from="depth_registered/image_rect" to="depth_registered/hw_registered/image_rect"/>
+    </node>
+  </group>
+
+  <node name ="voxel_grid"
+        pkg="nodelet" type="nodelet"
+        args="load pcl/VoxelGrid sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <rosparam>
+      leaf_size: 0.2
+      filter_field_name: z
+      filter_limit_min: 1.0
+      filter_limit_max: 4.0
+    </rosparam>
+  </node>
+
+  <node name="attention_clipper"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/AttentionClipper sample_manager">
+    <remap from="~input" to="/kinect_head/rgb/camera_info"/>
+    <remap from="~input/points" to="voxel_grid/output"/>
+    <rosparam>
+      frame_id: base_link
+      initial_pos: [2.5, 0.5, 1.7]
+      dimension_x: 1.0
+      dimension_y: 1.0
+      dimension_z: 1.0
+    </rosparam>
+  </node>
+
+  <node name="icp_registration"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ICPRegistration sample_manager">
+    <remap from="~input" to="voxel_grid/output"/>
+    <remap from="~input_reference" to="voxel_grid/output"/>
+  </node>
+
+  <node name="incremental_model_registration"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/IncrementalModelRegistration sample_manager">
+    <remap from="~input" to="voxel_grid/output"/>
+    <remap from="~input/pose" to="icp_registration/output_pose"/>
+    <remap from="~input/indices" to="attention_clipper/output/point_indices"/>
+    <remap from="~icp_service" to="icp_registration/icp_align"/>
+    <rosparam>
+      frame_id: base_link
+    </rosparam>
+  </node>
+
+  <node name="sample_empty_service_caller"
+        pkg="jsk_pcl_ros" type="sample_empty_service_caller.py">
+    <remap from="~service" to="incremental_model_registration/start_registration"/>
+    <rosparam>
+      rate: 0.5
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/incremental_model_registration.rviz"/>
+  </group>
+</launch>

@@ -73,8 +73,6 @@ namespace jsk_pcl_ros_utils
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void concatenate(
       const sensor_msgs::PointCloud2::ConstPtr& cloud_msg,
       const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg,

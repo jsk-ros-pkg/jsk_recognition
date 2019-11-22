@@ -1,0 +1,24 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_fcn_depth_prediction.launch">
+    <arg name="gui" value="false" />
+    <arg name="gpu" value="-1" />
+  </include>
+
+  <test test-name="test_fcn_depth_prediction"
+        name="test_fcn_depth_prediction"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /fcn_depth_prediction/output
+      timeout_0: 60
+      topic_1: /fcn_depth_prediction/output/label
+      timeout_1: 60
+      topic_2: /fcn_depth_prediction/output/proba_image
+      timeout_2: 60
+      topic_3: /fcn_depth_prediction/output/depth_pred_raw
+      timeout_3: 60
+    </rosparam>
+  </test>
+
+</launch>

@@ -1,0 +1,18 @@
+<launch>
+  <include file="$(find jsk_perception)/sample/sample_fisheye_ray.launch">
+    <arg name="interactive" value="false"/>
+    <arg name="rviz" value="false"/>
+  </include>
+
+  <test test-name="test_fisheye_ray"
+        name="test_fisheye_ray"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /fisheye_ray/output
+      timeout_0: 30
+      topic_1: /fisheye_ray/output_point
+      timeout_1: 30
+    </rosparam>
+  </test>
+</launch>

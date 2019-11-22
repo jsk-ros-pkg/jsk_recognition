@@ -1,0 +1,16 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_room73b2_table.xml"/>
+
+  <include file="$(find jsk_pcl_ros)/launch/octree_change_detector.launch">
+    <arg name="octree_resolution" value="0.02"/>
+    <arg name="octree_noise_filter" value="2"/>
+  </include>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/octree_change_publisher.rviz"/>
+  </group>
+</launch>

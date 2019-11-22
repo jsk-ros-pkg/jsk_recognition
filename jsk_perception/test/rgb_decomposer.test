@@ -1,0 +1,21 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_rgb_decomposer.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_rgb_decomposer"
+        name="test_rgb_decomposer"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /rgb_decomposer/output/red
+      timeout_0: 30
+      topic_1: /rgb_decomposer/output/green
+      timeout_1: 30
+      topic_2: /rgb_decomposer/output/blue
+      timeout_2: 30
+    </rosparam>
+  </test>
+
+</launch>

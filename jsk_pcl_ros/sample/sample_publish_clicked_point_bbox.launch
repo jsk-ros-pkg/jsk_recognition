@@ -1,0 +1,25 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="static_tf_publisher_odom_to_sample_point"
+        pkg="tf" type="static_transform_publisher"
+        args="1 1 0 0 0 0 odom sample_point 10"/>
+
+  <node name="sample_point_publisher"
+        pkg="rostopic" type="rostopic"
+        args="pub -r 1 -s /sample_point_publisher/output geometry_msgs/PointStamped
+              '{header: {stamp: now, frame_id: sample_point},
+              point: {x: 0, y: 0, z: 1}}'"/>
+
+  <node name="publish_clicked_point_bbox"
+        pkg="jsk_pcl_ros" type="publish_clicked_point_bbox.py">
+    <remap from="clicked_point" to="sample_point_publisher/output"/>
+    <remap from="bbox_with_clicked_point" to="~output"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/publish_clicked_point_bbox.rviz"/>
+  </group>
+</launch>

@@ -1,0 +1,21 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_edgebased_cube_finder.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_edgebased_cube_finder"
+        name="test_edgebased_cube_finder"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="30" retry="3">
+    <rosparam>
+      topic_0: /edgebased_cube_finder/output
+      timeout_0: 30
+      topic_1: /edgebased_cube_finder/output_pose_array
+      timeout_1: 30
+      topic_2: /edgebased_cube_finder/debug_filtered_cloud
+      timeout_2: 30
+    </rosparam>
+  </test>
+
+</launch>

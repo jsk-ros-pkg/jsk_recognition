@@ -126,19 +126,6 @@ namespace jsk_pcl_ros
     sub_disparity_.unsubscribe();
   }
 
-  void CaptureStereoSynchronizer::updateDiagnostic(
-    diagnostic_updater::DiagnosticStatusWrapper &stat)
-  {
-    if (vital_checker_->isAlive()) {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
-                   "CaptureStreoSynchronizer running");
-    }
-    else {
-      jsk_topic_tools::addDiagnosticErrorSummary(
-        "CaptureStreoSynchronizer", vital_checker_, stat);
-    }
-  }
-  
   void CaptureStereoSynchronizer::republish(
     const geometry_msgs::PoseStamped::ConstPtr& pose,
     const sensor_msgs::Image::ConstPtr& mask,

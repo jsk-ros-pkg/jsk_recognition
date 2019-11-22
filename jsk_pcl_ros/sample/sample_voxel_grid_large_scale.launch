@@ -1,0 +1,30 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="pointcloud_xyzrgb_to_xyz"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PointCloudXYZRGBToXYZ sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+  </node>
+
+  <node name="voxel_grid_large_scale"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/VoxelGridLargeScale sample_manager">
+    <remap from="~input" to="pointcloud_xyzrgb_to_xyz/output"/>
+    <rosparam>
+      leaf_size: 0.02
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/voxel_grid_large_scale.rviz"/>
+  </group>
+</launch>

@@ -1,10 +1,42 @@
 <launch>
-    <node name="pointcloud_database_server" pkg="nodelet" type="nodelet"
+  <arg name="gui" default="true"/>
+
+  <node name="static_tf_publisher_map_to_drill"
+        pkg="tf" type="static_transform_publisher"
+        args="0 0 0 0 0 0 map drill 10"/>
+
+  <node name="static_tf_publisher_map_to_bunny"
+        pkg="tf" type="static_transform_publisher"
+        args="0 0 0 0 0 0 map bunny 10"/>
+
+  <node name="pointcloud_database_server_array"
+        pkg="nodelet" type="nodelet"
         args="standalone jsk_pcl/PointcloudDatabaseServer" >
-        <rosparam subst_value="true">
-            models: ["$(find jsk_pcl_ros)/sample/data/drill.pcd",
-                     "$(find jsk_pcl_ros)/sample/data/drill.pcd",
-            ]
-        </rosparam>
-    </node>
+    <rosparam subst_value="true">
+      models: [
+        "$(find jsk_pcl_ros)/sample/data/drill.pcd",
+        "$(find jsk_pcl_ros_utils)/sample/data/bunny.pcd",
+      ]
+      duration: 1.0
+      use_array: true
+    </rosparam>
+  </node>
+
+  <node name="pointcloud_database_server_single"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/PointcloudDatabaseServer" >
+    <rosparam subst_value="true">
+      models: [
+        "$(find jsk_pcl_ros_utils)/sample/data/bunny.pcd",
+      ]
+      duration: 1.0
+      use_array: false
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/pointcloud_database_server.rviz"/>
+  </group>
 </launch>

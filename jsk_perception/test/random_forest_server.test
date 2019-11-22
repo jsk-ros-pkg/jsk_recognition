@@ -1,0 +1,15 @@
+<launch>
+  <include file="$(find jsk_perception)/sample/random_forest_sample.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_random_forest_server"
+        name="test_random_forest_server"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /random_forest_client/output/debug_image
+      timeout_0: 30
+    </rosparam>
+  </test>
+</launch>

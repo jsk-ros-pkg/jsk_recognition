@@ -42,45 +42,43 @@ class VGG16BatchNormalization(chainer.Chain):
             fc7=L.Linear(4096, 4096),
             fc8=L.Linear(4096, n_class)
         )
-        self.train = False
 
     def __call__(self, x, t=None):
-        h = F.relu(self.bn1_1(self.conv1_1(x), test=not self.train))
-        h = F.relu(self.bn1_2(self.conv1_2(h), test=not self.train))
+        h = F.relu(self.bn1_1(self.conv1_1(x)))
+        h = F.relu(self.bn1_2(self.conv1_2(h)))
         h = F.max_pooling_2d(h, 2, stride=2)
 
-        h = F.relu(self.bn2_1(self.conv2_1(h), test=not self.train))
-        h = F.relu(self.bn2_2(self.conv2_2(h), test=not self.train))
+        h = F.relu(self.bn2_1(self.conv2_1(h)))
+        h = F.relu(self.bn2_2(self.conv2_2(h)))
         h = F.max_pooling_2d(h, 2, stride=2)
 
-        h = F.relu(self.bn3_1(self.conv3_1(h), test=not self.train))
-        h = F.relu(self.bn3_2(self.conv3_2(h), test=not self.train))
-        h = F.relu(self.bn3_3(self.conv3_3(h), test=not self.train))
+        h = F.relu(self.bn3_1(self.conv3_1(h)))
+        h = F.relu(self.bn3_2(self.conv3_2(h)))
+        h = F.relu(self.bn3_3(self.conv3_3(h)))
         h = F.max_pooling_2d(h, 2, stride=2)
 
-        h = F.relu(self.bn4_1(self.conv4_1(h), test=not self.train))
-        h = F.relu(self.bn4_2(self.conv4_2(h), test=not self.train))
-        h = F.relu(self.bn4_3(self.conv4_3(h), test=not self.train))
+        h = F.relu(self.bn4_1(self.conv4_1(h)))
+        h = F.relu(self.bn4_2(self.conv4_2(h)))
+        h = F.relu(self.bn4_3(self.conv4_3(h)))
         h = F.max_pooling_2d(h, 2, stride=2)
 
-        h = F.relu(self.bn5_1(self.conv5_1(h), test=not self.train))
-        h = F.relu(self.bn5_2(self.conv5_2(h), test=not self.train))
-        h = F.relu(self.bn5_3(self.conv5_3(h), test=not self.train))
+        h = F.relu(self.bn5_1(self.conv5_1(h)))
+        h = F.relu(self.bn5_2(self.conv5_2(h)))
+        h = F.relu(self.bn5_3(self.conv5_3(h)))
         h = F.max_pooling_2d(h, 2, stride=2)
 
-        h = F.dropout(F.relu(self.fc6(h)), train=self.train, ratio=0.5)
-        h = F.dropout(F.relu(self.fc7(h)), train=self.train, ratio=0.5)
+        h = F.dropout(F.relu(self.fc6(h)), ratio=0.5)
+        h = F.dropout(F.relu(self.fc7(h)), ratio=0.5)
         h = self.fc8(h)
         fc8 = h
 
         self.pred = F.softmax(h)
 
         if t is None:
-            assert not self.train
+            assert not chainer.config.train
             return
 
         self.loss = F.softmax_cross_entropy(fc8, t)
         self.acc = F.accuracy(self.pred, t)
 
-        if self.train:
-            return self.loss
+        return self.loss

@@ -1,0 +1,46 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_arc2017_4objects.xml" />
+
+  <node name="centroid_publisher"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/CentroidPublisher">
+    <remap from="~input" to="/camera/depth_registered/points" />
+    <rosparam>
+      publish_tf: true
+    </rosparam>
+  </node>
+
+  <!-- create nan point cloud -->
+  <node name="passthrough"
+        pkg="nodelet" type="nodelet"
+        args="standalone pcl/PassThrough">
+    <remap from="~input" to="/camera/depth_registered/points" />
+    <rosparam>
+      frame_id: camera_link
+      filter_field_name: z
+      filter_limit_min: -1.0
+      filter_limit_max: 0.0
+      filter_limit_negative: False
+      keep_organized: true
+    </rosparam>
+  </node>
+  <node name="centroid_publisher_nan_input"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/CentroidPublisher">
+    <remap from="~input" to="passthrough/output" />
+    <rosparam>
+      publish_tf: true
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_centroid_publisher.rviz">
+    </node>
+  </group>
+
+</launch>

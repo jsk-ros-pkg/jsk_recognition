@@ -39,13 +39,13 @@ Installation
 1. Install DepthSenseSDK. You need to login to download it.  (`Middleware -> Download <http://www.softkinetic.com/>`_)
 2. Install ROS package::
 
-  cd ~/ros/indigo/src
-  wstool set ipa320/softkinetic https://github.com/ipa320/softkinetic.git --git -vindigo_dev -y --update
-  cd softkinetic/softkinetic && catkin bt -iv
+      cd ~/ros/indigo/src
+      wstool set ipa320/softkinetic https://github.com/ipa320/softkinetic.git --git -vindigo_dev -y --update
+      cd softkinetic/softkinetic && catkin bt -iv
 
 3. Connect device and run::
 
-  roslaunch softkinetic_camera softkinetic_camera_demo.launch
+      roslaunch softkinetic_camera softkinetic_camera_demo.launch
 
 
 Known Issues

@@ -1,10 +1,13 @@
 PolygonArrayUnwrapper
 =====================
 
+.. image:: images/polygon_array_unwrapper.png
+
 What is this?
 -------------
 
-Convert ``jsk_recognition_msgs/PolygonArray`` to ``geometry_msgs/PolygonStamped``, and ``jsk_recognition_msgs/ModelCoefficientsArray`` to ``pcl_msgs/ModelCoefficients``.
+Convert ``jsk_recognition_msgs/PolygonArray`` to ``geometry_msgs/PolygonStamped``,
+and ``jsk_recognition_msgs/ModelCoefficientsArray`` to ``pcl_msgs/ModelCoefficients``.
 
 
 Subscribing Topics
@@ -24,7 +27,9 @@ Publishing Topics
 
 * ``~output_polygon`` (``geometry_msgs/PolygonStamped``)
 
-  Target polygon. (If ``~use_likelihood`` is true, the plane which has the highest likelihood is selected, otherwise the first plane in array is selected.)
+  Target polygon.
+  (If ``~use_likelihood`` is true, the plane which has the highest likelihood is selected,
+  otherwise the first plane in array is selected.)
 
 * ``~output_coefficients`` (``pcl_msgs/ModelCoefficients``)
 
@@ -41,3 +46,11 @@ Parameters
 * ``~plane_index`` (Int, default: ``0``)
 
   If ``~use_likelihood`` is ``false``, this index is used to select output plane.
+
+
+Sample
+------
+
+.. code-block:: bash
+
+  roslaunch jsk_pcl_ros_utils sample_polygon_array_unwrapper.launch

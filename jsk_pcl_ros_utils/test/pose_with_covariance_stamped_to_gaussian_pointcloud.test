@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_pose_with_covariance_stamped_to_gaussian_pointcloud.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_pose_with_covariance_stamped_to_gaussian_pointcloud"
+        name="test_pose_with_covariance_stamped_to_gaussian_pointcloud"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /pose_with_covariance_stamped_to_gaussian_pointcloud/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

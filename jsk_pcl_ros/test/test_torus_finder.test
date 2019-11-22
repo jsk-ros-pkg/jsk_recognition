@@ -1,0 +1,33 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_torus_finder.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_torus_finder"
+        name="test_torus_finder"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /torus_finder/output
+      timeout_0: 30
+      topic_1: /torus_finder/output/inliers
+      timeout_1: 30
+      topic_2: /torus_finder/output/coefficients
+      timeout_2: 30
+      topic_3: /torus_finder/output/array
+      timeout_3: 30
+      topic_4: /torus_finder/output/pose
+      timeout_4: 30
+      topic_5: /torus_finder/output/with_failure
+      timeout_5: 30
+      topic_6: /torus_finder/output/with_failure/array
+      timeout_6: 30
+      topic_7: /torus_finder/output/latest_time
+      timeout_7: 30
+      topic_8: /torus_finder/output/average_time
+      timeout_8: 30
+    </rosparam>
+  </test>
+
+</launch>

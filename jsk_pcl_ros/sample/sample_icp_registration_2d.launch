@@ -1,0 +1,231 @@
+<launch>
+  <arg name="gui" default="true"/>
+  <arg name="manager" default="icp_registration_2d_nodelet_manager" />
+
+  <arg name="input_cloud" default="/kinect_head/depth_registered/points" />
+  <arg name="reference_model" default="$(find jsk_pcl_ros)/sample/data/kettle.pcd"/>
+
+  <arg name="sensor_frame_id" default="head_mount_kinect_rgb_optical_frame" />
+  <arg name="base_frame_id" default="base_footprint"/>
+
+  <!-- play input cloud -->
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+
+  <node name="$(arg manager)" pkg="nodelet" type="nodelet"
+        args="manager" output="screen"/>
+
+  <!-- publish reference cloud -->
+  <node name="kettle_pose_publisher"
+        pkg="rostopic" type="rostopic"
+        args="pub output geometry_msgs/PoseStamped -r 10 -s '{header: {stamp: now, frame_id: $(arg base_frame_id)}, pose: {position: {z: 0.0}, orientation: {w: 1.0}}}'">
+    <remap from="output" to="~output"/>
+  </node>
+
+  <node name="pcd_reader_with_pose"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PCDReaderWithPose $(arg manager)">
+    <remap from="~input" to="kettle_pose_publisher/output"/>
+    <rosparam subst_value="true">
+      pcd_file: $(arg reference_model)
+    </rosparam>
+  </node>
+
+  <!-- publsh plane tf frame /sink00 -->
+  <node name="input_relay"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_topic_tools/Relay $(arg manager)">
+    <remap from="~input" to="$(arg input_cloud)" />
+  </node>
+
+  <node name="pass_through"
+        pkg="nodelet" type="nodelet"
+        args="load pcl/PassThrough $(arg manager)">
+    <remap from="~input" to="input_relay/output"/>
+    <rosparam subst_value="true">
+      filter_field_name: z
+      filter_limit_min: 0.80
+      filter_limit_max: 1.40
+      filter_limit_negative: false
+      keep_organized: true
+      input_frame: $(arg base_frame_id)
+    </rosparam>
+  </node>
+  
+  <node name="organized_multi_plane_segmentation"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg manager)">
+    <remap from="~input" to="pass_through/output"/>
+    <rosparam subst_value="true">
+      min_size: 700
+      max_curvature: 0.01
+      estimate_normal: true
+      publish_normal: true
+    </rosparam>
+  </node>
+
+  <node name="plane_reasoner"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PlaneReasoner $(arg manager)">
+    <remap from="~input" to="input_relay/output"/>
+    <remap from="~input_inliers" to="organized_multi_plane_segmentation/output_refined"/>
+    <remap from="~input_polygons" to="organized_multi_plane_segmentation/output_refined_polygon"/>
+    <remap from="~input_coefficients" to="organized_multi_plane_segmentation/output_refined_coefficients"/>
+    <rosparam subst_value="true">
+      global_frame_id: $(arg base_frame_id)
+      horizontal_angular_threshold: 0.2
+      vertical_angular_threshold: 0.1
+    </rosparam>
+  </node>
+
+  <node name="plane_concatenator"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PlaneConcatenator $(arg manager)">
+    <remap from="~input" to="input_relay/output"/>
+    <remap from="~input/indices" to="plane_reasoner/output/horizontal/inliers"/>
+    <remap from="~input/polygons" to="plane_reasoner/output/horizontal/polygons"/>
+    <remap from="~input/coefficients" to="plane_reasoner/output/horizontal/coefficients"/>
+    <rosparam>
+      connect_angular_threshold: 0.1
+      connect_distance_threshold: 0.1
+      min_size: 100
+      min_area: 0.1
+      max_area: 1.0
+    </rosparam>
+  </node>
+
+  <node name="polygon_magnifier"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PolygonMagnifier $(arg manager)">
+    <remap from="~input" to="plane_concatenator/output/polygons"/>
+    <rosparam>
+      use_scale_factor: true
+      magnify_scale_factor: 0.9
+    </rosparam>
+  </node>
+
+  <node name="multi_plane_extraction"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/MultiPlaneExtraction $(arg manager)">
+    <remap from="~input" to="input_relay/output"/>
+    <remap from="~indices" to="plane_concatenator/output/indices"/>
+    <remap from="~input_polygons" to="polygon_magnifier/output"/>
+    <remap from="~input_coefficients" to="plane_concatenator/output/coefficients"/>
+    <rosparam subst_value="true">
+      use_sensor_frame: true
+      sensor_frame: $(arg sensor_frame_id)
+      min_height: 0.01
+      max_height: 0.30
+    </rosparam>
+  </node>
+
+  <node name="euclidean_clustering"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/EuclideanClustering $(arg manager)">
+    <remap from="~input" to="multi_plane_extraction/output"/>
+    <rosparam>
+      tolerance: 0.03
+      min_size: 1000
+      max_size: 2000000
+    </rosparam>
+  </node>
+
+  <node name="euclidean_clustering_decomposer"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg manager)">
+    <remap from="~input" to="input_relay/output"/>
+    <remap from="~target" to="euclidean_clustering/output"/>
+    <remap from="~align_planes" to="polygon_magnifier/output"/>
+    <remap from="~align_planes_coefficients" to="plane_concatenator/output/coefficients"/>
+    <rosparam subst_value="true">
+      queue_size: 100
+      publish_clouds: true
+      publish_tf: false
+      align_boxes: true
+      align_boxes_with_plane: false
+      target_frame_id: $(arg base_frame_id)
+      use_pca: true
+      min_size: 100
+      max_size: 2000000
+    </rosparam>
+  </node>
+
+  <node name="polygon_array_area_likelihood"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PolygonArrayAreaLikelihood $(arg manager)">
+    <remap from="~input" to="polygon_magnifier/output"/>
+    <rosparam>
+      area: 1.0
+    </rosparam>
+  </node>
+
+  <node name="extract_top_polygon_likelihood"
+        pkg="jsk_pcl_ros" type="extract_top_polygon_likelihood.py">
+    <remap from="~input" to="polygon_array_area_likelihood/output"/>
+    <remap from="~input/coefficients" to="plane_concatenator/output/coefficients" />
+    <rosparam>
+      min_likelihood: 0.2
+    </rosparam>
+  </node>
+
+  <node name="centroid_publisher"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/CentroidPublisher $(arg manager)">
+    <remap from="~input/polygons" to="extract_top_polygon_likelihood/output" />
+    <rosparam>
+      publish_tf: true
+      frame: sink
+    </rosparam>
+  </node>
+
+  <node name="downsample_input"
+        pkg="nodelet" type="nodelet"
+        args="load pcl/VoxelGrid $(arg manager)">
+    <remap from="~input" to="multi_plane_extraction/output"/>
+    <rosparam>
+      filter_field_name: z
+      filter_limit_min: -10000
+      filter_limit_max: 10000
+      keep_organized: true
+      leaf_size: 0.008
+    </rosparam>
+  </node>
+
+  <node name="tf_transform_cloud"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/TfTransformCloud $(arg manager)">
+    <remap from="~input" to="downsample_input/output"/>
+    <rosparam subst_value="true">
+      target_frame_id: sink00
+    </rosparam>
+  </node>
+
+  <node name="downsample_reference"
+        pkg="nodelet" type="nodelet"
+        args="load pcl/VoxelGrid $(arg manager)">
+    <remap from="~input" to="pcd_reader_with_pose/output"/>
+    <rosparam>
+      filter_field_name: z
+      filter_limit_min: -10000
+      filter_limit_max: 10000
+      keep_organized: true
+      leaf_size: 0.008
+    </rosparam>
+  </node>
+
+  <node name="icp_registration"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ICPRegistration $(arg manager)">
+    <remap from="~input" to="tf_transform_cloud/output"/>
+    <remap from="~input_reference" to="downsample_reference/output"/>
+    <rosparam>
+      transform_3dof: true
+      use_flipped_initial_pose: false
+      max_iteration: 1000
+    </rosparam>
+  </node>
+
+  <!-- visualization -->
+  <node name="rviz" pkg="rviz" type="rviz"
+        args="-d $(find jsk_pcl_ros)/sample/rviz/icp_registration_2d.rviz"
+        if="$(arg gui)"/>
+</launch>

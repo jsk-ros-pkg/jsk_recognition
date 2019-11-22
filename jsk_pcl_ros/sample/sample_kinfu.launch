@@ -1,0 +1,65 @@
+<launch>
+
+  <arg name="gui" default="true" />
+  <arg name="rosbag" default="true" />
+  <arg name="integrate_color" default="true" />
+
+  <group if="$(arg rosbag)">
+    <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_room73b2_table.xml" />
+  </group>
+
+  <arg name="INPUT_CAMERA_INFO" default="/camera/depth_registered/camera_info" />
+  <arg name="INPUT_DEPTH" default="/camera/depth_registered/hw_registered/image_rect_raw" />
+  <arg name="INPUT_COLOR" default="/camera/rgb/image_rect_color" />
+
+  <node name="bounding_box_array_publisher"
+        pkg="jsk_recognition_utils" type="bounding_box_array_publisher.py">
+    <rosparam>
+      frame_id: camera_link
+      boxes:
+        - position: [1.0, 0, 0]
+          dimension: [0.3, 0.3, 0.3]
+    </rosparam>
+  </node>
+  <node name="bbox_array_to_bbox"
+        pkg="jsk_pcl_ros_utils" type="bounding_box_array_to_bounding_box">
+    <remap from="~input" to="bounding_box_array_publisher/output" />
+    <rosparam>
+      index: 0
+    </rosparam>
+  </node>
+  <node name="save_mesh_server"
+        pkg="jsk_recognition_msgs" type="save_mesh_server.py">
+    <remap from="~input/bbox" to="bbox_array_to_bbox/output" />
+    <remap from="~save_mesh" to="/kinfu/save_mesh_with_context" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rosconsole_overlay_text"
+          pkg="jsk_rviz_plugins" type="rosconsole_overlay_text.py">
+      <rosparam>
+        nodes:
+          - /kinfu
+      </rosparam>
+    </node>
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/kinfu.rviz">
+    </node>
+  </group>
+
+  <node name="kinfu"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/Kinfu"
+        output="screen">
+    <remap from="~input/camera_info" to="$(arg INPUT_CAMERA_INFO)" />
+    <remap from="~input/depth" to="$(arg INPUT_DEPTH)" />
+    <remap from="~input/color" to="$(arg INPUT_COLOR)" if="$(arg integrate_color)" />
+    <rosparam subst_value="true">
+      auto_reset: false
+      integrate_color: $(arg integrate_color)
+      save_dir: $(optenv HOME)/.ros/jsk_pcl_ros/sample_kinfu
+    </rosparam>
+  </node>
+
+</launch>

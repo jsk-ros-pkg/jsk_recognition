@@ -1,0 +1,133 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_arc2017_4objects.xml" />
+
+  <arg name="MANAGER" value="nodelet_manager" />
+  <node name="$(arg MANAGER)"
+        pkg="nodelet" type="nodelet" args="manager" />
+
+  <node name="resize_points_publisher"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ResizePointsPublisher $(arg MANAGER)">
+    <remap from="~input" to="/camera/depth_registered/points" />
+    <rosparam>
+      step_x: 2
+      step_y: 2
+    </rosparam>
+  </node>
+  <node name="image_resizer"
+        pkg="nodelet" type="nodelet"
+        args="load resized_image_transport/ImageResizer $(arg MANAGER)">
+    <remap from="~input/image" to="apply_context_to_label_proba/output/label" />
+    <remap from="apply_context_to_label_proba/output/camera_info" to="/camera/rgb/camera_info" />
+    <rosparam>
+      resize_scale_x: 0.5
+      resize_scale_y: 0.5
+      interpolation: NEAREST
+      use_messages: false
+    </rosparam>
+  </node>
+
+  <arg name="INPUT_CLOUD" value="/resize_points_publisher/output" />
+  <arg name="INPUT_LABEL" value="/image_resizer/output/image" />
+
+  <node name="attention_clipper"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/AttentionClipper $(arg MANAGER)">
+    <remap from="~input/points" to="$(arg INPUT_CLOUD)" />
+    <rosparam>
+      initial_pos: [0.5, -0.05, 0]
+      dimension_x: 0.3
+      dimension_y: 0.3
+      dimension_z: 0.3
+      frame_id: camera_link
+    </rosparam>
+  </node>
+  <node name="extract_indices"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ExtractIndices $(arg MANAGER)">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <remap from="~indices" to="attention_clipper/output/point_indices" />
+    <rosparam>
+      keep_organized: true
+    </rosparam>
+  </node>
+
+  <node name="label_to_cluster_indices"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/LabelToClusterPointIndices $(arg MANAGER)">
+    <remap from="~input" to="$(arg INPUT_LABEL)" />
+  </node>
+
+  <!-- Indices -->
+  <node name="cluster_point_indices_decomposer"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)">
+    <remap from="~input" to="extract_indices/output" />
+    <remap from="~target" to="label_to_cluster_indices/output" />
+    <rosparam>
+      approximate_sync: true
+      queue_size: 50
+    </rosparam>
+  </node>
+  <node name="bboxes_to_bbox"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/BoundingBoxArrayToBoundingBox $(arg MANAGER)">
+    <remap from="~input" to="cluster_point_indices_decomposer/boxes" />
+    <rosparam>
+      index: 10  # label 11
+    </rosparam>
+  </node>
+
+  <!-- Z Axis -->
+  <node name="cluster_point_indices_decomposer_z_axis"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)">
+    <remap from="~input" to="extract_indices/output" />
+    <remap from="~target" to="label_to_cluster_indices/output" />
+    <rosparam>
+      approximate_sync: true
+      queue_size: 50
+      sort_by: -z_axis
+    </rosparam>
+  </node>
+  <node name="bboxes_to_bbox_z_axis"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/BoundingBoxArrayToBoundingBox $(arg MANAGER)">
+    <remap from="~input" to="cluster_point_indices_decomposer_z_axis/boxes" />
+    <rosparam>
+      index: 0
+    </rosparam>
+  </node>
+
+  <!-- Cloud Size -->
+  <node name="cluster_point_indices_decomposer_cloud_size"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg MANAGER)">
+    <remap from="~input" to="extract_indices/output" />
+    <remap from="~target" to="label_to_cluster_indices/output" />
+    <rosparam>
+      approximate_sync: true
+      queue_size: 50
+      sort_by: -cloud_size
+    </rosparam>
+  </node>
+  <node name="bboxes_to_bbox_cloud_size"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/BoundingBoxArrayToBoundingBox $(arg MANAGER)">
+    <remap from="~input" to="cluster_point_indices_decomposer_cloud_size/boxes" />
+    <rosparam>
+      index: 0
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+      pkg="rviz" type="rviz"
+      args="-d $(find jsk_pcl_ros)/sample/rviz/cluster_point_indices_decomposer_sort_by.rviz">
+    </node>
+  </group>
+
+</launch>

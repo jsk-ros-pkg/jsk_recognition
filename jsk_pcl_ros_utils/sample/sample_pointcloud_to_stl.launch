@@ -1,0 +1,48 @@
+<launch>
+  <arg name="gui" default="true"/>
+  <arg name="filename" default="$(env HOME)/.ros/jsk_pcl_ros_utils_sample_pointcloud_to_stl_arc2017_4objects.stl"/>
+
+  <param name="/use_sim_time" value="true"/>
+
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros_utils)/sample/data/arc2017_4objects.bag --clock --loop -r 0.05"/>
+
+  <node name="republish_rgb"
+        pkg="image_transport" type="republish"
+        args="compressed raw">
+    <remap from="in" to="/camera/rgb/image_raw"/>
+    <remap from="out" to="/camera/rgb/image_raw"/>
+  </node>
+
+  <node name="republish_depth"
+        pkg="image_transport" type="republish"
+        args="compressedDepth raw">
+    <remap from="in" to="/camera/depth_registered/image_raw"/>
+    <remap from="out" to="/camera/depth/image_raw"/>
+  </node>
+
+  <node name="relay_camera_info"
+        pkg="topic_tools" type="relay"
+        args="/camera/depth_registered/camera_info /camera/depth/camera_info"/>
+
+  <include file="$(find openni2_launch)/launch/openni2.launch">
+    <arg name="load_driver" value="false"/>
+  </include>
+
+  <node name="pointcloud_to_stl"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/PointCloudToSTL"
+        output="screen">
+    <remap from="~input" to="camera/depth_registered/points"/>
+    <rosparam subst_value="true">
+      filename: $(arg filename)
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_pointcloud_to_stl.rviz"/>
+  </group>
+</launch>

@@ -1,0 +1,89 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="sample_rgb_image_publisher"
+        pkg="jsk_recognition_utils" type="sample_image_publisher.py">
+    <remap from="~output/image_raw" to="camera/rgb/image_raw"/>
+    <remap from="~output/camera_info" to="camera/rgb/camera_info"/>
+    <rosparam subst_value="true">
+      image_file: $(find jsk_recognition_utils)/sample/images/real_world_checkerboard_grid_7x6_size_0.108/rgb_image_raw.jpg
+      camera_info_file: $(find jsk_recognition_utils)/sample/images/real_world_checkerboard_grid_7x6_size_0.108/rgb_camera_info.yaml
+      frame_id: camera_rgb_optical_frame
+      encoding: rgb8
+      rate: 30.0
+    </rosparam>
+  </node>
+
+  <node name="sample_depth_image_publisher"
+        pkg="jsk_recognition_utils" type="sample_image_publisher.py">
+    <remap from="~output/image_raw" to="camera/depth/image_raw"/>
+    <remap from="~output/camera_info" to="camera/depth/camera_info"/>
+    <rosparam subst_value="true">
+      image_file: $(find jsk_recognition_utils)/sample/images/real_world_checkerboard_grid_7x6_size_0.108/depth_image_raw.npz
+      camera_info_file: $(find jsk_recognition_utils)/sample/images/real_world_checkerboard_grid_7x6_size_0.108/depth_camera_info.yaml
+      frame_id: camera_depth_optical_frame
+      encoding: 16UC1
+      rate: 30.0
+    </rosparam>
+  </node>
+
+  <node name="static_tf_publisher"
+        pkg="tf" type="static_transform_publisher"
+        args="-0.025 0 0 0 0 0 camera_rgb_optical_frame camera_depth_optical_frame 10"/>
+
+  <include file="$(find openni2_launch)/launch/openni2.launch">
+    <arg name="load_driver" value="false"/>
+  </include>
+
+  <rosparam>
+    display: 0
+    board_type: chess
+    grid0_size_x: 7
+    grid0_size_y: 6
+    rect0_size_x: 0.108
+    rect0_size_y: 0.108
+    queue_size: 10
+  </rosparam>
+
+  <node name="checkerboard_detector"
+        pkg="checkerboard_detector" type="checkerboard_detector">
+    <!-- input -->
+    <remap from="image" to="camera/rgb/image_raw"/>
+    <remap from="camera_info" to="camera/rgb/camera_info"/>
+    <!-- output -->
+    <remap from="ObjectDetection" to="~output/ObjectDetection"/>
+    <remap from="objectdetection_pose" to="~output/objectdetection_pose"/>
+    <remap from="corner_point" to="~output/corner_point"/>
+    <remap from="polygons" to="~output/polygons"/>
+    <remap from="debug_image" to="~output/debug_image"/>
+  </node>
+
+  <node name="depth_image_error"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/DepthImageError">
+    <remap from="~image" to="camera/depth_registered/sw_registered/image_rect"/>
+    <remap from="~camera_info" to="camera/depth_registered/sw_registered/camera_info"/>
+    <remap from="~point" to="checkerboard_detector/output/corner_point"/>
+    <rosparam>
+      approximate_sync: true
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="extract_true_depth"
+          pkg="topic_tools" type="transform"
+          args="/depth_image_error/output /extract_true_depth/output std_msgs/Float32
+                'm.true_depth'
+                --wait-for-start"/>
+
+    <node name="extract_observed_depth"
+          pkg="topic_tools" type="transform"
+          args="/depth_image_error/output /extract_observed_depth/output std_msgs/Float32
+                'm.observed_depth'
+                --wait-for-start"/>
+
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_depth_image_error.rviz"/>
+  </group>
+</launch>

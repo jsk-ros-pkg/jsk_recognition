@@ -1,0 +1,21 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="sample_camera_info_and_pointcloud_publisher"
+        pkg="jsk_pcl_ros_utils" type="sample_camera_info_and_pointcloud_publisher.py"/>
+
+  <node name="planar_pointcloud_simulator"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl_utils/PlanarPointCloudSimulator">
+    <remap from="~input" to="sample_camera_info_and_pointcloud_publisher/info"/>
+    <rosparam>
+      distance: 2.0
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_planar_pointcloud_simulator.rviz"/>
+  </group>
+</launch>

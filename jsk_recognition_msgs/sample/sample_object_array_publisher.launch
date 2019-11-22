@@ -1,0 +1,42 @@
+<launch>
+  <arg name="gui" default="true"/>
+  <arg name="JSK_INTERACTIVE_MARKER_INSTALLED" default="false"/>
+
+  <node name="object_array_publisher"
+        pkg="jsk_recognition_msgs" type="object_array_publisher.py">
+    <rosparam>
+      latch: false
+      objects:
+        - id: 35
+          name: tennis_ball_container
+          class_id: 2
+          class_name: cylinder
+          image_resources:
+            - package://jsk_recognition_msgs/sample/objects/tennis_ball_container/top.jpg
+          mesh_resource: package://jsk_recognition_msgs/sample/objects/tennis_ball_container/mesh/mesh.obj
+          weight: 0.217
+          dimensions:
+            x: 0.077
+            y: 0.218
+            z: 0.077
+    </rosparam>
+  </node>
+
+  <!-- Note: To visualize ObjectArray on Rviz, please install jsk_interactive_marker. -->
+  <!--       jsk_interactive_marker depends on jsk_recognition_msgs, so we cannot enable this node by default. -->
+
+  <group if="$(arg JSK_INTERACTIVE_MARKER_INSTALLED)">
+    <node name="transformable_interactive_server"
+          pkg="jsk_interactive_marker" type="transformable_server_sample">
+      <rosparam>
+        display_interactive_manipulator_only_selected: true
+      </rosparam>
+    </node>
+  </group>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_recognition_msgs)/sample/config/sample_object_array_publisher.rviz"/>
+  </group>
+</launch>

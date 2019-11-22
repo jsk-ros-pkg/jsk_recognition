@@ -1,0 +1,67 @@
+<launch>
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find pr2_description)/robots/pr2.urdf.xacro'"/>
+
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    <param name="use_gui" value="true"/>
+  </node>
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+        respawn="true" output="screen" />
+
+  <node pkg="jsk_pcl_ros" type="octomap_server_contact" name="octomap_server"
+        output="screen" >
+    <!-- data source to integrate (PointCloud2) -->
+    <remap from="cloud_in" to="/camera_cloud" />
+    <remap from="proximity_in" to="/hand_cloud" />
+    <remap from="contact_sensors_in" to="/hand_contact" />
+    <rosparam>
+      resolution: 0.005
+      frame_id: octomap_world
+      latch: false
+      publish_free_space: true
+      publish_unknown_space: true
+      <!-- maximum range to integrate (speedup!) -->
+      sensor_model/max_range: 5.0
+      <!-- color -->
+      color/r: 1.0
+      color/g: 0.0
+      color/b: 0.0
+      color/a: 1.0
+      color_free/r: 0.0
+      color_free/g: 1.0
+      color_free/b: 0.0
+      color_free/a: 1.0
+      color_unkown/r: 0.5
+      color_unkown/g: 0.5
+      color_unkown/b: 0.7
+      color_unkown/a: 1.0
+      <!-- octomap size -->
+      occupancy_min_x: -0.2
+      occupancy_max_x: 0.2
+      occupancy_min_y: -0.2
+      occupancy_max_y: 0.2
+      occupancy_min_z: -0.2
+      occupancy_max_z: 0.2
+      <!-- contact sensor -->
+      use_contact_surface: false
+      min_sensor_dist: 0.2
+      self_see_default_padding: 0.0
+      self_see_default_scale: 1.0
+      self_see_links:
+      - name: l_gripper_palm_link
+      - name: l_gripper_r_finger_link
+      - name: l_gripper_l_finger_link
+    </rosparam>
+  </node>
+
+  <node pkg="roseus" type="roseus" name="publish_sensor_for_octomap_pr2"
+        args="$(find jsk_pcl_ros)/euslisp/publish-sensor-for-octomap-pr2.l" />
+
+  <node pkg="tf" type="static_transform_publisher" name="robot_to_octomap" args="0.5 0.0 1.4 0 0 0 /base_footprint /octomap_world 20" />
+
+  <node pkg="jsk_pcl_ros" type="test_contact_sensor.py" name="test_contact_sensor"
+        output="screen" />
+
+  <node pkg="rviz" type="rviz" name="rviz"
+        args="-d  $(find jsk_pcl_ros)/config/octomap_server_contact_pr2.rviz" />
+</launch>

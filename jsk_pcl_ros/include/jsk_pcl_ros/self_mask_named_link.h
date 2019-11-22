@@ -59,7 +59,7 @@ namespace robot_self_filter
      * This is override function to use tf_prefix.
      * The frame in which the sensor is located is optional
      **/
-     void assumeFrame(const std_msgs::Header& header) {
+     bool assumeFrame(const std_msgs::Header& header) {
        const unsigned int bs = bodies_.size();
 
        // place the links in the assumed frame
@@ -77,6 +77,7 @@ namespace robot_self_filter
          catch (tf::TransformException& ex) {
            transf.setIdentity();
            ROS_ERROR("Unable to lookup transform from %s to %s. Exception: %s", (tf_prefix_+bodies_[i].name).c_str(), header.frame_id.c_str(), ex.what());
+           return false;
          }
 
          // set it for each body; we also include the offset specified in URDF
@@ -84,6 +85,7 @@ namespace robot_self_filter
          bodies_[i].unscaledBody->setPose(transf * bodies_[i].constTransf);
        }
        computeBoundingSpheres();
+       return true;
      }
 
      int getMaskContainmentforNamedLink(const tf::Vector3& pt, const std::string name) const {

@@ -1,4 +1,12 @@
 <library path="libjsk_pcl_ros">
+  <class name="jsk_pcl/FuseDepthImages"
+         type="jsk_pcl_ros::FuseDepthImages"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl/FuseRGBImages"
+         type="jsk_pcl_ros::FuseRGBImages"
+         base_class_type="nodelet::Nodelet">
+  </class>
   <class name="jsk_pcl/InteractiveCuboidLikelihood"
          type="jsk_pcl_ros::InteractiveCuboidLikelihood"
          base_class_type="nodelet::Nodelet">
@@ -219,6 +227,24 @@
   <class name="jsk_pcl/EnvironmentPlaneModeling" type="jsk_pcl_ros::EnvironmentPlaneModeling"
          base_class_type="nodelet::Nodelet">
     <description>modeling the environment</description>
+  </class>
+  <class name="jsk_pcl/ColorHistogram" type="jsk_pcl_ros::ColorHistogram"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Compute histogram for each point indices
+    </description>
+  </class>
+  <class name="jsk_pcl/ColorHistogramClassifier" type="jsk_pcl_ros::ColorHistogramClassifier"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Classify point indices using color histogram
+    </description>
+  </class>
+  <class name="jsk_pcl/ColorHistogramFilter" type="jsk_pcl_ros::ColorHistogramFilter"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Filter point indices using color histogram
+    </description>
   </class>
   <class name="jsk_pcl/ColorHistogramMatcher" type="jsk_pcl_ros::ColorHistogramMatcher"
          base_class_type="nodelet::Nodelet">
@@ -478,6 +504,10 @@
   </class>
   <class name="jsk_pcl/PPFRegistration"
          type="jsk_pcl_ros::PPFRegistration"
+         base_class_type="nodelet::Nodelet">
+  </class>
+  <class name="jsk_pcl/PrimitiveShapeClassifier"
+         type="jsk_pcl_ros::PrimitiveShapeClassifier"
          base_class_type="nodelet::Nodelet">
   </class>
 </library>

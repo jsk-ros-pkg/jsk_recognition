@@ -1,0 +1,23 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_people_pose_estimation_2d.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_people_pose_estimation_2d"
+        name="test_people_pose_estimation_2d"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /people_pose_estimation_2d/output
+      timeout_0: 60
+      topic_1: /people_pose_estimation_2d/pose
+      timeout_1: 60
+      topic_2: /people_pose_estimation_2d/pose_2d
+      timeout_2: 60
+      topic_3: /people_pose_estimation_2d/skeleton
+      timeout_3: 60
+    </rosparam>
+  </test>
+
+</launch>

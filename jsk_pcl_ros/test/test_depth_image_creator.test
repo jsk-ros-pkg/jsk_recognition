@@ -1,0 +1,31 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_depth_image_creator.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_depth_image_creator"
+        name="test_depth_image_creator"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="120" retry="6">
+    <rosparam>
+      topic_0: /depth_image_creator/output
+      timeout_0: 30
+      topic_1: /depth_image_creator/output_image
+      timeout_1: 30
+      topic_2: /depth_image_creator/output_cloud
+      timeout_2: 30
+      topic_3: /depth_image_creator/output_disp
+      timeout_3: 30
+      topic_4: /right_hand_right_camera/depth_image_creator/output
+      timeout_4: 30
+      topic_5: /right_hand_right_camera/depth_image_creator/output_image
+      timeout_5: 30
+      topic_6: /right_hand_right_camera/depth_image_creator/output_cloud
+      timeout_6: 30
+      topic_6: /right_hand_right_camera/depth_image_creator/output_disp
+      timeout_6: 30
+    </rosparam>
+  </test>
+
+</launch>

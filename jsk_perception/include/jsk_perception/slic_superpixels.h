@@ -82,6 +82,7 @@ namespace jsk_perception
     ////////////////////////////////////////////////////////
     int number_of_super_pixels_;
     int weight_;
+    bool debug_image_;
   private:
   };
 }

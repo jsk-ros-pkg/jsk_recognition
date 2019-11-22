@@ -1,21 +1,37 @@
 <launch>
+  <arg name="gui" default="true"/>
+
   <arg name="USE_SAMPLE_DATA" default="true" />
   <arg name="input" default="/camera/depth/points" />
   <arg name="sensor_frame" default="/camera_depth_optical_frame" />
 
+  <param name="/use_sim_time" value="true"/>
+
   <node name="rosbag_play"  if="$(arg USE_SAMPLE_DATA)"
         pkg="rosbag" type="play"
-        args="$(find jsk_pcl_ros)/sample/data/2016-10-29-17-05-44_tabletop-coffee-cup/tabletop-coffee-cup.bag --clock --loop" />
+        args="$(find jsk_pcl_ros)/sample/data/2017-06-19-19-34-18_tabletop_coffeecup.bag --clock --loop" />
 
   <node name="optical_frame_tf_publisher" if="$(arg USE_SAMPLE_DATA)"
       pkg="tf" type="static_transform_publisher"
-      args="0 0 0 -1.57 0 -1.57 map camera_depth_optical_frame 500" />
+      args="0 0 0 -1.57 0 -1.57 map camera_depth_optical_frame 10" />
+
+  <node name="coffee_cup_tf_publisher" if="$(arg USE_SAMPLE_DATA)"
+        pkg="tf" type="static_transform_publisher"
+        args="0 0 0 0 0 0 camera_depth_optical_frame 2016-10-26-02-09-51_coffee_cup 10" />
 
   <arg name="manager" value="icp_manager" />
   <node name="$(arg manager)" pkg="nodelet" type="nodelet" args="manager" />
 
   <!-- input cloud -->
-  <node name="multi_plane_estimate" pkg="nodelet" type="nodelet"
+  <node if="$(arg USE_SAMPLE_DATA)"
+        pkg="nodelet" type="nodelet" name="depth_to_points"
+        args="load depth_image_proc/point_cloud_xyz $(arg manager)">
+    <remap from="camera_info" to="/camera/depth/camera_info" />
+    <remap from="image_rect" to="/camera/depth/image_rect_raw"/>
+    <remap from="points" to="/camera/depth/points" />
+  </node>
+
+   <node name="multi_plane_estimate" pkg="nodelet" type="nodelet"
         args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg manager)"
         output="screen">
     <remap from="~input" to="$(arg input)" />
@@ -40,7 +56,7 @@
       use_sensor_frame: true
       sensor_frame: $(arg sensor_frame)
       min_height: 0.03
-      use_async: true
+      use_async: false
     </rosparam>
   </node>
   <!--
@@ -90,5 +106,9 @@
     <remap from="~input_reference" to="subsample_reference/output" />
   </node>
 
-
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/icp_registration.rviz"/>
+  </group>
 </launch>

@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_joint_state_static_filter.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_joint_state_static_filter"
+        name="test_joint_state_static_filter"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="30" retry="3">
+    <rosparam>
+      topic_0: /joint_state_static_filter/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

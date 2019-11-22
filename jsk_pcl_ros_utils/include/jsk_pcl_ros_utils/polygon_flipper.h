@@ -48,6 +48,7 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/synchronizer.h>
+#include <message_filters/pass_through.h>
 
 namespace jsk_pcl_ros_utils
 {
@@ -65,6 +66,8 @@ namespace jsk_pcl_ros_utils
     virtual void subscribe();
     virtual void unsubscribe();
 
+    virtual void fillEmptyIndices(
+      const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon_msg);
     virtual void flip(
       const jsk_recognition_msgs::PolygonArray::ConstPtr& polygon_msg,
       const jsk_recognition_msgs::ClusterPointIndices::ConstPtr& indices_msg,
@@ -72,13 +75,16 @@ namespace jsk_pcl_ros_utils
     
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> > sync_;
     message_filters::Subscriber<jsk_recognition_msgs::PolygonArray> sub_polygons_;
-    message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_indices_;
     message_filters::Subscriber<jsk_recognition_msgs::ModelCoefficientsArray> sub_coefficients_;
+    message_filters::Subscriber<jsk_recognition_msgs::ClusterPointIndices> sub_indices_;
+    message_filters::PassThrough<jsk_recognition_msgs::ClusterPointIndices> sub_indices_null_;
     ros::Publisher pub_polygons_;
     ros::Publisher pub_indices_;
     ros::Publisher pub_coefficients_;
     tf::TransformListener* tf_listener_;
     std::string sensor_frame_;
+    bool use_indices_;
+    int queue_size_;
   private:
     
   };

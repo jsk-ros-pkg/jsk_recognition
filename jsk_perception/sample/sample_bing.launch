@@ -16,10 +16,10 @@
     <remap from="~input" to="image_publisher/output" />
   </node>
 
-  <node name="draw_rect_array"
-        pkg="jsk_perception" type="draw_rect_array.py">
+  <node name="draw_rects"
+        pkg="jsk_perception" type="draw_rects">
     <remap from="~input" to="image_publisher/output" />
-    <remap from="~input/rect_array" to="bing/output" />
+    <remap from="~input/rects" to="bing/output" />
   </node>
 
   <group if="$(arg gui)">
@@ -36,7 +36,7 @@
     </node>
     <node name="image_view_2"
           pkg="image_view" type="image_view">
-      <remap from="image" to="draw_rect_array/output" />
+      <remap from="image" to="draw_rects/output" />
     </node>
   </group>
 

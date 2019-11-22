@@ -34,6 +34,11 @@ Publishing Topic
 
   Label image each object in param ``~target_names`` is segmented.
 
+* ``~output/proba_image`` (``sensor_msgs/Image``)
+
+  Probability image of each object.
+  The encoding is ``32FCX``, where X is the length of ``~target_names``.
+
 
 Parameters
 ----------
@@ -48,14 +53,23 @@ Parameters
 
   Target names for classification.
 
+* ``~backend`` (String, Default: ``chainer``)
+
+  Neural network framework.
+  Currently ``chainer`` and ``torch`` are supported.
+
 * ``~model_name`` (String, Required)
 
-  Currently ``fcn8s``, ``fcn16s`` or ``fcn32s`` is only supported.
+  Currently ``fcn8s``, ``fcn8s_at_once``, ``fcn16s`` or ``fcn32s`` is only supported.
   See models in https://github.com/wkentaro/fcn/tree/master/fcn/models.
 
-* ``~model_h5`` (String, Required)
+* ``~model_file`` (String, Required)
 
-  Saved h5 file for trained model.
+  Saved npz or h5 file for trained model.
+
+* ``~use_mask`` (Bool, default: ``False``)
+
+  If True, ``~input/mask`` is subscribed and ignore black region in the mask image.
 
 * ``~bg_label`` (Int, default: ``0``)
 
@@ -89,8 +103,19 @@ Parameters
 Sample
 ------
 
+**Sample**
+
 .. code-block:: bash
 
   roslaunch jsk_perception sample_fcn_object_segmentation.launch
 
 .. image:: images/sample_fcn_object_segmentation.png
+
+**Sample with mask image**
+
+.. code-block:: bash
+
+  roslaunch jsk_perception sample_fcn_object_segmentation.launch use_mask:=true
+
+.. image:: images/sample_fcn_object_segmentation_with_mask.png
+

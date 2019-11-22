@@ -1,0 +1,23 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_normal_estimation_omp.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_normal_estimation_omp"
+        name="test_normal_estimation_omp"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /normal_estimation_omp/output
+      timeout_0: 30
+      topic_1: /normal_estimation_omp/output_with_xyz
+      timeout_1: 30
+      topic_2: /normal_estimation_omp/output/latest_time
+      timeout_2: 30
+      topic_3: /normal_estimation_omp/output/average_time
+      timeout_3: 30
+    </rosparam>
+  </test>
+
+</launch>

@@ -3,22 +3,32 @@
 ######################################################
 # Install PCL 1.8
 ######################################################
-cd /tmp
 
-version="1.8.0rc2"
-url="https://github.com/PointCloudLibrary/pcl/archive/pcl-${version}.tar.gz"
-fname=pcl-${version}.tar.gz
+if [ ! -e /usr/local/include/pcl-1.8/pcl/pcl_base.h ]; then
+  cd /tmp
 
-wget $url -O $fname
-tar zxf $fname
+  version="1.8.0rc2"
+  url="https://github.com/PointCloudLibrary/pcl/archive/pcl-${version}.tar.gz"
+  fname=pcl-${version}.tar.gz
 
-cd pcl-pcl-${version}
-mkdir build
-cd build
+  wget $url -O $fname
+  tar zxf $fname
 
-cmake -DCMAKE_BUILD_TYPE=Release ..
-make -j2
-sudo make -j2 install
+  cd pcl-pcl-${version}
+  mkdir build
+  cd build
+ 
+  # pcl::CropBox does not work properly in kinetic
+  # with PCL_ENABLE_SSE:BOOL=TRUE flag
+  # https://github.com/PointCloudLibrary/pcl/pull/1917 
+  if [ $(lsb_release -c -s) = "xenial" ]; then
+    cmake -DCMAKE_BUILD_TYPE=Release -DPCL_ENABLE_SSE:BOOL=FALSE ..
+  else
+    cmake -DCMAKE_BUILD_TYPE=Release ..
+  fi
+  make -j2
+  sudo make -j2 install
+fi
 
 
 ######################################################

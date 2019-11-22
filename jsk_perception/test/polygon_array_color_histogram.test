@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_polygon_array_color_histogram.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_polygon_array_color_histogram"
+        name="test_polygon_array_color_histogram"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /polygon_array_color_histogram/output
+      timeout_0: 30
+      topic_1: /polygon_array_color_histogram/debug/polygon_image
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

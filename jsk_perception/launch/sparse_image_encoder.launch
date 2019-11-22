@@ -1,10 +1,14 @@
 <launch>
+  <arg name="image" default="edge/image" />
+  <arg name="sparse_image" default="sparse/image"/>
+  <arg name="rate" default="1.0"/>
   <arg name="print_point_num" default="false" />
+
   <node pkg="jsk_perception" type="sparse_image_encoder" name="sparse_image_encoder"
         output="screen">
-    <remap from="image" to="edge/image" />
-    <remap from="sparse_image" to="sparse/image" />
-    <param name="rate" value="1.0" />
+    <remap from="image" to="$(arg image)" />
+    <remap from="sparse_image" to="$(arg sparse_image)" />
+    <param name="rate" value="$(arg rate)" />
     <param name="print_point_num" value="$(arg print_point_num)" />
   </node>
 </launch>

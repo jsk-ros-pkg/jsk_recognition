@@ -1,0 +1,23 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_centroid_publisher.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_centroid_publisher"
+        name="test_centroid_publisher"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="25" retry="3">
+    <rosparam>
+      topic_0: /centroid_publisher/output/point
+      timeout_0: 20
+      topic_1: /centroid_publisher/output/pose
+      timeout_1: 20
+      topic_2: /centroid_publisher_nan_input/output/point
+      timeout_2: 20
+      topic_3: /centroid_publisher_nan_input/output/pose
+      timeout_3: 20
+    </rosparam>
+  </test>
+
+</launch>

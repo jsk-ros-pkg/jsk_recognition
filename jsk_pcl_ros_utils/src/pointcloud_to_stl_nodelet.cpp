@@ -63,7 +63,7 @@ namespace jsk_pcl_ros_utils
 
     visualization_msgs::Marker marker_msg;
     marker_msg.header = input->header;
-    marker_msg.mesh_resource = std::string("package://jsk_pcl_ros_utils/temp.stl");//file_name_;//latest_output_path_;
+    marker_msg.mesh_resource = latest_output_path_;
     marker_msg.ns = "pcl_mesh_reconstrunction";
     marker_msg.id = 0;
     marker_msg.type = visualization_msgs::Marker::MESH_RESOURCE;

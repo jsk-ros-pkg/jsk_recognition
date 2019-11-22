@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/rgb_color_filter_sample.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_rgb_color_filter"
+        name="test_rgb_color_filter"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /pcl_nodelet/rgb_output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

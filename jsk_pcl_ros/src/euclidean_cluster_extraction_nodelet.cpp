@@ -202,26 +202,8 @@ namespace jsk_pcl_ros
 
   void EuclideanClustering::onInit()
   {
-    ConnectionBasedNodelet::onInit();
-    
-    ////////////////////////////////////////////////////////
-    // diagnostics
-    ////////////////////////////////////////////////////////
-    diagnostic_updater_.reset(
-      new jsk_recognition_utils::TimeredDiagnosticUpdater(*pnh_, ros::Duration(1.0)));
-    diagnostic_updater_->setHardwareID(getName());
-    diagnostic_updater_->add(
-      getName() + "::EuclideanClustering",
-      boost::bind(
-        &EuclideanClustering::updateDiagnostic,
-        this,
-        _1));
-    double vital_rate;
-    pnh_->param("vital_rate", vital_rate, 1.0);
-    vital_checker_.reset(
-      new jsk_topic_tools::VitalChecker(1 / vital_rate));
-    diagnostic_updater_->start();
-    
+    DiagnosticNodelet::onInit();
+
     ////////////////////////////////////////////////////////
     // dynamic reconfigure
     ////////////////////////////////////////////////////////
@@ -262,9 +244,9 @@ namespace jsk_pcl_ros
       diagnostic_msgs::DiagnosticStatus::OK,
       "EuclideanSegmentation running");
 
-      jsk_recognition_utils::addDiagnosticInformation(
+      jsk_topic_tools::addDiagnosticInformation(
         "Kdtree Construction", kdtree_acc_, stat);
-      jsk_recognition_utils::addDiagnosticInformation(
+      jsk_topic_tools::addDiagnosticInformation(
         "Euclidean Segmentation", segmentation_acc_, stat);
       stat.add("Cluster Num (Avg.)", cluster_counter_.mean());
       stat.add("Max Size of the cluster", maxsize_);
@@ -272,10 +254,7 @@ namespace jsk_pcl_ros
       stat.add("Cluster tolerance", tolerance);
       stat.add("Tracking tolerance", label_tracking_tolerance);
     }
-    else {
-      jsk_recognition_utils::addDiagnosticErrorSummary(
-        "EuclideanClustering", vital_checker_, stat);
-    }
+    DiagnosticNodelet::updateDiagnostic(stat);
   }
   
   void EuclideanClustering::configCallback (Config &config, uint32_t level)

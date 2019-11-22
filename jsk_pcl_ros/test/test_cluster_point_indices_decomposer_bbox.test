@@ -1,0 +1,122 @@
+<launch>
+
+  <!-- publish pointcloud -->
+  <param name="/use_sim_time" value="true" />
+  <node name="publish_pointcloud"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/sample/data/octomap_contact.bag --clock --loop" />
+
+  <!-- Reconstruct pointcloud on this computer -->
+  <!-- RGB -->
+  <group ns="/head_camera/rgb">
+    <node name="republish_rgb" pkg="image_transport" type="republish" args="compressed raw">
+      <remap from="in" to="image_raw" />
+      <remap from="out" to="image_raw" />
+    </node>
+  </group>
+  <!-- Depth -->
+  <group ns="/head_camera/depth_registered">
+    <node name="republish_depth_registered" pkg="image_transport" type="republish"
+          args="compressedDepth raw">
+      <remap from="in" to="image_raw" />
+      <remap from="out" to="image_raw" />
+    </node>
+  </group>
+  <!-- publish pointcloud -->
+  <include file="$(find openni2_launch)/launch/openni2.launch">
+    <!-- <arg name="depth" value="depth_registered"/> -->
+    <arg name="load_driver" value="false" />
+    <arg name="camera" value="head_camera" />
+    <arg name="depth_registration" value="true" />
+    <arg name="rgb_frame_id" value="head_camera_rgb_optical_frame" />
+    <arg name="depth_frame_id" value="head_camera_depth_optical_frame" />
+  </include>
+
+  <node name="mask_image_generator"
+        pkg="jsk_perception" type="mask_image_generator"
+        required="true">
+    <remap from="~input" to="/head_camera/rgb/image_rect_color" />
+    <rosparam>
+      offset_x: 170
+      offset_y: 170
+      width: 250
+      height: 250
+    </rosparam>
+  </node>
+
+  <node name="mask_image_to_label"
+        pkg="jsk_perception" type="mask_image_to_label.py">
+    <remap from="~input" to="mask_image_generator/output" />
+  </node>
+
+  <node name="label_to_cluster_point_indices"
+        pkg="jsk_pcl_ros_utils" type="label_to_cluster_point_indices">
+    <remap from="~input" to="mask_image_to_label/output" />
+  </node>
+
+  <node name="cluster_point_indices_decomposer"
+        pkg="jsk_pcl_ros" type="cluster_point_indices_decomposer">
+    <remap from="~input" to="/head_camera/depth_registered/points" />
+    <remap from="~target" to="label_to_cluster_point_indices/output" />
+    <rosparam>
+      approximate_sync: true
+    </rosparam>
+  </node>
+
+  <node name="cluster_point_indices_decomposer_align_boxes_with_frame"
+        pkg="jsk_pcl_ros" type="cluster_point_indices_decomposer">
+    <remap from="~input" to="/head_camera/depth_registered/points" />
+    <remap from="~target" to="label_to_cluster_point_indices/output" />
+    <rosparam>
+      approximate_sync: true
+      use_pca: false
+      align_boxes: true
+      align_boxes_with_plane: false
+      target_frame_id: base_link
+    </rosparam>
+  </node>
+
+  <node name="cluster_point_indices_decomposer_pca"
+        pkg="jsk_pcl_ros" type="cluster_point_indices_decomposer">
+    <remap from="~input" to="/head_camera/depth_registered/points" />
+    <remap from="~target" to="label_to_cluster_point_indices/output" />
+    <rosparam>
+      approximate_sync: true
+      use_pca: true
+      align_boxes: true
+      align_boxes_with_plane: false
+      target_frame_id: base_link
+    </rosparam>
+  </node>
+
+  <test test-name="test_cluster_point_indices_decomposer_bbox"
+        name="test_cluster_point_indices_decomposer_bbox"
+        pkg="jsk_pcl_ros" type="test_cluster_point_indices_decomposer_bbox.py"
+        time-limit="30" retry="1">
+    <remap from="~boxes" to="cluster_point_indices_decomposer/boxes" />
+    <rosparam>
+      check_times: 10
+    </rosparam>
+  </test>
+
+  <test test-name="test_cluster_point_indices_decomposer_bbox_align_boxes_with_frame"
+        name="test_cluster_point_indices_decomposer_bbox_align_boxes_with_frame"
+        pkg="jsk_pcl_ros" type="test_cluster_point_indices_decomposer_bbox.py"
+        time-limit="30" retry="1">
+    <remap from="~boxes" to="cluster_point_indices_decomposer_align_boxes_with_frame/boxes" />
+    <rosparam>
+      check_times: 10
+    </rosparam>
+  </test>
+
+  <test test-name="test_cluster_point_indices_decomposer_bbox_pca"
+        name="test_cluster_point_indices_decomposer_bbox_pca"
+        pkg="jsk_pcl_ros" type="test_cluster_point_indices_decomposer_bbox.py"
+        time-limit="30" retry="1">
+    <remap from="~boxes" to="cluster_point_indices_decomposer_pca/boxes" />
+    <rosparam>
+      check_times: 10
+    </rosparam>
+  </test>
+
+</launch>

@@ -2,6 +2,146 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.10 (2019-03-27)
+-------------------
+* Re-enable pointcloud_to_pcd.test `#2402 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2402>`_)
+* [doc] [jsk_pcl_ros_utils] [jsk_pcl_ros] Add documentation (`#2393 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2393>`_)
+
+  * Add test for TransformPointcloudInBoundingBox
+  * Add sample for TransformPointcloudInBoundingBox
+  * Add test for PlaneReasoner
+  * Add sample for PlaneReasoner
+  * Add test for PlaneRejcetor
+  * Add sample for PlaneRejcetor
+  * Add test for PolygonAppender
+  * Add sample for PolygonAppender
+  * Add test for StaticPolygonArrayPublisher
+  * Add sample for StaticPolygonArrayPublisher
+  * Add test for NormalConcatenater
+  * Add sample for NormalConcatenater
+
+* Contributors: Yuto Uchimi
+
+1.2.9 (2019-02-23)
+------------------
+
+1.2.8 (2019-02-22)
+------------------
+
+1.2.7 (2019-02-14)
+------------------
+* [jsk_pcl_ros, jsk_pcl_ros_utils] Use ccache if installed to make it fast to generate object file (`#2342 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2342>`_ )
+* Contributors: Iori Yanokura
+
+1.2.6 (2018-11-02)
+------------------
+* [jsk_pcl_ros_utils/cluster_point_indices_to_point_indices] Concatenate all indices in case of index==-1 (`#2330 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2330>`_)
+* [jsk_pcl_ros_utils/package.xml] Add dependencies for compressed_image/depth_image_transport to run sample launch files (`#2341 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2341>`_)
+* Install 'sample', 'scripts', 'test' into SHARE_DESTINATION (`#2345 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2345>`_)
+* [jsk_perception] Retrain bof data for sklearn==0.2.0 version and modified jsk_pcl_ros/utils's test for kinetic travis (`#2337 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2337>`_)
+  * [jsk_pcl_ros_utils] Ignore test for pointcloud_to_pcd.test
+
+* Add --pkg-path option to install_sample_data.py not to use rospack (`#2314 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2314>`_)
+  * Close https://github.com/jsk-ros-pkg/jsk_recognition/pull/2303
+
+* fix for jsk-ros-pkg/jsk_common/pull/1586 (`#2311 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2311>`_)
+  * to avoid add_custom_target cannot create target install_sample_data because another target with the same name already exists errors
+
+* Use diagnostic nodelet for EuclideanClustering and other nodelets (`#2301 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2301>`_)
+  * jsk_pcl_ros: euclidean_clustering: use dianogistc nodelet
+    Use DiagnosticNodelet::updateDiagnostic preferrably
+
+* Fix warnings for jsk_pcl_ros_utils (`#2265 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2265>`_)
+  * Fix warnings for jsk_pcl_ros_utils
+    ```
+  CMake Warning at /opt/ros/kinetic/share/catkin/cmake/catkin_package.cmake:166 (message):
+  catkin_package() DEPENDS on 'pcl' but neither 'pcl_INCLUDE_DIRS' nor
+  'pcl_LIBRARIES' is defined.
+  Call Stack (most recent call first):
+  /opt/ros/kinetic/share/catkin/cmake/catkin_package.cmake:102 (_catkin_package)
+  CMakeLists.txt:220 (catkin_package)
+  CMake Warning (dev) at CMakeLists.txt:214 (add_dependencies):
+  Policy CMP0046 is not set: Error on non-existent dependency in
+  add_dependencies.  Run "cmake --help-policy CMP0046" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+  The dependency target "jsk_pcl_ros_utils_gencpp" of target
+  "jsk_pcl_ros_utils" does not exist.
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+    ```
+* Contributors: Yuki Furuta, Kei Okada, Kentaro Wada, Yuto Uchimi, Iori Yanokura
+
+1.2.5 (2018-04-09)
+------------------
+
+1.2.4 (2018-01-12)
+------------------
+* jsk_pcl_ros_utils: pointcloud_to_mask_image:  add depth image for input (`#2229 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2229>`_)
+    jsk_pcl_ros_utils: add depth image for input to pointcloud_to_mask_image
+    jsk_pcl_ros_utils: update doc for pointcloud_to_mask_image
+* Contributors: Yuki Furuta
+
+1.2.3 (2017-11-23)
+------------------
+*  [jsk_pcl_ros_utils] polygon_flipper: add option '~use_indices' (`#2189 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2189>`_)
+* Contributors: Yuki Furuta
+
+1.2.2 (2017-07-23)
+------------------
+
+1.2.1 (2017-07-15)
+------------------
+
+1.2.0 (2017-07-15)
+------------------
+
+1.1.3 (2017-07-07)
+------------------
+* Filter invalid centroid in centroid_publisher (`#2150 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2150>`_)
+  * Looser timeout for centroid_publisher.test
+  * Add sample and test for CentroidPublisher
+  * Filter invalid centroid in centroid_publisher
+
+* Capability of specifying background label for LabelToClusterPointIndices (`#2134 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2134>`_)
+  * fix bug in label_to_cluster_point_indices_nodelet
+  * Capability of specifying background label for LabelToClusterPointIndices
+
+* add ignore_labels in label_to_cluster_point_indices (`#2151 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2151>`_)
+  * Fix style of code of LabelToClusterPointIndices
+
+* [jsk_pcl_ros_utils/src] add onInitPostProcess forStaticPolygonArrayPublisher, PolygonArrayTransformer (`#2126 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2126>`_)
+  * [jsk_pcl_ros_utils] add onInitPostProcess to static_polygon_array_publisher_nodelet.cpp, polygon_array_transformer_nodelet.cpp
+
+* Contributors: Kanae Kochigami, Kentaro Wada, Shingo Kitagawa
+
+1.1.2 (2017-06-16)
+------------------
+* [jsk_pcl_ros_utils] add PolygonArrayLikelihoodFilter (`#2054 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2054>`_ )
+  * [jsk_pcl_ros_utils] add sample / test for polygon_array_likelihood_filter
+  * [jsk_pcl_ros_utils][polygon_array_likelihood_filter] fix
+  * [jsk_pcl_ros_utils] add polygon_array_likelihood_filter
+    [jsk_pcl_ros_utils] add docs for polygon_array_likelihood_filter
+* Add PointCloudXYZRGBToXYZ: (add for testing) (https://github.com/jsk-ros-pkg/jsk_recognition/commit/86b64a27d00d218b68e3d598220cd0c6fadbeaec)
+* [jsk_pcl_ros_utils][polygon_magnifier] Support scale factor to  magnify polygon (`#2072 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2072>`_ )
+  * [jsk_pcl_ros_utils][polygon_magnifier] support scale factor to magnify
+* Fix website url for jsk_pcl_ros_utils (`#2071 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2071>`_ )
+  - modified:   README.md
+  - modified:   jsk_pcl_ros_utils/package.xml
+* [jsk_pcl_ros_utils][polygon_magnifier] allow negative distance to magnify (`#2053 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2053>`_ )
+  [jsk_pcl_ros_utils][polygon_magnifier] update docs
+  [jsk_recognition_utils] add polygon_array_publisher.py / sample_polygon_array_publisher.launch
+  [jsk_pcl_ros_utils] add sample / test for polygon_magnifier
+* Generate README by script (`#2064 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2064>`_)
+* [jsk_pcl_ros_utils][plane_rejector] add onInitPostProcess (`#2049 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2049>`_)
+* [jsk_pcl_ros_utils][CMakeLists.txt] Suppress warning on build (`#2040 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2040>`_)
+  * [jsk_pcl_ros_utils][CMakeLists.txt] remove comment out lines
+  * [jsk_pcl_ros_utils][CMakeLists.txt] remove debug line
+  * [jsk_pcl_ros_utils][CMakeLists.txt] comment out generate_messages
+* [jsk_pcl_ros_utils] ensure super class functionality works (`#2043 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2043>`_ )
+  * [jsk_pcl_ros_utils] ensure call onInitPostProcess() on DiagnosticNodelet
+  * [jsk_pcl_ros_utils] ensure poke on callback in DiagnosticNodelet
+* [jsk_pcl_ros_utils][centroid_publisher_nodelet] support polygon array (`#2038 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2038>`_ )
+* Contributors: Kei Okada, Kentaro Wada, Yuki Furuta
+
 1.1.1 (2017-03-04)
 ------------------
 * Remove unnecessary cmake messages (`#2010 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2010>`_)

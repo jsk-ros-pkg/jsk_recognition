@@ -1,0 +1,36 @@
+<launch>
+  <param name="/use_sim_time" value="true"/>
+  <param name="robot_description"
+         command="$(find xacro)/xacro.py '$(find pr2_description)/robots/pr2.urdf.xacro'"/>
+
+  <node name="rosbag_play" pkg="rosbag" type="play"
+        args="$(find jsk_perception)/sample/data/2019-07-18-15-37-50_pr2_self_see.bag --clock --loop"/>
+
+  <group ns="kinect_head">
+    <group ns="rgb">
+      <node name="republish"
+            pkg="image_transport" type="republish"
+            args="compressed raw">
+        <remap from="in" to="image_rect_color"/>
+        <remap from="out" to="image_rect_color"/>
+      </node>
+    </group>
+
+    <group ns="depth_registered/hw_registered">
+      <node name="republish"
+            pkg="image_transport" type="republish"
+            args="compressedDepth raw">
+        <remap from="in" to="image_rect"/>
+        <remap from="out" to="image_rect"/>
+      </node>
+    </group>
+
+    <node name="point_cloud_xyzrgb"
+          pkg="nodelet" type="nodelet"
+          args="standalone depth_image_proc/point_cloud_xyzrgb">
+      <remap from="rgb/camera_info" to="rgb/camera_info"/>
+      <remap from="rgb/image_rect_color" to="rgb/image_rect_color"/>
+      <remap from="depth_registered/image_rect" to="depth_registered/hw_registered/image_rect"/>
+    </node>
+  </group>
+</launch>

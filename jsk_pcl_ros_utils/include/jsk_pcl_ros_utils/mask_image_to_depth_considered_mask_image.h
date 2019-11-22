@@ -68,8 +68,6 @@ namespace jsk_pcl_ros_utils
     virtual void onInit();
     virtual void subscribe();
     virtual void unsubscribe();
-    virtual void updateDiagnostic(
-      diagnostic_updater::DiagnosticStatusWrapper &stat);
     virtual void extractmask
     (
      const sensor_msgs::PointCloud2::ConstPtr& point_cloud2_msg,
@@ -82,6 +80,7 @@ namespace jsk_pcl_ros_utils
     ////////////////////////////////////////////////////////
     boost::shared_ptr <dynamic_reconfigure::Server<Config> > srv_;
     bool approximate_sync_;
+    int queue_size_;
     int extract_num_;
     boost::mutex mutex_;
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;

@@ -38,18 +38,45 @@ Publishing Topics
 Parameters
 -----------
 
--  ``approximate_sync`` (``Bool``, default: ``false``)
+- ``~approximate_sync`` (``Bool``, default: ``false``)
+
+  Whether to allow approximate synchronization of input topics.
+
+- ``~method_type`` (``Int``, default: ``0``)
+
+  The type of sample consensus method to use.
+
+  - 0: SAC_RANSAC
+  - 1: SAC_LMEDS
+  - 2: SAC_MSAC
+  - 3: SAC_RRANSAC
+  - 4: SAC_RMSAC
+  - 5: SAC_MLESAC
+  - 6: SAC_PROSAC
 
 - ``~outlier_threshold`` (``Double``, default: ``0.005``)
 
-  Outlier threshold to detect plane using RANSAC.
+  Outlier threshold in meters to detect plane using RANSAC.
 
-- ``max_iterations`` (``Int``, default: ``1000``)
+- ``~max_iterations`` (``Int``, default: ``1000``)
 
   Maximum iteration number to detect larger plane using RANSAC.
 
-- ``min_indices`` (``Int``, default: ``1000``)
+- ``~min_indices`` (``Int``, default: ``1000``)
 
-- ``min_length`` (``Double``, default: ``0.1``)
+  Minimum number of points which construct a line.
 
-- ``line_width`` (``Double``, default: ``0.01``)
+- ``~min_length`` (``Double``, default: ``0.1``)
+
+  Minimum length of each line in meters.
+
+- ``~line_width`` (``Double``, default: ``0.01``)
+
+  Width of line marker published to ``~debug/line_marker``.
+
+Sample
+------
+
+.. code-block:: bash
+
+  roslaunch jsk_pcl_ros sample_line_segment_detector.launch

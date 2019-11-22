@@ -8,10 +8,8 @@ What is this?
 .. image:: ./images/vgg16_object_recognition.png
 
 Recognize object with VGG16 net by resizing input image to 224 x 224.
-This node requires pretrained Chainer_ model.
+This node requires pretrained `chainer <https://github.com/chainer/chainer>`_ model.
 For training VGG16 net, please refer to `wkentaro/vgg16 <https://github.com/wkentaro/vgg16>`_
-
-.. _Chainer:: https://github.com/pfnet/chainer
 
 
 Subscribing Topic
@@ -50,9 +48,9 @@ Parameters
   Currently ``vgg16`` or ``vgg16_batch_normalization`` is only supported.
   See models in ``$(rospack find jsk_recognition_utils)/python/jsk_recognition_utils/chainermodels``.
 
-* ``~model_h5`` (String, Required)
+* ``~model_file`` (String, Required)
 
-  Saved h5 file for trained model.
+  Trained model file.
 
 * ``use_mask`` (Bool, Default: ``False``)
 

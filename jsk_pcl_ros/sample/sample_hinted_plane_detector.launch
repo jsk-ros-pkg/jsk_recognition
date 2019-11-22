@@ -1,0 +1,76 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="organized_pass_through"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/OrganizedPassThrough sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <rosparam>
+      keep_organized: false
+      remove_nan: true
+    </rosparam>
+  </node>
+
+  <node name="normal_estimation_omp"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/NormalEstimationOMP sample_manager">
+    <remap from="~input" to="organized_pass_through/output"/>
+    <rosparam>
+      k_search: 15
+    </rosparam>
+  </node>
+
+  <node name="mask_image_generator"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/MaskImageGenerator sample_manager">
+    <remap from="~input" to="/kinect_head/rgb/image_rect_color"/>
+    <rosparam>
+      offset_x: 400
+      offset_y: 150
+      width: 80
+      height: 100
+    </rosparam>
+  </node>
+
+  <node name="mask_image_to_point_indices"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/MaskImageToPointIndices sample_manager">
+    <remap from="~input" to="mask_image_generator/output"/>
+  </node>
+
+  <node name="extract_indices_hint"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ExtractIndices sample_manager">
+    <remap from="~input" to="/kinect_head/depth_registered/points"/>
+    <remap from="~indices" to="mask_image_to_point_indices/output"/>
+    <rosparam>
+      approximate_sync: true
+      keep_organized: false  # Remove NaN here.
+    </rosparam>
+  </node>
+
+  <node name="hinted_plane_detector"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/HintedPlaneDetector sample_manager">
+    <remap from="~input" to="normal_estimation_omp/output_with_xyz"/>
+    <remap from="~input/hint/cloud" to="extract_indices_hint/output"/>
+    <rosparam>
+      hint_outlier_threashold: 1.0
+      outlier_threashold: 0.05
+      normal_filter_eps_angle: 0.157
+      eps_angle: 0.157
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/hinted_plane_detector.rviz"/>
+  </group>
+</launch>

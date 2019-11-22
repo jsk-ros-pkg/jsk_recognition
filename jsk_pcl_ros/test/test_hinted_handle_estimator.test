@@ -1,0 +1,23 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_hinted_handle_estimator.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_hinted_handle_estimator"
+        name="test_hinted_handle_estimator"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /hinted_handle_estimator/handle_pose
+      timeout_0: 30
+      topic_1: /hinted_handle_estimator/handle
+      timeout_1: 30
+      topic_2: /hinted_handle_estimator/debug_marker
+      timeout_2: 30
+      topic_3: /hinted_handle_estimator/debug_marker_array
+      timeout_3: 30
+    </rosparam>
+  </test>
+
+</launch>

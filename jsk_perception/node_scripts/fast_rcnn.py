@@ -3,21 +3,24 @@
 import os.path as osp
 import sys
 
+import chainer
 from chainer import cuda
 import chainer.serializers as S
 from chainer import Variable
 import cv2
+from distutils.version import LooseVersion
 import numpy as np
 
 import cv_bridge
-from jsk_recognition_msgs.msg import RectArray
+from dynamic_reconfigure.server import Server
+from jsk_perception.cfg import FastRCNNConfig as Config
+from jsk_recognition_msgs.msg import Rect, RectArray
+from jsk_recognition_msgs.msg import ClassificationResult
 import jsk_recognition_utils
 from jsk_recognition_utils.chainermodels import VGG16FastRCNN
 from jsk_recognition_utils.chainermodels import VGG_CNN_M_1024
 from jsk_recognition_utils.nms import nms
 from jsk_topic_tools import ConnectionBasedTransport
-from jsk_topic_tools.log_utils import jsk_logfatal
-from jsk_topic_tools.log_utils import jsk_loginfo
 import message_filters
 import rospkg
 import rospy
@@ -41,11 +44,23 @@ class FastRCNN(ConnectionBasedTransport):
 
     def __init__(self, model, target_names, pixel_means, use_gpu):
         super(FastRCNN, self).__init__()
+
+        self._srv = Server(Config, self.configCallback)
+
         self.model = model
-        self._pub = self.advertise('~output', Image, queue_size=1)
+        self._pub_rects = self.advertise('~output/rect_array',
+                                         RectArray, queue_size=1)
+        self._pub_class = self.advertise('~output/class',
+                                         ClassificationResult, queue_size=1)
         self.target_names = target_names
         self.pixel_means = np.array(pixel_means, dtype=np.float32)
         self.use_gpu = use_gpu
+        self.classifier_name = rospy.get_param("~classifier_name", rospy.get_name())
+
+    def configCallback(self, config, level):
+        self.nms_thresh = config.nms_thresh
+        self.conf_thresh = config.conf_thresh
+        return config
 
     def subscribe(self):
         self._sub = message_filters.Subscriber('~input', Image)
@@ -75,22 +90,20 @@ class FastRCNN(ConnectionBasedTransport):
             return
         rects = rects_orig * im_scale
         scores, bbox_pred = self._im_detect(im, rects)
-        out_im = self._draw_result(
-            im_orig, scores, bbox_pred, rects_orig, nms_thresh=0.3, conf=0.8)
-        out_msg = bridge.cv2_to_imgmsg(out_im, encoding='bgr8')
-        out_msg.header = imgmsg.header
-        self._pub.publish(out_msg)
 
-    def _draw_result(self, im, clss, bbox, rects, nms_thresh, conf):
+        rects = RectArray(header=imgmsg.header)
+        labels = []
+        label_proba = []
         for cls_id in range(1, len(self.target_names)):
-            _cls = clss[:, cls_id][:, np.newaxis]
-            _bbx = bbox[:, cls_id * 4: (cls_id + 1) * 4]
+            _cls = scores[:, cls_id][:, np.newaxis]
+            _bbx = bbox_pred[:, cls_id * 4: (cls_id + 1) * 4]
             dets = np.hstack((_bbx, _cls))
-            keep = nms(dets, nms_thresh)
+            keep = nms(dets, self.nms_thresh)
             dets = dets[keep, :]
-            orig_rects = cuda.cupy.asnumpy(rects)[keep, :]
+            orig_rects = cuda.cupy.asnumpy(rects_orig)[keep, :]
 
-            inds = np.where(dets[:, -1] >= conf)[0]
+            inds = np.where(dets[:, -1] >= self.conf_thresh)[0]
+
             for i in inds:
                 _bbox = dets[i, :4]
                 x1, y1, x2, y2 = orig_rects[i]
@@ -109,19 +122,22 @@ class FastRCNN(ConnectionBasedTransport):
                 y1 = _center_y - 0.5 * _height
                 x2 = _center_x + 0.5 * _width
                 y2 = _center_y + 0.5 * _height
+                rect = Rect(x=x1, y=y1, width=x2-x1, height=y2-y1)
+                rects.rects.append(rect)
+                labels.append(cls_id)
+                label_proba.append(dets[:, -1][i])
 
-                cv2.rectangle(im, (int(x1), int(y1)), (int(x2), int(y2)),
-                              (0, 0, 255), 2, cv2.CV_AA)
-                ret, baseline = cv2.getTextSize(
-                    self.target_names[cls_id], cv2.FONT_HERSHEY_SIMPLEX,
-                    1.0, 1)
-                cv2.rectangle(im, (int(x1), int(y2) - ret[1] - baseline),
-                              (int(x1) + ret[0], int(y2)), (0, 0, 255), -1)
-                cv2.putText(im, self.target_names[cls_id],
-                            (int(x1), int(y2) - baseline),
-                            cv2.FONT_HERSHEY_SIMPLEX, 1.0,
-                            (255, 255, 255), 1, cv2.CV_AA)
-        return im
+        # publish classification result
+        clss = ClassificationResult(
+            header=imgmsg.header,
+            classifier=self.classifier_name,
+            target_names=self.target_names,
+            labels=labels,
+            label_names=[self.target_names[l] for l in labels],
+            label_proba=label_proba,
+        )
+        self._pub_rects.publish(rects)
+        self._pub_class.publish(clss)
 
     def _im_detect(self, im, rects):
         xp = cuda.cupy if self.use_gpu else np
@@ -131,10 +147,18 @@ class FastRCNN(ConnectionBasedTransport):
         # batch_indices is always 0 when batch size is 1
         batch_indices = xp.zeros((len(rects), 1), dtype=np.float32)
         rects = xp.hstack((batch_indices, rects))
-        x = Variable(x_data, volatile=True)
-        rects_val = Variable(rects, volatile=True)
-        self.model.train = False
-        cls_score, bbox_pred = self.model(x, rects_val)
+        if LooseVersion(chainer.__version__).version[0] < 2:
+            x = Variable(x_data, volatile=True)
+            rects_val = Variable(rects, volatile=True)
+            self.model.train = False
+            cls_score, bbox_pred = self.model(x, rects_val)
+        else:
+            with chainer.using_config('train', False), \
+                 chainer.no_backprop_mode():
+                x = Variable(x_data)
+                rects_val = Variable(rects)
+                cls_score, bbox_pred = self.model(x, rects_val)
+
         scores = cuda.to_cpu(cls_score.data)
         bbox_pred = cuda.to_cpu(bbox_pred.data)
         return scores, bbox_pred
@@ -150,11 +174,8 @@ def main():
         rospy.logerr('Unspecified rosparam: {0}'.format(e))
         sys.exit(1)
 
-    # FIXME: In CPU mode, there is no detections.
-    if not cuda.available:
-        jsk_logfatal('CUDA environment is required.')
-        sys.exit(1)
-    use_gpu = True
+    gpu = rospy.get_param('~gpu', -1)
+    use_gpu = True if gpu >= 0 else False
 
     # setup model
     PKG = 'jsk_perception'
@@ -169,11 +190,11 @@ def main():
     else:
         rospy.logerr('Unsupported model: {0}'.format(model_name))
         sys.exit(1)
-    jsk_loginfo('Loading chainermodel')
+    rospy.loginfo('Loading chainermodel')
     S.load_hdf5(chainermodel, model)
     if use_gpu:
-        model.to_gpu()
-    jsk_loginfo('Finished loading chainermodel')
+        model.to_gpu(gpu)
+    rospy.loginfo('Finished loading chainermodel')
 
     # assumptions
     target_names = [

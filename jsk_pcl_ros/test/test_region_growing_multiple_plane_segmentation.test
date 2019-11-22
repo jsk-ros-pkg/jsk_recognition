@@ -1,0 +1,27 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_region_growing_multiple_plane_segmentation.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_region_growing_multiple_plane_segmentation"
+        name="test_region_growing_multiple_plane_segmentation"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /region_growing_multiple_plane_segmentation/output/clustering_result
+      timeout_0: 30
+      topic_1: /region_growing_multiple_plane_segmentation/output/inliers
+      timeout_1: 30
+      topic_2: /region_growing_multiple_plane_segmentation/output/coefficients
+      timeout_2: 30
+      topic_3: /region_growing_multiple_plane_segmentation/output/polygons
+      timeout_3: 30
+      topic_4: /region_growing_multiple_plane_segmentation/output/latest_time
+      timeout_4: 30
+      topic_5: /region_growing_multiple_plane_segmentation/output/average_time
+      timeout_5: 30
+    </rosparam>
+  </test>
+
+</launch>

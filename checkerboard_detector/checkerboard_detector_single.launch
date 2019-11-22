@@ -12,6 +12,14 @@
     <param name="grid0_size_y" type="int" value="5"/>
     <param name="type0" type="string" value="4x5chessboard"/>
 
+    <param name="use_P"              value="true" /> <!-- if you use rectified image, use_P should be true -->
+    <param name="invert_color"       value="false" /> <!-- invert white and black -->
+    <param name="message_throttle"   value="1" />
+    <param name="queue_size"         value="1" />
+    <param name="publish_queue_size" value="1" />
+    <param name="axis_size"   value="0.05" /> <!-- set axis_size as [m] -->
+    <param name="circle_size" value="6" />    <!-- set circle_size as [pixel] -->
+
     <node pkg="checkerboard_detector" type="checkerboard_detector"
           name="detector_node" respawn="false" output="screen">
       <remap from="camera_info" to="/camera/rgb/camera_info"/>

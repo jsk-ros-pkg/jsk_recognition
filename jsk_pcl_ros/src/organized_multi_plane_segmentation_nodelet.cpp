@@ -751,7 +751,7 @@ namespace jsk_pcl_ros
       bool alivep = normal_estimation_vital_checker_->isAlive();
       if (alivep) {
         stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "NormalEstimation running");
-        jsk_recognition_utils::addDiagnosticInformation(
+        jsk_topic_tools::addDiagnosticInformation(
           "Time to estimate normal", normal_estimation_time_acc_, stat);
         // normal estimation parameters
         if (estimation_method_ == 0) {
@@ -804,10 +804,10 @@ namespace jsk_pcl_ros
     if (alivep) {
       stat.summary(diagnostic_msgs::DiagnosticStatus::OK,
                    "PlaneSegmentation running");
-      jsk_recognition_utils::addDiagnosticInformation(
+      jsk_topic_tools::addDiagnosticInformation(
         "Time to segment planes", plane_segmentation_time_acc_, stat);
       if (ransac_refine_coefficients_) {
-        jsk_recognition_utils::addDiagnosticInformation(
+        jsk_topic_tools::addDiagnosticInformation(
           "Time to refine by RANSAC", ransac_refinement_time_acc_, stat);
       }
       stat.add("Minimum Inliers", min_size_);

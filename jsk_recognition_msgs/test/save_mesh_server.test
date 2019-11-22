@@ -1,0 +1,24 @@
+<launch>
+  <arg name="GROUND_FRAME_ID" value="map"/>
+
+  <node name="save_mesh_server"
+        pkg="jsk_recognition_msgs" type="save_mesh_server.py">
+    <remap from="~input/bbox" to="bounding_box_publisher/output"/>
+    <remap from="~request" to="test_save_mesh_server/timer_service_request"/>
+    <remap from="~save_mesh" to="test_save_mesh_server/save_mesh_sample"/>
+    <rosparam subst_value="true">
+      ground_frame_id: $(arg GROUND_FRAME_ID)
+    </rosparam>
+  </node>
+
+  <test test-name="test_save_mesh_server"
+        name="test_save_mesh_server"
+        pkg="jsk_recognition_msgs" type="test_save_mesh_server.py">
+    <remap from="~bbox_output" to="bounding_box_publisher/output"/>
+    <remap from="~request" to="~timer_service_request"/>
+    <remap from="~save_mesh" to="~save_mesh_sample"/>
+    <rosparam subst_value="true">
+      ground_frame_id: $(arg GROUND_FRAME_ID)
+    </rosparam>
+  </test>
+</launch>

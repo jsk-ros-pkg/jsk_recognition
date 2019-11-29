@@ -226,8 +226,8 @@ public:
       cv::Mat map_matrix = cv::getPerspectiveTransform (src_pnt, dst_pnt);
       cv::warpPerspective (src, dest, map_matrix, dest.size(), interpolation_method_);
     }
-    catch (std::runtime_error e) {
-      ROS_INFO_THROTTLE(10, "[virtual_camera_mono] failed to transform image: %s", e.what());
+    catch (tf::TransformException e) {
+      ROS_WARN_THROTTLE(10, "[virtual_camera_mono] failed to transform image: %s", e.what());
       return false;
     }
     return true;

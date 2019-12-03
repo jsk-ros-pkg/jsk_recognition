@@ -1,0 +1,14 @@
+microphone:
+  name: default # microphone name
+  rate: 44100 # sampling rate of microphone
+  length: 512 # the number of sampling data in fft
+               # length = rate / frequency resolution of fft
+
+publish_spectrogram:
+  cutoff_rate: 8000 # cutoff the high frequency data from fft result
+                    # please set the number less than (10 * frequency resolution of fft)
+  hit_volume_threshold: 0.1 # volume threshold to detect sound. set best threshold for your microphone
+  time_to_listen: 0.3 # total time of horizontal axis of spectrogram
+
+classify_spectrogram_ros:
+  model: $(find sound_classification)/scripts/result/model_best.npz # weights for sound classification

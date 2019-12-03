@@ -1,0 +1,17 @@
+<launch>
+<!-- USAGE -->
+<!-- roslaunch sound_classification record_sound_image_classification.launch filename:=$HOME/.ros/rosbag/hoge.bag -->
+
+  <arg name="filename" />
+  <node name="rosbag_record"
+        pkg="rosbag" type="record"
+        args="-O $(arg filename)
+              -b 0
+              /usb_cam_node/image_raw
+              /microphone/spectrogram
+              /object_class_by_image
+              "
+
+        output="screen">
+  </node>
+</launch>

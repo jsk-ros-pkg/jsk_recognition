@@ -1,0 +1,21 @@
+<launch>
+  <arg name="target_class" default="table"/> <!-- target class of saved spectrogram -->
+  <arg name="use_microphone" default="true"/> <!-- publish topics from microphone -->
+  <arg name="classification" default="false"/> <!-- online sound classification on ROS -->
+  <arg name="publish_spectrogram" default="true"/> <!-- publish spectrogram from spectrum -->
+  <arg name="rqt" default="false"/> <!-- visualize spectrogram, object class and camera image on rqt -->
+
+  <!-- publish sound topics from microphone -->
+  <include file="$(find sound_classification)/launch/microphone.launch" >
+    <arg name="use_microphone" value="$(arg use_microphone)"/>
+    <arg name="classification" value="$(arg classification)"/>
+    <arg name="publish_spectrogram" value="$(arg publish_spectrogram)"/>
+    <arg name="rqt" value="$(arg rqt)"/>
+  </include>
+
+  <!-- save spectrogram in train/original_spectrogram -->
+  <node pkg="sound_classification" name="save_spectrogram" type="save_spectrogram.py" output="screen">
+    <param name="target_class" value="$(arg target_class)"/>
+  </node>
+
+</launch>

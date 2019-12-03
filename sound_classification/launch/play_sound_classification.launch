@@ -1,0 +1,14 @@
+<launch>
+  <!-- USAGE -->
+  <!-- roslaunch sound_classification play_rosbag.launch filename:=$HOME/.ros/rosbag/hoge.bag -->
+
+  <arg name="filename" />
+
+  <param name="use_sim_time" value="true" />
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(arg filename) --clock --loop"/>
+
+  <node pkg="rqt_gui" type="rqt_gui" name="rqt_gui" args="--perspective-file $(find sound_classification)/config/sound_classification.perspective"/>
+
+</launch>

@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package>
+  <name>sound_classification</name>
+  <version>0.0.1</version>
+  <description>The sound_classification package</description>
+  <maintainer email="708yamaguchi@gmail.com">naoya</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>message_generation</build_depend>
+
+  <run_depend>message_runtime</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <!-- apt run depend -->
+  <run_depend>python-pyaudio</run_depend>
+  <!-- pip run depend -->
+  <run_depend>imgaug-pip</run_depend>
+</package>

@@ -31,13 +31,12 @@ class AudioToSpectrogram(object):
             rospy.logerr("'~bitdepth' {} is unsupported.".format(bitdepth))
 
         # Audio topic buffer
-        # buffer for audio topic
+        # Buffer for audio topic
         self.audio_buffer = np.array([], dtype=self.dtype)
-        # how long audio_buffer should be for one audio topic
+        # How long audio_buffer should be for one audio topic
         self.audio_buffer_len = int(sampling_rate * sampling_period)
 
         # fft config
-        # window function for fft
         window_function = np.arange(
             0.0, 1.0, 1.0 / self.audio_buffer_len)
         self.window_function = 0.54 - 0.46 * np.cos(
@@ -52,14 +51,14 @@ class AudioToSpectrogram(object):
         band_pass_freq = freq[self.cutoff_mask]
 
         # Spectrogram config
-        # how long we store audio topic to create one spectrogram topic
-        spectrogram_duration = rospy.get_param('~spectrogram_duration', 10)
-        # how many audio data in one audio topic. Same as chunk.
+        # Period[s] to store audio data to create one spectrogram topic
+        spectrogram_period = rospy.get_param('~spectrogram_period', 10)
+        # How many audio data in one audio topic. Same as chunk.
         # fft is executed per audio data of frame_per_buffer length
         frame_per_buffer = rospy.get_param('~frame_per_buffer', 1024)
         audio_topic_frequency = sampling_rate / float(frame_per_buffer)
         self.spectrogram_len = int(
-            spectrogram_duration * audio_topic_frequency)
+            spectrogram_period * audio_topic_frequency)
         self.spectrogram = np.zeros((
             self.spectrogram_len,
             len(band_pass_freq)))
@@ -72,7 +71,7 @@ class AudioToSpectrogram(object):
         self.bridge = CvBridge()
 
     def _cb(self, msg):
-        # save msg to audio_buffer
+        # Save audio msg to audio_buffer
         data = msg.data
         audio_buffer = np.frombuffer(data, dtype=self.dtype)
         self.audio_buffer = np.append(
@@ -81,14 +80,15 @@ class AudioToSpectrogram(object):
             -self.audio_buffer_len:]
         if len(self.audio_buffer) != self.audio_buffer_len:
             return
-        # calc spectrogram by fft
+        # Calc spectrogram by fft
         spectrum = np.fft.fft(self.audio_buffer * self.window_function)
         spectrum = np.log(np.abs(spectrum))
         spectrum = spectrum[self.cutoff_mask]
-        # create spectrogram and publish
+        # Create spectrogram and publish
         self.spectrogram = np.concatenate(
             [self.spectrogram, spectrum[None]])
-        self.spectrogram = self.spectrogram[1:].astype(np.float32)  # add new element to the queue
+        self.spectrogram = self.spectrogram[-self.spectrogram_len:].astype(
+            np.float32)
         spectrogram_pub = self.spectrogram.transpose(1, 0)[::-1, :]
         spectrogram_pub = self.bridge.cv2_to_imgmsg(spectrogram_pub, '32FC1')
         spectrogram_pub.header.stamp = rospy.Time.now()

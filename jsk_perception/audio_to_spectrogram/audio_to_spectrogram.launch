@@ -17,7 +17,7 @@
       bitdepth: 16
       high_cut_freq: 800
       low_cut_freq: 0
-      spectrogram_duration: 10
+      spectrogram_period: 10
       frame_per_buffer: 1024
     </rosparam>
   </node>

@@ -44,7 +44,7 @@ class AudioToSpectrogram(object):
         if high_cut_freq > mic_sampling_rate / 2:
             rospy.logerr('Set high_cut_freq lower than {} Hz'.format(
                 mic_sampling_rate / 2))
-        low_cut_freq = rospy.get_param('~low_cut_freq', 0)
+        low_cut_freq = rospy.get_param('~low_cut_freq', 1)  # remove 0 Hz
         freq = np.fft.fftfreq(
             self.audio_buffer_len, d=1./mic_sampling_rate)
         self.cutoff_mask = np.where(
@@ -59,7 +59,6 @@ class AudioToSpectrogram(object):
         # Period[s] to store audio data to create one spectrogram topic
         spectrogram_period = rospy.get_param('~spectrogram_period', 5)
         # self.spectrogram_len equals to horizontal pixel of output spectrogram
-        # equals to fft_exec_rate * spectrogram_period
         self.spectrogram_len = int(
             self.fft_exec_rate * spectrogram_period)
         self.spectrogram = np.zeros((

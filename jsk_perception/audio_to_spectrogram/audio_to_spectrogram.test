@@ -1,0 +1,17 @@
+<launch>
+
+  <env name="DISPLAY" value="" />
+
+  <include file="$(find jsk_perception)/audio_to_spectrogram/sample_audio_to_spectrogram.launch" />
+
+  <test test-name="test_audio_to_spectrogram"
+        name="test_audio_to_spectrogram"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /audio_to_spectrogram/spectrogram
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

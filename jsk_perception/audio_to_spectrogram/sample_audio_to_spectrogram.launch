@@ -1,16 +1,14 @@
 <launch>
 
-  <arg name="filename" default="$(find jsk_perception)/audio_to_spectrogram/sample_audio.bag" />
+  <arg name="filename" default="$(find jsk_perception)/audio_to_spectrogram/audio_300hz.bag" />
   <param name="use_sim_time" value="true" />
   <node name="rosbag_play"
         pkg="rosbag" type="play"
         args="$(arg filename) --clock --loop"/>
 
-  <node pkg="jsk_perception" type="audio_to_spectrogram.py" name="audio_to_spectrogram" >
-    <!-- for fetch and PR2. Remove when Pull Request -->
+  <node pkg="jsk_perception" type="audio_to_spectrogram.py" name="audio_to_spectrogram" respawn="true">
     <remap from="~audio" to="/audio" />
     <rosparam>
-      <!-- TODO fetch these params from respeaker_ros via rosparam -->
       <!-- meaning of rosparams below are described in audio_to_spectrogram.py -->
       mic_sampling_rate: 16000
       fft_sampling_period: 0.3

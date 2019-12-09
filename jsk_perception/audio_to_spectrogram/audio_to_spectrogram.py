@@ -41,6 +41,9 @@ class AudioToSpectrogram(object):
         self.window_function = 0.54 - 0.46 * np.cos(
             2 * np.pi * window_function)
         high_cut_freq = rospy.get_param('~high_cut_freq', 800)
+        if high_cut_freq > mic_sampling_rate / 2:
+            rospy.logerr('Set high_cut_freq lower than {} Hz'.format(
+                mic_sampling_rate / 2))
         low_cut_freq = rospy.get_param('~low_cut_freq', 0)
         freq = np.fft.fftfreq(
             self.audio_buffer_len, d=1./mic_sampling_rate)
@@ -60,13 +63,15 @@ class AudioToSpectrogram(object):
         self.spectrogram_len = int(
             self.fft_exec_rate * spectrogram_period)
         self.spectrogram = np.zeros((
-            self.spectrogram_len,
+            0,
             len(band_pass_freq)))
+        rospy.logwarn('Please wait for the first spectrogram to come.')
 
         # ROS
         rospy.Subscriber(
             '~audio', AudioData, self.audio_cb)
-        self.pub_spectrogram = rospy.Publisher('~spectrogram', Image)
+        self.pub_spectrogram = rospy.Publisher(
+            '~spectrogram', Image, queue_size=1)
         rospy.Timer(rospy.Duration(1. / self.fft_exec_rate), self.timer_cb)
         self.bridge = CvBridge()
 
@@ -89,6 +94,8 @@ class AudioToSpectrogram(object):
         # Create and publish spectrogram
         self.spectrogram = np.concatenate(
             [self.spectrogram, spectrum[None]])
+        if self.spectrogram.shape[0] < self.spectrogram_len:
+            return
         self.spectrogram = self.spectrogram[-self.spectrogram_len:].astype(
             np.float32)
         spectrogram_pub = self.spectrogram.transpose(1, 0)[::-1, :]

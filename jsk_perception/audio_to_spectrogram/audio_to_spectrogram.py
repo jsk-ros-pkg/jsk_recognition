@@ -11,66 +11,66 @@ from sensor_msgs.msg import Image
 
 # This node publish spectrogram (sensor_msgs/Image)
 # from audio (audio_common_msgs/AudioData)
-# Respeaker is assumed to be used.
-# https://github.com/jsk-ros-pkg/jsk_3rdparty/blob/master/respeaker_ros/scripts/respeaker_node.py  # NOQA
+# The number of channel is assumed to be 1.
+# The format of /audio is assumed to be wave.
 
 class AudioToSpectrogram(object):
 
     def __init__(self):
         super(AudioToSpectrogram, self).__init__()
+
         # Audio topic config
-        # Sampling rate of audio topic. This depends on microphone.
-        sampling_rate = rospy.get_param('~sampling_rate', 16000)
+        # Sampling rate of microphone (namely audio topic).
+        mic_sampling_rate = rospy.get_param('~mic_sampling_rate', 16000)
         # Period[s] to sample audio data for one fft
-        sampling_period = rospy.get_param('~sampling_period', 0.5)
+        fft_sampling_period = rospy.get_param('~fft_sampling_period', 0.3)
         # Bits per one audio data
         bitdepth = rospy.get_param('~bitdepth', 16)
         if bitdepth == 16:
             self.dtype = 'int16'
         else:
             rospy.logerr("'~bitdepth' {} is unsupported.".format(bitdepth))
-
         # Audio topic buffer
-        # Buffer for audio topic
         self.audio_buffer = np.array([], dtype=self.dtype)
         # How long audio_buffer should be for one audio topic
-        self.audio_buffer_len = int(sampling_rate * sampling_period)
+        self.audio_buffer_len = int(mic_sampling_rate * fft_sampling_period)
 
         # fft config
         window_function = np.arange(
             0.0, 1.0, 1.0 / self.audio_buffer_len)
         self.window_function = 0.54 - 0.46 * np.cos(
             2 * np.pi * window_function)
-        high_cut_freq = rospy.get_param('~high_cut_freq', sampling_rate // 2)
+        high_cut_freq = rospy.get_param('~high_cut_freq', 800)
         low_cut_freq = rospy.get_param('~low_cut_freq', 0)
         freq = np.fft.fftfreq(
-            self.audio_buffer_len, d=1./sampling_rate)
+            self.audio_buffer_len, d=1./mic_sampling_rate)
         self.cutoff_mask = np.where(
             (low_cut_freq <= freq) & (freq <= high_cut_freq),
             True, False)
         band_pass_freq = freq[self.cutoff_mask]
+        # How many times fft is executed in one second
+        # fft_exec_rate equals to output spectrogram hz
+        self.fft_exec_rate = rospy.get_param('~fft_exec_rate', 50)
 
         # Spectrogram config
         # Period[s] to store audio data to create one spectrogram topic
-        spectrogram_period = rospy.get_param('~spectrogram_period', 10)
-        # How many audio data in one audio topic. Same as chunk.
-        # fft is executed per audio data of frame_per_buffer length
-        frame_per_buffer = rospy.get_param('~frame_per_buffer', 1024)
-        audio_topic_frequency = sampling_rate / float(frame_per_buffer)
+        spectrogram_period = rospy.get_param('~spectrogram_period', 5)
+        # self.spectrogram_len equals to horizontal pixel of output spectrogram
+        # equals to fft_exec_rate * spectrogram_period
         self.spectrogram_len = int(
-            spectrogram_period * audio_topic_frequency)
+            self.fft_exec_rate * spectrogram_period)
         self.spectrogram = np.zeros((
             self.spectrogram_len,
             len(band_pass_freq)))
 
         # ROS
-        rospy.Rate(100)
-        self.sub_audio = rospy.Subscriber(
-            '~audio', AudioData, self._cb, queue_size=1000, buff_size=2**24)
+        rospy.Subscriber(
+            '~audio', AudioData, self.audio_cb)
         self.pub_spectrogram = rospy.Publisher('~spectrogram', Image)
+        rospy.Timer(rospy.Duration(1. / self.fft_exec_rate), self.timer_cb)
         self.bridge = CvBridge()
 
-    def _cb(self, msg):
+    def audio_cb(self, msg):
         # Save audio msg to audio_buffer
         data = msg.data
         audio_buffer = np.frombuffer(data, dtype=self.dtype)
@@ -78,13 +78,15 @@ class AudioToSpectrogram(object):
             self.audio_buffer, audio_buffer)
         self.audio_buffer = self.audio_buffer[
             -self.audio_buffer_len:]
+
+    def timer_cb(self, timer):
         if len(self.audio_buffer) != self.audio_buffer_len:
             return
         # Calc spectrogram by fft
         spectrum = np.fft.fft(self.audio_buffer * self.window_function)
         spectrum = np.log(np.abs(spectrum))
         spectrum = spectrum[self.cutoff_mask]
-        # Create spectrogram and publish
+        # Create and publish spectrogram
         self.spectrogram = np.concatenate(
             [self.spectrogram, spectrum[None]])
         self.spectrogram = self.spectrogram[-self.spectrogram_len:].astype(

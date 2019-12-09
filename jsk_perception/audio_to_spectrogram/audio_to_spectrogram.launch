@@ -7,18 +7,18 @@
         args="$(arg filename) --clock --loop"/>
 
   <node pkg="jsk_perception" type="audio_to_spectrogram.py" name="audio_to_spectrogram" >
-    <!-- for fetch and PR2 -->
+    <!-- for fetch and PR2. Remove when Pull Request -->
     <remap from="~audio" to="/audio" />
     <rosparam>
-      <!-- for respeaker_ros -->
       <!-- TODO fetch these params from respeaker_ros via rosparam -->
-      sampling_rate: 16000
-      sampling_period: 0.5
+      <!-- meaning of rosparams below are described in audio_to_spectrogram.py -->
+      mic_sampling_rate: 16000
+      fft_sampling_period: 0.3
       bitdepth: 16
       high_cut_freq: 800
       low_cut_freq: 0
-      spectrogram_period: 10
-      frame_per_buffer: 1024
+      fft_exec_rate: 50
+      spectrogram_period: 5
     </rosparam>
   </node>
 

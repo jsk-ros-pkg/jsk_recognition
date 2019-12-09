@@ -9,7 +9,7 @@
         pkg="jsk_tools" type="test_topic_published.py"
         retry="3">
     <rosparam>
-      topic_0: /audio_to_spectrogram/spectrogram
+      topic_0: /spectrum_to_spectrogram/spectrogram
       timeout_0: 30
     </rosparam>
   </test>

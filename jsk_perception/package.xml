@@ -18,6 +18,7 @@
 
   <!-- ALPHABETICAL ORDER -->
   <build_depend>angles</build_depend>
+  <build_depend>audio_common_msgs</build_depend>
   <build_depend>cmake_modules</build_depend>
   <build_depend>cv_bridge</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
@@ -50,6 +51,7 @@
 
   <!-- ALPHABETICAL ORDER -->
   <run_depend>angles</run_depend>
+  <run_depend>audio_common_msgs</run_depend>
   <run_depend>checkerboard_detector</run_depend>
   <run_depend>cv_bridge</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>

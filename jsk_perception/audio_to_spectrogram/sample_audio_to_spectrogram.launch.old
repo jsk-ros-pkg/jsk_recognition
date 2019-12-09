@@ -6,32 +6,23 @@
         pkg="rosbag" type="play"
         args="$(arg filename) --clock --loop"/>
 
-  <node pkg="jsk_perception" type="audio_to_spectrum.py" name="audio_to_spectrum" respawn="true">
+  <node pkg="jsk_perception" type="audio_to_spectrogram.py" name="audio_to_spectrogram" respawn="true">
     <remap from="~audio" to="/audio" />
     <rosparam>
-      <!-- meaning of rosparams below are described in audio_to_spectrum.py -->
+      <!-- meaning of rosparams below are described in audio_to_spectrogram.py -->
       mic_sampling_rate: 16000
       fft_sampling_period: 0.3
       bitdepth: 16
       high_cut_freq: 800
       low_cut_freq: 1
       fft_exec_rate: 50
+      spectrogram_period: 1
     </rosparam>
   </node>
-
-  <node pkg="jsk_perception" type="spectrum_to_spectrogram.py" name="spectrum_to_spectrogram" respawn="true">
-    <remap from="~spectrum" to="/audio_to_spectrum/spectrum_filtered" />
-    <rosparam>
-      <!-- meaning of rosparams below are described in audio_to_spectrum.py -->
-      fft_exec_rate: 50
-      spectrogram_period: 5
-    </rosparam>
-  </node>
-
 
   <!-- you can get jet image from /spectrogram_view/output-->
   <node pkg="image_view" type="image_view" name="spectrogram_view"  >
-    <remap from="image" to="/spectrum_to_spectrogram/spectrogram" />
+    <remap from="image" to="/audio_to_spectrogram/spectrogram" />
     <rosparam>
       <!-- set all pixels between 0 and 255 -->
       do_dynamic_scaling: true

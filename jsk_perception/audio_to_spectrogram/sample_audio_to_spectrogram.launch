@@ -22,12 +22,11 @@
   <node pkg="jsk_perception" type="spectrum_to_spectrogram.py" name="spectrum_to_spectrogram" respawn="true">
     <remap from="~spectrum" to="/audio_to_spectrum/spectrum_filtered" />
     <rosparam>
-      <!-- meaning of rosparams below are described in audio_to_spectrum.py -->
+      <!-- meaning of rosparams below are described in spectrum_to_spectrogram.py -->
       fft_exec_rate: 50
       spectrogram_period: 5
     </rosparam>
   </node>
-
 
   <!-- you can get jet image from /spectrogram_view/output-->
   <node pkg="image_view" type="image_view" name="spectrogram_view"  >

@@ -87,7 +87,7 @@ class ImagePublisher(object):
     def cv2_to_imgmsg(self, img, encoding):
         bridge = cv_bridge.CvBridge()
         # resolve encoding
-        if getCvType(encoding) in [0, 2, 5]:
+        if getCvType(encoding) in [cv2.CV_8UC1, cv2.CV_16UC1, cv2.CV_32FC1]:
             # mono8
             if len(img.shape) == 3:
                 if img.shape[2] == 4:
@@ -95,25 +95,25 @@ class ImagePublisher(object):
                 else:
                     code = cv2.COLOR_BGR2GRAY
                 img = cv2.cvtColor(img, code)
-            if getCvType(encoding) == 2:
+            if getCvType(encoding) == cv2.CV_16UC1:
                 # 16UC1
                 img = img.astype(np.float32)
                 img = img / 255 * (2 ** 16)
                 img = img.astype(np.uint16)
-            elif getCvType(encoding) == 5:
+            elif getCvType(encoding) == cv2.CV_32FC1:
                 # 32FC1
                 img = img.astype(np.float32)
                 img /= 255
-        elif getCvType(encoding) == 16 and len(img.shape) == 3:
+        elif getCvType(encoding) == cv2.CV_8UC3 and len(img.shape) == 3:
             # 8UC3
             # BGRA, BGR -> BGR
             img = img[:, :, :3]
             # BGR -> RGB
             if encoding in ('rgb8', 'rgb16'):
                 img = img[:, :, ::-1]
-        elif (getCvType(encoding) == 24 and
+        elif (getCvType(encoding) == cv2.CV_8UC4 and
                 len(img.shape) == 3 and img.shape[2] == 4):
-            # 8UC3
+            # 8UC4
             if encoding in ('rgba8', 'rgba16'):
                 # BGRA -> RGBA
                 img = img[:, :, [2, 1, 0, 3]]

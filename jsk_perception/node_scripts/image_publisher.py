@@ -89,11 +89,12 @@ class ImagePublisher(object):
         # resolve encoding
         if getCvType(encoding) in [0, 2, 5]:
             # mono8
-            if img.shape[2] == 4:
-                code = cv2.COLOR_BGRA2GRAY
-            else:
-                code = cv2.COLOR_BGR2GRAY
-            img = cv2.cvtColor(img, code)
+            if len(img.shape) == 3:
+                if img.shape[2] == 4:
+                    code = cv2.COLOR_BGRA2GRAY
+                else:
+                    code = cv2.COLOR_BGR2GRAY
+                img = cv2.cvtColor(img, code)
             if getCvType(encoding) == 2:
                 # 16UC1
                 img = img.astype(np.float32)
@@ -103,14 +104,15 @@ class ImagePublisher(object):
                 # 32FC1
                 img = img.astype(np.float32)
                 img /= 255
-        elif getCvType(encoding) == 16:
+        elif getCvType(encoding) == 16 and len(img.shape) == 3:
             # 8UC3
             # BGRA, BGR -> BGR
             img = img[:, :, :3]
             # BGR -> RGB
             if encoding in ('rgb8', 'rgb16'):
                 img = img[:, :, ::-1]
-        elif getCvType(encoding) == 24 and img.shape[2] == 4:
+        elif (getCvType(encoding) == 24 and
+                len(img.shape) == 3 and img.shape[2] == 4):
             # 8UC3
             if encoding in ('rgba8', 'rgba16'):
                 # BGRA -> RGBA

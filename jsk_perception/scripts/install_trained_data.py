@@ -223,7 +223,7 @@ def main():
     )
     download_data(
         pkg_name=PKG,
-        path='trained_data/fcn8s_depth_prediction_concat_at_once_mirror.npz',
+        path='trained_data/fcn8s_depth_prediction_concat_first_mirror.npz',
         url='https://drive.google.com/uc?id=1vW2LT7drf_T9faQ_8DBz1UXqTg4cRLp4',
         md5='33fd84c084b1c50cb718d81d5c59c6e9',
     )

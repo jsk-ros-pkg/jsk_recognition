@@ -23,12 +23,13 @@
     <remap from="~spectrum" to="/audio_to_spectrum/spectrum_filtered" />
     <rosparam>
       <!-- meaning of rosparams below are described in spectrum_to_spectrogram.py -->
-      fft_exec_rate: 50
+      image_height: 300
+      image_width: 300
       spectrogram_period: 5
     </rosparam>
   </node>
 
-  <!-- you can get jet image from /spectrogram_view/output-->
+  <!-- you can get spectrogram image topic from /spectrogram_view/output-->
   <node pkg="image_view" type="image_view" name="spectrogram_view"  >
     <remap from="image" to="/spectrum_to_spectrogram/spectrogram" />
     <rosparam>

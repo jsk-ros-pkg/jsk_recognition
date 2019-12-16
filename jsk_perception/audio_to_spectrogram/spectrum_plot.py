@@ -20,7 +20,7 @@ class SpectrumPlot():
                                  wspace=0.2, hspace=0.6)
         self.ax = self.fig.add_subplot(1, 1, 1)
         self.ax.grid(True)
-        self.ax.set_xlabel('Frequency', fontsize=12)
+        self.ax.set_xlabel('Frequency [Hz]', fontsize=12)
         self.ax.set_ylabel('Amplitude', fontsize=12)
         self.line, = self.ax.plot([0, 0], label='Amplitude of Spectrum')
         # ROS subscriber

@@ -7,9 +7,8 @@ from chainer import cuda
 import chainer.functions as F
 import chainer.links as L
 import chainer.serializers as S
-
+import cv2
 import fcn
-import matplotlib.cm
 import numpy as np
 
 import cv_bridge
@@ -28,9 +27,9 @@ def colorize_depth(depth, min_value=None, max_value=None):
     colorized = depth.copy()
     nan_mask = np.isnan(colorized)
     colorized[nan_mask] = 0
-    colorized = 1. * (colorized - min_value) / (max_value - min_value)
-    colorized = matplotlib.cm.jet(colorized)[:, :, :3]
-    colorized = (colorized * 255).astype(np.uint8)
+    colorized = 255 * (colorized - min_value) / (max_value - min_value)
+    colorized = np.minimum(np.maximum(colorized, 0), 255).astype(np.uint8)
+    colorized = cv2.applyColorMap(colorized, cv2.COLORMAP_JET)
     colorized[nan_mask] = (0, 0, 0)
     return colorized
 

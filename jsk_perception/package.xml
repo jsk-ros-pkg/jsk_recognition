@@ -77,7 +77,11 @@
   <run_depend>posedetection_msgs</run_depend>
   <!-- install chainer {{ -->
   <run_depend>python-h5py</run_depend>
-  <run_depend version_lt="7.0.0">python-chainer-pip</run_depend>
+  <!-- Install chainer manually because chainer>=7.0.0 does not work on python 2-->
+  <!-- see: https://github.com/chainer/chainer/pull/8517 -->
+  <!-- Also, rosdep install packages on latest version -->
+  <!-- see: https://github.com/ros-infrastructure/rosdep/pull/694 -->
+  <!-- run_depend version_lt="7.0.0">python-chainer-pip</run_depend -->
   <run_depend>python-chainercv-pip</run_depend>
   <!-- }} install chainer -->
   <run_depend>python-dlib</run_depend>  <!-- pip -->

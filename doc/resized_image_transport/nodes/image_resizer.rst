@@ -1,4 +1,4 @@
-interpolation_methoimage_resizer
+image_resizer
 =============
 
 Publish resized image and camera_info.

@@ -39,15 +39,14 @@ def colorize_depth(depth, min_value=None, max_value=None):
 
 
 def transform(in_data):
-    # min_value = 0.5
-    # max_value = 5.0
+    min_value = 0.5
+    max_value = 5.0
 
     label_gt = in_data[0][2]
     depth_gt = in_data[0][3]
 
     image_bgrs = None
-    depth_nan2zeros = None
-    # depth_bgrs = None
+    depth_bgrs = None
 
     for example in in_data:
         image_rgb, depth, label_gt, depth_gt, _ = example
@@ -60,39 +59,24 @@ def transform(in_data):
         # (H, W, 3) -> (3, H, W)
         image_bgr = image_bgr.transpose((2, 0, 1))
 
-        # depth -> depth_nan2zero: (H, W) -> (1, H, W) -> (3, H, W)
-        depth_nan2zero = depth.copy()
-        depth_nan2zero[np.isnan(depth_nan2zero)] = 0.0
-        depth_nan2zero = depth_nan2zero[np.newaxis, :, :]
-        depth_nan2zero_3ch = np.concatenate(
-            (depth_nan2zero, depth_nan2zero), axis=0)
-        depth_nan2zero_3ch = np.concatenate(
-            (depth_nan2zero_3ch, depth_nan2zero), axis=0)
-
         # depth -> depth_bgr: (H, W) -> (H, W, 3) -> (3, H, W)
-        # depth_bgr = colorize_depth(
-        #     depth, min_value=min_value, max_value=max_value)
-        # depth_bgr = depth_bgr.astype(np.float32)
-        # depth_bgr -= mean_bgr
-        # depth_bgr = depth_bgr.transpose((2, 0, 1))
+        depth_bgr = colorize_depth(
+            depth, min_value=min_value, max_value=max_value)
+        depth_bgr = depth_bgr.astype(np.float32)
+        depth_bgr -= mean_bgr
+        depth_bgr = depth_bgr.transpose((2, 0, 1))
 
         # Append to list
         if image_bgrs is None:
             image_bgrs = image_bgr
-            depth_nan2zeros = depth_nan2zero
-            # depth_bgrs = depth_bgr
+            depth_bgrs = depth_bgr
         else:
             # (3, H, W) -> (3 * num_view, H, W)
             image_bgrs = np.concatenate((image_bgrs, image_bgr), axis=0)
-            # (1, H, W) -> (1 * num_view, H, W)
-            depth_nan2zeros = np.concatenate(
-                (depth_nan2zeros, depth_nan2zero), axis=0)
             # (3, H, W) -> (3 * num_view, H, W)
-            # depth_bgrs = np.concatenate((depth_bgrs, depth_bgr), axis=0)
+            depth_bgrs = np.concatenate((depth_bgrs, depth_bgr), axis=0)
 
-    # return image_bgrs, depth_nan2zeros, depth_bgrs, label_gt, depth_gt
-    # return image_bgrs, depth_bgrs, label_gt, depth_gt
-    return image_bgrs, depth_nan2zero_3ch, label_gt, depth_gt
+    return image_bgrs, depth_bgrs, label_gt, depth_gt
 
 
 def main():

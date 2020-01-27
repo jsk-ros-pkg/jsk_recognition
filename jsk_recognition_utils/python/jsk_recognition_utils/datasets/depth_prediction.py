@@ -7,6 +7,7 @@ import chainer
 import cv2
 import numpy as np
 import PIL.Image
+import rospkg
 import skimage.io
 
 import imgaug.augmenters as iaa
@@ -28,9 +29,10 @@ class DepthPredictionDataset(chainer.dataset.DatasetMixin):
         'label.png'
     ])
 
-    root_dir = osp.expanduser(
-        '~/data/mvtk/mirror_recognition/'
-        'multi_view_mirror_3d_annotated_dataset')
+    rospack = rospkg.RosPack()
+    root_dir = osp.join(
+        rospack.get_path('jsk_perception'), 'learning_datasets',
+        'human_size_mirror_dataset')
     mean_bgr = np.array([104.00698793, 116.66876762, 122.67891434])
     min_value = 0.5
     max_value = 5.0

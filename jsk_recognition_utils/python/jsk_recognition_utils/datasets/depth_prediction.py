@@ -6,12 +6,32 @@ import os.path as osp
 import chainer
 import cv2
 import imgaug.augmenters as iaa
+import imgaug.imgaug as ia
+from imgaug.parameters import Deterministic
 import numpy as np
 import PIL.Image
 import rospkg
 import skimage.io
 
-import mvtk
+
+def augment_object_data(object_data, random_state, augmentations):
+    aug = iaa.Sequential(
+        augmentations,
+        random_order=False,
+        random_state=ia.copy_random_state(random_state),
+    )
+
+    def activator_imgs(images, augmenter, parents, default):
+        if isinstance(augmenter, iaa.Affine):
+            augmenter.order = Deterministic(1)
+            augmenter.cval = Deterministic(0)
+        return True
+
+    for objd in object_data:
+        aug = aug.to_deterministic()
+        objd['img'] = aug.augment_image(
+            objd['img'], hooks=ia.HooksImages(activator=activator_imgs))
+        yield objd
 
 
 class DepthPredictionDataset(chainer.dataset.DatasetMixin):
@@ -126,7 +146,7 @@ class DepthPredictionDataset(chainer.dataset.DatasetMixin):
                 st(iaa.AdditiveGaussianNoise(
                     scale=(0.0, 0.1 * 255), per_channel=True)),
             ]
-            obj_datum = next(mvtk.aug.augment_object_data(
+            obj_datum = next(augment_object_data(
                 [obj_datum], random_state=random_state, augmentations=augs))
             image = obj_datum['img']
 

@@ -338,6 +338,53 @@ class FCN8sDepthPrediction(chainer.Chain):
         assert not chainer.config.train
         return
 
+    def init_from_vgg16(self, vgg16):
+        for l in self.children():
+            if l.name.startswith('conv'):
+                l1 = getattr(vgg16,
+                             l.name.split('_')[0] + l.name.split('_')[2] +
+                             '_' + l.name.split('_')[3])
+                l2 = getattr(self, l.name)
+                assert l1.W.shape == l2.W.shape
+                assert l1.b.shape == l2.b.shape
+                l2.W.data[...] = l1.W.data[...]
+                l2.b.data[...] = l1.b.data[...]
+            elif l.name in ['rgb_fc6', 'rgb_fc7']:
+                l1 = getattr(vgg16, l.name.split('_')[1])
+                l2 = getattr(self, l.name)
+                assert l1.W.size == l2.W.size
+                assert l1.b.size == l2.b.size
+                l2.W.data[...] = l1.W.data.reshape(l2.W.shape)[...]
+                l2.b.data[...] = l1.b.data.reshape(l2.b.shape)[...]
+            elif l.name == 'depth_fc6' and self.concat is False:
+                l1 = getattr(vgg16, 'fc6')
+                l2 = getattr(self, l.name)
+                assert l1.W.size == l2.W.size
+                assert l1.b.size == l2.b.size
+                l2.W.data[...] = l1.W.data.reshape(l2.W.shape)[...]
+                l2.b.data[...] = l1.b.data.reshape(l2.b.shape)[...]
+            elif l.name == 'concat_fc6' and self.concat is True:
+                l1 = getattr(vgg16, 'fc6')
+                l2 = getattr(self, l.name)
+                assert l1.W.size * 2 == l2.W.size
+                assert l1.b.size == l2.b.size
+                l2.W.data[:, :int(l2.W.shape[1] / 2), :, :] = \
+                    l1.W.data.reshape(
+                        (l2.W.shape[0], int(l2.W.shape[1] / 2),
+                         l2.W.shape[2], l2.W.shape[3]))[...]
+                l2.W.data[:, int(l2.W.shape[1] / 2):, :, :] = \
+                    l1.W.data.reshape(
+                        (l2.W.shape[0], int(l2.W.shape[1] / 2),
+                         l2.W.shape[2], l2.W.shape[3]))[...]
+                l2.b.data[...] = l1.b.data.reshape(l2.b.shape)[...]
+            elif l.name == 'concat_fc7':
+                l1 = getattr(vgg16, 'fc7')
+                l2 = getattr(self, l.name)
+                assert l1.W.size == l2.W.size
+                assert l1.b.size == l2.b.size
+                l2.W.data[...] = l1.W.data.reshape(l2.W.shape)[...]
+                l2.b.data[...] = l1.b.data.reshape(l2.b.shape)[...]
+
 
 class FCN8sDepthPredictionConcatFirst(FCN8sDepthPrediction):
 
@@ -562,3 +609,43 @@ class FCN8sDepthPredictionConcatFirst(FCN8sDepthPrediction):
 
         assert not chainer.config.train
         return
+
+    def init_from_vgg16(self, vgg16):
+        for l in self.children():
+            if l.name == 'conv_depth_1_1':
+                l1 = getattr(vgg16, 'conv1_1')
+                l2 = getattr(self, l.name)
+                assert l1.W.size * 2 == l2.W.size
+                assert l1.b.size == l2.b.size
+                l2.W.data[:, :int(l2.W.shape[1] / 2), :, :] = \
+                    l1.W.data.reshape(
+                        (l2.W.shape[0], int(l2.W.shape[1] / 2),
+                         l2.W.shape[2], l2.W.shape[3]))[...]
+                l2.W.data[:, int(l2.W.shape[1] / 2):, :, :] = \
+                    l1.W.data.reshape(
+                        (l2.W.shape[0], int(l2.W.shape[1] / 2),
+                         l2.W.shape[2], l2.W.shape[3]))[...]
+                l2.b.data[...] = l1.b.data.reshape(l2.b.shape)[...]
+            elif l.name.startswith('conv'):
+                l1 = getattr(vgg16,
+                             l.name.split('_')[0] + l.name.split('_')[2] +
+                             '_' + l.name.split('_')[3])
+                l2 = getattr(self, l.name)
+                assert l1.W.shape == l2.W.shape
+                assert l1.b.shape == l2.b.shape
+                l2.W.data[...] = l1.W.data[...]
+                l2.b.data[...] = l1.b.data[...]
+            elif l.name in ['rgb_fc6', 'rgb_fc7']:
+                l1 = getattr(vgg16, l.name.split('_')[1])
+                l2 = getattr(self, l.name)
+                assert l1.W.size == l2.W.size
+                assert l1.b.size == l2.b.size
+                l2.W.data[...] = l1.W.data.reshape(l2.W.shape)[...]
+                l2.b.data[...] = l1.b.data.reshape(l2.b.shape)[...]
+            elif l.name in ['depth_fc6', 'depth_fc7']:
+                l1 = getattr(vgg16, l.name.split('_')[1])
+                l2 = getattr(self, l.name)
+                assert l1.W.size == l2.W.size
+                assert l1.b.size == l2.b.size
+                l2.W.data[...] = l1.W.data.reshape(l2.W.shape)[...]
+                l2.b.data[...] = l1.b.data.reshape(l2.b.shape)[...]

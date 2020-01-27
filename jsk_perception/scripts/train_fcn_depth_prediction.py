@@ -80,11 +80,12 @@ def main():
             jsk_perception_datasets_path, 'human_size_mirror_dataset'),
         type=str, help='Path to root directory of dataset')
     parser.add_argument(
-        '-m', '--model', type=str, required=True, help='Model class name')
+        '-m', '--model', default='FCN8sDepthPredictionConcatFirst', type=str,
+        help='Model class name')
     parser.add_argument(
-        '-b', '--batch_size', type=int, required=True, help='Batch size')
+        '-b', '--batch_size', default=1, type=int, help='Batch size')
     parser.add_argument(
-        '-e', '--epoch', type=int, required=True, help='Training epoch')
+        '-e', '--epoch', default=100, type=int, help='Training epoch')
     parser.add_argument(
         '-o', '--out', type=str, default=None, help='Output directory')
     args = parser.parse_args()
@@ -165,9 +166,6 @@ def main():
     with open(osp.join(out, 'model.txt'), 'w') as f:
         f.write(model.__class__.__name__)
 
-    with open(osp.join(out, 'n_class.txt'), 'w') as f:
-        f.write(str(n_class))
-
     with open(osp.join(out, 'batch_size.txt'), 'w') as f:
         f.write(str(args.batch_size))
 
@@ -175,26 +173,29 @@ def main():
         extensions.snapshot_object(
             model,
             savefun=chainer.serializers.save_npz,
-            filename='max_miou.npz'),
-        trigger=chainer.training.triggers.MaxValueTrigger(
-            'validation/main/miou', save_interval))
-    trainer.extend(
-        extensions.snapshot_object(
-            model,
-            savefun=chainer.serializers.save_npz,
-            filename='max_depth_acc.npz'),
+            filename='model_snapshot.npz'),
         trigger=chainer.training.triggers.MaxValueTrigger(
             'validation/main/depth_acc<0.10', save_interval))
 
     trainer.extend(
         extensions.dump_graph(
             root_name='main/loss',
-            out_name='graph.dot'))
+            out_name='network_architecture.dot'))
 
     trainer.extend(
         extensions.LogReport(
             log_name='log.json',
             trigger=log_interval))
+
+    trainer.extend(
+        extensions.PlotReport([
+            'main/loss',
+            'validation/main/loss',
+        ],
+            file_name='loss_plot.png',
+            x_key='epoch',
+            trigger=(5, 'epoch')),
+        trigger=(5, 'epoch'))
 
     trainer.extend(chainer.training.extensions.PrintReport([
         'iteration',

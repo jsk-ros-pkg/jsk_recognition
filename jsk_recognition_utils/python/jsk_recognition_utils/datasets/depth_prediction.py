@@ -183,28 +183,3 @@ class DepthPredictionDataset(chainer.dataset.DatasetMixin):
             dsize=(in_img.shape[1], in_img.shape[0]), flags=flags)
         rot_img[rot_keep == False] = np.nan  # NOQA
         return rot_img
-
-    def visualize(self, index):
-        examples = self[index]
-
-        print('[%04d] %s' % (index, '>' * 75))
-        print('got example indices: {}'.format(
-            [example[4] for example in examples]))
-        print('[%04d] %s' % (index, '<' * 75))
-
-        viz = []
-        for i, example in enumerate(examples):
-            image, depth, label, depth_gt, idx = example
-            depth_viz = mvtk.image.colorize_depth(
-                depth, min_value=self.min_value, max_value=self.max_value)
-            label = mvtk.image.label2rgb(
-                label.astype(np.int32), img=image,
-                label_names=self.class_names, alpha=0.7)
-            depth_gt_viz = mvtk.image.colorize_depth(
-                depth_gt, min_value=self.min_value, max_value=self.max_value)
-            viz.append(mvtk.image.tile(
-                [image, depth_viz, label, depth_gt_viz], (2, 2)))
-
-        viz_all = mvtk.image.tile(viz, (1, len(examples)))
-
-        return mvtk.image.resize(viz_all, size=600 * 600)  # for small window

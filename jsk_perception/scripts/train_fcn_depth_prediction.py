@@ -45,38 +45,24 @@ def transform(in_data):
     label_gt = in_data[0][2]
     depth_gt = in_data[0][3]
 
-    image_bgrs = None
-    depth_bgrs = None
+    image_rgb, depth, label_gt, depth_gt, _ = in_data
 
-    for example in in_data:
-        image_rgb, depth, label_gt, depth_gt, _ = example
+    # RGB -> BGR
+    image_bgr = image_rgb[:, :, ::-1]
+    image_bgr = image_rgb.astype(np.float32)
+    mean_bgr = np.array([104.00698793, 116.66876762, 122.67891434])
+    image_bgr -= mean_bgr
+    # (H, W, 3) -> (3, H, W)
+    image_bgr = image_bgr.transpose((2, 0, 1))
 
-        # RGB -> BGR
-        image_bgr = image_rgb[:, :, ::-1]
-        image_bgr = image_rgb.astype(np.float32)
-        mean_bgr = np.array([104.00698793, 116.66876762, 122.67891434])
-        image_bgr -= mean_bgr
-        # (H, W, 3) -> (3, H, W)
-        image_bgr = image_bgr.transpose((2, 0, 1))
+    # depth -> depth_bgr: (H, W) -> (H, W, 3) -> (3, H, W)
+    depth_bgr = colorize_depth(
+        depth, min_value=min_value, max_value=max_value)
+    depth_bgr = depth_bgr.astype(np.float32)
+    depth_bgr -= mean_bgr
+    depth_bgr = depth_bgr.transpose((2, 0, 1))
 
-        # depth -> depth_bgr: (H, W) -> (H, W, 3) -> (3, H, W)
-        depth_bgr = colorize_depth(
-            depth, min_value=min_value, max_value=max_value)
-        depth_bgr = depth_bgr.astype(np.float32)
-        depth_bgr -= mean_bgr
-        depth_bgr = depth_bgr.transpose((2, 0, 1))
-
-        # Append to list
-        if image_bgrs is None:
-            image_bgrs = image_bgr
-            depth_bgrs = depth_bgr
-        else:
-            # (3, H, W) -> (3 * num_view, H, W)
-            image_bgrs = np.concatenate((image_bgrs, image_bgr), axis=0)
-            # (3, H, W) -> (3 * num_view, H, W)
-            depth_bgrs = np.concatenate((depth_bgrs, depth_bgr), axis=0)
-
-    return image_bgrs, depth_bgrs, label_gt, depth_gt
+    return image_bgr, depth_bgr, label_gt, depth_gt
 
 
 def main():
@@ -89,9 +75,6 @@ def main():
     parser.add_argument(
         '-m', '--model', type=str, required=True, help='Model class name')
     parser.add_argument(
-        '-n', '--num_view', type=int, required=True,
-        help='Number of getting examples at the same time')
-    parser.add_argument(
         '-b', '--batch_size', type=int, required=True, help='Batch size')
     parser.add_argument(
         '-e', '--epoch', type=int, required=True, help='Training epoch')
@@ -100,7 +83,6 @@ def main():
     args = parser.parse_args()
 
     gpu = args.gpu
-    num_view = args.num_view
     out = args.out
 
     # 0. config
@@ -119,10 +101,8 @@ def main():
     # 1. dataset
 
     if args.dataset == 'DepthPredictionDataset':
-        dataset_train = DepthPredictionDataset(
-            split='train', aug=True, num_view=num_view)
-        dataset_valid = DepthPredictionDataset(
-            split='test', aug=False, num_view=num_view)
+        dataset_train = DepthPredictionDataset(split='train', aug=True)
+        dataset_valid = DepthPredictionDataset(split='test', aug=False)
     else:
         print('Invalid dataset class.')
         exit(1)
@@ -147,8 +127,7 @@ def main():
     assert n_class == 2
 
     if args.model == 'FCN8sDepthPredictionConcatFirst':
-        model = FCN8sDepthPredictionConcatFirst(
-            n_class=n_class, masking=True, no_bp_before_rgb_pool5=False)
+        model = FCN8sDepthPredictionConcatFirst(n_class=n_class, masking=True)
     else:
         print('Invalid model class.')
         exit(1)
@@ -186,9 +165,6 @@ def main():
 
     with open(osp.join(out, 'batch_size.txt'), 'w') as f:
         f.write(str(args.batch_size))
-
-    with open(osp.join(out, 'num_view.txt'), 'w') as f:
-        f.write(str(num_view))
 
     trainer.extend(
         extensions.snapshot_object(

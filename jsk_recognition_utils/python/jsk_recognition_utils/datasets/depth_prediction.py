@@ -57,11 +57,10 @@ class DepthPredictionDataset(chainer.dataset.DatasetMixin):
     min_value = 0.5
     max_value = 5.0
 
-    def __init__(self, split, aug=False, num_view=1):
+    def __init__(self, split, aug=False):
         assert split in ['train', 'test']
         self.split = split
         self.aug = aug
-        self.num_view = num_view
 
         self._files_dirs = []
         self._scenes = []
@@ -81,14 +80,7 @@ class DepthPredictionDataset(chainer.dataset.DatasetMixin):
         return len(self._files_dirs)
 
     def get_example(self, i):
-        examples = []
-
-        # Append index == i as first example
-        examples.append(self._get_example(self._files_dirs[i], i))
-
-        assert len(examples) == self.num_view
-
-        return examples
+        return self._get_example(self._files_dirs[i], i)
 
     def _get_example(self, files_dir, idx):
         image_file = osp.join(files_dir, 'image.png')

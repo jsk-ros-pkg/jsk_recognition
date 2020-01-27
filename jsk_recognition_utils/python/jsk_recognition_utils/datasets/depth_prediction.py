@@ -5,12 +5,12 @@ import os.path as osp
 
 import chainer
 import cv2
+import imgaug.augmenters as iaa
 import numpy as np
 import PIL.Image
 import rospkg
 import skimage.io
 
-import imgaug.augmenters as iaa
 import mvtk
 
 

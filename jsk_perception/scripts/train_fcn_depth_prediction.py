@@ -66,12 +66,19 @@ def transform(in_data):
 
 
 def main():
+    rospack = rospkg.RosPack()
+    jsk_perception_datasets_path = osp.join(
+        rospack.get_path('jsk_perception'), 'learning_datasets')
+
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         '-g', '--gpu', default=0, type=int, help='GPU id')
     parser.add_argument(
-        '-d', '--dataset', type=str, required=True, help='Dataset class name')
+        '-d', '--dataset_dir',
+        default=osp.join(
+            jsk_perception_datasets_path, 'human_size_mirror_dataset'),
+        type=str, help='Path to root directory of dataset')
     parser.add_argument(
         '-m', '--model', type=str, required=True, help='Model class name')
     parser.add_argument(
@@ -100,12 +107,10 @@ def main():
 
     # 1. dataset
 
-    if args.dataset == 'DepthPredictionDataset':
-        dataset_train = DepthPredictionDataset(split='train', aug=True)
-        dataset_valid = DepthPredictionDataset(split='test', aug=False)
-    else:
-        print('Invalid dataset class.')
-        exit(1)
+    dataset_train = DepthPredictionDataset(
+        args.dataset_dir, split='train', aug=True)
+    dataset_valid = DepthPredictionDataset(
+        args.dataset_dir, split='test', aug=False)
 
     dataset_train_transformed = TransformDataset(dataset_train, transform)
     dataset_valid_transformed = TransformDataset(dataset_valid, transform)

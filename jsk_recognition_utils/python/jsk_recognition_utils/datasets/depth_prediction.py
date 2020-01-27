@@ -49,15 +49,12 @@ class DepthPredictionDataset(chainer.dataset.DatasetMixin):
         'label.png'
     ])
 
-    rospack = rospkg.RosPack()
-    root_dir = osp.join(
-        rospack.get_path('jsk_perception'), 'learning_datasets',
-        'human_size_mirror_dataset')
     mean_bgr = np.array([104.00698793, 116.66876762, 122.67891434])
     min_value = 0.5
     max_value = 5.0
 
-    def __init__(self, split, aug=False):
+    def __init__(self, root_dir, split, aug=False):
+        self.root_dir = root_dir
         assert split in ['train', 'test']
         self.split = split
         self.aug = aug

@@ -1,7 +1,9 @@
 import chainer
+from chainer import cuda
 import chainer.functions as F
 import chainer.links as L
 import fcn
+import numpy as np
 
 
 class FCN8sDepthPrediction(chainer.Chain):
@@ -327,6 +329,115 @@ class FCN8sDepthPrediction(chainer.Chain):
 
         return depth_score
 
+    def compute_loss_mask(self, mask_score, true_mask):
+        # segmentation loss
+        seg_loss = F.softmax_cross_entropy(
+            mask_score, true_mask, normalize=True)
+
+        return seg_loss
+
+    def compute_loss_depth(self, depth_pred, true_mask, true_depth):
+        assert true_mask.dtype == self.xp.int32
+
+        # Whole region
+        keep_regardless_mask = ~self.xp.isnan(true_depth)
+        if self.xp.sum(keep_regardless_mask) == 0:
+            depth_loss_regardless_mask = 0
+        else:
+            depth_loss_regardless_mask = F.sum(F.log(F.cosh(
+                depth_pred[keep_regardless_mask[self.xp.newaxis, :, :, :]] -
+                true_depth[keep_regardless_mask])))
+            depth_loss_regardless_mask /= \
+                true_depth.shape[1] * true_depth.shape[2]
+
+        # Only masked region
+        keep_only_mask = self.xp.logical_and(
+            true_mask > 0, ~self.xp.isnan(true_depth))
+        if self.xp.sum(keep_only_mask) == 0:
+            depth_loss_only_mask = 0
+        else:
+            depth_loss_only_mask = F.sum(F.log(F.cosh(
+                depth_pred[keep_only_mask[self.xp.newaxis, :, :, :]] -
+                true_depth[keep_only_mask])))
+            depth_loss_only_mask /= true_depth.shape[1] + true_depth.shape[2]
+
+        # Regression loss
+        coef = [1, 1]
+        reg_loss = (coef[0] * depth_loss_regardless_mask +
+                    coef[1] * depth_loss_only_mask)
+
+        return reg_loss
+
+    def compute_loss(self, mask_score, depth_pred, true_mask, true_depth):
+        seg_loss = self.compute_loss_mask(mask_score, true_mask)
+        reg_loss = self.compute_loss_depth(depth_pred, true_mask, true_depth)
+
+        # Loss
+        coef = [1, 1]
+        loss = coef[0] * seg_loss + coef[1] * reg_loss
+        if self.xp.isnan(float(loss.data)):
+            raise ValueError('Loss is nan.')
+
+        batch_size = len(mask_score)
+        assert batch_size == 1
+
+        # GPU -> CPU
+        # N, C, H, W -> C, H, W
+        true_mask = cuda.to_cpu(true_mask)[0]
+        mask_pred = cuda.to_cpu(F.argmax(self.score_label, axis=1).data)[0]
+        true_depth = cuda.to_cpu(true_depth)[0]
+        depth_pred = cuda.to_cpu(depth_pred.data)[0]
+
+        # Evaluate Mask IU
+        mask_iu = fcn.utils.label_accuracy_score(
+            [true_mask], [mask_pred], n_class=2)[2]
+
+        # Evaluate Depth Accuracy
+        depth_acc = {}
+        for thresh in [0.01, 0.02, 0.03, 0.04, 0.05, 0.07, 0.10, 0.15, 0.20,
+                       0.25, 0.30, 0.40, 0.50, 0.70, 1.00]:
+            t_lbl_fg = true_mask > 0
+            p_lbl_fg = mask_pred > 0
+            if np.sum(t_lbl_fg) == 0 and np.sum(p_lbl_fg) == 0:
+                acc = 1.0
+            elif np.sum(t_lbl_fg) == 0:
+                acc = 0.0
+            else:
+                # {TP and (|error| < thresh)} / (TP or FP or FN)
+                true_depth_cp = np.copy(true_depth)
+                true_depth_cp[np.isnan(true_depth_cp)] = np.inf
+                numer = np.sum(
+                    np.logical_and(
+                        np.logical_and(t_lbl_fg, p_lbl_fg),
+                        np.abs(true_depth_cp - depth_pred) < thresh))
+                denom = np.sum(np.logical_or(t_lbl_fg, p_lbl_fg))
+                acc = 1. * numer / denom
+            depth_acc['%.2f' % thresh] = acc
+
+        chainer.reporter.report({
+            'loss': loss,
+            'seg_loss': seg_loss,
+            'reg_loss': reg_loss,
+            'miou': mask_iu,
+            'depth_acc<0.01': depth_acc['0.01'],
+            'depth_acc<0.02': depth_acc['0.02'],
+            'depth_acc<0.03': depth_acc['0.03'],
+            'depth_acc<0.04': depth_acc['0.04'],
+            'depth_acc<0.05': depth_acc['0.05'],
+            'depth_acc<0.07': depth_acc['0.07'],
+            'depth_acc<0.10': depth_acc['0.10'],
+            'depth_acc<0.15': depth_acc['0.15'],
+            'depth_acc<0.20': depth_acc['0.20'],
+            'depth_acc<0.25': depth_acc['0.25'],
+            'depth_acc<0.30': depth_acc['0.30'],
+            'depth_acc<0.40': depth_acc['0.40'],
+            'depth_acc<0.50': depth_acc['0.50'],
+            'depth_acc<0.70': depth_acc['0.70'],
+            'depth_acc<1.00': depth_acc['1.00'],
+        }, self)
+
+        return loss
+
     def __call__(self, rgb, depth_viz):
         mask_score, rgb_pool5 = self.predict_mask(rgb, return_pool5=True)
         self.mask_score = mask_score
@@ -519,7 +630,7 @@ class FCN8sDepthPredictionConcatFirst(FCN8sDepthPrediction):
 
         if self.masking is True:
             # (N, C, H, W) -> (N, H, W)
-            mask_pred_tmp = F.argmax(self.mask_score, axis=1)
+            mask_pred_tmp = F.argmax(self.score_label, axis=1)
             # (N, H, W) -> (N, 1, H, W), float required for resizing
             mask_pred_tmp = mask_pred_tmp[:, None, :, :].data.astype(
                 self.xp.float32)  # 1/1
@@ -601,14 +712,20 @@ class FCN8sDepthPredictionConcatFirst(FCN8sDepthPrediction):
 
         return depth_pred
 
-    def __call__(self, rgb, depth_viz):
+    def __call__(self, rgb, depth_viz, mask_gt=None, depth_gt=None):
         score_label = self.predict_mask(rgb, return_pool5=False)
-        self.mask_score = score_label
+        self.score_label = score_label
         depth_pred = self.predict_depth(rgb, score_label, depth_viz)
         self.depth_score = depth_pred
 
-        assert not chainer.config.train
-        return
+        if mask_gt is None or depth_gt is None:
+            assert not chainer.config.train
+            return
+
+        loss = self.compute_loss(
+            score_label, depth_pred, mask_gt, depth_gt)
+
+        return loss
 
     def init_from_vgg16(self, vgg16):
         for l in self.children():

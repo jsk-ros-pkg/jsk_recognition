@@ -24,12 +24,6 @@ else()
   set(PCL_MSGS pcl_msgs) ## hydro and later
 endif()
 
-if($ENV{ROS_DISTRO} STREQUAL "groovy")
-  set(ML_CLASSIFIERS )
-else()
-  set(ML_CLASSIFIERS ml_classifiers) ## hydro and later
-endif()
-
 find_package(catkin REQUIRED COMPONENTS
   jsk_recognition_utils
   dynamic_reconfigure pcl_ros nodelet message_generation genmsg
@@ -48,7 +42,6 @@ find_package(catkin REQUIRED COMPONENTS
   kdl_conversions
   )
 find_package(PkgConfig)
-pkg_check_modules(${ML_CLASSIFIERS} ml_classifiers QUIET)
 # only run in hydro
 if(NOT $ENV{ROS_DISTRO} STREQUAL "groovy")
   find_package(PCL REQUIRED)

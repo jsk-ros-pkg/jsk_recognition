@@ -20,6 +20,14 @@ elseif(COMPILER_SUPPORTS_CXX0X)
 else()
   message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
+find_package(PkgConfig)
+pkg_check_modules(ml_classifiers ml_classifiers QUIET)
+message(STATUS "Check if ml_classifiers exists ${ml_classifiers_FOUND}")
+if(ml_classifiers_FOUND)
+  set(ML_CLASSIFIERS ml_classifiers) ## hydro and later
+else()
+  set(ML_CLASSIFIERS )
+endif()
 
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
@@ -49,9 +57,9 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   # tf2_ros
   tf_conversions
+  #
+  ${ML_CLASSIFIERS}
   )
-find_package(PkgConfig)
-pkg_check_modules(ml_classifiers ml_classifiers QUIET)
 # only run in hydro
 find_package(PCL REQUIRED)
 find_package(OpenMP)

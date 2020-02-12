@@ -140,6 +140,7 @@ generate_dynamic_reconfigure_options(
   cfg/LabelImageDecomposer.cfg
   cfg/SSDObjectDetector.cfg
   cfg/MaskRCNNInstanceSegmentation.cfg
+  cfg/VirtualCameraMono.cfg
 )
 
 message(WARNING "DEPRECATION WARNING: srv files in jsk_pcl_ros are deprecated."
@@ -500,6 +501,7 @@ if(CATKIN_ENABLE_TESTING)
     jsk_add_rostest(test/unapply_mask_image.test)
     jsk_add_rostest(test/unwrap_histogram_with_range_array.test)
     jsk_add_rostest(test/vgg16_object_recognition.test)
+    jsk_add_rostest(test/virtual_camera_mono.test)
     jsk_add_rostest(test/ssd_object_detector.test)
     jsk_add_rostest(test/ycc_decomposer.test)
     if(TARGET JSK_NODELET_${PROJECT_NAME}_bing)

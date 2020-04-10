@@ -32,9 +32,11 @@ class SpectrumToSpectrogram(object):
             '~spectrum', Spectrum, self.audio_cb)
         self.pub_spectrogram = rospy.Publisher(
             '~spectrogram', Image, queue_size=1)
+        publish_rate = rospy.get_param(
+            '~publish_rate', float(self.image_width / self.spectrogram_period))
         rospy.Timer(
             rospy.Duration(
-                float(self.spectrogram_period) / self.image_width),
+                1.0 / publish_rate),
             self.timer_cb)
         self.bridge = CvBridge()
 

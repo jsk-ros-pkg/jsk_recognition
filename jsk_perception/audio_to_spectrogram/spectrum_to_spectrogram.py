@@ -44,16 +44,17 @@ class SpectrumToSpectrogram(object):
         self.spectrogram = np.concatenate(
             [self.spectrogram, spectrum[None]])
         self.spectrum_stamp.append(msg.header.stamp)
+        # Extract spectrogram of last (self.spectrogram_period) seconds
+        time_now = rospy.Time.now()
+        for i, stamp in enumerate(self.spectrum_stamp):
+            if (time_now - stamp).to_sec() < self.spectrogram_period:
+                self.spectrogram = self.spectrogram[i:]
+                self.spectrum_stamp = self.spectrum_stamp[i:]
+                break
 
     def timer_cb(self, timer):
         if self.spectrogram.shape[0] == 0:
             return
-        # Extract spectrogram of last (self.spectrogram_period) seconds
-        time_now = rospy.Time.now()
-        for i, stamp in enumerate(self.spectrum_stamp):
-            if (time_now - stamp).to_sec() > self.spectrogram_period:
-                self.spectrum_stamp = self.spectrum_stamp[i:]
-                self.spectrogram = self.spectrogram[i:]
         # Reshape spectrogram
         spectrogram = self.spectrogram.transpose(1, 0)[::-1, :]
         spectrogram = cv2.resize(

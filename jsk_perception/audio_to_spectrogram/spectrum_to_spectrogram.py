@@ -63,7 +63,7 @@ class SpectrumToSpectrogram(object):
             spectrogram, (self.image_width, self.image_height))
         # Publish spectrogram
         spectrogram_msg = self.bridge.cv2_to_imgmsg(spectrogram, '32FC1')
-        spectrogram_msg.header.stamp = rospy.Time.now()
+        spectrogram_msg.header.stamp = self.spectrum_stamp[-1]
         self.pub_spectrogram.publish(spectrogram_msg)
 
 

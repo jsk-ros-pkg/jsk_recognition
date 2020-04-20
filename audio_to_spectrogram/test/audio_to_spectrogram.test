@@ -1,6 +1,6 @@
 <launch>
 
-  <include file="$(find jsk_perception)/audio_to_spectrogram/sample_audio_to_spectrogram.launch">
+  <include file="$(find audio_to_spectrogram)/sample/sample_audio_to_spectrogram.launch">
     <arg name="gui" value="false" />
   </include>
 

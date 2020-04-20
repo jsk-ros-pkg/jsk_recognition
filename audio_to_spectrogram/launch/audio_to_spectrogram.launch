@@ -3,17 +3,11 @@
 
 <launch>
   <arg name="gui" default="true" />
-
-  <!-- play rosbag -->
-  <arg name="filename" default="$(find jsk_perception)/audio_to_spectrogram/audio_300hz.bag" />
-  <param name="use_sim_time" value="true" />
-  <node name="rosbag_play"
-        pkg="rosbag" type="play"
-        args="$(arg filename) --clock --loop"/>
+  <arg name="audio_topic" default="/audio" />
 
   <!-- convert audio topic to spectrum topic -->
-  <node pkg="jsk_perception" type="audio_to_spectrum.py" name="audio_to_spectrum" respawn="true">
-    <remap from="~audio" to="/audio" />
+  <node pkg="audio_to_spectrogram" type="audio_to_spectrum.py" name="audio_to_spectrum" respawn="true">
+    <remap from="~audio" to="$(arg audio_topic)" />
     <rosparam>
       <!-- meaning of rosparams below are described in audio_to_spectrum.py -->
       mic_sampling_rate: 16000
@@ -26,7 +20,7 @@
   </node>
 
   <!-- convert spectrum topic to spectrogram topic -->
-  <node pkg="jsk_perception" type="spectrum_to_spectrogram.py" name="spectrum_to_spectrogram" respawn="true">
+  <node pkg="audio_to_spectrogram" type="spectrum_to_spectrogram.py" name="spectrum_to_spectrogram" respawn="true">
     <remap from="~spectrum" to="/audio_to_spectrum/spectrum_filtered" />
     <rosparam>
       <!-- meaning of rosparams below are described in spectrum_to_spectrogram.py -->
@@ -38,7 +32,7 @@
 
   <group if="$(arg gui)">
     <!-- visualize spectrum -->
-    <node pkg="jsk_perception" type="spectrum_plot.py" name="spectrum_plot"  >
+    <node pkg="audio_to_spectrogram" type="spectrum_plot.py" name="spectrum_plot"  >
       <remap from="~spectrum" to="/audio_to_spectrum/spectrum_filtered" />
     </node>
 

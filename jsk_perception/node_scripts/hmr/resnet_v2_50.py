@@ -1,3 +1,16 @@
+from __future__ import print_function
+
+import pkg_resources, sys
+from distutils.version import LooseVersion
+if LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersion('7.0.0') and \
+   sys.version_info.major == 2:
+   print('''Please install chainer <= 7.0.0:
+
+    sudo pip install chainer==6.7.0
+
+c.f https://github.com/jsk-ros-pkg/jsk_recognition/pull/2485
+''', file=sys.stderr)
+   sys.exit(1)
 import chainer
 import chainer.functions as F
 from chainer import initializers

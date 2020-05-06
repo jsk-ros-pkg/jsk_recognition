@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 # Author: Furushchev <furushchev@jsk.imi.i.u-tokyo.ac.jp>
 
+from __future__ import print_function
+
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -20,6 +22,17 @@ from sensor_msgs.msg import Image
 from jsk_recognition_msgs.msg import Rect, RectArray
 from jsk_recognition_msgs.msg import ClassificationResult
 
+import pkg_resources, sys
+from distutils.version import LooseVersion
+if LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersion('7.0.0') and \
+   sys.version_info.major == 2:
+   print('''Please install chainer <= 7.0.0:
+
+    sudo pip install chainer==6.7.0
+
+c.f https://github.com/jsk-ros-pkg/jsk_recognition/pull/2485
+''', file=sys.stderr)
+   sys.exit(1)
 import chainer
 from chainercv.links import SSD300
 from chainercv.links import SSD512

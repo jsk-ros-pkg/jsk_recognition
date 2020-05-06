@@ -22,7 +22,7 @@ from sensor_msgs.msg import Image
 from jsk_recognition_msgs.msg import Rect, RectArray
 from jsk_recognition_msgs.msg import ClassificationResult
 
-import pkg_resources, sys
+import itertools, pkg_resources, sys
 from distutils.version import LooseVersion
 if LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersion('7.0.0') and \
    sys.version_info.major == 2:
@@ -33,6 +33,15 @@ if LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersi
 c.f https://github.com/jsk-ros-pkg/jsk_recognition/pull/2485
 ''', file=sys.stderr)
    sys.exit(1)
+if [p for p in list(itertools.chain(*[pkg_resources.find_distributions(_) for _ in sys.path])) if "cupy-" in p.project_name ] == []:
+   print('''Please install CuPy
+
+    sudo pip install cupy-cuda[your cuda version]
+i.e.
+    sudo pip install cupy-cuda91
+
+''', file=sys.stderr)
+   #sys.exit(1)
 import chainer
 from chainercv.links import SSD300
 from chainercv.links import SSD512

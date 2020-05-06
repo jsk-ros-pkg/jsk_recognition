@@ -13,7 +13,7 @@ import sys
 import yaml
 
 # chainer
-import pkg_resources
+import itertools, pkg_resources
 from distutils.version import LooseVersion
 if LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersion('7.0.0') and \
    sys.version_info.major == 2:
@@ -22,6 +22,15 @@ if LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersi
     sudo pip install chainer==6.7.0
 
 c.f https://github.com/jsk-ros-pkg/jsk_recognition/pull/2485
+''', file=sys.stderr)
+   sys.exit(1)
+if [p for p in list(itertools.chain(*[pkg_resources.find_distributions(_) for _ in sys.path])) if "cupy-" in p.project_name ] == []:
+   print('''Please install CuPy
+
+    sudo pip install cupy-cuda[your cuda version]
+i.e.
+    sudo pip install cupy-cuda91
+
 ''', file=sys.stderr)
    sys.exit(1)
 import chainer

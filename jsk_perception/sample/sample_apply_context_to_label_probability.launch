@@ -8,7 +8,7 @@
     <arg name="gpu" value="$(arg gpu)"/>
   </include>
 
-  <arg name="INPUT_IMAGE" value="image_publisher/output" />
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
   <arg name="INPUT_LABEL_PROBABILITY" value="fcn_object_segmentation/output/proba_image" />
 
   <node name="apply_context_to_label_probability"

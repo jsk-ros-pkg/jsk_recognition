@@ -14,7 +14,7 @@
   </node>
 
   <include file="$(find jsk_perception)/launch/imagenet_object_recognition.launch">
-    <arg name="INPUT_IMAGE" value="/image_publisher/output" />
+    <arg name="INPUT_IMAGE" default="/image_publisher/output" />
     <arg name="gpu" value="$(arg gpu)" />
     <arg name="network" value="$(arg network)" />
   </include>

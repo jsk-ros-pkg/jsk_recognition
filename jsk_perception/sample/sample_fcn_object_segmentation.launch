@@ -37,7 +37,7 @@
   </group>
 
   <include file="$(find jsk_perception)/launch/fcn_object_segmentation.launch">
-    <arg name="INPUT_IMAGE" value="image_publisher/output" />
+    <arg name="INPUT_IMAGE" default="image_publisher/output" />
     <arg name="INPUT_MASK" value="mask_image_generator/output" />
     <arg name="USE_MASK" value="$(arg use_mask)" />
     <arg name="GPU" value="$(arg gpu)" />

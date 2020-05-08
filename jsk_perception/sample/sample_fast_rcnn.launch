@@ -13,7 +13,7 @@
   </node>
 
   <include file="$(find jsk_perception)/launch/fast_rcnn.launch">
-    <arg name="INPUT_IMAGE" value="image_publisher/output" />
+    <arg name="INPUT_IMAGE" default="image_publisher/output" />
     <arg name="MODEL" value="$(arg model)" />
     <arg name="GPU" value="$(arg gpu)" />
   </include>

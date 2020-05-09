@@ -10,10 +10,11 @@
       publish_info: false
     </rosparam>
   </node>
+  <arg name="MASK_IMAGE" default="mask_publisher/output" />
 
   <node name="dilate_mask_image"
         pkg="jsk_perception" type="dilate_mask_image" >
-    <remap from="~input" to="mask_publisher/output" />
+    <remap from="~input" to="$(arg MASK_IMAGE)" />
   </node>
 
   <node name="concave_hull_mask_image"
@@ -28,7 +29,7 @@
     </node>
     <node name="image_view1"
           pkg="image_view" type="image_view">
-      <remap from="image" to="mask_publisher/output" />
+      <remap from="image" to="$(arg MASK_IMAGE)" />
     </node>
   </group>
 

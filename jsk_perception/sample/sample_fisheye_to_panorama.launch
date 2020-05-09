@@ -7,11 +7,12 @@
       file_name: $(find jsk_perception)/sample/image/martin-espinoza-1148036-unsplash_640x480.jpg
     </rosparam>
   </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <node name="fisheye_to_panorama_rectify"
         pkg="nodelet" type="nodelet"
         args="standalone jsk_perception/FisheyeToPanorama">
-    <remap from="~input" to="image_publisher/output"/>
+    <remap from="~input" to="$(arg INPUT_IMAGE)"/>
     <rosparam>
       use_panorama: false
       simple_panorama: false
@@ -23,7 +24,7 @@
   <node name="fisheye_to_panorama"
         pkg="nodelet" type="nodelet"
         args="standalone jsk_perception/FisheyeToPanorama">
-    <remap from="~input" to="image_publisher/output"/>
+    <remap from="~input" to="$(arg INPUT_IMAGE)"/>
     <rosparam>
       use_panorama: true
       simple_panorama: true

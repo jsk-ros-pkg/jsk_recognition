@@ -99,6 +99,7 @@
   <run_depend>sound_play</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>tf</run_depend>
+  <run_depend>tf2_geometry_msgs</run_depend>
   <run_depend>topic_tools</run_depend>
   <run_depend>robot_self_filter</run_depend>
   <run_depend>yaml-cpp</run_depend>

@@ -7,7 +7,7 @@
   <test test-name="test_depth_calibration"
         name="test_depth_calibration"
         pkg="jsk_tools" type="test_topic_published.py"
-        retry="3">
+        time-limit="35" retry="3">
     <rosparam>
       topic_0: /depth_calibration/output
       timeout_0: 30

@@ -27,6 +27,9 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 
    Array of oriented bounding box for each segmented cluster.
 
+   If `~align_boxes`, `~align_boxes_with_plane` and `~fill_boxes_label_with_nearest_plane_index` are `True`,
+   each box(`jsk_recognition_msgs/BoundingBox`)'s label indicates nearest plane index.
+
 * `~label` (`sensor_msgs/Image`):
 
    Label image for each cluster point indices.
@@ -105,6 +108,11 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
     - `input_indices`: same order as the input cluster indices
     - `z_axis`: sort by z axis of cloud
     - `cloud_size`: sort by size of cloud
+
+* `~fill_boxes_label_with_nearest_plane_index` (Boolean, default: `False`):
+
+    If `~align_boxes`, `~align_boxes_with_plane` and this value are `True`,
+    each box(`jsk_recognition_msgs/BoundingBox`)'s label indicates nearest plane index.
 
 ## Sample
 

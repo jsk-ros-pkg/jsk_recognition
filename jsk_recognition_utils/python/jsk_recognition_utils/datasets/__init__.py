@@ -1,5 +1,6 @@
+from jsk_recognition_utils.datasets import detection
 from jsk_recognition_utils.datasets import segmentation
 
-
+DetectionDataset = detection.DetectionDataset
 InstanceSegmentationDataset = segmentation.InstanceSegmentationDataset
 SemanticSegmentationDataset = segmentation.SemanticSegmentationDataset

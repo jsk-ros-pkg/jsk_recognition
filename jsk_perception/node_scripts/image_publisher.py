@@ -43,6 +43,12 @@ class ImagePublisher(object):
         file_name = config['file_name']
         config['file_name'] = os.path.abspath(file_name)
         img = cv2.imread(file_name, cv2.IMREAD_UNCHANGED)
+        # when file is gray scale but encoding is not grayscale,
+        # load the image again in color
+        if (len(img.shape) == 2 and
+                getCvType(self.encoding) not in [
+                    cv2.CV_8UC1, cv2.CV_16UC1, cv2.CV_32FC1]):
+            img = cv2.imread(file_name, cv2.IMREAD_COLOR)
         if img is None:
             rospy.logwarn('Could not read image file: {}'.format(file_name))
             with self.lock:

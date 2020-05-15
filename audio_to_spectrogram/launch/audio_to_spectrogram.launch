@@ -8,6 +8,9 @@
   <arg name="mic_sampling_rate" default="16000" />
   <arg name="device" default="hw:0,0" />
   <arg name="audio_topic" default="/audio" />
+  <arg name="high_cut_freq" default="800" />
+  <arg name="low_cut_freq" default="1" />
+  <arg name="spectrogram_period" default="5" />
   <arg name="gui" default="true" />
 
   <!-- Publish audio topic from microphone -->
@@ -31,8 +34,8 @@
       mic_sampling_rate: $(arg mic_sampling_rate)
       fft_sampling_period: 0.3
       bitdepth: $(arg bitdepth)
-      high_cut_freq: 800
-      low_cut_freq: 1
+      high_cut_freq: $(arg high_cut_freq)
+      low_cut_freq: $(arg low_cut_freq)
       fft_exec_rate: 50
     </rosparam>
   </node>
@@ -40,11 +43,11 @@
   <!-- convert spectrum topic to spectrogram topic -->
   <node pkg="audio_to_spectrogram" type="spectrum_to_spectrogram.py" name="spectrum_to_spectrogram" respawn="true">
     <remap from="~spectrum" to="/audio_to_spectrum/spectrum_filtered" />
-    <rosparam>
+    <rosparam subst_value="true">
       <!-- meaning of rosparams below are described in spectrum_to_spectrogram.py -->
       image_height: 300
       image_width: 300
-      spectrogram_period: 5
+      spectrogram_period: $(arg spectrogram_period)
     </rosparam>
   </node>
 

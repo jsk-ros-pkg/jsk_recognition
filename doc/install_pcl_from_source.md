@@ -1,8 +1,10 @@
 # Install PCL from source
 
+The following settings can be applied at the same time by combining cmake options.
+
 ## Install PCL from source without SSE
 
-This is needed for [AttentionClipper](https://github.com/jsk-ros-pkg/jsk_recognition/issues/2380).
+This is sometimes needed for [AttentionClipper](https://github.com/jsk-ros-pkg/jsk_recognition/issues/2380).
 
 ```bash
 cd

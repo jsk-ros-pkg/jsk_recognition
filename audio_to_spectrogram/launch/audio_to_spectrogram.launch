@@ -1,0 +1,52 @@
+<!-- data flow  -->
+<!-- audio -> spectrum -> spectrogram -->
+
+<launch>
+  <arg name="gui" default="true" />
+  <arg name="audio_topic" default="/audio" />
+
+  <!-- convert audio topic to spectrum topic -->
+  <node pkg="audio_to_spectrogram" type="audio_to_spectrum.py" name="audio_to_spectrum" respawn="true">
+    <remap from="~audio" to="$(arg audio_topic)" />
+    <rosparam>
+      <!-- meaning of rosparams below are described in audio_to_spectrum.py -->
+      mic_sampling_rate: 16000
+      fft_sampling_period: 0.3
+      bitdepth: 16
+      high_cut_freq: 800
+      low_cut_freq: 1
+      fft_exec_rate: 50
+    </rosparam>
+  </node>
+
+  <!-- convert spectrum topic to spectrogram topic -->
+  <node pkg="audio_to_spectrogram" type="spectrum_to_spectrogram.py" name="spectrum_to_spectrogram" respawn="true">
+    <remap from="~spectrum" to="/audio_to_spectrum/spectrum_filtered" />
+    <rosparam>
+      <!-- meaning of rosparams below are described in spectrum_to_spectrogram.py -->
+      image_height: 300
+      image_width: 300
+      spectrogram_period: 5
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <!-- visualize spectrum -->
+    <node pkg="audio_to_spectrogram" type="spectrum_plot.py" name="spectrum_plot"  >
+      <remap from="~spectrum" to="/audio_to_spectrum/spectrum_filtered" />
+    </node>
+
+    <!-- visualize spectrogram -->
+    <!-- you can get spectrogram image topic from /spectrogram_view/output-->
+    <node pkg="image_view" type="image_view" name="spectrogram_view"  >
+      <remap from="image" to="/spectrum_to_spectrogram/spectrogram" />
+      <rosparam>
+        <!-- set all pixels between 0 and 255 -->
+        do_dynamic_scaling: true
+        <!-- use jet colormap -->
+        colormap: 2
+      </rosparam>
+    </node>
+  </group>
+
+</launch>

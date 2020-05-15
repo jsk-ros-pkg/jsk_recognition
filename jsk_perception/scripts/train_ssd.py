@@ -47,6 +47,7 @@ from chainercv.links.model.ssd import random_distort
 from chainercv.links.model.ssd import resize_with_random_interpolation
 
 from jsk_recognition_utils.datasets import DetectionDataset
+from jsk_recognition_utils.datasets import BboxDetectionDataset
 import rospkg
 
 # https://docs.chainer.org/en/stable/tips.html#my-training-process-gets-stuck-when-using-multiprocessiterator
@@ -146,6 +147,8 @@ def main():
     parser.add_argument('--val-dataset-dir', type=str,
                         default=osp.join(jsk_perception_datasets_path,
                                          'kitchen_dataset', 'test'))
+    parser.add_argument('--dataset-type', type=str,
+                        default='instance')
     parser.add_argument(
         '--model-name', choices=('ssd300', 'ssd512'), default='ssd512')
     parser.add_argument('--gpu', type=int, default=0)
@@ -154,7 +157,14 @@ def main():
     parser.add_argument('--out-dir', type=str, default=None)
     args = parser.parse_args()
 
-    train_dataset = DetectionDataset(args.train_dataset_dir)
+    if (args.dataset_type == 'instance'):
+        train_dataset = DetectionDataset(args.train_dataset_dir)
+    elif (args.dataset_type == 'bbox'):
+        train_dataset = BboxDetectionDataset(args.train_dataset_dir)
+    else:
+        print 'unsuppported dataset type'
+        return
+
     fg_label_names = train_dataset.fg_class_names
 
     if args.model_name == 'ssd300':
@@ -177,7 +187,11 @@ def main():
         Transform(model.coder, model.insize, model.mean))
     train_iter = chainer.iterators.MultiprocessIterator(train, args.batch_size)
 
-    test_dataset = DetectionDataset(args.val_dataset_dir)
+    if (args.dataset_type == 'instance'):
+        test_dataset = DetectionDataset(args.val_dataset_dir)
+    elif (args.dataset_type == 'bbox'):
+        test_dataset = BboxDetectionDataset(args.val_dataset_dir)
+
     test_iter = chainer.iterators.SerialIterator(
         test_dataset, args.batch_size, repeat=False, shuffle=False)
 

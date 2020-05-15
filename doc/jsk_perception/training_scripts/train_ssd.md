@@ -28,12 +28,38 @@ path_to_awesome_dataset/
 `-- etc.
 ```
 
+`BboxDetectionDataset` (imported from `jsk_recognition_utils.datasets`)
+
+This class assumes the following directory structure for each split.
+This can be generated using [labelme](https://github.com/wkentaro/labelme/tree/master/examples/bbox_detection)
+
+```
+path_to_awesome_dataset/
+|-- JPEGImages
+|   |-- foo.jpg
+|   |-- bar.jpg
+|   `-- etc.
+|-- Annotations
+|   |-- foo.xml
+|   |-- bar.xml
+|   `-- etc.
+|-- AnnotationsVisualization (not necessary)
+|   |-- foo.jpg
+|   |-- bar.jpg
+|   `-- etc.
+`-- class_names.txt
+```
+
 ## Arguments
 
 - `--train-dataset-dir` (`string`, default: `$(rospack find jsk_perception)/learning_datasets/kitchen_dataset/train`)
 - `--val-dataset-dir` (`string`, default: `$(rospack find jsk_perception)/learning_datasets/kitchen_dataset/test`)
 
   Directory name which contains dataset for training and validation respectively.
+
+- `--dataset-type` (`string`, default: `instance`)
+
+  Choose dataset type. If you use `DetectionDataset` structure, choose `instance`. If you use `BboxDetectionDataset`, choose `bbox`.
 
 - `--model-name` (`string`, default: `ssd512`)
 

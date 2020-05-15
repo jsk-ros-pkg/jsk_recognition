@@ -12,9 +12,10 @@
       encoding: bgr8
     </rosparam>
   </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <include file="$(find jsk_perception)/launch/imagenet_object_recognition.launch">
-    <arg name="INPUT_IMAGE" value="/image_publisher/output" />
+    <arg name="INPUT_IMAGE" default="$(arg INPUT_IMAGE)" />
     <arg name="gpu" value="$(arg gpu)" />
     <arg name="network" value="$(arg network)" />
   </include>
@@ -22,7 +23,7 @@
   <node name="draw_classification_result"
         pkg="jsk_perception" type="draw_classification_result.py">
     <remap from="~input" to="object_recognition/output" />
-    <remap from="~input/image" to="image_publisher/output" />
+    <remap from="~input/image" to="$(arg INPUT_IMAGE)" />
   </node>
 
   <group if="$(arg gui)">

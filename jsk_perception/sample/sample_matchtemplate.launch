@@ -8,6 +8,7 @@
       publish_info: false
     </rosparam>
   </node>
+  <arg name="INPUT_IMAGE" default="image_publisher_search/output" />
 
   <node name="image_publisher_reference"
         pkg="jsk_perception" type="image_publisher.py">
@@ -16,6 +17,7 @@
       publish_info: false
     </rosparam>
   </node>
+  <arg name="REFERENCE_IMAGE" default="image_publisher_reference/output" />
 
   <node name="reference_point_publisher"
         pkg="rostopic" type="rostopic"
@@ -29,8 +31,8 @@
 
   <node name="matchtemplate"
         pkg="jsk_perception" type="matchtemplate.py">
-    <remap from="search" to="image_publisher_search/output"/>
-    <remap from="reference" to="image_publisher_reference/output"/>
+    <remap from="search" to="$(arg INPUT_IMAGE)"/>
+    <remap from="reference" to="$(arg REFERENCE_IMAGE)"/>
     <remap from="set_reference_point" to="reference_point_publisher/output"/>
     <remap from="set_search_rect" to="search_rect_publisher/output"/>
     <remap from="debug_image" to="~debug_image"/>

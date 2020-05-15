@@ -11,16 +11,17 @@
       publish_info: false
     </rosparam>
   </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <include file="$(find jsk_perception)/launch/fast_rcnn.launch">
-    <arg name="INPUT_IMAGE" value="image_publisher/output" />
+    <arg name="INPUT_IMAGE" default="$(arg INPUT_IMAGE)" />
     <arg name="MODEL" value="$(arg model)" />
     <arg name="GPU" value="$(arg gpu)" />
   </include>
 
   <node name="draw_rects" pkg="jsk_perception" type="draw_rects"
         output="screen">
-    <remap from="~input" to="image_publisher/output" />
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <remap from="~input/rects" to="fast_rcnn/output/rect_array" />
     <remap from="~input/class" to="fast_rcnn/output/class" />
     <rosparam>

@@ -11,6 +11,7 @@
       file_name: $(find jsk_perception)/sample/depth_prediction_rgb.jpg
     </rosparam>
   </node>
+  <arg name="INPUT_IMAGE" default="image_publisher_rgb/output" />
 
   <node name="image_publisher_depth"
         pkg="jsk_perception" type="image_publisher.py">
@@ -20,6 +21,7 @@
       file_name: $(find jsk_perception)/sample/depth_prediction_depth.jpg
     </rosparam>
   </node>
+  <arg name="DEPTH_IMAGE" default="image_publisher_depth/output" />
 
   <rosparam command="load" file="$(find jsk_perception)/config/refrigerator_target_names.yaml"
             ns="label_names" />
@@ -27,8 +29,8 @@
   <node name="fcn_depth_prediction"
         pkg="jsk_perception" type="fcn_depth_prediction.py"
         output="screen">
-    <remap from="~input" to="image_publisher_rgb/output" />
-    <remap from="~input/depth" to="image_publisher_depth/output" />
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/depth" to="$(arg DEPTH_IMAGE)" />
     <remap from="~target_names" to="label_names" />
     <rosparam subst_value="true">
       gpu: $(arg gpu)

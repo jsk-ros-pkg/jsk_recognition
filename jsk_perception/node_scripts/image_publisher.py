@@ -42,15 +42,21 @@ class ImagePublisher(object):
     def _cb_dyn_reconfig(self, config, level):
         file_name = config['file_name']
         config['file_name'] = os.path.abspath(file_name)
-        img_bgr = cv2.imread(file_name)
-        if img_bgr is None:
+        img = cv2.imread(file_name, cv2.IMREAD_UNCHANGED)
+        # when file is gray scale but encoding is not grayscale,
+        # load the image again in color
+        if (len(img.shape) == 2 and
+                getCvType(self.encoding) not in [
+                    cv2.CV_8UC1, cv2.CV_16UC1, cv2.CV_32FC1]):
+            img = cv2.imread(file_name, cv2.IMREAD_COLOR)
+        if img is None:
             rospy.logwarn('Could not read image file: {}'.format(file_name))
             with self.lock:
                 self.imgmsg = None
         else:
             rospy.loginfo('Read the image file: {}'.format(file_name))
             with self.lock:
-                self.imgmsg = self.cv2_to_imgmsg(img_bgr, self.encoding)
+                self.imgmsg = self.cv2_to_imgmsg(img, self.encoding)
         return config
 
     def publish(self, event):
@@ -84,30 +90,39 @@ class ImagePublisher(object):
                 info.R = [1, 0, 0, 0, 1, 0, 0, 0, 1]
             self.pub_info.publish(info)
 
-    def cv2_to_imgmsg(self, img_bgr, encoding):
+    def cv2_to_imgmsg(self, img, encoding):
         bridge = cv_bridge.CvBridge()
         # resolve encoding
-        if getCvType(encoding) == 0:
+        if getCvType(encoding) in [cv2.CV_8UC1, cv2.CV_16UC1, cv2.CV_32FC1]:
             # mono8
-            img = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-        elif getCvType(encoding) == 2:
-            # 16UC1
-            img = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-            img = img.astype(np.float32)
-            img = img / 255 * (2 ** 16)
-            img = img.astype(np.uint16)
-        elif getCvType(encoding) == 5:
-            # 32FC1
-            img = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-            img = img.astype(np.float32)
-            img /= 255
-        elif getCvType(encoding) == 16:
+            if len(img.shape) == 3:
+                if img.shape[2] == 4:
+                    code = cv2.COLOR_BGRA2GRAY
+                else:
+                    code = cv2.COLOR_BGR2GRAY
+                img = cv2.cvtColor(img, code)
+            if getCvType(encoding) == cv2.CV_16UC1:
+                # 16UC1
+                img = img.astype(np.float32)
+                img = img / 255 * (2 ** 16)
+                img = img.astype(np.uint16)
+            elif getCvType(encoding) == cv2.CV_32FC1:
+                # 32FC1
+                img = img.astype(np.float32)
+                img /= 255
+        elif getCvType(encoding) == cv2.CV_8UC3 and len(img.shape) == 3:
             # 8UC3
+            # BGRA, BGR -> BGR
+            img = img[:, :, :3]
+            # BGR -> RGB
             if encoding in ('rgb8', 'rgb16'):
-                # RGB
-                img = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
-            else:
-                img = img_bgr
+                img = img[:, :, ::-1]
+        elif (getCvType(encoding) == cv2.CV_8UC4 and
+                len(img.shape) == 3 and img.shape[2] == 4):
+            # 8UC4
+            if encoding in ('rgba8', 'rgba16'):
+                # BGRA -> RGBA
+                img = img[:, :, [2, 1, 0, 3]]
         else:
             rospy.logerr('unsupported encoding: {0}'.format(encoding))
             return

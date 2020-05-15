@@ -12,6 +12,7 @@
         args="$(arg filename) --clock --loop"/>
 
   <include file="$(find audio_to_spectrogram)/launch/audio_to_spectrogram.launch" >
+    <arg name="launch_audio_capture" value="false" />
     <arg name="gui" value="$(arg gui)" />
   </include>
 

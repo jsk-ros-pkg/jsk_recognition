@@ -2,17 +2,35 @@
 <!-- audio -> spectrum -> spectrogram -->
 
 <launch>
-  <arg name="gui" default="true" />
+  <arg name="launch_audio_capture" default="true" />
+
+  <arg name="bitdepth" default="16" />
+  <arg name="mic_sampling_rate" default="16000" />
+  <arg name="device" default="hw:0,0" />
   <arg name="audio_topic" default="/audio" />
+  <arg name="gui" default="true" />
+
+  <!-- Publish audio topic from microphone -->
+  <node name="audio_capture" pkg="audio_capture" type="audio_capture"
+        if="$(arg launch_audio_capture)"
+        respawn="true">
+    <rosparam subst_value="true">
+      format: wave
+      channels: 1
+      depth: $(arg bitdepth)
+      sample_rate: $(arg mic_sampling_rate)
+      device: $(arg device)
+    </rosparam>
+  </node>
 
   <!-- convert audio topic to spectrum topic -->
   <node pkg="audio_to_spectrogram" type="audio_to_spectrum.py" name="audio_to_spectrum" respawn="true">
     <remap from="~audio" to="$(arg audio_topic)" />
-    <rosparam>
+    <rosparam subst_value="true">
       <!-- meaning of rosparams below are described in audio_to_spectrum.py -->
-      mic_sampling_rate: 16000
+      mic_sampling_rate: $(arg mic_sampling_rate)
       fft_sampling_period: 0.3
-      bitdepth: 16
+      bitdepth: $(arg bitdepth)
       high_cut_freq: 800
       low_cut_freq: 1
       fft_exec_rate: 50

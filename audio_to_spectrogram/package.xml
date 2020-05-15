@@ -9,6 +9,7 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <run_depend>audio_capture</run_depend>
   <run_depend>audio_common_msgs</run_depend>
   <run_depend>cv_bridge</run_depend>
   <run_depend>image_view</run_depend>

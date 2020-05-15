@@ -176,6 +176,8 @@ def main():
     if args.out_dir is None:
         out_dir = osp.join(
             rospkg.get_ros_home(), 'learning_logs', timestamp)
+    else:
+        out_dir = args.out_dir
 
     step_epoch = [args.max_epoch * 2 // 3, args.max_epoch * 5 // 6]
     trainer = training.Trainer(

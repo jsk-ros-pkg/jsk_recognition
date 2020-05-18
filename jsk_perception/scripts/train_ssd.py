@@ -162,7 +162,7 @@ def main():
     elif (args.dataset_type == 'bbox'):
         train_dataset = BboxDetectionDataset(args.train_dataset_dir)
     else:
-        print 'unsuppported dataset type'
+        print('unsuppported dataset type')
         return
 
     fg_label_names = train_dataset.fg_class_names

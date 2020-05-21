@@ -26,26 +26,26 @@ It retrieves 3-D environment as pointcloud.
    Pointcloud source to estimate 3D points that the user wantedt to specify on a 2D screen
 * `~point` (`geometry_msgs/PointStamped`):
 
-   Input point to represent (u, v) image coordinate and this topic is enabled only if `~use_point` parameter is set `True`.
+   Input point to represent (u, v) image coordinate.
    Only x and y fileds are used and the header frame_id is ignored.
-   If `~use_sync` parameter is set `True`, `~points` and `~point` are synchronized.
+   If `~synchronization` parameter is set `True`, `~points` and `~point` are synchronized.
 
 * `~rect` (`geometry_msgs/PolygonStamped`):
 
-   Input rectangular region on image local coordinates and this topic is enabled only if `~use_rect` parameter is set `True`.
+   Input rectangular region on image local coordinates.
    Only x and y fields are used and the header frame_id is ignored.
    And the region should be rectangular.
-   If `~use_sync` parameter is set `True`,
+   If `~synchronization` parameter is set `True`, `~points` and `~rect` are synchronized.
 
 * `~poly` (`geometry_msgs/PolygonStamped`):`
 
   Input polygonal region in image local coordinates.
+  If `~synchronization` parameter is set `True`, `~points` and `~poly` are synchronized.
 * `~point_array` (`sensor_msgs/PointCloud2`):
 
-   Input points to represent series of (u, v) image coordinate and this
-   topic is enabled only if `~use_point_array` parameter is set `True`.
+   Input points to represent series of (u, v) image coordinate.
    Only x and y fields are used and the header frame_id is ignored.
-   If `~use_sync` parameter is set `True`, `~point_array` and `~point` are
+   If `~synchronization` parameter is set `True`, `~points` and `~point_array` are
    synchronized.
 
 ## Publishing Topics
@@ -79,30 +79,21 @@ geometry_msgs/Vector3 vector
    With int this service, the latest pointcloud acquired by `~points` is used to convert (u, v) into 3-D point.
 
 ## Parameters
-* `~use_sync` (Boolean, default: `False`):
+* `~synchronization` (Boolean, default: `False`):
 
    If this parameter is set to `True`, the timestamps of 3-D pointcloud and the target point/rectangle/point array are synchronized.
+* `~approximate_sync` (Boolean, default: `False`):
+
+   If this parameter is set to `True`, approximate synchronization is enabled. This parameter is valid only when `~synchronization` is `True`.
 * `~queue_size` (Integer, default: `1`):
 
    Queue length of subscribing topics.
 * `~crop_size` (Integer, default: `10`):
 
    The size of approximate region if `~points` pointcloud has nan holes.
-* `~use_rect` (Boolean, default: `False`):
+* `~search_size` (Integer, default: `16`):
 
-   Enable `~polygon` topic.
-* `~use_poly` (Boolean, default: `False`):
+   Size to search normal of point cloud.
+* `~timeout` (Double, default: `3.0`):
 
-   Enable `~poly` topic.
-* `~use_point` (Boolean, default: `False`):
-
-   Enable `~point` topic.
-* `~use_point_array` (Boolean, default: `False`):
-
-   Enable `~point_array` topic.
-* `~publish_points` (Boolean, default: `False`):
-
-   Publish result of screenpoint to `~output` topic.
-* `~publish_point` (Boolean, default: `False`):
-
-   Publish result of screenpoint to `~output_point` topic.
+   Timeout to wait for point cloud.

@@ -88,9 +88,9 @@ class SSDDataset(chainer.dataset.DatasetMixin):
             try:
                 l = self.label_names.index(anno_i['label_class'])
             except Exception as e:
-                print >> sys.stderr, "Failed to index label class: {}".format(anno_i)
-                print >> sys.stderr, "image file name: {}".format(img_filename)
-                print >> sys.stderr, "annotation file name: {}".format(anno_filename)
+                print("Failed to index label class: {}".format(anno_i), file=sys.stderr)
+                print("image file name: {}".format(img_filename), file=sys.stderr)
+                print("annotation file name: {}".format(anno_filename), file=sys.stderr)
                 continue
             bbox.append(
                 [center_y - h / 2, center_x - w / 2,
@@ -188,7 +188,7 @@ if __name__ == '__main__':
     with open(args.label_file, "r") as f:
         label_names = tuple(yaml.load(f))
 
-    print "Loaded %d labels" % len(label_names)
+    print("Loaded %d labels" % len(label_names))
 
     if args.val is None:
         dataset = SSDDataset(args.train, label_names)
@@ -198,7 +198,7 @@ if __name__ == '__main__':
         train = SSDDataset(args.train, label_names)
         test  = SSDDataset(args.val, label_names)
 
-    print "train: {}, test: {}".format(len(train), len(test))
+    print("train: {}, test: {}".format(len(train), len(test)))
 
     pretrained_model = SSD300(pretrained_model=args.base_model)
 

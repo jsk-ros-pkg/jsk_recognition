@@ -24,12 +24,15 @@ Original issue: [attention_clipper does not work properly on Kinetic + PCL1.8.0]
 * `~input/points` (`sensor_msgs/PointCloud2`)
 
   Original pointcloud.
+
 * `~input/pose` (`geometry_msgs/PoseStamped`)
 * `~input/box` (`jsk_recognition_msgs/BoundingBox`)
+
   Specify the pose of the bounding box. Timestamp will be ignored and camera info's timestamp will be used. If you use `~input/box`, you can change the size of attention region. There callbacks are only enabled if `~use_multiple_attention` is false.
 
 * `~input/pose_array` (`geometry_msgs/PoseArray`)
 * `~input/box_array` (`jsk_recognition_msgs/BoundingBoxArray`)
+
   It's an array version of `~input/pose` and `~input/box`. There callbacks are only enabled if `~use_multiple_attention` is true.
 
 ## Publishing Topic
@@ -97,7 +100,7 @@ Original issue: [attention_clipper does not work properly on Kinetic + PCL1.8.0]
   Publish points which are not inside of attention regions if this parameter is true.
 
 ## For use
- If you want to get PointCloud2 which are inside of interest regions, you should use [ExtractIndices](./extract_indices.md) node like in sample_attention_clipper.launch
+If you want to get PointCloud2 which are inside of interest regions, you should use [ExtractIndices](./extract_indices.md) node like in [sample_attention_clipper.launch](https://github.com/jsk-ros-pkg/jsk_recognition/blob/master/jsk_pcl_ros/sample/sample_attention_clipper.launch).
 
 ## Sample
 

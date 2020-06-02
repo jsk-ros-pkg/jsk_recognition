@@ -95,6 +95,9 @@ Original issue: [attention_clipper does not work properly on Kinetic + PCL1.8.0]
 
   Publish points which are not inside of attention regions if this parameter is true.
 
+## For use
+ If you want to get PointCloud2 which are inside of interest regions, you should use [ExtractIndices](https://jsk-recognition.readthedocs.io/en/latest/jsk_pcl_ros/nodes/extract_indices.html) node like in sample_attention_clipper.launch
+
 ## Sample
 
 ```bash

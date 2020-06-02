@@ -91,12 +91,13 @@ Original issue: [attention_clipper does not work properly on Kinetic + PCL1.8.0]
   `~dimensions` should follow `[[x, y, z], ...]`.
   `~prefixes` `[prefix1, prefix2, ...]`. These prefixes will add to the /point_indices and advertise
   Available only if `~use_multiple_attention` is true.
+
 * `~negative` (Boolean, default: `False`)
 
   Publish points which are not inside of attention regions if this parameter is true.
 
 ## For use
- If you want to get PointCloud2 which are inside of interest regions, you should use [ExtractIndices](https://jsk-recognition.readthedocs.io/en/latest/jsk_pcl_ros/nodes/extract_indices.html) node like in sample_attention_clipper.launch
+ If you want to get PointCloud2 which are inside of interest regions, you should use [ExtractIndices](./extract_indices.md) node like in sample_attention_clipper.launch
 
 ## Sample
 

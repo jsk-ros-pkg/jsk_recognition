@@ -1,0 +1,69 @@
+<launch>
+  <arg name="gui" default="true"/>
+  <arg name="gpu" default="0" />
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml"/>
+
+  <node name="ssd_73b2_kitchen"
+        pkg="jsk_perception" type="ssd_object_detector.py"
+        clear_params="true">
+    <remap from="~input" to="/kinect_head/rgb/image_rect_color" />
+    <rosparam command="load"
+              file="$(find jsk_perception)/trained_data/ssd512_73B2_kitchen_20191114_classnames.yaml" />
+    <rosparam subst_value="true">
+      gpu: $(arg gpu)
+      model: ssd512
+      model_path: $(find jsk_perception)/trained_data/ssd512_73B2_kitchen_20191114.npz
+    </rosparam>
+  </node>
+  <node name="rects_to_cpi"
+        pkg="jsk_recognition_utils" type="rect_array_to_cluster_point_indices.py"
+        output="screen">
+    <remap from="~input" to="ssd_73b2_kitchen/output/rect"/>
+    <remap from="~input/info" to="/kinect_head/rgb/camera_info" />
+    <rosparam>
+      use_info: true
+      approximate_sync: true
+      queue_size: 100
+    </rosparam>
+  </node>
+
+  <node name="nodelet_manager" pkg="nodelet" type="nodelet" args="manager" />
+  <node name="multi_euclidean_clustering" pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/MultiEuclideanClustering nodelet_manager"
+        output="screen">
+    <remap from="~input" to="/kinect_head/depth_registered/points" />
+    <remap from="~input/cluster_indices" to="rects_to_cpi/output" />
+    <rosparam>
+      downsample: true
+    </rosparam>
+  </node>
+
+  <node name="cpi_decomposer" pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ClusterPointIndicesDecomposer nodelet_manager"
+        output="screen">
+    <remap from="~input" to="/kinect_head/depth_registered/points" />
+    <remap from="~target" to="/multi_euclidean_clustering/output" />
+    <rosparam subst_value="true">
+      use_pca: true
+      approximate_sync: true
+      queue_size: 100
+    </rosparam>
+  </node>
+
+  <node name="image_cluster_indices_decomposer"
+        pkg="jsk_perception" type="image_cluster_indices_decomposer.py"
+        output="screen">
+    <remap from="~input" to="/kinect_head/rgb/image_rect_color" />
+    <remap from="~input/cluster_indices" to="rects_to_cpi/output" />
+    <rosparam>
+      approximate_sync: true
+      queue_size: 100
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node pkg="rviz" type="rviz" name="$(anon rviz)"
+          args=" -d $(find jsk_pcl_ros)/sample/rviz/multi_euclidean_clustering.rviz"/>
+  </group>
+</launch>

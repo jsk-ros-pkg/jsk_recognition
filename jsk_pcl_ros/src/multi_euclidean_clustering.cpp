@@ -17,8 +17,8 @@ namespace jsk_pcl_ros
     pub_cluster_indices_ =
       advertise<jsk_recognition_msgs::ClusterPointIndices>(*pnh_, "output", 1);
 
+    cloud_.reset(new pcl::PointCloud<pcl::PointXYZ>);
     onInitPostProcess();
-
   }
 
   void MultiEuclideanClustering::subscribe()

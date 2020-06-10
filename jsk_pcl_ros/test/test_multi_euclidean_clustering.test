@@ -1,0 +1,16 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_multi_euclidean_clustering.launch">
+    <arg name="gui" value="false"/>
+    <arg name="gpu" value="-1" />
+  </include>
+
+  <test test-name="test_multi_euclidean_clustering" name="test_multi_euclidean_clustering"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /multi_euclidean_clustering/output
+      timeout_0: 60
+    </rosparam>
+  </test>
+</launch>

@@ -132,6 +132,7 @@ generate_dynamic_reconfigure_options(
   cfg/PrimitiveShapeClassifier.cfg
   cfg/Kinfu.cfg
   cfg/PointcloudScreenpoint.cfg
+  cfg/MultiEuclideanClustering.cfg
   )
 
 find_package(OpenCV REQUIRED core imgproc)
@@ -374,6 +375,8 @@ jsk_pcl_nodelet(src/voxel_grid_large_scale_nodelet.cpp
   "jsk_pcl/VoxelGridLargeScale" "voxel_grid_large_scale")
 jsk_pcl_nodelet(src/ppf_registration_nodelet.cpp
   "jsk_pcl/PPFRegistration" "ppf_registration")
+jsk_pcl_nodelet(src/multi_euclidean_clustering.cpp
+    "jsk_pcl/MultiEuclideanClustering" "multi_euclidean_clustering")
 
 # kinfu.h uses jsk_rviz_plugins/OverlayText.h, but jsk_recognition should not depends on jsk_visualization
 find_package(jsk_rviz_plugins QUIET)

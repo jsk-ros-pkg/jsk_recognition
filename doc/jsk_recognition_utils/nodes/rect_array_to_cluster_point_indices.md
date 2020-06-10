@@ -27,11 +27,11 @@ Convert `jsk_recognition_msgs/RectArray` to `jsk_recognition_msgs/ClusterPointIn
 
   Subscribe camera_info topic or not
 
-* `img_width`: (Int, required)
+* `~img_width`: (Int, required)
 
   Image width. Required only when `use_info` is `false`.
 
-* `img_height`: (Int, required)
+* `~img_height`: (Int, required)
 
   Image height. Required only when `use_info` is `false`.
 
@@ -39,11 +39,11 @@ Convert `jsk_recognition_msgs/RectArray` to `jsk_recognition_msgs/ClusterPointIn
 
   Queue size for `message_filters`. Used only when `use_info` is `true`.
 
-* `approximate_sync` (Bool, Default: `false`)
+* `~approximate_sync` (Bool, Default: `false`)
 
   Use approximate_sync or not. Used only when `use_info` is `true`.
 
-* `slop` (Float, Default: `0.1`)
+* `~slop` (Float, Default: `0.1`)
 
   Slop size for `message_filters`. Used only when `use_info` is `true`.
 

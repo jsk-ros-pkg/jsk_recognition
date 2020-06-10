@@ -8,9 +8,10 @@
       publish_info: false
     </rosparam>
   </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <include file="$(find opencv_apps)/launch/edge_detection.launch">
-    <arg name="image" value="image_publisher/output"/>
+    <arg name="image" value="$(arg INPUT_IMAGE)"/>
     <arg name="debug_view" value="false"/>
   </include>
 

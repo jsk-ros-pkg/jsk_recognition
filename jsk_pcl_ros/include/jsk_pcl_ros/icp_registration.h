@@ -101,7 +101,8 @@ namespace jsk_pcl_ros
     virtual void configCallback (Config &config, uint32_t level);
     virtual void publishDebugCloud(
       ros::Publisher& pub,
-      const pcl::PointCloud<PointT>& cloud);
+      const pcl::PointCloud<PointT>& cloud,
+      const std_msgs::Header& header);
     virtual double alignPointcloud(
       pcl::PointCloud<PointT>::Ptr& cloud,
       pcl::PointCloud<PointT>::Ptr& reference,

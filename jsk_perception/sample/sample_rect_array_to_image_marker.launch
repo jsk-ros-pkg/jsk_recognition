@@ -10,10 +10,11 @@
       publish_info: false
     </rosparam>
   </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <node name="selective_search"
         pkg="jsk_perception" type="selective_search.py">
-    <remap from="~input" to="image_publisher/output" />
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
   </node>
 
   <node name="rect_array_to_image_marker"
@@ -24,7 +25,7 @@
   <group if="$(arg gui)">
     <node name="image_view2"
           pkg="image_view2" type="image_view2">
-      <remap from="image" to="image_publisher/output" />
+      <remap from="image" to="$(arg INPUT_IMAGE)" />
       <remap from="image_marker" to="rect_array_to_image_marker/output" />
     </node>
   </group>

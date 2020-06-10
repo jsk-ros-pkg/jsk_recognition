@@ -48,10 +48,8 @@ class RectArrayToClusterPointIndices(ConnectionBasedTransport):
         self._convert(rects_msg, H, W)
 
     def _convert(self, rects_msg, img_height=None, img_width=None):
-        if img_height is None:
-            H = self.img_height
-        if img_width is None:
-            W = self.img_width
+        H = self.img_height if img_height is None else img_height
+        W = self.img_width if img_width is None else img_width
         cpi_msg = ClusterPointIndices(header=rects_msg.header)
         for rect in rects_msg.rects:
             indices_msg = PointIndices(header=rects_msg.header)

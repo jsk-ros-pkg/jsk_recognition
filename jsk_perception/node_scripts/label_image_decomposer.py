@@ -40,7 +40,7 @@ def label2rgb(lbl, img=None, label_names=None, alpha=0.3, bg_label=0):
 
     lbl_viz = np.zeros((lbl.shape[0], lbl.shape[1], 3), dtype=np.uint8)
     fg_mask = lbl != bg_label
-    lbl_viz[fg_mask] = cmap[lbl[fg_mask] % 256]
+    lbl_viz[fg_mask] = cmap[lbl[fg_mask] % 255]
     lbl_viz[~fg_mask] = bg_color
 
     if img is not None:

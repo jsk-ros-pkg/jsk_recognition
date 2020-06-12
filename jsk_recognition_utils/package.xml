@@ -7,7 +7,7 @@
 
   <url type="repository">http://github.com/jsk-ros-pkg/jsk_recognition</url>
   <url type="bugtracker">http://github.com/jsk-ros-pkg/jsk_recognition/issues</url>
-  <url type="website">http://jsk-docs.readthedocs.io/en/latest/jsk_recognition/jsk_recognition_utils</url>
+  <url type="website">https://jsk-docs.readthedocs.io/projects/jsk_recognition/en/latest/jsk_recognition_utils</url>
 
   <license>BSD</license>
 
@@ -38,7 +38,7 @@
   <run_depend>jsk_topic_tools</run_depend>
   <run_depend>pcl_msgs</run_depend>
   <run_depend>pcl_ros</run_depend>
-  <run_depend>python-chainer-pip</run_depend>
+  <run_depend version_lt="7.0.0">python-chainer-pip</run_depend>
   <run_depend>python-skimage</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>std_msgs</run_depend>

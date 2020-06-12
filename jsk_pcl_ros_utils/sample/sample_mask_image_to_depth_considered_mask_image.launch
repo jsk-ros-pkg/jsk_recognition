@@ -1,0 +1,28 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_shelf_bin.xml" />
+
+
+  <node name="mask_image"
+        pkg="jsk_pcl_ros_utils" type="pointcloud_to_mask_image">
+    <remap from="~input" to="/right_hand_camera/depth_registered/points" />
+  </node>
+
+  <node name="depth_considered" pkg="jsk_pcl_ros_utils" type="mask_image_to_depth_considered_mask_image"
+        output="screen">
+    <remap from="~input" to="/right_hand_camera/depth_registered/points"/>
+    <remap from="~input/image" to="mask_image/output"/>
+    <rosparam>
+      approximate_sync: true
+      queue_size: 100
+      use_mask_region: false
+      extract_num: 70000
+    </rosparam>
+  </node>
+
+  <node if="$(arg gui)"
+        name="image_view" pkg="image_view" type="image_view">
+    <remap from="image" to="depth_considered/output"/>
+  </node>
+</launch>

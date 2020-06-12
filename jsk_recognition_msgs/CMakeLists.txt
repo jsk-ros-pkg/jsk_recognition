@@ -22,6 +22,8 @@ add_message_files(
   HistogramWithRangeBin.msg
   HistogramWithRange.msg
   HistogramWithRangeArray.msg
+  HumanSkeleton.msg
+  HumanSkeletonArray.msg
   ICPResult.msg
   ImageDifferenceValue.msg
   Int32Stamped.msg
@@ -52,6 +54,7 @@ add_message_files(
   SparseOccupancyGridCell.msg
   SparseOccupancyGridColumn.msg
   SparseOccupancyGrid.msg
+  Spectrum.msg
   TimeRange.msg
   TorusArray.msg
   Torus.msg

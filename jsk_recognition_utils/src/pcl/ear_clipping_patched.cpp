@@ -65,7 +65,7 @@ pcl::EarClippingPatched::performProcessing (PolygonMesh& output)
 void
 pcl::EarClippingPatched::triangulate (const Vertices& vertices, PolygonMesh& output)
 {
-  const int n_vertices = static_cast<const int> (vertices.vertices.size ());
+  const size_t n_vertices = vertices.vertices.size ();
 
   if (n_vertices < 3)
     return;
@@ -75,76 +75,55 @@ pcl::EarClippingPatched::triangulate (const Vertices& vertices, PolygonMesh& out
     return;
   }
 
-  std::vector<uint32_t> remaining_vertices (n_vertices);
-  if (area (vertices.vertices) > 0) // clockwise?
-    remaining_vertices = vertices.vertices;
-  else
-    for (int v = 0; v < n_vertices; v++)
+  std::vector<uint32_t> remaining_vertices = vertices.vertices;
+  size_t count = triangulateClockwiseVertices(remaining_vertices, output);
+
+  // if the input vertices order is anti-clockwise, it always left a
+  // convex polygon and start infinite loops, which means will left more
+  // than 3 points.
+  if (remaining_vertices.size() < 3) return;
+
+  output.polygons.erase(output.polygons.end(), output.polygons.end() + count);
+  remaining_vertices.resize(n_vertices);
+  for (size_t v = 0; v < n_vertices; v++)
       remaining_vertices[v] = vertices.vertices[n_vertices - 1 - v];
+  triangulateClockwiseVertices(remaining_vertices, output);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+size_t
+pcl::EarClippingPatched::triangulateClockwiseVertices (std::vector<uint32_t>& vertices, PolygonMesh& output)
+{
+  // triangles count
+  size_t count = 0;
 
   // Avoid closed loops.
-  if (remaining_vertices.front () == remaining_vertices.back ())
-    remaining_vertices.erase (remaining_vertices.end () - 1);
+  if (vertices.front () == vertices.back ())
+    vertices.erase (vertices.end () - 1);
 
   // null_iterations avoids infinite loops if the polygon is not simple.
-  for (int u = static_cast<int> (remaining_vertices.size ()) - 1, null_iterations = 0;
-      remaining_vertices.size () > 2 && null_iterations < static_cast<int >(remaining_vertices.size () * 2);
-      ++null_iterations, u = (u+1) % static_cast<int> (remaining_vertices.size ()))
+  for (int u = static_cast<int> (vertices.size ()) - 1, null_iterations = 0;
+      vertices.size () > 2 && null_iterations < static_cast<int >(vertices.size () * 2);
+      ++null_iterations, u = (u+1) % static_cast<int> (vertices.size ()))
   {
-    int v = (u + 1) % static_cast<int> (remaining_vertices.size ());
-    int w = (u + 2) % static_cast<int> (remaining_vertices.size ());
+    int v = (u + 1) % static_cast<int> (vertices.size ());
+    int w = (u + 2) % static_cast<int> (vertices.size ());
 
-    if (isEar (u, v, w, remaining_vertices))
+    if (vertices.size() == 3 || isEar (u, v, w, vertices))
     {
       Vertices triangle;
       triangle.vertices.resize (3);
-      triangle.vertices[0] = remaining_vertices[u];
-      triangle.vertices[1] = remaining_vertices[v];
-      triangle.vertices[2] = remaining_vertices[w];
+      triangle.vertices[0] = vertices[u];
+      triangle.vertices[1] = vertices[v];
+      triangle.vertices[2] = vertices[w];
       output.polygons.push_back (triangle);
-      remaining_vertices.erase (remaining_vertices.begin () + v);
+      vertices.erase (vertices.begin () + v);
       null_iterations = 0;
+      count++;
     }
   }
+  return count;
 }
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-float
-pcl::EarClippingPatched::area (const std::vector<uint32_t>& vertices)
-{
-    //if the polygon is projected onto the xy-plane, the area of the polygon is determined
-    //by the trapeze formula of Gauss. However this fails, if the projection is one 'line'.
-    //Therefore the following implementation determines the area of the flat polygon in 3D-space
-    //using Stoke's law: http://code.activestate.com/recipes/578276-3d-polygon-area/
-
-    int n = static_cast<int> (vertices.size ());
-    float area = 0.0f;
-    Eigen::Vector3f prev_p, cur_p;
-    Eigen::Vector3f total (0,0,0);
-    Eigen::Vector3f unit_normal;
-
-    if (n > 3)
-    {
-        for (int prev = n - 1, cur = 0; cur < n; prev = cur++)
-        {
-            prev_p = points_->points[vertices[prev]].getVector3fMap();
-            cur_p = points_->points[vertices[cur]].getVector3fMap();
-
-            total += prev_p.cross( cur_p );
-        }
-
-        //unit_normal is unit normal vector of plane defined by the first three points
-        prev_p = points_->points[vertices[1]].getVector3fMap() - points_->points[vertices[0]].getVector3fMap();
-        cur_p = points_->points[vertices[2]].getVector3fMap() - points_->points[vertices[0]].getVector3fMap();
-        unit_normal = (prev_p.cross(cur_p)).normalized();
-
-        area = total.dot( unit_normal );
-    }
-
-    return area * 0.5f; 
-}
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 bool
@@ -156,16 +135,17 @@ pcl::EarClippingPatched::isEar (int u, int v, int w, const std::vector<uint32_t>
   p_w = points_->points[vertices[w]].getVector3fMap();
 
   const float eps = 1e-15f;
-  Eigen::Vector3f p_uv, p_uw;
-  p_uv = p_v - p_u;
-  p_uw = p_w - p_u;
+  Eigen::Vector3f p_vu, p_vw;
+  p_vu = p_u - p_v;
+  p_vw = p_w - p_v;
 
-  // Avoid flat triangles.
-  if ((p_uv.cross(p_uw)).norm() < eps)
+  // 1: Avoid flat triangles and concave vertex
+  Eigen::Vector3f cross = p_vu.cross(p_vw);
+  if ((cross[2] > 0) || (cross.norm() < eps))
     return (false);
 
   Eigen::Vector3f p;
-  // Check if any other vertex is inside the triangle.
+  // 2: Check if any other vertex is inside the triangle.
   for (int k = 0; k < static_cast<int> (vertices.size ()); k++)
   {
     if ((k == u) || (k == v) || (k == w))
@@ -175,6 +155,25 @@ pcl::EarClippingPatched::isEar (int u, int v, int w, const std::vector<uint32_t>
     if (isInsideTriangle (p_u, p_v, p_w, p))
       return (false);
   }
+
+  // 3: Check if the line segment uw lies completely inside the polygon.
+  // Here we suppose simple polygon (all edges do not intersect by themselves),
+  // so we only check if the middle point of line segment uw is inside the polygon.
+  Eigen::Vector3f p_i0, p_i1;
+  Eigen::Vector3f p_mid_uw = (p_u + p_w) / 2.0;
+  // HACK: avoid double-counting intersection at polygon vertices
+  Eigen::Vector3f p_inf = p_mid_uw + (p_v - p_mid_uw) * 1e15f + p_vu * 1e10f;
+  int intersect_count = 0;
+  for (int i = 0; i < static_cast<int>(vertices.size()); i++)
+  {
+    p_i0 = points_->points[vertices[i]].getVector3fMap();
+    p_i1 = points_->points[vertices[(i + 1) % static_cast<int>(vertices.size())]].getVector3fMap();
+    if (intersect(p_mid_uw, p_inf, p_i0, p_i1))
+      intersect_count++;
+  }
+  if (intersect_count % 2 == 0)
+    return (false);
+
   return (true);
 }
 
@@ -207,3 +206,26 @@ pcl::EarClippingPatched::isInsideTriangle (const Eigen::Vector3f& u,
   return (a >= 0) && (b >= 0) && (a + b < 1);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+bool
+pcl::EarClippingPatched::intersect (const Eigen::Vector3f& p0,
+                                    const Eigen::Vector3f& p1,
+                                    const Eigen::Vector3f& p2,
+                                    const Eigen::Vector3f& p3)
+{
+  // See http://mathworld.wolfram.com/Line-LineIntersection.html
+  Eigen::Vector3f a = p1 - p0;
+  Eigen::Vector3f b = p3 - p2;
+  Eigen::Vector3f c = p2 - p0;
+
+  // Parallel line segments do not intersect each other.
+  if (a.cross(b).norm() == 0)
+    return (false);
+
+  // Compute intersection of two lines.
+  float s = (c.cross(b)).dot(a.cross(b)) / ((a.cross(b)).norm() * (a.cross(b)).norm());
+  float t = (c.cross(a)).dot(a.cross(b)) / ((a.cross(b)).norm() * (a.cross(b)).norm());
+
+  // Check if the intersection is inside the line segments.
+  return ((s >= 0 && s <= 1) && (t >= 0 && t <= 1));
+}

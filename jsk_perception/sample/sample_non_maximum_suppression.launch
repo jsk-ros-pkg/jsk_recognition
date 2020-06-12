@@ -1,8 +1,10 @@
 <launch>
   <arg name="gui" default="true"/>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <include file="$(find jsk_perception)/sample/sample_selective_search.launch">
     <arg name="gui" value="false"/>
+    <arg name="INPUT_IMAGE" default="$(arg INPUT_IMAGE)" />
   </include>
 
   <node name="non_maximum_suppression"
@@ -15,7 +17,7 @@
 
   <node name="draw_rects_nms"
         pkg="jsk_perception" type="draw_rects">
-    <remap from="~input" to="image_publisher/output"/>
+    <remap from="~input" to="$(arg INPUT_IMAGE)"/>
     <remap from="~input/rects" to="non_maximum_suppression/output"/>
   </node>
 

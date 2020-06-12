@@ -82,11 +82,12 @@ namespace pcl
       void
       triangulate (const Vertices& vertices, PolygonMesh& output);
 
-      /** \brief Compute the signed area of a polygon. 
-        * \param[in] vertices the vertices representing the polygon 
+      /** \brief Triangulate one polygon, assume the vertices are clockwise. 
+        * \param[in] vertices the set of vertices
+        * \param[out] output the resultant polygonal mesh
         */
-      float
-      area (const std::vector<uint32_t>& vertices);
+      size_t
+      triangulateClockwiseVertices (std::vector<uint32_t>& vertices, PolygonMesh& output);
 
       /** \brief Check if the triangle (u,v,w) is an ear. 
         * \param[in] u the first triangle vertex 
@@ -119,6 +120,17 @@ namespace pcl
         return p1[0]*p2[1] - p1[1]*p2[0];
       }
 
+      /** \brief Check if two line segments intersect by themselves.
+        * \param[in] p0 an end of the first line segment
+        * \param[in] p1 the other end of the first line segment
+        * \param[in] p2 an end of the second line segment
+        * \param[in] p3 the other end of the second line segment
+        */
+      bool
+      intersect (const Eigen::Vector3f& p0,
+                 const Eigen::Vector3f& p1,
+                 const Eigen::Vector3f& p2,
+                 const Eigen::Vector3f& p3);
   };
 
 }

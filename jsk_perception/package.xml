@@ -12,7 +12,7 @@
 
   <url type="repository">http://github.com/jsk-ros-pkg/jsk_recognition</url>
   <url type="bugtracker">http://github.com/jsk-ros-pkg/jsk_recognition/issues</url>
-  <url type="website">http://jsk-docs.readthedocs.io/en/latest/jsk_recognition/doc/jsk_perception</url>
+  <url type="website">https://jsk-docs.readthedocs.io/projects/jsk_recognition/en/latest/jsk_perception</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
@@ -77,7 +77,7 @@
   <run_depend>posedetection_msgs</run_depend>
   <!-- install chainer {{ -->
   <run_depend>python-h5py</run_depend>
-  <run_depend>python-chainer-pip</run_depend>
+  <run_depend version_lt="7.0.0">python-chainer-pip</run_depend>
   <run_depend>python-chainercv-pip</run_depend>
   <!-- }} install chainer -->
   <run_depend>python-dlib</run_depend>  <!-- pip -->
@@ -99,6 +99,7 @@
   <run_depend>sound_play</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>tf</run_depend>
+  <run_depend>tf2_geometry_msgs</run_depend>
   <run_depend>topic_tools</run_depend>
   <run_depend>robot_self_filter</run_depend>
   <run_depend>yaml-cpp</run_depend>

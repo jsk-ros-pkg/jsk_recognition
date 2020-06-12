@@ -2,6 +2,7 @@
 
   <env name="DISPLAY" value="" />
 
+  <param name="/use_sim_time" value="true" />
   <include file="$(find jsk_perception)/sample/sample_image_cluster_indices_decomposer.launch" />
 
   <test test-name="test_image_cluster_indices_decomposer"

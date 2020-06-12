@@ -41,6 +41,12 @@ There are some training scripts in jsk_perception package.
       ../jsk_perception/training_scripts/train_mask_rcnn
 
 
+   .. toctree::
+      :maxdepth: 1
+      :caption: Training for object detection
+
+      ../jsk_perception/training_scripts/train_ssd
+
 4. Infer with trained network
 -----------------------------
 
@@ -57,3 +63,9 @@ Now you can use your trained network to infer things as a ROS node.
       :caption: Nodes for instance segmentation
 
       ../jsk_perception/nodes/mask_rcnn_instance_segmentation
+
+   .. toctree::
+      :maxdepth: 1
+      :caption: Nodes for object detection
+
+      ../jsk_perception/nodes/ssd_object_detector

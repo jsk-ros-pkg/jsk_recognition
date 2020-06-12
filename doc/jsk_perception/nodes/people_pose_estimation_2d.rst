@@ -47,6 +47,12 @@ Publishing Topic
 
   If ``with_depth`` is true, publish 2D joint position.
 
+* ``~skeleton`` (``jsk_recognition_msgs/HumanSkeletonArray``)
+
+  If ``with_depth`` is ``true``, publish 3D human skeletons.
+
+  Rviz visualization is available in `jsk-ros-pkg/jsk_visualization #740 <https://github.com/jsk-ros-pkg/jsk_visualization/pull/740>`_.
+
 Parameters
 ----------
 

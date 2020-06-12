@@ -17,7 +17,7 @@
   <test test-name="test_objectdetection_tf_publisher"
         name="test_objectdetection_tf_publisher"
         pkg="jsk_tools" type="test_topic_published.py"
-        time-limit="10" retry="3">
+        time-limit="15" retry="3">
     <rosparam>
       topic_0: /tf_to_transform_map_to_checkerboard/output
       timeout_0: 10

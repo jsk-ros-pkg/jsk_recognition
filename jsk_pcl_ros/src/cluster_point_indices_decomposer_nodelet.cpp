@@ -126,6 +126,7 @@ namespace jsk_pcl_ros
     max_size_ = config.max_size;
     min_size_ = config.min_size;
     use_pca_ = config.use_pca;
+    fill_boxes_label_with_nearest_plane_index_ = config.fill_boxes_label_with_nearest_plane_index;
   }
 
   void ClusterPointIndicesDecomposer::subscribe()
@@ -323,9 +324,10 @@ namespace jsk_pcl_ros
     const jsk_recognition_msgs::PolygonArrayConstPtr& planes,
     const jsk_recognition_msgs::ModelCoefficientsArrayConstPtr& coefficients,
     Eigen::Matrix4f& m4,
-    Eigen::Quaternionf& q)
+    Eigen::Quaternionf& q,
+    int& nearest_plane_index)
   {
-    int nearest_plane_index = findNearestPlane(center, planes, coefficients);
+    nearest_plane_index = findNearestPlane(center, planes, coefficients);
     if (nearest_plane_index == -1) {
       segmented_cloud_transformed = segmented_cloud;
       NODELET_ERROR("no planes to align boxes are given");
@@ -429,11 +431,13 @@ namespace jsk_pcl_ros
     // align boxes if possible
     Eigen::Matrix4f m4 = Eigen::Matrix4f::Identity();
     Eigen::Quaternionf q = Eigen::Quaternionf::Identity();
+    int nearest_plane_index = 0;
     if (align_boxes_) {
       if (align_boxes_with_plane_) {
         is_center_valid = pcl::compute3DCentroid(*segmented_cloud, center) != 0;
         bool success = transformPointCloudToAlignWithPlane(segmented_cloud, segmented_cloud_transformed,
-                                                           center, planes, coefficients, m4, q);
+                                                           center, planes, coefficients, m4, q,
+                                                           nearest_plane_index);
         if (!success) {
           return false;
         }
@@ -495,7 +499,8 @@ namespace jsk_pcl_ros
         planes_by_frame->polygons.push_back(plane_by_frame);
         //
         bool success = transformPointCloudToAlignWithPlane(segmented_cloud, segmented_cloud_transformed,
-                                                           center, planes_by_frame, coefficients_by_frame, m4, q);
+                                                           center, planes_by_frame, coefficients_by_frame, m4, q,
+                                                           nearest_plane_index);
         if (!success) {
           return false;
         }
@@ -548,6 +553,11 @@ namespace jsk_pcl_ros
     bounding_box.dimensions.x = xwidth;
     bounding_box.dimensions.y = ywidth;
     bounding_box.dimensions.z = zwidth;
+    if (align_boxes_ &&
+        align_boxes_with_plane_ &&
+        fill_boxes_label_with_nearest_plane_index_) {
+      bounding_box.label = nearest_plane_index;
+    }
     return true;
   }
 

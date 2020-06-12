@@ -11,7 +11,7 @@
       rate: 30
     </rosparam>
   </node>
-  <arg name="INPUT_IMAGE" value="image_publisher/output" />
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <node name="mask_rcnn_73b2_kitchen"
         pkg="jsk_perception" type="mask_rcnn_instance_segmentation.py"

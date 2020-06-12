@@ -9,11 +9,12 @@
       publish_info: false
     </rosparam>
   </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <node name="single_channel_histogram"
         pkg="nodelet" type="nodelet"
         args="standalone jsk_perception/SingleChannelHistogram">
-    <remap from="~input" to="image_publisher/output"/>
+    <remap from="~input" to="$(arg INPUT_IMAGE)"/>
     <rosparam>
       use_mask: false
       hist_size: 100
@@ -45,7 +46,7 @@
 
     <node name="image_view"
           pkg="image_view" type="image_view">
-      <remap from="image" to="image_publisher/output"/>
+      <remap from="image" to="$(arg INPUT_IMAGE)"/>
     </node>
   </group>
 </launch>

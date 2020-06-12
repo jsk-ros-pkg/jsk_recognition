@@ -11,8 +11,8 @@
     <rosparam>
       topic_0: /consensus_tracking/output/mask
       timeout_0: 30
-      topic_0: /consensus_tracking/debug/image
-      timeout_0: 30
+      topic_1: /consensus_tracking/debug/image
+      timeout_1: 30
     </rosparam>
   </test>
 

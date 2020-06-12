@@ -7,7 +7,7 @@
   <test test-name="test_tf_transform_boundbing_box_array"
         name="test_tf_transform_boundbing_box_array"
         pkg="jsk_tools" type="test_topic_published.py"
-        retry="3">
+         time-limit="45" retry="6">
     <rosparam>
       topic_0: /tf_transform_bounding_box_array/output
       timeout_0: 30

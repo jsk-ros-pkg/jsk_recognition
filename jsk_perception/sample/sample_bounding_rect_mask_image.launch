@@ -10,16 +10,17 @@
       publish_info: false
     </rosparam>
   </node>
+  <arg name="MASK_IMAGE" default="mask_publisher/output" />
 
   <node name="bounding_rect_mask_image"
         pkg="jsk_perception" type="bounding_rect_mask_image">
-    <remap from="~input" to="mask_publisher/output" />
+    <remap from="~input" to="$(arg MASK_IMAGE)" />
   </node>
 
   <group if="$(arg gui)">
     <node name="image_view0"
           pkg="image_view" type="image_view">
-      <remap from="image" to="mask_publisher/output" />
+      <remap from="image" to="$(arg MASK_IMAGE)" />
     </node>
     <node name="image_view1"
           pkg="image_view" type="image_view">

@@ -10,7 +10,7 @@ from jsk_topic_tools import ConnectionBasedTransport
 import message_filters
 import rospy
 from sensor_msgs.msg import Image
-import pkg_resources
+import itertools, pkg_resources
 from distutils.version import StrictVersion
 from threading import Lock
 

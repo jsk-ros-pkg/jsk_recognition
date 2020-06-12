@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_virtual_camera_mono.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_virtual_camera_mono"
+        name="test_virtual_camera_mono"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /virtual_camera_mono/image
+      timeout_0: 30
+      topic_1: /virtual_camera_mono/camera_info
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

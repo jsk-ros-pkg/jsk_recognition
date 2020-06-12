@@ -10,11 +10,12 @@
       publish_info: false
     </rosparam>
   </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <group if="$(arg interactive)">
     <node name="image_view2"
           pkg="image_view2" type="image_view2">
-      <remap from="image" to="image_publisher/output"/>
+      <remap from="image" to="$(arg INPUT_IMAGE)"/>
     </node>
   </group>
 
@@ -27,7 +28,7 @@
 
   <node name="fisheye_ray"
         pkg="jsk_perception" type="fisheye_ray.py">
-    <remap from="image" to="image_publisher/output"/>
+    <remap from="image" to="$(arg INPUT_IMAGE)"/>
     <remap from="clicked_point" to="image_publisher/output/screenpoint" if="$(arg interactive)"/>
     <remap from="clicked_point" to="static_2d_point_publisher/output" unless="$(arg interactive)"/>
     <rosparam>

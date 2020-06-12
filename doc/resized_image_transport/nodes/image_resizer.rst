@@ -50,6 +50,11 @@ Parameters
 
   Topic publishing rate if ``~use_messages`` is ``true``.
 
+- ``~interpolation`` (``String``, default: ``LINEAR``)
+
+  Candidates: NEAREST, LINEAR, AREA, CUBIC, LANCZOS4
+
+  See `this page <https://docs.opencv.org/2.4/modules/imgproc/doc/geometric_transformations.html#resize>`_ for more details
 
 Sample
 ------

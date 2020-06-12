@@ -9,11 +9,12 @@
       publish_info: false
     </rosparam>
   </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <node name="skeletonization"
         pkg="nodelet" type="nodelet"
         args="standalone jsk_perception/Skeletonization">
-    <remap from="~input" to="image_publisher/output"/>
+    <remap from="~input" to="$(arg INPUT_IMAGE)"/>
   </node>
 
   <group if="$(arg gui)">

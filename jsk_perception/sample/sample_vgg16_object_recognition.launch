@@ -11,6 +11,8 @@
       encoding: bgr8
     </rosparam>
   </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
+
   <node name="mask_publisher"
         pkg="jsk_perception" type="image_publisher.py">
     <rosparam subst_value="true">
@@ -19,11 +21,12 @@
       encoding: mono8
     </rosparam>
   </node>
+  <arg name="MASK_IMAGE" default="mask_publisher/output" />
 
   <node name="apply_mask_image"
         pkg="jsk_perception" type="apply_mask_image">
-    <remap from="~input" to="image_publisher/output" />
-    <remap from="~input/mask" to="mask_publisher/output" />
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <remap from="~input/mask" to="$(arg MASK_IMAGE)" />
     <rosparam>
       approximate_sync: true
     </rosparam>
@@ -87,12 +90,12 @@
   <node name="draw_classification_result"
         pkg="jsk_perception" type="draw_classification_result.py">
     <remap from="~input" to="vgg16_object_recognition/output" />
-    <remap from="~input/image" to="image_publisher/output" />
+    <remap from="~input/image" to="$(arg INPUT_IMAGE)" />
   </node>
   <node name="draw_classification_result_masked"
         pkg="jsk_perception" type="draw_classification_result.py">
     <remap from="~input" to="vgg16_object_recognition_masked/output" />
-    <remap from="~input/image" to="image_publisher/output" />
+    <remap from="~input/image" to="$(arg INPUT_IMAGE)" />
   </node>
 
   <group if="$(arg gui)">

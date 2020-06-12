@@ -39,7 +39,6 @@
 
 #include <ros/ros.h>
 #include <tf/tf.h>
-#include <tf/message_filter.h>
 #include <message_filters/subscriber.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <moveit/version.h>
@@ -51,6 +50,12 @@
 #include <pcl/point_cloud.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/filters/extract_indices.h>
+
+#if (ROS_VERSION_MINIMUM(1,14,0) || MOVEIT_VERSION_MAJOR >= 1) // melodic or MoveIt 1.0
+#include <tf2_ros/message_filter.h>
+#else
+#include <tf/message_filter.h>
+#endif
 
 namespace jsk_pcl_ros
 {
@@ -73,7 +78,11 @@ namespace jsk_pcl_ros
   protected:
     virtual void stopHelper();
     virtual bool getShapeTransform(ShapeHandle h,
+#if (ROS_VERSION_MINIMUM(1,14,0) || MOVEIT_VERSION_MAJOR >= 1) // melodic or MoveIt 1.0
+                                   Eigen::Isometry3d &transform) const;
+#else
                                    Eigen::Affine3d &transform) const;
+#endif
     template <typename PointT>
     void cloudMsgCallback(
       const sensor_msgs::PointCloud2::ConstPtr &cloud_msg)
@@ -88,10 +97,17 @@ namespace jsk_pcl_ros
           if (tf_) {
             try
             {
+#if (ROS_VERSION_MINIMUM(1,14,0) || MOVEIT_VERSION_MAJOR >= 1) // melodic or MoveIt 1.0
+              tf::transformStampedMsgToTF(tf_->lookupTransform(monitor_->getMapFrame(),
+                                          cloud_msg->header.frame_id,
+                                          cloud_msg->header.stamp),
+                                          map_H_sensor);
+#else
               tf_->lookupTransform(monitor_->getMapFrame(),
                                    cloud_msg->header.frame_id,
                                    cloud_msg->header.stamp,
                                    map_H_sensor);
+#endif
             }
             catch (tf::TransformException& ex)
             {
@@ -128,7 +144,7 @@ namespace jsk_pcl_ros
           return;
         }
         /* mask out points on the robot */
-#if (MOVEIT_VERSION_MINOR < 6)
+#if (MOVEIT_VERSION_MAJOR == 0 and MOVEIT_VERSION_MINOR < 6)
         shape_mask_->maskContainment(xyz_cloud, sensor_origin_eigen, 0.0,
                                      max_range_, mask_);
 #else   // from moveit 0.6 (indigo), PCL dependency is removed
@@ -160,7 +176,11 @@ namespace jsk_pcl_ros
     ////////////////////////////////////////////////////////
     ros::NodeHandle root_nh_;
     ros::NodeHandle private_nh_;
+#if (ROS_VERSION_MINIMUM(1,14,0) || MOVEIT_VERSION_MAJOR >= 1) // melodic and MoveIt 1.0
+    std::shared_ptr<tf2_ros::Buffer> tf_;
+#else
     boost::shared_ptr<tf::Transformer> tf_;
+#endif
     std::string point_cloud_topic_;
     double scale_;
     double padding_;
@@ -170,7 +190,11 @@ namespace jsk_pcl_ros
     ros::Publisher filtered_cloud_publisher_;
 
     message_filters::Subscriber<sensor_msgs::PointCloud2> *point_cloud_subscriber_;
+#if (ROS_VERSION_MINIMUM(1,14,0) || MOVEIT_VERSION_MAJOR >= 1) // melodic or MoveIt 1.0
+    tf2_ros::MessageFilter<sensor_msgs::PointCloud2> *point_cloud_filter_;
+#else
     tf::MessageFilter<sensor_msgs::PointCloud2> *point_cloud_filter_;
+#endif
 
     boost::scoped_ptr<point_containment_filter::ShapeMask> shape_mask_;
     std::vector<int> mask_;

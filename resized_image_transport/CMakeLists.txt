@@ -60,7 +60,9 @@ add_dependencies(resized_image_transport ${PROJECT_NAME}_gencfg)
 # and the latter is each content.
 
 # Mark executables and/or libraries for installation
-install(TARGETS ${nodelet_executables}
+install(TARGETS
+  resized_image_transport
+  ${nodelet_executables}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -88,5 +90,6 @@ if(CATKIN_ENABLE_TESTING)
     # FIXME: jsk_tools/test_topic_published.py does not work on hydro travis/jenkins
     # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
     add_rostest(test/image_resizer.test)
+    add_rostest(test/log_polar.test)
   endif()
 endif()

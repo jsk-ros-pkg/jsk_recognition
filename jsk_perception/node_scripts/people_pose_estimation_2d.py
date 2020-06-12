@@ -3,8 +3,30 @@
 
 #    See: https://arxiv.org/abs/1611.08050
 
+from __future__ import print_function
+
 import math
 
+import itertools, pkg_resources, sys
+from distutils.version import LooseVersion
+if LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersion('7.0.0') and \
+   sys.version_info.major == 2:
+   print('''Please install chainer <= 7.0.0:
+
+    sudo pip install chainer==6.7.0
+
+c.f https://github.com/jsk-ros-pkg/jsk_recognition/pull/2485
+''', file=sys.stderr)
+   sys.exit(1)
+if [p for p in list(itertools.chain(*[pkg_resources.find_distributions(_) for _ in sys.path])) if "cupy-" in p.project_name ] == []:
+   print('''Please install CuPy
+
+    sudo pip install cupy-cuda[your cuda version]
+i.e.
+    sudo pip install cupy-cuda91
+
+''', file=sys.stderr)
+   sys.exit(1)
 import chainer
 import chainer.functions as F
 from chainer import cuda
@@ -21,8 +43,11 @@ from jsk_topic_tools import ConnectionBasedTransport
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import Point
 from geometry_msgs.msg import Quaternion
+from jsk_recognition_msgs.msg import HumanSkeleton
+from jsk_recognition_msgs.msg import HumanSkeletonArray
 from jsk_recognition_msgs.msg import PeoplePose
 from jsk_recognition_msgs.msg import PeoplePoseArray
+from jsk_recognition_msgs.msg import Segment
 from sensor_msgs.msg import CameraInfo
 from sensor_msgs.msg import Image
 
@@ -136,6 +161,9 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         self.sub_info = None
         if self.with_depth is True:
             self.pose_2d_pub = self.advertise('~pose_2d', PeoplePoseArray, queue_size=1)
+            # visualization rviz plugin: https://github.com/jsk-ros-pkg/jsk_visualization/pull/740
+            self.skeleton_pub = self.advertise(
+                '~skeleton', HumanSkeletonArray, queue_size=1)
 
     def check_wh(self):
         if (self.width is None) != (self.height is None):
@@ -178,12 +206,10 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
                         dx = abs(x - c)
                         e = np.exp(- (dx ** 2 + dy ** 2) / (2 * sigma ** 2))
                         k[0][0][y][x] = 1 / (sigma ** 2 * 2 * np.pi) * e
-                with chainer.cuda.get_device_from_id(self.hand_net._device_id):
-                    k = chainer.cuda.to_gpu(k)
+                k = chainer.cuda.to_gpu(k, device=self.gpu)
                 self.hand_gaussian_kernel = k
-            chainer.global_config.train = False
-            chainer.global_config.enable_backprop = False
-
+        chainer.global_config.train = False
+        chainer.global_config.enable_backprop = False
 
     def subscribe(self):
         if self.with_depth:
@@ -260,6 +286,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         people_pose_2d_msg = self._create_2d_people_pose_array_msgs(
             people_joint_positions,
             img_msg.header)
+        skeleton_msgs = HumanSkeletonArray(header=img_msg.header)
 
         # calculate xyz-position
         fx = camera_info_msg.K[0]
@@ -268,6 +295,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         cy = camera_info_msg.K[5]
         for person_joint_positions in people_joint_positions:
             pose_msg = PeoplePose()
+            skeleton_msg = HumanSkeleton(header=img_msg.header)
             for joint_pos in person_joint_positions:
                 if joint_pos['score'] < 0:
                     continue
@@ -286,8 +314,25 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
                                            orientation=Quaternion(w=1)))
             people_pose_msg.poses.append(pose_msg)
 
+            for i, conn in enumerate(self.limb_sequence):
+                j1_name = self.index2limbname[conn[0] - 1]
+                j2_name = self.index2limbname[conn[1] - 1]
+                if j1_name not in pose_msg.limb_names \
+                        or j2_name not in pose_msg.limb_names:
+                    continue
+                j1_index = pose_msg.limb_names.index(j1_name)
+                j2_index = pose_msg.limb_names.index(j2_name)
+                bone_name = '{}->{}'.format(j1_name, j2_name)
+                bone = Segment(
+                    start_point=pose_msg.poses[j1_index].position,
+                    end_point=pose_msg.poses[j2_index].position)
+                skeleton_msg.bones.append(bone)
+                skeleton_msg.bone_names.append(bone_name)
+            skeleton_msgs.skeletons.append(skeleton_msg)
+
         self.pose_2d_pub.publish(people_pose_2d_msg)
         self.pose_pub.publish(people_pose_msg)
+        self.skeleton_pub.publish(skeleton_msgs)
 
         if self.visualize:
             vis_img = self._draw_joints(img, people_joint_positions, all_peaks)
@@ -336,8 +381,9 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         raise ValueError('Unsupported backend: {0}'.format(self.backend))
 
     def _pose_estimate_chainer_backend(self, bgr_img):
+        if self.gpu >= 0:
+            chainer.cuda.get_device_from_id(self.gpu).use()
         xp = self.pose_net.xp
-        device_id = self.pose_net._device_id
 
         org_h, org_w, _ = bgr_img.shape
         if not (self.width is None or self.height is None):
@@ -356,8 +402,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
             x = np.transpose(np.float32(
                 padded_img[:, :, :, np.newaxis]), (3, 2, 0, 1)) / 256 - 0.5
             if self.gpu >= 0:
-                with chainer.cuda.get_device_from_id(device_id):
-                    x = chainer.cuda.to_gpu(x)
+                x = chainer.cuda.to_gpu(x)
             x = chainer.Variable(x)
             pafs, heatmaps = self.pose_net(x)
             paf = pafs[-1]
@@ -412,7 +457,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
             peaks_order = chainer.cuda.to_cpu(peaks_order)
             all_peaks = all_peaks[np.argsort(peaks_order)]
         all_peaks[:, 3] = xp.arange(peak_counter, dtype=np.float32)
-        if self.gpu != -1:
+        if self.gpu >= 0:
             all_peaks = chainer.cuda.to_cpu(all_peaks)
             peaks_order = chainer.cuda.to_cpu(peaks_order)
         all_peaks = np.split(all_peaks, np.cumsum(
@@ -446,8 +491,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         vec = np.vstack(target_candidates_B)[
             :, :2] - np.vstack(target_candidates_A)[:, :2]
         if self.gpu >= 0:
-            with chainer.cuda.get_device_from_id(device_id):
-                vec = chainer.cuda.to_gpu(vec)
+            vec = chainer.cuda.to_gpu(vec)
         norm = xp.sqrt(xp.sum(vec ** 2, axis=1)) + eps
         vec = vec / norm[:, None]
         start_end = zip(np.round(np.mgrid[np.vstack(target_candidates_A)[:, 1].reshape(-1, 1):np.vstack(target_candidates_B)[:, 1].reshape(-1, 1):(mid_num * 1j)]).astype(np.int32),
@@ -672,6 +716,8 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         raise ValueError('Unsupported backend: {0}'.format(self.backend))
 
     def _hand_estimate_chainer_backend(self, bgr, people_joint_positions):
+        if self.gpu >= 0:
+            chainer.cuda.get_device_from_id(self.gpu).use()
         # https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/29ea7e24dce4abae30faecf769855823ad7bb637/src/openpose/hand/handDetector.cpp
         for joint_positions in people_joint_positions:
             # crop hand image for each person
@@ -720,7 +766,6 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
 
     def _hand_estimate_chainer_backend_each(self, hand_bgr, cx, cy, left_hand):
         xp = self.hand_net.xp
-        device_id = self.hand_net._device_id
 
         if left_hand:
             hand_bgr = cv2.flip(hand_bgr, 1)  # 1 = vertical
@@ -731,8 +776,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
         x = x / 256 - 0.5
 
         if self.gpu >= 0:
-            with chainer.cuda.get_device_from_id(device_id):
-                x = chainer.cuda.to_gpu(x)
+            x = chainer.cuda.to_gpu(x)
         x = chainer.Variable(x)
 
         heatmaps = self.hand_net(x)
@@ -754,8 +798,7 @@ class PeoplePoseEstimation2D(ConnectionBasedTransport):
                 heatmap = gaussian_filter(heatmaps[i], sigma=self.hand_gaussian_sigma)
                 hmaps.append(heatmap)
         else:
-            with chainer.cuda.get_device_from_id(device_id):
-                heatmaps = chainer.cuda.to_gpu(heatmaps)
+            heatmaps = chainer.cuda.to_gpu(heatmaps)
             heatmaps = F.convolution_2d(
                 heatmaps[:, xp.newaxis], self.hand_gaussian_kernel,
                 stride=1, pad=int(self.hand_gaussian_ksize / 2))

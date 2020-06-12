@@ -1,0 +1,116 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <arg name="input" default="/camera/depth/points"/>
+  <arg name="sensor_frame" default="/camera_depth_optical_frame"/>
+
+  <param name="/use_sim_time" value="true"/>
+
+  <node name="rosbag_play"
+        pkg="rosbag" type="play"
+        args="$(find jsk_pcl_ros)/sample/data/2017-06-19-19-34-18_tabletop_coffeecup.bag --clock --loop"/>
+
+  <node name="optical_frame_tf_publisher"
+      pkg="tf" type="static_transform_publisher"
+      args="0 0 0 -1.57 0 -1.57 map camera_depth_optical_frame 10"/>
+
+  <node name="coffee_cup_tf_publisher"
+        pkg="tf" type="static_transform_publisher"
+        args="0 0 0 0 0 0 camera_depth_optical_frame 2016-10-26-02-09-51_coffee_cup 10"/>
+
+  <arg name="manager" value="sample_manager"/>
+
+  <node name="$(arg manager)"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="point_cloud_xyz"
+        pkg="nodelet" type="nodelet"
+        args="load depth_image_proc/point_cloud_xyz $(arg manager)">
+    <remap from="camera_info" to="/camera/depth/camera_info"/>
+    <remap from="image_rect" to="/camera/depth/image_rect_raw"/>
+    <remap from="points" to="/camera/depth/points"/>
+  </node>
+
+  <!-- target cloud -->
+  <node name="organized_multi_plane_segmentation"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg manager)">
+    <remap from="~input" to="$(arg input)"/>
+    <rosparam>
+      max_curvature: 0.01
+      estimate_normal: true
+    </rosparam>
+  </node>
+
+  <node name="multi_plane_extraction"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/MultiPlaneExtraction $(arg manager)">
+    <remap from="~input" to="$(arg input)"/>
+    <remap from="~indices" to="organized_multi_plane_segmentation/output_refined"/>
+    <remap from="~input_polygons" to="organized_multi_plane_segmentation/output_refined_polygon"/>
+    <remap from="~input_coefficients" to="organized_multi_plane_segmentation/output_refined_coefficients"/>
+    <rosparam subst_value="true">
+      use_sensor_frame: true
+      sensor_frame: $(arg sensor_frame)
+      min_height: 0.03
+      use_async: false
+    </rosparam>
+  </node>
+
+  <node name="voxel_grid_target"
+        pkg="nodelet" type="nodelet"
+        args="load pcl/VoxelGrid $(arg manager)">
+    <remap from="~input" to="multi_plane_extraction/output"/>
+    <rosparam>
+      leaf_size: 0.008
+    </rosparam>
+  </node>
+
+  <!-- reference cloud -->
+  <node name="pointcloud_database_server"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/PointcloudDatabaseServer $(arg manager)">
+    <rosparam subst_value="true">
+      models: [
+        "$(find jsk_pcl_ros)/sample/data/2016-10-26-02-09-51_coffee_cup.pcd",
+      ]
+      duration: 0.05
+      use_array: false
+    </rosparam>
+  </node>
+
+  <node name="voxel_grid_reference"
+        pkg="nodelet" type="nodelet"
+        args="load pcl/VoxelGrid $(arg manager)">
+    <remap from="~input" to="pointcloud_database_server/cloud"/>
+    <rosparam>
+      leaf_size: 0.005
+    </rosparam>
+  </node>
+
+  <node name="particle_filter_tracking"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ParticleFilterTracking $(arg manager)">
+    <remap from="~input" to="voxel_grid_target/output"/>
+    <rosparam>
+      use_change_detection: false
+      align_box: false
+      default_step_covariance_x: 0.01
+      default_step_covariance_y: 0.01
+      default_step_covariance_z: 0.01
+    </rosparam>
+  </node>
+
+  <node name="send_renew_model"
+        pkg="jsk_pcl_ros" type="renew_tracking.py">
+    <remap from="selected_pointcloud" to="voxel_grid_reference/output"/>
+    <remap from="particle_filter_tracker/renew_model" to="particle_filter_tracking/renew_model"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/particle_filter_tracking.rviz"/>
+  </group>
+</launch>

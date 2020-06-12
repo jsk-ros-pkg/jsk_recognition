@@ -1,0 +1,54 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="image_publisher_search"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/template/elevator_inside_panel_eng2.png
+      publish_info: false
+    </rosparam>
+  </node>
+  <arg name="INPUT_IMAGE" default="image_publisher_search/output" />
+
+  <node name="image_publisher_reference"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/elevator_inside_panel_eng2_7f.png
+      publish_info: false
+    </rosparam>
+  </node>
+  <arg name="REFERENCE_IMAGE" default="image_publisher_reference/output" />
+
+  <node name="reference_point_publisher"
+        pkg="rostopic" type="rostopic"
+        args="pub -r 1 -s reference_point_publisher/output geometry_msgs/PointStamped
+              '{header: {stamp: 'now', frame_id: camera}, point: {x: 50, y: 10, z: 0}}'"/>
+
+  <node name="search_rect_publisher"
+        pkg="rostopic" type="rostopic"
+        args="pub -r 1 -s search_rect_publisher/output jsk_recognition_msgs/Rect
+              '{x: 10, y: 10, width: 450, height: 399}'"/>
+
+  <node name="matchtemplate"
+        pkg="jsk_perception" type="matchtemplate.py">
+    <remap from="search" to="$(arg INPUT_IMAGE)"/>
+    <remap from="reference" to="$(arg REFERENCE_IMAGE)"/>
+    <remap from="set_reference_point" to="reference_point_publisher/output"/>
+    <remap from="set_search_rect" to="search_rect_publisher/output"/>
+    <remap from="debug_image" to="~debug_image"/>
+    <remap from="current_template" to="~current_template"/>
+    <remap from="result" to="~result"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view_debug_image"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="matchtemplate/debug_image"/>
+    </node>
+
+    <node name="image_view_current_template"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="matchtemplate/current_template"/>
+    </node>
+  </group>
+</launch>

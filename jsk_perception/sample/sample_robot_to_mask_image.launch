@@ -1,0 +1,50 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_perception)/sample/include/play_rosbag_pr2_self_see.xml"/>
+
+  <node name="robot_to_mask_image"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_perception/RobotToMaskImage">
+    <remap from="~input/camera_info" to="/kinect_head/rgb/camera_info"/>
+    <rosparam>
+      self_see_links:
+        - name: base_link
+        - name: l_shoulder_pan_link
+        - name: l_shoulder_lift_link
+        - name: l_upper_arm_link
+        - name: l_upper_arm_roll_link
+        - name: l_elbow_flex_link
+        - name: l_forearm_link
+        - name: l_forearm_roll_link
+        - name: l_wrist_flex_link
+        - name: l_wrist_roll_link
+        - name: l_gripper_palm_link
+        - name: l_gripper_l_finger_link
+        - name: l_gripper_l_finger_tip_link
+        - name: l_gripper_r_finger_link
+        - name: l_gripper_r_finger_tip_link
+        - name: r_shoulder_pan_link
+        - name: r_shoulder_lift_link
+        - name: r_upper_arm_link
+        - name: r_upper_arm_roll_link
+        - name: r_elbow_flex_link
+        - name: r_forearm_link
+        - name: r_forearm_roll_link
+        - name: r_wrist_flex_link
+        - name: r_wrist_roll_link
+        - name: r_gripper_palm_link
+        - name: r_gripper_l_finger_link
+        - name: r_gripper_l_finger_tip_link
+        - name: r_gripper_r_finger_link
+        - name: r_gripper_r_finger_tip_link
+      self_see_default_padding: 0.0
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_perception)/sample/config/sample_robot_to_mask_image.rviz"/>
+  </group>
+</launch>

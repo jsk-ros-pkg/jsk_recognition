@@ -2,6 +2,106 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.10 (2019-03-27)
+-------------------
+* use (MOVEIT_VERSION_MAJOR == 0 and MOVEIT_VERSION_MINOR < 6), since moveit is upgraded to 1.0 (`#2416 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2416>`_)
+* [doc] [jsk_pcl_ros_utils] [jsk_pcl_ros] Add documentation (`#2393 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2393>`_)
+
+  * Add test for InteractiveCuboidLikelihood
+  * Add dependency on jsk_interactive_marker to jsk_pcl_ros
+  * Remove unused nodes in sample_plane_supported_cuboid_estimator.launch
+  * Set queue_size explicitly for publisher in sample_simulate_tabletop_cloud.py
+  * Add test for EdgebasedCubeFinder
+  * Add sample for EdgebasedCubeFinder
+  * Add test for FindObjectOnPlane
+  * Add sample for FindObjectOnPlane
+  * Add test for EnvironmentPlaneModeling
+  * Add sample for EnvironmentPlaneModeling
+  * Add test for JointStateStaticFilter
+  * Add sample for JointStateStaticFilter
+  * Install additional rosbag file for move & stop joints
+  * Add test for MultiPlaneSACSegmentation
+  * Add sample for MultiPlaneSACSegmentation
+  * Fix for assertion error (ptr != 0) when subscribing only ~input
+  * Add test for HandleEstimator
+  * Add sample for HandleEstimator
+  * Add test for VoxelGridDownsampleManager/Decoder
+  * Add sample for VoxelGridDownsampleManager/Decoder
+  * Add test for ColorizeMapRandomForest
+  * Add sample for ColorizeMapRandomForest
+  * Fix executable name for ColorizeMapRandomForest
+  * Fix names in ColorizeMapRandomForest
+  * Run test for ColorizeRandomForest only when ml_classifiers is found
+  * Add doc for ColorizeRandomForest
+  * Add test for ColorizeRandomForest
+  * Add sample for ColorizeRandomForest
+  * Fix typo in CMakeLists.txt in order to build ColorizeRandomForest
+  * Fix names in ColorizeRandomForest
+  * Add test for SelectedClusterPublisher
+  * Add sample for SelectedClusterPublisher
+  * Add test for BilateralFilter
+  * Add sample for BilateralFilter
+
+* Contributors: Kei Okada, Yuto Uchimi
+
+1.2.9 (2019-02-23)
+------------------
+
+1.2.8 (2019-02-22)
+------------------
+
+1.2.7 (2019-02-14)
+------------------
+* add melodic test (`#2355 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2355>`_ )
+
+  * fix for melodic, use ros::AsyncSpinner
+  * revert Reverts `#2310 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2310>`_, kinfu.h uses jsk_rviz_plugins/OverlayText.h, but jsk_recognition should not depends on jsk_visualization, jsk_visualization depends on jsk_recognition
+  * moveit API change: Affine3d -> Isometry3d
+  * replace tf::MessageFilter by tf2_ros::MessageFilter
+
+* OctomapServerContact sample with PR2(`#2392 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2392>`_ )
+
+  * [jsk_pcl_ros/octomap_server_contact] check wheter tf transformation succeeds.
+  * [jsk_pcl_ros/octomap_server_contact] refactor euslisp node for publishing sensor data.
+  * [jsk_pcl_ros/octomap_server_contact] use openmp for scan grids.
+  * [jsk_pcl_ros/octomap_server_contact] write with one loop for scanning grid.
+  * [jsk_pcl_ros/octomap_server_contact] remove unnecessary lines in the case that vertex is not used (= contact surface is not used). change parameter name: use_vetex -> use_contact_surface.
+  * [jsk_pcl_ros/octomap_server_contact] clamp min and max points for scanning all leaf.
+  * [jsk_pcl_ros/octomap_server_contact] pass timestamp of subscribed message for tf transformation correctly.
+  * [jsk_pcl_ros] add launch, scripts, and configs for sample of octomap_server_contact with PR2.
+
+* Add method to convert jsk_recognition_msgs/BoundingBox to cube in euslisp (`#2384 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2384>`_ )
+
+  * add function to convert jsk_recognition_msgs/BoundingBox to cube in euslisp
+  * divide single roseus file into node file and library file
+  * correct message type
+
+* normal_estimation_omp_nodelet.cpp: add line to preserve rgb data of pointcloud (`#2388 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2388>`_ )
+* [jsk_pcl_ros, jsk_pcl_ros_utils] Use ccache if installed to make it fast to generate object file (`#2342 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2342>`_ )
+
+  * [jsk_pcl_ros] Use ccache if installed to make it fast to generate object file
+
+* Fix cluster point indices decomposer to make bounding box from cloud including nan (`#2369 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2369>`_ )
+
+  * remove nan only when is_dense is False
+  * take over is_dense from input cloud and remove nan for bounding box computation
+  * [jsk_pcl_ros] Add test_depend to jsk_perception
+  *  Add bbox test for cpi decomposer.
+
+* [octomap_server_contact] Publish frontier grid (`#2344 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2344>`_ )
+
+  * add test topics which is passed to test_topic_published.py
+  * modify name space in remap
+  * add test for octomap_contact
+  * install bag file for octomap server contact
+  * update sample rviz config for octomap frontier
+  * add sample launch file for octomap frontier grid
+  * publish frontier grid in octomap_server_contact
+
+* Correct md5 of install rosbag file (`#2361 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2361>`_ )
+
+* Contributors: Christian Rauch, Kei Okada, Masaki Murooka, Naoya Yamaguchi, Shingo Kitagawa, Shun Hasegawa, Iory Yanokura, Hideaki Ito, Weiqi Yang
+
 1.2.6 (2018-11-02)
 ------------------
 * [octomap_server_contact] add callback function to insert proximity sensor pointcloud (`#2328 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2328>`_)

@@ -1,0 +1,21 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_voxel_grid_downsample.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_voxel_grid_downsample"
+        name="test_voxel_grid_downsample"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="30" retry="3">
+    <rosparam>
+      topic_0: /voxel_grid_downsample_manager/output
+      timeout_0: 30
+      topic_1: /voxel_grid_downsample_manager/output_encoded
+      timeout_1: 30
+      topic_2: /voxel_grid_downsample_decoder/output
+      timeout_2: 30
+    </rosparam>
+  </test>
+
+</launch>

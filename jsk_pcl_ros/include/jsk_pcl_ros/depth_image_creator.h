@@ -87,6 +87,7 @@ namespace jsk_pcl_ros
     bool use_service;
     bool use_asynchronous;
     bool use_approximate;
+    bool organize_cloud_;
     int info_throttle_;
     int info_counter_;
     int max_queue_size_;
@@ -95,6 +96,7 @@ namespace jsk_pcl_ros
     tf::StampedTransform fixed_transform;
     tf::TransformListener* tf_listener_;
     double scale_depth;
+    float fill_value;
     typedef pcl::PointXYZRGB Point;
     typedef pcl::PointCloud< Point > PointCloud;
 

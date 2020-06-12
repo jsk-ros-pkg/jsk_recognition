@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_supervoxel_segmentation.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_supervoxel_segmentation"
+        name="test_supervoxel_segmentation"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /supervoxel_segmentation/output/cloud
+      timeout_0: 30
+      topic_1: /supervoxel_segmentation/output/indices
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

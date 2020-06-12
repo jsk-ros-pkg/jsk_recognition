@@ -105,9 +105,9 @@ namespace jsk_pcl_ros
   {
     boost::mutex::scoped_lock lock(mutex_);
     int x0 = rect->polygon.points[0].x;
-    int x1 = rect->polygon.points[1].x;
+    int x1 = rect->polygon.points[2].x;
     int y0 = rect->polygon.points[0].y;
-    int y1 = rect->polygon.points[1].y;
+    int y1 = rect->polygon.points[2].y;
     if (x0 > x1) {
       std::swap(x0, x1);
     }
@@ -120,6 +120,10 @@ namespace jsk_pcl_ros
     int x1_index = x1 / width;
     if (x0_index != x1_index) {
       NODELET_WARN("malformed rectangle");
+      return;
+    }
+    if (snapshot_buffer_.size() == 0) {
+      NODELET_WARN("Size of snapshot buffer is 0.");
       return;
     }
     else {

@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_in_hand_recognition_manager.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_in_hand_recognition_manager"
+        name="test_in_hand_recognition_manager"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /in_hand_recognition_manager/output
+      timeout_0: 30
+      topic_1: /in_hand_recognition_manager/output/recognition
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

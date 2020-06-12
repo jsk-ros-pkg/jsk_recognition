@@ -1,0 +1,44 @@
+<launch>
+  <arg name="interactive" default="true"/>
+  <arg name="rviz" default="true"/>
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/martin-espinoza-1148036-unsplash_640x480.jpg
+      frame_id: fisheye
+      publish_info: false
+    </rosparam>
+  </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
+
+  <group if="$(arg interactive)">
+    <node name="image_view2"
+          pkg="image_view2" type="image_view2">
+      <remap from="image" to="$(arg INPUT_IMAGE)"/>
+    </node>
+  </group>
+
+  <group unless="$(arg interactive)">
+    <node name="static_2d_point_publisher"
+          pkg="rostopic" type="rostopic"
+          args="pub -r 1 -s static_2d_point_publisher/output geometry_msgs/PointStamped
+                '{header: {stamp: 'now', frame_id: fisheye}, point: {x: 400, y: 300, z: 0}}'"/>
+  </group>
+
+  <node name="fisheye_ray"
+        pkg="jsk_perception" type="fisheye_ray.py">
+    <remap from="image" to="$(arg INPUT_IMAGE)"/>
+    <remap from="clicked_point" to="image_publisher/output/screenpoint" if="$(arg interactive)"/>
+    <remap from="clicked_point" to="static_2d_point_publisher/output" unless="$(arg interactive)"/>
+    <rosparam>
+      frame_id: fisheye
+    </rosparam>
+  </node>
+
+  <group if="$(arg rviz)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_perception)/sample/config/sample_fisheye_ray.rviz"/>
+  </group>
+</launch>

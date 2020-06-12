@@ -1,0 +1,40 @@
+<launch>
+  <arg name="gui" default="true" />
+  <arg name="gpu" default="0" />
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      publish_info: false
+      file_name: $(find jsk_perception)/sample/object_detection_example_1.jpg
+    </rosparam>
+  </node>
+  <arg name="input_image" value="image_publisher/output" />
+
+  <node name="ssd_object_detector"
+        pkg="jsk_perception" type="ssd_object_detector.py">
+    <remap from="~input" to="$(arg input_image)" />
+    <rosparam subst_value="true">
+      gpu: $(arg gpu)
+    </rosparam>
+    <param name="model_path" value="voc0712" />
+  </node>
+
+  <node name="deep_sort_tracker"
+        pkg="jsk_perception" type="deep_sort_tracker_node.py"
+        output="screen"
+        clear_params="true" >
+    <remap from="~input" to="$(arg input_image)" />
+    <remap from="~input/rects" to="ssd_object_detector/output/rect" />
+    <remap from="~input/class" to="ssd_object_detector/output/class" />
+    <rosparam subst_value="true">
+      gpu: $(arg gpu)
+      pretrained_model: $(find jsk_perception)/trained_data/deepsort_chainermodel.npz
+    </rosparam>
+  </node>
+
+  <node name="image_view" pkg="image_view" type="image_view"
+        if="$(arg gui)">
+    <remap from="image" to="deep_sort_tracker/output/viz" />
+  </node>
+</launch>

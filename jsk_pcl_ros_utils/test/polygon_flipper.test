@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/sample_polygon_flipper.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_polygon_flipper"
+        name="test_polygon_flipper"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /polygon_flipper/output/polygons
+      timeout_0: 30
+      topic_1: /polygon_flipper/output/coefficients
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

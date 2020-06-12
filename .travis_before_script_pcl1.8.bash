@@ -17,8 +17,15 @@ if [ ! -e /usr/local/include/pcl-1.8/pcl/pcl_base.h ]; then
   cd pcl-pcl-${version}
   mkdir build
   cd build
-
-  cmake -DCMAKE_BUILD_TYPE=Release ..
+ 
+  # pcl::CropBox does not work properly in kinetic
+  # with PCL_ENABLE_SSE:BOOL=TRUE flag
+  # https://github.com/PointCloudLibrary/pcl/pull/1917 
+  if [ $(lsb_release -c -s) = "xenial" ]; then
+    cmake -DCMAKE_BUILD_TYPE=Release -DPCL_ENABLE_SSE:BOOL=FALSE ..
+  else
+    cmake -DCMAKE_BUILD_TYPE=Release ..
+  fi
   make -j2
   sudo make -j2 install
 fi

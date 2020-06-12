@@ -1,0 +1,21 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_extract_cuboid_particles_top_n.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_extract_cuboid_particles_top_n"
+        name="test_extract_cuboid_particles_top_n"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /extract_cuboid_particles_top_n/output
+      timeout_0: 30
+      topic_1: /extract_cuboid_particles_top_n/output/box_array
+      timeout_1: 30
+      topic_2: /extract_cuboid_particles_top_n/output/pose_array
+      timeout_2: 30
+    </rosparam>
+  </test>
+
+</launch>

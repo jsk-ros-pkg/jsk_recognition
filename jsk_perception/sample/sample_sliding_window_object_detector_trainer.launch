@@ -1,0 +1,18 @@
+<launch>
+  <rosparam subst_value="true">
+    dataset_path: $(find jsk_perception)/sample/data/
+    object_dataset_filename: apc2016_object_imgs_and_masks.bag
+    object_dataset_topic: /publish_apc2016_object_imgs_and_masks/output/image
+    nonobject_dataset_filename: apc2016_object_imgs_and_masks.bag
+    nonobject_dataset_topic: /publish_apc2016_object_imgs_and_masks/output/mask
+    swindow_x: 32
+    swindow_y: 32
+    classifier_name: $(env HOME)/.ros/jsk_perception_sample_sliding_window_object_detector_classifier.xml
+    manifest_filename: $(env HOME)/.ros/jsk_perception_sample_sliding_window_object_detector_manifest.xml
+  </rosparam>
+
+  <node name="sliding_window_object_detector_trainer"
+        pkg="jsk_perception" type="sliding_window_object_detector_trainer_node"
+        output="screen">
+  </node>
+</launch>

@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_recognition_utils)/sample/sample_pose_array_to_pose.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_pose_array_to_pose"
+        name="test_pose_array_to_pose"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="60" retry="3">
+    <rosparam>
+      topic_0: /pose_array_to_pose/output
+      timeout_0: 60
+    </rosparam>
+  </test>
+
+</launch>

@@ -1,5 +1,6 @@
 from jsk_recognition_utils.chainermodels import alexnet
 from jsk_recognition_utils.chainermodels import alexnet_batch_normalization
+from jsk_recognition_utils.chainermodels import deep_sort_net
 from jsk_recognition_utils.chainermodels import vgg16
 from jsk_recognition_utils.chainermodels import vgg16_batch_normalization
 from jsk_recognition_utils.chainermodels import vgg16_fast_rcnn

@@ -2,12 +2,12 @@
 
 import roslib; roslib.load_manifest('jsk_perception')
 import rospy
-import numpy
+import numpy as np
 import thread
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import *
-from jsk_perception.msg import *
-import cv
+from jsk_recognition_msgs.msg import Rect
+import cv2
 from cv_bridge import CvBridge, CvBridgeError
 
 from dynamic_reconfigure.server import Server as DynamicReconfigureServer
@@ -22,31 +22,28 @@ from jsk_perception.cfg import matchtemplateConfig as ConfigType
 #   match method: 6type
 
 # publish topic:
-#   ~/current_template    [sensor_msgs/Image]
-#   ~/result              [geometry_msgs/TransformStamped]
-#   ~/debug_image         [sensor_msgs/Image]
+#   current_template    [sensor_msgs/Image]
+#   result              [geometry_msgs/TransformStamped]
+#   debug_image         [sensor_msgs/Image]
 
 # subscribe topic:
-#   ~/reference           [sensor_msgs/Image]
-#   ~/search              [sensor_msgs/Image]
-#   ~/set_reference_point [geometry_msgs/PointStamped]
-#   ~/set_search_rect     [jsk_perception/Rect]
+#   reference           [sensor_msgs/Image]
+#   search              [sensor_msgs/Image]
+#   set_reference_point [geometry_msgs/PointStamped]
+#   set_search_rect     [jsk_recognition_msgs/Rect]
 
 # return (1st-val,1st-loc,2nd-val,2nd-loc)
 def _MinMaxLock2nd(arr,ex_size,is_min):
     if is_min: idx = 0
     else: idx = 1
-    status = cv.MinMaxLoc(arr)
+    status = cv2.minMaxLoc(arr)
     pt1 = (max(status[2+idx][0]-ex_size[0]/2,0),
            max(status[2+idx][1]-ex_size[1]/2,0))
-    pt2 = (min(status[2+idx][0]+ex_size[0]/2,cv.GetSize(arr)[0]),
-           min(status[2+idx][1]+ex_size[1]/2,cv.GetSize(arr)[1]))
-    mask = cv.CreateImage(cv.GetSize(arr), cv.IPL_DEPTH_8U, 1)
-    cv.Set(mask,cv.Scalar(255))
-    cv.SetImageROI(mask,(pt1[0],pt1[1],pt2[0]-pt1[0],pt2[1]-pt1[1]))
-    cv.Set(mask,cv.Scalar(0))
-    cv.ResetImageROI(mask)
-    status2 = cv.MinMaxLoc(arr,mask)
+    pt2 = (min(status[2+idx][0]+ex_size[0]/2,arr.shape[1]),
+           min(status[2+idx][1]+ex_size[1]/2,arr.shape[0]))
+    mask = np.ones((arr.shape[0], arr.shape[1]), dtype=np.uint8) * 255
+    mask[pt1[0]:pt2[0], pt1[1]:pt2[1]] = 0
+    status2 = cv2.minMaxLoc(arr, mask)
     return (status[0+idx],status2[0+idx],status[2+idx],status2[2+idx])
 
 def MinLock2nd(arr,ex_size):
@@ -66,9 +63,11 @@ class MepConverter:
         self.clock = [rospy.Time.now()]
 
         # publisher
-        self.reference_pub = rospy.Publisher("current_template",Image)
-        self.result_pub = rospy.Publisher("result",TransformStamped)
-        self.debug_pub = rospy.Publisher("debug_image",Image)
+        self.reference_pub = rospy.Publisher(
+            "current_template", Image, queue_size=1)
+        self.result_pub = rospy.Publisher(
+            "result", TransformStamped, queue_size=1)
+        self.debug_pub = rospy.Publisher("debug_image", Image, queue_size=1)
 
         # subscriber
         self.reference_image_sub = rospy.Subscriber(rospy.resolve_name("reference"),
@@ -89,43 +88,44 @@ class MepConverter:
         if not self.templates.has_key(ref_id):
             self.templates[ref_id] = {'ref_orig':None,'ref_point':None,'ref_image':None,
                                       'ser_frame':None, 'ser_rect':None,
-                                      'color':'mono8', 'method':cv.CV_TM_SQDIFF_NORMED} # normalized SSD
+                                      'color':'mono8', 'method':cv2.TM_SQDIFF_NORMED} # normalized SSD
             color_changed = True
         else:
             color_changed = (self.templates[ref_id]['color'] != color) and (color != None)
 
-        something_changed = (ref_image != None) or (ref_rect != None) or color_changed
+        something_changed = (ref_image is not None) or \
+                            (ref_rect is not None) or color_changed
 
         # parameters for template
-        if ref_image != None:
-            self.templates[ref_id]['ref_orig'] = cv.CloneImage(ref_image)
+        if ref_image is not None:
+            self.templates[ref_id]['ref_orig'] = ref_image.copy()
         else:
             ref_image = self.templates[ref_id]['ref_orig'] # old image can be set here
 
         if color != None:
-            if ref_image != None and ref_image.nChannels == 1:
+            if ref_image is not None and ref_image.ndim == 2:
                 color = 'mono8'
             self.templates[ref_id]['color'] = color
         else:
             color = self.templates[ref_id]['color']
 
         # copy template from reference original image
-        if (ref_rect != None) and (ref_image != None) and something_changed:
-            ref_rect = (min(max(0,ref_rect[0]),ref_image.width-ref_rect[2]),
-                        min(max(0,ref_rect[1]),ref_image.height-ref_rect[3]),
+        if (ref_rect is not None) and (ref_image is not None) and \
+           something_changed:
+            ref_rect = (min(max(0,ref_rect[0]),ref_image.shape[1]-ref_rect[2]),
+                        min(max(0,ref_rect[1]),ref_image.shape[0]-ref_rect[3]),
                         ref_rect[2],ref_rect[3])
-            template_image = cv.CreateImage((ref_rect[2], ref_rect[3]),
-                                         ref_image.depth,
-                                         {'mono8':1,'bgr8':3,'hsv8':3}[color])
-            cv.SetImageROI(ref_image, ref_rect)
-            if color == 'mono8' and ref_image.nChannels == 1:
-                cv.Copy(ref_image, template_image)
+            ref_image_rect = ref_image[
+                    ref_rect[1]:ref_rect[1] + ref_rect[3],
+                    ref_rect[0]:ref_rect[0] + ref_rect[2]].copy()
+            if color == 'bgr8' or (color == 'mono8' and ref_image.ndim == 2):
+                template_image = ref_image_rect
             elif color == 'mono8':
-                cv.CvtColor(ref_image,template_image,cv.CV_BGR2GRAY)
-            elif color == 'bgr8':
-                cv.Copy(ref_image, template_image)
+                template_image = cv2.cvtColor(
+                    ref_image_rect, cv2.COLOR_BGR2GRAY)
             elif color == 'hsv8':
-                cv.CvtColor(ref_image,template_image,cv.CV_BGR2HSV)
+                template_image = cv2.cvtColor(
+                    ref_image_rect, cv2.COLOR_BGR2HSV)
 
             self.templates[ref_id]['ref_point'] = (ref_rect[0]+ref_rect[2]/2,
                                                    ref_rect[1]+ref_rect[3]/2)
@@ -146,7 +146,8 @@ class MepConverter:
     def set_reference (self, rect):
         if self.reference_image_msg == None: return
         try:
-            cv_image = cv.GetImage(self.bridge.imgmsg_to_cv(self.reference_image_msg, "bgr8"))
+            cv_image = self.bridge.imgmsg_to_cv2(
+                self.reference_image_msg, "bgr8")
             self.set_template('',ref_image=cv_image, ref_rect=rect)
         except CvBridgeError, e:
             print e
@@ -196,11 +197,13 @@ class MepConverter:
         if config['current_template_id'] in self.templates.keys():
             # set template configuration
             template = self.templates[config['current_template_id']]
-            method_enum = [cv.CV_TM_SQDIFF, cv.CV_TM_SQDIFF_NORMED, cv.CV_TM_CCORR,
-                           cv.CV_TM_CCORR_NORMED, cv.CV_TM_CCOEFF, cv.CV_TM_CCOEFF_NORMED]
-            if (template['ref_point'] != None) and (template['ref_image'] != None):
+            method_enum = [
+                cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED, cv2.TM_CCORR,
+                cv2.TM_CCORR_NORMED, cv2.TM_CCOEFF, cv2.TM_CCOEFF_NORMED]
+            if (template['ref_point'] is not None) and \
+               (template['ref_image'] is not None):
                 ref_pt = template['ref_point']
-                ref_size = cv.GetSize(template['ref_image'])
+                ref_size = template['ref_image'].shape
                 ref_rect = (ref_pt[0]-ref_size[0]/2,ref_pt[1]-ref_size[1]/2,ref_size[0],ref_size[1])
             self.set_template(ref_id=config['current_template_id'],
                               color=config['template_color_space'],
@@ -214,7 +217,7 @@ class MepConverter:
     def ser_image_callback (self, msg):
         # initialize debug image
         if self.show_debug_image:
-            debug_image = cv.CloneImage(cv.GetImage(self.bridge.imgmsg_to_cv(msg, "bgr8")))
+            debug_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
 
         self.lockobj.acquire()
 
@@ -224,7 +227,8 @@ class MepConverter:
             search_rect = self.templates[template_id]['ser_rect']
             matchmethod = self.templates[template_id]['method']
             color_space = self.templates[template_id]['color']
-            if reference_image == None: continue
+            if reference_image is None:
+                continue
             if search_rect == None: continue
             if (self.templates[template_id]['ser_frame'] != None and
                 self.templates[template_id]['ser_frame'] != msg.header.frame_id): continue
@@ -238,29 +242,29 @@ class MepConverter:
             result = TransformStamped(header=msg.header)
 
             try:
-                if color_space in ['mono8','bgr8']:
-                    search_image = cv.GetImage(self.bridge.imgmsg_to_cv(msg, color_space))
+                if color_space == 'mono8':
+                    search_image = self.bridge.imgmsg_to_cv2(msg, 'mono8')
                 else:
-                    cv_image = cv.GetImage(self.bridge.imgmsg_to_cv(msg, 'bgr8'))
-                    search_image = cv.CreateImage(cv.GetSize(cv_image),cv_image.depth,cv_image.nChannels)
-                    cv.CvtColor(cv_image,search_image,cv.CV_BGR2HSV)
+                    search_image = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
+                    if color_space != 'bgr8':
+                        search_image = cv2.cvtColor(
+                            search_image, cv2.COLOR_BGR2HSV)
 
-                image_size = cv.GetSize(search_image)
-                reference_size = cv.GetSize(reference_image)
+                image_size = search_image.shape
+                reference_size = (
+                    reference_image.shape[1], reference_image.shape[0])
 
                 # search size < reference size
                 if (search_rect[2] < reference_size[0]) or (search_rect[3] < reference_size[1]):
                     continue
 
-                cv.SetImageROI(search_image,search_rect)
-                ressize = list(search_rect)[2:]
-                ressize[0] -= reference_size[0] - 1
-                ressize[1] -= reference_size[1] - 1
-                results = cv.CreateImage(ressize, cv.IPL_DEPTH_32F, 1)
-                cv.MatchTemplate(search_image, reference_image, results, matchmethod)
-                cv.ResetImageROI(search_image)
+                results = cv2.matchTemplate(
+                    search_image[
+                        search_rect[1]:search_rect[1] + search_rect[3],
+                        search_rect[0]:search_rect[0] + search_rect[2]],
+                    reference_image, matchmethod)
 
-                if matchmethod in [cv.CV_TM_SQDIFF,cv.CV_TM_SQDIFF_NORMED]:
+                if matchmethod in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
                     status = MinLock2nd(results,reference_size) # minimum for SSD
                 else:
                     status = MaxLock2nd(results,reference_size) # maximum for others
@@ -276,13 +280,20 @@ class MepConverter:
                 result.transform.rotation.w = 1 # not rotate, temporary
                 self.result_pub.publish(result)
 
-                self.reference_pub.publish(self.bridge.cv_to_imgmsg(reference_image, "passthrough"))
+                if reference_image.ndim == 2 and \
+                   reference_image.dtype == np.uint8:
+                    ref_msg = self.bridge.cv2_to_imgmsg(
+                        reference_image, "mono8")
+                else:
+                    ref_msg = self.bridge.cv2_to_imgmsg(
+                        reference_image, "bgr8")
+                self.reference_pub.publish(ref_msg)
 
                 # self feedback
                 if self.auto_search_area:
                     val_x = result_pt[0]-search_rect[2]/2
                     val_y = result_pt[1]-search_rect[3]/2
-                    ser_scale = max(2,5+numpy.log(status[0])) # ???
+                    ser_scale = max(2,5+np.log(status[0])) # ???
                     new_ser_rect = (
                         min(max(val_x,0),image_size[0]-search_rect[2]),
                         min(max(val_y,0),image_size[1]-search_rect[3]),
@@ -291,27 +302,34 @@ class MepConverter:
 
                 # draw on debug image
                 if self.show_debug_image:
-                    cv.Rectangle(debug_image,
-                              (result_pt[0] - reference_size[0]/2,
-                               result_pt[1] - reference_size[1]/2),
-                              (result_pt[0] + reference_size[0]/2,
-                               result_pt[1] + reference_size[1]/2),
-                              cv.CV_RGB(255,0,0))
-                    cv.Rectangle(debug_image,
-                              (search_rect[0], search_rect[1]),
-                              (search_rect[0] + search_rect[2],
-                               search_rect[1] + search_rect[3]),
-                              cv.CV_RGB(0,255,0))
-                    cv.PutText(debug_image, str(status[0]), (search_rect[0], search_rect[1] + search_rect[3]), font, cv.CV_RGB(0,255,0))
+                    cv2.rectangle(debug_image,
+                                  (result_pt[0] - reference_size[0]/2,
+                                   result_pt[1] - reference_size[1]/2),
+                                  (result_pt[0] + reference_size[0]/2,
+                                   result_pt[1] + reference_size[1]/2),
+                                  color=(0, 0, 255))  # red
+                    cv2.rectangle(debug_image,
+                                  (search_rect[0], search_rect[1]),
+                                  (search_rect[0] + search_rect[2],
+                                   search_rect[1] + search_rect[3]),
+                                  color=(0, 255, 0))
+                    cv2.putText(
+                        debug_image, str(status[0]),
+                        (search_rect[0], search_rect[1] + search_rect[3]),
+                        fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1,
+                        color=(0, 255, 0), thickness=2,
+                        lineType=16)  # 16 means cv2.CV_AA
 
-                    cv.SetImageROI(debug_image,(0,0,reference_size[0],reference_size[1]))
-                    if reference_image.nChannels == 1:
-                        reference_color_image = cv.CreateImage(reference_size, debug_image.depth, debug_image.nChannels)
-                        cv.CvtColor (reference_image, reference_color_image, cv.CV_GRAY2BGR) # TODO
-                        cv.Copy(reference_color_image,debug_image)
+                    if reference_image.ndim == 2:
+                        reference_color_image = cv2.cvtColor(
+                            reference_image, cv2.COLOR_GRAY2BGR)
+                        debug_image[
+                            :reference_size[1], :reference_size[0], :] = \
+                            reference_color_image.copy()
                     else:
-                        cv.Copy(reference_image,debug_image)
-                    cv.ResetImageROI(debug_image)
+                        debug_image[
+                            :reference_size[1], :reference_size[0], :] = \
+                            reference_image.copy()
 
             except CvBridgeError, e:
                 print e
@@ -323,10 +341,15 @@ class MepConverter:
             self.clock += [rospy.Time.now()]
             if 30 <= len(self.clock):
                 fps = 30.0 / (self.clock[29]-self.clock[0]).to_sec()
-                cv.PutText(debug_image, '%.1f fps'%fps, (msg.width-150,40),font,cv.CV_RGB(255,0,0))
+                cv2.putText(
+                    debug_image, '%.1f fps' % fps, (msg.width - 150, 40),
+                    fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1,
+                    color=(0, 0, 255),  # red
+                    thickness=2, lineType=16)  # 16 means cv2.CV_AA
                 self.clock = self.clock[-30:]
             # publish debug image
-            self.debug_pub.publish(self.bridge.cv_to_imgmsg(debug_image, "bgr8"))
+            debug_msg = self.bridge.cv2_to_imgmsg(debug_image, "bgr8")
+            self.debug_pub.publish(debug_msg)
 
         return
 
@@ -338,8 +361,5 @@ if __name__=='__main__':
     ## reconfigure
     rospy.loginfo("reference image %s, size %s", obj.reference_image_sub.resolved_name, obj.default_template_size)
     rospy.loginfo("   search_image %s, size %s", obj.search_image_sub.resolved_name, obj.default_search_size)
-
-    # opencv
-    font = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0.0, 2, cv.CV_AA)
 
     rospy.spin()

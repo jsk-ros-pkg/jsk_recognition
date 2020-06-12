@@ -1,0 +1,56 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/laugh_out_loud_joke_book.jpg
+    </rosparam>
+  </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
+
+  <node name="mask_image_generator0"
+        pkg="jsk_perception" type="mask_image_generator">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <rosparam>
+      offset_x: 50
+      offset_y: 50
+      width: 128
+      height: 128
+    </rosparam>
+  </node>
+
+  <node name="mask_image_generator1"
+        pkg="jsk_perception" type="mask_image_generator">
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
+    <rosparam>
+      offset_x: 100
+      offset_y: 100
+      width: 128
+      height: 128
+    </rosparam>
+  </node>
+
+  <node name="subtract_mask_image"
+        pkg="jsk_perception" type="subtract_mask_image">
+    <remap from="~input/src1" to="mask_image_generator0/output" />
+    <remap from="~input/src2" to="mask_image_generator1/output" />
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="mask_image_generator0/output" />
+    </node>
+    <node name="image_view1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="mask_image_generator1/output" />
+    </node>
+    <node name="image_view2"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="subtract_mask_image/output" />
+    </node>
+  </group>
+
+</launch>

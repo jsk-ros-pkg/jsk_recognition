@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_non_maximum_suppression.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_non_maximum_suppression"
+        name="test_non_maximum_suppression"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /non_maximum_suppression/output
+      timeout_0: 30
+      topic_1: /non_maximum_suppression/output/count
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

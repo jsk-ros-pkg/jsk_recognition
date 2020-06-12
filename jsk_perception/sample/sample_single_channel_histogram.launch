@@ -1,0 +1,52 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/lipton-milktea-box.png
+      encoding: mono8
+      publish_info: false
+    </rosparam>
+  </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
+
+  <node name="single_channel_histogram"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_perception/SingleChannelHistogram">
+    <remap from="~input" to="$(arg INPUT_IMAGE)"/>
+    <rosparam>
+      use_mask: false
+      hist_size: 100
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="color_histogram_to_histogram_with_range"
+          pkg="topic_tools" type="transform"
+          args="/single_channel_histogram/output
+                /color_histogram_to_histogram_with_range/output
+                jsk_recognition_msgs/HistogramWithRange
+                &quot;
+                jsk_recognition_msgs.msg.HistogramWithRange(
+                     header=m.header,
+                     bins=[
+                         jsk_recognition_msgs.msg.HistogramWithRangeBin(
+                             min_value=i * 255.0 / len(m.histogram),
+                             max_value=(i + 1) * 255.0 / len(m.histogram),
+                             count=x) for i, x in enumerate(m.histogram)
+                     ])
+                &quot;
+                --import jsk_recognition_msgs
+                --wait-for-start"/>
+
+    <node name="rqt_histogram_plot"
+          pkg="jsk_rqt_plugins" type="rqt_histogram_plot"
+          args="/color_histogram_to_histogram_with_range/output"/>
+
+    <node name="image_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="$(arg INPUT_IMAGE)"/>
+    </node>
+  </group>
+</launch>

@@ -1,6 +1,6 @@
 <package>
   <name>checkerboard_detector</name>
-  <version>1.2.6</version>
+  <version>1.2.10</version>
   <description>Uses opencv to find checkboards and compute their 6D poses with respect to the image. Requires the image to be calibrated.<br />
     Parameters:<br />
     <ul>
@@ -16,7 +16,7 @@
 
   <url type="repository">http://github.com/jsk-ros-pkg/jsk_recognition</url>
   <url type="bugtracker">http://github.com/jsk-ros-pkg/jsk_recognition/issues</url>
-  <url type="website">http://jsk-docs.readthedocs.io/en/latest/jsk_recognition/doc/checkerboard_detector</url>
+  <url type="website">https://jsk-docs.readthedocs.io/projects/jsk_recognition/en/latest/checkerboard_detector</url>
 
   <author>Rosen Diankov (rdiankov@cs.cmu.edu)</author>
   <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
@@ -39,6 +39,7 @@
   <run_depend>sensor_msgs</run_depend>
   <run_depend>posedetection_msgs</run_depend>
   <run_depend>image_geometry</run_depend>
+  <run_depend>image_publisher</run_depend>
   <run_depend>jsk_recognition_msgs</run_depend>
   <build_depend>eigen_conversions</build_depend>
   <run_depend>eigen_conversions</run_depend>
@@ -49,7 +50,11 @@
   <run_depend>tf</run_depend>
   <build_depend>tf2</build_depend>
   <run_depend>tf2</run_depend>
-  <export>
 
+  <test_depend>jsk_tools</test_depend>
+  <test_depend>jsk_topic_tools</test_depend>
+  <test_depend>rostest</test_depend>
+
+  <export>
   </export>
 </package>

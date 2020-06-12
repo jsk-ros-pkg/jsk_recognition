@@ -1,14 +1,25 @@
 # DepthImageError
 
+![](images/depth_image_error.png)
+
 Compute error of depth image and corner point of checker board.
 
 ## Subscribing Topic
 * `~image` (`sensor_msgs/Image`)
+
+  Input rectified and registered depth image whose encoding is `32FC1`
+  (i.e. metric is [m]).
+
 * `~camera_info` (`sensor_msgs/CameraInfo`)
-  Input image and camera info.
+
+  Depth_registered camera info.
+
 * `~point` (`geometry_msgs/PointStamped`)
 
-  Corner point of checkerboard.
+  Corner point of checkerboard whose frame_id is the same as rgb image.
+
+  x and y field should represent (u, v) point in [pixels],
+  while z field should represent depth in [m].
 
 ## Publishing Topic
 * `~output` (`jsk_recognition_msgs/DepthErrorResult`)
@@ -22,11 +33,6 @@ Compute error of depth image and corner point of checker board.
 
 ## Sample
 
-```
-$ roslaunch jsk_pcl_ros depth_error.launch
-```
-
-Use with multisense and murooka board.
-```
-$ roslaunch jsk_pcl_ros depth_error.launch IMAGE_TOPIC:=/multisense_local/left/image_rect_color CAMERA_INFO_TOPIC:=/multisense_local/left/camera_info GRID_SIZE_X:=6 GRID_SIZE_Y:=5 DEPTH_IMAGE:=/multisense/depth
+```bash
+roslaunch jsk_pcl_ros_utils sample_depth_image_error.launch
 ```

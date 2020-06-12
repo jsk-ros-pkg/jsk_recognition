@@ -91,6 +91,10 @@ add_library(jsk_recognition_utils SHARED
 
 if (CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
+  if("$ENV{ROS_DISTRO}" STRGREATER "indigo") # kinetic and later uses qt5
+    find_package(Qt5Widgets REQUIRED)
+    set(QT_LIBRARIES Qt5::Widgets)
+  endif()
   add_rostest_gtest(test_tf_listener_singleton test/tf_listener_singleton.test src/tests/test_tf_listener_singleton.cpp)
   target_link_libraries(test_tf_listener_singleton ${PROJECT_NAME} ${catkin_LIBRARIES})
   catkin_add_gtest(test_cv_utils src/tests/test_cv_utils.cpp)
@@ -102,6 +106,13 @@ if (CATKIN_ENABLE_TESTING)
     # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
     add_rostest(sample/sample_add_bounding_box_array.launch ARGS gui:=false)
     add_rostest(sample/sample_bounding_box_array_publisher.launch ARGS gui:=false)
+    add_rostest(test/add_cluster_indices.test)
+    add_rostest(test/image_16uc1_to_32fc1.test)
+    add_rostest(test/polygon_array_publisher.test)
+    add_rostest(test/polygon_array_to_polygon.test)
+    add_rostest(test/pose_array_to_pose.test)
+    add_rostest(test/rect_array_to_polygon_array.test)
+    add_rostest(test/static_virtual_camera.test)
   endif()
 endif()
 

@@ -57,6 +57,14 @@ def main():
         md5='ff7f6a90090d152e2c43bf5057d4e853',
     )
 
+    download_data(
+        pkg_name=PKG,
+        path='sample/data/2019-07-18-15-37-50_pr2_self_see.bag',
+        url='https://drive.google.com/uc?id=1MvSfxqOnRjQeaCM4QF9Fs_Ye9HZKFXwa',
+        md5='a98d10a058a74458f41cc7b1be5acea8',
+        extract=False,
+    )
+
 
 if __name__ == '__main__':
     main()

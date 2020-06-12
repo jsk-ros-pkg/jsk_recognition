@@ -2,6 +2,8 @@
 #ifndef _TARGET_ADAPTIVE_TRACKING_H_
 #define _TARGET_ADAPTIVE_TRACKING_H_
 
+#include <string>
+
 #include <ros/ros.h>
 #include <ros/console.h>
 
@@ -133,6 +135,10 @@ namespace jsk_pcl_ros
       pcl::PointCloud<PointT>::Ptr previous_template_;
       float growth_rate_;
       float previous_distance_;
+
+      bool use_tf_;
+      std::string parent_frame_id_;
+      std::string child_frame_id_;
 
       double color_importance_;
       double spatial_importance_;

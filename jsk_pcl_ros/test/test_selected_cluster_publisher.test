@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_selected_cluster_publisher.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_selected_cluster_publisher"
+        name="test_selected_cluster_publisher"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="30" retry="3">
+    <rosparam>
+      topic_0: /selected_cluster_publisher/output
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

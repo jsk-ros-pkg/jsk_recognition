@@ -40,7 +40,7 @@ namespace jsk_pcl_ros
   void ColorizeMapRandomForest::onInit(void)
   {
     ConnectionBasedNodelet::onInit();
-    pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "cloth_result", 1);
+    pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
     
     srand(time(NULL));
 
@@ -52,22 +52,22 @@ namespace jsk_pcl_ros
     tmp_sum_num = 100;
     if (!pnh_->getParam("rs", tmp_radius))
       {
-        ROS_WARN("~rs is not specified, set 1");
+        NODELET_WARN("~rs is not specified, so set to 0.03");
       }
 
     if (!pnh_->getParam("po", tmp_pass))
       {
-        ROS_WARN("~po is not specified, set 1");
+        NODELET_WARN("~po is not specified, so set to 0.03");
       }
 
     if (!pnh_->getParam("po2", tmp_pass2))
       {
-        ROS_WARN("~po is not specified, set 1");
+        NODELET_WARN("~po2 is not specified, so set to 0.06");
       }
 
     if (!pnh_->getParam("sum_num", tmp_sum_num))
       {
-        ROS_WARN("~sum_num is not specified, set 1");
+        NODELET_WARN("~sum_num is not specified, so set to 100");
       }
 
     radius_search_ = tmp_radius;
@@ -110,7 +110,7 @@ namespace jsk_pcl_ros
     pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree2 (new pcl::search::KdTree<pcl::PointXYZRGB> ());
     pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr cloud_normals (new pcl::PointCloud<pcl::PointXYZRGBNormal>);
     ne.setInputCloud (cloud);
-    ROS_INFO("normal estimate");
+    NODELET_DEBUG("normal estimate");
     ne.setSearchMethod (tree2);
     ne.setRadiusSearch (0.02);
     ne.compute (*cloud_normals);
@@ -126,7 +126,7 @@ namespace jsk_pcl_ros
     pcl::PointXYZRGBNormal max_pt,min_pt;
     pcl::getMinMax3D(*cloud_normals, min_pt, max_pt);
     for (int i = 0 ; i < 200; i++){
-      ROS_INFO("fpfh %d / 200", i);
+      NODELET_DEBUG("fpfh %d / 200", i);
       double lucky = 0, lucky2 = 0;
       std::string axis("x"),other_axis("y");
       int rand_xy = rand()%2;
@@ -199,7 +199,7 @@ namespace jsk_pcl_ros
       bool cloth = false;
       if(success){
         call_counter++;
-        ros::ServiceClient client = pnh_->serviceClient<ml_classifiers::ClassifyData>("/predict");
+        ros::ServiceClient client = pnh_->serviceClient<ml_classifiers::ClassifyData>("classify_server");
         ml_classifiers::ClassifyData srv;
         ml_classifiers::ClassDataPoint class_data_point;
         class_data_point.point = result;
@@ -207,7 +207,7 @@ namespace jsk_pcl_ros
         if(client.call(srv))
           if (atoi(srv.response.classifications[0].c_str()) == 0)
             cloth = true;
-        ROS_INFO("response result : %s", srv.response.classifications[0].c_str());
+        NODELET_DEBUG("response result : %s", srv.response.classifications[0].c_str());
       }else{
         continue;
       }

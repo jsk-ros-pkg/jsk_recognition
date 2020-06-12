@@ -1,5 +1,5 @@
 PolygonArrayLikelihoodFilter
-=====================
+============================
 
 .. image:: ./images/polygon_array_likelihood_filter.png
 

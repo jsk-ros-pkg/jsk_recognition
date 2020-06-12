@@ -4,6 +4,11 @@
 
 Use kinfu (kinect fusion) for model generation and SLAM.
 
+## Note
+
+Kinfu is available only with CUDA enabled PCL. 
+
+Please see [here](../../install_pcl_from_source.md) for more information.
 
 ## Subscribing Topics
 
@@ -87,6 +92,10 @@ Use kinfu (kinect fusion) for model generation and SLAM.
     - `-1`: all textures are used and texture mesh is saved
     - `0`: no textures are used and polygon mesh is saved
     - `>0`: `n_textures_` textures are used and texture mesh is saved
+
+* `~volume_size` (Float, default: `3.0`)
+
+  TSDF Volume size for Kinect Fusion.
 
 
 ## Sample

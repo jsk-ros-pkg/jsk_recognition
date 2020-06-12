@@ -1,0 +1,38 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/lena.jpg
+      publish_info: false
+    </rosparam>
+  </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
+
+  <include file="$(find opencv_apps)/launch/edge_detection.launch">
+    <arg name="image" value="$(arg INPUT_IMAGE)"/>
+    <arg name="debug_view" value="false"/>
+  </include>
+
+  <include file="$(find jsk_perception)/launch/sparse_image_encoder.launch">
+    <arg name="image" value="edge_detection/image"/>
+    <arg name="sparse_image" value="sparse/image"/>
+  </include>
+
+  <include file="$(find jsk_perception)/launch/sparse_image_decoder.launch">
+    <arg name="sparse_image" value="sparse/image"/>
+    <arg name="sparse/image_decoded" value="sparse/image_decoded"/>
+  </include>
+
+  <group if="$(arg gui)">
+    <node name="image_view_edge"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="edge_detection/image" />
+    </node>
+    <node name="image_view_edge_sparse"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="sparse/image_decoded" />
+    </node>
+  </group>
+</launch>

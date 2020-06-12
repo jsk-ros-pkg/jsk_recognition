@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_heightmap_time_accumulation.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_heightmap_time_accumulation"
+        name="test_heightmap_time_accumulation"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /heightmap_time_accumulation/output
+      timeout_0: 30
+      topic_1: /heightmap_time_accumulation/output/config
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

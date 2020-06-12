@@ -2,6 +2,20 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.10 (2019-03-27)
+-------------------
+
+1.2.9 (2019-02-23)
+------------------
+
+1.2.8 (2019-02-22)
+------------------
+
+1.2.7 (2019-02-14)
+------------------
+* [resized_image_transport] install resized_image_transport (`#2390 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2390>`_ )
+* Contributors: Shingo Kitagawa
+
 1.2.6 (2018-11-02)
 ------------------
 * Call USE_SOURCE_PERMISSIONS before PATTERN(`#2345 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2345>`_)

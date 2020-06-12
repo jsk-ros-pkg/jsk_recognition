@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_colorize_random_forest.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_colorize_random_forest"
+        name="test_colorize_random_forest"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="60" retry="6">
+    <rosparam>
+      topic_0: /colorize_random_forest/output/zero
+      timeout_0: 60
+      topic_1: /colorize_random_forest/output/nonzero
+      timeout_1: 60
+    </rosparam>
+  </test>
+
+</launch>

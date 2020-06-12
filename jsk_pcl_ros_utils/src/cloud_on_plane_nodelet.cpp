@@ -44,6 +44,7 @@ namespace jsk_pcl_ros_utils
   {
     DiagnosticNodelet::onInit();
     pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
+    pnh_->param("approximate_sync", approximate_sync_, false);
     srv_ = boost::make_shared <dynamic_reconfigure::Server<Config> > (*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (
@@ -59,10 +60,15 @@ namespace jsk_pcl_ros_utils
   {
     sub_cloud_.subscribe(*pnh_, "input", 1);
     sub_polygon_.subscribe(*pnh_, "input/polygon", 1);
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> > (100);
-    sync_->connectInput(sub_cloud_, sub_polygon_);
-    sync_->registerCallback(boost::bind(&CloudOnPlane::predicate, this,
-                                        _1, _2));
+    if (approximate_sync_) {
+      async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> > (100);
+      async_->connectInput(sub_cloud_, sub_polygon_);
+      async_->registerCallback(boost::bind(&CloudOnPlane::predicate, this, _1, _2));
+    } else {
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> > (100);
+      sync_->connectInput(sub_cloud_, sub_polygon_);
+      sync_->registerCallback(boost::bind(&CloudOnPlane::predicate, this, _1, _2));
+    }
   }
 
   void CloudOnPlane::unsubscribe()

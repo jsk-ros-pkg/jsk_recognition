@@ -1,0 +1,27 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="camera_info_publisher"
+        pkg="rostopic" type="rostopic"
+        args="pub -r 30 -s /camera/rgb/camera_info sensor_msgs/CameraInfo
+              '{header: {stamp: now, frame_id: camera},
+                height: 480,
+                width: 640,
+                K: [525.0, 0.0, 319.5, 0.0, 525.0, 239.5, 0.0, 0.0, 1.0],
+                R: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0],
+                P: [525.0, 0.0, 319.5, 0.0, 0.0, 525.0, 239.5, 0.0, 0.0, 0.0, 1.0, 0.0],
+                roi: {x_offset: 100, y_offset: 100, height: 200, width: 300}}'"/>
+
+  <node name="roi_to_mask_image"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_perception/ROIToMaskImage">
+    <remap from="~input" to="camera/rgb/camera_info"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="roi_to_mask_image/output"/>
+    </node>
+  </group>
+</launch>

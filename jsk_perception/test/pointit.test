@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_pointit.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_pointit"
+        name="test_pointit"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="35" retry="3">
+    <rosparam>
+      topic_0: /pointit/output
+      timeout_0: 30
+      topic_1: /pointit/output/marker_array
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

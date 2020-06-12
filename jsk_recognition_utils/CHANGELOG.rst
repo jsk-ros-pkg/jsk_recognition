@@ -2,6 +2,52 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.10 (2019-03-27)
+-------------------
+* Add qtbase5-dev as a package.xml dependency for jsk_recognition_utils. (`#2417 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2417>`_)
+  Needed since CMakeLists.txt tries to depend on it.
+  Signed-off-by: Chris Lalancette <clalancette@openrobotics.org>
+* Contributors: Chris Lalancette
+
+1.2.9 (2019-02-23)
+------------------
+* add QT_LIBRARIES Qt5::Widgets to fix 'cannot find -lQt5::Widgets' error on debian stretch (`#2398 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2398>`_ )
+* Contributors: Kei Okada
+
+1.2.8 (2019-02-22)
+------------------
+
+1.2.7 (2019-02-14)
+------------------
+* [jsk_perception] Add deep_sort_tracker_node.py (`#2351 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2351>`_ )
+  * [jsk_recognition_utils/deep_sort_net.py] Renamed network name DeepSortFeature -> DeepSortFeatureExtractor
+  * [jsk_perception/deep_sort/deep_sort_net.py] Moved to jsk_recognition_utils's chainermodels
+
+* [jsk_recognition_utils] Resolve dependency for chainer (`#2306 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2306>`_ )
+* Support passing Numpy_INCLUDE_DIRS externally (`#2389 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2389>`_ )
+
+* [doc] [jsk_perception] [jsk_recognition_utils] Add guide to image recognition with deep learning (`#2365 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2365>`_)
+
+  * Add doc for image annotation
+  * Add annotate_images_with_labelme to index
+  * Add dataset class for semantic segmentation
+  * Add install_learning_datasets script
+  * Download datasets during catkin build
+  * Add .gitignore in learning_datasets/
+  * Add train_fcn script
+  * Set default learning_rate to valid value
+  * Enable plotting from remote host as well
+  * Add doc for training FCN
+  * Add doc for starting deep learning with image dataset
+  * Add how to create dataset, where to store it in documentation
+  * Dump param for fcn_object_segmentation.py
+  * Add InstanceSegmentationDataset
+  * Add train script for Mask-RCNN
+  * Fix model_name and outputs in train_fcn.md
+  * Add doc for training Mask-RCNN
+
+* Contributors: Esteve Fernandez, Yuto Uchimi, Iori Yanokura
+
 1.2.6 (2018-11-02)
 ------------------
 * Install 'sample' and 'test'into SHARE_DESTINATION (`#2345 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2345>`_)

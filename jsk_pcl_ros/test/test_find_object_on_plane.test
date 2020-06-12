@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_find_object_on_plane.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_find_object_on_plane"
+        name="test_find_object_on_plane"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="30" retry="3">
+    <rosparam>
+      topic_0: /find_object_on_plane/debug/min_area_rect_image
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

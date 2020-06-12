@@ -1,0 +1,47 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_organized_edge_detector.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <test test-name="test_organized_edge_detector"
+        name="test_organized_edge_detector"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /organized_edge_detector/output_normal
+      timeout_0: 30
+      topic_1: /organized_edge_detector/output_nan_boundary_edge
+      timeout_1: 30
+      topic_2: /organized_edge_detector/output_occluding_edge
+      timeout_2: 30
+      topic_3: /organized_edge_detector/output_occluded_edge
+      timeout_3: 30
+      topic_4: /organized_edge_detector/output_curvature_edge
+      timeout_4: 30
+      topic_5: /organized_edge_detector/output_rgb_edge
+      timeout_5: 30
+      topic_6: /organized_edge_detector/output
+      timeout_6: 30
+      topic_7: /organized_edge_detector/output_nan_boundary_edge_indices
+      timeout_7: 30
+      topic_8: /organized_edge_detector/output_occluding_edge_indices
+      timeout_8: 30
+      topic_9: /organized_edge_detector/output_occluded_edge_indices
+      timeout_9: 30
+      topic_10: /organized_edge_detector/output_curvature_edge_indices
+      timeout_10: 30
+      topic_11: /organized_edge_detector/output_rgb_edge_indices
+      timeout_11: 30
+      topic_12: /organized_edge_detector/output_indices
+      timeout_12: 30
+      topic_13: /organized_edge_detector/output_straight_edges_indices
+      timeout_13: 30
+      topic_14: /organized_edge_detector/edge_image
+      timeout_14: 30
+      topic_15: /organized_edge_detector/hough_image
+      timeout_15: 30
+    </rosparam>
+  </test>
+
+</launch>

@@ -23,7 +23,7 @@ def callback(msg):
 def main():
   global marker_array_pub
   rospy.init_node("marker_appender")
-  marker_array_pub = rospy.Publisher("marker_array", MarkerArray)
+  marker_array_pub = rospy.Publisher("marker_array", MarkerArray, queue_size=1)
   s = rospy.Subscriber("marker", Marker, callback)
   rospy.spin()
 

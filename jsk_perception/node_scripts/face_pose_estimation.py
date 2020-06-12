@@ -2,11 +2,33 @@
 # -*- coding: utf-8 -*-
 # Author: Furushchev <furushchev@jsk.imi.i.u-tokyo.ac.jp>
 
+from __future__ import print_function
+
 import cv2
 import numpy as np
 import os
 import traceback
 
+import itertools, pkg_resources, sys
+from distutils.version import LooseVersion
+if LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersion('7.0.0') and \
+   sys.version_info.major == 2:
+   print('''Please install chainer <= 7.0.0:
+
+    sudo pip install chainer==6.7.0
+
+c.f https://github.com/jsk-ros-pkg/jsk_recognition/pull/2485
+''', file=sys.stderr)
+   sys.exit(1)
+if [p for p in list(itertools.chain(*[pkg_resources.find_distributions(_) for _ in sys.path])) if "cupy-" in p.project_name ] == []:
+   print('''Please install CuPy
+
+    sudo pip install cupy-cuda[your cuda version]
+i.e.
+    sudo pip install cupy-cuda91
+
+''', file=sys.stderr)
+   sys.exit(1)
 import chainer
 from chainer.dataset import download
 from chainer.serializers import load_npz
@@ -137,10 +159,8 @@ class HyperFacePredictor(object):
         model.report = False
         model.backward = False
 
-        if gpu >= 0:
-            chainer.cuda.check_cuda_available()
-            chainer.cuda.get_device(gpu).use()
-            model.to_gpu()
+        if self.gpu >= 0:
+            model.to_gpu(self.gpu)
 
         self.model = model
 
@@ -158,11 +178,8 @@ class HyperFacePredictor(object):
 
         return img
 
-    def __call__(self, imgs):
-        if self.gpu >= 0:
-            xp = chainer.cuda.cupy
-        else:
-            xp = np
+    def forward(self, imgs):
+        xp = self.model.xp
         imgs = xp.asarray([self.preprocess(img) for img in imgs])
 
         # forwarding
@@ -187,6 +204,11 @@ class HyperFacePredictor(object):
                 "gender": gender[i]
             })
         return result
+
+    def __call__(self, imgs):
+        if self.gpu >= 0:
+            chainer.cuda.get_device_from_id(self.gpu).use()
+        return self.forward(imgs)
 
 
 class FacePoseEstimator(ConnectionBasedTransport):

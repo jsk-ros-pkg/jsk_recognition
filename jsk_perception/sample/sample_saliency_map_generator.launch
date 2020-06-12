@@ -1,0 +1,34 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <include file="$(find jsk_perception)/sample/sample_image_publisher.launch">
+    <arg name="gui" value="false"/>
+  </include>
+
+  <node name="saliency_map_generator"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_perception/SaliencyMapGenerator">
+    <remap from="~input" to="raw_image_bgr/image_color"/>
+    <remap from="/saliency_map_generator/output/saliency_map" to="~output"/>
+    <rosparam>
+      num_threads: 1
+      fps: false
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="tile_image"
+          pkg="jsk_perception" type="tile_image.py">
+      <rosparam>
+        input_topics:
+          - /raw_image_bgr/image_color
+          - /saliency_map_generator/output
+      </rosparam>
+    </node>
+
+    <node name="image_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="tile_image/output"/>
+    </node>
+  </group>
+</launch>

@@ -10,6 +10,7 @@
       publish_info: false
     </rosparam>
   </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <node name="depth_publisher"
         pkg="jsk_perception" type="image_publisher.py">
@@ -19,16 +20,17 @@
       publish_info: false
     </rosparam>
   </node>
+  <arg name="DEPTH_IMAGE" default="depth_publisher/output" />
 
   <node name="colorize_float_image"
         pkg="jsk_perception" type="colorize_float_image">
-    <remap from="~input" to="depth_publisher/output" />
+    <remap from="~input" to="$(arg DEPTH_IMAGE)" />
   </node>
 
   <node name="overlay_image_color_on_mono"
         pkg="jsk_perception" type="overlay_image_color_on_mono">
     <remap from="~input/color" to="colorize_float_image/output" />
-    <remap from="~input/mono" to="image_publisher/output" />
+    <remap from="~input/mono" to="$(arg INPUT_IMAGE)" />
     <rosparam>
       approximate_sync: true
     </rosparam>
@@ -41,7 +43,7 @@
     </node>
     <node name="image_view1"
           pkg="image_view" type="image_view">
-      <remap from="image" to="image_publisher/output" />
+      <remap from="image" to="$(arg INPUT_IMAGE)" />
     </node>
     <node name="image_view2"
           pkg="image_view" type="image_view">

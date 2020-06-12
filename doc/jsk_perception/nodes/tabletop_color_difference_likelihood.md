@@ -24,38 +24,61 @@ by multiplying given ratio and all the area of hisotgrams.
 * `~input` (`sensor_msgs/Image`)
 
   Single channel color image
+
 * `~input/polygons` (`jsk_recognition_msgs/PolygonArray`)
 
   Polygon messages
+
 * `~input/camera_info` (`sensor_msgs/CameraInfo`)
 
   Input camera info
+
 
 ## Publishing Topic
 * `~output` (`sensor_msgs/Image`)
 
   Result distance image.
+
 * `~debug/histogram_image` (`sensor_msgs/Image`)
 
   Image to visualize histogram. Red bars are extracted top N histograms.
+
 * `~debug/polygon_image` (`sensor_msgs/Image`)
 
   Image to visualize polygons projected on 2-D image.
 
+
 ## Parameters
-* `~tf_queue_size` (default: `10`)
+* `~tf_queue_size` (Int, default: `10`)
 
   Queue length of tf message filters
-* `~cyclic_value` (default: `True`)
+
+* `~cyclic_value` (Bool, default: `True`)
 
   Set to true if the channel is circular value.
-* `~bin_size` (default: `30`)
+
+* `~bin_size` (Int, default: `30`)
 
   The number of bins in histogram.
-* `~pixel_min_value` (default: `0`)
-* `~pixel_max_value` (default: `180`)
+
+  This paramteter can be changed by `dynamic_reconfigure`.
+
+* `~pixel_min_value` (Int, default: `0`)
+* `~pixel_max_value` (Int, default: `180`)
 
   Minimum and maximum value in the color space.
-* `~histogram_top_n_ratio` (default: `0.5`)
+
+  This paramteter can be changed by `dynamic_reconfigure`.
+
+* `~histogram_top_n_ratio` (Float, default: `0.5`)
 
   Ratio of extracting top N histograms.
+
+  This paramteter can be changed by `dynamic_reconfigure`.
+
+
+## Sample
+
+```bash
+roslaunch jsk_perception sample_tabletop_color_difference_likelihood.launch
+```

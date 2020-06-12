@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 # Author: Yuki Furuta <furushchev@jsk.imi.i.u-tokyo.ac.jp>
 
+from __future__ import print_function
+
 import argparse
 import copy
 import json
@@ -11,6 +13,26 @@ import sys
 import yaml
 
 # chainer
+import itertools, pkg_resources
+from distutils.version import LooseVersion
+if LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersion('7.0.0') and \
+   sys.version_info.major == 2:
+   print('''Please install chainer <= 7.0.0:
+
+    sudo pip install chainer==6.7.0
+
+c.f https://github.com/jsk-ros-pkg/jsk_recognition/pull/2485
+''', file=sys.stderr)
+   sys.exit(1)
+if [p for p in list(itertools.chain(*[pkg_resources.find_distributions(_) for _ in sys.path])) if "cupy-" in p.project_name ] == []:
+   print('''Please install CuPy
+
+    sudo pip install cupy-cuda[your cuda version]
+i.e.
+    sudo pip install cupy-cuda91
+
+''', file=sys.stderr)
+   sys.exit(1)
 import chainer
 from chainer import serializers
 from chainer import training
@@ -66,9 +88,9 @@ class SSDDataset(chainer.dataset.DatasetMixin):
             try:
                 l = self.label_names.index(anno_i['label_class'])
             except Exception as e:
-                print >> sys.stderr, "Failed to index label class: {}".format(anno_i)
-                print >> sys.stderr, "image file name: {}".format(img_filename)
-                print >> sys.stderr, "annotation file name: {}".format(anno_filename)
+                print("Failed to index label class: {}".format(anno_i), file=sys.stderr)
+                print("image file name: {}".format(img_filename), file=sys.stderr)
+                print("annotation file name: {}".format(anno_filename), file=sys.stderr)
                 continue
             bbox.append(
                 [center_y - h / 2, center_x - w / 2,
@@ -166,7 +188,7 @@ if __name__ == '__main__':
     with open(args.label_file, "r") as f:
         label_names = tuple(yaml.load(f))
 
-    print "Loaded %d labels" % len(label_names)
+    print("Loaded %d labels" % len(label_names))
 
     if args.val is None:
         dataset = SSDDataset(args.train, label_names)
@@ -176,7 +198,7 @@ if __name__ == '__main__':
         train = SSDDataset(args.train, label_names)
         test  = SSDDataset(args.val, label_names)
 
-    print "train: {}, test: {}".format(len(train), len(test))
+    print("train: {}, test: {}".format(len(train), len(test)))
 
     pretrained_model = SSD300(pretrained_model=args.base_model)
 

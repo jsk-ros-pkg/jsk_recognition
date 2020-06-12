@@ -1,0 +1,72 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/lena.jpg
+      encoding: rgb8
+      publish_info: true
+      frame_id: map
+      fovx: 90.0
+      fovy: 90.0
+    </rosparam>
+  </node>
+
+  <node name="sample_manager"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <node name="planar_pointcloud_simulator"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PlanarPointCloudSimulator sample_manager">
+    <remap from="~input" to="image_publisher/output/camera_info"/>
+    <rosparam>
+      distance: 2.0
+    </rosparam>
+  </node>
+
+  <node name="pointcloud_xyz_to_xyzrgb"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/PointCloudXYZToXYZRGB sample_manager">
+    <remap from="~input" to="planar_pointcloud_simulator/output"/>
+  </node>
+
+  <node name="static_polygon_array_publisher"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/StaticPolygonArrayPublisher sample_manager">
+    <remap from="~input" to="pointcloud_xyz_to_xyzrgb/output"/>
+    <rosparam>
+      use_message: true
+      frame_ids:
+        - map
+        - map
+        - map
+        - map
+      polygon_array:
+        - [[-2.0, 2.0, 2.5], [-2.0, 0.0, 2.5], [0.0, 0.0, 2.5], [0.0, 2.0, 2.5]]
+        - [[2.0, 2.0, 3.0], [2.0, 0.0, 3.0], [0.0, 0.0, 3.0], [0.0, 2.0, 3.0]]
+        - [[-2.0, -2.0, 3.5], [-2.0, 0.0, 3.5], [0.0, 0.0, 3.5], [0.0, -2.0, 3.5]]
+        - [[2.0, -2.0, 4.0], [2.0, 0.0, 4.0], [0.0, 0.0, 4.0], [0.0, -2.0, 4.0]]
+    </rosparam>
+  </node>
+
+  <node name="colorize_distance_from_plane"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl_utils/ColorizeDistanceFromPlane sample_manager">
+    <remap from="~input" to="pointcloud_xyz_to_xyzrgb/output"/>
+    <remap from="~input_polygons" to="static_polygon_array_publisher/output_polygons"/>
+    <remap from="~input_coefficients" to="static_polygon_array_publisher/output_coefficients"/>
+    <rosparam>
+      min_distance: 0.0
+      max_distance: 2.0
+      only_projectable: false
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros_utils)/sample/config/sample_colorize_distance_from_plane.rviz"/>
+  </group>
+</launch>

@@ -2,6 +2,37 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.10 (2019-03-27)
+-------------------
+* Re-enable pointcloud_to_pcd.test `#2402 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2402>`_)
+* [doc] [jsk_pcl_ros_utils] [jsk_pcl_ros] Add documentation (`#2393 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2393>`_)
+
+  * Add test for TransformPointcloudInBoundingBox
+  * Add sample for TransformPointcloudInBoundingBox
+  * Add test for PlaneReasoner
+  * Add sample for PlaneReasoner
+  * Add test for PlaneRejcetor
+  * Add sample for PlaneRejcetor
+  * Add test for PolygonAppender
+  * Add sample for PolygonAppender
+  * Add test for StaticPolygonArrayPublisher
+  * Add sample for StaticPolygonArrayPublisher
+  * Add test for NormalConcatenater
+  * Add sample for NormalConcatenater
+
+* Contributors: Yuto Uchimi
+
+1.2.9 (2019-02-23)
+------------------
+
+1.2.8 (2019-02-22)
+------------------
+
+1.2.7 (2019-02-14)
+------------------
+* [jsk_pcl_ros, jsk_pcl_ros_utils] Use ccache if installed to make it fast to generate object file (`#2342 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2342>`_ )
+* Contributors: Iori Yanokura
+
 1.2.6 (2018-11-02)
 ------------------
 * [jsk_pcl_ros_utils/cluster_point_indices_to_point_indices] Concatenate all indices in case of index==-1 (`#2330 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2330>`_)

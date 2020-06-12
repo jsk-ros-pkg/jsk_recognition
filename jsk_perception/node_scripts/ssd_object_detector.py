@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 # Author: Furushchev <furushchev@jsk.imi.i.u-tokyo.ac.jp>
 
+from __future__ import print_function
+
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -20,9 +22,33 @@ from sensor_msgs.msg import Image
 from jsk_recognition_msgs.msg import Rect, RectArray
 from jsk_recognition_msgs.msg import ClassificationResult
 
+import itertools, pkg_resources, sys
+from distutils.version import LooseVersion
+if LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersion('7.0.0') and \
+   sys.version_info.major == 2:
+   print('''Please install chainer <= 7.0.0:
+
+    sudo pip install chainer==6.7.0
+
+c.f https://github.com/jsk-ros-pkg/jsk_recognition/pull/2485
+''', file=sys.stderr)
+   sys.exit(1)
+if [p for p in list(itertools.chain(*[pkg_resources.find_distributions(_) for _ in sys.path])) if "cupy-" in p.project_name ] == []:
+   print('''Please install CuPy
+
+    sudo pip install cupy-cuda[your cuda version]
+i.e.
+    sudo pip install cupy-cuda91
+
+''', file=sys.stderr)
+   #sys.exit(1)
+import chainer
 from chainercv.links import SSD300
 from chainercv.links import SSD512
 from chainercv.visualizations import vis_bbox
+
+
+chainer.config.cv_resize_backend = 'cv2'
 
 
 class SSDObjectDetector(ConnectionBasedTransport):
@@ -51,7 +77,8 @@ class SSDObjectDetector(ConnectionBasedTransport):
             n_fg_class=len(self.label_names),
             pretrained_model=model_path)
         if self.gpu >= 0:
-            self.model.to_gpu(self.gpu)
+            chainer.cuda.get_device_from_id(self.gpu).use()
+            self.model.to_gpu()
         rospy.loginfo("Loaded model: %s" % model_path)
 
         # dynamic reconfigure
@@ -113,6 +140,8 @@ class SSDObjectDetector(ConnectionBasedTransport):
             rospy.loginfo("%s: elapsed %f msec" % ("convert", (tcur-tprev)*1000))
             tprev = tcur
 
+        if self.gpu >= 0:
+            chainer.cuda.get_device_from_id(self.gpu).use()
         bboxes, labels, scores = self.model.predict([img])
         bboxes, labels, scores = bboxes[0], labels[0], scores[0]
 
@@ -156,14 +185,14 @@ class SSDObjectDetector(ConnectionBasedTransport):
             tprev = tcur
 
         if self.visualize:
-            self.publish_bbox_image(img, bboxes, labels, scores)
+            self.publish_bbox_image(img, bboxes, labels, scores, msg.header)
 
         if self.profiling:
             tcur = time.time()
             rospy.loginfo("%s: elapsed %f msec" % ("callback end", (tcur-tprev)*1000))
             tprev = tcur
 
-    def publish_bbox_image(self, img, bbox, label, score):
+    def publish_bbox_image(self, img, bbox, label, score, header):
         vis_bbox(img, bbox, label, score,
                  label_names=self.label_names)
         fig = plt.gcf()
@@ -178,6 +207,7 @@ class SSDObjectDetector(ConnectionBasedTransport):
         except Exception as e:
             rospy.logerr("Failed to convert bbox image: %s" % str(e))
             return
+        msg.header = header
         self.pub_image.publish(msg)
 
 

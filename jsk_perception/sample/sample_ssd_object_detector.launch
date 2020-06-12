@@ -13,11 +13,12 @@
       file_name: $(find jsk_perception)/sample/object_detection_example_1.jpg
     </rosparam>
   </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <node name="ssd_object_detector"
         pkg="jsk_perception" type="ssd_object_detector.py"
         output="screen">
-    <remap from="~input" to="image_publisher/output" />
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <rosparam subst_value="true">
       gpu: $(arg gpu)
     </rosparam>

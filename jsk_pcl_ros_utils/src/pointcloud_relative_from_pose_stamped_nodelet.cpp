@@ -47,6 +47,7 @@ namespace jsk_pcl_ros_utils
   {
     DiagnosticNodelet::onInit();
     pub_ = advertise<sensor_msgs::PointCloud2>(*pnh_, "output", 1);
+    pnh_->param<bool>("approximate_sync", approximate_sync_, false);
     onInitPostProcess();
   }
   
@@ -54,9 +55,15 @@ namespace jsk_pcl_ros_utils
   {
     sub_cloud_.subscribe(*pnh_, "input", 1);
     sub_pose_.subscribe(*pnh_, "input/pose", 1);
-    sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
-    sync_->connectInput(sub_cloud_, sub_pose_);
-    sync_->registerCallback(boost::bind(&PointCloudRelativeFromPoseStamped::transform, this, _1, _2));
+    if (approximate_sync_) {
+      async_ = boost::make_shared<message_filters::Synchronizer<ApproximateSyncPolicy> >(100);
+      async_->connectInput(sub_cloud_, sub_pose_);
+      async_->registerCallback(boost::bind(&PointCloudRelativeFromPoseStamped::transform, this, _1, _2));
+    } else {
+      sync_ = boost::make_shared<message_filters::Synchronizer<SyncPolicy> >(100);
+      sync_->connectInput(sub_cloud_, sub_pose_);
+      sync_->registerCallback(boost::bind(&PointCloudRelativeFromPoseStamped::transform, this, _1, _2));
+    }
   }
   
   void PointCloudRelativeFromPoseStamped::unsubscribe()

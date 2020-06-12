@@ -1,8 +1,30 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
+import os
 import sys
+import yaml
 
+import itertools, pkg_resources
+from distutils.version import LooseVersion
+if LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersion('7.0.0') and \
+   sys.version_info.major == 2:
+   print('''Please install chainer <= 7.0.0:
+
+    sudo pip install chainer==6.7.0
+
+c.f https://github.com/jsk-ros-pkg/jsk_recognition/pull/2485
+''', file=sys.stderr)
+   sys.exit(1)
+if [p for p in list(itertools.chain(*[pkg_resources.find_distributions(_) for _ in sys.path])) if "cupy-" in p.project_name ] == []:
+   print('''Please install CuPy
+
+    sudo pip install cupy-cuda[your cuda version]
+i.e.
+    sudo pip install cupy-cuda91
+
+''', file=sys.stderr)
+   sys.exit(1)
 import chainer
 import numpy as np
 
@@ -17,6 +39,8 @@ except ImportError:
     sys.exit(1)
 
 import cv_bridge
+from dynamic_reconfigure.server import Server
+from jsk_perception.cfg import MaskRCNNInstanceSegmentationConfig as Config
 from jsk_recognition_msgs.msg import ClusterPointIndices
 from jsk_recognition_msgs.msg import Label
 from jsk_recognition_msgs.msg import LabelArray
@@ -38,12 +62,16 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
         super(MaskRCNNInstanceSegmentation, self).__init__()
         # gpu
         self.gpu = rospy.get_param('~gpu', 0)
-        if self.gpu >= 0:
-            chainer.cuda.get_device_from_id(self.gpu).use()
         chainer.global_config.train = False
         chainer.global_config.enable_backprop = False
 
-        self.fg_class_names = rospy.get_param('~fg_class_names')
+        fg_class_names = rospy.get_param('~fg_class_names')
+        if isinstance(fg_class_names, str) and os.path.exists(fg_class_names):
+            rospy.loginfo('Loading class names from file: {}'.format(fg_class_names))
+            with open(fg_class_names, 'r') as f:
+                fg_class_names = yaml.load(f)
+        self.fg_class_names = fg_class_names
+
         pretrained_model = rospy.get_param('~pretrained_model')
         self.classifier_name = rospy.get_param(
             "~classifier_name", rospy.get_name())
@@ -53,10 +81,14 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
             n_layers=50,
             n_fg_class=n_fg_class,
             pretrained_model=pretrained_model,
+            anchor_scales=rospy.get_param('~anchor_scales', [4, 8, 16, 32]),
+            min_size=rospy.get_param('~min_size', 600),
+            max_size=rospy.get_param('~max_size', 1000),
         )
-        self.model.score_thresh = rospy.get_param('~score_thresh', 0.7)
         if self.gpu >= 0:
-            self.model.to_gpu()
+            self.model.to_gpu(self.gpu)
+
+        self.srv = Server(Config, self.config_callback)
 
         self.pub_indices = self.advertise(
             '~output/cluster_indices', ClusterPointIndices, queue_size=1)
@@ -82,12 +114,19 @@ class MaskRCNNInstanceSegmentation(ConnectionBasedTransport):
     def unsubscribe(self):
         self.sub.unregister()
 
+    def config_callback(self, config, level):
+        self.model.score_thresh = config.score_thresh
+        return config
+
     def callback(self, imgmsg):
         bridge = cv_bridge.CvBridge()
         img = bridge.imgmsg_to_cv2(imgmsg, desired_encoding='rgb8')
         img_chw = img.transpose(2, 0, 1)  # C, H, W
 
+        if self.gpu >= 0:
+            chainer.cuda.get_device_from_id(self.gpu).use()
         bboxes, masks, labels, scores = self.model.predict([img_chw])
+
         bboxes = bboxes[0]
         masks = masks[0]
         labels = labels[0]

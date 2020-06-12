@@ -130,11 +130,6 @@ namespace jsk_pcl_ros
     dynamic_reconfigure::Server<Config>::CallbackType f =
       boost::bind (&LineSegmentCollector::configCallback, this, _1, _2);
     srv_->setCallback (f);
-    
-    if (!pnh_->getParam("fixed_frame_id", fixed_frame_id_)) {
-      NODELET_ERROR("no ~fixed_frame_id is specified");
-      return;
-    }
 
     std::string rotate_type_str;
     pnh_->param("rotate_type", rotate_type_str, std::string("tilt_two_way"));

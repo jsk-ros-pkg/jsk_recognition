@@ -1,0 +1,62 @@
+<launch>
+  <arg name="gui" default="true"/>
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/laugh_out_loud_joke_book.jpg
+    </rosparam>
+  </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
+
+  <node name="mask_image_generator"
+        pkg="jsk_perception" type="mask_image_generator">
+    <remap from="~input" to="$(arg INPUT_IMAGE)"/>
+    <rosparam subst_value="true">
+      offset_x: 80
+      offset_y: 60
+      width: 200
+      height: 250
+    </rosparam>
+  </node>
+
+  <node name="solidity_rag_merge"
+        pkg="jsk_perception" type="solidity_rag_merge.py">
+    <remap from="~input" to="$(arg INPUT_IMAGE)"/>
+    <remap from="~input/mask" to="mask_image_generator/output"/>
+    <rosparam>
+      approximate_sync: true
+      debug: true
+    </rosparam>
+  </node>
+
+  <node name="colorize_labels_slic"
+        pkg="jsk_perception" type="colorize_labels">
+    <remap from="~input" to="solidity_rag_merge/debug/slic"/>
+  </node>
+
+  <node name="colorize_labels_merged"
+        pkg="jsk_perception" type="colorize_labels">
+    <remap from="~input" to="solidity_rag_merge/output"/>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="tile_image"
+          pkg="jsk_perception" type="tile_image.py">
+      <rosparam>
+        input_topics:
+          - /image_publisher/output
+          - /solidity_rag_merge/debug/rag
+          - /solidity_rag_merge/debug/label_viz
+          - /mask_image_generator/output
+          - /colorize_labels_slic/output
+          - /colorize_labels_merged/output
+      </rosparam>
+    </node>
+
+    <node name="image_view"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="tile_image/output"/>
+    </node>
+  </group>
+</launch>

@@ -1,5 +1,7 @@
 #include <ros/ros.h>
+#include <dynamic_reconfigure/server.h>
 #include <jsk_topic_tools/log_utils.h>
+#include <jsk_topic_tools/rosparam_utils.h>
 #include <image_transport/image_transport.h>
 #include <image_geometry/pinhole_camera_model.h>
 #include <tf/transform_listener.h>
@@ -8,15 +10,21 @@
 #include <opencv/highgui.h>
 #include <cv_bridge/cv_bridge.h>
 
+#include <string>
 #include <vector>
 #include <boost/assign.hpp>
+#include <boost/thread.hpp>
 
 #include <geometry_msgs/Polygon.h>
 #include <geometry_msgs/PolygonStamped.h>
 
+#include <jsk_perception/VirtualCameraMonoConfig.h>
+
+
 class VirtualCameraMono
 {
   ros::NodeHandle nh_,private_nh_;
+  boost::shared_ptr<dynamic_reconfigure::Server<jsk_perception::VirtualCameraMonoConfig> > srv_;
   image_transport::ImageTransport it_,it_priv_;
   image_transport::CameraSubscriber sub_;
   image_transport::CameraPublisher pub_;
@@ -28,6 +36,7 @@ class VirtualCameraMono
 
   tf::StampedTransform trans_; // transform to virtual camera
   geometry_msgs::PolygonStamped poly_; // target polygon to transform image
+  int interpolation_method_;
 
 public:
   VirtualCameraMono() : private_nh_("~"), it_(nh_), it_priv_(private_nh_), subscriber_count_(0)
@@ -36,13 +45,29 @@ public:
     image_transport::SubscriberStatusCallback disconnect_cb = boost::bind(&VirtualCameraMono::disconnectCb, this, _1);
     pub_ = it_priv_.advertiseCamera("image", 1, connect_cb, disconnect_cb);
 
-    // init parameters : TODO replace ros::param
-    trans_.frame_id_ = "/elevator_inside_panel";
-    trans_.child_frame_id_ = "/virtual_camera_frame";
-    trans_.setOrigin(tf::Vector3(0.7,0,0));
-    trans_.setRotation(tf::Quaternion(0.707,0,0,-0.707) * tf::Quaternion(0,0.707,0,-0.707));
+    dynamic_reconfigure::Server<jsk_perception::VirtualCameraMonoConfig>::CallbackType f =
+      boost::bind(&VirtualCameraMono::configCb, this, _1, _2);
+    srv_ = boost::make_shared<dynamic_reconfigure::Server<jsk_perception::VirtualCameraMonoConfig> >(private_nh_);
+    srv_->setCallback(f);
 
-    poly_.header.frame_id = "/elevator_inside_panel";
+    private_nh_.param("frame_id", trans_.frame_id_, std::string("/elevator_inside_panel"));
+    private_nh_.param("child_frame_id", trans_.child_frame_id_, std::string("/virtual_camera_frame"));
+
+    std::vector<double> initial_pos, initial_rot;
+    if (jsk_topic_tools::readVectorParameter(private_nh_, "initial_pos", initial_pos)) {
+      trans_.setOrigin(tf::Vector3(initial_pos[0], initial_pos[1], initial_pos[2]));
+    }
+    else {
+      trans_.setOrigin(tf::Vector3(0.7, 0, 0));
+    }
+    if (jsk_topic_tools::readVectorParameter(private_nh_, "initial_rot", initial_rot)) {
+      trans_.setRotation(tf::Quaternion(initial_rot[0], initial_rot[1], initial_rot[2], initial_rot[3]));
+    }
+    else {
+      trans_.setRotation(tf::Quaternion(0.707, 0, 0, -0.707) * tf::Quaternion(0, 0.707, 0, -0.707));
+    }
+
+    poly_.header.frame_id = trans_.frame_id_;
     geometry_msgs::Point32 pt;
     pt.x=0, pt.y=1, pt.z=0; poly_.polygon.points.push_back(pt);
     pt.x=0, pt.y=-1, pt.z=0; poly_.polygon.points.push_back(pt);
@@ -53,6 +78,31 @@ public:
     sub_trans_ = nh_.subscribe<geometry_msgs::TransformStamped>("view_point", 1, &VirtualCameraMono::transCb, this);
     sub_poly_ = nh_.subscribe<geometry_msgs::PolygonStamped>("target_polygon", 1, &VirtualCameraMono::polyCb, this);
 
+  }
+
+  void configCb(const jsk_perception::VirtualCameraMonoConfig &config, uint32_t level)
+  {
+    boost::mutex::scoped_lock(mutex_);
+    switch (config.interpolation_method) {
+      case 0:
+        interpolation_method_ = cv::INTER_NEAREST;
+        break;
+      case 1:
+        interpolation_method_ = cv::INTER_LINEAR;
+        break;
+      case 2:
+        interpolation_method_ = cv::INTER_AREA;
+        break;
+      case 3:
+        interpolation_method_ = cv::INTER_CUBIC;
+        break;
+      case 4:
+        interpolation_method_ = cv::INTER_LANCZOS4;
+        break;
+      default:
+        ROS_ERROR("Invalid interpolation method: %d", config.interpolation_method);
+        break;
+    }
   }
 
   void connectCb(const image_transport::SingleSubscriberPublisher&)
@@ -108,13 +158,10 @@ public:
 
     //
     ROS_DEBUG("transform image.");
-    //IplImage *outimage = cvCloneImage(image); // need to release
     cv::Mat outimage = image.clone();
     if (TransformImage(image, outimage, trans_, poly_, cam_model_)) {
-      //
       ROS_DEBUG("publish image and transform.");
       sensor_msgs::CameraInfo virtual_info = *info_msg;
-      //sensor_msgs::Image::Ptr img_msg = bridge_.cvToImgMsg(outimage, "bgr8");
       cv_ptr->image = outimage;
       sensor_msgs::Image::Ptr img_msg = cv_ptr->toImageMsg();
       img_msg->header.stamp = trans_.stamp_;
@@ -123,15 +170,14 @@ public:
       virtual_info.header.frame_id = trans_.child_frame_id_;
       pub_.publish(*img_msg, virtual_info);
     }
-
-    // finalize
-    //cvReleaseImage(&outimage);
   }
 
   // subscribe target polygon
   void polyCb(const geometry_msgs::PolygonStampedConstPtr& poly) { poly_ = *poly; }
+
   // subscribe virtual camera pose
-  void transCb(const geometry_msgs::TransformStampedConstPtr& tf) {
+  void transCb(const geometry_msgs::TransformStampedConstPtr& tf)
+  {
     trans_.frame_id_ = tf->header.frame_id;
     trans_.child_frame_id_ = tf->child_frame_id;
     trans_.setOrigin(tf::Vector3(tf->transform.translation.x,
@@ -178,18 +224,10 @@ public:
       }
 
       cv::Mat map_matrix = cv::getPerspectiveTransform (src_pnt, dst_pnt);
-
-      // unrectified?
-      //IplImage* rectified = cvCloneImage(src);
-      //cv::Mat from_mat = cv::Mat(src), to_mat = cv::Mat(rectified);
-      //cam_model_.rectifyImage(from_mat,to_mat);
-      //cvWarpPerspective (rectified, dest, map_matrix, CV_INTER_LINEAR + CV_WARP_FILL_OUTLIERS, cvScalarAll (0));
-      cv::Mat to_mat = src.clone();
-      cam_model_.rectifyImage(src, to_mat);
-      cv::warpPerspective (src, dest, map_matrix, dest.size(), cv::INTER_LINEAR);
-      //cvReleaseImage(&rectified);
-    } catch ( std::runtime_error e ) {
-      ROS_INFO_THROTTLE(10, "[virtual_camera_mono] failed to transform image: %s", e.what());
+      cv::warpPerspective (src, dest, map_matrix, dest.size(), interpolation_method_);
+    }
+    catch (tf::TransformException e) {
+      ROS_WARN_THROTTLE(10, "[virtual_camera_mono] failed to transform image: %s", e.what());
       return false;
     }
     return true;

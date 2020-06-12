@@ -10,22 +10,23 @@
       encoding: mono8
     </rosparam>
   </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <node name="blob_detector"
         pkg="jsk_perception" type="blob_detector">
-    <remap from="~input" to="image_publisher/output" />
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
   </node>
 
   <node name="label_image_decomposer"
         pkg="jsk_perception" type="label_image_decomposer.py">
-    <remap from="~input" to="image_publisher/output" />
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <remap from="~input/label" to="blob_detector/output" />
   </node>
 
   <group if="$(arg gui)">
     <node name="image_view0"
           pkg="image_view" type="image_view">
-      <remap from="image" to="image_publisher/output" />
+      <remap from="image" to="$(arg INPUT_IMAGE)" />
     </node>
     <node name="image_view1"
           pkg="image_view" type="image_view">

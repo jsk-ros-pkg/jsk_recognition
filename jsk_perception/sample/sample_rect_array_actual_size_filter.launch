@@ -7,7 +7,7 @@
     pkg="rosbag" type="play"
     args="$(find jsk_perception)/sample/data/2016-11-11-12-53-06_in_lab.bag --clock --loop" />
 
-  <arg name="INPUT_IMAGE" value="/camera/rgb/image_raw" />
+  <arg name="INPUT_IMAGE" default="/camera/rgb/image_raw" />
   <arg name="INPUT_DEPTH_IMAGE" value="/camera/depth_registered/image_raw" />
   <arg name="INPUT_CAMERA_INFO" value="/camera/depth_registered/camera_info" />
 

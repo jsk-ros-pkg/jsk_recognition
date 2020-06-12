@@ -29,6 +29,32 @@
     </rosparam>
   </node>
 
+  <node name="raw_image_bgra"
+        pkg="jsk_perception" type="image_publisher.py">
+    <remap from="~output" to="~image_color" />
+    <remap from="~output/camera_info" to="~camera_info" />
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/sample_alpha.png
+      encoding: bgra8
+      publish_info: true
+      fovx: 84.1
+      fovy: 53.8
+    </rosparam>
+  </node>
+
+  <node name="raw_image_rgba"
+        pkg="jsk_perception" type="image_publisher.py">
+    <remap from="~output" to="~image_color" />
+    <remap from="~output/camera_info" to="~camera_info" />
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/image/sample_alpha.png
+      encoding: rgba8
+      publish_info: true
+      fovx: 84.1
+      fovy: 53.8
+    </rosparam>
+  </node>
+
   <node name="mask_image"
         pkg="jsk_perception" type="image_publisher.py">
     <remap from="~output" to="~mask" />
@@ -111,6 +137,14 @@
       <rosparam>
         bg_label: 0
       </rosparam>
+    </node>
+    <node name="image_view6"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="raw_image_bgra/image_color" />
+    </node>
+    <node name="image_view7"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="raw_image_rgba/image_color" />
     </node>
   </group>
 

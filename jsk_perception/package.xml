@@ -77,7 +77,7 @@
   <run_depend>posedetection_msgs</run_depend>
   <!-- install chainer {{ -->
   <run_depend>python-h5py</run_depend>
-  <run_depend>python-chainer-pip</run_depend>
+  <run_depend version_lt="7.0.0">python-chainer-pip</run_depend>
   <run_depend>python-chainercv-pip</run_depend>
   <!-- }} install chainer -->
   <run_depend>python-dlib</run_depend>  <!-- pip -->
@@ -99,6 +99,7 @@
   <run_depend>sound_play</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>tf</run_depend>
+  <run_depend>tf2_geometry_msgs</run_depend>
   <run_depend>topic_tools</run_depend>
   <run_depend>robot_self_filter</run_depend>
   <run_depend>yaml-cpp</run_depend>

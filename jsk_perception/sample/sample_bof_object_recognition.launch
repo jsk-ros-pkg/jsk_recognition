@@ -6,38 +6,41 @@
         pkg="jsk_perception" type="image_publisher.py">
     <param name="~file_name" value="$(find jsk_perception)/sample/image/laugh_out_loud_joke_book.jpg" />
   </node>
+  <arg name="INPUT_IMAGE" default="raw_image/output" />
 
   <node name="mask_image"
         pkg="jsk_perception" type="image_publisher.py">
     <param name="~file_name" value="$(find jsk_perception)/sample/image/laugh_out_loud_joke_book_mask.jpg" />
   </node>
+  <arg name="MASK_IMAGE" default="mask_image/output" />
 
   <node name="label_image"
         pkg="jsk_perception" type="mask_image_to_label.py">
-    <remap from="~input" to="mask_image/output" />
+    <remap from="~input" to="$(arg MASK_IMAGE)" />
   </node>
+  <arg name="LABEL_IMAGE" default="label_image/output" />
 
   <node name="colorize_labels"
         pkg="jsk_perception" type="colorize_labels">
-    <remap from="~input" to="label_image/output" />
+    <remap from="~input" to="$(arg LABEL_IMAGE)" />
   </node>
 
   <node name="imagesift"
         pkg="imagesift" type="imagesift">
-    <remap from="image" to="raw_image/output" />
+    <remap from="image" to="$(arg INPUT_IMAGE)" />
     <remap from="Feature0D" to="~output" />
   </node>
 
   <node name="feature0d_to_image"
         pkg="posedetection_msgs" type="feature0d_to_image">
-    <remap from="image" to="raw_image/output" />
+    <remap from="image" to="$(arg INPUT_IMAGE)" />
     <remap from="Feature0D" to="imagesift/output" />
   </node>
 
   <node name="bof_histogram_extractor"
         pkg="jsk_perception" type="bof_histogram_extractor.py">
     <remap from="~input" to="imagesift/output" />
-    <remap from="~input/label" to="label_image/output" />
+    <remap from="~input/label" to="$(arg LABEL_IMAGE)" />
     <param name="~bof_data" value="$(find jsk_perception)/trained_data/apc2015_sample_bof_sklearn==0.20.0.pkl.gz" />
     <rosparam>
       approximate_sync: true

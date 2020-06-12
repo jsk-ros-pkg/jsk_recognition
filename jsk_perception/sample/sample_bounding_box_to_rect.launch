@@ -5,7 +5,7 @@
         args="$(find jsk_perception)/test_data/2016-04-05-17-19-43_draw_bbox/vision.bag --loop">
   </node>
 
-  <arg name="INPUT_IMAGE" value="/kinect2_torso/hd/image_color" />
+  <arg name="INPUT_IMAGE" default="/kinect2_torso/hd/image_color" />
   <arg name="INPUT_INFO" value="/kinect2_torso/hd/camera_info" />
   <arg name="INPUT_BBOXES" value="bin_gtol_clipper/output/box_array" />
 

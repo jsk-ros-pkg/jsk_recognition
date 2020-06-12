@@ -10,10 +10,11 @@
       publish_info: false
     </rosparam>
   </node>
+  <arg name="MASK_IMAGE" default="mask_publisher/output" />
 
   <node name="convex_hull_mask_image"
         pkg="jsk_perception" type="convex_hull_mask_image">
-    <remap from="~input" to="mask_publisher/output" />
+    <remap from="~input" to="$(arg MASK_IMAGE)" />
   </node>
 
   <group if="$(arg gui)">

@@ -7,11 +7,12 @@
       file_name: $(find jsk_perception)/sample/circles.png
     </rosparam>
   </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <node name="rgb_decomposer"
         pkg="nodelet" type="nodelet"
         args="standalone jsk_perception/RGBDecomposer">
-    <remap from="~input" to="image_publisher/output"/>
+    <remap from="~input" to="$(arg INPUT_IMAGE)"/>
   </node>
 
   <group if="$(arg gui)">

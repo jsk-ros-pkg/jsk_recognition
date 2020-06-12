@@ -8,10 +8,11 @@
       file_name: $(find jsk_perception)/sample/image/laugh_out_loud_joke_book.jpg
     </rosparam>
   </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <node name="mask_image_generator"
         pkg="jsk_perception" type="mask_image_generator">
-    <remap from="~input" to="image_publisher/output" />
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <rosparam>
       offset_x: 50
       offset_y: 50
@@ -27,7 +28,7 @@
 
   <node name="draw_rects"
         pkg="jsk_perception" type="draw_rects">
-    <remap from="~input" to="image_publisher/output" />
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <remap from="~input/rects" to="mask_image_to_rect/output" />
   </node>
 

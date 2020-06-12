@@ -12,12 +12,13 @@
       file_name: $(find jsk_perception)/sample/object_detection_example_1.jpg
     </rosparam>
   </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <group if="$(arg use_mask)">
     <node name="mask_image_generator"
           pkg="jsk_perception" type="mask_image_generator"
           required="true">
-      <remap from="~input" to="image_publisher/output" />
+      <remap from="~input" to="$(arg INPUT_IMAGE)" />
       <rosparam>
         offset_x: 170
         offset_y: 170
@@ -28,7 +29,7 @@
     <node name="apply_mask_image"
           pkg="jsk_perception" type="apply_mask_image"
           required="true">
-      <remap from="~input" to="image_publisher/output" />
+      <remap from="~input" to="$(arg INPUT_IMAGE)" />
       <remap from="~input/mask" to="mask_image_generator/output" />
       <rosparam>
         clip: false
@@ -37,7 +38,7 @@
   </group>
 
   <include file="$(find jsk_perception)/launch/fcn_object_segmentation.launch">
-    <arg name="INPUT_IMAGE" value="image_publisher/output" />
+    <arg name="INPUT_IMAGE" default="$(arg INPUT_IMAGE)" />
     <arg name="INPUT_MASK" value="mask_image_generator/output" />
     <arg name="USE_MASK" value="$(arg use_mask)" />
     <arg name="GPU" value="$(arg gpu)" />

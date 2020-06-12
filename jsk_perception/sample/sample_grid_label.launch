@@ -10,11 +10,12 @@
       publish_info: false
     </rosparam>
   </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <!-- create label -->
   <node name="grid_label"
         pkg="jsk_perception" type="grid_label">
-    <remap from="~input" to="image_publisher/output" />
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <rosparam>
       label_size: 128
     </rosparam>
@@ -23,7 +24,7 @@
   <group if="$(arg gui)">
     <node name="image_view0"
           pkg="image_view" type="image_view">
-      <remap from="image" to="image_publisher/output" />
+      <remap from="image" to="$(arg INPUT_IMAGE)" />
     </node>
     <node name="image_view1"
           pkg="image_view" type="image_view">

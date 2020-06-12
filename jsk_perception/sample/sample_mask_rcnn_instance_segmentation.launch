@@ -16,10 +16,10 @@
       rate: 30
     </rosparam>
   </node>
-  <arg name="INPUT_IMAGE" value="image_publisher/output" />
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <include file="$(find jsk_perception)/launch/mask_rcnn_instance_segmentation.launch">
-    <arg name="INPUT_IMAGE" value="$(arg INPUT_IMAGE)" />
+    <arg name="INPUT_IMAGE" default="$(arg INPUT_IMAGE)" />
     <arg name="gpu" value="$(arg gpu)" />
     <arg name="gui" value="false" />
     <arg name="COCO" value="$(arg COCO)" />

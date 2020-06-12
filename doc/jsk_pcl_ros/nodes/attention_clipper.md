@@ -8,6 +8,14 @@ retrieves `sensor_msgs/PointCloud2` and publish `pcl_msgs/PointIndices`.
 You can specify the pose and size of the interest bounding box and jsk\_pcl/AttentionClipper returns ROI
 to see the object.
 
+## Note
+
+AttentionClipper does not work properly on Kinetic + PCL 1.8.0, and you can avoid the problem with SSE disabled PCL.
+
+Please see [here](../../install_pcl_from_source.md) for more information.
+
+Original issue: [attention_clipper does not work properly on Kinetic + PCL1.8.0](https://github.com/jsk-ros-pkg/jsk_recognition/issues/2380)
+
 ## Subscribing Topic
 * `~input` (`sensor_msgs/CameraInfo`)
 

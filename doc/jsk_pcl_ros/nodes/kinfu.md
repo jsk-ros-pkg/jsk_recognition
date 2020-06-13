@@ -4,6 +4,11 @@
 
 Use kinfu (kinect fusion) for model generation and SLAM.
 
+## Note
+
+Kinfu is available only with CUDA enabled PCL. 
+
+Please see [here](../../install_pcl_from_source.md) for more information.
 
 ## Subscribing Topics
 

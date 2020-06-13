@@ -1,0 +1,17 @@
+<launch>
+
+  <include file="$(find audio_to_spectrogram)/sample/sample_audio_to_spectrogram.launch">
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_audio_to_spectrogram"
+        name="test_audio_to_spectrogram"
+        pkg="jsk_tools" type="test_topic_published.py"
+        retry="3">
+    <rosparam>
+      topic_0: /spectrum_to_spectrogram/spectrogram
+      timeout_0: 30
+    </rosparam>
+  </test>
+
+</launch>

@@ -2,7 +2,7 @@
 
   <node name="rosbag_play"
         pkg="rosbag" type="play"
-        args="$(find jsk_perception)/test_data/2016-04-06-08-16-08_img_cpi_decomposer/vision.bag --loop" />
+        args="$(find jsk_perception)/test_data/2016-04-06-08-16-08_img_cpi_decomposer/vision.bag --clock --loop" />
 
   <node name="image_cluster_indices_decomposer"
         pkg="jsk_perception" type="image_cluster_indices_decomposer.py">

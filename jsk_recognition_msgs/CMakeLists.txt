@@ -54,6 +54,7 @@ add_message_files(
   SparseOccupancyGridCell.msg
   SparseOccupancyGridColumn.msg
   SparseOccupancyGrid.msg
+  Spectrum.msg
   TimeRange.msg
   TorusArray.msg
   Torus.msg

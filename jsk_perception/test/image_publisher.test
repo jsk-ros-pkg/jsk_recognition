@@ -28,6 +28,14 @@
       timeout_8: 10
       topic_9: /depth_image_32fc1/camera_info
       timeout_9: 10
+      topic_10: /raw_image_bgra/image_color
+      timeout_10: 10
+      topic_11: /raw_image_bgra/camera_info
+      timeout_11: 10
+      topic_12: /raw_image_rgba/image_color
+      timeout_12: 10
+      topic_13: /raw_image_rgba/camera_info
+      timeout_13: 10
     </rosparam>
   </test>
 

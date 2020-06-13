@@ -168,13 +168,13 @@ namespace jsk_pcl_ros
   
   void ICPRegistration::publishDebugCloud(
       ros::Publisher& pub,
-      const pcl::PointCloud<PointT>& cloud)
+      const pcl::PointCloud<PointT>& cloud,
+      const std_msgs::Header& header)
   {
     if (pub.getNumSubscribers() > 0) {
       sensor_msgs::PointCloud2 ros_cloud;
       pcl::toROSMsg(cloud, ros_cloud);
-      ros_cloud.header.frame_id = "base_link";
-      ros_cloud.header.stamp = ros::Time::now();
+      ros_cloud.header = header;
       pub.publish(ros_cloud);
     }
   }
@@ -444,9 +444,9 @@ namespace jsk_pcl_ros
       pub_result_cloud_.publish(empty_cloud);
 
       pcl::PointCloud<PointT> empty_pcl_cloud;
-      publishDebugCloud(pub_debug_source_cloud_, empty_pcl_cloud);
-      publishDebugCloud(pub_debug_target_cloud_, empty_pcl_cloud);
-      publishDebugCloud(pub_debug_result_cloud_, empty_pcl_cloud);
+      publishDebugCloud(pub_debug_source_cloud_, empty_pcl_cloud, header);
+      publishDebugCloud(pub_debug_target_cloud_, empty_pcl_cloud, header);
+      publishDebugCloud(pub_debug_result_cloud_, empty_pcl_cloud, header);
 
       geometry_msgs::PoseStamped empty_pose;
       empty_pose.header = header;
@@ -489,15 +489,15 @@ namespace jsk_pcl_ros
     ros_result_pose.header = header;
     tf::poseEigenToMsg(best_transform_result, ros_result_pose.pose);
     pub_result_pose_.publish(ros_result_pose);
-    publishDebugCloud(pub_debug_source_cloud_, *best_reference);
-    publishDebugCloud(pub_debug_target_cloud_, *cloud);
+    publishDebugCloud(pub_debug_source_cloud_, *best_reference, header);
+    publishDebugCloud(pub_debug_target_cloud_, *cloud, header);
     pcl::PointCloud<PointT>::Ptr transformed_cloud_for_debug_result
       (new pcl::PointCloud<PointT>);
     pcl::transformPointCloud(
       *best_transformed_cloud, *transformed_cloud_for_debug_result,
       best_offset_result.inverse());
     publishDebugCloud(pub_debug_result_cloud_,
-                      *transformed_cloud_for_debug_result);
+                      *transformed_cloud_for_debug_result, header);
     result.header = ros_result_pose.header;
     result.pose = ros_result_pose.pose;
     result.score = min_score;

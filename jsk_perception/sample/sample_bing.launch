@@ -10,22 +10,23 @@
       publish_info: false
     </rosparam>
   </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <node name="bing"
         pkg="jsk_perception" type="bing">
-    <remap from="~input" to="image_publisher/output" />
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
   </node>
 
   <node name="draw_rects"
         pkg="jsk_perception" type="draw_rects">
-    <remap from="~input" to="image_publisher/output" />
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <remap from="~input/rects" to="bing/output" />
   </node>
 
   <group if="$(arg gui)">
     <node name="image_view_0"
           pkg="image_view" type="image_view">
-      <remap from="image" to="image_publisher/output" />
+      <remap from="image" to="$(arg INPUT_IMAGE)" />
     </node>
     <node name="image_view_1"
           pkg="image_view" type="image_view">

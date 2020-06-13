@@ -9,7 +9,7 @@
         required="true">
   </node>
 
-  <arg name="INPUT_IMAGE" value="/camera/rgb/image_rect_color" />
+  <arg name="INPUT_IMAGE" default="/camera/rgb/image_rect_color" />
 
   <node name="fback_flow"
         pkg="opencv_apps" type="fback_flow">

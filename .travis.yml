@@ -30,6 +30,10 @@ before_script:
   - if [[ "$ROS_DISTRO" == "kinetic" && "$DOCKER_IMAGE_JENKINS" == "" ]]; then export export DOCKER_IMAGE_JENKINS='ros-ubuntu:16.04-pcl'; fi
   - if [[ "$ROS_DISTRO" == "melodic" && "$DOCKER_IMAGE_JENKINS" == "" ]]; then export export DOCKER_IMAGE_JENKINS='ros-ubuntu:18.04-pcl'; fi
 script:
+  # use https://github.com/ros-infrastructure/rosdep/pull/694 to respect version_lt for python pip, some package requries python3
+  - export BEFORE_SCRIPT="sudo pip install numpy==1.16.6; $BEFORE_SCRIPT"
+  - export BEFORE_SCRIPT="sudo pip install fcn chainercv chainer==6.7.0 cupy-cuda91; $BEFORE_SCRIPT"
+  - if [[ "$ROS_DISTRO" == "kinetic" && "$ROS_DISTRO" == "melodic" ]]; then export BEFORE_SCRIPT="sudo apt-get install -y patchutils; curl -sL https://patch-diff.githubusercontent.com/raw/ros-infrastructure/rosdep/pull/753.diff | sudo patch -d /usr/lib/python2.7/dist-packages/ -p2; curl -sL https://patch-diff.githubusercontent.com/raw/ros-infrastructure/rosdep/pull/694.diff | filterdiff --exclude='a/test/*' | sudo patch -d /usr/lib/python2.7/dist-packages/ -p2; $BEFORE_SCRIPT"; fi
   - source .travis/travis.sh
   - (cd $TRAVIS_BUILD_DIR/doc && source setup.sh && make html)
 after_success:

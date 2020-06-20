@@ -1,0 +1,26 @@
+<launch>
+  <arg name="gui" default="true"/>
+  <arg name="INPUT" default="/kinect_head/depth_registered/points" />
+  <arg name="SENSOR" default="/head_mount_kinect_rgb_optical_frame" />
+  <arg name="publish_objects_tf" default="true" />
+  <arg name="launch_tracking" default="false" />
+  <arg name="manager" default="pr2_tabletop_object_detector_nodelet_manager"/>
+  <arg name="machine" default="localhost" />
+  <arg name="load_machine" default="true" />
+
+  <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml" />
+
+  <include file="$(find jsk_recognition_utils)/sample/sample_table_ssd_to_bounding_box.launch">
+    <arg name="input" value="$(arg INPUT)" />
+    <arg name="sensor_frame" value="$(arg SENSOR)" />
+    <arg name="manager" value="$(arg manager)" />
+    <arg name="machine" value="$(arg machine)" />
+    <arg name="launch_openni" value="false" />
+    <arg name="launch_tracking" value="$(arg launch_tracking)" />
+    <arg name="launch_rviz" value="false" />
+    <arg name="publish_tf" value="$(arg publish_objects_tf)" />
+  </include>
+
+  <node if="$(arg gui)" name="rviz" pkg="rviz" type="rviz"
+        args="-d $(find jsk_recognition_utils)/sample/config/sample_ssd_to_bounding_box.rviz" />
+</launch>

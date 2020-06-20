@@ -2,6 +2,7 @@
   <arg name="input" default="/camera/depth_registered/points" />
   <arg name="sensor_frame" default="/camera_rgb_optical_frame" />
   <arg name="cam_info" default="/camera/rgb/camera_info" />
+  <arg name="ssd_output" default="/ssd_73b2_kitchen/output" />
   <arg name="manager" default="tabletop_object_detector_nodelet_manager" />
   <arg name="machine" default="localhost" />
 
@@ -67,7 +68,7 @@
   <node name="rects_to_cpi"
         pkg="jsk_recognition_utils" type="rect_array_to_cluster_point_indices.py"
         output="screen">
-    <remap from="~input" to="edgetpu_object_detector/output/rects"/>
+    <remap from="~input" to="$(arg ssd_output)/rects"/>
     <remap from="~input/info" to="$(arg cam_info)"/>
     <rosparam>
       approximate_sync: false
@@ -78,7 +79,7 @@
   <node name="image_cpi_decomposer"
         pkg="jsk_perception" type="image_cluster_indices_decomposer.py"
         output="screen">
-    <remap from="~input" to="/edgetpu_object_detector/output/image"/>
+    <remap from="~input" to="$(arg ssd_output)/output/image"/>
     <remap from="~input/cluster_indices" to="rects_to_cpi/output" />
   </node>
 

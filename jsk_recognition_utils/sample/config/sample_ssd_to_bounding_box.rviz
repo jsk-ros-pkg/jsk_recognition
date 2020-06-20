@@ -85,7 +85,7 @@ Visualization Manager:
     - Class: jsk_rviz_plugin/BoundingBoxArray
       Enabled: true
       Name: BoundingBoxArray
-      Topic: /primitive_shape_classifier/euclidean_segmentation_decomposer/boxes
+      Topic: /segmentation_decomposer/boxes
       Unreliable: false
       Value: true
       alpha: 0.800000011920929

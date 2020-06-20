@@ -1,6 +1,7 @@
 <launch>
   <arg name="input" default="/camera/depth_registered/points" />
   <arg name="sensor_frame" default="/camera_rgb_optical_frame" />
+  <arg name="cam_info" default="/camera/rgb/camera_info" />
   <arg name="manager" default="tabletop_object_detector_nodelet_manager" />
   <arg name="machine" default="localhost" />
 
@@ -67,7 +68,7 @@
         pkg="jsk_recognition_utils" type="rect_array_to_cluster_point_indices.py"
         output="screen">
     <remap from="~input" to="edgetpu_object_detector/output/rects"/>
-    <remap from="~input/info" to="/camera/rgb/camera_info"/>
+    <remap from="~input/info" to="$(arg cam_info)"/>
     <rosparam>
       approximate_sync: false
       use_info: true

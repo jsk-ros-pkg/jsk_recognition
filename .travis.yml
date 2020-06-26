@@ -30,6 +30,7 @@ before_script:
   - if [[ "$ROS_DISTRO" == "indigo" && "$DOCKER_IMAGE_JENKINS" == "" ]]; then export export DOCKER_IMAGE_JENKINS='ros-ubuntu:14.04-pcl'; fi
   - if [[ "$ROS_DISTRO" == "kinetic" && "$DOCKER_IMAGE_JENKINS" == "" ]]; then export export DOCKER_IMAGE_JENKINS='ros-ubuntu:16.04-pcl'; fi
   - if [[ "$ROS_DISTRO" == "melodic" && "$DOCKER_IMAGE_JENKINS" == "" ]]; then export export DOCKER_IMAGE_JENKINS='ros-ubuntu:18.04-pcl'; fi
+  - if [[ "$ROS_DISTRO" == "noetic" && "$DOCKER_IMAGE_JENKINS" == "" ]]; then export export DOCKER_IMAGE_JENKINS='ros-ubuntu:20.04-pcl'; fi
 script:
   # use https://github.com/ros-infrastructure/rosdep/pull/694 to respect version_lt for python pip, some package requries python3
   - export BEFORE_SCRIPT="sudo pip install numpy==1.16.6; $BEFORE_SCRIPT"

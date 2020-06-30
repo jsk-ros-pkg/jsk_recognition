@@ -7,7 +7,6 @@ import chainer
 import cv2
 import numpy as np
 import PIL.Image
-import rospkg
 import skimage.io
 
 

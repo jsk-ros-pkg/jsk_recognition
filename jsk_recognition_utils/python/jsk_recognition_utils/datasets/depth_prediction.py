@@ -5,33 +5,10 @@ import os.path as osp
 
 import chainer
 import cv2
-import imgaug.augmenters as iaa
-import imgaug.imgaug as ia
-from imgaug.parameters import Deterministic
 import numpy as np
 import PIL.Image
 import rospkg
 import skimage.io
-
-
-def augment_object_data(object_data, random_state, augmentations):
-    aug = iaa.Sequential(
-        augmentations,
-        random_order=False,
-        random_state=ia.copy_random_state(random_state),
-    )
-
-    def activator_imgs(images, augmenter, parents, default):
-        if isinstance(augmenter, iaa.Affine):
-            augmenter.order = Deterministic(1)
-            augmenter.cval = Deterministic(0)
-        return True
-
-    for objd in object_data:
-        aug = aug.to_deterministic()
-        objd['img'] = aug.augment_image(
-            objd['img'], hooks=ia.HooksImages(activator=activator_imgs))
-        yield objd
 
 
 class DepthPredictionDataset(chainer.dataset.DatasetMixin):
@@ -120,27 +97,43 @@ class DepthPredictionDataset(chainer.dataset.DatasetMixin):
         # Data augmentation
         if self.aug:
             # 1. Color augmentation
-            obj_datum = dict(img=image)
-            random_state = np.random.RandomState()
-
-            def st(x):
-                return iaa.Sometimes(0.3, x)
-
-            augs = [
-                st(iaa.Add([-50, 50], per_channel=True)),
-                st(iaa.InColorspace(
-                    'HSV', children=iaa.WithChannels(
-                        [1, 2], iaa.Multiply([0.5, 2])))),
-                st(iaa.GaussianBlur(sigma=[0.0, 1.0])),
-                st(iaa.AdditiveGaussianNoise(
-                    scale=(0.0, 0.1 * 255), per_channel=True)),
-            ]
-            obj_datum = next(augment_object_data(
-                [obj_datum], random_state=random_state, augmentations=augs))
-            image = obj_datum['img']
+            np.random.seed()
+            proba_color = 0.3
+            # 1-1. Add [-50, 50) to R, G, B channel each
+            if np.random.uniform() < proba_color:
+                image = image.astype(np.float64)
+                image[:, :, 0] += np.random.uniform() * 100 - 50
+                image[:, :, 1] += np.random.uniform() * 100 - 50
+                image[:, :, 2] += np.random.uniform() * 100 - 50
+                image = np.clip(image, 0, 255)
+                image = image.astype(np.uint8)
+            # 1-2. Multiply [0.5, 2) for S, V channel each
+            if np.random.uniform() < proba_color:
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+                image = image.astype(np.float64)
+                image[:, :, 1] *= np.random.uniform() * 1.5 + 0.5
+                image[:, :, 2] *= np.random.uniform() * 1.5 + 0.5
+                image = np.clip(image, 0, 255)
+                image = image.astype(np.uint8)
+                image = cv2.cvtColor(image, cv2.COLOR_HSV2BGR)
+            # 1-3. Gaussian blur
+            if np.random.uniform() < proba_color:
+                image = cv2.GaussianBlur(image, (5, 5), np.random.uniform())
+            # 1-4. Add gaussian noise
+            if np.random.uniform() < proba_color:
+                image = image.astype(np.float64)
+                h = image.shape[0]
+                w = image.shape[1]
+                image[:, :, 0] += np.random.normal(
+                    0, np.random.uniform() * 0.1 * 255, (h, w))
+                image[:, :, 1] += np.random.normal(
+                    0, np.random.uniform() * 0.1 * 255, (h, w))
+                image[:, :, 2] += np.random.normal(
+                    0, np.random.uniform() * 0.1 * 255, (h, w))
+                image = np.clip(image, 0, 255)
+                image = image.astype(np.uint8)
 
             # 2. Depth noise
-            np.random.seed()
             if np.random.uniform() < 0.3:
                 noise_rate = np.random.uniform() * 0.25 + 0.05
                 depth[

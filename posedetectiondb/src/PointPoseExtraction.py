@@ -79,14 +79,14 @@ class PointPoseExtractor(metaclass.AutoReloader):
         if ransaciters is None:
             ransaciters = 1000
         if verboselevel > 0:
-            print 'thresh=%f,neighthresh=%f,dmin=%d,ransaciters=%d,goodinds=%d'%(thresh,neighthresh,dminexpected,ransaciters,len(goodinds))
+            print('thresh=%f,neighthresh=%f,dmin=%d,ransaciters=%d,goodinds=%d'%(thresh,neighthresh,dminexpected,ransaciters,len(goodinds)))
         T,infodict = self.ransac(data=data,model=self,n=self.ninitial,k=ransaciters,t=thresh,d=dminexpected,return_all=True,besterr_thresh=self.besterr_thresh)
         inliers = infodict['inliers']
         pts = transformPoints(T,data[inliers,2:5])
         iz = 1/pts[:,2]
         projerror = mean(sqrt((data[inliers,0]-pts[:,0]*iz)**2 + (data[inliers,1]-pts[:,1]*iz)**2))
         if verboselevel>0:
-            print 'extract time: %fs, err: %f, inliers: %d'%(time.time()-starttime,projerror,len(inliers))
+            print('extract time: %fs, err: %f, inliers: %d'%(time.time()-starttime,projerror,len(inliers)))
         return T, projerror
 
     def fit(self,data):
@@ -197,11 +197,11 @@ class PointPoseExtractor(metaclass.AutoReloader):
             test_err = model.get_error( test_points, maybemodel)
             also_idxs = test_idxs[test_err < t] # select indices of rows with accepted points
             if debug:
-                print 'test_err.min()',test_err.min()
-                print 'test_err.max()',test_err.max()
-                print 'numpy.mean(test_err)',numpy.mean(test_err)
-                print 'iteration %d:len(alsoinliers) = %d'%(
-                    iterations,len(also_idxs))
+                print('test_err.min()',test_err.min())
+                print('test_err.max()',test_err.max())
+                print('numpy.mean(test_err)',numpy.mean(test_err))
+                print('iteration %d:len(alsoinliers) = %d'%(
+                    iterations,len(also_idxs)))
             if len(also_idxs) > d:
                 alsoinliers = data[also_idxs,:]
                 betterdata = numpy.concatenate( (maybeinliers, alsoinliers) )
@@ -251,8 +251,8 @@ class ROSPlanarPoseProcessor(metaclass.AutoReloader):
                 self.Tright = template.get('Tright',eye(4))
                 self.featuretype = template.get('featuretype',None)
                 self.pe = PointPoseExtractor(type=self.type,points3d=template['points3d'],descriptors=template['descriptors'])
-            except IOError,e:
-                print 'failed to create template: ',e
+            except IOError as e:
+                print('failed to create template: ',e)
         if self.templateppfilename is None:
             self.templateppfilename = 'template.pp'
         self.errorthresh = errorthresh
@@ -280,8 +280,8 @@ class ROSPlanarPoseProcessor(metaclass.AutoReloader):
                     body = env.ReadKinBodyXMLFile(filename)
                     env.AddKinBody(body)
                     self.trimesh = env.Triangulate(body)
-            except openrave_exception,e:
-                print 'cannot create trimesh for %s: '%self.type,e
+            except openrave_exception as e:
+                print('cannot create trimesh for %s: '%self.type,e)
             finally:
                 env.Destroy()
             self.cvwindow = 'ImageDisplay (L-add point,R-reset)'
@@ -292,7 +292,7 @@ class ROSPlanarPoseProcessor(metaclass.AutoReloader):
 
 
     def __del__(self):
-        print 'deleting gui'
+        print('deleting gui')
         try:
             self.sub_feature.unregister()
         except:
@@ -305,11 +305,11 @@ class ROSPlanarPoseProcessor(metaclass.AutoReloader):
         self.pe=None
         if event == cv.CV_EVENT_LBUTTONUP:
             #with self.extractionlck:
-            print 'add correspondence',x,y
+            print('add correspondence',x,y)
             self.imagepoints.append(array((x,y),float))
         elif event == cv.CV_EVENT_RBUTTONUP:
             #with self.extractionlck:
-            print 'reset'
+            print('reset')
             self.imagepoints = []
             self.pe=None
     def drawpart(self,cv_image,T,KK):
@@ -355,13 +355,13 @@ class ROSPlanarPoseProcessor(metaclass.AutoReloader):
                 template = {'type':self.type,'points3d':points3d,'descriptors':descriptors,'Itemplate':self.Itemplate,'boundingbox':self.boundingbox,'Tright':self.Tright,'featuretype':res.features.type}
                 try:
                     self.pe = PointPoseExtractor(type=self.type,points3d=points3d,descriptors=descriptors)
-                except detection_error,e:
-                    print e
+                except detection_error as e:
+                    print(e)
                     self.pe=None
                 if len(req.savefilename) > 0:
                     pickle.dump(template,open(req.savefilename,'w'))
-            except (rospy.service.ServiceException,CvBridgeError),e:
-                print e
+            except (rospy.service.ServiceException,CvBridgeError) as e:
+                print(e)
                 return None
         return SetTemplateResponse()
 
@@ -374,8 +374,8 @@ class ROSPlanarPoseProcessor(metaclass.AutoReloader):
         with self.extractionlck:
             try:
                 cv_image = self.bridge.imgmsg_to_cv(featuremsg.image, "bgr8")
-            except CvBridgeError, e:
-                print e
+            except CvBridgeError as e:
+                print(e)
                 return
             # decompose P=KK*Tcamera
             P = reshape(array(featuremsg.info.P),(3,4))
@@ -386,13 +386,13 @@ class ROSPlanarPoseProcessor(metaclass.AutoReloader):
             KK = array(cvKK)
             Tcamera = eye(4)
             Tcamera[0:3,:] = c_[array(cvRcamera),-dot(array(cvRcamera),array(cvTcamera)[0:3]/cvTcamera[3,0])]
-            print "Tcamera: ",Tcamera
+            print("Tcamera: ",Tcamera)
             if self.pe is None:
                 if len(self.imagepoints) >= 4:
                     xaxis = self.imagepoints[1]-self.imagepoints[0]
                     yaxis = self.imagepoints[2]-self.imagepoints[1]
                     if xaxis[0]*yaxis[1]-xaxis[1]*yaxis[0] < 0:
-                        print 'point order is not correct! need to specify points in clockwise order'
+                        print('point order is not correct! need to specify points in clockwise order')
                         self.imagepoints=[]
                         return
                     # find the homography, warp the image, and get new features
@@ -421,8 +421,8 @@ class ROSPlanarPoseProcessor(metaclass.AutoReloader):
                         scipy.misc.pilutil.imshow(self.Itemplate)
                         self.pe = PointPoseExtractor(type=self.type,points3d=points3d,descriptors=descriptors)
                         self.imagepoints = []
-                    except rospy.service.ServiceException,e:
-                        print e
+                    except rospy.service.ServiceException as e:
+                        print(e)
                     return
             else:
                 success = False
@@ -453,11 +453,11 @@ class ROSPlanarPoseProcessor(metaclass.AutoReloader):
                         objdetmsg = posedetection_msgs.msg.ObjectDetection()
                         objdetmsg.objects=[pose]
                         objdetmsg.header = featuremsg.image.header
-                        print 'local texture: ',repr(Tlocal)
+                        print('local texture: ',repr(Tlocal))
                         self.pub_objdet.publish(objdetmsg)
                         self.drawpart(cv_image,Tlocalobject,KK)
                         self.drawcoordsys(cv_image,Tlocalobject,KK)
-                except detection_error,e:
+                except detection_error as e:
                     pass
                 if self.verboselevel > 0:
                     rospy.loginfo('%s: %s, detection time: %fs, projerror %f < %f'%(self.type,'success' if success else 'failure',time.time()-starttime,projerror,self.errorthresh))
@@ -475,7 +475,7 @@ def CreateTemplateFn(type='',imagefilename='',Tright=eye(4),object_width=100,obj
     cv_texture = cv.LoadImageM(imagefilename)
     [width,height] = cv.GetSize(cv_texture)
 
-    print 'image:name=%s, width=%d hegit=%d, object:width=%f hegith=%f'%(imagefilename,width,height,object_width,object_height)
+    print('image:name=%s, width=%d hegit=%d, object:width=%f hegith=%f'%(imagefilename,width,height,object_width,object_height))
 
     res=rospy.ServiceProxy('Feature0DDetect',posedetection_msgs.srv.Feature0DDetect)(image=CvBridge().cv_to_imgmsg(cv_texture))
     N = len(res.features.positions)/2
@@ -534,7 +534,7 @@ if __name__=='__main__':
     try:
         processor = ROSPlanarPoseProcessor(templateppfilename=options.template,errorthresh=options.errorthresh,neighthresh=options.neighthresh,thresh=options.thresh,Tright=T,dminexpected=options.dminexpected,ransaciters=options.ransaciters,showgui=options.showgui,verboselevel=0 if options.quiet else 1,type=options.type)
         rospy.spin()
-    except KeyboardInterrupt, e:
+    except KeyboardInterrupt as e:
         pass
 
 def test():

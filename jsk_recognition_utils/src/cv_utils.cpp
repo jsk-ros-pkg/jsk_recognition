@@ -141,7 +141,7 @@ namespace jsk_recognition_utils
     }
     
     cv::rectangle(image, cv::Point(left, height), cv::Point(right, height - top),
-                  color, CV_FILLED);
+                  color, cv::FILLED);
   }
 
   void labelToRGB(const cv::Mat src, cv::Mat& dst)

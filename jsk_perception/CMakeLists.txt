@@ -34,11 +34,12 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros
   posedetection_msgs
   roscpp
-  roseus
   rospack
   sensor_msgs
   std_msgs
   tf)
+
+find_package(roseus)
 
 find_package(Boost REQUIRED COMPONENTS filesystem system signals)
 
@@ -330,6 +331,8 @@ jsk_add_node(src/oriented_gradient_node.cpp oriented_gradient_node
 jsk_add_node(src/sliding_window_object_detector_trainer_node.cpp sliding_window_object_detector_trainer_node
              DEPENDS ${PROJECT_NAME} LIBRARIES ${PROJECT_NAME})
 
+message(STATUS "check if ROSEUS found : ${roseus_FOUND}")
+if(roseus_FOUND)
 add_custom_command(
  OUTPUT ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng8.launch
  ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng2.launch
@@ -346,6 +349,9 @@ add_custom_target(eusmodel_template ALL DEPENDS
   ${PROJECT_SOURCE_DIR}/sample/rimokon-pose.launch ${PROJECT_SOURCE_DIR}/sample/milktea-box.launch
   ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng8.launch
   ${PROJECT_SOURCE_DIR}/launch/eusmodel_detection_elevator-panels-eng2.launch)
+else(roseus_FOUND)
+  message(WARNING "could not find 'roseus' so skip eusmodel_template_gen.l and pose_detector_auto_gen_sample.l")
+endif(roseus_FOUND)
 
 # ------------------------------------------------------------------------------------
 # Install

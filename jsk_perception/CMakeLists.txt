@@ -41,7 +41,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(roseus)
 
-find_package(Boost REQUIRED COMPONENTS filesystem system signals)
+find_package(Boost REQUIRED COMPONENTS filesystem system)
 
 find_package(OpenCV REQUIRED)
 message("OPENCV ${OpenCV_VERSION} FOUND")

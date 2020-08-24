@@ -41,6 +41,8 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(roseus)
 
+catkin_python_setup()
+
 find_package(Boost REQUIRED COMPONENTS filesystem system)
 
 find_package(OpenCV REQUIRED)
@@ -89,11 +91,11 @@ endif()
 # ------------------------------------------------------------------------------------
 
 # download and install learning datasets
-add_custom_target(${PROJECT_NAME}_install_learning_datasets ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_learning_datasets.py)
+add_custom_target(${PROJECT_NAME}_install_learning_datasets ALL COMMAND python$ENV{ROS_PYTHON_VERSION} ${PROJECT_SOURCE_DIR}/scripts/install_learning_datasets.py)
 # download and install sample data
-add_custom_target(${PROJECT_NAME}_install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
+add_custom_target(${PROJECT_NAME}_install_sample_data ALL COMMAND python$ENV{ROS_PYTHON_VERSION} ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
 # download and install trained data
-add_custom_target(${PROJECT_NAME}_install_trained_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_trained_data.py)
+add_custom_target(${PROJECT_NAME}_install_trained_data ALL COMMAND python$ENV{ROS_PYTHON_VERSION} ${PROJECT_SOURCE_DIR}/scripts/install_trained_data.py)
 
 # ------------------------------------------------------------------------------------
 # Catkin setup
@@ -380,13 +382,31 @@ install(TARGETS
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(DIRECTORY config euslisp launch node_scripts plugins sample scripts template test
+install(DIRECTORY config euslisp launch node_scripts plugins sample template test
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   USE_SOURCE_PERMISSIONS
 )
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
+
+if($ENV{ROS_DISTRO} STREQUAL "indigo") # on noetic it needs catkin_install_python to support Python3 and it does not work on indigo for some reason...
+install(DIRECTORY scripts
+   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+   USE_SOURCE_PERMISSIONS
+ )
+else()
+install(PROGRAMS scripts/setup_opencv_learning_data.sh
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/scripts/
+)
+
+file(GLOB SCRIPT_PROGRAMS scripts/*.py)
+catkin_install_python(
+  PROGRAMS ${SCRIPT_PROGRAMS}
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/scripts/
+)
+endif()
+
 
 # ------------------------------------------------------------------------------------
 # Test
@@ -398,7 +418,7 @@ if(CATKIN_ENABLE_TESTING)
   find_package(roslint REQUIRED)
   find_package(rostest REQUIRED)
   # install test data by a script
-  add_custom_target(${PROJECT_NAME}_install_test_data COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_test_data.py)
+  add_custom_target(${PROJECT_NAME}_install_test_data COMMAND python$ENV{ROS_PYTHON_VERSION} ${PROJECT_SOURCE_DIR}/scripts/install_test_data.py)
   if(TARGET tests)
     add_dependencies(tests ${PROJECT_NAME}_install_test_data)
   endif()

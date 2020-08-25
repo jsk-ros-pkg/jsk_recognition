@@ -35,9 +35,15 @@
 
 #include <ros/ros.h>
 #include <rospack/rospack.h>
-#include <opencv/highgui.h>
 #include <cv_bridge/cv_bridge.h>
+#if ( CV_MAJOR_VERSION >= 4)
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui_c.h>
+#include <opencv2/calib3d/calib3d_c.h>
+#else
+#include <opencv/highgui.h>
 #include <opencv/cv.hpp>
+#endif
 #include <posedetection_msgs/Feature0DDetect.h>
 #include <posedetection_msgs/ImageFeature0D.h>
 #include <posedetection_msgs/ObjectDetection.h>

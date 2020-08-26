@@ -19,12 +19,14 @@
   <!-- <exec_depend>pcl</exec_depend> -->
   <build_depend>cv_bridge</build_depend>
   <build_depend>image_geometry</build_depend>
+  <build_depend>image_transport</build_depend>
   <build_depend>interactive_markers</build_depend>
   <build_depend>jsk_data</build_depend>
   <build_depend>jsk_pcl_ros_utils</build_depend>
   <build_depend>jsk_recognition_utils</build_depend>
   <!-- <build_depend>jsk_rviz_plugins</build_depend> --> <!-- jsk_recognition should not depends on jsk_visualization -->
   <build_depend version_gte="2.2.7">jsk_topic_tools</build_depend>
+  <build_depend>kdl_parser</build_depend>
   <build_depend>laser_assembler</build_depend>
   <build_depend>moveit_ros_perception</build_depend>
   <build_depend>octomap_server</build_depend>

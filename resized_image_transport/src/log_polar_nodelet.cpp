@@ -63,7 +63,11 @@ namespace resized_image_transport
     double scale_y = dst_height_ ? ((double)dst_height_)/image_height : resize_y_;
 
     cv_bridge::CvImagePtr cv_img = cv_bridge::toCvCopy(src_img);
+#if ( CV_MAJOR_VERSION >= 4)
+    IplImage src = cvIplImage(cv_img->image);
+#else
     IplImage src = cv_img->image;
+#endif
     IplImage* dst = cvCloneImage(&src);
 
     int log_polar_flags = CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS;

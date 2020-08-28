@@ -1,5 +1,8 @@
 
 #include <jsk_perception/saliency_map_generator.h>
+#if ( CV_MAJOR_VERSION >= 4)
+#include <opencv2/imgproc/imgproc_c.h>
+#endif
 
 namespace jsk_perception
 {

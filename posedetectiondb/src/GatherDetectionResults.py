@@ -58,7 +58,7 @@ class VisibilityModel(metaclass.AutoReloader):
             mlab.triangular_mesh(v[:,0],v[:,1],v[:,2],self.trimesh.indices,color=(0,0,0.5))
         if savefile is None:
             savefile = self.getfilename()
-        print 'saving measurements to %s'%savefile
+        print('saving measurements to %s'%savefile)
         mkdir_recursive(os.path.split(savefile)[0])
         savetxt(savefile,uniformpoints,'%f')
     def getfilename(self):
@@ -162,7 +162,7 @@ class OpenRAVEVisualizer(metaclass.AutoReloader):
         m = Tcamera[0:3,2]*dist
         self.drawmeasurement(m)
         self.measurements.append(m)
-        print 'num measurements %d'%len(self.measurements)
+        print('num measurements %d'%len(self.measurements))
 
     def drawmeasurement(self,m):
         dist = sqrt(sum(m**2))
@@ -172,7 +172,7 @@ class OpenRAVEVisualizer(metaclass.AutoReloader):
 
     def savemeasurements(self,filename):
         self.lck.acquire()
-        print 'saving measurements to %s'%filename
+        print('saving measurements to %s'%filename)
         savetxt(filename,self.measurements,'%f')
         self.lck.release()
 
@@ -201,10 +201,10 @@ if __name__=='__main__':
         if cmd == 'q':
             break
         elif cmd == 'c' and options.single:
-            print 'adding measurement'
+            print('adding measurement')
             visualizer.addmeasurement()
         else:
-            print 'bad command',cmd
+            print('bad command',cmd)
     if options.filename:
         visualizer.savemeasurements(options.filename)
 

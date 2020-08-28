@@ -57,6 +57,10 @@
 #include "jsk_recognition_utils/pcl_util.h"
 #include "jsk_recognition_utils/geo_util.h"
 
+#if ( CV_MAJOR_VERSION >= 4)
+#include <opencv2/imgproc/imgproc_c.h>
+#endif
+
 namespace jsk_pcl_ros
 {
   void LINEMODTrainer::onInit()

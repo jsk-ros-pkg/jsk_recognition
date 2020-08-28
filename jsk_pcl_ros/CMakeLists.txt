@@ -11,9 +11,12 @@ endif()
 
 # check c++11 / c++0x
 include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag("-std=c++14" COMPILER_SUPPORTS_CXX14)
 check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
 check_cxx_compiler_flag("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-if(COMPILER_SUPPORTS_CXX11)
+if(COMPILER_SUPPORTS_CXX14)
+  set(CMAKE_CXX_FLAGS "-std=c++14")
+elseif(COMPILER_SUPPORTS_CXX11)
   set(CMAKE_CXX_FLAGS "-std=c++11")
 elseif(COMPILER_SUPPORTS_CXX0X)
   set(CMAKE_CXX_FLAGS "-std=c++0x")
@@ -28,7 +31,7 @@ find_package(catkin REQUIRED COMPONENTS
   # genmsg
   # geometry_msgs
   image_geometry
-  # image_transport
+  image_transport
   interactive_markers
   # jsk_footstep_msgs
   jsk_pcl_ros_utils
@@ -37,10 +40,9 @@ find_package(catkin REQUIRED COMPONENTS
   # jsk_rviz_plugins # kinfu.h uses jsk_rviz_plugins/OverlayText.h, but jsk_recognition should not depends on jsk_visualization
   jsk_topic_tools
   # kdl_conversions
-  # kdl_parser
+  kdl_parser
   laser_assembler
   # nodelet
-  moveit_ros_perception
   # octomap_msgs
   octomap_server
   pcl_msgs
@@ -50,6 +52,7 @@ find_package(catkin REQUIRED COMPONENTS
   # tf2_ros
   tf_conversions
   )
+find_package(moveit_ros_perception)
 find_package(PkgConfig)
 pkg_check_modules(ml_classifiers ml_classifiers QUIET)
 # only run in hydro
@@ -406,7 +409,6 @@ endif(robot_self_filter_FOUND)
 add_library(jsk_pcl_ros_base SHARED
   src/region_adjacency_graph.cpp
   src/viewpoint_sampler.cpp)
-add_library(jsk_pcl_ros_moveit SHARED src/pointcloud_moveit_filter.cpp)
 add_library(jsk_pcl_ros SHARED ${jsk_pcl_nodelet_sources})
 if (PCL_GPU_KINFU_LARGE_SCALE_FOUND)
   target_link_libraries(jsk_pcl_ros
@@ -425,13 +427,20 @@ endif (robot_self_filter_FOUND)
 
 add_dependencies(jsk_pcl_ros ${PROJECT_NAME}_gencfg)
 add_dependencies(jsk_pcl_ros_base ${PROJECT_NAME}_gencfg)
-add_dependencies(jsk_pcl_ros_moveit ${PROJECT_NAME}_gencfg)
 
 target_link_libraries(jsk_pcl_ros_base
   ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
-target_link_libraries(jsk_pcl_ros_moveit
-  ${catkin_LIBRARIES} ${moveit_ros_perception_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
 
+set(jsk_pcl_ros_install_libraries jsk_pcl_ros jsk_pcl_ros_base)
+if(moveit_ros_perception_FOUND)
+  add_library(jsk_pcl_ros_moveit SHARED src/pointcloud_moveit_filter.cpp)
+  add_dependencies(jsk_pcl_ros_moveit ${PROJECT_NAME}_gencfg)
+  target_link_libraries(jsk_pcl_ros_moveit
+    ${catkin_LIBRARIES} ${moveit_ros_perception_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} yaml-cpp)
+  list(APPEND jsk_pcl_ros_install_libraries jsk_pcl_ros_moveit)
+else(moveit_ros_perception_FOUND)
+  message(STATUS "moveit_ros_perception is not found, so skip creating jsk_pcl_ros_moveit")
+endif(moveit_ros_perception_FOUND)
 
 # bench/ directory
 
@@ -455,13 +464,13 @@ catkin_package(
     DEPENDS PCL
     CATKIN_DEPENDS pcl_ros ${PCL_MSGS} jsk_recognition_utils
     INCLUDE_DIRS include
-    LIBRARIES jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit
+    LIBRARIES ${jsk_pcl_ros_install_libraries}
 )
 
 # download and install sample data
-add_custom_target(${PROJECT_NAME}_install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
+add_custom_target(${PROJECT_NAME}_install_sample_data ALL COMMAND python$ENV{ROS_PYTHON_VERSION} ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py)
 # download and install trained data
-add_custom_target(${PROJECT_NAME}_install_trained_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_trained_data.py)
+add_custom_target(${PROJECT_NAME}_install_trained_data ALL COMMAND python$ENV{ROS_PYTHON_VERSION} ${PROJECT_SOURCE_DIR}/scripts/install_trained_data.py)
 
 # From https://github.com/jsk-ros-pkg/jsk_recognition/pull/2345
 # Install header files directly into ${CATKIN_PACKAGE_INCLUDE_DESTINATION}.
@@ -476,7 +485,7 @@ add_custom_target(${PROJECT_NAME}_install_trained_data ALL COMMAND ${PROJECT_SOU
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
-install(TARGETS jsk_pcl_ros jsk_pcl_ros_base jsk_pcl_ros_moveit
+install(TARGETS ${jsk_pcl_ros_install_libraries}
   ${jsk_pcl_nodelet_executables}
   bench_ransac_plane_estimation
   depth_camera_error_visualization

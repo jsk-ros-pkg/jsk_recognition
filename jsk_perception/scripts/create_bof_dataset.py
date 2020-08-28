@@ -30,8 +30,8 @@ def cmd_extract_bof(data_path, output, data_size=1):
     bof = BagOfFeatures()
     try:
         bof.fit(X)
-    except MemoryError, e:
-        print('data_size: {} ({} * {})'.format(n_data, data_size, n_data_all))
+    except MemoryError as e:
+        print(('data_size: {} ({} * {})'.format(n_data, data_size, n_data_all)))
         print(e)
     # save bof extractor
     print('saving bof')

@@ -301,8 +301,8 @@ class TowerDetectViewerServer:
     def imageCB(self, data):
         try:
             self.cv_image = self.bridge.imgmsg_to_cv(data, "bgr8")
-        except CvBridgeError, e:
-            print e
+        except CvBridgeError as e:
+            print(e)
     def publishState(self):
         self.state.publish()
     def spin(self):

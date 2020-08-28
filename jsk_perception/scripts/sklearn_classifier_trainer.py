@@ -41,14 +41,14 @@ def main():
         clf = LogisticRegression()
     else:
         raise ValueError('unsupported classifier')
-    print('fitting {0}'.format(args.classifier))
+    print(('fitting {0}'.format(args.classifier)))
     clf.fit(X_train, y_train)
     clf.target_names_ = target_names
     with gzip.open(args.output, 'wb') as f:
         pickle.dump(clf, f)
     y_pred = clf.predict(X_test)
-    print('score of classifier: {}'.format(accuracy_score(y_test, y_pred)))
-    print(classification_report(y_test, y_pred, target_names=target_names))
+    print(('score of classifier: {}'.format(accuracy_score(y_test, y_pred))))
+    print((classification_report(y_test, y_pred, target_names=target_names)))
 
 
 if __name__ == '__main__':

@@ -6,6 +6,9 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#if ( CV_MAJOR_VERSION >= 4)
+#include <opencv2/imgproc/types_c.h>
+#endif
 
 #include <string>
 #include <vector>

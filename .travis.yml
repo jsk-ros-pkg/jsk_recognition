@@ -18,21 +18,26 @@ env:
     - USE_DEB=true
     - ROSDEP_ADDITIONAL_OPTIONS='-n -r -v --ignore-src' # run rosdep without -q
   matrix:
+    - CHECK_PYTHON3_COMPILE=true
     - ROS_DISTRO=indigo
     - ROS_DISTRO=indigo CATKIN_TOOLS_CONFIG_OPTIONS="--install" TEST_PKGS='jsk_recognition_msgs' # to skip test
     - ROS_DISTRO=indigo ROS_REPOSITORY_PATH="http://packages.ros.org/ros/ubuntu"
     - ROS_DISTRO=indigo BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_opencv3.bash' BUILD_PKGS='checkerboard_detector imagesift jsk_perception jsk_recognition_utils resized_image_transport'
     - ROS_DISTRO=indigo BEFORE_SCRIPT='$CI_SOURCE_PATH/.travis_before_script_pcl1.8.bash' BUILD_PKGS='jsk_pcl_ros_utils jsk_pcl_ros' DOCKER_IMAGE_JENKINS='ros-ubuntu:14.04-pcl1.8'
-    - ROS_DISTRO=kinetic
-    - ROS_DISTRO=melodic
+    - ROS_DISTRO=kinetic BUILD_PKGS='checkerboard_detector imagesift jsk_perception jsk_recognition_utils resized_image_transport'
+    - ROS_DISTRO=kinetic BUILD_PKGS='jsk_pcl_ros_utils jsk_pcl_ros'
+    - ROS_DISTRO=melodic BUILD_PKGS='checkerboard_detector imagesift jsk_perception jsk_recognition_utils resized_image_transport'
+    - ROS_DISTRO=melodic BUILD_PKGS='jsk_pcl_ros_utils jsk_pcl_ros'
+    - ROS_DISTRO=noetic  TEST_PKGS='jsk_recognition_msgs' # to skip test
 before_script:
   - if [[ "$ROS_DISTRO" == "indigo" && "$DOCKER_IMAGE_JENKINS" == "" ]]; then export export DOCKER_IMAGE_JENKINS='ros-ubuntu:14.04-pcl'; fi
   - if [[ "$ROS_DISTRO" == "kinetic" && "$DOCKER_IMAGE_JENKINS" == "" ]]; then export export DOCKER_IMAGE_JENKINS='ros-ubuntu:16.04-pcl'; fi
   - if [[ "$ROS_DISTRO" == "melodic" && "$DOCKER_IMAGE_JENKINS" == "" ]]; then export export DOCKER_IMAGE_JENKINS='ros-ubuntu:18.04-pcl'; fi
+  - if [[ "$ROS_DISTRO" == "noetic" && "$DOCKER_IMAGE_JENKINS" == "" ]]; then export export DOCKER_IMAGE_JENKINS='ros-ubuntu:20.04-pcl'; fi
 script:
+  - if [ "${CHECK_PYTHON3_COMPILE}" == "true" ]; then python3 -m compileall .; exit $?; fi
   # use https://github.com/ros-infrastructure/rosdep/pull/694 to respect version_lt for python pip, some package requries python3
-  - export BEFORE_SCRIPT="sudo pip install numpy==1.16.6; $BEFORE_SCRIPT"
-  - export BEFORE_SCRIPT="sudo pip install fcn chainercv chainer==6.7.0 cupy-cuda91; $BEFORE_SCRIPT"
+  - export BEFORE_SCRIPT="sudo pip install numpy==1.16.6; sudo pip install fcn chainercv chainer==6.7.0 cupy-cuda91; $BEFORE_SCRIPT"
   - if [[ "$ROS_DISTRO" == "kinetic" && "$ROS_DISTRO" == "melodic" ]]; then export BEFORE_SCRIPT="sudo apt-get install -y patchutils; curl -sL https://patch-diff.githubusercontent.com/raw/ros-infrastructure/rosdep/pull/753.diff | sudo patch -d /usr/lib/python2.7/dist-packages/ -p2; curl -sL https://patch-diff.githubusercontent.com/raw/ros-infrastructure/rosdep/pull/694.diff | filterdiff --exclude='a/test/*' | sudo patch -d /usr/lib/python2.7/dist-packages/ -p2; $BEFORE_SCRIPT"; fi
   - source .travis/travis.sh
   - (cd $TRAVIS_BUILD_DIR/doc && source setup.sh && make html)

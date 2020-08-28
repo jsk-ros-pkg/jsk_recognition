@@ -21,6 +21,9 @@
 #include <iostream>
 #include <ctype.h>
 
+#if ( CV_MAJOR_VERSION >= 4)
+#include <opencv2/highgui/highgui_c.h>
+#endif
 using namespace cv;
 using namespace std;
 

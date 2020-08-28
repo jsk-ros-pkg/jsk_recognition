@@ -53,7 +53,7 @@ def create_sift_dataset():
     targets, pos_list, scale_list, ori_list, desc_list = [], [], [], [], []
     for i, (filename, target) in enumerate(zip(bunch_files.filenames,
                                                bunch_files.target)):
-        print('filename: {}, label: {}'.format(filename, target))
+        print(('filename: {}, label: {}'.format(filename, target)))
         targets.append(target)
         # extract feature
         img = cv2.imread(filename, 0)

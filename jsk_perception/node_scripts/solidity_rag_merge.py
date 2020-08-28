@@ -129,7 +129,7 @@ def masked_slic(img, mask, n_segments, compactness):
     n_labels = len(np.unique(labels))
     try:
         mask = ndi.binary_closing(mask, structure=np.ones((3, 3)), iterations=1)
-    except IndexError, e:
+    except IndexError as e:
         rospy.logerr(e)
         return
     labels[mask == 0] = 0  # set bg_label

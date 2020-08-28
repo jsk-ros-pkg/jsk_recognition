@@ -36,8 +36,8 @@ if __name__ == "__main__":
     plt.plot(X, line_y_ransac, "r--",
              label="{0} x + {1}".format(model_ransac.estimator_.coef_[0][0],
                                         model_ransac.estimator_.intercept_[0]))
-    print "{0} x + {1}".format(model_ransac.estimator_.coef_[0][0],
-                               model_ransac.estimator_.intercept_[0])
+    print("{0} x + {1}".format(model_ransac.estimator_.coef_[0][0],
+                               model_ransac.estimator_.intercept_[0]))
     plt.grid()
     plt.xlabel("Distance [m]")
     plt.ylabel("Standard Deviation [m]")

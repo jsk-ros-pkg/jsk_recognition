@@ -30,7 +30,7 @@ def main():
                 width = int(width)
                 height = int(height)
                 if os.path.exists(fname):
-                    print "Opening " + fname
+                    print("Opening " + fname)
                     img = cv2.imread(fname)
                     cv2.rectangle(img, (x, y), 
                                   (x + width, y + height),

@@ -37,6 +37,9 @@
 #define JSK_RECOGNITION_UTILS_CV_UTILS_H_
 
 #include <opencv2/opencv.hpp>
+#if ( CV_MAJOR_VERSION >= 4)
+#include <opencv2/imgproc/imgproc_c.h>
+#endif
 #include <jsk_recognition_msgs/HistogramWithRangeBin.h>
 
 namespace jsk_recognition_utils

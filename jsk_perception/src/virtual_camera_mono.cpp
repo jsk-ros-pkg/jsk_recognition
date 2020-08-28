@@ -6,9 +6,12 @@
 #include <image_geometry/pinhole_camera_model.h>
 #include <tf/transform_listener.h>
 #include <tf/transform_broadcaster.h>
+#include <cv_bridge/cv_bridge.h>
+#if ( CV_MAJOR_VERSION >= 4)
+#else
 #include <opencv/cv.hpp>
 #include <opencv/highgui.h>
-#include <cv_bridge/cv_bridge.h>
+#endif
 
 #include <string>
 #include <vector>

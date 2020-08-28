@@ -132,7 +132,7 @@ class BinPack(ConnectionBasedTransport):
         #blocks.sort(key=lambda x: x.rect.width*x.rect.height, reverse=True)
         blocks.sort(reverse=True)
         packer.fit(blocks)
-        print (packer.root.rect.width, packer.root.rect.height)
+        print((packer.root.rect.width, packer.root.rect.height))
         return (packer.root.rect, blocks)
         # for block in blocks:
         #     if block.fit_location:

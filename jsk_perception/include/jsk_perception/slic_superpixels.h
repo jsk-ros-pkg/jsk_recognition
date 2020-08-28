@@ -44,7 +44,10 @@
 #include <image_transport/image_transport.h>
 #include <dynamic_reconfigure/server.h>
 #include <boost/thread.hpp>
+#if ( CV_MAJOR_VERSION >= 4)
+#else
 #include <opencv/cv.h>
+#endif
 
 #include <jsk_perception/SLICSuperPixelsConfig.h>
 #include <dynamic_reconfigure/server.h>

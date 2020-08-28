@@ -19,13 +19,13 @@ def callback(msg):
     for bin_index, msg_and_errs in bins.items():
         if len(msg_and_errs) < 5:
             continue
-        print "Bin: {0}m ~ {1}m".format(grid * bin_index, grid * (bin_index + 1))
-        print "   Sample:", len(msg_and_errs)
+        print("Bin: {0}m ~ {1}m".format(grid * bin_index, grid * (bin_index + 1)))
+        print("   Sample:", len(msg_and_errs))
         errs = [err for (msg, err) in msg_and_errs]
         mean = np.mean(errs, axis=0)
         stddev = np.std(errs, axis=0)
-        print "   Mean:", mean
-        print "   Stddev:", stddev
+        print("   Mean:", mean)
+        print("   Stddev:", stddev)
     data.xs.append(msg.true_depth)
     data.ys.append(msg.observed_depth)
     pub.publish(data)

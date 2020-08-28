@@ -1,4 +1,4 @@
-<package>
+<package format="3">
   <name>audio_to_spectrogram</name>
   <version>0.0.1</version>
   <description>Convert audio (audio_common_msgs/AudioData) to spectrogram (sensor_msgs/Image) </description>
@@ -9,13 +9,14 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <run_depend>audio_capture</run_depend>
-  <run_depend>audio_common_msgs</run_depend>
-  <run_depend>cv_bridge</run_depend>
-  <run_depend>image_view</run_depend>
-  <run_depend>jsk_recognition_msgs</run_depend>
-  <run_depend>python-matplotlib</run_depend>
-  <run_depend>sensor_msgs</run_depend>
+  <exec_depend>audio_capture</exec_depend>
+  <exec_depend>audio_common_msgs</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>image_view</exec_depend>
+  <exec_depend>jsk_recognition_msgs</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-matplotlib</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-matplotlib</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
 
   <test_depend>roslaunch</test_depend>
   <test_depend>rostest</test_depend>

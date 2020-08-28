@@ -40,7 +40,7 @@ class RandomForestServer:
     def classifyData(self, req):
         ret = []
         for data in req.data:
-            print data
+            print(data)
             ret.append(" ".join([
                 str(predict_data)
                 for predict_data in self.clf.predict([data.point])]))

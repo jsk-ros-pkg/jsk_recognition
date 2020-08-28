@@ -5,6 +5,9 @@
 #include <jsk_topic_tools/log_utils.h>
 #include <jsk_recognition_msgs/Rect.h>
 #include <jsk_perception/NonMaximumSuppression.h>
+#if ( CV_MAJOR_VERSION >= 4)
+#include <opencv2/imgproc/imgproc_c.h>
+#endif
 
 namespace jsk_perception
 {

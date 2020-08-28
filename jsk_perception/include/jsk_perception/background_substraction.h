@@ -38,8 +38,11 @@
 #define JSK_PERCEPTION_BACKGROUND_SUBSTRACTION_H_
 
 #include <jsk_topic_tools/diagnostic_nodelet.h>
-#include <opencv/cv.hpp>
 #include <opencv2/opencv.hpp>
+#if ( CV_MAJOR_VERSION >= 4)
+#else
+#include <opencv/cv.hpp>
+#endif
 #include <image_transport/image_transport.h>
 #include <image_transport/subscriber_filter.h>
 #include <sensor_msgs/image_encodings.h>

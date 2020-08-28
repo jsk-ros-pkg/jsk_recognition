@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package>
+<package format="3">
   <name>jsk_recognition_utils</name>
   <version>1.2.10</version>
   <description>C++ library about sensor model, geometrical modeling and perception. </description>
@@ -10,6 +10,9 @@
   <url type="website">https://jsk-docs.readthedocs.io/projects/jsk_recognition/en/latest/jsk_recognition_utils</url>
 
   <license>BSD</license>
+
+  <buildtool_depend condition="$ROS_PYTHON_VERSION == 2">python-setuptools</buildtool_depend>
+  <buildtool_depend condition="$ROS_PYTHON_VERSION == 3">python3-setuptools</buildtool_depend>
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>cython</build_depend>
@@ -30,24 +33,25 @@
   <build_depend>visualization_msgs</build_depend>
   <build_depend>yaml-cpp</build_depend>
   <build_depend>message_generation</build_depend>
-  <run_depend>eigen_conversions</run_depend>
-  <run_depend>geometry_msgs</run_depend>
-  <run_depend>image_geometry</run_depend>
-  <run_depend>image_view</run_depend>
-  <run_depend>jsk_recognition_msgs</run_depend>
-  <run_depend>jsk_topic_tools</run_depend>
-  <run_depend>pcl_msgs</run_depend>
-  <run_depend>pcl_ros</run_depend>
-  <run_depend version_lt="7.0.0">python-chainer-pip</run_depend>
-  <run_depend>python-skimage</run_depend>
-  <run_depend>sensor_msgs</run_depend>
-  <run_depend>std_msgs</run_depend>
-  <run_depend>tf2_ros</run_depend>
-  <run_depend>tf_conversions</run_depend>
-  <run_depend>tf</run_depend>
-  <run_depend>visualization_msgs</run_depend>
-  <run_depend>yaml-cpp</run_depend>
-  <run_depend>message_runtime</run_depend>
+  <exec_depend>eigen_conversions</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>image_geometry</exec_depend>
+  <exec_depend>image_view</exec_depend>
+  <exec_depend>jsk_recognition_msgs</exec_depend>
+  <exec_depend>jsk_topic_tools</exec_depend>
+  <exec_depend>pcl_msgs</exec_depend>
+  <exec_depend>pcl_ros</exec_depend>
+  <exec_depend version_lt="7.0.0">python-chainer-pip</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-skimage</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-skimage</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>tf_conversions</exec_depend>
+  <exec_depend>tf</exec_depend>
+  <exec_depend>visualization_msgs</exec_depend>
+  <exec_depend>yaml-cpp</exec_depend>
+  <exec_depend>message_runtime</exec_depend>
   <test_depend>jsk_tools</test_depend>
   <export>
   </export>

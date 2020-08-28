@@ -18,7 +18,7 @@ def cloud_cb(cloud):
         setCloud = rospy.ServiceProxy('particle_filter_tracker/renew_model', SetPointCloud2)
         setCloud(cloud, track_target_name)
         rospy.loginfo("Success renew_tracking service");
-    except rospy.ServiceException, e:
+    except rospy.ServiceException as e:
             rospy.loginfo("Failed to call renew_tracking service")
 
 if __name__ == "__main__":

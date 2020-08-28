@@ -86,7 +86,7 @@ class ObjectDetectionTfPublisher():
         try:
             res = set_dynamic_tf(set_tf_request)
         except rospy.ServiceException as exc:
-            print("Service did not process request: " + str(exc))
+            print(("Service did not process request: " + str(exc)))
 
 if __name__== '__main__':
     rospy.init_node('objectdetection_tf_publisher', anonymous=True)

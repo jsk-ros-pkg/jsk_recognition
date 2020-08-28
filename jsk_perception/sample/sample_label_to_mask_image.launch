@@ -10,11 +10,12 @@
       publish_info: false
     </rosparam>
   </node>
+  <arg name="INPUT_IMAGE" default="image_publisher/output" />
 
   <!-- create label -->
   <node name="grid_label"
         pkg="jsk_perception" type="grid_label">
-    <remap from="~input" to="image_publisher/output" />
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <rosparam>
       label_size: 128
     </rosparam>
@@ -30,7 +31,7 @@
 
   <node name="label_image_decomposer"
         pkg="jsk_perception" type="label_image_decomposer.py">
-    <remap from="~input" to="image_publisher/output" />
+    <remap from="~input" to="$(arg INPUT_IMAGE)" />
     <remap from="~input/label" to="grid_label/output" />
     <rosparam>
       queue_size: 30

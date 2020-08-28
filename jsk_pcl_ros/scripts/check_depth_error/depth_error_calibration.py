@@ -125,7 +125,7 @@ def setParameter(classifier):
     c0 = classifier.intercept_
     param = DepthCalibrationParameter()
     if not isValidClassifier(classifier):
-        print "parameters are list"
+        print("parameters are list")
         return
     if model == "linear":
         param.coefficients2 = [0, 0, 0, 0, 0]
@@ -168,7 +168,7 @@ def processData(x, y, u, v, cu, cv, fit = True):
             zs = value_cache[(uu, vv)]
             for z in zs:
                 if abs(z - y) < eps_z:
-                    print "duplicated value"
+                    print("duplicated value")
                     return
                 else:
                     value_cache[(uu, vv)].append(y)
@@ -180,22 +180,22 @@ def processData(x, y, u, v, cu, cv, fit = True):
         c_us.append(cu)
         c_vs.append(cv)
         if u > u_min and u < u_max and v < v_max and v > v_min:
-            print (x, y)
+            print((x, y))
             xs.append(genFeatureVector(x, u, v, cu, cv))
             ys.append(y)
             if fit:
                 classifier.fit(xs, ys)
                 try:
                     setParameter(classifier)
-                except rospy.service.ServiceException, e:
+                except rospy.service.ServiceException as e:
                     rospy.logfatal("failed to call service: %s" % (e.message))
             try:
-                print modelEquationString(classifier)
-            except Exception, e:
+                print(modelEquationString(classifier))
+            except Exception as e:
                 rospy.logwarn("failed to print model: %s" % e.message)
             
             else:
-                print "(%d, %d) is out of range" % (u, v)
+                print("(%d, %d) is out of range" % (u, v))
         
 def callback(msg):
     global xs, ys, classifier, u_min, u_max, v_min, v_max, raw_xs
@@ -338,7 +338,7 @@ def updatePlot():
             plot_img.shape = (h, w, 3)
             plt.close()
             pub_error_plot.publish(bridge.cv2_to_imgmsg(plot_img, "bgr8"))
-        except Exception, e:
+        except Exception as e:
             rospy.logerr(e.message)
 
 def generateFrequencyMap():
@@ -379,7 +379,7 @@ def main():
     height = args.height
     if args.models:
         for m in MODELS:
-            print m
+            print(m)
         return
     model = args.model
     if model not in MODELS:
@@ -409,14 +409,14 @@ def main():
         classifier.fit(xs, ys)
         try:
             setParameter(classifier)
-        except rospy.service.ServiceException, e:
+        except rospy.service.ServiceException as e:
             rospy.logfatal("failed to call service: %s" % (e.message))
     try:
         plt.show()
     finally:
         if not args.csv:
             csv_filename = "calibration-%s.csv" % datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-            print "Save calibration parameters to %s" % (csv_filename)
+            print("Save calibration parameters to %s" % (csv_filename))
             with open(csv_filename, "w") as f:
                 for x, y, u, v, cu, cv in zip(raw_xs, ys, us, vs, c_us, c_vs):
                     f.write("%f,%f,%d,%d,%f,%f\n" % (x, y, u, v, cu, cv))
@@ -424,7 +424,7 @@ def main():
         if dump is True or \
            (dump == "query" and query_yes_no("Dump result into yaml file?")):
             yaml_filename = "calibration_parameter_%s.yaml" % datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
-            print "writing to %s" % yaml_filename
+            print("writing to %s" % yaml_filename)
             c = classifier.coef_
             if model == "quadratic-uv-abs" or model == "quadratic-uv-quadratic-abs":
                 use_abs = "True"

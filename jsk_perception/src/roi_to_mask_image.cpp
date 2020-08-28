@@ -36,6 +36,9 @@
 #include "jsk_perception/roi_to_mask_image.h"
 #include <boost/assign.hpp>
 #include <jsk_topic_tools/log_utils.h>
+#if ( CV_MAJOR_VERSION >= 4)
+#include <opencv2/imgproc/imgproc_c.h>
+#endif
 
 namespace jsk_perception
 {

@@ -149,8 +149,8 @@ class MepConverter:
             cv_image = self.bridge.imgmsg_to_cv2(
                 self.reference_image_msg, "bgr8")
             self.set_template('',ref_image=cv_image, ref_rect=rect)
-        except CvBridgeError, e:
-            print e
+        except CvBridgeError as e:
+            print(e)
 
     #
     # Callback Functions (lock require)
@@ -164,7 +164,7 @@ class MepConverter:
                 pt[1]-self.default_template_size[1]/2,
                 self.default_template_size[0], self.default_template_size[1])
         self.set_reference(rect)
-        print rect
+        print(rect)
         search_rect = (pt[0]-self.default_search_size[0]/2,
                        pt[1]-self.default_search_size[1]/2,
                        self.default_search_size[0],self.default_search_size[1])
@@ -331,8 +331,8 @@ class MepConverter:
                             :reference_size[1], :reference_size[0], :] = \
                             reference_image.copy()
 
-            except CvBridgeError, e:
-                print e
+            except CvBridgeError as e:
+                print(e)
 
         self.lockobj.release()
 

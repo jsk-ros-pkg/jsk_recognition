@@ -28,7 +28,8 @@ env:
     - ROS_DISTRO=kinetic BUILD_PKGS='jsk_pcl_ros_utils jsk_pcl_ros'
     - ROS_DISTRO=melodic BUILD_PKGS='checkerboard_detector imagesift jsk_perception jsk_recognition_utils resized_image_transport'
     - ROS_DISTRO=melodic BUILD_PKGS='jsk_pcl_ros_utils jsk_pcl_ros'
-    - ROS_DISTRO=noetic  TEST_PKGS='jsk_recognition_msgs' # to skip test
+    - ROS_DISTRO=noetic  BUILD_PKGS='checkerboard_detector imagesift jsk_perception jsk_recognition_utils resized_image_transport' TEST_PKGS='jsk_recognition_msgs' # to skip test
+    - ROS_DISTRO=noetic  BUILD_PKGS='jsk_pcl_ros_utils jsk_pcl_ros' TEST_PKGS='jsk_recognition_msgs' # to skip test
 before_script:
   - if [[ "$ROS_DISTRO" == "indigo" && "$DOCKER_IMAGE_JENKINS" == "" ]]; then export export DOCKER_IMAGE_JENKINS='ros-ubuntu:14.04-pcl'; fi
   - if [[ "$ROS_DISTRO" == "kinetic" && "$DOCKER_IMAGE_JENKINS" == "" ]]; then export export DOCKER_IMAGE_JENKINS='ros-ubuntu:16.04-pcl'; fi

@@ -72,7 +72,7 @@ ENDIF()
 # ------------------------------------------------------------------------------------
 
 # download and install sample data
-add_custom_target(${PROJECT_NAME}_install_sample_data ALL COMMAND ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py --pkg-path ${PROJECT_SOURCE_DIR})
+add_custom_target(${PROJECT_NAME}_install_sample_data ALL COMMAND python$ENV{ROS_PYTHON_VERSION} ${PROJECT_SOURCE_DIR}/scripts/install_sample_data.py --pkg-path ${PROJECT_SOURCE_DIR})
 
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(

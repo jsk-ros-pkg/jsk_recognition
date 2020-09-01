@@ -173,7 +173,7 @@ class PoseFromCorrespondences(metaclass.AutoReloader):
         with self.extractionlck:
             self.KK = reshape(infomsg.K,(3,3))
             if any([f!=0 for f in infomsg.D]):
-                print 'Program does not support distorted images'
+                print('Program does not support distorted images')
 
     def imagecb(self,imagemsg):
         with self.extractionlck:
@@ -190,7 +190,7 @@ class PoseFromCorrespondences(metaclass.AutoReloader):
 
     def AddCorrespondence(self):
         with self.extractionlck:
-            print 'add correspondence'
+            print('add correspondence')
 #             if self.frame_id:
 #                 base_frame_id = self.orbody.GetLinks()[0].GetName()
 #                 (trans,rot) = self.lookupTransform(base_frame_id, self.frame_id, rospy.Time(0))
@@ -200,27 +200,27 @@ class PoseFromCorrespondences(metaclass.AutoReloader):
                 Tpattern_inv = linalg.inv(self.pattern[0])
                 self.imagepoints.append(array(self.cvpoint))
                 self.objectpoints.append(array(self.orpoint))
-                print 'total gathered points: %d'%len(self.imagepoints)
+                print('total gathered points: %d'%len(self.imagepoints))
                 if len(self.imagepoints) >= 4:
-                    print array(self.imagepoints)
-                    print array(self.objectpoints)
-                    print self.pattern[0]
+                    print(array(self.imagepoints))
+                    print(array(self.objectpoints))
+                    print(self.pattern[0])
                     Tcameraobject = FindExtrinsicCameraParams(array(self.imagepoints,float),array(self.objectpoints,float),self.KK)
                     self.Tobjectrel = dot(Tpattern_inv,Tcameraobject)
-                    print 'camera transform: ', Tcameraobject                        
+                    print('camera transform: ', Tcameraobject)
                     values = reshape(self.Tobjectrel[0:3,0:4],(12,))
-                    print "relative transform is: ",self.Tobjectrel
+                    print("relative transform is: ",self.Tobjectrel)
                     self.T_entry.insert(0, ' '.join(str(f) for f in values))
             else:
-                print 'point data not initialized'
+                print('point data not initialized')
 
     def Reset(self):
-        print 'reset'
+        print('reset')
         self.imagepoints = []
         self.objectpoints = []
         self.Tobjectrel = None
     def Quit(self):
-        print 'quitting from gui'
+        print('quitting from gui')
         self.doquit = True
         self.main.quit()
 
@@ -290,7 +290,7 @@ class PoseFromCorrespondences(metaclass.AutoReloader):
                 if a==1:
                     self.Tobjectrel[:3,:3]=dot(R,self.Tobjectrel[:3,:3])
                     self.Tobjectrel[:3,3]=self.Tobjectrel[:3,3]+mintranslation*T
-                    print "relative: ",self.Tobjectrel
+                    print("relative: ",self.Tobjectrel)
                     
     def spin(self):
         while not rospy.is_shutdown() and not self.doquit:
@@ -306,8 +306,8 @@ class PoseFromCorrespondences(metaclass.AutoReloader):
 
             try:
                 cv_image = self.bridge.imgmsg_to_cv(imagemsg, "bgr8")
-            except CvBridgeError, e:
-                print e
+            except CvBridgeError as e:
+                print(e)
 
             if Tpattern is not None:
                 if Tobjectrel is not None:
@@ -326,7 +326,7 @@ class PoseFromCorrespondences(metaclass.AutoReloader):
             self.keycb(char)
             gtk.gdk.threads_leave()
             time.sleep(1.0)
-        print 'quitting spin'
+        print('quitting spin')
             
 if __name__== '__main__':
     parser = OptionParser(description='Estiamtes the pose of an openrave object by specifying manual correspondeces between the image and the openrave environment. If a separate ObjectDetection pattern is added, will publish the pose of the object with respect to the pattern.')
@@ -350,5 +350,5 @@ if __name__== '__main__':
         if options.Tobjectrel is not None:
             processor.Tobjectrel = r_[reshape([float(s) for s in options.Tobjectrel.split()[0:12]],[3,4]),[[0,0,0,1]]]
         processor.spin()
-    except KeyboardInterrupt, e:
+    except KeyboardInterrupt as e:
         pass

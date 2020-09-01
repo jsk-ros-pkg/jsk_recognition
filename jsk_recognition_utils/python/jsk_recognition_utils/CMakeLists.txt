@@ -1,7 +1,7 @@
 if(NOT DEFINED Numpy_INCLUDE_DIRS)
   # Get Numpy include directories
   execute_process(
-    COMMAND python -c "import sys, numpy; sys.stdout.write(numpy.get_include())"
+    COMMAND python$ENV{ROS_PYTHON_VERSION} -c "import sys, numpy; sys.stdout.write(numpy.get_include())"
     OUTPUT_VARIABLE Numpy_INCLUDE_DIRS
     RESULT_VARIABLE retcode)
   if(NOT ${retcode} EQUAL 0)

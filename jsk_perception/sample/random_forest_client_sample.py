@@ -51,17 +51,17 @@ if __name__ == "__main__":
             answer = 0
         req_point.point = target
         req.data.append(req_point)
-        print OKGREEN,"Send Request         ====================>         Answer",ENDC
-        print OKGREEN,"    ",req_point.point,"       : ",str(answer),ENDC
+        print(OKGREEN,"Send Request         ====================>         Answer",ENDC)
+        print(OKGREEN,"    ",req_point.point,"       : ",str(answer),ENDC)
         response = predict_data(req)
-        print WARNING,"Get the result : ",ENDC
-        print WARNING,response.classifications,ENDC
+        print(WARNING,"Get the result : ",ENDC)
+        print(WARNING,response.classifications,ENDC)
         succeed = int(float(response.classifications[0])) == answer
         if succeed:
-            print OKBLUE,"Succeed!!!",ENDC
+            print(OKBLUE,"Succeed!!!",ENDC)
         else:
-            print FAIL,"FAIL...",FAIL
-        print "--- --- --- ---"
+            print(FAIL,"FAIL...",FAIL)
+        print("--- --- --- ---")
 
         # Config for plotting
         fig = plt.figure()

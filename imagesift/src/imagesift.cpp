@@ -22,8 +22,12 @@
 #include <posedetection_msgs/Feature0DDetect.h>
 #include <image_transport/image_transport.h>
 #include <image_transport/subscriber_filter.h>
+#if ( CV_MAJOR_VERSION >= 4)
+#include <opencv2/highgui.hpp>
+#else
 #include <opencv/highgui.h>
 #include <opencv/cv.h>
+#endif
 
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>

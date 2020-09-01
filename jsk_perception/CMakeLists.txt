@@ -41,7 +41,9 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(roseus)
 
-catkin_python_setup()
+if(NOT $ENV{ROS_DISTRO} STREQUAL "indigo") # on noetic it needs catkin_install_python to support Python3 and it does not work on indigo for some reason...
+  catkin_python_setup()
+endif()
 
 find_package(Boost REQUIRED COMPONENTS filesystem system)
 

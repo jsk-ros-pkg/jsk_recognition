@@ -1,6 +1,7 @@
 <launch>
   <include file="$(find jsk_perception)/sample/sample_face_pose_estimation.launch">
-    <arg name="test_mode" value="true" />
+    <arg name="launch_openni" default="false" />
+    <arg name="gui" default="false" />
   </include>
 
   <test test-name="test_face_pose_estimation"

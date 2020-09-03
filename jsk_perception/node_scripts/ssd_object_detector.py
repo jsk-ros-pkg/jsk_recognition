@@ -23,6 +23,8 @@ from jsk_recognition_msgs.msg import Rect, RectArray
 from jsk_recognition_msgs.msg import ClassificationResult
 from jsk_recognition_msgs.msg import Label
 from jsk_recognition_msgs.msg import LabelArray
+from jsk_recognition_msgs.msg import ClusterPointIndices
+from pcl_msgs.msg import PointIndices
 
 import itertools, pkg_resources, sys
 from distutils.version import LooseVersion
@@ -89,6 +91,8 @@ class SSDObjectDetector(ConnectionBasedTransport):
         # advertise
         self.pub_labels = self.advertise("~output/labels", LabelArray,
                                          queue_size=1)
+        self.pub_indices = self.advertise("~output/cluster_indices", ClusterPointIndices,
+                                          queue_size=1)
         self.pub_rects = self.advertise("~output/rect", RectArray,
                                         queue_size=1)
         self.pub_class = self.advertise("~output/class", ClassificationResult,
@@ -162,6 +166,23 @@ class SSDObjectDetector(ConnectionBasedTransport):
         if self.profiling:
             tcur = time.time()
             rospy.loginfo("%s: elapsed %f msec" % ("make labels msg", (tcur-tprev)*1000))
+
+        cluster_indices_msg = ClusterPointIndices(header=msg.header)
+        H = img.shape[1]
+        W = img.shape[2]
+        for bbox in bboxes:
+            ymin = max(0, int(np.floor(bbox[0])))
+            xmin = max(0, int(np.floor(bbox[1])))
+            ymax = min(H, int(np.ceil(bbox[2])))
+            xmax = min(W, int(np.ceil(bbox[3])))
+            indices = [range(W*y+xmin, W*y+xmax) for y in range(ymin, ymax)]
+            indices = np.array(indices, dtype=np.int32).flatten()
+            indices_msg = PointIndices(header=msg.header, indices=indices)
+            cluster_indices_msg.cluster_indices.append(indices_msg)
+
+        if self.profiling:
+            tcur = time.time()
+            rospy.loginfo("%s: elapsed %f msec" % ("make cluster_indices msg", (tcur-tprev)*1000))
             tprev = tcur
 
         rect_msg = RectArray(header=msg.header)
@@ -191,6 +212,7 @@ class SSDObjectDetector(ConnectionBasedTransport):
             tprev = tcur
 
         self.pub_labels.publish(labels_msg)
+        self.pub_indices.publish(cluster_indices_msg)
         self.pub_rects.publish(rect_msg)
         self.pub_class.publish(cls_msg)
 

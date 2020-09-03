@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_pcl_ros)/sample/sample_multi_euclidean_cluster_extraction.launch" >
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_multi_euclidean_clustering"
+        name="test_multi_euclidean_clustering"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="360" retry="3">
+    <rosparam>
+      topic_0: /multi_euclidean_clustering/cluster_num
+      timeout_0: 30
+      topic_1: /multi_euclidean_clustering/output
+      timeout_1: 30
+    </rosparam>
+  </test>
+
+</launch>

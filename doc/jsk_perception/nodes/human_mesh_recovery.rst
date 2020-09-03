@@ -79,4 +79,4 @@ Example
 
 .. code-block:: bash
 
-   roslaunch jsk_perception sample_human_mesh_recovery.launch GPU:=0
+   roslaunch jsk_perception sample_human_mesh_recovery.launch gpu:=0

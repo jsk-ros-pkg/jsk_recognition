@@ -1,8 +1,9 @@
 <launch>
   <arg name="input" default="/camera/depth_registered/points" />
-  <arg name="sensor_frame" default="/camera_rgb_optical_frame" />
-  <arg name="cam_info" default="/camera/rgb/camera_info" />
-  <arg name="ssd_output" default="/ssd_73b2_kitchen/output" />
+  <arg name="camera_frame_id" default="/camera_rgb_optical_frame" />
+  <arg name="camera_info" default="/camera/rgb/camera_info" />
+  <arg name="output_rects" default="/ssd_73b2_kitchen/output/rects" />
+  <arg name="input_image" default="/camera/rgb/image_rect_color" />
   <arg name="manager" default="tabletop_object_detector_nodelet_manager" />
   <arg name="machine" default="localhost" />
 
@@ -60,7 +61,7 @@
       max_queue_size: 1000
       use_sensor_frame: true
       keep_organized: true
-      sensor_frame: $(arg sensor_frame)
+      sensor_frame: $(arg camera_frame_id)
       min_height: 0.03
     </rosparam>
   </node>
@@ -68,8 +69,8 @@
   <node name="rects_to_cpi"
         pkg="jsk_recognition_utils" type="rect_array_to_cluster_point_indices.py"
         output="screen">
-    <remap from="~input" to="$(arg ssd_output)/rects"/>
-    <remap from="~input/info" to="$(arg cam_info)"/>
+    <remap from="~input" to="$(arg output_rects)"/>
+    <remap from="~input/info" to="$(arg camera_info)"/>
     <rosparam>
       approximate_sync: false
       use_info: true
@@ -79,7 +80,7 @@
   <node name="image_cpi_decomposer"
         pkg="jsk_perception" type="image_cluster_indices_decomposer.py"
         output="screen">
-    <remap from="~input" to="$(arg ssd_output)/output/image"/>
+    <remap from="~input" to="$(arg input_image)"/>
     <remap from="~input/cluster_indices" to="rects_to_cpi/output" />
   </node>
 

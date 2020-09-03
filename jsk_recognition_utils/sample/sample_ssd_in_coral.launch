@@ -13,12 +13,4 @@
     </rosparam>
     <param name="score_thresh" value="0.2" />
   </node>
-  
-  <!-- <include file="$(find coral_usb)/launch/edgetpu_object_detector.launch"> -->
-  <!--   <arg name="INPUT_IMAGE" value="/kinect_head/rgb/image_rect_color"/> -->
-  <!-- </include> -->
-  
-  <node pkg="image_view" type="image_view" name="image_view" output="screen">
-    <remap from="image" to="/image_cpi_decomposer/output"/>
-  </node>
 </launch>

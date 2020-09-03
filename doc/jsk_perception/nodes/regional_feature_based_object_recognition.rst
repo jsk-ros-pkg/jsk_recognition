@@ -55,7 +55,7 @@ The sample classifies 39 objects which is used Amazon Picking Challenge 2016.
 .. code-block:: bash
 
    roslaunch jsk_perception sample_regional_feature_based_object_recognition.launch  # CPU mode
-   roslaunch jsk_perception sample_regional_feature_based_object_recognition.launch GPU:=0  # GPU mode
+   roslaunch jsk_perception sample_regional_feature_based_object_recognition.launch gpu:=0  # GPU mode
 
 
 How to create db_file?

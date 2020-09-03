@@ -66,7 +66,7 @@ Parameters
 
 * ``~model_name`` (String, Required)
 
-  Currently, only ``fcn8s_depth_prediction`` is supported.
+  Currently, ``fcn8s_depth_prediction`` and ``fcn8s_depth_prediction_concat_first`` are supported.
 
 * ``~model_file`` (String, Required)
 

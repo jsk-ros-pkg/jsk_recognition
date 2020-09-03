@@ -4,7 +4,7 @@
 ![](images/centroid_publisher.jpg)
 
 This nodelet will subscribe the sensor\_msgs::PointCloud2 or jsk\_recognition\_msgs/PolygonArray and calculate its centroid.
-This also boardcasts coodinates of cloud or each polygons as `tf` whose parent is cloud headers frame\_id and whose child is the new centroid frame_id.
+This also broadcasts coodinates of cloud or each polygons as `tf` whose parent is cloud headers frame\_id and whose child is the new centroid frame_id.
 
 ## Subscribing Topics
 * `~input` (`sensor_msgs/PointCloud2`):

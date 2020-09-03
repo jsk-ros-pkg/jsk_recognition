@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 
-import dynamic_reconfigure.server
-from geometry_msgs.msg import PolygonStamped
 from geometry_msgs.msg import Point32
+from geometry_msgs.msg import PolygonStamped
 from jsk_recognition_msgs.msg import PolygonArray
 from jsk_recognition_msgs.msg import RectArray
 from jsk_topic_tools import ConnectionBasedTransport
-from jsk_recognition_utils.cfg import PolygonArrayToPolygonConfig
 import rospy
 
 
@@ -15,18 +13,12 @@ class RectArrayToPolygonArray(ConnectionBasedTransport):
     def __init__(self):
         super(RectArrayToPolygonArray, self).__init__()
         self.pub = self.advertise('~output', PolygonArray, queue_size=1)
-        dynamic_reconfigure.server.Server(PolygonArrayToPolygonConfig,
-                                          self._config_callback)
 
     def subscribe(self):
         self.sub = rospy.Subscriber('~input', RectArray, self._convert)
 
     def unsubscribe(self):
         self.sub.unregister()
-
-    def _config_callback(self, config, level):
-        self.index = config.index
-        return config
 
     def _convert(self, msg):
         polys_msg = PolygonArray()

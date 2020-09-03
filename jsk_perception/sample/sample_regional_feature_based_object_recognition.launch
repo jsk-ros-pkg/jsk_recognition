@@ -1,7 +1,7 @@
 <launch>
 
   <arg name="gui" default="true" />
-  <arg name="GPU" default="-1" />
+  <arg name="gpu" default="-1" />
 
   <include file="$(find jsk_perception)/sample/include/play_rosbag_apc2016_object_imgs_and_masks.xml" />
 
@@ -19,7 +19,7 @@
     <remap from="~input" to="publish_apc2016_object_imgs_and_masks/output/image" />
     <remap from="~input/mask" to="publish_apc2016_object_imgs_and_masks/output/mask" />
     <rosparam subst_value="true">
-      gpu: $(arg GPU)
+      gpu: $(arg gpu)
       db_file: $(find jsk_perception)/sample/data/resnet_features_apc2016.npz
     </rosparam>
   </node>

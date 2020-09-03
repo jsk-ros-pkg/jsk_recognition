@@ -45,6 +45,6 @@
 
   <group if="$(arg gui)">
     <node name="rviz" pkg="rviz" type="rviz"
-          args="-d $(find jsk_recognition_utils)/sample/config/sample_ssd_to_bounding_box_73b2.rviz" />
+          args="-d $(find jsk_recognition_utils)/sample/config/sample_ssd_to_bounding_box_73b2_kitchen.rviz" />
   </group>  
 </launch>

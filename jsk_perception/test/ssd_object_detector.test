@@ -13,6 +13,8 @@
       timeout_1: 120
       topic_2: /ssd_object_detector/output/rect
       timeout_2: 120
+      topic_3: /ssd_object_detector/output/cluster_indices
+      timeout_3: 120
     </rosparam>
   </test>
 

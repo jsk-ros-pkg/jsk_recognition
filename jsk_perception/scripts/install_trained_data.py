@@ -241,6 +241,12 @@ def main():
         url='https://drive.google.com/uc?id=15n00783FVwxrG9DRdBQOmi8xu1pz-FYl',
         md5='a585e4d41ed67d5052417ade6fb2d608',
     )
+    download_data(
+        pkg_name=PKG,
+        path='trained_data/fcn8s_depth_prediction_concat_first_mirror.npz',
+        url='https://drive.google.com/uc?id=1vW2LT7drf_T9faQ_8DBz1UXqTg4cRLp4',
+        md5='33fd84c084b1c50cb718d81d5c59c6e9',
+    )
 
     # node_scripts/mask_rcnn_instance_segmentation.py
     download_data(

@@ -31,7 +31,7 @@ See rosparam `~input_topics`.
 
 * `~approximate_sync` (Boolean, default: `False`):
 
-  Policy of synchronization, if `False` it synchornizes exactly, else approximately.
+  Policy of synchronization, if `False` it synchronizes exactly, else approximately.
 
 * `~queue_size` (Int, default: `100`):
 

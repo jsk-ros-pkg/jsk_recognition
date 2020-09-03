@@ -66,7 +66,7 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 
 * `~approximate_sync` (Boolean, default: `False`):
 
-   Policy of synchronization, if `False` it synchornizes exactly,
+   Policy of synchronization, if `False` it synchronizes exactly,
    else approximately.
 * `~queue_size` (Int, default: `100`):
 

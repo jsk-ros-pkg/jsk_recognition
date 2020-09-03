@@ -14,7 +14,7 @@
 
   <include file="$(find jsk_pcl_ros)/sample/include/play_rosbag_pr2_sink.xml" />
 
-  <include file="$(find jsk_recognition_utils)/sample/sample_table_ssd_to_bounding_box.launch">
+  <include file="$(find jsk_recognition_utils)/sample/sample_table_rects_to_bounding_box.launch">
     <arg name="input" value="$(arg INPUT)" />
     <arg name="input_image" value="$(arg INPUT_IMAGE)" />
     <arg name="camera_frame_id" value="$(arg CAMERA_FRAME_ID)" />

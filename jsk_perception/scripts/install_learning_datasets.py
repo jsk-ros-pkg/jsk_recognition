@@ -31,6 +31,15 @@ def main():
         extract=True,
     )
 
+    download_data(
+        pkg_name=PKG,
+        path='learning_datasets/human_size_mirror_dataset.tgz',
+        url='https://drive.google.com/uc?id=1uImtm0Drv5prFBUzxHxVcRTH-CESXj7d',
+        md5='27d0b6937a749d2643f66d378dd2d6d6',
+        quiet=quiet,
+        extract=True,
+    )
+
 
 if __name__ == '__main__':
     main()

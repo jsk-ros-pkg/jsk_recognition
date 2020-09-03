@@ -66,7 +66,7 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 
 * `~approximate_sync` (Boolean, default: `False`):
 
-   Policy of synchronization, if `False` it synchornizes exactly,
+   Policy of synchronization, if `False` it synchronizes exactly,
    else approximately.
 * `~queue_size` (Int, default: `100`):
 
@@ -93,6 +93,7 @@ It also publishes tf of centroids of each cluster and oriented bounding box of t
 * `~use_pca` (Boolean, default: `False`):
 
    Run PCA algorithm on each cluster to estimate x and y direction.
+   The x-axis indicates the first principal component and y-axis indicates the second one.
 
 * `~force_to_flip_z_axis` (Boolean, default: `True`)
 

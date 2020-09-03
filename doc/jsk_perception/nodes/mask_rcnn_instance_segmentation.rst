@@ -20,7 +20,7 @@ Subscribing Topic
 Publishing Topic
 ----------------
 
-* ``~output/cluter_indices`` (``jsk_recognition_msgs/ClusterPointIndices``)
+* ``~output/cluster_indices`` (``jsk_recognition_msgs/ClusterPointIndices``)
 
   Image indices of each instance.
 

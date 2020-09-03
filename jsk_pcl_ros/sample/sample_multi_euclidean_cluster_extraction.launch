@@ -1,0 +1,61 @@
+<launch>
+
+  <arg name="gui" default="true"/>
+  <arg name="downsample" default="true" />
+  <arg name="INPUT_CLOUD" default="/head_rgbd_sensor_remote/depth_registered/points" />
+  <arg name="INPUT_INDICES" default="/mask_rcnn_instance_segmentation/output/cluster_indices" />
+
+  <include file="$(find jsk_pcl_ros_utils)/sample/include/play_rosbag_hsr_multiobjects_in_shelf.xml" />
+
+  <node name="multi_euclidean_clustering"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/EuclideanClustering"
+        output="screen">
+    <remap from="~input/cluster_indices" to="$(arg INPUT_INDICES)" />
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <rosparam subst_value="true">
+      tolerance: 0.02
+      min_size: 0
+      max_size: 307200
+      approximate_sync: true
+      downsample_enable: $(arg downsample)
+      multi: true
+      queue_size: 100
+      cluster_filter: 1  <!-- take max size of clustering in each cluster -->
+    </rosparam>
+  </node>
+
+  <node name="multi_euclidean_cluster_point_indices_decomposer"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ClusterPointIndicesDecomposer">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <remap from="~target" to="/multi_euclidean_clustering/output" />
+    <rosparam>
+      align_boxes: false
+      use_pca: true
+      approximate_sync: false
+      queue_size: 100
+    </rosparam>
+  </node>
+
+  <node name="cluster_point_indices_decomposer"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ClusterPointIndicesDecomposer">
+    <remap from="~input" to="$(arg INPUT_CLOUD)" />
+    <remap from="~target" to="$(arg INPUT_INDICES)" />
+    <rosparam>
+      align_boxes: false
+      use_pca: true
+      approximate_sync: true
+      queue_size: 100
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="rviz"
+          pkg="rviz" type="rviz"
+          args="-d $(find jsk_pcl_ros)/sample/rviz/multi_euclidean_clustering.rviz">
+    </node>
+  </group>
+
+</launch>

@@ -8,7 +8,6 @@ from jsk_recognition_msgs.msg import Spectrum
 
 
 # This node execute FFT to audio (audio_common_msgs/AudioData)
-# The number of audio channel is assumed to be 1.
 # The format of audio topic is assumed to be wave.
 
 class AudioToSpectrum(object):
@@ -17,6 +16,8 @@ class AudioToSpectrum(object):
         super(AudioToSpectrum, self).__init__()
 
         # Audio topic config
+        # The number of channels in audio data
+        self.n_channel = rospy.get_param('~n_channel', 1)
         # Sampling rate of microphone (namely audio topic).
         mic_sampling_rate = rospy.get_param('~mic_sampling_rate', 16000)
         # Period[s] to sample audio data for one fft
@@ -61,9 +62,12 @@ class AudioToSpectrum(object):
         rospy.Timer(rospy.Duration(1. / self.fft_exec_rate), self.timer_cb)
 
     def audio_cb(self, msg):
-        # Save audio msg to audio_buffer
+        # Convert audio buffer to int array
         data = msg.data
         audio_buffer = np.frombuffer(data, dtype=self.dtype)
+        # Retreive one channel data
+        audio_buffer = audio_buffer[0::self.n_channel]
+        # Save audio msg to audio_buffer
         self.audio_buffer = np.append(
             self.audio_buffer, audio_buffer)
         self.audio_buffer = self.audio_buffer[

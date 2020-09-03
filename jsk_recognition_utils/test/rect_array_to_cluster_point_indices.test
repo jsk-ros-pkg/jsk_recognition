@@ -1,0 +1,19 @@
+<launch>
+
+  <include file="$(find jsk_recognition_utils)/sample/sample_rect_array_to_cluster_point_indices.launch" >
+    <arg name="gui" value="false" />
+  </include>
+
+  <test test-name="test_rect_array_to_cluster_point_indices"
+        name="test_rect_array_to_cluster_point_indices"
+        pkg="jsk_tools" type="test_topic_published.py"
+        time-limit="60" retry="3">
+    <rosparam>
+      topic_0: /rects_to_cpi/output
+      timeout_0: 60
+      topic_1: /image_cluster_indices_decomposer/output
+      timeout_0: 60
+    </rosparam>
+  </test>
+
+</launch>

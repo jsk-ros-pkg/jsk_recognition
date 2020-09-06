@@ -1,15 +1,17 @@
 Install RealSense camera
 ========================
 
-- librealsense: https://github.com/IntelRealSense/librealsense
+- SDK
+-- Intel Realsense SDK 2.0 (librealsense): https://github.com/IntelRealSense/librealsense
+-- ROS Wrapper for Intel® RealSense™ Devices (realsense-ros): https://github.com/IntelRealSense/realsense-ros
 
-- realsense-ros: https://github.com/intel-ros/realsense
+If you use Legacy Devices (F200, R200, LR200 and ZR300), please use `old librealsense <https://github.com/IntelRealSense/librealsense/tree/v1.12.1>`_._
 
-- Intel realsense robotic development kit: https://01.org/developerjourney/recipe/intel-realsense-robotic-development-kit
-
-- SR300 Data Sheet: https://software.intel.com/sites/default/files/managed/0c/ec/realsense-sr300-product-datasheet-rev-1-0.pdf
-
-- R200 Data Sheet: https://software.intel.com/sites/default/files/managed/d7/a9/realsense-camera-r200-product-datasheet.pdf
+- Data Sheet of RealSense Products
+-- T265: https://www.intelrealsense.com/wp-content/uploads/2019/09/Intel_RealSense_Tracking_Camera_Datasheet_Rev004_release.pdf
+-- D400 Series: https://www.intelrealsense.com/wp-content/uploads/2020/06/Intel-RealSense-D400-Series-Datasheet-June-2020.pdf
+-- SR300: https://software.intel.com/sites/default/files/managed/0c/ec/realsense-sr300-product-datasheet-rev-1-0.pdf
+-- R200: https://software.intel.com/sites/default/files/managed/d7/a9/realsense-camera-r200-product-datasheet.pdf
 
 Kernel Update
 -------------
@@ -19,8 +21,27 @@ librealsense works stably on 4.4.xx kernels.
 This installation guide is only appropriate for 4.4.xx kernels
 
 
-RealSense-ROS Installation
---------------------------
+Installation of librealsense
+------------
+
+- Ubuntu 20.04
+
+- Ubuntu 16.04 and 18.04
+
+Intel® RealSense™ SDK 2.0 can be installed with apt for ubuntu 16.04 and 18.04.
+Please see `this page <https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md>`_ for more details.
+
+.. code-block:: bash
+
+  sudo apt-key adv --keyserver keys.gnupg.net --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE
+  sudo add-apt-repository "deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo $(lsb_release -cs) stable"
+  sudo apt update
+  sudo apt-get install librealsense2-dkms librealsense2-utils librealsense2-dev librealsense2-dbg
+
+- Ubuntu 14.04
+
+librealsense 2.0 or above is not distributed with debian package for ubuntu 14.04. so you have to build librealsense from source.
+Please see `this page <https://github.com/IntelRealSense/librealsense/blob/master/doc/installation.md>`_ for more details about manual installation.
 
 .. code-block:: bash
 
@@ -62,7 +83,8 @@ RealSense-ROS Installation
   #
   # modprobe: ERROR: could not insert 'uvcvideo'
 
-Build
+
+Build realsense-ros
 -----
 
 .. code-block:: bash

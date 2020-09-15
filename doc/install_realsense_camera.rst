@@ -5,26 +5,18 @@ Install RealSense camera
 -- Intel Realsense SDK 2.0 (librealsense): https://github.com/IntelRealSense/librealsense
 -- ROS Wrapper for Intel® RealSense™ Devices (realsense-ros): https://github.com/IntelRealSense/realsense-ros
 
-If you use Legacy Devices (F200, R200, LR200 and ZR300), please use `old librealsense <https://github.com/IntelRealSense/librealsense/tree/v1.12.1>`_._
 
 - Data Sheet of RealSense Products
 -- T265: https://www.intelrealsense.com/wp-content/uploads/2019/09/Intel_RealSense_Tracking_Camera_Datasheet_Rev004_release.pdf
 -- D400 Series: https://www.intelrealsense.com/wp-content/uploads/2020/06/Intel-RealSense-D400-Series-Datasheet-June-2020.pdf
 -- SR300: https://software.intel.com/sites/default/files/managed/0c/ec/realsense-sr300-product-datasheet-rev-1-0.pdf
--- R200: https://software.intel.com/sites/default/files/managed/d7/a9/realsense-camera-r200-product-datasheet.pdf
 
-Kernel Update
--------------
-
-librealsense works stably on 4.4.xx kernels.
-
-This installation guide is only appropriate for 4.4.xx kernels
-
+- Legacy Devices
+-- If you use Legacy Devices (F200, R200, LR200 and ZR300), please use `old librealsense <https://github.com/IntelRealSense/librealsense/tree/v1.12.1>`_._
+-- Data Sheet R200: https://software.intel.com/sites/default/files/managed/d7/a9/realsense-camera-r200-product-datasheet.pdf
 
 Installation of librealsense
-------------
-
-- Ubuntu 20.04
+----------------------------
 
 - Ubuntu 16.04 and 18.04
 
@@ -41,6 +33,7 @@ Please see `this page <https://github.com/IntelRealSense/librealsense/blob/maste
 - Ubuntu 14.04
 
 librealsense 2.0 or above is not distributed with debian package for ubuntu 14.04. so you have to build librealsense from source.
+In addition, librealsense works stably on 4.4.xx kernels. So you need to upgrade your ubuntu kernel
 Please see `this page <https://github.com/IntelRealSense/librealsense/blob/master/doc/installation.md>`_ for more details about manual installation.
 
 .. code-block:: bash
@@ -84,8 +77,19 @@ Please see `this page <https://github.com/IntelRealSense/librealsense/blob/maste
   # modprobe: ERROR: could not insert 'uvcvideo'
 
 
-Build realsense-ros
+Installation of realsense-ros
 -----
+
+- Ubuntu 16.04 and 18.04
+
+realsense-ros is available as a debian package. please see `this page <https://github.com/IntelRealSense/realsense-ros>`_ for more details.
+
+.. code-block:: bash
+
+  sudo apt install ros-$ROS_DISTRO-realsense2-camera ros-$ROS_DISTRO-realsense2-description
+
+
+- Ubuntu 14.04
 
 .. code-block:: bash
 
@@ -99,6 +103,20 @@ Build realsense-ros
 
 Sample Launch
 -------------
+
+- for D400 Series
+
+.. code-block:: bash
+
+    roslaunch realsense2_camera rs_camera.launch
+
+- for T265
+
+.. code-block:: bash
+
+    roslaunch realsense2_camera rs_t265.launch
+
+- for legacy version
 
 .. code-block:: bash
 

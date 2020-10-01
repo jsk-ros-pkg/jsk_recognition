@@ -2,8 +2,8 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.11 (2020-10-01)
+-------------------
 * [jsk_pcl_ros] Add multi euclidean clustering (`#2463 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2463>`_)
 * Fix for  noetic / 20.04 (`#2507 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2507>`_)
 

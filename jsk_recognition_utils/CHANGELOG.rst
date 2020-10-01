@@ -2,8 +2,8 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.11 (2020-10-01)
+-------------------
 * Add ssd to bounding box sample (`#2513 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2513>`_)
 
   * rename launch and rvizconfig

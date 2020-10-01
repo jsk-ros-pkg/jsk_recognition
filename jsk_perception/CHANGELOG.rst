@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.11 (2020-10-01)
+-------------------
 * Add FCN8sDepthPredictionConcatFirst model to fcn_depth_prediction.py (`#2481 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2481>`_)
 
   * Update output file names

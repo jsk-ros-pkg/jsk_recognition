@@ -2,7 +2,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2014, JSK Lab
+ *  Copyright (c) 2015, JSK Lab
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,35 +33,51 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-
-#ifndef JSK_RECOGNITION_UTILS_TF_LISTENER_SINGLETON_H_
-#define JSK_RECOGNITION_UTILS_TF_LISTENER_SINGLETON_H_
-
-#include <tf/transform_listener.h>
-#include <tf2_ros/transform_listener.h>
+#include "jsk_recognition_utils/tf_listener.h"
+#include "jsk_recognition_utils/tf_listener_singleton.h"
 
 namespace jsk_recognition_utils
 {
-  class TfListenerSingleton
+
+  TfListener::TfListener(const bool use_tf2, double check_frequenccy, ros::Duration timeout_padding):
+    use_tf2_(use_tf2)
   {
-  public:
-    static tf::TransformListener* getInstance();
-    static void destroy();
-  protected:
-    static tf::TransformListener* instance_;
-    static boost::mutex mutex_;
-  private:
-    TfListenerSingleton(TfListenerSingleton const&){};
-    TfListenerSingleton& operator=(TfListenerSingleton const&){};
-  };
+    if (use_tf2_) {
+       // tf_action??
+      tf2_buffer_client_.reset(new tf2_ros::BufferClient("tf_action", check_frequenccy, timeout_padding));
+    }
+    else {
+      tf_listener_ = TfListenerSingleton::getInstance();
+    }
+  }
 
-  // tf Utility
-  tf::StampedTransform lookupTransformWithDuration(
-    tf::TransformListener* listener,
-    const std::string& to_frame,
-    const std::string& from_frame,
-    const ros::Time& stamp,
-    ros::Duration duration);
+  bool TfListener::waitForTransform(const std::string& target_frame,
+                                    const std::string& source_frame,
+                                    const ros::Time& time,
+                                    const ros::Duration& timeout) const
+  {
+    if (use_tf2_) {
+      return true;
+    }
+    else {
+      return tf_listener_->waitForTransform(target_frame, source_frame,
+                                            time, timeout);
+    }
+  }
+
+  void TfListener::lookupTransform(const std::string& target_frame,
+                                   const std::string& source_frame,
+                                   const ros::Time& time,
+                                   tf::StampedTransform& transform) const
+  {
+    if (use_tf2_) {
+      geometry_msgs::TransformStamped transform_msg
+        = tf2_buffer_client_->lookupTransform(target_frame, source_frame, time);
+      tf::transformStampedMsgToTF(transform_msg, transform);
+    }
+    else {
+      tf_listener_->lookupTransform(target_frame, source_frame,
+                                    time, transform);
+    }
+  }
 }
-
-#endif

@@ -2,6 +2,280 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [color_filter] publish color space for debugging(`#2477 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2477>`_)
+* Fix for  noetic / 20.04 (`#2507 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2507>`_)
+
+  * support -std=c++14, include image_transport/kdl_parser to library, disable moveit_ros_perception if not possible, support python3
+  * fix for python3, use 2to3 -f print, 2to3 -f except
+  * upgrade package.xml to format=3, migrate to noetic with ROS_PYTHON_VERSION=2/3, use multiple ROS distro strategy http://wiki.ros.org/noetic/Migration
+
+* fix publishDebugCloud (`#2488 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2488>`_)
+* set chainer version less than 7.0.0 (`#2485 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2485>`_)
+
+  * add time-limit to jsk_pcl_ros/test/test_linemod_trainer.test, jsk_perception/test/bing.test
+  * set time-limit=25 for timeout:30 tests
+
+* [jsk_pcl_ros] Add nearest plane index label to cluster_point_indices_decomposer (`#2472 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2472>`_)
+
+  * [jsk_pcl_ros/cluster_point_indices_decomposer] Renamed bba -> boxes
+  * [jsk_pcl_ros/cluster_point_indices_decomposer] Add parameter fill_bba_label_with_nearest_plane_index
+  * [jsk_pcl_ros/cluster_point_indices] Modified output bounding box indicating nearest plane index
+
+* [jsk_pcl_ros] Add multi euclidean clustering (`#2463 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2463>`_)
+  * [jsk_pcl_ros/multi_euclidean_clustering_sample] Fixed parameter cluster_tolerance to tolerance
+  * Moved bagfile for multi object detection:  Fixed path of play_rosbag xml
+    [jsk_pcl_ros_utils/install_sample_data.py] Make it multiprocess downloadable
+  * [jsk_pcl_eus/multi_euclidean_clustering] Add test
+  * [jsk_pcl_ros/euclidean_clustering] Update install data for data compression
+    [jsk_pcl_ros/euclidean_clustering] Update sample bag file player for data compression
+  * [jsk_pcl_ros/euclidean_clustering] Use capital for arguments
+  * [jsk_pcl_ros/euclidean_clustering] Fixed typo (multi -> ~multi)
+    [jsk_pcl_ros/euclidean_clustering] Fixed typo (synchornizes -> synchronizes)
+    [jsk_pcl_ros/euclidean_clustering] Fixed typo (approximate_sync\_ -> approximate_sync)
+    [jsk_pcl_ros/euclidean_clustering] Fixed size of maximum cluster size
+    [jsk_pcl_ros/euclidean_clustering] Delete duplicated value downsample_enable
+    [jsk_pcl_ros/euclidean_clustering] Fixed indent
+    [jsk_pcl_ros/euclidean_clustering/cfg] Fixed indent
+  * add downsample_cloud method
+  * [jsk_pcl_ros/multi_euclidean_clustering] Support cluster_filter type
+  * [jsk_pcl_ros/multi_euclidean_clustering] Modified input indices's name to ~input/cluster_indices'
+  * [jsk_pcl_ros/multi_euclidean_clustering] Modified default queue_size for sync
+  * [jsk_pcl_ros] Add test of multi euclidean clustering
+  * [jsk_pcl_ros] Add sample of multi euclidean clustering
+  * [jsk_pcl_ros/euclidean_clustering] Enable multi euclideanclustering
+
+* add the on-off function of using use_pca in dynamic reconfigure (`#2461 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2461>`_)
+
+  * removed pnh\_->param(use_pca, use_pca\_, false); in src/cluster_point_indices_decomposer_nodelet.cpp.
+  * add the on-off function of using use_pca in dynamic reconfigure
+
+* [jsk_pcl_ros/cluster_point_indices] Enable use_pca in case of align_boxes is false (`#2462 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2462>`_)
+
+  * [jsk_pcl_ros/sample_cluster_point_indices] Add PoseArray of results
+  * [jsk_pcl_ros/cluster_point_indices_decomposer] Fixed principal component axis
+  * [jsk_pcl_ros/cluster_point_indices_decomposer] Fixed comment
+  * [jsk_pcl_ros/cluster_point_indices_decomposer] Add use_pca is true case of example
+  * set center pose orientation
+  * fix centroid position
+  * [jsk_pcl_ros/cluster_point_indices] Enable use_pca in case of align_boxes is false
+
+* fix generate_readme.py and update readme (`#2442 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2442>`_)
+* Add sample, test and doc (`#2440 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2440>`_)
+
+  * Re-enable tests which failed due to wrong timeout of waitForTransform in PlaneSupportedCuboidEstimator
+  * Show message when tf2::TransformException is catched and just return
+  * Set timeout of waitForTransform: 0.0 -> 1.0 sec
+  * Do not query in sample for faster success of test
+  * Call rospy.spin() to correctly publish topics in depth_error_calibration.py
+  * Add ~organize_cloud parameter
+  * Show message when tf2::TransformException is catched and just return
+  * Set timeout of waitForTransform: 0.0 -> 1.0 sec
+  * Check NaN value to correctly set is_dense field
+  * Publish organized pointcloud
+  * Fix substitution to each element of output pointcloud
+  * Disable some test in jsk_pcl_ros
+  * Fix condition of publishing ~output/pose_array in ExtractCuboidParticlesTopN
+  * Disable loading URDF in default in play_rosbag_pr2_sink.xml to reduce test time
+  * Fix ~timeout param in test_linemod_trainer.py
+  * Wait a moment until /clock is published in test_linemod_trainer.py
+  * Add test for in_hand_recognition_manager.py
+  * Add sample for in_hand_recognition_manager.py
+  * Remove unused publisher and set queue_size to publisher
+  * Fix logging in in_hand_recognition_manager.py
+  * Update test for pointcloud_screenpoint.l
+  * Add new sample for pointcloud_screenpoint.l
+  * Add sample for store-pointcloud.l
+  * Fix shebang in store-pointcloud.l
+  * Add test for publish_clicked_point_bbox.py
+  * Add sample for publish_clicked_point_bbox.py
+  * Add queue_size to publisher in publish_clicked_point_bbox.py
+  * Add test for depth_error_calibration.py
+  * Add sample for depth_error_calibration.py
+  * Publish error plot image as well in depth_error_calibration.py
+  * Add test for display-bounding-box-array.l
+  * Add sample for display-bounding-box-array.l
+  * Fix shebang in display-bounding-box-array.l
+  * Add test for marker_appender.py
+  * Add sample for marker_appender.py
+  * Set queue_size to 1 in publisher in marker_appender.py
+  * Add test for tracking_info.py and tracker_status_info.py
+  * Add sample for tracking_info.py and tracker_status_info.py
+  * Do not duplicate dynamic_reconfigure server in one node
+  * Add test for renew_tracking.py and ParticleFilterTracking
+  * Add sample for renew_tracking.py
+  * Fix missing service argument in renew_tracking.py
+  * Add test for LINEMODDetector
+  * Add sample for LINEMODDetector
+  * Add test for LINEMODTrainer
+  * Add sample for LINEMODTrainer
+  * Fix mask image shape in LINEMODDetector
+  * Fix for working correctly with yaml-cpp>=0.5.0 in LINEMODDetector
+  * Add param for viewpoint sampling number in LINEMODTrainer
+  * Add test for IntermittentImageAnnotator
+  * Add sample for IntermittentImageAnnotator
+  * Fix index of polygon vertices to use because it's rectangle
+  * Just return from callback when snapshot_buffer is empty in IntermittentImageAnnotator
+  * Add test for CaptureStereoSynchronizer
+  * Add sample for CaptureStereoSynchronizer
+  * Add test for FeatureRegistration
+  * Add sample for FeatureRegistration
+  * Add ~transformation_epsilon paramter to enable converging in registration in FeatureRegistration
+  * Add test for TargetAdaptiveTracking
+  * Add sample for TargetAdaptiveTracking
+  * Fix dynamic_reconfigure::Server namespace in TargetAdaptiveTracking
+  * Support getting paramters for parent_frame and child_frame in TargetAdaptiveTracking
+  * Add test for Snapit
+  * Add sample for Snapit
+  * Remove totally malformed sample for Snapit
+  * Add test for CollisionDetector
+  * Add sample for CollisionDetector
+  * Add test for IncrementalModelRegistration
+  * Add sample for IncrementalModelRegistration
+  * Add test for TorusFinder
+  * Add sample for TorusFinder
+  * Suppress huge amount of error message in ParticleFilterTracking
+  * Add test for TiltLaserListener
+  * Add sample for TiltLaserListener
+  * Add test for ParticleFilterTracking
+  * Add sample for ParticleFilterTracking
+  * Update test for PointcloudDatabaseServer
+  * Update sample for PointcloudDatabaseServer
+  * Add test for ParallelEdgeFinder
+  * Add sample for ParallelEdgeFinder
+  * Add test for PointCloudLocalization
+  * Add sample for PointCloudLocalization
+  * Fix test for ICPRegistration
+  * Fix sample for ICPRegistration
+  * Add missing '~correspondence_randomness' param in ICPRegistration
+  * Add test for PlaneSupportedCuboidEstimator
+  * Add test for LineSegmentCollector
+  * Add sample for LineSegmentCollector
+  * Remove unused parameter error to successfully finish onInit in LineSegmentCollector
+  * Update test for LineSegmentDetector
+  * Update sample for LineSegmentDetector
+  * Add test for HintedStickFinder
+  * Add sample for HintedStickFinder
+  * Add test for HintedHandleEstimator
+  * Add sample for HintedHandleEstimator
+  * Add test for HintedPlaneDetector
+  * Add sample for HintedPlaneDetector
+  * Fix conditional branching to use correct parameter in HintedPlaneDetector
+  * Add test for HeightmapTimeAccumulation
+  * Add sample for HeightmapTimeAccumulation
+  * Show error message when lookupTransform failed in HeightmapTimeAccumulation
+  * Add test for HeightmapToPointCloud
+  * Add sample for HeightmapToPointCloud
+  * Add test for HeightmapMorphologicalFiltering
+  * Add sample for HeightmapMorphologicalFiltering
+  * Add test for HeightmapConverter
+  * Add sample for HeightmapConverter
+  * Fix transform in HeightmapConveter
+  * Add test for ExtractCuboidParticlesTopN
+  * Add sample for ExtractCuboidParticlesTopN
+  * Add test for RegionGrowingSegmentation
+  * Add sample for RegionGrowingSegmentation
+  * Add test for RegionGrowingMultiplePlaneSegmentation
+  * Add sample for RegionGrowingMultiplePlaneSegmentation
+  * Run test_organized_edge_detector.test only when PCL>1.7.2
+  * Add test for MultiPlaneExtraction
+  * Add sample for MultiPlaneExtraction
+  * Add test for OctreeChangePublisher
+  * Add sample for OctreeChangePublisher
+  * fix include order
+  * Add test for OrganizedPassThrough
+  * Add sample for OrganizedPassThrough
+  * Add test for OrganizedEdgeDetector
+  * Add sample for OrganizedEdgeDetector
+  * Add test for OrganizedMultiPlaneSegmentation
+  * Add sample for OrganizedMultiPlaneSegmentation
+  * Add test for MaskImageClusterFilter
+  * Add sample for MaskImageClusterFilter
+  * Add test for KeypointsPublisher
+  * Add sample for KeypointsPublisher
+  * Add test for MovingLeastSquareSmoothing
+  * Add sample for MovingLeastSquareSmoothing
+  * Add test for NormalEstimationIntegralImage
+  * Add sample for NormalEstimationIntegralImage
+  * Add test for NormalDirectionFilter
+  * Add sample for NormalDirectionFilter
+  * Add test for NormalEstimationOMP
+  * Add sample for NormalEstimationOMP
+  * Add test for VoxelGridLargeScale
+  * Add sample for VoxelGridLargeScale
+  * Add test for SupervoxelSegmentation
+  * Add sample for SupervoxelSegmentation
+  * Add test for ROIClipper
+  * Add sample for ROIClipper
+  * Remove duplicated test_mask_image_filter.test
+  * Add test for ResizePointsPublisher
+  * Add sample for ResizePointsPublisher
+  * Add test for FuseRGBImages
+  * Add test for FuseDepthImages
+  * Add test for RGBColorFilter
+  * Fix sample for RGBColorFilter not to require real camera
+  * Add test for GridSampler
+  * Add sample for GridSampler
+  * Add test for FisheyeSpherePublisher
+  * Add sample for FisheyeSpherePublisher
+  * Add test for MaskImageFilter
+  * Add sample for MaskImageFilter
+  * Add test for DepthCalibration
+  * Add sample for DepthCalibration
+  * Add test for BoundingBoxOcclusionRejector
+  * Fix sample for BoundingBoxOcclusionRejector so that users don't have to move interactive marker
+  * Add test for BorderEstimator
+  * Add sample for BorderEstimator
+  * Add test for extract_top_polygon_likelihood.py
+  * Add sample for extract_top_polygon_likelihood.py
+  * Add test for plane_time_ensync_for_recognition.py
+  * Add sample for plane_time_ensync_for_recognition.py
+  * Add test for dump_depth_error.py
+  * Add sample for dump_depth_error.py
+  * Support specifying output csv path as rosparam in dump_depth_error.py
+  * Add test for calculate_polygon_from_imu.py
+  * Add sample for calculate_polygon_from_imu.py
+  * Fix condition to use np.abs(acc) in calculate_polygon_from_imu.py
+  * Fix initialize arguments of PolygonArray in calculate_polygon_from_imu.py
+  * Move sample for PlanarPointCloudSimulator to jsk_pcl_ros_utils and do not use deprecated node
+
+* kinfu supports BGR8 encoding input (`#2432 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2432>`_)
+* add volume_size for kinfu parameter (`#2449 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2449>`_)
+* Publish organized pointcloud in DepthImageCreator (`#2446 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2446>`_)
+* [jsk_pcl_ros/DepthImageCreator] Add ~fill_value to specify initial value of depth image (`#2445 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2445>`_)
+
+  * Add ~fill_value parameter (default is nan) to specify initial value of depth image.
+
+* [jsk_pcl_ros/DepthImageCreator] Fix SEGV when pointcloud is not available yet in asynchronous mode (`#2444 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2444>`_)
+* [jsk_pcl_ros/pointcloud_moveit_filter] build support moveit > 1.0.0 (`#2443 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2443>`_)
+* add keep_organized param to heightmap_to_pointcloud (`#2434 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2434>`_)
+* add negative rosparam in mask_image_filter (`#2431 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2431>`_)
+
+  * add color_histogram_matcher test
+  * modified member variable is_dense true to false, to compute3DCentroid
+  * modified rosbag file, rviz config and document
+  * add keep_organized param to heightmap_to_pointcloud
+  * mofify test of mask_image_filter
+  * rename test file name from .launch to .test & modify CMakeLists for test of mask_image_filter
+  * add test for mask_image_filter
+  * add sample for maks_image_filter
+
+* [jsk_pcl_ros] Add sample_color_histogram_matcher.launch (`#2429 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2429>`_)
+
+  * add color_histogram_publisher node
+  * add rosbag file and rviz config file
+  * add sample_color_histogram_matcher.launch
+  * add negative param in mask_image_filter
+
+* Modify pcl version check for building with pcl-1.9 (`#2426 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2426>`_)
+* ClusterPointIndicesDecomposer: suppress error if contains zero indices (`#2408 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2408>`_)
+
+  * add wawrning on clustering zero size cloud
+  * suppress error if contains zero indices
+
+* Contributors: Akihiro Miki, Kei Okada, Ryohei Ueda, Shingo Kitagawa, Takayuki Murooka, Tomoya Ishii, Yuki Furuta, Yuki Omori, Yuto Uchimi, Iory Yanokura, Taichi Higashide
+
 1.2.10 (2019-03-27)
 -------------------
 * use (MOVEIT_VERSION_MAJOR == 0 and MOVEIT_VERSION_MINOR < 6), since moveit is upgraded to 1.0 (`#2416 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2416>`_)

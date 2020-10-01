@@ -2,6 +2,35 @@
 Changelog for package checkerboard_detector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix for  noetic / 20.04 (`#2507 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2507>`_)
+
+  * fix for python3, use 2to3 -f print, 2to3 -f except
+  * support opencv4 to checkerboard_detector
+
+* set chainer version less than 7.0.0 (`#2485 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2485>`_)
+
+  * relax test conditions
+
+* fix generate_readme.py and update readme (`#2442 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2442>`_)
+* Add sample, test and doc (`#2440 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2440>`_)
+
+  * Add test for objectdetection_tf_publisher
+  * Add sample for objectdetection_tf_publisher
+  * Add test for objectdetection_transform_echo
+  * Add sample for objectdetection_transform_echo
+  * Fix namespace for including from upper layer
+  * Publish PoseStamped in objectdetection_transform_echo
+  * Add sample for checkerboard_calibration
+  * Install sample/ and test/ to 'share' space
+  * Add test for checkerboard_detector
+  * Add sample for checkerboard_detector
+  * Publish debug_image even when param display == 0
+  * Publish debug_image as well in checkerboard_detector
+
+* Contributors: Kei Okada, Shingo Kitagawa, Yuki Furuta, Yuto Uchimi
+
 1.2.10 (2019-03-27)
 -------------------
 

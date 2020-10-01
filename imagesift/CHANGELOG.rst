@@ -2,6 +2,16 @@
 Changelog for package imagesift
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix for  noetic / 20.04 (`#2507 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2507>`_)
+
+  * imagesift/src/imagesift.cpp fix for opencv4
+  * upgrade package.xml to format=3, migrate to noetic with ROS_PYTHON_VERSION=2/3, use multiple ROS distro strategy http://wiki.ros.org/noetic/Migration
+
+* fix generate_readme.py and update readme (`#2442 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2442>`_)
+* Contributors: Kei Okada, Shingo Kitagawa, Yuki Furuta, Yuto Uchimi
+
 1.2.10 (2019-03-27)
 -------------------
 

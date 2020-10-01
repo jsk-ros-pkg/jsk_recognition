@@ -1,9 +1,25 @@
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Changelog for package jsk_recognition
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Changelog for package audio_to_spectrogram
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Forthcoming
 -----------
+* Fix for  noetic / 20.04 (`#2507 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2507>`_)
+
+  * upgrade package.xml to format=3, migrate to noetic with ROS_PYTHON_VERSION=2/3, use multiple ROS distro strategy http://wiki.ros.org/noetic/Migration
+
+* [audio_to_spectrogram] Enable multi channel input by retrieving single channel data (`#2514 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2514>`_)
+* [audio_to_spectrogram] Add README for usage and scripts interface (`#2498 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2498>`_)
+
+  * [audio_to_spectrogram] Add README for usage and scripts interface
+  * [audio_to_spectrogram] add args to audio_to_spectrogram.launch
+  * [audio_to_spectrogram] Add arg to run audio_capture
+
+* Convert audio data to spectrogram (`#2478 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2478>`_)
+
+  * Make audio_to_spectrogram as ROS package
+
+* Contributors: Kei Okada, Naoya Yamaguchi, Shingo Kitagawa
 
 1.2.10 (2019-03-27)
 -------------------
@@ -32,11 +48,11 @@ Forthcoming
 1.2.2 (2017-07-23)
 ------------------
 
-1.2.1 (2017-07-15)
-------------------
+1.2.1 (2017-07-15 20:44)
+------------------------
 
-1.2.0 (2017-07-15)
-------------------
+1.2.0 (2017-07-15 09:14)
+------------------------
 
 1.1.3 (2017-07-07)
 ------------------
@@ -47,11 +63,11 @@ Forthcoming
 1.1.1 (2017-03-04)
 ------------------
 
-1.1.0 (2017-02-09)
-------------------
+1.1.0 (2017-02-09 22:50)
+------------------------
 
-1.0.4 (2017-02-09)
-------------------
+1.0.4 (2017-02-09 22:48)
+------------------------
 
 1.0.3 (2017-02-08)
 ------------------
@@ -68,11 +84,11 @@ Forthcoming
 0.3.29 (2016-10-30)
 -------------------
 
-0.3.28 (2016-10-29)
--------------------
+0.3.28 (2016-10-29 16:34)
+-------------------------
 
-0.3.27 (2016-10-29)
--------------------
+0.3.27 (2016-10-29 00:14)
+-------------------------
 
 0.3.26 (2016-10-27)
 -------------------
@@ -113,11 +129,11 @@ Forthcoming
 0.3.14 (2016-02-04)
 -------------------
 
-0.3.13 (2015-12-19)
--------------------
+0.3.13 (2015-12-19 17:35)
+-------------------------
 
-0.3.12 (2015-12-19)
--------------------
+0.3.12 (2015-12-19 14:44)
+-------------------------
 
 0.3.11 (2015-12-18)
 -------------------
@@ -149,20 +165,14 @@ Forthcoming
 0.3.2 (2015-09-05)
 ------------------
 
-0.3.1 (2015-09-04)
-------------------
+0.3.1 (2015-09-04 17:12)
+------------------------
 
-0.3.0 (2015-09-04)
-------------------
-* [jsk_recognition_utils] Introduce new package jsk_recognition_utils
-  in order to use utility libraries defined in jsk_pcl_ros in jsk_perception
-* Contributors: Ryohei Ueda
+0.3.0 (2015-09-04 12:37)
+------------------------
 
-0.2.18 (2015-09-04)
--------------------
-* [jsk_recognition_utils] Introduce new package jsk_recognition_utils
-  in order to use utility libraries defined in jsk_pcl_ros in jsk_perception
-* Contributors: Ryohei Ueda
+0.2.18 (2015-09-04 01:07)
+-------------------------
 
 0.2.17 (2015-08-21)
 -------------------
@@ -190,12 +200,6 @@ Forthcoming
 
 0.2.9 (2015-03-29)
 ------------------
-* 0.2.8
-* Update Changelog
-* Contributors: Ryohei Ueda
-
-0.2.8 (2015-03-29)
-------------------
 
 0.2.7 (2015-03-26)
 ------------------
@@ -215,20 +219,14 @@ Forthcoming
 0.2.2 (2015-01-30)
 ------------------
 
-0.2.1 (2015-01-30)
-------------------
+0.2.0 (2015-01-29 12:20)
+------------------------
 
-0.2.0 (2015-01-29)
-------------------
-
-0.1.34 (2015-01-29)
--------------------
+0.1.34 (2015-01-29 11:53)
+-------------------------
 
 0.1.33 (2015-01-24)
 -------------------
-* [jsk_recognition] Add jsk_recognition_msgs to jsk_recognition meta
-  package's dependency
-* Contributors: Ryohei Ueda
 
 0.1.32 (2015-01-12)
 -------------------
@@ -236,11 +234,11 @@ Forthcoming
 0.1.31 (2015-01-08)
 -------------------
 
-0.1.30 (2014-12-24)
--------------------
+0.1.30 (2014-12-24 16:45)
+-------------------------
 
-0.1.29 (2014-12-24)
--------------------
+0.1.29 (2014-12-24 12:43)
+-------------------------
 
 0.1.28 (2014-12-17)
 -------------------
@@ -279,6 +277,9 @@ Forthcoming
 -------------------
 
 0.1.16 (2014-09-04)
+-------------------
+
+0.1.15 (2014-08-26)
 -------------------
 
 0.1.14 (2014-08-01)
@@ -322,4 +323,3 @@ Forthcoming
 
 0.1.1 (2014-04-10)
 ------------------
-* Initial commit

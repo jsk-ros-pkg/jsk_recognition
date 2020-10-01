@@ -2,6 +2,21 @@
 Changelog for package resized_image_transport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix for  noetic / 20.04 (`#2507 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2507>`_)
+
+  * resized_image_transport/src/log_polar_nodelet.cpp fix for opencv4
+
+* fix generate_readme.py and update readme (`#2442 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2442>`_)
+* Add sample, test and doc (`#2440 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2440>`_)
+
+  * Remove unnecessary dependency duplication and comments in package.xml
+  * Add test for LogPolar
+  * Add sample for LogPolar
+
+* Contributors: Kei Okada, Shingo Kitagawa, Yuki Furuta, Yuto Uchimi
+
 1.2.10 (2019-03-27)
 -------------------
 

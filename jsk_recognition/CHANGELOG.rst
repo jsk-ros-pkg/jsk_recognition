@@ -2,6 +2,9 @@
 Changelog for package jsk_recognition
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.11 (2020-10-01)
 -------------------
 

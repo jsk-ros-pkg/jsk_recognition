@@ -2,6 +2,9 @@
 Changelog for package audio_to_spectrogram
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.11 (2020-10-01)
 -------------------
 * Fix for  noetic / 20.04 (`#2507 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2507>`_)

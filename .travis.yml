@@ -19,6 +19,7 @@ env:
     - ROSDEP_ADDITIONAL_OPTIONS='-n -r -v --ignore-src' # run rosdep without -q
   matrix:
     - CHECK_PYTHON3_COMPILE=true
+    - ROS_DISTRO=melodic DOCKER_IMAGE_JENKINS="ros-ubuntu:18.04-base" BEFORE_SCRIPT="sudo pip uninstall -y fcn chainer chainercv cupy-cuda91; sudo ln -sf /bin/echo /usr/local/bin/pip; sudo ln -sf /bin/echo /usr/local/bin/pip2" TEST_PKGS="jsk_recognition_msgs" # check https://github.com/jsk-ros-pkg/jsk_recognition/pull/2533
     - ROS_DISTRO=indigo
     - ROS_DISTRO=indigo CATKIN_TOOLS_CONFIG_OPTIONS="--install" TEST_PKGS='jsk_recognition_msgs' # to skip test
     - ROS_DISTRO=indigo ROS_REPOSITORY_PATH="http://packages.ros.org/ros/ubuntu"

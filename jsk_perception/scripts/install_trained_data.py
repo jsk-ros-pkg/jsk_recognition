@@ -8,8 +8,11 @@ import os.path as osp
 
 import itertools, pkg_resources, sys
 from distutils.version import LooseVersion
-if pkg_resources.find_distributions("chainer") and \
-   LooseVersion(pkg_resources.get_distribution("chainer").version) >= LooseVersion('7.0.0') and \
+try:
+    chainer_version = pkg_resources.get_distribution(chainer).version
+except:
+    chainer_version = None
+if chainer_version and LooseVersion(chainer_version) >= LooseVersion('7.0.0') and \
    sys.version_info.major == 2:
    print('''Please install chainer <= 7.0.0:
 

@@ -2,6 +2,11 @@
 Changelog for package jsk_pcl_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [jsk_pcl_ros] add tf_duration parameter in depth_image_creator (`#2535 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2535>`_)
+* Contributors: Shumpei Wakabayashi
+
 1.2.13 (2020-10-08)
 -------------------
 

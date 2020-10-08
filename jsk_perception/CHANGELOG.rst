@@ -2,6 +2,30 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* remove packages=['jsk_perceptoin'] (`#2536 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2536>`_)
+* fix
+
+```
+  + /usr/bin/env PYTHONPATH=/opt/ros/melodic/lib/python2.7/dist-packages:/tmp/jsk_recognition-release/obj-x86_64-linux-gnu/lib/python2.7/dist-packages:/opt/ros/melodic/lib/python2.7/dist-packages:/home/k-okada/pynaoqi/pynaoqi-python2.7-2.5.5.5-linux64/lib/python2.7/site-packages CATKIN_BINARY_DIR=/tmp/jsk_recognition-release/obj-x86_64-linux-gnu /usr/bin/python2 /tmp/jsk_recognition-release/setup.py egg_info --egg-base /tmp/jsk_recognition-release/obj-x86_64-linux-gnu build --build-base /tmp/jsk_recognition-release/obj-x86_64-linux-gnu install --root=/tmp/jsk_recognition-release/debian/ros-melodic-jsk-perception --install-layout=deb --prefix=/opt/ros/melodic --install-scripts=/opt/ros/melodic/bin
+  running egg_info
+  creating /tmp/jsk_recognition-release/obj-x86_64-linux-gnu/jsk_perception.egg-info
+  writing /tmp/jsk_recognition-release/obj-x86_64-linux-gnu/jsk_perception.egg-info/PKG-INFO
+  writing top-level names to /tmp/jsk_recognition-release/obj-x86_64-linux-gnu/jsk_perception.egg-info/top_level.txt
+  writing dependency_links to /tmp/jsk_recognition-release/obj-x86_64-linux-gnu/jsk_perception.egg-info/dependency_links.txt
+  writing manifest file '/tmp/jsk_recognition-release/obj-x86_64-linux-gnu/jsk_perception.egg-info/SOURCES.txt'
+  error: package directory 'jsk_perception' does not exist
+  CMake Error at catkin_generated/safe_execute_install.cmake:4 (message):
+  execute_process(/tmp/jsk_recognition-release/obj-x86_64-linux-gnu/catkin_generated/python_distutils_install.sh)
+  returned error code
+  Call Stack (most recent call first):
+  cmake_install.cmake:41 (include)
+  Makefile:97: recipe for target 'install' failed
+```
+
+* Contributors: Kei Okada
+
 1.2.13 (2020-10-08)
 -------------------
 * fix logic to check chainer version (`#2534 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2534>`_)

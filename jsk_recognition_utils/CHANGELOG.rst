@@ -2,6 +2,9 @@
 Changelog for package jsk_recognition_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.13 (2020-10-08)
 -------------------
 

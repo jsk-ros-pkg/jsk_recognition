@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.14 (2020-10-09)
+-------------------
 * remove packages=['jsk_perceptoin'] (`#2536 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2536>`_)
 * fix
 

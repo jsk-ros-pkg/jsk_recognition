@@ -85,6 +85,7 @@ void jsk_pcl_ros::DepthImageCreator::onInit () {
   tf::Vector3 btp(trans_pos[0], trans_pos[1], trans_pos[2]);
   fixed_transform.setOrigin(btp);
   fixed_transform.setRotation(btq);
+  pnh_->param("tf_duration", tf_duration_, 0.001);
 
   pub_depth_ = advertise<sensor_msgs::Image> (*pnh_, "output", max_pub_queue_size_);
   pub_image_ = advertise<sensor_msgs::Image> (*pnh_, "output_image", max_pub_queue_size_);
@@ -219,7 +220,7 @@ void jsk_pcl_ros::DepthImageCreator::publish_points(const sensor_msgs::CameraInf
         tf_listener_->waitForTransform(pcloud2_ptr->header.frame_id,
                                        info->header.frame_id,
                                        info->header.stamp,
-                                       ros::Duration(0.001));
+                                       ros::Duration(tf_duration_));
         tf_listener_->lookupTransform(pcloud2_ptr->header.frame_id,
                                       info->header.frame_id,
                                       info->header.stamp, transform);

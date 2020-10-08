@@ -2,6 +2,9 @@
 Changelog for package audio_to_spectrogram
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.12 (2020-10-03)
 -------------------
 

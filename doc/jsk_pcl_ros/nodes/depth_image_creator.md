@@ -74,6 +74,10 @@ Currently it supports `pcl::PointXYZ` and `pcl::PointXYZRGB` as the input.
 
    Whether to organize `~output_cloud` or not.
 
+* `~tf_duration` (float, default: `0.001`):
+
+  TF Lookup transform duration. This value is only used when `use_fixed_transform` is `false`.
+
 ## Sample
 
 ```bash

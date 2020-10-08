@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.13 (2020-10-08)
+-------------------
 * fix logic to check chainer version (`#2534 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2534>`_)
 
   * add test to check `#2533 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2533>`_ regression

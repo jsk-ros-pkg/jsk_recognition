@@ -384,7 +384,13 @@ install(TARGETS
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(DIRECTORY config euslisp launch node_scripts plugins sample template test
+if(EXISTS template) # check if template/ direcotry exists, because this is auto-generated directory
+install(DIRECTORY template
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  USE_SOURCE_PERMISSIONS
+  )
+endif()
+install(DIRECTORY config euslisp launch node_scripts plugins sample test
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   USE_SOURCE_PERMISSIONS
 )

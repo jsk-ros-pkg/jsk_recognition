@@ -2,8 +2,8 @@
 Changelog for package jsk_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.15 (2020-10-10)
+-------------------
 * check if template/ direcotry exists, because this is auto-generated directory (`#2537 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2537>`_)
 
   * install within roseus_FOUND

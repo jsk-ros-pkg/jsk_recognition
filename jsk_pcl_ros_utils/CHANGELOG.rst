@@ -2,6 +2,119 @@
 Changelog for package jsk_pcl_ros_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.15 (2020-10-10)
+-------------------
+
+1.2.14 (2020-10-09)
+-------------------
+
+1.2.13 (2020-10-08)
+-------------------
+
+1.2.12 (2020-10-03)
+-------------------
+
+1.2.11 (2020-10-01)
+-------------------
+* [jsk_pcl_ros] Add multi euclidean clustering (`#2463 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2463>`_)
+* Fix for  noetic / 20.04 (`#2507 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2507>`_)
+
+  * upgrade package.xml to format=3, migrate to noetic with ROS_PYTHON_VERSION=2/3, use multiple ROS distro strategy http://wiki.ros.org/noetic/Migration
+
+* set time-limit and increase retry for jsk_pcl_ros_utils/test/tf_transform_bounding_box_array.test (`#2495 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2495>`_)
+
+  * set time-limit=25 for timeout:30 tests
+
+* set chainer version less than 7.0.0 (`#2485 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2485>`_)
+
+  * Moved bagfile for multi object detection Fixed path of play_rosbag xml [jsk_pcl_ros_utils/install_sample_data.py] Make it multiprocess downloadable
+
+* fix generate_readme.py and update readme (`#2442 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2442>`_)
+* MaskImageToDepthConsideredMaskImage: support approximate sync (`#2410 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2410>`_)
+* Add sample, test and doc (`#2440 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2440>`_)
+
+  * Add test for DepthImageError
+  * Add sample for DepthImageError
+  * Add test for PointCloudToSTL
+  * Add sample for PointCloudToSTL
+  * Fix mesh_resource in output marker msg in PointCloudToSTL
+  * Add test for ColorizeDistanceFromPlane
+  * Add sample for ColorizeDistanceFromPlane
+  * Add test for PoseWithCovarianceStampedToGaussianPointCloud
+  * Add sample for PoseWithCovarianceStampedToGaussianPointCloud
+  * Add test for PolygonPointsSampler
+  * Add sample for PolygonPointsSampler
+  * Add test for PolygonFlipper
+  * Add sample for PolygonFlipper
+  * Add test for PolygonArrayWrapper
+  * Add sample for PolygonArrayWrapper
+  * Add sample for PolygonArrayUnwrapper
+  * Add test for PolygonArrayTransformer
+  * Add sample for PolygonArrayTransformer
+  * Add test for PlaneConcatenator
+  * Add sample for PlaneConcatenator
+  * Add test for MarkerArrayVoxelToPointCloud
+  * Add sample for MarkerArrayVoxelToPointCloud
+  * Add test for PointCloudToClusterPointIndices
+  * Add sample for PointCloudToClusterPointIndices
+  * Support skip_nan in PointCloudToClusterPointIndices
+  * Add test for LabelToClusterPointIndices
+  * Add sample for LabelToClusterPointIndices
+  * Add test for SphericalPointCloudSimulator
+  * Add sample for SphericalPointCloudSimulator
+  * Add test for PlanarPointCloudSimulator
+  * Move sample for PlanarPointCloudSimulator to jsk_pcl_ros_utils and do not use deprecated node
+  * Add test for PointCloudRelativeFromPoseStamped
+  * Add sample for PointCloudRelativeFromPoseStamped
+  * Support approximate_sync in PointCloudRelativeFromPoseStamped
+  * Add test for NormalFlipToFrame
+  * Add sample for NormalFlipToFrame
+  * Add test for PCDReaderWithPose
+  * Add sample for PCDReaderWithPose
+  * Add test for TfTransformCloud
+  * Add sample for TfTransformCloud
+  * Add test for TfTransformBoundingBoxArray
+  * Add sample for TfTransformboundingBoxArray
+  * Add test for TfTransformBoundingBox
+  * Add sample for TfTransformBoundingBox
+  * Add test for PolygonArrayFootAngleLikelihood
+  * Add sample for PolygonArrayFootAngleLikelihood
+  * Add test for PolygonArrayDistanceLikelihood
+  * Add sample for PolygonArrayDistanceLikelihood
+  * Add test for PolygonArrayAreaLikelihood
+  * Add sample for PolygonArrayAreaLikelihood
+  * Add test for PolygonArrayAngleLikelihood
+  * Add sample for PolygonArrayAngleLikelihood
+  * Add test for DelayPointCloud
+  * Add sample for DelayPointCloud
+  * Add test for ColorizeHeight2DMapping
+  * Add sample for ColorizeHeight2DMapping
+  * Increase publishing rate of pcd_to_pointcloud in sample_pointcloud_xyz_to_xyzrgb.launch
+  * Add missing test for PointCloudXYZToXYZRGB
+  * Add test for PointCloudXYZRGBToXYZ
+  * Add sample for PointCloudXYZRGBToXYZ
+  * Explicitly depend on jsk_rviz_plugins in jsk_pcl_ros_utils/package.xml
+  * Add test for cloud_on_plane_info.py
+  * Add test for CloudOnPlane
+  * Add sample for CloudOnPlane and cloud_on_plane_info.py
+  * Support approximate_sync in CloudOnPlane
+  * Add test for MaskImageToDepthConsideredMaskImage
+  * MaskImageToDepthConsideredMaskImage: support approximate sync
+
+* MaskImageToPointIndices: support multi channel mask image (`#2409 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2409>`_)
+
+  * Enable all test for MaskImageToPointIndices
+  * Increase threshold to support JPEG compression as much as possible
+  * Use NODELET_ERROR instead of ROS_ERROR
+  * Fix access to each element of image
+  * Partially disable mask_image_to_point_indices.test
+  * Add sample for MaskImageToPointIndices
+  * Publish to another topic if ~use_multi_channels is true and ~target_channel == -1
+  * Merge branch 'master' into subtract-mask-image
+  * MaskImageToPointIndices: support multi channel mask image
+
+* Contributors: Kei Okada, Shingo Kitagawa, Yuki Furuta, Yuto Uchimi, Iory Yanokura
+
 1.2.10 (2019-03-27)
 -------------------
 * Re-enable pointcloud_to_pcd.test `#2402 <https://github.com/jsk-ros-pkg/jsk_recognition/issues/2402>`_)

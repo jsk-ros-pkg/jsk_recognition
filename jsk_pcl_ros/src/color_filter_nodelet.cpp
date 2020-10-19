@@ -123,6 +123,14 @@ namespace jsk_pcl_ros
     updateCondition();
   }
 
+  void RGBColorFilter::convertToColorSpace(float &x, float &y, float &z,
+                                           unsigned char r, unsigned char g, unsigned char b)
+  {
+    x = r/255.0;
+    y = g/255.0;
+    z = b/255.0;
+  }
+
   /*** HSI ***/
   void HSIColorFilter::onInit()
   {
@@ -206,6 +214,29 @@ namespace jsk_pcl_ros
     updateCondition();
   }
 
+  void HSIColorFilter::convertToColorSpace(float &x, float &y, float &z,
+                                           unsigned char r, unsigned char g, unsigned char b)
+  {
+    // http://pointcloudlibrary.github.io/documentation/conditional__removal_8hpp_source.html
+    // definitions taken from http://en.wikipedia.org/wiki/HSL_and_HSI
+    float hx = (2.0f * r - g - b) / 4.0f;  // hue x component -127 to 127
+    float hy = static_cast<float> (g - b) * 111.0f / 255.0f; // hue y component -111 to 111
+    int8_t h_ = static_cast<std::int8_t> (std::atan2(hy, hx) * 128.0f / M_PI);
+
+    int32_t i = (r+g+b)/3; // 0 to 255
+    uint8_t i_ = static_cast<std::uint8_t> (i);
+
+    std::int32_t m;  // min(r,g,b)
+    m = (r < g) ? r : g;
+    m = (m < b) ? m : b;
+
+    uint8_t s_ = static_cast<std::uint8_t> ((i == 0) ? 0 : 255 - (m * 255) / i); // saturation 0 to 255
+    //
+    x = (s_ * cos(h_ * M_PI / 128.0))/255.0; // h between -128 to 128
+    y = (s_ * sin(h_ * M_PI / 128.0))/255.0;
+    z = i_/255.0;
+  }
+
   /*** ColorFilter ***/
   template <class PackedComparison, typename Config>
   void ColorFilter<PackedComparison, Config>::filter(const sensor_msgs::PointCloud2ConstPtr &input,
@@ -224,6 +255,45 @@ namespace jsk_pcl_ros
       filter_instance_.setIndices(vindices);
     }
     filter_instance_.filter(tmp_out);
+
+    if ( color_space_pub_.getNumSubscribers() > 0 ){
+      /// publish color spaces
+      if ( color_space_msg_.data.size() != tmp_in.points.size()) {
+        color_space_msg_.data.resize(16*tmp_in.points.size());
+        color_space_msg_.width = tmp_in.points.size();
+        color_space_msg_.height = 1;
+        color_space_msg_.point_step = 16;
+        color_space_msg_.row_step = tmp_in.points.size();
+      }
+      for (unsigned int j=0; j<tmp_in.points.size(); j++) {
+        uint32_t rgb_data_ = *reinterpret_cast<int*> (&tmp_in.points[j].rgb);
+        unsigned char r_ = (rgb_data_>>16) & 0x0000ff;
+        unsigned char g_ = (rgb_data_>>8)  & 0x0000ff;
+        unsigned char b_ = (rgb_data_)     & 0x0000ff;
+
+        float x_, y_, z_;
+        convertToColorSpace(x_, y_, z_, r_, g_, b_); // convert rgb to xyz to construct color space
+
+        // skip (set black and move point to origin) if no depth data present
+        if ( std::isnan(tmp_in.points[j].x) && std::isnan(tmp_in.points[j].y) && std::isnan(tmp_in.points[j].z)  ) {
+          x_ = y_ = z_ = 0;
+          r_ = g_ = b_ = 0;
+        }
+        memcpy((void *)(&(color_space_msg_.data[j*16+0])), (const void *)&x_, sizeof(float));
+        memcpy((void *)(&(color_space_msg_.data[j*16+4])), (const void *)&y_, sizeof(float));
+        memcpy((void *)(&(color_space_msg_.data[j*16+8])), (const void *)&z_, sizeof(float));
+        // skip (set gray) if the point is filtered
+        if ( std::isnan(tmp_out.points[j].x) && std::isnan(tmp_out.points[j].y) && std::isnan(tmp_out.points[j].z) ) {
+          unsigned char gray_ = 16 + (r_/3 + g_/3 + b_/3)*(255-16)/255;
+          r_ = g_ = b_ = gray_;
+        }
+        // set data to color_space_msg
+        unsigned char rgb_packed_[4] = {r_, g_, b_, 0};
+        memcpy((void *)(&(color_space_msg_.data[j*16+12])), (const void *)rgb_packed_, 4*sizeof(unsigned char));
+      }
+      color_space_pub_.publish(color_space_msg_);
+    }
+
     if (tmp_out.points.size() > 0) {
       toROSMsg(tmp_out, out);
       pub_.publish(out);
@@ -240,6 +310,26 @@ namespace jsk_pcl_ros
   void ColorFilter<PackedComparison, Config>::onInit()
   {
     ConnectionBasedNodelet::onInit();
+
+    color_space_pub_ = pnh_->advertise<sensor_msgs::PointCloud2>("color_space", 1);
+    color_space_msg_.header.frame_id = "/map";
+    color_space_msg_.fields.resize(4);
+    color_space_msg_.fields[0].name = "x";
+    color_space_msg_.fields[0].offset = 0;
+    color_space_msg_.fields[0].datatype = sensor_msgs::PointField::FLOAT32;
+    color_space_msg_.fields[0].count = 1;
+    color_space_msg_.fields[1].name = "y";
+    color_space_msg_.fields[1].offset = 4;
+    color_space_msg_.fields[1].datatype = sensor_msgs::PointField::FLOAT32;
+    color_space_msg_.fields[1].count = 1;
+    color_space_msg_.fields[2].name = "z";
+    color_space_msg_.fields[2].offset = 8;
+    color_space_msg_.fields[2].datatype = sensor_msgs::PointField::FLOAT32;
+    color_space_msg_.fields[2].count = 1;
+    color_space_msg_.fields[3].name = "rgb";
+    color_space_msg_.fields[3].offset = 12;
+    color_space_msg_.fields[3].datatype = sensor_msgs::PointField::UINT32;
+    color_space_msg_.fields[3].count = 1;
 
     updateCondition();
     bool keep_organized;

@@ -196,7 +196,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'jsk_recognition.tex', u'jsk_recognition Documentation',
+  (master_doc, 'jsk_recognition.tex', u'jsk\_recognition Documentation',
    author, 'manual'),
 ]
 

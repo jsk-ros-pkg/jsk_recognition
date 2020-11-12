@@ -6,6 +6,7 @@
   <arg name="height" default="1504" />
   <arg name="video_mode" default="mjpeg" />
   <arg name="frame_rate" default="30" />
+  <arg name="gui" default="true" />
 
   <include file="$(find jsk_perception)/launch/libuvc_camera.launch">
     <arg name="camera_name" value="$(arg camera_name)" />
@@ -15,5 +16,6 @@
     <arg name="width" value="$(arg width)" />
     <arg name="video_mode" value="$(arg video_mode)" />
     <arg name="frame_rate" value="$(arg frame_rate)" />
+    <arg name="gui" value="$(arg gui)" />
   </include>
 </launch>

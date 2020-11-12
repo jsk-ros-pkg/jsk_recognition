@@ -1,0 +1,19 @@
+<launch>
+  <arg name="camera_name" default="insta360" />
+  <arg name="vendor" default="0x2e1a" />
+  <arg name="product" default="0x1000"/>
+  <arg name="width" default="3008" />
+  <arg name="height" default="1504" />
+  <arg name="video_mode" default="mjpeg" />
+  <arg name="frame_rate" default="30" />
+
+  <include file="$(find jsk_perception)/launch/libuvc_camera.launch">
+    <arg name="camera_name" value="$(arg camera_name)" />
+    <arg name="vendor" value="$(arg vendor)" />
+    <arg name="product" value="$(arg product)" />
+    <arg name="height" value="$(arg height)" />
+    <arg name="width" value="$(arg width)" />
+    <arg name="video_mode" value="$(arg video_mode)" />
+    <arg name="frame_rate" value="$(arg frame_rate)" />
+  </include>
+</launch>

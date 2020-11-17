@@ -81,6 +81,11 @@ namespace jsk_pcl_ros
       jsk_recognition_msgs::ClusterPointIndices,
       jsk_recognition_msgs::PolygonArray,
       jsk_recognition_msgs::ModelCoefficientsArray> SyncAlignPolicy;
+    typedef message_filters::sync_policies::ApproximateTime<
+      sensor_msgs::PointCloud2,
+      jsk_recognition_msgs::ClusterPointIndices,
+      jsk_recognition_msgs::PolygonArray,
+      jsk_recognition_msgs::ModelCoefficientsArray> ApproximateSyncAlignPolicy;
     virtual void onInit();
     virtual void extract(const sensor_msgs::PointCloud2ConstPtr &point,
                          const jsk_recognition_msgs::ClusterPointIndicesConstPtr &indices,
@@ -157,6 +162,7 @@ namespace jsk_pcl_ros
     boost::shared_ptr<message_filters::Synchronizer<SyncPolicy> >sync_;
     boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncPolicy> >async_;
     boost::shared_ptr<message_filters::Synchronizer<SyncAlignPolicy> >sync_align_;
+    boost::shared_ptr<message_filters::Synchronizer<ApproximateSyncAlignPolicy> >async_align_;
     std::vector<ros::Publisher> publishers_;
     ros::Publisher pc_pub_, box_pub_, mask_pub_, label_pub_, centers_pub_, negative_indices_pub_, indices_pub_;
     boost::shared_ptr<tf::TransformBroadcaster> br_;

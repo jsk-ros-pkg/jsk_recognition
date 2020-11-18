@@ -16,7 +16,7 @@ class XYZToScreenPoint:
         self.cameramodels.fromCameraInfo(msg)
         self.is_camera_arrived = True
 
-    def project3dToPixel_cb(self, msg):
+    def point_stamped_cb(self, msg):
         if not self.is_camera_arrived:
             return
         point = (msg.point.x, msg.point.y, msg.point.z)

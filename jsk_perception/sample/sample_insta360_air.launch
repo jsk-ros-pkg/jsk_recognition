@@ -1,4 +1,5 @@
 <launch>
+  <arg name="use_usb_cam" default="false" />
   <arg name="camera_name" default="insta360" />
   <arg name="vendor" default="0x2e1a" />
   <arg name="product" default="0x1000"/>
@@ -8,7 +9,7 @@
   <arg name="frame_rate" default="30" />
   <arg name="gui" default="true" />
 
-  <include file="$(find jsk_perception)/launch/libuvc_camera.launch">
+  <include unless="$(arg use_usb_cam)" file="$(find jsk_perception)/launch/libuvc_camera.launch">
     <arg name="camera_name" value="$(arg camera_name)" />
     <arg name="vendor" value="$(arg vendor)" />
     <arg name="product" value="$(arg product)" />
@@ -18,4 +19,19 @@
     <arg name="frame_rate" value="$(arg frame_rate)" />
     <arg name="gui" value="$(arg gui)" />
   </include>
+
+  <!-- For indigo or older -->
+  <group if="$(arg use_usb_cam)">
+    <node pkg="usb_cam" type="usb_cam_node" name="$(arg camera_name)">
+      <rosparam subst_value="true">
+        video_device: /dev/insta360
+        image_width: $(arg width)
+        image_height: $(arg height)
+        pixel_format: $(arg video_mode)
+        framerate: $(arg frame_rate)
+      </rosparam>
+    </node>
+    <node name="$(anon image_view)" pkg="image_view" type="image_view"
+          args="image:=$(arg camera_name)/image_raw" if="$(arg gui)" />
+  </group>
 </launch>

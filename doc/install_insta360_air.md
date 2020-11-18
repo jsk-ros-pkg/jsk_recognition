@@ -17,4 +17,6 @@ sudo service udev restart
 
 ```bash
 roslaunch jsk_perception sample_insta360_air.launch
+# For indigo or lower
+roslaunch jsk_perception sample_insta360_air.launch use_usb_cam:=true
 ```

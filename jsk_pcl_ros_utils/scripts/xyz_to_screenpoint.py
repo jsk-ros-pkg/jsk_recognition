@@ -22,7 +22,7 @@ class XYZToScreenPoint(object):
     def camera_info_cb(self, msg):
         self.cameramodels.fromCameraInfo(msg)
         self.is_camera_arrived = True
-        self.header = msg.header
+        self.frame_id = msg.header.frame_id
 
     def point_stamped_cb(self, msg):
         if not self.is_camera_arrived:

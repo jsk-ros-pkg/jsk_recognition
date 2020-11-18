@@ -26,8 +26,8 @@ class XYZToScreenPoint:
         pub = rospy.Publisher("~output", PointStamped, queue_size=1)
         pub_msg = PointStamped()
         pub_msg.header = msg.header
-        pub_msg.point.x = x
-        pub_msg.point.y = y
+        pub_msg.point.x = u
+        pub_msg.point.y = v
         pub_msg.point.z = 0
         pub.publish(pub_msg)
 
@@ -41,4 +41,3 @@ if __name__ == '__main__':
     xyz_to_screenpoint = XYZToScreenPoint()
     xyz_to_screenpoint.subscribeCameraInfo()
     rospy.spin()
-

@@ -7,7 +7,7 @@ from geometry_msgs.msg import PointStamped
 
 from image_geometry import PinholeCameraModel
 
-class XYZToScreenPoint:
+class XYZToScreenPoint(object):
     def __init__(self):
         self.cameramodels = PinholeCameraModel()
         self.is_camera_arrived = False

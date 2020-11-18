@@ -31,7 +31,8 @@ class XYZToScreenPoint(object):
         u, v = self.cameramodels.project3dToPixel(point)
         rospy.logdebug("u, v : {}, {}".format(u, v))
         pub_msg = PointStamped()
-        pub_msg.header = self.header
+        pub_msg.header = msg.header
+        pub_msg.header.frame_id = self.frame_id
         pub_msg.point.x = u
         pub_msg.point.y = v
         pub_msg.point.z = 0

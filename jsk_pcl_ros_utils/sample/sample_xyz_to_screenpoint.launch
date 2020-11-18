@@ -13,7 +13,7 @@
               '{header: {stamp: 'now', frame_id: camera}, point: {x: 0, y: 0, z: 1}}'"/>
   
   <node name="xyz_to_screenpoint"
-	pkg="jsk_pcl_ros_utils" type="xyz_to_screenpoint.py">
+        pkg="jsk_pcl_ros_utils" type="xyz_to_screenpoint.py">
     <remap from="~input/camera_info" to="camera/rgb/camera_info" />
     <remap from="~input" to="reference_point_publisher/output" />
   </node>

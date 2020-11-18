@@ -12,7 +12,7 @@ class XYZToScreenPoint:
         self.cameramodels = PinholeCameraModel()
         self.is_camera_arrived = False
 
-    def fromCameraInfo_cb(self, msg):
+    def camera_info_cb(self, msg):
         self.cameramodels.fromCameraInfo(msg)
         self.is_camera_arrived = True
 

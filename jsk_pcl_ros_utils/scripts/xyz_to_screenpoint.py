@@ -20,8 +20,8 @@ class XYZToScreenPoint:
         if not self.is_camera_arrived:
             return
         point = (msg.point.x, msg.point.y, msg.point.z)
-        x, y = self.cameramodels.project3dToPixel(point)
-        rospy.logdebug("x, y : %lf, %lf", x, y)
+        u, v = self.cameramodels.project3dToPixel(point)
+        rospy.logdebug("u, v : {}, {}".format(u, v))
         # publish info
         pub = rospy.Publisher("~output", PointStamped, queue_size=1)
         pub_msg = PointStamped()
@@ -41,5 +41,4 @@ if __name__ == '__main__':
     xyz_to_screenpoint = XYZToScreenPoint()
     xyz_to_screenpoint.subscribeCameraInfo()
     rospy.spin()
-
 

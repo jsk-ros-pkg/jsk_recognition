@@ -9,7 +9,7 @@ Convert (x, y, z) 3-D coordinate to (u, v) coordinate on a image using camerainf
 
 * `~input` (`geometry_msgs/PointStamped`)
 
-  Input point to represent (x, y, z) 3-D coordinate. The header frame_id is ignored.
+  Input point to represent (x, y, z) 3-D coordinate.
 
 * `~input/camera_info` (`sensor_msgs/CameraInfo`)
 
@@ -20,7 +20,8 @@ Convert (x, y, z) 3-D coordinate to (u, v) coordinate on a image using camerainf
 
 * `~output` (`geometry_msgs/PointStamped`)
 
-  Output point to represent (u, v) image coordinate. Only x and y fileds are used and the header frame_id is ignored. 
+  Output point to represent (u, v) image coordinate. Only x and y fileds are used.
+  The header frame_id uses the information of `~input/camera_info`.
 
 
 ## Parameters

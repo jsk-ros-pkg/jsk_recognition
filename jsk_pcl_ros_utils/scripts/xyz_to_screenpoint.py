@@ -38,7 +38,7 @@ class XYZToScreenPoint(object):
         try:
             transform = self.tf_buffer.lookup_transform(self.frame_id, msg.header.frame_id, rospy.Time(0), rospy.Duration(1.0))
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
-            print(e)
+            rospy.logerr('lookup_transform failed: {}'.format(e))
             return
         position_transformed = tf2_geometry_msgs.do_transform_pose(pose_stamped, transform).pose.position
         pub_point = (position_transformed.x, position_transformed.y, position_transformed.z)

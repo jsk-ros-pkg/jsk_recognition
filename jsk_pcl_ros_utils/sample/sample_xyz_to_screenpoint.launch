@@ -10,7 +10,7 @@
   <node name="reference_point_publisher"
         pkg="rostopic" type="rostopic"
         args="pub -r 1 -s reference_point_publisher/output geometry_msgs/PointStamped
-              '{header: {stamp: 'now', frame_id: camera}, point: {x: 0, y: 0, z: 1}}'"/>
+              '{header: {stamp: 'now', frame_id: 'camera_link'}, point: {x: 500, y: 100, z: 100}}'"/>
   
   <node name="xyz_to_screenpoint"
         pkg="jsk_pcl_ros_utils" type="xyz_to_screenpoint.py">

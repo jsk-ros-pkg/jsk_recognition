@@ -1,0 +1,34 @@
+<launch>
+  <arg name="use_usb_cam" default="false" />
+  <arg name="camera_name" default="insta360" />
+  <arg name="vendor" default="0x2e1a" />
+  <arg name="product" default="0x1000"/>
+  <arg name="width" default="3008" />
+  <arg name="height" default="1504" />
+  <arg name="video_mode" default="mjpeg" />
+  <arg name="frame_rate" default="30" />
+  <arg name="gui" default="true" />
+
+  <include unless="$(arg use_usb_cam)" file="$(find jsk_perception)/launch/libuvc_camera.launch">
+    <arg name="camera_name" value="$(arg camera_name)" />
+    <arg name="vendor" value="$(arg vendor)" />
+    <arg name="product" value="$(arg product)" />
+    <arg name="height" value="$(arg height)" />
+    <arg name="width" value="$(arg width)" />
+    <arg name="video_mode" value="$(arg video_mode)" />
+    <arg name="frame_rate" value="$(arg frame_rate)" />
+    <arg name="gui" value="$(arg gui)" />
+  </include>
+
+  <!-- For indigo or older -->
+  <include if="$(arg use_usb_cam)" file="$(find jsk_perception)/launch/usb_cam.launch">
+    <arg name="camera_name" value="$(arg camera_name)" />
+    <arg name="video_device" value="/dev/insta360" />
+    <arg name="height" value="$(arg height)" />
+    <arg name="width" value="$(arg width)" />
+    <arg name="video_mode" value="$(arg video_mode)" />
+    <arg name="frame_rate" value="$(arg frame_rate)" />
+    <arg name="gui" value="$(arg gui)" />
+  </include>
+
+</launch>

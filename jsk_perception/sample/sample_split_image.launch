@@ -1,0 +1,45 @@
+<launch>
+
+  <arg name="gui" default="true" />
+
+  <node name="image_publisher"
+        pkg="jsk_perception" type="image_publisher.py">
+    <remap from="~output" to="~image_color" />
+    <remap from="~output/camera_info" to="~camera_info" />
+    <rosparam subst_value="true">
+      file_name: $(find jsk_perception)/sample/kiva_pod_image_color.jpg
+      encoding: rgb8
+      publish_info: true
+      fovx: 84.1
+      fovy: 53.8
+    </rosparam>
+  </node>
+
+  <node pkg="jsk_perception" name="split_image" type="split_image.py" output="screen">
+    <remap from="~input" to="image_publisher/image_color" />
+    <rosparam>
+      vertical_parts: 2
+      horizontal_parts: 2
+    </rosparam>
+  </node>
+
+  <group if="$(arg gui)">
+    <node name="image_view_split_0_0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="split_image/output/0/0" />
+    </node>
+    <node name="image_view_split_0_1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="split_image/output/0/1" />
+    </node>
+    <node name="image_view_split_1_0"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="split_image/output/1/0" />
+    </node>
+    <node name="image_view_split_1_1"
+          pkg="image_view" type="image_view">
+      <remap from="image" to="split_image/output/1/1" />
+    </node>
+  </group>
+
+</launch>

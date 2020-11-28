@@ -8,13 +8,13 @@
         name="test_image_publisher"
         pkg="jsk_tools" type="test_topic_published.py">
     <rosparam>
-      topic_0: /split_image/output/0/0
+      topic_0: /split_image/output/vertical00/horizontal00
       timeout_0: 10
-      topic_1: /split_image/output/0/1
+      topic_1: /split_image/output/vertical00/horizontal01
       timeout_1: 10
-      topic_2: /split_image/output/1/0
+      topic_2: /split_image/output/vertical01/horizontal00
       timeout_0: 10
-      topic_3: /split_image/output/1/1
+      topic_3: /split_image/output/vertical01/horizontal01
       timeout_0: 10
     </rosparam>
   </test>

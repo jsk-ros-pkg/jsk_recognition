@@ -13,7 +13,7 @@ Split the input image at equal intervals vertically and horizontally.
 
 ## Publishing Topic
 
-* `~output/(vertical_index)/(horizontal_index)` (`sensor_msgs/Image`)
+* `~output/vertical(vertical_index)/horizontal(horizontal_index)` (`sensor_msgs/Image`)
 
     Split images. The number of published topics is `~vertical_splits` * `~horizontal_splits`.
 

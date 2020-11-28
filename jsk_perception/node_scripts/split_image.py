@@ -18,9 +18,10 @@ class SplitImage(ConnectionBasedTransport):
             pubs = []
             for h in range(self.horizontal_parts):
                 pubs.append(
-                    self.advertise('~output/{}/{}'.format(v, h),
-                                   Image,
-                                   queue_size=10))
+                    self.advertise(
+                        '~output/vertical{0:02}/horizontal{1:02}'.format(v, h),
+                        Image,
+                        queue_size=10))
             self.pubs.append(pubs)
         self.bridge = cv_bridge.CvBridge()
 

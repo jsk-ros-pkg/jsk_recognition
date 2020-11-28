@@ -26,19 +26,19 @@
   <group if="$(arg gui)">
     <node name="image_view_split_0_0"
           pkg="image_view" type="image_view">
-      <remap from="image" to="split_image/output/0/0" />
+      <remap from="image" to="split_image/output/vertical00/horizontal00" />
     </node>
     <node name="image_view_split_0_1"
           pkg="image_view" type="image_view">
-      <remap from="image" to="split_image/output/0/1" />
+      <remap from="image" to="split_image/output/vertical00/horizontal01" />
     </node>
     <node name="image_view_split_1_0"
           pkg="image_view" type="image_view">
-      <remap from="image" to="split_image/output/1/0" />
+      <remap from="image" to="split_image/output/vertical01/horizontal00" />
     </node>
     <node name="image_view_split_1_1"
           pkg="image_view" type="image_view">
-      <remap from="image" to="split_image/output/1/1" />
+      <remap from="image" to="split_image/output/vertical01/horizontal01" />
     </node>
   </group>
 

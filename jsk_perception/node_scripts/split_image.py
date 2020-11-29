@@ -40,8 +40,9 @@ class SplitImage(ConnectionBasedTransport):
                 h_pixels = float(width) / self.horizontal_parts
                 split_img = img[int(v*v_pixels):int((v+1)*v_pixels),
                                 int(h*h_pixels):int((h+1)*h_pixels)]
-                self.pubs[v][h].publish(
-                    self.bridge.cv2_to_imgmsg(split_img, encoding='bgr8'))
+                pub_msg = self.bridge.cv2_to_imgmsg(split_img, encoding='bgr8')
+                pub_msg.header = msg.header
+                self.pubs[v][h].publish(pub_msg)
 
 
 if __name__ == '__main__':

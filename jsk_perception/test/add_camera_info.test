@@ -1,0 +1,14 @@
+<launch>
+
+  <include file="$(find jsk_perception)/sample/sample_add_camera_info.launch" />
+
+  <test test-name="test_image_publisher"
+        name="test_image_publisher"
+        pkg="jsk_tools" type="test_topic_published.py">
+    <rosparam>
+      topic_0: /image_publisher/camera_info
+      timeout_0: 10
+    </rosparam>
+  </test>
+
+</launch>

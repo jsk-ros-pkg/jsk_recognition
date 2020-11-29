@@ -443,6 +443,7 @@ if(CATKIN_ENABLE_TESTING)
     # roslaunch_add_file_check in hydro is too strict
     # FIXME: jsk_tools/test_topic_published.py does not work on hydro travis/jenkins
     # https://github.com/jsk-ros-pkg/jsk_common/pull/1293#issuecomment-164158260
+    jsk_add_rostest(test/add_camera_info.test)
     jsk_add_rostest(test/add_mask_image.test)
     jsk_add_rostest(test/subtract_mask_image.test)
     jsk_add_rostest(test/alexnet_object_recognition.test)

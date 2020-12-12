@@ -57,18 +57,20 @@
   <!-- When rectification -->
   <group if="$(arg rectification)">
     <!-- Publish camera info to match the fisheye images -->
-    <node pkg="jsk_perception" name="add_camera_info_00" type="add_camera_info.py" output="screen">
+    <node pkg="jsk_interactive_marker" name="camera_info_publisher_00" type="camera_info_publisher" output="screen">
       <remap from="~input" to="/insta360/vertical00/horizontal00/image_raw" />
-      <remap from="~output" to="insta360/vertical00/horizontal00/camera_info" />
+      <remap from="~camera_info" to="insta360/vertical00/horizontal00/camera_info" />
       <rosparam subst_value="true">
         yaml_filename: $(arg yaml_filename00)
+        sync_image: true
       </rosparam>
     </node>
-    <node pkg="jsk_perception" name="add_camera_info_01" type="add_camera_info.py" output="screen">
+    <node pkg="jsk_interactive_marker" name="camera_info_publisher_01" type="camera_info_publisher" output="screen">
       <remap from="~input" to="/insta360/vertical00/horizontal01/image_raw" />
-      <remap from="~output" to="insta360/vertical00/horizontal01/camera_info" />
+      <remap from="~camera_info" to="insta360/vertical00/horizontal01/camera_info" />
       <rosparam subst_value="true">
         yaml_filename: $(arg yaml_filename01)
+        sync_image: true
       </rosparam>
     </node>
     <!-- rectify fisheys image -->

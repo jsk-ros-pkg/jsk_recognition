@@ -86,6 +86,8 @@ namespace jsk_pcl_ros
     double max_x_;
     double min_y_;
     double max_y_;
+    double min_z_;
+    double max_z_;
     int resolution_x_;
     int resolution_y_;
     int max_queue_size_;

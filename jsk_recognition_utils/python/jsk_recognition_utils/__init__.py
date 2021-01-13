@@ -1,12 +1,15 @@
-from jsk_recognition_utils import chainermodels
 from jsk_recognition_utils import color
 from jsk_recognition_utils import conversations
-from jsk_recognition_utils import datasets
 from jsk_recognition_utils import feature
 from jsk_recognition_utils import mask
 from jsk_recognition_utils import visualize
 from jsk_recognition_utils import geometry
 
+try:
+    from jsk_recognition_utils import chainermodels  # NOQA
+    from jsk_recognition_utils import datasets  # NOQA
+except ImportError:
+    print('Please install chainer<7.0.0 to import chainermodels')
 
 bounding_box_msg_to_aabb = conversations.bounding_box_msg_to_aabb
 rects_msg_to_ndarray = conversations.rects_msg_to_ndarray

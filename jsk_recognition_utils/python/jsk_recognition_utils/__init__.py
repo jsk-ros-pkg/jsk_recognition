@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from jsk_recognition_utils import color
 from jsk_recognition_utils import conversations
 from jsk_recognition_utils import feature
@@ -9,7 +11,11 @@ try:
     from jsk_recognition_utils import chainermodels  # NOQA
     from jsk_recognition_utils import datasets  # NOQA
 except ImportError:
-    print('Please install chainer<7.0.0 to import chainermodels')
+    import sys
+    print(
+        'Please install chainer<7.0.0 to import '
+        'jsk_recognition_utils.chainermodels and datasets',
+        file=sys.stderr)
 
 bounding_box_msg_to_aabb = conversations.bounding_box_msg_to_aabb
 rects_msg_to_ndarray = conversations.rects_msg_to_ndarray

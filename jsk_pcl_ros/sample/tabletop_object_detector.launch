@@ -36,7 +36,6 @@
   <node name="multi_plane_estimate" pkg="nodelet" type="nodelet"
         args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg manager)"
         output="screen"
-        if="$(arg launch_manager)"
         machine="$(arg machine)">
     <remap from="~input" to="input_relay/output" />
     <rosparam>
